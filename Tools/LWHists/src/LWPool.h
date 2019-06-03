@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2017 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
 */
 
 
@@ -19,6 +19,7 @@
 
 #include "LWPoolArea.h"
 #include <vector>
+#include <mutex>
 
 class LWPool {
 public:
@@ -29,6 +30,7 @@ public:
   char* acquire();
   char* acquireClean();//Same as acquire(), but zeroes out the acquired memory
   void release(char* );
+  void erase();
 
   long long getMemDishedOut() const;
   long long getMemOwned() const;
@@ -41,9 +43,7 @@ private:
   std::vector<LWPoolArea*> m_areas;
   LWPoolArea* m_likelyNonEmptyArea;//A good guess of where to find available chunks.
   LWPoolArea* m_likelyReleaseArea;//Last ::release(..) was to this area.
-  mutable std::vector<LWPoolArea*>::iterator m_areaIt;
-  std::vector<LWPoolArea*>::iterator m_areaItB;
-  std::vector<LWPoolArea*>::iterator m_areaItE;
+  mutable std::mutex m_mutex;
 
 private:
   LWPool( const LWPool & );
@@ -55,11 +55,10 @@ private:
   void init();
   bool belongsInArea(char*,LWPoolArea*) const;
 private:
-  static LWPool * s_motherPool;
   static LWPool * getMotherPool();
   char * searchAcquire();//goes through all areas until something is acquired.
   LWPoolArea* findArea(char*);//binary search for correct area
-  bool isMotherPool() const { return this==s_motherPool; }
+  bool isMotherPool() const { return this==getMotherPool(); }
   LWPool(unsigned chunksize,unsigned growsize);//Becomes a mother mem-pool (bool parameter
                                                      //is just to trigger this constructor.
 };

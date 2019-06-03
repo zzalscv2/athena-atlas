@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2019 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "validatefunctions.h"
@@ -10,8 +10,7 @@ namespace HistValFunctions {
   void testfailed(const std::string& testname)
   {
     std::cout<<"ERROR: HistValidator test failed: "<<testname<<std::endl;
-    assert(false);//gives a stack-trace
-    exit(1);
+    std::abort();//gives a stack-trace
   }
 
   void testTypes() {
