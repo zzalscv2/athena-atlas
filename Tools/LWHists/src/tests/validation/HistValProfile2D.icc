@@ -15,7 +15,7 @@ HistValProfile2D::HistValProfile2D( bool trigger_conversion_all,
 {
   m_h1 = new TProfile2D(name.c_str(),title.c_str(),nbinsx,xmin,xmax,nbinsy,ymin,ymax,profparmin, profparmax,profile_test_erroroption());
   m_h2 = TProfile2D_LW::create(name.c_str(),title.c_str(),nbinsx,xmin,xmax,nbinsy,ymin,ymax,profparmin, profparmax,profile_test_erroroption());
-  compareMetaData();
+  HistValProfile2D::compareMetaData();
 
   if (trigger_conversion_all)
     triggerConversionToROOTHist();
@@ -30,7 +30,7 @@ HistValProfile2D::HistValProfile2D( bool trigger_conversion_all,
 {
   m_h1 = new TProfile2D(name.c_str(),title.c_str(),nbinsx,xbins,nbinsy,ybins,profile_test_erroroption());
   m_h2 = TProfile2D_LW::create(name.c_str(),title.c_str(),nbinsx,xbins,nbinsy,ybins,profile_test_erroroption());
-  compareMetaData();
+  HistValProfile2D::compareMetaData();
 
   if (trigger_conversion_all)
     triggerConversionToROOTHist();
