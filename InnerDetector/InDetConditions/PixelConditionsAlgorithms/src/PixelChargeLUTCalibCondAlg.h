@@ -34,6 +34,8 @@ class PixelChargeLUTCalibCondAlg : public AthReentrantAlgorithm {
     virtual bool isReEntrant() const override final { return false; }
   private:
     const PixelID* m_pixelID{nullptr};
+    Gaudi::Property<std::string> m_pixelIDName
+    {this, "PixelIDName", "PixelID", "Pixel ID name"};
 
     SG::ReadCondHandleKey<InDetDD::SiDetectorElementCollection> m_pixelDetEleCollKey
     {this, "PixelDetEleCollKey", "PixelDetectorElementCollection", "Key of SiDetectorElementCollection for Pixel"};

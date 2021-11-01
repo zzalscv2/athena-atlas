@@ -10,6 +10,7 @@
 #include <DetDescrConditions/AlignableTransformContainer.h>
 #include <GeoModelKernel/GeoPhysVol.h>
 #include <GeoModelUtilities/GeoModelExperiment.h>
+#include <InDetIdentifier/PLR_ID.h>
 #include <SGTools/DataProxy.h>
 
 
@@ -48,7 +49,7 @@ StatusCode PLRDetectorTool::create()
   // The * converts a ConstPVLink to a ref to a GeoVPhysVol
   // The & takes the address of the GeoVPhysVol
   GeoPhysVol *world = &*theExpt->getPhysVol();
-  auto *manager = new InDetDD::PixelDetectorManager(&*detStore(), m_detectorName);
+  auto *manager = new InDetDD::PixelDetectorManager(&*detStore(), m_detectorName, "PLR_ID");
   manager->addFolder(m_alignmentFolderName);
 
   InDetDD::PLRGmxInterface gmxInterface(manager, m_commonItems.get(), &m_moduleTree);

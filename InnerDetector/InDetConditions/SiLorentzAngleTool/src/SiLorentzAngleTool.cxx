@@ -17,13 +17,12 @@
 
 SiLorentzAngleTool::SiLorentzAngleTool(const std::string& type, const std::string& name, const IInterface* parent):
   base_class(type, name, parent),
-  m_isPixel{true},
   m_condData{"SCTSiLorentzAngleCondData"}
 {
   declareProperty("IgnoreLocalPos", m_ignoreLocalPos = false, 
                   "Treat methods that take a local position as if one called the methods without a local position");
   // YOU NEED TO USE THE SAME PROPERTIES AS USED IN Pixel/SCTSiLorentzAngleCondAlg!!!
-  declareProperty("DetectorName", m_detectorName="Pixel", "Detector name (Pixel or SCT)");
+  declareProperty("DetectorName", m_detectorName="Pixel", "Detector name (Pixel, SCT or PLR)");
   declareProperty("NominalField", m_nominalField = 2.0834*Gaudi::Units::tesla);
   declareProperty("UseMagFieldCache", m_useMagFieldCache = true);
   declareProperty("SiLorentzAngleCondData", m_condData, "Key of input SiLorentzAngleCondData");
@@ -33,11 +32,10 @@ StatusCode SiLorentzAngleTool::initialize() {
 
   ATH_MSG_DEBUG("SiLorentzAngleTool Initialized");
 
-  if ((m_detectorName not_eq "Pixel") and (m_detectorName not_eq "SCT")) {
-    ATH_MSG_FATAL("Invalid detector name: " << m_detectorName << ". Must be Pixel or SCT.");
+  if ((m_detectorName not_eq "Pixel") and (m_detectorName not_eq "SCT") and (m_detectorName not_eq "PLR")) {
+    ATH_MSG_FATAL("Invalid detector name: " << m_detectorName << ". Must be Pixel, SCT or PLR.");
     return StatusCode::FAILURE;
   }
-  m_isPixel = (m_detectorName == "Pixel");
 
   // Read Cond Handle
   ATH_CHECK(m_condData.initialize());

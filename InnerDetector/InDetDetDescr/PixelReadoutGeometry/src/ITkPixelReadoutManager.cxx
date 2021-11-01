@@ -28,8 +28,8 @@ StatusCode PixelReadoutManager::initialize()
   ATH_MSG_DEBUG("ITkPixelReadoutManager::initialize()");
 
   ATH_CHECK(m_detStore.retrieve());
-  ATH_CHECK(m_detStore->retrieve(m_detManager, "ITkPixel"));
-  ATH_CHECK(m_detStore->retrieve(m_idHelper, "PixelID"));
+  ATH_CHECK(m_detStore->retrieve(m_detManager, m_detectorName.value()));
+  ATH_CHECK(m_detStore->retrieve(m_idHelper, m_pixelIDName.value()));
 
   return StatusCode::SUCCESS;
 }

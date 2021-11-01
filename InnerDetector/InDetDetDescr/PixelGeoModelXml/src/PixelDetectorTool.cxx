@@ -59,7 +59,7 @@ StatusCode PixelDetectorTool::create()
   // The * converts a ConstPVLink to a ref to a GeoVPhysVol
   // The & takes the address of the GeoVPhysVol
   GeoPhysVol *world = &*theExpt->getPhysVol();
-  auto *manager = new InDetDD::PixelDetectorManager(&*detStore(), m_detectorName);
+  auto *manager = new InDetDD::PixelDetectorManager(&*detStore(), m_detectorName, "PixelID");
   manager->addFolder(m_alignmentFolderName);
 
   InDetDD::ITk::PixelGmxInterface gmxInterface(manager, m_commonItems.get(), &m_moduleTree);

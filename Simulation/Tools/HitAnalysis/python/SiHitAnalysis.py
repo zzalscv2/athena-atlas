@@ -62,11 +62,11 @@ def HGTD_HitAnalysisCfg(flags):
     return acc
 
 
-def PLRHitAnalysisCfg(flags):
-    from PLRGeoModelXml.PLRGeoModelConfig import PLRGeometryCfg
-    acc = PLRGeometryCfg(flags)
+def PLR_HitAnalysisCfg(flags):
+    from PLRGeoModelXml.PLR_GeoModelConfig import PLR_GeometryCfg
+    acc = PLR_GeometryCfg(flags)
 
-    alg = CompFactory.SiHitAnalysis('PLRHitAnalysis')
+    alg = CompFactory.SiHitAnalysis('PLR_HitAnalysis')
     alg.CollectionName = 'PLR_Hits'
     alg.HistPath='/SiHitAnalysis/histos/'
     alg.NtuplePath='/SiHitAnalysis/ntuples/'
@@ -90,6 +90,6 @@ def SiHitAnalysisCfg(flags):
         acc.merge(HGTD_HitAnalysisCfg(flags))
 
     if flags.Detector.EnablePLR:
-        acc.merge(PLRHitAnalysisCfg(flags))
+        acc.merge(PLR_HitAnalysisCfg(flags))
 
     return acc

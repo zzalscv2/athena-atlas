@@ -68,8 +68,8 @@ def SCTGeoDetectorToolCfg(ConfigFlags, name='SCT', **kwargs):
 
 def PLRGeoDetectorToolCfg(ConfigFlags, name='PLR', **kwargs):
     #set up geometry
-    from PLRGeoModelXml.PLRGeoModelConfig import PLRGeometryCfg
-    result = PLRGeometryCfg(ConfigFlags)
+    from PLRGeoModelXml.PLR_GeoModelConfig import PLR_GeometryCfg
+    result = PLR_GeometryCfg(ConfigFlags)
     kwargs.setdefault("DetectorName", "PLR")
     #add the GeometryNotifierSvc
     kwargs.setdefault("GeometryNotifierSvc", result.getPrimaryAndMerge(G4GeometryNotifierSvcCfg(ConfigFlags)).name)

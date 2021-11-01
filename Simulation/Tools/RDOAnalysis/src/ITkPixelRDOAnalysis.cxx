@@ -34,8 +34,8 @@ StatusCode PixelRDOAnalysis::initialize() {
   ATH_CHECK( m_inputTruthKey.initialize() );
 
   // Grab PixelID helper
-  ATH_CHECK(detStore()->retrieve(m_pixelID, "PixelID"));
-  ATH_CHECK(detStore()->retrieve(m_pixelManager, "ITkPixel"));
+  ATH_CHECK(detStore()->retrieve(m_pixelID, m_pixelIDName.value()));
+  ATH_CHECK(detStore()->retrieve(m_pixelManager, m_detectorName.value()));
 
   // Grab Ntuple and histogramming service for tree
   ATH_CHECK(m_thistSvc.retrieve());

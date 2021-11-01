@@ -88,7 +88,8 @@ private:
   };
 
   const PixelID* m_detID {};
-
+  Gaudi::Property<std::string> m_pixelIDName
+  {this, "PixelIDName", "PixelID", "Pixel ID name"};
 
   TimedHitCollection<SiHit>* m_timedHits {};
 

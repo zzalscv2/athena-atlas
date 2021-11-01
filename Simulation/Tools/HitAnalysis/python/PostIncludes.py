@@ -1,9 +1,9 @@
-# Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
 
 # Adding SiHitValidation for whichever parts of ITk are running
 def ITkHitAnalysis(flags):
     from AthenaConfiguration.ComponentAccumulator import ComponentAccumulator
-    from HitAnalysis.SiHitAnalysis import ITkPixelHitAnalysisCfg, ITkStripHitAnalysisCfg, PLRHitAnalysisCfg
+    from HitAnalysis.SiHitAnalysis import ITkPixelHitAnalysisCfg, ITkStripHitAnalysisCfg, PLR_HitAnalysisCfg
 
     result = ComponentAccumulator()
 
@@ -14,7 +14,7 @@ def ITkHitAnalysis(flags):
         result.merge(ITkStripHitAnalysisCfg(flags))
 
     if flags.Detector.EnablePLR:
-        result.merge(PLRHitAnalysisCfg(flags))
+        result.merge(PLR_HitAnalysisCfg(flags))
 
     return result
 

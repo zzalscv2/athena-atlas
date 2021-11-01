@@ -43,6 +43,9 @@ class PixelSiLorentzAngleCondAlg: public AthReentrantAlgorithm {
 
   private:
 
+    Gaudi::Property<std::string> m_pixelIDName
+    {this, "PixelIDName", "PixelID", "Pixel ID name"};
+
     SG::ReadCondHandleKey<PixelModuleData> m_moduleDataKey
     {this, "PixelModuleData", "PixelModuleData", "Pixel module data"};
 

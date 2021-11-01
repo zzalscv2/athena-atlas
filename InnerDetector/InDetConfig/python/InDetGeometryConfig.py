@@ -33,8 +33,8 @@ def InDetGeometryCfg (flags):
         acc.merge(ITkStripReadoutGeometryCfg( flags ))
 
     if flags.Detector.GeometryPLR:
-        from PLRGeoModelXml.PLRGeoModelConfig import PLRGeometryCfg
-        acc.merge(PLRGeometryCfg( flags ))
+        from PLRGeoModelXml.PLR_GeoModelConfig import PLR_ReadoutGeometryCfg
+        acc.merge(PLR_ReadoutGeometryCfg( flags ))
 
     return acc
 

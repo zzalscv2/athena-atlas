@@ -94,7 +94,6 @@ private:
 
   // Properties
   std::string              m_detectorName;
-  bool                     m_isPixel;  
   double                   m_nominalField;
   bool                     m_useMagFieldCache;
   bool                     m_ignoreLocalPos;   // Makes methods using localPosition behave as method without passing localPosition.

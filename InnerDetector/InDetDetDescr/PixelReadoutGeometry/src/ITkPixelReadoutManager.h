@@ -49,8 +49,14 @@ public:
 
 private:
   ServiceHandle<StoreGateSvc> m_detStore{this, "DetectorStore", "DetectorStore"};
+
   const PixelDetectorManager *m_detManager{};
   const PixelID *m_idHelper{};
+
+  Gaudi::Property<std::string> m_detectorName
+  {this, "DetectorName", "ITkPixel", "Pixel detector name"};
+  Gaudi::Property<std::string> m_pixelIDName
+  {this, "PixelIDName", "PixelID", "Pixel ID name"};
 };
 
 } // namespace ITk

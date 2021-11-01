@@ -1,6 +1,6 @@
 # Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
 
-def PLRGeometryCfg(flags):
+def PLR_GeometryCfg(flags):
     from AtlasGeoModel.GeoModelConfig import GeoModelCfg
     acc = GeoModelCfg(flags)
     geoModelSvc = acc.getPrimary()
@@ -20,5 +20,29 @@ def PLRGeometryCfg(flags):
     if flags.ITk.Geometry.PLRClobOutputName:
         plrDetectorTool.ClobOutputName = flags.ITk.Geometry.PLRClobOutputName
     geoModelSvc.DetectorTools += [ plrDetectorTool ]
+    return acc
 
+
+def PLR_AlignmentCfg(flags):
+    if flags.GeoModel.Align.LegacyConditionsAccess:  # revert to old style CondHandle in case of simulation
+        from IOVDbSvc.IOVDbSvcConfig import addFoldersSplitOnline
+        return addFoldersSplitOnline(flags, "INDET", "/Indet/Onl/Align", "/Indet/Align")
+    else:
+        from PixelConditionsAlgorithms.PLR_ConditionsConfig import PLR_AlignCondAlgCfg
+        return PLR_AlignCondAlgCfg(flags)
+
+
+def PLR_SimulationGeometryCfg(flags):
+    # main GeoModel config
+    acc = PLR_GeometryCfg(flags)
+    acc.merge(PLR_AlignmentCfg(flags))
+    return acc
+
+
+def PLR_ReadoutGeometryCfg(flags, **kwargs):
+    # main GeoModel config
+    acc = PLR_GeometryCfg(flags)
+    acc.merge(PLR_AlignmentCfg(flags))
+    from PixelConditionsAlgorithms.PLR_ConditionsConfig import PLR_DetectorElementCondAlgCfg
+    acc.merge(PLR_DetectorElementCondAlgCfg(flags))
     return acc

@@ -27,7 +27,7 @@ StatusCode PixelDigitizationTool::initialize() {
   }
   ATH_CHECK(m_rndmSvc.retrieve());
 
-  ATH_CHECK(detStore()->retrieve(m_detID, "PixelID"));
+  ATH_CHECK(detStore()->retrieve(m_detID, m_pixelIDName.value()));
   ATH_MSG_DEBUG("Pixel ID helper retrieved");
 
   ATH_CHECK(m_chargeTool.retrieve());

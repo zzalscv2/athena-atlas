@@ -32,6 +32,8 @@ class PixelSiPropertiesCondAlg : public AthReentrantAlgorithm {
 
   private:
     const PixelID* m_pixid;
+    Gaudi::Property<std::string> m_pixelIDName
+    {this, "PixelIDName", "PixelID", "Pixel ID name"};
 
     SG::ReadCondHandleKey<PixelDCSTempData> m_readKeyTemp
     {this, "ReadKeyeTemp", "PixelDCSTempCondData", "Key of input sensor temperature conditions folder"};
