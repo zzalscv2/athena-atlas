@@ -20,7 +20,6 @@ AOD_outputs = [i for i, j in egammaKeysDict.outputs.items()
                             'ElectronSuperRec',
                             'EgammaLargeClusters',
                             'EgammaLargeClustersCellLink',
-                            'CellLink',
                             'TopoSeededCellLink',
                             'EgammaLargeClusters',
                             'EgammaLargeClustersCellLink',
@@ -29,6 +28,8 @@ AOD_outputs = [i for i, j in egammaKeysDict.outputs.items()
                             'FwdElectron',
                             'FwdCluster',
                             'FwdClusterCellLink',
+                            'EgammaLargeFWDClusters',
+                            'EgammaLargeFWDClustersCellLink',
                             'Conversion'
                             )]
 
@@ -39,7 +40,6 @@ ESD_outputs = [i for i, j in egammaKeysDict.outputs.items()
                             'EgammaLargeClusters',
                             'EgammaLargeClustersCellLink',
                             'TopoSeededCellLink',
-                            'CellLink',
                             'EgammaLargeClusters',
                             'EgammaLargeClustersCellLink',
                             'Photon',
@@ -47,6 +47,8 @@ ESD_outputs = [i for i, j in egammaKeysDict.outputs.items()
                             'FwdElectron',
                             'FwdCluster',
                             'FwdClusterCellLink',
+                            'EgammaLargeFWDClusters',
+                            'EgammaLargeFWDClustersCellLink',
                             'Conversion'
                             )]
 
