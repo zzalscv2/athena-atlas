@@ -1,4 +1,4 @@
-# Copyright (C) 2002-2018 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
 
 # AnaAlgorithm import(s):
 from AnaAlgorithm.AnaAlgSequence import AnaAlgSequence
@@ -8,9 +8,9 @@ try:
     from AthenaCommon.Logging import logging
 except ImportError:
     import logging
-prwlog = logging.getLogger('makePileupAnalysisSequence')
+log = logging.getLogger('makePileupAnalysisSequence')
 
-def makePileupAnalysisSequence( dataType, userPileupConfigs=[], userLumicalcFiles=[] , autoConfig=False ):
+def makePileupAnalysisSequence( dataType, campaign=None, files=None, useDefaultConfig=False, userLumicalcFiles=None, userPileupConfigs=None ):
     """Create a PRW analysis algorithm sequence
 
     Keyword arguments:
@@ -23,33 +23,49 @@ def makePileupAnalysisSequence( dataType, userPileupConfigs=[], userLumicalcFile
     # Create the analysis algorithm sequence object:
     seq = AnaAlgSequence( "PileupAnalysisSequence" )
 
-    muMcFiles = userPileupConfigs[:]
-    if autoConfig:
-        from PileupReweighting.AutoconfigurePRW import getLumiCalcFiles,getMCMuFiles
-        userLumicalcFiles = getLumiCalcFiles()
-        if len(muMcFiles)==0:
-            muMcFiles = getMCMuFiles()
-        else:
-            prwlog.warning('Sent autoconfig and userPileupConfigs='+str(userPileupConfigs))
-            prwlog.warning('Ignoring autoconfig and keeping user-specified files')
+    # TODO: support per-campaign config
 
-    if userLumicalcFiles==[]:
-        muDataFiles = ["GoodRunsLists/data15_13TeV/20170619/PHYS_StandardGRL_All_Good_25ns_276262-284484_OflLumi-13TeV-008.root",
-                       "GoodRunsLists/data16_13TeV/20180129/PHYS_StandardGRL_All_Good_25ns_297730-311481_OflLumi-13TeV-009.root",
-                       "GoodRunsLists/data17_13TeV/20180619/physics_25ns_Triggerno17e33prim.lumicalc.OflLumi-13TeV-010.root",
-                       "GoodRunsLists/data18_13TeV/20190708/ilumicalc_histograms_None_348885-364292_OflLumi-13TeV-010.root" ]
+    toolConfigFiles = []
+    toolLumicalcFiles = []
+    if files is not None and (campaign is None or userPileupConfigs is None):
+        if campaign is None:
+            from Campaigns.Utils import getMCCampaign
+            campaign = getMCCampaign(files=files)
+            if campaign:
+                log.info(f'Autoconfiguring PRW with campaign: {campaign}')
+            else:
+                log.info('Campaign could not be determined.')
+
+        if campaign:
+            if userPileupConfigs is None:
+                from PileupReweighting.AutoconfigurePRW import getConfigurationFiles
+                toolConfigFiles = getConfigurationFiles(campaign=campaign, files=files, useDefaultConfig=useDefaultConfig)
+                log.info('Setting PRW configuration based on input files')
+
+                if toolConfigFiles:
+                    log.info(f'Using PRW configuration: {", ".join(toolConfigFiles)}')
+            else:
+                log.info('Using user provided PRW configuration')
+
+    if userPileupConfigs is not None:
+        toolConfigFiles = userPileupConfigs[:]
+
+    if userLumicalcFiles is not None:
+        log.info('Using user-provided lumicalc files')
+        toolLumicalcFiles = userLumicalcFiles[:]
     else:
-        muDataFiles = userLumicalcFiles[:]
+        from PileupReweighting.AutoconfigurePRW import getLumicalcFiles
+        toolLumicalcFiles = getLumicalcFiles(campaign)
 
     # Set up the only algorithm of the sequence:
     alg = createAlgorithm( 'CP::PileupReweightingAlg', 'PileupReweightingAlg' )
     addPrivateTool( alg, 'pileupReweightingTool', 'CP::PileupReweightingTool' )
-    alg.pileupReweightingTool.ConfigFiles = muMcFiles
-    if not muMcFiles and dataType != "data":
-        prwlog.info("No PRW config files provided. Disabling reweighting")
+    alg.pileupReweightingTool.ConfigFiles = toolConfigFiles
+    if not toolConfigFiles and dataType != "data":
+        log.info("No PRW config files provided. Disabling reweighting")
         # Setting the weight decoration to the empty string disables the reweighting
         alg.pileupWeightDecoration = ""
-    alg.pileupReweightingTool.LumiCalcFiles = muDataFiles
+    alg.pileupReweightingTool.LumiCalcFiles = toolLumicalcFiles
 
     seq.append( alg, inputPropName = {} )
 
