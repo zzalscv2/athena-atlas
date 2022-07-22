@@ -1,78 +1,131 @@
-# Copyright (C) 2002-2019 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+from Campaigns.Utils import getMCCampaign
 
-# Helper functions for the configuration of pileup reweighting
-reco_campaigns = { 
- 'mc16a' : ['r9280','r9287','r9364'],
- 'mc16d' : ['r10069','r10201','r10211','r10212'],
- 'mc16e' : ['r10724','r10726']
-}
 
-# Function to get the campaign
-def getCampaign(ami_tag = None, project = None):
-    # Attempt auto-configuration
-    if ami_tag is None or project is None:
-        # either is not set, get unset from InputFilePeeker
-        from RecExConfig.InputFilePeeker import inputFileSummary
-        if inputFileSummary is not None:
-            ami_tag = inputFileSummary['tag_info']['AMITag'] if ami_tag is None else ami_tag
-            project = inputFileSummary['tag_info']['project_name'] if project is None else project
+def getLumicalcFiles(campaign):
+    list = []
 
-    assert ami_tag is not None
-    assert project is not None
+    if campaign in ['mc16a', 'mc20a']:
+        list.append(
+            'GoodRunsLists/data15_13TeV/20170619/PHYS_StandardGRL_All_Good_25ns_276262-284484_OflLumi-13TeV-008.root'
+        )
+        list.append(
+            'GoodRunsLists/data16_13TeV/20180129/PHYS_StandardGRL_All_Good_25ns_297730-311481_OflLumi-13TeV-009.root'
+        )
 
-    for c in reco_campaigns:
-        for r in reco_campaigns[c]:
-            if r in ami_tag:
-                return c
+    elif campaign in ['mc16d', 'mc20d']:
+        list.append(
+            'GoodRunsLists/data17_13TeV/20180619/physics_25ns_Triggerno17e33prim.lumicalc.OflLumi-13TeV-010.root'
+        )
 
-    # MC-equivalent projects for data
-    if 'data18' in project: return 'mc16e'
-    elif 'data17' in project: return 'mc16d'
-    elif 'data16' in project or 'data15' in project: return 'mc16a'
+    elif campaign in ['mc16e', 'mc20e']:
+        list.append(
+            'GoodRunsLists/data18_13TeV/20190318/ilumicalc_histograms_None_348885-364292_OflLumi-13TeV-010.root'
+        )
 
-    return None
+    elif campaign in ['mc21a']:
+        list.append(
+            'GoodRunsLists/data22_13p6TeV/20220902/ilumicalc_histograms_None_430536-430648_OflLumi-Run3-001.root'
+        )
 
-# Function to get the data lumicalc files
-def getLumiCalcFiles(campaign = None):
-    # Attempt auto-configuration
-    campaign = campaign or getCampaign()
-    if campaign=='mc16a':
-        return ["GoodRunsLists/data15_13TeV/20170619/PHYS_StandardGRL_All_Good_25ns_276262-284484_OflLumi-13TeV-008.root",
-                "GoodRunsLists/data16_13TeV/20180129/PHYS_StandardGRL_All_Good_25ns_297730-311481_OflLumi-13TeV-009.root"]
-    elif campaign=='mc16d':
-        return ["GoodRunsLists/data17_13TeV/20180619/physics_25ns_Triggerno17e33prim.lumicalc.OflLumi-13TeV-010.root" ]
-    elif campaign=='mc16e':
-        return ["GoodRunsLists/data18_13TeV/20190708/ilumicalc_histograms_None_348885-364292_OflLumi-13TeV-010.root" ]
-    return []
-
-def getMCMuFiles(data_type = None, campaign = None, dsid = None):
-    # Attempt auto-configuration
-    defaultDirectory = 'dev/PileupReweighting/share'
-
-    if data_type is None or campaign is None or dsid is None:
-        # one is not set, get unset from InputFilePeeker
-        from RecExConfig.InputFilePeeker import inputFileSummary
-        if inputFileSummary is not None and 'IS_SIMULATION' in inputFileSummary['evt_type']:
-            # We are in an MC file - get the AMI tag
-            ami_tag = inputFileSummary['tag_info']['AMITag']
-            campaign = getCampaign(ami_tag=ami_tag)
-            dsid = str(inputFileSummary['mc_channel_number'][0]) if dsid is None else dsid
-            sim_flavor = inputFileSummary['metadata']['/Simulation/Parameters']['SimulationFlavour']
-            sim_type = 'FS' if sim_flavor in ['FullG4'] else 'AFII'
-            inputFile = defaultDirectory+'/DSID'+dsid[:3]+'xxx/pileup_'+campaign+'_dsid'+dsid+'_'+sim_type+'.root'
-            return [inputFile]
     else:
-        # everything set explicitly
-        # data_type as in pileup analysis sequence: either 'data' or ('mc' or 'afii')
-        if data_type == "data":
-            return []
-        if data_type == "mc":
-            sim_type = "FS"
-        elif data_type == "afii":
-            sim_type = "AFII"
-        else:
-            raise ValueError("Invalid data_type %s" % data_type)
+        raise ValueError(f'Unsupported campaign {campaign}')
 
-        inputFile = defaultDirectory+'/DSID'+dsid[:3]+'xxx/pileup_'+campaign+'_dsid'+dsid+'_'+sim_type+'.root'
-        return [inputFile]
-    return []
+    if campaign in ['mc16a', 'mc20a']:
+        assert(len(list) == 2)
+    else:
+        assert(len(list) == 1)
+
+    return list
+
+
+def actualMuFiles(campaign):
+    list = []
+
+    if campaign in ['mc16d', 'mc20d']:
+        list.append(
+            'GoodRunsLists/data17_13TeV/20180619/physics_25ns_Triggerno17e33prim.actualMu.OflLumi-13TeV-010.root'
+        )
+    elif campaign in ['mc16e', 'mc20e']:
+        list.append(
+            'GoodRunsLists/data18_13TeV/20190318/physics_25ns_Triggerno17e33prim.actualMu.OflLumi-13TeV-010.root'
+        )
+
+    if campaign in ['mc16d', 'mc20d', 'mc16e', 'mc20e']:
+        assert(len(list) == 1)
+    else:
+        assert(len(list) == 0)
+
+    return list
+
+
+def defaultConfigFiles(campaign):
+    list = []
+
+    if campaign in ['mc20a']:
+        list.append(
+            'PileupReweighting/mc20_common/mc20a.284500.physlite.prw.v1.root'
+        )
+    elif campaign in ['mc20d']:
+        list.append(
+            'PileupReweighting/mc20_common/mc20d.300000.physlite.prw.v1.root'
+        )
+    elif campaign in ['mc20e']:
+        list.append(
+            'PileupReweighting/mc20_common/mc20e.310000.physlite.prw.v1.root'
+        )
+    elif campaign in ['mc21a']:
+        list.append(
+            'PileupReweighting/mc21_common/mc21a.410000.physlite.prw.v1.root'
+        )
+    else:
+        raise ValueError(f'Unsupported campaign {campaign}')
+
+    assert(len(list) == 1)
+
+    return list
+
+
+def getConfigurationFiles(campaign=None, dsid=None, data_type=None, files=None, useDefaultConfig=False):
+    # Attempt auto-configuration
+    default_directory = 'dev/PileupReweighting/share'
+    configuration_files = []
+
+    if files is not None and (campaign is None or dsid is None or data_type is None):
+        if campaign is None:
+            campaign = getMCCampaign(files=files)
+
+        if dsid is None or data_type is None:
+            from AthenaConfiguration.AutoConfigFlags import GetFileMD
+            metadata = GetFileMD(files)
+            if dsid is None:
+                dsid = str(metadata.get('mc_channel_number', 0))
+            if data_type is None:
+                simulation_flavour = GetFileMD(files).get('Simulator', '')
+                if not simulation_flavour:
+                    simulation_flavour = GetFileMD(files).get('SimulationFlavour', '')
+                data_type = 'mc' if simulation_flavour in ['', 'FullG4', 'FullG4_QS', 'FullG4_Longlived'] else 'afii'
+
+    # data_type as in pileup analysis sequence: either 'data' or ('mc' or 'afii')
+    if data_type == 'data':
+        raise ValueError('Data is not supported')
+
+    if data_type == 'mc':
+        simulation_type = 'FS'
+    elif data_type == 'afii':
+        simulation_type = 'AFII'
+    else:
+        raise ValueError(f'Invalid data_type {data_type}')
+
+    configuration_files = actualMuFiles(campaign)
+    if useDefaultConfig:
+        configuration_files += defaultConfigFiles(campaign)
+        return configuration_files
+
+    config = f'{default_directory}/DSID{dsid[:3]}xxx/pileup_{campaign}_dsid{dsid}_{simulation_type}.root'
+    from PathResolver import PathResolver
+    if not PathResolver.FindCalibFile(config):
+        return []
+    else:
+        configuration_files.append(config)
+    return configuration_files
