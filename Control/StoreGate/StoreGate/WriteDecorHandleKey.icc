@@ -11,7 +11,7 @@
  */
 
 
-#include "StoreGate/tools/DecorKeyHelpers.h"
+#include "StoreGate/DecorKeyHelpers.h"
 #include "GaudiKernel/IDataHandleHolder.h"
 
 

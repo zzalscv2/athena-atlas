@@ -10,7 +10,7 @@
  */
 
 
-#include "StoreGate/tools/DecorKeyHelpers.h"
+#include "StoreGate/DecorKeyHelpers.h"
 
 
 namespace SG {
