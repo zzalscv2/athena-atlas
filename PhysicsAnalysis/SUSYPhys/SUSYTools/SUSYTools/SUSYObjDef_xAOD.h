@@ -711,6 +711,7 @@ namespace ST {
     std::string m_IsoCloseByORpassLabel;
 
     bool m_useTRUTH3;
+    bool m_isRun3;
 
     std::map<std::string,bool> m_slices;
 
@@ -769,7 +770,7 @@ namespace ST {
     asg::AnaToolHandle<CP::IMuonSelectionTool> m_muonSelectionTool;
     asg::AnaToolHandle<CP::IMuonSelectionTool> m_muonSelectionHighPtTool;
     asg::AnaToolHandle<CP::IMuonSelectionTool> m_muonSelectionToolBaseline;
-    asg::AnaToolHandle<CP::IMuonCalibrationAndSmearingTool> m_muonCalibrationAndSmearingTool;
+    asg::AnaToolHandle<CP::IMuonCalibrationAndSmearingTool> m_muonCalibTool;
     asg::AnaToolHandle<CP::IMuonEfficiencyScaleFactors> m_muonEfficiencySFTool;
     asg::AnaToolHandle<CP::IMuonEfficiencyScaleFactors> m_muonEfficiencyBMHighPtSFTool;
     asg::AnaToolHandle<CP::IMuonEfficiencyScaleFactors> m_muonTTVAEfficiencySFTool;

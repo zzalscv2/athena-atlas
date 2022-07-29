@@ -436,49 +436,16 @@ float SUSYObjDef_xAOD::GetSignalElecSF(const xAOD::Electron& el,
   // Charge flip SF: combined ECIDs & charge ID
   if ( ecidsSF || cidSF ) {
     double chf_sf(1.);
-    CP::CorrectionCode result;
     // 1. ECIDs SF
     if ( ecidsSF ) {
-      if( m_runECIS ){
-        result = m_elecEfficiencySFTool_chf->getEfficiencyScaleFactor(el, chf_sf);
-        switch (result) {
-        case CP::CorrectionCode::Ok:
-          sf *= chf_sf;
-          break;
-        case CP::CorrectionCode::Error:
-          ATH_MSG_ERROR( "Failed to retrieve signal electron charge-flip SF");
-          break;
-        case CP::CorrectionCode::OutOfValidityRange:
-          ATH_MSG_VERBOSE( "OutOfValidityRange found for signal electron charge-flip SF");
-          break;
-        default:
-          ATH_MSG_WARNING( "Don't know what to do for signal electron charge-flip SF");
-        }
+      sf *= chf_sf;
+      ATH_MSG_WARNING( "ECID SF ARE NOT YET SUPPORTED IN R22" );
       }
-      else {
-         ATH_MSG_WARNING( "You're asking to get ecidsSF, but the WP is not set. Did you set Ele.CFT (only Loose supported)?" );
-      }
-    }
     // 2. CID SF
     if ( cidSF ) {
-      result = m_elecChargeEffCorrTool->getEfficiencyScaleFactor(el, chf_sf);
-      switch (result) {
-      case CP::CorrectionCode::Ok:
         sf *= chf_sf;
         dec_sfChIDEff(el) = chf_sf;
-        break;
-      case CP::CorrectionCode::Error:
-        ATH_MSG_ERROR( "Failed to retrieve signal electron charge efficiency correction SF");
-        break;
-      case CP::CorrectionCode::OutOfValidityRange:
-        // Range determined by bin range in configured correction file (CorrectionFileName)
-        // Run m_elecChargeEffCorrTool with message level VERBOSE to print out range
-        ATH_MSG_DEBUG( "OutOfValidityRange found for signal electron charge efficiency correction SF. Setting SF = 1");
-        dec_sfChIDEff(el) = 1;
-        break;
-      default:
-        ATH_MSG_WARNING( "Don't know what to do for signal electron charge efficiency correction SF");
-      }
+        ATH_MSG_WARNING( "CID SF ARE NOT YET SUPPORTED IN R22" );
     }
   }
 
@@ -490,64 +457,16 @@ float SUSYObjDef_xAOD::GetSignalElecSF(const xAOD::Electron& el,
 double SUSYObjDef_xAOD::GetEleTriggerEfficiencySF(const xAOD::Electron& el, const std::string& trigExpr) const {
 
   double trig_sf(1.);
-
-  std::string single_str = "SINGLE_E";
-  std::string dilep_str = "DI_E";
-  std::string multi_str = "MULTI_L";
-
-  CP::CorrectionCode result;
-  if ( trigExpr.find(single_str) != std::string::npos )
-    result = m_elecEfficiencySFTool_trig_singleLep->getEfficiencyScaleFactor(el, trig_sf);
-  else if ( trigExpr.find(dilep_str) != std::string::npos )
-    ATH_MSG_ERROR( "Use GetTriggerGlobalEfficiency for logical OR of lepton triggers");
-  else if ( trigExpr.find(multi_str) != std::string::npos )
-    ATH_MSG_ERROR( "Use GetTriggerGlobalEfficiency for logical OR of lepton triggers");
-  else
-    ATH_MSG_ERROR( "The trigger expression (" << trigExpr << ") is not supported by the electron trigger SF!");
-
-  switch (result) {
-    case CP::CorrectionCode::Error:
-      ATH_MSG_ERROR( "Failed to retrieve signal electron trigger SF");
-      return 1.;
-    case CP::CorrectionCode::OutOfValidityRange:
-      ATH_MSG_VERBOSE( "OutOfValidityRange found for signal electron trigger SF");
-      return 1.;
-    default:
-      break;
-  }
-
+  if (!acc_passOR(el)) trig_sf =1;
+  ATH_MSG_DEBUG( "ELECTRON TRIGGER SF ARE NOT YET SUPPORTED IN R22 FOR (" << trigExpr << "), RETURNING 1");
   return trig_sf;
 }
 
 double SUSYObjDef_xAOD::GetEleTriggerEfficiency(const xAOD::Electron& el, const std::string& trigExpr) const {
-
-  std::string single_str = "SINGLE_E";
-  std::string dilep_str = "DI_E";
-  std::string multi_str = "MULTI_L";
-
+  
   double trig_eff(1.);
-
-  CP::CorrectionCode result;
-  if ( m_electronTriggerSFStringSingle.find(single_str) != std::string::npos )
-    result = m_elecEfficiencySFTool_trigEff_singleLep->getEfficiencyScaleFactor(el, trig_eff);
-  else if ( trigExpr.find(dilep_str) != std::string::npos )
-    ATH_MSG_ERROR( "Use GetTriggerGlobalEfficiency for logical OR of lepton triggers");
-  else if ( trigExpr.find(multi_str) != std::string::npos )
-    ATH_MSG_ERROR( "Use GetTriggerGlobalEfficiency for logical OR of lepton triggers");
-  else
-    ATH_MSG_ERROR( "The trigger expression (" << trigExpr << ") is not supported by the electron trigger efficiency!");
-
-  switch (result) {
-  case CP::CorrectionCode::Error:
-    ATH_MSG_ERROR( "Failed to retrieve signal electron trigger efficiency");
-    return 1.;
-  case CP::CorrectionCode::OutOfValidityRange:
-    ATH_MSG_VERBOSE( "OutOfValidityRange found for signal electron trigger efficiency");
-    return 1.;
-  default:
-    break;
-  }
-
+  if (!acc_passOR(el)) trig_eff =1;
+  ATH_MSG_DEBUG( "ELECTRON TRIGGER EFFICIENCIES ARE NOT YET SUPPORTED IN R22 FOR (" << trigExpr << "), RETURNING 1");
   return trig_eff;
 }
 
@@ -579,10 +498,6 @@ double SUSYObjDef_xAOD::GetEleTriggerEfficiency(const xAOD::Electron& el, const 
     ATH_MSG_ERROR("Cannot configure AsgElectronEfficiencyCorrectionTool (id) for systematic var. " << systConfig.name() );
   }
 
-  ret = m_elecEfficiencySFTool_trig_singleLep->applySystematicVariation(systConfig);
-  if (ret != StatusCode::SUCCESS) {
-    ATH_MSG_ERROR("Cannot configure AsgElectronEfficiencyCorrectionTool (trigger) for systematic var. " << systConfig.name() );
-  }
 
   ret = m_elecEfficiencySFTool_iso->applySystematicVariation(systConfig);
   if (ret != StatusCode::SUCCESS) {
@@ -592,11 +507,6 @@ double SUSYObjDef_xAOD::GetEleTriggerEfficiency(const xAOD::Electron& el, const 
   ret = m_elecEfficiencySFTool_isoHighPt->applySystematicVariation(systConfig);
   if (ret != StatusCode::SUCCESS) {
     ATH_MSG_ERROR("Cannot configure AsgElectronEfficiencyCorrectionTool (iso high-pt) for systematic var. " << systConfig.name() );
-  }
-
-  ret = m_elecEfficiencySFTool_chf->applySystematicVariation(systConfig);
-  if (ret != StatusCode::SUCCESS) {
-    ATH_MSG_ERROR("Cannot configure AsgElectronEfficiencyCorrectionTool (charge-flip) for systematic var. " << systConfig.name() );
   }
 
   ret = m_elecChargeEffCorrTool->applySystematicVariation(systConfig);
@@ -619,11 +529,6 @@ double SUSYObjDef_xAOD::GetEleTriggerEfficiency(const xAOD::Electron& el, const 
     ATH_MSG_ERROR("Cannot configure AsgElectronEfficiencyCorrectionTool (id) back to default.");
   }
 
-  ret = m_elecEfficiencySFTool_trig_singleLep->applySystematicVariation(m_currentSyst);
-  if (ret != StatusCode::SUCCESS) {
-    ATH_MSG_ERROR("Cannot configure AsgElectronEfficiencyCorrectionTool (trigger) back to default.");
-  }
-
   ret = m_elecEfficiencySFTool_iso->applySystematicVariation(m_currentSyst);
   if (ret != StatusCode::SUCCESS) {
     ATH_MSG_ERROR("Cannot configure AsgElectronEfficiencyCorrectionTool (iso) back to default.");
@@ -632,11 +537,6 @@ double SUSYObjDef_xAOD::GetEleTriggerEfficiency(const xAOD::Electron& el, const 
   ret = m_elecEfficiencySFTool_isoHighPt->applySystematicVariation(m_currentSyst);
   if (ret != StatusCode::SUCCESS) {
     ATH_MSG_ERROR("Cannot configure AsgElectronEfficiencyCorrectionTool (iso high-pt) back to default.");
-  }
-
-  ret = m_elecEfficiencySFTool_chf->applySystematicVariation(m_currentSyst);
-  if (ret != StatusCode::SUCCESS) {
-    ATH_MSG_ERROR("Cannot configure AsgElectronEfficiencyCorrectionTool (charge-flip) back to default.");
   }
 
   ret = m_elecChargeEffCorrTool->applySystematicVariation(m_currentSyst);
