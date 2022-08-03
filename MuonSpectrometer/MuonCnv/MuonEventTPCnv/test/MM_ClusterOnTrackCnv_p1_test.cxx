@@ -94,7 +94,7 @@ void compare (const Muon::MMClusterOnTrack& p1,
            static_cast<const Muon::MuonClusterOnTrack&>(p2));
   assert (p1.detectorElement() == p2.detectorElement());
   // Link key gets modified during writing.
-  assert (p2.prepRawDataLink().key() == 480457663);
+  assert (SG::sgkeyShort (p2.prepRawDataLink().key()) == 480457663);
   assert (p1.prepRawDataLink().index() == p2.prepRawDataLink().index());
 }
 
