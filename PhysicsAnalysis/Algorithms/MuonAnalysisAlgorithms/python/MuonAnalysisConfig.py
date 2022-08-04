@@ -1,7 +1,6 @@
 # Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
 
 # AnaAlgorithm import(s):
-from AnaAlgorithm.DualUseConfig import createAlgorithm, addPrivateTool
 from AnalysisAlgorithmsConfig.ConfigBlock import ConfigBlock
 import ROOT
 
@@ -15,59 +14,51 @@ class MuonCalibrationConfig (ConfigBlock):
         self.postfix = postfix
         self.ptSelectionOutput = False
 
-    def collectReferences (self, config) :
-        self._muonRef1 = config.readOrUpdateRef (self.containerName, "Muons")
-        self._muonRef2 = config.updateRef (self.containerName, "Muons")
-
     def makeAlgs (self, config) :
         # Set up the eta-cut on all muons prior to everything else
-        alg = createAlgorithm( 'CP::AsgSelectionAlg',
+        alg = config.createAlgorithm( 'CP::AsgSelectionAlg',
                                'MuonEtaCutAlg' + self.postfix )
-        addPrivateTool( alg, 'selectionTool', 'CP::AsgPtEtaSelectionTool' )
+        config.addPrivateTool( 'selectionTool', 'CP::AsgPtEtaSelectionTool' )
         alg.selectionTool.maxEta = 2.5
         alg.selectionDecoration = 'selectEta' + self.postfix + ',as_bits'
-        alg.particles = self._muonRef1.input()
-        if self._muonRef1.wantCopy() :
-            alg.particlesOut = self._muonRef1.output()
+        alg.particles = config.readName (self.containerName, "Muons")
+        if config.wantCopy (self.containerName) :
+            alg.particlesOut = config.copyName (self.containerName)
         alg.preselection = config.getSelection (self.containerName, '')
         config.addSelection (self.containerName, '', alg.selectionDecoration, 2)
         config.addSelection (self.containerName, 'output', alg.selectionDecoration, 2)
-        config.addAlg (alg)
 
         # Set up the track selection algorithm:
-        alg = createAlgorithm( 'CP::AsgLeptonTrackSelectionAlg',
+        alg = config.createAlgorithm( 'CP::AsgLeptonTrackSelectionAlg',
                                'MuonTrackSelectionAlg' + self.postfix )
         alg.selectionDecoration = 'trackSelection' + self.postfix + ',as_bits'
         alg.maxD0Significance = 3
         alg.maxDeltaZ0SinTheta = 0.5
-        alg.particles = self._muonRef2.input()
+        alg.particles = config.readName (self.containerName)
         alg.preselection = config.getSelection (self.containerName, '')
         config.addSelection (self.containerName, '', alg.selectionDecoration, 3)
         config.addSelection (self.containerName, 'output', alg.selectionDecoration, 3)
-        config.addAlg (alg)
 
         # Set up the muon calibration and smearing algorithm:
-        alg = createAlgorithm( 'CP::MuonCalibrationAndSmearingAlg',
+        alg = config.createAlgorithm( 'CP::MuonCalibrationAndSmearingAlg',
                                'MuonCalibrationAndSmearingAlg' + self.postfix )
-        addPrivateTool( alg, 'calibrationAndSmearingTool',
+        config.addPrivateTool( 'calibrationAndSmearingTool',
                         'CP::MuonCalibrationPeriodTool' )
         alg.calibrationAndSmearingTool.calibrationMode = 2 # choose ID+MS with no sagitta bias
-        alg.muons = self._muonRef2.input()
-        alg.muonsOut = self._muonRef2.output()
+        alg.muons = config.readName (self.containerName)
+        alg.muonsOut = config.copyName (self.containerName)
         alg.preselection = config.getSelection (self.containerName, '')
-        config.addAlg (alg)
 
         # Set up the the pt selection
-        alg = createAlgorithm( 'CP::AsgSelectionAlg', 'MuonPtCutAlg' + self.postfix )
+        alg = config.createAlgorithm( 'CP::AsgSelectionAlg', 'MuonPtCutAlg' + self.postfix )
         alg.selectionDecoration = 'selectPt' + self.postfix + ',as_bits'
-        addPrivateTool( alg, 'selectionTool', 'CP::AsgPtEtaSelectionTool' )
-        alg.particles = self._muonRef2.output()
+        config.addPrivateTool( 'selectionTool', 'CP::AsgPtEtaSelectionTool' )
+        alg.particles = config.readName (self.containerName)
         alg.selectionTool.minPt = 3e3
         alg.preselection = config.getSelection (self.containerName, '')
         config.addSelection (self.containerName, '', alg.selectionDecoration, 2)
         if self.ptSelectionOutput :
             config.addSelection (self.containerName, 'output', alg.selectionDecoration, 2)
-        config.addAlg (alg)
 
 
 
@@ -84,9 +75,6 @@ class MuonWorkingPointConfig (ConfigBlock) :
         self.quality = quality
         self.isolation = isolation
         self.qualitySelectionOutput = False
-
-    def collectReferences (self, config) :
-        self._muonRef1 = config.readRef (self.containerName)
 
     def makeAlgs (self, config) :
 
@@ -116,45 +104,42 @@ class MuonWorkingPointConfig (ConfigBlock) :
                               '\", allowed values are Iso, NonIso')
 
         # Setup the muon quality selection
-        alg = createAlgorithm( 'CP::MuonSelectionAlgV2',
+        alg = config.createAlgorithm( 'CP::MuonSelectionAlgV2',
                                'MuonSelectionAlg' + postfix )
-        addPrivateTool( alg, 'selectionTool', 'CP::MuonSelectionTool' )
+        config.addPrivateTool( 'selectionTool', 'CP::MuonSelectionTool' )
         alg.selectionTool.MuQuality = quality
         alg.selectionDecoration = 'good_muon' + postfix + ',as_bits'
         alg.badMuonVetoDecoration = 'is_bad' + postfix + ',as_char'
-        alg.muons = self._muonRef1.input()
+        alg.muons = config.readName (self.containerName)
         alg.preselection = config.getSelection (self.containerName, self.selectionName)
         config.addSelection (self.containerName, self.selectionName, alg.selectionDecoration, 4)
         if self.qualitySelectionOutput:
             config.addSelection (self.containerName, 'output', alg.selectionDecoration, 4)
-        config.addAlg (alg)
 
         # Set up the isolation calculation algorithm:
         if self.isolation != 'NonIso' :
-            alg = createAlgorithm( 'CP::MuonIsolationAlg',
+            alg = config.createAlgorithm( 'CP::MuonIsolationAlg',
                                    'MuonIsolationAlg' + postfix )
-            addPrivateTool( alg, 'isolationTool', 'CP::IsolationSelectionTool' )
+            config.addPrivateTool( 'isolationTool', 'CP::IsolationSelectionTool' )
             alg.isolationDecoration = 'isolated_muon' + postfix + ',as_bits'
-            alg.muons = self._muonRef1.input()
+            alg.muons = config.readName (self.containerName)
             alg.preselection = config.getSelection (self.containerName, self.selectionName)
             config.addSelection (self.containerName, self.selectionName, alg.isolationDecoration, 1)
             if self.qualitySelectionOutput:
                 config.addSelection (self.containerName, 'output', alg.isolationDecoration, 1)
-            config.addAlg (alg)
 
         # Set up the efficiency scale factor calculation algorithm:
         if config.dataType() != 'data':
-            alg = createAlgorithm( 'CP::MuonEfficiencyScaleFactorAlg',
+            alg = config.createAlgorithm( 'CP::MuonEfficiencyScaleFactorAlg',
                                    'MuonEfficiencyScaleFactorAlg' + postfix )
-            addPrivateTool( alg, 'efficiencyScaleFactorTool',
+            config.addPrivateTool( 'efficiencyScaleFactorTool',
                             'CP::MuonEfficiencyScaleFactors' )
             alg.scaleFactorDecoration = 'muon_effSF' + postfix + "_%SYS%"
             alg.outOfValidity = 2 #silent
             alg.outOfValidityDeco = 'bad_eff' + postfix
             alg.efficiencyScaleFactorTool.WorkingPoint = self.quality
-            alg.muons = self._muonRef1.input()
+            alg.muons = config.readName (self.containerName)
             alg.preselection = config.getSelection (self.containerName, self.selectionName)
-            config.addAlg (alg)
 
 
 

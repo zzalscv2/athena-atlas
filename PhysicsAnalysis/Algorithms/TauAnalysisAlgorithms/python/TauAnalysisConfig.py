@@ -2,8 +2,6 @@
 
 # AnaAlgorithm import(s):
 from AnalysisAlgorithmsConfig.ConfigBlock import ConfigBlock
-from AnaAlgorithm.DualUseConfig import createAlgorithm, addPrivateTool, \
-                                       createPublicTool
 
 
 class TauCalibrationConfig (ConfigBlock):
@@ -15,9 +13,6 @@ class TauCalibrationConfig (ConfigBlock):
         self.postfix = postfix
         self.rerunTruthMatching = True
 
-    def collectReferences (self, config) :
-        self._tauRef1 = config.updateRef (self.containerName, "TauJets")
-
 
     def makeAlgs (self, config) :
 
@@ -27,22 +22,20 @@ class TauCalibrationConfig (ConfigBlock):
 
         # Set up the tau truth matching algorithm:
         if self.rerunTruthMatching and config.dataType() != 'data':
-            alg = createAlgorithm( 'CP::TauTruthMatchingAlg',
-                                   'TauTruthMatchingAlg' + postfix )
-            addPrivateTool( alg, 'matchingTool',
-                            'TauAnalysisTools::TauTruthMatchingTool' )
+            alg = config.createAlgorithm( 'CP::TauTruthMatchingAlg',
+                                          'TauTruthMatchingAlg' + postfix )
+            config.addPrivateTool( 'matchingTool',
+                                   'TauAnalysisTools::TauTruthMatchingTool' )
             alg.matchingTool.WriteTruthTaus = 1
-            alg.taus = self._tauRef1.input()
+            alg.taus = config.readName (self.containerName, 'TauJets')
             alg.preselection = config.getSelection (self.containerName, '')
-            config.addAlg (alg)
 
         # Set up the tau 4-momentum smearing algorithm:
-        alg = createAlgorithm( 'CP::TauSmearingAlg', 'TauSmearingAlg' + postfix )
-        addPrivateTool( alg, 'smearingTool', 'TauAnalysisTools::TauSmearingTool' )
-        alg.taus = self._tauRef1.input()
-        alg.tausOut = self._tauRef1.output()
+        alg = config.createAlgorithm( 'CP::TauSmearingAlg', 'TauSmearingAlg' + postfix )
+        config.addPrivateTool( 'smearingTool', 'TauAnalysisTools::TauSmearingTool' )
+        alg.taus = config.readName (self.containerName, 'TauJets')
+        alg.tausOut = config.copyName (self.containerName)
         alg.preselection = config.getSelection (self.containerName, '')
-        config.addAlg (alg)
 
 
 
@@ -60,9 +53,6 @@ class TauWorkingPointConfig (ConfigBlock) :
         self.postfix = postfix
         self.quality = quality
         self.legacyRecommendations = False
-
-    def collectReferences (self, config) :
-        self._tauRef1 = config.readRef (self.containerName)
 
 
     def makeAlgs (self, config) :
@@ -82,38 +72,35 @@ class TauWorkingPointConfig (ConfigBlock) :
         inputfile = nameFormat.format(self.quality.lower())
 
         # Setup the tau selection tool
-        selectionTool = createPublicTool( 'TauAnalysisTools::TauSelectionTool',
-                                          'TauSelectionTool' + postfix)
+        selectionTool = config.createPublicTool( 'TauAnalysisTools::TauSelectionTool',
+                                                 'TauSelectionTool' + postfix)
         selectionTool.ConfigPath = inputfile
-        config.addPublicTool( selectionTool )
 
         # Set up the algorithm selecting taus:
-        alg = createAlgorithm( 'CP::AsgSelectionAlg', 'TauSelectionAlg' + postfix )
-        addPrivateTool( alg, 'selectionTool', 'TauAnalysisTools::TauSelectionTool' )
+        alg = config.createAlgorithm( 'CP::AsgSelectionAlg', 'TauSelectionAlg' + postfix )
+        config.addPrivateTool( 'selectionTool', 'TauAnalysisTools::TauSelectionTool' )
         alg.selectionTool.ConfigPath = inputfile
         alg.selectionDecoration = 'selected_tau' + postfix + ',as_bits'
-        alg.particles = self._tauRef1.input()
+        alg.particles = config.readName (self.containerName)
         alg.preselection = config.getSelection (self.containerName, self.selectionName)
         config.addSelection (self.containerName, self.selectionName, alg.selectionDecoration, 6)
         config.addSelection (self.containerName, 'output', alg.selectionDecoration, 6)
-        config.addAlg (alg)
 
 
         # Set up the algorithm calculating the efficiency scale factors for the
         # taus:
         if config.dataType() != 'data':
-            alg = createAlgorithm( 'CP::TauEfficiencyCorrectionsAlg',
+            alg = config.createAlgorithm( 'CP::TauEfficiencyCorrectionsAlg',
                                    'TauEfficiencyCorrectionsAlg' + postfix )
-            addPrivateTool( alg, 'efficiencyCorrectionsTool',
+            config.addPrivateTool( 'efficiencyCorrectionsTool',
                             'TauAnalysisTools::TauEfficiencyCorrectionsTool' )
             alg.efficiencyCorrectionsTool.TauSelectionTool = '%s/%s' % \
                 ( selectionTool.getType(), selectionTool.getName() )
             alg.scaleFactorDecoration = 'tau_effSF' + postfix + '_%SYS%'
             alg.outOfValidity = 2 #silent
             alg.outOfValidityDeco = 'bad_eff' + postfix
-            alg.taus = self._tauRef1.input()
+            alg.taus = config.readName (self.containerName)
             alg.preselection = config.getSelection (self.containerName, self.selectionName)
-            config.addAlg (alg)
 
 
 
