@@ -24,17 +24,6 @@ class ConfigSequence:
         self._blocks.append (block)
 
 
-    def collectReferences (self, config) :
-        """call collectReferences() on all blocks
-
-        This registers references to the containers being processed in
-        the individual blocks, allowing them to match up along the
-        sequence when creating the algorithms.
-        """
-        for block in self._blocks:
-            block.collectReferences (config)
-
-
     def makeAlgs (self, config) :
         """call makeAlgs() on all blocks
 
@@ -52,5 +41,6 @@ class ConfigSequence:
         contain all the blocks that will be configured, as it will
         perform all configuration steps at once.
         """
-        self.collectReferences (config)
+        self.makeAlgs (config)
+        config.nextPass ()
         self.makeAlgs (config)
