@@ -625,7 +625,7 @@ StatusCode InDetGlobalTrackMonTool::fillHistograms()
 
     uint8_t iSummaryValue(0); // Dummy counter to retrieve summary values
 
-    for (const auto& trackPart: *trackParticles)
+    for (const auto trackPart: *trackParticles)
     {
 	const Trk::Track * track = trackPart->track();
 	if ( !track || track->perigeeParameters() == nullptr )
@@ -730,7 +730,7 @@ StatusCode InDetGlobalTrackMonTool::fillHistograms()
 		return StatusCode::SUCCESS;
 	    }
 
-	    for (const auto& trackPart: *forwardTrackParticles) {
+	    for (const auto trackPart: *forwardTrackParticles) {
 		FillForwardTracks( trackPart );
 	    }
 	}
@@ -919,7 +919,7 @@ void InDetGlobalTrackMonTool::FillTIDE()
     SG::ReadHandle<xAOD::VertexContainer> vertices { m_vertexKey };
     SG::ReadHandle<xAOD::JetContainer> jets(m_JetsName);
     if ( jets.isValid() ) {
-        for ( const auto& jetItr : *jets )
+        for ( const auto jetItr : *jets )
 	{
 	    if ( jetItr->pt() < 20000. )
 		continue;
@@ -999,7 +999,7 @@ void InDetGlobalTrackMonTool::FillTIDE()
 			const DataVector<const Trk::TrackStateOnSurface>* trackStates = track->trackStateOnSurfaces();
 			if ( trackStates == nullptr ) return;
 
-			for (const auto& tsos : *trackStates) {
+			for (const auto tsos : *trackStates) {
 
 			    if (tsos == nullptr) continue;
 
@@ -1088,7 +1088,7 @@ void InDetGlobalTrackMonTool::FillHitMaps( const xAOD::TrackParticle *trackPart 
     const DataVector<const Trk::TrackStateOnSurface>* trackStates = track->trackStateOnSurfaces();
     if ( trackStates == nullptr ) return;
 
-    for (const auto& trackState : *trackStates) {
+    for (const auto trackState : *trackStates) {
 
 	if (trackState == nullptr) continue;
 
