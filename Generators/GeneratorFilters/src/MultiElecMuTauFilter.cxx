@@ -59,6 +59,7 @@ StatusCode MultiElecMuTauFilter::filterEvent() {
         // 1. Find if it is hadronic (i.e. no decay lepton).
         // 2. Veto tau -> tau (FSR)
         // 3. Store the tau neutino to calculate the visible momentum
+        // cppcheck-suppress nullPointerRedundantCheck
         for (auto citr: *(tau->end_vertex())) {
           // Ignore tau -> tau (FSR)
           if (pitr->pdg_id() == citr->pdg_id()) {
