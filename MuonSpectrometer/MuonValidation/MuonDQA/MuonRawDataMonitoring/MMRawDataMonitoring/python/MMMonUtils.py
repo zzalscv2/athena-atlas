@@ -59,9 +59,9 @@ def get_time(histo):
         fd.SetParameters(p0, p1, p2, p3, p4)
         fd.SetParLimits(0, 0, histo.GetMaximum())
         fd.SetParLimits(1, histo.GetBinLowEdge(histo.FindFirstBinAbove())-5, histo.GetBinLowEdge(histo.FindFirstBinAbove())+10)
-        fd.SetParLimits(2, 0, 10)
+        fd.SetParLimits(2, 0.001, 10)
         fd.SetParLimits(3, histo.GetBinLowEdge(histo.FindFirstBinAbove()), histo.GetBinLowEdge(histo.FindLastBinAbove())+5)
-        fd.SetParLimits(4, 0, 10)
+        fd.SetParLimits(4, 0.001, 10)
         
 
         histo.Fit("fd","QRN")                                                                                                                                                              
