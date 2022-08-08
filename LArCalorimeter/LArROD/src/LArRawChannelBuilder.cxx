@@ -5,14 +5,11 @@
 #include "LArRawChannelBuilder.h"
 
 #include "LArRawEvent/LArDigitContainer.h"
-#include "TBEvent/TBPhase.h"
 
 #include "LArElecCalib/ILArPedestal.h"
 //#include "LArElecCalib/ILArRamp.h"
 #include "LArElecCalib/ILArOFC.h"
 #include "LArElecCalib/ILArShape.h"
-#include "LArElecCalib/ILArGlobalTimeOffset.h"
-#include "LArElecCalib/ILArFEBTimeOffset.h"
 #include "CLHEP/Units/SystemOfUnits.h"
 #include "StoreGate/StoreGateSvc.h"
 #include "StoreGate/ReadHandle.h"
@@ -30,7 +27,6 @@ using CLHEP::picosecond;
 LArRawChannelBuilder::LArRawChannelBuilder (const std::string& name, ISvcLocator* pSvcLocator):
   AthAlgorithm(name, pSvcLocator),
   m_onlineHelper(NULL),
-  m_useTDC(false),
   m_Ecut(256*MeV),
   m_initialTimeSampleShift(0),
   m_ramp_max(),
@@ -58,7 +54,6 @@ LArRawChannelBuilder::LArRawChannelBuilder (const std::string& name, ISvcLocator
   , m_shapesKey("LArShape")
  {
    //m_useIntercept={false,false,false,false};
- declareProperty("UseTDC",                    m_useTDC);
  declareProperty("Ecut",                      m_Ecut);
  declareProperty("UseHighGainRampIntercept",  m_useIntercept[CaloGain::LARHIGHGAIN]=false);
  declareProperty("UseMedGainRampIntercept",   m_useIntercept[CaloGain::LARMEDIUMGAIN]=false);
@@ -150,7 +145,6 @@ StatusCode LArRawChannelBuilder::initialize()
                  << "," << m_SamplingPeriodeUpperLimit << ") ns"  );
 
   ATH_CHECK( m_dataLocation.initialize() );
-  ATH_CHECK( m_tbPhaseLocation.initialize(m_useTDC) );
   ATH_CHECK( m_ChannelContainerName.initialize() );
 
   return StatusCode::SUCCESS;
@@ -170,11 +164,7 @@ StatusCode LArRawChannelBuilder::execute()
   int highE      = 0; // Number of channels with 'high' (above threshold) energy in a given event 
   int saturation = 0; // Number of saturating channels in a given event   
   
-  //const TBPhase* theTBPhase; //Pointer to Testbeam TDC-Phase object (if needed)
-  float PhaseTime=0;                //Testbeam TDC phase (if needed)
-  float globalTimeOffset=0;
   //Pointer to conditions data objects 
-  const ILArFEBTimeOffset* larFebTimeOffset=NULL;
   const ILArPedestal* larPedestal=NULL;
   const ILArShape* larShape=NULL;
   //Retrieve Digit Container
@@ -197,28 +187,6 @@ StatusCode LArRawChannelBuilder::execute()
 
   ATH_MSG_DEBUG( "Retrieving LArOFC object"  );
   SG::ReadCondHandle<ILArOFC> larOFC (m_ofcKey, ctx);
-
-  //retrieve TDC
-  if (m_useTDC) { //All this timing business is only necessary if the readout and the beam are not in phase (Testbeam)
-    const ILArGlobalTimeOffset* larGlobalTimeOffset = nullptr;
-    SG::ReadHandle<TBPhase> theTBPhase (m_tbPhaseLocation, ctx);
-
-    //Get Phase in nanoseconds
-    PhaseTime = theTBPhase->getPhase();
-    // ###
-    if (m_phaseInv) PhaseTime = m_SamplingPeriode - PhaseTime ;
-    ATH_MSG_DEBUG( " *** Phase = " << PhaseTime  );
-    // ###
-    
-    //Get Global Time Offset
-    StatusCode sc=detStore()->retrieve(larGlobalTimeOffset);
-    if (sc.isSuccess()) globalTimeOffset = larGlobalTimeOffset->TimeOffset();
-
-    //Get FEB time offset
-    sc=detStore()->retrieve(larFebTimeOffset);
-    if (sc.isFailure()) larFebTimeOffset=NULL;
-  }
-
 
   auto larRawChannelContainer = std::make_unique<LArRawChannelContainer>();
   larRawChannelContainer->reserve(digitContainer->size());
@@ -322,16 +290,7 @@ StatusCode LArRawChannelBuilder::execute()
     ILArOFC::OFCRef_t ofc_a;
     ILArOFC::OFCRef_t ofc_b;
     {// get OFC from Conditions Store
-      float febTimeOffset=0;
-      const HWIdentifier febid=m_onlineHelper->feb_Id(chid);
-      if (larFebTimeOffset)
-	febTimeOffset=larFebTimeOffset->TimeOffset(febid);
-      double timeShift=PhaseTime+globalTimeOffset+febTimeOffset;
-      if (msgLvl (MSG::VERBOSE))
-        msg() << MSG::VERBOSE << "Channel 0x" << MSG::hex << chid.get_compact() << MSG::dec 
- 	   << " phase=" << PhaseTime  << " Feb=" << febTimeOffset 
-	   << " Global=" << globalTimeOffset;
-
+      double timeShift=0;
       if (m_useOFCPhase) {
 	const double ofcTimeOffset=larOFC->timeOffset(chid,gain);
 	timeShift+=ofcTimeOffset;
@@ -540,8 +499,6 @@ StatusCode LArRawChannelBuilder::execute()
 	quality=0; //Can't calculate chi^2, assume good hit.
 	noShape++;
       }
-    //   if (m_useTDC) //Correct time according to EMTB definition (do we really want this?)
-    // 	time= -time+24.5-tbin;
     }// end-if energy>Ecut
     else 
       quality=-1; //in case E<Ecut
