@@ -34,7 +34,7 @@ namespace top {
   private:
     std::shared_ptr<top::TopConfig> m_config;
 
-    ToolHandle<CP::IMuonCalibrationAndSmearingTool> m_muonCalibrationPeriodTool;
+    ToolHandle<CP::IMuonCalibrationAndSmearingTool> m_muonMomentumCalibrationTool;
 
     ToolHandle<CP::IMuonSelectionTool> m_muonSelectionTool;
     ToolHandle<CP::IMuonSelectionTool> m_muonSelectionToolLoose;
