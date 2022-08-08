@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2020 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
 */
 
 // ********************************************************************
@@ -292,8 +292,8 @@ StatusCode LArFEBMonAlg::fillHistograms(const EventContext& ctx) const {
   
   bool newHighWaterMarkNFebBlocksTotal = false;
   if(m_nbOfFebBlocksTotal < nbOfFeb){ // new number of Febs
+    if(m_nbOfFebBlocksTotal >= 0) newHighWaterMarkNFebBlocksTotal = true;
     m_nbOfFebBlocksTotal = nbOfFeb;
-    newHighWaterMarkNFebBlocksTotal = true;
   }
   auto nbfeb = Monitored::Scalar<int>("nbFEB",nbOfFeb);
   fill(m_monGroupName, evttype, nbfeb); 
@@ -310,36 +310,38 @@ StatusCode LArFEBMonAlg::fillHistograms(const EventContext& ctx) const {
   
   // If the nb of DSP headers is lower than the maximum, this means that there are some missing FEBs, probably
   // due to missing ROS fragment
-  // This assumes that the maximum of DSP headers found is the expected one
-  //  ATH_MSG_ERROR( "ICI" << nbOfFeb << " " << m_nbOfFebBlocksTotal->GetBinLowEdge(m_nbOfFebBlocksTotal->GetMaximumBin()) );
   
   auto evtrej = Monitored::Scalar<int>("EvtRej",-1);
   float evt_yield=-1;
   auto evtyield = Monitored::Scalar<float>("EvtRejYield",-1);
   auto evtyieldout = Monitored::Scalar<float>("EvtRejYieldOut",-1);
   if (febInErrorTree.size()>=1 || newHighWaterMarkNFebBlocksTotal || nbOfFeb < m_nbOfFebBlocksTotal ){
-    evtrej=0.5; evt_yield = 100.;
-    if (febInErrorTree.size()>=4) evtrej=1.5;
+    evtrej=0; evt_yield = 100.;
+    if (febInErrorTree.size()>=4) evtrej=1;
     if (thisEvent->isEventFlagBitSet(xAOD::EventInfo::LAr,LArEventBitInfo::DATACORRUPTEDVETO)) evtyieldout=0.; // Vetoed 
     else evtyieldout=100.; // not vetoed
   } 
-  if(evtrej > 0) {
+  if(evtrej > -1) {
      fill(m_monGroupName,evtrej);
      evtrej=-1;
   }
 
   if (thisEvent->errorState(xAOD::EventInfo::LAr)==xAOD::EventInfo::Error || nbOfFeb != m_nbOfFebBlocksTotal || nbOfFeb < m_nFEBnominal){ // Event in error (whatever is the cause)
-    if (thisEvent->isEventFlagBitSet(xAOD::EventInfo::LAr,LArEventBitInfo::DATACORRUPTED) || nbOfFeb != m_nbOfFebBlocksTotal){ // Event corrupted (>=1/4 FEBs in error)
-      evtrej=2.5;
+    if (thisEvent->isEventFlagBitSet(xAOD::EventInfo::LAr,LArEventBitInfo::DATACORRUPTED) || thisEvent->isEventFlagBitSet(xAOD::EventInfo::LAr,LArEventBitInfo::DATACORRUPTEDVETO) || nbOfFeb != m_nbOfFebBlocksTotal){ // Event corrupted (>=1/4 FEBs in error)
+      evtrej=2;
       auto rbits = Monitored::Scalar<unsigned long>("rejBits", rejectionBits.to_ulong());
-      fill(m_monGroupName, rbits);
+      fill(m_monGroupName, rbits, evtrej);
     }
-    if (thisEvent->isEventFlagBitSet(xAOD::EventInfo::LAr,LArEventBitInfo::DATACORRUPTEDVETO)) evtrej=4.5; else evtrej=3.5;
     evt_yield = 100.;
-    if (thisEvent->isEventFlagBitSet(xAOD::EventInfo::LAr,LArEventBitInfo::DATACORRUPTEDVETO)) evtyieldout=0.; // Vetoed 
-    else evtyieldout=100.; // not vetoed
+    if (thisEvent->isEventFlagBitSet(xAOD::EventInfo::LAr,LArEventBitInfo::DATACORRUPTEDVETO)) {
+       evtrej=4;
+       evtyieldout=0.; // Vetoed 
+    } else {
+       evtrej=3;
+       evtyieldout=100.; // not vetoed
+    }
   } else{ // The event is NOT in error. Fill per LB TProfile
-    evtrej=6.5; evt_yield = 0.; evtyieldout=0.;
+    evtrej=6; evt_yield = 0.; evtyieldout=0.;
   }
   evtyield=evt_yield;
   auto evSize = Monitored::Scalar<float>("LArEvSize",larEventSize/sizeNorm);
@@ -347,10 +349,10 @@ StatusCode LArFEBMonAlg::fillHistograms(const EventContext& ctx) const {
   auto lb0 = Monitored::Scalar<int>("LB0",lumi_block); //to avoid 'NbOfEventsVSLB' being filled multiple times
   fill(m_monGroupName,evtrej,evtyieldout,evtyield,evSize, sweet2, lb0);
   if (thisEvent->isEventFlagBitSet(xAOD::EventInfo::LAr,LArEventBitInfo::NOISEBURSTVETO)) {
-     evtrej=5.5;
+     evtrej=5;
      fill(m_monGroupName,evtrej);
   }
-  evtrej=7.5;
+  evtrej=7;
   fill(m_monGroupName,evtrej);
   if(environment() == Environment_t::online) {
      auto lbfake = Monitored::Scalar<int>("LBf",0);
