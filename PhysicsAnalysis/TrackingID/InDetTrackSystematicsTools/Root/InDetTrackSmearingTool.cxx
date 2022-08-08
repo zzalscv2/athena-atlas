@@ -62,10 +62,9 @@ namespace InDet {
     declareProperty("calibFileIP_lowpt", m_calibFileIP_lowpt = "InDetTrackSystematicsTools/CalibData_21.2_2018-v18/trackIPAlign_dec2017.root");
     declareProperty("calibFileIP_highpt_Data16", m_calibFileIP_highpt_Data16 = "InDetTrackSystematicsTools/CalibData_21.2_2018-v18/trackIPAlignTight.root");
     declareProperty("calibFileIP_highpt_Data17", m_calibFileIP_highpt_Data17 = "InDetTrackSystematicsTools/CalibData_21.2_2018-v19/trackIPAlignTight_data2017.root");
-    declareProperty("calibFileIP_dijet_Data16", m_calibFileIP_dijet_Data16 = "InDetTrackSystematicsTools/CalibData_21.2_2018-v20/trackIPAlignTightPrimary_syst_dijet_2016.root");
-    declareProperty("calibFileIP_dijet_Data17", m_calibFileIP_dijet_Data17 = "InDetTrackSystematicsTools/CalibData_21.2_2018-v20/trackIPAlignTightPrimary_syst_dijet_2017.root");
+    declareProperty("calibFileIP_CTIDE", m_calibFileIP_CTIDE = "InDetTrackSystematicsTools/CalibData_22.0_2022-v00/d0z0_smearing_factors.root");
     declareProperty("runNumber", m_runNumber);
-    declareProperty("useDijetMaps", m_useDijetMaps);
+    declareProperty("doCTIDE", m_doCTIDE);
 
   }
 
@@ -81,10 +80,9 @@ namespace InDet {
     ATH_MSG_INFO( "Using for TRK_RES_D0_DEAD case the calibration file " << PathResolverFindCalibFile(m_calibFileD0Dead) );
     ATH_MSG_INFO( "Using for TRK_RES_Z0_DEAD case the calibration file " << PathResolverFindCalibFile(m_calibFileZ0Dead) );
 
-    if (m_useDijetMaps) {
-      ATH_MSG_INFO( "Using dedicated dijet smearing maps for tracks in jets" );
-      ATH_MSG_INFO( "Using for the full pT range the dijet Data16 calibration file " << PathResolverFindCalibFile(m_calibFileIP_dijet_Data16) );
-      ATH_MSG_INFO( "Using for the full pT range the dijet Data17 calibration file " << PathResolverFindCalibFile(m_calibFileIP_dijet_Data17) );
+    if (m_doCTIDE) {
+      ATH_MSG_INFO( "Using dedicated CTIDE smearing maps for tracks in jets" );
+      ATH_MSG_INFO( "Using for the full pT range the CTIDE calibration file " << PathResolverFindCalibFile(m_calibFileIP_CTIDE) );
     } else {
       ATH_MSG_INFO( "Using the low pT (< 15 GeV) calibration file " << PathResolverFindCalibFile(m_calibFileIP_lowpt) );
       ATH_MSG_INFO( "Using the high pT (> 15 GeV) Data16 calibration file " << PathResolverFindCalibFile(m_calibFileIP_highpt_Data16) );
@@ -279,30 +277,26 @@ CP::CorrectionCode InDetTrackSmearingTool::applyCorrection( xAOD::TrackParticle&
     std::string rootfileName_lowpt;
     std::string rootfileName_highpt;
 
-    if (m_useDijetMaps) {
+    if (m_doCTIDE) {
 
       // tool configured for tracks in jets
       // same map for lowpt and highpt
 
-      if (useData17Maps) {
-        rootfileName_lowpt  = m_calibFileIP_dijet_Data17;
-        rootfileName_highpt = m_calibFileIP_dijet_Data17;
-      } else {
-        rootfileName_lowpt  = m_calibFileIP_dijet_Data16;
-        rootfileName_highpt = m_calibFileIP_dijet_Data16;
-      }
-      ATH_CHECK( initObject<TH2>(m_smearD0_lowpt, rootfileName_lowpt, "quad_diff/d0unf_PtEta_quaddiff_comb" ) );
-      ATH_CHECK( initObject<TH2>(m_smearZ0_lowpt, rootfileName_lowpt, "quad_diff/z0unf_PtEta_quaddiff_comb" ) );
-      ATH_CHECK( initObject<TH2>(m_smearD0_lowpt_sys_up, rootfileName_lowpt, "quad_diff/d0unf_PtEta_quaddiff_comb_sys_up" ) );
-      ATH_CHECK( initObject<TH2>(m_smearZ0_lowpt_sys_up, rootfileName_lowpt, "quad_diff/z0unf_PtEta_quaddiff_comb_sys_up" ) );
-      ATH_CHECK( initObject<TH2>(m_smearD0_lowpt_sys_dw, rootfileName_lowpt, "quad_diff/d0unf_PtEta_quaddiff_comb_sys_dw" ) );
-      ATH_CHECK( initObject<TH2>(m_smearZ0_lowpt_sys_dw, rootfileName_lowpt, "quad_diff/z0unf_PtEta_quaddiff_comb_sys_dw" ) );
-      ATH_CHECK( initObject<TH2>(m_smearD0_highpt, rootfileName_highpt, "quad_diff/d0unf_PtEta_quaddiff_comb" ) );
-      ATH_CHECK( initObject<TH2>(m_smearZ0_highpt, rootfileName_highpt, "quad_diff/z0unf_PtEta_quaddiff_comb" ) );
-      ATH_CHECK( initObject<TH2>(m_smearD0_highpt_sys_up, rootfileName_highpt, "quad_diff/d0unf_PtEta_quaddiff_comb_sys_up" ) );
-      ATH_CHECK( initObject<TH2>(m_smearZ0_highpt_sys_up, rootfileName_highpt, "quad_diff/z0unf_PtEta_quaddiff_comb_sys_up" ) );
-      ATH_CHECK( initObject<TH2>(m_smearD0_highpt_sys_dw, rootfileName_highpt, "quad_diff/d0unf_PtEta_quaddiff_comb_sys_dw" ) );
-      ATH_CHECK( initObject<TH2>(m_smearZ0_highpt_sys_dw, rootfileName_highpt, "quad_diff/z0unf_PtEta_quaddiff_comb_sys_dw" ) );
+      rootfileName_lowpt  = m_calibFileIP_CTIDE;
+      rootfileName_highpt = m_calibFileIP_CTIDE;
+
+      ATH_CHECK( initObject<TH2>(m_smearD0_lowpt, rootfileName_lowpt, "d0quaddiff_Pt_Eta" ) );
+      ATH_CHECK( initObject<TH2>(m_smearZ0_lowpt, rootfileName_lowpt, "z0quaddiff_Pt_Eta" ) );
+      ATH_CHECK( initObject<TH2>(m_smearD0_lowpt_sys_up, rootfileName_lowpt, "d0quaddiff_Pt_Eta_up" ) );
+      ATH_CHECK( initObject<TH2>(m_smearZ0_lowpt_sys_up, rootfileName_lowpt, "z0quaddiff_Pt_Eta_up" ) );
+      ATH_CHECK( initObject<TH2>(m_smearD0_lowpt_sys_dw, rootfileName_lowpt, "d0quaddiff_Pt_Eta_down" ) );
+      ATH_CHECK( initObject<TH2>(m_smearZ0_lowpt_sys_dw, rootfileName_lowpt, "z0quaddiff_Pt_Eta_down" ) );
+      ATH_CHECK( initObject<TH2>(m_smearD0_highpt, rootfileName_highpt, "d0quaddiff_Pt_Eta" ) );
+      ATH_CHECK( initObject<TH2>(m_smearZ0_highpt, rootfileName_highpt, "z0quaddiff_Pt_Eta" ) );
+      ATH_CHECK( initObject<TH2>(m_smearD0_highpt_sys_up, rootfileName_highpt, "d0quaddiff_Pt_Eta_up" ) );
+      ATH_CHECK( initObject<TH2>(m_smearZ0_highpt_sys_up, rootfileName_highpt, "z0quaddiff_Pt_Eta_up" ) );
+      ATH_CHECK( initObject<TH2>(m_smearD0_highpt_sys_dw, rootfileName_highpt, "d0quaddiff_Pt_Eta_down" ) );
+      ATH_CHECK( initObject<TH2>(m_smearZ0_highpt_sys_dw, rootfileName_highpt, "z0quaddiff_Pt_Eta_down" ) );
 
     } else {
 
