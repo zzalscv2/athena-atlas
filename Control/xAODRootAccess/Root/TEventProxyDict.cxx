@@ -233,8 +233,8 @@ namespace xAOD {
       // Get the object describing this branch/object:
       BranchInfo* bi = getBranchInfo( sgkey );
       if( ! bi ) {
-         static std::set< SG::sgkey_t > missingSGKeys;
-         if( missingSGKeys.insert( sgkey ).second ) {
+         static SG::SGKeyMap< int > missingSGKeys;
+         if( missingSGKeys.emplace( sgkey, 0 ).second ) {
             ::Warning( "xAOD::TEvent::proxy_exact",
                        "Can't find BranchInfo for %d.",
                        sgkey );
@@ -333,8 +333,8 @@ namespace xAOD {
       if( ! efe ) {
          efe = m_inputEventFormat.get( sgkey, QUIET );
       }
-      static std::set< SG::sgkey_t > missingSGKeys;
-      if( ( ! efe ) && missingSGKeys.insert( sgkey ).second ) {
+      static SG::SGKeyMap< int > missingSGKeys;
+      if( ( ! efe ) && missingSGKeys.emplace( sgkey, 0 ).second ) {
          ::Warning( "xAOD::TEvent::getEventFormatElement",
                     "Can't find EventFormatElement for hashed "
                     "SG key %d", sgkey );
