@@ -198,18 +198,36 @@ def overlayMetadataCheck(flags):
         pileupSimulationMetadata = pileupMetaDataCheck["/Simulation/Parameters"]
         pileupTagInfoMetadata = pileupMetaDataCheck["/TagInfo"]
    
-        if not flags.Overlay.FastChain: 
-            logger.info("Checking Presampled pile-up metadata against Signal Simulation metadata...")
-            simulationMetadataCheck(signalSimulationMetadata, pileupSimulationMetadata)
-            tagInfoMetadataCheck(signalTagInfoMetadata, pileupTagInfoMetadata)
-        else:
-            logger.info("Checking Presampled pile-up metadata against configuration of jobs (i.e. flags)...")
-            overlayInputMetadataCheck(flags, pileupSimulationMetadata, pileupTagInfoMetadata)
+        logger.info("Checking Presampled pile-up metadata against Signal Simulation metadata...")
+        simulationMetadataCheck(signalSimulationMetadata, pileupSimulationMetadata)
+        tagInfoMetadataCheck(signalTagInfoMetadata, pileupTagInfoMetadata)
         logger.info("Completed all checks against Presampled pile-up Simulation metadata.")
-
 
         if pileupDigitizationMetadata:
             writeOverlayDigitizationMetadata(flags,pileupDigitizationMetadata)
+
+
+def fastChainOverlayMetadataCheck(flags):
+    """Check fastchain overlay metadata"""
+    if flags.Overlay.DataOverlay:
+        filesPileup = flags.Input.SecondaryFiles
+    else:
+        filesPileup = flags.Input.Files
+
+    # pile-up check
+    if not flags.Overlay.DataOverlay and filesPileup:
+        pileupMetaDataCheck = _getFileMD(filesPileup)
+        pileupDigitizationMetadata = pileupMetaDataCheck["/Digitization/Parameters"]
+        pileupSimulationMetadata = pileupMetaDataCheck["/Simulation/Parameters"]
+        pileupTagInfoMetadata = pileupMetaDataCheck["/TagInfo"]
+
+        logger.info("Checking Presampled pile-up metadata against configuration of jobs (i.e. flags)...")
+        overlayInputMetadataCheck(flags, pileupSimulationMetadata, pileupTagInfoMetadata)
+        logger.info("Completed all checks against Presampled pile-up Simulation metadata.")
+
+        if pileupDigitizationMetadata:
+            writeOverlayDigitizationMetadata(flags,pileupDigitizationMetadata)
+
 
 def writeOverlayDigitizationMetadata(flags,pileupDict):
     from IOVDbMetaDataTools import ParameterDbFiller
