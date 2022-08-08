@@ -16,6 +16,7 @@
 
 // Muon include(s):
 #include "MuonMomentumCorrections/MuonCalibrationAndSmearingTool.h"
+#include "MuonMomentumCorrections/MuonCalibTool.h"
 #include "MuonSelectorTools/MuonSelectionTool.h"
 #include "MuonEfficiencyCorrections/MuonTriggerScaleFactors.h"
 #include "MuonEfficiencyCorrections/MuonEfficiencyScaleFactors.h"
@@ -25,7 +26,7 @@ namespace top {
     asg::AsgTool(name) {
     declareProperty("config", m_config);
 
-    declareProperty("MuonCalibrationPeriodTool", m_muonCalibrationPeriodTool);
+    declareProperty("MuonMomentumCalibrationTool", m_muonMomentumCalibrationTool);
 
     declareProperty("MuonSelectionTool", m_muonSelectionTool);
     declareProperty("MuonSelectionToolLoose", m_muonSelectionToolLoose);
@@ -69,30 +70,30 @@ namespace top {
     m_muonSelectionTool = setupMuonSelectionTool("MuonSelectionTool",
                                                  m_config->muonQuality(),
                                                  m_config->muonEtacut(),
-						 m_config->muonUseMVALowPt(),
-						 m_config->muonUse2stationMuonsHighPt());
+                                                 m_config->muonUseMVALowPt(),
+                                                 m_config->muonUse2stationMuonsHighPt());
     m_muonSelectionToolLoose = setupMuonSelectionTool("MuonSelectionToolLoose",
                                                       m_config->muonQualityLoose(),
                                                       m_config->muonEtacut(),
-						      m_config->muonUseMVALowPtLoose(),
-						      m_config->muonUse2stationMuonsHighPtLoose());
+                                                      m_config->muonUseMVALowPtLoose(),
+                                                      m_config->muonUse2stationMuonsHighPtLoose());
     // the following is needed to make sure all muons for which d0sig is calculated are at least Loose
     m_muonSelectionToolVeryLooseVeto = setupMuonSelectionTool("MuonSelectionToolVeryLooseVeto",
                                                               "Loose",
                                                               2.5,
-							      m_config->muonUseMVALowPt(),
-							      m_config->muonUse2stationMuonsHighPt());
+                                                              m_config->muonUseMVALowPt(),
+                                                              m_config->muonUse2stationMuonsHighPt());
     ///-- Calibration and smearing --///  ---> now passing the flags (true/false) to CalibAndSmearingTool
-    m_muonCalibrationPeriodTool = setupMuonCalibrationAndSmearingTool("MuonCalibrationPeriodTool", 
-								      m_config->muonMuonDoExtraSmearingHighPt(),
-								      m_config->muonMuonDoSmearing2stationHighPt());
+    m_muonMomentumCalibrationTool = setupMuonCalibrationAndSmearingTool("MuonMomentumCalibrationTool", 
+                                                                        m_config->muonMuonDoExtraSmearingHighPt(),
+                                                                        m_config->muonMuonDoSmearing2stationHighPt());
     //now the soft muon part
     if (m_config->useSoftMuons()) {
       m_softmuonSelectionTool = setupMuonSelectionTool("SoftMuonSelectionTool",
                                                        m_config->softmuonQuality(),
                                                        m_config->softmuonEtacut(),
-						       m_config->softmuonUseMVALowPt(),
-						       false);
+                                                       m_config->softmuonUseMVALowPt(),
+                                                       false);
     }
 
     return StatusCode::SUCCESS;
@@ -314,7 +315,7 @@ namespace top {
     if (asg::ToolStore::contains<CP::IMuonCalibrationAndSmearingTool>(name)) {
       tool = asg::ToolStore::get<CP::IMuonCalibrationAndSmearingTool>(name);
     } else {
-      tool = new CP::MuonCalibrationPeriodTool(name);
+      tool = new CP::MuonCalibTool(name);
 
       top::check(asg::setProperty(tool, "doExtraSmearing", doExtraSmearingHighPt),
                  "Failed to set doExtraSmearing for " + name + " tool");
@@ -324,19 +325,12 @@ namespace top {
         top::check(asg::setProperty(tool, "useRandomRunNumber", false),
                    "Failed to set useRandomRunNumber for " + name + " tool");
       }
-      // this is a hack to assign mc21 campaign to mc16
-      std::vector<unsigned int> campaign = {310000, 330000, 410000};
-      top::check(asg::setProperty(tool, "MCperiods18", campaign),
-                 "Failed to set MCperiods18 for " + name + " tool");
-      CP::MuonCalibrationPeriodTool::CalibMode calibMode = CP::MuonCalibrationPeriodTool::CalibMode::noOption;
       if (m_config->muonCalibMode() == "correctData_CB")
-	      calibMode = CP::MuonCalibrationPeriodTool::CalibMode::correctData_CB;
+        top::check(asg::setProperty(tool, "calibMode", CP::MuonCalibTool::CalibMode::correctData_CB), "Failed to set calibrationMode for " + name + " tool");
       else if (m_config->muonCalibMode() == "correctData_IDMS")
-	      calibMode = CP::MuonCalibrationPeriodTool::CalibMode::correctData_IDMS;
+        top::check(asg::setProperty(tool, "calibMode", CP::MuonCalibTool::CalibMode::correctData_IDMS), "Failed to set calibrationMode for " + name + " tool");
       else if (m_config->muonCalibMode() == "notCorrectData_IDMS")
-	      calibMode = CP::MuonCalibrationPeriodTool::CalibMode::notCorrectData_IDMS;
-      top::check(asg::setProperty(tool, "calibrationMode", calibMode),
-		 "Failed to set calibrationMode for " + name + " tool");
+        top::check(asg::setProperty(tool, "calibMode", CP::MuonCalibTool::CalibMode::notCorrectData_IDMS), "Failed to set calibrationMode for " + name + " tool");
       top::check(tool->initialize(),
                  "Failed to set initialize " + name);
     }

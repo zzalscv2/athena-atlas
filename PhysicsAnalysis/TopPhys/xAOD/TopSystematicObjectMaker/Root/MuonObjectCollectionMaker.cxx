@@ -25,14 +25,14 @@ namespace top {
     m_specifiedSystematics(),
     m_recommendedSystematics(),
 
-    m_calibrationPeriodTool("MuonCalibrationPeriodTool"),
+    m_calibrationTool("MuonMomentumCalibrationTool"),
     m_muonSelectionToolVeryLooseVeto("MuonSelectionToolVeryLooseVeto"),
     m_muonSelectionTool("MuonSelectionTool"),
     m_muonSelectionToolLoose("MuonSelectionToolLoose")     
     {
     declareProperty("config", m_config);
 
-    declareProperty("MuonCalibrationPeriodTool", m_calibrationPeriodTool);
+    declareProperty("MuonMomentumCalibrationTool", m_calibrationTool);
     declareProperty("MuonSelectionToolVeryLooseVeto", m_muonSelectionToolVeryLooseVeto);
     declareProperty("MuonSelectionTool", m_muonSelectionTool);
     declareProperty("MuonSelectionToolLoose", m_muonSelectionToolLoose);
@@ -105,7 +105,7 @@ namespace top {
       if (!executeNominal && m_config->isSystNominal(m_config->systematicName(systematic.hash()))) continue;
 
       ///-- Tell tool which systematic to use --///
-      top::check(m_calibrationPeriodTool->applySystematicVariation(systematic), "Failed to applySystematicVariation");
+      top::check(m_calibrationTool->applySystematicVariation(systematic), "Failed to applySystematicVariation");
 
       ///-- Shallow copy of the xAOD --///
       std::pair< xAOD::MuonContainer*,
@@ -127,7 +127,7 @@ namespace top {
         
         ///-- Apply momentum correction --///
         if (muon->primaryTrackParticle()) {
-          top::check(m_calibrationPeriodTool->applyCorrection(*muon), "Failed to applyCorrection");
+          top::check(m_calibrationTool->applyCorrection(*muon), "Failed to applyCorrection");
 
           // don't do the decorations unless the muons are at least Loose
           // this is because it may fail if the muons are at just VeryLoose
@@ -191,7 +191,7 @@ namespace top {
   void MuonObjectCollectionMaker::specifiedSystematics(const std::set<std::string>& specifiedSystematics) {
     ///-- Get the recommended systematics from the tool, in std::vector format --///
     const std::vector<CP::SystematicSet> systList = CP::make_systematics_vector(
-      m_calibrationPeriodTool->recommendedSystematics());
+      m_calibrationTool->recommendedSystematics());
 
     for (auto s : systList) {
       
