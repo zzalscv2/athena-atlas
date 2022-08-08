@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
 */
 
 /// Implementations of concrete input-to-PseudoJet conversions
@@ -129,10 +129,15 @@ namespace PseudoJetGetter {
       
       bool reject = false;
 
+      // Reject PJs with invalid energy --- they will lead
+      // to crashes in fastjet.  See ATLASRECTS-7137.
+      float e = ip->e();
+      if (std::isinf(e) || std::isnan(e)) return true;
+
       if(ip->type() == xAOD::Type::FlowElement){
         const xAOD::FlowElement* pfo = dynamic_cast<const xAOD::FlowElement*>(ip);
 
-	reject = (skipNegativeEnergy && pfo->e()<FLT_MIN);
+	reject = (skipNegativeEnergy && e<FLT_MIN);
 
         if( pfo->isCharged() ){
 	  if(!useChargedPFOs) reject = true;
@@ -155,7 +160,7 @@ namespace PseudoJetGetter {
       // showers, but need to be present for overlap removal, because they 
       // don't retain these weights when added to the TST      
 
-      reject = (skipNegativeEnergy && pfo->e()<FLT_MIN);
+      reject = (skipNegativeEnergy && e<FLT_MIN);
 
       if( pfo->isCharged() ) {
 	if(!useChargedPFOs) reject = true;
