@@ -30,6 +30,13 @@ config_dict = {
         "prompt_stage_max_prompt_trk": 2,
         "max_jets": 1,
         "max_jet_rank": 0
+    },
+    "2p":{
+        "object_cuts": "set1",
+        "min_disp_trk": 0,
+        "max_prompt_trk": 2,
+        "other_frac": 0.75,
+        "max_jet_rank": 2
     }
 }
 
@@ -53,7 +60,7 @@ def TrigDJGetConfigValue(chainDict, key):
     return values[0]
 
 def TrigDJEnableMonitoring(chainDict):
-    return 'dispjetMon:online' in chainDict['monGroups']
+    return 'idMon:online' in chainDict['monGroups']
 
 def TrigDJHypoPromptToolFromDict( chainDict ):
     """ Use menu decoded chain dictionary to configure the tool """
