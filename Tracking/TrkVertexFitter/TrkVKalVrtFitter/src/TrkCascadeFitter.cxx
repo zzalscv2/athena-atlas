@@ -3,6 +3,7 @@
 */
 
 // Header include
+#include  "VxVertex/Vertex.h"
 #include "TrkVKalVrtFitter/TrkVKalVrtFitter.h"
 #include "TrkVKalVrtFitter/VKalVrtAtlas.h"
 #include "TrkVKalVrtFitter/VxCascadeInfo.h"
@@ -10,6 +11,10 @@
 #include "VxVertex/ExtendedVxCandidate.h"
 #include "TrkVKalVrtCore/TrkVKalUtils.h"
 #include "TrkVKalVrtCore/TrkVKalVrtCoreBase.h"
+#include  "xAODTracking/TrackParticleContainer.h"
+#include  "TrkVKalVrtFitter/IVKalState.h"
+#include "GaudiKernel/EventContext.h"
+
 //-------------------------------------------------
 // Other stuff
 #include<iostream>

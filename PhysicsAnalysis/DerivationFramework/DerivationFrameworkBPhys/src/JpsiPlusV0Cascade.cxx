@@ -18,6 +18,7 @@
 #include "xAODTracking/VertexContainer.h"
 #include "DerivationFrameworkBPhys/LocalVector.h"
 #include "HepPDT/ParticleDataTable.hh"
+#include "TrkVKalVrtFitter/VxCascadeInfo.h"
 
 namespace DerivationFramework {
     typedef ElementLink<xAOD::VertexContainer> VertexLink;

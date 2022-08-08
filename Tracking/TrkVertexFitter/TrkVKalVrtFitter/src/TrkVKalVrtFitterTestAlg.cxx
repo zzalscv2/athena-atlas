@@ -9,6 +9,8 @@
  */
 
 #undef NDEBUG
+#include "TrkVKalVrtFitter/VxCascadeInfo.h"
+
 #include "TrkVKalVrtFitterTestAlg.h"
 #include "TrkVKalVrtFitter/IVertexCascadeFitter.h"
 #include "xAODTracking/Vertex.h"
@@ -18,6 +20,8 @@
 #include "EventPrimitives/EventPrimitivesHelpers.h"
 #include "TestTools/FLOATassert.h"
 #include "GaudiKernel/SystemOfUnits.h"
+#include  "TrkVKalVrtFitter/IVKalState.h" //unique_ptr needs the deleter
+
 #include <cassert>
 
 

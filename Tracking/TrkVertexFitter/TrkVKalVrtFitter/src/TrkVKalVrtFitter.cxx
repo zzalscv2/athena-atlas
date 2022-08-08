@@ -14,6 +14,13 @@
 #include "VxVertex/VxTrackAtVertex.h"
 #include "TrkExInterfaces/IExtrapolator.h"
 #include "GaudiKernel/IChronoStatSvc.h"
+#include "GaudiKernel/EventContext.h"
+#include  "TrkTrack/Track.h"
+#include  "xAODTracking/NeutralParticleContainer.h"
+#include  "xAODTracking/VertexContainer.h"
+
+#include "GaudiKernel/EventContext.h"
+
 //-------------------------------------------------
 // Other stuff
 #include<iostream>

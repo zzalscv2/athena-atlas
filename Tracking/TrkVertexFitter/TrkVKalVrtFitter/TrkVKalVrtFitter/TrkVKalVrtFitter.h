@@ -8,31 +8,32 @@
 #define TRKVKALVRTFITTER_VKALVRTFITTER_H
 // Normal STL and physical vectors
 // Gaudi includes
-#include "GaudiKernel/IToolSvc.h"
 #include "GaudiKernel/ToolHandle.h"
-#include "GaudiKernel/EventContext.h"
 //
 // Interfaces
-#include  "TrkVertexFitterInterfaces/IVertexFitter.h"
-#include  "TrkVKalVrtFitter/ITrkVKalVrtFitter.h"
-#include  "TrkVKalVrtFitter/IVertexCascadeFitter.h"
-#include  "TrkVKalVrtFitter/VKalVrtAtlas.h"
-#include  "TrkVKalVrtCore/TrkVKalVrtCore.h"
+#include  "TrkVertexFitterInterfaces/IVertexFitter.h" //base class
+#include  "TrkVKalVrtFitter/ITrkVKalVrtFitter.h" //base class
+#include  "TrkVKalVrtFitter/IVertexCascadeFitter.h" //base class
 
-#include  "TrkNeutralParameters/NeutralParameters.h"
+#include  "TrkNeutralParameters/NeutralParameters.h" //typedef
 // MagField cache
 #include "MagFieldConditions/AtlasFieldCacheCondObj.h"
-#include <memory>
+#include  "xAODTracking/TrackParticleFwd.h"
+#include  "xAODTracking/NeutralParticleFwd.h"
+#include  "TrkVKalVrtFitter/IVKalState.h" //base class
+
+#include  "TrkVKalVrtFitter/VKalVrtAtlas.h" //for Trk::VKalAtlasMagFld (member)
+#include "TrkVKalVrtCore/TrkVKalVrtCore.h"  //for VKalVrtControl (member)
+
 //
 class IChronoStatSvc;
+class EventContext;
 
 namespace Trk{
 
-  class VKalVrtControl;
 
   enum { NTrMaxVFit=200 };
   typedef std::vector<double> dvect;
-  class VKalAtlasMagFld;
   class IExtrapolator;
   class IMagneticFieldTool;
   class VKalExtPropagator;
