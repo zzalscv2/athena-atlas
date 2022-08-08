@@ -136,7 +136,7 @@ def LArPileUpToolCfg(flags, name="LArPileUpTool", **kwargs):
     else:
         kwargs.setdefault("LArHitFloatContainers", [])
 
-        if flags.Common.isOverlay:
+        if flags.Common.isOverlay and not flags.Sim.DoFullChain:
             from SGComps.SGInputLoaderConfig import SGInputLoaderCfg
             acc.merge(SGInputLoaderCfg(flags, [
                 "LArHitContainer#LArHitEMB",

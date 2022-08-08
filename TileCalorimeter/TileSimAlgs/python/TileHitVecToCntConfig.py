@@ -61,7 +61,7 @@ def TileHitVecToCntToolCfg(flags, **kwargs):
         kwargs.setdefault('TileHitVectors', ['TileHitVec'])
     kwargs.setdefault('TileHitContainer', 'TileHitCnt')
 
-    if flags.Common.isOverlay:
+    if flags.Common.isOverlay and not flags.Sim.DoFullChain:
         from SGComps.SGInputLoaderConfig import SGInputLoaderCfg
         acc.merge(SGInputLoaderCfg(flags, [f'TileHitVector#{vec}' for vec in kwargs['TileHitVectors']]))
 
