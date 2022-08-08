@@ -1,10 +1,8 @@
 // This file's extension implies that it's C, but it's really -*- C++ -*-.
 
 /*
-  Copyright (C) 2002-2017 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
 */
-
-// $Id: ELVec.h,v 1.4 2008-11-21 06:29:05 ssnyder Exp $
 
 /**
  * @file  DataModelTestDataRead/ELVec.h
@@ -39,13 +37,8 @@ struct ELVec
   std::vector<DataLink<BVec> > m_dl;
   ElementLinkVector<BVec> m_elv;
 
-  ElementLinkVector<BVec> m_elv2;    // Transient
   ElementLinkIntVector_p1 m_elv2_p;
-
-  std::vector<ElementLink<BVec> > m_el2; // Transient
   std::vector<ElementLinkInt_p3> m_el2_p;
-
-  std::vector<DataLink<BVec> > m_dl2; // Transient
   std::vector<DataLink_p1> m_dl2_p;
 };
 

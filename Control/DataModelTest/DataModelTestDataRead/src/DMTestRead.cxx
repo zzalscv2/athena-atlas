@@ -87,12 +87,12 @@ StatusCode print_elvec (MsgStream& log,
 {
   const ELVec* vec;
   CHECK_WITH_CONTEXT( sg->retrieve (vec, key), context );
-  ELVec* mvec ATLAS_THREAD_SAFE = const_cast<ELVec*> (vec);  // not called in MT
+  std::vector<ElementLink<BVec> > el = vec->m_el;
   std::ostringstream ost;
   ost << key << ": ";
-  for (size_t i = 0; i < vec->m_el.size(); i++) {
-    const DMTest::B* b = *vec->m_el[i];
-    mvec->m_el[i].toPersistent();
+  for (size_t i = 0; i < el.size(); i++) {
+    const DMTest::B* b = *el[i];
+    el[i].toPersistent();
     ost << b->m_x << " ";
   }
   log << MSG::INFO << ost.str() << endmsg;
@@ -104,41 +104,43 @@ StatusCode remap_test (MsgStream& log, StoreGateSvc* sg)
 {
   const ELVec* vec;
   CHECK_WITH_CONTEXT( sg->retrieve (vec, "elv_remap"), "remap_test" );
-  ELVec* mvec ATLAS_THREAD_SAFE = const_cast<ELVec*> (vec);  // not called in MT
 
   ElementLinkCnv_p3<ElementLink<BVec> > elcnv;
-  mvec->m_el2.resize (mvec->m_el2_p.size());
-  for (size_t i=0; i < mvec->m_el2_p.size(); i++)
-    elcnv.persToTrans (&mvec->m_el2_p[i], &mvec->m_el2[i], log);
+  std::vector<ElementLink<BVec> > el2; // Transient
+  el2.resize (vec->m_el2_p.size());
+  for (size_t i=0; i < vec->m_el2_p.size(); i++)
+    elcnv.persToTrans (&vec->m_el2_p[i], &el2[i], log);
 
   std::ostringstream ost1;
   ost1 << "elv_remap: ";
-  for (size_t i = 0; i < vec->m_el2.size(); i++) {
-    const DMTest::B* b = *vec->m_el2[i];
+  for (size_t i = 0; i < el2.size(); i++) {
+    const DMTest::B* b = *el2[i];
     ost1 << b->m_x << " ";
   }
   log << MSG::INFO << ost1.str() << endmsg;
 
   ElementLinkVectorCnv_p1<ElementLinkVector<BVec> > elvcnv;
-  elvcnv.persToTrans (&vec->m_elv2_p, &const_cast<ELVec*>(vec)->m_elv2, log);
+  ElementLinkVector<BVec> elv2;    // Transient
+  elvcnv.persToTrans (&vec->m_elv2_p, &elv2, log);
 
   std::ostringstream ost2;
   ost2 << "elv_remap v2: ";
-  for (size_t i = 0; i < vec->m_elv2.size(); i++) {
-    const DMTest::B* b = *vec->m_elv2[i];
+  for (size_t i = 0; i < elv2.size(); i++) {
+    const DMTest::B* b = *elv2[i];
     ost2 << b->m_x << " ";
   }
   log << MSG::INFO << ost2.str() << endmsg;
 
   DataLinkCnv_p1<DataLink<BVec> > dlcnv;
-  mvec->m_dl2.resize (mvec->m_dl2_p.size());
-  for (size_t i=0; i < mvec->m_dl2_p.size(); i++)
-    dlcnv.persToTrans (&mvec->m_dl2_p[i], &mvec->m_dl2[i], log);
+  std::vector<DataLink<BVec> > dl2; // Transient
+  dl2.resize (vec->m_dl2_p.size());
+  for (size_t i=0; i < vec->m_dl2_p.size(); i++)
+    dlcnv.persToTrans (&vec->m_dl2_p[i], &dl2[i], log);
 
   const BVec* b3;
   CHECK_WITH_CONTEXT( sg->retrieve (b3, "b3"), "remap_test" );
-  assert (vec->m_dl2[0].cptr() == b3);
-  assert (vec->m_dl2[1].cptr() == b3);
+  assert (dl2[0].cptr() == b3);
+  assert (dl2[1].cptr() == b3);
 
   return StatusCode::SUCCESS;
 }
