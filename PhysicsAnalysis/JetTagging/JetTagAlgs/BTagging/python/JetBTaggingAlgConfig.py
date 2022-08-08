@@ -11,9 +11,11 @@ def JetBTaggingAlgCfg(ConfigFlags,
                       JetCollection,
                       PrimaryVertexCollectionName,
                       TaggerList,
-                      SecVertexers,
                       Tracks,
                       Muons,
+                      VxSecVertexInfoNameList,
+                      secVtxFinderxAODBaseNameList,
+                      secVtxFinderTrackNameList,
                       OutgoingTracks="BTagTrackToJetAssociator",
                       OutgoingMuons="Muons"):
 
@@ -26,17 +28,16 @@ def JetBTaggingAlgCfg(ConfigFlags,
         ConfigFlags, TaggerList, PrimaryVertexCollectionName, SetupScheme))
 
     # setup the secondary vertexing tool
-    options['BTagSecVertexing'] = acc.popToolsAndMerge(BTagLightSecVtxToolCfg(ConfigFlags, 'LightSecVx'+ConfigFlags.BTagging.GeneralToolSuffix, JetCollection, PrimaryVertexCollectionName, SecVertexers = SecVertexers))
+    options['BTagSecVertexing'] = acc.popToolsAndMerge(BTagLightSecVtxToolCfg(ConfigFlags, 'LightSecVx'+ConfigFlags.BTagging.GeneralToolSuffix, JetCollection, VxSecVertexInfoNameList, secVtxFinderxAODBaseNameList, secVtxFinderTrackNameList, PrimaryVertexCollectionName))
 
     # Set remaining options
-    options['JetCollectionName'] = JetCollection.replace('Track', 'PV0Track') + 'Jets'
+    options['JetCollectionName'] = JetCollection
     options['IncomingTracks'] = Tracks
     options['OutgoingTracks'] = OutgoingTracks
     options['IncomingMuons'] = Muons
     options['OutgoingMuons'] = OutgoingMuons
     options['JetCalibrationName'] = (
-        ConfigFlags.BTagging.forcedCalibrationChannel or
-        JetCollection.replace('Track', 'PV0Track')
+        ConfigFlags.BTagging.forcedCalibrationChannel
     )
     options['BTagSVCollectionName'] = BTaggingCollection + 'SecVtx'
     options['BTagJFVtxCollectionName'] = BTaggingCollection + 'JFVtx'

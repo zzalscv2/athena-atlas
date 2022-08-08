@@ -125,6 +125,8 @@ def BTagRecoSplitCfg(inputFlags, JetCollection=['AntiKt4EMTopo','AntiKt4EMPFlow'
                 JetCollection=jc,
                 nnList=GetTaggerTrainingMap(jc),
                 muons='', # muon augmentation isn't thread safe, disable
+                renameTrackJets=True,
+                AddedJetSuffix='Jets'
             )
         )
 
@@ -158,7 +160,9 @@ def BTagAlgsCfg(inputFlags,
                 trackCollection='InDetTrackParticles',
                 primaryVertices='PrimaryVertices',
                 muons='Muons',
-                BTagCollection=None):
+                BTagCollection=None,
+                renameTrackJets=False,
+                AddedJetSuffix=''):
 
     # If things aren't specified in the arguments, we'll read them
     # from the config flags
@@ -169,6 +173,10 @@ def BTagAlgsCfg(inputFlags,
         if inputFlags.BTagging.RunFlipTaggers:
             SecVertexers += ['JetFitterFlip','SV1Flip']
     jet = JetCollection
+    jetcol = JetCollection + AddedJetSuffix
+    if renameTrackJets is True:
+        jetcol = jetcol.replace("Track", "PV0Track")
+
     if BTagCollection is None:
         BTagCollection = inputFlags.BTagging.OutputFiles.Prefix + jet
 
@@ -181,49 +189,65 @@ def BTagAlgsCfg(inputFlags,
     JetMuonAssociator = 'MuonsForBTagging'
     BTagMuonAssociator = 'Muons'
 
+    # List of input VxSecVertexInfo containers
+    VxSecVertexInfoNameList = []
+
+    #List of secondary vertex finders
+    secVtxFinderxAODBaseNameList = []
     result = ComponentAccumulator()
 
     # Associate tracks to the jet
     result.merge(JetParticleAssociationAlgCfg(
         inputFlags,
-        jet+'Jets',
+        jetcol,
         trackCollection,
         JetTrackAssociator,
     ))
 
     if muons:
         result.merge(JetParticleAssociationAlgCfg(
-            inputFlags, jet+'Jets', muons, JetMuonAssociator))
+            inputFlags, jetcol, muons, JetMuonAssociator))
 
     # Build secondary vertices
     for sv in SecVertexers:
+        BTagVxSecVertexInfoName = sv + 'VxSecVertexInfo_' + jet
+        VxSecVertexInfoNameList.append(BTagVxSecVertexInfoName)
+        secVtxFinderxAODBaseNameList.append(sv)
+        AlgName = (jet + '_' + sv).lower()
         result.merge(JetSecVtxFindingAlgCfg(
             inputFlags,
-            jet,
-            primaryVertices,
-            sv,
-            JetTrackAssociator,
+            BTagVxSecVertexInfoName = BTagVxSecVertexInfoName,
+            SVAlgName = AlgName + '_secvtxfinding',
+            JetCollection = jetcol,
+            PrimaryVertexCollectionName = primaryVertices,
+            SVFinder = sv,
+            TracksToTag = JetTrackAssociator,
         ))
         result.merge(JetSecVertexingAlgCfg(
             inputFlags,
-            BTagCollection,
-            jet,
-            trackCollection,
-            primaryVertices,
-            sv
+            BTagVxSecVertexInfoName = BTagVxSecVertexInfoName,
+            SVAlgName = AlgName + '_secvtx',
+            BTaggingCollection = BTagCollection,
+            JetCollection = jetcol,
+            TrackCollection = trackCollection,
+            PrimaryVertexCollectionName = primaryVertices,
+            SVFinder = sv, 
         ))
 
     # Create the b-tagging object, and run the older b-tagging algorithms
+    secVtxFinderTrackNameList = [ BTagTrackAssociator ] * len(SecVertexers)
     result.merge(
         JetBTaggingAlgCfg(
             inputFlags,
             BTaggingCollection=BTagCollection,
-            JetCollection=jet,
+            JetCollection=jetcol,
             PrimaryVertexCollectionName=primaryVertices,
             TaggerList=TaggerList,
-            SecVertexers=SecVertexers,
             Tracks=JetTrackAssociator,
             Muons=JetMuonAssociator if muons else '',
+            VxSecVertexInfoNameList = VxSecVertexInfoNameList,
+            secVtxFinderxAODBaseNameList = secVtxFinderxAODBaseNameList,
+            secVtxFinderTrackNameList = secVtxFinderTrackNameList,
             OutgoingTracks=BTagTrackAssociator,
             OutgoingMuons=BTagMuonAssociator,
         )
