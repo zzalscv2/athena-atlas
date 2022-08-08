@@ -108,12 +108,12 @@ beamcond.tiltY=0.0
 kwargs = {}
 
 svcName = "G4UA::MaterialStepRecorderUserActionSvc"
-from TrkG4UserActions.TrkG4UserActionsConfigNew import MaterialStepRecorderUserActionSvcCfg
+from TrkG4UserActions.TrkG4UserActionsConfig import MaterialStepRecorderUserActionSvcCfg
 acc.merge(MaterialStepRecorderUserActionSvcCfg(ConfigFlags,svcName,**kwargs))
 kwargs.update(UserActionSvc=svcName)
 
 if args.simulate:
-  from G4AtlasAlg.G4AtlasAlgConfigNew import G4AtlasAlgCfg
+  from G4AtlasAlg.G4AtlasAlgConfig import G4AtlasAlgCfg
   acc.merge(G4AtlasAlgCfg(ConfigFlags, "ITkG4AtlasAlg", **kwargs))
   from OutputStreamAthenaPool.OutputStreamConfig import OutputStreamCfg
   from SimuJobTransforms.SimOutputConfig import getStreamHITS_ItemList

@@ -1,7 +1,7 @@
 #!/usr/bin/env python
 """Main steering for the digitization jobs
 
-Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
 """
 
 from AthenaConfiguration.ComponentAccumulator import ComponentAccumulator
@@ -10,9 +10,9 @@ from AthenaConfiguration.Enums import ProductionStep
 from AthenaConfiguration.MainServicesConfig import MainServicesCfg
 from AthenaPoolCnvSvc.PoolReadConfig import PoolReadCfg
 from AthenaPoolCnvSvc.PoolWriteConfig import PoolWriteCfg
-from BCM_Digitization.BCM_DigitizationConfigNew import BCM_DigitizationCfg
+from BCM_Digitization.BCM_DigitizationConfig import BCM_DigitizationCfg
 from Digitization.DigitizationParametersConfig import writeDigitizationMetadata
-from LArDigitization.LArDigitizationConfigNew import LArTriggerDigitizationCfg
+from LArDigitization.LArDigitizationConfig import LArTriggerDigitizationCfg
 from MCTruthSimAlgs.RecoTimingConfig import MergeRecoTimingObjCfg
 from MuonConfig.CSC_DigitizationConfig import CSC_DigitizationDigitToRDOCfg
 from MuonConfig.MDT_DigitizationConfig import MDT_DigitizationDigitToRDOCfg
@@ -21,12 +21,12 @@ from MuonConfig.RPC_DigitizationConfig import RPC_DigitizationDigitToRDOCfg
 from MuonConfig.TGC_DigitizationConfig import TGC_DigitizationDigitToRDOCfg
 from MuonConfig.sTGC_DigitizationConfig import sTGC_DigitizationDigitToRDOCfg
 from PixelDigitization.ITkPixelDigitizationConfig import ITkPixelDigitizationCfg
-from PixelDigitization.PixelDigitizationConfigNew import PixelDigitizationCfg
-from SCT_Digitization.SCT_DigitizationConfigNew import SCT_DigitizationCfg
+from PixelDigitization.PixelDigitizationConfig import PixelDigitizationCfg
+from SCT_Digitization.SCT_DigitizationConfig import SCT_DigitizationCfg
 from StripDigitization.StripDigitizationConfig import ITkStripDigitizationCfg
 from HGTD_Digitization.HGTD_DigitizationConfig import HGTD_DigitizationCfg
 from TileSimAlgs.TileDigitizationConfig import TileDigitizationCfg, TileTriggerDigitizationCfg
-from TRT_Digitization.TRT_DigitizationConfigNew import TRT_DigitizationCfg
+from TRT_Digitization.TRT_DigitizationConfig import TRT_DigitizationCfg
 from AFP_Digitization.AFP_DigitizationConfigNew import AFP_DigitizationCfg
 from RunDependentSimComps.PileUpUtils import pileupInputCollections
 
@@ -88,7 +88,7 @@ def DigitizationMainContentCfg(flags):
     # Signal-only truth information
     # TODO: is another flag needed for this?
     if flags.Digitization.PileUp:
-        from MCTruthSimAlgs.MCTruthSimAlgsConfigNew import (
+        from MCTruthSimAlgs.MCTruthSimAlgsConfig import (
             SignalOnlyMcEventCollCfg,
             MergeAntiKt4TruthJetsCfg,
             MergeAntiKt6TruthJetsCfg,

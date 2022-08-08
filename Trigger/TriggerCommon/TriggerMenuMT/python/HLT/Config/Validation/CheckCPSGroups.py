@@ -48,6 +48,11 @@ def checkCPSGroups(chainDicts):
         log.error("CPS group %s contains HLT chain %s with multi-seed L1 item", CPS_group, hlt['chainName'])
         CPS_OK = False
 
+      for grp in hlt['groups']:
+        if 'Primary' in grp:
+          log.error("Primary trigger '%s' in CPS %s", hlt['chainName'], CPS_group)
+          CPS_OK = False
+
       # Verify L1 item matches CPS group
       if CPS_item != hlt['L1item'][3:]:
         log.error("CPS group %s for HLT chain %s does not match L1 item %s", CPS_group, hlt['chainName'], hlt['L1item'])

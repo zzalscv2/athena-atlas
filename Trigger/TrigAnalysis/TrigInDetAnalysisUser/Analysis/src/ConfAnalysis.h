@@ -46,8 +46,7 @@ inline const std::string clean( std::string s) {
 
 class ConfAnalysis : public TrackAnalysis { 
   
-  //  private:
-  //     typedef std::map<std::string, TH1F*> maptype; 
+  using TrackAnalysis::execute;
 
 public:
   

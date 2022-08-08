@@ -18,7 +18,7 @@ def FastSimulationToolListCfg(ConfigFlags):
         if ConfigFlags.Sim.LArParameterization is not LArParameterization.NoFrozenShowers:
             # FIXME If we're only using Frozen Showers in the FCAL do
             # we really need to set up the EMB and EMEC as well?
-            from LArG4FastSimulation.LArG4FastSimulationConfigNew import EMBFastShowerCfg, EMECFastShowerCfg, FCALFastShowerCfg, FCAL2FastShowerCfg
+            from LArG4FastSimulation.LArG4FastSimulationConfig import EMBFastShowerCfg, EMECFastShowerCfg, FCALFastShowerCfg, FCAL2FastShowerCfg
             tools += [ result.popToolsAndMerge(EMBFastShowerCfg(ConfigFlags)) ]
             tools += [ result.popToolsAndMerge(EMECFastShowerCfg(ConfigFlags)) ]
             tools += [ result.popToolsAndMerge(FCALFastShowerCfg(ConfigFlags)) ]
@@ -58,7 +58,7 @@ def FwdSensitiveDetectorListCfg(ConfigFlags):
     result = ComponentAccumulator()
     tools = []
     if ConfigFlags.Detector.EnableForward:
-        print ('G4AtlasToolsConfigNew.FwdSensitiveDetectorListCfg ERROR Forward Detector SD configuration has not been migrated to CA yet!')
+        print ('G4AtlasToolsConfig.FwdSensitiveDetectorListCfg ERROR Forward Detector SD configuration has not been migrated to CA yet!')
     if ConfigFlags.Detector.EnableLucid:
         tools += [ 'LUCID_SensitiveDetector' ]
     if ConfigFlags.Detector.EnableForward:
@@ -164,7 +164,7 @@ def CaloSensitiveDetectorListCfg(ConfigFlags):
 
     if ConfigFlags.Detector.EnableTile:
         if ConfigFlags.Sim.CalibrationRun in [CalibrationRun.Tile, CalibrationRun.LArTile]:
-            from TileGeoG4Calib.TileGeoG4CalibConfigNew import TileGeoG4CalibSDCfg
+            from TileGeoG4Calib.TileGeoG4CalibConfig import TileGeoG4CalibSDCfg
             tools += [ result.popToolsAndMerge(TileGeoG4CalibSDCfg(ConfigFlags)) ]  # mode 1 : With CaloCalibrationHits
         else:
             from TileGeoG4SD.TileGeoG4SDToolConfig import TileGeoG4SDCfg
@@ -253,7 +253,7 @@ def TestBeamSensitiveDetectorListCfg(ConfigFlags):
     if "tb_Tile2000_2003" in ConfigFlags.GeoModel.AtlasVersion:
         if ConfigFlags.Detector.EnableTile:
             if ConfigFlags.Sim.CalibrationRun in [CalibrationRun.Tile, CalibrationRun.LArTile]:
-                from TileGeoG4Calib.TileGeoG4CalibConfigNew import TileCTBGeoG4CalibSDCfg
+                from TileGeoG4Calib.TileGeoG4CalibConfig import TileCTBGeoG4CalibSDCfg
                 tools += [ result.popToolsAndMerge(TileCTBGeoG4CalibSDCfg(ConfigFlags)) ] # mode 1 : With CaloCalibrationHits
             else:
                 from TileGeoG4SD.TileGeoG4SDToolConfig import TileCTBGeoG4SDCfg
@@ -278,7 +278,7 @@ def TestBeamSensitiveDetectorListCfg(ConfigFlags):
             tools += [ 'LArH8CalibSensitiveDetector' ] # mode 1 : With CaloCalibrationHits
     if ConfigFlags.Detector.EnableTile:
         if ConfigFlags.Sim.CalibrationRun in [CalibrationRun.Tile, CalibrationRun.LArTile]:
-            from TileGeoG4Calib.TileGeoG4CalibConfigNew import TileCTBGeoG4CalibSDCfg
+            from TileGeoG4Calib.TileGeoG4CalibConfig import TileCTBGeoG4CalibSDCfg
             tools += [ result.popToolsAndMerge(TileCTBGeoG4CalibSDCfg(ConfigFlags)) ] # mode 1 : With CaloCalibrationHits
         else:
             from TileGeoG4SD.TileGeoG4SDToolConfig import TileCTBGeoG4SDCfg

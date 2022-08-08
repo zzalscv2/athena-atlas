@@ -33,6 +33,8 @@ class TrackAnalysis {
 
 public:
 
+  /// the beam test parts are not really usable in a 
+  /// multithreaded environment
   TrackAnalysis( const std::string& name ) : 
     m_name(name), 
     m_xBeamReference(0), m_yBeamReference(0), m_zBeamReference(0),
@@ -57,13 +59,21 @@ public:
 			TrackAssociator*   matcher, 
 			TrigObjectMatcher* /* objects */ ) {
     execute( tracks1, tracks2, matcher );
-  };
-
+  }
   
   virtual void execute( const std::vector<TIDA::Track*>& ,
 			const std::vector<TIDA::Track*>& ,
 			TrackAssociator* , 
-			const TIDA::Event* ) { } 
+			const TIDA::Event* ) { }
+ 
+  virtual void execute( const std::vector<TIDA::Track*>& tracks1,
+			const std::vector<TIDA::Track*>& tracks2,
+			TrackAssociator* matcher, 
+			const TIDA::Event* event, 
+			double* ) { 
+    execute( tracks1, tracks2, matcher, event ); 
+  } 
+
 
   //  virtual void execute( const std::vector<TIDA::Track*>& ,
   //			const std::vector<TIDA::Track*>& ,
