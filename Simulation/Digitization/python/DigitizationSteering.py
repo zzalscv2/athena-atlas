@@ -84,7 +84,7 @@ def DigitizationMainContentCfg(flags):
     # Signal-only truth information
     # TODO: is another flag needed for this?
     if flags.Digitization.PileUp:
-        from MCTruthSimAlgs.MCTruthSimAlgsConfigNew import (
+        from MCTruthSimAlgs.MCTruthSimAlgsConfig import (
             SignalOnlyMcEventCollCfg,
             MergeAntiKt4TruthJetsCfg,
             MergeAntiKt6TruthJetsCfg,
