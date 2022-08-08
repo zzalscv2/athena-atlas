@@ -1,5 +1,5 @@
 //
-// Copyright (C) 2002-2020 CERN for the benefit of the ATLAS collaboration
+// Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
 //
 
 // Local include(s):
@@ -252,7 +252,7 @@ namespace xAOD {
       // Make sure that the persistent TTree is available:
       if( ! m_event.m_inMetaTree ) {
          ::Error( "xAOD::TTreeMgr::metaTree",
-                  XAOD_MESSAGE( "Couldn't get the input file's metatate "
+                  XAOD_MESSAGE( "Couldn't get the input file's metadata "
                                 "tree. Did you use readFrom(...)?" ) );
          return 0;
       }

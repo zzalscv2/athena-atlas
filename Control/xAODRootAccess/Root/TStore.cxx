@@ -295,7 +295,7 @@ namespace xAOD {
    /// @returns <code>kTRUE</code> if the object is managed by the store, or
    ///          <code>kFALSE</code> if it is not
    ///
-   ::Bool_t TStore::contains( uint32_t hash ) const {
+   ::Bool_t TStore::contains( SG::sgkey_t hash ) const {
 
       // Do the check quickly:
       return ( m_keys.find( hash ) != m_keys.end() );
@@ -331,7 +331,7 @@ namespace xAOD {
    /// @returns The name corresponding to this hashed key if the hashed key is
    ///          known, or an empty string if it isn't.
    ///
-   const std::string& TStore::getName( uint32_t hash ) const {
+   const std::string& TStore::getName( SG::sgkey_t hash ) const {
 
       // Try to find the name associated with this key:
       HashedKeys_t::const_iterator itr = m_keys.find( hash );

@@ -19,6 +19,7 @@
 // EDM include(s):
 #include "xAODEventFormat/EventFormat.h"
 #include "AthContainersInterfaces/IAuxStoreHolder.h"
+#include "CxxUtils/sgkey_t.h"
 
 // Interface include(s):
 #include "xAODRootAccessInterfaces/TVirtualEvent.h"
@@ -259,13 +260,13 @@ namespace xAOD {
       /// @{
 
       /// Function returning the hash describing an object name
-      uint32_t getHash( const std::string& key ) const override;
+      SG::sgkey_t getHash( const std::string& key ) const override;
       /// Function returning the hash describing a known object
-      uint32_t getKey( const void* obj ) const override;
+      SG::sgkey_t getKey( const void* obj ) const override;
       /// Function returning the key describing a known object
       const std::string& getName( const void* obj ) const override;
       /// Function returning the key describing a known object
-      const std::string& getName( uint32_t hash ) const override;
+      const std::string& getName( SG::sgkey_t hash ) const override;
 
       /// Internal function for recording an object into the output
       // Declared public so we can call it from python.
@@ -277,10 +278,10 @@ namespace xAOD {
                           ::Bool_t isOwner = kTRUE );
    protected:
       /// Function for retrieving an output object in a non-template way
-      void* getOutputObject( uint32_t key,
+      void* getOutputObject( SG::sgkey_t key,
                              const std::type_info& ti ) override;
       /// Function for retrieving an input object in a non-template way
-      const void* getInputObject( uint32_t key,
+      const void* getInputObject( SG::sgkey_t key,
                                   const std::type_info& ti,
                                   bool silent = false ) override;
 
@@ -469,7 +470,7 @@ namespace xAOD {
       }; // struct BranchInfo
 
       /// Map from hashed sgkey to BranchInfo.
-      mutable std::unordered_map< SG::sgkey_t, BranchInfo > m_branches;
+      mutable SG::SGKeyMap< BranchInfo > m_branches;
 
       /// @}
 

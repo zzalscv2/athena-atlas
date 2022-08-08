@@ -1,6 +1,6 @@
 // Dear emacs, this is -*- c++ -*-
 //
-// Copyright (C) 2002-2020 CERN for the benefit of the ATLAS collaboration
+// Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
 //
 #ifndef XAODROOTACCESSINTERFACES_TVIRTUALEVENT_ICC
 #define XAODROOTACCESSINTERFACES_TVIRTUALEVENT_ICC
@@ -22,7 +22,7 @@ namespace xAOD {
    ///          <code>false</code> otherwise
    ///
    template< typename T >
-   bool TVirtualEvent::retrieve( const T*& obj, uint32_t key, bool silent ) {
+   bool TVirtualEvent::retrieve( const T*& obj, sgkey_t key, bool silent ) {
 
       // Look among the output objects first:
       const void* result = getOutputObject( key, typeid( T ) );

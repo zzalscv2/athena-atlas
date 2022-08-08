@@ -1,6 +1,6 @@
 // Dear emacs, this is -*- c++ -*-
 //
-// Copyright (C) 2002-2020 CERN for the benefit of the ATLAS collaboration
+// Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
 //
 #ifndef XAODROOTACCESS_TOOLS_IPROXYDICT_H
 #define XAODROOTACCESS_TOOLS_IPROXYDICT_H
@@ -11,14 +11,13 @@
 #include <string>
 #include <vector>
 #include <memory>
+#include <cstdint>
 
 /// The CLID typedef is taken from xAODCore
 #include "xAODCore/CLASS_DEF.h"
+#include "CxxUtils/sgkey_t.h"
 
 namespace SG {
-
-   /// Simple emulation of SG::sgkey_t
-   typedef unsigned int sgkey_t;
 
    /// Simple emulation of SG::DataProxy
    struct DataProxy {};

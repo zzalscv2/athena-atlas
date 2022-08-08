@@ -1,7 +1,7 @@
 // Dear emacs, this is -*- c++ -*-
 
 /*
-  Copyright (C) 2002-2017 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
 */
 
 // $Id: Utils.h 601421 2014-06-12 11:44:08Z krasznaa $
@@ -19,12 +19,14 @@ extern "C" {
 #include <TDataType.h>
 #include <TTree.h>
 
+#include "CxxUtils/sgkey_t.h"
+
 namespace xAOD {
 
    namespace Utils {
 
       /// Function creating a hash out of a "key name"
-      uint32_t hash( const std::string& key );
+      SG::sgkey_t hash( const std::string& key );
 
       /// Get the dynamic auxiliary variable prefix based on a container name
       std::string dynBranchPrefix( const std::string& key );

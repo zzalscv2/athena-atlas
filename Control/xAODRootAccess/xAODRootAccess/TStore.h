@@ -1,6 +1,6 @@
 // Dear emacs, this is -*- c++ -*-
 //
-// Copyright (C) 2002-2020 CERN for the benefit of the ATLAS collaboration
+// Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
 //
 #ifndef XAODROOTACCESS_TSTORE_H
 #define XAODROOTACCESS_TSTORE_H
@@ -16,6 +16,7 @@
 
 // EDM include(s):
 #include "AthContainers/ConstDataVector.h"
+#include "CxxUtils/sgkey_t.h"
 
 // Local include(s):
 #include "AsgMessaging/StatusCode.h"
@@ -131,11 +132,11 @@ namespace xAOD {
       /// @{
 
       /// Check if an object with a given hash is managed by the store
-      ::Bool_t contains( uint32_t hash ) const;
+      ::Bool_t contains( SG::sgkey_t hash ) const;
       /// Check if an object with a given pointer is managed by the store
       ::Bool_t contains( const void* ptr ) const;
       /// Get the name corresponding to a hashed key
-      const std::string& getName( uint32_t hash ) const;
+      const std::string& getName( SG::sgkey_t hash ) const;
       /// Get the name of a managed object
       const std::string& getName( const void* ptr ) const;
       /// Function determining the list keys associated with a type name
@@ -147,7 +148,7 @@ namespace xAOD {
       /// Type of the internal container storing all the objects
       typedef std::map< std::string, THolder* > Objects_t;
       /// Type of the internal storage for the hashed keys of the object names
-      typedef std::map< uint32_t, std::string > HashedKeys_t;
+      typedef SG::SGKeyMap< std::string > HashedKeys_t;
 
       /// The object storage
       Objects_t m_objects;
