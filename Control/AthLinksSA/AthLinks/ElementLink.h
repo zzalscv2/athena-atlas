@@ -211,6 +211,14 @@ private:
 
 }; // class ElementLink
 
+template <typename STORABLE>
+bool operator< (const ElementLink<STORABLE> &lhs,
+                const ElementLink<STORABLE> &rhs);
+
+template <typename STORABLE>
+bool operator> (const ElementLink<STORABLE> &lhs,
+                const ElementLink<STORABLE> &rhs);
+
 /*
  * The following piece of code declares all members of the ElementLink
  * class as transient.
