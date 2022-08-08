@@ -12,7 +12,9 @@ MyParser.add_argument("--AugString", help="Augmentation string for the container
 MyParser.add_argument("--OutFile", help="Path to the output file", default='VSI.root')
 MyParser.add_argument("--truthCont", help="Truth container name", default='TruthVertices')
 MyParser.add_argument("--pdgIds", help="List of pdg Ids to match to", default='36')
-
+MyParser.add_argument("--trackPtCut", help="minimum pT cut on the truth track", default=1000)
+MyParser.add_argument("--trackMatchProb", help="minimum track match probability cut", default=0.5)
+MyParser.add_argument("--vertexMatchWeight", help="minumum vertex match weight cut", default=0.5)
 m_CustomArgs = MyParser.parse_known_args()[0]
 
 import AthenaPoolCnvSvc.ReadAthenaPool
@@ -27,6 +29,9 @@ tool = InDetSecVertexTruthMatchTool()
 tool.OutputLevel=INFO
 tool.pdgIds= m_CustomArgs.pdgIds
 tool.AugString = m_CustomArgs.AugString
+tool.trackPtCut = float(m_CustomArgs.trackPtCut)
+tool.trackMatchProb = float(m_CustomArgs.trackMatchProb)
+tool.vertexMatchWeight = float(m_CustomArgs.vertexMatchWeight)
 ToolSvc += tool
 
 # Add the test algorithm:
