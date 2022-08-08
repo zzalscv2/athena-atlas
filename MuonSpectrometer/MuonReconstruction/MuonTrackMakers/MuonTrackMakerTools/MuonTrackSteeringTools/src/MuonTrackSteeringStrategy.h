@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2020 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef MUON_MUONTRACKSTEERINGSTRATEGY_H
@@ -28,19 +28,19 @@ namespace Muon {
             Last = 0x8
         };
 
-        MuonTrackSteeringStrategy(const std::string name, std::bitset<Last> bits,
+        MuonTrackSteeringStrategy(const std::string & name, const std::bitset<Last> & bits,
                                   std::vector<std::vector<MuonStationIndex::ChIndex> >& path, std::vector<unsigned int>& seedOrder) :
             m_name(name), m_bits(bits), m_path(path), m_seeds(seedOrder) {}
 
         /** @brief Constructor that assumes the seed order could come as part of the options */
-        MuonTrackSteeringStrategy(const std::string name, std::vector<std::string> options,
+        MuonTrackSteeringStrategy(const std::string & name, std::vector<std::string> & options,
                                   std::vector<std::vector<MuonStationIndex::ChIndex> >& path) :
             m_name(name), m_path(path) {
             for (unsigned int i = 0; i < Last; ++i) m_bits.set(i, 0);
             for (unsigned int i = 0; i < options.size(); ++i) setOption(options[i], true);
         }
 
-        MuonTrackSteeringStrategy(const std::string name, std::vector<std::string> options,
+        MuonTrackSteeringStrategy(const std::string & name, std::vector<std::string> & options,
                                   std::vector<std::vector<MuonStationIndex::ChIndex> >& path, std::vector<unsigned int>& seedOrder) :
             m_name(name), m_path(path), m_seeds(seedOrder) {
             for (unsigned int i = 0; i < Last; ++i) m_bits.set(i, 0);

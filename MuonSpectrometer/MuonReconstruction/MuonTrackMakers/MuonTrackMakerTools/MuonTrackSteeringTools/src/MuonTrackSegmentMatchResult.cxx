@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2017 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
 */
 
 /***************************************************************************
@@ -20,11 +20,11 @@
 namespace Muon {
 
     TrackSegmentMatchResult::TrackSegmentMatchResult() {
-        clear();
+        TrackSegmentMatchResult::clear();
         resetCuts();
     }
 
-    TrackSegmentMatchResult::~TrackSegmentMatchResult() { clear(); }
+    TrackSegmentMatchResult::~TrackSegmentMatchResult() { TrackSegmentMatchResult::clear(); }
 
     void TrackSegmentMatchResult::clear() {
         localPosXDiff = 0.0;
@@ -144,7 +144,7 @@ namespace Muon {
 
     std::string TrackSegmentMatchResult::reasonString() const { return reasonString(reason); }
 
-    TrackSegmentMatchCuts::TrackSegmentMatchCuts() { clear(); }
+    TrackSegmentMatchCuts::TrackSegmentMatchCuts() { TrackSegmentMatchCuts::clear(); }
 
     TrackSegmentMatchCuts::~TrackSegmentMatchCuts() {}
 
