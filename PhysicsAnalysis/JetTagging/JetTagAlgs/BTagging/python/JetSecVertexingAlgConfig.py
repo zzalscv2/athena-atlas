@@ -5,7 +5,7 @@ from AthenaConfiguration.ComponentFactory import CompFactory
 from BTagging.MSVVariablesFactoryConfig import MSVVariablesFactoryCfg
 
 
-def JetSecVertexingAlgCfg(ConfigFlags, BTaggingCollection, JetCollection, TrackCollection, PrimaryVertexCollectionName="", SVFinder="", **options):
+def JetSecVertexingAlgCfg(ConfigFlags, BTagVxSecVertexInfoName, SVAlgName, BTaggingCollection, JetCollection, TrackCollection, PrimaryVertexCollectionName="", SVFinder="", **options):
     """Adds a SecVtxTool instance and registers it.
 
     input: name:               The tool's name.
@@ -32,14 +32,14 @@ def JetSecVertexingAlgCfg(ConfigFlags, BTaggingCollection, JetCollection, TrackC
     options = {}
     options.setdefault('SecVtxFinderxAODBaseName', SVFinder)
     options.setdefault('vxPrimaryCollectionName', PrimaryVertexCollectionName)
-    options['JetCollectionName'] = JetCollection.replace('Track', 'PV0Track') + 'Jets'
-    options['BTagVxSecVertexInfoName'] = SVFinder + 'VxSecVertexInfo_' + JetCollection
+    options['JetCollectionName'] = JetCollection
+    options['BTagVxSecVertexInfoName'] = BTagVxSecVertexInfoName
     options['TrackCollectionName'] = TrackCollection
     options['BTagJFVtxCollectionName'] = BTaggingCollection + JetSVLink
     options['BTagSVCollectionName'] = BTaggingCollection + JetSVLink
-    options['JetSecVtxLinkName'] = options['JetCollectionName'] + '.' + JetSVLink
+    options['JetSecVtxLinkName'] = JetCollection + '.' + JetSVLink
     options.setdefault('MSVVariableFactory', varFactory)
-    options['name'] = (JetCollection + '_' + SVFinder + '_secvtx').lower()
+    options['name'] = SVAlgName
 
     # -- create the association algorithm
     acc.addEventAlgo(CompFactory.Analysis.JetSecVertexingAlg(**options))
