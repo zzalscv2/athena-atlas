@@ -620,7 +620,7 @@ StatusCode EventSelectorAthenaPool::nextHandleFileTransition(IEvtSelector::Conte
       StatusCode rc = reinit();
       if( rc != StatusCode::SUCCESS ) return rc;
    }
-   else {   // advance to the next (not necessary after reinit)
+   else {   // advance to the next (not needed after reinit)
       // Check if we're at the end of file
       if (m_headerIterator == nullptr || m_headerIterator->next() == 0) {
          m_headerIterator = nullptr;
@@ -632,21 +632,27 @@ StatusCode EventSelectorAthenaPool::nextHandleFileTransition(IEvtSelector::Conte
          m_guid = Guid::null();
          disconnectIfFinished( old_guid );
 
-         // Open next file from inputCollections list.
-         ++m_inputCollectionsIterator;
-         // Create PoolCollectionConverter for input file
-         m_poolCollectionConverter = getCollectionCnv(true);
-         if (m_poolCollectionConverter == nullptr) {
-            // Return end iterator
-            ctxt = *m_endIter;
-            // This is not a real failure but a Gaudi way of handling "end of job"
-            return StatusCode::FAILURE;
-         }
-         // Get DataHeader iterator
-         m_headerIterator = &m_poolCollectionConverter->executeQuery();
+         // check if somebody updated Inputs in the EOF incident (like VP1 does)
+         if( m_inputCollectionsChanged ) {
+            StatusCode rc = reinit();
+            if( rc != StatusCode::SUCCESS ) return rc;
+         } else {
+            // Open next file from inputCollections list.
+            ++m_inputCollectionsIterator;
+            // Create PoolCollectionConverter for input file
+            m_poolCollectionConverter = getCollectionCnv(true);
+            if (m_poolCollectionConverter == nullptr) {
+               // Return end iterator
+               ctxt = *m_endIter;
+               // This is not a real failure but a Gaudi way of handling "end of job"
+               return StatusCode::FAILURE;
+            }
+            // Get DataHeader iterator
+            m_headerIterator = &m_poolCollectionConverter->executeQuery();
 
-         // Return RECOVERABLE to mark we should still continue
-         return StatusCode::RECOVERABLE;
+            // Return RECOVERABLE to mark we should still continue
+            return StatusCode::RECOVERABLE;
+         }
       }
    }
 
