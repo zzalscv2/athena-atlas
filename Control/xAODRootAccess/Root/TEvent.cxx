@@ -455,7 +455,7 @@ namespace xAOD {
       // This is a strange place. The object has to be deleted, as it is the
       // responsibility of the user code to do so. But if I also explicitly
       // tell the branch to forget about the address of the pointer, then
-      // all hell breaks lose...
+      // all hell breaks loose...
       delete format;
 
       // Look for the event tree in the input file:
@@ -1543,7 +1543,7 @@ namespace xAOD {
    /// @param key String key to turn into a hash
    /// @returns A hash corresponding to the specified string key
    ///
-   uint32_t TEvent::getHash( const std::string& key ) const {
+   SG::sgkey_t TEvent::getHash( const std::string& key ) const {
 
       // For empty keys let's finish quickly:
       if( key == "" ) return 0;
@@ -1565,7 +1565,7 @@ namespace xAOD {
    /// @returns The hashed identifier of the object, or 0 if the object was
    ///          not found in the event
    ///
-   uint32_t TEvent::getKey( const void* obj ) const {
+   SG::sgkey_t TEvent::getKey( const void* obj ) const {
 
       // Make use of the getName function:
       return getHash( getName( obj ) );
@@ -1743,7 +1743,7 @@ namespace xAOD {
    /// @returns The name of the object, or an empty string if the object was
    ///          not found in the event
    ///
-   const std::string& TEvent::getName( uint32_t hash ) const {
+   const std::string& TEvent::getName( SG::sgkey_t hash ) const {
 
       // If the branch is known from the input:
       if( m_inputEventFormat.exists( hash ) ) {
@@ -1777,7 +1777,7 @@ namespace xAOD {
    /// @returns A pointer to the requested object, or a null pointer in case
    ///          of failure
    ///
-   void* TEvent::getOutputObject( uint32_t key,
+   void* TEvent::getOutputObject( SG::sgkey_t key,
                                   const std::type_info& ti ) {
 
       // Get a string name for this key:
@@ -1801,7 +1801,7 @@ namespace xAOD {
    /// @returns A pointer to the requested object, or a null pointer in case
    ///          of failure
    ///
-   const void* TEvent::getInputObject( uint32_t key,
+   const void* TEvent::getInputObject( SG::sgkey_t key,
                                        const std::type_info& ti,
                                        bool silent ) {
 

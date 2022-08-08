@@ -80,7 +80,7 @@ public:
          // Try to load the object/container:
          if( ! this->getInputObject( efe.branchName(), *ti ) ) {
             Error( "TEventClass::loadInputObjects",
-                   XAOD_MESSAGE( "Couldnt load object: %s" ),
+                   XAOD_MESSAGE( "Couldn't load object: %s" ),
                    efe.branchName().c_str() );
             return StatusCode::FAILURE;
          }
