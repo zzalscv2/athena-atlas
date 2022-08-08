@@ -50,7 +50,7 @@ namespace {  // local funcs
 
 namespace Muon {
 
-    MooCandidateMatchingTool::MooTrackSegmentMatchResult::MooTrackSegmentMatchResult() { clear(); }
+    MooCandidateMatchingTool::MooTrackSegmentMatchResult::MooTrackSegmentMatchResult() { MooCandidateMatchingTool::MooTrackSegmentMatchResult::clear(); }
 
     void MooCandidateMatchingTool::MooTrackSegmentMatchResult::clear() {
         TrackSegmentMatchResult::clear();

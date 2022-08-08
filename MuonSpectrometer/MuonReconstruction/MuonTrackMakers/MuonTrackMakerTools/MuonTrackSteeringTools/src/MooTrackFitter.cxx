@@ -1505,14 +1505,14 @@ namespace Muon {
         const MuPatHit *firstphi1 = nullptr, *lastphi1 = nullptr, *firstphi2 = nullptr, *lastphi2 = nullptr;
 
         std::list<MuPatHit*>::const_iterator it = entry1->hitList().begin();
-        for (; it != entry1->hitList().end(); it++) {
+        for (; it != entry1->hitList().end(); ++it) {
             if ((**it).info().type != MuPatHit::Pseudo && (**it).info().measuresPhi) {
                 if (!firstphi1) firstphi1 = *it;
                 lastphi1 = *it;
             }
         }
         it = entry2->hitList().begin();
-        for (; it != entry2->hitList().end(); it++) {
+        for (; it != entry2->hitList().end(); ++it) {
             if ((**it).info().type != MuPatHit::Pseudo && (**it).info().measuresPhi) {
                 if (!firstphi2) firstphi2 = *it;
                 lastphi2 = *it;
@@ -1527,7 +1527,7 @@ namespace Muon {
         if (besttrkEntry) {
             const Trk::TrackParameters* mdtpar = nullptr;
             for (DataVector<const Trk::TrackParameters>::const_iterator parit = besttrkEntry->track().trackParameters()->begin();
-                 parit != besttrkEntry->track().trackParameters()->end(); parit++) {
+                 parit != besttrkEntry->track().trackParameters()->end(); ++parit) {
                 mdtpar = *parit;
                 if (mdtpar) break;
             }
@@ -1665,6 +1665,8 @@ namespace Muon {
 
         ATH_MSG_VERBOSE("fit: " << (prefit ? "prefit" : "fit") << "track with hits: " << hits.size() << std::endl
                                 << m_printer->print(hits));
+        //The 'pars' is  from perigee.get(), and the perigee object still exists in the 'garbage' vector
+        //cppcheck-suppress invalidLifetime
         std::unique_ptr<Trk::Track> track = std::unique_ptr<Trk::Track>(m_trackFitter->fit(ctx, hits, *pars, m_runOutlier, partHypo));
 
         // 'sign' track
