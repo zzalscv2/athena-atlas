@@ -539,4 +539,18 @@ void ElementLink< STORABLE >::findIndex() {
    return;
 }
 
+template <typename STORABLE>
+bool operator< (const ElementLink<STORABLE> &lhs,
+                const ElementLink<STORABLE> &rhs)
+{
+    return std::make_pair(lhs.persKey(), lhs.index()) < std::make_pair(rhs.persKey(), rhs.index());
+}
+
+template <typename STORABLE>
+bool operator> (const ElementLink<STORABLE> &lhs,
+                const ElementLink<STORABLE> &rhs)
+{
+    return rhs < lhs;
+}
+
 #endif // ATHLINKS_ELEMENTLINK_ICC
