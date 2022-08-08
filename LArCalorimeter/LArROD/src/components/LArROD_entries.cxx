@@ -1,9 +1,7 @@
 #include "../LArRawChannelBuilder.h"
 #include "../ReadLArRaw.h"
 #include "../ReadLArDigits.h"
-#include "../LArCalibDigitPreProcessor.h"
 #include "../LArRawChannelSimpleBuilder.h"
-#include "../LArTimeChecker.h"
 #include "../LArCalibDigitsAccumulator.h"
 #include "../LArDigitsAccumulator.h"
 #include "../LArRawChannelBuilderDriver.h"
@@ -29,14 +27,10 @@
 #include "../LArHITtoCell.h"
 
 
-typedef LArCalibDigitPreProcessor<TBLArCalibDigitContainer> TBLArCalDigProcessor;
-
 DECLARE_COMPONENT( LArRawChannelBuilder )
 DECLARE_COMPONENT( ReadLArRaw )
 DECLARE_COMPONENT( ReadLArDigits )
-DECLARE_COMPONENT( TBLArCalDigProcessor )
 DECLARE_COMPONENT( LArRawChannelSimpleBuilder )
-DECLARE_COMPONENT( LArTimeChecker )
 DECLARE_COMPONENT( LArCalibDigitsAccumulator )
 DECLARE_COMPONENT( LArDigitsAccumulator )
 DECLARE_COMPONENT( LArRawChannelBuilderDriver )
