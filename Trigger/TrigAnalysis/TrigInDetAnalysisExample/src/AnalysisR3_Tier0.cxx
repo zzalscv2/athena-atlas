@@ -131,6 +131,13 @@ void AnalysisR3_Tier0::initialise_R3() {
   m_htrkvtx_y_lb = new TIDA::Histogram<float>( monTool(),  "trkvtx_y_vs_lb" );
   m_htrkvtx_z_lb = new TIDA::Histogram<float>( monTool(),  "trkvtx_z_vs_lb" );
 
+  /// do we want to track the offline vertex ??? 
+  /// leave this in in preparation ...
+  //  m_hotrkvtx_x_lb = new TIDA::Histogram<float>( monTool(),  "otrkvtx_x_vs_lb" );
+  //  m_hotrkvtx_y_lb = new TIDA::Histogram<float>( monTool(),  "otrkvtx_y_vs_lb" );
+  //  m_hotrkvtx_z_lb = new TIDA::Histogram<float>( monTool(),  "otrkvtx_z_vs_lb" );
+
+
   /// han config too stufid to deal with spaces in histogram names
   m_hnpixvseta     = new TIDA::Histogram<float>( monTool(), "npix_vs_eta" );
   m_hnpixvseta_rec = new TIDA::Histogram<float>( monTool(), "npix_vs_eta_rec" );
@@ -249,16 +256,11 @@ void AnalysisR3_Tier0::initialise_R3() {
 
 extern TIDARoiDescriptor* agroi;
 
-void AnalysisR3_Tier0::execute(const std::vector<TIDA::Track*>& ,
-			       const std::vector<TIDA::Track*>& ,
-			       TrackAssociator*  ) 
-{ }
-
-
 void AnalysisR3_Tier0::execute(const std::vector<TIDA::Track*>& referenceTracks,
 			       const std::vector<TIDA::Track*>& testTracks,
 			       TrackAssociator* associator, 
-			       const TIDA::Event* tevt )
+			       const TIDA::Event* tevt, 
+			       double* beamline ) 
 { 
   
   /// Loop over reference tracks
@@ -311,9 +313,9 @@ void AnalysisR3_Tier0::execute(const std::vector<TIDA::Track*>& referenceTracks,
     m_hd0eff->Fill( referenceD0, eff_weight );
     m_hetaeff->Fill( referenceEta, eff_weight );
     m_hphieff->Fill( referencePhi, eff_weight );
-    m_hnVtxeff->Fill( m_nVtx, eff_weight );
+    /// m_hnVtxeff->Fill( m_nVtx, eff_weight ); /// don't use the class variable as this is not thread safe
+    m_hnVtxeff->Fill( beamline[3], eff_weight ); /// this is a hack to make it thread safe 
 
-    //    m_hlbeff->Fill( event()->lumi_block(), eff_weight );
     m_hlbeff->Fill( tevt->lumi_block(), eff_weight );
 
     m_htrkpT->Fill( std::fabs(referencePT)*0.001 );
@@ -389,9 +391,9 @@ void AnalysisR3_Tier0::execute(const std::vector<TIDA::Track*>& referenceTracks,
       //    m_htrkvtx_y_lb->Fill( event()->lumi_block(), beamTesty() );
       //    m_htrkvtx_z_lb->Fill( event()->lumi_block(), beamTestz() );
 
-      m_htrkvtx_x_lb->Fill( tevt->lumi_block(), beamTestx() );
-      m_htrkvtx_y_lb->Fill( tevt->lumi_block(), beamTesty() );
-      m_htrkvtx_z_lb->Fill( tevt->lumi_block(), beamTestz() );
+      m_htrkvtx_x_lb->Fill( tevt->lumi_block(), beamline[0] );
+      m_htrkvtx_y_lb->Fill( tevt->lumi_block(), beamline[1] );
+      m_htrkvtx_z_lb->Fill( tevt->lumi_block(), beamline[2] );
 
       for ( size_t ilayer=0 ; ilayer<32 ; ilayer++ ) { 
 	if ( test->hitPattern()&(1<<ilayer) ) m_hlayer_rec->Fill( ilayer );

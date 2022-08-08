@@ -321,7 +321,8 @@ protected:
     TIDA::Event   event;
     TIDA::Event*  eventp = &event;
 
-
+    double beamline[4] = { 0, 0, 0, 0 }; /// the fourth value will store the number of vertices
+	 
     // clear the ntuple TIDA::Event class
     eventp->clear();
 
@@ -985,10 +986,22 @@ protected:
 	/// debug ...
 	//	std::cout << "sutt track multiplicities: offline " << offline_tracks.size() << "\ttest " << test_tracks.size() << std::endl;
 
-	m_manalysis->setvertices( vertices.size() );  /// what is this for ???
+	/// get the beamline
+	
+	beamline[0] = pselectorTest->getBeamX();
+	beamline[1] = pselectorTest->getBeamY();
+	beamline[2] = pselectorTest->getBeamZ();
 
-	if ( refbeamspot.size()>0 )  m_manalysis->setBeamRef(   refbeamspot ); 
-	if ( testbeamspot.size()>0 ) m_manalysis->setBeamTest( testbeamspot ); 
+	beamline[3] = vertices.size();
+
+	/// the original code sets a class variable on the fill class
+	/// this will not be reentrant, as another instance could overwrite
+	/// it, but will keep it in for now. MAybe we could clone the 
+	/// analysis class each time we have an instance. Need to 
+	/// investigate whether such an event-by-event might be fast 
+	/// enough. Foe the time being, leave the original code here, 
+	/// but commented
+	//	m_manalysis->setvertices( vertices.size() );  /// what is this for ??? /// is this thread safe ??? 
 
 	/// if we want a purity, we need to swap round which tracks are the 
 	/// reference tracks and which the test tracks
@@ -1007,7 +1020,7 @@ protected:
 	  /// match test and reference tracks
 	  associator->match( test_tracks, ref_tracks );
 	  
-	  m_manalysis->execute( test_tracks, ref_tracks, associator, eventp );
+	  m_manalysis->execute( test_tracks, ref_tracks, associator, eventp, beamline );
 
 	}
 	else { 
@@ -1031,8 +1044,12 @@ protected:
 	  /// match test and reference tracks
 	  associator->match( ref_tracks, test_tracks );
 	
-	  m_manalysis->setroi( &rois.at(iroi)->roi() );  
-	  m_manalysis->execute( ref_tracks, test_tracks, associator, eventp );
+	  /// this setting of the roi is not thread safe so it has been diabled for the time being
+	  /// in principle we may be able to remove it completely, but we need to check whether
+	  /// we can do without this functionality, so leave the code in place until we either 
+	  /// fix it properly in the future, or determine that it is not needed 
+	  //	  m_manalysis->setroi( &rois.at(iroi)->roi() );  
+	  m_manalysis->execute( ref_tracks, test_tracks, associator, eventp, beamline );
 
 	  if ( vtx_name!="" ) { 
 	    /// get vertices for this roi - have to copy to a vector<Vertex*>
