@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2017 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
 */
 
 #include <math.h>
@@ -173,6 +173,11 @@ void setFittedParameters(double * result, std::vector<int> & matrixPnt)
         trk->fitP[0]=trk->iniP[0]+result[Pnt+3+it*3 + 0];
         trk->fitP[1]=trk->iniP[1]+result[Pnt+3+it*3 + 1];
         trk->fitP[2]=trk->iniP[2]+result[Pnt+3+it*3 + 2];
+        if( trk->fitP[2]*trk->iniP[2] < 0.) {   //Sign of momentum changes -> bad update, return to initial
+          trk->fitP[0]=trk->iniP[0];
+          trk->fitP[1]=trk->iniP[1];
+          trk->fitP[2]=trk->iniP[2];
+	}
 	trk->Chi2 = cfchi2(vk->fitV, trk->fitP, trk );
         Chi2+=trk->Chi2;
      }
