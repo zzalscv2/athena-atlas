@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2017 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
 */
 
 #include <math.h>
@@ -8,7 +8,6 @@
 
 namespace Trk {
 
-#define max(a,b) ((a) >= (b) ? (a) : (b))
 extern double d_sign(double , double );
        void vkGetEigVal(double ci[], double d[], int n);
 
@@ -266,18 +265,23 @@ void scaleg(double *g, double *scale, long int N, long int mfirst)
 
     /* Function Body */
     double tmp=0.;
+    double smax=0., smin=1.e30;
     for (i__ = 1; i__ <= N; ++i__) {
 	scale[i__] = 1.;
 	if (g_ref(i__, i__) == 0.)  			continue;
 	tmp = sqrt(fabs(g_ref(i__, i__)));
 	//scale[i__] = 1./tmp;           g_ref(i__, i__) = d_sign( 1., g_ref(i__, i__)); //VK old version -> diag==1
-	scale[i__] = 1./sqrt(tmp);   g_ref(i__, i__) = d_sign( tmp, g_ref(i__, i__));  //VK new version -> diag=sqrt(diag_old)
+	scale[i__] = 1./sqrt(tmp);                                                       //VK new version -> diag=sqrt(diag_old)
+        smax=std::max(smax,scale[i__]); 
+	smin=std::min(smin,scale[i__]);
     }
 
-    if (N <= 1) return;
+    double sLIM=1.e14*smin; //Define compression range
+    if(smax>sLIM){for (int i = 1; i <= N; ++i) scale[i]=std::min(scale[i],sLIM);}
+
+    if (N < 1) return;
     for (j = 1; j <= N; ++j) {
 	for (i__ = 1; i__ <= N; ++i__) {
-	    if(j==i__) continue;
 	    g_ref(i__, j) *= scale[i__] * scale[j];
 	}
     }
