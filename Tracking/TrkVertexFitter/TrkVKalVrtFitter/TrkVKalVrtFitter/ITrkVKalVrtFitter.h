@@ -15,21 +15,20 @@
 #include "EventPrimitives/EventPrimitives.h"
 // Gaudi includes
 #include "AthenaBaseComps/AthAlgTool.h"
-//#include "GaudiKernel/IToolSvc.h"
-#include "GaudiKernel/EventContext.h"
 //
-#include  "TrkVKalVrtFitter/IVKalState.h"
-#include  "TrkTrack/Track.h"
-#include  "xAODTracking/TrackParticleContainer.h"
-#include  "xAODTracking/NeutralParticleContainer.h"
-#include  "xAODTracking/VertexContainer.h"
+#include  "xAODTracking/TrackParticleFwd.h"
+#include  "xAODTracking/NeutralParticleFwd.h"
 
 #include <vector>
+#include <memory>
 
+class EventContext;
 
 namespace Trk{
 
 class IExtrapolator;
+class IVKalState;
+class Track;
 
 //------------------------------------------------------------------------
   static const InterfaceID IID_ITrkVKalVrtFitter("ITrkVKalVrtFitter", 1, 0);

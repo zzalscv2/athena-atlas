@@ -1,25 +1,25 @@
 /*
-  Copyright (C) 2002-2020 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
 */
 
 // IVertexCascadeFitter.h  - 
 //---------------------------------------------------------------
 #ifndef TRKVKALVRTFITTER_IVERTEXCASCADEFITTER_H
 #define TRKVKALVRTFITTER_IVERTEXCASCADEFITTER_H
-// Normal STL and physical vectors
-#include <vector>
+
 // Gaudi includes
 #include "AthenaBaseComps/AthAlgTool.h"
-//#include "GaudiKernel/IToolSvc.h"
-#include "GaudiKernel/EventContext.h"
 //
-#include  "VxVertex/Vertex.h"
-#include  "TrkVKalVrtFitter/VxCascadeInfo.h"
-#include  "TrkVKalVrtFitter/IVKalState.h"
-#include  "xAODTracking/TrackParticle.h" 
+#include  "xAODTracking/TrackParticleFwd.h"
+#include <memory>
+#include <vector>
 
+class EventContext;
 
 namespace Trk{
+  class Vertex;
+  class IVKalState;
+  class VxCascadeInfo;
 
  typedef int VertexID;
 

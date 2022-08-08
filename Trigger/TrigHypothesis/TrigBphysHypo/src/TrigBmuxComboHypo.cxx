@@ -27,6 +27,7 @@
 
 #include "Math/GenVector/VectorUtil.h"
 #include "Math/Vector2D.h"
+#include "TrkVKalVrtFitter/VxCascadeInfo.h"
 
 
 using TrigCompositeUtils::Decision;

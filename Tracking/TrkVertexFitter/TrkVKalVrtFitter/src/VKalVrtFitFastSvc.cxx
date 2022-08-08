@@ -7,9 +7,30 @@
 #include "TrkVKalVrtFitter/VKalVrtAtlas.h"
 //-------------------------------------------------
 //
-#include<iostream>
-#include<vector>
 #include "TrkTrack/TrackInfo.h"
+#include <vector>
+#include <algorithm> //for nth_element, max_element
+#include <cmath> //for abs
+
+namespace{
+  double
+  median(std::vector<double> & v){ //modifies the vector v
+    //assume we don't need to check for empty vector
+    const auto n = v.size();
+    const auto halfway =n/2;
+    //its a contiguous iterator, just use addition
+    std::vector<double>::iterator it = v.begin() + halfway;
+    std::nth_element(v.begin(), it, v.end());
+    if (n & 1){//it has an odd number of elements
+      return *it;//so just return the middle element
+    } else {
+      const double mid2 = *it;
+      //the following works because v is partially sorted by std::nth_element
+      const double mid1 = *std::max_element(v.begin(), it); 
+      return (mid1 + mid2) *0.5; //return the average of the two neighbouring mid elements
+    }
+  }
+}
 
 
 namespace Trk {
@@ -55,7 +76,6 @@ namespace Trk{
 //------ Variables and arrays needed for fitting kernel
 //
     double out[3];
-    int i,j;
     std::vector<double> xx,yy,zz,difz;
     Vertex[0]=Vertex[1]=Vertex[2]=0.;
 //
@@ -64,38 +84,19 @@ namespace Trk{
     if(ntrk==2){	 
       minDZ=Trk::vkvFastV(&state.m_apar[0][0],&state.m_apar[1][0], xyz0, BMAG_CUR, out);
     } else {
-      for( i=0;      i<ntrk-1; i++){
-	 for( j=i+1; j<ntrk;   j++){
-            double dZ=Trk::vkvFastV(&state.m_apar[i][0],&state.m_apar[j][0], xyz0, BMAG_CUR, out);
-	    xx.push_back(out[0]);
-	    yy.push_back(out[1]);
-	    zz.push_back(out[2]);
-	    difz.push_back(dZ);
-	  }
-	}
-	int n=xx.size();
-	std::sort(xx.begin(), xx.end());
-	std::sort(yy.begin(), yy.end());
-	std::sort(zz.begin(), zz.end());
-	std::sort(difz.begin(), difz.end());
-
-	std::vector<double>::iterator it1,it2;
-	it1=xx.begin()+(n+1)/2;
-	it2=xx.begin()+(n/2+1);
-	out[0]=0.5*( (*it1) + (*it2) );
-		
-	it1=yy.begin()+(n+1)/2;
-	it2=yy.begin()+(n/2+1);
-	out[1]=0.5*( (*it1) + (*it2) );
-
-	it1=zz.begin()+(n+1)/2;
-	it2=zz.begin()+(n/2+1);
-	out[2]=0.5*( (*it1) + (*it2) );
-
-	it1=difz.begin()+(n+1)/2;
-	it2=difz.begin()+(n/2+1);
-	minDZ=0.5*( (*it1) + (*it2) );
-
+      for(int i=0;i<ntrk-1; i++){
+        for(int j=i+1; j<ntrk;   j++){
+          double dZ=Trk::vkvFastV(&state.m_apar[i][0],&state.m_apar[j][0], xyz0, BMAG_CUR, out);
+          xx.push_back(out[0]);
+          yy.push_back(out[1]);
+          zz.push_back(out[2]);
+          difz.push_back(dZ);
+        }
+      }
+      out[0] = median(xx);
+      out[1] = median(yy);
+      out[2] = median(zz);
+      minDZ  = median(difz);
     }
     Vertex[0]= out[0] + state.m_refFrameX;
     Vertex[1]= out[1] + state.m_refFrameY;
@@ -126,42 +127,25 @@ namespace Trk{
 //------ Variables and arrays needed for fitting kernel
 //
     double out[3];
-    int i,j;
     std::vector<double> xx,yy,zz;
     Vertex[0]=Vertex[1]=Vertex[2]=0.;
 //
 //
     double xyz0[3]={ -state.m_refFrameX, -state.m_refFrameY, -state.m_refFrameZ};
     if(ntrk==2){	 
-    //Trk::vkvfast_(&state.m_apar[0][0],&state.m_apar[1][0],&BMAG_CUR,out);
       Trk::vkvFastV(&state.m_apar[0][0],&state.m_apar[1][0], xyz0, BMAG_CUR, out);
     } else {
-      for( i=0;      i<ntrk-1; i++){
-	 for( j=i+1; j<ntrk;   j++){
-          //Trk::vkvfast_(&state.m_apar[i][0],&state.m_apar[j][0],&BMAG_CUR,out);
-            Trk::vkvFastV(&state.m_apar[i][0],&state.m_apar[j][0], xyz0, BMAG_CUR, out);
-	    xx.push_back(out[0]);
-	    yy.push_back(out[1]);
-	    zz.push_back(out[2]);
-	  }
-	}
-	int n=xx.size();
-	std::sort(xx.begin(), xx.end());
-	std::sort(yy.begin(), yy.end());
-	std::sort(zz.begin(), zz.end());
-
-	std::vector<double>::iterator it1,it2;
-	it1=it2=xx.begin();
-	for(i=0; i<((n+1)/2); ++i,++it1){}; for(i=0; i<(n/2+1);++i,++it2){};
-	out[0]=0.5*( (*it1) + (*it2) );
-		
-	it1=it2=yy.begin();
-	for(i=0; i<((n+1)/2); ++i,++it1){}; for(i=0; i<(n/2+1);++i,++it2){};
-	out[1]=0.5*( (*it1) + (*it2) );
-
-	it1=it2=zz.begin();
-	for(i=0; i<((n+1)/2); ++i,++it1){}; for(i=0; i<(n/2+1);++i,++it2){};
-	out[2]=0.5*( (*it1) + (*it2) );
+      for(int i=0;i<ntrk-1; i++){
+	      for(int j=i+1; j<ntrk;   j++){
+          Trk::vkvFastV(&state.m_apar[i][0],&state.m_apar[j][0], xyz0, BMAG_CUR, out);
+	        xx.push_back(out[0]);
+	        yy.push_back(out[1]);
+	        zz.push_back(out[2]);
+	      }
+      }
+      out[0] = median(xx);
+      out[1] = median(yy);
+      out[2] = median(zz);
 
     }
     Vertex[0]= out[0] + state.m_refFrameX;

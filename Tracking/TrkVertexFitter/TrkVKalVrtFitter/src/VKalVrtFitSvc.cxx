@@ -10,8 +10,7 @@
 // Other stuff
 #include "GaudiKernel/IChronoStatSvc.h"
 //
-#include<iostream>
-#include<algorithm>
+#include <algorithm>
 #include <cmath>
 
  namespace Trk {
@@ -261,7 +260,6 @@ int TrkVKalVrtFitter::VKalVrtFit3( int ntrk,
 //
     double Bx,By,Bz;
     state.m_fitField.getMagFld(-state.m_refFrameX,-state.m_refFrameY,-state.m_refFrameZ,Bx,By,Bz);
-//std::cout.precision(8);std::cout<<" Exact mag="<<Bx<<", "<<By<<", "<<Bz<<" at 0,0,0"<<'\n';
 //
 //------  Fit option setting
 //
@@ -327,26 +325,8 @@ int TrkVKalVrtFitter::VKalVrtFit3( int ntrk,
     state.m_fitField.getMagFld(xyzfit[0] ,xyzfit[1] ,xyzfit[2] ,fx,fy,BMAG_CUR); 
     if(fabs(BMAG_CUR) < 0.01) BMAG_CUR=0.01;  // Safety
 
-
-    //double pmom[4]={0.};
-    //for ( i=0; i<ntrk; i++){
-    //  double Pt = m_CNVMAG*BMAG_CUR/fabs( state.m_parfs[i][2]);
-    //  double Px = Pt*cos(state.m_parfs[i][1]);
-    //  double Py = Pt*sin(state.m_parfs[i][1]);
-    //  double Pz = Pt/tan(state.m_parfs[i][0]);
-    //  double Ee = sqrt(Px*Px+Py*Py+Pz*Pz+state.m_vkalFitControl.vk_forcft.wm[i]*state.m_vkalFitControl.vk_forcft.wm[i]);
-    //  pmom[0] += Px; pmom[1] += Py; pmom[2] += Pz; pmom[3] += Ee;
-    //}
-    //Momentum.SetPxPyPzE( pmom[0], pmom[1], pmom[2], pmom[3] );
-
     Charge=0; for(i=0; i<ntrk; i++){Charge+=state.m_ich[i];};
     Charge=-Charge; //VK 30.11.2009 Change sign acoording to ATLAS 
-
-//  std::cout.precision(8);
-//  std::cout<<" Pmom="<<pmom[0]<<", "<<pmom[1]<<", "<<pmom[2]<<", "<<pmom[3]<<'\n';
-//  std::cout<<" Ptot="<<ptot[0]<<", "<<ptot[1]<<", "<<ptot[2]<<", "<<ptot[3]<<'\n';
-//  std::cout<<" Vertex="<<Vertex.x()<<", "<<Vertex.y()<<", "<<Vertex.z()
-//           <<" LocalMag="<<BMAG_CUR<<" Chi2="<<Chi2<<" Mass="<<Momentum.m()<<'\n';
 
 
     TrkAtVrt.clear(); TrkAtVrt.reserve(ntrk);
@@ -404,9 +384,6 @@ int TrkVKalVrtFitter::VKalVrtFit3( int ntrk,
     for(i=0; i<5;  i++) Perigee.push_back((double)Per[i]);
     for(i=0; i<15; i++) CovPerigee.push_back((double)CovPer[i]);
 
-//std::cout<<"Perigee V0"<<Per[0]<<", "<<Per[1]<<", "<<Per[2]<<", "<<Per[3]<<", "<<Per[4]<<'\n';
-//std::cout<<"CovPeri V0"<<CovPer[10]<<", "<<CovPer[11]<<", "<<CovPer[12]<<", "<<CovPer[13]<<", "<<CovPer[14]<<'\n';
-
     return StatusCode::SUCCESS;
   }
 
@@ -460,28 +437,10 @@ int TrkVKalVrtFitter::VKalVrtFit3( int ntrk,
 //
     int i,j,ik,jk,ip,iTrk;
     int DIM=3*NTrk+3;       //Current size of full covariance matrix
-//-----------  Change to heap
-//    double CovMtxOld[3*m_NTrMaxVFit+3][3*m_NTrMaxVFit+3];
-//    double Deriv    [3*m_NTrMaxVFit+3][3*m_NTrMaxVFit+3];
     std::vector<std::vector<double> > Deriv (DIM);
     for (std::vector<double>& v : Deriv) v.resize (DIM);
     std::vector<double> CovMtxOld(DIM*DIM);
-//-----------  Change to heap  VK 06.03.2008 temporary make a datamember 
-//    int NDim=3*m_NTrMaxVFit+3;
-//    double ErrMtx[ (3*m_NTrMaxVFit+3)*(3*m_NTrMaxVFit+4)/2 ];
-//    double * ErrMtx = new double[ NDim*(NDim+1)/2 ];
 
-
-//    long int vkNTrk = NTrk;
-//    int IERR = Trk::fiterm(vkNTrk,state.m_ErrMtx.data()); //Real error matrix after fit
-//    if(IERR)  {
-//      for(i=0; i<DIM; i++) delete[]Deriv[i];     delete[]Deriv;
-//      delete[]CovMtxOld;
-//      return StatusCode::FAILURE;
-//    }
-//std::cout<<" ErrF1="<<state.m_ErrMtx[0] <<", "<<state.m_ErrMtx[2] <<", "<<state.m_ErrMtx[5] <<", "<<
-//                      state.m_ErrMtx[9] <<", "<<state.m_ErrMtx[14]<<", "<<state.m_ErrMtx[20]<<", "<<
-//                      state.m_ErrMtx[27]<<", "<<state.m_ErrMtx[35]<<", "<<state.m_ErrMtx[44]<<'\n';
  
     CovVrtTrk.resize(DIM*(DIM+1)/2);
 
@@ -548,10 +507,6 @@ int TrkVKalVrtFitter::VKalVrtFit3( int ntrk,
        }
        CovVrtTrk[ipnt++]=tmp;
     }}
-//------------------------------------------------------------------------------------
-//std::cout<<" ErrF2="<<CovVrtTrk[0] <<", "<<CovVrtTrk[2] <<", "<<CovVrtTrk[5] <<", "<<
-//                      CovVrtTrk[9] <<", "<<CovVrtTrk[14]<<", "<<CovVrtTrk[20]<<", "<<
-//                      CovVrtTrk[27]<<", "<<CovVrtTrk[35]<<", "<<CovVrtTrk[44]<<'\n';
 
     return StatusCode::SUCCESS;
 

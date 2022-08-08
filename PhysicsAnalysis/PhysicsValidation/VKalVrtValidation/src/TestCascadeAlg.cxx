@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2019 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
 */
 
 
@@ -9,6 +9,7 @@
 #include "xAODTracking/VertexContainer.h"
 #include "xAODTracking/VertexAuxContainer.h"
 #include "TLorentzVector.h"
+#include "TrkVKalVrtFitter/VxCascadeInfo.h"
 
 
 TestCascadeAlg::TestCascadeAlg( const std::string& name, ISvcLocator* svcLoc ) :

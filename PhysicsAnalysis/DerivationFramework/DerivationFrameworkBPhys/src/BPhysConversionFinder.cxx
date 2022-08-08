@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
 */
 /////////////////////////////////////////////////////////////////
 // BPhysConversionFinder.cxx, (c) ATLAS Detector software
@@ -13,6 +13,7 @@
 #include "GeoPrimitives/GeoPrimitivesHelpers.h"
 #include "TrkVertexFitterInterfaces/IVertexFitter.h"
 #include "TrkVKalVrtFitter/TrkVKalVrtFitter.h"
+#include "TrkVKalVrtFitter/VxCascadeInfo.h"
 
 namespace DerivationFramework {
 

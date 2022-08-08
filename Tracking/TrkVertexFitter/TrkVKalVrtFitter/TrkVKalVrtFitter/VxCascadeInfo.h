@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2020 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
 */
 
 /****************************************
@@ -62,8 +62,6 @@ namespace Trk {
     VxCascadeInfo(const VxCascadeInfo &);
     VxCascadeInfo(VxCascadeInfo &&) noexcept = default;
 
-    /* clone method */
-    //virtual VxCascadeInfo* clone() const;
 	
     /* assignment operator */
     VxCascadeInfo operator= (const VxCascadeInfo &);
@@ -92,12 +90,7 @@ namespace Trk {
 
 
 
-  /* clone method */
-  //inline VxCascadeInfo* VxCascadeInfo::clone() const {
-  //  return new VxCascadeInfo(*this);
-  //}
-
-
+ 
 }//end namespace Trk
 
 #endif

@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2018 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
 */
 /////////////////////////////////////////////////////////////////
 // Cascade3Plus1.cxx, (c) ATLAS Detector software
@@ -16,6 +16,8 @@
 #include "DerivationFrameworkBPhys/BPhysPVTools.h"
 #include "xAODBPhys/BPhysHelper.h"
 #include "Math/Vector4D.h"
+
+#include "TrkVKalVrtFitter/VxCascadeInfo.h"
 
 namespace DerivationFramework {
 typedef ElementLink<xAOD::VertexContainer> VertexLink;
