@@ -5,8 +5,8 @@ Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
 from AthenaConfiguration.ComponentAccumulator import ComponentAccumulator
 from AthenaConfiguration.ComponentFactory import CompFactory
 from AthenaConfiguration.Enums import LHCPeriod
-from ISF_Services.ISF_ServicesCoreConfigNew import GeoIDSvcCfg, AFIIGeoIDSvcCfg
-from ISF_Tools.ISF_ToolsConfigNew import EntryLayerFilterCfg
+from ISF_Services.ISF_ServicesCoreConfig import GeoIDSvcCfg, AFIIGeoIDSvcCfg
+from ISF_Tools.ISF_ToolsConfig import EntryLayerFilterCfg
 
 
 def EntryLayerToolCfg(flags, name="ISF_EntryLayerTool", **kwargs):

@@ -6,11 +6,11 @@ from AthenaCommon.Logging import logging
 from AthenaConfiguration.ComponentAccumulator import ComponentAccumulator
 from AthenaConfiguration.ComponentFactory import CompFactory
 from ISF_Algorithms.CollectionMergerConfig import CollectionMergerCfg
-from ISF_Tools.ISF_ToolsConfigNew import ParticleHelperCfg
-from ISF_Services.ISF_ServicesConfigNew import (
+from ISF_Tools.ISF_ToolsConfig import ParticleHelperCfg
+from ISF_Services.ISF_ServicesConfig import (
     AFIIParticleBrokerSvcCfg, TruthServiceCfg
 )
-from ISF_Geant4Tools.ISF_Geant4ToolsConfigNew import G4RunManagerHelperCfg
+from ISF_Geant4Tools.ISF_Geant4ToolsConfig import G4RunManagerHelperCfg
 from RngComps.RandomServices import dSFMT
 
 def TrkExRndSvcCfg(flags):

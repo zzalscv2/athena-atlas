@@ -5,7 +5,7 @@ Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
 from AthenaConfiguration.ComponentAccumulator import ComponentAccumulator
 from AthenaConfiguration.ComponentFactory import CompFactory
 from AthenaCommon.SystemOfUnits import MeV, mm
-from ISF_Services.ISF_ServicesCoreConfigNew import GeoIDSvcCfg
+from ISF_Services.ISF_ServicesCoreConfig import GeoIDSvcCfg
 
 
 # GenParticleFilters

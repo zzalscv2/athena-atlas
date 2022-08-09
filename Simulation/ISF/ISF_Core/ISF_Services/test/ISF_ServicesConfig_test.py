@@ -1,5 +1,5 @@
 #!/usr/bin/env python
-"""Run tests on ISF_ServicesConfigNew.py
+"""Run tests on ISF_ServicesConfig.py
 
 Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
 """
@@ -29,8 +29,8 @@ if __name__ == '__main__':
   # Finalize
   ConfigFlags.lock()
 
-  from ISF_Services.ISF_ServicesConfigNew import MC15aPlusTruthServiceCfg, InputConverterCfg
-  from ISF_Services.ISF_ServicesCoreConfigNew import GeoIDSvcCfg
+  from ISF_Services.ISF_ServicesConfig import MC15aPlusTruthServiceCfg, InputConverterCfg
+  from ISF_Services.ISF_ServicesCoreConfig import GeoIDSvcCfg
 
   ## Initialize a new component accumulator
   cfg = MainServicesCfg(ConfigFlags)

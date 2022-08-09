@@ -5,7 +5,7 @@ Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
 from AthenaConfiguration.ComponentAccumulator import ComponentAccumulator
 from AthenaConfiguration.ComponentFactory import CompFactory
 from AthenaConfiguration.Enums import LHCPeriod
-from ISF_Geant4Tools.ISF_Geant4ToolsConfigNew import (
+from ISF_Geant4Tools.ISF_Geant4ToolsConfig import (
     Geant4ToolCfg, FullGeant4ToolCfg, LongLivedGeant4ToolCfg, PassBackGeant4ToolCfg,
     AFIIGeant4ToolCfg, AFII_QS_Geant4ToolCfg
 )

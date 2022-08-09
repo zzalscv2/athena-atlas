@@ -6,7 +6,7 @@ from AthenaConfiguration.ComponentAccumulator import ComponentAccumulator
 from AthenaConfiguration.ComponentFactory import CompFactory
 from AthenaConfiguration.Enums import BeamType
 from SimulationConfig.SimEnums import CavernBackground, TruthStrategy
-from ISF_HepMC_Tools.ISF_HepMC_ToolsConfigNew import (
+from ISF_HepMC_Tools.ISF_HepMC_ToolsConfig import (
     ParticleFinalStateFilterCfg, ParticlePositionFilterDynamicCfg,
     EtaPhiFilterCfg, GenParticleInteractingFilterCfg,
     KeepLLPDecayChildrenStrategyCfg,
@@ -21,11 +21,11 @@ from ISF_HepMC_Tools.ISF_HepMC_ToolsConfigNew import (
     TruthStrategyGroupCaloMuBremCfg,
     ParticleSimWhiteList_ExtraParticlesCfg,
 )
-from BarcodeServices.BarcodeServicesConfigNew import BarcodeSvcCfg
-from ISF_Geant4CommonTools.ISF_Geant4CommonToolsConfigNew import (
+from BarcodeServices.BarcodeServicesConfig import BarcodeSvcCfg
+from ISF_Geant4CommonTools.ISF_Geant4CommonToolsConfig import (
     EntryLayerToolCfg, AFIIEntryLayerToolCfg
 )
-from ISF_Tools.ISF_ToolsConfigNew import ParticleOrderingToolCfg
+from ISF_Tools.ISF_ToolsConfig import ParticleOrderingToolCfg
 
 #include file to access AtlasDetDescr::AtlasRegion enum
 import ROOT,cppyy

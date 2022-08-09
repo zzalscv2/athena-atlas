@@ -5,19 +5,19 @@ Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
 from AthenaConfiguration.ComponentAccumulator import ComponentAccumulator
 from AthenaConfiguration.ComponentFactory import CompFactory
 from RngComps.RandomServices import AthRNGSvcCfg
-from ISF_Services.ISF_ServicesConfigNew import TruthServiceCfg
+from ISF_Services.ISF_ServicesConfig import TruthServiceCfg
 
 ###################################################################################################
 # Moved from AdditionalConfigLegacy.py
 
-from ISF_FastCaloSimParametrization.ISF_FastCaloSimParametrizationConfigNew import FastCaloSimCaloExtrapolationCfg
+from ISF_FastCaloSimParametrization.ISF_FastCaloSimParametrizationConfig import FastCaloSimCaloExtrapolationCfg
 from FastCaloSim.FastCaloSimFactoryNew import (NITimedExtrapolatorCfg,
                                                FastShowerCellBuilderToolBaseCfg)
 
 
 def PunchThroughToolCfg(flags, name="ISF_PunchThroughTool", **kwargs):
 
-    from BarcodeServices.BarcodeServicesConfigNew import BarcodeSvcCfg
+    from BarcodeServices.BarcodeServicesConfig import BarcodeSvcCfg
     from SubDetectorEnvelopes.SubDetectorEnvelopesConfigNew import EnvelopeDefSvcCfg
     acc = ComponentAccumulator()
     kwargs.setdefault("FilenameLookupTable", "FastCaloSim/MC16/TFCSparam_mpt_v01.root")
