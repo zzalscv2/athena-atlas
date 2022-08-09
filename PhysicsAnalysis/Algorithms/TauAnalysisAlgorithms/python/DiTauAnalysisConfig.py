@@ -2,7 +2,6 @@
 
 # AnaAlgorithm import(s):
 from AnalysisAlgorithmsConfig.ConfigBlock import ConfigBlock
-from AnaAlgorithm.DualUseConfig import createAlgorithm, addPrivateTool
 
 
 class DiTauCalibrationConfig (ConfigBlock):
@@ -14,9 +13,6 @@ class DiTauCalibrationConfig (ConfigBlock):
         self.postfix = postfix
         self.rerunTruthMatching = True
 
-    def collectReferences (self, config) :
-        self._tauRef1 = config.updateRef (self.containerName, "DiTauJets")
-
 
     def makeAlgs (self, config) :
 
@@ -25,23 +21,21 @@ class DiTauCalibrationConfig (ConfigBlock):
             postfix = '_' + postfix
 
         # Set up the tau 4-momentum smearing algorithm:
-        alg = createAlgorithm( 'CP::DiTauSmearingAlg', 'DiTauSmearingAlg' + postfix )
-        addPrivateTool( alg, 'smearingTool', 'TauAnalysisTools::DiTauSmearingTool' )
-        alg.taus = self._tauRef1.input()
-        alg.tausOut = self._tauRef1.output()
+        alg = config.createAlgorithm( 'CP::DiTauSmearingAlg', 'DiTauSmearingAlg' + postfix )
+        config.addPrivateTool( 'smearingTool', 'TauAnalysisTools::DiTauSmearingTool' )
+        alg.taus = config.readName (self.containerName, "DiTauJets")
+        alg.tausOut = config.copyName (self.containerName)
         alg.preselection = config.getSelection (self.containerName, '')
-        config.addAlg (alg)
 
         # Set up the tau truth matching algorithm:
         if self.rerunTruthMatching and config.dataType() != 'data':
-            alg = createAlgorithm( 'CP::DiTauTruthMatchingAlg',
+            alg = config.createAlgorithm( 'CP::DiTauTruthMatchingAlg',
                                    'DiTauTruthMatchingAlg' + postfix )
-            addPrivateTool( alg, 'matchingTool',
+            config.addPrivateTool( 'matchingTool',
                             'TauAnalysisTools::DiTauTruthMatchingTool' )
             alg.matchingTool.WriteTruthTaus = 1
-            alg.taus = self._tauRef1.input()
+            alg.taus = self.readName (self.containerName)
             alg.preselection = config.getSelection (self.containerName, '')
-            config.addAlg (alg)
 
 
 
@@ -59,10 +53,6 @@ class DiTauWorkingPointConfig (ConfigBlock) :
         self.postfix = postfix
         self.quality = quality
         self.legacyRecommendations = False
-
-    def collectReferences (self, config) :
-        if config.dataType() != 'data':
-            self._tauRef1 = config.readRef (self.containerName)
 
 
     def makeAlgs (self, config) :
@@ -87,17 +77,16 @@ class DiTauWorkingPointConfig (ConfigBlock) :
         # Set up the algorithm calculating the efficiency scale factors for the
         # taus:
         if config.dataType() != 'data':
-            alg = createAlgorithm( 'CP::DiTauEfficiencyCorrectionsAlg',
+            alg = config.createAlgorithm( 'CP::DiTauEfficiencyCorrectionsAlg',
                                    'DiTauEfficiencyCorrectionsAlg' + postfix )
-            addPrivateTool( alg, 'efficiencyCorrectionsTool',
+            config.addPrivateTool( 'efficiencyCorrectionsTool',
                             'TauAnalysisTools::DiTauEfficiencyCorrectionsTool' )
             alg.efficiencyCorrectionsTool.IDLevel = IDLevel
             alg.scaleFactorDecoration = 'tau_effSF' + postfix
             # alg.outOfValidity = 2 #silent
             # alg.outOfValidityDeco = "bad_eff"
-            alg.taus = self._tauRef1.input()
+            alg.taus = config.readName (self.containerName)
             alg.preselection = config.getSelection (self.containerName, self.selectionName)
-            config.addAlg (alg)
 
 
 
