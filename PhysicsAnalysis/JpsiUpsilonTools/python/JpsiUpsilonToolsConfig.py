@@ -6,7 +6,8 @@ from AthenaConfiguration.ComponentFactory import CompFactory
 
 def PrimaryVertexRefittingToolCfg(ConfigFlags, **kwargs):
     acc = ComponentAccumulator()
-    from InDetConfig.TrackingCommonConfig import TrackToVertexIPEstimatorCfg
+    from TrkConfig.TrkVertexFitterUtilsConfig import TrackToVertexIPEstimatorCfg
     kwargs.setdefault( "TrackToVertexIPEstimator", acc.popToolsAndMerge( TrackToVertexIPEstimatorCfg(ConfigFlags,**kwargs) ) )
     acc.setPrivateTools( CompFactory.Analysis.PrimaryVertexRefitter( **kwargs) )
     return acc
+
