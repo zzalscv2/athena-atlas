@@ -1,6 +1,6 @@
-# Copyright (C) 2002-2017 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
 
 from AthenaCommon.CfgGetter import addTool
 
-addTool("LUCID_Digitization.LUCID_DigitizationConfig.getLucidRange"         , "LucidRange")
-addTool("LUCID_Digitization.LUCID_DigitizationConfig.getLUCID_PileUpTool"   , "LUCID_PileUpTool")
+addTool("LUCID_Digitization.LUCID_DigitizationConfigLegacy.getLucidRange"         , "LucidRange")
+addTool("LUCID_Digitization.LUCID_DigitizationConfigLegacy.getLUCID_PileUpTool"   , "LUCID_PileUpTool")
