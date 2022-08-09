@@ -21,15 +21,14 @@ def StandaloneMuonOutputCfg(flags):
     result.addPublicTool(cnvTool)
 
     aod_items = []
-    aod_items += ["xAOD::MuonSegmentContainer#NCB_MuonSegments"]
-    aod_items += ["xAOD::MuonSegmentAuxContainer#NCB_MuonSegmentsAux."]
-    if flags.Muon.runCommissioningChain:
+    if flags.Detector.EnableMM or flags.Detector.EnablesTGC:
         aod_items += ["xAOD::TrackParticleContainer#EMEO_MuonSpectrometerTrackParticles"]
         aod_items += ["xAOD::TrackParticleAuxContainer#EMEO_MuonSpectrometerTrackParticlesAux."]
-
-    if flags.Detector.EnableMM or flags.Detector.EnablesTGC:
         aod_items += ["xAOD::MuonSegmentContainer#xAODNSWSegments"]
         aod_items += ["xAOD::MuonSegmentAuxContainer#xAODNSWSegmentsAux."]
+    else:
+      aod_items += [ "xAOD::MuonSegmentContainer#NCB_MuonSegments" ]
+      aod_items += [ "xAOD::MuonSegmentAuxContainer#NCB_MuonSegmentsAux." ]
 
     # TrackParticles
     aod_items += ["xAOD::TrackParticleContainer#MuonSpectrometerTrackParticles"]

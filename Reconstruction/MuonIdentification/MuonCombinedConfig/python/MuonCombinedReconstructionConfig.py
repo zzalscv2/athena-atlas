@@ -526,6 +526,9 @@ def CombinedMuonOutputCfg(flags):
     aod_items += ["xAOD::SlowMuonContainer#SlowMuons"]
     aod_items += ["xAOD::SlowMuonAuxContainer#SlowMuonsAux."]
 
+    if flags.Muon.runCommissioningChain:
+        aod_items += ["xAOD::MuonContainer#EMEO_Muons"]
+        aod_items += ["xAOD::MuonAuxContainer#EMEO_MuonsAux."]
     # +++++ ESD +++++
 
     # Tracks
