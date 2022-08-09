@@ -116,19 +116,21 @@ namespace xAOD {
       /// used in the xAOD file, similar to how Athena saves hashed numbers
       /// in persistent ElementLinks.
       ///
-      /// Since Athena uses the top 2 bits in an ElementLink's 32-bit hashed key
+      /// Since Athena uses the top 2 bits in a hashed key
       /// to save additional state information about the link, the top 2 bits
       /// of the hash are always set to 0.
       ///
       /// @param name The name that we want to create a unique hash for
       /// @return A more or less unique hash for the string
       ///
-      uint32_t hash( const std::string& name ) {
+     SG::sgkey_t hash( const std::string& name ) {
+
+         static constexpr SG::sgkey_t MASK = (~static_cast<SG::sgkey_t>(0)) >> 2;
 
          // The helper object:
          static std::hash< std::string > helper;
          // Let the helper do the work:
-         return ( static_cast< uint32_t >( helper( name ) ) & 0x3fffffff );
+         return ( static_cast< SG::sgkey_t >( helper( name ) ) & MASK );
       }
 
       /// This function is used to figure out what to name dynamic auxiliary

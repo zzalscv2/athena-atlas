@@ -1,9 +1,11 @@
 // Dear emacs, this is -*- c++ -*-
 //
-// Copyright (C) 2002-2020 CERN for the benefit of the ATLAS collaboration
+// Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
 //
 #ifndef XAODROOTACCESSINTERFACES_TVIRTUALEVENT_H
 #define XAODROOTACCESSINTERFACES_TVIRTUALEVENT_H
+
+#include "CxxUtils/sgkey_t.h"
 
 // System include(s):
 extern "C" {
@@ -30,17 +32,19 @@ namespace xAOD {
    class TVirtualEvent {
 
    public:
+      using sgkey_t = SG::sgkey_t;
+
       /// Virtual destructor to make vtable happy
       virtual ~TVirtualEvent() = default;
 
       /// Key for retrieving the "default" object of a given type
-      static constexpr uint32_t DEFAULT_KEY = 0xffffffff;
+      static constexpr sgkey_t DEFAULT_KEY = ~static_cast<sgkey_t>(0);
       /// Mask for the keys, used mostly internally
-      static constexpr uint32_t KEY_MASK = 0x3fffffff;
+      static constexpr sgkey_t KEY_MASK = DEFAULT_KEY >> 2;
 
       /// Function retrieving an object from the event (constant version)
       template< typename T >
-      bool retrieve( const T*& obj, uint32_t key = DEFAULT_KEY,
+      bool retrieve( const T*& obj, sgkey_t key = DEFAULT_KEY,
                      bool silent = false );
       /// Function retrieving an object from the event (constant version)
       template< typename T >
@@ -56,20 +60,20 @@ namespace xAOD {
                  bool metadata = false ) const;
 
       /// Function returning the hash describing an object's name/key
-      virtual uint32_t getHash( const std::string& key ) const = 0;
+      virtual sgkey_t getHash( const std::string& key ) const = 0;
       /// Function returning the hash describing a known object
-      virtual uint32_t getKey( const void* obj ) const = 0;
+      virtual sgkey_t getKey( const void* obj ) const = 0;
       /// Function returning the key describing a known object
       virtual const std::string& getName( const void* obj ) const = 0;
       /// Function returning the key describing a known object
-      virtual const std::string& getName( uint32_t hash ) const = 0;
+      virtual const std::string& getName( sgkey_t hash ) const = 0;
 
    protected:
       /// Function for retrieving an output object in a non-template way
-      virtual void* getOutputObject( uint32_t key,
+      virtual void* getOutputObject( sgkey_t key,
                                      const std::type_info& ti ) = 0;
       /// Function for retrieving an input object in a non-template way
-      virtual const void* getInputObject( uint32_t key,
+      virtual const void* getInputObject( sgkey_t key,
                                           const std::type_info& ti,
                                           bool silent = false ) = 0;
       /// Function to retrieve list of keys describing a type name
