@@ -72,7 +72,7 @@ StatusCode jFexInputByteStreamTool::convertFromBS(const std::vector<const ROBF*>
         
         //There is no data to decode.. not even the ROD trailers
         if(rob->rod_ndata() <= 0){
-            //printf("ERROR No ROD words read. rob->rod_ndata() =%3d  \n",rob->rod_ndata());
+            ATH_MSG_WARNING(C.B_RED<<"  No ROD words to decode: " << rob->rod_ndata() <<" in ROB 0x"<< std::hex << rob->rob_source_id()<< std::dec <<". Skipping"<<C.END);
             continue;
         }
         
@@ -102,8 +102,11 @@ StatusCode jFexInputByteStreamTool::convertFromBS(const std::vector<const ROBF*>
             const auto [payload, fpga, jfex]                      = jFEXtoRODTrailer  ( vec_words.at(trailers_pos-2), vec_words.at(trailers_pos-1) );
             
             if(payload % jBits::DATA_BLOCKS != 0){
-                ATH_MSG_DEBUG(C.B_RED<< "ERROR!!"<<C.END<<"  Payload number (" << payload << ") not multuple of data blocks expected (" << jBits::DATA_BLOCKS <<")");
-                //printf("%sERROR!!%s payload number (%3d) not multuple of data blocks expected (%3d)",C.RED.c_str(),C.END.c_str(),payload,jBits::DATA_BLOCKS );
+                ATH_MSG_DEBUG("  Not full readout activated (" << payload << "). Data blocks/channels expected (" << jBits::DATA_BLOCKS <<")"<<C.END);
+            }
+            
+            if(payload % jBits::DATA_WORDS_PER_BLOCK != 0){
+                ATH_MSG_ERROR(C.B_RED<<"  Payload number (" << payload << ") not a multiple of data words per channel. Expected: " << jBits::DATA_WORDS_PER_BLOCK <<C.END);
                 READ_TOBS = false;
                 continue;
             }
@@ -111,8 +114,10 @@ StatusCode jFexInputByteStreamTool::convertFromBS(const std::vector<const ROBF*>
             //Position index, removing jFEX to ROD, TOB and xTOB Trailers from trailers_pos (4 positions), possible padding word added on the data to get even number of 32bit words
             unsigned int wordIndex = trailers_pos - (jBits::jFEX2ROD_WORDS);      
             
-
-            for (uint iblock = 0; iblock < jBits::DATA_BLOCKS; iblock++){
+            // Number of iterations that must be done. It is divisible otherwise it throws out an error (Line 108)
+            uint Max_iter = payload/jBits::DATA_WORDS_PER_BLOCK;
+            
+            for (uint iblock = 0; iblock < Max_iter; iblock++){
                 const auto [channel, saturation] = BulkStreamTrailer(vec_words.at(wordIndex-1),vec_words.at(wordIndex-2));
                 
                 const auto [DATA15_low          , DATA14, DATA13] = Dataformat1(vec_words.at(wordIndex-3));
