@@ -3,7 +3,7 @@
 from AthenaConfiguration.ComponentAccumulator import ComponentAccumulator
 from AthenaConfiguration.ComponentFactory import CompFactory
 
-from ISF_HepMC_Tools.ISF_HepMC_ToolsConfigNew import ParticleSimWhiteList_ExtraParticlesCfg, ParticleFinalStateFilterCfg, GenParticleInteractingFilterCfg, EtaPhiFilterCfg, ParticlePositionFilterDynamicCfg
+from ISF_HepMC_Tools.ISF_HepMC_ToolsConfig import ParticleSimWhiteList_ExtraParticlesCfg, ParticleFinalStateFilterCfg, GenParticleInteractingFilterCfg, EtaPhiFilterCfg, ParticlePositionFilterDynamicCfg
 AthSequencer=CompFactory.AthSequencer
 
 def SimEventFilterCfg(flags, name="ISF_SimEventFilter", sequenceName='SimSequence', **kwargs):

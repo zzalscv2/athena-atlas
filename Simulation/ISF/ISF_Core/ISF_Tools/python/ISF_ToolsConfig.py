@@ -5,7 +5,7 @@ Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
 from AthenaConfiguration.ComponentAccumulator import ComponentAccumulator
 from AthenaConfiguration.ComponentFactory import CompFactory
 from AthenaCommon.SystemOfUnits import MeV
-from BarcodeServices.BarcodeServicesConfigNew import BarcodeSvcCfg
+from BarcodeServices.BarcodeServicesConfig import BarcodeSvcCfg
 
 
 def ParticleHelperCfg(flags, name="ISF_ParticleHelper", **kwargs):
