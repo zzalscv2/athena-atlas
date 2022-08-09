@@ -159,8 +159,6 @@ def verifyExplicitL1Thresholds(chainname,chainparts,L1thresholds):
             log.verbose('  ChainPart %s has explicit L1 threshold %s',part,thisL1)
             assert 'PROBE' not in thisL1, f"Omit 'PROBE' from explicit L1 threshold '{thisL1}'"
             assert thisL1 == threshold.replace('PROBE',''), f"Explicit L1 threshold for chainpart '{thisL1}' does not match threshold '{threshold}' from list"
-            # For now enforce that this is only used for Phase-I thresholds
-            assert thisL1[0] in ['e','j','g','c'], f"Legacy L1 threshold '{thisL1}' specified explicitly" # Could be eFEX, jFEX, gFEX or cTAU
             counter += 1
     assert counter>0, f"Did not find explicit L1 seeds in chain parts for {chainname}!"
 
