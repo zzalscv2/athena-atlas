@@ -7,27 +7,12 @@
  -----------------------------------------
 ***************************************************************************/
 
-//<version>     $Name: not supported by cvs2svn $
-
-//<<<<<< INCLUDES                                                       >>>>>>
-
 #include "GaudiKernel/MsgStream.h"
 #include "AtlasDetDescr/AtlasDetectorID.h"
 #include "IdDict/IdDictDefs.h"
 #include "AtlasDetectorIDHelper.h"
-#include <iostream>
 #include <stdio.h>
 #include <assert.h>
-
-//<<<<<< PRIVATE DEFINES                                                >>>>>>
-//<<<<<< PRIVATE CONSTANTS                                              >>>>>>
-//<<<<<< PRIVATE TYPES                                                  >>>>>>
-//<<<<<< PRIVATE VARIABLE DEFINITIONS                                   >>>>>>
-//<<<<<< PUBLIC VARIABLE DEFINITIONS                                    >>>>>>
-//<<<<<< CLASS STRUCTURE INITIALIZATION                                 >>>>>>
-//<<<<<< PRIVATE FUNCTION DEFINITIONS                                   >>>>>>
-//<<<<<< PUBLIC FUNCTION DEFINITIONS                                    >>>>>>
-//<<<<<< MEMBER FUNCTION DEFINITIONS                                    >>>>>>
 
 AtlasDetectorID::AtlasDetectorID()
 {}
@@ -36,145 +21,6 @@ AtlasDetectorID::~AtlasDetectorID()
 {
     delete m_helper;
 }
-
-AtlasDetectorID::AtlasDetectorID(const AtlasDetectorID& other)
-        :
-        IdHelper(),
-        m_do_checks               (other.m_do_checks),
-        m_do_neighbours           (other.m_do_neighbours),
-        m_msgSvc                  (other.m_msgSvc),
-        m_quiet                   (other.m_quiet),
-        m_dict_version            (other.m_dict_version),
-        m_is_initialized_from_dict(other.m_is_initialized_from_dict),
-        m_DET_INDEX               (other.m_DET_INDEX),
-        m_SUBDET_INDEX            (other.m_SUBDET_INDEX),
-        m_MUON_SUBDET_INDEX       (other.m_MUON_SUBDET_INDEX),
-        m_INDET_ID                (other.m_INDET_ID),
-        m_LAR_ID                  (other.m_LAR_ID),
-        m_TILE_ID                 (other.m_TILE_ID),
-        m_MUON_ID                 (other.m_MUON_ID),
-        m_CALO_ID                 (other.m_CALO_ID),
-        m_PIXEL_ID                (other.m_PIXEL_ID),
-        m_SCT_ID                  (other.m_SCT_ID),
-        m_TRT_ID                  (other.m_TRT_ID),
-        m_HGTD_ID                 (other.m_HGTD_ID),
-        m_LUMI_ID                 (other.m_LUMI_ID),
-        m_LUMI_PLR_ID             (other.m_LUMI_PLR_ID),
-        m_LAR_EM_ID               (other.m_LAR_EM_ID),
-        m_LAR_HEC_ID              (other.m_LAR_HEC_ID),
-        m_LAR_FCAL_ID             (other.m_LAR_FCAL_ID),
-        m_LAR_FCAL_MODULE_INDEX   (other.m_LAR_FCAL_MODULE_INDEX),
-        m_MDT_ID                  (other.m_MDT_ID),
-        m_CSC_ID                  (other.m_CSC_ID),
-        m_RPC_ID                  (other.m_RPC_ID),
-        m_TGC_ID                  (other.m_TGC_ID),
-        m_STGC_ID                 (other.m_STGC_ID),
-        m_MM_ID                   (other.m_MM_ID),
-        m_FWD_ID                  (other.m_FWD_ID),
-        m_ALFA_ID                 (other.m_ALFA_ID),
-        m_BCM_ID                  (other.m_BCM_ID),
-        m_LUCID_ID                (other.m_LUCID_ID),
-        m_ZDC_ID                  (other.m_ZDC_ID),
-        m_isHighLuminosityLHC     (other.m_isHighLuminosityLHC),
-        m_lvl1_field              (other.m_lvl1_field),
-        m_lvl1_onl_field          (other.m_lvl1_onl_field),
-        m_lar_dm_field            (other.m_lar_dm_field),
-        m_tile_dm_field           (other.m_tile_dm_field),
-        m_atlas_dict              (other.m_atlas_dict),
-        m_indet_dict              (other.m_indet_dict),
-        m_lar_dict                (other.m_lar_dict),
-        m_tile_dict               (other.m_tile_dict),
-        m_muon_dict               (other.m_muon_dict),
-        m_calo_dict               (other.m_calo_dict),
-        m_fwd_dict                (other.m_fwd_dict),
-        m_det_impl                (other.m_det_impl),
-        m_indet_part_impl         (other.m_indet_part_impl),
-        m_calo_side_impl          (other.m_calo_side_impl),
-        m_lar_part_impl           (other.m_lar_part_impl),
-        m_lar_fcal_module_impl    (other.m_lar_fcal_module_impl),
-        m_muon_station_name_impl  (other.m_muon_station_name_impl),
-        m_muon_mdt_impl           (other.m_muon_mdt_impl),
-        m_muon_rpc_impl           (other.m_muon_rpc_impl)
-
-{
-    if (other.m_helper) {
-        // Must copy helper
-        m_helper = new  AtlasDetectorIDHelper(*other.m_helper);
-        m_helper->setMsgSvc(m_msgSvc);
-    }
-}
-
-AtlasDetectorID&
-AtlasDetectorID::operator= (const AtlasDetectorID& other)
-{
-    if (this != &other) {
-        m_do_checks             = other.m_do_checks;
-        m_do_neighbours         = other.m_do_neighbours;
-        m_msgSvc                = other.m_msgSvc;
-        m_quiet                 = other.m_quiet;
-        m_dict_version          = other.m_dict_version;
-        m_is_initialized_from_dict = other.m_is_initialized_from_dict;
-        m_DET_INDEX             = other.m_DET_INDEX;
-        m_SUBDET_INDEX          = other.m_SUBDET_INDEX;
-        m_MUON_SUBDET_INDEX     = other.m_MUON_SUBDET_INDEX;
-        m_INDET_ID              = other.m_INDET_ID;
-        m_LAR_ID                = other.m_LAR_ID;
-        m_TILE_ID               = other.m_TILE_ID;
-        m_MUON_ID               = other.m_MUON_ID;
-        m_CALO_ID               = other.m_CALO_ID;
-        m_PIXEL_ID              = other.m_PIXEL_ID;
-        m_SCT_ID                = other.m_SCT_ID;
-        m_TRT_ID                = other.m_TRT_ID;
-        m_HGTD_ID               = other.m_HGTD_ID;
-        m_LUMI_ID               = other.m_LUMI_ID;
-        m_LUMI_PLR_ID           = other.m_LUMI_PLR_ID;
-        m_LAR_EM_ID             = other.m_LAR_EM_ID;
-        m_LAR_HEC_ID            = other.m_LAR_HEC_ID;
-        m_LAR_FCAL_ID           = other.m_LAR_FCAL_ID;
-        m_LAR_FCAL_MODULE_INDEX = other.m_LAR_FCAL_MODULE_INDEX;
-        m_MDT_ID                = other.m_MDT_ID;
-        m_CSC_ID                = other.m_CSC_ID;
-        m_RPC_ID                = other.m_RPC_ID;
-        m_TGC_ID                = other.m_TGC_ID;
-        m_STGC_ID               = other.m_STGC_ID;
-        m_MM_ID                 = other.m_MM_ID;
-        m_FWD_ID                = other.m_FWD_ID;
-        m_ALFA_ID               = other.m_ALFA_ID;
-        m_BCM_ID                = other.m_BCM_ID;
-        m_LUCID_ID              = other.m_LUCID_ID;
-        m_ZDC_ID                = other.m_ZDC_ID;
-        m_isHighLuminosityLHC   = other.m_isHighLuminosityLHC;
-        m_lvl1_field            = other.m_lvl1_field;
-        m_lvl1_onl_field        = other.m_lvl1_onl_field;
-        m_lar_dm_field          = other.m_lar_dm_field;
-        m_tile_dm_field         = other.m_tile_dm_field;
-        m_atlas_dict            = other.m_atlas_dict;
-        m_indet_dict            = other.m_indet_dict;
-        m_lar_dict              = other.m_lar_dict;
-        m_tile_dict             = other.m_tile_dict;
-        m_muon_dict             = other.m_muon_dict;
-        m_calo_dict             = other.m_calo_dict;
-        m_fwd_dict              = other.m_fwd_dict;
-        m_det_impl              = other.m_det_impl;
-        m_indet_part_impl       = other.m_indet_part_impl;
-        m_calo_side_impl        = other.m_calo_side_impl;
-        m_lar_part_impl         = other.m_lar_part_impl;
-        m_lar_fcal_module_impl  = other.m_lar_fcal_module_impl;
-        m_muon_station_name_impl= other.m_muon_station_name_impl;
-        m_muon_mdt_impl         = other.m_muon_mdt_impl;
-        m_muon_rpc_impl         = other.m_muon_rpc_impl;
-
-        if (other.m_helper) {
-            // Must copy helper.
-            delete m_helper;
-            m_helper = new  AtlasDetectorIDHelper(*other.m_helper);
-            m_helper->setMsgSvc(m_msgSvc);
-        }
-    }
-
-    return (*this);
-}
-
 
 Identifier
 AtlasDetectorID::indet        (void) const
@@ -481,7 +327,7 @@ AtlasDetectorID::initialize_from_dictionary(const IdDictMgr& dict_mgr)
 
     // Initialize helper, needed for init of AtlasDetectorID
     if(!m_helper) {
-        m_helper = new AtlasDetectorIDHelper;
+        m_helper = new AtlasDetectorIDHelper();
         m_helper->setMsgSvc(m_msgSvc);
     }
 

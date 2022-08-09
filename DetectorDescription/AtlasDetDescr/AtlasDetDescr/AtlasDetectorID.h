@@ -17,7 +17,6 @@
  *
  * @author RD Schaffer <R.D.Schaffer@cern.ch>
  *
- * $Id: AtlasDetectorID.h,v 1.38 2007-02-23 09:33:30 prieur Exp $
  */
 
 //<<<<<< INCLUDES                                                       >>>>>>
@@ -86,9 +85,9 @@ public:
     /// @name strutors
     //@{
     AtlasDetectorID();
-    AtlasDetectorID(const AtlasDetectorID& other);
     virtual ~AtlasDetectorID();
-    AtlasDetectorID& operator= (const AtlasDetectorID& other);
+    AtlasDetectorID(const AtlasDetectorID& other) = delete;
+    AtlasDetectorID& operator= (const AtlasDetectorID& other) = delete;
     //@}
     
     ///Type of helper, defaulted to 'Unimplemented'
@@ -154,21 +153,21 @@ public:
     /// Create compact id from hash id (return == 0 for OK)
     virtual int         get_id          (const IdentifierHash& hash_id,
                                          Identifier& id,
-                                         const IdContext* context = 0) const;
+                                         const IdContext* context = 0) const override;
 
     /// Create hash id from compact id (return == 0 for OK)
     virtual int         get_hash        (const Identifier& id,
                                          IdentifierHash& hash_id,
-                                         const IdContext* context = 0) const;
+                                         const IdContext* context = 0) const override;
     //@}
 
     /// @name Initialization and version name
     //@{
     /// Initialization from the identifier dictionary
-    virtual int         initialize_from_dictionary(const IdDictMgr& dict_mgr);
+    virtual int         initialize_from_dictionary(const IdDictMgr& dict_mgr) override;
 
     // retrieve version of the dictionary
-    virtual std::string   dictionaryVersion  (void) const;
+    virtual std::string   dictionaryVersion  (void) const override;
     //@}
 
 
@@ -265,19 +264,19 @@ public:
 
     /// @name  Checks are performed by default in debug compilation and NOT in optimized compilation. One can switch or query this mode for any idHelper with the following methods:
     //@{
-    virtual bool        do_checks       (void) const;
-    virtual void        set_do_checks   (bool do_checks);
+    virtual bool        do_checks       (void) const override;
+    virtual void        set_do_checks   (bool do_checks) override;
     //@}
 
     /// @name neighbours are initialized by default. One can switch or query this mode with the following methods:
     //@{
-    virtual bool        do_neighbours       (void) const;
-    virtual void        set_do_neighbours   (bool do_neighbours);
+    virtual bool        do_neighbours       (void) const override;
+    virtual void        set_do_neighbours   (bool do_neighbours) override;
     //@}
 
     /// @name setting pointer to the MessageService
     //@{
-    virtual void setMessageSvc  (IMessageSvc* msgSvc);
+    virtual void setMessageSvc  (IMessageSvc* msgSvc) override;
     //@}
 
     /// Set flag for suppressing informational output.
@@ -288,7 +287,7 @@ protected:
 
     friend class AtlasDetectorIDHelper;
 
-    void                setDictVersion  (const IdDictMgr& dict_mgr, const std::string& name);
+    virtual void        setDictVersion  (const IdDictMgr& dict_mgr, const std::string& name) override;
 
     std::string         to_range        (const ExpandedIdentifier& id) const;
 
