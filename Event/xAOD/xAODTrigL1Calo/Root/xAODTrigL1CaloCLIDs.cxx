@@ -50,3 +50,5 @@
 #include "xAODTrigL1Calo/eFexTowerContainer.h"
 #include "xAODTrigL1Calo/jFexTowerAuxContainer.h"
 #include "xAODTrigL1Calo/jFexTowerContainer.h"
+#include "xAODTrigL1Calo/gFexTowerAuxContainer.h"
+#include "xAODTrigL1Calo/gFexTowerContainer.h"

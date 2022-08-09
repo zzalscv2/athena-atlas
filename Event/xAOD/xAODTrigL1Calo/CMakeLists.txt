@@ -31,6 +31,7 @@ atlas_add_xaod_smart_pointer_dicts(
               "xAOD::JEMEtSumsContainer_v2" "xAOD::JEMTobRoIContainer_v1"
               "xAOD::JetElementContainer_v2" "xAOD::L1TopoRawDataContainer_v1"
               "xAOD::eFexTowerContainer_v1" "xAOD::jFexTowerContainer_v1"
+	      "xAOD::gFexTowerContainer_v1"
    OBJECTS "xAOD::CMMRoI_v1" )
 
 atlas_add_dictionary( xAODTrigL1CaloDict

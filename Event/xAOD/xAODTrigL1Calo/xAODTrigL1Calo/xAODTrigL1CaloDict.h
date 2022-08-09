@@ -210,6 +210,13 @@
 #include "xAODTrigL1Calo/versions/jFexTowerContainer_v1.h"
 #include "xAODTrigL1Calo/versions/jFexTowerAuxContainer_v1.h"
 
+#include "xAODTrigL1Calo/gFexTower.h"
+#include "xAODTrigL1Calo/gFexTowerContainer.h"
+#include "xAODTrigL1Calo/gFexTowerAuxContainer.h"
+#include "xAODTrigL1Calo/versions/gFexTower_v1.h"
+#include "xAODTrigL1Calo/versions/gFexTowerContainer_v1.h"
+#include "xAODTrigL1Calo/versions/gFexTowerAuxContainer_v1.h"
+
 // EDM include(s).
 #include "xAODCore/tools/DictHelpers.h"
 
@@ -287,6 +294,8 @@ namespace {
     XAOD_INSTANTIATE_NS_CONTAINER_TYPES( xAOD, eFexTowerContainer_v1 );
     // jFexTower
     XAOD_INSTANTIATE_NS_CONTAINER_TYPES( xAOD, jFexTowerContainer_v1 );
+    // gFexTower
+    XAOD_INSTANTIATE_NS_CONTAINER_TYPES( xAOD, gFexTowerContainer_v1 );
   };
 }
 
