@@ -90,13 +90,11 @@ HLT_2e5_lhvloose_nogsf_bBeeM6000_L12EM3:
     1: 3
     2: 2
     3: 2
-    4: 2
   stepFeatures:
     0: 48
     1: 55
     2: 4
     3: 4
-    4: 4
 HLT_2g10_loose_L1eEM9_mu20_L1MU14FCH:
   eventCount: 0
   stepFeatures:
@@ -1431,13 +1429,11 @@ HLT_e14_idperf_tight_nogsf_L1eEM9:
     1: 6
     2: 1
     3: 1
-    4: 1
   stepFeatures:
     0: 8
     1: 7
     2: 1
     3: 1
-    4: 1
 HLT_e14_lhtight_e4_etcut_1invmAB5_L1JPSI-1M5-EM12:
   eventCount: 0
   stepFeatures:
@@ -1973,13 +1969,11 @@ HLT_e5_idperf_tight_nogsf_L1EM3:
     1: 19
     2: 13
     3: 13
-    4: 13
   stepFeatures:
     0: 42
     1: 30
     2: 18
     3: 18
-    4: 18
 HLT_e5_idperf_tight_nogsf_L1eEM5:
   eventCount: 22
   stepCounts:
@@ -1987,13 +1981,11 @@ HLT_e5_idperf_tight_nogsf_L1eEM5:
     1: 46
     2: 22
     3: 22
-    4: 22
   stepFeatures:
     0: 349
     1: 226
     2: 38
     3: 38
-    4: 38
 HLT_e5_lhtight_L1EM3:
   eventCount: 0
   stepCounts:
@@ -2165,13 +2157,11 @@ HLT_e5_lhvloose_nogsf_bBeeM6000_L1BPH-0DR3-EM7J15:
     1: 5
     2: 5
     3: 5
-    4: 5
   stepFeatures:
     0: 7
     1: 14
     2: 5
     3: 5
-    4: 5
 HLT_e5_lhvloose_nopix_lrtloose_idperf_probe_g25_medium_L1EM20VH:
   eventCount: 0
   stepCounts:
@@ -2322,13 +2312,11 @@ HLT_e9_lhvloose_nogsf_bBeeM6000_L1BPH-0DR3-EM7J15:
     1: 5
     2: 3
     3: 3
-    4: 3
   stepFeatures:
     0: 6
     1: 14
     2: 3
     3: 3
-    4: 3
 HLT_fslrt0_L14J15:
   eventCount: 0
 HLT_fslrt0_L1All:
