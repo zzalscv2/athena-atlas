@@ -488,7 +488,7 @@ namespace InDet {
                                           std::vector<rowcolID>& collectionID) {
     
     // check if duplicates are found. If that is the case, update the LVL1 
-    auto isDuplicate=[pixelID,rdoID](const rowcolID& rc) -> bool {
+    auto isDuplicate=[&](const rowcolID& rc) -> bool {
       return std::make_tuple(pixelID.phi_index(rdoID), pixelID.eta_index(rdoID)) == std::make_tuple(pixelID.phi_index(rc.ID), pixelID.eta_index(rc.ID));
     }; 
     
