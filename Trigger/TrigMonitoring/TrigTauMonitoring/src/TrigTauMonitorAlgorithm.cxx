@@ -703,6 +703,8 @@ void TrigTauMonitorAlgorithm::fillTAndPHLTEfficiencies(const EventContext& ctx, 
   auto monGroup = getGroup(monGroupName);
 
   auto tauPt = Monitored::Scalar<float>(monGroupName+"_tauPt",0.0);
+  auto tauEta = Monitored::Scalar<float>(monGroupName+"_tauEta",0.0);
+  auto tauPhi = Monitored::Scalar<float>(monGroupName+"_tauPhi",0.0);
   auto dR = Monitored::Scalar<float>(monGroupName+"_dR",0.0);
   auto dEta = Monitored::Scalar<float>(monGroupName+"_dEta",0.0);
   auto dPhi = Monitored::Scalar<float>(monGroupName+"_dPhi",0.0);
@@ -716,13 +718,15 @@ void TrigTauMonitorAlgorithm::fillTAndPHLTEfficiencies(const EventContext& ctx, 
   bool lep1_match = HLTMatching(offline_lep_vec[0], online_lep_vec, 0.2);
 
   tauPt = offline_tau_vec[0]->p4().Pt()/1000;
+  tauEta = offline_tau_vec[0]->p4().Eta();
+  tauPhi = offline_tau_vec[0]->p4().Phi();
   dR   = offline_tau_vec[0]->p4().DeltaR(offline_lep_vec[0]);
   dEta = std::abs(offline_tau_vec[0]->p4().Eta() - offline_lep_vec[0].Eta());
   dPhi = offline_tau_vec[0]->p4().DeltaPhi(offline_lep_vec[0]);
   averageMu = lbAverageInteractionsPerCrossing(ctx);
   HLT_match = hlt_fires && tau1_match && lep1_match;
 
-  fill(monGroup, tauPt, dR, dEta, dPhi, averageMu, HLT_match);
+  fill(monGroup, tauPt, tauEta, tauPhi, dR, dEta, dPhi, averageMu, HLT_match);
 
   ATH_MSG_DEBUG("After fill Tag and Probe HLT efficiencies: " << trigger);
   

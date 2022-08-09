@@ -361,6 +361,8 @@ class TrigTauMonAlgBuilder:
                                 type='TEfficiency',xbins=xbins,xmin=xmin,xmax=xmax,opt='kAlwaysCreate')
 
     defineEachStepHistograms('tauPt', 'p_{T} [GeV]', 60, 0.0, 300.)
+    defineEachStepHistograms('tauEta','#eta', 13, -2.6, 2.6)
+    defineEachStepHistograms('tauPhi','#phi', 16, -3.2, 3.2)
     defineEachStepHistograms('dR',' dR(#tau,lep)',20,0,4)
     defineEachStepHistograms('dEta',' dEta(#tau,lep)',20,0,4)
     defineEachStepHistograms('dPhi',' dPhi(#tau,lep)',8, -3.2, 3.2)
