@@ -1,6 +1,6 @@
 #!/usr/bin/env python
 
-# Copyright (C) 2002-2020 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
 # AtlCoolLib.py
 # module defining utilities for ATLAS command line tool use of COOL
 # Richard Hawkings, started 5/2/07
@@ -94,6 +94,10 @@ def athenaDesc(runLumi,datatype):
     elif (datatype=='AthenaAttributeList'):
         clid=40774348
         tname='AthenaAttributeList'
+    elif (datatype=='CondAttrListVec'):
+        clid=55403898
+        tname='CondAttrListVec'
+
     desc+='<addrHeader><address_header service_type=\"'+str(stype)+'\" clid=\"'+str(clid)+'\" /></addrHeader><typeName>'+tname+'</typeName>'
     return desc
 
