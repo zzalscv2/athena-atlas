@@ -27,7 +27,6 @@
 #include "LArRawConditions/LArADC2MeV.h"
 #include "LArCabling/LArOnOffIdMapping.h"
 #include "LArRawEvent/LArDigitContainer.h"
-#include "TBEvent/TBPhase.h"
 #include "LArRawEvent/LArRawChannelContainer.h"
 
 #include "LArIdentifier/LArOnlineID.h"
@@ -52,11 +51,8 @@ private:
   //Algo-properties
   SG::ReadHandleKey<LArDigitContainer> m_dataLocation
     { this, "DataLocation", "FREE", "" };
-  SG::ReadHandleKey<TBPhase> m_tbPhaseLocation
-    { this, "TBPhaseLocation", "TBPhase", "" };
   SG::WriteHandleKey<LArRawChannelContainer> m_ChannelContainerName
     { this, "LArRawChannelContainerName", "LArRawChannels", "" };
-  bool m_useTDC;
   float m_Ecut;
   int m_initialTimeSampleShift;
   int m_NOFCPhases;
