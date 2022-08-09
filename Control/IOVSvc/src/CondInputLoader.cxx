@@ -1,7 +1,7 @@
 ///////////////////////// -*- C++ -*- /////////////////////////////
 
 /*
-  Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
 */
 
 // CondInputLoader.cxx 
@@ -245,6 +245,8 @@ CondInputLoader::start()
   // we use a VHK to store the info instead of a DataObjIDColl, as this saves
   // us the trouble of stripping out the storename from the key later.
   //
+
+  m_vhk.clear();  // in case of multiple start transitions
 
   bool fail(false);
   for (const DataObjID* ditr : sortedDataObjIDColl (m_handlesToCreate)) {
