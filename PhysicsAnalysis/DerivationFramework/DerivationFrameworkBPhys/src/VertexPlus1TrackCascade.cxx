@@ -8,6 +8,7 @@
 #include "TrkVertexFitterInterfaces/IVertexFitter.h"
 #include "TrkVKalVrtFitter/TrkVKalVrtFitter.h"
 #include "TrkToolInterfaces/ITrackSelectorTool.h"
+#include "TrkVKalVrtFitter/VxCascadeInfo.h"
 
 namespace DerivationFramework {
 
