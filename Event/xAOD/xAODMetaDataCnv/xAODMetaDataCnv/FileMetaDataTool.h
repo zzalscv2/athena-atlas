@@ -1,6 +1,6 @@
 // Dear emacs, this is -*- c++ -*-
 /*
-  Copyright (C) 2002-2020 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
 */
 #ifndef XAODMETADATACNV_FILEMETADATATOOL_H
 #define XAODMETADATACNV_FILEMETADATATOOL_H
@@ -16,6 +16,8 @@
 # include "AthenaKernel/IMetaDataSvc.h"
 # include "AthenaKernel/IMetaDataTool.h"
 #endif
+
+#include "xAODMetaData/FileMetaData.h"
 
 namespace xAODMaker {
 
@@ -82,6 +84,9 @@ class FileMetaDataTool
 
   // implementation of individual object copy
   StatusCode copy(const std::string&);
+
+  // merge "var" src FMD attribute into dst FMD (assuming attribute of type vector<int>)
+  void       copyValues(const xAOD::FileMetaData *src, xAOD::FileMetaData *dst, const std::string& var);
 };  // class FileMetaDataTool
 
 }  // namespace xAODMaker

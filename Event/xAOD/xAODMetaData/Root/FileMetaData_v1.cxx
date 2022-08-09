@@ -1,12 +1,8 @@
 /*
-  Copyright (C) 2002-2020 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
 */
 
-// $Id: FileMetaData_v1.cxx 683694 2015-07-17 09:03:52Z krasznaa $
-
 // System include(s):
-#include <iostream>
-//#include <array>
 #include <cmath>
 #include <cstdlib>
 
@@ -20,16 +16,21 @@
 
 namespace xAOD {
 
-   FileMetaData_v1::FileMetaData_v1()
-      : SG::AuxElement() {
+   FileMetaData_v1::FileMetaData_v1()  : SG::AuxElement()
+   { }
 
-   }
 
-   bool FileMetaData_v1::operator==( const FileMetaData_v1& rhs ) const {
-
+   bool FileMetaData_v1::compareWith( const FileMetaData_v1& rhs, const std::set<std::string> ignore ) const
+   {
       // Get the variable types from both objects:
-      const SG::auxid_set_t& auxids1 = this->getAuxIDs();
-      const SG::auxid_set_t& auxids2 = rhs.getAuxIDs();
+      SG::auxid_set_t auxids1 = this->getAuxIDs();
+      SG::auxid_set_t auxids2 = rhs.getAuxIDs();
+      SG::AuxTypeRegistry& reg = SG::AuxTypeRegistry::instance();
+      for( auto var : ignore ) {
+         SG::auxid_t varid = reg.findAuxID(var);
+         auxids1.erase(varid);
+         auxids2.erase(varid);
+      }
 
       // They need to be the same. If the two objects have different variables,
       // that's bad. Unfortunately there's no equivalency operator for
@@ -47,7 +48,6 @@ namespace xAOD {
       for( SG::auxid_t auxid : auxids1 ) {
 
          // Check the type of the variable:
-         SG::AuxTypeRegistry& reg = SG::AuxTypeRegistry::instance();
          const std::type_info* ti = reg.getType( auxid );
          if( ! ti ) {
             // This is weird, but there's not much that we can do about it
