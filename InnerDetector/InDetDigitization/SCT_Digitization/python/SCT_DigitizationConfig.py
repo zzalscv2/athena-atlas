@@ -1,59 +1,173 @@
-# Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+"""Define methods to construct configured SCT Digitization tools and algorithms
 
-from AthenaCommon import CfgMgr
+Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+"""
+from AthenaCommon.Logging import logging
+from AthenaConfiguration.ComponentAccumulator import ComponentAccumulator
+from AthenaConfiguration.ComponentFactory import CompFactory
+from AthenaConfiguration.Enums import BeamType, ProductionStep
+from Digitization.PileUpMergeSvcConfigNew import PileUpMergeSvcCfg, PileUpXingFolderCfg
+from Digitization.PileUpToolsConfig import PileUpToolsCfg
+from Digitization.TruthDigitizationOutputConfig import TruthDigitizationOutputCfg
+from OutputStreamAthenaPool.OutputStreamConfig import OutputStreamCfg
+from SCT_ConditionsTools.SCT_ConditionsToolsConfig import SCT_ReadCalibChipDataCfg, SCT_SiliconConditionsCfg
+from SCT_GeoModel.SCT_GeoModelConfig import SCT_ReadoutGeometryCfg
+from SiLorentzAngleTool.SCT_LorentzAngleConfig import SCT_LorentzAngleToolCfg
+from SiPropertiesTool.SCT_SiPropertiesConfig import SCT_SiPropertiesCfg
+
 import AthenaCommon.SystemOfUnits as Units
-# The earliest bunch crossing time for which interactions will be sent
-# to the SCT Digitization code.
+
+# The earliest and last bunch crossing times for which interactions will be sent
+# to the SCT Digitization code
 def SCT_FirstXing():
     return -50
-# The latest bunch crossing time for which interactions will be sent
-# to the SCT Digitization code.
+
+
 def SCT_LastXing():
     return 25
 
 
+def SCT_DigitizationCommonCfg(flags, name="SCT_DigitizationToolCommon", **kwargs):
+    """Return ComponentAccumulator with common SCT digitization tool config"""
+    acc = SCT_ReadoutGeometryCfg(flags)
+    if not flags.Digitization.DoInnerDetectorNoise:
+        kwargs.setdefault("OnlyHitElements", True)
+    kwargs.setdefault("InputObjectName", "SCT_Hits")
+    kwargs.setdefault("EnableHits", True)
+    kwargs.setdefault("BarrelOnly", False)
+    # Set FixedTime for cosmics for use in SurfaceChargesGenerator
+    if flags.Beam.Type is BeamType.Cosmics:
+        kwargs.setdefault("CosmicsRun", True)
+        kwargs.setdefault("FixedTime", 10)
+    if flags.Digitization.DoXingByXingPileUp:
+        kwargs.setdefault("FirstXing", SCT_FirstXing())
+        kwargs.setdefault("LastXing", SCT_LastXing() )
+    from RngComps.RandomServices import AthRNGSvcCfg
+    kwargs.setdefault("RndmSvc", acc.getPrimaryAndMerge(AthRNGSvcCfg(flags)).name)
+    
+    SCT_DigitizationTool = CompFactory.SCT_DigitizationTool
+    tool = SCT_DigitizationTool(name, **kwargs)
+    # attach ToolHandles
+    tool.FrontEnd = acc.popToolsAndMerge(SCT_FrontEndCfg(flags))
+    tool.SurfaceChargesGenerator = acc.popToolsAndMerge(SCT_SurfaceChargesGeneratorCfg(flags))
+    tool.RandomDisabledCellGenerator = acc.popToolsAndMerge(SCT_RandomDisabledCellGeneratorCfg(flags))
+    acc.setPrivateTools(tool)
+    return acc
 
-######################################################################################
-def getSCT_RandomDisabledCellGenerator(name="SCT_RandomDisabledCellGenerator", **kwargs):
+
+def SCT_DigitizationToolCfg(flags, name="SCT_DigitizationTool", **kwargs):
+    """Return ComponentAccumulator with configured SCT digitization tool"""
+    acc = ComponentAccumulator()
+    if flags.Digitization.PileUp:
+        intervals = []
+        if not flags.Digitization.DoXingByXingPileUp:
+            intervals += [acc.popToolsAndMerge(SCT_RangeCfg(flags))]
+        kwargs.setdefault("MergeSvc", acc.getPrimaryAndMerge(PileUpMergeSvcCfg(flags, Intervals=intervals)).name)
+    else:
+        kwargs.setdefault("MergeSvc", '')
+    kwargs.setdefault("OnlyUseContainerName", flags.Digitization.PileUp)
+    if flags.Common.ProductionStep == ProductionStep.PileUpPresampling:
+        kwargs.setdefault("OutputObjectName", flags.Overlay.BkgPrefix + "SCT_RDOs")
+        kwargs.setdefault("OutputSDOName", flags.Overlay.BkgPrefix + "SCT_SDO_Map")
+    else:
+        kwargs.setdefault("OutputObjectName", "SCT_RDOs")
+        kwargs.setdefault("OutputSDOName", "SCT_SDO_Map")
+    kwargs.setdefault("HardScatterSplittingMode", 0)
+    tool = acc.popToolsAndMerge(SCT_DigitizationCommonCfg(flags, name, **kwargs))
+    acc.setPrivateTools(tool)
+    return acc
+
+
+def SCT_DigitizationHSToolCfg(flags, name="SCT_DigitizationHSTool", **kwargs):
+    """Return ComponentAccumulator with hard scatter configured SCT digitization tool"""
+    acc = ComponentAccumulator()
+    rangetool = acc.popToolsAndMerge(SCT_RangeCfg(flags))
+    kwargs.setdefault("MergeSvc", acc.getPrimaryAndMerge(PileUpMergeSvcCfg(flags, Intervals=rangetool)).name)
+    kwargs.setdefault("OutputObjectName", "SCT_RDOs")
+    kwargs.setdefault("OutputSDOName", "SCT_SDO_Map")
+    kwargs.setdefault("HardScatterSplittingMode", 1)
+    tool = acc.popToolsAndMerge(SCT_DigitizationCommonCfg(flags, name, **kwargs))
+    acc.setPrivateTools(tool)
+    return acc
+
+
+def SCT_DigitizationPUToolCfg(flags, name="SCT_DigitizationPUTool",**kwargs):
+    """Return ComponentAccumulator with pileup configured SCT digitization tool"""
+    acc = ComponentAccumulator()
+    rangetool = acc.popToolsAndMerge(SCT_RangeCfg(flags))
+    kwargs.setdefault("MergeSvc", acc.getPrimaryAndMerge(PileUpMergeSvcCfg(flags, Intervals=rangetool)).name)
+    kwargs.setdefault("OutputObjectName", "SCT_PU_RDOs")
+    kwargs.setdefault("OutputSDOName", "SCT_PU_SDO_Map")
+    kwargs.setdefault("HardScatterSplittingMode", 2)
+    tool = acc.popToolsAndMerge(SCT_DigitizationCommonCfg(flags, name, **kwargs))
+    acc.setPrivateTools(tool)
+    return acc
+
+
+def SCT_OverlayDigitizationToolCfg(flags, name="SCT_OverlayDigitizationTool",**kwargs):
+    """Return ComponentAccumulator with overlay configured SCT digitization tool"""
+    acc = ComponentAccumulator()
+    kwargs.setdefault("OnlyUseContainerName", False)
+    #in the case of track overlay, only run digitization on the HS
+    if not flags.Overlay.doTrackOverlay:
+        kwargs.setdefault("OutputObjectName", flags.Overlay.SigPrefix + "SCT_RDOs")
+        kwargs.setdefault("OutputSDOName", flags.Overlay.SigPrefix + "SCT_SDO_Map")
+    else:
+        kwargs.setdefault("OutputObjectName", "SCT_RDOs")
+        kwargs.setdefault("OutputSDOName", "SCT_SDO_Map")
+    kwargs.setdefault("HardScatterSplittingMode", 0)
+    kwargs.setdefault("MergeSvc", '')
+    tool = acc.popToolsAndMerge(SCT_DigitizationCommonCfg(flags, name, **kwargs))
+    acc.setPrivateTools(tool)
+    return acc
+
+
+def SCT_DigitizationToolSplitNoMergePUCfg(flags, name="SCT_DigitizationToolSplitNoMergePU",**kwargs):
+    """Return ComponentAccumulator with merged pileup configured SCT digitization tool"""
+    acc = ComponentAccumulator()
+    rangetool = acc.popToolsAndMerge(SCT_RangeCfg(flags))
+    kwargs.setdefault("MergeSvc", acc.getPrimaryAndMerge(PileUpMergeSvcCfg(flags, Intervals=rangetool)).name)
+    kwargs.setdefault("InputObjectName", "PileupSCT_Hits")
+    kwargs.setdefault("HardScatterSplittingMode", 0)
+    kwargs.setdefault("OutputObjectName", "SCT_PU_RDOs")
+    kwargs.setdefault("OutputSDOName", "SCT_PU_SDO_Map")
+    kwargs.setdefault("OnlyHitElements", True)
+    kwargs.setdefault("FrontEnd", "PileupSCT_FrontEnd")
+    tool = acc.popToolsAndMerge(SCT_DigitizationCommonCfg(flags, name, **kwargs))
+    acc.setPrivateTools(tool)
+    return acc
+
+
+def SCT_DigitizationToolGeantinoTruthCfg(flags, name="SCT_GeantinoTruthDigitizationTool", **kwargs):
+    """Return Geantino truth configured digitization tool"""
+    kwargs.setdefault("ParticleBarcodeVeto", 0)
+    return SCT_DigitizationToolCfg(flags, name, **kwargs)
+
+
+def SCT_RandomDisabledCellGeneratorCfg(flags, name="SCT_RandomDisabledCellGenerator", **kwargs):
+    """Return configured random cell disabling tool"""
+    acc = ComponentAccumulator()
     kwargs.setdefault("TotalBadChannels", 0.01)
-    from SCT_Digitization.SCT_DigitizationConf import SCT_RandomDisabledCellGenerator
-    return SCT_RandomDisabledCellGenerator(name, **kwargs)
+    acc.setPrivateTools(CompFactory.SCT_RandomDisabledCellGenerator(name, **kwargs))
+    return acc
 
 
-######################################################################################
-def getSCT_Amp(name="SCT_Amp", **kwargs):
+def SCT_AmpCfg(flags, name="SCT_Amp", **kwargs):
+    """Return configured amplifier and shaper tool"""
+    acc = ComponentAccumulator()
     kwargs.setdefault("CrossFactor2sides", 0.1)
     kwargs.setdefault("CrossFactorBack", 0.07)
     kwargs.setdefault("PeakTime", 21)
     kwargs.setdefault("deltaT", 1.0)
     kwargs.setdefault("Tmin", -25.0)
     kwargs.setdefault("Tmax", 150.0)
-    from SCT_Digitization.SCT_DigitizationConf import SCT_Amp
-    return SCT_Amp(name, **kwargs)
+    acc.setPrivateTools(CompFactory.SCT_Amp(name, **kwargs))
+    return acc
 
 
-######################################################################################
-def getSCT_SurfaceChargesGenerator(name="SCT_SurfaceChargesGenerator", **kwargs):
-    ## Set up services used by SCT_SurfaceChargesGenerator
-    # Set up SCT_DCSConditiosnTool
-    from SCT_ConditionsTools.SCT_DCSConditionsToolSetup import SCT_DCSConditionsToolSetup
-    sct_DCSConditionsToolSetup = SCT_DCSConditionsToolSetup()
-    sct_DCSConditionsToolSetup.setup()
-    # Set up SCT_SiliconConditionsTool
-    from SCT_ConditionsTools.SCT_SiliconConditionsToolSetup import SCT_SiliconConditionsToolSetup
-    sct_SiliconConditionsToolSetup = SCT_SiliconConditionsToolSetup()
-    sct_SiliconConditionsToolSetup.setDcsTool(sct_DCSConditionsToolSetup.getTool())
-    sct_SiliconConditionsToolSetup.setup()
-    # Set up SCT_SiPropertiesTool
-    from SiPropertiesTool.SCT_SiPropertiesToolSetup import SCT_SiPropertiesToolSetup
-    sct_SiPropertiesToolSetup = SCT_SiPropertiesToolSetup()
-    sct_SiPropertiesToolSetup.setSiliconTool(sct_SiliconConditionsToolSetup.getTool())
-    sct_SiPropertiesToolSetup.setup()
-    ## Charge trapping tool - used by SCT_SurfaceChargesGenerator
-    ## SiLorentzAngleTool for SCT_SurfaceChargesGenerator
-    from SiLorentzAngleTool.SCTLorentzAngleToolSetup import SCTLorentzAngleToolSetup
-    sctLorentzAngleToolSetup = SCTLorentzAngleToolSetup()
-
+def SCT_SurfaceChargesGeneratorCfg(flags, name="SCT_SurfaceChargesGenerator", **kwargs):
+    """Return ComponentAccumulator with configured surface charges tool"""
+    acc = ComponentAccumulator()
     kwargs.setdefault("FixedTime", -999)
     kwargs.setdefault("SubtractTime", -999)
     kwargs.setdefault("SurfaceDriftTime", 10*Units.ns)
@@ -61,33 +175,22 @@ def getSCT_SurfaceChargesGenerator(name="SCT_SurfaceChargesGenerator", **kwargs)
     kwargs.setdefault("SmallStepLength", 5*Units.micrometer)
     kwargs.setdefault("DepletionVoltage", 70)
     kwargs.setdefault("BiasVoltage", 150)
-    kwargs.setdefault("SiPropertiesTool", sct_SiPropertiesToolSetup.getTool())
-    kwargs.setdefault("LorentzAngleTool", sctLorentzAngleToolSetup.SCTLorentzAngleTool)
-    from AthenaCommon.GlobalFlags import globalflags
-    kwargs.setdefault("isOverlay", globalflags.isOverlay())
-
+    kwargs.setdefault("isOverlay", flags.Common.isOverlay)
     # kwargs.setdefault("doTrapping", True) # ATL-INDET-INT-2016-019
+    # experimental SCT_DetailedSurfaceChargesGenerator config dropped here
+    SCT_SurfaceChargesGenerator, SCT_RadDamageSummaryTool = CompFactory.getComps("SCT_SurfaceChargesGenerator", "SCT_RadDamageSummaryTool",)
+    tool = SCT_SurfaceChargesGenerator(name, **kwargs)
+    tool.RadDamageSummaryTool = SCT_RadDamageSummaryTool()
+    tool.SiConditionsTool = acc.popToolsAndMerge(SCT_SiliconConditionsCfg(flags))
+    tool.SiPropertiesTool = acc.popToolsAndMerge(SCT_SiPropertiesCfg(flags, SiConditionsTool=tool.SiConditionsTool))
+    tool.LorentzAngleTool = acc.popToolsAndMerge(SCT_LorentzAngleToolCfg(flags))
+    acc.setPrivateTools(tool)
+    return acc
 
-    from Digitization.DigitizationFlags import digitizationFlags
-    if 'doDetailedSurfChargesGen' in digitizationFlags.experimentalDigi():
-        kwargs.setdefault("ChargeDriftModel", 1)
-        kwargs.setdefault("EFieldModel", 2)
-        kwargs.setdefault("MagneticField", -2.0)
-        kwargs.setdefault("SensorTemperature", 273.15)
-        kwargs.setdefault("TransportTimeStep", 0.25)
-        kwargs.setdefault("TransportTimeMax", 25.0)
-        from SCT_Digitization.SCT_DigitizationConf import SCT_DetailedSurfaceChargesGenerator
-        return SCT_DetailedSurfaceChargesGenerator(name, **kwargs)
-    else:
-        from SCT_ConditionsTools.SCT_ConditionsToolsConf import SCT_RadDamageSummaryTool
-        kwargs.setdefault("RadDamageSummaryTool", SCT_RadDamageSummaryTool(name = "InDetSCT_RadDamageSummaryTool"))
-        from SCT_Digitization.SCT_DigitizationConf import SCT_SurfaceChargesGenerator
-        return SCT_SurfaceChargesGenerator(name, **kwargs)
 
-######################################################################################
-def getSCT_FrontEnd(name="SCT_FrontEnd", **kwargs):
-    from Digitization.DigitizationFlags import digitizationFlags
-    #Setup noise treament in SCT_FrontEnd
+def SCT_FrontEndCfg(flags, name="SCT_FrontEnd", **kwargs):
+    """Return ComponentAccumulator with configured front-end electronics tool"""
+    # Setup noise treament in SCT_FrontEnd
     # To set the mean noise values for the different module types
     # Default values set at 0 degrees, plus/minus ~5 enc per plus/minus degree
     kwargs.setdefault("NoiseBarrel", 1500.0)
@@ -102,49 +205,44 @@ def getSCT_FrontEnd(name="SCT_FrontEnd", **kwargs):
     kwargs.setdefault("NOMiddles", 2.7e-5)
     kwargs.setdefault("NOShortMiddles", 2.0e-9)
     kwargs.setdefault("NOOuters", 3.5e-5)
-    # If noise is turned off:
-    if not digitizationFlags.doInDetNoise.get_Value():
-        ###kwargs.setdefault("OnlyHitElements", True)
-        print('SCT_Digitization:::: Turned off Noise in SCT_FrontEnd')
+    if not flags.Digitization.DoInnerDetectorNoise:
+        log = logging.getLogger("SCT_FrontEndCfg")
+        log.info("SCT_Digitization:::: Turned off Noise in SCT_FrontEnd")
         kwargs.setdefault("NoiseOn", False)
         kwargs.setdefault("AnalogueNoiseOn", False)
     else:
         kwargs.setdefault("NoiseOn", True)
         kwargs.setdefault("AnalogueNoiseOn", True)
-    # In overlay MC, only analogue noise is on. Noise hits are not added.
-    from AthenaCommon.GlobalFlags import globalflags
-    if globalflags.isOverlay() and globalflags.DataSource == 'geant4':
+    # In overlay MC, only analogue noise is on (off for data). Noise hits are not added.
+    if flags.Common.isOverlay:
         kwargs["NoiseOn"] = False
-        kwargs["AnalogueNoiseOn"] = True
+        kwargs["AnalogueNoiseOn"] = flags.Input.isMC
     # Use Calibration data from Conditions DB, still for testing purposes only
     kwargs.setdefault("UseCalibData", True)
-
     # Setup the ReadCalibChip folders and Svc
-    from SCT_ConditionsTools.SCT_ReadCalibChipDataToolSetup import SCT_ReadCalibChipDataToolSetup
-    sct_ReadCalibChipDataToolSetup = SCT_ReadCalibChipDataToolSetup()
-    sct_ReadCalibChipDataToolSetup.setup()
-    kwargs.setdefault("SCT_ReadCalibChipDataTool", sct_ReadCalibChipDataToolSetup.getTool())
+    acc = SCT_ReadCalibChipDataCfg(flags)
+    kwargs.setdefault("SCT_ReadCalibChipDataTool", acc.popPrivateTools())
     # DataCompressionMode: 1 is level mode X1X (default), 2 is edge mode 01X, 3 is any hit mode (1XX|X1X|XX1)
-    from AthenaCommon.BeamFlags import jobproperties
-    if digitizationFlags.PileUpPresampling:
+    if flags.Common.ProductionStep == ProductionStep.PileUpPresampling:
         kwargs.setdefault("DataCompressionMode", 3)
-    elif globalflags.isOverlay() and globalflags.DataSource == 'geant4':
+    elif flags.Common.isOverlay and flags.Input.isMC:
         kwargs.setdefault("DataCompressionMode", 2)
-    elif (jobproperties.Beam.bunchSpacing() <= 50):
-        kwargs.setdefault("DataCompressionMode", 1) 
-    else: 
-        kwargs.setdefault("DataCompressionMode", 3) 
+    elif flags.Beam.BunchSpacing <= 50:
+        kwargs.setdefault("DataCompressionMode", 1)
+    else:
+        kwargs.setdefault("DataCompressionMode", 3)
     # DataReadOutMode: 0 is condensed mode and 1 is expanded mode
-    if globalflags.isOverlay() and globalflags.DataSource == 'geant4':
+    if flags.Common.isOverlay and flags.Input.isMC:
         kwargs.setdefault("DataReadOutMode", 0)
     else:
         kwargs.setdefault("DataReadOutMode", 1)
-    from SCT_Digitization.SCT_DigitizationConf import SCT_FrontEnd
-    return SCT_FrontEnd(name, **kwargs)
+    kwargs.setdefault("SCT_Amp", acc.popToolsAndMerge(SCT_AmpCfg(flags)))
+    acc.setPrivateTools(CompFactory.SCT_FrontEnd(name, **kwargs))
+    return acc
 
-######################################################################################
-def getPileupSCT_FrontEnd(name="PileupSCT_FrontEnd", **kwargs):
 
+def SCT_FrontEndPileupCfg(flags, name="PileupSCT_FrontEnd", **kwargs):
+    """Return ComponentAccumulator with pileup-configured front-end electronics tool"""
     kwargs.setdefault("NoiseBarrel", 0.0)
     kwargs.setdefault("NoiseBarrel3", 0.0)
     kwargs.setdefault("NoiseInners", 0.0)
@@ -158,146 +256,91 @@ def getPileupSCT_FrontEnd(name="PileupSCT_FrontEnd", **kwargs):
     kwargs.setdefault("NOShortMiddles", 0.0)
     kwargs.setdefault("NOOuters", 0.0)
     kwargs.setdefault("NoiseOn", False)
-
-    return getSCT_FrontEnd(name, **kwargs)
-
-######################################################################################
+    return SCT_FrontEndCfg(flags, name, **kwargs)
 
 
-def commonSCT_DigitizationConfig(name,**kwargs):
+def SCT_RangeCfg(flags, name="SiliconRange", **kwargs):
+    """Return an SCT configured PileUpXingFolder tool"""
+    kwargs.setdefault("FirstXing", SCT_FirstXing())
+    kwargs.setdefault("LastXing", SCT_LastXing())
+    kwargs.setdefault("CacheRefreshFrequency", 1.0) # default 0 no dataproxy reset
+    kwargs.setdefault("ItemList", ["SiHitCollection#SCT_Hits"] )
+    return PileUpXingFolderCfg(flags, name, **kwargs)
 
-    from Digitization.DigitizationFlags import digitizationFlags
-    # If noise is turned off:
-    if not digitizationFlags.doInDetNoise.get_Value():
-        kwargs.setdefault("OnlyHitElements", True)
 
-    kwargs.setdefault("InputObjectName", "SCT_Hits")
-    kwargs.setdefault("EnableHits", True)
-    kwargs.setdefault("BarrelOnly", False)
+def SCT_OutputCfg(flags):
+    """Return ComponentAccumulator with Output for SCT. Not standalone."""
+    acc = ComponentAccumulator()
+    if flags.Output.doWriteRDO:
+        ItemList = ["SCT_RDO_Container#*"]
+        if flags.Digitization.TruthOutput:
+            ItemList += ["InDetSimDataCollection#*"]
+            acc.merge(TruthDigitizationOutputCfg(flags))
+        acc.merge(OutputStreamCfg(flags, "RDO", ItemList))
+    return acc
 
-    # Use of random disabled cells
-    #kwargs.setdefault("RandomDisabledCells", True)
 
-    # Set FixedTime for cosmics for use in SurfaceChargesGenerator
-    from AthenaCommon.BeamFlags import jobproperties
-    if jobproperties.Beam.beamType == "cosmics" :
-        kwargs.setdefault("CosmicsRun", True)
-        kwargs.setdefault("FixedTime", 10)
+def SCT_DigitizationBasicCfg(flags, **kwargs):
+    """Return ComponentAccumulator for SCT digitization"""
+    acc = ComponentAccumulator()
+    if "PileUpTools" not in kwargs:
+        PileUpTools = acc.popToolsAndMerge(SCT_DigitizationToolCfg(flags))
+        kwargs["PileUpTools"] = PileUpTools
+    acc.merge(PileUpToolsCfg(flags, **kwargs))
+    return acc
 
-    # write out SCT1_RawData
-    #kwargs.setdefault("WriteSCT1_RawData", False)
 
-    if digitizationFlags.doXingByXingPileUp():
-        kwargs.setdefault("FirstXing", SCT_FirstXing())
-        kwargs.setdefault("LastXing",  SCT_LastXing() )
-    from AthenaCommon.DetFlags import DetFlags
-    if not DetFlags.pileup.any_on():
-        kwargs.setdefault("MergeSvc", '')
-        kwargs.setdefault("OnlyUseContainerName", False)
+def SCT_OverlayDigitizationBasicCfg(flags, **kwargs):
+    """Return ComponentAccumulator with SCT Overlay digitization"""
+    acc = ComponentAccumulator()
+    if flags.Common.ProductionStep != ProductionStep.FastChain:
+        from SGComps.SGInputLoaderConfig import SGInputLoaderCfg
+        acc.merge(SGInputLoaderCfg(flags, ["SiHitCollection#SCT_Hits"]))
 
-    from AthenaCommon import CfgMgr
-    return CfgMgr.SCT_DigitizationTool(name,**kwargs)
-#    else:
-#        from AthenaCommon import CfgMgr
-#        return CfgMgr.SCT_Digitization(name, **kwargs)
+    if "DigitizationTool" not in kwargs:
+        tool = acc.popToolsAndMerge(SCT_OverlayDigitizationToolCfg(flags))
+        kwargs["DigitizationTool"] = tool
 
-######################################################################################
+    if flags.Concurrency.NumThreads > 0:
+        kwargs.setdefault('Cardinality', flags.Concurrency.NumThreads)
 
-def SCT_DigitizationTool(name="SCT_DigitizationTool", **kwargs):
-    from Digitization.DigitizationFlags import digitizationFlags
-    if digitizationFlags.PileUpPresampling and 'LegacyOverlay' not in digitizationFlags.experimentalDigi():
-        from OverlayCommonAlgs.OverlayFlags import overlayFlags
-        kwargs.setdefault("OutputObjectName", overlayFlags.bkgPrefix() + "SCT_RDOs")
-        kwargs.setdefault("OutputSDOName", overlayFlags.bkgPrefix() + "SCT_SDO_Map")
-    else:
-        kwargs.setdefault("OutputObjectName", "SCT_RDOs")
-        kwargs.setdefault("OutputSDOName", "SCT_SDO_Map")
+    # Set common overlay extra inputs
+    kwargs.setdefault("ExtraInputs", flags.Overlay.ExtraInputs)
 
-    kwargs.setdefault("HardScatterSplittingMode", 0)
-    return commonSCT_DigitizationConfig(name,**kwargs)
+    SCT_Digitization = CompFactory.SCT_Digitization
+    acc.addEventAlgo(SCT_Digitization(name="SCT_OverlayDigitization", **kwargs))
+    return acc
 
-######################################################################################
 
-def SCT_GeantinoTruthDigitizationTool(name="SCT_GeantinoTruthDigitizationTool", **kwargs):
-    kwargs.setdefault("ParticleBarcodeVeto", 0)
-    return SCT_DigitizationTool(name,**kwargs)
+# with output defaults
+def SCT_DigitizationCfg(flags, **kwargs):
+    """Return ComponentAccumulator for SCT digitization and Output"""
+    acc = SCT_DigitizationBasicCfg(flags, **kwargs)
+    acc.merge(SCT_OutputCfg(flags))
+    return acc
 
-######################################################################################
 
-def SCT_DigitizationToolHS(name="SCT_DigitizationToolHS",**kwargs):
-    kwargs.setdefault("OutputObjectName", "SCT_RDOs")
-    kwargs.setdefault("OutputSDOName", "SCT_SDO_Map")
-    kwargs.setdefault("HardScatterSplittingMode", 1)
-    return commonSCT_DigitizationConfig(name,**kwargs)
+def SCT_OverlayDigitizationCfg(flags, **kwargs):
+    """Return ComponentAccumulator with SCT Overlay digitization and Output"""
+    acc = SCT_OverlayDigitizationBasicCfg(flags, **kwargs)
+    acc.merge(SCT_OutputCfg(flags))
+    return acc
 
-######################################################################################
 
-def SCT_DigitizationToolPU(name="SCT_DigitizationToolPU",**kwargs):
-    kwargs.setdefault("OutputObjectName", "SCT_PU_RDOs")
-    kwargs.setdefault("OutputSDOName", "SCT_PU_SDO_Map")
-    kwargs.setdefault("HardScatterSplittingMode", 2)
-    return commonSCT_DigitizationConfig(name,**kwargs)
+# additional specialisations
+def SCT_DigitizationHSCfg(flags, name="SCT_DigitizationHS", **kwargs):
+    """Return ComponentAccumulator for Hard-Scatter-only SCT digitization and Output"""
+    acc = SCT_DigitizationHSToolCfg(flags)
+    kwargs["PileUpTools"] = acc.popPrivateTools()
+    acc = SCT_DigitizationBasicCfg(flags, name=name, **kwargs)
+    acc.merge(SCT_OutputCfg(flags))
+    return acc
 
-######################################################################################
 
-def SCT_DigitizationToolSplitNoMergePU(name="SCT_DigitizationToolSplitNoMergePU",**kwargs):
-
-    kwargs.setdefault("InputObjectName", "PileupSCT_Hits")
-    kwargs.setdefault("HardScatterSplittingMode", 0)
-    kwargs.setdefault("OutputObjectName", "SCT_PU_RDOs")
-    kwargs.setdefault("OutputSDOName", "SCT_PU_SDO_Map")
-    kwargs.setdefault("OnlyHitElements", True)
-    kwargs.setdefault("FrontEnd", "PileupSCT_FrontEnd")
-
-    return commonSCT_DigitizationConfig(name,**kwargs)
-
-######################################################################################
-
-def SCT_OverlayDigitizationTool(name="SCT_OverlayDigitizationTool",**kwargs):
-    from OverlayCommonAlgs.OverlayFlags import overlayFlags
-    if overlayFlags.isOverlayMT():
-        kwargs.setdefault("OnlyUseContainerName", False)
-        kwargs.setdefault("OutputObjectName", overlayFlags.sigPrefix() + "SCT_RDOs")
-        kwargs.setdefault("OutputSDOName", overlayFlags.sigPrefix() + "SCT_SDO_Map")
-    else:
-        kwargs.setdefault("OutputObjectName", overlayFlags.evtStore() + "+SCT_RDOs")
-        kwargs.setdefault("OutputSDOName", overlayFlags.evtStore() + "+SCT_SDO_Map")
-    kwargs.setdefault("HardScatterSplittingMode", 0)
-    return commonSCT_DigitizationConfig(name,**kwargs)
-
-######################################################################################
-
-def getSiliconRange(name="SiliconRange" , **kwargs):
-    #this is the time of the xing in ns
-    kwargs.setdefault('FirstXing', SCT_FirstXing() )
-    kwargs.setdefault('LastXing',  SCT_LastXing()  )
-    kwargs.setdefault('CacheRefreshFrequency', 1.0 ) #default 0 no dataproxy reset
-    kwargs.setdefault('ItemList', ["SiHitCollection#SCT_Hits"] )
-    return CfgMgr.PileUpXingFolder(name, **kwargs)
-
-######################################################################################
-
-def SCT_DigitizationHS(name="SCT_DigitizationHS",**kwargs):
-    kwargs.setdefault("DigitizationTool", "SCT_DigitizationToolHS")
-    from SCT_Digitization.SCT_DigitizationConf import SCT_Digitization
-    return SCT_Digitization(name,**kwargs)
-
-######################################################################################
-
-def SCT_DigitizationPU(name="SCT_DigitizationPU",**kwargs):
-    kwargs.setdefault("DigitizationTool", "SCT_DigitizationToolPU")
-    return CfgMgr.SCT_Digitization(name,**kwargs)
-
-######################################################################################
-
-def SCT_OverlayDigitization(name="SCT_OverlayDigitization",**kwargs):
-    kwargs.setdefault("DigitizationTool", "SCT_OverlayDigitizationTool")
-    # Multi-threading settinggs
-    from AthenaCommon.ConcurrencyFlags import jobproperties as concurrencyProps
-    is_hive = (concurrencyProps.ConcurrencyFlags.NumThreads() > 0)
-    if is_hive:
-        kwargs.setdefault('Cardinality', concurrencyProps.ConcurrencyFlags.NumThreads())
-        # Set common overlay extra inputs
-        kwargs.setdefault("ExtraInputs", [("McEventCollection", "TruthEvent")])
-
-    return CfgMgr.SCT_Digitization(name,**kwargs)
+def SCT_DigitizationPUCfg(flags, name="SCT_DigitizationPU", **kwargs):
+    """Return ComponentAccumulator with Pile-up-only SCT digitization and Output"""
+    acc = SCT_DigitizationPUToolCfg(flags)
+    kwargs["PileUpTools"] = acc.popPrivateTools()
+    acc = SCT_DigitizationBasicCfg(flags, name=name, **kwargs)
+    acc.merge(SCT_OutputCfg(flags))
+    return acc

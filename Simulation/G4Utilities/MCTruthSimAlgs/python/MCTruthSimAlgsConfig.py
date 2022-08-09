@@ -1,353 +1,251 @@
-# Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+"""ComponentAccumulator configuration for Monte Carlo Truth simulation algorithms
 
-from Digitization.DigitizationFlags import digitizationFlags
-from AthenaCommon import CfgMgr
+Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+"""
+from AthenaConfiguration.ComponentAccumulator import ComponentAccumulator
+from AthenaConfiguration.ComponentFactory import CompFactory
+from AthenaConfiguration.Enums import ProductionStep
+from Digitization.PileUpToolsConfig import PileUpToolsCfg
+from Digitization.PileUpMergeSvcConfigNew import PileUpMergeSvcCfg, PileUpXingFolderCfg
 
-############################################################################
+# Note: various experimentalDigi uses not migrated
 
-def genericMergeMcEventCollTool(name="MergeMcEventCollTool", **kwargs):
-    if digitizationFlags.PileUpPresampling and 'LegacyOverlay' not in digitizationFlags.experimentalDigi():
-        from OverlayCommonAlgs.OverlayFlags import overlayFlags
-        kwargs.setdefault("TruthCollOutputKey", overlayFlags.bkgPrefix() + "TruthEvent")
+def GenericMergeMcEventCollCfg(flags, name="MergeMcEventCollTool", **kwargs):
+    acc = ComponentAccumulator()
+    kwargs.setdefault("TruthCollInputKey", "TruthEvent")
+    if flags.Common.ProductionStep == ProductionStep.PileUpPresampling:
+        kwargs.setdefault("TruthCollOutputKey", flags.Overlay.BkgPrefix + "TruthEvent")
     else:
         kwargs.setdefault("TruthCollOutputKey", "TruthEvent")
-    kwargs.setdefault("TruthCollInputKey", "TruthEvent")
-    if 'SimpleMerge' in digitizationFlags.experimentalDigi():
-        if not digitizationFlags.doXingByXingPileUp(): # Algorithm approach
-            kwargs.setdefault("PileUpMergeSvc", "PileUpMergeSvc")
-        return CfgMgr.SimpleMergeMcEventCollTool(name, **kwargs)
-    elif 'NewMerge' in digitizationFlags.experimentalDigi():
-        if not digitizationFlags.doXingByXingPileUp(): # Algorithm approach
-            kwargs.setdefault("PileUpMergeSvc", "PileUpMergeSvc")
-        if digitizationFlags.doLowPtMinBias:
-            kwargs.setdefault("ExpectLowPtMinBiasBackgroundCollection", True)
-        if digitizationFlags.doHighPtMinBias:
-            kwargs.setdefault("ExpectHighPtMinBiasBackgroundCollection", True)
-        # Default `PileUpType` to "Unknown"
-        kwargs.setdefault("PileUpType", -1)
-        return CfgMgr.NewMergeMcEventCollTool(name, **kwargs)
-    else:
-        kwargs.setdefault("LowTimeToKeep", -50.5)
-        kwargs.setdefault("HighTimeToKeep", 50.5)
-        kwargs.setdefault("KeepUnstable", False)
-        kwargs.setdefault("AbsEtaMax", 5.0)
-        kwargs.setdefault("OutOfTimeAbsEtaMax", 3.0)
-        kwargs.setdefault("rRange", 20.0)
-        kwargs.setdefault("zRange", 200.0)
-        #kwargs.setdefault("ptMin", 0.4*GeV)
-        #kwargs.setdefault("EKinMin", 1.0*MeV)
-        kwargs.setdefault("SaveCavernBackground", True)
-        kwargs.setdefault("SaveInTimeMinBias", True)
-        kwargs.setdefault("SaveOutOfTimeMinBias", True)
-        kwargs.setdefault("SaveRestOfMinBias", False)
-        kwargs.setdefault("AddBackgroundCollisionVertices", True)
-        kwargs.setdefault("CompressOutputCollection", False)
-        #kwargs.setdefault("CopyCompleteGenEvents", True)
-        return CfgMgr.MergeMcEventCollTool(name, **kwargs)
+    kwargs.setdefault("LowTimeToKeep", -50.5)
+    kwargs.setdefault("HighTimeToKeep", 50.5)
+    kwargs.setdefault("KeepUnstable", False)
+    kwargs.setdefault("AbsEtaMax", 5.0)
+    kwargs.setdefault("OutOfTimeAbsEtaMax", 3.0)
+    kwargs.setdefault("rRange", 20.0)
+    kwargs.setdefault("zRange", 200.0)
+    kwargs.setdefault("SaveCavernBackground", True)
+    kwargs.setdefault("SaveInTimeMinBias", True)
+    kwargs.setdefault("SaveOutOfTimeMinBias", True)
+    kwargs.setdefault("SaveRestOfMinBias", False)
+    kwargs.setdefault("AddBackgroundCollisionVertices", True)
+    kwargs.setdefault("CompressOutputCollection", False)
+    tool = CompFactory.MergeMcEventCollTool(name, **kwargs)
+    acc.merge(PileUpToolsCfg(flags, PileUpTools=tool))
+    return acc
 
-def MergeMcEventCollTool(name="MergeMcEventCollTool", **kwargs):
-    if digitizationFlags.doXingByXingPileUp(): # PileUpTool approach
+
+def MergeMcEventCollCfg(flags, name="MergeMcEventCollTool", **kwargs):
+    acc = ComponentAccumulator()
+    if flags.Digitization.DoXingByXingPileUp: # PileUpTool approach
         kwargs.setdefault("FirstXing", -30000)
         kwargs.setdefault("LastXing",   30000)
-    keys =['SimpleMerge', 'NewMerge']
-    if set(keys).isdisjoint(set(digitizationFlags.experimentalDigi())):
-        kwargs.setdefault("DoSlimming", False)
-        kwargs.setdefault("OnlySaveSignalTruth", False)
-    return genericMergeMcEventCollTool(name, **kwargs)
+    kwargs.setdefault("DoSlimming", False)
+    kwargs.setdefault("OnlySaveSignalTruth", False)
+    acc.merge(GenericMergeMcEventCollCfg(flags, name, **kwargs))
+    return acc
 
-def SignalOnlyMcEventCollTool(name="SignalOnlyMcEventCollTool", **kwargs):
-    if digitizationFlags.doXingByXingPileUp(): # PileUpTool approach
+
+def SignalOnlyMcEventCollCfg(flags, name="SignalOnlyMcEventCollTool", **kwargs):
+    acc = ComponentAccumulator()
+    if flags.Digitization.DoXingByXingPileUp: # PileUpTool approach
         kwargs.setdefault("FirstXing", 0)
         kwargs.setdefault("LastXing",  0)
-    keys =['SimpleMerge', 'NewMerge']
-    if set(keys).isdisjoint(set(digitizationFlags.experimentalDigi())):
-        kwargs.setdefault("OnlySaveSignalTruth", True)
-    return genericMergeMcEventCollTool(name, **kwargs)
+    kwargs.setdefault("OnlySaveSignalTruth", True)
+    acc.merge(GenericMergeMcEventCollCfg(flags, name, **kwargs))
+    return acc
 
-def InTimeOnlyMcEventCollTool(name="InTimeOnlyMcEventCollTool", **kwargs):
-    if digitizationFlags.doXingByXingPileUp(): # PileUpTool approach
+
+def InTimeOnlyMcEventCollCfg(flags, name="InTimeOnlyMcEventCollTool", **kwargs):
+    acc = ComponentAccumulator()
+    if flags.Digitization.DoXingByXingPileUp: # PileUpTool approach
         kwargs.setdefault("FirstXing", 0)
         kwargs.setdefault("LastXing",  0)
-    keys =['SimpleMerge', 'NewMerge']
-    if set(keys).isdisjoint(set(digitizationFlags.experimentalDigi())):
-        kwargs.setdefault("DoSlimming", False)
-        kwargs.setdefault("OnlySaveSignalTruth", False)
-    return genericMergeMcEventCollTool(name, **kwargs)
+    kwargs.setdefault("DoSlimming", False)
+    kwargs.setdefault("OnlySaveSignalTruth", False)
+    acc.merge(GenericMergeMcEventCollCfg(flags, name, **kwargs))
+    return acc
 
-############################################################################
 
 # The earliest bunch crossing time for which interactions will be sent
 # to the Truth jet merging code. See discussions in ATLASSIM-3837.
 def TruthJet_FirstXing():
     return -125
 
+
 # The latest bunch crossing time for which interactions will be sent
 # to the Truth jet merging code. See discussions in ATLASSIM-3837.
 def TruthJet_LastXing():
     return 75
 
-def getTruthJetRange(name="TruthJetRange", **kwargs):
+
+def TruthJetRangeCfg(flags, name="TruthJetRange", **kwargs):
+    """Return a Truth-Jet configured PileUpXingFolder tool"""
     #this is the time of the xing in ns
-    kwargs.setdefault('FirstXing', TruthJet_FirstXing() )
-    kwargs.setdefault('LastXing',  TruthJet_LastXing() )
-    itemList = []
-    if 'PileUpAntiKt4TruthJets' in digitizationFlags.experimentalDigi():
-        itemList += ["xAOD::JetContainer#AntiKt4TruthJets"]
-    if 'PileUpAntiKt6TruthJets' in digitizationFlags.experimentalDigi():
-        itemList += ["xAOD::JetContainer#AntiKt6TruthJets"]
-    kwargs.setdefault('ItemList',  itemList)
-    return CfgMgr.PileUpXingFolder(name, **kwargs)
+    kwargs.setdefault("FirstXing", TruthJet_FirstXing())
+    kwargs.setdefault("LastXing",  TruthJet_LastXing())
+    itemList = ["xAOD::JetContainer#AntiKt4TruthJets",
+                "xAOD::JetContainer#AntiKt6TruthJets"]
+    kwargs.setdefault("ItemList", itemList)
+    return PileUpXingFolderCfg(flags, name, **kwargs)
 
 
-def getMergeAntiKt4TruthJetsTool(name="MergeAntiKt4TruthJetsTool", **kwargs):
-    if digitizationFlags.doXingByXingPileUp(): # PileUpTool approach
-        kwargs.setdefault("FirstXing", TruthJet_FirstXing() )
-        kwargs.setdefault("LastXing",  TruthJet_LastXing() )
-
-    if digitizationFlags.PileUpPresampling and 'LegacyOverlay' not in digitizationFlags.experimentalDigi():
-        from OverlayCommonAlgs.OverlayFlags import overlayFlags
-        kwargs.setdefault("InTimeOutputTruthJetCollKey", overlayFlags.bkgPrefix() + "InTimeAntiKt4TruthJets")
-        kwargs.setdefault("OutOfTimeTruthJetCollKey", overlayFlags.bkgPrefix() + "OutOfTimeAntiKt4TruthJets")
+def MergeAntiKt4TruthJetsCfg(flags, name="MergeAntiKt4TruthJetsTool", **kwargs):
+    acc = ComponentAccumulator()
+    rangetool = acc.popToolsAndMerge(TruthJetRangeCfg(flags))
+    acc.merge(PileUpMergeSvcCfg(flags, Intervals=rangetool))
+    if flags.Digitization.DoXingByXingPileUp: # PileUpTool approach
+        kwargs.setdefault("FirstXing", TruthJet_FirstXing())
+        kwargs.setdefault("LastXing",  TruthJet_LastXing())
+    if flags.Common.ProductionStep == ProductionStep.PileUpPresampling:
+        kwargs.setdefault("InTimeOutputTruthJetCollKey", flags.Overlay.BkgPrefix + "InTimeAntiKt4TruthJets")
+        kwargs.setdefault("OutOfTimeTruthJetCollKey", flags.Overlay.BkgPrefix + "OutOfTimeAntiKt4TruthJets")
     else:
         kwargs.setdefault("InTimeOutputTruthJetCollKey", "InTimeAntiKt4TruthJets")
         kwargs.setdefault("OutOfTimeTruthJetCollKey", "OutOfTimeAntiKt4TruthJets")
+    tool = CompFactory.MergeTruthJetsTool(name, **kwargs)
+    acc.merge(PileUpToolsCfg(flags, PileUpTools=tool))
+    return acc
 
-    return CfgMgr.MergeTruthJetsTool(name, **kwargs)
 
-def getMergeAntiKt6TruthJetsTool(name="MergeAntiKt6TruthJetsTool", **kwargs):
-    if digitizationFlags.doXingByXingPileUp(): # PileUpTool approach
-        kwargs.setdefault("FirstXing", TruthJet_FirstXing() )
-        kwargs.setdefault("LastXing",  TruthJet_LastXing() )
-
-    if digitizationFlags.PileUpPresampling and 'LegacyOverlay' not in digitizationFlags.experimentalDigi():
-        from OverlayCommonAlgs.OverlayFlags import overlayFlags
-        kwargs.setdefault("InTimeOutputTruthJetCollKey", overlayFlags.bkgPrefix() + "InTimeAntiKt6TruthJets")
-        kwargs.setdefault("OutOfTimeTruthJetCollKey", overlayFlags.bkgPrefix() + "OutOfTimeAntiKt6TruthJets")
+def MergeAntiKt6TruthJetsCfg(flags, name="MergeAntiKt6TruthJetsTool", **kwargs):
+    acc = ComponentAccumulator()
+    rangetool = acc.popToolsAndMerge(TruthJetRangeCfg(flags))
+    acc.merge(PileUpMergeSvcCfg(flags, Intervals=rangetool))
+    if flags.Digitization.DoXingByXingPileUp: # PileUpTool approach
+        kwargs.setdefault("FirstXing", TruthJet_FirstXing())
+        kwargs.setdefault("LastXing",  TruthJet_LastXing())
+    if flags.Common.ProductionStep == ProductionStep.PileUpPresampling:
+        kwargs.setdefault("InTimeOutputTruthJetCollKey", flags.Overlay.BkgPrefix + "InTimeAntiKt6TruthJets")
+        kwargs.setdefault("OutOfTimeTruthJetCollKey", flags.Overlay.BkgPrefix + "OutOfTimeAntiKt6TruthJets")
     else:
         kwargs.setdefault("InTimeOutputTruthJetCollKey", "InTimeAntiKt6TruthJets")
         kwargs.setdefault("OutOfTimeTruthJetCollKey", "OutOfTimeAntiKt6TruthJets")
+    tool = CompFactory.MergeTruthJetsTool(name, **kwargs)
+    acc.merge(PileUpToolsCfg(flags, PileUpTools=tool))
+    return acc
 
-    return CfgMgr.MergeTruthJetsTool(name, **kwargs)
 
-def getMergeTruthJetsFilterTool(name="MergeTruthJetsFilterTool", **kwargs):
-    kwargs.setdefault("ActivateFilter", True )
-    return getMergeAntiKt4TruthJetsTool(name, **kwargs)
+def MergeTruthJetsFilterCfg(flags, name="MergeTruthJetsFilterTool", **kwargs):
+    acc = ComponentAccumulator()
+    kwargs.setdefault("ActivateFilter", True)
+    acc.merge(MergeAntiKt4TruthJetsCfg(flags, name, **kwargs))
+    return acc
 
-############################################################################
 
 # The earliest bunch crossing time for which interactions will be sent
 # to the Truth particle merging code.
 def TruthParticle_FirstXing():
     return 0
 
+
 # The latest bunch crossing time for which interactions will be sent
 # to the Truth particle merging code.
 def TruthParticle_LastXing():
     return 0
 
-def getTruthParticleRange(name="TruthParticleRange", **kwargs):
+
+def TruthParticleRangeCfg(flags, name="TruthParticleRange", **kwargs):
+    """Return a Truth-Particle configured PileUpXingFolder tool"""
     #this is the time of the xing in ns
-    kwargs.setdefault('FirstXing', TruthParticle_FirstXing() )
-    kwargs.setdefault('LastXing',  TruthParticle_LastXing() )
+    kwargs.setdefault("FirstXing", TruthParticle_FirstXing())
+    kwargs.setdefault("LastXing",  TruthParticle_LastXing())
     kwargs.setdefault("ItemList", ["xAOD::TruthParticleContainer#TruthPileupParticles",
                                    "xAOD::TruthParticleAuxContainer#TruthPileupParticlesAux."])
-    return CfgMgr.PileUpXingFolder(name, **kwargs)
+    return PileUpXingFolderCfg(flags, name, **kwargs)
 
 
-def getMergeTruthParticlesTool(name="MergeTruthParticlesTool", **kwargs):
-    if digitizationFlags.doXingByXingPileUp(): # PileUpTool approach
-        kwargs.setdefault("FirstXing", TruthParticle_FirstXing() )
-        kwargs.setdefault("LastXing",  TruthParticle_LastXing() )
-
-    if digitizationFlags.PileUpPresampling and 'LegacyOverlay' not in digitizationFlags.experimentalDigi():
-        from OverlayCommonAlgs.OverlayFlags import overlayFlags
-        kwargs.setdefault("InTimeOutputTruthParticleCollKey", overlayFlags.bkgPrefix() + "TruthPileupParticles")
+def MergeTruthParticlesCfg(flags, name="MergeTruthParticlesTool", **kwargs):
+    acc = ComponentAccumulator()
+    rangetool = acc.popToolsAndMerge(TruthParticleRangeCfg(flags))
+    acc.merge(PileUpMergeSvcCfg(flags, Intervals=rangetool))
+    if flags.Digitization.DoXingByXingPileUp: # PileUpTool approach
+        kwargs.setdefault("FirstXing", TruthParticle_FirstXing())
+        kwargs.setdefault("LastXing",  TruthParticle_LastXing())
+    if flags.Common.ProductionStep == ProductionStep.PileUpPresampling:
+        kwargs.setdefault("InTimeOutputTruthParticleCollKey", flags.Overlay.BkgPrefix + "TruthPileupParticles")
     else:
         kwargs.setdefault("InTimeOutputTruthParticleCollKey", "TruthPileupParticles")
+    tool = CompFactory.MergeTruthParticlesTool(name, **kwargs)
+    acc.merge(PileUpToolsCfg(flags, PileUpTools=tool))
+    return acc
 
-    return CfgMgr.MergeTruthParticlesTool(name, **kwargs)
-
-
-############################################################################
-
-def getNewMergeMcEventCollTool_Base(name="NewMergeMcEventCollTool_Base", **kwargs):
-    if digitizationFlags.doXingByXingPileUp(): # PileUpTool approach
-        kwargs.setdefault("FirstXing", -30000)
-        kwargs.setdefault("LastXing",   30000)
-    if digitizationFlags.PileUpPresampling and 'LegacyOverlay' not in digitizationFlags.experimentalDigi():
-        from OverlayCommonAlgs.OverlayFlags import overlayFlags
-        kwargs.setdefault("TruthCollOutputKey", overlayFlags.bkgPrefix() + "TruthEvent")
-    else:
-        kwargs.setdefault("TruthCollOutputKey", "TruthEvent")
-    kwargs.setdefault("TruthCollInputKey", "TruthEvent")
-    if not digitizationFlags.doXingByXingPileUp(): # Algorithm approach
-        kwargs.setdefault("PileUpMergeSvc", "PileUpMergeSvc")
-    # Default `PileUpType` to "Unknown"
-    kwargs.setdefault("PileUpType", -1)
-    return CfgMgr.NewMergeMcEventCollTool(name, **kwargs)
-
-def getNewMergeMcEventCollTool_Signal(name="NewMergeMcEventCollTool_Signal", **kwargs):
-    if digitizationFlags.doXingByXingPileUp(): # PileUpTool approach
-        kwargs.setdefault("FirstXing", 0)
-        kwargs.setdefault("LastXing",  0)
-    from Digitization import PileUpEventType
-    kwargs.setdefault("PileUpType", PileUpEventType.Signal)
-    return getNewMergeMcEventCollTool_Base(name, **kwargs)
-
-### All bunch-crossing pileup `NewMergeMcEventCollTool`s
-def getNewMergeMcEventCollTool_MinBias(name="NewMergeMcEventCollTool_MinBias", **kwargs):
-    from Digitization import PileUpEventType
-    kwargs.setdefault("PileUpType", PileUpEventType.MinimumBias)
-    if digitizationFlags.PileUpPresampling and 'LegacyOverlay' not in digitizationFlags.experimentalDigi():
-        from OverlayCommonAlgs.OverlayFlags import overlayFlags
-        kwargs.setdefault("TruthCollOutputKey", overlayFlags.bkgPrefix() + "TruthEvent_PU")
-    else:
-        kwargs.setdefault("TruthCollOutputKey", "TruthEvent_PU")
-    return getNewMergeMcEventCollTool_Base(name, **kwargs)
-
-def getNewMergeMcEventCollTool_HighPtMinBias(name="NewMergeMcEventCollTool_HighPtMinBias", **kwargs):
-    from Digitization import PileUpEventType
-    kwargs.setdefault("PileUpType", PileUpEventType.HighPtMinimumBias)
-    if digitizationFlags.PileUpPresampling and 'LegacyOverlay' not in digitizationFlags.experimentalDigi():
-        from OverlayCommonAlgs.OverlayFlags import overlayFlags
-        kwargs.setdefault("TruthCollOutputKey", overlayFlags.bkgPrefix() + "TruthEvent_HighPtPU")
-    else:
-        kwargs.setdefault("TruthCollOutputKey", "TruthEvent_HighPtPU")
-    return getNewMergeMcEventCollTool_Base(name, **kwargs)
-
-def getNewMergeMcEventCollTool_Cavern(name="NewMergeMcEventCollTool_Cavern", **kwargs):
-    from Digitization import PileUpEventType
-    kwargs.setdefault("PileUpType", PileUpEventType.Cavern)
-    if digitizationFlags.PileUpPresampling and 'LegacyOverlay' not in digitizationFlags.experimentalDigi():
-        from OverlayCommonAlgs.OverlayFlags import overlayFlags
-        kwargs.setdefault("TruthCollOutputKey", overlayFlags.bkgPrefix() + "TruthEvent_Cavern")
-    else:
-        kwargs.setdefault("TruthCollOutputKey", "TruthEvent_Cavern")
-    return getNewMergeMcEventCollTool_Base(name, **kwargs)
-
-def getNewMergeMcEventCollTool_HaloGas(name="NewMergeMcEventCollTool_HaloGas", **kwargs):
-    from Digitization import PileUpEventType
-    kwargs.setdefault("PileUpType", PileUpEventType.HaloGas)
-    if digitizationFlags.PileUpPresampling and 'LegacyOverlay' not in digitizationFlags.experimentalDigi():
-        from OverlayCommonAlgs.OverlayFlags import overlayFlags
-        kwargs.setdefault("TruthCollOutputKey", overlayFlags.bkgPrefix() + "TruthEvent_HaloGas")
-    else:
-        kwargs.setdefault("TruthCollOutputKey", "TruthEvent_HaloGas")
-    return getNewMergeMcEventCollTool_Base(name, **kwargs)
-
-### InTimeOnly pileup `NewMergeMcEventCollTool`s
-def getInTimeOnlyNewMergeMcEventCollTool_Base(name="InTimeOnlyNewMergeMcEventCollTool_Base", **kwargs):
-    if digitizationFlags.doXingByXingPileUp(): # PileUpTool approach
-        kwargs.setdefault("FirstXing", 0)
-        kwargs.setdefault("LastXing",  0)
-    return getNewMergeMcEventCollTool_Base(name, **kwargs)
-
-def getInTimeOnlyNewMergeMcEventCollTool_MinBias(name="InTimeOnlyNewMergeMcEventCollTool_MinBias", **kwargs):
-    from Digitization import PileUpEventType
-    kwargs.setdefault("PileUpType", PileUpEventType.MinimumBias)
-    if digitizationFlags.PileUpPresampling and 'LegacyOverlay' not in digitizationFlags.experimentalDigi():
-        from OverlayCommonAlgs.OverlayFlags import overlayFlags
-        kwargs.setdefault("TruthCollOutputKey", overlayFlags.bkgPrefix() + "TruthEvent_PU")
-    else:
-        kwargs.setdefault("TruthCollOutputKey", "TruthEvent_PU")
-    return getInTimeOnlyNewMergeMcEventCollTool_Base(name, **kwargs)
-
-def getInTimeOnlyNewMergeMcEventCollTool_HighPtMinBias(name="InTimeOnlyNewMergeMcEventCollTool_HighPtMinBias", **kwargs):
-    from Digitization import PileUpEventType
-    kwargs.setdefault("PileUpType", PileUpEventType.HighPtMinimumBias)
-    if digitizationFlags.PileUpPresampling and 'LegacyOverlay' not in digitizationFlags.experimentalDigi():
-        from OverlayCommonAlgs.OverlayFlags import overlayFlags
-        kwargs.setdefault("TruthCollOutputKey", overlayFlags.bkgPrefix() + "TruthEvent_HighPtPU")
-    else:
-        kwargs.setdefault("TruthCollOutputKey", "TruthEvent_HighPtPU")
-    return getInTimeOnlyNewMergeMcEventCollTool_Base(name, **kwargs)
-
-def getInTimeOnlyNewMergeMcEventCollTool_Cavern(name="InTimeOnlyNewMergeMcEventCollTool_Cavern", **kwargs):
-    from Digitization import PileUpEventType
-    kwargs.setdefault("PileUpType", PileUpEventType.Cavern)
-    if digitizationFlags.PileUpPresampling and 'LegacyOverlay' not in digitizationFlags.experimentalDigi():
-        from OverlayCommonAlgs.OverlayFlags import overlayFlags
-        kwargs.setdefault("TruthCollOutputKey", overlayFlags.bkgPrefix() + "TruthEvent_Cavern")
-    else:
-        kwargs.setdefault("TruthCollOutputKey", "TruthEvent_Cavern")
-    return getInTimeOnlyNewMergeMcEventCollTool_Base(name, **kwargs)
-
-def getInTimeOnlyNewMergeMcEventCollTool_HaloGas(name="InTimeOnlyNewMergeMcEventCollTool_HaloGas", **kwargs):
-    from Digitization import PileUpEventType
-    kwargs.setdefault("PileUpType", PileUpEventType.HaloGas)
-    if digitizationFlags.PileUpPresampling and 'LegacyOverlay' not in digitizationFlags.experimentalDigi():
-        from OverlayCommonAlgs.OverlayFlags import overlayFlags
-        kwargs.setdefault("TruthCollOutputKey", overlayFlags.bkgPrefix() + "TruthEvent_HaloGas")
-    else:
-        kwargs.setdefault("TruthCollOutputKey", "TruthEvent_HaloGas")
-    return getInTimeOnlyNewMergeMcEventCollTool_Base(name, **kwargs)
-
-############################################################################
 
 # The earliest bunch crossing time for which interactions will be sent
 # to the TrackRecordCollection merging code.
 def TrackRecord_FirstXing():
     return -1
 
+
 # The latest bunch crossing time for which interactions will be sent
 # to the TrackRecordCollection merging code.
 def TrackRecord_LastXing():
     return 1
 
-def getTrackRange(name="TrackRange" , **kwargs):
-    #this is the time of the xing in ns
-    kwargs.setdefault('FirstXing', TrackRecord_FirstXing() )
-    kwargs.setdefault('LastXing',  TrackRecord_LastXing() )
-    kwargs.setdefault('ItemList', ["TrackRecordCollection#MuonExitLayer"] )
-    #"TrackRecordCollection#MuonEntryLayer",
-    #"TrackRecordCollection#CaloEntryLayer"
-    return CfgMgr.PileUpXingFolder(name, **kwargs)
 
-def MergeTrackRecordCollTool(name="MergeTrackRecordCollTool", **kwargs):
-    if digitizationFlags.doXingByXingPileUp(): # PileUpTool approach
-        kwargs.setdefault("FirstXing", TrackRecord_FirstXing() )
-        kwargs.setdefault("LastXing",  TrackRecord_LastXing() )
+def TrackRangeCfg(flags, name="TrackRange", **kwargs):
+    """Return a Track configured PileUpXingFolder tool"""
+    # this is the time of the xing in ns
+    kwargs.setdefault("FirstXing", TrackRecord_FirstXing())
+    kwargs.setdefault("LastXing",  TrackRecord_LastXing())
+    kwargs.setdefault("ItemList", ["TrackRecordCollection#MuonExitLayer"])
+    return PileUpXingFolderCfg(flags, name, **kwargs)
 
-    return CfgMgr.MergeTrackRecordCollTool(name, **kwargs)
 
-def MergeCaloEntryLayerTool(name="MergeCaloEntryLayerTool", **kwargs):
-    kwargs.setdefault("TrackRecordCollKey", "CaloEntryLayer" )
-    if digitizationFlags.PileUpPresampling and 'LegacyOverlay' not in digitizationFlags.experimentalDigi():
-        from OverlayCommonAlgs.OverlayFlags import overlayFlags
-        kwargs.setdefault("TrackRecordCollOutputKey", overlayFlags.bkgPrefix() + "CaloEntryLayer")
+def MergeTrackRecordCollCfg(flags, name="MergeTrackRecordCollTool", **kwargs):
+    acc = ComponentAccumulator()
+    rangetool = acc.popToolsAndMerge(TrackRangeCfg(flags))
+    acc.merge(PileUpMergeSvcCfg(flags, Intervals=rangetool))
+    if flags.Digitization.DoXingByXingPileUp: # PileUpTool approach
+        kwargs.setdefault("FirstXing", TrackRecord_FirstXing())
+        kwargs.setdefault("LastXing",  TrackRecord_LastXing())
+    tool = CompFactory.MergeTrackRecordCollTool(name, **kwargs)
+    acc.merge(PileUpToolsCfg(flags, PileUpTools=tool))
+    return acc
+
+
+def MergeCaloEntryLayerCfg(flags, name="MergeCaloEntryLayerTool", **kwargs):
+    acc = ComponentAccumulator()
+    kwargs.setdefault("TrackRecordCollKey", "CaloEntryLayer")
+    if flags.Common.ProductionStep == ProductionStep.PileUpPresampling:
+        kwargs.setdefault("TrackRecordCollOutputKey", flags.Overlay.BkgPrefix + "CaloEntryLayer")
     else:
-        kwargs.setdefault("TrackRecordCollOutputKey", "CaloEntryLayer" )
-    return MergeTrackRecordCollTool(name, **kwargs)
+        kwargs.setdefault("TrackRecordCollOutputKey", "CaloEntryLayer")
+    acc.merge(MergeTrackRecordCollCfg(flags, name, **kwargs))
+    return acc
 
-def MergeMuonEntryLayerTool(name="MergeMuonEntryLayerTool", **kwargs):
-    kwargs.setdefault("TrackRecordCollKey", "MuonEntryLayer" )
-    if digitizationFlags.PileUpPresampling and 'LegacyOverlay' not in digitizationFlags.experimentalDigi():
-        from OverlayCommonAlgs.OverlayFlags import overlayFlags
-        kwargs.setdefault("TrackRecordCollOutputKey", overlayFlags.bkgPrefix() + "MuonEntryLayer")
+
+def MergeMuonEntryLayerCfg(flags, name="MergeMuonEntryLayerTool", **kwargs):
+    acc = ComponentAccumulator()
+    kwargs.setdefault("TrackRecordCollKey", "MuonEntryLayer")
+    if flags.Common.ProductionStep == ProductionStep.PileUpPresampling:
+        kwargs.setdefault("TrackRecordCollOutputKey", flags.Overlay.BkgPrefix + "MuonEntryLayer")
     else:
-        kwargs.setdefault("TrackRecordCollOutputKey", "MuonEntryLayer" )
-    return MergeTrackRecordCollTool(name, **kwargs)
+        kwargs.setdefault("TrackRecordCollOutputKey", "MuonEntryLayer")
+    acc.merge(MergeTrackRecordCollCfg(flags, name, **kwargs))
+    return acc
 
-def MergeMuonExitLayerTool(name="MergeMuonExitLayerTool", **kwargs):
-    kwargs.setdefault("TrackRecordCollKey", "MuonExitLayer" )
-    if digitizationFlags.PileUpPresampling and 'LegacyOverlay' not in digitizationFlags.experimentalDigi():
-        from OverlayCommonAlgs.OverlayFlags import overlayFlags
-        kwargs.setdefault("TrackRecordCollOutputKey", overlayFlags.bkgPrefix() + "MuonExitLayer")
+
+def MergeMuonExitLayerCfg(flags, name="MergeMuonExitLayerTool", **kwargs):
+    acc = ComponentAccumulator()
+    kwargs.setdefault("TrackRecordCollKey", "MuonExitLayer")
+    if flags.Common.ProductionStep == ProductionStep.PileUpPresampling:
+        kwargs.setdefault("TrackRecordCollOutputKey", flags.Overlay.BkgPrefix + "MuonExitLayer")
     else:
-        kwargs.setdefault("TrackRecordCollOutputKey", "MuonExitLayer" )
-    return MergeTrackRecordCollTool(name, **kwargs)
+        kwargs.setdefault("TrackRecordCollOutputKey", "MuonExitLayer")
+    acc.merge(MergeTrackRecordCollCfg(flags, name, **kwargs))
+    return acc
 
 
-############################################################################
-def MergeHijingParsTool(name="MergeHijingParsTool", **kwargs):
-    if digitizationFlags.doXingByXingPileUp(): # PileUpTool approach
+def MergeHijingParsCfg(flags, name="MergeHijingParsTool", **kwargs):
+    acc = ComponentAccumulator()
+    if flags.Digitization.DoXingByXingPileUp: # PileUpTool approach
         kwargs.setdefault("FirstXing", -1)
         kwargs.setdefault("LastXing",  +1)
+    tool = CompFactory.MergeHijingParsTool(name, **kwargs)
+    acc.merge(PileUpToolsCfg(flags, PileUpTools=tool))
+    return acc
 
-    return CfgMgr.MergeHijingParsTool(name, **kwargs)
-
-
-############################################################################
 
 # The earliest bunch crossing time for which interactions will be sent
 # to the CaloCalibrationHitContainer merging code.
@@ -355,90 +253,101 @@ def CalibHit_FirstXing():
     return -1
 
 # The latest bunch crossing time for which interactions will be sent
-# to the Truth jet merging code.
+# to the CaloCalibrationHitContainer merging code.
 def CalibHit_LastXing():
     return 1
 
-def getCalibRange(name="CalibRange", **kwargs):
+
+def CalibRangeCfg(flags, name="CalibRange", **kwargs):
+    """Return a Calibration configured PileUpXingFolder tool"""
     # bunch crossing range in ns
-    kwargs.setdefault('FirstXing', CalibHit_FirstXing() )
-    kwargs.setdefault('LastXing',  CalibHit_LastXing() )
-    ItemList = []
-    ItemList += ["CaloCalibrationHitContainer#LArCalibrationHitActive",
-                 "CaloCalibrationHitContainer#LArCalibrationHitDeadMaterial",
-                 "CaloCalibrationHitContainer#LArCalibrationHitInactive" ]
-    from Digitization.DigitizationFlags import digitizationFlags
-    if 'OldTileCalibHitContainers' in digitizationFlags.experimentalDigi():
-        ItemList += ["CaloCalibrationHitContainer#TileCalibrationCellHitCnt",
-                     "CaloCalibrationHitContainer#TileCalibrationDMHitCnt" ]
-    else:
-        ItemList += ["CaloCalibrationHitContainer#TileCalibHitActiveCell",
-                     "CaloCalibrationHitContainer#TileCalibHitInactiveCell",
-                     "CaloCalibrationHitContainer#TileCalibHitDeadMaterial" ]
-    kwargs.setdefault('ItemList', ItemList)
-    return CfgMgr.PileUpXingFolder(name, **kwargs)
-
-def MergeCalibHitsTool(name="MergeCalibHitsTool", **kwargs):
-    if digitizationFlags.doXingByXingPileUp(): # PileUpTool approach
-        kwargs.setdefault("FirstXing", CalibHit_FirstXing() )
-        kwargs.setdefault("LastXing",  CalibHit_LastXing() )
-    if 'OldTileCalibHitContainers' in digitizationFlags.experimentalDigi():
-        kwargs.setdefault("OldFormat", True)
-
-    return CfgMgr.MergeCalibHitsTool(name, **kwargs)
+    kwargs.setdefault("FirstXing", CalibHit_FirstXing())
+    kwargs.setdefault("LastXing",  CalibHit_LastXing())
+    ItemList = [
+        "CaloCalibrationHitContainer#LArCalibrationHitActive",
+        "CaloCalibrationHitContainer#LArCalibrationHitDeadMaterial",
+        "CaloCalibrationHitContainer#LArCalibrationHitInactive",
+        "CaloCalibrationHitContainer#TileCalibHitActiveCell",
+        "CaloCalibrationHitContainer#TileCalibHitInactiveCell",
+        "CaloCalibrationHitContainer#TileCalibHitDeadMaterial"
+    ]
+    kwargs.setdefault("ItemList", ItemList)
+    return PileUpXingFolderCfg(flags, name, **kwargs)
 
 
-############################################################################
+def MergeCalibHitsCfg(flags, name="MergeCalibHitsTool", **kwargs):
+    acc = ComponentAccumulator()
+    rangetool = acc.popToolsAndMerge(CalibRangeCfg(flags))
+    acc.merge(PileUpMergeSvcCfg(flags, Intervals=rangetool))
+    if flags.Digitization.DoXingByXingPileUp: # PileUpTool approach
+        kwargs.setdefault("FirstXing", CalibHit_FirstXing())
+        kwargs.setdefault("LastXing",  CalibHit_LastXing())
+    tool = CompFactory.MergeCalibHitsTool(name, **kwargs)
+    acc.merge(PileUpToolsCfg(flags, PileUpTools=tool))
+    return acc
+
 
 # The earliest bunch crossing time for which interactions will be sent
 # to the RecoTimingObj merging code.
 def TimingObj_FirstXing():
     return -1
 
+
 # The latest bunch crossing time for which interactions will be sent
 # to the RecoTimingObj merging code.
 def TimingObj_LastXing():
     return 1
 
-def getTimingObjRange(name="TimingObjRange" , **kwargs):
+
+def TimingObjRangeCfg(flags, name="TimingObjRange", **kwargs):
+    """Return a RecoTiming configured PileUpXingFolder tool"""
     #this is the time of the xing in ns
-    kwargs.setdefault('FirstXing', TimingObj_FirstXing() )
-    kwargs.setdefault('LastXing',  TimingObj_LastXing() )
-    kwargs.setdefault('ItemList', ["RecoTimingObj#EVNTtoHITS_timings"] )
-    return CfgMgr.PileUpXingFolder(name, **kwargs)
+    kwargs.setdefault("FirstXing", TimingObj_FirstXing())
+    kwargs.setdefault("LastXing",  TimingObj_LastXing())
+    kwargs.setdefault("ItemList", ["RecoTimingObj#EVNTtoHITS_timings"])
+    return PileUpXingFolderCfg(flags, name, **kwargs)
 
 
-def MergeRecoTimingObjTool(name="MergeRecoTimingObjTool", **kwargs):
-    if digitizationFlags.doXingByXingPileUp(): # PileUpTool approach
-        kwargs.setdefault("FirstXing", TimingObj_FirstXing() )
-        kwargs.setdefault("LastXing",  TimingObj_LastXing() )
-
+def MergeRecoTimingObjCfg(flags, name="MergeRecoTimingObjTool", **kwargs):
+    acc = ComponentAccumulator()
+    rangetool = acc.popToolsAndMerge(TimingObjRangeCfg(flags))
+    acc.merge(PileUpMergeSvcCfg(flags, Intervals=rangetool))
+    if flags.Digitization.DoXingByXingPileUp: # PileUpTool approach
+        kwargs.setdefault("FirstXing", TimingObj_FirstXing())
+        kwargs.setdefault("LastXing",  TimingObj_LastXing())
     kwargs.setdefault("RecoTimingObjInputKey", "EVNTtoHITS_timings")
-    if digitizationFlags.PileUpPresampling and 'LegacyOverlay' not in digitizationFlags.experimentalDigi():
-        from OverlayCommonAlgs.OverlayFlags import overlayFlags
-        kwargs.setdefault("RecoTimingObjOutputKey", overlayFlags.bkgPrefix() + "EVNTtoHITS_timings")
+    if flags.Common.ProductionStep == ProductionStep.PileUpPresampling:
+        kwargs.setdefault("RecoTimingObjInputKey", flags.Overlay.BkgPrefix + "EVNTtoHITS_timings")
     else:
-        kwargs.setdefault("RecoTimingObjOutputKey", "EVNTtoHITS_timings")
+        kwargs.setdefault("RecoTimingObjInputKey", "EVNTtoHITS_timings")
+    acc.setPrivateTools(CompFactory.MergeRecoTimingObjTool(name, **kwargs))
+    return acc
 
-    return CfgMgr.MergeRecoTimingObjTool(name, **kwargs)
+
+def MergeGenericMuonSimHitCollCfg(flags, name="MergeGenericMuonSimHitCollTool", **kwargs):
+    acc = ComponentAccumulator()
+    tool = CompFactory.MergeGenericMuonSimHitCollTool(name, **kwargs)
+    acc.merge(PileUpToolsCfg(flags, PileUpTools=tool))
+    return acc
 
 
-############################################################################
-def MergeGenericMuonSimHitCollTool(name="MergeGenericMuonSimHitCollTool", **kwargs):
-    return CfgMgr.MergeGenericMuonSimHitCollTool(name, **kwargs)
-
-def MergeMicromegasSimHitCollTool(name="MergeMicromegasSimHitCollTool", **kwargs):
+def MergeMicromegasSimHitCollCfg(flags, name="MergeMicromegasSimHitCollTool", **kwargs):
+    acc = ComponentAccumulator()
     kwargs.setdefault("SimHitContainerNames", ["MM_Hits"])
-    if digitizationFlags.doXingByXingPileUp(): # PileUpTool approach
+    if flags.Digitization.DoXingByXingPileUp: # PileUpTool approach
         kwargs.setdefault("FirstXing", -250)
         kwargs.setdefault("LastXing",   200)
-    return CfgMgr.MergeGenericMuonSimHitCollTool(name, **kwargs)
+    tool = CompFactory.MergeGenericMuonSimHitCollTool(name, **kwargs)
+    acc.merge(PileUpToolsCfg(flags, PileUpTools=tool))
+    return acc
 
-def MergeSTGCSimHitCollTool(name="MergeSTGCSimHitCollTool", **kwargs):
+
+def MergeSTGCSimHitCollCfg(flags, name="MergeSTGCSimHitCollTool", **kwargs):
+    acc = ComponentAccumulator()
     kwargs.setdefault("SimHitContainerNames", ["sTGC_Hits"])
-    if digitizationFlags.doXingByXingPileUp(): # PileUpTool approach
+    if flags.Digitization.DoXingByXingPileUp: # PileUpTool approach
         kwargs.setdefault("FirstXing", -50)
         kwargs.setdefault("LastXing",   75)
-    return CfgMgr.MergeGenericMuonSimHitCollTool(name, **kwargs)
-
-############################################################################
+    tool = CompFactory.MergeGenericMuonSimHitCollTool(name, **kwargs)
+    acc.merge(PileUpToolsCfg(flags, PileUpTools=tool))
+    return acc

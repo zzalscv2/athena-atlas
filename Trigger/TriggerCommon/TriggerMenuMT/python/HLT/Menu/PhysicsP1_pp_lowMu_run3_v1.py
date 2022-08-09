@@ -25,9 +25,9 @@ from .Physics_pp_run3_v1 import (
     Topo3Group
 )
 
-LowMuGroup = ['Primary:LowMu']
-LowMuGroupPhI = ['Primary:LowMuPhaseI']
-LowMuGroupLeg = ['Primary:LowMuLegacy']
+LowMuGroup = ['LowMu']
+LowMuGroupPhI = ['LowMuPhaseI']
+LowMuGroupLeg = ['LowMuLegacy']
 
 
 def setupMenu():

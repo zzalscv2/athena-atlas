@@ -44,12 +44,23 @@ public:
   
   virtual void execute(const std::vector<TIDA::Track*>& referenceTracks,
   		       const std::vector<TIDA::Track*>& testTracks,
-  		       TrackAssociator* associator );
+  		       TrackAssociator* associator ) { 
+    execute( referenceTracks, testTracks, associator, (const TIDA::Event*)0, (double*)0 );
+
+  }
 
   virtual void execute(const std::vector<TIDA::Track*>& referenceTracks,
   		       const std::vector<TIDA::Track*>& testTracks,
   		       TrackAssociator* associator,
-		       const TIDA::Event* tevt );
+		       const TIDA::Event* tevt ) { 
+    execute( referenceTracks, testTracks, associator, tevt, (double*)0 );
+  }
+  
+  virtual void execute(const std::vector<TIDA::Track*>& referenceTracks,
+  		       const std::vector<TIDA::Track*>& testTracks,
+  		       TrackAssociator* associator,
+		       const TIDA::Event* tevt, 
+		       double* beamline );
   
   virtual void execute_vtx(const std::vector<TIDA::Vertex*>& vtx0,
 			   const std::vector<TIDA::Vertex*>& vtx1, 

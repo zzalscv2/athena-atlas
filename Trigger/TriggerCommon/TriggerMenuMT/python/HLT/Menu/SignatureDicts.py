@@ -1117,7 +1117,7 @@ UnconventionalTrackingChainParts = {
     'isoInfo'        : ['iaggrmedium','iaggrloose','imedium','iloose'],
     'extra'          : '',
     'addInfo'        : ['perf'],
-    'dispjetConfig'  : ['3d2p', '1p', 'x3d1p'],
+    'dispjetConfig'  : ['3d2p', '1p', 'x3d1p', '2p'],
     'sigFolder'     : ['UnconventionalTracking'],
     'subSigs'       : ['UnconventionalTracking'],
     'chainPartIndex': list(range(0,10))
