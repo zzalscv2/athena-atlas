@@ -163,10 +163,10 @@ protected:
 
   ToolHandleArray<GenericMonitoringTool> m_monTools { this, "MonTools", {} }; // insane configuration paradigm ?
 
-  SG::ReadHandleKey<xAOD::TrackParticleContainer> m_trackdummykey{this, "OfflineTrackCollection", "InDetTrackParticles", "don't ever set this"};  
+  SG::ReadHandleKeyArray<xAOD::TrackParticleContainer> m_trackdummykeys{ this, "OfflineTrackCollections", {"InDetTrackParticles","InDetLargeD0TrackParticles"}, "" };  
 
-  SG::ReadHandleKey<xAOD::VertexContainer> m_vtxdummykey{this, "OfflineVertexCollection", "PrimaryVertices", "don't ever set this" }; 
-  
+  SG::ReadHandleKeyArray<xAOD::VertexContainer> m_vtxdummykeys{ this, "OfflineVertexCollections", {"PrimaryVertices"}, "" }; 
+
 };
 
 
