@@ -77,6 +77,8 @@ StatusCode Muon::sTgcRdoToPrepDataToolCore::processCollection(Muon::sTgcPrepData
     sTgcPadPrds.reserve(rdoColl->size());
     sTgcWirePrds.reserve(rdoColl->size());
     
+    // Count hits with negative charge, which indicates bad calibration
+    int nHitNegativeCharge{0};
   
     // MuonDetectorManager from the conditions store
     SG::ReadCondHandle<MuonGM::MuonDetectorManager> detMgrHandle{m_muDetMgrKey,ctx};
@@ -124,9 +126,14 @@ StatusCode Muon::sTgcRdoToPrepDataToolCore::processCollection(Muon::sTgcPrepData
 
         NSWCalib::CalibratedStrip calibStrip;
         ATH_CHECK (m_calibTool->calibrateStrip(ctx, rdo, calibStrip));
+        int calibratedCharge = static_cast<int>(calibStrip.charge);
+        if (calibratedCharge < 0) {
+            if (nHitNegativeCharge < 1)
+              ATH_MSG_WARNING("One sTGC RDO or more, such as one with pdo = "<<rdo->charge() << " counts, corresponds to a negative charge (" << calibratedCharge << "). Skipping these RDOs");
+            ++nHitNegativeCharge;
+            continue;
+        }
         
-        ATH_MSG_DEBUG("Adding a new STGC PRD, gasGap: " << gasGap << " channel: " << channel << " type: " << channelType );
-
         double width{0.};
         if (channelType == 0) { // Pads
             const MuonGM::MuonPadDesign* design = detEl->getPadDesign(rdoId);
@@ -158,13 +165,13 @@ StatusCode Muon::sTgcRdoToPrepDataToolCore::processCollection(Muon::sTgcPrepData
             // check if the same RdoId is already present; keep the one with the smallest time
             auto it = std::find_if(sTgcPrds.begin(), sTgcPrds.end(), [&rdoId](auto prd) { return (prd.identify() == rdoId); });
             if (it == sTgcPrds.end()) {
-                sTgcPrds.emplace_back(rdoId, hash, localPos, rdoList, cov, detEl, calibStrip.charge, calibStrip.time, bcTag);
+                sTgcPrds.emplace_back(rdoId, hash, localPos, rdoList, cov, detEl, calibratedCharge, calibStrip.time, bcTag);
             } else if (it->time() > calibStrip.time) {
-                *it = sTgcPrepData(rdoId, hash, localPos, rdoList, cov, detEl, calibStrip.charge, calibStrip.time, bcTag);
+                *it = sTgcPrepData(rdoId, hash, localPos, rdoList, cov, detEl, calibratedCharge, calibStrip.time, bcTag);
             }
         } else {
             // if not merging just add the PRD to the collection
-            prdColl->push_back(new sTgcPrepData(rdoId,hash,localPos,rdoList,cov,detEl, calibStrip.charge, calibStrip.time, bcTag));
+            prdColl->push_back(new sTgcPrepData(rdoId,hash,localPos,rdoList,cov,detEl, calibratedCharge, calibStrip.time, bcTag));
         } 
     }
 
