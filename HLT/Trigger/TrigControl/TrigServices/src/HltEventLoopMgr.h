@@ -167,6 +167,9 @@ private:
   /// Print the SOR record
   void printSORAttrList(const coral::AttributeList& atr) const;
 
+  /// Execute optional algs/sequences
+  StatusCode execAtStart(const EventContext& ctx) const;
+
   /** @brief Handle a failure to process an event
    *  @return FAILURE breaks the event loop
    **/
@@ -274,6 +277,9 @@ private:
 
   Gaudi::Property<std::string> m_sorPath{
     this, "SORPath", "/TDAQ/RunCtrl/SOR_Params", "Path to StartOfRun parameters in detector store"};
+
+  Gaudi::Property<std::vector<std::string>> m_execAtStart{
+    this, "execAtStart", {}, "List of algorithms/sequences to execute during prepareForRun"};
 
   Gaudi::Property<bool> m_setMagFieldFromPtree{
     this, "setMagFieldFromPtree", false, "Read magnet currents from ptree"};

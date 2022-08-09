@@ -313,6 +313,9 @@ StatusCode HltEventLoopMgr::prepareForRun(const ptree& /*pt*/)
     // Initialize COOL helper (needs to be done after IOVDbSvc has loaded all folders)
     ATH_CHECK(m_coolHelper->readFolderInfo());
 
+    // Run optional algs/sequences (e.g. CondAlgs ATR-26138)
+    ATH_CHECK(execAtStart(m_currentRunCtx));
+
     // close any open files (e.g. THistSvc)
     ATH_CHECK(m_ioCompMgr->io_finalize());
 
@@ -355,6 +358,25 @@ StatusCode HltEventLoopMgr::prepareForRun(const ptree& /*pt*/)
   ATH_MSG_VERBOSE("end of " << __FUNCTION__);
   return StatusCode::FAILURE;
 }
+
+
+// =============================================================================
+StatusCode HltEventLoopMgr::execAtStart(const EventContext& ctx) const
+{
+  const IAlgManager* algMgr = Gaudi::svcLocator()->as<IAlgManager>();
+  IAlgorithm* alg{nullptr};
+
+  StatusCode sc;
+  for (const std::string& name : m_execAtStart) {
+    if ( algMgr->getAlgorithm(name, alg) ) {
+      ATH_MSG_INFO("Executing " << alg->name() << "...");
+      sc &= alg->execute(ctx);
+    }
+    else ATH_MSG_WARNING("Cannot find algorithm or sequence " << name);
+  }
+  return sc;
+}
+
 
 // =============================================================================
 // Implementation of ITrigEventLoopMgr::hltUpdateAfterFork
