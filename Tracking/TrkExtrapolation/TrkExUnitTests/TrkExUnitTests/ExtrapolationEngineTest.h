@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
 */
 
 //////////////////////////////////////////////////////////////////
@@ -12,6 +12,7 @@
 // Athena & Gaudi includes
 #include "GaudiKernel/ServiceHandle.h"
 #include "GaudiKernel/ToolHandle.h"
+#include "CxxUtils/checker_macros.h"
 // Trk includes
 #include "TrkExUnitTests/TrkExUnitTestBase.h"
 #include "TrkExInterfaces/IExtrapolationEngine.h"
@@ -36,7 +37,8 @@ namespace Trk {
       @author Andreas.Salzburger@cern.ch, Noemi.Calace@cern.ch
    */
 
-  class ExtrapolationEngineTest: public TrkExUnitTestBase  {
+  class ATLAS_NOT_THREAD_SAFE ExtrapolationEngineTest: public TrkExUnitTestBase  {
+  //    ^ ExtrapolationEngine itself is not thread-safe
   public:
     /** Standard Athena-Algorithm Constructor */
     ExtrapolationEngineTest(const std::string& name, ISvcLocator* pSvcLocator);
