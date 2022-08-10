@@ -38,7 +38,7 @@ void LArG4H6BeamSD::Initialize(G4HCofThisEvent* /*HCE*/)
 
 G4bool LArG4H6BeamSD::ProcessHits(G4Step* aStep, G4TouchableHistory* /*Touchable*/)
 {
-  LArG4H6FrontHit* theFrontHit;
+  LArG4H6FrontHit* theFrontHit = nullptr;
 
   G4double edep  = aStep->GetTotalEnergyDeposit() * aStep->GetTrack()->GetWeight();
 
