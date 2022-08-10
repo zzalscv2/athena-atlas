@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2020 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef Muon_InsituTrackTools_H
@@ -63,20 +63,20 @@ namespace Muon
       /** default destructor */
       virtual ~InsituTrackTools () {};
 		
-      bool	isZBosonCandidate(const INavigable4Momentum *track1, const INavigable4Momentum *track2);
-      bool	isTriggeredMuon(INavigable4Momentum *track1);
-      bool	isTriggeredElectron(INavigable4Momentum *track1);
-      bool	isCloseTrack(const INavigable4Momentum *track1, const INavigable4Momentum *track2);
-      bool	isIsolatedTrack(const INavigable4Momentum *track1);
-      bool	isIsolatedMuon(const INavigable4Momentum *track1);
-      bool	isElectronCandidate(INavigable4Momentum *track1);
+      virtual bool	isZBosonCandidate(const INavigable4Momentum *track1, const INavigable4Momentum *track2) override;
+      virtual bool	isTriggeredMuon(const INavigable4Momentum *track1) override;
+      virtual bool	isTriggeredElectron(const INavigable4Momentum *track1) override;
+      virtual bool	isCloseTrack(const INavigable4Momentum *track1, const INavigable4Momentum *track2) override;
+      virtual bool	isIsolatedTrack(const INavigable4Momentum *track1) override;
+      virtual bool	isIsolatedMuon(const INavigable4Momentum *track1) override;
+      virtual bool	isElectronCandidate(const INavigable4Momentum *track1) override;
 		
-      double	getInvariantMass(const INavigable4Momentum *track1, const INavigable4Momentum *track2);
-      double	getDistance(const INavigable4Momentum *track1, const INavigable4Momentum *track2);
-      bool	getTrackIsolation(const INavigable4Momentum *trackParticle, float &PtIsolation, int &NIsolation);
-      float	getTrackPtIsolation(INavigable4Momentum *trackParticle);
-      int	getNTrackIsolation(INavigable4Momentum *trackParticle);
-      float	getJetIsolation(const INavigable4Momentum *trackParticle);
+      virtual double	getInvariantMass(const INavigable4Momentum *track1, const INavigable4Momentum *track2) override;
+      virtual double	getDistance(const INavigable4Momentum *track1, const INavigable4Momentum *track2) override;
+      virtual bool	getTrackIsolation(const INavigable4Momentum *trackParticle, float &PtIsolation, int &NIsolation) override;
+      virtual float	getTrackPtIsolation(const INavigable4Momentum *trackParticle) override;
+      virtual int	getNTrackIsolation(const INavigable4Momentum *trackParticle) override;
+      virtual float	getJetIsolation(const INavigable4Momentum *trackParticle) override;
        	
     private:
 		

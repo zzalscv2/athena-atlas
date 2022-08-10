@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2020 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "MuonDQAUtils/MuonSpectrometerProbeCollectorTool.h"
@@ -73,7 +73,7 @@ namespace Muon {
 	if (((*muonItr)->pt()>m_muonPtCut) && ((*muonItr)->isCombinedMuon()))
 	  {
 	    const Rec::TrackParticle *muonTrack	= (*muonItr)->track();
-	    if ((m_RequireTrigger==false) || (m_InsituPerformanceTools->isTriggeredMuon(const_cast<Rec::TrackParticle*>(muonTrack))==true))
+	    if ((m_RequireTrigger==false) || (m_InsituPerformanceTools->isTriggeredMuon(muonTrack)==true))
 	      {
 		Rec::TrackParticleContainer::const_iterator innerTrackItr  = trackTES->begin();
 		Rec::TrackParticleContainer::const_iterator innerTrackItrE = trackTES->end();
@@ -82,7 +82,7 @@ namespace Muon {
 		    const Rec::TrackParticle *innerTrack	= (*innerTrackItr);
 		    if (innerTrack->pt()>m_muonPtCut)
 		      {
-			if (m_InsituPerformanceTools->isZBosonCandidate(const_cast<Rec::TrackParticle*>(innerTrack), const_cast<Rec::TrackParticle*>(muonTrack))==true)
+			if (m_InsituPerformanceTools->isZBosonCandidate(innerTrack, muonTrack)==true)
 			  {
 			    Rec::TrackParticle temp;
 			    temp.setPx(innerTrack->px());
