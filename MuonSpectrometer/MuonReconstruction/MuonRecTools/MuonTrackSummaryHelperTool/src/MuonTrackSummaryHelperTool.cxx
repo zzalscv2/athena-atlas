@@ -301,9 +301,11 @@ void Muon::MuonTrackSummaryHelperTool::addDetailedTrackSummary(const Trk::Track&
                     layIds.insert(layId);
                     if (m_idHelperSvc->isCsc(id)) {
                         const Muon::CscClusterOnTrack* cscClus = dynamic_cast<const Muon::CscClusterOnTrack*>(rot);
-                        if (cscClus->status() == Muon::CscClusterStatus::CscStatusUnspoiled ||
+                        if (cscClus) {
+                          if (cscClus->status() == Muon::CscClusterStatus::CscStatusUnspoiled ||
                             cscClus->status() == Muon::CscClusterStatus::CscStatusSplitUnspoiled)
                             goodLayIds.insert(layId);
+                        }
                     }
                 }
             } else {
