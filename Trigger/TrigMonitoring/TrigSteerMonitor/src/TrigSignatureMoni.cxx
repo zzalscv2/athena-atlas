@@ -163,7 +163,7 @@ StatusCode TrigSignatureMoni::stop() {
 
   auto collToString = [&](int xbin, const LockedHandle<TH2>& hist, int startOfset=0, int endOffset=0){ 
     std::string v;
-    const int stepsSize = hist->GetYaxis()->GetNbins() - 3; // L1, AfterPS, Output
+    const int stepsSize = hist->GetYaxis()->GetNbins() - nBaseSteps();
     for (int ybin = 1; ybin <= hist->GetYaxis()->GetNbins()-endOffset; ++ybin) {
       if (ybin > startOfset) {
         // Skip steps where chain wasn't active
@@ -185,10 +185,11 @@ StatusCode TrigSignatureMoni::stop() {
   std::string v;
   v += fixedWidth("L1", 11);
   v += fixedWidth("AfterPS", 11);
-  for (int bin = 1; bin <= m_passHistogram->GetYaxis()->GetNbins()-3; ++bin) {
+  for (int bin = 1; bin <= m_passHistogram->GetYaxis()->GetNbins()-nBaseSteps(); ++bin) {
     v += fixedWidth("Step" + std::to_string(bin), 11);
   }
   v += fixedWidth("Output", 11);
+  v += fixedWidth("Express", 11);
   
   ATH_MSG_INFO("Chains passing step (1st row events & 2nd row decision counts):");  
   ATH_MSG_INFO(fixedWidth("ChainName", 30) << v);
@@ -259,16 +260,15 @@ StatusCode TrigSignatureMoni::fillSequences(const std::set<std::string>& sequenc
 }
 
 StatusCode TrigSignatureMoni::fillStreamsAndGroups(const std::map<std::string, TrigCompositeUtils::DecisionIDContainer>& nameToChainsMap, const TrigCompositeUtils::DecisionIDContainer& dc) const {
-  // Fill just the last row of the histograms
-  const double row = nSteps();
-  const double rateRow = nBaseSteps();
+  const int countOutputRow {nSteps()-1};
+  const int rateOutputRow {nBaseSteps()-1};
   for (const auto& name : nameToChainsMap) {
     for (TrigCompositeUtils::DecisionID id : dc) {
       if (name.second.find(id) != name.second.end()){
         double bin = m_nameToBinMap.at(name.first);
-        m_countHistogram->Fill(bin, row);
-        m_rateHistogram.fill(bin, rateRow);
-        m_passHistogram->Fill(bin, row);
+        m_countHistogram->Fill(bin, countOutputRow);
+        m_rateHistogram.fill(bin, rateOutputRow);
+        m_passHistogram->Fill(bin, countOutputRow);
         break;
       }
     }
@@ -378,18 +378,29 @@ StatusCode TrigSignatureMoni::execute( const EventContext& context ) const {
     TrigCompositeUtils::decisionIDs(expressDecisionObject, expressFinalIDs);
   }
 
-  // Fill the histograms
-  const int row {nSteps()};
-  const int rateRow {nBaseSteps()};
+  // Fill the histograms with output counts/rate
+  const int countOutputRow {nSteps()-1};
+  const int rateOutputRow {nBaseSteps()-1};
   ATH_CHECK( fillStreamsAndGroups(m_streamToChainMap, finalIDs));
-  ATH_CHECK( fillStreamsAndGroups(m_expressChainMap, expressFinalIDs));
   ATH_CHECK( fillStreamsAndGroups(m_groupToChainMap, finalIDs));
-  ATH_CHECK( fillPassEvents(finalIDs, row));
-  ATH_CHECK( fillRate(finalIDs, rateRow));
+  ATH_CHECK( fillPassEvents(finalIDs, countOutputRow));
+  ATH_CHECK( fillRate(finalIDs, rateOutputRow));
 
+  // Fill the histograms with express counts/rate
+  const int countExpressRow {nSteps()};
+  const int rateExpressRow {nBaseSteps()};
+  ATH_CHECK( fillStreamsAndGroups(m_expressChainMap, expressFinalIDs));
+  ATH_CHECK( fillPassEvents(expressFinalIDs, countExpressRow));
+  ATH_CHECK( fillRate(expressFinalIDs, rateExpressRow));
+
+  // Fill the "All" column in counts/rate histograms
   if (!finalIDs.empty()) {
-    m_passHistogram->Fill(1, double(row));
-    m_rateHistogram.fill(1, double(rateRow));
+    m_passHistogram->Fill(1, double(countOutputRow));
+    m_rateHistogram.fill(1, double(rateOutputRow));
+  }
+  if (!expressFinalIDs.empty()) {
+    m_passHistogram->Fill(1, double(countExpressRow));
+    m_rateHistogram.fill(1, double(rateExpressRow));
   }
 
   return StatusCode::SUCCESS;
@@ -416,7 +427,7 @@ int TrigSignatureMoni::nSteps() const {
 }
 
 int TrigSignatureMoni::nBaseSteps() const {
-  return 3; // in, after ps, out
+  return 4; // in, after ps, out, express
 }
 
 StatusCode TrigSignatureMoni::initHist(LockedHandle<TH2>& hist, SG::ReadHandle<TrigConf::HLTMenu>& hltMenuHandle, bool steps) {
@@ -462,7 +473,8 @@ StatusCode TrigSignatureMoni::initHist(LockedHandle<TH2>& hist, SG::ReadHandle<T
   for ( size_t i = 0; steps && i < m_decisionCollectorTools.size(); ++i) {
     y->SetBinLabel(3 + i, ("Step "+std::to_string(i)).c_str());
   }
-  y->SetBinLabel(y->GetNbins(), "Output"); // Last bin
+  y->SetBinLabel(y->GetNbins()-1, "Output"); // Second to last bin
+  y->SetBinLabel(y->GetNbins(), "Express"); // Last bin
 
   return StatusCode::SUCCESS;
 }
