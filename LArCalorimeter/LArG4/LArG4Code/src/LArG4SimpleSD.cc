@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "LArG4Code/LArG4SimpleSD.h"
@@ -10,7 +10,6 @@
 #include "CaloIdentifier/LArEM_ID.h"
 #include "CaloIdentifier/LArFCAL_ID.h"
 #include "CaloIdentifier/LArHEC_ID.h"
-#include "CaloIdentifier/LArMiniFCAL_ID.h"
 #include "StoreGate/StoreGateSvc.h"
 #include "LArSimEvent/LArHitContainer.h"
 
@@ -31,7 +30,6 @@ LArG4SimpleSD::LArG4SimpleSD(G4String a_name, ILArCalculatorSvc* calc, const std
   , m_larEmID(nullptr)
   , m_larFcalID(nullptr)
   , m_larHecID(nullptr)
-  , m_larMiniFcalID(nullptr)
 {
   // Only one string causes a change in action
   if(type == "Uniform")
@@ -47,7 +45,6 @@ LArG4SimpleSD::LArG4SimpleSD(G4String a_name, StoreGateSvc* detStore)
   , m_larEmID (nullptr)
   , m_larFcalID (nullptr)
   , m_larHecID (nullptr)
-  , m_larMiniFcalID (nullptr)
 {
   // This should only be used when it's safe to do this retrieval
   const CaloIdManager* caloIdManager=nullptr;
@@ -67,11 +64,7 @@ LArG4SimpleSD::LArG4SimpleSD(G4String a_name, StoreGateSvc* detStore)
   if(larHecID==0)
     throw std::runtime_error("IFastSimDedicatedSD: Invalid HEC ID helper");
 
-  const LArMiniFCAL_ID* larMiniFcalID = caloIdManager->getMiniFCAL_ID();
-  if(larMiniFcalID==0)
-    throw std::runtime_error("IFastSimDedicatedSD: Invalid Mini FCAL ID helper");
-
-  setupHelpers( larEmID, larFcalID, larHecID, larMiniFcalID );
+  setupHelpers( larEmID, larFcalID, larHecID );
 }
 
 LArG4SimpleSD::~LArG4SimpleSD()
@@ -332,21 +325,9 @@ Identifier LArG4SimpleSD::ConvertID(const LArG4Identifier& a_ident) const
             }
             else
             {
-                //is Mini FCAL
-                try
-                {
-                    id = m_larMiniFcalID->channel_id(a_ident[2],  // zSide
-                                                     a_ident[3],  // module
-                                                     a_ident[4],  // depth
-                                                     a_ident[5],  // eta
-                                                     a_ident[6]); // phi
-                }
-                catch(LArID_Exception& e)
-                {
-                    G4cout << "ERROR ConvertID:: LArMiniFCAL_ID error code " << e.code() << " "
-                    << (std::string) e
-                    << G4endl;
-                }
+              //is Mini FCAL
+              G4cout << "ERROR ConvertID:: unsupported LArMiniFCAL Identifier"
+                     << G4endl;
             }
         }
     }

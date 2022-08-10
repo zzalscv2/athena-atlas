@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2017 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "ActiveSDTool.h"
@@ -30,7 +30,6 @@ namespace LArG4
     , m_fcal1calc("FCAL1CalibCalculator", name)
     , m_fcal2calc("FCAL2CalibCalculator", name)
     , m_fcal3calc("FCAL3CalibCalculator", name)
-    , m_minfcalcalc("MiniFCALActiveCalibrationCalculator", name)
   {
     declareProperty("HitCollectionName", m_hitCollName);
     declareProperty("StacVolumes", m_stacVolumes);
@@ -46,7 +45,6 @@ namespace LArG4
     declareProperty("FCAL2Volumes", m_fcal2Volumes);
     declareProperty("FCAL3Volumes", m_fcal3Volumes);
     declareProperty("SliceVolumes", m_sliceVolumes);
-    declareProperty("MiniVolumes", m_miniVolumes);
 
     declareProperty("EMBPSCalibrationCalculator",m_bpsmodcalc);
     declareProperty("EMBCalibrationCalculator",m_embcalc);
@@ -61,7 +59,6 @@ namespace LArG4
     declareProperty("FCAL1CalibCalculator",m_fcal1calc);
     declareProperty("FCAL2CalibCalculator",m_fcal2calc);
     declareProperty("FCAL3CalibCalculator",m_fcal3calc);
-    declareProperty("MiniFCALActiveCalibrationCalculator",m_minfcalcalc);
   }
 
   //---------------------------------------------------------------------------
@@ -83,7 +80,6 @@ namespace LArG4
     ATH_CHECK(m_fcal1calc.retrieve());
     ATH_CHECK(m_fcal2calc.retrieve());
     ATH_CHECK(m_fcal3calc.retrieve());
-    ATH_CHECK(m_minfcalcalc.retrieve());
 
     return StatusCode::SUCCESS;
   }
@@ -111,7 +107,6 @@ namespace LArG4
     sdWrapper->addSD( makeOneSD( "FCAL::Module2::Gap::Calibration", &*m_fcal2calc, m_fcal2Volumes ) );
     sdWrapper->addSD( makeOneSD( "FCAL::Module3::Gap::Calibration", &*m_fcal3calc, m_fcal3Volumes ) );
     sdWrapper->addSD( makeOneSD( "HEC::Module::Depth::Slice::Wheel::Calibration", &*m_heccalc, m_sliceVolumes ) );
-    sdWrapper->addSD( makeOneSD( "MiniFCAL::Wafer", &*m_minfcalcalc, m_miniVolumes ) );
 
     return sdWrapper;
   }

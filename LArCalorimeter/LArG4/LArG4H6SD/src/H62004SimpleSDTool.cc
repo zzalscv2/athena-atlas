@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2019 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "H62004SimpleSDTool.h"
@@ -37,7 +37,7 @@ namespace LArG4
     // Create the simple SD
     auto sd = std::make_unique<LArG4H62004SD>
       (sdName, calc, m_timeBinType, m_timeBinWidth);
-    sd->setupHelpers(m_larEmID, m_larFcalID, m_larHecID, m_larMiniFcalID);
+    sd->setupHelpers(m_larEmID, m_larFcalID, m_larHecID);
 
     // Assign the volumes to the SD
     if( assignSD( sd.get(), parsedVolumes ).isFailure() ) {

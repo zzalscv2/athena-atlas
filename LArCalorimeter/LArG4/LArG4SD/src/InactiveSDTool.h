@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2017 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef LARG4SD_INACTIVESDTOOL_H
@@ -53,9 +53,6 @@ namespace LArG4
       std::vector<std::string> m_fcal1Volumes;
       std::vector<std::string> m_fcal2Volumes;
       std::vector<std::string> m_fcal3Volumes;
-      std::vector<std::string> m_miniMomVolumes;
-      std::vector<std::string> m_miniVolumes;
-      std::vector<std::string> m_miniLayVolumes;
       /// @}
 
       ServiceHandle<ILArCalibCalculatorSvc> m_embpscalc; //BarrelPresampler::CalibrationCalculator
@@ -68,7 +65,6 @@ namespace LArG4
       ServiceHandle<ILArCalibCalculatorSvc> m_fcal1calc;
       ServiceHandle<ILArCalibCalculatorSvc> m_fcal2calc;
       ServiceHandle<ILArCalibCalculatorSvc> m_fcal3calc;
-     ServiceHandle<ILArCalibCalculatorSvc> m_minfcalcalc; //LArG4::MiniFCAL::MiniFCALCalibrationCalculator(LArG4::MiniFCAL::kInactive) 
 
   }; // class InactiveSDTool
 

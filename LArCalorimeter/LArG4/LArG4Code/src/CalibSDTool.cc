@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2017 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "LArG4Code/CalibSDTool.h"
@@ -9,7 +9,6 @@
 #include "CaloIdentifier/LArEM_ID.h"
 #include "CaloIdentifier/LArFCAL_ID.h"
 #include "CaloIdentifier/LArHEC_ID.h"
-#include "CaloIdentifier/LArMiniFCAL_ID.h"
 #include "CaloIdentifier/CaloDM_ID.h"
 
 // Local includes
@@ -30,7 +29,6 @@ namespace LArG4
       m_larEmID(nullptr),
       m_larFcalID(nullptr),
       m_larHecID(nullptr),
-      m_larMiniFcalID(nullptr),
       m_caloDmID(nullptr),
       m_id_helper(nullptr)
   {
@@ -56,10 +54,6 @@ namespace LArG4
     }
     if( (m_larHecID = idMgr->getHEC_ID()) == nullptr) {
       ATH_MSG_ERROR("Invalid LAr HEC ID helper");
-      return StatusCode::FAILURE;
-    }
-    if( (m_larMiniFcalID = idMgr->getMiniFCAL_ID()) == nullptr) {
-      ATH_MSG_ERROR("Invalid LAr Mini FCAL ID helper");
       return StatusCode::FAILURE;
     }
     if( (m_caloDmID = idMgr->getDM_ID()) == nullptr) {
@@ -105,7 +99,7 @@ namespace LArG4
 
     // Create the calib SD
     auto sd = std::make_unique<LArG4CalibSD>(sdName, calc, m_doPID);
-    sd->setupHelpers(m_larEmID, m_larFcalID, m_larHecID, m_larMiniFcalID, m_caloDmID);
+    sd->setupHelpers(m_larEmID, m_larFcalID, m_larHecID, m_caloDmID);
 
     const std::string dead("Dead");
     if(sdName.find(dead)==std::string::npos) {

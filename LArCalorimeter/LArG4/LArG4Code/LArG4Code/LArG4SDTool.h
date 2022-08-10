@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef LARG4BARRELSDTOOL_H
@@ -16,7 +16,6 @@ class G4VSensitiveDetector;
 class LArEM_ID;
 class LArFCAL_ID;
 class LArHEC_ID;
-class LArMiniFCAL_ID;
 class CaloDM_ID;
 class LArG4SimpleSD;
 class LArG4CalibSD;
@@ -71,7 +70,6 @@ class LArG4SDTool : public SensitiveDetectorBase
   const LArEM_ID*       m_larEmID;
   const LArFCAL_ID*     m_larFcalID;
   const LArHEC_ID*      m_larHecID;
-  const LArMiniFCAL_ID* m_larMiniFcalID;
   const CaloDM_ID*      m_caloDmID;
 
   /// Helper function for matching strings with wildcards

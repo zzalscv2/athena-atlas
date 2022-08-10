@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2020 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "CxxUtils/checker_macros.h"
@@ -29,7 +29,6 @@ ATLAS_NO_CHECK_FILE_THREAD_SAFETY;
 #include "CaloIdentifier/LArEM_ID.h"
 #include "CaloIdentifier/LArFCAL_ID.h"
 #include "CaloIdentifier/LArHEC_ID.h"
-#include "CaloIdentifier/LArMiniFCAL_ID.h"
 #include "CaloIdentifier/CaloDM_ID.h"
 
 #include "G4AtlasTools/DerivedG4PhysicalVolume.h"
@@ -57,7 +56,6 @@ class LArG4CalibSDtest : public ::testing::Test {
   LArEM_ID* m_EM = new LArEM_ID(); 
   LArFCAL_ID* m_FCAL = new LArFCAL_ID();
   LArHEC_ID* m_HEC = new LArHEC_ID();
-  LArMiniFCAL_ID* m_mini = new LArMiniFCAL_ID();
   CaloDM_ID* m_caloDm = new CaloDM_ID();
   AtlasDetectorID* m_Id_helper = new AtlasDetectorID();
 };
@@ -70,7 +68,7 @@ TEST_F( LArG4CalibSDtest, ProcessHits )
 
   DerivedILArCalibCalculatorSvcForTest* calc = new DerivedILArCalibCalculatorSvcForTest();//use the derived ILArCalibCalculatorSvc class since ILArCalibCalculatorSvc is abstact and can not be instantiated
   LArG4CalibSD sd1("name1", calc, false);
-  sd1.setupHelpers(m_EM, m_FCAL, m_HEC, m_mini, m_caloDm);//add helpers(m_EM, m_FCAL, m_HEC, m_mini, m_caloDm), which can convert a set of numbers stored in LArG4Identifier object into a compact number stored in a Identifier object
+  sd1.setupHelpers(m_EM, m_FCAL, m_HEC, m_caloDm);//add helpers(m_EM, m_FCAL, m_HEC, m_caloDm), which can convert a set of numbers stored in LArG4Identifier object into a compact number stored in a Identifier object
   sd1.addDetectorHelper(m_Id_helper);//same with setupHelpers 
   sd1.ProcessHits(aStep, th);
 
@@ -91,7 +89,7 @@ TEST_F( LArG4CalibSDtest, EndOfAthenaEvent )
 
   DerivedILArCalibCalculatorSvcForTest* calc = new DerivedILArCalibCalculatorSvcForTest();//use the derived ILArCalibCalculatorSvc class since ILArCalibCalculatorSvc is abstact and can not be instantiated
   LArG4CalibSD sd2("name2", calc, false);
-  sd2.setupHelpers(m_EM, m_FCAL, m_HEC, m_mini, m_caloDm);//add helpers(m_EM, m_FCAL, m_HEC, m_mini, m_caloDm), which can convert a set of numbers stored in LArG4Identifier object into a compact number stored in a Identifier object
+  sd2.setupHelpers(m_EM, m_FCAL, m_HEC, m_caloDm);//add helpers(m_EM, m_FCAL, m_HEC, m_caloDm), which can convert a set of numbers stored in LArG4Identifier object into a compact number stored in a Identifier object
   sd2.addDetectorHelper(m_Id_helper);//same with setupHelpers
   sd2.SpecialHit(aStep, energies);//this member function is intended to store a newly-generated hit in to the hit collection calibrationHits with a kind of specific order
 
@@ -111,7 +109,7 @@ TEST_F( LArG4CalibSDtest, SpecialHit )
 
   DerivedILArCalibCalculatorSvcForTest* calc = new DerivedILArCalibCalculatorSvcForTest();//use the derived ILArCalibCalculatorSvc class since ILArCalibCalculatorSvc is abstact and can not be instantiated
   LArG4CalibSD sd5("name5", calc, false);
-  sd5.setupHelpers(m_EM, m_FCAL, m_HEC, m_mini, m_caloDm);//add helpers(m_EM, m_FCAL, m_HEC, m_mini, m_caloDm), which can convert a set of numbers stored in LArG4Identifier object into a compact number stored in a Identifier object
+  sd5.setupHelpers(m_EM, m_FCAL, m_HEC, m_caloDm);//add helpers(m_EM, m_FCAL, m_HEC, m_caloDm), which can convert a set of numbers stored in LArG4Identifier object into a compact number stored in a Identifier object
   sd5.addDetectorHelper(m_Id_helper);//same with setupHelpers
   sd5.SpecialHit(aStep, energies);//this member function is intended to store a newly-generated hit in to the hit collection calibrationHits with a kind of specific order
   
@@ -138,7 +136,7 @@ TEST_F( LArG4CalibSDtest, SimpleHit )
 
   DerivedILArCalibCalculatorSvcForTest* calc = new DerivedILArCalibCalculatorSvcForTest();
   LArG4CalibSD sd6("name6", calc, false);
-  sd6.setupHelpers(m_EM, m_FCAL, m_HEC, m_mini, m_caloDm); 
+  sd6.setupHelpers(m_EM, m_FCAL, m_HEC, m_caloDm);
   sd6.addDetectorHelper(m_Id_helper);
   LArG4CalibSD::m_calibrationHits_t calibrationHits; //it is actually a hit collection, since there is no previous hit in it, it will execute the "if (bookmark == calibrationHits.end() || !(*bookmark)->Equals(hit)) {if (calibrationHits.empty() || bookmark == calibrationHits.begin()) ...}" block of the member function SimpleHit
   sd6.SimpleHit(a_ident, energies, calibrationHits); //this member function is intended to store a newly-generated hit in to the hit collection calibrationHits with a kind of specific order
@@ -155,7 +153,6 @@ TEST_F( LArG4CalibSDtest, ConvertID )
 //const LArEM_ID*       m_larEmID;
 //const LArFCAL_ID*     m_larFcalID;
 //const LArHEC_ID*      m_larHecID;
-//const LArMiniFCAL_ID* m_larMiniFcalID;
 //const CaloDM_ID*      m_caloDmID;
 //const AtlasDetectorID* m_id_helper;
 
@@ -171,7 +168,7 @@ TEST_F( LArG4CalibSDtest, ConvertID )
 
   DerivedILArCalibCalculatorSvcForTest* calc = new DerivedILArCalibCalculatorSvcForTest();
   LArG4CalibSD sd7("name7", calc, false);
-  sd7.setupHelpers(m_EM, m_FCAL, m_HEC, m_mini, m_caloDm); //To set the identifier helper class objects m_larEmID using these objects: EM, FCAL, HEC, mini, caloDm
+  sd7.setupHelpers(m_EM, m_FCAL, m_HEC, m_caloDm); //To set the identifier helper class objects m_larEmID using these objects: EM, FCAL, HEC, caloDm
   sd7.addDetectorHelper(m_Id_helper); //To set the identifier helper class object m_id_helper using the object: id_helper
   Identifier id = sd7.ConvertID(a_ident); //generally speaking, a set of number was compact into a single number stored in id
 

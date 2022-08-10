@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2017 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef LARG4CALIBSD_H
@@ -20,7 +20,6 @@ class G4Step;
 class LArEM_ID;
 class LArFCAL_ID;
 class LArHEC_ID;
-class LArMiniFCAL_ID;
 class CaloDM_ID;
 class AtlasDetectorID;
 
@@ -62,12 +61,10 @@ public:
   void setupHelpers( const LArEM_ID* EM ,
                      const LArFCAL_ID* FCAL ,
                      const LArHEC_ID* HEC ,
-                     const LArMiniFCAL_ID* mini ,
                      const CaloDM_ID* caloDm ) {
     m_larEmID = EM;
     m_larFcalID = FCAL;
     m_larHecID = HEC;
-    m_larMiniFcalID = mini;
     m_caloDmID = caloDm;
   }
 
@@ -119,7 +116,6 @@ protected:
   const LArEM_ID*       m_larEmID;
   const LArFCAL_ID*     m_larFcalID;
   const LArHEC_ID*      m_larHecID;
-  const LArMiniFCAL_ID* m_larMiniFcalID;
   const CaloDM_ID*      m_caloDmID;
   const AtlasDetectorID* m_id_helper;
 };

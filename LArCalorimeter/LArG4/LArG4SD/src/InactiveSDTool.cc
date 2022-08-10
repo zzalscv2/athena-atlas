@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2017 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "InactiveSDTool.h"
@@ -27,7 +27,6 @@ namespace LArG4
     , m_fcal1calc("FCAL1CalibCalculator", name)
     , m_fcal2calc("FCAL2CalibCalculator", name)
     , m_fcal3calc("FCAL3CalibCalculator", name)
-    , m_minfcalcalc("MiniFCALInactiveCalibrationCalculator", name)
   {
     declareProperty("HitCollectionName", m_hitCollName);
     declareProperty("BarrelPreVolumes", m_barPreVolumes);
@@ -42,9 +41,6 @@ namespace LArG4
     declareProperty("FCAL1Volumes", m_fcal1Volumes);
     declareProperty("FCAL2Volumes", m_fcal2Volumes);
     declareProperty("FCAL3Volumes", m_fcal3Volumes);
-    declareProperty("MiniMomVolumes", m_miniMomVolumes);
-    declareProperty("MiniVolumes", m_miniVolumes);
-    declareProperty("MiniLayVolumes", m_miniLayVolumes);
 
     declareProperty("EMBPSCalibrationCalculator", m_embpscalc);
     declareProperty("EMBCalibrationCalculator", m_embcalc);
@@ -56,7 +52,6 @@ namespace LArG4
     declareProperty("FCAL1CalibCalculator", m_fcal1calc);
     declareProperty("FCAL2CalibCalculator", m_fcal2calc);
     declareProperty("FCAL3CalibCalculator", m_fcal3calc);
-    declareProperty("MiniFCALInactiveCalibrationCalculator", m_minfcalcalc);
   }
 
   //---------------------------------------------------------------------------
@@ -74,7 +69,6 @@ namespace LArG4
     ATH_CHECK(m_fcal1calc.retrieve());
     ATH_CHECK(m_fcal2calc.retrieve());
     ATH_CHECK(m_fcal3calc.retrieve());
-    ATH_CHECK(m_minfcalcalc.retrieve());
 
     return StatusCode::SUCCESS;
   }
@@ -130,15 +124,6 @@ namespace LArG4
     );
     sdWrapper->addSD(
       makeOneSD("LAr::FCAL::Inactive3", &*m_fcal3calc, m_fcal3Volumes)
-    );
-    sdWrapper->addSD(
-      makeOneSD("MiniFCALMother::Inactive", &*m_minfcalcalc, m_miniMomVolumes)
-    );
-    sdWrapper->addSD(
-      makeOneSD("MiniFCAL::Inactive", &*m_minfcalcalc, m_miniVolumes)
-    );
-    sdWrapper->addSD(
-      makeOneSD("MiniFCAL::Layer::Inactive", &*m_minfcalcalc, m_miniLayVolumes)
     );
 
     // Return the wrapper as my SD

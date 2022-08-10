@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2017 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "LArG4Code/LArG4CalibSD.h"
@@ -9,7 +9,6 @@
 #include "CaloIdentifier/LArEM_ID.h"
 #include "CaloIdentifier/LArFCAL_ID.h"
 #include "CaloIdentifier/LArHEC_ID.h"
-#include "CaloIdentifier/LArMiniFCAL_ID.h"
 #include "CaloIdentifier/CaloDM_ID.h"
 #include "CaloSimEvent/CaloCalibrationHitContainer.h"
 
@@ -26,7 +25,6 @@ LArG4CalibSD::LArG4CalibSD(G4String a_name, ILArCalibCalculatorSvc* calc, bool d
   , m_larEmID (nullptr)
   , m_larFcalID (nullptr)
   , m_larHecID (nullptr)
-  , m_larMiniFcalID (nullptr)
   , m_caloDmID (nullptr)
   , m_id_helper (nullptr)
 {}
@@ -260,20 +258,8 @@ Identifier LArG4CalibSD::ConvertID(const LArG4Identifier& a_ident) const
             }
             else
             {
-                //is Mini FCAL
-                try
-                {
-                    id = m_larMiniFcalID->channel_id(a_ident[2],  // zSide
-                                                     a_ident[3],  // module
-                                                     a_ident[4],  // depth
-                                                     a_ident[5],  // eta
-                                                     a_ident[6]); // phi
-                }
-                catch(LArID_Exception& e)
-                {
-                    G4cout << "ERROR ConvertID:: LArMiniFCAL_ID error code " << e.code() << " "
-                    << (std::string) e << G4endl;
-                }
+              //is Mini FCAL
+              G4cout << "ERROR ConvertID:: unsupported LArMiniFCAL Identifier " << G4endl;
             }
         }
     }
