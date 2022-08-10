@@ -787,9 +787,11 @@ void test5 (TestRCUSvc& rcusvc)
   exp2 << "{[2,t:120,l:10] - [2,t:130,l:20]} " << bptrs[5] << "\n";
   exp2 << "{[2,t:130,l:10] - [2,t:135,l:20]} " << bptrs[6] << "\n";
   exp2 << "{[20,t:120,l:10] - [20,t:130,l:40]} " << bptrs[8] << "\n";
-  //                                                  xxx 
-  //std::cout << "ss2: " << ss2.str() << "\nexp2: " << exp2.str() << "\n";
-  assert (ss2.str() == exp2.str());
+  if (ss2.str() != exp2.str()) {
+    std::cout << "ss2: " << ss2.str() << "\nexp2: " << exp2.str() << "\n";
+    std::cout.flush();
+    std::abort();
+  }
 }
 
 
@@ -870,10 +872,11 @@ void test7 (TestRCUSvc& rcusvc)
 
   assert (cc1.getDeps().empty());
   std::vector<CondContBase*> v  { &cc2, &cc3 };
-  cc1.addDeps (v);
+  cc1.addDep (&cc2);
+  cc1.addDep (&cc3);
   std::sort (v.begin(), v.end());
   assert (cc1.getDeps() == v);
-  cc1.addDeps (std::vector<CondContBase*> { &cc3 });
+  cc1.addDep (&cc3);
   assert (cc1.getDeps() == v);
 }
 

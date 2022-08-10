@@ -407,7 +407,8 @@ CondContBase::CondContBase (Athena::IRCUSvc& rcusvc,
     m_id (id),
     m_proxy (proxy),
     m_condSet (Updater_t (rcusvc), payloadDeleter, capacity),
-    m_cleanerSvc (s_cleanerSvcName, "CondContBase")
+    m_cleanerSvc (s_cleanerSvcName, "CondContBase"),
+    m_deps (DepSet::Updater_t(), 16)
 {
   if (!m_cleanerSvc.retrieve().isSuccess()) {
     std::abort();
@@ -678,19 +679,12 @@ StatusCode CondContBase::inserted (const EventContext& ctx)
 
 
 /**
- * @brief Declare other conditions containers that depend on this one.
- * @param deps Conditions containers that depend on this one.
+ * @brief Declare another conditions container that depends on this one.
+ * @param dep Conditions container that depends on this one.
  */
-void CondContBase::addDeps (const std::vector<CondContBase*>& deps)
+void CondContBase::addDep (CondContBase* dep)
 {
-  if (deps.empty()) return;
-  std::scoped_lock lock (m_depMutex);
-  m_deps.insert (m_deps.end(), deps.begin(), deps.end());
-
-  // Remove duplicates.
-  std::sort (m_deps.begin(), m_deps.end());
-  auto it = std::unique (m_deps.begin(), m_deps.end());
-  m_deps.resize (it - m_deps.begin());
+  m_deps.insert (dep);
 }
 
 
@@ -699,8 +693,7 @@ void CondContBase::addDeps (const std::vector<CondContBase*>& deps)
  */
 std::vector<CondContBase*> CondContBase::getDeps()
 {
-  std::scoped_lock lock (m_depMutex);
-  return m_deps;
+  return std::vector<CondContBase*> (m_deps.begin(), m_deps.end());
 }
 
 

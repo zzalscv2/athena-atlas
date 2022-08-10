@@ -73,6 +73,8 @@
 #include "AthenaKernel/IConditionsCleanerSvc.h"
 #include "AthenaKernel/CondObjDeleter.h"
 #include "CxxUtils/ConcurrentRangeMap.h"
+#include "CxxUtils/ConcurrentPtrSet.h"
+#include "CxxUtils/SimpleUpdater.h"
 #include "CxxUtils/checker_macros.h"
 
 #include "GaudiKernel/EventIDBase.h"
@@ -482,10 +484,10 @@ public:
 
 
   /**
-   * @brief Declare other conditions containers that depend on this one.
-   * @param deps Conditions containers that depend on this one.
+   * @brief Declare another conditions container that depends on this one.
+   * @param dep Conditions container that depends on this one.
    */
-  void addDeps (const std::vector<CondContBase*>& deps);
+  void addDep (CondContBase* dep);
 
 
   /**
@@ -669,12 +671,9 @@ private:
   ServiceHandle<Athena::IConditionsCleanerSvc> m_cleanerSvc;
 
   /// Other conditions dependencies that depend on this one, as inferred
-  /// by addDependency calls.  There should only be a few of them,
-  /// so just use a simple vector.
-  std::vector<CondContBase*> m_deps;
-
-  /// Serialize access to m_deps.
-  mutable std::mutex m_depMutex;
+  /// by addDependency calls.  There should only be a few of them.
+  using DepSet = CxxUtils::ConcurrentPtrSet<CondContBase, CxxUtils::SimpleUpdater>;
+  DepSet m_deps;
 
   /// Name of the global conditions cleaner service.
   static std::string s_cleanerSvcName ATLAS_THREAD_SAFE;

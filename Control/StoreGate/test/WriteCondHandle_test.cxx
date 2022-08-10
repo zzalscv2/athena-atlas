@@ -503,7 +503,9 @@ void test3( StoreGateSvc* cs )
   std::vector<CondContBase*> v { cc3, cc4 };
   std::sort (v.begin(), v.end());
   assert (cc1->getDeps() == std::vector<CondContBase*> {cc3});
-  assert (cc2->getDeps() == v);
+  std::vector<CondContBase*> v2 = cc2->getDeps();
+  std::sort (v2.begin(), v2.end());
+  assert (v2 == v);
   assert (cc3->getDeps() == std::vector<CondContBase*> {});
   assert (cc4->getDeps() == std::vector<CondContBase*> {});
 
@@ -520,7 +522,9 @@ void test3( StoreGateSvc* cs )
   }
 
   assert (cc1->getDeps() == std::vector<CondContBase*> {cc3});
-  assert (cc2->getDeps() == v);
+  v2 = cc2->getDeps();
+  std::sort (v2.begin(), v2.end());
+  assert (v2 == v);
   assert (cc3->getDeps() == std::vector<CondContBase*> {});
   assert (cc4->getDeps() == std::vector<CondContBase*> {});
 }
