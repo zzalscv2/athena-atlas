@@ -1,6 +1,6 @@
 # Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
 
-from G4DebuggingTools.G4DebuggingToolsConfigNew import VolumeDebugger
+from G4DebuggingTools.G4DebuggingToolsConfig import VolumeDebugger
 
 def VolumeDebuggerAtlas(configFlags, name="G4UA::ISFFullUserActionSvc", **kwargs):
     kwargs.setdefault("TargetVolume","")

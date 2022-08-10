@@ -60,4 +60,4 @@ def enableParticleID(ConfigFlags):
 
 def enableVerboseSelector(ConfigFlags):
     """ """
-    ConfigFlags.Sim.OptionalUserActionList += ['G4DebuggingTools.G4DebuggingToolsConfigNew.VerboseSelectorToolCfg']
+    ConfigFlags.Sim.OptionalUserActionList += ['G4DebuggingTools.G4DebuggingToolsConfig.VerboseSelectorToolCfg']
