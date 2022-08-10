@@ -1,6 +1,4 @@
-################################################################################
-# Package: MDT_Response
-################################################################################
+# Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
 
 # Declare the package name:
 atlas_subdir( MDT_Response )
@@ -23,5 +21,4 @@ atlas_add_library( MDT_Response
 atlas_add_executable( MDT_ResponseTest
                       src/MDT_ResponseTest.cxx
                       INCLUDE_DIRS ${ROOT_INCLUDE_DIRS} ${CLHEP_INCLUDE_DIRS}
-                      LINK_LIBRARIES ${ROOT_LIBRARIES} ${CLHEP_LIBRARIES} MDT_Response )
-
+                      LINK_LIBRARIES ${ROOT_LIBRARIES} ${CLHEP_LIBRARIES} CxxUtils MDT_Response )
