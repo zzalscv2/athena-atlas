@@ -31,6 +31,10 @@ def fromRunArgs(runArgs):
     from SimulationConfig.SimEnums import SimulationFlavour
     commonRunArgsToFlags(runArgs, ConfigFlags)
 
+    # Set ProductionStep
+    from AthenaConfiguration.Enums import ProductionStep
+    ConfigFlags.Common.ProductionStep = ProductionStep.Simulation
+
     # Generate detector list
     from SimuJobTransforms.SimulationHelpers import getDetectorsFromRunArgs
     detectors = getDetectorsFromRunArgs(ConfigFlags, runArgs)
