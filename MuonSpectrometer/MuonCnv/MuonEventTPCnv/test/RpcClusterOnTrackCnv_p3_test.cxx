@@ -93,7 +93,7 @@ void compare (const Muon::RpcClusterOnTrack& p1,
   assert (p1.detectorElement() == p2.detectorElement());
   assert (p2.time() == p2.time());
   // Link key gets modified during writing.
-  assert (p2.prepRawDataLink().key() == 765705747);
+  assert (SG::sgkeyShort (p2.prepRawDataLink().key()) == 765705747);
   assert (p1.prepRawDataLink().index() == p2.prepRawDataLink().index());
 }
 
