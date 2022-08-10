@@ -30,4 +30,4 @@ def enableG4Optimizations(flags):
     # Activate the G4GammaGeneralProcess and the UserAction required
     # to fix the creator process of secondary tracks.
     flags.Sim.G4Commands+=["/process/em/UseGeneralProcess true"]
-    flags.Sim.OptionalUserActionList += ['G4UserActions.G4UserActionsConfigNew.FixG4CreatorProcessToolCfg']
+    flags.Sim.OptionalUserActionList += ['G4UserActions.G4UserActionsConfig.FixG4CreatorProcessToolCfg']

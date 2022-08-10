@@ -12,7 +12,7 @@ def FastSimulationToolListCfg(ConfigFlags):
         #if hasattr(simFlags, 'ForwardDetectors') and simFlags.ForwardDetectors.statusOn and simFlags.ForwardDetectors() == 2:
         #    FastSimulationList += ['ForwardTransportModel']
         if ConfigFlags.Sim.BeamPipeSimMode is not BeamPipeSimMode.Normal:
-            from G4FastSimulation.G4FastSimulationConfigNew import SimpleFastKillerCfg
+            from G4FastSimulation.G4FastSimulationConfig import SimpleFastKillerCfg
             tools += [ result.popToolsAndMerge(SimpleFastKillerCfg(ConfigFlags)) ]
     if ConfigFlags.Detector.GeometryLAr:
         if ConfigFlags.Sim.LArParameterization is not LArParameterization.NoFrozenShowers:
@@ -24,14 +24,14 @@ def FastSimulationToolListCfg(ConfigFlags):
             tools += [ result.popToolsAndMerge(FCALFastShowerCfg(ConfigFlags)) ]
             tools += [ result.popToolsAndMerge(FCAL2FastShowerCfg(ConfigFlags)) ]
             if ConfigFlags.Sim.LArParameterization in [LArParameterization.DeadMaterialFrozenShowers, LArParameterization.FrozenShowersFCalOnly]:
-                from G4FastSimulation.G4FastSimulationConfigNew import DeadMaterialShowerCfg
+                from G4FastSimulation.G4FastSimulationConfig import DeadMaterialShowerCfg
                 tools += [ result.popToolsAndMerge(DeadMaterialShowerCfg(ConfigFlags)) ]
         else:
             print( "getFastSimulationMasterTool INFO No Frozen Showers" )
     if ConfigFlags.Detector.GeometryMuon:
         if ConfigFlags.Sim.CavernBackground not in [CavernBackground.Off, CavernBackground.Read]:
             # and not (hasattr(simFlags, 'RecordFlux') and simFlags.RecordFlux.statusOn and simFlags.RecordFlux()):
-            from TrackWriteFastSim.TrackWriteFastSimConfigNew import NeutronFastSimCfg
+            from TrackWriteFastSim.TrackWriteFastSimConfig import NeutronFastSimCfg
             tools += [ result.popToolsAndMerge(NeutronFastSimCfg(ConfigFlags)) ]
     result.setPrivateTools(tools)
     return result
@@ -77,7 +77,7 @@ def TrackFastSimSensitiveDetectorListCfg(ConfigFlags):
     result = ComponentAccumulator()
     tools = []
     if (ConfigFlags.Detector.EnableMuon and ConfigFlags.Sim.CavernBackground in [CavernBackground.Write, CavernBackground.WriteWorld]) or ConfigFlags.Sim.StoppedParticleFile:
-        from TrackWriteFastSim.TrackWriteFastSimConfigNew import TrackFastSimSDCfg
+        from TrackWriteFastSim.TrackWriteFastSimConfig import TrackFastSimSDCfg
         tools += [ result.popToolsAndMerge(TrackFastSimSDCfg(ConfigFlags)) ]
     result.setPrivateTools(tools)
     return result
@@ -226,7 +226,7 @@ def EnvelopeSensitiveDetectorListCfg(ConfigFlags):
     result = ComponentAccumulator()
     tools = []
     if ConfigFlags.Beam.Type is BeamType.Cosmics and not ConfigFlags.Sim.ReadTR:
-        from TrackWriteFastSim.TrackWriteFastSimConfigNew import CosmicTRSDCfg
+        from TrackWriteFastSim.TrackWriteFastSimConfig import CosmicTRSDCfg
         tools += [ result.popToolsAndMerge(CosmicTRSDCfg(ConfigFlags)) ]
     result.setPrivateTools(tools)
     return result
