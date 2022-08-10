@@ -19,6 +19,8 @@ calibrationChannelAliases = [
     "AntiKt4HI->AntiKt4HI,AntiKt4EMPFlow,AntiKt4EMTopo,AntiKt4LCTopo",
     "AntiKtVR30Rmax4Rmin02PV0Track->AntiKtVR30Rmax4Rmin02PV0Track,AntiKt4EMPFlow,AntiKt4EMTopo",
     "AntiKt4PFlowCustomVtx->AntiKt4EMTopo",
+    "AntiKtVR30Rmax4Rmin02Track->AntiKtVR30Rmax4Rmin02PV0Track,AntiKt4EMPFlow,AntiKt4EMTopo",
+
 ]
 
 def getGrades(flags):

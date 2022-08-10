@@ -5,7 +5,7 @@ from AthenaConfiguration.ComponentFactory import CompFactory
 from JetTagTools.JetFitterVariablesFactoryConfig import JetFitterVariablesFactoryCfg
 #from BTagging.MSVVariablesFactoryConfig import MSVVariablesFactoryCfg
 
-def BTagLightSecVtxToolCfg(flags, Name, JetCollection, PrimaryVertexCollectionName="", SecVertexers = [], TimeStamp = "", **options):
+def BTagLightSecVtxToolCfg(flags, Name, JetCollection, VxSecVertexInfoNameList, secVtxFinderxAODBaseNameList, secVtxFinderTrackNameList, PrimaryVertexCollectionName="", TimeStamp = "", **options):
     """Adds a SecVtxTool instance and registers it.
 
     input: name:               The tool's name.
@@ -16,21 +16,12 @@ def BTagLightSecVtxToolCfg(flags, Name, JetCollection, PrimaryVertexCollectionNa
     If outputObjs is set, then it is filled with objects written to SG."""
     acc = ComponentAccumulator()
 
-    jetcol = JetCollection.replace('Track', 'PV0Track') + 'Jets'
     OutputFilesJFVxname = "JFVtx"
     OutputFilesJFVxFlipname = "JFVtxFlip"
     OutputFilesSVname = "SecVtx"
     OutputFilesSVFlipname = 'SecVtxFlip'
-    VxSecVertexInfoNameList = []
-    secVtxFinderxAODBaseNameList = []
     if TimeStamp:
         TimeStamp = '_' + TimeStamp
-
-    for sv in SecVertexers:
-        VxSecVertexInfoNameList.append(sv+'VxSecVertexInfo_'+JetCollection)
-        secVtxFinderxAODBaseNameList.append(sv)
-
-    secVtxFinderTrackNameList = [ "BTagTrackToJetAssociator" ] * len(SecVertexers)
 
     jetFitterVF = acc.popToolsAndMerge(JetFitterVariablesFactoryCfg('JFVarFactory'))
 
@@ -47,12 +38,12 @@ def BTagLightSecVtxToolCfg(flags, Name, JetCollection, PrimaryVertexCollectionNa
     options['BTagVxSecVertexInfoNames'] = VxSecVertexInfoNameList
     options.setdefault('vxPrimaryCollectionName', PrimaryVertexCollectionName)
     options.setdefault('JetFitterVariableFactory', jetFitterVF)
-    options['JetSecVtxLinkName'] = jetcol + '.' + OutputFilesSVname
-    options['JetJFVtxLinkName'] = jetcol + '.' + OutputFilesJFVxname
+    options['JetSecVtxLinkName'] = JetCollection + '.' + OutputFilesSVname
+    options['JetJFVtxLinkName'] = JetCollection + '.' + OutputFilesJFVxname
     
     if flags.BTagging.RunFlipTaggers is True:
-        options['JetJFFlipVtxLinkName'] = jetcol + '.' + OutputFilesJFVxFlipname
-        options['JetSecVtxFlipLinkName'] = jetcol + '.' + OutputFilesSVFlipname
+        options['JetJFFlipVtxLinkName'] = JetCollection + '.' + OutputFilesJFVxFlipname
+        options['JetSecVtxFlipLinkName'] = JetCollection + '.' + OutputFilesSVFlipname
 
     #options.setdefault('MSVVariableFactory', varFactory)
     options['name'] = Name+TimeStamp
