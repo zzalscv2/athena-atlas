@@ -22,7 +22,7 @@ namespace DerivationFramework {
       const IInterface* p) : 
     AthAlgTool(t,n,p),
     m_v0Tools("Trk::V0Tools", this),
-    m_SearchTool(),
+    m_SearchTool("",this),
     m_pvRefitter("Analysis::PrimaryVertexRefitter", this)
   {
     declareInterface<DerivationFramework::IAugmentationTool>(this);
