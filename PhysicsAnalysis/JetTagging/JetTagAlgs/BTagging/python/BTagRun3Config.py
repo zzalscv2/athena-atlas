@@ -173,8 +173,10 @@ def BTagAlgsCfg(inputFlags,
         if inputFlags.BTagging.RunFlipTaggers:
             SecVertexers += ['JetFitterFlip','SV1Flip']
     jet = JetCollection
+    jetcol_no_suffix = JetCollection
     jetcol = JetCollection + AddedJetSuffix
     if renameTrackJets is True:
+        jetcol_no_suffix = jet.replace("Track", "PV0Track")
         jetcol = jetcol.replace("Track", "PV0Track")
 
     if BTagCollection is None:
@@ -241,6 +243,7 @@ def BTagAlgsCfg(inputFlags,
             inputFlags,
             BTaggingCollection=BTagCollection,
             JetCollection=jetcol,
+            JetColNoJetsSuffix=jetcol_no_suffix,
             PrimaryVertexCollectionName=primaryVertices,
             TaggerList=TaggerList,
             Tracks=JetTrackAssociator,
