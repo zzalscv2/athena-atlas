@@ -358,8 +358,11 @@ AlignmentTriggerMuonStream.AddItem(["xAOD::EventInfo#*"])
 AlignmentTriggerMuonStream.AddItem(["xAOD::EventAuxInfo#*"])
 AlignmentTriggerMuonStream.AddItem(["xAOD::MuonContainer#Muons"])
 AlignmentTriggerMuonStream.AddItem(["xAOD::MuonAuxContainer#MuonsAux."])
+
 AlignmentTriggerMuonStream.AddItem(["xAOD::MuonSegmentContainer#MuonSegments"])
 AlignmentTriggerMuonStream.AddItem(["xAOD::MuonSegmentAuxContainer#MuonSegmentsAux."])
+AlignmentTriggerMuonStream.AddItem(["xAOD::MuonSegmentContainer#UnAssocMuonSegments"])
+AlignmentTriggerMuonStream.AddItem(["xAOD::MuonSegmentAuxContainer#UnAssocMuonSegmentsAux."])
 AlignmentTriggerMuonStream.AddItem(["xAOD::TrackParticleContainer#MuonSpectrometerTrackParticles"])
 AlignmentTriggerMuonStream.AddItem(["xAOD::TrackParticleAuxContainer#MuonSpectrometerTrackParticlesAux."+trackParticleAuxExclusions])
 AlignmentTriggerMuonStream.AddItem(["xAOD::TrackParticleContainer#CombinedMuonTrackParticles"])
@@ -425,6 +428,10 @@ else:
     ## trigger containers
     AlignmentTriggerMuonStream.AddItem(["Muon::NSW_PadTriggerDataContainer#*"])
     AlignmentTriggerMuonStream.AddItem(["Muon::NSW_TrigRawDataContainer#*"])
+    ### 
+    AlignmentTriggerMuonStream.AddItem(["xAOD::MuonSegmentContainer#xAODNSWSegments"])
+    AlignmentTriggerMuonStream.AddItem(["xAOD::MuonSegmentAuxContainer#xAODNSWSegmentsAux."])
+
 ## Tile containers to be checked    
 AlignmentTriggerMuonStream.AddItem(["TileDigitsContainer#MuRcvDigitsCnt"])
 AlignmentTriggerMuonStream.AddItem(["TileRawChannelContainer#MuRcvRawChCnt"])
