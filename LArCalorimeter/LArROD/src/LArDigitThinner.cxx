@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2017 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "LArDigitThinner.h"
@@ -68,20 +68,13 @@ StatusCode LArDigitThinner::initialize() {
 }
 
 
-void LArDigitThinner::initCutValues(const EventContext& ctx) const {
+void LArDigitThinner::initCutValues(const EventContext& ctx) {
 
-  std::lock_guard<std::mutex> lock(m_cacheMtx); //Makes sure the following isn't 
-  //executed concurrently. If aquiring this mutex once per event turns out to be 
-  //too slow, we could use the "Double Checked Locking Pattern" 
-
-  //Note that the cut values per online-ID depends on the LAr-cabling. Even the cabling is 
+  //Note that the cut values per online-ID depends on the LAr-cabling. Even the cabling is
   //formally a time-dependent condition, it changes very rarely. Therefore putting it
   //into a ConditionsContainer filled by a dedicated conditions algorithm seems an
   //unecessary overkill. 
 
-  if (m_cacheFilled) return; //Already done
-
-  m_cacheFilled=true;
   m_energyCuts.assign(m_onlineID->channelHashMax(),std::numeric_limits<int>::max());
 
 
@@ -137,8 +130,14 @@ StatusCode LArDigitThinner::finalize()
 
 
 StatusCode LArDigitThinner::execute(const EventContext& ctx) const {
-  
-  initCutValues(ctx); //Should return right away if the cut values are already initialized
+
+  // initialize cut values once
+  static std::once_flag flag;
+  std::call_once(flag, [&]{
+      // safe because locked
+      auto this_nc ATLAS_THREAD_SAFE = const_cast<LArDigitThinner*>(this);
+      this_nc->initCutValues(ctx);
+    });
 
   //Get event inputs from read handles:
   SG::ReadHandle<LArDigitContainer> inputContainer(m_inputKey,ctx);

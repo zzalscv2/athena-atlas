@@ -21,7 +21,7 @@ atlas_add_component( LArROD
                      src/components/*.cxx
                      INCLUDE_DIRS ${CLHEP_INCLUDE_DIRS} ${LWTNN_INCLUDE_DIRS} ${ROOT_INCLUDE_DIRS}
                      DEFINITIONS ${CLHEP_DEFINITIONS}
-                     LINK_LIBRARIES ${CLHEP_LIBRARIES} ${LWTNN_LIBRARIES} ${ROOT_LIBRARIES} AthAllocators AthContainers AthenaBaseComps AthenaKernel AthenaPoolUtilities CaloConditions CaloDetDescrLib CaloEvent CaloIdentifier CommissionEvent GaudiKernel GeoModelInterfaces Identifier LArCOOLConditions LArCablingLib LArDigitizationLib LArElecCalib LArIdentifier LArRODLib LArRawConditions LArRawEvent LArRawUtilsLib LArRecConditions LArRecUtilsLib LArSimEvent StoreGateLib xAODEventInfo )
+                     LINK_LIBRARIES ${CLHEP_LIBRARIES} ${LWTNN_LIBRARIES} ${ROOT_LIBRARIES} AthAllocators AthContainers AthenaBaseComps AthenaKernel AthenaPoolUtilities CaloConditions CaloDetDescrLib CaloEvent CaloIdentifier CommissionEvent CxxUtils GaudiKernel GeoModelInterfaces Identifier LArCOOLConditions LArCablingLib LArDigitizationLib LArElecCalib LArIdentifier LArRODLib LArRawConditions LArRawEvent LArRecConditions LArRecEvent LArRecUtilsLib LArSimEvent StoreGateLib xAODEventInfo )
 
 # Install files from the package:
 atlas_install_python_modules( python/*.py POST_BUILD_CMD ${ATLAS_FLAKE8} )

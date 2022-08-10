@@ -14,6 +14,7 @@ NAME:     LArFebSummaryMaker
 ********************************************************************/
 
 #include <AthenaBaseComps/AthReentrantAlgorithm.h>
+#include <CxxUtils/checker_macros.h>
 #include <GaudiKernel/ServiceHandle.h>
 #include <GaudiKernel/ToolHandle.h>
 
@@ -48,7 +49,7 @@ class LArFebErrorSummaryMaker : public AthReentrantAlgorithm
 
   //Atomic counters:
   mutable std::atomic<int> m_missingFebsWarns{0}; //counter for missing FEB warnings
-  mutable std::array<std::atomic<unsigned>, LArFebErrorSummary::N_LArFebErrorType > m_errors; //error types accumulator
+  mutable std::array<std::atomic<unsigned>, LArFebErrorSummary::N_LArFebErrorType > m_errors ATLAS_THREAD_SAFE; //error types accumulator
 
   //The following variables are set in initialize:
   std::set<unsigned int> m_all_febs ; 
