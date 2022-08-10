@@ -10,6 +10,8 @@
 #include "TrigConfData/HLTChain.h"
 #include "TrigCompositeUtils/AlgToChainTool.h"
 
+#include "CostROSData.h"
+
 #include <map>
 #include <vector>
 
@@ -61,12 +63,12 @@ class CostData {
     /**
      * @brief Getter of the ROS to ROB map.
      */
-    const std::map<std::string, std::vector<uint32_t>>& rosToRobMap() const;
+    const CostROSData& costROSData() const;
 
     /**
      * @brief Set ROS to ROB map
      */
-    void setRosToRobMap(const std::map<std::string, std::vector<uint32_t>>& rosToRobMap);
+    void setCostROSData(const CostROSData& costROSData);
 
     /**
      * @brief Getter of the alg name to chains map.
@@ -191,7 +193,7 @@ class CostData {
     bool m_liveTimeIsPerEvent; //!< If the livetime represents a single event or all of the current LB
     const std::unordered_map<uint32_t, std::string>* m_typeMapPtr; //!< Cached non-owning pointer mapping algorithm instance names to types
     std::map<size_t, std::vector<size_t>> m_algToRos; //!< Mapping of indexes from m_costCollection to corresponding ROS requests made by algorithm
-    const std::map<std::string, std::vector<uint32_t>>* m_rosToRob = nullptr; //!< Mapping of ROS corresponding to ROB requests
+    const CostROSData* m_costROSData = nullptr; //!< Helper class to store ROS to ROB mapping
     const std::map<std::string, std::set<size_t>>* m_chainToAlgIdx = nullptr; //!<Mapping of chain to algorithms idx
     const std::map<std::string, std::set<size_t>>* m_chainToUniqAlgIdx = nullptr; //!<Mapping of chain name to its unique algorithms
     const std::map<std::string, std::map<int16_t, std::set<size_t>>>* m_sequencers = nullptr; //!<Mapping of sequence to algorithms

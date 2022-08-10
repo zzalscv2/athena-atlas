@@ -7,6 +7,7 @@
 #include "CounterBase.h"
 #include "TH1F.h"
 #include "TH2F.h"
+#include "TProfile.h"
 
 CounterBase::CounterBase(const std::string& name, const MonitorBase* parent) 
   : m_name(name), m_parent(parent) {
@@ -55,6 +56,47 @@ void CounterBase::regHistogram(const std::string& name,
     hist = std::make_unique<TH1F>(hisSvcName.c_str(), title.c_str(), bins, xbins.get());
   } else {
     throw std::runtime_error("CounterBase::regHistogram: Unknown logarithm flag");
+  }
+
+  m_variables.emplace(std::piecewise_construct,
+    std::forward_as_tuple(name),
+    std::forward_as_tuple(name, bookGetPointer(hist.release()), type)
+  );
+  // Histogram is now owned by THistSvc. A cache of the ptr is kept in the Variable
+}
+
+void CounterBase::regTProfile(const std::string& name, 
+  const std::string& title,
+  const VariableType type,
+  const LogType xaxis, 
+  const float min, 
+  const float max,
+  const size_t bins) 
+{
+  std::string hisSvcName = getParent()->getParent()->getName() + "_" + getParent()->getName() + "_" + getName() + "_" + name;
+  std::unique_ptr<TProfile> hist;
+
+  if (max <= min || bins == 0) {
+    throw std::runtime_error("CounterBase::regTProfile: Cannot have max <= min or bins == 0");
+  }
+
+  if (xaxis == kLinear) {
+    hist = std::make_unique<TProfile>(hisSvcName.c_str(), title.c_str(), bins, min, max);
+  } else if (xaxis == kLog) {
+    if (min <= 0) {
+      throw std::runtime_error("CounterBase::regTProfile: Cannot have min <= 0 with log binning");
+    }
+    std::unique_ptr<double[]> xbins = std::make_unique<double[]>(bins+1);
+    const double xlogmin = log10(min);
+    const double xlogmax = log10(max);
+    const double dlogx   = (xlogmax-xlogmin)/((double)bins);
+    for (size_t i = 0; i <= bins; ++i) { 
+      const double xlog = xlogmin + i*dlogx;
+      xbins[i] = exp( log(10) * xlog ); 
+    }
+    hist = std::make_unique<TProfile>(hisSvcName.c_str(), title.c_str(), bins, xbins.get());
+  } else {
+    throw std::runtime_error("CounterBase::regTProfile: Unknown logarithm flag");
   }
 
   m_variables.emplace(std::piecewise_construct,
@@ -131,6 +173,10 @@ void CounterBase::regHistogram(const std::string& name,
     std::forward_as_tuple(name, bookGetPointer(hist.release()), type)
   );
   // Histogram is now owned by THistSvc. A cache of the ptr is kept in the Variable
+}
+
+bool CounterBase::variableExists(const std::string& name) const {
+  return (m_variables.count(name) == 1);
 }
 
 Variable& CounterBase::getVariable(const std::string& name) {

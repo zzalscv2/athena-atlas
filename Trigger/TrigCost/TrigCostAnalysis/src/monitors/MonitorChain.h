@@ -54,6 +54,14 @@ class MonitorChain : public MonitorBase {
      * @return Owning unique ptr object typed on the CounterBase base class which points to concrete Counter of specialised type.
      */
     virtual std::unique_ptr<CounterBase> newCounter(const std::string& name) override; 
+
+    /**
+     * @brief Concrete counter instantiation. Mints named counter of CounterAlgorith type.
+     * @param[in] name Name of Counter to mint.
+     * @param[in] nROS Number of possible ROB ids to initialize ROB monitoring histograms
+     * @return Owning unique ptr object typed on the CounterBase base class which points to concrete Counter of specialised type.
+     */
+    std::unique_ptr<CounterBase> newCounter(const std::string& name, unsigned nROS);
 };
 
 #endif // TRIGCOSTANALYSIS_MONITORCHAIN_H

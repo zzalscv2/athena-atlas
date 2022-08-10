@@ -118,7 +118,14 @@ class Variable {
      * @param[in] label Label to set
      */
     StatusCode setBinLabel(int bin, const std::string& label);
-  
+
+    /**
+     * @brief Set label on given bin in cached histogram on y axis
+     * @param[in] bin Bin number
+     * @param[in] label Label to set
+     */
+    StatusCode setYBinLabel(int bin, const std::string& label);
+
     /**
      * @brief Sets, until the end of the event, a denominator which will be used to normalise every Fill.
      * @pram[in] value The denominator to normalise Fill operations.

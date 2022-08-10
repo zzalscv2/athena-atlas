@@ -54,8 +54,14 @@ class MonitorROS : public MonitorBase {
      */
     virtual std::unique_ptr<CounterBase> newCounter(const std::string& name) override; 
 
-  private:
-    std::map<uint32_t, std::string> m_robToRos; //!< Cache correspondis ROS per ROB id
+    /**
+     * @brief Creates named counter passing the nRobs argument.
+     * @param[in] name Name of Counter to mint.
+     * @param[in] nRobs Initialize ROB histograms with nRobs
+     * @return Owning unique ptr object typed on the CounterBase base class which points to concrete Counter of specialised type.
+     */
+    std::unique_ptr<CounterBase> newCounter(const std::string& name, unsigned nRobs); 
+
 };
 
 #endif // TRIGCOSTANALYSIS_MONITORROS_H
