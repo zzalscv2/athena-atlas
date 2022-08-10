@@ -138,7 +138,7 @@ StatusCode MuonHitRelocation::execute() {
     m_c->event = context.eventID().event_number();
     m_c->run = context.eventID().run_number();
 
-    const DataHandle<McEventCollection> mcEvent;
+    const McEventCollection* mcEvent;
     StatusCode sc = evtStore()->retrieve(mcEvent, "TruthEvent");
     if (sc.isFailure()) return StatusCode::SUCCESS;
 
@@ -169,7 +169,7 @@ StatusCode MuonHitRelocation::execute() {
         //-------------------------------------------------------------------------------------------------------
         // MDT:
         //
-        const DataHandle<MDTSimHitCollection> mdt_collection;
+        const MDTSimHitCollection* mdt_collection;
         if (evtStore()->retrieve(mdt_collection) == StatusCode::SUCCESS) {
             ATH_MSG_VERBOSE("MDT hit Collection found with size = " << mdt_collection->size());
             for (MDTSimHitConstIterator i_hit = mdt_collection->begin(); i_hit != mdt_collection->end(); ++i_hit) {
@@ -227,7 +227,7 @@ StatusCode MuonHitRelocation::execute() {
         //-------------------------------------------------------------------------------------------------------
         // TGC:
         //
-        const DataHandle<TGCSimHitCollection> tgc_collection;
+        const TGCSimHitCollection* tgc_collection;
         if (evtStore()->retrieve(tgc_collection) == StatusCode::SUCCESS) {
             ATH_MSG_VERBOSE("TGC hit Collection found with size = " << tgc_collection->size());
             for (TGCSimHitConstIterator i_hit = tgc_collection->begin(); i_hit != tgc_collection->end(); ++i_hit) {
@@ -285,7 +285,7 @@ StatusCode MuonHitRelocation::execute() {
         //-------------------------------------------------------------------------------------------------------
         // RPC:
         //
-        const DataHandle<RPCSimHitCollection> rpc_collection;
+        const RPCSimHitCollection* rpc_collection;
         if (evtStore()->retrieve(rpc_collection) == StatusCode::SUCCESS) {
             ATH_MSG_VERBOSE("RPC hit Collection found with size = " << rpc_collection->size());
             for (RPCSimHitConstIterator i_hit = rpc_collection->begin(); i_hit != rpc_collection->end(); ++i_hit) {
@@ -343,7 +343,7 @@ StatusCode MuonHitRelocation::execute() {
         //-------------------------------------------------------------------------------------------------------
         // CSC:
         //
-        const DataHandle<CSCSimHitCollection> csc_collection;
+        const CSCSimHitCollection* csc_collection;
         if (evtStore()->retrieve(csc_collection) == StatusCode::SUCCESS) {
             ATH_MSG_VERBOSE("CSC hit Collection found with size = " << csc_collection->size());
             for (CSCSimHitConstIterator i_hit = csc_collection->begin(); i_hit != csc_collection->end(); ++i_hit) {
@@ -401,7 +401,7 @@ StatusCode MuonHitRelocation::execute() {
         //
         m_stmuonHelper = sTgcHitIdHelper::GetHelper();
 
-        const DataHandle<sTGCSimHitCollection> stgc_collection;
+        const sTGCSimHitCollection* stgc_collection;
         if (evtStore()->retrieve(stgc_collection, "sTGC_Hits") == StatusCode::SUCCESS) {
             ATH_MSG_VERBOSE("sTGC Muon hit Collection sTGC hit found with size = " << stgc_collection->size());
             for (sTGCSimHitConstIterator i_hit = stgc_collection->begin(); i_hit != stgc_collection->end(); ++i_hit) {
@@ -465,7 +465,7 @@ StatusCode MuonHitRelocation::execute() {
         //
         m_mmmuonHelper = MicromegasHitIdHelper::GetHelper();
 
-        const DataHandle<MMSimHitCollection> mm_collection;
+        const MMSimHitCollection* mm_collection;
         if (evtStore()->retrieve(mm_collection, "MM_Hits") == StatusCode::SUCCESS) {
             ATH_MSG_VERBOSE("MM Muon hit Collection (Micromegas) found with size = " << mm_collection->size());
             for (MMSimHitConstIterator i_hit = mm_collection->begin(); i_hit != mm_collection->end(); ++i_hit) {

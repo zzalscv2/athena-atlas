@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2020 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
 */
 
 /***************************************************************************
@@ -29,9 +29,9 @@ public:
     MuonGMCheck(const std::string& name, ISvcLocator* pSvcLocator);
     ~MuonGMCheck() = default;
 
-    StatusCode initialize();
-    StatusCode execute();
-    void clearCache() const;
+    virtual StatusCode initialize() override;
+    virtual StatusCode execute() override;
+    void clearCache();
 
 private:
     // User setable properties

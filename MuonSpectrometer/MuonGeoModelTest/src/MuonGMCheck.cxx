@@ -192,7 +192,7 @@ StatusCode MuonGMCheck::execute() {
     return StatusCode::SUCCESS;
 }
 
-void MuonGMCheck::clearCache() const {
+void MuonGMCheck::clearCache() {
     if (p_MuonMgr->cachingFlag() == 0) p_MuonMgr->clearCache();
 }
 
