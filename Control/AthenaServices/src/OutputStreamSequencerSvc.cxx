@@ -121,24 +121,25 @@ void OutputStreamSequencerSvc::handle(const Incident& inc)
          // exit now, wait for the next (real) incident that will start the next range
          return;
       }
-      // start a new range
-      std::lock_guard lockg( m_mutex );
-      m_fileSequenceNumber++;
-      if( rangeID.empty() ) {
-         std::ostringstream n;
-         n << "_" << std::setw(4) << std::setfill('0') << m_fileSequenceNumber;
-         rangeID = n.str();
-         ATH_MSG_DEBUG("Default next event range filename extension: " << rangeID);
-      } 
-      if( slot >= m_rangeIDinSlot.size() ) {
-         // MN - late resize, is there a better place for it?
-         m_rangeIDinSlot.resize( std::max(slot+1, Gaudi::Concurrency::ConcurrencyFlags::numConcurrentEvents()) );
+      {
+         // start a new range
+         std::lock_guard lockg( m_mutex );
+         m_fileSequenceNumber++;
+         if( rangeID.empty() ) {
+            std::ostringstream n;
+            n << "_" << std::setw(4) << std::setfill('0') << m_fileSequenceNumber;
+            rangeID = n.str();
+            ATH_MSG_DEBUG("Default next event range filename extension: " << rangeID);
+         } 
+         if( slot >= m_rangeIDinSlot.size() ) {
+            // MN - late resize, is there a better place for it?
+            m_rangeIDinSlot.resize( std::max(slot+1, Gaudi::Concurrency::ConcurrencyFlags::numConcurrentEvents()) );
+         }
+         m_rangeIDinSlot[ slot ] = rangeID;
+         // remember range ID for next events in the same range
+         m_currentRangeID = rangeID;
       }
-      m_rangeIDinSlot[ slot ] = rangeID;
-      // remember range ID for next events in the same range
-      m_currentRangeID = rangeID;
-
-      if( not inConcurrentEventsMode() ) {
+      if( not inConcurrentEventsMode() and not fileInc ) {
          // non-file incident case (filename=="") in regular SP LoopMgr
          ATH_MSG_DEBUG("MetaData transition");
          bool disconnect { false };
