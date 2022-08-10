@@ -297,7 +297,7 @@ class TileLaserTimingTool: public AthAlgTool, virtual public ITileCalibTool {
     // fiber lengths
     // first index is barrel(0) and extended barrel(1)
     // second index is PMT-1
-    static float s_fiberLength[2][48];
+    static const float s_fiberLength[2][48];
 
     /** @return if channel is connected */
     inline bool isConnectedChan(int ros, int chan) {

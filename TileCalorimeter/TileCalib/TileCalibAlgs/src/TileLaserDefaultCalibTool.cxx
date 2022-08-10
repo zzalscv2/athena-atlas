@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2019 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
 */
 
 // Tile includes
@@ -24,6 +24,7 @@
 #include "TTree.h"
 #include <cmath>
 #include <iostream>
+#include <mutex>
 
 /****************************************************/
 /* TileLaserDefaultCalibTool.cxx     June 2017      */
@@ -383,8 +384,8 @@ StatusCode TileLaserDefaultCalibTool::execute(){
     }
   }
 
-  static int first = 1; // Do only once
-  if ( first ) {
+  static std::once_flag flag;  // Do only once
+  std::call_once(flag, [&]() {
     for ( int part=0; part<NPARTITIONS; ++part ) {
       int ros = part+1;
       for ( int drawer=0; drawer<NDRAWERS; ++drawer ) {
@@ -414,8 +415,7 @@ StatusCode TileLaserDefaultCalibTool::execute(){
 	}
       }
     }
-    first = 0; 
-  }
+  });
   
   if ( m_LASERII ) {  // LASERII
     // We need to have pedestals
