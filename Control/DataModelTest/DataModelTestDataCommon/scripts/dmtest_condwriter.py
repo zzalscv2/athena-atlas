@@ -1,12 +1,10 @@
 #!/usr/bin/env python
 #
-# Copyright (C) 2002-2019 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
 #
 # Script to create an AthenaAttributeList with a single attribute "xint".
 # Usage example: dmtest_condwriter.py --rs=1 --ls=1 'sqlite://;schema=test.db;dbname=OFLP200' AttrList_noTag 42
 #
-
-from __future__ import print_function
 
 import sys,os
 os.environ['CLING_STANDARD_PCH'] = 'none' #See bug ROOT-10789
@@ -19,22 +17,21 @@ class createTestDB(AtlCoolLib.coolTool):
         # set values of non-optional parameters
         self.tag=str(args[0])
         self.xint=int(args[1])
-        
+        self.folder=args[2] if len(args)>2 else '/DMTest/TestAttrList'
+
     def usage(self):
         """ Define the additional syntax for options """
         self._usage1()
-        print ('TAG xint')
+        print ('TAG xint [Folder]')
         self._usage2()
         
     def execute(self):
 
-        folder='/DMTest/TestAttrList'
-
         # do update - setup folder specification and create if needed
         spec = cool.RecordSpecification()
         spec.extend("xint", cool.StorageType.Int32)
-        print (">== Store object in folder",folder)
-        cfolder = AtlCoolLib.ensureFolder(self.db, folder, spec,
+        print (">== Store object in folder", self.folder)
+        cfolder = AtlCoolLib.ensureFolder(self.db, self.folder, spec,
                                           AtlCoolLib.athenaDesc(self.runLumi, 'AthenaAttributeList'),
                                           cool.FolderVersioning.MULTI_VERSION)
         if (cfolder is None): sys.exit(1)
@@ -56,6 +53,6 @@ class createTestDB(AtlCoolLib.coolTool):
 
         # print full content
         act = AtlCoolTool.AtlCoolTool(self.db)
-        print (act.more(folder))
+        print (act.more(self.folder))
 
-mytool = createTestDB('dmtest_condwriter.py',False,3,3,[])
+mytool = createTestDB('dmtest_condwriter.py',False,3,4,[])
