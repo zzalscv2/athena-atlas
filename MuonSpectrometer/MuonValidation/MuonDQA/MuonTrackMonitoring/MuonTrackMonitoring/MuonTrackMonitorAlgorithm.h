@@ -9,6 +9,8 @@
 #include "AthenaMonitoring/AthMonitorAlgorithm.h"
 
 #include "xAODMuon/MuonContainer.h"
+#include "xAODTracking/VertexContainer.h"
+#include "xAODEventInfo/EventInfo.h"
 #include <vector>
 #include <string>
 #include "StoreGate/ReadHandleKey.h"
@@ -27,27 +29,36 @@ class MuonTrackMonitorAlgorithm : public AthMonitorAlgorithm
 
   private:
 
-    SG::ReadHandleKey<xAOD::MuonContainer> m_MuonContainerKey { this, "MuonContainerKey", "Muons", "Key for Muon Containers" };
-    SG::ReadDecorHandleKey<xAOD::MuonContainer> m_MuonIsoDecorKey { this, "MuonIsoDecorKey", "Muons.ptcone30" };
+    SG::ReadHandleKey<xAOD::MuonContainer> m_MuonContainerKey{this, "MuonContainerKey", "Muons", "Key for Muon Containers" };
+    SG::ReadDecorHandleKey<xAOD::MuonContainer> m_MuonIsoDecorKey{this, "MuonIsoDecorKey", "Muons.ptcone30" };
+    SG::ReadHandleKey<xAOD::VertexContainer> m_VertexContainerKey{this, "PrimaryVerticesKey", "PrimaryVertices", "Key for primary VertexContainers"};
+    SG::ReadHandleKey<xAOD::EventInfo> m_EventInfoKey{this, "EventInfo", "EventInfo", ""};
 
-    // Toolds
+    // Tools
     /// Fills data-quality information (e.g. pt, eta, phi..) to histograms for given selection of muons
-    /// std::string sIdentifier = "CB","ZBoson","JPsi": String which is used to match the histogramming
+    /// std::string sIdentifier = "CB","ZBoson","Jpsi": String which is used to match the histogramming
     ///    variables that are defined by the Python script
     /// std::vector<const xAOD::Muon*>	&vecMuons: Vector of muons for which performance plots should be created
-    StatusCode	FillMuonInformation(const std::string& sIdentifier, std::vector<const xAOD::Muon*>	&vecMuons) const;
+    StatusCode	FillMuonInformation(const std::string& sIdentifier, std::vector<const xAOD::Muon*>	&vecMuons, const xAOD::Vertex *pvtx, const xAOD::EventInfo &evt) const;
+
+    /// Function to fill low level Track information
+    StatusCode FillTrackInformation(const std::string& sIdentifier, const xAOD::Muon* muon, const xAOD::Vertex *pvtx, const std::string& sTrack, const xAOD::EventInfo &evt) const;
 
     /// Function to create performance plots for muon standalone tracks with some detailed informatiom
-    StatusCode analyseLowLevelMuonFeatures(const xAOD::MuonContainer& Muons, uint32_t lumiBlockID) const;
+    //StatusCode analyseLowLevelMuonFeatures(const std::string& sIdentifier, const xAOD::MuonContainer& Muons, uint32_t lumiBlockID) const;
+    StatusCode analyseLowLevelMuonFeatures(const std::string& sIdentifier, std::vector<const xAOD::Muon*> &Muons, const xAOD::EventInfo &evt) const;
 
     /// Function to create performance plots for all combined muons
-    StatusCode analyseCombinedTracks(const xAOD::MuonContainer& Muons, uint32_t lumiBlockID) const;
+    StatusCode analyseCombinedTracks(const xAOD::MuonContainer& Muons, const xAOD::Vertex *pvtx, const xAOD::EventInfo &evt) const;
+
+    /// Function to get the primary vertex
+    const xAOD::Vertex* getPrimaryVertex(const xAOD::VertexContainer& Vertices) const;
 
     /// Function to create performance plots for all combined muons that lead to a Z Boson Candidate event
-    StatusCode analyseResonanceCandidates(const xAOD::MuonContainer& Muons, uint32_t lumiBlockID) const;
+    StatusCode analyseResonanceCandidates(const xAOD::MuonContainer& Muons, const xAOD::Vertex *pvtx, const xAOD::EventInfo &evt) const;
 
-    /// Function to create performance plots for all combined muons that lead to a JPsi Meson Candidate event
-    StatusCode plotResonanceCandidates(const std::string& resonanceName, std::vector<const xAOD::Muon*>& muonCandidates, uint32_t lumiBlockID) const;
+    /// Function to create performance plots for all combined muons that lead to a Jpsi Meson Candidate event
+    StatusCode plotResonanceCandidates(const std::string& resonanceName, std::vector<const xAOD::Muon*>& muonCandidates, const xAOD::Vertex *pvtx, const xAOD::EventInfo &evt) const;
 
     Gaudi::Property< std::vector<std::string> > m_hltchainList{ this, "HLTTriggerList", {"HLT_2mu14", "HLT_mu26_ivarmedium"}, "High-level triggers used" };
 
@@ -61,13 +72,13 @@ class MuonTrackMonitorAlgorithm : public AthMonitorAlgorithm
     Gaudi::Property< float > m_ZBosonSelection_minMass{ this, "ZBosonSelection_minMass", 76000., "Minimal accepted Z  boson mass" };
     Gaudi::Property< float > m_ZBosonSelection_maxMass{ this, "ZBosonSelection_maxMass", 106000., "Maximal accepted Z  boson mass" };
 
-    Gaudi::Property< float > m_JPsiSelection_minPt{ this, "JPsiSelection_minPt", 4000., "Minimal muon pt used for JPsi analysis" };
-    Gaudi::Property< float > m_JPsiSelection_maxEta{ this, "JPsiSelection_maxEta", 2.5, "Maximal muon eta used for JPsi analysis" };
-    Gaudi::Property< float > m_JPsiSelection_trkIsolation{ this, "JPsiSelection_trkIsolation", 1.0, "JPsi track DeltaR isolation criteria" };
-    Gaudi::Property< float > m_JPsiSelection_D0Cut{ this, "JPsiSelection_D0Cut", 100., "D0 cut applied for JPsi analysis" };
-    Gaudi::Property< float > m_JPsiSelection_Z0Cut{ this, "JPsiSelection_Z0Cut", 100., "Z0 cut applied for JPsi analysis" };
-    Gaudi::Property< float > m_JPsiSelection_minMass{ this, "JPsiSelection_minMass", 2600., "Minimal accepted JPsi mass" };
-    Gaudi::Property< float > m_JPsiSelection_maxMass{ this, "JPsiSelection_maxMass", 3600., "Maximal accepted JPsi mass" };
+    Gaudi::Property< float > m_JpsiSelection_minPt{ this, "JpsiSelection_minPt", 4000., "Minimal muon pt used for Jpsi analysis" };
+    Gaudi::Property< float > m_JpsiSelection_maxEta{ this, "JpsiSelection_maxEta", 2.5, "Maximal muon eta used for Jpsi analysis" };
+    Gaudi::Property< float > m_JpsiSelection_trkIsolation{ this, "JpsiSelection_trkIsolation", 1.0, "Jpsi track DeltaR isolation criteria" };
+    Gaudi::Property< float > m_JpsiSelection_D0Cut{ this, "JpsiSelection_D0Cut", 100., "D0 cut applied for Jpsi analysis" };
+    Gaudi::Property< float > m_JpsiSelection_Z0Cut{ this, "JpsiSelection_Z0Cut", 100., "Z0 cut applied for Jpsi analysis" };
+    Gaudi::Property< float > m_JpsiSelection_minMass{ this, "JpsiSelection_minMass", 2600, "Minimal accepted Jpsi mass" };
+    Gaudi::Property< float > m_JpsiSelection_maxMass{ this, "JpsiSelection_maxMass", 3600, "Maximal accepted Jpsi mass" };
 };
 
 

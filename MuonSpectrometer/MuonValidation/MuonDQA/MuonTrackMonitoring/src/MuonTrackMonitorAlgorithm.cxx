@@ -1,9 +1,17 @@
 /*
-	Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
-	2020 Matthias Schott - Uni Mainz
+    Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+    2020 Matthias Schott - Uni Mainz
 */
 
 #include "MuonTrackMonitoring/MuonTrackMonitorAlgorithm.h"
+#include "xAODTracking/TrackParticlexAODHelpers.h"
+#include "xAODEventInfo/EventInfo.h"
+
+
+namespace{
+  constexpr double MeVtoGeV = 1.e-3;
+}
+
 
 MuonTrackMonitorAlgorithm::MuonTrackMonitorAlgorithm (const std::string& name, ISvcLocator* pSvcLocator)
     :AthMonitorAlgorithm(name,pSvcLocator){}
@@ -11,352 +19,457 @@ MuonTrackMonitorAlgorithm::MuonTrackMonitorAlgorithm (const std::string& name, I
 
 StatusCode MuonTrackMonitorAlgorithm::initialize()
 {
-	ATH_CHECK(AthMonitorAlgorithm::initialize());
-	ATH_CHECK(m_MuonContainerKey.initialize());
-	ATH_CHECK(m_MuonIsoDecorKey.initialize());
-	return StatusCode::SUCCESS;
+    ATH_CHECK(AthMonitorAlgorithm::initialize());
+    ATH_CHECK(m_MuonContainerKey.initialize());
+    ATH_CHECK(m_MuonIsoDecorKey.initialize());
+    ATH_CHECK(m_VertexContainerKey.initialize(!m_VertexContainerKey.empty()));
+    ATH_CHECK(m_EventInfoKey.initialize());
+    return StatusCode::SUCCESS;
 }
 
-StatusCode MuonTrackMonitorAlgorithm::FillMuonInformation(const std::string& sIdentifier, std::vector<const xAOD::Muon*>	&vecMuons) const 
+
+//========================================================================================================
+StatusCode MuonTrackMonitorAlgorithm::FillTrackInformation(const std::string& sIdentifier, const xAOD::Muon* muon, const xAOD::Vertex *pvtx, const std::string& sTrack, const xAOD::EventInfo &evt) const
 {
-	/// Declaring all variables that are initialized via Python will be plotted
-	using namespace Monitored;
-	auto 	tool = getGroup("MuonTrackMonitorAlgorithm");
-	auto	MuonEta = Monitored::Scalar<float>((sIdentifier+"MuonEta").c_str(), 0);	
-	auto	MuonPhi = Monitored::Scalar<float>((sIdentifier+"MuonPhi").c_str(), 0);	
-	auto	MuonEtaTight = Monitored::Scalar<float>((sIdentifier+"MuonEtaTight").c_str(), 0);	
-	auto	MuonPhiTight = Monitored::Scalar<float>((sIdentifier+"MuonPhiTight").c_str(), 0);	
-	auto	MuonEtaMedium = Monitored::Scalar<float>((sIdentifier+"MuonEtaMedium").c_str(), 0);	
-	auto	MuonPhiMedium = Monitored::Scalar<float>((sIdentifier+"MuonPhiMedium").c_str(), 0);	
-	auto	MuonD0 = Monitored::Scalar<float>((sIdentifier+"MuonD0").c_str(), 0);	
-	auto	MuonZ0 = Monitored::Scalar<float>((sIdentifier+"MuonZ0").c_str(), 0);	
-	auto	MuonPt = Monitored::Scalar<float>((sIdentifier+"MuonPt").c_str(), 0);	
-	auto	MuonDPTIDME = Monitored::Scalar<float>((sIdentifier+"MuonDPTIDME").c_str(), 0);
-	auto	MuonsNBHits = Monitored::Scalar<float>((sIdentifier+"MuonNBHits").c_str(), 0);	
-	auto	MuonsNPixHits = Monitored::Scalar<float>((sIdentifier+"MuonNPixHits").c_str(), 0);	
-	auto	MuonsNSCTHits = Monitored::Scalar<float>((sIdentifier+"MuonNSCTHits").c_str(), 0);	
-	auto	MuonsNTRTHits = Monitored::Scalar<float>((sIdentifier+"MuonNTRTHits").c_str(), 0);	
-	auto	NonCBMuonsNBHits = Monitored::Scalar<float>((sIdentifier+"MuonNBHits").c_str(), 0);	
-	auto	NonCBMuonsNPixHits = Monitored::Scalar<float>((sIdentifier+"MuonNPixHits").c_str(), 0);	
-	auto	NonCBMuonsNSCTHits = Monitored::Scalar<float>((sIdentifier+"MuonNSCTHits").c_str(), 0);	
-	auto	NonCBMuonsNTRTHits = Monitored::Scalar<float>((sIdentifier+"MuonNTRTHits").c_str(), 0);	
-	auto	MuonsIDChi2NDF = Monitored::Scalar<float>((sIdentifier+"MuonIDChi2NDF").c_str(), 0);	
-	auto	MuonsMEChi2NDF = Monitored::Scalar<float>((sIdentifier+"MuonMEChi2NDF").c_str(), 0);	
+    double beamPosSigmaX = evt.beamPosSigmaX();
+    double beamPosSigmaY = evt.beamPosSigmaY();
+    double beamPosSigmaXY = evt.beamPosSigmaXY();
 
-	/// Loop over all Muons
-	for(unsigned int n=0; n<vecMuons.size(); n++) {
-		const xAOD::Muon* muon = vecMuons[n];
-		xAOD::Muon::MuonType muonType = muon->muonType();
-		xAOD::Muon::Quality muonQuality	= muon->quality();
+    ///Declaring all track variables
+    using namespace Monitored;
+    auto tool = getGroup("MuonTrackMonitorAlgorithm");
+    auto Author = Monitored::Scalar<float>((sIdentifier+sTrack+"Author").c_str(), -1);
+    auto Quality = Monitored::Scalar<float>((sIdentifier+sTrack+"Quality").c_str(), -1);
+    auto Type = Monitored::Scalar<float>((sIdentifier+sTrack+"Quality").c_str(), -1);
+    auto Eta = Monitored::Scalar<float>((sIdentifier+sTrack+"Eta").c_str(), -9);
+    auto Phi = Monitored::Scalar<float>((sIdentifier+sTrack+"Phi").c_str(), -9);
+    auto Pt = Monitored::Scalar<float>((sIdentifier+sTrack+"Pt").c_str(), -9);
+    auto D0 = Monitored::Scalar<float>((sIdentifier+sTrack+"D0").c_str(), -9);
+    auto Z0 = Monitored::Scalar<float>((sIdentifier+sTrack+"Z0").c_str(), -9);
+    auto deltaZ0 = Monitored::Scalar<float>((sIdentifier+sTrack+"deltaZ0").c_str(), -9);
+    auto D0sig = Monitored::Scalar<float>((sIdentifier+sTrack+"D0sig").c_str(), -9);
+    auto chi2ndof = Monitored::Scalar<float>((sIdentifier+sTrack+"chi2ndof").c_str(), -9);
 
-		if (muonType==xAOD::Muon::Combined) {
-			const xAOD::TrackParticle *cbtp = nullptr;
-			const xAOD::TrackParticle *idtp = nullptr;
-			const xAOD::TrackParticle *metp = nullptr;
+    Author = muon->author();
+    Quality = muon->quality();
+    Type = muon->type();
 
-			ElementLink<xAOD::TrackParticleContainer> cbtpLink = muon->combinedTrackParticleLink();
-			if (cbtpLink.isValid()) cbtp = *cbtpLink;
-			if (cbtp) {
-				uint8_t hitval_numberOfBLayerHits, hitval_numberOfPixelHits, hitval_numberOfSCTHits, hitval_numberOfTRTHits;
-				cbtp->summaryValue(hitval_numberOfBLayerHits,	xAOD::SummaryType::numberOfInnermostPixelLayerHits);
-				cbtp->summaryValue(hitval_numberOfPixelHits,	xAOD::SummaryType::numberOfPixelHits);
-				cbtp->summaryValue(hitval_numberOfSCTHits,		xAOD::SummaryType::numberOfSCTHits);
-				cbtp->summaryValue(hitval_numberOfTRTHits,		xAOD::SummaryType::numberOfTRTHits);		
+    // fill track particle hists
+    const xAOD::TrackParticle *tp = nullptr;
+    if (sTrack == "ME") {
+        tp = muon->trackParticle(xAOD::Muon::ExtrapolatedMuonSpectrometerTrackParticle);
+    }
+    if (sTrack == "MS") {
+        tp = muon->trackParticle(xAOD::Muon::MuonSpectrometerTrackParticle);
+    }    
+    if (tp) {
+        Eta = tp->eta();
+        Phi = tp->phi();
+        Pt = tp->pt() * MeVtoGeV;
+        D0 = tp->d0();
+        Z0 = tp->z0();
+        chi2ndof = tp->chiSquared()/std::max(1.f,tp->numberDoF());
 
-				/// Basic kinematic Information
-				MuonEta = cbtp->eta();
-				MuonPhi	= cbtp->phi();
-				MuonPt	= cbtp->pt();
-				MuonZ0	= cbtp->z0();
-				MuonD0	= cbtp->d0();
+        if (pvtx) {
+            deltaZ0 = tp->z0() + tp->vz() - pvtx->z();
+        }
 
-				fill(tool, MuonEta, MuonPhi, MuonPt, MuonZ0, MuonD0);
+        D0sig = xAOD::TrackingHelpers::d0significance( tp, beamPosSigmaX, beamPosSigmaY, beamPosSigmaXY );
 
-				/// Hit Information of the ID
-				MuonsNBHits 	= static_cast<unsigned int>(hitval_numberOfBLayerHits);
-				MuonsNPixHits 	= static_cast<unsigned int>(hitval_numberOfPixelHits);
-				MuonsNSCTHits 	= static_cast<unsigned int>(hitval_numberOfSCTHits);
-				MuonsNTRTHits 	= static_cast<unsigned int>(hitval_numberOfTRTHits);
-				fill(tool, MuonsNBHits, MuonsNPixHits, MuonsNSCTHits, MuonsNTRTHits);
-
-				/// Save Eta/Phi Information for medium and tight muons, 
-				/// to be used for lates efficiency studies
-				if (muonQuality==xAOD::Muon::Medium) {
-					MuonEtaMedium = cbtp->eta();
-					MuonPhiMedium = cbtp->phi();
-					fill(tool, MuonEtaMedium, MuonPhiMedium);
-				}
-				if (muonQuality==xAOD::Muon::Tight) {
-					MuonEtaTight = cbtp->eta();
-					MuonPhiTight = cbtp->phi();
-					fill(tool, MuonEtaTight, MuonPhiTight);
-				}
-				/// Momentum Resolution and chi2 studies of MS and ID only tracks
-				ElementLink<xAOD::TrackParticleContainer> idtpLink = muon->inDetTrackParticleLink();
-				ElementLink<xAOD::TrackParticleContainer> metpLink = muon->muonSpectrometerTrackParticleLink();
-				if (idtpLink.isValid()) idtp = *idtpLink;
-				if (metpLink.isValid()) metp = *metpLink;
-				if (idtp && metp) {
-					MuonDPTIDME 	= (idtp->pt() - metp->pt()) / idtp->pt();
-					MuonsIDChi2NDF 	= idtp->chiSquared()/std::max(1.f,idtp->numberDoF());
-					MuonsMEChi2NDF 	= metp->chiSquared()/std::max(1.f,metp->numberDoF());	
-					fill(tool, MuonDPTIDME, MuonsIDChi2NDF, MuonsMEChi2NDF);
-				}
-
-			}
-		}
-        else {
-			const xAOD::TrackParticle *ptp = nullptr;
-			const xAOD::TrackParticle *idtp = nullptr;
-			const xAOD::TrackParticle *metp = nullptr;
-
-            ptp = muon->primaryTrackParticle();
-			if (ptp) {
-				/// Basic kinematic Information
-				MuonEta = ptp->eta();
-				MuonPhi	= ptp->phi();
-				MuonPt	= ptp->pt();
-				MuonZ0	= ptp->z0();
-				MuonD0	= ptp->d0();
-				fill(tool, MuonEta, MuonPhi, MuonPt, MuonZ0, MuonD0);
+        fill(tool, Author, Quality, Type, Eta, Phi, Pt, D0, Z0, chi2ndof, deltaZ0, D0sig);
+    }
+    return StatusCode::SUCCESS;
+}
 
 
-                // Information on hits in each layer
-				uint8_t hitval_numberOfBLayerHits{0}, hitval_numberOfPixelHits{0}, hitval_numberOfSCTHits{0}, hitval_numberOfTRTHits{0};
-				ptp->summaryValue(hitval_numberOfBLayerHits,	xAOD::SummaryType::numberOfInnermostPixelLayerHits);
-				ptp->summaryValue(hitval_numberOfPixelHits,	xAOD::SummaryType::numberOfPixelHits);
-				ptp->summaryValue(hitval_numberOfSCTHits,    xAOD::SummaryType::numberOfSCTHits);
-				ptp->summaryValue(hitval_numberOfTRTHits,	xAOD::SummaryType::numberOfTRTHits);		
-				NonCBMuonsNBHits 	= static_cast<unsigned int>(hitval_numberOfBLayerHits);
-				NonCBMuonsNPixHits 	= static_cast<unsigned int>(hitval_numberOfPixelHits);
-				NonCBMuonsNSCTHits 	= static_cast<unsigned int>(hitval_numberOfSCTHits);
-				NonCBMuonsNTRTHits 	= static_cast<unsigned int>(hitval_numberOfTRTHits);
-				fill(tool, NonCBMuonsNBHits, NonCBMuonsNPixHits, NonCBMuonsNSCTHits, NonCBMuonsNTRTHits);
-                
-				/// Momentum Resolution and chi2 studies of MS and ID only tracks
-				ElementLink<xAOD::TrackParticleContainer> idtpLink = muon->inDetTrackParticleLink();
-				ElementLink<xAOD::TrackParticleContainer> metpLink = muon->extrapolatedMuonSpectrometerTrackParticleLink();
-				if (idtpLink.isValid()) idtp = *idtpLink;
-				if (metpLink.isValid()) metp = *metpLink;
-				if (idtp && metp) {
-					MuonDPTIDME 	= (idtp->pt() - metp->pt()) / idtp->pt();
-					MuonsIDChi2NDF 	= idtp->chiSquared()/idtp->numberDoF();
-					MuonsMEChi2NDF 	= metp->chiSquared()/metp->numberDoF();	
-					fill(tool, MuonDPTIDME, MuonsIDChi2NDF, MuonsMEChi2NDF);
-				}
+//========================================================================================================
+StatusCode MuonTrackMonitorAlgorithm::FillMuonInformation(const std::string& sIdentifier, std::vector<const xAOD::Muon*> &vecMuons, const xAOD::Vertex *pvtx, const xAOD::EventInfo &evt) const 
+{
+    /// Declaring all variables that are initialized via Python will be plotted
+    using namespace Monitored;
+    auto    tool = getGroup("MuonTrackMonitorAlgorithm");
+    auto    MuonEta = Monitored::Scalar<float>((sIdentifier+"MuonEta").c_str(), 0); 
+    auto    MuonPhi = Monitored::Scalar<float>((sIdentifier+"MuonPhi").c_str(), 0); 
+    auto    MuonEtaTight = Monitored::Scalar<float>((sIdentifier+"MuonEtaTight").c_str(), 0);   
+    auto    MuonPhiTight = Monitored::Scalar<float>((sIdentifier+"MuonPhiTight").c_str(), 0);   
+    auto    MuonEtaMedium = Monitored::Scalar<float>((sIdentifier+"MuonEtaMedium").c_str(), 0); 
+    auto    MuonPhiMedium = Monitored::Scalar<float>((sIdentifier+"MuonPhiMedium").c_str(), 0); 
+    auto    MuonD0 = Monitored::Scalar<float>((sIdentifier+"MuonD0").c_str(), 0);   
+    auto    MuonZ0 = Monitored::Scalar<float>((sIdentifier+"MuonZ0").c_str(), 0);   
+    auto    MuonPt = Monitored::Scalar<float>((sIdentifier+"MuonPt").c_str(), 0);   
+    auto    MuonDPTIDME = Monitored::Scalar<float>((sIdentifier+"MuonDPTIDME").c_str(), 0);
+    auto    MuonDPTIDMS = Monitored::Scalar<float>((sIdentifier+"MuonDPTIDMS").c_str(), 0);
+    auto    MuonDPTIDMECB = Monitored::Scalar<float>((sIdentifier+"MuonDPTIDMECB").c_str(), 0);
+    auto    MuonDPTCBME = Monitored::Scalar<float>((sIdentifier+"MuonDPTCBME").c_str(), 0);
+    auto    MuonsNBHits = Monitored::Scalar<float>((sIdentifier+"MuonNBHits").c_str(), 0);  
+    auto    MuonsNPixHits = Monitored::Scalar<float>((sIdentifier+"MuonNPixHits").c_str(), 0);  
+    auto    MuonsNSCTHits = Monitored::Scalar<float>((sIdentifier+"MuonNSCTHits").c_str(), 0);  
+    auto    MuonsNTRTHits = Monitored::Scalar<float>((sIdentifier+"MuonNTRTHits").c_str(), 0);  
+    auto    MuonsNBHitsAvg = Monitored::Scalar<float>((sIdentifier+"MuonNBHitsAvg").c_str(), 0);    
+    auto    MuonsNPixHitsAvg = Monitored::Scalar<float>((sIdentifier+"MuonNPixHitsAvg").c_str(), 0);    
+    auto    MuonsNSCTHitsAvg = Monitored::Scalar<float>((sIdentifier+"MuonNSCTHitsAvg").c_str(), 0);    
+    auto    MuonsNTRTHitsAvg = Monitored::Scalar<float>((sIdentifier+"MuonNTRTHitsAvg").c_str(), 0);    
+    auto    MuonsIDChi2NDF = Monitored::Scalar<float>((sIdentifier+"MuonIDChi2NDF").c_str(), 0);    
+    auto    MuonsMEChi2NDF = Monitored::Scalar<float>((sIdentifier+"MuonMEChi2NDF").c_str(), 0);    
+    auto    MuonsEtaHitsLayer1 = Monitored::Scalar<float>((sIdentifier+"MuonsEtaHitsLayer1").c_str(), 0);   
+    auto    MuonsEtaHitsLayer2 = Monitored::Scalar<float>((sIdentifier+"MuonsEtaHitsLayer2").c_str(), 0);   
+    auto    MuonsEtaHitsLayer3 = Monitored::Scalar<float>((sIdentifier+"MuonsEtaHitsLayer3").c_str(), 0);   
+    auto    MuonsEtaHitsLayer4 = Monitored::Scalar<float>((sIdentifier+"MuonsEtaHitsLayer4").c_str(), 0);   
+    auto    MuonsPhiHitsLayer1 = Monitored::Scalar<float>((sIdentifier+"MuonsPhiHitsLayer1").c_str(), 0);   
+    auto    MuonsPhiHitsLayer2 = Monitored::Scalar<float>((sIdentifier+"MuonsPhiHitsLayer2").c_str(), 0);   
+    auto    MuonsPhiHitsLayer3 = Monitored::Scalar<float>((sIdentifier+"MuonsPhiHitsLayer3").c_str(), 0);   
+    auto    MuonsPhiHitsLayer4 = Monitored::Scalar<float>((sIdentifier+"MuonsPhiHitsLayer4").c_str(), 0);   
+
+    /// Loop over all Muons
+    for(unsigned int n=0; n<vecMuons.size(); n++) {
+        const xAOD::Muon* muon = vecMuons[n];
+        xAOD::Muon::MuonType muonType = muon->muonType();
+        xAOD::Muon::Quality muonQuality = muon->quality();
+
+        /// Fill ME Track information
+        ATH_CHECK ( FillTrackInformation(sIdentifier, muon, pvtx, "ME", evt) );
+
+        /// Basic kinematic Information
+        MuonEta = muon->eta();
+        MuonPhi = muon->phi();
+        MuonPt  = muon->pt() * MeVtoGeV;
+
+        const xAOD::TrackParticle *metp = muon->trackParticle(xAOD::Muon::ExtrapolatedMuonSpectrometerTrackParticle);
+        const xAOD::TrackParticle *idtp = nullptr;
+        idtp = muon->trackParticle(xAOD::Muon::InnerDetectorTrackParticle);
+
+        if (muonType==xAOD::Muon::Combined) {
+            const xAOD::TrackParticle *cbtp = muon->trackParticle(xAOD::Muon::CombinedTrackParticle);
+
+            if (cbtp) {
+                uint8_t hitval_numberOfBLayerHits, hitval_numberOfPixelHits, hitval_numberOfSCTHits, hitval_numberOfTRTHits;
+                cbtp->summaryValue(hitval_numberOfBLayerHits,   xAOD::SummaryType::numberOfInnermostPixelLayerHits);
+                cbtp->summaryValue(hitval_numberOfPixelHits,    xAOD::SummaryType::numberOfPixelHits);
+                cbtp->summaryValue(hitval_numberOfSCTHits,      xAOD::SummaryType::numberOfSCTHits);
+                cbtp->summaryValue(hitval_numberOfTRTHits,      xAOD::SummaryType::numberOfTRTHits);        
+
+                MuonZ0  = cbtp->z0();
+                MuonD0  = cbtp->d0();
+
+                fill(tool, MuonEta, MuonPhi, MuonPt, MuonZ0, MuonD0);
+
+                /// Hit Information of the ID
+                MuonsNBHits     = static_cast<unsigned int>(hitval_numberOfBLayerHits);
+                MuonsNPixHits   = static_cast<unsigned int>(hitval_numberOfPixelHits);
+                MuonsNSCTHits   = static_cast<unsigned int>(hitval_numberOfSCTHits);
+                MuonsNTRTHits   = static_cast<unsigned int>(hitval_numberOfTRTHits);
+                fill(tool, MuonsNBHits, MuonsNPixHits, MuonsNSCTHits, MuonsNTRTHits);
+                MuonsNBHitsAvg = hitval_numberOfBLayerHits / vecMuons.size();
+                MuonsNPixHitsAvg = hitval_numberOfPixelHits / vecMuons.size();
+                MuonsNSCTHitsAvg = hitval_numberOfSCTHits / vecMuons.size();
+                MuonsNTRTHitsAvg = hitval_numberOfTRTHits / vecMuons.size();
+                fill(tool, MuonsNBHitsAvg, MuonsNPixHitsAvg, MuonsNSCTHitsAvg, MuonsNTRTHitsAvg);
+
+                /// Hit Information per layer
+                uint8_t hitval_nEtaLayer1{0}, hitval_nEtaLayer2{0}, hitval_nEtaLayer3{0}, hitval_nEtaLayer4{0};
+                uint8_t hitval_nPhiLayer1{0}, hitval_nPhiLayer2{0}, hitval_nPhiLayer3{0}, hitval_nPhiLayer4{0};
+                muon->summaryValue(hitval_nEtaLayer1, xAOD::MuonSummaryType::etaLayer1Hits);
+                muon->summaryValue(hitval_nEtaLayer2, xAOD::MuonSummaryType::etaLayer2Hits);
+                muon->summaryValue(hitval_nEtaLayer3, xAOD::MuonSummaryType::etaLayer3Hits);
+                muon->summaryValue(hitval_nEtaLayer4, xAOD::MuonSummaryType::etaLayer4Hits);
+                muon->summaryValue(hitval_nPhiLayer1, xAOD::MuonSummaryType::phiLayer1Hits);
+                muon->summaryValue(hitval_nPhiLayer2, xAOD::MuonSummaryType::phiLayer2Hits);
+                muon->summaryValue(hitval_nPhiLayer3, xAOD::MuonSummaryType::phiLayer3Hits);
+                muon->summaryValue(hitval_nPhiLayer4, xAOD::MuonSummaryType::phiLayer4Hits);
+                MuonsEtaHitsLayer1 = static_cast<unsigned int>(hitval_nEtaLayer1);
+                MuonsEtaHitsLayer2 = static_cast<unsigned int>(hitval_nEtaLayer2);
+                MuonsEtaHitsLayer3 = static_cast<unsigned int>(hitval_nEtaLayer3);
+                MuonsEtaHitsLayer4 = static_cast<unsigned int>(hitval_nEtaLayer4);
+                MuonsPhiHitsLayer1 = static_cast<unsigned int>(hitval_nPhiLayer1);
+                MuonsPhiHitsLayer2 = static_cast<unsigned int>(hitval_nPhiLayer2);
+                MuonsPhiHitsLayer3 = static_cast<unsigned int>(hitval_nPhiLayer3);
+                MuonsPhiHitsLayer4 = static_cast<unsigned int>(hitval_nPhiLayer4);
+                fill(tool, MuonsEtaHitsLayer1, MuonsEtaHitsLayer2, MuonsEtaHitsLayer3, MuonsEtaHitsLayer4, MuonsPhiHitsLayer1, MuonsPhiHitsLayer2, MuonsPhiHitsLayer3, MuonsPhiHitsLayer4);
+
+                /// Save Eta/Phi Information for medium and tight muons, 
+                /// to be used for lates efficiency studies
+                if (muonQuality==xAOD::Muon::Medium) {
+                    MuonEtaMedium = cbtp->eta();
+                    MuonPhiMedium = cbtp->phi();
+                    fill(tool, MuonEtaMedium, MuonPhiMedium);
+                }
+                if (muonQuality==xAOD::Muon::Tight) {
+                    MuonEtaTight = cbtp->eta();
+                    MuonPhiTight = cbtp->phi();
+                    fill(tool, MuonEtaTight, MuonPhiTight);
+                }
+                /// Momentum Resolution and chi2 studies of MS and ID only tracks
+                if (idtp && metp) {
+                    MuonDPTIDME     = (idtp->pt() - metp->pt()) / idtp->pt();
+                    MuonDPTCBME     = (cbtp->pt() - metp->pt()) / cbtp->pt();
+                    MuonDPTIDMECB   = (idtp->pt() - metp->pt()) / cbtp->pt();
+                    MuonsIDChi2NDF  = idtp->chiSquared()/std::max(1.f,idtp->numberDoF());
+                    MuonsMEChi2NDF  = metp->chiSquared()/std::max(1.f,metp->numberDoF());   
+                    fill(tool, MuonDPTIDME, MuonsIDChi2NDF, MuonsMEChi2NDF);
+                }
+
             }
         }
-	}
-	return StatusCode::SUCCESS;
+        else {
+            const xAOD::TrackParticle *ptp = muon->primaryTrackParticle();
+            if (ptp) {
+                MuonZ0  = ptp->z0();
+                MuonD0  = ptp->d0();
+
+                fill(tool, MuonEta, MuonPhi, MuonPt, MuonZ0, MuonD0);
+
+                // Information on hits in each layer
+                uint8_t hitval_numberOfBLayerHits{0}, hitval_numberOfPixelHits{0}, hitval_numberOfSCTHits{0}, hitval_numberOfTRTHits{0};
+                ptp->summaryValue(hitval_numberOfBLayerHits, xAOD::SummaryType::numberOfInnermostPixelLayerHits);
+                ptp->summaryValue(hitval_numberOfPixelHits, xAOD::SummaryType::numberOfPixelHits);
+                ptp->summaryValue(hitval_numberOfSCTHits, xAOD::SummaryType::numberOfSCTHits);
+                ptp->summaryValue(hitval_numberOfTRTHits, xAOD::SummaryType::numberOfTRTHits);        
+                MuonsNBHits     = static_cast<unsigned int>(hitval_numberOfBLayerHits);
+                MuonsNPixHits   = static_cast<unsigned int>(hitval_numberOfPixelHits);
+                MuonsNSCTHits   = static_cast<unsigned int>(hitval_numberOfSCTHits);
+                MuonsNTRTHits   = static_cast<unsigned int>(hitval_numberOfTRTHits);
+                fill(tool, MuonsNBHits, MuonsNPixHits, MuonsNSCTHits, MuonsNTRTHits);
+                
+                /// Momentum Resolution and chi2 studies of MS and ID only tracks
+                if (idtp && metp) {
+                    MuonDPTIDME     = (idtp->pt() - metp->pt()) / idtp->pt();
+                    MuonsIDChi2NDF  = idtp->chiSquared()/idtp->numberDoF();
+                    MuonsMEChi2NDF  = metp->chiSquared()/metp->numberDoF(); 
+                    fill(tool, MuonDPTIDME, MuonsIDChi2NDF, MuonsMEChi2NDF);
+                }
+            }
+        }
+    }
+    return StatusCode::SUCCESS;
 }
-	
+    
 //========================================================================================================
-StatusCode	MuonTrackMonitorAlgorithm::analyseLowLevelMuonFeatures(const xAOD::MuonContainer& Muons, uint32_t lumiBlockID) const 
+StatusCode  MuonTrackMonitorAlgorithm::analyseLowLevelMuonFeatures(const std::string& sIdentifier, std::vector<const xAOD::Muon*> &Muons, const xAOD::EventInfo &evt) const 
 {
-	using namespace Monitored;
-	/// Declaring all variables that are initialized via Python will be plotted
-	auto 	tool = getGroup("MuonTrackMonitorAlgorithm");
-	auto	MSAuthor = Monitored::Scalar<float>("MSAuthor", 0);
-	auto	MSQuality = Monitored::Scalar<float>("MSQuality", 0);
-	auto	MSType 	= Monitored::Scalar<float>("MSType", 0);
-	auto	MSLargeSectorR 	= Monitored::Scalar<float>("MSLargeSectorR", 0);
-	auto	MSLargeSectorZ 	= Monitored::Scalar<float>("MSLargeSectorZ", 0);
-	auto	MSSmallSectorR 	= Monitored::Scalar<float>("MSSmallSectorR", 0);
-	auto	MSSmallSectorZ 	= Monitored::Scalar<float>("MSSmallSectorZ", 0);
-	auto	MSEta = Monitored::Scalar<float>("MSEta", 0);
-	auto	MSPhi = Monitored::Scalar<float>("MSPhi", 0);
-	auto	MSPt = Monitored::Scalar<float>("MSPt", 0);
-	auto	MSLumiBlockNumberOfMuonTracks = Monitored::Scalar<float>("MSLumiBlockNumberOfMuonTracks", 0);
-	auto	MSLumiBlockNumberOfSegments = Monitored::Scalar<float>("MSLumiBlockNumberOfSegments", 0);
+    uint32_t lumiBlockID = evt.lumiBlock();
 
-	/// Loop over all muons
-	for(const auto muon : Muons) {
-		xAOD::Muon::Quality muonQuality	= muon->quality();
-		xAOD::Muon::MuonType muonType =	muon->muonType();
-		xAOD::Muon::Author muonAuthor =	muon->author();
+    using namespace Monitored;
 
-		/// General Muon Control Plots
-		MSAuthor = muonAuthor;
-		MSQuality = muonQuality;
-		MSType = muonType;
-		MSEta = muon->eta();
-		MSPhi = muon->phi();
-		MSPt = muon->pt();
-		MSLumiBlockNumberOfMuonTracks  = lumiBlockID;
-		fill(tool, MSAuthor, MSQuality, MSType, MSEta, MSPhi, MSPt, MSLumiBlockNumberOfMuonTracks);
+    /// Declaring all variables that are initialized via Python will be plotted
+    auto tool = getGroup("MuonTrackMonitorAlgorithm");
+    auto MuonAuthor = Monitored::Scalar<float>((sIdentifier+"Author").c_str(), 0);
+    auto MuonQuality = Monitored::Scalar<float>((sIdentifier+"Quality").c_str(), 0);
+    auto MuonType   = Monitored::Scalar<float>((sIdentifier+"Type").c_str(), 0);
+    auto MuonLargeSectorR = Monitored::Scalar<float>((sIdentifier+"LargeSectorR").c_str(), 0);
+    auto MuonLargeSectorZ = Monitored::Scalar<float>((sIdentifier+"LargeSectorZ").c_str(), 0);
+    auto MuonSmallSectorR = Monitored::Scalar<float>((sIdentifier+"SmallSectorR").c_str(), 0);
+    auto MuonSmallSectorZ = Monitored::Scalar<float>((sIdentifier+"SmallSectorZ").c_str(), 0);
+    auto MuonEta = Monitored::Scalar<float>((sIdentifier+"Eta").c_str(), 0);
+    auto MuonPhi = Monitored::Scalar<float>((sIdentifier+"Phi").c_str(), 0);
+    auto MuonPt = Monitored::Scalar<float>((sIdentifier+"Pt").c_str(), 0);
+    auto MuonEtaHi = Monitored::Scalar<float>((sIdentifier+"EtaHi").c_str(), 0);
+    auto MuonPhiHi = Monitored::Scalar<float>((sIdentifier+"PhiHi").c_str(), 0);
+    auto MuonPtHi = Monitored::Scalar<float>((sIdentifier+"PtHi").c_str(), 0);
+    auto LumiBlockNumberOfMuonTracks = Monitored::Scalar<float>((sIdentifier+"LumiBlockNumberOfMuonTracks").c_str(), 0);
+    auto LumiBlockNumberOfSegments = Monitored::Scalar<float>((sIdentifier+"LumiBlockNumberOfSegments").c_str(), 0);
+    auto MuonSector = Monitored::Scalar<float>((sIdentifier+"MuonSector").c_str(), 0);  
+    auto MuonCIndex = Monitored::Scalar<float>((sIdentifier+"MuonCIndex").c_str(), 0);  
+    auto MuonEta1 = Monitored::Scalar<float>((sIdentifier+"MuonEta1All").c_str(), 0);   
+    auto MuonPhi1 = Monitored::Scalar<float>((sIdentifier+"MuonPhi1All").c_str(), 0);   
+    auto MuonLumiBlock = Monitored::Scalar<float>((sIdentifier+"MuonLumiBlock").c_str(), 0);    
 
-		/// Do Muon Segments Plots
-		for (size_t nSeg=0; nSeg < muon->nMuonSegments(); nSeg++) {
-			MSLumiBlockNumberOfSegments = lumiBlockID;
-			fill(tool, MSLumiBlockNumberOfSegments);
-			const xAOD::MuonSegment* muonSegment = muon->muonSegment(nSeg);
+    /// Loop over all muons
+    for(const auto muon : Muons) {
+        xAOD::Muon::Quality muonQuality = muon->quality();
+        xAOD::Muon::MuonType muonType = muon->muonType();
+        xAOD::Muon::Author muonAuthor = muon->author();
+        MuonLumiBlock = lumiBlockID;
+        fill(tool, MuonLumiBlock);
+
+        /// General Muon Control Plots
+        MuonAuthor = muonAuthor;
+        MuonQuality = muonQuality;
+        MuonType = muonType;
+        MuonEta = muon->eta();
+        MuonPhi = muon->phi();
+        MuonPt = muon->pt() * MeVtoGeV;
+        LumiBlockNumberOfMuonTracks  = lumiBlockID;
+        fill(tool, MuonAuthor, MuonQuality, MuonType, MuonEta, MuonPhi, MuonPt, LumiBlockNumberOfMuonTracks);
+
+        // Fill high pT plots
+        if (muon->pt() > m_CBmuons_minPt) {
+            MuonEtaHi = muon->eta();
+            MuonPhiHi = muon->phi();
+            MuonPtHi = muon->pt() * MeVtoGeV;
+            fill(tool, MuonEtaHi, MuonPhiHi, MuonPtHi);
+        }
+            
+        /// Do Muon Segments and Sector Plots
+        for (size_t nSeg=0; nSeg < muon->nMuonSegments(); nSeg++) {
+            LumiBlockNumberOfSegments = lumiBlockID;
+            fill(tool, LumiBlockNumberOfSegments);
+            const xAOD::MuonSegment* muonSegment = muon->muonSegment(nSeg);
                         if (!muonSegment) {
                            continue;
                         }
-			MSLargeSectorR 	= sqrt(muonSegment->x()*muonSegment->x() + muonSegment->y()*muonSegment->y());
-			MSLargeSectorZ	= muonSegment->z();
-			MSSmallSectorR 	= sqrt(muonSegment->x()*muonSegment->x() + muonSegment->y()*muonSegment->y());
-			MSSmallSectorZ	= muonSegment->z();
-			int sector		= muonSegment->sector();
-			if(sector % 2 == 0) {
-				fill(tool, MSLargeSectorZ, MSLargeSectorR);
-			} else {
-				fill(tool, MSSmallSectorZ, MSSmallSectorR);
-			}
-		}
-	}
-
-	return StatusCode::SUCCESS;
-}
-
-
-
-//========================================================================================================
-StatusCode	MuonTrackMonitorAlgorithm::analyseCombinedTracks(const xAOD::MuonContainer& Muons, uint32_t lumiBlockID) const {
-	using namespace Monitored;
-
-	/// Declaring all variables that are initialized via Python will be plotted
-	auto tool = getGroup("MuonTrackMonitorAlgorithm");
-    auto MuonType = Monitored::Scalar<int>("MuonType", 0);
-	auto CBMuonSector = Monitored::Scalar<float>("CBMuonSector", 0);	
-	auto CBMuonCIndex = Monitored::Scalar<float>("CBMuonCIndex", 0);	
-	auto CBMuonEta1Triggered = Monitored::Scalar<float>("CBMuonEta1Triggered", 0);	
-	auto CBMuonPhi1Triggered = Monitored::Scalar<float>("CBMuonPhi1Triggered", 0);	
-	auto CBMuonEta1NoTrig = Monitored::Scalar<float>("CBMuonEta1NoTrig", 0);	
-	auto CBMuonPhi1NoTrig = Monitored::Scalar<float>("CBMuonPhi1NoTrig", 0);	
-	auto CBMuonEta1All = Monitored::Scalar<float>("CBMuonEta1All", 0);	
-	auto CBMuonPhi1All = Monitored::Scalar<float>("CBMuonPhi1All", 0);	
-	auto CBMuonLumiBlock = Monitored::Scalar<float>("CBMuonLumiBlock", 0);	
-
-	auto NonCBMuonSector = Monitored::Scalar<float>("NonCBMuonSector", 0);	
-	auto NonCBMuonCIndex = Monitored::Scalar<float>("NonCBMuonCIndex", 0);	
-	auto NonCBMuonEta1Triggered = Monitored::Scalar<float>("NonCBMuonEta1Triggered", 0);	
-	auto NonCBMuonPhi1Triggered = Monitored::Scalar<float>("NonCBMuonPhi1Triggered", 0);	
-	auto NonCBMuonEta1NoTrig = Monitored::Scalar<float>("NonCBMuonEta1NoTrig", 0);	
-	auto NonCBMuonPhi1NoTrig = Monitored::Scalar<float>("NonCBMuonPhi1NoTrig", 0);	
-	auto NonCBMuonEta1All = Monitored::Scalar<float>("NonCBMuonEta1All", 0);	
-	auto NonCBMuonPhi1All = Monitored::Scalar<float>("NonCBMuonPhi1All", 0);	
-	auto NonCBMuonLumiBlock = Monitored::Scalar<float>("NonCBMuonLumiBlock", 0);
-
-	/// Select Combined Muons
-	std::vector<const xAOD::Muon*>	vecCombinedMuonsHighPT;
-	std::vector<const xAOD::Muon*>	vecCombinedMuons;
-
-	/// Select not Combined Muons
-	std::vector<const xAOD::Muon*>	vecNonCombinedMuonsHighPT;
-	std::vector<const xAOD::Muon*>	vecNonCombinedMuons;
-
-	for(const auto muon : Muons) {
-		xAOD::Muon::MuonType muonType = muon->muonType();
-                MuonType = muonType;
-                fill(tool, MuonType);
-		if (muonType==xAOD::Muon::Combined) {
-			CBMuonLumiBlock = lumiBlockID;
-			fill(tool, CBMuonLumiBlock);
-
-			vecCombinedMuons.push_back(muon);
-			if (muon->pt() > m_CBmuons_minPt) vecCombinedMuonsHighPT.push_back(muon);
-
-			/// Provide Segment and Sector Plots
-			for (size_t nSeg=0; nSeg<muon->nMuonSegments();nSeg++) {
-				const xAOD::MuonSegment* muonSegment = muon->muonSegment(nSeg);
-                                if (!muonSegment) {
-                                   continue;
-                                }
-				CBMuonSector = muonSegment->sector();
-				CBMuonCIndex = muonSegment->chamberIndex();
-				fill(tool, CBMuonSector,CBMuonCIndex);
-			}
-		}
-        else {
-			NonCBMuonLumiBlock = lumiBlockID;
-			fill(tool, NonCBMuonLumiBlock);
-
-            vecNonCombinedMuons.push_back(muon);
-			if (muon->pt() > m_CBmuons_minPt) vecNonCombinedMuonsHighPT.push_back(muon);
-
-			/// Provide Segment and Sector Plots
-			for (size_t nSeg=0; nSeg<muon->nMuonSegments();nSeg++) {
-				const xAOD::MuonSegment* muonSegment = muon->muonSegment(nSeg);
-                                if (!muonSegment) {
-                                   continue;
-                                }
-				NonCBMuonSector = muonSegment->sector();
-				NonCBMuonCIndex = muonSegment->chamberIndex();
-				fill(tool, NonCBMuonSector, NonCBMuonCIndex);
-			}
-		}
-	}
-
-	/// Fill the relevant Muon Information for each Combined Muon
-	ATH_CHECK (FillMuonInformation("CB", vecCombinedMuons) );
-	ATH_CHECK (FillMuonInformation("NonCB", vecNonCombinedMuons) );
-	
-	/// Trigger Studies
-	if (vecCombinedMuonsHighPT.size()==1) {
-		CBMuonEta1All	= vecCombinedMuonsHighPT[0]->eta();
-		CBMuonPhi1All	= vecCombinedMuonsHighPT[0]->phi();
-		fill(tool, CBMuonEta1All, CBMuonPhi1All);
-
-		bool isTriggered = false;
-		for(const auto& chain : m_hltchainList){
-			if(!getTrigDecisionTool().empty() && getTrigDecisionTool()->isPassed( chain ) ){
-				isTriggered = true;
-			}
-		}
-
-		if ((isTriggered) && (vecCombinedMuonsHighPT.size() > 0)){
-			CBMuonEta1Triggered = vecCombinedMuonsHighPT[0]->eta();
-			CBMuonPhi1Triggered = vecCombinedMuonsHighPT[0]->phi();
-			fill(tool, CBMuonEta1Triggered, CBMuonPhi1Triggered);
-		}
-        else if (vecCombinedMuonsHighPT.size() > 0 ) {
-			CBMuonEta1NoTrig = vecCombinedMuonsHighPT[0]->eta();
-			CBMuonPhi1NoTrig = vecCombinedMuonsHighPT[0]->phi();
-			fill(tool, CBMuonEta1NoTrig, CBMuonPhi1NoTrig);
+            MuonSmallSectorR = MuonLargeSectorR = std::hypot(muonSegment->x(), muonSegment->y());
+            MuonSmallSectorZ = MuonLargeSectorZ = muonSegment->z();
+            MuonSector = muonSegment->sector();
+            MuonCIndex = muonSegment->chamberIndex();
+            int sector = muonSegment->sector();
+            if(sector % 2 == 0) {
+                fill(tool, MuonLargeSectorZ, MuonLargeSectorR, MuonSector, MuonCIndex);
+            } else {
+                fill(tool, MuonSmallSectorZ, MuonSmallSectorR, MuonSector, MuonCIndex);
+            }
         }
-	}
-            
+    }
 
-	return StatusCode::SUCCESS;
+    return StatusCode::SUCCESS;
+}
+
+
+
+//========================================================================================================
+StatusCode  MuonTrackMonitorAlgorithm::analyseCombinedTracks(const xAOD::MuonContainer& Muons, const xAOD::Vertex *pvtx, const xAOD::EventInfo &evt) const {
+    using namespace Monitored;
+
+    /// Declaring all variables that are initialized via Python will be plotted
+    auto tool = getGroup("MuonTrackMonitorAlgorithm");
+    auto MuonPrefix = Monitored::Scalar<const char*>("MuonPrefix", "");
+    auto NMuons = Monitored::Scalar<int>("NMuons", 0);
+    auto NMuonsTrig = Monitored::Scalar<int>("NMuonsTrig", 0);
+    auto NMuonsTrigCB = Monitored::Scalar<int>("NMuonsTrigCB", 0);
+    auto NMuonsTrigNonCB = Monitored::Scalar<int>("NMuonsTrigNonCB", 0);
+    auto NMuonsNoTrigCB = Monitored::Scalar<int>("NMuonsNoTrigCB", 0);
+    auto NMuonsNoTrigNonCB = Monitored::Scalar<int>("NMuonsNoTrigNonCB", 0);
+
+    /// Select Combined Muons
+    std::vector<const xAOD::Muon*>  vecAllCombinedMuons;
+    std::vector<const xAOD::Muon*>  vecCombinedMuons;
+    std::vector<const xAOD::Muon*>  vecNoTrigCombinedMuons;
+
+    /// Select not Combined Muons
+    std::vector<const xAOD::Muon*>  vecAllNonCombinedMuons;
+    std::vector<const xAOD::Muon*>  vecNonCombinedMuons;
+    std::vector<const xAOD::Muon*>  vecNoTrigNonCombinedMuons;
+
+    uint32_t n_muons = 0;
+    uint32_t n_muons_trig = 0;
+    uint32_t n_muons_trig_cb = 0;
+    uint32_t n_muons_trig_noncb = 0;
+    uint32_t n_muons_no_trig_cb = 0;
+    uint32_t n_muons_no_trig_noncb = 0;
+    for(const auto muon : Muons) {
+        n_muons++;
+        bool isTriggered = false;
+        for(const auto& chain : m_hltchainList){
+            if(!getTrigDecisionTool().empty() && getTrigDecisionTool()->isPassed( chain ) ){
+                isTriggered = true;
+            }
+        }
+
+        /// Fill MS Track information
+        if (isTriggered) {
+            ATH_CHECK ( FillTrackInformation("Container", muon, pvtx, "MS", evt) );
+        }
+        else {
+            ATH_CHECK ( FillTrackInformation("ContainerNoTrig", muon, pvtx, "MS", evt) );
+        }
+
+        xAOD::Muon::MuonType muonType = muon->muonType();
+        if (muonType==xAOD::Muon::Combined) {
+            vecAllCombinedMuons.push_back(muon);
+            if (isTriggered) {
+                vecCombinedMuons.push_back(muon);
+                n_muons_trig++;
+                n_muons_trig_cb++;
+                MuonPrefix = "TrigCB";
+            }
+            else {
+                vecNoTrigCombinedMuons.push_back(muon);
+                MuonPrefix = "NoTrigCB";
+                n_muons_no_trig_cb++;
+            }
+        }
+        else {
+            vecAllNonCombinedMuons.push_back(muon);
+            if (isTriggered) {
+                vecNonCombinedMuons.push_back(muon);
+                n_muons_trig++;
+                n_muons_trig_noncb++;
+                MuonPrefix = "TrigNonCB";
+            }
+            else {
+                vecNoTrigNonCombinedMuons.push_back(muon);
+                MuonPrefix = "NoTrigNonCB";
+                n_muons_no_trig_noncb++;
+            }
+        }
+        fill(tool, MuonPrefix);
+    }
+    NMuons = n_muons;
+    NMuonsTrig = n_muons_trig;
+    NMuonsTrigCB = n_muons_trig_cb;
+    NMuonsTrigNonCB = n_muons_trig_noncb;
+    NMuonsNoTrigCB = n_muons_no_trig_cb;
+    NMuonsNoTrigNonCB = n_muons_no_trig_noncb;
+    fill(tool, NMuons, NMuonsTrig, NMuonsTrigCB, NMuonsTrigNonCB, NMuonsNoTrigCB, NMuonsNoTrigNonCB);
+
+    /// Fill low level Muon Information for each Muon
+    ATH_CHECK (analyseLowLevelMuonFeatures("AllCB", vecAllCombinedMuons, evt) );
+    ATH_CHECK (analyseLowLevelMuonFeatures("AllNonCB", vecAllNonCombinedMuons, evt) );
+    ATH_CHECK (analyseLowLevelMuonFeatures("CB", vecCombinedMuons, evt) );
+    ATH_CHECK (analyseLowLevelMuonFeatures("NonCB", vecNonCombinedMuons, evt) );
+    ATH_CHECK (analyseLowLevelMuonFeatures("NoTrigCB", vecNoTrigCombinedMuons, evt) );
+    ATH_CHECK (analyseLowLevelMuonFeatures("NoTrigNonCB", vecNoTrigNonCombinedMuons, evt) );
+
+    /// Fill the relevant Muon Information for each Muon
+    ATH_CHECK (FillMuonInformation("AllCB", vecAllCombinedMuons, pvtx, evt) );
+    ATH_CHECK (FillMuonInformation("AllNonCB", vecAllNonCombinedMuons, pvtx, evt) );
+    ATH_CHECK (FillMuonInformation("CB", vecCombinedMuons, pvtx, evt) );
+    ATH_CHECK (FillMuonInformation("NonCB", vecNonCombinedMuons, pvtx, evt) );
+    ATH_CHECK (FillMuonInformation("NoTrigCB", vecNoTrigCombinedMuons, pvtx, evt) );
+    ATH_CHECK (FillMuonInformation("NoTrigNonCB", vecNoTrigNonCombinedMuons, pvtx, evt) );
+
+    return StatusCode::SUCCESS;
 }
 
 
 //========================================================================================================
-StatusCode	MuonTrackMonitorAlgorithm::plotResonanceCandidates(const std::string& resonanceName, std::vector<const xAOD::Muon*>& muonCandidates, uint32_t lumiBlockID) const {
-	using namespace Monitored;
+StatusCode  MuonTrackMonitorAlgorithm::plotResonanceCandidates(const std::string& resonanceName, std::vector<const xAOD::Muon*>& muonCandidates, const xAOD::Vertex *pvtx, const xAOD::EventInfo &evt) const {
 
-	/// Declaring all variables that are initialized via Python will be plotted
-	auto tool = getGroup("MuonTrackMonitorAlgorithm");
-	auto Eta = Monitored::Scalar<float>((resonanceName+"Eta").c_str(), 0);
-	auto Mass = Monitored::Scalar<float>((resonanceName+"Mass").c_str(), 0);
-	auto MuonLumiBlock = Monitored::Scalar<float>((resonanceName+"_MuonLumiBlock").c_str(), 0);	
-    auto muMinusEta = Monitored::Scalar<float>("muMinusEta", -9);
-    auto muPlusEta = Monitored::Scalar<float>("muPlusEta", -9);
-    auto Eta2D = Monitored::Scalar<const char*>("Eta2D", "");
+    uint32_t lumiBlockID = evt.lumiBlock();
 
-	/// Z Boson related plots	
-	std::map<int, int>	mapTagged_Resonance;
+    using namespace Monitored;
+
+    /// Declaring all variables that are initialized via Python will be plotted
+    auto tool = getGroup("MuonTrackMonitorAlgorithm");
+    auto Eta = Monitored::Scalar<float>((resonanceName+"Eta").c_str(), 0);
+    auto Mass = Monitored::Scalar<float>((resonanceName+"Mass").c_str(), 0);
+    auto MuonLumiBlock = Monitored::Scalar<float>((resonanceName+"MuonLumiBlock").c_str(), 0); 
+    auto muMinusEta = Monitored::Scalar<float>((resonanceName+"muMinusEta").c_str(), -9);
+    auto muPlusEta = Monitored::Scalar<float>((resonanceName+"muPlusEta").c_str(), -9);
+    auto Eta2D = Monitored::Scalar<const char*>((resonanceName+"Eta2D").c_str(), "outside");
+    auto Eta2 = Monitored::Scalar<int>((resonanceName+"Eta2").c_str(), -8);
+
+    /// Z Boson related plots   
+    std::map<int, int>  mapTagged_Resonance;
     std::vector<const xAOD::Muon*>  vecMuons;
-	for (unsigned int n=0; n<muonCandidates.size(); n++)	
-		mapTagged_Resonance[n]=0;
-	for (unsigned int n=0; n<muonCandidates.size(); n++){
+    for (unsigned int n=0; n<muonCandidates.size(); n++)    
+        mapTagged_Resonance[n]=0;
+    for (unsigned int n=0; n<muonCandidates.size(); n++){
         const TLorentzVector& tVec1 = muonCandidates[n]->p4();
-		for (unsigned int m=n+1; m<muonCandidates.size(); m++) {
+        for (unsigned int m=n+1; m<muonCandidates.size(); m++) {
             const TLorentzVector& tVec2 = muonCandidates[m]->p4();
             const TLorentzVector candidate = tVec1 + tVec2;
-            const float resonance_Mass   = candidate.M();
-			const float resonance_Eta	= candidate.Eta();
-			if (muonCandidates[n]->charge()==muonCandidates[m]->charge()) continue;
-			if ((resonance_Mass < m_ZBosonSelection_minMass)&&(resonanceName=="Z"))	continue;
-			if ((resonance_Mass > m_ZBosonSelection_maxMass)&&(resonanceName=="Z"))	continue;
-			if ((resonance_Mass < m_JPsiSelection_minMass)&&(resonanceName=="JPsi"))	continue;
-			if ((resonance_Mass > m_JPsiSelection_maxMass)&&(resonanceName=="JPsi"))	continue;
+            const float resonance_Mass = candidate.M() * MeVtoGeV;
+            const float resonance_Eta = candidate.Eta();
+            if (muonCandidates[n]->charge()==muonCandidates[m]->charge()) continue;
+            if ((candidate.M() < m_ZBosonSelection_minMass)&&(resonanceName=="Z")) continue;
+            if ((candidate.M() > m_ZBosonSelection_maxMass)&&(resonanceName=="Z")) continue;
+            if ((candidate.M() < m_JpsiSelection_minMass)&&(resonanceName=="Jpsi")) continue;
+            if ((candidate.M() > m_JpsiSelection_maxMass)&&(resonanceName=="Jpsi")) continue;
 
-			if (mapTagged_Resonance[n]!=1) vecMuons.push_back(muonCandidates[n]);
-			mapTagged_Resonance[n]=1;
-			if (mapTagged_Resonance[m]!=1) vecMuons.push_back(muonCandidates[m]);
-			mapTagged_Resonance[m]=1;
+            if (mapTagged_Resonance[n]!=1) vecMuons.push_back(muonCandidates[n]);
+            mapTagged_Resonance[n]=1;
+            if (mapTagged_Resonance[m]!=1) vecMuons.push_back(muonCandidates[m]);
+            mapTagged_Resonance[m]=1;
 
             if (muonCandidates[n]->charge()<0){
                 muMinusEta = tVec1.Eta();
@@ -366,115 +479,200 @@ StatusCode	MuonTrackMonitorAlgorithm::plotResonanceCandidates(const std::string&
                 muMinusEta = tVec2.Eta();
                 muPlusEta = tVec1.Eta();
             }
+            const char* EtaReg = "";
+            int EtaRegio = -9;
             if ((muMinusEta>1.05)&&(muPlusEta>1.05)){
-                Eta2D = "EA-EA";
+                EtaReg = "EA_EA";
+                auto Mass2D = Monitored::Scalar<float>((resonanceName+"Mass_"+EtaReg).c_str(), 0);
+                Mass2D = resonance_Mass;
+                fill(tool, Mass2D);
             } else if ((muMinusEta>1.05)&&(muPlusEta>0.)&&(muPlusEta<1.05)){
-                Eta2D = "EA-BA";
+                EtaReg = "EA_BA";
+                auto Mass2D = Monitored::Scalar<float>((resonanceName+"Mass_"+EtaReg).c_str(), 0);
+                Mass2D = resonance_Mass;
+                fill(tool, Mass2D);
             } else if ((muMinusEta>1.05)&&(muPlusEta>-1.05)&&(muPlusEta<0.)){
-                Eta2D = "EA-BC";
+                EtaReg = "EA_BC";
+                auto Mass2D = Monitored::Scalar<float>((resonanceName+"Mass_"+EtaReg).c_str(), 0);
+                Mass2D = resonance_Mass;
+                fill(tool, Mass2D);
             } else if ((muMinusEta>1.05)&&(muPlusEta<-1.05)){
-                Eta2D = "EA-EC";
+                EtaReg = "EA_EC";
+                auto Mass2D = Monitored::Scalar<float>((resonanceName+"Mass_"+EtaReg).c_str(), 0);
+                Mass2D = resonance_Mass;
+                fill(tool, Mass2D);
             } else if ((muMinusEta>0.)&&(muMinusEta<1.05)&&(muPlusEta>1.05)){
-                Eta2D = "BA-EA";
+                EtaReg = "BA_EA";
+                auto Mass2D = Monitored::Scalar<float>((resonanceName+"Mass_"+EtaReg).c_str(), 0);
+                Mass2D = resonance_Mass;
+                fill(tool, Mass2D);
             } else if ((muMinusEta>0.)&&(muMinusEta<1.05)&&(muPlusEta>0.)&&(muPlusEta<1.05)){
-                Eta2D = "BA-BA";
+                EtaReg = "BA_BA";
+                auto Mass2D = Monitored::Scalar<float>((resonanceName+"Mass_"+EtaReg).c_str(), 0);
+                Mass2D = resonance_Mass;
+                fill(tool, Mass2D);
             } else if ((muMinusEta>0.)&&(muMinusEta<1.05)&&(muPlusEta>-1.05)&&(muPlusEta<0.)){
-                Eta2D = "BA-BC";
+                EtaReg = "BA_BC";
+                auto Mass2D = Monitored::Scalar<float>((resonanceName+"Mass_"+EtaReg).c_str(), 0);
+                Mass2D = resonance_Mass;
+                fill(tool, Mass2D);
             } else if ((muMinusEta>0.)&&(muMinusEta<1.05)&&(muPlusEta<-1.05)){
-                Eta2D = "BA-EC";
+                EtaReg = "BA_EC";
+                auto Mass2D = Monitored::Scalar<float>((resonanceName+"Mass_"+EtaReg).c_str(), 0);
+                Mass2D = resonance_Mass;
+                fill(tool, Mass2D);
             } else if ((muMinusEta>-1.05)&&(muMinusEta<0.)&&(muPlusEta>1.05)){
-                Eta2D = "BC-EA";
+                EtaReg = "BC_EA";
+                auto Mass2D = Monitored::Scalar<float>((resonanceName+"Mass_"+EtaReg).c_str(), 0);
+                Mass2D = resonance_Mass;
+                fill(tool, Mass2D);
             } else if ((muMinusEta>-1.05)&&(muMinusEta<0.)&&(muPlusEta>0.)&&(muPlusEta<1.05)){
-                Eta2D = "BC-BA";
+                EtaReg = "BC_BA";
+                auto Mass2D = Monitored::Scalar<float>((resonanceName+"Mass_"+EtaReg).c_str(), 0);
+                Mass2D = resonance_Mass;
+                fill(tool, Mass2D);
             } else if ((muMinusEta>-1.05)&&(muMinusEta<0.)&&(muPlusEta>-1.05)&&(muPlusEta<0.)){
-                Eta2D = "BC-BC";
+                EtaReg = "BC_BC";
+                auto Mass2D = Monitored::Scalar<float>((resonanceName+"Mass_"+EtaReg).c_str(), 0);
+                Mass2D = resonance_Mass;
+                fill(tool, Mass2D);
             } else if ((muMinusEta>-1.05)&&(muMinusEta<0.)&&(muPlusEta<-1.05)){
-                Eta2D = "BC-EC";
+                EtaReg = "BC_EC";
+                auto Mass2D = Monitored::Scalar<float>((resonanceName+"Mass_"+EtaReg).c_str(), 0);
+                Mass2D = resonance_Mass;
+                fill(tool, Mass2D);
             } else if ((muMinusEta<-1.05)&&(muPlusEta>1.05)){
-                Eta2D = "EC-EA";
+                EtaReg = "EC_EA";
+                auto Mass2D = Monitored::Scalar<float>((resonanceName+"Mass_"+EtaReg).c_str(), 0);
+                Mass2D = resonance_Mass;
+                fill(tool, Mass2D);
             } else if ((muMinusEta<-1.05)&&(muPlusEta>0.)&&(muPlusEta<1.05)){
-                Eta2D = "EC-BA";
+                EtaReg = "EC_BA";
+                auto Mass2D = Monitored::Scalar<float>((resonanceName+"Mass_"+EtaReg).c_str(), 0);
+                Mass2D = resonance_Mass;
+                fill(tool, Mass2D);
             } else if ((muMinusEta<-1.05)&&(muPlusEta>-1.05)&&(muPlusEta<0.)){
-                Eta2D = "EC-BC";
+                EtaReg = "EC_BC";
+                auto Mass2D = Monitored::Scalar<float>((resonanceName+"Mass_"+EtaReg).c_str(), 0);
+                Mass2D = resonance_Mass;
+                fill(tool, Mass2D);
             } else if ((muMinusEta<-1.05)&&(muPlusEta<-1.05)){
-                Eta2D = "EC-EC";
+                EtaReg = "EC_EC";
+                auto Mass2D = Monitored::Scalar<float>((resonanceName+"Mass_"+EtaReg).c_str(), 0);
+                Mass2D = resonance_Mass;
+                fill(tool, Mass2D);
+            } else {
+                EtaReg = "out";
+                auto Mass2D = Monitored::Scalar<float>((resonanceName+"Mass_"+EtaReg).c_str(), 0);
             }
             Mass = resonance_Mass;
             Eta = resonance_Eta;
-			fill(tool, Mass, Eta, Eta2D, muMinusEta, muPlusEta);
-		
-			MuonLumiBlock =  lumiBlockID;
-			fill(tool, MuonLumiBlock);			
-		}
+            Eta2D = EtaReg;
+            Eta2 = EtaRegio;
+            fill(tool, Mass, Eta, Eta2, Eta2D, muMinusEta, muPlusEta);
+        
+            MuonLumiBlock =  lumiBlockID;
+            fill(tool, MuonLumiBlock);          
+        }
     }
 
-	/// Fill the relevant Muon Information for each Z Boson Candidate Muon
-	ATH_CHECK( FillMuonInformation(resonanceName, vecMuons) );		
+    /// Fill the relevant Muon Information for each Z Boson Candidate Muon
+    ATH_CHECK( FillMuonInformation(resonanceName, vecMuons, pvtx, evt) );
 
-	return StatusCode::SUCCESS;
+    return StatusCode::SUCCESS;
 }
 
 
-StatusCode	MuonTrackMonitorAlgorithm::analyseResonanceCandidates(const xAOD::MuonContainer& Muons, uint32_t lumiBlockID) const {
+//========================================================================================================
+StatusCode  MuonTrackMonitorAlgorithm::analyseResonanceCandidates(const xAOD::MuonContainer& Muons, const xAOD::Vertex *pvtx, const xAOD::EventInfo &evt) const {
 
-	std::vector<const xAOD::Muon*>	vecMuons_ZBoson_Candidates;
-	std::vector<const xAOD::Muon*>	vecMuons_JPsi_Candidates;
+    std::vector<const xAOD::Muon*>  vecMuons_ZBoson_Candidates;
+    std::vector<const xAOD::Muon*>  vecMuons_Jpsi_Candidates;
 
-	/// Select Muons Relevant for Z
-	for(const auto muon : Muons) {
-		xAOD::Muon::MuonType muonType = muon->muonType();
-		if (muonType==xAOD::Muon::Combined) {
-			const xAOD::TrackParticle *cbtp = nullptr;
-			ElementLink<xAOD::TrackParticleContainer> cbtpLink = muon->combinedTrackParticleLink();
-			if (cbtpLink.isValid()) cbtp = *cbtpLink;
+    /// Select Muons Relevant for Z
+    for(const auto muon : Muons) {
+        xAOD::Muon::MuonType muonType = muon->muonType();
+        if (muonType==xAOD::Muon::Combined) {
+            const xAOD::TrackParticle *cbtp = nullptr;
+            ElementLink<xAOD::TrackParticleContainer> cbtpLink = muon->combinedTrackParticleLink();
+            if (cbtpLink.isValid()) cbtp = *cbtpLink;
 
-			/// Select Z Boson
-			if (cbtp) {
-				float trkiso  = muon->isolation(xAOD::Iso::ptcone30)/muon->pt();
-				if (muonType==xAOD::Muon::Combined &&
-					cbtp &&
-					muon->pt()>m_ZBosonSelection_minPt &&
-					std::abs(muon->eta())<m_ZBosonSelection_maxEta &&
-					trkiso<m_ZBosonSelection_trkIsolation &&
-					std::abs(cbtp->z0())<m_ZBosonSelection_Z0Cut &&
-					std::abs(cbtp->d0())<m_ZBosonSelection_D0Cut )
-						vecMuons_ZBoson_Candidates.push_back(muon);
-				if (muonType==xAOD::Muon::Combined &&
-					cbtp &&
-					muon->pt()>m_JPsiSelection_minPt &&
-					std::abs(muon->eta())<m_JPsiSelection_maxEta &&
-					trkiso<m_JPsiSelection_trkIsolation &&
-					std::abs(cbtp->z0())<m_JPsiSelection_Z0Cut &&
-					std::abs(cbtp->d0())<m_JPsiSelection_D0Cut )
-						vecMuons_JPsi_Candidates.push_back(muon);
-			}
-		}
-	}
+            /// Select Z Boson and Jpsi
+            if (cbtp) {
+                float trkiso  = muon->isolation(xAOD::Iso::ptcone30)/muon->pt();
+                if (muonType==xAOD::Muon::Combined &&
+                    cbtp &&
+                    muon->pt()>m_ZBosonSelection_minPt &&
+                    std::abs(muon->eta())<m_ZBosonSelection_maxEta &&
+                    trkiso<m_ZBosonSelection_trkIsolation &&
+                    std::abs(cbtp->z0())<m_ZBosonSelection_Z0Cut &&
+                    std::abs(cbtp->d0())<m_ZBosonSelection_D0Cut )
+                        vecMuons_ZBoson_Candidates.push_back(muon);
+                if (muonType==xAOD::Muon::Combined &&
+                    cbtp &&
+                    muon->pt()>m_JpsiSelection_minPt &&
+                    std::abs(muon->eta())<m_JpsiSelection_maxEta &&
+                    trkiso<m_JpsiSelection_trkIsolation &&
+                    std::abs(cbtp->z0())<m_JpsiSelection_Z0Cut &&
+                    std::abs(cbtp->d0())<m_JpsiSelection_D0Cut )
+                        vecMuons_Jpsi_Candidates.push_back(muon);
+            }
+        }
+    }
 
-    ATH_CHECK( plotResonanceCandidates("Z", vecMuons_ZBoson_Candidates, lumiBlockID) );
-    ATH_CHECK( plotResonanceCandidates("JPsi", vecMuons_JPsi_Candidates, lumiBlockID) );
+    ATH_CHECK( plotResonanceCandidates("Z", vecMuons_ZBoson_Candidates, pvtx, evt) );
+    ATH_CHECK( plotResonanceCandidates("Jpsi", vecMuons_Jpsi_Candidates, pvtx, evt) );
 
-	return StatusCode::SUCCESS;
+    return StatusCode::SUCCESS;
 }
 
 
 //========================================================================================================
 StatusCode MuonTrackMonitorAlgorithm::fillHistograms(const EventContext& ctx) const
 {
-	using namespace Monitored;
+    using namespace Monitored;
 
-	//Declare the quantities which should be monitored
-	uint32_t lumiBlockID = GetEventInfo(ctx)->lumiBlock();
+    /// Get the EventInfo
+    if ((!m_EventInfoKey.empty()) &&  (!m_MuonContainerKey.empty()) && (!m_VertexContainerKey.empty())) {
+        SG::ReadHandle<xAOD::EventInfo> EventInfo{m_EventInfoKey, ctx};
+        if (ATH_UNLIKELY(! EventInfo.isValid())) {
+            ATH_MSG_ERROR("Unable to retrieve Event Info " << m_MuonContainerKey);
+            return StatusCode::FAILURE;
+        }
 
-	SG::ReadHandle<xAOD::MuonContainer> Muons{m_MuonContainerKey, ctx};
-	if (ATH_UNLIKELY(! Muons.isValid())) {
-		ATH_MSG_ERROR("Unable to retrieve muon container " << m_MuonContainerKey);
-		return StatusCode::FAILURE;
-	}
+        const xAOD::Vertex *pvtx = nullptr;
+        SG::ReadHandle<xAOD::VertexContainer> Vertices{m_VertexContainerKey, ctx};
+        if (!Vertices.isValid()) {
+            ATH_MSG_ERROR("Unable to retrieve Vertex container" << m_VertexContainerKey);
+            return StatusCode::FAILURE;
+        }
+        else {
+            pvtx = getPrimaryVertex(*Vertices);
+        }
 
-	ATH_CHECK( analyseLowLevelMuonFeatures(*Muons, lumiBlockID) );
-	ATH_CHECK( analyseCombinedTracks(*Muons, lumiBlockID) );
-	ATH_CHECK( analyseResonanceCandidates(*Muons, lumiBlockID) );
+        SG::ReadHandle<xAOD::MuonContainer> Muons{m_MuonContainerKey, ctx};
+        if (ATH_UNLIKELY(! Muons.isValid())) {
+            ATH_MSG_ERROR("Unable to retrieve muon container " << m_MuonContainerKey);
+            return StatusCode::FAILURE;
+        }
 
-	return StatusCode::SUCCESS;
+        ATH_CHECK( analyseCombinedTracks(*Muons, pvtx, *EventInfo) );
+        ATH_CHECK( analyseResonanceCandidates(*Muons, pvtx, *EventInfo) );
+
+    }
+
+    return StatusCode::SUCCESS;
+}
+
+
+//========================================================================================================
+const xAOD::Vertex* MuonTrackMonitorAlgorithm::getPrimaryVertex(const xAOD::VertexContainer& Vertices) const
+{
+    const xAOD::Vertex *pvtx = nullptr;
+    for(const auto vertex : Vertices){
+        if (vertex->vertexType() == xAOD::VxType::PriVtx) {
+            pvtx = vertex;
+        }
+    }
+    return pvtx;
 }
