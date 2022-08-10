@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef RegionSelectionSvc_H
@@ -55,8 +55,8 @@ public:
     /** get stations/multilayers in region */
     const std::vector<MuonCalib ::NtupleStationId> &GetStationsInRegions() const;
     /** add region ntuples which are relevant for this region to TChain */
-    int AddRegionNtuples(const std::string &infile, TChain *chain) const;
-    int AddRegionNtuples(const std::string &infile, TChain *chain, std::list<std::string> &dirnames) const;
+    int AddRegionNtuples(const std::string &infile, TChain *chain);
+    int AddRegionNtuples(const std::string &infile, TChain *chain, std::list<std::string> &dirnames);
 
 private:
     //! region string - job option
