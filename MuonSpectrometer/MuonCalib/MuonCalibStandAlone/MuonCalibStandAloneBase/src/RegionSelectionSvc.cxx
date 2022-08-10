@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2020 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
 */
 
 // MuonGeoModel
@@ -64,11 +64,11 @@ bool RegionSelectionSvc ::isInRegion(const MuonCalib::MuonFixedId &id) const { r
 
 std::string RegionSelectionSvc ::GetRegionSelection() const { return m_region_string; }
 const std::vector<MuonCalib ::NtupleStationId> &RegionSelectionSvc ::GetStationsInRegions() const { return m_stations_in_region; }
-int RegionSelectionSvc ::AddRegionNtuples(const std::string &infile, TChain *chain) const {
+int RegionSelectionSvc ::AddRegionNtuples(const std::string &infile, TChain *chain) {
     std::list<std::string> dirnames;
     return AddRegionNtuples(infile, chain, dirnames);
 }
-int RegionSelectionSvc ::AddRegionNtuples(const std::string &infile, TChain *chain, std::list<std::string> &dirnames) const {
+int RegionSelectionSvc ::AddRegionNtuples(const std::string &infile, TChain *chain, std::list<std::string> &dirnames) {
     int n_trees(0);
     if (dirnames.empty()) {
         // open file

@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2020 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "MuonCalibStandAloneBase/NtupleStationId.h"
@@ -26,7 +26,6 @@ namespace MuonCalib {
         m_phi = phi;
         m_ml = ml;
         m_author = author;
-        m_region_id_valid = false;
         m_geom_ok = false;
         return true;
     }
@@ -34,7 +33,6 @@ namespace MuonCalib {
     void NtupleStationId::SetStation(const std::string& station) {
         MuonFixedId id;
         m_station = id.stationStringToFixedStationNumber(station);
-        m_region_id_valid = false;
     }
 
     bool NtupleStationId::InitializeGeometry(const MdtIdHelper& mdtIdHelper, const MuonGM::MuonDetectorManager* detMgr) {
@@ -69,7 +67,7 @@ namespace MuonCalib {
         return true;
     }
 
-    void NtupleStationId::createRegionId() const {
+    std::string NtupleStationId::regionId() const {
         MuonFixedId id;
         std::ostringstream id_stream;
         if (m_station < 0) {
@@ -90,8 +88,7 @@ namespace MuonCalib {
             id_stream << "ANY";
         }
         if (m_ml > 0) { id_stream << "_" << m_ml; }
-        m_region_id = id_stream.str();
-        m_region_id_valid = true;
+        return id_stream.str();
     }
 
     int NtupleStationId::FixedId() const {

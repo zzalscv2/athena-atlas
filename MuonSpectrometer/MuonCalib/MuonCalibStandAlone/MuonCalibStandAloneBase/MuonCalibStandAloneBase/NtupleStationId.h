@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2017 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef NtupleStationId_H
@@ -34,8 +34,7 @@ namespace MuonCalib {
             m_author(0),
             m_region_hash(0),
             m_n_ml(-1),
-            m_geom_ok(false),
-            m_region_id_valid(false) {
+            m_geom_ok(false) {
             ResetVectors();
         }
         /** Initializing Constructor
@@ -63,7 +62,6 @@ namespace MuonCalib {
             m_phi = id.phi();
             m_ml = id.mdtMultilayer();
             m_author = 0;
-            m_region_id_valid = false;
             m_geom_ok = false;
         }
         inline void Initialize(const int &station, const int &eta, const int &phi, const int &ml = 0, const int &author = 0) {
@@ -72,7 +70,6 @@ namespace MuonCalib {
             m_phi = phi;
             m_ml = ml;
             m_author = author;
-            m_region_id_valid = false;
             m_geom_ok = false;
         }
         inline void ResetVectors() {
@@ -96,15 +93,12 @@ namespace MuonCalib {
         /** set phi */
         inline void SetPhi(const int &phi) {
             m_phi = phi;
-            m_region_id_valid = false;
         }
         inline void SetEta(const int &eta) {
             m_eta = eta;
-            m_region_id_valid = false;
         }
         inline void SetMultilayer(const int &ml) {
             m_ml = ml;
-            m_region_id_valid = false;
         }
         inline void SetAuthor(const int &author) { m_author = author; }
         /** comparision operators for the use as map ids*/
@@ -156,11 +150,8 @@ namespace MuonCalib {
             return true;
         }
         /** return the region id string */
-        inline const std::string regionId() const {
-            if (!m_region_id_valid) createRegionId();
-            return m_region_id;
-        }
-        /** initialize geometry information */
+        std::string regionId() const;
+          /** initialize geometry information */
         bool InitializeGeometry(const MdtIdHelper &mdtIdHelper, const MuonGM::MuonDetectorManager *detMgr);
         /** get station eta and phi*/
         inline int GetStation() const { return m_station; }
@@ -212,11 +203,6 @@ namespace MuonCalib {
         int m_layer_min[2], m_layer_max[2];
         int m_tube_min[2], m_tube_max[2];
         bool m_geom_ok;
-        //! region id
-        mutable std::string m_region_id;
-        mutable bool m_region_id_valid;
-        /** create the region id string */
-        void createRegionId() const;
     };
 
 }  // namespace MuonCalib
