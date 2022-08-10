@@ -9,6 +9,7 @@ from BTagging.BTagLightSecVertexingConfig import BTagLightSecVtxToolCfg
 def JetBTaggingAlgCfg(ConfigFlags,
                       BTaggingCollection,
                       JetCollection,
+                      JetColNoJetsSuffix,
                       PrimaryVertexCollectionName,
                       TaggerList,
                       Tracks,
@@ -37,7 +38,7 @@ def JetBTaggingAlgCfg(ConfigFlags,
     options['IncomingMuons'] = Muons
     options['OutgoingMuons'] = OutgoingMuons
     options['JetCalibrationName'] = (
-        ConfigFlags.BTagging.forcedCalibrationChannel
+        ConfigFlags.BTagging.forcedCalibrationChannel or JetColNoJetsSuffix
     )
     options['BTagSVCollectionName'] = BTaggingCollection + 'SecVtx'
     options['BTagJFVtxCollectionName'] = BTaggingCollection + 'JFVtx'
