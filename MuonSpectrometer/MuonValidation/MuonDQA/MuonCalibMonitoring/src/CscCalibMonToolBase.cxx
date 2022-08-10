@@ -1098,8 +1098,8 @@ std::string CscCalibMonToolBase::getGeoPath( int eta, int sector,  int wireLayer
 {
   std::stringstream ss;
 
-  static std::string histStr = "/_hists";
-  static std::string errorDir = "/ERROR";
+  static const std::string histStr = "/_hists";
+  static const std::string errorDir = "/ERROR";
 
   ss << std::setfill('0');//so we can have uniform numbers
 
