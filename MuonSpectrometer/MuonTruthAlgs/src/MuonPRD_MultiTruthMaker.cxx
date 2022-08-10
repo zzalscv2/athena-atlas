@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2020 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
 */
 
 // Algorithm producing truth info for PrepRawData, keeping all MC particles contributed to a PRD.
@@ -83,7 +83,7 @@ StatusCode MuonPRD_MultiTruthMaker::execute() {
             buildPRD_Truth<Muon::MMPrepDataContainer, MuonSimDataCollection>(m_MM_ContainerName, m_MM_SimDataMapName, m_MM_PRD_TruthName));
 
     bool ok = true;
-    for (std::vector<StatusCode>::const_iterator i = retvals.begin(); i != retvals.end(); i++) {
+    for (std::vector<StatusCode>::const_iterator i = retvals.begin(); i != retvals.end(); ++i) {
         if (i->isFailure()) ok = false;
     }
     if (ok) return StatusCode::SUCCESS;

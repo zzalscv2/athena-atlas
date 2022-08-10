@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2020 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
 */
 
 // Algorithm producing truth info for PrepRawData, keeping all MC particles contributed to a PRD.
@@ -37,7 +37,7 @@ StatusCode MuonPatternCombinationDetailedTrackTruthMaker::execute() {
     //----------------------------------------------------------------
     // Retrieve prep raw data truth
     std::vector<const PRD_MultiTruthCollection *> prdCollectionVector;
-    for (std::vector<std::string>::const_iterator ikey = m_PRD_TruthNames.begin(); ikey != m_PRD_TruthNames.end(); ikey++) {
+    for (std::vector<std::string>::const_iterator ikey = m_PRD_TruthNames.begin(); ikey != m_PRD_TruthNames.end(); ++ikey) {
         prdCollectionVector.push_back(nullptr);
         sc = evtStore()->retrieve(*prdCollectionVector.rbegin(), *ikey);
         if (!sc.isSuccess()) {

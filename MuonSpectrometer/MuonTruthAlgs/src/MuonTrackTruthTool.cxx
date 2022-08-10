@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2020 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "MuonTruthAlgs/MuonTrackTruthTool.h"
@@ -689,7 +689,6 @@ namespace Muon {
                 foundBC = true;
                 ATH_MSG_DEBUG("getMother() : pdg = " << pit->pdg_id() << " barcode = " << HepMC::barcode(pit));
                 if (pit->pdg_id() != pdgFinal) {  // the first case a track had a different flavour
-                    if (pit->pdg_id() == pdgFinal) ATH_MSG_ERROR("Wrong pdgId association in getMother() ");
 #ifdef HEPMC3
                     return pit.scptr();
 #else
