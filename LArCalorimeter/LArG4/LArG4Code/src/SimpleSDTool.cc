@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2017 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "LArG4Code/SimpleSDTool.h"
@@ -12,7 +12,6 @@
 #include "CaloIdentifier/LArEM_ID.h"
 #include "CaloIdentifier/LArFCAL_ID.h"
 #include "CaloIdentifier/LArHEC_ID.h"
-#include "CaloIdentifier/LArMiniFCAL_ID.h"
 
 // Local includes
 #include "LArG4Code/LArG4SimpleSD.h"
@@ -33,8 +32,7 @@ namespace LArG4
       m_useFrozenShowers(false),
       m_larEmID(nullptr),
       m_larFcalID(nullptr),
-      m_larHecID(nullptr),
-      m_larMiniFcalID(nullptr)
+      m_larHecID(nullptr)
   {
     declareProperty("TimeBinType", m_timeBinType);
     declareProperty("TimeBinWidth", m_timeBinWidth);
@@ -60,10 +58,6 @@ namespace LArG4
     }
     if( (m_larHecID = idMgr->getHEC_ID()) == nullptr) {
       ATH_MSG_ERROR("Invalid LAr HEC ID helper");
-      return StatusCode::FAILURE;
-    }
-    if( (m_larMiniFcalID = idMgr->getMiniFCAL_ID()) == nullptr) {
-      ATH_MSG_ERROR("Invalid LAr Mini FCAL ID helper");
       return StatusCode::FAILURE;
     }
 
@@ -105,7 +99,7 @@ namespace LArG4
     // Create the simple SD
     auto sd = std::make_unique<LArG4SimpleSD>
       (sdName, calc, m_timeBinType, m_timeBinWidth);
-    sd->setupHelpers(m_larEmID, m_larFcalID, m_larHecID, m_larMiniFcalID);
+    sd->setupHelpers(m_larEmID, m_larFcalID, m_larHecID);
 
     // Assign the volumes to the SD
     if( assignSD( sd.get(), parsedVolumes ).isFailure() ) {

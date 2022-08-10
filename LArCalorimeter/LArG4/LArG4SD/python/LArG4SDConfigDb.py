@@ -8,7 +8,6 @@ addTool("LArG4SD.LArG4SDConfigLegacy.getLArEMECSensitiveDetector","LArEMECSensit
 addTool("LArG4SD.LArG4SDConfigLegacy.getLArFCALSensitiveDetector","LArFCALSensitiveDetector")
 addTool("LArG4SD.LArG4SDConfigLegacy.getLArHECSensitiveDetector","LArHECSensitiveDetector")
 addTool("LArG4SD.LArG4SDConfigLegacy.getLArInactiveSensitiveDetector","LArInactiveSensitiveDetector")
-addTool("LArG4SD.LArG4SDConfigLegacy.getLArMiniFCALSensitiveDetector","LArMiniFCALSensitiveDetector")
 
 addService("LArG4SD.LArG4SDConfigLegacy.getCalibrationDefaultCalculator","CalibrationDefaultCalculator")
 addAlgorithm("LArG4SD.LArG4SDConfigLegacy.getDeadMaterialCalibrationHitMerger","DeadMaterialCalibrationHitMerger")

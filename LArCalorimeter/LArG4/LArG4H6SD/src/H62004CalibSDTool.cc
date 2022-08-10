@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2019 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "H62004CalibSDTool.h"
@@ -36,7 +36,7 @@ namespace LArG4
 
     // Create the simple SD
     auto sd = std::make_unique<LArG4H62004CalibSD>(sdName, calc, m_doPID);
-    sd->setupHelpers(m_larEmID, m_larFcalID, m_larHecID, m_larMiniFcalID, m_caloDmID);
+    sd->setupHelpers(m_larEmID, m_larFcalID, m_larHecID, m_caloDmID);
 
     // Assign the volumes to the SD
     if( assignSD( sd.get(), parsedVolumes ).isFailure() ) {

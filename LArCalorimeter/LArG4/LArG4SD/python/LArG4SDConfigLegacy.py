@@ -1,4 +1,4 @@
-# Copyright (C) 2002-2020 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
 
 from AthenaCommon import CfgMgr
 
@@ -14,7 +14,6 @@ def getLArActiveSensitiveDetector(name="LArActiveSensitiveDetector", **kwargs):
         kwargs.setdefault("NegIWVolumes",["LArMgr::LAr::EMEC::Neg::InnerWheel"])
         kwargs.setdefault("NegOWVolumes",["LArMgr::LAr::EMEC::Neg::OuterWheel"])
         kwargs.setdefault("NegBOBarretteVolumes",["LArMgr::LAr::EMEC::Neg::BackOuterBarrette::Module::Phidiv"])
-        kwargs.setdefault("MiniVolumes",["LArMgr::MiniFCAL::Wafer"])
     if simFlags.SimLayout.get_Value()!="tb_LArH6_2003":
         kwargs.setdefault("PosIWVolumes",["LArMgr::LAr::EMEC::Pos::InnerWheel"])
         kwargs.setdefault("PosOWVolumes",["LArMgr::LAr::EMEC::Pos::OuterWheel"])
@@ -268,9 +267,6 @@ def getLArInactiveSensitiveDetector(name="LArInactiveSensitiveDetector", **kwarg
                                              "LArMgr::LAr::HEC::Module::Depth::Slice::TieRod",
                                              "LArMgr::LAr::HEC::Module::Depth::Slice::Electrode::Copper",
                                              "LArMgr::LAr::HEC::Module::Depth::Slice::Electrode"])
-        kwargs.setdefault("MiniMomVolumes",["LArMgr::MiniFCALMother"])
-        kwargs.setdefault("MiniVolumes",["LArMgr::MiniFCAL"])
-        kwargs.setdefault("MiniLayVolumes",["LArMgr::MiniFCAL::Layer"])
     if simFlags.SimLayout.get_Value()=="tb_LArH6_2002":
         kwargs.setdefault("ECPosInVolumes", ["LArMgr::LAr::EMEC::Pos::InnerWheel::Absorber",
                                              "LArMgr::LAr::EMEC::Pos::InnerWheel::Electrode"])
@@ -295,12 +291,6 @@ def getLArInactiveSensitiveDetector(name="LArInactiveSensitiveDetector", **kwarg
     # No effect currently
     kwargs.setdefault("OutputCollectionNames", ["LArCalibrationHitInactive"])
     return CfgMgr.LArG4__InactiveSDTool(name, **kwargs)
-
-def getLArMiniFCALSensitiveDetector(name="LArMiniFCALSensitiveDetector", **kwargs):
-    kwargs.setdefault("MiniVolumes",["LArMgr::MiniFCAL::Wafer"])
-    # No effect currently
-    kwargs.setdefault("OutputCollectionNames", ["LArHitMiniFCAL"])
-    return CfgMgr.LArG4__MiniFCALSDTool(name, **kwargs)
 
 def getCalibrationDefaultCalculator(name="CalibrationDefaultCalculator", **kwargs):
     return CfgMgr.LArG4__CalibrationDefaultCalculator(name, **kwargs)

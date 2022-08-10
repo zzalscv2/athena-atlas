@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2017 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "LArG4Code/LArG4SDTool.h"
@@ -9,7 +9,6 @@
 #include "CaloIdentifier/LArEM_ID.h"
 #include "CaloIdentifier/LArFCAL_ID.h"
 #include "CaloIdentifier/LArHEC_ID.h"
-#include "CaloIdentifier/LArMiniFCAL_ID.h"
 #include "CaloIdentifier/CaloDM_ID.h"
 #include "LArG4Code/LArG4SimpleSD.h"
 #include "LArG4Code/LArG4CalibSD.h"
@@ -31,7 +30,6 @@ LArG4SDTool::LArG4SDTool(const std::string& type, const std::string& name, const
   , m_larEmID (nullptr)
   , m_larFcalID (nullptr)
   , m_larHecID (nullptr)
-  , m_larMiniFcalID (nullptr)
   , m_caloDmID (nullptr)
 {
   declareProperty("ParticleID",m_doPID=false);
@@ -62,12 +60,6 @@ StatusCode LArG4SDTool::initialize()
       ATH_MSG_ERROR("LArG4SDTool: Invalid HEC ID helper");
       return StatusCode::FAILURE;
     }
-  m_larMiniFcalID = caloIdManager->getMiniFCAL_ID();
-  if(m_larMiniFcalID==0)
-    {
-      ATH_MSG_ERROR("LArG4SDTool: Invalid Mini FCAL ID helper");
-      return StatusCode::FAILURE;
-    }
   m_caloDmID = caloIdManager->getDM_ID();
   if(!m_caloDmID)
     {
@@ -81,12 +73,12 @@ StatusCode LArG4SDTool::initialize()
 
 void LArG4SDTool::setupHelpers( LArG4SimpleSD* an_sd ) const
 {
-  an_sd->setupHelpers( m_larEmID, m_larFcalID, m_larHecID, m_larMiniFcalID );
+  an_sd->setupHelpers( m_larEmID, m_larFcalID, m_larHecID );
 }
 
 void LArG4SDTool::setupHelpers( LArG4CalibSD* an_sd ) const
 {
-  an_sd->setupHelpers( m_larEmID, m_larFcalID, m_larHecID, m_larMiniFcalID, m_caloDmID );
+  an_sd->setupHelpers( m_larEmID, m_larFcalID, m_larHecID, m_caloDmID );
 }
 
 void LArG4SDTool::setupAllSDs(std::map<G4VSensitiveDetector*,std::vector<std::string>*> configuration) const

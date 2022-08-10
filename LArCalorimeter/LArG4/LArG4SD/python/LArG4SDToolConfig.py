@@ -17,7 +17,6 @@ def LArActiveSensitiveDetectorToolCfg(ConfigFlags, name="LArActiveSensitiveDetec
         kwargs.setdefault("NegIWVolumes",["LArMgr::LAr::EMEC::Neg::InnerWheel"])
         kwargs.setdefault("NegOWVolumes",["LArMgr::LAr::EMEC::Neg::OuterWheel"])
         kwargs.setdefault("NegBOBarretteVolumes",["LArMgr::LAr::EMEC::Neg::BackOuterBarrette::Module::Phidiv"])
-        kwargs.setdefault("MiniVolumes",["LArMgr::MiniFCAL::Wafer"])
     if ConfigFlags.GeoModel.AtlasVersion!="tb_LArH6_2003":
         kwargs.setdefault("PosIWVolumes",["LArMgr::LAr::EMEC::Pos::InnerWheel"])
         kwargs.setdefault("PosOWVolumes",["LArMgr::LAr::EMEC::Pos::OuterWheel"])
@@ -377,9 +376,6 @@ def LArInactiveSensitiveDetectorToolCfg(ConfigFlags, name="LArInactiveSensitiveD
                                              "LArMgr::LAr::HEC::Module::Depth::Slice::TieRod",
                                              "LArMgr::LAr::HEC::Module::Depth::Slice::Electrode::Copper",
                                              "LArMgr::LAr::HEC::Module::Depth::Slice::Electrode"])
-        kwargs.setdefault("MiniMomVolumes",["LArMgr::MiniFCALMother"])
-        kwargs.setdefault("MiniVolumes",["LArMgr::MiniFCAL"])
-        kwargs.setdefault("MiniLayVolumes",["LArMgr::MiniFCAL::Layer"])
     if ConfigFlags.GeoModel.AtlasVersion=="tb_LArH6_2002":
         kwargs.setdefault("ECPosInVolumes", ["LArMgr::LAr::EMEC::Pos::InnerWheel::Absorber",
                                              "LArMgr::LAr::EMEC::Pos::InnerWheel::Electrode"])
@@ -423,16 +419,6 @@ def LArInactiveSensitiveDetectorToolCfg(ConfigFlags, name="LArInactiveSensitiveD
 
    
     result.setPrivateTools( CompFactory.LArG4.InactiveSDTool(name, **kwargs) )
-    return result
-
-
-def LArMiniFCALSensitiveDetectorToolCfg(ConfigFlags, name="LArMiniFCALSensitiveDetector", **kwargs):
-    result = ComponentAccumulator()
-    kwargs.setdefault("MiniVolumes",["LArMgr::MiniFCAL::Wafer"])
-    # No effect currently
-    kwargs.setdefault("OutputCollectionNames", ["LArHitMiniFCAL"])
-
-    result.setPrivateTools(CompFactory.LArG4.MiniFCALSDTool(name, **kwargs))
     return result
 
 
