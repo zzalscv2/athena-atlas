@@ -62,9 +62,6 @@ LAr::LArVolumeBuilder::LArVolumeBuilder(const std::string& t, const std::string&
   m_useCaloSurfBuilder(true),
   m_lArLayersPerRegion(1),
   m_useCaloTrackingGeometryBounds(true),
-  m_mbtsZ(-1.),
-  m_mbts_rmin(0.),
-  m_mbts_rmax(0.),
   m_calosurf("CaloSurfaceBuilder"),
   m_scale_HECmaterial(1.1)
 {
@@ -1652,43 +1649,48 @@ LAr::LArVolumeBuilder::trackingVolumes(const CaloDetDescrManager& caloDDM) const
   Amg::Transform3D trIn= topEC->getX();   
   Amg::Transform3D tr2(trIn);   
   const PVConstLink mbts= getChild(topEC,"MBTS_mother",trIn);
+
+  float mbtsZ{-1};    // MBTS layer position
+  float mbts_rmin{0}; // MBTS layer dimensions
+  float mbts_rmax{0}; // MBTS layer dimensions
+
   if (mbts) {
     //printChildren(mbts,-1,0,Amg::Transform3D(trIn));
     const PVConstLink mbts1= getChild(mbts,"MBTS1",trIn);
-    if (mbts1) m_mbtsZ=fabs(trIn.translation().z());
+    if (mbts1) mbtsZ=fabs(trIn.translation().z());
     if (mbts1) {
-      ATH_MSG_VERBOSE("MBTS1 layer found at z "<<m_mbtsZ);
+      ATH_MSG_VERBOSE("MBTS1 layer found at z "<<mbtsZ);
       // retrieve Rmin
       const GeoLogVol* clv = mbts1->getLogVol();
       const GeoTrd* trd=dynamic_cast<const GeoTrd*> (clv->getShape());
-      if (trd) m_mbts_rmin = trIn.translation().perp()-trd->getZHalfLength();
+      if (trd) mbts_rmin = trIn.translation().perp()-trd->getZHalfLength();
     }
     // retrieve MBTS2 for Rmax
     const PVConstLink mbts2= getChild(mbts,"MBTS2",tr2);
     if (mbts2) {
       const GeoLogVol* clv = mbts2->getLogVol();
       const GeoTrd* trd=dynamic_cast<const GeoTrd*> (clv->getShape());
-      if (trd) m_mbts_rmax = (tr2.translation().perp()+trd->getZHalfLength())/cos(acos(-1.)/8);
+      if (trd) mbts_rmax = (tr2.translation().perp()+trd->getZHalfLength())/cos(acos(-1.)/8);
     }
-    ATH_MSG_VERBOSE("MBTS layer span in R "<<m_mbts_rmin<<","<<m_mbts_rmax);
+    ATH_MSG_VERBOSE("MBTS layer span in R "<<mbts_rmin<<","<<mbts_rmax);
      
   } else {
     ATH_MSG_VERBOSE("MBTS not found ");    
   }
   
-  if (m_mbtsZ>0. && m_mbts_rmin>0. && m_mbts_rmax>0.){
+  if (mbtsZ>0. && mbts_rmin>0. && mbts_rmax>0.){
     // create the dummy volume to pass on the MBTS position 
     Trk::CylinderVolumeBounds* lArNegativeMBTSBounds = new Trk::CylinderVolumeBounds(
-								       m_mbts_rmin,
-								       m_mbts_rmax,
+								       mbts_rmin,
+								       mbts_rmax,
 								       10. );
 
     ATH_MSG_DEBUG( "Filled in LAr MBTS bounds : " << *lArNegativeMBTSBounds );
-    ATH_MSG_DEBUG( "   -> at z-position: +/- " << m_mbtsZ );
+    ATH_MSG_DEBUG( "   -> at z-position: +/- " << mbtsZ );
 
  
-    Amg::Vector3D lArEndcapInnerGapPos(0.,0., m_mbtsZ);
-    Amg::Vector3D lArEndcapInnerGapNeg(0.,0.,-m_mbtsZ);
+    Amg::Vector3D lArEndcapInnerGapPos(0.,0., mbtsZ);
+    Amg::Vector3D lArEndcapInnerGapNeg(0.,0.,-mbtsZ);
     Amg::Transform3D* lArPositiveMBTSTransform = new Amg::Transform3D(Amg::Translation3D(lArEndcapInnerGapPos));
     Amg::Transform3D* lArNegativeMBTSTransform = new Amg::Transform3D(Amg::Translation3D(lArEndcapInnerGapNeg));
 

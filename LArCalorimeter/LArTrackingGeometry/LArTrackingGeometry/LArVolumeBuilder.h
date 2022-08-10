@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2020 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
 */
 
 ///////////////////////////////////////////////////////////////////
@@ -99,9 +99,6 @@ private:
   //!< if true use DetDescr based layering,
   //!< if false use biequidistant layering
   bool m_useCaloTrackingGeometryBounds;
-  mutable float m_mbtsZ;     // MBTS layer position
-  mutable float m_mbts_rmin; // MBTS layer dimensions
-  mutable float m_mbts_rmax; // MBTS layer dimensions
 
   //!< tool required for DetDescr-based layering
   ToolHandle<ICaloSurfaceBuilder> m_calosurf;
