@@ -412,12 +412,16 @@ namespace CP {
 
     xAOD::Muon::Quality MuonSelectionTool::getQuality(const xAOD::Muon& mu) const {
         ATH_MSG_VERBOSE("Evaluating muon quality...");
-        
+        static const std::set<int> run3_qual{xAOD::Muon::Loose, xAOD::Muon::Medium ,4};
         //currently allow only medium, loose and highpt(barrel) when note in expert mode for run3
-        if(isRun3() && !m_developMode && m_quality!=1 && m_quality!=2 && m_quality!=4)
+        if(isRun3() && !m_developMode && !run3_qual.count(m_quality))
         {
           ATH_MSG_VERBOSE("tool configured with quality="<<m_quality<<" which is currently only supported in expert mode for run3");
           return xAOD::Muon::VeryLoose;
+        }
+        if (isRun3() && mu.isAuthor(xAOD::Muon::Author::Commissioning) && !m_allowComm) {
+            ATH_MSG_VERBOSE("Reject authors from the commissioning chain");
+            return xAOD::Muon::VeryLoose;
         }
 
         // SegmentTagged muons
@@ -1249,7 +1253,10 @@ namespace CP {
 
     bool MuonSelectionTool::passedCaloTagQuality(const xAOD::Muon& mu) const {
         // Use CaloScore variable based on Neural Network if enabled
-        if (m_useCaloScore) return passedCaloScore(mu);
+        // The neural network is only trained until eta = 1 
+        // cf. https://cds.cern.ch/record/2802605/files/CERN-THESIS-2021-290.pdf
+        constexpr float eta_range = 1.;
+        if (std::abs(mu.eta()) < eta_range && m_useCaloScore) return passedCaloScore(mu);
 
         // Otherwise we use CaloMuonIDTag
         int CaloMuonIDTag = -20;
