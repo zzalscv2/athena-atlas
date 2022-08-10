@@ -187,7 +187,7 @@ StatusCode sTgcFastDigitizer::execute() {
   std::vector<sTgcPrepData*> sTgcprds;
   std::vector<int> sTgcflag;
 
-  const DataHandle< sTGCSimHitCollection > collGMSH;
+  const sTGCSimHitCollection* collGMSH;
   ATH_CHECK(evtStore()->retrieve( collGMSH, "sTGC_Hits"));  // TODO: move to data handles
 
   ATH_MSG_DEBUG( "Retrieved " <<  collGMSH->size() << " sTgc hits!");
