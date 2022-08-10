@@ -81,6 +81,8 @@ def getFlavourTagging( inputJets, inputVertex, inputTracks, BTagName,
         muons=inputMuons,
         primaryVertices=inputVertex,
         BTagCollection=BTagName,
+        renameTrackJets=False,
+        AddedJetSuffix='Jets'
     ))
 
     return acc

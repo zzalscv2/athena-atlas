@@ -144,6 +144,8 @@ def getFtagComponent(cfgFlags, jetcol, pvCol):
         nnList=GetTaggerTrainingMap(jetcol_name_without_Jets),
         trackCollection=track_collection,
         primaryVertices=pvCol,
+        renameTrackJets=True,
+        AddedJetSuffix='Jets',
     ))
 
     return acc

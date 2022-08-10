@@ -32,7 +32,7 @@ def JetParticleAssociationAlgCfg(
         MinimumJetPtFlag=None):
 
     acc=ComponentAccumulator()
-    jetcol = JetCollection.replace("Track", "PV0Track")
+    jetcol = JetCollection
     name=(jetcol + "_" + OutputParticleDecoration + "_assoc").lower()
     if MinimumJetPt is None:
         MinimumJetPt = ConfigFlags.BTagging.minimumJetPtForTrackAssociation
