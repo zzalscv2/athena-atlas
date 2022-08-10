@@ -1,5 +1,5 @@
 #!/usr/bin/env python
-"""Run tests on ISF_MainConfigNew
+"""Run tests on ISF_MainConfig
 
 This test inherits from Simulation/G4Atlas/G4AtlasAlg/test/G4AtlasAlgConfig_Test.py
 
@@ -75,7 +75,7 @@ if __name__ == '__main__':
     cfg.merge(BeamEffectsAlgCfg(ConfigFlags))
 
     # add the ISF_MainConfig
-    from ISF_Config.ISF_MainConfigNew import Kernel_FullG4MTCfg
+    from ISF_Config.ISF_MainConfig import Kernel_FullG4MTCfg
     cfg.merge(Kernel_FullG4MTCfg(ConfigFlags))
 
     from OutputStreamAthenaPool.OutputStreamConfig import OutputStreamCfg
@@ -105,7 +105,7 @@ if __name__ == '__main__':
     sc = cfg.run()
 
     b = time.time()
-    log.info("Run ISF_MainConfigNew_Test in " + str(b-a) + " seconds")
+    log.info("Run ISF_MainConfig_Test in " + str(b-a) + " seconds")
 
     # Success should be 0
     #os.sys.exit(not sc.isSuccess())

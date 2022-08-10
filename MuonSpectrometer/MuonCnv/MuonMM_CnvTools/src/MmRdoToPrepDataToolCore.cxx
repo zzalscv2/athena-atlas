@@ -98,6 +98,9 @@ StatusCode Muon::MmRdoToPrepDataToolCore::processCollection(Muon::MMPrepDataCont
     return StatusCode::FAILURE;
   }
  
+  // Count hits with negative charge, which indicates bad calibration
+  int nHitNegativeCharge{0};
+
   std::vector<MMPrepData> MMprds;
   // convert the RDO collection to a PRD collection
   for (const MM_RawData* rdo : *rdoColl ) {
@@ -124,11 +127,10 @@ StatusCode Muon::MmRdoToPrepDataToolCore::processCollection(Muon::MMPrepDataCont
 
     bool getLocalPos = detEl->stripPosition(prdId,localPos);
     if ( !getLocalPos ) {
-      ATH_MSG_WARNING("Could not get the local strip position for MM "<<m_idHelperSvc->toString(prdId));
+      ATH_MSG_WARNING("Could not get the local strip position for "<<m_idHelperSvc->toString(prdId));
       continue;
     }
-    int stripNumberRDOId = detEl->stripNumber(localPos,layid);
-    ATH_MSG_DEBUG(" strip number at the hit position (assuming the design readout geometry): " << stripNumberRDOId );
+
     Amg::Vector3D globalPos;
     bool getGlobalPos = detEl->stripGlobalPosition(prdId,globalPos);
     if ( !getGlobalPos ) {
@@ -137,6 +139,12 @@ StatusCode Muon::MmRdoToPrepDataToolCore::processCollection(Muon::MMPrepDataCont
     }
     NSWCalib::CalibratedStrip calibStrip;
     ATH_CHECK (m_calibTool->calibrateStrip(ctx, rdo, calibStrip));
+    if (calibStrip.charge < 0) {
+        if (nHitNegativeCharge < 1)
+          ATH_MSG_WARNING("One MM RDO or more, such as one with pdo = "<<rdo->charge() << " counts, corresponds to a negative charge (" << calibStrip.charge << "). Skipping these RDOs");
+        ++nHitNegativeCharge;
+        continue;
+    }
 
     const Amg::Vector3D globalDir(globalPos.x(), globalPos.y(), globalPos.z());
     Trk::LocalDirection localDir;

@@ -120,7 +120,7 @@ def fromRunArgs(runArgs):
     from BeamEffects.BeamEffectsAlgConfig import BeamEffectsAlgCfg
     cfg.merge(BeamEffectsAlgCfg(ConfigFlags))
 
-    from ISF_Config.ISF_MainConfigNew import ISF_KernelCfg
+    from ISF_Config.ISF_MainConfig import ISF_KernelCfg
     cfg.merge(ISF_KernelCfg(ConfigFlags))
 
     from Digitization.DigitizationSteering import DigitizationMainContentCfg

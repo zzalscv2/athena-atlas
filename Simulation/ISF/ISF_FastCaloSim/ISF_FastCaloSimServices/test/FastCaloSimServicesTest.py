@@ -36,7 +36,7 @@ def FastCaloSimServicesMainCfg(ConfigFlags):
     acc.merge(BeamEffectsAlgCfg(ConfigFlags))
 
     # Add Kernel_ATLFAST3MT from ISF_MainConfig
-    from ISF_Config.ISF_MainConfigNew import Kernel_ATLFAST3MT_QSCfg
+    from ISF_Config.ISF_MainConfig import Kernel_ATLFAST3MT_QSCfg
     acc.merge(Kernel_ATLFAST3MT_QSCfg(ConfigFlags))
 
     from OutputStreamAthenaPool.OutputStreamConfig import OutputStreamCfg

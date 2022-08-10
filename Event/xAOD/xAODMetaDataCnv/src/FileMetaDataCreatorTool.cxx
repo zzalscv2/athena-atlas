@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
 */
 
 // Local include(s):
@@ -342,7 +342,7 @@ void FileMetaDataCreatorTool::addUniqueValue(
       ATH_MSG_DEBUG("added " << value << " to list of " << type);
     }
     if (!m_info->setValue(type, list)) {
-      ATH_MSG_DEBUG("error updating list for " + type);
+      ATH_MSG_WARNING("error updating list for " + type);
     }
   } catch (std::exception& e) {
     // Processing generated events not data

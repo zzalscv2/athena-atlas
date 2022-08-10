@@ -17,7 +17,7 @@ namespace Muon
      private:
       uint32_t m_vmm_word;
 
-      uint16_t m_vmm;          // vmm number
+      uint16_t m_roc_vmm;      // captured vmm number
       uint16_t m_chan;         // vmm channel
       uint16_t m_pdo;          // adc amplitude
       uint16_t m_tdo;          // peaking time 
@@ -52,7 +52,8 @@ namespace Muon
       uint16_t tdo          () {return m_tdo;};
       uint16_t rel_bcid     () {return m_rel;};
       uint16_t vmm_channel  () {return m_chan;};
-      uint16_t vmm          () {return m_vmm;};
+      uint16_t roc_vmm      () {return m_roc_vmm;};
+      uint16_t vmm          () {return m_offlineHelper->vmm();};
 
       // Access to Detector logical ID
 
@@ -99,17 +100,17 @@ inline bool Muon::nsw::VMMChannel::calculate_parity ()
 }
 
 inline Muon::nsw::VMMChannel::VMMChannel (uint32_t vmm_word, Muon::nsw::NSWElink *elink)
-	    : m_vmm_word (vmm_word), m_elink (elink)
+: m_vmm_word (vmm_word), m_elink (elink)
 {
   m_tdo      = Muon::nsw::helper::get_bits (vmm_word, Muon::nsw::bitMaskVmmHitTDC, Muon::nsw::bitPosVmmHitTDC);  // should be 0 if noTDC is true
   m_pdo      = Muon::nsw::helper::get_bits (vmm_word, Muon::nsw::bitMaskVmmHitADC, Muon::nsw::bitPosVmmHitADC);
   m_chan     = Muon::nsw::helper::get_bits (vmm_word, Muon::nsw::bitMaskVmmHitCHANNEL, Muon::nsw::bitPosVmmHitCHANNEL);
-  m_vmm      = Muon::nsw::helper::get_bits (vmm_word, Muon::nsw::bitMaskVmmHitVMMID, Muon::nsw::bitPosVmmHitVMMID);
+  m_roc_vmm  = Muon::nsw::helper::get_bits (vmm_word, Muon::nsw::bitMaskVmmHitVMMID, Muon::nsw::bitPosVmmHitVMMID);
   m_rel      = Muon::nsw::helper::get_bits (vmm_word, Muon::nsw::bitMaskVmmHitRELBCID, Muon::nsw::bitPosVmmHitRELBCID);
   m_neighbor = Muon::nsw::helper::get_bits (vmm_word, Muon::nsw::bitMaskVmmHitN, Muon::nsw::bitPosVmmHitN);
   m_parity   = Muon::nsw::helper::get_bits (vmm_word, Muon::nsw::bitMaskVmmHitP, Muon::nsw::bitPosVmmHitP);
 
-  m_offlineHelper = std::make_unique <Muon::nsw::helper::NSWOfflineHelper> (elink->elinkId (), m_vmm, m_chan);
+  m_offlineHelper = std::make_unique <Muon::nsw::helper::NSWOfflineHelper> (elink->elinkId (), m_roc_vmm, m_chan);
 }
 
 #endif // _MUON_VMM_CHANNEL_H_

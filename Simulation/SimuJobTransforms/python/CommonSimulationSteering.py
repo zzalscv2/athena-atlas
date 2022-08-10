@@ -81,7 +81,7 @@ def CommonSimulationCfg(ConfigFlags, log):
 
     if ConfigFlags.Sim.ISF.ReSimulation:
         # Case 4
-        from ISF_Algorithms.ISF_AlgorithmsConfigNew import SimEventFilterCfg, InvertedSimEventFilterCfg, RenameHitCollectionsCfg
+        from ISF_Algorithms.ISF_AlgorithmsConfig import SimEventFilterCfg, InvertedSimEventFilterCfg, RenameHitCollectionsCfg
         cfg.merge(SimEventFilterCfg(ConfigFlags, sequenceName='SimSequence'))
         cfg.merge(InvertedSimEventFilterCfg(ConfigFlags, sequenceName='CopyHitSequence'))
         cfg.merge(RenameHitCollectionsCfg(ConfigFlags, sequenceName='CopyHitSequence'))
@@ -100,7 +100,7 @@ def CommonSimulationCfg(ConfigFlags, log):
     AcceptAlgNames=[]
     if ConfigFlags.Sim.ISFRun:
         # add the ISF_MainConfig
-        from ISF_Config.ISF_MainConfigNew import ISF_KernelCfg
+        from ISF_Config.ISF_MainConfig import ISF_KernelCfg
         cfg.merge(ISF_KernelCfg(ConfigFlags))
         AcceptAlgNames = ['ISF_Kernel_' + ConfigFlags.Sim.ISF.Simulator.value]
         if ConfigFlags.Sim.ISF.ReSimulation:

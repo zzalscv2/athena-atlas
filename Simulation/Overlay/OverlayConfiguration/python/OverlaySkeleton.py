@@ -28,6 +28,7 @@ def defaultOverlayFlags(configFlags):
 def setOverlayInputFiles(runArgs, configFlags, log):
     hasRDO_BKGInput = hasattr(runArgs, 'inputRDO_BKGFile')
     hasBS_SKIMInput = hasattr(runArgs, 'inputBS_SKIMFile')
+    hasEVNT_Input   = hasattr(runArgs, 'inputEVNTFile')
 
     if configFlags.Common.ProductionStep == ProductionStep.Overlay and not hasattr(runArgs, 'inputHITSFile'):
         raise RuntimeError('No input HITS file defined')
@@ -47,6 +48,13 @@ def setOverlayInputFiles(runArgs, configFlags, log):
         configFlags.Input.Files = runArgs.inputRDO_BKGFile
         if configFlags.Common.ProductionStep == ProductionStep.Overlay:
             configFlags.Input.SecondaryFiles = runArgs.inputHITSFile
+        elif configFlags.Common.ProductionStep == ProductionStep.FastChain:
+            if not hasEVNT_Input:
+                raise RuntimeError('No input EVNT file defined')
+            else:
+                configFlags.Input.SecondaryFiles = runArgs.inputEVNTFile
+        else:
+            raise RuntimeError('No secondaryFiles are defined')
 
         # runNumber is MC channel number in reco
         if hasattr(runArgs, 'runNumber'):

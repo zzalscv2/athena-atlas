@@ -1,6 +1,6 @@
 """ComponentAccumulator core ISF_Service configuration
 Provides local configuration to be imported without circular dependencies
-Complements ISF_ServicesConfigNew
+Complements ISF_ServicesConfig
 
 Copyright (C) 2002-2020 CERN for the benefit of the ATLAS collaboration
 """
@@ -8,7 +8,7 @@ from AthenaConfiguration.ComponentAccumulator import ComponentAccumulator
 from AthenaConfiguration.ComponentFactory import CompFactory
 from AthenaCommon.SystemOfUnits import mm
 from SubDetectorEnvelopes.SubDetectorEnvelopesConfigNew import EnvelopeDefSvcCfg
-from ISF_Tools.ISF_ToolsConfigNew import ParticleKillerToolCfg
+from ISF_Tools.ISF_ToolsConfig import ParticleKillerToolCfg
 
 
 def ISFEnvelopeDefSvcCfg(ConfigFlags, name="ISF_ISFEnvelopeDefSvc", **kwargs):

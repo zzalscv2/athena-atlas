@@ -12,12 +12,12 @@ from G4UserActions.G4UserActionsConfigNew import (
     G4SimTimerToolCfg, G4TrackCounterToolCfg, HitWrapperToolCfg,
     LooperKillerToolCfg, StoppedParticleActionToolCfg
 )
-from ISF_Geant4CommonTools.ISF_Geant4CommonToolsConfigNew import EntryLayerToolCfg, EntryLayerToolMTCfg
-from ISF_Services.ISF_ServicesCoreConfigNew import AFIIGeoIDSvcCfg, GeoIDSvcCfg
-from ISF_Services.ISF_ServicesConfigNew import (
+from ISF_Geant4CommonTools.ISF_Geant4CommonToolsConfig import EntryLayerToolCfg, EntryLayerToolMTCfg
+from ISF_Services.ISF_ServicesCoreConfig import AFIIGeoIDSvcCfg, GeoIDSvcCfg
+from ISF_Services.ISF_ServicesConfig import (
     AFIIParticleBrokerSvcCfg, ParticleBrokerSvcCfg, TruthServiceCfg
 )
-from ISF_Tools.ISF_ToolsConfigNew import StoppedParticleFilterToolCfg
+from ISF_Tools.ISF_ToolsConfig import StoppedParticleFilterToolCfg
 from MCTruthBase.MCTruthBaseConfigNew import MCTruthSteppingActionToolCfg
 
 

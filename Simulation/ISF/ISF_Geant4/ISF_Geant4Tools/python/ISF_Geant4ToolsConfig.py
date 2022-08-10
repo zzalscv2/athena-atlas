@@ -15,7 +15,7 @@ from G4AtlasServices.G4AtlasUserActionConfig import (
 from G4AtlasTools.G4AtlasToolsConfig import (
     SensitiveDetectorMasterToolCfg, FastSimulationMasterToolCfg
 )
-from ISF_Services.ISF_ServicesConfigNew import (
+from ISF_Services.ISF_ServicesConfig import (
     InputConverterCfg, LongLivedInputConverterCfg
 )
 

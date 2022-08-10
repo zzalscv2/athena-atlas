@@ -341,9 +341,9 @@ void AFPSiDBasicKalmanTool::saveToXAOD (const AFPSiDBasicKalmanToolTrack& recoTr
   // add links to clusters
   ATH_MSG_DEBUG("Track position: (x="<<track->xLocal()<<", y="<<track->yLocal()<<", z="<<track->zLocal()<<")   slope: (dx="<<track->xSlope()<<", dy="<<track->ySlope()<<")   chi2="<<track->chi2()<<", nHoles="<<track->nHoles()<<", nClusters="<<track->nClusters());
   for (const xAOD::AFPSiHitsCluster* theCluster : recoTrack.clustersInTrack()) {
-    ElementLink< xAOD::AFPSiHitsClusterContainer >* clusterLink = new ElementLink< xAOD::AFPSiHitsClusterContainer >; // will be taken over by the xAODCluster and deleted
-    clusterLink->toContainedElement(*hitsClusterContainer, theCluster);
-    track->addCluster(*clusterLink);
+    ElementLink< xAOD::AFPSiHitsClusterContainer > clusterLink;
+    clusterLink.toContainedElement(*hitsClusterContainer, theCluster);
+    track->addCluster(clusterLink);
 
     ATH_MSG_DEBUG("cluster position: (x="<<theCluster->xLocal()<<", y="<<theCluster->yLocal()<<", z="<<theCluster->zLocal()<<")");
   }

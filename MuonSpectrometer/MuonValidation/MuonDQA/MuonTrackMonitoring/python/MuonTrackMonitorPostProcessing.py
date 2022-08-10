@@ -24,4 +24,10 @@ def project_mean_ROOT(inputs):
         mean.SetBinError(i, tmp.GetMeanError(1))
         sigma.SetBinContent(i, tmp.GetRMS(1))
         sigma.SetBinError(i, tmp.GetRMSError(1))
+    mean.SetTitle(inputs[0][1][0].GetTitle()+"projection mean")
+    mean.GetXaxis().SetTitle("#eta regions")
+    mean.GetYaxis().SetTitle("entries")
+    sigma.SetTitle(inputs[0][1][0].GetTitle()+"projection sigma")
+    sigma.GetXaxis().SetTitle("#eta regions")
+    sigma.GetYaxis().SetTitle("entries")
     return [mean, sigma]

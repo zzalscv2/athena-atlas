@@ -19,8 +19,7 @@ namespace Muon
       class NSWOfflineHelper
       {
        public:
-        NSWOfflineHelper (Muon::nsw::NSWResourceId *res_id, uint16_t vmm_number, uint16_t vmm_channel_number)
-          : m_elinkId (res_id), m_vmm (vmm_number), m_chan (vmm_channel_number) {};
+        NSWOfflineHelper (Muon::nsw::NSWResourceId *res_id, uint16_t roc_vmm, uint16_t vmm_channel_number);
 
         virtual ~NSWOfflineHelper () {};
 
@@ -37,12 +36,13 @@ namespace Muon
 
         uint8_t  channel_type   ();
         uint16_t channel_number ();
-
+        uint16_t vmm            () { return m_vmm; }
+ 
        private:
-        Muon::nsw::NSWResourceId *m_elinkId;
+        Muon::nsw::NSWResourceId *m_elinkId {nullptr};
 
-        uint16_t m_vmm;
-        uint16_t m_chan;
+        uint16_t m_vmm  {0};
+        uint16_t m_chan {0};
       };
 
       class NSWOfflineRobId
@@ -67,6 +67,20 @@ namespace Muon
     }
   }
 }
+
+
+//=====================================================================
+inline Muon::nsw::helper::NSWOfflineHelper::NSWOfflineHelper(Muon::nsw::NSWResourceId *res_id, uint16_t roc_vmm, uint16_t vmm_channel_number)
+: m_elinkId (res_id)
+, m_vmm (roc_vmm)
+, m_chan (vmm_channel_number) 
+{
+  // Conversion of an online vmm id (captured by the ROC, read from the fragment) 
+  // to the offline id used in all mappings, and vice versa, since the conversion is symmetric.
+  constexpr uint8_t vmmRemap[8] = { 2, 3, 0, 1, 5, 4, 6, 7 };  
+  if (res_id->detId() == eformat::MUON_STGC_ENDCAP_A_SIDE || res_id->detId() == eformat::MUON_STGC_ENDCAP_C_SIDE)
+    m_vmm = vmmRemap [roc_vmm];
+};
 
 #endif // _MUON_NSW_OFFLINE_HELPER_H_
 

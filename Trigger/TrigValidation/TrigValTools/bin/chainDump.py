@@ -1,6 +1,6 @@
 #!/usr/bin/env python
 #
-# Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
 #
 
 '''Script to dump trigger counts to a text file'''
@@ -73,6 +73,7 @@ def get_parser():
                         nargs='+',
                         default=[
                             'HLTFramework/TrigSignatureMoni/SignatureAcceptance',
+                            'HLTFramework/TrigSignatureMoni/../TrigSignatureMoni/SignatureAcceptance',
                             'HLTFramework/../HLTFramework/TrigSignatureMoni/SignatureAcceptance',
                             'TrigSteer_HLT/ChainAcceptance',
                             'TrigSteer_HLT/NumberOfActiveTEs',
@@ -94,6 +95,7 @@ def get_parser():
                         nargs='+',
                         default=[
                             'HLTFramework/TrigSignatureMoni/SignatureAcceptance:HLTChain',
+                            'HLTFramework/TrigSignatureMoni/../TrigSignatureMoni/SignatureAcceptance:HLTExpress',
                             'HLTFramework/../HLTFramework/TrigSignatureMoni/SignatureAcceptance:HLTStep',
                             'TrigSteer_HLT/ChainAcceptance:HLTChain',
                             'TrigSteer_HLT/NumberOfActiveTEs:HLTTE',
@@ -125,14 +127,20 @@ def load_histograms(root_file, hist_paths):
     return hist_dict
 
 
-def get_counts(hist):
+def get_counts(hist, rowLabel='Output'):
     '''
     Extract {xlabel, value} dictionary from a histogram. Values are stored as integers.
-    If histogram is 2D, the last y-bin is used to extract the value.
+    If histogram is 2D, the y-bin labelled rowLabel is used to extract the value.
     '''
 
     nbinsx = hist.GetNbinsX()
     nbinsy = hist.GetNbinsY()
+    outputRow = None  # Default to last row if 'Output' not found
+    for bin in range(1, nbinsy):
+        if hist.GetYaxis().GetBinLabel(bin) == rowLabel:
+            outputRow = bin
+            break
+
     counts = {}
     for b in range(1, nbinsx+1):
         label = hist.GetXaxis().GetBinLabel(b)
@@ -140,7 +148,7 @@ def get_counts(hist):
             logging.debug('Bin %d in histogram %s has no label, skipping', b, hist.GetName())
             continue
 
-        value = hist.GetBinContent(b) if hist.GetDimension() == 1 else hist.GetBinContent(b, nbinsy)
+        value = hist.GetBinContent(b) if hist.GetDimension() == 1 else hist.GetBinContent(b, outputRow or nbinsy)
         counts[label] = int(value)
 
     return counts
@@ -158,8 +166,12 @@ def get_2D_counts(hist):
             logging.debug('Bin %d in histogram %s has no label, skipping', x, hist.GetName())
             continue
 
-        for y in range(3, nbinsy): #get only steps
-            name = label + '_' + hist.GetYaxis().GetBinLabel(y)
+        for y in range(3, nbinsy):
+            rowName = hist.GetYaxis().GetBinLabel(y)
+            # Get only steps and skip the base rows
+            if rowName in ['Input','AfterPS','Output','Express']:
+                continue
+            name = label + '_' + rowName
             name = name.replace(' ', '')
             value = hist.GetBinContent(x, y)
             counts[name] = int(value)
@@ -442,11 +454,12 @@ def main():
                 'results would be overwritten. Use --countHists and ',
                 '--histDict options to avoid duplicates. Exiting.')
 
-        counts = get_2D_counts(hist) if text_name in ['HLTStep', 'HLTDecision'] else get_counts(hist)
+        rowLabel = 'Express' if 'Express' in text_name else 'Output'
+        counts = get_2D_counts(hist) if text_name in ['HLTStep', 'HLTDecision'] else get_counts(hist, rowLabel)
         ref_counts = {}
         if ref_hists:
             ref_hist = ref_hists[hist_name]
-            ref_counts = get_2D_counts(ref_hist) if text_name in ['HLTStep', 'HLTDecision'] else get_counts(ref_hist)
+            ref_counts = get_2D_counts(ref_hist) if text_name in ['HLTStep', 'HLTDecision'] else get_counts(ref_hist, rowLabel)
         d = make_counts_json_dict(counts, ref_counts)
 
         json_dict[text_name] = OrderedDict()

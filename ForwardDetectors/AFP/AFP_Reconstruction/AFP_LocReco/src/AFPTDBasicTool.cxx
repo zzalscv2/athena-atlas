@@ -154,9 +154,9 @@ void AFPTDBasicTool::saveToXAOD (const AFPTDBasicToolTrack& recoTrack, std::uniq
 // add links to bars
     ATH_MSG_DEBUG("Track time: (time="<<track->trainTime()<<", size="<<track->trainSize()<<", train id="<<track->trainID()<<")   station: (st="<<track->stationID()<<")");
     for (const xAOD::AFPToFHit* theHit : recoTrack.barInTrain()) {
-        ElementLink< xAOD::AFPToFHitContainer >* barLink = new ElementLink< xAOD::AFPToFHitContainer >; // will be taken over by the xAODTrain and deleted
-        barLink->toContainedElement(*hitContainer, theHit);
-        track->addBar(*barLink);
+        ElementLink< xAOD::AFPToFHitContainer > barLink;
+        barLink.toContainedElement(*hitContainer, theHit);
+        track->addBar(barLink);
 
         ATH_MSG_DEBUG("bar time="<<theHit->time()<<" bar in train ="<<theHit->barInTrainID()<<", trin id ="<<theHit->trainID()<<")");
     }

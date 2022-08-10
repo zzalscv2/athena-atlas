@@ -5,16 +5,16 @@ Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
 from AthenaConfiguration.ComponentAccumulator import ComponentAccumulator
 from AthenaConfiguration.ComponentFactory import CompFactory
 from SimulationConfig.SimulationMetadata import writeSimulationParametersMetadata
-from ISF_Services.ISF_ServicesCoreConfigNew import GeoIDSvcCfg, AFIIGeoIDSvcCfg
-from ISF_Services.ISF_ServicesConfigNew import (
+from ISF_Services.ISF_ServicesCoreConfig import GeoIDSvcCfg, AFIIGeoIDSvcCfg
+from ISF_Services.ISF_ServicesConfig import (
     InputConverterCfg, TruthServiceCfg,
     LongLivedInputConverterCfg, AFIIParticleBrokerSvcCfg
 )
-from ISF_Tools.ISF_ToolsConfigNew import (
+from ISF_Tools.ISF_ToolsConfig import (
     ParticleKillerToolCfg, EnergyParticleOrderingToolCfg,
     ParticleOrderingToolCfg, MemoryMonitorToolCfg
 )
-from ISF_SimulationSelectors.ISF_SimulationSelectorsConfigNew import (
+from ISF_SimulationSelectors.ISF_SimulationSelectorsConfig import (
     DefaultAFIIGeant4SelectorCfg,
     DefaultLegacyAFIIFastCaloSimSelectorCfg,
     DefaultParticleKillerSelectorCfg,
@@ -38,14 +38,14 @@ from ISF_SimulationSelectors.ISF_SimulationSelectorsConfigNew import (
     MuonFatrasSelectorCfg,
     DefaultFastCaloSimSelectorCfg
 )
-from ISF_Geant4Tools.ISF_Geant4ToolsConfigNew import (
+from ISF_Geant4Tools.ISF_Geant4ToolsConfig import (
     AFIIGeant4ToolCfg,
     AFII_QS_Geant4ToolCfg,
     FullGeant4ToolCfg,
     LongLivedGeant4ToolCfg,
     PassBackGeant4ToolCfg,
 )
-from ISF_Geant4CommonTools.ISF_Geant4CommonToolsConfigNew import (
+from ISF_Geant4CommonTools.ISF_Geant4CommonToolsConfig import (
     EntryLayerToolMTCfg,
     AFIIEntryLayerToolMTCfg
 )
@@ -210,7 +210,7 @@ def Kernel_ATLFASTIIMTCfg(flags, name="ISF_Kernel_ATLFASTIIMT", **kwargs):
     acc.addPublicTool(tool)
     pubTool = acc.getPublicTool(tool.name)
     kwargs.setdefault("CavernSimulationSelectors", [pubTool])
-    from ISF_FastCaloSimServices.ISF_FastCaloSimServicesConfigNew import LegacyAFIIFastCaloToolCfg
+    from ISF_FastCaloSimServices.ISF_FastCaloSimServicesConfig import LegacyAFIIFastCaloToolCfg
     kwargs.setdefault("SimulationTools", [
         acc.popToolsAndMerge(ParticleKillerToolCfg(flags)),
         acc.popToolsAndMerge(LegacyAFIIFastCaloToolCfg(flags)),
@@ -227,7 +227,7 @@ def Kernel_ATLFASTIIMTCfg(flags, name="ISF_Kernel_ATLFASTIIMT", **kwargs):
 def Kernel_ATLFASTIIFMTCfg(flags, name="ISF_Kernel_ATLFASTIIFMT", **kwargs):
     acc = ComponentAccumulator()
     acc.merge(Kernel_GenericSimulatorNoG4MTCfg(flags, False, name, **kwargs)) # Workaround
-    from ISF_FastCaloSimServices.ISF_FastCaloSimServicesConfigNew import FastCaloToolBaseCfg
+    from ISF_FastCaloSimServices.ISF_FastCaloSimServicesConfig import FastCaloToolBaseCfg
     from ISF_FatrasServices.ISF_FatrasConfig import fatrasTransportToolCfg
     kwargs.setdefault("SimulationTools", [
         acc.popToolsAndMerge(ParticleKillerToolCfg(flags)),
@@ -277,7 +277,7 @@ def Kernel_ATLFAST3MTCfg(flags, name="ISF_Kernel_ATLFAST3MT", **kwargs):
     # CavernSimulationSelectors
     acc.addPublicTool(acc.popToolsAndMerge(DefaultParticleKillerSelectorCfg(flags)))
     kwargs.setdefault("CavernSimulationSelectors"  , [ acc.getPublicTool("ISF_DefaultParticleKillerSelector") ])
-    from ISF_FastCaloSimServices.ISF_FastCaloSimServicesConfigNew import FastCaloSimV2ToolCfg
+    from ISF_FastCaloSimServices.ISF_FastCaloSimServicesConfig import FastCaloSimV2ToolCfg
     kwargs.setdefault("SimulationTools"            , [ acc.popToolsAndMerge(ParticleKillerToolCfg(flags)),
                                                        acc.popToolsAndMerge(FastCaloSimV2ToolCfg(flags)),
                                                        acc.popToolsAndMerge(AFIIGeant4ToolCfg(flags)) ])
@@ -323,7 +323,7 @@ def Kernel_ATLFAST3MT_QSCfg(flags, name="ISF_Kernel_ATLFAST3MT_QS", **kwargs):
     # CavernSimulationSelectors
     acc.addPublicTool(acc.popToolsAndMerge(DefaultParticleKillerSelectorCfg(flags)))
     kwargs.setdefault("CavernSimulationSelectors"  , [ acc.getPublicTool("ISF_DefaultParticleKillerSelector") ])
-    from ISF_FastCaloSimServices.ISF_FastCaloSimServicesConfigNew import FastCaloSimV2ToolCfg
+    from ISF_FastCaloSimServices.ISF_FastCaloSimServicesConfig import FastCaloSimV2ToolCfg
     kwargs.setdefault("SimulationTools"            , [ acc.popToolsAndMerge(ParticleKillerToolCfg(flags)),
                                                        acc.popToolsAndMerge(FastCaloSimV2ToolCfg(flags)),
                                                        acc.popToolsAndMerge(AFII_QS_Geant4ToolCfg(flags)) ])
