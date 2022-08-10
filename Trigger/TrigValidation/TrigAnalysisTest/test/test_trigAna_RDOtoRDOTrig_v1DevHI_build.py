@@ -35,13 +35,5 @@ test.check_steps = CheckSteps.default_check_steps(test)
 chaindump = test.get_step("ChainDump")
 chaindump.args = '--json --yaml ref_RDOtoRDOTrig_v1DevHI_build.new'
 
-refcomp = CheckSteps.ChainCompStep("CountRefComp")
-refcomp.input_file = 'ref_RDOtoRDOTrig_v1DevHI_build.new'
-refcomp.args += ' --patch'
-refcomp.reference_from_release = True # installed from TrigAnalysisTest/share
-refcomp.required = True
-
-CheckSteps.add_step_after_type(test.check_steps, CheckSteps.ChainDumpStep, refcomp)
-
 import sys
 sys.exit(test.run())
