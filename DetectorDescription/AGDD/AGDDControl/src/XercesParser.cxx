@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "AGDDControl/XercesParser.h"
@@ -105,13 +105,13 @@ bool XercesParser::ParseFileAndNavigate(AGDDController& c,
 bool XercesParser::ParseString(const std::string& s)
 {
 	const char* str=s.c_str();
-	MemBufInputSource* memBuf = new MemBufInputSource((const XMLByte*)str,strlen(str),"prodInfo",false);
+	MemBufInputSource memBuf ((const XMLByte*)str,strlen(str),"prodInfo",false);
     m_parser = new XercesDOMParser;
     bool errorsOccured = false;
 	if (!m_initialized) Initialize();
     try
     {
-    	m_parser->parse(*memBuf);
+    	m_parser->parse(memBuf);
     }
     catch (const OutOfMemoryException&)
     {
