@@ -276,7 +276,7 @@ void test2 (Athena::IConditionsCleanerSvc& svc)
   CondContTest cc1 (rcu, id, 10, CondContBase::KeyType::TIMESTAMP);
   CondContTest cc2 (rcu, id, 10, CondContBase::KeyType::TIMESTAMP);
 
-  cc1.addDeps (std::vector<CondContBase*> { &cc2 });
+  cc1.addDep (&cc2);
 
   assert( svc.condObjAdded (makeCtx(1000), cc1).isSuccess() );
   assert( svc.condObjAdded (makeCtx(2000), cc2).isSuccess() );  
