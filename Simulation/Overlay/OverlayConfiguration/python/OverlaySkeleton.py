@@ -2,10 +2,11 @@
 
 import sys
 
+from AthenaConfiguration.AutoConfigFlags import GetFileMD
+from AthenaConfiguration.Enums import ProductionStep
 from PyJobTransforms.CommonRunArgsToFlags import commonRunArgsToFlags
 from PyJobTransforms.TransformUtils import processPreExec, processPreInclude, processPostExec, processPostInclude
 from SimuJobTransforms.CommonSimulationSteering import specialConfigPreInclude, specialConfigPostInclude
-from AthenaConfiguration.Enums import ProductionStep
 
 
 def defaultOverlayFlags(configFlags):
@@ -55,6 +56,9 @@ def setOverlayInputFiles(runArgs, configFlags, log):
                 configFlags.Input.SecondaryFiles = runArgs.inputEVNTFile
         else:
             raise RuntimeError('No secondaryFiles are defined')
+
+        # take MCChannelNumber from secondary input:
+        configFlags.Input.MCChannelNumber = GetFileMD(configFlags.Input.SecondaryFiles).get("mc_channel_number", 0)
 
         # runNumber is MC channel number in reco
         if hasattr(runArgs, 'runNumber'):
