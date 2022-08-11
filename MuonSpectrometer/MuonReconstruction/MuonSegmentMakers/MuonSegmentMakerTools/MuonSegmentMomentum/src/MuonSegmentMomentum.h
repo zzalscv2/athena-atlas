@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2019 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef MuonSegmentMomentum_MuonSegmentMomentum_H
@@ -25,7 +25,7 @@ class MuonSegmentMomentum : public AthAlgTool, virtual public Muon::IMuonSegment
   virtual void fitMomentum2Segments( const EventContext&, const Muon::MuonSegment* segment1, const Muon::MuonSegment* segment2, double & signedMomentum ) const override;
 
   /** fits a momentum to a vector of segments */
-  virtual void fitMomentumVectorSegments( const EventContext&, const std::vector <const Muon::MuonSegment*>, double & signedMomentum ) const override;
+  virtual void fitMomentumVectorSegments( const EventContext&, const std::vector <const Muon::MuonSegment*> &, double & signedMomentum ) const override;
 
  private:  
   /** flag for use of cosmics, straight line model will be used, no interaction point constraint */
