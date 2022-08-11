@@ -17,6 +17,9 @@
 #include "EventInfo/EventInfo.h"
 #include "GaudiKernel/ITHistSvc.h"
 #include "TGCcablingInterface/ITGCcablingServerSvc.h"
+
+#include <mutex>
+
 using namespace MuonPRDTest;
 NSWPRDValAlg::NSWPRDValAlg(const std::string& name, ISvcLocator* pSvcLocator) : AthHistogramAlgorithm(name, pSvcLocator) {}
 
@@ -285,15 +288,13 @@ StatusCode NSWPRDValAlg::NSWMatchingAlg(EDM_object data0, EDM_object data1) {
                 }
             }
             ATH_MSG_VERBOSE("Total Number of matches found: " << nMatch << " " << data1.getName() << " for a single " << data0.getName());
-            static bool warningPrinted = false;
             if (nMatch == 0) {
                 if (m_noMatchWarning) {
-                    if (!warningPrinted) {
-                        ATH_MSG_WARNING(
-                            "No match found! Will now disable this kind of WARNING but please be aware that you are running with "
-                            "suppressNoMatchWarning set to true!");
-                        warningPrinted = true;
-                    }
+                    static std::once_flag flag;
+                    std::call_once(flag, [&]() {
+                        ATH_MSG_WARNING("No match found! Will now disable this kind of WARNING but please be "
+                                        "aware that you are running with suppressNoMatchWarning set to true!");
+                    });
                 } else {
                     ATH_MSG_DEBUG("No match found!");
                 }
