@@ -1,10 +1,9 @@
 /*
-  Copyright (C) 2002-2017 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
 */
 
 /** @file EvenEventsSelectorTool.cxx
  *  @brief This file contains the implementation for the EvenEventsSelectorTool class.
- *  $Id: EvenEventsSelectorTool.cxx,v 1.5 2009-03-17 09:44:46 cranshaw Exp $
  **/
 
 #include "EvenEventsSelectorTool.h"
@@ -23,7 +22,7 @@ EvenEventsSelectorTool::~EvenEventsSelectorTool() {
 StatusCode EvenEventsSelectorTool::postNext() const {
    ATH_MSG_INFO("EvenEventsSelectorTool::postNext");
    StatusCode retc = StatusCode::SUCCESS;
-   const DataHandle<AthenaAttributeList> attrList;
+   const AthenaAttributeList* attrList{nullptr};
    ATH_MSG_INFO(evtStore()->dump());
    StatusCode sc = evtStore()->retrieve(attrList,"EventInfoAtts");
    if (sc.isSuccess()) {
