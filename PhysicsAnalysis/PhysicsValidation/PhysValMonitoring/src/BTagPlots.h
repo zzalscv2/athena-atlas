@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef PHYSVALMONITORING_BTagPLOTS_H
@@ -16,7 +16,7 @@ class BTagPlots:public PlotBase {
     public:
     BTagPlots(PlotBase* pParent, const std::string& sDir, std::string sParticleType);
     void fill(const xAOD::BTagging* btag,const xAOD::EventInfo* evt);
-    void fill(unsigned int nbtag,const xAOD::EventInfo* evt) const;
+    void fill(unsigned int nbtag,const xAOD::EventInfo* evt);
       
       // Reco only information
       std::string m_sParticleType;

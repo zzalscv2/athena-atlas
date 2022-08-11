@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef PHYSVALMONITORING_METPLOTS_H
@@ -15,7 +15,7 @@ namespace PhysVal{
 class METPlots:public PlotBase {
     public:
     METPlots(PlotBase* pParent, const std::string& sDir, std::string sParticleType = "RefFinal");
-    void fill(const xAOD::MissingET* met,const xAOD::EventInfo* evt) const;
+    void fill(const xAOD::MissingET* met,const xAOD::EventInfo* evt);
       
       // Reco only information
       std::string m_sParticleType;
