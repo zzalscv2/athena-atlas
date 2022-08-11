@@ -64,22 +64,63 @@ namespace InDet {
 
   protected:
 
-    StatusCode initHistograms(int runNumber);
+    StatusCode initHistograms();
     StatusCode firstCall();
 
     float readHistogram(float fDefault, TH2* histogram, float phi, float eta) const;
-    //    float readEtaHistogram(float fDefault, TH1* histogram, float eta) const;
 
     float m_biasD0 = 0.f;
     float m_biasZ0 = 0.f;
     float m_biasQoverPsagitta = 0.f;
 
-    TH2* m_biasD0Histogram = nullptr; //!
-    TH2* m_biasZ0Histogram = nullptr; //!
-    TH2* m_biasQoverPsagittaHistogram = nullptr; //!
-    TH2* m_biasD0HistError = nullptr; //!
-    TH2* m_biasZ0HistError = nullptr; //!
-    TH2* m_biasQoverPsagittaHistError = nullptr; //!
+    std::unique_ptr<TH2> m_data15_biasD0Histogram = nullptr; //!
+    std::unique_ptr<TH2> m_data15_biasZ0Histogram = nullptr; //!
+    std::unique_ptr<TH2> m_data15_biasQoverPsagittaHistogram = nullptr; //!
+    std::unique_ptr<TH2> m_data15_biasD0HistError = nullptr; //!
+    std::unique_ptr<TH2> m_data15_biasZ0HistError = nullptr; //!
+    std::unique_ptr<TH2> m_data15_biasQoverPsagittaHistError = nullptr; //!
+
+    std::unique_ptr<TH2> m_data16_1stPart_biasD0Histogram = nullptr; //!
+    std::unique_ptr<TH2> m_data16_1stPart_biasZ0Histogram = nullptr; //!
+    std::unique_ptr<TH2> m_data16_1stPart_biasQoverPsagittaHistogram = nullptr; //!
+    std::unique_ptr<TH2> m_data16_1stPart_biasD0HistError = nullptr; //!
+    std::unique_ptr<TH2> m_data16_1stPart_biasZ0HistError = nullptr; //!
+    std::unique_ptr<TH2> m_data16_1stPart_biasQoverPsagittaHistError = nullptr; //!
+
+    std::unique_ptr<TH2> m_data16_2ndPart_biasD0Histogram = nullptr; //!
+    std::unique_ptr<TH2> m_data16_2ndPart_biasZ0Histogram = nullptr; //!
+    std::unique_ptr<TH2> m_data16_2ndPart_biasQoverPsagittaHistogram = nullptr; //!
+    std::unique_ptr<TH2> m_data16_2ndPart_biasD0HistError = nullptr; //!
+    std::unique_ptr<TH2> m_data16_2ndPart_biasZ0HistError = nullptr; //!
+    std::unique_ptr<TH2> m_data16_2ndPart_biasQoverPsagittaHistError = nullptr; //!
+
+    std::unique_ptr<TH2> m_data17_1stPart_biasD0Histogram = nullptr; //!
+    std::unique_ptr<TH2> m_data17_1stPart_biasZ0Histogram = nullptr; //!
+    std::unique_ptr<TH2> m_data17_1stPart_biasQoverPsagittaHistogram = nullptr; //!
+    std::unique_ptr<TH2> m_data17_1stPart_biasD0HistError = nullptr; //!
+    std::unique_ptr<TH2> m_data17_1stPart_biasZ0HistError = nullptr; //!
+    std::unique_ptr<TH2> m_data17_1stPart_biasQoverPsagittaHistError = nullptr; //!
+
+    std::unique_ptr<TH2> m_data17_2ndPart_biasD0Histogram = nullptr; //!
+    std::unique_ptr<TH2> m_data17_2ndPart_biasZ0Histogram = nullptr; //!
+    std::unique_ptr<TH2> m_data17_2ndPart_biasQoverPsagittaHistogram = nullptr; //!
+    std::unique_ptr<TH2> m_data17_2ndPart_biasD0HistError = nullptr; //!
+    std::unique_ptr<TH2> m_data17_2ndPart_biasZ0HistError = nullptr; //!
+    std::unique_ptr<TH2> m_data17_2ndPart_biasQoverPsagittaHistError = nullptr; //!
+
+    std::unique_ptr<TH2> m_data18_1stPart_biasD0Histogram = nullptr; //!
+    std::unique_ptr<TH2> m_data18_1stPart_biasZ0Histogram = nullptr; //!
+    std::unique_ptr<TH2> m_data18_1stPart_biasQoverPsagittaHistogram = nullptr; //!
+    std::unique_ptr<TH2> m_data18_1stPart_biasD0HistError = nullptr; //!
+    std::unique_ptr<TH2> m_data18_1stPart_biasZ0HistError = nullptr; //!
+    std::unique_ptr<TH2> m_data18_1stPart_biasQoverPsagittaHistError = nullptr; //!
+
+    std::unique_ptr<TH2> m_data18_2ndPart_biasD0Histogram = nullptr; //!
+    std::unique_ptr<TH2> m_data18_2ndPart_biasZ0Histogram = nullptr; //!
+    std::unique_ptr<TH2> m_data18_2ndPart_biasQoverPsagittaHistogram = nullptr; //!
+    std::unique_ptr<TH2> m_data18_2ndPart_biasD0HistError = nullptr; //!
+    std::unique_ptr<TH2> m_data18_2ndPart_biasZ0HistError = nullptr; //!
+    std::unique_ptr<TH2> m_data18_2ndPart_biasQoverPsagittaHistError = nullptr; //!
 
     // if neither of these is set manually, then the tool will try to get this from EventInfo in the event store.
     // these options exist only as a manual override.
@@ -93,11 +134,20 @@ namespace InDet {
 
     // allow the user to configure which calibration files to use if desired
     std::string m_calibFileData15;
-    std::string m_calibFileData16_preTS1;
-    std::string m_calibFileData16_postTS1;
-    std::string m_calibFileData17_preFire;
-    std::string m_calibFileData17_postFire;
-    std::string m_calibFileData18;
+    std::string m_calibFileData16_1stPart;
+    std::string m_calibFileData16_2ndPart;
+    std::string m_calibFileData17_1stPart;
+    std::string m_calibFileData17_2ndPart;
+    std::string m_calibFileData18_1stPart;
+    std::string m_calibFileData18_2ndPart;
+
+    // paths and histogram names in the calibration files
+    std::string m_d0_nominal_histName = "d0/d0_theNominal";
+    std::string m_z0_nominal_histName = "z0/z0_theNominal";
+    std::string m_sagitta_nominal_histName = "sagitta/sagitta_theNominal";
+    std::string m_d0_uncertainty_histName = "d0/d0_theUncertainty";
+    std::string m_z0_uncertainty_histName = "z0/z0_theUncertainty";
+    std::string m_sagitta_uncertainty_histName = "sagitta/sagitta_theUncertainty";
 
   }; // class InDetTrackBiasingTool
 
