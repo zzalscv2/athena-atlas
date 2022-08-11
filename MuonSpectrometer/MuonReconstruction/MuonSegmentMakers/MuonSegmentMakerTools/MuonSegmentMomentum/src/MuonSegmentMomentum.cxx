@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2019 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "MuonSegmentMomentum.h"
@@ -15,7 +15,7 @@ MuonSegmentMomentum::MuonSegmentMomentum(const std::string& type,const std::stri
   declareInterface<IMuonSegmentMomentumEstimator>(this);
 }
 
-void MuonSegmentMomentum::fitMomentumVectorSegments( const EventContext& ctx, const std::vector <const Muon::MuonSegment*> segments, double & signedMomentum ) const
+void MuonSegmentMomentum::fitMomentumVectorSegments( const EventContext& ctx, const std::vector <const Muon::MuonSegment*> & segments, double & signedMomentum ) const
 {
 
   /** Estimate signed momentum from vector of MDT/CSC segments

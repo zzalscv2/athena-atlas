@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2017 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef MUON_IMUONSEGMENTMOMENTUMESTIMATOR_H
@@ -23,7 +23,7 @@ namespace Muon {
 
         /** Calculate Momentum Estimate for 2 segments */
         virtual void fitMomentum2Segments(const EventContext& ctx, const MuonSegment* segment1, const MuonSegment* segment2, double& signedMomentum) const = 0;
-        virtual void fitMomentumVectorSegments(const EventContext& ctx, const std::vector<const MuonSegment*>, double& signedMomentum) const = 0;
+        virtual void fitMomentumVectorSegments(const EventContext& ctx, const std::vector<const MuonSegment*> &, double& signedMomentum) const = 0;
     };
 
     inline const InterfaceID& IMuonSegmentMomentumEstimator::interfaceID() { return IID_IMuonSegmentMomentumEstimator; }
