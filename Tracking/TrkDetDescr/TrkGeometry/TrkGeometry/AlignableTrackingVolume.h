@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
 */
 
 ///////////////////////////////////////////////////////////////////
@@ -45,9 +45,7 @@ namespace Trk {
                                 VolumeBounds* volbounds,
                                 const BinnedMaterial* matprop,
                                 int sampleID,
-                                const std::string& volumeName = "undefined")
-          ATLAS_CTORDTOR_NOT_THREAD_SAFE;
-        // unsafe cloneTV
+                                const std::string& volumeName = "undefined");
 
         /**Destructor*/
         virtual ~AlignableTrackingVolume() override;
