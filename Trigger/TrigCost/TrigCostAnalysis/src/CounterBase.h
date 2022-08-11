@@ -64,6 +64,13 @@ class CounterBase {
     const MonitorBase* getParent() const;
 
     /**
+     * @brief Check if a variable of a given name exists.
+     * @param[in] name Name of Variable.
+     * @return True if variable already exists.  
+     */
+    bool variableExists(const std::string& name) const;
+
+    /**
      * @brief Returns a mutable reference to a named Variable. Throws if no such Variable exists.
      * Used when more complicated logic is needed on a Variable than simply using the fill() method.
      * @param[in] name Variable to return
@@ -134,6 +141,22 @@ class CounterBase {
       const float max = 1000000.,
       const size_t bins = 70);
 
+    /**
+     * @brief Book a TProfile for this Counter, to be filled in per-event monitoring.
+     * @param[in] name The name of the histogram (and corresponding Variable)
+     * @param[in] title ROOT histogram title string in format "title;xaxis;yaxis"
+     * @param[in] xaxis Controls if the x-axis should use fixed-width or logarithmic bin boundaries.
+     * @param[in] min X-axis minimum bound.
+     * @param[in] max X-axis maximum bound.
+     * @param[in] bins Number of histogram bins.
+     */
+    void regTProfile(const std::string& name,
+      const std::string& title, 
+      const VariableType type = VariableType::kPerCall, 
+      const LogType xaxis = kLog,
+      const float min = 0.1, 
+      const float max = 1000000.,
+      const size_t bins = 70);
 
     /**
      * @brief Book a 2D histogram for this Counter, to be filled in per-event monitoring.

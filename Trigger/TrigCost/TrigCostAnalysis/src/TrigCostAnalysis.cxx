@@ -62,6 +62,8 @@ StatusCode  TrigCostAnalysis::initialize() {
       TrigConf::HLTUtils::file2hashes(hashFile);
     }
   }
+
+  m_costROSData.initialize(m_rosToRob);
   
   ATH_CHECK( m_histSvc->regTree("/COSTSTREAM/metadata", std::make_unique<TTree>("metadata", "metadata")) );
   ATH_CHECK( m_histSvc->getTree("/COSTSTREAM/metadata", m_metadataTree) );
@@ -272,7 +274,7 @@ StatusCode TrigCostAnalysis::execute() {
   const uint32_t onlineSlot = getOnlineSlot( costDataHandle.get() );
   CostData costData;
   ATH_CHECK( costData.set(costDataHandle.get(), rosDataHandle.get(), onlineSlot) );
-  costData.setRosToRobMap(m_rosToRob);
+  costData.setCostROSData(m_costROSData);
   costData.setChainToAlgMap(chainToAlgIdx);
   costData.setChainToUniqAlgMap(chainToUniqAlgs);
   costData.setSequencersMap(seqToAlgIdx);

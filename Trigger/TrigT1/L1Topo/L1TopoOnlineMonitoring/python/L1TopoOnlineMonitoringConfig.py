@@ -72,6 +72,7 @@ def getL1TopoPhase1OnlineMonitor(flags, name='L1TopoOnlineMonitor', doSimMon=Tru
     # Placeholder for phase-1 implementation
     #raise RuntimeError('L1Topo phase-1 online monitoring not yet implemented')
     alg = CompFactory.L1TopoOnlineMonitor("L1TopoMonitoringTool",
+                                          doHwMon = doHwMon,
                                           doSimMon = doSimMon,
                                           doHwMonCTP = doHwMonCtp,
                                           doComp = doComp)
@@ -120,7 +121,20 @@ def configureHistograms(alg, flags, doHwMonCtp, doHwMon, doComp):
                                     xmin=0, xmax=128)
 
     if doHwMon:
-        print("L1Topo Raw data decoders are not available...")
+        alg.MonTool.defineHistogram('HdwResults', path='EXPERT', type='TH1I',
+                                    title='Hardware Results for L1Topo', xbins=128, xlabels=label_topo_all,
+                                    xmin=0, xmax=128)
+        alg.MonTool.defineHistogram('OverflowResults', path='EXPERT', type='TH1I',
+                                    title='Overflow Results for L1Topo', xbins=128, xlabels=label_topo_all,
+                                    xmin=0, xmax=128)
+
+    mon_failure_labels = ['doHwMon', 'doSimMon', 'doHwMonCTP', 'doComp']
+    alg.MonTool.defineHistogram('MonitoringFailures', path='EXPERT', type='TH1F',
+                                title='Counts of mon functions returning failure;;Entries',
+                                xlabels=mon_failure_labels, xbins=len(mon_failure_labels),
+                                xmin=0, xmax=len(mon_failure_labels))
+
+
         
 def getL1TopoLegacyOnlineMonitor(flags, name='L1TopoLegacyOnlineMonitor', logLevel = None):
     alg = CompFactory.L1TopoLegacyOnlineMonitor()

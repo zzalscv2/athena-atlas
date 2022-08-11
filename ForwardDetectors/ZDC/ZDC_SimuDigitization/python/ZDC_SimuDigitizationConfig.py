@@ -1,0 +1,126 @@
+# Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+
+from AthenaConfiguration.ComponentAccumulator import ComponentAccumulator
+from AthenaConfiguration.ComponentFactory import CompFactory
+from AthenaConfiguration.Enums import ProductionStep
+from Digitization.PileUpMergeSvcConfigNew import PileUpMergeSvcCfg, PileUpXingFolderCfg
+
+# The earliest bunch crossing time for which interactions will be sent
+# to the ZDC Digitization code.
+def ZDC_FirstXing():
+    return 0 #Assume ZDC is only sensitive to the current bunch crossing, for the moment
+
+######################################################################################
+
+# The latest bunch crossing time for which interactions will be sent
+# to the ZDC Digitization code.
+def ZDC_LastXing():
+    return 0 #Assume ZDC is only sensitive to the current bunch crossing, for the moment
+
+######################################################################################
+
+def ZDC_RangeCfg(flags, name="ZdcRange" , **kwargs):
+    #this is the time of the xing in ns
+    kwargs.setdefault('FirstXing', ZDC_FirstXing() )
+    kwargs.setdefault('LastXing',  ZDC_LastXing() )
+    kwargs.setdefault('CacheRefreshFrequency', 1.0 ) #default 0 no dataproxy reset
+    kwargs.setdefault('ItemList', ["ZDC_SimStripHit_Collection#ZDC_SimStripHit_Collection",
+                                   "ZDC_SimPixelHit_Collection#ZDC_SimPixelHit_Collection"] )
+    return PileUpXingFolderCfg(flags, name, **kwargs)
+
+######################################################################################
+
+def ZDC_PileUpToolCfg(flags, name="ZDC_PileUpTool",**kwargs):
+    """Return ComponentAccumulator with ZDC digitization tool."""
+    acc = ComponentAccumulator()
+
+    # Configure bunch-crossing envelope
+    if flags.Digitization.PileUp:
+        intervals = []
+        if flags.Digitization.DoXingByXingPileUp:
+            kwargs.setdefault("FirstXing", ZDC_FirstXing() )
+            kwargs.setdefault("LastXing", ZDC_LastXing() )
+        else:
+            intervals += [acc.popToolsAndMerge(ZDC_RangeCfg(flags))]
+        kwargs.setdefault("mergeSvc", acc.getPrimaryAndMerge(PileUpMergeSvcCfg(flags, Intervals=intervals)).name)
+        #kwargs.setdefault("OnlyUseContainerName", True) # TODO in future MR
+    else:
+        kwargs.setdefault("mergeSvc", '')
+        #kwargs.setdefault("OnlyUseContainerName", False) #TODO in future MR
+
+    from RngComps.RandomServices import AthRNGSvcCfg
+    kwargs.setdefault("RndmSvc", acc.getPrimaryAndMerge(AthRNGSvcCfg(flags)).name)
+
+    acc.setPrivateTools(CompFactory.ZDC_PileUpTool(name, **kwargs))
+    return acc
+
+
+def ZDC_OverlayPileUpToolCfg(flags, name="ZDC_OverlayPileUpTool", **kwargs):
+    """Return ComponentAccumulator with ZDC_PileUpTool for Overlay"""
+    acc = ComponentAccumulator()
+    kwargs.setdefault("mergeSvc", '')
+    #kwargs.setdefault("OnlyUseContainerName", False) #TODO in future MR
+    tool = acc.popToolsAndMerge(ZDC_PileUpToolCfg(flags, name, **kwargs))
+    acc.setPrivateTools(tool)
+    return acc
+
+
+def ZDC_DigitizationOutputCfg(flags):
+    """Return ComponentAccumulator with Output for ZDC. Not standalone."""
+    acc = ComponentAccumulator()
+    if flags.Output.doWriteRDO:
+        ItemList = ["ZdcDigitsCollection#ZdcDigitsCollection"]
+        from OutputStreamAthenaPool.OutputStreamConfig import OutputStreamCfg
+        acc.merge(OutputStreamCfg(flags,"RDO", ItemList))
+    return acc
+
+
+def ZDC_DigitizationBasicCfg(flags, **kwargs):
+    """Return ComponentAccumulator for ZDC digitization"""
+    acc = ComponentAccumulator()
+    if "PileUpTools" not in kwargs:
+        PileUpTools = acc.popToolsAndMerge(ZDC_PileUpToolCfg(flags))
+        kwargs["PileUpTools"] = PileUpTools
+    from Digitization.PileUpToolsConfig import PileUpToolsCfg
+    acc.merge(PileUpToolsCfg(flags, **kwargs))
+    return acc
+
+
+def ZDC_OverlayDigitizationBasicCfg(flags, **kwargs):
+    """Return ComponentAccumulator with ZDC_DigiAlg."""
+    acc = ComponentAccumulator()
+    if flags.Common.ProductionStep != ProductionStep.FastChain:
+        from SGComps.SGInputLoaderConfig import SGInputLoaderCfg
+        acc.merge(SGInputLoaderCfg(flags,Load=[
+            ('ZDC_SimStripHit_Collection','ZDC_SimStripHit_Collection'),
+            ('ZDC_SimPixelHit_Collection','ZDC_SimPixelHit_Collection')
+        ] ) )
+    if "DigitizationTool" not in kwargs:
+        kwargs.setdefault("DigitizationTool", acc.popToolsAndMerge(ZDC_OverlayPileUpToolCfg(flags)))
+
+    if flags.Concurrency.NumThreads > 0:
+        kwargs.setdefault("Cardinality", flags.Concurrency.NumThreads)
+
+    # Set common overlay extra inputs
+    kwargs.setdefault("ExtraInputs", flags.Overlay.ExtraInputs)
+
+    acc.addEventAlgo(CompFactory.ZDC_DigiAlg("ZDC_DigiAlg", **kwargs))
+    return acc
+
+
+def ZDC_DigitizationCfg(flags, **kwargs):
+    """Return ComponentAccumulator for ZDC digitization and Output"""
+    acc = ComponentAccumulator()
+    acc.merge(ZDC_DigitizationBasicCfg(flags, **kwargs))
+    acc.merge(ZDC_DigitizationOutputCfg(flags))
+
+    return acc
+
+
+def ZDC_DigitizationOverlayCfg(flags, **kwargs):
+    """Return ComponentAccumulator for ZDC digitization and Output"""
+    acc = ComponentAccumulator()
+    acc.merge(ZDC_OverlayDigitizationBasicCfg(flags, **kwargs))
+    acc.merge(ZDC_DigitizationOutputCfg(flags))
+
+    return acc

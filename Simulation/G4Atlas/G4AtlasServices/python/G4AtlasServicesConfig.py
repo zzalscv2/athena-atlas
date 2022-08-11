@@ -6,7 +6,7 @@ from ExtraParticles.ExtraParticlesConfig import ExtraParticlesPhysicsToolCfg
 from SimulationConfig.SimEnums import CavernBackground
 from G4AtlasTools.G4GeometryToolConfig import G4AtlasDetectorConstructionToolCfg
 from G4ExtraProcesses.G4ExtraProcessesConfig import G4EMProcessesPhysicsToolCfg
-from G4StepLimitation.G4StepLimitationConfigNew import G4StepLimitationToolCfg
+from G4StepLimitation.G4StepLimitationConfig import G4StepLimitationToolCfg
 from TRT_TR_Process.TRT_TR_ProcessConfigNew import TRTPhysicsToolCfg
 
 

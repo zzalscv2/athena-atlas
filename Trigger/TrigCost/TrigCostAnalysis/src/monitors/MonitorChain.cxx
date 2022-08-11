@@ -13,13 +13,21 @@ StatusCode MonitorChain::newEvent(const CostData& data, const float weight) {
 
   const std::vector<TrigCompositeUtils::AlgToChainTool::ChainInfo>& seededChains = data.seededChains();
   for (size_t i = 0; i < seededChains.size(); ++i){
-    ATH_CHECK( getCounter(seededChains[i].name)->newEvent(data, i, weight) );
+    std::string chainName = seededChains[i].name;
+    if (!counterExists(chainName)){
+      // Create a new counter using specialized constructor in order to pass number of bins for some of the histograms
+      m_counters.insert( std::make_pair(chainName, newCounter(chainName, data.costROSData().getNROS())) );
+    } 
+    ATH_CHECK( getCounter(chainName)->newEvent(data, i, weight) );
   }
 
   return StatusCode::SUCCESS;
 }
 
-
 std::unique_ptr<CounterBase> MonitorChain::newCounter(const std::string& name) {
   return std::make_unique<CounterChain>(name, this);
+} 
+
+std::unique_ptr<CounterBase> MonitorChain::newCounter(const std::string& name, unsigned nROS) {
+  return std::make_unique<CounterChain>(name, nROS, this);
 } 

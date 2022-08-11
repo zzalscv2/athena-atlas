@@ -22,6 +22,12 @@ CounterROS::CounterROS(const std::string& name, const MonitorBase* parent)
   regHistogram("ROBStatus_perCall", "ROB status/Call;Status;Events", VariableType::kPerCall, LogType::kLinear, 0, robmonitor::NUM_ROBHIST_CODES+1, robmonitor::NUM_ROBHIST_CODES+1);
 }
 
+CounterROS::CounterROS(const std::string& name, unsigned nRobs, const MonitorBase* parent) 
+  : CounterROS(name, parent) {
+
+  regHistogram("ROBsPerRequest_perCall", "Number of ROB requests;ROBs names;Number of requests", VariableType::kPerCall, LogType::kLinear, 0, nRobs, nRobs);
+}
+
 StatusCode CounterROS::newEvent(const CostData& data, size_t index, const float weight) {
 
   // Monitor only ROB data for corresponding ROS
@@ -31,23 +37,34 @@ StatusCode CounterROS::newEvent(const CostData& data, size_t index, const float 
   const std::vector<unsigned> robs_history = tc->getDetail<std::vector<unsigned>>("robs_history");
   const std::vector<unsigned short> robs_status = tc->getDetail<std::vector<unsigned short>>("robs_status");
 
-  if (m_robIdsPerROS.size() == 0) {
-    m_robIdsPerROS = data.rosToRobMap().at(getName());
-  }
 
-  // Set lables of status histogram
-  ATH_CHECK( getVariable("ROBStatus_perCall").setBinLabel(1, "Unclassified"));
-  ATH_CHECK( getVariable("ROBStatus_perCall").setBinLabel(2, "Retrieved"));
-  ATH_CHECK( getVariable("ROBStatus_perCall").setBinLabel(3, "HLT Cached"));
-  ATH_CHECK( getVariable("ROBStatus_perCall").setBinLabel(4, "DCM Cached"));
-  ATH_CHECK( getVariable("ROBStatus_perCall").setBinLabel(5, "Ignored"));
-  ATH_CHECK( getVariable("ROBStatus_perCall").setBinLabel(6, "Disabled"));
-  ATH_CHECK( getVariable("ROBStatus_perCall").setBinLabel(7, "IsNotOK"));
+  if (m_robIdToBin.empty()) {
+    // Set lables of status histogram
+    ATH_CHECK( getVariable("ROBStatus_perCall").setBinLabel(1, "Unclassified"));
+    ATH_CHECK( getVariable("ROBStatus_perCall").setBinLabel(2, "Retrieved"));
+    ATH_CHECK( getVariable("ROBStatus_perCall").setBinLabel(3, "HLT Cached"));
+    ATH_CHECK( getVariable("ROBStatus_perCall").setBinLabel(4, "DCM Cached"));
+    ATH_CHECK( getVariable("ROBStatus_perCall").setBinLabel(5, "Ignored"));
+    ATH_CHECK( getVariable("ROBStatus_perCall").setBinLabel(6, "Disabled"));
+    ATH_CHECK( getVariable("ROBStatus_perCall").setBinLabel(7, "IsNotOK"));
+
+    if (variableExists("ROBsPerRequest_perCall")) {
+      // This monitor has it's own binning for ROBs due to the fact that limited number of ROBs are associated with one ROS
+      unsigned robCounter = 0;
+      for (uint32_t robId : data.costROSData().getROBForROS(getName())) {
+        std::string robName = data.costROSData().getROBName(robId);
+        ATH_CHECK( getVariable("ROBsPerRequest_perCall").setBinLabel(robCounter+1, robName));
+
+        m_robIdToBin[robId] = robCounter;
+        ++robCounter;
+      }
+    }
+  }
 
   // Find all ROB requests that are both in request and correspond to this ROS
   bool networkRequestIncremented = false;
   for (size_t i = 0; i < robIdsPerRequest.size(); ++i) {
-    if (std::find(m_robIdsPerROS.begin(), m_robIdsPerROS.end(), robIdsPerRequest[i]) != m_robIdsPerROS.end()) {
+    if (m_robIdToBin.find(robIdsPerRequest[i]) != m_robIdToBin.end()) {
       ATH_CHECK( fill("ROBStatus_perCall", getROBHistoryBin(robs_history[i]), weight) );
       // Status is ok when no status words are set
       if (robs_status[i] != 0) {
@@ -63,6 +80,10 @@ StatusCode CounterROS::newEvent(const CostData& data, size_t index, const float 
       }
       else if (robs_history[i] == robmonitor::HLT_CACHED || robs_history[i] == robmonitor::DCM_CACHED) {
         ATH_CHECK( fill("CachedROBSize_perEvent", robs_size[i] / 500., weight) );
+      }
+
+      if (variableExists("ROBsPerRequest_perCall")){
+        ATH_CHECK( fill("ROBsPerRequest_perCall", m_robIdToBin.at(robIdsPerRequest[i]), weight) );
       }
     }
   }

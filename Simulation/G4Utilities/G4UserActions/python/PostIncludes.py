@@ -8,7 +8,7 @@ def LengthIntegrator(configFlags, name="G4UA::ISFFullUserActionSvc", **kwargs):
     result = ComponentAccumulator()
     
     #Setting up the CA for the LengthIntegrator
-    from G4UserActions.G4UserActionsConfigNew import LengthIntegratorToolCfg
+    from G4UserActions.G4UserActionsConfig import LengthIntegratorToolCfg
     actionAcc = ComponentAccumulator()
     actions = []
     actions += [actionAcc.popToolsAndMerge(LengthIntegratorToolCfg(configFlags))]

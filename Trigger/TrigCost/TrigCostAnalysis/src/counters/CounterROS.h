@@ -27,6 +27,14 @@ class CounterROS : public CounterBase {
     CounterROS(const std::string& name, const MonitorBase* parent);
 
     /**
+     * @brief Construct counter.
+     * @param[in] name Counter's name
+     * @param[in] nRobs Number of ROBs possible for this ROB
+     * @param[in] parent Counter's parent monitor, cached non-owning pointer.
+     */
+    CounterROS(const std::string& name, unsigned nRobs, const MonitorBase* parent);
+
+    /**
      * @brief Default destructor.
      */
     virtual ~CounterROS() = default;
@@ -56,7 +64,7 @@ class CounterROS : public CounterBase {
      */
     int getROBHistoryBin(const unsigned history);
 
-    std::vector<uint32_t> m_robIdsPerROS; //!< Cached mapping of ROB ids corresponding to ROS
+    std::map<uint32_t, unsigned> m_robIdToBin; //!< Cached mapping of rob id to bin in ROBsPerRequest_perEvent histogram
 };
 
 #endif // TRIGCOSTANALYSIS_COUNTERROS_H

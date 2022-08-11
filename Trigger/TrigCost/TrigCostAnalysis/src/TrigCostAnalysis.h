@@ -17,6 +17,7 @@
 #include "GaudiKernel/ITHistSvc.h"
 
 #include "MonitoredRange.h"
+#include "CostROSData.h"
 
 #include <unordered_map>
 #include <mutex>
@@ -218,6 +219,7 @@ class TrigCostAnalysis: public ::AthAlgorithm {
     std::mutex m_addHostnameMutex; //!< Mutex to update set below
     mutable std::set<std::string> m_hostnames ATLAS_THREAD_SAFE; //!< Save unique hostnames for the run
 
+    CostROSData m_costROSData; //!< Cached CostROSData class with details needed for ROS monitoring
 }; 
 
 #endif // TRIGCOSTANALYSIS_TRIGCOSTALYSIS_H

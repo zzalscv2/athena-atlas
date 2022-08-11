@@ -14,16 +14,6 @@ MonitorROS::MonitorROS(const std::string& name, const MonitoredRange* parent)
 
 StatusCode MonitorROS::newEvent(const CostData& data, const float weight) {
 
-  // Prepare ROB id per corresponding ROS name map
-  if (m_robToRos.empty()) {
-    const std::map<std::string, std::vector<uint32_t>>& rosToRobMap = data.rosToRobMap();
-    for (const auto& rosRequest : rosToRobMap) {
-      for (uint32_t robId : rosRequest.second) {
-        m_robToRos[robId] = rosRequest.first;
-      }
-    }
-  }
-
   if (data.rosCollection().empty()){
     ATH_MSG_DEBUG("The ROS collection is empty!");
   }
@@ -33,14 +23,23 @@ StatusCode MonitorROS::newEvent(const CostData& data, const float weight) {
     // Create set of unique ROS for this request
     std::set<std::string> rosPerRequest;
     for (uint32_t robId : robIds) {
-      if (!m_robToRos.count(robId)){
+      if (data.costROSData().getROSForROB(robId).empty()){
         ATH_MSG_WARNING("ROS for ROB 0x" << std::hex << robId << " is missing");
         continue;
       }
-      rosPerRequest.insert(m_robToRos.at(robId));
+      std::string rosForROB = data.costROSData().getROSForROB(robId);
+      if (!rosForROB.empty()){
+        rosPerRequest.insert(rosForROB);
+      }
     }
 
     for (const std::string& rosName : rosPerRequest) {
+      if (!counterExists(rosName)){
+        // Create a new counter using specialized constructor in order to pass number of bins for some of the histograms
+        unsigned nRobs = data.costROSData().getROBForROS(rosName).size(); // Number of all possible ROBs for this ROS
+        m_counters.insert( std::make_pair(rosName, newCounter(rosName, nRobs)) );
+      } 
+
       ATH_CHECK( getCounter(rosName)->newEvent(data, tc->index(), weight) );
     }
   }
@@ -51,4 +50,8 @@ StatusCode MonitorROS::newEvent(const CostData& data, const float weight) {
 
 std::unique_ptr<CounterBase> MonitorROS::newCounter(const std::string& name) {
   return std::make_unique<CounterROS>(name, this);
+} 
+
+std::unique_ptr<CounterBase> MonitorROS::newCounter(const std::string& name, unsigned nRobs) {
+  return std::make_unique<CounterROS>(name, nRobs, this);
 } 

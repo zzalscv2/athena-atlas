@@ -7,7 +7,7 @@ from AthenaConfiguration.Enums import BeamType, LHCPeriod
 from CaloG4Sim.CaloG4SimConfig import CalibrationDefaultProcessingToolCfg
 from SimulationConfig.SimEnums import CalibrationRun, CavernBackground, SimulationFlavour
 from G4CosmicFilter.G4CosmicFilterConfig import CosmicFilterToolCfg
-from G4UserActions.G4UserActionsConfigNew import (
+from G4UserActions.G4UserActionsConfig import (
     AthenaStackingActionToolCfg, AthenaTrackingActionToolCfg,
     G4SimTimerToolCfg, G4TrackCounterToolCfg, HitWrapperToolCfg,
     LooperKillerToolCfg, StoppedParticleActionToolCfg
@@ -18,11 +18,11 @@ from ISF_Services.ISF_ServicesConfig import (
     AFIIParticleBrokerSvcCfg, ParticleBrokerSvcCfg, TruthServiceCfg
 )
 from ISF_Tools.ISF_ToolsConfig import StoppedParticleFilterToolCfg
-from MCTruthBase.MCTruthBaseConfigNew import MCTruthSteppingActionToolCfg
+from MCTruthBase.MCTruthBaseConfig import MCTruthSteppingActionToolCfg
 
 
 def OptionalUserActionCfg(flags):
-    """ flags.Sim.OptionalUserActionList = ['G4UserActions.G4UserActionsConfigNew.FixG4CreatorProcessToolCfg']"""
+    """ flags.Sim.OptionalUserActionList = ['G4UserActions.G4UserActionsConfig.FixG4CreatorProcessToolCfg']"""
     result = ComponentAccumulator()
     optionalUserActions = []
     for userActionString in flags.Sim.OptionalUserActionList:

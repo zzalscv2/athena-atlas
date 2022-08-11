@@ -3,7 +3,7 @@
 from AthenaConfiguration.ComponentAccumulator import ComponentAccumulator
 from AthenaConfiguration.ComponentFactory import CompFactory
 
-#Based on G4UserActionsConfigNew.py
+#Based on G4UserActionsConfig.py
 
 def VerboseSelectorToolCfg(flags, name="G4UA::VerboseSelectorTool", **kwargs):
     result = ComponentAccumulator()
@@ -28,7 +28,7 @@ def VolumeDebugger(configFlags, name="G4UA::ISFFullUserActionSvc", **kwargs):
 
     result = ComponentAccumulator()
     #Setting up the CA for the LengthIntegrator
-    from G4DebuggingTools.G4DebuggingToolsConfigNew import VolumeDebuggerToolCfg
+    from G4DebuggingTools.G4DebuggingToolsConfig import VolumeDebuggerToolCfg
     actionAcc = ComponentAccumulator()
     actions = []
     actions += [actionAcc.popToolsAndMerge(VolumeDebuggerToolCfg(configFlags,**kwargs))]

@@ -152,7 +152,8 @@ namespace CP {
         Gaudi::Property<bool> m_geoOnTheFly{this, "AllowSettingGeometryOnTheFly", false,"avoids crash if run2/run3 geo is wrongly set"};
         Gaudi::Property<bool> m_forceGeometry{this, "ForceGeometry", false,"expert option for performance studies: if true, the geometry will be based on the IsRun3Geo property without any safety check"};
         Gaudi::Property<bool> m_doBadMuonVetoMimic{this, "DoBadMuonVetoMimic", false}; // switch to cut away the tail of very large smearing in MC to mimic the effect of the bad muon veto for 2-station muons in the high-pT selection
-
+        Gaudi::Property<bool> m_allowComm{this, "AcceptCommChain", true, "Accepts muons from the EMEO chain if set to true"};
+        
         SG::ReadHandleKey<xAOD::EventInfo> m_eventInfo{this, "EventInfoContName", "EventInfo", "event info key"};
 
         // MVA configs for low-pT working point. Expert use only!

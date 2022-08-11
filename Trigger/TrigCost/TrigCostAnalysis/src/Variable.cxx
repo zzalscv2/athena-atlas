@@ -7,6 +7,7 @@
 #include "Variable.h"
 #include "TH1F.h"
 #include "TH2F.h"
+#include "TProfile.h"
 
 Variable::Variable(const std::string& name, TH1* cacheHistoPtr, VariableType type) :
   m_name(name),
@@ -67,9 +68,17 @@ StatusCode Variable::fill(float value, float weight) {
 StatusCode Variable::fill(float xvalue, float yvalue, float weight) {
   switch(m_variableType) {
     case kPerCall:
+    {
       ATH_CHECK(m_cacheHistoPtr != nullptr);
-      dynamic_cast<TH2F*>(m_cacheHistoPtr)->Fill(xvalue * m_oneOverDenominator, yvalue * m_oneOverDenominator, weight);
+      TH2F* th2f = dynamic_cast<TH2F*>(m_cacheHistoPtr);
+      if (th2f == nullptr){
+        // Cast failed - should be TProfile
+        dynamic_cast<TProfile*>(m_cacheHistoPtr)->Fill(xvalue * m_oneOverDenominator, yvalue * m_oneOverDenominator, weight);
+      } else {
+        th2f->Fill(xvalue * m_oneOverDenominator, yvalue * m_oneOverDenominator, weight);
+      }
       break;
+    }
     case kPerEvent:
       ++m_calls;
       m_xaccumulator += xvalue;
@@ -102,12 +111,24 @@ StatusCode Variable::setBinLabel(int bin, const std::string& label) {
 }
 
 
+StatusCode Variable::setYBinLabel(int bin, const std::string& label) {
+  m_cacheHistoPtr->GetYaxis()->SetBinLabel(bin, label.c_str());
+  return StatusCode::SUCCESS;
+}
+
+
 StatusCode Variable::endEvent() {
   if (m_variableType == kPerEvent && m_calls > 0) {
     ATH_CHECK(m_cacheHistoPtr != nullptr);
     // 2D histogram
     if (m_yaccumulator > 0){
-      dynamic_cast<TH2F*>(m_cacheHistoPtr)->Fill(m_xaccumulator * m_oneOverDenominator, m_yaccumulator, m_weight);
+      TH2F* th2f = dynamic_cast<TH2F*>(m_cacheHistoPtr);
+      if (th2f == nullptr){
+        // Cast failed - should be TProfile
+        dynamic_cast<TProfile*>(m_cacheHistoPtr)->Fill(m_xaccumulator * m_oneOverDenominator, m_yaccumulator, m_weight);
+      } else {
+        th2f->Fill(m_xaccumulator * m_oneOverDenominator, m_yaccumulator, m_weight);
+      }
     } else {
       m_cacheHistoPtr->Fill(m_xaccumulator * m_oneOverDenominator, m_weight);
     }
