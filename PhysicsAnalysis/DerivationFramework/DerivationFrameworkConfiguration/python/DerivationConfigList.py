@@ -44,6 +44,7 @@ from DerivationFrameworkLLP.LLP1 import LLP1Cfg
 from DerivationFrameworkBPhys.BPHY1 import BPHY1Cfg
 from DerivationFrameworkBPhys.BPHY2 import BPHY2Cfg
 from DerivationFrameworkBPhys.BPHY3 import BPHY3Cfg
+from DerivationFrameworkBPhys.BPHY4 import BPHY4Cfg
 from DerivationFrameworkBPhys.BPHY5 import BPHY5Cfg
 
 # Avoids compilation warnings from Flake8
@@ -53,5 +54,5 @@ __all__ = ['TEST1Cfg','TEST2Cfg','TEST3Cfg','TEST4Cfg','TEST5Cfg','TEST6Cfg',
            'PHYSVALCfg',
            'HIGG1D1Cfg',
            'LLP1Cfg',
-           'BPHY1Cfg','BPHY2Cfg', 'BPHY3Cfg', 'BPHY5Cfg']
+           'BPHY1Cfg','BPHY2Cfg', 'BPHY3Cfg', 'BPHY4Cfg', 'BPHY5Cfg']
 

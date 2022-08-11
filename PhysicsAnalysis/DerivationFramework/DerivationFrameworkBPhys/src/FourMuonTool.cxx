@@ -44,13 +44,8 @@ namespace DerivationFramework {
         }
         
         // retrieving V0 Fitter
-        if ( m_iV0VertexFitter.retrieve().isFailure() ) {
-            ATH_MSG_FATAL("Failed to retrieve tool " << m_iV0VertexFitter);
-            return StatusCode::FAILURE;
-        } else {
-            ATH_MSG_DEBUG("Retrieved tool " << m_iV0VertexFitter);
-        }
-        
+        ATH_CHECK( m_iV0VertexFitter.retrieve(DisableTool{!m_useV0Fitter}));
+
         // Get the track selector tool from ToolSvc
         if ( m_trkSelector.retrieve().isFailure() ) {
             ATH_MSG_FATAL("Failed to retrieve tool " << m_trkSelector);

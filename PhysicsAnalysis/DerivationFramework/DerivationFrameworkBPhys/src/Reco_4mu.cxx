@@ -21,8 +21,8 @@ namespace DerivationFramework {
                        const IInterface* p) :
     AthAlgTool(t,n,p),
     m_v0Tools("Trk::V0Tools"),
-    m_fourMuonTool("DerivationFramework::FourMuonTool"),
-    m_pvRefitter("Analysis::PrimaryVertexRefitter")
+    m_fourMuonTool("DerivationFramework::FourMuonTool",this),
+    m_pvRefitter("Analysis::PrimaryVertexRefitter",this)
     {
         declareInterface<DerivationFramework::ISkimmingTool>(this);
         
