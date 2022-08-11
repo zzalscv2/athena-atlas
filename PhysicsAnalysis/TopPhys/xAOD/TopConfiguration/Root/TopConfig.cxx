@@ -296,6 +296,7 @@ namespace top {
     m_doLargeRPseudodataJER(false),
     m_jetCalibSequence("GSC"),
     m_jetMCtoMCCalibration("None"),
+    m_useJESPrecisionFlavourUncertainties(false),
     m_allowSmallRJMSforAFII(false),
     m_jetStoreTruthLabels("True"),
     m_doJVTInMETCalculation(true),
@@ -1450,6 +1451,7 @@ namespace top {
     }
     this->jetCalibSequence(settings->value("JetCalibSequence"));
     this->jetMCtoMCCalibration(settings->value("JetMCtoMCCalibration"));
+    this->useJESPrecisionFlavourUncertainties(settings->value("useJESPrecisionFlavourUncertainties") == "True");
     this->allowSmallRJMSforAFII(settings->value("AllowJMSforAFII") == "True");
     this->doJVTinMET(settings->retrieve("JVTinMETCalculation"));
     this->saveFailJVTJets(settings->retrieve("SaveFailJVTJets"));
