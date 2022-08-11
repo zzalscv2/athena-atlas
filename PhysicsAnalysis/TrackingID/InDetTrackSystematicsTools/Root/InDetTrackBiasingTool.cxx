@@ -39,12 +39,13 @@ namespace InDet {
     declareProperty("isData", m_isData);
     declareProperty("isSimulation", m_isSimulation);
 
-    declareProperty("calibFileData15", m_calibFileData15 = "InDetTrackSystematicsTools/CalibData_21.2_2018-v18/data15_13TeV_all_CorrectionResult.root");
-    declareProperty("calibFileData16_preTS1", m_calibFileData16_preTS1 = "InDetTrackSystematicsTools/CalibData_21.2_2018-v18/data16_13TeV_preTS1_CorrectionResult.root");
-    declareProperty("calibFileData16_postTS1", m_calibFileData16_postTS1 = "InDetTrackSystematicsTools/CalibData_21.2_2018-v18/data16_13TeV_preTS1_CorrectionResult.root");
-    declareProperty("calibFileData17_preFire", m_calibFileData17_preFire = "InDetTrackSystematicsTools/CalibData_21.2_2018-v18/data17_13TeV_preFire_CorrectionResult.root");
-    declareProperty("calibFileData17_postFire", m_calibFileData17_postFire = "InDetTrackSystematicsTools/CalibData_21.2_2018-v18/data17_13TeV_postFire_CorrectionResult.root");
-    declareProperty("calibFileData18", m_calibFileData18 = "InDetTrackSystematicsTools/CalibData_21.2_2018-v21/z_2018_weak_mode_recommendations.root");
+    declareProperty("calibFileData15", m_calibFileData15 = "InDetTrackSystematicsTools/CalibData_22.0_2022-v00/REL22_REPRO_2015.root");
+    declareProperty("calibFileData16_1stPart", m_calibFileData16_1stPart = "InDetTrackSystematicsTools/CalibData_22.0_2022-v00/REL22_REPRO_2016_1stPart.root");
+    declareProperty("calibFileData16_2ndPart", m_calibFileData16_2ndPart = "InDetTrackSystematicsTools/CalibData_22.0_2022-v00/REL22_REPRO_2016_2ndPart.root");
+    declareProperty("calibFileData17_1stPart", m_calibFileData17_1stPart = "InDetTrackSystematicsTools/CalibData_22.0_2022-v00/REL22_REPRO_2017_1stPart.root");
+    declareProperty("calibFileData17_2ndPart", m_calibFileData17_2ndPart = "InDetTrackSystematicsTools/CalibData_22.0_2022-v00/REL22_REPRO_2017_2ndPart.root");
+    declareProperty("calibFileData18_1stPart", m_calibFileData18_1stPart = "InDetTrackSystematicsTools/CalibData_22.0_2022-v00/REL22_REPRO_2018_1stPart.root");
+    declareProperty("calibFileData18_2stPart", m_calibFileData18_2ndPart = "InDetTrackSystematicsTools/CalibData_22.0_2022-v00/REL22_REPRO_2018_2ndPart.root");
 
 
   }
@@ -70,12 +71,11 @@ namespace InDet {
         << " TeV^-1 (not part of an official recommendation)" );
     }
 
-    ATH_MSG_INFO( "Using for Data15 the calibration file " << PathResolverFindCalibFile(m_calibFileData15) );
-    ATH_MSG_INFO( "Using for Data16 preTS1 the calibration file " << PathResolverFindCalibFile(m_calibFileData16_preTS1) );
-    ATH_MSG_INFO( "Using for Data16 postTS1 the calibration file " << PathResolverFindCalibFile(m_calibFileData16_postTS1) );
-    ATH_MSG_INFO( "Using for Data17 preFire the calibration file " << PathResolverFindCalibFile(m_calibFileData17_preFire) );
-    ATH_MSG_INFO( "Using for Data17 postFire the calibration file " << PathResolverFindCalibFile(m_calibFileData17_postFire) );
-    ATH_MSG_INFO( "Using for Data18 the calibration file " << PathResolverFindCalibFile(m_calibFileData18) );
+    if (m_runNumber > 0) {
+      ATH_MSG_WARNING( "Using manually-set run number (" << m_runNumber << ") to determine which calibration file to use." );
+    }
+
+    ATH_CHECK( initHistograms() );
 
     ATH_CHECK( InDetTrackSystematicsTool::initialize() );
 
@@ -84,12 +84,6 @@ namespace InDet {
 
   InDetTrackBiasingTool::~InDetTrackBiasingTool() {
     m_runNumber = -1;
-    delete m_biasD0Histogram; m_biasD0Histogram = nullptr;
-    delete m_biasZ0Histogram; m_biasZ0Histogram = nullptr;
-    delete m_biasQoverPsagittaHistogram; m_biasQoverPsagittaHistogram = nullptr;
-    delete m_biasD0HistError; m_biasD0HistError = nullptr;
-    delete m_biasZ0HistError; m_biasZ0HistError = nullptr;
-    delete m_biasQoverPsagittaHistError; m_biasQoverPsagittaHistError = nullptr;
   }
 
   CP::CorrectionCode InDetTrackBiasingTool::applyCorrection(xAOD::TrackParticle& track) {
@@ -100,6 +94,103 @@ namespace InDet {
       }
       return false;
     }();
+
+    // specific histograms to be used based on the run number
+    TH2* biasD0Histogram = nullptr;
+    TH2* biasZ0Histogram = nullptr;
+    TH2* biasQoverPsagittaHistogram = nullptr;
+    TH2* biasD0HistError = nullptr;
+    TH2* biasZ0HistError = nullptr;
+    TH2* biasQoverPsagittaHistError = nullptr;
+
+    // determine which run number to use
+    const xAOD::EventInfo* eventInfo = evtStore()->retrieve<const xAOD::EventInfo>("EventInfo");
+    if (!eventInfo) {
+      ATH_MSG_ERROR("Could not retrieve EventInfo object!");
+      return CP::CorrectionCode::Error;
+    }
+    auto runNumber = eventInfo->runNumber(); // start with run number stored in event info
+    static const SG::AuxElement::Accessor<unsigned int> randomRunNumber("RandomRunNumber");
+    if (m_runNumber > 0) { // if manually-set run number is provided, use it
+      runNumber = m_runNumber;
+    } else if (m_isSimulation && randomRunNumber.isAvailable(*eventInfo)) { // use RandomRunNumber for simulation if available
+      runNumber = randomRunNumber(*(eventInfo));
+    }
+
+    // figure out which "IOV" the run number corresponds to
+    // TODO: replace StatusCodes with CP::CorrectionCodes
+    if (runNumber <= 0) {
+      ATH_MSG_WARNING( "Run number not set." );
+    }
+    if (runNumber >= 286282 && runNumber <= 287931) {
+      ATH_MSG_INFO( "Calibrating for 2015 HI and 5 TeV pp runs (286282 to 287931)." );
+      ATH_MSG_ERROR( "The 5 TeV and heavy ion runs do not have biasing maps for release 22. "
+         "Contact the tracking CP group to discuss the derivation of these maps." );
+      return CP::CorrectionCode::Error;
+    } else if (runNumber <= 364485) {
+      if (runNumber < 296939) { // data15 (before 296939)
+        biasD0Histogram = m_data15_biasD0Histogram.get();
+        biasZ0Histogram = m_data15_biasZ0Histogram.get();
+        biasQoverPsagittaHistogram = m_data15_biasQoverPsagittaHistogram.get();
+        biasD0HistError = m_data15_biasD0HistError.get();
+        biasZ0HistError = m_data15_biasZ0HistError.get();
+        biasQoverPsagittaHistError = m_data15_biasQoverPsagittaHistError.get();
+      } else if (runNumber <= 301912) { // data16 part 1/2 (296939 to 301912)
+        biasD0Histogram = m_data16_1stPart_biasD0Histogram.get();
+        biasZ0Histogram = m_data16_1stPart_biasZ0Histogram.get();
+        biasQoverPsagittaHistogram = m_data16_1stPart_biasQoverPsagittaHistogram.get();
+        biasD0HistError = m_data16_1stPart_biasD0HistError.get();
+        biasZ0HistError = m_data16_1stPart_biasZ0HistError.get();
+        biasQoverPsagittaHistError = m_data16_1stPart_biasQoverPsagittaHistError.get();
+      } else if (runNumber <= 312649) { // data16 part 2/2 (301912 to 312649)
+        biasD0Histogram = m_data16_2ndPart_biasD0Histogram.get();
+        biasZ0Histogram = m_data16_2ndPart_biasZ0Histogram.get();
+        biasQoverPsagittaHistogram = m_data16_2ndPart_biasQoverPsagittaHistogram.get();
+        biasD0HistError = m_data16_2ndPart_biasD0HistError.get();
+        biasZ0HistError = m_data16_2ndPart_biasZ0HistError.get();
+        biasQoverPsagittaHistError = m_data16_2ndPart_biasQoverPsagittaHistError.get();
+      } else if (runNumber <= 334842) { // data17 part 1/2 (324320 to 334842)
+        biasD0Histogram = m_data17_1stPart_biasD0Histogram.get();
+        biasZ0Histogram = m_data17_1stPart_biasZ0Histogram.get();
+        biasQoverPsagittaHistogram = m_data17_1stPart_biasQoverPsagittaHistogram.get();
+        biasD0HistError = m_data17_1stPart_biasD0HistError.get();
+        biasZ0HistError = m_data17_1stPart_biasZ0HistError.get();
+        biasQoverPsagittaHistError = m_data17_1stPart_biasQoverPsagittaHistError.get();
+      } else if (runNumber <= 348197) { // data17 (part 2/2 (334842 to 348197)
+        biasD0Histogram = m_data17_2ndPart_biasD0Histogram.get();
+        biasZ0Histogram = m_data17_2ndPart_biasZ0Histogram.get();
+        biasQoverPsagittaHistogram = m_data17_2ndPart_biasQoverPsagittaHistogram.get();
+        biasD0HistError = m_data17_2ndPart_biasD0HistError.get();
+        biasZ0HistError = m_data17_2ndPart_biasZ0HistError.get();
+        biasQoverPsagittaHistError = m_data17_2ndPart_biasQoverPsagittaHistError.get();
+      } else if (runNumber <= 353000) { // data18 (part 1/2 (348197 to 353000)
+        biasD0Histogram = m_data18_1stPart_biasD0Histogram.get();
+        biasZ0Histogram = m_data18_1stPart_biasZ0Histogram.get();
+        biasQoverPsagittaHistogram = m_data18_1stPart_biasQoverPsagittaHistogram.get();
+        biasD0HistError = m_data18_1stPart_biasD0HistError.get();
+        biasZ0HistError = m_data18_1stPart_biasZ0HistError.get();
+        biasQoverPsagittaHistError = m_data18_1stPart_biasQoverPsagittaHistError.get();
+      } else { // data18 (part 2/2 (353000 to 364485)
+        biasD0Histogram = m_data18_2ndPart_biasD0Histogram.get();
+        biasZ0Histogram = m_data18_2ndPart_biasZ0Histogram.get();
+        biasQoverPsagittaHistogram = m_data18_2ndPart_biasQoverPsagittaHistogram.get();
+        biasD0HistError = m_data18_2ndPart_biasD0HistError.get();
+        biasZ0HistError = m_data18_2ndPart_biasZ0HistError.get();
+        biasQoverPsagittaHistError = m_data18_2ndPart_biasQoverPsagittaHistError.get();
+      }
+    } else {
+      ATH_MSG_ERROR( "Run number = " << runNumber << " not in recognized range (< 364485)." );
+      return CP::CorrectionCode::Error;
+    }
+
+    // don't do the biasing if the histograms are null
+    m_doD0Bias = biasD0Histogram != nullptr;
+    m_doZ0Bias = biasZ0Histogram != nullptr;
+    m_doQoverPBias = biasQoverPsagittaHistogram != nullptr;
+
+    if (!m_doD0Bias) ATH_MSG_WARNING( "Will not perform d0 bias." );
+    if (!m_doZ0Bias) ATH_MSG_WARNING( "Will not perform z0 bias." );
+    if (!m_doQoverPBias) ATH_MSG_WARNING( "Will not perform q/p sagitta bias." );
 
     // declare static accessors to avoid repeating string lookups
     static const SG::AuxElement::Accessor< float > accD0( "d0" );
@@ -113,18 +204,18 @@ namespace InDet {
     if ( m_doD0Bias ) {
       bool d0WmActive = isActive( TRK_BIAS_D0_WM );
       if ( m_isData || d0WmActive ) {
-        accD0( track ) += readHistogram(m_biasD0, m_biasD0Histogram, phi, eta);
+        accD0( track ) += readHistogram(m_biasD0, biasD0Histogram, phi, eta);
         if ( m_isData && d0WmActive ) {
-          accD0( track ) += readHistogram(0., m_biasD0HistError, phi, eta);
+          accD0( track ) += readHistogram(0., biasD0HistError, phi, eta);
         }
       }
     }
     if ( m_doZ0Bias ) {
       bool z0WmActive = isActive( TRK_BIAS_Z0_WM );
       if ( m_isData || z0WmActive ) {
-        accZ0( track ) += readHistogram(m_biasZ0, m_biasZ0Histogram, phi, eta);
+        accZ0( track ) += readHistogram(m_biasZ0, biasZ0Histogram, phi, eta);
         if ( m_isData && z0WmActive ) {
-          accZ0( track ) += readHistogram(0., m_biasZ0HistError, phi, eta);
+          accZ0( track ) += readHistogram(0., biasZ0HistError, phi, eta);
         }
       }
     }
@@ -133,9 +224,9 @@ namespace InDet {
       if ( m_isData || qOverPWmActive ) {
         auto sinTheta = 1.0/cosh(eta);
         // readHistogram flips the sign of the correction if m_isSimulation is true
-        accQOverP( track ) += 1.e-6*sinTheta*readHistogram(m_biasQoverPsagitta, m_biasQoverPsagittaHistogram, phi, eta);
+        accQOverP( track ) += 1.e-6*sinTheta*readHistogram(m_biasQoverPsagitta, biasQoverPsagittaHistogram, phi, eta);
         if ( m_isData && qOverPWmActive ) {
-          accQOverP( track ) += 1.e-6*sinTheta*readHistogram(0., m_biasQoverPsagittaHistError, phi, eta);
+          accQOverP( track ) += 1.e-6*sinTheta*readHistogram(0., biasQoverPsagittaHistError, phi, eta);
         }
       }
     }
@@ -143,62 +234,164 @@ namespace InDet {
     return CP::CorrectionCode::Ok;
   }
 
-  StatusCode InDetTrackBiasingTool::initHistograms(int runNumber)
+  StatusCode InDetTrackBiasingTool::initHistograms()
   {
-    std::string rootfileName;
-    if (runNumber <= 0) {
-      ATH_MSG_WARNING( "Run number not set." );
-    }
-    if (runNumber >= 286282 && runNumber <= 287931) {
-      ATH_MSG_INFO( "Calibrating for 2015 HI and 5 TeV pp runs (286282 to 287931)." );
-      ATH_MSG_ERROR( "The 5 TeV and heavy ion runs do not have biasing maps for release 21. "
-         "Contact the tracking CP group to discuss the derivation of these maps." );
-      m_biasD0Histogram = nullptr;
-      m_biasZ0Histogram = nullptr;
-      m_biasQoverPsagittaHistogram = nullptr;
-      m_biasD0HistError = nullptr;
-      m_biasZ0HistError = nullptr;
-      m_biasQoverPsagittaHistError = nullptr;
-      return StatusCode::FAILURE;
-    } else if (runNumber <= 364485) {
-      if (runNumber < 297730) {
-        ATH_MSG_INFO( "Calibrating for 2015 runs (before 297730)." ); // 2015
-        rootfileName = m_calibFileData15;
-      } else if (runNumber <= 300908) {
-        ATH_MSG_INFO( "Calibrating for 2016 runs before IBL temperature change (297730 to 300908)." ); // pre-TSI 2016
-        rootfileName = m_calibFileData16_preTS1;
-      } else if (runNumber <= 311481) {
-        ATH_MSG_INFO( "Calibrating for 2016 runs after IBL temperature change (301912 to 311481)." ); // post-TS1 2016
-        rootfileName = m_calibFileData16_postTS1;
-      } else if (runNumber <= 334737) {
-        ATH_MSG_INFO( "Calibrating for 2017 runs pre-fire (323427 to 334737)." ); // pre-fire 2017
-        rootfileName = m_calibFileData17_preFire;
-      } else if (runNumber <= 341649) {
-        ATH_MSG_INFO( "Calibrating for 2017 runs post-fire (334842 to 341649)." ); // post-fire 2017
-        rootfileName = m_calibFileData17_postFire;
-      } else {
-        ATH_MSG_INFO( "Calibrating for 2018 data taking.");
-        rootfileName = m_calibFileData18;
-      }
-      ATH_CHECK ( initObject<TH2>(m_biasD0Histogram, rootfileName, "d0/theNominal_d0") );
-      ATH_CHECK ( initObject<TH2>(m_biasZ0Histogram, rootfileName, "z0/theNominal_z0") );
-      ATH_CHECK ( initObject<TH2>(m_biasQoverPsagittaHistogram, rootfileName, "sagitta/theNominal_sagitta") );
-      ATH_CHECK ( initObject<TH2>(m_biasD0HistError, rootfileName, "d0/theUncertainty_d0") );
-      ATH_CHECK ( initObject<TH2>(m_biasZ0HistError, rootfileName, "z0/theUncertainty_z0") );
-      ATH_CHECK ( initObject<TH2>(m_biasQoverPsagittaHistError, rootfileName, "sagitta/theUncertainty_sagitta") );
-    } else {
-      ATH_MSG_ERROR( "Run number = " << runNumber << " not in recognized range (286282 to 364485)." );
-      return StatusCode::FAILURE;
-    }
 
+    TH2* data15_biasD0Histogram_tmp;
+    TH2* data15_biasZ0Histogram_tmp;
+    TH2* data15_biasQoverPsagittaHistogram_tmp;
+    TH2* data15_biasD0HistError_tmp;
+    TH2* data15_biasZ0HistError_tmp;
+    TH2* data15_biasQoverPsagittaHistError_tmp;
 
-    m_doD0Bias = m_biasD0Histogram != nullptr;
-    m_doZ0Bias = m_biasZ0Histogram != nullptr;
-    m_doQoverPBias = m_biasQoverPsagittaHistogram != nullptr;
-    
-    if (!m_doD0Bias) ATH_MSG_WARNING( "Will not perform d0 bias." );
-    if (!m_doZ0Bias) ATH_MSG_WARNING( "Will not perform z0 bias." );
-    if (!m_doQoverPBias) ATH_MSG_WARNING( "Will not perform q/p sagitta bias." );
+    TH2* data16_1stPart_biasD0Histogram_tmp;
+    TH2* data16_1stPart_biasZ0Histogram_tmp;
+    TH2* data16_1stPart_biasQoverPsagittaHistogram_tmp;
+    TH2* data16_1stPart_biasD0HistError_tmp;
+    TH2* data16_1stPart_biasZ0HistError_tmp;
+    TH2* data16_1stPart_biasQoverPsagittaHistError_tmp;
+
+    TH2* data16_2ndPart_biasD0Histogram_tmp;
+    TH2* data16_2ndPart_biasZ0Histogram_tmp;
+    TH2* data16_2ndPart_biasQoverPsagittaHistogram_tmp;
+    TH2* data16_2ndPart_biasD0HistError_tmp;
+    TH2* data16_2ndPart_biasZ0HistError_tmp;
+    TH2* data16_2ndPart_biasQoverPsagittaHistError_tmp;
+
+    TH2* data17_1stPart_biasD0Histogram_tmp;
+    TH2* data17_1stPart_biasZ0Histogram_tmp;
+    TH2* data17_1stPart_biasQoverPsagittaHistogram_tmp;
+    TH2* data17_1stPart_biasD0HistError_tmp;
+    TH2* data17_1stPart_biasZ0HistError_tmp;
+    TH2* data17_1stPart_biasQoverPsagittaHistError_tmp;
+
+    TH2* data17_2ndPart_biasD0Histogram_tmp;
+    TH2* data17_2ndPart_biasZ0Histogram_tmp;
+    TH2* data17_2ndPart_biasQoverPsagittaHistogram_tmp;
+    TH2* data17_2ndPart_biasD0HistError_tmp;
+    TH2* data17_2ndPart_biasZ0HistError_tmp;
+    TH2* data17_2ndPart_biasQoverPsagittaHistError_tmp;
+
+    TH2* data18_1stPart_biasD0Histogram_tmp;
+    TH2* data18_1stPart_biasZ0Histogram_tmp;
+    TH2* data18_1stPart_biasQoverPsagittaHistogram_tmp;
+    TH2* data18_1stPart_biasD0HistError_tmp;
+    TH2* data18_1stPart_biasZ0HistError_tmp;
+    TH2* data18_1stPart_biasQoverPsagittaHistError_tmp;
+
+    TH2* data18_2ndPart_biasD0Histogram_tmp;
+    TH2* data18_2ndPart_biasZ0Histogram_tmp;
+    TH2* data18_2ndPart_biasQoverPsagittaHistogram_tmp;
+    TH2* data18_2ndPart_biasD0HistError_tmp;
+    TH2* data18_2ndPart_biasZ0HistError_tmp;
+    TH2* data18_2ndPart_biasQoverPsagittaHistError_tmp;
+
+    ATH_MSG_INFO( "Using for data15 (before 296939) the calibration file " << PathResolverFindCalibFile(m_calibFileData15) );
+    ATH_CHECK ( initObject<TH2>(data15_biasD0Histogram_tmp, m_calibFileData15, m_d0_nominal_histName) );
+    ATH_CHECK ( initObject<TH2>(data15_biasZ0Histogram_tmp, m_calibFileData15, m_z0_nominal_histName) );
+    ATH_CHECK ( initObject<TH2>(data15_biasQoverPsagittaHistogram_tmp, m_calibFileData15, m_sagitta_nominal_histName) );
+    ATH_CHECK ( initObject<TH2>(data15_biasD0HistError_tmp, m_calibFileData15, m_d0_uncertainty_histName) );
+    ATH_CHECK ( initObject<TH2>(data15_biasZ0HistError_tmp, m_calibFileData15, m_z0_uncertainty_histName) );
+    ATH_CHECK ( initObject<TH2>(data15_biasQoverPsagittaHistError_tmp, m_calibFileData15, m_sagitta_uncertainty_histName) );
+
+    ATH_MSG_INFO( "Using for data16 part 1/2 (296939 to 301912) the calibration file " << PathResolverFindCalibFile(m_calibFileData16_1stPart) );
+    ATH_CHECK ( initObject<TH2>(data16_1stPart_biasD0Histogram_tmp, m_calibFileData16_1stPart, m_d0_nominal_histName) );
+    ATH_CHECK ( initObject<TH2>(data16_1stPart_biasZ0Histogram_tmp, m_calibFileData16_1stPart, m_z0_nominal_histName) );
+    ATH_CHECK ( initObject<TH2>(data16_1stPart_biasQoverPsagittaHistogram_tmp, m_calibFileData16_1stPart, m_sagitta_nominal_histName) );
+    ATH_CHECK ( initObject<TH2>(data16_1stPart_biasD0HistError_tmp, m_calibFileData16_1stPart, m_d0_uncertainty_histName) );
+    ATH_CHECK ( initObject<TH2>(data16_1stPart_biasZ0HistError_tmp, m_calibFileData16_1stPart, m_z0_uncertainty_histName) );
+    ATH_CHECK ( initObject<TH2>(data16_1stPart_biasQoverPsagittaHistError_tmp, m_calibFileData16_1stPart, m_sagitta_uncertainty_histName) );
+
+    ATH_MSG_INFO( "Using for data16 part 2/2 (301912 to 312649) the calibration file " << PathResolverFindCalibFile(m_calibFileData16_2ndPart) );
+    ATH_CHECK ( initObject<TH2>(data16_2ndPart_biasD0Histogram_tmp, m_calibFileData16_2ndPart, m_d0_nominal_histName) );
+    ATH_CHECK ( initObject<TH2>(data16_2ndPart_biasZ0Histogram_tmp, m_calibFileData16_2ndPart, m_z0_nominal_histName) );
+    ATH_CHECK ( initObject<TH2>(data16_2ndPart_biasQoverPsagittaHistogram_tmp, m_calibFileData16_2ndPart, m_sagitta_nominal_histName) );
+    ATH_CHECK ( initObject<TH2>(data16_2ndPart_biasD0HistError_tmp, m_calibFileData16_2ndPart, m_d0_uncertainty_histName) );
+    ATH_CHECK ( initObject<TH2>(data16_2ndPart_biasZ0HistError_tmp, m_calibFileData16_2ndPart, m_z0_uncertainty_histName) );
+    ATH_CHECK ( initObject<TH2>(data16_2ndPart_biasQoverPsagittaHistError_tmp, m_calibFileData16_2ndPart, m_sagitta_uncertainty_histName) );
+
+    ATH_MSG_INFO( "Using for data17 part 1/2 (324320 to 334842) the calibration file " << PathResolverFindCalibFile(m_calibFileData17_1stPart) );
+    ATH_CHECK ( initObject<TH2>(data17_1stPart_biasD0Histogram_tmp, m_calibFileData17_1stPart, m_d0_nominal_histName) );
+    ATH_CHECK ( initObject<TH2>(data17_1stPart_biasZ0Histogram_tmp, m_calibFileData17_1stPart, m_z0_nominal_histName) );
+    ATH_CHECK ( initObject<TH2>(data17_1stPart_biasQoverPsagittaHistogram_tmp, m_calibFileData17_1stPart, m_sagitta_nominal_histName) );
+    ATH_CHECK ( initObject<TH2>(data17_1stPart_biasD0HistError_tmp, m_calibFileData17_1stPart, m_d0_uncertainty_histName) );
+    ATH_CHECK ( initObject<TH2>(data17_1stPart_biasZ0HistError_tmp, m_calibFileData17_1stPart, m_z0_uncertainty_histName) );
+    ATH_CHECK ( initObject<TH2>(data17_1stPart_biasQoverPsagittaHistError_tmp, m_calibFileData17_1stPart, m_sagitta_uncertainty_histName) );
+
+    ATH_MSG_INFO( "Using for data17 (part 2/2 (334842 to 348197) the calibration file " << PathResolverFindCalibFile(m_calibFileData17_2ndPart) );
+    ATH_CHECK ( initObject<TH2>(data17_2ndPart_biasD0Histogram_tmp, m_calibFileData17_2ndPart, m_d0_nominal_histName) );
+    ATH_CHECK ( initObject<TH2>(data17_2ndPart_biasZ0Histogram_tmp, m_calibFileData17_2ndPart, m_z0_nominal_histName) );
+    ATH_CHECK ( initObject<TH2>(data17_2ndPart_biasQoverPsagittaHistogram_tmp, m_calibFileData17_2ndPart, m_sagitta_nominal_histName) );
+    ATH_CHECK ( initObject<TH2>(data17_2ndPart_biasD0HistError_tmp, m_calibFileData17_2ndPart, m_d0_uncertainty_histName) );
+    ATH_CHECK ( initObject<TH2>(data17_2ndPart_biasZ0HistError_tmp, m_calibFileData17_2ndPart, m_z0_uncertainty_histName) );
+    ATH_CHECK ( initObject<TH2>(data17_2ndPart_biasQoverPsagittaHistError_tmp, m_calibFileData17_2ndPart, m_sagitta_uncertainty_histName) );
+
+    ATH_MSG_INFO( "Using for data18 (part 1/2 (348197 to 353000) the calibration file " << PathResolverFindCalibFile(m_calibFileData18_1stPart) );
+    ATH_CHECK ( initObject<TH2>(data18_1stPart_biasD0Histogram_tmp, m_calibFileData18_1stPart, m_d0_nominal_histName) );
+    ATH_CHECK ( initObject<TH2>(data18_1stPart_biasZ0Histogram_tmp, m_calibFileData18_1stPart, m_z0_nominal_histName) );
+    ATH_CHECK ( initObject<TH2>(data18_1stPart_biasQoverPsagittaHistogram_tmp, m_calibFileData18_1stPart, m_sagitta_nominal_histName) );
+    ATH_CHECK ( initObject<TH2>(data18_1stPart_biasD0HistError_tmp, m_calibFileData18_1stPart, m_d0_uncertainty_histName) );
+    ATH_CHECK ( initObject<TH2>(data18_1stPart_biasZ0HistError_tmp, m_calibFileData18_1stPart, m_z0_uncertainty_histName) );
+    ATH_CHECK ( initObject<TH2>(data18_1stPart_biasQoverPsagittaHistError_tmp, m_calibFileData18_1stPart, m_sagitta_uncertainty_histName) );
+
+    ATH_MSG_INFO( "Using for data18 (part 2/2 (353000 to 364485) the calibration file " << PathResolverFindCalibFile(m_calibFileData18_2ndPart) );
+    ATH_CHECK ( initObject<TH2>(data18_2ndPart_biasD0Histogram_tmp, m_calibFileData18_2ndPart, m_d0_nominal_histName) );
+    ATH_CHECK ( initObject<TH2>(data18_2ndPart_biasZ0Histogram_tmp, m_calibFileData18_2ndPart, m_z0_nominal_histName) );
+    ATH_CHECK ( initObject<TH2>(data18_2ndPart_biasQoverPsagittaHistogram_tmp, m_calibFileData18_2ndPart, m_sagitta_nominal_histName) );
+    ATH_CHECK ( initObject<TH2>(data18_2ndPart_biasD0HistError_tmp, m_calibFileData18_2ndPart, m_d0_uncertainty_histName) );
+    ATH_CHECK ( initObject<TH2>(data18_2ndPart_biasZ0HistError_tmp, m_calibFileData18_2ndPart, m_z0_uncertainty_histName) );
+    ATH_CHECK ( initObject<TH2>(data18_2ndPart_biasQoverPsagittaHistError_tmp, m_calibFileData18_2ndPart, m_sagitta_uncertainty_histName) );
+
+    // m_trkLRTEff = std::unique_ptr<TH2>(trkLRTEff_tmp);
+
+    m_data15_biasD0Histogram = std::unique_ptr<TH2>(data15_biasD0Histogram_tmp);
+    m_data15_biasZ0Histogram = std::unique_ptr<TH2>(data15_biasZ0Histogram_tmp);
+    m_data15_biasQoverPsagittaHistogram = std::unique_ptr<TH2>(data15_biasQoverPsagittaHistogram_tmp);
+    m_data15_biasD0HistError = std::unique_ptr<TH2>(data15_biasD0HistError_tmp);
+    m_data15_biasZ0HistError = std::unique_ptr<TH2>(data15_biasZ0HistError_tmp);
+    m_data15_biasQoverPsagittaHistError = std::unique_ptr<TH2>(data15_biasQoverPsagittaHistError_tmp);
+
+    m_data16_1stPart_biasD0Histogram = std::unique_ptr<TH2>(data16_1stPart_biasD0Histogram_tmp);
+    m_data16_1stPart_biasZ0Histogram = std::unique_ptr<TH2>(data16_1stPart_biasZ0Histogram_tmp);
+    m_data16_1stPart_biasQoverPsagittaHistogram = std::unique_ptr<TH2>(data16_1stPart_biasQoverPsagittaHistogram_tmp);
+    m_data16_1stPart_biasD0HistError = std::unique_ptr<TH2>(data16_1stPart_biasD0HistError_tmp);
+    m_data16_1stPart_biasZ0HistError = std::unique_ptr<TH2>(data16_1stPart_biasZ0HistError_tmp);
+    m_data16_1stPart_biasQoverPsagittaHistError = std::unique_ptr<TH2>(data16_1stPart_biasQoverPsagittaHistError_tmp);
+
+    m_data16_2ndPart_biasD0Histogram = std::unique_ptr<TH2>(data16_2ndPart_biasD0Histogram_tmp);
+    m_data16_2ndPart_biasZ0Histogram = std::unique_ptr<TH2>(data16_2ndPart_biasZ0Histogram_tmp);
+    m_data16_2ndPart_biasQoverPsagittaHistogram = std::unique_ptr<TH2>(data16_2ndPart_biasQoverPsagittaHistogram_tmp);
+    m_data16_2ndPart_biasD0HistError = std::unique_ptr<TH2>(data16_2ndPart_biasD0HistError_tmp);
+    m_data16_2ndPart_biasZ0HistError = std::unique_ptr<TH2>(data16_2ndPart_biasZ0HistError_tmp);
+    m_data16_2ndPart_biasQoverPsagittaHistError = std::unique_ptr<TH2>(data16_2ndPart_biasQoverPsagittaHistError_tmp);
+
+    m_data17_1stPart_biasD0Histogram = std::unique_ptr<TH2>(data17_1stPart_biasD0Histogram_tmp);
+    m_data17_1stPart_biasZ0Histogram = std::unique_ptr<TH2>(data17_1stPart_biasZ0Histogram_tmp);
+    m_data17_1stPart_biasQoverPsagittaHistogram = std::unique_ptr<TH2>(data17_1stPart_biasQoverPsagittaHistogram_tmp);
+    m_data17_1stPart_biasD0HistError = std::unique_ptr<TH2>(data17_1stPart_biasD0HistError_tmp);
+    m_data17_1stPart_biasZ0HistError = std::unique_ptr<TH2>(data17_1stPart_biasZ0HistError_tmp);
+    m_data17_1stPart_biasQoverPsagittaHistError = std::unique_ptr<TH2>(data17_1stPart_biasQoverPsagittaHistError_tmp);
+
+    m_data17_2ndPart_biasD0Histogram = std::unique_ptr<TH2>(data17_2ndPart_biasD0Histogram_tmp);
+    m_data17_2ndPart_biasZ0Histogram = std::unique_ptr<TH2>(data17_2ndPart_biasZ0Histogram_tmp);
+    m_data17_2ndPart_biasQoverPsagittaHistogram = std::unique_ptr<TH2>(data17_2ndPart_biasQoverPsagittaHistogram_tmp);
+    m_data17_2ndPart_biasD0HistError = std::unique_ptr<TH2>(data17_2ndPart_biasD0HistError_tmp);
+    m_data17_2ndPart_biasZ0HistError = std::unique_ptr<TH2>(data17_2ndPart_biasZ0HistError_tmp);
+    m_data17_2ndPart_biasQoverPsagittaHistError = std::unique_ptr<TH2>(data17_2ndPart_biasQoverPsagittaHistError_tmp);
+
+    m_data18_1stPart_biasD0Histogram = std::unique_ptr<TH2>(data18_1stPart_biasD0Histogram_tmp);
+    m_data18_1stPart_biasZ0Histogram = std::unique_ptr<TH2>(data18_1stPart_biasZ0Histogram_tmp);
+    m_data18_1stPart_biasQoverPsagittaHistogram = std::unique_ptr<TH2>(data18_1stPart_biasQoverPsagittaHistogram_tmp);
+    m_data18_1stPart_biasD0HistError = std::unique_ptr<TH2>(data18_1stPart_biasD0HistError_tmp);
+    m_data18_1stPart_biasZ0HistError = std::unique_ptr<TH2>(data18_1stPart_biasZ0HistError_tmp);
+    m_data18_1stPart_biasQoverPsagittaHistError = std::unique_ptr<TH2>(data18_1stPart_biasQoverPsagittaHistError_tmp);
+
+    m_data18_2ndPart_biasD0Histogram = std::unique_ptr<TH2>(data18_2ndPart_biasD0Histogram_tmp);
+    m_data18_2ndPart_biasZ0Histogram = std::unique_ptr<TH2>(data18_2ndPart_biasZ0Histogram_tmp);
+    m_data18_2ndPart_biasQoverPsagittaHistogram = std::unique_ptr<TH2>(data18_2ndPart_biasQoverPsagittaHistogram_tmp);
+    m_data18_2ndPart_biasD0HistError = std::unique_ptr<TH2>(data18_2ndPart_biasD0HistError_tmp);
+    m_data18_2ndPart_biasZ0HistError = std::unique_ptr<TH2>(data18_2ndPart_biasZ0HistError_tmp);
+    m_data18_2ndPart_biasQoverPsagittaHistError = std::unique_ptr<TH2>(data18_2ndPart_biasQoverPsagittaHistError_tmp);
 
     return StatusCode::SUCCESS;
   }
@@ -206,7 +399,7 @@ namespace InDet {
   StatusCode InDetTrackBiasingTool::firstCall()
   {
     assert( ! (m_isData && m_isSimulation) );
-    // if this option is set, we need to figure out the run number
+
     const xAOD::EventInfo* ei = nullptr;
     auto sc = evtStore()->retrieve( ei, "EventInfo" );
     if ( ! sc.isSuccess() ) {
@@ -235,16 +428,13 @@ namespace InDet {
     if (m_isData) ATH_MSG_INFO( "Set to data. Will apply biases to correct those observed in data." );
     if (m_isSimulation) ATH_MSG_INFO( "Set to simulation. Will apply biases in direction that is observed in data." );
 
-    auto runNumber = ei->runNumber();
-    if (m_runNumber > 0) {
-      if ( m_runNumber != runNumber && ! isSim) { // only warn for mis-matched run number if it is a data file
-        ATH_MSG_WARNING( "Manually-set run number (" << m_runNumber <<
-             ") does not match that from the event store (" << runNumber << ")." );
-        ATH_MSG_WARNING( "Will use the manually set run number, but you must make sure this is the desired behaviour!" );
-      }
-      runNumber = m_runNumber;
+    // warn if set to simulation but RandomRunNumber not found and no run number provided (will use run number set in event info)
+    static const SG::AuxElement::Accessor<unsigned int> randomRunNumber("RandomRunNumber");
+    if (m_isSimulation && !randomRunNumber.isAvailable(*ei) && m_runNumber <= 0) {
+      ATH_MSG_WARNING("Set to simulation with no run number provided, but RandomRunNumber not available. Will use default run number from EventInfo, "
+        "but biasing won't accurately reflect intervals of validity throughout the year. Run PileupReweightingTool first to pick up RandomRunNumber decorations.");
     }
-    return initHistograms( runNumber );
+    return StatusCode::SUCCESS;
   }
 
   float InDetTrackBiasingTool::readHistogram(float fDefault, TH2* histogram, float phi, float eta) const {
@@ -264,19 +454,6 @@ namespace InDet {
 
     return f;
   }
-
-  // // this function is not currently being used
-  // float InDetTrackBiasingTool::readEtaHistogram(float fDefault, TH1* histogram, float eta) const {
-  //   // safety measure:
-  //   if( eta>2.499 )  eta= 2.499;
-  //   if( eta<-2.499 ) eta=-2.499;
-
-  //   float f = histogram->GetBinContent(histogram->FindBin(eta));
-  //   f += fDefault;   // to be reconsidered
-
-  //   return f;
-  // }
-
 
   CP::CorrectionCode InDetTrackBiasingTool::correctedCopy( const xAOD::TrackParticle& in,
 							    xAOD::TrackParticle*& out )
