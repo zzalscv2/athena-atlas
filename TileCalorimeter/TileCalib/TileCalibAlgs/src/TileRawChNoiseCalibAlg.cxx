@@ -686,14 +686,15 @@ void TileRawChNoiseCalibAlg::StoreRunInfo(const TileDQstatus* dqStatus) {
   }
 
   if (m_time != 0) {
+    struct tm t;
     time_t t_time = m_time;
-    tm* timestr = localtime(&t_time);
-    m_year = (*timestr).tm_year + 1900;
-    m_month = (*timestr).tm_mon + 1;
-    m_day = (*timestr).tm_mday;
-    m_yday = (*timestr).tm_yday + 1;
-    m_hour = (*timestr).tm_hour;
-    m_min = (*timestr).tm_min;
+    localtime_r(&t_time, &t);
+    m_year = t.tm_year + 1900;
+    m_month = t.tm_mon + 1;
+    m_day = t.tm_mday;
+    m_yday = t.tm_yday + 1;
+    m_hour = t.tm_hour;
+    m_min = t.tm_min;
   } else {
     m_year = 0;
     m_month = 0;
