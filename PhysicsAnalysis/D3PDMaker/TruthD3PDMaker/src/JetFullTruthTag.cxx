@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2017 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
 */
 
 /**
@@ -58,7 +58,7 @@ StatusCode JetFullTruthTag::fill (const Jet& p)
   int pdgid=0;
   double dR2=0.;
 
-  const DataHandle<McEventCollection> mcCollection;
+  const McEventCollection* mcCollection{nullptr};
   if (evtStore()->retrieve(mcCollection,m_truthCollectionName).isSuccess()) {
     // We have an McEventCollection
     for (McEventCollection::const_iterator currentGenEventIter = mcCollection->begin();

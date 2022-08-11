@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2019 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
 */
 /**
  * @file TruthD3PDMaker/src/TruthLeptonParentAssociationTool.cxx
@@ -53,7 +53,7 @@ TruthLeptonParentAssociationTool::reset (const TruthParticle& p)
   m_primary_is_tau = (15==abs(p.pdgId()));
 
   // Just add the daughters in... but have to find it in the full record first
-  const DataHandle<McEventCollection> mcec;
+  const McEventCollection* mcec{nullptr};
   if (evtStore()->retrieve<McEventCollection>(mcec,"GEN_EVENT").isSuccess()){ // Always run on EVGEN anyway...
     // Loop over GenEvent's.
     for (const HepMC::GenEvent* ev_in : *mcec) {
@@ -68,7 +68,7 @@ TruthLeptonParentAssociationTool::reset (const TruthParticle& p)
     } // Loop over events
   } // Successful retrieve
 
-  const DataHandle<TruthParticleContainer> tpc;
+  const TruthParticleContainer* tpc{nullptr};
   if (evtStore()->retrieve<TruthParticleContainer>(tpc,"D3PDTruth").isSuccess()){
     for (unsigned int i=0;i<tpc->size();++i){
       if (! (*tpc)[i] ) continue;
