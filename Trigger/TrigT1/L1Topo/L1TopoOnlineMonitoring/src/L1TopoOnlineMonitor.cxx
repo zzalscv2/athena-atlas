@@ -8,6 +8,9 @@
 // Trigger includes
 #include "xAODTrigger/L1TopoSimResults.h"
 #include "TrigT1Result/CTP_Decoder.h"
+#include "L1TopoRDO/Helpers.h"
+#include "L1TopoRDO/L1TopoROD.h"
+#include "L1TopoRDO/L1TopoFPGA.h"
 
 // System includes
 #include <utility>
@@ -209,13 +212,62 @@ StatusCode L1TopoOnlineMonitor::doHwMon( DecisionBits& decisionBits, const Event
   ATH_MSG_DEBUG("----got L1Topo Raw Data container: " << cont.key());
 
   std::bitset<s_nTopoCTPOutputs>& triggerBits = DecisionBits::createBits(decisionBits.triggerBits);
-  for (size_t i=0; i<s_nTopoCTPOutputs; ++i) {
-    //Do something here when decoders are available
-    triggerBits[i] = 0;
+  std::bitset<s_nTopoCTPOutputs>& overflowBits = DecisionBits::createBits(decisionBits.overflowBits);
+  
+  std::unique_ptr<L1Topo::L1TopoFPGA> l1topoFPGA;
+  
+  for(const xAOD::L1TopoRawData* l1topo_raw : *cont) {
+    const std::vector<uint32_t>& dataWords = l1topo_raw->dataWords();
+    size_t nWords = dataWords.size();
+    uint32_t rodTrailer2 = dataWords[--nWords];
+    uint32_t rodTrailer1 = dataWords[--nWords];
+
+    L1Topo::L1TopoROD l1topoROD(rodTrailer1, rodTrailer2);
+
+    ATH_MSG_VERBOSE(l1topoROD);
+
+    for (size_t i = nWords; i --> 0;) {
+      if ((i+1)%8==0) {
+	uint32_t fpgaTrailer2 = dataWords[i];
+	uint32_t fpgaTrailer1 = dataWords[--i];
+
+	l1topoFPGA.reset(new L1Topo::L1TopoFPGA(fpgaTrailer1, fpgaTrailer2));
+
+	ATH_MSG_VERBOSE(*l1topoFPGA.get());
+    
+      }
+      else {
+	if (l1topoFPGA->topoNumber() != 1) {
+	  i-=3;
+	  uint32_t overflowWord = dataWords[--i];
+	  uint32_t triggerWord = dataWords[--i];
+	  for (size_t iBit=0;iBit<32;iBit++) {
+	    uint32_t topo = l1topoFPGA->topoNumber();
+	    uint32_t fpga = l1topoFPGA->fpgaNumber();
+	    unsigned int index = L1Topo::triggerBitIndexPhase1(topo, fpga, iBit);
+	    overflowBits[index] = (overflowWord>>iBit)&1;
+	    triggerBits[index] = (triggerWord>>iBit)&1;
+	  }
+	  ATH_MSG_DEBUG("trigger word: " << std::hex << std::showbase << triggerWord << std::dec);
+	  ATH_MSG_DEBUG("overflow word: " << std::hex << std::showbase << overflowWord << std::dec);
+	}
+      }
+    }
   }
 
-  //This will be filled up when the phase1 L1Topo decoders are ready.
-  return StatusCode::FAILURE;
+  triggerBits = triggerBits & (~overflowBits);
+  const std::vector<size_t> triggerBitIndicesHdw = bitsetIndices(triggerBits);
+  const std::vector<size_t> overflowBitIndicesHdw = bitsetIndices(overflowBits);
+  
+  ATH_MSG_VERBOSE("trigger bits: " << triggerBits.to_string() );
+  ATH_MSG_VERBOSE("overflow bits: " << overflowBits.to_string() );
+ 
+  auto monHdw = Monitored::Collection("HdwResults", triggerBitIndicesHdw);
+  auto monOverflow = Monitored::Collection("OverflowResults", overflowBitIndicesHdw);
+
+  Monitored::Group(m_monTool, monHdw, monOverflow);
+
+  return StatusCode::SUCCESS;
 }
 
 StatusCode L1TopoOnlineMonitor::doComp( DecisionBits& decisionBits ) const {

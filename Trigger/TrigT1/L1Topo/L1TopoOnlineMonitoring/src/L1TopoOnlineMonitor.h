@@ -73,7 +73,7 @@ private:
   Gaudi::Property<bool> m_doHwMonCTP {
     this, "doHwMonCTP", true, "Enable L1Topo HW readout from CTP"};
   Gaudi::Property<bool> m_doHwMon {
-    this, "doHwMon", false, "Enable L1Topo HW readout from RAW"};
+    this, "doHwMon", true, "Enable L1Topo HW readout from RAW"};
   Gaudi::Property<bool> m_doComp {
     this, "doComp", true, "Enable L1Topo HW/Sim comparison"};
 

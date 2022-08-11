@@ -6,7 +6,7 @@
 #define L1TOPORDO_BLOCKTYPES_H
 
 #include <cstdint>
-
+#include <string>
 
 namespace L1Topo {
 
@@ -25,8 +25,9 @@ namespace L1Topo {
   };
 
   //! Function to return the block type of a data word from L1Topo   
-  L1Topo::BlockTypes blockType(const uint32_t);
-
+  L1Topo::BlockTypes blockType(const uint32_t word, uint32_t offset=28, uint32_t size=0x0f);
+  std::string blockTypeString(L1Topo::BlockTypes type);
+  
 } // namespace L1Topo
 
 #endif // L1TOPORDO_BLOCKTYPES_H
