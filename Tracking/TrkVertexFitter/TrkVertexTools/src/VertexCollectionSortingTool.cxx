@@ -105,6 +105,7 @@ VertexCollectionSortingTool::sortVertexContainer(
   dummyVxCandidate->setPosition(primaryVtx->position());
   dummyVxCandidate->setCovariancePosition(primaryVtx->covariancePosition());
   dummyVxCandidate->setVertexType(xAOD::VxType::NoVtx);
+  sigWeightDec(*dummyVxCandidate) = 0.;
 
   return std::make_pair(NewContainer, auxNewContainer);
 }
