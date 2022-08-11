@@ -170,10 +170,13 @@ StatusCode MetaDataSvc::finalize() {
 StatusCode MetaDataSvc::stop() {
    ATH_MSG_DEBUG("MetaDataSvc::stop()");
 
-   // Fire metaDataStopIncident 
-   Incident metaDataStopIncident(name(), "MetaDataStop");
-   m_incSvc->fireIncident(metaDataStopIncident);
-   
+   if( m_outSeqSvc.isValid() and m_outSeqSvc->inUse() ) {
+      ATH_MSG_INFO("stop(): OutputSequencer in use, not firing MetaDataStop incident");
+   } else {
+      // Fire metaDataStopIncident 
+      Incident metaDataStopIncident(name(), "MetaDataStop");
+      m_incSvc->fireIncident(metaDataStopIncident);
+   }
    return(StatusCode::SUCCESS);
 }
 //_______________________________________________________________________
