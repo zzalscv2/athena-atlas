@@ -105,7 +105,7 @@ public:
     m_maxRatio=0;
   }
 
-  void add(const HashCell& hashCell);
+  void add(HashCell& hashCell);
 
   void add(CaloTopoTmpHashClusterBase& hashCluster);
 
@@ -113,11 +113,10 @@ public:
 
 
 template <class T>
-void CaloTopoTmpHashClusterBase<T>::add(const HashCell& hashCell)
+void CaloTopoTmpHashClusterBase<T>::add(HashCell& hashCell)
 {
-  const T* cell = hashCell.getCaloTopoTmpClusterCell();
-  // FIXME: Need const_cast because CxxUtils::pointer_list can only store void*
-  m_members.push_back (const_cast<T*>(cell));
+  T* cell = hashCell.getCaloTopoTmpClusterCell();
+  m_members.push_back (cell);
   
   float ratio = cell->getSignedRatio(); 
   if ( ratio > m_maxRatio ) {

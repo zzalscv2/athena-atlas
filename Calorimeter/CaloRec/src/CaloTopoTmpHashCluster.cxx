@@ -41,7 +41,7 @@
 // Methods --
 //-----------
 
-void CaloTopoTmpHashCluster::add(const HashCell& hashCell)
+void CaloTopoTmpHashCluster::add(HashCell& hashCell)
 {
   // take the cell with the largest Signal to Noise and report its E_t as the
   // relevant maxEt for the cluster - Note that there might be a cell with a

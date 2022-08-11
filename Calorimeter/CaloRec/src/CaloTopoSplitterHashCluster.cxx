@@ -47,7 +47,7 @@ CaloTopoSplitterHashCluster::~CaloTopoSplitterHashCluster()
 // Methods --
 //-----------
 
-void CaloTopoSplitterHashCluster::add (const HashCell& hashCell)
+void CaloTopoSplitterHashCluster::add (HashCell& hashCell)
 {
   if ( !m_parentCluster ) {
     const CaloTopoSplitterClusterCell* pCell = hashCell.getCaloTopoTmpClusterCell();

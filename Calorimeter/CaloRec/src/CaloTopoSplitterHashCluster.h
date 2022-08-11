@@ -88,7 +88,7 @@ public:
     m_containsLocalMax = false;
   }
 
-  void add(const HashCell& hashCell);
+  void add(HashCell& hashCell);
 
   void remove(const HashCell& hashCell);
 
