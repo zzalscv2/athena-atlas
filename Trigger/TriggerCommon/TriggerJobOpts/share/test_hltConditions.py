@@ -25,7 +25,7 @@ if 'folder' not in dir():
 from AthenaCommon.AppMgr import theApp
 from AthenaCommon.AthenaCommonFlags import athenaCommonFlags
 theApp.EvtMax = 10
-athenaCommonFlags.FilesInput = ['/cvmfs/atlas-nightlies.cern.ch/repo/data/data-art/TrigP1Test/data18_13TeV.00360026.physics_EnhancedBias.merge.RAW._lb0151._SFO-1._0001.1']
+athenaCommonFlags.FilesInput = ['/cvmfs/atlas-nightlies.cern.ch/repo/data/data-art/TrigP1Test/data22_cos.00415453.express_express.merge.RAW/data22_cos.00415453.express_express.merge.RAW._lb0200._SFO-11._0001.1']
 
 from AthenaCommon.Include import include
 myfolder = folder  # 'folder' seems to be overwritten somewhere in the include

@@ -123,16 +123,7 @@ include("LArConditionsCommon/LArConditionsCommon_comm_jobOptions.py")
 
 include( "LArCondAthenaPool/LArCondAthenaPool_joboptions.py" )
 
-from LArConditionsCommon import LArHVDB #Sets HV Calbling and DCS Database folders
-#conddb.addOverride("/LAR/IdentifierOfl/HVLineToElectrodeMap","LARIdentifierOflHVLineToElectrodeMap-UPD3-00")
-
 from LArConditionsCommon import LArHVDB
-
-from LArCalibUtils.LArCalibUtilsConf import LArHVCorrMaker
-theLArHVCorrMaker = LArHVCorrMaker("LArHVCorrMaker")
-theLArHVCorrMaker.keyOutput = keyOutput
-theLArHVCorrMaker.folderName = LArHVScaleCorrFolder
-topSequence += theLArHVCorrMaker
 
 from TrigT1CaloCalibUtils.TrigT1CaloCalibUtilsConf import L1CaloHVDummyContainers
 theL1CaloHVDummyContainers = L1CaloHVDummyContainers("L1CaloHVDummyContainers")
@@ -140,12 +131,11 @@ topSequence += theL1CaloHVDummyContainers
 
 # setup l1calo database
 include('TrigT1CaloCalibConditions/L1CaloCalibConditions_jobOptions.py')
-#svcMgr.IOVDbSvc.overrideTags +=  ["<prefix>/CALO/Identifier/CaloTTOnOffIdMapAtlas</prefix> <tag>CALOIdentifierCaloTTOnOffIdMapAtlas-RUN2-0002</tag>"]
 svcMgr.IOVDbSvc.overrideTags += ["<prefix>/LAR/Identifier/LArTTCellMapAtlas</prefix> <tag>LARIdentifierLArTTCellMapAtlas-RUN2-HadFcalFix2</tag>"]
 from IOVDbSvc.CondDB import conddb
-conddb.addFolderWithTag("CALO_ONL", "/CALO/Identifier/CaloTTOnOffIdMapAtlas", "CALOIdentifierCaloTTOnOffIdMapAtlas-RUN2-0002", className="CaloTTOnOffIdMap")
-conddb.addFolderWithTag("CALO_ONL", "/CALO/Identifier/CaloTTOnAttrIdMapAtlas", "CALOIdentifierCaloTTOnAttrIdMapAtlas-RUN2-0001", className="CaloTTOnAttrIdMap")
-conddb.addFolderWithTag("CALO_ONL", "/CALO/Identifier/CaloTTPpmRxIdMapAtlas", "CALOIdentifierCaloTTPpmRxIdMapAtlas-RUN2-0000", className="CaloTTPpmRxIdMap")
+conddb.addFolderWithTag("CALO_ONL", "/CALO/Identifier/CaloTTOnOffIdMapAtlas", "CALOIdentifierCaloTTOnOffIdMapAtlas-RUN2-0002")
+conddb.addFolderWithTag("CALO_ONL", "/CALO/Identifier/CaloTTOnAttrIdMapAtlas", "CALOIdentifierCaloTTOnAttrIdMapAtlas-RUN2-0001")
+conddb.addFolderWithTag("CALO_ONL", "/CALO/Identifier/CaloTTPpmRxIdMapAtlas", "CALOIdentifierCaloTTPpmRxIdMapAtlas-RUN2-0000")
 
 from LArCabling.LArCablingAccess import LArOnOffIdMapping
 LArOnOffIdMapping()

@@ -100,14 +100,11 @@ comment  = "Updated noise values"
 #=== Code starts below here
 #===
 #==================================================
-#=== set shortcut
-cppyy.load_library("libSTLAddRflx")
 
 #=== get a logger
 log = CaloCondLogger.getLogger("CaloNoiseWriter")
 
 #=== (re-)create the database
-#db = CaloCondTools.openDb('SQLITE', 'CONDBR2', 'UPDATE')
 dbSvc = cool.DatabaseSvcFactory.databaseService()
 try:
    db=dbSvc.openDatabase("sqlite://;schema="+filename+";dbname="+dbname, False)

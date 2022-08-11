@@ -20,6 +20,7 @@ class LArHVScaleCorr2Ntuple : public LArCond2NtupleBase
  private:
 
   SG::ReadCondHandleKey<ILArHVScaleCorr> m_contKey{this,"ContainerKey","LArHVScaleCorr","Key for HVCorr"};
+  StringProperty m_ntuplePath{this,"NtuplePath", "/NTUPLES/FILE1/HVSCALE","Ntuple name"};
 };
 
 #endif
