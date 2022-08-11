@@ -329,6 +329,7 @@ StatusCode RpcTrackAnaAlg::fillMuonExtrapolateEff(const EventContext& ctx) const
     mymuon.fourvec.SetPtEtaPhiM(muon->pt(),muon->eta(),muon->phi(),m_muonMass.value());
     /* fill tag of tag-and-probe info */
     mymuon.tagged = triggerMatching(muon,m_trigTagDefs)==StatusCode::SUCCESS;
+    //cppcheck-suppress uninitvar
     mymuons.push_back( mymuon );
   }
 
@@ -541,7 +542,7 @@ StatusCode RpcTrackAnaAlg::extrapolate2RPC(const xAOD::TrackParticle *track, con
   
   const std::vector<int> dl_vec = dl_vec_it->second;
   std::vector<int>::const_iterator it_dl = dl_vec.begin();
-  for(;it_dl != dl_vec.end(); it_dl++ ) {
+  for(;it_dl != dl_vec.end(); ++it_dl ) {
     int stName = *it_dl;
     std::pair<int, int> st_dbR = std::make_pair(stName, doubletR);
     std::map<std::pair<int, int>, std::vector<std::shared_ptr<GasGapData>>>::const_iterator gasgapIt = m_gasGapData.find(st_dbR);
@@ -704,7 +705,7 @@ StatusCode RpcTrackAnaAlg::extrapolate2RPC(const Trk::TrackParameters* trackPara
   const std::vector<int> dl_vec = dl_vec_it->second;
   
   std::vector<int>::const_iterator it_dl = dl_vec.begin();
-  for(;it_dl != dl_vec.end(); it_dl++ ) {
+  for(;it_dl != dl_vec.end(); ++it_dl ) {
     int stName = *it_dl;
     std::pair<int, int> st_dbR = std::make_pair(stName, doubletR);
     std::map<std::pair<int, int>, std::vector<std::shared_ptr<GasGapData>>>::const_iterator gasgapIt = m_gasGapData.find(st_dbR);
@@ -977,7 +978,7 @@ StatusCode RpcTrackAnaAlg::fillClusterSize(std::vector<const Muon::RpcPrepData*>
 	      hit = view_hits.begin();
       }
       else {
-	      hit++;
+	      ++hit;
       }
     }
 

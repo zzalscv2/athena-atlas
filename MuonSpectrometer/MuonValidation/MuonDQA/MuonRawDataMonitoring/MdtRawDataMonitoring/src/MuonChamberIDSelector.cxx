@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2020 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "MuonChamberIDSelector.h"
@@ -53,7 +53,7 @@ StatusCode MuonChamberIDSelector::selectMDT() {
   Identifier Id;
   IdentifierHash Idhash;
    	 
-  for (std::vector<Identifier>::const_iterator i = idfirst; i != idlast; i++)
+  for (std::vector<Identifier>::const_iterator i = idfirst; i != idlast; ++i)
     {    
       Id=*i;
       int gethash_code = m_idHelperSvc->mdtIdHelper().get_hash(Id, Idhash, &mdtModuleContext); 
@@ -82,7 +82,7 @@ StatusCode MuonChamberIDSelector::selectRPC() {
   IdentifierHash Idhash;
   m_rpcchambersId = new std::vector<Identifier>;
   	 
-  for (std::vector<Identifier>::const_iterator i = idfirst; i != idlast; i++)
+  for (std::vector<Identifier>::const_iterator i = idfirst; i != idlast; ++i)
     {    
       Id=*i;
       int gethash_code = m_idHelperSvc->rpcIdHelper().get_hash(Id, Idhash, &rpcModuleContext); 

@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
 */
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -376,7 +376,7 @@ StatusCode MdtRawDataValAlg::fillHistograms()
       xAOD::MuonRoIContainer::const_iterator mu_it = muonRoIs->begin(); 
       xAOD::MuonRoIContainer::const_iterator mu_it_end= muonRoIs->end();
 
-      for( ; mu_it != mu_it_end; mu_it++){
+      for( ; mu_it != mu_it_end; ++mu_it){
         if( (*mu_it)->getSource() == xAOD::MuonRoI::RoISource::Barrel) StoreTriggerType(L1_BARREL);
         if( (*mu_it)->getSource() == xAOD::MuonRoI::RoISource::Endcap ) StoreTriggerType(L1_ENDCAP);
       }
@@ -1291,7 +1291,7 @@ StatusCode MdtRawDataValAlg::bookMDTSummaryHistograms(/* bool isNewEventsBlock, 
       //Finished number of MDT hits per multilayer
       ////////////////////////////////////////////////////////////////////////////////////////////////////
       for(int iPhi = 0; iPhi < 16; ++iPhi) {
-        std::string Phi = returnString(iPhi+1);//iPhi starts from zero
+        std::string Phi = std::to_string(iPhi+1);//iPhi starts from zero
 
         //////////////////////////// MDThitsOccup_inPhiSlice     
         if(ilayer==0 && iecap==0){
@@ -1514,7 +1514,7 @@ StatusCode MdtRawDataValAlg::fillMDTHistograms( const Muon::MdtPrepData* mdtColl
 
   bool isNoisy = m_masked_tubes->isNoisy( mdtCollection );
 
-  std::string tube_str = returnString(mdttube);
+  std::string tube_str = std::to_string(mdttube);
 
 
   float tdc = mdtCollection->tdc()*25.0/32.0;
@@ -1770,9 +1770,8 @@ StatusCode MdtRawDataValAlg::handleEvent_effCalc(const Trk::SegmentCollection* s
         float adc = mrot->prepRawData()->adc();
         if(chambername.compare(0,3,"BMG")==0) adc /= 4. ;
         if(m_overalladc_segm_Lumi) m_overalladc_segm_Lumi->Fill(adc);
-        if( store_ROTs.find(tmpid) == store_ROTs.end() ) { // Let's not double-count hits belonging to multiple segments
-          store_ROTs.insert(tmpid);   
-
+        const auto & [placement, inserted] = store_ROTs.insert(tmpid);   
+        if (inserted){ // Let's not double-count hits belonging to multiple segments
           double tdc = mrot->prepRawData()->tdc()*25.0/32.0;
           // Note: the BMG is digitized with 200ps which is not same as other MDT chambers with 25/32=781.25ps
           if(chambername.compare(0,3,"BMG")==0) tdc = mrot->prepRawData()->tdc() * 0.2;
@@ -1959,7 +1958,7 @@ StatusCode MdtRawDataValAlg::handleEvent_effCalc(const Trk::SegmentCollection* s
 
   // Fill effentries/effcounts hists for efficiency calculation
   if(m_doChamberHists) { //Don't perform this block if not doing chamber by chamber hists
-    for (std::set<TubeTraversedBySegment, TubeTraversedBySegment_cmp>::iterator it=store_effTubes.begin(); it!=store_effTubes.end(); it++) {
+    for (std::set<TubeTraversedBySegment, TubeTraversedBySegment_cmp>::iterator it=store_effTubes.begin(); it!=store_effTubes.end(); ++it) {
       // GET HISTS
       MDTChamber* chamber;
       sc = getChamber( (*it).idHash, chamber );

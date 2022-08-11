@@ -51,7 +51,6 @@ namespace Muon {
 }
 
 //stl includes
-#include <sstream>
 #include <string>
 #include <vector>
 #include <map>
@@ -69,7 +68,7 @@ namespace monAlg{
 
   class TubeTraversedBySegment {
   public:
-    TubeTraversedBySegment(std::string hn, int tb, bool ih, IdentifierHash idh) 
+    TubeTraversedBySegment(const std::string & hn, int tb, bool ih, IdentifierHash idh) 
       { hardware_name = hn; tubeBin = tb; isHit = ih; idHash = idh; }
     std::string hardware_name;
     int tubeBin;
@@ -165,13 +164,7 @@ class MdtRawDataMonAlg: public AthMonitorAlgorithm {
   SG::ReadHandleKey<Trk::SegmentCollection> m_segm_type{this,"Eff_segm_type","TrackMuonSegments","muon segments"};
   SG::ReadHandleKey<xAOD::TrackParticleContainer> m_muon_type{this,"Muon_type","ExtrapolatedMuonTrackParticles","extrapolated muons"};
 
-  std::string returnString(int i) const{
-    std::stringstream ss;
-    std::string s;
-    ss << i;
-    ss >> s;
-    return s;
-  }
+  
 
   std::vector<Identifier> m_chambersId;
   std::vector<IdentifierHash> m_chambersIdHash;

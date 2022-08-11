@@ -41,15 +41,15 @@ StatusCode MdtRawDataMonAlg::binMdtGlobal( TH2* h, char ecap ) {
     if(ieta==0 && ecap=='E') continue;
     eta_s = ecap;
     (ieta<0)? eta_s+="C":((ieta>0)?eta_s+="A":eta_s+="B");
-    eta_s+=returnString(std::abs(ieta));
+    eta_s+=std::to_string(std::abs(ieta));
     h->Fill(eta_s,1,0);
   }	    	  
   
   //Set y-axis labels
   TString phi_s;
   for(int iphi=1; iphi<=16; iphi++) {
-    if(iphi<10)  phi_s = "0"+returnString(iphi);
-    else phi_s = returnString(iphi);
+    if(iphi<10)  phi_s = "0"+std::to_string(iphi);
+    else phi_s = std::to_string(iphi);
     if(ecap == 'B' && (iphi == 11 || iphi == 15)){
       h->Fill(eta_s,"I,"+phi_s+",R",0);
       h->Fill(eta_s,"I,"+phi_s+",M",0);
@@ -104,7 +104,7 @@ StatusCode  MdtRawDataMonAlg::binMdtRegional( TH2* h, std::string_view xAxis ) {
     if(ieta==0 && xAxis.substr(0,2)=="BO") eta_s = "BOB";
     else if(ieta==0) continue;
     else eta_s = xAxis.substr(0,3);
-    eta_s+=returnString(std::abs(ieta));
+    eta_s+=std::to_string(std::abs(ieta));
     h->Fill(eta_s,1,0);
   }
 
@@ -112,8 +112,8 @@ StatusCode  MdtRawDataMonAlg::binMdtRegional( TH2* h, std::string_view xAxis ) {
   //Set y-axis labels
   TString phi_s;
   for(int iphi=1; iphi<=16; iphi++) {
-    if(iphi<10) phi_s = "0"+returnString(iphi);
-    else phi_s = returnString(iphi);
+    if(iphi<10) phi_s = "0"+std::to_string(iphi);
+    else phi_s = std::to_string(iphi);
     if(!barrelExtra) {
       //Also uncomment lines in MdtRawDataValAlg.cxx in fillMDTSummaryHistograms() that actually fill these values
       if(xAxis.substr(0,2) == "BI" && (iphi == 11 || iphi ==15) ) {
@@ -141,8 +141,8 @@ StatusCode  MdtRawDataMonAlg::binMdtRegional( TH2* h, std::string_view xAxis ) {
 StatusCode  MdtRawDataMonAlg::binMdtGlobal_byLayer( TH2* nHits_In, TH2* nHits_Mid, TH2* nHits_Out){
   for(int iPhi = 1; iPhi != 17; ++iPhi){
     TString phiString = "";
-    if(iPhi<10) phiString = "0"+MdtRawDataMonAlg::returnString(iPhi);
-    else phiString = MdtRawDataMonAlg::returnString(iPhi);
+    if(iPhi<10) phiString = "0"+std::to_string(iPhi);
+    else phiString = std::to_string(iPhi);
     TString phiString_ml1 = phiString+",1";
     TString phiString_ml2 = phiString+",2";
     if(iPhi==11||iPhi==15){
@@ -165,9 +165,9 @@ StatusCode  MdtRawDataMonAlg::binMdtGlobal_byLayer( TH2* nHits_In, TH2* nHits_Mi
     nHits_Out->Fill("EOC6",phiString_ml2,0.);
   }
   for(int iEta = 6; iEta!=-2; --iEta){
-    TString etaIn = "EIC"+MdtRawDataMonAlg::returnString(iEta);
-    TString etaMid = "EMC"+MdtRawDataMonAlg::returnString(iEta);
-    TString etaOut = "EOC"+MdtRawDataMonAlg::returnString(iEta);      
+    TString etaIn = "EIC"+std::to_string(iEta);
+    TString etaMid = "EMC"+std::to_string(iEta);
+    TString etaOut = "EOC"+std::to_string(iEta);      
     if(iEta>0){
       if(iEta<6){
 	nHits_In->Fill(etaIn,"01,1",0);
@@ -187,11 +187,11 @@ StatusCode  MdtRawDataMonAlg::binMdtGlobal_byLayer( TH2* nHits_In, TH2* nHits_Mi
   for(int iEta = -4; iEta!=1; ++iEta){
     TString etaIn = "";
     if( iEta<-2){
-      etaIn = "EEC"+MdtRawDataMonAlg::returnString(std::abs(iEta+2));
+      etaIn = "EEC"+std::to_string(std::abs(iEta+2));
       nHits_In->Fill(etaIn,"01,1",0);
     }
     else if(iEta<0){
-      etaIn = "BEC"+MdtRawDataMonAlg::returnString(std::abs(iEta));
+      etaIn = "BEC"+std::to_string(std::abs(iEta));
       nHits_In->Fill(etaIn,"01,1",0);
     }
     else nHits_In->Fill("  ","01,1",0);
@@ -202,22 +202,22 @@ StatusCode  MdtRawDataMonAlg::binMdtGlobal_byLayer( TH2* nHits_In, TH2* nHits_Mi
     TString etaMid = "";
     TString etaOut = "";
     if(iEta<0){
-      etaIn = "BIC"+MdtRawDataMonAlg::returnString(std::abs(iEta));
-      etaOut = "BOC"+MdtRawDataMonAlg::returnString(std::abs(iEta));
+      etaIn = "BIC"+std::to_string(std::abs(iEta));
+      etaOut = "BOC"+std::to_string(std::abs(iEta));
       if(iEta>-7){
-	etaMid = "BMC"+MdtRawDataMonAlg::returnString(std::abs(iEta));
+	etaMid = "BMC"+std::to_string(std::abs(iEta));
       }
     }
     else if(iEta==0){
-      // 	etaIn = "BIB"+MdtRawDataMonAlg::returnString(iEta);
-      // 	etaMid = "BMB"+MdtRawDataMonAlg::returnString(iEta);
-      etaOut = "BOB"+MdtRawDataMonAlg::returnString(iEta);
+      // 	etaIn = "BIB"+std::to_string(iEta);
+      // 	etaMid = "BMB"+std::to_string(iEta);
+      etaOut = "BOB"+std::to_string(iEta);
     }
     else if(iEta<9){
-      etaIn = "BIA"+MdtRawDataMonAlg::returnString(iEta);
-      etaOut = "BOA"+MdtRawDataMonAlg::returnString(iEta);
+      etaIn = "BIA"+std::to_string(iEta);
+      etaOut = "BOA"+std::to_string(iEta);
       if(iEta<7){
-	etaMid = "BMA"+MdtRawDataMonAlg::returnString(iEta);
+	etaMid = "BMA"+std::to_string(iEta);
       }
     }
     if(iEta<9){
@@ -236,20 +236,20 @@ StatusCode  MdtRawDataMonAlg::binMdtGlobal_byLayer( TH2* nHits_In, TH2* nHits_Mi
   for(int iEta = 1; iEta!=6; ++iEta){
     TString etaIn = "";
     if( iEta<3){
-      etaIn = "BEA"+MdtRawDataMonAlg::returnString(std::abs(iEta));
+      etaIn = "BEA"+std::to_string(std::abs(iEta));
       nHits_In->Fill(etaIn,"01,1",0);
     }
     else if(iEta<5){
-      etaIn = "EEA"+MdtRawDataMonAlg::returnString(std::abs(iEta-2));
+      etaIn = "EEA"+std::to_string(std::abs(iEta-2));
       nHits_In->Fill(etaIn,"01,1",0);
     }
     else nHits_In->Fill("   ","01,1",0);
   }
 
   for(int iEta = 1; iEta!=7; ++iEta){
-    TString etaIn = "EIA"+MdtRawDataMonAlg::returnString(iEta);
-    TString etaMid = "EMA"+MdtRawDataMonAlg::returnString(iEta);
-    TString etaOut = "EOA"+MdtRawDataMonAlg::returnString(iEta);      
+    TString etaIn = "EIA"+std::to_string(iEta);
+    TString etaMid = "EMA"+std::to_string(iEta);
+    TString etaOut = "EOA"+std::to_string(iEta);      
     if(iEta<6){
       nHits_In->Fill(etaIn,"01,1",0);
       nHits_Mid->Fill(etaMid,"01,1",0);
@@ -408,7 +408,7 @@ void MdtRawDataMonAlg::mdtchamberId()
   IdContext mdtModuleContext = m_idHelperSvc->mdtIdHelper().module_context();
   Identifier Id;
   IdentifierHash Idhash;
-  for (std::vector<Identifier>::const_iterator i = idfirst; i != idlast; i++)
+  for (std::vector<Identifier>::const_iterator i = idfirst; i != idlast; ++i)
     {    
       Id=*i;
       int gethash_code = m_idHelperSvc->mdtIdHelper().get_hash(Id, Idhash, &mdtModuleContext); 

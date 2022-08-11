@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2020 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
 */
 
 ///////////////////////////////////////////////////////////////////////////
@@ -239,7 +239,7 @@ StatusCode MdtVsRpcRawDataValAlg::fillHistograms()
 
 	    
 		bool histo_flag=true;
-		for (std::vector<std::string>::const_iterator iter=m_layerSector_name_list.begin(); iter!=m_layerSector_name_list.end(); iter++){
+		for (std::vector<std::string>::const_iterator iter=m_layerSector_name_list.begin(); iter!=m_layerSector_name_list.end(); ++iter){
 		  if ( (sector_name+layerSector_name)==*iter){histo_flag=false;}
 		}
 
@@ -384,7 +384,7 @@ StatusCode MdtVsRpcRawDataValAlg::fillHistograms()
 			if(m_mdtvsrpcchamberhist){
 		      
 			  bool histo_flag=true;
-			  for (std::vector<std::string>::const_iterator iter=m_layer_name_list.begin(); iter!=m_layer_name_list.end(); iter++){
+			  for (std::vector<std::string>::const_iterator iter=m_layer_name_list.begin(); iter!=m_layer_name_list.end(); ++iter){
 			    if ( (hardware_name+layer_name)==*iter){histo_flag=false;}
 			  }
 			  if (histo_flag){
