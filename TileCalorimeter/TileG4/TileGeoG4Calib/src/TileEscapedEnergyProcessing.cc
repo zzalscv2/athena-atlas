@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2018 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
 */
 
 ///////////////////////////////////////////////////////////////
@@ -101,12 +101,12 @@ G4bool TileEscapedEnergyProcessing::Process( G4Step* fakeStep ) {
 //this method will store escaped particle energy in the particle 'mother'hit.
 //That's when escaped particle is created in real sensitive volume of Tile
 G4bool TileEscapedEnergyProcessing::Call_SD_ProcessHits(G4Step* aStep, G4String &SDname) {
-  G4TouchableHistory* ROhis = (G4TouchableHistory*) (aStep->GetPreStepPoint()->GetTouchable());
 
   G4SDManager *sdManager = G4SDManager::GetSDMpointer();
   G4VSensitiveDetector * TileCalibSD_G4 = sdManager->FindSensitiveDetector(SDname);
   TileGeoG4CalibSD * TileCalibSD = dynamic_cast<TileGeoG4CalibSD*>(TileCalibSD_G4);
 
-  G4bool esc_ok = TileCalibSD ? TileCalibSD->ProcessHits(aStep, ROhis) : false;
+  G4TouchableHistory th;  // not even used by ProcessHits
+  G4bool esc_ok = TileCalibSD ? TileCalibSD->ProcessHits(aStep, &th) : false;
   return esc_ok;
 }
