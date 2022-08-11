@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
 */
 
 /** 
@@ -189,17 +189,17 @@ StatusCode   LumiBlockMetaDataTool::finishUp() {
   // ======================================================
   ATH_MSG_VERBOSE(  " finishUp: write lumiblocks to meta data store " );
   
-  xAOD::LumiBlockRangeContainer* piovComplete = new xAOD::LumiBlockRangeContainer();
-  xAOD::LumiBlockRangeAuxContainer* piovCompleteAux = new xAOD::LumiBlockRangeAuxContainer();
-  piovComplete->setStore( piovCompleteAux );
+  auto piovComplete = std::make_unique<xAOD::LumiBlockRangeContainer>();
+  auto piovCompleteAux = std::make_unique<xAOD::LumiBlockRangeAuxContainer>();
+  piovComplete->setStore( piovCompleteAux.get() );
   
-  xAOD::LumiBlockRangeContainer* piovUnfinished = new xAOD::LumiBlockRangeContainer();
-  xAOD::LumiBlockRangeAuxContainer* piovUnfinishedAux = new xAOD::LumiBlockRangeAuxContainer();
-  piovUnfinished->setStore( piovUnfinishedAux );
+  auto piovUnfinished = std::make_unique<xAOD::LumiBlockRangeContainer>();
+  auto piovUnfinishedAux = std::make_unique<xAOD::LumiBlockRangeAuxContainer>();
+  piovUnfinished->setStore( piovUnfinishedAux.get() );
   
-  xAOD::LumiBlockRangeContainer* piovSuspect = new xAOD::LumiBlockRangeContainer();
-  xAOD::LumiBlockRangeAuxContainer* piovSuspectAux = new xAOD::LumiBlockRangeAuxContainer();
-  piovSuspect->setStore( piovSuspectAux );
+  auto piovSuspect = std::make_unique<xAOD::LumiBlockRangeContainer>();
+  auto piovSuspectAux = std::make_unique<xAOD::LumiBlockRangeAuxContainer>();
+  piovSuspect->setStore( piovSuspectAux.get() );
   
   if(!m_cacheSuspectOutputRangeContainer->empty()) {
     ATH_MSG_VERBOSE("Suspect OutputRangeCollection with size " << m_cacheSuspectOutputRangeContainer->size());
@@ -318,20 +318,20 @@ StatusCode   LumiBlockMetaDataTool::finishUp() {
   // =======================================================
   if(!piovComplete->empty()) {
     ATH_MSG_INFO(  "Write Complete LumiBlocks with size  " <<  piovComplete->size());
-    ATH_CHECK( m_pMetaDataStore->record( piovComplete, m_LBColl_name ) );
-    ATH_CHECK( m_pMetaDataStore->record( piovCompleteAux, m_LBColl_name + "Aux." ) );
+    ATH_CHECK( m_pMetaDataStore->record( std::move(piovComplete), m_LBColl_name ) );
+    ATH_CHECK( m_pMetaDataStore->record( std::move(piovCompleteAux), m_LBColl_name + "Aux." ) );
   }
   
   if(!piovUnfinished->empty()) {
     ATH_MSG_INFO(  "Write Unfinished LumiBlocks with size  " <<  piovUnfinished->size());
-    ATH_CHECK( m_pMetaDataStore->record( piovUnfinished, m_unfinishedLBColl_name ) );
-    ATH_CHECK( m_pMetaDataStore->record( piovUnfinishedAux, m_unfinishedLBColl_name + "Aux." ) );
+    ATH_CHECK( m_pMetaDataStore->record( std::move(piovUnfinished), m_unfinishedLBColl_name ) );
+    ATH_CHECK( m_pMetaDataStore->record( std::move(piovUnfinishedAux), m_unfinishedLBColl_name + "Aux." ) );
   }
 
   if(!piovSuspect->empty()) {
     ATH_MSG_INFO(  "Write Suspect LumiBlocks with size  " <<  piovSuspect->size());
-    ATH_CHECK( m_pMetaDataStore->record( piovSuspect, m_suspectLBColl_name ) );
-    ATH_CHECK( m_pMetaDataStore->record( piovSuspectAux, m_suspectLBColl_name + "Aux." ) );
+    ATH_CHECK( m_pMetaDataStore->record( std::move(piovSuspect), m_suspectLBColl_name ) );
+    ATH_CHECK( m_pMetaDataStore->record( std::move(piovSuspectAux), m_suspectLBColl_name + "Aux." ) );
   }
   
   return(StatusCode::SUCCESS);
