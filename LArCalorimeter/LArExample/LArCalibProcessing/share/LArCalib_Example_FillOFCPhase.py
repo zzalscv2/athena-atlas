@@ -8,6 +8,8 @@ if 'isSC' not in dir():
    isSC=False
 if 'hasID' not in dir():
    hasID=False
+if 'DefaultPhase' not in dir():
+   DefaultPhase=0
 if 'GroupType' not in dir():   
    GroupType = "ExtendedSubDetector"
 if 'Folder' not in dir():
@@ -49,6 +51,7 @@ LArOFPhaseFill.InputFile = inpFile
 LArOFPhaseFill.keyOFCBin = KeyOutput
 LArOFPhaseFill.isSC = isSC
 LArOFPhaseFill.isID = hasID
+LArOFPhaseFill.DefaultPhase = DefaultPhase
 LArOFPhaseFill.GroupingType = GroupType
 LArOFPhaseFill.OutputLevel = DEBUG
 topSequence += LArOFPhaseFill

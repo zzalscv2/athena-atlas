@@ -4,7 +4,7 @@
 
 #include "LArRecConditions/LArHVCorr.h"
 
-LArHVCorr::LArHVCorr(std::vector<float>&& vVec, const LArOnOffIdMapping* cabling, const CaloCell_ID*  caloidhelper): 
+LArHVCorr::LArHVCorr(std::vector<float>&& vVec, const LArOnOffIdMapping* cabling, const CaloCell_Base_ID*  caloidhelper): 
    m_larCablingSvc(cabling),
    m_calo_id(caloidhelper),
    m_hvCorr(vVec),

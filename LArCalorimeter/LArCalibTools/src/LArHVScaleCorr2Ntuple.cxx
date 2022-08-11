@@ -10,11 +10,11 @@ LArHVScaleCorr2Ntuple::LArHVScaleCorr2Ntuple(const std::string& name, ISvcLocato
   LArCond2NtupleBase(name, pSvcLocator)
 {
   m_ntTitle="HV Scale Correction"; 
-  m_ntpath="/NTUPLES/FILE1/HVSCALE";
 }
 
 StatusCode LArHVScaleCorr2Ntuple::initialize() {
    ATH_CHECK(m_contKey.initialize());
+   m_ntpath=m_ntuplePath;
    return LArCond2NtupleBase::initialize();
 }
 
@@ -36,7 +36,7 @@ StatusCode LArHVScaleCorr2Ntuple::stop() {
     return StatusCode::FAILURE;
    }
 
- SG::ReadCondHandle<LArOnOffIdMapping> cablingHdl{m_cablingKey};
+ SG::ReadCondHandle<LArOnOffIdMapping> cablingHdl{cablingKey()};
  const LArOnOffIdMapping* cabling=*cablingHdl;
  if(!cabling) {
      ATH_MSG_WARNING( "Do not have cabling object LArOnOffIdMapping" );
