@@ -34,9 +34,9 @@ namespace xAOD {
       void setPhi(float); /// setter for the above
 
       /// get module number
-      uint32_t module() const; /// getter for the module number [0-23] inclusive
+      uint8_t module() const; /// getter for the module number [0-23] inclusive
       /// set module number
-      void setModule(uint32_t); /// setter for the above
+      void setModule(uint8_t); /// setter for the above
 
       /// get fpga number
       uint8_t fpga() const; /// getter for the fpga number [0-3] inclusive
@@ -62,7 +62,7 @@ namespace xAOD {
       void initialize(const float Eta,const float Phi);
       void initialize(const float Eta,const float Phi,
                                    const std::vector<uint16_t>& Et_count,
-                                   const uint32_t Module,
+                                   const uint8_t Module,
                                    const uint8_t Fpga,
                                    const uint32_t Em_status,
                                    const uint32_t Had_status);
