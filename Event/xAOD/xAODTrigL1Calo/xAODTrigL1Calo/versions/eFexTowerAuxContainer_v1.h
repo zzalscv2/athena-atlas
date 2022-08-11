@@ -26,7 +26,7 @@ namespace xAOD{
     
     std::vector<float> eta;           
     std::vector<float> phi; 
-    std::vector<uint32_t> module;
+    std::vector<uint8_t> module;
     std::vector<uint8_t> fpga;
 
     std::vector<std::vector<uint16_t> > et_count;

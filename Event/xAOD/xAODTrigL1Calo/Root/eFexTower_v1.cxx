@@ -14,7 +14,7 @@ namespace xAOD{
   AUXSTORE_OBJECT_MOVE( eFexTower_v1 , std::vector<uint16_t> , et_count , setEt_count )
   AUXSTORE_PRIMITIVE_SETTER_AND_GETTER( eFexTower_v1, float , eta , setEta )
   AUXSTORE_PRIMITIVE_SETTER_AND_GETTER( eFexTower_v1, float , phi , setPhi )
-  AUXSTORE_PRIMITIVE_SETTER_AND_GETTER( eFexTower_v1, uint32_t , module , setModule )
+  AUXSTORE_PRIMITIVE_SETTER_AND_GETTER( eFexTower_v1, uint8_t , module , setModule )
   AUXSTORE_PRIMITIVE_SETTER_AND_GETTER( eFexTower_v1, uint8_t , fpga , setFpga )
   AUXSTORE_PRIMITIVE_SETTER_AND_GETTER( eFexTower_v1, uint32_t , em_status , setEm_status )
   AUXSTORE_PRIMITIVE_SETTER_AND_GETTER( eFexTower_v1, uint32_t , had_status , setHad_status )  
@@ -29,7 +29,7 @@ namespace xAOD{
   
   void eFexTower_v1::initialize(const float Eta,const float Phi,
                                    const std::vector<uint16_t>& Et_count,
-                                   const uint32_t Module,
+                                   const uint8_t Module,
                                    const uint8_t Fpga,
                                    const uint32_t Em_status,
 				   const uint32_t Had_status)
