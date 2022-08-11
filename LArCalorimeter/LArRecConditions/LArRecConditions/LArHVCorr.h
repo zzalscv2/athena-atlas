@@ -18,7 +18,7 @@ class CaloCell_ID;
 class LArHVCorr : public ILArHVScaleCorr {
  
   public: 
-   LArHVCorr(std::vector<float>&& vVec, const LArOnOffIdMapping* cabling, const CaloCell_ID*       caloidhelper);
+   LArHVCorr(std::vector<float>&& vVec, const LArOnOffIdMapping* cabling, const CaloCell_Base_ID*       caloidhelper);
    ~LArHVCorr () {};
 
 
@@ -31,7 +31,7 @@ class LArHVCorr : public ILArHVScaleCorr {
 
   private:
   const LArOnOffIdMapping* m_larCablingSvc;
-  const CaloCell_ID*       m_calo_id;
+  const CaloCell_Base_ID*       m_calo_id;
 
   std::vector<float>       m_hvCorr;
   const float              m_noCorr;

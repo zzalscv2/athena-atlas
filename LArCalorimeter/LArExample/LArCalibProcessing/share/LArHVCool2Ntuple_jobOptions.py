@@ -66,6 +66,7 @@ topSequence = AlgSequence()
 from LArCalibTools.LArCalibToolsConf import LArHVScaleCorr2Ntuple
 theLArHVScaleCorr2Ntuple = LArHVScaleCorr2Ntuple("LArHVScaleCorr2Ntuple")
 theLArHVScaleCorr2Ntuple.AddFEBTempInfo = False
+theLArHVScaleCorr2Ntuple.OffId = True
 topSequence += theLArHVScaleCorr2Ntuple
 
 theApp.HistogramPersistency = "ROOT"
