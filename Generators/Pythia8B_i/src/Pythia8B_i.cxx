@@ -338,7 +338,7 @@ StatusCode Pythia8B_i::callGenerator(){
             // Does the events contain a signal decay as required by the user
             if (signalSelect) {
                 if (!cleanUndecayed(*eventItr,m_bcodes)) continue;
-                if (signalSelect) {if (!signalAccept(*eventItr,m_sigCodes,m_nSignalRequired)) continue;}
+                if (!signalAccept(*eventItr,m_sigCodes,m_nSignalRequired)) continue;
             }
             // User-defined selections if any
             if (!m_userString.empty()) {
