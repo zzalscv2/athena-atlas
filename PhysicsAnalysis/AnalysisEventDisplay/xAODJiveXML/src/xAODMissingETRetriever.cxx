@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2017 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "xAODJiveXML/xAODMissingETRetriever.h"
@@ -29,9 +29,6 @@ namespace JiveXML {
     //Only declare the interface
     declareInterface<IDataRetriever>(this);
 
-    m_sgKey = "MET_Reference_AntiKt4EMTopo"; // New xAOD SG key in rel.20
-    declareProperty("StoreGateKey", m_sgKey, // backwards compatibility only !
-        "Collection to be first in output, shown in Atlantis without switching");
     declareProperty("FavouriteMETCollection" ,m_sgKeyFavourite = "MET_RefFinal" ,
 	"Collection to be first in output, shown in Atlantis without switching");
     declareProperty("OtherMETCollections" ,m_otherKeys,
@@ -44,40 +41,40 @@ namespace JiveXML {
    */
   StatusCode xAODMissingETRetriever::retrieve(ToolHandle<IFormatTool> &FormatTool) {
     
-    if (msgLvl(MSG::DEBUG)) msg(MSG::DEBUG)  << "in retrieveAll()" << endmsg;
+    ATH_MSG_DEBUG( "in retrieveAll()" );
     
     const DataHandle<xAOD::MissingETContainer> iterator, end;
     const xAOD::MissingETContainer* MissingETs;
 
     //obtain the default collection first
-    if (msgLvl(MSG::DEBUG)) msg(MSG::DEBUG)  << "Trying to retrieve " << dataTypeName() << " (" << m_sgKey << ")" << endmsg;
+    ATH_MSG_DEBUG( "Trying to retrieve " << dataTypeName() << " (" << m_sgKeyFavourite << ")" );
     StatusCode sc = evtStore()->retrieve(MissingETs, m_sgKeyFavourite);
     if (sc.isFailure() ) {
-      if (msgLvl(MSG::WARNING)) msg(MSG::WARNING) << "Collection " << m_sgKey << " not found in SG " << endmsg; 
+      ATH_MSG_WARNING( "Collection " << m_sgKeyFavourite << " not found in SG " );
     }else{
       DataMap data = getData(MissingETs);
-      if ( FormatTool->AddToEvent(dataTypeName(), m_sgKey+"_xAOD", &data).isFailure()){ //suffix can be removed later
-	if (msgLvl(MSG::WARNING)) msg(MSG::WARNING) << "Collection " << m_sgKey << " not found in SG " << endmsg;
+      if ( FormatTool->AddToEvent(dataTypeName(), m_sgKeyFavourite+"_xAOD", &data).isFailure()){ //suffix can be removed later
+	ATH_MSG_WARNING( "Collection " << m_sgKeyFavourite << " not found in SG " );
       }else{
-         if (msgLvl(MSG::DEBUG)) msg(MSG::DEBUG)  << dataTypeName() << " (" << m_sgKey << ") MissingET retrieved" << endmsg;
+         ATH_MSG_DEBUG( dataTypeName() << " (" << m_sgKeyFavourite << ") MissingET retrieved" );
       }
     }
  
     if ( m_otherKeys.empty() ) {
       //obtain all other collections from StoreGate
       if (( evtStore()->retrieve(iterator, end)).isFailure()){
-         if (msgLvl(MSG::WARNING)) msg(MSG::WARNING)  << "Unable to retrieve iterator for MET collection" << endmsg;
+         ATH_MSG_WARNING( "Unable to retrieve iterator for MET collection" );
 //        return false;
       }
       
       for (; iterator!=end; iterator++) {
 	  if (iterator.key()!=m_sgKeyFavourite) {
-             if (msgLvl(MSG::DEBUG)) msg(MSG::DEBUG)  << "Trying to retrieve all " << dataTypeName() << " (" << iterator.key() << ")" << endmsg;
+             ATH_MSG_DEBUG( "Trying to retrieve all " << dataTypeName() << " (" << iterator.key() << ")" );
              DataMap data = getData(iterator);
              if ( FormatTool->AddToEvent(dataTypeName(), iterator.key()+"_xAOD", &data).isFailure()){
-	       if (msgLvl(MSG::WARNING)) msg(MSG::WARNING) << "Collection " << iterator.key() << " not found in SG " << endmsg;
+	       ATH_MSG_WARNING( "Collection " << iterator.key() << " not found in SG " );
 	    }else{
-	      if (msgLvl(MSG::DEBUG)) msg(MSG::DEBUG) << dataTypeName() << " (" << iterator.key() << ") xAOD_MET retrieved" << endmsg;
+	      ATH_MSG_DEBUG( dataTypeName() << " (" << iterator.key() << ") xAOD_MET retrieved" );
 	    }
 	}
       }
@@ -88,12 +85,12 @@ namespace JiveXML {
         if ( !evtStore()->contains<xAOD::MissingETContainer>( (*keyIter) ) ){ continue; } // skip if not in SG
 	StatusCode sc = evtStore()->retrieve( MissingETs, (*keyIter) );
 	if (!sc.isFailure()) {
-          if (msgLvl(MSG::DEBUG)) msg(MSG::DEBUG)  << "Trying to retrieve selected " << dataTypeName() << " (" << (*keyIter) << ")" << endmsg;
+          ATH_MSG_DEBUG( "Trying to retrieve selected " << dataTypeName() << " (" << (*keyIter) << ")" );
           DataMap data = getData(MissingETs);
           if ( FormatTool->AddToEvent(dataTypeName(), (*keyIter)+"_xAOD", &data).isFailure()){
-	    if (msgLvl(MSG::WARNING)) msg(MSG::WARNING) << "Collection " << (*keyIter) << " not found in SG " << endmsg;
+	    ATH_MSG_WARNING( "Collection " << (*keyIter) << " not found in SG " );
 	  }else{
-	     if (msgLvl(MSG::DEBUG)) msg(MSG::DEBUG) << dataTypeName() << " (" << (*keyIter) << ") retrieved" << endmsg;
+	     ATH_MSG_DEBUG( dataTypeName() << " (" << (*keyIter) << ") retrieved" );
 	  }
 	}
       }
@@ -109,7 +106,7 @@ namespace JiveXML {
    */
   const DataMap xAODMissingETRetriever::getData(const xAOD::MissingETContainer* metCont) {
     
-    if (msgLvl(MSG::DEBUG)) msg(MSG::DEBUG) << "in getData()" << endmsg;
+    ATH_MSG_DEBUG( "in getData()" );
 
     DataMap DataMap;
 
@@ -132,18 +129,14 @@ namespace JiveXML {
     	mpx = (*metItr)->mpx()/GeV;
        	mpy = (*metItr)->mpy()/GeV;
  
-	if (msgLvl(MSG::DEBUG)) {
-	   msg(MSG::DEBUG) << "  Components: MissingET [GeV] mpx= "  << (*metItr)->mpx()/GeV
-		<< ", mpy= " << (*metItr)->mpy()/GeV
-		<< ", sumet= " << (*metItr)->sumet()/GeV << endmsg;
+        ATH_MSG_DEBUG( "  Components: MissingET [GeV] mpx= "  << mpx
+              << ", mpy= " << mpy
+              << ", sumet= " << sumet );
 
-	}
     } // end MissingETIterator 
 
-    if (msgLvl(MSG::DEBUG)) {
-	   msg(MSG::DEBUG) << "  FINAL: MissingET [GeV] mpx= "  << mpx
-		<< ", mpy= " << mpy << ", sumet= " << sumet << endmsg;
-    }
+	   ATH_MSG_DEBUG( "  FINAL: MissingET [GeV] mpx= "  << mpx
+		<< ", mpy= " << mpy << ", sumet= " << sumet );
 
     etx.push_back(DataType( mpx ));
     ety.push_back(DataType( mpy ));
@@ -154,9 +147,7 @@ namespace JiveXML {
     DataMap["etx"] = etx;
     DataMap["ety"] = ety;
 
-    if (msgLvl(MSG::DEBUG)) {
-      msg(MSG::DEBUG) << dataTypeName() << " retrieved with " << et.size() << " entries"<< endmsg;
-    }
+    ATH_MSG_DEBUG( dataTypeName() << " retrieved with " << et.size() << " entries" );
 
     //All collections retrieved okay
     return DataMap;
