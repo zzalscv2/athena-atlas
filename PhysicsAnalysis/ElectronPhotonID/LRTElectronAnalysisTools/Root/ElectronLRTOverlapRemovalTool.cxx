@@ -68,15 +68,19 @@ namespace CP
                 if (!lrt_cluster and !prompt_cluster)
                     continue;
 
-                // deltaR matching
-                double dEta = lrt_cluster->calEta() - prompt_cluster->calEta();
-                double dPhi = lrt_cluster->calPhi() - prompt_cluster->calPhi();
+                // matching based on hottest cell of cluster
+                //  as in ambiguity res for el/ph 
 
-                dPhi = CxxUtils::wrapToPi(dPhi);
+		const double prompt_elEta0 = prompt_cluster->eta0();
+		const double prompt_elPhi0 = prompt_cluster->phi0();
 
-                if (sqrt(pow(dEta, 2) + pow(dPhi, 2)) < m_ORThreshold)
+		const double lrt_elEta0 = lrt_cluster->eta0();
+		const double lrt_elPhi0 = lrt_cluster->phi0();
+
+                if (prompt_elEta0 == lrt_elEta0 && prompt_elPhi0 == lrt_elPhi0) 
                 {
                     ATH_MSG_DEBUG("Found a Calo cluster shared by LRT electron and prompt electron !");
+
                     // Save pointer to LRT electrons failing overlap
                     // This removes the LRT electron in favor of prompt
                     ElectronsToRemove.insert(LRTElectron);
