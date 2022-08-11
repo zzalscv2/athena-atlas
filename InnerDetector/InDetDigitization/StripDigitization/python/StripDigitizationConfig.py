@@ -209,9 +209,11 @@ def ITkStripFrontEndCfg(flags, name="ITkStripFrontEnd", **kwargs):
     #    kwargs.setdefault("NoiseOn", True)
     #    kwargs.setdefault("AnalogueNoiseOn", True)
     # In overlay MC, only analogue noise is on (off for data). Noise hits are not added.
+    # Currently disabled for ITk
     if flags.Common.isOverlay:
         kwargs["NoiseOn"] = False
-        kwargs["AnalogueNoiseOn"] = flags.Input.isMC
+        # kwargs["AnalogueNoiseOn"] = flags.Input.isMC
+        kwargs["AnalogueNoiseOn"] = False
     # Use Calibration data from Conditions DB, still for testing purposes only
     #This doesn't work yet for ITk - need specific version
     kwargs.setdefault("UseCalibData", False)
