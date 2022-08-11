@@ -74,7 +74,7 @@ namespace Muon {
         typedef PRD_MultiTruthCollection::const_iterator iprdt;
         std::pair<iprdt, iprdt> range = truthCol.equal_range(id);
         // Loop over particles contributing to this cluster
-        for (iprdt i = range.first; i != range.second; i++) {
+        for (iprdt i = range.first; i != range.second; ++i) {
             if (!i->second.isValid()) {
                 ATH_MSG_INFO("Unexpected invalid HepMcParticleLink in PRD_MultiTruthCollection");
             } else {
@@ -104,7 +104,7 @@ namespace Muon {
             std::vector<const Muon::TgcPrepDataCollection*> theTGCs;
             Muon::TgcPrepDataContainer::const_iterator theIt = clusterPRD->begin();
             int theEmpty(0), contInt(-1);
-            for (; theIt != clusterPRD->end(); theIt++) {
+            for (; theIt != clusterPRD->end(); ++theIt) {
                 contInt++;
                 if ((*theIt)->size() == 0) { theEmpty++; }
                 theTGCs.push_back(*theIt);
@@ -122,7 +122,7 @@ namespace Muon {
             std::vector<const Muon::RpcPrepDataCollection*> theRPCs;
             Muon::RpcPrepDataContainer::const_iterator theIt = clusterPRD->begin();
             int theEmpty(0), contInt(-1);
-            for (; theIt != clusterPRD->end(); theIt++) {
+            for (; theIt != clusterPRD->end(); ++theIt) {
                 contInt++;
                 if ((*theIt)->size() == 0) { theEmpty++; }
                 theRPCs.push_back(*theIt);
@@ -142,7 +142,7 @@ namespace Muon {
             std::vector<const Muon::TgcPrepDataCollection*> theTGCs;
             Muon::TgcPrepDataContainer::const_iterator theIt = clusterPRD->begin();
             int theEmpty(0), contInt(-1);
-            for (; theIt != clusterPRD->end(); theIt++) {
+            for (; theIt != clusterPRD->end(); ++theIt) {
                 contInt++;
                 if ((*theIt)->size() == 0) { theEmpty++; }
                 theTGCs.push_back(*theIt);
@@ -156,7 +156,7 @@ namespace Muon {
             std::vector<const Muon::RpcPrepDataCollection*> theRPCs;
             Muon::RpcPrepDataContainer::const_iterator theIt = clusterPRD->begin();
             int theEmpty(0), contInt(-1);
-            for (; theIt != clusterPRD->end(); theIt++) {
+            for (; theIt != clusterPRD->end(); ++theIt) {
                 contInt++;
                 if ((*theIt)->size() == 0) { theEmpty++; }
                 theRPCs.push_back(*theIt);
