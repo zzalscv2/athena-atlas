@@ -604,9 +604,15 @@ IOVDbFolder::specialCacheUpdate(const cool::IObject& ref,const ServiceHandle<IIO
   m_cachechan.push_back(ref.channelId());
   const coral::AttributeList& atrlist = ref.payload().attributeList();
   // use the shared specification in storing the payload
+  const unsigned int istart=m_cacheattr.size();
   m_cacheattr.push_back(coral::AttributeList(*m_cachespec,true));// maybe needs to be cleared before
   m_cacheattr.back().fastCopyData(atrlist);
   m_nbytesread+=IOVDbNamespace::attributeListSize(atrlist);
+  if (m_foldertype==CoolVector) {
+    // save pointers to start and end
+    m_cacheccstart.push_back(istart);
+    m_cacheccend.push_back(m_cacheattr.size());
+  }
 }
 
 void 
@@ -662,6 +668,7 @@ IOVDbFolder::getAddress(const cool::ValidityKey reftime,
     unsigned int nobj=0;
     // keep track of closest neighbouring IOVs
     std::tie(naystart, naystop) = m_iovs.getCacheBounds();
+
     for (unsigned int ic=0; ic!=m_iovs.size();++ic) {
       const auto & thisIov  = m_iovs.at(ic);
       if (thisIov.first<=reftime && reftime<thisIov.second) {
@@ -1090,7 +1097,7 @@ void
 IOVDbFolder::printCache(){
     const auto & [since,until] = m_iovs.getCacheBounds(); 
     ATH_MSG_DEBUG("folder cache printout -------------------");
-    ATH_MSG_DEBUG("length: "<<m_cachelength<<"\tstart: "<<since<<"\tstop: "<<until);
+    ATH_MSG_DEBUG(m_foldername << " length: "<<m_cachelength<<"\tstart: "<<since<<"\tstop: "<<until);
     ATH_MSG_DEBUG("current range: "<<m_currange);
     const auto & iovs = m_iovs.vectorStore();
     std::vector<cool::ChannelId>::iterator      ci= m_cachechan.begin();
