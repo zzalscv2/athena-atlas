@@ -13,6 +13,7 @@
 // Local include(s):
 #include "xAODMetaData/versions/FileMetaData_v1.h"
 #include "FileMetaDataAccessors_v1.h"
+#include <iostream>
 
 namespace xAOD {
 
