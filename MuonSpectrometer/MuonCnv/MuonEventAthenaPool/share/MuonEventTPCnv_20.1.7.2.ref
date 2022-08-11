@@ -343,9 +343,7 @@ MuGM:MuonFactory     INFO MDTIDHELPER retrieved from DetStore
 MDT_IDDetDescrCnv    INFO in createObj: creating a MdtIdHelper object in the detector store
 AtlasDetectorIDHelper::initialize_from_dictionary - Warning: unable to find mm region index: group, region size 0 0
 AtlasDetectorIDHelper::initialize_from_dictionary - Warning: unable to find stgc region index: group, region size 0 0
-AtlasDetectorID::initLevelsFromDict - there are no sTGC entries in the dictionary! 
-AtlasDetectorID::initLevelsFromDict - there are no MM entries in the dictionary! 
- AtlasDetectorID::initialize_from_dictionary - OK 
+AtlasDetectorID      INFO initialize_from_dictionary - OK
 MdtIdHelper          INFO MultiRange built successfully to Technology: MultiRange size is 203
 MdtIdHelper          INFO MultiRange built successfully to detector element: Multilayer MultiRange size is 234
 MdtIdHelper          INFO MultiRange built successfully to tube: MultiRange size is 234
@@ -357,9 +355,7 @@ MuGM:MuonFactory     INFO RPCIDHELPER retrieved from DetStore
 RPC_IDDetDescrCnv    INFO in createObj: creating a RpcIdHelper object in the detector store
 AtlasDetectorIDHelper::initialize_from_dictionary - Warning: unable to find mm region index: group, region size 0 0
 AtlasDetectorIDHelper::initialize_from_dictionary - Warning: unable to find stgc region index: group, region size 0 0
-AtlasDetectorID::initLevelsFromDict - there are no sTGC entries in the dictionary! 
-AtlasDetectorID::initLevelsFromDict - there are no MM entries in the dictionary! 
- AtlasDetectorID::initialize_from_dictionary - OK 
+AtlasDetectorID      INFO initialize_from_dictionary - OK
 RpcIdHelper          INFO MultiRange built successfully to doubletR: MultiRange size is 234
 RpcIdHelper          INFO MultiRange built successfully to detectorElement: DetectorElement MultiRange size is 234
 RpcIdHelper          INFO MultiRange built successfully to rpcStrip: MultiRange size is 234
@@ -371,9 +367,7 @@ MuGM:MuonFactory     INFO TGCIDHELPER retrieved from DetStore
 TGC_IDDetDescrCnv    INFO in createObj: creating a TgcIdHelper object in the detector store
 AtlasDetectorIDHelper::initialize_from_dictionary - Warning: unable to find mm region index: group, region size 0 0
 AtlasDetectorIDHelper::initialize_from_dictionary - Warning: unable to find stgc region index: group, region size 0 0
-AtlasDetectorID::initLevelsFromDict - there are no sTGC entries in the dictionary! 
-AtlasDetectorID::initLevelsFromDict - there are no MM entries in the dictionary! 
- AtlasDetectorID::initialize_from_dictionary - OK 
+AtlasDetectorID      INFO initialize_from_dictionary - OK
 TgcIdHelper          INFO MultiRange built successfully to Technology: MultiRange size is 203
 TgcIdHelper          INFO MultiRange built successfully to detector element: Multilayer MultiRange size is 203
 TgcIdHelper          INFO MultiRange built successfully to channel: MultiRange size is 234
@@ -385,9 +379,7 @@ MuGM:MuonFactory     INFO CSCIDHELPER retrieved from DetStore
 CSC_IDDetDescrCnv    INFO in createObj: creating a CcscIdHelper object in the detector store
 AtlasDetectorIDHelper::initialize_from_dictionary - Warning: unable to find mm region index: group, region size 0 0
 AtlasDetectorIDHelper::initialize_from_dictionary - Warning: unable to find stgc region index: group, region size 0 0
-AtlasDetectorID::initLevelsFromDict - there are no sTGC entries in the dictionary! 
-AtlasDetectorID::initLevelsFromDict - there are no MM entries in the dictionary! 
- AtlasDetectorID::initialize_from_dictionary - OK 
+AtlasDetectorID      INFO initialize_from_dictionary - OK
 CscIdHelper          INFO MultiRange built successfully to Technology: MultiRange size is 203
 CscIdHelper          INFO MultiRange built successfully to detector element: Multilayer MultiRange size is 230
 CscIdHelper          INFO MultiRange built successfully to cscStrip: MultiRange size is 234
@@ -400,16 +392,12 @@ MuGM:MuonFactory     INFO STGCIDHELPER retrieved from DetStore
 sTGC_IDDetDescrCnv   INFO in createObj: creating a sTgcIdHelper object in the detector store
 AtlasDetectorIDHelper::initialize_from_dictionary - Warning: unable to find mm region index: group, region size 0 0
 AtlasDetectorIDHelper::initialize_from_dictionary - Warning: unable to find stgc region index: group, region size 0 0
-AtlasDetectorID::initLevelsFromDict - there are no sTGC entries in the dictionary! 
-AtlasDetectorID::initLevelsFromDict - there are no MM entries in the dictionary! 
- AtlasDetectorID::initialize_from_dictionary - OK 
+AtlasDetectorID      INFO initialize_from_dictionary - OK
 MuGM:MuonFactory     INFO MMIDHELPER retrieved from DetStore
 MM_IDDetDescrCnv     INFO in createObj: creating a MmIdHelper object in the detector store
 AtlasDetectorIDHelper::initialize_from_dictionary - Warning: unable to find mm region index: group, region size 0 0
 AtlasDetectorIDHelper::initialize_from_dictionary - Warning: unable to find stgc region index: group, region size 0 0
-AtlasDetectorID::initLevelsFromDict - there are no sTGC entries in the dictionary! 
-AtlasDetectorID::initLevelsFromDict - there are no MM entries in the dictionary! 
- AtlasDetectorID::initialize_from_dictionary - OK 
+AtlasDetectorID      INFO initialize_from_dictionary - OK
 MuGM:MuonFactory     INFO  **************** MuonDetectorFactory001 ************************
 MuGM:MuonFactory     INFO  *** Start building the Muon Geometry Tree **********************
 MuGM:RDBReadAtlas    INFO Start retriving dbObjects with tag = <ATLAS-R1-2012-03-01-00> node <ATLAS>
