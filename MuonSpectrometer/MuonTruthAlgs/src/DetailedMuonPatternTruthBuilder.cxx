@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2020 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "DetailedMuonPatternTruthBuilder.h"
@@ -74,7 +74,7 @@ namespace {
 
     template <class Map> void printMap(const Map& m) {
         std::cout << "printMap(): [";
-        for (typename Map::const_iterator i = m.begin(); i != m.end(); i++) { std::cout << "(" << i->first << "," << i->second << "), "; }
+        for (typename Map::const_iterator i = m.begin(); i != m.end(); ++i) { std::cout << "(" << i->first << "," << i->second << "), "; }
         std::cout << "]" << std::endl;
     }
 
@@ -85,7 +85,7 @@ namespace {
     SubDetPRDs& operator+=(SubDetPRDs& a, const SubDetPRDs& b) {
         for (unsigned i = 0; i < SubDetHitStatistics::NUM_SUBDETECTORS; i++) {
             const std::set<Identifier>& bset = b.subDetHits[i];
-            for (std::set<Identifier>::const_iterator pb = bset.begin(); pb != bset.end(); pb++) { a.subDetHits[i].insert(*pb); }
+            for (std::set<Identifier>::const_iterator pb = bset.begin(); pb != bset.end(); ++pb) { a.subDetHits[i].insert(*pb); }
         }
         return a;
     }
@@ -138,7 +138,7 @@ namespace Trk {
         std::vector<const PRD_MultiTruthCollection*> orderedPRD_Truth(SubDetHitStatistics::NUM_SUBDETECTORS);
         PRD_InverseTruth inverseTruth;
 
-        for (std::vector<const PRD_MultiTruthCollection*>::const_iterator i = prdTruth.begin(); i != prdTruth.end(); i++) {
+        for (std::vector<const PRD_MultiTruthCollection*>::const_iterator i = prdTruth.begin(); i != prdTruth.end(); ++i) {
             if (*i) {
                 if (!(*i)->empty()) {
                     SubDetHitStatistics::SubDetType subdet = findSubDetType((*i)->begin()->first);
@@ -170,7 +170,7 @@ namespace Trk {
             " Entries with TruthTrajectories of more then one particle shown at the DEBUG level.\n"
             " Use VERBOSE level for complete dump.");
 
-        for (DetailedMuonPatternTruthCollection::const_iterator i = output->begin(); i != output->end(); i++) {
+        for (DetailedMuonPatternTruthCollection::const_iterator i = output->begin(); i != output->end(); ++i) {
             bool interesting = (i->second.trajectory().size() > 1);
 
             // TODO:  Reinsert the following code once I understand the compile-time error
@@ -201,7 +201,7 @@ namespace Trk {
         std::vector<const PRD_MultiTruthCollection*> orderedPRD_Truth(SubDetHitStatistics::NUM_SUBDETECTORS);
         PRD_InverseTruth inverseTruth;
 
-        for (std::vector<const PRD_MultiTruthCollection*>::const_iterator i = prdTruth.begin(); i != prdTruth.end(); i++) {
+        for (std::vector<const PRD_MultiTruthCollection*>::const_iterator i = prdTruth.begin(); i != prdTruth.end(); ++i) {
             if (*i) {
                 if (!(*i)->empty()) {
                     SubDetHitStatistics::SubDetType subdet = findSubDetType((*i)->begin()->first);
@@ -229,25 +229,7 @@ namespace Trk {
             " Entries with TruthTrajectories of more then one particle shown at the DEBUG level.\n"
             " Use VERBOSE level for complete dump.");
 
-        /*
-          for(TrackTruthCollection::const_iterator i=output->begin(); i!=output->end(); i++) {
-            bool interesting = (i.trajectory().size() > 1);
-
-          // TODO:  Reinsert the following code once I understand the compile-time error
-        //    msg(interesting  ? MSG::DEBUG : MSG::VERBOSE)
-        //      <<"out: trk="<<i->first.index()<<" => "<<i->second<<endmsg;
-
-            if(interesting) {
-              const TruthTrajectory& t = i.trajectory();
-              msg(MSG::VERBOSE)<<"Particles on the trajectory:\n";
-              for(unsigned k=0; k<t.size(); ++k) {
-                msg(MSG::VERBOSE)<<*t[k]<<"\n";
-              }
-              msg(MSG::VERBOSE)<<"\n"<<endmsg;
-            }
-
-          }
-        */
+     
     }
     //================================================================
 
@@ -317,7 +299,7 @@ namespace Trk {
 
                         int n = 0;
                         // Loop over particles contributing to this cluster
-                        for (iprdt i = range.first; i != range.second; i++) {
+                        for (iprdt i = range.first; i != range.second; ++i) {
                             if (!i->second.isValid()) {
                                 ATH_MSG_WARNING("Unexpected invalid HepMcParticleLink in PRD_MultiTruthCollection");
                             } else {
@@ -340,7 +322,7 @@ namespace Trk {
 
         if (msgLvl(MSG::VERBOSE)) {
             msg(MSG::VERBOSE) << "PRD truth particles = ";
-            for (std::map<HepMcParticleLink, SubDetPRDs>::const_iterator i = pairStat.begin(); i != pairStat.end(); i++) {
+            for (std::map<HepMcParticleLink, SubDetPRDs>::const_iterator i = pairStat.begin(); i != pairStat.end(); ++i) {
                 msg(MSG::VERBOSE) << i->first << ",";
             }
             msg(MSG::VERBOSE) << endmsg;
@@ -350,7 +332,7 @@ namespace Trk {
         // The stat structures are ready.
         // Build truth trajectories for the track
         std::set<HepMcParticleLink> seeds;
-        for (std::map<HepMcParticleLink, SubDetPRDs>::const_iterator i = pairStat.begin(); i != pairStat.end(); i++) {
+        for (std::map<HepMcParticleLink, SubDetPRDs>::const_iterator i = pairStat.begin(); i != pairStat.end(); ++i) {
             if (i->first.isValid()) {
                 seeds.insert(i->first);
             } else {
@@ -441,7 +423,7 @@ namespace Trk {
             // FIXME: what is the current average size?
             TruthTrajectory traj;
             traj.reserve(2);  // The average size is about 1.05.  Hardcode that instead of using slow list::size().
-            for (Sprout::const_iterator ppart = s->second.begin(); ppart != s->second.end(); ppart++) {
+            for (Sprout::const_iterator ppart = s->second.begin(); ppart != s->second.end(); ++ppart) {
                 traj.push_back(HepMcParticleLink(HepMC::barcode(*ppart), s->first.eventIndex()));
             }
 
@@ -776,7 +758,7 @@ namespace Trk {
 
                         int n = 0;
                         // Loop over particles contributing to this cluster
-                        for (iprdt i = range.first; i != range.second; i++) {
+                        for (iprdt i = range.first; i != range.second; ++i) {
                             if (!i->second.isValid()) {
                                 ATH_MSG_WARNING("Unexpected invalid HepMcParticleLink in PRD_MultiTruthCollection");
                             } else {
@@ -799,7 +781,7 @@ namespace Trk {
 
         if (msgLvl(MSG::VERBOSE)) {
             msg(MSG::VERBOSE) << "PRD truth particles = ";
-            for (std::map<HepMcParticleLink, SubDetPRDs>::const_iterator i = pairStat.begin(); i != pairStat.end(); i++) {
+            for (std::map<HepMcParticleLink, SubDetPRDs>::const_iterator i = pairStat.begin(); i != pairStat.end(); ++i) {
                 msg(MSG::VERBOSE) << i->first << ",";
             }
             msg(MSG::VERBOSE) << endmsg;
@@ -810,7 +792,7 @@ namespace Trk {
         // Build truth trajectories for the track
 
         std::set<HepMcParticleLink> seeds;
-        for (std::map<HepMcParticleLink, SubDetPRDs>::const_iterator i = pairStat.begin(); i != pairStat.end(); i++) {
+        for (std::map<HepMcParticleLink, SubDetPRDs>::const_iterator i = pairStat.begin(); i != pairStat.end(); ++i) {
             if (i->first.isValid()) {
                 seeds.insert(i->first);
             } else {
@@ -900,7 +882,7 @@ namespace Trk {
             // FIXME: what is the current average size?
             TruthTrajectory traj;
             traj.reserve(2);  // The average size is about 1.05.  Hardcode that instead of using slow list::size().
-            for (Sprout::const_iterator ppart = s->second.begin(); ppart != s->second.end(); ppart++) {
+            for (Sprout::const_iterator ppart = s->second.begin(); ppart != s->second.end(); ++ppart) {
                 traj.push_back(HepMcParticleLink(HepMC::barcode(*ppart), s->first.eventIndex()));
             }
 
@@ -928,7 +910,7 @@ namespace Trk {
         std::vector<const PRD_MultiTruthCollection*> orderedPRD_Truth(SubDetHitStatistics::NUM_SUBDETECTORS);
         PRD_InverseTruth inverseTruth;
 
-        for (std::vector<const PRD_MultiTruthCollection*>::const_iterator i = prdTruth.begin(); i != prdTruth.end(); i++) {
+        for (std::vector<const PRD_MultiTruthCollection*>::const_iterator i = prdTruth.begin(); i != prdTruth.end(); ++i) {
             if (*i) {
                 if (!(*i)->empty()) {
                     SubDetHitStatistics::SubDetType subdet = findSubDetType((*i)->begin()->first);
@@ -988,7 +970,7 @@ namespace Trk {
 
                     int n = 0;
                     // Loop over particles contributing to this cluster
-                    for (iprdt i = range.first; i != range.second; i++) {
+                    for (iprdt i = range.first; i != range.second; ++i) {
                         if (!i->second.isValid()) {
                             ATH_MSG_WARNING("Unexpected invalid HepMcParticleLink in PRD_MultiTruthCollection");
                         } else {
@@ -1009,7 +991,7 @@ namespace Trk {
 
         if (msgLvl(MSG::VERBOSE)) {
             msg(MSG::VERBOSE) << "PRD truth particles = ";
-            for (std::map<HepMcParticleLink, SubDetPRDs>::const_iterator i = pairStat.begin(); i != pairStat.end(); i++) {
+            for (std::map<HepMcParticleLink, SubDetPRDs>::const_iterator i = pairStat.begin(); i != pairStat.end(); ++i) {
                 msg(MSG::VERBOSE) << i->first << ",";
             }
             msg(MSG::VERBOSE) << endmsg;
@@ -1020,7 +1002,7 @@ namespace Trk {
         // Build truth trajectories for the track
 
         std::set<HepMcParticleLink> seeds;
-        for (std::map<HepMcParticleLink, SubDetPRDs>::const_iterator i = pairStat.begin(); i != pairStat.end(); i++) {
+        for (std::map<HepMcParticleLink, SubDetPRDs>::const_iterator i = pairStat.begin(); i != pairStat.end(); ++i) {
             if (i->first.isValid()) {
                 seeds.insert(i->first);
             } else {
@@ -1111,7 +1093,7 @@ namespace Trk {
             // FIXME: what is the current average size?
             TruthTrajectory traj;
             traj.reserve(2);  // The average size is about 1.05.  Hardcode that instead of using slow list::size().
-            for (Sprout::const_iterator ppart = s->second.begin(); ppart != s->second.end(); ppart++) {
+            for (Sprout::const_iterator ppart = s->second.begin(); ppart != s->second.end(); ++ppart) {
                 traj.push_back(HepMcParticleLink(HepMC::barcode(*ppart), s->first.eventIndex()));
             }
 
