@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2020 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "MuonDQAUtils/InsituTrackTools.h"
@@ -63,17 +63,17 @@ namespace Muon {
     return (tvec1+tvec2).M();
   }
 
-  bool	InsituTrackTools::isTriggeredMuon(INavigable4Momentum */*track1*/)
+  bool	InsituTrackTools::isTriggeredMuon(const INavigable4Momentum */*track1*/)
   {
     return true;
   }
 
-  bool	InsituTrackTools::isTriggeredElectron(INavigable4Momentum */*track1*/)
+  bool	InsituTrackTools::isTriggeredElectron(const INavigable4Momentum */*track1*/)
   {
     return true;
   }
 
-  bool	InsituTrackTools::isElectronCandidate(INavigable4Momentum */*track1*/)
+  bool	InsituTrackTools::isElectronCandidate(const INavigable4Momentum */*track1*/)
   {
     return false;
   }
@@ -126,7 +126,7 @@ namespace Muon {
     return true;
   }
 
-  float InsituTrackTools::getTrackPtIsolation(INavigable4Momentum *trackParticle)
+  float InsituTrackTools::getTrackPtIsolation(const INavigable4Momentum *trackParticle)
   {
     float	PtIsolation;
     int	NIsolation;
@@ -134,7 +134,7 @@ namespace Muon {
     return -1.0;
   }
 
-  int InsituTrackTools::getNTrackIsolation(INavigable4Momentum *trackParticle)
+  int InsituTrackTools::getNTrackIsolation(const INavigable4Momentum *trackParticle)
   {
     float	PtIsolation;
     int	NIsolation;

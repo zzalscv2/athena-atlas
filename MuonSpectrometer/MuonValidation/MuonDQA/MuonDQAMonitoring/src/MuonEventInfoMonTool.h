@@ -40,18 +40,18 @@ namespace MuonDQA {
       MuonEventInfoMonTool( const std::string & type, const std::string & name, const IInterface* parent ); 
  
       virtual ~MuonEventInfoMonTool()=default;
-      StatusCode initialize();
-      virtual StatusCode bookHistograms();
-      virtual StatusCode fillHistograms();
-      virtual StatusCode procHistograms();
+      virtual StatusCode initialize() override;
+      virtual StatusCode bookHistograms() override;
+      virtual StatusCode fillHistograms() override;
+      virtual StatusCode procHistograms() override;
 
 
     private: 
 
       /** retrieve event information from storegate and convert to MuonRawDQAEventInfo */
-      const MuonDQAEvent* retrieveEvent() const; 
+      const MuonDQAEvent* retrieveEvent();
       /** retrieve event information from storegate and convert to MuonCalibEventInfo */
-      MuonDQAEventInfo retrieveEventInfo() const;
+      MuonDQAEventInfo retrieveEventInfo();
   
       StoreGateSvc* m_eventStore;
   

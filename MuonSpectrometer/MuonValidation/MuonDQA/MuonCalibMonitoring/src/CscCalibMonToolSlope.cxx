@@ -496,7 +496,7 @@ StatusCode CscCalibMonToolSlope::postProc()
   IdContext chanContext = m_idHelperSvc->cscIdHelper().channel_context();
 
   //Get the slopeReport, checking for pointer errors along the way
-  const DataHandle<CscCalibReportContainer> repCont;
+  const CscCalibReportContainer* repCont;
   if (!evtStore()->retrieve(repCont, m_histKey).isSuccess())
   {
     ATH_MSG_ERROR( " Cannot retrieve object from storegate with key "

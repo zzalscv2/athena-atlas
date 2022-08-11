@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2017 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
 */
 
 ///////////////////////////////////////////////////////////////////
@@ -19,17 +19,17 @@ class IInsituTrackTools : virtual public IAlgTool {
 
   // enter declaration of your interface-defining member functions here
   virtual	bool	isZBosonCandidate(const INavigable4Momentum *track1, const INavigable4Momentum *track2) = 0;
-  virtual	bool	isTriggeredMuon(INavigable4Momentum *track1) = 0;
-  virtual	bool	isTriggeredElectron(INavigable4Momentum *track1) = 0;
+  virtual	bool	isTriggeredMuon(const INavigable4Momentum *track1) = 0;
+  virtual	bool	isTriggeredElectron(const INavigable4Momentum *track1) = 0;
   virtual	bool	isCloseTrack(const INavigable4Momentum *track1, const INavigable4Momentum *track2) = 0;
   virtual	bool	isIsolatedTrack(const INavigable4Momentum *track1) = 0;
   virtual	bool	isIsolatedMuon(const INavigable4Momentum *track1) = 0;
-  virtual	bool	isElectronCandidate(INavigable4Momentum *track1) = 0;
+  virtual	bool	isElectronCandidate(const INavigable4Momentum *track1) = 0;
   virtual	double	getInvariantMass(const INavigable4Momentum *track1, const INavigable4Momentum *track2) = 0;
   virtual	double	getDistance(const INavigable4Momentum *track1, const INavigable4Momentum *track2) = 0;
   virtual	bool	getTrackIsolation(const INavigable4Momentum *trackParticle, float &PtIsolation, int &NIsolation) = 0;
-  virtual	float	getTrackPtIsolation(INavigable4Momentum *trackParticle) = 0;
-  virtual	int	getNTrackIsolation(INavigable4Momentum *trackParticle) = 0;
+  virtual	float	getTrackPtIsolation(const INavigable4Momentum *trackParticle) = 0;
+  virtual	int	    getNTrackIsolation(const INavigable4Momentum *trackParticle) = 0;
   virtual	float	getJetIsolation(const INavigable4Momentum *trackParticle) = 0;
 
 };

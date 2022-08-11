@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2020 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "MuonDQAUtils/InnerDetProbeCollectorTool.h"
@@ -72,7 +72,7 @@ namespace Muon {
 	if (((*muonItr)->pt()>m_muonPtCut) && ((*muonItr)->isCombinedMuon()))
 	  {
 	    const Rec::TrackParticle *muonTrack	= (*muonItr)->track();
-	    if ((m_RequireTrigger==false) || (m_InsituPerformanceTools->isTriggeredMuon(const_cast<Rec::TrackParticle*>(muonTrack))==true))
+	    if ((m_RequireTrigger==false) || (m_InsituPerformanceTools->isTriggeredMuon(muonTrack)==true))
 	      {
 		Rec::TrackParticleContainer::const_iterator MSTrackItr  = trackTES->begin();
 		Rec::TrackParticleContainer::const_iterator MSTrackItrE = trackTES->end();
@@ -82,7 +82,7 @@ namespace Muon {
 		    if (MSTrack->pt()>m_muonPtCut)
 		      {
 						
-			if (m_InsituPerformanceTools->isZBosonCandidate(const_cast<Rec::TrackParticle*>(MSTrack), const_cast<Rec::TrackParticle*>(muonTrack))==true)
+			if (m_InsituPerformanceTools->isZBosonCandidate(MSTrack, muonTrack)==true)
 			  {
 			    m_IDProbeTrackContainer->push_back( new Rec::TrackParticle(**MSTrackItr) );
 			  }

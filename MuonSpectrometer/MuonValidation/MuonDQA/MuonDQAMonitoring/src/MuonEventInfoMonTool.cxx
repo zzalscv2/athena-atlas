@@ -114,7 +114,7 @@ namespace MuonDQA {
     return sc;
   }
   /*---------------------------------------------------------*/
-  MuonDQA::MuonDQAEventInfo MuonEventInfoMonTool::retrieveEventInfo() const  
+  MuonDQA::MuonDQAEventInfo MuonEventInfoMonTool::retrieveEventInfo()
   { 
   
     StatusCode sc = StatusCode::SUCCESS;  
@@ -178,20 +178,19 @@ namespace MuonDQA {
 
     if ( m_TriggerTagAdd ) {
 
-      const DataHandle< CTP_RDO > ctpRDO;
-      const DataHandle< CTP_RIO > ctpRIO;
-
-      if(!m_eventStore->contains(ctpRDO, "CTP_RDO") || ! m_eventStore->contains(ctpRIO, "CTP_RIO"))
+      if(!m_eventStore->contains<CTP_RDO>("CTP_RDO") || ! m_eventStore->contains<CTP_RIO>("CTP_RIO"))
 	{
 	  return MuonDQAeventInfo;
 	}
 
+      const CTP_RDO* ctpRDO;
       sc = m_eventStore->retrieve( ctpRDO, "CTP_RDO" );
       if ( sc.isFailure() ) {
 	ATH_MSG_WARNING( "CTP_RDO trigger info missing, not added to EventTag" );
 	return MuonDQAeventInfo;
       }
 
+      const CTP_RIO* ctpRIO;
       sc = m_eventStore->retrieve( ctpRIO, "CTP_RIO" );
       if ( sc.isFailure() ) {
 	ATH_MSG_WARNING( "CTP_RIO trigger info missing, not added to EventTag" );
@@ -243,7 +242,7 @@ namespace MuonDQA {
  
     return sc;
   } 
-  const MuonDQAEvent* MuonEventInfoMonTool::retrieveEvent() const {
+  const MuonDQAEvent* MuonEventInfoMonTool::retrieveEvent() {
      
     //Retrieve all ingredients needed to build an MuonDQAEvent
     MuonDQAEventInfo eventInfo = retrieveEventInfo();
