@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2020 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
 */
 
 // System include(s):
@@ -91,39 +91,36 @@ int main( int argc, char* argv[] ) {
 
 
    //Set Properties for photonID_SF tool
-   CHECK(photonSF_ID.setProperty("MapFilePath","PhotonEfficiencyCorrection/map0.txt"));
    CHECK(photonSF_ID.setProperty("ForceDataType",1));
 
    //Set Properties for photonISO_SF tool
-   CHECK(photonSF_Iso.setProperty("MapFilePath","PhotonEfficiencyCorrection/map0.txt"));
-   CHECK(photonSF_Iso.setProperty("IsoKey","Loose"));   // Set isolation WP: Loose,Tight,TightCaloOnly
+   CHECK(photonSF_Iso.setProperty("IsoKey","Loose"));  // Set isolation WP: Loose,Tight,TightCaloOnly
    CHECK(photonSF_Iso.setProperty("ForceDataType",1)); //set data type: 1 for FULLSIM, 3 for AF2
 
    //Set Properties for PhotonTrig_SF tool
-   CHECK(photonSF_Trig.setProperty("MapFilePath","PhotonEfficiencyCorrection/map0.txt"));
    CHECK(photonSF_Trig.setProperty("IsoKey","Loose"));  // Set isolation WP: Loose,Tight,TightCaloOnly
-   CHECK(photonSF_Trig.setProperty("TriggerKey","HLT_g20_tight_icalovloose_L1EM15VHI"));        // Set photon trigger
+   CHECK(photonSF_Trig.setProperty("TriggerKey","DI_PH_2015_2016_g25_loose_2017_2018_g50_loose_L1EM20VH"));  // Set photon trigger
    CHECK(photonSF_Trig.setProperty("ForceDataType",1)); //set data type: 1 for FULLSIM, 3 for AF2
 
    // If the Pileup reweighting tool is not initialized, one can use next properties:
    CHECK(photonSF_ID.setProperty("UseRandomRunNumber",false));
-   CHECK(photonSF_ID.setProperty("DefaultRandomRunNumber",325713)); // set first runnumber from 2017
+   CHECK(photonSF_ID.setProperty("DefaultRandomRunNumber",428648)); // first runnumber of physics in run-3
    CHECK(photonSF_Iso.setProperty("UseRandomRunNumber",false));
-   CHECK(photonSF_Iso.setProperty("DefaultRandomRunNumber",325713)); // set first runnumber from 2017
+   CHECK(photonSF_Iso.setProperty("DefaultRandomRunNumber",428648)); // first runnumber of physics in run-3
    CHECK(photonSF_Trig.setProperty("UseRandomRunNumber",false));
-   CHECK(photonSF_Trig.setProperty("DefaultRandomRunNumber",325713)); // set first runnumber from 2017
+   CHECK(photonSF_Trig.setProperty("DefaultRandomRunNumber",349534)); // first runnumber of 2018 data taking
 
    if(!photonSF_ID.initialize()){
      std::cout <<"Failed to initialize the tool, check for errors"<<std::endl;
-     return 0;
+     return 1;
    }
    if(!photonSF_Iso.initialize()){
      std::cout <<"Failed to initialize the tool, check for errors"<<std::endl;
-     return 0;
+     return 1;
    }
    if(!photonSF_Trig.initialize()){
      std::cout <<"Failed to initialize the tool, check for errors"<<std::endl;
-     return 0;
+     return 1;
    }
    
    // Test that recommended systematics properly bieng registered:
@@ -257,7 +254,7 @@ int main( int argc, char* argv[] ) {
 
    
    // Return gracefully:
-   return 1;
+   return 0;
    
 } // END PROGRAM
 

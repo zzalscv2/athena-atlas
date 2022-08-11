@@ -352,7 +352,7 @@ CP::CorrectionCode AsgPhotonEfficiencyCorrectionTool::applyEfficiencyScaleFactor
    
   // if not in the range: return OutOfVelidityRange with SF = 1 +/- 1
   if(fabs((inputObject.caloCluster())->etaBE(2))>MAXETA || inputObject.pt()<MIN_ET){
-    ATH_MSG_INFO("decorate object");
+    ATH_MSG_VERBOSE("decorate object");
 	inputObject.auxdata< float >( m_resultPrefix+m_resultName+"SF" ) = 1.0;
 	if(m_appliedSystematics != nullptr) inputObject.auxdata< float >( m_resultPrefix+m_resultName+"SF" ) =1.0 + appliedSystematics().getParameterByBaseName("PH_EFF_"+m_sysSubstring+"Uncertainty");
 	return CP::CorrectionCode::OutOfValidityRange;
@@ -366,7 +366,7 @@ CP::CorrectionCode AsgPhotonEfficiencyCorrectionTool::applyEfficiencyScaleFactor
 	eff=calculate(&inputObject).scaleFactor+sigma*calculate(&inputObject).totalUncertainty;
   }
   // decorate photon
-  ATH_MSG_INFO("decorate object");
+  ATH_MSG_VERBOSE("decorate object");
   inputObject.auxdata< float >( m_resultPrefix+m_resultName+"SF" ) = eff;
   return  CP::CorrectionCode::Ok;
 }

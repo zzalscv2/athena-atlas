@@ -45,8 +45,14 @@ if( XAOD_STANDALONE )
       LINK_LIBRARIES ${Boost_LIBRARIES} ${ROOT_LIBRARIES} AsgTools EgammaAnalysisInterfacesLib
       ElectronEfficiencyCorrectionLib PATCoreAcceptLib PATInterfaces PathResolver
       xAODCore xAODEgamma xAODEventInfo PhotonEfficiencyCorrectionLib )
+
+   #Tests
+   atlas_add_test(ut_RunOnASGAOD
+	          SCRIPT TestxAODPhotonAlg $ASG_TEST_FILE_MC
+		  POST_EXEC_SCRIPT nopost.sh)
+   
+
 endif()
 
 # Install files from the package:
 atlas_install_joboptions( share/*.py )
-atlas_install_data( data/*.root data/*.txt )
