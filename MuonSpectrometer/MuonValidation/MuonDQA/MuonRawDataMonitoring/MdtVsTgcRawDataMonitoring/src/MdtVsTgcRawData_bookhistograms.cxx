@@ -410,6 +410,7 @@ MdtVsTgcRawDataValAlg::labelStationMap(TH2 *h2, int ac, int ws){
   int ibin=1;
   if(rebin){//use new bin
     for(int l=0 ; l<9 ; l++ ){// Layer
+      //cppcheck-suppress negativeIndex
       for( int c=0 ; c<nChambers[l] ; c++ ){// Chamber
         sst << "L" << l+1 << "_";
         if(nChambers[l]==5)sst<<chamber1[c];

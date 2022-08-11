@@ -64,7 +64,7 @@ enum {L1_UNKNOWN, L1_BARREL, L1_ENDCAP};
 
 class TubeTraversedBySegment {
  public:
-  TubeTraversedBySegment(std::string hn, int tb, bool ih, IdentifierHash idh) 
+  TubeTraversedBySegment(const std::string & hn, int tb, bool ih, IdentifierHash idh) 
     { hardware_name = hn; tubeBin = tb; isHit = ih; idHash = idh; }
   std::string hardware_name;
   int tubeBin;

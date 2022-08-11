@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2020 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
 */
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -1062,63 +1062,62 @@ StatusCode MdtRawDataMonAlg::handleEvent_effCalc_fillVects(const Trk::SegmentCol
 	/*DEV
         //if(m_overalladc_segm_Lumi) m_overalladc_segm_Lumi->Fill(adc);
 	 DEV */
-        if( store_ROTs.find(tmpid) == store_ROTs.end() ) { // Let's not double-count hits belonging to multiple segments
-          store_ROTs.insert(tmpid);   
+    const auto & [placement, inserted] = store_ROTs.insert(tmpid);   
+    if (inserted){ // Let's not double-count hits belonging to multiple segments
+      double tdc = mrot->prepRawData()->tdc()*25.0/32.0;
+            // Note: the BMG is digitized with 200ps which is not same as other MDT chambers with 25/32=781.25ps
+      if(chambername.substr(0,3)=="BMG") tdc = mrot->prepRawData()->tdc() * 0.2;
+                //      double tdc = mrot->driftTime()+500;
+      int iregion = chamber->GetRegionEnum();
+      int ilayer = chamber->GetLayerEnum();
+      int statphi = chamber->GetStationPhi();
+      //	  int ibarrel_endcap = chamber->GetBarrelEndcapEnum();
 
-	  double tdc = mrot->prepRawData()->tdc()*25.0/32.0;
-          // Note: the BMG is digitized with 200ps which is not same as other MDT chambers with 25/32=781.25ps
-	  if(chambername.substr(0,3)=="BMG") tdc = mrot->prepRawData()->tdc() * 0.2;
-              //      double tdc = mrot->driftTime()+500;
-	  int iregion = chamber->GetRegionEnum();
-	  int ilayer = chamber->GetLayerEnum();
-	  int statphi = chamber->GetStationPhi();
-	  //	  int ibarrel_endcap = chamber->GetBarrelEndcapEnum();
+      auto& thisVects = vects[iregion][ilayer][statphi];
+      thisVects.adc_segs_mon.push_back(adc); 
 
-	  auto& thisVects = vects[iregion][ilayer][statphi];
-	  thisVects.adc_segs_mon.push_back(adc); 
+         
+      if(adc > m_ADCCut) { // This is somewhat redundant because this is usual cut for segment-reconstruction, but that's OK
+        if(statphi > 15) {
+          ATH_MSG_ERROR( "MDT StationPhi: " << statphi << " Is too high.  Chamber name: " << chamber->getName() );
+          continue;
+        }
+        thisVects.tdc_segs_mon.push_back(tdc); 
 
-	  	   
-	  if(adc > m_ADCCut) { // This is somewhat redundant because this is usual cut for segment-reconstruction, but that's OK
-	    if(statphi > 15) {
-	      ATH_MSG_ERROR( "MDT StationPhi: " << statphi << " Is too high.  Chamber name: " << chamber->getName() );
-	      continue;
-	    }
-	    thisVects.tdc_segs_mon.push_back(tdc); 
+        int binx=chamber->GetMDTHitsPerChamber_IMO_BinX();
+        if(iregion<2) binx=binx-9;
+        else binx=binx-7;
+        int biny=chamber->GetMDTHitsPerChamber_IMO_BinY();
 
-	    int binx=chamber->GetMDTHitsPerChamber_IMO_BinX();
-	    if(iregion<2) binx=binx-9;
-	    else binx=binx-7;
-	    int biny=chamber->GetMDTHitsPerChamber_IMO_BinY();
+        std::string varx = " ";
+        std::string vary = " ";
+        if(iregion<2){
+          varx="x_segs_mon_barrel";
+          vary="y_segs_mon_barrel";
+        } else {
+          varx="x_segs_mon_endcap";
+          vary="y_segs_mon_endcap";
+        }
 
-	    std::string varx = " ";
-	    std::string vary = " ";
-	    if(iregion<2){
-	      varx="x_segs_mon_barrel";
-	      vary="y_segs_mon_barrel";
-	    } else {
-	      varx="x_segs_mon_endcap";
-	      vary="y_segs_mon_endcap";
-	    }
+        thisVects.x_segs_mon.push_back(binx);
+        thisVects.y_segs_mon.push_back(biny-1);
 
-	    thisVects.x_segs_mon.push_back(binx);
-	    thisVects.y_segs_mon.push_back(biny-1);
+      }//adc cut
 
-	  }//adc cut
+      int mdtMultLayer = m_idHelperSvc->mdtIdHelper().multilayer(tmpid);
+      auto adc_perch = Monitored::Scalar<float>("adc_segs_perch_"+chambername, adc);
+      auto adc_ml1 = Monitored::Scalar<int>("adc_ml1", (int) ( mdtMultLayer==1));
+      auto adc_ml2 = Monitored::Scalar<int>("adc_ml2", (int) (mdtMultLayer==2));
 
-	  int mdtMultLayer = m_idHelperSvc->mdtIdHelper().multilayer(tmpid);
-	  auto adc_perch = Monitored::Scalar<float>("adc_segs_perch_"+chambername, adc);
-	  auto adc_ml1 = Monitored::Scalar<int>("adc_ml1", (int) ( mdtMultLayer==1));
-	  auto adc_ml2 = Monitored::Scalar<int>("adc_ml2", (int) (mdtMultLayer==2));
+      std::string monPerCh="MdtMonPerChamber";
+      if(iregion==0) monPerCh+="BA";
+      if(iregion==1) monPerCh+="BC";
+      if(iregion==2) monPerCh+="EA";
+      if(iregion==3) monPerCh+="EC";
 
-	  std::string monPerCh="MdtMonPerChamber";
-	  if(iregion==0) monPerCh+="BA";
-	  if(iregion==1) monPerCh+="BC";
-	  if(iregion==2) monPerCh+="EA";
-	  if(iregion==3) monPerCh+="EC";
+      fill(monPerCh, adc_perch, adc_ml1, adc_ml2);
 
-	  fill(monPerCh, adc_perch, adc_ml1, adc_ml2);
-
-	}
+    }
         // This information needs to be stored fully for each segment (for calculations below), so deal with these duplicates later
         // (otherwise we may not check a traversed ML for a differently pointing overlapping segment, for example)
 
@@ -1269,7 +1268,7 @@ StatusCode MdtRawDataMonAlg::handleEvent_effCalc_fillVects(const Trk::SegmentCol
 
   // Fill effentries/effcounts hists for efficiency calculation
   if(m_doChamberHists) { //Don't perform this block if not doing chamber by chamber hists
-    for (std::set<monAlg::TubeTraversedBySegment, monAlg::TubeTraversedBySegment_cmp>::iterator it=store_effTubes.begin(); it!=store_effTubes.end(); it++) {
+    for (std::set<monAlg::TubeTraversedBySegment, monAlg::TubeTraversedBySegment_cmp>::iterator it=store_effTubes.begin(); it!=store_effTubes.end(); ++it) {
       // GET HISTS
       MDTChamber* chamber;
       sc = getChamber( (*it).idHash, chamber );

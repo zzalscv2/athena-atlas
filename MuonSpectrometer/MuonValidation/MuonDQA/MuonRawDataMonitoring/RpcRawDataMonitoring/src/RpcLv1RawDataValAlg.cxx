@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
 */
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -430,7 +430,7 @@ StatusCode RpcLv1RawDataValAlg::fillHistograms()
                     std::string thr_name	     = thr_name_char	     ;
           
 		    bool histo_flag=true;
-		    for (std::vector<std::string>::const_iterator iter=m_sectorlogicTowerCma_name_list2.begin(); iter!=m_sectorlogicTowerCma_name_list2.end(); iter++){
+		    for (std::vector<std::string>::const_iterator iter=m_sectorlogicTowerCma_name_list2.begin(); iter!=m_sectorlogicTowerCma_name_list2.end(); ++iter){
 		      if ( (sectorlogic_name+tower_name+cma_name+thr_name)==*iter){histo_flag=false;}
 		    }
 		    if (histo_flag){ 
@@ -582,7 +582,7 @@ StatusCode RpcLv1RawDataValAlg::fillHistograms()
 		// Fill time histograms begin
 		if (m_rpclv1hist ) {	
 		  bool histo_flag=true;
-		  for (std::vector<std::string>::const_iterator iter=m_sectorlogicTowerCma_name_list.begin(); iter!=m_sectorlogicTowerCma_name_list.end(); iter++){
+		  for (std::vector<std::string>::const_iterator iter=m_sectorlogicTowerCma_name_list.begin(); iter!=m_sectorlogicTowerCma_name_list.end(); ++iter){
 		    if ( (sectorlogic_name+tower_name+cma_name)==*iter){histo_flag=false;}
 		  }
 		  if (histo_flag){
@@ -635,7 +635,7 @@ StatusCode RpcLv1RawDataValAlg::fillHistograms()
 		    if ( i_ijk==3  || i_ijk==5 ) { shift_ijk = 32 ; }
 
 		    bool histo_flag=true;
-		    for (std::vector<std::string>::const_iterator iter=m_profile_list.begin(); iter!=m_profile_list.end(); iter++){
+		    for (std::vector<std::string>::const_iterator iter=m_profile_list.begin(); iter!=m_profile_list.end(); ++iter){
 		      if ( (sectorlogic_name+cma_name_p+ijk_name_p)==*iter){histo_flag=false;}
 		    }
 		    if (histo_flag) {
@@ -852,7 +852,7 @@ StatusCode RpcLv1RawDataValAlg::bookHistogramsRecurrent()
 	// n bin y = 2 ^ ( nPad=7 ) = 128
 	int n_bin_logOR = 64 ;
 	
-	for (std::vector<std::string>::const_iterator it=LyNameVec.begin(); it!=LyNameVec.end(); it++ ) {
+	for (std::vector<std::string>::const_iterator it=LyNameVec.begin(); it!=LyNameVec.end(); ++it ) {
 	  std::string rpclv1_logicalOR_title      = "PhiLogicalOR_" + *it           ;
 	  const char* rpclv1_logicalOR_title_char = rpclv1_logicalOR_title.c_str();
           TH2* rpclv1_logicalOR = new TH2I( rpclv1_logicalOR_title_char, rpclv1_logicalOR_title_char, 
@@ -1451,7 +1451,7 @@ StatusCode RpcLv1RawDataValAlg::bookHistogramsRecurrent()
 	    DB_list.push_back( "ProfileDataCModd"  );
 	    DB_list.push_back( "ProfileDataCMeven" );
 	
-	    for ( std::vector<std::string>::const_iterator iter=DB_list.begin(); iter!=DB_list.end(); iter++ ) {
+	    for ( std::vector<std::string>::const_iterator iter=DB_list.begin(); iter!=DB_list.end(); ++iter ) {
 	      for ( int isec=0; isec!=16; isec++ ) {
 		for ( int idblPhi=0; idblPhi!=2; idblPhi ++) {
 		  bookRPCCoolHistograms( iter, isec, idblPhi, "Pivot0" ) ;

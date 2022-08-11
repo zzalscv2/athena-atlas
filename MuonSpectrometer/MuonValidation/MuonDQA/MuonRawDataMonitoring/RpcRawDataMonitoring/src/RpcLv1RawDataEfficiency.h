@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2020 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
 */
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -70,7 +70,7 @@ class OfflineMuon {
     void SetQ  ( float q   ) { m_q   = q;   }
 
     // Calculater
-    float DeltaR( OfflineMuon mu2 ) const {
+    float DeltaR( const OfflineMuon & mu2 ) const {
       return sqrt( (m_eta-mu2.Eta())*(m_eta-mu2.Eta())+(m_phi-mu2.Phi())*(m_phi-mu2.Phi()) ); }
 
  private:
@@ -98,7 +98,7 @@ class CoincidenceData {
     float Eta()          const { return m_eta; }
   
     // Calculator
-    float DeltaR(  OfflineMuon offmu ) const {
+    float DeltaR(  const OfflineMuon & offmu ) const {
       float fDeltaEta = m_eta-offmu.Eta();
       float fDeltaPhi = acos(cos(m_phi-offmu.Phi()));
       return sqrt( fDeltaEta*fDeltaEta + fDeltaPhi*fDeltaPhi ); }
