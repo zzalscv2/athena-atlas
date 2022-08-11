@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
 */
 
 #include <utility>
@@ -24,7 +24,7 @@ void BTagPlots::initializePlots(){
     std::cout << "filling b-tagging plots with BS weight: " << evt->beamSpotWeight();
 }
 
-  void BTagPlots::fill(unsigned int nbtag,const xAOD::EventInfo* evt) const{
+  void BTagPlots::fill(unsigned int nbtag,const xAOD::EventInfo* evt) {
     n->Fill(nbtag,evt->beamSpotWeight());
 }
 }
