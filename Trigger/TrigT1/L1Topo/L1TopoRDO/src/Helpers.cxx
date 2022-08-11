@@ -104,6 +104,10 @@ std::ostream& operator<<(std::ostream& os, const L1TopoRDO& rdo) {
 
 namespace L1Topo{
   
+  uint32_t decode(const uint32_t &word, const uint32_t &offset, const uint32_t &size) {
+    return static_cast<uint32_t>((word >> offset) & size);
+  }
+
   std::string formatHex8(uint32_t word){
     std::ostringstream s;
     s << std::showbase << std::hex << std::internal << std::setfill ('0') << std::setw(10) << word << std::dec << std::noshowbase;
@@ -141,6 +145,13 @@ const std::string formatVecHex8(const std::vector<uint32_t>& vec)
     uint32_t module = (moduleId >>4) & 0x1;
     uint32_t index = 64*module + 32*c.fpga() + c.clock() + 2*(8*c.index() + bitIdx);
     //std::cout << "L1Topo::triggerBitIndexNew DEBUG index=" << index << " for module=" << module << " fpga=" << c.fpga() << " clock=" << c.clock() << " index=" << c.index() << " bitIdx=" << bitIdx << std::endl;
+    return index;
+  }
+
+  // this reflects the actual CTP mapping and the CTP simulation with which L1Topo output is compared
+  unsigned int triggerBitIndexPhase1(uint32_t topo, uint32_t fpga, size_t bitIdx){
+    uint32_t index = (topo==3 ? (fpga+2)*32:fpga*32);
+    index += bitIdx<16 ? 2*(bitIdx) : 2*(bitIdx-16)+1;
     return index;
   }
 
