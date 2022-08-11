@@ -1405,7 +1405,7 @@ void RpcDigitizationTool::UnPackMCTruth(double theWord, float& proptime, float& 
 }
 
 //--------------------------------------------
-StatusCode RpcDigitizationTool::fillTagInfo() const {
+StatusCode RpcDigitizationTool::fillTagInfo() {
     if (!m_tagInfoMgr) return StatusCode::FAILURE;
 
     std::string RpctimeSchema = "";

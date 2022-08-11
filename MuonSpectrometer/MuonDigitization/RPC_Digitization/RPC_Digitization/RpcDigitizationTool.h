@@ -97,7 +97,7 @@ private:
     /** Digitization functionality shared with RPC_PileUpTool */
     StatusCode doDigitization(const EventContext& ctx, RpcDigitContainer* digitContainer, MuonSimDataCollection* sdoContainer);
     /** */
-    StatusCode fillTagInfo() const;
+    StatusCode fillTagInfo();
     /** */
     long long int PackMCTruth(float proptime, float tof, float posx, float posz) const;
     /** */
