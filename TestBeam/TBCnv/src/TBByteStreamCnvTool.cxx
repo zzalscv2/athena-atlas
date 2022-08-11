@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "TBCnv/TBByteStreamCnvTool.h"
@@ -168,7 +168,7 @@ StatusCode TBByteStreamCnvTool::WriteFragment()
   MsgStream logstr(msgSvc(), name());
  logstr << MSG::DEBUG << "WriteFragment" << endmsg;
  //Check if Fragment is already written
- const DataHandle<EventInfo> thisEventInfo;
+ const EventInfo* thisEventInfo;
    StatusCode sc=evtStore()->retrieve(thisEventInfo);
    if (sc!=StatusCode::SUCCESS)
      {logstr << MSG::WARNING << "No EventInfo object found!" << endmsg;
