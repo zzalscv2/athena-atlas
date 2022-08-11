@@ -64,7 +64,7 @@ public:
     m_maxEt = 0;
   }
 
-  void add(const HashCell& hashCell);
+  void add(HashCell& hashCell);
 
   void add(CaloTopoTmpHashCluster& hashCluster);
 
