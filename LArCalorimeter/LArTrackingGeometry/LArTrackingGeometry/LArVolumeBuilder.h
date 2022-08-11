@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2020 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
 */
 
 ///////////////////////////////////////////////////////////////////
@@ -9,8 +9,9 @@
 #ifndef LARTRACKINGGEOMETRY_LARVOLUMEBUILDER_H
 #define LARTRACKINGGEOMETRY_LARVOLUMEBUILDER_H
 
-// Gaudi
+// Athena/Gaudi
 #include "AthenaBaseComps/AthAlgTool.h"
+#include "CxxUtils/checker_macros.h"
 #include "GaudiKernel/ToolHandle.h"
 // Trk
 #include "CaloTrackingGeometry/ICaloSurfaceBuilder.h"
@@ -76,8 +77,6 @@ private:
                           const std::string& name,
                           Amg::Transform3D& trIn) const;
 
-  void throwIntoGarbage(const Trk::Material* mat) const;
-
   // ------------- private members -----------------------------------------
 
   std::string m_lArMgrLocation; //!< Location of the CaloDetDescrMgr
@@ -99,15 +98,13 @@ private:
   //!< if true use DetDescr based layering,
   //!< if false use biequidistant layering
   bool m_useCaloTrackingGeometryBounds;
-  mutable float m_mbtsZ;     // MBTS layer position
-  mutable float m_mbts_rmin; // MBTS layer dimensions
-  mutable float m_mbts_rmax; // MBTS layer dimensions
 
   //!< tool required for DetDescr-based layering
   ToolHandle<ICaloSurfaceBuilder> m_calosurf;
 
-  //internal garbage collector not MT safe
-  mutable std::map<const Trk::Material*, bool> m_materialGarbage;
+  //internal garbage collector (protected by lock)
+  typedef std::set<const Trk::Material*> MaterialGarbage;
+  mutable MaterialGarbage m_materialGarbage ATLAS_THREAD_SAFE;
 
   // material scaling ( temporary ? )
   float m_scale_HECmaterial;
@@ -115,12 +112,6 @@ private:
 
 } // end of namespace
 
-inline void
-LAr::LArVolumeBuilder::throwIntoGarbage(const Trk::Material* mat) const
-{
-  if (mat)
-    m_materialGarbage[mat] = true;
-}
 
 #endif // CALOTRACKINGGEOMETRY_LARVOLUMEBUILDER_H
 
