@@ -280,7 +280,7 @@ namespace top {
 
       // experimental! Jet response MC-to-MC corrections
       // see https://twiki.cern.ch/twiki/bin/viewauth/AtlasProtected/ApplyJetCalibrationR21#MC_to_MC_calibrations_this_is_cu
-      if (m_config->jetMCtoMCCalibration() != "None" && m_config->isMC()) {
+      if (m_config->jetMCtoMCCalibration() != "None" && m_config->jetMCtoMCCalibration() != "pythia" && m_config->isMC()) {
 	ATH_MSG_INFO("JES Calibration MC-to-MC      : " << m_config->jetMCtoMCCalibration());
 	top::check(asg::setProperty(jetCalibrationTool, "ShowerModel", m_config->jetMCtoMCCalibration()),
 		   "Failed to set ShowerModel " + m_config->jetMCtoMCCalibration());
@@ -344,8 +344,21 @@ namespace top {
 
     // Moriond2018 - AF2 JES
     // Summer2019 - JES/JER update
+
     std::string conference = "Summer2019";
 
+    if (m_config->useJESPrecisionFlavourUncertainties()) {
+      // JES precision flavour uncertainties are stored in Summer2022 directory
+      // These don't invalidate the recommendations stored in the Summer2019 directory
+      // additionally the MC-to-MC corrections also have to be applied when the JES precision flavour uncertaitnies are used
+      // see https://twiki.cern.ch/twiki/bin/viewauth/AtlasProtected/JetUncertaintiesRel21Summer2018SmallR
+      if (m_config->jetMCtoMCCalibration() == "None" && m_config->isMC()) {
+	ATH_MSG_ERROR("useJESPrecisionFlavourUncertainties option provided but jetMCtoMCCalibration option is None! You have to provide a valid jetMCtoMCCalibration option.");
+        return StatusCode::FAILURE;
+      }
+      ATH_MSG_INFO("useJESPrecisionFlavourUncertainties option provided. JES precision flavour uncertainties are used.");
+      conference = "Summer2022";
+    }
     // By setting calib_area to "None" we pick up the default from the JES group
     std::string calib_area = "None";
 

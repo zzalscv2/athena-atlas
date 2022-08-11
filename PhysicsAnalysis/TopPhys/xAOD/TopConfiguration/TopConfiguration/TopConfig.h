@@ -1615,8 +1615,16 @@ namespace top {
 	m_jetMCtoMCCalibration = s;
       }
     }
-
+    
     inline virtual const std::string& jetMCtoMCCalibration() const {return m_jetMCtoMCCalibration;}
+
+    inline virtual void useJESPrecisionFlavourUncertainties(const bool& b) {
+      if (!m_configFixed) {
+	m_useJESPrecisionFlavourUncertainties = b;
+      }
+    }
+
+    inline virtual bool useJESPrecisionFlavourUncertainties() const {return m_useJESPrecisionFlavourUncertainties;}
 
     inline virtual void allowSmallRJMSforAFII(const bool setting) {
       if (!m_configFixed) {
@@ -2659,6 +2667,7 @@ namespace top {
     bool m_doLargeRPseudodataJER; // True or False
     std::string m_jetCalibSequence; // GCC or JMS
     std::string m_jetMCtoMCCalibration; // None or MC-to-MC jet response calibration
+    bool m_useJESPrecisionFlavourUncertainties; // True or False, to determine whether reduced JES flavour uncertainties should be used
     bool m_allowSmallRJMSforAFII; // JMS is not supported on AFII so we crash, unless people override this option
     bool m_jetStoreTruthLabels; // True or False
     bool m_doJVTInMETCalculation;
