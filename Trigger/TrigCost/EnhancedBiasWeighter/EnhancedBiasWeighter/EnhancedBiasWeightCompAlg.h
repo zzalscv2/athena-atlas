@@ -49,6 +49,7 @@ class EnhancedBiasWeightCompAlg : public AthReentrantAlgorithm {
         double getTotalPrescale() const {return m_totalPrescale;}
         bool getIsRandom() const {return (getName().find("HLT_noalg_eb_L1RD") != std::string::npos);}
         bool getIsNoPS() const {return (getName().find("noPS") != std::string::npos);}
+        bool getIsDisabled() const {return (m_totalPrescale <= 0);}
 
         void setTotalPrescale(const double& prescale) {m_totalPrescale = prescale;}
 
@@ -70,13 +71,13 @@ class EnhancedBiasWeightCompAlg : public AthReentrantAlgorithm {
     };
 
     SG::ReadHandleKey<TrigConf::HLTMenu> m_HLTMenuKey{this, "HLTTriggerMenu", "DetectorStore+HLTTriggerMenu", "HLT Menu"};
-    ToolHandle<Trig::TrigDecisionTool> m_tdt{this, "TrigDecisionTool", ""};
+    PublicToolHandle<Trig::TrigDecisionTool> m_tdt{this, "TrigDecisionTool", "Trig::TrigDecisionTool/TrigDecisionTool", "TrigDecisionTool"};
     SG::ReadHandleKey<TrigCompositeUtils::DecisionContainer> m_finalDecisionKey{ this, "FinalDecisionKey", "", "Final stage of all decisions" };
 
     SG::ReadCondHandleKey<TrigConf::HLTPrescalesSet> m_HLTPrescaleSetInputKey {this, "HLTPrescales", "HLTPrescales", "HLT prescales set"};
     SG::ReadCondHandleKey<TrigConf::L1PrescalesSet> m_L1PrescaleSetInputKey {this, "L1Prescales", "L1Prescales", "L1 prescales set"};
 
-    Gaudi::Property<std::map<std::string, std::vector<std::string>>> m_chainToItem {this, "ChainToItemMap", {}, "Map for HLT seeded chains" };
+    Gaudi::Property<std::map<std::string, std::vector<std::string>>> m_chainToHLTSeed {this, "ChainToItemMap", {}, "Map for HLT seeded chains" };
 
     /// Calculate EB result based on total prescales of chains
     EBResult calculateEBWeight(const std::vector<EBChainInfo>& EBChains) const;
@@ -84,8 +85,8 @@ class EnhancedBiasWeightCompAlg : public AthReentrantAlgorithm {
     /// Retrieve total prescales (L1 * HLT) for chains into map
     StatusCode fillTotalPrescaleForChains(const EventContext& context, std::vector<EBChainInfo>& EBChains) const;
 
-    /// Get list of Enhanced Bias chains that passed
-    std::vector<EBChainInfo> getPassedEBChains(const TrigCompositeUtils::Decision& decisionObject) const;
+    /// Get list of Enhanced Bias chains that cound have passed
+    std::vector<EBChainInfo> getPassedEBChains() const;
 
     /// Check if any of random chains passed
     bool checkIfTriggeredByRandomChain(const std::vector<EBChainInfo>& EBChain) const;
