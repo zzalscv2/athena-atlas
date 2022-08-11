@@ -130,12 +130,15 @@ CaloCluster_OnTrackBuilder::getClusterLocalParameters(
     Trk::DefinedParameter locZ(z, Trk::locZ);
     Trk::DefinedParameter qOverP(clusterQoverE, Trk::qOverP);
     std::vector<Trk::DefinedParameter> defPar;
-    if (m_useClusterPhi)
+    if (m_useClusterPhi) {
       defPar.push_back(locRPhi);
-    if (m_useClusterEta)
+    }
+    if (m_useClusterEta) {
       defPar.push_back(locZ);
-    if (m_useClusterEnergy)
+    }
+    if (m_useClusterEnergy) {
       defPar.push_back(qOverP);
+    }
     return Trk::LocalParameters(defPar);
   }
   // Local paramters of a disk are
@@ -147,12 +150,15 @@ CaloCluster_OnTrackBuilder::getClusterLocalParameters(
   Trk::DefinedParameter locPhi(phi, Trk::locPhi);
   Trk::DefinedParameter qOverP(clusterQoverE, Trk::qOverP);
   std::vector<Trk::DefinedParameter> defPar;
-  if (m_useClusterEta)
+  if (m_useClusterEta) {
     defPar.push_back(locR);
-  if (m_useClusterPhi)
+  }
+  if (m_useClusterPhi) {
     defPar.push_back(locPhi);
-  if (m_useClusterEnergy)
+  }
+  if (m_useClusterEnergy) {
     defPar.push_back(qOverP);
+  }
 
   return Trk::LocalParameters(defPar);
 }
@@ -165,16 +171,20 @@ CaloCluster_OnTrackBuilder::getClusterErrorMatrix(
 {
 
   double phierr = 0.1;
-  phierr = phierr < 1.e-10 ? 0.1 : pow(phierr, 2);
-  if (!m_useClusterPhi)
+  phierr = phierr < 1.e-10 ? 0.1 : std::pow(phierr, 2);
+  if (!m_useClusterPhi) {
     phierr = 10;
+  }
+  // 10mm large error as currently we dont want to use this measurement
+  double etaerr = 10;
+  etaerr = etaerr < 1.e-10 ? 10. : std::pow(etaerr, 2);
 
-  double etaerr =
-    10; // 10mm large error as currently we dont want to use this measurement
-  etaerr = etaerr < 1.e-10 ? 10. : pow(etaerr, 2);
+  double energyerr =
+    std::pow(0.10 * std::sqrt(cluster->calE() * 1e-3) * 1000, -4);
 
-  double energyerr = pow(0.10 * sqrt(cluster->calE() * 1e-3) * 1000, -4);
-  Amg::MatrixX covMatrix;
+  int matrixSize = m_useClusterEta + m_useClusterPhi + m_useClusterEnergy;
+  Amg::MatrixX covMatrix(matrixSize, matrixSize);
+  covMatrix.setZero();
 
   if (xAOD::EgammaHelpers::isBarrel(cluster)) {
     // Two corindate in a cyclinder are
@@ -186,38 +196,37 @@ CaloCluster_OnTrackBuilder::getClusterErrorMatrix(
     int indexCount(0);
 
     if (m_useClusterPhi) {
-      ++indexCount;
       covMatrix(indexCount, indexCount) = phierr * r2;
+      ++indexCount;
     }
     if (m_useClusterEta) {
-      ++indexCount;
       covMatrix(indexCount, indexCount) = etaerr;
+      ++indexCount;
     }
     if (m_useClusterEnergy) {
-      ++indexCount;
       covMatrix(indexCount, indexCount) = energyerr;
+      ++indexCount;
     }
   } else {
     // Local paramters of a disk are
     // Trk::locR   = 0
     // Trk::locPhi = 1
-
     int indexCount(0);
 
     if (m_useClusterEta) {
-      ++indexCount;
       covMatrix(indexCount, indexCount) = etaerr;
+      ++indexCount;
     }
     if (m_useClusterPhi) {
-      ++indexCount;
       covMatrix(indexCount, indexCount) = phierr;
+      ++indexCount;
     }
     if (m_useClusterEnergy) {
-      ++indexCount;
       covMatrix(indexCount, indexCount) = energyerr;
+      ++indexCount;
     }
   }
 
-  return Amg::MatrixX(covMatrix);
+  return covMatrix;
 }
 
