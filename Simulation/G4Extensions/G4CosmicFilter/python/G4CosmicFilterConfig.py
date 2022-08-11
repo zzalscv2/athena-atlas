@@ -5,7 +5,7 @@ from AthenaConfiguration.ComponentFactory import CompFactory
 
 def configCosmicFilterVolumeNames(ConfigFlags):
     """returns a list with volume names. Can be merged with
-    athena/Simulation/ISF/ISF_Core/ISF_Tools/python/ISF_ToolsConfigNew.py#0103
+    athena/Simulation/ISF/ISF_Core/ISF_Tools/python/ISF_ToolsConfig.py#0103
     """
 
     volmap = {

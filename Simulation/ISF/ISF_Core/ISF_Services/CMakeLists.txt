@@ -94,9 +94,9 @@ atlas_add_test( TruthSvc_test
                 POST_EXEC_SCRIPT nopost.sh
                 )
 
-#test ISF_ServicesConfigNew
-atlas_add_test( ISF_ServicesConfigNew_test
-                SCRIPT test/ISF_ServicesConfigNew_test.py
+#test ISF_ServicesConfig
+atlas_add_test( ISF_ServicesConfig_test
+                SCRIPT test/ISF_ServicesConfig_test.py
                 POST_EXEC_SCRIPT nopost.sh
                 PROPERTIES TIMEOUT 300 )
 

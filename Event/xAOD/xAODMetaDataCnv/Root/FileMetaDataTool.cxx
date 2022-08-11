@@ -90,19 +90,22 @@ StatusCode
       // match that of the new input file
 #ifdef XAOD_STANDALONE
       if (outputMetaStore()->contains< xAOD::FileMetaData >(key)) {
-        xAOD::FileMetaData * output = nullptr;
-        ASG_CHECK(outputMetaStore()->retrieve(output, key));
+         xAOD::FileMetaData * output = nullptr;
+         ASG_CHECK(outputMetaStore()->retrieve(output, key));
 #else
       if (m_metaDataSvc->contains< xAOD::FileMetaData >(key)) {
-        const auto *output = m_metaDataSvc->tryConstRetrieve< xAOD::FileMetaData >(key);
-        if (!output) return StatusCode::FAILURE;
+         auto *output = m_metaDataSvc->tryRetrieve< xAOD::FileMetaData >(key);
+         if (!output) return StatusCode::FAILURE;
 #endif  // XAOD_STANDALONE
 
-        if (*input != *output)
-          ATH_MSG_WARNING("Inconsistent input file MetaData");
+         copyValues(input, output, "runNumbers");
+         copyValues(input, output, "lumiBlocks");
 
-        return StatusCode::SUCCESS;
+         const std::set<std::string>  ignore { "runNumbers", "lumiBlocks" };
+         if( !input->compareWith(*output, ignore) )
+            ATH_MSG_WARNING("Inconsistent input file MetaData");
 
+         return StatusCode::SUCCESS;
       }
 
       ATH_MSG_DEBUG("Creating output objects");
@@ -137,5 +140,30 @@ StatusCode
       // Return gracefully:
       return StatusCode::SUCCESS;
     }
+
+
+void FileMetaDataTool::copyValues(const xAOD::FileMetaData *src, xAOD::FileMetaData *dst,
+                                   const std::string& var)
+{
+   std::vector<uint32_t> src_vec, dst_vec;
+   src->value(var, src_vec);
+   dst->value(var, dst_vec);
+   bool updated = false;
+
+   for( auto val : src_vec ) {
+      // we want a sorted list of unique values (without using std::set)
+      auto it = std::lower_bound( dst_vec.begin(), dst_vec.end(), val );
+      if( it == dst_vec.end() || (*it) != val ) {
+         dst_vec.insert(it, val);
+         updated = true;
+         ATH_MSG_DEBUG("added " << val << " to list of " << var);
+      }
+   }
+   if( updated ) {
+      if( !dst->setValue(var, dst_vec) ) {
+         ATH_MSG_WARNING("error updating values for " + var);
+      }
+   }
+}
 
 }  // namespace xAODMaker

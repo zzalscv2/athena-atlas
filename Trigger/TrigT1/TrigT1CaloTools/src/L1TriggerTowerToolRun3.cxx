@@ -725,7 +725,7 @@ void L1TriggerTowerToolRun3::cpLut(const std::vector<int> &fir, const L1CaloCool
         offsetReal = pedMean * hwCoeffSum / pow(2.,startBit);
       }
       else{
-        offsetReal = pedMean * hwCoeffSum * slope / pow(2.,startBit) - slope/2.;
+	offsetReal = pedMean * static_cast<double>(hwCoeffSum) * static_cast<double>(slope) / pow(2.,static_cast<double>(startBit)) - static_cast<double>(slope)/2.;
       }
       offset = static_cast<unsigned short>( offsetReal < 0. ? 0 : offsetReal + 0.5 );
 
@@ -749,7 +749,7 @@ void L1TriggerTowerToolRun3::cpLut(const std::vector<int> &fir, const L1CaloCool
   } else if (strategy == 4) {
     // Run-3 FCAL LUT filling scheme (strategy 4) which is identical to
     // Run-2 strategy 2, but contains an additional fixed factor of 2.
-    lut(fir, 2*scale_menu*slope, 2*scale_menu*offset, scale_menu*cut, 1, disabled, output);
+    lut(fir, scale_menu*slope, scale_menu*offset, scale_menu*cut, 4, disabled, output);
 
   }
   
@@ -817,7 +817,7 @@ void L1TriggerTowerToolRun3::jepLut(const std::vector<int> &fir, const L1CaloCoo
         offsetReal = pedMean * hwCoeffSum / pow(2.,startBit);
       }
       else{
-        offsetReal = pedMean * hwCoeffSum * slope / pow(2.,startBit) - slope/2.;
+        offsetReal = pedMean * static_cast<double>(hwCoeffSum) * static_cast<double>(slope) / pow(2.,static_cast<double>(startBit)) - static_cast<double>(slope)/2.;
       }
       offset = static_cast<unsigned short>( offsetReal < 0. ? 0 : offsetReal + 0.5 );
 
@@ -847,7 +847,7 @@ void L1TriggerTowerToolRun3::jepLut(const std::vector<int> &fir, const L1CaloCoo
   else if (strategy == 4) {
     // Run-3 FCAL LUT filling scheme (strategy 4) which is identical to
     // Run-2 strategy 2, but contains an additional fixed factor of 2.
-    lut(fir, 2*scale_menu*slope, 2*scale_menu*offset, scale_menu*cut, 1, disabled, output);
+    lut(fir, scale_menu*slope, scale_menu*offset, scale_menu*cut, 4, disabled, output);
     
   }
   
@@ -865,15 +865,20 @@ void L1TriggerTowerToolRun3::lut(const std::vector<int> &fir, int slope, int off
   output.clear();
   output.reserve(fir.size()); // avoid frequent reallocations
   
- 
+  const int reScale = 2;
   for( auto it :  fir) { 
     int out = 0;
     if (!disabled) {
       if (strategy == 0 && it >= offset+cut) { // Original scheme
         out = ((it-offset)*slope + 2048)>>12;
-      } else if (strategy == 1 && it*slope >= offset+cut) { // New scheme
+      }
+      else if (strategy == 1 && it*slope >= offset+cut) { // New scheme
         out = (it*slope - offset + 2048)>>12;
       }
+      // Note: for strategy 2, the code is called with strategy=1
+      else if (strategy == 4 && it*slope >= offset+ cut/reScale) { // FCAL
+        out = (it*slope*reScale - offset*reScale + 2048)>>12;
+      } 
       if (out < 0)                 out = 0;
       if (out > s_saturationValue) out = s_saturationValue;
     }

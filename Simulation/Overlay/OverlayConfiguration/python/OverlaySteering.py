@@ -8,7 +8,8 @@ from AthenaConfiguration.MainServicesConfig import MainServicesCfg
 from AthenaConfiguration.Enums import LHCPeriod
 from AthenaPoolCnvSvc.PoolReadConfig import PoolReadCfg
 from AthenaPoolCnvSvc.PoolWriteConfig import PoolWriteCfg
-from OverlayConfiguration.OverlayMetadata import overlayMetadataCheck, overlayMetadataWrite
+from OverlayConfiguration.OverlayMetadata import overlayMetadataCheck, overlayMetadataWrite, \
+    fastChainOverlayMetadataCheck
 
 from InDetOverlay.BCMOverlayConfig import BCMOverlayCfg
 from InDetOverlay.ITkPixelOverlayConfig import ITkPixelOverlayCfg
@@ -47,14 +48,18 @@ def OverlayMainContentCfg(configFlags):
     """Main overlay content"""
 
     # Handle metadata correctly
-    overlayMetadataCheck(configFlags)
+    if configFlags.Overlay.FastChain:
+        fastChainOverlayMetadataCheck(configFlags)
+    else:
+        overlayMetadataCheck(configFlags)
     acc = overlayMetadataWrite(configFlags)
 
     # Add event info overlay
     acc.merge(EventInfoOverlayCfg(configFlags))
 
     # Add truth overlay (needed downstream)
-    acc.merge(CopyMcEventCollectionCfg(configFlags))
+    if not configFlags.Overlay.FastChain:
+        acc.merge(CopyMcEventCollectionCfg(configFlags))
     acc.merge(CopyJetTruthInfoCfg(configFlags))
     acc.merge(CopyPileupParticleTruthInfoCfg(configFlags))
     acc.merge(CopyTimingsCfg(configFlags))

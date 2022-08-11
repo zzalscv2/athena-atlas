@@ -1,10 +1,9 @@
 // Dear emacs, this is -*- c++ -*-
 
 /*
-  Copyright (C) 2002-2020 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
 */
 
-// $Id: FileMetaData_v1.h 685184 2015-07-23 20:25:43Z cranshaw $
 #ifndef XAODMETADATA_VERSIONS_FILEMETADATA_V1_H
 #define XAODMETADATA_VERSIONS_FILEMETADATA_V1_H
 
@@ -12,6 +11,7 @@
 #include <iosfwd>
 #include <string>
 #include <vector>
+#include <set>
 
 // EDM include(s):
 #include "AthContainers/AuxElement.h"
@@ -40,9 +40,12 @@ namespace xAOD {
       /// @{
 
       /// Operator testing the equality of two objects
-      bool operator==( const FileMetaData_v1& rhs ) const;
+      bool operator==( const FileMetaData_v1& rhs ) const { return compareWith(rhs, std::set<std::string>()); };
       /// Operator testing the inequality of two objects
       bool operator!=( const FileMetaData_v1& rhs ) const;
+
+      /// Compare this FMD object with another, optionally ignoring some attributes
+      bool compareWith(const FileMetaData_v1& rhs, const std::set<std::string> ignore ) const;
 
       /// @}
 

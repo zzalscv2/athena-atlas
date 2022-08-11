@@ -212,9 +212,9 @@ StatusCode AFPSiClusterTool::saveToXAOD(std::unique_ptr<xAOD::AFPSiHitsClusterCo
         
         // add links to hits
         for (const xAOD::AFPSiHit* theHit : theCluster.hits()) {
-          ElementLink< xAOD::AFPSiHitContainer >* hitLink = new ElementLink< xAOD::AFPSiHitContainer >; // will be taken over by the xAODCluster and deleted
-          hitLink->toContainedElement(*siHitContainer, theHit);
-          xAODCluster->addHitLink(*hitLink);
+          ElementLink< xAOD::AFPSiHitContainer > hitLink;
+          hitLink.toContainedElement(*siHitContainer, theHit);
+          xAODCluster->addHitLink(hitLink);
         }
       } // end for over layers
     } // end for over stations

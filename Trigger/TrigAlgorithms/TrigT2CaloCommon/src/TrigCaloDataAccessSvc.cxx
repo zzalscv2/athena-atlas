@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
 */
 #include "AthenaMonitoringKernel/Monitored.h"
 #include "TrigCaloDataAccessSvc.h"
@@ -451,7 +451,11 @@ unsigned int TrigCaloDataAccessSvc::lateInit(const EventContext& context) { // n
                 Identifier id = theCaloCCIDM->cell_id(i);
                 if ( id!=0 ){
                   const CaloDetDescrElement* el = theCaloDDM->get_element(id);
-                  cachefullcont->at(i) = (new CaloCell(el,0,0,0,(CaloGain::CaloGain)0) );
+		  if ( el->is_tile() ) {
+			 cachefullcont->at(i) = new TileCell(el,0);
+		  } else {
+			 cachefullcont->at(i) = new LArCell(el,0,0,0,(CaloGain::CaloGain)0);
+		  }
                 }
         }
 

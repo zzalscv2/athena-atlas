@@ -165,8 +165,8 @@ StatusCode TrigR3Mon::initialize() {
   /// We fetch the tracks and vertices in a helper class so don't want to mess 
   /// with this ReadHandleKey - it is only here to placate the scheduler
 
-  ATH_CHECK (m_trackdummykey.initialize());
-  ATH_CHECK (m_vtxdummykey.initialize());
+  ATH_CHECK (m_trackdummykeys.initialize());
+  ATH_CHECK (m_vtxdummykeys.initialize());
 
   ATH_MSG_DEBUG( " -----  exit init() ----- " );
 
