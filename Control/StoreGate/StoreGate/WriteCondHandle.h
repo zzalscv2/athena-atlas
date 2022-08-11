@@ -300,7 +300,7 @@ namespace SG {
   void
   WriteCondHandle<T>::addDependency(SG::ReadCondHandle<R>& rch) {
     CondContBase* dep_cc = rch.getCC();
-    dep_cc->addDeps (std::vector<CondContBase*> { m_cc });
+    dep_cc->addDep (m_cc);
     return addDependency(rch.getRange());
   }
 
