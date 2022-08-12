@@ -49,8 +49,9 @@ def getStream(type,name):
             EvtConversionSvc = "ByteStreamCnvSvc",
             OutputFile = "ByteStreamEventStorageOutputSvc",
             )
-        theApp.addOutputStream( StreamBS )
-        theApp.OutStreamType ="AthenaOutputStream"
+        from AthenaCommon.AlgSequence import AthSequencer
+        outSequence = AthSequencer("AthOutSeq")
+        outSequence += StreamBS
             
         # Define the output as follows: 
         ByteStreamEventStorageOutputSvc = svcMgr.ByteStreamEventStorageOutputSvc
