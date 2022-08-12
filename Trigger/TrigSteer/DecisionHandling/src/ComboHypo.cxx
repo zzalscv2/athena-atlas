@@ -176,9 +176,9 @@ StatusCode ComboHypo::execute(const EventContext& context ) const {
 
     bool overallDecision = true;
 
-    std::vector< std::set<uint32_t> > legFeatureHashes; //!< Keeps track per leg of the hash of the objects passing the leg
+    std::vector< SG::SGKeySet > legFeatureHashes; //!< Keeps track per leg of the hash of the objects passing the leg
     legFeatureHashes.resize( multiplicityPerLeg.size() );
-    size_t passthroughCounter = 0; //!< We allow Jets or a FullScan ROI to pass any multiplicity. So we may have to magic up some unique hashes. Counting integers work fine.
+    SG::sgkey_t passthroughCounter = 0; //!< We allow Jets or a FullScan ROI to pass any multiplicity. So we may have to magic up some unique hashes. Counting integers work fine.
 
     Combo::LegDecisionsMap thisChainCombMap;
 
@@ -190,7 +190,7 @@ StatusCode ComboHypo::execute(const EventContext& context ) const {
     //
     // Such a check is needed when implementing tag-and-probe style chains as when performing the probe processing we will be comparing 1st, 2nd, 3rd,. etc. 
     // step features on the probe leg to final-step features on the tag leg.
-    std::map<uint32_t, std::set<uint32_t>> priorFeaturesMap;
+    SG::SGKeyMap<std::set<uint32_t>> priorFeaturesMap;
 
     // Check multiplicity of each leg of this chain
     for ( size_t legIndex = 0; legIndex <  multiplicityPerLeg.size(); ++legIndex ) {
@@ -231,12 +231,13 @@ StatusCode ComboHypo::execute(const EventContext& context ) const {
       // to the Decision Object.
 
       for (const ElementLink<DecisionContainer>& dEL : it->second){
-        uint32_t featureKey = 0, roiKey = 0; // The container hash of the DecisionObject's most-recent feature, and its initial ROI
+        SG::sgkey_t featureKey = 0; // The container hash of the DecisionObject's most-recent feature, and its initial ROI
+        SG::sgkey_t roiKey = 0;
         uint16_t featureIndex = 0, roiIndex = 0; // The container index of the DecisionObject's most-recent feature, and its initial ROI
         bool roiIsFullscan = false; // Will be set to true if the DecisionObject's initial ROI is flagged as FullScan
         bool objectRequestsNoMultiplicityCheck = false; // Will be set to true if the object has been flagged as independently satisfying all requirements on a leg
         ATH_CHECK( extractFeatureAndRoI(it->first, dEL, featureKey, featureIndex, roiKey, roiIndex, roiIsFullscan, objectRequestsNoMultiplicityCheck, priorFeaturesMap, context) );
-        const bool theFeatureIsTheROI = (featureKey == roiKey and featureIndex == roiIndex); // The user explicitly set the feature === the RoI
+        const bool theFeatureIsTheROI = (SG::sgkeyEqual (featureKey, roiKey) and featureIndex == roiIndex); // The user explicitly set the feature === the RoI
         const bool thereIsNoFeatureYet = (featureKey == 0 and roiKey != 0); // The leg has not yet started to process
         if (objectRequestsNoMultiplicityCheck or (roiIsFullscan and (theFeatureIsTheROI or thereIsNoFeatureYet))) {
           // This passthroughCounter integer is being to generate unique "hash" values to allow Jets or FS ROI to meet the multiplicity requirements of this leg
@@ -246,7 +247,7 @@ StatusCode ComboHypo::execute(const EventContext& context ) const {
               << ". (Note: unique passing hash generated from " << (objectRequestsNoMultiplicityCheck ? "an object requesting NO multiplicity checks" : "an FullScan ROI") << ")");
           }
         } else {
-          const uint32_t uniquenessHash = (featureKey != 0 ? (featureKey + featureIndex) : (roiKey + roiIndex)); 
+          const SG::sgkey_t uniquenessHash = (featureKey != 0 ? (featureKey + featureIndex) : (roiKey + roiIndex)); 
           legFeatureHashes.at( legIndex ).insert( uniquenessHash );
           ATH_MSG_DEBUG("  -- Add feature hash '" << uniquenessHash << "' to leg " << legIndex << ".");
         }
@@ -260,12 +261,12 @@ StatusCode ComboHypo::execute(const EventContext& context ) const {
 
     // Up-cast any features which are actually earlier-step versions of other features (see priorFeaturesMap above)
     // to be considered as equivalent to the later step version, note that this is for combo uniqueness comparison purposes only.
-    for (std::set<uint32_t>& legHashes : legFeatureHashes) {
+    for (SG::SGKeySet& legHashes : legFeatureHashes) {
       // We will continue to up-cast a single feature at a time in each leg's set of features, until no more upcast opportunities are available.
       size_t emergencyBreak = 0;
       while (true) {
         bool somethingChanged = false;
-        for (const uint32_t legHash : legHashes) {
+        for (const SG::sgkey_t legHash : legHashes) {
           for (auto const& [key, payloadSet] : priorFeaturesMap) {
             if (payloadSet.count(legHash) == 1) {
               ATH_MSG_DEBUG("Feature hash=" << legHash << " identified as a prior feature of hash=" << key 
@@ -292,15 +293,19 @@ StatusCode ComboHypo::execute(const EventContext& context ) const {
     } // Loop over the different legs
 
     // Remove any duplicated features which are shared between legs.
-    // Keep the feature only in the leg which can afford to loose the least number of object, given its multiplicity requirement.
-    std::set<uint32_t> allFeatureHashes;
-    for (const std::set<uint32_t>& legHashes : legFeatureHashes) {
+    // Keep the feature only in the leg which can afford to lose the least number of object, given its multiplicity requirement.
+    // FIXME: The  order in which we iterate over allFeatureHashes can
+    //        affect the trigger results.  But OK not to use SGKeySet here,
+    //        since any duplicates will already have been removed
+    //        in legFeatureHashes.
+    std::set<SG::sgkey_t> allFeatureHashes;
+    for (const SG::SGKeySet& legHashes : legFeatureHashes) {
       allFeatureHashes.insert(legHashes.begin(), legHashes.end());
     }
-    for (const uint32_t featureHash : allFeatureHashes) {
+    for (const SG::sgkey_t featureHash : allFeatureHashes) {
       size_t legsWithHash = 0; //!< If this grows greater than one then we have to start culling features from legs
-      size_t keepLegIndex = 0; //!< If the hash is used in multiple legs, which leg can least afford to loose it?
-      int32_t keepLegMargin = std::numeric_limits<int32_t>::max(); //!< How many features the leg at keepLegIndex can afford to loose before it starts to fail its multiplicity requirement. 
+      size_t keepLegIndex = 0; //!< If the hash is used in multiple legs, which leg can least afford to lose it?
+      int32_t keepLegMargin = std::numeric_limits<int32_t>::max(); //!< How many features the leg at keepLegIndex can afford to lose before it starts to fail its multiplicity requirement. 
       for (size_t legIndex = 0; legIndex <  multiplicityPerLeg.size(); ++legIndex) {
         if (legFeatureHashes.at(legIndex).count(featureHash) == 0) {
           continue;
@@ -317,10 +322,10 @@ StatusCode ComboHypo::execute(const EventContext& context ) const {
       if (legsWithHash == 1) {
         continue;
       }
-      // If a feature is found on multiple legs, then remove it from all but the leg which can afford to loose it the least
+      // If a feature is found on multiple legs, then remove it from all but the leg which can afford to lose it the least
       for (size_t legIndex = 0; legIndex <  multiplicityPerLeg.size(); ++legIndex) {
         if (legIndex == keepLegIndex) {
-          ATH_MSG_DEBUG("Keeping feature hash '" << featureHash << "', on leg " << legIndex << ". This leg can least afford to loose it. "
+          ATH_MSG_DEBUG("Keeping feature hash '" << featureHash << "', on leg " << legIndex << ". This leg can least afford to lose it. "
             << "Leg has " << legFeatureHashes.at(legIndex).size() 
             << " features, and a multiplicity requirement of " << multiplicityPerLeg.at(legIndex));
           continue;
@@ -379,13 +384,13 @@ StatusCode ComboHypo::execute(const EventContext& context ) const {
 
 StatusCode ComboHypo::extractFeatureAndRoI(const HLT::Identifier& chainLegId,
   const ElementLink<DecisionContainer>& dEL,
-  uint32_t& featureKey,
+  SG::sgkey_t& featureKey,
   uint16_t& featureIndex,
-  uint32_t& roiKey,
+  SG::sgkey_t& roiKey,
   uint16_t& roiIndex,
   bool& roiIsFullscan,
   bool& objectRequestsNoMultiplicityCheck,
-  std::map<uint32_t, std::set<uint32_t>>& priorFeaturesMap,
+  SG::SGKeyMap<std::set<uint32_t>>& priorFeaturesMap,
   const EventContext& ctx) const 
 {
   // Return collections for the findLinks call. 
