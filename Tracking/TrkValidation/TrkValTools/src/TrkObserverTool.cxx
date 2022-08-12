@@ -388,21 +388,23 @@ std::string Trk::TrkObserverTool::dumpRejection(xAOD::RejectionStep rejectStep, 
 	std::string rejection_step = "";
 	std::string rejection_reason = "";
 	std::string rejection_description = "";
-	if ( m_rejectStep_descriptions.find(rejectStep) == m_rejectStep_descriptions.end() ) {
+	const auto istep = m_rejectStep_descriptions.find(rejectStep);
+	if ( istep == m_rejectStep_descriptions.end() ) {
 		// not found
 		rejection_step = "REJECTION STEP DESCRIPTION NOT FOUND: " + std::to_string(rejectStep);
 	}
 	else {
 		// found
-		rejection_step = m_rejectStep_descriptions[rejectStep];
+        rejection_step = istep->second;
 	}
-	if ( m_rejectReason_descriptions.find(rejectReason) == m_rejectReason_descriptions.end() ) {
+	const auto ireason = m_rejectReason_descriptions.find(rejectReason);
+	if ( ireason == m_rejectReason_descriptions.end() ) {
 		// not found
 		rejection_reason = "REJECTION REASON DESCRIPTION NOT FOUND: " + std::to_string(rejectReason);
 	}
 	else {
 		// found
-		rejection_reason = m_rejectReason_descriptions[rejectReason];
+        rejection_reason = ireason->second;
 	}
 	rejection_description = rejection_step + " (" + rejection_reason + ")";
 	return rejection_description;
@@ -422,7 +424,7 @@ int Trk::TrkObserverTool::getNObservedTracks(const ObservedTrackMap* trk_map) {
 	return trk_map->size();
 }
 
-std::map<xAOD::RejectionStep, std::string> Trk::TrkObserverTool::m_rejectStep_descriptions = {
+const std::map<xAOD::RejectionStep, std::string> Trk::TrkObserverTool::m_rejectStep_descriptions = {
 	{xAOD::RejectionStep::addNewTracks, "DenseEnvironmentsAmbiguityScoreProcessorTool::addNewTracks"},
 	{xAOD::RejectionStep::refitTrack, "AmbiguityProcessorBase::refitTrack"},
 	{xAOD::RejectionStep::addTrack, "AmbiguityProcessorBase::addTrack"},
@@ -430,7 +432,7 @@ std::map<xAOD::RejectionStep, std::string> Trk::TrkObserverTool::m_rejectStep_de
 	{xAOD::RejectionStep::getCleanedOutTrack, "InDetDenseEnvAmbiTrackSelectionTool::getCleanedOutTrack"}
 };
 
-std::map<xAOD::RejectionReason, std::string> Trk::TrkObserverTool::m_rejectReason_descriptions = {
+const std::map<xAOD::RejectionReason, std::string> Trk::TrkObserverTool::m_rejectReason_descriptions = {
 	{xAOD::RejectionReason::acceptedTrack, "not actually a rejection; accepted track"},
 	// Reason for rejection within DenseEnvironmentsAmbiguityProcessorTool::solveTracks
 	{xAOD::RejectionReason::stillBeingProcessed, "not actually a rejection; track still being processed"},
