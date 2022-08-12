@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "MuonSegmentMomentumFromField.h"
@@ -35,7 +35,7 @@ StatusCode MuonSegmentMomentumFromField::initialize()
   return StatusCode::SUCCESS; 
 }
 
-void MuonSegmentMomentumFromField::fitMomentumVectorSegments( const EventContext& ctx, const std::vector <const Muon::MuonSegment*> segments, double & signedMomentum ) const
+void MuonSegmentMomentumFromField::fitMomentumVectorSegments( const EventContext& ctx, const std::vector <const Muon::MuonSegment*>  & segments, double & signedMomentum ) const
 {
 
   /** Estimate signed momentum from vector of MDT/CSC segments
@@ -48,7 +48,7 @@ void MuonSegmentMomentumFromField::fitMomentumVectorSegments( const EventContext
   std::vector<const Muon::MuonSegment*>::const_iterator it2 = segments.begin();
   std::vector<const Muon::MuonSegment*>::const_iterator it_end = segments.end();
 
-  it2++;
+  ++it2;
   double maxintegral=0;  
   while (it2!=it_end){
     double integral= m_doOld ? fieldIntegralEstimate_old(ctx,*it,*it2) : fieldIntegralEstimate(ctx,*it,*it2);
@@ -57,8 +57,8 @@ void MuonSegmentMomentumFromField::fitMomentumVectorSegments( const EventContext
       if( m_doOld ) fitMomentum2Segments_old(ctx, *it, *it2, signedMomentum);
       else          fitMomentum2Segments(ctx, *it, *it2, signedMomentum);
     }
-    it++;
-    it2++;
+    ++it;
+    ++it2;
   }
   ATH_MSG_DEBUG( " Estimated signed momentum " << signedMomentum );
 }

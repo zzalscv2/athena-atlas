@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "MuonSegmentCleaner/MuonPhiHitSelector.h"
@@ -1151,7 +1151,7 @@ MuonPhiHitSelector::fitPhiSL(const double pmom, const std::vector<Identifier>& /
             pullOut[i] = resiOut[i] / std::sqrt(1. / err2invOut + ef_i2);
         }
 
-        if (std::abs(pullOut[i]) > std::abs(pullmax) && i < nfit) {
+        if ((i < nfit) and (std::abs(pullOut[i]) > std::abs(pullmax)) ) {
             imax    = indexf[i];
             jmax    = i;
             pullmax = pullOut[i];

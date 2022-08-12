@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2020 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef MuonSegmentMomentumFromField_MuonSegmentMomentumFromField_H
@@ -35,7 +35,7 @@ class MuonSegmentMomentumFromField : public AthAlgTool, virtual public Muon::IMu
   virtual void fitMomentum2Segments_old( const EventContext& ctx, const Muon::MuonSegment* segment1, const Muon::MuonSegment* segment2, double & signedMomentum ) const;
 
   /** fits a momentum to a vector of segments */
-  virtual void fitMomentumVectorSegments( const EventContext&, const std::vector <const Muon::MuonSegment*>, double & signedMomentum ) const;
+  virtual void fitMomentumVectorSegments( const EventContext&, const std::vector <const Muon::MuonSegment*> & , double & signedMomentum ) const;
  private:
   double fieldIntegralEstimate(const EventContext& ctx, const Muon::MuonSegment* segment1, const Muon::MuonSegment* segment2) const;
   double fieldIntegralEstimate_old(const EventContext& ctx, const Muon::MuonSegment* segment1, const Muon::MuonSegment* segment2) const;
