@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
 */
 #include "TrigStreamerHypoAlg.h"
 
@@ -50,7 +50,7 @@ StatusCode TrigStreamerHypoAlg::execute( const EventContext& context ) const {
        newDecision->setObjectLink(featureString(), featureLinkInfo.link);
      } else {
        // Obligatory link to feature. Re-use previous Step's feature.
-       uint32_t key = 0;
+       SG::sgkey_t key = 0;
        uint32_t clid = 0;
        uint16_t index = 0;
        const Decision* source = nullptr; // Unused
