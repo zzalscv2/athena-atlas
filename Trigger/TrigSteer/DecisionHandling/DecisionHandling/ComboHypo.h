@@ -87,13 +87,13 @@ class ComboHypo : public ::AthReentrantAlgorithm {
    **/
   StatusCode extractFeatureAndRoI(const HLT::Identifier& chainLegId,
     const ElementLink<TrigCompositeUtils::DecisionContainer>& EL,
-    uint32_t& featureKey, 
+    SG::sgkey_t& featureKey, 
     uint16_t& featureIndex, 
-    uint32_t& roiKey, 
+    SG::sgkey_t& roiKey, 
     uint16_t& roiIndex, 
     bool& roiFullscan, 
     bool& objectRequestsNoMultiplicityCheck,
-    std::map<uint32_t, std::set<uint32_t>>& priorFeaturesMap,
+    SG::SGKeyMap<std::set<uint32_t>>& priorFeaturesMap,
     const EventContext& ctx) const; 
 
 
