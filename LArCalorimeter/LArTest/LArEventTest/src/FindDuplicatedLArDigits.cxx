@@ -10,9 +10,6 @@
 #include "CaloIdentifier/CaloCell_ID.h"
 #include "LArRawEvent/LArDigitContainer.h"
 #include "LArRawEvent/LArFebHeaderContainer.h"
-#include "TBEvent/TBPhase.h"
-#include "TBEvent/TBTriggerPatternUnit.h"
-#include "TBEvent/TBScintillatorCont.h"
 
 #include "LArElecCalib/ILArPedestal.h"
 #include <fstream>
