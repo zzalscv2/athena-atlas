@@ -353,11 +353,18 @@ if InDetFlags.doV0Finder():
   # --- now configure the algorithm
   #
   if InDetFlags.doV0Finder() :
+    from InDetV0Finder.InDetV0FinderConf import InDet__V0MainDecorator
+    V0Decorator = InDet__V0MainDecorator(name = "V0Decorator",
+                                     V0Tools = v0_tools,
+                                     V0ContainerName         = InDetKeys.xAODV0VertexContainer(),
+                                     KshortContainerName     = InDetKeys.xAODKshortVertexContainer(),
+                                     LambdaContainerName     = InDetKeys.xAODLambdaVertexContainer(),
+                                     LambdabarContainerName  = InDetKeys.xAODLambdabarVertexContainer())
     from InDetV0Finder.InDetV0FinderConf import InDet__InDetV0Finder
     InDetV0Finder = InDet__InDetV0Finder(name                    = 'InDetV0Finder',
                                          #decorateV0              = False,
                                          InDetV0FinderToolName   = V0FinderTool,
-                                         V0Tools                 = v0_tools,
+                                         Decorator              = V0Decorator,
                                          V0ContainerName         = InDetKeys.xAODV0VertexContainer(),
                                          KshortContainerName     = InDetKeys.xAODKshortVertexContainer(),
                                          LambdaContainerName     = InDetKeys.xAODLambdaVertexContainer(),

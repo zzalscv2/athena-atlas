@@ -1,19 +1,17 @@
-# Copyright (C) 2002-2020 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
 
 # Declare the package name:
 atlas_subdir( InDetV0Finder )
 
 # External dependencies:
-find_package( CLHEP )
 find_package( HepPDT )
-find_package( ROOT COMPONENTS Core Tree MathCore Hist RIO pthread )
 
 atlas_add_library( InDetV0FinderLib
                    src/*.cxx
                    PUBLIC_HEADERS InDetV0Finder
-                   PRIVATE_INCLUDE_DIRS ${HEPPDT_INCLUDE_DIRS} ${ROOT_INCLUDE_DIRS} ${CLHEP_INCLUDE_DIRS}
-                   LINK_LIBRARIES AthContainers AthenaBaseComps BeamSpotConditionsData GaudiKernel StoreGateLib xAODTracking
-                   PRIVATE_LINK_LIBRARIES ${CLHEP_LIBRARIES} ${HEPPDT_LIBRARIES} ${ROOT_LIBRARIES} ITrackToVertex InDetConversionFinderToolsLib TrkExInterfaces TrkToolInterfaces TrkV0FitterLib TrkVKalVrtFitterLib TrkVertexAnalysisUtilsLib TrkVertexFitterInterfaces )
+                   PRIVATE_INCLUDE_DIRS ${HEPPDT_INCLUDE_DIRS} }
+                   LINK_LIBRARIES AthContainers AthenaBaseComps GaudiKernel StoreGateLib xAODTracking TrkVertexAnalysisUtilsLib
+                   PRIVATE_LINK_LIBRARIES  ${HEPPDT_LIBRARIES}  ITrackToVertex InDetConversionFinderToolsLib TrkExInterfaces TrkToolInterfaces TrkV0FitterLib TrkVKalVrtFitterLib  TrkVertexFitterInterfaces xAODEventInfo )
 
 atlas_add_component( InDetV0Finder
                      src/components/*.cxx
