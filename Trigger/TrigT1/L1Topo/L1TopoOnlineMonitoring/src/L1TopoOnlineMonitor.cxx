@@ -43,6 +43,30 @@ L1TopoOnlineMonitor::L1TopoOnlineMonitor(const std::string& name, ISvcLocator* s
 // =============================================================================
 StatusCode L1TopoOnlineMonitor::initialize() {
 
+  m_rateHdwNotSim.reset(new float[s_nTopoCTPOutputs]);
+  m_rateSimNotHdw.reset(new float[s_nTopoCTPOutputs]);
+  m_rateHdwAndSim.reset(new float[s_nTopoCTPOutputs]);
+  m_rateHdwSim.reset(new float[s_nTopoCTPOutputs]);
+  m_countHdwNotSim.reset(new float[s_nTopoCTPOutputs]);
+  m_countSimNotHdw.reset(new float[s_nTopoCTPOutputs]);
+  m_countHdwSim.reset(new float[s_nTopoCTPOutputs]);
+  m_countHdw.reset(new float[s_nTopoCTPOutputs]);
+  m_countSim.reset(new float[s_nTopoCTPOutputs]);
+  m_countAny.reset(new float[s_nTopoCTPOutputs]);
+
+  for (size_t i=0;i<s_nTopoCTPOutputs;i++){
+    m_rateHdwNotSim[i] = 0;
+    m_rateSimNotHdw[i] = 0;
+    m_rateHdwAndSim[i] = 0;
+    m_rateHdwSim[i] = 0;
+    m_countHdwNotSim[i] = 0;
+    m_countSimNotHdw[i] = 0;
+    m_countHdwSim[i] = 0;
+    m_countHdw[i] = 0;
+    m_countSim[i] = 0;
+    m_countAny[i] = 0;
+  }
+
   ATH_CHECK(m_l1topoKey.initialize());
   ATH_CHECK(m_ctpRdoKey.initialize(m_doHwMonCTP));
   ATH_CHECK(m_l1topoRawDataKey.initialize(m_doHwMon));
@@ -65,7 +89,7 @@ StatusCode L1TopoOnlineMonitor::start() {
 StatusCode L1TopoOnlineMonitor::fillHistograms( const EventContext& ctx ) const {
   
   DecisionBits decisionBits{};
-  enum class MonFunction : uint8_t {doSimMon=0, doHwMonCTP, doHwMon, doComp};
+  enum class MonFunction : uint8_t {doSimMon=0, doHwMonCTP, doHwMon, doComp, doSummary};
   std::vector<uint8_t> failedMonFunctions;
 
   
@@ -288,13 +312,65 @@ StatusCode L1TopoOnlineMonitor::doComp( DecisionBits& decisionBits ) const {
     return StatusCode::FAILURE;
   }
 
-  std::vector<size_t> triggerBitIndicesSimNotHdw = bitsetIndices(triggerBitsSim & (~triggerBitsHdw));
-  std::vector<size_t> triggerBitIndicesHdwNotSim = bitsetIndices(triggerBitsHdw & (~triggerBitsSim));
+  std::bitset<s_nTopoCTPOutputs> triggerBitsSimNotHdw = triggerBitsSim & (~triggerBitsHdw);
+  std::bitset<s_nTopoCTPOutputs> triggerBitsHdwNotSim = triggerBitsHdw & (~triggerBitsSim);
+  std::bitset<s_nTopoCTPOutputs> triggerBitsHdwSim = triggerBitsHdw & triggerBitsSim;
+  std::bitset<s_nTopoCTPOutputs> triggerBitsAny = triggerBitsHdw | triggerBitsSim;
+
+  std::vector<size_t> triggerBitIndicesSimNotHdw = bitsetIndices(triggerBitsSimNotHdw);
+  std::vector<size_t> triggerBitIndicesHdwNotSim = bitsetIndices(triggerBitsHdwNotSim);
   auto monSimNotHdw = Monitored::Collection("SimNotHdwL1TopoResult", triggerBitIndicesSimNotHdw);
   auto monHdwNotSim = Monitored::Collection("HdwNotSimL1TopoResult", triggerBitIndicesHdwNotSim);
 
   Monitored::Group(m_monTool, monSimNotHdw, monHdwNotSim);
 
+  float rate=0;
+  for (size_t i=0;i<4;i++) {
+    auto mon_trig = Monitored::Scalar<unsigned>("LegacyTopoTrigger_"+std::to_string(i));
+    auto mon_match = Monitored::Scalar<unsigned>("LegacyTopoMissMatch_"+std::to_string(i));
+    auto mon_weight = Monitored::Scalar<float>("LegacyTopoWeight_"+std::to_string(i));
+    for (size_t j=0;j<32;j++) {
+      m_countHdwNotSim[32*i+j]+=triggerBitsHdwNotSim[32*i+j];
+      m_countSimNotHdw[32*i+j]+=triggerBitsSimNotHdw[32*i+j];
+      m_countHdwSim[32*i+j]+=triggerBitsHdwSim[32*i+j];
+      m_countHdw[32*i+j]+=triggerBitsHdw[32*i+j];
+      m_countSim[32*i+j]+=triggerBitsSim[32*i+j];
+      m_countAny[32*i+j]+=triggerBitsAny[32*i+j];
+      
+      rate = m_countHdw[32*i+j]>0 ? m_countHdwNotSim[32*i+j]/m_countHdw[32*i+j] : 0;
+      if (rate != m_rateHdwNotSim[32*i+j]) {
+	mon_trig = static_cast<unsigned>(j);
+	mon_match = 0;
+	mon_weight = rate-m_rateHdwNotSim[32*i+j];
+	m_rateHdwNotSim[32*i+j] = rate;
+	Monitored::Group(m_monTool, mon_trig, mon_match, mon_weight);
+      }
+      rate = m_countSim[32*i+j]>0 ? m_countSimNotHdw[32*i+j]/m_countSim[32*i+j] : 0;
+      if (rate != m_rateSimNotHdw[32*i+j]) {
+	mon_trig = static_cast<unsigned>(j);
+	mon_match = 1;
+	mon_weight = rate-m_rateSimNotHdw[32*i+j];
+	m_rateSimNotHdw[32*i+j] = rate;
+	Monitored::Group(m_monTool, mon_trig, mon_match, mon_weight);
+      }
+      rate = m_countAny[32*i+j]>0 ? m_countHdwSim[32*i+j]/m_countAny[32*i+j] : 0;
+      if (rate != m_rateHdwAndSim[32*i+j]) {
+	mon_trig = static_cast<unsigned>(j);
+	mon_match = 2;
+	mon_weight = rate-m_rateHdwAndSim[32*i+j];
+	m_rateHdwAndSim[32*i+j] = rate;
+	Monitored::Group(m_monTool, mon_trig, mon_match, mon_weight);
+      }
+      rate = m_countSim[32*i+j]>0 ? m_countHdw[32*i+j]/m_countSim[32*i+j] : 0;
+      if (rate != m_rateHdwSim[32*i+j]) {
+	mon_trig = static_cast<unsigned>(j);
+	mon_match = 3;
+	mon_weight = rate-m_rateHdwSim[32*i+j];
+	m_rateHdwSim[32*i+j] = rate;
+	Monitored::Group(m_monTool, mon_trig, mon_match, mon_weight);
+      }
+    }
+  }
 
   return StatusCode::SUCCESS;
 }
