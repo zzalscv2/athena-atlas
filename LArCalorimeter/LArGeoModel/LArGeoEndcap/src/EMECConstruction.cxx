@@ -83,7 +83,8 @@
 
 
 LArGeo::EMECConstruction::EMECConstruction(bool is_tb, bool has_inner, bool has_outer)
-    : m_fullGeo(true), m_isTB(is_tb), m_hasInnerWheel(has_inner), m_hasOuterWheel(has_outer),
+  : AthMessaging("EMECConstruction"),
+    m_fullGeo(true), m_isTB(is_tb), m_hasInnerWheel(has_inner), m_hasOuterWheel(has_outer),
       m_innerWheelVariant("Wheel"), m_outerWheelVariant("Wheel") // "Wheel" (Meaning polycone) or "Cone" or "Slices"
 {
 /*
@@ -116,15 +117,6 @@ GeoFullPhysVol* LArGeo::EMECConstruction::GetEnvelope(bool bPos)
     throw std::runtime_error("Error in EndcapCryostatConstruction, cannot access DetectorStore");
   }
 
-  IMessageSvc* msgSvc;
-  MsgStream *msg;
-  StatusCode status = svcLocator->service("MessageSvc", msgSvc);
-  if(!status.isFailure()){
-    msg = new MsgStream(msgSvc, "EMECConstruction");
-  } else {
-    throw std::runtime_error("EMECConstruction: cannot access message service");
-  }
-
   // Get GeoModelSvc and RDBAccessSvc
 
   IRDBAccessSvc* pAccessSvc(0);
@@ -153,9 +145,8 @@ GeoFullPhysVol* LArGeo::EMECConstruction::GetEnvelope(bool bPos)
   }
 
   if(multilayered_absorbers > 0){
-    (*msg) << MSG::INFO << "multi-layered version of absorbers activated, "
-           << "parameter value is " << multilayered_absorbers
-           << endmsg;
+    ATH_MSG_INFO( "multi-layered version of absorbers activated, "
+                  << "parameter value is " << multilayered_absorbers );
   }
 
   StoredMaterialManager* materialManager = nullptr;
@@ -384,8 +375,8 @@ GeoFullPhysVol* LArGeo::EMECConstruction::GetEnvelope(bool bPos)
              && slice < 100 // slice number limited by two digits
             );
             if(slice >= 100){
-                (*msg) << MSG::ERROR << "too many LArWheel slices, something"
-                       << " goes wrong in EMECConstruction" << endmsg;
+                ATH_MSG_ERROR( "too many LArWheel slices, something"
+                               << " goes wrong in EMECConstruction" );
             }
             innerName += "s";
         } else { // it is a Polycone
@@ -393,10 +384,9 @@ GeoFullPhysVol* LArGeo::EMECConstruction::GetEnvelope(bool bPos)
             absorbers.push_back(innerName + "::Absorber");
             electrodes.push_back(innerName + "::Electrode");
         }
-        (*msg) << MSG::INFO << "activating " << innerName << endmsg;
-        (*msg) << MSG::DEBUG << absorbers.size() << " absorber, "
-                             << electrodes.size() << " electrode shapes created"
-                             << endmsg;
+        ATH_MSG_INFO( "activating " << innerName );
+        ATH_MSG_DEBUG( absorbers.size() << " absorber, "
+                       << electrodes.size() << " electrode shapes created" );
 
 
         double zBack = wheelThickness;
@@ -453,8 +443,8 @@ GeoFullPhysVol* LArGeo::EMECConstruction::GetEnvelope(bool bPos)
              && slice < 100 // slice number limited by two digits
             );
             if(slice >= 100){
-                (*msg) << MSG::ERROR << "too many LArWheel slices, something"
-                       << " goes wrong in EMECConstruction" << endmsg;
+               ATH_MSG_ERROR( "too many LArWheel slices, something"
+                              << " goes wrong in EMECConstruction" );
             }
             outerName += "s";
         } else { // it is Polycone
@@ -462,10 +452,9 @@ GeoFullPhysVol* LArGeo::EMECConstruction::GetEnvelope(bool bPos)
             absorbers.push_back(outerName + "::Absorber");
             electrodes.push_back(outerName + "::Electrode");
         }
-        (*msg) << MSG::INFO << "activating " << outerName << endmsg;
-        (*msg) << MSG::DEBUG << absorbers.size() << " absorber, "
-                             << electrodes.size() << " electrode shapes created"
-                             << endmsg;
+        ATH_MSG_INFO( "activating " << outerName );
+        ATH_MSG_DEBUG( absorbers.size() << " absorber, "
+                       << electrodes.size() << " electrode shapes created" );
 
         double zBack = wheelThickness;
         GeoPcon *outerShape = new GeoPcon(phiPosition - phiSize, 2.*phiSize);

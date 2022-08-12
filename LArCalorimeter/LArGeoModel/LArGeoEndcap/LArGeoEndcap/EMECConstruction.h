@@ -13,6 +13,7 @@
 #ifndef LARGEOENDCAP_EMECCONSTRUCTION_H
 #define LARGEOENDCAP_EMECCONSTRUCTION_H
 
+#include "AthenaBaseComps/AthMessaging.h"
 #include<vector>
 #include <string>
 class GeoFullPhysVol;
@@ -24,6 +25,7 @@ namespace LArGeo {
       @brief GeoModel description of the LAr EMEC envelope and the active part (custom shapes)
    */
   class EMECConstruction
+    : public AthMessaging
   {
   public:
 

@@ -157,7 +157,7 @@ GeoVFullPhysVol* LArGeo::FCALConstruction::GetEnvelope(bool bPos)
   if (!FCal23Slugs) throw std::runtime_error("Error in FCALConstruction, LAr::FCal23Slugs is not found.");
 
 
-  FCAL_ChannelMap *cmap = new FCAL_ChannelMap(0);
+  auto cmap = std::make_unique<FCAL_ChannelMap>(0);
 
   GeoFullPhysVol* fcalPhysical{nullptr};
 
@@ -641,7 +641,7 @@ GeoVFullPhysVol* LArGeo::FCALConstruction::GetEnvelope(bool bPos)
   //  if (detStore->retrieve(aChannelMap)==StatusCode::FAILURE) {
   if (!detStore->contains<FCAL_ChannelMap>("FCAL_ChannelMap")) {
     cmap->finish();
-    StatusCode status=detStore->record(cmap,"FCAL_ChannelMap");
+    StatusCode status=detStore->record(std::move(cmap),"FCAL_ChannelMap");
     if(!status.isSuccess()) throw std::runtime_error ("Cannot store FCAL_ChannelMap");
   }
 
