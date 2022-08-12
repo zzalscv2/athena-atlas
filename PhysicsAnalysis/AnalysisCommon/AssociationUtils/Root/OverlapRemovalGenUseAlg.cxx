@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2017 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
 */
 
 // EDM includes
@@ -148,7 +148,7 @@ StatusCode OverlapRemovalGenUseAlg::execute()
 	template<class ContainerType>
 void OverlapRemovalGenUseAlg::setDefaultDecorations(const ContainerType& container)
 {
-	static ort::inputDecorator_t defaultDec(m_overlapLabel);
+	const static ort::inputDecorator_t defaultDec(m_overlapLabel);
 	for(auto obj : container){
 		defaultDec(*obj) = m_defaultValue; //default to all objects being overlaps if we can't get primary vertices. Ensures the event cleaning decision fails.
 	}
@@ -161,7 +161,7 @@ void OverlapRemovalGenUseAlg::setDefaultDecorations(const ContainerType& contain
 	template<class ContainerType>
 void OverlapRemovalGenUseAlg::applySelection(const ContainerType& container)
 {
-	static ort::inputDecorator_t selDec(m_selectionLabel);
+	const static ort::inputDecorator_t selDec(m_selectionLabel);
 	for(auto obj : container){
 		selDec(*obj) = selectObject(*obj);
         ATH_MSG_VERBOSE("  Obj " << obj->index() << " of type " << obj->type()
@@ -239,8 +239,8 @@ bool OverlapRemovalGenUseAlg::selectObject<xAOD::TauJet>(const xAOD::TauJet& obj
 void OverlapRemovalGenUseAlg::printObjects(const xAOD::IParticleContainer& container,
                                          const std::string& type)
 {
-  static ort::inputAccessor_t selectAcc(m_selectionLabel);
-  static ort::outputAccessor_t overlapAcc(m_overlapLabel);
+  const static ort::inputAccessor_t selectAcc(m_selectionLabel);
+  const static ort::outputAccessor_t overlapAcc(m_overlapLabel);
   for(auto obj : container){
     if(selectAcc(*obj)){
       bool overlaps = overlapAcc(*obj);
