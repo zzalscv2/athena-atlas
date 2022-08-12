@@ -1297,9 +1297,7 @@ if doTileMon:
     if doTileTMDBMon:
         from AthenaCommon.Resilience import treatException
         try:
-            from AthenaCommon.Configurable import Configurable
-            Configurable.configurableRun3Behavior=1
-            from AthenaConfiguration.ComponentAccumulator import appendCAtoAthena
+            from AthenaConfiguration.ComponentAccumulator import CAtoGlobalWrapper
             from AthenaConfiguration.AllConfigFlags import ConfigFlags
 
             runTypes = {0 : 'PHY', 1 : 'PHY', 2 : 'LAS', 4 : 'PHY', 8 : 'CIS'}
@@ -1315,22 +1313,14 @@ if doTileMon:
             ConfigFlags.lock()
 
             from TileMonitoring.TileTMDBMonitorAlgorithm import TileTMDBMonitoringConfig
-            ca=TileTMDBMonitoringConfig(ConfigFlags)
+            ca = CAtoGlobalWrapper(TileTMDBMonitoringConfig, ConfigFlags)
 
             alg = ca.getEventAlgo('TileTMDBMonAlg')
             for tool in alg.GMTools:
                 tool.Histograms = [h.replace('OFFLINE','ONLINE') for h in tool.Histograms]
 
-            ca.getSequence('AthMonSeq_TileTMDBMonitoring').name = "TopAlg"
-            for el in ca._allSequences:
-                el.name = "TopAlg"
-                appendCAtoAthena(ca)
-
         except Exception:
             treatException("Could not translate TileTMDBMonitoringConfig to old cfg")
-        finally:
-            Configurable.configurableRun3Behavior=0
-        pass
 
     if (TileMonoRun):
         runType = 9
