@@ -119,8 +119,6 @@ class TrigInDetReco(ExecStep):
                 chains +=  "'HLT_tau25_idperf_tracktwoMVA_L1TAU12IM',"
                 chains +=  "'HLT_tau25_idperf_tracktwoLLP_L1TAU12IM',"
                 chains +=  "'HLT_tau25_idperf_trackLRT_L1TAU12IM',"
-                chains +=  "'HLT_tau80_idperf_trackLRT_L1TAU60',"
-                chains +=  "'HLT_tau160_idperf_trackLRT_L1TAU100',"
                 flags += 'doTauSlice=True;'
             if (i=='bjet') :
 #               chains += "'HLT_j80_pf_ftf_preselj20b95_L1J20',"
