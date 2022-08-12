@@ -1,5 +1,5 @@
 /*
- *   Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+ *   Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef TRACKINGGEOMETRYCONDALGTEST_H
@@ -32,13 +32,13 @@ public:
 
     virtual StatusCode initialize() override;
     virtual StatusCode execute(const EventContext& ctx) const override;
+    virtual bool isReEntrant() const override final { return false; }  // execute not thread-safe
     virtual StatusCode finalize() override {return StatusCode::SUCCESS;}
 
 private:
 
   /// Input conditions object.
   SG::ReadCondHandleKey<TrackingGeometry>   m_trackingGeometryReadKey{this, "TrackingGeometryReadKey", "AtlasTrackingGeometry", "Key of input TrackingGeometry"};
-  mutable const TrackingGeometry*           m_trackingGeometry;          //!< the tracking geometry
   ServiceHandle<Trk::ITrackingGeometrySvc>  m_trackingGeometrySvc;       //!< ToolHandle to the TrackingGeometrySvc
   ToolHandleArray<Trk::IGeometryProcessor>  m_trackingGeometryProcessors; //!< Tool to write out a Display format for external viewers
 
