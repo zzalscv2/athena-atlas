@@ -50,12 +50,14 @@ namespace FEHelpers {
   bool getClusterMoment(const xAOD::FlowElement& fe, xAOD::CaloCluster::MomentType momentType, float& value){
 
     // First try to retrieve directly from the cluster
-    const xAOD::CaloCluster* cluster = dynamic_cast<const xAOD::CaloCluster*>(fe.otherObject(0));
-    if(cluster != nullptr){
-      double tmpValue(-99.);
-      if(cluster->retrieveMoment(momentType, tmpValue)){
-        value = static_cast<float>(tmpValue);
-        return true;
+    if(fe.nOtherObjects() >= 1){
+      const xAOD::CaloCluster* cluster = dynamic_cast<const xAOD::CaloCluster*>(fe.otherObject(0));
+      if(cluster != nullptr){
+        double tmpValue(-99.);
+        if(cluster->retrieveMoment(momentType, tmpValue)){
+          value = static_cast<float>(tmpValue);
+          return true;
+        }
       }
     }
 
