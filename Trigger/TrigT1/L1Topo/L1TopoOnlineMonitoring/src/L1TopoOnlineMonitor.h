@@ -31,7 +31,7 @@
  *  @author Anil Sonay
  *
  *  This algorithm tend to catch L1Topo sim xAOD to record decision bits into online monitoring
- *  Decision bits could be from Legacy, phase1 simulations or hardware
+ *  Decision bits are from phase1 simulations or hardware
  **/
 
 class L1TopoOnlineMonitor : public AthMonitorAlgorithm {
@@ -62,8 +62,20 @@ private:
     }
   };
 
+  std::unique_ptr<float[]> m_rateHdwNotSim;
+  std::unique_ptr<float[]> m_rateSimNotHdw;
+  std::unique_ptr<float[]> m_rateHdwAndSim;
+  std::unique_ptr<float[]> m_rateHdwSim;
+  std::unique_ptr<float[]> m_countHdwNotSim;
+  std::unique_ptr<float[]> m_countSimNotHdw;
+  std::unique_ptr<float[]> m_countHdwSim;
+  std::unique_ptr<float[]> m_countHdw;
+  std::unique_ptr<float[]> m_countSim;
+  std::unique_ptr<float[]> m_countAny;
+
   std::vector<unsigned> m_ctpIds;
-  
+
+  //RateVars m_rateVars{};
   // ------------------------- Properties and handles --------------------------
   ToolHandle<GenericMonitoringTool> m_monTool {
     this, "MonTool", "" ,
@@ -104,7 +116,7 @@ private:
   
   /// Compare hardware and simulation
   StatusCode doComp(DecisionBits& decisionBits) const;
-
+    
   /// Get CTP ids from menu
   std::vector<unsigned> getCtpIds(const TrigConf::L1Menu& l1menu);
 

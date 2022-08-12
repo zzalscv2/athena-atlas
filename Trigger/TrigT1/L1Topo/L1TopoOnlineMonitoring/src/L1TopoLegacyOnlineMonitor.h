@@ -93,6 +93,17 @@ private:
     }
   };
 
+  std::unique_ptr<float[]> m_rateHdwNotSim;
+  std::unique_ptr<float[]> m_rateSimNotHdw;
+  std::unique_ptr<float[]> m_rateHdwAndSim;
+  std::unique_ptr<float[]> m_rateHdwSim;
+  std::unique_ptr<float[]> m_countHdwNotSim;
+  std::unique_ptr<float[]> m_countSimNotHdw;
+  std::unique_ptr<float[]> m_countHdwSim;
+  std::unique_ptr<float[]> m_countHdw;
+  std::unique_ptr<float[]> m_countSim;
+  std::unique_ptr<float[]> m_countAny;
+
   // ------------------------- Properties and handles --------------------------
   SG::WriteHandleKey<xAOD::TrigCompositeContainer> m_errorFlagsKey {
     this, "ErrorFlagsKey", "L1TopoErrorFlags_Legacy",
