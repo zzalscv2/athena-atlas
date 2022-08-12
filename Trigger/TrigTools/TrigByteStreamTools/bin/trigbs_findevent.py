@@ -1,6 +1,6 @@
 #!/usr/bin/env python
 
-# Copyright (C) 2002-2020 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
 """Find event in FILE(s).
 
 If no event identifier(s) are specified on the command line all events are printed.
@@ -58,8 +58,6 @@ def main():
          print('==%s' % f)
       for e in ifs:
          found = True
-         if ofs:
-            ofs.write(e)
          if args.globalid is not None and e.global_id() not in args.globalid:
             found = False
          if args.lvl1id is not None and e.lvl1_id() not in args.lvl1id:
@@ -68,6 +66,8 @@ def main():
             found = False
          if found:
             print('%s %s' % (f,fmtEvent(e,args.time is not None)))
+            if ofs:
+               ofs.write(e)
       
 if __name__ == '__main__':
    try:
