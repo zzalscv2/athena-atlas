@@ -2,16 +2,16 @@
 
 # Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
 
-# file   AFP_DigitizationConfigNew_test.py
+# file   AFP_DigitizationConfig_test.py
 # author Petr Balek <petr.balek@cern.ch>
 # date   2022-05-25
 
 # brief  A script to test AFP_Digitization package. Mostly inspired by Digitization/DigitizationConfigNew_test.py, but includes switching AFP digitization on (it's off by default). To test it:
 #           0. setup athena enviroment
 #           1a. run this script:
-#              $ python AFP_DigitizationConfigNew_test.py
+#              $ python AFP_DigitizationConfig_test.py
 #           1b. it's also possible to add some arguments:
-#              $ python AFP_DigitizationConfigNew_test.py Detector.EnableAFP=True
+#              $ python AFP_DigitizationConfig_test.py Detector.EnableAFP=True
 #           2. you may want to continue with reconstruction:
 #              $ RecoSteeringTest.py --filesInput=myRDO.pool.root --RDO Reco.EnableAFP=True
 

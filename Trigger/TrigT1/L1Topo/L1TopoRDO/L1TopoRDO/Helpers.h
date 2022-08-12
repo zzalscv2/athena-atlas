@@ -28,7 +28,8 @@ std::ostream& operator<<(std::ostream&, const L1TopoRDO&);
 
 
 namespace L1Topo {
-  
+  //! Helper function to decode word based on offset and size
+  uint32_t decode(const uint32_t &word, const uint32_t &offset, const uint32_t &size);
   //! Helper function to format a 32-bit integer as an 8-digit hex number for printing 
   std::string formatHex8(uint32_t word);
   //! Helper function to format a 32-bit integer as a  4-digit hex number for printing 
@@ -43,6 +44,9 @@ namespace L1Topo {
 
   unsigned int triggerBitIndexNew(uint32_t moduleId, const L1Topo::L1TopoTOB&, unsigned int bitIdx);
 
+  // Converting trigger position to CTP position for phase1 
+  unsigned int triggerBitIndexPhase1(uint32_t topo, uint32_t fpga, size_t bitIdx);
+  
   //! Get the trigger decision and overflow bits from the L1Topo ROI data block 'L1Topo TOB' and order them correctly in a bitset. Reference needed for layout.
   //std::pair< std::bitset<128>,std::bitset<128> > getDecisionAndOverflowBits(const std::vector<L1TopoResult>&);
   std::pair< std::bitset<128>,std::bitset<128> > getDecisionAndOverflowBits(const L1TopoRDOCollection&);

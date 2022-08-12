@@ -353,7 +353,7 @@ if __name__ == '__main__':
   # phase1 mon
   from L1TopoOnlineMonitoring import L1TopoOnlineMonitoringConfig as TopoMonConfig
   acc.addEventAlgo(
-      TopoMonConfig.getL1TopoPhase1OnlineMonitor(flags,'L1/L1TopoOffline',True,True,False,True,algLogLevel),
+      TopoMonConfig.getL1TopoPhase1OnlineMonitor(flags,'L1/L1TopoOffline',True,True,True,True,algLogLevel),
       sequenceName="AthAlgSeq"
   )
   # legacy mon

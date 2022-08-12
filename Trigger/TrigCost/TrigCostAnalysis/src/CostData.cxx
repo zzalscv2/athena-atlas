@@ -46,8 +46,8 @@ StatusCode CostData::cache() {
   return StatusCode::SUCCESS;
 }
 
-void CostData::setRosToRobMap(const std::map<std::string, std::vector<uint32_t>>& rosToRobMap) {
-  m_rosToRob = &rosToRobMap;
+void CostData::setCostROSData(const CostROSData& costROSData) {
+  m_costROSData = &costROSData;
 }
 
 void CostData::setLb(uint32_t lb) {
@@ -84,8 +84,8 @@ const xAOD::TrigCompositeContainer& CostData::rosCollection() const {
   return *m_rosCollection;
 }
 
-const std::map<std::string, std::vector<uint32_t>>& CostData::rosToRobMap() const {
-  return *m_rosToRob;
+const CostROSData& CostData::costROSData() const {
+  return *m_costROSData;
 }
 
 const std::map<size_t, std::vector<size_t>>& CostData::algToRequestMap() const {

@@ -21,10 +21,7 @@ StatusCode EnhancedBiasWeightCompAlg::initialize(){
     ATH_CHECK( m_HLTPrescaleSetInputKey.initialize() );
     ATH_CHECK( m_L1PrescaleSetInputKey.initialize() );
 
-    // Retireve TDT
-    if (!m_tdt.empty()){
-        ATH_CHECK( m_tdt.retrieve() );
-    }
+    ATH_CHECK( m_tdt.retrieve() );
 
     return StatusCode::SUCCESS;
 }
@@ -37,16 +34,13 @@ StatusCode EnhancedBiasWeightCompAlg::start() {
 
     // Save ids of EB chains - that contain "_eb_"
     m_EBChainIds = std::vector<HLT::Identifier>();
+    m_EBChainIds = std::vector<HLT::Identifier>();
     for (const TrigConf::Chain& chain : *hltMenuHandle){
         std::vector<std::string> streams = chain.streams();
         if (std::find(streams.begin(), streams.end(), "EnhancedBias") != streams.end()){
             auto chainId = HLT::Identifier(chain.name());
             m_EBChainIds.push_back(chainId);
-            if ((chain.name().find("_eb_") != std::string::npos) && (!m_chainToItem.empty())) {
-                m_EBChainIdToItem[chainId] = m_chainToItem[chain.name()];
-            } else {
-                m_EBChainIdToItem[chainId] = parseItems(chain.l1item());
-            }
+            m_EBChainIdToItem[chainId] = parseItems(chain.l1item());
         }
     }
 
@@ -84,23 +78,8 @@ StatusCode EnhancedBiasWeightCompAlg::stop(){
 
 StatusCode EnhancedBiasWeightCompAlg::execute(const EventContext& context) const {
 
-    // Retrieve information about EB chains that passed
-    std::vector<EBChainInfo> EBChains;
-    if (!m_tdt.empty()){
-        for (const auto& chainId : m_EBChainIds){
-            std::string chainName = HLT::Identifier(chainId).name();
-            if (m_tdt->isPassed(chainName)){
-                EBChains.push_back(EBChainInfo(HLT::Identifier(chainId)));
-            }
-        }
-    } else {
-        auto finalDecisionsHandle = SG::makeHandle( m_finalDecisionKey, context );
-        ATH_CHECK( finalDecisionsHandle.isValid() );
-
-        const TrigCompositeUtils::Decision* decisionObject = TrigCompositeUtils::getTerminusNode(finalDecisionsHandle);
-        ATH_CHECK(decisionObject != nullptr);
-        EBChains = getPassedEBChains(*decisionObject);
-    }
+    // Retrieve information about EB chains that could have passed
+    std::vector<EBChainInfo> EBChains = getPassedEBChains();
 
     ATH_MSG_DEBUG("Number of eb chains that passed int this event: " << EBChains.size());
 
@@ -149,12 +128,15 @@ StatusCode EnhancedBiasWeightCompAlg::fillTotalPrescaleForChains(const EventCont
     ATH_CHECK( L1PrescalesSet.isValid() );
 
     for (EBChainInfo& chain : EBChains) {
-        ATH_MSG_DEBUG("Items  for " << chain.getName());
+        if ( not HLTPrescalesSet->prescale(chain.getId()).enabled ){
+            chain.setTotalPrescale(-1);
+            continue;
+        }
+
         double HLTPrescale = HLTPrescalesSet->prescale(chain.getId()).prescale;
         double L1Prescale = 1.0;
         if (!chain.getIsNoPS()) {
             for (const std::string& item : m_EBChainIdToItem.at(chain.getId())){
-                ATH_MSG_DEBUG("     " << item << " PS " << L1PrescalesSet->prescale(item).prescale);
                 L1Prescale *= L1PrescalesSet->prescale(item).prescale;
             }
         }
@@ -171,6 +153,10 @@ EnhancedBiasWeightCompAlg::EBResult EnhancedBiasWeightCompAlg::calculateEBWeight
     double weight = 1.;
 
     for (const EBChainInfo& chain : EBChains){
+       if (chain.getIsDisabled()){
+            ATH_MSG_DEBUG("Chain " << chain.getName() << " disabled");
+            continue;
+        }
         ATH_MSG_DEBUG("Chain " << chain.getName() << " total prescale " << chain.getTotalPrescale());
         weight *= 1. - ( 1. / chain.getTotalPrescale() );
     }
@@ -184,14 +170,35 @@ EnhancedBiasWeightCompAlg::EBResult EnhancedBiasWeightCompAlg::calculateEBWeight
 }
 
 
-std::vector<EnhancedBiasWeightCompAlg::EBChainInfo> EnhancedBiasWeightCompAlg::getPassedEBChains(const TrigCompositeUtils::Decision& decisionObject) const {
+std::vector<EnhancedBiasWeightCompAlg::EBChainInfo> EnhancedBiasWeightCompAlg::getPassedEBChains() const {
     
     std::vector<EBChainInfo> passedEBChains;
 
     for (const HLT::Identifier& chainId : m_EBChainIds) {
-        if (std::find(decisionObject.decisions().begin(), decisionObject.decisions().end(), chainId) != decisionObject.decisions().end()) {
+        std::string chainName = HLT::Identifier(chainId).name();
+
+        bool ebChainIsSeeded = false;
+        // For chains with HLT seed discrimintaion check if one of the seeds could pass
+        if ((chainName.find("_eb_") != std::string::npos) && (!m_chainToHLTSeed.empty())){
+            for (const std::string& l1Item : m_chainToHLTSeed.value().at(chainName)) {
+                if (m_tdt->isPassedBits(l1Item) && TrigDefs::L1_isPassedBeforePrescale) {
+                    ebChainIsSeeded = true;
+                    break;
+                }
+            }
+        } else if (chainName.find("L1RD3") != std::string::npos){
+            // For the random items, we need to look at HLT decision
+            ebChainIsSeeded = m_tdt->isPassed(chainName);
+        } else {
+            for (const std::string& l1Item : m_EBChainIdToItem.at(chainId)) {
+                if (m_tdt->isPassedBits(l1Item) && TrigDefs::L1_isPassedBeforePrescale) {
+                    ebChainIsSeeded = true;
+                    break;
+                }
+            }
+        }
+        if (ebChainIsSeeded) {
             passedEBChains.push_back(EBChainInfo(HLT::Identifier(chainId)));
-            ATH_MSG_DEBUG("Chain " << HLT::Identifier(chainId).name() << " passed in this event");
         }
     }
 
