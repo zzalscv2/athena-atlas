@@ -70,6 +70,31 @@ L1TopoLegacyOnlineMonitor::L1TopoLegacyOnlineMonitor(const std::string& name, IS
 // =============================================================================
 StatusCode L1TopoLegacyOnlineMonitor::initialize() {
   const bool daqAccessEnabled = m_prescaleDaqRobAccess.value() >= 1;
+  
+
+  m_rateHdwNotSim.reset(new float[s_nTopoCTPOutputs]);
+  m_rateSimNotHdw.reset(new float[s_nTopoCTPOutputs]);
+  m_rateHdwAndSim.reset(new float[s_nTopoCTPOutputs]);
+  m_rateHdwSim.reset(new float[s_nTopoCTPOutputs]);
+  m_countHdwNotSim.reset(new float[s_nTopoCTPOutputs]);
+  m_countSimNotHdw.reset(new float[s_nTopoCTPOutputs]);
+  m_countHdwSim.reset(new float[s_nTopoCTPOutputs]);
+  m_countHdw.reset(new float[s_nTopoCTPOutputs]);
+  m_countSim.reset(new float[s_nTopoCTPOutputs]);
+  m_countAny.reset(new float[s_nTopoCTPOutputs]);
+
+  for (size_t i=0;i<s_nTopoCTPOutputs;i++){
+    m_rateHdwNotSim[i] = 0;
+    m_rateSimNotHdw[i] = 0;
+    m_rateHdwAndSim[i] = 0;
+    m_rateHdwSim[i] = 0;
+    m_countHdwNotSim[i] = 0;
+    m_countSimNotHdw[i] = 0;
+    m_countHdwSim[i] = 0;
+    m_countHdw[i] = 0;
+    m_countSim[i] = 0;
+    m_countAny[i] = 0;
+  }
 
   ATH_CHECK(m_errorFlagsKey.initialize());
   ATH_CHECK(m_RoIBResultKey.initialize(m_doCnvMon.value()));
@@ -485,6 +510,59 @@ StatusCode L1TopoLegacyOnlineMonitor::doSimMon(xAOD::TrigComposite& errorFlags,
   auto monHdwNotSim = Monitored::Collection("HdwNotSimResult", triggerBitIndicesHdwNotSim);
   Monitored::Group(m_monTool, monSim, monHdw, monSimNotHdw, monHdwNotSim);
 
+  std::bitset<s_nTopoCTPOutputs> triggerBitsSimNotHdw = triggerBitsSim & (~triggerBits) & (~overflowBits);
+  std::bitset<s_nTopoCTPOutputs> triggerBitsHdwNotSim = triggerBits & (~triggerBitsSim) & (~overflowBits);
+  std::bitset<s_nTopoCTPOutputs> triggerBitsHdwSim = triggerBits & triggerBitsSim & (~overflowBits);
+  std::bitset<s_nTopoCTPOutputs> triggerBitsAny = (triggerBits & (~overflowBits)) | (triggerBitsSim & (~overflowBits));
+
+  float rate=0;
+  for (size_t i=0;i<4;i++) {
+    auto mon_trig = Monitored::Scalar<unsigned>("LegacyTopoTrigger_"+std::to_string(i));
+    auto mon_match = Monitored::Scalar<unsigned>("LegacyTopoMissMatch_"+std::to_string(i));
+    auto mon_weight = Monitored::Scalar<float>("LegacyTopoWeight_"+std::to_string(i));
+    for (size_t j=0;j<32;j++) {
+      m_countHdwNotSim[32*i+j]+=triggerBitsHdwNotSim[32*i+j];
+      m_countSimNotHdw[32*i+j]+=triggerBitsSimNotHdw[32*i+j];
+      m_countHdwSim[32*i+j]+=triggerBitsHdwSim[32*i+j];
+      m_countHdw[32*i+j]+=triggerBits[32*i+j];
+      m_countSim[32*i+j]+=triggerBitsSim[32*i+j];
+      m_countAny[32*i+j]+=triggerBitsAny[32*i+j];
+      
+      rate = m_countHdw[32*i+j]>0 ? m_countHdwNotSim[32*i+j]/m_countHdw[32*i+j] : 0;
+      if (rate != m_rateHdwNotSim[32*i+j]) {
+	mon_trig = static_cast<unsigned>(j);
+	mon_match = 0;
+	mon_weight = rate-m_rateHdwNotSim[32*i+j];
+	m_rateHdwNotSim[32*i+j] = rate;
+	Monitored::Group(m_monTool, mon_trig, mon_match, mon_weight);
+      }
+      rate = m_countSim[32*i+j]>0 ? m_countSimNotHdw[32*i+j]/m_countSim[32*i+j] : 0;
+      if (rate != m_rateSimNotHdw[32*i+j]) {
+	mon_trig = static_cast<unsigned>(j);
+	mon_match = 1;
+	mon_weight = rate-m_rateSimNotHdw[32*i+j];
+	m_rateSimNotHdw[32*i+j] = rate;
+	Monitored::Group(m_monTool, mon_trig, mon_match, mon_weight);
+      }
+      rate = m_countAny[32*i+j]>0 ? m_countHdwSim[32*i+j]/m_countAny[32*i+j] : 0;
+      if (rate != m_rateHdwAndSim[32*i+j]) {
+	mon_trig = static_cast<unsigned>(j);
+	mon_match = 2;
+	mon_weight = rate-m_rateHdwAndSim[32*i+j];
+	m_rateHdwAndSim[32*i+j] = rate;
+	Monitored::Group(m_monTool, mon_trig, mon_match, mon_weight);
+      }
+      rate = m_countSim[32*i+j]>0 ? m_countHdw[32*i+j]/m_countSim[32*i+j] : 0;
+      if (rate != m_rateHdwSim[32*i+j]) {
+	mon_trig = static_cast<unsigned>(j);
+	mon_match = 3;
+	mon_weight = rate-m_rateHdwSim[32*i+j];
+	m_rateHdwSim[32*i+j] = rate;
+	Monitored::Group(m_monTool, mon_trig, mon_match, mon_weight);
+      }
+    }
+  }
+  
   // debug printout
   ATH_MSG_DEBUG("Simulated output from L1Topo from StoreGate with key " << m_simTopoCTPKey.key());
   ATH_MSG_DEBUG("L1Topo word 1 at clock 0 is: 0x" << L1Topo::formatHex8(simTopoCTP->cableWord1(0)));
