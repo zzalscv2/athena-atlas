@@ -2,5 +2,5 @@
 
 from AthenaCommon.CfgGetter import addAlgorithm
 
-addAlgorithm("TrackRecordGenerator.TrackRecordGeneratorConfig.getInput_TrackRecordGenerator", "TrackRecordGenerator")
-addAlgorithm("TrackRecordGenerator.TrackRecordGeneratorConfig.getTrackRecordCosmicGenerator", "TrackRecordCosmicGenerator")
+addAlgorithm("TrackRecordGenerator.TrackRecordGeneratorConfigLegacy.getInput_TrackRecordGenerator", "TrackRecordGenerator")
+addAlgorithm("TrackRecordGenerator.TrackRecordGeneratorConfigLegacy.getTrackRecordCosmicGenerator", "TrackRecordCosmicGenerator")
