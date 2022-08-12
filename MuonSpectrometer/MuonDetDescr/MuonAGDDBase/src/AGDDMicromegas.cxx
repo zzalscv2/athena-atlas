@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "MuonAGDDBase/AGDDMicromegas.h"
@@ -54,15 +54,15 @@ void AGDDMicromegas::CreateVolume (AGDDBuilder& builder)
 {
 //    std::cout<<"this is AGDDMicromegas::CreateVolume()"<<std::endl;
 	
-	MuonGM::MicromegasComponent *mm_comp=new MuonGM::MicromegasComponent;
-	mm_comp->name=tech;
-	mm_comp->dx1=small_x();
-	mm_comp->dx2=large_x();
-	mm_comp->dy=y();
-	mm_comp->subType=subType();
+	MuonGM::MicromegasComponent mm_comp;
+	mm_comp.name=tech;
+	mm_comp.dx1=small_x();
+	mm_comp.dx2=large_x();
+	mm_comp.dy=y();
+	mm_comp.subType=subType();
 	
-	MuonGM::Micromegas *cham=new MuonGM::Micromegas(mm_comp);
-	GeoPhysVol *vvv=(GeoPhysVol*)cham->build(builder.GetMaterialManager(), 1);
+	MuonGM::Micromegas cham (&mm_comp);
+	GeoPhysVol *vvv=(GeoPhysVol*)cham.build(builder.GetMaterialManager(), 1);
 
 	CreateSolid (builder);
 
@@ -70,7 +70,5 @@ void AGDDMicromegas::CreateVolume (AGDDBuilder& builder)
 	{
 		SetVolume(vvv);
 	}
-	
-	delete cham;
 }
 
