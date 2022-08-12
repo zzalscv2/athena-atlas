@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2017 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
 */
 
 //////////////////////////////////////////////////////////////////
@@ -51,7 +51,7 @@ public:
     virtual StatusCode addNtupleItems (
         TTree* tree,
         //const std::bitset<8>& detectorType
-        const int& detectorType ) const = 0;    
+        const int& detectorType ) = 0;
     
     //! fill special data about measurements
     virtual StatusCode fillMeasurementData (
@@ -60,16 +60,16 @@ public:
         //const NTuple::Item<long>& numberOfHits,
         //const std::bitset<8>& detectorType
         const int& detectorType,
-        const bool& isOutlier) const = 0;
+        const bool& isOutlier) = 0;
 
     //! fill special data about holes on track
     virtual StatusCode fillHoleData (
         const Trk::TrackStateOnSurface&,
-        const int& detectorType) const = 0;
+        const int& detectorType) = 0;
 
     //! reset ntuple variables
     virtual StatusCode resetVariables (
-        const int& detectorType ) const = 0;
+        const int& detectorType ) = 0;
 
 };
 

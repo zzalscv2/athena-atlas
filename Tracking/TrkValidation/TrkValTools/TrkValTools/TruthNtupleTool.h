@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2019 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
 */
 
 //////////////////////////////////////////////////////////////////
@@ -52,13 +52,13 @@ public:
     StatusCode initialize();
     StatusCode finalize();
 
-    virtual StatusCode writeTruthData ( const std::vector< Trk::ValidationTrackTruthData >& truthData ) const;
+    virtual StatusCode writeTruthData ( const std::vector< Trk::ValidationTrackTruthData >& truthData );
 
     virtual unsigned int getNumberOfTreeRecords() const;
 
     virtual StatusCode initBranches(const std::vector<const Trk::ITrackTruthClassifier*>& classifiers,
                                     bool,
-                                    const std::vector<std::string> trackCollectionNames) const;
+                                    const std::vector<std::string> trackCollectionNames);
 
 private:
 
@@ -66,41 +66,41 @@ private:
     std::string m_ntupleTreeName;       //!< jobOption: Ntuple tree name
     std::string m_ntupleFileName;       //!< jobOption: Ntuple file and dir name
     std::vector<double> m_etaBins;
-    mutable bool m_fillJets;            //!< jO: jet filling, set from external call
+    bool m_fillJets;            //!< jO: jet filling, set from external call
 
     //NTuple::Tuple* p_ntuple;          //!< Pointer to the ntuple
     TTree* m_nt; //!< Pointer to the NTuple tree
 
-    mutable unsigned int m_numberOfTreeEntries;
+    unsigned int m_numberOfTreeEntries;
 
     // ntuple variables
-    mutable int         m_runNumber;       //!< run number to which this MC truth particle belongs
-    mutable int         m_eventNumber;     //!< event number to which this MC truth particle belongs
+    int         m_runNumber;       //!< run number to which this MC truth particle belongs
+    int         m_eventNumber;     //!< event number to which this MC truth particle belongs
 
-    mutable std::vector< std::vector<unsigned int>* >   m_TrackLinkIndex;
-    mutable std::vector< std::vector<float>* >          m_mc_prob;
-    mutable std::vector<unsigned int>                   m_classifications;
+    std::vector< std::vector<unsigned int>* >   m_TrackLinkIndex;
+    std::vector< std::vector<float>* >          m_mc_prob;
+    std::vector<unsigned int>                   m_classifications;
     // Truth information
-    mutable float       m_mc_d0;            //!< d0 of MC truth particle's perigee parameters
-    mutable float       m_mc_z0;            //!< z of MC truth particle's perigee parameters
-    mutable float       m_mc_phi0;          //!< phi of MC truth particle's perigee parameters
-    mutable float       m_mc_theta;         //!< theta of MC truth particle's perigee parameters
-    mutable float       m_mc_qOverP;        //!< q/p of MC truth particle's perigee parameters
-    mutable float       m_mc_qOverPt;       //!< q/pT of MC truth particle's perigee parameters
-    mutable float       m_mc_eta;           //!< eta of MC truth particle's perigee parameters
+    float       m_mc_d0;            //!< d0 of MC truth particle's perigee parameters
+    float       m_mc_z0;            //!< z of MC truth particle's perigee parameters
+    float       m_mc_phi0;          //!< phi of MC truth particle's perigee parameters
+    float       m_mc_theta;         //!< theta of MC truth particle's perigee parameters
+    float       m_mc_qOverP;        //!< q/p of MC truth particle's perigee parameters
+    float       m_mc_qOverPt;       //!< q/pT of MC truth particle's perigee parameters
+    float       m_mc_eta;           //!< eta of MC truth particle's perigee parameters
 
-    mutable int         m_mc_particleID;    //!< PDG ID of MC truth particle
-    mutable int         m_mc_barcode;       //!< MC truth particle's barcode
-    mutable float       m_mc_energy;        //!< MC truth particle's energy at production vertex
-    mutable int         m_mc_jetLinkIndex;  //!< link to jet this particle belongs to (if jet tree is ON)
-    mutable float       m_mc_prodR; //!< Rxy of particle's production vertex
-    mutable float       m_mc_prodz; //!< z coordinate of particle's production vertex
+    int         m_mc_particleID;    //!< PDG ID of MC truth particle
+    int         m_mc_barcode;       //!< MC truth particle's barcode
+    float       m_mc_energy;        //!< MC truth particle's energy at production vertex
+    int         m_mc_jetLinkIndex;  //!< link to jet this particle belongs to (if jet tree is ON)
+    float       m_mc_prodR; //!< Rxy of particle's production vertex
+    float       m_mc_prodz; //!< z coordinate of particle's production vertex
 
     // statistics
-    mutable std::vector< std::vector<TH1D*> >   m_recoTrackCounts;
-    mutable std::vector< std::vector<TH1D*> >   m_truthTrackCounts;
+    std::vector< std::vector<TH1D*> >   m_recoTrackCounts;
+    std::vector< std::vector<TH1D*> >   m_truthTrackCounts;
 
-    mutable std::vector<const Trk::ITrackTruthClassifier*> m_trackTruthClassifiers;     //!< the truth classifiers
+    std::vector<const Trk::ITrackTruthClassifier*> m_trackTruthClassifiers;     //!< the truth classifiers
 
     SG::ReadHandleKey<xAOD::EventInfo>    m_evt  {this, "EvtInfo", "EventInfo", "EventInfo name"};
 };

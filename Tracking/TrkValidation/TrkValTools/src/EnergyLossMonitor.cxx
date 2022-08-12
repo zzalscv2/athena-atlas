@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2017 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
 */
 
 ///////////////////////////////////////////////////////////////////
@@ -80,7 +80,7 @@ StatusCode Trk::EnergyLossMonitor::finalize()
 void Trk::EnergyLossMonitor::initializeTrack(double p, 
                                              double E,
                                              double eta,
-                                             double phi) const
+                                             double phi)
 {
     m_initialP   = p;
     m_initialE   = E;
@@ -91,7 +91,7 @@ void Trk::EnergyLossMonitor::initializeTrack(double p,
 
 void Trk::EnergyLossMonitor::recordTrackState(const Amg::Vector3D& pos, 
                                               const Amg::Vector3D& mom,
-                                              double mass) const
+                                              double mass)
 {
 
   // Geant4 first step protection 
@@ -109,7 +109,7 @@ void Trk::EnergyLossMonitor::recordTrackState(const Amg::Vector3D& pos,
   }
 }
 
-void Trk::EnergyLossMonitor::finalizeTrack() const
+void Trk::EnergyLossMonitor::finalizeTrack()
 {
    m_steps = m_currentStep;
    StatusCode sc = m_ntupleSvc->writeRecord(m_outputNtuplePath);

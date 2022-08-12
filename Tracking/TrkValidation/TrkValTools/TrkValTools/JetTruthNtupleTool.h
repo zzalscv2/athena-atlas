@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2019 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
 */
 
 //////////////////////////////////////////////////////////////////
@@ -47,7 +47,7 @@ public:
 
     /** fill ntuple data for a given vector of truth jets */
     virtual StatusCode writeJetTruthData (const std::vector< Trk::GenParticleJet >&,
-                                          const int& ) const;
+                                          const int& );
 
     virtual unsigned int getNumberOfTreeRecords() const;
 
@@ -60,20 +60,20 @@ private:
 
     TTree* m_nt; //!< Pointer to the NTuple tree
 
-    mutable unsigned int m_numberOfTreeEntries;
+    unsigned int m_numberOfTreeEntries;
 
     // ntuple variables
-    mutable int         m_runNumber;
-    mutable int         m_eventNumber;
+    int         m_runNumber;
+    int         m_eventNumber;
 
     // truth jet information
     std::vector<unsigned int>*   m_genParticleLinkIndex;
     std::vector<float>* m_mc_trackToJetAngle;
-    mutable float       m_mc_jetMultiplicity;
-    mutable float       m_mc_jetSphericity;
-    mutable float       m_mc_jetThrust;
-    mutable float       m_mc_jetEnergy;
-    mutable float       m_mc_jetMomentum;
+    float       m_mc_jetMultiplicity;
+    float       m_mc_jetSphericity;
+    float       m_mc_jetThrust;
+    float       m_mc_jetEnergy;
+    float       m_mc_jetMomentum;
 
     SG::ReadHandleKey<xAOD::EventInfo>    m_evt  {this, "EvtInfo", "EventInfo", "EventInfo name"};
 };

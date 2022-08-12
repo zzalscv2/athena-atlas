@@ -56,37 +56,37 @@ public:
         //const NTuple::Item<long>& numberOfHits,
         //const std::bitset<8>& detectorType
         const int& detectorType,
-        const bool& isOutlier ) const;
+        const bool& isOutlier );
 
     /** fill special data about holes on track (here: do nothing) */
     virtual StatusCode fillHoleData (
         const Trk::TrackStateOnSurface&,
-        const int&) const;
+        const int&);
 
 
     /** add items to the ntuple and configure the helper tool:
     should be called once (per detector type) by the steering tool (Trk::ITrackValidationNtupleTool) */
     virtual StatusCode addNtupleItems (
         TTree* tree,
-        const int& detectorType ) const;
+        const int& detectorType );
 
     /** reset ntuple variables */
     virtual StatusCode resetVariables (
-        const int& detectorType ) const;
+        const int& detectorType );
 
 private:
 
-    //mutable bool      m_trkParametersWarning;//!< warn only once if no track pars exist
+    //bool      m_trkParametersWarning;//!< warn only once if no track pars exist
 
     // --- ntuple variables ---
-    mutable std::vector<float>* m_bremX;     //!< global position X of track at estimated brem surface UNIT:mm
-    mutable std::vector<float>* m_bremY;     //!< global position Y of track at estimated brem surface UNIT:mm
-    mutable std::vector<float>* m_bremZ;     //!< global position Z of track at estimated brem surface UNIT:mm
-    mutable std::vector<float>* m_trkQoverP; //!< curvature q/p of track at brem  UNIT:1/MeV
-    mutable std::vector<float>* m_thicknessInX0; //!< thickness of material layer at brem UNIT:fraction of X<sub>0</sub>
-    mutable std::vector<float>* m_dna;       //!< DNA-value q*sigma<sup>2</sup>(q/p) as additional noise term UNIT:1
-    mutable std::vector<int>*   m_dnaDirection; //!< DNA-direction along momentum (1) opposite (-1) or both (0) UNIT:alongP:1
-    mutable std::vector<int>*   m_trackStateIndices; //!< index of track state in full nHits vector
+    std::vector<float>* m_bremX;     //!< global position X of track at estimated brem surface UNIT:mm
+    std::vector<float>* m_bremY;     //!< global position Y of track at estimated brem surface UNIT:mm
+    std::vector<float>* m_bremZ;     //!< global position Z of track at estimated brem surface UNIT:mm
+    std::vector<float>* m_trkQoverP; //!< curvature q/p of track at brem  UNIT:1/MeV
+    std::vector<float>* m_thicknessInX0; //!< thickness of material layer at brem UNIT:fraction of X<sub>0</sub>
+    std::vector<float>* m_dna;       //!< DNA-value q*sigma<sup>2</sup>(q/p) as additional noise term UNIT:1
+    std::vector<int>*   m_dnaDirection; //!< DNA-direction along momentum (1) opposite (-1) or both (0) UNIT:alongP:1
+    std::vector<int>*   m_trackStateIndices; //!< index of track state in full nHits vector
 
 };
 

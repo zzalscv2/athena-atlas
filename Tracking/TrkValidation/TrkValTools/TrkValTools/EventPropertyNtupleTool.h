@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2017 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
 */
 
 //////////////////////////////////////////////////////////////////
@@ -38,22 +38,22 @@ namespace Trk {
     StatusCode finalize();
 
     //! method not active in this tool
-    virtual void registerTrackCollections( std::vector<std::string>, bool) const;
+    virtual void registerTrackCollections( std::vector<std::string>, bool);
     //! method not active in this tool
-    virtual void setTrackTreeIndices( unsigned int, int, int) const;
+    virtual void setTrackTreeIndices( unsigned int, int, int);
     //! method not active in this tool
-    virtual void setGenParticleTreeIndices( int, int) const;
+    virtual void setGenParticleTreeIndices( int, int);
 
     /** @brief add branches to the tree
       Should be called once dunring the initialisation phase by the calling algorithm
       (usually Trk::TrackValidationNtupleWriter) */
-    virtual StatusCode addNtupleItems ( TTree*, const std::string ) const;
+    virtual StatusCode addNtupleItems ( TTree*, const std::string );
 
     //! calculate event-wide data and copy into TTree branches, but don't write the record yet.
-    virtual StatusCode fillEventData ( ) const;
+    virtual StatusCode fillEventData ( );
 
     //! reset ntuple variables (mainly for vectors which need to be cleared)
-    virtual StatusCode  resetVariables ( ) const;
+    virtual StatusCode  resetVariables ( );
 
    //! is True if instance is Tool which links events property to Trk::Tracks
    inline  virtual bool isTrackLinkTool( ) const;
@@ -72,25 +72,25 @@ namespace Trk {
     std::string m_comTimeName;
 
     // --- ntuple items --- 
-    mutable int               m_runNumber;   //!< run number this event belongs to
-    mutable int               m_eventNumber; //!< event number
-    mutable float             m_tdc_phase;   //!< event phase in cosmic events (optional) UNIT:nsec
+    int               m_runNumber;   //!< run number this event belongs to
+    int               m_eventNumber; //!< event number
+    float             m_tdc_phase;   //!< event phase in cosmic events (optional) UNIT:nsec
 
     // more information about level1 trigger 2008 under Atlas.LevelOneCentralTriggerData
-    mutable int               m_trigLvl1Type;//!< level 1 trigger type bitted word (2008: equivalent with stream) UNIT:8-bit
-    mutable std::vector<unsigned int>* m_trigLvl1TAV; //!< level 1 trigger-after-veto info (256 bits in vector) UNIT:bitted
-    mutable int               m_lumiBlock;   //!< lumi block number of current event
-    mutable int               m_timeStamp;   //!< time stamp of current event
-    mutable int               m_bCID;        //!< bunch crossing ID for current event
+    int               m_trigLvl1Type;//!< level 1 trigger type bitted word (2008: equivalent with stream) UNIT:8-bit
+    std::vector<unsigned int>* m_trigLvl1TAV; //!< level 1 trigger-after-veto info (256 bits in vector) UNIT:bitted
+    int               m_lumiBlock;   //!< lumi block number of current event
+    int               m_timeStamp;   //!< time stamp of current event
+    int               m_bCID;        //!< bunch crossing ID for current event
   };
 }
 
 inline void Trk::EventPropertyNtupleTool::registerTrackCollections
-( std::vector<std::string>, bool) const { }
+( std::vector<std::string>, bool) { }
 
-inline void  Trk::EventPropertyNtupleTool::setTrackTreeIndices( unsigned int, int, int) const { }
+inline void  Trk::EventPropertyNtupleTool::setTrackTreeIndices( unsigned int, int, int) { }
 
-inline void  Trk::EventPropertyNtupleTool::setGenParticleTreeIndices(int, int) const { }
+inline void  Trk::EventPropertyNtupleTool::setGenParticleTreeIndices(int, int) { }
 
 inline bool  Trk::EventPropertyNtupleTool::isTrackLinkTool( ) const { return false; }
    

@@ -321,7 +321,7 @@ StatusCode Trk::MeasurementVectorNtupleTool::finalize() {
   return StatusCode::SUCCESS;
 }
 
-StatusCode Trk::MeasurementVectorNtupleTool::addNtupleItems( TTree* tree ) const {
+StatusCode Trk::MeasurementVectorNtupleTool::addNtupleItems( TTree* tree ) {
     if (!tree) return StatusCode::FAILURE;
     ATH_MSG_DEBUG ("added branches to ntuple");
     //-----------------
@@ -359,7 +359,7 @@ StatusCode Trk::MeasurementVectorNtupleTool::addNtupleItems( TTree* tree ) const
     ATH_MSG_VERBOSE ("added own branches to ntuple");
 
     StatusCode sc(StatusCode::SUCCESS);
-    ToolHandleArray< IValidationNtupleHelperTool >::const_iterator itTools;
+    ToolHandleArray< IValidationNtupleHelperTool >::iterator itTools;
     // get all the given ntuple helper tools for Pixel
     itTools = m_PixelNtupleHelperToolHandles.begin();
     for (  ; itTools != m_PixelNtupleHelperToolHandles.end(); ++itTools ) {
@@ -448,7 +448,7 @@ StatusCode Trk::MeasurementVectorNtupleTool::addNtupleItems( TTree* tree ) const
 StatusCode Trk::MeasurementVectorNtupleTool::fillTrackData (
     const Trk::Track& track,
     const int  /*iterationIndex*/,
-    const unsigned int /*fitStatCode*/ )  const {
+    const unsigned int /*fitStatCode*/ ) {
    // const Trk::FitterStatusCode /*fitStatCode*/ ) const {
 
   ATH_MSG_VERBOSE ("in fillTrackData(trk, indx) filling info about track states");
@@ -584,7 +584,7 @@ StatusCode Trk::MeasurementVectorNtupleTool::fillTrackData (
 /// fill trackparticle data into variables without actually writing the record
 //////////////////////////////////////
 StatusCode Trk::MeasurementVectorNtupleTool::fillTrackParticleData
-( const Trk::TrackParticleBase&) const
+( const Trk::TrackParticleBase&)
 {
 
   ATH_MSG_WARNING ("MeasurementVectorNtupleTool not meant to be used with TrackParticles.");
@@ -595,7 +595,7 @@ StatusCode Trk::MeasurementVectorNtupleTool::fillTrackParticleData
 //////////////////////////////////////
 // reset variables
 //////////////////////////////////////
-void Trk::MeasurementVectorNtupleTool::resetVariables() const {
+void Trk::MeasurementVectorNtupleTool::resetVariables() {
 
   // reset the counters
   m_nPixelHits = 0;
@@ -631,7 +631,7 @@ void Trk::MeasurementVectorNtupleTool::resetVariables() const {
   m_DetectorType->clear();
   m_isOutlier->clear();
 
-  std::vector< const Trk::IValidationNtupleHelperTool* >::const_iterator toolIter;
+  std::vector< Trk::IValidationNtupleHelperTool* >::iterator toolIter;
   toolIter = m_PixelHelperTools.begin();
   for (  ; toolIter != m_PixelHelperTools.end(); ++toolIter ) {
     // let tool reset its variables
@@ -706,7 +706,7 @@ void Trk::MeasurementVectorNtupleTool::resetVariables() const {
   }
 }
 
-StatusCode Trk::MeasurementVectorNtupleTool::fillTrackTruthData ( const TrackParameters*& /*truePerigee*/, const TrackTruth& /*trackTruth*/, const int /*indexInTruthTree*/ ) const
+StatusCode Trk::MeasurementVectorNtupleTool::fillTrackTruthData ( const TrackParameters*& /*truePerigee*/, const TrackTruth& /*trackTruth*/, const int /*indexInTruthTree*/ )
 {
 
   // implement code here (truth trajectory?)
@@ -721,7 +721,7 @@ StatusCode Trk::MeasurementVectorNtupleTool::fillMeasurementData(
     const Trk::MeasurementBase* measurement,
     const Trk::TrackParameters* trkParameters,
     const bool& isOutlier,
-    const int&  detectorType ) const {
+    const int&  detectorType ) {
 
     ATH_MSG_VERBOSE ("in fillMeasurementData");
 
@@ -794,7 +794,7 @@ StatusCode Trk::MeasurementVectorNtupleTool::callHelperTools(
     const Trk::TrackParameters* trkPar,
     const bool& isOutlier,
     const int& detectorType,
-    const int& nCurrentHit) const {
+    const int& nCurrentHit) {
 
     // ------------------------------------
     // try if measurement is a competingROT and check if joboption
@@ -819,8 +819,8 @@ StatusCode Trk::MeasurementVectorNtupleTool::callHelperTools(
                          detectorType==TrackState::CSC   ||
                          detectorType==TrackState::RPC   ||
                          detectorType==TrackState::TGC)   ) {
-      std::vector< const Trk::IValidationNtupleHelperTool* >::const_iterator toolIter;
-      std::vector< const Trk::IValidationNtupleHelperTool* >::const_iterator toolIterEnd;
+      std::vector< Trk::IValidationNtupleHelperTool* >::const_iterator toolIter;
+      std::vector< Trk::IValidationNtupleHelperTool* >::const_iterator toolIterEnd;
       switch (detectorType) {
       case TrackState::Pixel:
         toolIter = m_PixelHelperTools.begin();
@@ -878,7 +878,7 @@ StatusCode Trk::MeasurementVectorNtupleTool::callHelperTools(
 
     // call the general tools
     if (!m_GeneralHelperTools.empty()) {
-      std::vector< const Trk::IValidationNtupleHelperTool* >::const_iterator toolIter = m_GeneralHelperTools.begin();
+      std::vector< Trk::IValidationNtupleHelperTool* >::const_iterator toolIter = m_GeneralHelperTools.begin();
       for (; toolIter!=m_GeneralHelperTools.end(); ++toolIter) {
         if (((*toolIter)->fillMeasurementData(measurement, trkPar, detectorType, isOutlier)).isFailure()) {
           if (!m_helperToolWarning[(*toolIter)]) {
@@ -893,7 +893,7 @@ StatusCode Trk::MeasurementVectorNtupleTool::callHelperTools(
 }
 
 StatusCode Trk::MeasurementVectorNtupleTool::fillHoleData (
-        const Trk::TrackStateOnSurface& tsos) const {
+        const Trk::TrackStateOnSurface& tsos) {
     if (!m_doHoleSearch) return StatusCode::SUCCESS;
     // check if we really have a hole
     if (!tsos.type(Trk::TrackStateOnSurface::Hole)) return StatusCode::FAILURE;
@@ -931,8 +931,8 @@ StatusCode Trk::MeasurementVectorNtupleTool::fillHoleData (
     // ----------------------------
     // write detector specific data
     if ( detectorType!=TrackState::unidentified ) {
-        std::vector< const Trk::IValidationNtupleHelperTool* >::const_iterator toolIter;
-        std::vector< const Trk::IValidationNtupleHelperTool* >::const_iterator toolIterEnd;
+        std::vector< Trk::IValidationNtupleHelperTool* >::const_iterator toolIter;
+        std::vector< Trk::IValidationNtupleHelperTool* >::const_iterator toolIterEnd;
         switch (detectorType) {
         case TrackState::Pixel:
             toolIter = m_PixelHelperTools.begin();
@@ -973,7 +973,7 @@ StatusCode Trk::MeasurementVectorNtupleTool::fillHoleData (
 
     // call the general tools
     if (!m_GeneralHelperTools.empty()) {
-        std::vector< const Trk::IValidationNtupleHelperTool* >::const_iterator toolIter = m_GeneralHelperTools.begin();
+        std::vector< Trk::IValidationNtupleHelperTool* >::iterator toolIter = m_GeneralHelperTools.begin();
         for (; toolIter!=m_GeneralHelperTools.end(); ++toolIter) {
             if (((*toolIter)->fillHoleData(tsos, detectorType)).isFailure()) {
                 msg(MSG::WARNING) << "general helper tool did not succeed to fill general hole data"  << endmsg;

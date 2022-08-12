@@ -120,7 +120,7 @@ StatusCode Trk::JetTruthNtupleTool::writeJetTruthData (
                 const std::vector< Trk::GenParticleJet >& jets,
                 const int& nTruthRecordsAtCurrentEvent
                 //                const std::vector<unsigned int>& /*particleToJetIndex*/ 
-                ) const {
+                ) {
   ATH_MSG_VERBOSE ( "in writeJetTruthData(...)" );
 
   // ---------------------------------------

@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2017 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
 */
 
 //////////////////////////////////////////////////////////////////
@@ -59,13 +59,13 @@ public:
 
     /** fill ntuple data for a given vector of truth particle */
     virtual StatusCode writeTruthData (
-                const std::vector< Trk::ValidationTrackTruthData >& ) const = 0;
+                const std::vector< Trk::ValidationTrackTruthData >& ) = 0;
 
     virtual unsigned int getNumberOfTreeRecords() const = 0;
 
     virtual StatusCode initBranches(const std::vector<const Trk::ITrackTruthClassifier*>& classifiers,
                                     bool,
-                                    const std::vector<std::string> trackCollectionNames) const = 0;
+                                    const std::vector<std::string> trackCollectionNames) = 0;
 };
 
 inline const InterfaceID& Trk::ITruthNtupleTool::interfaceID() {

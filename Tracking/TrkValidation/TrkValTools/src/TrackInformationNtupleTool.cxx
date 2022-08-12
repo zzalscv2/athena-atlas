@@ -67,7 +67,7 @@ StatusCode Trk::TrackInformationNtupleTool::finalize() {
   return StatusCode::SUCCESS;
 }
 
-StatusCode Trk::TrackInformationNtupleTool::addNtupleItems( TTree* tree ) const {
+StatusCode Trk::TrackInformationNtupleTool::addNtupleItems( TTree* tree ) {
     if (!tree) return StatusCode::FAILURE;
     //-----------------
     // add items  *** Note: Documentation is in the header file, doxygen and wikis! ***
@@ -95,7 +95,7 @@ StatusCode Trk::TrackInformationNtupleTool::addNtupleItems( TTree* tree ) const 
 StatusCode Trk::TrackInformationNtupleTool::fillTrackData (
     const Trk::Track& track,
     const int iterationIndex,
-    const unsigned int fitStatCode ) const {
+    const unsigned int fitStatCode ) {
 
   ATH_MSG_VERBOSE ("in fillTrackData(trk, indx)");
   // ---------------------------------------
@@ -169,7 +169,7 @@ StatusCode Trk::TrackInformationNtupleTool::fillTrackData (
 /// fill trackparticle data into variables without actually writing the record
 //////////////////////////////////////
 StatusCode Trk::TrackInformationNtupleTool::fillTrackParticleData 
-( const Trk::TrackParticleBase& particle) const
+( const Trk::TrackParticleBase& particle)
 {
   ATH_MSG_VERBOSE ("in fillTrackData(trk, indx)");
   // ---------------------------------------
@@ -225,7 +225,7 @@ StatusCode Trk::TrackInformationNtupleTool::fillTrackParticleData
 //////////////////////////////////////
 // reset variables
 //////////////////////////////////////
-void Trk::TrackInformationNtupleTool::resetVariables() const {
+void Trk::TrackInformationNtupleTool::resetVariables() {
   // reset the counters
   m_nHits = 0;
 }

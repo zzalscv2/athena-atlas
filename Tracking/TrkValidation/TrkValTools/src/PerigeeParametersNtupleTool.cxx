@@ -102,7 +102,7 @@ StatusCode Trk::PerigeeParametersNtupleTool::finalize() {
   return StatusCode::SUCCESS;
 }
 
-StatusCode Trk::PerigeeParametersNtupleTool::addNtupleItems( TTree* tree ) const {
+StatusCode Trk::PerigeeParametersNtupleTool::addNtupleItems( TTree* tree ) {
     if (!tree) return StatusCode::FAILURE;
     //-----------------
     // add items  *** Note: Documentation is in the header file, doxygen and wikis! ***
@@ -164,7 +164,7 @@ StatusCode Trk::PerigeeParametersNtupleTool::addNtupleItems( TTree* tree ) const
 StatusCode Trk::PerigeeParametersNtupleTool::fillTrackData (
     const Trk::Track& track,
     const int  /*iterationIndex*/,
-    const unsigned int /*fitStatCode*/ ) const {
+    const unsigned int /*fitStatCode*/ ) {
     //const Trk::FitterStatusCode /*fitStatCode*/ ) const {
 
   ATH_MSG_VERBOSE ("in fillTrackData(trk, indx)");
@@ -201,7 +201,7 @@ StatusCode Trk::PerigeeParametersNtupleTool::fillTrackData (
 /// fill trackparticle data into variables without actually writing the record
 //////////////////////////////////////
 StatusCode Trk::PerigeeParametersNtupleTool::fillTrackParticleData 
-( const Trk::TrackParticleBase& particle) const
+( const Trk::TrackParticleBase& particle)
 {
 
   //----------------------------------------------
@@ -215,11 +215,11 @@ StatusCode Trk::PerigeeParametersNtupleTool::fillTrackParticleData
 //////////////////////////////////////
 // reset variables
 //////////////////////////////////////
-void Trk::PerigeeParametersNtupleTool::resetVariables() const {
+void Trk::PerigeeParametersNtupleTool::resetVariables() {
   // reset the counters
 }
 
-StatusCode Trk::PerigeeParametersNtupleTool::fillTrackTruthData ( const TrackParameters*& truePerigee, const TrackTruth& trackTruth, const int indexInTruthTree ) const
+StatusCode Trk::PerigeeParametersNtupleTool::fillTrackTruthData ( const TrackParameters*& truePerigee, const TrackTruth& trackTruth, const int indexInTruthTree )
 {
 
   if ( !m_doTruth ) return StatusCode::SUCCESS;
@@ -271,7 +271,7 @@ StatusCode Trk::PerigeeParametersNtupleTool::fillTrackTruthData ( const TrackPar
 /////////////////////////////////////////////////////////////////////////////
 /// fill the perigee in ntuple
 /////////////////////////////////////////////////////////////////////////////
-StatusCode Trk::PerigeeParametersNtupleTool::fillTrackPerigee(const Trk::Perigee* perigee) const {
+StatusCode Trk::PerigeeParametersNtupleTool::fillTrackPerigee(const Trk::Perigee* perigee) {
 
   ATH_MSG_VERBOSE ("in fillTrackPerigee");
 
