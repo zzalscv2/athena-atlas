@@ -114,7 +114,6 @@ public:
                  LayerArray* subLayers = nullptr,
                  TrackingVolumeArray* subVolumes = nullptr,
                  const std::string& volumeName = "undefined");
-  // unsafe intelink layers
 
   /** Constructor for a full equipped Tracking Volume
      - full by inheritance  ======> 2 a) static confinement */
@@ -123,7 +122,6 @@ public:
                  LayerArray* subLayers = nullptr,
                  TrackingVolumeArray* subVolumes = nullptr,
                  const std::string& volumeName = "undefined");
-  // unsafe intelink layers
 
   /** Constructor for a full equipped Tracking Volume
     - mixed  ======> 3 a) static confinement */
@@ -133,7 +131,6 @@ public:
                  LayerArray* subLayers = nullptr,
                  TrackingVolumeArray* subVolumes = nullptr,
                  const std::string& volumeName = "undefined");
-  // unsafe intelink layers
 
   /** Constructor for a full equipped Tracking Volume with detached subvolumes
     -  mixed =======> 1 b) detached volumes */
