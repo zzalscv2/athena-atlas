@@ -22,6 +22,7 @@ ATLAS_NO_CHECK_FILE_THREAD_SAFETY;  // non-MT EventLoopMgr
 #include "AthenaKernel/EventContextClid.h"
 #include "AthenaKernel/IEvtIdModifierSvc.h"
 
+#include "GaudiKernel/IAlgManager.h"
 #include "GaudiKernel/IAlgorithm.h"
 #include "GaudiKernel/SmartIF.h"
 #include "GaudiKernel/Incident.h"
@@ -67,6 +68,7 @@ AthenaEventLoopMgr::AthenaEventLoopMgr(const std::string& nam,
     m_histoDataMgrSvc( "HistogramDataSvc",         nam ), 
     m_histoPersSvc   ( "HistogramPersistencySvc",  nam ), 
     m_evtIdModSvc    ( "",         nam ),
+    m_execAtPreFork(),
     m_currentRun(0), m_firstRun(true), m_tools(this),
     m_nevt(0), m_writeHists(false),
     m_nev(0), m_proc(0), m_useTools(false), 
@@ -105,6 +107,8 @@ AthenaEventLoopMgr::AthenaEventLoopMgr(const std::string& nam,
                   "In case of DoubleEventSelector use event number from secondary input");
   declareProperty("EvtIdModifierSvc", m_evtIdModSvc,
                   "ServiceHandle for EvtIdModifierSvc");
+  declareProperty("ExecAtPreFork", m_execAtPreFork,
+                  "List of algorithms/sequences to execute during PreFork");
 }
 
 //=========================================================================
@@ -1105,6 +1109,12 @@ void AthenaEventLoopMgr::handle(const Incident& inc)
   m_firstRun=false;
   m_currentRun = ctx.eventID().run_number();
 
+  // Execute requested algorithms/sequences
+  if ( execAtPreFork(ctx).isFailure() ) {
+    ATH_MSG_ERROR ( "Unable to execute requested algorithms/sequences during PreFork!" );
+    return;
+  }
+
   // Clear Store
   const ClearStorePolicy::Type s_clearStore = clearStorePolicy( m_clearStorePolicy.value(), msgStream() );
   if(s_clearStore==ClearStorePolicy::EndEvent) {
@@ -1113,6 +1123,24 @@ void AthenaEventLoopMgr::handle(const Incident& inc)
       ATH_MSG_ERROR ( "Clear of Event data store failed" );
     }
   }
+}
+
+//=========================================================================
+// Execute certain algorithms/sequence in PreFork
+//=========================================================================
+StatusCode AthenaEventLoopMgr::execAtPreFork(const EventContext& ctx) const {
+  const IAlgManager* algMgr = Gaudi::svcLocator()->as<IAlgManager>();
+  IAlgorithm* alg{nullptr};
+
+  StatusCode sc;
+  for (const std::string& name : m_execAtPreFork) {
+    if ( algMgr->getAlgorithm(name, alg) ) {
+      ATH_MSG_INFO("Executing " << alg->name() << "...");
+      sc &= alg->execute(ctx);
+    }
+    else ATH_MSG_WARNING("Cannot find algorithm or sequence " << name);
+  }
+  return sc;
 }
 
 //=========================================================================
