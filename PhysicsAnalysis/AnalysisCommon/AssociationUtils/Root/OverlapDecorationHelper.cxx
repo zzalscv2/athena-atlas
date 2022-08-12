@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2018 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
 */
 
 // Local includes
@@ -67,17 +67,17 @@ namespace ORUtils
   // Set the overlap (output) decoration
   //---------------------------------------------------------------------------
   void OverlapDecorationHelper::setOverlapDecoration
-  (const xAOD::IParticle& obj, bool result)
+  (const xAOD::IParticle& obj, bool result) const
   {
     m_outputDecorator(obj) = result;
   }
   //---------------------------------------------------------------------------
-  void OverlapDecorationHelper::setObjectPass(const xAOD::IParticle& obj)
+  void OverlapDecorationHelper::setObjectPass(const xAOD::IParticle& obj) const
   {
     setOverlapDecoration(obj, m_outputPassValue);
   }
   //---------------------------------------------------------------------------
-  void OverlapDecorationHelper::setObjectFail(const xAOD::IParticle& obj)
+  void OverlapDecorationHelper::setObjectFail(const xAOD::IParticle& obj) const
   {
     setOverlapDecoration(obj, !m_outputPassValue);
   }
@@ -96,7 +96,7 @@ namespace ORUtils
   // Initialize output decoration
   //---------------------------------------------------------------------------
   void OverlapDecorationHelper::initializeDecorations
-  (const xAOD::IParticleContainer& container)
+  (const xAOD::IParticleContainer& container) const
   {
     if(!isDecorated(container))
       resetDecorations(container);
@@ -106,7 +106,7 @@ namespace ORUtils
   // Reset output decoration
   //---------------------------------------------------------------------------
   void OverlapDecorationHelper::resetDecorations
-  (const xAOD::IParticleContainer& container)
+  (const xAOD::IParticleContainer& container) const
   {
     for(auto obj : container){
       // This isn't terrible intuitive, but in order to support both output

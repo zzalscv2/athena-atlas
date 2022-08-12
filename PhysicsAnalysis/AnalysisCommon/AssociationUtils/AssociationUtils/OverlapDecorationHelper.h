@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2018 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef ASSOCIATIONUTILS_OVERLAPDECORATIONHELPER_H
@@ -52,13 +52,13 @@ namespace ORUtils
       char getObjectPriority(const xAOD::IParticle& obj) const;
 
       /// Set output decoration on object, pass or fail
-      void setOverlapDecoration(const xAOD::IParticle& obj, bool result);
+      void setOverlapDecoration(const xAOD::IParticle& obj, bool result) const;
 
       /// Shorthand way to set an object as passing overlap removal
-      void setObjectPass(const xAOD::IParticle& obj);
+      void setObjectPass(const xAOD::IParticle& obj) const;
 
       /// Shorthand way to set an object as failing overlap removal
-      void setObjectFail(const xAOD::IParticle& obj);
+      void setObjectFail(const xAOD::IParticle& obj) const;
 
       /// Check if output decoration has been applied to a container.
       /// Returns false if the container is empty.
@@ -67,10 +67,10 @@ namespace ORUtils
 
       /// Initialize decorations for a container to "pass".
       /// Note that the value written depends on the output pass-value.
-      void initializeDecorations(const xAOD::IParticleContainer& container);
+      void initializeDecorations(const xAOD::IParticleContainer& container) const;
 
       /// Helper method for setting all objects as passing
-      void resetDecorations(const xAOD::IParticleContainer& container);
+      void resetDecorations(const xAOD::IParticleContainer& container) const;
 
     private:
 
