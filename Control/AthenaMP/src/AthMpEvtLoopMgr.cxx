@@ -56,6 +56,7 @@ AthMpEvtLoopMgr::AthMpEvtLoopMgr(const std::string& name
   , m_nMemSamplingInterval(0) // no sampling by default
   , m_nEventsBeforeFork(0)
   , m_eventPrintoutInterval(1)
+  , m_execAtPreFork()
   , m_masterPid(getpid())
 {
   declareProperty("NWorkers",m_nWorkers);
@@ -69,6 +70,7 @@ AthMpEvtLoopMgr::AthMpEvtLoopMgr(const std::string& name
   declareProperty("MemSamplingInterval",m_nMemSamplingInterval);
   declareProperty("EventsBeforeFork",m_nEventsBeforeFork);
   declareProperty("EventPrintoutInterval",m_eventPrintoutInterval);
+  declareProperty("ExecAtPreFork", m_execAtPreFork);
 }
 
 AthMpEvtLoopMgr::~AthMpEvtLoopMgr()
@@ -118,6 +120,9 @@ StatusCode AthMpEvtLoopMgr::initialize()
     if(propertyServer) {
       if(propertyServer->setProperty("EventPrintoutInterval",m_eventPrintoutInterval).isFailure()) {
         ATH_MSG_WARNING("Could not set AthenaEventLoopMgr EventPrintoutInterval to " << m_eventPrintoutInterval);
+      }
+      if(propertyServer->setProperty("ExecAtPreFork",m_execAtPreFork).isFailure()) {
+        ATH_MSG_WARNING("Could not set AthenaEventLoopMgr ExecAtPreFork property, memory usage might get affected!");
       }
     }
     else {

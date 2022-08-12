@@ -98,6 +98,9 @@ protected:
   /// @property Reference to the EventID modifier Service
   IEvtIdModifierSvc_t m_evtIdModSvc;
 
+  /// @property list of algorithms/sequences to execute during  PreFork
+  StringArrayProperty m_execAtPreFork;
+
   /// @property histogram persistency technology to use: "ROOT", "HBOOK", "NONE". By default ("") get property value from ApplicationMgr
   StringProperty    m_histPersName;
 
@@ -178,6 +181,8 @@ public:
   virtual int size();
   /// IIncidentListenet interfaces
   void handle(const Incident& inc);
+  /// Execute certain algorithms/sequences in PreFork
+  StatusCode execAtPreFork(const EventContext& ctx) const;
 
   /// interface dispatcher
   virtual StatusCode queryInterface( const InterfaceID& riid, 
