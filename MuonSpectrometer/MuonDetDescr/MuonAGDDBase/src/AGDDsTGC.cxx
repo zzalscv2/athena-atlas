@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
 */
 
 
@@ -48,17 +48,17 @@ void AGDDsTGC::CreateSolid (const AGDDBuilder& /*builder*/)
 void AGDDsTGC::CreateVolume (AGDDBuilder& builder)
 {
 	
-	MuonGM::sTGCComponent *stgc_comp=new MuonGM::sTGCComponent;
-	stgc_comp->name=tech;
-	stgc_comp->dx1=small_x();
-	stgc_comp->dx2=large_x();
-	stgc_comp->dy=y();
-	stgc_comp->subType=subType();
-	stgc_comp->yCutout=yCutout();
-	stgc_comp->yCutoutCathode=yCutoutCathode();
+	MuonGM::sTGCComponent stgc_comp;
+	stgc_comp.name=tech;
+	stgc_comp.dx1=small_x();
+	stgc_comp.dx2=large_x();
+	stgc_comp.dy=y();
+	stgc_comp.subType=subType();
+	stgc_comp.yCutout=yCutout();
+	stgc_comp.yCutoutCathode=yCutoutCathode();
 	
-	MuonGM::sTGC *cham=new MuonGM::sTGC(stgc_comp);
-	GeoPhysVol *vvv=(GeoPhysVol*)cham->build(builder.GetMaterialManager(), 1);
+	MuonGM::sTGC cham(&stgc_comp);
+	GeoPhysVol *vvv=(GeoPhysVol*)cham.build(builder.GetMaterialManager(), 1);
 
 	CreateSolid (builder);
 
@@ -66,7 +66,5 @@ void AGDDsTGC::CreateVolume (AGDDBuilder& builder)
 	{
 		SetVolume(vvv);
 	}
-	
-	delete cham;
 }
 
