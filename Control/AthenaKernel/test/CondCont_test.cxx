@@ -875,9 +875,13 @@ void test7 (TestRCUSvc& rcusvc)
   cc1.addDep (&cc2);
   cc1.addDep (&cc3);
   std::sort (v.begin(), v.end());
-  assert (cc1.getDeps() == v);
+  std::vector<CondContBase*> vv = cc1.getDeps();
+  std::sort (vv.begin(), vv.end());
+  assert (vv == v);
   cc1.addDep (&cc3);
-  assert (cc1.getDeps() == v);
+  cc1.getDeps();
+  std::sort (vv.begin(), vv.end());
+  assert (vv == v);
 }
 
 
