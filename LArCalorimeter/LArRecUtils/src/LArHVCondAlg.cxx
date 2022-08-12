@@ -258,10 +258,6 @@ StatusCode LArHVCondAlg::makeHVScaleCorr (const EventContext& ctx,
     return StatusCode::FAILURE;
   }
   ATH_MSG_INFO("recorded new " << writeHandle.key() << " with range " << writeHandle.getRange() << " into Conditions Store");
-  ILArHVScaleCorr *imscale = nullptr;
-  if(detStore()->symLink(hvCorr.get(), imscale).isFailure()) {
-     ATH_MSG_WARNING("Could not symlink " << writeHandle.key() << " to ILArHVScaleCorr");
-  }
 
   return StatusCode::SUCCESS;
 }
