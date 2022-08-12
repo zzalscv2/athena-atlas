@@ -50,6 +50,7 @@ class AthMpEvtLoopMgr
   int                            m_nMemSamplingInterval;  // in seconds
   int                            m_nEventsBeforeFork;
   unsigned int                   m_eventPrintoutInterval;
+  StringArrayProperty            m_execAtPreFork;
   pid_t                          m_masterPid;
 
   // vectors for collecting memory samples
