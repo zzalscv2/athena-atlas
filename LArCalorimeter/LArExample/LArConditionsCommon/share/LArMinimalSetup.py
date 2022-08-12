@@ -1,4 +1,4 @@
-# Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
 
 ###########################################################
 # LArMinimalSetup.py:                                     #
@@ -30,7 +30,6 @@ DetFlags.digitize.all_setOff()
 #Set up GeoModel (not really needed but crashes without)
 from AtlasGeoModel import SetGeometryVersion
 from AtlasGeoModel import GeoModelInit
-svcMgr.GeoModelSvc.DetectorTools["LArDetectorToolNV"].ApplyAlignments=False
 
 #Get identifier mapping
 include( "LArConditionsCommon/LArIdMap_comm_jobOptions.py" )

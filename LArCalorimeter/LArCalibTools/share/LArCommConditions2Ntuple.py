@@ -443,7 +443,16 @@ if doObj("HVSCALE"):
       conddb.addFolder("",getDBFolderAndTag("/LAR/ElecCalibMC/HVScaleCorr"))
   else: 
     if IsFlat:
-      conddb.addFolder("",getDBFolderAndTag("/LAR/ElecCalibFlat/HVScaleCorr"))
+      from AthenaCommon.AlgSequence import AthSequencer
+      condSequence = AthSequencer("AthCondSeq")
+      if SuperCells:
+         folder="/LAR/ElecCalibFlatSC/HVScaleCorr"
+         from LArRecUtils.LArRecUtilsConf import LArFlatConditionsAlg_LArHVScaleCorrSC_ as LArHVCondAlg 
+      else:   
+         folder="/LAR/ElecCalibFlat/HVScaleCorr"
+         from LArRecUtils.LArRecUtilsConf import LArFlatConditionsAlg_LArHVScaleCorrFlat_ as LArHVCondAlg 
+      conddb.addFolder("",getDBFolderAndTag(folder),className = 'CondAttrListCollection')
+      condSequence += LArHVCondAlg(ReadKey=folder, WriteKey='HVScaleCorr')
     else:
       print( 'Only Flat HVSCALE !!!')
       import sys; sys.exit(-5) 
@@ -453,6 +462,8 @@ if doObj("HVSCALE"):
   theLArHVScaleCorr2Ntuple = LArHVScaleCorr2Ntuple("LArHVScaleCorr2Ntuple")
   theLArHVScaleCorr2Ntuple.AddFEBTempInfo = False
   theLArHVScaleCorr2Ntuple.isSC = SuperCells
+  theLArHVScaleCorr2Ntuple.isFlat = IsFlat
+  theLArHVScaleCorr2Ntuple.ContainerKey = 'HVScaleCorr'
   topSequence += theLArHVScaleCorr2Ntuple
     
 if (doObj("MINBIAS")):

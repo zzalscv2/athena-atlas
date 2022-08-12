@@ -55,6 +55,8 @@ PoolFileName = "dummy.pool.root"
 # database folder
 LArHVScaleCorrFolder = "/LAR/ElecCalibFlat/HVScaleCorr"
 
+LArSCHVScaleCorrFolder = "/LAR/ElecCalibFlatSC/HVScaleCorr"
+
 # output key
 keyOutput = "LArHVScaleCorr"
 
@@ -117,25 +119,15 @@ except:
    pass
 
 include( "AthenaCommon/Atlas_Gen.UnixStandardJob.py" )
-
 include( "CaloDetMgrDetDescrCnv/CaloDetMgrDetDescrCnv_joboptions.py")
-#include( "CaloIdCnv/CaloIdCnv_joboptions.py" )
-#include( "TileIdCnv/TileIdCnv_jobOptions.py" )
-#include( "LArDetDescr/LArDetDescr_joboptions.py" )
-#include("TileConditions/TileConditions_jobOptions.py" )
 include("LArConditionsCommon/LArConditionsCommon_comm_jobOptions.py")
-
-#include( "LArCondAthenaPool/LArCondAthenaPool_joboptions.py" )
 include( "LArConditionsCommon/LArIdMap_comm_jobOptions.py" )
 
+from LArCabling.LArCablingAccess import LArOnOffIdMappingSC
+LArOnOffIdMappingSC()
 
 from LArConditionsCommon import LArHVDB #Sets HV Cabling and DCS Database folders
 
-#conddb.addOverride("/LAR/IdentifierOfl/HVLineToElectrodeMap","LARIdentifierOflHVLineToElectrodeMap-UPD3-00")
-
-#from LArCalibUtils.LArCalibUtilsConf import LArHVCorrMaker
-#theLArHVCorrMaker = LArHVCorrMaker("LArHVCorrMaker")
-#topSequence += theLArHVCorrMaker
 #in rel. 22:
 from AthenaCommon.AlgSequence import AthSequencer
 condseq = AthSequencer("AthCondSeq")
@@ -149,15 +141,28 @@ for alg in condseq:
   if "LArHVScaleCorrFlat" in alg.getFullName():
      alg.WriteKey="HVScaleCorrFromDB"
 
+from LArCalibUtils.LArCalibUtilsConf import LArHVCorrMaker
+hvmaker=LArHVCorrMaker()
+hvmaker.LArHVScaleCorr="LArHVScaleCorr"
+hvmaker.folderName="/LAR/ElecCalibFlat/HVScaleCorr"
+topSequence += hvmaker
+
+from LArCondUtils.LArCondUtilsConf import LArHVCorrToSCHVCorr
+schvmaker = LArHVCorrToSCHVCorr()
+schvmaker.OutputKey="LARSCHVScaleCorr"
+topSequence += schvmaker
+
 from LArCalibTools.LArCalibToolsConf import LArHVScaleCorr2Ntuple
 theLArHVScaleCorr2Ntuple = LArHVScaleCorr2Ntuple("LArHVScaleCorr2Ntuple")
 theLArHVScaleCorr2Ntuple.AddFEBTempInfo = False
 topSequence += theLArHVScaleCorr2Ntuple
 
-#from LArCalibTools.LArCalibToolsConf import LArWFParams2Ntuple
-#LArWFParams2Ntuple = LArWFParams2Ntuple("LArWFParams2Ntuple")
-#LArWFParams2Ntuple.DumpTdrift = True
-#topSequence += LArWFParams2Ntuple
+theLArSCHVScaleCorr2Ntuple = LArHVScaleCorr2Ntuple("LArHVScaleCorr2NtupleSC")
+theLArSCHVScaleCorr2Ntuple.AddFEBTempInfo = False
+theLArSCHVScaleCorr2Ntuple.isSC = True
+theLArSCHVScaleCorr2Ntuple.ContainerKey="LARSCHVScaleCorr"
+theLArSCHVScaleCorr2Ntuple.NtuplePath="/NTUPLES/FILE1/HVSCALESC"
+topSequence += theLArSCHVScaleCorr2Ntuple
 
 theApp.HistogramPersistency = "ROOT"
 from GaudiSvc.GaudiSvcConf import NTupleSvc
@@ -165,13 +170,13 @@ svcMgr += NTupleSvc()
 svcMgr.NTupleSvc.Output = [ "FILE1 DATAFILE='hvcorr_ntuple.root' OPT='NEW'" ]
 
 # deal with DB output
-OutputObjectSpec = "CondAttrListCollection#"+LArHVScaleCorrFolder
-OutputObjectSpecTag = ''
+OutputObjectSpec = [ "CondAttrListCollection#"+LArHVScaleCorrFolder, "CondAttrListCollection#"+LArSCHVScaleCorrFolder ]
+OutputObjectSpecTag = ['','']
 OutputDB = "sqlite://;schema="+OutputSQLiteFile+";dbname=CONDBR2"
 
 from RegistrationServices.OutputConditionsAlg import OutputConditionsAlg
 theOutputConditionsAlg=OutputConditionsAlg("OutputConditionsAlg",PoolFileName,
-                          [OutputObjectSpec],[OutputObjectSpecTag],WriteIOV)
+                          OutputObjectSpec,OutputObjectSpecTag,WriteIOV)
 theOutputConditionsAlg.Run1 = IOVBegin
 
 svcMgr.IOVDbSvc.dbConnection  = OutputDB
@@ -181,8 +186,8 @@ svcMgr += IOVRegistrationSvc()
 svcMgr.IOVRegistrationSvc.OutputLevel = DEBUG 
 svcMgr.IOVRegistrationSvc.RecreateFolders = True
 svcMgr.IOVRegistrationSvc.SVFolder=True
-svcMgr.IOVRegistrationSvc.OverrideNames += ["HVScaleCorr",]
-svcMgr.IOVRegistrationSvc.OverrideTypes += ["Blob16M",]
+svcMgr.IOVRegistrationSvc.OverrideNames += ["HVScaleCorr","HVScaleCorr",]
+svcMgr.IOVRegistrationSvc.OverrideTypes += ["Blob16M","Blob16M",]
 
 #--------------------------------------------------------------
 #--- Dummy event loop parameters
@@ -205,5 +210,3 @@ svcMgr.MessageSvc.debugLimit       = 100000
 svcMgr.MessageSvc.infoLimit        = 100000
 svcMgr.MessageSvc.Format           = "% F%30W%S%7W%R%T %0W%M"
 svcMgr.IOVDbSvc.OutputLevel        = INFO
-
-#theLArHVCorrMaker.OutputLevel = INFO

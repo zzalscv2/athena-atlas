@@ -250,7 +250,7 @@ from CoolConvUtilities import AtlCoolTool
 toolNew = AtlCoolTool.AtlCoolTool("sqlite://;schema=larnoisesqlite.db;dbname=CONDBR2")
 toolNew.usetag("$fulltag")
 a=toolNew.more('/LAR/NoiseOfl/CellNoise')
-f = file('dumpDB.txt','w')
+f = open('dumpDB.txt','w')
 f.write(str(a))
 f.close()
 exit()
@@ -281,8 +281,7 @@ AtlCoolCopy "sqlite://;schema=larnoisesqlite.db;dbname=CONDBR2" "sqlite://;schem
 
 echo "Doing check of the noise sqlite against P1HLT cache....."
 echo "Will take 3-5 minutes, be patient......"
-#(mkdir /tmp/noise_test_$$; cp caloSqlite_UPD1_online.db /tmp/noise_test_$$/; cd /tmp/noise_test_$$/; source $AtlasSetup/scripts/asetup.sh --tags=AtlasP1HLT,20.2.1.4,setup,here; athena.py -c "sqlite='caloSqlite_UPD1_online.db'" TriggerJobOpts/test_hltConditions.py >/dev/null 2>&1 ) >/dev/null 2>&1
-(mkdir /tmp/noise_test_$$; cp caloSqlite_UPD1_online.db /tmp/noise_test_$$/; cd /tmp/noise_test_$$/; athena.py -c "sqlite='caloSqlite_UPD1_online.db'" TriggerJobOpts/test_hltConditions.py >/dev/null 2>&1 ) >/dev/null 2>&1
+(mkdir /tmp/noise_test_$$; cp caloSqlite_UPD1_online.db /tmp/noise_test_$$/; cd /tmp/noise_test_$$/; athena.py --threads=1  -c "sqlite='caloSqlite_UPD1_online.db'" TriggerJobOpts/test_hltConditions.py >/dev/null 2>&1 ) >/dev/null 2>&1
 if [ $? -ne 0 ];  then
       echo "Testing job reported an error ! "
       echo "Please, do not upload constants to online ! "

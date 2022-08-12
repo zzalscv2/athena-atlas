@@ -68,7 +68,7 @@ StatusCode LArOFPhaseFill::stop()
 
   typedef std::pair<HWIdentifier, int> idi;
   std::map<idi, uint > inmap;
-  uint b_ec, p_n, ft, sl, ch, g, onlid;
+  uint b_ec=0, p_n=0, ft=0, sl=0, ch=0, g=0, onlid=0;
   uint count, gmax; 
   if(m_isSC) gmax=CaloGain::LARHIGHGAIN; else gmax=CaloGain::LARLOWGAIN;
 
@@ -88,9 +88,15 @@ StatusCode LArOFPhaseFill::stop()
            if(line[0]=='#') continue;
            std::istringstream iss(line);
            if(m_isID) 
-              iss>>std::dec>>onlid>>g>>phase;
+              if(m_isSC)
+                iss>>std::dec>>onlid>>phase;
+              else   
+                iss>>std::dec>>onlid>>g>>phase;
            else{
-              iss>>std::dec>>b_ec>>p_n>>ft>>sl>>ch>>g>>phase;
+              if(m_isSC)
+                 iss>>std::dec>>b_ec>>p_n>>ft>>sl>>ch>>g>>phase;
+              else   
+                 iss>>std::dec>>b_ec>>p_n>>ft>>sl>>ch>>g>>phase;
               if(!iss.good()) {
                  ATH_MSG_WARNING("Wrong line: "<<line);
                  continue;
@@ -126,9 +132,11 @@ StatusCode LArOFPhaseFill::stop()
            }
            HWIdentifier oc;
            if(m_isID) oc=HWIdentifier(onlid); else oc = m_lar_on_id->channel_Id(b_ec, p_n, ft, sl, ch); 
+           ATH_MSG_DEBUG("Read " << onlid << " gain " << g <<" phase: "<<phase);
            inmap[std::make_pair(oc,g)] = phase;
            ++count;
        }while(!in.eof());
+        ATH_MSG_INFO(count<<" lines read out");
      }
   }
 
