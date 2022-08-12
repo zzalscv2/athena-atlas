@@ -52,7 +52,6 @@ namespace DerivationFramework {
         }
 
         ATH_CHECK(m_beamSpotKey.initialize());
-        ATH_CHECK(m_refPVContainerName.initialize(m_refitPV));
         IPartPropSvc* partPropSvc = 0;
         StatusCode sc = service("PartPropSvc", partPropSvc, true);
         if (sc.isFailure()) {
@@ -116,8 +115,8 @@ namespace DerivationFramework {
           refPvContainer = new xAOD::VertexContainer;
           refPvAuxContainer = new xAOD::VertexAuxContainer;
           refPvContainer->setStore(refPvAuxContainer);
-          SG::WriteHandle<xAOD::VertexContainer> refPV(m_refPVContainerName);
-          ATH_CHECK(refPV.record(std::unique_ptr<xAOD::VertexContainer>(refPvContainer)));
+          CHECK(evtStore()->record(refPvContainer   , m_refPVContainerName       ));
+          CHECK(evtStore()->record(refPvAuxContainer, m_refPVContainerName + "Aux."));
       }
 
       ATH_CHECK(performSearch(&cascadeinfoContainer));
