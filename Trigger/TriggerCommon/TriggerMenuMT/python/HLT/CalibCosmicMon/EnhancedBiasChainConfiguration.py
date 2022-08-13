@@ -42,7 +42,7 @@ l1seeds = { 'low'  : \
                 'L1_DY-BOX-2MU3V',\
                 'L1_EM15VHI_2TAU12IM_J25_3J12',\
                 #'L1_EM15_XS30',\
-                'L1_EM18VHI',\
+                'L1_EM15VH',\
                 'L1_EM20VH',\
                 'L1_EM7_MU8F',\
                 'L1_HT190-J15s5pETA21',\

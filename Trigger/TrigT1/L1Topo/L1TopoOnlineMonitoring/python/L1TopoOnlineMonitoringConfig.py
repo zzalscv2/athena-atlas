@@ -119,6 +119,17 @@ def configureHistograms(alg, flags, doHwMonCtp, doHwMon, doComp):
                                     title='L1Topo events with hardware accept and simulation fail',
                                     xbins=128, xlabels=label_topo_all,
                                     xmin=0, xmax=128)
+        ylabels = ['#frac{HdwNotSim}{Hdw}','#frac{SimNotHdw}{Sim}','#frac{HdwAndSim}{HdwOrSim}','#frac{Hdw}{Sim}']
+        for topo in [(0,'2a'),(1,'2b'),(2,'3a'),(3,'3b')]:
+            name = f'Phase1TopoTrigger_{topo[0]},Phase1TopoMissMatch_{topo[0]};Ph1Topo{topo[1]}'
+            title = f'Phase1 Topo{topo[1]} Miss/Matches Summary'
+            alg.MonTool.defineHistogram(name, path='EXPERT', type='TH2F',
+                                        title=title,xbins=32,ybins=4,
+                                        weight=f'Phase1TopoWeight_{topo[0]}',
+                                        xlabels=label_topo_all[topo[0]*32:(topo[0]+1)*32],
+                                        ylabels=ylabels,
+                                        xmin=0, xmax=32,
+                                        ymin=0, ymax=len(ylabels))
 
     if doHwMon:
         alg.MonTool.defineHistogram('HdwResults', path='EXPERT', type='TH1I',
@@ -127,6 +138,7 @@ def configureHistograms(alg, flags, doHwMonCtp, doHwMon, doComp):
         alg.MonTool.defineHistogram('OverflowResults', path='EXPERT', type='TH1I',
                                     title='Overflow Results for L1Topo', xbins=128, xlabels=label_topo_all,
                                     xmin=0, xmax=128)
+        
 
     mon_failure_labels = ['doHwMon', 'doSimMon', 'doHwMonCTP', 'doComp']
     alg.MonTool.defineHistogram('MonitoringFailures', path='EXPERT', type='TH1F',
@@ -227,6 +239,18 @@ def configureLegacyHistograms(alg, flags):
     defineBitsHistogram('HdwResults', 'L1Topo hardware accepts, events with no overflows')
     defineBitsHistogram('SimNotHdwResult', 'L1Topo events with simulation accept and hardware fail, events with no overflows')
     defineBitsHistogram('HdwNotSimResult', 'L1Topo events with hardware accept and simulation fail, events with no overflows')
+    ylabels = ['#frac{HdwNotSim}{Hdw}','#frac{SimNotHdw}{Sim}','#frac{HdwAndSim}{HdwOrSim}','#frac{Hdw}{Sim}']
+    for topo in [(0,'1a'),(1,'1b'),(2,'2a'),(3,'2b')]:
+        name = f'LegacyTopoTrigger_{topo[0]},LegacyTopoMissMatch_{topo[0]};LegacyTopo{topo[1]}'
+        title = f'Legacy Topo{topo[1]} Miss/Matches Summary'
+        alg.MonTool.defineHistogram(name, path='EXPERT', type='TH2F',
+                                    title=title,xbins=32,ybins=4,
+                                    weight=f'LegacyTopoWeight_{topo[0]}',
+                                    xlabels=topo_trigline_labels[topo[0]*32:(topo[0]+1)*32],
+                                    ylabels=ylabels,
+                                    xmin=0, xmax=32,
+                                    ymin=0, ymax=len(ylabels))
+        
     defineBitsHistogram('Hdw_vs_Sim_Events', 'L1Topo decisions hardware XOR simulation event-by-event differences, events with no overflows')
     defineBitsHistogram('SimDaqRobResults', 'L1Topo simulation accepts, events with no overflows (DAQ ROB)')
     defineBitsHistogram('HdwDaqRobResults', 'L1Topo hardware accepts, events with no overflows (DAQ ROB)')

@@ -40,8 +40,9 @@ tau_etaNScale = 0.5;
 tau_phiNScale = 0.33;
 tau_d0NScale = 1.0;
 tau_z0NScale = 0.33;
-tau_d0Max = 200.;
-tau_a0Max = 200.;
+tau_d0Max = 150.;
+tau_a0Max = 150.;
+tau_a0NScale = 0.15;
 
 bjet_ptNScale = 0.75;
 bjet_etaNScale = 0.5;

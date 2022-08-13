@@ -1,5 +1,5 @@
 /*
-   Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+   Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
    */
 
 #include "xAODJiveXML/xAODJetRetriever.h"
@@ -63,29 +63,29 @@ namespace JiveXML {
    */
   StatusCode xAODJetRetriever::retrieve(ToolHandle<IFormatTool> &FormatTool) {
 
-    if (msgLvl(MSG::DEBUG)) msg(MSG::DEBUG)  << "in retrieveAll()" << endmsg;
+    ATH_MSG_DEBUG( "in retrieveAll()" );
 
     const DataHandle<xAOD::JetContainer> iterator, end;
     const xAOD::JetContainer* Jets;
 
     //obtain the default collection first
-    if (msgLvl(MSG::DEBUG)) msg(MSG::DEBUG)  << "Trying to retrieve " << dataTypeName() << " (" << m_sgKeyFavourite << ")" << endmsg;
+    ATH_MSG_DEBUG( "Trying to retrieve " << dataTypeName() << " (" << m_sgKeyFavourite << ")" );
     StatusCode sc = evtStore()->retrieve(Jets, m_sgKeyFavourite);
     if (sc.isFailure() ) {
-      if (msgLvl(MSG::WARNING)) msg(MSG::WARNING) << "Collection " << m_sgKeyFavourite << " not found in SG " << endmsg; 
+      ATH_MSG_WARNING( "Collection " << m_sgKeyFavourite << " not found in SG " );
     }else{
       DataMap data = getData(Jets);
       if ( FormatTool->AddToEvent(dataTypeName(), m_sgKeyFavourite+"_xAOD", &data).isFailure()){
-        if (msgLvl(MSG::WARNING)) msg(MSG::WARNING) << "Collection " << m_sgKeyFavourite << " not found in SG " << endmsg;
+        ATH_MSG_WARNING( "Collection " << m_sgKeyFavourite << " not found in SG " );
       }else{
-        if (msgLvl(MSG::DEBUG)) msg(MSG::DEBUG)  << dataTypeName() << " (" << m_sgKeyFavourite << ") Jet retrieved" << endmsg;
+        ATH_MSG_DEBUG( dataTypeName() << " (" << m_sgKeyFavourite << ") Jet retrieved" );
       }
     }
 
     if ( m_otherKeys.empty() ) {
       //obtain all other collections from StoreGate
       if (( evtStore()->retrieve(iterator, end)).isFailure()){
-        if (msgLvl(MSG::WARNING)) msg(MSG::WARNING)  << "Unable to retrieve iterator for Jet collection" << endmsg;
+        ATH_MSG_WARNING( "Unable to retrieve iterator for Jet collection" );
         //        return false;
       }
 
@@ -95,12 +95,12 @@ namespace JiveXML {
         if ( m_doWriteHLT ){ position = 99; } // override SG key find
         if ( position != 0 ){  // SG key doesn't contain HLTAutoKey
           if (iterator.key()!=m_sgKeyFavourite) {
-            if (msgLvl(MSG::DEBUG)) msg(MSG::DEBUG)  << "Trying to retrieve all " << dataTypeName() << " (" << iterator.key() << ")" << endmsg;
+            ATH_MSG_DEBUG( "Trying to retrieve all " << dataTypeName() << " (" << iterator.key() << ")" );
             DataMap data = getData(iterator);
             if ( FormatTool->AddToEvent(dataTypeName(), iterator.key()+"_xAOD", &data).isFailure()){
-              if (msgLvl(MSG::WARNING)) msg(MSG::WARNING) << "Collection " << iterator.key() << " not found in SG " << endmsg;
+              ATH_MSG_WARNING( "Collection " << iterator.key() << " not found in SG " );
             }else{
-              if (msgLvl(MSG::DEBUG)) msg(MSG::DEBUG) << dataTypeName() << " (" << iterator.key() << ") AODJet retrieved" << endmsg;
+              ATH_MSG_DEBUG( dataTypeName() << " (" << iterator.key() << ") AODJet retrieved" );
             }
           }
         }
@@ -112,12 +112,12 @@ namespace JiveXML {
         if ( !evtStore()->contains<xAOD::JetContainer>( (*keyIter) ) ){ continue; } // skip if not in SG
         StatusCode sc = evtStore()->retrieve( Jets, (*keyIter) );
         if (!sc.isFailure()) {
-          if (msgLvl(MSG::DEBUG)) msg(MSG::DEBUG)  << "Trying to retrieve selected " << dataTypeName() << " (" << (*keyIter) << ")" << endmsg;
+          ATH_MSG_DEBUG( "Trying to retrieve selected " << dataTypeName() << " (" << (*keyIter) << ")" );
           DataMap data = getData(Jets);
           if ( FormatTool->AddToEvent(dataTypeName(), (*keyIter)+"_xAOD", &data).isFailure()){
-            if (msgLvl(MSG::WARNING)) msg(MSG::WARNING) << "Collection " << (*keyIter) << " not found in SG " << endmsg;
+            ATH_MSG_WARNING( "Collection " << (*keyIter) << " not found in SG " );
           }else{
-            if (msgLvl(MSG::DEBUG)) msg(MSG::DEBUG) << dataTypeName() << " (" << (*keyIter) << ") retrieved" << endmsg;
+            ATH_MSG_DEBUG( dataTypeName() << " (" << (*keyIter) << ") retrieved" );
           }
         }
       }
@@ -133,7 +133,7 @@ namespace JiveXML {
    */
   const DataMap xAODJetRetriever::getData(const xAOD::JetContainer* jetCont) {
 
-    if (msgLvl(MSG::DEBUG)) msg(MSG::DEBUG) << "in getData()" << endmsg;
+    ATH_MSG_DEBUG( "in getData()" );
 
     DataMap DataMap;
 
@@ -175,11 +175,7 @@ namespace JiveXML {
     double btag3 = 0.;
     for (; jetItr != jetItrE; ++jetItr) {
       bool isCalo = false;
-      if (msgLvl(MSG::DEBUG)) {
-        msg(MSG::DEBUG) << "  Jet #" << counter++ << " : eta = "  << (*jetItr)->eta() 
-          << ", phi = " << (*jetItr)->phi() 
-          << ", pt = " << (*jetItr)->pt() << endmsg;
-      }
+      ATH_MSG_DEBUG( "  Jet #" << counter++ << " : eta = "  << (*jetItr)->eta() << ", phi = " << (*jetItr)->phi() << ", pt = " << (*jetItr)->pt() );
 
       //if rawConstituent are CaloClusters, get associated tracks, and mark jet as isCalo
 
@@ -193,7 +189,7 @@ namespace JiveXML {
           dynamic_cast< const xAOD::CaloCluster* >(
               ( *jetItr )->rawConstituent( j ) );
         if( ! cluster ) {
-          if (msgLvl(MSG::VERBOSE)) { msg(MSG::VERBOSE) << "  Associated cluster: n/a" << endmsg; }
+          ATH_MSG_VERBOSE( "  Associated cluster: n/a" );
         } else {
 
           isCalo=true;
@@ -210,10 +206,7 @@ namespace JiveXML {
           }
 
 
-          if (msgLvl(MSG::VERBOSE)) { msg(MSG::VERBOSE) << "  Associated cluster: eta = "
-            << cluster->eta() << ", phi = "
-              << cluster->phi() << endmsg; 
-          }
+          ATH_MSG_VERBOSE( "  Associated cluster: eta = " << cluster->eta() << ", phi = " << cluster->phi() );
         }
       }
 
@@ -226,7 +219,7 @@ namespace JiveXML {
         std::vector<const xAOD::TrackParticle*> ghosttracks = (*jetItr)->getAssociatedObjects<xAOD::TrackParticle >(xAOD::JetAttribute::GhostTrack);
 
         if( ghosttracks.empty() ) {
-          if (msgLvl(MSG::VERBOSE)) { msg(MSG::VERBOSE) << "  Associated track: ERROR" << endmsg; }
+          ATH_MSG_VERBOSE( "  Associated track: ERROR" );
 	  trackLinkCount.push_back(DataType(0.));
         }
         else {
@@ -238,9 +231,9 @@ namespace JiveXML {
             trackKey.push_back(DataType(ghosttracks[i]->index()));
             trackContKey.push_back(m_tracksName);
 
-            if (msgLvl(MSG::VERBOSE)) { msg(MSG::VERBOSE) << "  Associated track: d0 = "
+            ATH_MSG_VERBOSE( "  Associated track: d0 = "
               << ghosttracks[i]->d0() << ", pt = "
-                << ghosttracks[i]->pt() << endmsg; }
+                << ghosttracks[i]->pt() );
           }
           trackLinkCount.push_back(DataType(ghosttracks.size()));
         }
@@ -252,7 +245,7 @@ namespace JiveXML {
       for( size_t j = 0; j < ( *jetItr )->numConstituents(); ++j ) {
         const xAOD::TrackParticle* track = dynamic_cast< const xAOD::TrackParticle* >( ( *jetItr )->rawConstituent( j ) );
         if( ! track ) {
-          if (msgLvl(MSG::VERBOSE)) { msg(MSG::VERBOSE) << "  Associated track: ERROR" << endmsg; }
+          ATH_MSG_VERBOSE( "  Associated track: ERROR" );
         }
         else{
           if(!isCalo){
@@ -260,7 +253,7 @@ namespace JiveXML {
             trackContKey.push_back(m_tracksName);
 	    //trackLinkCount.push_back(DataType(
             trackcounter++;
-	    if (msgLvl(MSG::VERBOSE)) { msg(MSG::VERBOSE) << "  Associated track: d0 = " << track->d0() << ", pt = " << track->pt() << endmsg; }
+	    ATH_MSG_VERBOSE( "  Associated track: d0 = " << track->d0() << ", pt = " << track->pt() );
           }
         }
       }
@@ -297,11 +290,10 @@ namespace JiveXML {
       btag2 = (bTagJet) ? bTagJet->IP3D_loglikelihoodratio() : 0;
       bTagValue.push_back( btag2 );
       bTagName.push_back( DataType( "SV1" ));
-      btag3 = (bTagJet) ? bTagJet->SV1_loglikelihoodratio() : 0;
+      btag3 = 0;
       bTagValue.push_back( btag3 );
 
-      if (msgLvl(MSG::VERBOSE)) { msg(MSG::VERBOSE) << " Jet #" << counter << "; BTagging: MV2c10: "
-        << btag1 << ", IP3D: " << btag2 << ", SV1: " << btag3 << endmsg; }
+      ATH_MSG_VERBOSE( " Jet #" << counter << "; BTagging: MV2c10: " << btag1 << ", IP3D: " << btag2 << ", SV1: " << btag3 );
 
       // from AnalysisJiveXML:
       //   bTagName.push_back( DataType( "JetFitterTagNN" ));
@@ -332,10 +324,6 @@ namespace JiveXML {
         jvf.push_back( DataType(  jvfread[0] ));
       }
 
-      if (msgLvl(MSG::VERBOSE)) { msg(MSG::VERBOSE) << " JVF: " << jvfread[0] 
-        << " EMFrac: " << (*jetItr)->auxdata<float>("EMFrac") 
-          << endmsg; }
-
       isGood.push_back( DataType( -1111. )); // not anymore defined ? 
       //// this is defined in xAOD-JetAttribute, but doesn't work with data15:
       //      isBad.push_back( DataType( (*jetItr)->auxdata<float>("isBadMedium") ));
@@ -343,7 +331,13 @@ namespace JiveXML {
       isBad.push_back( DataType( -1111. ));
       isUgly.push_back( DataType( -1111. ));
       if (isCalo){
-        emfrac.push_back( DataType( (*jetItr)->auxdata<float>("EMFrac") )); 
+        float emfracread = 0;
+        if(!(*jetItr)->getAttribute(xAOD::JetAttribute::EMFrac,emfracread)) {
+           ATH_MSG_WARNING("Jet EMFrac unavailable!");
+           emfrac.push_back( DataType( 0. ));
+        }else{
+           emfrac.push_back( DataType( emfracread ));
+        }
       }
       else { emfrac.push_back( DataType( 0. ));
       }
@@ -388,9 +382,7 @@ namespace JiveXML {
     DataMap["trackLinkCount"] = trackLinkCount;
     DataMap["numCells"] = numCells;
 
-    if (msgLvl(MSG::DEBUG)) {
-      msg(MSG::DEBUG) << dataTypeName() << " retrieved with " << phi.size() << " entries"<< endmsg;
-    }
+    ATH_MSG_DEBUG( dataTypeName() << " retrieved with " << phi.size() << " entries" );
 
     //All collections retrieved okay
     return DataMap;
