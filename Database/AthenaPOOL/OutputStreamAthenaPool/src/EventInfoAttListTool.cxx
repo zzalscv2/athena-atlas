@@ -198,5 +198,7 @@ StatusCode EventInfoAttListTool::eventTag(AthenaAttributeList& eventTag,
 /** finialize - called once at the end */
 StatusCode  EventInfoAttListTool::finalize() {
   ATH_MSG_DEBUG("in finalize()");
+  m_attribListSpec->release();
+  m_attribListSpec = nullptr;
   return AthAlgTool::finalize();
 }
