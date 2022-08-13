@@ -182,12 +182,12 @@ CaloCluster_OnTrackBuilder::getClusterErrorMatrix(
   double energyerr =
     std::pow(0.10 * std::sqrt(cluster->calE() * 1e-3) * 1000, -4);
 
-  int matrixSize = m_useClusterEta + m_useClusterPhi + m_useClusterEnergy;
+  int matrixSize = static_cast<int>(m_useClusterEta) + static_cast<int>(m_useClusterPhi) + static_cast<int>(m_useClusterEnergy);
   Amg::MatrixX covMatrix(matrixSize, matrixSize);
   covMatrix.setZero();
 
   if (xAOD::EgammaHelpers::isBarrel(cluster)) {
-    // Two corindate in a cyclinder are
+    // The two coordinates for a cyclinder are
     // Trk::locRPhi = 0 (ie phi)
     // Trk::locZ    = 1(ie z)
     Amg::Vector3D surfRefPoint = surf.globalReferencePoint();
