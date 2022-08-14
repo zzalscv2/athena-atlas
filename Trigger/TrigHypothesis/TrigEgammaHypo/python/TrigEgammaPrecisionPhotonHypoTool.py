@@ -31,37 +31,6 @@ class TrigEgammaPrecisionPhotonHypoToolConfig:
                            'loose'    , 
                            ]
 
-  #Below are the configuration of the calorimeter isolation selections
-  # The dictionary key is the working point (icaloloose, icalo medium and icalotight
-  # the value is an array of three components where first component refers to a cut related to topoetcone20/pt, the second to topoetcone30/pt and third to topoetcone40/pt
-  # __caloIsolationCut is the cut on the variable topoetcone[x]/pt
-  # __caloEtconeCut is the cut on etcone[x]/pt Not used. But kept for backward compatibility
-  # __caloIsolationOffset is the offset applied to that cut
-  # so the selection is:
-  # 
-  
-  __caloIsolationCut = {
-                          None          : [None, None, None],
-                          'icaloloose'  : [0.1  , 999., 999. ],
-                          'icalomedium' : [0.075, 999., 999. ],
-                          'icalotight'  : [999. , 999., 0.03 ]
-                        }
-
-  __caloEtconeCut = {
-                          None          : [None, None, None],
-                          'icaloloose'  : [999., 999., 999.],
-                          'icalomedium' : [999., 999., 999.],
-                          'icalotight'  : [999., 999., 999.]
-                        }
-
-  __caloIsolationOffset = {
-                          None          : [None, None, None],
-                          'icaloloose' : [0.,0.,0.],
-                          'icalomedium': [0.,0.,0],
-                          'icalotight' : [0.,0.,2.45*GeV]
-                          }
-
-
   def __init__(self, name, monGroups, cpart, tool=None):
 
     from AthenaCommon.Logging import logging
@@ -69,7 +38,6 @@ class TrigEgammaPrecisionPhotonHypoToolConfig:
     self.__name       = name
     self.__threshold  = float(cpart['threshold']) 
     self.__sel        = cpart['addInfo'][0] if cpart['addInfo'] else cpart['IDinfo']
-    self.__isoinfo    = cpart['isoInfo']
     self.__monGroups = monGroups
     
     if not tool:
@@ -86,7 +54,6 @@ class TrigEgammaPrecisionPhotonHypoToolConfig:
     self.__log.debug( 'Chain     :%s', self.__name )
     self.__log.debug( 'Threshold :%s', self.__threshold )
     self.__log.debug( 'Pidname   :%s', self.__sel )
-    self.__log.debug( 'isoinfo   :%s', self.__isoinfo )
 
 
   def chain(self):
@@ -97,9 +64,6 @@ class TrigEgammaPrecisionPhotonHypoToolConfig:
 
   def etthr(self):
     return self.__threshold
-
-  def isoInfo(self):
-    return self.__isoinfo
 
   def tool(self):
     return self.__tool
@@ -112,16 +76,6 @@ class TrigEgammaPrecisionPhotonHypoToolConfig:
     self.tool().dETACLUSTERthr = 9999.
     self.tool().dPHICLUSTERthr = 9999.
 
-
-  #
-  # Isolation and nominal cut
-  #
-  def isoCut(self):
-    self.tool().RelTopoEtConeCut = self.__caloIsolationCut[self.isoInfo()]
-    self.tool().RelEtConeCut = self.__caloEtconeCut[self.isoInfo()]
-    self.tool().Offset = self.__caloIsolationOffset[self.isoInfo()]
-    self.nominal()
- 
 
   def nominal(self):
     if not self.pidname() in self.__operation_points:
@@ -136,13 +90,6 @@ class TrigEgammaPrecisionPhotonHypoToolConfig:
 
     if 'etcut' == self.pidname():
       self.etcut()
-
-    elif self.isoInfo() and self.isoInfo() != '':
-
-      if self.isoInfo() not in self.__caloIsolationCut.keys():
-        self.__log.error('Isolation cut %s not defined!', self.isoInfo())
-      self.__log.debug('Configuring Isolation cut %s with value %d',self.isoInfo(),self.__caloIsolationCut[self.isoInfo()])
-      self.isoCut()
 
     else:
       self.nominal()

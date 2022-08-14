@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
 */
 #ifndef TRIGEGAMMAHYPO_TRIGPRECISIONPHOTONHYPOTOOLINC_H
 #define TRIGEGAMMAHYPO_TRIGPRECISIONPHOTONHYPOTOOLINC_H 1
@@ -12,7 +12,7 @@
 #include "StoreGate/ReadDecorHandle.h"
 
 /**
- * @class Implementation of the Egamma selection for Photons
+ * @class Implementation of the CutBased Photon Identification
  * @brief 
  **/
 
@@ -34,9 +34,9 @@ class TrigEgammaPrecisionPhotonHypoTool : public extends<AthAlgTool, ITrigEgamma
     Gaudi::Property< std::vector<float> > m_eTthr { this, "ETthr", {}, "ET Threshold" };
     Gaudi::Property< float >              m_detacluster { this, "dETACLUSTERthr", 0. , "" };
     Gaudi::Property< float >              m_dphicluster { this, "dPHICLUSTERthr", 0. , "" };
-    Gaudi::Property< std::vector<float> > m_RelEtConeCut { this, "RelEtConeCut", {999., 999., 999.} , "Calo isolation cut on etcone20" };
-    Gaudi::Property< std::vector<float> > m_RelTopoEtConeCut { this, "RelTopoEtConeCut", {999., 999., 999.}, "Calo isolation cut in [TopoEtcone20/pt, TopoEtcone30/pt, TopoEtcone40/pt]" };
-    Gaudi::Property< std::vector<float> > m_CutOffset { this, "Offset", {0., 0., 0.} , "Calo isolation offset cut in [(Topo)Etcone20/pt, (Topo)Etcone30/pt, (Topo)Etcone40/pt]" };
+//    Gaudi::Property< std::vector<float> > m_RelEtConeCut { this, "RelEtConeCut", {999., 999., 999.} , "Calo isolation cut on etcone20" };
+//    Gaudi::Property< std::vector<float> > m_RelTopoEtConeCut { this, "RelTopoEtConeCut", {999., 999., 999.}, "Calo isolation cut in [TopoEtcone20/pt, TopoEtcone30/pt, TopoEtcone40/pt]" };
+//    Gaudi::Property< std::vector<float> > m_CutOffset { this, "Offset", {0., 0., 0.} , "Calo isolation offset cut in [(Topo)Etcone20/pt, (Topo)Etcone30/pt, (Topo)Etcone40/pt]" };
     Gaudi::Property< std::string >        m_pidName {this, "PidName", "", "Pid name"}; 
     
     /* monitoring */
