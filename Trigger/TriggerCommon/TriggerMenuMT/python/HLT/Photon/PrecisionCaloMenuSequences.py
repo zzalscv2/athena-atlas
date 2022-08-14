@@ -55,7 +55,7 @@ def precisionCaloSequence(flags, ion=False):
 
 
 
-def precisionCaloMenuSequence(name, is_probe_leg=False, ion=False):
+def precisionCaloMenuSequence(flags, name, is_probe_leg=False, ion=False):
     """ Creates precisionCalo MENU sequence """
 
     (sequence, precisionCaloViewsMaker, sequenceOut) = RecoFragmentsPool.retrieve(precisionCaloSequence, ConfigFlags, ion=ion)

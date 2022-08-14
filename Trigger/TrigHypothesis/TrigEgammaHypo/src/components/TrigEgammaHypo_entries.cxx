@@ -10,6 +10,8 @@
 #include "../TrigEgammaPrecisionCaloHypoAlg.h"
 #include "../TrigEgammaPrecisionPhotonHypoAlg.h"
 #include "../TrigEgammaPrecisionElectronHypoAlg.h"
+#include "../TrigEgammaPrecisionPhotonCaloIsoHypoTool.h"
+#include "../TrigEgammaPrecisionPhotonCaloIsoHypoAlg.h"
 #include "../TrigEgammaTLAPhotonHypoAlg.h"
 #include "../combos/TrigEgammaTopoHypoTool.h"
 #include "../TrigEgammaTLAPhotonHypoTool.h"
@@ -27,5 +29,7 @@ DECLARE_COMPONENT( TrigEgammaFastElectronHypoTool )
 DECLARE_COMPONENT( TrigEgammaFastPhotonHypoTool )
 DECLARE_COMPONENT( TrigEgammaPrecisionCaloHypoAlg )
 DECLARE_COMPONENT( TrigEgammaPrecisionPhotonHypoAlg )
+DECLARE_COMPONENT( TrigEgammaPrecisionPhotonCaloIsoHypoTool )
+DECLARE_COMPONENT( TrigEgammaPrecisionPhotonCaloIsoHypoAlg )
 DECLARE_COMPONENT( TrigEgammaPrecisionElectronHypoAlg )
 DECLARE_COMPONENT( TrigEgammaTopoHypoTool )
