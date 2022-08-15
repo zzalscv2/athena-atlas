@@ -13,7 +13,7 @@
 #include <string>
 
 #include "AthenaBaseComps/AthAlgTool.h"
-#include "AthContainers/AuxElement.h"  
+#include "AthContainers/AuxElement.h"
 #include "GaudiKernel/ToolHandle.h"
 #include "DerivationFrameworkInterfaces/IAugmentationTool.h"
 #include "BoostedJetTaggers/DeepsetXbbTagger.h"
@@ -21,7 +21,7 @@
 
 namespace DerivationFramework {
 
-  
+
   class ExKtbbAugmentation : public AthAlgTool, public IAugmentationTool {
 
 
@@ -34,7 +34,7 @@ namespace DerivationFramework {
     int getDeXTerLabel(const int ghostBFinalCount,const int ghostCFinalCount) const;
 
    private:
-    std::string m_eventInfoName;    
+    std::string m_eventInfoName;
     std::string m_secvtxName;
     std::string m_largeJetCollectionName;
     std::string m_smallJetCollectionName;
@@ -58,6 +58,7 @@ namespace DerivationFramework {
     const SG::AuxElement::Decorator<std::vector<float> > secvtx_3dsig;
     const SG::AuxElement::Decorator<float> jet_maxsd0;
     const SG::AuxElement::Decorator<float> jet_av3sd0;
+    const SG::AuxElement::Decorator<float> jet_dexter_Dbb;
     const SG::AuxElement::Decorator<float> jet_dexter_pbb;
     const SG::AuxElement::Decorator<float> jet_dexter_pb;
     const SG::AuxElement::Decorator<float> jet_dexter_pl;

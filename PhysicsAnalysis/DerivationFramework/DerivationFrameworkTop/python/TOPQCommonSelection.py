@@ -106,8 +106,8 @@ largeR_220="("+akt10LCtrimmedcalib_220+")"
 largeR_350="("+akt10LCtrimmedcalib_350+")"
 largeR_200_masscut="("+akt10LCtrimmedcalib_200_masscut+")"
 
-#Missing ET
-met_150 = "(MET_Reference_AntiKt4EMTopo['FinalTrk'].met > 150*GeV)"
+#Require dexter-tagged jet at 70% WP
+akt8_dexter = "(AntiKt8EMPFlowJets.ExKtbb_dexter_Dbb > 1.8)"
 
 #=============================================
 # LEPTON EVENT SELECTION
@@ -181,13 +181,13 @@ def setup_jet(TOPQname, ToolSvc):
         smallR_EMTopo_btag_sel = ('(count({}) > 0 || count({}) > 0)'.format(akt4EM_FCBEff_85_MV2c10, akt4EM_FCBEff_85_DL1))
         smallR_EMPFlow_sel = 'count({}) >= 5'.format(akt4EMPFlowcalib_20)
         smallR_EMPFlow_btag_sel = ('(count({}) > 0 || count({}) > 0)'.format(akt4EMPFlow_FCBEff_85_MV2c10, akt4EMPFlow_FCBEff_85_DL1))
-        met_sel = ('(count({}) >= 1 && count({}) >= 1)'.format(akt4EMPFlowcalib_20,met_150))
+        akt8_sel = ('(count({}) >= 1 && count({}) >= 1)'.format(akt4EMPFlowcalib_20,akt8_dexter))
         TOPQ_Selection_jet = '({} || ({} && {}) || ({} && {}) || {})'.format(largeR_sel,
                                                                        smallR_EMTopo_sel,
                                                                        smallR_EMTopo_btag_sel,
                                                                        smallR_EMPFlow_sel,
                                                                        smallR_EMPFlow_btag_sel,
-                                                                       met_sel)
+                                                                       akt8_sel)
     elif TOPQname == 'TOPQ5':
         TOPQ_Selection_jet = "1"
     elif TOPQname == 'TOPQ6':

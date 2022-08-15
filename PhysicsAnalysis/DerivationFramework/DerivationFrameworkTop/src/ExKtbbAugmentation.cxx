@@ -30,6 +30,7 @@ ExKtbbAugmentation::ExKtbbAugmentation(const std::string& t, const std::string& 
   secvtx_3dsig("SoftBVrtClusterTool_MSVTight_Vertices_3dsig"),
   jet_maxsd0("ExKtbb_maxsd0"),
   jet_av3sd0("ExKtbb_av3sd0"),
+  jet_dexter_Dbb("ExKtbb_dexter_Dbb"),
   jet_dexter_pbb("ExKtbb_dexter_pbb"),
   jet_dexter_pb("ExKtbb_dexter_pb"),
   jet_dexter_pl("ExKtbb_dexter_pl"),
@@ -142,7 +143,7 @@ StatusCode ExKtbbAugmentation::addBranches() const{
     if (vtx->vertexType() != xAOD::VxType::VertexType::PriVtx) continue;
     primVtx = vtx;
   }
-  
+
   const xAOD::VertexContainer *msecvtx;
   if (evtStore()->retrieve(msecvtx,m_secvtxName).isFailure()) {
     ATH_MSG_ERROR("could not retrieve MSV " <<m_eventInfoName);
@@ -161,7 +162,7 @@ StatusCode ExKtbbAugmentation::addBranches() const{
   for (const auto jet : *jets) {
 
     std::vector<const xAOD::TruthParticle *> jetlabelpartsb;
-    std::vector<const xAOD::TruthParticle *> jetlabelpartsc;    
+    std::vector<const xAOD::TruthParticle *> jetlabelpartsc;
 
     auto constVector = jet->constituentLinks();
     for (auto constituent : constVector)
@@ -200,7 +201,7 @@ StatusCode ExKtbbAugmentation::addBranches() const{
                 jetlabelpartsc.push_back(chadron);
             }
           }
-          // For track sd0      
+          // For track sd0
 	  auto constVector = subjet->getConstituents();
 	  std::vector<double> sd0;
 	  for (const auto constituent : constVector) {
@@ -242,7 +243,7 @@ StatusCode ExKtbbAugmentation::addBranches() const{
       using ParticleJetTools::childrenRemoved;
       childrenRemoved(jetlabelpartsb, jetlabelpartsb);
       childrenRemoved(jetlabelpartsb, jetlabelpartsc);
-      childrenRemoved(jetlabelpartsc, jetlabelpartsc);    
+      childrenRemoved(jetlabelpartsc, jetlabelpartsc);
       int ghostBTotalCount = jetlabelpartsb.size();
       int ghostCTotalCount = jetlabelpartsc.size();
 
@@ -260,6 +261,28 @@ StatusCode ExKtbbAugmentation::addBranches() const{
     jet_dexter_pbb(*jet) = scores.at("dexter_pbb");
     jet_dexter_pb(*jet) = scores.at("dexter_pb");
     jet_dexter_pl(*jet) = scores.at("dexter_pl");
+
+    int rcjetLabel = static_cast<int>(jet->index());
+    int counter = 0;
+    for (const auto ak4jet : *smalljets) {
+       if ( smalljet_largeJetLabel(*ak4jet) == rcjetLabel ) { counter += 1; }
+    }
+    // only want ak8 jets with one constituent
+    if ( counter != 1 ) { jet_dexter_Dbb(*jet) = -9999; }
+    else {
+       if(std::isnan(scores.at("dexter_pbb"))){
+         jet_dexter_Dbb(*jet) = -9999;
+       }
+       else {
+          float dexter_Dbb = scores.at("dexter_pbb") / (0.4 * scores.at("dexter_pb") + (1-0.4) * scores.at("dexter_pl"));
+          if (dexter_Dbb > 0){
+             jet_dexter_Dbb(*jet) = std::log(dexter_Dbb);
+          }
+          else {
+             jet_dexter_Dbb(*jet) = -9999;
+          }
+       }
+    }
 
     m_dexter->setProperty("negativeTagMode", "TrksFlip");
     ATH_CHECK(m_dexter.retrieve());
@@ -308,19 +331,19 @@ StatusCode ExKtbbAugmentation::addBranches() const{
     // Loop over secondary vertices and calculate displacement with respect to track jet kt-closest to it
     // These quantities are stored in temporary vectors defined above.
 
-    for(xAOD::Vertex *secVtx: *msecvtx) { 
+    for(xAOD::Vertex *secVtx: *msecvtx) {
 
       TLorentzVector SecVtxVector;
       SecVtxVector.SetPxPyPzE(tc_lvt_px(*secVtx), tc_lvt_py(*secVtx), tc_lvt_pz(*secVtx), tc_lvt_ee(*secVtx));
 
       if(SecVtxVector.DeltaR(jet->p4()) > 0.8) continue;
 
-      auto trackJet = std::min_element(ExKtSubjets.begin(), ExKtSubjets.end(), 
+      auto trackJet = std::min_element(ExKtSubjets.begin(), ExKtSubjets.end(),
 				       [&SecVtxVector](const xAOD::Jet* j1, const xAOD::Jet* j2){
 					 return (SecVtxVector.DeltaR(j1->p4()) < SecVtxVector.DeltaR(j2->p4()));
 				       }
 				       );
-      
+
       float Lx = secVtx->position().x()-primVtx->position().x();
       float Ly = secVtx->position().y()-primVtx->position().y();
       float Lz = secVtx->position().z()-primVtx->position().z();
@@ -328,13 +351,13 @@ StatusCode ExKtbbAugmentation::addBranches() const{
       Amg::Vector3D jetDirection((*trackJet)->p4().Px(),(*trackJet)->p4().Py(),(*trackJet)->p4().Pz());
       Amg::Vector3D dL(Lx,Ly,Lz);
 
-      AmgSymMatrix(3) covariance = secVtx->covariancePosition() + primVtx->covariancePosition(); 
+      AmgSymMatrix(3) covariance = secVtx->covariancePosition() + primVtx->covariancePosition();
       AmgSymMatrix(3) invert_covariance = covariance.inverse();
 
       const float z0_sig = std::abs(Lz)/std::sqrt(covariance(2,2));
       const float Lxy = std::hypot(Lx,Ly);
       const float Lxy_sig = std::sqrt(Lx*Lx*invert_covariance(0,0) + 2*Lx*Ly*invert_covariance(0,1) + Ly*Ly*invert_covariance(1,1));
-  
+
       const double decaylength = dL.norm();
       double decaylength_err = dL.dot(covariance*dL);
       decaylength_err /= dL.squaredNorm();
@@ -357,9 +380,9 @@ StatusCode ExKtbbAugmentation::addBranches() const{
       vtx_lz[ExKt_index].push_back(std::abs(Lz));
       vtx_lzsig[ExKt_index].push_back(z0_sig);
       vtx_3dsig[ExKt_index].push_back(decaylength_significance);
-      
+
     }
-    
+
     // Move the values to the decorator of the appropriate trackjet.
     for (size_t i=0; i<ExKtSubjets.size(); i++) {
       secvtx_pt(*ExKtSubjets[i]) = std::move(vtx_pt[i]);
@@ -375,7 +398,7 @@ StatusCode ExKtbbAugmentation::addBranches() const{
       secvtx_lzsig(*ExKtSubjets[i]) = std::move(vtx_lzsig[i]);
       secvtx_3dsig(*ExKtSubjets[i]) = std::move(vtx_3dsig[i]);
     }
-  } 
+  }
   return StatusCode::SUCCESS;
 
 }
