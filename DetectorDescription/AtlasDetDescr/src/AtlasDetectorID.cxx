@@ -7,28 +7,12 @@
  -----------------------------------------
 ***************************************************************************/
 
-//<doc><file>   $Id: AtlasDetectorID.cxx,v 1.58 2007-11-25 17:16:50 schaffer Exp $
-//<version>     $Name: not supported by cvs2svn $
-
-//<<<<<< INCLUDES                                                       >>>>>>
-
 #include "GaudiKernel/MsgStream.h"
 #include "AtlasDetDescr/AtlasDetectorID.h"
 #include "IdDict/IdDictDefs.h"
 #include "AtlasDetectorIDHelper.h"
-#include <iostream>
 #include <stdio.h>
 #include <assert.h>
-
-//<<<<<< PRIVATE DEFINES                                                >>>>>>
-//<<<<<< PRIVATE CONSTANTS                                              >>>>>>
-//<<<<<< PRIVATE TYPES                                                  >>>>>>
-//<<<<<< PRIVATE VARIABLE DEFINITIONS                                   >>>>>>
-//<<<<<< PUBLIC VARIABLE DEFINITIONS                                    >>>>>>
-//<<<<<< CLASS STRUCTURE INITIALIZATION                                 >>>>>>
-//<<<<<< PRIVATE FUNCTION DEFINITIONS                                   >>>>>>
-//<<<<<< PUBLIC FUNCTION DEFINITIONS                                    >>>>>>
-//<<<<<< MEMBER FUNCTION DEFINITIONS                                    >>>>>>
 
 AtlasDetectorID::AtlasDetectorID()
 {}
@@ -37,145 +21,6 @@ AtlasDetectorID::~AtlasDetectorID()
 {
     delete m_helper;
 }
-
-AtlasDetectorID::AtlasDetectorID(const AtlasDetectorID& other)
-        :
-        IdHelper(),
-        m_do_checks               (other.m_do_checks),
-        m_do_neighbours           (other.m_do_neighbours),
-        m_msgSvc                  (other.m_msgSvc),
-        m_quiet                   (other.m_quiet),
-        m_dict_version            (other.m_dict_version),
-        m_is_initialized_from_dict(other.m_is_initialized_from_dict),
-        m_DET_INDEX               (other.m_DET_INDEX),
-        m_SUBDET_INDEX            (other.m_SUBDET_INDEX),
-        m_MUON_SUBDET_INDEX       (other.m_MUON_SUBDET_INDEX),
-        m_INDET_ID                (other.m_INDET_ID),
-        m_LAR_ID                  (other.m_LAR_ID),
-        m_TILE_ID                 (other.m_TILE_ID),
-        m_MUON_ID                 (other.m_MUON_ID),
-        m_CALO_ID                 (other.m_CALO_ID),
-        m_PIXEL_ID                (other.m_PIXEL_ID),
-        m_SCT_ID                  (other.m_SCT_ID),
-        m_TRT_ID                  (other.m_TRT_ID),
-        m_HGTD_ID                 (other.m_HGTD_ID),
-        m_LUMI_ID                 (other.m_LUMI_ID),
-        m_LUMI_PLR_ID             (other.m_LUMI_PLR_ID),
-        m_LAR_EM_ID               (other.m_LAR_EM_ID),
-        m_LAR_HEC_ID              (other.m_LAR_HEC_ID),
-        m_LAR_FCAL_ID             (other.m_LAR_FCAL_ID),
-        m_LAR_FCAL_MODULE_INDEX   (other.m_LAR_FCAL_MODULE_INDEX),
-        m_MDT_ID                  (other.m_MDT_ID),
-        m_CSC_ID                  (other.m_CSC_ID),
-        m_RPC_ID                  (other.m_RPC_ID),
-        m_TGC_ID                  (other.m_TGC_ID),
-        m_STGC_ID                 (other.m_STGC_ID),
-        m_MM_ID                   (other.m_MM_ID),
-        m_FWD_ID                  (other.m_FWD_ID),
-        m_ALFA_ID                 (other.m_ALFA_ID),
-        m_BCM_ID                  (other.m_BCM_ID),
-        m_LUCID_ID                (other.m_LUCID_ID),
-        m_ZDC_ID                  (other.m_ZDC_ID),
-        m_isHighLuminosityLHC     (other.m_isHighLuminosityLHC),
-        m_lvl1_field              (other.m_lvl1_field),
-        m_lvl1_onl_field          (other.m_lvl1_onl_field),
-        m_lar_dm_field            (other.m_lar_dm_field),
-        m_tile_dm_field           (other.m_tile_dm_field),
-        m_atlas_dict              (other.m_atlas_dict),
-        m_indet_dict              (other.m_indet_dict),
-        m_lar_dict                (other.m_lar_dict),
-        m_tile_dict               (other.m_tile_dict),
-        m_muon_dict               (other.m_muon_dict),
-        m_calo_dict               (other.m_calo_dict),
-        m_fwd_dict                (other.m_fwd_dict),
-        m_det_impl                (other.m_det_impl),
-        m_indet_part_impl         (other.m_indet_part_impl),
-        m_calo_side_impl          (other.m_calo_side_impl),
-        m_lar_part_impl           (other.m_lar_part_impl),
-        m_lar_fcal_module_impl    (other.m_lar_fcal_module_impl),
-        m_muon_station_name_impl  (other.m_muon_station_name_impl),
-        m_muon_mdt_impl           (other.m_muon_mdt_impl),
-        m_muon_rpc_impl           (other.m_muon_rpc_impl)
-
-{
-    if (other.m_helper) {
-        // Must copy helper
-        m_helper = new  AtlasDetectorIDHelper(*other.m_helper);
-        m_helper->setMsgSvc(m_msgSvc);
-    }
-}
-
-AtlasDetectorID&
-AtlasDetectorID::operator= (const AtlasDetectorID& other)
-{
-    if (this != &other) {
-        m_do_checks             = other.m_do_checks;
-        m_do_neighbours         = other.m_do_neighbours;
-        m_msgSvc                = other.m_msgSvc;
-        m_quiet                 = other.m_quiet;
-        m_dict_version          = other.m_dict_version;
-        m_is_initialized_from_dict = other.m_is_initialized_from_dict;
-        m_DET_INDEX             = other.m_DET_INDEX;
-        m_SUBDET_INDEX          = other.m_SUBDET_INDEX;
-        m_MUON_SUBDET_INDEX     = other.m_MUON_SUBDET_INDEX;
-        m_INDET_ID              = other.m_INDET_ID;
-        m_LAR_ID                = other.m_LAR_ID;
-        m_TILE_ID               = other.m_TILE_ID;
-        m_MUON_ID               = other.m_MUON_ID;
-        m_CALO_ID               = other.m_CALO_ID;
-        m_PIXEL_ID              = other.m_PIXEL_ID;
-        m_SCT_ID                = other.m_SCT_ID;
-        m_TRT_ID                = other.m_TRT_ID;
-        m_HGTD_ID               = other.m_HGTD_ID;
-        m_LUMI_ID               = other.m_LUMI_ID;
-        m_LUMI_PLR_ID           = other.m_LUMI_PLR_ID;
-        m_LAR_EM_ID             = other.m_LAR_EM_ID;
-        m_LAR_HEC_ID            = other.m_LAR_HEC_ID;
-        m_LAR_FCAL_ID           = other.m_LAR_FCAL_ID;
-        m_LAR_FCAL_MODULE_INDEX = other.m_LAR_FCAL_MODULE_INDEX;
-        m_MDT_ID                = other.m_MDT_ID;
-        m_CSC_ID                = other.m_CSC_ID;
-        m_RPC_ID                = other.m_RPC_ID;
-        m_TGC_ID                = other.m_TGC_ID;
-        m_STGC_ID               = other.m_STGC_ID;
-        m_MM_ID                 = other.m_MM_ID;
-        m_FWD_ID                = other.m_FWD_ID;
-        m_ALFA_ID               = other.m_ALFA_ID;
-        m_BCM_ID                = other.m_BCM_ID;
-        m_LUCID_ID              = other.m_LUCID_ID;
-        m_ZDC_ID                = other.m_ZDC_ID;
-        m_isHighLuminosityLHC   = other.m_isHighLuminosityLHC;
-        m_lvl1_field            = other.m_lvl1_field;
-        m_lvl1_onl_field        = other.m_lvl1_onl_field;
-        m_lar_dm_field          = other.m_lar_dm_field;
-        m_tile_dm_field         = other.m_tile_dm_field;
-        m_atlas_dict            = other.m_atlas_dict;
-        m_indet_dict            = other.m_indet_dict;
-        m_lar_dict              = other.m_lar_dict;
-        m_tile_dict             = other.m_tile_dict;
-        m_muon_dict             = other.m_muon_dict;
-        m_calo_dict             = other.m_calo_dict;
-        m_fwd_dict              = other.m_fwd_dict;
-        m_det_impl              = other.m_det_impl;
-        m_indet_part_impl       = other.m_indet_part_impl;
-        m_calo_side_impl        = other.m_calo_side_impl;
-        m_lar_part_impl         = other.m_lar_part_impl;
-        m_lar_fcal_module_impl  = other.m_lar_fcal_module_impl;
-        m_muon_station_name_impl= other.m_muon_station_name_impl;
-        m_muon_mdt_impl         = other.m_muon_mdt_impl;
-        m_muon_rpc_impl         = other.m_muon_rpc_impl;
-
-        if (other.m_helper) {
-            // Must copy helper.
-            delete m_helper;
-            m_helper = new  AtlasDetectorIDHelper(*other.m_helper);
-            m_helper->setMsgSvc(m_msgSvc);
-        }
-    }
-
-    return (*this);
-}
-
 
 Identifier
 AtlasDetectorID::indet        (void) const
@@ -446,27 +291,16 @@ AtlasDetectorID::reinitialize             (const IdDictMgr& dict_mgr)
 
     // Loop over dict names and check version tags
     if (m_dict_names.size() != m_dict_tags.size()) {
-        if(m_msgSvc) {
-            MsgStream log(m_msgSvc, "AtlasDetectorID" );
-            log << MSG::ERROR << "reinitialize: dict names and tags vectors not the same length " << endmsg;
-            log << MSG::ERROR << "names: " << m_dict_names.size() << " tags: " << m_dict_tags.size() << endmsg;
-        }
-        else {
-            std::cout << MSG::ERROR << "reinitialize: dict names and tags vectors not the same length " << std::endl;
-            std::cout << "AtlasDetectorID::reinitialize ERROR names: " << m_dict_names.size() << " tags: " << m_dict_tags.size() << std::endl;
-        }
+        MsgStream log(m_msgSvc, "AtlasDetectorID" );
+        log << MSG::ERROR << "reinitialize: dict names and tags vectors not the same length " << endmsg;
+        log << MSG::ERROR << "names: " << m_dict_names.size() << " tags: " << m_dict_tags.size() << endmsg;
     }
     for (unsigned int i = 0; i < m_dict_names.size(); ++i) {
         // Access dictionary by name
         IdDictDictionary* dict = dict_mgr.find_dictionary(m_dict_names[i]);
         if (!dict) {
-            if(m_msgSvc) {
-                MsgStream log(m_msgSvc, "AtlasDetectorID" );
-                log << MSG::ERROR << "reinitialize: could not find dict -  " << m_dict_names[i] << endmsg;
-            }
-            else {
-              std::cout << "AtlasDetectorID::reinitialize ERROR could not find dict -  " << m_dict_names[i] << std::endl;
-            }
+            MsgStream log(m_msgSvc, "AtlasDetectorID" );
+            log << MSG::ERROR << "reinitialize: could not find dict -  " << m_dict_names[i] << endmsg;
             return(false);
         }
         if (m_dict_tags[i] != dict->dict_tag()) {
@@ -493,7 +327,7 @@ AtlasDetectorID::initialize_from_dictionary(const IdDictMgr& dict_mgr)
 
     // Initialize helper, needed for init of AtlasDetectorID
     if(!m_helper) {
-        m_helper = new AtlasDetectorIDHelper;
+        m_helper = new AtlasDetectorIDHelper();
         m_helper->setMsgSvc(m_msgSvc);
     }
 
@@ -505,13 +339,8 @@ AtlasDetectorID::initialize_from_dictionary(const IdDictMgr& dict_mgr)
     m_is_initialized_from_dict = true;
 
     if (!m_quiet) {
-      if(m_msgSvc) {
         MsgStream log(m_msgSvc, "AtlasDetectorID" );
         log << MSG::INFO << "initialize_from_dictionary - OK" << endmsg;
-      }
-      else {
-        std::cout << " AtlasDetectorID::initialize_from_dictionary - OK " << std::endl;
-      }
     }
 
     return (0);
@@ -741,13 +570,8 @@ AtlasDetectorID::show           (Identifier id,
                                  const IdContext* context,
                                  char sep ) const
 {
-    if(m_msgSvc) {
-        MsgStream log(m_msgSvc, "AtlasDetectorID" );
-        log << MSG::INFO << show_to_string(id, context, sep) << endmsg;
-    }
-    else {
-        std::cout << show_to_string(id, context, sep) << std::endl;
-    }
+    MsgStream log(m_msgSvc, "AtlasDetectorID" );
+    log << MSG::INFO << show_to_string(id, context, sep) << endmsg;
 }
 
 // or provide the printout in string form
@@ -829,13 +653,8 @@ void
 AtlasDetectorID::print (Identifier id,
                         const IdContext* context) const
 {
-    if(m_msgSvc) {
-        MsgStream log(m_msgSvc, "AtlasDetectorID" );
-        log << MSG::INFO << print_to_string(id, context) << endmsg;
-    }
-    else {
-        std::cout << print_to_string(id, context) << std::endl;
-    }
+    MsgStream log(m_msgSvc, "AtlasDetectorID" );
+    log << MSG::INFO << print_to_string(id, context) << endmsg;
 }
 
 std::string
@@ -1026,14 +845,8 @@ AtlasDetectorID::initLevelsFromDict(const IdDictMgr& dict_mgr)
     // Initialize ids for InDet subdet
     m_indet_dict = dict_mgr.find_dictionary ("InnerDetector");
     if(!m_indet_dict) {
-        if(m_msgSvc) {
-            MsgStream log(m_msgSvc, "AtlasDetectorID" );
-            log << MSG::WARNING << "initLevelsFromDict - cannot access InnerDetector dictionary" << endmsg;
-        }
-        else {
-            std::cout << " AtlasDetectorID::initLevelsFromDict - Warning cannot access InnerDetector dictionary "
-                      << std::endl;
-        }
+        MsgStream log(m_msgSvc, "AtlasDetectorID" );
+        log << MSG::WARNING << "initLevelsFromDict - cannot access InnerDetector dictionary" << endmsg;
     }
     else {
 
@@ -1050,14 +863,8 @@ AtlasDetectorID::initLevelsFromDict(const IdDictMgr& dict_mgr)
 
         field = m_indet_dict->find_field("part");
         if (!field) {
-            if(m_msgSvc) {
-                MsgStream log(m_msgSvc, "AtlasDetectorID" );
-                log << MSG::ERROR << "initLevelsFromDict - unable to find 'part' field for InnerDetector dictionary" << endmsg;
-            }
-            else {
-                std::cout << "AtlasDetectorID::initLevelsFromDict - unable to find 'part' field for InnerDetector dictionary"
-                          << std::endl;
-            }
+            MsgStream log(m_msgSvc, "AtlasDetectorID" );
+            log << MSG::ERROR << "initLevelsFromDict - unable to find 'part' field for InnerDetector dictionary" << endmsg;
             return (1);
         }
 
@@ -1067,28 +874,16 @@ AtlasDetectorID::initLevelsFromDict(const IdDictMgr& dict_mgr)
                 m_PIXEL_ID = label->m_value;
             }
             else {
-                if(m_msgSvc) {
-                    MsgStream log(m_msgSvc, "AtlasDetectorID" );
-                    log << MSG::ERROR << "initLevelsFromDict - label Pixel does NOT have a value "
-                        << endmsg;
-                }
-                else {
-                    std::cout << "AtlasDetectorID::initLevelsFromDict - label Pixel does NOT have a value "
-                              << std::endl;
-                }
+                MsgStream log(m_msgSvc, "AtlasDetectorID" );
+                log << MSG::ERROR << "initLevelsFromDict - label Pixel does NOT have a value "
+                    << endmsg;
                 return (1);
             }
         }
         else {
-            if(m_msgSvc) {
-                MsgStream log(m_msgSvc, "AtlasDetectorID" );
-                log << MSG::ERROR << "initLevelsFromDict - unable to find 'Pixel' label "
-                    << endmsg;
-            }
-            else {
-                std::cout << "AtlasDetectorID::initLevelsFromDict - unable to find 'Pixel' label "
-                          << std::endl;
-            }
+            MsgStream log(m_msgSvc, "AtlasDetectorID" );
+            log << MSG::ERROR << "initLevelsFromDict - unable to find 'Pixel' label "
+                << endmsg;
             return (1);
         }
 
@@ -1098,28 +893,16 @@ AtlasDetectorID::initLevelsFromDict(const IdDictMgr& dict_mgr)
                 m_SCT_ID = label->m_value;
             }
             else {
-                if(m_msgSvc) {
-                    MsgStream log(m_msgSvc, "AtlasDetectorID" );
-                    log << MSG::ERROR << "initLevelsFromDict - label SCT does NOT have a value "
-                        << endmsg;
-                }
-                else {
-                    std::cout << "AtlasDetectorID::initLevelsFromDict - label SCT does NOT have a value "
-                              << std::endl;
-                }
+                MsgStream log(m_msgSvc, "AtlasDetectorID" );
+                log << MSG::ERROR << "initLevelsFromDict - label SCT does NOT have a value "
+                    << endmsg;
                 return (1);
             }
         }
         else {
-            if(m_msgSvc) {
-                MsgStream log(m_msgSvc, "AtlasDetectorID" );
-                log << MSG::ERROR << "initLevelsFromDict - unable to find 'SCT' label "
-                    << endmsg;
-            }
-            else {
-                std::cout << "AtlasDetectorID::initLevelsFromDict - unable to find 'SCT' label "
-                          << std::endl;
-            }
+            MsgStream log(m_msgSvc, "AtlasDetectorID" );
+            log << MSG::ERROR << "initLevelsFromDict - unable to find 'SCT' label "
+                << endmsg;
             return (1);
         }
         if (!m_isHighLuminosityLHC) {
@@ -1129,28 +912,16 @@ AtlasDetectorID::initLevelsFromDict(const IdDictMgr& dict_mgr)
                     m_TRT_ID = label->m_value;
                 }
                 else {
-                    if(m_msgSvc) {
-                        MsgStream log(m_msgSvc, "AtlasDetectorID" );
-                        log << MSG::ERROR << "initLevelsFromDict - label TRT does NOT have a value "
-                            << endmsg;
-                    }
-                    else {
-                        std::cout << "AtlasDetectorID::initLevelsFromDict - label TRT does NOT have a value "
-                                  << std::endl;
-                    }
+                    MsgStream log(m_msgSvc, "AtlasDetectorID" );
+                    log << MSG::ERROR << "initLevelsFromDict - label TRT does NOT have a value "
+                        << endmsg;
                     return (1);
                 }
             }
             else {
-                if(m_msgSvc) {
-                    MsgStream log(m_msgSvc, "AtlasDetectorID" );
-                    log << MSG::ERROR << "initLevelsFromDict - unable to find 'TRT' label "
-                        << endmsg;
-                }
-                else {
-                    std::cout << "AtlasDetectorID::initLevelsFromDict - unable to find 'TRT' label "
-                              << std::endl;
-                }
+                MsgStream log(m_msgSvc, "AtlasDetectorID" );
+                log << MSG::ERROR << "initLevelsFromDict - unable to find 'TRT' label "
+                    << endmsg;
                 return (1);
             }
         }
@@ -1162,28 +933,16 @@ AtlasDetectorID::initLevelsFromDict(const IdDictMgr& dict_mgr)
                         m_LUMI_ID = label->m_value;
                     }
                     else {
-                        if(m_msgSvc) {
-                            MsgStream log(m_msgSvc, "AtlasDetectorID" );
-                            log << MSG::ERROR << "initLevelsFromDict - label LuminosityDetectors does NOT have a value "
-                                << endmsg;
-                        }
-                        else {
-                            std::cout << "AtlasDetectorID::initLevelsFromDict - label LuminosityDetectors does NOT have a value "
-                                      << std::endl;
-                        }
+                        MsgStream log(m_msgSvc, "AtlasDetectorID" );
+                        log << MSG::ERROR << "initLevelsFromDict - label LuminosityDetectors does NOT have a value "
+                            << endmsg;
                         return (1);
                     }
                 }
                 else {
-                    if(m_msgSvc) {
-                  MsgStream log(m_msgSvc, "AtlasDetectorID" );
-                  log << MSG::ERROR << "initLevelsFromDict - unable to find 'LuminosityDetectors' label "
-                  << endmsg;
-                    }
-                    else {
-                    std::cout << "AtlasDetectorID::initLevelsFromDict - unable to find 'LuminosityDetectors' label "
-                    << std::endl;
-                    }
+                    MsgStream log(m_msgSvc, "AtlasDetectorID" );
+                    log << MSG::ERROR << "initLevelsFromDict - unable to find 'LuminosityDetectors' label "
+                        << endmsg;
                     return (1);
                 }
             }
@@ -1194,28 +953,16 @@ AtlasDetectorID::initLevelsFromDict(const IdDictMgr& dict_mgr)
                     m_HGTD_ID = label->m_value;
                 }
                 else {
-                    if(m_msgSvc) {
-                        MsgStream log(m_msgSvc, "AtlasDetectorID" );
-                        log << MSG::ERROR << "initLevelsFromDict - label HGTD does NOT have a value "
-                            << endmsg;
-                    }
-                    else {
-                        std::cout << "AtlasDetectorID::initLevelsFromDict - label HGTD does NOT have a value "
-                                  << std::endl;
-                    }
+                    MsgStream log(m_msgSvc, "AtlasDetectorID" );
+                    log << MSG::ERROR << "initLevelsFromDict - label HGTD does NOT have a value "
+                        << endmsg;
                     return (1);
                 }
             }
             else {
-                if(m_msgSvc) {
-              MsgStream log(m_msgSvc, "AtlasDetectorID" );
-              log << MSG::ERROR << "initLevelsFromDict - unable to find 'HGTD' label "
-              << endmsg;
-                }
-                else {
-                std::cout << "AtlasDetectorID::initLevelsFromDict - unable to find 'HGTD' label "
-                << std::endl;
-                }
+                MsgStream log(m_msgSvc, "AtlasDetectorID" );
+                log << MSG::ERROR << "initLevelsFromDict - unable to find 'HGTD' label "
+                    << endmsg;
                 return (1);
             }
         }
@@ -1227,14 +974,8 @@ AtlasDetectorID::initLevelsFromDict(const IdDictMgr& dict_mgr)
     // Initialize ids for Forward dets
     m_fwd_dict = dict_mgr.find_dictionary ("ForwardDetectors");
     if(!m_fwd_dict) {
-        if(m_msgSvc) {
-            MsgStream log(m_msgSvc, "AtlasDetectorID" );
-            log << MSG::WARNING << "initLevelsFromDict - cannot access ForwardDetectors dictionary" << endmsg;
-        }
-        else {
-            std::cout << " AtlasDetectorID::initLevelsFromDict - Warning cannot access ForwardDetectors dictionary "
-                      << std::endl;
-        }
+        MsgStream log(m_msgSvc, "AtlasDetectorID" );
+        log << MSG::WARNING << "initLevelsFromDict - cannot access ForwardDetectors dictionary" << endmsg;
     }
     else {
 
@@ -1246,14 +987,8 @@ AtlasDetectorID::initLevelsFromDict(const IdDictMgr& dict_mgr)
 
         field = m_fwd_dict->find_field("part");
         if (!field) {
-            if(m_msgSvc) {
-                MsgStream log(m_msgSvc, "AtlasDetectorID" );
-                log << MSG::ERROR << "initLevelsFromDict - unable to find 'part' field for ForwardDetectors dictionary" << endmsg;
-            }
-            else {
-                std::cout << "AtlasDetectorID::initLevelsFromDict - unable to find 'part' field for ForwardDetectors dictionary"
-                          << std::endl;
-            }
+            MsgStream log(m_msgSvc, "AtlasDetectorID" );
+            log << MSG::ERROR << "initLevelsFromDict - unable to find 'part' field for ForwardDetectors dictionary" << endmsg;
             return (1);
         }
 
@@ -1263,28 +998,16 @@ AtlasDetectorID::initLevelsFromDict(const IdDictMgr& dict_mgr)
                 m_ALFA_ID = label->m_value;
             }
             else {
-                if(m_msgSvc) {
-                    MsgStream log(m_msgSvc, "AtlasDetectorID" );
-                    log << MSG::ERROR << "initLevelsFromDict - label ALFA does NOT have a value "
-                        << endmsg;
-                }
-                else {
-                    std::cout << "AtlasDetectorID::initLevelsFromDict - label ALFA does NOT have a value "
-                              << std::endl;
-                }
+                MsgStream log(m_msgSvc, "AtlasDetectorID" );
+                log << MSG::ERROR << "initLevelsFromDict - label ALFA does NOT have a value "
+                    << endmsg;
                 return (1);
             }
         }
         else {
-            if(m_msgSvc) {
-                MsgStream log(m_msgSvc, "AtlasDetectorID" );
-                log << MSG::ERROR << "initLevelsFromDict - unable to find 'ALFA' label "
-                    << endmsg;
-            }
-            else {
-                std::cout << "AtlasDetectorID::initLevelsFromDict - unable to find 'ALFA' label "
-                          << std::endl;
-            }
+            MsgStream log(m_msgSvc, "AtlasDetectorID" );
+            log << MSG::ERROR << "initLevelsFromDict - unable to find 'ALFA' label "
+                << endmsg;
             return (1);
         }
 
@@ -1294,28 +1017,16 @@ AtlasDetectorID::initLevelsFromDict(const IdDictMgr& dict_mgr)
                 m_BCM_ID = label->m_value;
             }
             else {
-                if(m_msgSvc) {
-                    MsgStream log(m_msgSvc, "AtlasDetectorID" );
-                    log << MSG::ERROR << "initLevelsFromDict - label BCM does NOT have a value "
-                        << endmsg;
-                }
-                else {
-                    std::cout << "AtlasDetectorID::initLevelsFromDict - label BCM does NOT have a value "
-                              << std::endl;
-                }
+                MsgStream log(m_msgSvc, "AtlasDetectorID" );
+                log << MSG::ERROR << "initLevelsFromDict - label BCM does NOT have a value "
+                    << endmsg;
                 return (1);
             }
         }
         else {
-            if(m_msgSvc) {
-                MsgStream log(m_msgSvc, "AtlasDetectorID" );
-                log << MSG::ERROR << "initLevelsFromDict - unable to find 'BCM' label "
-                    << endmsg;
-            }
-            else {
-                std::cout << "AtlasDetectorID::initLevelsFromDict - unable to find 'BCM' label "
-                          << std::endl;
-            }
+            MsgStream log(m_msgSvc, "AtlasDetectorID" );
+            log << MSG::ERROR << "initLevelsFromDict - unable to find 'BCM' label "
+                << endmsg;
             return (1);
         }
         label = field->find_label("LUCID");
@@ -1324,28 +1035,16 @@ AtlasDetectorID::initLevelsFromDict(const IdDictMgr& dict_mgr)
                 m_LUCID_ID = label->m_value;
             }
             else {
-                if(m_msgSvc) {
-                    MsgStream log(m_msgSvc, "AtlasDetectorID" );
-                    log << MSG::ERROR << "initLevelsFromDict - label LUCID does NOT have a value "
-                        << endmsg;
-                }
-                else {
-                    std::cout << "AtlasDetectorID::initLevelsFromDict - label LUCID does NOT have a value "
-                              << std::endl;
-                }
+                MsgStream log(m_msgSvc, "AtlasDetectorID" );
+                log << MSG::ERROR << "initLevelsFromDict - label LUCID does NOT have a value "
+                    << endmsg;
                 return (1);
             }
         }
         else {
-            if(m_msgSvc) {
-                MsgStream log(m_msgSvc, "AtlasDetectorID" );
-                log << MSG::ERROR << "initLevelsFromDict - unable to find 'LUCID' label "
-                    << endmsg;
-            }
-            else {
-                std::cout << "AtlasDetectorID::initLevelsFromDict - unable to find 'LUCID' label "
-                          << std::endl;
-            }
+            MsgStream log(m_msgSvc, "AtlasDetectorID" );
+            log << MSG::ERROR << "initLevelsFromDict - unable to find 'LUCID' label "
+                << endmsg;
             return (1);
         }
         label = field->find_label("ZDC");
@@ -1354,28 +1053,16 @@ AtlasDetectorID::initLevelsFromDict(const IdDictMgr& dict_mgr)
                 m_ZDC_ID = label->m_value;
             }
             else {
-                if(m_msgSvc) {
-                    MsgStream log(m_msgSvc, "AtlasDetectorID" );
-                    log << MSG::ERROR << "initLevelsFromDict - label ZDC does NOT have a value "
-                        << endmsg;
-                }
-                else {
-                    std::cout << "AtlasDetectorID::initLevelsFromDict - label ZDC does NOT have a value "
-                              << std::endl;
-                }
+                MsgStream log(m_msgSvc, "AtlasDetectorID" );
+                log << MSG::ERROR << "initLevelsFromDict - label ZDC does NOT have a value "
+                    << endmsg;
                 return (1);
             }
         }
         else {
-            if(m_msgSvc) {
-                MsgStream log(m_msgSvc, "AtlasDetectorID" );
-                log << MSG::ERROR << "initLevelsFromDict - unable to find 'ZDC' label "
-                    << endmsg;
-            }
-            else {
-                std::cout << "AtlasDetectorID::initLevelsFromDict - unable to find 'ZDC' label "
-                          << std::endl;
-            }
+            MsgStream log(m_msgSvc, "AtlasDetectorID" );
+            log << MSG::ERROR << "initLevelsFromDict - unable to find 'ZDC' label "
+                << endmsg;
             return (1);
         }
     }
@@ -1383,15 +1070,9 @@ AtlasDetectorID::initLevelsFromDict(const IdDictMgr& dict_mgr)
     // Initialize ids for LAr detectors
     m_lar_dict = dict_mgr.find_dictionary ("LArCalorimeter");
     if(!m_lar_dict) {
-        if(m_msgSvc) {
-            MsgStream log(m_msgSvc, "AtlasDetectorID" );
-            log << MSG::WARNING << "initLevelsFromDict -  cannot access LArCalorimeter dictionary "
-                << endmsg;
-        }
-        else {
-            std::cout << " AtlasDetectorID::initLevelsFromDict - Warning cannot access LArCalorimeter dictionary "
-                      << std::endl;
-        }
+        MsgStream log(m_msgSvc, "AtlasDetectorID" );
+        log << MSG::WARNING << "initLevelsFromDict -  cannot access LArCalorimeter dictionary "
+            << endmsg;
     }
     else {
         // Found LAr dict
@@ -1400,15 +1081,9 @@ AtlasDetectorID::initLevelsFromDict(const IdDictMgr& dict_mgr)
 
         field = m_lar_dict->find_field("part");
         if (!field) {
-            if(m_msgSvc) {
-                MsgStream log(m_msgSvc, "AtlasDetectorID" );
-                log << MSG::ERROR << "initLevelsFromDict - unable to find 'part' field for LArCalorimeter dictionary"
-                    << endmsg;
-            }
-            else {
-                std::cout << "AtlasDetectorID::initLevelsFromDict - unable to find 'part' field for LArCalorimeter dictionary"
-                          << std::endl;
-            }
+            MsgStream log(m_msgSvc, "AtlasDetectorID" );
+            log << MSG::ERROR << "initLevelsFromDict - unable to find 'part' field for LArCalorimeter dictionary"
+                << endmsg;
             return (1);
         }
 
@@ -1418,28 +1093,16 @@ AtlasDetectorID::initLevelsFromDict(const IdDictMgr& dict_mgr)
                 m_LAR_EM_ID = label->m_value;
             }
             else {
-                if(m_msgSvc) {
-                    MsgStream log(m_msgSvc, "AtlasDetectorID" );
-                    log << MSG::ERROR << "initLevelsFromDict - label LArEM does NOT have a value "
-                        << endmsg;
-                }
-                else {
-                    std::cout << "AtlasDetectorID::initLevelsFromDict - label LArEM does NOT have a value "
-                              << std::endl;
-                }
+                MsgStream log(m_msgSvc, "AtlasDetectorID" );
+                log << MSG::ERROR << "initLevelsFromDict - label LArEM does NOT have a value "
+                    << endmsg;
                 return (1);
             }
         }
         else {
-            if(m_msgSvc) {
-                MsgStream log(m_msgSvc, "AtlasDetectorID" );
-                log << MSG::ERROR << "initLevelsFromDict - unable to find 'LArEM' label "
-                    << endmsg;
-            }
-            else {
-                std::cout << "AtlasDetectorID::initLevelsFromDict - unable to find 'LArEM' label "
-                          << std::endl;
-            }
+            MsgStream log(m_msgSvc, "AtlasDetectorID" );
+            log << MSG::ERROR << "initLevelsFromDict - unable to find 'LArEM' label "
+                << endmsg;
             return (1);
         }
         label = field->find_label("LArHEC");
@@ -1448,28 +1111,16 @@ AtlasDetectorID::initLevelsFromDict(const IdDictMgr& dict_mgr)
                 m_LAR_HEC_ID = label->m_value;
             }
             else {
-                if(m_msgSvc) {
-                    MsgStream log(m_msgSvc, "AtlasDetectorID" );
-                    log << MSG::ERROR << "initLevelsFromDict - label LArHEC does NOT have a value "
-                        << endmsg;
-                }
-                else {
-                    std::cout << "AtlasDetectorID::initLevelsFromDict - label LArHEC does NOT have a value "
-                              << std::endl;
-                }
+                MsgStream log(m_msgSvc, "AtlasDetectorID" );
+                log << MSG::ERROR << "initLevelsFromDict - label LArHEC does NOT have a value "
+                    << endmsg;
                 return (1);
             }
         }
         else {
-            if(m_msgSvc) {
-                MsgStream log(m_msgSvc, "AtlasDetectorID" );
-                log << MSG::ERROR << "initLevelsFromDict - unable to find 'LArHEC' label "
-                    << endmsg;
-            }
-            else {
-                std::cout << "AtlasDetectorID::initLevelsFromDict - unable to find 'LArHEC' label "
-                          << std::endl;
-            }
+            MsgStream log(m_msgSvc, "AtlasDetectorID" );
+            log << MSG::ERROR << "initLevelsFromDict - unable to find 'LArHEC' label "
+                << endmsg;
             return (1);
         }
         label = field->find_label("LArFCAL");
@@ -1478,28 +1129,16 @@ AtlasDetectorID::initLevelsFromDict(const IdDictMgr& dict_mgr)
                 m_LAR_FCAL_ID = label->m_value;
             }
             else {
-                if(m_msgSvc) {
-                    MsgStream log(m_msgSvc, "AtlasDetectorID" );
-                    log << MSG::ERROR << "initLevelsFromDict - label LArFCAL does NOT have a value "
-                        << endmsg;
-                }
-                else {
-                    std::cout << "AtlasDetectorID::initLevelsFromDict - label LArFCAL does NOT have a value "
-                              << std::endl;
-                }
+                MsgStream log(m_msgSvc, "AtlasDetectorID" );
+                log << MSG::ERROR << "initLevelsFromDict - label LArFCAL does NOT have a value "
+                    << endmsg;
                 return (1);
             }
         }
         else {
-            if(m_msgSvc) {
-                MsgStream log(m_msgSvc, "AtlasDetectorID" );
-                log << MSG::ERROR << "initLevelsFromDict - unable to find 'LArFCAL' label "
-                    << endmsg;
-            }
-            else {
-                std::cout << "AtlasDetectorID::initLevelsFromDict - unable to find 'LArFCAL' label "
-                          << std::endl;
-            }
+            MsgStream log(m_msgSvc, "AtlasDetectorID" );
+            log << MSG::ERROR << "initLevelsFromDict - unable to find 'LArFCAL' label "
+                << endmsg;
             return (1);
         }
         // set
@@ -1509,14 +1148,9 @@ AtlasDetectorID::initLevelsFromDict(const IdDictMgr& dict_mgr)
             m_LAR_FCAL_MODULE_INDEX = field->m_index ;
         }
         else {
-            std::string strg = "initLevelsFromDict - unable to find 'module' field for miniFCAL ";
-            if(m_msgSvc) {
-                MsgStream log(m_msgSvc, "AtlasDetectorID" );
-                log << MSG::DEBUG << strg << endmsg;
-            }
-            else {
-                std::cout << "AtlasDetectorID: " << strg << std::endl;
-            }
+            MsgStream log(m_msgSvc, "AtlasDetectorID" );
+            log << MSG::DEBUG << "initLevelsFromDict - unable to find 'module' field for miniFCAL"
+                << endmsg;
             // return (1); For the moment, this is not an
             // error. Cannot be an error until miniFCAL is always in
             // the xml files.
@@ -1527,15 +1161,9 @@ AtlasDetectorID::initLevelsFromDict(const IdDictMgr& dict_mgr)
     // Initialize ids for Tile calo
     m_tile_dict = dict_mgr.find_dictionary ("TileCalorimeter");
     if(!m_tile_dict) {
-        if(m_msgSvc) {
-            MsgStream log(m_msgSvc, "AtlasDetectorID" );
-            log << MSG::WARNING << "initLevelsFromDict -  cannot access TileCalorimeter dictionary "
-                << endmsg;
-        }
-        else {
-            std::cout << " AtlasDetectorID::initLevelsFromDict - Warning cannot access TileCalorimeter dictionary "
-                      << std::endl;
-        }
+        MsgStream log(m_msgSvc, "AtlasDetectorID" );
+        log << MSG::WARNING << "initLevelsFromDict -  cannot access TileCalorimeter dictionary"
+            << endmsg;
     }
     else {
         // File Tile
@@ -1547,15 +1175,9 @@ AtlasDetectorID::initLevelsFromDict(const IdDictMgr& dict_mgr)
     // Initialize ids for Muon detectors
     m_muon_dict = dict_mgr.find_dictionary ("MuonSpectrometer");
     if(!m_muon_dict) {
-        if(m_msgSvc) {
-            MsgStream log(m_msgSvc, "AtlasDetectorID" );
-            log << MSG::WARNING << "initLevelsFromDict - cannot access MuonSpectrometer dictionary "
-                << endmsg;
-        }
-        else {
-            std::cout << " AtlasDetectorID::initLevelsFromDict - Warning cannot access MuonSpectrometer dictionary "
-                      << std::endl;
-        }
+        MsgStream log(m_msgSvc, "AtlasDetectorID" );
+        log << MSG::WARNING << "initLevelsFromDict - cannot access MuonSpectrometer dictionary"
+            << endmsg;
     }
     else {
         // Found muon dict
@@ -1684,16 +1306,10 @@ AtlasDetectorID::initLevelsFromDict(const IdDictMgr& dict_mgr)
 
 	  }
 	  else {
-            if(m_msgSvc) {
 	      MsgStream log(m_msgSvc, "AtlasDetectorID" );
 	      log << MSG::ERROR << "initLevelsFromDict - unable to find 'stationName' field for MuonSpectrometer dictionary"
-		  << endmsg;
-            }
-            else {
-	      std::cout << "AtlasDetectorID::initLevelsFromDict - unable to find 'stationName' field for MuonSpectrometer dictionary"
-			<< std::endl;
-            }
-            return (1);
+              << endmsg;
+          return (1);
 	  }
 	}
 	// end of filling stationName <-> technology associations
@@ -1703,15 +1319,9 @@ AtlasDetectorID::initLevelsFromDict(const IdDictMgr& dict_mgr)
             m_MUON_SUBDET_INDEX = field->m_index;
         }
         else {
-            if(m_msgSvc) {
-                MsgStream log(m_msgSvc, "AtlasDetectorID" );
-                log << MSG::ERROR << "initLevelsFromDict - unable to find 'technology' field for MuonSpectrometer dictionary"
-                    << endmsg;
-            }
-            else {
-                std::cout << "AtlasDetectorID::initLevelsFromDict - unable to find 'technology' field for MuonSpectrometer dictionary"
-                          << std::endl;
-            }
+            MsgStream log(m_msgSvc, "AtlasDetectorID" );
+            log << MSG::ERROR << "initLevelsFromDict - unable to find 'technology' field for MuonSpectrometer dictionary"
+                << endmsg;
             return (1);
         }
 
@@ -1721,28 +1331,16 @@ AtlasDetectorID::initLevelsFromDict(const IdDictMgr& dict_mgr)
                 m_MDT_ID = label->m_value;
             }
             else {
-                if(m_msgSvc) {
-                    MsgStream log(m_msgSvc, "AtlasDetectorID" );
-                    log << MSG::ERROR << "initLevelsFromDict - label MDT does NOT have a value "
-                        << endmsg;
-                }
-                else {
-                    std::cout << "AtlasDetectorID::initLevelsFromDict - label MDT does NOT have a value "
-                              << std::endl;
-                }
+                MsgStream log(m_msgSvc, "AtlasDetectorID" );
+                log << MSG::ERROR << "initLevelsFromDict - label MDT does NOT have a value"
+                    << endmsg;
                 return (1);
             }
         }
         else {
-            if(m_msgSvc) {
-                MsgStream log(m_msgSvc, "AtlasDetectorID" );
-                log << MSG::ERROR << "initLevelsFromDict - unable to find 'MDT' label "
-                    << endmsg;
-            }
-            else {
-                std::cout << "AtlasDetectorID::initLevelsFromDict - unable to find 'MDT' label "
-                          << std::endl;
-            }
+            MsgStream log(m_msgSvc, "AtlasDetectorID" );
+            log << MSG::ERROR << "initLevelsFromDict - unable to find 'MDT' label"
+                << endmsg;
             return (1);
         }
         label = field->find_label("RPC");
@@ -1751,28 +1349,16 @@ AtlasDetectorID::initLevelsFromDict(const IdDictMgr& dict_mgr)
                 m_RPC_ID = label->m_value;
             }
             else {
-                if(m_msgSvc) {
-                    MsgStream log(m_msgSvc, "AtlasDetectorID" );
-                    log << MSG::ERROR << "initLevelsFromDict - label RPC does NOT have a value "
-                        << endmsg;
-                }
-                else {
-                    std::cout << "AtlasDetectorID::initLevelsFromDict - label RPC does NOT have a value "
-                              << std::endl;
-                }
+                MsgStream log(m_msgSvc, "AtlasDetectorID" );
+                log << MSG::ERROR << "initLevelsFromDict - label RPC does NOT have a value"
+                    << endmsg;
                 return (1);
             }
         }
         else {
-            if(m_msgSvc) {
-                MsgStream log(m_msgSvc, "AtlasDetectorID" );
-                log << MSG::ERROR << "initLevelsFromDict - unable to find 'RPC' label "
-                    << endmsg;
-            }
-            else {
-                std::cout << "AtlasDetectorID::initLevelsFromDict - unable to find 'RPC' label "
-                          << std::endl;
-            }
+            MsgStream log(m_msgSvc, "AtlasDetectorID" );
+            log << MSG::ERROR << "initLevelsFromDict - unable to find 'RPC' label "
+                << endmsg;
         }
         label = field->find_label("TGC");
         if (label) {
@@ -1780,28 +1366,16 @@ AtlasDetectorID::initLevelsFromDict(const IdDictMgr& dict_mgr)
                 m_TGC_ID = label->m_value;
             }
             else {
-                if(m_msgSvc) {
-                    MsgStream log(m_msgSvc, "AtlasDetectorID" );
-                    log << MSG::ERROR << "initLevelsFromDict - label TGC does NOT have a value "
-                        << endmsg;
-                }
-                else {
-                    std::cout << "AtlasDetectorID::initLevelsFromDict - label TGC does NOT have a value "
-                              << std::endl;
-                }
+                MsgStream log(m_msgSvc, "AtlasDetectorID" );
+                log << MSG::ERROR << "initLevelsFromDict - label TGC does NOT have a value "
+                    << endmsg;
                 return (1);
             }
         }
         else {
-            if(m_msgSvc) {
-                MsgStream log(m_msgSvc, "AtlasDetectorID" );
-                log << MSG::ERROR << "initLevelsFromDict - unable to find 'TGC' label "
-                    << endmsg;
-            }
-            else {
-                std::cout << "AtlasDetectorID::initLevelsFromDict - unable to find 'TGC' label "
-                          << std::endl;
-            }
+            MsgStream log(m_msgSvc, "AtlasDetectorID" );
+            log << MSG::ERROR << "initLevelsFromDict - unable to find 'TGC' label "
+                << endmsg;
         }
         label = field->find_label("STGC");
         if (label) {
@@ -1809,29 +1383,17 @@ AtlasDetectorID::initLevelsFromDict(const IdDictMgr& dict_mgr)
                 m_STGC_ID = label->m_value;
             }
             else {
-                if(m_msgSvc) {
-                    MsgStream log(m_msgSvc, "AtlasDetectorID" );
-                    log << MSG::ERROR << "initLevelsFromDict - label STGC does NOT have a value "
-                        << endmsg;
-                }
-                else {
-                    std::cout << "AtlasDetectorID::initLevelsFromDict - label STGC does NOT have a value "
-                              << std::endl;
-                }
+                MsgStream log(m_msgSvc, "AtlasDetectorID" );
+                log << MSG::ERROR << "initLevelsFromDict - label STGC does NOT have a value "
+                    << endmsg;
                 return (1);
             }
         }
         else {
             if (!m_quiet) {
-              if(m_msgSvc) {
                 MsgStream log(m_msgSvc, "AtlasDetectorID" );
                 log << MSG::DEBUG << "initLevelsFromDict - there are no sTGC entries in the dictionary! "
                     << endmsg;
-              }
-              else {
-                std::cout << "AtlasDetectorID::initLevelsFromDict - there are no sTGC entries in the dictionary! "
-                          << std::endl;
-              }
             }
         }
         label = field->find_label("MM");
@@ -1840,29 +1402,17 @@ AtlasDetectorID::initLevelsFromDict(const IdDictMgr& dict_mgr)
                 m_MM_ID = label->m_value;
             }
             else {
-                if(m_msgSvc) {
-                    MsgStream log(m_msgSvc, "AtlasDetectorID" );
-                    log << MSG::ERROR << "initLevelsFromDict - label MM does NOT have a value "
-                        << endmsg;
-                }
-                else {
-                    std::cout << "AtlasDetectorID::initLevelsFromDict - label MM does NOT have a value "
-                              << std::endl;
-                }
+                MsgStream log(m_msgSvc, "AtlasDetectorID" );
+                log << MSG::ERROR << "initLevelsFromDict - label MM does NOT have a value "
+                    << endmsg;
                 return (1);
             }
         }
         else {
             if (!m_quiet) {
-              if(m_msgSvc) {
                 MsgStream log(m_msgSvc, "AtlasDetectorID" );
                 log << MSG::DEBUG << "initLevelsFromDict - there are no MM entries in the dictionary! "
                     << endmsg;
-              }
-              else {
-                std::cout << "AtlasDetectorID::initLevelsFromDict - there are no MM entries in the dictionary! "
-                          << std::endl;
-              }
             }
         }
         label = field->find_label("CSC");
@@ -1871,28 +1421,16 @@ AtlasDetectorID::initLevelsFromDict(const IdDictMgr& dict_mgr)
                 m_CSC_ID = label->m_value;
             }
             else {
-                if(m_msgSvc) {
-                    MsgStream log(m_msgSvc, "AtlasDetectorID" );
-                    log << MSG::ERROR << "initLevelsFromDict - label CSC does NOT have a value "
-                        << endmsg;
-                }
-                else {
-                    std::cout << "AtlasDetectorID::initLevelsFromDict - label CSC does NOT have a value "
-                              << std::endl;
-                }
+                MsgStream log(m_msgSvc, "AtlasDetectorID" );
+                log << MSG::ERROR << "initLevelsFromDict - label CSC does NOT have a value "
+                    << endmsg;
                 return (1);
             }
         }
         else {
-            if(m_msgSvc) {
-                MsgStream log(m_msgSvc, "AtlasDetectorID" );
-                log << MSG::DEBUG << "initLevelsFromDict - there are no CSC entries in the dictionary! "
-                    << endmsg;
-            }
-            else {
-                std::cout << "AtlasDetectorID::initLevelsFromDict - there are no CSC entries in the dictionary! "
-                          << std::endl;
-            }
+            MsgStream log(m_msgSvc, "AtlasDetectorID" );
+            log << MSG::DEBUG << "initLevelsFromDict - there are no CSC entries in the dictionary! "
+                << endmsg;
             return (1);
         }
     }
@@ -1900,15 +1438,9 @@ AtlasDetectorID::initLevelsFromDict(const IdDictMgr& dict_mgr)
     // Initialize id for Calo and fields for lvl1 and dead material
     m_calo_dict = dict_mgr.find_dictionary ("Calorimeter");
     if(!m_calo_dict) {
-        if(m_msgSvc) {
-            MsgStream log(m_msgSvc, "AtlasDetectorID" );
-            log << MSG::ERROR << "initLevelsFromDict - Warning cannot access Calorimeter dictionary "
-                << endmsg;
-        }
-        else {
-            std::cout << " AtlasDetectorID::initLevelsFromDict - Warning cannot access Calorimeter dictionary "
-                      << std::endl;
-        }
+        MsgStream log(m_msgSvc, "AtlasDetectorID" );
+        log << MSG::ERROR << "initLevelsFromDict - Warning cannot access Calorimeter dictionary "
+            << endmsg;
     }
     else {
         // Found calo dict
@@ -1920,31 +1452,17 @@ AtlasDetectorID::initLevelsFromDict(const IdDictMgr& dict_mgr)
         m_lvl1_field.clear();
         // negative half
         if (m_calo_dict->get_label_value("DetZside", "negative_lvl1_side", value)) {
-            if(m_msgSvc) {
-                MsgStream log(m_msgSvc, "AtlasDetectorID" );
-                log << MSG::ERROR << "initLevelsFromDict - Could not get value for label 'negative_lvl1_side' of field 'DetZside' in dictionary "
-                    << endmsg;
-            }
-            else {
-                std::cout << "Could not get value for label 'negative_lvl1_side' of field 'DetZside' in dictionary "
-                          << m_calo_dict->m_name
-                          << std::endl;
-            }
+            MsgStream log(m_msgSvc, "AtlasDetectorID" );
+            log << MSG::ERROR << "initLevelsFromDict - Could not get value for label 'negative_lvl1_side' of field 'DetZside' in dictionary " << m_calo_dict->m_name
+                << endmsg;
             return (1);
         }
         m_lvl1_field.add_value(value);
         // positive half
         if (m_calo_dict->get_label_value("DetZside", "positive_lvl1_side", value)) {
-            if(m_msgSvc) {
-                MsgStream log(m_msgSvc, "AtlasDetectorID" );
-                log << MSG::ERROR << "initLevelsFromDict - Could not get value for label 'positive_lvl1_side' of field 'DetZside' in dictionary "
-                    << endmsg;
-            }
-            else {
-                std::cout << "Could not get value for label 'positive_lvl1_side' of field 'DetZside' in dictionary "
-                          << m_calo_dict->m_name
-                          << std::endl;
-            }
+            MsgStream log(m_msgSvc, "AtlasDetectorID" );
+            log << MSG::ERROR << "initLevelsFromDict - Could not get value for label 'positive_lvl1_side' of field 'DetZside' in dictionary " << m_calo_dict->m_name
+                << endmsg;
             return (1);
         }
         m_lvl1_field.add_value(value);
@@ -1953,31 +1471,17 @@ AtlasDetectorID::initLevelsFromDict(const IdDictMgr& dict_mgr)
         m_lar_dm_field.clear();
         // negative half
         if (m_calo_dict->get_label_value("DetZside", "negative_DMLar_side", value)) {
-            if(m_msgSvc) {
-                MsgStream log(m_msgSvc, "AtlasDetectorID" );
-                log << MSG::ERROR << "initLevelsFromDict - Could not get value for label 'negative_DMLar_side' of field 'DetZside' in dictionary "
-                    << endmsg;
-            }
-            else {
-                std::cout << "Could not get value for label 'negative_DMLar_side' of field 'DetZside' in dictionary "
-                          << m_calo_dict->m_name
-                          << std::endl;
-            }
+            MsgStream log(m_msgSvc, "AtlasDetectorID" );
+            log << MSG::ERROR << "initLevelsFromDict - Could not get value for label 'negative_DMLar_side' of field 'DetZside' in dictionary " << m_calo_dict->m_name
+                << endmsg;
             return (1);
         }
         m_lar_dm_field.add_value(value);
         // positive half
         if (m_calo_dict->get_label_value("DetZside", "positive_DMLar_side", value)) {
-            if(m_msgSvc) {
-                MsgStream log(m_msgSvc, "AtlasDetectorID" );
-                log << MSG::ERROR << "initLevelsFromDict - Could not get value for label 'positive_DMLar_side' of field 'DetZside' in dictionary "
-                    << endmsg;
-            }
-            else {
-                std::cout << "Could not get value for label 'positive_DMLar_side' of field 'DetZside' in dictionary "
-                          << m_calo_dict->m_name
-                          << std::endl;
-            }
+            MsgStream log(m_msgSvc, "AtlasDetectorID" );
+            log << MSG::ERROR << "initLevelsFromDict - Could not get value for label 'positive_DMLar_side' of field 'DetZside' in dictionary " << m_calo_dict->m_name
+                << endmsg;
             return (1);
         }
         m_lar_dm_field.add_value(value);
@@ -1986,31 +1490,17 @@ AtlasDetectorID::initLevelsFromDict(const IdDictMgr& dict_mgr)
         m_tile_dm_field.clear();
         // negative half
         if (m_calo_dict->get_label_value("DetZside", "negative_DMTile_side", value)) {
-            if(m_msgSvc) {
-                MsgStream log(m_msgSvc, "AtlasDetectorID" );
-                log << MSG::ERROR << "initLevelsFromDict - Could not get value for label 'negative_DMTile_side' of field 'DetZside' in dictionary "
-                    << endmsg;
-            }
-            else {
-                std::cout << "Could not get value for label 'negative_DMTile_side' of field 'DetZside' in dictionary "
-                          << m_calo_dict->m_name
-                          << std::endl;
-            }
+            MsgStream log(m_msgSvc, "AtlasDetectorID" );
+            log << MSG::ERROR << "initLevelsFromDict - Could not get value for label 'negative_DMTile_side' of field 'DetZside' in dictionary " << m_calo_dict->m_name
+                << endmsg;
             return (1);
         }
         m_tile_dm_field.add_value(value);
         // positive half
         if (m_calo_dict->get_label_value("DetZside", "positive_DMTile_side", value)) {
-            if(m_msgSvc) {
-                MsgStream log(m_msgSvc, "AtlasDetectorID" );
-                log << MSG::ERROR << "initLevelsFromDict - Could not get value for label 'positive_DMTile_side' of field 'DetZside' in dictionary "
-                    << endmsg;
-            }
-            else {
-                std::cout << "Could not get value for label 'positive_DMTile_side' of field 'DetZside' in dictionary "
-                          << m_calo_dict->m_name
-                          << std::endl;
-            }
+            MsgStream log(m_msgSvc, "AtlasDetectorID" );
+            log << MSG::ERROR << "initLevelsFromDict - Could not get value for label 'positive_DMTile_side' of field 'DetZside' in dictionary " << m_calo_dict->m_name
+                << endmsg;
             return (1);
         }
         m_tile_dm_field.add_value(value);
@@ -2020,16 +1510,9 @@ AtlasDetectorID::initLevelsFromDict(const IdDictMgr& dict_mgr)
 
         int notok = m_calo_dict->get_label_value("DetZside", "no_side", value);
         if (notok && !m_quiet) {
-            if(m_msgSvc) {
-                MsgStream log(m_msgSvc, "AtlasDetectorID" );
-                log << MSG::DEBUG << "initLevelsFromDict -  Could not get value for label 'no_side' of field 'DetZside' in dictionary "
-                    << endmsg;
-            }
-            else {
-                std::cout << "AtlasDetectorID      DEBUG Could not get value for label 'no_side' of field 'DetZside' in dictionary "
-                          << m_calo_dict->m_name
-                          << std::endl;
-            }
+            MsgStream log(m_msgSvc, "AtlasDetectorID" );
+            log << MSG::DEBUG << "initLevelsFromDict -  Could not get value for label 'no_side' of field 'DetZside' in dictionary " << m_calo_dict->m_name
+                << endmsg;
             //      return (1);
         } else {
             m_lvl1_onl_field.add_value(value);
@@ -2044,16 +1527,10 @@ AtlasDetectorID::initLevelsFromDict(const IdDictMgr& dict_mgr)
             m_DET_INDEX = field->m_index;
         }
         else {
-            if(m_msgSvc) {
-                MsgStream log(m_msgSvc, "AtlasDetectorID" );
-                log << MSG::ERROR << "initLevelsFromDict -  - unable to find 'subdet' field from dict "
-                    << endmsg;
-            }
-            else {
-                std::cout << "AtlasDetectorID::initLevelsFromDict - unable to find 'subdet' field from dict "
-                          << top_dict->m_name
-                          << std::endl;
-            }
+            MsgStream log(m_msgSvc, "AtlasDetectorID" );
+            log << MSG::ERROR << "initLevelsFromDict -  - unable to find 'subdet' field from dict "
+                << top_dict->m_name
+                << endmsg;
             return (1);
         }
 
@@ -2064,28 +1541,16 @@ AtlasDetectorID::initLevelsFromDict(const IdDictMgr& dict_mgr)
                 m_INDET_ID = label->m_value;
             }
             else {
-                if(m_msgSvc) {
-                    MsgStream log(m_msgSvc, "AtlasDetectorID" );
-                    log << MSG::ERROR << "initLevelsFromDict - label InnerDetector does NOT have a value "
-                        << endmsg;
-                }
-                else {
-                    std::cout << "AtlasDetectorID::initLevelsFromDict - label InnerDetector does NOT have a value "
-                              << std::endl;
-                }
+                MsgStream log(m_msgSvc, "AtlasDetectorID" );
+                log << MSG::ERROR << "initLevelsFromDict - label InnerDetector does NOT have a value "
+                    << endmsg;
                 return (1);
             }
         }
         else {
-            if(m_msgSvc) {
-                MsgStream log(m_msgSvc, "AtlasDetectorID" );
-                log << MSG::ERROR << "initLevelsFromDict - unable to find 'InnerDetector' label "
-                    << endmsg;
-            }
-            else {
-                std::cout << "AtlasDetectorID::initLevelsFromDict - unable to find 'InnerDetector' label "
-                          << std::endl;
-            }
+            MsgStream log(m_msgSvc, "AtlasDetectorID" );
+            log << MSG::ERROR << "initLevelsFromDict - unable to find 'InnerDetector' label "
+                << endmsg;
             return (1);
         }
 
@@ -2096,28 +1561,16 @@ AtlasDetectorID::initLevelsFromDict(const IdDictMgr& dict_mgr)
                 m_FWD_ID = label->m_value;
             }
             else {
-                if(m_msgSvc) {
-                    MsgStream log(m_msgSvc, "AtlasDetectorID" );
-                    log << MSG::ERROR << "initLevelsFromDict - label ForwardDetectors does NOT have a value "
-                        << endmsg;
-                }
-                else {
-                    std::cout << "AtlasDetectorID::initLevelsFromDict - label ForwardDetectors does NOT have a value "
-                              << std::endl;
-                }
+                MsgStream log(m_msgSvc, "AtlasDetectorID" );
+                log << MSG::ERROR << "initLevelsFromDict - label ForwardDetectors does NOT have a value "
+                    << endmsg;
                 return (1);
             }
         }
         else {
-            if(m_msgSvc) {
-                MsgStream log(m_msgSvc, "AtlasDetectorID" );
-                log << MSG::ERROR << "initLevelsFromDict - unable to find 'ForwardDetectors' label "
-                    << endmsg;
-            }
-            else {
-                std::cout << "AtlasDetectorID::initLevelsFromDict - unable to find 'ForwardDetectors' label "
-                          << std::endl;
-            }
+            MsgStream log(m_msgSvc, "AtlasDetectorID" );
+            log << MSG::ERROR << "initLevelsFromDict - unable to find 'ForwardDetectors' label "
+                << endmsg;
             return (1);
         }
 
@@ -2129,28 +1582,16 @@ AtlasDetectorID::initLevelsFromDict(const IdDictMgr& dict_mgr)
                 m_LAR_ID = label->m_value;
             }
             else {
-                if(m_msgSvc) {
-                    MsgStream log(m_msgSvc, "AtlasDetectorID" );
-                    log << MSG::ERROR << "initLevelsFromDict - label LArCalorimeter does NOT have a value "
-                        << endmsg;
-                }
-                else {
-                    std::cout << "AtlasDetectorID::initLevelsFromDict - label LArCalorimeter does NOT have a value "
-                              << std::endl;
-                }
+                MsgStream log(m_msgSvc, "AtlasDetectorID" );
+                log << MSG::ERROR << "initLevelsFromDict - label LArCalorimeter does NOT have a value "
+                    << endmsg;
                 return (1);
             }
         }
         else {
-            if(m_msgSvc) {
-                MsgStream log(m_msgSvc, "AtlasDetectorID" );
-                log << MSG::ERROR << "initLevelsFromDict - unable to find 'LArCalorimeter' label "
-                    << endmsg;
-            }
-            else {
-                std::cout << "AtlasDetectorID::initLevelsFromDict - unable to find 'LArCalorimeter' label "
-                          << std::endl;
-            }
+            MsgStream log(m_msgSvc, "AtlasDetectorID" );
+            log << MSG::ERROR << "initLevelsFromDict - unable to find 'LArCalorimeter' label "
+                << endmsg;
             return (1);
         }
 
@@ -2161,28 +1602,16 @@ AtlasDetectorID::initLevelsFromDict(const IdDictMgr& dict_mgr)
                 m_TILE_ID = label->m_value;
             }
             else {
-                if(m_msgSvc) {
-                    MsgStream log(m_msgSvc, "AtlasDetectorID" );
-                    log << MSG::ERROR << "initLevelsFromDict - label TileCalorimeter does NOT have a value "
-                        << endmsg;
-                }
-                else {
-                    std::cout << "AtlasDetectorID::initLevelsFromDict - label TileCalorimeter does NOT have a value "
-                              << std::endl;
-                }
+                MsgStream log(m_msgSvc, "AtlasDetectorID" );
+                log << MSG::ERROR << "initLevelsFromDict - label TileCalorimeter does NOT have a value "
+                    << endmsg;
                 return (1);
             }
         }
         else {
-            if(m_msgSvc) {
-                MsgStream log(m_msgSvc, "AtlasDetectorID" );
-                log << MSG::ERROR << "initLevelsFromDict - unable to find 'TileCalorimeter' label "
-                    << endmsg;
-            }
-            else {
-                std::cout << "AtlasDetectorID::initLevelsFromDict - unable to find 'TileCalorimeter' label "
-                          << std::endl;
-            }
+            MsgStream log(m_msgSvc, "AtlasDetectorID" );
+            log << MSG::ERROR << "initLevelsFromDict - unable to find 'TileCalorimeter' label "
+                << endmsg;
             return (1);
         }
 
@@ -2193,28 +1622,16 @@ AtlasDetectorID::initLevelsFromDict(const IdDictMgr& dict_mgr)
                 m_MUON_ID = label->m_value;
             }
             else {
-                if(m_msgSvc) {
-                    MsgStream log(m_msgSvc, "AtlasDetectorID" );
-                    log << MSG::ERROR << "initLevelsFromDict - label MuonSpectrometer does NOT have a value "
-                        << endmsg;
-                }
-                else {
-                    std::cout << "AtlasDetectorID::initLevelsFromDict - label MuonSpectrometer does NOT have a value "
-                              << std::endl;
-                }
+                MsgStream log(m_msgSvc, "AtlasDetectorID" );
+                log << MSG::ERROR << "initLevelsFromDict - label MuonSpectrometer does NOT have a value "
+                    << endmsg;
                 return (1);
             }
         }
         else {
-            if(m_msgSvc) {
-                MsgStream log(m_msgSvc, "AtlasDetectorID" );
-                log << MSG::ERROR << "initLevelsFromDict - unable to find 'MuonSpectrometer' label "
-                    << endmsg;
-            }
-            else {
-                std::cout << "AtlasDetectorID::initLevelsFromDict - unable to find 'MuonSpectrometer' label "
-                          << std::endl;
-            }
+            MsgStream log(m_msgSvc, "AtlasDetectorID" );
+            log << MSG::ERROR << "initLevelsFromDict - unable to find 'MuonSpectrometer' label "
+                << endmsg;
             return (1);
         }
 
@@ -2225,28 +1642,16 @@ AtlasDetectorID::initLevelsFromDict(const IdDictMgr& dict_mgr)
                 m_CALO_ID = label->m_value;
             }
             else {
-                if(m_msgSvc) {
-                    MsgStream log(m_msgSvc, "AtlasDetectorID" );
-                    log << MSG::ERROR << "initLevelsFromDict - label Calorimeter does NOT have a value "
-                        << endmsg;
-                }
-                else {
-                    std::cout << "AtlasDetectorID::initLevelsFromDict - label Calorimeter does NOT have a value "
-                              << std::endl;
-                }
+                MsgStream log(m_msgSvc, "AtlasDetectorID" );
+                log << MSG::ERROR << "initLevelsFromDict - label Calorimeter does NOT have a value "
+                    << endmsg;
                 return (1);
             }
         }
         else {
-            if(m_msgSvc) {
-                MsgStream log(m_msgSvc, "AtlasDetectorID" );
-                log << MSG::ERROR << "initLevelsFromDict - unable to find 'Calorimeter' label "
-                    << endmsg;
-            }
-            else {
-                std::cout << "AtlasDetectorID::initLevelsFromDict - unable to find 'Calorimeter' label "
-                          << std::endl;
-            }
+            MsgStream log(m_msgSvc, "AtlasDetectorID" );
+            log << MSG::ERROR << "initLevelsFromDict - unable to find 'Calorimeter' label "
+                << endmsg;
             return (1);
         }
 
@@ -2278,32 +1683,18 @@ AtlasDetectorID::initLevelsFromDict(const IdDictMgr& dict_mgr)
             m_SUBDET_INDEX = field->m_index;
         }
         else {
-            if(m_msgSvc) {
-                MsgStream log(m_msgSvc, "AtlasDetectorID" );
-                log << MSG::ERROR << "initLevelsFromDict - unable to find field "
-                    << name << " from dict "
-                    << top_dict->m_name
-                    << endmsg;
-            }
-            else {
-                std::cout << "AtlasDetectorID::initLevelsFromDict - unable to find field "
-                          << name << " from dict "
-                          << top_dict->m_name
-                          << std::endl;
-            }
+            MsgStream log(m_msgSvc, "AtlasDetectorID" );
+            log << MSG::ERROR << "initLevelsFromDict - unable to find field "
+                << name << " from dict "
+                << top_dict->m_name
+                << endmsg;
             return (1);
         }
     }
     else {
-        if(m_msgSvc) {
-            MsgStream log(m_msgSvc, "AtlasDetectorID" );
-            log << MSG::ERROR << "initLevelsFromDict - no top dictionary defined "
-                << endmsg;
-        }
-        else {
-            std::cout << "AtlasDetectorID::initLevelsFromDict - no top dictionary defined "
-                      << std::endl;
-        }
+        MsgStream log(m_msgSvc, "AtlasDetectorID" );
+        log << MSG::ERROR << "initLevelsFromDict - no top dictionary defined "
+            << endmsg;
         return (1);
     }
 
@@ -2336,16 +1727,10 @@ AtlasDetectorID::initLevelsFromDict(const IdDictMgr& dict_mgr)
         // bit. This is needed to avoid an overflow decoding error
         // when a pixel channel id is decoded
         if(m_det_impl.ored_field().get_mode() != Range::field::enumerated) {
-            if(m_msgSvc) {
-                MsgStream log(m_msgSvc, "AtlasDetectorID" );
-                log << MSG::ERROR << "initLevelsFromDict - ERROR det implementation is not enumerated: "
-                    << m_det_impl.show_to_string()
-                    << endmsg;
-            }
-            else {
-                std::cout << "AtlasDetectorID::initLevelsFromDict - ERROR det implementation is not enumerated: " << std::endl;
-                std::cout << m_det_impl.show_to_string() << std::endl;
-            }
+            MsgStream log(m_msgSvc, "AtlasDetectorID" );
+            log << MSG::ERROR << "initLevelsFromDict - ERROR det implementation is not enumerated: "
+                << m_det_impl.show_to_string()
+                << endmsg;
         }
 
         size_type bits    = m_det_impl.bits();

@@ -5,14 +5,8 @@ CaloIDHelper        ERROR helper. set size 9 not equal to hash max 10
 test_helper
 AtlasDetectorIDHelper::initialize_from_dictionary - Warning: unable to find mm region index: group, region size 0 0
 AtlasDetectorIDHelper::initialize_from_dictionary - Warning: unable to find stgc region index: group, region size 0 0
-AtlasDetectorID::initLevelsFromDict - there are no sTGC entries in the dictionary! 
-AtlasDetectorID::initLevelsFromDict - there are no MM entries in the dictionary! 
-AtlasDetectorID      DEBUG Could not get value for label 'no_side' of field 'DetZside' in dictionary Calorimeter
- AtlasDetectorID::initialize_from_dictionary - OK 
-AtlasDetectorID::initLevelsFromDict - there are no sTGC entries in the dictionary! 
-AtlasDetectorID::initLevelsFromDict - there are no MM entries in the dictionary! 
-AtlasDetectorID      DEBUG Could not get value for label 'no_side' of field 'DetZside' in dictionary Calorimeter
- AtlasDetectorID::initialize_from_dictionary - OK 
+AtlasDetectorID      INFO initialize_from_dictionary - OK
+AtlasDetectorID      INFO initialize_from_dictionary - OK
 100 0 0 0.025 0.0981748
 110 0.003125 0 0.003125 0.0981748
 120 0 0 0.025 0.0245437

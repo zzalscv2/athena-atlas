@@ -423,18 +423,18 @@ IdDictDetDescrCnv    INFO Dictionary LArHighVoltage       version fullAtlas     
 IdDictDetDescrCnv    INFO Dictionary MuonSpectrometer     version R.01                 DetDescr tag MuonIdentifier-02
 IdDictDetDescrCnv    INFO Dictionary TileCalorimeter      version fullAtlasAndTestBeam DetDescr tag TileIdentifier-00
 CaloLVL1_ID          INFO initialize_from_dictionary
- AtlasDetectorID::initialize_from_dictionary - OK 
+AtlasDetectorID      INFO initialize_from_dictionary - OK
 TileIDDetDescrCnv    INFO in createObj: creating a TileID helper object in the detector store
 CORAL/Services/ConnectionService     Info Session on connection to service oracle://atlas_dd started for user atlasdd_reader. Id=6fde3fde-9017-11db-837e-003048836897
 TileID               INFO initialize_from_dictionary 
- AtlasDetectorID::initialize_from_dictionary - OK 
+AtlasDetectorID      INFO initialize_from_dictionary - OK
 TileNeighbour        INFO Reading file  /afs/cern.ch/atlas/software/builds/nightlies/dev/AtlasConditions/rel_6/InstallArea/share/TileNeighbour.txt
 TileTBIDDetDesc...   INFO in createObj: creating a TileTBID helper object in the detector store
 TileTBID             INFO initialize_from_dictionary 
- AtlasDetectorID::initialize_from_dictionary - OK 
+AtlasDetectorID      INFO initialize_from_dictionary - OK
 TileHWIDDetDesc...   INFO in createObj: creating a TileHWID helper object in the detector store
 TileHWID             INFO initialize_from_dictionary 
- AtlasDetectorID::initialize_from_dictionary - OK 
+AtlasDetectorID      INFO initialize_from_dictionary - OK
 TileInfoLoader       INFO Set CaloLVL1 TileID, TileTBID and TileHWID helpers in TileCablingService 
 TileInfoLoader       INFO TileNoise=true,  digitsNoiseSigmaHi=1.6, digitsNoiseSigmaLo=0.8
 TileInfoLoader       INFO digitsResolutionHi=-9999, setting it equal to digitsNoiseSigmaHi
@@ -481,26 +481,26 @@ LArCellContFake...  DEBUG  Found DetectorStore
 CaloCell_IDDetD...   INFO in createObj: creating a CaloCell_ID helper object in the detector store
 LArEM_IDDetDesc...   INFO in createObj: creating a LArEM_ID helper object in the detector store
 LArEM_ID             INFO initialize_from_dictionary
- AtlasDetectorID::initialize_from_dictionary - OK 
+AtlasDetectorID      INFO initialize_from_dictionary - OK
 LArHEC_IDDetDes...   INFO in createObj: creating a LArHEC_ID helper object in the detector store
 LArHEC_ID            INFO initialize_from_dictionary
- AtlasDetectorID::initialize_from_dictionary - OK 
+AtlasDetectorID      INFO initialize_from_dictionary - OK
 LArFCAL_IDDetDe...   INFO in createObj: creating a LArFCAL_ID helper object in the detector store
 LArFCAL_ID           INFO initialize_from_dictionary
- AtlasDetectorID::initialize_from_dictionary - OK 
+AtlasDetectorID      INFO initialize_from_dictionary - OK
 CORAL/Services/ConnectionService     Info Session on connection to service oracle://atlas_dd started for user atlasdd_reader. Id=6fde3fde-9017-11db-837e-003048836897
 LArFCAL_ID           INFO Reading file /afs/cern.ch/atlas/software/builds/nightlies/dev/AtlasConditions/rel_6/InstallArea/share/FCal2DNeighbors.txt
 LArFCAL_ID           INFO Reading file /afs/cern.ch/atlas/software/builds/nightlies/dev/AtlasConditions/rel_6/InstallArea/share/FCal3DNeighborsNext.txt
 LArFCAL_ID           INFO Reading file /afs/cern.ch/atlas/software/builds/nightlies/dev/AtlasConditions/rel_6/InstallArea/share/FCal3DNeighborsPrev.txt
 CORAL/Services/ConnectionService     Info Session on connection to service oracle://atlas_dd started for user atlasdd_reader. Id=6fde3fde-9017-11db-837e-003048836897
- AtlasDetectorID::initialize_from_dictionary - OK 
+AtlasDetectorID      INFO initialize_from_dictionary - OK
 LArCellContFake...  DEBUG  Found the CaloCell_ID helper. 
 CaloMgrDetDescrCnv   INFO in createObj: creating a Calo Detector Manager object in the detector store
 CaloIdMgrDetDes...   INFO in createObj: creating a CaloDescrManager object in the detector store
 CaloIdMgrDetDes...   INFO Set CaloCell_ID helper in CaloIdMgr 
 CaloDM_IDDetDes...   INFO in createObj: creating a CaloDM_ID helper object in the detector store
 CaloDM_ID            INFO initialize_from_dictionary
- AtlasDetectorID::initialize_from_dictionary - OK 
+AtlasDetectorID      INFO initialize_from_dictionary - OK
 CaloIdMgrDetDes...   INFO Set CaloDM_ID helper in CaloIdMgr 
 CaloIdMgrDetDes...   INFO Set CaloLVL1_ID helper in CaloIdMgr 
 CaloIdMgrDetDes...   INFO Set LArEM_ID helper in CaloIdMgr 

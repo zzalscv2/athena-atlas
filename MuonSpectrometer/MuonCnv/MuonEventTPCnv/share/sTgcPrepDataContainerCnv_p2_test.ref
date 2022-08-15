@@ -14,7 +14,7 @@ AGDDtoGeoSvc         INFO  this is AGDDtoGeoSvc::initialize()
  Volume pmdum3 not found: returning 0
  INFO Initialize from dictionary
  DEBUG (Re)initialize
- AtlasDetectorID::initialize_from_dictionary - OK 
+AtlasDetectorID      INFO initialize_from_dictionary - OK
  DEBUG decode index and bit fields for each level: 
  DEBUG indet          decode 1 vals 2,4,5,7,10,11,12,13 mask/zero mask/shift/bits/offset 7   1fffffffffffffff 61 3  0  indexes 0 0 1 2 0 3 0 0 4 5 6 7 mode  enumerated  
  DEBUG pixel          decode 1 vals 1:3             mask/zero mask/shift/bits/offset 3   e7ffffffffffffff 59 2  3  indexes                     mode  both_bounded  
@@ -59,10 +59,10 @@ eta_index     7
  DEBUG Wafer range -> 2/1/0/0/0:21/-6:6 | 2/1/0/1/0:37/-6:6 | 2/1/0/2/0:51/-6:6 | 2/1/-2,2/0:2/0:47/0
  DEBUG Pixel range -> 2/1/0/0/0:21/-6:6/0:327/0:191 | 2/1/0/1/0:37/-6:6/0:327/0:143 | 2/1/0/2/0:51/-6:6/0:327/0:143 | 2/1/-2,2/0:2/0:47/0/0:327/0:143
 INFO SCT_ID::initialize_from_dictionary 
- AtlasDetectorID::initialize_from_dictionary - OK 
+AtlasDetectorID      INFO initialize_from_dictionary - OK
 INFO Initialize from dictionary cout 0
  DEBUG (Re)initialize
- AtlasDetectorID::initialize_from_dictionary - OK 
+AtlasDetectorID      INFO initialize_from_dictionary - OK
  DEBUG decode index and bit fields for each level: 
  DEBUG indet     decode 1 vals 2,4,5,7,10,11,12,13 mask/zero mask/shift/bits/offset 7   1fffffffffffffff 61 3  0  indexes 0 0 1 2 0 3 0 0 4 5 6 7 mode  enumerated  
  DEBUG trt       decode 1 vals 1:3             mask/zero mask/shift/bits/offset 3   e7ffffffffffffff 59 2  3  indexes                     mode  both_bounded  
@@ -130,7 +130,7 @@ MmIdHelper           INFO Initializing MicroMegas hash indices ...
 MmIdHelper           INFO The element hash max is 64
 MmIdHelper           INFO The detector element hash max is 128
 MmIdHelper           INFO Initializing MicroMegas hash indices for finding neighbors ... 
- AtlasDetectorID::initialize_from_dictionary - OK 
+AtlasDetectorID      INFO initialize_from_dictionary - OK
 ClassIDSvc           INFO getRegistryEntries: read 541 CLIDRegistry entries for module ALL
 test1
 ClassIDSvc           INFO getRegistryEntries: read 346 CLIDRegistry entries for module ALL
