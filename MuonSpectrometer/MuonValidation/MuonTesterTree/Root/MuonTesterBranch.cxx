@@ -46,6 +46,7 @@ MuonTesterBranch::~MuonTesterBranch() {
 MuonTesterBranch::MuonTesterBranch(TTree* tree, const std::string& br_name) : m_tree(tree), m_name(br_name) {}
 std::string MuonTesterBranch::name() const { return m_name; }
 bool MuonTesterBranch::initialized() const { return m_init; }
+TTree* MuonTesterBranch::tree() { return m_tree; }
 const TTree* MuonTesterBranch::tree() const { return m_tree; }
 
 std::string MuonTesterBranch::eraseWhiteSpaces(const std::string& In) {

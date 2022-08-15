@@ -29,6 +29,7 @@ public:
     /// of the addToTree method
     bool initialized() const;
     /// Returns the underlying TTree object
+    TTree* tree();
     const TTree* tree() const;
     /// Returns the data dependencies needed by the MuonTesterBranch
     std::vector<DataDependency> data_dependencies() override final;
