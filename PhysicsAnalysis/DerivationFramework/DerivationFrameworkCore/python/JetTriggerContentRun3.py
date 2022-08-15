@@ -1,68 +1,10 @@
 # Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
 
 JetTriggerContentRun3 = [
-# Small-R EMTopo jets
-# Small-R EMTopo jets w/ area-based PU subtraction + Jet Energy Scale corrections
-"HLT_AntiKt4EMTopoJets_subjes",
-"HLT_AntiKt4EMTopoJets_subjesAux.pt.eta.phi.m",
-# Small-R EMTopo jets w/ area-based PU subtraction + Jet Energy Scale corrections + in-situ corrections + calo-only Global Sequential Calibration (GSC) (Run 2 default)
-"HLT_AntiKt4EMTopoJets_subjesIS",
-"HLT_AntiKt4EMTopoJets_subjesISAux.pt.eta.phi.m",
-# Small-R EMTopo jets w/ area-based PU subtraction + Jet Energy Scale (JES) calibration + in-situ (IS) corrections + calo+track-based GSC
-"HLT_AntiKt4EMTopoJets_subjesgscIS_ftf",
-"HLT_AntiKt4EMTopoJets_subjesgscIS_ftfAux.pt.eta.phi.m",
-# Small-R EMTopo jets w/ area-based PU subtraction + Jet Energy Scale (JES) calibration + in-situ (IS) corrections + calo+track-based GSC + residual PU calibration (mu and NPV-dependent)
-"HLT_AntiKt4EMTopoJets_subresjesgscIS_ftf",
-"HLT_AntiKt4EMTopoJets_subresjesgscIS_ftfAux.pt.eta.phi.m",
-
-# Small-R EMPFlow jets w/ full scan HLT tracking
-# Small-R EMPFlow jets w/ area-based PU subtraction + Jet Energy Scale corrections
-"HLT_AntiKt4EMPFlowJets_subjes_ftf",
-"HLT_AntiKt4EMPFlowJets_subjes_ftfAux.pt.eta.phi.m",
-# Small-R EMPFlow jets w/ area-based PU subtraction + Jet Energy Scale corrections + in-situ corrections + calo-only Global Sequential Calibration (GSC) (Run 2 default)
-"HLT_AntiKt4EMPFlowJets_subjesIS_ftf",
-"HLT_AntiKt4EMPFlowJets_subjesIS_ftfAux.pt.eta.phi.m",
-# Small-R EMPFlow jets w/ area-based PU subtraction + Jet Energy Scale (JES) calibration + in-situ (IS) corrections + calo+track-based GSC
-"HLT_AntiKt4EMPFlowJets_subjesgscIS_ftf",
-"HLT_AntiKt4EMPFlowJets_subjesgscIS_ftfAux.pt.eta.phi.m",
-# Small-R EMPFlow jets w/ area-based PU subtraction + Jet Energy Scale (JES) calibration + in-situ (IS) corrections + calo+track-based GSC + residual PU calibration (mu and NPV-dependent) (Run 3 default)
-"HLT_AntiKt4EMPFlowJets_subresjesgscIS_ftf",
-"HLT_AntiKt4EMPFlowJets_subresjesgscIS_ftfAux.pt.eta.phi.m",
-
-# Large-R jets reclustered from small-R EMTopo jets
-"HLT_AntiKt10EMTopoRCJets_subjesIS",
-"HLT_AntiKt10EMTopoRCJets_subjesISAux.pt.eta.phi.m",
-
-# Large-R EMTopo jets w/ local calibration and trimming + JES corrections
-"HLT_AntiKt10LCTopoTrimmedPtFrac4SmallR20Jets_jes",
-"HLT_AntiKt10LCTopoTrimmedPtFrac4SmallR20Jets_jesAux.pt.eta.phi.m",
-
-# Large-R EMPFlow jets w/ constituent-level PU subtraction, uncalibrated (additional calibration variables can be added here)
-"HLT_AntiKt10EMPFlowCSSKSoftDropBeta100Zcut10Jets_nojcalib_ftf",
-"HLT_AntiKt10EMPFlowCSSKSoftDropBeta100Zcut10Jets_nojcalib_ftfAux.pt.eta.phi.m",
-
-# Large-R EMPFlow jets w/ constituent-level PU subtraction, w/ (offline-based) JES calibration
-"HLT_AntiKt10EMPFlowCSSKSoftDropBeta100Zcut10Jets_jes_ftf",
-"HLT_AntiKt10EMPFlowCSSKSoftDropBeta100Zcut10Jets_jes_ftfAux.pt.eta.phi.m",
-
-# L1 containers
-# Small-R jFEX jets
-"L1_jFexSRJetRoI",
-"L1_jFexSRJetRoIAux.",
-
-# Large-R jFEX jets
-"L1_jFexLRJetRoI",
-"L1_jFexLRJetRoIAux.",
-
-# Small-R gFEX jets
-"L1_gFexSRJetRoI",
-"L1_gFexSRJetRoIAux.",
-
-# Large-R gFEX jets
-"L1_gFexLRJetRoI",
-"L1_gFexLRJetRoIAux.",
-
-
-
-
-]
+"HLT_AntiKt4EMTopoJets_nojcalibAux.m.pt.eta.phi.ActiveArea.ActiveArea4vec_m.ActiveArea4vec_pt.ActiveArea4vec_eta.ActiveArea4vec_phi.EMFrac.HECFrac.DetectorEta.DetectorPhi.NumTrkPt1000.TrackWidthPt1000.SumPtTrkPt500.EnergyPerSampling.SumPtChargedPFOPt500.JVFCorr.JetConstitScaleMomentum_m.JetConstitScaleMomentum_pt.JetConstitScaleMomentum_eta.JetConstitScaleMomentum_phi",
+"HLT_AntiKt4EMTopoJets_nojcalib_ftfAux.m.pt.eta.phi.ActiveArea.ActiveArea4vec_m.ActiveArea4vec_pt.ActiveArea4vec_eta.ActiveArea4vec_phi.EMFrac.HECFrac.DetectorEta.DetectorPhi.NumTrkPt1000.TrackWidthPt1000.SumPtTrkPt500.EnergyPerSampling.JVFCorr.JetConstitScaleMomentum_m.JetConstitScaleMomentum_pt.JetConstitScaleMomentum_eta.JetConstitScaleMomentum_phi",
+"HLT_AntiKt4EMTopoJets_subjesISAux.m.pt.eta.phi.Timing.JetPileupScaleMomentum_m.JetPileupScaleMomentum_pt.JetPileupScaleMomentum_eta.JetPileupScaleMomentum_phi.JetEtaJESScaleMomentum_m.JetEtaJESScaleMomentum_pt.JetEtaJESScaleMomentum_eta.JetEtaJESScaleMomentum_phi.JetGSCScaleMomentum_m.JetGSCScaleMomentum_pt.JetGSCScaleMomentum_eta.JetGSCScaleMomentum_phi",
+"HLT_AntiKt4EMTopoJets_subresjesgscIS_ftfAux.m.pt.eta.phi.Jvt.JvtRpt.Timing.JetPileupScaleMomentum_m.JetPileupScaleMomentum_pt.JetPileupScaleMomentum_eta.JetPileupScaleMomentum_phi.JetEtaJESScaleMomentum_m.JetEtaJESScaleMomentum_pt.JetEtaJESScaleMomentum_eta.JetEtaJESScaleMomentum_phi.JetGSCScaleMomentum_m.JetGSCScaleMomentum_pt.JetGSCScaleMomentum_eta.JetGSCScaleMomentum_phi",
+"HLT_AntiKt4EMPFlowJets_nojcalib_ftfAux.m.pt.eta.phi.ActiveArea.ActiveArea4vec_m.ActiveArea4vec_pt.ActiveArea4vec_eta.ActiveArea4vec_phi.EMFrac.HECFrac.DetectorEta.DetectorPhi.NumTrkPt1000.TrackWidthPt1000.SumPtTrkPt500.EnergyPerSampling.SumPtChargedPFOPt500.JVFCorr.JetConstitScaleMomentum_m.JetConstitScaleMomentum_pt.JetConstitScaleMomentum_eta.JetConstitScaleMomentum_phi",
+"HLT_AntiKt4EMPFlowJets_subresjesgscIS_ftfAux.m.pt.eta.phi.Jvt.JvtRpt.Timing.dips20211116_pb.dips20211116_pu.dips20211116_pc.fastDIPS20211215_pb.fastDIPS20211215_pu.fastDIPS20211215_pc.JetPileupScaleMomentum_m.JetPileupScaleMomentum_pt.JetPileupScaleMomentum_eta.JetPileupScaleMomentum_phi.JetEtaJESScaleMomentum_m.JetEtaJESScaleMomentum_pt.JetEtaJESScaleMomentum_eta.JetEtaJESScaleMomentum_phi.JetGSCScaleMomentum_m.JetGSCScaleMomentum_pt.JetGSCScaleMomentum_eta.JetGSCScaleMomentum_phi",
+"HLT_AntiKt10EMPFlowCSSKSoftDropBeta100Zcut10Jets_jes_ftfAux.JetConstitScaleMomentum_pt.JetConstitScaleMomentum_eta.JetConstitScaleMomentum_phi.JetConstitScaleMomentum_m.JetEtaJESScaleMomentum_pt.JetEtaJESScaleMomentum_eta.JetEtaJESScaleMomentum_phi.JetEtaJESScaleMomentum_m"]
