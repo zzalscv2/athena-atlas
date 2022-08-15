@@ -165,6 +165,9 @@ if __name__=='__main__':
    ConfigFlags.GeoModel.Layout="alas"
    ConfigFlags.GeoModel.AtlasVersion="ATLAS-R2-2015-04-00-00"
 
+   #Run clustering w/o calibration
+   ConfigFlags.Calo.TopoCluster.doTopoClusterLocalCalib=False
+
    ConfigFlags.Exec.MaxEvents=-1
 
    from AthenaConfiguration.AutoConfigOnlineRecoFlags import setDefaultOnlineRecoFlags
