@@ -373,6 +373,7 @@ TOPQExtraVariables_AntiKt4EMPFlowJets_ForTOPQ4           =  ["AntiKt4EMPFlowJets
                                                              + "LargeJetLabel."]
 TOPQExtraVariables_AntiKt8EMPFlowJets_ForTOPQ4           =  ["AntiKt8EMPFlowJets."
                                                              + "ExKt2GASubJets."
+                                                             + "ExKtbb_dexter_Dbb."
                                                              + "ExKtbb_dexter_pbb."
                                                              + "ExKtbb_dexter_pb."
                                                              + "ExKtbb_dexter_pl."
