@@ -1,5 +1,8 @@
 # Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
 
+import AnaAlgorithm.DualUseConfig as DualUseConfig
+
+
 def mapUserName (name) :
     """map an internal name to a name for systematics data handles
 
@@ -19,127 +22,29 @@ class ContainerConfig :
         self.name = name
         self.sourceName = sourceName
         self.index = 0
+        self.maxIndex = None
         self.viewIndex = 1
         self.selection = {}
         self.selection[''] = []
         self.selectionBits = {}
         self.selectionBits[''] = []
 
-
-    def indexName (self, index) :
-        """the name of the (temporary) container at the processing
-        step `index`"""
-
-        if index == 0 :
-            if not self.sourceName :
-                raise Exception ("no source name defined for " + self.name)
+    def currentName (self) :
+        if self.index == 0 :
             return self.sourceName
-        if index == self.index :
-            return mapUserName (self.name)
-        return mapUserName(self.name + "_STEP" + str(index))
+        if self.maxIndex and self.index == self.maxIndex :
+            return mapUserName(self.name)
+        return mapUserName(self.name + "_STEP" + str(self.index))
 
 
-
-
-class ContainerReadRef :
-    """a read-only reference to a container"""
-
-    def __init__ (self, config, readIndex) :
-        self._config = config
-        self._readIndex = readIndex
-
-    def sourceContainer (self):
-        """get the original container for the container"""
-        if not self._config.sourceName:
-            raise Exception ('no source container for ' + self.config.name)
-        return self._config.sourceName
-
-    def input (self) :
-        """get the name of the input container in the event store"""
-        return self._config.indexName (self._readIndex)
-
-    def wantCopy (self) :
-        """whether a shallow copy should be configured with this reference"""
-        return False
-
-
-
-
-class ContainerUpdateRef :
-    """a copy/update reference to a container (i.e. making a copy)"""
-
-    def __init__ (self, config, readIndex, writeIndex) :
-        self._config = config
-        self._readIndex = readIndex
-        self._writeIndex = writeIndex
-
-    def sourceContainer (self):
-        """get the original container for the container"""
-        if not self._config.sourceName:
-            raise Exception ('no source container for ' + self.config.name)
-        return self._config.sourceName
-
-    def input (self) :
-        """get the name of the input container in the event store"""
-        return self._config.indexName (self._readIndex)
-
-    def output (self) :
-        """get the name of the output container in the event store"""
-        return self._config.indexName (self._writeIndex)
-
-    def wantCopy (self) :
-        """whether a shallow copy should be configured with this reference"""
-        return True
-
-
-
-
-class ContainerWriteRef :
-    """a write reference to a container (creating a new container)"""
-
-    def __init__ (self, config) :
-        self._config = config
-
-    def output (self) :
-        """get the name of the output container in the event store"""
-        return self._config.indexName (1)
-
-
-
-
-class ContainerViewRef :
-    """a view reference to a container (providing a view container based
-    on a selection"""
-
-    def __init__ (self, config, baseConfig, baseRef, selection) :
-        self._config = config
-        self._baseConfig = baseConfig
-        self._baseRef = baseRef
-        self._selection = selection
-        self._scheduledAlg = False
-
-    def sourceContainer (self):
-        """get the original container for the container"""
-        return self._baseRef.sourceContainer()
-
-    def input (self) :
-        """get the name of the input container in the event store"""
-
-        if not self._scheduledAlg :
-            viewIndex = self._config.viewIndex
-            self._config.viewIndex += 1
-            inputContainer = self._baseRef.input()
-            outputContainer = mapUserName(self._config.name + "_VIEW" + str(viewIndex))
-            self.outputContainer = outputContainer
-            from AnaAlgorithm.DualUseConfig import createAlgorithm
-            viewalg = createAlgorithm( 'CP::AsgViewFromSelectionAlg', self._config.name + 'View' + str (viewIndex) + 'Alg' )
-            viewalg.selection = [ self._selection ]
-            viewalg.input = inputContainer
-            viewalg.output = outputContainer
-            self._baseConfig.addAlg (viewalg)
-            self._scheduledAlg = True
-
-        return self.outputContainer
+    def nextPass (self) :
+        self.maxIndex = self.index
+        self.index = 0
+        self.viewIndex = 1
+        self.selection = {}
+        self.selection[''] = []
+        self.selectionBits = {}
+        self.selectionBits[''] = []
 
 
 
@@ -168,95 +73,110 @@ class ConfigAccumulator :
         self._dataType = dataType
         self._algSeq = algSeq
         self._containerConfig = {}
+        self._pass = 0
+        self._algorithms = {}
+        self._currentAlg = None
+
 
     def dataType (self) :
         """the data type we run on (data, mc, afii)"""
         return self._dataType
 
-    def addAlg (self, alg) :
-        """add an algorithm to the sequence being created"""
-        self._algSeq += alg
+    def createAlgorithm (self, type, name) :
+        """create a new algorithm and register it as the current algorithm"""
+        if self._pass == 0 :
+            if name in self._algorithms :
+                raise Exception ('duplicate algorithms: ' + name)
+            alg = DualUseConfig.createAlgorithm (type, name)
+            self._algSeq += alg
+            self._algorithms[name] = alg
+            self._currentAlg = alg
+            return alg
+        else :
+            if name not in self._algorithms :
+                raise Exception ('unknown algorithm requested: ' + name)
+            self._currentAlg = self._algorithms[name]
+            return self._algorithms[name]
 
 
-    def readOrUpdateRef (self, containerName, sourceName) :
-        """get a reference object to decorate the given container with
-        an option to update it
+    def createPublicTool (self, type, name) :
+        '''create a new public tool and register it as the "current algorithm"'''
+        if self._pass == 0 :
+            if name in self._algorithms :
+                raise Exception ('duplicate public tool: ' + name)
+            tool = DualUseConfig.createPublicTool (type, name)
+            try:
+                # Try to access the ToolSvc, to see whethet we're in Athena mode:
+                from AthenaCommon.AppMgr import ToolSvc  # noqa: F401
+            except ImportError:
+                # We're not, so let's remember this as a "normal" algorithm:
+                self._algSeq += tool
+            self._algorithms[name] = tool
+            self._currentAlg = tool
+            return tool
+        else :
+            if name not in self._algorithms :
+                raise Exception ('unknown public tool requested: ' + name)
+            self._currentAlg = self._algorithms[name]
+            return self._algorithms[name]
 
-        The idea is that for the first algorithm in the sequence we
-        usually want to make a shallow copy, and usually do that by
-        taking advantage of copy-handles that can optionally copy.  So
-        for every algorithm that could be the first in a sequence we
-        use this kind of reference which will either return a
-        read-reference or an update reference based on the context in
-        which it is used.
 
-        Callers should check the wantCopy() member function on the
-        reference to see whether a copy should be configured.
+    def addPrivateTool (self, type, name) :
+        """add a private tool to the current algorithm"""
+        if self._pass == 0 :
+            DualUseConfig.addPrivateTool (self._currentAlg, type, name)
+
+
+    def readName (self, containerName, sourceName=None) :
+        """get the name of the "current copy" of the given container
+
+        As extra copies get created during processing this will track
+        the correct name of the current copy.  Optionally one can pass
+        in the name of the container before the first copy.
         """
         if containerName not in self._containerConfig :
             if not sourceName :
                 raise Exception ("no source container for: " + containerName)
             self._containerConfig[containerName] = ContainerConfig (containerName, sourceName)
-            config = self._containerConfig[containerName]
-            config.index += 1
-            return ContainerUpdateRef (config, config.index-1, config.index)
-        else :
-            config = self._containerConfig[containerName]
-            return ContainerReadRef (config, config.index)
+        return self._containerConfig[containerName].currentName()
 
 
-    def updateRef (self, containerName, sourceName) :
-        """get a reference object to update/copy the given container"""
+    def copyName (self, containerName) :
+        """register that a copy of the container will be made and return
+        its name"""
         if containerName not in self._containerConfig :
-            if not sourceName :
-                raise Exception ("no source container for: " + containerName)
-            self._containerConfig[containerName] = ContainerConfig (containerName, sourceName)
-        config = self._containerConfig[containerName]
-        config.index += 1
-        return ContainerUpdateRef (config, config.index-1, config.index)
+            raise Exception ("unknown container: " + containerName)
+        self._containerConfig[containerName].index += 1
+        return self._containerConfig[containerName].currentName()
 
 
-    def writeRef (self, containerName) :
-        """get a reference object to write/create the given container"""
-        if containerName in self._containerConfig :
-            raise Exception ("trying to create already existing container: " + containerName)
-        self._containerConfig[containerName] = ContainerConfig (containerName, None)
-        config = self._containerConfig[containerName]
-        config.index = 1
-        return ContainerWriteRef (config)
+    def wantCopy (self, containerName) :
+        """ask whether we want/need a copy of the container
 
-
-    def readRef (self, containerName) :
-        """get a reference object to read the given container"""
+        This usually only happens if no copy of the container has been
+        made yet and the copy is needed to allow modifications, etc.
+        """
         if containerName not in self._containerConfig :
-            self._containerConfig[containerName] = ContainerConfig (containerName, containerName)
-        config = self._containerConfig[containerName]
-        return ContainerReadRef (config, config.index)
+            raise Exception ("unknown container: " + containerName)
+        return self._containerConfig[containerName].index == 0
 
 
-    def viewRef (self, containerName) :
-        """get a reference object to read the given container with the given selection
+    def nextPass (self) :
+        """switch to the next configuration pass
 
-        The idea here is that this allows the user to specify a given view
-        as e.g. MyElectrons.tight and the reference object will then return
-        the name of a view container in the event store that has the
-        selection applied.  This brings the handling of algorithms with a
-        view-based preselection in line with other algorithms.
-
-        WARNING: Unlike the other references this may/will schedule an
-        algorithm when queried (to create the view), so care must be
-        taken to query the container name at the right time."""
-        split = containerName.split ('.')
-        if len(split) == 1:
-            return self.readRef (containerName)
-        if len(split) != 2:
-            raise Exception ('invalid name for a view input: ' + containerName)
-        baseRef = self.readRef(split[0])
-        config = self._containerConfig[split[0]]
-        return ContainerViewRef (config, self, baseRef, split[1])
+        Configuration happens in two steps, with all the blocks processed
+        twice.  This switches from the first to the second pass.
+        """
+        if self._pass != 0 :
+            raise Exception ("already performed final pass")
+        for name in self._containerConfig :
+            self._containerConfig[name].nextPass ()
+        self._pass = 1
+        self._currentAlg = None
 
 
     def getSelection (self, containerName, selectionName) :
+
         """get the selection string for the given selection on the given
         container"""
         if containerName not in self._containerConfig :
