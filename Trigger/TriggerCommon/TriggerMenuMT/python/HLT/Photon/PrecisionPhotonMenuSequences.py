@@ -43,7 +43,7 @@ def precisionPhotonSequence(ConfigFlags, ion=False):
 
 
 
-def precisionPhotonMenuSequence(name,ion=False):
+def precisionPhotonMenuSequence(flags, name,ion=False):
 
     # This will be executed after pricisionCalo, so we need to pickup indeed the topoClusters by precisionCalo and add them here as requirements
 

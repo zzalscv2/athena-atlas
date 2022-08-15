@@ -15,6 +15,7 @@ else:
     from ..CommonSequences.CaloSequences import fastCaloMenuSequence
     from ..Photon.FastPhotonMenuSequences import fastPhotonMenuSequence
     from ..Photon.PrecisionPhotonMenuSequences import precisionPhotonMenuSequence
+    from ..Photon.PrecisionPhotonCaloIsoMenuSequences import precisionPhotonCaloIsoMenuSequence
     from ..Photon.PrecisionCaloMenuSequences import precisionCaloMenuSequence
     from ..Photon.HipTRTMenuSequences import hipTRTMenuSequence
     from TrigEgammaHypo.TrigEgammaHypoConf import TrigEgammaTopoHypoTool
@@ -31,22 +32,6 @@ def fastPhotonCaloSequenceCfg( flags, doRinger = False ):
     
 def fastPhotonSequenceCfg( flags ):    
     return fastPhotonMenuSequence( flags )
-
-def precisionPhotonCaloSequenceCfg( flags ):
-    return precisionCaloMenuSequence('Photon')
-
-def precisionPhotonCaloSequenceCfg_ion( flags ):
-    return precisionCaloMenuSequence('Photon', ion=True)
-
-def precisionPhotonSequenceCfg( flags ):
-    return precisionPhotonMenuSequence('Photon')
-
-def precisionPhotonSequenceCfg_ion( flags ):
-    return precisionPhotonMenuSequence('Photon', ion=True)
-
-def hipTRTMenuSequenceCfg( flags ):
-    return hipTRTMenuSequence()
-
 
 def _diPhotonComboHypoToolFromDict(chainDict, lowermass=80000,uppermass=-999,dphi=1.5,applymass=False,applydphi=False): 
     name = chainDict['chainName']
@@ -94,6 +79,7 @@ class PhotonChainConfiguration(ChainConfigurationBase):
 
         stepNames = [] # This will contain the name of the steps we will want to configure
         # Put first fast Calo. Two possible variants now: 
+        # Step 1
         stepNames += ['getFastCalo']
 
         # OK now, unless its a HipTRT chain we need to do fastPhoton here:
@@ -101,20 +87,30 @@ class PhotonChainConfiguration(ChainConfigurationBase):
             stepNames += ['getHipTRT']
             # for hiptrt chains, there is noprecision Calo nor precision Photon so returning sequence here:
             return stepNames
-        else:
-            stepNames += ['getFastPhoton']
+
+        # Now we do fast Photon
+        # Step 2
+        stepNames += ['getFastPhoton']
 
 
         # After we need to place precisionCalo. There is no chain (except hiptrt) that does not require precision calo. Otherwise please insert logic here:
-
+        # Step 3
         stepNames += ['getPrecisionCaloPhoton']
 
         # And we will do precisionPhoton UNLESS its an etcut chain
         if 'etcut' in self.chainPart['IDinfo']:
             # if its an etcut chain we return the sequence up to here
             return stepNames
-        else:
-            stepNames += ['getPrecisionPhoton']
+
+
+        #Now its the turn of precision Photon. Here we apply cutbased identification
+        #Step 4
+        stepNames += ['getPrecisionPhoton']
+
+        # Finally we need to run isolaton *IF* its an isolated chain
+        # Step 5
+        if 'icaloloose' in self.chainPart['isoInfo'] or 'icalomedium' in self.chainPart['isoInfo'] or 'icalotight' in self.chainPart['isoInfo']:
+            stepNames += ['getPhotonCaloIso']
 
         return stepNames
 
@@ -145,40 +141,56 @@ class PhotonChainConfiguration(ChainConfigurationBase):
     # --------------------
     def getFastCalo(self):
         stepName = "PhotonFastCalo"
-        if '_ringer' in self.chainDict['chainName']:
-            return self.getStep(1,stepName,[ fastPhotonCaloSequenceCfg], doRinger = True)
-        return self.getStep(1,stepName,[ fastPhotonCaloSequenceCfg], doRinger = False)
+        doRinger = 'ringer' in self.chainPart['L2IDAlg']
+
+        return self.getStep(1,stepName,[ fastCaloMenuSequence], name = 'Photon', doRinger = doRinger)
 
     def getFastPhoton(self):
         stepName = "FastPhoton"
-        return self.getStep(2,stepName,[ fastPhotonSequenceCfg])
+        return self.getStep(2,stepName,[ fastPhotonMenuSequence])
 
     def getPrecisionCaloPhoton(self):
-        if self.chainPart['extra'] == 'ion':
+        do_ion = 'ion' in self.chainPart['extra']
+        if do_ion:
             stepName = "PhotonPrecisionHICalo"
-            return self.getStep(3,stepName, [precisionPhotonCaloSequenceCfg_ion])
+        else:
+            stepName = "PhotonPrecisionCalo"
 
-        stepName = "PhotonPrecisionCalo"
-        return self.getStep(3,stepName,[ precisionPhotonCaloSequenceCfg])
+        return self.getStep(3,stepName,[ precisionCaloMenuSequence], name = 'Photon', ion=do_ion)
     
     def getHipTRT(self):
         stepName = "hipTRT"
-        return self.getStep(2,stepName,[ hipTRTMenuSequenceCfg])
+        return self.getStep(2,stepName,[ hipTRTMenuSequence])
 
     def getPrecisionPhoton(self):
+
+        stepName = "precision_photon"
+        do_ion = 'ion' in self.chainPart['extra'] == 'ion'
+
+        if do_ion:
+            stepName += '_ion'
+        
+
+        return self.getStep(4,stepName,sequenceCfgArray=[precisionPhotonMenuSequence], name = 'Photon',  ion=do_ion)
+
+    def getPhotonCaloIso(self):
+
+        stepName = "precision_photon_CaloIso"
+        comboTools = []
+        do_ion = 'ion' in self.chainPart['extra']
+
+        if do_ion:
+            stepName += '_ion'
         
         if "dPhi15" in self.chainDict["topo"]:
+            stepName+='_dPhi15'
             if "m80" in self.chainDict["topo"]:
-                stepName = "precision_photon_dPhi15_m80"
-                return self.getStep(4,stepName,sequenceCfgArray=[precisionPhotonSequenceCfg], comboTools=[diphotonDPhiMassHypoToolFromDict])
+                stepName+= '_m80'
+                comboTools.append(diphotonDPhiMassHypoToolFromDict)
             else:
-                stepName = "precision_photon_dPhi15"
-                return self.getStep(4,stepName,sequenceCfgArray=[precisionPhotonSequenceCfg], comboTools=[diphotonDPhiHypoToolFromDict])
-        else:
-            if self.chainPart['extra'] == 'ion':
-                stepName = "precision_photon_ion"
-                return self.getStep(4,stepName, [precisionPhotonSequenceCfg_ion])
+                comboTools.append(diphotonDPhiHypoToolFromDict)
 
-            stepName = "precision_photon"
-            return self.getStep(4,stepName,[ precisionPhotonSequenceCfg])
+       
+
+        return self.getStep(5,stepName,sequenceCfgArray=[precisionPhotonCaloIsoMenuSequence], name = 'Photon', comboTools=comboTools, ion=do_ion)
     

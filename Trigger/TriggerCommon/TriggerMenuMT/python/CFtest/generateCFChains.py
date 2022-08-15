@@ -41,10 +41,12 @@ def generateCFChains(opt):
             ]
         menu.chainsInMenu['Egamma'] += electronChains
 
-        from TriggerMenuMT.HLT.Photon.PhotonChainConfiguration import fastPhotonCaloSequenceCfg, fastPhotonSequenceCfg, precisionPhotonCaloSequenceCfg
+        from TriggerMenuMT.HLT.Photon.PhotonChainConfiguration import fastPhotonCaloSequenceCfg, fastPhotonSequenceCfg
+        from TriggerMenuMT.HLT.Photon.PrecisionCaloMenuSequences import precisionCaloMenuSequence
+
         fastCaloSeq            = RecoFragmentsPool.retrieve( fastPhotonCaloSequenceCfg, ConfigFlags )
         fastPhotonSeq          = RecoFragmentsPool.retrieve( fastPhotonSequenceCfg, ConfigFlags )
-        precisionCaloPhotonSeq = RecoFragmentsPool.retrieve( precisionPhotonCaloSequenceCfg, ConfigFlags)
+        precisionCaloPhotonSeq = RecoFragmentsPool.retrieve( precisionCaloMenuSequence, ConfigFlags, name='Photon')
         
         FastCaloStep            = makeChainStep("PhotonFastCaloStep", [fastCaloSeq])
         fastPhotonStep          = makeChainStep("PhotonStep2", [fastPhotonSeq])
