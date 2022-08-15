@@ -77,15 +77,16 @@ except:
 load_files_for_sleptonLLP_scenario(simdict)
 
 if doG4SimConfig:
-    simFlags.PhysicsOptions += ["GauginosPhysicsTool","AllSleptonsPhysicsTool"]
+    localPhysicsOptions = ["GauginosPhysicsTool","AllSleptonsPhysicsTool"]
     # Slepton decays from SleptonsConfig
     if "GMSBSlepton" in simdict:
-        simFlags.PhysicsOptions += ["SElectronRPlusToElectronGravitino","SElectronLPlusToElectronGravitino"]
-        simFlags.PhysicsOptions += ["SElectronRMinusToElectronGravitino","SElectronLMinusToElectronGravitino"]
-        simFlags.PhysicsOptions += ["SMuonRPlusToMuonGravitino","SMuonLPlusToMuonGravitino"]
-        simFlags.PhysicsOptions += ["SMuonRMinusToMuonGravitino","SMuonLMinusToMuonGravitino"]
+        localPhysicsOptions += ["SElectronRPlusToElectronGravitino","SElectronLPlusToElectronGravitino"]
+        localPhysicsOptions += ["SElectronRMinusToElectronGravitino","SElectronLMinusToElectronGravitino"]
+        localPhysicsOptions += ["SMuonRPlusToMuonGravitino","SMuonLPlusToMuonGravitino"]
+        localPhysicsOptions += ["SMuonRMinusToMuonGravitino","SMuonLMinusToMuonGravitino"]
     if "GMSBStau" in simdict:
-        simFlags.PhysicsOptions += ["STauRPlusToTauGravitino","STauLPlusToTauGravitino"]
-        simFlags.PhysicsOptions += ["STauRMinusToTauGravitino","STauLMinusToTauGravitino"]
+        localPhysicsOptions += ["STauRPlusToTauGravitino","STauLPlusToTauGravitino"]
+        localPhysicsOptions += ["STauRMinusToTauGravitino","STauLMinusToTauGravitino"]
 
+    simFlags.PhysicsOptions = localPhysicsOptions + simFlags.PhysicsOptions.get_Value()
 del doG4SimConfig, simdict

@@ -1,4 +1,4 @@
-# Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
 
 from AthenaConfiguration.AccumulatorCache import AccumulatorCache
 import os
@@ -126,11 +126,13 @@ def fcpPreInclude(flags):
 
 def fcpCfg(flags):
     result = ComponentAccumulator()
+    if flags.Common.ProductionStep == ProductionStep.Simulation:
+        result.merge(PhysicsListSvcCfg(flags))
+
     simdict = flags.Input.SpecialConfiguration
     load_files_for_fcp_scenario(simdict["MASS"], simdict["CHARGE"], simdict["X"], simdict["Y"])
 
     if flags.Common.ProductionStep == ProductionStep.Simulation:
-        result.merge(PhysicsListSvcCfg(flags))
         physicsOptions = [ result.popToolsAndMerge(MonopolePhysicsToolCfg(flags)) ]
         result.getService("PhysicsListSvc").PhysOption += physicsOptions
         # add monopole-specific configuration for looper killer
@@ -154,17 +156,17 @@ def QballCfg(flags):
     result = ComponentAccumulator()
     simdict = flags.Input.SpecialConfiguration
     if flags.Common.ProductionStep == ProductionStep.Simulation:
-            if "InteractingPDGCodes" not in simdict:
-                assert "CHARGE" in simdict
-                CODE=10000000+int(float(simdict["CHARGE"])*100)
-                simdict['InteractingPDGCodes'] = str([CODE,-1*CODE])
+        result.merge(PhysicsListSvcCfg(flags))
+        if "InteractingPDGCodes" not in simdict:
+            assert "CHARGE" in simdict
+            CODE=10000000+int(float(simdict["CHARGE"])*100)
+            simdict['InteractingPDGCodes'] = str([CODE,-1*CODE])
 
     assert "MASS" in simdict
     assert "CHARGE" in simdict
     load_files_for_qball_scenario(simdict["MASS"], simdict["CHARGE"])
 
     if flags.Common.ProductionStep == ProductionStep.Simulation:
-        result.merge(PhysicsListSvcCfg(flags))
         physicsOptions = [ result.popToolsAndMerge(MonopolePhysicsToolCfg(flags)) ]
         result.getService("PhysicsListSvc").PhysOption += physicsOptions
         # add monopole-specific configuration for looper killer
@@ -187,16 +189,17 @@ def MonopolePreInclude(flags):
 
 def MonopoleCfg(flags):
     result = ComponentAccumulator()
-    simdict = flags.Input.SpecialConfiguration
-
-    assert "MASS" in simdict
-    assert "CHARGE" in simdict
-    load_files_for_qball_scenario(simdict["MASS"], simdict["CHARGE"])
-
     if flags.Common.ProductionStep == ProductionStep.Simulation:
         result.merge(PhysicsListSvcCfg(flags))
+
+    simdict = flags.Input.SpecialConfiguration
+    assert "MASS" in simdict
+    assert "GCHARGE" in simdict
+    load_files_for_monopole_scenario(simdict["MASS"], simdict["GCHARGE"])
+
+    if flags.Common.ProductionStep == ProductionStep.Simulation:
         physicsOptions = [ result.popToolsAndMerge(MonopolePhysicsToolCfg(flags)) ]
-        result.getService("PhysicsListSvc").PhysOption += physicsOptions
+        result.getService("PhysicsListSvc").PhysOption = physicsOptions + result.getService("PhysicsListSvc").PhysOption
         # add monopole-specific configuration for looper killer
         #simFlags.OptionalUserActionList.addAction('G4UA::MonopoleLooperKillerTool') #FIXME missing functionality
         # add default HIP killer

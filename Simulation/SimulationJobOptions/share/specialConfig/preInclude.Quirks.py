@@ -51,5 +51,5 @@ if getPDGTABLE(simFlags.ExtraParticlesPDGTABLE.get_Value()):
             f.write("0\n")
         f.close()
 
-        simFlags.PhysicsOptions += ["QuirksPhysicsTool"]
+        simFlags.PhysicsOptions.get_Value().insert(0,"QuirksPhysicsTool")
     del quirk_firststring, quirk_maxboost, quirk_maxmerge, quirk_debugenabled, quirk_debugdist, quirk_debugsteps, doG4SimConfig, simdict, f, quirk_mass, quirk_charge, quirk_pdgid, quirk_stringforce

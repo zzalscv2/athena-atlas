@@ -1,4 +1,4 @@
-# Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
 
 from AthenaConfiguration.AccumulatorCache import AccumulatorCache
 import sys, shutil, re
@@ -400,14 +400,15 @@ def SleptonsLLPCfg(flags):
 
 def GMSB_Cfg(flags):
     result = ComponentAccumulator()
+    if flags.Common.ProductionStep == ProductionStep.Simulation:
+        result.merge(PhysicsListSvcCfg(flags))
+
     simdict = flags.Input.SpecialConfiguration
     assert "GMSBIndex" in simdict
-
     load_files_for_GMSB_scenario(simdict)
 
     if flags.Common.ProductionStep == ProductionStep.Simulation:
         GMSBIndex = int(simdict["GMSBIndex"])
-        result.merge(PhysicsListSvcCfg(flags))
         physicsOptions = []
         if GMSBIndex == 1: # generic neutralino to photon scenario
             physicsOptions = [ result.popToolsAndMerge(GauginosPhysicsToolCfg(flags)) ]
