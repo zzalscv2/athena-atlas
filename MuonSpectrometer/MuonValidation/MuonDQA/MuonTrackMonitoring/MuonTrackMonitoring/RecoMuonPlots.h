@@ -1,23 +1,19 @@
 /*
-  Copyright (C) 2002-2017 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef MUONTRACKMONITORING_RECOMUONPLOTS_H
 #define MUONTRACKMONITORING_RECOMUONPLOTS_H
 
-#include "TrkValHistUtils/PlotBase.h"
-#include "TrkValHistUtils/ParamPlots.h"
-#include "TrkValHistUtils/MSHitPlots.h"
-#include "TrkValHistUtils/ImpactPlots.h"
-#include "MuonHistUtils/RecoInfoPlots.h"
-#include "MuonHistUtils/MomentumPullPlots.h"
-#include "MuonHistUtils/MuonHitSummaryPlots.h"
-#include "MuonHistUtils/MuonIsolationPlots.h"
-#include "MuonHistUtils/MuonParamPlots.h"
+#include "TrkValHistUtils/PlotBase.h" //base class
+#include "TrkValHistUtils/ParamPlots.h" //member
+#include "TrkValHistUtils/ImpactPlots.h" //member
+#include "MuonHistUtils/RecoInfoPlots.h" //member
+#include "MuonHistUtils/MomentumPullPlots.h" //member
 
-#include "xAODMuon/Muon.h"
-#include "xAODMuon/MuonContainer.h"
-#include "xAODTracking/TrackingPrimitives.h"
+#include "xAODMuon/Muon.h" //typedef xAOD::Muon
+#include <cstdint> //for  uint8_t 
+class TH2;
 
 class RecoMuonPlots:public PlotBase {
     public:

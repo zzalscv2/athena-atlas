@@ -1,9 +1,17 @@
 /*
-  Copyright (C) 2002-2020 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "MuonTrackMonitoring/RecoMuonPlots.h"
 #include "MuonHistUtils/MuonEnumDefs.h"
+
+#include "xAODMuon/MuonContainer.h"
+#include "xAODTracking/TrackingPrimitives.h" //for MuonSummaryType enum
+
+#include <TH2.h>
+#include <vector>
+#include <cmath> //for abs, sqrt
+
 typedef ElementLink< xAOD::TrackParticleContainer > TrackLink;
 typedef ElementLink< xAOD::MuonContainer > MuonLink;
 
@@ -132,10 +140,12 @@ void RecoMuonPlots::fill(const xAOD::Muon& mu, xAOD::Muon::Quality my_quality){
     m_MS_eff_ndof->Fill(msExtrapTrk->eta(), msExtrapTrk->phi(), msExtrapTrk->numberDoF());
     m_MS_eff_chi2->Fill(msExtrapTrk->eta(), msExtrapTrk->phi(), msExtrapTrk->chiSquared()/(msExtrapTrk->numberDoF() * 1.0));
   }
-
-  if (!primaryTrk->summaryValue(hitval_numberOfPrecisionLayers,  xAOD::numberOfPrecisionLayers))  return; 
-  if (!primaryTrk->summaryValue(hitval_numberOfPhiLayers,        xAOD::numberOfPhiLayers))        return; 
-  if (!primaryTrk->summaryValue(hitval_numberOfTriggerEtaLayers, xAOD::numberOfTriggerEtaLayers)) return; 
+  
+  if (primaryTrk) {
+    if (!primaryTrk->summaryValue(hitval_numberOfPrecisionLayers,  xAOD::numberOfPrecisionLayers))  return; 
+    if (!primaryTrk->summaryValue(hitval_numberOfPhiLayers,        xAOD::numberOfPhiLayers))        return; 
+    if (!primaryTrk->summaryValue(hitval_numberOfTriggerEtaLayers, xAOD::numberOfTriggerEtaLayers)) return; 
+  }
 
   if (!mu.summaryValue(hitval_innerSmallHits,     xAOD::MuonSummaryType::innerSmallHits))    return; 
   if (!mu.summaryValue(hitval_innerLargeHits,     xAOD::MuonSummaryType::innerLargeHits))    return; 
@@ -176,10 +186,10 @@ void RecoMuonPlots::fill(const xAOD::Muon& mu, xAOD::Muon::Quality my_quality){
   m_avg_hits_trt -> Fill(mu.eta(), mu.phi(), hitval_numberOfTRTHits);
 
   if (primaryTrk && inDetTrk && msExtrapTrk) {
-      qoverp_diff   = fabs(inDetTrk->qOverP() - msExtrapTrk->qOverP());
-      qoverp_sigma  = sqrt(inDetTrk->definingParametersCovMatrix()(4,4) + msExtrapTrk->definingParametersCovMatrix()(4,4));
+      qoverp_diff   = std::abs(inDetTrk->qOverP() - msExtrapTrk->qOverP());
+      qoverp_sigma  = std::sqrt(inDetTrk->definingParametersCovMatrix()(4,4) + msExtrapTrk->definingParametersCovMatrix()(4,4));
       qoverp_signif = (qoverp_sigma     > 0) ? (qoverp_diff / qoverp_sigma) : -999;
-      ddpt_idme     = (primaryTrk->pt() > 0) ? fabs(inDetTrk->pt() - msExtrapTrk->pt()) / primaryTrk->pt() : -999;
+      ddpt_idme     = (primaryTrk->pt() > 0) ? std::abs(inDetTrk->pt() - msExtrapTrk->pt()) / primaryTrk->pt() : -999;
       
       m_avg_ddpt_idme -> Fill(mu.eta(), mu.phi(), ddpt_idme);
       m_avg_dptsignif -> Fill(mu.eta(), mu.phi(), qoverp_signif);
