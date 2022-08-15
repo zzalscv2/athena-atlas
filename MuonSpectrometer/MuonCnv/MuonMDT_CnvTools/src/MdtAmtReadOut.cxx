@@ -26,7 +26,6 @@ MdtAmtReadOut::MdtAmtReadOut() :
     m_masked(0),
     m_leading(false) {}
 
-
 void MdtAmtReadOut::decodeWord(uint32_t dataWord) {
     //  Zero all the decoded quantities
     setZero();

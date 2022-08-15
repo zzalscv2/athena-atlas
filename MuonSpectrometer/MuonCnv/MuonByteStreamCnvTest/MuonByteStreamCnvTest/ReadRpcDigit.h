@@ -8,45 +8,42 @@
 #include <string.h>
 
 #include "AthenaBaseComps/AthAlgorithm.h"
-#include "GaudiKernel/ServiceHandle.h"
-
 #include "GaudiKernel/NTuple.h"
+#include "GaudiKernel/ServiceHandle.h"
 #include "MuonIdHelpers/IMuonIdHelperSvc.h"
 
 class RpcIdHelper;
 
-class ReadRpcDigit : public AthAlgorithm
-{
- public:
-  // Agorithm constructor
-  ReadRpcDigit (const std::string &name, ISvcLocator *pSvcLocator);
-  ~ReadRpcDigit()=default;
+class ReadRpcDigit : public AthAlgorithm {
+public:
+    // Agorithm constructor
+    ReadRpcDigit(const std::string &name, ISvcLocator *pSvcLocator);
+    ~ReadRpcDigit() = default;
 
-  // Gaudi hooks
-  StatusCode initialize();
-  StatusCode execute();
+    // Gaudi hooks
+    StatusCode initialize();
+    StatusCode execute();
 
- private:
-  ServiceHandle<Muon::IMuonIdHelperSvc> m_idHelperSvc {this, "MuonIdHelperSvc", "Muon::MuonIdHelperSvc/MuonIdHelperSvc"};
-  StatusCode accessNtuple();
-  bool m_rpcNtuple;
-  std::string m_NtupleLocID;
-  NTuple::Tuple* m_ntuplePtr;
+private:
+    ServiceHandle<Muon::IMuonIdHelperSvc> m_idHelperSvc{this, "MuonIdHelperSvc", "Muon::MuonIdHelperSvc/MuonIdHelperSvc"};
+    StatusCode accessNtuple();
+    bool m_rpcNtuple;
+    std::string m_NtupleLocID;
+    NTuple::Tuple *m_ntuplePtr;
 
-  // Ntuple Variables
-  // Digits block
-  NTuple::Item<long> m_nColl;    // number of collection in the container
-  NTuple::Item<long> m_nDig;     // number of digit in the collection 
-  NTuple::Array<float> m_time;
-  NTuple::Array<float> m_station;    // Return the station
-  NTuple::Array<float> m_eta;        // Return the station eta
-  NTuple::Array<float> m_phi;        // Return the station phi
-  NTuple::Array<float> m_doubletR;   // Return doubletR
-  NTuple::Array<float> m_doubletZ;   // Return doubletZ
-  NTuple::Array<float> m_doubletPhi; // Return doubletPhi
-  NTuple::Array<float> m_gasGap;     // Return gasGap
-  NTuple::Array<float> m_measuresPhi;     // Return measuresPhi
-  NTuple::Array<float> m_strip;       // Return the strip # 
+    // Ntuple Variables
+    // Digits block
+    NTuple::Item<long> m_nColl;  // number of collection in the container
+    NTuple::Item<long> m_nDig;   // number of digit in the collection
+    NTuple::Array<float> m_time;
+    NTuple::Array<float> m_station;      // Return the station
+    NTuple::Array<float> m_eta;          // Return the station eta
+    NTuple::Array<float> m_phi;          // Return the station phi
+    NTuple::Array<float> m_doubletR;     // Return doubletR
+    NTuple::Array<float> m_doubletZ;     // Return doubletZ
+    NTuple::Array<float> m_doubletPhi;   // Return doubletPhi
+    NTuple::Array<float> m_gasGap;       // Return gasGap
+    NTuple::Array<float> m_measuresPhi;  // Return measuresPhi
+    NTuple::Array<float> m_strip;        // Return the strip #
 };
-#endif     // MUONBYTESTREAMCNVTEST_READRPCDIGIT
-
+#endif  // MUONBYTESTREAMCNVTEST_READRPCDIGIT

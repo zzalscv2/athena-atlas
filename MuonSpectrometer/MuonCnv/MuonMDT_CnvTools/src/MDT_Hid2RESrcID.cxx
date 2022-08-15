@@ -42,8 +42,6 @@ uint32_t MDT_Hid2RESrcID::getRodID(const Identifier& offlineId) const {
 
     log << MSG::DEBUG << "Getting RODId of the Station " << MSG::hex << offlineId << MSG::dec << endmsg;
 
-  
-
     SG::ReadCondHandle<MuonMDT_CablingMap> readHandle{m_readKey};
     const MuonMDT_CablingMap* readCdo{*readHandle};
     if (!readCdo) {
@@ -52,11 +50,11 @@ uint32_t MDT_Hid2RESrcID::getRodID(const Identifier& offlineId) const {
         return 0;
     }
     MuonMDT_CablingMap::CablingData cabling_data{};
-    if (!readCdo->convert(offlineId,cabling_data)){
-        log<< MSG::ERROR<<" Invalid identifier given "<<endmsg;
+    if (!readCdo->convert(offlineId, cabling_data)) {
+        log << MSG::ERROR << " Invalid identifier given " << endmsg;
         return 0;
     }
-    bool online =  readCdo->getOnlineId(cabling_data, log);
+    bool online = readCdo->getOnlineId(cabling_data, log);
 
     if (!online) {
         log << MSG::DEBUG << "ROD Id of the Station " << MSG::hex << "0x" << offlineId << " not found" << endmsg;
@@ -65,7 +63,7 @@ uint32_t MDT_Hid2RESrcID::getRodID(const Identifier& offlineId) const {
         log << MSG::DEBUG << "The ROD ID of the station "
             << "is " << MSG::hex << "0x" << cabling_data.mrod << MSG::dec << endmsg;
     }
- 
+
     eformat::SubDetector detid = (eformat::SubDetector)cabling_data.subdetectorId;
 
     // if (SubsystemId == eformat::MUON_MDT_BARREL_A_SIDE) {

@@ -20,18 +20,16 @@
 // store the digits in StoreGate
 
 class CscDigitToCscRDO : public AthAlgorithm {
+public:
+    CscDigitToCscRDO(const std::string& name, ISvcLocator* pSvcLocator);
+    ~CscDigitToCscRDO() = default;
 
- public:
+    virtual StatusCode initialize() override;
+    virtual StatusCode execute() override;
+    virtual bool isClonable() const override final { return true; }
 
-  CscDigitToCscRDO(const std::string& name, ISvcLocator* pSvcLocator);
-  ~CscDigitToCscRDO()=default;
-
-  virtual StatusCode initialize() override;
-  virtual StatusCode execute() override;
-  virtual bool isClonable() const override final { return true; }
-
- private:
-   ToolHandle<IMuonDigitizationTool> m_digTool{this};
+private:
+    ToolHandle<IMuonDigitizationTool> m_digTool{this};
 };
 
 #endif

@@ -72,7 +72,7 @@ private:
 public:
     // Constructor and destructor
     MdtAmtReadOut();
-    ~MdtAmtReadOut() =default;
+    ~MdtAmtReadOut() = default;
 
     // Methods for decoding and encoding dataWords
     void decodeWord(uint32_t dataWord);
