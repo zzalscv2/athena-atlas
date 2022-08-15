@@ -563,11 +563,12 @@ StatusCode RpcDigitizationTool::doDigitization(const EventContext& ctx, RpcDigit
                           << doubletR << " doubletZ " << doubletZ << " doubletPhi " << doubletPhi << " gasGap " << gasGap << " measphi "
                           << measphi);  //
 
+            bool isValidEta{false}, isValidPhi{false};
             const Identifier idpaneleta =
-                m_idHelper->channelID(stationName, stationEta, stationPhi, doubletR, doubletZ, doubletPhi, gasGap, 0, 1);
+                m_idHelper->channelID(stationName, stationEta, stationPhi, doubletR, doubletZ, doubletPhi, gasGap, 0, 1, isValidEta);
             const Identifier idpanelphi =
-                m_idHelper->channelID(stationName, stationEta, stationPhi, doubletR, doubletZ, doubletPhi, gasGap, 1, 1);
-            if (!m_idHelper->valid(idpaneleta) || !m_idHelper->valid(idpanelphi)) {
+                m_idHelper->channelID(stationName, stationEta, stationPhi, doubletR, doubletZ, doubletPhi, gasGap, 1, 1, isValidPhi);
+            if (!isValidEta || !isValidPhi) {
                 ATH_MSG_WARNING("Found an invalid identifier "
                                 << " stationName " << stationName << " stationEta " << stationEta << " stationPhi " << stationPhi
                                 << " doubletR " << doubletR << " doubletZ " << doubletZ << " doubletPhi " << doubletPhi << " gasGap "
@@ -592,11 +593,11 @@ StatusCode RpcDigitizationTool::doDigitization(const EventContext& ctx, RpcDigit
 
             // create Identifiers
             Identifier atlasRpcIdeta =
-                m_idHelper->channelID(stationName, stationEta, stationPhi, doubletR, doubletZ, doubletPhi, gasGap, 0, pcseta[1]);
+                m_idHelper->channelID(stationName, stationEta, stationPhi, doubletR, doubletZ, doubletPhi, gasGap, 0, pcseta[1], isValidEta);
             Identifier atlasRpcIdphi =
-                m_idHelper->channelID(stationName, stationEta, stationPhi, doubletR, doubletZ, doubletPhi, gasGap, 1, pcsphi[1]);
+                m_idHelper->channelID(stationName, stationEta, stationPhi, doubletR, doubletZ, doubletPhi, gasGap, 1, pcsphi[1], isValidPhi);
 
-            if (!m_idHelper->valid(atlasRpcIdeta) || !m_idHelper->valid(atlasRpcIdphi)) {
+            if (!isValidEta || !isValidPhi) {
                 ATH_MSG_WARNING("Found an invalid identifier "
                                 << " stationName " << stationName << " stationEta " << stationEta << " stationPhi " << stationPhi
                                 << " doubletR " << doubletR << " doubletZ " << doubletZ << " doubletPhi " << doubletPhi << " gasGap "
@@ -683,10 +684,15 @@ StatusCode RpcDigitizationTool::doDigitization(const EventContext& ctx, RpcDigit
                 // --------------------------------------------------------------------
 
                 // we create one digit-vector/deposit for each strip in the cluster
-
+                bool isValid{false};
                 for (int clus = pcs[1]; clus <= pcs[2]; ++clus) {
-                    Identifier newId = m_idHelper->channelID(m_idHelper->elementID(stationName, stationEta, stationPhi, doubletR), doubletZ,
-                                                             doubletPhi, gasGap, imeasphi, clus);
+                    Identifier newId = m_idHelper->channelID(stationName, stationEta, stationPhi, doubletR, doubletZ,
+                                                             doubletPhi, gasGap, imeasphi, clus, isValid);
+                    if (!isValid) {
+                        ATH_MSG_WARNING(__FILE__<<":"<<__LINE__<< "Channel "<< stationName<<" "<<stationEta<<" "<<stationPhi<<" "<< doubletR<<" "<<doubletZ
+                                        <<" "<< doubletPhi<<" "<< gasGap <<" "<< imeasphi<<" "<< clus<<" is invalid");
+                        continue;
+                    }
                     // here count and maybe kill dead strips if using COOL input for the detector status
                     if (m_Efficiency_fromCOOL) {
                         SG::ReadCondHandle<RpcCondDbData> readHandle{m_readKey, ctx};
@@ -1300,10 +1306,13 @@ int RpcDigitizationTool::findStripNumber(const Amg::Vector3D& posInGap, const Id
     // find position of first and last strip
 
     int nstrips = ele->Nstrips(measuresPhi);
-
-    Identifier firstStrip = m_idHelper->channelID(digitId, doubletZ, doubletPhi, gasGap, measuresPhi, 1);
-    Identifier lastStrip = m_idHelper->channelID(digitId, doubletZ, doubletPhi, gasGap, measuresPhi, nstrips);
-
+    bool isValidFirst{false}, isValidLast{false};
+    Identifier firstStrip = m_idHelper->channelID(digitId, doubletZ, doubletPhi, gasGap, measuresPhi, 1,isValidFirst);
+    Identifier lastStrip = m_idHelper->channelID(digitId, doubletZ, doubletPhi, gasGap, measuresPhi, nstrips, isValidLast);
+    if (!isValidFirst || !isValidLast) {
+        ATH_MSG_WARNING(__FILE__<<":"<<__LINE__<<" "<<m_idHelper->show_to_string(digitId)<<" does not make much sense");
+        return -1;
+    }
     Amg::Vector3D firstPos(0., 0., 0);
     try {
         firstPos = ele->localStripPos(firstStrip);
@@ -2331,30 +2340,21 @@ StatusCode RpcDigitizationTool::DumpRPCCalibFromCoolDB(const EventContext& ctx) 
                                 if (!rpc) continue;
                                 Identifier idr = rpc->identify();
                                 if (idr == 0) continue;
-                                Identifier atlasIdEta = m_idHelper->channelID(idr, doubletZ, doubletPhi, gasGap, 0, 1);
-                                if (atlasIdEta == 0) continue;
-                                Identifier atlasIdPhi = m_idHelper->channelID(idr, doubletZ, doubletPhi, gasGap, 1, 1);
-                                if (atlasIdPhi == 0) continue;
+                                Identifier atlasIdEta = m_idHelper->channelID(idr, doubletZ, doubletPhi, gasGap, 0, 1, isValid);
+                                if (!isValid) continue;
+                                Identifier atlasIdPhi = m_idHelper->channelID(idr, doubletZ, doubletPhi, gasGap, 1, 1, isValid);
+                                if (!isValid) continue;
 
                                 countGasGap++;
 
                                 indexSName = stationName - 2;
                                 if (indexSName > 3) indexSName = indexSName - 2;
 
-                                float efficiencyEta = 0.;
-                                float averageCSEta = 0.;
-                                float FracCS1Eta = 0.;
-                                float FracCS2Eta = 0.;
-                                float FracCStailEta = 0.;
-
-                                int ProjectedTracksEta = 0;
-                                float efficiencygapEta = 0.;
-
-                                float efficiencyPhi = 0.;
-                                float averageCSPhi = 0.;
-                                float FracCS1Phi = 0.;
-                                float FracCS2Phi = 0.;
-                                float FracCStailPhi = 0.;
+                                float efficiencyEta{0.}, averageCSEta{0.}, FracCS1Eta{0.}, FracCS2Eta{0.}, FracCStailEta{0.};
+                                float efficiencyPhi{0.}, averageCSPhi{0.}, FracCS1Phi{0.}, FracCS2Phi{0.}, FracCStailPhi{0.}, efficiencygapEta{0.};
+                                int ProjectedTracksEta{0};
+                               
+                              
 
                                 if (readCdo->getEfficiencyMap().find(atlasIdEta) != readCdo->getEfficiencyMap().end())
                                     efficiencyEta = readCdo->getEfficiencyMap().find(atlasIdEta)->second;
@@ -2641,8 +2641,8 @@ StatusCode RpcDigitizationTool::DumpRPCCalibFromCoolDB(const EventContext& ctx) 
                                     if (!rpc) continue;
                                     Identifier idr = rpc->identify();
                                     if (idr == 0) continue;
-                                    Identifier atlasId = m_idHelper->channelID(idr, doubletZ, doubletPhi, gasGap, measphi, 1);
-                                    if (atlasId == 0) continue;
+                                    Identifier atlasId = m_idHelper->channelID(idr, doubletZ, doubletPhi, gasGap, measphi, 1, isValid);
+                                    if (!isValid) continue;
 
                                     if (readCdo->getEfficiencyMap().find(atlasId)->second == 1) {
                                         ATH_MSG_VERBOSE("Effi RPC panel = 1: " << readCdo->getDeadStripMap().find(atlasId)->second << " "
@@ -2718,8 +2718,8 @@ StatusCode RpcDigitizationTool::DumpRPCCalibFromCoolDB(const EventContext& ctx) 
                                     if (!rpc) continue;
                                     Identifier idr = rpc->identify();
                                     if (idr == 0) continue;
-                                    Identifier atlasId = m_idHelper->channelID(idr, doubletZ, doubletPhi, gasGap, measphi, 1);
-                                    if (atlasId == 0) continue;
+                                    Identifier atlasId = m_idHelper->channelID(idr, doubletZ, doubletPhi, gasGap, measphi, 1, isValid);
+                                    if (!isValid) continue;
 
                                     indexSName = stationName - 2;
                                     if (indexSName > 3) indexSName = indexSName - 2;
@@ -2826,8 +2826,8 @@ StatusCode RpcDigitizationTool::DumpRPCCalibFromCoolDB(const EventContext& ctx) 
                                         if (!rpc) continue;
                                         Identifier idr = rpc->identify();
                                         if (idr == 0) continue;
-                                        Identifier atlasId = m_idHelper->channelID(idr, doubletZ, doubletPhi, gasGap, measphi, strip);
-                                        if (atlasId == 0) continue;
+                                        Identifier atlasId = m_idHelper->channelID(idr, doubletZ, doubletPhi, gasGap, measphi, strip, isValid);
+                                        if (!isValid) continue;
                                         int stripstatus = readCdo->getDeadStripIntMap().find(atlasId)->second;
                                         if (stripstatus != 1) continue;
                                         ATH_MSG_VERBOSE("Identifier " << atlasId << " sName " << stationName << " sEta " << stationEta
