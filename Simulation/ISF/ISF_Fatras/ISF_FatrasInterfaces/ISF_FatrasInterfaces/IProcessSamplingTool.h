@@ -13,7 +13,7 @@
 #include "GaudiKernel/IAlgTool.h"
 #include "TrkExUtils/ExtrapolationCell.h"
 #include "TrkExUtils/TargetSurfaces.h"
-#include "ISF_Event/ISFParticleVector.h"
+#include "ISF_Event/ISFParticleContainer.h"
 
 namespace Trk{
   class Track;

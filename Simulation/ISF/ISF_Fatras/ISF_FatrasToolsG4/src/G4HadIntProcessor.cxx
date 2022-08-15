@@ -14,7 +14,7 @@
 
 // ISF
 #include "ISF_Event/ISFParticle.h"
-#include "ISF_Event/ISFParticleVector.h"
+#include "ISF_Event/ISFParticleContainer.h"
 #include "ISF_Event/ParticleClipboard.h"
 #include "ISF_Event/ParticleUserInformation.h"
 #include "ISF_Interfaces/IParticleBroker.h"

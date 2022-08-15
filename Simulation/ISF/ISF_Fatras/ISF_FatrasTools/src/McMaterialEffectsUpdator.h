@@ -24,7 +24,7 @@
 #include "TrkParameters/TrackParameters.h"
 
 // ISF
-#include "ISF_Event/ISFParticleVector.h"
+#include "ISF_Event/ISFParticleContainer.h"
 #include "ISF_Event/ITruthIncident.h"
 
 // Barcode
