@@ -44,8 +44,8 @@ def ITkStripConfigurationConditionsToolCfg(flags, name="ITkStripConfigurationCon
     if "ChannelFolderDB" not in cond_kwargs:
         acc.merge(addFoldersSplitOnline(flags,
                                         detDb=cond_kwargs["dbInstance"],
-                                        online_folders=cond_kwargs["ChannelFolder"],
-                                        offline_folders=cond_kwargs["ChannelFolder"],
+                                        onlineFolders=cond_kwargs["ChannelFolder"],
+                                        offlineFolders=cond_kwargs["ChannelFolder"],
                                         className="CondAttrListVec",
                                         splitMC=True))
     else:
@@ -53,8 +53,8 @@ def ITkStripConfigurationConditionsToolCfg(flags, name="ITkStripConfigurationCon
     if "ModuleFolderDB" not in cond_kwargs:
         acc.merge(addFoldersSplitOnline(flags,
                                         detDb=cond_kwargs["dbInstance"],
-                                        online_folders=cond_kwargs["ModuleFolder"],
-                                        offline_folders=cond_kwargs["ModuleFolder"],
+                                        onlineFolders=cond_kwargs["ModuleFolder"],
+                                        offlineFolders=cond_kwargs["ModuleFolder"],
                                         className="CondAttrListVec",
                                         splitMC=True))
     else:
@@ -62,8 +62,8 @@ def ITkStripConfigurationConditionsToolCfg(flags, name="ITkStripConfigurationCon
     if "MurFolderDB" not in cond_kwargs:
         acc.merge(addFoldersSplitOnline(flags,
                                         detDb=cond_kwargs["dbInstance"],
-                                        online_folders=cond_kwargs["MurFolder"],
-                                        offline_folders=cond_kwargs["MurFolder"],
+                                        onlineFolders=cond_kwargs["MurFolder"],
+                                        offlineFolders=cond_kwargs["MurFolder"],
                                         className="CondAttrListVec",
                                         splitMC=True))
     else:
@@ -100,8 +100,8 @@ def ITkStripModuleVetoCfg(flags, name="ITkStripModuleVeto", **kwargs):
 
     if kwargs["useDB"]:
         # Condition folder
-        acc.merge(addFolders(configFlags=flags,
-                             folderstrings="/SCT/Manual/BadModules",
+        acc.merge(addFolders(flags,
+                             folderStrings="/SCT/Manual/BadModules",
                              detDb="SCT_OFL",
                              className="AthenaAttributeList",
                              tag=kwargs["folderTag"]))
@@ -146,14 +146,14 @@ def ITkStripReadCalibDataToolCfg(flags, name="ITkStripReadCalibDataTool", cond_k
 
     acc.merge(addFoldersSplitOnline(flags,
                                     detDb="ITkStrip",
-                                    online_folders=cond_kwargs["NoiseFolder"],
-                                    offline_folders=cond_kwargs["NoiseFolder"],
+                                    onlineFolders=cond_kwargs["NoiseFolder"],
+                                    offlineFolders=cond_kwargs["NoiseFolder"],
                                     className="CondAttrListCollection",
                                     splitMC=True))
     acc.merge(addFoldersSplitOnline(flags,
                                     detDb="ITkStrip",
-                                    online_folders=cond_kwargs["GainFolder"],
-                                    offline_folders=cond_kwargs["GainFolder"],
+                                    onlineFolders=cond_kwargs["GainFolder"],
+                                    offlineFolders=cond_kwargs["GainFolder"],
                                     className="CondAttrListCollection",
                                     splitMC=True))
 

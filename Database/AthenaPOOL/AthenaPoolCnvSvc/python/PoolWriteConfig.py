@@ -1,16 +1,11 @@
 """Configuration for POOL file writing
 
-Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
 """
-from AthenaConfiguration.ComponentAccumulator import ComponentAccumulator
-from AthenaConfiguration.ComponentFactory import CompFactory
-AthenaPoolCnvSvc=CompFactory.AthenaPoolCnvSvc
-
 
 def PoolWriteCfg(flags, forceTreeAutoFlush=-1):
     """Return ComponentAccumulator configured to Write POOL files"""
     # based on WriteAthenaPool._configureWriteAthenaPool
-    acc = ComponentAccumulator()
 
     PoolAttributes = []
     # Switch off splitting by setting default SplitLevel to 0
@@ -115,6 +110,5 @@ def PoolWriteCfg(flags, forceTreeAutoFlush=-1):
         PoolAttributes += [ pah.setContainerSplitLevel( FileName, "CollectionTree", str(CONTAINER_SPLITLEVEL) ) ]
         PoolAttributes += [ pah.setContainerSplitLevel( FileName, "Aux.", str(CONTAINER_SPLITLEVEL) ) ]
 
-    acc.addService(AthenaPoolCnvSvc(PoolAttributes = PoolAttributes))
-    acc.addService(CompFactory.EvtPersistencySvc("EventPersistencySvc",CnvServices=["AthenaPoolCnvSvc"]))
-    return acc
+    from AthenaPoolCnvSvc.PoolCommonConfig import AthenaPoolCnvSvcCfg
+    return AthenaPoolCnvSvcCfg(flags, PoolAttributes=PoolAttributes)
