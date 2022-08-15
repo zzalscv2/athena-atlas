@@ -61,7 +61,7 @@ def TRTHitGeneratorSequence(ConfigFlags):
 
 
 
-def hipTRTMenuSequence():
+def hipTRTMenuSequence(flags):
     """ Creates TRTDataGenerator MENU sequence """
     (sequenceOut, trtDataSequence, trtViewsMaker) = RecoFragmentsPool.retrieve(TRTHitGeneratorSequence, ConfigFlags)
 

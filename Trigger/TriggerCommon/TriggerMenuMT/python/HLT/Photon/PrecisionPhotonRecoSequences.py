@@ -34,14 +34,15 @@ def precisionPhotonRecoSequence(RoIs, ion=False):
 
     ViewVerify = CfgMgr.AthViews__ViewDataVerifier("PrecisionPhotonPhotonViewDataVerifier" + tag)
     ViewVerify.DataObjects = [( 'xAOD::CaloClusterContainer' , 'StoreGateSvc+%s' % caloClusters ),
-                              ( 'xAOD::CaloClusterContainer' , 'StoreGateSvc+%s' % TrigEgammaKeys.precisionTopoClusterContainer), # this is for the calo isolation tool 
                               ( 'EgammaRecContainer', 'StoreGateSvc+%s' % TrigEgammaKeys.precisionPhotonSuperClusterCollection),
                               ( 'CaloCellContainer' , 'StoreGateSvc+CaloCells' ),
-                              ( 'CaloCellContainer' , 'StoreGateSvc+CaloCellsFS' ),
                               ( 'xAOD::EventInfo' , 'StoreGateSvc+EventInfo' ),
-                              ( 'xAOD::EventShape' , 'StoreGateSvc+TrigIsoEventShape' ),
-                              ( 'xAOD::IParticleContainer' , 'StoreGateSvc+HLT_TopoCaloClustersFS'),
-                              ( 'PseudoJetContainer' , 'StoreGateSvc+PseudoJetTrigEMTopo' )]
+                              ]
+#                              ( 'xAOD::CaloClusterContainer' , 'StoreGateSvc+%s' % TrigEgammaKeys.precisionTopoClusterContainer), # this is for the calo isolation tool 
+                              #( 'xAOD::EventShape' , 'StoreGateSvc+TrigIsoEventShape' ),
+                              #( 'xAOD::IParticleContainer' , 'StoreGateSvc+HLT_TopoCaloClustersFS'),
+                              #( 'PseudoJetContainer' , 'StoreGateSvc+PseudoJetTrigEMTopo' )
+                              #( 'CaloCellContainer' , 'StoreGateSvc+CaloCellsFS' ),
                               
     if ion is True: ViewVerify.DataObjects.append(( 'CaloCellContainer' , 'StoreGateSvc+CorrectedRoICaloCells' ))
 
@@ -64,20 +65,12 @@ def precisionPhotonRecoSequence(RoIs, ion=False):
 
     collectionOut = trigTopoEgammaAlgo.PhotonOutputName
 
-    # Add CaloIsolationTool
-    from TriggerMenuMT.HLT.Egamma.TrigEgammaFactories import TrigPhotonIsoBuilderCfg, TrigPhotonIsoBuilderHICfg #, egammaFSEventDensitySequence
-
-    if ion:
-        thesequence += TrigPhotonIsoBuilderHICfg('TrigPhotonIsolationBuilderHI' + tag)
-    else:
-        #thesequence += egammaFSEventDensitySequence() 
-        thesequence += TrigPhotonIsoBuilderCfg('TrigPhotonIsolationBuilder')
 
     #online monitoring for topoEgammaBuilder
     from TriggerMenuMT.HLT.Photon.TrigPhotonFactories import PrecisionPhotonTopoMonitorCfg
     PrecisionPhotonRecoMonAlgo = PrecisionPhotonTopoMonitorCfg('PrecisionPhotonTopoEgammaBuilder' + tag)
     PrecisionPhotonRecoMonAlgo.PhotonKey = trigTopoEgammaAlgo.PhotonOutputName
-    PrecisionPhotonRecoMonAlgo.IsoVarKeys = [ '%s.topoetcone20' % trigTopoEgammaAlgo.PhotonOutputName, '%s.topoetcone40' % trigTopoEgammaAlgo.PhotonOutputName]
+    #PrecisionPhotonRecoMonAlgo.IsoVarKeys = [ '%s.topoetcone20' % trigTopoEgammaAlgo.PhotonOutputName, '%s.topoetcone40' % trigTopoEgammaAlgo.PhotonOutputName]
     thesequence += PrecisionPhotonRecoMonAlgo
 
     #online monitoring for TrigPhotonSuperClusterBuilder
