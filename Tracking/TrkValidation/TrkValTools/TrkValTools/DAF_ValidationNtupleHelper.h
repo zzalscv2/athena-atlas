@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2017 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
 */
 
 //////////////////////////////////////////////////////////////////
@@ -48,23 +48,23 @@ public:
         const Trk::MeasurementBase*,
         const Trk::TrackParameters*,
         const int& detectorType,
-        const bool& isOutlier ) const;
+        const bool& isOutlier );
 
     /** fill special data about holes on track (here: do nothing) */
     virtual StatusCode fillHoleData (
         const Trk::TrackStateOnSurface&,
-        const int& ) const;
+        const int& );
 
     /** add items to the ntuple and configure the helper tool:
         should be called once (per detector type) by the
         steering tool (Trk::ITrackValidationNtupleTool) */
     virtual StatusCode addNtupleItems (
         TTree* tree,
-        const int& detectorType ) const;
+        const int& detectorType );
 
     /** reset ntuple variables */
     virtual StatusCode resetVariables (
-        const int& detectorType ) const;
+        const int& detectorType );
 
 private:
     
@@ -74,11 +74,11 @@ private:
     ToolHandle<Trk::IResidualPullCalculator>    m_residualPullCalculator;   //!< The residual and pull calculator tool
     
 
-    mutable int* m_isUnbiased;    
+    int* m_isUnbiased;    
 
-    mutable std::vector<int>*   m_nContainedROTs;
-    mutable std::vector<int>*   m_indexOfMaxAssgnProb;
-    mutable std::vector<float>* m_maxAssgnProb;
+    std::vector<int>*   m_nContainedROTs;
+    std::vector<int>*   m_indexOfMaxAssgnProb;
+    std::vector<float>* m_maxAssgnProb;
     
 };
 

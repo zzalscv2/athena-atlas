@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2017 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
 */
 
 //////////////////////////////////////////////////////////////////
@@ -47,40 +47,40 @@ public:
       Should be called once (per track collection and tree) dunring the initialisation phase by the calling algorithm
       (usually Trk::TrackValidationNtupleWriter) */
     virtual StatusCode addNtupleItems (
-        TTree* tree ) const = 0;
+        TTree* tree ) = 0;
 
     /** fill AND write ntuple data of a given track */
     virtual StatusCode writeTrackData (
         const Trk::Track&,
         const int iterationIndex,
-        const unsigned int fitStatCode = 0 ) const = 0;
+        const unsigned int fitStatCode = 0 ) = 0;
 
      /** fill AND write ntuple data of a given track particle */
     virtual StatusCode writeTrackParticleData (
-        const Trk::TrackParticleBase& ) const = 0;
+        const Trk::TrackParticleBase& ) = 0;
     
     /** fill ntuple data of a given track without writing the record.
     - if this method is called twice without writing the ntuple inbetween the first data will be lost! */
     virtual StatusCode fillTrackData (
         const Trk::Track&,
         const int iterationIndex,
-        const unsigned int fitStatCode = 0 ) const = 0;
+        const unsigned int fitStatCode = 0 ) = 0;
 
     /** fill ntuple data of a given track particle without writing the record.
     - if this method is called twice without writing the ntuple inbetween the first data will be lost! */
     virtual StatusCode fillTrackParticleData (
-        const Trk::TrackParticleBase&) const = 0;
+        const Trk::TrackParticleBase&) = 0;
         
     /** fill ntuple data of a given track without writing the record.
     - if this method is called twice without writing the ntuple inbetween the first data will be lost! */
     virtual StatusCode fillTrackParameter (
         const Trk::TrackParameters*,
-        const int iterationIndex ) const = 0;
+        const int iterationIndex ) = 0;
     
     /** fill ntuple data of given measurement and track parameters without writing the record*/
     virtual StatusCode fillMeasurementData (
         const Trk::MeasurementBase*,
-        const Trk::TrackParameters* ) const = 0;
+        const Trk::TrackParameters* ) = 0;
         
     /** fill ntuple data of an outlier measurement (without writing the
         record yet). The TrackParameters and FQoS are optional, i.e.
@@ -88,18 +88,18 @@ public:
     virtual StatusCode fillOutlierData (
         const Trk::MeasurementBase*,
         const Trk::TrackParameters*,
-        const Trk::FitQualityOnSurface* ) const = 0;
+        const Trk::FitQualityOnSurface* ) = 0;
 
     /** fill ntuple data of holes on track without writing the record */
     virtual StatusCode fillHoleData (
-        const Trk::TrackStateOnSurface&) const = 0;
+        const Trk::TrackStateOnSurface&) = 0;
 
     virtual StatusCode fillTrackTruthData ( const TrackParameters*&,
                                             const TrackTruth&, 
-                                            const int truthIndex = -1 ) const = 0;
+                                            const int truthIndex = -1 ) = 0;
     
     /** write the filled data into the ntuple */
-    virtual StatusCode writeRecord( TTree* tree ) const = 0;
+    virtual StatusCode writeRecord( TTree* tree ) = 0;
 };
 
 inline const InterfaceID& Trk::IValidationNtupleTool::interfaceID() {

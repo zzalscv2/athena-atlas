@@ -127,7 +127,7 @@ StatusCode Trk::BasicValTrkParticleNtupleTool::finalize() {
   return StatusCode::SUCCESS;
 }
 
-StatusCode Trk::BasicValTrkParticleNtupleTool::addNtupleItems( TTree* tree ) const {
+StatusCode Trk::BasicValTrkParticleNtupleTool::addNtupleItems( TTree* tree ) {
     if (!tree) return StatusCode::FAILURE;
     //-----------------
     // add items  *** Note: Documentation is in the header file, doxygen and wikis! ***
@@ -176,7 +176,7 @@ StatusCode Trk::BasicValTrkParticleNtupleTool::addNtupleItems( TTree* tree ) con
 
 
 StatusCode Trk::BasicValTrkParticleNtupleTool::writeTrackParticleData (
-     const Trk::TrackParticleBase& track)  const {
+     const Trk::TrackParticleBase& track) {
     if (!m_nt) {
         ATH_MSG_ERROR("writeTrackParticleData(...) can only be used, if property BookNewNtuple is set to true" );
         return StatusCode::FAILURE;
@@ -195,7 +195,7 @@ StatusCode Trk::BasicValTrkParticleNtupleTool::writeTrackParticleData (
 /// fill track data into variables without actually writing the record
 //////////////////////////////////////
 StatusCode Trk::BasicValTrkParticleNtupleTool::fillTrackParticleData (
-    const Trk::TrackParticleBase& track) const {
+    const Trk::TrackParticleBase& track) {
 
   // ---------------------------------------
     // detect new event, reset TrackParticle counter if new event
@@ -237,7 +237,7 @@ StatusCode Trk::BasicValTrkParticleNtupleTool::fillTrackParticleData (
 /////////////////////////////////////////////////////////////////////////////
 /// fill the perigee in ntuple
 /////////////////////////////////////////////////////////////////////////////
-StatusCode Trk::BasicValTrkParticleNtupleTool::fillTrkParticlePerigee(const Trk::Perigee* perigee) const {
+StatusCode Trk::BasicValTrkParticleNtupleTool::fillTrkParticlePerigee(const Trk::Perigee* perigee) {
 
   ATH_MSG_VERBOSE ("in fillTrackPerigee");
 
@@ -278,7 +278,7 @@ StatusCode Trk::BasicValTrkParticleNtupleTool::fillTrkParticlePerigee(const Trk:
 /////////////////////////////////////////////////////////////////////////////
 /// fill the perigee in ntuple
 /////////////////////////////////////////////////////////////////////////////
-StatusCode Trk::BasicValTrkParticleNtupleTool::fillTrkParticleSummary(const Trk::TrackSummary* summary) const {
+StatusCode Trk::BasicValTrkParticleNtupleTool::fillTrkParticleSummary(const Trk::TrackSummary* summary) {
 
   ATH_MSG_VERBOSE ("in fillTrackSummary");
 
@@ -315,7 +315,7 @@ StatusCode Trk::BasicValTrkParticleNtupleTool::fillTrkParticleSummary(const Trk:
     return StatusCode::SUCCESS;
 }
 
-StatusCode Trk::BasicValTrkParticleNtupleTool::fillFitQualityData(const Trk::FitQuality* fitQuality) const {
+StatusCode Trk::BasicValTrkParticleNtupleTool::fillFitQualityData(const Trk::FitQuality* fitQuality) {
   if (!fitQuality) {
         ATH_MSG_WARNING("Something is wrong - track has no fit quality data !!");
         m_chi2  = 0;
@@ -333,7 +333,7 @@ StatusCode Trk::BasicValTrkParticleNtupleTool::fillFitQualityData(const Trk::Fit
    return StatusCode::SUCCESS;
 }
 
-StatusCode Trk::BasicValTrkParticleNtupleTool::writeRecord(TTree* tree) const {
+StatusCode Trk::BasicValTrkParticleNtupleTool::writeRecord(TTree* tree) {
     if (!tree) return StatusCode::FAILURE;
     ATH_MSG_VERBOSE ("Writting Track Particles into the Tree");
     tree->Fill();
@@ -341,7 +341,7 @@ StatusCode Trk::BasicValTrkParticleNtupleTool::writeRecord(TTree* tree) const {
     return StatusCode::SUCCESS;
 }
 
-void Trk::BasicValTrkParticleNtupleTool::resetVariables() const {
+void Trk::BasicValTrkParticleNtupleTool::resetVariables() {
    m_numberOfPixelHits=0;  
    m_numberOfContribPixelLayers=0;
    m_numberOfPixelHoles=0;
@@ -359,40 +359,38 @@ void Trk::BasicValTrkParticleNtupleTool::resetVariables() const {
 StatusCode Trk::BasicValTrkParticleNtupleTool::writeTrackData (
         const Trk::Track&,
         const int,
-        const unsigned int ) const{return StatusCode::SUCCESS;}
+        const unsigned int ) {return StatusCode::SUCCESS;}
         //const Trk::FitterStatusCode  ) const {return StatusCode::SUCCESS;}
 
   
     StatusCode Trk::BasicValTrkParticleNtupleTool::fillTrackData (
         const Trk::Track&,
         const int,
-        const unsigned int ) const{return StatusCode::SUCCESS;}
+        const unsigned int ) {return StatusCode::SUCCESS;}
         //const Trk::FitterStatusCode ) const {return StatusCode::SUCCESS;}
   
        
     StatusCode Trk::BasicValTrkParticleNtupleTool::fillTrackParameter (
         const Trk::TrackParameters*,
-        const int ) const {return StatusCode::SUCCESS;}
+        const int ) {return StatusCode::SUCCESS;}
 
       
     StatusCode Trk::BasicValTrkParticleNtupleTool::fillMeasurementData (
         const Trk::MeasurementBase*,
-        const Trk::TrackParameters* ) const {return StatusCode::SUCCESS;}
+        const Trk::TrackParameters* ) {return StatusCode::SUCCESS;}
 
            
     StatusCode Trk::BasicValTrkParticleNtupleTool::fillOutlierData (
         const Trk::MeasurementBase*,
         const Trk::TrackParameters*,
-        const Trk::FitQualityOnSurface* ) const {return StatusCode::SUCCESS;}
+        const Trk::FitQualityOnSurface* ) {return StatusCode::SUCCESS;}
 
     
     StatusCode Trk::BasicValTrkParticleNtupleTool::fillHoleData (
-        const Trk::TrackStateOnSurface&) const {return StatusCode::SUCCESS;}
+        const Trk::TrackStateOnSurface&) {return StatusCode::SUCCESS;}
 
     
     StatusCode Trk::BasicValTrkParticleNtupleTool::fillTrackTruthData ( 
 					    const TrackParameters*&,
                                             const TrackTruth&, 
-                                            const int) const {return StatusCode::SUCCESS;}
-
-
+                                            const int) {return StatusCode::SUCCESS;}

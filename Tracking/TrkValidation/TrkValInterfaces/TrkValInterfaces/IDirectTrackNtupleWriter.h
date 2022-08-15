@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2017 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
 */
 
 //////////////////////////////////////////////////////////////////
@@ -52,11 +52,11 @@ public:
     virtual StatusCode writeTrackData (
         const Trk::Track&,
         const int iterationIndex,
-        const unsigned int fitStatCode = 0) const = 0;
+        const unsigned int fitStatCode = 0) = 0;
 
      /** fill AND write ntuple data of a given track particle */
     virtual StatusCode writeTrackParticleData (
-        const Trk::TrackParticleBase& ) const = 0;
+        const Trk::TrackParticleBase& ) = 0;
     
 };
 

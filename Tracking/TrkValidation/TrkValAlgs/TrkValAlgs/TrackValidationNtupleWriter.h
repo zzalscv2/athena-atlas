@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2017 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
 */
 
 //////////////////////////////////////////////////////////////////
@@ -78,7 +78,7 @@ protected:
   ToolHandleArray<Trk::ITrackTruthClassifier> m_trackTruthClassifierHandles;    //!< jobO: list of truth classifiers
   std::vector<const Trk::ITrackTruthClassifier*> m_trackTruthClassifiers;     //!< the truth classifiers
   ToolHandleArray<Trk::IEventPropertyNtupleTool> m_eventPropertyNtupleHandles;//!< jobO: list of event property tools
-  std::vector<const Trk::IEventPropertyNtupleTool*> m_eventPropertyNtupleTools;//!< list of event property tools
+  std::vector<Trk::IEventPropertyNtupleTool*> m_eventPropertyNtupleTools;//!< list of event property tools
   
   std::vector<std::string>  m_inputTrackCollection;     //!< name of the TrackCollection
   std::vector<std::string>  m_inputTrackParticleCollection;     //!< name of the TrackParticleCollection

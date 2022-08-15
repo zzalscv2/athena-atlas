@@ -65,7 +65,7 @@ StatusCode Trk::EventPropertyNtupleTool::finalize() {
 }
 
 
-StatusCode Trk::EventPropertyNtupleTool::addNtupleItems( TTree* tree, const std::string ) const {
+StatusCode Trk::EventPropertyNtupleTool::addNtupleItems( TTree* tree, const std::string ) {
   if (!tree) return StatusCode::FAILURE;
   //-----------------
   // add items
@@ -84,7 +84,7 @@ StatusCode Trk::EventPropertyNtupleTool::addNtupleItems( TTree* tree, const std:
   return StatusCode::SUCCESS;
 }
 
-StatusCode Trk::EventPropertyNtupleTool::fillEventData( ) const {
+StatusCode Trk::EventPropertyNtupleTool::fillEventData( ) {
   const EventInfo* eventInfo;
   if ((evtStore()->retrieve(eventInfo)).isFailure()) {
     msg(MSG::WARNING) << "Could not retrieve event info" << endmsg;
@@ -138,7 +138,7 @@ StatusCode Trk::EventPropertyNtupleTool::fillEventData( ) const {
   // remember calling algo is the one to record the content on the tree.
 }
 
-StatusCode Trk::EventPropertyNtupleTool::resetVariables( ) const {
+StatusCode Trk::EventPropertyNtupleTool::resetVariables( ) {
   m_eventNumber = 0;
   m_runNumber   = 0;
   m_tdc_phase   = 0.0;

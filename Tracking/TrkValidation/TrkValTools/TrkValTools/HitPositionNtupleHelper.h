@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2017 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
 */
 
 //////////////////////////////////////////////////////////////////
@@ -49,40 +49,40 @@ public:
         //const NTuple::Item<long>& numberOfHits,
         //const std::bitset<8>& detectorType
         const int& detectorType,
-        const bool& isOutlier ) const;
+        const bool& isOutlier );
 
     /** fill special data about holes on track (here: do nothing) */
     virtual StatusCode fillHoleData (
         const Trk::TrackStateOnSurface&,
-        const int&) const;
+        const int&);
 
 
     /** add items to the ntuple and configure the helper tool:
     should be called once (per detector type) by the steering tool (Trk::ITrackValidationNtupleTool) */
     virtual StatusCode addNtupleItems (
         TTree* tree,
-        const int& detectorType) const;
+        const int& detectorType);
 
     //! reset ntuple variables
     virtual StatusCode resetVariables (
-        const int& detectorType ) const;
+        const int& detectorType );
 
 private:
 
     // --- member variables for ntuple items ---
-    mutable std::vector<float>*             m_hitX; //!< x-coordinate of GlobalPosition of the measurement UNIT:mm
-    mutable std::vector<float>*             m_hitY; //!< y-coordinate of GlobalPosition of the measurement UNIT:mm
-    mutable std::vector<float>*             m_hitZ; //!< x-coordinate of GlobalPosition of the measurement UNIT:mm
-    mutable std::vector<float>*        m_hitRadius; //!< perp() of GlobalPosition of the measurement       UNIT:mm
-    mutable std::vector<float>*           m_hitPhi; //!< phi() of GlobalPosition of the measurement        UNIT:rad
-    mutable std::vector<float>*          m_hitLoc1; //!< Trk::loc1 of the local position of the measurement UNIT:mm
-    mutable std::vector<float>*          m_hitLoc2; //!< Trk::loc2 of the local position. Value is set to -1000.0 if no second local coordinate exists for a measurement UNIT:mm
-    mutable std::vector<float>*      m_hitSurfaceX; //!< x-coordinate of GlobalPosition of the center of the measurement surface UNIT:mm
-    mutable std::vector<float>*      m_hitSurfaceY; //!< y-coordinate of GlobalPosition of the center of the measurement surface UNIT:mm
-    mutable std::vector<float>*      m_hitSurfaceZ; //!< z-coordinate of GlobalPosition of the center of the measurement surface UNIT:mm
-    mutable std::vector<float>* m_hitSurfaceRadius; //!< perp() of the center of the measurement surface UNIT:mm
-    mutable std::vector<float>*    m_hitSurfacePhi; //!< phi() of the center of the measurement surface UNIT:rad
-    mutable std::vector<float>*  m_hitSurfaceTheta; //!< theta() of the center of the measurement surface UNIT:rad
+    std::vector<float>*             m_hitX; //!< x-coordinate of GlobalPosition of the measurement UNIT:mm
+    std::vector<float>*             m_hitY; //!< y-coordinate of GlobalPosition of the measurement UNIT:mm
+    std::vector<float>*             m_hitZ; //!< x-coordinate of GlobalPosition of the measurement UNIT:mm
+    std::vector<float>*        m_hitRadius; //!< perp() of GlobalPosition of the measurement       UNIT:mm
+    std::vector<float>*           m_hitPhi; //!< phi() of GlobalPosition of the measurement        UNIT:rad
+    std::vector<float>*          m_hitLoc1; //!< Trk::loc1 of the local position of the measurement UNIT:mm
+    std::vector<float>*          m_hitLoc2; //!< Trk::loc2 of the local position. Value is set to -1000.0 if no second local coordinate exists for a measurement UNIT:mm
+    std::vector<float>*      m_hitSurfaceX; //!< x-coordinate of GlobalPosition of the center of the measurement surface UNIT:mm
+    std::vector<float>*      m_hitSurfaceY; //!< y-coordinate of GlobalPosition of the center of the measurement surface UNIT:mm
+    std::vector<float>*      m_hitSurfaceZ; //!< z-coordinate of GlobalPosition of the center of the measurement surface UNIT:mm
+    std::vector<float>* m_hitSurfaceRadius; //!< perp() of the center of the measurement surface UNIT:mm
+    std::vector<float>*    m_hitSurfacePhi; //!< phi() of the center of the measurement surface UNIT:rad
+    std::vector<float>*  m_hitSurfaceTheta; //!< theta() of the center of the measurement surface UNIT:rad
 };
 
 

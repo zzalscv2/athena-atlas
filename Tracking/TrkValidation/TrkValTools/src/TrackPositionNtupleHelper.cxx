@@ -81,7 +81,7 @@ StatusCode Trk::TrackPositionNtupleHelper::finalize() {
 ///////////////////////////////////////
 StatusCode Trk::TrackPositionNtupleHelper::addNtupleItems (
     TTree* tree,
-    const int& ) const {
+    const int& ) {
 
     // add items
     tree->Branch("TrackX",          &m_trkX);
@@ -106,7 +106,7 @@ StatusCode Trk::TrackPositionNtupleHelper::fillMeasurementData (
     //const NTuple::Item<long>& numberOfHits,
     //const std::bitset<8>& detectorType
     const int&,
-    const bool& isOutlier) const {
+    const bool& isOutlier) {
 
     if (!trkPar) {
         m_trkX->push_back( s_errorEntry );
@@ -153,7 +153,7 @@ StatusCode Trk::TrackPositionNtupleHelper::fillMeasurementData (
 }
 
 StatusCode Trk::TrackPositionNtupleHelper::resetVariables (
-        const int&  ) const {
+        const int&  ) {
     m_trkX->clear();
     m_trkY->clear();
     m_trkZ->clear();
@@ -169,7 +169,7 @@ StatusCode Trk::TrackPositionNtupleHelper::resetVariables (
 
 StatusCode Trk::TrackPositionNtupleHelper::fillHoleData (
         const Trk::TrackStateOnSurface&,
-        const int&) const {
+        const int&) {
     // we do nothing with holes
     return StatusCode::SUCCESS;
 }

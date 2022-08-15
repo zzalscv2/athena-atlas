@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2017 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
 */
 
 //////////////////////////////////////////////////////////////////
@@ -50,36 +50,36 @@ public:
         //const NTuple::Item<long>& numberOfHits,
         //const std::bitset<8>& detectorType
         const int& detectorType,
-        const bool& isOutlier ) const;
+        const bool& isOutlier );
 
     //! fill special data about holes on track (here: do nothing)
     virtual StatusCode fillHoleData (
         const Trk::TrackStateOnSurface&,
-        const int&) const;
+        const int&);
 
 
     /** add items to the ntuple and configure the helper tool:
     should be called once (per detector type) by the steering tool (Trk::ITrackValidationNtupleTool) */
     virtual StatusCode addNtupleItems (
         TTree* tree,
-        const int& detectorType ) const;
+        const int& detectorType );
 
     //! reset ntuple variables
     virtual StatusCode resetVariables (
-        const int& detectorType ) const;
+        const int& detectorType );
 
 private:
 
-    mutable bool      m_trkParametersWarning;//!< warn only once if no track pars exist
+    bool      m_trkParametersWarning;//!< warn only once if no track pars exist
 
-    mutable std::vector<float>*         m_trkX;  //!< global position X of track intersecting meas't surface
-    mutable std::vector<float>*         m_trkY;  //!< global position Y of track intersecting meas't surface
-    mutable std::vector<float>*         m_trkZ;  //!< global position Z of track intersection meas't surface
-    mutable std::vector<float>* m_trkMomentumX;  //!< global momentum X of track at measurement
-    mutable std::vector<float>* m_trkMomentumY;  //!< global momentum Y of track at measurement
-    mutable std::vector<float>* m_trkMomentumZ;  //!< global momentum Z of track at measurement
-    mutable std::vector<float>*      m_trkLoc1;  //!< local position 1st coord. of track intersecting meas't surface
-    mutable std::vector<float>*      m_trkLoc2;  //!< local position 2nd coord. of track intersecting meas't surface
+    std::vector<float>*         m_trkX;  //!< global position X of track intersecting meas't surface
+    std::vector<float>*         m_trkY;  //!< global position Y of track intersecting meas't surface
+    std::vector<float>*         m_trkZ;  //!< global position Z of track intersection meas't surface
+    std::vector<float>* m_trkMomentumX;  //!< global momentum X of track at measurement
+    std::vector<float>* m_trkMomentumY;  //!< global momentum Y of track at measurement
+    std::vector<float>* m_trkMomentumZ;  //!< global momentum Z of track at measurement
+    std::vector<float>*      m_trkLoc1;  //!< local position 1st coord. of track intersecting meas't surface
+    std::vector<float>*      m_trkLoc2;  //!< local position 2nd coord. of track intersecting meas't surface
 
 };
 

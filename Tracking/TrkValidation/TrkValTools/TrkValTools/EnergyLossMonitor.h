@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2017 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
 */
 
 //////////////////////////////////////////////////////////////////
@@ -40,15 +40,15 @@ namespace Trk {
     virtual void initializeTrack(double p, 
                                  double E,
                                  double eta,
-                                 double phi) const;
+                                 double phi);
 
     /** Record a single TrackState */
     virtual void recordTrackState(const Amg::Vector3D& pos, 
                                   const Amg::Vector3D& mom,
-                                  double mass) const;
+                                  double mass);
 
     /** Finalization State */
-    virtual void finalizeTrack() const;
+    virtual void finalizeTrack();
     
 private:    
     /** Ntuple Business */
@@ -57,24 +57,24 @@ private:
     std::string                              m_outputNtupleDescription;
 
     /** Ntuple helper */
-    mutable int                              m_currentStep;    
+    int                              m_currentStep;    
 
     /** Step variables */
-    mutable NTuple::Item<long>               m_steps;
+    NTuple::Item<long>               m_steps;
     /** Initial variables */
-    mutable NTuple::Item<float>              m_initialP;
-    mutable NTuple::Item<float>              m_initialE;
-    mutable NTuple::Item<float>              m_initialEta;
-    mutable NTuple::Item<float>              m_initialPhi;
+    NTuple::Item<float>              m_initialP;
+    NTuple::Item<float>              m_initialE;
+    NTuple::Item<float>              m_initialEta;
+    NTuple::Item<float>              m_initialPhi;
 
-    mutable NTuple::Array<float>             m_p;
-    mutable NTuple::Array<float>             m_E;
-    mutable NTuple::Array<float>             m_eta;  
-    mutable NTuple::Array<float>             m_phi;
-    mutable NTuple::Array<float>             m_hitX;
-    mutable NTuple::Array<float>             m_hitY;
-    mutable NTuple::Array<float>             m_hitR;
-    mutable NTuple::Array<float>             m_hitZ;
+    NTuple::Array<float>             m_p;
+    NTuple::Array<float>             m_E;
+    NTuple::Array<float>             m_eta;  
+    NTuple::Array<float>             m_phi;
+    NTuple::Array<float>             m_hitX;
+    NTuple::Array<float>             m_hitY;
+    NTuple::Array<float>             m_hitR;
+    NTuple::Array<float>             m_hitZ;
 
 };
 
