@@ -1,0 +1,115 @@
+# Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+#====================================================================
+# BPHY4.py
+#====================================================================
+
+from AthenaConfiguration.ComponentAccumulator import ComponentAccumulator
+from AthenaConfiguration.ComponentFactory import CompFactory
+
+BPHYDerivationName = "BPHY4"
+streamName = "StreamDAOD_BPHY4"
+
+def BPHY4Cfg(ConfigFlags):
+    from DerivationFrameworkBPhys.commonBPHYMethodsCfg import (BPHY_V0ToolCfg,  BPHY_InDetDetailedTrackSelectorToolCfg, BPHY_VertexPointEstimatorCfg, BPHY_TrkVKalVrtFitterCfg)
+    from JpsiUpsilonTools.JpsiUpsilonToolsConfig import PrimaryVertexRefittingToolCfg
+    acc = ComponentAccumulator()
+    V0Tools = acc.popToolsAndMerge(BPHY_V0ToolCfg(ConfigFlags, BPHYDerivationName))
+    vkalvrt = acc.popToolsAndMerge(BPHY_TrkVKalVrtFitterCfg(ConfigFlags, BPHYDerivationName))        # VKalVrt vertex fitter
+    acc.addPublicTool(vkalvrt)
+    acc.addPublicTool(V0Tools)
+    trackselect = acc.popToolsAndMerge(BPHY_InDetDetailedTrackSelectorToolCfg(ConfigFlags, BPHYDerivationName))
+    acc.addPublicTool(trackselect)
+    vpest = acc.popToolsAndMerge(BPHY_VertexPointEstimatorCfg(ConfigFlags, BPHYDerivationName))
+    acc.addPublicTool(vpest)
+
+    BPHY4FourMuonTool = CompFactory.DerivationFramework.FourMuonTool(
+            name                        = "BPHY4FourMuonTool",
+            V0Tools                     = V0Tools,
+            ptCut                       = 2500.0,
+            etaCut                      = 2.5,
+            muonCollectionKey           = "Muons",
+            TrackParticleCollection     = "InDetTrackParticles",
+            V0VertexFitterTool          = None,             # V0 vertex fitter
+            useV0Fitter                 = False,                   # if False a TrkVertexFitterTool will be used
+            TrkVertexFitterTool         = vkalvrt,        # VKalVrt vertex fitter
+            TrackSelectorTool           = trackselect,
+            VertexPointEstimator        = vpest)
+    BPHY4_Reco_4mu = CompFactory.DerivationFramework.Reco_4mu(
+            name                    = "BPHY4_Reco_4mu",
+            FourMuonTool            = BPHY4FourMuonTool,
+            V0Tools                 = V0Tools,
+            PVRefitter              = acc.popToolsAndMerge(PrimaryVertexRefittingToolCfg(ConfigFlags)),
+            PairContainerName       = "BPHY4Pairs",
+            QuadrupletContainerName = "BPHY4Quads",
+            PVContainerName         = "PrimaryVertices",
+            RefPVContainerName      = "BPHY4RefittedPrimaryVertices",
+            RefitPV                 = True,
+            MaxPVrefit              = 100000,
+            DoVertexType            = 7)
+
+    BPHY4MuonTPThinningTool = CompFactory.DerivationFramework.MuonTrackParticleThinning(name     = "BPHY4MuonTPThinningTool",
+                                                                         MuonKey    = "Muons",
+                                                                         StreamName = streamName,
+                                                                         InDetTrackParticlesKey  = "InDetTrackParticles")
+    BPHY4ElectronTPThinningTool = CompFactory.DerivationFramework.EgammaTrackParticleThinning(name     = "BPHY4ElectronTPThinningTool",
+                                                                               SGKey                   = "Electrons",
+                                                                               GSFTrackParticlesKey    = "GSFTrackParticles",
+                                                                               StreamName = streamName,
+                                                                               InDetTrackParticlesKey  = "InDetTrackParticles")
+    BPHY4ThinningTools = [BPHY4MuonTPThinningTool, BPHY4ElectronTPThinningTool]
+    BPHY4SlimTools     = [BPHY4_Reco_4mu]
+
+    for t in BPHY4ThinningTools +BPHY4SlimTools : acc.addPublicTool(t)
+    acc.addEventAlgo(CompFactory.DerivationFramework.DerivationKernel("BPHY4Kernel",   SkimmingTools     = BPHY4SlimTools,  ThinningTools     = BPHY4ThinningTools  ))
+
+    from DerivationFrameworkCore.SlimmingHelper import SlimmingHelper
+    from OutputStreamAthenaPool.OutputStreamConfig import OutputStreamCfg
+    BPHY4SlimmingHelper = SlimmingHelper("BPHY4SlimmingHelper", NamesAndTypes = ConfigFlags.Input.TypedCollections)
+    BPHY4AllVariables  = []
+    BPHY4StaticContent = []
+    BPHY4SmartVariables =[]
+    from DerivationFrameworkCore.SlimmingHelper import SlimmingHelper
+    
+    # Needed for trigger objects
+    BPHY4SlimmingHelper.IncludeMuonTriggerContent = True
+    BPHY4SlimmingHelper.IncludeBPhysTriggerContent = True
+    
+    ## primary vertices
+    BPHY4AllVariables += ["PrimaryVertices"]
+    BPHY4StaticContent += ["xAOD::VertexContainer#BPHY4RefittedPrimaryVertices"]
+    BPHY4StaticContent += ["xAOD::VertexAuxContainer#BPHY4RefittedPrimaryVerticesAux."]
+    
+    ## ID track particles
+    BPHY4AllVariables += ["InDetTrackParticles"]
+    BPHY4SmartVariables += ["InDetTrackParticles"]
+    
+    ## combined / extrapolated muon track particles 
+    ## (note: for tagged muons there is no extra TrackParticle collection since the ID tracks
+    ##        are store in InDetTrackParticles collection)
+    BPHY4AllVariables += ["CombinedMuonTrackParticles"]
+    BPHY4AllVariables += ["ExtrapolatedMuonTrackParticles"]
+    
+    ## muon container
+    BPHY4AllVariables += ["Muons"]
+    BPHY4SmartVariables += ["Muons"]
+    
+    ## Electron container
+    BPHY4SmartVariables += ["Electrons"] 
+    
+    ## Pair/quad candidates 
+    BPHY4StaticContent += ["xAOD::VertexContainer#%s"        % BPHY4_Reco_4mu.PairContainerName]
+    BPHY4StaticContent += ["xAOD::VertexAuxContainer#%sAux." % BPHY4_Reco_4mu.PairContainerName]
+    BPHY4StaticContent += ["xAOD::VertexContainer#%s"        % BPHY4_Reco_4mu.QuadrupletContainerName]
+    BPHY4StaticContent += ["xAOD::VertexAuxContainer#%sAux." % BPHY4_Reco_4mu.QuadrupletContainerName]
+    
+    ## we have to disable vxTrackAtVertex branch since it is not xAOD compatible
+    BPHY4StaticContent += ["xAOD::VertexAuxContainer#%sAux.-vxTrackAtVertex" % BPHY4_Reco_4mu.PairContainerName]
+    BPHY4StaticContent += ["xAOD::VertexAuxContainer#%sAux.-vxTrackAtVertex" % BPHY4_Reco_4mu.QuadrupletContainerName]
+
+    BPHY4SlimmingHelper.AllVariables = BPHY4AllVariables
+    BPHY4SlimmingHelper.StaticContent = BPHY4StaticContent
+    BPHY4SlimmingHelper.SmartCollections = BPHY4SmartVariables
+    BPHY4ItemList = BPHY4SlimmingHelper.GetItemList()
+    acc.merge(OutputStreamCfg(ConfigFlags, "DAOD_BPHY4", ItemList=BPHY4ItemList, AcceptAlgs=["BPHY4Kernel"]))
+    acc.printConfig(withDetails=True, summariseProps=True, onlyComponents = [], printDefaults=True, printComponentsOnly=False)
+    return acc
