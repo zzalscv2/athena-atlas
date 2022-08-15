@@ -178,9 +178,6 @@ if __name__=="__main__":
 
     args = parser.parse_args()
 
-    from AthenaCommon.Configurable import Configurable
-    Configurable.configurableRun3Behavior=1
-
     from AthenaConfiguration.AllConfigFlags import ConfigFlags as cfgFlags
 
     cfgFlags.Input.Files= args.filesIn.split(",")
