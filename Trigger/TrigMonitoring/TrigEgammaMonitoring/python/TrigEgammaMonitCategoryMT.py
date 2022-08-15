@@ -30,8 +30,8 @@ monitoringTP_electron = [
     'HLT_e140_lhloose_L1EM22VHI',
     'HLT_e140_lhloose_noringer_L1EM22VHI',
     'HLT_e60_lhmedium_L1EM22VHI',
-    'HLT_e26_lhtight_ivarloose_L1EM22VH',
     'HLT_e26_lhtight_L1EM22VHI',   
+    'HLT_e26_lhtight_ivarloose_L1EM22VHI',
     'HLT_e26_lhtight_ivarmedium_L1EM22VHI',
     'HLT_e28_lhtight_ivarloose_L1EM22VHI'
         ]
@@ -77,6 +77,7 @@ validation_electron = [
 
 validationTP_electron = [
         'HLT_e26_lhtight_L1EM22VHI',
+        'HLT_e26_lhtight_ivarloose_L1EM22VH',
         'HLT_e26_lhtight_ivarloose_L1EM15VH',
         'HLT_e26_lhtight_ivarloose_L1EM22VHI',
         'HLT_e26_lhtight_ivarmedium_L1EM22VHI',
