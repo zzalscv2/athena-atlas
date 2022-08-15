@@ -594,6 +594,7 @@ void TrigTauMonitorAlgorithm::fillHLTEfficiencies(const EventContext& ctx, const
   auto monGroup = getGroup(monGroupName);
 
   auto tauPt = Monitored::Scalar<float>(monGroupName+"_tauPt",0.0);
+  auto tauPt_coarse = Monitored::Scalar<float>(monGroupName+"_tauPt_coarse",0.0);
   auto tauEta = Monitored::Scalar<float>(monGroupName+"_tauEta",0.0);
   auto tauPhi = Monitored::Scalar<float>(monGroupName+"_tauPhi",0.0);
   auto averageMu = Monitored::Scalar<float>(monGroupName+"_averageMu",0.0); 
@@ -633,13 +634,14 @@ void TrigTauMonitorAlgorithm::fillHLTEfficiencies(const EventContext& ctx, const
        if(!L1_match) continue; // skip this offline tau since not matched with L1 item   
  
        tauPt = offline_tau->pt()/1e3;
+       tauPt_coarse = offline_tau->pt()/1e3;
        tauEta = offline_tau->eta();
        tauPhi = offline_tau->phi();
        averageMu = lbAverageInteractionsPerCrossing(ctx);
        // HLT matching  : dR matching + HLT fires
        HLT_match = HLTMatching(offline_tau, online_tau_vec, 0.2) && hlt_fires;
 
-       fill(monGroup, tauPt, tauEta, tauPhi, averageMu, HLT_match);
+       fill(monGroup, tauPt_coarse, tauPt, tauEta, tauPhi, averageMu, HLT_match);
   }
 
   legacyL1rois.clear();
@@ -928,8 +930,15 @@ void TrigTauMonitorAlgorithm::fillRNNTrack(const std::string& trigger, const std
       }
       */
 
+      auto n_track = Monitored::Scalar<float>("n_track",0.0);
+      n_track = tracks.size();
+
       auto track_pt_log = Monitored::Collection("track_pt_log", tracks, [](const xAOD::TauTrack *track){return TMath::Log10( track->pt()); }); 
-  
+ 
+      auto track_eta = Monitored::Collection("track_eta", tracks, [&tau](const xAOD::TauTrack *track){return track->eta(); });
+   
+      auto track_phi = Monitored::Collection("track_phi", tracks, [&tau](const xAOD::TauTrack *track){return track->phi(); }); 
+
       auto track_dEta = Monitored::Collection("track_dEta", tracks, [&tau](const xAOD::TauTrack *track){auto ddeta=track->eta()- tau->eta();return ddeta; });
 
       auto track_dPhi = Monitored::Collection("track_dPhi", tracks, [&tau](const xAOD::TauTrack *track){return track->p4().DeltaPhi(tau->p4());}); 
@@ -963,7 +972,7 @@ void TrigTauMonitorAlgorithm::fillRNNTrack(const std::string& trigger, const std
                                                     return   detail; });
                                                   
 
-      fill(monGroup,track_pt_log,track_dEta,track_dPhi,track_z0sinThetaTJVA_abs_log,track_d0_abs_log,track_nIBLHitsAndExp,track_nPixelHitsPlusDeadSensors,track_nSCTHitsPlusDeadSensors);
+      fill(monGroup,n_track,track_pt_log,track_eta,track_phi,track_dEta,track_dPhi,track_z0sinThetaTJVA_abs_log,track_d0_abs_log,track_nIBLHitsAndExp,track_nPixelHitsPlusDeadSensors,track_nSCTHitsPlusDeadSensors);
     }
 
   ATH_MSG_DEBUG("After fill  RNN input Track: " << trigger);
@@ -1026,7 +1035,12 @@ void TrigTauMonitorAlgorithm::fillRNNCluster(const std::string& trigger, const s
     }
     */
 
-    auto cluster_et_log = Monitored::Collection("cluster_et_log",clusters, [](const xAOD::CaloCluster *cluster){return TMath::Log10( cluster->et()); }); 
+    auto n_cluster = Monitored::Scalar<float>("n_cluster",0.0); 
+    n_cluster = clusters.size();
+
+    auto cluster_et_log = Monitored::Collection("cluster_et_log",clusters, [](const xAOD::CaloCluster *cluster){return TMath::Log10( cluster->et()); });
+    auto cluster_eta =  Monitored::Collection("cluster_eta", clusters, [&tau](const xAOD::CaloCluster *cluster){return cluster->eta();});
+    auto cluster_phi =  Monitored::Collection("cluster_phi", clusters, [&tau](const xAOD::CaloCluster *cluster){return cluster->phi();});
     auto cluster_dEta = Monitored::Collection("cluster_dEta", clusters, [&tau](const xAOD::CaloCluster *cluster){auto ddeta=cluster->eta()- tau->eta();return ddeta; });
     auto cluster_dPhi = Monitored::Collection("cluster_dPhi", clusters, [&tau](const xAOD::CaloCluster *cluster){return cluster->p4().DeltaPhi(tau->p4()); }); 
     auto cluster_SECOND_R_log10 = Monitored::Collection("cluster_SECOND_R_log10", clusters, [](const xAOD::CaloCluster *cluster){
@@ -1035,20 +1049,20 @@ void TrigTauMonitorAlgorithm::fillRNNCluster(const std::string& trigger, const s
                                               if (success_SECOND_R) detail = TMath::Log10(detail + 0.1);
                                               return detail;});
 
-      auto cluster_SECOND_LAMBDA_log10 = Monitored::Collection("cluster_SECOND_LAMBDA_log10", clusters, [](const xAOD::CaloCluster *cluster){
+    auto cluster_SECOND_LAMBDA_log10 = Monitored::Collection("cluster_SECOND_LAMBDA_log10", clusters, [](const xAOD::CaloCluster *cluster){
                                               double detail = -999.;
                                               const auto success_SECOND_LAMBDA = cluster->retrieveMoment(xAOD::CaloCluster::MomentType::SECOND_LAMBDA, detail);
                                               if (success_SECOND_LAMBDA) detail = TMath::Log10(detail + 0.1); 
                                               return detail;});
 
-      auto cluster_CENTER_LAMBDA_log10 = Monitored::Collection("cluster_CENTER_LAMBDA_log10", clusters, [](const xAOD::CaloCluster *cluster){
+    auto cluster_CENTER_LAMBDA_log10 = Monitored::Collection("cluster_CENTER_LAMBDA_log10", clusters, [](const xAOD::CaloCluster *cluster){
                                               double detail = -999.;
                                               const auto success_CENTER_LAMBDA = cluster->retrieveMoment(xAOD::CaloCluster::MomentType::CENTER_LAMBDA, detail);
                                               if (success_CENTER_LAMBDA) detail = TMath::Log10(detail + 1e-6); 
                                               return detail;});                                                  
 
-      fill(monGroup,cluster_pt_jetseed_log,cluster_et_log,cluster_dEta,cluster_dPhi,cluster_SECOND_R_log10,cluster_SECOND_LAMBDA_log10,cluster_CENTER_LAMBDA_log10);
-    }
+    fill(monGroup,n_cluster,cluster_pt_jetseed_log,cluster_et_log,cluster_eta,cluster_phi,cluster_dEta,cluster_dPhi,cluster_SECOND_R_log10,cluster_SECOND_LAMBDA_log10,cluster_CENTER_LAMBDA_log10);
+  }
 
   ATH_MSG_DEBUG("After fill  RNN input Cluster: " << trigger);
 }
