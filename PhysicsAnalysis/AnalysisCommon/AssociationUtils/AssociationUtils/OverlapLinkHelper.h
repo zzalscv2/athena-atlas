@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2018 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef ASSOCIATIONUTILS_OVERLAPLINKHELPER_H
@@ -41,7 +41,7 @@ namespace ORUtils
 
       /// Decorate p1 with an overlap object link to p2
       StatusCode addObjectLink(const xAOD::IParticle& p1,
-                               const xAOD::IParticle& p2);
+                               const xAOD::IParticle& p2) const;
 
       /// @brief Retrieve an overlap-linked particle.
       /// Returns null if no ElementLink decoration exists.

@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2018 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
 */
 
 // Local includes
@@ -20,7 +20,7 @@ namespace ORUtils
   // Link p1 to p2
   //---------------------------------------------------------------------------
   StatusCode OverlapLinkHelper::addObjectLink
-  (const xAOD::IParticle& p1, const xAOD::IParticle& p2)
+  (const xAOD::IParticle& p1, const xAOD::IParticle& p2) const
   {
     const xAOD::IParticleContainer* overlapContainer =
       static_cast<const xAOD::IParticleContainer*>( p2.container() );

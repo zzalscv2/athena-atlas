@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2018 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "ORToolBoxTestAlg.h"
@@ -86,7 +86,7 @@ StatusCode ORToolBoxTestAlg::execute()
 template<class ContainerType>
 void ORToolBoxTestAlg::applySelection(const ContainerType& container)
 {
-  static ort::inputDecorator_t selDec(m_flags.inputLabel);
+  const static ort::inputDecorator_t selDec(m_flags.inputLabel);
   for(auto obj : container){
     selDec(*obj) = selectObject(*obj);
   }
@@ -104,7 +104,7 @@ template<>
 bool ORToolBoxTestAlg::selectObject<xAOD::Jet>(const xAOD::Jet& jet)
 {
   // Label bjets
-  static ort::inputDecorator_t bJetDec(m_flags.bJetLabel);
+  const static ort::inputDecorator_t bJetDec(m_flags.bJetLabel);
   bJetDec(jet) = false;
   double mv2c10 = 0.;
   const xAOD::BTagging* btag = xAOD::BTaggingUtilities::getBTagging( jet );

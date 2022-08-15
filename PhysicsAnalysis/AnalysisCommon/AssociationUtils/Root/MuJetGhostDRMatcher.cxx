@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2019 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
 */
 
 // Infrastructure
@@ -34,7 +34,7 @@ namespace ORUtils
   {
     // Ghost track list accessor
     using GhostList_t = std::vector< ElementLink<xAOD::IParticleContainer> >;
-    static SG::AuxElement::ConstAccessor<GhostList_t> ghostAcc("GhostTrack");
+    const static SG::AuxElement::ConstAccessor<GhostList_t> ghostAcc("GhostTrack");
 
     // Check the particle types. First particle should be the muon,
     // and the second particle should be the jet.
