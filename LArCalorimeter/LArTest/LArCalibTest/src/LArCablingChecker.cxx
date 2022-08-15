@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "LArCalibTest/LArCablingChecker.h"
@@ -74,7 +74,7 @@ StatusCode LArCablingChecker::initialize() {
 }
 
 StatusCode LArCablingChecker::execute() {
-  const DataHandle<xAOD::EventInfo> thisEventInfo;
+  const xAOD::EventInfo* thisEventInfo;
   ATH_CHECK( evtStore()->retrieve(thisEventInfo) );
 
   unsigned eventNb = thisEventInfo->eventNumber();
@@ -87,7 +87,7 @@ StatusCode LArCablingChecker::execute() {
   ATH_CHECK( evtStore()->retrieve(larDigitCont, m_key) );
   
   //const LArCalibParams* calibParams;
-  const DataHandle<LArCalibParams> calibParams;
+  const LArCalibParams* calibParams;
   ATH_CHECK( detStore()->retrieve(calibParams,"LArCalibParams") );
 
   SG::ReadCondHandle<LArBadChannelCont> readHandle{m_BCKey};
