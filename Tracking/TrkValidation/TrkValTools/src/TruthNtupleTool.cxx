@@ -133,7 +133,7 @@ StatusCode Trk::TruthNtupleTool::initialize() {
 
 }
 
-StatusCode Trk::TruthNtupleTool::initBranches(const std::vector<const Trk::ITrackTruthClassifier*>& classifiers, bool fillJets,  const std::vector<std::string> trackCollectionNames) const {
+StatusCode Trk::TruthNtupleTool::initBranches(const std::vector<const Trk::ITrackTruthClassifier*>& classifiers, bool fillJets,  const std::vector<std::string> trackCollectionNames) {
     m_trackTruthClassifiers = classifiers;
     m_classifications.resize(classifiers.size(), 0);
     m_recoTrackCounts.resize(classifiers.size());
@@ -256,7 +256,7 @@ StatusCode Trk::TruthNtupleTool::finalize() {
 /// write track data to ntuple
 //////////////////////////////////////
 StatusCode Trk::TruthNtupleTool::writeTruthData (
-               const std::vector< Trk::ValidationTrackTruthData >& truthData) const {
+               const std::vector< Trk::ValidationTrackTruthData >& truthData) {
 
     ATH_MSG_DEBUG ("in writeTruthData(...) with ValTrackTruthData size = "<<truthData.size());
     // ---------------------------------------

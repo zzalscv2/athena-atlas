@@ -111,12 +111,12 @@ StatusCode Trk::DirectTrackNtupleWriterTool::finalize() {
 StatusCode Trk::DirectTrackNtupleWriterTool::writeTrackData (
      const Trk::Track& track,
      const int iterationIndex,
-     const unsigned int fitStatCode )  const {
+     const unsigned int fitStatCode ) {
 //     const Trk::FitterStatusCode fitStatCode )  const {
     
   ATH_MSG_VERBOSE ("in writeTrackData(trk, indx)");
 
-  ToolHandleArray< Trk::ITrackValidationNtupleTool >::const_iterator itTools;
+  ToolHandleArray< Trk::ITrackValidationNtupleTool >::iterator itTools;
   itTools = m_ValidationNtupleTools.begin();
   for (  ; itTools != m_ValidationNtupleTools.end(); ++itTools ) {
     if (((*itTools)->fillTrackData( track, iterationIndex, fitStatCode )).isFailure()) {
@@ -134,11 +134,11 @@ StatusCode Trk::DirectTrackNtupleWriterTool::writeTrackData (
 /// write track particle data to ntuple
 //////////////////////////////////////
 StatusCode Trk::DirectTrackNtupleWriterTool::writeTrackParticleData (
-     const Trk::TrackParticleBase& particlebase )  const {
+     const Trk::TrackParticleBase& particlebase ) {
     
   ATH_MSG_VERBOSE ("in writeTrackParticleData()");
 
-  ToolHandleArray< Trk::ITrackValidationNtupleTool >::const_iterator itTools;
+  ToolHandleArray< Trk::ITrackValidationNtupleTool >::iterator itTools;
   itTools = m_ValidationNtupleTools.begin();
   for (  ; itTools != m_ValidationNtupleTools.end(); ++itTools ) {
     if (((*itTools)->fillTrackParticleData( particlebase )).isFailure()) {
@@ -155,11 +155,11 @@ StatusCode Trk::DirectTrackNtupleWriterTool::writeTrackParticleData (
 /////////////////////////////////////////
 /// write the filled data into the ntuple
 /////////////////////////////////////////
-StatusCode Trk::DirectTrackNtupleWriterTool::writeRecord(TTree* tree) const {
+StatusCode Trk::DirectTrackNtupleWriterTool::writeRecord(TTree* tree) {
     if (!tree) return StatusCode::FAILURE;
     tree->Fill();
     // reset variables for next call
-    ToolHandleArray< Trk::ITrackValidationNtupleTool >::const_iterator itTools;
+    ToolHandleArray< Trk::ITrackValidationNtupleTool >::iterator itTools;
     itTools = m_ValidationNtupleTools.begin();
     for ( ; itTools != m_ValidationNtupleTools.end(); ++itTools ) (*itTools)->resetVariables();
     return StatusCode::SUCCESS;

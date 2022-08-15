@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2020 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef MUONMUONSTATIONNTUPLEHELPERTOOL_H
@@ -42,23 +42,23 @@ namespace Muon
           const Trk::MeasurementBase*,
           const Trk::TrackParameters*,
           const int& detectorType,
-          const bool& isOutlier ) const;
+          const bool& isOutlier );
 
       //! fill special data about holes on track (here: do nothing)
       virtual StatusCode fillHoleData (
           const Trk::TrackStateOnSurface&,
-          const int&) const;
+          const int&);
 
 
       /** add items to the ntuple and configure the helper tool:
       should be called once (per detector type) by the steering tool (Trk::IValidationNtupleTool) */
       virtual StatusCode addNtupleItems (
           TTree* tree,
-          const int& detectorType ) const;
+          const int& detectorType );
 
       //! reset ntuple variables
       virtual StatusCode resetVariables (
-          const int& detectorType ) const;
+          const int& detectorType );
 
     private:
 

@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2017 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
 */
 
 //////////////////////////////////////////////////////////////////
@@ -33,14 +33,14 @@ static const InterfaceID IID_IEnergyLossMonitor("IEnergyLossMonitor",1,0);
     virtual void initializeTrack(double p,
                                  double E,
                                  double eta,
-                                 double phi) const = 0;
+                                 double phi) = 0;
 
     /** Record a single TrackState */
     virtual void recordTrackState(const Amg::Vector3D& pos, 
                                   const Amg::Vector3D& mom,
-                                  double mass) const = 0;
+                                  double mass) = 0;
     /** Finalization State */
-    virtual void finalizeTrack() const = 0;
+    virtual void finalizeTrack() = 0;
 
 };
 

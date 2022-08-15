@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2017 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
 */
 
 //////////////////////////////////////////////////////////////////
@@ -37,40 +37,40 @@ namespace Trk {
       /** Initialize State */
       virtual void initializeTrack(const Amg::Vector3D& pos,
                                    const Amg::Vector3D& mom,
-                                   double m, int pdg) const override;
+                                   double m, int pdg) override;
       
       
       /** Record a single TrackState */
-      virtual void recordTrackState(const Amg::Vector3D& pos, const Amg::Vector3D& mom) const override;
+      virtual void recordTrackState(const Amg::Vector3D& pos, const Amg::Vector3D& mom) override;
       
       /** Finalization State */
-      virtual void finalizeTrack() const override;
+      virtual void finalizeTrack() override;
     
   private: 
          
       std::string                       m_treeName;
       std::string                       m_treeFolder;  
       std::string                       m_treeDescription;
-      mutable TTree*                    m_tree;
+      TTree*                    m_tree;
 
-      mutable float                     m_pM;
-      mutable float                     m_pEta;
-      mutable float                     m_pPhi;
-      mutable float                     m_pE;
-      mutable float                     m_eEta;
-      mutable float                     m_ePhi;
-      mutable float                     m_eE;
-      mutable int                       m_pPdg;
-      mutable std::vector< float >*     m_pPositionX;
-      mutable std::vector< float >*     m_pPositionY;      
-      mutable std::vector< float >*     m_pPositionZ;
-      mutable std::vector< float >*     m_pPositionR;
-      mutable std::vector< float >*     m_pMomentumX;
-      mutable std::vector< float >*     m_pMomentumY;      
-      mutable std::vector< float >*     m_pMomentumZ;
-      mutable std::vector< float >*     m_pMomentumMag;
-      mutable std::vector< float >*     m_pMomentumEta;
-      mutable std::vector< float >*     m_pMomentumPhi;
+      float                     m_pM;
+      float                     m_pEta;
+      float                     m_pPhi;
+      float                     m_pE;
+      float                     m_eEta;
+      float                     m_ePhi;
+      float                     m_eE;
+      int                       m_pPdg;
+      std::vector< float >*     m_pPositionX;
+      std::vector< float >*     m_pPositionY;      
+      std::vector< float >*     m_pPositionZ;
+      std::vector< float >*     m_pPositionR;
+      std::vector< float >*     m_pMomentumX;
+      std::vector< float >*     m_pMomentumY;      
+      std::vector< float >*     m_pMomentumZ;
+      std::vector< float >*     m_pMomentumMag;
+      std::vector< float >*     m_pMomentumEta;
+      std::vector< float >*     m_pMomentumPhi;
 
 
 };

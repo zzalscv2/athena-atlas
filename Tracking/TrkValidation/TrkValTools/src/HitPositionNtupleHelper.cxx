@@ -110,7 +110,7 @@ StatusCode Trk::HitPositionNtupleHelper::finalize() {
 ///////////////////////////////////////
 StatusCode Trk::HitPositionNtupleHelper::addNtupleItems (
     TTree* tree,
-    const int& ) const {
+    const int& ) {
 
     
     // add items
@@ -140,7 +140,7 @@ StatusCode Trk::HitPositionNtupleHelper::fillMeasurementData (
     const Trk::MeasurementBase* measurement,
     const Trk::TrackParameters*,
     const int& /*detectorType*/,
-    const bool&) const {
+    const bool&) {
 
 
     if (!measurement) {
@@ -187,7 +187,7 @@ StatusCode Trk::HitPositionNtupleHelper::fillMeasurementData (
 }
 
 StatusCode Trk::HitPositionNtupleHelper::resetVariables (
-        const int&  ) const {
+        const int&  ) {
     m_hitX->clear();
     m_hitY->clear();
     m_hitZ->clear();
@@ -209,7 +209,7 @@ StatusCode Trk::HitPositionNtupleHelper::resetVariables (
 
 StatusCode Trk::HitPositionNtupleHelper::fillHoleData (
         const Trk::TrackStateOnSurface&,
-        const int&) const {
+        const int&) {
     // we do nothing with holes
     return StatusCode::SUCCESS;
 }

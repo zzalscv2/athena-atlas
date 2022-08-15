@@ -98,7 +98,7 @@ StatusCode Trk::BremPositionNtupleHelper::finalize() {
 ///////////////////////////////////////
 StatusCode Trk::BremPositionNtupleHelper::addNtupleItems (
     TTree* tree,
-    const int& ) const {
+    const int& ) {
 
     // add items
     tree->Branch("BremEffectsX",    &m_bremX);
@@ -121,13 +121,13 @@ StatusCode Trk::BremPositionNtupleHelper::fillMeasurementData (
     const Trk::MeasurementBase*,
     const Trk::TrackParameters* /*trkPar*/,
     const int&,
-    const bool& /*isOutlier*/) const {
+    const bool& /*isOutlier*/) {
 
     return StatusCode::SUCCESS;
 }
 
 StatusCode Trk::BremPositionNtupleHelper::resetVariables (
-        const int&  ) const {
+        const int&  ) {
     m_bremX->clear();
     m_bremY->clear();
     m_bremZ->clear();
@@ -143,7 +143,7 @@ StatusCode Trk::BremPositionNtupleHelper::resetVariables (
 
 StatusCode Trk::BremPositionNtupleHelper::fillHoleData (
         const Trk::TrackStateOnSurface& tsos,
-        const int& bremToTrackIndex ) const { // FIXME this abuses the interface even more
+        const int& bremToTrackIndex ) { // FIXME this abuses the interface even more
 
   // check if state has brem to analyse
   const Trk::MaterialEffectsBase* mEffect = tsos.materialEffectsOnTrack();

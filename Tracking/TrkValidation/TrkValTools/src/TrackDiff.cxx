@@ -230,7 +230,7 @@ StatusCode Trk::TrackDiff::finalize() {
 //////////////////////////////////////
 StatusCode Trk::TrackDiff::diff (
         const Trk::Track& referenceTrack,
-        const Trk::Track& comparedTrack ) const {
+        const Trk::Track& comparedTrack ) {
 
     ATH_MSG_VERBOSE ( "in diff(trk, trk)" );
     resetVariables();
@@ -436,7 +436,7 @@ DataVector< const Trk::TrackStateData >* Trk::TrackDiff::extractDataFromTrack( c
 
 
 /// reset variables
-void Trk::TrackDiff::resetVariables() const {
+void Trk::TrackDiff::resetVariables() {
     // reset the counters
     //m_fakes = 0;
     //m_missed = 0;
@@ -529,7 +529,7 @@ Trk::TrackState::MeasurementType Trk::TrackDiff::detectorType(const Trk::RIO_OnT
 
 /// diff two TrackStateData
 bool Trk::TrackDiff::diffStateInfo(const Trk::TrackStateData* refTrackState,
-                                   const Trk::TrackStateData* compareTrackState) const {
+                                   const Trk::TrackStateData* compareTrackState) {
 
     bool foundDiff = false;
 

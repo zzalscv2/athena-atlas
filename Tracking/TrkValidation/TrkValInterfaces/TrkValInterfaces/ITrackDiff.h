@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2017 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
 */
 
 //////////////////////////////////////////////////////////////////
@@ -34,7 +34,7 @@ public:
     /** diff of two given tracks */
     virtual StatusCode diff (
         const Trk::Track& referenceTrack,
-        const Trk::Track& ) const = 0;
+        const Trk::Track& ) = 0;
 };
 
 inline const InterfaceID& Trk::ITrackDiff::interfaceID() {

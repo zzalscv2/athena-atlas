@@ -89,7 +89,7 @@ StatusCode Trk::DAF_ValidationNtupleHelper::finalize() {
 StatusCode Trk::DAF_ValidationNtupleHelper::addNtupleItems (
     TTree* tree,
     //const std::bitset<8>& detectorType
-    const int& ) const {
+    const int& ) {
 
     // retrieve item (is the used track state unbiased?) from ntuple
     TBranch* trackStatesUnbiasedBranch = tree->GetBranch("TrackStatesUnbiased");
@@ -126,7 +126,7 @@ StatusCode Trk::DAF_ValidationNtupleHelper::fillMeasurementData (
     //const NTuple::Item<long>& numberOfHits,
     //const std::bitset<8>& detectorType
     const int&,
-    const bool& isOutlier) const {
+    const bool& isOutlier) {
 
     if (isOutlier) {
         // we do nothing for outliers, because competing ROTs are no outliers by definition
@@ -157,7 +157,7 @@ StatusCode Trk::DAF_ValidationNtupleHelper::fillMeasurementData (
 }
 
 StatusCode Trk::DAF_ValidationNtupleHelper::resetVariables (
-        const int&  ) const {
+        const int&  ) {
     m_nContainedROTs->clear();
     m_indexOfMaxAssgnProb->clear();
     m_maxAssgnProb->clear();
@@ -166,7 +166,7 @@ StatusCode Trk::DAF_ValidationNtupleHelper::resetVariables (
 
 StatusCode Trk::DAF_ValidationNtupleHelper::fillHoleData (
         const Trk::TrackStateOnSurface&,
-        const int&) const {
+        const int&) {
     // we do nothing with holes
     return StatusCode::SUCCESS;
 }

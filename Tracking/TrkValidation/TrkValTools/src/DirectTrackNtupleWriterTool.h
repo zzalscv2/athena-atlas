@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2017 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
 */
 
 //////////////////////////////////////////////////////////////////
@@ -61,15 +61,15 @@ public:
     virtual StatusCode writeTrackData (
         const Trk::Track&,
         const int iterationIndex,
-        const unsigned int fitStatCode ) const;
+        const unsigned int fitStatCode );
 
     /** fill AND write ntuple data of a given track particle */
-    virtual StatusCode writeTrackParticleData ( const Trk::TrackParticleBase& ) const;
+    virtual StatusCode writeTrackParticleData ( const Trk::TrackParticleBase& );
 
     
 private:
     /** write the filled data into the ntuple */
-    StatusCode writeRecord(TTree* tree) const;
+    StatusCode writeRecord(TTree* tree);
 
     ToolHandleArray<Trk::ITrackValidationNtupleTool> m_ValidationNtupleTools;  //!< set of tools for writting Trk::Track into the Ntuple
     ToolHandle<Trk::IExtrapolator>                   m_extrapolatorHandle;     //!< extrapolator, in case tracks do not have Perigee

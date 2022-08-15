@@ -77,8 +77,8 @@ namespace Trk {
 			static std::string dumpRejection(xAOD::RejectionStep rejectStep, xAOD::RejectionReason rejectReason) ;
 			static int getNFinalTracks(const ObservedTrackMap* trk_map) ;
 			static int getNObservedTracks(const ObservedTrackMap* trk_map) ;
-			static std::map<xAOD::RejectionStep, std::string> m_rejectStep_descriptions;
-			static std::map<xAOD::RejectionReason, std::string> m_rejectReason_descriptions;
+			static const std::map<xAOD::RejectionStep, std::string> m_rejectStep_descriptions;
+			static const std::map<xAOD::RejectionReason, std::string> m_rejectReason_descriptions;
 	}; 
 }
 

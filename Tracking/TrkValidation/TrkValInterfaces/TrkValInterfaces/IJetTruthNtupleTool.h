@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2017 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
 */
 
 //////////////////////////////////////////////////////////////////
@@ -39,7 +39,7 @@ public:
 
     /** fill ntuple data for a given vector of truth jets */
     virtual StatusCode writeJetTruthData (const std::vector< Trk::GenParticleJet >&,
-                                          const int& ) const = 0;
+                                          const int& ) = 0;
 
     virtual unsigned int getNumberOfTreeRecords() const = 0;
 };
