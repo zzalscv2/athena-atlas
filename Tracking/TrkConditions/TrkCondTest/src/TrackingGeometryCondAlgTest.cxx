@@ -1,10 +1,11 @@
 /*
- *   Copyright (C) 2002-2020 CERN for the benefit of the ATLAS collaboration
+ *   Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "GaudiKernel/ISvcLocator.h"
 
 #include "AthenaKernel/IOVSvcDefs.h"
+#include "CxxUtils/checker_macros.h"
 
 // Trk includes
 #include "TrkCondTest/TrackingGeometryCondAlgTest.h"
@@ -13,7 +14,6 @@
 
 Trk::TrackingGeometryCondAlgTest::TrackingGeometryCondAlgTest(const std::string& name, ISvcLocator* pSvcLocator)
   : AthReentrantAlgorithm(name, pSvcLocator),
-  m_trackingGeometry(nullptr),
   m_trackingGeometrySvc("AtlasTrackingGeometrySvc", name),
   m_trackingGeometryProcessors()
 {
@@ -43,17 +43,20 @@ StatusCode Trk::TrackingGeometryCondAlgTest::execute(const EventContext& ctx) co
   }
   const Trk::TrackingGeometry* trkGeom = *readHandle;
   ATH_MSG_INFO( "eventID: "  << ctx.eventID());
-  m_trackingGeometry = m_trackingGeometrySvc->trackingGeometry();
-  if( m_trackingGeometry == nullptr){
+  const TrackingGeometry* trackingGeometry = m_trackingGeometrySvc->trackingGeometry();
+  if( trackingGeometry == nullptr){
     ATH_MSG_FATAL( "TRACKING GEOMETRY NOT FOUND IN SVC");
     return StatusCode::FAILURE;
   }
 
   for (const ToolHandle<Trk::IGeometryProcessor>& proc : m_trackingGeometryProcessors) {
     ATH_MSG_VERBOSE("PRINT SVC TG");
-    ATH_CHECK(proc->process(*m_trackingGeometry));
+    // process is not thread-safe but we made this algorithm non-reentrant
+    StatusCode sc1 ATLAS_THREAD_SAFE = proc->process(*trackingGeometry);
+    ATH_CHECK(sc1);
     ATH_MSG_VERBOSE("PRINT COND TG");
-    ATH_CHECK(proc->process(*trkGeom));
+    StatusCode sc2 ATLAS_THREAD_SAFE = proc->process(*trkGeom);
+    ATH_CHECK(sc2);
   }
   return StatusCode::SUCCESS;
 }
