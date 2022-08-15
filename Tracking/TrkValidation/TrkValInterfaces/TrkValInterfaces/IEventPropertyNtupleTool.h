@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2017 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
 */
 
 //////////////////////////////////////////////////////////////////
@@ -38,7 +38,7 @@ class IEventPropertyNtupleTool : virtual public IAlgTool {
 
   //! make active track collections known to tool, such that a delayed addition to tree is possible
   virtual void registerTrackCollections ( std::vector<std::string>,
-                                                bool ) const = 0;
+                                                bool ) = 0;
 
   /*
     virtual void registerTrackParticleCollections ( std::vector<std::string>,
@@ -48,19 +48,19 @@ class IEventPropertyNtupleTool : virtual public IAlgTool {
       @param[in] tree is the TTree from the Trk::TrackValidationNtupleWriter or from CBNT
       @param[in] prefix is usually none, but allows a tracking-specific prefix when added to CBNT
     */
-  virtual StatusCode addNtupleItems( TTree* tree, const std::string prefix="" ) const = 0;
+  virtual StatusCode addNtupleItems( TTree* tree, const std::string prefix="" ) = 0;
 
   //! transfer of track-tree indices into event tree variables, to allow delayed writing by TV or CBNT
-  virtual void setTrackTreeIndices( unsigned int, int, int) const = 0;
+  virtual void setTrackTreeIndices( unsigned int, int, int) = 0;
 
   //! transfer of truth-tree indices into event tree variables
-  virtual void setGenParticleTreeIndices( int, int) const = 0;
+  virtual void setGenParticleTreeIndices( int, int) = 0;
 
   //! fill ntuple data from calculations, storegate etc but DO NOT WRITE Tree record
-  virtual StatusCode fillEventData ( ) const = 0;
+  virtual StatusCode fillEventData ( ) = 0;
 
   //! reset ntuple variables (mainly for vectors which need to be cleared)
-  virtual StatusCode  resetVariables ( ) const = 0;
+  virtual StatusCode  resetVariables ( ) = 0;
 
   //! is True if instance is Tool which links events property to Trk::Tracks
   virtual bool isTrackLinkTool( ) const = 0;

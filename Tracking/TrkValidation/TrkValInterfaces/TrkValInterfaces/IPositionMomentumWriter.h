@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2017 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
 */
 
 //////////////////////////////////////////////////////////////////
@@ -32,13 +32,13 @@ static const InterfaceID IID_IPositionMomentumWriter("IPositionMomentumWriter",1
     /** Initialize State */
     virtual void initializeTrack(const Amg::Vector3D& pos,
                                    const Amg::Vector3D& mom,
-                                   double m, int pdg) const = 0;
+                                   double m, int pdg) = 0;
 
     /** Record a single TrackState */
     virtual void recordTrackState(const Amg::Vector3D& pos, 
-                                  const Amg::Vector3D& mom) const = 0;
+                                  const Amg::Vector3D& mom) = 0;
     /** Finalization State */
-    virtual void finalizeTrack() const = 0;
+    virtual void finalizeTrack() = 0;
 
 };
 

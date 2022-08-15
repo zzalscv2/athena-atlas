@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2017 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
 */
 
 //////////////////////////////////////////////////////////////////
@@ -41,22 +41,22 @@ namespace Trk {
     StatusCode finalize();
 
     //! see interface for documentation
-    virtual void registerTrackCollections( std::vector<std::string>, bool) const;
+    virtual void registerTrackCollections( std::vector<std::string>, bool);
     //! see interface for documentation
-    virtual void setTrackTreeIndices( unsigned int, int, int) const;
+    virtual void setTrackTreeIndices( unsigned int, int, int);
     //! see interface for documentation
-    virtual void setGenParticleTreeIndices( int, int) const;
+    virtual void setGenParticleTreeIndices( int, int);
 
     /** @brief add branches to the tree
         Should be called once dunring the initialisation phase by the calling algorithm
         (usually Trk::TrackValidationNtupleWriter) */
-    virtual StatusCode addNtupleItems ( TTree*, const std::string ) const;
+    virtual StatusCode addNtupleItems ( TTree*, const std::string );
 
     //! calculate event-wide data and copy into TTree branches, but don't write the record yet.
-    virtual StatusCode fillEventData ( ) const;
+    virtual StatusCode fillEventData ( );
 
     //! reset ntuple variables (mainly for vectors which need to be cleared)
-    virtual StatusCode  resetVariables ( ) const;
+    virtual StatusCode  resetVariables ( );
        
     //! is True if instance is Tool which links events property to Trk::Tracks
    inline  virtual bool isTrackLinkTool( ) const;
@@ -74,15 +74,15 @@ namespace Trk {
     StatusCode checkCollectionType() const;
 
     std::string                       m_collectionType;
-    mutable TTree*                    m_eventLinkTree;         //!< pointer to event-wise ntuple trees (one for all input track collections + truth)
-    mutable bool                      m_doTruth;               //!< Switch to turn on / off truth
-    mutable std::vector<std::string>  m_trackCollections;      //!< name of the TrackCollections to form tree branch names later
+    TTree*                    m_eventLinkTree;         //!< pointer to event-wise ntuple trees (one for all input track collections + truth)
+    bool                      m_doTruth;               //!< Switch to turn on / off truth
+    std::vector<std::string>  m_trackCollections;      //!< name of the TrackCollections to form tree branch names later
 
     // --- ntuple items --- 
-    mutable std::vector<int>  m_trackIndexBegin;       //!< index-based link from event tree to track tree entry.
-    mutable std::vector<int>  m_nTracksPerEvent;       //!< # of tracks per event, to form track loop.
-    mutable int               m_genParticleIndexBegin; //!< index-based link from event tree to truth tree entry.
-    mutable int               m_nGenParticlesPerEvent; //!< # of true tracks per event, to form truth loop.
+    std::vector<int>  m_trackIndexBegin;       //!< index-based link from event tree to track tree entry.
+    std::vector<int>  m_nTracksPerEvent;       //!< # of tracks per event, to form track loop.
+    int               m_genParticleIndexBegin; //!< index-based link from event tree to truth tree entry.
+    int               m_nGenParticlesPerEvent; //!< # of true tracks per event, to form truth loop.
     
     static const std::string s_trackTypeName;            //!< denotes instance which deals with Trk::Track
     static const std::string s_trkParticleTypeName;      //!< denotes instance which deals with Rec::TrackParticle

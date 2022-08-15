@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2017 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
 */
 
 //////////////////////////////////////////////////////////////////
@@ -44,26 +44,26 @@ public:
       Should be called once (per track collection and tree) dunring the initialisation phase by the calling algorithm
       (usually Trk::TrackValidationNtupleWriter) */
     virtual StatusCode addNtupleItems (
-        TTree* tree ) const = 0;
+        TTree* tree ) = 0;
 
     /** fill ntuple data of a given track without writing the record.
     - if this method is called twice without writing the ntuple inbetween the first data will be lost! */
     virtual StatusCode fillTrackData (
         const Trk::Track&,
         const int iterationIndex,
-        const unsigned int fitStatCode = 0) const = 0;
+        const unsigned int fitStatCode = 0) = 0;
 
     /** fill ntuple data of a given track particle without writing the record.
     - if this method is called twice without writing the ntuple inbetween the first data will be lost! */
     virtual StatusCode fillTrackParticleData (
-        const Trk::TrackParticleBase&) const = 0;
+        const Trk::TrackParticleBase&) = 0;
         
     virtual StatusCode fillTrackTruthData ( const Trk::TrackParameters*&,
                                             const TrackTruth&, 
-                                            const int truthIndex = -1 ) const = 0;
+                                            const int truthIndex = -1 ) = 0;
     
     /** reset the variables after writing the record to disk ntuple */
-    virtual void resetVariables( ) const = 0;
+    virtual void resetVariables( ) = 0;
 };
 
 inline const InterfaceID& Trk::ITrackValidationNtupleTool::interfaceID() {

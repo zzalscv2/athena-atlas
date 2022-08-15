@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2020 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "MuonStationNtupleHelperTool.h"
@@ -64,7 +64,7 @@ StatusCode Muon::MuonStationNtupleHelperTool::finalize()
 ///////////////////////////////////////
 StatusCode Muon::MuonStationNtupleHelperTool::addNtupleItems (
     TTree* tree,
-    const int& detectorType) const {
+    const int& detectorType) {
 
     // add items to the ntuple
     if (detectorType==Trk::TrackState::MDT) {
@@ -94,7 +94,7 @@ StatusCode Muon::MuonStationNtupleHelperTool::fillMeasurementData (
     const Trk::MeasurementBase* hit,
     const Trk::TrackParameters* ,
     const int& detectorType,
-    const bool& /*isOutlier*/) const {
+    const bool& /*isOutlier*/) {
 
     // todo is this actually called for outliers?
 
@@ -119,7 +119,7 @@ StatusCode Muon::MuonStationNtupleHelperTool::fillMeasurementData (
 }
 
 StatusCode Muon::MuonStationNtupleHelperTool::resetVariables (
-        const int& detectorType ) const {
+        const int& detectorType ) {
     if (detectorType==Trk::TrackState::MDT) {
       m_mdtSectorIx->clear();
       m_mdtStationIx->clear();
@@ -138,7 +138,7 @@ StatusCode Muon::MuonStationNtupleHelperTool::resetVariables (
 
 StatusCode Muon::MuonStationNtupleHelperTool::fillHoleData (
         const Trk::TrackStateOnSurface&,
-        const int&) const {
+        const int&) {
     // we do nothing with holes
     return StatusCode::SUCCESS;
 }

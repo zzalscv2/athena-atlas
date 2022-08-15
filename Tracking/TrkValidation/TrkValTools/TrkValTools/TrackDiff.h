@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2019 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
 */
 
 //////////////////////////////////////////////////////////////////
@@ -88,7 +88,7 @@ public:
     /** diff of two given tracks */
     virtual StatusCode diff (
         const Trk::Track& referenceTrack,
-        const Trk::Track& comparedTrack) const;
+        const Trk::Track& comparedTrack);
 
 
 private:
@@ -109,23 +109,23 @@ private:
     bool m_writeNtuple;                 //!< jobOption: write data to ntuple?
     bool m_writeCompetingROT;           //!< jobOption: write data about TrkCompetingRIOsOnTrack?
 
-    mutable int m_eventNumber;
+    int m_eventNumber;
    
-    mutable int m_nRefStates[Trk::TrackState::NumberOfMeasurementTypes];
-    mutable int m_nCompStates[Trk::TrackState::NumberOfMeasurementTypes];
-    mutable int m_fakes[Trk::TrackState::NumberOfMeasurementTypes];
+    int m_nRefStates[Trk::TrackState::NumberOfMeasurementTypes];
+    int m_nCompStates[Trk::TrackState::NumberOfMeasurementTypes];
+    int m_fakes[Trk::TrackState::NumberOfMeasurementTypes];
 
-    mutable int m_missed[Trk::TrackState::NumberOfMeasurementTypes];
-    mutable int m_wrongType[Trk::TrackState::NumberOfMeasurementTypes];
-    mutable int m_missingType[Trk::TrackStateOnSurface::NumberOfTrackStateOnSurfaceTypes];
-    mutable int m_fakeType[Trk::TrackStateOnSurface::NumberOfTrackStateOnSurfaceTypes];
-    mutable int m_refType[Trk::TrackStateOnSurface::NumberOfTrackStateOnSurfaceTypes];
-    mutable int m_compareType[Trk::TrackStateOnSurface::NumberOfTrackStateOnSurfaceTypes];
-    mutable int m_PRD_Mismatches[Trk::TrackState::NumberOfMeasurementTypes];
-    mutable int m_driftCircleSignFlips;
-    mutable int m_noDriftTime;
+    int m_missed[Trk::TrackState::NumberOfMeasurementTypes];
+    int m_wrongType[Trk::TrackState::NumberOfMeasurementTypes];
+    int m_missingType[Trk::TrackStateOnSurface::NumberOfTrackStateOnSurfaceTypes];
+    int m_fakeType[Trk::TrackStateOnSurface::NumberOfTrackStateOnSurfaceTypes];
+    int m_refType[Trk::TrackStateOnSurface::NumberOfTrackStateOnSurfaceTypes];
+    int m_compareType[Trk::TrackStateOnSurface::NumberOfTrackStateOnSurfaceTypes];
+    int m_PRD_Mismatches[Trk::TrackState::NumberOfMeasurementTypes];
+    int m_driftCircleSignFlips;
+    int m_noDriftTime;
 
-    mutable int m_nDiffs;
+    int m_nDiffs;
     std::vector<int>*   m_detectorType;
     std::vector<int>*   m_isFake;   //!< vector<bool> would be more efficient, but vector<bool> is not a normal vector<> and seems to make trouble
     std::vector<int>*   m_isMissing;
@@ -142,17 +142,17 @@ private:
     std::vector<float>* m_surfY;
     std::vector<float>* m_surfZ;
 
-    mutable float m_trackEta;
-    mutable float m_trackPhi;
+    float m_trackEta;
+    float m_trackPhi;
 
 
-    mutable int m_nRefStatesSum[Trk::TrackState::NumberOfMeasurementTypes];
-    mutable int m_nCompStatesSum[Trk::TrackState::NumberOfMeasurementTypes];
-    mutable int m_fakesSum[Trk::TrackState::NumberOfMeasurementTypes];
-    mutable int m_missedSum[Trk::TrackState::NumberOfMeasurementTypes];
-    mutable int m_wrongTypeSum[Trk::TrackState::NumberOfMeasurementTypes];
-    mutable int m_PRD_MismatchesSum[Trk::TrackState::NumberOfMeasurementTypes];
-    mutable int m_trackSum;
+    int m_nRefStatesSum[Trk::TrackState::NumberOfMeasurementTypes];
+    int m_nCompStatesSum[Trk::TrackState::NumberOfMeasurementTypes];
+    int m_fakesSum[Trk::TrackState::NumberOfMeasurementTypes];
+    int m_missedSum[Trk::TrackState::NumberOfMeasurementTypes];
+    int m_wrongTypeSum[Trk::TrackState::NumberOfMeasurementTypes];
+    int m_PRD_MismatchesSum[Trk::TrackState::NumberOfMeasurementTypes];
+    int m_trackSum;
 
     SG::ReadHandleKey<xAOD::EventInfo>    m_evt  {this, "EvtInfo", "EventInfo", "EventInfo name"};
 
@@ -160,7 +160,7 @@ private:
     DataVector< const Trk::TrackStateData >* extractDataFromTrack( const Trk::Track& ) const;
 
     /** reset the ntuple variables */
-    void resetVariables() const;
+    void resetVariables();
 
     /** get detector type and name by identifier of Trk::RIO_OnTrack */
     Trk::TrackState::MeasurementType detectorType(const Trk::RIO_OnTrack& ROT,
@@ -168,7 +168,7 @@ private:
 
     /** diff of two given track state data */
     bool diffStateInfo(const Trk::TrackStateData* refTrackStateData,
-                       const Trk::TrackStateData* compareTrackStateData) const;
+                       const Trk::TrackStateData* compareTrackStateData);
 
 };
 

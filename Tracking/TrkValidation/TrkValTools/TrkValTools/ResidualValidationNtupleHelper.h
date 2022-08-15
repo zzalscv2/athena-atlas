@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2017 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
 */
 
 //////////////////////////////////////////////////////////////////
@@ -52,23 +52,23 @@ public:
         //const NTuple::Item<long>& numberOfHits,
         //const std::bitset<8>& detectorType
         const int& detectorType,
-        const bool& isOutlier ) const;
+        const bool& isOutlier );
 
     /** fill special data about holes on track (here: do nothing) */
     virtual StatusCode fillHoleData (
         const Trk::TrackStateOnSurface&,
-        const int&) const;
+        const int&);
 
 
     /** add items to the ntuple and configure the helper tool:
     should be called once (per detector type) by the steering tool (Trk::IValidationNtupleTool) */
     virtual StatusCode addNtupleItems (
         TTree* tree,
-        const int& detectorType ) const;
+        const int& detectorType );
 
     /** reset ntuple variables */
     virtual StatusCode resetVariables (
-        const int& detectorType ) const;
+        const int& detectorType );
 
 private:
 
@@ -77,52 +77,52 @@ private:
         const double locMesCov,
         const double locTrkCov ) const;
     void givePullWarning() const;
-    void fillValues(const int& detectorType, double res1=-1000., double pull1=-1000., double res2=-1000., double pull2=-1000.) const;
+    void fillValues(const int& detectorType, double res1=-1000., double pull1=-1000., double res2=-1000., double pull2=-1000.);
 
-    mutable bool                m_pullWarning; //!< warn only once, if pull cannot be calculated
-    mutable bool                m_trkParametersWarning; //!< warn only once, if no track parameters exist
+    bool                m_pullWarning; //!< warn only once, if pull cannot be calculated
+    bool                m_trkParametersWarning; //!< warn only once, if no track parameters exist
 
     //! The residual and pull calculator tool
     ToolHandle<Trk::IResidualPullCalculator> m_residualPullCalculator;
 
     bool m_ignoreMissTrkCov;
 
-    mutable int* m_isUnbiased;
+    int* m_isUnbiased;
 
     // --- ntuple variables, documentation picked up by scripts for wiki tables ---
-    mutable std::vector<float>* m_PixPullPhi; //!< hit pull in pixel local phi coord for each Pixel meas't, vector of size nPixelHits UNIT:1
-    mutable std::vector<float>* m_PixPullEta; //!< hit pull in pixel local eta coord for each Pixel meas't, vector of size nPixelHits UNIT:1
-    mutable std::vector<float>* m_PixResPhi;  //!< hit residual in pixel local phi for each Pixel meas't, vector of size nPixelHits UNIT:mm
-    mutable std::vector<float>* m_PixResEta;  //!< hit residual in pixel local eta for each Pixel meas't, vector of size nPixelHits UNIT:mm
+    std::vector<float>* m_PixPullPhi; //!< hit pull in pixel local phi coord for each Pixel meas't, vector of size nPixelHits UNIT:1
+    std::vector<float>* m_PixPullEta; //!< hit pull in pixel local eta coord for each Pixel meas't, vector of size nPixelHits UNIT:1
+    std::vector<float>* m_PixResPhi;  //!< hit residual in pixel local phi for each Pixel meas't, vector of size nPixelHits UNIT:mm
+    std::vector<float>* m_PixResEta;  //!< hit residual in pixel local eta for each Pixel meas't, vector of size nPixelHits UNIT:mm
     
-    mutable std::vector<float>* m_SCTPull;    //!< hit pull in SCT local strip coord for each SCT meas't (corrects for fan-shaped strip arrangement in endcap, i.e. pull is perpendicular to strip direction), vector of size nSCTHits UNIT:1
-    mutable std::vector<float>* m_SCTRes;     //!< hit residual in SCT local strip coord for each SCT meas't (corrects for fan-shaped strip arrangement in endcap, i.e. residual is perpendicular to strip direction), vector of size nSCTHits  UNIT:mm
+    std::vector<float>* m_SCTPull;    //!< hit pull in SCT local strip coord for each SCT meas't (corrects for fan-shaped strip arrangement in endcap, i.e. pull is perpendicular to strip direction), vector of size nSCTHits UNIT:1
+    std::vector<float>* m_SCTRes;     //!< hit residual in SCT local strip coord for each SCT meas't (corrects for fan-shaped strip arrangement in endcap, i.e. residual is perpendicular to strip direction), vector of size nSCTHits  UNIT:mm
 
-    mutable std::vector<float>* m_TRTPull;    //!< hit pull in TRT drift radius for each TRT meas't, vector of size nTRTHits  UNIT:1
-    mutable std::vector<float>* m_TRTRes;     //!< hit residual in TRT drift radius for each TRT meas't, vector of size nTRTHits  UNIT:mm
+    std::vector<float>* m_TRTPull;    //!< hit pull in TRT drift radius for each TRT meas't, vector of size nTRTHits  UNIT:1
+    std::vector<float>* m_TRTRes;     //!< hit residual in TRT drift radius for each TRT meas't, vector of size nTRTHits  UNIT:mm
 
-    mutable std::vector<float>* m_MDTPull;    //!< hit pull in MDT drift radius for each MDT meas't, vector of size nMDTHits  UNIT:1
-    mutable std::vector<float>* m_MDTRes;     //!< hit residual in MDT drift radius for each MDT meas't, vector of size nMDTHits  UNIT:mm
+    std::vector<float>* m_MDTPull;    //!< hit pull in MDT drift radius for each MDT meas't, vector of size nMDTHits  UNIT:1
+    std::vector<float>* m_MDTRes;     //!< hit residual in MDT drift radius for each MDT meas't, vector of size nMDTHits  UNIT:mm
 
-    mutable std::vector<float>* m_RPCPull;    //!< hit pull in RPC strip coordinate for each RPC meas't, vector of size nRPCHits  UNIT:1
-    mutable std::vector<float>* m_RPCRes;     //!< hit residual in RPC coordinate for each RPC meas't, vector of size nRPCHits  UNIT:mm
+    std::vector<float>* m_RPCPull;    //!< hit pull in RPC strip coordinate for each RPC meas't, vector of size nRPCHits  UNIT:1
+    std::vector<float>* m_RPCRes;     //!< hit residual in RPC coordinate for each RPC meas't, vector of size nRPCHits  UNIT:mm
 
-    mutable std::vector<float>* m_TGCPull;    //!< hit pull in TGC strip coordinate for each TGC meas't (corrects for fan-shaped strip arrangement), vector of size nTGCHits  UNIT:1
-    mutable std::vector<float>* m_TGCRes;     //!< hit residual in TGC strip coordinate for each TGC meas't, vector of size nTGCHits  UNIT:mm
+    std::vector<float>* m_TGCPull;    //!< hit pull in TGC strip coordinate for each TGC meas't (corrects for fan-shaped strip arrangement), vector of size nTGCHits  UNIT:1
+    std::vector<float>* m_TGCRes;     //!< hit residual in TGC strip coordinate for each TGC meas't, vector of size nTGCHits  UNIT:mm
 
-    mutable std::vector<float>* m_CSCPull;    //!< hit pull in CSC ??? coordinate for each CSC meas't, vector of size nCSCHits  UNIT:1
-    mutable std::vector<float>* m_CSCRes;     //!< hit residual in CSC ??? coordinate for each CSC meas't, vector of size nCSCHits  UNIT:mm
+    std::vector<float>* m_CSCPull;    //!< hit pull in CSC ??? coordinate for each CSC meas't, vector of size nCSCHits  UNIT:1
+    std::vector<float>* m_CSCRes;     //!< hit residual in CSC ??? coordinate for each CSC meas't, vector of size nCSCHits  UNIT:mm
 
 };
 
  inline void Trk::ResidualValidationNtupleHelper::givePullWarning() const {
-    if(!m_pullWarning) {
-        m_pullWarning = true;
+   [[maybe_unused]] static const bool pullWarningOnce = [&]() {
         msg(MSG::WARNING) << "no covariance of the track parameters given, can not calc pull!" << endmsg;
         msg(MSG::WARNING) << "you may want to use the jobOption 'IgnoreMissingTrackCovariance' to calculate it anyhow." << endmsg;
-    }
+        return true;
+   }();
  }
- inline void Trk::ResidualValidationNtupleHelper::fillValues(const int& detectorType, double res1, double pull1, double res2, double pull2) const {
+ inline void Trk::ResidualValidationNtupleHelper::fillValues(const int& detectorType, double res1, double pull1, double res2, double pull2) {
    if (detectorType==TrackState::Pixel) {
         m_PixResPhi->push_back(res1);
         m_PixResEta->push_back(res2);

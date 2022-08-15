@@ -56,14 +56,14 @@ StatusCode Trk::EventToTrackLinkNtupleTool::finalize() {
 }
 
 void Trk::EventToTrackLinkNtupleTool::registerTrackCollections
-( std::vector<std::string> collections, bool doTruth) const {
+( std::vector<std::string> collections, bool doTruth) {
   m_trackCollections = collections;
   m_doTruth = doTruth;
   m_trackIndexBegin.resize(m_trackCollections.size());
   m_nTracksPerEvent.resize(m_trackCollections.size());
 }
 
-StatusCode Trk::EventToTrackLinkNtupleTool::addNtupleItems( TTree* tree, const std::string cbnt_prefix ) const {
+StatusCode Trk::EventToTrackLinkNtupleTool::addNtupleItems( TTree* tree, const std::string cbnt_prefix ) {
   if (!tree) return StatusCode::FAILURE;
   //-----------------
   // add items
@@ -84,7 +84,7 @@ StatusCode Trk::EventToTrackLinkNtupleTool::addNtupleItems( TTree* tree, const s
 void Trk::EventToTrackLinkNtupleTool::setTrackTreeIndices
 ( unsigned int tColIndex, 
   int indexBegin,
-  int nTracksPerEvent ) const {
+  int nTracksPerEvent ) {
   ATH_MSG_DEBUG ("start setTrackTreeIndices");
   ATH_MSG_VERBOSE ("Collection index "<<tColIndex<<"\tm_trackIndexBegin\t"<< m_trackIndexBegin.size() );
   m_trackIndexBegin[tColIndex] = indexBegin;
@@ -94,16 +94,16 @@ void Trk::EventToTrackLinkNtupleTool::setTrackTreeIndices
 
 void Trk::EventToTrackLinkNtupleTool::setGenParticleTreeIndices
 ( int indexBegin,
-  int nGenParticlesPerEvent) const {
+  int nGenParticlesPerEvent) {
   m_genParticleIndexBegin = indexBegin;
   m_nGenParticlesPerEvent = nGenParticlesPerEvent;
 }
 
-StatusCode Trk::EventToTrackLinkNtupleTool::fillEventData( ) const {
+StatusCode Trk::EventToTrackLinkNtupleTool::fillEventData( ) {
   return StatusCode::SUCCESS;
 }
 
-StatusCode Trk::EventToTrackLinkNtupleTool::resetVariables( ) const {
+StatusCode Trk::EventToTrackLinkNtupleTool::resetVariables( ) {
   return StatusCode::SUCCESS;
 }
 

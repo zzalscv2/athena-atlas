@@ -34,7 +34,6 @@ Trk::ResidualValidationNtupleHelper::ResidualValidationNtupleHelper(
     const IInterface*  p )
         :
   AthAlgTool(t,n,p),
-  m_pullWarning(false),
   m_trkParametersWarning(false),
   m_residualPullCalculator("Trk::ResidualPullCalculator/ResidualPullCalculator"),
   m_isUnbiased(nullptr),
@@ -117,7 +116,7 @@ StatusCode Trk::ResidualValidationNtupleHelper::finalize() {
 ///////////////////////////////////////
 StatusCode Trk::ResidualValidationNtupleHelper::addNtupleItems (
     TTree* tree,
-    const int& detectorType ) const {
+    const int& detectorType ) {
 
     TBranch* trackStatesUnbiasedBranch = tree->GetBranch("TrackStatesUnbiased");
     if (!trackStatesUnbiasedBranch) {
@@ -204,7 +203,7 @@ StatusCode Trk::ResidualValidationNtupleHelper::fillMeasurementData (
     //const NTuple::Item<long>& numberOfHits,
     //const std::bitset<8>& detectorType
     const int& detectorType,
-    const bool& isOutlier ) const {
+    const bool& isOutlier ) {
 
     //const Trk::MeasuredTrackParameters *measuredTrkParameters = dynamic_cast<const Trk::MeasuredTrackParameters*>(trkParameters);
     if (!trkParameters) {
@@ -276,7 +275,7 @@ StatusCode Trk::ResidualValidationNtupleHelper::fillMeasurementData (
 }
 
 StatusCode Trk::ResidualValidationNtupleHelper::resetVariables (
-        const int& detectorType ) const {
+        const int& detectorType ) {
     if (detectorType==TrackState::Pixel) {
         m_PixPullPhi->clear();
         m_PixPullEta->clear();
@@ -307,7 +306,7 @@ StatusCode Trk::ResidualValidationNtupleHelper::resetVariables (
 
 StatusCode Trk::ResidualValidationNtupleHelper::fillHoleData (
         const Trk::TrackStateOnSurface&,
-        const int&) const {
+        const int&) {
     // we do nothing with holes
     return StatusCode::SUCCESS;
 }

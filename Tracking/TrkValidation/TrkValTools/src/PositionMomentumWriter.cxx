@@ -144,7 +144,7 @@ StatusCode Trk::PositionMomentumWriter::finalize()
 
 void Trk::PositionMomentumWriter::initializeTrack(const Amg::Vector3D& pos,
                                                   const Amg::Vector3D& mom,
-                                                  double m, int pdg) const
+                                                  double m, int pdg)
 {
     if (m_tree){
         // initialize the parmeters
@@ -168,7 +168,7 @@ void Trk::PositionMomentumWriter::initializeTrack(const Amg::Vector3D& pos,
 }
 
 void Trk::PositionMomentumWriter::recordTrackState(const Amg::Vector3D& pos, 
-                                                   const Amg::Vector3D& mom) const
+                                                   const Amg::Vector3D& mom)
 {
     if (m_tree){
         // record the momentum / position
@@ -185,7 +185,7 @@ void Trk::PositionMomentumWriter::recordTrackState(const Amg::Vector3D& pos,
     }
 }
 
-void Trk::PositionMomentumWriter::finalizeTrack() const
+void Trk::PositionMomentumWriter::finalizeTrack()
 {
     if (m_tree){
         
