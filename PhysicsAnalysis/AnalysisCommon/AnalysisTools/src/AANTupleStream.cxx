@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2020 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "AnalysisTools/AANTupleStream.h"
@@ -23,7 +23,6 @@
 #include "StoreGate/StoreGateSvc.h"
 #include "SGTools/DataProxy.h"
 #include "PersistentDataModel/DataHeader.h"
-#include "StoreGate/DataHandle.h"
 
 #include "RootCollection/AttributeListLayout.h"
 #include "CoralBase/AttributeList.h"
@@ -225,8 +224,8 @@ StatusCode AANTupleStream::execute()
   if (m_existDH)
     {
       // get token
-      const DataHandle<DataHeader> beg; 
-      const DataHandle<DataHeader> ending; 
+      SG::ConstIterator<DataHeader> beg;
+      SG::ConstIterator<DataHeader> ending;
       StatusCode status = evtStore()->retrieve(beg,ending);
       if (status.isFailure() || beg==ending)
 	{
@@ -258,8 +257,7 @@ StatusCode AANTupleStream::execute()
       ATH_MSG_DEBUG ("Found token: Key=" << beg.key() << ", Ref=" << ref);
 
       // Get a single input header ref if requested
-      const DataHeader* hdr=0;
-      hdr = beg;
+      const DataHeader* hdr = &(*beg);
       if (hdr->sizeProvenance())
 	{
 	  std::vector<DataHeaderElement>::const_iterator it =
@@ -377,24 +375,22 @@ void AANTupleStream::writeAttributeListSpecification()
 
 void AANTupleStream::setupTree()
 {
-  static std::map<std::string,char> typeDict;
-  if (!typeDict.size())
-    {
-      typeDict["double"] = 'D';   
-      typeDict["long double"] = 'D';    // only 64 bit doubles are supported 
-      typeDict["float"] = 'F';
-      typeDict["int"] = 'i';
-      typeDict["unsigned int"] = 'I';
-      typeDict["long"] = 'i';           // support for 64 bit integers introduced with ROOT 4.00/08 
-      typeDict["unsigned long"] = 'I';  // support for 64 bit integers introduced with ROOT 4.00/08 
-      typeDict["short"] = 's';
-      typeDict["unsigned short"] = 'S';
-      typeDict["char"] = 'b';           // AttributeLists's "get_root_type_char(...)" returned 'C' ??? 
-      typeDict["unsigned char"] = 'B';  // AttributeLists's "get_root_type_char(...)" returned 's' ???
-      typeDict["bool"] = 'B';           // AttributeLists's "get_root_type_char(...)" returned 'i' ???
-      typeDict["string"] = 'C';
-      typeDict["Token"] = 'C';
-    }
+  static const std::map<std::string,char> typeDict = {
+    {"double", 'D'},
+    {"long double", 'D'},    // only 64 bit doubles are supported
+    {"float", 'F'},
+    {"int", 'i'},
+    {"unsigned int", 'I'},
+    {"long", 'i'},           // support for 64 bit integers introduced with ROOT 4.00/08
+    {"unsigned long", 'I'},  // support for 64 bit integers introduced with ROOT 4.00/08
+    {"short", 's'},
+    {"unsigned short", 'S'},
+    {"char", 'b'},           // AttributeLists's "get_root_type_char(...)" returned 'C' ???
+    {"unsigned char", 'B'},  // AttributeLists's "get_root_type_char(...)" returned 's' ???
+    {"bool", 'B'},           // AttributeLists's "get_root_type_char(...)" returned 'i' ???
+    {"string", 'C'},
+    {"Token", 'C'}
+  };
 
   // go to the root dir of output file
   TDirectory::TContext save;
@@ -407,7 +403,7 @@ void AANTupleStream::setupTree()
   for(coral::AttributeListSpecification::const_iterator iter=m_attribSpec->begin(); iter!=m_attribSpec->end(); ++iter)
     {
       std::string type = "/?";
-      type[1] = typeDict[iter->typeName()];
+      type[1] = typeDict.at(iter->typeName());
       std::string leaflist = iter->name() + type;
       m_tree->Branch(iter->name().c_str(),0,leaflist.c_str());
     }
