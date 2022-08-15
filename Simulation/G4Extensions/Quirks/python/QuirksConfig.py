@@ -61,8 +61,9 @@ def QuirkPhysicsToolCfg(flags, name="QuirkPhysicsTool", **kwargs):
 
 def QuirksCfg(flags):
     result = ComponentAccumulator()
-    load_files_for_quirks_scenario(flags)
     if flags.Common.ProductionStep == ProductionStep.Simulation:
         result.merge(PhysicsListSvcCfg(flags))
+    load_files_for_quirks_scenario(flags)
+    if flags.Common.ProductionStep == ProductionStep.Simulation:
         result.getService("PhysicsListSvc").PhysOption += [ result.popToolsAndMerge(QuirkPhysicsToolCfg(flags)) ]
     return result

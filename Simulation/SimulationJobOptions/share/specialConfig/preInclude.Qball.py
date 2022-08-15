@@ -63,7 +63,7 @@ load_files_for_qball_scenario(simdict["MASS"], simdict["CHARGE"])
 
 if doG4SimConfig:
     from G4AtlasApps.SimFlags import simFlags
-    simFlags.PhysicsOptions += ["MonopolePhysicsTool"]
+    simFlags.PhysicsOptions.get_Value().insert(0,"MonopolePhysicsTool")
     # add monopole-specific configuration for looper killer
     simFlags.OptionalUserActionList.addAction('G4UA::MonopoleLooperKillerTool')
     # add default HIP killer

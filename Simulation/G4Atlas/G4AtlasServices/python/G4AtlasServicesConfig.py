@@ -1,6 +1,7 @@
 # Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
 from AthenaConfiguration.ComponentFactory import CompFactory
 from AthenaConfiguration.ComponentAccumulator import ComponentAccumulator
+from AthenaConfiguration.AccumulatorCache import AccumulatorCache
 
 from ExtraParticles.ExtraParticlesConfig import ExtraParticlesPhysicsToolCfg
 from SimulationConfig.SimEnums import CavernBackground
@@ -20,6 +21,7 @@ def DetectorGeometrySvcCfg(ConfigFlags, name="DetectorGeometrySvc", **kwargs):
     return result
 
 
+@AccumulatorCache
 def PhysicsListSvcCfg(ConfigFlags, name="PhysicsListSvc", **kwargs):
     result = ComponentAccumulator()
     PhysOptionList = [ result.popToolsAndMerge(G4StepLimitationToolCfg(ConfigFlags)) ]

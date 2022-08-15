@@ -1,4 +1,4 @@
-# Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
 
 from AthenaConfiguration.AccumulatorCache import AccumulatorCache
 import shutil, re
@@ -151,12 +151,13 @@ def CharginoMinusToMuMinusNeutralinoCfg(flags, name="CharginoMinusToMuMinusNeutr
 
 def AMSB_Cfg(flags):
     result = ComponentAccumulator()
+    if flags.Common.ProductionStep == ProductionStep.Simulation:
+        result.merge(PhysicsListSvcCfg(flags))
     C1Mass = eval(flags.Input.SpecialConfiguration["AMSBC1Mass"])
     N1Mass = eval(flags.Input.SpecialConfiguration["AMSBN1Mass"])
     # patching PDGTABLE
     get_and_fix_PDGTABLE_AMSB([(1000022, N1Mass, '~chi(0,1)', '0'), (1000024, C1Mass, '~chi(+,1)', '+')])
     if flags.Common.ProductionStep == ProductionStep.Simulation:
-        result.merge(PhysicsListSvcCfg(flags))
         physicsOptions = [ result.popToolsAndMerge(CharginosPhysicsToolCfg(flags)) ]
         # Add Chargino decays if necessary
         C1Lifetime = eval(flags.Input.SpecialConfiguration.get("AMSBC1Lifetime", "-1.0"))
