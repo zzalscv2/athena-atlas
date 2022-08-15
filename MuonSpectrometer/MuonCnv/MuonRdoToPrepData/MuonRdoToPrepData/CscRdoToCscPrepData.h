@@ -7,11 +7,10 @@
 
 #include "AthenaBaseComps/AthAlgorithm.h"
 #include "GaudiKernel/ToolHandle.h"
-
-#include "MuonCnvToolInterfaces/IMuonRdoToPrepDataTool.h"
-#include "TrigSteeringEvent/TrigRoiDescriptor.h"
 #include "IRegionSelector/IRegSelTool.h"
+#include "MuonCnvToolInterfaces/IMuonRdoToPrepDataTool.h"
 #include "MuonPrepRawData/CscStripPrepDataContainer.h"
+#include "TrigSteeringEvent/TrigRoiDescriptor.h"
 /** Algorithm to decode RDO into CscStripPrepData
  - get the RDO container from Storegate
  - loop over the RDO
@@ -22,23 +21,22 @@
  BNL, April 03, 2005
 */
 class CscRdoToCscPrepData : public AthAlgorithm {
-
 public:
+    CscRdoToCscPrepData(const std::string& name, ISvcLocator* pSvcLocator);
 
-  CscRdoToCscPrepData(const std::string& name, ISvcLocator* pSvcLocator);
-
-  StatusCode initialize();
-  StatusCode execute();
+    StatusCode initialize();
+    StatusCode execute();
 
 private:
-  ToolHandle<Muon::IMuonRdoToPrepDataTool> m_muonRdoToPrepDataTool{this,"CscRdoToCscPrepDataTool","Muon::CscRdoToCscPrepDataTool/CscRdoToPrepDataTool"};
-  ToolHandle<IRegSelTool> m_regsel_csc{this,"RegSel_CSC","RegSelTool/RegSelTool_CSC"};
+    ToolHandle<Muon::IMuonRdoToPrepDataTool> m_muonRdoToPrepDataTool{this, "CscRdoToCscPrepDataTool",
+                                                                     "Muon::CscRdoToCscPrepDataTool/CscRdoToPrepDataTool"};
+    ToolHandle<IRegSelTool> m_regsel_csc{this, "RegSel_CSC", "RegSelTool/RegSelTool_CSC"};
 
-  bool                                    m_print_inputRdo; //!<< If true, will dump information about the input RDOs.  
-  bool                                    m_print_prepData; //!<< If true, will dump information about the resulting PRDs.  
-  bool m_seededDecoding;
-  SG::ReadHandleKey<TrigRoiDescriptorCollection> m_roiCollectionKey;
-  SG::WriteHandleKey<Muon::CscStripPrepDataContainer> m_cscCollection;
+    bool m_print_inputRdo;  //!<< If true, will dump information about the input RDOs.
+    bool m_print_prepData;  //!<< If true, will dump information about the resulting PRDs.
+    bool m_seededDecoding;
+    SG::ReadHandleKey<TrigRoiDescriptorCollection> m_roiCollectionKey;
+    SG::WriteHandleKey<Muon::CscStripPrepDataContainer> m_cscCollection;
 };
 
-#endif /// CSCRDOTOCSCPREPDATA_H
+#endif  /// CSCRDOTOCSCPREPDATA_H

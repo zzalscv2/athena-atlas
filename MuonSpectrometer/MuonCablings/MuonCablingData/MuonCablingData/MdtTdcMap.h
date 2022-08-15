@@ -115,8 +115,9 @@ struct MdtTdcOffSorter {
     MdtTdcOffSorter() = default;
     MdtTdcOffSorter(const MdtTdcMap* ptr) : m_ptr{ptr} {}
     const MdtTdcMap* operator->() const { return m_ptr; }
-    bool operator!() const { return !m_ptr; }   
+    bool operator!() const { return !m_ptr; }
     operator bool() const { return m_ptr; }
+
 private:
     const MdtTdcMap* m_ptr{nullptr};
 };
@@ -145,8 +146,5 @@ inline bool operator<(const MdtTdcOffSorter& a, const MdtTdcOffSorter& b) { retu
 inline bool operator<(const MdtTdcOnlSorter& a, const MdtTdcOnlSorter& b) { return a->moduleId() < b->moduleId(); }
 inline bool operator<(const MdtTdcOnlSorter& a, const MdtCablingData& b) { return a->moduleId() < b.tdcId; }
 inline bool operator<(const MdtCablingData& a, const MdtTdcOnlSorter& b) { return a.tdcId < b->moduleId(); }
-
-
-
 
 #endif  // MUONMDT_CABLING_MDTAMTMAP_H

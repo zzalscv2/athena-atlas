@@ -2,10 +2,11 @@
   Copyright (C) 2002-2017 CERN for the benefit of the ATLAS collaboration
 */
 
-@page MuonRdoToPrepData_page Short Description: Muon RDO conversion to PrepRawData
+@page MuonRdoToPrepData_page Short Description : Muon RDO conversion to PrepRawData
 
- - The Raw Data Object (RDO) classes of the MuonSpectrometer are implemented in the package MuonRDO. The 
-Reconstruction Input/Output Object (RIO) classes are in MuonDetRec/MuonPrepRawData.
+                                                 -
+                                                 The Raw Data Object(RDO)
+classes of the MuonSpectrometer are implemented in the package MuonRDO.The Reconstruction Input / Output Object(RIO) classes are in MuonDetRec/MuonPrepRawData.
   
  - CscRdoToCscPrepData: it reads in the collection of CSC RDO and converts then into reconstruction 
 input/output objects, using the PrepRawData class. The CSC calibration tools and services are needed for this 

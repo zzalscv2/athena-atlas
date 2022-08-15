@@ -4,7 +4,6 @@
 
 #include "MdtHptdcReadOut.h"
 
-
 MdtHptdcReadOut::MdtHptdcReadOut() :
     m_dataWord(0),
     m_wordHeader(0),
@@ -18,7 +17,6 @@ MdtHptdcReadOut::MdtHptdcReadOut() :
     m_width(0),
     m_errflag(0),
     m_leading(false) {}
-
 
 void MdtHptdcReadOut::decodeWord(uint32_t dataWord) {
     //  Zero all the decoded quantities
