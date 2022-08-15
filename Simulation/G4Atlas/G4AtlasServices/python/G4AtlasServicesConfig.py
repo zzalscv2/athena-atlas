@@ -8,7 +8,7 @@ from SimulationConfig.SimEnums import CavernBackground
 from G4AtlasTools.G4GeometryToolConfig import G4AtlasDetectorConstructionToolCfg
 from G4ExtraProcesses.G4ExtraProcessesConfig import G4EMProcessesPhysicsToolCfg
 from G4StepLimitation.G4StepLimitationConfig import G4StepLimitationToolCfg
-from TRT_TR_Process.TRT_TR_ProcessConfigNew import TRTPhysicsToolCfg
+from TRT_TR_Process.TRT_TR_ProcessConfig import TRTPhysicsToolCfg
 
 
 def DetectorGeometrySvcCfg(ConfigFlags, name="DetectorGeometrySvc", **kwargs):

@@ -61,7 +61,7 @@ def CommonSimulationCfg(ConfigFlags, log):
         cfg.merge(PoolReadCfg(ConfigFlags))
         if ConfigFlags.Sim.ReadTR or ConfigFlags.Sim.CavernBackground is CavernBackground.Read:
             # Cases 2a, 2b, 2c
-            from TrackRecordGenerator.TrackRecordGeneratorConfigNew import Input_TrackRecordGeneratorCfg
+            from TrackRecordGenerator.TrackRecordGeneratorConfig import Input_TrackRecordGeneratorCfg
             cfg.merge(Input_TrackRecordGeneratorCfg(ConfigFlags))
         if ConfigFlags.Sim.ISF.ReSimulation:
             # Case 4

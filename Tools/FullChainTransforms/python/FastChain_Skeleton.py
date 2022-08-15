@@ -108,7 +108,7 @@ def fromRunArgs(runArgs):
     ConfigFlags.lock()
 
     if ConfigFlags.Digitization.PileUp:
-        from Digitization.PileUpConfigNew import PileUpEventLoopMgrCfg
+        from Digitization.PileUpConfig import PileUpEventLoopMgrCfg
         cfg = MainServicesCfg(ConfigFlags, LoopMgr="PileUpEventLoopMgr")
         cfg.merge(PileUpEventLoopMgrCfg(ConfigFlags))
     else:

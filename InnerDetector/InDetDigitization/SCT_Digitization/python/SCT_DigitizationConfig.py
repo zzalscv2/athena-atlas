@@ -6,7 +6,7 @@ from AthenaCommon.Logging import logging
 from AthenaConfiguration.ComponentAccumulator import ComponentAccumulator
 from AthenaConfiguration.ComponentFactory import CompFactory
 from AthenaConfiguration.Enums import BeamType, ProductionStep
-from Digitization.PileUpMergeSvcConfigNew import PileUpMergeSvcCfg, PileUpXingFolderCfg
+from Digitization.PileUpMergeSvcConfig import PileUpMergeSvcCfg, PileUpXingFolderCfg
 from Digitization.PileUpToolsConfig import PileUpToolsCfg
 from Digitization.TruthDigitizationOutputConfig import TruthDigitizationOutputCfg
 from OutputStreamAthenaPool.OutputStreamConfig import OutputStreamCfg
