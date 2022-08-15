@@ -12,7 +12,7 @@
 // Gaudi
 #include "GaudiKernel/IAlgTool.h"
 // ISF
-#include "ISF_Event/ISFParticleVector.h"
+#include "ISF_Event/ISFParticleContainer.h"
 // Trk
 #include "TrkParameters/TrackParameters.h"
 #include "TrkNeutralParameters/NeutralParameters.h"

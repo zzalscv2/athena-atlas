@@ -14,7 +14,7 @@
 #include "AthenaKernel/IOVSvcDefs.h"
 
 // ISF includes
-#include "ISF_Event/ISFParticleVector.h"
+#include "ISF_Event/ISFParticleContainer.h"
 #include "ISF_Event/SimSvcID.h"
 
 class McEventCollection;

@@ -17,7 +17,7 @@
 
 // ISF includes
 #include "ISF_Event/ISFParticle.h"
-#include "ISF_Event/ISFParticleVector.h"
+#include "ISF_Event/ISFParticleContainer.h"
 #include "ISF_Event/ITruthIncident.h"
 // DetectorDescription
 #include "AtlasDetDescr/AtlasRegion.h"
