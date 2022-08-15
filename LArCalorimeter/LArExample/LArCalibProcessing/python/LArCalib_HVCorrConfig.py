@@ -12,7 +12,6 @@ def HVCorrConfig(flags,outputName="hvcorr"):
     from LArCalibUtils.LArHVScaleConfig import LArHVScaleCfg
 
     result.merge(LArHVScaleCfg(flags))
-   
     result.getCondAlgo("LArHVCondAlg").UndoOnlineHVCorr=False
     result.getCondAlgo("LArHVCondAlg").keyOutputCorr="NewLArHVScaleCorr"
 
@@ -20,7 +19,6 @@ def HVCorrConfig(flags,outputName="hvcorr"):
     #The LArHVCorrMaker creates a flat blob in a CondAttrListCollection
     #Input: The HV Scale Correction computed by the LArHVCondAlg based on the DCS HV values
     result.addEventAlgo(CompFactory.LArHVCorrMaker(LArHVScaleCorr="NewLArHVScaleCorr"))
-
 
     #Ntuple writing ... 
     from LArCalibProcessing.LArCalib_HVScale2NtupleConfig import LArHVScaleCorr2NtupleCfg
@@ -48,7 +46,6 @@ def HVCorrConfig(flags,outputName="hvcorr"):
     return result
 
 
-
 if __name__=="__main__":
     import sys
     from time import time,strptime
@@ -62,7 +59,6 @@ if __name__=="__main__":
     outputName="hvcorr"
     if len(sys.argv)>2:
         outputName=sys.argv[2]
-        
 
     try:
         ts=strptime(sys.argv[1]+'/UTC','%Y-%m-%d:%H:%M:%S/%Z')
@@ -94,10 +90,8 @@ if __name__=="__main__":
      
 
     from AthenaConfiguration.AllConfigFlags import ConfigFlags
-
     if len(sys.argv)>3:
         ConfigFlags.IOVDb.GlobalTag=sys.argv[3]
-
 
     ConfigFlags.Input.RunNumber=rlb[0]
     ConfigFlags.Input.LumiBlockNumber=rlb[1]
