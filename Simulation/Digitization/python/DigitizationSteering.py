@@ -43,7 +43,7 @@ def DigitizationMainServicesCfg(flags):
             logDigiSteering.error("DigitizationMainServicesCfg: Attempting to run pile-up digitization AthenaMT using %s threads!", str(flags.Concurrency.NumThreads))
             logDigiSteering.error("DigitizationMainServicesCfg: Running pile-up digitization with AthenaMT is not supported. Please update your configuration. The job will fail now.")
             raise RuntimeError("DigitizationSteering.DigitizationMainServicesCfg: Running pile-up digitization with AthenaMT is not supported. Please update your configuration.")
-        from Digitization.PileUpConfigNew import PileUpEventLoopMgrCfg
+        from Digitization.PileUpConfig import PileUpEventLoopMgrCfg
         acc = MainServicesCfg(flags, LoopMgr="PileUpEventLoopMgr")
         acc.merge(PileUpEventLoopMgrCfg(flags))
     else:
@@ -81,7 +81,7 @@ def DigitizationMainContentCfg(flags):
         acc.merge(EventInfoUpdateFromContextAlgCfg(flags))
 
         # Decorate pile-up values
-        from Digitization.PileUpConfigNew import NoPileUpMuWriterCfg
+        from Digitization.PileUpConfig import NoPileUpMuWriterCfg
         acc.merge(NoPileUpMuWriterCfg(flags))
 
     # Signal-only truth information

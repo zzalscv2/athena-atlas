@@ -6,7 +6,7 @@ from AthenaConfiguration.ComponentAccumulator import ComponentAccumulator
 from AthenaConfiguration.ComponentFactory import CompFactory
 from AthenaConfiguration.Enums import BeamType
 from OutputStreamAthenaPool.OutputStreamConfig import OutputStreamCfg
-from Digitization.PileUpMergeSvcConfigNew import PileUpMergeSvcCfg, PileUpXingFolderCfg
+from Digitization.PileUpMergeSvcConfig import PileUpMergeSvcCfg, PileUpXingFolderCfg
 from Digitization.PileUpToolsConfig import PileUpToolsCfg
 
 def getTileFirstXing():
