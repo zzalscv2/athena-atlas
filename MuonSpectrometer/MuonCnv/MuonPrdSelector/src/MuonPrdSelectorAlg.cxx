@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2020 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "MuonPrdSelector/MuonPrdSelectorAlg.h"
@@ -442,8 +442,8 @@ void MuonPrdSelectorAlg::print(){
     ATH_MSG_DEBUG( "CSC OUT Collection(" << std::setw(2) << i_coll << ") : " << ID  );
   }
 
-  const DataHandle<Muon::MdtPrepDataCollection> mdtCollection;
-  const DataHandle<Muon::MdtPrepDataCollection> lastColl;
+  SG::ConstIterator<Muon::MdtPrepDataCollection> mdtCollection;
+  SG::ConstIterator<Muon::MdtPrepDataCollection> lastColl;
   i_coll = 0;
   if (evtStore()->retrieve(mdtCollection,lastColl) ==StatusCode::SUCCESS) {
     for ( ; mdtCollection != lastColl ; ++mdtCollection ) {
