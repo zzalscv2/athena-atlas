@@ -12,6 +12,7 @@
 
 #include "HGTD_RIO_OnTrack/HGTD_ClusterOnTrack.h"
 #include "StoreGate/WriteHandle.h"
+#include "StoreGate/WriteDecorHandle.h"
 #include "xAODTruth/TruthParticleContainer.h"
 
 namespace {
@@ -34,35 +35,17 @@ StatusCode TrackTimeExtensionAlg::initialize() {
   ATH_CHECK(m_sdo_coll_rh_key.initialize());
   ATH_CHECK(m_mc_coll_rh_key.initialize());
   ATH_CHECK(m_trk_ptkl_rh_key.initialize());
+  ATH_CHECK(m_layerHasExtensionKey.initialize());
+  ATH_CHECK(m_layerExtensionChi2Key.initialize());
+  ATH_CHECK(m_layerClusterRawTimeKey.initialize());
+  ATH_CHECK(m_layerClusterTimeKey.initialize());
+  ATH_CHECK(m_layerClusterTruthClassKey.initialize());
+  ATH_CHECK(m_layerClusterShadowedKey.initialize());
+  ATH_CHECK(m_layerClusterMergedKey.initialize());
+  ATH_CHECK(m_layerPrimaryExpectedKey.initialize());
+  ATH_CHECK(m_extrapXKey.initialize());
+  ATH_CHECK(m_extrapYKey.initialize());
 
-  m_dec_layer_has_ext =
-      std::make_unique<SG::AuxElement::Decorator<std::vector<bool>>>(
-          m_deco_prefix + "_has_extension");
-  m_dec_layer_ext_chi2 =
-      std::make_unique<SG::AuxElement::Decorator<std::vector<float>>>(
-          m_deco_prefix + "_extension_chi2");
-  m_dec_layer_cluster_raw_time =
-      std::make_unique<SG::AuxElement::Decorator<std::vector<float>>>(
-          m_deco_prefix + "_cluster_raw_time");
-  m_dec_layer_cluster_time =
-      std::make_unique<SG::AuxElement::Decorator<std::vector<float>>>(
-          m_deco_prefix + "_cluster_time");
-  m_dec_layer_cluster_truth_class =
-      std::make_unique<SG::AuxElement::Decorator<std::vector<int>>>(
-          m_deco_prefix + "_cluster_truth_class");
-  m_dec_layer_cluster_shadowed =
-      std::make_unique<SG::AuxElement::Decorator<std::vector<bool>>>(
-          m_deco_prefix + "_cluster_shadowed");
-  m_dec_layer_cluster_merged =
-      std::make_unique<SG::AuxElement::Decorator<std::vector<bool>>>(
-          m_deco_prefix + "_cluster_merged");
-  m_dec_layer_primary_expected =
-      std::make_unique<SG::AuxElement::Decorator<std::vector<bool>>>(
-          m_deco_prefix + "_primary_expected");
-  m_dec_extrap_x = std::make_unique<SG::AuxElement::Decorator<float>>(
-      m_deco_prefix + "_extrap_x");
-  m_dec_extrap_y = std::make_unique<SG::AuxElement::Decorator<float>>(
-      m_deco_prefix + "_extrap_y");
 
   return StatusCode::SUCCESS;
 }
@@ -173,6 +156,17 @@ StatusCode TrackTimeExtensionAlg::decorateTrackParticle(
     const InDetSimDataCollection* sdo_collection,
     const HepMC::GenEvent* hs_event, bool skip_deco) const {
 
+  SG::WriteDecorHandle<xAOD::TrackParticleContainer, std::vector<bool>> layerHasExtensionHandle(m_layerHasExtensionKey);
+  SG::WriteDecorHandle<xAOD::TrackParticleContainer, std::vector<float>> layerExtensionChi2Handle(m_layerExtensionChi2Key);
+  SG::WriteDecorHandle<xAOD::TrackParticleContainer, std::vector<float>> layerClusterRawTimeHandle(m_layerClusterRawTimeKey);
+  SG::WriteDecorHandle<xAOD::TrackParticleContainer, std::vector<float>> layerClusterTimeHandle(m_layerClusterTimeKey);
+  SG::WriteDecorHandle<xAOD::TrackParticleContainer, std::vector<int>> layerClusterTruthClassHandle(m_layerClusterTruthClassKey);
+  SG::WriteDecorHandle<xAOD::TrackParticleContainer, std::vector<bool>> layerClusterShadowedHandle(m_layerClusterShadowedKey);
+  SG::WriteDecorHandle<xAOD::TrackParticleContainer, std::vector<bool>> layerClusterMergedHandle(m_layerClusterMergedKey);
+  SG::WriteDecorHandle<xAOD::TrackParticleContainer, std::vector<bool>> layerPrimaryExpectedHandle(m_layerPrimaryExpectedKey);
+  SG::WriteDecorHandle<xAOD::TrackParticleContainer, float> extrapXHandle(m_extrapXKey);
+  SG::WriteDecorHandle<xAOD::TrackParticleContainer, float> extrapYHandle(m_extrapYKey);
+
   std::vector<bool> has_cluster_vec;
   has_cluster_vec.reserve(n_hgtd_layers);
   std::vector<float> chi2_vec;
@@ -259,16 +253,16 @@ StatusCode TrackTimeExtensionAlg::decorateTrackParticle(
 
   } // END LOOP over TrackStateOnSurface
 
-  m_dec_layer_has_ext->set(*track_ptkl, has_cluster_vec);
-  m_dec_layer_ext_chi2->set(*track_ptkl, chi2_vec);
-  m_dec_layer_cluster_raw_time->set(*track_ptkl, raw_time_vec);
-  m_dec_layer_cluster_time->set(*track_ptkl, time_vec);
-  m_dec_layer_cluster_truth_class->set(*track_ptkl, truth_vec);
-  m_dec_layer_cluster_shadowed->set(*track_ptkl, is_shadowed_vec);
-  m_dec_layer_cluster_merged->set(*track_ptkl, is_merged_vec);
-  m_dec_layer_primary_expected->set(*track_ptkl, primary_exists_vec);
-  m_dec_extrap_x->set(*track_ptkl, extension.m_extrap_x);
-  m_dec_extrap_y->set(*track_ptkl, extension.m_extrap_y);
+  layerHasExtensionHandle(*track_ptkl) = has_cluster_vec;
+  layerExtensionChi2Handle(*track_ptkl) = chi2_vec;
+  layerClusterRawTimeHandle(*track_ptkl) = raw_time_vec;
+  layerClusterTimeHandle(*track_ptkl) = time_vec;
+  layerClusterTruthClassHandle(*track_ptkl) = truth_vec;
+  layerClusterShadowedHandle(*track_ptkl) = is_shadowed_vec;
+  layerClusterMergedHandle(*track_ptkl) = is_merged_vec;
+  layerPrimaryExpectedHandle(*track_ptkl) = primary_exists_vec;
+  extrapXHandle(*track_ptkl) = extension.m_extrap_x;
+  extrapYHandle(*track_ptkl) = extension.m_extrap_y;
 
   return StatusCode::SUCCESS;
 }
