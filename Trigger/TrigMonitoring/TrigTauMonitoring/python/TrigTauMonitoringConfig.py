@@ -147,73 +147,54 @@ class TrigTauMonAlgBuilder:
        'HLT_tau0_ptonly_L1TAU60',
        # tau25
        'HLT_tau25_idperf_tracktwoMVA_L1TAU12IM',
-       'HLT_tau25_idperf_tracktwoMVABDT_L1TAU12IM',
        'HLT_tau25_perf_tracktwoMVA_L1TAU12IM',
-       'HLT_tau25_perf_tracktwoMVABDT_L1TAU12IM',
        'HLT_tau25_looseRNN_tracktwoMVA_L1TAU12IM',
-       'HLT_tau25_looseRNN_tracktwoMVABDT_L1TAU12IM',
        'HLT_tau25_mediumRNN_tracktwoMVA_L1TAU12IM',
-       'HLT_tau25_mediumRNN_tracktwoMVABDT_L1TAU12IM',
        'HLT_tau25_tightRNN_tracktwoMVA_L1TAU12IM',
-       'HLT_tau25_tightRNN_tracktwoMVABDT_L1TAU12IM',
        # tau35
        'HLT_tau35_idperf_tracktwoMVA_L1TAU20IM',
-       'HLT_tau35_idperf_tracktwoMVABDT_L1TAU20IM',
        'HLT_tau35_perf_tracktwoMVA_L1TAU20IM',
-       'HLT_tau35_perf_tracktwoMVABDT_L1TAU20IM',
        'HLT_tau35_looseRNN_tracktwoMVA_L1TAU20IM',
-       'HLT_tau35_looseRNN_tracktwoMVABDT_L1TAU20IM',
        'HLT_tau35_mediumRNN_tracktwoMVA_L1TAU20IM',
-       'HLT_tau35_mediumRNN_tracktwoMVABDT_L1TAU20IM',
        'HLT_tau35_tightRNN_tracktwoMVA_L1TAU20IM',
-       'HLT_tau35_tightRNN_tracktwoMVABDT_L1TAU20IM',
        # tau60
-       'HLT_tau60_mediumRNN_tracktwoMVABDT_L1TAU40',
+       'HLT_tau60_mediumRNN_tracktwoMVA_L1TAU40',
        # tau80
-       'HLT_tau80_mediumRNN_tracktwoMVABDT_L1TAU60', 
+       'HLT_tau80_mediumRNN_tracktwoMVA_L1TAU60', 
        # tau160
        'HLT_tau160_ptonly_L1TAU100',
        'HLT_tau160_idperf_tracktwoMVA_L1TAU100',
-       'HLT_tau160_idperf_tracktwoMVABDT_L1TAU100',
        'HLT_tau160_perf_tracktwoMVA_L1TAU100',
-       'HLT_tau160_perf_tracktwoMVABDT_L1TAU100',
        'HLT_tau160_mediumRNN_tracktwoMVA_L1TAU100',
-       'HLT_tau160_mediumRNN_tracktwoMVABDT_L1TAU100',
        # tau180
        'HLT_tau180_mediumRNN_tracktwoLLP_L1TAU100',
        'HLT_tau180_tightRNN_tracktwoLLP_L1TAU100',
        # tau200
        'HLT_tau200_mediumRNN_tracktwoMVA_L1TAU100',
-       'HLT_tau200_mediumRNN_tracktwoMVABDT_L1TAU100',
        'HLT_tau200_mediumRNN_tracktwoLLP_L1TAU100',
        'HLT_tau200_tightRNN_tracktwoLLP_L1TAU100',
        # ditau
        'HLT_tau80_mediumRNN_tracktwoMVA_tau60_mediumRNN_tracktwoMVA_03dRAB_L1TAU60_2TAU40',
        'HLT_tau80_mediumRNN_tracktwoMVA_tau35_mediumRNN_tracktwoMVA_03dRAB30_L1TAU60_DR-TAU20ITAU12I',
        'HLT_tau35_mediumRNN_tracktwoMVA_tau25_mediumRNN_tracktwoMVA_03dRAB30_L1DR-TAU20ITAU12I-J25',
-       'HLT_tau80_mediumRNN_tracktwoMVABDT_tau60_mediumRNN_tracktwoMVABDT_03dRAB_L1TAU60_2TAU40',
-       'HLT_tau80_mediumRNN_tracktwoMVABDT_tau35_mediumRNN_tracktwoMVABDT_03dRAB30_L1TAU60_DR-TAU20ITAU12I',
-       'HLT_tau35_mediumRNN_tracktwoMVABDT_tau25_mediumRNN_tracktwoMVABDT_03dRAB30_L1DR-TAU20ITAU12I-J25',
        'HLT_tau80_mediumRNN_tracktwoLLP_tau60_mediumRNN_tracktwoLLP_03dRAB_L1TAU60_2TAU40',
        'HLT_tau80_mediumRNN_tracktwoLLP_tau60_tightRNN_tracktwoLLP_03dRAB_L1TAU60_2TAU40',
        'HLT_tau80_tightRNN_tracktwoLLP_tau60_tightRNN_tracktwoLLP_03dRAB_L1TAU60_2TAU40',
        'HLT_tau100_mediumRNN_tracktwoLLP_tau80_mediumRNN_tracktwoLLP_03dRAB_L1TAU60_2TAU40',
        'HLT_tau35_mediumRNN_tracktwoMVA_tau25_mediumRNN_tracktwoMVA_03dRAB_L1TAU20IM_2TAU12IM_4J12p0ETA25',
        'HLT_tau40_mediumRNN_tracktwoMVA_tau35_mediumRNN_tracktwoMVA_03dRAB_L1TAU25IM_2TAU20IM_2J25_3J20',
-       'HLT_tau35_mediumRNN_tracktwoMVABDT_tau25_mediumRNN_tracktwoMVABDT_03dRAB_L1TAU20IM_2TAU12IM_4J12p0ETA25',
-       'HLT_tau40_mediumRNN_tracktwoMVABDT_tau35_mediumRNN_tracktwoMVABDT_03dRAB_L1TAU25IM_2TAU20IM_2J25_3J20',
        # Tag and probe
        'HLT_e26_lhtight_ivarloose_tau20_mediumRNN_tracktwoMVA_03dRAB_L1EM22VHI',
        'HLT_mu26_ivarmedium_tau20_mediumRNN_tracktwoMVA_03dRAB_L1MU14FCH',
        # Phase-I
-       'HLT_tau25_idperf_tracktwoMVABDT_L1eTAU20',
-       'HLT_tau25_perf_tracktwoMVABDT_L1eTAU20', 
-       'HLT_tau25_mediumRNN_tracktwoMVABDT_L1eTAU20',
-       'HLT_tau25_idperf_tracktwoMVABDT_L1eTAU20M',
-       'HLT_tau25_perf_tracktwoMVABDT_L1eTAU20M',
-       'HLT_tau25_mediumRNN_tracktwoMVABDT_L1eTAU20M',     
-       'HLT_tau35_mediumRNN_tracktwoMVABDT_L1eTAU30', 
-       'HLT_tau160_mediumRNN_tracktwoMVABDT_L1eTAU140',
+       'HLT_tau25_idperf_tracktwoMVA_L1eTAU20',
+       'HLT_tau25_perf_tracktwoMVA_L1eTAU20', 
+       'HLT_tau25_mediumRNN_tracktwoMVA_L1eTAU20',
+       'HLT_tau25_idperf_tracktwoMVA_L1eTAU20M',
+       'HLT_tau25_perf_tracktwoMVA_L1eTAU20M',
+       'HLT_tau25_mediumRNN_tracktwoMVA_L1eTAU20M',     
+       'HLT_tau35_mediumRNN_tracktwoMVA_L1eTAU30', 
+       'HLT_tau160_mediumRNN_tracktwoMVA_L1eTAU140',
     ]
 
     self.tauList = monitoring_tau
@@ -318,6 +299,24 @@ class TrigTauMonAlgBuilder:
     defineEachStepHistograms('tauEta','#eta', 13, -2.6, 2.6)
     defineEachStepHistograms('tauPhi','#phi', 16, -3.2, 3.2) 
     defineEachStepHistograms('averageMu', 'average pileup', 10, 0., 80.)
+
+ 
+    def defineEachStepHistogramsCoarse(xvariable, xlabel, binning):
+   
+        monGroup.defineHistogram(monGroupName+'_HLTpass,'+monGroupName+'_'+xvariable+';EffHLT_'+xvariable+'_wrt_Offline',
+                                title='HLT Efficiency ' +trigger+' '+nProng+';'+xlabel+';Efficiency',
+                                type='TEfficiency',xbins=binning, xmin=binning[0], xmax=binning[-1], opt='kAlwaysCreate')
+
+    #define coarse binning
+    binning = [0,500]
+    if 'HLT_tau0' in trigger: binning   = [ 0, 5, 10, 15, 20, 50, 100, 150, 250, 500 ] 
+    elif 'HLT_tau25' in trigger: binning = [15, 20, 25, 30, 35, 40, 50, 60, 80, 150, 250, 500 ]
+    elif 'HLT_tau35' in trigger: binning = [25, 30, 35, 40, 50, 60, 80, 150,  250, 500 ]
+    elif 'HLT_tau60' in trigger: binning = [50, 55, 60, 65, 70, 80, 110, 150,  250, 500 ]
+    elif 'HLT_tau80' in trigger: binning = [70, 75, 80, 85, 90,  110, 150,  250, 500 ]
+    elif 'HLT_tau160' in trigger: binning = [150, 155, 160, 165, 170, 180, 200, 240, 300, 500 ]
+    elif 'HLT_tau200' in trigger: binning = [190, 195, 200, 205, 210, 240, 300, 500 ]
+    defineEachStepHistogramsCoarse('tauPt_coarse', 'p_{T} [GeV]', binning)
 
   #
   # Booking DiTau efficiencies
@@ -459,8 +458,11 @@ class TrigTauMonAlgBuilder:
     monGroup = self.helper.addGroup( monAlg, monGroupName,
                               self.basePath+'/'+monGroupPath )
 
+    monGroup.defineHistogram('n_track', title='number of tracks; N tracks; Events', xbins=15, xmin=0, xmax=15, opt='kAlwaysCreate')
     monGroup.defineHistogram('track_pt_log',title='track_pt_log;track_pt_log;Events',xbins=20,xmin=2,xmax=7,opt='kAlwaysCreate')
     monGroup.defineHistogram('track_pt_jetseed_log',title='track_pt_jetseed_log;track_pt_jetseed_log;Events',xbins=50,xmin=2,xmax=7,opt='kAlwaysCreate')
+    monGroup.defineHistogram('track_eta', title='track_eta; track_eta; Events', xbins=26,xmin=-2.6,xmax=2.6,opt='kAlwaysCreate')
+    monGroup.defineHistogram('track_phi', title='track_phi; track_phi; Events', xbins=16,xmin=-3.2,xmax=3.2,opt='kAlwaysCreate')
     monGroup.defineHistogram('track_dEta',title='track_dEta;track_dEta;Events',xbins=100,xmin=-0.5,xmax=0.5,opt='kAlwaysCreate')
     monGroup.defineHistogram('track_dPhi',title='track_dPhi;track_dPhi;Events',xbins=100,xmin=-0.5,xmax=0.5,opt='kAlwaysCreate')
     monGroup.defineHistogram('track_d0_abs_log',title='track_d0_abs_log;track_d0_abs_log;Events',xbins=50,xmin=-7,xmax=2,opt='kAlwaysCreate')
@@ -468,7 +470,9 @@ class TrigTauMonAlgBuilder:
     monGroup.defineHistogram('track_nIBLHitsAndExp',title='track_nIBLHitsAndExp; track_nIBLHitsAndExp;Events',xbins=3,xmin=0,xmax=3,opt='kAlwaysCreate')
     monGroup.defineHistogram('track_nPixelHitsPlusDeadSensors',title='track_nPixelHitsPlusDeadSensors;track_nPixelHitsPlusDeadSensors;Events',xbins=11,xmin=0,xmax=11,opt='kAlwaysCreate')
     monGroup.defineHistogram('track_nSCTHitsPlusDeadSensors',title='track_nSCTHitsPlusDeadSensors;track_nSCTHitsPlusDeadSensors;Events',xbins=20,xmin=0,xmax=20,opt='kAlwaysCreate')
-        
+    monGroup.defineHistogram('track_eta,track_phi', type='TH2F', title='Track Eta vs Phi; track eta; track phi', xbins=26,xmin=-2.6,xmax=2.6, ybins=16,ymin=-3.2,ymax=3.2,opt='kAlwaysCreate')
+    monGroup.defineHistogram('track_dEta,track_dPhi', type='TH2F', title='Track dEta vs dPhi; track_dEta ; track_dPhi', xbins=100,xmin=-0.5,xmax=0.5,ybins=100,ymin=-0.5,ymax=0.5,opt='kAlwaysCreate')        
+
   def bookRNNCluster( self, monAlg, trigger, online ):
 
     monGroupName = trigger+'_RNN_'+('HLT' if online else 'Offline')+'_InputCluster'
@@ -477,13 +481,18 @@ class TrigTauMonAlgBuilder:
     monGroup = self.helper.addGroup( monAlg, monGroupName,
                               self.basePath+'/'+monGroupPath )
 
+    monGroup.defineHistogram('n_cluster', title='number of cluster; N cluster; Events', xbins=30, xmin=0, xmax=30, opt='kAlwaysCreate')
     monGroup.defineHistogram('cluster_et_log',title='cluster_et_log; cluster_et_log;Events',xbins=30,xmin=0,xmax=6,opt='kAlwaysCreate')
     monGroup.defineHistogram('cluster_pt_jetseed_log',title='cluster_pt_jetseed_log; cluster_pt_jetseed_log;Events',xbins=50,xmin=2,xmax=7,opt='kAlwaysCreate')
+    monGroup.defineHistogram('cluster_eta', title='cluster_eta; cluster_eta; Events', xbins=26,xmin=-2.6,xmax=2.6,opt='kAlwaysCreate')
+    monGroup.defineHistogram('cluster_phi', title='cluster_phi; cluster_phi; Events', xbins=16,xmin=-3.2,xmax=3.2,opt='kAlwaysCreate')
     monGroup.defineHistogram('cluster_dEta',title='cluster_dEta; cluster_dEta;Events',xbins=100,xmin=-0.5,xmax=0.5,opt='kAlwaysCreate')
     monGroup.defineHistogram('cluster_dPhi',title='cluster_dPhi; cluster_dPhi;Events',xbins=100,xmin=-0.5,xmax=0.5,opt='kAlwaysCreate')
     monGroup.defineHistogram('cluster_SECOND_R_log10',title='cluster_SECOND_R_log10; cluster_SECOND_R_log10;Events',xbins=50,xmin=-3,xmax=7,opt='kAlwaysCreate')
     monGroup.defineHistogram('cluster_SECOND_LAMBDA_log10',title='cluster_SECOND_LAMBDA_log10; cluster_SECOND_LAMBDA_log10;Events',xbins=50,xmin=-3,xmax=7,opt='kAlwaysCreate')
     monGroup.defineHistogram('cluster_CENTER_LAMBDA_log10',title='cluster_CENTER_LAMBDA_log10; cluster_CENTER_LAMBDA_log10;Events',xbins=50,xmin=-2,xmax=5,opt='kAlwaysCreate')
+    monGroup.defineHistogram('cluster_eta,cluster_phi', type='TH2F', title='Cluster Eta vs Phi; cluster eta; cluster phi', xbins=26,xmin=-2.6,xmax=2.6, ybins=16,ymin=-3.2,ymax=3.2,opt='kAlwaysCreate')
+    monGroup.defineHistogram('cluster_dEta,cluster_dPhi', type='TH2F', title='Cluster dEta vs dPhi; cluster_dEta ; cluster_dPhi', xbins=100,xmin=-0.5,xmax=0.5,ybins=100,ymin=-0.5,ymax=0.5,opt='kAlwaysCreate')
 
   def bookbasicVars( self, monAlg, trigger, nProng, online ):
   
