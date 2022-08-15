@@ -28,6 +28,7 @@
 #include "HGTD_RecToolInterfaces/IHGTD_ClusterTruthTool.h"
 #include "HGTD_RecToolInterfaces/IHGTD_TrackTimeExtensionTool.h"
 #include "StoreGate/ReadHandleKey.h"
+#include "StoreGate/WriteDecorHandleKey.h"
 #include "xAODTracking/TrackParticle.h"
 #include "xAODTracking/TrackParticleContainer.h"
 #include "InDetSimData/InDetSimDataCollection.h"
@@ -66,24 +67,17 @@ private:
 
   ToolHandle<IHGTD_ClusterTruthTool> m_truth_tool{this, "TruthTool", "ClusterTruthTool/ClusterTruthTool", "Tool for classifying HGTD clusters with truth information"};
 
-  std::unique_ptr<SG::AuxElement::Decorator<std::vector<bool>>>
-      m_dec_layer_has_ext;
-  std::unique_ptr<SG::AuxElement::Decorator<std::vector<float>>>
-      m_dec_layer_ext_chi2;
-  std::unique_ptr<SG::AuxElement::Decorator<std::vector<float>>>
-      m_dec_layer_cluster_raw_time;
-  std::unique_ptr<SG::AuxElement::Decorator<std::vector<float>>>
-      m_dec_layer_cluster_time;
-  std::unique_ptr<SG::AuxElement::Decorator<std::vector<int>>>
-      m_dec_layer_cluster_truth_class;
-  std::unique_ptr<SG::AuxElement::Decorator<std::vector<bool>>>
-      m_dec_layer_cluster_shadowed;
-  std::unique_ptr<SG::AuxElement::Decorator<std::vector<bool>>>
-      m_dec_layer_cluster_merged;
-  std::unique_ptr<SG::AuxElement::Decorator<std::vector<bool>>>
-      m_dec_layer_primary_expected;
-  std::unique_ptr<SG::AuxElement::Decorator<float>> m_dec_extrap_x;
-  std::unique_ptr<SG::AuxElement::Decorator<float>> m_dec_extrap_y;
+  SG::WriteDecorHandleKey<xAOD::TrackParticleContainer> m_layerHasExtensionKey{this, "HGTD_has_extension", "InDetTrackParticles.HGTD_has_extension", "deco with a handle for an extension"};
+  SG::WriteDecorHandleKey<xAOD::TrackParticleContainer> m_layerExtensionChi2Key{this, "HGTD_extension_chi2", "InDetTrackParticles.HGTD_extension_chi2", "deco with a handle for a ch2 of extension"};
+  SG::WriteDecorHandleKey<xAOD::TrackParticleContainer> m_layerClusterRawTimeKey{this, "HGTD_cluster_raw_time", "InDetTrackParticles.HGTD_cluster_raw_time", "deco with a handle for layer cluster raw time"};
+  SG::WriteDecorHandleKey<xAOD::TrackParticleContainer> m_layerClusterTimeKey{this, "HGTD_cluster_time", "InDetTrackParticles.HGTD_cluster_time", "deco with a handle for cluster time"};
+  SG::WriteDecorHandleKey<xAOD::TrackParticleContainer> m_layerClusterTruthClassKey{this, "HGTD_cluster_truth_class", "InDetTrackParticles.HGTD_cluster_truth_class", "deco with a handle for a truth time"};
+  SG::WriteDecorHandleKey<xAOD::TrackParticleContainer> m_layerClusterShadowedKey{this, "HGTD_cluster_shadowed", "InDetTrackParticles.HGTD_cluster_shadowed", "deco with a handle for a shadowed cluster"};
+  SG::WriteDecorHandleKey<xAOD::TrackParticleContainer> m_layerClusterMergedKey{this, "HGTD_cluster_merged", "InDetTrackParticles.HGTD_cluster_merged", "deco with a handle for a merged cluster"};
+  SG::WriteDecorHandleKey<xAOD::TrackParticleContainer> m_layerPrimaryExpectedKey{this, "HGTD_primary_expected", "InDetTrackParticles.HGTD_primary_expected", "deco with a handle for an expected primary"};
+  SG::WriteDecorHandleKey<xAOD::TrackParticleContainer> m_extrapXKey{this, "HGTD_extrap_x", "InDetTrackParticles.HGTD_extrap_x", "deco with a handle for an x of extrap"};
+  SG::WriteDecorHandleKey<xAOD::TrackParticleContainer> m_extrapYKey{this, "HGTD_extrap_y", "InDetTrackParticles.HGTD_extrap_y", "deco with a handle for an y of extrap"};
+
 };
 
 } // namespace HGTD
