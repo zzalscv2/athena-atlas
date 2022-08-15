@@ -16,6 +16,7 @@
 #include <fstream>
 #include <sstream>
 #include <cstdlib>
+#include <unordered_set>
 
 using namespace std;
 using namespace TrigConf;
@@ -95,8 +96,8 @@ HLTChain::HLTChain( const HLTChain& o ) :
 
 TrigConf::HLTChain::~HLTChain() {
    for(HLTSignature *sig : m_HLTSignatureList) delete sig;
-   for(HLTStreamTag* s : m_streams) delete s;
-   for(HLTStreamTag* s : m_streams_orig) delete s;
+   for(HLTTriggerType *tt : m_HLTTriggerTypeList) delete tt;
+   clearStreams();
 }
 
 
@@ -136,6 +137,15 @@ TrigConf::HLTChain::set_chain_name(const string& chain_name) {
    m_chain_hash_id = HLTUtils::string2hash(chain_name);
    setName(chain_name);
    return *this;
+}
+
+TrigConf::HLTChain&
+TrigConf::HLTChain::set_triggerTypeList(const std::vector<HLTTriggerType*>&trigList)
+{
+    for (HLTTriggerType *tt : m_HLTTriggerTypeList)
+        delete tt;
+    m_HLTTriggerTypeList = trigList;
+    return *this;
 }
 
 // @brief sets lower chain name
@@ -243,10 +253,22 @@ TrigConf::HLTChain::addStream(HLTStreamTag* stream) {
 
 void
 TrigConf::HLTChain::clearStreams() {
-   for(HLTStreamTag *s : m_streams_orig) delete s;
-   for(HLTStreamTag *s : m_streams) delete s;
+   // The memory management between the streams map and the stream vectors is completely confused
+   // It's going to be too invasive a change to fix that directly so instead just make sure that
+   // everything is correctly deleted at the end
+   std::unordered_set<HLTStreamTag *> deleted;
+   for(HLTStreamTag *s : m_streams_orig)
+       if (deleted.insert(s).second)
+           delete s;
+   for(HLTStreamTag *s : m_streams)
+       if (deleted.insert(s).second)
+           delete s;
+   for (auto &p : m_streams_map)
+       if (deleted.insert(p.second).second)
+           delete p.second;
    m_streams_orig.clear();
    m_streams.clear();
+   m_streams_map.clear();
 }
 
 std::pair<bool, float>

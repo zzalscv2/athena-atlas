@@ -97,7 +97,7 @@ namespace TrigConf {
       HLTChain& set_lower_chain_counter  ( int lower_chain_counter) { m_lower_chain_counter = lower_chain_counter; return *this; }
       HLTChain& set_lower_chain_counters ( const std::vector<int>& low_ccs) { m_lower_chain_counters = low_ccs; return *this; }
       HLTChain& set_signatureList        ( const std::vector<HLTSignature*>&   sigList);
-      HLTChain& set_triggerTypeList      ( const std::vector<HLTTriggerType*>& trigList) { m_HLTTriggerTypeList = trigList; return *this; }
+      HLTChain& set_triggerTypeList      ( const std::vector<HLTTriggerType*>& trigList);
       HLTChain& set_groupList            ( const std::set<std::string>& groups) { m_groups = groups; return *this; }
       HLTChain& set_EB_after_step        ( int EB_after_step ) { m_EB_after_step = EB_after_step; return *this; }
       HLTChain& set_leg_multiplicities   ( const std::vector<size_t>& mult ) { m_leg_multiplicities = mult; return *this; }
