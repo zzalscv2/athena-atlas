@@ -25,7 +25,7 @@ StatusCode TrackParticleClusterAssociationAlg::initialize()
       m_doDetEta = true;
       m_detectorEtaDecor = m_caloClusters.key() + "." + m_detectorEtaDecor.key();
   }
-  
+
   ATH_CHECK( m_caloExtKey.initialize() );
   ATH_CHECK( m_trackParticleCollectionHandle.initialize() );
   ATH_CHECK( m_caloClusters.initialize() );
@@ -96,13 +96,14 @@ StatusCode TrackParticleClusterAssociationAlg::execute()
   unsigned int ntracks = 0;
   for( const xAOD::TrackParticle* tp : *trackParticles){
 
+    // retrieve the vector of links to cluster (and creating it )
+    std::vector< ElementLink< xAOD::CaloClusterContainer > > & caloClusterLinks = assoClustDecor(*tp);
 
     if( tp->pt() < m_ptCut ) continue;
 
     if( pv0 != nullptr) if(! m_trackvertexassoTool->isCompatible(*tp, *pv0 )) continue;
-    
-    ATH_MSG_DEBUG(" Selected track " << tp->index() << "  pt " << tp->pt() << " eta " << tp->eta() << " phi " << tp->phi() );
 
+    ATH_MSG_DEBUG(" Selected track " << tp->index() << "  pt " << tp->pt() << " eta " << tp->eta() << " phi " << tp->phi() );
 
     // IMMPORTANT : this assumes a correspondance between the TrackParticleContainer and the CaloExtensionCollection !
     const Trk::CaloExtension * caloExtension = (*caloExts)[tp->index() ] ;
@@ -115,10 +116,8 @@ StatusCode TrackParticleClusterAssociationAlg::execute()
     // build the associated clusters
     std::vector<const xAOD::CaloCluster*> assoClusters = associatedClusters( *caloExtension, *clusterContainer); 
 
+    // translate vector of links to cluster in ElementLink
 
-    // retrieve the vector of links to cluster (and creating it )
-    std::vector< ElementLink< xAOD::CaloClusterContainer > > & caloClusterLinks = assoClustDecor(*tp);
-    // translate in ElementLink
     caloClusterLinks.reserve( assoClusters.size() );
     for(const xAOD::CaloCluster* cluster : assoClusters) caloClusterLinks.emplace_back( *clusterContainer,cluster->index() );
     ntracks++;     
