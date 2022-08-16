@@ -142,6 +142,13 @@ bool TrigmuCombHypoTool::decideOnSingleObject(TrigmuCombHypoTool::CombinedMuonIn
  
    auto ptValue = pMuon->pt() * pMuon->charge() / Gaudi::Units::GeV;
  
+ 
+   if (pMuon->pt() == 0) {
+      ATH_MSG_DEBUG("L2CombinedMuon pt == 0, empty container -> rejected");
+      result = false;
+      return result;
+   }
+
    fexPt    = ptValue;
    ptFL      = ptValue;
    idEta    = pMuon->eta();
@@ -152,12 +159,6 @@ bool TrigmuCombHypoTool::decideOnSingleObject(TrigmuCombHypoTool::CombinedMuonIn
    ATH_MSG_DEBUG("combined muon pt (GeV)/ sigma_pt (GeV)/ eta / phi / usedalgo: " 
                << fexPt << " (GeV) / " << ptresComb << " (GeV) / " << idEta << " / " << idPhi 
                << " / " << usealgo);
- 
-   if (pMuon->pt() == 0) {
-      ATH_MSG_DEBUG("L2CombinedMuon pt == 0, empty container -> rejected");
-      result = false;
-      return result;
-   }
  
    // check the pointers to the L2StandAloneMuon
    if (!pMuon->muSATrack()) {

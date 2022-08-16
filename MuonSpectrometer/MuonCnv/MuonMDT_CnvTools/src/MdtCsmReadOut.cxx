@@ -23,7 +23,6 @@ MdtCsmReadOut::MdtCsmReadOut() :
     m_error(0),
     m_zeroSupp(0) {}
 
-
 void MdtCsmReadOut::decodeWord(uint32_t dataWord) {
     setZero();
 

@@ -10,19 +10,15 @@
 #include "MuonDigToolInterfaces/IMuonDigitizationTool.h"
 
 class MuonRdoToMuonDigit : public AthAlgorithm {
+public:
+    MuonRdoToMuonDigit(const std::string& name, ISvcLocator* pSvcLocator);
+    ~MuonRdoToMuonDigit() = default;
 
- public:
+    StatusCode initialize();
+    StatusCode execute();
 
-  MuonRdoToMuonDigit(const std::string& name, ISvcLocator* pSvcLocator);
-  ~MuonRdoToMuonDigit()=default;
-
-  StatusCode initialize();
-  StatusCode execute();
-
- private:
-
-   ToolHandle<IMuonDigitizationTool> m_digTool{this,"MuonRdoToMuonDigitTool","MuonRdoToMuonDigitTool"};
+private:
+    ToolHandle<IMuonDigitizationTool> m_digTool{this, "MuonRdoToMuonDigitTool", "MuonRdoToMuonDigitTool"};
 };
 
 #endif
-

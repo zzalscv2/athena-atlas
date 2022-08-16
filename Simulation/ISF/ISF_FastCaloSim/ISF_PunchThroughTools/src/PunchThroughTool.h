@@ -26,7 +26,7 @@
 #include "BarcodeEvent/PhysicsProcessCode.h"
 #include "GeoPrimitives/GeoPrimitives.h"
 
-#include "ISF_Event/ISFParticleVector.h"
+#include "ISF_Event/ISFParticleContainer.h"
 
 #include "AtlasHepMC/GenEvent_fwd.h"
 

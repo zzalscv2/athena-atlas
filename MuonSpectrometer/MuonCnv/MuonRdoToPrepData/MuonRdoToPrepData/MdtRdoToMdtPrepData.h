@@ -3,15 +3,14 @@
 */
 
 #ifndef MDTRDOTOMDTPREPDATA_H
-#define MDTRDOTOMDTPREPDATA_H 
+#define MDTRDOTOMDTPREPDATA_H
 
 #include "AthenaBaseComps/AthAlgorithm.h"
 #include "GaudiKernel/ToolHandle.h"
-
-#include "MuonCnvToolInterfaces/IMuonRdoToPrepDataTool.h"
-#include "TrigSteeringEvent/TrigRoiDescriptor.h"
 #include "IRegionSelector/IRegSelTool.h"
+#include "MuonCnvToolInterfaces/IMuonRdoToPrepDataTool.h"
 #include "MuonPrepRawData/MuonPrepDataContainer.h"
+#include "TrigSteeringEvent/TrigRoiDescriptor.h"
 
 class MdtIdHelper;
 class MdtDigit;
@@ -32,30 +31,25 @@ class MDTcablingSvc;
 ////////////////////////////////////////////////////////////////////////////////////////
 
 class MdtRdoToMdtPrepData : public AthAlgorithm {
+public:
+    MdtRdoToMdtPrepData(const std::string& name, ISvcLocator* pSvcLocator);
 
- public:
+    StatusCode initialize();
+    StatusCode execute();
 
-  MdtRdoToMdtPrepData(const std::string& name, ISvcLocator* pSvcLocator);
-    
-  StatusCode initialize();
-  StatusCode execute();
-
- private:
-
+private:
     // EJWM - where is this implemented? Removing to avoid missing symbol
-    //void printRpcPrepRawData(); //!< Prints information about the resultant PRDs.
+    // void printRpcPrepRawData(); //!< Prints information about the resultant PRDs.
 
-    ToolHandle<Muon::IMuonRdoToPrepDataTool> m_tool{this,"DecodingTool","Muon::MdtRdoToPrepDataTool/MdtPrepDataProviderTool","mdt rdo to prep data conversion tool"};
-    ToolHandle<IRegSelTool> m_regsel_mdt{this,"RegSel_MDT","RegSelTool/RegSelTool_MDT"};
+    ToolHandle<Muon::IMuonRdoToPrepDataTool> m_tool{this, "DecodingTool", "Muon::MdtRdoToPrepDataTool/MdtPrepDataProviderTool",
+                                                    "mdt rdo to prep data conversion tool"};
+    ToolHandle<IRegSelTool> m_regsel_mdt{this, "RegSel_MDT", "RegSelTool/RegSelTool_MDT"};
 
-    bool                                    m_print_inputRdo; //!<< If true, will dump information about the input RDOs.
-    bool                                    m_print_prepData; //!<< If true, will dump information about the resulting PRDs.
+    bool m_print_inputRdo;  //!<< If true, will dump information about the input RDOs.
+    bool m_print_prepData;  //!<< If true, will dump information about the resulting PRDs.
     bool m_seededDecoding;
     SG::ReadHandleKey<TrigRoiDescriptorCollection> m_roiCollectionKey;
     SG::WriteHandleKey<Muon::MdtPrepDataContainer> m_mdtCollection;
-
 };
 
-#endif /// MDTRDOTOMDTPREPDATA_H
-
-
+#endif  /// MDTRDOTOMDTPREPDATA_H

@@ -7,29 +7,26 @@
 
 #include "AthenaBaseComps/AthReentrantAlgorithm.h"
 #include "GaudiKernel/ServiceHandle.h"
-
-#include "MuonRDO/MM_RawDataContainer.h"
 #include "MuonDigitContainer/MmDigitContainer.h"
 #include "MuonIdHelpers/IMuonIdHelperSvc.h"
+#include "MuonRDO/MM_RawDataContainer.h"
 #include "NSWCalibTools/INSWCalibTool.h"
 
 /////////////////////////////////////////////////////////////////////////////
 
-class MM_DigitToRDO : public AthReentrantAlgorithm
-{
-
+class MM_DigitToRDO : public AthReentrantAlgorithm {
 public:
-
-  MM_DigitToRDO (const std::string& name, ISvcLocator* pSvcLocator);
-  virtual ~MM_DigitToRDO() = default;
-  virtual StatusCode initialize() override final;
-  virtual StatusCode execute(const EventContext& ctx) const override final;
+    MM_DigitToRDO(const std::string& name, ISvcLocator* pSvcLocator);
+    virtual ~MM_DigitToRDO() = default;
+    virtual StatusCode initialize() override final;
+    virtual StatusCode execute(const EventContext& ctx) const override final;
 
 private:
-  ServiceHandle<Muon::IMuonIdHelperSvc> m_idHelperSvc {this, "MuonIdHelperSvc", "Muon::MuonIdHelperSvc/MuonIdHelperSvc"};
-  SG::WriteHandleKey<Muon::MM_RawDataContainer> m_rdoContainer{this, "OutputObjectName", "MMRDO","WriteHandleKey for Output MM_RawDataContainer"};
-  SG::ReadHandleKey<MmDigitContainer> m_digitContainer{this, "InputObjectName", "MM_DIGITS", "ReadHAndleKey for Input MmDigitContainer"};
-  ToolHandle<Muon::INSWCalibTool> m_calibTool{this,"CalibrationTool", ""};
+    ServiceHandle<Muon::IMuonIdHelperSvc> m_idHelperSvc{this, "MuonIdHelperSvc", "Muon::MuonIdHelperSvc/MuonIdHelperSvc"};
+    SG::WriteHandleKey<Muon::MM_RawDataContainer> m_rdoContainer{this, "OutputObjectName", "MMRDO",
+                                                                 "WriteHandleKey for Output MM_RawDataContainer"};
+    SG::ReadHandleKey<MmDigitContainer> m_digitContainer{this, "InputObjectName", "MM_DIGITS", "ReadHAndleKey for Input MmDigitContainer"};
+    ToolHandle<Muon::INSWCalibTool> m_calibTool{this, "CalibrationTool", ""};
 };
 
 #endif

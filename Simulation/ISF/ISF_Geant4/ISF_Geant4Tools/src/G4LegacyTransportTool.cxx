@@ -14,7 +14,7 @@
 
 // ISF classes
 #include "ISF_Event/ISFParticle.h"
-#include "ISF_Event/ISFParticleVector.h"
+#include "ISF_Event/ISFParticleContainer.h"
 
 // Athena classes
 #include "GeneratorObjects/McEventCollection.h"

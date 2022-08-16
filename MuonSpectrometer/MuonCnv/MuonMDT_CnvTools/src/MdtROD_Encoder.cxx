@@ -18,32 +18,24 @@
 #include "MuonIdHelpers/MdtIdHelper.h"
 #include "StoreGate/StoreGateSvc.h"
 
-
 MdtROD_Encoder::MdtROD_Encoder() {
-    if (!m_mdtIdHelper.retrieve().isSuccess()) {
-        throw std::runtime_error("MdtROD_Encoder -- Failed to initialize the IdHelperSvc");
-    }
+    if (!m_mdtIdHelper.retrieve().isSuccess()) { throw std::runtime_error("MdtROD_Encoder -- Failed to initialize the IdHelperSvc"); }
 }
 // Add a CSM
-void MdtROD_Encoder::add(const MdtCsm* csm) {
-    m_vMdtCsm.push_back(csm);   
-}
+void MdtROD_Encoder::add(const MdtCsm* csm) { m_vMdtCsm.push_back(csm); }
 
 // Clear the vector of CSMs
-void MdtROD_Encoder::clear() {
-    m_vMdtCsm.erase(m_vMdtCsm.begin(), m_vMdtCsm.end());   
-}
+void MdtROD_Encoder::clear() { m_vMdtCsm.erase(m_vMdtCsm.begin(), m_vMdtCsm.end()); }
 
 /** convert all MDT CSMs in the current list to
   a vector of 32bit words
 */
 
-void MdtROD_Encoder::fillROD(std::vector<uint32_t>& v) {    
-
+void MdtROD_Encoder::fillROD(std::vector<uint32_t>& v) {
     MdtAmtReadOut amtReadOut{};
     MdtHptdcReadOut hptdcReadOut{};
     MdtCsmReadOut csmReadOut{};
-  
+
     uint32_t mrod_wcnt{0};
 
     using hit_vector = std::vector<const MdtAmtHit*>;
@@ -59,8 +51,7 @@ void MdtROD_Encoder::fillROD(std::vector<uint32_t>& v) {
 
     // make the body of the ROD
     // Loop on the CSMs
-    for ( const MdtCsm* csm :  m_vMdtCsm) {
-     
+    for (const MdtCsm* csm : m_vMdtCsm) {
         const bool isHPTDC = m_mdtIdHelper->hasHPTDC(csm->identify());
 
         uint16_t ctwc = 0;  // Trailer word count initialized
@@ -106,7 +97,7 @@ void MdtROD_Encoder::fillROD(std::vector<uint32_t>& v) {
             // Loop on the hits for this TDC
             hit_vector::const_iterator it_amtvec = (*it_tdc).second.begin();
             for (; it_amtvec != (*it_tdc).second.end(); ++it_amtvec) {
-                uint16_t chan = (*it_amtvec)->channelId();                
+                uint16_t chan = (*it_amtvec)->channelId();
 
                 uint16_t coarse = (*it_amtvec)->coarse();
                 uint16_t fine = (*it_amtvec)->fine();
@@ -142,5 +133,4 @@ void MdtROD_Encoder::fillROD(std::vector<uint32_t>& v) {
 
     // Close the MROD: MROD word count in EOB
     v.push_back(csmReadOut.makeEOB(mrod_wcnt));
-  
 }

@@ -15,7 +15,7 @@ from LArRecUtils.LArRecUtilsConfig import LArAutoCorrNoiseCondAlgCfg
 from LArBadChannelTool.LArBadChannelConfig import LArBadFebCfg,LArBadChannelCfg
 from LArConfiguration.LArElecCalibDBConfig import LArElecCalibDbCfg
 from Digitization.PileUpToolsConfig import PileUpToolsCfg
-from Digitization.PileUpMergeSvcConfigNew import PileUpMergeSvcCfg
+from Digitization.PileUpMergeSvcConfig import PileUpMergeSvcCfg, PileUpXingFolderCfg
 # for Digitization
 from LArROD.LArRawChannelBuilderAlgConfig import LArRawChannelBuilderAlgCfg
 from LArROD.LArDigitThinnerConfig import LArDigitThinnerCfg
@@ -48,8 +48,7 @@ def LArRangeEMCfg(flags, name="LArRangeEM", **kwargs):
     else:
         kwargs.setdefault("ItemList", ["LArHitContainer#LArHitEMB",
                                        "LArHitContainer#LArHitEMEC"])
-    PileUpXingFolder = CompFactory.PileUpXingFolder
-    return PileUpXingFolder(name, **kwargs)
+    return PileUpXingFolderCfg(flags, name, **kwargs)
 
 
 def LArRangeHECCfg(flags, name="LArRangeHEC", **kwargs):
@@ -61,8 +60,7 @@ def LArRangeHECCfg(flags, name="LArRangeHEC", **kwargs):
         kwargs.setdefault("ItemList", ["LArHitFloatContainer#LArHitHEC"])
     else:
         kwargs.setdefault("ItemList", ["LArHitContainer#LArHitHEC"])
-    PileUpXingFolder = CompFactory.PileUpXingFolder
-    return PileUpXingFolder(name, **kwargs)
+    return PileUpXingFolderCfg(flags, name, **kwargs)
 
 
 def LArRangeFCALCfg(flags, name="LArRangeFCAL", **kwargs):
@@ -74,8 +72,7 @@ def LArRangeFCALCfg(flags, name="LArRangeFCAL", **kwargs):
         kwargs.setdefault("ItemList", ["LArHitFloatContainer#LArHitFCAL"])
     else:
         kwargs.setdefault("ItemList", ["LArHitContainer#LArHitFCAL"])
-    PileUpXingFolder = CompFactory.PileUpXingFolder
-    return PileUpXingFolder(name, **kwargs)
+    return PileUpXingFolderCfg(flags, name, **kwargs)
 
 
 def LArPileUpToolCfg(flags, name="LArPileUpTool", **kwargs):

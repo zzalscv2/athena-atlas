@@ -1,10 +1,20 @@
-# Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
 
 # ComponentAccumulator based configuration
 from AthenaConfiguration.ComponentAccumulator import ComponentAccumulator
 from AthenaConfiguration.ComponentFactory import CompFactory
 GlobalFieldManagerTool, DetectorFieldManagerTool=CompFactory.getComps("GlobalFieldManagerTool","DetectorFieldManagerTool",)
 from G4AtlasServices.G4AtlasFieldServices import StandardFieldSvcCfg, Q1FwdG4FieldSvcCfg, Q2FwdG4FieldSvcCfg, Q3FwdG4FieldSvcCfg, D1FwdG4FieldSvcCfg, D2FwdG4FieldSvcCfg, Q4FwdG4FieldSvcCfg, Q5FwdG4FieldSvcCfg, Q6FwdG4FieldSvcCfg, Q7FwdG4FieldSvcCfg, Q1HKickFwdG4FieldSvcCfg, Q1VKickFwdG4FieldSvcCfg, Q2HKickFwdG4FieldSvcCfg, Q2VKickFwdG4FieldSvcCfg, Q3HKickFwdG4FieldSvcCfg, Q3VKickFwdG4FieldSvcCfg, Q4VKickAFwdG4FieldSvcCfg, Q4HKickFwdG4FieldSvcCfg, Q4VKickBFwdG4FieldSvcCfg, Q5HKickFwdG4FieldSvcCfg, Q6VKickFwdG4FieldSvcCfg
+
+def EquationOfMotionCfg(ConfigFlags, **kwargs):
+    """Return the TruthService config flagged by Sim.TruthStrategy"""
+    from Monopole.MonopoleConfig import G4mplEqMagElectricFieldToolCfg
+    stratmap = {
+       "G4mplEqMagElectricField" : G4mplEqMagElectricFieldToolCfg,
+    }
+    xCfg = stratmap[ConfigFlags.Sim.G4EquationOfMotion]
+    return xCfg(ConfigFlags, **kwargs)
+
 
 # Field Managers
 def ATLASFieldManagerToolCfg(ConfigFlags, name='ATLASFieldManager', **kwargs):
@@ -13,7 +23,7 @@ def ATLASFieldManagerToolCfg(ConfigFlags, name='ATLASFieldManager', **kwargs):
     kwargs.setdefault("FieldSvc", result.getPrimaryAndMerge(StandardFieldSvcCfg(ConfigFlags)).name)
     kwargs.setdefault("UseTightMuonStepping", False)
     if len(ConfigFlags.Sim.G4EquationOfMotion)>0:
-        kwargs.setdefault("EquationOfMotion", ConfigFlags.Sim.G4EquationOfMotion )
+        kwargs.setdefault("EquationOfMotion", result.popToolsAndMerge(EquationOfMotionCfg(ConfigFlags)))
     result.setPrivateTools(GlobalFieldManagerTool(name, **kwargs))
     return result
 
@@ -23,7 +33,7 @@ def TightMuonsATLASFieldManagerToolCfg(ConfigFlags, name='TightMuonsATLASFieldMa
     kwargs.setdefault("FieldSvc", result.getPrimaryAndMerge(StandardFieldSvcCfg(ConfigFlags)).name)
     kwargs.setdefault("UseTightMuonStepping",True)
     if len(ConfigFlags.Sim.G4EquationOfMotion)>0:
-        kwargs.setdefault("EquationOfMotion", ConfigFlags.Sim.G4EquationOfMotion )
+        kwargs.setdefault("EquationOfMotion", result.popToolsAndMerge(EquationOfMotionCfg(ConfigFlags)))
     result.setPrivateTools(GlobalFieldManagerTool(name, **kwargs))
     return result
 
@@ -39,7 +49,7 @@ def BasicDetectorFieldManagerToolCfg(ConfigFlags, name='BasicDetectorFieldManage
     kwargs.setdefault("IntegratorStepper", ConfigFlags.Sim.G4Stepper)
     kwargs.setdefault('MuonOnlyField',     False)
     if len(ConfigFlags.Sim.G4EquationOfMotion)>0:
-        kwargs.setdefault("EquationOfMotion", ConfigFlags.Sim.G4EquationOfMotion )
+        kwargs.setdefault("EquationOfMotion", result.popToolsAndMerge(EquationOfMotionCfg(ConfigFlags)))
     result.setPrivateTools(DetectorFieldManagerTool(name, **kwargs))
     return result
 

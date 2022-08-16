@@ -11,7 +11,6 @@
 #include "GaudiKernel/ISvcLocator.h"
 #include "GaudiKernel/MsgStream.h"
 
-
 MdtRODReadOut::MdtRODReadOut() :
     // m_dataWord(0),
     m_subdetId(0),
@@ -19,7 +18,6 @@ MdtRODReadOut::MdtRODReadOut() :
     m_lvl1Id(0),
     m_bcId(0),
     m_triggerTypeId(0) {}
-
 
 // Decode the ROD header
 void MdtRODReadOut::decodeHeader(const std::vector<uint32_t>& p) {

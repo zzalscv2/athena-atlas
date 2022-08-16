@@ -13,51 +13,42 @@
 */
 
 #include "AthenaBaseComps/AthAlgorithm.h"
-#include "GaudiKernel/ServiceHandle.h"
-
 #include "GaudiKernel/NTuple.h"
+#include "GaudiKernel/ServiceHandle.h"
 #include "MuonIdHelpers/IMuonIdHelperSvc.h"
 
 /////////////////////////////////////////////////////////////////////////////
 
-class ReadTgcDigit: public AthAlgorithm
-{
+class ReadTgcDigit : public AthAlgorithm {
 public:
-  ReadTgcDigit (const std::string& name, ISvcLocator* pSvcLocator);
-  virtual StatusCode initialize();
-  virtual StatusCode execute();
+    ReadTgcDigit(const std::string& name, ISvcLocator* pSvcLocator);
+    virtual StatusCode initialize();
+    virtual StatusCode execute();
 
 protected:
-  NTuple::Tuple* m_ntuplePtr;
+    NTuple::Tuple* m_ntuplePtr;
 
 private:
-  StatusCode accessNtuple();
-  bool m_tgcNtuple;
+    StatusCode accessNtuple();
+    bool m_tgcNtuple;
 
-  //Ntuple ID
-  std::string     m_NtupleLocID;
+    // Ntuple ID
+    std::string m_NtupleLocID;
 
-  ServiceHandle<Muon::IMuonIdHelperSvc> m_idHelperSvc {this, "MuonIdHelperSvc", "Muon::MuonIdHelperSvc/MuonIdHelperSvc"};
+    ServiceHandle<Muon::IMuonIdHelperSvc> m_idHelperSvc{this, "MuonIdHelperSvc", "Muon::MuonIdHelperSvc/MuonIdHelperSvc"};
 
-  // Define variables in the Ntuple:
+    // Define variables in the Ntuple:
 
-  NTuple::Item<long>   m_nColl;    // number of collection in the container
-  NTuple::Item<long>   m_nDig;     // number of digit in the collection 
+    NTuple::Item<long> m_nColl;  // number of collection in the container
+    NTuple::Item<long> m_nDig;   // number of digit in the collection
 
-  NTuple::Array<long>  m_stationName; // ID information
-  NTuple::Array<long>  m_stationEta;
-  NTuple::Array<long>  m_stationPhi;
-  NTuple::Array<long>  m_gasGap;
-  NTuple::Array<long>  m_isStrip;
-  NTuple::Array<long>  m_channel;
-  NTuple::Array<long>  m_bcTag;
+    NTuple::Array<long> m_stationName;  // ID information
+    NTuple::Array<long> m_stationEta;
+    NTuple::Array<long> m_stationPhi;
+    NTuple::Array<long> m_gasGap;
+    NTuple::Array<long> m_isStrip;
+    NTuple::Array<long> m_channel;
+    NTuple::Array<long> m_bcTag;
 };
 
 #endif
-
-
-
-
-
-
-

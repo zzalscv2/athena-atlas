@@ -35,7 +35,7 @@ For more **complex commands**, or **any command that contains a semicolon (`;`)*
 Either one available within the release:
 ```cmake
 atlas_add_citest( Digitization_NewConfig
-   SCRIPT DigitizationConfigNew_test.py )
+   SCRIPT DigitizationConfig_test.py )
 ```
 or add a script to the [`test/`](test/) folder:
 ```cmake

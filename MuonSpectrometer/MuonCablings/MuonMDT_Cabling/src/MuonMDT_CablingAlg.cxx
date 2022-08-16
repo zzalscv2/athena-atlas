@@ -102,7 +102,8 @@ StatusCode MuonMDT_CablingAlg::loadCablingSchema(const EventContext& ctx, EventI
             if (!cabling_map.addMezzanine(map_data, msgStream())) {
                 ATH_MSG_ERROR("Failed to add cabling " << map_data);
                 return StatusCode::FAILURE;
-            } else ATH_MSG_VERBOSE("Added new cabling channel "<<map_data);
+            } else
+                ATH_MSG_VERBOSE("Added new cabling channel " << map_data);
         }
     }  // end of CondAttrListCollection loop
     /// Load manually the BIX7 / BIY7 chambers into the data base if neccessary
@@ -206,8 +207,8 @@ bool MuonMDT_CablingAlg::extractStationInfo(const coral::AttributeList& atr, Cab
     /// Temporary hack to remove all EI chambers until the proper data base tag arrives
     if (m_isRun3) {
         /// It's still useful to keep the C-side chamber if the asymmetric geometry is loaded
-        if ( ( stationNameString == "EIS" && (!m_idHelperSvc->hasCSC() || chamber_name.find('A') != std::string::npos) ) 
-            || chamber_name.find("BIS7A") != std::string::npos) {
+        if ((stationNameString == "EIS" && (!m_idHelperSvc->hasCSC() || chamber_name.find('A') != std::string::npos)) ||
+            chamber_name.find("BIS7A") != std::string::npos) {
             ATH_MSG_VERBOSE("It's sooo sad but the chamber " << chamber_name << " is no longer with us");
             return false;
         }

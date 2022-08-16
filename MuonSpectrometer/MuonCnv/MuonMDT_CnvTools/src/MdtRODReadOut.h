@@ -31,8 +31,8 @@ private:
 
 public:
     MdtRODReadOut();
-    ~MdtRODReadOut()=default;
-    
+    ~MdtRODReadOut() = default;
+
     void decodeHeader(const std::vector<uint32_t>& p);
     void decodeFooter(const std::vector<uint32_t>& p);
 

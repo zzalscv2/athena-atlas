@@ -47,7 +47,7 @@ def DigitizationMainServicesCfg(flags):
             acc = MainServicesCfg(flags)
             acc.merge(PileUpMTAlgCfg(flags))
         else:
-            from Digitization.PileUpConfigNew import PileUpEventLoopMgrCfg
+            from Digitization.PileUpConfig import PileUpEventLoopMgrCfg
             acc = MainServicesCfg(flags, LoopMgr="PileUpEventLoopMgr")
             acc.merge(PileUpEventLoopMgrCfg(flags))
     else:
@@ -85,7 +85,7 @@ def DigitizationMainContentCfg(flags):
         acc.merge(EventInfoUpdateFromContextAlgCfg(flags))
 
         # Decorate pile-up values
-        from Digitization.PileUpConfigNew import NoPileUpMuWriterCfg
+        from Digitization.PileUpConfig import NoPileUpMuWriterCfg
         acc.merge(NoPileUpMuWriterCfg(flags))
 
     # Signal-only truth information
