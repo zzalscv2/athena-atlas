@@ -34,7 +34,7 @@ mv log.RAWtoESD log.RAWtoESD_serial
 # now run reconstruction with AthenaMT with 1 thread
 Reco_tf.py --AMI q443 \
            --imf False \
-           --athenaopts="HITStoRDO:--threads=1;--RAWtoALL:--threads=1" \
+           --athenaopts="HITStoRDO:--threads=1;RAWtoALL:--threads=1" \
            --outputESDFile OUT_ESD_1thread.root
 exit_code=$?
 echo  "art-result: ${exit_code} Reco_tf_1thread.py"
