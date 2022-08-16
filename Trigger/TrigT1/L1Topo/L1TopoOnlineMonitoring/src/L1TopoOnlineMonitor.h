@@ -88,6 +88,8 @@ private:
     this, "doHwMon", true, "Enable L1Topo HW readout from RAW"};
   Gaudi::Property<bool> m_doComp {
     this, "doComp", true, "Enable L1Topo HW/Sim comparison"};
+  Gaudi::Property<bool> m_forceCTPasHdw {
+    this, "forceCTPasHdw", false, "Force to CTP monitoring as primary in Sim/Hdw comparison"};
 
   ServiceHandle<StoreGateSvc> m_detStore { this, "DetectorStore", "StoreGateSvc/DetectorStore", "Detector store to get the menu" };
 
