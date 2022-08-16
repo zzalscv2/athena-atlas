@@ -75,7 +75,7 @@ StatusCode LArRawChannelMonAlg::initialize()
 {
   ATH_MSG_DEBUG("===> start " << name() << "::initialize <=== ");
 
-  ATH_CHECK(m_EventInfoKey.initialize());
+  ATH_CHECK(m_larFlagKey.initialize());
   ATH_CHECK(m_LArRawChannel_container_key.initialize());
   ATH_CHECK(detStore()->retrieve(m_lar_online_id_ptr, "LArOnlineID"));
   ATH_CHECK(detStore()->retrieve(m_calo_id_mgr_ptr));
