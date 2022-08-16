@@ -39,6 +39,7 @@ def addDerivationSubstep(executor_set):
     # It handles the composite output filenames and inserts them into the transform's dataDictionary.
     # If this isn't done the file validation will run over the wrong file name.
     executor = reductionFrameworkExecutor(name='Derivation',
+                                          skeletonFile=None,
                                           skeletonCA='DerivationFrameworkConfiguration.DerivationSkeleton',
                                           substep='DerivationFramework',
                                           tryDropAndReload=False,
