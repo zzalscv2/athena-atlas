@@ -31,8 +31,6 @@ public:
     /// Returns the underlying TTree object
     TTree* tree();
     const TTree* tree() const;
-    TTree* tree();
- 
     /// Returns the data dependencies needed by the MuonTesterBranch
     std::vector<DataDependency> data_dependencies() override final;
 
