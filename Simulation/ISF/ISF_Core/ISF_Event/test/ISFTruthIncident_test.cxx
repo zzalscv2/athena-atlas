@@ -10,7 +10,7 @@
 #include "ISF_Event/ISFParticle.h"
 
 // children container typedefs
-#include "ISF_Event/ISFParticleVector.h"
+#include "ISF_Event/ISFParticleContainer.h"
 
 #include "GeoPrimitives/GeoPrimitives.h"
 
