@@ -30,6 +30,8 @@ public:
     bool initialized() const;
     /// Returns the underlying TTree object
     const TTree* tree() const;
+    TTree* tree();
+ 
     /// Returns the data dependencies needed by the MuonTesterBranch
     std::vector<DataDependency> data_dependencies() override final;
 
