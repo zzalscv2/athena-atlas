@@ -2,6 +2,7 @@
 
 from AthenaConfiguration.ComponentAccumulator import ComponentAccumulator
 from AthenaConfiguration.ComponentFactory import CompFactory
+from AthenaConfiguration.Enums import LHCPeriod
 from LArCellRec.LArCellBuilderConfig import LArCellBuilderCfg,LArCellCorrectorCfg
 from TileRecUtils.TileCellBuilderConfig import TileCellBuilderCfg
 from CaloCellCorrection.CaloCellCorrectionConfig import CaloCellPedestalCorrCfg, CaloCellNeighborsAverageCorrCfg, CaloCellTimeCorrCfg, CaloEnergyRescalerCfg
@@ -55,14 +56,15 @@ def CaloCellMakerCfg(configFlags):
                                          CaloCellsOutputName="AllCalo")
 
     result.addEventAlgo(cellAlgo, primary=True)
+
+    outputContainers = ["CaloCellContainer#AllCalo"]
+    if configFlags.GeoModel.Run in [LHCPeriod.Run1, LHCPeriod.Run2, LHCPeriod.Run3]:
+        outputContainers += ["TileCellContainer#MBTSContainer"]
+    if configFlags.GeoModel.Run is LHCPeriod.Run2:
+        outputContainers += ["TileCellContainer#E4prContainer"]
     from OutputStreamAthenaPool.OutputStreamConfig import addToESD, addToAOD
-    result.merge(addToESD(configFlags, ["CaloCellContainer#AllCalo",
-                                        "TileCellContainer#MBTSContainer",
-                                        "TileCellContainer#E4prContainer"]))
-    result.merge(addToAOD(configFlags,
-                          ["CaloCellContainer#AllCalo",
-                           "TileCellContainer#MBTSContainer",
-                           "TileCellContainer#E4prContainer"]))
+    result.merge(addToESD(configFlags, outputContainers))
+    result.merge(addToAOD(configFlags, outputContainers))
 
     return result
 

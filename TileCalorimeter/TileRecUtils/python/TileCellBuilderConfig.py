@@ -1,9 +1,10 @@
-# Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
 
 """Define method to construct configured Tile Cell builder tool"""
 
 from AthenaConfiguration.ComponentAccumulator import ComponentAccumulator
 from AthenaConfiguration.ComponentFactory import CompFactory
+from AthenaConfiguration.Enums import LHCPeriod
 
 def TileCellBuilderCfg(flags, **kwargs):
     """Return component accumulator with configured private Tile Cell builder tool
@@ -17,6 +18,9 @@ def TileCellBuilderCfg(flags, **kwargs):
     kwargs.setdefault('CheckDCS', flags.Tile.useDCS)
     kwargs.setdefault('TileRawChannelContainer', flags.Tile.RawChannelContainer)
     kwargs.setdefault('SkipGain', -1) # Never skip any gain by default
+
+    kwargs.setdefault('MBTSContainer', 'MBTSContainer' if flags.GeoModel.Run in [LHCPeriod.Run1, LHCPeriod.Run2, LHCPeriod.Run3] else "")
+    kwargs.setdefault('E4prContainer', 'E4prContainer' if flags.GeoModel.Run is LHCPeriod.Run2 else "")
 
     if kwargs['SkipGain'] not in [-1, 0, 1]:
         raise(Exception("Invalid Tile gain requsted to be skipped: %s" % kwargs['SkipGain']))
