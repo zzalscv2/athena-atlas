@@ -207,7 +207,7 @@ CaloCondBlobBase::getDate() const
 {
   if(!getCommentSizeUint32()) return std::string("");
   ::time_t timeStamp = getTimeStamp();
-  char buf[23];
+  char buf[26];
   char* iBeg = ::ctime_r(&timeStamp, buf);
   char* iEnd = iBeg;
   while(*iEnd!='\n'){++iEnd;}
