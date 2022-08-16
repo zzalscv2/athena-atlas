@@ -21,6 +21,8 @@
 #include "TrigConfData/L1Menu.h"
 #include "L1CaloFEXSim/jFEXOutputCollection.h"
 
+#include "L1CaloFEXSim/jFEXtauTOB.h"
+
 namespace LVL1 {
   
 /*
@@ -49,9 +51,7 @@ Interface definition for jFEXFPGA
 
     virtual std::vector <std::vector <uint32_t>> getFwdElTOBs() =0;
 
-    virtual uint32_t formTauTOB(int &, int &) =0;
-    virtual std::vector <std::vector <uint32_t>> getTauTOBs() = 0;
-    virtual std::vector <std::vector <uint32_t>> getTauxTOBs() = 0;
+    virtual std::vector<std::unique_ptr<jFEXtauTOB>> getTauTOBs() = 0;
 
     virtual uint32_t formSumETTOB(int , int ) =0;
     virtual std::vector <uint32_t> getSumEtTOBs() =0;    

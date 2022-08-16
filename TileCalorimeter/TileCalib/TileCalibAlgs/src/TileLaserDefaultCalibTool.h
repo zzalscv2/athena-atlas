@@ -167,13 +167,21 @@ class TileLaserDefaultCalibTool : public AthAlgTool, virtual public ITileCalibTo
   float (*m_ratio_good_S)[NPARTITIONS][NDRAWERS][NCHANNELS][NGAINS];     // Corresponding RMS
   float (*m_pmt_ratios)[NDRAWERS][NCHANNELS][NGAINS];       // Calib coefficients computed for this run (for all diodes)
   float (*m_pmt_S_ratios)[NDRAWERS][NCHANNELS][NGAINS];     // Corresponding RMS
+
+  float (*m_diode_ratio_low)[NDIODES];
+  float (*m_diode_ratio_high)[NDIODES];
+  float (*m_diode_ratio_sigma_low)[NDIODES];
+  float (*m_diode_ratio_sigma_high)[NDIODES];
+
+
   RunningStat* m_rs_diode_signal[NDIODES_LASER1];
   RunningStat* m_rs_PMT_signal[NPMTS];
   RunningStat* (*m_rs_ratio)[NPARTITIONS][NDRAWERS][NCHANNELS][NGAINS];
   RunningStat* (*m_rs_ratio_good)[NPARTITIONS][NDRAWERS][NCHANNELS][NGAINS];
-  RunningStat* (*m_rs_pmt_ratios)[NDRAWERS][NCHANNELS][NGAINS];
+  RunningStat* (*m_rs_pmt_ratios)[NDRAWERS][NCHANNELS][NGAINS]; 
  
-
+  RunningStat* (*m_rs_diode_ratio_low)[NDIODES];
+  RunningStat* (*m_rs_diode_ratio_high)[NDIODES];
 
   float (*m_meantime)[NGAINS];         // Mean time computed for this run per partition (to remove 25ns jitter) 
   float (*m_time)[NDRAWERS][NCHANNELS][NGAINS];           // Mean time computed for this run

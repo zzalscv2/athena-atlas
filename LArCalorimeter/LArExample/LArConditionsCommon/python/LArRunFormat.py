@@ -1,6 +1,6 @@
 #!/usr/bin/env python
 
-# Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
 
 from CoolConvUtilities.AtlCoolLib import indirectOpen
 from os import environ
@@ -66,10 +66,10 @@ def getLArFormatForRun(run,readOracle=True,quiet=False,connstring=None):
     mlog_LRF.info("Connecting to database %s", connstring)
 
     if "DBRELEASE" in environ:
-        print ("Running in DBRelease, forcing readOracle to False")
+        mlog_LRF.info ("Running in DBRelease, forcing readOracle to False")
         readOracle=False
 
-    print("run=",run)
+    mlog_LRF.info("run=",run)
     runDB=indirectOpen(connstring,oracle=readOracle)
     if (runDB is None):
         mlog_LRF.error("Cannot connect to database %s",connstring)
@@ -99,6 +99,90 @@ def getLArFormatForRun(run,readOracle=True,quiet=False,connstring=None):
     mlog_LRF.info("Found info for run %d", run)
     return  LArRunInfo(nSamples,gainType,latency,firstSample,format,runType)
 
+class LArDTRunInfo:
+    "Wrapper class to hold LAr DT run configuration information"
+    def __init__(self,streamTypes, streamLengths, timing, adccalib):
+        self._sTypes = streamTypes
+        self._sLengths = streamLengths
+        self._tim = timing
+        self._adcc = adccalib
+
+    def streamTypes(self):
+           return self._sTypes
+
+    def streamLengths(self):
+           return self._sLengths
+
+    def timing(self):
+           return self._tim
+
+    def ADCCalib(self):
+           return self._adcc
+
+def getLArDTInfoForRun(run,readOracle=True,quiet=False,connstring=None):
+    from AthenaCommon.Logging import logging
+    mlog_LRF = logging.getLogger( 'getLArDTRunIngoForRun' )
+    if connstring is None:
+        from IOVDbSvc.CondDB import conddb
+        connstring = "COOLONL_LAR/"+conddb.dbdata
+    
+    mlog_LRF.info("Connecting to database %s", connstring)
+
+    if "DBRELEASE" in environ:
+        mlog_LRF.info("Running in DBRelease, forcing readOracle to False")
+        readOracle=False
+
+    mlog_LRF.info("run=",run)
+    runDB=indirectOpen(connstring,oracle=readOracle)
+    if (runDB is None):
+        mlog_LRF.error("Cannot connect to database %s",connstring)
+        raise RuntimeError("getLArFormatForRun ERROR: Cannot connect to database %s",connstring)
+    typesMap={0:"ADC", 1:"RawADC", 2:"Energy", 3:"SelectedEnergy",15:"Invalid"}
+    sTypes=[]
+    sLengths=[]    
+    timing=None
+    adccalib=None
+    mux=[]
+    try:
+        folder=runDB.getFolder('/LAR/Configuration/RunLogDT')
+        runiov=run << 32
+        obj=folder.findObject(runiov,0)
+        payload=obj.payload()
+        timing=payload['timing_configuration']
+        recipe=payload['recipe_tdaq']
+        mux.append(ord(payload['mux_setting_0']))
+        mux.append(ord(payload['mux_setting_1']))
+        adccalib=payload['ADCCalibMode']
+    except Exception:
+        mlog_LRF.warning("No information in /LAR/Configuration/RunLogDT for run %i", run)
+        #mlog_LRF.warning(e)
+        return None
+
+    runDB.closeDatabase()
+    mlog_LRF.info("Found DT info for run %d", run)
+    # parse recipe string of the type at0_bcX-at1_bcY...
+    for s,m in ["at0_bc",0],["at1_bc",1]:
+       pos=recipe.find(s)
+       if pos >=0:
+          n=-1
+          try:
+             n=int(recipe[pos+6:pos+8])
+          except Exception:
+             try:
+               n=int(recipe[pos+6:pos+7])
+             except Exception:
+               mlog_LRF.warning("could not decode ",recipe[pos+6:])
+          if n>=0:
+             sLengths.append(n)
+             if mux[m] in typesMap.keys():
+                sTypes.append(typesMap[mux[m]])
+             else:         
+                sTypes.append(15)
+          pass      
+       pass
+
+    return  LArDTRunInfo(sTypes, sLengths, timing, adccalib)
+
 # command line driver for convenience
 if __name__=='__main__':
     import sys
@@ -111,3 +195,11 @@ if __name__=='__main__':
       print(" LAr run configuration: Nsamples:%d  GainType:%d  Latency:%d  FirstSample:%d  Format:%s  runType:%s" % (myformat.nSamples(),myformat.gainType(),myformat.latency(),myformat.firstSample(),myformat.stringFormat(),myformat.stringRunType()))
     else:
       print(" LAr run infomation not available")
+
+    myformat1=getLArDTInfoForRun(run, connstring="COOLONL_LAR/CONDBR2")
+    if (myformat1 is not None):
+      print(" LAr DT run configuration: timing:%s  adccalib:%d" % (myformat1.timing(),myformat1.ADCCalib()))
+      for i in range(0,len(myformat1.streamTypes())):
+         print(" stream: %s  size: %d" % (myformat1.streamTypes()[i], myformat1.streamLengths()[i]))  
+    else:
+      print(" LAr DT run infomation not available")

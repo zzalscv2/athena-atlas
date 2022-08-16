@@ -35,10 +35,6 @@ class IjFEXtauAlgo : virtual public IAlgTool {
         virtual int getIsLocalMaxima()  =0;
         virtual int getFirstEtRing()  =0;
         virtual void setFPGAEnergy(std::unordered_map<int,std::vector<int> > et_map)   =0;
-        
-
-        virtual std::unique_ptr<jFEXtauTOB> getTauTOBs(int, int) = 0;
-        
 
     private:
 

@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
 */
 
 //***************************************************************************
@@ -25,6 +25,7 @@
 #include "L1CaloFEXToolInterfaces/IjFEXForwardJetsAlgo.h"
 #include "L1CaloFEXToolInterfaces/IjFEXForwardElecAlgo.h"
 #include "L1CaloFEXToolInterfaces/IjFEXPileupAndNoise.h"
+#include "L1CaloFEXToolInterfaces/IjFEXFormTOBs.h"
 #include "CaloEvent/CaloCellContainer.h"
 #include "CaloIdentifier/CaloIdManager.h"
 #include "CaloIdentifier/CaloCell_SuperCell_ID.h"
@@ -41,6 +42,8 @@
 #include "StoreGate/WriteHandle.h"
 #include "StoreGate/ReadHandle.h"
 #include "StoreGate/StoreGateSvc.h"
+
+#include "L1CaloFEXSim/jFEXtauTOB.h"
 
 namespace LVL1 {
   
@@ -82,10 +85,8 @@ namespace LVL1 {
     /** sorted Electron tobs */
     virtual std::vector <std::vector <uint32_t>> getFwdElTOBs() override;
 
-    /**Form a tob word out of the potential candidate Tau tob */
-    virtual uint32_t formTauTOB(int &, int &) override;
-    virtual std::vector <std::vector <uint32_t>> getTauTOBs() override;    
-    virtual std::vector <std::vector <uint32_t>> getTauxTOBs() override; 
+    /* Retreive Tau TOB words  */
+    virtual std::vector<std::unique_ptr<jFEXtauTOB>> getTauTOBs() override;    
        
     /**Form a tob word out of the potential candidate SumET tob */
     virtual uint32_t formSumETTOB(int , int ) override;
@@ -105,16 +106,22 @@ namespace LVL1 {
   
     int Get_calibrated_SRj_ET(int Energy, int jfex);
     
+    template <class TOBObjectClass> static bool TOBetSort(const TOBObjectClass& i, const TOBObjectClass& j , uint bits, uint mask) {
+        return (((i->getWord() >> bits ) & mask)>((j->getWord() >> bits ) & mask)); 
+    }
+    
     static bool etSRJetSort(std::vector<uint32_t> i, std::vector<uint32_t> j){ return (((i.at(0) >> FEXAlgoSpaceDefs::jJ_etBit   ) & 0x7ff  )> ((j.at(0) >> FEXAlgoSpaceDefs::jJ_etBit  ) & 0x7ff ));}
     static bool etLRJetSort(std::vector<uint32_t> i, std::vector<uint32_t> j){ return (((i.at(0) >> FEXAlgoSpaceDefs::jLJ_etBit  ) & 0x1fff )> ((j.at(0) >> FEXAlgoSpaceDefs::jLJ_etBit ) & 0x1fff));}
     static bool etTauSort  (std::vector<uint32_t> i, std::vector<uint32_t> j){ return (((i.at(0) >> FEXAlgoSpaceDefs::jTau_etBit ) & 0x7ff  )> ((j.at(0) >> FEXAlgoSpaceDefs::jTau_etBit) & 0x7ff ));}
     static bool etFwdElSort  (std::vector<uint32_t> i, std::vector<uint32_t> j){ return (((i.at(0) >> FEXAlgoSpaceDefs::jEM_etBit ) & 0x7ff  )> ((j.at(0) >> FEXAlgoSpaceDefs::jEM_etBit) & 0x7ff ));}
     
+    
+    std::vector<std::unique_ptr<jFEXtauTOB>> m_tau_tobwords;
+    
     int m_id;
     int m_jfexid;
     std::vector<std::vector<uint32_t>> m_SRJet_tobwords;
     std::vector<std::vector<uint32_t>> m_LRJet_tobwords;
-    std::vector<std::vector<uint32_t>> m_tau_tobwords;
     std::vector<std::vector<uint32_t>> m_FwdEl_tobwords;
     std::vector<uint32_t> m_sumET_tobwords;
     std::vector<uint32_t> m_Met_tobwords;
@@ -145,6 +152,7 @@ namespace LVL1 {
     ToolHandle<IjFEXForwardJetsAlgo> m_jFEXForwardJetsAlgoTool {this, "jFEXForwardJetsAlgoTool"      , "LVL1::jFEXForwardJetsAlgo"      , "Tool that runs the jFEX FCAL Jets algorithm"};
     ToolHandle<IjFEXForwardElecAlgo> m_jFEXForwardElecAlgoTool {this, "jFEXForwardElecAlgoTool"      , "LVL1::jFEXForwardElecAlgo"      , "Tool that runs the jFEX FCAL Electrons algorithm"};
     ToolHandle<IjFEXPileupAndNoise> m_jFEXPileupAndNoiseTool {this, "jFEXPileupAndNoiseTool", "LVL1::jFEXPileupAndNoise", "Tool that applies Pileup and Noise"};
+    ToolHandle<IjFEXFormTOBs> m_IjFEXFormTOBsTool {this, "IjFEXFormTOBsTool", "LVL1::jFEXFormTOBs", "Tool that forms TOB words"};
     
     int getTTowerET_SG(unsigned int TTID);
     std::string m_jfex_string[6] = {"1C","2C","3C","3A","2A","1A"};

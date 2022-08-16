@@ -218,6 +218,7 @@ if __name__ == '__main__':
   parser = argparse.ArgumentParser("Running L1TopoSimulation standalone for the BS input", formatter_class=RawTextHelpFormatter)
   parser.add_argument("-i","--inputs",nargs='*',action="store", dest="inputs", help="Inputs will be used in commands", required=True)
   parser.add_argument("-m","--module",action="store", dest="module", help="Input modules wants to be simulated.",default="", required=False)
+  parser.add_argument("-fCtp","--forceCtp",action="store_true", dest="forceCtp", help="Force to CTP monitoring as primary in Sim/Hdw comparison.",default=False, required=False)
   parser.add_argument("-l","--logLevel",action="store", dest="log", help="Log level.",default="warning", required=False)
   parser.add_argument("-n","--nevent", type=int, action="store", dest="nevent", help="Maximum number of events will be executed.",default=0, required=False)
   parser.add_argument("-s","--skipEvents", type=int, action="store", dest="skipEvents", help="How many events will be skipped.",default=0, required=False)
@@ -353,7 +354,7 @@ if __name__ == '__main__':
   # phase1 mon
   from L1TopoOnlineMonitoring import L1TopoOnlineMonitoringConfig as TopoMonConfig
   acc.addEventAlgo(
-      TopoMonConfig.getL1TopoPhase1OnlineMonitor(flags,'L1/L1TopoOffline',True,True,True,True,algLogLevel),
+      TopoMonConfig.getL1TopoPhase1OnlineMonitor(flags,'L1/L1TopoOffline',True,True,True,True,args.forceCtp,algLogLevel),
       sequenceName="AthAlgSeq"
   )
   # legacy mon

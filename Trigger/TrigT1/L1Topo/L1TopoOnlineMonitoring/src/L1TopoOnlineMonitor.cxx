@@ -100,20 +100,20 @@ StatusCode L1TopoOnlineMonitor::fillHistograms( const EventContext& ctx ) const 
       failedMonFunctions.push_back(static_cast<uint8_t>(MonFunction::doHwMon));
     }    
   }
-  
-  if (m_doSimMon) {
-    StatusCode sc = doSimMon(decisionBits,ctx);
-    ATH_MSG_DEBUG("Executed doSimMon: " << (sc.isFailure() ? "failed" : "ok"));
-    if (sc.isFailure()) {
-      failedMonFunctions.push_back(static_cast<uint8_t>(MonFunction::doSimMon));
-    }    
-  }
 
   if (m_doHwMonCTP) {
     StatusCode sc = doHwMonCTP(decisionBits,ctx);
     ATH_MSG_DEBUG("Executed doHWMonCTP: " << (sc.isFailure() ? "failed" : "ok"));
     if (sc.isFailure()) {
       failedMonFunctions.push_back(static_cast<uint8_t>(MonFunction::doHwMonCTP));
+    }    
+  }
+  
+  if (m_doSimMon) {
+    StatusCode sc = doSimMon(decisionBits,ctx);
+    ATH_MSG_DEBUG("Executed doSimMon: " << (sc.isFailure() ? "failed" : "ok"));
+    if (sc.isFailure()) {
+      failedMonFunctions.push_back(static_cast<uint8_t>(MonFunction::doSimMon));
     }    
   }
 
@@ -155,8 +155,8 @@ StatusCode L1TopoOnlineMonitor::doSimMon( DecisionBits& decisionBits, const Even
 	if ((l1topo_dec->topoWord() & mask) !=0)
 	  {
 	    topoword.push_back(32*l1topo_dec->clock()+i);
-	    uint32_t pos = 32*l1topo_dec->clock()*(l1topo_dec->connectionId()-1)+i;
-	    triggerBitsSim[pos] = (!decisionBits.triggerBits.has_value() && m_ctpIds[pos]>=512) ? false : true;
+	    uint32_t pos = 32*(l1topo_dec->clock()+(l1topo_dec->connectionId()==2 ? 0 : 2))+i;
+	    triggerBitsSim[pos] = ((!decisionBits.triggerBits.has_value() || m_forceCTPasHdw) && m_ctpIds[pos]>=512) ? false : true;
 	  }
       }
       std::string name = "CableElec_";
@@ -180,6 +180,10 @@ StatusCode L1TopoOnlineMonitor::doSimMon( DecisionBits& decisionBits, const Even
       return StatusCode::FAILURE;
     }
   }
+  std::vector<size_t> triggerBitIndicesSim = bitsetIndices(triggerBitsSim);
+  auto monTopoSim = Monitored::Collection("TopoSim", triggerBitIndicesSim);
+  Monitored::Group(m_monTool,monTopoSim);
+
   
   return StatusCode::SUCCESS;
 }
@@ -303,7 +307,7 @@ StatusCode L1TopoOnlineMonitor::doComp( DecisionBits& decisionBits ) const {
   std::bitset<s_nTopoCTPOutputs> triggerBitsSim = decisionBits.triggerBitsSim.value(); // Alias
   std::bitset<s_nTopoCTPOutputs> triggerBitsHdw;
 
-  if (decisionBits.triggerBits.has_value())
+  if (decisionBits.triggerBits.has_value() && !m_forceCTPasHdw)
     {triggerBitsHdw = decisionBits.triggerBits.value();}
   else if (decisionBits.triggerBitsCtp.has_value())
     {triggerBitsHdw = decisionBits.triggerBitsCtp.value();}
@@ -326,9 +330,9 @@ StatusCode L1TopoOnlineMonitor::doComp( DecisionBits& decisionBits ) const {
 
   float rate=0;
   for (size_t i=0;i<4;i++) {
-    auto mon_trig = Monitored::Scalar<unsigned>("LegacyTopoTrigger_"+std::to_string(i));
-    auto mon_match = Monitored::Scalar<unsigned>("LegacyTopoMissMatch_"+std::to_string(i));
-    auto mon_weight = Monitored::Scalar<float>("LegacyTopoWeight_"+std::to_string(i));
+    auto mon_trig = Monitored::Scalar<unsigned>("Phase1TopoTrigger_"+std::to_string(i));
+    auto mon_match = Monitored::Scalar<unsigned>("Phase1TopoMissMatch_"+std::to_string(i));
+    auto mon_weight = Monitored::Scalar<float>("Phase1TopoWeight_"+std::to_string(i));
     for (size_t j=0;j<32;j++) {
       m_countHdwNotSim[32*i+j]+=triggerBitsHdwNotSim[32*i+j];
       m_countSimNotHdw[32*i+j]+=triggerBitsSimNotHdw[32*i+j];

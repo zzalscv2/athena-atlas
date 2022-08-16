@@ -452,7 +452,7 @@ unsigned int TrigCaloDataAccessSvc::lateInit(const EventContext& context) { // n
                 if ( id!=0 ){
                   const CaloDetDescrElement* el = theCaloDDM->get_element(id);
 		  if ( el->is_tile() ) {
-			 cachefullcont->at(i) = new TileCell(el,0);
+			 cachefullcont->at(i) = new TileCell(el,0,0,0,0,CaloGain::TILEHIGHHIGH);
 		  } else {
 			 cachefullcont->at(i) = new LArCell(el,0,0,0,(CaloGain::CaloGain)0);
 		  }
