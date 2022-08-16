@@ -1,6 +1,7 @@
 #!/bin/sh
 
 # art-include: master/Athena
+# art-include: master/AthDerivation
 # art-description: DAOD building PHYS and PHYSLITE mc20 MP w/ SharedWriter w/o parallel compression and FAFE
 # art-type: grid
 # art-output: *.pool.root

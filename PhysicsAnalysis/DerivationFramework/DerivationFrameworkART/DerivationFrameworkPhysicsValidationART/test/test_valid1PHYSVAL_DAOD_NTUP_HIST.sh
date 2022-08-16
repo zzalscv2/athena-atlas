@@ -63,7 +63,7 @@ case $ArtProcess in
 	unset  ATHENA_PROC_NUMBER
 	echo "Unset ATHENA_NUM_PROC=${ATHENA_NUM_PROC} and ATHENA_PROC_NUMBER=${ATHENA_PROC_NUMBER}"
 	
-	DAOD_PE="default:from AthenaCommon.DetFlags import DetFlags; DetFlags.detdescr.all_setOff(); DetFlags.BField_setOn(); DetFlags.digitize.all_setOff(); DetFlags.detdescr.Calo_setOn(); DetFlags.simulate.all_setOff(); DetFlags.pileup.all_setOff(); DetFlags.overlay.all_setOff();"
+	DAOD_PE="default:from AthenaCommon.DetFlags import DetFlags; DetFlags.detdescr.all_setOff(); DetFlags.BField_setOn(); DetFlags.digitize.all_setOff(); DetFlags.detdescr.Calo_setOn(); DetFlags.simulate.all_setOff(); DetFlags.pileup.all_setOff(); DetFlags.overlay.all_setOff(); DetFlags.detdescr.Muon_setOn();"
 
 	NTUP_PE="all:from InDetPhysValMonitoring.InDetPhysValJobProperties import InDetPhysValFlags;InDetPhysValFlags.doValidateTightPrimaryTracks.set_Value_and_Lock(True);InDetPhysValFlags.doValidateMuonMatchedTracks.set_Value_and_Lock(True);InDetPhysValFlags.doValidateElectronMatchedTracks.set_Value_and_Lock(True)"
                  
