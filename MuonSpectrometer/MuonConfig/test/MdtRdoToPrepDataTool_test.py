@@ -1,5 +1,5 @@
 #
-# Copyright (C) 2002-2020 CERN for the benefit of the ATLAS collaboration.
+# Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration.
 #
 # File: MuonMDT_CnvTools/share/MdtRdoToPrepDataTool_test.py
 # Author: scott snyder
@@ -25,7 +25,7 @@ class TestAlg (Alg):
     def initialize (self):
         ROOT.Muon.IMuonRdoToPrepDataTool
 
-        self.tool = ROOT.ToolHandle(ROOT.Muon.IMuonRdoToPrepDataTool)('Muon__MdtRdoToPrepDataTool')
+        self.tool = ROOT.ToolHandle(ROOT.Muon.IMuonRdoToPrepDataTool)('Muon::MdtRdoToPrepDataToolMT/Muon__MdtRdoToPrepDataTool')
         if not self.tool.retrieve():
             assert 0
         return StatusCode.Success
@@ -44,7 +44,7 @@ def testCfg (configFlags):
     from MagFieldServices.MagFieldServicesConfig import AtlasFieldCacheCondAlgCfg
     result.merge (AtlasFieldCacheCondAlgCfg(configFlags, UseDCS = False))
 
-    Muon__MdtRdoToPrepDataTool = CompFactory.Muon.MdtRdoToPrepDataTool
+    Muon__MdtRdoToPrepDataTool = CompFactory.Muon.MdtRdoToPrepDataToolMT
     result.addPublicTool (Muon__MdtRdoToPrepDataTool ('Muon__MdtRdoToPrepDataTool', OutputLevel = 1))
     
     result.addEventAlgo (TestAlg ('TestAlg'))
