@@ -163,13 +163,7 @@ def TrigMETMonConfig(inputFlags):
                  "gFexRho"]
     algsHLT = ["cell", 
                "tcpufit", 
-               "tcpufit_sig30", 
-               "pfsum_cssk", 
-               "pfsum_vssk", 
                "pfopufit", 
-               "pfopufit_sig30", 
-               "mhtpufit_pf", 
-               "mhtpufit_em",
                "met_nn"]
     algsHLT2d = ["cell", 
                  "tcpufit", 
@@ -178,7 +172,13 @@ def TrigMETMonConfig(inputFlags):
                      "tc_em",
                      "cvfpufit",
                      "pfsum",
-                     "trkmht"]
+                     "trkmht",
+                     "mhtpufit_pf", 
+                     "mhtpufit_em",
+                     "tcpufit_sig30", 
+                     "pfopufit_sig30", 
+                     "pfsum_cssk", 
+                     "pfsum_vssk"]
     algsMET2d_tcpufit = ["pfopufit", 
                          "pfsum_cssk",
                          "trkmht_pf"]
@@ -242,7 +242,9 @@ def TrigMETMonConfig(inputFlags):
     muonPtCut = 30.0
     electronEtaCut = 2.5
     muonEtaCut = 2.5
-    signalLepAlgs = ["pfopufit"]
+    signalLepAlgs = ["pfopufit",
+                     "cell",
+                     "tcpufit"]
    
     TrigMETMonAlg.electronPtCut = electronPtCut
     TrigMETMonAlg.electronEtaCut = electronEtaCut
@@ -550,6 +552,17 @@ def TrigMETMonConfig(inputFlags):
                              weight='{}_SigEl_Et'.format(alg),
                              path='Shifter/SignalEl/{}'.format(alg),
                              xbins=phi_bins,xmin=phi_min,xmax=phi_max)
+      metGroup.defineHistogram('{0}_SigEl_eta,{0}_SigEl_phi;{0}_SigEl_eta_phi'.format(alg), 
+                             type='TH2F', 
+                             title='{} #eta - #phi;#eta;#phi'.format(alg),
+                             path='Shifter/SignalEl/{}'.format(alg),
+                             xbins=eta_bins_2d,xmin=eta_min,xmax=eta_max,ybins=phi_bins_2d,ymin=phi_min,ymax=phi_max)
+      metGroup.defineHistogram('{0}_SigEl_eta,{0}_SigEl_phi;{0}_SigEl_eta_phi_etweight'.format(alg), 
+                             type='TH2F', 
+                             title='{} #eta - #phi (etweighted);#eta;#phi'.format(alg),
+                             weight='{}_SigEl_Et'.format(alg),
+                             path='Shifter/SignalEl/{}'.format(alg),
+                             xbins=eta_bins_2d,xmin=eta_min,xmax=eta_max,ybins=phi_bins_2d,ymin=phi_min,ymax=phi_max)
       metGroup.defineHistogram('{}_SigMu_Ex'.format(alg),
                              title='{} Missing E_{{x}};E_{{x}} [GeV];Events'.format(alg),
                              path='Shifter/SignalMu/{}'.format(alg),
@@ -591,6 +604,17 @@ def TrigMETMonConfig(inputFlags):
                              weight='{}_SigMu_Et'.format(alg),
                              path='Shifter/SignalMu/{}'.format(alg),
                              xbins=phi_bins,xmin=phi_min,xmax=phi_max)
+      metGroup.defineHistogram('{0}_SigMu_eta,{0}_SigMu_phi;{0}_SigMu_eta_phi'.format(alg), 
+                             type='TH2F', 
+                             title='{} #eta - #phi;#eta;#phi'.format(alg),
+                             path='Shifter/SignalMu/{}'.format(alg),
+                             xbins=eta_bins_2d,xmin=eta_min,xmax=eta_max,ybins=phi_bins_2d,ymin=phi_min,ymax=phi_max)
+      metGroup.defineHistogram('{0}_SigMu_eta,{0}_SigMu_phi;{0}_SigMu_eta_phi_etweight'.format(alg), 
+                             type='TH2F', 
+                             title='{} #eta - #phi (etweighted);#eta;#phi'.format(alg),
+                             weight='{}_SigMu_Et'.format(alg),
+                             path='Shifter/SignalMu/{}'.format(alg),
+                             xbins=eta_bins_2d,xmin=eta_min,xmax=eta_max,ybins=phi_bins_2d,ymin=phi_min,ymax=phi_max)
 
     ## HLT 2d eta-phi histos
     for alg in algsHLT2d:

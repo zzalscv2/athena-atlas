@@ -889,6 +889,8 @@ StatusCode TrigMETMonitorAlgorithm::fillHistograms( const EventContext& ctx ) co
         hlt_met = hlt_tc_em_met_cont->at(0);
       } else if (alg == "tcpufit" && hlt_tcpufit_met_cont.isValid() && hlt_tcpufit_met_cont->size() > 0) {
         hlt_met = hlt_tcpufit_met_cont->at(0);
+      } else if (alg == "tcpufit_sig30" && hlt_tcpufit_sig30_met_cont.isValid() && hlt_tcpufit_sig30_met_cont->size() > 0) {
+        hlt_met = hlt_tcpufit_sig30_met_cont->at(0);
       } else if (alg == "trkmht" && hlt_trkmht_met_cont.isValid() && hlt_trkmht_met_cont->size() > 0) {
         hlt_met = hlt_trkmht_met_cont->at(0);
       } else if (alg == "pfsum" && hlt_pfsum_met_cont.isValid() && hlt_pfsum_met_cont->size() > 0) {
@@ -899,12 +901,16 @@ StatusCode TrigMETMonitorAlgorithm::fillHistograms( const EventContext& ctx ) co
         hlt_met = hlt_pfsum_vssk_met_cont->at(0);
       } else if (alg == "pfopufit" && hlt_pfopufit_met_cont.isValid() && hlt_pfopufit_met_cont->size() > 0) {
         hlt_met = hlt_pfopufit_met_cont->at(0);
+      } else if (alg == "pfopufit_sig30" && hlt_pfopufit_sig30_met_cont.isValid() && hlt_pfopufit_sig30_met_cont->size() > 0) {
+        hlt_met = hlt_pfopufit_sig30_met_cont->at(0);
       } else if (alg == "cvfpufit" && hlt_cvfpufit_met_cont.isValid() && hlt_cvfpufit_met_cont->size() > 0) {
         hlt_met = hlt_cvfpufit_met_cont->at(0);
       } else if (alg == "mhtpufit_pf" && hlt_mhtpufit_pf_met_cont.isValid() && hlt_mhtpufit_pf_met_cont->size() > 0) {
         hlt_met = hlt_mhtpufit_pf_met_cont->at(0);
       } else if (alg == "mhtpufit_em" && hlt_mhtpufit_em_met_cont.isValid() && hlt_mhtpufit_em_met_cont->size() > 0) {
         hlt_met = hlt_mhtpufit_em_met_cont->at(0);
+      } else if (alg == "met_nn" && hlt_met_nn_cont.isValid() && hlt_met_nn_cont->size() > 0) {
+        hlt_met = hlt_met_nn_cont->at(0);
       } else {
         hlt_met = 0;
       }
