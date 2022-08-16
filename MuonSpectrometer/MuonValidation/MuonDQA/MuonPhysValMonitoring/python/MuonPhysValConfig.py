@@ -42,7 +42,7 @@ def PhysValMuonCfg(flags, container='', **kwargs):
     kwargs.setdefault("SelectMuonWorkingPoints", [0, 1, 2])
     kwargs.setdefault("SelectMuonAuthors", [1, 2 , 4, 5, 6, 8, 10])
     selectMuonCat = [0, 1]
-    if not flags.Input.isMC: 
+    if not flags.Input.isMC:
         selectMuonCat = [0, 1, 4]
     kwargs.setdefault("SelectMuonCategories", selectMuonCat)
     from IsolationSelection.IsolationSelectionConfig import MuonPhysValIsolationSelCfg
@@ -62,20 +62,4 @@ def PhysValMuonCfg(flags, container='', **kwargs):
     kwargs.setdefault("DetailLevel", 10)
 
     acc.setPrivateTools(CompFactory.MuonPhysValMonitoring.MuonPhysValMonitoringTool("muphysval", **kwargs))
-    return acc
-
-
-def MuonPhysValCfg(flags, **kwargs):
-    acc = ComponentAccumulator()
-
-    kwargs.setdefault("FileKey", "PhysVal")
-    kwargs.setdefault("Environment", "altprod")
-    kwargs.setdefault("ManualDataTypeSetup", True)
-    kwargs.setdefault("DataType", "monteCarlo")
-    kwargs.setdefault("ManualRunLBSetup", True)
-    kwargs.setdefault("Run", 1)
-    kwargs.setdefault("LumiBlock", 1)
-    kwargs.setdefault("AthenaMonTools", [acc.popToolsAndMerge(PhysValMuonCfg(flags))])
-    acc.addEventAlgo(CompFactory.AthenaMonManager( "PhysValMonManager", **kwargs), primary = True)
- 
     return acc

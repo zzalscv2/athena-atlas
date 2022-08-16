@@ -49,25 +49,9 @@ def PhysValMETCfg(flags, **kwargs):
                 isDAOD_PHYSVAL=True
             break
     kwargs.setdefault("InputIsDAOD", isDAOD_PHYSVAL)
-    
+
     kwargs.setdefault("DoMETRefPlots", "xAOD::MissingETContainer#MET_Reference_AntiKt4EMTopo" in flags.Input.TypedCollections)
 
     tool = CompFactory.MissingEtDQA.PhysValMET(**kwargs)
     acc.setPrivateTools(tool)
-    return acc
-
-
-def MissingEtDQACfg(flags, **kwargs):
-    acc = ComponentAccumulator()
-
-    kwargs.setdefault("FileKey", "M_output")
-    kwargs.setdefault("Environment", "altprod")
-    kwargs.setdefault("ManualDataTypeSetup", True)
-    kwargs.setdefault("DataType", "monteCarlo")
-    kwargs.setdefault("ManualRunLBSetup", True)
-    kwargs.setdefault("Run", 1)
-    kwargs.setdefault("LumiBlock", 1)
-    kwargs.setdefault("AthenaMonTools", [acc.popToolsAndMerge(PhysValMETCfg(flags))])
-    acc.addEventAlgo(CompFactory.AthenaMonManager( "PhysValMonManager", **kwargs), primary = True)
-
     return acc

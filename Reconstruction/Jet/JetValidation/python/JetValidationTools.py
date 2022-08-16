@@ -67,7 +67,7 @@ def JetMonToolCfg(container, flags, refcontainer='', onlyKinematics=False, globa
         if "kinematics" in var:
             tool = acc.popToolsAndMerge(JetKinematicHistosCfg(var))
         elif "effresponse" in var:
-            tool = acc.popToolsAndMerge(JetEfficiencyResponseHistosCfg(var))
+            tool = acc.popToolsAndMerge(JetEfficiencyResponseHistosCfg(var, refcontainer))
         else:
             from JetMonitoring.JetHistoTools import compactSpecification
             spec = compactSpecification[var]
@@ -128,10 +128,11 @@ def JetHistogramsAndSelectionCfg(selection, histos):
     return acc
 
 
-def JetEfficiencyResponseHistosCfg(name):
+def JetEfficiencyResponseHistosCfg(name, refcontainer):
     acc = ComponentAccumulator()
 
     tool = CompFactory.EfficiencyResponseHistos(name)
+    tool.RefContainer = refcontainer
     tool.HistoDef = [
         acc.popToolsAndMerge(CreateHistoDefToolCfg('erhEfficiencyR1', "Jet p_{T} Efficiency #DeltaR = 0.1;p_{T}^{Truth} (GeV);Efficiency",50,0,100 )),
         acc.popToolsAndMerge(CreateHistoDefToolCfg('erhEfficiencyR2', "Jet p_{T} Efficiency #DeltaR = 0.2;p_{T}^{Truth} (GeV);Efficiency",50,0,100 )),

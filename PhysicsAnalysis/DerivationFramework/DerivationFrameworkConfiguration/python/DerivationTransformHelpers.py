@@ -3,9 +3,8 @@
 Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
 """
 
-from PyJobTransforms.trfArgClasses import argFactory, argList, argPOOLFile
-from PyJobTransforms.trfExe import reductionFrameworkExecutor
-import PyJobTransforms.trfArgClasses as trfArgClasses
+from PyJobTransforms.trfArgClasses import argFactory, argList, argNTUPFile, argPOOLFile, argSubstepBool
+from PyJobTransforms.trfExe import athenaExecutor, reductionFrameworkExecutor
 
 def addDerivationArguments(parser):
     """Add common derivation command-line parser arguments."""
@@ -33,12 +32,30 @@ def addDerivationArguments(parser):
     parser.add_argument('--outputD2AODFile', nargs='+',
                         type=argFactory(argPOOLFile, io='output'),
                         help='Output D2AOD filename stub, D2AOD_X will be prepended to it',
-                        group='Derivation') 
-    parser.add_argument('--passThrough', 
-                        type=trfArgClasses.argFactory(trfArgClasses.argSubstepBool, defaultSubstep = 'Derivation', runarg=True),
+                        group='Derivation')
+    parser.add_argument('--passThrough',
+                        type=argFactory(argSubstepBool, defaultSubstep = 'Derivation', runarg=True),
                         metavar='BOOL',
                         help='Disable all skimming and write every event',
                         group='Derivation')
+
+
+def addPhysicsValidationArguments(parser):
+    """Add validation command-line parser arguments."""
+    parser.defineArgGroup('Physics Validation', 'Physics validation options')
+    parser.add_argument('--validationFlags', nargs='+',
+                        type=argFactory(argList),
+                        help='Physics validation histogram switches',
+                        group='Physics Validation')
+    parser.add_argument('--inputDAOD_PHYSVALFile', nargs='+',
+                        type=argFactory(argPOOLFile, io='input'),
+                        help='Input DAOD_PHYSVAL for validation ntuples building',
+                        group='Physics Validation')
+    parser.add_argument('--outputNTUP_PHYSVALFile',
+                        type=argFactory(argNTUPFile, io='output'),
+                        help='Output physics validation file',
+                        group='Physics Validation')
+
 
 def addDerivationSubstep(executor_set):
     # We use the existing DF executor which inherits from the athenaExecutor.
@@ -54,3 +71,14 @@ def addDerivationSubstep(executor_set):
                                           outData=['DAOD', 'D2AOD'])
     executor_set.add(executor)
 
+
+def addPhysicsValidationSubstep(executor_set):
+    executor = athenaExecutor(name='PhysicsValidation',
+                              skeletonFile=None,
+                              skeletonCA='DerivationFrameworkConfiguration.PhysicsValidationSkeleton',
+                              substep='PhysicsValidation',
+                              tryDropAndReload=False,
+                              perfMonFile='ntuple.pmon.gz',
+                              inData=['DAOD_PHYSVAL'],
+                              outData=['NTUP_PHYSVAL'])
+    executor_set.add(executor)

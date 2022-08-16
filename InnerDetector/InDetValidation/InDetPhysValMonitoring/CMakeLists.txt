@@ -24,7 +24,7 @@ atlas_add_component( InDetPhysValMonitoring
 atlas_install_python_modules( python/*.py )
 atlas_install_joboptions( share/*.py share/*.txt )
 atlas_install_runtime( share/*.xml share/*.xsd)
-atlas_install_runtime( scripts/*.py )
+atlas_install_runtime( scripts/*.py POST_BUILD_CMD ${ATLAS_FLAKE8} )
 
 # build postprocessing program 
 atlas_add_executable( postProcessIDPVMHistos util/postProcessIDPVMHistos.cxx 

@@ -39,12 +39,16 @@ def main():
 
 def getTransform():
     executor_set = set()
-    from DerivationFrameworkConfiguration.DerivationTransformHelpers import addDerivationArguments, addDerivationSubstep
+    from DerivationFrameworkConfiguration.DerivationTransformHelpers import \
+        addDerivationArguments, addDerivationSubstep, \
+        addPhysicsValidationArguments, addPhysicsValidationSubstep
     addDerivationSubstep(executor_set)
+    addPhysicsValidationSubstep(executor_set)
     trf = transform(executor=executor_set,
                     description='ATLAS derivation framework transform. Inputs must be EVNT, AOD or DAOD. Outputs must be DAOD or D2AOD.')
     addAthenaArguments(trf.parser)
     addDerivationArguments(trf.parser)
+    addPhysicsValidationArguments(trf.parser)
     return trf
 
 

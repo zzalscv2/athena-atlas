@@ -311,6 +311,11 @@ def _createCfgFlags():
         return createPerfMonConfigFlags()
     _addFlagsCategory(acf, "PerfMon", __perfmon, 'PerfMonComps')
 
+    def __physVal():
+        from PhysValMonitoring.PhysValFlags import createPhysValConfigFlags
+        return createPhysValConfigFlags()
+    _addFlagsCategory(acf, "PhysVal", __physVal , "PhysValMonitoring")
+
     return acf
 
 

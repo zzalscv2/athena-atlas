@@ -24,19 +24,3 @@ def EgammaPhysValMonitoringToolCfg(flags, **kwargs):
     tool = CompFactory.EgammaPhysValMonitoring.EgammaPhysValMonitoringTool(**kwargs)
     acc.setPrivateTools(tool)
     return acc
-
-def EgammaPhysValMonitoringCfg(flags, **kwargs):
-    acc = ComponentAccumulator()
-
-    kwargs.setdefault("FileKey", "M_output")
-    kwargs.setdefault("Environment", "altprod")
-    kwargs.setdefault("ManualDataTypeSetup", True)
-    kwargs.setdefault("DataType", "monteCarlo")
-    kwargs.setdefault("ManualRunLBSetup", True)
-    kwargs.setdefault("Run", 1)
-    kwargs.setdefault("LumiBlock", 1)
-    kwargs.setdefault("AthenaMonTools", [acc.popToolsAndMerge(EgammaPhysValMonitoringToolCfg(flags))])
-    acc.addEventAlgo(CompFactory.AthenaMonManager( "PhysValMonManager", **kwargs), primary = True)
-
-    return acc
-
