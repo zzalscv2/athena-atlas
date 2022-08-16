@@ -150,6 +150,10 @@ G4bool LArFCS_StepInfoSD::ProcessHits(G4Step* a_step,G4TouchableHistory*)
           maxSubHitEnergyindex = i;
         }
       }
+      if (maxSubHitEnergyindex == -1){//because there were no hits; numberOfProcessedHits ==0
+         G4cout << this->GetName()<<" WARNING ProcessHits: numberOfProcessedHits is zero" << G4endl;
+         continue;
+      }
       //Identifier for the subhit with max energy
       Identifier maxEnergyIdentifier = this->ConvertID(processedHits[maxSubHitEnergyindex].id);
       const CaloDetDescrElement *maxEnergyCell = m_calo_dd_man.get()->get_element(maxEnergyIdentifier);
