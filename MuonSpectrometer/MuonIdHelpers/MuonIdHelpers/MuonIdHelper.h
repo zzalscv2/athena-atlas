@@ -11,7 +11,6 @@
 #include <string>
 #include <vector>
 
-#include "AthenaBaseComps/AthMessaging.h"
 #include "AthenaKernel/CLASS_DEF.h"
 #include "AtlasDetDescr/AtlasDetectorID.h"
 #include "IdDict/IdDictDefs.h"
@@ -78,7 +77,7 @@ class IdDictDictionary;
 // CERN, Feb. 2013
 // ******************************************************************************
 
-class MuonIdHelper : public AtlasDetectorID, public AthMessaging {
+class MuonIdHelper : public AtlasDetectorID {
 public:
     // Constructor
 
