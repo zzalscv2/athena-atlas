@@ -20,6 +20,8 @@
 #include "MuonPrepRawData/MdtPrepDataContainer.h"
 #include "MuonPrepRawData/RpcPrepDataContainer.h"
 #include "MuonPrepRawData/TgcPrepDataContainer.h"
+#include "MuonPrepRawData/MMPrepDataContainer.h"
+#include "MuonPrepRawData/sTgcPrepDataContainer.h"
 #include "InDetPrepRawData/PixelClusterContainer.h"
 #include "InDetPrepRawData/SCT_ClusterContainer.h"
 #include "InDetPrepRawData/TRT_DriftCircleContainer.h"
@@ -78,8 +80,8 @@ protected:
   SG::ReadHandleKey<Muon::MdtPrepDataContainer> m_mdtPrepRawDataKey{this, "MdtPrepRawDataKey", "MDT_DriftCircles", "Key for MDT PRD Container"};
   SG::ReadHandleKey<Muon::RpcPrepDataContainer> m_rpcPrepRawDataKey{this, "RpcPrepRawDataKey", "RPC_Measurements", "Key for RPC PRD Container"};
   SG::ReadHandleKey<Muon::TgcPrepDataContainer> m_tgcPrepRawDataKey{this, "TgcPrepRawDataKey", "TGC_MeasurementsAllBCs", "Key for TGC PRD Container"};
-  SG::ReadHandleKey<Muon::TgcPrepDataContainer> m_mmPrepRawDataKey{this, "MMPrepRawDataKey", "MM_Measurements", "Key for MM PRD Container"};
-  SG::ReadHandleKey<Muon::TgcPrepDataContainer> m_stgcPrepRawDataKey{this, "sTgcPrepRawDataKey", "STGC_Measurements", "Key for sTGC PRD Container"};
+  SG::ReadHandleKey<Muon::MMPrepDataContainer> m_mmPrepRawDataKey{this, "MMPrepRawDataKey", "MM_Measurements", "Key for MM PRD Container"};
+  SG::ReadHandleKey<Muon::sTgcPrepDataContainer> m_stgcPrepRawDataKey{this, "sTgcPrepRawDataKey", "STGC_Measurements", "Key for sTGC PRD Container"};
   SG::ReadHandleKey<InDet::PixelClusterContainer> m_pixelPrepRawDataKey{this, "PixelPrepRawDataKey", "PixelClusters", "Key for Pixel PRD Container"};
   SG::ReadHandleKey<InDet::SCT_ClusterContainer> m_sctPrepRawDataKey{this, "SctPrepRawDataKey", "SCT_Clusters", "Key for SCT PRD Container"};
   SG::ReadHandleKey<InDet::TRT_DriftCircleContainer> m_trtPrepRawDataKey{this, "TrtPrepRawDataKey", "TRT_DriftCircles", "Key for TRT PRD Container"};

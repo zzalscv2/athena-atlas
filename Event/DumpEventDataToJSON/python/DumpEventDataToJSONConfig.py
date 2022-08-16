@@ -117,7 +117,7 @@ if __name__ == "__main__":
         ConfigFlags, doExtrap=False, OutputLevel=VERBOSE, DumpTestEvent=args.prependCalib, OutputLocation=args.output,
         CscPrepRawDataKey = "CSC_Clusters" if ConfigFlags.Detector.EnableCSC else "",
         MMPrepRawDataKey = "MM_Measurements" if ConfigFlags.Detector.EnableMM else "",
-        sTgcPrepRawDataKey = "sTgcPrepRawDataKey" if ConfigFlags.Detector.EnablesTGC else "",
+        sTgcPrepRawDataKey = "STGC_Measurements" if ConfigFlags.Detector.EnablesTGC else "",
         )
     
     cfg.merge(topoAcc)

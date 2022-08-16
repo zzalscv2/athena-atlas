@@ -93,6 +93,8 @@ StatusCode DumpEventDataToJsonAlg::execute()
   ATH_CHECK(getAndFillContainer(j, m_mdtPrepRawDataKey, "Hits"));
   ATH_CHECK(getAndFillContainer(j, m_rpcPrepRawDataKey, "Hits"));
   ATH_CHECK(getAndFillContainer(j, m_tgcPrepRawDataKey, "Hits"));
+  ATH_CHECK(getAndFillContainer(j, m_stgcPrepRawDataKey, "Hits"));
+  ATH_CHECK(getAndFillContainer(j, m_mmPrepRawDataKey, "Hits"));
   ATH_CHECK(getAndFillContainer(j, m_pixelPrepRawDataKey, "Hits"));
   ATH_CHECK(getAndFillContainer(j, m_sctPrepRawDataKey, "Hits"));
   // ATH_CHECK(getAndFillContainer(j, m_trtPrepRawDataKey, "Hits")); // Need specialisation. TODO.
@@ -374,18 +376,20 @@ StatusCode DumpEventDataToJsonAlg::getAndFillContainer(nlohmann::json &event,
                                                        const SG::ReadHandleKey<TYPE> &key,
                                                        const std::string &jsonType)
 {
-  if (key.empty())
+  if (key.empty()) {
     return StatusCode::SUCCESS;
-
+  }
   SG::ReadHandle<TYPE> handle(key);
 
   ATH_MSG_VERBOSE("Trying to load " << handle.key());
   ATH_CHECK(handle.isValid());
-  ATH_MSG_VERBOSE("Got back " << handle->size());
+  ATH_MSG_VERBOSE("Which has "<<handle->numberOfCollections()<<" collections: " );
 
   nlohmann::json tmp = getData(*handle);
-  event[jsonType][handle.key()] = tmp;
-
+  if (!tmp.is_null()) {
+    ATH_MSG_VERBOSE("Writing "<<jsonType<<" : "<<handle.key()<<" with"<<tmp.size()<<" elements:");
+    event[jsonType][handle.key()] = tmp;
+  }
   return StatusCode::SUCCESS;
 }
 
@@ -394,7 +398,7 @@ template <class TYPE>
 nlohmann::json DumpEventDataToJsonAlg::getData(const TYPE &container)
 {
 
-  nlohmann::json colldata;
+  nlohmann::json colldata = {};
   for (const auto &coll : container)
   {
     for (const auto &prd : *coll)
