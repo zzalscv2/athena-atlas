@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
 */
 
 //***************************************************************************
@@ -751,9 +751,19 @@ std::vector<std::vector<std::vector<uint32_t>>> jFEXSim::getLargeRJetTOBs()
    return m_largeRJet_tobWords;
 }
 
-std::vector<std::vector<std::vector<uint32_t>>> jFEXSim::getTauTOBs()
+std::vector<std::unique_ptr<jFEXtauTOB>> jFEXSim::getTauTOBs()
 {
-  return m_tau_tobWords;
+    std::vector<std::unique_ptr<jFEXtauTOB>> tauTOBs;
+    tauTOBs.clear();
+    
+    // We need the copy since we cannot move a member of the class, since it will not be part of it anymore
+    for (unsigned int i = 0; i < m_tau_tobWords.size(); ++i){
+        for(unsigned int j = 0; j < m_tau_tobWords[i].size(); ++j){
+            tauTOBs.push_back(std::move(m_tau_tobWords[i][j]));
+        }
+    } 
+    
+    return tauTOBs;    
 }
 
 std::vector<std::vector<std::vector<uint32_t>>> jFEXSim::getFwdElTOBs()

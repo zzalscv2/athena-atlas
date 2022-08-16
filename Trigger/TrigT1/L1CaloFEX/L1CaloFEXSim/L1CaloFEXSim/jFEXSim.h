@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
 */
 
 //***************************************************************************
@@ -20,6 +20,8 @@
 #include "CaloIdentifier/CaloIdManager.h"
 #include "CaloIdentifier/CaloCell_SuperCell_ID.h"
 #include "L1CaloFEXSim/FEXAlgoSpaceDefs.h"
+
+#include "L1CaloFEXSim/jFEXtauTOB.h"
 
 namespace LVL1 {
   
@@ -59,17 +61,16 @@ namespace LVL1 {
     virtual StatusCode ExecuteBarrel(int tmp [FEXAlgoSpaceDefs::jFEX_algoSpace_height][FEXAlgoSpaceDefs::jFEX_thin_algoSpace_width], jFEXOutputCollection* inputOutputCollection) override;
     virtual std::vector<std::vector<std::vector<uint32_t>>> getSmallRJetTOBs() override;
     virtual std::vector<std::vector<std::vector<uint32_t>>> getLargeRJetTOBs() override;
-    virtual std::vector<std::vector<std::vector<uint32_t>>> getTauTOBs() override;
     virtual std::vector<std::vector<std::vector<uint32_t>>> getFwdElTOBs() override;
     virtual std::vector<std::vector<uint32_t>> getSumEtTOBs() override;
     virtual std::vector<std::vector<uint32_t>> getMetTOBs() override;
+    
+    virtual std::vector<std::unique_ptr<jFEXtauTOB>> getTauTOBs() override;
 
     /** Internal data */
   private:
-    static bool smallRJet_ET_Sort(uint32_t i, uint32_t j){ return (((i >> 0 ) & 0x7ff)> ((j >> 0) & 0x7ff));}
-    static bool largeRJet_ET_Sort(uint32_t i, uint32_t j){ return (((i >> 0 ) & 0x1fff)> ((j >> 0) & 0x1fff));}
+  
     int m_id;
-
     int m_jTowersIDs_Wide [FEXAlgoSpaceDefs::jFEX_algoSpace_height][FEXAlgoSpaceDefs::jFEX_wide_algoSpace_width];
     int m_jTowersIDs_Thin [FEXAlgoSpaceDefs::jFEX_algoSpace_height][FEXAlgoSpaceDefs::jFEX_thin_algoSpace_width];
 
@@ -79,7 +80,7 @@ namespace LVL1 {
    
     std::vector<std::vector<std::vector<uint32_t>>> m_smallRJet_tobWords;
     std::vector<std::vector<std::vector<uint32_t>>> m_largeRJet_tobWords;
-    std::vector<std::vector<std::vector<uint32_t>>> m_tau_tobWords;
+    std::vector< std::vector<std::unique_ptr<jFEXtauTOB>> > m_tau_tobWords;
     std::vector<std::vector<std::vector<uint32_t>>> m_fwdEl_tobWords;
     std::vector<std::vector<uint32_t>> m_sumET_tobWords;
     std::vector<std::vector<uint32_t>> m_Met_tobWords;

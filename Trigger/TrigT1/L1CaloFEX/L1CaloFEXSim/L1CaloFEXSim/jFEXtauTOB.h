@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
 */
 //***************************************************************************
 //              jFEXtauTOB - TOBs Tau Algorithm in jFEX
@@ -16,29 +16,36 @@
 namespace LVL1 {
   class jFEXtauTOB
   {
- 
-  private:
-    unsigned int m_eta;
-    unsigned int m_phi;
-    unsigned int m_ET;
-    unsigned int m_Iso;
-    unsigned int m_Sat;
-
 
   public:
     jFEXtauTOB();
     ~jFEXtauTOB() {};
+    
+    void initialize(uint8_t , uint8_t , uint32_t , uint , uint );
+    
+    void setFpga(uint8_t  x){m_fpga = x;};
+    void setjFex(uint8_t  x){m_jfex = x;};
+    void setWord(uint32_t x){m_word = x;};
+    void setRes (uint     x){m_res  = x;};
+    void setTTID(uint     x){m_ttid = x;};
+    
+    uint8_t  getFpga(){return m_fpga;};
+    uint8_t  getjFex(){return m_jfex;};
+    uint32_t getWord(){return m_word;};
+    uint     getRes() {return m_res;};
+    uint     getTTID(){return m_ttid;};
+    
+    uint     getEt();
 
-    void setET(unsigned int);
-    void setPhi(unsigned int);
-    void setEta(unsigned int);
-    void setIso(unsigned int);
-    void setSat(unsigned int);
-    unsigned int GetEta();
-    unsigned int GetPhi();
-    unsigned int GetET();
-    unsigned int GetIso();
-    unsigned int GetSat();
+ 
+  private:
+    uint8_t  m_fpga;
+    uint8_t  m_jfex;
+    uint32_t m_word;
+    uint     m_res;
+    uint     m_ttid;
+    
+    uint     m_Et;
 
 
     

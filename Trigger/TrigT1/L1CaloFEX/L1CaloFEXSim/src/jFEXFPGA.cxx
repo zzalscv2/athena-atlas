@@ -29,6 +29,7 @@
 #include "L1CaloFEXSim/jFEXForwardElecAlgo.h"
 #include "L1CaloFEXSim/jFEXForwardElecInfo.h"
 #include "L1CaloFEXSim/jFEXPileupAndNoise.h"
+#include "L1CaloFEXSim/jFEXFormTOBs.h"
 #include "CaloEvent/CaloCellContainer.h"
 #include "CaloIdentifier/CaloIdManager.h"
 #include "CaloIdentifier/CaloCell_SuperCell_ID.h"
@@ -93,6 +94,10 @@ void jFEXFPGA::reset() {
 }
 
 StatusCode jFEXFPGA::execute(jFEXOutputCollection* inputOutputCollection) {
+    
+    // Retrieve the L1 menu configuration
+    SG::ReadHandle<TrigConf::L1Menu> l1Menu (m_l1MenuKey/*, ctx*/);
+    const TrigConf::L1ThrExtraInfo_jTAU & thr_jTAU = l1Menu->thrExtraInfo().jTAU();    
     
     SG::ReadHandle<jTowerContainer> jTowerContainer(m_jTowerContainerKey/*,ctx*/);
     if(!jTowerContainer.isValid()) {
@@ -311,9 +316,13 @@ StatusCode jFEXFPGA::execute(jFEXOutputCollection* inputOutputCollection) {
                     //calculates the 1st energy ring
                     m_jFEXtauAlgoTool->setFirstEtRing(TT_First_ETring);
                     
-                    uint32_t jTau_tobword = formTauTOB(mphi, meta);
+                    uint32_t jTau_tobword = m_IjFEXFormTOBsTool->formTauTOB(mphi,meta,m_jFEXtauAlgoTool->getClusterEt(),m_jFEXtauAlgoTool->getFirstEtRing(),thr_jTAU.resolutionMeV(),thr_jTAU.ptMinToTopoMeV(m_jfex_string[m_jfexid]));
                     std::vector<uint32_t> TAUtob_aux{jTau_tobword,(uint32_t) m_jTowersIDs_Thin[mphi][meta]};
-                    if ( jTau_tobword != 0 ) m_tau_tobwords.push_back(TAUtob_aux); 
+                    
+                    std::unique_ptr<jFEXtauTOB> jTau_tob = std::make_unique<jFEXtauTOB>();
+                    jTau_tob->initialize(m_id,m_jfexid,jTau_tobword,thr_jTAU.resolutionMeV(),m_jTowersIDs_Thin[mphi][meta]);
+                    
+                    if ( jTau_tobword != 0 ) m_tau_tobwords.push_back(std::move(jTau_tob)); 
                 }                
             }
         }
@@ -466,9 +475,13 @@ StatusCode jFEXFPGA::execute(jFEXOutputCollection* inputOutputCollection) {
                     //calculates the 1st energy ring
                     m_jFEXtauAlgoTool->setFirstEtRing(TT_First_ETring);
                     
-                    uint32_t jTau_tobword = formTauTOB(mphi, meta);
+                    uint32_t jTau_tobword = m_IjFEXFormTOBsTool->formTauTOB(mphi,meta,m_jFEXtauAlgoTool->getClusterEt(),m_jFEXtauAlgoTool->getFirstEtRing(),thr_jTAU.resolutionMeV(),thr_jTAU.ptMinToTopoMeV(m_jfex_string[m_jfexid]));
                     std::vector<uint32_t> TAUtob_aux{jTau_tobword,(uint32_t) jTowersIDs[mphi][meta]};
-                    if ( jTau_tobword != 0 ) m_tau_tobwords.push_back(TAUtob_aux); 
+                    
+                    std::unique_ptr<jFEXtauTOB> jTau_tob = std::make_unique<jFEXtauTOB>();
+                    jTau_tob->initialize(m_id,m_jfexid,jTau_tobword,thr_jTAU.resolutionMeV(),jTowersIDs[mphi][meta]);
+                                        
+                    if ( jTau_tobword != 0 ) m_tau_tobwords.push_back(std::move(jTau_tob));  
                 }
             }
         }
@@ -710,68 +723,22 @@ uint32_t jFEXFPGA::formLargeRJetTOB(int &iphi, int &ieta) {
 }
 
 
-uint32_t jFEXFPGA::formTauTOB(int & iphi, int &ieta )
-{
-    uint32_t tobWord = 0;
+std::vector <std::unique_ptr<jFEXtauTOB>> jFEXFPGA::getTauTOBs() {
     
-    // Retrieve the L1 menu configuration
-    SG::ReadHandle<TrigConf::L1Menu> l1Menu (m_l1MenuKey/*, ctx*/);
-    const TrigConf::L1ThrExtraInfo_jTAU & thr_jTAU = l1Menu->thrExtraInfo().jTAU();    
-    const int jFEXETResolution = thr_jTAU.resolutionMeV(); //LSB is 200MeV
-
-    int eta = ieta-8; // needed to substract 8 to be in the FPGA core area
-    int phi = iphi-8; // needed to substract 8 to be in the FPGA core area
-    int sat = 0; //1 bit for saturation flag, not coded yet
-
-    unsigned int et = m_jFEXtauAlgoTool->getClusterEt()/jFEXETResolution;
-    if (et > 0x7ff) { //0x7ff is 11 bits
-        ATH_MSG_DEBUG("Et saturated: " << et );
-        et = 0x7ff;
-        sat=1;
-    }
-
-    unsigned int iso = m_jFEXtauAlgoTool->getFirstEtRing()/jFEXETResolution;
-    if (iso > 0x7ff) iso = 0x7ff;  //0x7ff is 11 bits
-
-    //create basic tobword with 32 bits
-    tobWord = tobWord + (iso << FEXAlgoSpaceDefs::jTau_isoBit) + (et << FEXAlgoSpaceDefs::jTau_etBit) + (eta << FEXAlgoSpaceDefs::jTau_etaBit) + (phi << FEXAlgoSpaceDefs::jTau_phiBit) + sat ;
-
-    ATH_MSG_DEBUG("tobword tau with iso, et, eta and phi: " << std::bitset<32>(tobWord) );
-
-
-    std::string str_jfexname = m_jfex_string[m_jfexid];
-    unsigned int minEtThreshold = thr_jTAU.ptMinToTopoMeV(str_jfexname)/jFEXETResolution;
-
-    if (et < minEtThreshold) return 0;
-    else return tobWord;
-
-}
-
-
-std::vector <std::vector <uint32_t>> jFEXFPGA::getTauTOBs() {
-    auto tobsSort = m_tau_tobwords;
-
-    ATH_MSG_DEBUG("number of tau tobs: " << tobsSort.size() << " in FPGA: " << m_id<< " before truncation");
-    // sort tobs by their et ( 13 bits of the 32 bit tob word)
-    std::sort (tobsSort.begin(), tobsSort.end(), etTauSort);
-
+    std::vector<std::unique_ptr<jFEXtauTOB>> tobsSort;
+    tobsSort.clear();
     
-    while(tobsSort.size()<6) {
-        std::vector <uint32_t> v{0,0};
-        tobsSort.push_back(v);
+    // We need the copy since we cannot move a member of the class, since it will not be part of it anymore
+    for(auto &j : m_tau_tobwords) {
+        tobsSort.push_back(std::move(j));
     }
-    tobsSort.resize(6);
+    std::sort (tobsSort.begin(), tobsSort.end(), std::bind(TOBetSort<std::unique_ptr<jFEXtauTOB>>, std::placeholders::_1, std::placeholders::_2, FEXAlgoSpaceDefs::jTau_etBit, 0x7ff));
+
+    if(tobsSort.size()>6) tobsSort.resize(6);
     
     return tobsSort;
-
 }
 
-std::vector <std::vector <uint32_t>> jFEXFPGA::getTauxTOBs()
-{
-
-  return m_tau_tobwords;
-
-}
 
 uint32_t jFEXFPGA::formSumETTOB(int ETlow, int EThigh )
 {

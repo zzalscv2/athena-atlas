@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
 */
 
 //***************************************************************************
@@ -96,10 +96,11 @@ namespace LVL1 {
     std::unordered_map<int,jTower> m_jTowersColl;
     std::unordered_map<uint8_t, std::vector<std::vector<std::vector<uint32_t>>> > m_allSmallRJetTobs; 
     std::unordered_map<uint8_t, std::vector<std::vector<std::vector<uint32_t>>> > m_allLargeRJetTobs;
-    std::unordered_map<uint8_t, std::vector<std::vector<std::vector<uint32_t>>> > m_alltauTobs;
+    std::unordered_map<uint8_t, std::vector<std::unique_ptr<jFEXtauTOB>>> m_alltauTobs;
     std::unordered_map<uint8_t, std::vector<std::vector<std::vector<uint32_t>>> > m_allfwdElTobs;
     std::unordered_map<uint8_t, std::vector<std::vector<uint32_t>> > m_allsumEtTobs;
     std::unordered_map<uint8_t, std::vector<std::vector<uint32_t>> > m_allMetTobs;
+    
   };
   
 } // end of namespace
