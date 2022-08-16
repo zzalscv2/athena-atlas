@@ -434,7 +434,7 @@ def getJetRecAlg( jetdef, monTool = None, ftf_suffix = ''):
         JetRadius = jetdef.radius,
         PtMin = jetdef.ptmin,
         InputPseudoJets = pjContNames,#
-        GhostArea = 0.01, 
+        GhostArea = jetdef.ghostarea, 
         JetInputType = int(jetdef.inputdef.jetinputtype),
         RandomOption = 1,
         VariableRMinRadius = jetdef.VRMinRadius,

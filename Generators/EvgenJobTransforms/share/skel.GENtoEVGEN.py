@@ -460,8 +460,8 @@ if hasattr( runArgs, "outputEVNTFile") or hasattr( runArgs, "outputEVNT_PreFile"
     StreamEVGEN.RequireAlgs += ["EvgenFilterSeq"]
     ## Used for pile-up (remove dynamic variables except flavour labels)
     if evgenConfig.saveJets:
-        StreamEVGEN.ItemList += ["xAOD::JetContainer_v1#*"]
-        StreamEVGEN.ItemList += ["xAOD::JetAuxContainer_v1#*.TruthLabelID.PartonTruthLabelID"]
+       StreamEVGEN.ItemList += ["xAOD::JetContainer#AntiKt4TruthJets", "xAOD::AuxContainerBase!#AntiKt4TruthJetsAux.-PseudoJet.-constituentLinks.-constituentWeights"]
+       StreamEVGEN.ItemList += ["xAOD::JetContainer#AntiKt6TruthJets", "xAOD::AuxContainerBase!#AntiKt6TruthJetsAux.-PseudoJet.-constituentLinks.-constituentWeights"]
     if evgenConfig.savePileupTruthParticles:
        StreamEVGEN.ItemList += ["xAOD::TruthParticleContainer#TruthPileupParticles*"]
        StreamEVGEN.ItemList += ["xAOD::TruthParticleAuxContainer#TruthPileupParticlesAux.*"]

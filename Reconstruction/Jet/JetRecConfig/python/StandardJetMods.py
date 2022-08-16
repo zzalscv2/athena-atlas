@@ -51,12 +51,16 @@ stdJetModifiers.update(
 # PackageName.PackageConfig (modules to be moved)
 
 # Calibration
-from JetCalibTools import JetCalibToolsConfig
-stdJetModifiers.update(
-    Calib = JetModifier("JetCalibrationTool","jetcalib_jetcoll_calibseq",
-                        createfn=JetCalibToolsConfig.getJetCalibToolFromString,
-                        prereqs=lambda mod,jetdef : JetCalibToolsConfig.getJetCalibToolPrereqs(mod,jetdef)+["input:PrimaryVertices"])
-)
+try:
+    from JetCalibTools import JetCalibToolsConfig
+    stdJetModifiers.update(
+        Calib = JetModifier("JetCalibrationTool","jetcalib_jetcoll_calibseq",
+                            createfn=JetCalibToolsConfig.getJetCalibToolFromString,
+                            prereqs=lambda mod,jetdef : JetCalibToolsConfig.getJetCalibToolPrereqs(mod,jetdef)+["input:PrimaryVertices"])
+    )
+except ModuleNotFoundError:
+    # In some releases (AthGeneration) JetCalibTools is not existing
+    pass
 
 # TBD:
 # All items below in principle will support decoration mode, rather
@@ -78,66 +82,78 @@ def isMC(flags):
 
 
 # Standard jet moments
-from JetMomentTools import JetMomentToolsConfig
-stdJetModifiers.update(
+try:
+    from JetMomentTools import JetMomentToolsConfig
+    stdJetModifiers.update(
 
-    # Easy cases, no special config or prereqs, just default tool config 
-    ClusterMoments =  JetModifier("JetClusterMomentsTool", "clsmoms", JetContainer = _jetname),
-    ECPSFrac =        JetModifier("JetECPSFractionTool", "ecpsfrac", JetContainer = _jetname),
-    Width =           JetModifier("JetWidthTool", "width", JetContainer = _jetname),
+        # Easy cases, no special config or prereqs, just default tool config 
+        ClusterMoments =  JetModifier("JetClusterMomentsTool", "clsmoms", JetContainer = _jetname),
+        ECPSFrac =        JetModifier("JetECPSFractionTool", "ecpsfrac", JetContainer = _jetname),
+        Width =           JetModifier("JetWidthTool", "width", JetContainer = _jetname),
 
-    # More complex cases here
-    CaloEnergies =    JetModifier("JetCaloEnergies", "jetens", 
-                                  prereqs=["mod:EMScaleMom"], JetContainer = _jetname,
-                                  ),
-    CaloQuality =     JetModifier("JetCaloQualityTool", "caloqual",
-                                  TimingCuts = [5,10],
-                                  Calculations = ["LArQuality", "N90Constituents", "FracSamplingMax",  "NegativeE", "Timing", "HECQuality", "Centroid", "AverageLArQF", "BchCorrCell"],JetContainer = _jetname),
+        # More complex cases here
+        CaloEnergies =    JetModifier("JetCaloEnergies", "jetens", 
+                                      prereqs=["mod:EMScaleMom"], JetContainer = _jetname,
+                                      ),
+        CaloQuality =     JetModifier("JetCaloQualityTool", "caloqual",
+                                      TimingCuts = [5,10],
+                                      Calculations = ["LArQuality", "N90Constituents", "FracSamplingMax",  "NegativeE", "Timing", "HECQuality", "Centroid", "AverageLArQF", "BchCorrCell"],JetContainer = _jetname),
 
-    ConstitFourMom =  JetModifier("JetConstitFourMomTool", "constitfourmom_basename",
-                                  createfn=JetMomentToolsConfig.getConstitFourMomTool,),
-    EMScaleMom =      JetModifier("JetEMScaleMomTool", "emscalemom_basename",
-                                  createfn=JetMomentToolsConfig.getEMScaleMomTool,
-                                  JetContainer = _jetname),
+        ConstitFourMom =  JetModifier("JetConstitFourMomTool", "constitfourmom_basename",
+                                      createfn=JetMomentToolsConfig.getConstitFourMomTool,),
+        EMScaleMom =      JetModifier("JetEMScaleMomTool", "emscalemom_basename",
+                                      createfn=JetMomentToolsConfig.getEMScaleMomTool,
+                                      JetContainer = _jetname),
 
-    JVF =             JetModifier("JetVertexFractionTool", "jvf",
-                                   createfn=JetMomentToolsConfig.getJVFTool,
-                                   prereqs = ["mod:TrackMoments", "input:PrimaryVertices"] ,JetContainer = _jetname),
-    JVT =             JetModifier("JetVertexTaggerTool", "jvt",
-                                   createfn=JetMomentToolsConfig.getJVTTool,
-                                   prereqs = [ "mod:JVF" ],JetContainer = _jetname),
-    NNJVT =           JetModifier("JetVertexNNTagger", "nnjvt",
-                                   createfn=JetMomentToolsConfig.getNNJvtTool,
-                                   prereqs = [ "mod:JVF" ],JetContainer = _jetname),
-    LArHVCorr =       JetModifier("JetLArHVTool", "larhvcorr",
-                                   prereqs = ["mod:EMScaleMom"],JetContainer = _jetname),
-    OriginSetPV =     JetModifier("JetOriginCorrectionTool", "origin_setpv",
-                                   prereqs = [ "mod:JVF" ],JetContainer = _jetname, OnlyAssignPV=True),
-    TrackMoments =    JetModifier("JetTrackMomentsTool", "trkmoms",
-                                  createfn=JetMomentToolsConfig.getTrackMomentsTool,
-                                  prereqs = [ "input:JetTrackVtxAssoc","ghost:Track" ],JetContainer = _jetname),
-    
-    TrackSumMoments = JetModifier("JetTrackSumMomentsTool", "trksummoms",
-                                  createfn=JetMomentToolsConfig.getTrackSumMomentsTool,
-                                  prereqs = [ "input:JetTrackVtxAssoc","ghost:Track" ],JetContainer = _jetname),
-    Charge =          JetModifier("JetChargeTool", "jetcharge", 
-                                  prereqs = [ "ghost:Track" ]),
+        JVF =             JetModifier("JetVertexFractionTool", "jvf",
+                                       createfn=JetMomentToolsConfig.getJVFTool,
+                                       prereqs = ["mod:TrackMoments", "input:PrimaryVertices"] ,JetContainer = _jetname),
+        JVT =             JetModifier("JetVertexTaggerTool", "jvt",
+                                       createfn=JetMomentToolsConfig.getJVTTool,
+                                       prereqs = [ "mod:JVF" ],JetContainer = _jetname),
+        NNJVT =           JetModifier("JetVertexNNTagger", "nnjvt",
+                                       createfn=JetMomentToolsConfig.getNNJvtTool,
+                                       prereqs = [ "mod:JVF" ],JetContainer = _jetname),
+        LArHVCorr =       JetModifier("JetLArHVTool", "larhvcorr",
+                                       prereqs = ["mod:EMScaleMom"],JetContainer = _jetname),
+        OriginSetPV =     JetModifier("JetOriginCorrectionTool", "origin_setpv",
+                                       prereqs = [ "mod:JVF" ],JetContainer = _jetname, OnlyAssignPV=True),
+        TrackMoments =    JetModifier("JetTrackMomentsTool", "trkmoms",
+                                      createfn=JetMomentToolsConfig.getTrackMomentsTool,
+                                      prereqs = [ "input:JetTrackVtxAssoc","ghost:Track" ],JetContainer = _jetname),
 
-    QGTagging =       JetModifier("JetQGTaggerVariableTool", "qgtagging",
-                                  createfn=JetMomentToolsConfig.getQGTaggingTool,
-                                  prereqs = lambda _,jetdef : ["mod:JetPtAssociation", "mod:TrackMoments"] if not isMC(jetdef._cflags) else ["mod:TrackMoments"],
-                                  JetContainer = _jetname),
+        TrackSumMoments = JetModifier("JetTrackSumMomentsTool", "trksummoms",
+                                      createfn=JetMomentToolsConfig.getTrackSumMomentsTool,
+                                      prereqs = [ "input:JetTrackVtxAssoc","ghost:Track" ],JetContainer = _jetname),
+        Charge =          JetModifier("JetChargeTool", "jetcharge", 
+                                      prereqs = [ "ghost:Track" ]),
 
-    fJVT =           JetModifier("JetForwardPFlowJvtTool", "fJVT",
-                                 createfn=JetMomentToolsConfig.getPFlowfJVTTool,
-                                 prereqs = ["input:EventDensity","input:PrimaryVertices"],
-                                 JetContainer = _jetname),
+        QGTagging =       JetModifier("JetQGTaggerVariableTool", "qgtagging",
+                                      createfn=JetMomentToolsConfig.getQGTaggingTool,
+                                      prereqs = lambda _,jetdef : ["mod:JetPtAssociation", "mod:TrackMoments"] if not isMC(jetdef._cflags) else ["mod:TrackMoments"],
+                                      JetContainer = _jetname),
 
-    bJVT =           JetModifier("JetBalancePFlowJvtTool", "bJVT",
-                                 createfn=JetMomentToolsConfig.getPFlowbJVTTool,
-                                 prereqs = ["input:EventDensity","input:PrimaryVertices"],
-                                 JetContainer = _jetname),
-)
+        fJVT =           JetModifier("JetForwardPFlowJvtTool", "fJVT",
+                                     createfn=JetMomentToolsConfig.getPFlowfJVTTool,
+                                     prereqs = ["input:EventDensity","input:PrimaryVertices"],
+                                     JetContainer = _jetname),
+
+        bJVT =           JetModifier("JetBalancePFlowJvtTool", "bJVT",
+                                     createfn=JetMomentToolsConfig.getPFlowbJVTTool,
+                                     prereqs = ["input:EventDensity","input:PrimaryVertices"],
+                                     JetContainer = _jetname),
+
+        JetPtAssociation = JetModifier("JetPtAssociationTool", "jetPtAssociation",
+                                       filterfn=isMC,
+                                       createfn=JetMomentToolsConfig.getJetPtAssociationTool,
+                                       prereqs=["ghost:Truth"],
+                                       JetContainer = _jetname
+                                       ),
+
+    )
+except ModuleNotFoundError:
+    # In some releases (AthGeneration) JetMomentTools is not existing
+    pass
 
 # Truth labelling moments
 from ParticleJetTools import ParticleJetToolsConfig
@@ -168,12 +184,6 @@ stdJetModifiers.update(
                                             "ghost:TausFinal"]
                                    ),
 
-    JetPtAssociation = JetModifier("JetPtAssociationTool", "jetPtAssociation",
-                                   filterfn=isMC,
-                                   createfn=JetMomentToolsConfig.getJetPtAssociationTool,
-                                   prereqs=["ghost:Truth"],
-                                   JetContainer = _jetname
-                                  ),
 
     JetTaggingTruthLabel = JetModifier("JetTaggingTruthLabel", "truthlabeler_{mods}",
                                        filterfn=isMC,

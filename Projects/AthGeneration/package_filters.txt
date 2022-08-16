@@ -181,7 +181,7 @@
 + Reconstruction/Jet/JetEvent
 + Reconstruction/Jet/JetInterface
 + Reconstruction/Jet/JetRec
-#+ Reconstruction/Jet/JetRecConfig
++ Reconstruction/Jet/JetRecConfig
 + Reconstruction/Particle
 #+ Reconstruction/RecAlgs
 #+ Reconstruction/RecEvent

@@ -6,10 +6,11 @@
 #
 # Author: P-A Delsart                                              #
 """
-
-
 from AthenaConfiguration.ComponentFactory import CompFactory
-from EventShapeTools.EventDensityConfig import configEventDensityTool, getEventShapeName
+
+# we can't add the imports here, because some modules may not be available
+# in all releases (Ex: AthGeneration, AnalysisBase...) so we delay the imports
+# inside the functions
 
 def _buildJetAlgForInput(suffix, tools ):
     jetalg = CompFactory.JetAlgorithm("jetalg_"+suffix,
@@ -30,6 +31,34 @@ def buildJetInputTruth(parentjetdef, truthmod):
     from ParticleJetTools.ParticleJetToolsConfig import getCopyTruthJetParticles
     return _buildJetAlgForInput("truthpartcopy_"+truthmod,
                                 tools = [ getCopyTruthJetParticles(truthmod) ]
+    )
+
+def buildJetInputTruthGEN(parentjetdef, truthmod):
+    """  Build truth constituents as in EVTGEN jobs in the r21 config. 
+    IMPORTANT : this is expected to be temporary, only to reproduce the EVTGEN r21 config with the new config. The definitions should be harmonized with reco-level at some point and this function removed.
+    The source for r21 EVTGEN config was in GeneratorFilters/share/common/GenerateTruthJets.py
+    """
+    truthmod = truthmod or ""
+
+    # recopy config from GeneratorFilters/share/common/GenerateTruthJets.py
+    truthClassifier = CompFactory.MCTruthClassifier("JetMCTruthClassifier",
+                                                                   barcodeG4Shift=1000000) # or 200k? Doesn't matter anyway?
+
+    if truthmod == "":
+        truthpartcopy = CompFactory.CopyTruthJetParticles("truthpartcopy",
+                                                                   OutputName="JetInputTruthParticlesGEN",
+                                                                   MCTruthClassifier=truthClassifier,
+                                                                   BarCodeFromMetadata=0)
+    elif truthmod=="NoWZ":
+ 
+        truthpartcopy = CompFactory.CopyTruthJetParticles("truthpartcopywz",
+                                                                     OutputName="JetInputTruthParticlesGENNoWZ",
+                                                                     MCTruthClassifier=truthClassifier,
+                                                                     IncludePromptLeptons=False,
+                                                                     BarCodeFromMetadata=0)
+        
+    return _buildJetAlgForInput("truthpartcopy_"+truthmod,
+                                tools = [ truthpartcopy ]
     )
 
 def buildLabelledTruth(parentjetdef, truthmod):
@@ -76,6 +105,7 @@ def buildEventShapeAlg(jetOrConstitdef, inputspec, voronoiRf = 0.9, radius = 0.4
      median energy density for pileup correction"""
 
     from .JetRecConfig import getPJContName
+    from EventShapeTools.EventDensityConfig import configEventDensityTool, getEventShapeName
 
     
     pjContName = getPJContName(jetOrConstitdef,suffix)

@@ -80,6 +80,7 @@ class JetDefinition(object):
                  context = "default", # describe a context for which this definition will be used. See StandardJetContext
                  VRMinR = -1.0, # Minimum radius for VR jet finding
                  VRMassSc = -1.0, # Mass scale for VR jet finding, in MeV
+                 ghostarea = 0.01, # area resolution when evaluating jet area using "ghosts"
                  lock = False,        # lock the properties of this instance to avoid accidental overwrite after __init__
     ):     
 
@@ -99,6 +100,7 @@ class JetDefinition(object):
         self._context = context
         self._VRMinRadius = VRMinR
         self._VRMassScale = VRMassSc
+        self._ghostarea = ghostarea
         self._defineName()
         
         self.ptmin = ptmin # The pt down to which FastJet is run
@@ -186,6 +188,9 @@ class JetDefinition(object):
 
     @make_lproperty
     def context(self): pass
+
+    @make_lproperty
+    def ghostarea(self): pass
     
 
     def fullname(self):
