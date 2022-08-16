@@ -168,8 +168,8 @@ bool MuonMDT_CablingMap::addMezzanine(const CablingData& map_data, MsgStream& lo
     if (debug) { log << MSG::VERBOSE << " Added new readout channel " << map_data << endmsg; }
     m_toOnlineConv[map_data].emplace(newTdc.get());
     TdcOnlSet& attachedTdcs = m_toOfflineConv[map_data].all_modules;
-    if (attachedTdcs.size() <= map_data.tdcId) attachedTdcs.resize(map_data.tdcId+1);
-    attachedTdcs [map_data.tdcId] = MdtTdcOnlSorter{newTdc.get()};
+    if (attachedTdcs.size() <= map_data.tdcId) attachedTdcs.resize(map_data.tdcId + 1);
+    attachedTdcs[map_data.tdcId] = MdtTdcOnlSorter{newTdc.get()};
     m_tdcs.push_back(std::move(newTdc));
 
     if (!addChamberToRODMap(map_data, log) && debug) { log << MSG::VERBOSE << "Station already in the map !" << endmsg; }
@@ -199,7 +199,8 @@ bool MuonMDT_CablingMap::getOfflineId(CablingData& cabling_map, MsgStream& log) 
     } else {
         const TdcOnlSet& attachedTdcs = module_itr->second.all_modules;
         if (attachedTdcs.size() < cabling_map.tdcId) {
-            log << MSG::WARNING<<"getOfflineId() -- Tdc: "<< static_cast<unsigned>(cabling_map.tdcId)<<" is not part of "<<module_itr->first<<". Maximally "<<attachedTdcs.size()<<" Tdcs were attached. "<<endmsg;
+            log << MSG::WARNING << "getOfflineId() -- Tdc: " << static_cast<unsigned>(cabling_map.tdcId) << " is not part of "
+                << module_itr->first << ". Maximally " << attachedTdcs.size() << " Tdcs were attached. " << endmsg;
             return false;
         }
         const MdtTdcOnlSorter& TdcItr = attachedTdcs.at(cabling_map.tdcId);
@@ -225,10 +226,8 @@ bool MuonMDT_CablingMap::getOfflineId(CablingData& cabling_map, MsgStream& log) 
             << MSG::dec << " subdetector: 0x" << MSG::hex << static_cast<unsigned>(cabling_map.subdetectorId) << MSG::dec << endmsg;
 
         log << MSG::VERBOSE << "Mapped to: Station: " << static_cast<int>(cabling_map.stationIndex)
-            << " eta: " << static_cast<int>(cabling_map.eta)
-            << " phi: " << static_cast<int>(cabling_map.phi)
-            << " multiLayer: " << static_cast<int>(cabling_map.multilayer)
-            << " layer: " << cabling_map.layer
+            << " eta: " << static_cast<int>(cabling_map.eta) << " phi: " << static_cast<int>(cabling_map.phi)
+            << " multiLayer: " << static_cast<int>(cabling_map.multilayer) << " layer: " << cabling_map.layer
             << " tube: " << cabling_map.tube << endmsg;
     }
     return true;
@@ -374,9 +373,10 @@ bool MuonMDT_CablingMap::finalize_init(MsgStream& log) {
 
     const unsigned int offToOnlChan = std::accumulate(m_toOnlineConv.begin(), m_toOnlineConv.end(), 0,
                                                       [](unsigned int N, const auto& map) { return N + map.second.size(); });
-    const unsigned int onlToOffChan = std::accumulate(m_toOfflineConv.begin(), m_toOfflineConv.end(), 0,
-                                                      [](unsigned int N, const auto& map) { 
-                return N + std::accumulate(map.second.begin(), map.second.end(), 0, [](unsigned int M, const auto& tdc){ return  M +  tdc; }); });
+    const unsigned int onlToOffChan =
+        std::accumulate(m_toOfflineConv.begin(), m_toOfflineConv.end(), 0, [](unsigned int N, const auto& map) {
+            return N + std::accumulate(map.second.begin(), map.second.end(), 0, [](unsigned int M, const auto& tdc) { return M + tdc; });
+        });
 
     if (offToOnlChan != onlToOffChan || onlToOffChan != m_tdcs.size()) {
         log << MSG::ERROR << "Offline <-> online conversion channels were lost. Expect " << m_tdcs.size()

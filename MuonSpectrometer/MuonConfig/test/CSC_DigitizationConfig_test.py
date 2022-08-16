@@ -1,5 +1,5 @@
 #!/usr/bin/env python
-"""Run tests on CSC_DigitizationConfigNew.py
+"""Run tests on CSC_DigitizationConfig.py
 
 Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
 """

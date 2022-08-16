@@ -180,6 +180,29 @@ def TIDAMonitoring( flags=None, name=None, monlevel=None, mcTruth=False ) :
                 tools += [ tidatau ]
 
 
+        #### tau LRT ####
+
+        if mcTruth:
+                tidataulrt = TrigR3Mon_builder(flags, name = "IDTauLRTTruth"+toolkey+"Tool", mcTruth=True, pdgID=15 )
+                tidataulrt.SliceTag = "HLT/TRIDT/TauLRTTruth/"+key
+        else:
+                tidataulrt = TrigR3Mon_builder( flags, name = "IDTauLRT"+toolkey+"Tool", useHighestPT=True )
+                tidataulrt.SliceTag = "HLT/TRIDT/TauLRT/"+key
+
+        tidataulrt.AnalysisConfig = "Tier0"
+
+        chains = getchains( [ "HLT_tau.*_idperf.*_trackLRT.*:key=HLT_IDTrack_TauLRT_FTF:roi=HLT_Roi_LRT",
+                              "HLT_tau.*_idperf.*_trackLRT.*:key=HLT_IDTrack_TauLRT_IDTrig:roi=HLT_Roi_TauLRT"], monlevel )
+
+        if len(chains)>0 :
+
+                tidataulrt.ntupleChainNames  = chains
+                tidataulrt.ntupleChainNames += [ "Offline", "Offline:+InDetLargeD0TrackParticles" ]
+
+                tidataulrt.MonTools = createMonTools( flags, tidataulrt.SliceTag, chains )
+
+                tools += [ tidataulrt ]
+
 
         #### bjets ####
 

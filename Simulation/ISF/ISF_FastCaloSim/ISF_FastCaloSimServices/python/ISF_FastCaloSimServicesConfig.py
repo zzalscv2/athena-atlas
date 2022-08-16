@@ -18,7 +18,7 @@ from FastCaloSim.FastCaloSimFactoryNew import (NITimedExtrapolatorCfg,
 def PunchThroughToolCfg(flags, name="ISF_PunchThroughTool", **kwargs):
 
     from BarcodeServices.BarcodeServicesConfig import BarcodeSvcCfg
-    from SubDetectorEnvelopes.SubDetectorEnvelopesConfigNew import EnvelopeDefSvcCfg
+    from SubDetectorEnvelopes.SubDetectorEnvelopesConfig import EnvelopeDefSvcCfg
     acc = ComponentAccumulator()
     kwargs.setdefault("FilenameLookupTable", "FastCaloSim/MC16/TFCSparam_mpt_v01.root")
     kwargs.setdefault("PunchThroughInitiators", [211])

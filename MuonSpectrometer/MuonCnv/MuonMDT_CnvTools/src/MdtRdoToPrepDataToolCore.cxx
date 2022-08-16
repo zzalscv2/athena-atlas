@@ -55,8 +55,7 @@ Muon::MdtRdoToPrepDataToolCore::MdtRdoToPrepDataToolCore(const std::string& t, c
     declareProperty("DoPropagationCorrection", m_mdtCalibSvcSettings->doProp = false);
     // DataHandle
     declareProperty("RDOContainer", m_rdoContainerKey = "MDTCSM", "MdtCsmContainer to retrieve");
-    declareProperty("OutputCollection", m_mdtPrepDataContainerKey = "MDT_DriftCircles",
-                    "Muon::MdtPrepDataContainer to record");
+    declareProperty("OutputCollection", m_mdtPrepDataContainerKey = "MDT_DriftCircles", "Muon::MdtPrepDataContainer to record");
 }
 
 StatusCode Muon::MdtRdoToPrepDataToolCore::initialize() {
@@ -998,8 +997,8 @@ StatusCode Muon::MdtRdoToPrepDataToolCore::processCsmTwin(Muon::MdtPrepDataConta
                     MdtTwinPrepData* twin_newPrepData =
                         new MdtTwinPrepData(promptHit_channelId,
                                             // promptHit_channelHash,
-                                            mdtHashId, driftRadiusZTwin, cov, descriptor, promptHit_Digit->tdc(),
-                                            promptHit_Digit->adc(), twinHit_Digit->tdc(), twinHit_Digit->adc(), digitStatus);
+                                            mdtHashId, driftRadiusZTwin, cov, descriptor, promptHit_Digit->tdc(), promptHit_Digit->adc(),
+                                            twinHit_Digit->tdc(), twinHit_Digit->adc(), digitStatus);
 
                     ATH_MSG_DEBUG(
                         " MADE A 2D TWINPREPDATA "
@@ -1034,8 +1033,8 @@ StatusCode Muon::MdtRdoToPrepDataToolCore::processCsmTwin(Muon::MdtPrepDataConta
                     (cov)(0, 0) = errRadius * errRadius;
 
                     MdtPrepData* twin_newPrepData =
-                        new MdtPrepData(promptHit_channelId, promptHit_channelHash, driftRadius, cov, descriptor,
-                                        promptHit_Digit->tdc(), promptHit_Digit->adc(), digitStatus);
+                        new MdtPrepData(promptHit_channelId, promptHit_channelHash, driftRadius, cov, descriptor, promptHit_Digit->tdc(),
+                                        promptHit_Digit->adc(), digitStatus);
 
                     ATH_MSG_DEBUG(
                         " MADE A 1D(=original) PREPDATA OUT OF TWINPAIR "
@@ -1186,9 +1185,8 @@ StatusCode Muon::MdtRdoToPrepDataToolCore::processCsmTwin(Muon::MdtPrepDataConta
 
                 // second_digit
                 // Create new PrepData
-                MdtPrepData* second_newPrepData =
-                    new MdtPrepData(second_channelId, mdtHashId, second_driftRadius, cov2, second_descriptor,
-                                    second_digit->tdc(), second_digit->adc(), second_digitStatus);
+                MdtPrepData* second_newPrepData = new MdtPrepData(second_channelId, mdtHashId, second_driftRadius, cov2, second_descriptor,
+                                                                  second_digit->tdc(), second_digit->adc(), second_digitStatus);
 
                 second_newPrepData->setHashAndIndex(driftCircleColl->identifyHash(), driftCircleColl->size());
                 driftCircleColl->push_back(second_newPrepData);

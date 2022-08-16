@@ -41,8 +41,6 @@ namespace Muon {
 }  // namespace Muon
 
 inline MdtDigit* Muon::MdtRDO_Decoder::getDigit(const MdtAmtHit* amtHit, uint16_t& subdetId, uint16_t& mrodId, uint16_t& csmId) const {
-    
-    
     SG::ReadCondHandle<MuonMDT_CablingMap> readHandle{m_readKey};
     const MuonMDT_CablingMap* readCdo{*readHandle};
     if (!readCdo) {
@@ -60,11 +58,11 @@ inline MdtDigit* Muon::MdtRDO_Decoder::getDigit(const MdtAmtHit* amtHit, uint16_
     uint16_t fine = amtHit->fine();
     int width = (int)amtHit->width();
 
-    MsgStream& msg(msgStream() );
+    MsgStream& msg(msgStream());
     bool cab = readCdo->getOfflineId(cabling_data, msg);
     if (!cab) return nullptr;
     Identifier chanId;
-    if (!readCdo->convert(cabling_data,chanId,false)) return nullptr;
+    if (!readCdo->convert(cabling_data, chanId, false)) return nullptr;
     int tdcCounts = coarse * 32 + fine;
     MdtDigit* mdtDigit = new MdtDigit(chanId, tdcCounts, width, amtHit->isMasked());
     return mdtDigit;
@@ -72,8 +70,6 @@ inline MdtDigit* Muon::MdtRDO_Decoder::getDigit(const MdtAmtHit* amtHit, uint16_
 
 inline Identifier Muon::MdtRDO_Decoder::getOfflineData(const MdtAmtHit* amtHit, uint16_t& subdetId, uint16_t& mrodId, uint16_t& csmId,
                                                        int& tdcCounts, int& width) const {
-    
-    
     uint16_t tdc = amtHit->tdcId();
     uint16_t chan = amtHit->channelId();
     uint16_t coarse = amtHit->coarse();
@@ -95,15 +91,13 @@ inline Identifier Muon::MdtRDO_Decoder::getOfflineData(const MdtAmtHit* amtHit, 
     cabling_data.channelId = chan;
     cabling_data.mrod = mrodId;
 
-    bool cab = readCdo->getOfflineId(cabling_data, msgStream() );
+    bool cab = readCdo->getOfflineId(cabling_data, msgStream());
 
-    if (!cab) {
-        return chanIdDefault;
-    }
+    if (!cab) { return chanIdDefault; }
 
     Identifier chanId;
-    readCdo->convert(cabling_data, chanId);    
-   
+    readCdo->convert(cabling_data, chanId);
+
     return chanId;
 }
 

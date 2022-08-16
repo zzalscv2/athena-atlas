@@ -1,5 +1,5 @@
 #
-#  Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+#  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
 #
 
 '''@file TrigTLAMonitorAlgorithm.py
@@ -188,10 +188,6 @@ if __name__=='__main__':
     parser.add_argument('input',nargs='?',default='/afs/cern.ch/work/e/enagy/public/ARTfiles/MCtest160322.AOD.pool.root')
     parser.add_argument('--data',action='store_true',help='Input file is data.')
     args = parser.parse_args()
-
-    # Setup the Run III behavior
-    from AthenaCommon.Configurable import Configurable
-    Configurable.configurableRun3Behavior = 1
 
     # Setup logs
     from AthenaCommon.Logging import log

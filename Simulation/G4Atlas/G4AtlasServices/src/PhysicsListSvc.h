@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2020 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef G4ATLASTOOLS_PHYSICSLISTSVC_H
@@ -40,8 +40,8 @@ private:
   /// This command prints a message about a G4Command depending on its returnCode
   void CommandLog(int returnCode, const std::string& commandString) const;
 
-  ToolHandleArray<IPhysicsOptionTool> m_phys_option;
-  ToolHandleArray<IPhysicsOptionTool> m_phys_decay;
+  ToolHandleArray<IPhysicsOptionTool> m_phys_option{this, "PhysOption", {}, "Tool handle array of physics options" };
+  ToolHandleArray<IPhysicsOptionTool> m_phys_decay{this, "PhysicsDecay", {}, "Tool handle array of physics decays"};
   G4VModularPhysicsList* m_physicsList{}; ///!< Handle on the physics list
   Gaudi::Property<std::string> m_physicsListName{this, "PhysicsList", "FTFP_BERT", "Name for physics list"};     ///!< Name for the physics list (property to be set in the tool)
   Gaudi::Property<double> m_neutronTimeCut{this, "NeutronTimeCut", 0, "Time cut for neutron killer"};           ///!< Time cut for neutrons (in the neutron killer process)

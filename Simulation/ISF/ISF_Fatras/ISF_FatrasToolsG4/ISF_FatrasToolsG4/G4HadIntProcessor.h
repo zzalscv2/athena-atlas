@@ -28,7 +28,7 @@
 
 // ISF
 #include "ISF_Event/ITruthIncident.h"
-#include "ISF_Event/ISFParticleVector.h"
+#include "ISF_Event/ISFParticleContainer.h"
 
 // Forward Declarations
 class TTree;

@@ -6,7 +6,7 @@
 # author Petr Balek <petr.balek@cern.ch>
 # date   2022-05-25
 
-# brief  A script to test AFP_Digitization package. Mostly inspired by Digitization/DigitizationConfigNew_test.py, but includes switching AFP digitization on (it's off by default). To test it:
+# brief  A script to test AFP_Digitization package. Mostly inspired by Digitization/DigitizationConfig_test.py, but includes switching AFP digitization on (it's off by default). To test it:
 #           0. setup athena enviroment
 #           1a. run this script:
 #              $ python AFP_DigitizationConfig_test.py
@@ -17,7 +17,7 @@
 
 
 if __name__ == "__main__":
-    """Test AFP ComponentAccumulator Digitization configuration modules, inspired by Digitization/DigitizationConfigNew_test.py"""
+    """Test AFP ComponentAccumulator Digitization configuration modules, inspired by Digitization/DigitizationConfig_test.py"""
     
     from AthenaCommon.Logging import log
     from AthenaCommon.Constants import DEBUG

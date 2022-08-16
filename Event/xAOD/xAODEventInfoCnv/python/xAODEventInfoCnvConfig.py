@@ -26,9 +26,7 @@ def EventInfoCnvAlgCfg(flags, name="EventInfoCnvAlg",
         from BeamSpotConditions.BeamSpotConditionsConfig import BeamSpotCondAlgCfg
         acc.merge(BeamSpotCondAlgCfg(flags))
 
-    xAODMaker__EventInfoCnvAlg = CompFactory.xAODMaker.EventInfoCnvAlg
-    alg = xAODMaker__EventInfoCnvAlg(name, **kwargs)
-    acc.addEventAlgo(alg)
+    acc.addEventAlgo(CompFactory.xAODMaker.EventInfoCnvAlg(name, **kwargs))
 
     return acc
 
@@ -41,8 +39,8 @@ def EventInfoOverlayAlgCfg(flags, name="EventInfoOverlay", **kwargs):
     from BeamSpotConditions.BeamSpotConditionsConfig import BeamSpotCondAlgCfg
     acc.merge(BeamSpotCondAlgCfg(flags))
 
-    kwargs.setdefault("BkgInputKey", flags.Overlay.BkgPrefix + "EventInfo")
-    kwargs.setdefault("SignalInputKey", flags.Overlay.SigPrefix + "EventInfo")
+    kwargs.setdefault("BkgInputKey", f"{flags.Overlay.BkgPrefix}EventInfo")
+    kwargs.setdefault("SignalInputKey", f"{flags.Overlay.SigPrefix}EventInfo")
     kwargs.setdefault("OutputKey", "EventInfo")
 
     kwargs.setdefault("DataOverlay", flags.Overlay.DataOverlay)
@@ -52,35 +50,26 @@ def EventInfoOverlayAlgCfg(flags, name="EventInfoOverlay", **kwargs):
         kwargs.setdefault("MCChannelNumber", flags.Input.MCChannelNumber)
 
     # Do the xAOD::EventInfo overlay
-    xAODMaker__EventInfoOverlay = CompFactory.xAODMaker.EventInfoOverlay
-    alg = xAODMaker__EventInfoOverlay(name, **kwargs)
-    acc.addEventAlgo(alg)
+    acc.addEventAlgo(CompFactory.xAODMaker.EventInfoOverlay(name, **kwargs))
 
     # Re-map signal address
     from SGComps.AddressRemappingConfig import AddressRemappingCfg
     acc.merge(AddressRemappingCfg([
-        "xAOD::EventInfo#EventInfo->" + flags.Overlay.SigPrefix + "EventInfo",
-        "xAOD::EventAuxInfo#EventInfoAux.->" + flags.Overlay.SigPrefix + "EventInfoAux.",
+        f"xAOD::EventInfo#EventInfo->{flags.Overlay.SigPrefix}EventInfo",
+        f"xAOD::EventAuxInfo#EventInfoAux.->{flags.Overlay.SigPrefix}EventInfoAux.",
     ]))
 
-    return acc
-
-
-def EventInfoOverlayOutputCfg(flags, **kwargs):
-    """Return event info overlay output configuration"""
-    acc = ComponentAccumulator()
-
+    # Add output
     from OutputStreamAthenaPool.OutputStreamConfig import OutputStreamCfg
     if flags.Output.doWriteRDO:
         acc.merge(OutputStreamCfg(flags, "RDO"))
 
     # Add signal output
     if flags.Output.doWriteRDO_SGNL:
-        acc.merge(OutputStreamCfg(flags, "RDO_SGNL",
-                                  ItemList=[
-                                      "xAOD::EventInfo#Sig_EventInfo",
-                                      "xAOD::EventAuxInfo#Sig_EventInfoAux."
-                                  ]))
+        acc.merge(OutputStreamCfg(flags, "RDO_SGNL", ItemList=[
+            f"xAOD::EventInfo#{flags.Overlay.SigPrefix}EventInfo",
+            f"xAOD::EventAuxInfo#{flags.Overlay.SigPrefix}EventInfoAux."
+        ]))
 
     return acc
 
@@ -89,25 +78,28 @@ def EventInfoOverlayCfg(flags, **kwargs):
     """Return a ComponentAccumulator for the full EventInfoOverlay algorithm accumulator"""
 
     acc = ComponentAccumulator()
-
+    inputs = [f"xAOD::EventInfo#{flags.Overlay.BkgPrefix}EventInfo"]
     # Check if running on legacy HITS
     if "EventInfo" not in flags.Input.Collections and "EventInfo" not in flags.Input.SecondaryCollections:
         acc.merge(EventInfoCnvAlgCfg(flags,
-                                     inputKey=flags.Overlay.SigPrefix+"McEventInfo",
-                                     outputKey=flags.Overlay.SigPrefix+"EventInfo",
+                                     inputKey=f"{flags.Overlay.SigPrefix}McEventInfo",
+                                     outputKey=f"{flags.Overlay.SigPrefix}EventInfo",
                                      **kwargs))
         # Re-map signal address
         from SGComps.AddressRemappingConfig import AddressRemappingCfg
         acc.merge(AddressRemappingCfg([
-            "EventInfo#McEventInfo->" + flags.Overlay.SigPrefix + "McEventInfo",
+            f"EventInfo#McEventInfo->{flags.Overlay.SigPrefix}McEventInfo",
         ]))
 
+        inputs.append(f"EventInfo#{flags.Overlay.SigPrefix}McEventInfo")
+    else:
+        inputs.append(f"xAOD::EventInfo#{flags.Overlay.SigPrefix}EventInfo")
+
+    from SGComps.SGInputLoaderConfig import SGInputLoaderCfg
+    acc.merge(SGInputLoaderCfg(flags, inputs))
+
     acc.merge(EventInfoOverlayAlgCfg(flags, **kwargs))
-    acc.merge(EventInfoOverlayOutputCfg(flags, **kwargs))
     return acc
-
-
-
 
 
 def EventInfoUpdateFromContextAlgCfg(flags, name="EventInfoUpdateFromContextAlg", **kwargs):
@@ -134,32 +126,4 @@ def EventInfoUpdateFromContextAlgCfg(flags, name="EventInfoUpdateFromContextAlg"
         "xAOD::EventAuxInfo#EventInfoAux.->" + "Input_EventInfoAux.",
     ]))
 
-    return acc
-
-
-def EventInfoUpdateFromContextOutputCfg(flags, **kwargs):
-    """Return event info overlay output configuration"""
-    acc = ComponentAccumulator()
-
-    from OutputStreamAthenaPool.OutputStreamConfig import OutputStreamCfg
-    if flags.Output.doWriteRDO:
-        acc.merge(OutputStreamCfg(flags, "RDO"))
-
-    return acc
-
-
-def EventInfoUpdateFromContextCfg(flags, **kwargs):
-    """Return a ComponentAccumulator for the full EventInfoOverlay algorithm accumulator"""
-
-    acc = ComponentAccumulator()
-
-    # Check if running on legacy HITS
-    if "EventInfo" not in flags.Input.Collections and "EventInfo" not in flags.Input.SecondaryCollections:
-        acc.merge(EventInfoCnvAlgCfg(flags,
-                                     inputKey="McEventInfo",
-                                     outputKey="Input_EventInfo",
-                                     **kwargs))
-
-    acc.merge(EventInfoUpdateFromContextAlgCfg(flags, **kwargs))
-    acc.merge(EventInfoUpdateFromContextOutputCfg(flags, **kwargs))
     return acc

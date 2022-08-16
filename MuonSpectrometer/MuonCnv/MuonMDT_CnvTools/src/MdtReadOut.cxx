@@ -10,7 +10,6 @@
 
 MdtReadOut::MdtReadOut() : m_word(0) {}
 
-
 // Encode a 32-bits data word from fragments with size < 16 bits
 uint32_t MdtReadOut::setBits(uint16_t nData, const uint16_t* inputData, const uint16_t* inputPos) {
     uint32_t result = 0;

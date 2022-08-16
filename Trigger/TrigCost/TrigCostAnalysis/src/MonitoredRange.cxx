@@ -6,6 +6,8 @@
 #include "MonitoredRange.h"
 #include "MonitorBase.h"
 
+#include "TProfile.h"
+
 MonitoredRange::MonitoredRange(const std::string& name, TrigCostAnalysis* parent) : 
   m_name(name),
   m_parent(parent),
@@ -14,7 +16,7 @@ MonitoredRange::MonitoredRange(const std::string& name, TrigCostAnalysis* parent
   m_seenLB()
 {
   std::string hisSvcName = getName() + "_walltime";
-  std::unique_ptr<TH1F> hist = std::make_unique<TH1F>(hisSvcName.c_str(), "Walltime;;Seconds", 1, -.5, .5);
+  std::unique_ptr<TProfile> hist = std::make_unique<TProfile>(hisSvcName.c_str(), "Walltime;;Seconds", 1000, 0, 1000);
   m_cachedLifetimeHistPtr = bookGetPointer(hist.release()); // Now owned by HistSvc
 }
 
@@ -65,7 +67,7 @@ StatusCode MonitoredRange::newEvent(const CostData& data, const float weight, co
     // For this case we increment this bin for event event this monitor sees.
     // Or, we can process P1 data where we only know the LB length and must assume that all events are collected and processed,
     // otherwise the normalisation will be off. For this case we increment this one for every unique LB this monitor sees.
-    m_cachedLifetimeHistPtr->Fill(0., data.liveTime());
+    m_cachedLifetimeHistPtr->Fill(data.lb(), data.liveTime());
   }
   
   return StatusCode::SUCCESS;

@@ -1,5 +1,6 @@
 # Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
 
+
 # import Hypo Algs/Tools
 from AthenaConfiguration.ComponentFactory import CompFactory # tools are imported from the factory, (NewJO)
 from TrigMuonHypo.TrigMuonHypoConf import (  # noqa: F401 (import all into this module)
@@ -21,6 +22,7 @@ from TrigMuonHypo.TrigMuonHypoMonitoring import (
     TrigMuonEFInvMassHypoMonitoring
 )
 
+monitorAll = False #should only be true for local debugging to have histograms from all chains
 
 # other imports
 from AthenaCommon.SystemOfUnits import GeV
@@ -278,8 +280,11 @@ def TrigMufastHypoToolFromDict( chainDict ):
     config = TrigMufastHypoConfig()
     tool = config.ConfigurationHypoTool( chainDict['chainName'], thresholds )
 
-    if any(group in muonHypoMonGroups for group in chainDict['monGroups']):
+    if monitorAll:
         tool.MonTool = TrigMufastHypoMonitoring('TrigMufastHypoTool/'+chainDict['chainName'])
+    else:
+        if any(group in muonHypoMonGroups for group in chainDict['monGroups']):
+            tool.MonTool = TrigMufastHypoMonitoring('TrigMufastHypoTool/'+chainDict['chainName'])
     
     return tool
 
@@ -289,8 +294,11 @@ def TrigMufastHypoToolwORFromDict( chainDict ):
     config = TrigMufastHypoConfig()
     tool = config.ConfigurationHypoTool( chainDict['chainName'], thresholds )
 
-    if any(group in muonHypoMonGroups for group in chainDict['monGroups']):
+    if monitorAll:
         tool.MonTool = TrigL2MuonOverlapRemoverMonitoringMufast('TrigMufastHypoTool/'+chainDict['chainName'])
+    else:
+        if any(group in muonHypoMonGroups for group in chainDict['monGroups']):
+            tool.MonTool = TrigL2MuonOverlapRemoverMonitoringMufast('TrigMufastHypoTool/'+chainDict['chainName'])
 
     # Overlap Removal
     tool.ApplyOR = True
@@ -432,8 +440,11 @@ def TrigmuCombHypoToolFromDict( chainDict ):
 
     tool = config.ConfigurationHypoTool( chainDict['chainName'], thresholds, tight, acceptAll )
 
-    if any(group in muonHypoMonGroups for group in chainDict['monGroups']):
+    if monitorAll:
         tool.MonTool = TrigmuCombHypoMonitoring("TrigmuCombHypoTool/"+chainDict['chainName'])
+    else:
+        if any(group in muonHypoMonGroups for group in chainDict['monGroups']):
+            tool.MonTool = TrigmuCombHypoMonitoring("TrigmuCombHypoTool/"+chainDict['chainName'])
 
     d0cut=0.
     if 'd0loose' in chainDict['chainParts'][0]['lrtInfo']:
@@ -462,8 +473,11 @@ def TrigmuCombHypoToolwORFromDict( chainDict ):
 
     tool = config.ConfigurationHypoTool( chainDict['chainName'], thresholds, tight, acceptAll )
 
-    if any(group in muonHypoMonGroups for group in chainDict['monGroups']):
+    if monitorAll:
         tool.MonTool = TrigL2MuonOverlapRemoverMonitoringMucomb("TrigmuCombHypoTool/"+chainDict['chainName'])
+    else:
+        if any(group in muonHypoMonGroups for group in chainDict['monGroups']):
+            tool.MonTool = TrigL2MuonOverlapRemoverMonitoringMucomb("TrigmuCombHypoTool/"+chainDict['chainName'])
 
     # Overlap Removal
     tool.ApplyOR = True
@@ -589,8 +603,11 @@ def TrigMuonEFMSonlyHypoToolFromDict( chainDict ) :
         doOverlap=True
     tool = config.ConfigurationHypoTool( chainDict['chainName'], thresholds, doOverlap )
 
-    if any(group in muonHypoMonGroups for group in chainDict['monGroups']):
+    if monitorAll:
         tool.MonTool = TrigMuonEFHypoMonitoring("TrigMuonEFMSonlyHypoTool/"+chainDict['chainName'])
+    else:
+        if any(group in muonHypoMonGroups for group in chainDict['monGroups']):
+            tool.MonTool = TrigMuonEFHypoMonitoring("TrigMuonEFMSonlyHypoTool/"+chainDict['chainName'])
     
     return tool
 
@@ -619,8 +636,11 @@ def TrigMuonEFMSonlyHypoToolFromName(chainDict):
     config = TrigMuonEFMSonlyHypoConfig()
     tool = config.ConfigurationHypoTool(chainDict['chainName'], thresholds, False)
 
-    if any(group in muonHypoMonGroups for group in chainDict['monGroups']):
+    if monitorAll:
         tool.MonTool = TrigMuonEFHypoMonitoring("TrigMuonEFMSonlyHypoTool/"+chainDict['chainName'])
+    else:
+        if any(group in muonHypoMonGroups for group in chainDict['monGroups']):
+            tool.MonTool = TrigMuonEFHypoMonitoring("TrigMuonEFMSonlyHypoTool/"+chainDict['chainName'])
 
     return tool
 
@@ -691,8 +711,11 @@ def TrigMuonEFCombinerHypoToolFromDict( chainDict ) :
     config = TrigMuonEFCombinerHypoConfig()
     tool = config.ConfigurationHypoTool( chainDict['chainName'], thresholds , muonquality, narrowscan, overlap)
 
-    if any(group in muonHypoMonGroups for group in chainDict['monGroups']):
+    if monitorAll:
         tool.MonTool = TrigMuonEFHypoMonitoring("TrigMuonEFCombinerHypoTool/"+chainDict['chainName'])
+    else:
+        if any(group in muonHypoMonGroups for group in chainDict['monGroups']):
+            tool.MonTool = TrigMuonEFHypoMonitoring("TrigMuonEFCombinerHypoTool/"+chainDict['chainName'])
 
     d0cut=0.
     if 'd0loose' in chainDict['chainParts'][0]['lrtInfo']:
@@ -742,8 +765,11 @@ def TrigMuonEFCombinerHypoToolFromName(chainDict):
 
     tool = config.ConfigurationHypoTool(chainDict['chainName'], thresholds, muonquality, narrowscan, False)
 
-    if any(group in muonHypoMonGroups for group in chainDict['monGroups']):
+    if monitorAll:
         tool.MonTool = TrigMuonEFHypoMonitoring("TrigMuonEFCombinerHypoTool/"+chainDict['chainName'])
+    else:
+        if any(group in muonHypoMonGroups for group in chainDict['monGroups']):
+            tool.MonTool = TrigMuonEFHypoMonitoring("TrigMuonEFCombinerHypoTool/"+chainDict['chainName'])
 
     return tool
 
@@ -848,8 +874,11 @@ def TrigMuonEFInvMassHypoToolFromDict( chainDict ) :
     config = TrigMuonEFInvMassHypoConfig()
     tool = config.ConfigurationHypoTool( chainDict['chainName'], thresholds, osCut )
 
-    if any(group in muonHypoMonGroups for group in chainDict['monGroups']):
+    if monitorAll:
         tool.MonTool = TrigMuonEFInvMassHypoMonitoring("TrigMuonEFInvMassHypoTool/"+chainDict['chainName'])
+    else:
+        if any(group in muonHypoMonGroups for group in chainDict['monGroups']):
+            tool.MonTool = TrigMuonEFInvMassHypoMonitoring("TrigMuonEFInvMassHypoTool/"+chainDict['chainName'])
 
     return tool
 

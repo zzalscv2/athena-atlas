@@ -5,10 +5,10 @@
 #ifndef MUONBYTESTREAM_CSCRDOCONTRAWEVENTCNV_H
 #define MUONBYTESTREAM_CSCRDOCONTRAWEVENTCNV_H
 
-#include "GaudiKernel/ToolHandle.h"
-#include "GaudiKernel/ServiceHandle.h"
-#include "MuonCSC_CnvTools/ICSC_RDOtoByteStreamTool.h"
 #include "AthenaBaseComps/AthConstConverter.h"
+#include "GaudiKernel/ServiceHandle.h"
+#include "GaudiKernel/ToolHandle.h"
+#include "MuonCSC_CnvTools/ICSC_RDOtoByteStreamTool.h"
 
 class DataObject;
 class StatusCode;
@@ -16,36 +16,28 @@ class StatusCode;
 // Abstract factory to create the converter
 template <class TYPE> class CnvFactory;
 
-
 /*
   ByteStream Converter between CSC RDO <---> BYTE STREAM
 
   @author Ketevi A. Assamagan
   BNL December 27 2003
 */
-class CscRdoContByteStreamCnv: public AthConstConverter 
-{
-
+class CscRdoContByteStreamCnv : public AthConstConverter {
 public:
-  CscRdoContByteStreamCnv(ISvcLocator* svcloc);
+    CscRdoContByteStreamCnv(ISvcLocator* svcloc);
 
-  virtual StatusCode initialize() override;
-  virtual StatusCode createObjConst(IOpaqueAddress* /*pAddr*/, DataObject*& /*pObj*/) const override {
-    return StatusCode::FAILURE;
-  }
-  
-  virtual StatusCode createRepConst(DataObject* pObj, IOpaqueAddress*& pAddr) const override;
+    virtual StatusCode initialize() override;
+    virtual StatusCode createObjConst(IOpaqueAddress* /*pAddr*/, DataObject*& /*pObj*/) const override { return StatusCode::FAILURE; }
 
-  /// Storage type and class ID
-  virtual long repSvcType() const override { return i_repSvcType(); }
-  static long storageType();
-  static const CLID& classID();
+    virtual StatusCode createRepConst(DataObject* pObj, IOpaqueAddress*& pAddr) const override;
 
-private: 
-   ToolHandle<Muon::ICSC_RDOtoByteStreamTool>               m_tool; 
+    /// Storage type and class ID
+    virtual long repSvcType() const override { return i_repSvcType(); }
+    static long storageType();
+    static const CLID& classID();
+
+private:
+    ToolHandle<Muon::ICSC_RDOtoByteStreamTool> m_tool;
 };
 
 #endif
-
-
-

@@ -103,9 +103,9 @@ namespace Muon {
         SG::ReadHandleKey<MdtCsmContainer> m_rdoContainerKey;  // MDTCSM
 
         /** member variables for algorithm properties: */
-        bool m_calibratePrepData;  //!< toggle on/off calibration of MdtPrepData
-        bool m_decodeData;         //!< toggle on/off the decoding of MDT RDO into MdtPrepData
-        bool m_sortPrepData = false;       //!< Toggle on/off the sorting of the MdtPrepData
+        bool m_calibratePrepData;     //!< toggle on/off calibration of MdtPrepData
+        bool m_decodeData;            //!< toggle on/off the decoding of MDT RDO into MdtPrepData
+        bool m_sortPrepData = false;  //!< Toggle on/off the sorting of the MdtPrepData
 
         ToolHandle<Muon::IMDT_RDO_Decoder> m_mdtDecoder{this, "Decoder", "Muon::MdtRDO_Decoder/MdtRDO_Decoder"};
 

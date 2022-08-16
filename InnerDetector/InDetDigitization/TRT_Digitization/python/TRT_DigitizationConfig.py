@@ -11,7 +11,7 @@ from TRT_PAI_Process.TRT_PAI_ProcessConfig import TRT_PAI_Process_XeToolCfg, TRT
 from IOVDbSvc.IOVDbSvcConfig import addFolders
 from OutputStreamAthenaPool.OutputStreamConfig import OutputStreamCfg
 from Digitization.PileUpToolsConfig import PileUpToolsCfg
-from Digitization.PileUpMergeSvcConfigNew import PileUpMergeSvcCfg, PileUpXingFolderCfg
+from Digitization.PileUpMergeSvcConfig import PileUpMergeSvcCfg, PileUpXingFolderCfg
 from Digitization.TruthDigitizationOutputConfig import TruthDigitizationOutputCfg
 
 

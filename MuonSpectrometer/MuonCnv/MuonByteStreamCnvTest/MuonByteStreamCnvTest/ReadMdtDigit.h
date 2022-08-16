@@ -6,50 +6,39 @@
 #define READMDTDIGIT_H
 
 #include "AthenaBaseComps/AthAlgorithm.h"
-#include "GaudiKernel/ServiceHandle.h"
-
 #include "GaudiKernel/NTuple.h"
+#include "GaudiKernel/ServiceHandle.h"
 #include "MuonIdHelpers/IMuonIdHelperSvc.h"
 
 /////////////////////////////////////////////////////////////////////////////
 
-class ReadMdtDigit: public AthAlgorithm {
+class ReadMdtDigit : public AthAlgorithm {
+public:
+    ReadMdtDigit(const std::string& name, ISvcLocator* pSvcLocator);
+    virtual StatusCode initialize();
+    virtual StatusCode execute();
 
- public:
-  ReadMdtDigit (const std::string& name, ISvcLocator* pSvcLocator);
-  virtual StatusCode initialize();
-  virtual StatusCode execute();
+protected:
+    NTuple::Tuple* m_ntuplePtr;
 
- protected:
+private:
+    StatusCode accessNtuple();
+    bool m_mdtNtuple;
 
-  NTuple::Tuple* m_ntuplePtr;
+    // Ntuple ID
+    std::string m_NtupleLocID;
 
- private:
+    ServiceHandle<Muon::IMuonIdHelperSvc> m_idHelperSvc{this, "MuonIdHelperSvc", "Muon::MuonIdHelperSvc/MuonIdHelperSvc"};
 
-  StatusCode accessNtuple();
-  bool m_mdtNtuple;
+    // Define variables in the Ntuple:
 
-  //Ntuple ID
-  std::string     m_NtupleLocID;
-
-  ServiceHandle<Muon::IMuonIdHelperSvc> m_idHelperSvc {this, "MuonIdHelperSvc", "Muon::MuonIdHelperSvc/MuonIdHelperSvc"};
-
-  // Define variables in the Ntuple:
-
-  NTuple::Item<long>   m_nColl;    // number of collection in the container
-  NTuple::Item<long>   m_nDig;     // number of digit in the collection 
-  NTuple::Array<float> m_tdc;
-  NTuple::Array<float> m_adc;
-  NTuple::Array<float> m_multi; // Return the multilayers
-  NTuple::Array<float> m_layer;// Return the  layer in each multilayer.
-  NTuple::Array<float> m_wire; // Return the wire in each layer.
+    NTuple::Item<long> m_nColl;  // number of collection in the container
+    NTuple::Item<long> m_nDig;   // number of digit in the collection
+    NTuple::Array<float> m_tdc;
+    NTuple::Array<float> m_adc;
+    NTuple::Array<float> m_multi;  // Return the multilayers
+    NTuple::Array<float> m_layer;  // Return the  layer in each multilayer.
+    NTuple::Array<float> m_wire;   // Return the wire in each layer.
 };
 
 #endif
-
-
-
-
-
-
-

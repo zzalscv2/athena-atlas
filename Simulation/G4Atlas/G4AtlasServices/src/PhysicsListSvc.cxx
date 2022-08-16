@@ -19,11 +19,7 @@
 
 PhysicsListSvc::PhysicsListSvc(const std::string& name, ISvcLocator* pSvcLocator)
   : base_class(name,pSvcLocator)
-  , m_phys_option(this)
-  , m_phys_decay(this)
 {
-  declareProperty("PhysOption"      , m_phys_option ,                  "Tool handle array of physics options" );
-  declareProperty("PhysicsDecay"    , m_phys_decay ,                   "Tool handle array of physics decays" );
 }
 
 

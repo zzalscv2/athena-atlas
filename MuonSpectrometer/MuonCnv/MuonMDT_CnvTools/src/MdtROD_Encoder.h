@@ -5,13 +5,12 @@
 #ifndef MUONBYTESTREAM_MDTROD_ENCODER_H
 #define MUONBYTESTREAM_MDTROD_ENCODER_H
 
+#include <MuonIdHelpers/IMuonIdHelperSvc.h>
 #include <stdint.h>
 
-#include <MuonIdHelpers/IMuonIdHelperSvc.h>
 #include "ByteStreamData/RawEvent.h"
-#include "MuonRDO/MdtCsm.h"
 #include "GaudiKernel/ServiceHandle.h"
-
+#include "MuonRDO/MdtCsm.h"
 
 class MdtROD_Encoder {
 public:
@@ -42,7 +41,7 @@ public:
 
 private:
     ServiceHandle<Muon::IMuonIdHelperSvc> m_mdtIdHelper{"Muon::MuonIdHelperSvc/MuonIdHelperSvc", "MdtRDO_Encoder"};
-    std::vector<const MdtCsm*> m_vMdtCsm;   
+    std::vector<const MdtCsm*> m_vMdtCsm;
 };
 
 #endif

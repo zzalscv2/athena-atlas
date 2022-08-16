@@ -5,7 +5,7 @@
 #include "ISF_Interfaces/ITruthSvc.h"
 #include "ISF_Event/ISFParticleContainer.h"
 #include "ISF_Interfaces/ISimulationSelector.h"
-#include "ISF_Event/ISFParticleVector.h"
+#include "ISF_Event/ISFParticleContainer.h"
 #include "AthenaBaseComps/AthService.h"
 #include "GaudiKernel/ToolHandle.h"
 #include "GaudiKernel/ServiceHandle.h"

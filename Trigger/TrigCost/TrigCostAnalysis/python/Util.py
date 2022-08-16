@@ -101,8 +101,7 @@ def getWalltime(inputFile, rootName):
     if not dirObj.IsA().InheritsFrom(ROOT.TDirectory.Class()): return 0
     for hist in dirObj.GetListOfKeys():
         if '_walltime' in hist.GetName():
-            obj = hist.ReadObj()
-            return obj.GetBinContent(1)
+            return hist.ReadObj().Integral()
 
     log.error("Walltime not found")
     return 0

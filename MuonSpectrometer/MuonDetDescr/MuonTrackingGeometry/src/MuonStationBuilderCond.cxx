@@ -608,8 +608,8 @@ Muon::MuonStationBuilderCond::buildDetachedTrackingVolumes(const EventContext& c
                             stId = m_idHelperSvc->mdtIdHelper().elementID(vname.substr(0, 3), eta, phi, is_valid);
                         }
                         if (!is_valid || !stId.get_compact()) {
-                            ATH_MSG_WARNING("identifier of the station not found:" << vname << "," << eta << "," << phi);
-                            continue;
+                            ATH_MSG_DEBUG("identifier of the station not found:" << vname << "," << eta << "," << phi);
+                            if(!stId.get_compact()) continue;
                         }
                         unsigned int iD = stId.get_identifier32().get_compact();
                         // clone station from prototype
@@ -1095,7 +1095,7 @@ void Muon::MuonStationBuilderCond::identifyPrototype(const Trk::TrackingVolume* 
         const Trk::BinnedArray<const Trk::TrackingVolume>* confinedVolumes = station->confinedVolumes();
         if (confinedVolumes) {
             Trk::BinnedArraySpan<Trk::TrackingVolume const * const> vols = confinedVolumes->arrayObjects();
-            for (unsigned int iv = 0; iv < vols.size(); iv++)
+            for (unsigned int iv = 0; iv < vols.size(); iv++) {
                 if (m_idHelperSvc->hasRPC() && vols[iv]->volumeName() == "RPC") {
                     // for active layers do a search of associated ROE
                     const std::vector<const Trk::Layer*>* layers = vols[iv]->confinedArbitraryLayers();
@@ -1171,6 +1171,7 @@ void Muon::MuonStationBuilderCond::identifyPrototype(const Trk::TrackingVolume* 
                         }
                     }
                 }
+            }
         }
     }
 
