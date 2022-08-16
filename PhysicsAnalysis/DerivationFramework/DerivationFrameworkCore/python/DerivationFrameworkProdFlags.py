@@ -2800,6 +2800,19 @@ class WriteDAOD_HION12Stream (JobProperty):
 jobproperties.DerivationFrameworkProdFlags.add_JobProperty(WriteDAOD_HION12Stream)
 listAODtoDPD.append(WriteDAOD_HION12Stream.StreamName)
 
+class WriteDAOD_HION13Stream (JobProperty):
+     """HION13 derivation"""
+     statusOn = True
+     allowedTypes = ['bool']
+     StoredValue = False
+     StreamName = 'StreamDAOD_HION13'
+     FileName = ''
+     isVirtual = False
+     DPDMakerScript = "DerivationFrameworkHI/HION13.py"
+     pass
+jobproperties.DerivationFrameworkProdFlags.add_JobProperty(WriteDAOD_HION13Stream)
+listAODtoDPD.append(WriteDAOD_HION13Stream.StreamName)
+
 ################################
 # Defined by the trigger group
 ################################
