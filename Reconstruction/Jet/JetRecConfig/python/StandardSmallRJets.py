@@ -173,6 +173,21 @@ AntiKtVRTruthCharged = JetDefinition("AntiKt",0.4, cst.TruthCharged,
 )
 
 
+#**************
+# TEMPORARY : special inputs for EVTGEN jobs (as long as gen-level and reco-level definitions are not harmonized)
+AntiKt4TruthGEN = JetDefinition("AntiKt",0.4, cst.TruthGEN,
+                                ptmin = 5000, 
+                                ghostdefs = [],
+                                modifiers = ("Sort", )+truthmods,
+                                ghostarea = 0.,
+                                lock = True,
+)
+AntiKt4TruthGENWZ = AntiKt4TruthGEN.clone(inputdef=cst.TruthGENWZ)
+
+AntiKt6TruthGEN   = AntiKt4TruthGEN.clone(radius=0.6)
+AntiKt6TruthGENWZ = AntiKt4TruthGENWZ.clone(radius=0.6)
+
+
 def StandardSmallRJetCfg(configFlags):
     """Top-level function to schedule the smallR jets in standard reconstruction """
     from JetRecConfig.JetRecConfig import JetRecCfg

@@ -2,13 +2,12 @@
 # Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
 
 """
- StandardJetConstits: A module defining standard definitions for jet inputs : external container and 
+ StandardJetConstits: A module containing standard definitions for jet inputs : external container and 
  constituents.
  These can be copied and modified by users who want something a bit   
  different from what is provided.                                     
                                                                       
  Author: TJ Khoo, P-A Delsart                                                      
- * Written for the time being to work in R21, but with R22 in mind    
                                                                       
 
 """
@@ -19,7 +18,7 @@ from .StandardJetContext import inputsFromContext
 from AthenaConfiguration.Enums import BeamType
 
 # Prepare dictionnaries to hold all of our standard definitions.
-# They will be filled from the list below
+# They will be filled from the lists below
 from .Utilities import ldict
 stdInputExtDic = ldict()
 stdConstitDic = ldict()
@@ -29,8 +28,18 @@ stdContitModifDic = ldict()
 # This module contains the helper functions needed to instantiate the input container external
 # to Jet domain
 import JetRecConfig.JetInputConfig as inputcfg
-import JetRecTools.JetRecToolsConfig as jrtcfg
-import TrackCaloClusterRecTools.TrackCaloClusterConfig as tcccfg
+try:
+    import JetRecTools.JetRecToolsConfig as jrtcfg
+except ModuleNotFoundError:
+    # In some releases JetRecTools is not existing
+    pass
+    
+try:
+    import TrackCaloClusterRecTools.TrackCaloClusterConfig as tcccfg
+except ModuleNotFoundError:
+    # In some releases TrackCaloClusterRecTools is not existing
+    pass
+
 def isMC(flags):
     """A simple filter function for  testing if we're running in MC
     returns (bool, str) where the str contains an explanation of why the bool is False.
@@ -72,7 +81,6 @@ def standardReco(input):
             from eflowRec.PFRun3Config import PFCfg
             flags = jetdef._cflags
             return PFCfg(flags) if flags.Jet.doUpstreamDependencies else None
-
         
     else:
         f = doNothingFunc
@@ -176,6 +184,16 @@ _stdInputList = [
                      algoBuilder = inputcfg.buildJetInputTruth, filterfn=isMC,specs="Charged"),
 
 
+    #**************
+    # TEMPORARY : special inputs for EVTGEN jobs (as long as gen-level and reco-level definitions are not harmonized)
+    JetInputExternal("JetInputTruthParticlesGEN",  xAODType.TruthParticle,
+                     algoBuilder = inputcfg.buildJetInputTruthGEN, filterfn=isMC ),
+
+    JetInputExternal("JetInputTruthParticlesGENNoWZ",  xAODType.TruthParticle,
+                     algoBuilder = inputcfg.buildJetInputTruthGEN, filterfn=isMC,specs="NoWZ"),
+    #**************
+    
+    
     JetInputExternal("PV0JetSelectedTracks", xAODType.TrackParticle,
                      prereqs=["input:JetSelectedTracks_trackSelOpt", "input:JetTrackUsedInFitDeco"],
                      algoBuilder = inputcfg.buildPV0TrackSel ),
@@ -311,9 +329,15 @@ _stdSeqList = [
 
     JetInputConstit("TruthCharged", xAODType.TruthParticle, "JetInputTruthParticlesCharged", jetinputtype="TruthCharged"),
 
+    #**************
+    # TEMPORARY : special inputs for EVTGEN jobs (as long as gen-level and reco-level definitions are not harmonized)
+    JetInputConstit("TruthGEN", xAODType.TruthParticle, "JetInputTruthParticlesGEN" , label="Truth"),
     
+    JetInputConstit("TruthGENWZ", xAODType.TruthParticle, "JetInputTruthParticlesGENNoWZ", jetinputtype="TruthWZ", label="TruthWZ"),
+        
 ]
 
+# define JetInputConstit for each flavour type :
 for label in  _truthFlavours:    
     _stdSeqList.append( JetInputConstit(label, xAODType.TruthParticle, "TruthLabel"+label ) )
 
