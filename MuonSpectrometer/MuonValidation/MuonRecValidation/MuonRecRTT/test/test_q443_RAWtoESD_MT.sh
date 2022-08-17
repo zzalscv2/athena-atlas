@@ -1,6 +1,6 @@
 #!/bin/sh
 #
-# art-description: run the RAWtoESD transform of plain q221 with different number of threads and compare the outputs
+# art-description: run the RAWtoESD transform of plain q443 with different number of threads and compare the outputs
 #
 # art-type: grid
 # art-include: master/Athena
@@ -18,11 +18,8 @@
 # art-output: log.RAWtoESD_8thread
 
 #####################################################################
-# to save some computing time, start already from the q221 trigger RDO output (made in 22.0.34)
-Reco_tf.py --inputRDO_TRIGFile /cvmfs/atlas-nightlies.cern.ch/repo/data/data-art/MuonRecRTT/Run2/q221_RDO/rel22_0_34/tmp.RDO_TRIG \
-           --AMI q221 \
+Reco_tf.py --AMI q443 \
            --imf False \
-           --conditionsTag 'default:OFLCOND-MC16-SDR-RUN2-09' \
            --outputESDFile OUT_ESD.root
 exit_code=$?
 echo  "art-result: ${exit_code} Reco_tf.py"
@@ -35,12 +32,9 @@ mv log.RAWtoESD log.RAWtoESD_serial
 
 #####################################################################
 # now run reconstruction with AthenaMT with 1 thread
-# to save some computing time, start already from the q221 trigger RDO output (made in 22.0.34)
-Reco_tf.py --inputRDO_TRIGFile /cvmfs/atlas-nightlies.cern.ch/repo/data/data-art/MuonRecRTT/Run2/q221_RDO/rel22_0_34/tmp.RDO_TRIG \
-           --AMI q221 \
+Reco_tf.py --AMI q443 \
            --imf False \
-           --athenaopts="--threads=1" \
-           --conditionsTag 'default:OFLCOND-MC16-SDR-RUN2-09' \
+           --athenaopts="HITStoRDO:--threads=1;RAWtoALL:--threads=1" \
            --outputESDFile OUT_ESD_1thread.root
 exit_code=$?
 echo  "art-result: ${exit_code} Reco_tf_1thread.py"
@@ -53,12 +47,9 @@ mv log.RAWtoESD log.RAWtoESD_1thread
 
 #####################################################################
 # now run reconstruction with AthenaMT with 5 threads
-# to save some computing time, start already from the q221 trigger RDO output (made in 22.0.34)
-Reco_tf.py --inputRDO_TRIGFile /cvmfs/atlas-nightlies.cern.ch/repo/data/data-art/MuonRecRTT/Run2/q221_RDO/rel22_0_34/tmp.RDO_TRIG \
-           --AMI q221 \
+Reco_tf.py --AMI q443 \
            --imf False \
-           --athenaopts="--threads=5" \
-           --conditionsTag 'default:OFLCOND-MC16-SDR-RUN2-09' \
+           --athenaopts="HITStoRDO:--threads=5;RAWtoALL:--threads=5" \
            --outputESDFile OUT_ESD_5thread.root
 exit_code=$?
 echo  "art-result: ${exit_code} Reco_tf_5thread.py"
@@ -71,12 +62,9 @@ mv log.RAWtoESD log.RAWtoESD_5thread
 
 #####################################################################
 # now run reconstruction with AthenaMT with 8 threads
-# to save some computing time, start already from the q221 trigger RDO output (made in 22.0.34)
-Reco_tf.py --inputRDO_TRIGFile /cvmfs/atlas-nightlies.cern.ch/repo/data/data-art/MuonRecRTT/Run2/q221_RDO/rel22_0_34/tmp.RDO_TRIG \
-           --AMI q221 \
+Reco_tf.py --AMI q443 \
            --imf False \
-           --athenaopts="--threads=8" \
-           --conditionsTag 'default:OFLCOND-MC16-SDR-RUN2-09' \
+           --athenaopts="HITStoRDO:--threads=8;RAWtoALL:--threads=8" \
            --outputESDFile OUT_ESD_8thread.root
 exit_code=$?
 echo  "art-result: ${exit_code} Reco_tf_8thread.py"
@@ -102,6 +90,9 @@ acmd.py diff-root  --nan-equal \
                                   xAOD::BTaggingAuxContainer_v1_HLT_BTaggingAuxDyn \
                                   xAOD::JetAuxContainer_v1_AntiKt4EMTopoJetsAuxDyn \
                                   xAOD::JetAuxContainer_v1_AntiKt4EMPFlowJetsAuxDyn \
+                                  RecoTimingObj_p1_HITStoRDO_timings \
+                                  RecoTimingObj_p1_RAWtoESD_mems \
+                                  RecoTimingObj_p1_RAWtoESD_timings \
                                   index_ref \
                   --order-trees OUT_ESD_1thread.root OUT_ESD.root &> diff_1_vs_serial.txt
 exit_code=$?
@@ -125,6 +116,9 @@ acmd.py diff-root  --nan-equal \
                                   xAOD::BTaggingAuxContainer_v1_HLT_BTaggingAuxDyn \
                                   xAOD::JetAuxContainer_v1_AntiKt4EMTopoJetsAuxDyn \
                                   xAOD::JetAuxContainer_v1_AntiKt4EMPFlowJetsAuxDyn \
+                                  RecoTimingObj_p1_HITStoRDO_timings \
+                                  RecoTimingObj_p1_RAWtoESD_mems \
+                                  RecoTimingObj_p1_RAWtoESD_timings \
                                   index_ref \
                     --order-trees OUT_ESD_5thread.root OUT_ESD_1thread.root &> diff_5_vs_1.txt
 exit_code=$?
@@ -148,6 +142,9 @@ acmd.py diff-root  --nan-equal \
                                   xAOD::BTaggingAuxContainer_v1_HLT_BTaggingAuxDyn \
                                   xAOD::JetAuxContainer_v1_AntiKt4EMTopoJetsAuxDyn \
                                   xAOD::JetAuxContainer_v1_AntiKt4EMPFlowJetsAuxDyn \
+                                  RecoTimingObj_p1_HITStoRDO_timings \
+                                  RecoTimingObj_p1_RAWtoESD_mems \
+                                  RecoTimingObj_p1_RAWtoESD_timings \
                                   index_ref \
                    --order-trees OUT_ESD_8thread.root OUT_ESD_1thread.root &> diff_8_vs_1.txt
 exit_code=$?
@@ -159,3 +156,6 @@ fi
 #####################################################################
 
 echo "art-result: $?"
+
+######################### TEMP ########################
+# --inputRDO_TRIGFile /cvmfs/atlas-nightlies.cern.ch/repo/data/data-art/MuonRecRTT/Run2/q221_RDO/rel22_0_34/tmp.RDO_TRIG \

@@ -1,6 +1,6 @@
 #!/bin/sh
 #
-# art-description: run the RAWtoESD transform of plain q431 with different number of threads and compare the outputs
+# art-description: run the RAWtoESD transform of plain q442 with different number of threads and compare the outputs
 #
 # art-type: grid
 # art-include: master/Athena
@@ -18,8 +18,9 @@
 # art-output: log.RAWtoESD_8thread
 
 #####################################################################
-Reco_tf.py --AMI q431 \
+Reco_tf.py --AMI q442 \
            --imf False \
+           --conditionsTag = "default:CONDBR2-BLKPA-RUN2-09" \
            --outputESDFile OUT_ESD.root
 exit_code=$?
 echo  "art-result: ${exit_code} Reco_tf.py"
@@ -27,13 +28,14 @@ if [ ${exit_code} -ne 0 ]
 then
     exit ${exit_code}
 fi
-mv log.RAWtoESD log.RAWtoESD_serial
+mv log.RAWtoALL log.RAWtoESD_serial
 #####################################################################
 
 #####################################################################
 # now run reconstruction with AthenaMT with 1 thread
-Reco_tf.py --AMI q431 \
+Reco_tf.py --AMI q442 \
            --imf False \
+           --conditionsTag = "default:CONDBR2-BLKPA-RUN2-09" \
            --athenaopts="--threads=1" \
            --outputESDFile OUT_ESD_1thread.root
 exit_code=$?
@@ -42,13 +44,14 @@ if [ ${exit_code} -ne 0 ]
 then
     exit ${exit_code}
 fi
-mv log.RAWtoESD log.RAWtoESD_1thread
+mv log.RAWtoALL log.RAWtoESD_1thread
 #####################################################################
 
 #####################################################################
 # now run reconstruction with AthenaMT with 5 threads
-Reco_tf.py --AMI q431 \
+Reco_tf.py --AMI q442 \
            --imf False \
+           --conditionsTag = "default:CONDBR2-BLKPA-RUN2-09" \
            --athenaopts="--threads=5" \
            --outputESDFile OUT_ESD_5thread.root
 exit_code=$?
@@ -57,13 +60,14 @@ if [ ${exit_code} -ne 0 ]
 then
     exit ${exit_code}
 fi
-mv log.RAWtoESD log.RAWtoESD_5thread
+mv log.RAWtoALL log.RAWtoESD_5thread
 #####################################################################
 
 #####################################################################
 # now run reconstruction with AthenaMT with 8 threads
-Reco_tf.py --AMI q431 \
+Reco_tf.py --AMI q442 \
            --imf False \
+           --conditionsTag = "default:CONDBR2-BLKPA-RUN2-09" \
            --athenaopts="--threads=8" \
            --outputESDFile OUT_ESD_8thread.root
 exit_code=$?
@@ -72,7 +76,7 @@ if [ ${exit_code} -ne 0 ]
 then
     exit ${exit_code}
 fi
-mv log.RAWtoESD log.RAWtoESD_8thread
+mv log.RAWtoALL log.RAWtoESD_8thread
 #####################################################################
 
 #####################################################################
