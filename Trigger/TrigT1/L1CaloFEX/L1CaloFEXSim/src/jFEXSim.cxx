@@ -751,9 +751,9 @@ std::vector<std::vector<std::vector<uint32_t>>> jFEXSim::getLargeRJetTOBs()
    return m_largeRJet_tobWords;
 }
 
-std::vector<std::unique_ptr<jFEXtauTOB>> jFEXSim::getTauTOBs()
+std::vector<std::unique_ptr<jFEXTOB>> jFEXSim::getTauTOBs()
 {
-    std::vector<std::unique_ptr<jFEXtauTOB>> tauTOBs;
+    std::vector<std::unique_ptr<jFEXTOB>> tauTOBs;
     tauTOBs.clear();
     
     // We need the copy since we cannot move a member of the class, since it will not be part of it anymore

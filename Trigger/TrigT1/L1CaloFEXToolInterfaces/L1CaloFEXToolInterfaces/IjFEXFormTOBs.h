@@ -26,7 +26,11 @@ Interface definition for eFEXFormTOBs
   public:
     static const InterfaceID& interfaceID( ) ;
 
-    virtual uint32_t formTauTOB(int, int, int, int, int, int) = 0;
+    virtual uint32_t formTauTOB  (int, int, int, int, int, int) = 0;
+    virtual uint32_t formSRJetTOB(int, int, int, int, int, int) = 0;
+    virtual uint32_t formLRJetTOB(int, int, int, int, int, int) = 0;
+    virtual uint32_t formSumETTOB(int, int, int ) = 0;
+    virtual uint32_t formMetTOB  (int, int, int ) = 0;
 
   private:
 

@@ -15,7 +15,6 @@
 #include "AthenaBaseComps/AthAlgTool.h"
 #include "L1CaloFEXToolInterfaces/IjFEXmetAlgo.h"
 #include "AthenaKernel/CLASS_DEF.h"
-#include "L1CaloFEXSim/jFEXmetTOB.h"
 #include "L1CaloFEXSim/jTowerContainer.h"
 
 #include "CaloEvent/CaloCellContainer.h"
@@ -51,8 +50,6 @@ namespace LVL1 {
     virtual int GetMetYComponent()  override;
     virtual int getTTowerET(unsigned int TTID ) override; 
     virtual void setFPGAEnergy(std::unordered_map<int,std::vector<int> > et_map)  override;
-    
-    virtual std::unique_ptr<jFEXmetTOB> getmetTOBs() override;
     
 protected:
 

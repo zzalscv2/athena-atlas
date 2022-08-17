@@ -12,7 +12,6 @@
 #define IjFEXsumETAlgo_H
 
 #include "GaudiKernel/IAlgTool.h"
-#include "L1CaloFEXSim/jFEXsumETTOB.h"
 #include "L1CaloFEXSim/jTowerContainer.h"
 #include "L1CaloFEXSim/FEXAlgoSpaceDefs.h"
 
@@ -35,10 +34,6 @@ class IjFEXsumETAlgo : virtual public IAlgTool {
         virtual int getETupperEta(uint )  =0;
         virtual void setFPGAEnergy(std::unordered_map<int,std::vector<int> > et_map)  =0;
         
-
-        virtual std::unique_ptr<jFEXsumETTOB> getsumETTOBs() = 0;
-        
-
     private:
 
 };
