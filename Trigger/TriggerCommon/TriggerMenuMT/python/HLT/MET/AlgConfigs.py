@@ -251,11 +251,14 @@ class NNHLTConfig(AlgConfig):
         # Read the names of the algorithms used from the network file. The network file contains
         # the container+aux read from it, e.g. HLT_MET_cell.met so we strip off the HLT_MET_ prefix
         # and the .XX suffix
-        self.inputs = {
-                dct2["name"].removeprefix("HLT_MET_").partition(".")[0]
-                for dct in network["inputs"]
-                for dct2 in dct["variables"]
-        }
+        # The variables containers can appear multiple times (e.g. met and sumet) therefore we have
+        # to make sure to only add each once
+        self.inputs = []
+        for dct in network["inputs"]:
+            for dct2 in dct["variables"]:
+                met = dct2["name"].removeprefix("HLT_MET_").partition(".")[0]
+                if met not in self.inputs:
+                    self.inputs.append(met)
         super().__init__(inputs=self.inputs, inputRegistry=HLTInputConfigRegistry(), **recoDict)
 
     def make_fex_accumulator(self, flags, name, inputs):
