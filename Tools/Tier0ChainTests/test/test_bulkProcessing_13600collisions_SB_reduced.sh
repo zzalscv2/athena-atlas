@@ -9,14 +9,10 @@
 Reco_tf.py  \
 --AMI f1259  \
 --inputBSFile="/cvmfs/atlas-nightlies.cern.ch/repo/data/data-art/Tier0ChainTests/TCT_Run3/data22_13p6TeV.00429782.physics_Main.daq.RAW._lb0562._SFO-11._0001.data" \
+--maxEvents=300 \
 --outputAODFile="AOD.pool.root" \
 --outputESDFile="ESD.pool.root" \
 --outputHISTFile="HIST.root" \
---outputDAOD_IDTIDEFile="DAOD_IDTIDE.pool.root" \
---outputDRAW_ZMUMUFile="myDRAW_ZMUMU.data" \
---outputDESDM_MCPFile="myDESDM_MCP.pool.root" \
---outputDRAW_EGZFile="myDRAW_EGZ.data" \
---outputDAOD_L1CALO5File="myDAOD_L1CALO5.pool.root" \
 --imf False
 
 
@@ -36,7 +32,7 @@ echo  "art-result: ${rc2} (against previous nightly)"
 rc3=-9999
 if [ ${rc1} -eq 0 ]
 then
-  art.py compare ref . /cvmfs/atlas-nightlies.cern.ch/repo/data/data-art/Tier0ChainTests/TCT_Run3-22.0_references_for_comparison/test_bulkProcessing_13600collisions_SB \
+  art.py compare ref . /cvmfs/atlas-nightlies.cern.ch/repo/data/data-art/Tier0ChainTests/TCT_Run3-22.0_references_for_comparison/test_bulkProcessing_13600collisions_SB_reduced \
   --entries 100 --mode=semi-detailed --order-trees --ignore-exit-code diff-pool
   rc3=$?
 fi
