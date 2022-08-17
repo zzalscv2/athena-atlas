@@ -130,6 +130,15 @@ TileLaserDefaultCalibTool::TileLaserDefaultCalibTool(const std::string& type, co
   m_rs_raw_signal = new RunningStat*[NPARTITIONS][NDRAWERS][NCHANNELS][NGAINS]();
   m_rs_reducedKappa = new RunningStat*[NPARTITIONS][NDRAWERS][NCOUPLES-1][NCOUPLES][NGAINS][NFIBERS]();
 
+  m_rs_diode_ratio_low = new RunningStat*[NDIODES][NDIODES]();
+  m_rs_diode_ratio_high = new RunningStat*[NDIODES][NDIODES]();
+  m_diode_ratio_low = new float[NDIODES][NDIODES]();
+  m_diode_ratio_high = new float[NDIODES][NDIODES]();
+
+  m_diode_ratio_sigma_low = new float[NDIODES][NDIODES]();
+  m_diode_ratio_sigma_high = new float[NDIODES][NDIODES]();
+
+
 } // TileLaserDefaultCalibTool::TileLaserDefaultCalibTool
 
 TileLaserDefaultCalibTool::~TileLaserDefaultCalibTool()
@@ -183,6 +192,13 @@ TileLaserDefaultCalibTool::~TileLaserDefaultCalibTool()
   delete[] m_rs_signal;
   delete[] m_rs_raw_signal;
   delete[] m_rs_reducedKappa;
+  delete[] m_rs_diode_ratio_low;
+  delete[] m_rs_diode_ratio_high;
+  delete[] m_diode_ratio_low;
+  delete[] m_diode_ratio_high;
+  delete[] m_diode_ratio_sigma_low;
+  delete[] m_diode_ratio_sigma_high;
+
 }
 
 
@@ -203,6 +219,19 @@ StatusCode TileLaserDefaultCalibTool::initialize(){
 
   
   // Loop over monitoring pmts laserii
+	  
+	  for ( int diodei=0; diodei<NDIODES; diodei++ ) {
+	    for ( int diodej=0; diodej<NDIODES; diodej++ ) {
+	      m_rs_diode_ratio_low[diodei][diodej]= new RunningStat();
+	      m_rs_diode_ratio_high [diodei][diodej]=new RunningStat();
+	      m_diode_ratio_low [diodei][diodej]=0;
+	      m_diode_ratio_high [diodei][diodej]=0;
+	      m_diode_ratio_sigma_low [diodei][diodej]=0;
+	      m_diode_ratio_sigma_high [diodei][diodej]=0;
+	}
+      }    
+
+
   for ( int diode=0; diode<NDIODES; ++diode ) {
     for ( int gain=0; gain<NGAINS; gain++ ) {
       m_diode_LASERII[diode][gain] = 0;      // diode signal values
@@ -513,7 +542,16 @@ StatusCode TileLaserDefaultCalibTool::execute(){
 	ATH_MSG_DEBUG ( text[gain]  << diode << " Signal=" << normalization[diode][gain] << " " << m_rs_diode_signal_LASERII[diode][gain]->Mean() << " " << laserObj->getDiodeADC(diode,gain) << " Ped="<< m_diode_Ped_LASERII[diode][gain] );
       }
     }    
-    
+    for ( int gain=0; gain<NGAINS; ++gain ) {
+      for ( int diodei=0; diodei<NDIODES; diodei++ ) {
+	for ( int diodej=0; diodej<NDIODES; diodej++ ) {
+	  if (diodej>=diodei){
+	    if (gain==0){m_rs_diode_ratio_low[diodei][diodej]->Push(normalization[diodei][gain]/normalization[diodej][gain]);}
+	  if (gain==1){m_rs_diode_ratio_high[diodei][diodej]->Push(normalization[diodei][gain]/normalization[diodej][gain]);}
+	    }
+	}
+      }
+  }    
     // And also the PMT responses
     for (int pmt=0; pmt<NPMTS; pmt++ ) {
       for ( int gain=0; gain<NGAINS; gain++ ) {
@@ -783,7 +821,18 @@ StatusCode TileLaserDefaultCalibTool::finalizeCalculations(){
   ATH_MSG_INFO ( "finalizeCalculations()" );
 
   // Loop over monitors
-  if ( m_LASERII ) { // LASERII  
+  if ( m_LASERII ) { // LASERII
+
+    for ( int diodei=0; diodei<NDIODES; diodei++ ) {
+      for ( int diodej=0; diodej<NDIODES; diodej++ ) {
+	if (diodej>=diodei){
+	      m_diode_ratio_low[diodei][diodej]=m_rs_diode_ratio_low[diodei][diodej]->Mean();
+	      m_diode_ratio_high[diodei][diodej]=m_rs_diode_ratio_high[diodei][diodej]->Mean();
+	      m_diode_ratio_sigma_low[diodei][diodej]=m_rs_diode_ratio_low[diodei][diodej]->StandardDeviation();
+	      m_diode_ratio_sigma_high[diodei][diodej]=m_rs_diode_ratio_high[diodei][diodej]->StandardDeviation();}
+	}
+      }  
+  
     for(int pmt=0; pmt<NPMTS; pmt++){
       for ( int gain=0; gain<NGAINS; ++gain ) {
 	m_PMT_LASERII[pmt][gain]         = m_rs_PMT_signal_LASERII[pmt][gain]->Mean();
@@ -912,10 +961,10 @@ StatusCode TileLaserDefaultCalibTool::finalizeCalculations(){
 
             for ( int diode=0; diode<NDIODES; diode++ ) {
 	      for ( int diode_gain=0; diode_gain<NGAINS; diode_gain++) {
-		m_ratio_LASERII[diode][diode_gain][partition][drawer][channel][gain]   = m_rs_ratio_LASERII[diode][diode_gain][partition][drawer][channel][gain]->Mean();
-		m_ratio_S_LASERII[diode][diode_gain][partition][drawer][channel][gain] = m_rs_ratio_LASERII[diode][diode_gain][partition][drawer][channel][gain]->StandardDeviation();
-		m_ratio_LASERII_good[diode][diode_gain][partition][drawer][channel][gain]   = m_rs_ratio_LASERII_good[diode][diode_gain][partition][drawer][channel][gain]->Mean();
-		m_ratio_S_LASERII_good[diode][diode_gain][partition][drawer][channel][gain] = m_rs_ratio_LASERII_good[diode][diode_gain][partition][drawer][channel][gain]->StandardDeviation();
+		  m_ratio_LASERII[diode][diode_gain][partition][drawer][channel][gain]   = m_rs_ratio_LASERII[diode][diode_gain][partition][drawer][channel][gain]->Mean();
+		  m_ratio_S_LASERII[diode][diode_gain][partition][drawer][channel][gain] = m_rs_ratio_LASERII[diode][diode_gain][partition][drawer][channel][gain]->StandardDeviation();
+		  m_ratio_LASERII_good[diode][diode_gain][partition][drawer][channel][gain]   = m_rs_ratio_LASERII_good[diode][diode_gain][partition][drawer][channel][gain]->Mean();
+		  m_ratio_S_LASERII_good[diode][diode_gain][partition][drawer][channel][gain] = m_rs_ratio_LASERII_good[diode][diode_gain][partition][drawer][channel][gain]->StandardDeviation();
 	      } // FOR
 	    }
 	    m_pmt_ratios[partition][drawer][channel][gain] = m_rs_pmt_ratios[partition][drawer][channel][gain]->Mean();
@@ -955,6 +1004,14 @@ StatusCode TileLaserDefaultCalibTool::finalizeCalculations(){
   } // partitions
 
   // remove all RunningStat objects from memory
+
+for ( int diodei=0; diodei<NDIODES; diodei++ ) {
+    for ( int diodej=0; diodej<NDIODES; diodej++ ) {
+      delete m_rs_diode_ratio_low[diodei][diodej];
+      delete m_rs_diode_ratio_high [diodei][diodej];	  
+	}
+      }
+
   for ( int diode=0; diode<NDIODES; ++diode ) {
     for ( int gain=0; gain<NGAINS; gain++ ) {
       delete m_rs_diode_signal_LASERII[diode][gain];
@@ -1069,6 +1126,12 @@ StatusCode TileLaserDefaultCalibTool::writeNtuple(int runNumber, int runType, TF
     t->Branch("Sigma_Ratio_good",*m_ratio_S_LASERII_good,"signal_cor_good_s[10][2][4][64][48][2]/F");
     t->Branch("Pmt_Ratio", *m_pmt_ratios, "pmt_ratio[4][64][48][2]/F");
     t->Branch("Sigma_Pmt_Ratio", *m_pmt_S_ratios, "pmt_ratio_s[4][64][48][2]/F");
+
+    t->Branch("Diode_ratio_Low_Gain",*m_diode_ratio_low, "diode_ratio_low[10][10]/F");
+    t->Branch("Diode_ratio_High_Gain",*m_diode_ratio_high, "diode_ratio_high[10][10]/F");
+    t->Branch("Diode_ratio_Sigma_Low_Gain",*m_diode_ratio_sigma_low, "diode_ratio_sigma_low[10][10]/F");
+    t->Branch("Diode_ratio_Sigma_High_Gain",*m_diode_ratio_sigma_high, "diode_ratio_sigma_high[10][10]/F");
+
  
   } else {
               /* Laser I */

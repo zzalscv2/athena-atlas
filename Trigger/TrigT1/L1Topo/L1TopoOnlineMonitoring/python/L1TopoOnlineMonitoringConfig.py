@@ -68,14 +68,15 @@ def getL1TopoLabels(flags,connectors = {0: 'LegacyTopo0', 1: 'LegacyTopo1'}, bma
     return topo_trigline_labels
 
 
-def getL1TopoPhase1OnlineMonitor(flags, name='L1TopoOnlineMonitor', doSimMon=True, doHwMonCtp=False, doHwMon=False, doComp=False, logLevel = None):
+def getL1TopoPhase1OnlineMonitor(flags, name='L1TopoOnlineMonitor', doSimMon=True, doHwMonCtp=False, doHwMon=False, doComp=False, forceCtp=False, logLevel = None):
     # Placeholder for phase-1 implementation
     #raise RuntimeError('L1Topo phase-1 online monitoring not yet implemented')
     alg = CompFactory.L1TopoOnlineMonitor("L1TopoMonitoringTool",
                                           doHwMon = doHwMon,
                                           doSimMon = doSimMon,
                                           doHwMonCTP = doHwMonCtp,
-                                          doComp = doComp)
+                                          doComp = doComp,
+                                          forceCTPasHdw=forceCtp)
     if logLevel : alg.OutputLevel=logLevel
     alg.MonTool = GenericMonitoringTool('MonTool')
     alg.MonTool.HistPath = name
@@ -103,6 +104,10 @@ def configureHistograms(alg, flags, doHwMonCtp, doHwMon, doComp):
         title = f'Topo Optical Cable {cable}'
         alg.MonTool.defineHistogram(name, path='EXPERT', type='TH1I',
                                     title=title, xbins=128, 
+                                    xmin=0, xmax=128)
+
+    alg.MonTool.defineHistogram('TopoSim', path='EXPERT', type='TH1I',
+                                    title='Simulation Results for L1Topo', xbins=128, xlabels=label_topo_all,
                                     xmin=0, xmax=128)
 
     if doHwMonCtp:

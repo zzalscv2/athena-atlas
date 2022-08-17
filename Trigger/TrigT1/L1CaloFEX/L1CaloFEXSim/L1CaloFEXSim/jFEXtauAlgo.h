@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration  
+  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration  
 */
 //***************************************************************************  
 //		jFEXtauAlgo - Algorithm for Tau Algorithm in jFEX
@@ -15,7 +15,6 @@
 #include "AthenaBaseComps/AthAlgTool.h"
 #include "L1CaloFEXToolInterfaces/IjFEXtauAlgo.h"
 #include "AthenaKernel/CLASS_DEF.h"
-#include "L1CaloFEXSim/jFEXtauTOB.h"
 #include "L1CaloFEXSim/jTowerContainer.h"
 
 #include "CaloEvent/CaloCellContainer.h"
@@ -53,13 +52,6 @@ namespace LVL1 {
     virtual int getFirstEtRing()  override;
     virtual void setFPGAEnergy(std::unordered_map<int,std::vector<int> > et_map)  override;
     
-    
-    virtual std::unique_ptr<jFEXtauTOB> getTauTOBs(int mphi, int meta) override;
-
-    
-// virtual jFEXtauAlgo* getTauTOBs() override;
-//LVL1::jFEXtauAlgoTOB * LVL1::jFEXtauAlgo::getTauTOB()
-    
 protected:
 
   private:
@@ -73,7 +65,6 @@ protected:
         int m_TTwindow[5][5]={{0}};
         int m_ClusterEt = 0;
         int m_TauIsolation = 0;
-        //int m_tauClusterIDs[4][5];
 	    bool m_seedSet=false;
 	    bool m_isLocalMaxima=false;
           

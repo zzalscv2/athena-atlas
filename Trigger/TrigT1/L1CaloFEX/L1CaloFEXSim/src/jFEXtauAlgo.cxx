@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration  
+  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration  
 */
 //***************************************************************************  
 //		jFEXtauAlgo - Algorithm for Tau Algorithm in jFEX
@@ -12,7 +12,6 @@
 #include <stdio.h>
 #include <math.h>
 #include "L1CaloFEXSim/jFEXtauAlgo.h"
-#include "L1CaloFEXSim/jFEXtauTOB.h"
 #include "L1CaloFEXSim/jTower.h"
 #include "L1CaloFEXSim/jTowerContainer.h"
 #include "CaloEvent/CaloCellContainer.h"
@@ -130,32 +129,6 @@ bool LVL1::jFEXtauAlgo::isSeedLocalMaxima(){
     ATH_MSG_DEBUG("Local Maxima found. with ClusterET = "<<m_ClusterEt);
     return true;
 }
-
-
-         
-std::unique_ptr<jFEXtauTOB> LVL1::jFEXtauAlgo::getTauTOBs(int mphi, int meta){
-
-  std::unique_ptr<jFEXtauTOB> tob = std::make_unique<jFEXtauTOB>();
-  
-  int sat = 0; 
-  unsigned int et = m_ClusterEt/200.;
-  if (et > 0x7ff) { //0x7ff is 11 bits
-    et = 0x7ff;
-    sat=1;
-  }
-  unsigned int iso = m_TauIsolation/200.;
-  if (iso > 0x7ff) { //0x7ff is 11 bits
-    iso = 0x7ff;
-  }
-
-  tob->setET(et);
-  tob->setPhi(mphi-8); // coord within the FPGA core area
-  tob->setEta(meta-8); // coord within the FPGA core area
-  tob->setIso(iso);
-  tob->setSat(sat);
-  return tob;
-}
-
 
 //Gets the ET for the TT. This ET is EM + HAD
 int LVL1::jFEXtauAlgo::getTTowerET(unsigned int TTID ) {
