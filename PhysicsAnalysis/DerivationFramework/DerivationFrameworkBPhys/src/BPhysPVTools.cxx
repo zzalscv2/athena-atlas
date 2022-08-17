@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2017 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "DerivationFrameworkBPhys/BPhysPVTools.h"
@@ -16,12 +16,14 @@
 using namespace std;
 
 DerivationFramework::BPhysPVTools::BPhysPVTools(const Trk::V0Tools *v0Tools) :
+  AthMessaging("BPhysPVTools"),
   m_v0Tools(v0Tools), m_EvtData(nullptr), m_PV_minNTracks(0),
  m_3dCalc(false)
 {
 }
 
 DerivationFramework::BPhysPVTools::BPhysPVTools(const Trk::V0Tools *v0Tools, const xAOD::EventInfo *eventInfo) :
+  AthMessaging("BPhysPVTools"),
   m_v0Tools(v0Tools), m_EvtData(eventInfo), m_PV_minNTracks(0),
  m_3dCalc(false)
 {
@@ -54,7 +56,8 @@ void DerivationFramework::BPhysPVTools::FillBPhysHelper(xAOD::BPhysHelper &vtx,
 
 void DerivationFramework::BPhysPVTools::FillBPhysHelperNULL(xAOD::BPhysHelper &vtx,
 							    const xAOD::VertexContainer* PvContainer,
-							    xAOD::BPhysHelper::pv_type pvtype, bool do3d) {
+							    xAOD::BPhysHelper::pv_type pvtype, bool do3d) const {
+
   const xAOD::Vertex* PV = nullptr;
   BPHYS_CHECK( vtx.setPv      ( PV, PvContainer, pvtype ) );
   constexpr float errConst = std::numeric_limits<float>::lowest();
@@ -407,12 +410,12 @@ StatusCode DerivationFramework::BPhysPVTools::FillCandwithRefittedVertices(xAOD:
     return StatusCode::SUCCESS;
 }
 
-size_t DerivationFramework::BPhysPVTools::FindHighPtIndex(const std::vector<const xAOD::Vertex*> &PVlist) {
+size_t DerivationFramework::BPhysPVTools::FindHighPtIndex(const std::vector<const xAOD::Vertex*> &PVlist) const {
     // it SHOULD be the first one in the collection but it shouldn't take long to do a quick check
     for(size_t i =0; i<PVlist.size(); i++) {
         if(PVlist[i]->vertexType() == xAOD::VxType::PriVtx) return i;
     }
-    cout << "FATAL ERROR High Pt Primary vertex not found - this should not happen\n";
+    ATH_MSG_ERROR("High Pt Primary vertex not found - this should not happen");
     return std::numeric_limits<std::size_t>::max(); //This should not happen
 }
 
@@ -519,8 +522,7 @@ Amg::Vector3D DerivationFramework::BPhysPVTools::DocaExtrapToBeamSpot(xAOD::BPhy
     Amg::Vector3D xT(xSV.x()-xBS.x(), xSV.y()-xBS.y(), 0.);
     xDOCA = xSV - pSV*pT.dot(xT)/pT.mag2();
   } else {
-    std::cout << "BPhysPVTools::DocaExtrapToBeamSpot: WARNING pT == 0."
-	      << std::endl;
+    ATH_MSG_WARNING("DocaExtrapToBeamSpot: pT == 0.");
   }
   return xDOCA;
 }

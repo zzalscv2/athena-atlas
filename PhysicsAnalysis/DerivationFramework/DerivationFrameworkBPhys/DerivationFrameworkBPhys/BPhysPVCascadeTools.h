@@ -1,11 +1,12 @@
 /*
-  Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef DERIVATIONFRAMEWORK_PVCASCADETOOLS_H
 #define DERIVATIONFRAMEWORK_PVCASCADETOOLS_H
 
 #include "GaudiKernel/ToolHandle.h"
+#include "AthenaBaseComps/AthMessaging.h"
 #include "xAODBPhys/BPhysHypoHelper.h"
 #include "DerivationFrameworkBPhys/CascadeTools.h"
 #include "EventKernel/PdtPdg.h"
@@ -31,7 +32,7 @@ namespace HepPDT{
 
 namespace DerivationFramework {
   
-  class BPhysPVCascadeTools {
+  class BPhysPVCascadeTools : public AthMessaging {
   typedef ElementLink<xAOD::VertexContainer> VertexLink;
   typedef std::vector<VertexLink> VertexLinkVector;
   private:
@@ -50,9 +51,6 @@ namespace DerivationFramework {
        
        void ProcessVertex(const std::vector<TLorentzVector> &mom, Amg::MatrixX cov, xAOD::BPhysHypoHelper &vtx, xAOD::BPhysHelper::pv_type pvtype, double mass) const;
     
-       static void FillBPhysHelperNULL(xAOD::BPhysHelper &vtx, const xAOD::VertexContainer* PvContainer,
-           xAOD::BPhysHelper::pv_type pvtype);
-       
        ///Fills the BPhysHelper object with the standard parameters
        void FillBPhysHelper(const std::vector<TLorentzVector> &mom, Amg::MatrixX cov, xAOD::BPhysHelper &vtx, const xAOD::Vertex* refPV,const xAOD::VertexContainer* refPvContainer,
                     xAOD::BPhysHelper::pv_type pvtype, int) const;
@@ -65,8 +63,6 @@ namespace DerivationFramework {
        size_t FindLowA0Index(const std::vector<TLorentzVector> &mom, const xAOD::BPhysHelper &Obj,
 			     const std::vector<const xAOD::Vertex*> &PVlist,
 			     const size_t PV_minNTracks=0) const;
-       
-       static size_t FindHighPtIndex(const std::vector<const xAOD::Vertex*> &PVlist);
        
        template< size_t NTracks> //NTracks = number of tracks in this type of vertex, if this is not known do not use this method
        static bool VerticesMatchTracks(const xAOD::Vertex* v1, const xAOD::Vertex* v2); 

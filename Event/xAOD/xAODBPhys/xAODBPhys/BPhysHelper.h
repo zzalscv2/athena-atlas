@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2019 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
 */
 
 /** @file:   BPhysHelper.h
@@ -735,10 +735,6 @@ namespace xAOD {
 
 /** Useful CHECK macro
  */
-#ifdef ATH_MSG_WARNING
-  #define BPHYS_CHECK( EXP ) { if( ! EXP ) ATH_MSG_WARNING ( "Call of \"" << #EXP << "\" failed" ); }
-#else
-  #define BPHYS_CHECK( EXP ) { if( ! EXP ) std::cout << "Warning in <BPhysHelper::BPHYS_CHECK> Call of \"" << #EXP << "\" failed" << std::endl; }
-#endif
+#define BPHYS_CHECK( EXP ) { if( ! EXP ) ATH_MSG_WARNING ( "Call of \"" << #EXP << "\" failed" ); }
 
 #endif // XAOD_BPHYSHELPER_H

@@ -1,11 +1,12 @@
 /*
-  Copyright (C) 2002-2017 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef DERIVATIONFRAMEWORK_PVTOOLS_H
 #define DERIVATIONFRAMEWORK_PVTOOLS_H
 
 #include "GaudiKernel/ToolHandle.h"
+#include "AthenaBaseComps/AthMessaging.h"
 #include "xAODBPhys/BPhysHelper.h"
 #include <vector>
 #include "xAODEventInfo/EventInfo.h"
@@ -21,7 +22,7 @@ namespace Analysis{
 
 namespace DerivationFramework {
   
-  class BPhysPVTools {
+  class BPhysPVTools : public AthMessaging {
 
   private:
        const Trk::V0Tools *m_v0Tools;
@@ -39,8 +40,8 @@ namespace DerivationFramework {
        void SetSave3d(bool v) { m_3dCalc =v; }
        StatusCode FillCandExistingVertices(xAOD::VertexContainer* vtxContainer, const xAOD::VertexContainer* pvContainer, int DoVertexType);
        
-       static void FillBPhysHelperNULL(xAOD::BPhysHelper &vtx, const xAOD::VertexContainer* PvContainer,
-           xAOD::BPhysHelper::pv_type pvtype, bool do3d = false);
+       void FillBPhysHelperNULL(xAOD::BPhysHelper &vtx, const xAOD::VertexContainer* PvContainer,
+           xAOD::BPhysHelper::pv_type pvtype, bool do3d = false) const;
        
        StatusCode FillCandwithRefittedVertices(xAOD::VertexContainer* vtxContainer, const xAOD::VertexContainer* pvContainer,xAOD::VertexContainer* refPvContainer, const Analysis::PrimaryVertexRefitter* , size_t in_PV_max, int DoVertexType);
        
@@ -61,7 +62,7 @@ namespace DerivationFramework {
 			     const std::vector<const xAOD::Vertex*> &PVlist,
 			     const size_t PV_minNTracks=0) const;
        
-       static size_t FindHighPtIndex(const std::vector<const xAOD::Vertex*> &PVlist);
+       size_t FindHighPtIndex(const std::vector<const xAOD::Vertex*> &PVlist) const;
        
        /// Static method call with
        /// DerivationFramework::BPhysDerHelpers::GetGoodPV

@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2017 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "DerivationFrameworkBPhys/BPhysPVCascadeTools.h"
@@ -15,6 +15,7 @@
 #include <iostream>
 
 DerivationFramework::BPhysPVCascadeTools::BPhysPVCascadeTools(const CascadeTools *cascadeTools) :
+  AthMessaging("BPhysPVCascadeTools"),
   m_cascadeTools(cascadeTools), m_eventInfo(nullptr), m_PV_minNTracks(0),
   m_copyAllVertices(true)
 {
@@ -22,6 +23,7 @@ DerivationFramework::BPhysPVCascadeTools::BPhysPVCascadeTools(const CascadeTools
 
 DerivationFramework::BPhysPVCascadeTools::BPhysPVCascadeTools(const CascadeTools *cascadeTools,
                                                 const xAOD::EventInfo* eventinfo) :
+  AthMessaging("BPhysPVCascadeTools"),
   m_cascadeTools(cascadeTools), m_eventInfo(eventinfo), m_PV_minNTracks(0),
   m_copyAllVertices(true)
 {
@@ -71,12 +73,6 @@ void DerivationFramework::BPhysPVCascadeTools::ProcessVertex(const std::vector<T
 
 }
 
-void DerivationFramework::BPhysPVCascadeTools::FillBPhysHelperNULL(xAOD::BPhysHelper &vtx,
-							    const xAOD::VertexContainer* PvContainer,
-							    xAOD::BPhysHelper::pv_type pvtype) {
-   DerivationFramework::BPhysPVTools::FillBPhysHelperNULL(vtx, PvContainer, pvtype);
-}
-
 size_t DerivationFramework::BPhysPVCascadeTools::FindLowZIndex(const std::vector<TLorentzVector> &mom, const xAOD::BPhysHelper &Obj,
 							const std::vector<const xAOD::Vertex*> &PVlist,
 							const size_t PV_minNTracks) const {
@@ -97,10 +93,6 @@ size_t DerivationFramework::BPhysPVCascadeTools::FindLowZIndex(const std::vector
     }
   }
   return lowZ;
-}
-
-size_t DerivationFramework::BPhysPVCascadeTools::FindHighPtIndex(const std::vector<const xAOD::Vertex*> &PVlist) {
-    return DerivationFramework::BPhysPVTools::FindHighPtIndex(PVlist);
 }
 
 size_t DerivationFramework::BPhysPVCascadeTools::FindLowA0Index(const std::vector<TLorentzVector> &mom, const xAOD::BPhysHelper &Obj,
@@ -243,6 +235,9 @@ StatusCode DerivationFramework::BPhysPVCascadeTools::FillCandwithRefittedVertice
                                                                            Trk::VxCascadeInfo* casc, int index,
                                                                            double mass, xAOD::BPhysHypoHelper &vtx)
 {
+    static const Trk::V0Tools* dummy = nullptr;
+    static const DerivationFramework::BPhysPVTools pvtool(dummy);
+
     const std::vector<TLorentzVector> &mom = casc->getParticleMoms()[index];
     const Amg::MatrixX &cov = casc->getCovariance()[index];
     const std::vector<xAOD::Vertex*> &cascadeVertices = casc->vertices();
@@ -291,7 +286,7 @@ StatusCode DerivationFramework::BPhysPVCascadeTools::FillCandwithRefittedVertice
 
          if(doPt){
             indexestoProcess.push_back(std::make_pair
-                (FindHighPtIndex(refPVvertexes), xAOD::BPhysHelper::PV_MAX_SUM_PT2));
+                (pvtool.FindHighPtIndex(refPVvertexes), xAOD::BPhysHelper::PV_MAX_SUM_PT2));
          }
          if(doA0) {
             indexestoProcess.push_back(std::make_pair( FindLowA0Index(mom, vtx, refPVvertexes, m_PV_minNTracks),  
@@ -306,7 +301,7 @@ StatusCode DerivationFramework::BPhysPVCascadeTools::FillCandwithRefittedVertice
             if( lowZBA < pVmax ) { 
                indexestoProcess.push_back(std::make_pair(lowZBA, xAOD::BPhysHelper::PV_MIN_Z0_BA));
             }
-            else FillBPhysHelperNULL(vtx, pvContainer, xAOD::BPhysHelper::PV_MIN_Z0_BA);
+            else pvtool.FillBPhysHelperNULL(vtx, pvContainer, xAOD::BPhysHelper::PV_MIN_Z0_BA);
          }
 
          for(size_t i =0 ; i<indexestoProcess.size(); i++){
@@ -337,7 +332,7 @@ StatusCode DerivationFramework::BPhysPVCascadeTools::FillCandwithRefittedVertice
        } else {
             // 2.a) the first PV with the largest sum pT.
          if(doPt) {
-           size_t highPtindex = FindHighPtIndex(GoodPVs); // Should be 0 in PV ordering
+           size_t highPtindex = pvtool.FindHighPtIndex(GoodPVs); // Should be 0 in PV ordering
            FillBPhysHelper(mom, cov, vtx, GoodPVs[highPtindex], pvContainer, xAOD::BPhysHelper::PV_MAX_SUM_PT2, 0);
          }
          // 2.b) the closest in 3D:
@@ -357,7 +352,7 @@ StatusCode DerivationFramework::BPhysPVCascadeTools::FillCandwithRefittedVertice
              FillBPhysHelper(mom, cov, vtx, GoodPVs[lowZBA], pvContainer, xAOD::BPhysHelper::PV_MIN_Z0_BA, 0);
            } else {
              // nothing found -- fill NULL
-             FillBPhysHelperNULL(vtx, pvContainer, xAOD::BPhysHelper::PV_MIN_Z0_BA);
+             pvtool.FillBPhysHelperNULL(vtx, pvContainer, xAOD::BPhysHelper::PV_MIN_Z0_BA);
            }
          }
        } // refitPV
