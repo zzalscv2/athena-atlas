@@ -1,12 +1,6 @@
-#include<vector>
-#include<cmath>
-#include<map>
-#include<sstream>
-#include<string>
-#include<iostream>
-#include<fstream>
-#include<utility>
-#include<filesystem>
+/*
+  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+*/
 
 
 #include "TFile.h"
@@ -15,74 +9,593 @@
 #include "TKey.h"
 #include "Riostream.h"
 
+#include <array>
+#include <vector>
+#include <cmath>
+#include <map>
+#include <sstream>
+#include <string>
+#include <iostream>
+#include <fstream>
+#include <utility>
+#include <filesystem>
+#include <memory>
+#include <numeric> //for std::accumulate
+#include <regex>
+
 #include "CxxUtils/checker_macros.h"
+
+
 ATLAS_NO_CHECK_FILE_THREAD_SAFETY;  // standalone application
 
-std::vector<std::pair<std::string, std::vector<int>>> pixelMapping;
-std::vector<std::pair<int, std::vector<int>>> hashMapping;
-std::vector<std::pair<std::string, std::vector<int>>> channelMapping;
-void
-setPixelMapping(bool isIBL);
-std::string
-getDCSIDFromPosition(int barrel_ec, int layer, int module_phi, int module_eta);
-int
-getHashFromPosition(int barrel_ec, int layer, int module_phi, int module_eta);
-std::vector<int>
-getPositionFromDCSID(std::string module_name);
-std::vector<int>
-getChannelFromHashID(int hashid);
-void
-checkInactiveModule(bool isIBL,
-                    TFile* hitMapFile,
-                    int& npush_back,
-                    std::vector<std::string>& vsmodule,
-                    std::vector<int>& vLB_start,
-                    std::vector<int>& vLB_end);
-void
-checkInactiveFEs(bool isIBL,
-                 TFile* hitMapFile,
-                 int& npush_backFE,
-                 std::vector<std::string>& vsFE,
-                 std::vector<std::string>& FEcode);
-void
-make_txt(const std::string& srun,
-         int npush_back,
-         int npush_backFE,
-         const std::vector<std::string>& vsFE,
-         const std::vector<std::string>& vsmodule,
-         const std::vector<int>& vLB_start,
-         const std::vector<int>& vLB_end,
-         const std::vector<std::string>& FEcode);
+namespace fs = std::filesystem;
 
-std::vector<std::string> &splitter(const std::string &s, char delim, std::vector<std::string> &elems) {
-  std::stringstream ss(s);
-  std::string item;
-  while (std::getline(ss, item, delim)) {
-    elems.push_back(item);
+//global in this application
+using Position = std::array<int,4>;
+using LumiBlockVector = std::vector<std::pair<int, int>>;
+using ModuleIdVector = std::vector<std::string>;
+//
+using FrontEndIdVector = std::vector<std::string>;
+using FrontEndCodeVector = std::vector<std::string>;
+//
+static constexpr int invalidChannel{-1};
+static constexpr Position invalidPosition{-100,-100,-100,-100};
+std::map<std::string, Position> pixelMapping;
+std::map<Position, int> hashMapping;
+std::map<int, int> channelMapping;
+
+namespace{
+ const std::array<std::string, 6> globalDiskNames{
+    "Disk1A",
+    "Disk2A",
+    "Disk3A",
+    "Disk1C",
+    "Disk2C",
+    "Disk3C"
+  };
+  //initialiser for component names
+  std::vector<std::string>
+  componentNames(bool isIBL){
+    std::vector<std::string> components{std::begin(globalDiskNames), std::end(globalDiskNames)};
+    if (isIBL) components.emplace_back("IBL");
+    components.insert(components.end(), {"B0", "B1", "B2"});
+    return components;
   }
-  return elems;
-}
+  
+  //initialiser for layer names
+  std::vector<std::string>
+  layerNames(bool isIBL){
+    std::vector<std::string> layers;
+    if(isIBL) layers.push_back("IBL");
+    layers.insert(layers.end(), {"B0", "B1", "B2"});
+    return layers;
+  }
+  
+  //initialiser for stave numbers
+  std::vector<int>
+  staveInitialiser(bool isIBL){
+    if (isIBL) return std::vector<int>{14, 22, 38, 52};
+    return std::vector<int>{22, 38, 52};
+  }
+  
+  //check a certain root directory exists in the file
+  bool
+  directoryExists(TFile * pFile, const std::string & prefix){
+    if (not pFile){
+      std::cout<<"TFile pointer is invalid"<<std::endl;
+      exit(1);
+    }
+    auto pDir = pFile->Get(prefix.substr(0,prefix.size()-1).c_str());
+    return bool(pDir);
+  }
+  
+  //get the histoName from a root file and path, variable value ; this will be key in the maps
+  std::string 
+  getHistoName(TFile* pFile, const std::string & path, const int var ){
+    auto pDir = pFile->Get(path.c_str());
+    if (not pDir){
+      std::cout<<"Directory pointer is invalid; looking for "<<path<<std::endl;
+      return std::string();
+    }
+    return (static_cast<TKey*>((static_cast<TDirectory*>(pDir))->GetListOfKeys()->At(var)))->GetName();
+  };
+  
+  //get the histoPtr from a root file and path, variable value ; this will be value in the maps
+  TH1D*
+  getHistoPtr(TFile* pFile, const std::string & path, const int var ){
+    return static_cast<TH1D*>((static_cast<TKey*>(((static_cast<TDirectory*>(pFile->Get( path.c_str() ) ))->GetListOfKeys() )->At(var) ))->ReadObj());
+  };
+  
+  std::vector<std::string> 
+  splitter(const std::string &s, const std::string & delim) {
+    static const std::regex reg(delim);
+    std::sregex_token_iterator iter(s.begin(), s.end(), reg, -1);
+    std::sregex_token_iterator end;
+    std::vector<std::string> elems(iter, end);
+    return elems;
+  }
+  
+  //find a file from the datapath paths and return its full path+name
+  std::string
+  findFile(const std::string & datapaths, const std::string & filename){
+    std::string fullPath;
+    const std::vector<std::string> paths = splitter(datapaths, ":");//paths to search
+    auto pathMatches = [&filename](const std::string & p)->bool{
+      return fs::exists(p+"/"+filename);
+    };
+    auto ptr = std::find_if(paths.begin(), paths.end(), pathMatches);
+    if (ptr!=paths.end()) return *ptr +"/"+filename;
+    //file not found if you reach here
+    std::cout <<"File "<<filename<<" not found in any datapath searched."<<std::endl;
+    return fullPath;
+  }
+  
+  Position 
+  getPositionFromDCSID (const std::string & module_name){
+    const static std::regex r("(.I.{11}[^78]).{2}");
+    std::smatch m;
+    bool matched = std::regex_match(module_name, m, r);
+    auto  ptr = pixelMapping.find(matched ? m[1] : module_name);
+    if (ptr != pixelMapping.end()) return ptr->second;
+    return invalidPosition;
+  }
+  
+  void setPixelMapping(bool isIBL){
+    const std::string cmtpath = std::getenv("DATAPATH");
+    const std::string mappingFilename = isIBL ? ("PixelMapping_Run2.dat") : ("PixelMapping_May08.dat");
+    const std::string & mappingFullPath = findFile(cmtpath, mappingFilename);
+    if (mappingFullPath.empty()) exit(1);
+    std::cout<<"Mapping file path: "<<mappingFullPath<<std::endl; 
+    std::ifstream ifs(mappingFullPath);
+    Position position{};
+    std::string module_name;
+    //tmp_position[0] = barrel_ec; tmp_position[1] = layer; tmp_position[2] = module_phi;tmp_position[3] = module_eta;
+    while(ifs >> position[0] >> position[1] >> position[2] >> position[3] >> module_name) {
+      const auto & [ptr, inserted] = pixelMapping.insert({module_name, position});
+      if (not inserted) std::cout<<"Duplicate name inserted for module_name "<<module_name<<std::endl;
+    }
+    //
+    if (isIBL){
+      const std::string hashDCSIdPath = findFile(cmtpath, "HashVSdcsID.dat");
+      if (hashDCSIdPath.empty()) exit(1);
+      std::cout<<"hashDCSIdPath file path: "<<hashDCSIdPath<<std::endl;
+      std::ifstream ifs2(hashDCSIdPath);
+      int hash{}; 
+      int ignoreInt{};
+      std::string ignoreString;
+      while(ifs2 >> ignoreInt >> hash >> ignoreInt >> ignoreInt >> position[0] >> position[1] >> position[2] >> position[3] >> ignoreInt >> ignoreInt >> ignoreString) {
+        const auto & [ptr, inserted] = hashMapping.insert({position,hash});
+        if (not inserted) std::cout<<"Duplicate position inserted for hash "<<hash<<std::endl;
+      }
+    }
+    //
+    const std::string run2TableFullPath = findFile(cmtpath,"table_Run2.txt");
+    if (run2TableFullPath.empty()) exit(1);
+    std::cout<<"run2TableFullPath file path: "<<run2TableFullPath<<std::endl;
+    std::ifstream ifs3(run2TableFullPath);
+    /* in table_Run2.txt the lines are like
+        PixMapOverlayWr...   INFO     0        20480  [2.1.-4.0.0.0.0.0] LI_S15_C_34_M3_C1_2 
+        PixMapOverlayWr...   INFO   135     26955776  [2.1.-2.2.27.0.0.0]D3C-B03-S2-M2   
+    */
+    const static std::regex re(R"(^PixMapOverlayWr...   INFO\s+([0-9]*)\s+([0-9]*)\s+\[([-.0-9]*)\]\s*([-_A-Z0-9]*)\s*$)");  
+    std::string str;
+    while(getline(ifs3, str)){
+      std::smatch sm;
+      if (!std::regex_match (str, sm,re)) continue;
+      const auto& [ptr, inserted] = channelMapping.insert({std::stoi(sm[2]), std::stoi(sm[1])}); //{hash, channel} pair
+      if (not inserted) std::cout<<"Duplicate chanHash at module "<<sm[4]<<std::endl;
+    }// while(getline(ifs3, str))
+    std::cout<<"Channel mapping size "<<channelMapping.size()<<std::endl;
+  }
+  
+  //-----------------------------
+  // Function to read info from Lumi-block information (IBL for each FE, rest for each module)
+  //-----------------------------
+  std::pair< ModuleIdVector, LumiBlockVector > 
+  checkInactiveModule(bool isIBL, TFile* hitMapFile){
+    ModuleIdVector moduleIds;
+    LumiBlockVector lumiblocks;
+    //-----------------------------
+    // Everything adapted to new noise maps
+    //-----------------------------
+    TH1* nEventsLBHistogram = 0;
+    hitMapFile->GetObject("NEventsLB", nEventsLBHistogram);
+  
+    //-------------------------------
+    // Initialization
+    //-------------------------------
+    const std::vector<std::string> & components = componentNames(isIBL);
 
-std::vector<std::string> splitter(const std::string &s, char delim) {
-  std::vector<std::string> elems;
-  splitter(s, delim, elems); 
-  std::cout<<s<<" "<<delim<<" "<<std::endl;
-  return elems;
-}
+    std::map<std::string, TH1D*> lbdep;
+    //------------------------------------
+    // read hit maps from input file
+    //
+    // endcaps
+    // 48 modules each disk
+    // phi_index [0,327]
+    // eta_index [0,143]
+    //------------------------------------
+    std::string prefix("All/OccupancyLb/");//might modify this, so not const
+    //check this directory exists, modify the prefix if not
+    if (not directoryExists(hitMapFile, prefix)){
+      std::cout <<"Directory "<<prefix<<" does not exist in the chosen hit map file; trying alternative name."<<std::endl;
+      prefix = "OccupancyLb/";
+      if (not directoryExists(hitMapFile, prefix)){
+        std::cout <<"Directory "<<prefix<<" also does not exist in the chosen hit map file. Aborting."<<std::endl;
+        exit(1);
+      }
+    }
+    for(const auto & d: globalDiskNames){
+      std::string lbdepPath =  prefix + d;
+      for(int phi = 0; phi < 48; phi++){
+        const std::string & name = getHistoName(hitMapFile,lbdepPath, phi);
+        lbdep[name] = getHistoPtr(hitMapFile,lbdepPath, phi);
+        lbdep[name]->SetName(name.c_str());
+      }
+    }
 
-bool is_file_exist(const char *fileName)
-{
-  std::ifstream infile;
-  infile.open(fileName);
-  return infile.good();
-}
+    //-----------------------------------------------------------
+    // read hit maps from input file
+    //
+    // barrel
+    // 22, 38, 52 slaves for layer 0, 1 and 2
+    // 13 modules per stave
+    // phi_index [0,319] for layer 0, [0,327] for layer 1 & 2
+    // eta_index [0,143] for layer 0, 1 & 2
+    //-----------------------------------------------------------
+    const std::vector<int> & staves = staveInitialiser(isIBL);
+    const std::vector<std::string> & layers = layerNames(isIBL);
+  
+    for(unsigned int layer = 0; layer < staves.size(); layer++){
+      std::string lbdepPath = prefix + layers[layer];
+      int nModulesPerStave = 13;
+      if (isIBL && layer == 0) nModulesPerStave = 32; // --- IBL --- //
+      const int nModulesTotal = staves[layer] * nModulesPerStave;
+      for(int module = 0; module < nModulesTotal; module++){ // loop on modules
+        const std::string & name =  getHistoName(hitMapFile,lbdepPath, module);
+        lbdep[name] = getHistoPtr(hitMapFile,lbdepPath, module);
+        lbdep[name]->SetName(name.c_str());
+      }
+    }
+  
+    const int nbin = nEventsLBHistogram->GetNbinsX();
+    for(const auto & [moduleID, pHisto] : lbdep){
+      int LB_start = 0;
+      int LB_end = 0;
+      int flag_start = 0;
+    
+      //-----------------------------
+      // Writing list of modules (or FEs in IBL modules) that do not work during a LB
+      //-----------------------------
+      for (int LB = 0; LB <= nbin; LB++) {
+        if(nEventsLBHistogram->GetBinContent(LB) < 80.) {
+          continue; // #to ensure that the LB contains at least 80 events
+        }
+        if(pHisto->GetBinContent(LB) == 0) { // (#module hits in LB) / (#events in LB) < 1
+          if(flag_start == 0){
+            flag_start = 1;
+            LB_start = LB-1;
+          }
+          LB_end = LB-1;
+        }else{// the module have hits
+          if(flag_start == 1){
+            flag_start = 0;
+            moduleIds.push_back(moduleID);
+            lumiblocks.push_back({LB_start, LB_end});
+          }
+        }
+      }
+      if(flag_start == 1){
+        moduleIds.push_back(moduleID);
+        lumiblocks.push_back({LB_start, LB_end});
+      }
+    }//for .. lbdep
+    return std::pair(moduleIds, lumiblocks);
+  }
+  
+  
+  
+  
+  //---------------------------------------
+  // Make a txt file out of masked modules/FEs
+  //---------------------------------------
+  void
+  make_txt(const std::string& srun,
+           int npush_back,
+           int npush_backFE,
+           const std::vector<std::string>& vsFE,
+           const ModuleIdVector& vsmodule,
+           const LumiBlockVector& vLB,
+           const std::vector<std::string>& FEcode)
+  {
+    std::string spyfilename = "./PixelModuleFeMask_run" + srun;
+    spyfilename += ".txt";
+    std::ofstream txtFile;
+    txtFile.open(spyfilename.c_str(),std::ofstream::out);
+    std::cout <<"spyfilename: "<<spyfilename << std::endl;
+  
+    //---------------------------------------
+    // List of masked FE
+    //---------------------------------------
+    std::vector<std::vector<int>> channel_FEcode(npush_backFE+1, std::vector<int>(2));
+    std::cout<<"Number  of FE Codes " << npush_backFE<<std::endl;
+    if(npush_backFE > 0){
+      for(int i=1; i<=npush_backFE; i++){
+        const auto & position = getPositionFromDCSID(vsFE[i-1]);
+        if (position == invalidPosition) continue;
+        auto pairPtr = hashMapping.find(position);
+        if (pairPtr == hashMapping.end()) continue;
+        int module_hash = pairPtr->second;
+        const auto  ptr = channelMapping.find(module_hash);
+        if (ptr == channelMapping.end()) continue;
+        const int channel = ptr->second;
+        const int FECode = std::stoi(FEcode[i-1]);
+        channel_FEcode[i][0]=channel;
+        channel_FEcode[i][1]=FECode;
+        for(int l=1; l<i;l++){// Calculating/getting values for list
+          if (channel_FEcode[i][0]>channel_FEcode[l][0]){
+            continue;
+          }
+          else{
+            for(int k=0; k<i-l; k++){
+              channel_FEcode[i-k][0]=channel_FEcode[i-1-k][0];
+              channel_FEcode[i-k][1]=channel_FEcode[i-1-k][1];
+            }
+          }
+          channel_FEcode[l][0]=channel;
+          channel_FEcode[l][1]=FECode;
+          break;
+        }
+      }
+    }
+  
+    auto it_smodule = vsmodule.begin();
+    auto it_LB = vLB.begin();
+    std::cout<<"Number to push back "<<npush_back<<std::endl;
+    static constexpr int defaultCode=65535;
+    //---------------------------------------
+    //List of masked modules and FEs(IBL) per LB
+    //---------------------------------------
+    std::vector<std::vector<unsigned long>> channel_Modulecode(npush_back+1, std::vector<unsigned long>(4));
+ 
+    if(npush_back > 0){
+      using RX = std::regex;
+      /*
+        module names are like D3C-B03-S2-M2, LI_S01_C_M4_C8_1, LI_S05_A_M2_A3
+      */
+      static const std::array<RX, 5> arr={RX(".I.{11}(7|8).*"), RX(".I.{5}A.{5}[^78]_1"), RX(".I.{5}C.{5}[^78]_1"), RX(".I.{5}A.{5}[^78]_2"), RX(".I.{5}C.{5}[^78]_2")  };
+      static constexpr std::array<int, 5> codes{0,1,2,2,1};//module codes corresponding to the module name matches
+      for(int i=1; i<=npush_back; i++){
+        const auto & position = getPositionFromDCSID(*it_smodule);
+        if (position == invalidPosition) continue;
+        std::string module_name = *it_smodule;
+        auto pairPtr = hashMapping.find(position);
+        if (pairPtr == hashMapping.end()) continue;
+        int module_hash = pairPtr->second;
+        const auto & ptr = channelMapping.find(module_hash);
+        if (ptr == channelMapping.end()) continue;
+        unsigned long channel = static_cast<unsigned long>(ptr->second);       
+        unsigned long sRun = std::stoul (srun);
+        unsigned long iov_start = (sRun << 32) + it_LB->first;
+        unsigned long iov_end = (sRun << 32) + it_LB->second;
+        channel_Modulecode[i]={channel, defaultCode, iov_start, iov_end};
+        //
+        auto findMatch = [&module_name](const RX & rx)->bool{
+          return std::regex_match(module_name, rx);
+        };
+      
+        for(int l=1; l<=i;l++){//Calculating/getting values for list
+          if (channel_Modulecode[i][0]>channel_Modulecode[l][0]){
+            continue;
+          }
+          for(int k=0; k<i-l; k++){
+            channel_Modulecode[i-k]=channel_Modulecode[i-1-k];
+          }
+          channel_Modulecode[l][0]=channel;
+          channel_Modulecode[l][1]=defaultCode;
+          auto pMatch = std::find_if(arr.begin(),arr.end(),findMatch);
+          if (pMatch != arr.end()){
+            const auto dist = std::distance(arr.begin(), pMatch);
+            channel_Modulecode[l][1]=codes[dist];
+          }
+          channel_Modulecode[l][2]=iov_start;
+          channel_Modulecode[l][3]=iov_end;
+          break;
+        }
+        ++it_smodule;
+        ++it_LB;
+      }  
+    }
+    //-----------------------------------
+    // Combine both lists
+    //-----------------------------------
+    std::vector<std::vector<unsigned long>> combine(npush_backFE+npush_back+1, std::vector<unsigned long>(4));
+    std::string module_info;
+    for(int i=1; i<=npush_backFE+npush_back; i++){
+      if (i<=npush_backFE){
+        combine[i][0]=channel_FEcode[i][0];
+        combine[i][1]=channel_FEcode[i][1];
+        combine[i][2]=0;
+        combine[i][3]=0;
+        if(combine[i][1]==65535)
+          continue;     
+      } else {
+        combine[i]=channel_Modulecode[i-npush_backFE];
+      }
+      if(combine[i][1]==65535){
+       combine[i][1]=0;
+      }
+      module_info =std::to_string(combine[i][0])+" "+std::to_string(combine[i][1])+" "+std::to_string(combine[i][2])+" "+std::to_string(combine[i][3])+"\n";
+      txtFile << module_info;
+    }
+    txtFile.close();
+  }
+  
+  std::pair<FrontEndIdVector, FrontEndCodeVector> 
+  checkInactiveFEs(bool isIBL, TFile* hitMapFile){//, int &npush_backFE, 
+                        //std::vector<std::string> &vsFE, std::vector<std::string> &FEcode){ //Function for FE masking
+    FrontEndIdVector frontEndIds;
+    FrontEndCodeVector frontEndCodes;
+    //-------------------------------
+    // Everything adapted to new noise maps
+    // Initialization
+    //-------------------------------
+    const std::vector<std::string> & components =  componentNames(isIBL);
 
-using namespace std;
+    std::map<std::string, TH1D*> hitMaps;
+    //------------------------------------
+    // read hit maps from input file
+    //
+    // endcaps
+    // 48 modules each disk
+    // phi_index [0,327]
+    // eta_index [0,143]
+    //------------------------------------
+ 
+    std::string hitMapsDirName{"All/Occupancy2d/"};
+    if (not directoryExists(hitMapFile, hitMapsDirName)){
+      std::cout << "Directory "<<hitMapsDirName <<" does not exist in the hits map file; trying alternative."<<std::endl;
+      hitMapsDirName = "Occupancy2d/";
+      if (not directoryExists(hitMapFile, hitMapsDirName)){
+        std::cout << "Directory "<<hitMapsDirName <<" also does not exist. Aborting."<<std::endl;
+        exit(1);
+      }
+    }
+  
+    for(const auto & component: globalDiskNames){
+      const std::string hitMapsPath = hitMapsDirName + component;
+      for(int phi = 0; phi < 48; phi++){
+        const std::string & name = getHistoName(hitMapFile, hitMapsPath, phi);
+        hitMaps[name] = getHistoPtr(hitMapFile, hitMapsPath, phi);
+      }
+    } // loop over k
+  
+
+    //-----------------------------------------------------------
+    // read hit maps from input file
+    //
+    // barrel
+    // 22, 38, 52 slaves for layer 0, 1 and 2
+    // 13 modules per stave
+    // phi_index [0,319] for layer 0, [0,327] for layer 1 & 2
+    // eta_index [0,143] for layer 0, 1 & 2
+    //-----------------------------------------------------------
+    // E.G
+    // D1A_B01_S1_M2
+    const std::vector<int> & staves = staveInitialiser(isIBL);
+    const std::vector<std::string> & layers = layerNames(isIBL);
+
+    for(unsigned int layer = 0; layer < staves.size(); layer++){
+      const std::string hitMapsPath = hitMapsDirName + layers[layer];
+      int nModulesPerStave = 13;
+      if (isIBL && layer == 0) nModulesPerStave = 32; // --- IBL --- //
+      if (layer !=0){						//IBL ignored,because treated in function for LB information
+        for(int module = 0; module < staves[layer] * nModulesPerStave; module++){ // loop on modules
+          const std::string & name = getHistoName(hitMapFile, hitMapsPath, module);
+          hitMaps[name] = getHistoPtr(hitMapFile, hitMapsPath, module);
+          hitMaps[name]->SetName(name.c_str());
+        }
+      }
+    }
+    //---------------------------------------
+    // Writing list of FE that shall be masked
+    //---------------------------------------
+    std::cout<<"hitMaps.size(): "<<hitMaps.size()<<std::endl;
+    int modulesWithNoHits = 0;
+    //int a=0; //counting variable
+    for(const auto & [moduleID, pHisto] : hitMaps){
+      //---------------------------------------
+      // Further variables for counting
+      //---------------------------------------
+      int nbinx = pHisto->GetNbinsX();
+      int nbiny = pHisto->GetNbinsY();
+      std::array<double, 16> FE={};
+   
+      //---------------------------------------
+      // Variables to identify modules
+      //---------------------------------------
+      std::size_t disk1A = moduleID.find("D1A");
+      std::size_t disk2A = moduleID.find("D2A");
+      std::size_t disk3A = moduleID.find("D3A");
+      std::size_t disk1C = moduleID.find("D1C");
+      std::size_t disk2C = moduleID.find("D2C");
+      std::size_t disk3C = moduleID.find("D3C");
+      std::size_t M1_find = moduleID.find("M1");
+      std::size_t M2_find = moduleID.find("M2");
+      std::size_t M3_find = moduleID.find("M3");
+      std::size_t M4_find = moduleID.find("M4");
+      std::size_t M5_find = moduleID.find("M5");
+      std::size_t M6_find = moduleID.find("M6");
+      //---------------------------------------
+      // Check for hits in FEs
+      //---------------------------------------
+      bool inDiskA1to3 = (!disk1A or !disk2A or !disk3A);
+      bool isM1M2orM3 =  (M1_find==11 or M2_find==11 or M3_find==11);
+      bool inDiskC1to3 = (!disk1C or !disk2C or !disk3C);
+      bool isM4M5orM6 =  (M4_find==11 or M5_find==11 or M6_find==11);
+      bool found = (inDiskA1to3 and isM1M2orM3) or  (inDiskC1to3 and isM4M5orM6);
+      //limits in original code; last one is dummy large number
+      constexpr std::array<int, 8> kBounds{18, 36, 54, 72, 90, 108, 126, 1000000};
+      //FE indices swap around for lval>164
+      constexpr std::array<std::pair<int, int>, 8> indices{
+        {{8,7},{9,6}, {10,5}, {11,4}, {12,3}, {13,2}, {14, 1}, {15,0}}
+      };
+      auto findIndices=[&kBounds, &indices](int kVal)->std::pair<int, int>{
+        auto place = std::lower_bound(kBounds.begin(), kBounds.end(), kVal);
+        auto i = std::distance(kBounds.begin(), place);
+        return indices[i];
+      };
+      auto returnIndex=[](const std::pair<int, int> indices, bool found, int lVal)->int{
+        if (lVal>164) return found ? indices.first : indices.second;
+        return found ? indices.second : indices.first;
+      };
+      for(int k=1; k<=nbinx; k++){
+        const auto & relevantPair = findIndices(k);
+        for(int l=1; l<=nbiny; l++){
+          const bool hitExists = hitMaps[moduleID]->GetBinContent(k,l)!=0;
+          if (not hitExists) continue;
+          const int i = returnIndex(relevantPair, found, l);
+          ++FE[i];
+        }
+      }// Hits in FEs checked 
+    
+      //---------------------------------------
+      // Variables for threshold
+      //---------------------------------------
+      int sum=0;
+      //how many zeroes in the array?
+      const int numZeroes = std::count(FE.begin(), FE.end(), 0.);
+      int denom = FE.size() - numZeroes;
+      //---------------------------------------
+      // Making list of masked FE
+      //---------------------------------------
+      int average_hit=0;
+      if(denom!=0){ 
+       average_hit = std::accumulate(FE.begin(), FE.end(), 0.)/denom;
+      } else {
+        ++modulesWithNoHits;
+      }
+      const auto ninetyPercent = 0.9*average_hit;
+      for (int i(0); i!= FE.size();++i){
+        if(FE[i]<=ninetyPercent){
+          sum=sum+std::pow(2,i);//calculating number to know which FEs in the module shall be masked
+        }
+      }
+      //
+      if (sum!=0){
+        frontEndCodes.push_back(std::to_string(sum));
+        frontEndIds.push_back(moduleID);
+      }
+    }
+    std::cout<<modulesWithNoHits<<" modules had no hits out of "<<hitMaps.size()<<" modules in the hit maps."<<std::endl;
+    return std::pair(frontEndIds, frontEndCodes);
+  }
+  //
+ 
+}
 
 int main(int argc, char* argv[]){
-  bool isIBL = true;
-  std::string stag_name = "PixMapOverlay-RUN2-DATA-UPD4-04";
-
+  const bool isIBL = true;
   //-----------------------------------
   //Usage configuration of the program
   //------------------------------------
@@ -108,951 +621,35 @@ int main(int argc, char* argv[]){
   //Read pixel mapping
   //------------------------------
   setPixelMapping(isIBL);
-
   //-----------------------------
   //Open input and output files; define variables
   //------------------------------
   int npush_back = 0;
   int npush_backFE = 0;
-  std::vector<std::string> vsmodule;
-  std::vector<std::string> vsFE;
-  std::vector<std::string> FEcode;
-  std::vector<int> vLB_start;
-  std::vector<int> vLB_end;
-
+  FrontEndIdVector frontEnds;
+  FrontEndCodeVector codes;
+  ModuleIdVector moduleIds;
+  LumiBlockVector lumiblocks;
+  //
   if(flag_first != true){
-    TFile* hitMapFile = new TFile(finname.c_str(), "READ");
+    auto hitMapFile = std::make_unique<TFile>(finname.c_str(), "READ");
     if( !hitMapFile || !hitMapFile->IsOpen() ){
       std::cerr << "Error: Unable to open input file." << std::endl;
       return 1;
     
     }
-    checkInactiveFEs(isIBL, hitMapFile, npush_backFE, vsFE, FEcode);
-    checkInactiveModule(isIBL, hitMapFile, npush_back, vsmodule, vLB_start, vLB_end);
-    
-    
+    std::tie(frontEnds, codes) = checkInactiveFEs(isIBL, hitMapFile.get());
+    npush_backFE += codes.size();
+    std::tie(moduleIds, lumiblocks) = checkInactiveModule(isIBL, hitMapFile.get());
+    npush_back += lumiblocks.size();
     hitMapFile->Close();
-    delete hitMapFile;
   }
-
   //-----------------------------
   // Open file to save txt fragment with disabled modules
   //-----------------------------
   std::cout<<"create txt file"<<std::endl;
-  make_txt(runNumber, npush_back,npush_backFE, vsFE,  vsmodule, vLB_start, vLB_end, FEcode);
-
+  make_txt(runNumber, npush_back, npush_backFE, frontEnds,  moduleIds, lumiblocks, codes);
   return 0;
 }
 
-//-----------------------------
-// Function to read infos from Lumi-block information (IBL for each FE, rest for each module)
-//-----------------------------
-void checkInactiveModule(bool isIBL, TFile* hitMapFile, int &npush_back, std::vector<std::string> &vsmodule, 
-                         std::vector<int> &vLB_start, std::vector<int> &vLB_end){
-  //-----------------------------
-  // Everything adopted to new noise maps
-  //-----------------------------
-  TH1* nEventsLBHistogram = 0;
-  hitMapFile->GetObject("NEventsLB", nEventsLBHistogram);
-  
-  //-------------------------------
-  // Initialization
-  //-------------------------------
-  std::vector<std::string> components;
-  components.push_back("Disk1A");
-  components.push_back("Disk2A");
-  components.push_back("Disk3A");
-  components.push_back("Disk1C");
-  components.push_back("Disk2C");
-  components.push_back("Disk3C");
-  if (isIBL) components.push_back("IBL");
-  components.push_back("B0");
-  components.push_back("B1");
-  components.push_back("B2");
 
-  std::map<std::string, TH1D*> lbdep;
-  //------------------------------------
-  // read hit maps from input file
-  //
-  // endcaps
-  // 48 modules each disk
-  // phi_index [0,327]
-  // eta_index [0,143]
-  //------------------------------------
-  std::vector<std::string> hemispheres;
-  hemispheres.push_back("A");
-  hemispheres.push_back("C");
-
-  for(std::vector<std::string>::const_iterator hemisphere = hemispheres.begin(); hemisphere != hemispheres.end(); ++hemisphere){
-    std::string lbdepDirName = std::string("All/OccupancyLb");
-
-    for(int k = 1; k <= 3; k ++){
-      std::string component, lbdepPath;
-      component = "Disk" +std::to_string(k) + (*hemisphere);
-      lbdepPath = lbdepDirName + "/Disk" + std::to_string(k) + (*hemisphere);
-      
-      for(int phi = 0; phi < 48; phi++){
-        std::string name((static_cast<TKey*>((static_cast<TDirectory*>(hitMapFile->Get(lbdepPath.c_str())))->GetListOfKeys()->At(phi)))->GetName());
-        lbdep[name] = static_cast<TH1D*>((static_cast<TKey*>(((static_cast<TDirectory*>(hitMapFile->Get(lbdepPath.c_str())))->GetListOfKeys())->At(phi)))->ReadObj());
-        lbdep[name]->SetName(name.c_str());
-      }
-    } // loop over k
-  }
-
-  //-----------------------------------------------------------
-  // read hit maps from input file
-  //
-  // barrel
-  // 22, 38, 52 slaves for layer 0, 1 and 2
-  // 13 modules per stave
-  // phi_index [0,319] for layer 0, [0,327] for layer 1 & 2
-  // eta_index [0,143] for layer 0, 1 & 2
-  //-----------------------------------------------------------
-  std::vector<int> staves;
-  if(isIBL) staves.push_back(14);
-  staves.push_back(22);
-  staves.push_back(38);
-  staves.push_back(52);
-
-  std::vector<std::string> layers;
-  if(isIBL) layers.push_back("IBL");
-  layers.push_back("B0");
-  layers.push_back("B1");
-  layers.push_back("B2");
-
-  std::string lbdepDirName("lbdep_barrel");
-  for(unsigned int layer = 0; layer < staves.size(); layer++){
-    std::string Layer = layers[layer];
-    const std::string lbdepPath = "All/OccupancyLb/" + Layer;
-    int nModulesPerStave = 13;
-    if (isIBL && layer == 0) nModulesPerStave = 32; // --- IBL --- //
-      for(int module = 0; module < staves[layer] * nModulesPerStave; module++){ // loop on modules
-        std::string name((static_cast<TKey*>((static_cast<TDirectory*>(hitMapFile->Get(lbdepPath.c_str())))->GetListOfKeys()->At(module)))->GetName());
-        lbdep[name] = static_cast<TH1D*>((static_cast<TKey*>(((static_cast<TDirectory*>(hitMapFile->Get( lbdepPath.c_str() ) ))->GetListOfKeys() )->At(module) ))->ReadObj());
-        lbdep[name]->SetName(name.c_str());
-      }
-  }
-  
-  for(std::map<std::string, TH1D*>::const_iterator module = lbdep.begin(); module != lbdep.end(); ++module){
-    std::string moduleID = (*module).first;
-    int LB_start = 0;
-    int LB_end = 0;
-    int flag_start = 0;
-    int nbin =nEventsLBHistogram->GetNbinsX();
-
-
-
-
-    //-----------------------------
-    // Writing list of modules (or FEs in IBL modules) that do not work during a LB
-    //-----------------------------
-    for (int LB = 0; LB <= nbin; LB++) {
-   
-      if(nEventsLBHistogram->GetBinContent(LB) < 80.) {
-	continue; // #to asure that the LB contains at least 80 events
-      }
-      if(lbdep[moduleID]->GetBinContent(LB) ==0) { // (#module hits in LB) / (#events in LB) < 1
-	if(flag_start == 0){
-	  flag_start = 1;
-	  LB_start = LB-1;
-	  LB_end = LB-1;
-	}else{
-	  LB_end = LB-1;
-	}
-      }else{// the module have hits
-	if(flag_start == 1){
-	  flag_start = 0;
-	  vsmodule.push_back(moduleID);
-	  vLB_start.push_back(LB_start);
-	  vLB_end.push_back(LB_end);
-	  npush_back++;
-	}
-      }
-    }
-    if(flag_start == 1){
-      vsmodule.push_back(moduleID);
-      vLB_start.push_back(LB_start);
-      vLB_end.push_back(LB_end);
-      npush_back++;
-    }
-
-  }//for(std::map<std::string, TH1D*>::const_iterator module = lbdep.begin(); module != lbdep.end(); ++module)
-}
-
-void checkInactiveFEs(bool isIBL, TFile* hitMapFile, int &npush_backFE, 
-                      std::vector<std::string> &vsFE, std::vector<std::string> &FEcode){ //Function for FE masking
-  //
-  //-------------------------------
-  // Everything adopted to new noise maps
-  // Initialization
-  //-------------------------------
-  std::vector<std::string> components;
-  components.push_back("Disk1A");
-  components.push_back("Disk2A");
-  components.push_back("Disk3A");
-  components.push_back("Disk1C");
-  components.push_back("Disk2C");
-  components.push_back("Disk3C");
-  if (isIBL) components.push_back("IBL");
-  components.push_back("B0");
-  components.push_back("B1");
-  components.push_back("B2");
-
-  std::map<std::string, TH1D*> hitMaps;
-  //------------------------------------
-  // read hit maps from input file
-  //
-  // endcaps
-  // 48 modules each disk
-  // phi_index [0,327]
-  // eta_index [0,143]
-  //------------------------------------
-  std::vector<std::string> hemispheres;
-  hemispheres.push_back("A");
-  hemispheres.push_back("C");
-
-  for(std::vector<std::string>::const_iterator hemisphere = hemispheres.begin();
-      hemisphere != hemispheres.end(); ++hemisphere){
-    std::string hitMapsDirName = std::string("All/Occupancy2d");
-
-    for(int k = 1; k <= 3; k ++){
-      std::string component, hitMapsPath;
-      component = "Disk"+std::to_string(k)+ (*hemisphere);
-      hitMapsPath = hitMapsDirName + "/Disk"+ std::to_string(k)+(*hemisphere);
-
-      
-      for(int phi = 0; phi < 48; phi++){
-        std::string name((static_cast<TKey*>((static_cast<TDirectory*>(hitMapFile->Get(hitMapsPath.c_str())))->GetListOfKeys()->At(phi)))->GetName());
-        hitMaps[name] = static_cast<TH1D*>((static_cast<TKey*>(((static_cast<TDirectory*>(hitMapFile->Get(hitMapsPath.c_str())))->GetListOfKeys())->At(phi)))->ReadObj());
-        hitMaps[name]->SetName(name.c_str());
-      }
-    } // loop over k
-  }
-
-  //-----------------------------------------------------------
-  // read hit maps from input file
-  //
-  // barrel
-  // 22, 38, 52 slaves for layer 0, 1 and 2
-  // 13 modules per stave
-  // phi_index [0,319] for layer 0, [0,327] for layer 1 & 2
-  // eta_index [0,143] for layer 0, 1 & 2
-  //-----------------------------------------------------------
-  std::vector<int> staves;
-  if(isIBL) staves.push_back(14);
-  staves.push_back(22);
-  staves.push_back(38);
-  staves.push_back(52);
-
-  std::vector<std::string> layers;
-  if(isIBL) layers.push_back("IBL");
-  layers.push_back("B0");
-  layers.push_back("B1");
-  layers.push_back("B2");
-
-  std::string hitMapsDirName("hitMaps_barrel");
-  for(unsigned int layer = 0; layer < staves.size(); layer++){
-    std::string hitMapsPath;
-    hitMapsPath ="All/Occupancy2d/" + layers[layer];
-    int nModulesPerStave = 13;
-    if (isIBL && layer == 0) nModulesPerStave = 32; // --- IBL --- //
-    if (layer !=0){						//IBL ignored,because treated in function for LB information
-      for(int module = 0; module < staves[layer] * nModulesPerStave; module++){ // loop on modules
-        std::string name((static_cast<TKey*>((static_cast<TDirectory*>(hitMapFile->Get(hitMapsPath.c_str())))->GetListOfKeys()->At(module)))->GetName());
-        hitMaps[name] = static_cast<TH1D*>((static_cast<TKey*>(((static_cast<TDirectory*>(hitMapFile->Get( hitMapsPath.c_str() ) ))->GetListOfKeys() )->At(module) ))->ReadObj());
-        hitMaps[name]->SetName(name.c_str());
-      }
-    }
-  }
-  //---------------------------------------
-  // Writing list of FE that shall be masked
-  //---------------------------------------
-  std::cout<<"hitMaps.size(): "<<hitMaps.size()<<endl;
-  int a=0; //counting variable
-  for(std::map<std::string, TH1D*>::const_iterator module = hitMaps.begin(); module != hitMaps.end(); ++module){
-    std::string moduleID = (*module).first;
-    //---------------------------------------
-    // Further variables for counting
-    //---------------------------------------
-    int nbinx =hitMaps[moduleID]->GetNbinsX();
-    int nbiny =hitMaps[moduleID]->GetNbinsY();
-    double FE0=0;
-    double FE1=0;
-    double FE2=0;
-    double FE3=0;
-    double FE4=0;
-    double FE5=0;
-    double FE6=0;
-    double FE7=0;
-    double FE8=0;
-    double FE9=0;
-    double FE10=0;
-    double FE11=0;
-    double FE12=0;
-    double FE13=0;
-    double FE14=0;
-    double FE15=0;
-    //---------------------------------------
-    // Variables to identify modules
-    //---------------------------------------
-    std::string D1A ("D1A");
-    std::string D2A ("D2A");
-    std::string D3A ("D3A");
-    std::string D1C ("D1C");
-    std::string D2C ("D2C");
-    std::string D3C ("D3C");
-    std::string M1 ("M1");
-    std::string M2 ("M2");
-    std::string M3 ("M3");
-    std::string M4 ("M4");
-    std::string M5 ("M5");
-    std::string M6 ("M6");
-    std::size_t disk1A = moduleID.find(D1A);
-    std::size_t disk2A = moduleID.find(D2A);
-    std::size_t disk3A = moduleID.find(D3A);
-    std::size_t disk1C = moduleID.find(D1C);
-    std::size_t disk2C = moduleID.find(D2C);
-    std::size_t disk3C = moduleID.find(D3C);
-    std::size_t M1_find = moduleID.find(M1);
-    std::size_t M2_find = moduleID.find(M2);
-    std::size_t M3_find = moduleID.find(M3);
-    std::size_t M4_find = moduleID.find(M4);
-    std::size_t M5_find = moduleID.find(M5);
-    std::size_t M6_find = moduleID.find(M6);
-    //---------------------------------------
-    // Check for hits in FEs
-    //---------------------------------------
-    for(int k=1; k<=nbinx; k++){
-      for(int l=1; l<=nbiny; l++){
-	if(k<=18){
-          if(l<=164){
-            if(((!disk1A or !disk2A or !disk3A) and (M1_find==11 or M2_find==11 or M3_find==11)) or  ((!disk1C or !disk2C or !disk3C) and (M4_find==11 or M5_find==11 or M6_find==11))){
-              if(hitMaps[moduleID]->GetBinContent(k,l)!=0){FE7++;}
-            }
-            else{
-              if(hitMaps[moduleID]->GetBinContent(k,l)!=0){FE8++;}
-            }
-          }
-          else if(l>=165){
-            if(((!disk1A or !disk2A or !disk3A) and (M1_find==11 or M2_find==11 or M3_find==11)) or  ((!disk1C or !disk2C or !disk3C) and (M4_find==11 or M5_find==11 or M6_find==11))){
-              if(hitMaps[moduleID]->GetBinContent(k,l)!=0){FE8++;}
-            }
-            else{
-              if(hitMaps[moduleID]->GetBinContent(k,l)!=0){FE7++;}
-            }
-          }
-          else{
-            std::cout<<"ERROR"<<" "<<k<<" "<<l<<std::endl;
-          }
-        }
-        if(k>=19 and k<=36){
-          if(l<=164){
-            if(((!disk1A or !disk2A or !disk3A) and (M1_find==11 or M2_find==11 or M3_find==11)) or  ((!disk1C or !disk2C or !disk3C) and (M4_find==11 or M5_find==11 or M6_find==11))){
-              if(hitMaps[moduleID]->GetBinContent(k,l)!=0){FE6++;}
-            }
-            else{
-              if(hitMaps[moduleID]->GetBinContent(k,l)!=0){FE9++;}
-            }
-          }
-          else if(l>=165){
-            if(((!disk1A or !disk2A or !disk3A) and (M1_find==11 or M2_find==11 or M3_find==11)) or  ((!disk1C or !disk2C or !disk3C) and (M4_find==11 or M5_find==11 or M6_find==11))){
-              if(hitMaps[moduleID]->GetBinContent(k,l)!=0){FE9++;}
-            }
-            else{
-              if(hitMaps[moduleID]->GetBinContent(k,l)!=0){FE6++;}
-            }
-          }
-          else{
-            std::cout<<"ERROR"<<" "<<k<<" "<<l<<std::endl;
-          }
-        }
-        if(k>=37 and k<=54){
-          if(l<=164){
-            if(((!disk1A or !disk2A or !disk3A) and (M1_find==11 or M2_find==11 or M3_find==11)) or  ((!disk1C or !disk2C or !disk3C) and (M4_find==11 or M5_find==11 or M6_find==11))){
-              if(hitMaps[moduleID]->GetBinContent(k,l)!=0){FE5++;}
-            }
-            else{
-              if(hitMaps[moduleID]->GetBinContent(k,l)!=0){FE10++;}
-            }
-          }
-          else if(l>=165){
-            if(((!disk1A or !disk2A or !disk3A) and (M1_find==11 or M2_find==11 or M3_find==11)) or  ((!disk1C or !disk2C or !disk3C) and (M4_find==11 or M5_find==11 or M6_find==11))){
-              if(hitMaps[moduleID]->GetBinContent(k,l)!=0){FE10++;}
-            }
-            else{
-              if(hitMaps[moduleID]->GetBinContent(k,l)!=0){FE5++;}
-            }
-          }
-          else{
-            std::cout<<"ERROR"<<" "<<k<<" "<<l<<std::endl;
-          }
-        }
-        if(k>=55 and k<=72){
-          if(l<=164){
-            if(((!disk1A or !disk2A or !disk3A) and (M1_find==11 or M2_find==11 or M3_find==11)) or  ((!disk1C or !disk2C or !disk3C) and (M4_find==11 or M5_find==11 or M6_find==11))){
-              if(hitMaps[moduleID]->GetBinContent(k,l)!=0){FE4++;}
-            }
-            else{
-              if(hitMaps[moduleID]->GetBinContent(k,l)!=0){FE11++;}
-            }
-          }
-          else if(l>=165){
-            if(((!disk1A or !disk2A or !disk3A) and (M1_find==11 or M2_find==11 or M3_find==11)) or  ((!disk1C or !disk2C or !disk3C) and (M4_find==11 or M5_find==11 or M6_find==11))){
-              if(hitMaps[moduleID]->GetBinContent(k,l)!=0){FE11++;}
-            }
-            else{
-              if(hitMaps[moduleID]->GetBinContent(k,l)!=0){FE4++;}
-            }
-          }
-          else{
-            std::cout<<"ERROR"<<" "<<k<<" "<<l<<std::endl;
-          }
-        }
-        if(k>=73 and k<=90){
-          if(l<=164){
-            if(((!disk1A or !disk2A or !disk3A) and (M1_find==11 or M2_find==11 or M3_find==11)) or  ((!disk1C or !disk2C or !disk3C) and (M4_find==11 or M5_find==11 or M6_find==11))){
-              if(hitMaps[moduleID]->GetBinContent(k,l)!=0){FE3++;}
-            }
-            else{
-              if(hitMaps[moduleID]->GetBinContent(k,l)!=0){FE12++;}
-            }
-          }
-          else if(l>=165){
-            if(((!disk1A or !disk2A or !disk3A) and (M1_find==11 or M2_find==11 or M3_find==11)) or  ((!disk1C or !disk2C or !disk3C) and (M4_find==11 or M5_find==11 or M6_find==11))){
-              if(hitMaps[moduleID]->GetBinContent(k,l)!=0){FE12++;}
-            }
-            else{
-              if(hitMaps[moduleID]->GetBinContent(k,l)!=0){FE3++;}
-            }
-          }
-          else{
-            std::cout<<"ERROR"<<" "<<k<<" "<<l<<std::endl;
-          }
-        }
-        if(k>=91 and k<=108){
-          if(l<=164){
-            if(((!disk1A or !disk2A or !disk3A) and (M1_find==11 or M2_find==11 or M3_find==11)) or  ((!disk1C or !disk2C or !disk3C) and (M4_find==11 or M5_find==11 or M6_find==11))){
-              if(hitMaps[moduleID]->GetBinContent(k,l)!=0){FE2++;}
-            }
-            else{
-              if(hitMaps[moduleID]->GetBinContent(k,l)!=0){FE13++;}
-            }
-          }
-          else if(l>=165){
-            if(((!disk1A or !disk2A or !disk3A) and (M1_find==11 or M2_find==11 or M3_find==11)) or  ((!disk1C or !disk2C or !disk3C) and (M4_find==11 or M5_find==11 or M6_find==11))){
-              if(hitMaps[moduleID]->GetBinContent(k,l)!=0){FE13++;}
-            }
-            else{
-              if(hitMaps[moduleID]->GetBinContent(k,l)!=0){FE2++;}
-            }
-          }
-          else{
-            std::cout<<"ERROR"<<" "<<k<<" "<<l<<std::endl;
-          }
-        }
-        if(k>=109 and k<=126){
-          if(l<=164){
-            if(((!disk1A or !disk2A or !disk3A) and (M1_find==11 or M2_find==11 or M3_find==11)) or  ((!disk1C or !disk2C or !disk3C) and (M4_find==11 or M5_find==11 or M6_find==11))){
-              if(hitMaps[moduleID]->GetBinContent(k,l)!=0){FE1++;}
-            }
-            else{
-              if(hitMaps[moduleID]->GetBinContent(k,l)!=0){FE14++;}
-            }
-          }
-          else if(l>=165){
-            if(((!disk1A or !disk2A or !disk3A) and (M1_find==11 or M2_find==11 or M3_find==11)) or  ((!disk1C or !disk2C or !disk3C) and (M4_find==11 or M5_find==11 or M6_find==11))){
-              if(hitMaps[moduleID]->GetBinContent(k,l)!=0){FE14++;}
-            }
-            else{
-              if(hitMaps[moduleID]->GetBinContent(k,l)!=0){FE1++;}
-            }
-          }
-          else{
-            std::cout<<"ERROR"<<" "<<k<<" "<<l<<std::endl;
-          }  
-        }
-        if(k>=127){
-          if(l<=164){
-            if(((!disk1A or !disk2A or !disk3A) and (M1_find==11 or M2_find==11 or M3_find==11)) or  ((!disk1C or !disk2C or !disk3C) and (M4_find==11 or M5_find==11 or M6_find==11))){
-              if(hitMaps[moduleID]->GetBinContent(k,l)!=0){FE0++;}
-            }
-            else{
-              if(hitMaps[moduleID]->GetBinContent(k,l)!=0){FE15++;}
-            }
-          }
-          else if(l>=165){
-            if(((!disk1A or !disk2A or !disk3A) and (M1_find==11 or M2_find==11 or M3_find==11)) or  ((!disk1C or !disk2C or !disk3C) and (M4_find==11 or M5_find==11 or M6_find==11))){
-              if(hitMaps[moduleID]->GetBinContent(k,l)!=0){FE15++;}
-            }
-            else{
-              if(hitMaps[moduleID]->GetBinContent(k,l)!=0){FE0++;}
-            }
-          }
-          else{
-            std::cout<<"ERROR"<<" "<<k<<" "<<l<<std::endl;
-          }
-        }
-      }
-    }// Hits in FEs checked 
-    
-    //---------------------------------------
-    // Variables for threshold
-    //---------------------------------------
-    int sum=0;
-    int sum_FE=0;
-    int denom=16;
-    if(FE0==0){denom=denom-1;}
-    if(FE1==0){denom=denom-1;}
-    if(FE2==0){denom=denom-1;}
-    if(FE3==0){denom=denom-1;}
-    if(FE4==0){denom=denom-1;}
-    if(FE5==0){denom=denom-1;}
-    if(FE6==0){denom=denom-1;}
-    if(FE7==0){denom=denom-1;}
-    if(FE8==0){denom=denom-1;}
-    if(FE9==0){denom=denom-1;}
-    if(FE10==0){denom=denom-1;}
-    if(FE11==0){denom=denom-1;}
-    if(FE12==0){denom=denom-1;}
-    if(FE13==0){denom=denom-1;}
-    if(FE14==0){denom=denom-1;}
-    if(FE15==0){denom=denom-1;} 
-    
-    //---------------------------------------
-    // Making list of masked FE
-    //---------------------------------------
-    int average_hit=0;
-    if(denom!=0){ 
-     average_hit =(FE0+FE1+FE2+FE3+FE4+FE5+FE6+FE7+FE8+FE9+FE10+FE11+FE12+FE13+FE14+FE15)/denom;
-    }
-    if(FE0<=0.9*average_hit and disk1A!=0 and disk2A!=0 and disk3A!=0 and disk1C!=0 and disk2C!=0 and disk3C!=0){//value multiplied with average_hit is threshold
-      sum=sum+std::pow(2,0);//calculating number to know which FEs in the module shall be masked
-      sum_FE++;
-    }
-    else if(FE0<=0.9*average_hit and (!disk1A or !disk2A or !disk3A or !disk1C or !disk2C or !disk3C)){//value multiplied with average_hit is threshold
-      sum=sum+std::pow(2,0);//calculating number to know which FEs in the module shall be masked
-      sum_FE++;
-    }
-    if(FE1<=0.9*average_hit and disk1A!=0 and disk2A!=0 and disk3A!=0 and disk1C!=0 and disk2C!=0 and disk3C!=0){//value multiplied with average_hit is threshold
-      sum=sum+std::pow(2,1);//calculating number to know which FEs in the module shall be masked
-      sum_FE++;
-    }
-    else if(FE1<=0.9*average_hit and (!disk1A or !disk2A or !disk3A or !disk1C or !disk2C or !disk3C)){//value multiplied with average_hit is threshold
-      sum=sum+std::pow(2,1);//calculating number to know which FEs in the module shall be masked
-      sum_FE++;
-    }
-    if(FE2<=0.9*average_hit and disk1A!=0 and disk2A!=0 and disk3A!=0 and disk1C!=0 and disk2C!=0 and disk3C!=0){//value multiplied with average_hit is threshold
-      sum=sum+std::pow(2,2);//calculating number to know which FEs in the module shall be masked
-      sum_FE++;
-    }
-    else if(FE2<=0.9*average_hit and (!disk1A or !disk2A or !disk3A or !disk1C or !disk2C or !disk3C)){//value multiplied with average_hit is threshold
-      sum=sum+std::pow(2,2);//calculating number to know which FEs in the module shall be masked
-      sum_FE++;
-    }
-    if(FE3<=0.9*average_hit and disk1A!=0 and disk2A!=0 and disk3A!=0 and disk1C!=0 and disk2C!=0 and disk3C!=0){//value multiplied with average_hit is threshold
-      sum=sum+std::pow(2,3);//calculating number to know which FEs in the module shall be masked
-      sum_FE++;
-    }
-    else if(FE3<=0.9*average_hit and (!disk1A or !disk2A or !disk3A or !disk1C or !disk2C or !disk3C)){//value multiplied with average_hit is threshold
-      sum=sum+std::pow(2,3);//calculating number to know which FEs in the module shall be masked
-      sum_FE++;
-    }
-    if(FE4<=0.9*average_hit and disk1A!=0 and disk2A!=0 and disk3A!=0 and disk1C!=0 and disk2C!=0 and disk3C!=0){//value multiplied with average_hit is threshold
-      sum=sum+std::pow(2,4);//calculating number to know which FEs in the module shall be masked
-      sum_FE++;
-    }
-    else if(FE4<=0.9*average_hit and (!disk1A or !disk2A or !disk3A or !disk1C or !disk2C or !disk3C)){//value multiplied with average_hit is threshold
-      sum=sum+std::pow(2,4);//calculating number to know which FEs in the module shall be masked
-      sum_FE++;
-    }
-    if(FE5<=0.9*average_hit and disk1A!=0 and disk2A!=0 and disk3A!=0 and disk1C!=0 and disk2C!=0 and disk3C!=0){//value multiplied with average_hit is threshold
-      sum=sum+std::pow(2,5);//calculating number to know which FEs in the module shall be masked
-      sum_FE++;
-    }
-    else if(FE5<=0.9*average_hit and (!disk1A or !disk2A or !disk3A or !disk1C or !disk2C or !disk3C)){//value multiplied with average_hit is threshold
-      sum=sum+std::pow(2,5);//calculating number to know which FEs in the module shall be masked
-      sum_FE++;
-    }
-    if(FE6<=0.9*average_hit and disk1A!=0 and disk2A!=0 and disk3A!=0 and disk1C!=0 and disk2C!=0 and disk3C!=0){//value multiplied with average_hit is threshold
-      sum=sum+std::pow(2,6);//calculating number to know which FEs in the module shall be masked
-      sum_FE++;
-    }
-    else if(FE6<=0.9*average_hit and (!disk1A or !disk2A or !disk3A or !disk1C or !disk2C or !disk3C)){//value multiplied with average_hit is threshold
-      sum=sum+std::pow(2,6);//calculating number to know which FEs in the module shall be masked
-      sum_FE++;
-    }
-    if(FE7<=0.9*average_hit and disk1A!=0 and disk2A!=0 and disk3A!=0 and disk1C!=0 and disk2C!=0 and disk3C!=0){//value multiplied with average_hit is threshold
-      sum=sum+std::pow(2,7);//calculating number to know which FEs in the module shall be masked
-      sum_FE++;
-    }
-    else if(FE7<=0.9*average_hit and (!disk1A or !disk2A or !disk3A or !disk1C or !disk2C or !disk3C)){//value multiplied with average_hit is threshold
-      sum=sum+std::pow(2,7);//calculating number to know which FEs in the module shall be masked
-      sum_FE++;
-    }
-    if(FE8<=0.9*average_hit and disk1A!=0 and disk2A!=0 and disk3A!=0 and disk1C!=0 and disk2C!=0 and disk3C!=0){//value multiplied with average_hit is threshold
-      sum=sum+std::pow(2,8);//calculating number to know which FEs in the module shall be masked
-      sum_FE++;
-    }
-    else if(FE8<=0.9*average_hit and (!disk1A or !disk2A or !disk3A or !disk1C or !disk2C or !disk3C)){//value multiplied with average_hit is threshold
-      sum=sum+std::pow(2,8);//calculating number to know which FEs in the module shall be masked
-      sum_FE++;
-    }
-    if(FE9<=0.9*average_hit and disk1A!=0 and disk2A!=0 and disk3A!=0 and disk1C!=0 and disk2C!=0 and disk3C!=0){//value multiplied with average_hit is threshold
-      sum=sum+std::pow(2,9);//calculating number to know which FEs in the module shall be masked
-      sum_FE++;
-    }
-    else if(FE9<=0.9*average_hit and (!disk1A or !disk2A or !disk3A or !disk1C or !disk2C or !disk3C)){//value multiplied with average_hit is threshold
-      sum=sum+std::pow(2,9);//calculating number to know which FEs in the module shall be masked
-      sum_FE++;
-    }
-    if(FE10<=0.9*average_hit and disk1A!=0 and disk2A!=0 and disk3A!=0 and disk1C!=0 and disk2C!=0 and disk3C!=0){//value multiplied with average_hit is threshold
-      sum=sum+std::pow(2,10);//calculating number to know which FEs in the module shall be masked
-      sum_FE++;
-    }
-    else if(FE10<=0.9*average_hit and (!disk1A or !disk2A or !disk3A or !disk1C or !disk2C or !disk3C)){//value multiplied with average_hit is threshold
-      sum=sum+std::pow(2,10);//calculating number to know which FEs in the module shall be masked
-      sum_FE++;
-    }
-    if(FE11<=0.9*average_hit and disk1A!=0 and disk2A!=0 and disk3A!=0 and disk1C!=0 and disk2C!=0 and disk3C!=0){//value multiplied with average_hit is threshold
-      sum=sum+std::pow(2,11);//calculating number to know which FEs in the module shall be masked
-      sum_FE++;
-    }
-    else if(FE11<=0.9*average_hit and (!disk1A or !disk2A or !disk3A or !disk1C or !disk2C or !disk3C)){//value multiplied with average_hit is threshold
-      sum=sum+std::pow(2,11);//calculating number to know which FEs in the module shall be masked
-      sum_FE++;
-    }
-    if(FE12<=0.9*average_hit and disk1A!=0 and disk2A!=0 and disk3A!=0 and disk1C!=0 and disk2C!=0 and disk3C!=0){//value multiplied with average_hit is threshold
-      sum=sum+std::pow(2,12);//calculating number to know which FEs in the module shall be masked
-      sum_FE++;
-    }
-    else if(FE12<=0.9*average_hit and (!disk1A or !disk2A or !disk3A or !disk1C or !disk2C or !disk3C)){//value multiplied with average_hit is threshold
-      sum=sum+std::pow(2,12);//calculating number to know which FEs in the module shall be masked
-      sum_FE++;
-    }
-    if(FE13<=0.9*average_hit and disk1A!=0 and disk2A!=0 and disk3A!=0 and disk1C!=0 and disk2C!=0 and disk3C!=0){//value multiplied with average_hit is threshold
-      sum=sum+std::pow(2,13);//calculating number to know which FEs in the module shall be masked
-      sum_FE++;
-    }
-    else if(FE13<=0.9*average_hit and (!disk1A or !disk2A or !disk3A or !disk1C or !disk2C or !disk3C)){//value multiplied with average_hit is threshold
-      sum=sum+std::pow(2,13);//calculating number to know which FEs in the module shall be masked
-      sum_FE++;
-    }
-    if(FE14<=0.9*average_hit and disk1A!=0 and disk2A!=0 and disk3A!=0 and disk1C!=0 and disk2C!=0 and disk3C!=0){//value multiplied with average_hit is threshold
-      sum=sum+std::pow(2,14);//calculating number to know which FEs in the module shall be masked
-      sum_FE++;
-    }
-    else if(FE14<=0.9*average_hit and (!disk1A or !disk2A or !disk3A or !disk1C or !disk2C or !disk3C)){//value multiplied with average_hit is threshold
-      sum=sum+std::pow(2,14);//calculating number to know which FEs in the module shall be masked
-      sum_FE++;
-    }
-    if(FE15<=0.9*average_hit and disk1A!=0 and disk2A!=0 and disk3A!=0 and disk1C!=0 and disk2C!=0 and disk3C!=0){//value multiplied with average_hit is threshold
-      sum=sum+std::pow(2,15);//calculating number to know which FEs in the module shall be masked
-      sum_FE++;
-    }
-    else if(FE15<=0.9*average_hit and (!disk1A or !disk2A or !disk3A or !disk1C or !disk2C or !disk3C)){//value multiplied with average_hit is threshold
-      sum=sum+std::pow(2,15);//calculating number to know which FEs in the module shall be masked
-      sum_FE++;
-    }
-    if (sum!=0){
-      a++;
-      FEcode.push_back(std::to_string(sum));
-      vsFE.push_back(moduleID);
-      npush_backFE++;
-    }
-  }
-  
-}
-
-
-void setPixelMapping(bool isIBL){
-  std::string cmtpath = std::getenv("DATAPATH");
-  std::vector<std::string> paths = splitter(cmtpath, ':');
-  std::ifstream ifs;
-  std::ifstream ifs2;
-  std::ifstream ifs3;
-
-  for(const auto& x : paths){
-    if(is_file_exist((x + "/PixelMapping_Run2.dat").c_str())){
-      std::cout << "datapath: " << x <<" "<<std::endl;
-      if(isIBL){
-        ifs.open(x + "/PixelMapping_Run2.dat");
-        ifs2.open(x + "/HashVSdcsID.dat");
-      }else{
-        ifs.open(x + "/PixelMapping_May08.dat");
-      }
-      int tmp_barrel_ec{}; int tmp_layer{}; int tmp_module_phi{}; int tmp_module_eta{}; std::string tmp_module_name;
-      std::vector<int> tmp_position;
-      tmp_position.resize(4);
-
-      
-      while(ifs >> tmp_barrel_ec >> tmp_layer >> tmp_module_phi >> tmp_module_eta >> tmp_module_name) {
-        
-        tmp_position[0] = tmp_barrel_ec;
-        tmp_position[1] = tmp_layer;
-        tmp_position[2] = tmp_module_phi;
-        tmp_position[3] = tmp_module_eta;
-        pixelMapping.push_back(std::make_pair(tmp_module_name, tmp_position));
-      }
-      int tmp_hash{}; int tmp0{}; int tmp1{}; int tmp2{}; int tmp3{}; int tmp4{}; std::string tmp_id;
-      while(ifs2 >> tmp0 >> tmp_hash >> tmp1 >> tmp2 >> tmp_barrel_ec >> tmp_layer >> tmp_module_phi >> tmp_module_eta >> tmp3 >> tmp4 >> tmp_id) {
-
-        tmp_position[0] = tmp_barrel_ec;
-        tmp_position[1] = tmp_layer;
-        tmp_position[2] = tmp_module_phi;
-        tmp_position[3] = tmp_module_eta;
-        hashMapping.push_back(std::make_pair(tmp_hash, tmp_position));
-      }
-    }
-    if(is_file_exist((x + "/table_Run2.txt").c_str())){
-      std::cout << "datapath: " << x << std::endl;
-      ifs3.open(x + "/table_Run2.txt");
-      std::string str;
-      std::string tmp_word1, tmp_word2, tmp_word3;
-      int tmp_channel{};
-      int tmp_hashid = 0;
-      std::string tmp_module_name;
-      std::vector<int> tmp_position;
-      tmp_position.resize(2);
-
-      int flag_start = 0;
-      while(getline(ifs3, str)){
-	if(flag_start == 1){
-	  int pos = 0;
-	  pos = str.find("INFO") + 6;
-	  if(str.find("INFO") != std::string::npos) {tmp_channel = atoi( (str.substr(pos, 4)).c_str() );}
-	  pos = str.find('[') - 10;
-	  if(str.find('[') != std::string::npos) {tmp_hashid = atoi( (str.substr(pos, 8)).c_str() );}
-	  pos = str.find('[') + 19;
-	  if(str.find('[') != std::string::npos) {tmp_module_name = str.substr(pos, 19);}
-	  tmp_position[0] = tmp_channel;
-	  tmp_position[1] = tmp_hashid;
-	  channelMapping.push_back(std::make_pair(tmp_module_name, tmp_position));
-	}
-	if(str.find("PixMapOverlay") != std::string::npos) flag_start = 1;
-     }// while(getline(ifs3, str))
-     std::cout<<channelMapping.size()<<std::endl;
-    }
-  }
-}
-
-std::string getDCSIDFromPosition (int barrel_ec, int layer, int module_phi, int module_eta){
-  for(unsigned int ii = 0; ii < pixelMapping.size(); ii++) {
-    if (pixelMapping[ii].second.size() != 4) {
-      std::cout << "getDCSIDFromPosition: Vector size is not 4!" << std::endl;
-      return std::string("Error!");
-    }
-    if (pixelMapping[ii].second[0] != barrel_ec) continue;
-    if (pixelMapping[ii].second[1] != layer) continue;
-    if (pixelMapping[ii].second[2] != module_phi) continue;
-    if (pixelMapping[ii].second[3] != module_eta) continue;
-    return pixelMapping[ii].first;
-  }
-  std::cout << "[getDCSIDFromPosition] Not found!" << std::endl;
-  return std::string("Error!");
-}
-
-int getHashFromPosition (int barrel_ec, int layer, int module_phi, int module_eta){
-  for(unsigned int ii = 0; ii < hashMapping.size(); ii++) {
-    if (hashMapping[ii].second.size() != 4) {
-      std::cout << "getDCSIDFromPosition: Vector size is not 4!" << std::endl;
-      return 0;
-    }
-    if (hashMapping[ii].second[0] != barrel_ec) continue;
-    if (hashMapping[ii].second[1] != layer) continue;
-    if (hashMapping[ii].second[2] != module_phi) continue;
-    if (hashMapping[ii].second[3] != module_eta) continue;
-    return hashMapping[ii].first;
-  }
-  std::cout << "[getHashFromPosition] Not found!" << std::endl;
-  return 0;
-}
-
-std::vector<int> getPositionFromDCSID (std::string module_name){
-  std::string seven = "7";
-  std::string eight = "8";
-  std::string character = "I";
-  if(module_name[13]!=seven and module_name[13]!=eight and module_name[1]==character){
-    module_name.erase(14,2);
-  }
-  for(unsigned int ii = 0; ii < pixelMapping.size(); ii++) {
-  
-    if (pixelMapping[ii].first == module_name){
-      return pixelMapping[ii].second;
-    }
-  }
-  return pixelMapping[0].second;
-}
-
-std::vector<int> getChannelFromHashID (int hashid){
-  for(unsigned int ii = 0; ii < channelMapping.size(); ii++) {
-    if (channelMapping[ii].second[1] == hashid)
-      return channelMapping[ii].second;
-  }
-  std::cout << "[getChannelFromHashID] Not found!" << std::endl;
-  return channelMapping[1].second;
-}
-//---------------------------------------
-// Make a txt file out of masked modules/FEs
-//---------------------------------------
-void
-make_txt(const std::string& srun,
-         int npush_back,
-         int npush_backFE,
-         const std::vector<std::string>& vsFE,
-         const std::vector<std::string>& vsmodule,
-         const std::vector<int>& vLB_start,
-         const std::vector<int>& vLB_end,
-         const std::vector<std::string>& FEcode)
-{
-  std::string spyfilename = "./PixelModuleFeMask_run" + srun;
-  spyfilename += ".txt";
-  std::ofstream txtFile;
-  txtFile.open(spyfilename.c_str(),std::ofstream::out);
-  std::cout <<"spyfilename: "<<spyfilename << std::endl;
-  
-  //---------------------------------------
-  // List of masked FE
-  //---------------------------------------
-  std::vector<std::vector<int>> channel_FEcode(npush_backFE+1, std::vector<int>(2));
-  std::cout<<npush_backFE<<std::endl;
-  if(npush_backFE > 0){
-    for(int i=1; i<=npush_backFE; i++){
-      
-      std::vector<int> position = getPositionFromDCSID(vsFE[i-1]);
-      int barrel = position[0];
-      int layer = position[1];
-      int module_phi = position[2];
-      int module_eta = position[3];
-      int module_hash = getHashFromPosition(barrel, layer, module_phi, module_eta);
-      std::vector<int> channel_set = getChannelFromHashID(module_hash);
-      int channel = channel_set[0];
-      int FECode =0;
-      stringstream FECODE(FEcode[i-1]);
-      FECODE >> FECode;
-      channel_FEcode[i][0]=channel;
-      channel_FEcode[i][1]=FECode;
-      for(int l=1; l<i;l++){// Calculating/getting values for list
-        if (channel_FEcode[i][0]>channel_FEcode[l][0]){
-          continue;
-        }
-        else{
-          for(int k=0; k<i-l; k++){
-            channel_FEcode[i-k][0]=channel_FEcode[i-1-k][0];
-            channel_FEcode[i-k][1]=channel_FEcode[i-1-k][1];
-         }
-        }
-        channel_FEcode[l][0]=channel;
-        channel_FEcode[l][1]=FECode;
-        break;
-      }
-    }
-  }
-  
-  std::vector <std::string>::const_iterator it_smodule = vsmodule.begin();
-  std::vector <int>::const_iterator it_LBstart = vLB_start.begin();
-  std::vector <int>::const_iterator it_LBend = vLB_end.begin();
-  std::cout<<npush_back<<std::endl;
-  
-  //---------------------------------------
-  //List of masked modules and FEs(IBL) per LB
-  //---------------------------------------
-  std::vector<std::vector<unsigned long>> channel_Modulecode(npush_back+1, std::vector<unsigned long>(4));
-  const std::string seven = "7";
-  const std::string eight = "8";
-  const std::string one = "1";
-  const std::string two = "2";
-  const std::string character = "I";
-  const std::string sideA = "A"; 
-  const std::string sideC = "C"; 
-  if(npush_back > 0){
-      for(int i=1; i<=npush_back; i++){
-        std::vector<int> position = getPositionFromDCSID(*it_smodule);
-        std::string module_name = *it_smodule;
-        int barrel = position[0];
-        int layer = position[1];
-        int module_phi = position[2];
-        int module_eta = position[3];
-        int module_hash = getHashFromPosition(barrel, layer, module_phi, module_eta);
-        std::vector<int> channel_set = getChannelFromHashID(module_hash);
-        int channel = channel_set[0];       
-        unsigned long sRun = std::stoi (srun);
-        unsigned long iov_start = (sRun << 32)+*it_LBstart;
-        unsigned long iov_end = (sRun << 32)+*it_LBend;
-        channel_Modulecode[i][0]=channel;
-        channel_Modulecode[i][1]=65535;
-        channel_Modulecode[i][2]=iov_start;
-        channel_Modulecode[i][3]=iov_end;
-        for(int l=1; l<=i;l++){//Calculating/getting values for list
-          if (channel_Modulecode[i][0]>channel_Modulecode[l][0]){
-            continue;
-          }
-          else{
-            for(int k=0; k<i-l; k++){
-              channel_Modulecode[i-k][0]=channel_Modulecode[i-1-k][0];
-              channel_Modulecode[i-k][1]=channel_Modulecode[i-1-k][1];
-              channel_Modulecode[i-k][2]=channel_Modulecode[i-1-k][2];
-              channel_Modulecode[i-k][3]=channel_Modulecode[i-1-k][3];
-            }
-          }
-          channel_Modulecode[l][0]=channel;
-          channel_Modulecode[l][1]=65535;
-          if( module_name[1]==character and (module_name[13]==seven or module_name[13]==eight)){
-           channel_Modulecode[l][1]=0;
-          }
-          else if(module_name[13]!=seven and module_name[13]!=eight and module_name[1]==character){
-           if(module_name[15]==one and module_name[7]==sideA){ 
-             channel_Modulecode[l][1]=1;
-           }
-           else if(module_name[15]==one and module_name[7]==sideC){ 
-             channel_Modulecode[l][1]=2;
-           }
-           else if(module_name[15]==two and module_name[7]==sideA){
-             channel_Modulecode[l][1]=2;
-           }
-           else if(module_name[15]==two and module_name[7]==sideC){
-             channel_Modulecode[l][1]=1;
-           }
-          }
-          channel_Modulecode[l][2]=iov_start;
-          channel_Modulecode[l][3]=iov_end;
-          break;
-        }
-        ++it_smodule;
-        ++it_LBstart;
-        ++it_LBend;
-      }  
-  }
-  //-----------------------------------
-  // Combine both lists
-  //-----------------------------------
-  std::vector<std::vector<unsigned long>> combine(npush_backFE+npush_back+1, std::vector<unsigned long>(4));
-  std::string module_info;
-  for(int i=1; i<=npush_backFE+npush_back; i++){
-    if (i<=npush_backFE){
-      combine[i][0]=channel_FEcode[i][0];
-      combine[i][1]=channel_FEcode[i][1];
-      combine[i][2]=0;
-      combine[i][3]=0;
-      if(combine[i][1]==65535)
-        continue;     
-    }
-    else{
-      combine[i][0]=channel_Modulecode[i-npush_backFE][0];
-      combine[i][1]=channel_Modulecode[i-npush_backFE][1];
-      combine[i][2]=channel_Modulecode[i-npush_backFE][2];
-      combine[i][3]=channel_Modulecode[i-npush_backFE][3];
-    }
-
-    if(combine[i][1]==65535){
-     combine[i][1]=0;
-     module_info =std::to_string(combine[i][0])+" "+std::to_string(combine[i][1])+" "+std::to_string(combine[i][2])+" "+std::to_string(combine[i][3])+"\n";
-    }
-    else{
-     module_info =std::to_string(combine[i][0])+" "+std::to_string(combine[i][1])+" "+std::to_string(combine[i][2])+" "+std::to_string(combine[i][3])+"\n";
-    }
-
-    txtFile << module_info;
-  }
-  
-  txtFile.close();
-}
