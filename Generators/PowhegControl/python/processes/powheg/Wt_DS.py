@@ -126,6 +126,7 @@ class Wt_DS(PowhegV2):
         self.add_keyword("rand1")
         self.add_keyword("rand2")
         self.add_keyword("renscfact", self.default_scales[1])
+        self.add_keyword("runningscales", 1)
         self.add_keyword("rwl_add")
         self.add_keyword("rwl_file")
         self.add_keyword("rwl_format_rwgt")
