@@ -352,6 +352,7 @@ class MenuSequence(object):
 
     def __init__(self, Sequence, Maker,  Hypo, HypoToolGen, IsProbe=False):
         assert compName(Maker).startswith("IM"), "The input maker {} name needs to start with letter: IM".format(compName(Maker))        
+
         # For probe legs we need to substitute the inputmaker and hypo alg
         # so we will use temp variables for both
         if IsProbe:
@@ -1122,7 +1123,7 @@ class RecoFragmentsPool(object):
     DebugCaching = False
 
     @staticmethod
-    def chacheableArgsDict(kwargsDict):
+    def cacheableArgsDict(kwargsDict):
         """
         Sort the kwargs dictionary and replace all DataHandle objects in dict values with
         their string representation.
@@ -1146,6 +1147,12 @@ class RecoFragmentsPool(object):
             return tuple(new_list)
         if isinstance(obj,dict):
             new_dict = dict([(k,RecoFragmentsPool.recursiveToTuple(v)) for k,v in obj.items()])
+            # Workaround for odd case where a passed Configurable is compared by pointer value
+            conf_dict = {}
+            for k,v in new_dict.items():
+                if hasattr(v,'getFullName'):
+                    conf_dict[k+'.__fullname__'] = v.getFullName()
+            new_dict.update(conf_dict)
             return tuple(new_dict.items())
         # neither list or dict
         return obj
@@ -1157,7 +1164,8 @@ class RecoFragmentsPool(object):
             return obj
         if all([isinstance(x,tuple) and len(x)==2 for x in obj]):
             # tuple consisting only of 2-element tuples is most likely a dict
-            return dict([(k,RecoFragmentsPool.recursiveFromTuple(v)) for k,v in obj])
+            # Ignore the [something]__name__ keys used for workaround above
+            return dict([(k,RecoFragmentsPool.recursiveFromTuple(v)) for k,v in obj if not k.endswith('.__fullname__')])
         # all other cases is a list
         return list([RecoFragmentsPool.recursiveFromTuple(x) for x in obj])
 
@@ -1165,7 +1173,7 @@ class RecoFragmentsPool(object):
     def retrieve(creator, flags, **kwargs):
         if not isinstance(flags, AthConfigFlags):
             raise TypeError("RecoFragmentsPool: First argument for creator function passed to retrieve() must be of type AthConfigFlags")
-        kwargs2 = RecoFragmentsPool.chacheableArgsDict(kwargs)
+        kwargs2 = RecoFragmentsPool.cacheableArgsDict(kwargs)
         return RecoFragmentsPool.retrieve_cacheable(creator, flags, RecoFragmentsPool.recursiveToTuple(kwargs2))
 
     @staticmethod
