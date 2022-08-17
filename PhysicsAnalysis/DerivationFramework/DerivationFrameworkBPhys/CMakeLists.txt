@@ -1,10 +1,9 @@
-# Copyright (C) 2002-2020 CERN for the benefit of the ATLAS collaboration
-################################################################################
-# Package: DerivationFrameworkBPhys
-################################################################################
+# Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
 
 # Declare the package name:
 atlas_subdir( DerivationFrameworkBPhys )
+
+# External dependencies:
 find_package( ROOT COMPONENTS Core MathCore )
 
 # Component(s) in the package:
@@ -13,7 +12,7 @@ atlas_add_component( DerivationFrameworkBPhys
    INCLUDE_DIRS ${ROOT_INCLUDE_DIRS}
    LINK_LIBRARIES xAODMuon AthenaBaseComps JpsiUpsilonToolsLib
    MuonSelectorToolsLib ${ROOT_LIBRARIES}
-   xAODTracking xAODBPhysLib AthenaKernel RecoToolInterfaces EventPrimitives
+   xAODTracking xAODBPhysLib AthenaBaseComps AthenaKernel RecoToolInterfaces EventPrimitives
    DerivationFrameworkInterfaces BPhysToolsLib TrackVertexAssociationToolLib
    xAODBase xAODMetaData  AsgTools CaloInterfaceLib TrackToCaloLib
    xAODEventInfo AthenaPoolUtilities xAODPrimitives TrigDecisionToolLib
