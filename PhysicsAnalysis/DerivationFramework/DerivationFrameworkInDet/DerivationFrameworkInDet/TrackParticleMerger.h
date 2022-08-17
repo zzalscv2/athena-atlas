@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
 */
 
 ///////////////////////////////////////////////////////////////////
@@ -36,9 +36,8 @@ namespace DerivationFramework {
       ///////////////////////////////////////////////////////////////////
 
       TrackParticleMerger(const std::string& t, const std::string& n, const IInterface* p);
-      virtual ~TrackParticleMerger() {}
-      StatusCode initialize();
-      StatusCode finalize();
+      virtual ~TrackParticleMerger() = default;
+      StatusCode initialize()override;
       virtual StatusCode addBranches() const;
  
     protected:
@@ -59,7 +58,7 @@ namespace DerivationFramework {
                                xAOD::TrackParticleContainer* outputCol) const;
 
     private:
-      bool  m_createViewCollection;     //!< option to create a view collection and not deep-copy tracks
+      Gaudi::Property<bool>  m_createViewCollection{this, "createViewColllection", true};     //!< option to create a view collection and not deep-copy tracks 
     };
     
 }

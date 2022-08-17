@@ -25,8 +25,7 @@ namespace DerivationFramework {
   TrackParticleMerger::TrackParticleMerger(const std::string& t,
       const std::string& n,
       const IInterface* p) :
-    AthAlgTool(t,n,p),
-    m_createViewCollection(true)
+    AthAlgTool(t,n,p)
   {
     declareInterface<DerivationFramework::IAugmentationTool>(this);
     // The default goal of this merger is to create a collection combining standard and LRT tracks
@@ -34,8 +33,7 @@ namespace DerivationFramework {
     m_outtrackParticleAuxLocation = "InDetWithLRTTrackParticlesAux."    ;
     declareProperty("TrackParticleLocation",         m_trackParticleLocation);
     declareProperty("OutputTrackParticleAuxLocation",   m_outtrackParticleAuxLocation);
-    declareProperty("OutputTrackParticleLocation",   m_outtrackParticleLocation); 
-    declareProperty("CreateViewColllection" ,        m_createViewCollection   );
+    declareProperty("OutputTrackParticleLocation",   m_outtrackParticleLocation);
   }
 
   ///////////////////////////////////////////////////////////////////
@@ -52,16 +50,6 @@ namespace DerivationFramework {
     return StatusCode::SUCCESS;
   }
 
-  ///////////////////////////////////////////////////////////////////
-  // Finalize
-  ///////////////////////////////////////////////////////////////////
-
-  StatusCode TrackParticleMerger::finalize()
-  {
-     return StatusCode::SUCCESS;
-  }
-
- 
   StatusCode TrackParticleMerger::addBranches() const
   {
     const EventContext& ctx = Gaudi::Hive::currentContext();
@@ -84,8 +72,8 @@ namespace DerivationFramework {
       ///Retrieve track particles from StoreGate
       SG::ReadHandle<xAOD::TrackParticleContainer> trackParticleCol (tcname, ctx);
       if (!trackParticleCol.isValid()) {
-        ATH_MSG_WARNING("Unable to retrieve xAOD::TrackParticleContainer, \"" << tcname << "\", returning without running LRT merger!");
-        return StatusCode::SUCCESS;
+        ATH_MSG_FATAL("Unable to retrieve xAOD::TrackParticleContainer, \"" << tcname << "\", cannot run the LRT track merger!");
+        return StatusCode::FAILURE;
       }
       trackParticleCollections.push_back(trackParticleCol.cptr());
       ttNumber += trackParticleCol->size();
@@ -115,15 +103,13 @@ namespace DerivationFramework {
                                                   xAOD::TrackParticleContainer* outputCol) const
   {
     // loop over tracks, accept them and add them into association tool
-    if(trackParticleCol && !trackParticleCol->empty()) {
-      ATH_MSG_DEBUG("Size of track particle collection " << trackParticleCol->size());
-      // loop over tracks
-      for(const auto *const rf: *trackParticleCol){
-        // add track into output
-        // FIXME: const_cast
-        xAOD::TrackParticle* newTrackParticle = m_createViewCollection ? const_cast<xAOD::TrackParticle*>(rf) : new xAOD::TrackParticle(*rf);
-        outputCol->push_back(newTrackParticle);
-      }
+    if(!trackParticleCol || trackParticleCol->empty()) {return;}
+    ATH_MSG_DEBUG("Size of track particle collection " << trackParticleCol->size());
+    // loop over tracks
+    for(const auto *const rf: *trackParticleCol){
+      // add track into output
+      xAOD::TrackParticle* newTrackParticle = m_createViewCollection ? const_cast<xAOD::TrackParticle*>(rf) : new xAOD::TrackParticle(*rf);
+      outputCol->push_back(newTrackParticle);
     }
   }
 }

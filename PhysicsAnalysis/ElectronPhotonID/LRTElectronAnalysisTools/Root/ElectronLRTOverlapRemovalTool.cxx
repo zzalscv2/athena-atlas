@@ -24,8 +24,8 @@ namespace CP
 
         if (m_electronLLHTool.empty())
         {
-            asg::AsgToolConfig config("AsgElectronLikelihoodTool/ElectronLHSelectorLooseNoPix");
-            ATH_CHECK(config.setProperty("ConfigFile", "ElectronPhotonSelectorTools/trigger/rel22_20210611/ElectronLikelihoodLooseTriggerConfig_NoPix.conf"));
+            asg::AsgToolConfig config("AsgElectronLikelihoodTool/ElectronLHSelectorVeryLooseNoPix");
+            ATH_CHECK(config.setProperty("ConfigFile", "ElectronPhotonSelectorTools/trigger/rel22_20210611/ElectronLikelihoodVeryLooseTriggerConfig_NoPix.conf"));
             ATH_CHECK(config.makePrivateTool(m_electronLLHTool));
         }
 
@@ -51,7 +51,10 @@ namespace CP
 
             // Skip electrons that do not pass ID threshold
             if (!m_electronLLHTool->accept(promptElectron))
+            {
+                ElectronsToRemove.insert(promptElectron);
                 continue;
+            }        
 
             // loop over lrt electrons
             for (const xAOD::Electron *LRTElectron : LRTElectronCol)
@@ -61,7 +64,10 @@ namespace CP
 
                 // Skip LRT electrons that do not pass ID threshold
                 if (!m_electronLLHTool->accept(LRTElectron))
+                {
+                    ElectronsToRemove.insert(LRTElectron);
                     continue;
+                }
 
                 // check that clusters exist (necessary? copied from MuonSpec overlap, but all electrons have clusters...)
                 // TODO: This should then fall back to delta R if clusters are missing
