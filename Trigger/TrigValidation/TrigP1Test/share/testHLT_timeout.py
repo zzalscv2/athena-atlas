@@ -1,5 +1,5 @@
 #
-#  Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+#  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
 #
 
 # This file is based on MTCalibPeb.py
@@ -12,23 +12,21 @@ from AthenaCommon.AlgScheduler import AlgScheduler
 AlgScheduler.setDataLoaderAlg('SGInputLoader')
 
 # Configure the HLT algorithms
-from AthenaCommon.Configurable import Configurable
-Configurable.configurableRun3Behavior += 1
+from AthenaCommon.Configurable import ConfigurableRun3Behavior
+hypo = None
+with ConfigurableRun3Behavior():
+    import TrigExamples.MTCalibPebConfig as Conf
+    hypo_tools = [Conf.make_hypo_tool('HLT_MTCalibPeb{:d}'.format(num)) for num in range(1, 4)]
+    for tool in hypo_tools:
+        # 100% accept rate, no ROB requests, sleeps for up to 1.4 seconds
+        tool.RandomAcceptRate = 1.0
+        tool.ROBAccessDict = {}
+        tool.BurnTimePerCycleMillisec = 200
+        tool.NumBurnCycles = 7
+        tool.PEBROBList = [0x7c0000]
 
-import TrigExamples.MTCalibPebConfig as Conf
-hypo_tools = [Conf.make_hypo_tool('HLT_MTCalibPeb{:d}'.format(num)) for num in range(1, 4)]
-for tool in hypo_tools:
-    # 100% accept rate, no ROB requests, sleeps for up to 1.4 seconds
-    tool.RandomAcceptRate = 1.0
-    tool.ROBAccessDict = {}
-    tool.BurnTimePerCycleMillisec = 200
-    tool.NumBurnCycles = 7
-    tool.PEBROBList = [0x7c0000]
-
-hypo = Conf.make_hypo_alg('HypoAlg1')
-hypo.HypoTools = hypo_tools
-
-Configurable.configurableRun3Behavior -= 1
+    hypo = Conf.make_hypo_alg('HypoAlg1')
+    hypo.HypoTools = hypo_tools
 
 # Set flags
 from AthenaConfiguration.AllConfigFlags import ConfigFlags
