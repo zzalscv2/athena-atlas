@@ -14,4 +14,4 @@ atlas_add_component( TauDQA
    AthenaMonitoringLib TauAnalysisToolsLib TrkValHistUtils xAODJet xAODEgamma
    xAODTau xAODTruth xAODEventInfo )
 atlas_install_python_modules( python/*.py )
-atlas_install_runtime( scripts/*.py )
+atlas_install_runtime( scripts/*.py POST_BUILD_CMD ${ATLAS_FLAKE8} )

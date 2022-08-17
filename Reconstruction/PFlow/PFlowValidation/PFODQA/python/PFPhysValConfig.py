@@ -31,18 +31,3 @@ def PhysValPFOCfg(flags):
     tools += [ acc.popToolsAndMerge(PhysValPFOToolCfg("PhysValFE_neutral", "JetETMissNeutralParticleFlowObjects")) ]
     acc.setPrivateTools(tools)
     return acc
-
-def PFODQACf(flags, **kwargs):
-    acc = ComponentAccumulator()
-
-    kwargs.setdefault("FileKey", "PhysVal")
-    kwargs.setdefault("Environment", "altprod")
-    kwargs.setdefault("ManualDataTypeSetup", True)
-    kwargs.setdefault("DataType", "monteCarlo")
-    kwargs.setdefault("ManualRunLBSetup", True)
-    kwargs.setdefault("Run", 1)
-    kwargs.setdefault("LumiBlock", 1)
-    kwargs.setdefault("AthenaMonTools", acc.popToolsAndMerge(PhysValPFOCfg(flags)))
-    acc.addEventAlgo(CompFactory.AthenaMonManager( "PhysValMonManager", **kwargs), primary = True)
- 
-    return acc

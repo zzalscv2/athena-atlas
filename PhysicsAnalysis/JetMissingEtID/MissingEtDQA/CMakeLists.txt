@@ -16,4 +16,4 @@ atlas_add_component( MissingEtDQA
                      LINK_LIBRARIES ${ROOT_LIBRARIES} GaudiKernel AsgTools AthenaBaseComps AthenaMonitoringLib xAODEgamma xAODJet xAODMissingET xAODMuon xAODTau xAODTracking EgammaAnalysisInterfacesLib MuonSelectorToolsLib JetInterface METInterface METUtilitiesLib TauAnalysisToolsLib)
 
 atlas_install_python_modules( python/*.py )
-atlas_install_runtime( scripts/*.py )
+atlas_install_runtime( scripts/*.py POST_BUILD_CMD ${ATLAS_FLAKE8} )

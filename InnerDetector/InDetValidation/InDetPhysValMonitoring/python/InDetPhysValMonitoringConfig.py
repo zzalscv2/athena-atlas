@@ -103,7 +103,7 @@ def InDetPhysValMonitoringToolCfg(flags, **kwargs):
     jets_name_for_HardScatter = 'AntiKt4EMTopoJets'
     # if we are running with sumpT(w) hard scatter selection, we need to schedule jet finding
     if flags.PhysVal.IDPVM.hardScatterStrategy == 2:
-        
+
         from InDetPhysValMonitoring.addRecoJetsConfig import AddRecoJetsIfNotExistingCfg
         acc.merge(AddRecoJetsIfNotExistingCfg(flags, jets_name_for_HardScatter))
 
@@ -130,7 +130,7 @@ def InDetPhysValMonitoringToolCfg(flags, **kwargs):
         if flags.PhysVal.IDPVM.doValidateTracksInJets:
             jets_name = 'AntiKt4TruthJets'
             kwargs.setdefault("JetContainerName", jets_name)
-            kwargs.setdefault("FillTrackInJetPlots", True)            
+            kwargs.setdefault("FillTrackInJetPlots", True)
 
             from InDetPhysValMonitoring.addTruthJetsConfig import AddTruthJetsIfNotExistingCfg
             acc.merge(AddTruthJetsIfNotExistingCfg(flags))
@@ -169,7 +169,7 @@ def InDetPhysValMonitoringToolCfg(flags, **kwargs):
         kwargs.setdefault("TruthVertexContainerName", '')
         kwargs.setdefault("TruthEvents", '')
         kwargs.setdefault("TruthPileupEvents", '')
-        kwargs.setdefault("TruthSelectionTool", None)        
+        kwargs.setdefault("TruthSelectionTool", None)
         # the jet container is actually meant to be a truth jet container
         kwargs.setdefault("JetContainerName", '')
         kwargs.setdefault("FillTrackInJetPlots", False)
@@ -251,7 +251,7 @@ def InDetPhysValMonitoringToolMuonsCfg(flags, **kwargs):
     return InDetPhysValMonitoringToolCfg(flags, name='InDetPhysValMonitoringToolMuons', **kwargs)
 
 def InDetPhysValMonitoringToolDBMCfg(flags, **kwargs):
-    
+
     kwargs.setdefault("SubFolder", 'DBM/')
     kwargs.setdefault("TrackParticleContainerName", 'ResolvedDBMTracks')
     kwargs.setdefault("useTrackSelection", True)
@@ -303,15 +303,6 @@ def InDetPhysValMonitoringCfg(flags):
     if flags.PhysVal.IDPVM.doValidateMergedLargeD0Tracks:
         acc.merge(LRTMergerCfg(flags))
 
-    monMan = CompFactory.AthenaMonManager( "PhysValMonManager" )
-    monMan.FileKey = "M_output"
-    monMan.Environment = "altprod"
-    monMan.ManualDataTypeSetup = True
-    monMan.DataType = "monteCarlo"
-    monMan.ManualRunLBSetup = True
-    monMan.Run = 1
-    monMan.LumiBlock = 1
-
     mons = [ (True                                       ,  InDetPhysValMonitoringToolCfg ),
              (flags.PhysVal.IDPVM.doValidateMuonMatchedTracks    ,  InDetPhysValMonitoringToolMuonsCfg ),
              (flags.PhysVal.IDPVM.doValidateElectronMatchedTracks,  InDetPhysValMonitoringToolElectronsCfg ),
@@ -323,9 +314,10 @@ def InDetPhysValMonitoringCfg(flags):
              (flags.PhysVal.IDPVM.doValidateGSFTracks            ,  InDetPhysValMonitoringToolGSFCfg )
     ]
 
+    tools = []
     for enabled, creator in mons :
         if enabled :
-            monMan.AthenaMonTools += [ acc.popToolsAndMerge(creator(flags)) ]
+            tools.append(acc.popToolsAndMerge(creator(flags)))
 
     from  InDetPhysValMonitoring.ConfigUtils import extractCollectionPrefix
     for col in flags.PhysVal.IDPVM.validateExtraTrackCollections :
@@ -334,9 +326,8 @@ def InDetPhysValMonitoringCfg(flags):
         tool.SubFolder = prefix+'Tracks/'
         tool.TrackParticleContainerName = prefix+'TrackParticles'
 
-        monMan.AthenaMonTools += [ tool ]
-        
-    acc.addEventAlgo(monMan, primary = True)
+        tools.append(tool)
+
+    from PhysValMonitoring.PhysValMonitoringConfig import PhysValMonitoringCfg
+    acc.merge(PhysValMonitoringCfg(flags, tools=tools))
     return acc
-             
-    

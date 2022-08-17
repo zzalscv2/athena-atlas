@@ -11,48 +11,74 @@
 from AthenaConfiguration.ComponentAccumulator import ComponentAccumulator
 from AthenaConfiguration.ComponentFactory import CompFactory
 
-def PhysValMonitoringCfg(flags):
+
+def PhysValExampleCfg(flags, **kwargs):
     acc = ComponentAccumulator()
 
-    monMan = CompFactory.AthenaMonManager( "PhysValMonManager" )
-    monMan.FileKey = "M_output"
-    monMan.Environment = "altprod"
-    monMan.ManualDataTypeSetup = True
-    monMan.DataType = "monteCarlo"
-    monMan.ManualRunLBSetup = True
-    monMan.Run = 1
-    monMan.LumiBlock = 1
+    from AthenaCommon.Constants import WARNING
+    kwargs.setdefault("EnableLumi", False)
+    kwargs.setdefault("OutputLevel", WARNING)
+    kwargs.setdefault("DetailLevel", 10)
+    kwargs.setdefault("TauContainerName", "TauJets")
+    kwargs.setdefault("PhotonContainerName", "Photons")
+    kwargs.setdefault("ElectronContainerName", "Electrons")
 
+    # Keep this disabled for now
+    kwargs.setdefault("DoExJet", False)
+    kwargs.setdefault("DoExBtag", False)
+    kwargs.setdefault("DoExMET", False)
+    kwargs.setdefault("METContainerName", "")
+
+    acc.setPrivateTools(CompFactory.PhysVal.PhysValExample(**kwargs))
+    return acc
+
+
+def PhysValMonitoringCfg(flags, name="PhysValMonManager", tools=[], **kwargs):
+    acc = ComponentAccumulator()
+
+    kwargs.setdefault("FileKey", "PhysVal")
+    kwargs.setdefault("Environment", "altprod")
+    kwargs.setdefault("ManualDataTypeSetup", True)
+    kwargs.setdefault("DataType", "monteCarlo")
+    kwargs.setdefault("ManualRunLBSetup", True)
+    kwargs.setdefault("Run", 1)
+    kwargs.setdefault("LumiBlock", 1)
+
+    if flags.PhysVal.doExample:
+        tools.append(acc.popToolsAndMerge(PhysValExampleCfg(flags)))
     if flags.PhysVal.doInDet:
         from InDetPhysValMonitoring.InDetPhysValMonitoringConfig import InDetPhysValMonitoringToolCfg
-        monMan.AthenaMonTools += [ acc.popToolsAndMerge(InDetPhysValMonitoringToolCfg(flags)) ]
+        tools.append(acc.popToolsAndMerge(InDetPhysValMonitoringToolCfg(flags)))
     if flags.PhysVal.doBtag:
         from JetTagDQA.JetTagDQAConfig import PhysValBTagCfg
-        monMan.AthenaMonTools += [ acc.popToolsAndMerge(PhysValBTagCfg(flags)) ]
+        tools.append(acc.popToolsAndMerge(PhysValBTagCfg(flags)))
     if flags.PhysVal.doMET:
         from MissingEtDQA.MissingEtDQAConfig import PhysValMETCfg
-        monMan.AthenaMonTools += [ acc.popToolsAndMerge(PhysValMETCfg(flags)) ]
+        tools.append(acc.popToolsAndMerge(PhysValMETCfg(flags)))
     if flags.PhysVal.doEgamma:
         from EgammaPhysValMonitoring.EgammaPhysValMonitoringConfig import EgammaPhysValMonitoringToolCfg
-        monMan.AthenaMonTools += [ acc.popToolsAndMerge(EgammaPhysValMonitoringToolCfg(flags)) ]
+        tools.append(acc.popToolsAndMerge(EgammaPhysValMonitoringToolCfg(flags)))
     if flags.PhysVal.doTau:
         from TauDQA.TauDQAConfig import PhysValTauCfg
-        monMan.AthenaMonTools += [ acc.popToolsAndMerge(PhysValTauCfg(flags))]
+        tools.append(acc.popToolsAndMerge(PhysValTauCfg(flags)))
     if flags.PhysVal.doJet:
         from JetValidation.JetValidationConfig import PhysValJetCfg
-        monMan.AthenaMonTools += [ acc.popToolsAndMerge(PhysValJetCfg(flags)) ]
+        tools.append(acc.popToolsAndMerge(PhysValJetCfg(flags)))
     if flags.PhysVal.doTopoCluster:
-        from PFODQA.ClusterDQAConfig import  ClusterDQACfg
-        monMan.AthenaMonTools += [ acc.popToolsAndMerge(ClusterDQACfg(flags))]
+        from PFODQA.ClusterDQAConfig import PhysValClusterCfg
+        tools += acc.popToolsAndMerge(PhysValClusterCfg(flags))
     if flags.PhysVal.doZee:
         from ZeeValidation.ZeeValidationMonToolConfig import PhysValZeeCfg
-        monMan.AthenaMonTools += [ acc.popToolsAndMerge(PhysValZeeCfg(flags)) ]
+        tools.append(acc.popToolsAndMerge(PhysValZeeCfg(flags)))
     if flags.PhysVal.doPFlow:
         from PFODQA.PFPhysValConfig import PhysValPFOCfg
-        monMan.AthenaMonTools += acc.popToolsAndMerge(PhysValPFOCfg(flags))
+        tools += acc.popToolsAndMerge(PhysValPFOCfg(flags))
     if flags.PhysVal.doMuon:
         from MuonPhysValMonitoring.MuonPhysValConfig import PhysValMuonCfg
-        monMan.AthenaMonTools += acc.popToolsAndMerge(PhysValMuonCfg(flags))
+        tools.append(acc.popToolsAndMerge(PhysValMuonCfg(flags)))
 
-    acc.addEventAlgo(monMan, primary = True)
+    kwargs.setdefault("AthenaMonTools", tools)
+
+    acc.addEventAlgo(CompFactory.AthenaMonManager(name, **kwargs))
+    acc.addService(CompFactory.THistSvc(Output=[f"PhysVal DATAFILE='{flags.PhysVal.OutputFileName}' OPT='RECREATE'"]))
     return acc

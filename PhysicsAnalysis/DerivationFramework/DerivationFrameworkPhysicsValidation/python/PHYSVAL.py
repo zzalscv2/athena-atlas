@@ -2,10 +2,10 @@
 #!/usr/bin/env python
 #====================================================================
 # DAOD_PHYSVAL.py
-# This defines DAOD_PHYSVAL, an unskimmed DAOD format for 
-# Run 3 validation. It contains the variables and objects needed for 
+# This defines DAOD_PHYSVAL, an unskimmed DAOD format for
+# Run 3 validation. It contains the variables and objects needed for
 # most physics validation tasks in ATLAS.
-# It requires the flag PHYSVAL in Derivation_tf.py   
+# It requires the flag PHYSVAL in Derivation_tf.py
 #====================================================================
 
 from AthenaConfiguration.ComponentAccumulator import ComponentAccumulator
@@ -23,7 +23,7 @@ def PHYSVALKernelCfg(ConfigFlags, name='PHYSVALKernel', **kwargs):
 
     # Kernel algorithm
     DerivationKernel = CompFactory.DerivationFramework.DerivationKernel
-    acc.addEventAlgo(DerivationKernel(name))       
+    acc.addEventAlgo(DerivationKernel(name))
     return acc
 
 
@@ -46,7 +46,7 @@ def PHYSVALCfg(ConfigFlags):
     # =============================
     from OutputStreamAthenaPool.OutputStreamConfig import OutputStreamCfg
     from DerivationFrameworkCore.SlimmingHelper import SlimmingHelper
-    
+
     PHYSVALSlimmingHelper = SlimmingHelper("PHYSVALSlimmingHelper", NamesAndTypes = ConfigFlags.Input.TypedCollections)
     PHYSVALSlimmingHelper.SmartCollections = ["EventInfo",
                                               "Electrons",
@@ -66,7 +66,7 @@ def PHYSVALCfg(ConfigFlags):
                                               "AntiKt10LCTopoTrimmedPtFrac5SmallR20Jets",
                                               "AntiKt10UFOCSSKSoftDropBeta100Zcut10Jets",
                                               "AntiKtVR30Rmax4Rmin02PV0TrackJets"]
-   
+
     PHYSVALSlimmingHelper.AllVariables =  ["EventInfo",
                                            "Electrons", "ForwardElectrons",
                                            "Photons",
@@ -79,7 +79,7 @@ def PHYSVALCfg(ConfigFlags):
                                            "BTagging_AntiKt4EMPFlow",
                                            "BTagging_AntiKt4EMTopo",
                                            "BTagging_AntiKtVR30Rmax4Rmin02Track",
-                                           "BTagging_AntiKt4EMPFlowJFVtx", 
+                                           "BTagging_AntiKt4EMPFlowJFVtx",
                                            "BTagging_AntiKt4EMPFlowJFVtxFlip", #Flip version of JetFitter
                                            "BTagging_AntiKt4EMPFlowSecVtx",
                                            "BTagging_AntiKt4EMPFlowSecVtxFlip", #Flip version of SV1
@@ -111,7 +111,7 @@ def PHYSVALCfg(ConfigFlags):
             "InDetSiSPSeededTracksParticles"]
         PHYSVALSlimmingHelper.SmartCollections += PseudoTrackContainers
         PHYSVALSlimmingHelper.AllVariables += PseudoTrackContainers
- 
+
     excludedVertexAuxData = "-vxTrackAtVertex.-MvfFitInfo.-isInitialized.-VTAV"
     StaticContent = []
     StaticContent += ["xAOD::VertexContainer#SoftBVrtClusterTool_Tight_Vertices"]
@@ -123,9 +123,9 @@ def PHYSVALCfg(ConfigFlags):
     StaticContent += ["xAOD::VertexAuxContainer#BTagging_AntiKt4EMPFlowSecVtxAux.-vxTrackAtVertex"]
     if ConfigFlags.BTagging.RunFlipTaggers is True:
         StaticContent += ["xAOD::VertexAuxContainer#BTagging_AntiKt4EMPFlowSecVtxFlipAux.-vxTrackAtVertex"]
- 
+
     PHYSVALSlimmingHelper.StaticContent = StaticContent
-    
+
     # Truth containers
     if ConfigFlags.Input.isMC:
         PHYSVALSlimmingHelper.AppendToDictionary = {'TruthEvents':'xAOD::TruthEventContainer','TruthEventsAux':'xAOD::TruthEventAuxContainer',
@@ -166,8 +166,9 @@ def PHYSVALCfg(ConfigFlags):
         from DerivationFrameworkMCTruth.MCTruthCommonConfig import addTruth3ContentToSlimmerTool
         addTruth3ContentToSlimmerTool(PHYSVALSlimmingHelper)
         PHYSVALSlimmingHelper.AllVariables += ['TruthHFWithDecayParticles','TruthHFWithDecayVertices','TruthCharm','TruthPileupParticles','InTimeAntiKt4TruthJets','OutOfTimeAntiKt4TruthJets']
-        # End of isMC clause       
- 
+        PHYSVALSlimmingHelper.SmartCollections += ['AntiKt4TruthJets']
+        # End of isMC clause
+
     PHYSVALSlimmingHelper.ExtraVariables += ["AntiKt10TruthTrimmedPtFrac5SmallR20Jets.Tau1_wta.Tau2_wta.Tau3_wta.D2.GhostBHadronsFinalCount",
                                              "Electrons.TruthLink",
                                              "Muons.TruthLink",
@@ -197,27 +198,27 @@ def PHYSVALCfg(ConfigFlags):
     # Run 2
     if ConfigFlags.Trigger.EDMVersion == 2:
         from DerivationFrameworkPhys.TriggerMatchingCommonConfig import AddRun2TriggerMatchingToSlimmingHelper
-        AddRun2TriggerMatchingToSlimmingHelper(SlimmingHelper = PHYSVALSlimmingHelper, 
-                                         OutputContainerPrefix = "TrigMatch_", 
+        AddRun2TriggerMatchingToSlimmingHelper(SlimmingHelper = PHYSVALSlimmingHelper,
+                                         OutputContainerPrefix = "TrigMatch_",
                                          TriggerList = PHYSVALTriggerListsHelper.Run2TriggerNamesTau)
-        AddRun2TriggerMatchingToSlimmingHelper(SlimmingHelper = PHYSVALSlimmingHelper, 
+        AddRun2TriggerMatchingToSlimmingHelper(SlimmingHelper = PHYSVALSlimmingHelper,
                                          OutputContainerPrefix = "TrigMatch_",
                                          TriggerList = PHYSVALTriggerListsHelper.Run2TriggerNamesNoTau)
     # Run 3
     if ConfigFlags.Trigger.EDMVersion == 3:
         from TrigNavSlimmingMT.TrigNavSlimmingMTConfig import AddRun3TrigNavSlimmingCollectionsToSlimmingHelper
-        AddRun3TrigNavSlimmingCollectionsToSlimmingHelper(PHYSVALSlimmingHelper)        
+        AddRun3TrigNavSlimmingCollectionsToSlimmingHelper(PHYSVALSlimmingHelper)
         # Run 2 is added here temporarily to allow testing/comparison/debugging
         from DerivationFrameworkPhys.TriggerMatchingCommonConfig import AddRun2TriggerMatchingToSlimmingHelper
-        AddRun2TriggerMatchingToSlimmingHelper(SlimmingHelper = PHYSVALSlimmingHelper, 
-                                         OutputContainerPrefix = "TrigMatch_", 
+        AddRun2TriggerMatchingToSlimmingHelper(SlimmingHelper = PHYSVALSlimmingHelper,
+                                         OutputContainerPrefix = "TrigMatch_",
                                          TriggerList = PHYSVALTriggerListsHelper.Run3TriggerNamesTau)
-        AddRun2TriggerMatchingToSlimmingHelper(SlimmingHelper = PHYSVALSlimmingHelper, 
+        AddRun2TriggerMatchingToSlimmingHelper(SlimmingHelper = PHYSVALSlimmingHelper,
                                          OutputContainerPrefix = "TrigMatch_",
                                          TriggerList = PHYSVALTriggerListsHelper.Run3TriggerNamesNoTau)
 
 
-    # Output stream    
+    # Output stream
     PHYSVALItemList = PHYSVALSlimmingHelper.GetItemList()
     acc.merge(OutputStreamCfg(ConfigFlags, "DAOD_PHYSVAL", ItemList=PHYSVALItemList, AcceptAlgs=["PHYSVALKernel"]))
 

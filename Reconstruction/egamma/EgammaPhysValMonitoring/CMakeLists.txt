@@ -14,4 +14,4 @@ atlas_add_component( EgammaPhysValMonitoring
                      LINK_LIBRARIES ${CLHEP_LIBRARIES} GaudiKernel AthenaBaseComps AthenaMonitoringLib StoreGateLib xAODEgamma xAODEventInfo xAODPrimitives xAODTruth MCTruthClassifierLib TrkValHistUtils )
 
 atlas_install_python_modules( python/*.py )
-atlas_install_runtime( scripts/*.py )
+atlas_install_runtime( scripts/*.py POST_BUILD_CMD ${ATLAS_FLAKE8} )
