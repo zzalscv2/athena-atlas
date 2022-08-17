@@ -57,6 +57,77 @@ def IsolationSteeringDerivCfg(flags, name = 'IsolationSteeringDeriv', inType = '
 
     return acc
 
+def LRTElectronIsolationSteeringDerivCfg(flags, name = 'LRTElectronCaloIsolationSteeringDeriv'):
+
+    mlog = logging.getLogger(name)
+    mlog.info('Starting LRT electron calo Isolation steering')
+
+    acc = ComponentAccumulator()
+
+    # Prepare CaloIsolationTool
+    kwargs = dict()
+    from IsolationAlgs.IsoToolsConfig import EGammaCaloIsolationToolCfg
+    kwargs['CaloTopoIsolationTool'] = acc.popToolsAndMerge(EGammaCaloIsolationToolCfg(flags))
+
+    # Prepare IsolationBuilder
+    from xAODPrimitives.xAODIso import xAODIso as isoPar
+    isoType  = [ [ isoPar.topoetcone20, isoPar.topoetcone30, isoPar.topoetcone40 ] ]
+    isoCor   = [ [ isoPar.core57cells, isoPar.ptCorrection, isoPar.pileupCorrection ] ]
+    isoExCor = [ [ ] ]
+    kwargs['ElIsoTypes'] = isoType
+    kwargs['ElCorTypes'] = isoCor
+    kwargs['ElCorTypesExtra'] = isoExCor
+    kwargs['ElectronCollectionContainerName'] = 'LRT'+flags.Egamma.Keys.Output.Electrons
+
+    kwargs['name'] = 'LRTElectronCaloIsolationBuilder'
+
+    acc.addEventAlgo(CompFactory.IsolationBuilder(**kwargs))
+
+    mlog.info("LRTElectron calo isolation configured")
+
+    return acc
+
+def LRTMuonIsolationSteeringDerivCfg(flags, name = 'LRTMuonCaloIsolationSteeringDeriv'):
+
+    mlog = logging.getLogger(name)
+    mlog.info('Starting LRT muon calo Isolation steering')
+
+    acc = ComponentAccumulator()
+
+    # Need to add density inputs for mc20 (containers present in MC21 AODs)
+    from IsolationAlgs.IsoDensityConfig import (
+        NFlowInputAlgCfg, DensityForIsoAlgCfg)
+    acc.merge(NFlowInputAlgCfg(flags,InputType = "EMPFlow"))
+    acc.merge(DensityForIsoAlgCfg(flags,name='CentralDensityForNFlowIso'))
+    acc.merge(DensityForIsoAlgCfg(flags,name='ForwardDensityForNFlowIso'))
+
+    # Prepare CaloIsolationTool
+    the_pflowElementsTool = CompFactory.xAOD.FlowElementsInConeTool(
+            name='FlowElementsInConeTool')
+    
+    from IsolationAlgs.IsoToolsConfig import MuonCaloIsolationToolCfg
+    cisoTool = acc.popToolsAndMerge(MuonCaloIsolationToolCfg(flags,
+                                    FlowElementsInConeTool =  the_pflowElementsTool ))
+    # Prepare IsolationBuilder
+    from xAODPrimitives.xAODIso import xAODIso as isoPar
+    misoType  = [ [ isoPar.topoetcone20, isoPar.topoetcone30, isoPar.topoetcone40 ],
+                  [ isoPar.neflowisol20, isoPar.neflowisol30, isoPar.neflowisol40 ] ]
+    misoCor   = [ [ isoPar.coreCone, isoPar.pileupCorrection ],
+                  [ isoPar.coreCone, isoPar.pileupCorrection ] ]
+    misoExCor = [ [ ], [ ] ]
+
+    acc.addEventAlgo(CompFactory.IsolationBuilder(name= "LRTMuonCaloIsolationBuilder",
+                                                  MuonCollectionContainerName = "MuonsLRT",
+                                                  MuCorTypesExtra = misoExCor,
+                                                  MuCorTypes = misoCor,
+                                                  CaloTopoIsolationTool = cisoTool,
+                                                  PFlowIsolationTool = cisoTool,
+                                                  MuIsoTypes = misoType ))
+
+    mlog.info("MuonLRT calo isolation configured")
+
+    return acc
+
 if __name__ == "__main__":
     from AthenaConfiguration.AllConfigFlags import ConfigFlags as flags
     from AthenaConfiguration.ComponentAccumulator import printProperties
@@ -72,10 +143,20 @@ if __name__ == "__main__":
 
     acc = MainServicesCfg(flags)
     acc.merge(IsolationSteeringDerivCfg(flags))
+    acc.merge(LRTElectronIsolationSteeringDerivCfg(flags))
+    acc.merge(LRTMuonIsolationSteeringDerivCfg(flags))
     acc.printConfig(withDetails=True,
                     printDefaults=True)
     printProperties(mlog,
                     acc.getEventAlgo('PFlowIsolationBuilder'),
+                    nestLevel=1,
+                    printDefaults=True)
+    printProperties(mlog,
+                    acc.getEventAlgo('LRTElectronCaloIsolationBuilder'),
+                    nestLevel=1,
+                    printDefaults=True)
+    printProperties(mlog,
+                    acc.getEventAlgo('LRTMuonCaloIsolationBuilder'),
                     nestLevel=1,
                     printDefaults=True)
 

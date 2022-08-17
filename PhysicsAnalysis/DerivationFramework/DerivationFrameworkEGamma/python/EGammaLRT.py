@@ -231,8 +231,17 @@ def makeLRTEGammaDF():
     )
 
     # =======================================
-    # ADD TOOLS
+    # ADD ISOLATION TOOLS
     # =======================================
-    import IsolationAlgs.IsoUpdatedTrackCones as isoCones
     if not hasattr(DerivationFrameworkJob, "IsolationBuilderNonprompt_All_MaxWeight1000LRT"):
+        import IsolationAlgs.IsoUpdatedTrackCones as isoCones
         DerivationFrameworkJob += isoCones.GetUpdatedIsoTrackCones(postfix="LRT")
+
+    if not hasattr(DerivationFrameworkJob, 'LRTElectronCaloIsolationBuilder'):
+        from AthenaConfiguration.ComponentAccumulator import CAtoGlobalWrapper
+        from AthenaConfiguration.AllConfigFlags import ConfigFlags
+        from IsolationAlgs.IsolationSteeringDerivConfig import (
+            LRTElectronIsolationSteeringDerivCfg )
+            
+        CAtoGlobalWrapper(LRTElectronIsolationSteeringDerivCfg, ConfigFlags)
+        

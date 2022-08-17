@@ -26,6 +26,7 @@ namespace CP {
   {
     if(m_muonSelectionTool.empty()){
       asg::AsgToolConfig config("CP::MuonSelectionTool/MuonSelectionTool");
+      ATH_CHECK(config.setProperty("TurnOffMomCorr",true));
       ATH_CHECK(config.makePrivateTool(m_muonSelectionTool));
     }
 

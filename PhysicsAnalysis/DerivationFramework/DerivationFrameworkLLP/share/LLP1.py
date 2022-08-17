@@ -3,9 +3,9 @@
 #====================================================================
 # LLP1.py
 # This defines DAOD_LLP1, a DAOD format for Run 3.
-# It contains the variables and objects needed for the large majority 
+# It contains the variables and objects needed for the large majority
 # of physics analyses in ATLAS.
-# It requires the reductionConf flag LLP1 in Reco_tf.py   
+# It requires the reductionConf flag LLP1 in Reco_tf.py
 #====================================================================
 from AthenaCommon import Logging
 from AthenaConfiguration.Enums import LHCPeriod
@@ -16,7 +16,9 @@ from DerivationFrameworkCore.DerivationFrameworkMaster import DerivationFramewor
 from DerivationFrameworkPhys import PhysCommon
 from DerivationFrameworkPhys import PhysCommonTrigger
 from DerivationFrameworkEGamma import EGammaLRT
+from DerivationFrameworkMuons import MuonsLRT
 EGammaLRT.makeLRTEGammaDF()
+MuonsLRT.makeLRTMuonsDF()
 from DerivationFrameworkJetEtMiss import METCommon
 from DerivationFrameworkJetEtMiss.METCommon import scheduleMETAssocAlg
 from DerivationFrameworkCore import LHE3WeightMetadata
@@ -26,13 +28,13 @@ from TriggerMenuMT.TriggerAPI.TriggerEnums import TriggerPeriod, TriggerType
 
 
 #====================================================================
-# Set up sequence for this format and add to the top sequence 
+# Set up sequence for this format and add to the top sequence
 #====================================================================
 SeqLLP1 = CfgMgr.AthSequencer("SeqLLP1")
 DerivationFrameworkJob += SeqLLP1
 
 #====================================================================
-# SET UP STREAM   
+# SET UP STREAM
 #====================================================================
 streamName = derivationFlags.WriteDAOD_LLP1Stream.StreamName
 fileName   = buildFileName( derivationFlags.WriteDAOD_LLP1Stream )
@@ -44,7 +46,7 @@ thinningTools       = []
 skimmingTools       = []
 augmentationTools   = []
 
-# Special sequence 
+# Special sequence
 SeqLLP1 = CfgMgr.AthSequencer("SeqLLP1")
 
 #====================================================================
@@ -56,10 +58,13 @@ InDetFlags.doR3LargeD0.set_Value_and_Lock(True)
 #====================================================================
 # Run the LRT merger
 #====================================================================
+MergedElectronContainer = "StdWithLRTElectrons"
+MergedMuonContainer = "StdWithLRTMuons"
+MergedTrackCollection = "InDetWithLRTTrackParticles"
 from DerivationFrameworkInDet.DerivationFrameworkInDetConf import DerivationFramework__TrackParticleMerger
 LRTAndStandardTrackParticleMerger = DerivationFramework__TrackParticleMerger(name                        = "LRTAndStandardTrackParticleMerger",
                                                                              TrackParticleLocation       = ["InDetTrackParticles","InDetLargeD0TrackParticles"],
-                                                                             OutputTrackParticleLocation = "InDetWithLRTTrackParticles",
+                                                                             OutputTrackParticleLocation = MergedTrackCollection,
                                                                              CreateViewColllection       = True)
 
 ToolSvc += LRTAndStandardTrackParticleMerger
@@ -70,15 +75,20 @@ SeqLLP1 += CfgMgr.DerivationFramework__CommonAugmentation("InDetWithLRTLRTMerge"
 #====================================================================
 # Run the LRT Electron merger
 #====================================================================
-
-# Name of a temporary merged electron collection - not written to the DAOD
-MergedElectronContainer = "StdWithLRTElectrons"
-
-SeqLLP1 += CfgMgr.CP__ElectronLRTMergingAlg(name="LLP1_ElectronLRTMergingAlg", 
+SeqLLP1 += CfgMgr.CP__ElectronLRTMergingAlg(name="LLP1_ElectronLRTMergingAlg",
                                             PromptElectronLocation  = "Electrons",
                                             LRTElectronLocation     = "LRTElectrons",
                                             OutputCollectionName    = MergedElectronContainer,
                                             CreateViewCollection    = True)
+
+#====================================================================
+# Run the Muon merger
+#====================================================================
+SeqLLP1 += CfgMgr.CP__MuonLRTMergingAlg(name="LLP1_MuonLRTMergingAlg",
+                                        PromptMuonLocation    = "Muons",
+                                        LRTMuonLocation       = "MuonsLRT",
+                                        OutputMuonLocation    = MergedMuonContainer,
+                                        CreateViewCollection  = True)
 
 #====================================================================
 # Run VSI
@@ -113,14 +123,35 @@ VrtSecInclusive_InDet.Extrapolator                 = ToolSvc.AtlasExtrapolator
 VrtSecInclusive_InDet.TrackToVertexIPEstimatorTool = ToolSvc.LLP1IPETool
 VrtSecInclusive_InDet.TrackToVertexTool            = ToolSvc.LLP1T2VTool
 VrtSecInclusive_InDet.FillIntermediateVertices     = False
-VrtSecInclusive_InDet.TrackLocation                = "InDetWithLRTTrackParticles"
+VrtSecInclusive_InDet.TrackLocation                = MergedTrackCollection
 VrtSecInclusive_InDet.PixelConditionsSummaryTool   = InDetPixelConditionsSummaryTool
 VrtSecInclusive_InDet.doAugmentDVimpactParametersToMuons = False
 VrtSecInclusive_InDet.doAugmentDVimpactParametersToElectrons = False
-
 SeqLLP1 += VrtSecInclusive_InDet
 
-LLP1VrtSecInclusiveSuffixes = [""]
+# leptons-only VSI
+LeptonsModSuffix = "_LeptonsMod_LRTR3_1p0"
+vsi_lepMod = setupVSI( "InDet"+LeptonsModSuffix, AugSuffix=LeptonsModSuffix )
+
+vsi_lepMod.twoTrkVtxFormingD0Cut = 1.0 # loosen d0 cut to 1 mm
+vsi_lepMod.doSelectTracksWithLRTCuts = True # apply addtional track cuts inspired by LRT Run 3 optimizations
+vsi_lepMod.doSelectTracksFromMuons    = True # do leptons-only vertexing
+vsi_lepMod.doRemoveCaloTaggedMuons    = True # do remove calo-tagged muons from track selection
+vsi_lepMod.doSelectTracksFromElectrons  = True # do leptons-only vertexing
+vsi_lepMod.VertexFitterTool             = InclusiveVxFitterTool
+vsi_lepMod.Extrapolator                 = ToolSvc.AtlasExtrapolator
+vsi_lepMod.TrackToVertexIPEstimatorTool = ToolSvc.LLP1IPETool
+vsi_lepMod.TrackToVertexTool            = ToolSvc.LLP1T2VTool
+vsi_lepMod.FillIntermediateVertices     = False
+vsi_lepMod.TrackLocation                = MergedTrackCollection
+vsi_lepMod.MuonLocation                 = MergedMuonContainer
+vsi_lepMod.ElectronLocation                 = MergedElectronContainer
+vsi_lepMod.PixelConditionsSummaryTool   = InDetPixelConditionsSummaryTool
+vsi_lepMod.doAugmentDVimpactParametersToMuons = False
+vsi_lepMod.doAugmentDVimpactParametersToElectrons = False
+SeqLLP1 += vsi_lepMod
+
+LLP1VrtSecInclusiveSuffixes = ["",LeptonsModSuffix]
 
 #====================================================================
 # SKIMMING
@@ -140,7 +171,6 @@ triggers = trig_el + trig_mu + trig_g + trig_elmu + trig_mug + trig_VBF_2018
 #remove duplicates
 triggers = sorted(list(set(triggers)))
 
-
 #trigger
 from DerivationFrameworkTools.DerivationFrameworkToolsConf import DerivationFramework__TriggerSkimmingTool
 LLP1TriggerSkimmingTool = DerivationFramework__TriggerSkimmingTool(name = "LLP1TriggerPreSkimmingTool",
@@ -157,14 +187,14 @@ skimmingTools.append(LLP1TriggerSkimmingTool)
 #====================================================================
 # THINNING
 #====================================================================
-# ID tracks: See recommedations here: 
+# ID tracks: See recommedations here:
 # https://twiki.cern.ch/twiki/bin/viewauth/AtlasProtected/DaodRecommendations
 
 # Inner detector group recommendations for indet tracks in analysis
 LLP1_thinning_expression = "InDetTrackParticles.DFCommonTightPrimary && abs(DFCommonInDetTrackZ0AtPV)*sin(InDetTrackParticles.theta) < 3.0*mm && InDetTrackParticles.pt > 10*GeV"
 from DerivationFrameworkInDet.DerivationFrameworkInDetConf import DerivationFramework__TrackParticleThinning
 LLP1TrackParticleThinningTool = DerivationFramework__TrackParticleThinning(name                    = "LLP1TrackParticleThinningTool",
-                                                                           StreamName              = LLP1Stream.Name, 
+                                                                           StreamName              = LLP1Stream.Name,
                                                                            SelectionString         = LLP1_thinning_expression,
                                                                            InDetTrackParticlesKey  = "InDetTrackParticles")
 
@@ -268,7 +298,7 @@ LLP1VSITPThinningTool = DerivationFramework__VSITrackParticleThinning( name     
                                                                           StreamName              = LLP1Stream.Name,
                                                                           InDetTrackParticlesKey  = "InDetTrackParticles",
                                                                           AugVerStrings = LLP1VrtSecInclusiveSuffixes)
-                    
+
 ToolSvc += LLP1VSITPThinningTool
 thinningTools.append(LLP1VSITPThinningTool)
 
@@ -309,10 +339,23 @@ else:
 ToolSvc += LLP1_LRTMaxCellDecoratorTool
 augmentationTools.append(LLP1_LRTMaxCellDecoratorTool)
 
+#====================================================================
+# TRIGGER MATCHING WITH LRT LEPTONS (does not include tau chains)
+#===================================================================
+from DerivationFrameworkTrigger.TriggerMatchingHelper import TriggerMatchingHelper
+lrt_tm_helper = TriggerMatchingHelper(
+    PhysCommonTrigger.trigger_names_notau,
+    name="LRTDFTriggerMatchingTool",
+    OutputContainerPrefix="LRTTrigMatch_",
+    InputElectrons=MergedElectronContainer,
+    InputMuons=MergedMuonContainer
+)
 
+ToolSvc += lrt_tm_helper.tool
+augmentationTools.append(lrt_tm_helper.tool)
 
 #====================================================================
-# CREATE THE DERIVATION KERNEL ALGORITHM   
+# CREATE THE DERIVATION KERNEL ALGORITHM
 #====================================================================
 # Add the kernel for thinning (requires the objects be defined)
 from DerivationFrameworkCore.DerivationFrameworkCoreConf import DerivationFramework__DerivationKernel
@@ -322,7 +365,7 @@ SeqLLP1 += CfgMgr.DerivationFramework__DerivationKernel("LLP1Kernel",
                                                         ThinningTools = thinningTools)
 
 #====================================================================
-# FLAVOUR TAGGING   
+# FLAVOUR TAGGING
 #====================================================================
 
 from DerivationFrameworkFlavourTag.FtagRun3DerivationConfig import FtagJetCollections
@@ -330,7 +373,7 @@ FtagJetCollections(['AntiKt4EMTopoJets'],SeqLLP1)
 
 
 #====================================================================
-# CONTENTS   
+# CONTENTS
 #====================================================================
 from DerivationFrameworkCore.SlimmingHelper import SlimmingHelper
 LLP1SlimmingHelper = SlimmingHelper("LLP1SlimmingHelper")
@@ -348,7 +391,7 @@ LLP1SlimmingHelper.SmartCollections = ["EventInfo",
                                        "AntiKt4EMPFlowJets",
                                        "BTagging_AntiKt4EMTopo",
                                        "BTagging_AntiKt4EMPFlow",
-                                       "BTagging_AntiKtVR30Rmax4Rmin02Track", 
+                                       "BTagging_AntiKtVR30Rmax4Rmin02Track",
                                        "MET_Baseline_AntiKt4EMTopo",
                                        "MET_Baseline_AntiKt4EMPFlow",
                                        "TauJets",
@@ -358,9 +401,16 @@ LLP1SlimmingHelper.SmartCollections = ["EventInfo",
                                        "AntiKtVR30Rmax4Rmin02PV0TrackJets",
                                       ]
 
-LLP1SlimmingHelper.AllVariables =  ["MuonSegments"]
-
-
+LLP1SlimmingHelper.AllVariables = ["MSDisplacedVertex",
+                                   "MuonSpectrometerTrackParticles",
+                                   "MuonSegments",
+                                   "MSonlyTracklets",
+                                   "CombinedMuonTrackParticles",
+                                   "ExtrapolatedMuonTrackParticles",
+                                   "CombinedMuonsLRTTrackParticles",
+                                   "ExtraPolatedMuonsLRTTrackParticles",
+                                   "MSOnlyExtraPolatedMuonsLRTTrackParticles",
+                                  ]
 
 
 excludedVertexAuxData = "-vxTrackAtVertex.-MvfFitInfo.-isInitialized.-VTAV"
@@ -438,15 +488,15 @@ LLP1SlimmingHelper.ExtraVariables += ["AntiKt10TruthTrimmedPtFrac5SmallR20Jets.T
                                       "PrimaryVertices.t.x.y.z",
                                       "InDetTrackParticles.d0.z0.vz.TTVA_AMVFVertices.TTVA_AMVFWeights.eProbabilityHT.truthParticleLink.truthMatchProbability.radiusOfFirstHit",
                                       "InDetLargeD0TrackParticles.d0.z0.vz.TTVA_AMVFVertices.TTVA_AMVFWeights.eProbabilityHT.truthParticleLink.truthMatchProbability.radiusOfFirstHit",
-                                      "GSFTrackParticles.numberOfPixelHoles.numberOfSCTHoles.numberDoF.chiSquared",
-                                      "LRTGSFTrackParticles.numberOfPixelHoles.numberOfSCTHoles.numberDoF.chiSquared",
+                                      "GSFTrackParticles.d0.z0.vz.TTVA_AMVFVertices.TTVA_AMVFWeights.eProbabilityHT.truthParticleLink.truthMatchProbability.radiusOfFirstHit.numberOfPixelHoles.numberOfSCTHoles.numberDoF.chiSquared",
+                                      "LRTGSFTrackParticles.d0.z0.vz.TTVA_AMVFVertices.TTVA_AMVFWeights.eProbabilityHT.truthParticleLink.truthMatchProbability.radiusOfFirstHit.numberOfPixelHoles.numberOfSCTHoles.numberDoF.chiSquared",
                                       "EventInfo.hardScatterVertexLink.timeStampNSOffset",
                                       "TauJets.dRmax.etOverPtLeadTrk",
                                       "HLT_xAOD__TrigMissingETContainer_TrigEFMissingET.ex.ey",
                                       "HLT_xAOD__TrigMissingETContainer_TrigEFMissingET_mht.ex.ey"]
 
 
-VSITrackAuxVars = [ 
+VSITrackAuxVars = [
     "is_selected", "is_associated", "is_svtrk_final", "pt_wrtSV", "eta_wrtSV",
     "phi_wrtSV", "d0_wrtSV", "z0_wrtSV", "errP_wrtSV", "errd0_wrtSV",
     "errz0_wrtSV", "chi2_toSV"
@@ -455,22 +505,15 @@ VSITrackAuxVars = [
 for suffix in LLP1VrtSecInclusiveSuffixes:
     LLP1SlimmingHelper.ExtraVariables += [ "InDetTrackParticles." + '.'.join( [ var + suffix for var in VSITrackAuxVars] ) ]
     LLP1SlimmingHelper.ExtraVariables += [ "InDetLargeD0TrackParticles." + '.'.join( [ var + suffix for var in VSITrackAuxVars] ) ]
+    LLP1SlimmingHelper.ExtraVariables += [ "GSFTrackParticles." + '.'.join( [ var + suffix for var in VSITrackAuxVars] ) ]
+    LLP1SlimmingHelper.ExtraVariables += [ "LRTGSFTrackParticles." + '.'.join( [ var + suffix for var in VSITrackAuxVars] ) ]
 
 # Add trigger matching
 # Run 2
 PhysCommonTrigger.trigmatching_helper_notau.add_to_slimming(LLP1SlimmingHelper)
 PhysCommonTrigger.trigmatching_helper_tau.add_to_slimming(LLP1SlimmingHelper)
 
-# LRT Electron and Muon trigger matching
-from DerivationFrameworkTrigger.TriggerMatchingHelper import TriggerMatchingHelper
-lrt_tm_helper = TriggerMatchingHelper(
-    PhysCommonTrigger.trigger_names_notau,
-    name="LRTDFTriggerMatchingTool",
-    OutputContainerPrefix="LRTTrigMatch_",
-    InputElectrons=MergedElectronContainer,
-    InputMuons="MuonsLRT", # TODO Important, change to transient collection name after !53881 is merged
-    add_to_df_job=True
-)
+# LRT Lepton trigger matching variables
 lrt_tm_helper.add_to_slimming(LLP1SlimmingHelper)
 
 
