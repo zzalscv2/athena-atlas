@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2017 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
 */
 
 //************************************************************
@@ -22,7 +22,8 @@
 class G4Step;
 class G4HCofThisEvent;
 class TileTBID;
-class CombinedScintillatorDescription;
+class TileSimHit;
+class Identifier;
 
 class CombinedScintillatorSD : public G4VSensitiveDetector
 {
@@ -40,9 +41,9 @@ private:
 
   static const int N_CELLS = 2;
 
-  int m_nhits[N_CELLS];
-  TileSimHit* m_hit[N_CELLS];
-  Identifier m_id[N_CELLS];
+  int m_nhits[N_CELLS]={};
+  TileSimHit* m_hit[N_CELLS]={};
+  Identifier m_id[N_CELLS]={};
   // The hits collections
   SG::WriteHandle<TileHitVector> m_HitColl;
 };

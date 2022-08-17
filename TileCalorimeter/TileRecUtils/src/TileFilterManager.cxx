@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2020 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
 */
 
 // **************************************************************************************
@@ -11,7 +11,9 @@
 
 #include "TileRecUtils/TileFilterManager.h"
 #include "TileConditions/TileInfo.h"
-
+#include "TileRecUtils/TileFilterResult.h"
+#include <CLHEP/Matrix/Matrix.h>
+#include <CLHEP/Matrix/Vector.h>
 #include <algorithm>
 #include <iostream>
 #include "boost/io/ios_state.hpp"
@@ -328,7 +330,7 @@ int TileFilterManager::fitDigits2(TileFilterResult &tResult, bool lDebug) {
     // double chiCutLow[4] = {chiCut, 1.50, 0.75, 0.};
     const int Ndim = 12;
     double chiAmp[Ndim];
-    int iAmp[Ndim];
+    int iAmp[Ndim] = {};
     int Npile = 0;
     for (int i = 2; i < Npar; i++) {
       chiAmp[Npile] = fitAmp[i] / fitErr[i];
@@ -346,8 +348,6 @@ int TileFilterManager::fitDigits2(TileFilterResult &tResult, bool lDebug) {
       //      chiMin = chiCutLow[ndrop];
       int idrop = -1;
       for (int i = 0; i < Npile; i++) {
-        //	if(debug) std::cout << "drop candidate: i=" << i << ", iAmp=" << iAmp[i]
-        //       << ", chiAmp=" << chiAmp[i] <<", chiMin=" << chiMin << std::endl;
         if (iAmp[i] < 0) continue;
         if (chiAmp[i] > chiMin) continue;
         chiMin = chiAmp[i];
