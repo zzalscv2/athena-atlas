@@ -25,7 +25,7 @@ class LocalParameters;
 #include "CaloTrackingGeometry/ICaloSurfaceBuilder.h"
 #include "xAODCaloEvent/CaloClusterFwd.h"
 #include "xAODEgamma/EgammaFwd.h"
-
+#include "egammaUtils/eg_resolution.h"
 class CaloDetDescrManager;
 
 class CaloCluster_OnTrackBuilder
@@ -79,10 +79,10 @@ private:
 
   Gaudi::Property<bool> m_useClusterEnergy{ this, "UseClusterEnergy", true };
   Gaudi::Property<bool> m_useClusterPhi{ this, "UseClusterPhi", true };
-  Gaudi::Property<bool> m_useClusterEta{ this, "UseClusterEta", true };
+  Gaudi::Property<bool> m_useClusterEta{ this, "UseClusterEta", false };
 
-  /** @brief (deta,dphi) granularity*/
-  const LArEM_ID* m_emid;
+  /** @brief helper for returning energy resolution*/
+  std::unique_ptr<eg_resolution> m_eg_resol{};
 };
 
 #endif // CALOCLUSTER_ONTRACKBUILER_H
