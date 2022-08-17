@@ -88,6 +88,18 @@ def egammaTrkRefitterToolCfg(flags,
     return acc
 
 
+def CaloCluster_OnTrackBuilderCfg(flags,
+                                  name='CaloCluster_OnTrackBuilder',
+                                  **kwargs):
+    acc = ComponentAccumulator()
+    if "CaloSurfaceBuilder" not in kwargs:
+        kwargs["CaloSurfaceBuilder"] = acc.popToolsAndMerge(
+            egCaloSurfaceBuilderCfg(flags))
+    tool = CompFactory.CaloCluster_OnTrackBuilder(name, **kwargs)
+    acc.setPrivateTools(tool)
+    return acc
+
+
 if __name__ == "__main__":
 
     from AthenaConfiguration.AllConfigFlags import ConfigFlags
@@ -106,9 +118,14 @@ if __name__ == "__main__":
         EMExtrapolationToolsCfg(ConfigFlags)),
         nestLevel=1,
         printDefaults=True)
-    mlog.info("Configuring egammaTrkRefitterToolCfg :")
+    mlog.info("Configuring egammaTrkRefitterTool :")
     printProperties(mlog, cfg.popToolsAndMerge(
         egammaTrkRefitterToolCfg(ConfigFlags)),
+        nestLevel=1,
+        printDefaults=True)
+    mlog.info("Configuring CaloCluster_OnTrackBuilder :")
+    printProperties(mlog, cfg.popToolsAndMerge(
+        CaloCluster_OnTrackBuilderCfg(ConfigFlags)),
         nestLevel=1,
         printDefaults=True)
 

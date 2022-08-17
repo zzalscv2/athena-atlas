@@ -20,9 +20,9 @@ CaloCluster_OnTrackBuilder::CaloCluster_OnTrackBuilder(const std::string& t,
                                                        const std::string& n,
                                                        const IInterface* p)
   : AthAlgTool(t, n, p)
-  , m_emid(nullptr)
 {
   declareInterface<ICaloCluster_OnTrackBuilder>(this);
+  m_eg_resol = std::make_unique<eg_resolution>("run2_R21_v1");
 }
 
 CaloCluster_OnTrackBuilder::~CaloCluster_OnTrackBuilder() = default;
@@ -111,32 +111,29 @@ CaloCluster_OnTrackBuilder::getClusterLocalParameters(
 {
 
   Amg::Vector3D surfRefPoint = surf->globalReferencePoint();
-
   double eta = cluster->eta();
-  double theta = 2 * atan(exp(-eta)); //  -log(tan(theta/2));
-  double tantheta = tan(theta);
   double phi = cluster->phi();
-
-  double clusterQoverE =
-    cluster->calE() != 0 ? (double)charge / cluster->calE() : 0;
+  double clusterQoverE = cluster->e() != 0 ? (double)charge / cluster->e() : 0;
 
   if (xAOD::EgammaHelpers::isBarrel(cluster)) {
     // Two corindate in a cyclinder are
     // Trk::locRPhi = 0 (ie phi)
     // Trk::locZ    = 1(ie z)
     double r = surfRefPoint.perp();
-    double z = tantheta == 0 ? 0. : r / tantheta;
-    Trk::DefinedParameter locRPhi(r * phi, Trk::locRPhi);
-    Trk::DefinedParameter locZ(z, Trk::locZ);
-    Trk::DefinedParameter qOverP(clusterQoverE, Trk::qOverP);
     std::vector<Trk::DefinedParameter> defPar;
     if (m_useClusterPhi) {
+      Trk::DefinedParameter locRPhi(r * phi, Trk::locRPhi);
       defPar.push_back(locRPhi);
     }
     if (m_useClusterEta) {
+      double theta = 2 * atan(exp(-eta)); //  -log(tan(theta/2));
+      double tantheta = tan(theta);
+      double z = tantheta == 0 ? 0. : r / tantheta;
+      Trk::DefinedParameter locZ(z, Trk::locZ);
       defPar.push_back(locZ);
     }
     if (m_useClusterEnergy) {
+      Trk::DefinedParameter qOverP(clusterQoverE, Trk::qOverP);
       defPar.push_back(qOverP);
     }
     return Trk::LocalParameters(defPar);
@@ -145,18 +142,20 @@ CaloCluster_OnTrackBuilder::getClusterLocalParameters(
   // Trk::locR   = 0
   // Trk::locPhi = 1
   double z = surfRefPoint.z();
-  double r = z * tantheta;
-  Trk::DefinedParameter locR(r, Trk::locR);
-  Trk::DefinedParameter locPhi(phi, Trk::locPhi);
-  Trk::DefinedParameter qOverP(clusterQoverE, Trk::qOverP);
   std::vector<Trk::DefinedParameter> defPar;
   if (m_useClusterEta) {
+    double theta = 2 * atan(exp(-eta)); //  -log(tan(theta/2));
+    double tantheta = tan(theta);
+    double r = z * tantheta;
+    Trk::DefinedParameter locR(r, Trk::locR);
     defPar.push_back(locR);
   }
   if (m_useClusterPhi) {
+    Trk::DefinedParameter locPhi(phi, Trk::locPhi);
     defPar.push_back(locPhi);
   }
   if (m_useClusterEnergy) {
+    Trk::DefinedParameter qOverP(clusterQoverE, Trk::qOverP);
     defPar.push_back(qOverP);
   }
 
@@ -169,42 +168,44 @@ CaloCluster_OnTrackBuilder::getClusterErrorMatrix(
   const Trk::Surface& surf,
   int) const
 {
-
-  double phierr = 0.1;
-  phierr = phierr < 1.e-10 ? 0.1 : std::pow(phierr, 2);
-  if (!m_useClusterPhi) {
-    phierr = 10;
-  }
-  // 10mm large error as currently we dont want to use this measurement
-  double etaerr = 10;
-  etaerr = etaerr < 1.e-10 ? 10. : std::pow(etaerr, 2);
-
-  double energyerr =
-    std::pow(0.10 * std::sqrt(cluster->calE() * 1e-3) * 1000, -4);
-
-  int matrixSize = static_cast<int>(m_useClusterEta) + static_cast<int>(m_useClusterPhi) + static_cast<int>(m_useClusterEnergy);
+  int matrixSize = static_cast<int>(m_useClusterEta) +
+                   static_cast<int>(m_useClusterPhi) +
+                   static_cast<int>(m_useClusterEnergy);
   Amg::MatrixX covMatrix(matrixSize, matrixSize);
   covMatrix.setZero();
 
+  //variance in phi ~ 1e-04
+  //sigma ~ 0.01
+  constexpr double phivariance = 1e-04;
+  // simga ~ 20 mm large error as currently we do not want to rely
+  // on the eta side of the cluster.
+  constexpr double zvariance = 400;
+  const double clusterE = cluster->e();
+  const double sigmaP_over_P = m_eg_resol->getResolution(0, //electron
+                                                         clusterE,
+                                                         cluster->eta(),
+                                                         2//90% quantile
+                                                         );
+  const double qOverP = 1./clusterE;
+  const double qOverP_variance =(qOverP*qOverP)*(sigmaP_over_P*sigmaP_over_P);
   if (xAOD::EgammaHelpers::isBarrel(cluster)) {
     // The two coordinates for a cyclinder are
     // Trk::locRPhi = 0 (ie phi)
     // Trk::locZ    = 1(ie z)
     Amg::Vector3D surfRefPoint = surf.globalReferencePoint();
-    double r2 = pow(surfRefPoint[0], 2);
-
+    double r = surfRefPoint.perp();
+    double r2 = r*r;
     int indexCount(0);
-
     if (m_useClusterPhi) {
-      covMatrix(indexCount, indexCount) = phierr * r2;
+      covMatrix(indexCount, indexCount) = phivariance * r2;
       ++indexCount;
     }
     if (m_useClusterEta) {
-      covMatrix(indexCount, indexCount) = etaerr;
+      covMatrix(indexCount, indexCount) = zvariance;
       ++indexCount;
     }
     if (m_useClusterEnergy) {
-      covMatrix(indexCount, indexCount) = energyerr;
+      covMatrix(indexCount, indexCount) = qOverP_variance;
       ++indexCount;
     }
   } else {
@@ -214,15 +215,15 @@ CaloCluster_OnTrackBuilder::getClusterErrorMatrix(
     int indexCount(0);
 
     if (m_useClusterEta) {
-      covMatrix(indexCount, indexCount) = etaerr;
+      covMatrix(indexCount, indexCount) = zvariance;
       ++indexCount;
     }
     if (m_useClusterPhi) {
-      covMatrix(indexCount, indexCount) = phierr;
+      covMatrix(indexCount, indexCount) = phivariance;
       ++indexCount;
     }
     if (m_useClusterEnergy) {
-      covMatrix(indexCount, indexCount) = energyerr;
+      covMatrix(indexCount, indexCount) = qOverP_variance;
       ++indexCount;
     }
   }
