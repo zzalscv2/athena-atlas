@@ -73,7 +73,7 @@ namespace CP {
         Gaudi::Property<bool> m_isRun3{this, "IsRun3Geo", false, "Needed for MuonSelectionTool"}; 
 
         // Properties of the tool
-        Gaudi::Property<std::string> m_release{this, "release", "Recs2022_06_15_Rel22PreRecs",     "Release"};
+        Gaudi::Property<std::string> m_release{this, "release", "Recs2022_08_16_Run3PreRecs",     "Release"};
         // Systematics scheme 
         Gaudi::Property<std::string> m_sysScheme{this, "systematicScheme", "Corr_Scale",     "Systematic scheme to be configured"};
 
