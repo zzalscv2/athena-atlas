@@ -1,3 +1,7 @@
+/*
+  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+*/
+
 // This ROOT MACRO produces histograms representing distribution of output
 // quantities (energy, time, pedestal, chi2) from Optimal Filtering Algorithms
 // (TileOptATLAS, TileOpt2, TileFit) in the case of existence of corresponding
@@ -273,6 +277,7 @@ class TileOFA: public TileOfaInterface {
     // "TileOfaDescription" which describes characteristics particular
     // Optimal Filtering Algorithm for particular gain.
     TileOFA(TileOfaDescription tileOfaDescr);
+    TileOFA(const TileOFA &) = delete; //delete copy
     virtual ~TileOFA();
     virtual void SetEnergyUniGainThreshold(Float_t energyUniGainThreshold);
     virtual void SetEnergyLowGainThreshold(Float_t energyLowGainThreshold);
@@ -282,6 +287,7 @@ class TileOFA: public TileOfaInterface {
     virtual void SetBadModules(TObjArray* modules);
     virtual void MakeAndFillRttHistogramsFromFile(TFile* inputFile);
     virtual void SaveRttHistogramsToFile(TFile* outputFile);
+    
 
   private:
     // Copy constructor are declared as private and have no definitions
@@ -479,16 +485,16 @@ class TileOFA: public TileOfaInterface {
     Int_t runNumber_;
     // Two dimensional histogram representing average energy
     // distribution vis channel and module
-    TProfile2D* energyVsModuleAndChannel_[4];
+    TProfile2D* energyVsModuleAndChannel_[4]={};
     // Two dimensional histogram representing average time
     // distribution vis channel and module
-    TProfile2D* timeVsModuleAndChannel_[4];
+    TProfile2D* timeVsModuleAndChannel_[4]={};
     // Two dimensional histogram representing average pedestal
     // distribution vis channel and module
-    TProfile2D* pedestalVsModuleAndChannel_[4];
+    TProfile2D* pedestalVsModuleAndChannel_[4]={};
     // Two dimensional histogram representing average chi2
     // distribution vis channel and module
-    TProfile2D* chi2VsModuleAndChannel_[4];
+    TProfile2D* chi2VsModuleAndChannel_[4]={};
     // Tree in input ntuple with name h2000_map.
     TTree* h2000_map_tree_;
     // Represents channel status from branch "bad" in tree "h2000_map" and
@@ -528,6 +534,7 @@ class TileOfaCollection: public TileOfaInterface {
     // parameter is  initial capacity of collection.
     TileOfaCollection(Int_t initialSize);
     virtual ~TileOfaCollection();
+    TileOfaCollection(const TileOfaCollection &) = delete;
     // Adds to collection the object of type "TileOfaInterface".
     void Add(TileOfaInterface* algorithm);
     virtual void SetEnergyUniGainThreshold(Float_t energyUniGainThreshold);

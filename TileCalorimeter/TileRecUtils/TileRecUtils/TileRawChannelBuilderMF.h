@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2018 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef TILERECUTILS_TILERAWCHANNELBUILDERMF_H
@@ -21,13 +21,14 @@
  ********************************************************************/
 
 // Tile includes
-#include "TileRecUtils/TileRawChannelBuilder.h"
-#include "TileConditions/ITileCondToolOfc.h"
-#include "TileConditions/TileCondToolTiming.h"
-#include "TileConditions/TileCondToolNoiseSample.h"
+#include "TileRecUtils/TileRawChannelBuilder.h" //base class
+#include "TileConditions/ITileCondToolOfc.h" //ToolHandle template parameter
+#include "TileConditions/TileCondToolNoiseSample.h"  //ToolHandle template parameter
+#include <vector>
+#include <string>
 
 class TileHWID;
-//class TileFilterManager;
+class TileDigits;
 
 class TileRawChannelBuilderMF: public TileRawChannelBuilder {
   public:

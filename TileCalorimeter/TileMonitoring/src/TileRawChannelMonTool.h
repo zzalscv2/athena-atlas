@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
 */
 
 // ********************************************************************
@@ -172,7 +172,7 @@ class TileRawChannelMonTool: public TilePaterMonTool {
     bool m_is12bit{};
     SG::ReadHandleKey<TileDQstatus> m_DQstatusKey;
     int m_intCalibUnit{};
-    double m_dac2Charge[3];
+    double m_dac2Charge[3]={};
 };
 
 #endif

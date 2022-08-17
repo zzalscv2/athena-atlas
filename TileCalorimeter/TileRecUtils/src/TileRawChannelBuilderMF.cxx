@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
 */
 
 // small hack to enable datapool usage
@@ -23,8 +23,6 @@
 #include <algorithm>
 #include <cmath>
 
-// C++ STL includes
-#include <vector>
 
 // for matrix treatment
 #include "CLHEP/Matrix/Matrix.h"
@@ -214,8 +212,8 @@ TileRawChannel* TileRawChannelBuilderMF::rawChannel(const TileDigits* tiledigits
     // begin COF iteration for amplitude greater than m_ampMinThresh (15 ADC) and within +/- bunch spacing/2
     int n = 7;
     CLHEP::HepMatrix A(n, n, 0);
-    int t;
-    double signalModel[7];
+    int t=0;
+    double signalModel[7]={};
     bool goodEne = true;
     t_ch = -phase;
     for (int it = 0; it < m_maxIterations; it++) {
@@ -435,7 +433,7 @@ TileRawChannel* TileRawChannelBuilderMF::rawChannel(const TileDigits* tiledigits
       }
     }
 
-    // we know that time is zero here, put negagive chi^2 to indicate that
+    // we know that time is zero here, put negative chi^2 to indicate that
     for (k = 0; k < m_digits.size(); ++k) {
       double dqf = (signalModel[k] - (m_digits[k] - ped_ch));
       MFchi2 += dqf * dqf;

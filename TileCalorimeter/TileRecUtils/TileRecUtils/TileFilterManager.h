@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2019 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef TILERECUTILS_TILEFILTERMANAGER_H
@@ -14,13 +14,18 @@
 
 // ************************************************************************************
 
-#include "TileRecUtils/TileFitter.h"
-#include "TileRecUtils/TileFilterResult.h"
 
-#include <CLHEP/Matrix/Matrix.h>
-#include <CLHEP/Matrix/Vector.h>
+#include "TileRecUtils/TileFitter.h" //member vector template param
+
 #include <string>
 #include <vector>
+
+class TileFilterResult;
+
+namespace CLHEP{
+  class HepVector;
+  class HepMatrix;
+}
 
 //using namespace CLHEP;
 /** Auxiliary class for TileRawChannelMakerManyAmps. 
