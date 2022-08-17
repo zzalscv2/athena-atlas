@@ -223,8 +223,8 @@ def setupMenu():
         ChainProp(name='HLT_mu26_ivarmedium_mu6_l2io_probe_L1MU18VFCH', l1SeedThresholds=['MU18VFCH','PROBEMU5VF'], groups=TagAndProbeGroup+SingleMuonGroup),
         ChainProp(name='HLT_mu26_ivarmedium_mu6_l2mt_probe_L1MU18VFCH', l1SeedThresholds=['MU18VFCH','PROBEMU5VF'], groups=TagAndProbeGroup+SingleMuonGroup),
         # ATR-25512 Duplicate tag and probe mu26_ivarmedium -> mu24_ivarmedium
-        ChainProp(name='HLT_mu24_ivarmedium_mu6_l2io_probe_L1MU14FCH', l1SeedThresholds=['MU14FCH','PROBEMU5VF'], groups=TagAndProbeGroup+SingleMuonGroup),
-        ChainProp(name='HLT_mu24_ivarmedium_mu6_l2mt_probe_L1MU14FCH', l1SeedThresholds=['MU14FCH','PROBEMU5VF'], groups=TagAndProbeGroup+SingleMuonGroup, monGroups=['muonMon:shifter']),
+        ChainProp(name='HLT_mu24_ivarmedium_mu6_l2io_probe_L1MU14FCH', l1SeedThresholds=['MU14FCH','PROBEMU5VF'], groups=TagAndProbeGroup+SingleMuonGroup, monGroups=['muonMon:shifter']),
+        ChainProp(name='HLT_mu24_ivarmedium_mu6_l2mt_probe_L1MU14FCH', l1SeedThresholds=['MU14FCH','PROBEMU5VF'], groups=TagAndProbeGroup+SingleMuonGroup),
         # JPsi tag-and-probe
         # ATR-23614
         ChainProp(name='HLT_mu20_mu2noL1_invmJPsiOS_L1MU14FCH',  l1SeedThresholds=['MU14FCH','FSNOSEED'], groups=SupportGroup+MultiMuonGroup+['RATE:CPS_MU14FCH']),
