@@ -301,9 +301,9 @@ StatusCode OldSpclMcFilterTool::selectSpclMcBarcodes()
 StatusCode OldSpclMcFilterTool::shapeGenEvent( McEventCollection* genAod )
 {
   //now remove all the particles except those whose barcodes are marked
-  for ( McEventCollection::const_iterator evt = genAod->begin(); 
-	evt != genAod->end(); 
-	++evt) {
+  for ( McEventCollection::iterator evt = genAod->begin();
+        evt != genAod->end();
+        ++evt) {
     std::vector<HepMC::GenParticlePtr> going_out;
 
     std::list<int> evtBarcodes;
