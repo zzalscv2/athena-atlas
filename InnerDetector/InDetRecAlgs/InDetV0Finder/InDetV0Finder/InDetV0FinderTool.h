@@ -17,12 +17,10 @@
 
 #include "AthenaBaseComps/AthAlgTool.h"
 #include "GaudiKernel/ToolHandle.h"
-#include "AthContainers/DataVector.h"
 #include "xAODTracking/VertexContainer.h"
-#include "xAODTracking/VertexAuxContainer.h"
 #include "xAODTracking/TrackParticleContainer.h"
 #include "StoreGate/WriteDecorHandleKey.h"
-#include "BeamSpotConditionsData/BeamSpotData.h"
+#include "xAODEventInfo/EventInfo.h"
 #include <atomic>
 /**
    The InDetV0FinderTool reads in the TrackParticle container from StoreGate,
@@ -90,7 +88,6 @@ namespace Reco{
 namespace InDet
 {
   class VertexPointEstimator;
-  class ConversionFinderUtils;
 
   static const InterfaceID IID_InDetV0FinderTool("InDetV0FinderTool", 1, 0);
 
@@ -104,12 +101,12 @@ namespace InDet
 
     static const InterfaceID& interfaceID() { return IID_InDetV0FinderTool;}
 
-    StatusCode performSearch(xAOD::VertexContainer*& v0Container, xAOD::VertexAuxContainer*& v0AuxContainer,
-                             xAOD::VertexContainer*& ksContainer, xAOD::VertexAuxContainer*& ksAuxContainer,
-                             xAOD::VertexContainer*& laContainer, xAOD::VertexAuxContainer*& laAuxContainer,
-                             xAOD::VertexContainer*& lbContainer, xAOD::VertexAuxContainer*& lbAuxContainer,
+    StatusCode performSearch(xAOD::VertexContainer* v0Container,
+                             xAOD::VertexContainer* ksContainer,
+                             xAOD::VertexContainer* laContainer,
+                             xAOD::VertexContainer* lbContainer,
                              const xAOD::Vertex* vertex,
-			     const xAOD::VertexContainer* vertColl
+			     const xAOD::VertexContainer* vertColl, const EventContext& ctx
 			     ) const;
 
   //protected:
@@ -125,7 +122,6 @@ namespace InDet
     ToolHandle < Trk::IVertexFitter > m_iGammaFitter;
     ToolHandle < Trk::V0Tools > m_V0Tools;
     ToolHandle < Reco::ITrackToVertex > m_trackToVertexTool;
-    ToolHandle < InDet::ConversionFinderUtils > m_helpertool;
     ToolHandle < Trk::ITrackSelectorTool > m_trkSelector;
     ToolHandle < InDet::VertexPointEstimator > m_vertexEstimator;
     ToolHandle < Trk::IExtrapolator > m_extrapolator;
@@ -177,7 +173,7 @@ namespace InDet
 
     static double invariantMass(const Trk::TrackParameters* per1, const Trk::TrackParameters* per2, double m1, double m2) ;
 
-    bool doFit(const xAOD::TrackParticle* track1, const xAOD::TrackParticle* track2, Amg::Vector3D &startingPoint) const;
+    bool doFit(const xAOD::TrackParticle* track1, const xAOD::TrackParticle* track2, Amg::Vector3D &startingPoint, const EventContext& ctx) const;
 
     bool d0Pass(const xAOD::TrackParticle* track1, const xAOD::TrackParticle* track2, const xAOD::VertexContainer * vertColl) const;
     bool d0Pass(const xAOD::TrackParticle* track1, const xAOD::TrackParticle* track2, const xAOD::Vertex * vertex) const;
@@ -194,7 +190,9 @@ namespace InDet
 
     SG::ReadHandleKey<xAOD::VertexContainer> m_vertexKey { this, "VertexContainer", "PrimaryVertices",
 	                                                   "primary vertex container" };
-    SG::WriteDecorHandleKey<xAOD::VertexContainer> m_v0LinksDecorkey;
+    SG::WriteDecorHandleKey<xAOD::VertexContainer> m_v0LinksDecorkeyks;
+    SG::WriteDecorHandleKey<xAOD::VertexContainer> m_v0LinksDecorkeylb;
+    SG::WriteDecorHandleKey<xAOD::VertexContainer> m_v0LinksDecorkeylbb;
     SG::WriteDecorHandleKey<xAOD::VertexContainer> m_v0_ksLinksDecorkey;
     SG::WriteDecorHandleKey<xAOD::VertexContainer> m_v0_laLinksDecorkey;
     SG::WriteDecorHandleKey<xAOD::VertexContainer> m_v0_lbLinksDecorkey;
@@ -204,8 +202,15 @@ namespace InDet
     SG::WriteDecorHandleKey<xAOD::VertexContainer> m_mDecor_gmasserr;
     SG::WriteDecorHandleKey<xAOD::VertexContainer> m_mDecor_gprob;
 
-    SG::ReadCondHandleKey<InDet::BeamSpotData> m_beamSpotKey { this, "BeamSpotKey", "BeamSpotData", "SG key for beam spot" };
+    SG::ReadHandleKey<xAOD::EventInfo> m_eventInfo_key{this, "EventInfo", "EventInfo", "Input event information"};
 
+    // V0 candidate output container name (same calling alg)
+    Gaudi::Property<std::string>       m_v0Key { this, "V0ContainerName", "V0Candidates", "V0 container name (same calling alg)" };
+    Gaudi::Property<std::string>       m_ksKey { this, "KshortContainerName", "KshortCandidates", "Ks container name (same calling alg)" };
+    Gaudi::Property<std::string>       m_laKey { this, "LambdaContainerName", "LambdaCandidates",
+                                                              "Lambda container name (same calling alg)" };
+    Gaudi::Property<std::string>       m_lbKey { this, "LambdabarContainerName", "LambdabarCandidates", 
+                                                              "Lambdabar container name (same calling alg)" };
 
   };
 

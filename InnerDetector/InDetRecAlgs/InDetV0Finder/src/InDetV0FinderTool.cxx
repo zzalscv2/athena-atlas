@@ -15,9 +15,6 @@
 
  ***************************************************************************/
 
-#include "GaudiKernel/IToolSvc.h"
-#include "GaudiKernel/ISvcLocator.h"
-
 #include "InDetV0Finder/InDetV0FinderTool.h"
 #include "TrkVertexFitterInterfaces/IVertexFitter.h"
 #include "TrkV0Fitter/TrkV0VertexFitter.h"
@@ -27,13 +24,11 @@
 
 #include "TrkToolInterfaces/ITrackSelectorTool.h"
 #include "InDetConversionFinderTools/VertexPointEstimator.h"
-#include "InDetConversionFinderTools/ConversionFinderUtils.h"
 
 #include "ITrackToVertex/ITrackToVertex.h"
 
 
 #include "GaudiKernel/IPartPropSvc.h"
-#include "CLHEP/GenericFunctions/CumulativeChiSquare.hh" // for chi2prob calculation
 
 #include "xAODTracking/TrackingPrimitives.h"
 
@@ -59,7 +54,6 @@ InDetV0FinderTool::InDetV0FinderTool(const std::string& t, const std::string& n,
   m_iGammaFitter("Trk::TrkVKalVrtFitter"),
   m_V0Tools("Trk::V0Tools"),
   m_trackToVertexTool("Reco::TrackToVertex"),
-  m_helpertool("InDet::ConversionFinderUtils"),
   m_trkSelector("InDet::TrackSelectorTool"),
   m_vertexEstimator("InDet::VertexPointEstimator"),
   m_extrapolator("Trk::Extrapolator"),
@@ -106,7 +100,6 @@ InDetV0FinderTool::InDetV0FinderTool(const std::string& t, const std::string& n,
   declareProperty("GammaFitterTool", m_iGammaFitter);
   declareProperty("V0Tools",m_V0Tools);
   declareProperty("TrackToVertexTool",m_trackToVertexTool);
-  declareProperty("ConversionFinderHelperTool", m_helpertool);
   declareProperty("TrackSelectorTool", m_trkSelector);
   declareProperty("VertexPointEstimator", m_vertexEstimator);
   declareProperty("Extrapolator", m_extrapolator);
@@ -143,7 +136,9 @@ InDetV0FinderTool::InDetV0FinderTool(const std::string& t, const std::string& n,
   declareProperty("vert_a0xy_cut", m_vert_a0xy_cut );
   declareProperty("vert_a0z_cut", m_vert_a0z_cut );
 
-  declareProperty("V0Link", m_v0LinksDecorkey);
+  declareProperty("V0Linkks", m_v0LinksDecorkeyks);
+  declareProperty("V0Linklb", m_v0LinksDecorkeylb);
+  declareProperty("V0Linklbb", m_v0LinksDecorkeylbb);
   declareProperty("KshortLink", m_v0_ksLinksDecorkey);
   declareProperty("LambdaLink", m_v0_laLinksDecorkey);
   declareProperty("LambdabarLink", m_v0_lbLinksDecorkey);
@@ -163,30 +158,30 @@ StatusCode InDetV0FinderTool::initialize()
 // Get the right vertex fitting tool from ToolSvc 
   if (m_useV0Fitter) {
     ATH_CHECK( m_iVertexFitter.retrieve() );
-    msg(MSG::DEBUG) << "Retrieved tool " << m_iVertexFitter << endmsg;
+    ATH_MSG_DEBUG( "Retrieved tool " << m_iVertexFitter);
  
     ATH_CHECK( m_iGammaFitter.retrieve() );
-    msg(MSG::DEBUG) << "Retrieved tool " << m_iGammaFitter << endmsg;
+    ATH_MSG_DEBUG("Retrieved tool " << m_iGammaFitter);
 
   } else {
     ATH_CHECK( m_iVKVertexFitter.retrieve() );
-    msg(MSG::DEBUG) << "Retrieved tool " << m_iVKVertexFitter << endmsg;
+    ATH_MSG_DEBUG("Retrieved tool " << m_iVKVertexFitter);
 
 // Get the VKalVrt Ks vertex fitting tool from ToolSvc
     ATH_CHECK( m_iKshortFitter.retrieve() );
-    msg(MSG::DEBUG) << "Retrieved tool " << m_iKshortFitter << endmsg;
+    ATH_MSG_DEBUG("Retrieved tool " << m_iKshortFitter);
 
 // Get the VKalVrt Lambda vertex fitting tool from ToolSvc
     ATH_CHECK( m_iLambdaFitter.retrieve() );
-    msg(MSG::DEBUG) << "Retrieved tool " << m_iLambdaFitter << endmsg;
+    ATH_MSG_DEBUG( "Retrieved tool " << m_iLambdaFitter);
 
 // Get the VKalVrt Lambdabar vertex fitting tool from ToolSvc
     ATH_CHECK( m_iLambdabarFitter.retrieve() );
-    msg(MSG::DEBUG) << "Retrieved tool " << m_iLambdabarFitter << endmsg;
+    ATH_MSG_DEBUG("Retrieved tool " << m_iLambdabarFitter);
 
 // Get the VKalVrt Gamma vertex fitting tool from ToolSvc
     ATH_CHECK( m_iGammaFitter.retrieve() );
-    msg(MSG::DEBUG) << "Retrieved tool " << m_iGammaFitter << endmsg;
+    ATH_MSG_DEBUG( "Retrieved tool " << m_iGammaFitter );
   }
 
 // get the Particle Properties Service
@@ -196,50 +191,54 @@ StatusCode InDetV0FinderTool::initialize()
 
 // uploading the V0 tools
   ATH_CHECK( m_V0Tools.retrieve() );
-  msg(MSG::DEBUG) << "Retrieved tool " << m_V0Tools << endmsg;
+  ATH_MSG_DEBUG("Retrieved tool " << m_V0Tools);
 
 // Get the TrackToVertex extrapolator tool
   ATH_CHECK( m_trackToVertexTool.retrieve() );
 
 // Get the extrapolator
   ATH_CHECK( m_extrapolator.retrieve() );
-  msg(MSG::DEBUG) << "Retrieved tool " << m_extrapolator << endmsg;
+  ATH_MSG_DEBUG("Retrieved tool ");
 
   // Initialize vertex container key
   ATH_CHECK( m_vertexKey.initialize() );
 
-  m_v0LinksDecorkey = m_vertexKey.key() + ".V0Link";
-  m_v0_ksLinksDecorkey = m_vertexKey.key() + ".KshortLink";
-  m_v0_laLinksDecorkey = m_vertexKey.key() + ".LambdaLink";
-  m_v0_lbLinksDecorkey = m_vertexKey.key() + ".LambdabarLink";
-  ATH_CHECK( m_v0LinksDecorkey.initialize());
+  m_v0LinksDecorkeyks = m_ksKey + ".V0Link";
+  m_v0LinksDecorkeylb = m_laKey + ".V0Link";
+  m_v0LinksDecorkeylbb = m_lbKey + ".V0Link";
+  m_v0_ksLinksDecorkey = m_v0Key + ".KshortLink";
+  m_v0_laLinksDecorkey = m_v0Key + ".LambdaLink";
+  m_v0_lbLinksDecorkey = m_v0Key + ".LambdabarLink";
+  ATH_MSG_DEBUG("m_v0_lbLinksDecorkey = " << m_v0_lbLinksDecorkey.key());
+  ATH_MSG_DEBUG("m_v0_laLinksDecorkey = " << m_v0_laLinksDecorkey.key());
+  ATH_MSG_DEBUG("m_v0_ksLinksDecorkey = " << m_v0_ksLinksDecorkey.key());
+  ATH_MSG_DEBUG("m_v0LinksDecorkeyks = " << m_v0LinksDecorkeyks.key());
+  ATH_CHECK( m_v0LinksDecorkeyks.initialize());
+  ATH_CHECK( m_v0LinksDecorkeylb.initialize());
+  ATH_CHECK( m_v0LinksDecorkeylbb.initialize());
   ATH_CHECK( m_v0_ksLinksDecorkey.initialize());
   ATH_CHECK( m_v0_laLinksDecorkey.initialize());
   ATH_CHECK( m_v0_lbLinksDecorkey.initialize());
 
-  m_mDecor_gfit = m_vertexKey.key() + ".gamma_fit";
-  m_mDecor_gmass = m_vertexKey.key() + ".gamma_mass";
-  m_mDecor_gmasserr = m_vertexKey.key() + ".gamma_massError";
-  m_mDecor_gprob = m_vertexKey.key() + ".gamma_probability";
+  m_mDecor_gfit = m_v0Key + ".gamma_fit"; 
+  m_mDecor_gmass = m_v0Key + ".gamma_mass";
+  m_mDecor_gmasserr = m_v0Key + ".gamma_massError";
+  m_mDecor_gprob = m_v0Key + ".gamma_probability";
   ATH_CHECK( m_mDecor_gfit.initialize());
   ATH_CHECK( m_mDecor_gmass.initialize());
   ATH_CHECK( m_mDecor_gmasserr.initialize());
   ATH_CHECK( m_mDecor_gprob.initialize());
 
-  ATH_CHECK( m_beamSpotKey.initialize());
+  ATH_CHECK( m_eventInfo_key.initialize());
 
-
-// Get the helpertool from ToolSvc
-  ATH_CHECK( m_helpertool.retrieve() );
-  msg(MSG::DEBUG) << "Retrieved tool " << m_helpertool << endmsg;
 
 // Get the track selector tool from ToolSvc
   ATH_CHECK( m_trkSelector.retrieve() );
-  msg(MSG::DEBUG) << "Retrieved tool " << m_trkSelector << endmsg;
+  ATH_MSG_DEBUG("Retrieved tool " << m_trkSelector);
 
 // Get the vertex point estimator tool from ToolSvc
   ATH_CHECK( m_vertexEstimator.retrieve() );
-  msg(MSG::DEBUG) << "Retrieved tool " << m_vertexEstimator << endmsg;
+  ATH_MSG_DEBUG("Retrieved tool " << m_vertexEstimator);
 
   const HepPDT::ParticleData* pd_pi = m_particleDataTable->particle(PDG::pi_plus);
   const HepPDT::ParticleData* pd_p  = m_particleDataTable->particle(PDG::p_plus);
@@ -273,38 +272,27 @@ StatusCode InDetV0FinderTool::initialize()
 
 
 
-  msg(MSG::DEBUG) << "Initialization successful" << endmsg;
+  ATH_MSG_DEBUG( "Initialization successful" );
 
   return StatusCode::SUCCESS;
 }
 
-StatusCode InDetV0FinderTool::performSearch(xAOD::VertexContainer*& v0Container, xAOD::VertexAuxContainer*& v0AuxContainer,
-                                            xAOD::VertexContainer*& ksContainer, xAOD::VertexAuxContainer*& ksAuxContainer,
-                                            xAOD::VertexContainer*& laContainer, xAOD::VertexAuxContainer*& laAuxContainer,
-                                            xAOD::VertexContainer*& lbContainer, xAOD::VertexAuxContainer*& lbAuxContainer,
+StatusCode InDetV0FinderTool::performSearch(xAOD::VertexContainer* v0Container,
+                                            xAOD::VertexContainer* ksContainer,
+                                            xAOD::VertexContainer* laContainer,
+                                            xAOD::VertexContainer* lbContainer,
                                             const xAOD::Vertex* primaryVertex,
-					    const xAOD::VertexContainer* vertColl
+					    const xAOD::VertexContainer* vertColl,
+                                            const EventContext& ctx
 					    ) const
 {
 
   ATH_MSG_DEBUG( "InDetV0FinderTool::performSearch" );
-  v0Container = new xAOD::VertexContainer;
-  v0AuxContainer = new xAOD::VertexAuxContainer;
-  v0Container->setStore(v0AuxContainer);
-  ksContainer = new xAOD::VertexContainer;
-  ksAuxContainer = new xAOD::VertexAuxContainer;
-  ksContainer->setStore(ksAuxContainer);
-  laContainer = new xAOD::VertexContainer;
-  laAuxContainer = new xAOD::VertexAuxContainer;
-  laContainer->setStore(laAuxContainer);
-  lbContainer = new xAOD::VertexContainer;
-  lbAuxContainer = new xAOD::VertexAuxContainer;
-  lbContainer->setStore(lbAuxContainer);
 
   m_events_processed ++;
 
 // Retrieve track particles from StoreGate
-  SG::ReadHandle<xAOD::TrackParticleContainer> TPC( m_trackParticleKey );
+  SG::ReadHandle<xAOD::TrackParticleContainer> TPC( m_trackParticleKey, ctx );
   if ( !TPC.isValid() )
   {
       ATH_MSG_ERROR("Input TrackParticle collection is invalid!");
@@ -316,8 +304,8 @@ StatusCode InDetV0FinderTool::performSearch(xAOD::VertexContainer*& v0Container,
     ATH_MSG_DEBUG("Vertex  container size " << vertColl->size());
   }
 
-  SG::ReadCondHandle<InDet::BeamSpotData> beamSpotHandle { m_beamSpotKey };
-  Amg::Vector3D beamspot = Amg::Vector3D(beamSpotHandle->beamVtx().position());
+  SG::ReadHandle<xAOD::EventInfo> evt { m_eventInfo_key, ctx };
+  Amg::Vector3D beamspot = Amg::Vector3D(evt->beamPosX(), evt->beamPosY(), evt->beamPosZ());
 
 // track preselection
   std::vector<const xAOD::TrackParticle*> posTracks; posTracks.clear();
@@ -351,7 +339,7 @@ StatusCode InDetV0FinderTool::performSearch(xAOD::VertexContainer*& v0Container,
 
   if (!posTracks.empty() && !negTracks.empty())
   {
-  SG::ReadHandle<xAOD::VertexContainer> vertices { m_vertexKey };
+  SG::ReadHandle<xAOD::VertexContainer> vertices { m_vertexKey, ctx };
   if (!vertices.isValid())
   {
     ATH_MSG_WARNING("Primary vertex container with key " << m_vertexKey.key() << " not found");
@@ -387,14 +375,16 @@ StatusCode InDetV0FinderTool::performSearch(xAOD::VertexContainer*& v0Container,
       }
     }
 
-    SG::WriteDecorHandle<xAOD::VertexContainer, ElementLink<xAOD::VertexContainer>> v0LinksDecor(m_v0LinksDecorkey);
-    SG::WriteDecorHandle<xAOD::VertexContainer, ElementLink<xAOD::VertexContainer>> v0_ksLinksDecor(m_v0_ksLinksDecorkey);
-    SG::WriteDecorHandle<xAOD::VertexContainer, ElementLink<xAOD::VertexContainer>> v0_laLinksDecor(m_v0_laLinksDecorkey);
-    SG::WriteDecorHandle<xAOD::VertexContainer, ElementLink<xAOD::VertexContainer>> v0_lbLinksDecor(m_v0_lbLinksDecorkey);
-    SG::WriteDecorHandle<xAOD::VertexContainer, int> mDecor_gfit(m_mDecor_gfit);
-    SG::WriteDecorHandle<xAOD::VertexContainer, float> mDecor_gmass(m_mDecor_gmass);
-    SG::WriteDecorHandle<xAOD::VertexContainer, float> mDecor_gmasserr(m_mDecor_gmasserr);
-    SG::WriteDecorHandle<xAOD::VertexContainer, float> mDecor_gprob(m_mDecor_gprob); 
+    SG::WriteDecorHandle<xAOD::VertexContainer, ElementLink<xAOD::VertexContainer>> v0LinksDecorks(m_v0LinksDecorkeyks, ctx);
+    SG::WriteDecorHandle<xAOD::VertexContainer, ElementLink<xAOD::VertexContainer>> v0LinksDecorlb(m_v0LinksDecorkeylb, ctx);
+    SG::WriteDecorHandle<xAOD::VertexContainer, ElementLink<xAOD::VertexContainer>> v0LinksDecorlbb(m_v0LinksDecorkeylbb, ctx);
+    SG::WriteDecorHandle<xAOD::VertexContainer, ElementLink<xAOD::VertexContainer>> v0_ksLinksDecor(m_v0_ksLinksDecorkey, ctx);
+    SG::WriteDecorHandle<xAOD::VertexContainer, ElementLink<xAOD::VertexContainer>> v0_laLinksDecor(m_v0_laLinksDecorkey, ctx);
+    SG::WriteDecorHandle<xAOD::VertexContainer, ElementLink<xAOD::VertexContainer>> v0_lbLinksDecor(m_v0_lbLinksDecorkey, ctx);
+    SG::WriteDecorHandle<xAOD::VertexContainer, int> mDecor_gfit(m_mDecor_gfit, ctx);
+    SG::WriteDecorHandle<xAOD::VertexContainer, float> mDecor_gmass(m_mDecor_gmass, ctx);
+    SG::WriteDecorHandle<xAOD::VertexContainer, float> mDecor_gmasserr(m_mDecor_gmasserr, ctx);
+    SG::WriteDecorHandle<xAOD::VertexContainer, float> mDecor_gprob(m_mDecor_gprob, ctx); 
     unsigned int i2 = 0;
     for (tpIt2 = negTracks.begin(); tpIt2 != negTracks.end(); ++tpIt2)
     {
@@ -470,7 +460,7 @@ StatusCode InDetV0FinderTool::performSearch(xAOD::VertexContainer*& v0Container,
         {
 
 // pair pre-selection cuts
-          if ( doFit(TP1,TP2,startingPoint) )
+          if ( doFit(TP1,TP2,startingPoint, ctx) )
           {
             std::vector<const xAOD::TrackParticle*> pairV0;
             pairV0.clear();
@@ -589,7 +579,7 @@ StatusCode InDetV0FinderTool::performSearch(xAOD::VertexContainer*& v0Container,
 
                           v0Link.setElement(v0Container->back());
                           v0Link.setStorableObject(*v0Container);
-                          v0LinksDecor(*(ksContainer->back())) = v0Link;
+                          v0LinksDecorks(*(ksContainer->back())) = v0Link;
 
                           ksLink.setElement(ksContainer->back());
                           ksLink.setStorableObject(*ksContainer);
@@ -612,7 +602,7 @@ StatusCode InDetV0FinderTool::performSearch(xAOD::VertexContainer*& v0Container,
 
                           v0Link.setElement(v0Container->back());
                           v0Link.setStorableObject(*v0Container);
-                          v0LinksDecor(*(laContainer->back())) = v0Link;
+                          v0LinksDecorlb(*(laContainer->back())) = v0Link;
 
                           laLink.setElement(laContainer->back());
                           laLink.setStorableObject(*laContainer);
@@ -635,7 +625,7 @@ StatusCode InDetV0FinderTool::performSearch(xAOD::VertexContainer*& v0Container,
 
                           v0Link.setElement(v0Container->back());
                           v0Link.setStorableObject(*v0Container);
-                          v0LinksDecor(*(lbContainer->back())) = v0Link;
+                          v0LinksDecorlbb(*(lbContainer->back())) = v0Link;
 
                           lbLink.setElement(lbContainer->back());
                           lbLink.setStorableObject(*lbContainer);
@@ -704,15 +694,15 @@ StatusCode InDetV0FinderTool::finalize()
 
 void InDetV0FinderTool::SGError(const std::string& errService) const
 {
-  msg(MSG::FATAL) << errService << " not found. Exiting !" << endmsg;
+  ATH_MSG_FATAL(errService << " not found. Exiting !");
 }
 
 
-bool InDetV0FinderTool::doFit(const xAOD::TrackParticle* track1, const xAOD::TrackParticle* track2, Amg::Vector3D &startingPoint) const
+bool InDetV0FinderTool::doFit(const xAOD::TrackParticle* track1, const xAOD::TrackParticle* track2,
+                                 Amg::Vector3D &startingPoint, const EventContext& ctx) const
 {
   bool pass = false;
   double srxy = startingPoint.perp();
-  const EventContext& ctx = Gaudi::Hive::currentContext();
   if (srxy <= m_maxsxy)
   {
     double massKshort_i=2000001., massLambda_i=2000001., massLambdabar_i=2000001.;
