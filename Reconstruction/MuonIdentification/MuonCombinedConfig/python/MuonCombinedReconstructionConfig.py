@@ -150,16 +150,14 @@ def EMEO_MuonCombinedMuonCandidateAlgCfg(flags, name="MuonCombinedMuonCandidateA
 
 
 def MuonCombinedInDetCandidateAlgCfg(flags, name="MuonCombinedInDetCandidateAlg", **kwargs):
-    from MuonCombinedConfig.MuonCombinedRecToolsConfig import MuonCombinedInDetDetailedTrackSelectorToolCfg, MuonSystemExtensionToolCfg
+    from InDetConfig.InDetTrackSelectorToolConfig import MuonCombinedInDetDetailedTrackSelectorToolCfg, MuonCombinedInDetDetailedForwardTrackSelectorToolCfg
+    from MuonCombinedConfig.MuonCombinedRecToolsConfig import MuonSystemExtensionToolCfg
     result = MuonCombinedInDetDetailedTrackSelectorToolCfg(flags)
     kwargs.setdefault("TrackSelector", result.popPrivateTools())
     if flags.MuonCombined.doSiAssocForwardMuons and flags.InDet.Tracking.doForwardTracks:
         kwargs.setdefault("DoSiliconAssocForwardMuons", True)
-        # From old config, addTool("MuonCombinedRecExample.MuonCombinedTools.MuonCombinedInDetDetailedTrackSelectorTool","MuonCombinedInDetDetailedForwardTrackSelectorTool", nHitSct=0)
-        acc = MuonCombinedInDetDetailedTrackSelectorToolCfg(
-            flags, "MuonCombinedInDetDetailedForwardTrackSelectorTool", nHitSct=0)
-        kwargs.setdefault("InDetForwardTrackSelector", acc.popPrivateTools())
-        result.merge(acc)
+        kwargs.setdefault("InDetForwardTrackSelector", result.popToolsAndMerge(
+            MuonCombinedInDetDetailedForwardTrackSelectorToolCfg(flags)))
 
     muon_ext_tool = result.popToolsAndMerge(
         MuonSystemExtensionToolCfg(flags))
@@ -205,20 +203,21 @@ def LRT_MuonInDetToMuonSystemExtensionAlgCfg(flags, name="MuonInDetToMuonSystemE
 
 
 def LRT_MuonCombinedInDetCandidateAlgCfg(flags, name="MuonCombinedInDetCandidateAlg_LRT", **kwargs):
-    from MuonCombinedConfig.MuonCombinedRecToolsConfig import MuonCombinedInDetDetailedTrackSelectorToolCfg, MuonCombinedInDetDetailedTrackSelectorTool_LRTCfg
+    from InDetConfig.InDetTrackSelectorToolConfig import MuonCombinedInDetDetailedForwardTrackSelectorToolCfg, MuonCombinedInDetDetailedTrackSelectorTool_LRTCfg
     result = ComponentAccumulator()
-    sel_acc = MuonCombinedInDetDetailedTrackSelectorTool_LRTCfg(flags)
-    kwargs.setdefault("TrackSelector", sel_acc.popPrivateTools())
-    result.merge(sel_acc)
+
+    kwargs.setdefault("TrackSelector", result.popToolsAndMerge(
+        MuonCombinedInDetDetailedTrackSelectorTool_LRTCfg(flags)))
+
     # Use the Standard Track particle container in cases where no separate containters will be
     # saved for the LRT tracking
     kwargs.setdefault("TrackParticleLocation", ["InDetLargeD0TrackParticles"])
     kwargs.setdefault("InDetCandidateLocation", "TrackParticleCandidateLRT")
     kwargs.setdefault("DoSiliconAssocForwardMuons", False)
-    fwd_acc = MuonCombinedInDetDetailedTrackSelectorToolCfg(
-        flags, "MuonCombinedInDetDetailedForwardTrackSelectorTool", nHitSct=0)
 
-    kwargs.setdefault("InDetForwardTrackSelector", fwd_acc.popPrivateTools())
+    kwargs.setdefault("InDetForwardTrackSelector", result.popToolsAndMerge(
+        MuonCombinedInDetDetailedForwardTrackSelectorToolCfg(flags)))
+
     if flags.Reco.EnableCaloExtension and not flags.Muon.MuonTrigger:
         kwargs.setdefault("CaloExtensionLocation", [
                           "ParticleCaloExtension_LRT"])

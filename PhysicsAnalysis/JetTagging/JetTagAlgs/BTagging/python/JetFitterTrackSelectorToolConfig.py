@@ -4,7 +4,7 @@ from AthenaConfiguration.ComponentAccumulator import ComponentAccumulator
 from AthenaConfiguration.ComponentFactory import CompFactory
 
 from BTagging.InDetJetFitterUtilsConfig import InDetJetFitterUtilsCfg
-from BTagging.InDetImprovedJetFitterTrackSelectorToolConfig import InDetImprovedJetFitterTrackSelectorToolCfg
+from InDetConfig.InDetTrackSelectorToolConfig import InDetImprovedJetFitterTrackSelectorToolCfg
 from TrkConfig.AtlasExtrapolatorConfig import AtlasExtrapolatorCfg
 
 def InDetJetFitterTrackSelectorToolCfg(flags, name, suffix="", useBTagFlagsDefaults = True, **options):

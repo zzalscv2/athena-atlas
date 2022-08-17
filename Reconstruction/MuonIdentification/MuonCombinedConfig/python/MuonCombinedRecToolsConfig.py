@@ -7,7 +7,6 @@ from AthenaConfiguration.ComponentAccumulator import ComponentAccumulator
 from AthenaConfiguration.ComponentFactory import CompFactory
 from AthenaConfiguration.Enums import BeamType
 from TrkConfig.AtlasExtrapolatorConfig import AtlasExtrapolatorCfg
-from IOVDbSvc.IOVDbSvcConfig import addFoldersSplitOnline
 from MuonConfig.MuonRecToolsConfig import MuonEDMPrinterToolCfg
 from MuonConfig.MuonTrackBuildingConfig import MuonSegmentRegionRecoveryToolCfg
 
@@ -27,95 +26,21 @@ def MuonTrackToVertexCfg(flags, name='MuonTrackToVertexTool', **kwargs):
     return acc
 
 
-def MuonCombinedInDetDetailedTrackSelectorToolCfg(flags, name="MuonCombinedInDetDetailedTrackSelectorTool", **kwargs):
-    if flags.Beam.Type is BeamType.Collisions:
-        kwargs.setdefault("pTMin", 2000)
-        kwargs.setdefault("nHitBLayer", 0)
-        kwargs.setdefault("nHitBLayerPlusPix", 0)
-        kwargs.setdefault("nHitTrt", 0)
-        kwargs.setdefault("useTrackQualityInfo", False)
-        if flags.Muon.SAMuonTrigger:
-            kwargs.setdefault("IPd0Max", 19999.0)
-            kwargs.setdefault("IPz0Max", 19999.0)
-            kwargs.setdefault("z0Max", 19999.0)
-            kwargs.setdefault("useTrackSummaryInfo", False)
-            kwargs.setdefault("nHitPix", 0)
-            kwargs.setdefault("nHitSct", 0)
-            kwargs.setdefault("nHitSi", 0)
-        else:
-            kwargs.setdefault("IPd0Max", 50.0)
-            kwargs.setdefault("IPz0Max", 9999.0)
-            kwargs.setdefault("z0Max", 9999.0)
-            kwargs.setdefault("useTrackSummaryInfo", True)
-            kwargs.setdefault("nHitPix", 1)
-            kwargs.setdefault("nHitSct", 3)
-            kwargs.setdefault("nHitSi", 4)
-    else:
-        kwargs.setdefault("pTMin", 500)
-        kwargs.setdefault("IPd0Max", 19999.0)
-        kwargs.setdefault("IPz0Max", 19999.0)
-        kwargs.setdefault("z0Max", 19999.0)
-        kwargs.setdefault("useTrackSummaryInfo", False)
-        kwargs.setdefault("useTrackQualityInfo", False)
-
-    result = AtlasExtrapolatorCfg(flags)
-    extrapolator = result.getPrimary()
-    kwargs.setdefault("Extrapolator", extrapolator)
-
-    kwargs.setdefault("TrackSummaryTool", "")
-
-    # Has two CondKeys
-    # SG::ReadCondHandleKey<InDet::BeamSpotData> m_beamSpotKey { this, "BeamSpotKey", "BeamSpotData", "SG key for beam spot" };
-
-    # FIXME - let's put this someplace central?
-    result.merge(addFoldersSplitOnline(flags, "INDET", "/Indet/Onl/Beampos",
-                 "/Indet/Beampos", className='AthenaAttributeList'))
-    result.addCondAlgo(CompFactory.BeamSpotCondAlg("BeamSpotCondAlg"))
-
-    # SG::ReadCondHandleKey<AtlasFieldCacheCondObj> m_fieldCacheCondObjInputKey {this, "AtlasFieldCacheCondObj", "fieldCondObj", "Name of the Magnetic Field conditions object key"};
-    # FIXME - handle this ^
-
-    tool = CompFactory.InDet.InDetDetailedTrackSelectorTool(name, **kwargs)
-    result.setPrivateTools(tool)
-    return result
-
-
-def MuonCombinedInDetDetailedTrackSelectorTool_LRTCfg(flags, name='MuonCombinedInDetDetailedTrackSelectorTool_LRT', **kwargs):
-    kwargs.setdefault("pTMin", 2000)
-    kwargs.setdefault("IPd0Max", 1.e4)
-    kwargs.setdefault("IPz0Max",  1.e4)
-    kwargs.setdefault("z0Max",  1.e4)
-    kwargs.setdefault("useTrackSummaryInfo", True)
-    kwargs.setdefault("nHitBLayer", 0)
-    kwargs.setdefault("nHitPix", 0)
-    kwargs.setdefault("nHitBLayerPlusPix", 0)
-    kwargs.setdefault("nHitSct", 4)
-    kwargs.setdefault("nHitSi", 4)
-    kwargs.setdefault("nHitTrt", 0)
-    kwargs.setdefault("useTrackQualityInfo", False)
-    return MuonCombinedInDetDetailedTrackSelectorToolCfg(flags, name, **kwargs)
-
-
 def InDetCandidateToolCfg(flags, name="InDetCandidateTool", **kwargs):
+    from InDetConfig.InDetTrackSelectorToolConfig import MuonCombinedInDetDetailedTrackSelectorToolCfg
     result = MuonCombinedInDetDetailedTrackSelectorToolCfg(flags)
-    kwargs.setdefault("TrackSelector", result.getPrimary())
-    tool = CompFactory.MuonCombined.InDetCandidateTool(name, **kwargs)
-    result.addPublicTool(tool)
-    result.setPrivateTools(tool)
+    kwargs.setdefault("TrackSelector", result.popPrivateTools())
+    result.setPrivateTools(CompFactory.MuonCombined.InDetCandidateTool(name, **kwargs))
     return result
 
 
-def MuonInDetForwardCandidateToolCfg(flags,  name='MuonInDetForwardCandidateTool', **kwargs):
-    result = MuonCombinedInDetDetailedTrackSelectorToolCfg(
-        flags, "MuonCombinedInDetDetailedForwardTrackSelectorTool", nHitSct=0)
-
-    acc = InDetCandidateToolCfg(flags, name="InDetForwardCandidateTool",
-                                TrackSelector=result.getPrimary(),
-                                FlagCandidatesAsSiAssociated=True)
-    tool = acc.getPrimary()
-    result.merge(acc)
-    result.addPublicTool(tool)
-    result.setPrivateTools(tool)
+def MuonInDetForwardCandidateToolCfg(flags,  name='InDetForwardCandidateTool', **kwargs):
+    from InDetConfig.InDetTrackSelectorToolConfig import MuonCombinedInDetDetailedForwardTrackSelectorToolCfg
+    result = MuonCombinedInDetDetailedForwardTrackSelectorToolCfg(flags)
+    kwargs.setdefault("TrackSelector", result.popPrivateTools())
+    kwargs.setdefault("FlagCandidatesAsSiAssociated", True)
+    result.setPrivateTools(result.popToolsAndMerge(
+        InDetCandidateToolCfg(flags, name, **kwargs)))
     return result  # FIXME - is this and the above, actually used?
 
 
@@ -934,26 +859,6 @@ def CombinedMuonTagTestToolCfg(flags, name='CombinedMuonTagTestTool', **kwargs):
 # From MuonCaloTagTool.py
 
 
-def CaloTrkMuIdAlgTrackSelectorToolCfg(flags, name='CaloTrkMuIdAlgTrackSelectorTool', **kwargs):
-    result = ComponentAccumulator()
-    kwargs.setdefault("pTMin", 5000.)
-    kwargs.setdefault("IPd0Max", 7.)
-    kwargs.setdefault("IPz0Max", 130)     # 130 (tuned on Z)
-    kwargs.setdefault("nHitBLayer", 0)
-    kwargs.setdefault("nHitPix", 1)
-    kwargs.setdefault("nHitSct", 5)
-    kwargs.setdefault("nHitSi", 7)
-    kwargs.setdefault("nHitTrt", 0)
-    from TrkConfig.TrkTrackSummaryToolConfig import MuonCombinedTrackSummaryToolCfg
-    kwargs.setdefault("TrackSummaryTool", result.popToolsAndMerge(MuonCombinedTrackSummaryToolCfg(flags)))
-    acc = AtlasExtrapolatorCfg(flags)
-    kwargs.setdefault("Extrapolator", acc.popPrivateTools())
-    result.merge(acc)
-    tool = CompFactory.InDet.InDetDetailedTrackSelectorTool(name, **kwargs)
-    result.setPrivateTools(tool)
-    return result
-
-
 def TrackDepositInCaloToolCfg(flags, name='TrackDepositInCaloTool', **kwargs):
     from TrackToCalo.TrackToCaloConfig import ParticleCaloExtensionToolCfg, ParticleCaloCellAssociationToolCfg
     result = ParticleCaloExtensionToolCfg(flags)
@@ -996,23 +901,17 @@ def MuonCaloTagToolCfg(flags, name='MuonCaloTagTool', **kwargs):
     kwargs.setdefault("CaloMuonTagLoose",       CompFactory.CaloMuonTag(
         name="CaloMuonTagLoose", TagMode="Loose"))
     kwargs.setdefault("CaloMuonTagTight",       CompFactory.CaloMuonTag())
-    acc = CaloMuonLikelihoodToolCfg(flags)
-    kwargs.setdefault("CaloMuonLikelihoodTool", acc.popPrivateTools())
-    result.merge(acc)
-    acc = CaloMuonScoreToolCfg(flags)
-    kwargs.setdefault("CaloMuonScoreTool", acc.popPrivateTools())
-    result.merge(acc)
-    acc = TrackDepositInCaloToolCfg(flags)
-    trackDepositInCaloTool = acc.popPrivateTools()
-    kwargs.setdefault("TrackDepositInCaloTool", trackDepositInCaloTool)
-    result.merge(acc)
-    acc = CaloTrkMuIdAlgTrackSelectorToolCfg(flags)
-    calotrkmuidalgtrackselectortool = acc.popPrivateTools()
-    kwargs.setdefault("TrackSelectorTool",   calotrkmuidalgtrackselectortool)
-    result.merge(acc)
+    kwargs.setdefault("CaloMuonLikelihoodTool", result.popToolsAndMerge(
+        CaloMuonLikelihoodToolCfg(flags)))
+    kwargs.setdefault("CaloMuonScoreTool",      result.popToolsAndMerge(
+        CaloMuonScoreToolCfg(flags)))
+    kwargs.setdefault("TrackDepositInCaloTool", result.popToolsAndMerge(
+        TrackDepositInCaloToolCfg(flags)))
+    from InDetConfig.InDetTrackSelectorToolConfig import CaloTrkMuIdAlgTrackSelectorToolCfg
+    kwargs.setdefault("TrackSelectorTool",      result.popToolsAndMerge(
+        CaloTrkMuIdAlgTrackSelectorToolCfg(flags)))
     kwargs.setdefault("doCaloLR", False)
-    tool = CompFactory.MuonCombined.MuonCaloTagTool(name, **kwargs)
-    result.setPrivateTools(tool)
+    result.setPrivateTools(CompFactory.MuonCombined.MuonCaloTagTool(name, **kwargs))
     return result
 
 # Misc
