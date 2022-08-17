@@ -5,7 +5,7 @@ from AthenaConfiguration.ComponentFactory import CompFactory
 
 from BTagging.ImprovedJetFitterInitializationHelperConfig import ImprovedJetFitterInitializationHelperCfg
 from BTagging.ImprovedJetFitterRoutinesConfig import ImprovedJetFitterRoutinesCfg
-from BTagging.InDetImprovedJetFitterTrackSelectorToolConfig import InDetImprovedJetFitterTrackSelectorToolCfg
+from InDetConfig.InDetTrackSelectorToolConfig import InDetImprovedJetFitterTrackSelectorToolCfg
 
 def InDetInDetJetFitterVxFinderCfg(flags, name, suffix="", useBTagFlagsDefaults = True, **options):
     """Sets up a InDetJetFitterVxFinder  tool and returns it.

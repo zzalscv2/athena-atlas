@@ -97,43 +97,6 @@ def TauAxisCfg(flags):
     return result
 
 #########################################################################
-def InDetTrackSelectorToolCfg(flags):
-    result = ComponentAccumulator()
-    _name = sPrefix + 'InDetTrackSelectorTool'
-
-    from MagFieldServices.MagFieldServicesConfig import AtlasFieldCacheCondAlgCfg
-    result.merge(AtlasFieldCacheCondAlgCfg(flags))
-
-    from BeamSpotConditions.BeamSpotConditionsConfig import BeamSpotCondAlgCfg
-    result.merge(BeamSpotCondAlgCfg(flags))
-
-    from TrkConfig.AtlasExtrapolatorConfig import AtlasExtrapolatorCfg
-    #Configures tau track selector tool (should eventually check whether an existing one is available)
-    InDet__InDetDetailedTrackSelectorTool = CompFactory.InDet.InDetDetailedTrackSelectorTool
-    InDetTrackSelectorTool = InDet__InDetDetailedTrackSelectorTool(name = _name,
-                                                                   pTMin                = 1000.,
-                                                                   IPd0Max              = 1.,
-                                                                   IPz0Max              = 1.5, 
-                                                                   useTrackSummaryInfo  = True,
-                                                                   nHitBLayer           = 0, 
-                                                                   nHitPix              = 2,  # PixelHits + PixelDeadSensors
-                                                                   nHitSct              = 0,  # SCTHits + SCTDeadSensors
-                                                                   nHitSi               = 7,  # PixelHits + SCTHits + PixelDeadSensors + SCTDeadSensors
-                                                                   nHitTrt              = 0,  # nTRTHits
-                                                                   useSharedHitInfo     = False,
-                                                                   nSharedBLayer        = 99999,
-                                                                   nSharedPix           = 99999,
-                                                                   nSharedSct           = 99999,
-                                                                   nSharedSi            = 99999,
-                                                                   useTrackQualityInfo  = True,
-                                                                   fitChi2OnNdfMax      = 99999,
-                                                                   TrackSummaryTool     = None,
-                                                                   Extrapolator         = result.popToolsAndMerge(AtlasExtrapolatorCfg(flags)) )
-
-    result.setPrivateTools(InDetTrackSelectorTool)
-    return result
-
-#########################################################################
 def TrackToVertexToolCfg(flags):
     result = ComponentAccumulator()
     _name = sPrefix + 'TrackToVertexTool'
@@ -171,12 +134,13 @@ def TauTrackFinderCfg(flags):
 
     from TrackToCalo.TrackToCaloConfig import ParticleCaloExtensionToolCfg
     from TrkConfig.TrkVertexFitterUtilsConfig import AtlasTrackToVertexIPEstimatorCfg
+    from InDetConfig.InDetTrackSelectorToolConfig import TauRecInDetTrackSelectorToolCfg
 
     TauTrackFinder = CompFactory.getComp("TauTrackFinder")
     TauTrackFinder = TauTrackFinder(name = _name,
                                     MaxJetDrTau = 0.2,
                                     MaxJetDrWide = 0.4,
-                                    TrackSelectorToolTau      = result.popToolsAndMerge(InDetTrackSelectorToolCfg(flags)),
+                                    TrackSelectorToolTau      = result.popToolsAndMerge(TauRecInDetTrackSelectorToolCfg(flags)),
                                     TrackToVertexTool         = result.popToolsAndMerge(TrackToVertexToolCfg(flags)),
                                     ParticleCaloExtensionTool = result.popToolsAndMerge(ParticleCaloExtensionToolCfg(flags)),
                                     tauParticleCache = getParticleCache(flags), # only returns a string

@@ -81,8 +81,8 @@ def DiTauTrackFinderCfg(ConfigFlags, name="DiTauRec_DiTauTrackFinder", **kwargs)
     kwargs.setdefault("TrackParticleContainer", "InDetTrackParticles")
 
     if "TrackSelectorTool" not in kwargs:
-        from tauRec.TauToolHolder import InDetTrackSelectorToolCfg
-        InDetTrackSelectorTool = acc.popToolsAndMerge(InDetTrackSelectorToolCfg(ConfigFlags))
+        from InDetConfig.InDetTrackSelectorToolConfig import TauRecInDetTrackSelectorToolCfg
+        InDetTrackSelectorTool = acc.popToolsAndMerge(TauRecInDetTrackSelectorToolCfg(ConfigFlags))
         acc.addPublicTool(InDetTrackSelectorTool)
         kwargs.setdefault("TrackSelectorTool", InDetTrackSelectorTool)
 

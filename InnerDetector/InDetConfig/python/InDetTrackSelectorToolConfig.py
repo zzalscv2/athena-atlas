@@ -3,7 +3,7 @@
 
 from AthenaConfiguration.ComponentAccumulator import ComponentAccumulator
 from AthenaConfiguration.ComponentFactory import CompFactory
-
+from AthenaConfiguration.Enums import LHCPeriod, BeamType
 
 def InDetConversionTrackSelectorToolCfg(flags, name="TrackSelector", **kwargs):
     acc = ComponentAccumulator()
@@ -29,6 +29,128 @@ def InDetConversionTrackSelectorToolCfg(flags, name="TrackSelector", **kwargs):
 
     acc.setPrivateTools(CompFactory.InDet.InDetConversionTrackSelectorTool(name, **kwargs))
     return acc
+
+def InDetTrackSelectorToolCfg(flags, name='InDetTrackSelectorTool', **kwargs):
+
+    from BeamSpotConditions.BeamSpotConditionsConfig import BeamSpotCondAlgCfg
+    from MagFieldServices.MagFieldServicesConfig import AtlasFieldCacheCondAlgCfg
+    result = BeamSpotCondAlgCfg(flags) # To produce the input InDet::BeamSpotData CondHandle
+    result.merge(AtlasFieldCacheCondAlgCfg(flags)) # To produce the input AtlasFieldCacheCondObj
+
+    if "Extrapolator" not in kwargs:
+        from TrkConfig.AtlasExtrapolatorConfig import AtlasExtrapolatorCfg
+        kwargs.setdefault("Extrapolator", result.popToolsAndMerge(AtlasExtrapolatorCfg(flags)))
+
+    result.setPrivateTools(CompFactory.InDet.InDetDetailedTrackSelectorTool(name, **kwargs))
+    return result
+
+def InDetImprovedJetFitterTrackSelectorToolCfg(flags, name='InDetImprovedJFTrackSelTool', **kwargs):
+    kwargs.setdefault("pTMin",      500.0)
+    kwargs.setdefault("IPd0Max",    7.0)
+    kwargs.setdefault("IPz0Max",    10.0)
+    kwargs.setdefault("sigIPd0Max", 0.35)
+    kwargs.setdefault("sigIPz0Max", 2.5)
+    kwargs.setdefault("etaMax",     9999.0)
+    kwargs.setdefault("nHitBLayer", 0)
+    kwargs.setdefault("nHitPix",    1)
+    kwargs.setdefault("nHitSct",    4 if flags.GeoModel.Run < LHCPeriod.Run4 else 0)
+    kwargs.setdefault("nHitSi",     7)
+    kwargs.setdefault("nHitTrt",    0)
+    kwargs.setdefault("fitChi2OnNdfMax", 3.5)
+    kwargs.setdefault("useTrackSummaryInfo", True)
+    kwargs.setdefault("useSharedHitInfo",    False)
+    kwargs.setdefault("useTrackQualityInfo", True)
+    kwargs.setdefault("TrackSummaryTool", "")
+    return InDetTrackSelectorToolCfg(flags, name, **kwargs)
+
+def MuonCombinedInDetDetailedTrackSelectorToolCfg(flags, name="MuonCombinedInDetDetailedTrackSelectorTool", **kwargs):
+    if flags.Beam.Type is BeamType.Collisions:
+        kwargs.setdefault("pTMin",             2000)
+        kwargs.setdefault("nHitBLayer",        0)
+        kwargs.setdefault("nHitBLayerPlusPix", 0)
+        kwargs.setdefault("nHitTrt",           0)
+        kwargs.setdefault("useTrackQualityInfo", False)
+        if flags.Muon.SAMuonTrigger:
+            kwargs.setdefault("IPd0Max",       19999.0)
+            kwargs.setdefault("IPz0Max",       19999.0)
+            kwargs.setdefault("z0Max",         19999.0)
+            kwargs.setdefault("nHitPix",       0)
+            kwargs.setdefault("nHitSct",       0)
+            kwargs.setdefault("nHitSi",        0)
+            kwargs.setdefault("useTrackSummaryInfo", False)
+        else:
+            kwargs.setdefault("IPd0Max",       50.0)
+            kwargs.setdefault("IPz0Max",       9999.0)
+            kwargs.setdefault("z0Max",         9999.0)
+            kwargs.setdefault("nHitPix",       1)
+            kwargs.setdefault("nHitSct",       3)
+            kwargs.setdefault("nHitSi",        4)
+            kwargs.setdefault("useTrackSummaryInfo", True)
+    else:
+        kwargs.setdefault("pTMin",             500)
+        kwargs.setdefault("IPd0Max",           19999.0)
+        kwargs.setdefault("IPz0Max",           19999.0)
+        kwargs.setdefault("z0Max",             19999.0)
+        kwargs.setdefault("useTrackSummaryInfo", False)
+        kwargs.setdefault("useTrackQualityInfo", False)
+
+    kwargs.setdefault("TrackSummaryTool", "")
+    return InDetTrackSelectorToolCfg(flags, name, **kwargs)
+
+def MuonCombinedInDetDetailedTrackSelectorTool_LRTCfg(flags, name='MuonCombinedInDetDetailedTrackSelectorTool_LRT', **kwargs):
+    kwargs.setdefault("pTMin",      2000)
+    kwargs.setdefault("IPd0Max",    1.e4)
+    kwargs.setdefault("IPz0Max",    1.e4)
+    kwargs.setdefault("z0Max",      1.e4)
+    kwargs.setdefault("nHitBLayer", 0)
+    kwargs.setdefault("nHitPix",    0)
+    kwargs.setdefault("nHitBLayerPlusPix", 0)
+    kwargs.setdefault("nHitSct",    4)
+    kwargs.setdefault("nHitSi",     4)
+    kwargs.setdefault("nHitTrt",    0)
+    kwargs.setdefault("useTrackSummaryInfo", True)
+    kwargs.setdefault("useTrackQualityInfo", False)
+    return MuonCombinedInDetDetailedTrackSelectorToolCfg(flags, name, **kwargs)
+
+def MuonCombinedInDetDetailedForwardTrackSelectorToolCfg(flags, name='MuonCombinedInDetDetailedForwardTrackSelectorTool', **kwargs):
+    kwargs.setdefault("nHitSct", 0)
+    return MuonCombinedInDetDetailedTrackSelectorToolCfg(flags, name, **kwargs)
+
+def CaloTrkMuIdAlgTrackSelectorToolCfg(flags, name='CaloTrkMuIdAlgTrackSelectorTool', **kwargs):
+    result = ComponentAccumulator()
+
+    kwargs.setdefault("pTMin",      5000.)
+    kwargs.setdefault("IPd0Max",    7.)
+    kwargs.setdefault("IPz0Max",    130.) # (tuned on Z)
+    kwargs.setdefault("nHitBLayer", 0)
+    kwargs.setdefault("nHitPix",    1)
+    kwargs.setdefault("nHitSct",    5)
+    kwargs.setdefault("nHitSi",     7)
+    kwargs.setdefault("nHitTrt",    0)
+
+    from TrkConfig.TrkTrackSummaryToolConfig import MuonCombinedTrackSummaryToolCfg
+    kwargs.setdefault("TrackSummaryTool", result.popToolsAndMerge(
+        MuonCombinedTrackSummaryToolCfg(flags)))
+
+    result.setPrivateTools(result.popToolsAndMerge(
+        InDetTrackSelectorToolCfg(flags, name, **kwargs)))
+    return result
+
+def TauRecInDetTrackSelectorToolCfg(flags, name='tauRec_InDetTrackSelectorTool', **kwargs):
+    kwargs.setdefault("pTMin",      1000.0)
+    kwargs.setdefault("IPd0Max",    1.)
+    kwargs.setdefault("IPz0Max",    1.5)
+    kwargs.setdefault("nHitBLayer", 0)
+    kwargs.setdefault("nHitPix",    2) # PixelHits + PixelDeadSensors
+    kwargs.setdefault("nHitSct",    0) # SCTHits + SCTDeadSensors
+    kwargs.setdefault("nHitSi",     7) # PixelHits + SCTHits + PixelDeadSensors + SCTDeadSensors
+    kwargs.setdefault("nHitTrt",    0)
+    kwargs.setdefault("fitChi2OnNdfMax", 99999)
+    kwargs.setdefault("useTrackSummaryInfo", True)
+    kwargs.setdefault("useSharedHitInfo",    False)
+    kwargs.setdefault("useTrackQualityInfo", True)
+    kwargs.setdefault("TrackSummaryTool", "")
+    return InDetTrackSelectorToolCfg(flags, name, **kwargs)
 
 def InDetTRTDriftCircleCutToolCfg(flags, name='InDetTRTDriftCircleCutTool', **kwargs):
     from TRT_ConditionsAlgs.TRT_ConditionsAlgsConfig import TRTActiveCondAlgCfg
