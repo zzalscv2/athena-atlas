@@ -21,7 +21,6 @@
 #include "CaloIdentifier/CaloCell_SuperCell_ID.h"
 #include "L1CaloFEXSim/FEXAlgoSpaceDefs.h"
 
-#include "L1CaloFEXSim/jFEXtauTOB.h"
 
 namespace LVL1 {
   
@@ -65,7 +64,7 @@ namespace LVL1 {
     virtual std::vector<std::vector<uint32_t>> getSumEtTOBs() override;
     virtual std::vector<std::vector<uint32_t>> getMetTOBs() override;
     
-    virtual std::vector<std::unique_ptr<jFEXtauTOB>> getTauTOBs() override;
+    virtual std::vector<std::unique_ptr<jFEXTOB>> getTauTOBs() override;
 
     /** Internal data */
   private:
@@ -80,7 +79,7 @@ namespace LVL1 {
    
     std::vector<std::vector<std::vector<uint32_t>>> m_smallRJet_tobWords;
     std::vector<std::vector<std::vector<uint32_t>>> m_largeRJet_tobWords;
-    std::vector< std::vector<std::unique_ptr<jFEXtauTOB>> > m_tau_tobWords;
+    std::vector< std::vector<std::unique_ptr<jFEXTOB>> > m_tau_tobWords;
     std::vector<std::vector<std::vector<uint32_t>>> m_fwdEl_tobWords;
     std::vector<std::vector<uint32_t>> m_sumET_tobWords;
     std::vector<std::vector<uint32_t>> m_Met_tobWords;

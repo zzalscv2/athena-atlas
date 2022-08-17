@@ -15,7 +15,6 @@
 #include "AthenaBaseComps/AthAlgTool.h"
 #include "L1CaloFEXToolInterfaces/IjFEXsumETAlgo.h"
 #include "AthenaKernel/CLASS_DEF.h"
-#include "L1CaloFEXSim/jFEXsumETTOB.h"
 #include "L1CaloFEXSim/jTowerContainer.h"
 
 #include "CaloEvent/CaloCellContainer.h"
@@ -51,8 +50,6 @@ namespace LVL1 {
     virtual int getETlowerEta(uint bin)  override;
     virtual int getETupperEta(uint bin)  override;   
     virtual void setFPGAEnergy(std::unordered_map<int,std::vector<int> > et_map)  override;
-    
-    virtual std::unique_ptr<jFEXsumETTOB> getsumETTOBs() override;
     
 protected:
 

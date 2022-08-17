@@ -50,8 +50,8 @@ if __name__ == "__main__":
         nRDOSTGC     += inputTree.N_RDO_sTGC
 
         if Options.checkPRD:
-            nPRDMM += inputTree.PRD_MM
-            nPRDSTGC += inputTree.PRD_sTGC
+            nPRDMM += inputTree.N_PRD_MM
+            nPRDSTGC += inputTree.N_PRD_sTGC
 
         if Options.checkHits:
             nHitsMM      += inputTree.Hits_MM_nHits

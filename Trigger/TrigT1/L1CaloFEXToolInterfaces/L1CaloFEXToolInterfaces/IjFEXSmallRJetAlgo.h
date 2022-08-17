@@ -12,7 +12,6 @@
 #define IjFEXSmallRJetAlgo_H
 
 #include "GaudiKernel/IAlgTool.h"
-#include "L1CaloFEXSim/jFEXSmallRJetTOB.h"
 #include "L1CaloFEXSim/jTowerContainer.h"
 
 namespace LVL1{
@@ -33,7 +32,6 @@ namespace LVL1{
       virtual unsigned int getSmallClusterET() =0;
       virtual unsigned int getSmallETRing() =0;
       virtual bool checkDisplacedLM() = 0;
-      virtual std::unique_ptr<jFEXSmallRJetTOB> getSmallRJetTOBs() = 0; 
       virtual unsigned int getTTIDcentre() =0;
       virtual void setFPGAEnergy(std::unordered_map<int,std::vector<int> > et_map)   =0;
 

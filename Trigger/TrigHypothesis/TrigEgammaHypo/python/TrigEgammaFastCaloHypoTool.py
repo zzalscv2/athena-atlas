@@ -3,14 +3,7 @@
 
 from AthenaCommon.SystemOfUnits import GeV
 from AthenaConfiguration.AllConfigFlags import ConfigFlags
-from AthenaCommon.Configurable import Configurable
 from AthenaConfiguration.ComponentFactory import CompFactory
-
-if not Configurable.configurableRun3Behavior:
-    from AthOnnxruntimeService.AthOnnxruntimeServiceConf import AthONNX__ONNXRuntimeSvc
-    from AthenaCommon.AppMgr import ServiceMgr
-    ServiceMgr += AthONNX__ONNXRuntimeSvc()
-
 
 def same( val , tool):
   return [val]*( len( tool.EtaBins ) - 1 )

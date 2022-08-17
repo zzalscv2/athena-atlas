@@ -12,7 +12,6 @@
 #include <stdio.h>
 #include <math.h>
 #include "L1CaloFEXSim/jFEXmetAlgo.h"
-#include "L1CaloFEXSim/jFEXmetTOB.h"
 #include "L1CaloFEXSim/jTower.h"
 #include "L1CaloFEXSim/jTowerContainer.h"
 #include "CaloEvent/CaloCellContainer.h"
@@ -231,18 +230,6 @@ void LVL1::jFEXmetAlgo::buildMetYComponent()
 int LVL1::jFEXmetAlgo::GetMetYComponent()
 {
     return m_Totalmet_Ycoord;
-}
-         
-std::unique_ptr<jFEXmetTOB> LVL1::jFEXmetAlgo::getmetTOBs(){
-
-  std::unique_ptr<jFEXmetTOB> tob = std::make_unique<jFEXmetTOB>();
-
-
-  tob->setMetX(m_Totalmet_Xcoord);
-  tob->setMetY(m_Totalmet_Ycoord); 
-  tob->setSat(0); 
-  tob->setRes(0);
-  return tob;
 }
 
 //Gets the ET for the TT. This ET is EM + HAD

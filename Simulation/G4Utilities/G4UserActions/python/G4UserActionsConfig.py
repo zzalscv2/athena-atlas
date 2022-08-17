@@ -123,3 +123,16 @@ def RadiationMapsMakerToolCfg(ConfigFlags, name="G4UA::UserActionSvc.RadiationMa
     result.setPrivateTools(CompFactory.G4UA.RadiationMapsMakerTool(name, **kwargs))
     return result
 
+
+def HIPKillerToolCfg(ConfigFlags, name="G4UA::HIPKillerTool", **kwargs):
+    result = ComponentAccumulator()
+    result.setPrivateTools(CompFactory.G4UA.HIPKillerTool(name, **kwargs))
+    return result
+
+
+def MonopoleLooperKillerToolCfg(ConfigFlags, name="G4UA::MonopoleLooperKillerTool", **kwargs):
+    kwargs.setdefault("MaxSteps",2000000)
+    kwargs.setdefault("PrintSteps",2)
+    kwargs.setdefault("VerboseLevel",0)
+    return LooperKillerToolCfg(ConfigFlags, name, **kwargs)
+

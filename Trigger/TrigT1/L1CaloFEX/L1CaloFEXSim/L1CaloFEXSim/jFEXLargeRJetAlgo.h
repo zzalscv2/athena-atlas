@@ -15,7 +15,6 @@
 #include "AthenaKernel/CLASS_DEF.h" 
 #include "L1CaloFEXToolInterfaces/IjFEXLargeRJetAlgo.h"
 #include "L1CaloFEXToolInterfaces/IjFEXSmallRJetAlgo.h"
-#include "L1CaloFEXSim/jFEXLargeRJetTOB.h"
 #include "L1CaloFEXSim/jTowerContainer.h"
 
 #include "CaloEvent/CaloCellContainer.h"
@@ -43,7 +42,6 @@ namespace LVL1 {
     virtual void setupCluster(int inputTable[15][15]) override;
     virtual unsigned int getRingET() override;
     virtual unsigned int getLargeClusterET(unsigned int smallClusterET, unsigned int largeRingET) override;
-    virtual std::unique_ptr<jFEXLargeRJetTOB> getLargeRJetTOBs(int smallClusterET,int TTID) override;
     virtual void setFPGAEnergy(std::unordered_map<int,std::vector<int> > et_map)  override;
 
   protected:

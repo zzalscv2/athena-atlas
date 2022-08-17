@@ -12,9 +12,6 @@
 #include <L1CaloFEXSim/jFEXNtupleWriter.h>
 #include "StoreGate/StoreGateSvc.h"
 #include "L1CaloFEXSim/jFEXSmallRJetAlgo.h"
-#include "L1CaloFEXSim/jFEXSmallRJetTOB.h"
-//#include "L1CaloFEXSim/jFEXtauAlgo.h"
-//#include "L1CaloFEXSim/jFEXtauTOB.h"
 #include "L1CaloFEXSim/jFEXOutputCollection.h"
 #include <vector>
 #include "TTree.h"

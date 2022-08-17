@@ -116,6 +116,10 @@ def G4mplEqMagElectricFieldToolCfg(flags, name="G4mplEqMagElectricField", **kwar
 def fcpPreInclude(flags):
     simdict = flags.Input.SpecialConfiguration
     if flags.Common.ProductionStep == ProductionStep.Simulation:
+        # add monopole-specific configuration for looper killer
+        flags.Sim.OptionalUserActionList += ['G4UserActions.G4UserActionsConfig.MonopoleLooperKillerToolCfg']
+        # add default HIP killer
+        flags.Sim.OptionalUserActionList += ['G4UserActions.G4UserActionsConfig.HIPKillerToolCfg']
         if "InteractingPDGCodes" not in simdict: #FIXME This code would ideally update the ConfigFlag itself
             assert "CHARGE" in simdict
             assert "X" in simdict
@@ -146,10 +150,14 @@ def fcpCfg(flags):
 def QballPreInclude(flags):
     simdict = flags.Input.SpecialConfiguration
     if flags.Common.ProductionStep == ProductionStep.Simulation:
-            if "InteractingPDGCodes" not in simdict:
-                assert "CHARGE" in simdict
-                CODE=10000000+int(float(simdict["CHARGE"])*100)
-                simdict['InteractingPDGCodes'] = str([CODE,-1*CODE])
+        # add monopole-specific configuration for looper killer
+        flags.Sim.OptionalUserActionList += ['G4UserActions.G4UserActionsConfig.MonopoleLooperKillerToolCfg']
+        # add default HIP killer
+        flags.Sim.OptionalUserActionList += ['G4UserActions.G4UserActionsConfig.HIPKillerToolCfg']
+        if "InteractingPDGCodes" not in simdict:
+            assert "CHARGE" in simdict
+            CODE=10000000+int(float(simdict["CHARGE"])*100)
+            simdict['InteractingPDGCodes'] = str([CODE,-1*CODE])
 
 
 def QballCfg(flags):
@@ -169,16 +177,16 @@ def QballCfg(flags):
     if flags.Common.ProductionStep == ProductionStep.Simulation:
         physicsOptions = [ result.popToolsAndMerge(MonopolePhysicsToolCfg(flags)) ]
         result.getService("PhysicsListSvc").PhysOption += physicsOptions
-        # add monopole-specific configuration for looper killer
-        #simFlags.OptionalUserActionList.addAction('G4UA::MonopoleLooperKillerTool') #FIXME missing functionality
-        # add default HIP killer
-        #simFlags.OptionalUserActionList.addAction('G4UA::HIPKillerTool') #FIXME missing functionality
 
     return result
 
 
 def MonopolePreInclude(flags):
     if flags.Common.ProductionStep == ProductionStep.Simulation:
+        # add monopole-specific configuration for looper killer
+        flags.Sim.OptionalUserActionList += ['G4UserActions.G4UserActionsConfig.MonopoleLooperKillerToolCfg']
+        # add default HIP killer
+        flags.Sim.OptionalUserActionList += ['G4UserActions.G4UserActionsConfig.HIPKillerToolCfg']
         flags.Sim.G4Stepper = 'ClassicalRK4'
         flags.Sim.G4EquationOfMotion = "G4mplEqMagElectricField" #Monopole Equation of Motion
         flags.Sim.TightMuonStepping = False
@@ -200,8 +208,4 @@ def MonopoleCfg(flags):
     if flags.Common.ProductionStep == ProductionStep.Simulation:
         physicsOptions = [ result.popToolsAndMerge(MonopolePhysicsToolCfg(flags)) ]
         result.getService("PhysicsListSvc").PhysOption = physicsOptions + result.getService("PhysicsListSvc").PhysOption
-        # add monopole-specific configuration for looper killer
-        #simFlags.OptionalUserActionList.addAction('G4UA::MonopoleLooperKillerTool') #FIXME missing functionality
-        # add default HIP killer
-        #simFlags.OptionalUserActionList.addAction('G4UA::HIPKillerTool') #FIXME missing functionality
     return result

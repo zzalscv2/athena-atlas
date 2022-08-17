@@ -12,7 +12,6 @@
 #define IjFEXtauAlgo_H
 
 #include "GaudiKernel/IAlgTool.h"
-#include "L1CaloFEXSim/jFEXtauTOB.h"
 #include "L1CaloFEXSim/jTowerContainer.h"
 
 namespace LVL1 {

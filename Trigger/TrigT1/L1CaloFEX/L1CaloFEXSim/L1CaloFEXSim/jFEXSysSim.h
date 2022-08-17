@@ -35,6 +35,8 @@
 #include "xAODTrigger/jFexSumETRoIAuxContainer.h"
 #include "TrigConfData/L1Menu.h"
 
+#include "L1CaloFEXSim/jFEXTOB.h"
+
 namespace LVL1 {
   
   //Doxygen class description below:
@@ -96,7 +98,7 @@ namespace LVL1 {
     std::unordered_map<int,jTower> m_jTowersColl;
     std::unordered_map<uint8_t, std::vector<std::vector<std::vector<uint32_t>>> > m_allSmallRJetTobs; 
     std::unordered_map<uint8_t, std::vector<std::vector<std::vector<uint32_t>>> > m_allLargeRJetTobs;
-    std::unordered_map<uint8_t, std::vector<std::unique_ptr<jFEXtauTOB>>> m_alltauTobs;
+    std::unordered_map<uint8_t, std::vector<std::unique_ptr<jFEXTOB>>> m_alltauTobs;
     std::unordered_map<uint8_t, std::vector<std::vector<std::vector<uint32_t>>> > m_allfwdElTobs;
     std::unordered_map<uint8_t, std::vector<std::vector<uint32_t>> > m_allsumEtTobs;
     std::unordered_map<uint8_t, std::vector<std::vector<uint32_t>> > m_allMetTobs;
