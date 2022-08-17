@@ -14,7 +14,6 @@
 #include "AthenaBaseComps/AthAlgTool.h"
 #include "L1CaloFEXToolInterfaces/IjFEXSmallRJetAlgo.h"
 #include "AthenaKernel/CLASS_DEF.h"
-#include "L1CaloFEXSim/jFEXSmallRJetTOB.h"
 #include "L1CaloFEXSim/jTowerContainer.h"
 
 #include "CaloEvent/CaloCellContainer.h"
@@ -49,11 +48,8 @@ namespace LVL1 {
     virtual unsigned int getSmallClusterET() override;
     virtual unsigned int getSmallETRing() override;
     virtual bool checkDisplacedLM() override;
-    virtual std::unique_ptr<jFEXSmallRJetTOB> getSmallRJetTOBs() override;
     virtual unsigned int getTTIDcentre() override;
     virtual void setFPGAEnergy(std::unordered_map<int,std::vector<int> > et_map)  override;
-  //  virtual jFEXSmallRJetTOB* getSmallRJetTOBs() override;
-//LVL1::jFEXSmallRJetAlgoTOB * LVL1::jFEXSmallRJetAlgo::getSmallRJetTOB()
     
 protected:
 

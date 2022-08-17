@@ -12,7 +12,6 @@
 #define IjFEXmetAlgo_H
 
 #include "GaudiKernel/IAlgTool.h"
-#include "L1CaloFEXSim/jFEXmetTOB.h"
 #include "L1CaloFEXSim/jTowerContainer.h"
 #include "L1CaloFEXSim/FEXAlgoSpaceDefs.h"
 
@@ -35,10 +34,6 @@ class IjFEXmetAlgo : virtual public IAlgTool {
         virtual int getTTowerET(unsigned int TTID ) =0; 
         virtual void setFPGAEnergy(std::unordered_map<int,std::vector<int> > et_map)   =0;
         
-
-        virtual std::unique_ptr<jFEXmetTOB> getmetTOBs() = 0;
-        
-
     private:
 
 };

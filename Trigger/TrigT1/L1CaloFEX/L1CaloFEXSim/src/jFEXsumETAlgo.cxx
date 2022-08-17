@@ -12,7 +12,6 @@
 #include <stdio.h>
 #include <math.h>
 #include "L1CaloFEXSim/jFEXsumETAlgo.h"
-#include "L1CaloFEXSim/jFEXsumETTOB.h"
 #include "L1CaloFEXSim/jTower.h"
 #include "L1CaloFEXSim/jTowerContainer.h"
 #include "CaloEvent/CaloCellContainer.h"
@@ -163,21 +162,6 @@ int LVL1::jFEXsumETAlgo::getETupperEta(uint bin)
     }
     return m_SumhighEta;
 }
-
-
-         
-std::unique_ptr<jFEXsumETTOB> LVL1::jFEXsumETAlgo::getsumETTOBs(){
-
-  std::unique_ptr<jFEXsumETTOB> tob = std::make_unique<jFEXsumETTOB>();
-
-
-  tob->setETlow(m_SumlowEta);
-  tob->setEThigh(m_SumhighEta); 
-  tob->setSatlow(0); 
-  tob->setSathigh(0);
-  return tob;
-}
-
 
 
 //Gets the ET for the TT. This ET is EM + HAD

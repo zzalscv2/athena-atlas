@@ -2,24 +2,24 @@
   Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
 */
 //***************************************************************************
-//              jFEXtauTOB - TOBs Tau Algorithm in jFEX
+//              jFEXTOB - TOBs info in jFEX
 //                              -------------------
 //     begin                : 18 02 2021
 //     email                : Sergi.Rodriguez@cern.ch
 //***************************************************************************
 
 
-#ifndef JFEX_TAU_TOB_H
-#define JFEX_TAU_TOB_H
+#ifndef JFEX_TOB_H
+#define JFEX_TOB_H
 #include "AthenaKernel/CLASS_DEF.h"
 
 namespace LVL1 {
-  class jFEXtauTOB
+  class jFEXTOB
   {
 
   public:
-    jFEXtauTOB();
-    ~jFEXtauTOB() {};
+    jFEXTOB();
+    ~jFEXTOB() {};
     
     void initialize(uint8_t , uint8_t , uint32_t , uint , uint );
     
@@ -32,12 +32,10 @@ namespace LVL1 {
     uint8_t  getFpga(){return m_fpga;};
     uint8_t  getjFex(){return m_jfex;};
     uint32_t getWord(){return m_word;};
-    uint     getRes() {return m_res;};
+    uint     getRes() {return m_res; };
     uint     getTTID(){return m_ttid;};
     
-    uint     getEt();
 
- 
   private:
     uint8_t  m_fpga;
     uint8_t  m_jfex;
@@ -45,15 +43,11 @@ namespace LVL1 {
     uint     m_res;
     uint     m_ttid;
     
-    uint     m_Et;
-
-
-    
 
   };
   
 
 } //end of namespace
 
-CLASS_DEF( LVL1::jFEXtauTOB , 207986940 , 1 )
+CLASS_DEF( LVL1::jFEXTOB , 133374173 , 1 )
 #endif 
