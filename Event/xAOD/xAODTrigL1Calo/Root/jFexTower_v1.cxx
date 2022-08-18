@@ -2,11 +2,11 @@
   Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
 */
 
-// EDM includes(s):
-#include "xAODCore/AuxStoreAccessorMacros.h"
-
 // Local include(s):
 #include "xAODTrigL1Calo/versions/jFexTower_v1.h"
+
+// EDM includes(s):
+#include "xAODCore/AuxStoreAccessorMacros.h"
 
 namespace xAOD{  
 
@@ -15,8 +15,8 @@ namespace xAOD{
   AUXSTORE_PRIMITIVE_SETTER_AND_GETTER( jFexTower_v1, uint8_t , module , setModule )
   AUXSTORE_PRIMITIVE_SETTER_AND_GETTER( jFexTower_v1, uint8_t , fpga , setFpga )
   AUXSTORE_PRIMITIVE_SETTER_AND_GETTER( jFexTower_v1, uint8_t , channel , setChannel )
-  AUXSTORE_PRIMITIVE_SETTER_AND_GETTER( jFexTower_v1, uint16_t , et , setEt )
-  AUXSTORE_PRIMITIVE_SETTER_AND_GETTER( jFexTower_v1, uint8_t , dataID , setDataID )
+  AUXSTORE_PRIMITIVE_SETTER_AND_GETTER( jFexTower_v1, uint16_t , towerEt , setTowerEt )
+  AUXSTORE_PRIMITIVE_SETTER_AND_GETTER( jFexTower_v1, uint8_t , jFEXdataID , setJFEXdataID )
   AUXSTORE_PRIMITIVE_SETTER_AND_GETTER( jFexTower_v1, char , isSaturated , setIsSaturated )
   
   /// initialize
@@ -27,20 +27,20 @@ namespace xAOD{
   }
   
   void jFexTower_v1::initialize(const float Eta,const float Phi,
-                                   const uint16_t Et,
+                                   const uint16_t TowerEt,
                                    const uint8_t Module,
                                    const uint8_t Fpga,
 				   const uint8_t Channel,
-				   const uint8_t DataID,
+				   const uint8_t JFEXdataID,
 				   const char IsSaturated)
   {
     setEta( Eta );
     setPhi( Phi );
-    setEt( Et );
+    setTowerEt( TowerEt );
     setModule( Module );
     setFpga( Fpga );
     setChannel( Channel );
-    setDataID( DataID );
+    setJFEXdataID( JFEXdataID );
     setIsSaturated( IsSaturated );
   }
 

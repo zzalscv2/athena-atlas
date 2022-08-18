@@ -14,7 +14,7 @@ namespace xAOD {
     AUX_VARIABLE( iEta );           
     AUX_VARIABLE( iPhi );
     AUX_VARIABLE( fpga );
-    AUX_VARIABLE( et );
+    AUX_VARIABLE( towerEt );
     AUX_VARIABLE( isSaturated );
     }
 
