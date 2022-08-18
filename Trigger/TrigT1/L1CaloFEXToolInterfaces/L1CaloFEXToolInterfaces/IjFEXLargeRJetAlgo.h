@@ -12,7 +12,6 @@
 #define IJFEXLARGERJETALGO_H
 
 #include "GaudiKernel/IAlgTool.h"
-#include "L1CaloFEXSim/jFEXLargeRJetTOB.h"
 #include "L1CaloFEXSim/jTowerContainer.h"
 
 namespace LVL1{
@@ -26,7 +25,6 @@ namespace LVL1{
       virtual void setupCluster(int inputTable[15][15]) = 0;
       virtual unsigned int getRingET() = 0;
       virtual unsigned int getLargeClusterET(unsigned int smallClusterET, unsigned int largeRingET) = 0;
-      virtual std::unique_ptr<jFEXLargeRJetTOB> getLargeRJetTOBs(int smallClusterET,int TTID) = 0;
       virtual void setFPGAEnergy(std::unordered_map<int,std::vector<int> > et_map)   =0;
 
    private:

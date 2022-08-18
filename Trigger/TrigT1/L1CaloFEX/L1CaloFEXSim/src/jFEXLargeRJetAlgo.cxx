@@ -11,7 +11,6 @@
 #include <iostream>
 #include <vector>
 #include "L1CaloFEXSim/jFEXLargeRJetAlgo.h"
-#include "L1CaloFEXSim/jFEXLargeRJetTOB.h"
 #include "L1CaloFEXSim/jTower.h"
 #include "L1CaloFEXSim/jTowerContainer.h"
 #include "CaloEvent/CaloCellContainer.h"
@@ -73,18 +72,6 @@ unsigned int LVL1::jFEXLargeRJetAlgo::getLargeClusterET(unsigned int smallCluste
   return largeClusterET; 
 }
 
-std::unique_ptr<jFEXLargeRJetTOB> LVL1::jFEXLargeRJetAlgo::getLargeRJetTOBs(int smallClusterET,int TTID){
-                                                           
-  std::unique_ptr<jFEXLargeRJetTOB> tob = std::make_unique<jFEXLargeRJetTOB>(); 
-  unsigned int et = getLargeClusterET(smallClusterET,getRingET());
-  tob->setET(et);
-  tob->setPhi(m_jFEXSmallRJetAlgoTool->getRealPhi(TTID)/10.); 
-  tob->setEta(m_jFEXSmallRJetAlgoTool->getRealEta(TTID)/10.); 
-  tob->setRes(0); 
-  tob->setSat(0); 
-
-  return tob;
-}
 
 //Gets the ET for the TT. This ET is EM + HAD
 int LVL1::jFEXLargeRJetAlgo::getTTowerET(unsigned int TTID ) {

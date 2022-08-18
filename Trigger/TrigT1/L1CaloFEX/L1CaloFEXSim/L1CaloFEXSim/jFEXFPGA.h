@@ -43,7 +43,7 @@
 #include "StoreGate/ReadHandle.h"
 #include "StoreGate/StoreGateSvc.h"
 
-#include "L1CaloFEXSim/jFEXtauTOB.h"
+#include "L1CaloFEXSim/jFEXTOB.h"
 
 namespace LVL1 {
   
@@ -77,8 +77,6 @@ namespace LVL1 {
     virtual void SetTowersAndCells_SG( int [][FEXAlgoSpaceDefs::jFEX_thin_algoSpace_width] ) override ;
 
     /**Form a tob word out of the potential candidate SmallRJet tob */
-    virtual uint32_t formSmallRJetTOB(int &, int &) override;
-    virtual uint32_t formLargeRJetTOB(int &, int &) override;
     virtual std::vector <std::vector <uint32_t>> getSmallRJetTOBs() override;
     virtual std::vector <std::vector <uint32_t>> getLargeRJetTOBs() override;
 
@@ -86,14 +84,12 @@ namespace LVL1 {
     virtual std::vector <std::vector <uint32_t>> getFwdElTOBs() override;
 
     /* Retreive Tau TOB words  */
-    virtual std::vector<std::unique_ptr<jFEXtauTOB>> getTauTOBs() override;    
+    virtual std::vector<std::unique_ptr<jFEXTOB>> getTauTOBs() override;    
        
     /**Form a tob word out of the potential candidate SumET tob */
-    virtual uint32_t formSumETTOB(int , int ) override;
     virtual std::vector <uint32_t> getSumEtTOBs() override;    
        
     /**Form a tob word out of the potential candidate MET tob */
-    virtual uint32_t formMetTOB(int , int ) override;
     virtual std::vector <uint32_t> getMetTOBs() override;    
     
     int getTTowerET_EM     (unsigned int TTID ) override; 
@@ -104,8 +100,6 @@ namespace LVL1 {
    /** Internal data */
   private:
   
-    int Get_calibrated_SRj_ET(int Energy, int jfex);
-    
     template <class TOBObjectClass> static bool TOBetSort(const TOBObjectClass& i, const TOBObjectClass& j , uint bits, uint mask) {
         return (((i->getWord() >> bits ) & mask)>((j->getWord() >> bits ) & mask)); 
     }
@@ -115,8 +109,7 @@ namespace LVL1 {
     static bool etTauSort  (std::vector<uint32_t> i, std::vector<uint32_t> j){ return (((i.at(0) >> FEXAlgoSpaceDefs::jTau_etBit ) & 0x7ff  )> ((j.at(0) >> FEXAlgoSpaceDefs::jTau_etBit) & 0x7ff ));}
     static bool etFwdElSort  (std::vector<uint32_t> i, std::vector<uint32_t> j){ return (((i.at(0) >> FEXAlgoSpaceDefs::jEM_etBit ) & 0x7ff  )> ((j.at(0) >> FEXAlgoSpaceDefs::jEM_etBit) & 0x7ff ));}
     
-    
-    std::vector<std::unique_ptr<jFEXtauTOB>> m_tau_tobwords;
+    std::vector<std::unique_ptr<jFEXTOB>> m_tau_tobwords;
     
     int m_id;
     int m_jfexid;

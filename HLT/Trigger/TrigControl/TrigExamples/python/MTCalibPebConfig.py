@@ -334,12 +334,10 @@ def hlt_seq_cfg(flags, num_chains, concurrent=False, hackCA2Global=False, hypo_a
     # Hack to work around a shortcoming of CA2GlobalWrapper when a component
     # has an empty ToolHandle and CA adds a tool to the handle
     if hackCA2Global:
-        from AthenaCommon.Configurable import Configurable
-        prevConfBehav = Configurable.configurableRun3Behavior
-        Configurable.configurableRun3Behavior=0
         from AthenaCommon.AppMgr import ServiceMgr as svcMgr
-        svcMgr.HltEventLoopMgr.ResultMaker = conf2toConfigurable(acc.getService('HltEventLoopMgr').ResultMaker)
-        Configurable.configurableRun3Behavior=prevConfBehav
+        from AthenaCommon.Configurable import ConfigurableRun3Behavior
+        with ConfigurableRun3Behavior(target_state=0):
+            svcMgr.HltEventLoopMgr.ResultMaker = conf2toConfigurable(acc.getService('HltEventLoopMgr').ResultMaker)
 
     return acc
 

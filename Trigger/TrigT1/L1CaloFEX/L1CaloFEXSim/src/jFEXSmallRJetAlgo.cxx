@@ -10,7 +10,6 @@
 #include <iostream>
 #include <vector>
 #include "L1CaloFEXSim/jFEXSmallRJetAlgo.h"
-#include "L1CaloFEXSim/jFEXSmallRJetTOB.h"
 #include "L1CaloFEXSim/jTower.h"
 #include "L1CaloFEXSim/jTowerContainer.h"
 #include "CaloEvent/CaloCellContainer.h"
@@ -200,21 +199,6 @@ unsigned int LVL1::jFEXSmallRJetAlgo::getSmallETRing(){
   return SmallETRing;
 }
          
-std::unique_ptr<jFEXSmallRJetTOB> LVL1::jFEXSmallRJetAlgo::getSmallRJetTOBs(){
-
-  std::unique_ptr<jFEXSmallRJetTOB> tob = std::make_unique<jFEXSmallRJetTOB>();
-
-  unsigned int et = getSmallClusterET();
-
-  tob->setET(et); 
-  tob->setPhi(getRealPhi(m_jFEXalgoTowerID[3][3]));
-  tob->setEta(getRealEta(m_jFEXalgoTowerID[3][3]));
-  tob->setRes(0);
-  tob->setSat(0);
-  return tob;
-}
-
-
 unsigned int LVL1::jFEXSmallRJetAlgo::getTTIDcentre(){
   return m_jFEXalgoTowerID[3][3];
 }

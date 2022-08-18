@@ -18,10 +18,6 @@
 
 #include "L1CaloFEXSim/jFEXSim.h"
 #include "L1CaloFEXSim/jFEXOutputCollection.h"
-#include "L1CaloFEXSim/jFEXSmallRJetTOB.h"
-#include "L1CaloFEXSim/jFEXLargeRJetTOB.h"
-#include "L1CaloFEXSim/jFEXtauTOB.h"
-#include "L1CaloFEXSim/jFEXForwardElecTOB.h"
 
 #include "TROOT.h"
 #include "TH1.h"

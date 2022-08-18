@@ -151,6 +151,7 @@ StatusCode TileJetMonitorAlgorithm::fillTimeHistograms(const xAOD::Jet& jet, uin
 
   ToolHandle<GenericMonitoringTool> tileJetChannTimeDQTool = getGroup("TileJetChanTimeDQ");
 
+  std::array<std::string, 4> sampleName{"A", "BC", "D", "E"};
   std::array<std::string, 2> gainName{"LG", "HG"};
   std::array<std::string, 5> partitionName{"AUX", "LBA", "LBC", "EBA", "EBC"};
 
@@ -325,22 +326,26 @@ StatusCode TileJetMonitorAlgorithm::fillTimeHistograms(const xAOD::Jet& jet, uin
                                  << ", index " << index
                                  << ", time: " << tilecell->time());
                   
-                  std::string name("Cell_time_" + partitionName[ros1] + "_" + gainName[gain1] + "_slice_" + std::to_string(index));
-                  auto cellTime = Monitored::Scalar<float>(name, tilecell->time());
-                  fill("TileJetCellTime", cellTime);
+		  // TD adding histograms per partition and per radial sampling
+                  std::string name1("Cell_time_" + partitionName[ros1] + "_" + sampleName[sample] + "_" + gainName[gain1] + "_slice_" + std::to_string(index));
+                  auto cellTime1 = Monitored::Scalar<float>(name1, tilecell->time());
+                  fill("TileJetCellTime", cellTime1);
+
                   
                   if (m_doEnergyProfiles) {
-                    std::string indexName("index_" + partitionName[ros1] + "_" + gainName[gain1]);
-                    auto energyIndex = Monitored::Scalar<float>(indexName, index);
+		    // TD adding energy profiles per partition and per radial sampling
+                    std::string indexName1("index_" + partitionName[ros1] + "_" + sampleName[sample] + "_" + gainName[gain1]);
+                    auto energyIndex1 = Monitored::Scalar<float>(indexName1, index);
                     
-                    std::string energyName("energy_" + partitionName[ros1] + "_" + gainName[gain1]);
-                    auto cellEnergy = Monitored::Scalar<float>(energyName, tilecell->energy());
+                    std::string energyName1("energy_" + partitionName[ros1] + "_" + sampleName[sample] + "_" + gainName[gain1]);
+                    auto cellEnergy1 = Monitored::Scalar<float>(energyName1, tilecell->energy());
                     
-                    fill("TileJetCellEnergyProfile", energyIndex, cellEnergy);
+                    fill("TileJetCellEnergyProfile", energyIndex1, cellEnergy1);
                   } else {
-                    std::string name("Cell_ene_" + partitionName[ros1] + "_" + gainName[gain1] + "_slice_" + std::to_string(index));
-                    auto cellEnergy = Monitored::Scalar<float>(name, tilecell->energy());
-                    fill("TileJetCellEnergy", cellEnergy);
+		    // TD adding energy histograms per partition and per radial sampling
+                    std::string name1("Cell_ene_" + partitionName[ros1] + "_" + sampleName[sample] + "_" + gainName[gain1] + "_slice_" + std::to_string(index));
+                    auto cellEnergy1 = Monitored::Scalar<float>(name1, tilecell->energy());
+                    fill("TileJetCellEnergy", cellEnergy1);
                   }
 
                 }
