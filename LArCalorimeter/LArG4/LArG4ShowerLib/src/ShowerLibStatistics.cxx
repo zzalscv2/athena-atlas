@@ -20,7 +20,7 @@ ShowerLibStatistics::ShowerLibStatistics(const std::map<int,std::string>& bincap
                                                                                                                           m_binstrings(bincaptions),
                                                                                                                           m_binsizes(binsizes)
 {
-	for(std::map<int,int>::const_iterator it = m_binsizes.begin(); it != m_binsizes.end(); it++)
+	for(std::map<int,int>::const_iterator it = m_binsizes.begin(); it != m_binsizes.end(); ++it)
 		  m_calls[(*it).first] = 0;
 }
 
