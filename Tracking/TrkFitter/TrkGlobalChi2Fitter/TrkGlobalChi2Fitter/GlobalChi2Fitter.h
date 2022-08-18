@@ -174,6 +174,19 @@ namespace Trk {
       unsigned int m_sct_dead = 0;
     };
 
+    enum FitterStatusType {
+      S_FITS,
+      S_SUCCESSFUL_FITS,
+      S_MAT_INV_FAIL,
+      S_NOT_ENOUGH_MEAS,
+      S_PROPAGATION_FAIL,
+      S_INVALID_ANGLES,
+      S_NOT_CONVERGENT,
+      S_HIGH_CHI2,
+      S_LOW_MOMENTUM,
+      __S_MAX_VALUE
+    };
+
     struct Cache {
       /*
        * Currently the information about what type of fit is being passed by the
@@ -230,7 +243,10 @@ namespace Trk {
 
       FitterStatusCode m_fittercode;
 
-      Cache(const GlobalChi2Fitter *fitter):
+      std::array<std::atomic<unsigned int>, __S_MAX_VALUE> m_fit_status {};
+      std::array<std::atomic<unsigned int>, __S_MAX_VALUE>  *m_fit_status_out = nullptr;
+
+       Cache(const GlobalChi2Fitter *fitter):
         m_calomat(fitter->m_calomat),
         m_extmat(fitter->m_extmat),
         m_sirecal(fitter->m_sirecal),
@@ -239,24 +255,24 @@ namespace Trk {
         m_acceleration(fitter->m_acceleration),
         m_fiteloss(fitter->m_fiteloss),
         m_asymeloss(fitter->m_asymeloss),
-        m_miniter(fitter->m_miniter)
+        m_miniter(fitter->m_miniter),
+        m_fit_status_out(&fitter->m_fit_status)
       {}
+      ~Cache() {
+         unsigned int idx=0;
+         for (unsigned int a_fit_status : m_fit_status) {
+            if (a_fit_status) {
+               (*m_fit_status_out)[idx] += a_fit_status;
+            }
+            ++idx;
+         }
+      }
 
       Cache & operator=(const Cache &) = delete;
-    };
-  private:
 
-    enum FitterStatusType {
-      S_FITS,
-      S_SUCCESSFUL_FITS,
-      S_MAT_INV_FAIL,
-      S_NOT_ENOUGH_MEAS,
-      S_PROPAGATION_FAIL,
-      S_INVALID_ANGLES,
-      S_NOT_CONVERGENT,
-      S_HIGH_CHI2,
-      S_LOW_MOMENTUM,
-      __S_MAX_VALUE
+      void incrementFitStatus(enum FitterStatusType status)  {
+         m_fit_status[status]++;
+      }
     };
 
   public:
@@ -864,8 +880,6 @@ namespace Trk {
 
     bool isMuonTrack(const Track &) const;
 
-    void incrementFitStatus(enum FitterStatusType) const;
-
     /**
      * @brief Initialize a field cache inside a fit cache object.
      *
@@ -985,8 +999,8 @@ namespace Trk {
      * shared across threads, we protect the array with a mutex, and we mark
      * these members as thread_safe for the ATLAS G++ plugin.
      */
-    mutable std::mutex m_fit_status_lock ATLAS_THREAD_SAFE;
-    mutable std::array<unsigned int, __S_MAX_VALUE> m_fit_status ATLAS_THREAD_SAFE = {};
+    //mutable std::mutex m_fit_status_lock ATLAS_THREAD_SAFE;
+    mutable std::array<std::atomic<unsigned int>, __S_MAX_VALUE> m_fit_status ATLAS_THREAD_SAFE = {};
   };
 }
 #endif
