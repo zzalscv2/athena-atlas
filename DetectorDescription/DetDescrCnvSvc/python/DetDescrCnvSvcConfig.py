@@ -27,11 +27,9 @@ def DetDescrCnvSvcCfg(flags, **kwargs):
     else:
         kwargs.setdefault("IdDictFromRDB", True)
 
-    DetDescrCnvSvc=CompFactory.DetDescrCnvSvc
-    EvtPersistencySvc=CompFactory.EvtPersistencySvc
-    acc=ComponentAccumulator()
-    # Specify primary Identifier dictionary to be use
-    detDescrCnvSvc=DetDescrCnvSvc(**kwargs)
-    acc.addService(detDescrCnvSvc,create=True)
-    acc.addService(EvtPersistencySvc("EventPersistencySvc",CnvServices=[detDescrCnvSvc.getName(),])) #No service handle yet???
+    acc = ComponentAccumulator()
+    service = CompFactory.DetDescrCnvSvc(**kwargs)
+    acc.addService(service, create=True)
+    acc.addService(CompFactory.EvtPersistencySvc("EventPersistencySvc",
+                                                 CnvServices=[service.getName()]))
     return acc

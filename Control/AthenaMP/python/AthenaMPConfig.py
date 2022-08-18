@@ -86,28 +86,25 @@ def AthenaMPCfg(configFlags):
             AthenaSharedMemoryTool = CompFactory.AthenaSharedMemoryTool
 
             if configFlags.Input.Format is Format.BS:
-                evSel=CompFactory.EventSelectorByteStream("EventSelector")
+                evSel = CompFactory.EventSelectorByteStream("EventSelector")
 
                 from ByteStreamCnvSvc.ByteStreamConfig import ByteStreamReadCfg
                 bscfg = ByteStreamReadCfg(configFlags)
                 result.merge(bscfg)
             else:
-                evSel=CompFactory.EventSelectorAthenaPool("EventSelector")
+                evSel = CompFactory.EventSelectorAthenaPool("EventSelector")
 
-                # AthenaPoolCnvSvc
-                apcs=CompFactory.AthenaPoolCnvSvc()
-                apcs.InputStreamingTool = AthenaSharedMemoryTool("InputStreamingTool",
-                                                                 SharedMemoryName="InputStream"+str(os.getpid()),
-                                                                 UseMultipleSegments=True)
-                result.addService(apcs)
+                inputStreamingTool = AthenaSharedMemoryTool("InputStreamingTool",
+                                                            SharedMemoryName=f"InputStream{str(os.getpid())}",
+                                                            UseMultipleSegments=True)
 
                 from AthenaPoolCnvSvc.PoolReadConfig import PoolReadCfg
-                poolcfg = PoolReadCfg(configFlags)
-
-                result.merge(poolcfg)
+                result.merge(PoolReadCfg(configFlags))
+                from AthenaPoolCnvSvc.PoolCommonConfig import AthenaPoolCnvSvcCfg
+                result.merge(AthenaPoolCnvSvcCfg(configFlags, InputStreamingTool=inputStreamingTool))
 
             evSel.SharedMemoryTool = AthenaSharedMemoryTool("EventStreamingTool",
-                                                            SharedMemoryName="EventStream"+str(os.getpid()))
+                                                            SharedMemoryName=f"EventStream{str(os.getpid())}")
             result.addService(evSel)
 
         if use_shared_writer:
@@ -116,17 +113,15 @@ def AthenaMPCfg(configFlags):
                     configFlags.Output.doWriteDAOD,
                     configFlags.Output.doWriteRDO)) or configFlags.Output.HITSFileName!='':
                 AthenaSharedMemoryTool = CompFactory.AthenaSharedMemoryTool
-
-                apcs=CompFactory.AthenaPoolCnvSvc()
-                apcs.OutputStreamingTool += [ AthenaSharedMemoryTool("OutputStreamingTool_0",
-                                                                     SharedMemoryName="OutputStream"+str(os.getpid())) ]
-                apcs.ParallelCompression = use_parallel_compression
-                result.addService(apcs)
+                outputStreamingTool = AthenaSharedMemoryTool("OutputStreamingTool_0",
+                                                             SharedMemoryName=f"OutputStream{str(os.getpid())}")
 
                 from AthenaPoolCnvSvc.PoolWriteConfig import PoolWriteCfg
-                poolcfg = PoolWriteCfg(configFlags)
-
-                result.merge(poolcfg)
+                result.merge(PoolWriteCfg(configFlags))
+                from AthenaPoolCnvSvc.PoolCommonConfig import AthenaPoolCnvSvcCfg
+                result.merge(AthenaPoolCnvSvcCfg(configFlags,
+                                                 OutputStreamingTool=[outputStreamingTool],
+                                                 ParallelCompression=use_parallel_compression))
 
         queue_provider = CompFactory.SharedEvtQueueProvider(UseSharedReader=use_shared_reader,
                                                             IsPileup=mpevtloop.IsPileup,
