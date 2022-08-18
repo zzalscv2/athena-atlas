@@ -131,11 +131,11 @@ def fromRunArgs(runArgs):
     from PerfMonComps.PerfMonConfigHelpers import setPerfmonFlagsFromRunArgs
     setPerfmonFlagsFromRunArgs(ConfigFlags, runArgs)
 
-    # Special Configuration preInclude
-    specialConfigPreInclude(ConfigFlags)
-
     # Pre-include
     processPreInclude(runArgs, ConfigFlags)
+
+    # Special Configuration preInclude
+    specialConfigPreInclude(ConfigFlags)
 
     # Pre-exec
     processPreExec(runArgs, ConfigFlags)

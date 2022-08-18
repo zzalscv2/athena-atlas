@@ -57,11 +57,11 @@ def fromRunArgs(runArgs):
         else:
             ConfigFlags.Output.HITSFileName  = runArgs.outputHITS_RSMFile
 
-    # Special Configuration preInclude
-    specialConfigPreInclude(ConfigFlags)
-
     # Pre-include
     processPreInclude(runArgs, ConfigFlags)
+
+    # Special Configuration preInclude
+    specialConfigPreInclude(ConfigFlags)
 
     # Pre-exec
     processPreExec(runArgs, ConfigFlags)
