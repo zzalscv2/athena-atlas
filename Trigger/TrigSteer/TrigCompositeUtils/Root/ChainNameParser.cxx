@@ -5,72 +5,220 @@
 #include <string>
 #include <regex>
 #include <array>
+#include <algorithm>
 
 #include "TrigCompositeUtils/ChainNameParser.h"
 
-// returns sig token (or empty string of token does not correspond to a sig) and multiplicity
-// this parsing follws trigger menu convention
-std::pair<std::string, int> getSigToken(const std::string& token) {
-    static const std::array<std::regex, 18> sig{std::regex("(\\d*)(e)\\d.*"),
-                                                std::regex("(\\d*)(g)\\d.*"),
-                                                std::regex("(\\d*)(j)\\d.*"),
-                                                std::regex("(\\d*)(mu)\\d.*"),
-                                                std::regex("(\\d*)(tau)\\d.*"),
-                                                std::regex("()(xe)\\d.*"),
-                                                std::regex("()(xs)\\d.*"),
-                                                std::regex("()(te)\\d.*"),
-                                                std::regex("()(ht)\\d.*"),
-                                                std::regex("()(noalg)"), 
-                                                std::regex("()(mb)"), 
-                                                std::regex("()(l1calocalib).*"), 
-                                                std::regex("()(lar).*"),
-                                                std::regex("()(zdc).*"),
-                                                std::regex("()(lumipeb)"),
-                                                std::regex("()(alfacalib)"),
-                                                std::regex("()(calibAFP)"),
-                                                std::regex("()(afp)")};
-    for (const auto& s : sig) {
-        std::smatch match;
-        if (std::regex_match(token, match, s)) {
-            if (match[1] == "")
-                return { match[2], 1 };
-            else
-                return { match[2], std::stoi(match[1]) };
+#include <iostream>
 
+namespace
+{
+    std::string join(const std::vector<std::string> &parts, const std::string &piece)
+    {
+        std::string result;
+        if (parts.empty())
+            return result;
+        auto itr = parts.begin();
+        result = *itr;
+        for (++itr; itr != parts.end(); ++itr)
+            result += piece + *itr;
+        return result;
+    }
+
+    const std::regex &legHeadRegex()
+    {
+        const static std::regex re(ChainNameParser::legHeadPattern());
+        return re;
+    }
+}
+
+namespace ChainNameParser {
+
+    std::string LegInfo::legName() const
+    {
+        std::string result;
+        if (multiplicity != 1)
+            result += std::to_string(multiplicity);
+        result += signature;
+        if (threshold != -1)
+            result += std::to_string(threshold);
+        if (legParts.size())
+            result += "_" + join(legParts, "_");
+        return result;
+    }
+
+    xAODType::ObjectType LegInfo::type() const
+    {
+        if (signature == "e")
+        {
+            if (std::find(legParts.begin(), legParts.end(), "etcut") != legParts.end())
+                return xAODType::CaloCluster;
+            else
+                return xAODType::Electron;
+        }
+        else if (signature == "g")
+        {
+            if (std::find(legParts.begin(), legParts.end(), "etcut") != legParts.end())
+                return xAODType::CaloCluster;
+            else
+                return xAODType::Photon;
+        }
+        else if (signature == "j")
+            return xAODType::Jet;
+        else if (signature == "mu")
+            return xAODType::Muon;
+        else if (signature == "tau")
+            return xAODType::Tau;
+        else
+            return xAODType::Other;
+    }
+
+    LegInfoIterator::LegInfoIterator(const std::string &chain) :
+        m_itr(chain.begin()), m_end(chain.end())
+    {
+        // Move the iterator until we've found the start of a leg
+        while (!advance()) {}
+        std::cout << "Currently pointing at " << m_current.legName() << std::endl;
+        // Now we have the next leg info stored in the peek variables, but not the current.
+        // Advance the iterator once to store these in the current
+        this->operator++();
+        std::cout << "Currently pointing at " << m_current.legName() << std::endl;
+    }
+
+    bool LegInfoIterator::operator==(const LegInfoIterator &other)
+    {
+        return m_itr == other.m_itr && m_end == other.m_end && m_peekSignature == other.m_peekSignature;
+    }
+
+    bool LegInfoIterator::operator!=(const LegInfoIterator &other)
+    {
+        return !(*this == other);
+    }
+
+    LegInfoIterator::reference LegInfoIterator::operator *() const
+    {
+        return m_current;
+    }
+
+    LegInfoIterator::pointer LegInfoIterator::operator->() const
+    {
+        return &m_current;
+    }
+
+    LegInfoIterator &LegInfoIterator::operator++()
+    {
+        if (m_peekSignature.empty() && m_itr == m_end)
+        {
+            // No more signatures to find, exhaust the iterator
+            m_current = {};
+            m_itr = std::string::const_iterator();
+            m_end = std::string::const_iterator();
+            m_peekMultiplicity = 0;
+            m_peekThreshold = -1;
+        }
+        else
+        {
+            // Copy the peeked information into the current info
+            m_current.multiplicity = m_peekMultiplicity;
+            m_current.signature = m_peekSignature;
+            m_current.threshold = m_peekThreshold;
+            m_current.legParts.clear();
+            m_peekSignature.clear();
+            // Now step through until we find the next leg
+            while (!advance()) {}
+        }
+        return *this;
+    }
+
+    LegInfoIterator LegInfoIterator::operator++(int)
+    {
+        LegInfoIterator itr(*this);
+        this->operator++();
+        return itr;
+    }
+
+    bool LegInfoIterator::exhausted() const
+    {
+        return m_itr == std::string::const_iterator();
+    }
+
+    bool LegInfoIterator::advance()
+    {
+        std::string::const_iterator next = std::find(m_itr, m_end, '_');
+        std::smatch match;
+        if (std::regex_match(m_itr, next, match, legHeadRegex()))
+        {
+            // This means we've found the start of the next leg. Record its data and return true
+            if (match.str(1).empty())
+                m_peekMultiplicity = 1;
+            else
+                m_peekMultiplicity = std::atoi(match.str(1).c_str());
+            m_peekSignature = match.str(2);
+            if (match.str(3).empty())
+                m_peekThreshold = -1;
+            else
+                m_peekThreshold = std::atoi(match.str(3).c_str());
+            // Advance the iterator (skip the underscore if there is one)
+            m_itr = next == m_end ? next : next + 1;
+            return true;
+        }
+        else if (
+                next == m_end ||
+                (std::distance(m_itr, next) >= 2 && std::string(m_itr, m_itr + 2) == "L1"))
+        {
+            // This new part is actually the L1 item. Signal that there's no more to explore by
+            // setting the iterator to the end
+            m_itr = m_end;
+            return true;
+        }
+        else
+        {
+            // Otherwise this is just a leg
+            m_current.legParts.emplace_back(m_itr, next);
+            // Advance the iterator (skip the underscore if there is one)
+            m_itr = next == m_end ? next : next + 1;
+            return false;
         }
     }
-    return { "", 0 };
-}
 
-std::vector<int> ChainNameParser::multiplicities(const std::string& chain) {
-    static const std::regex regex("_");
-    std::vector<std::string> parts(
-        std::sregex_token_iterator(chain.begin(), chain.end(), regex, -1),
-        std::sregex_token_iterator()
-    );
-    std::vector<int> mult;
-    for (const auto& token : parts) {
-        auto found = getSigToken(token);
-        if ( !found.first.empty() ) mult.push_back(found.second);
+    std::string HLTChainInfo::l1Item() const
+    {
+        std::size_t pos = m_chain.rfind("_L1");
+        if (pos == std::string::npos)
+            return "";
+        else
+            return "L1_" + m_chain.substr(pos+3);
     }
-    if ( mult.empty() )
-        return {1};
-    return mult;
-}
 
-
-std::vector<std::string> ChainNameParser::signatures(const std::string& chain) {
-    static const std::regex regex("_");
-    std::vector<std::string> parts(
-        std::sregex_token_iterator(chain.begin(), chain.end(), regex, -1),
-        std::sregex_token_iterator()
-    );
-    std::vector<std::string> sigs;
-    for (const auto& token : parts) {
-        auto sig = getSigToken(token).first;
-        if ( not sig.empty())
-            sigs.emplace_back(sig);
+    const std::vector<std::string> &allSignatures()
+    {
+        const static std::vector<std::string> signatures{
+            "e", "g", "j", "mu", "tau", "xe", "xs", "te", "ht", "noalg", "mb",
+            "l1calocalib", "lar", "zdc", "lumipeb", "alfacalib", "calibAFP", "afp"
+        };
+        return signatures;
     }
-    return sigs;
 
-}
+    std::string legHeadPattern()
+    {
+        return "(\\d*)("+join(allSignatures(), "|")+")(\\d*)";
+    }
+
+    std::vector<int> multiplicities(const std::string &chain)
+    {
+        std::vector<int> multiplicities;
+        for (auto itr = LegInfoIterator(chain); !itr.exhausted(); ++itr)
+            multiplicities.push_back(itr->multiplicity);
+        return multiplicities;
+    }
+
+    std::vector<std::string> signatures(const std::string &chain)
+    {
+        std::vector<std::string> signatures;
+        for (auto itr = LegInfoIterator(chain); !itr.exhausted(); ++itr)
+            signatures.push_back(itr->signature);
+        return signatures;
+    }
+
+} //> end namespace ChainNameParser
+

@@ -7,6 +7,28 @@
 #include "TrigSteeringEvent/TrigRoiDescriptorCollection.h"
 #include "TrigCompositeUtils/TrigCompositeUtils.h"
 
+namespace {
+  using namespace TrigCompositeUtils;
+  template <typename T>
+  std::ostream &operator<<(std::ostream &os, const LinkInfo<T> &info)
+  {
+      return os << info.source << ", (" << info.link.persKey() << ", " << info.link.persIndex() << ")";
+  }
+
+  template <typename T>
+  std::ostream &operator<<(std::ostream &os, const std::vector<T> &v)
+  {
+    os << "[";
+    if (v.size() > 0)
+    {
+      for (auto itr = v.begin(); itr != v.end() - 1; ++itr)
+        os << *itr << ", ";
+      os << v.back();
+    }
+    return os << "]";
+  }
+}
+
 namespace TrigCompositeUtils
 {
   bool uniqueObjects(const std::vector<LinkInfo<xAOD::IParticleContainer>> &links)
@@ -60,31 +82,29 @@ namespace TrigCompositeUtils
     }
   }
 
+  IPartCombItr::IPartCombItr() {}
+
   IPartCombItr::IPartCombItr(
       const std::vector<std::tuple<std::size_t, LInfoItr_t, LInfoItr_t>> &pieces,
       std::function<bool(const VecLInfo_t &)> filter)
       : m_filter(std::move(filter))
   {
-    m_itrs.reserve(pieces.size());
-    auto currentItr = std::back_inserter(m_current);
+    std::vector<KFromNItr> idxItrs;
+    idxItrs.reserve(pieces.size());
+    m_linkInfoItrs.reserve(pieces.size());
+    std::size_t size = 0;
     for (const auto &tup : pieces)
     {
+      std::size_t multiplicity = std::get<0>(tup);
       LInfoItr_t begin = std::get<1>(tup);
       LInfoItr_t end = std::get<2>(tup);
-      m_itrs.push_back(std::make_pair(
-          KFromNItr(std::get<0>(tup), std::distance(begin, end)), begin));
-      const KFromNItr &idxItr = std::get<0>(m_itrs.back());
-      if (idxItr.exhausted())
-        for (std::size_t ii = 0; ii < idxItr.size(); ++ii)
-          *(currentItr++) = LinkInfo<xAOD::IParticleContainer>{};
-      else
-        std::transform(
-            idxItr->begin(), idxItr->end(), currentItr,
-            [begin](std::size_t idx) { return *(begin + idx); });
+      idxItrs.emplace_back(multiplicity, std::distance(begin, end));
+      m_linkInfoItrs.push_back(begin);
+      size += multiplicity;
     }
-    // make sure that the starting set makes sense
-    if (!exhausted() && !m_filter(m_current))
-      this->operator++();
+    m_idxItr = ProductItr<KFromNItr>(idxItrs, std::vector<KFromNItr>(idxItrs.size()));
+    m_current.assign(size, {});
+    readCurrent();
   }
 
   IPartCombItr::IPartCombItr(
@@ -94,37 +114,16 @@ namespace TrigCompositeUtils
   {
   }
 
-  IPartCombItr::IPartCombItr(std::function<bool(const VecLInfo_t &)> filter)
-      : m_filter(std::move(filter)) {}
-
-  IPartCombItr::IPartCombItr(FilterType filter)
-      : m_filter(getFilter(filter)) {}
-
   void IPartCombItr::reset()
   {
     // Reset each individual iterator and set our current value accordingly
-    auto outItr = m_current.begin();
-    for (auto &itrPair : m_itrs)
-    {
-      KFromNItr &idxItr = itrPair.first;
-      idxItr.reset();
-      if (idxItr.exhausted())
-        for (std::size_t ii = 0; ii < idxItr.size(); ++ii)
-          *(outItr++) = LinkInfo<xAOD::IParticleContainer>{};
-      else
-        for (std::size_t idx : *idxItr)
-          *(outItr++) = *(itrPair.second + idx);
-    }
-    // make sure that the starting set makes sense
-    if (!exhausted() && !m_filter(m_current))
-      this->operator++();
+    m_idxItr.reset();
+    readCurrent();
   }
 
   bool IPartCombItr::exhausted() const
   {
-    return m_itrs.size() == 0 ||
-           std::any_of(m_itrs.begin(), m_itrs.end(),
-                       [](const auto &itrPair) { return itrPair.first.exhausted(); });
+    return m_idxItr.exhausted();
   }
 
   IPartCombItr::reference IPartCombItr::operator*() const
@@ -146,35 +145,8 @@ namespace TrigCompositeUtils
     if (exhausted())
       // Don't iterate an iterator that is already past the end
       return *this;
-    auto backItr = m_itrs.rbegin();
-    std::size_t step = 0;
-    while (backItr != m_itrs.rend())
-    {
-      KFromNItr &idxItr = backItr->first;
-      step += idxItr.size();
-      if (!(++backItr->first).exhausted())
-      {
-        // This is the starting point for a good combination
-        // We need to update the current value
-        auto outItr = m_current.end() - step;
-        for (std::size_t idx : *idxItr)
-          *(outItr++) = *(backItr->second + idx);
-
-        // Any iterators we passed by up to this point were exhausted so we have
-        // to reset them before we use their values
-        for (auto itr = backItr.base(); itr != m_itrs.end(); ++itr)
-        {
-          itr->first.reset();
-          for (std::size_t idx : *itr->first)
-            *(outItr++) = *(itr->second + idx);
-        }
-        break;
-      }
-      ++backItr;
-    }
-    if (!m_filter(m_current))
-      // If we fail the filter condition, advance the iterator again
-      this->operator++();
+    ++m_idxItr;
+    readCurrent();
     return *this;
   }
 
@@ -190,12 +162,31 @@ namespace TrigCompositeUtils
     // All past-the-end iterators compare equal
     if (exhausted() && other.exhausted())
       return true;
-    return m_itrs == other.m_itrs;
+    return m_idxItr == other.m_idxItr && m_linkInfoItrs == other.m_linkInfoItrs;
   }
 
   bool IPartCombItr::operator!=(const IPartCombItr &other) const
   {
     return !(*this == other);
+  }
+
+  void IPartCombItr::readCurrent()
+  {
+    if (exhausted())
+      m_current.assign(m_current.size(), {});
+    else
+    {
+      auto currentItr = m_current.begin();
+      for (std::size_t iLeg = 0; iLeg < nLegs(); ++iLeg)
+      {
+        std::vector<std::size_t> indices = *(*m_idxItr)[iLeg];
+        for (std::size_t idx : indices)
+            *(currentItr++) = *(m_linkInfoItrs[iLeg] + idx);
+      }
+      if (!m_filter(m_current))
+        // If we fail the filter condition, advance the iterator again
+        this->operator++();
+    }
   }
 
 } // namespace TrigCompositeUtils

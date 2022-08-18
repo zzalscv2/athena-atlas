@@ -572,7 +572,8 @@ namespace TrigCompositeUtils {
    * 
    * @param[in] chainName The name of the chain
    * @param[in] features The IParticle features of the container
-   * @param[in] legMultiplicities The multiplicity of each chain leg
+   * @param[in] legMultiplicities The multiplicity of each chain leg. If a leg will not produce
+   *            an IParticle feature its multiplicity should be set to 0
    * @param[in] filter A function that returns true for all valid combinations
    */
   Combinations buildCombinations(
@@ -590,7 +591,8 @@ namespace TrigCompositeUtils {
    * 
    * @param[in] chainName The name of the chain
    * @param[in] features The IParticle features of the container
-   * @param[in] legs legMultiplicities The multiplicity of each chain leg
+   * @param[in] legMultiplicities The multiplicity of each chain leg. If a leg will not produce
+   *            an IParticle feature its multiplicity should be set to 0
    * @param[in] filter A FilterType enum describing how to filter valid combinations
    */
   Combinations buildCombinations(
@@ -605,6 +607,9 @@ namespace TrigCompositeUtils {
    * Returns a TrigCompositeUtils::Combinations object that generates all valid
    * combinations of features. This is a range object that returns on iterator
    * which creates the combinations on the fly.
+   *
+   * Note that if any legs of this chain do not have IParticle features this will not generate any
+   * combinations.
    * 
    * @param[in] chainName The name of the chain
    * @param[in] features The IParticle features of the container
@@ -623,6 +628,9 @@ namespace TrigCompositeUtils {
    * Returns a TrigCompositeUtils::Combinations object that generates all valid
    * combinations of features. This is a range object that returns on iterator
    * which creates the combinations on the fly.
+   *
+   * Note that if any legs of this chain do not have IParticle features this will not generate any
+   * combinations.
    * 
    * @param[in] chainName The name of the chain
    * @param[in] features The IParticle features of the container

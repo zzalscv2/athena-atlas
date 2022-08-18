@@ -10,6 +10,9 @@
 #include "TriggerMatchingTool/IMatchingTool.h"
 #include "TriggerMatchingTool/IMatchScoringTool.h"
 #include "TrigDecisionTool/TrigDecisionTool.h"
+#include "CxxUtils/checker_macros.h"
+
+#include <mutex>
 
 namespace Trig
 {
@@ -17,6 +20,10 @@ namespace Trig
   {
     ASG_TOOL_CLASS(R3MatchingTool, IMatchingTool)
   public:
+    using multInfo_t = std::vector<std::size_t>;
+    using typeInfo_t = std::vector<xAODType::ObjectType>;
+    using chainInfo_t = std::pair<multInfo_t, typeInfo_t>;
+
     R3MatchingTool(const std::string &name);
     ~R3MatchingTool();
 
@@ -41,8 +48,17 @@ namespace Trig
     bool matchObjects(
         const xAOD::IParticle *reco,
         const ElementLink<xAOD::IParticleContainer> &onlineLink,
+        xAODType::ObjectType onlineType,
         std::map<std::pair<uint32_t, uint32_t>, bool> &cache,
         double drThreshold) const;
+
+
+
+    // Keep a cache of the interpreted chain information
+    mutable std::map<std::string, chainInfo_t> m_chainInfoCache ATLAS_THREAD_SAFE;
+    mutable std::mutex m_chainInfoMutex ATLAS_THREAD_SAFE;
+    const chainInfo_t &getChainInfo(const std::string &chain) const;
+
 
     // Internal functions
     /// Inherited from the interface but does nothing

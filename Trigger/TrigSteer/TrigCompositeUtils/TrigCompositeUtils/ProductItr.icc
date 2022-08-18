@@ -1,0 +1,90 @@
+/*
+  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+*/
+
+#include <stdexcept>
+
+namespace TrigCompositeUtils {
+    template <typename Iterator>
+    ProductItr<Iterator>::ProductItr(const std::vector<Iterator> &itrs,
+                                     const std::vector<Iterator> &endItrs)
+            : m_startItrs(itrs), m_endItrs(endItrs) {
+        if (itrs.size() != endItrs.size())
+            throw std::invalid_argument("Provided start and end iterators have different sizes!");
+        reset();
+    }
+
+    template <typename Iterator>
+    void ProductItr<Iterator>::reset() {
+        // Reset the start iterators
+        m_currentItrs = m_startItrs;
+        for (std::size_t idx = 0; idx < nItrs(); ++idx) {
+            if (m_currentItrs[idx] == m_endItrs[idx]) {
+                // Exhausted iterator - exhaust the entire lot
+                m_currentItrs = m_endItrs;
+                break;
+            }
+        }
+    }
+
+    template <typename Iterator>
+    bool ProductItr<Iterator>::exhausted() const {
+        // Exhausted if the first iterator has been left in an exhausted
+        // position
+        return nItrs() == 0 || m_currentItrs[0] == m_endItrs[0];
+    }
+
+    template <typename Iterator>
+    typename ProductItr<Iterator>::reference ProductItr<Iterator>::operator*() const {
+        if (exhausted())
+            throw std::runtime_error("Cannot dereference exhausted iterator!");
+        return m_currentItrs;
+    }
+
+    template <typename Iterator>
+    typename ProductItr<Iterator>::pointer ProductItr<Iterator>::operator->() const {
+        if (exhausted())
+            throw std::runtime_error("Cannot dereference exhausted iterator!");
+        return &m_currentItrs;
+    }
+
+    template <typename Iterator>
+    ProductItr<Iterator> &ProductItr<Iterator>::operator++() {
+        if (exhausted())
+            // Don't iterate an iterator that is already past the end
+            return *this;
+        for (std::size_t idx = nItrs() - 1; idx != static_cast<std::size_t>(-1); --idx) {
+            Iterator &itr = m_currentItrs[idx];
+            if (++itr != m_endItrs[idx]) {
+                // Iterator isn't exhausted! Update the combination
+                // Any iterators we passed by up to this point were exhausted so we have
+                // to reset them before we use their values
+                for (std::size_t idx2 = idx + 1; idx2 < nItrs(); ++idx2)
+                    m_currentItrs[idx2] = m_startItrs[idx2];
+                break;
+            }
+        }
+        return *this;
+    }
+
+    template <typename Iterator>
+    ProductItr<Iterator> ProductItr<Iterator>::operator++(int) {
+        ProductItr itr = *this;
+        this->operator++();
+        return itr;
+    }
+
+    template <typename Iterator>
+    bool ProductItr<Iterator>::operator==(const ProductItr &other) const {
+        // All past-the-end iterators compare equal
+        if (exhausted() && other.exhausted())
+            return true;
+        return m_currentItrs == other.m_currentItrs;
+    }
+
+    template <typename Iterator>
+    bool ProductItr<Iterator>::operator!=(const ProductItr &other) const {
+        return !(*this == other);
+    }
+
+} // namespace TrigCompositeUtils

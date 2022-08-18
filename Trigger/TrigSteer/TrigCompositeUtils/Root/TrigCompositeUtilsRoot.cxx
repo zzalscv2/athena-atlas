@@ -725,6 +725,9 @@ namespace TrigCompositeUtils {
     else
       for (std::size_t legIdx = 0; legIdx < legMultiplicities.size(); ++legIdx)
       {
+        // Skip any that will not provide IParticle features
+        if (legMultiplicities[legIdx] == 0)
+          continue;
         HLT::Identifier legID = createLegName(chainName, legIdx);
         std::vector<LinkInfo<xAOD::IParticleContainer>> legFeatures;
         for (const LinkInfo<xAOD::IParticleContainer>& info : features)
