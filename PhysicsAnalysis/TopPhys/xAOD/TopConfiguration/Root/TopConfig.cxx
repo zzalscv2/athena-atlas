@@ -1287,6 +1287,10 @@ namespace top {
       this->muonSFCustomInputFolder(customMuonSF);
     }
     {
+      std::string const& customMuonSFTrigger = settings->value("MuonSFCustomInputFolderTrigger");
+      this->muonSFCustomInputFolderTrigger(customMuonSFTrigger);
+    }
+    {
       int customMuonForceYear = std::stoi(settings->value("MuonForceYear"));
       this->muonForceYear(customMuonForceYear);
     }
