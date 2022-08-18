@@ -28,15 +28,6 @@ test.art_type = 'build'
 test.exec_steps = [ex]
 test.check_steps = CheckSteps.default_check_steps(test)
 
-# Add a step comparing counts against a reference from test_trigP1_v1Dev_decodeBS_build
-chaindump = test.get_step("ChainDump")
-chaindump.args = '--json --yaml ref_v1Dev_decodeBS_build.new'
-refcomp = CheckSteps.ChainCompStep("CountRefComp")
-refcomp.input_file = 'ref_v1Dev_decodeBS_build.new'
-refcomp.reference_from_release = True # installed from TrigP1Test/share
-refcomp.required = True # Final exit code depends on this step
-CheckSteps.add_step_after_type(test.check_steps, CheckSteps.ChainDumpStep, refcomp)
-
 # Use RootComp reference from test_trigP1_v1Dev_decodeBS_build
 test.get_step('RootComp').ref_test_name = 'trigP1_v1Dev_decodeBS_build'
 
