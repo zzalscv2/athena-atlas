@@ -12,6 +12,8 @@
 
 ## Add the physics tool
 simFlags.PhysicsOptions += ['ExtraParticlesPhysicsTool']
+# Trigger the creation of the PDGParser instance before any susy/exotics particles are added to the PDGTABLE.MeV file
+from ExtraParticles.ExtraParticlesConfigLegacy import pdgParser # noqa: F401
 
 ## Add the additional ExtraParticles to the white list
 from G4AtlasApps.SimFlags import SimFlags
