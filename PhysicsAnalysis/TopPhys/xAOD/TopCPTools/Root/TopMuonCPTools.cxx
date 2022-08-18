@@ -297,6 +297,10 @@ namespace top {
         top::check(asg::setProperty(tool, "CustomInputFolder", m_config->muonSFCustomInputFolder()),
                    "Failed to set CustomInputFolder property for MuonEfficiencyScaleFactors tool");
       }
+      if (m_config->isRun3()) {
+        top::check(asg::setProperty(tool, "CalibrationRelease", "220817_Preliminary_r22run3"),
+                   "Failed to set CalibrationRelease property for MuonEfficiencyScaleFactors tool");
+      }
 
       if (!isIso) {
         top::check(asg::setProperty(tool, "BreakDownSystematics", m_config->muonBreakDownSystematics()), 
