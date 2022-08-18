@@ -1,0 +1,24 @@
+--- Test without MessageSvc
+Athena::getMessageSvc: WARNING MessageSvc not found, will use std::cout
+MyObj1            WARNING Hello
+MyObj1               INFO World
+MyObj2            WARNING Hello
+MyObj2               INFO World
+
+
+JobOptionsSvc        INFO # =======> /scratch/fwinkl/athena/Control/AthenaBaseComps/share/athMessaging_test.txt
+JobOptionsSvc        INFO # (2,1): MessageSvc.OutputLevel = 4
+JobOptionsSvc        INFO Job options successfully read in from /scratch/fwinkl/athena/Control/AthenaBaseComps/share/athMessaging_test.txt
+ApplicationMgr    SUCCESS 
+====================================================================================================================================
+                                                   Welcome to ApplicationMgr (GaudiCoreSvc v36r6)
+                                          running on pc-tbed-pub-42.cern.ch on Thu Aug 18 14:30:50 2022
+====================================================================================================================================
+ApplicationMgr       INFO Application Manager Configured successfully
+EventLoopMgr      WARNING Unable to locate service "EventSelector" 
+EventLoopMgr      WARNING No events will be processed from external input.
+ApplicationMgr       INFO Application Manager Initialized successfully
+ApplicationMgr Ready
+--- Test with MessageSvc
+MyObj1            WARNING Hello
+MyObj2            WARNING Hello
