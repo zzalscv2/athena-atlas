@@ -169,22 +169,27 @@ def badEtaPhi_forAllMaskPatterns(inputs):
 
 ####################################################################
 
-def evaluateModuleHistograms(inputs, minBinStat=5, mvaThr=0.5, excludeOutOfAcc=True):
+def evaluateModuleHistograms(inputs, minBinStat=5, mvaThr=0.5, excludeOutOfAcc=True, historyDepth=10):
     layer   = inputs[0][0]['layer']
     ohisto  = inputs[0][1][1].Clone()
     ohisto.Reset()
     i_layer = baselayers.index(layer)
 
-    histos = [_[1][0] for _ in inputs]
+    # from this histo get current LB
+    lbhisto = inputs[0][1][2]
+    lbn = lbhisto.FindLastBinAbove(0)
+    currentLB = lbn + 1
+    if currentLB<historyDepth: # do nothing, return empty histogram
+        return [ohisto]
 
+    histos = [_[1][0] for _ in inputs]
     for ih, histo in enumerate(histos):
         #
         # collect info from module's past behaviour
         #
-        nInpBins = histo.GetNbinsX()
         stat = 0
         cont = 0
-        for inputbin in range(1, nInpBins + 1):
+        for inputbin in range(currentLB-historyDepth, currentLB):
             stat += histo.GetBinEntries(inputbin)
             cont += histo.GetBinContent(inputbin)*histo.GetBinEntries(inputbin)
         #
@@ -216,7 +221,7 @@ def evaluateModuleHistograms(inputs, minBinStat=5, mvaThr=0.5, excludeOutOfAcc=T
             ohisto.SetBinContent(i_x,i_y,0)
             ohisto.SetBinEntries(i_bin,1) #OK (out of acceptance)
         else:
-            if stat>minBinStat:
+            if stat>=minBinStat:
                 if cont/stat>mvaThr: #not OK
                     ohisto.SetBinContent(i_x,i_y,1.0)
                     ohisto.SetBinEntries(i_bin,1)
