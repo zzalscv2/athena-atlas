@@ -189,7 +189,7 @@ StatusCode L2muCombMon :: fillVariablesPerOfflineMuonPerChain(const EventContext
   auto dR = Monitored::Scalar<float>(chain+"_dR",-999.);
 
   float offPt = mu->pt()/1e3;
-  float offPhi = mu->phi();
+  //float offPhi = mu->phi();  //Comment out due to the failure at Tier0 (ATR-26161)
   offEta = mu->eta();
 
   
@@ -212,6 +212,7 @@ StatusCode L2muCombMon :: fillVariablesPerOfflineMuonPerChain(const EventContext
   fill(m_group+"_"+chain, offEta, ptresol);
 
 
+  /* Comment out due to the failure at Tier0 (ATR-26161)
   // HLT_Roi_L2SAMuon variables
   const TrigCompositeUtils::Decision* muDecision = muLinkInfo.source;
   const TrigCompositeUtils::LinkInfo<TrigRoiDescriptorCollection> roiLinkInfo = TrigCompositeUtils::findLink<TrigRoiDescriptorCollection>(muDecision, "roi");
@@ -229,6 +230,7 @@ StatusCode L2muCombMon :: fillVariablesPerOfflineMuonPerChain(const EventContext
   roidR = sqrt(roidEta*roidEta + roidPhi*roidPhi);
   
   fill(m_group+"_"+chain, roidEta, roidPhi, roidR, offEta);
+  */
 
 
   return StatusCode::SUCCESS;
