@@ -2,4 +2,4 @@
 
 from AthenaCommon.CfgGetter import addAlgorithm
 
-addAlgorithm("MdtOverlay.MdtOverlayConfig.getMdtOverlay", "MdtOverlay")
+addAlgorithm("MdtOverlay.MdtOverlayConfigLegacy.getMdtOverlay", "MdtOverlay")

@@ -2,7 +2,7 @@
 
 from AthenaCommon.CfgGetter import addTool
 
-addTool("CSC_Digitization.CSC_DigitizationConfig.getCscDigitizationTool" , "CscDigitizationTool")
-addTool("CSC_Digitization.CSC_DigitizationConfig.getCscOverlayDigitizationTool" , "CscOverlayDigitizationTool")
-addTool("CSC_Digitization.CSC_DigitizationConfig.getCscOverlayDigitBuilder" , "CscOverlayDigitBuilder")
-addTool("CSC_Digitization.CSC_DigitizationConfig.getCscRange"         , "CscRange")
+addTool("CSC_Digitization.CSC_DigitizationConfigLegacy.getCscDigitizationTool" , "CscDigitizationTool")
+addTool("CSC_Digitization.CSC_DigitizationConfigLegacy.getCscOverlayDigitizationTool" , "CscOverlayDigitizationTool")
+addTool("CSC_Digitization.CSC_DigitizationConfigLegacy.getCscOverlayDigitBuilder" , "CscOverlayDigitBuilder")
+addTool("CSC_Digitization.CSC_DigitizationConfigLegacy.getCscRange"         , "CscRange")
