@@ -110,7 +110,7 @@ StatusCode LArG4GenShowerLib::initialize()
   std::vector< std::string >::const_iterator nameiter;
 
   ATH_MSG_DEBUG ( "Starting struct files iteration" );
-  for (nameiter = m_lib_struct_files.value().begin(); nameiter != m_lib_struct_files.value().end(); nameiter++ ) {
+  for (nameiter = m_lib_struct_files.value().begin(); nameiter != m_lib_struct_files.value().end(); ++nameiter ) {
 
     ATH_MSG_DEBUG ( "Struct file: " << (*nameiter) );
 
@@ -172,7 +172,7 @@ StatusCode LArG4GenShowerLib::execute()
   }
 
   double etot = 0.;
-  for (ShowerLib::StepInfoList::const_iterator iter = eventSteps->begin();iter != eventSteps->end();iter++) {
+  for (ShowerLib::StepInfoList::const_iterator iter = eventSteps->begin();iter != eventSteps->end();++iter) {
     etot += (*iter)->dep();
   }
 
@@ -234,7 +234,7 @@ StatusCode LArG4GenShowerLib::execute()
   // sort the hits by R, make the border where 95% is deposited
   eventSteps->sort(stepInfoDistCompare(stepInfoDistCompare::R));
   ShowerLib::StepInfoList::const_iterator iter = eventSteps->begin();
-  for (;(iter != eventSteps->end()) && (edep < containmentEnergy);iter++) {
+  for (;(iter != eventSteps->end()) && (edep < containmentEnergy);++iter) {
     edep += (*iter)->dep();
     maxR = (*iter)->position().r();
   }
@@ -243,7 +243,7 @@ StatusCode LArG4GenShowerLib::execute()
   // sort the hits by Z, make the border where 95% is deposited
   eventSteps->sort(stepInfoDistCompare(stepInfoDistCompare::Z));
   iter = eventSteps->begin();
-  for (;(iter != eventSteps->end()) && (edep < containmentEnergy);iter++) {
+  for (;(iter != eventSteps->end()) && (edep < containmentEnergy);++iter) {
     edep += (*iter)->dep();
     maxZ = (*iter)->position().z();
   }
@@ -347,9 +347,9 @@ void LArG4GenShowerLib::clusterize(ShowerLib::StepInfoList* stepinfo)
   distMap distances;
 
   //fill the map
-  for (ShowerLib::StepInfoList::iterator i_h1(stepinfo->begin()); i_h1 != stepinfo->end(); i_h1++) {
+  for (ShowerLib::StepInfoList::iterator i_h1(stepinfo->begin()); i_h1 != stepinfo->end(); ++i_h1) {
     //iterate only the upper triangle of N*N matrix, since we do not want to create every distance twice
-    for (ShowerLib::StepInfoList::reverse_iterator i_h2(stepinfo->rbegin()); (*i_h2) != (*i_h1); i_h2++) {
+    for (ShowerLib::StepInfoList::reverse_iterator i_h2(stepinfo->rbegin()); (*i_h2) != (*i_h1); ++i_h2) {
       distances.insert(distMap::value_type((*i_h1)->diff2(**i_h2),Dist(*i_h1, *i_h2)));
     }
   }
@@ -369,7 +369,7 @@ void LArG4GenShowerLib::clusterize(ShowerLib::StepInfoList* stepinfo)
 
     ShowerLib::StepInfo* mergedHit = (*iter).second.merge(); //merge two closest hits
 
-    for (ShowerLib::StepInfoList::iterator i_h1(stepinfo->begin()); i_h1 != stepinfo->end(); i_h1++) {
+    for (ShowerLib::StepInfoList::iterator i_h1(stepinfo->begin()); i_h1 != stepinfo->end(); ++i_h1) {
       if ((*i_h1)->valid()){ //only for valid hits
         distances.insert(distMap::value_type((*i_h1)->diff2(*mergedHit),Dist(*i_h1, mergedHit))); //calculate and store distances
       }
@@ -382,7 +382,7 @@ void LArG4GenShowerLib::clusterize(ShowerLib::StepInfoList* stepinfo)
   // remove invalid
   for (ShowerLib::StepInfoList::iterator i = stepinfo->begin(); i != stepinfo->end();) {
     if ((*i)->valid()) {
-      i++;
+      ++i;
     } else {
       delete (*i);
       i = stepinfo->erase(i);
@@ -396,7 +396,7 @@ void LArG4GenShowerLib::truncate(ShowerLib::StepInfoList* stepinfo)
   double etot = 0;
   stepinfo->sort(stepInfoDistCompare(stepInfoDistCompare::RHO));
 
-  for (ShowerLib::StepInfoList::const_iterator i(stepinfo->begin()); i != stepinfo->end(); i++) {
+  for (ShowerLib::StepInfoList::const_iterator i(stepinfo->begin()); i != stepinfo->end(); ++i) {
     etot += (*i)->dep();
   }
 
@@ -438,7 +438,7 @@ void LArG4GenShowerLib::addingTagsToLibrary()
   }
 
   libMap::iterator itr;
-  for (itr = m_libraries.begin();itr != m_libraries.end();itr++){
+  for (itr = m_libraries.begin();itr != m_libraries.end();++itr){
     // release
     (*itr).second->release(atlasReleaseTag);
 
@@ -471,7 +471,7 @@ StatusCode LArG4GenShowerLib::finalize()
   addingTagsToLibrary();
 
   libMap::iterator itr;
-  for (itr = m_libraries_by_filename.begin();itr != m_libraries_by_filename.end();itr++){
+  for (itr = m_libraries_by_filename.begin();itr != m_libraries_by_filename.end();++itr){
     ATH_MSG_DEBUG ( "Writing shower library to file " << (*itr).first );
 
     TFile libr((*itr).first.c_str(),"RECREATE");
@@ -487,7 +487,7 @@ StatusCode LArG4GenShowerLib::finalize()
     ATH_MSG_INFO ( "Total number of showers: " << m_stat_numshowers
                    << ", valid: "<< m_stat_valid << " (" << (m_stat_valid*100)/m_stat_numshowers << "%)"
                    << ", invalid: " << m_stat_invalid << " (" << (m_stat_invalid*100)/m_stat_numshowers << "%)" );
-    for (itr = m_libraries.begin();itr != m_libraries.end();itr++){
+    for (itr = m_libraries.begin();itr != m_libraries.end();++itr){
       ATH_MSG_INFO ( "*******************************************" );
       std::stringstream ss((*itr).second->statistics());
       for(std::string line; std::getline(ss,line);)

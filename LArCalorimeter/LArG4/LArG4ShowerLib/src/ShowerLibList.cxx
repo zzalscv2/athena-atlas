@@ -57,7 +57,7 @@ namespace ShowerLib {
     	IShowerLib* library = NULL;
     	vectorTTree ttreeVector = vectorTTreeFull();
 		vectorTTree::const_iterator libiter;
-		for (libiter = ttreeVector.begin(); libiter != ttreeVector.end(); libiter++) {
+		for (libiter = ttreeVector.begin(); libiter != ttreeVector.end(); ++libiter) {
 			library = (**libiter)(fname);
 			if (library != NULL) break;
 		}
@@ -69,7 +69,7 @@ namespace ShowerLib {
     	IShowerLib* library = NULL;
     	vectorStruct structVector = vectorStructFull();
 		vectorStruct::const_iterator libiter;
-		for (libiter = structVector.begin(); libiter != structVector.end(); libiter++) {
+		for (libiter = structVector.begin(); libiter != structVector.end(); ++libiter) {
 			library = (**libiter)(fname);
 			if (library != NULL) break;
 		}

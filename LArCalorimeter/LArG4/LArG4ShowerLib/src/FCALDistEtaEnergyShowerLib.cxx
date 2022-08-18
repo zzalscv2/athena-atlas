@@ -314,9 +314,9 @@ namespace ShowerLib {
 	  if (randomShift > 0) {
 		  double upperEnergy = (*distit).first * 1.01; //we allow 1% off
 		  for (int i = 0; i < randomShift; i++) {
-			  distit++;
+			  ++distit;
 			  if (distit == (*etait).second.end()) {
-				  distit--;
+				  --distit;
 				  break;
 			  }
 			  if ((*distit).first > upperEnergy) break; //energy diff too high
@@ -325,7 +325,7 @@ namespace ShowerLib {
 	  if ((randomShift < 0)&&(distit != (*etait).second.begin())) {
 		  double lowerEnergy = (*distit).first * 0.99; //we allow 1% off
 		  for (int i = 0; i > randomShift; i--) {
-			  distit--;
+			  --distit;
 			  if (distit == (*etait).second.begin()) {
 				  //distit++;
 				  break;
@@ -342,7 +342,7 @@ namespace ShowerLib {
 	  float energyScale = track->GetKineticEnergy() / (*distit).first;
 	  //std::cout << "Scale: " << energyScale << std::endl;
 
-	  for (iter = (*distit).second.begin() /*outshower->begin()*/; iter != (*distit).second.end() /*outshower->end()*/; iter++) {
+	  for (iter = (*distit).second.begin() /*outshower->begin()*/; iter != (*distit).second.end() /*outshower->end()*/; ++iter) {
 		  EnergySpot tmp( (*iter)->GetPosition(), (*iter)->GetEnergy(), (*iter)->GetTime() );
 		  tmp.SetEnergy(tmp.GetEnergy() * energyScale);
 		  outshower->push_back(tmp);
@@ -426,7 +426,7 @@ namespace ShowerLib {
 	  int spread = 2; //will calculate average Z for 5 showers max ( -2 .. 0 .. +2 )
 	  double upperEnergy = (*distit).first * 1.01; //we allow 1% off
 	  for (int i = 0; i < spread; i++) {
-		  distiter++;
+		  ++distiter;
 		  if (distiter == (*etait).second.end()) {
 			  break;
 		  }
@@ -439,7 +439,7 @@ namespace ShowerLib {
 	  if (distiter != (*etait).second.begin()) {
 		  double lowerEnergy = (*distit).first * 0.99; //we allow 1% off
 		  for (int i = 0; i < spread; i++) {
-			  distiter--;
+			  --distiter;
 			  if (lowerEnergy > (*distiter).first) break; //energy diff too high
 			  //the shower is OK, including it to the average
 			  rezZ += (*distiter).second.getZSize();
@@ -522,7 +522,7 @@ namespace ShowerLib {
 	  int spread = 2; //will calculate average Z for 5 showers max ( -2 .. 0 .. +2 )
 	  double upperEnergy = (*distit).first * 1.01; //we allow 1% off
 	  for (int i = 0; i < spread; i++) {
-		  distiter++;
+		  ++distiter;
 		  if (distiter == (*etait).second.end()) {
 			  break;
 		  }
@@ -535,7 +535,7 @@ namespace ShowerLib {
 	  if (distiter != (*etait).second.begin()) {
 		  double lowerEnergy = (*distit).first * 0.99; //we allow 1% off
 		  for (int i = 0; i < spread; i++) {
-			  distiter--;
+			  --distiter;
 			  if (lowerEnergy > (*distiter).first) break; //energy diff too high
 			  //the shower is OK, including it to the average
 			  rezR += (*distiter).second.getRSize();
@@ -729,7 +729,7 @@ namespace ShowerLib {
 	  dest->Fill();
 	  
 	  library::const_iterator libit;
-	  for (libit = m_libData.begin(); libit != m_libData.end(); libit ++) {
+	  for (libit = m_libData.begin(); libit != m_libData.end(); ++libit) {
 		  x = (*libit).second.size();
 		  y = (*libit).first;
 		  z = 0;
@@ -737,7 +737,7 @@ namespace ShowerLib {
 		  time = 0;
 		  dest->Fill(); //eta bin header
 		  etabin::const_iterator etait;
-		  for (etait = (*libit).second.begin(); etait != (*libit).second.end(); etait++) {
+		  for (etait = (*libit).second.begin(); etait != (*libit).second.end(); ++etait) {
 			  x = (*etait).second.size();
 			  y = (*etait).first;
 			  z = 0;
@@ -745,7 +745,7 @@ namespace ShowerLib {
 			  time = 0;
 			  dest->Fill(); //eta bin header
 			  distbin::const_iterator distit;
-			  for (distit = (*etait).second.begin(); distit != (*etait).second.end(); distit++) {
+			  for (distit = (*etait).second.begin(); distit != (*etait).second.end(); ++distit) {
 				  x = (*distit).second.size();
 				  y = (*distit).second.getRSize();
 				  z = (*distit).second.getZSize();
@@ -753,7 +753,7 @@ namespace ShowerLib {
 				  time = 0;
 				  dest->Fill(); //shower header
 				  Shower::const_iterator iter;
-				  for (iter = (*distit).second.begin(); iter != (*distit).second.end(); iter++) {
+				  for (iter = (*distit).second.begin(); iter != (*distit).second.end(); ++iter) {
 					  x = (*iter)->GetPosition().x();
 					  y = (*iter)->GetPosition().y();
 					  z = (*iter)->GetPosition().z();
@@ -780,10 +780,10 @@ namespace ShowerLib {
   {
 	  std::map<float, std::vector<float> >::const_iterator iter;
 
-	  for (iter = structure.begin(); iter != structure.end(); iter++) {
+	  for (iter = structure.begin(); iter != structure.end(); ++iter) {
 		  m_libData[(*iter).first];
 		  std::vector<float>::const_iterator inneriter;
-		  for (inneriter = (*iter).second.begin(); inneriter != (*iter).second.end(); inneriter++) {
+		  for (inneriter = (*iter).second.begin(); inneriter != (*iter).second.end(); ++inneriter) {
 			  (m_libData[(*iter).first])[(*inneriter)];
 		  }
 	  }
