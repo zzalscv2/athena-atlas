@@ -30,8 +30,10 @@
 //----- Constructor
 TgcDigitMaker::TgcDigitMaker(const TgcHitIdHelper* hitIdHelper,
 			     const MuonGM::MuonDetectorManager* mdManager,
-			     unsigned int                       runperiod)
-  : AthMessaging ("TgcDigitMaker")
+			     unsigned int                       runperiod,
+                             const bool doFourBunch)
+  : AthMessaging ("TgcDigitMaker"),
+    m_doFourBunchDigitization(doFourBunch)
 {
   m_hitIdHelper             = hitIdHelper;
   m_mdManager               = mdManager;
@@ -504,58 +506,38 @@ bool TgcDigitMaker::efficiencyCheck(const std::string& stationName, const int st
 }
 //+++++++++++++++++++++++++++++++++++++++++++++++
 uint16_t TgcDigitMaker::bcTagging(const double digitTime, const double window, const double offset) const {
-
+  const double calc_coll_time = digitTime - offset;   // calculated collision time
   uint16_t bctag = 0;
-  if(-m_bunchCrossingTime+offset < digitTime && digitTime < -m_bunchCrossingTime+offset+window) {
-    bctag = (bctag | 0x1);
+  if (-m_bunchCrossingTime < calc_coll_time && calc_coll_time < window - m_bunchCrossingTime) {
+    bctag |= 0x1;
   }
-  if(                     offset < digitTime && digitTime <                      offset+window) {
-    bctag = (bctag | 0x2);
+  if (                  0. < calc_coll_time && calc_coll_time < window) {
+    bctag |= 0x2;
   }
-  if(+m_bunchCrossingTime+offset < digitTime && digitTime < +m_bunchCrossingTime+offset+window) {
-    bctag = (bctag | 0x4);
+  if ( m_bunchCrossingTime < calc_coll_time && calc_coll_time < window + m_bunchCrossingTime) {
+    bctag |= 0x4;
+  }
+  if (2.*m_bunchCrossingTime < calc_coll_time && calc_coll_time < window + 2.*m_bunchCrossingTime &&
+      m_doFourBunchDigitization) {
+    bctag |= 0x8;
   }
   return bctag;
 }
 //+++++++++++++++++++++++++++++++++++++++++++++++
 void TgcDigitMaker::addDigit(const Identifier id, const uint16_t bctag, TgcDigitCollection* digits) const {
-  if ((bctag & 0x1) != 0) {
-    bool duplicate = false;
-    for (const auto digit : *digits) {
-      if (id==digit->identify() && TgcDigit::BC_PREVIOUS==digit->bcTag()) {
-        duplicate = true;
-        break;
+  for (int bc=TgcDigit::BC_PREVIOUS; bc <= TgcDigit::BC_NEXTNEXT; bc++) {
+    if ((bctag>>(bc-1)) & 0x1) {
+      bool duplicate = false;
+      for (const auto digit : *digits) {
+        if (id == digit->identify() && digit->bcTag() == bc) {
+          duplicate = true;
+          break;
+        }
       }
-    }
-    if (!duplicate) {
-      std::unique_ptr<TgcDigit> multihitDigit = std::make_unique<TgcDigit>(id,TgcDigit::BC_PREVIOUS);
-      digits -> push_back(multihitDigit.release());
-    }
-  }
-  if ((bctag & 0x2) != 0) {
-    bool duplicate = false;
-    for (const auto digit : *digits) {
-      if (id==digit->identify() && TgcDigit::BC_CURRENT==digit->bcTag()) {
-        duplicate = true;
-        break;
+      if (!duplicate) {
+        std::unique_ptr<TgcDigit> multihitDigit = std::make_unique<TgcDigit>(id, bc);
+        digits->push_back(multihitDigit.release());
       }
-    }
-    if (!duplicate) {
-      std::unique_ptr<TgcDigit> multihitDigit = std::make_unique<TgcDigit>(id,TgcDigit::BC_CURRENT);
-      digits -> push_back(multihitDigit.release());
-    }
-  }
-  if ((bctag & 0x4) != 0) {
-    bool duplicate = false;
-    for (const auto digit : *digits) {
-      if (id==digit->identify() && TgcDigit::BC_NEXT==digit->bcTag()) {
-        duplicate = true;
-        break;
-      }
-    }
-    if (!duplicate) {
-      std::unique_ptr<TgcDigit> multihitDigit = std::make_unique<TgcDigit>(id,TgcDigit::BC_NEXT);
-      digits -> push_back(multihitDigit.release());
     }
   }
   return;
