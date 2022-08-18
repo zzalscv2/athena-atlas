@@ -29,6 +29,7 @@
 #include "GeoModelKernel/GeoSerialIdentifier.h"
 #include "GeoModelKernel/GeoSerialTransformer.h"
 #include "GeoModelKernel/GeoXF.h"
+#include "GeoModelUtilities/GeoRef.h"
 
 // volumes used:  Pcon, Tubs, Cons, Box, Trap 
 #include "GeoModelKernel/GeoPcon.h"
@@ -253,12 +254,12 @@ void LArGeo::BarrelConstruction::MakeEnvelope()
   double contract = m_parameters->GetValue("LArEMBAbsorberContraction");
 
   double density_lead = Lead->getDensity()/(contract*contract*contract);
-  GeoMaterial* myLead = new GeoMaterial("myLead",density_lead);
+  GeoRef<GeoMaterial> myLead (new GeoMaterial("myLead",density_lead));
   myLead->add(Pb,1.0);
   myLead->lock();
 
   double density_iron = Iron->getDensity()/(contract*contract*contract);
-  GeoMaterial* myIron = new GeoMaterial("myIron",density_iron);
+  GeoRef<GeoMaterial> myIron (new GeoMaterial("myIron",density_iron));
   myIron->add(Fe,1.0);
   myIron->lock();
 
