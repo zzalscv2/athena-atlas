@@ -32,7 +32,8 @@ template <class T> size_t MatrixBranch<T>::ncols(size_t row) const {
 }
 template <class T> const T& MatrixBranch<T>::getDefault() const { return m_default; }
 template <class T> void MatrixBranch<T>::setDefault(const T& def) { m_default = def; }
-template <class T> TTree* MatrixBranch<T>::tree() const { return m_Vec.tree(); }
+template <class T> const TTree* MatrixBranch<T>::tree() const { return m_Vec.tree(); }
+template <class T> TTree* MatrixBranch<T>::tree() { return m_Vec.tree(); }
 template <class T> bool MatrixBranch<T>::initialized() const { return m_Vec.initialized(); }
 
 template <class T> std::vector<IMuonTesterBranch::DataDependency> MatrixBranch<T>::data_dependencies() { return {};}
