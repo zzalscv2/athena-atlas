@@ -265,8 +265,8 @@ namespace top {
                  "Failed to set MuonQuality for " + name);
       top::check(asg::setProperty(tool, "AllowZeroSF", true),
                  "Failed to set AllowZeroSF for " + name);
-      if (m_config->muonSFCustomInputFolder() != " ") {
-        top::check(asg::setProperty(tool, "CustomInputFolder", m_config->muonSFCustomInputFolder()),
+      if (m_config->muonSFCustomInputFolderTrigger() != " ") {
+        top::check(asg::setProperty(tool, "CustomInputFolder", m_config->muonSFCustomInputFolderTrigger()),
                    "Failed to set CustomInputFolder property for MuonTriggerScaleFactors tool");
       }
       if (m_config->muonForcePeriod() != " ") {

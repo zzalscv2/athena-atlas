@@ -183,6 +183,9 @@ namespace top {
     registerParameter("MuonSFCustomInputFolder",
                       "EXPERT OPTION! Tells the MuonEfficiencyScaleFactors tools to use a custom input folder path. If set to \" \" will use the default",
                       " ");
+    registerParameter("MuonSFCustomInputFolderTrigger",
+                      "EXPERT OPTION! Tells the MuonEfficiencyScaleFactors trigger tools to use a custom input folder path. If set to \" \" will use the default",
+                      " ");
     registerParameter("MuonForceYear",
                       "EXPERT OPTION! Tells the MuonEfficiencyScaleFactors tools to use a custom Year. If set to -1 will use the default",
                       "-1");

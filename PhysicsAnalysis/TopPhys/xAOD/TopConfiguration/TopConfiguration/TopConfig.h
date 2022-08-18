@@ -1125,6 +1125,12 @@ namespace top {
         m_muonSFCustomInputFolder = s;
       }
     } 
+    std::string const& muonSFCustomInputFolderTrigger() const {return m_muonSFCustomInputFolderTrigger;}
+    void muonSFCustomInputFolderTrigger(const std::string& s) {
+      if (!m_configFixed) {
+        m_muonSFCustomInputFolderTrigger = s;
+      }
+    } 
     int muonForceYear() const {return m_muonForceYear;}
     void muonForceYear(int s) {
       if (!m_configFixed) {
@@ -2464,6 +2470,7 @@ namespace top {
     bool m_muonMuonDoExtraSmearingHighPt; //to turn on/off a special correction for the muon with high momenta.
     bool m_muonBreakDownSystematics; //to turn on/off a more complex systematic model
     std::string m_muonSFCustomInputFolder;
+    std::string m_muonSFCustomInputFolderTrigger;
     std::string m_muonForcePeriod;
     int m_muonForceYear;
     std::string m_muonForceTrigger;
