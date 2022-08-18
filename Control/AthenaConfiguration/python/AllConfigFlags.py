@@ -66,6 +66,11 @@ def _createCfgFlags():
     acf.addFlag('Input.TypedCollections', lambda prevFlags : _typedInputCollections(prevFlags.Input.Files) )
     acf.addFlag('Input.SecondaryTypedCollections', lambda prevFlags : _typedInputCollections(prevFlags.Input.SecondaryFiles) )
 
+    def _metadataItems(inputFile):
+        return GetFileMD(inputFile).get("metadata_items", {})
+
+    acf.addFlag('Input.MetadataItems', lambda prevFlags : _metadataItems(prevFlags.Input.Files) )
+
     acf.addFlag('Concurrency.NumProcs', 0)
     acf.addFlag('Concurrency.NumThreads', 0 )
     acf.addFlag('Concurrency.NumConcurrentEvents', lambda prevFlags : prevFlags.Concurrency.NumThreads)

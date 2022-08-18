@@ -14,6 +14,7 @@ def BunchCrossingCondAlgCfg(configFlags):
     run1=(configFlags.IOVDb.DatabaseInstance=='COMP200')
     cfgsvc = None
     folder = ''
+    bgkey = ''
 
     if configFlags.Beam.BunchStructureSource == BunchStructureSource.MC:
         folder = "/Digitization/Parameters"
@@ -31,6 +32,19 @@ def BunchCrossingCondAlgCfg(configFlags):
     elif configFlags.Beam.BunchStructureSource == BunchStructureSource.TrigConf:
         from TrigConfxAOD.TrigConfxAODConfig import getxAODConfigSvc
         cfgsvc = result.getPrimaryAndMerge(getxAODConfigSvc(configFlags))
+        if cfgsvc.UseInFileMetadata:
+            if 'TriggerMenuJson_BG' not in configFlags.Input.MetadataItems:
+                # this is for when we need to configure the BunchGroupCondAlg with info extracted from converted JSON
+                # in this case avoid using the xAODConfigSvc, because it will be set up incorrectly
+                from TrigConfigSvc.TrigConfigSvcCfg import BunchGroupCondAlgCfg
+                configFlags_with_DB = configFlags.clone()
+                configFlags_with_DB.Trigger.triggerConfig = 'FILE'
+                result.merge(BunchGroupCondAlgCfg(configFlags_with_DB))
+                bgkey = 'L1BunchGroup'
+            else:  # trust that we can use the in-file metadata
+                bgkey = ''
+        else:
+            bgkey = 'L1BunchGroup'
     elif configFlags.Beam.BunchStructureSource == BunchStructureSource.Lumi:
         from .LuminosityCondAlgConfig import LuminosityCondAlgCfg
         result.merge(LuminosityCondAlgCfg(configFlags))
@@ -39,7 +53,8 @@ def BunchCrossingCondAlgCfg(configFlags):
                                Run1=run1,
                                FillParamsFolderKey=folder,
                                Mode=configFlags.Beam.BunchStructureSource.value,
-                               TrigConfigSvc=cfgsvc 
+                               TrigConfigSvc=cfgsvc,
+                               L1BunchGroupCondData=bgkey
                                )
 
     result.addCondAlgo(alg)

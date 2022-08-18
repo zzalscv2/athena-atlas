@@ -35,10 +35,11 @@ if DQMonFlags.doMonitoring():
          from LumiBlockComps.BunchCrossingCondAlgDefault import BunchCrossingCondAlgDefault
          BunchCrossingCondAlgDefault()
 
+         from AthenaConfiguration.ComponentAccumulator import CAtoGlobalWrapper
          from AthenaConfiguration.AllConfigFlags import ConfigFlags
 
          from AthenaMonitoring.AthenaMonitoringAODRecoCfg import AthenaMonitoringAODRecoCfg
-         ComponentAccumulator.CAtoGlobalWrapper(AthenaMonitoringAODRecoCfg, ConfigFlags)
+         CAtoGlobalWrapper(AthenaMonitoringAODRecoCfg, ConfigFlags)
 
    def doOldStylePostSetup(addlSequences=[]):
       #------------------------#

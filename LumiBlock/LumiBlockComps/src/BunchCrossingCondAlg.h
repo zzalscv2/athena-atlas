@@ -1,6 +1,6 @@
 // This file's extension implies that it's C, but it's really -*- C++ -*-.
 /*
- * Copyright (C) 2002-2019 CERN for the benefit of the ATLAS collaboration.
+ * Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration.
  */
 /**
  * @file BunchCrossingCondAlg.h
@@ -21,6 +21,7 @@
 #include "StoreGate/WriteCondHandleKey.h"
 #include "TrigConfInterfaces/ILVL1ConfigSvc.h"
 #include "LumiBlockData/LuminosityCondData.h"
+#include "TrigConfData/L1BunchGroupSet.h"
 
 /**
  * @brief Conditions algorithm to unpack fill parameters from COOL.
@@ -47,6 +48,7 @@ private:
   /// Input conditions object.
   SG::ReadCondHandleKey<AthenaAttributeList> m_fillParamsFolderKey{ this, "FillParamsFolderKey", "/TDAQ/OLC/LHC/FILLPARAMS", "" };
   SG::ReadCondHandleKey<LuminosityCondData> m_lumiCondDataKey{this, "LumiCondData", "LuminosityCondData", "Lumi cond data key"};
+  SG::ReadCondHandleKey<TrigConf::L1BunchGroupSet> m_bunchGroupCondDataKey{this, "L1BunchGroupCondData", "L1BunchGroup", "Bunch group cond data key"};
   /// Output conditions object.
   SG::WriteCondHandleKey<BunchCrossingCondData> m_outputKey{this, "OutputKey", "BunchCrossingData", "Key of output CDO" };
 

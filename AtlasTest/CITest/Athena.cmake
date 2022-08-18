@@ -135,6 +135,10 @@ atlas_add_citest( DataQuality_r21ESD_Postprocessing
    SCRIPT ${CMAKE_CURRENT_SOURCE_DIR}/test/DataQuality_r21ESD_Postprocessing.sh
    DEPENDS_SUCCESS DataQuality_r21ESD )
 
+atlas_add_citest( DataQuality_Run3Data_AODtoHIST
+   SCRIPT Reco_tf.py --AMI=q449 --inputAODFile="../RecoRun3Data_Collisions/run_q449/myAOD.pool.root" --outputHISTFile=DataQuality_Run3Data_AODtoHIST.root  --athenaopts='--threads=1'
+   DEPENDS_SUCCESS RecoRun3Data_Collisions )
+
 
 #################################################################################
 # Special reconstruction
