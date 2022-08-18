@@ -1,4 +1,4 @@
-# Copyright (C) 2002-2020 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
 
 # Declare the package name:
 atlas_subdir( LUCID_EventTPCnv )
@@ -19,39 +19,39 @@ atlas_add_dictionary( LUCID_EventTPCnvDict
 atlas_add_test( LUCID_DigitCnv_p1_test
                 SOURCES
                 test/LUCID_DigitCnv_p1_test.cxx
-                LINK_LIBRARIES LUCID_EventTPCnv TestTools )
+                LINK_LIBRARIES LUCID_EventTPCnv TestTools CxxUtils )
 
 atlas_add_test( LUCID_DigitCnv_p2_test
                 SOURCES
                 test/LUCID_DigitCnv_p2_test.cxx
-                LINK_LIBRARIES LUCID_EventTPCnv TestTools )
+                LINK_LIBRARIES LUCID_EventTPCnv TestTools CxxUtils )
 
 atlas_add_test( LUCID_DigitContainerCnv_p1_test
                 SOURCES
                 test/LUCID_DigitContainerCnv_p1_test.cxx
-                LINK_LIBRARIES LUCID_EventTPCnv TestTools )
+                LINK_LIBRARIES LUCID_EventTPCnv TestTools CxxUtils )
 
 atlas_add_test( LUCID_DigitContainerCnv_p2_test
                 SOURCES
                 test/LUCID_DigitContainerCnv_p2_test.cxx
-                LINK_LIBRARIES LUCID_EventTPCnv TestTools )
+                LINK_LIBRARIES LUCID_EventTPCnv TestTools CxxUtils )
 
 atlas_add_test( LUCID_RawDataCnv_p1_test
                 SOURCES
                 test/LUCID_RawDataCnv_p1_test.cxx
-                LINK_LIBRARIES LUCID_EventTPCnv TestTools )
+                LINK_LIBRARIES LUCID_EventTPCnv TestTools CxxUtils )
 
 atlas_add_test( LUCID_RawDataContainerCnv_p1_test
                 SOURCES
                 test/LUCID_RawDataContainerCnv_p1_test.cxx
-                LINK_LIBRARIES LUCID_EventTPCnv TestTools )
+                LINK_LIBRARIES LUCID_EventTPCnv TestTools CxxUtils )
 
 atlas_add_test( LUCID_SimHitCnv_p1_test
                 SOURCES
                 test/LUCID_SimHitCnv_p1_test.cxx
-                LINK_LIBRARIES AtlasHepMCLib GeneratorObjectsTPCnv LUCID_EventTPCnv TestTools )
+                LINK_LIBRARIES AtlasHepMCLib GeneratorObjectsTPCnv LUCID_EventTPCnv TestTools CxxUtils )
 
 atlas_add_test( LUCID_SimHitCnv_p2_test
                 SOURCES
                 test/LUCID_SimHitCnv_p2_test.cxx
-                LINK_LIBRARIES AtlasHepMCLib GeneratorObjectsTPCnv LUCID_EventTPCnv TestTools )
+                LINK_LIBRARIES AtlasHepMCLib GeneratorObjectsTPCnv LUCID_EventTPCnv TestTools CxxUtils )
