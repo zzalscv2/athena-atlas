@@ -103,7 +103,8 @@ StatusCode TgcDigitizationTool::initialize()
   // initialize class to execute digitization
   m_digitizer = new TgcDigitMaker(m_hitIdHelper,
                                   m_mdManager,
-                                  runperiod);
+                                  runperiod,
+                                  m_doFourBunchDigitization);
   m_digitizer->setLevel(static_cast<MSG::Level>(msgLevel()));
   ATH_CHECK(m_rndmSvc.retrieve());
 
@@ -403,10 +404,10 @@ StatusCode TgcDigitizationTool::digitizeCore(const EventContext& ctx) {
           }
 
 	  // fill the SDO collection in StoreGate if not pile-up
-      if (!m_includePileUpTruth &&
-          ((phit->trackNumber() == 0) || (phit->trackNumber() == m_vetoThisBarcode))) {
-        continue;
-      }
+          if (!m_includePileUpTruth &&
+              ((phit->trackNumber() == 0) || (phit->trackNumber() == m_vetoThisBarcode))) {
+            continue;
+          }
 
 	  // link to MC info
 	  //const HepMcParticleLink & particleLink = hit.particleLink();
