@@ -6,6 +6,7 @@
 #define AFP_GeoModelFactory_h 1
 
 #include "GeoModelKernel/GeoVDetectorFactory.h"
+#include "GeoModelUtilities/GeoRef.h"
 #include "AFP_GeoModelManager.h"
 #include "AFP_Geometry/AFP_Geometry.h"
 #include <string>
@@ -40,7 +41,7 @@ public:
     void updatePositions(AFP_BPMCOOLPARAMS* pBpmParams);
 
 private:
-    std::map<std::string,const GeoMaterial*> m_MapMaterials;
+    std::map<std::string, GeoRef<const GeoMaterial> > m_MapMaterials;
 
     void defineMaterials();
 

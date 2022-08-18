@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "GeoModelUtilities/GeoModelExperiment.h"
@@ -19,7 +19,7 @@
  ** Constructor(s)
  **/
 AFP_GeoModelTool::AFP_GeoModelTool( const std::string& type, const std::string& name, const IInterface* parent )
-    : GeoModelTool( type, name, parent ), m_pAFPDetectorFactory(NULL), m_iovSvc( "IOVDbSvc", name )
+    : GeoModelTool( type, name, parent ), m_iovSvc( "IOVDbSvc", name )
 {
     m_CfgParams.clear();
     m_pGeometry=NULL;
@@ -183,7 +183,7 @@ StatusCode AFP_GeoModelTool::create()
 	CHECK(checkPropertiesSettings());
 
     m_pGeometry=new AFP_Geometry(&m_CfgParams);
-    m_pAFPDetectorFactory=new AFP_GeoModelFactory(detStore().operator->(), m_pGeometry);
+    m_pAFPDetectorFactory=std::make_unique<AFP_GeoModelFactory>(detStore().operator->(), m_pGeometry);
 
 	if (m_detector==NULL)
 	{

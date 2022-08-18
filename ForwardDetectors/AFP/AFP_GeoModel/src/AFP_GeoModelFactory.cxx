@@ -103,7 +103,7 @@ void AFP_GeoModelFactory::defineMaterials()
     pMPT->AddProperty("ABSLENGTH", PhotonEnergyOptVac, AbsorptionOptVac, 2);
     pMatOptVacuum->SetMaterialPropertiesTable(pMPT);
     pMatOptVacuum->lock();
-    m_MapMaterials.insert(std::pair<std::string,GeoMaterial*>(matName,pMatOptVacuum));
+    m_MapMaterials.emplace(matName,pMatOptVacuum);
 
     // Steel Grade 316L (Roman Pot)
     matName="Steel_AFP";
@@ -132,15 +132,7 @@ void AFP_GeoModelFactory::defineMaterials()
     steel->add(const_cast<GeoElement*> (Ni),aNi/Atot);
     steel->add(const_cast<GeoElement*> (N),  aN/Atot);
     steel->lock();
-    m_MapMaterials.insert(std::pair<std::string,GeoMaterial*>(matName,steel));
-
-    // Silicon 100% (Detector)
-    matName="Silicon";
-    GeoMaterial* pMaterial=new GeoMaterial(matName, 2.329*CLHEP::g/CLHEP::cm3);
-
-    pMaterial->add(const_cast<GeoElement*> (Si), 1);
-    pMaterial->lock();
-    m_MapMaterials.insert(std::pair<std::string,GeoMaterial*>(matName,pMaterial));
+    m_MapMaterials.emplace(matName,steel);
 
     // CE7 70% Si, 30% Al
     matName="CE7";
@@ -151,7 +143,7 @@ void AFP_GeoModelFactory::defineMaterials()
     pMatCE7->add(const_cast<GeoElement*> (Si),aSi/Atot);
     pMatCE7->add(const_cast<GeoElement*> (Al),aAl/Atot);
     pMatCE7->lock();
-    m_MapMaterials.insert(std::pair<std::string,GeoMaterial*>(matName,pMatCE7));
+    m_MapMaterials.emplace(matName,pMatCE7);
 
     // Quartz 70% SiO2 for TD Quartic (with refractive index and absorption length)
     matName="Quartz";
@@ -174,7 +166,7 @@ void AFP_GeoModelFactory::defineMaterials()
     pMPT->AddProperty("ABSLENGTH", arrEnergy1, arrQuartzAbsLength, nEntriesCnt1);
     pMatQuartz->SetMaterialPropertiesTable(pMPT);
     pMatQuartz->lock();
-    m_MapMaterials.insert(std::pair<std::string,GeoMaterial*>(matName,pMatQuartz));
+    m_MapMaterials.emplace(matName,pMatQuartz);
 
     // Silicon for TD SiPMT (with refractive index)
     matName="SiliconPMT";
@@ -193,7 +185,7 @@ void AFP_GeoModelFactory::defineMaterials()
     pMPT->AddProperty("ABSLENGTH", arrEnergy2, arrSiliconAbsLength, nEntriesCnt2);
     pMatSiliconPMT->SetMaterialPropertiesTable(pMPT);
     pMatSiliconPMT->lock();
-    m_MapMaterials.insert(std::pair<std::string,GeoMaterial*>(matName,pMatSiliconPMT));
+    m_MapMaterials.emplace(matName,pMatSiliconPMT);
 
 
     // Silicon
@@ -202,7 +194,7 @@ void AFP_GeoModelFactory::defineMaterials()
     aSi=1.0*Si->getA()/(g/mole);
     pMatSilicon->add(const_cast<GeoElement*> (Si),1.0);
     pMatSilicon->lock();
-    m_MapMaterials.insert(std::pair<std::string,GeoMaterial*>(matName,pMatSilicon));
+    m_MapMaterials.emplace(matName,pMatSilicon);
 
     // Water
     matName="Water";
@@ -213,7 +205,7 @@ void AFP_GeoModelFactory::defineMaterials()
     pMatWater->add(const_cast<GeoElement*> (H),aH/Atot);
     pMatWater->add(const_cast<GeoElement*> (O),aO/Atot);
     pMatWater->lock();
-    m_MapMaterials.insert(std::pair<std::string,GeoMaterial*>(matName,pMatWater));
+    m_MapMaterials.emplace(matName,pMatWater);
 
     // Beryllium
     matName="Beryllium_AFP";
@@ -221,7 +213,7 @@ void AFP_GeoModelFactory::defineMaterials()
 
     pMaterialBe->add(const_cast<GeoElement*> (Be), 1);
     pMaterialBe->lock();
-    m_MapMaterials.insert(std::pair<std::string,GeoMaterial*>(matName,pMaterialBe));
+    m_MapMaterials.emplace(matName,pMaterialBe);
 }
 
 

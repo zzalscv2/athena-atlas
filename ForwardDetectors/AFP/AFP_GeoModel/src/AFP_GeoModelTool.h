@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef AFP_GeoModelTool_H
@@ -25,7 +25,7 @@ class AFP_GeoModelTool final : public GeoModelTool
  private:
     AFP_CONFIGURATION m_CfgParams;
     AFP_Geometry* m_pGeometry;
-    AFP_GeoModelFactory* m_pAFPDetectorFactory;
+    std::unique_ptr<AFP_GeoModelFactory> m_pAFPDetectorFactory;
     ServiceHandle< IIOVDbSvc > m_iovSvc;
     AFP_SIDCONFIGURATION m_defsidcfg;
     std::vector<double> m_vecAFP00XStaggering, m_vecAFP00YStaggering;
