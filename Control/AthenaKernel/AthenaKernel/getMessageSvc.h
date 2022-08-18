@@ -1,7 +1,7 @@
 // This file's extension implies that it's C, but it's really -*- C++ -*-.
 
 /*
-  Copyright (C) 2002-2019 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef ATHENAKERNEL_GETMESSAGESVC_H
@@ -29,6 +29,8 @@ namespace Athena {
    *             @c MessageSvc instance if it is not there already.
    *             The default is to be lazy and don't create anything.
    *  @param quiet : do not print warning if MessagesSvc cannot be found (default false)
+   *
+   *  Once found, the MessageSvc pointer is cached for future calls.
    *
    *  Also used via weak-linking from TrigConf code (see e.g. TrigConfBase/Root/MsgStream.cxx)
    *  DO NOT MODIFY THE SIGNATURE OF THESE METHODS WITHOUT UPDATING THE TRIGCONF SIDE !!!

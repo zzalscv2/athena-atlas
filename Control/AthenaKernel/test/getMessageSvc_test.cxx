@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2017 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
 */
 
 /**
@@ -9,7 +9,6 @@
  *
  * get a MsgSvc pointer out of thin air and use it
  *
- * $Id: getMessageSvc_test.cxx,v 1.5 2008-07-14 22:10:14 calaf Exp $
  */
 #undef NDEBUG
 #include <cassert>
@@ -38,9 +37,23 @@ private:
 };
 
 int main() {
+  // Try to find message service before it is available.
+  // Should result in two attempts (and WARNINGs) to retrieve it.
+  IMessageSvc *pMS{nullptr};
+  pMS = Athena::getMessageSvc();
+  pMS = Athena::getMessageSvc();
+  assert(pMS == nullptr);
+
+  // Test quiet flag
+  Athena::getMessageSvc(Athena::Options::Lazy, /*quiet=*/true );
+  Athena::getMessageSvcQuiet = true;
+  Athena::getMessageSvc();
+  Athena::getMessageSvcQuiet = false;
+
+  // Now test within Gaudi environment
   ISvcLocator* pDum;
   assert( Athena_test::initGaudi(pDum) );
-  IMessageSvc *pMS(Athena::getMessageSvc());
+  pMS = Athena::getMessageSvc();
   assert( pMS );
   //usual nasty trick to get the ref count
   pMS->addRef();
