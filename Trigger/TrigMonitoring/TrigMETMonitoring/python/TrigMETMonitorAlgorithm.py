@@ -319,6 +319,14 @@ def TrigMETMonConfig(inputFlags):
                              path='Expert/Offline',xbins=et_bins,xmin=et_min,xmax=et_max)
     metGroup.defineHistogram('offline_sumEt',title='Offline sumE_{T};sumE_{T} [GeV];Events',
                              path='Expert/Offline',xbins=sumet_bins,xmin=sumet_min,xmax=sumet_max)
+    metGroup.defineHistogram('offline_NoMu_Ex',title='Offline (No Mu) Missing E_{x};E_{x} [GeV];Events',
+                             path='Expert/Offline',xbins=ec_bins,xmin=ec_min,xmax=ec_max)
+    metGroup.defineHistogram('offline_NoMu_Ey',title='Offline (No Mu) Missing E_{y};E_{y} [GeV];Events',
+                             path='Expert/Offline',xbins=ec_bins,xmin=ec_min,xmax=ec_max)
+    metGroup.defineHistogram('offline_NoMu_Et',title='Offline (No Mu) Missing E_{T};E_{T} [GeV];Events',
+                             path='Expert/Offline',xbins=et_bins,xmin=et_min,xmax=et_max)
+    metGroup.defineHistogram('offline_NoMu_sumEt',title='Offline (No Mu) sumE_{T};sumE_{T} [GeV];Events',
+                             path='Expert/Offline',xbins=sumet_bins,xmin=sumet_min,xmax=sumet_max)
     ## HLT electron and muon
     metGroup.defineHistogram('hlt_el_mult',title='HLT Electron Multiplicity;Number of electrons;Events',
                            path='Expert/ElMu',xbins=10,xmin=0,xmax=10)
@@ -660,8 +668,8 @@ def TrigMETMonConfig(inputFlags):
     
     ## pileup
     metGroup.defineHistogram('act_IPBC', type='TH1F',title='Actual IPBC;Actual IPBC;Events',
-    ## HLT cell component
                              path='Shifter/Component',xbins=100,xmin=0,xmax=100)
+    ## HLT cell component
     metGroup.defineHistogram('HLT_MET_status',type='TH1F',title='HLT MET Status;;',
                              weight='MET_status',
                              path='Shifter/Component',
