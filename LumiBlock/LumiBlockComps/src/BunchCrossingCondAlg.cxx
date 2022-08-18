@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration.
+ * Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration.
  */
 
 #include "BunchCrossingCondAlg.h"
@@ -11,10 +11,9 @@
 #include <cstdint>
 
 #include "CoralBase/AttributeListException.h"
-#include "TrigConfL1Data/BunchGroupSet.h"
 
 namespace {
-   // helper to set timestamp based IOV with infinit range
+   // helper to set timestamp based IOV with infinite range
   EventIDBase infiniteIOVBegin() {
      return EventIDBase( 0, // run,
                         EventIDBase::UNDEFEVT,  // event
@@ -24,7 +23,7 @@ namespace {
                         );
   }
 
-  EventIDBase infiniteIOVEend() {
+  EventIDBase infiniteIOVEnd() {
      return EventIDBase( std::numeric_limits<int>::max() - 1, // run
                          EventIDBase::UNDEFEVT,  // event
                          std::numeric_limits<int>::max() - 1, // seconds
@@ -38,6 +37,7 @@ namespace {
 StatusCode BunchCrossingCondAlg::initialize() {
   if (m_mode == 2) {
     ATH_CHECK( m_trigConfigSvc.retrieve() );
+    ATH_CHECK( m_bunchGroupCondDataKey.initialize( SG::AllowEmpty ) );
   }
   ATH_CHECK( m_fillParamsFolderKey.initialize( m_mode == 0 || m_mode == 1 ) );
   ATH_CHECK( m_lumiCondDataKey.initialize( m_mode == 3 ) );
@@ -56,29 +56,38 @@ StatusCode BunchCrossingCondAlg::execute (const EventContext& ctx) const {
   // make sure that the output IOV has a valid timestamp, otherwise the conditions
   // data cannot be added to the "mixed" conditions data container. A mixed container
   // is needed when the conditions depends on e.g. the LuminosityCondData
-  EventIDRange infinite_range(infiniteIOVBegin(),infiniteIOVEend());
+  EventIDRange infinite_range(infiniteIOVBegin(),infiniteIOVEnd());
   writeHdl.addDependency(infinite_range);
 
   //Output object & range:
   auto bccd=std::make_unique<BunchCrossingCondData>();
 
   if (m_mode == 2) { // use trigger bunch groups
-    const std::vector< TrigConf::BunchGroup >& bgs =
-        m_trigConfigSvc->bunchGroupSet()->bunchGroups();
+    const TrigConf::L1BunchGroupSet* bgs{nullptr};
+    if (!m_bunchGroupCondDataKey.empty()) {
+      SG::ReadCondHandle<TrigConf::L1BunchGroupSet> bgsh(m_bunchGroupCondDataKey, ctx);
+      if (! bgsh.isValid()) {
+        ATH_MSG_ERROR("Unable to retrieve L1BunchGroupSet object " << m_bunchGroupCondDataKey);
+        return StatusCode::FAILURE;
+      }
+      bgs = *bgsh;
+    } else {
+      bgs = &(m_trigConfigSvc->l1BunchGroupSet(ctx));
+    }
     // bunch group 1 = paired
-    ATH_MSG_INFO("BG1 bunches " << bgs[1].bunches() );
-    for (const auto& pos : bgs[1].bunches() ) {
+    ATH_MSG_DEBUG("from BunchGroupCondData: BG1 bunches " << bgs->getBunchGroup(1)->bunches() );
+    for (const auto& pos : bgs->getBunchGroup(1)->bunches() ) {
       bccd->m_beam1.set(pos);
       bccd->m_beam2.set(pos);
       bccd->m_luminous.set(pos);
     }
     // in Run 1 we don't have bunch group information to determine beam 1 or beam 2 unpaired
     // so test if we have at least 15 bunch groups, then assume BG13/14 are the unpaired bunches
-    if (bgs.size() >= 15) {
-      for (const auto& pos : bgs[13].bunches() ) {
+    if (bgs->size() >= 15) {
+      for (const auto& pos : bgs->getBunchGroup(13)->bunches() ) {
         bccd->m_beam1.set(pos);
       }
-      for (const auto& pos : bgs[14].bunches() ) {
+      for (const auto& pos : bgs->getBunchGroup(14)->bunches() ) {
         bccd->m_beam2.set(pos);
       }
     }

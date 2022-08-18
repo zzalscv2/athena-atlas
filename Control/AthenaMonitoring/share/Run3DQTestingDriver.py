@@ -101,7 +101,6 @@ if __name__=='__main__':
 
     # Initialize configuration object, add accumulator, merge, and run.
     from AthenaConfiguration.MainServicesConfig import MainServicesCfg
-    from AthenaPoolCnvSvc.PoolReadConfig import PoolReadCfg
     cfg = MainServicesCfg(ConfigFlags)
 
     # add FPE auditor
@@ -118,6 +117,7 @@ if __name__=='__main__':
         from CaloRec.CaloRecoConfig import CaloRecoCfg
         cfg.merge(CaloRecoCfg(ConfigFlags))
     else:
+        from AthenaPoolCnvSvc.PoolReadConfig import PoolReadCfg
         cfg.merge(PoolReadCfg(ConfigFlags))
 
     # load DQ

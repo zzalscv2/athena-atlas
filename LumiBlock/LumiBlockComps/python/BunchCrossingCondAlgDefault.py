@@ -20,6 +20,7 @@ def BunchCrossingCondAlgDefault():
 
     run1=(conddb.dbdata == 'COMP200')
     folder = None
+    bgkey = ''
 
     if conddb.isMC and beamFlags.bunchStructureSource() != 1:
         mlog.info('This is MC, trying to reset beamFlags.bunchStructureSource to 1')
@@ -40,6 +41,13 @@ def BunchCrossingCondAlgDefault():
             # /Digitization/Parameters metadata is not present in the
             # input file and will be created during the job
             mlog.info("Folder %s will be created during the job.", folder)
+    elif beamFlags.bunchStructureSource() == 2:
+        bgkey = 'L1BunchGroup'  # unless we use in file metadata...
+        from AthenaCommon.AppMgr import ServiceMgr as svcMgr
+        if getattr(svcMgr, 'xAODConfigSvc'):
+            if svcMgr.xAODConfigSvc.UseInFileMetadata:
+                bgkey = ''
+        # this probably fails for reading R21 ESD but not going to support that case
     elif beamFlags.bunchStructureSource() == 0:
         folder = '/TDAQ/OLC/LHC/FILLPARAMS'
         # Mistakenly created as multi-version folder, must specify HEAD 
@@ -51,7 +59,8 @@ def BunchCrossingCondAlgDefault():
     alg = BunchCrossingCondAlg(name,
                                Run1=run1,
                                FillParamsFolderKey =folder,
-                               Mode=beamFlags.bunchStructureSource() )
+                               Mode=beamFlags.bunchStructureSource(),
+                               L1BunchGroupCondData=bgkey )
 
     condSeq += alg
 

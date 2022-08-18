@@ -13,7 +13,6 @@ def LBDurationCondAlgCfg (configFlags):
     name = 'LBDurationCondAlg'
     result = ComponentAccumulator()
 
-    from IOVDbSvc.CondDB import conddb   # noqa: F401
     folder = "/TRIGGER/LUMI/LBLB"
     result.merge (addFolders (configFlags, folder, 'TRIGGER',
                               className = 'AthenaAttributeList'))
