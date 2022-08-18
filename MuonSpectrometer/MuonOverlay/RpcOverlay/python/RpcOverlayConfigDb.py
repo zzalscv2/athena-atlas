@@ -2,4 +2,4 @@
 
 from AthenaCommon.CfgGetter import addAlgorithm
 
-addAlgorithm("RpcOverlay.RpcOverlayConfig.getRpcOverlay", "RpcOverlay")
+addAlgorithm("RpcOverlay.RpcOverlayConfigLegacy.getRpcOverlay", "RpcOverlay")

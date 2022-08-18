@@ -2,7 +2,7 @@
 
 from AthenaCommon.CfgGetter import addTool, addAlgorithm
 
-addTool("TGC_Digitization.TGC_DigitizationConfig.TgcDigitizationTool" , "TgcDigitizationTool")
-addTool("TGC_Digitization.TGC_DigitizationConfig.getTgcRange"         , "TgcRange")
-addTool("TGC_Digitization.TGC_DigitizationConfig.Tgc_OverlayDigitizationTool" , "Tgc_OverlayDigitizationTool")
-addAlgorithm("TGC_Digitization.TGC_DigitizationConfig.getTGC_OverlayDigitizer" , "TGC_OverlayDigitizer")
+addTool("TGC_Digitization.TGC_DigitizationConfigLegacy.TgcDigitizationTool" , "TgcDigitizationTool")
+addTool("TGC_Digitization.TGC_DigitizationConfigLegacy.getTgcRange"         , "TgcRange")
+addTool("TGC_Digitization.TGC_DigitizationConfigLegacy.Tgc_OverlayDigitizationTool" , "Tgc_OverlayDigitizationTool")
+addAlgorithm("TGC_Digitization.TGC_DigitizationConfigLegacy.getTGC_OverlayDigitizer" , "TGC_OverlayDigitizer")

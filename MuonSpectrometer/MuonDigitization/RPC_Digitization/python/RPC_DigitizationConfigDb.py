@@ -2,7 +2,7 @@
 
 from AthenaCommon.CfgGetter import addTool, addAlgorithm
 
-addTool("RPC_Digitization.RPC_DigitizationConfig.RpcDigitizationTool" , "RpcDigitizationTool")
-addTool("RPC_Digitization.RPC_DigitizationConfig.getRpcRange"         , "RpcRange")
-addTool("RPC_Digitization.RPC_DigitizationConfig.Rpc_OverlayDigitizationTool" , "Rpc_OverlayDigitizationTool")
-addAlgorithm("RPC_Digitization.RPC_DigitizationConfig.getRPC_OverlayDigitizer" , "RPC_OverlayDigitizer")
+addTool("RPC_Digitization.RPC_DigitizationConfigLegacy.RpcDigitizationTool" , "RpcDigitizationTool")
+addTool("RPC_Digitization.RPC_DigitizationConfigLegacy.getRpcRange"         , "RpcRange")
+addTool("RPC_Digitization.RPC_DigitizationConfigLegacy.Rpc_OverlayDigitizationTool" , "Rpc_OverlayDigitizationTool")
+addAlgorithm("RPC_Digitization.RPC_DigitizationConfigLegacy.getRPC_OverlayDigitizer" , "RPC_OverlayDigitizer")

@@ -2,4 +2,4 @@
 
 from AthenaCommon.CfgGetter import addAlgorithm
 
-addAlgorithm("TgcOverlay.TgcOverlayConfig.getTgcOverlay", "TgcOverlay")
+addAlgorithm("TgcOverlay.TgcOverlayConfigLegacy.getTgcOverlay", "TgcOverlay")
