@@ -42,10 +42,11 @@ def exploreTree(inputFile, dumpSummary=False, underflowThreshold=0.1, overflowTh
         if maxRanges > 0 and rangeCounter >= maxRanges:
             log.info("{0} ranges were processed - exiting the postprocessing".format(rangeCounter))
             break
-
-        walltime = getWalltime(inputFile, timeRange.GetName())
+        
         rangeObj = timeRange.ReadObj()
         if not rangeObj.IsA().InheritsFrom(ROOT.TDirectory.Class()): continue
+        
+        walltime = getWalltime(inputFile, timeRange.GetName())
 
         for table in rangeObj.GetListOfKeys():
             tableObj = table.ReadObj()
@@ -101,7 +102,11 @@ def getWalltime(inputFile, rootName):
     if not dirObj.IsA().InheritsFrom(ROOT.TDirectory.Class()): return 0
     for hist in dirObj.GetListOfKeys():
         if '_walltime' in hist.GetName():
-            return hist.ReadObj().Integral()
+            histObj = hist.ReadObj()
+            if histObj.IsA().InheritsFrom(ROOT.TProfile.Class()):
+                return histObj.Integral()
+            else:
+                return histObj.GetBinContent(1)
 
     log.error("Walltime not found")
     return 0
