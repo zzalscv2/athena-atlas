@@ -14,6 +14,7 @@
 #include "xAODBase/IParticleContainer.h"
 #include "TrigCompositeUtils/KFromNItr.h"
 #include "TrigCompositeUtils/LinkInfo.h"
+#include "TrigCompositeUtils/ProductItr.h"
 
 namespace TrigCompositeUtils
 {
@@ -49,6 +50,9 @@ namespace TrigCompositeUtils
     using pointer = const value_type *;
     using difference_type = std::ptrdiff_t;
 
+    /// A default constructed iterator acts as a past-the-end iterator
+    IPartCombItr();
+
     /**
      * @brief The direct constructor
      * 
@@ -75,44 +79,11 @@ namespace TrigCompositeUtils
         const std::vector<std::tuple<std::size_t, LInfoItr_t, LInfoItr_t>> &pieces,
         FilterType filter = FilterType::UniqueObjects);
 
-    /// Base case constructor for the variadic constructors
-    IPartCombItr(std::function<bool(const VecLInfo_t &)> filter);
-
-    /// Base case constructor for the variadict constructors
-    IPartCombItr(FilterType filter = FilterType::UniqueObjects);
-
-    template <typename... Ts>
-    IPartCombItr(std::size_t k, const LInfoItr_t &begin, const LInfoItr_t &end, Ts &&... args)
-        : IPartCombItr(std::forward<Ts>(args)...)
-    {
-      m_itrs.insert(m_itrs.begin(), std::make_pair(KFromNItr(k, std::distance(begin, end)), begin));
-      m_current.insert(m_current.begin(), k, {});
-      const KFromNItr &idxItr = std::get<0>(m_itrs.front());
-      if (!idxItr.exhausted())
-        std::transform(idxItr->begin(), idxItr->end(), m_current.begin(),
-                       [begin](std::size_t idx) { return *(begin + idx); });
-    }
-
-    template <typename... Ts>
-    IPartCombItr(const LInfoItr_t &begin, const LInfoItr_t &end, Ts &&... args)
-        : IPartCombItr(1, begin, end, std::forward<Ts>(args)...)
-    {
-    }
-
-    template <typename... Ts>
-    IPartCombItr(std::size_t k, const VecLInfo_t &linfos, Ts &&... args)
-        : IPartCombItr(k, linfos.begin(), linfos.end(), std::forward<Ts>(args)...)
-    {
-    }
-
-    template <typename... Ts>
-    IPartCombItr(const VecLInfo_t &linfos, Ts &&... args)
-        : IPartCombItr(1, linfos.begin(), linfos.end(), std::forward<Ts>(args)...)
-    {
-    }
-
     /// The size of each combination
     std::size_t size() const { return m_current.size(); }
+
+    /// The number of legs
+    std::size_t nLegs() const { return m_linkInfoItrs.size(); }
 
     /**
      * @brief Reset the iterator to its starting point
@@ -142,7 +113,9 @@ namespace TrigCompositeUtils
 
   private:
     std::function<bool(const VecLInfo_t &)> m_filter;
-    std::vector<std::pair<KFromNItr, LInfoItr_t>> m_itrs;
+    std::vector<LInfoItr_t> m_linkInfoItrs;
+    ProductItr<KFromNItr> m_idxItr;
+    void readCurrent();
     VecLInfo_t m_current;
 
   }; //> end class IPartCombItr

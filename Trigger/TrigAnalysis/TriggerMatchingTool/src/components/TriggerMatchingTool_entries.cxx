@@ -6,6 +6,7 @@
 #include "TriggerMatchingTool/DRScoringTool.h"
 #include "TriggerMatchingTool/TypedScoringTool.h"
 #include "TriggerMatchingTool/EgammaDRScoringTool.h"
+#include "TriggerMatchingTool/TrigMatchTestAlg.h"
 
 DECLARE_COMPONENT(Trig::MatchingTool)
 
@@ -17,6 +18,7 @@ DECLARE_COMPONENT(Trig::R3IParticleRetrievalTool)
 DECLARE_COMPONENT(Trig::DRScoringTool)
 DECLARE_COMPONENT(Trig::TypedScoringTool)
 DECLARE_COMPONENT(Trig::EgammaDRScoringTool)
+DECLARE_COMPONENT(Trig::TrigMatchTestAlg)
 
 #include "../TestMatchingToolAlg.h"
 DECLARE_COMPONENT(TestMatchingToolAlg)

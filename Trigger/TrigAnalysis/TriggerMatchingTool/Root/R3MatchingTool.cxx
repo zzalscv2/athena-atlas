@@ -5,6 +5,7 @@
 #include "TriggerMatchingTool/R3MatchingTool.h"
 #include "xAODBase/IParticleContainer.h"
 #include "TrigCompositeUtils/Combinations.h"
+#include "TrigCompositeUtils/ChainNameParser.h"
 #include "xAODEgamma/Egamma.h"
 #include <numeric>
 #include <algorithm>
@@ -55,6 +56,7 @@ namespace Trig
     const Trig::ChainGroup *chainGroup = m_trigDecTool->getChainGroup(chain);
     for (const std::string &chainName : chainGroup->getListOfTriggers())
     {
+      const chainInfo_t &chainInfo = getChainInfo(chainName);
       if (!m_trigDecTool->isPassed(chainName, rerun ? TrigDefs::Physics | TrigDefs::allowResurrectedDecision : TrigDefs::Physics))
       {
         ATH_MSG_DEBUG("Chain " << chainName << " did not pass");
@@ -79,7 +81,7 @@ namespace Trig
       TrigCompositeUtils::Combinations combinations = TrigCompositeUtils::buildCombinations(
         chainName,
         features,
-        m_trigDecTool->ExperimentalAndExpertMethods().getChainConfigurationDetails(chainName),
+        chainInfo.first,
         TrigCompositeUtils::FilterType::UniqueObjects);
       // Warn once per call if one of the chain groups is too small to match anything
       if (combinations.size() < recoObjects.size())
@@ -100,7 +102,13 @@ namespace Trig
           bool match = true;
           for (std::size_t recoIdx = 0; recoIdx < recoObjects.size(); ++recoIdx)
           {
-            if (!matchObjects(recoObjects[recoIdx], combination[onlineIndices[recoIdx]].link, cachedComparisons[recoIdx], matchThreshold))
+            std::size_t onlineIdx = onlineIndices[recoIdx];
+            if (!matchObjects(
+                        recoObjects[recoIdx],
+                        combination[onlineIdx].link,
+                        chainInfo.second[onlineIdx],
+                        cachedComparisons[recoIdx],
+                        matchThreshold))
             {
               match = false;
               break;
@@ -129,6 +137,7 @@ namespace Trig
   bool R3MatchingTool::matchObjects(
       const xAOD::IParticle *reco,
       const ElementLink<xAOD::IParticleContainer> &onlineLink,
+      xAODType::ObjectType onlineType,
       std::map<std::pair<uint32_t, uint32_t>, bool> &cache,
       double scoreThreshold) const
   {
@@ -142,9 +151,9 @@ namespace Trig
     if (cacheItr == cache.end())
     {
       const xAOD::IParticle *online = *onlineLink;
-      ATH_MSG_DEBUG("Match online " << online->type() << " to offline " << reco->type());
-      bool match = online->type() == reco->type();
-      if (online->type() == xAOD::Type::CaloCluster && (reco->type() == xAOD::Type::Electron || reco->type() == xAOD::Type::Photon))
+      ATH_MSG_DEBUG("Match online " << onlineType << " to offline " << reco->type());
+      bool match = onlineType == reco->type();
+      if (onlineType == xAOD::Type::CaloCluster && (reco->type() == xAOD::Type::Electron || reco->type() == xAOD::Type::Photon))
       {
         // Calo cluster is a special case - some of the egamma chains can return these (the etcut chains)
         // In these cases we need to match this against the caloCluster object contained in electrons or photons
@@ -162,6 +171,33 @@ namespace Trig
       if (match)
         match = m_scoreTool->score(*online, *reco) < scoreThreshold;
       cacheItr = cache.insert(std::make_pair(linkIndices, match)).first;
+    }
+    return cacheItr->second;
+  }
+
+  const R3MatchingTool::chainInfo_t &R3MatchingTool::getChainInfo(const std::string &chain) const
+  {
+    std::lock_guard<std::mutex> guard(m_chainInfoMutex);
+    auto cacheItr = m_chainInfoCache.find(chain);
+    if (cacheItr == m_chainInfoCache.end())
+    {
+        chainInfo_t info;
+        for (const ChainNameParser::LegInfo &legInfo : ChainNameParser::HLTChainInfo(chain))
+        {
+            const xAODType::ObjectType type = legInfo.type();
+            if (type == xAODType::Other)
+            {
+                // Use 0 to signal that a leg expects no IParticle features
+                info.first.push_back(0);
+            }
+            else
+            {
+                info.first.push_back(legInfo.multiplicity);
+                for (std::size_t idx = 0; idx < legInfo.multiplicity; ++idx)
+                    info.second.push_back(type);
+            }
+        }
+        cacheItr = m_chainInfoCache.insert(std::make_pair(chain, std::move(info))).first;
     }
     return cacheItr->second;
   }

@@ -10,4 +10,5 @@
    <class name="Trig::DRScoringTool" />
    <class name="Trig::TypedScoringTool" />
    <class name="Trig::EgammaDRScoringTool" />
+   <class name="Trig::TrigMatchTestAlg" />
 </lcgdict>

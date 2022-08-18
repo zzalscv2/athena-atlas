@@ -13,5 +13,6 @@
 #include "TriggerMatchingTool/DRScoringTool.h"
 #include "TriggerMatchingTool/TypedScoringTool.h"
 #include "TriggerMatchingTool/EgammaDRScoringTool.h"
+#include "TriggerMatchingTool/TrigMatchTestAlg.h"
 
 #endif
