@@ -36,8 +36,8 @@ test.check_steps = CheckSteps.default_check_steps(test)
 # Ultimately there should be no per-event messages
 msgcount = test.get_step("MessageCount")
 msgcount.thresholds = {
-  'WARNING': 550,
-  'INFO': 750,
+  'WARNING': 400,  # Remaining warnings are mostly from ATLASRECTS-3866
+  'INFO': 600,
   'other': 20
 }
 msgcount.required = True # make the test exit code depend on this step
