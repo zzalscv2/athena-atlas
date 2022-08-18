@@ -1,4 +1,4 @@
-# Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
 
 # Declare the package name:
 atlas_subdir( AthenaBaseComps )
@@ -27,7 +27,12 @@ atlas_add_test( AthReentrantAlgorithm_test
 
 atlas_add_test( AthAlgorithm_test
    SOURCES test/AthAlgorithm_test.cxx
-   LINK_LIBRARIES StoreGateLib GaudiKernel TestTools AthenaBaseComps 
+   LINK_LIBRARIES StoreGateLib GaudiKernel TestTools AthenaBaseComps
+   ENVIRONMENT "JOBOPTSEARCHPATH=${CMAKE_CURRENT_SOURCE_DIR}/share" )
+
+atlas_add_test( AthMessaging_test
+   SOURCES test/AthMessaging_test.cxx
+   LINK_LIBRARIES GaudiKernel TestTools AthenaBaseComps
    ENVIRONMENT "JOBOPTSEARCHPATH=${CMAKE_CURRENT_SOURCE_DIR}/share" )
 
 atlas_add_test( AthAlgTool_test
