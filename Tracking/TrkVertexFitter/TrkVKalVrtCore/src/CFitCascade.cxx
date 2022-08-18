@@ -504,7 +504,8 @@ int fitVertexCascade( VKVertex * vk, int Pointing)
 //
 
      if(fullSTOP) break; 
-     if(cnstRemnants>Chi2Full) break; //no way to fulfil constraints
+     if(cnstRemnants>1.e4&&Iter>10)     //no way to fulfil constraints
+       { delete[] fullMatrix; delete[] fullLSide; delete[] tmpLSide; delete[] iniCovMatrix; return -2;}
 //     
      if( Iter<NFitIterationMax && Iter>2){
        if(fabs(Chi2Diff)<0.001 && cnstRemnants/minCnstRemnants<10.){   //stable cascade position before end of cycling
