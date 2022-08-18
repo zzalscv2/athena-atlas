@@ -8,8 +8,7 @@
 '''
 
 from PixelMonitoring.PixelAthMonitoringBase import define2DProfHist, ModulesHead
-from PixelMonitoring.PixelAthMonitoringBase import LabelX, LabelY, baselayers
-from AthenaCommon.AthenaCommonFlags import athenaCommonFlags ### test of 100LB histograms
+from PixelMonitoring.PixelAthMonitoringBase import LabelX, LabelY, baselayers, lumibinsx
 
 def PixelAthMVAMonAlgCfg(helper, alg, **kwargs):
     '''
@@ -21,8 +20,6 @@ def PixelAthMVAMonAlgCfg(helper, alg, **kwargs):
 
     dumpTree = kwargs.get('dumpTree', False)
     path     = '/Pixel/MVA/'
-
-    forceOnline = not athenaCommonFlags.isOnline
 
     if dumpTree:
         mvaGroup = helper.addGroup(alg, 'MVA')
@@ -50,8 +47,7 @@ vartree', path=path, treedef='pixmvamontool_lb/i:status_vec/vector<float>\
     title = 'BDT score reset every 10 LB'
     define2DProfHist(helper, alg, 'BDTWeights', title, path, type='TProfile2D', opt='kLBNHistoryDepth=10', histname=histoGroupName)
 
-    if forceOnline: athenaCommonFlags.isOnline = True
-    xbins = 10 # only last 10LB will be shown and used
+    xbins = lumibinsx
     fullvarstring  = 'pixmvamontool_lb, BDTWeights_val' #re-use monitoring variables
     modArray = []
     for i, layer in enumerate(baselayers):
@@ -81,8 +77,7 @@ vartree', path=path, treedef='pixmvamontool_lb/i:status_vec/vector<float>\
             hname = hnames[hname_idx]
             tool.defineHistogram(fullvarstring + ';' + hname, type='TProfile', path=layer, 
                                         title='BDT score for last 100LB ' + hname + ';lumi block;<BDT score>',
-                                        xbins=xbins, xmin=-0.5, xmax=-0.5+xbins, opt='kLive={0}'.format(xbins))
-    if forceOnline: athenaCommonFlags.isOnline = False
+                                        xbins=xbins, xmin=-0.5, xmax=-0.5+xbins)
 '''
 This function configures 1D (Profile) vs lumi histograms for Pixel(IBL) modules(FEs).
 '''
