@@ -60,15 +60,5 @@ msgcount.thresholds = {
 }
 msgcount.required = True # make the test exit code depend on this step
 
-# Add a step comparing counts against a reference
-chaindump = test.get_step("ChainDump")
-chaindump.args = '--json --yaml ref_v1Dev_decodeBS_build.new'
-refcomp = CheckSteps.ChainCompStep("CountRefComp")
-refcomp.input_file = 'ref_v1Dev_decodeBS_build.new'
-refcomp.args += ' --patch'
-refcomp.reference_from_release = True # installed from TrigP1Test/share
-refcomp.required = True # Final exit code depends on this step
-CheckSteps.add_step_after_type(test.check_steps, CheckSteps.ChainDumpStep, refcomp)
-
 import sys
 sys.exit(test.run())
