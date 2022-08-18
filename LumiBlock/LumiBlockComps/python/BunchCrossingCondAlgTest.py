@@ -87,24 +87,16 @@ ConfigFlags.lock()
 
 result=MainServicesCfg(ConfigFlags)
 
-mcevtsel=CompFactory.McEventSelector(RunNumber=330470,
-                                     EventsPerRun=1,
-                                     FirstEvent=1183722158,
-                                     FirstLB=310,
-                                     EventsPerLB=1,
-                                     #InitialTimeStamp=1500867637,
-                                     InitialTimeStamp=1,
-                                     TimeStampInterval=1
-                                     )
-
-result.addService(mcevtsel)
-result.setAppProperty("EvtSel",mcevtsel.getFullJobOptName())
-
-mccnvsvc=CompFactory.McCnvSvc()
-result.addService(mccnvsvc)
-
-
-result.addService(CompFactory.EvtPersistencySvc("EventPersistencySvc",CnvServices=[mccnvsvc.getFullJobOptName(),]))
+from McEventSelector.McEventSelectorConfig import McEventSelectorCfg
+result.merge(McEventSelectorCfg(ConfigFlags,
+                                RunNumber=330470,
+                                EventsPerRun=1,
+                                FirstEvent=1183722158,
+                                FirstLB=310,
+                                EventsPerLB=1,
+                                #InitialTimeStamp=1500867637,
+                                InitialTimeStamp=1,
+                                TimeStampInterval=1))
 
 result.merge(BunchCrossingCondAlgCfg(ConfigFlags))
 

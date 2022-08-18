@@ -54,9 +54,9 @@ test.get_step('CheckFile').input_file = 'ESD.pool.root,ESD.Module1.pool.root'
 # Ultimately there should be no per-event messages
 msgcount = test.get_step("MessageCount")
 msgcount.thresholds = {
-  'WARNING': 4000,  # TODO: Fix the warnings and decrease the limit, ATR-23548, ATR-22942
-  'INFO': 600,
-  'other': 100
+  'WARNING': 500,  # Remaining warnings are mostly from ATLASRECTS-3866
+  'INFO': 500,
+  'other': 50
 }
 msgcount.required = True # make the test exit code depend on this step
 

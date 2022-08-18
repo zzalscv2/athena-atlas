@@ -105,6 +105,7 @@ namespace JetTagDQA {
     bool m_onZprime = false;
     float m_jetPtCutTtbar;
     float m_jetPtCutZprime;
+    float m_jetEtaCut;
     float m_JVTCutAntiKt4EMTopoJets;
     float m_JVTCutLargerEtaAntiKt4EMTopoJets;
     float m_JVTCutAntiKt4EMPFlowJets;

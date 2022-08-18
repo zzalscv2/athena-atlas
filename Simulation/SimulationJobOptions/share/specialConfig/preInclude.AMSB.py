@@ -57,7 +57,7 @@ get_and_fix_PDGTABLE([(1000022, N1Mass, '~chi(0,1)', '0'), (1000024, C1Mass, '~c
 
 if doG4SimConfig:
     from G4AtlasApps.SimFlags import simFlags
-    simFlags.PhysicsOptions.get_Value().insert(0,'CharginosPhysicsTool')
+    simFlags.PhysicsOptions += ['CharginosPhysicsTool']
     # Add Chargino decays if necessary
     C1Lifetime = eval(simFlags.specialConfiguration.get_Value().get("AMSBC1Lifetime", "-1.0"))
     if C1Lifetime > 0.0:

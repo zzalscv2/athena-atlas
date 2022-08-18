@@ -365,10 +365,6 @@ def muonRdoDecodeTestData( forTrigger = False ):
 
     cfg.merge( MuonRDOtoPRDConvertorsCfg( ConfigFlags) )
 
-    # Need to add POOL converter  - may be a better way of doing this?
-    cfg.addService( CompFactory.AthenaPoolCnvSvc() )
-    cfg.getService("EventPersistencySvc").CnvServices += [ "AthenaPoolCnvSvc" ]
-
     log.info('Print Config')
     cfg.printConfig(withDetails=True)
 

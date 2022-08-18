@@ -3,22 +3,22 @@
 from AthenaCommon.CfgGetter import addAlgorithm, addTool
 
 
-addAlgorithm("MuonByteStreamCnvTest.MuonByteStreamCnvTestConfig.getMdtRdoToMdtDigitAlg", "MdtRdoToMdtDigitAlg")
-addAlgorithm("MuonByteStreamCnvTest.MuonByteStreamCnvTestConfig.getRpcRdoToRpcDigitAlg", "RpcRdoToRpcDigitAlg")
-addAlgorithm("MuonByteStreamCnvTest.MuonByteStreamCnvTestConfig.getTgcRdoToTgcDigitAlg", "TgcRdoToTgcDigitAlg")
-addAlgorithm("MuonByteStreamCnvTest.MuonByteStreamCnvTestConfig.getSTGC_RdoToDigitAlg", "STGC_RdoToDigitAlg")
-addAlgorithm("MuonByteStreamCnvTest.MuonByteStreamCnvTestConfig.getMM_RdoToDigitAlg", "MM_RdoToDigitAlg")
+addAlgorithm("MuonByteStreamCnvTest.MuonByteStreamCnvTestConfigLegacy.getMdtRdoToMdtDigitAlg", "MdtRdoToMdtDigitAlg")
+addAlgorithm("MuonByteStreamCnvTest.MuonByteStreamCnvTestConfigLegacy.getRpcRdoToRpcDigitAlg", "RpcRdoToRpcDigitAlg")
+addAlgorithm("MuonByteStreamCnvTest.MuonByteStreamCnvTestConfigLegacy.getTgcRdoToTgcDigitAlg", "TgcRdoToTgcDigitAlg")
+addAlgorithm("MuonByteStreamCnvTest.MuonByteStreamCnvTestConfigLegacy.getSTGC_RdoToDigitAlg", "STGC_RdoToDigitAlg")
+addAlgorithm("MuonByteStreamCnvTest.MuonByteStreamCnvTestConfigLegacy.getMM_RdoToDigitAlg", "MM_RdoToDigitAlg")
 
-addAlgorithm("MuonByteStreamCnvTest.MuonByteStreamCnvTestConfig.getMdtDigitToMdtRDO" , "MdtDigitToMdtRDO")
-addAlgorithm("MuonByteStreamCnvTest.MuonByteStreamCnvTestConfig.getRpcDigitToRpcRDO" , "RpcDigitToRpcRDO")
-addAlgorithm("MuonByteStreamCnvTest.MuonByteStreamCnvTestConfig.getTgcDigitToTgcRDO" , "TgcDigitToTgcRDO")
-addAlgorithm("MuonByteStreamCnvTest.MuonByteStreamCnvTestConfig.getSTGC_DigitToRDO" , "STGC_DigitToRDO")
-addAlgorithm("MuonByteStreamCnvTest.MuonByteStreamCnvTestConfig.getMM_DigitToRDO" , "MM_DigitToRDO")
+addAlgorithm("MuonByteStreamCnvTest.MuonByteStreamCnvTestConfigLegacy.getMdtDigitToMdtRDO" , "MdtDigitToMdtRDO")
+addAlgorithm("MuonByteStreamCnvTest.MuonByteStreamCnvTestConfigLegacy.getRpcDigitToRpcRDO" , "RpcDigitToRpcRDO")
+addAlgorithm("MuonByteStreamCnvTest.MuonByteStreamCnvTestConfigLegacy.getTgcDigitToTgcRDO" , "TgcDigitToTgcRDO")
+addAlgorithm("MuonByteStreamCnvTest.MuonByteStreamCnvTestConfigLegacy.getSTGC_DigitToRDO" , "STGC_DigitToRDO")
+addAlgorithm("MuonByteStreamCnvTest.MuonByteStreamCnvTestConfigLegacy.getMM_DigitToRDO" , "MM_DigitToRDO")
 
-addAlgorithm("MuonByteStreamCnvTest.MuonByteStreamCnvTestConfig.getSigMdtDigitToMdtRDO" , "SigMdtDigitToMdtRDO")
-addAlgorithm("MuonByteStreamCnvTest.MuonByteStreamCnvTestConfig.getSigRpcDigitToRpcRDO" , "SigRpcDigitToRpcRDO")
-addAlgorithm("MuonByteStreamCnvTest.MuonByteStreamCnvTestConfig.getSigTgcDigitToTgcRDO" , "SigTgcDigitToTgcRDO")
+addAlgorithm("MuonByteStreamCnvTest.MuonByteStreamCnvTestConfigLegacy.getSigMdtDigitToMdtRDO" , "SigMdtDigitToMdtRDO")
+addAlgorithm("MuonByteStreamCnvTest.MuonByteStreamCnvTestConfigLegacy.getSigRpcDigitToRpcRDO" , "SigRpcDigitToRpcRDO")
+addAlgorithm("MuonByteStreamCnvTest.MuonByteStreamCnvTestConfigLegacy.getSigTgcDigitToTgcRDO" , "SigTgcDigitToTgcRDO")
 
-addTool("MuonByteStreamCnvTest.MuonByteStreamCnvTestConfig.getCscRdoDecoder", "CscRDO_Decoder")
-addTool("MuonByteStreamCnvTest.MuonByteStreamCnvTestConfig.getsTgcRdoDecoder", "STGC_RDO_Decoder")
-addTool("MuonByteStreamCnvTest.MuonByteStreamCnvTestConfig.getMmRdoDecoder", "MM_RDO_Decoder")
+addTool("MuonByteStreamCnvTest.MuonByteStreamCnvTestConfigLegacy.getCscRdoDecoder", "CscRDO_Decoder")
+addTool("MuonByteStreamCnvTest.MuonByteStreamCnvTestConfigLegacy.getsTgcRdoDecoder", "STGC_RDO_Decoder")
+addTool("MuonByteStreamCnvTest.MuonByteStreamCnvTestConfigLegacy.getMmRdoDecoder", "MM_RDO_Decoder")

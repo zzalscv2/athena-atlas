@@ -53,6 +53,10 @@ def TgcDigitizationTool(name="TgcDigitizationTool", **kwargs):
     kwargs.setdefault("TGCDigitTimeOffsetKey", "TGCDigitTimeOffsetData")
     kwargs.setdefault("TGCDigitCrosstalkKey", "TGCDigitCrosstalkData")
 
+    from AtlasGeoModel.CommonGMJobProperties import CommonGeometryFlags as commonGeoFlags
+    if commonGeoFlags.Run() != "RUN3":
+        kwargs.setdefault("FourBunchDigitization", False)
+
     return CfgMgr.TgcDigitizationTool(name, **kwargs)
 
 def getTgcRange(name="TgcRange", **kwargs):

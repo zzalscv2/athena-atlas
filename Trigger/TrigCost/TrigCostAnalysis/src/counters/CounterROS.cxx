@@ -64,6 +64,10 @@ StatusCode CounterROS::newEvent(const CostData& data, size_t index, const float 
   // Find all ROB requests that are both in request and correspond to this ROS
   bool networkRequestIncremented = false;
   for (size_t i = 0; i < robIdsPerRequest.size(); ++i) {
+
+    // Check if the ROB was requested by ROS
+    if (data.costROSData().getROSForROB(robIdsPerRequest[i]) != getName() ) continue;
+
     if (m_robIdToBin.find(robIdsPerRequest[i]) != m_robIdToBin.end()) {
       ATH_CHECK( fill("ROBStatus_perCall", getROBHistoryBin(robs_history[i]), weight) );
       // Status is ok when no status words are set

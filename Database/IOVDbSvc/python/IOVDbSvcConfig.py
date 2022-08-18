@@ -5,105 +5,87 @@ import os
 from AthenaConfiguration.ComponentFactory import CompFactory
 from AthenaConfiguration.AccumulatorCache import AccumulatorCache
 
+
+def CondInputLoaderCfg(flags, **kwargs):
+    result = ComponentAccumulator()
+    result.addCondAlgo(CompFactory.CondInputLoader(**kwargs))
+    return result
+
+
 @AccumulatorCache
-def IOVDbSvcCfg(configFlags):
+def IOVDbSvcCfg(flags, **kwargs):
+    # Add the conditions loader, must be the first in the sequence
+    result = CondInputLoaderCfg(flags)
 
-    result=ComponentAccumulator()
+    # Properties of IOVDbSvc to be set here:
+    # online-mode, DBInstance (slite)
 
-    #Add the conditions loader, must be the first in the sequence
-    CondInputLoader=CompFactory.CondInputLoader
-    result.addCondAlgo(CondInputLoader())
-
-    IOVDbSvc=CompFactory.IOVDbSvc
-    CondSvc=CompFactory.CondSvc
-    ProxyProviderSvc=CompFactory.ProxyProviderSvc
-
-    #Properties of IOVDbSvc to be set here:
-    #online-mode, DBInstance (slite)
-    
-    #Services it (sometimes) depends upon:
+    # Services it (sometimes) depends upon:
     # m_h_IOVSvc     ("IOVSvc", name),
-    #m_h_sgSvc      ("StoreGateSvc", name),
-    #m_h_detStore   ("DetectorStore", name),
-    #m_h_metaDataStore ("StoreGateSvc/MetaDataStore", name), 
-    #m_h_persSvc    ("EventPersistencySvc", name),
-    #m_h_clidSvc    ("ClassIDSvc", name),
-    #m_h_poolSvc    ("PoolSvc", name),
-    #m_h_metaDataTool("IOVDbMetaDataTool"),
-    #m_h_tagInfoMgr("TagInfoMgr", name),
+    # m_h_sgSvc      ("StoreGateSvc", name),
+    # m_h_detStore   ("DetectorStore", name),
+    # m_h_metaDataStore ("StoreGateSvc/MetaDataStore", name),
+    # m_h_persSvc    ("EventPersistencySvc", name),
+    # m_h_clidSvc    ("ClassIDSvc", name),
+    # m_h_poolSvc    ("PoolSvc", name),
+    # m_h_metaDataTool("IOVDbMetaDataTool"),
+    # m_h_tagInfoMgr("TagInfoMgr", name),
 
-    isMC=configFlags.Input.isMC
-
-    # Set up IOVDbSvc
-    iovDbSvc=IOVDbSvc()
-    
-    iovDbSvc.dbConnection=configFlags.IOVDb.DBConnection
+    kwargs.setdefault('dbConnection', flags.IOVDb.DBConnection)
     # setup knowledge of dbinstance in IOVDbSvc, for global tag x-check
-    iovDbSvc.DBInstance=configFlags.IOVDb.DatabaseInstance
+    kwargs.setdefault('DBInstance', flags.IOVDb.DatabaseInstance)
 
-    if 'FRONTIER_SERVER' in os.environ.keys() and os.environ['FRONTIER_SERVER']!="":
-        iovDbSvc.CacheAlign=3
+    if 'FRONTIER_SERVER' in os.environ.keys() and os.environ['FRONTIER_SERVER'] != '':
+        kwargs.setdefault('CacheAlign', 3)
 
+    kwargs.setdefault('GlobalTag', flags.IOVDb.GlobalTag)
+    if 'Folders' in kwargs:
+        kwargs['Folders'] = ['/TagInfo<metaOnly/>'] + kwargs['Folders']
+    else:
+        kwargs.setdefault('Folders', ['/TagInfo<metaOnly/>'])
 
-    iovDbSvc.GlobalTag=configFlags.IOVDb.GlobalTag
-
-    result.addService(iovDbSvc,primary=True)
-
+    result.addService(CompFactory.IOVDbSvc(**kwargs), primary=True)
 
     # Set up POOLSvc with appropriate catalogs
-    
-    PoolSvc=CompFactory.PoolSvc
-    poolSvc=PoolSvc()
-    poolSvc.MaxFilesOpen=configFlags.PoolSvc.MaxFilesOpen
-    poolSvc.ReadCatalog=["apcfile:poolcond/PoolFileCatalog.xml",
-                         "apcfile:poolcond/PoolCat_oflcond.xml",
-                         ]
+    from AthenaPoolCnvSvc.PoolCommonConfig import PoolSvcCfg
+    result.merge(PoolSvcCfg(flags, withCatalogs=True))
+    result.addService(CompFactory.CondSvc())
+    result.addService(CompFactory.ProxyProviderSvc(ProviderNames=['IOVDbSvc']))
 
-    if not isMC:
-         poolSvc.ReadCatalog+=["apcfile:poolcond/PoolCat_comcond.xml",]
-    result.addService(poolSvc)
-    result.addService(CondSvc())
-    result.addService(ProxyProviderSvc(ProviderNames=["IOVDbSvc",]))
-
-    if not isMC:
-        DBReplicaSvc=CompFactory.DBReplicaSvc
-        result.addService(DBReplicaSvc(COOLSQLiteVetoPattern="/DBRelease/"))
+    if not flags.Input.isMC:
+        result.addService(CompFactory.DBReplicaSvc(COOLSQLiteVetoPattern='/DBRelease/'))
 
     # Get TagInfoMgr
-    from EventInfoMgt.TagInfoMgrConfig import TagInfoMgrCfg 
-    result.merge(TagInfoMgrCfg(configFlags))
-    iovDbSvc.Folders.append("/TagInfo<metaOnly/>")
-    
-    # Set up MetaDataSvc                                                                                             
+    from EventInfoMgt.TagInfoMgrConfig import TagInfoMgrCfg
+    result.merge(TagInfoMgrCfg(flags))
+
+    # Set up MetaDataSvc
     from AthenaServices.MetaDataSvcConfig import MetaDataSvcCfg
-    result.merge(MetaDataSvcCfg(configFlags, ["IOVDbMetaDataTool"]))
+    result.merge(MetaDataSvcCfg(flags, ['IOVDbMetaDataTool']))
 
     return result
 
 
-#Convenience method to add folders:
-def addFolders(configFlags,folderstrings,detDb=None,className=None,extensible=False,tag=None,db=None,modifiers=""):
-    tagstr = ''
+# Convenience method to add folders:
+def addFolders(flags, folderStrings, detDb=None, className=None, extensible=False, tag=None, db=None, modifiers=''):
+    tagString = ''
     if tag is not None:
-        tagstr = '<tag>%s</tag>' % tag
+        tagString = '<tag>%s</tag>' % tag
 
-    #Convenience hack: Allow a single string as parameter:
-    if isinstance(folderstrings,str):
-        return addFolderList(configFlags,((folderstrings+tagstr,detDb,className),),extensible,db,modifiers)
+    # Convenience hack: Allow a single string as parameter:
+    if isinstance(folderStrings, str):
+        return addFolderList(flags, ((folderStrings + tagString, detDb, className),), extensible, db, modifiers)
 
-    else: #Got a list of folders
-        folderdefs=[]
+    else: # Got a list of folders
+        folderDefinitions = []
 
-        for fs in folderstrings:
-            folderdefs.append((fs+tagstr,detDb,className))
-        
-    return addFolderList(configFlags,folderdefs,extensible,db,modifiers)
-    
+        for folderString in folderStrings:
+            folderDefinitions.append((folderString + tagString, detDb, className))
 
+    return addFolderList(flags, folderDefinitions, extensible, db, modifiers)
 
 
-
-def addFolderList(configFlags,listOfFolderInfoTuple,extensible=False,db=None,modifiers=""):
+def addFolderList(flags, listOfFolderInfoTuple, extensible=False, db=None, modifiers=''):
     """Add access to the given set of folders, in the identified subdetector schema.
     FolerInfoTuple consists of (foldername,detDB,classname)
 
@@ -111,70 +93,63 @@ def addFolderList(configFlags,listOfFolderInfoTuple,extensible=False,db=None,mod
     the end time for this range will be set to just past the current event.
     Subsequent accesses will update this end time for subsequent events.
     This allows the possibility of later adding a new IOV using IOVSvc::setRange."""
+    loadFolders = []
+    folders = []
 
-
-    result=IOVDbSvcCfg(configFlags)
-    iovDbSvc=result.getPrimary()
-
-    loadFolders=[]
-
-    for (fs,detDb,className) in listOfFolderInfoTuple:
-       
-        #Add class-name to CondInputLoader (if reqired)
+    for (fs, detDb, className) in listOfFolderInfoTuple:
+        # Add class-name to CondInputLoader (if reqired)
         if className is not None:
             loadFolders.append((className, _extractFolder(fs)))
 
-    
-        if detDb is not None and fs.find("<db>")==-1:
+        if detDb is not None and fs.find('<db>') == -1:
             if db:  # override database name if provided
-                dbname=db
+                dbName=db
             else:
-                dbname=configFlags.IOVDb.DatabaseInstance
+                dbName = flags.IOVDb.DatabaseInstance
             if detDb in _dblist.keys():
-                fs = "<db>"+_dblist[detDb]+"/"+dbname+"</db> " + fs
-            elif os.access(detDb,os.R_OK):
-                #Assume slqite file
-                fs = "<db>sqlite://;schema="+detDb+";dbname="+dbname+"</db> " + fs
+                fs = f'<db>{_dblist[detDb]}/{dbName}</db> {fs}'
+            elif os.access(detDb, os.R_OK):
+                # Assume slqite file
+                fs = f'<db>sqlite://;schema={detDb};dbname={dbName}</db> {fs}'
             else:
-                raise ConfigurationError("Error, db shorthand %s not known, nor found as sqlite file" % detDb)
-            #Append database string to folder-name
+                raise ConfigurationError(f'Error, db shorthand {detDb} not known, nor found as sqlite file')
+            # Append database string to folder-name
 
-    
         if extensible:
             fs = fs + '<extensible/>'
 
-        #Add explicitly given xml-modifiers (like channel-selection)
-        fs+=modifiers 
+        # Add explicitly given xml-modifiers (like channel-selection)
+        fs += modifiers
 
-        #Append (modified) folder-name string to IOVDbSvc Folders property
-        iovDbSvc.Folders.append(fs)
+        # Append (modified) folder-name string to IOVDbSvc Folders property
+        folders.append(fs)
 
 
-    if len(loadFolders)>0:
-        result.getCondAlgo("CondInputLoader").Load+=loadFolders
-        AthenaPoolCnvSvc=CompFactory.AthenaPoolCnvSvc
-        apcs=AthenaPoolCnvSvc()
-        result.addService(apcs)
-        EvtPersistencySvc=CompFactory.EvtPersistencySvc
-        result.addService(EvtPersistencySvc("EventPersistencySvc",CnvServices=[apcs.getFullJobOptName(),]))
+    result = IOVDbSvcCfg(flags, Folders=folders)
+    if loadFolders:
+        result.getCondAlgo('CondInputLoader').Load += loadFolders
+        from AthenaPoolCnvSvc.PoolCommonConfig import AthenaPoolCnvSvcCfg
+        result.merge(AthenaPoolCnvSvcCfg(flags))
 
     return result
-    
-def addFoldersSplitOnline(configFlags, detDb, online_folders, offline_folders, className=None, addMCString="_OFL", splitMC=False, tag=None, forceDb=None,modifiers=""):
-    "Add access to given folder, using either online_folder  or offline_folder. For MC, add addMCString as a postfix (default is _OFL)"
-    
-    if configFlags.Common.isOnline and not configFlags.Input.isMC:
-        folders = online_folders
-    elif splitMC and not configFlags.Input.isMC:
-        folders = online_folders
+
+
+def addFoldersSplitOnline(flags, detDb, onlineFolders, offlineFolders, className=None, addMCString='_OFL', splitMC=False, tag=None, forceDb=None, modifiers=''):
+    """Add access to given folder, using either online_folder  or offline_folder. For MC, add addMCString as a postfix (default is _OFL)"""
+
+    if flags.Common.isOnline and not flags.Input.isMC:
+        folders = onlineFolders
+    elif splitMC and not flags.Input.isMC:
+        folders = onlineFolders
     else:
         # MC, so add addMCString
-        detDb = detDb+addMCString
-        folders = offline_folders
-    result = addFolders(configFlags, folders, className=className, detDb=detDb, tag=tag, db=forceDb,modifiers=modifiers) 
-    return result
+        detDb = detDb + addMCString
+        folders = offlineFolders
 
-_dblist={
+    return addFolders(flags, folders, detDb, className, tag=tag, db=forceDb, modifiers=modifiers)
+
+
+_dblist = {
     'INDET':'COOLONL_INDET',
     'INDET_ONL':'COOLONL_INDET',
     'PIXEL':'COOLONL_PIXEL',
@@ -208,7 +183,7 @@ _dblist={
     'CALO':'COOLONL_CALO',
     'CALO_ONL':'COOLONL_CALO',
     'FWD':'COOLONL_FWD',
-    'FWD_ONL':'COOLONL_FWD',            
+    'FWD_ONL':'COOLONL_FWD',
     'INDET_OFL':'COOLOFL_INDET',
     'PIXEL_OFL':'COOLOFL_PIXEL',
     'SCT_OFL':'COOLOFL_SCT',
@@ -227,50 +202,48 @@ _dblist={
     'TRIGGER_OFL':'COOLOFL_TRIGGER',
     'CALO_OFL':'COOLOFL_CALO',
     'FWD_OFL':'COOLOFL_FWD'
-    }
-
-def addOverride(configFlags,folder,tag):
-  "Add a tag override for the specified folder"
-  result=IOVDbSvcCfg(configFlags)
-  iovDbSvc=result.getPrimary()
-  iovDbSvc.overrideTags+=['<prefix>%s</prefix> <tag>%s</tag>' % (folder,tag)]
-  return result
+}
 
 
-def _extractFolder(folderstr):
-    "Extract the folder name (non-XML text) from a IOVDbSvc.Folders entry"
-    fname=""
-    xmltag=""
-    ix=0
-    while ix<len(folderstr):
-        if (folderstr[ix]=='<' and xmltag==""):
-            ix2=folderstr.find('>',ix)
-            if (ix2!=-1):
-                xmltag=(folderstr[ix+1:ix2]).strip()
-                ix=ix2+1
-        elif (folderstr[ix:ix+2]=='</' and xmltag!=""):
-            ix2=folderstr.find('>',ix)
-            if (ix2!=-1):
-                xmltag=""
-                ix=ix2+1
+def addOverride(flags, folder, tag):
+    """Add a tag override for the specified folder"""
+    return IOVDbSvcCfg(flags, overrideTags=[f'<prefix>{folder}</prefix> <tag>{tag}</tag>'])
+
+
+def _extractFolder(folderString):
+    """Extract the folder name (non-XML text) from a IOVDbSvc.Folders entry"""
+    folderName = ''
+    xmlTag = ''
+    ix = 0
+    while ix < len(folderString):
+        if (folderString[ix] == '<' and xmlTag == ''):
+            ix2 = folderString.find('>', ix)
+            if ix2 != -1:
+                xmlTag = folderString[ix + 1 : ix2].strip()
+                ix = ix2 + 1
+        elif folderString[ix:ix+2] == '</' and xmlTag != '':
+            ix2 = folderString.find('>', ix)
+            if ix2 != -1:
+                xmlTag = ''
+                ix = ix2 + 1
         else:
-            ix2=folderstr.find('<',ix)
-            if ix2==-1: ix2=len(folderstr)
-            if (xmltag==""): fname=fname+folderstr[ix:ix2]
-            ix=ix2
-    return fname.strip()
+            ix2 = folderString.find('<', ix)
+            if ix2 == -1:
+                ix2 = len(folderString)
+            if xmlTag == '':
+                folderName = folderName + folderString[ix : ix2]
+            ix = ix2
+    return folderName.strip()
 
-    
-        
-if __name__ == "__main__":
+
+if __name__ == '__main__':
     from AthenaConfiguration.AllConfigFlags import ConfigFlags
     from AthenaConfiguration.TestDefaults import defaultTestFiles
 
     ConfigFlags.Input.Files = defaultTestFiles.RAW
     ConfigFlags.lock()
 
-    acc  = IOVDbSvcCfg(ConfigFlags)
+    acc = IOVDbSvcCfg(ConfigFlags)
 
-    f=open('test.pkl','wb')
-    acc.store(f)
-    f.close()
+    with open('test.pkl','wb') as f:
+        acc.store(f)

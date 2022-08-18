@@ -294,7 +294,12 @@ StatusCode TrigMETMonitorAlgorithm::fillHistograms( const EventContext& ctx ) co
     auto offline_Ey = Monitored::Scalar<float>("offline_Ey",0.0);
     auto offline_Et = Monitored::Scalar<float>("offline_Et",0.0);
     auto offline_sumEt = Monitored::Scalar<float>("offline_sumEt",0.0);
-    auto offline_Et_eff = Monitored::Scalar<float>("offline_Et_eff",0.0);
+    auto offline_Et_eff = Monitored::Scalar<float>("offline_Et_eff",0.0); 
+    auto offline_NoMu_Ex = Monitored::Scalar<float>("offline_NoMu_Ex",0.0);
+    auto offline_NoMu_Ey = Monitored::Scalar<float>("offline_NoMu_Ey",0.0);
+    auto offline_NoMu_Et = Monitored::Scalar<float>("offline_NoMu_Et",0.0);
+    auto offline_NoMu_sumEt = Monitored::Scalar<float>("offline_NoMu_sumEt",0.0);
+    auto offline_NoMu_Et_eff = Monitored::Scalar<float>("offline_NoMu_Et_eff",0.0);
 
     auto HLT_MET_status = Monitored::Scalar<int>("HLT_MET_status",0.0);
     auto MET_status = Monitored::Scalar<float>("MET_status",0.0);
@@ -443,6 +448,8 @@ StatusCode TrigMETMonitorAlgorithm::fillHistograms( const EventContext& ctx ) co
 
     // access offline MET values
     const xAOD::MissingET *offline_met = 0;
+    const xAOD::MissingET *finalTrkMET = 0;
+    const xAOD::MissingET *muonsMET = 0;
     if ( offline_met_cont.isValid() && offline_met_cont->size() > 0 ) {
       offline_met = offline_met_cont->at(0);
       offline_Ex = - (offline_met->mpx())/1000.;
@@ -451,9 +458,20 @@ StatusCode TrigMETMonitorAlgorithm::fillHistograms( const EventContext& ctx ) co
       offline_Et = std::sqrt(offline_Ex*offline_Ex + offline_Ey*offline_Ey);
       offline_Et_eff = std::sqrt(offline_Ex*offline_Ex + offline_Ey*offline_Ey);
       fill(tool,offline_Ex,offline_Ey,offline_Et,offline_sumEt);
+	  
+      finalTrkMET = ((*offline_met_cont)["FinalTrk"]);
+      muonsMET = ((*offline_met_cont)["Muons"]);
+      if(finalTrkMET && muonsMET){
+        xAOD::MissingET finalTrkNoMuMET = *finalTrkMET - *muonsMET;
+        offline_NoMu_Ex = - (finalTrkNoMuMET.mpx())/1000.;
+        offline_NoMu_Ey = - (finalTrkNoMuMET.mpy())/1000.;	
+        offline_NoMu_sumEt = (finalTrkNoMuMET.sumet())/1000.;
+        offline_NoMu_Et = std::sqrt(offline_NoMu_Ex*offline_NoMu_Ex + offline_NoMu_Ey*offline_NoMu_Ey);
+        offline_NoMu_Et_eff = std::sqrt(offline_NoMu_Ex*offline_NoMu_Ex + offline_NoMu_Ey*offline_NoMu_Ey);
+        fill(tool,offline_NoMu_Ex,offline_NoMu_Ey,offline_NoMu_Et,offline_NoMu_sumEt);
+      }	
     }
 
-    
     // access L1 MET values
     for (const std::string& alg : m_algsL1) {
       SG::ReadHandle<xAOD::EnergySumRoI> l1_met_cont;
@@ -983,21 +1001,20 @@ StatusCode TrigMETMonitorAlgorithm::fillHistograms( const EventContext& ctx ) co
     // efficiency plots
     for (const std::string& chain : m_l1Chains) {
       auto pass_chain = Monitored::Scalar<float>("pass_" + chain, static_cast<float>(getTrigDecisionTool()->isPassed(chain)));
-      fill(tool, pass_chain,offline_Et_eff);
+      fill(tool, pass_chain,offline_NoMu_Et_eff);
     }
     for (const std::string& chain : m_hltChains) {
       auto pass_chain = Monitored::Scalar<float>("pass_" + chain, static_cast<float>(getTrigDecisionTool()->isPassed(chain)));
-      fill(tool, pass_chain,offline_Et_eff);
+      fill(tool, pass_chain,offline_NoMu_Et_eff);
     }
     for (const std::string& chain : m_hltChainsVal) {
       auto pass_chain = Monitored::Scalar<float>("pass_" + chain, static_cast<float>(getTrigDecisionTool()->isPassed(chain)));
-      fill(tool, pass_chain,offline_Et_eff);
+      fill(tool, pass_chain,offline_NoMu_Et_eff);
     }
     for (const std::string& chain : m_hltChainsT0) {
       auto pass_chain = Monitored::Scalar<float>("pass_" + chain, static_cast<float>(getTrigDecisionTool()->isPassed(chain)));
-      fill(tool, pass_chain,offline_Et_eff);
+      fill(tool, pass_chain,offline_NoMu_Et_eff);
     }
-
 
     return StatusCode::SUCCESS;
 }

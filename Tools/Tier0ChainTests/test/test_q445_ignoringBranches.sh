@@ -65,7 +65,7 @@ echo "art-result: $rc3     3 ESD diff-root comparison"
 rc4=-9999
 if [ $rc1 -eq 0 ]
 then
-  art.py compare grid --file=*RDO*.pool.root --diff-root --entries 50 "$1" "$2" --mode=semi-detailed --order-trees \
+  art.py compare grid --file=*RDO*.pool.root --diff-root --entries 50 "$1" "$2" --mode=semi-detailed --order-trees
   rc4=$?
 fi
 echo "art-result: $rc4     4 RDO diff-root comparison"

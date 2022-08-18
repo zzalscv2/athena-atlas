@@ -18,9 +18,7 @@ from AthenaPoolCnvSvc.PoolReadConfig import PoolReadCfg
 
 def writeFileMetaData(flags):
     """set up an output stream and xAOD::EventInfo"""
-    accumulator = OutputStreamConfig.OutputStreamCfg(
-        configFlags=flags, streamName="AOD"
-    )
+    accumulator = OutputStreamConfig.OutputStreamCfg(flags, streamName="AOD")
 
     accumulator.merge(
         xAODEventInfoCnvConfig.EventInfoCnvAlgCfg(

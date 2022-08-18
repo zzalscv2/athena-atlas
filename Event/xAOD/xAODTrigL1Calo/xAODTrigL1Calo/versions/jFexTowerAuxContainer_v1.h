@@ -5,13 +5,14 @@
 #ifndef XAODTRIGL1CALO_VERSIONS_JFEXTOWERAUXCONTAINER_V1_H
 #define XAODTRIGL1CALO_VERSIONS_JFEXTOWERAUXCONTAINER_V1_H
 
-// STL include(s):
-#include <vector>
+// EDM include(s):
+#include "xAODCore/AuxContainerBase.h"
+
 // System include(s):
 #include <stdint.h>
 
-// EDM include(s):
-#include "xAODCore/AuxContainerBase.h"
+// STL include(s):
+#include <vector>
 
 namespace xAOD{
 
@@ -29,8 +30,8 @@ namespace xAOD{
     std::vector<uint8_t> module;
     std::vector<uint8_t> fpga;
     std::vector<uint8_t> channel;
-    std::vector<uint16_t> et;
-    std::vector<uint8_t> dataID;
+    std::vector<uint16_t> towerEt;
+    std::vector<uint8_t> jFEXdataID;
     std::vector<char> isSaturated;
     
   }; // class jFexTowerAuxContainer_v1 

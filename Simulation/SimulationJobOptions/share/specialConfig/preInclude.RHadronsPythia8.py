@@ -81,7 +81,7 @@ except:
 
 # Add the appropriate physics tool
 from G4AtlasApps.SimFlags import simFlags
-simFlags.PhysicsOptions.get_Value().insert(0,"RHadronsPhysicsTool")
+simFlags.PhysicsOptions += ["RHadronsPhysicsTool"]
 
 
 # From the run number, load up the configuration.  Not the most beautiful thing, but this works.

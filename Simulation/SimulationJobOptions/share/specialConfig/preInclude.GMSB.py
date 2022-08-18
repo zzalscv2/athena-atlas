@@ -120,10 +120,9 @@ if doG4SimConfig:
     ## Assuming that GMSBIndex is an int here...
     GMSBIndex = int(simdict["GMSBIndex"])
     if GMSBIndex == 1: # generic neutralino to photon scenario
-        localPhysicsOptions = ["GauginosPhysicsTool","NeutralinoToPhotonGravitino"]
-        simFlags.PhysicsOptions = localPhysicsOptions + simFlags.PhysicsOptions.get_Value()
+        simFlags.PhysicsOptions += ["GauginosPhysicsTool","NeutralinoToPhotonGravitino"]
     elif GMSBIndex == 2 or GMSBIndex == 3 or GMSBIndex == 4: # generic stau scenario
-        simFlags.PhysicsOptions.get_Value().insert(0,"SleptonsPhysicsTool")
+        simFlags.PhysicsOptions += ["SleptonsPhysicsTool"]
     else:
         print ('GMSBIndex %i not supported' % GMSBIndex)
         raise

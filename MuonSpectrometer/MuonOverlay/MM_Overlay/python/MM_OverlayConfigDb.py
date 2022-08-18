@@ -2,4 +2,4 @@
 
 from AthenaCommon.CfgGetter import addAlgorithm
 
-addAlgorithm("MM_Overlay.MM_OverlayConfig.getMM_Overlay", "MM_Overlay")
+addAlgorithm("MM_Overlay.MM_OverlayConfigLegacy.getMM_Overlay", "MM_Overlay")

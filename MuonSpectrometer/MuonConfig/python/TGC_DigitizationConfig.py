@@ -62,6 +62,10 @@ def TGC_DigitizationToolCfg(flags, name="TgcDigitizationTool", **kwargs):
     kwargs.setdefault("TGCDigitTimeOffsetKey", "TGCDigitTimeOffsetData")
     kwargs.setdefault("TGCDigitCrosstalkKey", "TGCDigitCrosstalkData")
 
+    from AthenaConfiguration.Enums  import LHCPeriod
+    if flags.GeoModel.Run < LHCPeriod.Run3:
+        kwargs.setdefault("FourBunchDigitization", False)
+
     from RngComps.RandomServices import AthRNGSvcCfg
     kwargs.setdefault("RndmSvc", acc.getPrimaryAndMerge(AthRNGSvcCfg(flags)).name)
 
@@ -82,6 +86,10 @@ def TGC_OverlayDigitizationToolCfg(flags, name="Tgc_OverlayDigitizationTool", **
     kwargs.setdefault("TGCDigitASDposKey", "TGCDigitASDposData")
     kwargs.setdefault("TGCDigitTimeOffsetKey", "TGCDigitTimeOffsetData")
     kwargs.setdefault("TGCDigitCrosstalkKey", "TGCDigitCrosstalkData")
+
+    from AthenaConfiguration.Enums  import LHCPeriod
+    if flags.GeoModel.Run < LHCPeriod.Run3:
+        kwargs.setdefault("FourBunchDigitization", False)
 
     from RngComps.RandomServices import AthRNGSvcCfg
     kwargs.setdefault("RndmSvc", acc.getPrimaryAndMerge(AthRNGSvcCfg(flags)).name)

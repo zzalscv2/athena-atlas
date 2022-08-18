@@ -92,6 +92,7 @@ private:
   std::list<TGCSimHitCollection*>    m_TGCHitCollList;
 
   Gaudi::Property<bool> m_onlyUseContainerName{this, "OnlyUseContainerName", true, "Don't use the ReadHandleKey directly. Just extract the container name from it."};
+  Gaudi::Property<bool> m_doFourBunchDigitization{this, "FourBunchDigitization", true, "Do the four bunch digitization since Run-3"};
   SG::ReadHandleKey<TGCSimHitCollection> m_hitsContainerKey{this, "InputObjectName", "TGC_Hits", "name of the input object"};
   std::string m_inputHitCollectionName{""};
   SG::ReadCondHandleKey<TgcDigitASDposData> m_readCondKey_ASDpos{this,"TGCDigitASDposKey","","ReadCondHandleKey for TGCDigitASDposData"};

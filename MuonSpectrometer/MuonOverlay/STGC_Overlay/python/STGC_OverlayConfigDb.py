@@ -2,4 +2,4 @@
 
 from AthenaCommon.CfgGetter import addAlgorithm
 
-addAlgorithm("STGC_Overlay.STGC_OverlayConfig.getSTGC_Overlay", "STGC_Overlay")
+addAlgorithm("STGC_Overlay.STGC_OverlayConfigLegacy.getSTGC_Overlay", "STGC_Overlay")
