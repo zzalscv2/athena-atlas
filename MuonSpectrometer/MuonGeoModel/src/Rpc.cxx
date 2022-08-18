@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "MuonGeoModel/Rpc.h"
@@ -18,6 +18,7 @@
 #include "GeoModelKernel/GeoTransform.h"
 #include "GeoModelKernel/GeoTrd.h"
 #include "GeoModelKernel/GeoVFullPhysVol.h"
+#include "GeoModelUtilities/GeoRef.h"
 #include "MuonGeoModel/MYSQL.h"
 #include "MuonGeoModel/RPC_Technology.h"
 #include "MuonGeoModel/RpcLayer.h"
@@ -35,6 +36,8 @@ namespace {
 } // namespace
 
 namespace MuonGM {
+
+    using PVRef = GeoRef<GeoPhysVol>;
 
     Rpc::Rpc(const MYSQL& mysql, Component *ss) : DetectorElement(ss->name) {
         double tol = 1.e-3;
@@ -137,7 +140,7 @@ namespace MuonGM {
             const GeoShape *sholpan2 = sholpan;
             const GeoMaterial *mallpan = matManager.getMaterial("std::Aluminium");
             GeoLogVol *lallpan = new GeoLogVol("RPC_AL_extsuppanel", sallpan, mallpan);
-            GeoPhysVol *pallpan = new GeoPhysVol(lallpan);
+            PVRef pallpan = PVRef (new GeoPhysVol(lallpan));
             const GeoMaterial *mholpan = matManager.getMaterial("muo::RpcAlHonC");
             GeoLogVol *lholpan = new GeoLogVol("RPC_honeyc_extsuppanel", sholpan2, mholpan);
             GeoPhysVol *pholpan = new GeoPhysVol(lholpan);
@@ -145,21 +148,16 @@ namespace MuonGM {
 
             // Apply cutouts
             if (cutoutson && vcutdef.size() > 0) {
-                GeoPhysVol *tempPhys = nullptr;
                 Cutout *cut = nullptr;
-                GeoShape *cutoutShape = nullptr;
                 GeoTrf::Transform3D cutTrans{GeoTrf::Transform3D::Identity()};
                 for (unsigned i = 0; i < vcutdef.size(); i++) {
                     cut = vcutdef[i];
-                    cutoutShape = new GeoTrd(thickness / 2. + 1., thickness / 2. + 1., cut->widthXs / 2., cut->widthXl / 2., cut->lengthY / 2.);
+                    GeoRef<GeoTrd> cutoutShape (new GeoTrd (thickness / 2. + 1., thickness / 2. + 1., cut->widthXs / 2., cut->widthXl / 2., cut->lengthY / 2.));
                     cutTrans = GeoTrf::Translate3D(0.0, cut->dx, -length / 2 + cut->dy + cut->lengthY / 2.);
 
                     GeoCutVolAction cutAction(*cutoutShape, cutTrans);
                     pallpan->apply(&cutAction);
-                    tempPhys = cutAction.getPV();
-                    pallpan->ref();
-                    pallpan->unref();
-                    pallpan = tempPhys;
+                    pallpan = PVRef (cutAction.getPV());
                 }
             }
 
@@ -207,7 +205,7 @@ namespace MuonGM {
             const GeoShape *salcpan = scpan;
             const GeoShape *shocpan2 = shocpan;
             GeoLogVol *lalcpan = new GeoLogVol("RPC_AL_midsuppanel", salcpan, mallpan);
-            GeoPhysVol *palcpan = new GeoPhysVol(lalcpan);
+            PVRef palcpan = PVRef (new GeoPhysVol(lalcpan));
             const GeoMaterial *mhocpan = matManager.getMaterial("muo::RpcPapHonC");
             GeoLogVol *lhocpan = new GeoLogVol("RPC_honeyc_midsuppanel", shocpan2, mhocpan);
             GeoPhysVol *phocpan = new GeoPhysVol(lhocpan);
@@ -215,21 +213,16 @@ namespace MuonGM {
 
             // Apply cutouts
             if (cutoutson && vcutdef.size() > 0) {
-                GeoPhysVol *tempPhys = nullptr;
                 Cutout *cut = nullptr;
-                GeoShape *cutoutShape = nullptr;
                 GeoTrf::Transform3D cutTrans{GeoTrf::Transform3D::Identity()};
                 for (unsigned i = 0; i < vcutdef.size(); i++) {
                     cut = vcutdef[i];
-                    cutoutShape = new GeoTrd(thickness / 2. + 1., thickness / 2. + 1., cut->widthXs / 2., cut->widthXl / 2., cut->lengthY / 2.);
+                    GeoRef<GeoTrd> cutoutShape (new GeoTrd (thickness / 2. + 1., thickness / 2. + 1., cut->widthXs / 2., cut->widthXl / 2., cut->lengthY / 2.));
                     cutTrans = GeoTrf::Translate3D(0.0, cut->dx, -length / 2 + cut->dy + cut->lengthY / 2.);
 
                     GeoCutVolAction cutAction(*cutoutShape, cutTrans);
                     palcpan->apply(&cutAction);
-                    tempPhys = cutAction.getPV();
-                    palcpan->ref();
-                    palcpan->unref();
-                    palcpan = tempPhys;
+                    palcpan = PVRef (cutAction.getPV());
                 }
             }
 
@@ -306,24 +299,25 @@ namespace MuonGM {
             if (RPCprint) {
                 log << MSG::VERBOSE << " Rpc:: put upper RPC layer at " << newpos << " from centre " << endmsg;
             }
-            GeoTransform *rugg = new GeoTransform(GeoTrf::RotateY3D(180 * Gaudi::Units::deg));
             if (!skip_rpc) {
                 prpc->add(new GeoIdentifierTag(2));
                 prpc->add(tugg);
-                if (m_nlayers == 2)
+                if (m_nlayers == 2) {
+                    GeoTransform *rugg = new GeoTransform(GeoTrf::RotateY3D(180 * Gaudi::Units::deg));
                     prpc->add(rugg); // only to be done for standard (non-BI) RPCs
+                }
                 prpc->add(puppergg);
             }
 
             // additional RpcLayer for BI (3 gaps)
             if (m_nlayers == 3) {
                 newpos += rpcLayerThickness / 2.;
-                RpcLayer *rthird = new RpcLayer(name, this);
+                RpcLayer rthird (name, this);
                 GeoVPhysVol *pthirdgg;
                 if (cutoutson && vcutdef.size() > 0) {
-                    pthirdgg = rthird->build(matManager, mysql, cutoutson, vcutdef);
+                    pthirdgg = rthird.build(matManager, mysql, cutoutson, vcutdef);
                 } else {
-                    pthirdgg = rthird->build(matManager, mysql);
+                    pthirdgg = rthird.build(matManager, mysql);
                 }
 
                 newpos += rpcLayerThickness / 2.;
