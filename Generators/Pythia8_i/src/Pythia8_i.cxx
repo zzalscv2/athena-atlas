@@ -619,8 +619,15 @@ StatusCode Pythia8_i::fillWeights(HepMC::GenEvent *evt){
 
   // The following depends on the specific hepmc2/3 implementation
 #ifdef HEPMC3
-  if (!evt->run_info()) evt->set_run_info(m_runinfo);
+  if (!evt->run_info()) {
+     evt->set_run_info(m_runinfo);
+}
   evt->run_info()->set_weight_names(m_weightNames);
+
+// for the first event, weight AUX_bare_not_for_analyses is not present in evt->weights(), so we need to book a place for it by hand
+  if (m_internal_event_number == 1 && evt->run_info()->weight_names().size() == evt->weights().size()+1 ) {
+     evt->weights().push_back(1.0);
+}
 
   // added conversion GeV ->  MeV to ensure correct units
   evt->set_units(HepMC3::Units::MEV, HepMC3::Units::MM);
