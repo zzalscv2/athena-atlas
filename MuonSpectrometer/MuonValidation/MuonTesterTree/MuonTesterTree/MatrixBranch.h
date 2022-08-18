@@ -26,7 +26,9 @@ public:
 
     std::vector<DataDependency> data_dependencies() override final;
 
-    TTree* tree() const;
+    const TTree* tree() const;
+    TTree* tree();
+
     bool initialized() const;
 
     /// Returns the i-th element of the outer vector

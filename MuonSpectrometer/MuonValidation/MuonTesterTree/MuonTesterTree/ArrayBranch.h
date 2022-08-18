@@ -32,7 +32,9 @@ public:
     std::vector<DataDependency> data_dependencies() override final;
 
     /// Underlying tree object
-    TTree* tree() const;
+    const TTree* tree() const;
+    TTree* tree();
+    
 
     /// Is the branch initialized
     bool initialized() const;
