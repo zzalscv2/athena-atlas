@@ -4,8 +4,10 @@
 
 #include "PixelDeadMapCondAlg.h"
 #include "GaudiKernel/EventIDRange.h"
+#include "StringUtilities.h"
 
-#include <sstream>
+
+using PixelConditionsAlgorithms::parseDeadMapString;
 
 PixelDeadMapCondAlg::PixelDeadMapCondAlg(const std::string& name, ISvcLocator* pSvcLocator):
   ::AthReentrantAlgorithm(name, pSvcLocator)
@@ -56,33 +58,15 @@ StatusCode PixelDeadMapCondAlg::execute(const EventContext& ctx) const {
 
     for (CondAttrListCollection::const_iterator attrList=readCdo->begin(); attrList!=readCdo->end(); ++attrList) {
       const CondAttrListCollection::AttributeList &payload = attrList->second;
-
       // RUN-3 format
       if (payload.exists("data_array") and not payload["data_array"].isNull()) {
         const std::string &stringStatus = payload["data_array"].data<std::string>();
-
-        std::stringstream ss(stringStatus);
-        std::vector<std::string> component;
-        std::string buffer;
-        while (std::getline(ss,buffer,',')) { component.push_back(buffer); }
-
-        for (int i=0; i<(int)component.size(); i++) {
-          std::stringstream checkModule(component[i]);
-          std::vector<std::string> moduleString;
-          while (std::getline(checkModule,buffer,':')) { moduleString.push_back(buffer); }
-
-          if (moduleString.size()==2) {
-            std::stringstream checkModuleHash(moduleString[0]);
-            std::vector<std::string> moduleStringHash;
-            while (std::getline(checkModuleHash,buffer,'"')) { moduleStringHash.push_back(buffer); }
-
-            int moduleHash   = std::atoi(moduleStringHash[1].c_str());
-            int moduleStatus = std::atoi(moduleString[1].c_str());
-
-            if (moduleStatus==0) { writeCdo->setModuleStatus(moduleHash, 1); }
-            else                 { writeCdo->setChipStatus(moduleHash, moduleStatus); }
-          }
-
+        const auto & hashStatusVector = parseDeadMapString(stringStatus);
+        for (const auto & [hash, status] : hashStatusVector){
+          //status ==0 means its the module status to be set to '1'
+          if (status==0) writeCdo->setModuleStatus(hash, 1);
+          //...any other status will set the chip status
+          else writeCdo->setChipStatus(hash, status);
         }
       }
     }
