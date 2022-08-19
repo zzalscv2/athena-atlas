@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef INDETCONVERSIONFINDERTOOLS_TRACKPAIRSSELECTOR_H
@@ -73,7 +73,7 @@ private:
   ToolHandle<Trk::ITrkDistanceFinder> m_distanceTool{
     this,
     "DistanceTool",
-    "Trk::SeedNewtonDistanceFinder",
+    "Trk::SeedNewtonTrkDistanceFinder",
     "Distance of minimum approach tool"
   };
   /** Properties for track selection: all cuts are ANDed */
