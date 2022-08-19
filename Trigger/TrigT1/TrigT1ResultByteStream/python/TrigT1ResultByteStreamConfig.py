@@ -7,7 +7,7 @@ from AthenaConfiguration.Enums import Format
 from TrigEDMConfig.TriggerEDMRun3 import recordable
 from libpyeformat_helper import SourceIdentifier, SubDetector
 
-from L1CaloFEXByteStream.L1CaloFEXByteStreamConfig import eFexByteStreamToolCfg, jFexRoiByteStreamToolCfg, jFexInputByteStreamToolCfg, gFexByteStreamToolCfg
+from L1CaloFEXByteStream.L1CaloFEXByteStreamConfig import eFexByteStreamToolCfg, jFexRoiByteStreamToolCfg, jFexInputByteStreamToolCfg, gFexByteStreamToolCfg, gFexInputByteStreamToolCfg
 from L1TopoByteStream.L1TopoByteStreamConfig import L1TopoPhase1ByteStreamToolCfg
 from TrigT1MuonRecRoiTool.TrigT1MuonRecRoiToolConfig import getRun3RPCRecRoiTool
 from TrigT1MuonRecRoiTool.TrigT1MuonRecRoiToolConfig import getRun3TGCRecRoiTool
@@ -227,7 +227,7 @@ if __name__ == '__main__':
   parser.add_argument('--evtMax',type=int,default=-1,help="number of events")
   parser.add_argument('--filesInput',nargs='+',help="input files",required=True)
   parser.add_argument('--outputLevel',default="WARNING",choices={ 'INFO','WARNING','DEBUG','VERBOSE'})
-  parser.add_argument('--outputs',nargs='+',choices={"eTOBs","exTOBs","eTowers","jTOBs","jTowers","gFex","Topo","legacy"},required=True,
+  parser.add_argument('--outputs',nargs='+',choices={"eTOBs","exTOBs","eTowers","jTOBs","jTowers","gTOBs","gCaloTowers","Topo","legacy"},required=True,
                       help="What data to decode and output.")
   args = parser.parse_args()
 
@@ -375,7 +375,7 @@ if __name__ == '__main__':
   ########################################
   # gFEX ROIs
   ########################################
-  if 'gFex' in args.outputs:
+  if 'gTOBs' in args.outputs:
     gFexTool = gFexByteStreamToolCfg('gFexBSDecoder', flags)
     decoderTools += [gFexTool]
     outputEDM += addEDM('xAOD::gFexJetRoIContainer',    gFexTool.gFexRhoOutputContainerWriteKey.Path)
@@ -389,6 +389,15 @@ if __name__ == '__main__':
     outputEDM += addEDM('xAOD::gFexGlobalRoIContainer', gFexTool.gMETComponentsRmsOutputContainerWriteKey.Path)
     outputEDM += addEDM('xAOD::gFexGlobalRoIContainer', gFexTool.gScalarENoiseCutOutputContainerWriteKey.Path)
     outputEDM += addEDM('xAOD::gFexGlobalRoIContainer', gFexTool.gScalarERmsOutputContainerWriteKey.Path)
+
+  ########################################
+  # gFEX input Data
+  ########################################
+  if 'gCaloTowers' in args.outputs:
+    inputgFexTool = gFexInputByteStreamToolCfg('gFexInputBSDecoder', flags)
+    decoderTools += [inputgFexTool]
+    # saving/adding the gTower xAOD container
+    outputEDM += addEDM('xAOD::gFexTowerContainer', inputgFexTool.gTowersWriteKey.Path)
 
   ########################################
   # Topop ROIs  
