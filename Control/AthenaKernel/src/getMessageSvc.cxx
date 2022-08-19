@@ -1,16 +1,17 @@
 /*
-  Copyright (C) 2002-2019 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
 */
 
 #include <iostream>
 #include "GaudiKernel/Bootstrap.h"
 #include "GaudiKernel/IMessageSvc.h"
 #include "GaudiKernel/ISvcLocator.h"
+#include "GaudiKernel/ServiceHandle.h"
+#include "CxxUtils/checker_macros.h"
+
 #include "AthenaKernel/getMessageSvc.h"
 
 using namespace Athena;
-using std::cerr;
-using std::endl;
 
 /// Set this to force off the warning messages from getMessageSvc
 /// (in unit tests, for example).
@@ -18,15 +19,25 @@ std::atomic<bool> Athena::getMessageSvcQuiet;
 
 IMessageSvc* Athena::getMessageSvc( bool quiet ) { return getMessageSvc( Options::Lazy, quiet ); }
 IMessageSvc* Athena::getMessageSvc( const Options::CreateOptions opt, bool quiet ) {
-  IMessageSvc* pSvc(0);
-  const bool createIf( opt == Athena::Options::Eager );
-  if (!(Gaudi::svcLocator()->service("MessageSvc", pSvc, createIf)).isSuccess() &&
-      !quiet &&
-      !Athena::getMessageSvcQuiet)
-  {
-    cerr << "Athena::getMessageSvc: WARNING MessageSvc not found, will use std::cout" << endl;
+
+  // We cache the MessageSvc, but only once it has been found. This ensures that an
+  // early call to this method (before MessageSvc is available) does not prevent
+  // from finding it in subsequent calls. The limited use of ServiceHandle for this
+  // purpose should be thread-safe:
+  static ServiceHandle<IMessageSvc> msgSvc ATLAS_THREAD_SAFE ("MessageSvc", "getMessageSvc");
+
+  if (msgSvc.get()) {
+    msgSvc->addRef();  // even if cached, maintain correct ref-count
   }
-  return pSvc;
+  else {
+    const bool warn = !(quiet || Athena::getMessageSvcQuiet);
+    if ( ((opt==Athena::Options::Lazy && !Gaudi::svcLocator()->existsService("MessageSvc")) ||
+          msgSvc.retrieve().isFailure()) && warn ) {
+      std::cerr << "Athena::getMessageSvc: WARNING MessageSvc not found, will use std::cout" << std::endl;
+    }
+  }
+
+  return msgSvc.get();
 }
 
 void Athena::reportMessage (IMessageSvc* ims, const std::string &source, int type, const std::string &message) {
