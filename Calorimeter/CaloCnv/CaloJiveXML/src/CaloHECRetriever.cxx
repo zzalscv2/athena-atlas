@@ -2,13 +2,12 @@
   Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
 */
 
-#include "CaloJiveXML/CaloHECRetriever.h"
+#include "CaloHECRetriever.h"
 
 #include "AthenaKernel/Units.h"
 
 #include "EventContainers/SelectAllObject.h"
 
-#include "CaloEvent/CaloCellContainer.h"
 #include "CaloDetDescr/CaloDetDescrElement.h"
 #include "LArElecCalib/ILArPedestal.h"
 #include "LArRawEvent/LArDigitContainer.h"
@@ -31,15 +30,12 @@ namespace JiveXML {
    **/
   CaloHECRetriever::CaloHECRetriever(const std::string& type,const std::string& name,const IInterface* parent):
     AthAlgTool(type,name,parent),
-    m_typeName("HEC"),
-    m_calocell_id(nullptr),
-    m_sgKey ("AllCalo")
+    m_calocell_id(nullptr)
   {
     //Only declare the interface
     declareInterface<IDataRetriever>(this);
     
     declareInterface<IDataRetriever>(this);
-    declareProperty("StoreGateKey" , m_sgKey);
     declareProperty("HEClCellThreshold", m_cellThreshold = 50.);
     declareProperty("RetrieveHEC" , m_hec = true);
     declareProperty("DoBadHEC",     m_doBadHEC = false);
@@ -61,6 +57,7 @@ namespace JiveXML {
     ATH_MSG_DEBUG( "Initialising Tool"  );
     ATH_CHECK( detStore()->retrieve (m_calocell_id, "CaloCell_ID") );
 
+    ATH_CHECK( m_sgKey.initialize() );
     ATH_CHECK( m_cablingKey.initialize() );
     ATH_CHECK( m_adc2mevKey.initialize(m_doHECCellDetails) );
 
@@ -73,19 +70,19 @@ namespace JiveXML {
   StatusCode CaloHECRetriever::retrieve(ToolHandle<IFormatTool> &FormatTool) {
     
     ATH_MSG_DEBUG( "in retrieve()"  );
-
-    const CaloCellContainer* cellContainer;
-    if ( !evtStore()->retrieve(cellContainer,m_sgKey))
-      {
-	ATH_MSG_WARNING( "Could not retrieve Calorimeter Cells "  );
-	return StatusCode::FAILURE;
-      }
-
-   if(m_hec){
-      DataMap data = getHECData(cellContainer);
-      ATH_CHECK( FormatTool->AddToEvent(dataTypeName(), m_sgKey, &data) );
-      ATH_MSG_DEBUG( "HEC retrieved"  );
+    
+    SG::ReadHandle<CaloCellContainer> cellContainer(m_sgKey);
+    if (!cellContainer.isValid()){
+	    ATH_MSG_WARNING( "Could not retrieve Calorimeter Cells "  );
     }
+    else{
+      if(m_hec){
+        DataMap data = getHECData(&(*cellContainer));
+        ATH_CHECK( FormatTool->AddToEvent(dataTypeName(), m_sgKey.key(), &data) );
+        ATH_MSG_DEBUG( "HEC retrieved"  );
+      }
+    }
+
     //HEC cells retrieved okay
     return StatusCode::SUCCESS;
   }

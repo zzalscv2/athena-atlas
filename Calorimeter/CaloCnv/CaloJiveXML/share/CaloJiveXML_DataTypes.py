@@ -8,6 +8,40 @@ if not "theEventData2XML" in dir():
 from LArRecUtils.LArADC2MeVCondAlgDefault import LArADC2MeVCondAlgDefault
 LArADC2MeVCondAlgDefault()
 
+tileDigitsContainer = ""
+tileRawChannelContainer = ""
+
+from AthenaConfiguration.Enums import Format
+if ConfigFlags.Input.Format is Format.BS:
+   tileDigitsContainer = "TileDigitsCnt"
+
+   if ConfigFlags.Tile.doOpt2:
+       tileRawChannelContainer = 'TileRawChannelOpt2'
+   elif ConfigFlags.Tile.doOptATLAS:
+       tileRawChannelContainer = 'TileRawChannelFixed'
+   elif ConfigFlags.Tile.doFitCOOL:
+       tileRawChannelContainer = 'TileRawChannelFitCool'
+   elif ConfigFlags.Tile.doFit:
+       tileRawChannelContainer = 'TileRawChannelFit'
+   else:
+       tileRawChannelContainer = 'TileRawChannelCnt'
+
+else:
+   if "TileDigitsCnt" in ConfigFlags.Input.Collections:
+       tileDigitsContainer = "TileDigitsCnt"
+   elif "TileDigitsFlt" in ConfigFlags.Input.Collections:
+       tileDigitsContainer = "TileDigitsFlt"
+
+   if "TileRawChannelOpt2" in ConfigFlags.Input.Collections:
+       tileRawChannelContainer = 'TileRawChannelOpt2'
+   elif "TileRawChannelFitCool" in ConfigFlags.Input.Collections:
+       tileRawChannelContainer = 'TileRawChannelFitCool'
+   elif "TileRawChannelFit" in ConfigFlags.Input.Collections:
+       tileRawChannelContainer = 'TileRawChannelFit'
+   elif "TileRawChannelCnt" in ConfigFlags.Input.Collections:
+       tileRawChannelContainer = 'TileRawChannelCnt'
+
+
 ## example how to switch on writting-out of HLT collections
 ## and select favourite and other collections 
 
@@ -18,7 +52,7 @@ theCaloClusterRetriever = JiveXML__CaloClusterRetriever (name = "CaloClusterRetr
 #theCaloClusterRetriever.DoWriteHLT = True
 ## Default collection (most Electron have elementLink to this one):
 
-theCaloClusterRetriever.FavouriteClusterCollection="egClusterCollection"
+theCaloClusterRetriever.FavouriteClusterCollection="egammaTopoClusters"
 
 ## example how to set other collection. when commented out: all other, non-HLT
 ##
@@ -28,12 +62,16 @@ theCaloClusterRetriever.OtherClusterCollections=["CombinedCluster","MuonClusterC
 #
 from CaloJiveXML.CaloJiveXMLConf import JiveXML__CaloTileRetriever
 theCaloTileRetriever = JiveXML__CaloTileRetriever (name = "CaloTileRetriever")
+theCaloTileRetriever.TileDigitsContainer = tileDigitsContainer
+theCaloTileRetriever.TileRawChannelContainer = tileRawChannelContainer
 theCaloTileRetriever.DoTileCellDetails = False
 theCaloTileRetriever.DoTileDigit = False
 theCaloTileRetriever.DoBadTile = False
 
 from CaloJiveXML.CaloJiveXMLConf import JiveXML__CaloMBTSRetriever
 theCaloMBTSRetriever = JiveXML__CaloMBTSRetriever (name = "CaloMBTSRetriever")
+theCaloMBTSRetriever.TileDigitsContainer = tileDigitsContainer
+theCaloMBTSRetriever.TileRawChannelContainer = tileRawChannelContainer
 theCaloMBTSRetriever.DoMBTSDigits = False
 
 from CaloJiveXML.CaloJiveXMLConf import JiveXML__CaloFCalRetriever

@@ -2,16 +2,14 @@
   Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
 */
 
-#include "CaloJiveXML/LArDigitRetriever.h"
+#include "LArDigitRetriever.h"
 
 #include "CLHEP/Units/SystemOfUnits.h"
 
 #include "EventContainers/SelectAllObject.h"
 
-#include "CaloEvent/CaloCellContainer.h"
 #include "CaloDetDescr/CaloDetDescrElement.h"
 #include "LArElecCalib/ILArPedestal.h"
-#include "LArRawEvent/LArDigitContainer.h"
 #include "LArIdentifier/LArOnlineID.h"
 #include "LArRawEvent/LArRawChannel.h"
 #include "LArRawEvent/LArRawChannelContainer.h"
@@ -32,19 +30,14 @@ namespace JiveXML {
    **/
   LArDigitRetriever::LArDigitRetriever(const std::string& type,const std::string& name,const IInterface* parent):
     AthAlgTool(type,name,parent),
-    m_typeName("LArDigit"),
-    m_sgKey ("AllCalo"),
     m_calocell_id(nullptr)
   {
     //Only declare the interface
     declareInterface<IDataRetriever>(this);
    
-    m_sgKeyLArDigit[0] = "FREE"; // can also be: "HIGH" (for raw data)
-    m_sgKeyLArDigit[1] = "LArDigitContainer_Thinned"; // used for DPD/ESD
     m_doDigit = false;
     m_inputdpd = false;
     
-    declareProperty("StoreGateKey" , m_sgKey);
     declareProperty("CellThreshold", m_cellThreshold = 50.);
     declareProperty("RetrieveLAr"  , m_lar  = true);
     declareProperty("RetrieveHEC"  , m_hec  = true);
@@ -72,6 +65,9 @@ namespace JiveXML {
     ATH_CHECK( detStore()->retrieve (m_calocell_id, "CaloCell_ID") );
     ATH_CHECK( m_adc2mevKey.initialize() );
 
+    ATH_CHECK( m_sgKey.initialize() );
+    ATH_CHECK( m_sgKeyLArDigit_raw.initialize() );
+    ATH_CHECK( m_sgKeyLArDigit_esd.initialize() );
     ATH_CHECK( m_cablingKey.initialize() );
 
     return StatusCode::SUCCESS;        
@@ -88,31 +84,31 @@ namespace JiveXML {
       m_doDigit = true; 
     }
 
-    const CaloCellContainer* cellContainer = nullptr;
-    if (!evtStore()->retrieve(cellContainer,m_sgKey))
-      {
-        ATH_MSG_WARNING( "Could not retrieve Calorimeter Cells"  );
-//        return StatusCode::SUCCESS;
+    SG::ReadHandle<CaloCellContainer> cellContainer(m_sgKey);
+    if (!cellContainer.isValid()){
+	    ATH_MSG_WARNING( "Could not retrieve Calorimeter Cells "  );
+    }
+    else{
+
+      if(m_fcal){
+        DataMap data = getLArDigitData(&(*cellContainer),"FCAL",CaloCell_ID::LARFCAL);
+        ATH_CHECK( FormatTool->AddToEvent("FCAL", m_sgKey.key(), &data) );
+        ATH_MSG_DEBUG( "FCAL retrieved"  );
       }
 
-   if(m_fcal){
-      DataMap data = getLArDigitData(cellContainer,"FCAL",CaloCell_ID::LARFCAL);
-      ATH_CHECK( FormatTool->AddToEvent("FCAL", m_sgKey, &data) );
-      ATH_MSG_DEBUG( "FCAL retrieved"  );
+      if(m_lar){
+        DataMap data = getLArDigitData(&(*cellContainer),"LAr",CaloCell_ID::LAREM);
+        ATH_CHECK( FormatTool->AddToEvent("LAr", m_sgKey.key(), &data) );
+        ATH_MSG_DEBUG( "LAr retrieved"  );
+      }
+
+      if(m_hec){
+        DataMap data = getLArDigitData(&(*cellContainer),"HEC",CaloCell_ID::LARHEC);
+        ATH_CHECK( FormatTool->AddToEvent("HEC", m_sgKey.key(), &data) );
+        ATH_MSG_DEBUG( "HEC retrieved"  );
+      }
     }
 
-    if(m_lar){
-      DataMap data = getLArDigitData(cellContainer,"LAr",CaloCell_ID::LAREM);
-      ATH_CHECK( FormatTool->AddToEvent("LAr", m_sgKey, &data) );
-      ATH_MSG_DEBUG( "LAr retrieved"  );
-    }
-
-    if(m_hec){
-      DataMap data = getLArDigitData(cellContainer,"HEC",CaloCell_ID::LARHEC);
-      ATH_CHECK( FormatTool->AddToEvent("HEC", m_sgKey, &data) );
-      ATH_MSG_DEBUG( "HEC retrieved"  );
-    }
-    
     //Tile cells retrieved okay
     return StatusCode::SUCCESS;
   }
@@ -159,18 +155,19 @@ namespace JiveXML {
 
     std::string LArSampleIndexStr="adcCounts multiple=\"0\"";
              
-    const LArDigitContainer* LArDigitCnt;
-    StatusCode scLArDigit;
-    scLArDigit = evtStore()->retrieve(LArDigitCnt, m_sgKeyLArDigit[0]);
-    if (scLArDigit.isFailure()) {
-      scLArDigit = evtStore()->retrieve(LArDigitCnt, m_sgKeyLArDigit[1]);
+    SG::ReadHandle<LArDigitContainer> LArDigitCnt_raw_handle(m_sgKeyLArDigit_raw);
+    SG::ReadHandle<LArDigitContainer> LArDigitCnt_esd_handle(m_sgKeyLArDigit_esd);
+    const LArDigitContainer* LArDigitCnt = nullptr; 
+    if (LArDigitCnt_raw_handle.isValid()) {
+      LArDigitCnt = &(*LArDigitCnt_raw_handle);
+    }
+    else if (LArDigitCnt_esd_handle.isValid()) {
+      LArDigitCnt = &(*LArDigitCnt_esd_handle);
       m_inputdpd = true;
     }
-
-    if (scLArDigit.isFailure()){
+    else {
       ATH_MSG_WARNING( "Could not retrieve LArDigits"  );
     }
-
 
     const ILArPedestal* larPedestal = nullptr;
     if ( detStore()->retrieve(larPedestal).isFailure()){
@@ -196,7 +193,7 @@ namespace JiveXML {
     }
       
     
-    if (!scLArDigit.isFailure() && m_doDigit==true) {
+    if (LArDigitCnt && m_doDigit==true) {
 
       int cellIndex[200000] = {0};
       int nLArSamples = 0;
@@ -440,7 +437,7 @@ namespace JiveXML {
 
         }//for(;it1!=it2;it1++)
       }// if (m_inputdpd)
-    }// if (!scLArDigit)
+    }
 
 //----------------above lines are trying to get the LAr,HEC and FCAL tags --------------    
 

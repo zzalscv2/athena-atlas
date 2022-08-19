@@ -1,12 +1,12 @@
-#include "CaloJiveXML/CaloLArRetriever.h"
-#include "CaloJiveXML/CaloHECRetriever.h"
-#include "CaloJiveXML/CaloFCalRetriever.h"
-#include "CaloJiveXML/CaloMBTSRetriever.h"
-#include "CaloJiveXML/CaloTileRetriever.h"
-#include "CaloJiveXML/CaloClusterRetriever.h"
-#include "CaloJiveXML/LArDigitRetriever.h"
-#include "CaloJiveXML/BadTileRetriever.h"
-#include "CaloJiveXML/BadLArRetriever.h"
+#include "../CaloLArRetriever.h"
+#include "../CaloHECRetriever.h"
+#include "../CaloFCalRetriever.h"
+#include "../CaloMBTSRetriever.h"
+#include "../CaloTileRetriever.h"
+#include "../CaloClusterRetriever.h"
+#include "../LArDigitRetriever.h"
+#include "../BadTileRetriever.h"
+#include "../BadLArRetriever.h"
 
 using namespace JiveXML;
 
