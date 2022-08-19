@@ -111,7 +111,7 @@ def AddTauWPDecorationCfg(ConfigFlags, **kwargs):
     acc = ComponentAccumulator()
 
     TauWPDecoratorWrapper = CompFactory.DerivationFramework.TauWPDecoratorWrapper
-    DerivationKernel = CompFactory.DerivationFramework.DerivationKernel
+    TauWPDecoratorKernel = CompFactory.DerivationFramework.CommonAugmentation
 
     if (evetoFixTag=="v1"):
         evetoTauWPDecorator = CompFactory.TauWPDecorator(name = f"{prefix}TauWPDecoratorEleRNN",
@@ -130,8 +130,8 @@ def AddTauWPDecorationCfg(ConfigFlags, **kwargs):
                                                            TauContainerName   = "TauJets",
                                                            TauWPDecorator     = evetoTauWPDecorator)
         acc.addPublicTool(evetoTauWPDecoratorWrapper)
-        acc.addEventAlgo(DerivationKernel(name              = f"{prefix}TauWPDecorator",
-                                          AugmentationTools = [evetoTauWPDecoratorWrapper]))
+        acc.addEventAlgo(TauWPDecoratorKernel(name              = f"{prefix}TauWPDecorator",
+                                              AugmentationTools = [evetoTauWPDecoratorWrapper]))
 
 
     return(acc)      
