@@ -11,6 +11,7 @@
 
 // Includes for the dictionary generation:
 #include "BoostedJetTaggers/SmoothedWZTagger.h"
+#include "BoostedJetTaggers/SmoothedTopTagger.h"
 #include "BoostedJetTaggers/JSSWTopTaggerDNN.h"
 #include "BoostedJetTaggers/JSSWTopTaggerANN.h"
 #include "BoostedJetTaggers/JetQGTagger.h"
