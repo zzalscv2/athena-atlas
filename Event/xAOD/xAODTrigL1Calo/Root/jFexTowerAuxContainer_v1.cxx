@@ -16,8 +16,8 @@ namespace xAOD {
     AUX_VARIABLE( module );
     AUX_VARIABLE( fpga );
     AUX_VARIABLE( channel );
-    AUX_VARIABLE( dataID );
-    AUX_VARIABLE( et );
+    AUX_VARIABLE( jFEXdataID );
+    AUX_VARIABLE( towerEt );
     AUX_VARIABLE( isSaturated );
     }
 

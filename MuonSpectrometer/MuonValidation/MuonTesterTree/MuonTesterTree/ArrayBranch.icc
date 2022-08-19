@@ -74,6 +74,8 @@ template <class T> bool ArrayBranch<T>::init() {
     m_init = true;
     return true;
 }
+template <class T> const TTree* ArrayBranch<T>::tree() const {return m_tree;}
+template <class T> TTree* ArrayBranch<T>::tree(){ return m_tree;}
 template <class T> bool ArrayBranch<T>::initialized() const { return m_init; }
 template <class T> bool ArrayBranch<T>::fill(const EventContext&) {
     if (!initialized()) {

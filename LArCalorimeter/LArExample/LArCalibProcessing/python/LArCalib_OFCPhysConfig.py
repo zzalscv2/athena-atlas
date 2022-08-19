@@ -137,19 +137,14 @@ def LArOFCPhysCfg(flags):
         pass # end if ROOT ntuple writing
 
 
-    #MC Event selector since we have no input data file 
-    mcCnvSvc = CompFactory.McCnvSvc()
-    result.addService(mcCnvSvc)
-    result.addService(CompFactory.EvtPersistencySvc("EventPersistencySvc",CnvServices=[mcCnvSvc.getFullJobOptName(),]))
-    eventSelector=CompFactory.McEventSelector("EventSelector",
-                                              RunNumber = flags.LArCalib.Input.RunNumbers[0],
-                                              EventsPerRun      = 1,
-                                              FirstEvent	       = 0,
-                                              InitialTimeStamp  = 0,
-                                              TimeStampInterval = 1
-                                          )
-
-    result.addService(eventSelector)
+    #MC Event selector since we have no input data file
+    from McEventSelector.McEventSelectorConfig import McEventSelectorCfg
+    result.merge(McEventSelectorCfg(flags,
+                                    RunNumber         = flags.LArCalib.Input.RunNumbers[0],
+                                    EventsPerRun      = 1,
+                                    FirstEvent	      = 0,
+                                    InitialTimeStamp  = 0,
+                                    TimeStampInterval = 1))
     return result
 
 

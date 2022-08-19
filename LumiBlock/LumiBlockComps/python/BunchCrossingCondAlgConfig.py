@@ -74,28 +74,15 @@ if __name__=="__main__":
 
     result=MainServicesCfg(ConfigFlags)
 
-    McEventSelector=CompFactory.McEventSelector
-    McCnvSvc=CompFactory.McCnvSvc
-    EvtPersistencySvc=CompFactory.EvtPersistencySvc
-
-    #event & time-stamp from the q431 test input
-    mcevtsel=McEventSelector(RunNumber=330470,
-                             EventsPerRun=1,
-                             FirstEvent=1183722158,
-                             FirstLB=310,
-                             EventsPerLB=1,
-                             InitialTimeStamp=1500867637,
-                             TimeStampInterval=1
-                         )
-
-    result.addService(mcevtsel)
-    result.setAppProperty("EvtSel",mcevtsel.getFullJobOptName())
-
-    mccnvsvc=McCnvSvc()
-    result.addService(mccnvsvc)
-
-
-    result.addService(EvtPersistencySvc("EventPersistencySvc",CnvServices=[mccnvsvc.getFullJobOptName(),]))
+    from McEventSelector.McEventSelectorConfig import McEventSelectorCfg
+    result.merge(McEventSelectorCfg(ConfigFlags,
+                                    RunNumber=330470,
+                                    EventsPerRun=1,
+                                    FirstEvent=1183722158,
+                                    FirstLB=310,
+                                    EventsPerLB=1,
+                                    InitialTimeStamp=1500867637,
+                                    TimeStampInterval=1))
 
     result.merge(BunchCrossingCondAlgCfg(ConfigFlags))
 

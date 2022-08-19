@@ -65,7 +65,7 @@ if doG4SimConfig:
     simFlags.EquationOfMotion.set_Value_and_Lock("G4mplEqMagElectricField") #Monopole Equation of Motion
     simFlags.G4Stepper.set_Value_and_Lock('ClassicalRK4')
     simFlags.TightMuonStepping.set_Value_and_Lock(False)
-    simFlags.PhysicsOptions.get_Value().insert(0,"MonopolePhysicsTool")
+    simFlags.PhysicsOptions += ["MonopolePhysicsTool"]
     # add monopole-specific configuration for looper killer
     simFlags.OptionalUserActionList.addAction('G4UA::MonopoleLooperKillerTool')
     # add default HIP killer

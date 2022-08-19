@@ -41,7 +41,8 @@ class TgcDigitMaker : public AthMessaging {
  public:
   TgcDigitMaker(const TgcHitIdHelper* hitIdHelper,
 		const MuonGM::MuonDetectorManager * mdManager,
-		unsigned int                        runperiod);
+		unsigned int                        runperiod,
+                const bool doFourBunch);
 
   virtual ~TgcDigitMaker();
 
@@ -183,6 +184,9 @@ class TgcDigitMaker : public AthMessaging {
   */
   double m_gateTimeWindow[N_STATION][N_SENSOR]{};
   double m_bunchCrossingTime;
+
+  /** Activate four bunch digitization */
+  bool m_doFourBunchDigitization{false};
 };
 
 #endif

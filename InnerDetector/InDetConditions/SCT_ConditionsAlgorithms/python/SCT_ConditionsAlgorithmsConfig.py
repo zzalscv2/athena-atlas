@@ -39,20 +39,20 @@ def SCT_ConfigurationCondAlgCfg(flags, name="SCT_ConfigurationCondAlg", **kwargs
 
     acc.merge(addFoldersSplitOnline(flags,
                                     detDb="SCT",
-                                    online_folders=channelFolder,
-                                    offline_folders=channelFolder,
+                                    onlineFolders=channelFolder,
+                                    offlineFolders=channelFolder,
                                     className="CondAttrListVec",
                                     splitMC=True))
     acc.merge(addFoldersSplitOnline(flags,
                                     detDb="SCT",
-                                    online_folders=f"{config_folder_prefix}Module",
-                                    offline_folders=f"{config_folder_prefix}Module",
+                                    onlineFolders=f"{config_folder_prefix}Module",
+                                    offlineFolders=f"{config_folder_prefix}Module",
                                     className="CondAttrListVec",
                                     splitMC=True))
     acc.merge(addFoldersSplitOnline(flags,
                                     detDb="SCT",
-                                    online_folders=f"{config_folder_prefix}MUR",
-                                    offline_folders=f"{config_folder_prefix}MUR",
+                                    onlineFolders=f"{config_folder_prefix}MUR",
+                                    offlineFolders=f"{config_folder_prefix}MUR",
                                     className="CondAttrListVec",
                                     splitMC=True))
 

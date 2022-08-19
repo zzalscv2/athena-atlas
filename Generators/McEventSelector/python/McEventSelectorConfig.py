@@ -1,32 +1,26 @@
-# Copyright (C) 2002-2020 CERN for the benefit of the ATLAS collaboration
-
-# https://twiki.cern.ch/twiki/bin/viewauth/AtlasComputing/AthenaJobConfigRun3
-
+# Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
 from AthenaConfiguration.ComponentAccumulator import ComponentAccumulator
 from AthenaConfiguration.ComponentFactory import CompFactory
 
-def McEventSelectorCfg(configFlags, **kw):
-    cfg=ComponentAccumulator()
+def McEventSelectorCfg(flags, **kwargs):
+    cfg = ComponentAccumulator()
 
-    McCnvSvc=CompFactory.McCnvSvc
-    mcCnvSvc = McCnvSvc()
-    cfg.addService(mcCnvSvc)
-    EvtPersistencySvc=CompFactory.EvtPersistencySvc
-    cfg.addService(EvtPersistencySvc("EventPersistencySvc",CnvServices=[mcCnvSvc.getFullJobOptName(),]))
+    service = CompFactory.McCnvSvc()
+    cfg.addService(service)
+    cfg.addService(CompFactory.EvtPersistencySvc("EventPersistencySvc",
+                                                 CnvServices=[service.getFullJobOptName()]))
 
-    McEventSelector=CompFactory.McEventSelector
-    evSel=McEventSelector("EventSelector")
-    rn = configFlags.Input.RunNumber
-    if isinstance(rn, type([])):
-        rn = rn[0]
-    evSel.RunNumber = rn
-    tstamp = configFlags.Input.TimeStamp
-    if isinstance(tstamp, type([])):
-        tstamp = tstamp[0]
-    evSel.InitialTimeStamp = tstamp
-    for k, v in kw.items():
-        setattr (evSel, k, v)
+    runNumber = flags.Input.RunNumber
+    if isinstance(runNumber, type([])) and runNumber:
+        runNumber = runNumber[0]
+    kwargs.setdefault("RunNumber", runNumber)
+    timeStamp = flags.Input.TimeStamp
+    if isinstance(timeStamp, type([])) and timeStamp:
+        timeStamp = timeStamp[0]
+    kwargs.setdefault("InitialTimeStamp", timeStamp)
+
+    evSel = CompFactory.McEventSelector("EventSelector", **kwargs)
     cfg.addService(evSel)
-    cfg.setAppProperty("EvtSel",evSel.getFullJobOptName())
+    cfg.setAppProperty("EvtSel", evSel.getFullJobOptName())
 
     return cfg

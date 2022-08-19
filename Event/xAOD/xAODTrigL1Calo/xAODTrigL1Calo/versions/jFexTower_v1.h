@@ -49,14 +49,14 @@ namespace xAOD {
       void setChannel(uint8_t); /// setter for the above
       
       /// get Energy Value
-      uint16_t et() const; /// getter for the energy value
+      uint16_t towerEt() const; /// getter for the energy value
       /// set Energy Value
-      void setEt(uint16_t); /// setter for the above
+      void setTowerEt(uint16_t); /// setter for the above
 
       /// get the location where Et is placed in the data stream
-      uint8_t dataID() const; /// getter for the location in data stream where Et is placed [0-15]
+      uint8_t jFEXdataID() const; /// getter for the location in data stream where Et is placed [0-15]
       /// set the location where Et is placed in the data stream
-      void setDataID(uint8_t); /// setter for the above
+      void setJFEXdataID(uint8_t); /// setter for the above
 
       /// Is jTower saturated?
       char isSaturated() const; /// getter for the saturation flag of jTower
@@ -65,11 +65,11 @@ namespace xAOD {
 
       void initialize(const float Eta,const float Phi);
       void initialize(const float Eta,const float Phi,
-                                   const uint16_t Et,
+                                   const uint16_t TowerEt,
                                    const uint8_t Module,
                                    const uint8_t Fpga,
 				   const uint8_t Channel,
-				   const uint8_t DataID,
+				   const uint8_t JFEXdataID,
 				   const char IsSaturated);
 
     

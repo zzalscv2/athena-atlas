@@ -143,8 +143,8 @@ def SCT_ConfigurationConditionsToolCfg(flags, name="InDetSCT_ConfigurationCondit
     if "ChannelFolderDB" not in cond_kwargs:
         acc.merge(addFoldersSplitOnline(flags,
                                         detDb=cond_kwargs["dbInstance"],
-                                        online_folders=cond_kwargs["ChannelFolder"],
-                                        offline_folders=cond_kwargs["ChannelFolder"],
+                                        onlineFolders=cond_kwargs["ChannelFolder"],
+                                        offlineFolders=cond_kwargs["ChannelFolder"],
                                         className="CondAttrListVec",
                                         splitMC=True))
     else:
@@ -152,8 +152,8 @@ def SCT_ConfigurationConditionsToolCfg(flags, name="InDetSCT_ConfigurationCondit
     if "ModuleFolderDB" not in cond_kwargs:
         acc.merge(addFoldersSplitOnline(flags,
                                         detDb=cond_kwargs["dbInstance"],
-                                        online_folders=cond_kwargs["ModuleFolder"],
-                                        offline_folders=cond_kwargs["ModuleFolder"],
+                                        onlineFolders=cond_kwargs["ModuleFolder"],
+                                        offlineFolders=cond_kwargs["ModuleFolder"],
                                         className="CondAttrListVec",
                                         splitMC=True))
     else:
@@ -161,8 +161,8 @@ def SCT_ConfigurationConditionsToolCfg(flags, name="InDetSCT_ConfigurationCondit
     if "MurFolderDB" not in cond_kwargs:
         acc.merge(addFoldersSplitOnline(flags,
                                         detDb=cond_kwargs["dbInstance"],
-                                        online_folders=cond_kwargs["MurFolder"],
-                                        offline_folders=cond_kwargs["MurFolder"],
+                                        onlineFolders=cond_kwargs["MurFolder"],
+                                        offlineFolders=cond_kwargs["MurFolder"],
                                         className="CondAttrListVec",
                                         splitMC=True))
     else:
@@ -239,7 +239,7 @@ def SCT_LinkMaskingCfg(flags, name="SCT_LinkMasking", **kwargs):
     folder = "/purple/pants"
     # mycool.db is hard coded in Database/IOVDbSvc/python/IOVDbSvcConfig.py
     dbConnection = "<dbConnection>sqlite://;schema=mycool.db;dbname=CONDBR2</dbConnection>"
-    acc.merge(addFolders(configFlags=flags, folderstrings=folder, className="CondAttrListCollection", db=dbConnection))
+    acc.merge(addFolders(flags, folderStrings=folder, className="CondAttrListCollection", db=dbConnection))
 
     # Condition algorithm
     kwargs.setdefault("ReadKey", folder)
@@ -279,8 +279,8 @@ def SCT_ModuleVetoCfg(flags, name="InDetSCT_ModuleVeto", **kwargs):
 
     if kwargs["useDB"]:
         # Condition folder
-        acc.merge(addFolders(configFlags=flags,
-                             folderstrings="/SCT/Manual/BadModules",
+        acc.merge(addFolders(flags,
+                             folderStrings="/SCT/Manual/BadModules",
                              detDb="SCT_OFL",
                              className="AthenaAttributeList",
                              tag=kwargs["folderTag"]))
@@ -360,14 +360,14 @@ def SCT_ReadCalibDataToolCfg(flags, name="InDetSCT_ReadCalibDataTool", cond_kwar
 
     acc.merge(addFoldersSplitOnline(flags,
                                     detDb="SCT",
-                                    online_folders=cond_kwargs["NoiseFolder"],
-                                    offline_folders=cond_kwargs["NoiseFolder"],
+                                    onlineFolders=cond_kwargs["NoiseFolder"],
+                                    offlineFolders=cond_kwargs["NoiseFolder"],
                                     className="CondAttrListCollection",
                                     splitMC=True))
     acc.merge(addFoldersSplitOnline(flags,
                                     detDb="SCT",
-                                    online_folders=cond_kwargs["GainFolder"],
-                                    offline_folders=cond_kwargs["GainFolder"],
+                                    onlineFolders=cond_kwargs["GainFolder"],
+                                    offlineFolders=cond_kwargs["GainFolder"],
                                     className="CondAttrListCollection",
                                     splitMC=True))
 

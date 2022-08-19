@@ -88,5 +88,5 @@ if doG4SimConfig:
         localPhysicsOptions += ["STauRPlusToTauGravitino","STauLPlusToTauGravitino"]
         localPhysicsOptions += ["STauRMinusToTauGravitino","STauLMinusToTauGravitino"]
 
-    simFlags.PhysicsOptions = localPhysicsOptions + simFlags.PhysicsOptions.get_Value()
+    simFlags.PhysicsOptions += localPhysicsOptions
 del doG4SimConfig, simdict

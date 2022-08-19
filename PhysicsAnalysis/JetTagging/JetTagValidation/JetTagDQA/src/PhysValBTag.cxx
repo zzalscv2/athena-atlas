@@ -58,6 +58,7 @@ namespace JetTagDQA {
 
     declareProperty( "JetPtCutTtbar", m_jetPtCutTtbar = 20000);
     declareProperty( "JetPtCutZprime", m_jetPtCutZprime = 500000);
+    declareProperty( "JetEtaCut", m_jetEtaCut = 2.5);
     declareProperty( "JVTCutAntiKt4EMTopoJets", m_JVTCutAntiKt4EMTopoJets = 0.59);
     declareProperty( "JVTCutLargerEtaAntiKt4EMTopoJets", m_JVTCutLargerEtaAntiKt4EMTopoJets = 0.11);
     declareProperty( "JVTCutAntiKt4EMPFlowJets", m_JVTCutAntiKt4EMPFlowJets = 0.2);
@@ -235,10 +236,14 @@ namespace JetTagDQA {
 
         // apply the jet pT eta and jvt cuts
         if(jet->pt() <= m_jetPtCut) continue;
-        if(std::abs(jet->eta()) >= 2.5) continue;
+        if(std::abs(jet->eta()) >= m_jetEtaCut) continue;
         //Arnaud: JVT cut to remove horns in jet eta 
-        if ((plot->m_JVT_defined) &&  (jet->getAttribute<float>("Jvt")) < (plot->m_JVT_cut) && jet->pt() > 20e3 && jet->pt() < 60e3 && (std::abs(jet->eta()) < 2.4) ) continue;
-        if ((plot->m_JVTLargerEta_defined) &&  (jet->getAttribute<float>("Jvt")) < (plot->m_JVTLargerEta_cut) && jet->pt() > 20e3 && jet->pt() < 60e3 && (std::abs(jet->eta()) > 2.4) && (std::abs(jet->eta()) < 2.5) ) continue;
+        if (plot->m_JVT_defined && jet->getAttribute<float>("Jvt") < plot->m_JVT_cut
+	    && jet->pt() > 20e3 && jet->pt() < 60e3
+	    && std::abs(jet->eta()) < 2.4 ) continue;
+        if (plot->m_JVTLargerEta_defined && jet->getAttribute<float>("Jvt") < plot->m_JVTLargerEta_cut
+	    && jet->pt() > 20e3 && jet->pt() < 60e3
+	    && std::abs(jet->eta()) > 2.4 && std::abs(jet->eta()) < m_jetEtaCut ) continue;
 
         // get the btagging
         const xAOD::BTagging* btag = xAOD::BTaggingUtilities::getBTagging( *jet );

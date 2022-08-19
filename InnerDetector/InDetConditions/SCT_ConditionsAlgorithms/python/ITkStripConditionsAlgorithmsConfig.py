@@ -37,20 +37,20 @@ def ITkStripConfigurationCondAlgCfg(flags, name="ITkStripConfigurationCondAlg", 
 
     acc.merge(addFoldersSplitOnline(flags,
                                     detDb="ITkStrip",
-                                    online_folders=channelFolder,
-                                    offline_folders=channelFolder,
+                                    onlineFolders=channelFolder,
+                                    offlineFolders=channelFolder,
                                     className="CondAttrListVec",
                                     splitMC=True))
     acc.merge(addFoldersSplitOnline(flags,
                                     detDb="ITkStrip",
-                                    online_folders=f"{folder_prefix}Module",
-                                    offline_folders=f"{folder_prefix}Module",
+                                    onlineFolders=f"{folder_prefix}Module",
+                                    offlineFolders=f"{folder_prefix}Module",
                                     className="CondAttrListVec",
                                     splitMC=True))
     acc.merge(addFoldersSplitOnline(flags,
                                     detDb="ITkStrip",
-                                    online_folders=f"{folder_prefix}MUR",
-                                    offline_folders=f"{folder_prefix}MUR",
+                                    onlineFolders=f"{folder_prefix}MUR",
+                                    offlineFolders=f"{folder_prefix}MUR",
                                     className="CondAttrListVec",
                                     splitMC=True))
 

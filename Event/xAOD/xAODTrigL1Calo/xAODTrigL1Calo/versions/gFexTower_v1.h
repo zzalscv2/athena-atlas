@@ -39,9 +39,9 @@ namespace xAOD {
       void setFpga(uint8_t); /// setter for the above
       
       /// get Energy Value
-      uint16_t et() const; /// getter for the energy value
+      uint16_t towerEt() const; /// getter for the energy value
       /// set Energy Value
-      void setEt(uint16_t); /// setter for the above
+      void setTowerEt(uint16_t); /// setter for the above
 
       /// Is gTower saturated?
       char isSaturated() const; /// getter for the saturation flag of gTower
@@ -50,7 +50,7 @@ namespace xAOD {
 
       void initialize(const uint8_t Eta,const uint8_t Phi);
       void initialize(const uint8_t Eta,const uint8_t Phi,
-                                   const uint16_t Et,
+                                   const uint16_t TowerEt,
                                    const uint8_t Fpga,
 				   const char IsSaturated);
 

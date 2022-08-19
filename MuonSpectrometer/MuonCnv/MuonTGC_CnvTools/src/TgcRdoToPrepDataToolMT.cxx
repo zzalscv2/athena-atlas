@@ -700,6 +700,9 @@ void Muon::TgcRdoToPrepDataToolMT::selectDecoder(State& state,
 StatusCode Muon::TgcRdoToPrepDataToolMT::decodeHits(State& state,
                                                       const TgcRawData& rd, std::vector<std::unordered_map<IdentifierHash, std::unique_ptr<TgcPrepDataCollection> > >& collectionMap) const
 {
+  // The channel hit by hardware-ROD supports only three-bunch readout. Data of TgcDigit::BC_NEXTNEXT should be skipped in this function.
+  if (rd.bcTag() == TgcDigit::BC_NEXTNEXT) return StatusCode::SUCCESS;
+
   m_nHitRDOs++; // Count the number of input Hit RDOs.
   bool isConverted = false;
   bool isDuplicated = false; 

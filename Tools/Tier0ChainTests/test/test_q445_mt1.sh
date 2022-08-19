@@ -5,11 +5,11 @@
 # art-include: master/Athena
 # art-include: 22.0/Athena
 # art-include: 22.0-mc20/Athena
-# art-athena-mt: 8
+# art-athena-mt: 1
 
 Reco_tf.py \
 --AMI=q445 \
---athenaopts "RDOtoRDOTrigger:--threads=1" "RAWtoESD:--threads=1" "ESDtoAOD:--threads=1" \
+--athenaopts "--threads=1" \
 --maxEvents=500 \
 --outputRDOFile=myRDO.pool.root --outputAODFile=myAOD.pool.root --outputESDFile=myESD.pool.root --outputHISTFile=myHIST.root \
 --imf False
