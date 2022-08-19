@@ -20,10 +20,7 @@ def AFP_SiClusterTools_Cfg(flags, kwargs={}):
         
         rowColToLocal = CompFactory.AFPSiRowColToLocalCSTool("AFPSiRowColToLocalCSTool")
         
-        acc = ComponentAccumulator()
-        acc.addCondAlgo(CompFactory.CondInputLoader(Load=[('CondAttrListCollection', 'ConditionStore+/FWD/AFP/Align/Global'),
-                                                          ('CondAttrListCollection', 'ConditionStore+/FWD/AFP/Align/Local')]))
-                                                                  
+        acc = ComponentAccumulator()                                              
         if flags.Input.isMC:
                 # if other tags are desired, they can be set also in postExec, e.g.
                 # --postExec 'from IOVDbSvc.CondDB import conddb; conddb.addOverride("/FWD/AFP/Align/Local","AFPMCAlignLoc-329484-02"); conddb.addOverride("/FWD/AFP/Align/Global","AFPMCAlignGlob-331020-01");'
