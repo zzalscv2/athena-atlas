@@ -2,10 +2,7 @@
   Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
 */
 
-#include "CaloJiveXML/CaloClusterRetriever.h"
-
-#include "CaloEvent/CaloClusterContainer.h"
-#include "CaloEvent/CaloCell.h"
+#include "CaloClusterRetriever.h"
 
 #include "AthenaKernel/Units.h"
 
@@ -21,7 +18,6 @@ namespace JiveXML {
    **/
   CaloClusterRetriever::CaloClusterRetriever(const std::string& type,const std::string& name,const IInterface* parent):
     AthAlgTool(type,name,parent),
-    m_typeName("Cluster"),
     m_sgKeyFavourite ("LArClusterEM")
   {
     //Only declare the interface
@@ -33,7 +29,17 @@ namespace JiveXML {
         "Other collections to be retrieved. If list left empty, all available retrieved");
     declareProperty("DoWriteHLT", m_doWriteHLT = false,"Ignore HLTAutokey object by default."); // ignore HLTAutoKey objects
   }
-   
+
+  StatusCode CaloClusterRetriever::initialize()
+  {
+
+    ATH_MSG_DEBUG("Initialising Tool");
+
+    ATH_CHECK(m_sgKeyFavourite.initialize());
+
+    return StatusCode::SUCCESS;
+  }
+
   /**
    * For each cluster collections retrieve basic parameters.
    * 'Favourite' cluster collection first, then 'Other' collections.
@@ -43,62 +49,64 @@ namespace JiveXML {
     
     ATH_MSG_DEBUG( "in retrieveAll()"  );
     
-    SG::ConstIterator<CaloClusterContainer> iterator, end;
-    const CaloClusterContainer* ccc;
-
     //obtain the default collection first
-    ATH_MSG_DEBUG( "Trying to retrieve " << dataTypeName() << " (" << m_sgKeyFavourite << ")"  );
+    ATH_MSG_DEBUG( "Trying to retrieve " << dataTypeName() << " (" << m_sgKeyFavourite.key() << ")"  );
 
-    if ( evtStore()->retrieve(ccc, m_sgKeyFavourite).isFailure() ) {
-      ATH_MSG_WARNING( "Favourite Collection " << m_sgKeyFavourite << " not found in SG "  );
-    }else{
-      DataMap data = getData(ccc);
-      if ( FormatTool->AddToEvent(dataTypeName(), m_sgKeyFavourite+"_ESD", &data).isFailure()){
-	ATH_MSG_WARNING( "Favourite Collection " << m_sgKeyFavourite << " not found in SG "  );
-      }else{
-        ATH_MSG_DEBUG( dataTypeName() << " (" << m_sgKeyFavourite << ") CaloCluster retrieved"  );
+    SG::ReadHandle<xAOD::CaloClusterContainer> ccc_primary(m_sgKeyFavourite);
+    if (ccc_primary.isValid()) {
+      DataMap data = getData(&(*ccc_primary));
+      if (FormatTool->AddToEvent(dataTypeName(), m_sgKeyFavourite.key() + "_ESD", &data).isFailure()) {
+        ATH_MSG_WARNING("Failed to retrieve favourite Collection " << m_sgKeyFavourite.key() );
       }
+      else {
+        ATH_MSG_DEBUG(dataTypeName() << " (" << m_sgKeyFavourite.key() << ") CaloCluster retrieved");
+      }
+    }
+    else{
+      ATH_MSG_WARNING("Favourite Collection " << m_sgKeyFavourite.key() << " not found in SG ");
     }
 
     if ( m_otherKeys.empty() ) {
       //obtain all other collections from StoreGate
-      if (( evtStore()->retrieve(iterator, end)).isFailure()){
-        ATH_MSG_WARNING( "Unable to retrieve iterator for CaloCluster collection"  );
-//        return false;
-      }
-      
-      for (; iterator!=end; ++iterator) {
-
-        std::string::size_type position = iterator.key().find("HLTAutoKey",0);
-        if ( m_doWriteHLT ){ position = 99; } // override SG key find
-
-        if ( position != 0 ){  // SG key doesn't contain HLTAutoKey         
-	  if (iterator.key()!=m_sgKeyFavourite) {
-             ATH_MSG_DEBUG( "Trying to retrieve all " << dataTypeName() << " (" << iterator.key() << ")"  );
-             DataMap data = getData(&*iterator);
-             if ( FormatTool->AddToEvent(dataTypeName(), iterator.key()+"_ESD", &data).isFailure()){
-	       ATH_MSG_WARNING( "Collection " << iterator.key() << " not found in SG "  );
-	    }else{
-               ATH_MSG_DEBUG( dataTypeName() << " (" << iterator.key() << ") CaloCluster retrieved"  );
-	    }
+      std::vector<std::string> allkeys;
+      evtStore()->keys(static_cast<CLID>( ClassID_traits<xAOD::CaloClusterContainer>::ID() ), allkeys);
+      for (auto key : allkeys) {
+        if (key!=m_sgKeyFavourite.key()) {
+          ATH_MSG_DEBUG( "Trying to retrieve all " << dataTypeName() << " (" << key << ")"  );
+          SG::ReadHandle<xAOD::CaloClusterContainer> containerRH(key);
+          if (!containerRH.isValid()) {
+            ATH_MSG_DEBUG( "Unable to retrieve CaloCluster collection " << key );
+          } else {
+            std::string::size_type position = key.find("HLTAutoKey",0);
+            if ( m_doWriteHLT ){ position = 99; } // override SG key find
+            if ( position != 0 ){  // SG key doesn't contain HLTAutoKey
+              DataMap data = getData(&*containerRH);
+              if ( FormatTool->AddToEvent(dataTypeName(), containerRH.key()+"_ESD", &data).isFailure()){
+                 ATH_MSG_WARNING( "Collection " << containerRH.key() << " not found in SG "  );
+              }else{
+                 ATH_MSG_DEBUG( dataTypeName() << " (" << containerRH.key() << ") CaloCluster retrieved"  );
+              }
+            }
           }
-	}
+        }
       }
     }else {
       //obtain all collections with keys provided by user: m_otherKeys
-      std::vector<std::string>::const_iterator keyIter;
-      for ( keyIter=m_otherKeys.begin(); keyIter!=m_otherKeys.end(); ++keyIter ){
-       if ( evtStore()->contains<CaloClusterContainer>(*keyIter) ){ // to avoid some SG dumps
-	if ( !evtStore()->retrieve( ccc, (*keyIter) ).isFailure()) {
-          ATH_MSG_DEBUG( "Trying to retrieve selected " << dataTypeName() << " (" << (*keyIter) << ")"  );
-          DataMap data = getData(ccc);
-          if ( FormatTool->AddToEvent(dataTypeName(), (*keyIter)+"_ESD", &data).isFailure()){
-	    ATH_MSG_WARNING( "Collection " << (*keyIter) << " not found in SG "  );
-	  }else{
-            ATH_MSG_DEBUG( dataTypeName() << " (" << (*keyIter) << ") retrieved"  );
-	  }
-	}
-       }
+      for (auto key : m_otherKeys) {
+        if (key!=m_sgKeyFavourite.key()) {
+          ATH_MSG_DEBUG( "Trying to retrieve selected " << dataTypeName() << " (" << key << ")"  );
+          SG::ReadHandle<xAOD::CaloClusterContainer> containerRH(key);
+          if (!containerRH.isValid()) {
+            ATH_MSG_DEBUG( "Unable to retrieve CaloCluster collection " << key );
+          } else {
+            DataMap data = getData(&*containerRH);
+            if ( FormatTool->AddToEvent(dataTypeName(), containerRH.key()+"_ESD", &data).isFailure()){
+               ATH_MSG_WARNING( "Collection " << containerRH.key() << " not found in SG "  );
+            }else{
+               ATH_MSG_DEBUG( dataTypeName() << " (" << containerRH.key() << ") retrieved"  );
+            }
+          }
+        }
       }
     }
     //All collections retrieved okay
@@ -112,7 +120,7 @@ namespace JiveXML {
    * back-navigation causes Athena crash).
    * @param FormatTool the tool that will create formated output from the DataMap
    */
-  const DataMap CaloClusterRetriever::getData(const CaloClusterContainer* ccc) {
+  const DataMap CaloClusterRetriever::getData(const xAOD::CaloClusterContainer* ccc) {
     
     ATH_MSG_DEBUG( "getData()"  );
 
@@ -123,39 +131,32 @@ namespace JiveXML {
     DataVect et; et.reserve(ccc->size());
     DataVect idVec; idVec.reserve(ccc->size());
     DataVect numCellsVec; numCellsVec.reserve(ccc->size());
+    DataVect cells; cells.reserve( ccc->size() );
 
-    std::string tagCells;
-    CaloClusterContainer::const_iterator itr = ccc->begin();  
     int noClu = ccc->size();
     int noCells = 0;
-    for (; itr != ccc->end(); ++itr){ 
-      for(CaloCluster::cell_iterator it = (*itr)->cell_begin(); 
-              it != (*itr)->cell_end() ; ++it){
-         ++noCells;
-      }
-    }
-    if(noClu){
-	tagCells = "cells multiple=\"" +DataType(noCells/(noClu*1.0)).toString()+"\"";
-    }else{
-	tagCells = "cells multiple=\"1.0\"";
-    }
-    DataVect cells; cells.reserve( ccc->size() );
     
-    itr = ccc->begin(); // reset iterator
     int id = 0;
-    for (; itr != ccc->end(); ++itr) {
-      phi.push_back(DataType((*itr)->phi()));
-      eta.push_back(DataType((*itr)->eta()));
-      et.push_back(DataType((*itr)->et()*(1./GeV)));
+    for (const auto cluster : *ccc) {
+      phi.push_back(DataType(cluster->phi()));
+      eta.push_back(DataType(cluster->eta()));
+      et.push_back(DataType(cluster->et()*(1./GeV)));
       idVec.push_back(DataType( ++id ));
 
-      int numCells = 0;
-      CaloCluster::cell_iterator cell = (*itr)->cell_begin();
-      for(; cell != (*itr)->cell_end() ; ++cell){
-	cells.push_back(DataType((*cell)->ID().get_compact()));
-	++numCells;
-      }
+      int numCells = cluster->size();
       numCellsVec.push_back(DataType( numCells ));
+      noCells += numCells;
+
+      for (const auto cell : *cluster) {
+        cells.push_back(cell->ID().get_compact());
+      }
+    }
+
+    std::string tagCells;
+    if(noClu){
+      tagCells = "cells multiple=\"" +DataType(noCells/(noClu*1.0)).toString()+"\"";
+    }else{
+      tagCells = "cells multiple=\"1.0\"";
     }
 
     // Start with mandatory entries

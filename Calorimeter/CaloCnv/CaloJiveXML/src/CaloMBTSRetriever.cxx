@@ -2,17 +2,14 @@
   Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
 */
 
-#include "CaloJiveXML/CaloMBTSRetriever.h"
+#include "CaloMBTSRetriever.h"
 
 #include "CLHEP/Units/SystemOfUnits.h"
 
 #include "EventContainers/SelectAllObject.h"
 
-#include "CaloEvent/CaloCellContainer.h"
 #include "CaloDetDescr/CaloDetDescrElement.h"
 #include "TileEvent/TileCell.h"
-#include "TileEvent/TileRawChannelContainer.h"
-#include "TileEvent/TileDigitsContainer.h"
 #include "TileEvent/TileCellContainer.h"
 #include "Identifier/HWIdentifier.h"
 #include "CaloIdentifier/TileID.h"
@@ -32,17 +29,24 @@ namespace JiveXML {
    **/
   CaloMBTSRetriever::CaloMBTSRetriever(const std::string& type,const std::string& name,const IInterface* parent):
     AthAlgTool(type,name,parent),
-    m_typeName("MBTS"),
-    m_tileTBID(nullptr),
-    m_sgKeyMBTS ("MBTSContainer")
+    m_tileTBID(nullptr)
   {
     //Only declare the interface
     declareInterface<IDataRetriever>(this);
 
-    declareProperty("StoreGateKeyMBTS" , m_sgKeyMBTS);
     declareProperty("MBTSThreshold", m_mbtsThreshold = 0.05);
     declareProperty("RetrieveMBTS" , m_mbts = true);
     declareProperty("DoMBTSDigits",  m_mbtsdigit=false);
+
+    // TileDigitsContainer names: {"TileDigitsCnt","TileDigitsFlt"};
+    declareProperty("TileDigitsContainer" ,m_sgKeyTileDigits = "",
+        "Input collection to retrieve Tile digits, used when doTileDigit is True");
+
+    // TileRawChannelContainer names: {"TileRawChannelOpt2","TileRawChannelOpt","TileRawChannelFixed",
+    //                                 "TileRawChannelFitCool","TileRawChannelFit",
+    //                                 "TileRawChannelCnt","TileRawChannelFlt"};
+    declareProperty("TileRawChannelContainer" ,m_sgKeyTileRawChannel = "",
+        "Input collection to retrieve Tile raw channels, used when doTileCellDetails is True.");
   }
 
   /**
@@ -53,6 +57,7 @@ namespace JiveXML {
 
     ATH_MSG_DEBUG( "Initialising Tool" );
 
+    ATH_CHECK(m_sgKeyMBTS.initialize());
 
     //=== get TileCondToolTiming
     ATH_CHECK( m_tileToolTiming.retrieve() );
@@ -60,6 +65,9 @@ namespace JiveXML {
     //=== get TileCondToolEmscale
     ATH_CHECK( m_tileToolEmscale.retrieve() );
 
+    ATH_CHECK( m_sgKeyTileDigits.initialize(m_mbtsdigit) );
+
+    ATH_CHECK( m_sgKeyTileRawChannel.initialize() );
 
     return StatusCode::SUCCESS;
   }
@@ -71,18 +79,18 @@ namespace JiveXML {
 
     ATH_MSG_DEBUG( "in retrieve()"  );
 
-    const TileCellContainer* cellContainerMBTS;
-    if ( !evtStore()->retrieve(cellContainerMBTS,m_sgKeyMBTS))
-    {
-      ATH_MSG_WARNING( "Could not retrieve Calorimeter Cells "  );
-      return StatusCode::FAILURE;
+    SG::ReadHandle<TileCellContainer> cellContainerMBTS(m_sgKeyMBTS);
+    if (!cellContainerMBTS.isValid()){
+	    ATH_MSG_WARNING( "Could not retrieve MBTS Cells "  );
+    }
+    else{
+      if (m_mbts) {
+        DataMap data = getMBTSData(&(*cellContainerMBTS));
+        ATH_CHECK( FormatTool->AddToEvent(dataTypeName(), m_sgKeyMBTS.key(), &data) );
+        ATH_MSG_DEBUG( "MBTS retrieved"  );
+      }
     }
 
-    if (m_mbts) {
-      DataMap data = getMBTSData(cellContainerMBTS);
-      ATH_CHECK( FormatTool->AddToEvent(dataTypeName(), m_sgKeyMBTS, &data) );
-      ATH_MSG_DEBUG( "MBTS retrieved"  );
-    }
     //MBTS cells retrieved okay
     return StatusCode::SUCCESS;
   }
@@ -114,10 +122,6 @@ namespace JiveXML {
     DataVect adcCounts; adcCounts.reserve(tileMBTSCellContainer->size() * 10);
 
     std::string adcCountsStr="adcCounts multiple=\"0\"";
-    StatusCode scTileDigit = StatusCode::FAILURE;
-    StatusCode scTileRawChannel = StatusCode::FAILURE;
-    const TileDigitsContainer *tileDigits = nullptr;
-    const TileRawChannelContainer* RawChannelCnt = nullptr;
     const TileHWID* tileHWID = nullptr;
     const TileInfo* tileInfo = nullptr;
     const TileCablingService* cabling=nullptr;
@@ -137,37 +141,24 @@ namespace JiveXML {
       ATH_MSG_ERROR( "in getMBTSData(), Could not retrieve TileInfo" );
     }
 
-    std::string RchName[7] = {"TileRawChannelOpt2","TileRawChannelOpt","TileRawChannelFixed",
-                              "TileRawChannelFitCool","TileRawChannelFit",
-                              "TileRawChannelCnt","TileRawChannelFlt"};
-    int icntr=0;
-    for ( ; icntr<7; ++icntr) {
-      if (evtStore()->contains<TileRawChannelContainer>(RchName[icntr])) break;
+    SG::ReadHandle<TileRawChannelContainer> RawChannelCnt(m_sgKeyTileRawChannel);
+    if (!RawChannelCnt.isValid()){
+        ATH_MSG_WARNING( "Could not retrieve TileRawChannel "  );
     }
-    if (icntr<7) {
-      scTileRawChannel = evtStore()->retrieve(RawChannelCnt,RchName[icntr]);
-      if (scTileRawChannel.isSuccess()) {
+    else{
         RChUnit = RawChannelCnt->get_unit();
         offlineRch = (RChUnit<TileRawChannelUnit::OnlineADCcounts &&
                       RawChannelCnt->get_type() != TileFragHash::OptFilterDsp);
+    }
+
+    SG::ReadHandle<TileDigitsContainer> tileDigits;
+    if (m_mbtsdigit) {
+      tileDigits = SG::makeHandle(m_sgKeyTileDigits);
+      if (!tileDigits.isValid()){
+         ATH_MSG_WARNING( "Could not retrieve TileDigits "  );
       }
     }
 
-    if (scTileRawChannel.isFailure())
-      ATH_MSG_WARNING( "in getMBTSData(), Could not retrieve TileRawchannel"  );
-
-    std::string DigiName[2] = {"TileDigitsCnt","TileDigitsFlt"};
-    int icntd=2;
-    for (icntd=0; icntd<2; ++icntd) {
-      if (evtStore()->contains<TileDigitsContainer>(DigiName[icntd])) break;
-    }
-    if (icntd<2) {
-      scTileDigit = evtStore()->retrieve(tileDigits,DigiName[icntd]);
-    }
-
-    if (scTileDigit.isFailure()) {
-      ATH_MSG_WARNING( "in getMBTSData(), Could not retrieve TileDigits"  );
-    }
     // from: TileCalorimeter/TileRec/src/TileCellToNtuple.cxx
 
     std::string MBTS_ID;
@@ -186,34 +177,26 @@ namespace JiveXML {
 
     //Loop over TileRawChannel to get Pedestal and raw amplitude and time
 
-    if (scTileRawChannel.isSuccess()) { // separate "if" just to make sure that status is always checked
-     if (offlineRch) {
+    if (RawChannelCnt.isValid()) {
+      if (offlineRch) {
 
-      TileRawChannelContainer::const_iterator collItr=RawChannelCnt->begin();
-      TileRawChannelContainer::const_iterator lastColl=RawChannelCnt->end();
+        for (const auto rawChannel : *RawChannelCnt) {
 
-      for (; collItr!=lastColl; ++collItr) {
+          for (const auto cell : *rawChannel) {
 
-        TileRawChannelCollection::const_iterator chItr=(*collItr)->begin();
-        TileRawChannelCollection::const_iterator lastCh=(*collItr)->end();
-
-        if (chItr!=lastCh) {
-
-          for (; chItr!=lastCh; ++chItr) {
-
-            Identifier pmt_id = (*chItr)->pmt_ID();
+            Identifier pmt_id = cell->pmt_ID();
             if (!m_tileTBID->is_tiletb(pmt_id)) continue;
 
-            Identifier id = (*chItr)->cell_ID();
+            Identifier id = cell->cell_ID();
             cellid = id.get_identifier32().get_compact();
-            HWIdentifier hwid=(*chItr)->adc_HWID();
+            HWIdentifier hwid=cell->adc_HWID();
             int adc       = tileHWID->adc(hwid);
             int channel   = tileHWID->channel(hwid);
             int drawer    = tileHWID->drawer(hwid);
             int ros       = tileHWID->ros(hwid);
             int drawerIdx = TileCalibUtils::getDrawerIdx(ros,drawer);
 
-            amplitude = (*chItr)->amplitude();
+            amplitude = cell->amplitude();
             //Change amplitude units to ADC counts
             if (TileRawChannelUnit::ADCcounts < RChUnit && RChUnit < TileRawChannelUnit::OnlineADCcounts) {
               amplitude /= m_tileToolEmscale->channelCalib(drawerIdx, channel, adc, 1.0, TileRawChannelUnit::ADCcounts, RChUnit);
@@ -221,57 +204,45 @@ namespace JiveXML {
               amplitude = m_tileToolEmscale->undoOnlCalib(drawerIdx, channel, adc, amplitude, RChUnit);
             }
 
-            theMbtspedestal.insert(std::make_pair( cellid, (*chItr)->pedestal() ) );
+            theMbtspedestal.insert(std::make_pair( cellid, cell->pedestal() ) );
             theMbtsrawamp.insert(std::make_pair( cellid, amplitude ));
-            theMbtsrawtime.insert(std::make_pair( cellid, (*chItr)->time((*chItr)->uncorrTime()) ));
+            theMbtsrawtime.insert(std::make_pair( cellid, cell->time(cell->uncorrTime()) ));
             break;
 
           }
         }
       }
-     }
     }
 
     //Loop over TileDigits to retrieve MBTS digits
 
-    if (m_mbtsdigit) {
+    if (m_mbtsdigit && tileDigits.isValid()) {
 
-      if (scTileDigit.isSuccess() && tileDigits) {
+      //----- get tile digits--------------------------
 
-        //----- get tile digits--------------------------
-        TileDigitsContainer::const_iterator itColl = tileDigits->begin();
-        TileDigitsContainer::const_iterator itCollEnd = tileDigits->end();
+      // tile digits loop
+      for (const auto digitChannel : *tileDigits) {
 
-        // tile digits loop
-        for (; itColl != itCollEnd; ++itColl) {
-          TileDigitsCollection::const_iterator it = (*itColl)->begin();
-          TileDigitsCollection::const_iterator itEnd = (*itColl)->end();
+        for (const auto cell : *digitChannel) {
 
-          for (; it!=itEnd; ++it) {
+          Identifier pmt_id = cell->pmt_ID();
+          if (!m_tileTBID->is_tiletb(pmt_id)) continue;
 
-            Identifier pmt_id = (*it)->pmt_ID();
-            if (!m_tileTBID->is_tiletb(pmt_id)) continue;
+          Identifier id = cell->cell_ID();
+          cellid = id.get_identifier32().get_compact();
 
-            Identifier id = (*it)->cell_ID();
-            cellid = id.get_identifier32().get_compact();
+          nTileSamples = cell->NtimeSamples();
+          std::vector<float> tileSamples = cell->samples();
+          theMbtsdigit.insert(std::make_pair( cellid, tileSamples));
+          break;
 
-            nTileSamples = (*it)->NtimeSamples();
-            std::vector<float> tileSamples = (*it)->samples();
-            theMbtsdigit.insert(std::make_pair( cellid, tileSamples));
-            break;
-
-          }
-        }//for TileDigitContainer loop
-      } // if scTileDigit.isSuccess
+        }
+      }//for TileDigitContainer loop
     } //if (m_mbtsdigit)
 
     //Loop Over TileCellContainer to retrieve MBTSCell information
 
-    TileCellContainer::const_iterator it = tileMBTSCellContainer->begin();
-    TileCellContainer::const_iterator end = tileMBTSCellContainer->end();
-    for (; it != end; ++it) {
-
-      const TileCell *cell = (const TileCell *)(*it);
+    for (const auto cell : *tileMBTSCellContainer) {
 
       int qual = cell->quality();
       if (cell->badcell()) qual = -qual;
@@ -308,7 +279,7 @@ namespace JiveXML {
       phi.push_back(DataType( phiMBTS ));
       sampling.push_back(DataType( m_tileTBID->channel(id) ));
 
-      if (scTileRawChannel.isSuccess() ) {
+      if (RawChannelCnt.isValid()) {
 
         cellPedestal.push_back(DataType( theMbtspedestal[id.get_identifier32().get_compact()] ));
         cellRawAmplitude.push_back(DataType( theMbtsrawamp[id.get_identifier32().get_compact()] ));
@@ -356,7 +327,7 @@ namespace JiveXML {
       }
 
 
-      if (m_mbtsdigit && scTileDigit.isSuccess()) {
+      if (m_mbtsdigit && tileDigits.isValid()) {
 
         if ( !theMbtsdigit[id.get_identifier32().get_compact()].empty() ) {
           for (int i=0; i<nTileSamples; i++) {

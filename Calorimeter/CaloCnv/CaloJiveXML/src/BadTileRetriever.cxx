@@ -2,13 +2,12 @@
   Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
 */
 
-#include "CaloJiveXML/BadTileRetriever.h"
+#include "BadTileRetriever.h"
 
 #include "AthenaKernel/Units.h"
 
 #include "EventContainers/SelectAllObject.h"
 
-#include "CaloEvent/CaloCellContainer.h"
 #include "CaloIdentifier/CaloCell_ID.h"
 #include "CaloDetDescr/CaloDetDescrElement.h"
 #include "TileEvent/TileCell.h"
@@ -37,14 +36,11 @@ namespace JiveXML {
    **/
   BadTileRetriever::BadTileRetriever(const std::string& type,const std::string& name,const IInterface* parent):
     AthAlgTool(type,name,parent),
-    m_typeName("BadTILE"),
-    m_calocell_id(nullptr),
-    m_sgKey ("AllCalo")
+    m_calocell_id(nullptr)
   {
     //Only declare the interface
     declareInterface<IDataRetriever>(this);
     
-    declareProperty("StoreGateKey" , m_sgKey);
     declareProperty("CellThreshold", m_cellThreshold = 50.);
     declareProperty("RetrieveTILE" , m_tile = true);
     declareProperty("DoBadTile",     m_doBadTile = false);
@@ -60,6 +56,7 @@ namespace JiveXML {
 
     ATH_MSG_DEBUG( "Initialising Tool"  );
     ATH_CHECK( detStore()->retrieve (m_calocell_id, "CaloCell_ID") );
+    ATH_CHECK(m_sgKey.initialize());
 
     return StatusCode::SUCCESS;	
   }
@@ -71,18 +68,18 @@ namespace JiveXML {
     
     ATH_MSG_DEBUG( "in retrieve()"  );
 
-    const CaloCellContainer* cellContainer = nullptr;
-    if (!evtStore()->retrieve(cellContainer,m_sgKey))
-      {
-	ATH_MSG_WARNING( "Could not retrieve Calorimeter Cells for Tile "  );
-//        return StatusCode::SUCCESS;
-      }
-
-    if(m_tile){
-      DataMap data = getBadTileData(cellContainer);
-      ATH_CHECK( FormatTool->AddToEvent(dataTypeName(), m_sgKey, &data) );
-      ATH_MSG_DEBUG( "Tile retrieved"  );
+    SG::ReadHandle<CaloCellContainer> cellContainer(m_sgKey);
+    if (!cellContainer.isValid()){
+	    ATH_MSG_WARNING( "Could not retrieve Calorimeter Cells "  );
     }
+    else{
+      if(m_tile){
+        DataMap data = getBadTileData(&(*cellContainer));
+        ATH_CHECK( FormatTool->AddToEvent(dataTypeName(), m_sgKey.key(), &data) );
+        ATH_MSG_DEBUG( "Bad Tile retrieved"  );
+      }
+    }
+
     //Tile cells retrieved okay
     return StatusCode::SUCCESS;
   }
