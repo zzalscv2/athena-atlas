@@ -9,7 +9,7 @@
 
 Reco_tf.py \
 --AMI=q445 \
---athenaopts "--threads=1" \
+--athenaopts='--threads=1' \
 --maxEvents=500 \
 --outputRDOFile=myRDO.pool.root --outputAODFile=myAOD.pool.root --outputESDFile=myESD.pool.root --outputHISTFile=myHIST.root \
 --imf False
