@@ -97,21 +97,6 @@ def TauAxisCfg(flags):
     return result
 
 #########################################################################
-def TrackToVertexToolCfg(flags):
-    result = ComponentAccumulator()
-    _name = sPrefix + 'TrackToVertexTool'
-
-    from BeamSpotConditions.BeamSpotConditionsConfig import BeamSpotCondAlgCfg
-    result.merge(BeamSpotCondAlgCfg(flags))
-
-    from TrkConfig.AtlasExtrapolatorConfig import AtlasExtrapolatorCfg
-    Reco__TrackToVertex = CompFactory.Reco.TrackToVertex
-    TrackToVertexTool = Reco__TrackToVertex( name = _name,
-                                             Extrapolator = result.popToolsAndMerge(AtlasExtrapolatorCfg(flags)) )
-
-    result.setPrivateTools(TrackToVertexTool)
-    return result
-
 
 def getParticleCache(flags):
     #If reading from ESD we not create a cache of extrapolations to the calorimeter, so we should signify this by setting the cache key to a null string
@@ -132,6 +117,7 @@ def TauTrackFinderCfg(flags):
     from BeamSpotConditions.BeamSpotConditionsConfig import BeamSpotCondAlgCfg
     result.merge(BeamSpotCondAlgCfg(flags))
 
+    from TrackToVertex.TrackToVertexConfig import TrackToVertexCfg
     from TrackToCalo.TrackToCaloConfig import ParticleCaloExtensionToolCfg
     from TrkConfig.TrkVertexFitterUtilsConfig import AtlasTrackToVertexIPEstimatorCfg
     from InDetConfig.InDetTrackSelectorToolConfig import TauRecInDetTrackSelectorToolCfg
@@ -141,7 +127,7 @@ def TauTrackFinderCfg(flags):
                                     MaxJetDrTau = 0.2,
                                     MaxJetDrWide = 0.4,
                                     TrackSelectorToolTau      = result.popToolsAndMerge(TauRecInDetTrackSelectorToolCfg(flags)),
-                                    TrackToVertexTool         = result.popToolsAndMerge(TrackToVertexToolCfg(flags)),
+                                    TrackToVertexTool         = result.popToolsAndMerge(TrackToVertexCfg(flags)),
                                     ParticleCaloExtensionTool = result.popToolsAndMerge(ParticleCaloExtensionToolCfg(flags)),
                                     tauParticleCache = getParticleCache(flags), # only returns a string
                                     removeDuplicateCoreTracks = flags.Tau.RemoveDupeCoreTracks,
