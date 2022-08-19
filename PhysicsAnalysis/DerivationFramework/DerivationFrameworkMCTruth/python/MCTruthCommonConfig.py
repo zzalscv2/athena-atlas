@@ -380,8 +380,8 @@ def AddLargeRJetD2Cfg():
     theTruthD2Decorator = acc.getPrimaryAndMerge(TruthD2DecoratorCfg(name            = "TruthD2Decorator",
                                                                      JetContainerKey = "AntiKt10TruthSoftDropBeta100Zcut10Jets",
                                                                      DecorationName  = "D2"))
-    DerivationKernel = CompFactory.DerivationFramework.DerivationKernel
-    acc.addEventAlgo(DerivationKernel("TRUTHD2Kernel", AugmentationTools = [theTruthD2Decorator] ))
+    TruthD2DecoratorKernel = CompFactory.DerivationFramework.CommonAugmentation
+    acc.addEventAlgo(TruthD2DecoratorKernel("TRUTHD2Kernel", AugmentationTools = [theTruthD2Decorator] ))
     return acc
 
 # Truth energy density tools
@@ -418,8 +418,8 @@ def AddTruthEnergyDensityCfg():
                                                                                )
     acc.addPublicTool(DFCommonTruthEDDecorator, primary = True)
     
-    DerivationKernel = CompFactory.DerivationFramework.DerivationKernel
-    acc.addEventAlgo(DerivationKernel("DFCommonTruthEDKernel", AugmentationTools = [DFCommonTruthEDDecorator] ))
+    DFCommonTruthEDKernel = CompFactory.DerivationFramework.CommonAugmentation
+    acc.addEventAlgo(DFCommonTruthEDKernel("DFCommonTruthEDKernel", AugmentationTools = [DFCommonTruthEDDecorator] ))
     return acc
 
 
@@ -453,7 +453,7 @@ def AddMiniTruthCollectionLinksCfg(ConfigFlags, **kwargs):
             RecoCollection="Muons", 
             TargetCollections=["TruthMuons","TruthPhotons","TruthElectrons"]))
         aug_tools += [ muon_relink ]
-    acc.addEventAlgo(CompFactory.DerivationFramework.DerivationKernel(
+    acc.addEventAlgo(CompFactory.DerivationFramework.CommonAugmentation(
         "MiniCollectionTruthLinkKernel",
         AugmentationTools = aug_tools ))
     return acc
