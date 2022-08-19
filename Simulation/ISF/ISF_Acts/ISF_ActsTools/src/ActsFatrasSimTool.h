@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef ISF_ACTSTOOLS_ACTSFATRASSIMTOOL_H
@@ -12,6 +12,7 @@
 // Athena
 #include "AthenaKernel/IAthRNGSvc.h"
 #include "AthenaKernel/RNGWrapper.h"
+#include "CxxUtils/checker_macros.h"
 
 // ISF
 #include "ISF_Event/ISFParticle.h"
@@ -230,7 +231,7 @@ class ActsFatrasSimTool : public BaseSimulatorTool {
 
   // Random number service
   ServiceHandle<IAthRNGSvc> m_rngSvc{this, "RNGServec", "AthRNGSvc"};
-  ATHRNG::RNGWrapper* m_randomEngine;
+  ATHRNG::RNGWrapper* m_randomEngine ATLAS_THREAD_SAFE {};
   Gaudi::Property<std::string> m_randomEngineName{this, "RandomEngineName",
     "RandomEngineName", "Name of random number stream"};
 
