@@ -86,52 +86,52 @@ namespace LVL1 {
 // JFEX bit shifting in the TOB words
     // jFEX Taus (jTau)
       // Data locations within word
-      static const int jTau_isoBit = 21;
-      static const int jTau_etBit  = 10;
-      static const int jTau_etaBit = 5;
-      static const int jTau_phiBit = 1;
-      static const int jTau_satBit = 0;
+      constexpr static int jTau_isoBit = 21;
+      constexpr static int jTau_etBit  = 10;
+      constexpr static int jTau_etaBit = 5;
+      constexpr static int jTau_phiBit = 1;
+      constexpr static int jTau_satBit = 0;
 
       // jFEX Forward Electrons (jEM)
       // Data locations within word
-      static const int jEM_resBit  = 27;
-      static const int jEM_emf2Bit = 25;
-      static const int jEM_emf1Bit = 23;
-      static const int jEM_isoBit  = 21;
-      static const int jEM_etBit   = 10;
-      static const int jEM_etaBit  = 5;
-      static const int jEM_phiBit  = 1;
-      static const int jEM_satBit  = 0;
+      constexpr static int jEM_resBit  = 27;
+      constexpr static int jEM_emf2Bit = 25;
+      constexpr static int jEM_emf1Bit = 23;
+      constexpr static int jEM_isoBit  = 21;
+      constexpr static int jEM_etBit   = 10;
+      constexpr static int jEM_etaBit  = 5;
+      constexpr static int jEM_phiBit  = 1;
+      constexpr static int jEM_satBit  = 0;
       
     // jFEX SRJets (jJ)
       // Data locations within word
-      static const int jJ_resBit = 21;
-      static const int jJ_etBit  = 10;
-      static const int jJ_etaBit = 5;
-      static const int jJ_phiBit = 1;
-      static const int jJ_satBit = 0;
+      constexpr static int jJ_resBit = 21;
+      constexpr static int jJ_etBit  = 10;
+      constexpr static int jJ_etaBit = 5;
+      constexpr static int jJ_phiBit = 1;
+      constexpr static int jJ_satBit = 0;
       
     // jFEX LRJets (jLJ)
       // Data locations within word
-      static const int jLJ_resBit = 23;
-      static const int jLJ_etBit  = 10;
-      static const int jLJ_etaBit = 5;
-      static const int jLJ_phiBit = 1;
-      static const int jLJ_satBit = 0; 
+      constexpr static int jLJ_resBit = 23;
+      constexpr static int jLJ_etBit  = 10;
+      constexpr static int jLJ_etaBit = 5;
+      constexpr static int jLJ_phiBit = 1;
+      constexpr static int jLJ_satBit = 0; 
       
     // jFEX MET (jXE)
       // Data locations within word
-      static const int jXE_ResBit   = 31;
-      static const int jXE_Ey_Bit   = 16;
-      static const int jXE_Ex_Bit   = 1;
-      static const int jXE_SatBit   = 0;
+      constexpr static int jXE_ResBit   = 31;
+      constexpr static int jXE_Ey_Bit   = 16;
+      constexpr static int jXE_Ex_Bit   = 1;
+      constexpr static int jXE_SatBit   = 0;
       
     // jFEX SumET (jTE)
       // Data locations within word
-      static const int jTE_Sat_upperBit = 31;
-      static const int jTE_Et_upperBit  = 16;
-      static const int jTE_Et_lowerBit  = 1; 
-      static const int jTE_Sat_lowerBit = 0; 
+      constexpr static int jTE_Sat_upperBit = 31;
+      constexpr static int jTE_Et_upperBit  = 16;
+      constexpr static int jTE_Et_lowerBit  = 1; 
+      constexpr static int jTE_Sat_lowerBit = 0; 
       
     // jFEX SRJet Et Calibration (Calculated by performancy group, Elena Michelle Villhauer's QT)
     constexpr static int SRJ_Calib_params[6][9] =
