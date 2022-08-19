@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2019 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
 */
 
 ///////////////////////////////////////////////////////////////////
@@ -83,8 +83,7 @@ bool ISF::GenParticleSimWhiteList::pass(HepMC::ConstGenParticlePtr particle) con
 
   ATH_MSG_VERBOSE( "Checking whether " << particle << " passes the filter." );
 
-  static std::vector<int> vertices(500);
-  vertices.clear();
+  std::vector<int> vertices(500);
   bool so_far_so_good = pass( particle , vertices );
 
   // Test all parent particles
@@ -109,8 +108,7 @@ bool ISF::GenParticleSimWhiteList::pass(const HepMC::GenParticle& particle) cons
 
   ATH_MSG_VERBOSE( "Checking whether " << particle << " passes the filter." );
 
-  static std::vector<int> vertices(500);
-  vertices.clear();
+  std::vector<int> vertices(500);
   bool so_far_so_good = pass( particle , vertices );
 
   // Test all parent particles
