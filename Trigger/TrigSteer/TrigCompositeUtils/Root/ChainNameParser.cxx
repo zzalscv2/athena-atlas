@@ -78,11 +78,9 @@ namespace ChainNameParser {
     {
         // Move the iterator until we've found the start of a leg
         while (!advance()) {}
-        std::cout << "Currently pointing at " << m_current.legName() << std::endl;
         // Now we have the next leg info stored in the peek variables, but not the current.
         // Advance the iterator once to store these in the current
         this->operator++();
-        std::cout << "Currently pointing at " << m_current.legName() << std::endl;
     }
 
     bool LegInfoIterator::operator==(const LegInfoIterator &other)
