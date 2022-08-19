@@ -34,7 +34,7 @@ void TrackTruthCollectionCnv_p0::persToTrans( const Trk::TrackTruthCollection_p0
   else {
     TrackTruthCollectionAccessor::trackCollectionLink(trans) = (*pers)[0].first.getStorableObjectPointer();
 
-    for(Trk::TrackTruthCollection_p0::const_iterator i=pers->begin(); i!=pers->end(); i++) {
+    for(Trk::TrackTruthCollection_p0::const_iterator i=pers->begin(); i!=pers->end(); ++i) {
       trans->insert(trans->end(), std::make_pair(i->first, i->second));
     }
   }

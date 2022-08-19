@@ -33,7 +33,7 @@ void DetailedTrackTruthCollectionCnv_p2::persToTrans( const Trk::DetailedTrackTr
 
   dataLinkConverter.persToTrans(pers->m_trackCollectionLink, TrackTruthCollectionAccessor::trackCollectionLink(trans), msg);
 
-  for(Trk::DetailedTrackTruthCollection_p2::CollectionType::const_iterator i=pers->m_entries.begin(); i!=pers->m_entries.end(); i++) {
+  for(Trk::DetailedTrackTruthCollection_p2::CollectionType::const_iterator i=pers->m_entries.begin(); i!=pers->m_entries.end(); ++i) {
     DetailedTrackTruth dt;
     detailedTruthConverter.persToTrans(&i->detailedTruth, &dt, msg);
     trans->insert(trans->end(), std::make_pair(i->key.m_index, dt) );
@@ -54,7 +54,7 @@ void DetailedTrackTruthCollectionCnv_p2::transToPers( const DetailedTrackTruthCo
   pers->m_entries.resize(trans->size());
   Trk::DetailedTrackTruthCollection_p2::CollectionType::size_type ipers(0);
 
-  for(DetailedTrackTruthCollection::const_iterator itrans=trans->begin(); itrans!=trans->end(); itrans++, ipers++) {
+  for(DetailedTrackTruthCollection::const_iterator itrans=trans->begin(); itrans!=trans->end(); ++itrans, ++ipers) {
     Trk::DetailedTrackTruthCollection_p2::Entry& current = pers->m_entries[ipers];
     current.key.m_index = itrans->first.index(); // extract index from ElementLink
     detailedTruthConverter.transToPers(&itrans->second, &current.detailedTruth, msg);

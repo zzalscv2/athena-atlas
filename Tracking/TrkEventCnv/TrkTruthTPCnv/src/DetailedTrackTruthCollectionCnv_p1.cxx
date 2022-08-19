@@ -33,7 +33,7 @@ void DetailedTrackTruthCollectionCnv_p1::persToTrans( const Trk::DetailedTrackTr
 
   dataLinkConverter.persToTrans(pers->m_trackCollectionLink, TrackTruthCollectionAccessor::trackCollectionLink(trans), msg);
 
-  for(Trk::DetailedTrackTruthCollection_p1::CollectionType::const_iterator i=pers->m_entries.begin(); i!=pers->m_entries.end(); i++) {
+  for(Trk::DetailedTrackTruthCollection_p1::CollectionType::const_iterator i=pers->m_entries.begin(); i!=pers->m_entries.end(); ++i) {
     DetailedTrackTruth dt;
     detailedTruthConverter.persToTrans(&i->detailedTruth, &dt, msg);
     trans->insert(trans->end(), std::make_pair(i->key.m_index, dt) );

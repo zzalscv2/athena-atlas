@@ -30,7 +30,7 @@ void TrackTruthCollectionCnv_p1::persToTrans( const Trk::TrackTruthCollection_p1
 
   dataLinkConverter.persToTrans(pers->m_trackCollectionLink, TrackTruthCollectionAccessor::trackCollectionLink(trans), msg);
 
-  for(Trk::TrackTruthCollection_p1::CollectionType::const_iterator i=pers->m_entries.begin(); i!=pers->m_entries.end(); i++) {
+  for(Trk::TrackTruthCollection_p1::CollectionType::const_iterator i=pers->m_entries.begin(); i!=pers->m_entries.end(); ++i) {
     HepMcParticleLink link;
     particleLinkConverter.persToTrans(&i->particle, &link, msg);
     trans->insert(trans->end(), std::make_pair(i->index, TrackTruth(link, i->probability, 0)) );
@@ -50,7 +50,7 @@ void TrackTruthCollectionCnv_p1::transToPers( const TrackTruthCollection* trans,
 
   pers->m_entries.resize(trans->size());
   Trk::TrackTruthCollection_p1::CollectionType::size_type ipers(0);
-  for(TrackTruthCollection::const_iterator itrans=trans->begin(); itrans!=trans->end(); itrans++, ipers++) {
+  for(TrackTruthCollection::const_iterator itrans=trans->begin(); itrans!=trans->end(); ++itrans, ++ipers) {
     Trk::TrackTruthCollection_p1::Entry& current = pers->m_entries[ipers];
     const TrackTruth& truth = itrans->second;
     current.index = itrans->first.index(); // extract index from ElementLink
