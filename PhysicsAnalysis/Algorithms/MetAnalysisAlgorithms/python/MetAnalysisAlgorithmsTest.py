@@ -21,15 +21,21 @@ def makeSequence (dataType) :
 
     # Set up a selection alg for demonstration purposes
     # Also to avoid warnings from building MET with very soft electrons
+
+    # We need to copy here, because w/o an output container, it's assumed
+    # that the input container is non-const
+    eleCopyAlg = createAlgorithm( 'CP::AsgShallowCopyAlg', 'MetEleCopyAlg' )
+    eleCopyAlg.input = 'Electrons'
+    eleCopyAlg.output = 'DecorElectrons_%SYS%'
+    algSeq += eleCopyAlg
+
+
     selalg = createAlgorithm( 'CP::AsgSelectionAlg', 'METEleSelAlg' )
     addPrivateTool( selalg, 'selectionTool', 'CP::AsgPtEtaSelectionTool' )
     selalg.selectionTool.minPt = 10e3
     selalg.selectionTool.maxEta = 2.47
     selalg.selectionDecoration = 'selectPtEta'
-    selalg.particles = 'Electrons'
-    # We need to copy here, because w/o an output container, it's assumed
-    # that the input container is non-const
-    selalg.particlesOut = 'DecorElectrons_%SYS%'
+    selalg.particles = 'DecorElectrons_%SYS%'
     algSeq += selalg
 
     # Now make a view container holding only the electrons for the MET calculation

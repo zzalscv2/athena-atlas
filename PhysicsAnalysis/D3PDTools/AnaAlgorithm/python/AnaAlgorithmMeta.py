@@ -47,6 +47,6 @@ class AnaAlgorithmMeta ( object ):
 
     @staticmethod
     def allowedStageNames():
-        return ["calibration", "selection", "efficiency", "undefined"]
+        return ["prepare", "calibration", "selection", "efficiency", "undefined"]
 
     pass
