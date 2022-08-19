@@ -1,9 +1,10 @@
 #!/usr/bin/env python
 #
-#  Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+#  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
 #
-
+from TrigCostAnalysis.ROSToROB import ROSToROBMap
 from TrigCostAnalysis.TableConstructorBase import TableConstructorBase, Column
+ROSToROBMap = ROSToROBMap().get_mapping()
 
 '''
 @file ROS_HLT_TableConstructor.py
@@ -23,7 +24,8 @@ class ROS_HLT_TableConstructor(TableConstructorBase):
                                    "CachedROBSize_perEvent",
                                    "NetworkROBSize_perEvent",
                                    "Time_perEvent",
-                                   "ROBStatus_perCall"]
+                                   "ROBStatus_perCall",
+                                   "NROBsPerRequest_perCall"]
 
 
     def defineColumns(self):
@@ -35,6 +37,7 @@ class ROS_HLT_TableConstructor(TableConstructorBase):
         self.columns['retrievedSizeRate']   = Column("Retrieved ROB Data Rate [kB/s]", "Amount of data fetched from the ROBs in kB/s.", True)
         self.columns['cachedSizeRate']      = Column("Cached ROB Data Rate [kB/s]", "Amount of cached data requested from the ROBs in kB/s.", True)
         self.columns['time']                = Column("Time Per Event [ms]", "Average time for all requests and retrievals per event.")
+        self.columns['fullRequests']        = Column("Full ROS requests [%]", "How many of requests to the ROS requested all ROBs")
         self.columns['robsUnclassified']    = Column("Unclassified ROBs Rate [Hz]", "Rate of ROB calls which were flagged unclassified.", True)
         self.columns['robsRetrieved']       = Column("Retrieved ROBs Rate [Hz]","Total rate of fetched ROB calls.", True)
         self.columns['robsHLTCached']       = Column("Cached HLT ROBs Rate [Hz]","Total rate of HLT cached ROB calls.", True)
@@ -60,3 +63,10 @@ class ROS_HLT_TableConstructor(TableConstructorBase):
         self.columns['robsIgnored'].addValue(self.getHistogram("ROBStatus_perCall").GetBinContent(5))
         self.columns['robsDisabled'].addValue(self.getHistogram("ROBStatus_perCall").GetBinContent(6))
         self.columns['robsNotOk'].addValue(self.getHistogram("ROBStatus_perCall").GetBinContent(7))
+
+        # Read maximum number of ROBs from ROS to ROB mapping
+        maxRobs = len(ROSToROBMap[itemName])
+        nMaxRobsRequests = self.getHistogram("NROBsPerRequest_perCall").GetBinContent(maxRobs)
+
+        allRobsRequests = self.getHistogram("NROBsPerRequest_perCall").Integral()
+        self.columns['fullRequests'].addValue(nMaxRobsRequests/allRobsRequests*100)
