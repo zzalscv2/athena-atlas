@@ -15,6 +15,7 @@ def createTileConfigFlags():
      tcf.addFlag('Tile.doFitCOOL', False)
      tcf.addFlag('Tile.doMF', False)
      tcf.addFlag('Tile.doOF1', False)
+     tcf.addFlag('Tile.doWiener', False)
      tcf.addFlag('Tile.doOpt2', _doOpt2)
      tcf.addFlag('Tile.doOptATLAS', _doOptATLAS)
      tcf.addFlag('Tile.NoiseFilter', lambda prevFlags : -1 if prevFlags.Input.isMC else 1)
@@ -66,7 +67,7 @@ def _doExtraMethods(prevFlags):
      # Check if any Optimal Filter, but Opt2 and OptATLAS, is already scheduled
      if (prevFlags.Tile.doQIE or prevFlags.Tile.doManyAmps or prevFlags.Tile.doFlat
          or prevFlags.Tile.doFit or prevFlags.Tile.doFitCOOL or prevFlags.Tile.doMF
-         or prevFlags.Tile.doOF1):
+         or prevFlags.Tile.doOF1 or prevFlags.Tile.doWiener):
           return True
      else:
           return False
@@ -160,6 +161,8 @@ def _getRawChannelContainer(prevFlags):
           rawChannelContainer = 'TileRawChannelMF'
      if prevFlags.Tile.doOF1:
           rawChannelContainer = 'TileRawChannelOF1'
+     if prevFlags.Tile.doWiener:
+          rawChannelContainer = 'TileRawChannelWiener'
      if prevFlags.Tile.doOpt2:
           rawChannelContainer = 'TileRawChannelOpt2'
      if prevFlags.Tile.doOptATLAS:
