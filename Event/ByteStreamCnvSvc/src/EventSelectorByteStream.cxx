@@ -39,7 +39,7 @@ EventSelectorByteStream::EventSelectorByteStream(const std::string &name,
   // McEventSelector and are not really used anywhere
   // TODO(berghaus): validate if those are even used
   m_eventsPerRun.verifier().setLower(0);
-  m_firstEventNo.verifier().setLower(0);
+  m_firstEventNo.verifier().setLower(1);
   m_firstLBNo.verifier().setLower(0);
   m_eventsPerLB.verifier().setLower(0);
   m_initTimeStamp.verifier().setLower(0);

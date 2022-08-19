@@ -33,8 +33,6 @@ function( _add_test testName toExecute )
       list( APPEND _options LOG_IGNORE_PATTERN ${ARG_IGNORE} )
    endif()
 
-   list( APPEND _options ENVIRONMENT "ATLAS_REFERENCE_TAG=AthenaPoolExampleAlgorithms/AthenaPoolExampleAlgorithms-01-00-03" )
-
    # Set up the test:
    atlas_add_test( ${testName}
        SCRIPT ${CMAKE_CURRENT_BINARY_DIR}/${testName}_test.sh

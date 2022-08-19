@@ -16,7 +16,7 @@ if (nThreads < 1) :
 
 # setup the McEventSelector
 import AthenaCommon.AtlasUnixGeneratorJob
-svcMgr.EventSelector.FirstEvent=0
+svcMgr.EventSelector.FirstEvent=1
 svcMgr.EventSelector.RunNumber=1
 svcMgr.EventSelector.InitialTimeStamp=0
 svcMgr.EventSelector.TimeStampInterval=1

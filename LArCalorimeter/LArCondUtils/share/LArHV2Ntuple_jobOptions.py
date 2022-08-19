@@ -99,7 +99,7 @@ svcMgr.THistSvc.Output  = ["file1 DATAFILE='"+OutFile+"' OPT='RECREATE'"];
 #--------------------------------------------------------------
 svcMgr.EventSelector.RunNumber         = RunNumber
 svcMgr.EventSelector.EventsPerRun      = 100
-svcMgr.EventSelector.FirstEvent        = 0
+svcMgr.EventSelector.FirstEvent        = 1
 svcMgr.EventSelector.EventsPerLB       = 100
 svcMgr.EventSelector.FirstLB           = 1
 svcMgr.EventSelector.InitialTimeStamp  = int(TimeStamp/1e9)

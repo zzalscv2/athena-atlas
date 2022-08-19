@@ -34,28 +34,28 @@ TILEHIGHHIGH = -11
 TILEHIGHLOW = -12
 cell_desc = {
     # larem barrel
-    (LAREM, 1, 1, 0, 100, 10) : (1000,   LARHIGHGAIN,     1011.48),
+    (LAREM, 1, 1, 0, 100, 10) : (1000,   LARHIGHGAIN,     1016.54),
     (LAREM, 1, 1, 0, 100, 11) : (50000,  LARMEDIUMGAIN,  49967.99),
-    (LAREM, 1, 1, 0, 100, 12) : (300000, LARLOWGAIN,    299961.5),
+    (LAREM, 1, 1, 0, 100, 12) : (300000, LARLOWGAIN,    300459.37),
 
     # larem endcap
-    (LAREM, 2, 1, 2, 30, 10) : (1000,     LARHIGHGAIN,      999.00),
+    (LAREM, 2, 1, 2, 30, 10) : (1000,     LARHIGHGAIN,      997.80),
     (LAREM, 2, 1, 2, 30, 11) : (50000,    LARMEDIUMGAIN,  50016.62),
-    (LAREM, 2, 1, 2, 30, 12) : (300000,   LARLOWGAIN,    300378.72),
+    (LAREM, 2, 1, 2, 30, 12) : (300000,   LARLOWGAIN,    300066.75),
 
     # larhec
-    (LARHEC, 2, 1, 0, 3, 10) : (1000,     LARMEDIUMGAIN,    1381.22),
-    (LARHEC, 2, 1, 0, 3, 11) : (50000,    LARMEDIUMGAIN,  50287.54),
-    (LARHEC, 2, 1, 0, 3, 12) : (300000,   LARLOWGAIN,    299838.22),
+    (LARHEC, 2, 1, 0, 3, 10) : (1000,     LARMEDIUMGAIN,    1114.68),
+    (LARHEC, 2, 1, 0, 3, 11) : (50000,    LARMEDIUMGAIN,   50116.44),
+    (LARHEC, 2, 1, 0, 3, 12) : (300000,   LARLOWGAIN,     300149.56),
 
     # fcal
-    (LARFCAL, 2, 1, 0, 3, 10) : (1000,     LARHIGHGAIN,     1042.98),
-    (LARFCAL, 2, 1, 0, 3, 11) : (50000,    LARMEDIUMGAIN,  50249.20),
-    (LARFCAL, 2, 1, 0, 3, 12) : (800000,   LARLOWGAIN,    798303.31),
+    (LARFCAL, 2, 1, 0, 3, 10) : (1000,     LARHIGHGAIN,      964.61),
+    (LARFCAL, 2, 1, 0, 3, 11) : (50000,    LARMEDIUMGAIN,  49740.66),
+    (LARFCAL, 2, 1, 0, 3, 12) : (800000,   LARLOWGAIN,    801551.06),
 
     # tile
-    (TILE, 1, 1, 10, 3, 1) : (1000,      TILEHIGHHIGH,    986.54),
-    (TILE, 1, 1, 11, 3, 1) : (50000,     TILEHIGHLOW,    50179.39),
+    (TILE, 1, 1, 10, 3, 1) : (1000,      TILEHIGHHIGH,    1011.98),
+    (TILE, 1, 1, 11, 3, 1) : (50000,     TILEHIGHLOW,    49821.16),
     }
 
 def make_calo_cells (detStore, desc):

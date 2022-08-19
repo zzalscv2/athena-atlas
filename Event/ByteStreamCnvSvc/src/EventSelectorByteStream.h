@@ -211,7 +211,7 @@ private: // properties
    Gaudi::Property<bool> m_filebased{this, "FileBased", true, ""};
 
    Gaudi::CheckedProperty<int> m_runNo{this, "RunNumber", 0, ""};
-   Gaudi::CheckedProperty<int> m_firstEventNo{this, "FirstEvent", 0, ""};
+   Gaudi::CheckedProperty<int> m_firstEventNo{this, "FirstEvent", 1, ""};
    Gaudi::CheckedProperty<int> m_eventsPerRun{this, "EventsPerRun", 1000000, ""};
    Gaudi::CheckedProperty<int> m_firstLBNo{this, "FirstLB", 0, ""};
    Gaudi::CheckedProperty<int> m_eventsPerLB{this, "EventsPerLB", 1000, ""};

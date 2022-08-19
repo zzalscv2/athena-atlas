@@ -226,8 +226,8 @@ McEventSelector::McEventSelector( const std::string& name, ISvcLocator* svcloc )
   m_runNo.verifier().setLower( 0 );
   declareProperty( "EventsPerRun",        m_eventsPerRun = 2000000000 );
   m_eventsPerRun.verifier().setLower( 0 );
-  declareProperty( "FirstEvent",          m_firstEventNo = 0 );
-  m_firstEventNo.verifier().setLower( 0 );
+  declareProperty( "FirstEvent",          m_firstEventNo = 1 );
+  m_firstEventNo.verifier().setLower( 1 );
   declareProperty( "FirstLB",             m_firstLBNo = 0);
   m_firstLBNo.verifier().setLower(0);
   declareProperty( "EventsPerLB",         m_eventsPerLB = 1000 );

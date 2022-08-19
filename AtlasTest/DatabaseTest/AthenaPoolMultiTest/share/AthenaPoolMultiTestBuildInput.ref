@@ -1,10 +1,5 @@
 AddTrigMap           INFO in initialize()
 WriteData            INFO in initialize()
-AddTrigMap           INFO EventInfo event: 0 run: 0
-AddTrigMap           INFO registered all data
-WriteData           DEBUG in execute()
-WriteData            INFO EventInfo event: 0  run: 0
-WriteData            INFO registered all data
 AddTrigMap           INFO EventInfo event: 1 run: 0
 AddTrigMap           INFO registered all data
 WriteData           DEBUG in execute()
@@ -99,5 +94,10 @@ AddTrigMap           INFO EventInfo event: 19 run: 0
 AddTrigMap           INFO registered all data
 WriteData           DEBUG in execute()
 WriteData            INFO EventInfo event: 19  run: 0
+WriteData            INFO registered all data
+AddTrigMap           INFO EventInfo event: 20 run: 0
+AddTrigMap           INFO registered all data
+WriteData           DEBUG in execute()
+WriteData            INFO EventInfo event: 20  run: 0
 WriteData            INFO registered all data
 WriteData            INFO in finalize()

@@ -145,4 +145,4 @@ if("t0base" in readPars):
 #IOVDbSvc = Service( "IOVDbSvc" )
 #IOVDbSvc.OutputLevel        = 2
 #ServiceMgr.EventSelector.RunNumber		= 0
-#ServiceMgr.EventSelector.FirstEvent	= 0
+#ServiceMgr.EventSelector.FirstEvent	= 1

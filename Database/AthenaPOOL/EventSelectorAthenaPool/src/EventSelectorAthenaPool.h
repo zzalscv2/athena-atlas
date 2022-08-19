@@ -223,7 +223,7 @@ private: // properties
    Gaudi::Property<bool> m_overrideRunNumber{this, "OverrideRunNumber", false, ""};
    Gaudi::Property<bool> m_overrideRunNumberFromInput{this, "OverrideRunNumberFromInput", false, ""};
    // TODO: check if not really used
-   Gaudi::CheckedProperty<int> m_firstEventNo{this, "FirstEvent", 0, ""};
+   Gaudi::CheckedProperty<int> m_firstEventNo{this, "FirstEvent", 1, ""};
    // TODO: check if not really used
    Gaudi::CheckedProperty<int> m_eventsPerRun{this, "EventsPerRun", 1000000, ""};
    Gaudi::CheckedProperty<int> m_firstLBNo{this, "FirstLB", 0, ""};
