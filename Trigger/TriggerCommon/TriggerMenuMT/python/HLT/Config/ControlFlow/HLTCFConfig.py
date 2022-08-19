@@ -209,8 +209,10 @@ def makeHLTTree(flags, newJO=False, hltMenuConfig = None):
 
             # The LAr Noise Burst end-of-event sequence
             if 'larnoiseburst' in acceptedEventChainDict['chainParts'][0]['purpose']:
-                # Add stream filter to EndOfEventFilterAlg (only consider events accepted to the Main stream)
-                endOfEventFilterAlg.StreamFilter = ['Main']
+                # Add stream filter to EndOfEventFilterAlg
+                # Only accept events going to streams that already do full calo reco
+                # CosmicCalo explicitly requested [ATR-26096]
+                endOfEventFilterAlg.StreamFilter = ['Main','VBFDelayed','PhysicsTLA','CosmicCalo']
 
                 from TriggerMenuMT.HLT.CalibCosmicMon.CalibChainConfiguration import getLArNoiseBurstRecoSequence
                 recoSeq = getLArNoiseBurstRecoSequence()
