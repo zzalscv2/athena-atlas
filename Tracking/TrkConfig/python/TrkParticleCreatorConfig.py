@@ -16,8 +16,9 @@ def TrackParticleCreatorToolCfg(flags, name="InDetxAODParticleCreatorTool", **kw
 
     result = ComponentAccumulator()
     if "TrackToVertex" not in kwargs:
-        from InDetConfig.TrackRecoConfig import TrackToVertexCfg
+        from TrackToVertex.TrackToVertexConfig import TrackToVertexCfg
         kwargs.setdefault("TrackToVertex", result.popToolsAndMerge(TrackToVertexCfg(flags)))
+
     if "TrackSummaryTool" not in kwargs:
         from TrkConfig.TrkTrackSummaryToolConfig import InDetTrackSummaryToolSharedHitsCfg
         TrackSummaryTool = result.popToolsAndMerge(InDetTrackSummaryToolSharedHitsCfg(flags))
@@ -73,8 +74,8 @@ def InDetTrigParticleCreatorToolFTFCfg(flags, name="InDetTrigParticleCreatorTool
     result = ComponentAccumulator()
 
     if "TrackToVertex" not in kwargs:
-        from TrigInDetConfig.TrigInDetConfig import TrigTrackToVertexCfg
-        kwargs.setdefault("TrackToVertex", result.popToolsAndMerge(TrigTrackToVertexCfg(flags)))
+        from TrackToVertex.TrackToVertexConfig import TrackToVertexCfg
+        kwargs.setdefault("TrackToVertex", result.popToolsAndMerge(TrackToVertexCfg(flags)))
 
     if "TrackSummaryTool" not in kwargs:
         from TrkConfig.TrkTrackSummaryToolConfig import InDetTrigTrackSummaryToolCfg
@@ -92,8 +93,9 @@ def ITkTrackParticleCreatorToolCfg(flags, name="ITkTrackParticleCreatorTool", **
     result = ComponentAccumulator()
 
     if "TrackToVertex" not in kwargs:
-        from InDetConfig.TrackRecoConfig import TrackToVertexCfg
+        from TrackToVertex.TrackToVertexConfig import TrackToVertexCfg
         kwargs.setdefault("TrackToVertex", result.popToolsAndMerge(TrackToVertexCfg(flags)))
+
     if "TrackSummaryTool" not in kwargs:
         from TrkConfig.TrkTrackSummaryToolConfig import ITkTrackSummaryToolSharedHitsCfg
         TrackSummaryTool = result.popToolsAndMerge(ITkTrackSummaryToolSharedHitsCfg(flags))
@@ -122,7 +124,7 @@ def GSFBuildInDetParticleCreatorToolCfg(flags, name="GSFBuildInDetParticleCreato
     result = ComponentAccumulator()
 
     if "TrackToVertex" not in kwargs:
-        from InDetConfig.TrackRecoConfig import TrackToVertexCfg
+        from TrackToVertex.TrackToVertexConfig import TrackToVertexCfg
         kwargs.setdefault("TrackToVertex", result.popToolsAndMerge(TrackToVertexCfg(flags)))
 
     if "TrackSummaryTool" not in kwargs:
@@ -155,7 +157,7 @@ def MuonParticleCreatorToolCfg(flags, name="MuonParticleCreatorTool", **kwargs):
     result = ComponentAccumulator()
 
     if "TrackToVertex" not in kwargs:
-        from InDetConfig.TrackRecoConfig import TrackToVertexCfg
+        from TrackToVertex.TrackToVertexConfig import TrackToVertexCfg
         kwargs.setdefault("TrackToVertex", result.popToolsAndMerge(
             TrackToVertexCfg(flags)))
 
@@ -189,9 +191,9 @@ def MuonCombinedParticleCreatorCfg(flags, name="MuonCombinedParticleCreator", **
             kwargs.setdefault("TrackSummaryTool", result.popToolsAndMerge(MuonCombinedTrackSummaryToolCfg(flags)))
 
     if "TrackToVertex" not in kwargs:
-        from MuonCombinedConfig.MuonCombinedRecToolsConfig import MuonTrackToVertexCfg
+        from TrackToVertex.TrackToVertexConfig import TrackToVertexCfg
         kwargs.setdefault('TrackToVertex', result.popToolsAndMerge(
-            MuonTrackToVertexCfg(flags)))
+            TrackToVertexCfg(flags)))
 
     if "MuonSummaryTool" not in kwargs:
         from MuonConfig.MuonRecToolsConfig import MuonHitSummaryToolCfg
@@ -216,7 +218,7 @@ def MuonCaloParticleCreatorCfg(flags, name="MuonCaloParticleCreator", **kwargs):
     result = ComponentAccumulator()
 
     if "TrackToVertex" not in kwargs:
-        from InDetConfig.TrackRecoConfig import TrackToVertexCfg
+        from TrackToVertex.TrackToVertexConfig import TrackToVertexCfg
         kwargs.setdefault("TrackToVertex", result.popToolsAndMerge(
             TrackToVertexCfg(flags, name='TrackToVertex')))
 

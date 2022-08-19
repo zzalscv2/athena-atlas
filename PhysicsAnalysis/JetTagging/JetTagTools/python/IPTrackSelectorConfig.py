@@ -3,7 +3,7 @@
 from AthenaConfiguration.ComponentAccumulator import ComponentAccumulator
 from AthenaConfiguration.ComponentFactory import CompFactory
 from AthenaConfiguration.Enums import LHCPeriod
-from JetTagTools.BTagTrackToVertexToolConfig import BTagTrackToVertexToolCfg
+from TrackToVertex.TrackToVertexConfig import TrackToVertexCfg
 from InDetConfig.InDetEtaDependentCutsConfig import IDEtaDependentCuts_IPXD_SvcCfg
 
 
@@ -22,7 +22,7 @@ def IPTrackSelectorCfg(flags, name = 'IPTrackSelector', useBTagFlagsDefaults = T
     output: The actual tool."""
     acc = ComponentAccumulator()
     if useBTagFlagsDefaults:
-        trackToVertexTool = acc.popToolsAndMerge(BTagTrackToVertexToolCfg(flags, 'BTagTrackToVertexTool'))
+        trackToVertexTool = acc.popToolsAndMerge(TrackToVertexCfg(flags, 'BTagTrackToVertexTool'))
         defaults = {'useBLayerHitPrediction' : True,
                      'nHitBLayer'             : 0 ,
                      'usepTDepTrackSel'       : False,

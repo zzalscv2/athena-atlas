@@ -15,17 +15,6 @@ from TrkConfig.AtlasExtrapolatorToolsConfig import AtlasEnergyLossUpdatorCfg
 GeV = 1000
 mm = 1
 
-def MuonTrackToVertexCfg(flags, name='MuonTrackToVertexTool', **kwargs):
-    acc = ComponentAccumulator()
-    if 'Extrapolator' not in kwargs:
-        accExtrapolator = AtlasExtrapolatorCfg(flags, 'AtlasExtrapolator')
-        atlasExtrapolator = accExtrapolator.popPrivateTools()
-        acc.merge(accExtrapolator)
-        kwargs.setdefault('Extrapolator', atlasExtrapolator)
-    acc.setPrivateTools(CompFactory.Reco.TrackToVertex(name, **kwargs))
-    return acc
-
-
 def InDetCandidateToolCfg(flags, name="InDetCandidateTool", **kwargs):
     from InDetConfig.InDetTrackSelectorToolConfig import MuonCombinedInDetDetailedTrackSelectorToolCfg
     result = MuonCombinedInDetDetailedTrackSelectorToolCfg(flags)
