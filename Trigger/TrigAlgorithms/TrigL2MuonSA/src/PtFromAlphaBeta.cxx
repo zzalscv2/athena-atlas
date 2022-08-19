@@ -46,7 +46,7 @@ StatusCode TrigL2MuonSA::PtFromAlphaBeta::setPt(TrigL2MuonSA::TrackPattern& trac
 {
 
   if (trackPattern.etaBin < -1) 
-    return StatusCode::FAILURE;
+    return StatusCode::SUCCESS;
   
   const float ZERO_LIMIT = 1e-5;
   

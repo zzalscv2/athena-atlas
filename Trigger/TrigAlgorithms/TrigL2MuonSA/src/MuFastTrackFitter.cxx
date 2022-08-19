@@ -160,6 +160,7 @@ StatusCode TrigL2MuonSA::MuFastTrackFitter::findTracks(const TrigRoiDescriptor* 
 
      if ( itTrack.etaBin < -1 ) {
        itTrack.etaBin = (int)((std::abs(muonRoad.extFtfMiddleEta)-1.)/0.05); // eta binning is the same as AlphaBetaEstimate
+       if(itTrack.etaBin <= -1) itTrack.etaBin = 0;
      }
 
      ATH_CHECK( m_ptFromAlphaBeta->setPt(itTrack,tgcFitResult) );
