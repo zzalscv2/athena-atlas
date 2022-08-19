@@ -167,6 +167,7 @@ class JSSTaggerBase :   public asg::AsgTool ,
     SG::ReadDecorHandleKey<xAOD::JetContainer> m_readQwKey{this, "QwName", "Qw", "SG key for Qw"};
 
     SG::ReadDecorHandleKey<xAOD::JetContainer> m_readThrustMajKey{this, "ThrustMajName", "ThrustMaj", "SG key for ThrustMaj"};
+    SG::ReadDecorHandleKey<xAOD::JetContainer> m_readSphericityKey{this, "SphericityName", "Sphericity", "SG key for Sphericity"};
 
     SG::ReadDecorHandleKey<xAOD::JetContainer> m_readL2Key{this, "L2Name", "L2", "SG key for L2"};
     SG::ReadDecorHandleKey<xAOD::JetContainer> m_readL3Key{this, "L3Name", "L3", "SG key for L3"};

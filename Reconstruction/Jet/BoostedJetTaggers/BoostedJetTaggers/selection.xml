@@ -1,6 +1,7 @@
 <lcgdict>
   <!-- Requested dictionary generation -->
   <class name="SmoothedWZTagger" />
+  <class name="SmoothedTopTagger" />
   <class name="JSSWTopTaggerDNN" />
   <class name="JSSWTopTaggerANN" />
   <class name="JetQGTagger" />

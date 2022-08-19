@@ -125,6 +125,7 @@ StatusCode JSSTaggerBase::initialize() {
   m_readSplit23Key = m_containerName + "." + m_readSplit23Key.key();
   m_readQwKey = m_containerName + "." + m_readQwKey.key();
   m_readThrustMajKey = m_containerName + "." + m_readThrustMajKey.key();
+  m_readSphericityKey = m_containerName + "." + m_readSphericityKey.key();
   m_readL2Key = m_containerName + "." + m_readL2Key.key();
   m_readL3Key = m_containerName + "." + m_readL3Key.key();
   m_readECFG331Key = m_containerName + "." + m_readECFG331Key.key();
@@ -157,6 +158,7 @@ StatusCode JSSTaggerBase::initialize() {
   ATH_CHECK( m_readSplit23Key.initialize() );
   ATH_CHECK( m_readQwKey.initialize() );
   ATH_CHECK( m_readThrustMajKey.initialize() );
+  ATH_CHECK( m_readSphericityKey.initialize() );
   ATH_CHECK( m_readL2Key.initialize() );
   ATH_CHECK( m_readL3Key.initialize() );
   ATH_CHECK( m_readECFG331Key.initialize() );
