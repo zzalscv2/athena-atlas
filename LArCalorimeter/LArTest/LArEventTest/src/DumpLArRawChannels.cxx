@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "LArEventTest/DumpLArRawChannels.h"
@@ -75,7 +75,7 @@ StatusCode DumpLArRawChannels::execute()
 {
  m_count++; 
  ATH_MSG_INFO ( "======== executing event "<< m_count << " ========" );
- const DataHandle<xAOD::EventInfo> thisEventInfo;
+ const xAOD::EventInfo* thisEventInfo;
  StatusCode sc=evtStore()->retrieve(thisEventInfo);
  if (sc!=StatusCode::SUCCESS)
    ATH_MSG_WARNING ( "No EventInfo object found!" );
@@ -85,8 +85,6 @@ StatusCode DumpLArRawChannels::execute()
      m_evt=thisEventInfo->eventNumber();
    }
 
- const DataHandle < LArRawChannelContainer > channel_cont;
- 
  SG::ReadCondHandle<LArOnOffIdMapping> larCablingHdl(m_cablingKey);
  const LArOnOffIdMapping* cabling=*larCablingHdl;
  if(!cabling) {
@@ -94,6 +92,7 @@ StatusCode DumpLArRawChannels::execute()
      return StatusCode::FAILURE;
  }
 
+ const LArRawChannelContainer* channel_cont;
  if (m_key.size())
    ATH_CHECK( evtStore()->retrieve(channel_cont,m_key) );
  else
