@@ -154,9 +154,34 @@ BPHY10BdJpsiKst = Analysis__JpsiPlus2Tracks(
 ToolSvc += BPHY10BdJpsiKst
 print(BPHY10BdJpsiKst)   
 
+## 7/ call the V0Finder if a Jpsi has been found
+doSimpleV0Finder = False
+if doSimpleV0Finder:
+  include("DerivationFrameworkBPhys/configureSimpleV0Finder.py")
+else:
+  include("DerivationFrameworkBPhys/configureV0Finder.py")
 
+
+
+BPHY10_V0FinderTools = BPHYV0FinderTools("BPHY10")
+print(BPHY10_V0FinderTools)
+
+BPHY10_V0FinderTools.V0FinderTool.V0ContainerName = "BPHY10RecoV0Candidates"
+BPHY10_V0FinderTools.V0FinderTool.KshortContainerName = "BPHY10RecoKshortCandidates"
+BPHY10_V0FinderTools.V0FinderTool.LambdaContainerName = "BPHY10RecoLambdaCandidates"
+BPHY10_V0FinderTools.V0FinderTool.LambdabarContainerName = "BPHY10RecoLambdabarCandidates"
+
+from InDetV0Finder.InDetV0FinderConf import InDet__V0MainDecorator
+V0Decorator = InDet__V0MainDecorator(name = "BPHY10V0Decorator",
+                                     V0Tools = TrackingCommon.getV0Tools(),
+                                     V0ContainerName = "BPHY10RecoV0Candidates",
+                                    KshortContainerName = "BPHY10RecoKshortCandidates",
+                                    LambdaContainerName = "BPHY10RecoLambdaCandidates",
+                                    LambdabarContainerName = "BPHY10RecoLambdabarCandidates")
+ToolSvc += V0Decorator
 ## 6/ setup the combined augmentation/skimming tool for the BdKst
-from DerivationFrameworkBPhys.DerivationFrameworkBPhysConf import DerivationFramework__Reco_Vertex	
+from DerivationFrameworkBPhys.DerivationFrameworkBPhysConf import DerivationFramework__Reco_Vertex
+
 BPHY10BdKstSelectAndWrite  = DerivationFramework__Reco_Vertex(
     name                   = "BPHY10BdKstSelectAndWrite",
     VertexSearchTool     = BPHY10BdJpsiKst,
@@ -212,14 +237,11 @@ if doSimpleV0Finder:
 else:
   include("DerivationFrameworkBPhys/configureV0Finder.py")
 
-BPHY10_V0FinderTools = BPHYV0FinderTools("BPHY10")
-print(BPHY10_V0FinderTools)
-
 from DerivationFrameworkBPhys.DerivationFrameworkBPhysConf import DerivationFramework__Reco_V0Finder
 BPHY10_Reco_V0Finder   = DerivationFramework__Reco_V0Finder(
     name                   = "BPHY10_Reco_V0Finder",
     V0FinderTool           = BPHY10_V0FinderTools.V0FinderTool,
-    V0Tools                = TrackingCommon.getV0Tools(),
+    Decorator              = V0Decorator,
     #OutputLevel            = DEBUG,
     V0ContainerName        = "BPHY10RecoV0Candidates",
     KshortContainerName    = "BPHY10RecoKshortCandidates",
