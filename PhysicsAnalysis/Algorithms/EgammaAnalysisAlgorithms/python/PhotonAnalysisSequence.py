@@ -110,6 +110,12 @@ def makePhotonCalibrationSequence( seq, dataType,
 
     cleaningWP = 'NoTime' if cleaningAllowLate else ''
 
+    # Set up a shallow copy to decorate
+    alg = createAlgorithm( 'CP::AsgShallowCopyAlg', 'PhotonShallowCopyAlg' + postfix )
+    seq.append( alg, inputPropName = 'input',
+                outputPropName = 'output',
+                stageName = 'prepare')
+
     # Set up the eta-cut on all photons prior to everything else
     alg = createAlgorithm( 'CP::AsgSelectionAlg', 'PhotonEtaCutAlg' + postfix )
     alg.selectionDecoration = 'selectEta' + postfix + ',as_bits'
@@ -120,7 +126,6 @@ def makePhotonCalibrationSequence( seq, dataType,
         alg.selectionTool.etaGapHigh = 1.52
     alg.selectionTool.useClusterEta = True
     seq.append( alg, inputPropName = 'particles',
-                outputPropName = 'particlesOut',
                 stageName = 'calibration',
                 metaConfig = {'selectionDecorNames' : [alg.selectionDecoration],
                               'selectionDecorNamesOutput' : [alg.selectionDecoration],

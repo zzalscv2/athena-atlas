@@ -104,6 +104,12 @@ def makeElectronCalibrationSequence( seq, dataType, postfix = '',
     if dataType not in [ 'data', 'mc', 'afii' ]:
         raise ValueError( 'Invalid data type: %s' % dataType )
 
+    # Set up a shallow copy to decorate
+    alg = createAlgorithm( 'CP::AsgShallowCopyAlg', 'ElectronShallowCopyAlg' + postfix )
+    seq.append( alg, inputPropName = 'input',
+                outputPropName = 'output',
+                stageName = 'prepare')
+
     # Set up the eta-cut on all electrons prior to everything else
     alg = createAlgorithm( 'CP::AsgSelectionAlg', 'ElectronEtaCutAlg' + postfix )
     alg.selectionDecoration = 'selectEta' + postfix + ',as_bits'
@@ -114,7 +120,6 @@ def makeElectronCalibrationSequence( seq, dataType, postfix = '',
         alg.selectionTool.etaGapHigh = 1.52
     alg.selectionTool.useClusterEta = True
     seq.append( alg, inputPropName = 'particles',
-                outputPropName = 'particlesOut',
                 stageName = 'calibration',
                 metaConfig = {'selectionDecorNames' : [alg.selectionDecoration],
                               'selectionDecorNamesOutput' : [alg.selectionDecoration],
