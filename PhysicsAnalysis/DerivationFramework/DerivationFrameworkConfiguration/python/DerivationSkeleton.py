@@ -9,14 +9,8 @@ from AthenaPoolCnvSvc.PoolReadConfig import PoolReadCfg
 from AthenaPoolCnvSvc.PoolWriteConfig import PoolWriteCfg
 from AthenaConfiguration.ComponentFactory import CompFactory
 
-#def defaultDerivationFlags(configFlags):
-#   """Fill default derivation flags"""
-#    # Not sure if anything will be needed here, leaving as a comment in case it is needed later
 
 def fromRunArgs(runArgs):
-    from AthenaCommon.Configurable import Configurable
-    Configurable.configurableRun3Behavior = True
-
     from AthenaCommon.Logging import logging
     logDerivation = logging.getLogger('Derivation')
     logDerivation.info('****************** STARTING DERIVATION *****************')

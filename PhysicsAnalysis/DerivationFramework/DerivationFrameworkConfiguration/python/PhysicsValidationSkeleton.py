@@ -8,9 +8,6 @@ from AthenaPoolCnvSvc.PoolReadConfig import PoolReadCfg
 
 
 def fromRunArgs(runArgs):
-    from AthenaCommon.Configurable import Configurable
-    Configurable.configurableRun3Behavior = True
-
     from AthenaCommon.Logging import logging
     logDerivation = logging.getLogger('PhysicsValidation')
     logDerivation.info('****************** STARTING NTUP_PHYSVAL *****************')
