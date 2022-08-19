@@ -1,7 +1,6 @@
 # ********************************************************************************
 # Offline AthenaMonitoring configuration
 #
-# $Id: DataQualitySteering_jobOptions.py,v 1.15 2009-05-05 08:20:08 sschaetz Exp $
 # ********************************************************************************
 
 import six
@@ -180,12 +179,7 @@ if DQMonFlags.doMonitoring():
             treatException("DataQualitySteering_jobOptions.py: exception when setting up L1 Calo monitoring")
 
       if DQMonFlags.doHLTMon():
-         try:
-            include("TrigHLTMonitoring/HLTMonitoring_topOptions.py")
-            HLTMonMan = topSequence.HLTMonManager
-            HLTMonMan.FileKey = DQMonFlags.monManFileKey()  
-         except Exception:
-            treatException("DataQualitySteering_jobOptions.py: exception when setting up HLT monitoring")
+         local_logger.warning("The legacy Run-2 HLT monitoring is no longer supported")
 
       #--------------#
       # TRT electron #
@@ -358,10 +352,7 @@ if DQMonFlags.doMonitoring():
 
          addlSequences=[]
          if DQMonFlags.doHLTMon():
-            try:
-               include("TrigHLTMonitoring/HLTMonitoring_topOptions.py")
-            except Exception:
-               treatException("DataQualitySteering_jobOptions.py: exception when setting up HLT monitoring")
+            local_logger.warning("The legacy Run-2 HLT monitoring is no longer supported")
          if DQMonFlags.doLVL1CaloMon():
             try:
                include("TrigT1CaloMonitoring/TrigT1CaloMonitoring_forRecExCommission.py")
