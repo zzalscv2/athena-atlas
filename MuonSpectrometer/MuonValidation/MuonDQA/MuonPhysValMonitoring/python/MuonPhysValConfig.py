@@ -47,7 +47,7 @@ def PhysValMuonCfg(flags, container='', **kwargs):
     kwargs.setdefault("SelectMuonCategories", selectMuonCat)
     from IsolationSelection.IsolationSelectionConfig import MuonPhysValIsolationSelCfg
     kwargs.setdefault("IsoTool", acc.popToolsAndMerge(MuonPhysValIsolationSelCfg(flags)))
-    from MuonCombinedConfig.MuonCombinedRecToolsConfig import MuonCombinedInDetDetailedTrackSelectorToolCfg
+    from InDetConfig.InDetTrackSelectorToolConfig import MuonCombinedInDetDetailedTrackSelectorToolCfg
     kwargs.setdefault("TrackSelector",acc.popToolsAndMerge(MuonCombinedInDetDetailedTrackSelectorToolCfg(flags)))
     from MuonSelectorTools.MuonSelectorToolsConfig import MuonSelectionToolCfg
     kwargs.setdefault("MuonSelector", acc.popToolsAndMerge(MuonSelectionToolCfg(flags)))
