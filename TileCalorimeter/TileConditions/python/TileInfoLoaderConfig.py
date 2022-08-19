@@ -23,6 +23,8 @@ def TileInfoLoaderCfg(flags, **kwargs):
     acc = ComponentAccumulator()
     acc.merge (TileCablingSvcCfg(flags))
 
+    kwargs.setdefault('LoadWienerFilterWeights', flags.Tile.doWiener)
+
     if 'NoiseScaleIndex' not in kwargs:
         if flags.Tile.doOpt2 and not flags.Tile.doOptATLAS:
             msg.info("Adjusting TileInfo to return cell noise for Opt.Filter with iterations")

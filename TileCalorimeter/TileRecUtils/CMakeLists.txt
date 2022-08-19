@@ -78,6 +78,11 @@ atlas_add_test( TileRawChannelBuilderMFConfig_test
                  PROPERTIES TIMEOUT 300
                  POST_EXEC_SCRIPT nopost.sh)
 
+atlas_add_test( TileRawChannelBuilderWienerConfig_test
+                 SCRIPT python -m TileRecUtils.TileRawChannelBuilderWienerConfig
+                 PROPERTIES TIMEOUT 300
+                 POST_EXEC_SCRIPT nopost.sh)
+
 atlas_add_test( TileCellNoiseFilterConfig_test
                  SCRIPT python -m TileRecUtils.TileCellNoiseFilterConfig
                  PROPERTIES TIMEOUT 300
