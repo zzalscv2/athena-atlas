@@ -1,11 +1,12 @@
 /*
-  Copyright (C) 2002-2020 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef BEAMPIPEGEOMODEL_BEAMPIPEDETECTORFACTORY_H
 #define BEAMPIPEGEOMODEL_BEAMPIPEDETECTORFACTORY_H
 
 #include "GeoModelKernel/GeoVDetectorFactory.h"
+#include "GeoModelUtilities/GeoRef.h"
 #include "BeamPipeGeoModel/BeamPipeDetectorManager.h"
 #include "RDBAccessSvc/IRDBAccessSvc.h"
 #include <string>
@@ -53,9 +54,9 @@ class BeamPipeDetectorFactory final : public GeoVDetectorFactory
   class EnvelopeShapes {
   public:
     EnvelopeShapes() : centralShape(0), fwdShape(0), bpShape(0) {} 
-    GeoShape * centralShape;
-    GeoShape * fwdShape;
-    GeoShape * bpShape;
+    GeoRef<GeoShape> centralShape;
+    GeoRef<GeoShape> fwdShape;
+    GeoRef<GeoShape> bpShape;
   };
 
 

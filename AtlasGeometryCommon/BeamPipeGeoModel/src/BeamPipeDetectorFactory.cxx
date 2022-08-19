@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2020 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "BeamPipeDetectorFactory.h"
@@ -70,7 +70,7 @@ void BeamPipeDetectorFactory::create(GeoPhysVol *world)
   const GeoMaterial* ether = m_materialManager->getMaterial("special::Ether");
   GeoTube* dummytube= new GeoTube(0., 4711., 4711.);
   GeoLogVol* dummyBeamPipe = new GeoLogVol("BeamPipe",dummytube,ether);
-  GeoPhysVol* theBeamPipe = new GeoPhysVol(dummyBeamPipe);
+  GeoRef<GeoPhysVol> theBeamPipe (new GeoPhysVol(dummyBeamPipe));
 
   EnvelopeShapes envelopes;
 
@@ -353,7 +353,7 @@ BeamPipeDetectorFactory::makeEnvelope(const IRDBRecordset_ptr& bpipeEnvelope)
     envelopes.centralShape  = new GeoTube(0, rFwd, m_centralRegionZMax);
   } else {
     // This case probably will never get used and is untested.
-    GeoPcon* pcone = new GeoPcon(0, 360*Gaudi::Units::deg);
+    GeoRef<GeoPcon> pcone (new GeoPcon(0, 360*Gaudi::Units::deg));
 
     pcone->addPlane(-m_centralRegionZMax,0,rFwd);
     for (int i=centralEntry.size()-1; i>=0; i--) {  
@@ -373,7 +373,7 @@ BeamPipeDetectorFactory::makeEnvelope(const IRDBRecordset_ptr& bpipeEnvelope)
   
   // forward
   {
-    GeoPcon* pcone = new GeoPcon(0, 360*Gaudi::Units::deg);
+    GeoRef<GeoPcon> pcone (new GeoPcon(0, 360*Gaudi::Units::deg));
     pcone->addPlane(m_centralRegionZMax,0,rFwd);
     if (fwdEntry.size() == 0) { 
       // Unlikely case but for completeness
@@ -390,7 +390,7 @@ BeamPipeDetectorFactory::makeEnvelope(const IRDBRecordset_ptr& bpipeEnvelope)
 
   //central+fwd
   {
-    GeoPcon* Pcone = new GeoPcon(0, 360*Gaudi::Units::deg);
+    GeoRef<GeoPcon> Pcone =(new GeoPcon(0, 360*Gaudi::Units::deg));
     for (int i=fwdEntry.size()-1; i>=0; i--) {
       double z = fwdEntry[i].z();
       double r = fwdEntry[i].r();
@@ -423,14 +423,14 @@ BeamPipeDetectorFactory::makeEnvelopeOld(const IRDBRecordset_ptr& atlasMother)
   double clen = (*atlasMother)[0]->getDouble("CALOZMX")*Gaudi::Units::cm;
 
   // Central Section.
-  GeoTube * bpipeCentralShape = new GeoTube(0, iir, m_centralRegionZMax);
+  GeoRef<GeoTube> bpipeCentralShape (new GeoTube(0, iir, m_centralRegionZMax));
 
   // Left/Right section. We create this once (as the +ve z section) and
   // place th -ve section by doing a rotation.
 
   // Right section (+ve z)
 
-  GeoPcon* bpipeEnvPcone = new GeoPcon(0, 360*Gaudi::Units::deg);
+  GeoRef<GeoPcon> bpipeEnvPcone (new GeoPcon(0, 360*Gaudi::Units::deg));
   bpipeEnvPcone->addPlane(m_centralRegionZMax,0,iir);
   bpipeEnvPcone->addPlane(ilen,0,iir);
   bpipeEnvPcone->addPlane(ilen,0,cir); 
