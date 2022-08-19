@@ -68,7 +68,7 @@ def createRecoConfigFlags():
                   prevFlags.Input.isMC)
     flags.addFlag("Reco.PostProcessing.InDetForwardTrackParticleThinning",
                   lambda prevFlags: prevFlags.Reco.EnablePostProcessing and
-                  prevFlags.Reco.EnableTracking and prevFlags.Reco.EnableCombinedMuon)
+                  prevFlags.Reco.EnableTracking)
     return flags
 
 
