@@ -52,7 +52,7 @@ StatusCode MdtRdoToMdtDigit::decodeMdt(const MdtCsm* rdoColl, MdtDigitContainer*
         // for each Csm, loop over AmtHit, converter AmtHit to digit
         // retrieve/create digit collection, and insert digit into collection
         for (const MdtAmtHit* amtHit : *rdoColl) {
-            MdtDigit* newDigit = m_mdtRdoDecoderTool->getDigit(amtHit, subdetId, mrodId, csmId);
+            std::unique_ptr<MdtDigit> newDigit{m_mdtRdoDecoderTool->getDigit(amtHit, subdetId, mrodId, csmId)};
 
             if (!newDigit) {
                 ATH_MSG_WARNING("Error in MDT RDO decoder");
@@ -74,20 +74,20 @@ StatusCode MdtRdoToMdtDigit::decodeMdt(const MdtCsm* rdoColl, MdtDigitContainer*
                 MdtDigitCollection* coll = nullptr;
                 auto sc ATLAS_THREAD_SAFE = mdtContainer->naughtyRetrieve(coll_hash, coll);
                 if (sc.isFailure()) return StatusCode::FAILURE;
-                if (nullptr == coll) {
+                if (!coll) {
                     MdtDigitCollection* newCollection = new MdtDigitCollection(elementId, coll_hash);
-                    newCollection->push_back(newDigit);
+                    newCollection->push_back(std::move(newDigit));
                     collection = newCollection;
                     if (mdtContainer->addCollection(newCollection, coll_hash).isFailure())
                         ATH_MSG_WARNING("Couldn't record MdtDigitCollection with key=" << coll_hash << " in StoreGate!");
                 } else {
                     MdtDigitCollection* oldCollection = coll;
-                    oldCollection->push_back(newDigit);
+                    oldCollection->push_back(std::move(newDigit));
                     collection = oldCollection;
                 }
                 oldId = elementId;
             } else {
-                collection->push_back(newDigit);
+                collection->push_back(std::move(newDigit));
             }
         }
     }

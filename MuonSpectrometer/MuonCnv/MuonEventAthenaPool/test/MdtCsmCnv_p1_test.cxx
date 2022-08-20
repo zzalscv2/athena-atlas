@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2017 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
 */
 
 // $Id$
@@ -14,6 +14,7 @@
 #include "../src/MdtCsmCnv_p1.h"
 #include "TestTools/leakcheck.h"
 #include "GaudiKernel/MsgStream.h"
+#include "StoreGate/StoreGateSvc.h"
 #include <cassert>
 #include <iostream>
 
@@ -55,6 +56,7 @@ void test1()
 
 int main()
 {
+  Gaudi::svcLocator();
   test1();
   return 0;
 }

@@ -20,8 +20,7 @@ def MdtRDO_DecoderCfg(flags, name="Muon::MdtRDO_Decoder", **kwargs):
 def MdtRdoToMdtDigitCfg(flags, name="MdtRdoToMdtDigitAlg", **kwargs):
     """Return ComponentAccumulator with configured MdtRdoToMdtDigit algorithm"""
     acc = MuonIdHelperSvcCfg(flags)
-    kwargs.setdefault("mdtRdoDecoderTool", acc.popToolsAndMerge(MdtRDO_DecoderCfg(flags)))
-
+    kwargs.setdefault("mdtRdoDecoderTool", acc.popToolsAndMerge(MdtRDO_DecoderCfg(flags)))   
     if flags.Common.isOverlay:
         kwargs.setdefault("MdtRdoContainer", f"{flags.Overlay.BkgPrefix}MDTCSM")
         kwargs.setdefault("MdtDigitContainer", f"{flags.Overlay.BkgPrefix}MDT_DIGITS")
@@ -123,7 +122,9 @@ def MdtDigitToMdtRDOCfg(flags, name="MdtDigitToMdtRDO", **kwargs):
     """Return ComponentAccumulator with configured MdtDigitToMdtRDO algorithm"""
     acc = ComponentAccumulator()
     kwargs.setdefault("MuonIdHelperSvc", acc.getPrimaryAndMerge(MuonIdHelperSvcCfg(flags)).name)
-
+    ### Disable failures due to improper cabling maps
+    from AthenaConfiguration.Enums import LHCPeriod
+    kwargs.setdefault("isPhaseII", flags.GeoModel.Run >= LHCPeriod.Run4)
     if flags.Common.ProductionStep == ProductionStep.PileUpPresampling:
         kwargs.setdefault("OutputObjectName", f"{flags.Overlay.BkgPrefix}MDTCSM")
     else:

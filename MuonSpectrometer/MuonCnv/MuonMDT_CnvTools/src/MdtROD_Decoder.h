@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef MUONBYTESTREAM_MDTROD_DECODER_H
@@ -28,10 +28,10 @@
 #include "eformat/SourceIdentifier.h"
 #include "eformat/Version.h"
 
-typedef std::map<uint16_t, MdtAmtHit*, std::less<uint16_t> > leading_amt_map;
-
 class MdtROD_Decoder : public AthAlgTool {
 public:
+    using leading_amt_map = std::map<uint16_t, std::unique_ptr<MdtAmtHit>>;
+
     /** constructor
      */
     MdtROD_Decoder(const std::string& type, const std::string& name, const IInterface* parent);
@@ -54,8 +54,6 @@ public:
 
     int specialROBNumber() const { return m_specialROBNumber; }
 
-    std::pair<IdentifierHash, Identifier> getHash(Identifier ident) const;
-
 private:
     std::unique_ptr<MDT_Hid2RESrcID> m_hid2re{};
     SG::ReadCondHandleKey<MuonMDT_CablingMap> m_readKey{this, "ReadKey", "MuonMDT_CablingMap", "Key of MuonMDT_CablingMap"};
@@ -64,9 +62,6 @@ private:
 
     /** TMP special ROB number for sector13 runs*/
     int m_specialROBNumber{-1};
-
-    bool m_BMEpresent{false};
-    int m_BMEid{-1};
 
     // variables to count how often the caching kicks in
     // Mutable as this is just to count calls of const function
