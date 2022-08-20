@@ -7,7 +7,7 @@ include ("GeneratorFilters/CreatexAODSlimContainers.py")
 
 from GeneratorFilters.GeneratorFiltersConf import xAODForwardProtonFilter
 xAODForwardProtonFilter = xAODForwardProtonFilter("xAODForwardProtonFilter")  
-filtSeq += xAODForwardProtonTimeFilter
+filtSeq += xAODForwardProtonFilter
 
 # to modiify cuts put into JOs e.g.:
 #filtSeq.xAODForwardProtonFilter.xi_min = 0.00
