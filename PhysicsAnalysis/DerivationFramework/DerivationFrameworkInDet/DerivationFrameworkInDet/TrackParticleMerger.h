@@ -58,7 +58,7 @@ namespace DerivationFramework {
                                xAOD::TrackParticleContainer* outputCol) const;
 
     private:
-      Gaudi::Property<bool>  m_createViewCollection{this, "createViewColllection", true};     //!< option to create a view collection and not deep-copy tracks 
+      Gaudi::Property<bool>  m_createViewCollection{this, "CreateViewColllection", true};     //!< option to create a view collection and not deep-copy tracks 
     };
     
 }
