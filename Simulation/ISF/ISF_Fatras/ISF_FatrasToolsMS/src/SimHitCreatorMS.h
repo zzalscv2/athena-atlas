@@ -126,8 +126,6 @@ namespace iFatras
       
       double                               m_mdtSigmaDriftRadius;
       
-      mutable std::string                  m_stationName; 
-
       int   				   m_BMGid; //added to protect against dead sensors
       bool                                 m_createAllMdtHits;      
       bool   				   m_BMGpresent = false;//added to protect against dead sensors
