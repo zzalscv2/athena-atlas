@@ -841,6 +841,7 @@ StatusCode EventSelectorAthenaPool::seek(Context& /*ctxt*/, int evtNum) const {
          // Create DataHeader iterators
          m_headerIterator = &m_poolCollectionConverter->executeQuery();
          EventContextAthenaPool* beginIter = new EventContextAthenaPool(this);
+         m_evtCount = m_firstEvt[m_curCollection];
          next(*beginIter).ignore();
          ATH_MSG_DEBUG("Token " << m_headerIterator->eventRef().toString());
       } catch (std::exception &e) {
