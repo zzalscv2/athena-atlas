@@ -90,6 +90,13 @@ def writeDigitizationMetadata():
             logDigitizationWriteMetadata.debug('DigitizationMetaData: Not using jobproperty "%s" as it is switched off.', o)
     del digitMetaDataKeys
 
+    # PileUp
+    testKey = "pileUp"
+    from AthenaCommon.DetFlags import DetFlags
+    testValue = str(DetFlags.pileup.any_on() or digitizationFlags.doXingByXingPileUp())
+    logDigitizationWriteMetadata.info('DigitizationMetaData: setting "%s" to be %s', testKey, testValue)
+    dbFiller.addDigitParam(testKey, testValue)
+
     # Bunch Structure
     testKey = "BeamIntensityPattern"
     if digitizationFlags.BeamIntensityPattern.statusOn:
@@ -162,7 +169,6 @@ def writeDigitizationMetadata():
     del globalMetaDataKeys
 
     ## Digitized detector flags: add each enabled detector to the DigitizedDetectors list
-    from AthenaCommon.DetFlags import DetFlags
     digiDets = []
     for det in ['pixel','SCT','TRT','BCM','Lucid','ZDC','ALFA','AFP','FwdRegion','LAr','HGTD','Tile','MDT','CSC','TGC','RPC','MM','sTGC','Truth','LVL1']:
         attrname = det+"_on"
