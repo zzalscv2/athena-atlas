@@ -8,7 +8,7 @@ createxAODSlimmedContainer("TruthLightLeptons",prefiltSeq)
 prefiltSeq.xAODCnv.AODContainerName = 'GEN_EVENT'
 
 from GeneratorFilters.GeneratorFiltersConf import xAODDiLeptonMassFilter
-xAODSDiLeptonMassFilter = xAODDiLeptonMassFilter("xAODDiLeptonMassFilter")
+xAODDiLeptonMassFilter = xAODDiLeptonMassFilter("xAODDiLeptonMassFilter")
 filtSeq += xAODDiLeptonMassFilter
 
 # to modiify cuts put into JOs e.g.:
