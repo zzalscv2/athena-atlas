@@ -246,7 +246,7 @@ def FlavorTagInit(DoReduceInfo = False,
 
 def applyBTagging(jetalg,algname,sequence):
     btagWPlist = [ 'FixedCutBEff_60', 'FixedCutBEff_70', 'FixedCutBEff_77', 'FixedCutBEff_85' ]
-    btagAlglist = [ 'MV2c10', 'MV2r', 'MV2rmu', 'DL1', 'DL1r', 'DL1rmu']
+    btagAlglist = [ 'MV2c10', 'DL1', 'DL1r' ]
 
     btagtooldict = {}
     from AthenaCommon.AppMgr import ToolSvc
