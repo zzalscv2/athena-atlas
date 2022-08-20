@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "LArEventTest/DumpLArDigits.h"
@@ -52,7 +52,7 @@ StatusCode DumpLArDigits::execute()
 {
  m_count++; 
  ATH_MSG_INFO ( "======== executing event "<< m_count << " ========" );
- const DataHandle<xAOD::EventInfo> thisEventInfo;
+ const xAOD::EventInfo* thisEventInfo;
  StatusCode sc=evtStore()->retrieve(thisEventInfo);
  if (sc!=StatusCode::SUCCESS)
    ATH_MSG_WARNING ( "No EventInfo object found!" );
@@ -61,7 +61,7 @@ StatusCode DumpLArDigits::execute()
    std::cout << "*** Event #" << std::dec << thisEventInfo->runNumber() << "/" << thisEventInfo->eventNumber() << std::endl;
    }
 
- const DataHandle < LArDigitContainer > digit_cont;
+ const LArDigitContainer* digit_cont;
  
  if (m_key.size())
    ATH_CHECK( evtStore()->retrieve(digit_cont,m_key) );

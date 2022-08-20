@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2019 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "LArEventTest/FindDuplicatedLArDigits.h"
@@ -63,7 +63,7 @@ StatusCode FindDuplicatedLArDigits::initialize()
 StatusCode FindDuplicatedLArDigits::execute()
 {
   // Retrieve EventInfo
-  const DataHandle<xAOD::EventInfo> thisEventInfo;
+  const xAOD::EventInfo* thisEventInfo;
   StatusCode sc=evtStore()->retrieve(thisEventInfo);
   unsigned eventnumber=0;
   if (sc!=StatusCode::SUCCESS)
@@ -73,7 +73,7 @@ StatusCode FindDuplicatedLArDigits::execute()
   }
 
   // Retrieve LArDigitContainer
-  const DataHandle < LArDigitContainer > digit_cont;
+  const LArDigitContainer* digit_cont;
   if (m_contKey.size())
     ATH_CHECK( evtStore()->retrieve(digit_cont,m_contKey) );
   else
