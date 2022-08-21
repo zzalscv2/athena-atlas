@@ -6,9 +6,6 @@ from PyJobTransforms.TransformUtils import processPreExec, processPreInclude, pr
 
 
 def fromRunArgs(runArgs):
-    from AthenaCommon.Configurable import Configurable
-    Configurable.configurableRun3Behavior = True
-
     from AthenaCommon.Logging import logging
     log = logging.getLogger('RDOMerge_tf')
     log.info('****************** STARTING RDO MERGING *****************')
