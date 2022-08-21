@@ -57,13 +57,12 @@ def getCopyTruthLabelParticles(truthtype):
     return ctp
 
 # Generates input truth particle containers for truth jets
-def getCopyTruthJetParticles(modspec):
+def getCopyTruthJetParticles(modspec, cflags):
     truthclassif = getMCTruthClassifier()
 
     barCodeFromMetadata=2
-    # # Input file is EVNT
-    from RecExConfig.ObjKeyStore import objKeyStore
-    if objKeyStore.isInInput( "McEventCollection", "GEN_EVENT" ):
+    # Input file is EVNT
+    if "McEventCollection#GEN_EVENT" in cflags.Input.TypedCollections:
         barCodeFromMetadata=0
 
     truthpartcopy = CompFactory.CopyTruthJetParticles(
