@@ -1,6 +1,4 @@
-################################################################################
-# Package: ISF_ActsTools
-################################################################################
+# Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
 
 # Declare the package name:
 atlas_subdir( ISF_ActsTools )
@@ -14,7 +12,7 @@ atlas_add_component( ISF_ActsTools
 		             INCLUDE_DIRS
                      ${CLHEP_INCLUDE_DIRS} ${HEPMC_INCLUDE_DIRS}
                      ${EIGEN_INCLUDE_DIRS}
-                     LINK_LIBRARIES ActsCore ActsFatras AthenaBaseComps
+                     LINK_LIBRARIES ActsCore ActsFatras AthenaBaseComps CxxUtils
                      TrkTrack ISF_Event AthenaKernel AtlasDetDescr GeoPrimitives
                      GaudiKernel GeneratorObjects ISF_Event StoreGateLib
                      GeoModelUtilities ActsInteropLib ActsGeometryLib
