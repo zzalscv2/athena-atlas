@@ -24,8 +24,15 @@ def fastCaloSequence(flags, name="fastCaloSequence"):
     (fastCaloViewsMaker, InViewRoIs) = fastCaloEVCreator()
     # reco sequence always build the rings
     (fastCaloInViewSequence, sequenceOut) = fastCaloRecoSequence(InViewRoIs, doRinger=True)
+
+    from TrigGenericAlgs.TrigGenericAlgsConfig import ROBPrefetchingAlgCfg_Calo
+    robPrefetchAlg = RecoFragmentsPool.retrieve(ROBPrefetchingAlgCfg_Calo,
+                                                flags,
+                                                nameSuffix=fastCaloViewsMaker.name(),
+                                                inputMaker=fastCaloViewsMaker)
+
      # connect EVC and reco
-    fastCaloSequence = seqAND(name, [fastCaloViewsMaker, fastCaloInViewSequence ])
+    fastCaloSequence = seqAND(name, [fastCaloViewsMaker, robPrefetchAlg, fastCaloInViewSequence ])
     return (fastCaloSequence, fastCaloViewsMaker, sequenceOut)
 
 

@@ -1,6 +1,7 @@
 # Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
 
 from AthenaConfiguration.ComponentFactory import CompFactory
+from TrigPartialEventBuilding.TrigPartialEventBuildingConfig import getRegSelTools
 
 class TimeBurnerCfg(CompFactory.TimeBurner):
     def __init__(self, name="TimeBurner", **kwargs):
@@ -41,3 +42,17 @@ def L1CorrelationAlgCfg(name, **kwargs):
     kwargs.setdefault("MonTool",L1CorrelationMonitoringCfg("L1CorrelationAlg"))
     return CompFactory.L1CorrelationAlg(name, **kwargs)
 
+def ROBPrefetchingAlgCfg(flags, name, inputMaker=None, regSelDets=[]):
+    alg = CompFactory.ROBPrefetchingAlg(name)
+    alg.RegionSelectorTools = getRegSelTools(flags, regSelDets)
+
+    return alg
+
+def ROBPrefetchingAlgCfg_Si(flags, nameSuffix, inputMaker=None):
+    return ROBPrefetchingAlgCfg(flags, 'ROBPrefetchingAlg_Si_'+nameSuffix, inputMaker, ['Pixel', 'SCT'])
+
+def ROBPrefetchingAlgCfg_Calo(flags, nameSuffix, inputMaker=None):
+    return ROBPrefetchingAlgCfg(flags, 'ROBPrefetchingAlg_Calo_'+nameSuffix, inputMaker, ['TTEM', 'TTHEC', 'FCALEM', 'FCALHAD', 'TILE'])
+
+def ROBPrefetchingAlgCfg_Muon(flags, nameSuffix, inputMaker=None):
+    return ROBPrefetchingAlgCfg(flags, 'ROBPrefetchingAlg_Muon_'+nameSuffix, inputMaker, ['MDT', 'RPC', 'TGC', 'CSC', 'MM', 'sTGC'])

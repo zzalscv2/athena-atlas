@@ -61,7 +61,13 @@ def fastElectronSequence(ConfigFlags, variant=''):
     electronInViewAlgs = parOR("electronInViewAlgs"+variant, viewAlgs + [ theElectronFex ])
     l2ElectronViewsMaker.ViewNodeName = "electronInViewAlgs"+variant
 
-    electronAthSequence = seqAND("electronAthSequence"+variant, [l2ElectronViewsMaker, electronInViewAlgs ] )
+    from TrigGenericAlgs.TrigGenericAlgsConfig import ROBPrefetchingAlgCfg_Si
+    robPrefetchAlg = RecoFragmentsPool.retrieve(ROBPrefetchingAlgCfg_Si,
+                                                ConfigFlags,
+                                                nameSuffix=l2ElectronViewsMaker.name(),
+                                                inputMaker=l2ElectronViewsMaker)
+
+    electronAthSequence = seqAND("electronAthSequence"+variant, [l2ElectronViewsMaker, robPrefetchAlg, electronInViewAlgs ] )
     return (electronAthSequence, l2ElectronViewsMaker)
 
 

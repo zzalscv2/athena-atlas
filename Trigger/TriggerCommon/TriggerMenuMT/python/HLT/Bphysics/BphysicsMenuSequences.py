@@ -36,7 +36,13 @@ def bmumuxAlgSequence(ConfigFlags):
 
     viewMaker.ViewNodeName = recoSequence.name()
 
-    sequence = seqAND('bmumuxSequence', [viewMaker, recoSequence])
+    from TrigGenericAlgs.TrigGenericAlgsConfig import ROBPrefetchingAlgCfg_Si
+    robPrefetchAlg = RecoFragmentsPool.retrieve(ROBPrefetchingAlgCfg_Si,
+                                                ConfigFlags,
+                                                nameSuffix=viewMaker.name(),
+                                                inputMaker=viewMaker)
+
+    sequence = seqAND('bmumuxSequence', [viewMaker, robPrefetchAlg, recoSequence])
 
     return (sequence, viewMaker)
 
