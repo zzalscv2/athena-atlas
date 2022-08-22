@@ -12,6 +12,7 @@ atlas_depends_on_subdirs(
    Event/xAOD/xAODMuon
    PhysicsAnalysis/MuonID/MuonSelectorTools
    Reconstruction/Jet/JetEDM
+   Event/FourMomUtils
    PRIVATE
    Tools/PathResolver )
 
