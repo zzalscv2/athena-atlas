@@ -176,7 +176,32 @@ def defineMenu():
         # TGC
         'L1_TGC_BURST',
 
+        # ZDC bits and comb for debugging
+        'L1_ZDC_BIT2',
+        'L1_ZDC_BIT1',
+        'L1_ZDC_BIT0',
+        'L1_ZDC_COMB0',
+        'L1_ZDC_COMB1',
+        'L1_ZDC_COMB2',
+        'L1_ZDC_COMB3',
+        'L1_ZDC_COMB4',
+        'L1_ZDC_COMB5',
+        'L1_ZDC_COMB6',
+        'L1_ZDC_COMB7',
+
+        # ZDC items for LHCf+ZDC special run ATR-26051
+        'L1_ZDC_OR'           ,
+        'L1_ZDC_XOR_E2'       ,
+        'L1_ZDC_XOR_E1_E3'    ,
+        'L1_ZDC_E1_AND_E1'    ,
+        'L1_ZDC_E1_AND_E2ORE3',
+        'L1_ZDC_E2_AND_E2'    ,
+        'L1_ZDC_E2_AND_E3'    ,
+        'L1_ZDC_E3_AND_E3'    ,
+        'L1_ZDC_A_AND_C'      ,
+        'L1_ZDC_OR_EMPTY', 'L1_ZDC_OR_UNPAIRED_ISO', 'L1_ZDC_OR_UNPAIRED_NONISO',
         # LHCF
+        'L1_LHCF', 'L1_LHCF_UNPAIRED_ISO', 'L1_LHCF_EMPTY',
     
         #CALREQ
         'L1_CALREQ1',
