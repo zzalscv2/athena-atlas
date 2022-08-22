@@ -77,7 +77,19 @@ StatusCode  L1CaloCondAlg:: initialize ()
   // Readout Config JSON (Run 3)
   ATH_CHECK( m_readoutConfigJSON.initialize() );
   ATH_CHECK( m_readoutConfigContainerJSON.initialize() );
- 
+
+  static const std::string pprFolderBase = "/TRIGGER/L1Calo/V2/Calibration/";
+  // Should correspond with the PprKeys enum.
+  for (const std::string s : { "PprChanCalib", "PprChanCommon",
+                                "PprChanHighMu", "PprChanLowMu" })
+  {
+    m_physicsKeys.push_back (pprFolderBase + "Physics/" + s);
+    m_calib1Keys.push_back (pprFolderBase + "Calib1/" + s);
+    m_calib2Keys.push_back (pprFolderBase + "Calib2/" + s);
+  }
+  ATH_CHECK ( m_physicsKeys.initialize (m_usePhysicsRegime) );
+  ATH_CHECK( m_calib1Keys.initialize (m_useCalib1Regime) );
+  ATH_CHECK( m_calib2Keys.initialize (m_useCalib2Regime) );
 
   return StatusCode::SUCCESS;
 
@@ -151,6 +163,21 @@ StatusCode  L1CaloCondAlg:: execute ()
    
    ATH_MSG_DEBUG("timing regime --> "<< timingRegime );
 
+   SG::ReadCondHandleKeyArray<CondAttrListCollection>* pprKeys = nullptr;
+   if (timingRegime == "Physics") {
+     pprKeys = &m_physicsKeys;
+   }
+   else if (timingRegime == "Calib1") {
+     pprKeys = &m_calib1Keys;
+   }
+   else if (timingRegime == "Calib2") {
+     pprKeys = &m_calib2Keys;
+   }
+   else {
+     ATH_MSG_ERROR( "Bad timing regime " << timingRegime <<
+                    "; must be one of Physics, Calib1, Calib2" );
+     return StatusCode::FAILURE;
+   }
    
    // Strategy 
   
@@ -191,23 +218,12 @@ StatusCode  L1CaloCondAlg:: execute ()
   
   ATH_MSG_DEBUG("strategy selected --> " << strategy);
   
-
-
-
-  
+  const std::string keyPprChanCalib= (*pprKeys)[PPRCHANCALIB].key();
     
-  std::string keyPprChanCalib= "/TRIGGER/L1Calo/V2/Calibration/" + timingRegime  +"/PprChanCalib";
-  SG::ReadCondHandleKey<CondAttrListCollection> pprChanCalib (keyPprChanCalib);
-  
-  ATH_CHECK(pprChanCalib.initialize() );
-
-  
-
-
   SG::ReadCondHandle<CondAttrListCollection> readHandleDisTowers(m_disabledTowers);
   const CondAttrListCollection* readCdo_DisTowers(*readHandleDisTowers);
   
-  SG::ReadCondHandle<CondAttrListCollection> readHandlePprChanCalib(pprChanCalib);
+  SG::ReadCondHandle<CondAttrListCollection> readHandlePprChanCalib((*pprKeys)[PPRCHANCALIB]);
   const CondAttrListCollection* readCdo_PprChanCalib(*readHandlePprChanCalib);
 
   SG::ReadCondHandle<CondAttrListCollection> readHandlePprChanDefaults(m_pprChanDefaults);
@@ -587,27 +603,33 @@ StatusCode  L1CaloCondAlg:: execute ()
    if (!strategy.empty()){
      
 
-      std::string keyPprChanCommon = "/TRIGGER/L1Calo/V2/Calibration/" + timingRegime  +"/PprChanCommon";
-      SG::ReadCondHandleKey<CondAttrListCollection> pprChanCommon (keyPprChanCommon);
-      
-      ATH_CHECK(pprChanCommon.initialize() );
-  
-      
-      std::string keyPprChanStrategy =  "/TRIGGER/L1Calo/V2/Calibration/" + timingRegime + "/PprChan" + strategy;
-      SG::ReadCondHandleKey<CondAttrListCollection> pprChanStrategy (keyPprChanStrategy);
-  
-      ATH_CHECK(pprChanStrategy.initialize() );
-  
+      const std::string keyPprChanCommon = (*pprKeys)[PPRCHANCOMMON].key();
+
+      SG::ReadCondHandleKey<CondAttrListCollection>* pprChanStrategy = nullptr;
+      if (strategy == "HighMu") {
+        pprChanStrategy = &(*pprKeys)[PPRCHANHIGHMU];
+      }
+      else if (strategy == "LowMu") {
+        pprChanStrategy = &(*pprKeys)[PPRCHANLOWMU];
+      }
+      else {
+        ATH_MSG_ERROR( "Bad strategy " << strategy <<
+                       "; should be either HighMu or LowMu" );
+        return StatusCode::FAILURE;
+      }
+      const std::string keyPprChanStrategy = pprChanStrategy->key();
+
+
       ATH_MSG_DEBUG("Entering to !strategy.empty() option --> strategy " << strategy);
       ATH_MSG_DEBUG("PprChanCommon folder " << keyPprChanCommon );
       ATH_MSG_DEBUG("PprChanStrategy folder " << keyPprChanStrategy);
 
 
 
-      SG::ReadCondHandle<CondAttrListCollection> readHandlePprChanCommon(pprChanCommon);
+      SG::ReadCondHandle<CondAttrListCollection> readHandlePprChanCommon((*pprKeys)[PPRCHANCOMMON]);
       const CondAttrListCollection* readCdo_PprChanCommon(*readHandlePprChanCommon);
       
-      SG::ReadCondHandle<CondAttrListCollection> readHandlePprChanStrategy(pprChanStrategy);
+      SG::ReadCondHandle<CondAttrListCollection> readHandlePprChanStrategy(*pprChanStrategy);
       const CondAttrListCollection* readCdo_PprChanStrategy(*readHandlePprChanStrategy);
       
       if (readCdo_PprChanCommon == 0) {
