@@ -61,8 +61,7 @@ def AFP_LocReco_SiD_Cfg(flags, kwargs={}):
 def AFP_LocReco_TD_Cfg(flags, kwargs={}):
 
         acc = ComponentAccumulator()
-        
-        acc.addCondAlgo(CompFactory.CondInputLoader(Load=[('CondAttrListCollection', 'ConditionStore+/FWD/AFP/ToFParameters/Local')]))
+
         if flags.Input.isMC:
                 # if other tags are desired, they can be set also in postExec, e.g.
                 # --postExec 'from IOVDbSvc.CondDB import conddb; conddb.addOverride("/FWD/AFP/ToFParameters/Local","AFPMCToFLoc-329484-02");'
