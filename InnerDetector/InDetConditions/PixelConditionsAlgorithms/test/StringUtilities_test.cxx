@@ -24,6 +24,9 @@
 #include "DeadMapTestString.h"
 #include <stdexcept>
 
+//also check: ctest -R Trigger_athenaHLT_v1Cosmic
+//after checking out CITest
+
 using ValueType = std::pair<int, int>;
 std::ostream & 
 operator<<(std::ostream & o, const ValueType& v){
@@ -40,6 +43,7 @@ namespace boost::test_tools::tt_detail {
   };                                                          
 }
 
+
 BOOST_AUTO_TEST_SUITE(PixelConditionsAlgorithmsStringUtilitiesTest)
   BOOST_AUTO_TEST_CASE(parseDeadMapString){
     const std::string emptyString;
@@ -53,6 +57,13 @@ BOOST_AUTO_TEST_SUITE(PixelConditionsAlgorithmsStringUtilitiesTest)
     BOOST_TEST(run3Result[0] == ValueType(12,0));
     //check entry three which should be {64, 256}, so should be a chip status
     BOOST_TEST(run3Result[3] == ValueType(64,256));
+    BOOST_TEST_MESSAGE("Check results with the one-off anomalous db string format");
+    const std::string anomaly =   R"({"12":0,"19":0,"53":0,"64":256,"65":0,"139":0})";
+    const auto anomalousStringResult = PixelConditionsAlgorithms::parseDeadMapString(anomaly);
+    BOOST_TEST(anomalousStringResult.size() == 6);
+    BOOST_TEST(anomalousStringResult[3] == ValueType(64,256));
+    const std::string brokenDbString = R"({"494":512,"501":1024,"503":0,517:128})";
+    BOOST_CHECK_THROW(PixelConditionsAlgorithms::parseDeadMapString(brokenDbString), std::runtime_error);
   }
 
 

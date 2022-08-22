@@ -3,40 +3,59 @@
 */
 
 #include "StringUtilities.h"
-#include <sstream>
-//getline is in <string>, already included
+#include <charconv>  //for std::from_chars
+#include <algorithm> //for std::find_if
+#include <stdexcept> //for std::runtime_error
+#include <iostream>
+
+/*
+  original implementation used two string streams. A more complete std::regex_iterator
+  version was tried but results in a x4 increase in parsing time for 164 elements.
+  This version is approx ten times faster than the original implementation (local tests)
+  and is robust against small variations in the format, e.g. actual delimiters used.
+*/
 
 namespace PixelConditionsAlgorithms{
-
-   //parses the data_array string from the pixel dead map conditions db
   std::vector<std::pair<int, int>>//module hash, module status
-  parseDeadMapString(const std::string & dataArrayString){
+  parseDeadMapString(const std::string & s){
     std::vector<std::pair<int, int>> result;
-    if (dataArrayString.empty()) return result;
-    //
-    std::stringstream ss(dataArrayString);
-    std::vector<std::string> component;
-    std::string buffer;
-    while (std::getline(ss,buffer,',')) { 
-      component.push_back(buffer); 
-    }
-    for (const auto & elem : component) {
-      std::stringstream checkModule(elem);
-      std::vector<std::string> moduleString;
-      while (std::getline(checkModule,buffer,':')) { 
-        moduleString.push_back(buffer); 
+    //the Trigger_athenaHLT_v1Cosmic CI test returns a pair of empty braces, "{}"; trap this
+    if (s.size()<4) return result;
+    //a valid string is json, enclosed in braces.
+    const bool is_valid = (s.front() == '{') and (s.back() == '}');
+    if (not is_valid) return result;
+    auto is_digit=[](const char c)->bool{
+      return (c>='0') and (c<='9');
+    };
+    auto is_quote=[](const char c)->bool{
+      return (c=='"');
+    };
+    auto pc=s.data();
+    const auto pcEnd=pc+s.size();
+    int hash{};
+    int status{};
+    static constexpr  std::errc success{};
+    
+    //database strings look like : {"12":0,"19":0,"53":0,"64":256}
+    for (;pc<pcEnd;++pc){
+      //fast-forward to the first quote
+      pc=std::find_if(pc,pcEnd,is_quote);
+      //the following converts everything up to the first non-digit character 
+      //the ptr is pointing to the first non-digit character (which should be a quote)
+      const auto &[ptr, errCode] = std::from_chars(++pc, pcEnd, hash);
+      if (errCode!= success){
+        throw std::runtime_error("Bad hash conversion from database string in PixelConditionsAlgorithms::parseDeadMapString:" +s+".");
       }
-      if (moduleString.size()==2) {
-        std::stringstream checkModuleHash(moduleString[0]);
-        std::vector<std::string> moduleStringHash;
-        while (std::getline(checkModuleHash,buffer,'"')) { 
-          moduleStringHash.push_back(buffer); 
-        }
-        const int moduleHash   = std::stoi(moduleStringHash[1]);
-        const int moduleStatus = std::stoi(moduleString[1]);
-        result.push_back({moduleHash, moduleStatus}); 
+      //fast-forward to the next digit
+      pc=std::find_if(ptr,pcEnd,is_digit);
+      const auto &[ptr2, errCode2] = std::from_chars(pc, pcEnd, status);
+      if (errCode2!= success){
+        throw std::runtime_error("Bad status conversion from database string in PixelConditionsAlgorithms::parseDeadMapString:"+s+".");
       }
+      pc=ptr2;
+      result.emplace_back(hash, status);
     }
+    
     //
     return result;
   }
