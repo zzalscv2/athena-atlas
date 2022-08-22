@@ -38,10 +38,6 @@ def IP3DTagCfg( flags, name = 'IP3DTag', PrimaryVertexCollectionName="", scheme 
         trackGradeFactory = acc.popToolsAndMerge(IPDetailedTrackGradeFactoryCfg(flags, 'IP3DDetailedTrackGradeFactory'))
         trackSelectorTool = acc.popToolsAndMerge(IPTrackSelectorCfg(flags, 'IP3DTrackSelector'))
         likelihood = acc.popToolsAndMerge(NewLikelihoodToolCfg(flags, 'IP3DNewLikelihoodTool', 'IP3D', scheme))
-        from InDetConfig.InDetTrackSelectionToolConfig import InDetTrackSelectionTool_Loose_Cfg
-        inDetTrackSelectionTool = acc.popToolsAndMerge(
-            InDetTrackSelectionTool_Loose_Cfg(flags, name='InDetTrackSelector',
-                                              maxZ0SinTheta = 3))
 
         defaults = { 'Runmodus'                         : flags.BTagging.RunModus,
                      'referenceType'                    : flags.BTagging.ReferenceType,
@@ -61,7 +57,6 @@ def IP3DTagCfg( flags, name = 'IP3DTag', PrimaryVertexCollectionName="", scheme 
                      'SVForIPTool'                      : svForIPTool,
                      'trackGradeFactory'                : trackGradeFactory,
                      'TrackToVertexIPEstimator'         : trackToVertexIPEstimator,
-                     'InDetTrackSelectionTool'          : inDetTrackSelectionTool,
                      }
         for option in defaults:
             options.setdefault(option, defaults[option])
