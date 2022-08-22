@@ -113,22 +113,22 @@ namespace ExpressionParsing {
 
 
 
-  void Compiler::operator()(unsigned int n) const
+  void Compiler::operator()(unsigned int n)
   {
     code.push_back(op_val);
     code.push_back(n);
   }
-  void Compiler::operator()(bool n) const
+  void Compiler::operator()(bool n)
   {
     code.push_back(op_val);
     code.push_back((int)n);
   }
-  void Compiler::operator()(double n) const
+  void Compiler::operator()(double n)
   {
     code.push_back(op_val);
     code.push_back(n);
   }
-  void Compiler::operator()(const std::string &n) const
+  void Compiler::operator()(const std::string &n)
   {
     const IUnitInterpreter *units = m_unitInterpreter;
 
@@ -142,7 +142,7 @@ namespace ExpressionParsing {
     else                              code.push_back(StackElement(n, m_proxyLoader));
   }
 
-  void Compiler::operator()(ast::operation const& x) const
+  void Compiler::operator()(ast::operation const& x)
   {
     boost::apply_visitor(*this, x.operand_);
     if (x.operator_ == "&&") code.push_back(op_and);
@@ -161,7 +161,7 @@ namespace ExpressionParsing {
     else BOOST_ASSERT(0);
   }
 
-  void Compiler::operator()(ast::unaryexpr_ const& x) const
+  void Compiler::operator()(ast::unaryexpr_ const& x)
   {
     boost::apply_visitor(*this, x.operand_);
     if (x.operator_ == "-") code.push_back(op_neg);
@@ -189,7 +189,7 @@ namespace ExpressionParsing {
     else BOOST_ASSERT(0);
   }
 
-  void Compiler::operator()(ast::expression const& x) const
+  void Compiler::operator()(ast::expression const& x)
   {
     boost::apply_visitor(*this, x.first);
     for(ast::operation const& oper : x.rest)
