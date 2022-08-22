@@ -196,7 +196,7 @@ StatusCode  ISF::GeoIDSvc::initialize()
     RadiusGeoIDPairSet::iterator radIt    = tmpRBinsGlobal[i].begin();
     RadiusGeoIDPairSet::iterator radItEnd = tmpRBinsGlobal[i].end();
     size_t                       ii = 0;
-    for ( ; radIt!=radItEnd; radIt++) {
+    for ( ; radIt!=radItEnd; ++radIt) {
       double curR = sqrt((*radIt).first);
       // skip this one if it has radius==0
       if (curR<m_tolerance) continue;
@@ -381,7 +381,7 @@ ISF::RZPairList* ISF::GeoIDSvc::prepareRZPairs( AtlasDetDescr::AtlasRegion geoID
     // loop over the (r,z) pairs in the given RZPairVector
     RZPairVector::const_iterator rzIt    = rz.begin();
     RZPairVector::const_iterator rzItEnd = rz.end();
-    for (; rzIt!=rzItEnd; rzIt++) {
+    for (; rzIt!=rzItEnd; ++rzIt) {
       const RZPair &curRZ = *rzIt;
       double   curZ = curRZ.second;
       int  curZSign = sign(curZ);
@@ -495,13 +495,13 @@ bool ISF::GeoIDSvc::checkSymmetric( RZPairList& positiveZ, RZPairList& negativeZ
   RZPairList::iterator negIt      = negativeZ.end();
 
   while ( posIt != posItEnd) {
-    negIt--;
+    --negIt;
 
     // require that deltaR and deltaZ are the same within bounds
     if ( fabs(negIt->first-posIt->first)>m_tolerance || fabs(negIt->second+posIt->second)>m_tolerance)
       return false;
 
-    posIt++;
+    ++posIt;
   }
 
   // all fine

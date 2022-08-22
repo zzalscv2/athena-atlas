@@ -144,11 +144,11 @@ StatusCode ISF::SimHitTreeCreator::fillSimHitsTree()
       HepMcParticleLink HMPL = (*ih).particleLink();
       this->addHepMcParticleLinkInfoToTree(HMPL);
 
-      ih++;
+      ++ih;
       while (ih!=mdtHits->end() && m_id==(*ih).MDTid() && m_barcode==(*ih).trackNumber() ) {
         // merge energy deposits and move on
         m_edeposit += (*ih).energyDeposit();
-        ih++;
+        ++ih;
       }
       m_t_simHits->Fill();
     }
@@ -168,11 +168,11 @@ StatusCode ISF::SimHitTreeCreator::fillSimHitsTree()
       HepMcParticleLink HMPL = (*ih).particleLink();
       this->addHepMcParticleLinkInfoToTree(HMPL);
 
-      ih++;
+      ++ih;
       while (ih!=rpcHits->end() && m_id==(*ih).RPCid() && m_barcode==(*ih).trackNumber() ) {
         // merge energy deposits and move on
         m_edeposit += (*ih).energyDeposit();
-        ih++;
+        ++ih;
       }
       m_t_simHits->Fill();
     }
@@ -192,11 +192,11 @@ StatusCode ISF::SimHitTreeCreator::fillSimHitsTree()
       HepMcParticleLink HMPL = (*ih).particleLink();
       this->addHepMcParticleLinkInfoToTree(HMPL);
 
-      ih++;
+      ++ih;
       while (ih!=tgcHits->end() && m_id==(*ih).TGCid() && m_barcode==(*ih).trackNumber() ) {
         // merge energy deposits and move on
         m_edeposit += (*ih).energyDeposit();
-        ih++;
+        ++ih;
       }
       m_t_simHits->Fill();
     }
@@ -216,11 +216,11 @@ StatusCode ISF::SimHitTreeCreator::fillSimHitsTree()
       HepMcParticleLink HMPL = (*ih).particleLink();
       this->addHepMcParticleLinkInfoToTree(HMPL);
 
-      ih++;
+      ++ih;
       while (ih!=cscHits->end() && m_id==(*ih).CSCid() && m_barcode==(*ih).trackNumber() ) {
         // merge energy deposits and move on
         m_edeposit += (*ih).energyDeposit();
-        ih++;
+        ++ih;
       }
       m_t_simHits->Fill();
     }
@@ -244,11 +244,11 @@ StatusCode ISF::SimHitTreeCreator::fillSimHitsTree()
         m_barcode = (*ih).trackNumber();
         this->addHepMcParticleLinkInfoToTree(HMPL);
 
-        ih++;
+        ++ih;
         while (ih!=pixHits->end() && ((unsigned int)m_id)==(*ih).identify() && m_barcode==(*ih).trackNumber() ) {
           // merge energy deposits and move on
           m_edeposit += (*ih).energyLoss();
-          ih++;
+          ++ih;
         }
         m_t_simHits->Fill();
       }
@@ -269,11 +269,11 @@ StatusCode ISF::SimHitTreeCreator::fillSimHitsTree()
         m_barcode = (*ih).trackNumber();
         this->addHepMcParticleLinkInfoToTree(HMPL);
 
-        ih++;
+        ++ih;
         while (ih!=sctHits->end() && ((unsigned int)m_id)==(*ih).identify() && m_barcode==(*ih).trackNumber() ) {
           // merge energy deposits and move on
           m_edeposit += (*ih).energyLoss();
-          ih++;
+          ++ih;
         }
         m_t_simHits->Fill();
       }
@@ -293,7 +293,7 @@ StatusCode ISF::SimHitTreeCreator::fillSimHitsTree()
         m_barcode = (*ih).GetTrackID();
         this->addHepMcParticleLinkInfoToTree(HMPL);
 
-        ih++;
+        ++ih;
         while (ih!=trtHits->end() && m_id==(*ih).GetHitID() && m_barcode==(*ih).GetTrackID() ) {
           // merge energy deposits and move on
           m_edeposit += (*ih).GetEnergyDeposit();
