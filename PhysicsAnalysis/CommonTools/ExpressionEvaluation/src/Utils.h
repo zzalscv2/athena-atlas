@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
 */
 #ifndef _ExpressionEvaluation_Utils_h_
 #define _ExpressionEvaluation_Utils_h_
@@ -8,6 +8,7 @@
 #include "GaudiKernel/DataHandle.h"
 #include "AthContainers/AuxVectorBase.h"
 #include "AthContainers/AuxElement.h"
+#include "CxxUtils/checker_macros.h"
 
 namespace ExpressionParsing {
 /** Auxiliary function to initialize newly create data handles.
@@ -93,10 +94,10 @@ namespace ExpressionParsing {
          return *s_instance;
       }
    private:
-      static CxxUtils::CachedUniquePtrT<T_Derived> s_instance;
+      static CxxUtils::CachedUniquePtrT<T_Derived> s_instance ATLAS_THREAD_SAFE;
    };
    template <class T_Derived>
-   CxxUtils::CachedUniquePtrT<T_Derived> Singleton<T_Derived>::s_instance;
+   CxxUtils::CachedUniquePtrT<T_Derived> Singleton<T_Derived>::s_instance ATLAS_THREAD_SAFE;
 
 }
 #endif

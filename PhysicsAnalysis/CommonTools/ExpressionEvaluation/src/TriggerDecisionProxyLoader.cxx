@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2017 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
 */
 
 /////////////////////////////////////////////////////////////////
@@ -11,6 +11,7 @@
 /////////////////////////////////////////////////////////////////
 
 #include "ExpressionEvaluation/TriggerDecisionProxyLoader.h"
+#include <set>
 #include <string>
 
 namespace ExpressionParsing {
@@ -24,7 +25,7 @@ namespace ExpressionParsing {
 
   IProxyLoader::VariableType TriggerDecisionProxyLoader::variableTypeFromString(const std::string &varname)
   {
-    static std::vector<std::string> knownPrefixes({"L1", "L2", "EF", "HLT"});
+    static const std::set<std::string> knownPrefixes{"L1", "L2", "EF", "HLT"};
 
     std::size_t location = varname.find('_');
     if (location == std::string::npos) return VT_UNK;

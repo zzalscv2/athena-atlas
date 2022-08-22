@@ -166,15 +166,15 @@ namespace ExpressionParsing
           IUnitInterpreter *unitInterpreter)
         : code(code), m_proxyLoader(proxyLoader), m_unitInterpreter(unitInterpreter) { }
 
-      void operator()(ast::nil) const { BOOST_ASSERT(0); }
-      void operator()(unsigned int n) const;
-      void operator()(bool n) const;
-      void operator()(double n) const;
-      void operator()(const std::string &n) const;
+      void operator()(ast::nil) { BOOST_ASSERT(0); }
+      void operator()(unsigned int n);
+      void operator()(bool n);
+      void operator()(double n);
+      void operator()(const std::string &n);
 
-      void operator()(ast::operation const& x) const;
-      void operator()(ast::unaryexpr_ const& x) const;
-      void operator()(ast::expression const& x) const;
+      void operator()(ast::operation const& x);
+      void operator()(ast::unaryexpr_ const& x);
+      void operator()(ast::expression const& x);
 
     private:
       IProxyLoader *m_proxyLoader;
