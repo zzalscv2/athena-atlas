@@ -150,7 +150,7 @@ StatusCode TileTrackFillerTool::fill(const xAOD::TrackParticle& p){
     const xAOD::TrackParticle* trackPointer = &p;
     
     if(!trackPointer) { ATH_MSG_INFO("NULL POINTER"); return StatusCode::RECOVERABLE; }
-
+    auto perigee = m_trackToVertexTool->perigeeAtVertex(Gaudi::Hive::currentContext(), *trackPointer);
     
     // STORE TRACK PARAMETERS
     if(m_LevelOfDetails > 0){
@@ -177,17 +177,17 @@ StatusCode TileTrackFillerTool::fill(const xAOD::TrackParticle& p){
         trackPointer->summaryValue( *((uint8_t*)m_numberOfSCTHits), xAOD::numberOfSCTHits );
         trackPointer->summaryValue( *((uint8_t*)m_numberOfTRTHits), xAOD::numberOfTRTHits );
   
-        *m_d0                               = m_trackToVertexTool->perigeeAtVertex(*trackPointer)->parameters()[Trk::d0];
-        *m_z0                               = m_trackToVertexTool->perigeeAtVertex(*trackPointer)->parameters()[Trk::d0];
+        *m_d0                               = perigee->parameters()[Trk::d0];
+        *m_z0                               = perigee->parameters()[Trk::d0];
     }
 
     if(m_LevelOfDetails > 1){
-        *m_vtxX                             = m_trackToVertexTool->perigeeAtVertex(*trackPointer)->parameters()[Trk::x];
-        *m_vtxY                             = m_trackToVertexTool->perigeeAtVertex(*trackPointer)->parameters()[Trk::y];
-        *m_vtxZ                             = m_trackToVertexTool->perigeeAtVertex(*trackPointer)->parameters()[Trk::z];
-        *m_phi0                             = m_trackToVertexTool->perigeeAtVertex(*trackPointer)->parameters()[Trk::phi0];
-        *m_theta                            = m_trackToVertexTool->perigeeAtVertex(*trackPointer)->parameters()[Trk::theta];
-        *m_qOverP                           = m_trackToVertexTool->perigeeAtVertex(*trackPointer)->parameters()[Trk::qOverP];
+        *m_vtxX                             = perigee->parameters()[Trk::x];
+        *m_vtxY                             = perigee->parameters()[Trk::y];
+        *m_vtxZ                             = perigee->parameters()[Trk::z];
+        *m_phi0                             = perigee->parameters()[Trk::phi0];
+        *m_theta                            = perigee->parameters()[Trk::theta];
+        *m_qOverP                           = perigee->parameters()[Trk::qOverP];
     }
 
     if(m_LevelOfDetails > 2){        

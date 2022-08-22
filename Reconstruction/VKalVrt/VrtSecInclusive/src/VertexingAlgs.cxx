@@ -1490,7 +1490,7 @@ namespace VKalVrtAthena {
     std::map<const WrkVrt*, const xAOD::Vertex*> wrkvrtLinkMap;
     
     //----------------------------------------------------------
-
+    auto ctx = Gaudi::Hive::currentContext();
 
     ATH_MSG_DEBUG(" > " << __FUNCTION__ << ": input #vertices = " << workVerticesContainer->size() );
     
@@ -1626,12 +1626,11 @@ namespace VKalVrtAthena {
         
         for( auto& itrk : *indices ) {
           const auto* trk = tracks.at( itrk );
-          const auto* sv_perigee = m_trackToVertexTool->perigeeAtVertex( *trk, wrkvrt.vertex );
+          auto sv_perigee = m_trackToVertexTool->perigeeAtVertex(ctx, *trk, wrkvrt.vertex );
           if( !sv_perigee ) {
             ATH_MSG_INFO(" > " << __FUNCTION__ << ": > Track index " << trk->index() << ": Failed in obtaining the SV perigee!" );
             good_flag = false;
           }
-          delete sv_perigee;
         }
       
       }
@@ -1697,7 +1696,7 @@ namespace VKalVrtAthena {
         // Get the perigee of the track at the vertex
         ATH_MSG_VERBOSE(" > " << __FUNCTION__ << ": > Track index " << trk->index() << ": Get the prigee of the track at the vertex." );
 
-        const Trk::Perigee* sv_perigee = m_trackToVertexTool->perigeeAtVertex( *trk, wrkvrt.vertex );
+        auto sv_perigee = m_trackToVertexTool->perigeeAtVertex(ctx, *trk, wrkvrt.vertex );
         if( !sv_perigee ) {
           ATH_MSG_WARNING(" > " << __FUNCTION__ << ": > Track index " << trk->index() << ": Failed in obtaining the SV perigee!" );
           
@@ -1753,8 +1752,6 @@ namespace VKalVrtAthena {
         sumP4_electron += p4wrtSV_electron;
         sumP4_proton   += p4wrtSV_proton;
         
-        delete sv_perigee;
-
         ATH_MSG_VERBOSE(" > " << __FUNCTION__ << ": > Track index " << trk->index() << ": end." );
       } // loop over tracks in vertex
 
@@ -2039,13 +2036,12 @@ namespace VKalVrtAthena {
       m_fitSvc->VKalGetImpact(trk, vertex, static_cast<int>( trk->charge() ), impactParameters, impactParErrors);
     }
     else if( m_jp.trkExtrapolator==2 ){
-      const Trk::Perigee* sv_perigee = m_trackToVertexTool->perigeeAtVertex( *trk, vertex );
+      auto sv_perigee = m_trackToVertexTool->perigeeAtVertex(Gaudi::Hive::currentContext(), *trk, vertex );
       if( !sv_perigee ) return false;
       impactParameters.push_back(sv_perigee->parameters() [Trk::d0]);
       impactParameters.push_back(sv_perigee->parameters() [Trk::z0]);
       impactParErrors.push_back((*sv_perigee->covariance())( Trk::d0, Trk::d0 ));
       impactParErrors.push_back((*sv_perigee->covariance())( Trk::z0, Trk::z0 ));
-      delete sv_perigee;
     }
     else{
       ATH_MSG_WARNING( " > " << __FUNCTION__ << ": Unknown track extrapolator " << m_jp.trkExtrapolator   );

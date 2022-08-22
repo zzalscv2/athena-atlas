@@ -149,7 +149,7 @@ StatusCode TrigBmuxComboHypo::findBmuxCandidates(TrigBmuxState& state) const {
     const auto muonInDetTrack = muon->trackParticle(xAOD::Muon::TrackParticleType::InnerDetectorTrackParticle);
     auto p_mu = muonInDetTrack->genvecP4();
     p_mu.SetM(PDG::mMuon);
-    double z0_mu = (m_trkZ0 > 0. ? getTrkImpactParameterZ0(*muonInDetTrack, state.beamSpotPosition()) : -1.);
+    double z0_mu = (m_trkZ0 > 0. ? getTrkImpactParameterZ0(state.context(), *muonInDetTrack, state.beamSpotPosition()) : -1.);
     mon_nMuon++;
 
     // add muon from decision to state.leptons
@@ -172,7 +172,7 @@ StatusCode TrigBmuxComboHypo::findBmuxCandidates(TrigBmuxState& state) const {
     tracks.reserve(tracksHandle->size());
     for (size_t idx = 0; idx < tracksHandle->size(); ++idx) {
       const auto track = tracksHandle->get(idx);
-      if (track->definingParametersCovMatrixVec().empty() || isIdenticalTracks(track, muonInDetTrack) || (m_trkZ0 > 0. && std::abs(getTrkImpactParameterZ0(*track, state.beamSpotPosition()) - z0_mu) > m_trkZ0)) continue;
+      if (track->definingParametersCovMatrixVec().empty() || isIdenticalTracks(track, muonInDetTrack) || (m_trkZ0 > 0. && std::abs(getTrkImpactParameterZ0(state.context(), *track, state.beamSpotPosition()) - z0_mu) > m_trkZ0)) continue;
       tracks.emplace_back(ViewHelper::makeLink<xAOD::TrackParticleContainer>(view, tracksHandle, idx));
     }
     nTrk.push_back(tracks.size());
@@ -262,7 +262,7 @@ StatusCode TrigBmuxComboHypo::findBmuxCandidates(TrigBmuxState& state) const {
 
             bool makeDstar = true;
             if (m_BToD0_maxDstarPionZ0 > 0.) {
-              std::unique_ptr<const Trk::Perigee> perigee(m_trackToVertexTool->perigeeAtVertex(*trk3, vtx_D0->position()));
+              std::unique_ptr<const Trk::Perigee> perigee(m_trackToVertexTool->perigeeAtVertex(state.context(), *trk3, vtx_D0->position()));
               if (std::abs(perigee->parameters()[Trk::z0]) > m_BToD0_maxDstarPionZ0) makeDstar = false;
             }
 
@@ -688,9 +688,9 @@ bool TrigBmuxComboHypo::isIdenticalTracks(const xAOD::TrackParticle* lhs, const 
 }
 
 
-double TrigBmuxComboHypo::getTrkImpactParameterZ0(const xAOD::TrackParticle& track, const Amg::Vector3D& vertex) const {
+double TrigBmuxComboHypo::getTrkImpactParameterZ0(const EventContext& ctx, const xAOD::TrackParticle& track, const Amg::Vector3D& vertex) const {
 
-  std::unique_ptr<const Trk::Perigee> perigee(m_trackToVertexTool->perigeeAtVertex(track, vertex));
+  std::unique_ptr<const Trk::Perigee> perigee(m_trackToVertexTool->perigeeAtVertex(ctx, track, vertex));
   double z0 = perigee->parameters()[Trk::z0];
   return z0;
 }

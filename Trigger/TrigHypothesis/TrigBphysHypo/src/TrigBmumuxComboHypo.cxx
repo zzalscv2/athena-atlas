@@ -338,7 +338,7 @@ StatusCode TrigBmumuxComboHypo::findBmumuxCandidates(TrigBmumuxState& state) con
     selectedTrackZ0.reserve(tracks.size());
     if (m_trkZ0 > 0.) {
       for (const auto& trackEL : tracks) {
-        std::unique_ptr<const Trk::Perigee> perigee(m_trackToVertexTool->perigeeAtVertex(**trackEL, dimuon->position()));
+        std::unique_ptr<const Trk::Perigee> perigee(m_trackToVertexTool->perigeeAtVertex(state.context(), **trackEL, dimuon->position()));
         if (std::abs(perigee->parameters()[Trk::z0]) < m_trkZ0) {
           selectedTracks.push_back(trackEL);
           selectedTrackZ0.push_back(perigee->parameters()[Trk::z0]);

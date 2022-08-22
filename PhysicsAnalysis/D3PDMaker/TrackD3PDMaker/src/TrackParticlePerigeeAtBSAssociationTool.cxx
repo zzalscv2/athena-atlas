@@ -66,7 +66,7 @@ TrackParticlePerigeeAtBSAssociationTool::get (const Rec::TrackParticle& track)
   Amg::Vector3D beamSpot(0,0,0);
   beamSpot = beamSpotHandle->beamVtx().position();
 
-  return m_trackToVertexTool->perigeeAtVertex(track, beamSpot);
+  return m_trackToVertexTool->perigeeAtVertex(Gaudi::Hive::currentContext(), track, beamSpot).release();
 }
 
 /**
@@ -83,7 +83,7 @@ TrackParticlePerigeeAtBSAssociationTool::get (const xAOD::TrackParticle& track)
   SG::ReadCondHandle<InDet::BeamSpotData> beamSpotHandle { m_beamSpotKey };
   beamSpot = beamSpotHandle->beamVtx().position();
 
-  return m_trackToVertexTool->perigeeAtVertex(track, beamSpot);
+  return m_trackToVertexTool->perigeeAtVertex(Gaudi::Hive::currentContext(), track, beamSpot).release();
 }
 
 /**

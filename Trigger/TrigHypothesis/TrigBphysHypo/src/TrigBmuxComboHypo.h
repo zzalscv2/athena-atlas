@@ -130,7 +130,7 @@ class TrigBmuxComboHypo: public ::ComboHypo {
 
   bool isIdenticalTracks(const xAOD::TrackParticle* lhs, const xAOD::TrackParticle* rhs) const;
   bool isInMassRange(double mass, const std::pair<double, double>& range) const { return (mass > range.first && mass < range.second); }
-  double getTrkImpactParameterZ0(const xAOD::TrackParticle& track, const Amg::Vector3D& vertex) const;
+  double getTrkImpactParameterZ0(const EventContext& ctx, const xAOD::TrackParticle& track, const Amg::Vector3D& vertex) const;
   double Lxy(const Amg::Vector3D& productionVertex, const Amg::Vector3D& decayVertex, const std::vector<TLorentzVector>& momenta) const;
 
   SG::ReadHandleKey<xAOD::TrackParticleContainer> m_trackParticleContainerKey {this,

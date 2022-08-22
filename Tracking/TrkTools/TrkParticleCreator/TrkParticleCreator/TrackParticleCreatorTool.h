@@ -39,7 +39,7 @@ changes : 11.02.04 added docu
 #include "xAODTracking/TrackParticleContainer.h"
 #include "xAODTracking/TrackingPrimitives.h"
 #include "xAODTracking/VertexFwd.h"
-
+#include "BeamSpotConditionsData/BeamSpotData.h"
 #include "GaudiKernel/ToolHandle.h"
 // MagField cache
 #include "MagFieldConditions/AtlasFieldCacheCondObj.h"
@@ -302,6 +302,7 @@ private:
   bool m_checkConversion;
   int m_minSiHits;
   double m_minPt;
+  SG::ReadCondHandleKey<InDet::BeamSpotData> m_beamSpotKey { this, "BeamSpotKey", "BeamSpotData", "SG key for beam spot" };
 };
 
 } // end of namespace Trk

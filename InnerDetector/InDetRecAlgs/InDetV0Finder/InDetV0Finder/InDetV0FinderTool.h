@@ -175,9 +175,9 @@ namespace InDet
 
     bool doFit(const xAOD::TrackParticle* track1, const xAOD::TrackParticle* track2, Amg::Vector3D &startingPoint, const EventContext& ctx) const;
 
-    bool d0Pass(const xAOD::TrackParticle* track1, const xAOD::TrackParticle* track2, const xAOD::VertexContainer * vertColl) const;
-    bool d0Pass(const xAOD::TrackParticle* track1, const xAOD::TrackParticle* track2, const xAOD::Vertex * vertex) const;
-    bool d0Pass(const xAOD::TrackParticle* track1, const xAOD::TrackParticle* track2, const Amg::Vector3D& vertex) const;
+    bool d0Pass(const xAOD::TrackParticle* track1, const xAOD::TrackParticle* track2, const xAOD::VertexContainer * vertColl, const EventContext& ctx) const;
+    bool d0Pass(const xAOD::TrackParticle* track1, const xAOD::TrackParticle* track2, const xAOD::Vertex * vertex, const EventContext& ctx) const;
+    bool d0Pass(const xAOD::TrackParticle* track1, const xAOD::TrackParticle* track2, const Amg::Vector3D& vertex, const EventContext& ctx) const;
 
     bool pointAtVertex(const xAOD::Vertex* v0, const xAOD::Vertex* PV) const;
     bool pointAtVertexColl(xAOD::Vertex* v0, const xAOD::VertexContainer * vertColl) const;

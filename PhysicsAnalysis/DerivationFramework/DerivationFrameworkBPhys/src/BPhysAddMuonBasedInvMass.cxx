@@ -478,8 +478,8 @@ namespace DerivationFramework {
     
   double chi2 = -100.;
 
-  const Trk::Perigee* trkPerigee =
-    m_trackToVertexTool->perigeeAtVertex(track, pos);
+  auto trkPerigee =
+    m_trackToVertexTool->perigeeAtVertex(Gaudi::Hive::currentContext(), track, pos);
   if ( trkPerigee != NULL ) {
     const AmgSymMatrix(5)* locError = trkPerigee->covariance();
     if ( locError != NULL ) {
@@ -495,8 +495,6 @@ namespace DerivationFramework {
 			<< ", z0 = " << z0 << ", z0Err = " << z0Err);
       }
     } // locError != NULL
-    delete trkPerigee;
-    trkPerigee = nullptr;
   } else {
     ATH_MSG_WARNING("getTrackPVChi2: Could not get perigee");
   }
@@ -528,11 +526,11 @@ namespace DerivationFramework {
     std::vector<TLorentzVector> trkMom;
     TLorentzVector totMom;
     std::vector<const Trk::Perigee*> trkPer;
-
+    auto ctx = Gaudi::Hive::currentContext();
     for (;trItr != trItrEnd; ++trItr,++massHypItr){
-      const Trk::Perigee* trkPerigee = 
-        m_trackToVertexTool->perigeeAtVertex(*(*trItr), pos);
-      trkPer.push_back(trkPerigee);
+      auto trkPerigee = 
+        m_trackToVertexTool->perigeeAtVertex(ctx, *(*trItr), pos);
+
       if ( trkPerigee != NULL ) {
         // try to get the correct momentum measurement
         pxTmp = trkPerigee->momentum()[Trk::px];
@@ -548,6 +546,7 @@ namespace DerivationFramework {
         ATH_MSG_WARNING("BPhysAddMuonBasedInvMass::getInvariantMassError: "
 			"defaulting to simple momentum!");
       }
+      trkPer.push_back(trkPerigee.release());
       massTmp = *massHypItr;
       eTmp    = pxTmp*pxTmp+pyTmp*pyTmp+pzTmp*pzTmp+massTmp*massTmp;
       eTmp    = eTmp > 0. ? sqrt(eTmp) : 0.; 

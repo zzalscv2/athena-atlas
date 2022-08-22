@@ -1703,10 +1703,11 @@ StatusCode IDPerfMonZmumu::FillRecParameters(const Trk::Track* track, const xAOD
 
   //const Trk::AtaStraightLine*  atBL =   dynamic_cast<const Trk::AtaStraightLine*>(m_trackToVertexTool->trackAtBeamline( *track ));
   // R21 SALVA -->  atBL = m_trackToVertexTool->trackAtBeamline( *track )
-
-  const Trk::AtaStraightLine*  atBL =
-    dynamic_cast<const Trk::AtaStraightLine*>(m_trackToVertexTool->trackAtBeamline( *track ,
-										    m_trackToVertexTool->GetBeamLine(m_trackToVertexTool->GetBeamSpotData(Gaudi::Hive::currentContext())).get() ));
+  SG::ReadCondHandle<InDet::BeamSpotData> beamSpotHandle { m_beamSpotKey };
+  auto beamline = m_trackToVertexTool->GetBeamLine(beamSpotHandle.cptr());
+  auto trackBLtemp = m_trackToVertexTool->trackAtBeamline(Gaudi::Hive::currentContext(), *track ,
+                        beamline.get() );
+  const Trk::AtaStraightLine*  atBL = dynamic_cast<const Trk::AtaStraightLine*>(trackBLtemp.get());
 
   if (atBL){
     double qOverP   = atBL->parameters()[Trk::qOverP];
@@ -1723,7 +1724,6 @@ StatusCode IDPerfMonZmumu::FillRecParameters(const Trk::Track* track, const xAOD
       //      d0_err = Amg::error(*trkPerigee->covariance(),Trk::d0);  //->Why not?
     } 
     //    std::cout << " -- atBL -- px: " << px << "  py: " << py << "  pz: " << pz << "  d0: "<< d0 << "   z0: "<< z0 << std::endl;
-    delete atBL;
   }
   else {
     ATH_MSG_WARNING("FillRecParameters::Failed extrapolation to the BeamLine");
