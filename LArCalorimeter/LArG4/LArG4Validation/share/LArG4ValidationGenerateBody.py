@@ -38,6 +38,7 @@ athenaCommonFlags.EvtMax=options['nevents']
 from G4AtlasApps.SimFlags import simFlags
 simFlags.load_atlas_flags()
 simFlags.CalibrationRun.set_Off()
+simFlags.SimBarcodeOffset.set_On()
 
 # Random seeds get random values
 from random import randint
@@ -71,6 +72,9 @@ if options['input'] is not None:
 else:
     ## Use single particle generator
     import AthenaCommon.AtlasUnixGeneratorJob
+    if hasattr(svcMgr, 'EventSelector'):
+        svcMgr.EventSelector.FirstEvent = options['firstEvent']
+
     import ParticleGun as PG
     topSequence += PG.ParticleGun(randomSvcName=simFlags.RandomSvc.get_Value(), randomStream="SINGLE")
     topSequence.ParticleGun.sampler.pid = int(options["pid"])

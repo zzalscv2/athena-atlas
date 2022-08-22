@@ -19,6 +19,7 @@ parser.add_option("--pid",        dest="pid",         default='11',             
 parser.add_option("--configFile", dest="configFileName", default='',   help="name of file with configuration (default: none)")
 parser.add_option("--parameterize",dest="parameterize", default=0, type=int, help="parameteriziation level (0=off, default: %default)")
 parser.add_option("--nevents",    dest="nevents",     default=-1,         type=int, help="number of events to generate (default: all)")
+parser.add_option("--firstEvent", dest="firstEvent",  default=1,         type=int, help="first event to generate (default: 1)")
 parser.add_option("--runNumber",  dest="runNumber", default=410000, type=int, help="run number (default: %default)")
 parser.add_option("--simulate",  dest="simulate", default=1, type=int, help="run simulation (default: %default)")
 parser.add_option("--FSLib",      dest="fsLibs",      default=[],      action="append",  help="path to the frozen shower libraries (separate flag for each library must be used)")
