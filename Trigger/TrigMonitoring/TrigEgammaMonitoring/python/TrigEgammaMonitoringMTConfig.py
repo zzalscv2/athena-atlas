@@ -422,6 +422,7 @@ class TrigEgammaMonAlgBuilder:
       self.phMonAlg.Analysis = "Photons"
       self.phMonAlg.MatchTool = EgammaMatchTool
       self.phMonAlg.PhotonKey = 'Photons'
+      self.phMonAlg.PhotonIsolationKeys = {"Photons.topoetcone20", "Photons.topoetcone40"}
       self.phMonAlg.isEMResultNames=self.isemnames
       self.phMonAlg.LHResultNames=self.lhnames
       self.phMonAlg.PhotonIsEMSelector =[TightPhotonSelector,MediumPhotonSelector,LoosePhotonSelector]

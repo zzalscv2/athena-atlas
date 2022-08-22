@@ -23,7 +23,7 @@ StatusCode TrigEgammaMonitorPhotonAlgorithm::initialize()
   ATH_CHECK(TrigEgammaMonitorAnalysisAlgorithm::initialize());
 
   ATH_CHECK(m_offPhotonKey.initialize());
-
+  ATH_CHECK(m_offPhotonIsolationKeys.initialize());
   
   for(auto& trigName : m_trigInputList)
   {
@@ -34,8 +34,6 @@ StatusCode TrigEgammaMonitorPhotonAlgorithm::initialize()
       setTrigInfo(trigName);
     }
   }
-
-
  
   return StatusCode::SUCCESS;
 }
@@ -144,6 +142,3 @@ StatusCode TrigEgammaMonitorPhotonAlgorithm::executeNavigation( const EventConte
   ATH_MSG_DEBUG("BaseToolMT::Photon TEs " << pairObjs.size() << " found.");
   return StatusCode::SUCCESS;
 }
-
-
-
