@@ -420,7 +420,7 @@ namespace VKalVrtAthena {
     StatusCode refitAndSelectGoodQualityVertices( std::vector<WrkVrt>* );
 
     /** get secondary vertex impact parameters **/
-    bool getSVImpactParameters(const xAOD::TrackParticle* trk, Amg::Vector3D vertex, std::vector<double>& impactParameters, std::vector<double>& impactParErrors); 
+    bool getSVImpactParameters(const xAOD::TrackParticle* trk, const Amg::Vector3D& vertex, std::vector<double>& impactParameters, std::vector<double>& impactParErrors); 
 
     enum TrkParameter    { k_d0=0, k_z0=1, k_theta=2, k_phi=3, k_qOverP=4 ,k_nTP=5 };
     enum TrkParameterUnc { k_d0d0=0, k_z0z0=1, k_nTPU=2 };
@@ -435,7 +435,7 @@ namespace VKalVrtAthena {
     // Supporting utility functions
     
     /** print the contents of reconstructed vertices */
-    void printWrkSet(const std::vector<WrkVrt> *WrkVrtSet, const std::string name);
+    void printWrkSet(const std::vector<WrkVrt> *WrkVrtSet, const std::string& name);
 
     /** refit the vertex. */
     StatusCode refitVertex( WrkVrt& );
@@ -538,7 +538,7 @@ namespace VKalVrtAthena {
     template<class Track> void setIntersection(Track *trk, IntersectionPos *bec, const Trk::Perigee* per);
     
     /** monitor the intermediate status of vertexing */
-    StatusCode monitorVertexingAlgorithmStep( std::vector<WrkVrt>*, const std::string name, bool final = false );
+    StatusCode monitorVertexingAlgorithmStep( std::vector<WrkVrt>*, const std::string& name, bool final = false );
     
     ////////////////////////////////////////////////////////////////////////////////////////
     // 

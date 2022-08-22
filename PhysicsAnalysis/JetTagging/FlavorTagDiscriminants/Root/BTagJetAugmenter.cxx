@@ -56,7 +56,7 @@ namespace {
 
 }
 
-BTagJetAugmenter::BTagJetAugmenter(std::string associator, FlavorTagDiscriminants::FlipTagConfig f):
+BTagJetAugmenter::BTagJetAugmenter(const std::string& associator, FlavorTagDiscriminants::FlipTagConfig f):
   m_jetLink("jetLink"),
   m_pt_uncalib("pt_btagJes"),
   m_eta_uncalib("eta_btagJes"),

@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2017 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
 */
 
 // Header for my class
@@ -14,7 +14,7 @@
 #include "G4DynamicParticle.hh"
 #include "G4DecayProducts.hh"
 
-RHadronPythiaDecayer::RHadronPythiaDecayer( const std::string s )
+RHadronPythiaDecayer::RHadronPythiaDecayer( const std::string& s )
  : G4VExtDecayer(s)
 {
   // In the constructor, make a decayer instance, so that it's initialized here and not in the event loop

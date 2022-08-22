@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
 */
 
 // Header include
@@ -1002,7 +1002,7 @@ namespace VKalVrtAthena {
       }
       
       size_t count_mergiable = std::count_if( mergiableVertex.begin(), mergiableVertex.end(),
-                                              [&](std::pair<unsigned, std::vector<WrkVrt>::reverse_iterator> p ) {
+                                              [&](const std::pair<unsigned, std::vector<WrkVrt>::reverse_iterator>& p ) {
                                                 return p.second != workVerticesContainer->rend(); } );
       
       if( mergiableVerticesSet.size() == 1 && count_mergiable == wrkvrt.selectedTrackIndices.size() ) {
@@ -1921,7 +1921,7 @@ namespace VKalVrtAthena {
   
   
   //____________________________________________________________________________________________________
-  StatusCode VrtSecInclusive::monitorVertexingAlgorithmStep( std::vector<WrkVrt>* workVerticesContainer, const std::string name, bool final ) {
+  StatusCode VrtSecInclusive::monitorVertexingAlgorithmStep( std::vector<WrkVrt>* workVerticesContainer, const std::string& name, bool final ) {
     
     if( m_jp.FillIntermediateVertices ) {
       
@@ -2028,7 +2028,7 @@ namespace VKalVrtAthena {
   }
   
   //____________________________________________________________________________________________________
-  bool VrtSecInclusive::getSVImpactParameters(const xAOD::TrackParticle* trk, Amg::Vector3D vertex,
+  bool VrtSecInclusive::getSVImpactParameters(const xAOD::TrackParticle* trk, const Amg::Vector3D& vertex,
                                               std::vector<double>& impactParameters,
                                               std::vector<double>& impactParErrors){
 

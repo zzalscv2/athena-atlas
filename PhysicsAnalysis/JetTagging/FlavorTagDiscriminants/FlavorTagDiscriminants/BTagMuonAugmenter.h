@@ -1,6 +1,6 @@
 // for text editors: this file is -*- C++ -*-
 /*
-  Copyright (C) 2002-2020 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef BTAG_MUON_AUGMENTER_H
@@ -39,7 +39,7 @@ namespace FlavorTagDiscriminants {
 
   class BTagMuonAugmenter {
    public:
-    BTagMuonAugmenter(std::string muonAssociationName,
+    BTagMuonAugmenter(const std::string& muonAssociationName,
                       float muonMaxDR = defaults::MUON_MAX_DR,
                       float muonMinpT = defaults::MUON_MIN_PT,
                       FlipTagConfig = FlipTagConfig::STANDARD);
