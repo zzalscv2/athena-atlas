@@ -935,9 +935,9 @@ void TrigTauMonitorAlgorithm::fillRNNTrack(const std::string& trigger, const std
 
       auto track_pt_log = Monitored::Collection("track_pt_log", tracks, [](const xAOD::TauTrack *track){return TMath::Log10( track->pt()); }); 
  
-      auto track_eta = Monitored::Collection("track_eta", tracks, [&tau](const xAOD::TauTrack *track){return track->eta(); });
+      auto track_eta = Monitored::Collection("track_eta", tracks, [](const xAOD::TauTrack *track){return track->eta(); });
    
-      auto track_phi = Monitored::Collection("track_phi", tracks, [&tau](const xAOD::TauTrack *track){return track->phi(); }); 
+      auto track_phi = Monitored::Collection("track_phi", tracks, [](const xAOD::TauTrack *track){return track->phi(); }); 
 
       auto track_dEta = Monitored::Collection("track_dEta", tracks, [&tau](const xAOD::TauTrack *track){auto ddeta=track->eta()- tau->eta();return ddeta; });
 
@@ -1039,8 +1039,8 @@ void TrigTauMonitorAlgorithm::fillRNNCluster(const std::string& trigger, const s
     n_cluster = clusters.size();
 
     auto cluster_et_log = Monitored::Collection("cluster_et_log",clusters, [](const xAOD::CaloCluster *cluster){return TMath::Log10( cluster->et()); });
-    auto cluster_eta =  Monitored::Collection("cluster_eta", clusters, [&tau](const xAOD::CaloCluster *cluster){return cluster->eta();});
-    auto cluster_phi =  Monitored::Collection("cluster_phi", clusters, [&tau](const xAOD::CaloCluster *cluster){return cluster->phi();});
+    auto cluster_eta =  Monitored::Collection("cluster_eta", clusters, [](const xAOD::CaloCluster *cluster){return cluster->eta();});
+    auto cluster_phi =  Monitored::Collection("cluster_phi", clusters, [](const xAOD::CaloCluster *cluster){return cluster->phi();});
     auto cluster_dEta = Monitored::Collection("cluster_dEta", clusters, [&tau](const xAOD::CaloCluster *cluster){auto ddeta=cluster->eta()- tau->eta();return ddeta; });
     auto cluster_dPhi = Monitored::Collection("cluster_dPhi", clusters, [&tau](const xAOD::CaloCluster *cluster){return cluster->p4().DeltaPhi(tau->p4()); }); 
     auto cluster_SECOND_R_log10 = Monitored::Collection("cluster_SECOND_R_log10", clusters, [](const xAOD::CaloCluster *cluster){
