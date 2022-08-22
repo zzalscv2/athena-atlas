@@ -3,7 +3,9 @@ Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
 */
 #ifndef MUONTESTER_MUONFOURVECTORBRANCH_H
 #define MUONTESTER_MUONFOURVECTORBRANCH_H
+#ifndef XAOD_ANALYSIS
 #include <AtlasHepMC/SimpleVector.h>
+#endif 
 #include <MuonTesterTree/ThreeVectorBranch.h>
 #include <TLorentzVector.h>
 
@@ -16,10 +18,11 @@ public:
     void push_back(const TLorentzVector& vec);
     void operator+=(const TLorentzVector& vec);
     void set(const TLorentzVector& vec, size_t pos);
-
+#ifndef XAOD_ANALYSIS
     void push_back(const HepMC::FourVector& vec);
     void operator+=(const HepMC::FourVector& vec);
     void set(const HepMC::FourVector& vec, size_t pos);
+#endif 
 
     void push_back(const float pt, const float eta, const float phi, const float e);
     void set(const float pt, const float eta, const float phi, const float e, size_t pos);
@@ -46,11 +49,11 @@ public:
     void push_back(const TLorentzVector& vec);
     void operator+=(const TLorentzVector& vec);
     void set(const TLorentzVector& vec, size_t pos);
-
+#ifndef XAOD_ANALYSIS
     void push_back(const HepMC::FourVector& vec);
     void operator+=(const HepMC::FourVector& vec);
     void set(const HepMC::FourVector& vec, size_t pos);
-
+#endif
     void push_back(const float x, const float y, const float z, const float t);
     void set(const float x, const float y, const float z, const float t, size_t pos);
 
