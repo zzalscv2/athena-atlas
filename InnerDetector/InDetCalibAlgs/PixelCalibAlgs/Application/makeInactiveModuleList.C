@@ -38,7 +38,6 @@ using ModuleIdVector = std::vector<std::string>;
 using FrontEndIdVector = std::vector<std::string>;
 using FrontEndCodeVector = std::vector<std::string>;
 //
-static constexpr int invalidChannel{-1};
 static constexpr Position invalidPosition{-100,-100,-100,-100};
 std::map<std::string, Position> pixelMapping;
 std::map<Position, int> hashMapping;
@@ -53,15 +52,6 @@ namespace{
     "Disk2C",
     "Disk3C"
   };
-  //initialiser for component names
-  std::vector<std::string>
-  componentNames(bool isIBL){
-    std::vector<std::string> components{std::begin(globalDiskNames), std::end(globalDiskNames)};
-    if (isIBL) components.emplace_back("IBL");
-    components.insert(components.end(), {"B0", "B1", "B2"});
-    return components;
-  }
-  
   //initialiser for layer names
   std::vector<std::string>
   layerNames(bool isIBL){
@@ -204,7 +194,6 @@ namespace{
     //-------------------------------
     // Initialization
     //-------------------------------
-    const std::vector<std::string> & components = componentNames(isIBL);
 
     std::map<std::string, TH1D*> lbdep;
     //------------------------------------
@@ -440,7 +429,6 @@ namespace{
     // Everything adapted to new noise maps
     // Initialization
     //-------------------------------
-    const std::vector<std::string> & components =  componentNames(isIBL);
 
     std::map<std::string, TH1D*> hitMaps;
     //------------------------------------
