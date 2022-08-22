@@ -32,6 +32,7 @@ namespace DerivationFramework {
     ATH_MSG_DEBUG("in initialize()");
     // get the V0Finder tool
     ATH_CHECK( m_v0FinderTool.retrieve());
+    ATH_CHECK( m_v0DecoTool.retrieve());
 
     ATH_CHECK(m_vertexKey.initialize());
     ATH_CHECK(m_v0Key.initialize());
