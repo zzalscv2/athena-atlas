@@ -37,8 +37,8 @@ namespace DerivationFramework {
 
       TrackParticleMerger(const std::string& t, const std::string& n, const IInterface* p);
       virtual ~TrackParticleMerger() = default;
-      StatusCode initialize()override;
-      virtual StatusCode addBranches() const;
+      virtual StatusCode initialize() override;
+      virtual StatusCode addBranches() const override;
  
     protected:
 
