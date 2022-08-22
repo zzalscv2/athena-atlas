@@ -1,6 +1,8 @@
 /*
-  Copyright (C) 2002-2020 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
 */
+
+#include <utility>
 
 #include "FlavorTagDiscriminants/FTagDataDependencyNames.h"
 
@@ -14,7 +16,7 @@ namespace FlavorTagDiscriminants {
     return d1;
   }
   void FTagDataDependencyNames::operator+=(FTagDataDependencyNames d) {
-    FTagDataDependencyNames tmp = *this + d;
+    FTagDataDependencyNames tmp = *this + std::move(d);
     *this = tmp;
   }
 }

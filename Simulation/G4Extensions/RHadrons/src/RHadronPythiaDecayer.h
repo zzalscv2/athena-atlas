@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2017 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef RHadronPythiaDecayer_H
@@ -14,7 +14,7 @@ class G4DecayProducts;
 class RHadronPythiaDecayer: public G4VExtDecayer
 {
   public:
-   RHadronPythiaDecayer( const std::string s );
+   RHadronPythiaDecayer( const std::string& s );
    virtual G4DecayProducts* ImportDecayProducts(const G4Track&);
 };
 

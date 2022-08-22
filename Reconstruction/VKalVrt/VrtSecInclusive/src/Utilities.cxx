@@ -990,7 +990,7 @@ namespace VKalVrtAthena {
 
 
   //____________________________________________________________________________________________________
-  void VrtSecInclusive::printWrkSet(const std::vector<WrkVrt> *workVerticesContainer, const std::string name)
+  void VrtSecInclusive::printWrkSet(const std::vector<WrkVrt> *workVerticesContainer, const std::string& name)
   {
     ATH_MSG_DEBUG( " >> " << __FUNCTION__ << ": ===============================================================" );
     ATH_MSG_DEBUG( " >> " << __FUNCTION__ << ": " << name << ": #vertices = " << workVerticesContainer->size() );
@@ -1000,7 +1000,7 @@ namespace VKalVrtAthena {
     auto concatenateIndicesToString = []( auto indices, auto& collection ) -> std::string {
       if( 0 == indices.size() ) return "";
       return std::accumulate( std::next(indices.begin()), indices.end(), std::to_string( indices.at(0) ),
-                              [&collection]( std::string str, auto& index ) { return str + ", " + std::to_string( collection.at(index)->index() ); } );
+                              [&collection]( const std::string& str, auto& index ) { return str + ", " + std::to_string( collection.at(index)->index() ); } );
     };
     
     std::map<const xAOD::TruthVertex*, bool> previous;

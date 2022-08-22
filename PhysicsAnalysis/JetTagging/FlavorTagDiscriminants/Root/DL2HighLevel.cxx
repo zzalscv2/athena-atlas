@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "FlavorTagDiscriminants/DL2HighLevel.h"
@@ -17,6 +17,7 @@
 #include <boost/property_tree/exceptions.hpp>
 
 #include <fstream>
+#include <utility>
 
 
 namespace FlavorTagDiscriminants {
@@ -41,7 +42,7 @@ namespace FlavorTagDiscriminants {
     }
 
     auto [input_config, trk_config, options] = dataprep::createGetterConfig(
-      config, flip_config, remap_scalar, track_link_type);
+      config, flip_config, std::move(remap_scalar), track_link_type);
     options.default_output_value = default_output_value;
 
     m_dl2.reset(

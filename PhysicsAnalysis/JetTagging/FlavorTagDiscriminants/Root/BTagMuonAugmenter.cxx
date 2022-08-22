@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2020 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "FlavorTagDiscriminants/BTagMuonAugmenter.h"
@@ -10,7 +10,7 @@
 
 namespace FlavorTagDiscriminants {
 
-  BTagMuonAugmenter::BTagMuonAugmenter(std::string muonAssociationName,
+  BTagMuonAugmenter::BTagMuonAugmenter(const std::string& muonAssociationName,
                                        float muonMaxDR,
                                        float muonMinpT,
                                        FlipTagConfig flipConfig)
