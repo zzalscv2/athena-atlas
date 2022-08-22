@@ -83,6 +83,9 @@ def createTriggerFlags(doTriggerRecoFlags):
     # also enables per step decison printouts
     flags.addFlag('Trigger.doRuntimeNaviVal', False)
 
+    # Enable the ROBPrefetchingAlg functionality in menu sequences
+    flags.addFlag('Trigger.enableROBPrefetching', True)
+
     # if 1, Run1 decoding version is set; if 2, Run2; if 3, Run 3
     def EDMVersion(flags):
         """Determine Trigger EDM version based on the input file."""

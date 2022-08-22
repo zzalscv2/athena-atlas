@@ -57,7 +57,13 @@ def DJDispFragment(ConfigFlags):
 
     InputMakerAlg.ViewNodeName = reco_seq.name()
 
-    return (seqAND("UncTrkrecoSeqDJTrigDisp", [InputMakerAlg, reco_seq]), InputMakerAlg)
+    from TrigGenericAlgs.TrigGenericAlgsConfig import ROBPrefetchingAlgCfg_Si
+    robPrefetchAlg = RecoFragmentsPool.retrieve(ROBPrefetchingAlgCfg_Si,
+                                                ConfigFlags,
+                                                nameSuffix=InputMakerAlg.name(),
+                                                inputMaker=InputMakerAlg)
+
+    return (seqAND("UncTrkrecoSeqDJTrigDisp", [InputMakerAlg, robPrefetchAlg, reco_seq]), InputMakerAlg)
 
 def DJDispStep():
     from TrigLongLivedParticlesHypo.TrigDJHypoConfig import TrigDJHypoDispToolFromDict
