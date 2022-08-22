@@ -68,8 +68,7 @@ HGTD_TrackingGeometryBuilderCond::HGTD_TrackingGeometryBuilderCond(const std::st
 
 // destructor
 HGTD_TrackingGeometryBuilderCond::~HGTD_TrackingGeometryBuilderCond()
-{
-}
+= default;
 
 // Athena standard methods
 // initialize

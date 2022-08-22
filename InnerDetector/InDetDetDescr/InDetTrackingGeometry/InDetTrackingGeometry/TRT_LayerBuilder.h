@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2017 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
 */
 
 ///////////////////////////////////////////////////////////////////
@@ -62,13 +62,13 @@ namespace InDet {
       StatusCode initialize();
        
       /** LayerBuilder interface method - returning Barrel-like layers */
-      const std::vector< const Trk::CylinderLayer* >* cylindricalLayers() const; 
+      const std::vector<Trk::CylinderLayer*>* cylindricalLayers() const; 
       
       /** LayerBuilder interface method - returning Endcap-like layers */
-      const std::vector< const Trk::DiscLayer* >*     discLayers() const; 
+      const std::vector<Trk::DiscLayer*>*     discLayers() const; 
       
       /** LayerBuilder interface method - returning Planar-like layers */
-      const std::vector< const Trk::PlaneLayer* >*    planarLayers() const; 
+      const std::vector<Trk::PlaneLayer*>*    planarLayers() const; 
             
       /** Name identification */
       const std::string& identification() const;      
@@ -97,8 +97,8 @@ namespace InDet {
       
   };
 
- inline const std::vector< const Trk::PlaneLayer* >* TRT_LayerBuilder::planarLayers() const
- { return 0; }
+ inline const std::vector<Trk::PlaneLayer* >* TRT_LayerBuilder::planarLayers() const
+ { return nullptr; }
  
  inline const std::string& TRT_LayerBuilder::identification() const
  { return m_identification; }

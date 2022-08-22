@@ -76,9 +76,7 @@ InDet::RobustTrackingGeometryBuilderCond::RobustTrackingGeometryBuilderCond(cons
 }
 
 // destructor
-InDet::RobustTrackingGeometryBuilderCond::~RobustTrackingGeometryBuilderCond()
-{
-}
+InDet::RobustTrackingGeometryBuilderCond::~RobustTrackingGeometryBuilderCond()= default;
 
 // Athena standard methods
 // initialize

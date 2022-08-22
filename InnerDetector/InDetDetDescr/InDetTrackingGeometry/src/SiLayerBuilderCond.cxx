@@ -101,8 +101,7 @@ InDet::SiLayerBuilderCond::SiLayerBuilderCond(const std::string& t, const std::s
 }
 
 // destructor
-InDet::SiLayerBuilderCond::~SiLayerBuilderCond()
-{}
+InDet::SiLayerBuilderCond::~SiLayerBuilderCond()= default;
 
 // Athena standard methods
 // initialize
@@ -406,8 +405,8 @@ InDet::SiLayerBuilderCond::cylindricalLayers(const EventContext& ctx,
          std::map< const Trk::Surface*,Amg::Vector3D > uniqueSurfaceMap;
          auto usmIter = uniqueSurfaceMap.end();
          // ------- iterate  
-         auto asurfIter = arraySurfaces.begin();
-         auto asurfIterEnd = arraySurfaces.end();
+         const auto *asurfIter = arraySurfaces.begin();
+         const auto *asurfIterEnd = arraySurfaces.end();
          for ( ; asurfIter != asurfIterEnd; ++asurfIter){
              if ( (*asurfIter) ) {
                 ++sumCheckBarrelModules;

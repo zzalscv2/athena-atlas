@@ -80,9 +80,7 @@ InDet::StagedTrackingGeometryBuilder::StagedTrackingGeometryBuilder(const std::s
 }
 
 // destructor
-InDet::StagedTrackingGeometryBuilder::~StagedTrackingGeometryBuilder()
-{
-}
+InDet::StagedTrackingGeometryBuilder::~StagedTrackingGeometryBuilder()= default;
 
 // Athena standard methods
 // initialize
@@ -156,9 +154,9 @@ Trk::TrackingGeometry* InDet::StagedTrackingGeometryBuilder::trackingGeometry AT
        // screen output 
        ATH_MSG_DEBUG( "[ LayerBuilder : '" << lProvider->identification() << "' ] being processed. " );
        // retrieve the layers
-       std::vector<const Trk::Layer*> centralLayers = lProvider->centralLayers();
-       std::vector<const Trk::Layer*> negativeLayers = lProvider->negativeLayers();
-       std::vector<const Trk::Layer*> positiveLayers = lProvider->positiveLayers();
+       std::vector<Trk::Layer*> centralLayers = lProvider->centralLayers();
+       std::vector<Trk::Layer*> negativeLayers = lProvider->negativeLayers();
+       std::vector<Trk::Layer*> positiveLayers = lProvider->positiveLayers();
        ATH_MSG_VERBOSE("       -> retrieved "  << centralLayers.size()  << " central layers.");
        ATH_MSG_VERBOSE("       -> retrieved "  << negativeLayers.size() << " layers on negative side.");
        ATH_MSG_VERBOSE("       -> retrieved "  << positiveLayers.size() << " layers on positive side.");
@@ -385,9 +383,9 @@ const Trk::TrackingVolume* InDet::StagedTrackingGeometryBuilder::packVolumeTripl
 
 /** Private helper method, estimates the overal dimensions */
 InDet::LayerSetup InDet::StagedTrackingGeometryBuilder::estimateLayerSetup(const std::string& idName, size_t ilS,
-                                                                           const std::vector<const Trk::Layer*>& negLayers,
-                                                                           const std::vector<const Trk::Layer*>& cenLayers,
-                                                                           const std::vector<const Trk::Layer*>& posLayers,
+                                                                           const std::vector<Trk::Layer*>& negLayers,
+                                                                           const std::vector<Trk::Layer*>& cenLayers,
+                                                                           const std::vector<Trk::Layer*>& posLayers,
                                                                            double maxR, double maxZ) const
 {  
   // prepare the dimensions
@@ -429,7 +427,7 @@ InDet::LayerSetup InDet::StagedTrackingGeometryBuilder::estimateLayerSetup(const
 
 
 /** Private helper method to estimate the layer dimensions */
-void InDet::StagedTrackingGeometryBuilder::estimateLayerDimensions(const std::vector<const Trk::Layer*>& layers,
+void InDet::StagedTrackingGeometryBuilder::estimateLayerDimensions(const std::vector<Trk::Layer*>& layers,
                                                                    double& rMin, double& rMax, double& zMin, double& zMax) const
 {
     // parse through the layers and estimate

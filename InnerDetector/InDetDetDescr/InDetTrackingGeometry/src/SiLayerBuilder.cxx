@@ -44,8 +44,8 @@
 // STL
 #include <map>
 
-std::vector<const Trk::CylinderLayer*> InDet::SiLayerBuilder::s_splitCylinderLayers;
-std::vector<const Trk::DiscLayer*>     InDet::SiLayerBuilder::s_splitDiscLayers;
+std::vector<Trk::CylinderLayer*> InDet::SiLayerBuilder::s_splitCylinderLayers;
+std::vector<Trk::DiscLayer*>     InDet::SiLayerBuilder::s_splitDiscLayers;
 double InDet::SiLayerBuilder::s_splitRadius = 0.;
     
 // constructor
@@ -109,8 +109,7 @@ InDet::SiLayerBuilder::SiLayerBuilder(const std::string& t, const std::string& n
 }
 
 // destructor
-InDet::SiLayerBuilder::~SiLayerBuilder()
-{}
+InDet::SiLayerBuilder::~SiLayerBuilder()= default;
 
 // Athena standard methods
 // initialize
@@ -154,14 +153,14 @@ StatusCode InDet::SiLayerBuilder::finalize()
 
 
 /** LayerBuilder interface method - returning Barrel-like layers */
-const std::vector< const Trk::CylinderLayer* >* InDet::SiLayerBuilder::cylindricalLayers() const
+const std::vector<Trk::CylinderLayer*>* InDet::SiLayerBuilder::cylindricalLayers() const
 {
 
   // split mode 2nd part return the already built layers 
   if (m_splitMode && !s_splitCylinderLayers.empty() ){
       ATH_MSG_DEBUG( "[ Split mode/ Part 2 ] Returning " << s_splitCylinderLayers.size() << " cylinder layers." );
       ATH_MSG_VERBOSE( "                       Split radius was set to " << s_splitRadius );
-      std::vector<const Trk::CylinderLayer*>* splitCylinderLayers = dressCylinderLayers(s_splitCylinderLayers);
+      std::vector<Trk::CylinderLayer*>* splitCylinderLayers = dressCylinderLayers(s_splitCylinderLayers);
       s_splitCylinderLayers.clear();
       return splitCylinderLayers; 
   } else if (m_splitMode){
@@ -327,7 +326,7 @@ const std::vector< const Trk::CylinderLayer* >* InDet::SiLayerBuilder::cylindric
    
   // [-B-] ------------------------ Construction of the layers -----------------------------------          
   // [-B-1] construct the detection layers
-  std::vector< const Trk::CylinderLayer* > cylinderDetectionLayers;
+  std::vector<Trk::CylinderLayer* > cylinderDetectionLayers;
   int layerCounter          = 0;
   double currentLayerExtend = 0.;
   
@@ -410,8 +409,8 @@ const std::vector< const Trk::CylinderLayer* >* InDet::SiLayerBuilder::cylindric
          std::map< const Trk::Surface*,Amg::Vector3D > uniqueSurfaceMap;
          auto usmIter = uniqueSurfaceMap.end();
          // ------- iterate  
-         auto asurfIter = arraySurfaces.begin();
-         auto asurfIterEnd = arraySurfaces.end();
+         const auto *asurfIter = arraySurfaces.begin();
+         const auto *asurfIterEnd = arraySurfaces.end();
          for ( ; asurfIter != asurfIterEnd; ++asurfIter){
              if ( (*asurfIter) ) {
                 ++sumCheckBarrelModules;
@@ -507,7 +506,7 @@ const std::vector< const Trk::CylinderLayer* >* InDet::SiLayerBuilder::cylindric
   // --------------------------- enf of detection layer construction loop ----------------------------------
 
   ATH_MSG_DEBUG("Creating the final CylinderLayer collection with (potentially) additional layers.");
-  std::vector< const Trk::CylinderLayer* >* cylinderLayers = dressCylinderLayers(cylinderDetectionLayers);
+  std::vector<Trk::CylinderLayer* >* cylinderLayers = dressCylinderLayers(cylinderDetectionLayers);
   
   // multiply the check number in case of SCT 
   sumCheckBarrelModules *= (m_pixelCase) ? 1 : 2; 
@@ -524,13 +523,13 @@ const std::vector< const Trk::CylinderLayer* >* InDet::SiLayerBuilder::cylindric
 } 
       
 /** LayerBuilder interface method - returning Endcap-like layers */
-const std::vector< const Trk::DiscLayer* >* InDet::SiLayerBuilder::discLayers() const
+const std::vector<Trk::DiscLayer* >* InDet::SiLayerBuilder::discLayers() const
 {
  
   // split mode 2nd 
   if (m_splitMode && !s_splitDiscLayers.empty() ){
     ATH_MSG_DEBUG( "[ Split mode/ Part 2 ] Returning " << s_splitDiscLayers.size() << " disc layers." );
-    std::vector<const Trk::DiscLayer*>* splitDiscs = new std::vector<const Trk::DiscLayer*>(s_splitDiscLayers);
+    std::vector<Trk::DiscLayer*>* splitDiscs = new std::vector<Trk::DiscLayer*>(s_splitDiscLayers);
     s_splitDiscLayers.clear();
     return splitDiscs; 
   }
@@ -545,7 +544,7 @@ const std::vector< const Trk::DiscLayer* >* InDet::SiLayerBuilder::discLayers() 
   if (!nDBMLayers) return ((m_pixelCase and m_useRingLayout) ? createRingLayers() : createDiscLayers());
   
   ATH_MSG_DEBUG( "Found " << m_siMgr->numerology().numEndcapsDBM() << " DBM layers active, building first ECs, then DBMS");
-  std::vector<const Trk::DiscLayer*>* ecLayers = createDiscLayers();
+  std::vector<Trk::DiscLayer*>* ecLayers = createDiscLayers();
   if (ecLayers) {
       ATH_MSG_VERBOSE( "Created " << ecLayers->size() << " endcap layers w/o  DBM.");
       ecLayers = createDiscLayers(ecLayers);
@@ -556,7 +555,7 @@ const std::vector< const Trk::DiscLayer* >* InDet::SiLayerBuilder::discLayers() 
 }
 
 /** LayerBuilder interface method - returning Endcap-like layers */
-std::vector< const Trk::DiscLayer* >* InDet::SiLayerBuilder::createDiscLayers(std::vector<const Trk::DiscLayer*>* dLayers) const {
+std::vector<Trk::DiscLayer* >* InDet::SiLayerBuilder::createDiscLayers(std::vector<Trk::DiscLayer*>* dLayers) const {
  
   // this is the DBM flag
   bool isDBM = (dLayers!=nullptr);
@@ -732,7 +731,7 @@ std::vector< const Trk::DiscLayer* >* InDet::SiLayerBuilder::createDiscLayers(st
     
   // [-B-] ------------------------ Construction of the layers -----------------------------------
   // construct the layers
-  std::vector< const Trk::DiscLayer* >* discLayers = dLayers ? dLayers : new std::vector< const Trk::DiscLayer* >;
+  std::vector<Trk::DiscLayer*>* discLayers = dLayers ? dLayers : new std::vector<Trk::DiscLayer*>;
   std::vector<double>::iterator discZposIter = discZpos.begin();
   int discCounter = 0;
                                               
@@ -958,8 +957,8 @@ std::vector< const Trk::DiscLayer* >* InDet::SiLayerBuilder::createDiscLayers(st
  
   // sort the vector
   Trk::DiscLayerSorterZ zSorter;
-  std::vector<const Trk::DiscLayer*>::iterator sortIter = discLayers->begin();
-  std::vector<const Trk::DiscLayer*>::iterator sortEnd   = discLayers->end(); 
+  std::vector<Trk::DiscLayer*>::iterator sortIter = discLayers->begin();
+  std::vector<Trk::DiscLayer*>::iterator sortEnd   = discLayers->end(); 
   std::sort(sortIter, sortEnd, zSorter);
  
   // if there are additional layers to be built - never build for the DBM loop
@@ -1042,7 +1041,7 @@ std::vector< const Trk::DiscLayer* >* InDet::SiLayerBuilder::createDiscLayers(st
 
 /** LayerBuilder interface method - returning ring-like layers */
 /** this is ITk pixel specific and doesn't include DBM modules */
-std::vector< const Trk::DiscLayer* >* InDet::SiLayerBuilder::createRingLayers() const {
+std::vector<Trk::DiscLayer*>* InDet::SiLayerBuilder::createRingLayers() const {
  
   // get general layout
   InDetDD::SiDetectorElementCollection::const_iterator sidetIter = m_siMgr->getDetectorElementBegin();
@@ -1161,7 +1160,7 @@ std::vector< const Trk::DiscLayer* >* InDet::SiLayerBuilder::createRingLayers() 
       
   // [-B-] ------------------------ Construction of the layers -----------------------------------
   // construct the layers
-  std::vector< const Trk::DiscLayer* >* discLayers = new std::vector< const Trk::DiscLayer* >;
+  std::vector<Trk::DiscLayer*>* discLayers = new std::vector<Trk::DiscLayer*>;
   std::vector<double>::iterator discZposIter = discZpos.begin();
   int discCounter = 0;
                                               
@@ -1277,8 +1276,8 @@ std::vector< const Trk::DiscLayer* >* InDet::SiLayerBuilder::createRingLayers() 
  
   // sort the vector
   Trk::DiscLayerSorterZ zSorter;
-  std::vector<const Trk::DiscLayer*>::iterator sortIter = discLayers->begin();
-  std::vector<const Trk::DiscLayer*>::iterator sortEnd   = discLayers->end(); 
+  std::vector<Trk::DiscLayer*>::iterator sortIter = discLayers->begin();
+  std::vector<Trk::DiscLayer*>::iterator sortEnd   = discLayers->end(); 
   std::sort(sortIter, sortEnd, zSorter);
  
   // if there are additional layers to be built - never build for the DBM loop
@@ -1357,10 +1356,10 @@ std::vector< const Trk::DiscLayer* >* InDet::SiLayerBuilder::createRingLayers() 
   return discLayers;
 }
 
-std::vector< const Trk::CylinderLayer* >* InDet::SiLayerBuilder::dressCylinderLayers(const std::vector< const Trk::CylinderLayer* >& detectionLayers ) const {
+std::vector<Trk::CylinderLayer*>* InDet::SiLayerBuilder::dressCylinderLayers(const std::vector<Trk::CylinderLayer*>& detectionLayers ) const {
 
 
-    std::vector< const Trk::CylinderLayer* >* cylinderLayers = new std::vector< const Trk::CylinderLayer* >;
+    std::vector<Trk::CylinderLayer*>* cylinderLayers = new std::vector<Trk::CylinderLayer*>;
     // --------------------------- start of additional layer construction loop -------------------------------
     // for the additional layer
     if (!m_barrelAdditionalLayerR.empty()){

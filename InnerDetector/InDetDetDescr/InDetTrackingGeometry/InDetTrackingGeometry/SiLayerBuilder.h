@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2020 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
 */
 
 ///////////////////////////////////////////////////////////////////
@@ -81,23 +81,23 @@ namespace InDet {
       StatusCode finalize();
        
       /** LayerBuilder interface method - returning Barrel-like layers */
-      const std::vector< const Trk::CylinderLayer* >* cylindricalLayers() const; 
+      const std::vector<Trk::CylinderLayer* >* cylindricalLayers() const; 
       
       /** LayerBuilder interface method - returning Endcap-like layers */
-      const std::vector< const Trk::DiscLayer* >*     discLayers() const; 
+      const std::vector<Trk::DiscLayer* >*     discLayers() const; 
       
       /** LayerBuilder interface method - returning Planar-like layers */
-      const std::vector< const Trk::PlaneLayer* >*    planarLayers() const; 
+      const std::vector<Trk::PlaneLayer* >*    planarLayers() const; 
              
       /** Name identification */
       const std::string& identification() const;      
         
     private:
-      std::vector< const Trk::CylinderLayer* >* dressCylinderLayers(const std::vector< const Trk::CylinderLayer* >& dLayers) const;
+      std::vector<Trk::CylinderLayer* >* dressCylinderLayers(const std::vector<Trk::CylinderLayer* >& dLayers) const;
       
       /** create the disc layers, if no vector is given, then it's the first pass, else it's the DBM for the Pixels */
-      std::vector< const Trk::DiscLayer* >* createDiscLayers(std::vector<const Trk::DiscLayer* >* dLayers = NULL) const;      
-      std::vector< const Trk::DiscLayer* >* createRingLayers() const;
+      std::vector<Trk::DiscLayer*>* createDiscLayers(std::vector<Trk::DiscLayer*>* dLayers = nullptr) const;      
+      std::vector<Trk::DiscLayer*>* createRingLayers() const;
         
       const Trk::LayerMaterialProperties* barrelLayerMaterial(double r, double hz) const;  //!< helper method to construct barrel material
       const Trk::LayerMaterialProperties* endcapLayerMaterial(double rMin, double rMax) const; //!< helper method to construct endcap material
@@ -135,8 +135,8 @@ namespace InDet {
       double                                         m_splitTolerance;                  //!< difference in layer half length to provoke the split
 
       static double                                  s_splitRadius;                     //!< Split radius for multiple pixel systems
-      static std::vector<const Trk::CylinderLayer*>  s_splitCylinderLayers;             //!< cached SLHC/split cylinder layers for projective layout
-      static std::vector<const Trk::DiscLayer*>      s_splitDiscLayers;                 //!< cached SLHC/split disc layers for projective layout
+      static std::vector<Trk::CylinderLayer*>        s_splitCylinderLayers;             //!< cached SLHC/split cylinder layers for projective layout
+      static std::vector<Trk::DiscLayer*>            s_splitDiscLayers;                 //!< cached SLHC/split disc layers for projective layout
                                                      
       bool                                           m_runGeometryValidation;           //!< run the validation of the geometry ( no empty bins)
       
@@ -148,7 +148,7 @@ namespace InDet {
                       
   };
 
- inline const std::vector< const Trk::PlaneLayer* >* SiLayerBuilder::planarLayers() const
+ inline const std::vector<Trk::PlaneLayer*>* SiLayerBuilder::planarLayers() const
  { return 0; }
  
  inline const std::string& SiLayerBuilder::identification() const

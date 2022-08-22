@@ -85,9 +85,7 @@ InDet::StagedTrackingGeometryBuilderCond::StagedTrackingGeometryBuilderCond(cons
 }
 
 // destructor
-InDet::StagedTrackingGeometryBuilderCond::~StagedTrackingGeometryBuilderCond()
-{
-}
+InDet::StagedTrackingGeometryBuilderCond::~StagedTrackingGeometryBuilderCond()= default;
 
 // Athena standard methods
 // initialize

@@ -43,7 +43,7 @@ namespace {
   {
   public:
     PtrVectorWrapper ()
-      : m_ptr(new std::vector<const T *>)
+      : m_ptr(new std::vector<T *>)
     {
     }
 
@@ -55,16 +55,16 @@ namespace {
 	m_ptr->clear();
       }
     }
-    std::vector<const T *> &operator*() { return *m_ptr; }
-    const std::vector<const T *> &operator*() const { return *m_ptr; }
+    std::vector<T *> &operator*() { return *m_ptr; }
+    const std::vector<T *> &operator*() const { return *m_ptr; }
 
-    std::vector<const T *> *operator->() { return m_ptr.get(); }
-    const std::vector<const T *> *operator->() const { return m_ptr.get(); }
+    std::vector<T *> *operator->() { return m_ptr.get(); }
+    const std::vector<T *> *operator->() const { return m_ptr.get(); }
 
-    std::vector<const T *> *release() { return m_ptr.release(); }
+    std::vector<T *> *release() { return m_ptr.release(); }
 
   private:
-    std::unique_ptr<std::vector<const T *> > m_ptr;
+    std::unique_ptr<std::vector<T *> > m_ptr;
   };
 
 }
@@ -109,8 +109,7 @@ InDet::TRT_LayerBuilder::TRT_LayerBuilder(const std::string& t, const std::strin
 }
 
 // destructor
-InDet::TRT_LayerBuilder::~TRT_LayerBuilder()
-{}
+InDet::TRT_LayerBuilder::~TRT_LayerBuilder()= default;
 
 // Athena standard methods
 // initialize
@@ -125,7 +124,7 @@ StatusCode InDet::TRT_LayerBuilder::initialize()
 }
 
 /** LayerBuilder interface method - returning Barrel-like layers */
-const std::vector< const Trk::CylinderLayer* >* InDet::TRT_LayerBuilder::cylindricalLayers() const
+const std::vector<Trk::CylinderLayer*>* InDet::TRT_LayerBuilder::cylindricalLayers() const
 {
 
   if (!m_trtMgr) return nullptr;
@@ -475,7 +474,7 @@ const std::vector< const Trk::CylinderLayer* >* InDet::TRT_LayerBuilder::cylindr
   return barrelLayers.release();
 }
 
-const std::vector< const Trk::DiscLayer* >* InDet::TRT_LayerBuilder::discLayers() const
+const std::vector<Trk::DiscLayer*>* InDet::TRT_LayerBuilder::discLayers() const
 {
 
 
