@@ -106,7 +106,7 @@ class ItemDef:
         ZDC_comb6 = d.ZDC_2      & d.ZDC_1      & Not(d.ZDC_0)
         ZDC_comb7 = d.ZDC_2      & d.ZDC_1      & d.ZDC_0
 
-        # combined signals
+        # combined signals for heavy ion runs
         ZDC_yy    = ZDC_comb0 | ZDC_comb1 | ZDC_comb2 | ZDC_comb3
         ZDC_had   = ZDC_comb7
         ZDC_Ay    = ZDC_comb1 | ZDC_comb3 | ZDC_comb4 | ZDC_comb5
@@ -118,6 +118,21 @@ class ItemDef:
         VZDC_A_C  = ZDC_comb0
         VZDC_AORC = ZDC_comb0 | ZDC_comb1 | ZDC_comb2 | ZDC_comb5 | ZDC_comb6
         ZDC_AND   = ZDC_A_C
+
+        # ZDC configuration for LHCf+ZDC special run in Sep. 2022
+        # rename existing ZDC configuration to match request in ATR-26051
+        ZDC_VETO          = ZDC_comb0
+        ZDC_XOR_E1_E3     = ZDC_comb1
+        ZDC_XOR_E2        = ZDC_comb2
+        ZDC_E1_AND_E1     = ZDC_comb3
+        ZDC_E1_AND_E2ORE3 = ZDC_comb4
+        ZDC_E2_AND_E2     = ZDC_comb5
+        ZDC_E2_AND_E3     = ZDC_comb6
+        ZDC_E3_AND_E3     = ZDC_comb7
+        # (additional) combined ZDC signals for LHCf+ZDC special run
+        ZDC_OR = Not(ZDC_VETO)
+        ZDC_A_AND_C = Not( ZDC_VETO | ZDC_XOR_E2 | ZDC_XOR_E1_E3 )
+
 
         MenuItem('L1_EM3'       ).setLogic( d.EM3        & physcond).setTriggerType( TT.calo )
         MenuItem('L1_EM7'       ).setLogic( d.EM7        & physcond).setTriggerType( TT.calo )
@@ -1175,6 +1190,36 @@ class ItemDef:
         MenuItem('L1_ZDC_XOR_VTE50'            ).setLogic(ZDC_XOR & Not(d.TE50) & physcond)
         MenuItem('L1_ZDC_XOR_VTE200'           ).setLogic(ZDC_XOR & Not(d.TE200) & physcond)
         MenuItem('L1_ZDC_XOR_VTE200_MBTS_1'    ).setLogic(ZDC_XOR & Not(d.TE200) & MBTS_1 & physcond)
+
+
+        # ATR-26051
+        # ZDC for 2022 LHCf+ZDC special run, item names are set to be different from ZDC items for heavy ion runs
+        MenuItem('L1_ZDC_OR'           ).setLogic( ZDC_OR            & physcond)
+        MenuItem('L1_ZDC_XOR_E2'       ).setLogic( ZDC_XOR_E2        & physcond)
+        MenuItem('L1_ZDC_XOR_E1_E3'    ).setLogic( ZDC_XOR_E1_E3     & physcond)
+        MenuItem('L1_ZDC_E1_AND_E1'    ).setLogic( ZDC_E1_AND_E1     & physcond)
+        MenuItem('L1_ZDC_E1_AND_E2ORE3').setLogic( ZDC_E1_AND_E2ORE3 & physcond)
+        MenuItem('L1_ZDC_E2_AND_E2'    ).setLogic( ZDC_E2_AND_E2     & physcond)
+        MenuItem('L1_ZDC_E2_AND_E3'    ).setLogic( ZDC_E2_AND_E3     & physcond)
+        MenuItem('L1_ZDC_E3_AND_E3'    ).setLogic( ZDC_E3_AND_E3     & physcond)
+        MenuItem('L1_ZDC_A_AND_C'      ).setLogic( ZDC_A_AND_C       & physcond)
+        MenuItem('L1_ZDC_OR_EMPTY'          ).setLogic( ZDC_OR & cosmiccond)
+        MenuItem('L1_ZDC_OR_UNPAIRED_ISO'   ).setLogic( ZDC_OR & unpaired_isocond)
+        MenuItem('L1_ZDC_OR_UNPAIRED_NONISO').setLogic( ZDC_OR & unpaired_nonisocond)
+        # individual ZDC bits
+        MenuItem('L1_ZDC_BIT2').setLogic( d.ZDC_2 & physcond)
+        MenuItem('L1_ZDC_BIT1').setLogic( d.ZDC_1 & physcond)
+        MenuItem('L1_ZDC_BIT0').setLogic( d.ZDC_0 & physcond)
+        # individual ZDC comb
+        MenuItem('L1_ZDC_COMB0').setLogic( ZDC_comb0 & physcond)
+        MenuItem('L1_ZDC_COMB1').setLogic( ZDC_comb1 & physcond)
+        MenuItem('L1_ZDC_COMB2').setLogic( ZDC_comb2 & physcond)
+        MenuItem('L1_ZDC_COMB3').setLogic( ZDC_comb3 & physcond)
+        MenuItem('L1_ZDC_COMB4').setLogic( ZDC_comb4 & physcond)
+        MenuItem('L1_ZDC_COMB5').setLogic( ZDC_comb5 & physcond)
+        MenuItem('L1_ZDC_COMB6').setLogic( ZDC_comb6 & physcond)
+        MenuItem('L1_ZDC_COMB7').setLogic( ZDC_comb7 & physcond)
+
 
         # ATR-14967
         MenuItem('L1_EM3_VZDC_A'           ).setLogic( d.EM3 & Not(ZDC_A) & physcond)
