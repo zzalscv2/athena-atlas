@@ -195,8 +195,14 @@ StatusCode TrigL2MuonSA::MuFastDataPreparator::prepareData(const LVL1::RecMuonRo
   double roiEtaMaxLow = 0.;
   double roiEtaMinHigh = 0.;
   double roiEtaMaxHigh = 0.;
-  m_recRPCRoiTool->etaDimLow(data, roiEtaMinLow, roiEtaMaxLow);
-  m_recRPCRoiTool->etaDimHigh(data, roiEtaMinHigh, roiEtaMaxHigh);
+  if(!m_recRPCRoiTool->etaDimLow(data, roiEtaMinLow, roiEtaMaxLow)) {
+    roiEtaMinLow = p_roids->eta();
+    roiEtaMaxLow = p_roids->eta();
+  }
+  if(!m_recRPCRoiTool->etaDimHigh(data, roiEtaMinHigh, roiEtaMaxHigh)) {
+    roiEtaMinHigh = p_roids->eta();
+    roiEtaMaxHigh = p_roids->eta();
+  }
 
   ATH_MSG_DEBUG("nr of RPC hits=" << rpcHits.size());
 
@@ -277,8 +283,14 @@ StatusCode TrigL2MuonSA::MuFastDataPreparator::prepareData(const xAOD::MuonRoI* 
   double roiEtaMaxLow = 0.;
   double roiEtaMinHigh = 0.;
   double roiEtaMaxHigh = 0.;
-  m_recRPCRoiTool->etaDimLow(data, roiEtaMinLow, roiEtaMaxLow);
-  m_recRPCRoiTool->etaDimHigh(data, roiEtaMinHigh, roiEtaMaxHigh);
+  if(!m_recRPCRoiTool->etaDimLow(data, roiEtaMinLow, roiEtaMaxLow)) {
+    roiEtaMinLow = p_roids->eta();
+    roiEtaMaxLow = p_roids->eta();
+  }
+  if(!m_recRPCRoiTool->etaDimHigh(data, roiEtaMinHigh, roiEtaMaxHigh)) {
+    roiEtaMinHigh = p_roids->eta();
+    roiEtaMaxHigh = p_roids->eta();
+  }
 
   ATH_MSG_DEBUG("nr of RPC hits=" << rpcHits.size());
 
@@ -361,8 +373,14 @@ StatusCode TrigL2MuonSA::MuFastDataPreparator::prepareData(const LVL1::RecMuonRo
   double roiEtaMaxLow = 0.;
   double roiEtaMinHigh = 0.;
   double roiEtaMaxHigh = 0.;
-  m_recRPCRoiTool->etaDimLow(data, roiEtaMinLow, roiEtaMaxLow);
-  m_recRPCRoiTool->etaDimHigh(data, roiEtaMinHigh, roiEtaMaxHigh);
+  if(!m_recRPCRoiTool->etaDimLow(data, roiEtaMinLow, roiEtaMaxLow)) {
+    roiEtaMinLow = p_roids->eta();
+    roiEtaMaxLow = p_roids->eta();
+  }
+  if(!m_recRPCRoiTool->etaDimHigh(data, roiEtaMinHigh, roiEtaMaxHigh)) {
+    roiEtaMinHigh = p_roids->eta();
+    roiEtaMaxHigh = p_roids->eta();
+  }
 
   sc = m_clusterRoadDefiner->defineRoad(p_roi,
                                         clusterRoad,
@@ -478,8 +496,14 @@ StatusCode TrigL2MuonSA::MuFastDataPreparator::prepareData(const xAOD::MuonRoI* 
   double roiEtaMaxLow = 0.;
   double roiEtaMinHigh = 0.;
   double roiEtaMaxHigh = 0.;
-  m_recRPCRoiTool->etaDimLow(data, roiEtaMinLow, roiEtaMaxLow);
-  m_recRPCRoiTool->etaDimHigh(data, roiEtaMinHigh, roiEtaMaxHigh);
+  if(!m_recRPCRoiTool->etaDimLow(data, roiEtaMinLow, roiEtaMaxLow)) {
+    roiEtaMinLow = p_roids->eta();
+    roiEtaMaxLow = p_roids->eta();
+  }
+  if(!m_recRPCRoiTool->etaDimHigh(data, roiEtaMinHigh, roiEtaMaxHigh)) {
+    roiEtaMinHigh = p_roids->eta();
+    roiEtaMaxHigh = p_roids->eta();
+  }
 
   sc = m_clusterRoadDefiner->defineRoad(p_roi,
                                         clusterRoad,

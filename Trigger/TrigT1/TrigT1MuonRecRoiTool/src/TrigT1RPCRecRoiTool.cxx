@@ -199,10 +199,18 @@ namespace LVL1 {
   
     const MuonGM::RpcReadoutElement* EtaLowBorder_descriptor =
       muonMgr->getRpcReadoutElement(EtaLowBorder_id);
+    if(EtaLowBorder_descriptor==nullptr){
+      ATH_MSG_WARNING("Null pointer to the RpcReadoutElement object for EtaLowBorder.");
+      return false;
+    }
     EtaLowBorder_pos = EtaLowBorder_descriptor->stripPos(EtaLowBorder_id);
     
     const MuonGM::RpcReadoutElement* EtaHighBorder_descriptor =
       muonMgr->getRpcReadoutElement(EtaHighBorder_id);
+    if(EtaHighBorder_descriptor==nullptr){
+      ATH_MSG_WARNING("Null pointer to the RpcReadoutElement object for EtaHighBorder.");
+      return false;
+    }
     EtaHighBorder_pos = EtaHighBorder_descriptor->stripPos(EtaHighBorder_id);
     
     etaMin=EtaLowBorder_pos.eta();
@@ -247,10 +255,18 @@ namespace LVL1 {
 
     const MuonGM::RpcReadoutElement* EtaLowBorder_descriptor =
       muonMgr->getRpcReadoutElement(EtaLowBorder_id);
+    if(EtaLowBorder_descriptor==nullptr){
+      ATH_MSG_WARNING("Null pointer to the RpcReadoutElement object for EtaLowBorder.");
+      return false;
+    }
     EtaLowBorder_pos = EtaLowBorder_descriptor->stripPos(EtaLowBorder_id);
     
     const MuonGM::RpcReadoutElement* EtaHighBorder_descriptor =
       muonMgr->getRpcReadoutElement(EtaHighBorder_id);
+    if(EtaHighBorder_descriptor==nullptr){
+      ATH_MSG_WARNING("Null pointer to the RpcReadoutElement object for EtaHighBorder.");
+      return false;
+    }
     EtaHighBorder_pos = EtaHighBorder_descriptor->stripPos(EtaHighBorder_id);
     
     etaMin=EtaLowBorder_pos.eta();
