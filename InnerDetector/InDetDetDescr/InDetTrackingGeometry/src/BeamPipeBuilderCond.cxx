@@ -71,8 +71,7 @@ InDet::BeamPipeBuilderCond::BeamPipeBuilderCond(const std::string& t, const std:
 }
 
 // destructor
-InDet::BeamPipeBuilderCond::~BeamPipeBuilderCond()
-{}
+InDet::BeamPipeBuilderCond::~BeamPipeBuilderCond()= default;
 
 // Athena standard methods
 // initialize

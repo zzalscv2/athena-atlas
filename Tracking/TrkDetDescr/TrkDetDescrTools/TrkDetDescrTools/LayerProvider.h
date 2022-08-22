@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2017 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
 */
 
 ///////////////////////////////////////////////////////////////////
@@ -47,23 +47,23 @@ namespace Trk {
         StatusCode finalize();
 
         /** LayerBuilder interface method - returning the layers at negative side */
-        const std::vector< const Layer* > negativeLayers() const; 
+        const std::vector<Layer*> negativeLayers() const; 
       
         /** LayerBuilder interface method - returning the central layers */
-        const std::vector< const Layer* > centralLayers() const; 
+        const std::vector<Layer*> centralLayers() const; 
       
         /** LayerBuilder interface method - returning the layers at negative side */
-        const std::vector< const Layer* > positiveLayers() const; 
+        const std::vector<Layer*> positiveLayers() const; 
 
         /** Name identification */
         const std::string& identification() const;
 
       private:
         /** LayerBuilder interface method - returning the layers at negative side */
-        const std::vector< const Layer* > discLayers(int posneg) const;   
+        const std::vector<Layer*> discLayers(int posneg) const;   
       
         ToolHandle<ILayerBuilder>               m_layerBuilder;
-        mutable std::vector<const Trk::Layer*>  m_layerCache;
+        mutable std::vector<Trk::Layer*>  m_layerCache;
         
     };
 

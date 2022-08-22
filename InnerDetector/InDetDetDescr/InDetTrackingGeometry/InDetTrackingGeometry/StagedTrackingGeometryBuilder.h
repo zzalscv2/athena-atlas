@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2020 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
 */
 
 ///////////////////////////////////////////////////////////////////
@@ -82,14 +82,14 @@ namespace InDet {
     
     LayerSetup(const std::string& idName,
                int cCode,
-               const std::vector<const Trk::Layer*>& negLayers,
-               const std::vector<const Trk::Layer*>& cenLayers,
-               const std::vector<const Trk::Layer*>& posLayers,
+               const std::vector<Trk::Layer*>& negLayers,
+               const std::vector<Trk::Layer*>& cenLayers,
+               const std::vector<Trk::Layer*>& posLayers,
                double minRc, double maxRc, double zC, int binC,
                bool bec=false, double minRe=0., double maxRe=0., double zMinE=0., double zMaxE=0., int binE = 0) :
-      negativeLayers(negLayers),
-      centralLayers(cenLayers),
-      positiveLayers(posLayers),
+      negativeLayers(negLayers.begin(),negLayers.end()),
+      centralLayers(cenLayers.begin(),cenLayers.end()),
+      positiveLayers(posLayers.begin(),posLayers.end()),
       minRadiusCenter(minRc),
       maxRadiusCenter(maxRc),
       zExtendCenter(zC),
@@ -151,13 +151,13 @@ namespace InDet {
     private:
       /** Private helper method, estimates the overal dimensions */
       LayerSetup estimateLayerSetup(const std::string& idName, size_t ils,
-                                    const std::vector<const Trk::Layer*>& negLayers,
-                                    const std::vector<const Trk::Layer*>& centralLayers,
-                                    const std::vector<const Trk::Layer*>& posLayers,
+                                    const std::vector<Trk::Layer*>& negLayers,
+                                    const std::vector<Trk::Layer*>& centralLayers,
+                                    const std::vector<Trk::Layer*>& posLayers,
                                     double maxR, double maxZ) const;
                                     
       /** Private helper method to estimate the layer dimensions */
-      void estimateLayerDimensions(const std::vector<const Trk::Layer*>& layers,
+      void estimateLayerDimensions(const std::vector<Trk::Layer*>& layers,
                                    double& rMin, double& rMax, double& zMin, double& zMax) const;
                                    
       /** Private helper method to check if a sector is compatible with the cache */

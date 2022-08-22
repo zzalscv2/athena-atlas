@@ -109,8 +109,7 @@ InDet::TRT_LayerBuilderCond::TRT_LayerBuilderCond(const std::string& t, const st
 }
 
 // destructor
-InDet::TRT_LayerBuilderCond::~TRT_LayerBuilderCond()
-{}
+InDet::TRT_LayerBuilderCond::~TRT_LayerBuilderCond()= default;
 
 // Athena standard methods
 // initialize

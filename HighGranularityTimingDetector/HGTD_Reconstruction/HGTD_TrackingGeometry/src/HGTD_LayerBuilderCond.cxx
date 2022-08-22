@@ -69,8 +69,7 @@ HGTD_LayerBuilderCond::HGTD_LayerBuilderCond(const std::string& t, const std::st
 }
 
 // destructor
-HGTD_LayerBuilderCond::~HGTD_LayerBuilderCond()
-{}
+HGTD_LayerBuilderCond::~HGTD_LayerBuilderCond()= default;
 
 // Athena standard methods
 // initialize

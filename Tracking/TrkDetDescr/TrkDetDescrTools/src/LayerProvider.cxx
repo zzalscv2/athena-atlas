@@ -40,7 +40,7 @@ StatusCode Trk::LayerProvider::initialize()
 }
 
 /** LayerBuilder interface method - returning the layers at negative side */
-const std::vector< const Trk::Layer* > Trk::LayerProvider::negativeLayers() const
+const std::vector<Trk::Layer*> Trk::LayerProvider::negativeLayers() const
 {
     // if any cache is there it has to be returned
     if (!m_layerCache.empty()) return m_layerCache;
@@ -49,12 +49,12 @@ const std::vector< const Trk::Layer* > Trk::LayerProvider::negativeLayers() cons
 }    
 
 /** LayerBuilder interface method - returning the central layers */
-const std::vector< const Trk::Layer* > Trk::LayerProvider::centralLayers() const
+const std::vector<Trk::Layer*> Trk::LayerProvider::centralLayers() const
 {
     // central layers
-    std::vector< const Trk::Layer* >            cLayers;
+    std::vector<Trk::Layer* >            cLayers;
     // retrieving the cylinder layers from the layer builder
-    const std::vector< const Trk::CylinderLayer* >*   cylinderLayers = m_layerBuilder->cylindricalLayers();
+    const std::vector< Trk::CylinderLayer* >*   cylinderLayers = m_layerBuilder->cylindricalLayers();
     // loop over it and push into the return vector;
     if (cylinderLayers){
         for (const auto & cL : (*cylinderLayers))
@@ -67,7 +67,7 @@ const std::vector< const Trk::Layer* > Trk::LayerProvider::centralLayers() const
 } 
 
 /** LayerBuilder interface method - returning the layers at negative side */
-const std::vector< const Trk::Layer* > Trk::LayerProvider::positiveLayers() const
+const std::vector<Trk::Layer*> Trk::LayerProvider::positiveLayers() const
 {
     // if any cache is there it has to be returned
     if (!m_layerCache.empty()) return m_layerCache;
@@ -76,12 +76,12 @@ const std::vector< const Trk::Layer* > Trk::LayerProvider::positiveLayers() cons
 }
 
 /** LayerBuilder interface method - returning the layers at negative side */
-const std::vector< const Trk::Layer* > Trk::LayerProvider::discLayers(int posneg) const
+const std::vector<Trk::Layer*> Trk::LayerProvider::discLayers(int posneg) const
 {
     // get the disc layers
-    std::vector < const Trk::Layer* >   dLayers;
+    std::vector <Trk::Layer*>   dLayers;
     // retrieving the cylinder layers from the layer builder
-    const std::vector< const Trk::DiscLayer* >* discLayers = m_layerBuilder->discLayers();
+    const std::vector<Trk::DiscLayer*>* discLayers = m_layerBuilder->discLayers();
     // loop and fill either cache or dLayers
     if (discLayers){
         // loop over and push into the return/cache vector 

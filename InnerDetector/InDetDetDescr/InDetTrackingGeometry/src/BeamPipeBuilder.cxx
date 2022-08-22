@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
 */
 
 ///////////////////////////////////////////////////////////////////
@@ -69,8 +69,7 @@ InDet::BeamPipeBuilder::BeamPipeBuilder(const std::string& t, const std::string&
 }
 
 // destructor
-InDet::BeamPipeBuilder::~BeamPipeBuilder()
-{}
+InDet::BeamPipeBuilder::~BeamPipeBuilder()= default;
 
 // Athena standard methods
 // initialize
@@ -95,10 +94,10 @@ StatusCode InDet::BeamPipeBuilder::finalize()
 
 
 /** LayerBuilder interface method - returning Barrel-like layers */
-const std::vector< const Trk::CylinderLayer* >* InDet::BeamPipeBuilder::cylindricalLayers() const
+const std::vector< Trk::CylinderLayer* >* InDet::BeamPipeBuilder::cylindricalLayers() const
 {
   
-  std::vector<const Trk::CylinderLayer*>* beamPipe = new std::vector<const Trk::CylinderLayer*>;
+  std::vector<Trk::CylinderLayer*>* beamPipe = new std::vector<Trk::CylinderLayer*>;
   
   // the geometry
   Amg::Transform3D beamPipeTransform;
@@ -109,8 +108,10 @@ const std::vector< const Trk::CylinderLayer* >* InDet::BeamPipeBuilder::cylindri
   if (m_beamPipeMgr){
         // get the central top volume
         PVConstLink beamPipeTopVolume =  m_beamPipeMgr->getTreeTop(0);
-        if (m_beamPipeMgr->getNumTreeTops()==1){ // Beampipe implementation using assembly volume has only one tree top instead of 3 in the default case(union of a central and two forward beampipes)   
-          beamPipeTopVolume =  m_beamPipeMgr->getTreeTop(0)->getChildVol(0)->getChildVol(0);//the BeamPipeCentral volume is the child of the child volume of the top volume in this case 
+        if (m_beamPipeMgr->getNumTreeTops()==1){ 
+        // Beampipe implementation using assembly volume has only one tree top instead of 3 in the default case(union of a central and two forward beampipes)   
+          beamPipeTopVolume =  m_beamPipeMgr->getTreeTop(0)->getChildVol(0)->getChildVol(0);
+          //the BeamPipeCentral volume is the child of the child volume of the top volume in this case 
         }
         beamPipeTransform = Amg::Translation3D(beamPipeTopVolume->getX().translation().x(),
                                                   beamPipeTopVolume->getX().translation().y(),

@@ -75,9 +75,7 @@ InDet::RobustTrackingGeometryBuilder::RobustTrackingGeometryBuilder(const std::s
 }
 
 // destructor
-InDet::RobustTrackingGeometryBuilder::~RobustTrackingGeometryBuilder()
-{
-}
+InDet::RobustTrackingGeometryBuilder::~RobustTrackingGeometryBuilder()= default;
 
 // Athena standard methods
 // initialize
@@ -182,7 +180,7 @@ Trk::TrackingGeometry* InDet::RobustTrackingGeometryBuilder::trackingGeometry AT
        // retrieve the cylinder and disc layers
        ATH_MSG_DEBUG( "[ LayerBuilder : '" << m_layerBuilders[ilb]->identification() << "' ] being processed. " );
        // (a) cylinder           
-       const std::vector<const Trk::CylinderLayer*>* cylinderLayers = m_layerBuilders[ilb]->cylindricalLayers();
+       const std::vector<Trk::CylinderLayer*>* cylinderLayers = m_layerBuilders[ilb]->cylindricalLayers();
        // (a)
        std::vector<const Trk::Layer*> cylinderVolumeLayers;     
        if (cylinderLayers && !cylinderLayers->empty()){
@@ -231,7 +229,7 @@ Trk::TrackingGeometry* InDet::RobustTrackingGeometryBuilder::trackingGeometry AT
        endcapMinExtend =  ( centralExtendZ > endcapMinExtend) ? 10e10 : endcapMinExtend; 
        
        // (b) discs       
-       const std::vector<const Trk::DiscLayer*>* discLayers = m_layerBuilders[ilb]->discLayers();       
+       const std::vector<Trk::DiscLayer*>* discLayers = m_layerBuilders[ilb]->discLayers();       
        std::vector<const Trk::Layer*> discVolumeLayersNeg;
        std::vector<const Trk::Layer*> discVolumeLayersPos;                        
        if (discLayers && !discLayers->empty()){
@@ -332,21 +330,9 @@ Trk::TrackingGeometry* InDet::RobustTrackingGeometryBuilder::trackingGeometry AT
    Trk::CylinderVolumeBounds* beamPipeBounds = new Trk::CylinderVolumeBounds(overallRmin,overallExtendZ); 
    // BinnedArray needed
    Trk::BinnedArray<Trk::Layer>* beamPipeLayerArray = nullptr;
-   const std::vector<const Trk::CylinderLayer*>* beamPipeVec = m_beamPipeBuilder->cylindricalLayers();
+   const std::vector<Trk::CylinderLayer*>* beamPipeVec = m_beamPipeBuilder->cylindricalLayers();
    if (!beamPipeVec->empty()) {
-     /*
-      * This is done correctly in RobustTrackingGeometryBuilderCond as the beamPipeBuilderCond
-      * return already what we want
-      * We do not fix it here / non condition tools 
-      * as we assume the non-safe RobustTrackingGeometryBuilder
-      * is to be replaced by RobustTrackingGeometryBuilderCond
-      */
-     auto mutablebeamPipeVec = std::vector<Trk::CylinderLayer*>();
-     mutablebeamPipeVec.reserve(beamPipeVec->size());
-     for (const Trk::CylinderLayer* lay : *beamPipeVec) {
-       mutablebeamPipeVec.push_back(const_cast<Trk::CylinderLayer*>(lay));
-     }
-     beamPipeLayerArray = m_layerArrayCreator->cylinderLayerArray(mutablebeamPipeVec, 0., beamPipeBounds->outerRadius(), Trk::arbitrary);
+     beamPipeLayerArray = m_layerArrayCreator->cylinderLayerArray(*beamPipeVec, 0., beamPipeBounds->outerRadius(), Trk::arbitrary);
    }
    delete beamPipeVec;
    // create the TrackingVolume
