@@ -13,31 +13,31 @@ namespace {
     using TrkLink = ElementLink<xAOD::TrackParticleContainer>;
 
     constexpr double MeVtoGeV = 1. / Gaudi::Units::GeV;
+} // anonymous namespace
 
-    std::ostream& operator<<(std::ostream& sstr, const xAOD::IParticle* part) {
-        if (part->type() == xAOD::Type::ObjectType::Muon) {
-            const xAOD::Muon* mu = static_cast<const xAOD::Muon*>(part);
-            sstr << " Muon pT: " << mu->pt() * MeVtoGeV << " [GeV], eta: " << mu->eta() << ", phi: " << mu->phi() << ", q: " << mu->charge()
-                 << ", priamry Author: " << mu->author();
-        } else if (part->type() == xAOD::Type::ObjectType::Electron) {
-            const xAOD::Electron* elec = static_cast<const xAOD::Electron*>(part);
-            sstr << " Electron pT: " << elec->pt() * MeVtoGeV << " [GeV], eta: " << elec->eta() << ", phi: " << elec->phi()
-                 << ", q: " << elec->charge();
-        } else if (part->type() == xAOD::Type::ObjectType::TrackParticle) {
-            const xAOD::TrackParticle* trk = static_cast<const xAOD::TrackParticle*>(part);
-            sstr << " Track pT: " << trk->pt() * MeVtoGeV << " [GeV], eta: " << trk->eta() << ", phi: " << trk->phi()
-                 << ", q: " << trk->charge() << ", d0: " << trk->d0() << ", z0: " << trk->z0();
-        }
-        sstr << " index: " << part->index();
-        return sstr;
-    }
+std::ostream& operator<<(std::ostream& sstr, const xAOD::IParticle* part) {
+  if (part->type() == xAOD::Type::ObjectType::Muon) {
+    const xAOD::Muon* mu = static_cast<const xAOD::Muon*>(part);
+    sstr << " Muon pT: " << mu->pt() * MeVtoGeV << " [GeV], eta: " << mu->eta() << ", phi: " << mu->phi() << ", q: " << mu->charge()
+         << ", priamry Author: " << mu->author();
+  } else if (part->type() == xAOD::Type::ObjectType::Electron) {
+    const xAOD::Electron* elec = static_cast<const xAOD::Electron*>(part);
+    sstr << " Electron pT: " << elec->pt() * MeVtoGeV << " [GeV], eta: " << elec->eta() << ", phi: " << elec->phi()
+         << ", q: " << elec->charge();
+  } else if (part->type() == xAOD::Type::ObjectType::TrackParticle) {
+    const xAOD::TrackParticle* trk = static_cast<const xAOD::TrackParticle*>(part);
+    sstr << " Track pT: " << trk->pt() * MeVtoGeV << " [GeV], eta: " << trk->eta() << ", phi: " << trk->phi()
+         << ", q: " << trk->charge() << ", d0: " << trk->d0() << ", z0: " << trk->z0();
+  }
+  sstr << " index: " << part->index();
+  return sstr;
+}
 
-    std::ostream& operator<<(std::ostream& sstr, const LeptonQuadruplet& quad) {
-        sstr << std::endl;
-        for (const xAOD::IParticle* lep : quad) { sstr << " **** " << lep << std::endl; }
-        return sstr;
-    }
-}  // namespace
+std::ostream& operator<<(std::ostream& sstr, const LeptonQuadruplet& quad) {
+  sstr << std::endl;
+  for (const xAOD::IParticle* lep : quad) { sstr << " **** " << lep << std::endl; }
+  return sstr;
+}
 
 namespace DerivationFramework {
 
