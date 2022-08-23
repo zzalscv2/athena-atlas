@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "MuonByteStreamCnvTest/RpcByteStreamDecoder.h"
@@ -132,8 +132,11 @@ RpcCoinMatrix* RpcByteStreamDecoder::decodeMatrix(MatrixReadOut* matrix, Identif
     MatrixReadOutStructure matrix_subheader = matrix->getSubHeader();
     MatrixReadOutStructure matrix_footer = matrix->getFooter();
     // Check the data structure
+    // cppcheck-suppress assertWithSideEffect
     assert(matrix_header.isHeader());
+    // cppcheck-suppress assertWithSideEffect
     assert(matrix_subheader.isSubHeader());
+    // cppcheck-suppress assertWithSideEffect
     assert(matrix_footer.isFooter());
 
     // Create the coincidence matrix
@@ -144,6 +147,7 @@ RpcCoinMatrix* RpcByteStreamDecoder::decodeMatrix(MatrixReadOut* matrix, Identif
     MatrixReadOutStructure cm_hit;
     for (int j = 0; j < matrix->numberOfBodyWords(); ++j) {
         cm_hit = matrix->getCMAHit(j);
+        // cppcheck-suppress assertWithSideEffect
         assert(cm_hit.isBody());
         RpcFiredChannel* firedChannel = nullptr;
 
