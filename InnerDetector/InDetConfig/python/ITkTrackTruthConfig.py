@@ -1,35 +1,16 @@
 # Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
 from AthenaConfiguration.ComponentAccumulator import ComponentAccumulator
-from AthenaConfiguration.ComponentFactory     import CompFactory
+
 # -------------------------------------------------------------------------
 #
 # ------- fragment to handle track truth association
 #
 # -------------------------------------------------------------------------
 
-def ITkTruthMatchToolCfg(flags, name='ITkTruthMatchTool', **kwargs) :
-    acc = ComponentAccumulator()
-
-    kwargs.setdefault("WeightPixel", 10.)
-    kwargs.setdefault("WeightSCT", 5.)
-
-    ITkTruthMatchSimilarityTool = CompFactory.Trk.TruthMatchRatio(name = name, **kwargs)
-    acc.setPrivateTools(ITkTruthMatchSimilarityTool)
-    return acc
-
-def ITkTrackTruthSimilaritySelectorCfg(flags, DetailedTruth, TracksTruth, name='Selector', **kwargs) :
-    acc = ComponentAccumulator()
-
-    ITkTruthMatchSimilarityTool = acc.popToolsAndMerge(ITkTruthMatchToolCfg(flags))
-
-    kwargs.setdefault("DetailedTrackTruthName", DetailedTruth)
-    kwargs.setdefault("OutputName", TracksTruth)
-    kwargs.setdefault("TrackTruthSimilarityTool", ITkTruthMatchSimilarityTool)
-
-    acc.addEventAlgo(CompFactory.TrackTruthSimilaritySelector(name = TracksTruth+name, **kwargs))
-    return acc
-
-def ITkTrackTruthCfg(flags, Tracks = "CombinedITkTracks", DetailedTruth = "CombinedITkTracksDetailedTruth", TracksTruth = "CombinedITkTracksTruthCollection"):
+def ITkTrackTruthCfg(flags,
+                     Tracks = "CombinedITkTracks",
+                     DetailedTruth = "CombinedITkTracksDetailedTruth",
+                     TracksTruth = "CombinedITkTracksTruthCollection"):
     acc = ComponentAccumulator()
     #
     # --- Enable the detailed track truth
@@ -39,6 +20,7 @@ def ITkTrackTruthCfg(flags, Tracks = "CombinedITkTracks", DetailedTruth = "Combi
     #
     # --- Detailed to old TrackTruth
     #
+    from TrkConfig.TrkTruthAlgsConfig import ITkTrackTruthSimilaritySelectorCfg
     acc.merge(ITkTrackTruthSimilaritySelectorCfg(flags, DetailedTruth, TracksTruth))
 
     return acc
