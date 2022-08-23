@@ -237,54 +237,54 @@ namespace InDet {
   StatusCode InDetTrackBiasingTool::initHistograms()
   {
 
-    TH2* data15_biasD0Histogram_tmp;
-    TH2* data15_biasZ0Histogram_tmp;
-    TH2* data15_biasQoverPsagittaHistogram_tmp;
-    TH2* data15_biasD0HistError_tmp;
-    TH2* data15_biasZ0HistError_tmp;
-    TH2* data15_biasQoverPsagittaHistError_tmp;
+    TH2* data15_biasD0Histogram_tmp = nullptr;
+    TH2* data15_biasZ0Histogram_tmp = nullptr;
+    TH2* data15_biasQoverPsagittaHistogram_tmp = nullptr;
+    TH2* data15_biasD0HistError_tmp = nullptr;
+    TH2* data15_biasZ0HistError_tmp = nullptr;
+    TH2* data15_biasQoverPsagittaHistError_tmp = nullptr;
 
-    TH2* data16_1stPart_biasD0Histogram_tmp;
-    TH2* data16_1stPart_biasZ0Histogram_tmp;
-    TH2* data16_1stPart_biasQoverPsagittaHistogram_tmp;
-    TH2* data16_1stPart_biasD0HistError_tmp;
-    TH2* data16_1stPart_biasZ0HistError_tmp;
-    TH2* data16_1stPart_biasQoverPsagittaHistError_tmp;
+    TH2* data16_1stPart_biasD0Histogram_tmp = nullptr;
+    TH2* data16_1stPart_biasZ0Histogram_tmp = nullptr;
+    TH2* data16_1stPart_biasQoverPsagittaHistogram_tmp = nullptr;
+    TH2* data16_1stPart_biasD0HistError_tmp = nullptr;
+    TH2* data16_1stPart_biasZ0HistError_tmp = nullptr;
+    TH2* data16_1stPart_biasQoverPsagittaHistError_tmp = nullptr;
 
-    TH2* data16_2ndPart_biasD0Histogram_tmp;
-    TH2* data16_2ndPart_biasZ0Histogram_tmp;
-    TH2* data16_2ndPart_biasQoverPsagittaHistogram_tmp;
-    TH2* data16_2ndPart_biasD0HistError_tmp;
-    TH2* data16_2ndPart_biasZ0HistError_tmp;
-    TH2* data16_2ndPart_biasQoverPsagittaHistError_tmp;
+    TH2* data16_2ndPart_biasD0Histogram_tmp = nullptr;
+    TH2* data16_2ndPart_biasZ0Histogram_tmp = nullptr;
+    TH2* data16_2ndPart_biasQoverPsagittaHistogram_tmp = nullptr;
+    TH2* data16_2ndPart_biasD0HistError_tmp = nullptr;
+    TH2* data16_2ndPart_biasZ0HistError_tmp = nullptr;
+    TH2* data16_2ndPart_biasQoverPsagittaHistError_tmp = nullptr;
 
-    TH2* data17_1stPart_biasD0Histogram_tmp;
-    TH2* data17_1stPart_biasZ0Histogram_tmp;
-    TH2* data17_1stPart_biasQoverPsagittaHistogram_tmp;
-    TH2* data17_1stPart_biasD0HistError_tmp;
-    TH2* data17_1stPart_biasZ0HistError_tmp;
-    TH2* data17_1stPart_biasQoverPsagittaHistError_tmp;
+    TH2* data17_1stPart_biasD0Histogram_tmp = nullptr;
+    TH2* data17_1stPart_biasZ0Histogram_tmp = nullptr;
+    TH2* data17_1stPart_biasQoverPsagittaHistogram_tmp = nullptr;
+    TH2* data17_1stPart_biasD0HistError_tmp = nullptr;
+    TH2* data17_1stPart_biasZ0HistError_tmp = nullptr;
+    TH2* data17_1stPart_biasQoverPsagittaHistError_tmp = nullptr;
 
-    TH2* data17_2ndPart_biasD0Histogram_tmp;
-    TH2* data17_2ndPart_biasZ0Histogram_tmp;
-    TH2* data17_2ndPart_biasQoverPsagittaHistogram_tmp;
-    TH2* data17_2ndPart_biasD0HistError_tmp;
-    TH2* data17_2ndPart_biasZ0HistError_tmp;
-    TH2* data17_2ndPart_biasQoverPsagittaHistError_tmp;
+    TH2* data17_2ndPart_biasD0Histogram_tmp = nullptr;
+    TH2* data17_2ndPart_biasZ0Histogram_tmp = nullptr;
+    TH2* data17_2ndPart_biasQoverPsagittaHistogram_tmp = nullptr;
+    TH2* data17_2ndPart_biasD0HistError_tmp = nullptr;
+    TH2* data17_2ndPart_biasZ0HistError_tmp = nullptr;
+    TH2* data17_2ndPart_biasQoverPsagittaHistError_tmp = nullptr;
 
-    TH2* data18_1stPart_biasD0Histogram_tmp;
-    TH2* data18_1stPart_biasZ0Histogram_tmp;
-    TH2* data18_1stPart_biasQoverPsagittaHistogram_tmp;
-    TH2* data18_1stPart_biasD0HistError_tmp;
-    TH2* data18_1stPart_biasZ0HistError_tmp;
-    TH2* data18_1stPart_biasQoverPsagittaHistError_tmp;
+    TH2* data18_1stPart_biasD0Histogram_tmp = nullptr;
+    TH2* data18_1stPart_biasZ0Histogram_tmp = nullptr;
+    TH2* data18_1stPart_biasQoverPsagittaHistogram_tmp = nullptr;
+    TH2* data18_1stPart_biasD0HistError_tmp = nullptr;
+    TH2* data18_1stPart_biasZ0HistError_tmp = nullptr;
+    TH2* data18_1stPart_biasQoverPsagittaHistError_tmp = nullptr;
 
-    TH2* data18_2ndPart_biasD0Histogram_tmp;
-    TH2* data18_2ndPart_biasZ0Histogram_tmp;
-    TH2* data18_2ndPart_biasQoverPsagittaHistogram_tmp;
-    TH2* data18_2ndPart_biasD0HistError_tmp;
-    TH2* data18_2ndPart_biasZ0HistError_tmp;
-    TH2* data18_2ndPart_biasQoverPsagittaHistError_tmp;
+    TH2* data18_2ndPart_biasD0Histogram_tmp = nullptr;
+    TH2* data18_2ndPart_biasZ0Histogram_tmp = nullptr;
+    TH2* data18_2ndPart_biasQoverPsagittaHistogram_tmp = nullptr;
+    TH2* data18_2ndPart_biasD0HistError_tmp = nullptr;
+    TH2* data18_2ndPart_biasZ0HistError_tmp = nullptr;
+    TH2* data18_2ndPart_biasQoverPsagittaHistError_tmp = nullptr;
 
     ATH_MSG_INFO( "Using for data15 (before 296939) the calibration file " << PathResolverFindCalibFile(m_calibFileData15) );
     ATH_CHECK ( initObject<TH2>(data15_biasD0Histogram_tmp, m_calibFileData15, m_d0_nominal_histName) );
