@@ -6,12 +6,12 @@ from AthenaConfiguration.ComponentAccumulator import ComponentAccumulator
 from AthenaConfiguration.ComponentFactory import CompFactory
 from AthenaConfiguration.Enums import ProductionStep
 from AthenaPoolCnvSvc.PoolReadConfig import PoolReadCfg
-from Digitization.RunDependentConfigNew import (
+from Digitization.RunDependentConfig import (
     maxNevtsPerXing,
     LumiProfileSvcCfg,
     NoProfileSvcCfg,
 )
-from Digitization.PileUpConfigNew import (
+from Digitization.PileUpConfig import (
     LowPtMinBiasEventSelectorCfg,
     HighPtMinBiasEventSelectorCfg,
     CavernEventSelectorCfg,
