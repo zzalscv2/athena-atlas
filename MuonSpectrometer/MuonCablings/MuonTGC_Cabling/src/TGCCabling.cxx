@@ -347,7 +347,6 @@ bool TGCCabling::getReadoutFromSLB(const TGCModuleSLB* slb,
   return true;  
 }
 
-
 // coincidence channel -> readout channel
 bool TGCCabling::getReadoutFromHighPtID(TGCIdBase::SideType side,
 					 int rodId,
@@ -370,12 +369,22 @@ bool TGCCabling::getReadoutFromHighPtID(TGCIdBase::SideType side,
   channel = -1;
 
   // get sector number
-  int readoutSector = (rodId -1); //rod ID = 1..12
+  
+  int readoutSector = (rodId -1); 
   int sector = sectorInReadout;
-  if(region==TGCIdBase::Forward) {
-    sector += readoutSector*(TGCId::NumberOfForwardSector/TGCId::NumberOfReadoutSector);
-  } else {
-    sector += readoutSector*(TGCId::NumberOfEndcapSector/TGCId::NumberOfReadoutSector);
+  if (rodId<13){
+    if(region==TGCIdBase::Forward) {
+      sector += readoutSector*(TGCId::NumberOfForwardSector/TGCId::NumberOfReadoutSector);
+    } else {
+      sector += readoutSector*(TGCId::NumberOfEndcapSector/TGCId::NumberOfReadoutSector);
+    }
+  }else if(rodId<20){
+    readoutSector -= 16;
+    if(region==TGCIdBase::Forward) {
+      sector += readoutSector*(TGCId::NumberOfForwardSector/TGCId::NumberOfSReadoutSector);
+    } else {
+      sector += readoutSector*(TGCId::NumberOfEndcapSector/TGCId::NumberOfSReadoutSector);
+    }
   }
     
   TGCChannelHPBIn hpbin(side,
@@ -405,10 +414,10 @@ bool TGCCabling::getReadoutFromHighPtID(TGCIdBase::SideType side,
   
   // SLB Module -> readout ID
   TGCIdBase::SideType sideType;
-  int rodid;
+  int rodid; // dummy
   bool status = getReadoutFromSLB(slb,
 				  sideType,
-				  rodid,
+				  rodid, 
 				  sswId,
 				  sbLoc);
   

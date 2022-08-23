@@ -685,12 +685,12 @@ void LVL1TGCTrigger::recordRdoHPT(TGCSector* sector,
     int startEndcapSector, coverageOfEndcapSector;
     int startForwardSector, coverageOfForwardSector;
     rodId = 1;
-    m_cabling->getCoveragefromRodID(rodId,
-                                    startEndcapSector,
-                                    coverageOfEndcapSector,
-                                    startForwardSector,
-                                    coverageOfForwardSector
-                                    ) ;
+    m_cabling->getCoveragefromSRodID(rodId,
+                                     startEndcapSector,
+                                     coverageOfEndcapSector,
+                                     startForwardSector,
+                                     coverageOfForwardSector
+                                     ) ;
     
     uint16_t bcTag=m_CurrentBunchTag, l1Id=0, bcId=0;
     
@@ -822,24 +822,24 @@ void LVL1TGCTrigger::recordRdoInner(TGCSector * sector,
     // get readout ID
     int subDetectorId=0, rodId=0, sswId=0, sbLoc=0;
     
-    bool status = m_cabling->getReadoutIDfromSLID(phi, isAside, isEndcap,
-                                                  subDetectorId, rodId, sswId, sbLoc);
+    bool status = m_cabling->getSReadoutIDfromSLID(phi, isAside, isEndcap,
+                                                   subDetectorId, rodId, sswId, sbLoc);
     if (!status) {
       ATH_MSG_WARNING("TGCcablignSvc::ReadoutIDfromSLID fails in recordRdoInner()" );
       return;
     }
 
     //  secID for TGCRawData
-    //  0-3(EC), 0-1(FWD) for new TGCcabling (1/12sector)
-    //  0-5(EC), 0-2(FWD) for new TGCcabling (octant)
+    //  0-3(EC), 0-1(FWD) for 1/12 sector
+    //  0-15(EC), 0-7(FWD) for 1/3 sector covered by SROD in RUn3
     int startEndcapSector, coverageOfEndcapSector;
     int startForwardSector, coverageOfForwardSector;
-    m_cabling->getCoveragefromRodID(rodId,
-                                    startEndcapSector,
-                                    coverageOfEndcapSector,
-                                    startForwardSector,
-				    coverageOfForwardSector
-                                    ) ;
+    m_cabling->getCoveragefromSRodID(rodId,
+                                     startEndcapSector,
+                                     coverageOfEndcapSector,
+                                     startForwardSector,
+                                     coverageOfForwardSector
+                                     ) ;
     int secId = 0;
     if (isEndcap){
       secId = sectorId % coverageOfEndcapSector;
@@ -974,12 +974,12 @@ void LVL1TGCTrigger::recordRdoSL(TGCSector* sector,
     int startEndcapSector, coverageOfEndcapSector;
     int startForwardSector, coverageOfForwardSector;
     int rodId = 1;
-    m_cabling->getCoveragefromRodID(rodId,
-                                    startEndcapSector,
-                                    coverageOfEndcapSector,
-                                    startForwardSector,
-                                    coverageOfForwardSector
-                                    ) ;
+    m_cabling->getCoveragefromSRodID(rodId,
+                                     startEndcapSector,
+                                     coverageOfEndcapSector,
+                                     startForwardSector,
+                                     coverageOfForwardSector
+                                     ) ;
     int secId = 0;
     if (isEndcap){
       secId = sectorId % coverageOfEndcapSector;
@@ -992,8 +992,8 @@ void LVL1TGCTrigger::recordRdoSL(TGCSector* sector,
     
     // get readout ID
     int subDetectorId = 0, sswId = 0, sbLoc = 0;
-    bool status = m_cabling->getReadoutIDfromSLID(phi, isAside, isEndcap,
-                                                  subDetectorId, rodId, sswId, sbLoc);
+    bool status = m_cabling->getSReadoutIDfromSLID(phi, isAside, isEndcap,
+                                                   subDetectorId, rodId, sswId, sbLoc);
     if (!status) {
       ATH_MSG_WARNING("TGCcablignSvc::ReadoutIDfromSLID fails"
                       << (isEndcap ? "  Endcap-" : "  Forward-")
@@ -1238,8 +1238,8 @@ StatusCode LVL1TGCTrigger::getCabling()
       return StatusCode::FAILURE;
     }
     
-    int maxRodId,maxSswId, maxSbloc,minChannelId, maxChannelId;
-    m_cabling->getReadoutIDRanges( maxRodId,maxSswId, maxSbloc,minChannelId, maxChannelId);
+    int maxRodId, maxSRodId, maxSswId, maxSbloc,minChannelId, maxChannelId;
+    m_cabling->getReadoutIDRanges( maxRodId, maxSRodId, maxSswId, maxSbloc,minChannelId, maxChannelId);
     if (maxRodId ==12) {
       ATH_MSG_INFO(m_cabling->name() << " is OK");
     } else {
