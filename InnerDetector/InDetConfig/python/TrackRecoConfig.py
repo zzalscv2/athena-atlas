@@ -4,16 +4,6 @@ from AthenaConfiguration.ComponentAccumulator import ComponentAccumulator
 from AthenaConfiguration.ComponentFactory import CompFactory
 from AthenaConfiguration.Enums import BeamType, Format
 
-def TrackToVertexCfg(flags, name="AtlasTrackToVertexTool", **kwargs):
-    result = ComponentAccumulator()
-    if "Extrapolator" not in kwargs:
-        from TrkConfig.AtlasExtrapolatorConfig import AtlasExtrapolatorCfg
-        kwargs["Extrapolator"] = result.popToolsAndMerge(AtlasExtrapolatorCfg(flags))
-    from BeamSpotConditions.BeamSpotConditionsConfig import BeamSpotCondAlgCfg
-    result.merge(BeamSpotCondAlgCfg(flags))
-    result.setPrivateTools(CompFactory.Reco.TrackToVertex(name, **kwargs))
-    return result
-
 def TrackCollectionMergerAlgCfg(flags, name="InDetTrackCollectionMerger",
                                 InputCombinedTracks=None,
                                 OutputCombinedTracks="",

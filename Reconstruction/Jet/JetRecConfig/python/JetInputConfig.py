@@ -30,7 +30,7 @@ def buildJetInputTruth(parentjetdef, truthmod):
     truthmod = truthmod or ""
     from ParticleJetTools.ParticleJetToolsConfig import getCopyTruthJetParticles
     return _buildJetAlgForInput("truthpartcopy_"+truthmod,
-                                tools = [ getCopyTruthJetParticles(truthmod) ]
+                                tools = [ getCopyTruthJetParticles(truthmod, parentjetdef._cflags) ]
     )
 
 def buildJetInputTruthGEN(parentjetdef, truthmod):

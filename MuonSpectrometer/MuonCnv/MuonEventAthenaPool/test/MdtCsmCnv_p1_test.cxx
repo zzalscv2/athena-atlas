@@ -13,6 +13,7 @@
 #include "TestTools/leakcheck.h"
 #include "CxxUtils/checker_macros.h"
 #include "GaudiKernel/MsgStream.h"
+#include "StoreGate/StoreGateSvc.h"
 #include <cassert>
 #include <iostream>
 
@@ -54,6 +55,7 @@ void test1 ATLAS_NOT_THREAD_SAFE ()
 
 int main ATLAS_NOT_THREAD_SAFE ()
 {
+  Gaudi::svcLocator();
   test1();
   return 0;
 }

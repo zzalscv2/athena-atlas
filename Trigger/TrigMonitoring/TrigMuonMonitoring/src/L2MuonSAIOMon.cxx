@@ -1002,7 +1002,7 @@ StatusCode L2MuonSAIOMon :: decision_ptthreshold( const std::string &chain, std:
     my_EtaBins = {0, 1.05, 1.5, 2.0, 9.9}; //4GeV_v15a
     my_muCombThres = {3.86, 3.77, 3.69, 3.70}; //4GeV_v15a
     my_pikCuts = false;
-  }else if(chain == "HLT_mu26_ivarmedium_mu6_l2io_probe_L1MU14FCH"){
+  }else if(chain == "HLT_mu24_ivarmedium_mu6_l2io_probe_L1MU14FCH"){
     my_EtaBins = {0, 1.05, 1.5, 2.0, 9.9}; //6GeV_v15a
     my_muCombThres = {5.87, 5.79, 5.70, 5.62}; //6GeV_v15a
     my_pikCuts = false;

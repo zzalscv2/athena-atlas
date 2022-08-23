@@ -2,18 +2,15 @@
   Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
 */
 
-#include "CaloJiveXML/CaloTileRetriever.h"
+#include "CaloTileRetriever.h"
 
 #include "AthenaKernel/Units.h"
 
 #include "EventContainers/SelectAllObject.h"
 
-#include "CaloEvent/CaloCellContainer.h"
 #include "CaloIdentifier/CaloCell_ID.h"
 #include "CaloDetDescr/CaloDetDescrElement.h"
 #include "TileEvent/TileCell.h"
-#include "TileEvent/TileDigitsContainer.h"
-#include "TileEvent/TileRawChannelContainer.h"
 #include "TileEvent/TileCellContainer.h"
 #include "Identifier/HWIdentifier.h"
 #include "CaloIdentifier/TileID.h"
@@ -35,14 +32,11 @@ namespace JiveXML {
    **/
   CaloTileRetriever::CaloTileRetriever(const std::string& type,const std::string& name,const IInterface* parent):
     AthAlgTool(type,name,parent),
-    m_typeName("TileDigit"),
-    m_calocell_id(nullptr),
-    m_sgKey ("AllCalo")
+    m_calocell_id(nullptr)
   {
    //Only declare the interface
    declareInterface<IDataRetriever>(this);
 
-   declareProperty("StoreGateKey" , m_sgKey);
    declareProperty("CellThreshold", m_cellThreshold = 50.);
    declareProperty("RetrieveTILE" , m_tile = true);
    declareProperty("DoTileDigit",   m_doTileDigit = false);
@@ -50,6 +44,16 @@ namespace JiveXML {
    declareProperty("DoTileCellDetails",  m_doTileCellDetails = false);
    declareProperty("CellEnergyPrec", m_cellEnergyPrec = 3);
    declareProperty("CellTimePrec", m_cellTimePrec = 3);
+
+   // TileDigitsContainer names: {"TileDigitsCnt","TileDigitsFlt"};
+   declareProperty("TileDigitsContainer" ,m_sgKeyTileDigits = "",
+        "Input collection to retrieve Tile digits, used when doTileDigit is True");
+
+   // TileRawChannelContainer names: {"TileRawChannelOpt2","TileRawChannelOpt","TileRawChannelFixed",
+   //                                 "TileRawChannelFitCool","TileRawChannelFit",
+   //                                 "TileRawChannelCnt","TileRawChannelFlt"};
+   declareProperty("TileRawChannelContainer" ,m_sgKeyTileRawChannel = "",
+        "Input collection to retrieve Tile raw channels, used when doTileCellDetails is True.");
   }
 
   /**
@@ -69,6 +73,12 @@ namespace JiveXML {
 
     //=== get TileBadChanTool
     ATH_CHECK( m_tileBadChanTool.retrieve() );
+    
+    ATH_CHECK( m_sgKey.initialize() );
+
+    ATH_CHECK( m_sgKeyTileDigits.initialize(m_doTileDigit) );
+
+    ATH_CHECK( m_sgKeyTileRawChannel.initialize(m_doTileCellDetails) );
 
     return StatusCode::SUCCESS;
   }
@@ -80,17 +90,18 @@ namespace JiveXML {
 
     ATH_MSG_DEBUG( "in retrieve()"  );
 
-    const CaloCellContainer* cellContainer;
-    if (!evtStore()->retrieve(cellContainer,m_sgKey)) {
-      ATH_MSG_WARNING( "Could not retrieve Calorimeter Cells for Tile "  );
-      return StatusCode::SUCCESS;
+    SG::ReadHandle<CaloCellContainer> cellContainer(m_sgKey);
+    if (!cellContainer.isValid()){
+	    ATH_MSG_WARNING( "Could not retrieve Calorimeter Cells "  );
+    }
+    else{
+      if (m_tile) {
+        DataMap data = getCaloTileData(&(*cellContainer));
+        ATH_CHECK( FormatTool->AddToEvent("TILE", m_sgKey.key(), &data) );
+        ATH_MSG_DEBUG( "Tile retrieved"  );
+      }
     }
 
-    if (m_tile) {
-      DataMap data = getCaloTileData(cellContainer);
-      ATH_CHECK( FormatTool->AddToEvent("TILE", m_sgKey, &data) );
-      ATH_MSG_DEBUG( "Tile retrieved"  );
-    }
     //Tile cells retrieved okay
     return StatusCode::SUCCESS;
   }
@@ -140,14 +151,10 @@ namespace JiveXML {
     std::string adcCounts1Str = "adcCounts1 multiple=\"0\"";
     std::string adcCounts2Str = "adcCounts2 multiple=\"0\"";
 
-    StatusCode scTileDigit = StatusCode::FAILURE;
-    StatusCode scTileRawChannel = StatusCode::FAILURE;
     const TileID* tileID = nullptr;
     const TileHWID* tileHWID = nullptr;
     const TileInfo* tileInfo = nullptr;
     const TileCablingService* cabling=nullptr;
-    const TileDigitsContainer *tileDigits = nullptr;
-    const TileRawChannelContainer* RawChannelCnt;
     TileRawChannelUnit::UNIT RChUnit = TileRawChannelUnit::ADCcounts;  //!< Unit for TileRawChannels (ADC, pCb, etc.)
     cabling = TileCablingService::getInstance();
     double energyGeV;
@@ -183,67 +190,44 @@ namespace JiveXML {
       ATH_MSG_ERROR( "in getCaloTileData(), Could not retrieve TileInfo" );
     }
 
+    SG::ReadHandle<TileDigitsContainer> tileDigits;
     if (m_doTileDigit) {
-
-      std::string DigiName[2] = {"TileDigitsCnt","TileDigitsFlt"};
-      int icntd=2;
-      for (icntd=0; icntd<2; ++icntd) {
-        if (evtStore()->contains<TileDigitsContainer>(DigiName[icntd])) break;
+      tileDigits = SG::makeHandle(m_sgKeyTileDigits);
+      if (!tileDigits.isValid()){
+         ATH_MSG_WARNING( "Could not retrieve TileDigits "  );
       }
-      if (icntd<2) {
-        scTileDigit = evtStore()->retrieve(tileDigits,DigiName[icntd]);
-      }
-
-      if (scTileDigit.isFailure())
-        ATH_MSG_ERROR( "in getTileData(), Could not retrieve TileDigits"  );
     }
 
-
+    SG::ReadHandle<TileRawChannelContainer> RawChannelCnt;
     if (m_doTileCellDetails) {
-
-      std::string RchName[7] = {"TileRawChannelOpt2","TileRawChannelOpt","TileRawChannelFixed",
-                                "TileRawChannelFitCool","TileRawChannelFit",
-                                "TileRawChannelCnt","TileRawChannelFlt"};
-      int icntr=0;
-      for ( ; icntr<7; ++icntr) {
-        if (evtStore()->contains<TileRawChannelContainer>(RchName[icntr])) break;
+      RawChannelCnt = SG::makeHandle(m_sgKeyTileRawChannel);
+      if (!RawChannelCnt.isValid()){
+         ATH_MSG_WARNING( "Could not retrieve TileRawChannel "  );
       }
-      if (icntr<7) {
-        scTileRawChannel = evtStore()->retrieve(RawChannelCnt,RchName[icntr]);
-        if (scTileRawChannel.isSuccess()) {
+      else {
           RChUnit = RawChannelCnt->get_unit();
           offlineRch = (RChUnit<TileRawChannelUnit::OnlineADCcounts && 
                         RawChannelCnt->get_type() != TileFragHash::OptFilterDsp);
-        }
       }
-
-      if (scTileRawChannel.isFailure())
-        ATH_MSG_WARNING( "in getTileData(), Could not retrieve TileRawchannel"  );
     }
 
 
     // Loop Over TileRawChannelContainer to retrieve raw information. Keep the values in vectors
 
-    if (scTileRawChannel.isSuccess()) { // separate "if" just to make sure that status is always checked
+    if (m_doTileCellDetails && RawChannelCnt.isValid()) {
      if (offlineRch) {
 
-      TileRawChannelContainer::const_iterator collItr=RawChannelCnt->begin();
-      TileRawChannelContainer::const_iterator lastColl=RawChannelCnt->end();
+      for (const auto rawChannel : *RawChannelCnt) {
 
-      for (; collItr!=lastColl; ++collItr) {
+         for (const auto cell : *rawChannel) {
 
-        TileRawChannelCollection::const_iterator chItr=(*collItr)->begin();
-        TileRawChannelCollection::const_iterator lastCh=(*collItr)->end();
-
-        for (; chItr!=lastCh; ++chItr) {
-
-          /*Identifier cell_id =*/ (*chItr)->cell_ID_index(Index,pmtInd);
+          /*Identifier cell_id =*/ cell->cell_ID_index(Index,pmtInd);
           if (Index <= -1 ) continue;  //disconnect channel index is -1 and MBTS is -2. They do not have an idhash
-          IdentifierHash cell_hash = m_calocell_id->calo_cell_hash( (*chItr)->cell_ID() );
+          IdentifierHash cell_hash = m_calocell_id->calo_cell_hash( cell->cell_ID() );
           cellInd = cellContainer->findIndex(cell_hash);  //find Cell Index
           if (cellInd < 0) continue;
 
-          HWIdentifier hwid=(*chItr)->adc_HWID();
+          HWIdentifier hwid=cell->adc_HWID();
           int adc       = tileHWID->adc(hwid);
           int channel   = tileHWID->channel(hwid);
           int drawer    = tileHWID->drawer(hwid);
@@ -252,7 +236,7 @@ namespace JiveXML {
           int drawerIdx = TileCalibUtils::getDrawerIdx(ros,drawer);
           uint32_t tileAdcStatus = m_tileBadChanTool->encodeStatus(m_tileBadChanTool->getAdcStatus(drawerIdx,channel,adc));
 
-          amplitude = (*chItr)->amplitude();
+          amplitude = cell->amplitude();
           //Change amplitude units to ADC counts
           if (TileRawChannelUnit::ADCcounts < RChUnit && RChUnit < TileRawChannelUnit::OnlineADCcounts) {
             amplitude /= m_tileToolEmscale->channelCalib(drawerIdx, channel, adc, 1.0, TileRawChannelUnit::ADCcounts, RChUnit);
@@ -264,17 +248,17 @@ namespace JiveXML {
 
           if ( pmtInd == 0 ) { // first PMT
 
-            pmt1ped[cellInd] = (*chItr)->pedestal();
+            pmt1ped[cellInd] = cell->pedestal();
             pmt1rawamp[cellInd] = amplitude;
-            pmt1rawtime[cellInd] = (*chItr)->uncorrTime();
+            pmt1rawtime[cellInd] = cell->uncorrTime();
             pmt1number[cellInd] = PMT;
             pmt1status[cellInd] = tileAdcStatus;
           }
           else { // second PMT
 
-            pmt2ped[cellInd] = (*chItr)->pedestal();
+            pmt2ped[cellInd] = cell->pedestal();
             pmt2rawamp[cellInd] = amplitude;
-            pmt2rawtime[cellInd] = (*chItr)->uncorrTime();
+            pmt2rawtime[cellInd] = cell->uncorrTime();
             pmt2number[cellInd] = PMT;
             pmt2status[cellInd] = tileAdcStatus;
 
@@ -282,33 +266,29 @@ namespace JiveXML {
         }
       }//for TileRawChannelContainer loop
      }
-    } //end TileRawChannel.sucess
+    } // end of doTileCellDetails
 
 
     //Loop over TileDigitsContainer to retrieve digits. Keep the digits values in a map
 
-    if (scTileDigit.isSuccess() && tileDigits) {
+    if (m_doTileDigit && tileDigits.isValid()) {
 
       //----- get tile digits--------------------------
-      TileDigitsContainer::const_iterator itColl = tileDigits->begin();
-      TileDigitsContainer::const_iterator itCollEnd = tileDigits->end();
 
       // tile digits loop
-      for (; itColl != itCollEnd; ++itColl) {
-        TileDigitsCollection::const_iterator it = (*itColl)->begin();
-        TileDigitsCollection::const_iterator itEnd = (*itColl)->end();
+      for (const auto digitChannel : *tileDigits) {
 
-        for (; it!=itEnd; ++it) {
+        for (const auto cell : *digitChannel) {
 
-          /*Identifier cell_id =*/ (*it)->cell_ID_index(Index,pmtInd);
+          /*Identifier cell_id =*/ cell->cell_ID_index(Index,pmtInd);
           if (Index <= -1 ) continue; //disconnect channel index is -1 and MBTS is -2. They do not have an idhash
-          IdentifierHash cell_hash = m_calocell_id->calo_cell_hash( (*it)->cell_ID() );
+          IdentifierHash cell_hash = m_calocell_id->calo_cell_hash( cell->cell_ID() );
           cellInd = cellContainer->findIndex(cell_hash);  //find Cell Index
           if (cellInd < 0) continue;
           if ( (*cellContainer)[cellInd]->energy() < m_cellThreshold) continue;
 
-          nTileSamples = (*it)->NtimeSamples();
-          std::vector<float> tileSamples = (*it)->samples();
+          nTileSamples = cell->NtimeSamples();
+          std::vector<float> tileSamples = cell->samples();
 
           if (pmtInd == 0 ) { // first PMT
             pmt1digit.insert(std::make_pair( cellInd, tileSamples ) );
@@ -319,7 +299,7 @@ namespace JiveXML {
 
         }
       }//for TileDigitContainer loop
-    } // if scTileDigit.isSuccess
+    } // end if doTileDigit
 
 
     //Loop Over CaloCellContainer to retrieve TileCell information
@@ -348,7 +328,7 @@ namespace JiveXML {
       phi.push_back(DataType((*it1)->phi()));
       eta.push_back(DataType((*it1)->eta()));
 
-      if (m_doTileDigit && scTileDigit.isSuccess()) {
+      if (m_doTileDigit && tileDigits.isValid()) {
 
         if ( !pmt1digit[cellInd].empty()) {
           for (int i=0; i<nTileSamples; i++) {
@@ -409,7 +389,7 @@ namespace JiveXML {
         pmt2Chi2.push_back(DataType(qual2));
         pmt2Gain.push_back(DataType(gain2));
 
-        if (offlineRch && scTileRawChannel.isSuccess() 
+        if (offlineRch && RawChannelCnt.isValid() 
             && (noch1 || pmt1number[cellInd]!=0) && (noch2 || pmt2number[cellInd]!=0)) {
 
           uint32_t tileAdcStatus = pmt1status[cellInd];

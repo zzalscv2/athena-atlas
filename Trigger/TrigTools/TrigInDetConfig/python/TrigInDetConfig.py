@@ -279,17 +279,6 @@ def ftfCfg(flags, roisKey, signature, signatureName):
 
   return acc
 
-def TrigTrackToVertexCfg(flags, name = 'TrigTrackToVertexTool', **kwargs ):
-    acc = ComponentAccumulator()
-    if 'Extrapolator' not in kwargs:
-      extrapolator_acc = ExtrapolatorCfg( flags )
-      extrapolator = extrapolator_acc.getPrimary()
-      acc.merge(extrapolator_acc)
-      kwargs.setdefault('Extrapolator', extrapolator) # @TODO or atlas extrapolator ?
-    tool = CompFactory.Reco.TrackToVertex( name, **kwargs)
-    acc.setPrivateTools(tool)
-    return acc
-
 def _trackConverterCfg(flags, signature, inputTracksKey, outputTrackParticleKey):
   acc = ComponentAccumulator()
 

@@ -16,7 +16,6 @@ public:
     ReadTgcRDO(const std::string& name, ISvcLocator* pSvcLocator);
     virtual StatusCode initialize() override;
     virtual StatusCode execute() override;
-   
 
 protected:
     NTuple::Tuple* m_ntuplePtr{nullptr};

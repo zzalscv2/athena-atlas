@@ -22,8 +22,7 @@
 const int MAX_RDO = 24;
 const int MAX_DATA = 1024;
 
-ReadTgcRDO::ReadTgcRDO(const std::string& name, ISvcLocator* pSvcLocator) :
-    AthAlgorithm(name, pSvcLocator) {
+ReadTgcRDO::ReadTgcRDO(const std::string& name, ISvcLocator* pSvcLocator) : AthAlgorithm(name, pSvcLocator) {
     // Declare the properties
     declareProperty("NtupleLocID", m_NtupleLocID);
     declareProperty("WriteTgcNtuple", m_tgcNtuple = false);

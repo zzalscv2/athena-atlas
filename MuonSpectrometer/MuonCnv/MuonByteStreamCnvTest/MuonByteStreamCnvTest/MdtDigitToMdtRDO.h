@@ -23,16 +23,12 @@ public:
     virtual StatusCode execute(const EventContext& ctx) const override final;
 
 private:
-    StatusCode fill_MDTdata(const EventContext& ctx) const;
-
     // NOTE: although this function has no clients in release 22, currently the Run2 trigger simulation is still run in
     //       release 21 on RDOs produced in release 22. Since release 21 accesses the TagInfo, it needs to be written to the
     //       RDOs produced in release 22. The fillTagInfo() function thus needs to stay in release 22 until the workflow changes
     StatusCode fillTagInfo() const;
 
 protected:
-    bool m_BMEpresent{false};
-    int m_BME_station_name{-1};
     ///
     bool m_BMGpresent{false};
     int m_BMG_station_name{-1};
@@ -44,13 +40,7 @@ protected:
     SG::ReadCondHandleKey<MuonMDT_CablingMap> m_cablingKey{this, "CablingKey", "MuonMDT_CablingMap", "Key of MuonMDT_CablingMap"};
     SG::ReadCondHandleKey<MdtCondDbData> m_condKey{this, "ConditionsKey", "MdtCondDbData", "Key of MDT condition data"};
 
-    /// Create from the module_id a MdtCsmContainer
-    /// -- cabling_ptr: Pointer to the cached cabling map from the conditions
-    /// -- Identifier:  Identifier of the current chamber
-    /// -- moduleHash:
-    /// -- need_second: Create the second CSM needed for BME and BIS78 (Run-III)
-    std::unique_ptr<MdtCsm> make_csm(const MuonMDT_CablingMap* cabling_ptr, const Identifier module_id, IdentifierHash module_hash,
-                                     bool need_second) const;
+    Gaudi::Property<bool> m_isPhaseII{this, "isPhaseII", false, "Switch to set the phase II geometry. Allows for cabling failures"};
 };
 
 #endif

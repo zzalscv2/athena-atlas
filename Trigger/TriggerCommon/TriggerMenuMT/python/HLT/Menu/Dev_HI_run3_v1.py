@@ -214,6 +214,29 @@ def setupMenu():
         ChainProp(name='HLT_mb_sp_L1TE3_VTE50',                l1SeedThresholds=['FSNOSEED'], stream=[UPCStream], groups=MinBiasGroup+SupportGroup),
         ChainProp(name='HLT_mb_sp15_trk15_hmt_L1MBTS_1_VTE50', l1SeedThresholds=['FSNOSEED'], stream=[UPCStream], groups=MinBiasGroup+SupportGroup),
         ChainProp(name='HLT_mb_sp300_trk20_hmt_L1TE3_VTE50',   l1SeedThresholds=['FSNOSEED'], stream=[UPCStream], groups=MinBiasGroup+SupportGroup),
+
+        #Minbias chains for LHCf+ZDC special run ATR-26051
+        ChainProp(name='HLT_mb_sptrk_L1ZDC_OR',            l1SeedThresholds=['FSNOSEED'], stream=[UPCStream], groups=['PS:Online', 'PS:NoHLTReprocessing']+MinBiasGroup),
+        ChainProp(name='HLT_mb_sptrk_L1ZDC_XOR_E2',        l1SeedThresholds=['FSNOSEED'], stream=[UPCStream], groups=['PS:Online', 'PS:NoHLTReprocessing']+MinBiasGroup),
+        ChainProp(name='HLT_mb_sptrk_L1ZDC_XOR_E1_E3',     l1SeedThresholds=['FSNOSEED'], stream=[UPCStream], groups=['PS:Online', 'PS:NoHLTReprocessing']+MinBiasGroup),
+        ChainProp(name='HLT_mb_sptrk_L1ZDC_E1_AND_E1',     l1SeedThresholds=['FSNOSEED'], stream=[UPCStream], groups=['PS:Online', 'PS:NoHLTReprocessing']+MinBiasGroup),
+        ChainProp(name='HLT_mb_sptrk_L1ZDC_E1_AND_E2ORE3', l1SeedThresholds=['FSNOSEED'], stream=[UPCStream], groups=['PS:Online', 'PS:NoHLTReprocessing']+MinBiasGroup),
+        ChainProp(name='HLT_mb_sptrk_L1ZDC_E2_AND_E2',     l1SeedThresholds=['FSNOSEED'], stream=[UPCStream], groups=['PS:Online', 'PS:NoHLTReprocessing']+MinBiasGroup),
+        ChainProp(name='HLT_mb_sptrk_L1ZDC_E2_AND_E3',     l1SeedThresholds=['FSNOSEED'], stream=[UPCStream], groups=['PS:Online', 'PS:NoHLTReprocessing']+MinBiasGroup),
+        ChainProp(name='HLT_mb_sptrk_L1ZDC_E3_AND_E3',     l1SeedThresholds=['FSNOSEED'], stream=[UPCStream], groups=['PS:Online', 'PS:NoHLTReprocessing']+MinBiasGroup),
+        ChainProp(name='HLT_mb_sptrk_L1ZDC_A_AND_C',       l1SeedThresholds=['FSNOSEED'], stream=[UPCStream], groups=['PS:Online', 'PS:NoHLTReprocessing']+MinBiasGroup),
+        ChainProp(name='HLT_mb_sp100_trk30_hmt_L1ZDC_OR',            l1SeedThresholds=['FSNOSEED'], stream=[UPCStream], groups=['PS:Online', 'PS:NoHLTReprocessing']+MinBiasGroup),
+        ChainProp(name='HLT_mb_sp100_trk30_hmt_L1ZDC_XOR_E2',        l1SeedThresholds=['FSNOSEED'], stream=[UPCStream], groups=['PS:Online', 'PS:NoHLTReprocessing']+MinBiasGroup),
+        ChainProp(name='HLT_mb_sp100_trk30_hmt_L1ZDC_XOR_E1_E3',     l1SeedThresholds=['FSNOSEED'], stream=[UPCStream], groups=['PS:Online', 'PS:NoHLTReprocessing']+MinBiasGroup),
+        ChainProp(name='HLT_mb_sp100_trk30_hmt_L1ZDC_E1_AND_E1',     l1SeedThresholds=['FSNOSEED'], stream=[UPCStream], groups=['PS:Online', 'PS:NoHLTReprocessing']+MinBiasGroup),
+        ChainProp(name='HLT_mb_sp100_trk30_hmt_L1ZDC_E1_AND_E2ORE3', l1SeedThresholds=['FSNOSEED'], stream=[UPCStream], groups=['PS:Online', 'PS:NoHLTReprocessing']+MinBiasGroup),
+        ChainProp(name='HLT_mb_sp100_trk30_hmt_L1ZDC_E2_AND_E2',     l1SeedThresholds=['FSNOSEED'], stream=[UPCStream], groups=['PS:Online', 'PS:NoHLTReprocessing']+MinBiasGroup),
+        ChainProp(name='HLT_mb_sp100_trk30_hmt_L1ZDC_E2_AND_E3',     l1SeedThresholds=['FSNOSEED'], stream=[UPCStream], groups=['PS:Online', 'PS:NoHLTReprocessing']+MinBiasGroup),
+        ChainProp(name='HLT_mb_sp100_trk30_hmt_L1ZDC_E3_AND_E3',     l1SeedThresholds=['FSNOSEED'], stream=[UPCStream], groups=['PS:Online', 'PS:NoHLTReprocessing']+MinBiasGroup),
+        ChainProp(name='HLT_mb_sp100_trk30_hmt_L1ZDC_A_AND_C',       l1SeedThresholds=['FSNOSEED'], stream=[UPCStream], groups=['PS:Online', 'PS:NoHLTReprocessing']+MinBiasGroup),
+        # HMT trigger with L1_AFP_A_OR_C
+        ChainProp(name='HLT_mb_sptrk_L1AFP_A_OR_C',           l1SeedThresholds=['FSNOSEED'], stream=[UPCStream], groups=['PS:Online', 'PS:NoHLTReprocessing']+MinBiasGroup),
+        ChainProp(name='HLT_mb_sp100_trk30_hmt_L1AFP_A_OR_C', l1SeedThresholds=['FSNOSEED'], stream=[UPCStream], groups=['PS:Online', 'PS:NoHLTReprocessing']+MinBiasGroup),
     ]
 
     chains['Streaming'] += [
@@ -262,6 +285,45 @@ def setupMenu():
         ChainProp(name='HLT_noalg_L1MBTS_1_VTE50', l1SeedThresholds=['FSNOSEED'], stream=[UPCStream], groups=MinBiasGroup+SupportGroup),
         ChainProp(name='HLT_noalg_L1TE50_VTE200',  l1SeedThresholds=['FSNOSEED'], stream=[UPCStream], groups=MinBiasGroup+SupportGroup),
         ChainProp(name='HLT_noalg_L1TRT_VTE200',   l1SeedThresholds=['FSNOSEED'], stream=[UPCStream], groups=MinBiasGroup+SupportGroup),
+
+        #ZDC streamer for LHCf+ZDC special run ATR-26051
+        ChainProp(name='HLT_noalg_L1ZDC_OR',            l1SeedThresholds=['FSNOSEED'], stream=[UPCStream], groups=['PS:Online', 'PS:NoHLTReprocessing']+MinBiasGroup),
+        ChainProp(name='HLT_noalg_L1ZDC_XOR_E2',        l1SeedThresholds=['FSNOSEED'], stream=[UPCStream], groups=['PS:Online', 'PS:NoHLTReprocessing']+MinBiasGroup),
+        ChainProp(name='HLT_noalg_L1ZDC_XOR_E1_E3',     l1SeedThresholds=['FSNOSEED'], stream=[UPCStream], groups=['PS:Online', 'PS:NoHLTReprocessing']+MinBiasGroup),
+        ChainProp(name='HLT_noalg_L1ZDC_E1_AND_E1',     l1SeedThresholds=['FSNOSEED'], stream=[UPCStream], groups=['PS:Online', 'PS:NoHLTReprocessing']+MinBiasGroup),
+        ChainProp(name='HLT_noalg_L1ZDC_E1_AND_E2ORE3', l1SeedThresholds=['FSNOSEED'], stream=[UPCStream], groups=['PS:Online', 'PS:NoHLTReprocessing']+MinBiasGroup),
+        ChainProp(name='HLT_noalg_L1ZDC_E2_AND_E2',     l1SeedThresholds=['FSNOSEED'], stream=[UPCStream], groups=['PS:Online', 'PS:NoHLTReprocessing']+MinBiasGroup),
+        ChainProp(name='HLT_noalg_L1ZDC_E2_AND_E3',     l1SeedThresholds=['FSNOSEED'], stream=[UPCStream], groups=['PS:Online', 'PS:NoHLTReprocessing']+MinBiasGroup),
+        ChainProp(name='HLT_noalg_L1ZDC_E3_AND_E3',     l1SeedThresholds=['FSNOSEED'], stream=[UPCStream], groups=['PS:Online', 'PS:NoHLTReprocessing']+MinBiasGroup),
+        ChainProp(name='HLT_noalg_L1ZDC_A_AND_C',       l1SeedThresholds=['FSNOSEED'], stream=[UPCStream], groups=['PS:Online', 'PS:NoHLTReprocessing']+MinBiasGroup),
+        ChainProp(name='HLT_noalg_L1ZDC_OR_EMPTY',          l1SeedThresholds=['FSNOSEED'], stream=[UPCStream], groups=['PS:Online', 'PS:NoHLTReprocessing']+MinBiasGroup),
+        ChainProp(name='HLT_noalg_L1ZDC_OR_UNPAIRED_ISO',   l1SeedThresholds=['FSNOSEED'], stream=[UPCStream], groups=['PS:Online', 'PS:NoHLTReprocessing']+MinBiasGroup),
+        ChainProp(name='HLT_noalg_L1ZDC_OR_UNPAIRED_NONISO',l1SeedThresholds=['FSNOSEED'], stream=[UPCStream], groups=['PS:Online', 'PS:NoHLTReprocessing']+MinBiasGroup),
+
+        #ZDC bits and comb streamer 
+        ChainProp(name='HLT_noalg_L1ZDC_BIT2', l1SeedThresholds=['FSNOSEED'], stream=[UPCStream], groups=['PS:Online', 'PS:NoHLTReprocessing']+MinBiasGroup),
+        ChainProp(name='HLT_noalg_L1ZDC_BIT1', l1SeedThresholds=['FSNOSEED'], stream=[UPCStream], groups=['PS:Online', 'PS:NoHLTReprocessing']+MinBiasGroup),
+        ChainProp(name='HLT_noalg_L1ZDC_BIT0', l1SeedThresholds=['FSNOSEED'], stream=[UPCStream], groups=['PS:Online', 'PS:NoHLTReprocessing']+MinBiasGroup),
+        ChainProp(name='HLT_noalg_L1ZDC_COMB0', l1SeedThresholds=['FSNOSEED'], stream=[UPCStream], groups=['PS:Online', 'PS:NoHLTReprocessing']+MinBiasGroup),
+        ChainProp(name='HLT_noalg_L1ZDC_COMB1', l1SeedThresholds=['FSNOSEED'], stream=[UPCStream], groups=['PS:Online', 'PS:NoHLTReprocessing']+MinBiasGroup),
+        ChainProp(name='HLT_noalg_L1ZDC_COMB2', l1SeedThresholds=['FSNOSEED'], stream=[UPCStream], groups=['PS:Online', 'PS:NoHLTReprocessing']+MinBiasGroup),
+        ChainProp(name='HLT_noalg_L1ZDC_COMB3', l1SeedThresholds=['FSNOSEED'], stream=[UPCStream], groups=['PS:Online', 'PS:NoHLTReprocessing']+MinBiasGroup),
+        ChainProp(name='HLT_noalg_L1ZDC_COMB4', l1SeedThresholds=['FSNOSEED'], stream=[UPCStream], groups=['PS:Online', 'PS:NoHLTReprocessing']+MinBiasGroup),
+        ChainProp(name='HLT_noalg_L1ZDC_COMB5', l1SeedThresholds=['FSNOSEED'], stream=[UPCStream], groups=['PS:Online', 'PS:NoHLTReprocessing']+MinBiasGroup),
+        ChainProp(name='HLT_noalg_L1ZDC_COMB6', l1SeedThresholds=['FSNOSEED'], stream=[UPCStream], groups=['PS:Online', 'PS:NoHLTReprocessing']+MinBiasGroup),
+        ChainProp(name='HLT_noalg_L1ZDC_COMB7', l1SeedThresholds=['FSNOSEED'], stream=[UPCStream], groups=['PS:Online', 'PS:NoHLTReprocessing']+MinBiasGroup),
+
+        #LHCf 
+        ChainProp(name='HLT_noalg_L1LHCF', l1SeedThresholds=['FSNOSEED'], stream=[UPCStream], groups=['PS:Online', 'PS:NoHLTReprocessing']+MinBiasGroup),
+
+        #AFP
+        ChainProp(name='HLT_noalg_L1AFP_A_AND_C',               l1SeedThresholds=['FSNOSEED'], stream=[UPCStream], groups=['PS:Online', 'PS:NoHLTReprocessing']+MinBiasGroup),
+        ChainProp(name='HLT_noalg_L1AFP_A_OR_C',                l1SeedThresholds=['FSNOSEED'], stream=[UPCStream], groups=['PS:Online', 'PS:NoHLTReprocessing']+MinBiasGroup),
+        ChainProp(name='HLT_noalg_L1AFP_A_OR_C_UNPAIRED_ISO',   l1SeedThresholds=['FSNOSEED'], stream=[UPCStream], groups=['PS:Online', 'PS:NoHLTReprocessing']+MinBiasGroup),
+        ChainProp(name='HLT_noalg_L1AFP_A_OR_C_UNPAIRED_NONISO',l1SeedThresholds=['FSNOSEED'], stream=[UPCStream], groups=['PS:Online', 'PS:NoHLTReprocessing']+MinBiasGroup),
+        ChainProp(name='HLT_noalg_L1AFP_A_OR_C_EMPTY',          l1SeedThresholds=['FSNOSEED'], stream=[UPCStream], groups=['PS:Online', 'PS:NoHLTReprocessing']+MinBiasGroup),
+        ChainProp(name='HLT_noalg_L1AFP_A_OR_C_FIRSTEMPTY',     l1SeedThresholds=['FSNOSEED'], stream=[UPCStream], groups=['PS:Online', 'PS:NoHLTReprocessing']+MinBiasGroup),
+
     ]
 
 

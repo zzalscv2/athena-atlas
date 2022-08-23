@@ -7,6 +7,7 @@
 #include "AthenaPoolUtilities/CondAttrListCollection.h"
 #include "AthenaBaseComps/AthAlgorithm.h"
 #include "AthenaKernel/IOVInfiniteRange.h"
+#include "StoreGate/CondHandleKeyArray.h"
 
 #include "TrigT1CaloCalibConditions/L1CaloDisabledTowersContainer.h" 
 #include "TrigT1CaloCalibConditions/L1CaloDerivedRunParsContainer.h"
@@ -38,9 +39,30 @@ class L1CaloCondAlg: public ::AthAlgorithm {
  private: 
 
 
-  Gaudi::Property<std::string> m_timingRegime{this,"timingRegime","","String-> Cali1, Calib2 or Physics"};  
-  Gaudi::Property<std::string> m_strategy{this,"strategy","","String-> empty, PprChanHighMu or PprChanLowMu"}; 
+  Gaudi::Property<std::string> m_timingRegime{this,"timingRegime","","String-> Calib1, Calib2 or Physics"};  
+  Gaudi::Property<std::string> m_strategy{this,"strategy","","String-> empty, HighMu or LowMu"};
 
+  Gaudi::Property<bool> m_usePhysicsRegime
+    { this, "UsePhysicsRegime", false, "Allow use of Physics timing regime" };
+  Gaudi::Property<bool> m_useCalib1Regime
+    { this, "UseCalib1Regime", false, "Allow use of Calib1 timing regime" };
+  Gaudi::Property<bool> m_useCalib2Regime
+    { this, "UseCalib2Regime", false, "Allow use of Calib2 timing regime" };
+
+  enum PprKeys {
+                // Should correspond with the name list in initialize().
+                PPRCHANCALIB = 0,
+                PPRCHANCOMMON = 1,
+                PPRCHANHIGHMU = 2,
+                PPRCHANLOWMU = 3
+  };
+
+  SG::ReadCondHandleKeyArray<CondAttrListCollection> m_physicsKeys
+    { this, "PhysicsKeys", {}, "" };
+  SG::ReadCondHandleKeyArray<CondAttrListCollection> m_calib1Keys
+    { this, "Calib1Keys", {}, "" };
+  SG::ReadCondHandleKeyArray<CondAttrListCollection> m_calib2Keys
+    { this, "Calib2Keys", {}, "" };
 
   // Folders only located at V1
   SG::ReadCondHandleKey<CondAttrListCollection> m_disabledTowers{ this, "DisabledTowers", "/TRIGGER/L1Calo/V1/Conditions/DisabledTowers", "DisabledTowers" };

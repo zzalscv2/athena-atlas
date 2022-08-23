@@ -53,6 +53,13 @@ def TileRawChannelMakerCfg(flags, **kwargs):
         mlog.info(" adding now TileRawChannelBuilderOpt2Filter with name %s to the algorithm: %s",
                   tileRawChannelBuilderOF1.name, name)
 
+    if flags.Tile.doWiener:
+        from TileRecUtils.TileRawChannelBuilderWienerConfig import TileRawChannelBuilderWienerCfg
+        tileRawChannelBuilderWiener = acc.popToolsAndMerge( TileRawChannelBuilderWienerCfg(flags) )
+        tileRawChannelBuilder += [tileRawChannelBuilderWiener]
+        mlog.info(" adding now TileRawChannelBuilderWienerFilter with name %s to the algorithm: %s",
+                  tileRawChannelBuilderWiener.name, name)
+
     if flags.Tile.doOpt2:
         from TileRecUtils.TileRawChannelBuilderOptConfig import TileRawChannelBuilderOpt2Cfg
         tileRawChannelBuilderOpt2 = acc.popToolsAndMerge( TileRawChannelBuilderOpt2Cfg(flags) )
@@ -162,6 +169,7 @@ if __name__ == "__main__":
     ConfigFlags.Tile.RunType = 'PHY'
     ConfigFlags.Tile.doFit = True
     ConfigFlags.Tile.doOF1 = True
+    ConfigFlags.Tile.doWiener = True
     ConfigFlags.Tile.doOpt2 = True
     ConfigFlags.Tile.doOptATLAS = True
     ConfigFlags.Tile.correctTimeJumps = True

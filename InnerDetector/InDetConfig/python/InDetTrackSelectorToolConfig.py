@@ -30,6 +30,24 @@ def InDetConversionTrackSelectorToolCfg(flags, name="TrackSelector", **kwargs):
     acc.setPrivateTools(CompFactory.InDet.InDetConversionTrackSelectorTool(name, **kwargs))
     return acc
 
+def V0InDetConversionTrackSelectorToolCfg(flags, name='InDetV0VxTrackSelector', **kwargs):
+    acc = ComponentAccumulator()
+
+    if "Extrapolator" not in kwargs:
+        from TrkConfig.AtlasExtrapolatorConfig import AtlasExtrapolatorCfg
+        kwargs.setdefault("Extrapolator", acc.popToolsAndMerge(AtlasExtrapolatorCfg(flags)))
+
+    kwargs.setdefault("maxTrtD0", 50.)
+    kwargs.setdefault("maxSiZ0",  250.)
+    kwargs.setdefault("significanceD0_Si", 1.)
+    kwargs.setdefault("significanceD0_Trt", 1.)
+    kwargs.setdefault("significanceZ0_Trt", 3.)
+    kwargs.setdefault("minPt", 400.0)
+    kwargs.setdefault("IsConversion", False)
+
+    acc.setPrivateTools(CompFactory.InDet.InDetConversionTrackSelectorTool(name, **kwargs))
+    return acc
+
 def InDetTrackSelectorToolCfg(flags, name='InDetTrackSelectorTool', **kwargs):
 
     from BeamSpotConditions.BeamSpotConditionsConfig import BeamSpotCondAlgCfg
@@ -151,6 +169,42 @@ def TauRecInDetTrackSelectorToolCfg(flags, name='tauRec_InDetTrackSelectorTool',
     kwargs.setdefault("useTrackQualityInfo", True)
     kwargs.setdefault("TrackSummaryTool", "")
     return InDetTrackSelectorToolCfg(flags, name, **kwargs)
+
+def BPHY_InDetDetailedTrackSelectorToolCfg(flags, name='BPHY_InDetDetailedTrackSelectorTool', **kwargs):
+    acc = ComponentAccumulator()
+
+    # Different from other InDetTrackSelectorToolCfg
+    if "Extrapolator" not in kwargs:
+        from TrkConfig.AtlasExtrapolatorConfig import InDetExtrapolatorCfg
+        kwargs.setdefault("Extrapolator", acc.popToolsAndMerge(InDetExtrapolatorCfg(flags)))
+
+    kwargs.setdefault("pTMin"                , 400.0)
+    kwargs.setdefault("IPd0Max"              , 10000.0)
+    kwargs.setdefault("IPz0Max"              , 10000.0)
+    kwargs.setdefault("z0Max"                , 10000.0)
+    kwargs.setdefault("sigIPd0Max"           , 10000.0)
+    kwargs.setdefault("sigIPz0Max"           , 10000.0)
+    kwargs.setdefault("d0significanceMax"    , -1.)
+    kwargs.setdefault("z0significanceMax"    , -1.)
+    kwargs.setdefault("etaMax"               , 9999.)
+    kwargs.setdefault("useTrackSummaryInfo"  , True)
+    kwargs.setdefault("nHitBLayer"           , 0)
+    kwargs.setdefault("nHitPix"              , 1)
+    kwargs.setdefault("nHitBLayerPlusPix"    , 1)
+    kwargs.setdefault("nHitSct"              , 2)
+    kwargs.setdefault("nHitSi"               , 3)
+    kwargs.setdefault("nHitTrt"              , 0)
+    kwargs.setdefault("nHitTrtHighEFractionMax", 10000.0)
+    kwargs.setdefault("useSharedHitInfo"     , False)
+    kwargs.setdefault("useTrackQualityInfo"  , True)
+    kwargs.setdefault("fitChi2OnNdfMax"      , 10000.0)
+    kwargs.setdefault("TrtMaxEtaAcceptance"  , 1.9)
+    kwargs.setdefault("UseEventInfoBS"       , True)
+    kwargs.setdefault("TrackSummaryTool"     , None)
+
+    acc.setPrivateTools(acc.popToolsAndMerge(InDetTrackSelectorToolCfg(flags, name, **kwargs)))
+    return acc
+
 
 def InDetTRTDriftCircleCutToolCfg(flags, name='InDetTRTDriftCircleCutTool', **kwargs):
     from TRT_ConditionsAlgs.TRT_ConditionsAlgsConfig import TRTActiveCondAlgCfg

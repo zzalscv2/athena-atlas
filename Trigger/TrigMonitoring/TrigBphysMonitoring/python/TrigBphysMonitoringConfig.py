@@ -193,28 +193,18 @@ class TrigBphysMonAlgBuilder:
     from TrkConfig.AtlasExtrapolatorConfig import AtlasExtrapolatorCfg
     AtlasExtrapolator = acc.popToolsAndMerge( AtlasExtrapolatorCfg(self.helper.inputFlags) )
     acc.addPublicTool(AtlasExtrapolator)
-    
-    VertexPointEstimator = CompFactory.InDet.VertexPointEstimator(
-                                                                  name = 'BphysMonVertexPointEstimator',
-                                                                  MinDeltaR = [-10000., -10000., -10000.],
-                                                                  MaxDeltaR = [ 10000.,  10000.,  10000.],
-                                                                  MaxPhi    = [ 10000.,  10000.,  10000.],
-                                                                  MaxChi2OfVtxEstimation = 2000.)
-    acc.addPublicTool(VertexPointEstimator)
-    self.bphysMonAlg.VertexPointEstimator = VertexPointEstimator
-    
-    VertexFitter = CompFactory.Trk.TrkVKalVrtFitter(
-                                                    name = 'BphysMonTrkVKalVrtFitter',
-                                                    FirstMeasuredPoint = True,
-                                                    MakeExtendedVertex = True,
-                                                    Extrapolator = AtlasExtrapolator)
-    acc.addPublicTool(VertexFitter)
-    self.bphysMonAlg.VertexFitter = VertexFitter
-    
-    V0Tools = CompFactory.Trk.V0Tools(name = "BphysMonV0Tools",
-                                      Extrapolator = AtlasExtrapolator)
-    acc.addPublicTool(V0Tools)
-    self.bphysMonAlg.V0Tools = V0Tools
+
+    from InDetConfig.InDetConversionFinderToolsConfig import BPHY_VertexPointEstimatorCfg
+    self.bphysMonAlg.VertexPointEstimator = acc.popToolsAndMerge(
+        BPHY_VertexPointEstimatorCfg(self.helper.inputFlags, 'BphysMonVertexPointEstimator'))
+
+    from TrkConfig.TrkVKalVrtFitterConfig import BPHY_TrkVKalVrtFitterCfg
+    self.bphysMonAlg.VertexFitter = acc.popToolsAndMerge(
+        BPHY_TrkVKalVrtFitterCfg(self.helper.inputFlags, 'BphysMonTrkVKalVrtFitter'))
+
+    from TrkConfig.TrkVertexAnalysisUtilsConfig import V0ToolsCfg
+    self.bphysMonAlg.V0Tools = acc.popToolsAndMerge(
+        V0ToolsCfg(self.helper.inputFlags, 'BphysMonV0Tools'))
     
     self.bphysMonAlg.ContainerNames = self.monitored_containers
     self.bphysMonAlg.ChainNames_MuMu = self.monitored_mumu_list

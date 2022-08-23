@@ -28,6 +28,7 @@ struct MdtCablingOffData {
     bool operator==(const MdtCablingOffData& other) const { return m_cache.hash == other.m_cache.hash; }
     bool operator!=(const MdtCablingOffData& other) const { return m_cache.hash != other.m_cache.hash; }
     bool operator<(const MdtCablingOffData& other) const { return m_cache.hash < other.m_cache.hash; }
+    bool operator!() const { return !m_cache.hash; }
 
 private:
     union {
@@ -50,6 +51,7 @@ struct MdtCablingOnData {
     bool operator==(const MdtCablingOnData& other) const { return m_cache.hash == other.m_cache.hash; }
     bool operator!=(const MdtCablingOnData& other) const { return m_cache.hash != other.m_cache.hash; }
     bool operator<(const MdtCablingOnData& other) const { return m_cache.hash < other.m_cache.hash; }
+    bool operator!() const { return !m_cache.hash; }
 
 private:
     union {

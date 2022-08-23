@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2019 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef TrigEgammaMonitorPhotonAlgorithm_H
@@ -7,8 +7,7 @@
 
 
 #include "TrigEgammaMonitorAnalysisAlgorithm.h"
-
-
+#include "StoreGate/ReadDecorHandleKeyArray.h"
 
 
 class TrigEgammaMonitorPhotonAlgorithm: public TrigEgammaMonitorAnalysisAlgorithm 
@@ -48,8 +47,10 @@ class TrigEgammaMonitorPhotonAlgorithm: public TrigEgammaMonitorAnalysisAlgorith
     Gaudi::Property<bool> m_forcePidSelection{ this, "ForcePidSelection", true};
  
     // Containers 
-    /*! Event Wise offline ElectronContainer Access and end iterator */
+    /*! Event Wise offline PhotonContainer Access and end iterator */
     SG::ReadHandleKey<xAOD::PhotonContainer> m_offPhotonKey{ this, "PhotonKey", "Photons", ""};
+    /*! Ensure offline photon isolation decoration is retrieved after being created */
+    SG::ReadDecorHandleKeyArray<xAOD::PhotonContainer> m_offPhotonIsolationKeys {this, "PhotonIsolationKeys", {"Photons.topoetcone20", "Photons.topoetcone40"} };
     
 };
 

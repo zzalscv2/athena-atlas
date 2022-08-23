@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2017 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef MUONREVENTATHENAPOOL_MDTCSM_P1_H
@@ -17,16 +17,16 @@ class MdtCsm_p1 : public std::vector<MdtAmtHit_p1>
 {
 public:
     friend class  MdtCsmCnv_p1;
-    MdtCsm_p1() : m_Id(0), m_idHash(0), m_SubDetId(0), m_MrodId(0), m_CsmId(0) {}
+    MdtCsm_p1() = default;
     
  private:
 
-  uint32_t m_Id;
-  uint32_t m_idHash; 
+  uint32_t m_Id{0};
+  uint32_t m_idHash{0}; 
 
-  uint16_t m_SubDetId;   // Sub-detector identifier
-  uint16_t m_MrodId;     // Mrod number
-  uint16_t m_CsmId;      // Csm link number
+  uint16_t m_SubDetId{0};   // Sub-detector identifier
+  uint16_t m_MrodId{0};     // Mrod number
+  uint16_t m_CsmId{0};      // Csm link number
 };
 
 #endif   // MUONREVENTATHENAPOOL_MDTCSM_P1_H

@@ -63,7 +63,7 @@ ThinInDetForwardTrackParticlesAlg::initialize()
     return StatusCode::FAILURE;
   }
   ATH_CHECK(m_tracksKey.initialize(m_streamName, m_doThinning));
-  ATH_CHECK(m_muonsKey.initialize(m_doThinning));
+  ATH_CHECK(m_muonsKey.initialize(m_doThinning && !m_muonsKey.empty()));
   ATH_MSG_DEBUG("==> done with initialize " << name() << "...");
 
   return StatusCode::SUCCESS;
@@ -95,37 +95,44 @@ ThinInDetForwardTrackParticlesAlg::execute(const EventContext& ctx) const
     return StatusCode::SUCCESS;
   }
 
-  // Retrieve InDetForwardTrackParticles and Muons containers
+  // Retrieve InDetForwardTrackParticles container
   SG::ThinningHandle<xAOD::TrackParticleContainer> tracks(m_tracksKey, ctx);
-  SG::ReadHandle<xAOD::MuonContainer> muons(m_muonsKey, ctx);
 
   // Set up mask and set the main counters
   std::vector<bool> trackMask;
   unsigned int nTracks = tracks->size();
   m_nTracksProcessed.fetch_add(nTracks, std::memory_order_relaxed);
   trackMask.assign(nTracks, false);
-  m_nMuons.fetch_add(muons->size(), std::memory_order_relaxed);
+
+  unsigned int nSiFwdAssoc = 0;
+  unsigned int nSiFwdMuons = 0;
 
   // Loop over the muons. Identify which are SiliconAssociatedForwardMuon.
   // Get their associated inner detector track. Find that track in the
   // InDetForwardTrackParticles. Set the mask element.
-  unsigned int nSiFwdAssoc = 0;
-  unsigned int nSiFwdMuons = 0;
-  for (const auto* muon : *muons) {
-    if (muon->muonType() == xAOD::Muon::SiliconAssociatedForwardMuon) {
-      ++nSiFwdMuons;
-      const xAOD::TrackParticle* muTrk(nullptr);
-      if (muon->inDetTrackParticleLink().isValid())
-        muTrk = *(muon->inDetTrackParticleLink());
-      if (muTrk != nullptr) {
-        auto search = std::find(tracks->begin(), tracks->end(), muTrk);
-        if (search != tracks->end()) {
-          ++nSiFwdAssoc;
-          trackMask[(*search)->index()] = true;
-        }
+  // Only if muons are provided as inputs
+
+  if(!m_muonsKey.empty()){
+    SG::ReadHandle<xAOD::MuonContainer> muons(m_muonsKey, ctx);
+    m_nMuons.fetch_add(muons->size(), std::memory_order_relaxed);
+
+    for (const auto* muon : *muons) {
+      if (muon->muonType() == xAOD::Muon::SiliconAssociatedForwardMuon) {
+	++nSiFwdMuons;
+	const xAOD::TrackParticle* muTrk(nullptr);
+	if (muon->inDetTrackParticleLink().isValid())
+	  muTrk = *(muon->inDetTrackParticleLink());
+	if (muTrk != nullptr) {
+	  auto search = std::find(tracks->begin(), tracks->end(), muTrk);
+	  if (search != tracks->end()) {
+	    ++nSiFwdAssoc;
+	    trackMask[(*search)->index()] = true;
+	  }
+	}
       }
     }
   }
+
   m_nSiFwdAssoc.fetch_add(nSiFwdAssoc, std::memory_order_relaxed);
   m_nSiFwdMuons.fetch_add(nSiFwdMuons, std::memory_order_relaxed);
 
