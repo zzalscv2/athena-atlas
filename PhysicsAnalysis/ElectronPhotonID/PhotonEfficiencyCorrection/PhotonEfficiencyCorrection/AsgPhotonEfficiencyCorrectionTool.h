@@ -49,22 +49,11 @@ public:
   /// Standard destructor
   virtual ~AsgPhotonEfficiencyCorrectionTool();
 
-
-public:
   /// Gaudi Service Interface method implementations
   virtual StatusCode initialize() override;
 
 
-
 public:
-  typedef Root::TPhotonEfficiencyCorrectionTool::Result Result;
-  /// The main calculate method: the actual correction factors are determined here
-  const Result calculate( const xAOD::IParticle* part ) const;
-  const Result calculate( const xAOD::Egamma* egam ) const;
-  const Result calculate( const xAOD::Egamma& egam ) const{  
- 		    return calculate(&egam);
-  } // pass the Egamma obj by reference
-
   ///Add some method for now as a first step to move the tool to then new interface 
   virtual CP::CorrectionCode getEfficiencyScaleFactor(const xAOD::Egamma& inputObject, double& efficiencyScaleFactor) const override;
   virtual CP::CorrectionCode getEfficiencyScaleFactorError(const xAOD::Egamma& inputObject, double& efficiencyScaleFactorError) const override;
@@ -94,6 +83,14 @@ public:
 
   // Private member variables
 private:
+  typedef Root::TPhotonEfficiencyCorrectionTool::Result Result;
+  /// I think these calculate methods are only used internally
+  const Result calculate( const xAOD::IParticle* part ) const;
+  const Result calculate( const xAOD::Egamma* egam ) const;
+  const Result calculate( const xAOD::Egamma& egam ) const{  
+ 		    return calculate(&egam);
+  } // pass the Egamma obj by reference
+
   /// Pointer to the underlying ROOT based tool
   Root::TPhotonEfficiencyCorrectionTool* m_rootTool_unc;
   Root::TPhotonEfficiencyCorrectionTool* m_rootTool_con;

@@ -32,12 +32,6 @@
 #include "TSystem.h"
 #define MAXETA 2.47
 #define MIN_ET 7000.0
-#define MIN_ET_OF_SF 7000.0
-#define MIN_ET_Iso_SF 10000.0
-#define MIN_ET_Trig_SF 10000.0
-#define MAX_ET_OF_SF 1499999.99
-#define MAX_ET_Iso_SF 999999.99
-#define MAX_ET_Trig_SF 99999.99
 
 using Result = Root::TPhotonEfficiencyCorrectionTool::Result;
 
@@ -251,34 +245,14 @@ const Result AsgPhotonEfficiencyCorrectionTool::calculate( const xAOD::Egamma* e
   }
   	
   // Check if photon in the range to get the SF
-  if(eta2>MAXETA) {
+  if(eta2>MAXETA) { // this should become a CP::CorrectionCode::OutOfValidityRange in the future
         ATH_MSG_WARNING( "No correction factor provided for eta "<<cluster->etaBE(2)<<" Returning SF = 1 + / - 1");
         return result;
   }
-  if(et<MIN_ET_OF_SF && m_sysSubstring=="ID_") {
-        ATH_MSG_WARNING( "No ID scale factor uncertainty provided for et "<<et/1e3<<"GeV Returning SF = 1 + / - 1");
+  if (itr_pt!=m_pteta_bins.end() && et<itr_pt->first) { // this should become a CP::CorrectionCode::OutOfValidityRange in the future
+        ATH_MSG_WARNING( "No scale factor uncertainty provided for et "<<et/1e3<<"GeV Returning SF = 1 + / - 1");
 	return result;
   }
-  if(et<MIN_ET_Iso_SF && m_sysSubstring=="ISO_") {
-        ATH_MSG_WARNING( "No isolation scale factor uncertainty provided for et "<<et/1e3<<"GeV Returning SF = 1 + / - 1");
-	return result;
-  }
-  if(et<MIN_ET_Trig_SF && m_sysSubstring=="TRIGGER_") {
-        ATH_MSG_WARNING( "No trigger scale factor uncertainty provided for et "<<et/1e3<<"GeV Returning SF = 1 + / - 1");
-	return result;
-  }
-  if(et>MAX_ET_OF_SF && m_sysSubstring=="ID_") {
-        ATH_MSG_WARNING( "No scale factor provided for et "<<et/1e3<<"GeV Returning SF for "<<MAX_ET_OF_SF/1e3<<"GeV");
-        et=MAX_ET_OF_SF;
-  }
-  if(et>MAX_ET_Iso_SF && m_sysSubstring=="ISO_") {
-        ATH_MSG_WARNING( "No isolation scale factor provided for et "<<et/1e3<<"GeV Returning SF for "<<MAX_ET_Iso_SF/1e3<<"GeV");
-        et=MAX_ET_Iso_SF;
-  }
-  if(et>MAX_ET_Trig_SF && m_sysSubstring=="TRIGGER_") {
-        ATH_MSG_WARNING( "No trigger scale factor provided for et "<<et/1e3<<"GeV Returning SF for "<<MAX_ET_Trig_SF/1e3<<"GeV");
-        et=MAX_ET_Trig_SF;
-  }   
   
   // Get the DataType of the current egamma object
 //!  PATCore::ParticleDataType::DataType dataType = (PATCore::ParticleDataType::DataType) (egam->dataType());
