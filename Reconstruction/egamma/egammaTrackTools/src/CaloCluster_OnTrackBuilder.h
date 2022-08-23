@@ -77,6 +77,9 @@ private:
     "CaloDetDescrManager"
   };
 
+  /** @brief Which cluster measurements to use in order to add constraints
+   * by default we are interested in the ones that affect the bending plane
+   * Energy and phi */
   Gaudi::Property<bool> m_useClusterEnergy{ this, "UseClusterEnergy", true };
   Gaudi::Property<bool> m_useClusterPhi{ this, "UseClusterPhi", true };
   Gaudi::Property<bool> m_useClusterEta{ this, "UseClusterEta", false };

@@ -16,6 +16,41 @@
 
 #include "StoreGate/ReadHandle.h"
 
+namespace {
+
+// cluster Et and absEta returns
+// quick phi resolution paramtrization
+double
+phiResol(double clusterEt, double absEta)
+{
+  if (absEta < 0.6) {
+    return 0.065 / std::sqrt(clusterEt) - 0.007;
+  }
+  if (absEta < 0.8) {
+    return 0.074 / std::sqrt(clusterEt) - 0.008;
+  }
+  if (absEta < 1.15) {
+    return 0.085 / std::sqrt(clusterEt) - 0.010;
+  }
+  if (absEta < 1.37) {
+    return 0.091 / std::sqrt(clusterEt) - 0.010;
+  }
+  if (absEta < 1.52) {
+    return 0.082 / std::sqrt(clusterEt) - 0.006;
+  }
+  if (absEta < 1.81) {
+    return 0.084 / std::sqrt(clusterEt) - 0.008;
+  }
+  if (absEta < 2.01) {
+    return 0.046 / std::sqrt(clusterEt) - 0.001;
+  }
+  if (absEta < 2.37) {
+    return 0.032 / std::sqrt(clusterEt) + 0.001;
+  }
+  return 0.030 / std::sqrt(clusterEt) + 0.003;
+}
+}
+
 CaloCluster_OnTrackBuilder::CaloCluster_OnTrackBuilder(const std::string& t,
                                                        const std::string& n,
                                                        const IInterface* p)
@@ -174,20 +209,34 @@ CaloCluster_OnTrackBuilder::getClusterErrorMatrix(
   Amg::MatrixX covMatrix(matrixSize, matrixSize);
   covMatrix.setZero();
 
-  //variance in phi ~ 1e-04
-  //sigma ~ 0.01
-  constexpr double phivariance = 1e-04;
-  // simga ~ 20 mm large error as currently we do not want to rely
-  // on the eta side of the cluster.
-  constexpr double zvariance = 400;
   const double clusterE = cluster->e();
-  const double sigmaP_over_P = m_eg_resol->getResolution(0, //electron
+  const double clusterEta = cluster->eta();
+  const double clusterEt = cluster->et();
+
+  //variance in phi from calorimeter phi resolution 
+  double phiresol = phiResol(clusterEt, std::abs(clusterEta));
+  if (phiresol < 2e-3) {
+    //Avoid going too small for  very high pt
+    phiresol = 2e-3;
+  }
+  const double phivariance = phiresol * phiresol;
+
+  //q over p variance from sigmaE/E (calo energy resolution)
+  const double sigmaP_over_P = m_eg_resol->getResolution(0, // electron
                                                          clusterE,
-                                                         cluster->eta(),
-                                                         2//90% quantile
-                                                         );
+                                                         clusterEta,
+                                                         2 // 90% quantile
+  );
   const double qOverP = 1./clusterE;
   const double qOverP_variance =(qOverP*qOverP)*(sigmaP_over_P*sigmaP_over_P);
+
+  // Variance in Z
+  // sigma ~ 20 mm large error 
+  // As currently we do not want to rely
+  // on the eta side of the cluster.
+  constexpr double zvariance = 400;
+ 
+
   if (xAOD::EgammaHelpers::isBarrel(cluster)) {
     // The two coordinates for a cyclinder are
     // Trk::locRPhi = 0 (ie phi)
