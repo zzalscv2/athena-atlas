@@ -16,6 +16,11 @@ namespace CP {
         ATH_CHECK(m_eventInfo.initialize());
         ATH_CHECK(m_inputKey.initialize());
         ATH_CHECK(m_outputKey.initialize());
+        ///
+        m_ptDecorKeys.emplace_back(m_outputKey.key() + ".InnerDetectorPt");
+        m_ptDecorKeys.emplace_back(m_outputKey.key() + ".MuonSpectrometerPt");
+        ATH_CHECK(m_ptDecorKeys.initialize());
+        
         ATH_CHECK(m_tool.retrieve());
         if (!m_prwTool.empty()) {
             m_useRndNumber = true;
@@ -63,7 +68,7 @@ namespace CP {
             ATH_MSG_DEBUG(" New pt=" << iParticle->pt());
         }
         SG::WriteHandle<xAOD::MuonContainer> writeHandle{m_outputKey, ctx};
-        ATH_CHECK(writeHandle.record(std::move(output.first), std::move(output.second)));
+        ATH_CHECK(writeHandle.recordNonConst(std::move(output.first), std::move(output.second)));
         // Return gracefully:
         return StatusCode::SUCCESS;
     }

@@ -64,7 +64,7 @@ namespace CP {
             ATH_MSG_VERBOSE("New pt=" << iParticle->pt());
         }
         SG::WriteHandle<xAOD::TrackParticleContainer> writeHandle{m_outputKey, ctx};
-        ATH_CHECK(writeHandle.record(std::move(output.first), std::move(output.second)));
+        ATH_CHECK(writeHandle.recordNonConst(std::move(output.first), std::move(output.second)));
 
         // Return gracefully:
         return StatusCode::SUCCESS;
