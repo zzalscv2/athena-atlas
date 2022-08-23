@@ -131,6 +131,11 @@ def PHYSVALCfg(ConfigFlags):
     if ConfigFlags.BTagging.RunFlipTaggers is True:
         StaticContent += ["xAOD::VertexAuxContainer#BTagging_AntiKt4EMPFlowSecVtxFlipAux.-vxTrackAtVertex"]
 
+    if ConfigFlags.GeoModel.Run >= LHCPeriod.Run4:
+        StaticContent += ["xAOD::VertexAuxContainer#BTagging_AntiKt4EMTopoSecVtxAux.-vxTrackAtVertex"]
+        if ConfigFlags.BTagging.RunFlipTaggers is True:
+            StaticContent += ["xAOD::VertexAuxContainer#BTagging_AntiKt4EMTopoSecVtxFlipAux.-vxTrackAtVertex"]
+ 
     PHYSVALSlimmingHelper.StaticContent = StaticContent
 
     # Truth containers
