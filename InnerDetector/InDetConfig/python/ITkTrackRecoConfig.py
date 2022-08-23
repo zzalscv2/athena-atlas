@@ -6,30 +6,6 @@ from AthenaConfiguration.Enums import Format
 
 from InDetConfig.TrackRecoConfig import FTAG_AUXDATA
 
-def ITkTrackCollectionMergerAlgCfg(flags, name="ITkTrackCollectionMerger",
-                                   InputCombinedTracks=None,
-                                   OutputCombinedTracks="CombinedITkTracks",
-                                   AssociationMapName="ITkPRDToTrackMapCombinedITkTracks",
-                                   CombinedITkClusterSplitProbContainer="",
-                                   **kwargs):
-    result = ComponentAccumulator()
-
-    kwargs.setdefault("TracksLocation", InputCombinedTracks)
-    kwargs.setdefault("OutputTracksLocation", OutputCombinedTracks)
-    from InDetConfig.InDetAssociationToolsConfig import ITkPRDtoTrackMapToolGangedPixelsCfg
-    ITkPRDtoTrackMapToolGangedPixels = result.popToolsAndMerge(ITkPRDtoTrackMapToolGangedPixelsCfg(flags))
-    kwargs.setdefault("AssociationTool", ITkPRDtoTrackMapToolGangedPixels)
-    kwargs.setdefault("AssociationMapName", AssociationMapName)
-    kwargs.setdefault("UpdateSharedHits", True)
-    kwargs.setdefault("UpdateAdditionalInfo", True)
-    from TrkConfig.TrkTrackSummaryToolConfig import ITkTrackSummaryToolSharedHitsCfg
-    TrackSummaryTool = result.popToolsAndMerge(ITkTrackSummaryToolSharedHitsCfg(flags, name="CombinedITkSplitProbTrackSummaryToolSharedHits"))
-    TrackSummaryTool.InDetSummaryHelperTool.ClusterSplitProbabilityName = CombinedITkClusterSplitProbContainer
-    result.addPublicTool(TrackSummaryTool)
-    kwargs.setdefault("SummaryTool", TrackSummaryTool)
-
-    result.addEventAlgo(CompFactory.Trk.TrackCollectionMerger(name, **kwargs))
-    return result
 
 def CombinedTrackingPassFlagSets(flags):
 
@@ -112,7 +88,7 @@ def ITkTrackRecoCfg(flags):
 
         InputExtendedITkTracks += [TrackContainer]
 
-
+    from TrkConfig.TrkTrackCollectionMergerConfig import ITkTrackCollectionMergerAlgCfg
     result.merge(ITkTrackCollectionMergerAlgCfg(flags,
                                                 InputCombinedTracks = InputCombinedITkTracks,
                                                 CombinedITkClusterSplitProbContainer = ITkClusterSplitProbabilityContainerName(flags)))
