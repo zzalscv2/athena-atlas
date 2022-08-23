@@ -77,11 +77,16 @@ class MMRawDataMonAlg: public AthMonitorAlgorithm {
   void clusterFromSegments(const Trk::SegmentCollection*, const int lb) const;
   
   int get_PCB_from_channel(const int channel) const;
+  int get_FEB_from_channel(const int channel, const int stEta) const;
   int get_sectorPhi_from_stationPhi_stName(const int stationPhi, const std::string& stName) const;
   int get_sectorEta_from_stationEta(const int stationEta) const;
 
   int get_bin_for_occ_CSide_hist(const int stationEta, const int multiplet, const int gas_gap) const;
   int get_bin_for_occ_ASide_hist(const int stationEta, const int multiplet, const int gas_gap) const;
+
+  int get_bin_for_occ(const int gas_gap, const int PCB) const;
+  int get_bin_for_feb_occ(const int gas_gap, const int FEB) const;
+
   int get_bin_for_occ_CSide_pcb_eta2_hist(const int stationEta, const int multiplet, const int gas_gap, const int PCB) const;
   int get_bin_for_occ_CSide_pcb_eta1_hist(const int stationEta, const int multiplet, const int gas_gap, const int PCB) const;
   int get_bin_for_occ_ASide_pcb_eta2_hist(const int stationEta, const int multiplet, const int gas_gap, const int PCB) const;

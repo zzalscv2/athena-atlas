@@ -63,24 +63,15 @@ def MMMonitoringConfig(inputFlags):
     mmGroup.defineHistogram('charge_onseg;Charge_onseg', type='TH1F', title='Charge on segments; Charge[fC]; Number of Entries', path='Overview', xbins=200, xmin=0., xmax=1000., opt='kAlwaysCreate')
     mmGroup.defineHistogram('strp_time_onseg;strip_time_onseg',  type='TH1F', title='strip time on segments; time [ns]; Number of Entries', path='Overview',   xbins=800, xmin=-100, xmax=700., opt='kAlwaysCreate')
     
-    thisLabelx,thisLabely=getMMLabel("x_lab_occ_etaminus1","y_lab_occ_etaminus1")
-    mmGroup.defineHistogram('sector_CSide_eta1,stationPhi_CSide_eta1;Occupancy_CSide_eta1_PCB', type='TH2F', title='Occupancy EC eta1; ; Sector;', path='Occupancy', xbins=40, xmin=0, xmax=40., ybins=16, ymin=.5, ymax=16.5, xlabels=thisLabelx, opt='kAlwaysCreate')
-    mmGroup.defineHistogram('sector_CSide_eta1_ontrack,stationPhi_CSide_eta1_ontrack;Occupancy_CSide_eta1_PCB_ontrack', type='TH2F', title='Occupancy EC eta1 ontrack; ;Sector ;', path='Occupancy_ontrack', xbins=40, xmin=0, xmax=40., ybins=16, ymin=.5, ymax=16.5, xlabels=thisLabelx, opt='kAlwaysCreate')
-    thisLabelx1,thisLabely1=getMMLabel("x_lab_occ_etaminus2","y_lab_occ_etaminus2")
-    mmGroup.defineHistogram('sector_CSide_eta2,stationPhi_CSide_eta2;Occupancy_CSide_eta2_PCB', type='TH2F', title='Occupancy EC eta2; ;Sector;', path='Occupancy', xbins=24, xmin=0, xmax=24., ybins=16, ymin=.5, ymax=16.5, xlabels=thisLabelx1, opt='kAlwaysCreate')
-    mmGroup.defineHistogram('sector_CSide_eta2_ontrack,stationPhi_CSide_eta2_ontrack;Occupancy_CSide_eta2_PCB_ontrack', type='TH2F', title='Occupancy EC eta2 ontrack; ;Sector;', path='Occupancy_ontrack', xbins=24, xmin=0, xmax=24., ybins=16, ymin=.5, ymax=16.5, xlabels=thisLabelx1, opt='kAlwaysCreate')
-    thisLabelx2,thisLabely2=getMMLabel("x_lab_occ_eta1","y_lab_occ_eta1")
-    mmGroup.defineHistogram('sector_ASide_eta1,stationPhi_ASide_eta1;Occupancy_ASide_eta1_PCB', type='TH2F', title='Occupancy EA eta1; ;Sector;', path='Occupancy', xbins=40, xmin=0, xmax=40., ybins=16, ymin=.5, ymax=16.5, xlabels=thisLabelx2, opt='kAlwaysCreate')
-    mmGroup.defineHistogram('sector_ASide_eta1_ontrack,stationPhi_ASide_eta1_ontrack;Occupancy_ASide_eta1_PCB_ontrack', type='TH2F', title='Occupancy EA eta1 ontrack; ;Sector;', path='Occupancy_ontrack', xbins=40, xmin=0, xmax=40., ybins=16, ymin=.5, ymax=16.5, xlabels=thisLabelx2, opt='kAlwaysCreate')
-    thisLabelx3,thisLabely3=getMMLabel("x_lab_occ_eta2","y_lab_occ_eta2")
-    mmGroup.defineHistogram('sector_ASide_eta2,stationPhi_ASide_eta2;Occupancy_ASide_eta2_PCB', type='TH2F', title='Occupancy EA eta2; ;Sector;', path='Occupancy', xbins=24, xmin=0, xmax=24., ybins=16, ymin=.5, ymax=16.5, xlabels=thisLabelx3, opt='kAlwaysCreate')
-    mmGroup.defineHistogram('sector_ASide_eta2_ontrack,stationPhi_ASide_eta2_ontrack;Occupancy_ASide_eta2_PCB_ontrack', type='TH2F', title='Occupancy EA eta2  ontrack; ;Sector;', path='Occupancy_ontrack', xbins=24, xmin=0, xmax=24., ybins=16, ymin=.5, ymax=16.5, xlabels=thisLabelx3, opt='kAlwaysCreate')
-
-    mmGroup.defineHistogram('sector_CSide_eta1_onseg, stationPhi_CSide_eta1_onseg;Occupancy_CSide_eta1_PCB_onseg', type='TH2F', title='Occupancy EC eta1 onseg; ;Sector ;', path='Segments/Occupancy', xbins=40, xmin=0, xmax=40., ybins=16, ymin=0.5, ymax=16.5, xlabels=thisLabelx, opt='kAlwaysCreate')
-    mmGroup.defineHistogram('sector_CSide_eta2_onseg, stationPhi_CSide_eta2_onseg;Occupancy_CSide_eta2_PCB_onseg', type='TH2F', title='Occupancy EC eta2 onseg; ;Sector ;', path='Segments/Occupancy', xbins=40, xmin=0, xmax=24., ybins=16, ymin=0.5, ymax=16.5, xlabels=thisLabelx1, opt='kAlwaysCreate')
-    mmGroup.defineHistogram('sector_ASide_eta1_onseg, stationPhi_ASide_eta1_onseg;Occupancy_ASide_eta1_PCB_onseg', type='TH2F', title='Occupancy EA eta1 onseg; ;Sector ;', path='Segments/Occupancy', xbins=40, xmin=0, xmax=40., ybins=16, ymin=0.5, ymax=16.5, xlabels=thisLabelx2, opt='kAlwaysCreate')
-    mmGroup.defineHistogram('sector_ASide_eta2_onseg, stationPhi_ASide_eta2_onseg;Occupancy_ASide_eta2_PCB_onseg', type='TH2F', title='Occupancy EA eta2 onseg; ;Sector ;', path='Segments/Occupancy', xbins=40, xmin=0, xmax=24., ybins=16, ymin=0.5, ymax=16.5, xlabels=thisLabelx3, opt='kAlwaysCreate')
-
+    
+    occLabelx=getMMLabelY("x_lab_occ")
+    mmGroup.defineHistogram('sector_CSide,stationPhi_CSide;Occupancy_CSide_PCB', type='TH2F', title='Occupancy EC; ; Sector;', path='Occupancy', xbins=64, xmin=0, xmax=128., ybins=16, ymin=.5, ymax=16.5, xlabels=occLabelx, opt='kAlwaysCreate')
+    mmGroup.defineHistogram('sector_ASide,stationPhi_ASide;Occupancy_ASide_PCB', type='TH2F', title='Occupancy EA; ; Sector;', path='Occupancy', xbins=64, xmin=0, xmax=128., ybins=16, ymin=.5, ymax=16.5,  xlabels=occLabelx, opt='kAlwaysCreate')
+    mmGroup.defineHistogram('sector_CSide_ontrack,stationPhi_CSide_ontrack;Occupancy_CSide_PCB_ontrack', type='TH2F', title='Occupancy EC ontrack; ; Sector;', path='Occupancy', xbins=64, xmin=0, xmax=128., ybins=16, ymin=.5, ymax=16.5, xlabels=occLabelx, opt='kAlwaysCreate')
+    mmGroup.defineHistogram('sector_ASide_ontrack,stationPhi_ASide_ontrack;Occupancy_ASide_PCB_ontrack', type='TH2F', title='Occupancy EA ontrack; ; Sector;', path='Occupancy', xbins=64, xmin=0, xmax=128., ybins=16, ymin=.5, ymax=16.5,  xlabels=occLabelx, opt='kAlwaysCreate')
+    mmGroup.defineHistogram('sector_CSide_onseg,stationPhi_CSide_onseg;Occupancy_CSide_PCB_onseg', type='TH2F', title='Occupancy EC onseg; ; Sector;', path='Occupancy', xbins=64, xmin=0, xmax=128., ybins=16, ymin=.5, ymax=16.5, xlabels=occLabelx, opt='kAlwaysCreate')
+    mmGroup.defineHistogram('sector_ASide_onseg,stationPhi_ASide_onseg;Occupancy_ASide_PCB_onseg', type='TH2F', title='Occupancy EA onseg; ; Sector;', path='Occupancy', xbins=64, xmin=0, xmax=128., ybins=16, ymin=.5, ymax=16.5,  xlabels=occLabelx, opt='kAlwaysCreate')
+    
     side = ["CSide","ASide"]
     etasector  = ["1","2"]
     for iside in side:
@@ -111,10 +102,11 @@ def MMMonitoringConfig(inputFlags):
             title_MMSummary=f'Number of strips per cluster E{iside} stPhi {phi}; ; Strip Number'
             var=f'sector_strip_{iside}_phi{phi},strip_number_{iside}_phi{phi};Strip_number_pergap_{iside}_stPhi{phi}'
             mmSideGroup.defineHistogram(var, type='TH2F', title=title_MMSummary, path='Number_of_strips_percluster_perPhiSector', xbins=16, xmin=0, xmax=16, xlabels=thisLabelx11, ybins=5120, ymin=0., ymax=5120., opt='kAlwaysCreate')
-            thisLabely=getMMLabelY("y_lab_occ_lb")
-            mmSideGroup.defineHistogram(f'lb_mon,sector_lb_{iside}_phi{phi};Occupancy_lb_{iside}_phi{phi}', type='TH2F', title=f'Occupancy wrt lb sector {phi}; LB; PCB', path='Occupancy',  xbins=100, xmin=-0.5, xmax=99.5, opt='kAddBinsDynamically,kAlwaysCreate', ybins=64, ymin=0., ymax=64, ylabels=thisLabely, merge='merge')
-            mmSideGroup.defineHistogram(f'lb_ontrack,sector_lb_{iside}_phi{phi}_ontrack;Occupancy_lb_{iside}_phi{phi}_ontrack', type='TH2F', title=f'Occupancy wrt lb sector {phi} ontrack ; LB; PCB', path='Occupancy',  xbins=100, xmin=-0.5, xmax=99.5, opt='kAddBinsDynamically,kAlwaysCreate', ybins=64, ymin=0., ymax=64, ylabels=thisLabely, merge='merge')
-            mmSideGroup.defineHistogram(f'lb_onseg,sector_lb_{iside}_phi{phi}_onseg;Occupancy_lb_{iside}_phi{phi}_onseg', type='TH2F', title=f'Occupancy wrt lb sector {phi} onSegms; LB; PCB', path='Segments/Occupancy',  xbins=100, xmin=-0.5, xmax=99.5, opt='kAddBinsDynamically,kAlwaysCreate', ybins=64, ymin=0., ymax=64, ylabels=thisLabely, merge='merge')
+
+            thisLabely=getMMLabelY("x_lab_occ")
+            mmSideGroup.defineHistogram(f'lb_mon,sector_lb_{iside}_phi{phi};Occupancy_lb_{iside}_phi{phi}', type='TH2F', title=f'Occupancy wrt lb sector {phi}; LB; PCB FEB', path='Occupancy',  xbins=100, xmin=-0.5, xmax=99.5, opt='kAddBinsDynamically,kAlwaysCreate', ybins=128, ymin=0., ymax=128, ylabels=thisLabely, merge='merge')
+            mmSideGroup.defineHistogram(f'lb_ontrack,sector_lb_{iside}_phi{phi}_ontrack;Occupancy_lb_{iside}_phi{phi}_ontrack', type='TH2F', title=f'Occupancy wrt lb sector {phi} ontrack ; LB; PCB FEB', path='Occupancy',  xbins=100, xmin=-0.5, xmax=99.5, opt='kAddBinsDynamically,kAlwaysCreate', ybins=128, ymin=0., ymax=128, ylabels=thisLabely, merge='merge')
+            mmSideGroup.defineHistogram(f'lb_onseg,sector_lb_{iside}_phi{phi}_onseg;Occupancy_lb_{iside}_phi{phi}_onseg', type='TH2F', title=f'Occupancy wrt lb sector {phi} onSegms; LB; PCB FEB', path='Segments/Occupancy',  xbins=100, xmin=-0.5, xmax=99.5, opt='kAddBinsDynamically,kAlwaysCreate', ybins=128, ymin=0., ymax=128, ylabels=thisLabely, merge='merge')
 
 
             for eta in etasector:
@@ -197,7 +189,8 @@ if __name__=='__main__':
     
     # Set the Athena configuration flags
     from AthenaConfiguration.AllConfigFlags import ConfigFlags
-    ConfigFlags.Input.Files =['/afs/cern.ch/user/b/bigliett/myeos/DQ/group.det-muon.DiMuonGenerator_EtaGtr_1p2_Pt10to100.ESD.Run3_2NSW_250322_reco_n270322_EXT0/group.det-muon.28531270.EXT0._000004.ESD.pool.root','/afs/cern.ch/user/b/bigliett/myeos/DQ/group.det-muon.DiMuonGenerator_EtaGtr_1p2_Pt10to100.ESD.Run3_2NSW_250322_reco_n270322_EXT0/group.det-muon.28531270.EXT0._000008.ESD.pool.root','/afs/cern.ch/user/b/bigliett/myeos/DQ/group.det-muon.DiMuonGenerator_EtaGtr_1p2_Pt10to100.ESD.Run3_2NSW_250322_reco_n270322_EXT0/group.det-muon.28531270.EXT0._000013.ESD.pool.root','/afs/cern.ch/user/b/bigliett/myeos/DQ/group.det-muon.DiMuonGenerator_EtaGtr_1p2_Pt10to100.ESD.Run3_2NSW_250322_reco_n270322_EXT0/group.det-muon.28531270.EXT0._000020.ESD.pool.root','/afs/cern.ch/user/b/bigliett/myeos/DQ/group.det-muon.DiMuonGenerator_EtaGtr_1p2_Pt10to100.ESD.Run3_2NSW_250322_reco_n270322_EXT0/group.det-muon.28531270.EXT0._000022.ESD.pool.root']
+    #ConfigFlags.Input.Files =['/afs/cern.ch/user/b/bigliett/myeos/DQ/group.det-muon.DiMuonGenerator_EtaGtr_1p2_Pt10to100.ESD.Run3_2NSW_250322_reco_n270322_EXT0/group.det-muon.28531270.EXT0._000004.ESD.pool.root','/afs/cern.ch/user/b/bigliett/myeos/DQ/group.det-muon.DiMuonGenerator_EtaGtr_1p2_Pt10to100.ESD.Run3_2NSW_250322_reco_n270322_EXT0/group.det-muon.28531270.EXT0._000008.ESD.pool.root','/afs/cern.ch/user/b/bigliett/myeos/DQ/group.det-muon.DiMuonGenerator_EtaGtr_1p2_Pt10to100.ESD.Run3_2NSW_250322_reco_n270322_EXT0/group.det-muon.28531270.EXT0._000013.ESD.pool.root','/afs/cern.ch/user/b/bigliett/myeos/DQ/group.det-muon.DiMuonGenerator_EtaGtr_1p2_Pt10to100.ESD.Run3_2NSW_250322_reco_n270322_EXT0/group.det-muon.28531270.EXT0._000020.ESD.pool.root','/afs/cern.ch/user/b/bigliett/myeos/DQ/group.det-muon.DiMuonGenerator_EtaGtr_1p2_Pt10to100.ESD.Run3_2NSW_250322_reco_n270322_EXT0/group.det-muon.28531270.EXT0._000022.ESD.pool.root']
+    ConfigFlags.Input.Files =['/afs/cern.ch/user/b/bigliett/myeos/DQ/group.det-muon.DiMuonGenerator_EtaGtr_1p2_Pt10to100.ESD.Run3_2NSW_250322_reco_n270322_EXT0/group.det-muon.28531270.EXT0._000004.ESD.pool.root']
 
 
     #from AthenaCommon.AthenaCommonFlags import athenaCommonFlags

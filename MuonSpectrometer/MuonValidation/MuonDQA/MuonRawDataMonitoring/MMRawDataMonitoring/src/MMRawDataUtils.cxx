@@ -31,6 +31,36 @@ int MMRawDataMonAlg::get_PCB_from_channel(int channel) const {
   throw std::invalid_argument( "channel is not valid!" );
 }
 
+int MMRawDataMonAlg::get_FEB_from_channel(int channel, int stEta) const {
+
+  if(fabs(stEta)==1){
+    if (channel>0 && channel<=512) return 1;
+    if (channel>512 && channel<=1024) return 2;
+    
+    if (channel>1024 && channel<=1536) return 3;
+    if (channel>1536 && channel<=2048) return 4;
+
+    if (channel>2048 && channel<=2560) return 5;
+    if (channel>2560 && channel<=3072) return 6;
+    
+    if (channel>3072 && channel<=3584) return 7;
+    if (channel>3584 && channel<=4096) return 8;
+    
+    if (channel>4096 && channel<=4608) return 9;
+    if (channel>4608 && channel<=5120) return 10;
+  }else if(fabs(stEta)==2){
+    if (channel>0 && channel<=512) return 11;
+    if (channel>512 && channel<=1024) return 12;
+    
+    if (channel>1024 && channel<=1536) return 13;
+    if (channel>1536 && channel<=2048) return 14;
+
+    if (channel>2048 && channel<=2560) return 15;
+    if (channel>2560 && channel<=3072) return 16;
+  } 
+  throw std::invalid_argument( "channel is not valid!" );
+}
+
 int MMRawDataMonAlg::get_sectorPhi_from_stationPhi_stName(int stationPhi,const std::string & stName) const {
   
   if (stationPhi==1 && stName=="MML") return 1;
@@ -92,6 +122,25 @@ int MMRawDataMonAlg::get_bin_for_occ_CSide_pcb_eta2_hist(int stationEta, int mul
   return  (multiplet-1)*max_gas_gap*max_pcb+ (gas_gap-1)*max_pcb + (PCB-1);
 
 }
+
+
+
+int MMRawDataMonAlg::get_bin_for_occ(int gas_gap, int PCB) const {
+
+  static const int max_pcb = 8;
+
+  return  (gas_gap-1)*max_pcb + (PCB-1);
+
+}
+
+int MMRawDataMonAlg::get_bin_for_feb_occ(int gas_gap, int FEB) const {
+
+  static const int max_feb = 16;
+
+  return  (gas_gap-1)*max_feb + (FEB-1);
+
+}
+
 
 int MMRawDataMonAlg::get_bin_for_occ_CSide_pcb_eta1_hist(int stationEta, int multiplet, int gas_gap, int PCB) const {
 
