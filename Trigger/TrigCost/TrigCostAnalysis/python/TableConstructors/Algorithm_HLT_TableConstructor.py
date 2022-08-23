@@ -48,8 +48,8 @@ class Algorithm_HLT_TableConstructor(TableConstructorBase):
         self.columns["timePerCall"]             = Column("Alg Total Time/Call [ms]", "Mean weighted alg time. Normalised to all alg calls")
         self.columns["timePerEvent"]            = Column("Alg Total Time/Event [ms]", "Mean weighted alg time. Normalised to all events with one or more alg calls")
         self.columns["requestTimePerEvent"]     = Column("ROS Data Request Time/Event [ms]", "Average time waiting for ROS data per event for  events with at least one execution in this run range")
-        self.columns["dataRate"]                = Column("Data Request Rate [Hz]", "Rate of calls to the ROS from this algorithm in this run range", True)
-        self.columns["retrievedDataRate"]       = Column("Retrieved ROB Rate [Hz]", "Rate of ROB retrievals from this algorithm in this run range", True)
+        self.columns["dataRate"]                = Column("Data Request Rate [Hz]", "Rate of data requests to ROSes from this algorithm in this run range", True)
+        self.columns["retrievedDataRate"]       = Column("Retrieved Data request Rate [Hz]", "Rate of data request with at least one network ROS request from this algorithm in this run range", True)
         self.columns["cachedDataSizeRate"]      = Column("Cached ROB Rate [kB/s]", "Average size of cached ROB data fetches for this algorithm in this run range", True)
         self.columns["retrievedDataSizeRate"]   = Column("Retrieved ROB Rate [kB/s]", "Average size of retrieved ROB data fetches for this algorithm in this run range")
     

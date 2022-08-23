@@ -73,8 +73,8 @@ StatusCode CounterROS::newEvent(const CostData& data, size_t index, const float 
 
     if (m_robIdToBin.find(robIdsPerRequest[i]) != m_robIdToBin.end()) {
       ATH_CHECK( fill("ROBStatus_perCall", getROBHistoryBin(robs_history[i]), weight) );
-      // Status is ok when no status words are set
-      if (robs_status[i] != 0) {
+      // If status is okay robs_status[i] equals true
+      if (robs_status[i] == false ) {
         // The last bin of ROBStatus_perCall histogram store isStatusNotOk bool value
         ATH_CHECK( fill("ROBStatus_perCall", robmonitor::NUM_ROBHIST_CODES, weight) );
       }

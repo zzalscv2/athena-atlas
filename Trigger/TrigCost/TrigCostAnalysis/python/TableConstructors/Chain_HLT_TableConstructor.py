@@ -46,9 +46,9 @@ class Chain_HLT_TableConstructor(TableConstructorBase):
         self.columns["totalUniqTime"] = Column("Total Unique Time [s]", "Total time used by algorithms for this chain for this run range")
         self.columns['totalUniqTimeFrac'] = Column("Total Unique Time [%]", "Total unique chain time as a percentage of the total time of all chains in this run range")
         self.columns['algPerEvent'] = Column("Run Algs/Event", "Total number of algorithms executed by this chain")
-        self.columns["dataRate"] = Column("Data Request Rate [Hz]", "Rate of calls to the ROS from this algorithm in this run range", True)
-        self.columns["retrievedDataRate"] = Column("Retrieved ROB Rate [Hz]", "Rate of ROB retrievals from this algorithm in this run range", True)
-        self.columns["cachedDataSizeRate"] = Column("Cached ROB Rate [kB/s]", "Average size of cached ROB data fetches for this algorithm in this run range", True)
+        self.columns["dataRate"] = Column("Data Request Rate [Hz]", "Rate of data requests to ROSes (one request can be to many ROSes) from this chain in this run range", True)
+        self.columns["retrievedDataRate"] = Column("Retrieved Data Request Rate [Hz]", "Rate of data request with at least one network ROS request from this chain in this run range", True)
+        self.columns["cachedDataSizeRate"] = Column("Cached ROB Rate [kB/s]", "Average size of cached ROB data fetches from this algorithm in this run range", True)
         self.columns["retrievedDataSizeRate"]   = Column("Retrieved ROB Rate [kB/s]", "Average size of retrieved ROB data fetches for this algorithm in this run range") 
 
 
