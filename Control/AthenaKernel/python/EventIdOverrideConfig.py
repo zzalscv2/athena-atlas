@@ -2,6 +2,7 @@
 
 from AthenaConfiguration.ComponentAccumulator import ComponentAccumulator
 from AthenaConfiguration.ComponentFactory import CompFactory
+from AthenaConfiguration.Enums import Project
 
 # based on https://acode-browser1.usatlas.bnl.gov/lxr/source/athena/Control/AthenaServices/python/Configurables.py#0247
 def add_modifier(run_nbr=None, evt_nbr=None, time_stamp=None, lbk_nbr=None, nevts=1):
@@ -128,7 +129,7 @@ def getMinMaxRunNumbers(ConfigFlags):
 
 def EvtIdModifierSvcCfg(ConfigFlags, name="EvtIdModifierSvc", **kwargs):
     acc = ComponentAccumulator()
-    if ConfigFlags.Common.Project != "AthSimulation" and (ConfigFlags.Digitization.PileUp or ConfigFlags.Sim.DoFullChain):
+    if ConfigFlags.Common.Project is not Project.AthSimulation and (ConfigFlags.Digitization.PileUp or ConfigFlags.Sim.DoFullChain):
         kwargs.setdefault("EvtStoreName", "OriginalEvent_SG")
     else:
         kwargs.setdefault("EvtStoreName", "StoreGateSvc")

@@ -12,18 +12,16 @@ if __name__ == '__main__':
   from AthenaCommon.Constants import DEBUG
   log.setLevel(DEBUG)
 
-
   #import config flags
   from AthenaConfiguration.AllConfigFlags import ConfigFlags
-  from AthenaConfiguration.Enums import ProductionStep
+  from AthenaConfiguration.Enums import ProductionStep, Project
   ConfigFlags.Common.ProductionStep = ProductionStep.Simulation
 
   from AthenaConfiguration.TestDefaults import defaultTestFiles
   inputDir = defaultTestFiles.d
   ConfigFlags.Input.Files = defaultTestFiles.EVNT
 
-  import os
-  if "AthSimulation_DIR" in os.environ:
+  if ConfigFlags.Common.Project is Project.AthSimulation:
     detectors =['Bpipe', 'BCM', 'DBM',  'Pixel', 'SCT', 'TRT', 'LAr', 'Tile', 'CSC', 'MDT', 'RPC', 'TGC'] # Forward Detector geometry not currently included in AthSimulation
   else:
     detectors =['Bpipe', 'BCM', 'DBM',  'Pixel', 'SCT', 'TRT', 'LAr', 'Tile', 'CSC', 'MDT', 'RPC', 'TGC', 'FwdRegion', 'Lucid', 'ZDC', 'ALFA', 'AFP']
@@ -40,7 +38,6 @@ if __name__ == '__main__':
   # Finalize
   ConfigFlags.lock()
 
-
   from G4AtlasTools.G4GeometryToolConfig import BeamPipeGeoDetectorToolCfg
   from G4AtlasTools.G4GeometryToolConfig import PixelGeoDetectorToolCfg
   from G4AtlasTools.G4GeometryToolConfig import SCTGeoDetectorToolCfg
@@ -54,7 +51,6 @@ if __name__ == '__main__':
   from G4AtlasTools.G4GeometryToolConfig import AFPGeoDetectorToolCfg
   from G4AtlasTools.G4GeometryToolConfig import ForwardRegionEnvelopeCfg
   from G4AtlasTools.G4GeometryToolConfig import MaterialDescriptionToolCfg
-
 
   ## Initialize a new component accumulator
   cfg = ComponentAccumulator()

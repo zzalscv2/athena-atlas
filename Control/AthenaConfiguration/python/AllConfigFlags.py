@@ -3,7 +3,7 @@
 from AthenaCommon.SystemOfUnits import TeV
 from AthenaConfiguration.AthConfigFlags import AthConfigFlags
 from AthenaConfiguration.AutoConfigFlags import GetFileMD, getInitialTimeStampsFromRunNumbers, getRunToTimestampDict, getSpecialConfigurationMetadata
-from AthenaConfiguration.Enums import BeamType, Format, ProductionStep
+from AthenaConfiguration.Enums import BeamType, Format, ProductionStep, Project
 from PyUtils.moduleExists import moduleExists
 
 
@@ -112,14 +112,16 @@ def _createCfgFlags():
     def _checkProject():
         import os
         if "AthSimulation_DIR" in os.environ:
-            return "AthSimulation"
+            return Project.AthSimulation
         if "AthGeneration_DIR" in os.environ:
-            return "AthGeneration"
+            return Project.AthGeneration
         if "AthAnalysis_DIR" in os.environ:
-            return "AthAnalysis"
+            return Project.AthAnalysis
+        if "AthDerivation_DIR" in os.environ:
+            return Project.AthDerivation
         #TODO expand this method.
-        return "Athena"
-    acf.addFlag('Common.Project', _checkProject())
+        return Project.Athena
+    acf.addFlag('Common.Project', _checkProject(), enum=Project)
 
     # replace global.Beam*
     acf.addFlag('Beam.BunchSpacing', 25) # former global.BunchSpacing
@@ -229,7 +231,7 @@ def _createCfgFlags():
 
     def __trigger():
         from TriggerJobOpts.TriggerConfigFlags import createTriggerFlags
-        return createTriggerFlags(acf.Common.Project!='AthAnalysis')
+        return createTriggerFlags(acf.Common.Project is not Project.AthAnalysis)
     _addFlagsCategory(acf, "Trigger", __trigger, 'TriggerJobOpts' )
 
     def __indet():

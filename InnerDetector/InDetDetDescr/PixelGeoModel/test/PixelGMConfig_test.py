@@ -5,6 +5,7 @@ Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
 """
 if __name__ == "__main__":
     from AthenaConfiguration.AllConfigFlags import ConfigFlags
+    from AthenaConfiguration.Enums import Project
     from AthenaConfiguration.TestDefaults import defaultTestFiles
 
     ConfigFlags.Input.Files = defaultTestFiles.HITS_RUN2
@@ -12,7 +13,7 @@ if __name__ == "__main__":
     ConfigFlags.GeoModel.Align.Dynamic = False
     ConfigFlags.lock()
 
-    if ConfigFlags.Common.Project == "AthSimulation":
+    if ConfigFlags.Common.Project is Project.AthSimulation:
         from PixelGeoModel.PixelGeoModelConfig import PixelSimulationGeometryCfg
         acc = PixelSimulationGeometryCfg(ConfigFlags)
         f=open('PixelSimulationGeometryCfg.pkl','wb')
