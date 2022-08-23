@@ -20,12 +20,15 @@ class PreJetAnalysisConfig (ConfigBlock) :
         if self.postfix != '' and self.postfix[0] != '_' :
             self.postfix = '_' + self.postfix
         self.runOriginalObjectLink = False
-        self.runGhostMuonAssociation = False
+        self.runGhostMuonAssociation = None
 
 
     def makeAlgs (self, config) :
 
-        config.readName (self.containerName, self.jetCollection)
+        if config.isPhyslite() :
+            config.setSourceName (self.containerName, "AnalysisJets")
+        else :
+            config.setSourceName (self.containerName, self.jetCollection)
 
         # Relink original jets in case of b-tagging calibration
         if self.runOriginalObjectLink :
@@ -38,7 +41,8 @@ class PreJetAnalysisConfig (ConfigBlock) :
             alg.preselection = config.getPreselection (self.containerName, '')
 
         # Set up the jet ghost muon association algorithm:
-        if self.runGhostMuonAssociation:
+        if (self.runGhostMuonAssociation is None and not config.isPhyslite()) or \
+           (self.runGhostMuonAssociation is True):
             alg = config.createAlgorithm( 'CP::JetGhostMuonAssociationAlg',
                                           'JetGhostMuonAssociationAlg'+self.postfix )
             alg.jets = config.readName (self.containerName)
@@ -372,7 +376,7 @@ class LargeRJetAnalysisConfig (ConfigBlock) :
 # https://twiki.cern.ch/twiki/bin/view/AtlasProtected/JVTCalibrationRel21
 
 def makeJetAnalysisConfig( seq, containerName, jetCollection, postfix = '',
-                           runGhostMuonAssociation = True,
+                           runGhostMuonAssociation = None,
                            **kwargs):
     """Create a jet analysis algorithm sequence
       The jet collection is interpreted and selects the correct function to call,

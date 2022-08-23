@@ -15,10 +15,16 @@ class MuonCalibrationConfig (ConfigBlock):
         self.ptSelectionOutput = False
 
     def makeAlgs (self, config) :
+
+        if config.isPhyslite() :
+            config.setSourceName (self.containerName, "AnalysisMuons")
+        else :
+            config.setSourceName (self.containerName, "Muons")
+
         # Set up a shallow copy to decorate
-        if config.wantCopy (self.containerName, 'Muons') :
+        if config.wantCopy (self.containerName) :
             alg = config.createAlgorithm( 'CP::AsgShallowCopyAlg', 'MuonShallowCopyAlg' + self.postfix )
-            alg.input = config.readName (self.containerName, "Muons")
+            alg.input = config.readName (self.containerName)
             alg.output = config.copyName (self.containerName)
 
         # Set up the eta-cut on all muons prior to everything else
@@ -27,7 +33,7 @@ class MuonCalibrationConfig (ConfigBlock):
         config.addPrivateTool( 'selectionTool', 'CP::AsgPtEtaSelectionTool' )
         alg.selectionTool.maxEta = 2.5
         alg.selectionDecoration = 'selectEta' + self.postfix + ',as_bits'
-        alg.particles = config.readName (self.containerName, "Muons")
+        alg.particles = config.readName (self.containerName)
         alg.preselection = config.getPreselection (self.containerName, '')
         config.addSelection (self.containerName, '', alg.selectionDecoration,
                              bits=2)
