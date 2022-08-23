@@ -2,7 +2,7 @@
 #	Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
 #
 
-from ROOT import TH2F
+from ROOT import TH2F, TLine
 from .MMMonUtils import getMMLabelX, get_MPV_charge, get_mean_and_sigma, getXYbins, poi, get_time
 
 def make_eff_histo_per_PCB(inputs):
@@ -225,4 +225,34 @@ def map_per_PCB(inputs, histo_name, start_index, proctype):
                                 h_poi_per_PCB.GetZaxis().SetRangeUser(0, 300)
                         xbin+=1
         return[h_poi_per_PCB]
+
+
+def add_layer_lines(inputs):
+        h1 = inputs[0][1][0].Clone()
+        putLine(h1, 16, 0.5, 16, 16.5, offset=0, c=2)
+        putLine(h1, 32, 0.5, 32, 16.5, offset=0, c=2)
+        putLine(h1, 48, 0.5, 48, 16.5, offset=0, c=2)
+        putLine(h1, 64, 0.5, 64, 16.5, offset=0, c=2)
+        putLine(h1, 80, 0.5, 80, 16.5, offset=0, c=2)
+        putLine(h1, 96, 0.5, 96, 16.5, offset=0, c=2)
+        putLine(h1, 112, 0.5, 112, 16.5, offset=0, c=2)
+
+        h2 = inputs[0][1][1].Clone()
+        putLine(h2, 16, 0.5, 16, 16.5, offset=0, c=2)
+        putLine(h2, 32, 0.5, 32, 16.5, offset=0, c=2)
+        putLine(h2, 48, 0.5, 48, 16.5, offset=0, c=2)
+        putLine(h2, 64, 0.5, 64, 16.5, offset=0, c=2)
+        putLine(h2, 80, 0.5, 80, 16.5, offset=0, c=2)
+        putLine(h2, 96, 0.5, 96, 16.5, offset=0, c=2)
+        putLine(h2, 112, 0.5, 112, 16.5, offset=0, c=2)
+
+
+        return [h1, h2]
+
+def putLine(h, x1, y1, x2, y2, offset=0, c=1):
+    line = TLine(x1-offset, y1, x2-offset, y2)
+    line.SetLineColor(c)
+    line.SetLineStyle(2)
+    line.SetLineWidth(2)
+    h.GetListOfFunctions().Add(line)
 
