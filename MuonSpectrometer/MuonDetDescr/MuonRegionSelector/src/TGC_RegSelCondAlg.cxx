@@ -96,11 +96,12 @@ std::unique_ptr<RegSelSiLUT> TGC_RegSelCondAlg::createTable( const EventContext&
   std::unique_ptr<RegSelSiLUT> lut = std::make_unique<RegSelSiLUT>();
 
   int maxRodId = 0;
+  int maxSRodId = 0;
   int maxSswId = 0;
   int maxSbloc = 0;
   int minChannelId = 0;
   int maxChannelId = 0;
-  cabling->getReadoutIDRanges(maxRodId, maxSswId, maxSbloc, minChannelId, maxChannelId);
+  cabling->getReadoutIDRanges(maxRodId, maxSRodId, maxSswId, maxSbloc, minChannelId, maxChannelId);
 
   for (std::vector<Identifier>::const_iterator i = idfirst; i != idlast; i++) {
    

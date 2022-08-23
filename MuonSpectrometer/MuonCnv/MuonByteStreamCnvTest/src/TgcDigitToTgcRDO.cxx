@@ -208,8 +208,8 @@ StatusCode TgcDigitToTgcRDO::fillTagInfo() const {
 StatusCode TgcDigitToTgcRDO::getCabling() {
     ATH_CHECK(m_tgc_cabling_server->giveCabling(m_cabling));
 
-    int maxRodId, maxSswId, maxSbloc, minChannelId, maxChannelId;
-    m_cabling->getReadoutIDRanges(maxRodId, maxSswId, maxSbloc, minChannelId, maxChannelId);
+    int maxRodId, maxSRodId, maxSswId, maxSbloc, minChannelId, maxChannelId;
+    m_cabling->getReadoutIDRanges(maxRodId, maxSRodId, maxSswId, maxSbloc, minChannelId, maxChannelId);
     if (maxRodId == 12) {
         ATH_MSG_INFO(m_cabling->name() << " (12-fold) is selected ");
         m_cablingType = "TGCcabling12Svc";
