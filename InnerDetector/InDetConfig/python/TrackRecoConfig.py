@@ -4,61 +4,6 @@ from AthenaConfiguration.ComponentAccumulator import ComponentAccumulator
 from AthenaConfiguration.ComponentFactory import CompFactory
 from AthenaConfiguration.Enums import BeamType, Format
 
-def TrackCollectionMergerAlgCfg(flags, name="InDetTrackCollectionMerger",
-                                InputCombinedTracks=None,
-                                OutputCombinedTracks="",
-                                AssociationMapName="",
-                                CombinedInDetClusterSplitProbContainer="",
-                                **kwargs):
-    result = ComponentAccumulator()
-
-    if flags.Overlay.doTrackOverlay:
-        kwargs.setdefault("DoTrackOverlay",True)
-        if "Disappearing" in name:
-            InputCombinedTracks+=flags.Overlay.BkgPrefix+"DisappearingTracks"
-        else:
-            InputCombinedTracks+=flags.Overlay.BkgPrefix+"CombinedInDetTracks"
-    kwargs.setdefault("TracksLocation", InputCombinedTracks)
-    kwargs.setdefault("OutputTracksLocation", OutputCombinedTracks)
-    from InDetConfig.InDetAssociationToolsConfig import InDetPRDtoTrackMapToolGangedPixelsCfg
-    InDetPRDtoTrackMapToolGangedPixels = result.popToolsAndMerge(InDetPRDtoTrackMapToolGangedPixelsCfg(flags))
-    kwargs.setdefault("AssociationTool", InDetPRDtoTrackMapToolGangedPixels)
-    kwargs.setdefault("AssociationMapName", AssociationMapName)
-    kwargs.setdefault("UpdateSharedHits", True)
-    kwargs.setdefault("UpdateAdditionalInfo", True)
-    kwargs.setdefault("DoTrackOverlay",flags.Overlay.doTrackOverlay)
-    from TrkConfig.TrkTrackSummaryToolConfig import InDetTrackSummaryToolSharedHitsCfg
-    TrackSummaryTool = result.popToolsAndMerge(InDetTrackSummaryToolSharedHitsCfg(flags, name=OutputCombinedTracks+"SummaryToolSharedHits"))
-    TrackSummaryTool.InDetSummaryHelperTool.ClusterSplitProbabilityName = CombinedInDetClusterSplitProbContainer
-    result.addPublicTool(TrackSummaryTool)
-    kwargs.setdefault("SummaryTool", TrackSummaryTool)
-
-    result.addEventAlgo(CompFactory.Trk.TrackCollectionMerger(name, **kwargs))
-    return result
-
-# Configuration not supported, to be recommissioned if needed
-def ReFitTrackAlgCfg(flags, name="InDetRefitTrack", InputTrackCollection="CombinedInDetTracks", OutputTrackCollection="RefittedTracks", **kwargs):
-    result = ComponentAccumulator()
-
-    from TrkConfig.CommonTrackFitterConfig import InDetTrackFitterCfg, InDetTrackFitterTRTCfg
-    InDetTrackFitter = result.popToolsAndMerge(InDetTrackFitterCfg(flags))
-    InDetTrackFitterTRT = result.popToolsAndMerge(InDetTrackFitterTRTCfg(flags))
-    from TrkConfig.TrkTrackSummaryToolConfig import InDetTrackSummaryToolSharedHitsCfg
-    TrackSummaryTool = result.popToolsAndMerge(InDetTrackSummaryToolSharedHitsCfg(flags))
-    from InDetConfig.InDetAssociationToolsConfig import InDetPRDtoTrackMapToolGangedPixelsCfg
-    InDetPRDtoTrackMapToolGangedPixels = result.popToolsAndMerge(InDetPRDtoTrackMapToolGangedPixelsCfg(flags))
-    kwargs.setdefault("FitterTool", InDetTrackFitter)
-    kwargs.setdefault("FitterToolTRT", InDetTrackFitterTRT)
-    kwargs.setdefault("SummaryTool", TrackSummaryTool)
-    kwargs.setdefault("AssociationTool", InDetPRDtoTrackMapToolGangedPixels)
-    kwargs.setdefault("TrackName", InputTrackCollection)
-    kwargs.setdefault("NewTrackName", OutputTrackCollection)
-    kwargs.setdefault("useParticleHypothesisFromTrack", True)
-    kwargs.setdefault("matEffects", flags.InDet.materialInteractionsType if flags.InDet.materialInteractions else 0)
-
-    result.addEventAlgo(CompFactory.Trk.ReFitTrack(name, **kwargs))
-    return result
-
 def CombinedTrackingPassFlagSets(flags):
 
     flags_set = []
@@ -167,6 +112,7 @@ def InDetTrackRecoCfg(flags):
     from InDetConfig.TRTStandaloneConfig import TRTStandaloneCfg
     from InDetConfig.TRTExtensionConfig import NewTrackingTRTExtensionCfg
     from xAODTrackingCnv.xAODTrackingCnvConfig import TrackParticleCnvAlgPIDCheckCfg
+    from TrkConfig.TrkTrackCollectionMergerConfig import TrackCollectionMergerAlgCfg
 
     # ------------------------------------------------------------
     #
