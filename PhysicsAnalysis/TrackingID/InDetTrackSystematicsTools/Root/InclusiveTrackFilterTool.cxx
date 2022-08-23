@@ -25,7 +25,7 @@ namespace InDet {
 
     m_rnd = std::make_unique<TRandom3>(m_seed);
 
-    TH2* trkLRTEff_tmp;
+    TH2* trkLRTEff_tmp = nullptr;
     ATH_CHECK( initObject<TH2>( trkLRTEff_tmp,
                m_calibFileLRTEff, 
                m_calibHistLRTEff) );
