@@ -44,6 +44,8 @@ def BunchCrossingCondAlgCfg(configFlags):
             else:  # trust that we can use the in-file metadata
                 bgkey = ''
         else:
+            from TrigConfigSvc.TrigConfigSvcCfg import BunchGroupCondAlgCfg
+            result.merge(BunchGroupCondAlgCfg(configFlags))
             bgkey = 'L1BunchGroup'
     elif configFlags.Beam.BunchStructureSource == BunchStructureSource.Lumi:
         from .LuminosityCondAlgConfig import LuminosityCondAlgCfg
