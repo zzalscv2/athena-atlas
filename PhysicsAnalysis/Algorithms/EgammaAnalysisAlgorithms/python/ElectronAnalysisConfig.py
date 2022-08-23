@@ -18,8 +18,13 @@ class ElectronCalibrationConfig (ConfigBlock) :
 
     def makeAlgs (self, config) :
 
+        if config.isPhyslite() :
+            config.setSourceName (self.containerName, "AnalysisElectrons")
+        else :
+            config.setSourceName (self.containerName, "Electrons")
+
         # Set up a shallow copy to decorate
-        if config.wantCopy (self.containerName, 'Electrons') :
+        if config.wantCopy (self.containerName) :
             alg = config.createAlgorithm( 'CP::AsgShallowCopyAlg', 'ElectronShallowCopyAlg' + self.postfix )
             alg.input = config.readName (self.containerName)
             alg.output = config.copyName (self.containerName)

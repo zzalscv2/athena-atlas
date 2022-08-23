@@ -51,22 +51,25 @@ def addOutputCopyAlgorithms (algSeq, postfix, inputContainer, outputContainer, s
     algSeq += copyalg
 
 
-def makeSequenceOld (dataType, algSeq, vars, forCompare) :
+def makeSequenceOld (dataType, algSeq, vars, forCompare, isPhyslite, noPhysliteBroken) :
 
     # Include, and then set up the pileup analysis sequence:
     prwfiles, lumicalcfiles = pileupConfigFiles(dataType)
 
-    from AsgAnalysisAlgorithms.PileupAnalysisSequence import \
-        makePileupAnalysisSequence
-    pileupSequence = makePileupAnalysisSequence(
-        dataType,
-        userPileupConfigs=prwfiles,
-        userLumicalcFiles=lumicalcfiles,
-    )
-    pileupSequence.configure( inputName = {}, outputName = {} )
+    if not isPhyslite :
+        from AsgAnalysisAlgorithms.PileupAnalysisSequence import \
+            makePileupAnalysisSequence
+        pileupSequence = makePileupAnalysisSequence(
+            dataType,
+            userPileupConfigs=prwfiles,
+            userLumicalcFiles=lumicalcfiles,
+        )
+        pileupSequence.configure( inputName = {}, outputName = {} )
+
+        # Add the pileup sequence to the job:
+        algSeq += pileupSequence
 
     # Add the pileup sequence to the job:
-    algSeq += pileupSequence
     vars += [ 'EventInfo.runNumber     -> runNumber',
              'EventInfo.eventNumber   -> eventNumber', ]
 
@@ -74,23 +77,30 @@ def makeSequenceOld (dataType, algSeq, vars, forCompare) :
     # Include, and then set up the jet analysis algorithm sequence:
     from JetAnalysisAlgorithms.JetAnalysisSequence import makeJetAnalysisSequence
     jetContainer = 'AntiKt4EMPFlowJets'
-    jetSequence = makeJetAnalysisSequence( dataType, jetContainer, enableCutflow=True, enableKinematicHistograms=True, shallowViewOutput = False )
+    if isPhyslite :
+        input = 'AnalysisJets'
+    else :
+        input = jetContainer
+    jetSequence = makeJetAnalysisSequence( dataType, jetContainer,
+                                           runJvtUpdate = True,
+                                           enableCutflow=True, enableKinematicHistograms=True, shallowViewOutput = False,
+                                           runGhostMuonAssociation = not isPhyslite)
 
-    from FTagAnalysisAlgorithms.FTagAnalysisSequence import makeFTagAnalysisSequence
-    btagger = "DL1r"
-    btagWP = "FixedCutBEff_77"
-    makeFTagAnalysisSequence( jetSequence, dataType, jetContainer, noEfficiency = False, legacyRecommendations = True,
-                              enableCutflow=True, btagger = btagger, btagWP = btagWP )
-    vars += [
-        'OutJets_%SYS%.ftag_select_' + btagger + '_' + btagWP + ' -> jet_ftag_select_%SYS%',
-    ]
-    if dataType != 'data' :
+    if not noPhysliteBroken :
+        from FTagAnalysisAlgorithms.FTagAnalysisSequence import makeFTagAnalysisSequence
+        btagger = "MV2c10"
+        btagWP = "FixedCutBEff_77"
+        makeFTagAnalysisSequence( jetSequence, dataType, jetContainer, noEfficiency = False, legacyRecommendations = True,
+                                  enableCutflow=True, btagger = btagger, btagWP = btagWP )
         vars += [
-            'OutJets_%SYS%.ftag_effSF_' + btagger + '_' + btagWP + '_%SYS% -> jet_ftag_eff_%SYS%'
+            'OutJets_%SYS%.ftag_select_' + btagger + '_' + btagWP + ' -> jet_ftag_select_%SYS%',
         ]
+        if dataType != 'data' :
+            vars += [
+                'OutJets_%SYS%.ftag_effSF_' + btagger + '_' + btagWP + '_%SYS% -> jet_ftag_eff_%SYS%'
+            ]
 
-    jetSequence.configure( inputName = jetContainer, outputName = 'AnaJets_%SYS%' )
-
+    jetSequence.configure( inputName = input, outputName = 'AnaJets_%SYS%' )
 
     # Include, and then set up the jet analysis algorithm sequence:
     from JetAnalysisAlgorithms.JetJvtAnalysisSequence import makeJetJvtAnalysisSequence
@@ -104,7 +114,7 @@ def makeSequenceOld (dataType, algSeq, vars, forCompare) :
     vars += ['OutJets_%SYS%.pt  -> jet_pt_%SYS%',
              'OutJets_NOSYS.phi -> jet_phi',
              'OutJets_NOSYS.eta -> jet_eta', ]
-    if dataType != 'data':
+    if dataType != 'data' :
         vars += [ 'OutJets_%SYS%.jvt_effSF_%SYS% -> jet_jvtEfficiency_%SYS%', ]
         if not forCompare :
             vars += [
@@ -116,23 +126,34 @@ def makeSequenceOld (dataType, algSeq, vars, forCompare) :
 
     # Include, and then set up the muon analysis algorithm sequence:
     from MuonAnalysisAlgorithms.MuonAnalysisSequence import makeMuonAnalysisSequence
+    if isPhyslite :
+        input = 'AnalysisMuons'
+    else :
+        input = 'Muons'
+
     muonSequenceMedium = makeMuonAnalysisSequence( dataType, deepCopyOutput = False, shallowViewOutput = False,
                                                    workingPoint = 'Medium.NonIso', postfix = 'medium',
                                                    enableCutflow=True, enableKinematicHistograms=True, ptSelectionOutput = True )
-    muonSequenceMedium.configure( inputName = 'Muons',
+    # FIX ME: the current version of the `MuonSelectionTool` doesn't work
+    # on the current version of PHYSLITE, and needs a new PHYSLITE production
+    # campaign
+    if noPhysliteBroken :
+        muonSequenceMedium.__delattr__ ('MuonSelectionAlg_medium')
+    muonSequenceMedium.configure( inputName = input,
                                   outputName = 'AnaMuonsMedium_%SYS%' )
-
-    # Add the sequence to the job:
     algSeq += muonSequenceMedium
 
     muonSequenceTight = makeMuonAnalysisSequence( dataType, deepCopyOutput = False, shallowViewOutput = False,
                                                   workingPoint = 'Tight.NonIso', postfix = 'tight',
                                                   enableCutflow=True, enableKinematicHistograms=True, ptSelectionOutput = True )
     muonSequenceTight.removeStage ("calibration")
+    # FIX ME: the current version of the `MuonSelectionTool` doesn't work
+    # on the current version of PHYSLITE, and needs a new PHYSLITE production
+    # campaign
+    if noPhysliteBroken :
+        muonSequenceTight.__delattr__ ('MuonSelectionAlg_tight')
     muonSequenceTight.configure( inputName = 'AnaMuonsMedium_%SYS%',
                                  outputName = 'AnaMuons_%SYS%')
-
-    # Add the sequence to the job:
     algSeq += muonSequenceTight
     vars += [ 'OutMuons_NOSYS.eta -> mu_eta',
               'OutMuons_NOSYS.phi -> mu_phi',
@@ -148,15 +169,23 @@ def makeSequenceOld (dataType, algSeq, vars, forCompare) :
     # Include, and then set up the electron analysis sequence:
     from EgammaAnalysisAlgorithms.ElectronAnalysisSequence import \
         makeElectronAnalysisSequence
+    if isPhyslite :
+        input = 'AnalysisElectrons'
+    else :
+        input = 'Electrons'
     likelihood = True
     recomputeLikelihood=False
     if likelihood:
         workingpoint = 'LooseLHElectron.Loose_VarRad'
     else:
         workingpoint = 'LooseDNNElectron.Loose_VarRad'
+    # FIXME: fails for PHYSLITE with missing data item
+    # ptvarcone30_Nonprompt_All_MaxWeightTTVALooseCone_pt1000
+    if noPhysliteBroken :
+        workingpoint = workingpoint.split('.')[0] + '.NonIso'
     electronSequence = makeElectronAnalysisSequence( dataType, workingpoint, postfix = 'loose',
                                                      recomputeLikelihood=recomputeLikelihood, enableCutflow=True, enableKinematicHistograms=True, shallowViewOutput = False )
-    electronSequence.configure( inputName = 'Electrons',
+    electronSequence.configure( inputName = input,
                                 outputName = 'AnaElectrons_%SYS%' )
     algSeq += electronSequence
     vars += [ 'OutElectrons_%SYS%.pt  -> el_pt_%SYS%',
@@ -171,9 +200,13 @@ def makeSequenceOld (dataType, algSeq, vars, forCompare) :
     # Include, and then set up the photon analysis sequence:
     from EgammaAnalysisAlgorithms.PhotonAnalysisSequence import \
         makePhotonAnalysisSequence
+    if isPhyslite :
+        input = 'AnalysisPhotons'
+    else :
+        input = 'Photons'
     photonSequence = makePhotonAnalysisSequence( dataType, 'Tight.FixedCutTight', postfix = 'tight',
                                                  recomputeIsEM=False, enableCutflow=True, enableKinematicHistograms=True, shallowViewOutput = False )
-    photonSequence.configure( inputName = 'Photons',
+    photonSequence.configure( inputName = input,
                               outputName = 'AnaPhotons_%SYS%' )
     algSeq += photonSequence
     vars += [ 'OutPhotons_%SYS%.pt  -> ph_pt_%SYS%',
@@ -186,9 +219,13 @@ def makeSequenceOld (dataType, algSeq, vars, forCompare) :
 
     # Include, and then set up the tau analysis algorithm sequence:
     from TauAnalysisAlgorithms.TauAnalysisSequence import makeTauAnalysisSequence
+    if isPhyslite :
+        input = 'AnalysisTauJets'
+    else :
+        input = 'TauJets'
     tauSequence = makeTauAnalysisSequence( dataType, 'Tight', postfix = 'tight',
                                            enableCutflow=True, enableKinematicHistograms=True, shallowViewOutput = False )
-    tauSequence.configure( inputName = 'TauJets', outputName = 'AnaTauJets_%SYS%' )
+    tauSequence.configure( inputName = input, outputName = 'AnaTauJets_%SYS%' )
 
     # Add the sequence to the job:
     algSeq += tauSequence
@@ -199,6 +236,7 @@ def makeSequenceOld (dataType, algSeq, vars, forCompare) :
               'OutTauJets_%SYS%.baselineSelection_tight -> tau_select_tight_%SYS%', ]
     if dataType != 'data':
         vars += [ 'OutTauJets_%SYS%.tau_effSF_tight_%SYS% -> tau_effSF_tight_%SYS%', ]
+
 
 
     # temporarily disabled until di-taus are supported in R22
@@ -269,6 +307,11 @@ def makeSequenceOld (dataType, algSeq, vars, forCompare) :
 
 
     # Now make view containers for the inputs to the met calculation
+    metInputs = { 'jets'      : 'METJets_%SYS%',
+                  'taus'      : 'METTauJets_%SYS%',
+                  'muons'     : 'METMuons_%SYS%',
+                  'electrons' : 'METElectrons_%SYS%',
+                  'photons'   : 'METPhotons_%SYS%' }
     viewalg = createAlgorithm( 'CP::AsgViewFromSelectionAlg','METElectronsViewAlg' )
     viewalg.selection = [ 'selectPtEta', 'baselineSelection_loose,as_char' ]
     viewalg.input = 'AnaElectrons_%SYS%'
@@ -301,12 +344,12 @@ def makeSequenceOld (dataType, algSeq, vars, forCompare) :
 
     # Include, and then set up the met analysis algorithm sequence:
     from MetAnalysisAlgorithms.MetAnalysisSequence import makeMetAnalysisSequence
-    metSequence = makeMetAnalysisSequence( dataType, metSuffix = jetContainer[:-4] )
-    metSequence.configure( inputName = { 'jets'      : 'METJets_%SYS%',
-                                         'taus'      : 'METTauJets_%SYS%',
-                                         'muons'     : 'METMuons_%SYS%',
-                                         'electrons' : 'METElectrons_%SYS%',
-                                         'photons'   : 'METPhotons_%SYS%' },
+    if isPhyslite :
+        metSuffix = 'AnalysisMET'
+    else :
+        metSuffix = jetContainer[:-4]
+    metSequence = makeMetAnalysisSequence( dataType, metSuffix=metSuffix )
+    metSequence.configure( inputName = metInputs,
                            outputName = 'AnaMET_%SYS%' )
 
     # Add the sequence to the job:
@@ -321,11 +364,19 @@ def makeSequenceOld (dataType, algSeq, vars, forCompare) :
 
 
     # Make view containers holding as inputs for OR
+    orInputs = {
+            'photons'   : 'AnaPhotons_%SYS%',
+            'muons'     : 'AnaMuons_%SYS%',
+            'jets'      : 'AnaJets_%SYS%',
+            'taus'      : 'AnaTauJets_%SYS%'
+        }
+
     selectalg = createAlgorithm( 'CP::AsgSelectionAlg','ORElectronsSelectAlg' )
     selectalg.preselection = 'selectPtEta&&baselineSelection_loose,as_char'
     selectalg.particles = 'AnaElectrons_%SYS%'
     selectalg.selectionDecoration = 'preselectOR,as_char'
     algSeq += selectalg
+    orInputs['electrons'] = 'AnaElectrons_%SYS%'
 
     selectalg = createAlgorithm( 'CP::AsgSelectionAlg','ORPhotonsSelectAlg' )
     selectalg.preselection = 'selectPtEta&&baselineSelection_tight,as_char'
@@ -418,22 +469,25 @@ def makeSequenceOld (dataType, algSeq, vars, forCompare) :
 
 
 
-def makeSequenceBlocks (dataType, algSeq, vars, forCompare) :
+def makeSequenceBlocks (dataType, algSeq, vars, forCompare, isPhyslite, noPhysliteBroken) :
 
-    # Include, and then set up the pileup analysis sequence:
-    prwfiles, lumicalcfiles = pileupConfigFiles(dataType)
+    if not isPhyslite :
+        # Include, and then set up the pileup analysis sequence:
+        prwfiles, lumicalcfiles = pileupConfigFiles(dataType)
 
-    from AsgAnalysisAlgorithms.PileupAnalysisSequence import \
-        makePileupAnalysisSequence
-    pileupSequence = makePileupAnalysisSequence(
-        dataType,
-        userPileupConfigs=prwfiles,
-        userLumicalcFiles=lumicalcfiles,
-    )
-    pileupSequence.configure( inputName = {}, outputName = {} )
+        from AsgAnalysisAlgorithms.PileupAnalysisSequence import \
+            makePileupAnalysisSequence
+        pileupSequence = makePileupAnalysisSequence(
+            dataType,
+            userPileupConfigs=prwfiles,
+            userLumicalcFiles=lumicalcfiles,
+        )
+        pileupSequence.configure( inputName = {}, outputName = {} )
 
-    # Add the pileup sequence to the job:
-    algSeq += pileupSequence
+        # Add the pileup sequence to the job:
+        algSeq += pileupSequence
+
+
     vars += [ 'EventInfo.runNumber     -> runNumber',
               'EventInfo.eventNumber   -> eventNumber', ]
 
@@ -450,6 +504,10 @@ def makeSequenceBlocks (dataType, algSeq, vars, forCompare) :
         workingpoint = 'LooseLHElectron.Loose_VarRad'
     else:
         workingpoint = 'LooseDNNElectron.Loose_VarRad'
+    # FIXME: fails for PHYSLITE with missing data item
+    # ptvarcone30_Nonprompt_All_MaxWeightTTVALooseCone_pt1000
+    if noPhysliteBroken :
+        workingpoint = workingpoint.split('.')[0] + '.NonIso'
     makeElectronCalibrationConfig (configSeq, 'AnaElectrons')
     makeElectronWorkingPointConfig (configSeq, 'AnaElectrons', workingpoint, postfix = 'loose',
                                     recomputeLikelihood=recomputeLikelihood)
@@ -518,7 +576,7 @@ def makeSequenceBlocks (dataType, algSeq, vars, forCompare) :
         ]
 
 
-    configAccumulator = ConfigAccumulator (dataType, algSeq)
+    configAccumulator = ConfigAccumulator (dataType, algSeq, isPhyslite=isPhyslite)
     configSeq.fullConfigure (configAccumulator)
 
     selalg = createAlgorithm( 'CP::AsgSelectionAlg', 'UserElectronsSelectionAlg' )
@@ -583,7 +641,7 @@ def makeSequenceBlocks (dataType, algSeq, vars, forCompare) :
 
 
 
-def makeSequence (dataType, useBlocks, forCompare, noSystematics, hardCuts = False) :
+def makeSequence (dataType, useBlocks, forCompare, noSystematics, hardCuts = False, isPhyslite = False, noPhysliteBroken = False) :
 
     # do some harder cuts on all object types, this is mostly used for
     # benchmarking
@@ -608,9 +666,11 @@ def makeSequence (dataType, useBlocks, forCompare, noSystematics, hardCuts = Fal
 
     vars = []
     if not useBlocks :
-        makeSequenceOld (dataType, algSeq, vars=vars, forCompare=forCompare)
+        makeSequenceOld (dataType, algSeq, vars=vars, forCompare=forCompare,
+                         isPhyslite=isPhyslite, noPhysliteBroken=noPhysliteBroken)
     else :
-        makeSequenceBlocks (dataType, algSeq, vars=vars, forCompare=forCompare)
+        makeSequenceBlocks (dataType, algSeq, vars=vars, forCompare=forCompare,
+                            isPhyslite=isPhyslite, noPhysliteBroken=noPhysliteBroken)
 
 
     # Add an ntuple dumper algorithm:

@@ -18,6 +18,11 @@ class TauCalibrationConfig (ConfigBlock):
 
     def makeAlgs (self, config) :
 
+        if config.isPhyslite() :
+            config.setSourceName (self.containerName, "AnalysisTauJets")
+        else :
+            config.setSourceName (self.containerName, "TauJets")
+
         # Set up the tau truth matching algorithm:
         if self.rerunTruthMatching and config.dataType() != 'data':
             alg = config.createAlgorithm( 'CP::TauTruthMatchingAlg',
@@ -25,13 +30,13 @@ class TauCalibrationConfig (ConfigBlock):
             config.addPrivateTool( 'matchingTool',
                                    'TauAnalysisTools::TauTruthMatchingTool' )
             alg.matchingTool.WriteTruthTaus = 1
-            alg.taus = config.readName (self.containerName, 'TauJets')
+            alg.taus = config.readName (self.containerName)
             alg.preselection = config.getPreselection (self.containerName, '')
 
         # Set up the tau 4-momentum smearing algorithm:
         alg = config.createAlgorithm( 'CP::TauSmearingAlg', 'TauSmearingAlg' + self.postfix )
         config.addPrivateTool( 'smearingTool', 'TauAnalysisTools::TauSmearingTool' )
-        alg.taus = config.readName (self.containerName, 'TauJets')
+        alg.taus = config.readName (self.containerName)
         alg.tausOut = config.copyName (self.containerName)
         alg.preselection = config.getPreselection (self.containerName, '')
 

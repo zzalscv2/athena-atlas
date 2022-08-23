@@ -38,10 +38,16 @@ parser.add_option( '--hard-cuts', dest='hard_cuts',
                    help = 'Configure the job with harder cuts' )
 parser.add_option( '--block-config', dest='block_config',
                    action = 'store_true', default = False,
-                   help = 'Run the job in "unit test mode"' )
+                   help = 'Configure the job with block configuration' )
 parser.add_option( '--for-compare', dest='for_compare',
                    action = 'store_true', default = False,
                    help = 'Configure the job for comparison of sequences vs blocks' )
+parser.add_option( '--physlite', dest='physlite',
+                   action = 'store_true', default = False,
+                   help = 'Configure the job for physlite' )
+parser.add_option( '--no-physlite-broken', dest='no_physlite_broken',
+                   action = 'store_true', default = False,
+                   help = 'Configure the job to skip algorithms that fail on physlite test file' )
 ( options, args ) = parser.parse_args()
 
 # Set up (Py)ROOT.
@@ -57,6 +63,8 @@ ROOT.xAOD.TauJetContainer()
 dataType = options.data_type
 blockConfig = options.block_config
 forCompare = options.for_compare
+isPhyslite = options.physlite
+noPhysliteBroken = options.no_physlite_broken
 
 if dataType not in ["data", "mc", "afii"] :
     raise Exception ("invalid data type: " + dataType)
@@ -67,9 +75,14 @@ import os
 sh = ROOT.SH.SampleHandler()
 sh.setMetaString( 'nc_tree', 'CollectionTree' )
 sample = ROOT.SH.SampleLocal (dataType)
-inputfile = {"data": 'ASG_TEST_FILE_DATA',
-             "mc":   'ASG_TEST_FILE_MC',
-             "afii": 'ASG_TEST_FILE_MC_AFII'}
+if isPhyslite :
+    inputfile = {"data": 'ASG_TEST_FILE_LITE_DATA',
+                 "mc":   'ASG_TEST_FILE_LITE_MC',
+                 "afii": 'ASG_TEST_FILE_LITE_MC_AFII'}
+else :
+    inputfile = {"data": 'ASG_TEST_FILE_DATA',
+                 "mc":   'ASG_TEST_FILE_MC',
+                 "afii": 'ASG_TEST_FILE_MC_AFII'}
 if options.force_input :
     sample.add (options.force_input)
 else :
@@ -87,7 +100,10 @@ if options.algorithm_timer :
 
 
 from AnalysisAlgorithmsConfig.FullCPAlgorithmsTest import makeSequence
-algSeq = makeSequence (dataType, blockConfig, forCompare=forCompare, noSystematics = options.no_systematics, hardCuts = options.hard_cuts)
+algSeq = makeSequence (dataType, blockConfig, forCompare=forCompare,
+                       noSystematics = options.no_systematics,
+                       hardCuts = options.hard_cuts, isPhyslite=isPhyslite,
+                       noPhysliteBroken=noPhysliteBroken)
 print( algSeq ) # For debugging
 algSeq.addSelfToJob( job )
 
