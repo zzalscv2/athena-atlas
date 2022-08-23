@@ -99,12 +99,12 @@ namespace CP {
         Gaudi::Property<bool>  m_2stations_highpt_smearing{this, "do2StationsHighPt", false, "TODO"};
         Gaudi::Property<float> m_HighPtSystThreshold{this, "HighPtSystThr", 300.0, "Thershold for high pT smearing in GeV"};      
 
-        asg::AnaToolHandle<CP::IMuonSelectionTool> m_MuonSelectionTool;
+        asg::AnaToolHandle<CP::IMuonSelectionTool> m_MuonSelectionTool{""};
 
-        asg::AnaToolHandle<CP::IMuonCalibIntTool> m_MuonIntSagittaTool;
-        asg::AnaToolHandle<CP::IMuonCalibIntScaleSmearTool> m_MuonIntScaleSmearTool;
+        asg::AnaToolHandle<CP::IMuonCalibIntTool> m_MuonIntSagittaTool{""};
+        asg::AnaToolHandle<CP::IMuonCalibIntScaleSmearTool> m_MuonIntScaleSmearTool{""};
 
-        asg::AnaToolHandle<CP::IMuonCalibIntTool> m_MuonIntHighTSmearTool;
+        asg::AnaToolHandle<CP::IMuonCalibIntTool> m_MuonIntHighTSmearTool{""};
 
 
         // internal tool function

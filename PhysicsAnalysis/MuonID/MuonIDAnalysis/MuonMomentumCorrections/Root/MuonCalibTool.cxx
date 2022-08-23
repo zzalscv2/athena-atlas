@@ -15,9 +15,13 @@
 namespace CP
 {
 
-    MuonCalibTool::MuonCalibTool(const std::string &name) : asg::AsgTool(name),
-                                                            m_MuonSelectionTool("")
-    {
+    MuonCalibTool::MuonCalibTool(const std::string &name) : asg::AsgTool(name){
+        
+        /// These properties are meant to be expert properties for debugging of the code and shall not touched by the common 
+        m_MuonSelectionTool.declarePropertyFor(this,"MuonSelectionTool", "Instance of the MuonSelectionTool needed for the HighPt categorization");
+        m_MuonIntSagittaTool.declarePropertyFor(this, "SagittaTool", "Instance of the Sagitta bias corrections sub tool");
+        m_MuonIntScaleSmearTool.declarePropertyFor(this, "ScaleAndSmearTool", "Instance of the tool that applies the smearing & scale corrections");
+        m_MuonIntHighTSmearTool.declarePropertyFor(this, "HighPtSmearingTool", "Extra smearing of the high pt working point");       
     }
 
     StatusCode MuonCalibTool::initialize()
@@ -57,38 +61,46 @@ namespace CP
         }
 
         // Get the muon selection tool
-        m_MuonSelectionTool.setTypeAndName("CP::MuonSelectionTool/MCaST_Own_MST");
-        ATH_CHECK(m_MuonSelectionTool.setProperty("MaxEta", 2.7));
-        ATH_CHECK(m_MuonSelectionTool.setProperty("MuQuality", 1));
-        ATH_CHECK(m_MuonSelectionTool.setProperty("TurnOffMomCorr", true));
-        ATH_CHECK(m_MuonSelectionTool.setProperty("IsRun3Geo", m_isRun3.value()));
-        // ATH_CHECK(m_MuonSelectionTool.setProperty("OutputLevel", msg().level()));
+        if (m_MuonSelectionTool.empty()) {
+            m_MuonSelectionTool.setTypeAndName("CP::MuonSelectionTool/MCaST_Own_MST");
+            ATH_CHECK(m_MuonSelectionTool.setProperty("MaxEta", 2.7));
+            ATH_CHECK(m_MuonSelectionTool.setProperty("MuQuality", 1));
+            ATH_CHECK(m_MuonSelectionTool.setProperty("TurnOffMomCorr", true));
+            ATH_CHECK(m_MuonSelectionTool.setProperty("IsRun3Geo", m_isRun3.value()));
+            ATH_CHECK(m_MuonSelectionTool.setProperty("OutputLevel", msg().level()));
+        }
         ATH_CHECK(m_MuonSelectionTool.retrieve());
 
 
         // Create the Sagitta tool
-        m_MuonIntSagittaTool.setTypeAndName("CP::MuonCalibIntSagittaTool/MCaST_Sagitta");
-        ATH_CHECK(m_MuonIntSagittaTool.setProperty("release", m_release.value()));
-        ATH_CHECK(m_MuonIntSagittaTool.setProperty("systematicScheme", m_sysScheme.value()));
-        ATH_CHECK(m_MuonIntSagittaTool.setProperty("applyCorrectionOnData", m_applyCorrectionOnData.value()));
-        ATH_CHECK(m_MuonIntSagittaTool.setProperty("doEtaSagittaSys", m_doEtaSagittaSys.value()));
-        ATH_CHECK(m_MuonIntSagittaTool.setProperty("OutputLevel", msg().level()));
+        if (m_MuonIntSagittaTool.empty()) {
+            m_MuonIntSagittaTool.setTypeAndName("CP::MuonCalibIntSagittaTool/MCaST_Sagitta");
+            ATH_CHECK(m_MuonIntSagittaTool.setProperty("release", m_release.value()));
+            ATH_CHECK(m_MuonIntSagittaTool.setProperty("systematicScheme", m_sysScheme.value()));
+            ATH_CHECK(m_MuonIntSagittaTool.setProperty("applyCorrectionOnData", m_applyCorrectionOnData.value()));
+            ATH_CHECK(m_MuonIntSagittaTool.setProperty("doEtaSagittaSys", m_doEtaSagittaSys.value()));
+            ATH_CHECK(m_MuonIntSagittaTool.setProperty("OutputLevel", msg().level()));
+        }       
         ATH_CHECK(m_MuonIntSagittaTool.retrieve());
 
         // Create the scale smear tool
-        m_MuonIntScaleSmearTool.setTypeAndName("CP::MuonCalibIntScaleSmearTool/MCaST_ScaleSmear");
-        ATH_CHECK(m_MuonIntScaleSmearTool.setProperty("release", m_release.value()));
-        ATH_CHECK(m_MuonIntScaleSmearTool.setProperty("systematicScheme", m_sysScheme.value()));
-        ATH_CHECK(m_MuonIntScaleSmearTool.setProperty("doDirectCBCalib", m_doDirectCBCalib.value()));
-        ATH_CHECK(m_MuonIntScaleSmearTool.setProperty("OutputLevel", msg().level()));
-        ATH_CHECK(m_MuonIntScaleSmearTool.retrieve());
-
-        // Create the high pT tool
-        m_MuonIntHighTSmearTool.setTypeAndName("CP::MuonCalibIntHighpTSmearTool/MCaST_highPtScaleSmear");
-        ATH_CHECK(m_MuonIntHighTSmearTool.setProperty("release", m_release.value()));
-        ATH_CHECK(m_MuonIntHighTSmearTool.setProperty("OutputLevel", msg().level()));
-        ATH_CHECK(m_MuonIntHighTSmearTool.retrieve());
-
+        if (m_MuonIntScaleSmearTool.empty()) {
+            m_MuonIntScaleSmearTool.setTypeAndName("CP::MuonCalibIntScaleSmearTool/MCaST_ScaleSmear");
+            ATH_CHECK(m_MuonIntScaleSmearTool.setProperty("release", m_release.value()));
+            ATH_CHECK(m_MuonIntScaleSmearTool.setProperty("systematicScheme", m_sysScheme.value()));
+            ATH_CHECK(m_MuonIntScaleSmearTool.setProperty("doDirectCBCalib", m_doDirectCBCalib.value()));
+            ATH_CHECK(m_MuonIntScaleSmearTool.setProperty("OutputLevel", msg().level()));
+            ATH_CHECK(m_MuonIntScaleSmearTool.retrieve());
+        }
+        /// Create the high pT tool            
+        if (m_extra_highpt_smearing || m_2stations_highpt_smearing) {
+            if (m_MuonIntHighTSmearTool.empty()) {
+                m_MuonIntHighTSmearTool.setTypeAndName("CP::MuonCalibIntHighpTSmearTool/MCaST_highPtScaleSmear");
+                ATH_CHECK(m_MuonIntHighTSmearTool.setProperty("release", m_release.value()));
+                ATH_CHECK(m_MuonIntHighTSmearTool.setProperty("OutputLevel", msg().level()));
+            }
+            ATH_CHECK(m_MuonIntHighTSmearTool.retrieve());
+        }
         if (!applySystematicVariation(SystematicSet()))
         {
             ATH_MSG_ERROR("Unable to run with no systematic");
@@ -251,8 +263,7 @@ namespace CP
     {
         SystematicSet result = m_MuonIntSagittaTool->affectingSystematics();
         result.insert(m_MuonIntScaleSmearTool->affectingSystematics());
-        result.insert(m_MuonIntHighTSmearTool->affectingSystematics());
-     
+        if (!m_MuonIntHighTSmearTool.empty()) result.insert(m_MuonIntHighTSmearTool->affectingSystematics());     
         return result;
     }
 
@@ -267,9 +278,10 @@ namespace CP
         code = m_MuonIntScaleSmearTool->applySystematicVariation(systConfig);          
         if(code != StatusCode::SUCCESS) return code;
 
-        code = m_MuonIntHighTSmearTool->applySystematicVariation(systConfig);          
-        if(code != StatusCode::SUCCESS) return code;
-
+        if (!m_MuonIntHighTSmearTool.empty()){
+            code = m_MuonIntHighTSmearTool->applySystematicVariation(systConfig);          
+            if(code != StatusCode::SUCCESS) return code;
+        }
         return code;
     }
 
@@ -498,15 +510,15 @@ namespace CP
         static const SG::AuxElement::Accessor<unsigned int> acc_rnd("RandomRunNumber");
         // I've copied the run number ranges from SUSYTools
         // https://gitlab.cern.ch/atlas/athena/blob/21.2/PhysicsAnalysis/SUSYPhys/SUSYTools/Root/SUSYObjDef_xAOD.cxx#L2438
-        static const unsigned int last_run_16 = 320000;
-        static const unsigned int last_run_17 = 342000;
-        static const unsigned int last_run_18 = 364485;
-        static const unsigned int last_run_22 = 999999;
+        constexpr unsigned int last_run_16 = 320000;
+        constexpr unsigned int last_run_17 = 342000;
+        constexpr unsigned int last_run_18 = 364485;
+        constexpr unsigned int last_run_22 = 999999;
 
-        static const std::vector<int> MCperiods1516{284500};
-        static const std::vector<int> MCperiods17{300000, 304000, 305000};
-        static const std::vector<int> MCperiods18{310000};
-        static const std::vector<int> MCperiods22{330000, 410000};
+        static const std::set<int> MCperiods1516{284500};
+        static const std::set<int> MCperiods17{300000, 304000, 305000};
+        static const std::set<int> MCperiods18{310000};
+        static const std::set<int> MCperiods22{330000, 410000};
 
 
         SG::ReadHandle<xAOD::EventInfo> evtInfo(m_eventInfo);
@@ -524,18 +536,18 @@ namespace CP
         }
         // Check the Monte carlo
         if (!isData && (!m_useRndRun || !acc_rnd.isAvailable(*evtInfo))) {
-            if (std::find(MCperiods1516.begin(), MCperiods1516.end(), run) != MCperiods1516.end()) {
+            if (MCperiods1516.count(run)) {
                 ATH_MSG_DEBUG("The current run " << run << " corresponds to data mc20a / data15-16");
                 return MCP::DataYear::Data16;
-            } else if (std::find(MCperiods17.begin(), MCperiods17.end(), run) != MCperiods17.end()) {
+            } else if (MCperiods17.count(run)) {
                 ATH_MSG_DEBUG("The current run " << run << " corresponds to data mc20d / data17");
                 return MCP::DataYear::Data17;
-            } else if (std::find(MCperiods18.begin(), MCperiods18.end(), run) != MCperiods18.end()) {
+            } else if (MCperiods18.count(run)) {
                 ATH_MSG_DEBUG("The current run " << run << " corresponds to data mc20e / data18");
                 return MCP::DataYear::Data18;
-            } else if (std::find(MCperiods22.begin(), MCperiods22.end(), run) != MCperiods22.end()) {
+            } else if (MCperiods22.count(run)) {
                 ATH_MSG_DEBUG("The current run " << run << " corresponds to data mc21a / data22");
-                return MCP::DataYear::Data18;
+                return MCP::DataYear::Data22;
             }
 
         }
