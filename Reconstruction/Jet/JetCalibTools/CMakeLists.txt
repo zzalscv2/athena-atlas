@@ -5,7 +5,7 @@ atlas_subdir( JetCalibTools )
 
 # External dependencies:
 find_package( Boost )
-find_package( ROOT COMPONENTS Core Tree MathCore Hist RIO Graf Gpad )
+find_package( ROOT COMPONENTS Core Tree MathCore Hist RIO Graf Gpad lwtnn )
 
 # Libraries in the package:
 atlas_add_library( JetCalibToolsLib

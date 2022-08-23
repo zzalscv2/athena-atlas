@@ -66,6 +66,7 @@ StatusCode EtaJESCorrection::initialize() {
   m_secondaryminPt_JES = m_config->GetValue(m_jetAlgo+".SecondaryMinPtForETAJES",7);
   // Freeze JES correction at maximum values of energy for each eta bin
   m_freezeJESatHighE = m_config->GetValue(m_jetAlgo+".FreezeJEScorrectionatHighE", false);
+  m_isSpline = m_config->GetValue(m_jetAlgo+".isSpline", false);
 
   // From mswiatlo, help from dag: variable eta binning
   std::vector<double> etaBins = JetCalibUtils::VectorizeD(m_config->GetValue("JES.EtaBins",""));
@@ -88,49 +89,52 @@ StatusCode EtaJESCorrection::initialize() {
   }
 
   for (uint ieta=0;ieta<etaBins.size()-1;++ieta) {
+    if(!m_isSpline){
+      // Read in absolute JES calibration factors
+      TString key=Form("JES.%s_Bin%d",m_jetAlgo.Data(),ieta);
+      std::vector<double> params = JetCalibUtils::VectorizeD(m_config->GetValue(key,""));
+      m_nPar = params.size();
+      if (m_nPar<s_nParMin || m_nPar>s_nParMax) { ATH_MSG_FATAL( "Cannot read JES calib constants " << key ); return StatusCode::FAILURE; }
+      for (uint ipar=0;ipar<m_nPar;++ipar) m_JESFactors[ieta][ipar] = params[ipar];
 
-    // Read in absolute JES calibration factors
-    TString key=Form("JES.%s_Bin%d",m_jetAlgo.Data(),ieta);
-    std::vector<double> params = JetCalibUtils::VectorizeD(m_config->GetValue(key,""));
-    m_nPar = params.size();
-    if (m_nPar<s_nParMin || m_nPar>s_nParMax) { ATH_MSG_FATAL( "Cannot read JES calib constants " << key ); return StatusCode::FAILURE; }
-    for (uint ipar=0;ipar<m_nPar;++ipar) m_JESFactors[ieta][ipar] = params[ipar];
+        //Protections for high order extrapolation methods at low Et (Et < _minPt_JES)
+        if(m_lowPtExtrap > 0) {
+          //Calculate the slope of the response curve at the minPt for each eta bin
+          //Used in the GetLowPtJES method when Pt < minPt
+          const double *factors = m_JESFactors[ieta];
+          double Ecutoff;
+          if(!m_useSecondaryminPt_JES) Ecutoff = m_minPt_JES*cosh(etaBins[ieta]);
+          else {
+            if(fabs(etaBins[ieta]) < m_etaSecondaryminPt_JES) Ecutoff = m_minPt_JES*cosh(etaBins[ieta]);
+            else{ Ecutoff = m_secondaryminPt_JES*cosh(etaBins[ieta]);}
+          }
+          const double Rcutoff = getLogPolN(factors,Ecutoff);
+          const double Slope = getLogPolNSlope(factors,Ecutoff);
+          if(Slope > Rcutoff/Ecutoff) ATH_MSG_FATAL("Slope of calibration curve at minimum ET is too steep for the JES factors of etabin " << ieta << ", eta = " << etaBins[ieta] );
 
-      //Protections for high order extrapolation methods at low Et (Et < _minPt_JES)
-      if(m_lowPtExtrap > 0) {
-	//Calculate the slope of the response curve at the minPt for each eta bin
-	//Used in the GetLowPtJES method when Pt < minPt
-	const double *factors = m_JESFactors[ieta];
-	double Ecutoff;
-	if(!m_useSecondaryminPt_JES) Ecutoff = m_minPt_JES*cosh(etaBins[ieta]);
-	else {
-	  if(fabs(etaBins[ieta]) < m_etaSecondaryminPt_JES) Ecutoff = m_minPt_JES*cosh(etaBins[ieta]);
-	  else{ Ecutoff = m_secondaryminPt_JES*cosh(etaBins[ieta]);}
-	}
-	const double Rcutoff = getLogPolN(factors,Ecutoff);
-	const double Slope = getLogPolNSlope(factors,Ecutoff);
-	if(Slope > Rcutoff/Ecutoff) ATH_MSG_FATAL("Slope of calibration curve at minimum ET is too steep for the JES factors of etabin " << ieta << ", eta = " << etaBins[ieta] );
-
-	m_JES_MinPt_E[ieta] = Ecutoff;
-	m_JES_MinPt_R[ieta] = Rcutoff;
-	m_JES_MinPt_Slopes[ieta] = Slope;
+          m_JES_MinPt_E[ieta] = Ecutoff;
+          m_JES_MinPt_R[ieta] = Rcutoff;
+          m_JES_MinPt_Slopes[ieta] = Slope;
       
-	//Calculate the parameters for a 2nd order polynomial extension to the calibration curve below minimum ET
-	//Used in the GetLowPtJES method when Pt < minPt
-	if(m_lowPtExtrap == 2) {
-	  const double h = m_lowPtMinR;
-	  const double Param1 = (2/Ecutoff)*(Rcutoff-h)-Slope;
-	  const double Param2 = (0.5/Ecutoff)*(Slope-Param1);
-	  //Slope of the calibration curve should always be positive
-	  if( Param1 < 0 || Param1 + 2*Param2*Ecutoff < 0) ATH_MSG_FATAL("Polynomial extension to calibration curve below minimum ET is not monotonically increasing for etabin " << ieta << ", eta = " << etaBins[ieta] );
-	  m_JES_MinPt_Param1[ieta] = Param1;
-	  m_JES_MinPt_Param2[ieta] = Param2;
-	}
+          //Calculate the parameters for a 2nd order polynomial extension to the calibration curve below minimum ET
+          //Used in the GetLowPtJES method when Pt < minPt
+          if(m_lowPtExtrap == 2) {
+            const double h = m_lowPtMinR;
+            const double Param1 = (2/Ecutoff)*(Rcutoff-h)-Slope;
+            const double Param2 = (0.5/Ecutoff)*(Slope-Param1);
+            //Slope of the calibration curve should always be positive
+            if( Param1 < 0 || Param1 + 2*Param2*Ecutoff < 0) ATH_MSG_FATAL("Polynomial extension to calibration curve below minimum ET is not monotonically increasing for etabin " << ieta << ", eta = " << etaBins[ieta] );
+            m_JES_MinPt_Param1[ieta] = Param1;
+            m_JES_MinPt_Param2[ieta] = Param2;
+          }
+        }
       }
 
     // Read in jet eta calibration factors
-    key=Form("EtaCorr.%s_Bin%d",m_jetAlgo.Data(),ieta);
-    params = JetCalibUtils::VectorizeD(m_config->GetValue(key,""));
+    TString key=Form("EtaCorr.%s_Bin%d",m_jetAlgo.Data(),ieta);
+    std::vector<double> params = JetCalibUtils::VectorizeD(m_config->GetValue(key,""));
+    m_nPar = params.size();
+
     if (params.size()!=m_nPar) { ATH_MSG_FATAL( "Cannot read jet eta calib constants " << key ); return StatusCode::FAILURE; }
     for (uint ipar=0;ipar<m_nPar;++ipar) m_etaCorrFactors[ieta][ipar] = params[ipar];
 
@@ -150,9 +154,69 @@ StatusCode EtaJESCorrection::initialize() {
     }
 
   }
+  if(m_isSpline){
+    TString absoluteJESCalibHists = m_config->GetValue("AbsoluteJES.CalibHists","");
+    if(m_dev){
+      absoluteJESCalibHists.Remove(0,33);
+      absoluteJESCalibHists.Insert(0,"JetCalibTools/");
+    }
+    else{
+      absoluteJESCalibHists.Insert(14,m_calibAreaTag);
+    }
+    TString calibHistFile = PathResolverFindCalibFile(absoluteJESCalibHists.Data());
+    loadSplineHists(calibHistFile, "etaJes");
+
+    //Protections for high order extrapolation methods at low Et (Et < _minPt_JES)
+    if(m_lowPtExtrap != 1) {
+      ATH_MSG_ERROR("Only linear extrapolations are supported for p-splines currently. Please change the config file to reflect this");
+      return StatusCode::FAILURE;
+    }
+
+    if(m_lowPtExtrap > 0) {
+      for (uint ieta=0;ieta<etaBins.size()-1;++ieta) {
+        //Calculate the slope of the response curve at the minPt for each eta bin
+        //Used in the GetLowPtJES method when Pt < minPt
+        double Ecutoff;
+        if(!m_useSecondaryminPt_JES) Ecutoff = m_minPt_JES*cosh(etaBins[ieta]);
+        else {
+          if(std::abs(etaBins[ieta]) < m_etaSecondaryminPt_JES) Ecutoff = m_minPt_JES*cosh(etaBins[ieta]);
+          else{ Ecutoff = m_secondaryminPt_JES*cosh(etaBins[ieta]);}
+        }
+        const double Rcutoff = getSplineCorr(ieta, Ecutoff);
+        const double Slope = getSplineSlope(ieta, Ecutoff);
+        if(Slope > Rcutoff/Ecutoff) ATH_MSG_WARNING("Slope of calibration curve at minimum ET is too steep for the JES factors of etabin " << ieta << ", eta = " << etaBins[ieta] );
+  
+        m_JES_MinPt_E[ieta] = Ecutoff;
+        m_JES_MinPt_R[ieta] = Rcutoff;
+        m_JES_MinPt_Slopes[ieta] = Slope;
+      }
+    }
+  }
+
 
   return StatusCode::SUCCESS;
 }
+
+
+/// Loads the calib constants from histograms in TFile named fileName. 
+void EtaJESCorrection::loadSplineHists(const TString & fileName, const std::string &etajes_name) 
+{
+  std::unique_ptr<TFile> tmpF(TFile::Open( fileName ));
+  TList *etajes_l = static_cast<TList*>( tmpF->Get(etajes_name.c_str()));
+
+  m_etajesFactors.resize( etajes_l->GetSize() );
+  if(etajes_l->GetSize() != m_etaBinAxis->GetNbins()+1){
+    ATH_MSG_WARNING("Do not have the correct number of eta bins for " << fileName << "\t" << etajes_name << "\t" << etajes_l->GetSize() );
+  }
+
+  for(int i=0 ; i<m_etaBinAxis->GetNbins(); i++){
+    //m_etajesFactors[i].reset((TH1D*)etajes_l->At(i));
+    m_etajesFactors[i].reset(static_cast<TH1D*>(etajes_l->At(i)));
+    m_etajesFactors[i]->SetDirectory(nullptr);
+  }
+  tmpF->Close();
+}
+
 
 StatusCode EtaJESCorrection::calibrate(xAOD::Jet& jet, JetEventInfo&) const {
 
@@ -210,10 +274,18 @@ double EtaJESCorrection::getJES(double E_uncorr, double eta_det) const {
 
   // Get the factors
   int ieta = getEtaBin(eta_det);
-  const double *factors = m_JESFactors[ieta];
 
   // Freeze correction
   if(m_freezeJESatHighE && E>m_energyFreezeJES[ieta] && m_energyFreezeJES[ieta]!=-1) E = m_energyFreezeJES[ieta];
+
+
+  // The low pT extrapolation doesn't work for the spline yet, so putting this code here.
+  if(m_isSpline){
+    double R = getSplineCorr(ieta, E);
+    return 1.0/R;
+  }
+  const double *factors = m_JESFactors[ieta];
+
   
   // Calculate the jet response and then the JES as 1/R
   double R = getLogPolN(factors,E);
@@ -243,6 +315,26 @@ double EtaJESCorrection::getLowPtJES(double E_uncorr, double eta_det) const {
   else ATH_MSG_WARNING("Incorrect specification of low Pt JES extrapolation, please check the value of the LowPtJESExtrapolationMethod config flag.");
   return 1;
 }
+
+double EtaJESCorrection::getSplineSlope(const int ieta, const double minE) const {
+  // Don't want to use interpolation here, so instead just use the values at the bin centers near the cutoff
+  int minBin = m_etajesFactors[ieta]->FindBin(minE);
+
+  double rFirst = m_etajesFactors[ ieta ]->GetBinContent(minBin);
+  double rSecond = m_etajesFactors[ ieta ]->GetBinContent(minBin+1);
+  double binWidth = m_etajesFactors[ ieta ]->GetBinCenter(minBin+1) - m_etajesFactors[ ieta ]->GetBinCenter(minBin);
+  double slope = (rSecond - rFirst) / binWidth;
+
+  return slope;
+}
+
+
+double EtaJESCorrection::getSplineCorr(const int etaBin, double E) const {
+  double R = m_etajesFactors[ etaBin ]->Interpolate(E);
+  return R;
+}
+
+
 
 double EtaJESCorrection::getEtaCorr(double E_corr, double eta_det) const {
   int ieta = getEtaBin(eta_det);
