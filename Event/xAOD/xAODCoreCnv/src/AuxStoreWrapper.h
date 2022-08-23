@@ -1,10 +1,9 @@
 // Dear emacs, this is -*- c++ -*-
 
 /*
-  Copyright (C) 2002-2017 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
 */
 
-// $Id: AuxStoreWrapper.h 665308 2015-05-06 14:41:26Z krasznaa $
 #ifndef XAODCORECNV_AUXSTOREWRAPPER_H
 #define XAODCORECNV_AUXSTOREWRAPPER_H
 
@@ -19,6 +18,7 @@
 #include "GaudiKernel/IClassIDSvc.h"
 #include "GaudiKernel/ServiceHandle.h"
 #include "AthenaBaseComps/AthAlgorithm.h"
+#include "CxxUtils/checker_macros.h"
 
 // Forward declaration(s):
 namespace SG {
@@ -37,10 +37,8 @@ namespace xAODMaker {
     *
     * @author Attila Krasznahorkay <Attila.Krasznahorkay@cern.ch>
     *
-    * $Revision: 665308 $
-    * $Date: 2015-05-06 16:41:26 +0200 (Wed, 06 May 2015) $
     */
-   class AuxStoreWrapper : public AthAlgorithm {
+   class ATLAS_NOT_THREAD_SAFE AuxStoreWrapper : public AthAlgorithm {
 
    public:
       /// Regular Algorithm constructor

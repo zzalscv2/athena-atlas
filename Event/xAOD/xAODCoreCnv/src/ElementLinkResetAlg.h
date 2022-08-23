@@ -1,10 +1,9 @@
 // Dear emacs, this is -*- c++ -*-
 
 /*
-  Copyright (C) 2002-2020 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
 */
 
-// $Id: ElementLinkResetAlg.h 788434 2016-12-07 14:46:53Z krasznaa $
 #ifndef XAODCORECNV_ELEMENTLINKRESETALG_H
 #define XAODCORECNV_ELEMENTLINKRESETALG_H
 
@@ -14,6 +13,7 @@
 
 // Gaudi/Athena include(s):
 #include "AthenaBaseComps/AthAlgorithm.h"
+#include "CxxUtils/checker_macros.h"
 
 // Forward declaration(s):
 namespace SG {
@@ -35,10 +35,8 @@ namespace xAODMaker {
     *
     * @author Attila Krasznahorkay <Attila.Krasznahorkay@cern.ch>
     *
-    * $Revision: 788434 $
-    * $Date: 2016-12-07 15:46:53 +0100 (Wed, 07 Dec 2016) $
     */
-   class ElementLinkResetAlg : public AthAlgorithm {
+   class ATLAS_NOT_THREAD_SAFE ElementLinkResetAlg : public AthAlgorithm {
 
    public:
       /// Regular Algorithm constructor
