@@ -14,9 +14,6 @@ def fromRunArgs(runArgs):
     # Setup configuration flags
     log.info('**** Setting up configuration flags')
 
-    from AthenaCommon.Configurable import Configurable
-    Configurable.configurableRun3Behavior=True
-
     from PyJobTransforms.CommonRunArgsToFlags import commonRunArgsToFlags
     from AthenaConfiguration.AllConfigFlags import ConfigFlags
     commonRunArgsToFlags(runArgs, ConfigFlags)
