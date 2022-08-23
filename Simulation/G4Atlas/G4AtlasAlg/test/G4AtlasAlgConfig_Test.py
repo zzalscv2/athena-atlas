@@ -43,13 +43,9 @@ if __name__ == '__main__':
     ConfigFlags.Sim.BeamPipeSimMode = BeamPipeSimMode.FastSim
     ConfigFlags.Sim.ReleaseGeoModel = False
 
+    ConfigFlags.GeoModel.AtlasVersion = "ATLAS-R2-2016-01-00-01"
     ConfigFlags.IOVDb.GlobalTag = "OFLCOND-MC16-SDR-14"
     ConfigFlags.GeoModel.Align.Dynamic = False
-
-    detectors =['Bpipe', 'BCM', 'DBM',  'Pixel', 'SCT', 'TRT', 'LAr', 'Tile', 'CSC', 'MDT', 'RPC', 'TGC']
-    # Setup detector flags
-    from AthenaConfiguration.DetectorConfigFlags import setupDetectorsFromList
-    setupDetectorsFromList(ConfigFlags, detectors, toggle_geometry=True)
 
     # Finalize
     ConfigFlags.lock()

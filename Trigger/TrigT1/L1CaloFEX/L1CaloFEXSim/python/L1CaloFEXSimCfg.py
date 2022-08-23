@@ -163,8 +163,8 @@ if __name__ == '__main__':
         flags.GeoModel.AtlasVersion = 'ATLAS-R3S-2021-02-00-00'
 
     # Enable only calo for this test
-    from AthenaConfiguration.DetectorConfigFlags import setupDetectorsFromList
-    setupDetectorsFromList(flags,['LAr','Tile','MBTS'],True)
+    from AthenaConfiguration.DetectorConfigFlags import setupDetectorFlags
+    setupDetectorFlags(flags, ['LAr','Tile','MBTS'], toggle_geometry=True)
 
     flags.lock()
 

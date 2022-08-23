@@ -39,9 +39,8 @@ ConfigFlags.Common.ProductionStep = ProductionStep.Simulation
 ConfigFlags.Input.Files = [args.input]
 if args.localgeo:
     ConfigFlags.ITk.Geometry.AllLocal = True
-if args.detectors:
-    from AthenaConfiguration.DetectorConfigFlags import setupDetectorsFromList
-    setupDetectorsFromList(ConfigFlags, args.detectors, toggle_geometry=True)
+from AthenaConfiguration.DetectorConfigFlags import setupDetectorFlags
+setupDetectorFlags(ConfigFlags, args.detectors, use_metadata=True, toggle_geometry=True)
 ConfigFlags.lock()
 
 # Construct our accumulator to run

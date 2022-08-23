@@ -7,6 +7,7 @@ Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
 from AthenaConfiguration.ComponentAccumulator import ComponentAccumulator
 from AthenaConfiguration.ComponentFactory import CompFactory
 from AthenaConfiguration.Enums import ProductionStep
+from AthenaConfiguration.DetectorConfigFlags import getEnabledDetectors
 from AthenaConfiguration.MainServicesConfig import MainServicesCfg
 from AthenaPoolCnvSvc.PoolReadConfig import PoolReadCfg
 from AthenaPoolCnvSvc.PoolWriteConfig import PoolWriteCfg
@@ -94,7 +95,7 @@ def DigitizationMainContentCfg(flags):
             MergeMuonEntryLayerCfg,
             MergeCalibHitsCfg,
         )
-        if flags.Common.ProductionStep is not ProductionStep.FastChain:
+        if flags.Common.ProductionStep is not ProductionStep.FastChain and getEnabledDetectors(flags):
             acc.merge(SignalOnlyMcEventCollCfg(flags))
         if flags.Digitization.EnableTruth:
             puCollections = pileupInputCollections(flags.Digitization.PU.LowPtMinBiasInputCols)

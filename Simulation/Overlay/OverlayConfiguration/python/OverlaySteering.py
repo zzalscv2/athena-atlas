@@ -5,6 +5,7 @@ Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
 """
 
 from AthenaConfiguration.MainServicesConfig import MainServicesCfg
+from AthenaConfiguration.DetectorConfigFlags import getEnabledDetectors
 from AthenaConfiguration.Enums import LHCPeriod
 from AthenaPoolCnvSvc.PoolReadConfig import PoolReadCfg
 from AthenaPoolCnvSvc.PoolWriteConfig import PoolWriteCfg
@@ -58,7 +59,7 @@ def OverlayMainContentCfg(configFlags):
     acc.merge(EventInfoOverlayCfg(configFlags))
 
     # Add truth overlay (needed downstream)
-    if not configFlags.Overlay.FastChain:
+    if not configFlags.Overlay.FastChain and getEnabledDetectors(configFlags):
         acc.merge(CopyMcEventCollectionCfg(configFlags))
     if configFlags.Digitization.EnableTruth:
         acc.merge(CopyJetTruthInfoCfg(configFlags))

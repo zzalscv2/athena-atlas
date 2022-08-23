@@ -64,10 +64,10 @@ ConfigFlags.GeoModel.Align.Dynamic = False
 
 ConfigFlags.Exec.SkipEvents = args.skipEvents
 
-from AthenaConfiguration.DetectorConfigFlags import setupDetectorsFromList
+from AthenaConfiguration.DetectorConfigFlags import setupDetectorFlags
 detectors = args.detectors if 'detectors' in args and args.detectors else ['ITkPixel', 'ITkStrip', 'HGTD']
 detectors.append('Bpipe')  # always run with beam pipe
-setupDetectorsFromList(ConfigFlags, detectors, toggle_geometry=True)
+setupDetectorFlags(ConfigFlags, detectors, toggle_geometry=True)
   
 log.debug('Lock config flags now.')
 ConfigFlags.lock()

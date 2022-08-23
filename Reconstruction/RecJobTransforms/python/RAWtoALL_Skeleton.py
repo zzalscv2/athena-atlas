@@ -25,6 +25,12 @@ def fromRunArgs(runArgs):
     from RecJobTransforms.RecoConfigFlags import recoRunArgsToFlags
     recoRunArgsToFlags(runArgs, ConfigFlags)
 
+    # Autoconfigure enabled subdetectors
+    if hasattr(runArgs, 'detectors'):
+        detectors = runArgs.detectors
+    else:
+        detectors = None
+
     # TODO: event service?
 
     ## Inputs
@@ -69,6 +75,13 @@ def fromRunArgs(runArgs):
 
     from AthenaConfiguration.Enums import ProductionStep
     ConfigFlags.Common.ProductionStep=ProductionStep.Reconstruction
+
+    # Setup detector flags
+    from AthenaConfiguration.DetectorConfigFlags import setupDetectorFlags
+    setupDetectorFlags(ConfigFlags, detectors, use_metadata=True, toggle_geometry=True, keep_beampipe=True)
+    # Print reco domain status
+    from RecJobTransforms.RecoConfigFlags import printRecoFlags
+    printRecoFlags(ConfigFlags)
 
     # TODO: DESD, DAOD and DRAW
 

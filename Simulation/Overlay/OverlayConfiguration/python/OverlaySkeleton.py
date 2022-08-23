@@ -118,9 +118,8 @@ def fromRunArgs(runArgs):
     defaultOverlayFlags(ConfigFlags)
 
     # Setup detector flags
-    if detectors:
-        from AthenaConfiguration.DetectorConfigFlags import setupDetectorsFromList
-        setupDetectorsFromList(ConfigFlags, detectors)
+    from AthenaConfiguration.DetectorConfigFlags import setupDetectorFlags
+    setupDetectorFlags(ConfigFlags, detectors, use_metadata=True, toggle_geometry=True)
 
     # Disable LVL1 trigger if triggerConfig explicitly set to 'NONE'
     if hasattr(runArgs, 'triggerConfig') and runArgs.triggerConfig == 'NONE':

@@ -29,21 +29,8 @@ def fillAtlasMetadata(ConfigFlags, dbFiller):
 
     #---------
     ## Simulated detector flags: add each enabled detector to the simulatedDetectors list
-    ConfigFlags._loadDynaFlags("Detector") # Ensure that Detector flags have been loaded
-    from AthenaConfiguration.DetectorConfigFlags import allDetectors
-    simDets = []
-    for det in allDetectors:
-        if det in ['Bpipe', 'Cavern']: # skip regions without sensitive detectors
-            continue
-        attrname = f'Detector.Geometry{det}'
-        if ConfigFlags.hasFlag(attrname):
-            testValue = ConfigFlags(attrname)
-            if testValue:
-                simDets.append(det)
-        else:
-            simMDlog.info("No flag called '%s' found in ConfigFlags", attrname)
-    simDets.append('Truth') # FIXME Currently there is no way to switch off processing Truth containers
-
+    from AthenaConfiguration.DetectorConfigFlags import getEnabledDetectors
+    simDets = getEnabledDetectors(ConfigFlags)
     simMDlog.info("Setting 'SimulatedDetectors' = %r", simDets)
     dbFiller.addSimParam('SimulatedDetectors', repr(simDets))
 

@@ -83,8 +83,12 @@ def defaultTestFlags(configFlags, args):
         configFlags.Output.RDO_SGNLFileName = args.outputSig
 
     if 'detectors' in args and args.detectors:
-        from AthenaConfiguration.DetectorConfigFlags import setupDetectorsFromList
-        setupDetectorsFromList(configFlags, args.detectors)
+        detectors = args.detectors
+    else:
+        detectors = None
+
+    from AthenaConfiguration.DetectorConfigFlags import setupDetectorFlags
+    setupDetectorFlags(configFlags, detectors, toggle_geometry=True, use_metadata=True)
 
 
 def postprocessAndLockFlags(configFlags, args):

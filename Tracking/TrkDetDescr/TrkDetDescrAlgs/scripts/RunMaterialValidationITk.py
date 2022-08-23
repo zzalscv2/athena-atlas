@@ -41,10 +41,10 @@ ConfigFlags.Input.Files = []
 if args.localgeo:
   ConfigFlags.ITk.Geometry.AllLocal = True
   
-from AthenaConfiguration.DetectorConfigFlags import setupDetectorsFromList
+from AthenaConfiguration.DetectorConfigFlags import setupDetectorFlags
 detectors = args.detectors if 'detectors' in args and args.detectors else ['ITkPixel', 'ITkStrip', 'HGTD']
 detectors.append('Bpipe')  # always run with beam pipe
-setupDetectorsFromList(ConfigFlags, detectors, toggle_geometry=True)
+setupDetectorFlags(ConfigFlags, detectors, toggle_geometry=True)
 
 ConfigFlags.GeoModel.AtlasVersion = args.geometrytag
 ConfigFlags.IOVDb.GlobalTag = "OFLCOND-SIM-00-00-00"

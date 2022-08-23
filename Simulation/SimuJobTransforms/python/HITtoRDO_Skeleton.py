@@ -53,9 +53,8 @@ def fromRunArgs(runArgs):
     log.info('Running with pile-up: %s', ConfigFlags.Digitization.PileUp)
 
     # Setup detector flags
-    if detectors:
-        from AthenaConfiguration.DetectorConfigFlags import setupDetectorsFromList
-        setupDetectorsFromList(ConfigFlags, detectors)
+    from AthenaConfiguration.DetectorConfigFlags import setupDetectorFlags
+    setupDetectorFlags(ConfigFlags, detectors, use_metadata=True, toggle_geometry=True)
 
     # Setup perfmon flags from runargs
     from PerfMonComps.PerfMonConfigHelpers import setPerfmonFlagsFromRunArgs
