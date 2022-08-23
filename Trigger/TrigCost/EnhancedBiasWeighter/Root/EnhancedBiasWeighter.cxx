@@ -15,6 +15,7 @@
 #include "TXMLAttr.h"
 
 #include <memory>
+#include <filesystem>
 
 namespace {
   template <typename T>
@@ -74,11 +75,11 @@ StatusCode EnhancedBiasWeighter::finalize()
 StatusCode EnhancedBiasWeighter::loadWeights()
 {
   // Construct name
-  std::stringstream fileNameDev, fileName;
+  std::stringstream fileName;
   const uint32_t runNumber = m_runNumber; // This is because Gaudi::Properties have special behaviour with the << operator
-  fileName  << "TrigCostRootAnalysis/EnhancedBiasWeights_" << runNumber << ".xml";
+  fileName  << "EnhancedBiasWeights_" << runNumber << ".xml";
+  std::string weightingFile = (!m_weightsDirectory.empty()) ? findLocalFile(fileName.str()) : PathResolverFindCalibFile("TrigCostRootAnalysis/" + fileName.str() );  // Check standard area
 
-  std::string weightingFile = PathResolverFindCalibFile( fileName.str() );  // Check standard area
   if (weightingFile == "") {
     msg() << (m_errorOnMissingEBWeights ? MSG::ERROR : MSG::WARNING)  << "Could not retrieve " << fileName.str() << ", cannot perform enhanced bias weighting." << endmsg;
     return (m_errorOnMissingEBWeights ? StatusCode::FAILURE : StatusCode::SUCCESS);
@@ -151,10 +152,9 @@ StatusCode EnhancedBiasWeighter::loadLumi()
 
   // Read in number of events to expect 
   // Construct name
-  std::stringstream fileNameDev, fileName;
-  fileName    << "TrigCostRootAnalysis/enhanced_bias_run_" << runNumber << ".xml";
-
-  std::string runFile = PathResolverFindCalibFile( fileName.str() );  // Check standard area
+  std::stringstream fileName;
+  fileName    << "enhanced_bias_run_" << runNumber << ".xml";
+  std::string runFile = (!m_weightsDirectory.empty()) ? findLocalFile(fileName.str()) : PathResolverFindCalibFile("TrigCostRootAnalysis/" + fileName.str() );  // Check standard area
   if (runFile == "") {
     msg() << (m_errorOnMissingEBWeights ? MSG::ERROR : MSG::WARNING)  << "Could not retrieve " << fileName.str() << ", cannot perform enhanced bias weighting." << endmsg;
     return (m_errorOnMissingEBWeights ? StatusCode::FAILURE : StatusCode::SUCCESS);
@@ -724,4 +724,22 @@ StatusCode EnhancedBiasWeighter::addBranches() const
   decoratorBCIDDistanceFromFront(*eventInfo) = distance;
 
   return StatusCode::SUCCESS;
+}
+
+
+std::string EnhancedBiasWeighter::findLocalFile (const std::string& fileName) const {
+
+  if (m_weightsDirectory.empty()) {
+    ATH_MSG_ERROR("Local directory for EB xml not set!");
+    return "";
+  }
+
+  std::string fullName = m_weightsDirectory+ "/" + fileName;
+
+  if (!std::filesystem::exists(fullName)) {
+    ATH_MSG_ERROR("File " << fullName << " not found!");
+    return "";
+  }
+
+  return fullName;
 }
