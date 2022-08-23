@@ -33,18 +33,28 @@ const Result Root::TPhotonEfficiencyCorrectionTool::calculate( const PATCore::Pa
                                   const double et /* in MeV */
                                   ) const {
 
-    size_t CorrIndex{0},MCToysIndex{0} ;// The Photons for now do not break down those
+    size_t CorrIndex{0},MCToysIndex{0};
     std::vector<double> result;
-    Root::TElectronEfficiencyCorrectionTool::calculate(dataType,
-            runnumber,
-            cluster_eta,
-            et, /* in MeV */
-            result,
-            CorrIndex,
-            MCToysIndex
-            );
-
+    const int status = Root::TElectronEfficiencyCorrectionTool::calculate(dataType,
+									  runnumber,
+									  cluster_eta,
+									  et, /* in MeV */
+									  result,
+									  CorrIndex,
+									  MCToysIndex
+									  );
+    
     Result output;
+
+    // if status 0 something went wrong
+    if (!status) {
+      output.scaleFactor=-999;
+      output.totalUncertainty=1;
+      ATH_MSG_DEBUG("Something went wrong ... in the future we should report an CP::CorrectionCode::OutOfValidityRange");
+      return output;
+    }
+
+    // For Photons we only support one correlation model
     output.scaleFactor= result[static_cast<size_t>(Root::TElectronEfficiencyCorrectionTool::Position::SF)];
     output.totalUncertainty=result[static_cast<size_t>(Root::TElectronEfficiencyCorrectionTool::Position::Total)];
     return output;
