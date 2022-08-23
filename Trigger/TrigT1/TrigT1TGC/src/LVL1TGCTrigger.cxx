@@ -53,7 +53,6 @@ namespace LVL1TGCTrigger {
 LVL1TGCTrigger::LVL1TGCTrigger(const std::string& name, ISvcLocator* pSvcLocator)
 : AthAlgorithm(name,pSvcLocator),
   m_cabling(0),
-  m_bctagInProcess(0),
   m_db(0),
   m_nEventInSector(0),
   m_innerTrackletSlotHolder( tgcArgs() ),
@@ -185,11 +184,11 @@ StatusCode LVL1TGCTrigger::execute()
     
     // process one by one
     StatusCode sc = StatusCode::SUCCESS;
-    for (int bc=TgcDigit::BC_PREVIOUS; bc<=TgcDigit::BC_NEXT; bc++){
+    for (int bc=TgcDigit::BC_PREVIOUS; bc<=TgcDigit::BC_NEXTNEXT; bc++){
       sc = StatusCode::SUCCESS;
       
       // Use TileMu only if BC_CURRENT
-      if (doTileMu && bc==m_CurrentBunchTag) {
+      if (doTileMu && bc == m_CurrentBunchTag) {
         sc = fillTMDB();
         if (sc.isFailure()) {
           ATH_MSG_WARNING("Cannot retrieve Tile Mu Data");
@@ -198,17 +197,17 @@ StatusCode LVL1TGCTrigger::execute()
       }
 
       // Use NSW trigger output 
-      if(doNSW && bc==m_CurrentBunchTag){
+      if(doNSW && bc==m_CurrentBunchTag){  // To implement BC-calculation
 	ATH_CHECK(fillNSW());
       }
 
       // Use RPC BIS78 trigger output
-      if(doBIS78 && bc==m_CurrentBunchTag){
+      if(doBIS78 && bc == m_CurrentBunchTag){  // Todo: implement BC-calculation
 	ATH_CHECK(fillBIS78());
       }
 
-      if (m_ProcessAllBunches || bc==m_CurrentBunchTag){
-        m_bctagInProcess =bc;
+      if (m_ProcessAllBunches || bc == m_CurrentBunchTag) {
+        m_bctagInProcess = bc;
         sc = processOneBunch(tgc_container, muctpiinputPhase1, tgcrdo);
       }
       if (sc.isFailure()) {
