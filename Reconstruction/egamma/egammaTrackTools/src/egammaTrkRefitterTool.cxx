@@ -162,8 +162,20 @@ egammaTrkRefitterTool::addPointsToTrack(const EventContext& ctx,
   /* The issue here is that some of the returned measurements are owned by
    * storegate some not. For the ones that are not put them in a vector of
    * unique_ptr which we will also return to the caller*/
-
-  if (track && track->trackParameters() && !track->trackParameters()->empty()) {
+  if (m_useClusterPosition && eg->caloCluster()) {
+    int charge(0);
+    if (track->perigeeParameters()) {
+      charge = (int)track->perigeeParameters()->charge();
+    }
+    std::unique_ptr<const Trk::CaloCluster_OnTrack> ccot(
+      m_CCOTBuilder->buildClusterOnTrack(ctx, eg->caloCluster(), charge));
+    if (ccot != nullptr) {
+      collect.m_trash.push_back(std::move(ccot));
+      collect.m_measurements.push_back(collect.m_trash.back().get());
+    }
+  }
+  if (m_useBeamSpot && track && track->trackParameters() &&
+      !track->trackParameters()->empty()) {
     std::unique_ptr<const Trk::VertexOnTrack> vot(
       provideVotFromBeamspot(ctx, track));
     // fill the beamSpot if you have it
@@ -183,17 +195,6 @@ egammaTrkRefitterTool::addPointsToTrack(const EventContext& ctx,
   } else {
     ATH_MSG_WARNING("Could not extract MeasurementBase from track");
     return collect;
-  }
-  if (m_useClusterPosition && eg->caloCluster()) {
-    int charge(0);
-    if (track->perigeeParameters())
-      charge = (int)track->perigeeParameters()->charge();
-    std::unique_ptr<const Trk::CaloCluster_OnTrack> ccot(
-      m_CCOTBuilder->buildClusterOnTrack(ctx, eg->caloCluster(), charge));
-    if (ccot != nullptr) {
-      collect.m_trash.push_back(std::move(ccot));
-      collect.m_measurements.push_back(collect.m_trash.back().get());
-    }
   }
   return collect;
 }
