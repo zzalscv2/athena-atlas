@@ -3,7 +3,7 @@ Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
 */
 #ifndef MUONTESTER_MUONIDENTIFIERBRANCH_H
 #define MUONTESTER_MUONIDENTIFIERBRANCH_H
-
+#ifndef XAOD_ANALYSIS
 #include <MuonIdHelpers/IMuonIdHelperSvc.h>
 #include <MuonTesterTree/MuonTesterBranch.h>
 #include <MuonTesterTree/VectorBranch.h>
@@ -114,5 +114,5 @@ private:
     VectorBranch<uint8_t>& m_multiplet{parent().newVector<uint8_t>(name() + "_multiplet")};
     VectorBranch<uint16_t>& m_channel{parent().newVector<uint16_t>(name() + "_channel")};
 };
-
+#endif
 #endif
