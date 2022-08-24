@@ -56,11 +56,11 @@ def PhysCommonAugmentationsCfg(ConfigFlags,**kwargs):
     # TODO: need to find the new flags equivalent for the missing settings below, then we can
     # drop these kwargs and do everything via the ConfigFlags
     acc.merge(InDetCommonCfg(ConfigFlags,
-                             DoVertexFinding = ConfigFlags.InDet.PriVertex.doVertexFinding,
-                             AddPseudoTracks = ConfigFlags.InDet.Tracking.doPseudoTracking,
+                             DoVertexFinding = ConfigFlags.InDet.PriVertex.doVertexFinding if ConfigFlags.GeoModel.Run<=LHCPeriod.Run3 else ConfigFlags.ITk.PriVertex.doVertexFinding,
+                             AddPseudoTracks = ConfigFlags.InDet.Tracking.doPseudoTracking and ConfigFlags.GeoModel.Run<=LHCPeriod.Run3,
                              DecoLRTTTVA = False,
-                             DoR3LargeD0 = ConfigFlags.InDet.Tracking.doR3LargeD0,
-                             StoreSeparateLargeD0Container = ConfigFlags.InDet.Tracking.storeSeparateLargeD0Container,
+                             DoR3LargeD0 = ConfigFlags.InDet.Tracking.doR3LargeD0 if ConfigFlags.GeoModel.Run<=LHCPeriod.Run3 else ConfigFlags.ITk.Tracking.doLargeD0,
+                             StoreSeparateLargeD0Container = ConfigFlags.InDet.Tracking.storeSeparateLargeD0Container if ConfigFlags.GeoModel.Run<=LHCPeriod.Run3 else ConfigFlags.ITk.Tracking.storeSeparateLargeD0Container,
                              MergeLRT = False)) 
     acc.merge(MuonsCommonCfg(ConfigFlags))
     acc.merge(EGammaCommonCfg(ConfigFlags))
