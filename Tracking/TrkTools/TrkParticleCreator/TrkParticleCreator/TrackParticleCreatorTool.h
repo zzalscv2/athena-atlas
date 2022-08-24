@@ -17,6 +17,7 @@ changes : 11.02.04 added docu
 #include "AthenaBaseComps/AthAlgTool.h"
 #include "TrkToolInterfaces/ITrackParticleCreatorTool.h"
 
+#include "TrkDetDescrInterfaces/ITrackingVolumesSvc.h"
 #include "AthContainers/AuxElement.h"
 #include "EventPrimitives/EventPrimitivesHelpers.h"
 #include "ITrackToVertex/ITrackToVertex.h"
@@ -224,6 +225,9 @@ private:
     "IBLParameterSvc",
     "IBLParameterSvc"
   };
+  
+  ServiceHandle<ITrackingVolumesSvc> m_trackingVolumesSvc{this,"TrackingVolumesSvc","Trk::TrackingVolumesSvc/TrackingVolumesSvc"};
+
 
   SG::ReadCondHandleKey<AtlasFieldCacheCondObj> m_fieldCacheCondObjInputKey{
     this,
