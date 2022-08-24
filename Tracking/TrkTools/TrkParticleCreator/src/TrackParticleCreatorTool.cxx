@@ -27,6 +27,7 @@
 #include "TrkSurfaces/PerigeeSurface.h"
 #include "TrkTrack/TrackStateOnSurface.h"
 #include "TrkTrackSummary/TrackSummary.h"
+#include "TrkGeometry/TrackingVolume.h"
 
 #include "GeoPrimitives/GeoPrimitivesHelpers.h"
 #include "IdDictDetDescr/IdDictManager.h"
@@ -215,6 +216,7 @@ TrackParticleCreatorTool::initialize()
   } else {
     m_hitSummaryTool.disable();
   }
+  ATH_CHECK(m_trackingVolumesSvc.retrieve());
 
   ATH_CHECK(m_fieldCacheCondObjInputKey.initialize());
 
@@ -809,28 +811,37 @@ TrackParticleCreatorTool::setParameters(const EventContext& ctx,
     values[3] = mom[0];
     values[4] = mom[1];
     values[5] = mom[2];
-
+    
+    const bool straightPars = (!fieldCache.solenoidOn() && m_trackingVolumesSvc->volume(Trk::ITrackingVolumesSvc::CalorimeterEntryLayer).inside(pos)) ||
+                              (!fieldCache.toroidOn() && !m_trackingVolumesSvc->volume(Trk::ITrackingVolumesSvc::MuonSpectrometerEntryLayer).inside(pos) &&
+                                   m_trackingVolumesSvc->volume(Trk::ITrackingVolumesSvc::MuonSpectrometerExitLayer).inside(pos));
     AmgSymMatrix(5) covarianceMatrix;
     covarianceMatrix.setIdentity();
 
     if (param->covariance()) {
       // has covariance matrix
       // now convert from to Curvilinear -- to be double checked for correctness
-      Amg::Vector3D magnFieldVect;
-      magnFieldVect.setZero();
-      fieldCache.getField(pos.data(), magnFieldVect.data());
+        CurvilinearUVT curvilinearUVT(mom.unit());
+        if (!straightPars){
+            Amg::Vector3D magnFieldVect;
+            magnFieldVect.setZero();
+            fieldCache.getField(pos.data(), magnFieldVect.data());
+            const Amg::Transform3D& localToGlobalTransform = param->associatedSurface().transform();
 
-      CurvilinearUVT curvilinearUVT(param->momentum().unit());
-      const Amg::Transform3D& localToGlobalTransform = param->associatedSurface().transform();
+            JacobianLocalToCurvilinear jacobian(magnFieldVect,
+                                                  param->parameters()[Trk::qOverP],
+                                                  std::sin(param->parameters()[Trk::theta]),
+                                                  curvilinearUVT,
+                                                  localToGlobalTransform.rotation().col(0),
+                                                  localToGlobalTransform.rotation().col(1));
 
-      JacobianLocalToCurvilinear jacobian(magnFieldVect,
-                                          param->parameters()[Trk::qOverP],
-                                          sin(param->parameters()[Trk::theta]),
-                                          curvilinearUVT,
-                                          localToGlobalTransform.rotation().col(0),
-                                          localToGlobalTransform.rotation().col(1));
-
-      covarianceMatrix = param->covariance()->similarity(jacobian);
+            covarianceMatrix = param->covariance()->similarity(jacobian);
+        } else {
+           const Amg::Vector3D loc_x {param->parameters()[Trk::locX],0,0};
+           const Amg::Vector3D loc_y {0,param->parameters()[Trk::locY],0};
+           JacobianLocalToCurvilinear jacobian(curvilinearUVT, loc_x, loc_y); 
+           covarianceMatrix = param->covariance()->similarity(jacobian);
+        }
     }
     std::vector<float> covMatrixVec;
     Amg::compress(covarianceMatrix, covMatrixVec);
