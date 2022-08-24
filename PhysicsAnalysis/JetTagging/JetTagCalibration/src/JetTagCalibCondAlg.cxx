@@ -562,7 +562,7 @@ namespace Analysis {
                     inputVars.push_back(commaSepVars.substr(0,commaSepVars.find(',')));
                     commaSepVars.erase(0,commaSepVars.find(',')+1);
                   }
-                  inputVars.push_back(commaSepVars.substr(0,-1));
+                  inputVars.push_back(commaSepVars);
                   ATH_MSG_DEBUG("#BTAG# inputVars.size()= "<< inputVars.size() <<" toa->GetEntries()= "<< toa->GetEntries() <<"commaSepVars= "<< commaSepVars);
                   for (unsigned int asv=0; asv<inputVars.size(); asv++) ATH_MSG_DEBUG("#BTAG# inputVar= "<< inputVars.at(asv));
                   writeCdo->addInputVars(tagger,fname,inputVars);
