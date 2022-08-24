@@ -87,6 +87,12 @@ def makeMuonCalibrationSequence( seq, dataType,
     if dataType not in ["data", "mc", "afii"] :
         raise ValueError ("invalid data type: " + dataType)
 
+    # Set up a shallow copy to decorate
+    alg = createAlgorithm( 'CP::AsgShallowCopyAlg', 'MuonShallowCopyAlg' + postfix )
+    seq.append( alg, inputPropName = 'input',
+                outputPropName = 'output',
+                stageName = 'prepare')
+
     # Set up the eta-cut on all muons prior to everything else
     alg = createAlgorithm( 'CP::AsgSelectionAlg',
                            'MuonEtaCutAlg' + postfix )
@@ -94,7 +100,6 @@ def makeMuonCalibrationSequence( seq, dataType,
     alg.selectionTool.maxEta = 2.5
     alg.selectionDecoration = 'selectEta' + postfix + ',as_bits'
     seq.append( alg, inputPropName = 'particles',
-                outputPropName = 'particlesOut',
                 stageName = 'selection',
                 metaConfig = {'selectionDecorNames' : [alg.selectionDecoration],
                               'selectionDecorNamesOutput' : [alg.selectionDecoration],

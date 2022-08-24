@@ -151,14 +151,16 @@ class ConfigAccumulator :
         return self._containerConfig[containerName].currentName()
 
 
-    def wantCopy (self, containerName) :
+    def wantCopy (self, containerName, sourceName=None) :
         """ask whether we want/need a copy of the container
 
         This usually only happens if no copy of the container has been
         made yet and the copy is needed to allow modifications, etc.
         """
         if containerName not in self._containerConfig :
-            raise Exception ("unknown container: " + containerName)
+            if not sourceName :
+                raise Exception ("no source container for: " + containerName)
+            self._containerConfig[containerName] = ContainerConfig (containerName, sourceName)
         return self._containerConfig[containerName].index == 0
 
 

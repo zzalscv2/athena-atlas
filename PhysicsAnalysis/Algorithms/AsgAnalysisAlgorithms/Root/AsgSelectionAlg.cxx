@@ -70,7 +70,7 @@ namespace CP
         ANA_CHECK (m_systematicsTool->applySystematicVariation (sys));
 
       const xAOD::IParticleContainer *particles = nullptr;
-      ANA_CHECK (m_particlesHandle.getCopy (particles, sys));
+      ANA_CHECK (m_particlesHandle.retrieve (particles, sys));
       for (const xAOD::IParticle *particle : *particles)
       {
         if (m_preselection.getBool (*particle, sys))
