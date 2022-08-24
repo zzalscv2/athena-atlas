@@ -6,7 +6,6 @@
 #include <charconv>  //for std::from_chars
 #include <algorithm> //for std::find_if
 #include <stdexcept> //for std::runtime_error
-#include <iostream>
 
 /*
   original implementation used two string streams. A more complete std::regex_iterator
@@ -20,7 +19,8 @@ namespace PixelConditionsAlgorithms{
   parseDeadMapString(const std::string & s){
     std::vector<std::pair<int, int>> result;
     //the Trigger_athenaHLT_v1Cosmic CI test returns a pair of empty braces, "{}"; trap this
-    if (s.size()<4) return result;
+    //in fact the minimal useful string would be {"d":d}, where d is a digit
+    if (s.size()<7) return result;
     //a valid string is json, enclosed in braces.
     const bool is_valid = (s.front() == '{') and (s.back() == '}');
     if (not is_valid) return result;
