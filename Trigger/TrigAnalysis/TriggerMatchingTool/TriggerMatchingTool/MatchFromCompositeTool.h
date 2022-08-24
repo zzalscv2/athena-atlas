@@ -11,6 +11,7 @@
 #include "AthLinks/ElementLink.h"
 #include "xAODBase/IParticleContainer.h"
 #include "xAODTrigger/TrigCompositeContainer.h"
+#include "CxxUtils/sgkey_t.h"
 
 // Package includes
 #include "TriggerMatchingTool/IMatchingTool.h"
@@ -86,6 +87,18 @@ namespace Trig {
       /// The prefix to expect at the front of the trig composite container name
       std::string m_inputPrefix;
 
+#ifdef XAOD_STANDALONE
+      /// Remap broken links in AnalysisBase
+      bool m_remapBrokenLinks = false;
+
+      /// Containers that will be remapped
+      std::vector<std::string> m_remapContainers{
+          "Electrons", "Photons", "Muons", "TauJets"};
+      /// CLIDS for those containers
+      std::vector<CLID> m_remapCLIDs{
+          1087532415, 1105575213, 1178459224, 1177172564};
+#endif
+
       // Internal functions
       /// Inherited from the interface but does nothing
       virtual MatchingImplementation* impl() const override { return nullptr; }
@@ -104,6 +117,8 @@ namespace Trig {
       bool areTheSame(
           const xAOD::IParticle& lhs,
           const xAOD::IParticle& rhs) const;
+
+      std::map<SG::sgkey_t, SG::sgkey_t> m_keyRemap;
   }; //> end class MatchFromCompositeTool
 } //> end namespace Trig
 
