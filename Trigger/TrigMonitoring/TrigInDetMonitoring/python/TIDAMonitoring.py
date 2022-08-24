@@ -165,7 +165,7 @@ def TIDAMonitoring( flags=None, name=None, monlevel=None, mcTruth=False ) :
 
         tidatau.AnalysisConfig = "Tier0"
 
-        chains = getchains( [ "HLT_tau.*idperf.*tracktwo_.*:key=HLT_IDTrack_TauCore_FTF:roi=HLT_Roi_TauCore",
+        chains = getchains( [ "HLT_tau.*idperf.*tracktwoMVA_.*:key=HLT_IDTrack_TauCore_FTF:roi=HLT_Roi_TauCore",
                               "HLT_tau.*idperf.*tracktwoMVA_.*:key=HLT_IDTrack_TauIso_FTF:roi=HLT_Roi_TauIso",
                               "HLT_tau.*idperf.*tracktwoMVA_.*:key=HLT_IDTrack_Tau_IDTrig:roi=HLT_Roi_TauIso",
                               "HLT_mu.*tau.*idperf.*:HLT_IDTrack_TauCore_FTF:roi=HLT_Roi_TauCore",
