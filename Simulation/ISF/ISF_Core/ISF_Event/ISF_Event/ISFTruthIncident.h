@@ -51,7 +51,7 @@ namespace ISF {
     ~ISFTruthIncident();
 
     /** Return HepMC position of the truth vertex */
-    const HepMC::FourVector&  position() const override final;
+    const HepMC::FourVector&  position() override final;
     /** Return category of the physics process represented by the truth incident (eg hadronic, em, ..) */
     int                       physicsProcessCategory() const override final;
     /** Return specific physics process code of the truth incident (eg ionisation, bremsstrahlung, ..)*/
@@ -112,7 +112,7 @@ namespace ISF {
     const ISFParticleVector&           m_children;
     const Barcode::PhysicsProcessCode  m_process;
     const ISF::KillPrimary             m_killsPrimary;
-    mutable const HepMC::FourVector   *m_position;
+    const HepMC::FourVector*           m_position;
   };
 
 } // end of namespace

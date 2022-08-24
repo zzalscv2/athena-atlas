@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2017 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef ISF_GEANT4TOOLS_ISFG4HELPER_H
@@ -49,7 +49,7 @@ class ISFG4Helper {
   static TrackInformation* attachTrackInfoToNewG4Track( G4Track& aTrack,
                                    const ISF::ISFParticle& baseIsp,
                                    TrackClassification classification,
-                                   HepMC::GenParticlePtr nonRegeneratedTruthParticle = nullptr);
+                                   HepMC::ConstGenParticlePtr nonRegeneratedTruthParticle = nullptr);
   
   /** return pointer to current AtlasG4EventUserInfo */
   static AtlasG4EventUserInfo* getAtlasG4EventUserInfo();

@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2017 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
 */
 
 // class header
@@ -79,7 +79,7 @@ TrackInformation*
 iGeant4::ISFG4Helper::attachTrackInfoToNewG4Track( G4Track& aTrack,
                                                     const ISF::ISFParticle& baseIsp,
                                                     TrackClassification classification,
-                                                    HepMC::GenParticlePtr nonRegeneratedTruthParticle)
+                                                    HepMC::ConstGenParticlePtr nonRegeneratedTruthParticle)
 {
   if ( aTrack.GetUserInformation() ) {
     G4ExceptionDescription description;

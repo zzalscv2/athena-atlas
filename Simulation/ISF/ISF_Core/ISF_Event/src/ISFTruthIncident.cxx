@@ -36,7 +36,7 @@ ISF::ISFTruthIncident::~ISFTruthIncident() {
   delete m_position;
 }
 
-const HepMC::FourVector& ISF::ISFTruthIncident::position() const {
+const HepMC::FourVector& ISF::ISFTruthIncident::position() {
 
   if ( !m_position) {
     // no position was given, compute it
