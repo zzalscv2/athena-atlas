@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2017 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "EventDisplayFilters/FilterUsingMBTS.h"
@@ -39,7 +39,7 @@ StatusCode FilterUsingMBTS::initialize()
 StatusCode FilterUsingMBTS::execute()
 {
 	// Decode CTP RDO
-	const DataHandle < CTP_RDO > theCTP_RDO = 0;
+	const CTP_RDO* theCTP_RDO = 0;
 	ATH_CHECK( evtStore()->retrieve(theCTP_RDO, "CTP_RDO") );
 	CTP_Decoder ctp;
 	ctp.setRDO(theCTP_RDO);

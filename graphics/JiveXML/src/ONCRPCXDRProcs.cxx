@@ -1,8 +1,11 @@
 /*
-  Copyright (C) 2002-2017 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
 */
 
+#include "CxxUtils/checker_macros.h"
 #include "JiveXML/ONCRPCXDRProcs.h"
+
+ATLAS_NO_CHECK_FILE_THREAD_SAFETY;  // lots of const violations in this C-code
 
 namespace JiveXML {
 
@@ -37,7 +40,7 @@ namespace JiveXML {
       return false ;
 
     //de-/encode stream name
-    if (! xdr_wrapstring( xdrsp, &(eventReq->StreamName)))
+    if (! xdr_wrapstring( xdrsp, (char**)&(eventReq->StreamName)))
       return false ;
 
     // All done successfully
@@ -60,7 +63,7 @@ namespace JiveXML {
       return false ;
     
     //de-/encode stream name
-    if (! xdr_wrapstring( xdrsp, &(event->StreamName)))
+    if (! xdr_wrapstring( xdrsp, (char**)&(event->StreamName)))
       return false ;
 
     //de-/encode event number

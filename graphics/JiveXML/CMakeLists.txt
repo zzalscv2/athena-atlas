@@ -15,14 +15,14 @@ if ( RPC_FOUND )
    JiveXML/*.h src/*.cxx
    PUBLIC_HEADERS JiveXML
    INCLUDE_DIRS ${RPC_INCLUDE_DIRS}
-   LINK_LIBRARIES ${RPC_LIBRARIES} AthenaBaseComps GaudiKernel
+   LINK_LIBRARIES ${RPC_LIBRARIES} AthenaBaseComps CxxUtils GaudiKernel
    PRIVATE_LINK_LIBRARIES EventInfo xAODEventInfo )
 else()
   atlas_add_library( JiveXMLLib
    JiveXML/*.h src/*.cxx
    PUBLIC_HEADERS JiveXML
    INCLUDE_DIRS ${RPC_INCLUDE_DIRS}
-   LINK_LIBRARIES AthenaBaseComps GaudiKernel
+   LINK_LIBRARIES AthenaBaseComps CxxUtils GaudiKernel
    PRIVATE_LINK_LIBRARIES EventInfo xAODEventInfo ) 
 endif() 
 

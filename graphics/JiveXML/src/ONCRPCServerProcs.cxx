@@ -1,7 +1,9 @@
 /*
-  Copyright (C) 2002-2017 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
 */
 
+
+#include <CxxUtils/checker_macros.h>
 
 #include <JiveXML/ONCRPCServerProcs.h>
 #include <JiveXML/ONCRPCXDRProcs.h>
@@ -26,7 +28,8 @@ namespace JiveXML {
 
     //If there was an error, assemble the message
     std::ostringstream msg;
-    msg << "Error in " << Module << ": " << strerror(RetVal);
+    char errbuf[256];
+    msg << "Error in " << Module << ": " << strerror_r(RetVal, errbuf, sizeof(errbuf));
     
     //Output the message via the ServerSvc
     ServerSvc->Message(MSG::ERROR,msg.str());
@@ -124,7 +127,8 @@ namespace JiveXML {
     EventStreamID reqEvtStreamID(eventReq->EventNumber,eventReq->RunNumber,eventReq->StreamName);
 
     //We got all the data from the request, so delete it
-    xdr_free((xdrproc_t)xdr_event_req,(caddr_t)eventReq);
+    caddr_t nc_eventReq ATLAS_THREAD_SAFE = (caddr_t)eventReq;
+    xdr_free((xdrproc_t)xdr_event_req,nc_eventReq);
 
     //Prepare response structure
     Event event;
@@ -133,7 +137,7 @@ namespace JiveXML {
     event.isCompressed = false ;
     event.EventNumber = currEvtStreamID.EventNumber();
     event.RunNumber = currEvtStreamID.RunNumber();
-    event.StreamName = (char*) currEvtStreamID.StreamName().c_str();
+    event.StreamName = currEvtStreamID.StreamName().c_str();
     event.NBytes = 0; event.EventData = NULL ;
 
     //Check if such a stream was currently found
@@ -244,7 +248,8 @@ namespace JiveXML {
       checkResult(errno,"dispatch thread sending reply to SETEVENT call",ServerSvc);
 
     //Afterwards free the object
-    xdr_free((xdrproc_t)xdr_event,(caddr_t)event);
+    caddr_t nc_event ATLAS_THREAD_SAFE = (caddr_t)event;
+    xdr_free((xdrproc_t)xdr_event,nc_event);
   }
       
 } //namespace

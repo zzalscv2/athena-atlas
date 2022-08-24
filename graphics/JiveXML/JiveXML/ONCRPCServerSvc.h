@@ -1,11 +1,12 @@
 /*
-  Copyright (C) 2002-2017 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef JIVEXML_ONCRPCSERVERSVC_H
 #define JIVEXML_ONCRPCSERVERSVC_H
 
 #include "AthenaBaseComps/AthService.h"
+#include "CxxUtils/checker_macros.h"
 #include "GaudiKernel/ServiceHandle.h"
 #include "GaudiKernel/MsgStream.h"
 #include "JiveXML/EventStream.h"
@@ -94,7 +95,7 @@ namespace JiveXML {
     EventStreamMap m_eventStreamMap;
 
     //A mutex (mutual exclusive) lock for the data map
-    mutable pthread_mutex_t m_accessLock;
+    mutable pthread_mutex_t m_accessLock ATLAS_THREAD_SAFE;
 
     //A handle to the server thread
     pthread_t m_ServerThreadHandle;
