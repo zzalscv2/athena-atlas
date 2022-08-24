@@ -1,12 +1,6 @@
 TileHWID             INFO initialize_from_dictionary 
-AtlasDetectorIDHelper::initialize_from_dictionary - Warning: unable to find mm region index: group, region size 0 0
-AtlasDetectorIDHelper::initialize_from_dictionary - Warning: unable to find stgc region index: group, region size 0 0
 AtlasDetectorID      INFO initialize_from_dictionary - OK
 TileTBID             INFO initialize_from_dictionary 
-AtlasDetectorIDHelper::initialize_from_dictionary - Warning: unable to find mm region index: group, region size 0 0
-AtlasDetectorIDHelper::initialize_from_dictionary - Warning: unable to find stgc region index: group, region size 0 0
 AtlasDetectorID      INFO initialize_from_dictionary - OK
-AtlasDetectorIDHelper::initialize_from_dictionary - Warning: unable to find mm region index: group, region size 0 0
-AtlasDetectorIDHelper::initialize_from_dictionary - Warning: unable to find stgc region index: group, region size 0 0
 AtlasDetectorID      INFO initialize_from_dictionary - OK
 test1

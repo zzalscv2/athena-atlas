@@ -1,10 +1,11 @@
 /*
-  Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef SRC_ATLASDETECTORIDHELPER_H
 #define SRC_ATLASDETECTORIDHELPER_H
 
+#include "AthenaBaseComps/AthMessaging.h"
 #include "Identifier/Identifier.h"
 #include "Identifier/IdContext.h"
 #include "Identifier/IdHelper.h"
@@ -13,13 +14,13 @@
 
 class IdDictField;
 
-class AtlasDetectorIDHelper {
+class AtlasDetectorIDHelper : public AthMessaging {
 public:
     
     enum ERRORS { UNDEFINED = 999 };
 
 
-    AtlasDetectorIDHelper(void);
+    AtlasDetectorIDHelper(IMessageSvc* msgSvc);
 
     typedef Identifier::size_type 			size_type; 
 
@@ -56,8 +57,6 @@ public:
 
     const IdDictField* station_field();
 
-    void        setMsgSvc(IMessageSvc* msgSvc) { m_msgSvc = msgSvc; }
-
 
 private:
 
@@ -88,9 +87,7 @@ private:
     size_type m_zdc_region_index{UNDEFINED};
     bool m_initialized{};
     IdDictField *m_station_field{};
-    /// pointer to the message service
-    IMessageSvc *m_msgSvc{};
-    
+
 };
 
 
