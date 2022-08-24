@@ -18,9 +18,18 @@ parser.add_option( '-s', '--submission-dir', dest = 'submission_dir',
 parser.add_option( '-u', '--unit-test', dest='unit_test',
                    action = 'store_true', default = False,
                    help = 'Run the job in "unit test mode"' )
+parser.add_option( '--direct-driver', dest='direct_driver',
+                   action = 'store_true', default = False,
+                   help = 'Run the job with the direct driver' )
+parser.add_option( '--algorithm-timer', dest='algorithm_timer',
+                   action = 'store_true', default = False,
+                   help = 'Run the job with a timer for each algorithm' )
 parser.add_option( '--block-config', dest='block_config',
                    action = 'store_true', default = False,
                    help = 'Run the job in "unit test mode"' )
+parser.add_option( '--for-compare', dest='for_compare',
+                   action = 'store_true', default = False,
+                   help = 'Configure the job for comparison of sequences vs blocks' )
 ( options, args ) = parser.parse_args()
 
 # Set up (Py)ROOT.
@@ -35,6 +44,7 @@ ROOT.xAOD.TauJetContainer()
 
 dataType = options.data_type
 blockConfig = options.block_config
+forCompare = options.for_compare
 
 if dataType not in ["data", "mc", "afii"] :
     raise Exception ("invalid data type: " + dataType)
@@ -61,10 +71,12 @@ sh.printContent()
 job = ROOT.EL.Job()
 job.sampleHandler( sh )
 job.options().setDouble( ROOT.EL.Job.optMaxEvents, 500 )
+if options.algorithm_timer :
+    job.options().setBool( ROOT.EL.Job.optAlgorithmTimer, True )
 
 
 from AnalysisAlgorithmsConfig.FullCPAlgorithmsTest import makeSequence
-algSeq = makeSequence (dataType, blockConfig)
+algSeq = makeSequence (dataType, blockConfig, forCompare=forCompare)
 print( algSeq ) # For debugging
 algSeq.addSelfToJob( job )
 
@@ -76,13 +88,20 @@ submitDir = options.submission_dir
 if options.unit_test:
     import os
     import tempfile
-    submitDir = tempfile.mkdtemp( prefix = 'muonTest_'+dataType+'_', dir = os.getcwd() )
+    submitDir = tempfile.mkdtemp( prefix = 'fullCPTest_'+dataType+'_', dir = os.getcwd() )
     os.rmdir( submitDir )
     pass
+
 
 # Run the job using the local driver.  This is intentionally the local
 # driver, unlike most other tests that use the direct driver.  That
 # way it tests whether the code works correctly with that driver,
 # which is a lot more similar to the way the batch/grid drivers work.
 driver = ROOT.EL.LocalDriver()
+
+if options.direct_driver :
+    # this is for testing purposes, as only the direct driver respects
+    # the limit on the number of events.
+    driver = ROOT.EL.DirectDriver()
+
 driver.submit( job, submitDir )

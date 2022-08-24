@@ -13,28 +13,28 @@ if( XAOD_STANDALONE )
    atlas_install_scripts( share/*_eljob.py )
 
    atlas_add_test( testJobData
-      SCRIPT FullCPAlgorithmsTest_eljob.py --data-type data --unit-test
+      SCRIPT FullCPAlgorithmsTest_eljob.py --data-type data --unit-test --direct-driver
       POST_EXEC_SCRIPT nopost.sh
       PROPERTIES TIMEOUT 600 )
    atlas_add_test( testJobFullSim
-      SCRIPT FullCPAlgorithmsTest_eljob.py --data-type mc --unit-test
+      SCRIPT FullCPAlgorithmsTest_eljob.py --data-type mc --unit-test --direct-driver
       POST_EXEC_SCRIPT nopost.sh
       PROPERTIES TIMEOUT 600 )
    atlas_add_test( testJobFastSim
-      SCRIPT FullCPAlgorithmsTest_eljob.py --data-type afii --unit-test
+      SCRIPT FullCPAlgorithmsTest_eljob.py --data-type afii --unit-test --direct-driver
       POST_EXEC_SCRIPT nopost.sh
       PROPERTIES TIMEOUT 600 )
 
    atlas_add_test( testJobDataConfig
-      SCRIPT FullCPAlgorithmsTest_eljob.py --data-type data --unit-test --block-config
+      SCRIPT FullCPAlgorithmsTest_eljob.py --data-type data --unit-test --direct-driver --block-config
       POST_EXEC_SCRIPT nopost.sh
       PROPERTIES TIMEOUT 600 )
    atlas_add_test( testJobFullSimConfig
-      SCRIPT FullCPAlgorithmsTest_eljob.py --data-type mc --unit-test --block-config
+      SCRIPT FullCPAlgorithmsTest_eljob.py --data-type mc --unit-test --direct-driver --block-config
       POST_EXEC_SCRIPT nopost.sh
       PROPERTIES TIMEOUT 600 )
    atlas_add_test( testJobFastSimConfig
-      SCRIPT FullCPAlgorithmsTest_eljob.py --data-type afii --unit-test --block-config
+      SCRIPT FullCPAlgorithmsTest_eljob.py --data-type afii --unit-test --direct-driver --block-config
       POST_EXEC_SCRIPT nopost.sh
       PROPERTIES TIMEOUT 600 )
 
