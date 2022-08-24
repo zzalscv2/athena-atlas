@@ -12,6 +12,14 @@ class FlagEnum(Enum):
     __hash__ = Enum.__hash__
 
 
+class Project(FlagEnum):
+    Athena = 'Athena'
+    AthAnalysis = 'AthAnalysis'
+    AthDerivation = 'AthDerivation'
+    AthGeneration = 'AthGeneration'
+    AthSimulation = 'AthSimulation'
+
+
 class Format(FlagEnum):
     BS = 'BS'
     POOL = 'POOL'

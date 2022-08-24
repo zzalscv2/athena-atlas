@@ -2,22 +2,19 @@
 """Run tests on G4AtlasFieldServices
 
 Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
-from __future__ import print_function
 """
 
 if __name__ == '__main__':
   from AthenaConfiguration.MainServicesConfig import MainServicesCfg
-  import os
 
   # Set up logging
   from AthenaCommon.Logging import log
   from AthenaCommon.Constants import DEBUG
   log.setLevel(DEBUG)
 
-
   #import config flags
   from AthenaConfiguration.AllConfigFlags import ConfigFlags
-  
+  from AthenaConfiguration.Enums import Project
   from AthenaConfiguration.TestDefaults import defaultTestFiles
   inputDir = defaultTestFiles.d
   ConfigFlags.Input.Files = defaultTestFiles.EVNT
@@ -36,9 +33,8 @@ if __name__ == '__main__':
   acc1 = StandardFieldSvcCfg(ConfigFlags)
   acc2 = ForwardFieldSvcCfg(ConfigFlags)
 
-  #don't run for simulation only tests (todo - make new general test)
-  import os
-  if not "AthSimulation_DIR" in os.environ:
+  # don't run for simulation only tests (todo - make new general test)
+  if ConfigFlags.Common.Project is not Project.AthSimulation:
     acc3 = Q1FwdG4FieldSvcCfg(ConfigFlags)
     cfg.merge(acc3)
 
@@ -51,12 +47,9 @@ if __name__ == '__main__':
   cfg.printConfig(withDetails=True, summariseProps = True)
   ConfigFlags.dump()
 
-
   f=open("test.pkl","wb")
   cfg.store(f)
   f.close()
-
-
 
   print (cfg._publicTools)
   print ("-----------------finished----------------------")

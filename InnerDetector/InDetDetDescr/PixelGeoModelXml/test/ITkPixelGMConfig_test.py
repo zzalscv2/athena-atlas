@@ -5,13 +5,14 @@ Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
 """
 if __name__ == "__main__":
     from AthenaConfiguration.AllConfigFlags import ConfigFlags
+    from AthenaConfiguration.Enums import Project
 
     ConfigFlags.Input.Files = ["/cvmfs/atlas-nightlies.cern.ch/repo/data/data-art/PhaseIIUpgrade/HITS/ttbar.HITS.pool.root"]
     ConfigFlags.IOVDb.GlobalTag = "OFLCOND-MC16-SDR-16"
     ConfigFlags.GeoModel.Align.Dynamic = False
     ConfigFlags.lock()
 
-    if ConfigFlags.Common.Project == "AthSimulation":
+    if ConfigFlags.Common.Project is Project.AthSimulation:
         from PixelGeoModelXml.ITkPixelGeoModelConfig import ITkPixelSimulationGeometryCfg
         acc = ITkPixelSimulationGeometryCfg(ConfigFlags)
         f=open('ITkPixelSimulationGeometryCfg.pkl','wb')

@@ -2,7 +2,7 @@
 
 from AthenaConfiguration.AthConfigFlags import AthConfigFlags
 from AthenaConfiguration.AutoConfigFlags import GetFileMD, DetDescrInfo
-from AthenaConfiguration.Enums import LHCPeriod, ProductionStep
+from AthenaConfiguration.Enums import LHCPeriod, ProductionStep, Project
 
 def createGeoModelConfigFlags():
     gcf=AthConfigFlags()
@@ -17,7 +17,7 @@ def createGeoModelConfigFlags():
                 lambda prevFlags : prevFlags.Common.ProductionStep != ProductionStep.Simulation and not prevFlags.Input.isMC)
 
     gcf.addFlag("GeoModel.Align.LegacyConditionsAccess",
-                lambda prevFlags : prevFlags.Common.Project == "AthSimulation" or prevFlags.Common.ProductionStep == ProductionStep.Simulation)
+                lambda prevFlags : prevFlags.Common.Project is Project.AthSimulation or prevFlags.Common.ProductionStep is ProductionStep.Simulation)
                 # Mainly for G4 which still loads alignment on initialize
 
     gcf.addFlag("GeoModel.Run",
