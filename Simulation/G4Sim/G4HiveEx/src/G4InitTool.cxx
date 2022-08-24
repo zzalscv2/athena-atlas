@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2017 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "G4InitTool.h"
@@ -15,6 +15,8 @@
 #include "G4VUserActionInitialization.hh"
 #include "G4UserWorkerInitialization.hh"
 #include "G4AutoDelete.hh"
+
+#include "CxxUtils/checker_macros.h"
 
 #include <unistd.h>
 #include <sys/syscall.h>
@@ -76,12 +78,13 @@ G4InitTool::initThread() {
 
   // Share detector from master with worker.
   ATH_MSG_INFO("Assigning detector construction");
-  const G4VUserDetectorConstruction* detector = masterRM->GetUserDetectorConstruction();
-  wrm->G4RunManager::SetUserInitialization
-    (const_cast<G4VUserDetectorConstruction*>(detector));
+  auto detector ATLAS_THREAD_SAFE = const_cast<G4VUserDetectorConstruction*>
+    (masterRM->GetUserDetectorConstruction());
+  wrm->G4RunManager::SetUserInitialization(detector);
+
   // Share physics list from master with worker.
-  const G4VUserPhysicsList* physicslist = masterRM->GetUserPhysicsList();
-  wrm->SetUserInitialization(const_cast<G4VUserPhysicsList*>(physicslist));
+  auto physicslist ATLAS_THREAD_SAFE = const_cast<G4VUserPhysicsList*>(masterRM->GetUserPhysicsList());
+  wrm->SetUserInitialization(physicslist);
 
   // Build thread-local user actions - NOT CURRENTLY USED.
   if(masterRM->GetUserActionInitialization()) {
