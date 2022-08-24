@@ -521,7 +521,7 @@ def CombinedMuonOutputCfg(flags):
 
     # stau
     aod_items += ["xAOD::MuonContainer#Staus"]
-    aod_items += ["xAOD::MuonAuxContainer#StausAux" + excludedAuxData]
+    aod_items += ["xAOD::MuonAuxContainer#StausAux." + excludedAuxData]
     aod_items += ["xAOD::SlowMuonContainer#SlowMuons"]
     aod_items += ["xAOD::SlowMuonAuxContainer#SlowMuonsAux."]
 
