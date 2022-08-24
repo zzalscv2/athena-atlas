@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef AFP_GeoModelManager_h
@@ -22,7 +22,7 @@ public:
 	// Access to raw geometry:
 	virtual PVConstLink getTreeTop(unsigned int i) const;
 	// Add a Tree top:
-	void addTreeTop(PVLink);
+	void addTreeTop(const PVLink&);
 
 private:
 	const AFP_GeoModelManager & operator=(const AFP_GeoModelManager &right);

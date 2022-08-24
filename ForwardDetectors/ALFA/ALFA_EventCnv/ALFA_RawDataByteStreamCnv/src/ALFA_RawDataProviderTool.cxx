@@ -45,7 +45,7 @@ StatusCode ALFA_RawDataProviderTool::convert( std::vector<const ROBFragment*>& v
 
   ATH_MSG_DEBUG("Number of ROB fragments is " << vecRobs.size());
 
-  if(vecRobs.size() == 0) return StatusCode::SUCCESS;
+  if(vecRobs.empty()) return StatusCode::SUCCESS;
 
   std::vector<const ROBFragment*>::const_iterator rob_it = vecRobs.begin();
 

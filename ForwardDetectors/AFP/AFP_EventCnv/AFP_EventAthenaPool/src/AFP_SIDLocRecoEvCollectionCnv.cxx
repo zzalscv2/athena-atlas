@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2020 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "AFP_EventTPCnv/AFP_SIDLocRecoEvCollectionCnv_p1.h"
@@ -20,7 +20,7 @@ AFP_SIDLocRecoEvCollection* AFP_SIDLocRecoEvCollectionCnv::createTransient() {
     
     AFP_SIDLocRecoEvCollectionCnv_p1   TPConverter_p1;
 
-    AFP_SIDLocRecoEvCollection       *trans_cont(0); // probably inicialization
+    AFP_SIDLocRecoEvCollection       *trans_cont(nullptr); // probably inicialization
     
     //GUID of persistence collection class (see selection.xml in AFP_EventTPCnv, class item AFP_SIDLocRecoEvCollection_p1)
     static const pool::Guid p1_guid ("D0C144F2-E82E-44B3-84BC-22C7D10F262E");

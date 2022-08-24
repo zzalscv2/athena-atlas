@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2017 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef ALFA_CLinkEvent_h
@@ -105,7 +105,7 @@ public:
         { m_LocRecCorrODEvColl = link; }
 
 private:
-	DCSID m_DCSId;
+	DCSID m_DCSId{};
 	DataLink<ALFA_RawDataContainer> m_RawDataEvColl;
 	DataLink<ALFA_DigitCollection> m_DigitEvColl;
 	DataLink<ALFA_ODDigitCollection> m_ODDigitEvColl;

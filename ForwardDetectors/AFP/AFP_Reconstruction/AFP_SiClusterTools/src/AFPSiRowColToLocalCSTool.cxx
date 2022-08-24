@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
 */
 
 /**
@@ -49,7 +49,7 @@ void AFPSiRowColToLocalCSTool::initTransformationMatricesSize (std::list<std::ve
 
 StatusCode AFPSiRowColToLocalCSTool::initialize() 
 {  
-  typedef std::vector< std::vector<ROOT::Math::Transform3D> >  TransformVec_t;
+  using TransformVec_t = std::vector<std::vector<ROOT::Math::Transform3D>>;
 
   std::list<TransformVec_t*> matricesForLayersInit;
   matricesForLayersInit.push_back(&m_transformations);
@@ -212,7 +212,7 @@ xAOD::AFPSiHitsCluster* AFPSiRowColToLocalCSTool::newXAODLocal (const int statio
     ROOT::Math::XYZPoint localCS = globTranslation*locTranslation*locRotation*m_transformations.at(stationID).at(layerID)*horizVertID;
 	ROOT::Math::XYZPoint localCSError = locRotation*m_transformationsErr.at(stationID).at(layerID)*horizVertIDErr;
 
-    auto xAODCluster = xAODContainer->push_back(std::make_unique<xAOD::AFPSiHitsCluster>());
+    auto *xAODCluster = xAODContainer->push_back(std::make_unique<xAOD::AFPSiHitsCluster>());
 
     fillXAOD (stationID, layerID, localCS, localCSError, xAODCluster);
     xAODCluster->setDepositedCharge(cluster.charge());

@@ -43,6 +43,6 @@ void ALFA_RawDataCnv_p1::transToPers(const ALFA_RawData* transObj, ALFA_RawData_
   }   
   
 
-  if (transObj->dataWords()!=0)
+  if (transObj->dataWords()!=nullptr)
     persObj->m_dataWords = *transObj->dataWords();
 }

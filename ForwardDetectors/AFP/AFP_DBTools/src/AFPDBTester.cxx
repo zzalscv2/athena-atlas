@@ -50,7 +50,7 @@ StatusCode AFPDBTester::execute()
   ATH_MSG_INFO("execute: "<<getContext().eventID().event_number()<<" , before CaloLocalHadCoeff");
   SG::ReadCondHandle<CaloLocalHadCoeff> rch(m_key, ctx);
   const CaloLocalHadCoeff* condObject = *rch;
-  if(condObject==0) {
+  if(condObject==nullptr) {
     ATH_MSG_ERROR("Unable to access conditions object CaloLocalHadCoeff");
     return StatusCode::FAILURE;
   }

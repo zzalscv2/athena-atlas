@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
 */
 
 /// @file	 AFPSiDLinRegTool.cxx
@@ -38,9 +38,7 @@ StatusCode AFPSiDLinRegTool::initialize()
 
 			auto HasAnyClusters = [](int n) { return n > 0; };
 
-			if (std::count_if(plane.begin(), plane.end(), HasAnyClusters) < m_minimalNumberOfPlanesInTrack) { return false; }
-
-			return true;
+			return std::count_if(plane.begin(), plane.end(), HasAnyClusters) >= m_minimalNumberOfPlanesInTrack;
 		};
 	}
 	else if(m_trackSelection=="tight" || m_trackSelection=="Tight")
@@ -88,9 +86,7 @@ bool AFPSiDLinRegTool::areNeighbours(const xAOD::AFPSiHitsCluster* a, const xAOD
 	const double dx = xa - xb;
 	const double dy = ya - yb;
 	const double maxDistanceSq = m_allowedDistanceBetweenClustersInTrack * m_allowedDistanceBetweenClustersInTrack;
-	if (dx * dx + dy * dy > maxDistanceSq) { return false; }
-
-	return true;
+	return dx * dx + dy * dy <= maxDistanceSq;
 }
 
 
@@ -122,13 +118,13 @@ std::vector<const xAOD::AFPSiHitsCluster*> AFPSiDLinRegTool::findClusterAroundEl
 		toJoin.remove(t);
 	  }
 
-	} while (newNeighbours.size() > 0);
+	} while (!newNeighbours.empty());
 
 	return track;
 }
   
 
-std::pair<double, double> AFPSiDLinRegTool::linearRegression(std::vector<std::pair<double, double>> YX) const
+std::pair<double, double> AFPSiDLinRegTool::linearRegression(const std::vector<std::pair<double, double>>& YX) const
 {
 	// here, "x" is Z axis and "y" is X or Y axis
 	
@@ -174,10 +170,10 @@ StatusCode AFPSiDLinRegTool::reconstructTracks(std::unique_ptr<xAOD::AFPTrackCon
 
 
 	// Loop until all clusters are used
-	while (clustersInStation.size() > 0)
+	while (!clustersInStation.empty())
 	{
 		// Take first element from the list...
-		const auto initialCluster = clustersInStation.front();
+		const auto *const initialCluster = clustersInStation.front();
 		clustersInStation.pop_front();
 
 		// ...and find other clusters around it
@@ -189,13 +185,13 @@ StatusCode AFPSiDLinRegTool::reconstructTracks(std::unique_ptr<xAOD::AFPTrackCon
 			continue;
 		}
 		
-		auto track = outputContainer->push_back(std::make_unique<xAOD::AFPTrack>());
+		auto *track = outputContainer->push_back(std::make_unique<xAOD::AFPTrack>());
 
 		// Set stationID
 		track->setStationID(m_stationID);
 
 		// Add links to clusters
-		for (const auto cluster : clusterOfClusters) {
+		for (const auto *const cluster : clusterOfClusters) {
 			ElementLink<xAOD::AFPSiHitsClusterContainer> clusterLink;
 			clusterLink.toContainedElement(*clusters, cluster);
 			track->addCluster(clusterLink);
@@ -233,8 +229,8 @@ StatusCode AFPSiDLinRegTool::reconstructTracks(std::unique_ptr<xAOD::AFPTrackCon
 			for (int i = 0; i < nClusters; i++) {
 				const xAOD::AFPSiHitsCluster* cluster = *(track->clusters().at(i));
 								
-				XZ.push_back({cluster->xLocal(), cluster->zLocal()});
-				YZ.push_back({cluster->yLocal(), cluster->zLocal()});
+				XZ.emplace_back(cluster->xLocal(), cluster->zLocal());
+				YZ.emplace_back(cluster->yLocal(), cluster->zLocal());
 			}
 
 			auto linregx = linearRegression(XZ);
@@ -269,7 +265,7 @@ StatusCode AFPSiDLinRegTool::reconstructTracks(std::unique_ptr<xAOD::AFPTrackCon
 		track->setAlgID(xAOD::AFPTrackRecoAlgID::linReg);
 		
 		std::vector<int> clustersPlane{0, 0, 0, 0};
-		for (auto cl : track->clusters()) {
+		for (const auto& cl : track->clusters()) {
 			++clustersPlane[(*cl)->pixelLayerID()];
 		}
 		auto HasNoClusters = [](int n) { return n == 0; };

@@ -1,17 +1,17 @@
 /*
-Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
 */
 
 
 #include "AFP_RawEv/versions/AFP_ToFRawData_v2.h"
 
 
-AFP_ToFRawData_v2::AFP_ToFRawData_v2():
+AFP_ToFRawData_v2::AFP_ToFRawData_v2(): AFP_RawDataCommonHead(),
   AthMessaging(Gaudi::svcLocator()->service< IMessageSvc >("MessageSvc"),"AFP_ToFRawData_v2")
 {}
 
 
-AFP_ToFRawData_v2::AFP_ToFRawData_v2(const AFP_ToFRawData_v2& copy):
+AFP_ToFRawData_v2::AFP_ToFRawData_v2(const AFP_ToFRawData_v2& copy): AFP_RawDataCommonHead(copy),
   AthMessaging(Gaudi::svcLocator()->service< IMessageSvc >("MessageSvc"),"AFP_ToFRawData_v2")
 {
   m_header=copy.m_header;

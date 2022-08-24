@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2019 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef ALFA_CLINKALG_H
@@ -52,7 +52,7 @@ public:
 	~ALFA_CLinkAlg();
 
 private:
-	DCSID m_CurrentDCSId;
+	DCSID m_CurrentDCSId{};
 	ServiceHandle< IIOVDbSvc > m_iovSvc;
 
 	int m_nDataType; //data type (simulation or real data) using in the local reconstruction

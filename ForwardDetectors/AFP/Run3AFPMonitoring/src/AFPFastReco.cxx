@@ -1,5 +1,5 @@
 /*
- *   Copyright (C) 2002-2020 CERN for the benefit of the ATLAS collaboration
+ *   Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
  *   *
  *   *
  *   *       AFPFastReco.cxx
@@ -8,6 +8,8 @@
  *   */
 
 #include <Run3AFPMonitoring/AFPFastReco.h>
+
+#include <cmath>
 
 namespace AFPMon {
 
@@ -26,9 +28,9 @@ void AFPFastReco::recoClusters()
 
     std::list toCluster(m_hitContainer->begin(), m_hitContainer->end());
 
-    while (toCluster.size() > 0) 
+    while (!toCluster.empty()) 
 	{
-		auto init = *(toCluster.begin());
+		const auto *init = *(toCluster.begin());
 		toCluster.pop_front();
 		auto clusteredHits = findAround(init, toCluster);
 
@@ -54,8 +56,8 @@ void AFPFastReco::recoClusters()
 		const int layerID   = init->pixelLayerID();
 
 		const float x = xPlane;
-		const float y = yPlane * cos(tilt);
-		const float z = yPlane * sin(tilt) + dz * layerID;
+		const float y = yPlane * std::cos(tilt);
+		const float z = yPlane * std::sin(tilt) + dz * layerID;
 
 		m_clusters.emplace_back(x, y, z, stationID, layerID, sumToT_temp);
     }
@@ -65,7 +67,7 @@ void AFPFastReco::recoTracks()
 {
 	std::list toTrack(m_clusters.begin(), m_clusters.end());
 
-	while (toTrack.size() > 0) 
+	while (!toTrack.empty()) 
 	{
 		auto init = *(toTrack.begin());
 		toTrack.pop_front();
@@ -94,7 +96,7 @@ void AFPFastReco::recoTracks()
     }
 }
 
-std::pair<double, double> AFPFastReco::linReg(std::vector<std::pair<double, double>> YX) const 
+std::pair<double, double> AFPFastReco::linReg(const std::vector<std::pair<double, double>>& YX) const 
 {
     double meanx = 0;
     double meany = 0;
@@ -140,9 +142,7 @@ bool AFPFastReco::areNeighbours(const AFPCluster& lhs, const AFPCluster& rhs) co
 
 	const float dx = lhs.x - rhs.x;
 	const float dy = lhs.y - rhs.y;
-	if (dx * dx + dy * dy > s_clusterDistance) return false;
-
-	return true;
+	return dx * dx + dy * dy <= s_clusterDistance;
 }
 
 }  // namespace AFPMon

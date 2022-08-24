@@ -5,9 +5,9 @@
 #define AlfaLocalHits_cxx
 
 // C, C++ headers
+#include <cstdio>
+#include <cstdlib>
 #include <iostream>
-#include <stdlib.h>
-#include <stdio.h>
 
 #include "AlfaLocalHits.h"
 #include "ALFA_LocRecEv/ALFA_LocRecEvent.h"
@@ -29,7 +29,7 @@ AlfaLocalHit::AlfaLocalHit(){
 	m_x          = 0.0;
 	m_y          = 0.0;
 	m_z          = 0.0;
-	m_LocRecCorr = 0;
+	m_LocRecCorr = nullptr;
 }
 
 
@@ -100,14 +100,14 @@ int AlfaLocalHit::GetMDindex(const char * name){
 	throw std::runtime_error("AlfaLocalHit::GetMDindex ... Not recognised detector name: " + n);
 }
 TString AlfaLocalHit::GetMDname(int i){
-  if(i == 0) return TString("B7L1U");
-  if(i == 1) return TString("B7L1L");
-  if(i == 2) return TString("A7L1U");
-  if(i == 3) return TString("A7L1L"); 
-  if(i == 4) return TString("A7R1U");
-  if(i == 5) return TString("A7R1L");
-  if(i == 6) return TString("B7R1U");
-  if(i == 7) return TString("B7R1L");
+  if(i == 0) return {"B7L1U"};
+  if(i == 1) return {"B7L1L"};
+  if(i == 2) return {"A7L1U"};
+  if(i == 3) return {"A7L1L"}; 
+  if(i == 4) return {"A7R1U"};
+  if(i == 5) return {"A7R1L"};
+  if(i == 6) return {"B7R1U"};
+  if(i == 7) return {"B7R1L"};
   throw std::runtime_error("AlfaLocalHit::GetMDname ... Not recognised detector number: " + std::to_string(i));
 }
 
@@ -131,7 +131,7 @@ void AlfaLocalHits::update(){
   m_nhits   = m_hits.size();
   m_npaths = m_paths.size();
 }
-int AlfaLocalHits::AddHit(AlfaLocalHit h){
+int AlfaLocalHits::AddHit(const AlfaLocalHit& h){
   m_hits.push_back(h);
   update();
   return m_hits.size();
@@ -277,8 +277,8 @@ AlfaTrackCand::AlfaTrackCand(AlfaLocalHits * hits){
   m_z = 1.e10;
   m_xslope = 1.e10;
   m_yslope = 1.e10;
-  m_nearlocalhit = 0;
-  m_farlocalhit = 0;
+  m_nearlocalhit = nullptr;
+  m_farlocalhit = nullptr;
 
   // ... asign hits that create the track
   m_trackcandhits = hits;
@@ -452,7 +452,7 @@ void AlfaTrackCand::CalcImpactPoints() {
 }
 
 
-void AlfaTrackCand::Dump() {
+void AlfaTrackCand::Dump() const {
   //cout.precision(8);
   cout << "Dumping AlfaTrackCand:" << endl;
   cout << " arm = "  << std::setprecision(8) << m_arm

@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2020 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "ALFA_RawDataContainerCnv_charge.h"
@@ -23,7 +23,7 @@ ALFA_RawDataContainer_charge* ALFA_RawDataContainerCnv_charge::createTransient()
 if (log.level()<=MSG::DEBUG) log << MSG::DEBUG << "In ALFA_RawDataContainerCnv_charge::createTransient" << endmsg;
 
  ALFA_RawDataContainerCnv_charge_p1 TPConverter_p1;
- ALFA_RawDataContainer_charge* transCont(0);
+ ALFA_RawDataContainer_charge* transCont(nullptr);
 
 static const pool::Guid p1_guid("0C023583-E3D4-4C7D-9B20-B6B2A1018D2F");
 

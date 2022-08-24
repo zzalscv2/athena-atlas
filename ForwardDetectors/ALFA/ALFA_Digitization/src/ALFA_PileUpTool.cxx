@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "ALFA_Digitization/ALFA_PileUpTool.h"
@@ -27,7 +27,7 @@
 
 // from now old part
 
-#include <math.h>
+#include <cmath>
 #include <functional>
 
 //for truth particles
@@ -63,11 +63,11 @@ ALFA_PileUpTool::ALFA_PileUpTool(const std::string& type,
   m_SimHitCollectionName = "ALFA_HitCollection";
   m_SimODHitCollectionName = "ALFA_ODHitCollection";
   
-  m_digitCollection = 0;	// initializing to null pointer
-  m_ODdigitCollection = 0;	// initializing to null pointer
+  m_digitCollection = nullptr;	// initializing to null pointer
+  m_ODdigitCollection = nullptr;	// initializing to null pointer
   
-  m_mergedALFA_HitList = 0;
-  m_mergedALFA_ODHitList = 0;
+  m_mergedALFA_HitList = nullptr;
+  m_mergedALFA_ODHitList = nullptr;
   
   m_key_DigitCollection  = "ALFA_DigitCollection";
   m_key_ODDigitCollection  = "ALFA_ODDigitCollection";  
@@ -123,8 +123,8 @@ StatusCode ALFA_PileUpTool::processAllSubEvents(const EventContext& ctx) {
 
   ATH_MSG_DEBUG ("ALFA_PileUpTool::processAllSubEvents()");
 
-  typedef PileUpMergeSvc::TimedList<ALFA_HitCollection>::type TimedALFAHitCollList;
-  typedef PileUpMergeSvc::TimedList<ALFA_ODHitCollection>::type TimedALFAODHitCollList;
+  using TimedALFAHitCollList = PileUpMergeSvc::TimedList<ALFA_HitCollection>::type;
+  using TimedALFAODHitCollList = PileUpMergeSvc::TimedList<ALFA_ODHitCollection>::type;
   
   TimedALFAHitCollList tHitCollList;
   TimedALFAODHitCollList tODHitCollList;
@@ -262,7 +262,7 @@ StatusCode ALFA_PileUpTool::processBunchXing(int bunchXing,
                     );
   
     
-    const ALFA_HitCollection* tmpHitColl = 0;
+    const ALFA_HitCollection* tmpHitColl = nullptr;
    
     if (!seStore.retrieve(tmpHitColl, m_SimHitCollectionName).isSuccess()) {
       
@@ -278,7 +278,7 @@ StatusCode ALFA_PileUpTool::processBunchXing(int bunchXing,
    
     for (; iHitColl!=eHitColl; ++iHitColl) m_mergedALFA_HitList->push_back((*iHitColl));
     
-    const ALFA_ODHitCollection* tmpODHitColl = 0;
+    const ALFA_ODHitCollection* tmpODHitColl = nullptr;
    
     if (!seStore.retrieve(tmpODHitColl, m_SimODHitCollectionName).isSuccess()) {
       
@@ -332,7 +332,7 @@ StatusCode ALFA_PileUpTool::finalize() { return StatusCode::SUCCESS; }
 
 
 
-StatusCode ALFA_PileUpTool::recordCollection(ServiceHandle<StoreGateSvc>& evtStore, std::string key_digitCnt) 
+StatusCode ALFA_PileUpTool::recordCollection(ServiceHandle<StoreGateSvc>& evtStore, const std::string& key_digitCnt) 
 {
   ATH_MSG_DEBUG ("ALFA_Digitization::recordCollection"); 
     
@@ -344,7 +344,7 @@ StatusCode ALFA_PileUpTool::recordCollection(ServiceHandle<StoreGateSvc>& evtSto
 }
 
 
-StatusCode ALFA_PileUpTool::recordODCollection(ServiceHandle<StoreGateSvc>& evtStore, std::string key_ODdigitCnt) {
+StatusCode ALFA_PileUpTool::recordODCollection(ServiceHandle<StoreGateSvc>& evtStore, const std::string& key_ODdigitCnt) {
 
   ATH_MSG_DEBUG ("ALFA_Digitization::recordODCollection");  
     
@@ -384,7 +384,7 @@ void ALFA_PileUpTool::ALFA_MD_info(TimedHitCollection<ALFA_Hit>& tHitALFA)
   TimedHitCollection<ALFA_Hit>  thpc = tHitALFA;
   TimedHitCollection<ALFA_Hit>::const_iterator i, e, it;
  
-  while (thpc.nextDetectorElement(i, e)) for (it = i; it != e; it++) {
+  while (thpc.nextDetectorElement(i, e)) for (it = i; it != e; ++it) {
        
     station = (*it)->GetStationNumber();
     plate   = (*it)->GetPlateNumber();
@@ -472,7 +472,7 @@ void ALFA_PileUpTool::ALFA_OD_info(TimedHitCollection<ALFA_ODHit>& tODHitALFA)
   TimedHitCollection<ALFA_ODHit>  thpc = tODHitALFA;
   TimedHitCollection<ALFA_ODHit>::const_iterator i, e, it;
   
-  while (thpc.nextDetectorElement(i, e)) for (it = i; it != e; it++) {
+  while (thpc.nextDetectorElement(i, e)) for (it = i; it != e; ++it) {
      
     station = (*it)->GetStationNumber();
     side    = (*it)->GetODSide();    

@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef ALFA_PILEUP_TOOL_H
@@ -81,7 +81,7 @@ class ALFA_PileUpTool: public PileUpToolBase {
       
    //StatusCode Truth_info();
    
-   StatusCode recordCollection(ServiceHandle<StoreGateSvc>& evtStore, std::string key_digitCnt);
+   StatusCode recordCollection(ServiceHandle<StoreGateSvc>& evtStore, const std::string& key_digitCnt);
    //StatusCode fillDigitCollection();
    
    void ALFA_MD_info(const ALFA_HitCollection*);
@@ -92,7 +92,7 @@ class ALFA_PileUpTool: public PileUpToolBase {
    
    StatusCode fill_MD_DigitCollection(CLHEP::HepRandomEngine*);     
 
-   StatusCode recordODCollection(ServiceHandle<StoreGateSvc>& evtStore, std::string key_ODdigitCnt);
+   StatusCode recordODCollection(ServiceHandle<StoreGateSvc>& evtStore, const std::string& key_ODdigitCnt);
    //StatusCode fillODDigitCollection();
    
    void ALFA_OD_info(const ALFA_ODHitCollection*);

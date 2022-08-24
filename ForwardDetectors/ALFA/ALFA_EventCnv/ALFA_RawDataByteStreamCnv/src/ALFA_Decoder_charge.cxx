@@ -97,7 +97,7 @@ msg(MSG::DEBUG) << " Bytestream summary:" << m_fragment_number << " fragments fo
 StatusCode ALFA_Decoder_charge::fillCollection(const OFFLINE_FRAGMENTS_NAMESPACE::ROBFragment *robFrag, ALFA_RawDataContainer_charge* rdoCont, std::vector<unsigned int>* ) {
  msg(MSG::DEBUG) << " ALFA_RoDDecoder_charge::fillCollection" << endmsg;
 
-ALFA_RawDataCollection_charge* collection = 0;   
+ALFA_RawDataCollection_charge* collection = nullptr;   
 
  uint32_t wordPos   = 0;
 
@@ -480,7 +480,7 @@ msg(MSG::DEBUG) << " ALFA_RoDDecoder_charge::getCollection" << endmsg;
   }
   if (collExists) {
     msg(MSG::DEBUG) << " Collection exists " << endmsg;
-    return 0;
+    return nullptr;
 
   } else {  // if collection does not exist create it
     coll = new ALFA_RawDataCollection_charge(MBIdNum);

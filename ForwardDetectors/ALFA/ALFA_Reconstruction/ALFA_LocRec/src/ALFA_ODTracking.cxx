@@ -42,7 +42,7 @@ StatusCode ALFA_ODTracking::Execute(Int_t iRPot, const std::list<ODHIT> &ListODH
 	std::map<int, FIBERS> MapLayers;
 	MapLayers.clear();
 	std::list<ODHIT>::const_iterator iter;
-	for (iter=ListODHits.begin(); iter!=ListODHits.end(); iter++)
+	for (iter=ListODHits.begin(); iter!=ListODHits.end(); ++iter)
 	{
 		if (iRPot == (*iter).iRPot)
 		{
@@ -115,10 +115,10 @@ void ALFA_ODTracking::FiberProjection(Int_t iRPot, std::map<int, FIBERS> &MapLay
 		for (Int_t iPlate=0; iPlate<ODPLATESCNT; iPlate++)
 		{
 			//multiplicity cut
-			if (MapLayers[2*iPlate+iSide].ListFibers.size()<=(UInt_t)m_iMultiplicityCut && MapLayers[2*iPlate+iSide].ListFibers.size() > 0)
+			if (MapLayers[2*iPlate+iSide].ListFibers.size()<=(UInt_t)m_iMultiplicityCut && !MapLayers[2*iPlate+iSide].ListFibers.empty())
 			{
 				//Making the projections
-				for (iIter=MapLayers[2*iPlate+iSide].ListFibers.begin(); iIter!=MapLayers[2*iPlate+iSide].ListFibers.end(); iIter++)
+				for (iIter=MapLayers[2*iPlate+iSide].ListFibers.begin(); iIter!=MapLayers[2*iPlate+iSide].ListFibers.end(); ++iIter)
 				{
 //					cout << "iPot, iPlate, iSide, iFiber = " << iRPot << ", " << iPlate << ", " << iSide << ", " << *iIter << endl;
 					fPosition = -1*(iSign*fFiberXPos*faOD[iRPot][iPlate][iSide][*iIter] + fbOD[iRPot][iPlate][iSide][*iIter]);
@@ -196,7 +196,7 @@ void ALFA_ODTracking::FiberProjection(Int_t iRPot, std::map<int, FIBERS> &MapLay
 					iFibSel = 9999;
 					fMin = 0.24/cos(TMath::Pi()/4.0);
 
-					for (iIter=MapLayers[2*iPlate+iSide].ListFibers.begin(); iIter!=MapLayers[2*iPlate+iSide].ListFibers.end(); iIter++)
+					for (iIter=MapLayers[2*iPlate+iSide].ListFibers.begin(); iIter!=MapLayers[2*iPlate+iSide].ListFibers.end(); ++iIter)
 					{
 						fPosition = iSign*fFiberXPos*faOD[iRPot][iPlate][iSide][*iIter] + fbOD[iRPot][iPlate][iSide][*iIter];
 						fDist = TMath::Abs(Results.fRecPos-fPosition);
@@ -245,17 +245,17 @@ void ALFA_ODTracking::FindingPosition(Int_t iRPot, std::map<int, FIBERS> &MapLay
 
 		if (((Int_t)MapLayers[0+iSide].ListFibers.size()<=m_iMultiplicityCut) && ((Int_t)MapLayers[2+iSide].ListFibers.size()<=m_iMultiplicityCut) && ((Int_t)MapLayers[4+iSide].ListFibers.size()<=m_iMultiplicityCut))
 		{
-			if (MapLayers[0+iSide].ListFibers.size()>0)
+			if (!MapLayers[0+iSide].ListFibers.empty())
 			{
-				for (intIter0=MapLayers[0+iSide].ListFibers.begin(); intIter0!=MapLayers[0+iSide].ListFibers.end(); intIter0++)
+				for (intIter0=MapLayers[0+iSide].ListFibers.begin(); intIter0!=MapLayers[0+iSide].ListFibers.end(); ++intIter0)
 				{
-					if (MapLayers[2+iSide].ListFibers.size()>0)
+					if (!MapLayers[2+iSide].ListFibers.empty())
 					{
-						for (intIter1=MapLayers[2+iSide].ListFibers.begin(); intIter1!=MapLayers[2+iSide].ListFibers.end(); intIter1++)
+						for (intIter1=MapLayers[2+iSide].ListFibers.begin(); intIter1!=MapLayers[2+iSide].ListFibers.end(); ++intIter1)
 						{
-							if (MapLayers[4+iSide].ListFibers.size()>0)
+							if (!MapLayers[4+iSide].ListFibers.empty())
 							{
-								for (intIter2=MapLayers[4+iSide].ListFibers.begin(); intIter2!=MapLayers[4+iSide].ListFibers.end(); intIter2++)
+								for (intIter2=MapLayers[4+iSide].ListFibers.begin(); intIter2!=MapLayers[4+iSide].ListFibers.end(); ++intIter2)
 								{
 									fDistanceA = TMath::Abs(iSign*fFiberXPos*faOD[iRPot][0][iSide][*intIter0] + fbOD[iRPot][0][iSide][*intIter0] - iSign*fFiberXPos*faOD[iRPot][1][iSide][*intIter1] - fbOD[iRPot][1][iSide][*intIter1]);
 									fDistanceB = TMath::Abs(iSign*fFiberXPos*faOD[iRPot][1][iSide][*intIter1] + fbOD[iRPot][1][iSide][*intIter1] - iSign*fFiberXPos*faOD[iRPot][2][iSide][*intIter2] - fbOD[iRPot][2][iSide][*intIter2]);
@@ -284,9 +284,9 @@ void ALFA_ODTracking::FindingPosition(Int_t iRPot, std::map<int, FIBERS> &MapLay
 					}
 					else
 					{
-						if (MapLayers[4+iSide].ListFibers.size()>0)
+						if (!MapLayers[4+iSide].ListFibers.empty())
 						{
-							for (intIter2=MapLayers[2*2+iSide].ListFibers.begin(); intIter2!=MapLayers[2*2+iSide].ListFibers.end(); intIter2++)
+							for (intIter2=MapLayers[2*2+iSide].ListFibers.begin(); intIter2!=MapLayers[2*2+iSide].ListFibers.end(); ++intIter2)
 							{
 								fDistanceA = TMath::Abs(iSign*fFiberXPos*faOD[iRPot][0][iSide][*intIter0]+fbOD[iRPot][0][iSide][*intIter0] - iSign*fFiberXPos*faOD[iRPot][2][iSide][*intIter2]-fbOD[iRPot][2][iSide][*intIter2]);
 								if (fDistanceA < m_fDistanceCut)
@@ -303,13 +303,13 @@ void ALFA_ODTracking::FindingPosition(Int_t iRPot, std::map<int, FIBERS> &MapLay
 			}
 			else
 			{
-				if (MapLayers[2+iSide].ListFibers.size()>0)
+				if (!MapLayers[2+iSide].ListFibers.empty())
 				{
-					for (intIter1=MapLayers[2*1+iSide].ListFibers.begin(); intIter1!=MapLayers[2*1+iSide].ListFibers.end(); intIter1++)
+					for (intIter1=MapLayers[2*1+iSide].ListFibers.begin(); intIter1!=MapLayers[2*1+iSide].ListFibers.end(); ++intIter1)
 					{
-						if (MapLayers[4+iSide].ListFibers.size()>0)
+						if (!MapLayers[4+iSide].ListFibers.empty())
 						{
-							for (intIter2=MapLayers[2*2+iSide].ListFibers.begin(); intIter2!=MapLayers[2*2+iSide].ListFibers.end(); intIter2++)
+							for (intIter2=MapLayers[2*2+iSide].ListFibers.begin(); intIter2!=MapLayers[2*2+iSide].ListFibers.end(); ++intIter2)
 							{
 								fDistanceB = TMath::Abs(iSign*fFiberXPos*faOD[iRPot][1][iSide][*intIter1]+fbOD[iRPot][1][iSide][*intIter1] - iSign*fFiberXPos*faOD[iRPot][2][iSide][*intIter2]-fbOD[iRPot][2][iSide][*intIter2]);
 								if (fDistanceB<m_fDistanceCut)

@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2017 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "ALFA_CLinkEv/ALFA_CLinkEvent.h"
@@ -53,7 +53,7 @@ StatusCode ALFA_CLinkEvent::AddLink(eDVType eType, const void* pObj)
 
 const void* ALFA_CLinkEvent::GetLinkedObject(eDVType eType) const
 {
-	const void* pObj=NULL;
+	const void* pObj=nullptr;
 
 	switch(eType){
 	case EDVT_RAWDATAEVCOLLECTION:
@@ -121,7 +121,7 @@ void ALFA_CLinkEvent::SetDCSFolderID(eDCSItem eItem, const unsigned long long ul
 
 void ALFA_CLinkEvent::SetDCSFolderIDs(const DCSID* pDCSIds)
 {
-	if(pDCSIds!=NULL) memcpy(&m_DCSId,pDCSIds,sizeof(DCSID));
+	if(pDCSIds!=nullptr) memcpy(&m_DCSId,pDCSIds,sizeof(DCSID));
 }
 
 unsigned long long ALFA_CLinkEvent::GetDCSFolderID(eDCSItem eItem) const

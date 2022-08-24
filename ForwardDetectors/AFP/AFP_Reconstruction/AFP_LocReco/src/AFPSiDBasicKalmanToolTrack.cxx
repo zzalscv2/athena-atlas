@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
 */
 
 /// @file   AFPSiDBasicKalmanToolTrack.cxx
@@ -8,7 +8,7 @@
 /// 
 /// @brief  Implementation file for AFPSiDBasicKalmanToolTrack used in tracks reconstruction with Kalman filter.
 
-#include <math.h>
+#include <cmath>
 
 // debug remove after debugging
 #include<iostream>

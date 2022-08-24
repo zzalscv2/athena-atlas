@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2019 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
 */
 
 // $Id$
@@ -89,7 +89,7 @@ void compare (const ALFA_RawDataContainer& p1,
 
 void testit (const ALFA_RawDataContainer& trans1)
 {
-  MsgStream log (0, "test");
+  MsgStream log (nullptr, "test");
   ALFA_RawDataContainerCnv_p1 cnv;
   ALFA_RawDataContainer_p1 pers;
   cnv.transToPers (&trans1, &pers, log);
@@ -106,6 +106,7 @@ void init_RawData (ALFA_RawData& r, int o)
   r.SetMBId_PMF (345+o);
   r.SetEventCount_PMF (456+o);
   std::vector<uint16_t> v;
+  v.reserve(16);
   for (int k=0; k<16; k++)
     v.push_back (4+k+o);
   r.SetMarocChan_PMF (v);

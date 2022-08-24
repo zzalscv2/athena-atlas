@@ -112,7 +112,7 @@ StatusCode ALFA_CLinkAlg::LoadAllEventData(ALFA_CLinkEvent* pDataEvent)
 	//RawDataContainer
 	if (m_nDataType==1)
 	{
-		const ALFA_RawDataContainer* pAuxRawDataColl=NULL;
+		const ALFA_RawDataContainer* pAuxRawDataColl=nullptr;
 		sc = evtStore()->retrieve(pAuxRawDataColl, EVCOLLNAME_RAWDATA);
 		if(sc.isFailure() || !pAuxRawDataColl)
 		{
@@ -207,7 +207,7 @@ StatusCode ALFA_CLinkAlg::COOLUpdate(IOVSVC_CALLBACK_ARGS_K(keys))
 {
 	list<string>::const_iterator iter;
 
-	for(iter=keys.begin();iter!=keys.end();iter++){
+	for(iter=keys.begin();iter!=keys.end();++iter){
 		if((*iter)==DCSCOLLNAME_BLM){
 			msg(MSG::DEBUG) << " IOV/COOL Notification '"<<DCSCOLLNAME_BLM<<"'" << endmsg;
 			m_CurrentDCSId.ullBlmID=CalcDCSId(EDCSI_BLM);
@@ -280,7 +280,7 @@ unsigned long long ALFA_CLinkAlg::CalcDCSId(eDCSItem eItem)
 		break;
 	}
 
-	const CondAttrListCollection* pAttrListCol=NULL;
+	const CondAttrListCollection* pAttrListCol=nullptr;
     IIOVDbSvc::KeyInfo info;
 	CHECK(detStore()->retrieve(pAttrListCol,Folder), 0);
 	if(!m_iovSvc->getKeyInfo(Folder,info)) {
@@ -308,7 +308,7 @@ StatusCode ALFA_CLinkAlg::CalcAllDCSIds(PDCSID pDCSIds)
 {
 	bool bRes=true;
 
-	if(pDCSIds!=NULL){
+	if(pDCSIds!=nullptr){
 		memset(pDCSIds,0,sizeof(DCSID));
 		bRes&=(pDCSIds->ullBlmID=CalcDCSId(EDCSI_BLM))>0;
 		bRes&=(pDCSIds->ullHVChannelID=CalcDCSId(EDCSI_HVCHANNEL))>0;
@@ -357,17 +357,17 @@ StatusCode ALFA_CLinkAlg::FillXAOD_TrackingData(xAOD::ALFADataContainer* pxAODCo
 	sc=evtStore()->retrieve(pLocRecEvColl, EVCOLLNAME_LOCREC);
 	sc2=evtStore()->retrieve(pLocRecODEvColl, EVCOLLNAME_LOCRECOD);
 
-	if(!sc.isFailure() && !sc2.isFailure() && pLocRecEvColl!=NULL && pLocRecODEvColl!=NULL)
+	if(!sc.isFailure() && !sc2.isFailure() && pLocRecEvColl!=nullptr && pLocRecODEvColl!=nullptr)
 	{
 		m_nMaxTrackCnt=1;
 		// resolve max track count from LocRecEvCollection
 		memset(&arrTrackCntPerRPot[0],0,sizeof(arrTrackCntPerRPot));
-		for(iterLocRec=pLocRecEvColl->begin();iterLocRec!=pLocRecEvColl->end();iterLocRec++)
+		for(iterLocRec=pLocRecEvColl->begin();iterLocRec!=pLocRecEvColl->end();++iterLocRec)
 		{
 			nPotID=(*iterLocRec)->getPotNum();
 			arrTrackCntPerRPot[nPotID]++;
 		}
-		for(iterLocRecOD=pLocRecODEvColl->begin();iterLocRecOD!=pLocRecODEvColl->end();iterLocRecOD++)
+		for(iterLocRecOD=pLocRecODEvColl->begin();iterLocRecOD!=pLocRecODEvColl->end();++iterLocRecOD)
 		{
 			nPotID=(*iterLocRecOD)->getPotNum();
 			arrTrackCntPerRPot[nPotID]++;
@@ -381,7 +381,7 @@ StatusCode ALFA_CLinkAlg::FillXAOD_TrackingData(xAOD::ALFADataContainer* pxAODCo
 
 		//fill data - LocRecEvCollection
 		vecFiberSel.clear();
-		for(iterLocRec=pLocRecEvColl->begin();iterLocRec!=pLocRecEvColl->end();iterLocRec++)
+		for(iterLocRec=pLocRecEvColl->begin();iterLocRec!=pLocRecEvColl->end();++iterLocRec)
 		{
 			nPotID=(*iterLocRec)->getPotNum();
 
@@ -405,7 +405,7 @@ StatusCode ALFA_CLinkAlg::FillXAOD_TrackingData(xAOD::ALFADataContainer* pxAODCo
 
 		//fill data - LocRecODEvCollection
 		vecFiberSel.clear();
-		for(iterLocRecOD=pLocRecODEvColl->begin();iterLocRecOD!=pLocRecODEvColl->end();iterLocRecOD++)
+		for(iterLocRecOD=pLocRecODEvColl->begin();iterLocRecOD!=pLocRecODEvColl->end();++iterLocRecOD)
 		{
 			nPotID=(*iterLocRecOD)->getPotNum();
 			nSideID=(*iterLocRecOD)->getSide();
@@ -441,13 +441,13 @@ StatusCode ALFA_CLinkAlg::FillXAOD_TrackingData(xAOD::ALFADataContainer* pxAODCo
 	sc=evtStore()->retrieve(pLocRecCorrEvColl, EVCOLLNAME_LOCRECCORR);
 	sc2=evtStore()->retrieve(pLocRecCorrODEvColl, EVCOLLNAME_LOCRECCORROD);
 
-	if(!sc.isFailure() && !sc2.isFailure() && pLocRecCorrEvColl!=NULL && pLocRecCorrODEvColl!=NULL)
+	if(!sc.isFailure() && !sc2.isFailure() && pLocRecCorrEvColl!=nullptr && pLocRecCorrODEvColl!=nullptr)
 	{
 		memset(&arrTrackCntPerRPot[0],0,sizeof(arrTrackCntPerRPot));
 		ClearXAODTrackingData(m_nMaxTrackCnt,ERC_LOCCORRECTED);
 
 		//fill data - LocRecCorrEvCollection - ONLY DetCS for now (TODO rest)
-		for(iterLocRecCorr=pLocRecCorrEvColl->begin();iterLocRecCorr!=pLocRecCorrEvColl->end();iterLocRecCorr++)
+		for(iterLocRecCorr=pLocRecCorrEvColl->begin();iterLocRecCorr!=pLocRecCorrEvColl->end();++iterLocRecCorr)
 		{
 			nPotID=(*iterLocRecCorr)->getPotNum();
 
@@ -468,7 +468,7 @@ StatusCode ALFA_CLinkAlg::FillXAOD_TrackingData(xAOD::ALFADataContainer* pxAODCo
 		}
 
 		//fill data - LocRecCorrODEvCollection - ONLY DetCS for now (TODO rest)
-		for(iterLocRecCorrOD=pLocRecCorrODEvColl->begin();iterLocRecCorrOD!=pLocRecCorrODEvColl->end();iterLocRecCorrOD++)
+		for(iterLocRecCorrOD=pLocRecCorrODEvColl->begin();iterLocRecCorrOD!=pLocRecCorrODEvColl->end();++iterLocRecCorrOD)
 		{
 			nPotID=(*iterLocRecCorrOD)->getPotNum();
 			nSideID=(*iterLocRecCorrOD)->getSide();
@@ -552,7 +552,7 @@ StatusCode ALFA_CLinkAlg::FillXAOD_HeaderData(xAOD::ALFADataContainer* pxAODCont
 		const ALFA_RawDataContainer* pRawDataColl;
 		ALFA_RawDataContainer::const_iterator iterRawData;
 		sc=evtStore()->retrieve(pRawDataColl, EVCOLLNAME_RAWDATA);
-		if(!sc.isFailure() && pRawDataColl!=NULL)
+		if(!sc.isFailure() && pRawDataColl!=nullptr)
 		{
 			//m_nTimeStamp=pRawDataColl->GetTimeStamp();
 			//m_nTimeStamp_ns=pRawDataColl->GetTimeStampns();
@@ -581,7 +581,7 @@ StatusCode ALFA_CLinkAlg::FillXAOD_HeaderData(xAOD::ALFADataContainer* pxAODCont
 	const ALFA_DigitCollection* pDigitColl;
 	ALFA_DigitCollection::const_iterator iterDigit;
 	sc=evtStore()->retrieve(pDigitColl, EVCOLLNAME_DIGIT);
-	if(!sc.isFailure() && pDigitColl!=NULL)
+	if(!sc.isFailure() && pDigitColl!=nullptr)
 	{
 		for(iterDigit=pDigitColl->begin();iterDigit!=pDigitColl->end();iterDigit++)
 		{
@@ -610,7 +610,7 @@ StatusCode ALFA_CLinkAlg::FillXAOD_HeaderData(xAOD::ALFADataContainer* pxAODCont
 	const ALFA_ODDigitCollection* pODDigitColl;
 	ALFA_ODDigitCollection::const_iterator iterODDigit;
 	sc=evtStore()->retrieve(pODDigitColl, EVCOLLNAME_ODDIGIT);
-	if(!sc.isFailure() && pODDigitColl!=NULL)
+	if(!sc.isFailure() && pODDigitColl!=nullptr)
 	{
 		for(iterODDigit=pODDigitColl->begin();iterODDigit!=pODDigitColl->end();iterODDigit++)
 		{

@@ -26,10 +26,10 @@ bool ALFA_RDBAccess::ReadGeometry(const eRPotName eRPName, eFiberType eFType,
 	MsgStream LogStream(Athena::getMessageSvc(), "ALFA_RDBAaccess::ReadGeometry");
 	
 	m_svcLocator = Gaudi::svcLocator();
-	IRDBAccessSvc* iAccessSvc = NULL;
+	IRDBAccessSvc* iAccessSvc = nullptr;
 
 	StatusCode result = m_svcLocator->service("RDBAccessSvc", iAccessSvc);
-	if (result.isFailure() || iAccessSvc == NULL)
+	if (result.isFailure() || iAccessSvc == nullptr)
 	{
 		LogStream << MSG::FATAL << " Could not initialize RDBAccessSvc! ((RP no."<<eRPName<<", Fiber type "<<eFType<<")"<< endmsg;
 
@@ -43,7 +43,7 @@ bool ALFA_RDBAccess::ReadGeometry(const eRPotName eRPName, eFiberType eFType,
 	return bRes;
 }
 
-bool ALFA_RDBAccess::ReadFiberGeometry(IRDBAccessSvc* iAccessSvc, std::string element, std::string tag, std::string node)
+bool ALFA_RDBAccess::ReadFiberGeometry(IRDBAccessSvc* iAccessSvc, const std::string& element, const std::string& tag, const std::string& node)
 {
 	bool bRes = false;
 	
@@ -76,7 +76,7 @@ bool ALFA_RDBAccess::ReadFiberGeometry(IRDBAccessSvc* iAccessSvc, std::string el
 			listFData.push_back(FiberData);
 		}
 		
-		if (listFData.size())
+		if (!listFData.empty())
 		{
 			m_ListFiberData=listFData;
 			bRes = true;

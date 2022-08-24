@@ -104,7 +104,7 @@ StatusCode ALFA_Decoder::fillCollection(const OFFLINE_FRAGMENTS_NAMESPACE::ROBFr
 {
   msg(MSG::DEBUG) << " ALFA_RoDDecoder::fillCollection" << endmsg;
 
-  ALFA_RawDataCollection* collection = 0;
+  ALFA_RawDataCollection* collection = nullptr;
 
   uint32_t wordPos   = 0;
 
@@ -140,7 +140,7 @@ StatusCode ALFA_Decoder::fillCollection(const OFFLINE_FRAGMENTS_NAMESPACE::ROBFr
 
 
   // retrieve EventInfo
-  const EventInfo* eventInfo=0;
+  const EventInfo* eventInfo=nullptr;
   StatusCode sc = evtStore()->retrieve(eventInfo);
   if (sc.isFailure()) {
     ATH_MSG_WARNING (" cannot retrieve EventInfo, will not set ALFA bit information ");
@@ -357,7 +357,7 @@ StatusCode ALFA_Decoder::fillCollection(const OFFLINE_FRAGMENTS_NAMESPACE::ROBFr
 	      uint16_t WordIdNum;
 	      uint16_t FiberNum;
 
-	      if (m_ALFA_RawDataReadOut->is_TDCt() && m_ALFA_RawDataReadOut->bit26_27()==0 &&  m_ALFA_RawDataReadOut->bit16()==false && m_ALFA_RawDataReadOut->bit18()==false )
+	      if (m_ALFA_RawDataReadOut->is_TDCt() && m_ALFA_RawDataReadOut->bit26_27()==0 &&  !m_ALFA_RawDataReadOut->bit16() && !m_ALFA_RawDataReadOut->bit18() )
 		{
 
 		  //msg(MSG::DEBUG)<<" DECODER : PMFId  " <<  m_ALFA_RawDataReadOut->PMFId() <<  " MBId  " << m_ALFA_RawDataReadOut->MBId() << endmsg;
@@ -673,7 +673,7 @@ ALFA_RawDataCollection* ALFA_Decoder::getCollection(unsigned int MBIdNum, ALFA_R
   if (collExists)
     {
       msg(MSG::DEBUG) << " Collection exists " << endmsg;
-      return 0;
+      return nullptr;
 
     }
   else // if collection does not exist create it

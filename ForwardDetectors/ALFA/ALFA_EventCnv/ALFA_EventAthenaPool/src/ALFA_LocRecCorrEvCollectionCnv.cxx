@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2020 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "ALFA_EventTPCnv/ALFA_LocRecCorrEvCollectionCnv_p1.h"
@@ -20,7 +20,7 @@ ALFA_LocRecCorrEvCollection* ALFA_LocRecCorrEvCollectionCnv::createTransient() {
     
     ALFA_LocRecCorrEvCollectionCnv_p1   TPConverter_p1;
 
-    ALFA_LocRecCorrEvCollection       *trans_cont(0); // probably inicialization
+    ALFA_LocRecCorrEvCollection       *trans_cont(nullptr); // probably inicialization
     static const pool::Guid p1_guid ("E6C77BF6-011B-4A7F-847A-E34A0B402976");
 
     

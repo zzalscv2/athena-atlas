@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef AFP_SICLUSTERTOOLS_AFPSICLUSTERAllNEIGHBOURS_H
@@ -55,7 +55,7 @@ private:
   
   Gaudi::Property<std::string> m_neighbourhoodType {this, "neighbourhoodType", "X", "type of hit neighbourhood in cluster, either X (only long-edge) or XY (both long- and short-edge)"};
   
-  bool m_doOnlyHorz;
+  bool m_doOnlyHorz = false;
 };
 
 

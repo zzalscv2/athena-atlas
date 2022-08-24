@@ -22,7 +22,7 @@ AFP_GeoModelTool::AFP_GeoModelTool( const std::string& type, const std::string& 
     : GeoModelTool( type, name, parent ), m_iovSvc( "IOVDbSvc", name )
 {
     m_CfgParams.clear();
-    m_pGeometry=NULL;
+    m_pGeometry=nullptr;
 
 	m_defsidcfg.clear();
 
@@ -71,14 +71,14 @@ AFP_GeoModelTool::~AFP_GeoModelTool()
 {
     // This will need to be modified once we register the  DetectorNode in
     // the Transient Detector Store
-    if(m_detector!=NULL) {
+    if(m_detector!=nullptr) {
         delete m_detector;
-        m_detector=NULL;
+        m_detector=nullptr;
     }
 
-    if(m_pGeometry!=NULL){
+    if(m_pGeometry!=nullptr){
         delete m_pGeometry;
-        m_pGeometry=NULL;
+        m_pGeometry=nullptr;
     }
 }
 
@@ -88,7 +88,7 @@ StatusCode AFP_GeoModelTool::checkPropertiesSettings()
 
 	MsgStream LogStream(Athena::getMessageSvc(), "AFP_GeoModelTool::CheckPropertiesSettings");
 
-	if(m_vecAFP00XStaggering.size()>0){
+	if(!m_vecAFP00XStaggering.empty()){
 		if(m_vecAFP00XStaggering.size()==m_CfgParams.sidcfg[EAS_AFP00].fLayerCount){
 			m_CfgParams.sidcfg[EAS_AFP00].vecXStaggering=m_vecAFP00XStaggering;
 		}
@@ -97,7 +97,7 @@ StatusCode AFP_GeoModelTool::checkPropertiesSettings()
 			bRes=false;
 		}
 	}
-	if(m_vecAFP00YStaggering.size()>0){
+	if(!m_vecAFP00YStaggering.empty()){
 		if(m_vecAFP00YStaggering.size()==m_CfgParams.sidcfg[EAS_AFP00].fLayerCount){
 			m_CfgParams.sidcfg[EAS_AFP00].vecYStaggering=m_vecAFP00YStaggering;
 		}
@@ -107,7 +107,7 @@ StatusCode AFP_GeoModelTool::checkPropertiesSettings()
 		}
 	}
 
-	if(m_vecAFP01XStaggering.size()>0){
+	if(!m_vecAFP01XStaggering.empty()){
 		if(m_vecAFP01XStaggering.size()==m_CfgParams.sidcfg[EAS_AFP01].fLayerCount){
 			m_CfgParams.sidcfg[EAS_AFP01].vecXStaggering=m_vecAFP01XStaggering;
 		}
@@ -116,7 +116,7 @@ StatusCode AFP_GeoModelTool::checkPropertiesSettings()
 			bRes=false;
 		}
 	}
-	if(m_vecAFP01YStaggering.size()>0){
+	if(!m_vecAFP01YStaggering.empty()){
 		if(m_vecAFP01YStaggering.size()==m_CfgParams.sidcfg[EAS_AFP01].fLayerCount){
 			m_CfgParams.sidcfg[EAS_AFP01].vecYStaggering=m_vecAFP01YStaggering;
 		}
@@ -126,7 +126,7 @@ StatusCode AFP_GeoModelTool::checkPropertiesSettings()
 		}
 	}
 
-	if(m_vecAFP02XStaggering.size()>0){
+	if(!m_vecAFP02XStaggering.empty()){
 		if(m_vecAFP02XStaggering.size()==m_CfgParams.sidcfg[EAS_AFP02].fLayerCount){
 			m_CfgParams.sidcfg[EAS_AFP02].vecXStaggering=m_vecAFP02XStaggering;
 		}
@@ -135,7 +135,7 @@ StatusCode AFP_GeoModelTool::checkPropertiesSettings()
 			bRes=false;
 		}
 	}
-	if(m_vecAFP02YStaggering.size()>0){
+	if(!m_vecAFP02YStaggering.empty()){
 		if(m_vecAFP02YStaggering.size()==m_CfgParams.sidcfg[EAS_AFP02].fLayerCount){
 			m_CfgParams.sidcfg[EAS_AFP02].vecYStaggering=m_vecAFP02YStaggering;
 		}
@@ -145,7 +145,7 @@ StatusCode AFP_GeoModelTool::checkPropertiesSettings()
 		}
 	}
 
-	if(m_vecAFP03XStaggering.size()>0){
+	if(!m_vecAFP03XStaggering.empty()){
 		if(m_vecAFP03XStaggering.size()==m_CfgParams.sidcfg[EAS_AFP03].fLayerCount){
 			m_CfgParams.sidcfg[EAS_AFP03].vecXStaggering=m_vecAFP03XStaggering;
 		}
@@ -154,7 +154,7 @@ StatusCode AFP_GeoModelTool::checkPropertiesSettings()
 			bRes=false;
 		}
 	}
-	if(m_vecAFP03YStaggering.size()>0){
+	if(!m_vecAFP03YStaggering.empty()){
 		if(m_vecAFP03YStaggering.size()==m_CfgParams.sidcfg[EAS_AFP03].fLayerCount){
 			m_CfgParams.sidcfg[EAS_AFP03].vecYStaggering=m_vecAFP03YStaggering;
 		}
@@ -185,7 +185,7 @@ StatusCode AFP_GeoModelTool::create()
     m_pGeometry=new AFP_Geometry(&m_CfgParams);
     m_pAFPDetectorFactory=std::make_unique<AFP_GeoModelFactory>(detStore().operator->(), m_pGeometry);
 
-	if (m_detector==NULL)
+	if (m_detector==nullptr)
 	{
 		try
 		{

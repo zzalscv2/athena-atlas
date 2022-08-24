@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2019 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef ALFA_DECODER_H
@@ -66,18 +66,18 @@ class ALFA_Decoder: public AthAlgTool {
 
 
  private:
-  const eformat::FullEventFragment<const uint32_t*> * m_event;
-  const eformat::ROBFragment<const uint32_t*> * m_robFrag;
+  const eformat::FullEventFragment<const uint32_t*> * m_event = nullptr;
+  const eformat::ROBFragment<const uint32_t*> * m_robFrag = nullptr;
 
-  unsigned int                m_fragment_number;
+  unsigned int                m_fragment_number = 0U;
 
   /// Service for reading bytestream
   ServiceHandle<IROBDataProviderSvc>   m_robDataProvider;
 
   // Methods for the decoding
-  ALFA_RawDataReadOut*       m_ALFA_RawDataReadOut;
-  ALFA_RawDataCollectionReadOut*       m_ALFA_RawDataCollectionReadOut;
-  ALFA_RawDataContainerReadOut*       m_ALFA_RawDataContainerReadOut;
+  ALFA_RawDataReadOut*       m_ALFA_RawDataReadOut = nullptr;
+  ALFA_RawDataCollectionReadOut*       m_ALFA_RawDataCollectionReadOut = nullptr;
+  ALFA_RawDataContainerReadOut*       m_ALFA_RawDataContainerReadOut = nullptr;
   
 };
 

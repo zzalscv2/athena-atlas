@@ -9,8 +9,8 @@ using namespace std;
 ALFA_CenterGravity::ALFA_CenterGravity() :
     AthMessaging("ALFA_CenterGravity")
 {
-	m_histU_PT = NULL;
-	m_histV_PT = NULL;
+	m_histU_PT = nullptr;
+	m_histV_PT = nullptr;
 
 
 
@@ -142,7 +142,7 @@ StatusCode ALFA_CenterGravity::SelectHitInLayer()
 	std::list<int>::iterator iterFiber;
 
 	std::list<MDHIT>::const_iterator iter;
-	for (iter=m_ListMDHits.begin(); iter!=m_ListMDHits.end(); iter++)
+	for (iter=m_ListMDHits.begin(); iter!=m_ListMDHits.end(); ++iter)
 	{
 		if (m_iRPot == (*iter).iRPot)
 		{
@@ -162,7 +162,7 @@ StatusCode ALFA_CenterGravity::SelectHitInLayer()
 
 	for (Int_t iLayer = 0; iLayer < ALFALAYERSCNT*ALFAPLATESCNT; iLayer++)
 	{
-		for (iterFiber=mapLayers[iLayer].ListFibers.begin(); iterFiber!=mapLayers[iLayer].ListFibers.end(); iterFiber++)
+		for (iterFiber=mapLayers[iLayer].ListFibers.begin(); iterFiber!=mapLayers[iLayer].ListFibers.end(); ++iterFiber)
 		{
 			if (fmod((double)iLayer,(double)2) == 0)	// for U-fibers
 			{
@@ -231,7 +231,7 @@ StatusCode ALFA_CenterGravity::SelectHitInLayer()
 		fRMinU = fRMinV = 0.5;
 		m_iFHits[iLayer] = -9999;
 
-		for (iterFiber=mapLayers[iLayer].ListFibers.begin(); iterFiber!=mapLayers[iLayer].ListFibers.end(); iterFiber++)
+		for (iterFiber=mapLayers[iLayer].ListFibers.begin(); iterFiber!=mapLayers[iLayer].ListFibers.end(); ++iterFiber)
 		{
 			if (fmod((double)iLayer,(double)2) == 0)	// for U-fibers
 			{
@@ -331,10 +331,10 @@ void ALFA_CenterGravity::HistInitialize()
 
 void ALFA_CenterGravity::HistFinalize()
 {
-	if (m_histU_PT!=NULL) delete m_histU_PT;
-	if (m_histV_PT!=NULL) delete m_histV_PT;
-	m_histU_PT = NULL;
-	m_histV_PT = NULL;
+	if (m_histU_PT!=nullptr) delete m_histU_PT;
+	if (m_histV_PT!=nullptr) delete m_histV_PT;
+	m_histU_PT = nullptr;
+	m_histV_PT = nullptr;
 }
 
 void ALFA_CenterGravity::GetData(Int_t (&iFibSel)[ALFALAYERSCNT*ALFAPLATESCNT])

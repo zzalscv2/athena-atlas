@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2017 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
 */
 
 // $Id$
@@ -48,7 +48,7 @@ void compare (const ALFA_CLinkEvent& p1,
 
 void testit (const ALFA_CLinkEvent& trans1)
 {
-  MsgStream log (0, "test");
+  MsgStream log (nullptr, "test");
   ALFA_CLinkEventCnv_p1 cnv;
   ALFA_CLinkEvent_p1 pers;
   cnv.transToPers (&trans1, &pers, log);

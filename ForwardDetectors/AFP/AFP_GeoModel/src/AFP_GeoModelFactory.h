@@ -66,8 +66,8 @@ private:
     void addRomanPot(GeoPhysVol* pPhysMotherVol, const char* pszStationName, HepGeom::Transform3D& TransInMotherVolume);
 
     //TOF part
-    GeoOpticalSurface* m_pOpticalSurface;
-    GeoOpticalSurface* m_pReflectionOptSurface;
+    GeoOpticalSurface* m_pOpticalSurface = nullptr;
+    GeoOpticalSurface* m_pReflectionOptSurface = nullptr;
     void initializeTDParameters();
     StatusCode addTimingDetector(const char* pszStationName, GeoOpticalPhysVol* pPhysMotherVol, HepGeom::Transform3D& TransInMotherVolume, GeoBorderSurfaceContainer* bsContainer);
     void addLQBarSegment(const char* pszStationName, const int nQuarticID, const int nLQBarID,AFPTOF_LBARDIMENSIONS& LQBarDims, GeoOpticalPhysVol* pPhysMotherVolume, HepGeom::Transform3D& TransInMotherVolume, GeoBorderSurfaceContainer* bsContainer);

@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2020 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "ALFA_EventTPCnv/ALFA_ODHitCollectionCnv_p1.h"
@@ -20,7 +20,7 @@ ALFA_ODHitCollection* ALFA_ODHitCollectionCnv::createTransient() {
     
     ALFA_ODHitCollectionCnv_p1   TPConverter_p1;
 
-    ALFA_ODHitCollection       *trans_cont(0); // probably inicialization
+    ALFA_ODHitCollection       *trans_cont(nullptr); // probably inicialization
     static const pool::Guid   p1_guid("11D7B0C9-54FF-44BF-A673-E9691004488B");
     
     if( this->compareClassGuid(p1_guid)) {

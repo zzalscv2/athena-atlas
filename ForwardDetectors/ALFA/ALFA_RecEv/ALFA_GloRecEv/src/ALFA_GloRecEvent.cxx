@@ -14,8 +14,8 @@ ALFA_GloRecEvent::ALFA_GloRecEvent()
 	m_y               = 0.0;
 	m_x_slope         = 0.0;
 	m_y_slope         = 0.0;
-	m_near_LocRecCorr = 0;
-	m_far_LocRecCorr  = 0;
+	m_near_LocRecCorr = nullptr;
+	m_far_LocRecCorr  = nullptr;
 }
 
 // destructor

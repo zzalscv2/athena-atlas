@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef AFP_TOFRAWDATA_V2_H
@@ -67,14 +67,14 @@ private:
   /// - value 1 meas picoTDC header
   /// - value 2 means hit measurement (only HPTDC)
   /// - value 3 is per event error (only HPTDC)
-  uint16_t m_header;
+  uint16_t m_header = 0U;
 
   /// @brief Value of 12 most significant bit
   ///
   /// In the following record: `xxxx xxxx xxxE xxxx xxxx xxxx xxxx xxxx`
   /// it means bits marked with `E`. Contains information about signal
   /// beginning or end. Always set to 0 for picoTDC.
-  uint16_t m_edge;
+  uint16_t m_edge = 0U;
 
   /// @brief Value of 13-17 (HPTDC) or 14-19 (picoTDC) most significant bits
   ///
@@ -83,7 +83,7 @@ private:
   /// picoTDC #1+#2: `xxxx xxxx xxxx xCCC CCCx xxxx xxxx xxxx`
   /// it means bits marked with `C`. Contains information about
   /// channel of the time measurement.
-  uint16_t m_channel;
+  uint16_t m_channel = 0U;
   
   /// @brief Special value for channel number, denoting the entry is actually a trigger word
   ///
@@ -97,7 +97,7 @@ private:
   /// picoTDC #1: `xxxx xxxx xxxx xxxx xxxt tttt tttt tttt`
   /// Trigger:    `xxxx xxxx xxxx xTTT xxxx xxxx xxxx xxxx`
   /// it means bits marked with `t` or `T`. Contains information about time (`t`) or about delayed trigger (`T`).
-  uint32_t m_time_or_delayedTrigger;
+  uint32_t m_time_or_delayedTrigger = 0U;
 
   /// @brief Value of 11-16 (HPTDC) or 13 (picoTDC) least significant bits for signal lenght; value of 16 (picoTDC) least significant bits for trigger pattern
   ///
@@ -107,7 +107,7 @@ private:
   /// Trigger:    `xxxx xxxx xxxx xxxx PPPP PPPP PPPP PPPP`
   /// it means bits marked with `L` or `P`. Contains information how long
   /// signal from the bar was above threshold (`L`) or information about the trigger pattern (`P`).
-  uint32_t m_pulseLength_or_triggerPattern;
+  uint32_t m_pulseLength_or_triggerPattern = 0U;
   
 };
 #endif
