@@ -5,6 +5,18 @@
 #include "TriggerMatchingTool/MatchFromCompositeTool.h"
 #include "FourMomUtils/xAODP4Helpers.h"
 
+#include "CxxUtils/crc64.h"
+
+#ifdef XAOD_STANDALONE
+namespace {
+    SG::sgkey_t hashContainer(const std::string &container, CLID clid)
+    {
+        static const SG::sgkey_t sgkey_t_max = (static_cast<SG::sgkey_t>(1) << 30) - 1;
+        return CxxUtils::crc64addint(CxxUtils::crc64(container), clid) & sgkey_t_max;
+    }
+}
+#endif
+
 namespace Trig {
   MatchFromCompositeTool::MatchFromCompositeTool(const std::string& name) :
     asg::AsgTool(name)
@@ -18,12 +30,40 @@ namespace Trig {
     declareProperty("InputPrefix", m_inputPrefix="TrigMatch_",
         "The input prefix to expect at the beginning of the TrigComposite "
         "container names.");
+#ifdef XAOD_STANDALONE
+    declareProperty("RemapBrokenLinks", m_remapBrokenLinks,
+        "Whether to remap element links which are broken in some derivations for AnalysisBase");
+    declareProperty("RemapContainers", m_remapContainers,
+        "Containers whose links need remapping");
+    declareProperty("RemapCLIDs", m_remapCLIDs, "CLIDs for those containers");
+#endif
   }
 
   MatchFromCompositeTool::~MatchFromCompositeTool() {}
 
   StatusCode MatchFromCompositeTool::initialize() {
     ATH_MSG_INFO( "initializing " << name() );
+#ifdef XAOD_STANDALONE
+    ATH_MSG_INFO("Remap broken links? " << m_remapBrokenLinks);
+    if (m_remapBrokenLinks)
+    {
+        if (m_remapContainers.size() != m_remapCLIDs.size())
+        {
+            ATH_MSG_ERROR("Number of containers and CLIDs to remap do not match!");
+            return StatusCode::FAILURE;
+        }
+        CLID iparticleCLID = ClassID_traits<xAOD::IParticleContainer>::ID();
+        for (std::size_t idx = 0; idx < m_remapContainers.size(); ++idx)
+        {
+            const std::string &name = m_remapContainers[idx];
+            m_keyRemap[hashContainer(name, iparticleCLID)] = hashContainer(name, m_remapCLIDs[idx]);
+        }
+        ATH_MSG_INFO("Remap: ");
+        for (const auto &p : m_keyRemap)
+            ATH_MSG_INFO("\t" << p.first << " -> " << p.second);
+
+    }
+#endif
     return StatusCode::SUCCESS;
   }
 
@@ -79,6 +119,14 @@ namespace Trig {
       // had some of its members removed.
       if (link.isValid() )
         online.push_back(*link);
+#ifdef XAOD_STANDALONE
+      else if (m_remapBrokenLinks)
+      {
+        auto itr = m_keyRemap.find(link.persKey());
+        if (itr != m_keyRemap.end())
+            online.push_back(*ElementLink<xAOD::IParticleContainer>(itr->second, link.index()));
+      }
+#endif
     // I will follow the way the current tool works and match even if there are
     // fewer reco objects than trigger objects
     for (const xAOD::IParticle* offlinePart : offline) {
