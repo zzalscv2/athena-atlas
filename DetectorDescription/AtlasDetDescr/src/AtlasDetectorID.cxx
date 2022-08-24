@@ -327,8 +327,7 @@ AtlasDetectorID::initialize_from_dictionary(const IdDictMgr& dict_mgr)
 
     // Initialize helper, needed for init of AtlasDetectorID
     if(!m_helper) {
-        m_helper = new AtlasDetectorIDHelper();
-        m_helper->setMsgSvc(m_msgSvc);
+        m_helper = new AtlasDetectorIDHelper(m_msgSvc);
     }
 
     if(m_helper->initialize_from_dictionary(dict_mgr, m_quiet)) return (1);

@@ -1,4 +1,4 @@
-# Copyright (C) 2002-2020 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
 
 # Declare the package name:
 atlas_subdir( AtlasDetDescr )
@@ -9,7 +9,7 @@ atlas_add_library( AtlasDetDescr
                    src/AtlasDetectorIDHelper.cxx
                    src/AtlasRegionHelper.cxx
                    PUBLIC_HEADERS AtlasDetDescr
-                   LINK_LIBRARIES IdDict Identifier AthenaKernel
+                   LINK_LIBRARIES IdDict Identifier AthenaKernel AthenaBaseComps
                    PRIVATE_LINK_LIBRARIES GaudiKernel )
 
 atlas_add_dictionary( AtlasDetDescrDict
