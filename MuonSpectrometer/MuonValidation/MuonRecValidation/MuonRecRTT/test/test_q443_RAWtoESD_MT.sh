@@ -157,5 +157,3 @@ fi
 
 echo "art-result: $?"
 
-######################### TEMP ########################
-# --inputRDO_TRIGFile /cvmfs/atlas-nightlies.cern.ch/repo/data/data-art/MuonRecRTT/Run2/q221_RDO/rel22_0_34/tmp.RDO_TRIG \

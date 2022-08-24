@@ -482,8 +482,8 @@ class MyHistoFiller(object):
             else:
                 MyHistoFiller.CSCPRDStationEta.Fill(MyHistoFiller.Eta(ord(TTree.PRD_CSC_stationEta[n])))
                 MyHistoFiller.CSCPRDStationPhi.Fill(ord(TTree.PRD_CSC_stationPhi[n]))
-                MyHistoFiller.CSCPRDChamberLayer.Fill(ord(TTree.PRD_CSC_chlayer[n]))
-                MyHistoFiller.CSCPRDWireLayer.Fill(ord(TTree.PRD_CSC_wlayer[n]))
+                MyHistoFiller.CSCPRDChamberLayer.Fill(ord(TTree.PRD_CSC_chamberLayer[n]))
+                MyHistoFiller.CSCPRDWireLayer.Fill(ord(TTree.PRD_CSC_wireLayer[n]))
                 MyHistoFiller.CSCPRDStrip.Fill(ord(TTree.PRD_CSC_strip[n]))
                 MyHistoFiller.CSCPRDmeasurePhi.Fill(TTree.PRD_CSC_measuresPhi[n])
                 MyHistoFiller.CSCPRDTime.Fill(TTree.PRD_CSC_time[n])

@@ -47,7 +47,7 @@ NSWPRDValAlg.doCSCHit = False # no CSC_Hits present in RDO files
 NSWPRDValAlg.doCSCSDO = MuonGeometryFlags.hasCSC()
 NSWPRDValAlg.doCSCDigit = False # no CSC_DIGITS present in RDO files
 NSWPRDValAlg.doCSCRDO = False
-NSWPRDValAlg.doCSCPRD = False
+NSWPRDValAlg.doCSCPRD = MuonGeometryFlags.hasCSC()
 
 
 #-----------------------------------------------------------------------------
