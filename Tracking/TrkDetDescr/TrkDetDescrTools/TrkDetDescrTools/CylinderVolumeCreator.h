@@ -72,10 +72,8 @@ public:
    * std::vector<const Layer*>&, Material&, VolumeBounds*,
    * Amg::Transform3D*,bool, const std::string&) const;
    */
-  //Not safe due to TrackingVolume ctor with interlink
-  //layers modifies the const Layers
-  virtual TrackingVolume* createTrackingVolume ATLAS_NOT_THREAD_SAFE(
-    const std::vector<const Layer*>& layers,
+  virtual TrackingVolume* createTrackingVolume(
+    const std::vector<Layer*>& layers,
     Material& matprop,
     VolumeBounds* volBounds = 0,
     Amg::Transform3D* transform = 0,
@@ -86,9 +84,8 @@ public:
    * std::vector<const Layer*>& , Material&,
    * ,double,double,double,double,bool,const std::string&) const;
    */
-  //Not safe as it calls the previous overload
-  virtual TrackingVolume* createTrackingVolume ATLAS_NOT_THREAD_SAFE(
-    const std::vector<const Layer*>& layers,
+  virtual TrackingVolume* createTrackingVolume(
+    const std::vector<Layer*>& layers,
     Material& matprop,
     double loc1Min,
     double loc1Max,
@@ -143,8 +140,8 @@ private:
               if given, these are checked against the layer
      positions/dimensions. */
 
-  StatusCode estimateAndCheckDimension ATLAS_NOT_THREAD_SAFE(
-    const std::vector<const Layer*>& layers,
+  StatusCode estimateAndCheckDimension(
+    const std::vector<Layer*>& layers,
     Trk::CylinderVolumeBounds*& cylBounds,
     Amg::Transform3D*& translation,
     std::vector<CylinderLayer*>& cylLayers,

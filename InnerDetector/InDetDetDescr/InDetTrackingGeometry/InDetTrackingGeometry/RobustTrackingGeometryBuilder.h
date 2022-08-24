@@ -89,9 +89,9 @@ namespace InDet {
       /** Private method, creates and packs a triple containing of
        * NegEndcap-Barrel-PosEndcap layers */
       const Trk::TrackingVolume* packVolumeTriple
-      ATLAS_NOT_THREAD_SAFE(const std::vector<const Trk::Layer*>& negLayers,
-                            const std::vector<const Trk::Layer*>& centralLayers,
-                            const std::vector<const Trk::Layer*>& posLayers,
+      ATLAS_NOT_THREAD_SAFE(const std::vector<Trk::Layer*>& negLayers,
+                            const std::vector<Trk::Layer*>& centralLayers,
+                            const std::vector<Trk::Layer*>& posLayers,
                             double rMin,
                             double rMax,
                             double zMin,

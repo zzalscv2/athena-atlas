@@ -156,15 +156,15 @@ InDet::RobustTrackingGeometryBuilderCond::trackingGeometry ATLAS_NOT_THREAD_SAFE
    double overallRmax     = 0.;
       
    // cylinder layers at growing radii
-   std::vector< std::vector< const Trk::Layer*> > providedCylinderLayers;
+   std::vector< std::vector<Trk::Layer*> > providedCylinderLayers;
    providedCylinderLayers.reserve(numLayBuilders);
    std::vector< double > cylinderInnerRadii(numLayBuilders,10e10);
    std::vector< double > cylinderOuterRadii(numLayBuilders,0.);
    std::vector< double > cylinderExtendsInZ(numLayBuilders,0.);
    
    // negative disc layers and positive disc layers
-   std::vector< std::vector< const Trk::Layer*> > providedDiscLayersNeg;   
-   std::vector< std::vector< const Trk::Layer*> > providedDiscLayersPos;
+   std::vector< std::vector< Trk::Layer*> > providedDiscLayersNeg;   
+   std::vector< std::vector< Trk::Layer*> > providedDiscLayersPos;
    providedDiscLayersNeg.reserve(numLayBuilders);
    providedDiscLayersPos.reserve(numLayBuilders);   
    std::vector< double > discInnerRadii(numLayBuilders,10e10);
@@ -185,7 +185,7 @@ InDet::RobustTrackingGeometryBuilderCond::trackingGeometry ATLAS_NOT_THREAD_SAFE
        // (a) cylinder           
        std::unique_ptr<const std::vector<Trk::CylinderLayer*> > cylinderLayers = m_layerBuilders[ilb]->cylindricalLayers(ctx, whandle);
        // (a)
-       std::vector<const Trk::Layer*> cylinderVolumeLayers;     
+       std::vector<Trk::Layer*> cylinderVolumeLayers;     
        if (cylinderLayers && !cylinderLayers->empty()){
            // screen output
            ATH_MSG_DEBUG(  "          Processing CylinderLayers : " );         
@@ -233,8 +233,8 @@ InDet::RobustTrackingGeometryBuilderCond::trackingGeometry ATLAS_NOT_THREAD_SAFE
        
        // (b) discs       
        std::unique_ptr<const std::vector<Trk::DiscLayer*> > discLayers = m_layerBuilders[ilb]->discLayers(ctx, whandle);
-       std::vector<const Trk::Layer*> discVolumeLayersNeg;
-       std::vector<const Trk::Layer*> discVolumeLayersPos;                        
+       std::vector<Trk::Layer*> discVolumeLayersNeg;
+       std::vector<Trk::Layer*> discVolumeLayersPos;                        
        if (discLayers && !discLayers->empty()){
          // screen output
          ATH_MSG_DEBUG(  "          Processing DiscLayers : " );            
@@ -639,9 +639,9 @@ StatusCode InDet::RobustTrackingGeometryBuilderCond::finalize()
 
 
 const Trk::TrackingVolume* InDet::RobustTrackingGeometryBuilderCond::packVolumeTriple ATLAS_NOT_THREAD_SAFE ( // Thread unsafe TrackingVolume::registerColorCode method is used.
-                                     const std::vector<const Trk::Layer*>& negLayers,
-                                     const std::vector<const Trk::Layer*>& centralLayers,
-                                     const std::vector<const Trk::Layer*>& posLayers,
+                                     const std::vector<Trk::Layer*>& negLayers,
+                                     const std::vector<Trk::Layer*>& centralLayers,
+                                     const std::vector<Trk::Layer*>& posLayers,
                                      double rMin, double rMax,
                                      double zMax, double zPosCentral,
                                      const std::string& baseName,
