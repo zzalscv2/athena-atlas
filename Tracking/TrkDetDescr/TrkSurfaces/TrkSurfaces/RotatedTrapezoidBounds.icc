@@ -93,9 +93,9 @@ RotatedTrapezoidBounds::inside(const Amg::Vector2D& locpo,
   normal << 0, -1, 1, 0;
   // ellipse is always at (0,0), surface is moved to ellipse position and then
   // rotated
-  Amg::Vector2D p;
-  p = Amg::Vector2D (-m_boundValues[RotatedTrapezoidBounds::bv_halfX],
-                     m_boundValues[RotatedTrapezoidBounds::bv_minHalfY]);
+  Amg::Vector2D p =
+    Amg::Vector2D(-m_boundValues[RotatedTrapezoidBounds::bv_halfX],
+                  m_boundValues[RotatedTrapezoidBounds::bv_minHalfY]);
   elementP[0] = (rotMatrix * (p - locpo));
   p = Amg::Vector2D (-m_boundValues[RotatedTrapezoidBounds::bv_halfX],
                      -m_boundValues[RotatedTrapezoidBounds::bv_minHalfY]);
