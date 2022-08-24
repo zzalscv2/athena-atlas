@@ -33,9 +33,6 @@ def defaultSimulationFlags(ConfigFlags, detectors):
 
 
 def fromRunArgs(runArgs):
-    from AthenaCommon.Configurable import Configurable
-    Configurable.configurableRun3Behavior = True
-
     from AthenaCommon.Logging import logging
     log = logging.getLogger('Sim_tf')
     log.info('****************** STARTING Simulation *****************')

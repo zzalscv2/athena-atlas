@@ -9,6 +9,7 @@ from DecisionHandling.DecisionHandlingConf import ViewCreatorInitialROITool, Vie
 from TrigT2CaloCommon.CaloDef import HLTLCTopoRecoSequence
 from TrigEDMConfig.TriggerEDMRun3 import recordable
 from TriggerMenuMT.HLT.Config.MenuComponents import RecoFragmentsPool
+from TrigGenericAlgs.TrigGenericAlgsConfig import ROBPrefetchingAlgCfg_Si, ROBPrefetchingAlgCfg_Calo
 import AthenaCommon.CfgMgr as CfgMgr
 
 
@@ -173,7 +174,12 @@ def tauCaloMVASequence(flags):
                                      ( 'SG::AuxElement' , 'StoreGateSvc+EventInfo.averageInteractionsPerCrossing' )]
     tauCaloMVAInViewSequence += tauCaloMVARecoVDV
 
-    tauCaloMVASequence = seqAND("tauCaloMVASequence", [tauCaloMVAViewsMaker, tauCaloMVAInViewSequence ])
+    robPrefetchAlg = RecoFragmentsPool.retrieve(ROBPrefetchingAlgCfg_Calo,
+                                                flags,
+                                                nameSuffix=tauCaloMVAViewsMaker.name(),
+                                                inputMaker=tauCaloMVAViewsMaker)
+
+    tauCaloMVASequence = seqAND("tauCaloMVASequence", [tauCaloMVAViewsMaker, robPrefetchAlg, tauCaloMVAInViewSequence ])
     return (tauCaloMVASequence, tauCaloMVAViewsMaker, sequenceOut)
 
 def tauIdSequence( RoIs, name):
@@ -305,9 +311,14 @@ def tauFTFCoreSequence(flags):
     ftfCoreViewsMaker.RequireParentView = True
     ftfCoreViewsMaker.ViewNodeName      = RecoSequenceName
 
+    robPrefetchAlg = RecoFragmentsPool.retrieve(ROBPrefetchingAlgCfg_Si,
+                                                flags,
+                                                nameSuffix=ftfCoreViewsMaker.name(),
+                                                inputMaker=ftfCoreViewsMaker)
+
     (tauFTFCoreInViewSequence, sequenceOut) = tauFTFSequence( ftfCoreViewsMaker.InViewRoIs, RecoSequenceName)
 
-    tauFastTrackCoreSequence = seqAND("tauFastTrackCoreSequence", [ftfCoreViewsMaker, tauFTFCoreInViewSequence ])
+    tauFastTrackCoreSequence = seqAND("tauFastTrackCoreSequence", [ftfCoreViewsMaker, robPrefetchAlg, tauFTFCoreInViewSequence])
     return (tauFastTrackCoreSequence, ftfCoreViewsMaker, sequenceOut)
 
 # ===============================================================================================
@@ -337,9 +348,14 @@ def tauFTFLRTSequence(ConfigFlags):
     ftfLRTViewsMaker.RequireParentView = True
     ftfLRTViewsMaker.ViewNodeName      = RecoSequenceName
 
+    robPrefetchAlg = RecoFragmentsPool.retrieve(ROBPrefetchingAlgCfg_Si,
+                                                ConfigFlags,
+                                                nameSuffix=ftfLRTViewsMaker.name(),
+                                                inputMaker=ftfLRTViewsMaker)
+
     (tauFTFLRTInViewSequence, sequenceOut) = tauFTFSequence( ftfLRTViewsMaker.InViewRoIs, RecoSequenceName)
 
-    tauFastTrackLRTSequence = seqAND("tauFastTrackLRTSequence", [ftfLRTViewsMaker, tauFTFLRTInViewSequence ])
+    tauFastTrackLRTSequence = seqAND("tauFastTrackLRTSequence", [ftfLRTViewsMaker, robPrefetchAlg, tauFTFLRTInViewSequence])
     return (tauFastTrackLRTSequence, ftfLRTViewsMaker, sequenceOut)
 
 # ===============================================================================================                                                          
@@ -363,9 +379,14 @@ def tauFTFIsoSequence(flags):
     ftfIsoViewsMaker.RequireParentView = True
     ftfIsoViewsMaker.ViewNodeName      = RecoSequenceName
 
+    robPrefetchAlg = RecoFragmentsPool.retrieve(ROBPrefetchingAlgCfg_Si,
+                                                flags,
+                                                nameSuffix=ftfIsoViewsMaker.name(),
+                                                inputMaker=ftfIsoViewsMaker)
+
     (tauFTFIsoInViewSequence, sequenceOut) = tauFTFSequence( ftfIsoViewsMaker.InViewRoIs, RecoSequenceName)
 
-    tauFastTrackIsoSequence = seqAND("tauFastTrackIsoSequence", [ftfIsoViewsMaker, tauFTFIsoInViewSequence ])
+    tauFastTrackIsoSequence = seqAND("tauFastTrackIsoSequence", [ftfIsoViewsMaker, robPrefetchAlg, tauFTFIsoInViewSequence])
     return (tauFastTrackIsoSequence, ftfIsoViewsMaker, sequenceOut)
 
 # ===============================================================================================                                                                                                  
@@ -389,9 +410,14 @@ def tauFTFIsoBDTSequence(flags):
     ftfIsoViewsMaker.RequireParentView = True
     ftfIsoViewsMaker.ViewNodeName      = RecoSequenceName
 
+    robPrefetchAlg = RecoFragmentsPool.retrieve(ROBPrefetchingAlgCfg_Si,
+                                                flags,
+                                                nameSuffix=ftfIsoViewsMaker.name(),
+                                                inputMaker=ftfIsoViewsMaker)
+
     (tauFTFIsoBDTInViewSequence, sequenceOut) = tauFTFSequence( ftfIsoViewsMaker.InViewRoIs, RecoSequenceName)
 
-    tauFastTrackIsoBDTSequence = seqAND("tauFastTrackIsoBDTSequence", [ftfIsoViewsMaker, tauFTFIsoBDTInViewSequence ])
+    tauFastTrackIsoBDTSequence = seqAND("tauFastTrackIsoBDTSequence", [ftfIsoViewsMaker, robPrefetchAlg, tauFTFIsoBDTInViewSequence])
     return (tauFastTrackIsoBDTSequence, ftfIsoViewsMaker, sequenceOut)
 
 # ===============================================================================================                                                            

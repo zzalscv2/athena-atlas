@@ -24,7 +24,7 @@ namespace DerivationFramework {
     m_v0Tools("Trk::V0Tools"),
     m_vertexFitter("Trk::TrkVKalVrtFitter"),
     m_vertexEstimator("InDet::VertexPointEstimator"),
-    m_distanceTool("Trk::SeedNewtonDistanceFinder/InDetConversionTrkDistanceFinder"),
+    m_distanceTool("Trk::SeedNewtonTrkDistanceFinder/InDetConversionTrkDistanceFinder"),
     m_postSelector("InDet::ConversionPostSelector"),
     m_cascadeFitter("Trk::TrkVKalVrtFitter"),
     m_inputTrackParticleContainerName("InDetTrackParticles"),

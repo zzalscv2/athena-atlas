@@ -11,6 +11,7 @@ class ThinInDetForwardTrackParticles(Configured):
         mlog = logging.getLogger ('ThinInDetForwardTrackParticles.py::configure:')
         from InDetRecExample.InDetJobProperties import InDetFlags
         from InDetRecExample.InDetKeys import InDetKeys
+        from RecExConfig.RecFlags import rec
         from PyUtils.MetaReaderPeeker import convert_itemList
         
         eventdata_items = convert_itemList() 
@@ -29,6 +30,11 @@ class ThinInDetForwardTrackParticles(Configured):
                 ThinInDetForwardTrackParticles = True,
                 StreamName = 'StreamAOD'
             )
+
+            if not rec.doMuonCombined():
+                mlog.info("Combined muon reconstruction is disabled so all InDetForwardTrackParticles will be thinned")
+                theInDetFwdThinner.MuonsKey = ""
+
             print (theInDetFwdThinner)
         except Exception:
             import traceback

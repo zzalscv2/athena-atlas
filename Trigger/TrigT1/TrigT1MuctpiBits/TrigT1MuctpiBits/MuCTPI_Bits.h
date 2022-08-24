@@ -30,7 +30,7 @@ namespace LVL1::MuCTPIBits {
   /// Mask for the bit showing if more than one muon candidates were in the sector RoI
    static constexpr uint32_t ROI_OVERFLOW_MASK = 0x1;
   /// Position of the RoI overflow mask
-   static constexpr uint32_t RUN3_ROI_OVERFLOW_SHIFT = 13;
+   static constexpr uint32_t RUN3_ROI_OVERFLOW_SHIFT = 12;
    static constexpr uint32_t ROI_OVERFLOW_SHIFT = 1;
 
   /// Mask for the full potential ROI word from the data words

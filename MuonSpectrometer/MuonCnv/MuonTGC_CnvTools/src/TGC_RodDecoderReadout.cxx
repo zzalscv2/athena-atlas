@@ -149,7 +149,7 @@ void Muon::TGC_RodDecoderReadout::getCollection(const ROBFragment& robFrag, TgcR
   rdo->setL1Id(robFrag.rod_lvl1_id());
   rdo->setBcId(robFrag.rod_bc_id());
   rdo->setTriggerType(robFrag.rod_lvl1_trigger_type());
-  rdo->setOnlineId(sid.subdetector_id(), sid.module_id());
+  rdo->setOnlineId(sid.subdetector_id(), sid.module_id()); // rodId = module_id (ROD: 1-12, SROD: 17-19)
   
   uint32_t nstatus = robFrag.rod_nstatus(); // 5 : ROD , 3 : SROD
   ATH_MSG_DEBUG( " Number of Status Words = " << nstatus ); 
@@ -469,7 +469,7 @@ void Muon::TGC_RodDecoderReadout::byteStreamSrod2Rdo(OFFLINE_FRAGMENTS_NAMESPACE
   fromBS32(source_id, sid);
   //uint16_t rod = sid.rodid & 0x0F; // 1-3
   
-  if(rdo->identify() != TgcRdo::calculateOnlineId(sid.side, sid.rodid))
+  if(rdo->identify() != TgcRdo::calculateOnlineId(sid.side, sid.rodid))  // 24-29
     {
       ATH_MSG_DEBUG( "Error: input TgcRdo id does not match bytestream id" );
       return;
@@ -485,7 +485,7 @@ void Muon::TGC_RodDecoderReadout::byteStreamSrod2Rdo(OFFLINE_FRAGMENTS_NAMESPACE
         {
           TGC_BYTESTREAM_NSL_ROI roi;
           fromBS32(bs[iBs], roi);
-          TgcRawData* raw = new TgcRawData(bcTag(roi.bcBitmap),
+          TgcRawData* raw = new TgcRawData(roi.bcBitmap+1,
                                            rdo->subDetectorId(),
                                            rdo->rodId(),
                                            rdo->l1Id(),
@@ -504,7 +504,7 @@ void Muon::TGC_RodDecoderReadout::byteStreamSrod2Rdo(OFFLINE_FRAGMENTS_NAMESPACE
         {
           TGC_BYTESTREAM_NSL_HIPT hipt;
           fromBS32(bs[iBs], hipt);
-          TgcRawData* raw = new TgcRawData(bcTag(hipt.bcBitmap),
+          TgcRawData* raw = new TgcRawData(hipt.bcBitmap+1,
                                            rdo->subDetectorId(),
                                            rdo->rodId(),
                                            rdo->l1Id(),
@@ -526,33 +526,37 @@ void Muon::TGC_RodDecoderReadout::byteStreamSrod2Rdo(OFFLINE_FRAGMENTS_NAMESPACE
         {
           TGC_BYTESTREAM_NSL_EIFI eifi;
           fromBS32(bs[iBs], eifi);
-          TgcRawData* raw = new TgcRawData(bcTag(eifi.bcBitmap),
-                                           rdo->subDetectorId(),
-                                           rdo->rodId(),
-                                           rdo->l1Id(),
-                                           rdo->bcId(),
-                                           static_cast<bool>(eifi.fwd),
-                                           eifi.sector,
-                                           eifi.ei,
-                                           eifi.fi,
-                                           eifi.chamberid);
-          rdo->push_back(raw);
+          for ( int isector = 0; isector < 2; isector++ ){// duplicate for the neighboring trigger sector
+            TgcRawData* raw = new TgcRawData(eifi.bcBitmap+1,
+                                             rdo->subDetectorId(),
+                                             rdo->rodId(),
+                                             rdo->l1Id(),
+                                             rdo->bcId(),
+                                             static_cast<bool>(eifi.fwd),
+                                             eifi.sector + isector,
+                                             eifi.ei,
+                                             eifi.fi,
+                                             eifi.chamberid);
+            rdo->push_back(raw);
+          }
           break;
         }
       case 3 : // TMDB
         {
           TGC_BYTESTREAM_NSL_TMDB tmdb;
           fromBS32(bs[iBs], tmdb);
-          TgcRawData* raw = new TgcRawData(bcTag(tmdb.bcBitmap),
-                                           rdo->subDetectorId(),
-                                           rdo->rodId(),
-                                           rdo->l1Id(),
-                                           rdo->bcId(),
-                                           false,
-                                           tmdb.sector,
-                                           tmdb.module,
-                                           tmdb.bcid);
-          rdo->push_back(raw);
+          for ( int isector = 0; isector < 2; isector++ ){// duplicate for the neighboring trigger sector
+            TgcRawData* raw = new TgcRawData(tmdb.bcBitmap+1,
+                                             rdo->subDetectorId(),
+                                             rdo->rodId(),
+                                             rdo->l1Id(),
+                                             rdo->bcId(),
+                                             false,
+                                             tmdb.sector + isector,
+                                             tmdb.module,
+                                             tmdb.bcid);
+            rdo->push_back(raw);
+          }
           break;
         }
       case 4 : // NSW 4-5
@@ -575,7 +579,7 @@ void Muon::TGC_RodDecoderReadout::byteStreamSrod2Rdo(OFFLINE_FRAGMENTS_NAMESPACE
             continue;
           }
 
-          TgcRawData* raw = new TgcRawData(bcTag(nswpos.bcBitmap),
+          TgcRawData* raw = new TgcRawData(nswpos.bcBitmap+1,
                                            rdo->subDetectorId(),
                                            rdo->rodId(),
                                            rdo->l1Id(),
@@ -611,19 +615,21 @@ void Muon::TGC_RodDecoderReadout::byteStreamSrod2Rdo(OFFLINE_FRAGMENTS_NAMESPACE
             continue;
           }
 
-          TgcRawData* raw = new TgcRawData(bcTag(rpcpos.bcBitmap),
-                                           rdo->subDetectorId(),
-                                           rdo->rodId(),
-                                           rdo->l1Id(),
-                                           static_cast<uint16_t>(rdo->bcId()),
-                                           static_cast<bool>(rpcpos.fwd),
-                                           static_cast<uint16_t>(rpcpos.sector),
-                                           rpcpos.eta,
-                                           rpcpos.phi,
-                                           static_cast<uint16_t>(rpccoin.flag),
-                                           rpccoin.deta,
-                                           rpccoin.dphi);
-          rdo->push_back(raw);
+          for ( int isector = 0; isector < 2; isector++ ){// duplicate for the neighboring trigger sector
+            TgcRawData* raw = new TgcRawData(rpcpos.bcBitmap+1,
+                                             rdo->subDetectorId(),
+                                             rdo->rodId(),
+                                             rdo->l1Id(),
+                                             static_cast<uint16_t>(rdo->bcId()),
+                                             static_cast<bool>(rpcpos.fwd),
+                                             static_cast<uint16_t>(rpcpos.sector) + isector,
+                                             rpcpos.eta,
+                                             rpcpos.phi,
+                                             static_cast<uint16_t>(rpccoin.flag),
+                                             rpccoin.deta,
+                                             rpccoin.dphi);
+            rdo->push_back(raw);
+          }
           break;
         }
       } // switch

@@ -166,7 +166,7 @@ void  Muon::TgcCoinDataContainerCnv_p3::persToTrans(const Muon::MuonCoinDataCont
         for (unsigned int ichan = 0; ichan < nchans; ++ ichan) {
             const TPObjRef pchan = persCont->m_CoinData[ichan + pcoll.m_begin];
             Muon::TgcCoinData* chan = dynamic_cast<Muon::TgcCoinData*>(createTransFromPStore((CONV**)nullptr, pchan, log ) );
-            if(chan->type()!=Muon::TgcCoinData::TYPE_TRACKLET_EIFI && !chan->isInner()) {
+            if( (chan->type()!=Muon::TgcCoinData::TYPE_TRACKLET_EIFI && (!chan->isInner() )) && (chan->type()!=Muon::TgcCoinData::TYPE_UNKNOWN) ) {
               const MuonGM::TgcReadoutElement * deOut = m_muonDetMgr->getTgcReadoutElement(Identifier(chan->channelIdOut()));
               chan->m_detElOut = deOut;
             }

@@ -8,9 +8,6 @@ from SimuJobTransforms.CommonSimulationSteering import specialConfigPreInclude, 
 
 
 def fromRunArgs(runArgs):
-    from AthenaCommon.Configurable import Configurable
-    Configurable.configurableRun3Behavior = True
-
     from AthenaCommon.Logging import logging
     log = logging.getLogger('HITtoRDO')
     log.info('****************** STARTING HITtoRDO *****************')

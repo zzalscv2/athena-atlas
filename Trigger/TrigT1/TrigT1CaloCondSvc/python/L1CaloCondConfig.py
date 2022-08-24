@@ -46,7 +46,10 @@ def L1CaloCondAlgCfg(flags, readTest=False, Physics=True, Calib1=True, Calib2=Tr
         
         from AthenaConfiguration.ComponentFactory import CompFactory
         result = L1CaloCondFoldersCfg(flags, Physics, Calib1, Calib2)
-        result.addCondAlgo(CompFactory.L1CaloCondAlg(), 'AthAlgSeq')
+        result.addCondAlgo(CompFactory.L1CaloCondAlg(UsePhysicsRegime = Physics,
+                                                     UseCalib1Regime = Calib1,
+                                                     UseCalib2Regime = Calib2),
+                           'AthAlgSeq')
         
         if readTest:
                 # Set True for test L1CaloCondAlg and print condition container parameters 

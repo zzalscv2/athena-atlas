@@ -15,7 +15,7 @@ def VrtSecInclusiveCfg(flags, name="VrtSecInclusive", **kwargs):
 
     from TrkConfig.AtlasExtrapolatorConfig import AtlasExtrapolatorCfg
     from TrkConfig.TrkVertexFitterUtilsConfig import TrackToVertexIPEstimatorCfg
-    from InDetConfig.TrackRecoConfig import TrackToVertexCfg
+    from TrackToVertex.TrackToVertexConfig import TrackToVertexCfg
     from TrkConfig.TrkVKalVrtFitterConfig import TrkVKalVrtFitterCfg
     from PixelConditionsTools.PixelConditionsSummaryConfig import PixelConditionsSummaryCfg
 

@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2019 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef JETTAGTOOLS_IPTAG_H
@@ -22,8 +22,6 @@
 
 namespace Reco { class ITrackToVertex; }
 namespace Trk  { class ITrackToVertexIPEstimator; }
-// following two are temporary (to be moved to a separate Tool)
-namespace InDet { class IInDetTrackSelectionTool; }
 
 namespace Analysis { 
 
@@ -157,9 +155,6 @@ namespace Analysis {
 
     /** GP: Tool for the estimation of the IPs to the Vertex */
     ToolHandle< Trk::ITrackToVertexIPEstimator > m_trackToVertexIPEstimator;
-    
-    /** InDetTrackSelectorTool (temporary: to be moved to a separate Tool) */
-    ToolHandle< InDet::IInDetTrackSelectionTool > m_InDetTrackSelectorTool;
 
     // VD: for debugging
     mutable std::atomic<int> m_nbjet;

@@ -69,7 +69,7 @@ def getLArFormatForRun(run,readOracle=True,quiet=False,connstring=None):
         mlog_LRF.info ("Running in DBRelease, forcing readOracle to False")
         readOracle=False
 
-    mlog_LRF.info("run=",run)
+    mlog_LRF.info("run=%i",run)
     runDB=indirectOpen(connstring,oracle=readOracle)
     if (runDB is None):
         mlog_LRF.error("Cannot connect to database %s",connstring)
@@ -96,7 +96,7 @@ def getLArFormatForRun(run,readOracle=True,quiet=False,connstring=None):
         #mlog_LRF.warning(e)
         return None
     runDB.closeDatabase()
-    mlog_LRF.info("Found info for run %d", run)
+    mlog_LRF.info("Found info for run %i", run)
     return  LArRunInfo(nSamples,gainType,latency,firstSample,format,runType)
 
 class LArDTRunInfo:
@@ -132,7 +132,7 @@ def getLArDTInfoForRun(run,readOracle=True,quiet=False,connstring=None):
         mlog_LRF.info("Running in DBRelease, forcing readOracle to False")
         readOracle=False
 
-    mlog_LRF.info("run=",run)
+    mlog_LRF.info("run=%i",run)
     runDB=indirectOpen(connstring,oracle=readOracle)
     if (runDB is None):
         mlog_LRF.error("Cannot connect to database %s",connstring)
@@ -159,7 +159,7 @@ def getLArDTInfoForRun(run,readOracle=True,quiet=False,connstring=None):
         return None
 
     runDB.closeDatabase()
-    mlog_LRF.info("Found DT info for run %d", run)
+    mlog_LRF.info("Found DT info for run %i", run)
     # parse recipe string of the type at0_bcX-at1_bcY...
     for s,m in ["at0_bc",0],["at1_bc",1]:
        pos=recipe.find(s)
@@ -171,7 +171,7 @@ def getLArDTInfoForRun(run,readOracle=True,quiet=False,connstring=None):
              try:
                n=int(recipe[pos+6:pos+7])
              except Exception:
-               mlog_LRF.warning("could not decode ",recipe[pos+6:])
+               mlog_LRF.warning("could not decode %s",recipe[pos+6:])
           if n>=0:
              sLengths.append(n)
              if mux[m] in typesMap.keys():
@@ -194,7 +194,7 @@ if __name__=='__main__':
     if (myformat is not None):
       print(" LAr run configuration: Nsamples:%d  GainType:%d  Latency:%d  FirstSample:%d  Format:%s  runType:%s" % (myformat.nSamples(),myformat.gainType(),myformat.latency(),myformat.firstSample(),myformat.stringFormat(),myformat.stringRunType()))
     else:
-      print(" LAr run infomation not available")
+      print(" LAr run information not available")
 
     myformat1=getLArDTInfoForRun(run, connstring="COOLONL_LAR/CONDBR2")
     if (myformat1 is not None):
@@ -202,4 +202,4 @@ if __name__=='__main__':
       for i in range(0,len(myformat1.streamTypes())):
          print(" stream: %s  size: %d" % (myformat1.streamTypes()[i], myformat1.streamLengths()[i]))  
     else:
-      print(" LAr DT run infomation not available")
+      print(" LAr DT run information not available")

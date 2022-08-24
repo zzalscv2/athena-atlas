@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "xAODTrigger/TrigCompositeContainer.h"
@@ -19,7 +19,8 @@ CounterROS::CounterROS(const std::string& name, const MonitorBase* parent)
   regHistogram("CachedROBSize_perEvent", "Total Cached ROB Size/Event;ROB size;Events", VariableType::kPerEvent, LogType::kLinear, 0, 1024, 50);
   regHistogram("NetworkROBSize_perEvent", "Total Network ROB Size/Event;ROB size;Events", VariableType::kPerEvent, LogType::kLinear, 0, 1024, 50);
   regHistogram("Time_perEvent", "ROB Elapsed Time/Event;Elapsed Time [ms];Events", VariableType::kPerEvent);
-  regHistogram("ROBStatus_perCall", "ROB status/Call;Status;Events", VariableType::kPerCall, LogType::kLinear, 0, robmonitor::NUM_ROBHIST_CODES+1, robmonitor::NUM_ROBHIST_CODES+1);
+  regHistogram("ROBStatus_perCall", "ROB status/Call;Status;Calls", VariableType::kPerCall, LogType::kLinear, 0, robmonitor::NUM_ROBHIST_CODES+1, robmonitor::NUM_ROBHIST_CODES+1);
+  regHistogram("NROBsPerRequest_perCall", "Number of requested ROBs;Number of requestes ROBs;Number of requests", VariableType::kPerCall, LogType::kLinear, 0.5, 30.5, 30);
 }
 
 CounterROS::CounterROS(const std::string& name, unsigned nRobs, const MonitorBase* parent) 
@@ -61,8 +62,10 @@ StatusCode CounterROS::newEvent(const CostData& data, size_t index, const float 
     }
   }
 
+
   // Find all ROB requests that are both in request and correspond to this ROS
   bool networkRequestIncremented = false;
+  int nRequestedRobs = 0;
   for (size_t i = 0; i < robIdsPerRequest.size(); ++i) {
 
     // Check if the ROB was requested by ROS
@@ -89,8 +92,12 @@ StatusCode CounterROS::newEvent(const CostData& data, size_t index, const float 
       if (variableExists("ROBsPerRequest_perCall")){
         ATH_CHECK( fill("ROBsPerRequest_perCall", m_robIdToBin.at(robIdsPerRequest[i]), weight) );
       }
+
+      ++nRequestedRobs;
     }
   }
+
+  ATH_CHECK( fill("NROBsPerRequest_perCall", nRequestedRobs, weight) );
 
   ATH_CHECK( increment("Request_perEvent", weight) );
 

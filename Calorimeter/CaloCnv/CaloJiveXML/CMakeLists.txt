@@ -11,7 +11,7 @@ atlas_add_component( CaloJiveXML
                      src/*.cxx
                      src/components/*.cxx
                      INCLUDE_DIRS ${CLHEP_INCLUDE_DIRS}
-                     LINK_LIBRARIES ${CLHEP_LIBRARIES} AthenaBaseComps AthenaKernel CaloDetDescrLib CaloEvent CaloIdentifier EventContainers GaudiKernel Identifier JiveXMLLib LArCablingLib LArElecCalib LArIdentifier LArRawEvent LArRawConditions TileCalibBlobObjs TileConditionsLib TileEvent TileIdentifier StoreGateLib )
+                     LINK_LIBRARIES ${CLHEP_LIBRARIES} AthenaBaseComps AthenaKernel CaloDetDescrLib CaloEvent CaloIdentifier EventContainers GaudiKernel Identifier JiveXMLLib LArCablingLib LArElecCalib LArIdentifier LArRawEvent LArRawConditions TileCalibBlobObjs TileConditionsLib TileEvent TileIdentifier StoreGateLib xAODCaloEvent)
 
 # Install files from the package:
 atlas_install_joboptions( share/*.py )

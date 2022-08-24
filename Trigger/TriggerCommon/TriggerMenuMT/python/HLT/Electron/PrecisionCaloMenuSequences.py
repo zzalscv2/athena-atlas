@@ -54,8 +54,14 @@ def precisionCaloSequence(flags, ion=False, variant=''):
         egammaFSRecoSequence = egammaFSCaloRecoSequence()
         theSequence += egammaFSRecoSequence
 
+    from TrigGenericAlgs.TrigGenericAlgsConfig import ROBPrefetchingAlgCfg_Calo
+    robPrefetchAlg = RecoFragmentsPool.retrieve(ROBPrefetchingAlgCfg_Calo,
+                                                ConfigFlags,
+                                                nameSuffix=precisionCaloViewsMaker.name(),
+                                                inputMaker=precisionCaloViewsMaker)
+
     # connect EVC and reco
-    theSequence += [precisionCaloViewsMaker, precisionCaloInViewSequence]
+    theSequence += [precisionCaloViewsMaker, robPrefetchAlg, precisionCaloInViewSequence]
     return (theSequence, precisionCaloViewsMaker, sequenceOut)
 
 

@@ -158,3 +158,23 @@ def jFexInputByteStreamToolCfg(name, flags, writeBS=False):
     tool.jTowersWriteKey  = "L1_jTowers"
     
   return tool
+
+
+def gFexInputByteStreamToolCfg(name, flags, writeBS=False):
+  tool = CompFactory.gFexInputByteStreamTool(name)
+  gfex_roi_moduleids = [0x3000]
+  tool.ROBIDs = [int(SourceIdentifier(SubDetector.TDAQ_CALO_FEAT_EXTRACT_DAQ, moduleid)) for moduleid in gfex_roi_moduleids]  
+  print ("[L1CaloFEXByteStreamConfig::gFexInputByteStreamToolCfg]  tool.ROBIDs   ", tool.ROBIDs)
+
+  if writeBS:
+    # write BS == read xAOD
+    tool.gTowersReadKey   = "L1_gTowers" 
+
+    tool.gTowersWriteKey  =""
+  else:
+    # read BS == write xAOD
+    tool.gTowersReadKey   =""
+  
+    tool.gTowersWriteKey  = "L1_gTowers"
+    
+  return tool

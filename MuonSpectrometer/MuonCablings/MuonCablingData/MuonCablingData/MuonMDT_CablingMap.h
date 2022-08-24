@@ -24,8 +24,26 @@ public:
     using MezzanineTypes = std::map<uint8_t, std::unique_ptr<MdtMezzanineType>>;
     using TdcOffSet = std::set<MdtTdcOffSorter, std::less<>>;
     using TdcOnlSet = std::vector<MdtTdcOnlSorter>;
-    using OffToOnlMap = std::map<MdtCablingOffData, TdcOffSet>;
 
+    /// Helper struct to group the Mezzanine cards mounted on each multilayer
+    /// The object provides the following information
+    ///   1) List of all mezzanine cards associated with the particular multilayer
+    ///   2) The BME / BIS78 chambers are split into 2 CSM modules due to their
+    //       larger number of tubes. The csm caches the up to 2 CSM associated with
+    //       this object
+    struct MdtOffChModule {
+        TdcOffSet::const_iterator begin() const { return cards.begin(); }
+        TdcOffSet::const_iterator end() const { return cards.end(); }
+        TdcOffSet::const_iterator begin() { return cards.begin(); }
+        TdcOffSet::const_iterator end() { return cards.end(); }
+
+        /// Mezzanine cards mounted on the chamber
+        TdcOffSet cards{};
+        /// The up to 2 CSMs to which the cards are connected
+        std::array<MdtCablingOnData, 2> csm{};
+    };
+
+    using OffToOnlMap = std::map<MdtCablingOffData, MdtOffChModule>;
     /// The online -> offline conversion needs to treat two cases
     ///   tdcId && channelId == 0xFF:
     ///     ** Decode the station name using the first module in the set with tdcZero() == 0
@@ -43,13 +61,11 @@ public:
     };
     using OnlToOffMap = std::map<MdtCablingOnData, MdtTdcModule>;
 
-    /** typedef to implement the csm mapping to ROD */
-    /* mapping from hashid to ROD identifier as Subdetector+Rodid */
-    using ChamberToRODMap = std::map<IdentifierHash, uint32_t>;
-    using RODToChamberMap = std::map<uint32_t, std::vector<IdentifierHash>>;
-
-    using ListOfROD = std::vector<uint32_t>;
-
+    /** typedef to implement the csm mapping to ROB */
+    /* mapping from hashid to ROB identifier as Subdetector+Rodid */
+    using ChamberToROBMap = std::map<IdentifierHash, uint32_t>;
+    using ROBToChamberMap = std::map<uint32_t, std::vector<IdentifierHash>>;
+    using ListOfROB = std::vector<uint32_t>;
     using CablingData = MdtCablingData;
     MuonMDT_CablingMap();
     ~MuonMDT_CablingMap();
@@ -75,16 +91,16 @@ public:
     /** return the ROD id of a given chamber, given the hash id */
     uint32_t getROBId(const IdentifierHash& stationCode, MsgStream& log) const;
     /** get the robs corresponding to a vector of hashIds, copied from Svc before the readCdo migration */
-    ListOfROD getROBId(const std::vector<IdentifierHash>& mdtHashVector, MsgStream& log) const;
+    ListOfROB getROBId(const std::vector<IdentifierHash>& mdtHashVector, MsgStream& log) const;
 
     /** return a vector of HashId lists for a  given list of ROD's */
-    std::vector<IdentifierHash> getChamberHashVec(const std::vector<uint32_t>& ROBId_list, MsgStream& log) const;
+    std::vector<IdentifierHash> getMultiLayerHashVec(const std::vector<uint32_t>& ROBId_list, MsgStream& log) const;
 
     /** return a HashId list for a  given ROD */
-    const std::vector<IdentifierHash>& getChamberHashVec(const uint32_t ROBI, MsgStream& log) const;
+    const std::vector<IdentifierHash>& getMultiLayerHashVec(const uint32_t ROBI, MsgStream& log) const;
 
     /** return the ROD id of a given chamber */
-    const ListOfROD& getAllROBId() const;
+    const ListOfROB& getAllROBId() const;
 
     /// Returns the map to convert the online -> offline identifiers
     const OnlToOffMap& getOnlineConvMap() const;
@@ -93,12 +109,20 @@ public:
 
     bool finalize_init(MsgStream& log);
 
+    /// Transforms the identifier to an IdentifierHash corresponding to the module
+    bool getStationCode(const CablingData& map_data, IdentifierHash& mdtHashId, MsgStream& log) const;
+    /// Transforms the identifier to an IdentifierHash corresponding to the multilayer
+    /// In this case, the multi layer represents the CSM chip
+    bool getMultiLayerCode(const CablingData& map_data, Identifier& multiLayer, IdentifierHash& mdtHashId, MsgStream& log) const;
+
+    /// Returns whether the channel belongs to the first or second mounted CSM card
+    unsigned int csmNumOnChamber(const CablingData& map_data, MsgStream& log) const;
+    /// Returns if the cabling map has found multilayers connected to 2 CSM cards
+    bool has2CsmML() const;
+
 private:
     /** private function to add a chamber to the ROD map */
-    bool addChamberToRODMap(const CablingData& cabling_data, MsgStream& log);
-
-    /// Transforms the identifier to an IdentifierHash
-    bool getStationCode(const CablingData& map_data, IdentifierHash& mdtHashId, MsgStream& log) const;
+    bool addChamberToROBMap(const CablingData& cabling_data, MsgStream& log);
 
     /** List of mezzanine types, to be initialized from the conditions db */
     MezzanineTypes m_listOfMezzanineTypes;
@@ -114,14 +138,18 @@ private:
     OnlToOffMap m_toOfflineConv{};
     std::vector<std::unique_ptr<MdtTdcMap>> m_tdcs{};
 
-    /** map returning a vecotr of Hashid's associated with a given ROD */
-    // new sbarnes
-    RODToChamberMap m_RODToChamber{};
-    /** full list of RODs */
-    ListOfROD m_listOfROD{};
+    /** map returning a detector element hashes associated with a given ROD */
+    ROBToChamberMap m_ROBToMultiLayer{};
+
+    /** full list of ROBs */
+    ListOfROB m_listOfROB{};
 
     /** map returning the RODid for a given chamber ID */
-    ChamberToRODMap m_chamberToROD{};
+    ChamberToROBMap m_chamberToROB{};
+    /** map raturning the RODid for a given multi layer ID */
+    ChamberToROBMap m_multilayerToROB{};
+    /** Switch to check whether the layout has chambers with 2 CSM chips*/
+    bool m_2CSM_cham{false};
 };
 
 //#include "CLIDSvc/CLASS_DEF.h"

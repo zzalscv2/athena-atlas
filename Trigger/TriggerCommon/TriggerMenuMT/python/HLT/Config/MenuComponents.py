@@ -8,7 +8,7 @@ from TriggerMenuMT.HLT.Config.ControlFlow.HLTCFTools import (NoHypoToolCreated,
                                                              isComboHypoAlg, 
                                                              isInputMakerBase, 
                                                              isHypoAlg)
-from AthenaCommon.CFElements import parOR, seqAND, compName, getProp, findAlgorithmByPredicate
+from AthenaCommon.CFElements import parOR, seqAND, compName, getProp, hasProp, findAlgorithmByPredicate
 from AthenaCommon.Configurable import Configurable
 from AthenaConfiguration.AllConfigFlags import ConfigFlags
 from AthenaConfiguration.AthConfigFlags import AthConfigFlags
@@ -370,6 +370,18 @@ class MenuSequence(object):
         self._seed=''
         input_maker_output= self.maker.readOutputList()[0] # only one since it's merged
 
+        # Connect InputMaker output to ROBPrefetchingAlg(s) if there are any (except for probe seq which is handled later)
+        if ConfigFlags.Trigger.enableROBPrefetching:
+            seqChildren = Sequence.getChildren() if hasattr(Sequence,'getChildren') else Sequence.Members
+            for child in seqChildren:
+                if hasProp(child,'ROBPrefetchingInputDecisions') and input_maker_output not in child.ROBPrefetchingInputDecisions and not input_maker_output.endswith('_probe'):
+                    locked = bool(child.isLocked()) if hasattr(child,'isLocked') else False
+                    if locked:
+                        child.unlock()
+                    child.ROBPrefetchingInputDecisions += [input_maker_output]
+                    if locked:
+                        child.lock()
+
         self._name = CFNaming.menuSequenceName(compName(_Hypo))
         self._hypoToolConf = HypoToolConf( HypoToolGen )
         Hypo.RuntimeValidation = ConfigFlags.Trigger.doRuntimeNaviVal
@@ -384,16 +396,21 @@ class MenuSequence(object):
                 probeSeq = baseSeq.clone(baseSeq.name()+"_probe")
                 probeSeq += probeIM                
                 if isinstance(probeIM,CompFactory.EventViewCreatorAlgorithm):
-                    ViewSeq = baseSeq.getChildren()[1] # There can only be one?
-                    _ViewSeq = ViewSeq.clone(ViewSeq.name()+"_probe")
-                    probeIM.ViewNodeName = _ViewSeq.name()                    
-                    for viewalg in ViewSeq.getChildren():
-                        _ViewSeq += viewalg
-                    probeSeq += _ViewSeq                
+                    for child in baseSeq.getChildren()[1:]:
+                        probeChild = child.clone(child.name()+"_probe")
+                        if hasProp(child,'ROBPrefetchingInputDecisions') and ConfigFlags.Trigger.enableROBPrefetching and child.ROBPrefetchingInputDecisions:
+                            # child is a ROB prefetching alg, map the probe IM decisions
+                            probeChild.ROBPrefetchingInputDecisions = [str(probeIM.InputMakerOutputDecisions)]
+                        elif probeIM.ViewNodeName == child.name():
+                            # child is the view alg sequence, map it to the probe sequence
+                            probeIM.ViewNodeName = probeChild.name()
+                            for viewalg in child.getChildren():
+                                probeChild += viewalg
+                        probeSeq += probeChild
                 return probeSeq
-                # Make sure nothing was lost
+            # Make sure nothing was lost
             _Sequence = getProbeSequence(baseSeq=Sequence,probeIM=_Maker)
-            assert(len(_Sequence.getChildren()) == len(Sequence.getChildren()))
+            assert len(_Sequence.getChildren()) == len(Sequence.getChildren()), f'Different number of children in sequence {_Sequence.name()} vs {Sequence.name()} ({len(_Sequence.getChildren())} vs {len(Sequence.getChildren())})'
 
         self._sequence = Node( Alg=_Sequence)
 

@@ -246,8 +246,14 @@ def jetRoITrackJetTagHypoMenuSequence(configFlags, jetsIn, isPresel=True, **jetR
     # NOTE: Forcing non-parallel reco seq here else we get stalls from the EventView algs executing before the JetCopyAlg.
     jetAthRecoSeq = seqAND(f"jetRoITrackJetTagHypo_{jetDefString}_RecoSequence",[ftaggedJetsCopyAlg,jetTrkFtagSeq,jetViewAlg])
 
+    from TrigGenericAlgs.TrigGenericAlgsConfig import ROBPrefetchingAlgCfg_Si
+    robPrefetchAlg = RecoFragmentsPool.retrieve(ROBPrefetchingAlgCfg_Si,
+                                                configFlags,
+                                                nameSuffix=InputMakerAlg.name(),
+                                                inputMaker=InputMakerAlg)
+
     jetAthMenuSeq = seqAND(f"jetRoITrackJetTagHypo_{jetDefString}_MenuSequence",
-                       [InputMakerAlg,jetAthRecoSeq])
+                       [InputMakerAlg,robPrefetchAlg,jetAthRecoSeq])
 
     # Needs track-to-jet association here, maybe with dR decorator
     hypoType = JetHypoAlgType.ROIPRESEL if isPresel else JetHypoAlgType.STANDARD

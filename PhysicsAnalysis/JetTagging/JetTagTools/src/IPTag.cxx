@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2019 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "JetTagTools/IPTag.h"
@@ -24,7 +24,6 @@
 #include "ITrackToVertex/ITrackToVertex.h"
 #include "TrkVertexFitterInterfaces/ITrackToVertexIPEstimator.h"
 #include "ParticleJetTools/JetFlavourInfo.h"
-#include "InDetTrackSelectionTool/IInDetTrackSelectionTool.h"
 #include "TH1.h"
 #include <cmath>
 #include <sstream>
@@ -89,8 +88,7 @@ namespace Analysis {
       m_likelihoodTool("Analysis::NewLikelihoodTool", this),
       m_SVForIPTool("Analysis::SVForIPTool", this),
       m_trackGradeFactory("Analysis::BasicTrackGradeFactory", this),
-      m_trackToVertexIPEstimator(this),
-      m_InDetTrackSelectorTool("InDet::InDetTrackSelectionTool", this)
+      m_trackToVertexIPEstimator(this)
   {
     // global configuration:
     declareProperty("Runmodus"      , m_runModus);
@@ -143,7 +141,6 @@ namespace Analysis {
     declareProperty("SVForIPTool"               , m_SVForIPTool                    );  
     declareProperty("trackGradeFactory"         , m_trackGradeFactory              );
     declareProperty("TrackToVertexIPEstimator"  , m_trackToVertexIPEstimator       );
-    declareProperty("InDetTrackSelectionTool"   , m_InDetTrackSelectorTool         ); //
   }
 
   //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -338,18 +335,6 @@ namespace Analysis {
 
 	}
       // ms m_histoHelper->print();
-    }
-
-    if (m_impactParameterView=="3D") { 
-      if ( m_InDetTrackSelectorTool.retrieve().isFailure() )  {
-	ATH_MSG_FATAL("#BTAG# Failed to retrieve tool " <<  m_InDetTrackSelectorTool);
-	return StatusCode::FAILURE;
-      } else {
-	ATH_MSG_DEBUG("#BTAG# Retrieved tool " <<  m_InDetTrackSelectorTool);
-      }
-    }
-    else {
-      m_InDetTrackSelectorTool.disable();
     }
 
     return StatusCode::SUCCESS;
