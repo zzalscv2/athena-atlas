@@ -101,9 +101,9 @@ DiamondBounds::inside(const Amg::Vector2D& locpo,
   normal << 0, -1, 1, 0;
   // ellipse is always at (0,0), surface is moved to ellipse position and then
   // rotated
-  Amg::Vector2D p;
-  p = Amg::Vector2D (-m_boundValues[DiamondBounds::bv_minHalfX],
-                     -2. * m_boundValues[DiamondBounds::bv_halfY1]);
+  Amg::Vector2D p =
+    Amg::Vector2D(-m_boundValues[DiamondBounds::bv_minHalfX],
+                  -2. * m_boundValues[DiamondBounds::bv_halfY1]);
   elementP[0] = (rotMatrix * (p - locpo));
   p = Amg::Vector2D (-m_boundValues[DiamondBounds::bv_medHalfX], 0.);
   elementP[1] = (rotMatrix * (p - locpo));

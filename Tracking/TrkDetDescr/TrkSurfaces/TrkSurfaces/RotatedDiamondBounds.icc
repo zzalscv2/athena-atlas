@@ -104,9 +104,9 @@ RotatedDiamondBounds::inside(const Amg::Vector2D& locpo,
   Amg::Vector2D locpoF;
   locpoF[0] = locpo[Trk::locY];
   locpoF[1] = locpo[Trk::locX];
-  Amg::Vector2D p;
-  p = Amg::Vector2D (-m_boundValues[RotatedDiamondBounds::bv_minHalfX],
-                     -2. * m_boundValues[RotatedDiamondBounds::bv_halfY1]);
+  Amg::Vector2D p =
+    Amg::Vector2D(-m_boundValues[RotatedDiamondBounds::bv_minHalfX],
+                  -2. * m_boundValues[RotatedDiamondBounds::bv_halfY1]);
   elementP[0] = (rotMatrix * (p - locpoF));
   p = Amg::Vector2D (-m_boundValues[RotatedDiamondBounds::bv_medHalfX], 0.);
   elementP[1] = (rotMatrix * (p - locpoF));
