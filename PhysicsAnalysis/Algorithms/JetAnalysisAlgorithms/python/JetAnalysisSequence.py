@@ -60,10 +60,14 @@ def makeJetAnalysisSequence( dataType, jetCollection, postfix = '',
     jetCollectionName=jetCollection
     if(jetCollection=="AnalysisJets") :
         jetCollectionName="AntiKt4EMPFlowJets"
-
+    if(jetCollection=="AnalysisLargeRJets") :
+        jetCollectionName="AntiKt10UFOCSSKSoftDropBeta100Zcut10Jets"
+    
+    #AntiKt10UFO CSSKSoftDropBeta100Zcut10Jets
+    
     # interpret the jet collection
     collection_pattern = re.compile(
-        r"AntiKt(\d+)(EMTopo|EMPFlow|LCTopo|TrackCaloCluster)(TrimmedPtFrac5SmallR20)?Jets")
+        r"AntiKt(\d+)(EMTopo|EMPFlow|LCTopo|TrackCaloCluster|UFO)(TrimmedPtFrac5SmallR20|CSSKSoftDropBeta100Zcut10)?Jets")
     match = collection_pattern.match(jetCollectionName)
     if not match:
         raise ValueError(
@@ -165,6 +169,8 @@ def makeSmallRJetAnalysisSequence( seq, dataType, jetCollection,
     jetCollectionName=jetCollection
     if(jetCollection=="AnalysisJets") :
         jetCollectionName="AntiKt4EMPFlowJets"
+    if(jetCollection=="AnalysisLargeRJets") :
+        jetCollectionName="AntiKt10UFOCSSKSoftDropBeta100Zcut10Jets"
     
     if jetInput not in ["EMTopo", "EMPFlow"]:
         raise ValueError(
@@ -307,6 +313,9 @@ def makeRScanJetAnalysisSequence( seq, dataType, jetCollection,
     jetCollectionName=jetCollection
     if(jetCollection=="AnalysisJets") :
         jetCollectionName="AntiKt4EMPFlowJets"
+    if(jetCollection=="AnalysisLargeRJets") :
+        jetCollectionName="AntiKt10LCTopoTrimmedPtFrac5SmallR20Jets"
+
     
     if jetInput != "LCTopo":
         raise ValueError(
@@ -316,11 +325,11 @@ def makeRScanJetAnalysisSequence( seq, dataType, jetCollection,
     addPrivateTool( alg, 'calibrationTool', 'JetCalibrationTool' )
     alg.calibrationTool.JetCollection = jetCollectionName[:-4]
     alg.calibrationTool.ConfigFile = \
-        "JES_MC16Recommendation_Rscan{0}LC_18Dec2018_R21.config".format(radius)
+        "JES_MC16Recommendation_Rscan{0}LC_Feb2022_R21.config".format(radius)
     if dataType == 'data':
         alg.calibrationTool.CalibSequence = "JetArea_Residual_EtaJES_GSC_Insitu"
     else:
-        alg.calibrationTool.CalibSequence = "JetArea_Residual_EtaJES_GSC"
+        alg.calibrationTool.CalibSequence = "JetArea_Residual_EtaJES_GSC_Smear"
     alg.calibrationTool.IsData = (dataType == 'data')
     seq.append( alg, inputPropName = 'jets', outputPropName = 'jetsOut', stageName = 'calibration' )
     # Logging would be good
@@ -336,55 +345,79 @@ def makeLargeRJetAnalysisSequence( seq, dataType, jetCollection,
         jetCollection -- The jet container to run on.
         jetInput -- The type of input used, read from the collection name.
         postfix -- String to be added to the end of all public names.
-        largeRMass -- Which large-R mass definition to use. Ignored if not running on large-R jets ("Comb", "Calo", "TCC", "TA")
+        largeRMass -- Which large-R mass definition to use. Ignored if not running on large-R jets ("Comb", "Calo", "TA")
     """
 
     jetCollectionName=jetCollection
     if(jetCollection=="AnalysisJets") :
         jetCollectionName="AntiKt4EMPFlowJets"
+    if(jetCollection=="AnalysisLargeRJets") :
+        jetCollectionName="AntiKt10UFOCSSKSoftDropBeta100Zcut10Jets"
 
-    if largeRMass not in ["Comb", "Calo", "TCC", "TA"]:
+    if largeRMass not in ["Comb", "Calo", "TA"]:
         raise ValueError ("Invalid large-R mass defintion {0}!".format(largeRMass) )
 
-    if jetInput not in ["LCTopo", "TrackCaloCluster"]:
+    if jetInput not in ["LCTopo", "TrackCaloCluster", "UFO"]:
         raise ValueError (
             "Unsupported input type '{0}' for large-R jets!".format(jetInput) )
+
     if jetInput == "TrackCaloCluster":
         # Only one mass defintion supported
         if largeRMass != "Calo":
             raise ValueError(
                 "Unsupported large-R TCC jet mass '{0}'!".format(largeRMass) )
         configFile = "JES_MC16recommendation_FatJet_TCC_JMS_calo_30Oct2018.config"
-    else:
+
+    if jetInput == "LCTopo":
         if largeRMass == "Comb":
-            configFile = "JES_MC16recommendation_FatJet_Trimmed_JMS_comb_17Oct2018.config"
+            if dataType == "data":
+                configFile = "JES_MC16recommendation_FatJet_Trimmed_JMS_comb_March2021.config"
+            if dataType == "mc":
+                configFile = "JES_MC16recommendation_FatJet_Trimmed_JMS_comb_17Oct2018.config"
         elif largeRMass == "Calo":
-            configFile = "JES_MC16recommendation_FatJet_Trimmed_JMS_calo_12Oct2018.config"
-        elif largeRMass == "TCC":
-            configFile = "JES_MC16recommendation_FatJet_TCC_JMS_calo_30Oct2018.config"
-        else:
-            configFile = "JES_MC16recommendation_FatJet_Trimmed_JMS_TA_12Oct2018.config"
+            if dataType == "data":
+                configFile = "JES_MC16recommendation_FatJet_Trimmed_JMS_comb_March2021.config"
+            if dataType == "mc":
+                configFile = "JES_MC16recommendation_FatJet_Trimmed_JMS_calo_12Oct2018.config "
+        elif largeRMass == "TA":
+            if dataType == "data":
+                configFile = "JES_MC16recommendation_FatJet_Trimmed_JMS_comb_March2021.config"
+            if dataType == "mc":
+                configFile = "JES_MC16recommendation_FatJet_Trimmed_JMS_TA_12Oct2018.config"
+
+    if jetInput == "UFO":
+        configFile = "JES_MC16recommendation_R10_UFO_CSSK_SoftDrop_JMS_01April2020.config"
+
     # Prepare the jet calibration algorithm
     alg = createAlgorithm( 'CP::JetCalibrationAlg', 'JetCalibrationAlg'+postfix )
     addPrivateTool( alg, 'calibrationTool', 'JetCalibrationTool' )
     alg.calibrationTool.JetCollection = jetCollectionName[:-4]
     alg.calibrationTool.ConfigFile = configFile
-    alg.calibrationTool.CalibSequence = "EtaJES_JMS"
+    if jetInput == "TrackCaloCluster" or jetInput == "UFO" or dataType == "mc":
+        alg.calibrationTool.CalibSequence = "EtaJES_JMS"
+    elif dataType == "data":
+        alg.calibrationTool.CalibSequence = "EtaJES_JMS_Insitu_InsituCombinedMass"
     alg.calibrationTool.IsData = 0
     seq.append( alg, inputPropName = 'jets', outputPropName = 'jetsOut', stageName = 'calibration' )
 
     # Jet uncertainties
-    alg = createAlgorithm( 'CP::JetUncertaintiesAlg', 'JetUncertaintiesAlg'+postfix )
-    # R=1.0 jets have a validity range 
-    alg.outOfValidity = 2 # SILENT
-    alg.outOfValidityDeco = 'outOfValidity'
-    addPrivateTool( alg, 'uncertaintiesTool', 'JetUncertaintiesTool' )
-    alg.uncertaintiesTool.JetDefinition = jetCollectionName[:-4]
-    alg.uncertaintiesTool.ConfigFile = \
-        "rel21/Moriond2018/R10_{0}Mass_all.config".format(largeRMass)
-    alg.uncertaintiesTool.MCType = "MC16a"
-    alg.uncertaintiesTool.IsData = (dataType == "data")
-    seq.append( alg, inputPropName = 'jets', outputPropName = 'jetsOut',
-                stageName = 'calibration',
-                metaConfig = {'selectionDecorNames' : ['outOfValidity'],
-                              'selectionDecorCount' : [1]} )
+       
+    if jetInput == "UFO":
+        print("WARNING: uncertainties for UFO jets are not yet released!")
+
+    if jetInput != "UFO":
+        alg = createAlgorithm( 'CP::JetUncertaintiesAlg', 'JetUncertaintiesAlg'+postfix )
+        # R=1.0 jets have a validity range 
+        alg.outOfValidity = 2 # SILENT
+        alg.outOfValidityDeco = 'outOfValidity'
+        addPrivateTool( alg, 'uncertaintiesTool', 'JetUncertaintiesTool' )
+        
+        alg.uncertaintiesTool.JetDefinition = jetCollectionName[:-4]
+        alg.uncertaintiesTool.ConfigFile = \
+            "rel21/Moriond2018/R10_{0}Mass_all.config".format(largeRMass)
+        alg.uncertaintiesTool.MCType = "MC16a"
+        alg.uncertaintiesTool.IsData = (dataType == "data")
+        
+        seq.append( alg, inputPropName = 'jets', outputPropName = 'jetsOut',
+                    stageName = 'calibration',
+                    metaConfig = {'selectionDecorNames' : ['outOfValidity'], 'selectionDecorCount' : [1]} )

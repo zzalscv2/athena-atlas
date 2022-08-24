@@ -260,6 +260,13 @@ print( jetSequence ) # For debugging
 
 SeqPHYSLITE += jetSequence
 
+largeRjetContainer='AntiKt10UFOCSSKSoftDropBeta100Zcut10Jets'
+largeRjetSequence = makeJetAnalysisSequence( dataType, largeRjetContainer, postfix="largeR",
+                                                 deepCopyOutput = True, shallowViewOutput = False,
+                                                 runGhostMuonAssociation = False)
+largeRjetSequence.configure( inputName = largeRjetContainer, outputName = 'AnalysisLargeRJets')
+SeqPHYSLITE += largeRjetSequence
+
 # Build MET from our analysis objects
 from DerivationFrameworkJetEtMiss import METCommon
 from METReconstruction.METAssocConfig import METAssocConfig,AssocConfig
@@ -348,6 +355,7 @@ PHYSLITESlimmingHelper.AppendToDictionary = {
                                          'MET_Core_AnalysisMET':'xAOD::MissingETContainer', 'MET_Core_AnalysisMETAux':'xAOD::MissingETAuxContainer',
                                          'METAssoc_AnalysisMET':'xAOD::MissingETAssociationMap', 'METAssoc_AnalysisMETAux':'xAOD::MissingETAuxAssociationMap',
                                          'AntiKt10TruthTrimmedPtFrac5SmallR20Jets':'xAOD::JetContainer', 'AntiKt10TruthTrimmedPtFrac5SmallR20JetsAux':'xAOD::JetAuxContainer',
+                                         'AnalysisLargeRJets':'xAOD::JetContainer','AnalysisLargeRJetsAux':'xAOD::AuxContainerBase'
                                          }
 
 # Leaving these as smart collections
@@ -380,6 +388,7 @@ PHYSLITESlimmingHelper.ExtraVariables = [
   "EventInfo.hardScatterVertexLink.RandomRunNumber",
   "Kt4EMPFlowEventShape.Density",
   "TauTracks.pt.eta.phi.flagSet.trackLinks",
+  "AnalysisLargeRJets.pt.eta.phi.m.JetConstitScaleMomentum_pt.JetConstitScaleMomentum_eta.JetConstitScaleMomentum_phi.JetConstitScaleMomentum_m.DetectorEta.TrackSumMass.TrackSumPt.constituentLinks.ECF1.ECF2.ECF3.Tau1_wta.Tau2_wta.Tau3_wta.Split12.Split23.Qw.D2.C2"
   ]
 
 if DerivationFrameworkIsMonteCarlo:
