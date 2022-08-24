@@ -287,6 +287,8 @@ SUSYObjDef_xAOD::SUSYObjDef_xAOD( const std::string& name )
 
     m_useTRUTH3(true),
 
+    m_isRun3(false),
+
     m_slices(std::map<std::string,bool>()),
 
     m_metJetSelection(""),
@@ -320,7 +322,7 @@ SUSYObjDef_xAOD::SUSYObjDef_xAOD( const std::string& name )
     m_muonSelectionTool(""),
     m_muonSelectionHighPtTool(""),
     m_muonSelectionToolBaseline(""),
-    m_muonCalibrationAndSmearingTool(""),
+    m_muonCalibTool(""),
     m_muonEfficiencySFTool(""),
     m_muonEfficiencyBMHighPtSFTool(""),
     m_muonTTVAEfficiencySFTool(""),
@@ -330,11 +332,8 @@ SUSYObjDef_xAOD::SUSYObjDef_xAOD( const std::string& name )
     //
     m_elecEfficiencySFTool_reco(""),
     m_elecEfficiencySFTool_id(""),
-    m_elecEfficiencySFTool_trig_singleLep(""),
-    m_elecEfficiencySFTool_trigEff_singleLep(""),
     m_elecEfficiencySFTool_iso(""),
     m_elecEfficiencySFTool_isoHighPt(""),
-    m_elecEfficiencySFTool_chf(""),
     //
     m_egammaCalibTool(""),
     m_elecSelLikelihood(""),
@@ -638,7 +637,7 @@ SUSYObjDef_xAOD::SUSYObjDef_xAOD( const std::string& name )
   m_muonSelectionTool.declarePropertyFor( this, "MuonSelectionTool", "The MuonSelectionTool for signal muons" );
   m_muonSelectionHighPtTool.declarePropertyFor( this, "MuonSelectionHighPtTool", "The MuonSelectionTool for signal muons (HighPt WP)" );
   m_muonSelectionToolBaseline.declarePropertyFor( this, "MuonSelectionToolBaseline", "The MuonSelectionTool for baseline muons" );
-  m_muonCalibrationAndSmearingTool.declarePropertyFor( this, "MuonCalibrationAndSmearingTool", "The MuonCalibrationAndSmearingTool" );
+  m_muonCalibTool.declarePropertyFor( this, "MuonCalibTool", "The MuonCalibTool" );
   m_muonEfficiencySFTool.declarePropertyFor( this, "MuonEfficiencyScaleFactorsTool", "The MuonEfficiencySFTool" );
   m_muonEfficiencyBMHighPtSFTool.declarePropertyFor( this, "MuonBadMuonHighPtScaleFactorsTool", "The MuonBadMuonHighPtSFTool" );
   m_muonTTVAEfficiencySFTool.declarePropertyFor( this, "MuonTTVAEfficiencyScaleFactorsTool", "The MuonTTVAEfficiencySFTool" );
@@ -647,11 +646,9 @@ SUSYObjDef_xAOD::SUSYObjDef_xAOD( const std::string& name )
   m_muonTriggerSFTool.declarePropertyFor( this, "MuonTriggerScaleFactorsTool", "The MuonTriggerSFTool" );
   //
   m_elecEfficiencySFTool_reco.declarePropertyFor( this, "ElectronEfficiencyCorrectionTool_reco", "The ElectronEfficiencyCorrectionTool for reconstruction SFs" );
-  m_elecEfficiencySFTool_trig_singleLep.declarePropertyFor( this, "ElectronEfficiencyCorrectionTool_trig_singleLep", "The ElectronEfficiencyCorrectionTool for single-e triggers" );
   m_elecEfficiencySFTool_id.declarePropertyFor( this, "ElectronEfficiencyCorrectionTool_id", "The ElectronEfficiencyCorrectionTool for ID SFs" );
   m_elecEfficiencySFTool_iso.declarePropertyFor( this, "ElectronEfficiencyCorrectionTool_iso" , "The ElectronEfficiencyCorrectionTool for iso SFs" );
   m_elecEfficiencySFTool_isoHighPt.declarePropertyFor( this, "ElectronEfficiencyCorrectionTool_isoHigPt" , "The ElectronEfficiencyCorrectionTool for iso high-pt SFs" );
-  m_elecEfficiencySFTool_chf.declarePropertyFor( this, "ElectronEfficiencyCorrectionTool_chf" , "The ElectronEfficiencyCorrectionTool for charge-flip SFs" );
   m_elecSelLikelihood.declarePropertyFor( this, "ElectronLikelihoodTool" , "The ElectronSelLikelihoodTool for signal electrons" );
   m_elecSelLikelihoodBaseline.declarePropertyFor( this, "ElectronLikelihoodToolBaseline" , "The ElectronSelLikelihoodTool for baseline electrons" );
   m_egammaAmbiguityTool.declarePropertyFor( this, "EgammaAmbiguityTool", "The EgammaAmbiguityTool" );
@@ -1289,6 +1286,11 @@ StatusCode SUSYObjDef_xAOD::readConfig()
 
   m_conf_to_prop["Tau.DoTruthMatching"] = "TauDoTruthMatching";
   //
+
+
+  configFromFile(m_isRun3, "IsRun3", rEnv, false);
+
+
   configFromFile(m_slices["ele"],  "Slices.Ele",  rEnv, true);
   configFromFile(m_slices["pho"],  "Slices.Pho",  rEnv, true);
   configFromFile(m_slices["mu"],   "Slices.Mu",   rEnv, true);
@@ -1327,7 +1329,7 @@ StatusCode SUSYObjDef_xAOD::readConfig()
   configFromFile(m_EG_corrModel, "Ele.EffNPcorrModel", rEnv, "TOTAL");
   configFromFile(m_EG_corrFNList, "Ele.EffCorrFNList", rEnv, "None");
   configFromFile(m_electronTriggerSFStringSingle, "Ele.TriggerSFStringSingle", rEnv, "SINGLE_E_2015_e24_lhmedium_L1EM20VH_OR_e60_lhmedium_OR_e120_lhloose_2016_2018_e26_lhtight_nod0_ivarloose_OR_e60_lhmedium_nod0_OR_e140_lhloose_nod0");
-  configFromFile(m_eleEffMapFilePath, "Ele.EffMapFilePath", rEnv, "ElectronEfficiencyCorrection/2015_2018/rel21.2/Precision_Summer2020_v1/map1.txt");
+  configFromFile(m_eleEffMapFilePath, "Ele.EffMapFilePath", rEnv, "ElectronEfficiencyCorrection/2015_2025/rel22.2/2022_Summer_Prerecom_v1/map0.txt");
   configFromFile(m_trig2015combination_singleLep, "Trig.Singlelep2015", rEnv, "e24_lhmedium_L1EM20VH_OR_e60_lhmedium_OR_e120_lhloose || mu20_iloose_L1MU15_OR_mu50"); 
   configFromFile(m_trig2016combination_singleLep, "Trig.Singlelep2016", rEnv, "e26_lhtight_nod0_ivarloose_OR_e60_lhmedium_nod0_OR_e140_lhloose_nod0 || mu26_ivarmedium_OR_mu50"); 
   configFromFile(m_trig2017combination_singleLep, "Trig.Singlelep2017", rEnv, "e26_lhtight_nod0_ivarloose_OR_e60_lhmedium_nod0_OR_e140_lhloose_nod0 || mu26_ivarmedium_OR_mu50"); 
@@ -1440,7 +1442,7 @@ StatusCode SUSYObjDef_xAOD::readConfig()
   configFromFile(m_BtagWP, "Btag.WP", rEnv, "FixedCutBEff_77");
   configFromFile(m_BtagMinPt, "Btag.MinPt", rEnv, -1.); // Not calibrated below 20
   
-  configFromFile(m_bTaggingCalibrationFilePath, "Btag.CalibPath", rEnv, "xAODBTaggingEfficiency/13TeV/2021-22-13TeV-MC16-CDI-2021-12-02_v2.root");
+  configFromFile(m_bTaggingCalibrationFilePath, "Btag.CalibPath", rEnv, "xAODBTaggingEfficiency/13TeV/2022-22-13TeV-MC20-CDI-2022-07-28_v1.root");
   configFromFile(m_BtagSystStrategy, "Btag.SystStrategy", rEnv, "Envelope");
 
   configFromFile(m_useBtagging_trkJet, "BtagTrkJet.enable", rEnv, true);
@@ -2024,13 +2026,13 @@ StatusCode SUSYObjDef_xAOD::applySystematicVariation( const CP::SystematicSet& s
       ATH_MSG_VERBOSE("Configured FJVTEfficiency for systematic var. " << systConfig.name() );
     }
   }
-  if (!m_muonCalibrationAndSmearingTool.empty()) {
-    StatusCode ret =   m_muonCalibrationAndSmearingTool->applySystematicVariation(systConfig);
+  if (!m_muonCalibTool.empty()) {
+    StatusCode ret =   m_muonCalibTool->applySystematicVariation(systConfig);
     if (ret != StatusCode::SUCCESS) {
-      ATH_MSG_ERROR("Cannot configure MuonCalibrationAndSmearingTool for systematic var. " << systConfig.name() );
+      ATH_MSG_ERROR("Cannot configure MuonCalibTool for systematic var. " << systConfig.name() );
       return ret;
     } else {
-      ATH_MSG_VERBOSE("MuonCalibrationAndSmearingTool configured for systematic var. " << systConfig.name() );
+      ATH_MSG_VERBOSE("MuonCalibTool configured for systematic var. " << systConfig.name() );
     }
   }
   if (!m_muonEfficiencySFTool.empty()) {
@@ -2096,15 +2098,6 @@ StatusCode SUSYObjDef_xAOD::applySystematicVariation( const CP::SystematicSet& s
       ATH_MSG_VERBOSE("AsgElectronEfficiencyCorrectionTool (id) configured for systematic var. " << systConfig.name() );
     }
   }
-  if (!m_elecEfficiencySFTool_trig_singleLep.empty()) {
-    StatusCode ret = m_elecEfficiencySFTool_trig_singleLep->applySystematicVariation(systConfig);
-    if (ret != StatusCode::SUCCESS) {
-      ATH_MSG_ERROR("Cannot configure AsgElectronEfficiencyCorrectionTool (trigger) for systematic var. " << systConfig.name() );
-      return ret;
-    } else {
-      ATH_MSG_VERBOSE("AsgElectronEfficiencyCorrectionTool (trigger) configured for systematic var. " << systConfig.name() );
-    }
-  }
   if (!m_trigGlobalEffCorrTool_diLep.empty()) {
     StatusCode ret = m_trigGlobalEffCorrTool_diLep->applySystematicVariation(systConfig);
     for(auto &sfop : m_elecTrigEffTools){
@@ -2163,15 +2156,6 @@ StatusCode SUSYObjDef_xAOD::applySystematicVariation( const CP::SystematicSet& s
       return ret;
     } else {
       ATH_MSG_VERBOSE("AsgElectronEfficiencyCorrectionTool (iso high-pt) configured for systematic var. " << systConfig.name() );
-    }
-  }
-  if (!m_elecEfficiencySFTool_chf.empty()) {
-    StatusCode ret = m_elecEfficiencySFTool_chf->applySystematicVariation(systConfig);
-    if (ret != StatusCode::SUCCESS) {
-      ATH_MSG_ERROR("Cannot configure AsgElectronEfficiencyCorrectionTool (chf) for systematic var. " << systConfig.name() );
-      return ret;
-    } else {
-      ATH_MSG_VERBOSE("AsgElectronEfficiencyCorrectionTool (chf) configured for systematic var. " << systConfig.name() );
     }
   }
   if (!m_elecChargeEffCorrTool.empty()) {
@@ -2423,8 +2407,8 @@ ST::SystInfo SUSYObjDef_xAOD::getSystInfo(const CP::SystematicVariation& sys) co
     }
   }
 
-  if (!m_muonCalibrationAndSmearingTool.empty()) {
-    if ( m_muonCalibrationAndSmearingTool->isAffectedBySystematic(sys) ) {
+  if (!m_muonCalibTool.empty()) {
+    if ( m_muonCalibTool->isAffectedBySystematic(sys) ) {
       sysInfo.affectsKinematics = true;
       sysInfo.affectsType = SystObjType::Muon;
     }
@@ -2478,20 +2462,6 @@ ST::SystInfo SUSYObjDef_xAOD::getSystInfo(const CP::SystematicVariation& sys) co
       sysInfo.affectedWeights.insert(ST::Weights::Electron::ID);
     }
   }
-  if (!m_elecEfficiencySFTool_trig_singleLep.empty()) {
-    if ( m_elecEfficiencySFTool_trig_singleLep->isAffectedBySystematic(sys) ) {
-      sysInfo.affectsWeights = true;
-      sysInfo.affectsType = SystObjType::Electron;
-      sysInfo.affectedWeights.insert(ST::Weights::Electron::Trigger);
-    }
-  }
-  if (!m_elecEfficiencySFTool_trigEff_singleLep.empty()) {
-    if ( m_elecEfficiencySFTool_trigEff_singleLep->isAffectedBySystematic(sys) ) {
-      sysInfo.affectsWeights = true;
-      sysInfo.affectsType = SystObjType::Electron;
-      sysInfo.affectedWeights.insert(ST::Weights::Electron::Trigger);
-    }
-  }
   if (!m_trigGlobalEffCorrTool_diLep.empty()) {
     if ( m_trigGlobalEffCorrTool_diLep->isAffectedBySystematic(sys) ) {
       sysInfo.affectsWeights = true;
@@ -2518,20 +2488,6 @@ ST::SystInfo SUSYObjDef_xAOD::getSystInfo(const CP::SystematicVariation& sys) co
       sysInfo.affectsWeights = true;
       sysInfo.affectsType = SystObjType::Electron;
       sysInfo.affectedWeights.insert(ST::Weights::Electron::Isolation);
-    }
-  }
-  if (!m_elecEfficiencySFTool_chf.empty() ) {
-    if ( m_elecEfficiencySFTool_chf->isAffectedBySystematic(sys) ) {
-      sysInfo.affectsWeights = true;
-      sysInfo.affectsType = SystObjType::Electron;
-      sysInfo.affectedWeights.insert(ST::Weights::Electron::ChargeID);
-    }
-  }
-  if (!m_elecChargeEffCorrTool.empty() ) {
-    if ( m_elecChargeEffCorrTool->isAffectedBySystematic(sys) ) {
-      sysInfo.affectsWeights = true;
-      sysInfo.affectsType = SystObjType::Electron;
-      sysInfo.affectedWeights.insert(ST::Weights::Electron::ChargeID);
     }
   }
   if (!m_egammaCalibTool.empty()) {

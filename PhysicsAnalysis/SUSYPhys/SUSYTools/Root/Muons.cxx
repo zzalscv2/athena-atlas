@@ -116,7 +116,7 @@ StatusCode SUSYObjDef_xAOD::FillMuon(xAOD::Muon& input, float ptcut, float etacu
   ATH_MSG_VERBOSE( "MUON type = " << input.muonType() );
   ATH_MSG_VERBOSE( "MUON author = " << input.author() );
 
-  if (m_muonCalibrationAndSmearingTool->applyCorrection( input ) == CP::CorrectionCode::OutOfValidityRange){
+  if (m_muonCalibTool->applyCorrection( input ) == CP::CorrectionCode::OutOfValidityRange){
     ATH_MSG_VERBOSE("FillMuon: applyCorrection out of validity range");
   }
 
