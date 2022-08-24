@@ -79,6 +79,7 @@ SeqLLP1 += CfgMgr.CP__ElectronLRTMergingAlg(name="LLP1_ElectronLRTMergingAlg",
                                             PromptElectronLocation  = "Electrons",
                                             LRTElectronLocation     = "LRTElectrons",
                                             OutputCollectionName    = MergedElectronContainer,
+                                            isDAOD                  = False,
                                             CreateViewCollection    = True)
 
 #====================================================================
@@ -476,8 +477,8 @@ LLP1SlimmingHelper.ExtraVariables += ["AntiKt10TruthTrimmedPtFrac5SmallR20Jets.T
                                       "Electrons.maxEcell_time.maxEcell_energy.maxEcell_gain.maxEcell_onlId.maxEcell_x.maxEcell_y.maxEcell_z.f3",
                                       "LRTElectrons.maxEcell_time.maxEcell_energy.maxEcell_gain.maxEcell_onlId.maxEcell_x.maxEcell_y.maxEcell_z.f3",
                                       "Photons.maxEcell_time.maxEcell_energy.maxEcell_gain.maxEcell_onlId.maxEcell_x.maxEcell_y.maxEcell_z.f3",
-                                      "egammaClusters.phi_sampl",
-                                      "LRTegammaClusters.phi_sampl",
+                                      "egammaClusters.phi_sampl.eta0.phi0",
+                                      "LRTegammaClusters.phi_sampl.eta0.phi0",
                                       "Muons.TruthLink", "MuonsLRT.TruthLink",
                                       "Photons.TruthLink",
                                       "AntiKt4EMTopoJets.DFCommonJets_QGTagger_truthjet_nCharged.DFCommonJets_QGTagger_truthjet_pt.DFCommonJets_QGTagger_truthjet_eta.DFCommonJets_QGTagger_NTracks.DFCommonJets_QGTagger_TracksWidth.DFCommonJets_QGTagger_TracksC1.PartonTruthLabelID.ConeExclBHadronsFinal.ConeExclCHadronsFinal.GhostBHadronsFinal.GhostCHadronsFinal.GhostBHadronsFinalCount.GhostBHadronsFinalPt.GhostCHadronsFinalCount.GhostCHadronsFinalPt.GhostBHadronsFinal.GhostCHadronsFinal.GhostTrack.GhostTrackCount.GhostTrackLRT.GhostTrackLRTCount",

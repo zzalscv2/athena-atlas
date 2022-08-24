@@ -57,6 +57,8 @@ namespace CP
         /// Advantageous in certain analysis frameworks.
         Gaudi::Property<int> m_ORstrategy{this, "overlapStrategy", CP::IElectronLRTOverlapRemovalTool::defaultStrategy, "Overlap removal strategy to use (0 = default)"};
 
+        Gaudi::Property<bool> m_isDAOD{this, "isDAOD", true, "Switch for running on AOD (false) or DAOD (true)"}; /** Switches method for retrieving electron ID **/
+
         SG::ReadHandleKey<xAOD::ElectronContainer> m_promptElectronLocation{this, "PromptElectronLocation", "Electrons", "Prompt electrons to merge"}; /** Standard electron collection to be merged. */
 
         SG::ReadHandleKey<xAOD::ElectronContainer> m_lrtElectronLocation{this, "LRTElectronLocation", "ElectronsLRT", "LRT electrons to merge"}; /** LRT electron collection to be merged. */
