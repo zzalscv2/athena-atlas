@@ -172,17 +172,21 @@ AthSequencer::execute( const EventContext& ctx ) const
 StatusCode AthSequencer::executeAlgorithm (Gaudi::Algorithm* theAlgorithm,
                                            const EventContext& ctx) const
 {
-  // Call the sysExecute() of the method the algorithm
-  if (!s_abortTimer) {
-    s_abortTimer = std::make_unique<Athena::AlgorithmTimer>(0);
+  // Start timer if enabled
+  if (m_timeoutMilliseconds>0) {
+    // Create thread-specific timer if not done already
+    if (!s_abortTimer) {
+      s_abortTimer = std::make_unique<Athena::AlgorithmTimer>(0);
+    }
+    s_abortTimer->start(m_timeoutMilliseconds);
   }
-  s_abortTimer->start(m_timeoutMilliseconds);
+
+  // Call the sysExecute() of the method the algorithm
   StatusCode sc = theAlgorithm->sysExecute( ctx );
 
-  const unsigned int remaining = s_abortTimer->stop();
-
-  // but printout only if non-zero timeout was used
-  if (m_timeoutMilliseconds) {
+  // Stop timer if enabled
+  if (m_timeoutMilliseconds>0) {
+    const unsigned int remaining = s_abortTimer->stop();
     ATH_MSG_DEBUG ("Time left before interrupting <"
                    << theAlgorithm->name() << "> : " << remaining);
   }
