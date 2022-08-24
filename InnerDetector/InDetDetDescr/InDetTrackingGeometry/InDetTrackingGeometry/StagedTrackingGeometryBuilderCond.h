@@ -53,9 +53,9 @@ struct LayerSetupCond
 {
 
   // the layer cache
-  std::vector<const Trk::Layer*> negativeLayers;
-  std::vector<const Trk::Layer*> centralLayers;
-  std::vector<const Trk::Layer*> positiveLayers;
+  std::vector<Trk::Layer*> negativeLayers;
+  std::vector<Trk::Layer*> centralLayers;
+  std::vector<Trk::Layer*> positiveLayers;
 
   // center information
   double minRadiusCenter;
@@ -95,9 +95,9 @@ struct LayerSetupCond
                  double zMinE = 0.,
                  double zMaxE = 0.,
                  int binE = 0)
-    : negativeLayers(negLayers.begin(),negLayers.end())
-    , centralLayers(cenLayers.begin(),cenLayers.end())
-    , positiveLayers(posLayers.begin(),posLayers.end())
+    : negativeLayers(negLayers)
+    , centralLayers(cenLayers)
+    , positiveLayers(posLayers)
     , minRadiusCenter(minRc)
     , maxRadiusCenter(maxRc)
     , zExtendCenter(zC)
@@ -198,7 +198,7 @@ struct LayerSetupCond
          sub-volumes and updates the radius
             */
       Trk::TrackingVolume* createTrackingVolume
-      ATLAS_NOT_THREAD_SAFE(const std::vector<const Trk::Layer*>& layers,
+      ATLAS_NOT_THREAD_SAFE(const std::vector<Trk::Layer*>& layers,
                             double innerRadius,
                             double& outerRadius,
                             double zMin,
@@ -211,7 +211,7 @@ struct LayerSetupCond
           - in case of a ring layout the subvolumes are created and the rMax is adapted                                             
          */
       const Trk::TrackingVolume* packVolumeTriple
-      ATLAS_NOT_THREAD_SAFE(const LayerSetupCond& layerSetup,
+      ATLAS_NOT_THREAD_SAFE(LayerSetupCond& layerSetup,
                             double rMin,
                             double& rMax,
                             double zMin,
@@ -225,15 +225,15 @@ struct LayerSetupCond
         const std::string& baseName = "UndefinedVolume") const;
 
       /** Private helper method for detection of Ring layout */
-      bool ringLayout(const std::vector<const Trk::Layer*>& layers, std::vector<double>& rmins, std::vector<double>& rmaxs) const;                                              
+      bool ringLayout(const std::vector<Trk::Layer*>& layers, std::vector<double>& rmins, std::vector<double>& rmaxs) const;                                              
 
       /** helper method needed for the Ring layout */
       void checkForInsert(std::vector<double>& radii, double radius) const;
       void checkForInsert(double rmin, double rmax, std::vector<std::pair<double, double>>& radii) const;
       
       /** Private helper method for merging of rings with z-overlap */
-      std::vector<const Trk::Layer*> checkZoverlap(std::vector<const Trk::Layer*>& lays) const; 
-      const Trk::Layer* mergeDiscLayers(std::vector<const Trk::Layer*>& dlays) const;
+      std::vector<Trk::Layer*> checkZoverlap(std::vector<Trk::Layer*>& lays) const; 
+      Trk::Layer* mergeDiscLayers(std::vector<Trk::Layer*>& dlays) const;
 
       // helper tools for the geometry building
       ToolHandleArray<Trk::ILayerProviderCond>       m_layerProviders;          //!< Helper Tools for the Layer creation, includes beam pipe builder   

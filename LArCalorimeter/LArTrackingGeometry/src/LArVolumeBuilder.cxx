@@ -126,7 +126,7 @@ StatusCode LAr::LArVolumeBuilder::finalize()
   ATH_MSG_DEBUG( "finalize() successful" );
 
   // empty the material garbage 
-  for ( auto mat : m_materialGarbage ) {
+  for ( const auto *mat : m_materialGarbage ) {
     delete mat;
   }
 

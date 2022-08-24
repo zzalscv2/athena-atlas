@@ -90,13 +90,14 @@ StatusCode Trk::CylinderVolumeCreator::initialize()
     return StatusCode::SUCCESS;
 }
 
-Trk::TrackingVolume* Trk::CylinderVolumeCreator::createTrackingVolume
-ATLAS_NOT_THREAD_SAFE(const std::vector<const Trk::Layer*>& layers,
-                      Trk::Material& matprop,
-                      Trk::VolumeBounds* volBounds,
-                      Amg::Transform3D* transform,
-                      const std::string& volumeName,
-                      Trk::BinningType btype) const
+Trk::TrackingVolume*
+Trk::CylinderVolumeCreator::createTrackingVolume(
+  const std::vector<Trk::Layer*>& layers,
+  Trk::Material& matprop,
+  Trk::VolumeBounds* volBounds,
+  Amg::Transform3D* transform,
+  const std::string& volumeName,
+  Trk::BinningType btype) const
 
 {
     
@@ -194,15 +195,17 @@ ATLAS_NOT_THREAD_SAFE(const std::vector<const Trk::Layer*>& layers,
     return tVolume;
 }
 
-Trk::TrackingVolume* Trk::CylinderVolumeCreator::createTrackingVolume
-ATLAS_NOT_THREAD_SAFE(const std::vector<const Trk::Layer*>& layers,
-                      Trk::Material& matprop,
-                      double rMin,
-                      double rMax,
-                      double zMin,
-                      double zMax,
-                      const std::string& volumeName,
-                      Trk::BinningType btype) const
+Trk::TrackingVolume*
+Trk::CylinderVolumeCreator::createTrackingVolume(
+  const std::vector<Trk::Layer*>& layers,
+  Trk::Material& matprop,
+  double rMin,
+  double rMax,
+  double zMin,
+  double zMax,
+  const std::string& volumeName,
+  Trk::BinningType btype) const
+
 {
   // that's what is needed
   Trk::CylinderVolumeBounds* cBounds = nullptr;
@@ -302,7 +305,7 @@ ATLAS_NOT_THREAD_SAFE(Trk::Material& matprop,
                        << zMax);
 
   // create the layers
-  std::vector<const Trk::Layer*> layers;
+  std::vector<Trk::Layer*> layers;
   layers.reserve(layerPositions.size());
 
   std::vector<double>::const_iterator layerPropIter = layerPositions.begin();
@@ -466,15 +469,19 @@ ATLAS_NOT_THREAD_SAFE(const std::vector<const Trk::TrackingVolume*>& volumes,
 }
 
 /** private helper method to estimate and check the dimensions of a tracking volume */
-StatusCode Trk::CylinderVolumeCreator::estimateAndCheckDimension(
-                                                 const std::vector<const Trk::Layer*>& layers,
-                                                 Trk::CylinderVolumeBounds*& cylinderVolumeBounds,
-                                                 Amg::Transform3D*& transform,
-                                                 std::vector<Trk::CylinderLayer*>& cylinderLayers,
-                                                 std::vector<Trk::DiscLayer*>& discLayers,
-                                                 double& rMinClean, double& rMaxClean,
-                                                 double& zMinClean, double& zMaxClean,
-                                                 Trk::BinningType bType) const
+StatusCode
+Trk::CylinderVolumeCreator::estimateAndCheckDimension(
+  const std::vector<Trk::Layer*>& layers,
+  Trk::CylinderVolumeBounds*& cylinderVolumeBounds,
+  Amg::Transform3D*& transform,
+  std::vector<Trk::CylinderLayer*>& cylinderLayers,
+  std::vector<Trk::DiscLayer*>& discLayers,
+  double& rMinClean,
+  double& rMaxClean,
+  double& zMinClean,
+  double& zMaxClean,
+  Trk::BinningType bType) const
+
 {
     // check and bail out if no layers are given
     if (layers.empty()) {
@@ -499,9 +506,8 @@ StatusCode Trk::CylinderVolumeCreator::estimateAndCheckDimension(
     zMaxClean = -10e10;
 
     // find out what is there
-    for (const auto & layerIter : layers) {
+    for (auto *const layerIter : layers) {
         //class is not thread safe due to this
-      Trk::Layer* mutableLayer = const_cast<Trk::Layer*>(layerIter);
         // initialize
         double currentRmin = 0.;
         double currentRmax = 0.;
@@ -514,7 +520,7 @@ StatusCode Trk::CylinderVolumeCreator::estimateAndCheckDimension(
         if (cylBounds) {
             radial = true;
             // fill it into the cylinderLayer vector
-            cylinderLayers.push_back(dynamic_cast<Trk::CylinderLayer*>(mutableLayer));
+            cylinderLayers.push_back(dynamic_cast<Trk::CylinderLayer*>(layerIter));
             // get the raw data
             double currentR   = cylBounds->r();
             double centerZ     = (layerIter->surfaceRepresentation()).center().z();
@@ -533,7 +539,7 @@ StatusCode Trk::CylinderVolumeCreator::estimateAndCheckDimension(
                 dynamic_cast<const Trk::DiscBounds*>(&(layerIter->surfaceRepresentation()).bounds());
         if (discBounds) {
             // fill it into the discLayer vector
-            discLayers.push_back(dynamic_cast<Trk::DiscLayer*>(mutableLayer));
+            discLayers.push_back(dynamic_cast<Trk::DiscLayer*>(layerIter));
             // check for min/max in the cylinder bounds case
             double centerZ     = (layerIter->surfaceRepresentation()).center().z();
             currentRmin = discBounds->rMin();

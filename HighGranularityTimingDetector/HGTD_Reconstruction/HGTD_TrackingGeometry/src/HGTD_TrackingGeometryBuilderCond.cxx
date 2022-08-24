@@ -156,8 +156,8 @@ HGTD_TrackingGeometryBuilderCond::trackingGeometry
                   << enclosedOuterRadius);
 
   // prepare the layers
-  std::vector<const Trk::Layer*> negativeLayers;
-  std::vector<const Trk::Layer*> positiveLayers;  
+  std::vector<Trk::Layer*> negativeLayers;
+  std::vector<Trk::Layer*> positiveLayers;  
   
   std::unique_ptr<const std::vector<Trk::DiscLayer*> > discLayers = m_layerBuilder->discLayers(ctx, whandle);
   

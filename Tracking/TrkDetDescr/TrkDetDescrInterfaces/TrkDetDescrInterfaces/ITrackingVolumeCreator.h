@@ -66,8 +66,8 @@ public:
       @param volumeName  : volume name to be given
 
       */
-  virtual TrackingVolume* createTrackingVolume ATLAS_NOT_THREAD_SAFE(
-    const std::vector<const Layer*>& layers,
+  virtual TrackingVolume* createTrackingVolume(
+    const std::vector<Layer*>& layers,
     Material& matprop,
     VolumeBounds* volBounds = 0,
     Amg::Transform3D* transform = 0,
@@ -85,8 +85,8 @@ public:
       @param volumeName  : volume name to be given
 
       */
-  virtual TrackingVolume* createTrackingVolume ATLAS_NOT_THREAD_SAFE(
-    const std::vector<const Layer*>& layers,
+  virtual TrackingVolume* createTrackingVolume(
+    const std::vector<Layer*>& layers,
     Material& matprop,
     double loc1Min,
     double loc1Max,
