@@ -617,5 +617,8 @@ def EGammaCommonCfg(ConfigFlags):
     from IsolationAlgs.DerivationTrackIsoConfig import DerivationTrackIsoCfg
     acc.merge(DerivationTrackIsoCfg(ConfigFlags, object_type = ('Electrons', 'Muons')))
 
+    from IsolationAlgs.IsolationSteeringDerivConfig import IsolationSteeringDerivCfg
+    acc.merge(IsolationSteeringDerivCfg(ConfigFlags))
+
     return acc
 

@@ -22,7 +22,7 @@ def makeEGammaCommonIso():
     addIsoVar = ''
     densityList = []
     densityDict = {}
-    for inT in ['','CSSK']:
+    for inT in ['CSSK']:
         if not hasattr(DerivationFrameworkJob, inT+'PFlowIsolationBuilder'):
             CAtoGlobalWrapper(IsolationSteeringDerivCfg, ConfigFlags,
                                   inType = 'EMPFlow'+inT)

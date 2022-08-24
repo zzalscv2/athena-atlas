@@ -13,6 +13,7 @@ def makeEGammaDFCommon():
     from AthenaCommon import CfgMgr
     from AthenaCommon.GlobalFlags import globalflags
     from AthenaCommon.AppMgr import ToolSvc, ServiceMgr as svcMgr
+    from AthenaConfiguration.AllConfigFlags import ConfigFlags
 
     # ====================================================================
     # PHOTON ETA (=ETA2), ET (=E/COSH(ETA2))
@@ -560,7 +561,6 @@ def makeEGammaDFCommon():
         from JetRecConfig.JetRecConfig import getInputAlgs,getConstitPJGAlg,reOrderAlgs
         from JetRecConfig.StandardJetConstits import stdConstitDic as cst
         from AthenaConfiguration.ComponentAccumulator import conf2toConfigurable
-        from AthenaConfiguration.AllConfigFlags import ConfigFlags
 
         # Schedule PseudoJetTruth
         constit_algs = getInputAlgs(cst.Truth, configFlags=ConfigFlags)
@@ -612,3 +612,9 @@ def makeEGammaDFCommon():
     import IsolationAlgs.IsoUpdatedTrackCones as isoCones
     if not hasattr(DerivationFrameworkJob, "IsolationBuilderNonprompt_All_MaxWeight1000"):
         DerivationFrameworkJob += isoCones.GetUpdatedIsoTrackCones()
+
+    from AthenaConfiguration.ComponentAccumulator import CAtoGlobalWrapper
+    from IsolationAlgs.IsolationSteeringDerivConfig import IsolationSteeringDerivCfg
+    if not hasattr(DerivationFrameworkJob, 'PFlowIsolationBuilder'):
+        CAtoGlobalWrapper(IsolationSteeringDerivCfg, ConfigFlags,
+                          inType = 'EMPFlow')
