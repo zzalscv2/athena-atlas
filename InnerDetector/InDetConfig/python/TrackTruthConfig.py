@@ -1,6 +1,5 @@
 # Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
 from AthenaConfiguration.ComponentAccumulator import ComponentAccumulator
-from AthenaConfiguration.ComponentFactory import CompFactory
 
 # -------------------------------------------------------------------------
 #
@@ -8,30 +7,10 @@ from AthenaConfiguration.ComponentFactory import CompFactory
 #
 # -------------------------------------------------------------------------
 
-def InDetTruthMatchToolCfg(flags, name='InDetTruthMatchTool', **kwargs) :
-    acc = ComponentAccumulator()
-
-    kwargs.setdefault("WeightPixel", 10.)
-    kwargs.setdefault("WeightSCT", 5.)
-    kwargs.setdefault("WeightTRT", 1.)
-
-    InDetTruthMatchSimilarityTool = CompFactory.Trk.TruthMatchRatio(name = name, **kwargs)
-    acc.setPrivateTools(InDetTruthMatchSimilarityTool)
-    return acc
-
-def TrackTruthSimilaritySelectorCfg(flags, DetailedTruth, TracksTruth, name='Selector', **kwargs) :
-    acc = ComponentAccumulator()
-
-    InDetTruthMatchSimilarityTool = acc.popToolsAndMerge(InDetTruthMatchToolCfg(flags))
-
-    kwargs.setdefault("DetailedTrackTruthName", DetailedTruth)
-    kwargs.setdefault("OutputName", TracksTruth)
-    kwargs.setdefault("TrackTruthSimilarityTool", InDetTruthMatchSimilarityTool)
-
-    acc.addEventAlgo(CompFactory.TrackTruthSimilaritySelector(name = TracksTruth+name, **kwargs))
-    return acc
-
-def InDetTrackTruthCfg(flags, Tracks="CombinedInDetTracks", DetailedTruth="CombinedInDetTracksDetailedTruth", TracksTruth="CombinedInDetTracksTruthCollection"):
+def InDetTrackTruthCfg(flags,
+                       Tracks="CombinedInDetTracks",
+                       DetailedTruth="CombinedInDetTracksDetailedTruth",
+                       TracksTruth="CombinedInDetTracksTruthCollection"):
     acc = ComponentAccumulator()
     #
     # --- Enable the detailed track truth
@@ -41,6 +20,7 @@ def InDetTrackTruthCfg(flags, Tracks="CombinedInDetTracks", DetailedTruth="Combi
     #
     # --- Detailed to old TrackTruth
     #
+    from TrkConfig.TrkTruthAlgsConfig import TrackTruthSimilaritySelectorCfg
     acc.merge(TrackTruthSimilaritySelectorCfg(flags, DetailedTruth, TracksTruth))
 
     return acc

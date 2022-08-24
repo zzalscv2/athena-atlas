@@ -5,7 +5,7 @@
 /***************************************************************************
     MuonTGC_CablingSvc.h
 
-    Author : Susumu.Oda@cern.ch, Hisaya.Kurashige@cern.ch
+    Author : Toshi.Sumida@cern.ch, Susumu.Oda@cern.ch, Hisaya.Kurashige@cern.ch
     Created from TGCcabling12Svc.cxx in June, 2009
     Description : online-offline ID mapper for TGC
   
@@ -49,6 +49,7 @@ class MuonTGC_CablingSvc : public ITGCcablingSvc
   // give max value of ReadoutID parameters
   virtual
   void getReadoutIDRanges(int& maxRodId,
+                          int& maxSRodId,
 			  int& maxSswId,
 			  int& maxSbloc,
 			  int& minChannelId,
@@ -67,6 +68,18 @@ class MuonTGC_CablingSvc : public ITGCcablingSvc
 			    int & startForwardSector,
 			    int & coverageOfForwardSector) const override;
 
+  // give phi-range which a SROD covers
+  virtual
+  bool getCoveragefromSRodID(const int srodID,
+			    double & startPhi,
+			    double & endPhi) const override;
+
+  virtual
+  bool getCoveragefromSRodID(const int srodID,
+                             int & startEndcapSector,
+                             int & coverageOfEndcapSector,
+                             int & startForwardSector,
+                             int & coverageOfForwardSector) const override;
 
   // Readout ID is ored
   virtual
@@ -258,15 +271,34 @@ class MuonTGC_CablingSvc : public ITGCcablingSvc
 			    const int sswID,
 			    const int sbLoc) const override;
 
-  // SL ID -> readout ID ( SROD )
+  // readout ID (SROD) -> SL ID 
+  virtual
+  bool getSLIDfromSReadoutID(int & phi,
+                             bool & isAside,
+                             const int subsectorID,
+                             const int srodID,
+                             const int sector,
+                             const bool forward) const override;
+
+  // SL ID -> readout ID ( ROD )
   virtual
   bool getReadoutIDfromSLID(const int phi,
 			    const bool isAside,
 			    const bool isEndcap,
 			    int & subsectorID,
-			    int & srodID,
+			    int & rodID,
 			    int & sswID,
 			    int & sbLoc) const override;
+
+  // SL ID -> readout ID ( SROD )
+  virtual
+  bool getSReadoutIDfromSLID(const int phi,
+                             const bool isAside,
+                             const bool isEndcap,
+                             int & subsectorID,
+                             int & srodID,
+                             int & sswID,
+                             int & sbLoc) const override;
 
   // HighPtID used in Simulation -> HighPtID in RDO
   virtual

@@ -407,8 +407,6 @@ def write_dummy_menu_json(flags, chains, chain_to_streams):
 
 # unit test
 if __name__ == '__main__':
-    from AthenaCommon.Configurable import Configurable
-    Configurable.configurableRun3Behavior=1
     from AthenaConfiguration.AllConfigFlags import ConfigFlags as flags
     set_flags(flags)
     flags.lock()

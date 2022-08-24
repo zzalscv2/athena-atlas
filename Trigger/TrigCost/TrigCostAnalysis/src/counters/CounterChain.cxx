@@ -29,6 +29,7 @@ CounterChain::CounterChain(const std::string& name, unsigned nRos, const Monitor
   : CounterChain(name, parent)
 {
   regTProfile("ROSRequests_perEvent", "Number of ROS requests;ROS names;Numer of requests to ROS per event", VariableType::kPerCall, LogType::kLinear, 0, nRos, nRos);
+  regTProfile("NetworkROSRequests_perEvent", "Number of network ROS requests;ROS names;Numer of requests to ROS over the network per event", VariableType::kPerCall, LogType::kLinear, 0, nRos, nRos);
   regTProfile("ROBRequestsPerROS_perEvent", "Number of ROBs per ROS requests;ROS names;Numer of ROBs requested per request", VariableType::kPerCall, LogType::kLinear, 0, nRos, nRos);
   regTProfile("ROBRequestsPerROSPerEvent_perEvent", "Number of ROBs per ROS requests per event;ROS names;Numer of ROBs requested by ROS per event", VariableType::kPerCall, LogType::kLinear, 0, nRos, nRos);
 }
@@ -43,6 +44,7 @@ StatusCode CounterChain::newEvent(const CostData& data, size_t index, const floa
     for (const auto& rosToRobPair : data.costROSData().getROStoROBMap()) {
       int binForROS = data.costROSData().getBinForROS(rosToRobPair.first) + 1;
       ATH_CHECK( getVariable("ROSRequests_perEvent").setBinLabel(binForROS, rosToRobPair.first));
+      ATH_CHECK( getVariable("NetworkROSRequests_perEvent").setBinLabel(binForROS, rosToRobPair.first));
       ATH_CHECK( getVariable("ROBRequestsPerROS_perEvent").setBinLabel(binForROS, rosToRobPair.first));
       ATH_CHECK( getVariable("ROBRequestsPerROSPerEvent_perEvent").setBinLabel(binForROS, rosToRobPair.first));
     }
@@ -66,6 +68,7 @@ StatusCode CounterChain::newEvent(const CostData& data, size_t index, const floa
   if (!data.chainToAlgMap().count(getName())) return StatusCode::SUCCESS;
 
   std::map<std::string, int> nRosPerEvent; // Accumulate how many times ROS was requested in a request per this event
+  std::map<std::string, int> nNetworkRosPerEvent; // Accumulate how many times ROS was requested in a request per this event
   std::map<std::string, int> nRobsPerRosPerEvent; // Accumulate how many ROBs ROS requested per this event
   for (const size_t algIndex : data.chainToAlgMap().at(getName())){
     const xAOD::TrigComposite* alg = data.costCollection().at(algIndex);
@@ -95,6 +98,7 @@ StatusCode CounterChain::newEvent(const CostData& data, size_t index, const floa
 
       bool networkRequestIncremented = false;
       std::set<std::string> requestedROSes;
+      std::set<std::string> requestedNetworkROSes;
       for (size_t i = 0; i < robs_size.size(); ++i) {
         // ROB request was fetched over the network
         if (robs_history[i] == robmonitor::RETRIEVED) {
@@ -114,6 +118,10 @@ StatusCode CounterChain::newEvent(const CostData& data, size_t index, const floa
             requestedROSes.insert(rosForROB);
             nRobsPerRosPerRequest[rosForROB] += 1;
             nRobsPerRosPerEvent[rosForROB] += 1;
+
+            if (robs_history[i] == robmonitor::RETRIEVED) {
+              requestedNetworkROSes.insert(rosForROB);
+            }
           }
         }
       }
@@ -128,6 +136,10 @@ StatusCode CounterChain::newEvent(const CostData& data, size_t index, const floa
           nRosPerEvent[rosName] += 1;
       }
     
+      for (const std::string& rosName : requestedNetworkROSes){
+          nNetworkRosPerEvent[rosName] += 1;
+      }
+
       ATH_CHECK( increment("Request_perEvent", weight) );
 
       if (networkRequestIncremented) {
@@ -142,6 +154,10 @@ StatusCode CounterChain::newEvent(const CostData& data, size_t index, const floa
   // Save the requested ROSes per event
   for (const auto& robPerRosPair : nRosPerEvent) {
     ATH_CHECK( fill("ROSRequests_perEvent", data.costROSData().getBinForROS(robPerRosPair.first), robPerRosPair.second, weight) );
+  }
+
+  for (const auto& robPerRosPair : nNetworkRosPerEvent) {
+    ATH_CHECK( fill("NetworkROSRequests_perEvent", data.costROSData().getBinForROS(robPerRosPair.first), robPerRosPair.second, weight) );
   }
 
   // Save the number of ROBs per ROS per event

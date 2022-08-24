@@ -180,6 +180,8 @@ class EnhancedBiasWeighter: public asg::AsgTool, public virtual IEnhancedBiasWei
     int32_t getEventEBID(const xAOD::EventInfo* eventInfo) const; 
     int32_t getEventEBID(const EventContext& context) const; 
 
+    std::string findLocalFile (const std::string& fileName) const;
+
     SG::ReadCondHandleKey<BunchCrossingCondData> m_bunchCrossingKey{this, "BunchCrossingKey", "BunchCrossingData", "Key BunchCrossing CDO" }; //!< Tool to get distance into bunch train
 
     Gaudi::Property<uint32_t> m_runNumber{this, "RunNumber", 0, "Run we're processing (if data), needed at initialize to locate and read in extra configuration."};
@@ -191,7 +193,8 @@ class EnhancedBiasWeighter: public asg::AsgTool, public virtual IEnhancedBiasWei
     Gaudi::Property<double> m_mcFilterEfficiency{this, "MCFilterEfficiency", 1.0, "If running over MC. The process filter efficiency (0.0-1.0)"}; 
     Gaudi::Property<double> m_mcKFactor{this, "MCKFactor", 1.0, "If running over MC. The process filter efficiency (0.0-1.0)"}; 
     Gaudi::Property<bool> m_mcIgnoreGeneratorWeights{this, "MCIgnoreGeneratorWeights", false, "If running over MC. Flag to ignore the generator weight."}; 
-    Gaudi::Property<double> m_inelasticCrossSection{this, "InelasticCrossSection", 8e-26, "Inelastic cross section in units cm^2. Default 80 mb at 13 TeV."}; 
+    Gaudi::Property<double> m_inelasticCrossSection{this, "InelasticCrossSection", 8e-26, "Inelastic cross section in units cm^2. Default 80 mb at 13 TeV."};
+    Gaudi::Property<std::string> m_weightsDirectory {this, "EBWeightsDirectory", "", "Path to directory with EB XML weights files, if empty they will be read from calibration area"};  
 
 
     double m_deadtime; //!< Online deadtime to correct for in rate prediction. Currently a constant for the EB period

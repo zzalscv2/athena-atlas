@@ -118,20 +118,15 @@ StatusCode TrigEventInfoRecorderAlg::decorateTLA(const EventContext& context, xA
        
        for (unsigned int i_vtx = 0; i_vtx <  vertex_container->size(); i_vtx++)
        {
-        privtx = vertex_container->at(i_vtx);
 
-        if (  !( privtx->vertexType() == xAOD::VxType::PriVtx
-                && privtx->nTrackParticles() >= 2 ) ){
-            privtx = nullptr;
-        } else {
-            ATH_MSG_DEBUG( "Primary vertex successfully retrieved" );
-            NPV++;
-        }
+        privtx = vertex_container->at(i_vtx);
+        if ( privtx->nTrackParticles() >= 2)  NPV++;
+       
        }
     }   
     
     else {
-       ATH_MSG_WARNING( "Couldn't retrieve primary vertex, keeping null privtx" );
+       ATH_MSG_WARNING( "Couldn't retrieve primary vertex, NPV will be 0" );
     }
 
 

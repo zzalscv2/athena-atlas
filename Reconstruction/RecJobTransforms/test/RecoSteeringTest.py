@@ -7,8 +7,6 @@ import sys
 def _run(input):
     import datetime
     startStamp = datetime.datetime.now()
-    from AthenaCommon.Configurable import Configurable
-    Configurable.configurableRun3Behavior=True
     from AthenaConfiguration.AllConfigFlags import ConfigFlags as flags
     flags.Exec.MaxEvents = 5
     flags.Concurrency.NumThreads = 1

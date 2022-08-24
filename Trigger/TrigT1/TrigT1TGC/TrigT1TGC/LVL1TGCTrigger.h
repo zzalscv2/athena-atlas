@@ -147,7 +147,7 @@ class LVL1TGCTrigger : public AthAlgorithm
 
     
     bool              m_firstTime{true};
-    uint16_t          m_bctagInProcess;
+    uint16_t m_bctagInProcess{TgcDigit::BC_UNDEFINED};
 
     TGCDatabaseManager *m_db;
     std::unique_ptr<TGCTimingManager> m_TimingManager;

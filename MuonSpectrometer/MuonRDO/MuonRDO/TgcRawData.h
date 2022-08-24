@@ -220,7 +220,8 @@ public:
     // return Information Type Hit:Coincidence
     bool isCoincidence() const
     {
-        return m_type == TYPE_TRACKLET || m_type == TYPE_HIPT || m_type == TYPE_SL;
+        return m_type == TYPE_TRACKLET || m_type == TYPE_HIPT || m_type == TYPE_SL
+          || m_type == TYPE_INNER || m_type == TYPE_INNER_NSW || m_type == TYPE_INNER_BIS || m_type == TYPE_INNER_EIFI || m_type == TYPE_INNER_TMDB;
     }
 
     /*********** common accessors

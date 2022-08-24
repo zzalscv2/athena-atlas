@@ -15,6 +15,7 @@
 #include "JetCalibTools/CalibrationMethods/BcidOffsetCorrection.h"
 #include "JetCalibTools/CalibrationMethods/EtaJESCorrection.h"
 #include "JetCalibTools/CalibrationMethods/GlobalSequentialCorrection.h"
+#include "JetCalibTools/CalibrationMethods/GlobalNNCalibration.h"
 #include "JetCalibTools/CalibrationMethods/InsituDataCorrection.h"
 #include "JetCalibTools/CalibrationMethods/JMSCorrection.h"
 #include "JetCalibTools/CalibrationMethods/JetSmearingCorrection.h"
@@ -133,7 +134,7 @@ StatusCode JetCalibrationTool::initialize() {
                                                  "HLT_xAOD__JetContainer_a4tcemsubjesISFS");
 
   if ( !calibSeq.Contains("Origin") ) m_doOrigin = false;
-  if ( !calibSeq.Contains("GSC") ) m_doGSC = false;
+  if ( !calibSeq.Contains("GSC") && !calibSeq.Contains("GNNC")) m_doGSC = false;
   if ( !calibSeq.Contains("Bcid") ) m_doBcid = false;
 
   //Protect against the in-situ calibration being requested when isData is false
@@ -261,6 +262,13 @@ StatusCode JetCalibrationTool::getCalibClass(TString calibration) {
     ATH_CHECK(gsc->initialize());
     m_calibSteps.push_back(std::move(gsc)); 
     return StatusCode::SUCCESS; 
+  }
+  else if ( calibration.EqualTo("GNNC") ) {
+    std::unique_ptr<JetCalibrationStep> gnnc = std::make_unique<GlobalNNCalibration>(this->name()+"_GNNC",m_globalConfig,jetAlgo,calibPath,m_devMode);
+    gnnc->msg().setLevel( this->msg().level() );
+    ATH_CHECK(gnnc->initialize());
+    m_calibSteps.push_back(std::move(gnnc));
+    return StatusCode::SUCCESS;
   }
   else if ( calibration.EqualTo("JMS") ) {
     std::unique_ptr<JetCalibrationStep> jetMassCorr = std::make_unique<JMSCorrection>(this->name()+"_JMS", m_globalConfig, jetAlgo, calibPath, m_devMode);
