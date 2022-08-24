@@ -205,8 +205,10 @@ def MuonRotCreatorCfg(flags, name="MuonRotCreator", **kwargs):
 
     kwargs.setdefault("ToolMuonDriftCircle", mdt_rot_creator)
     kwargs.setdefault("ToolMuonCluster", cluster_rot_creator)
-    kwargs.setdefault("ToolMuonMMCluster", result.popToolsAndMerge(
-        MMClusterOnTrackCreatorCfg(flags)))
+    
+    if flags.GeoModel.Run >= LHCPeriod.Run3:
+        kwargs.setdefault("ToolMuonMMCluster", result.popToolsAndMerge(
+                                        MMClusterOnTrackCreatorCfg(flags)))
     
     kwargs.setdefault("ToolPixelCluster", None)
     kwargs.setdefault("ToolSCT_Cluster", None)
