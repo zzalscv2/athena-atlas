@@ -22,17 +22,40 @@ namespace CP
     StatusCode ElectronLRTOverlapRemovalTool::initialize()
     {
 
-        if (m_electronLLHTool.empty())
+        if (!m_isDAOD)
         {
-            asg::AsgToolConfig config("AsgElectronLikelihoodTool/ElectronLHSelectorVeryLooseNoPix");
-            ATH_CHECK(config.setProperty("ConfigFile", "ElectronPhotonSelectorTools/trigger/rel22_20210611/ElectronLikelihoodVeryLooseTriggerConfig_NoPix.conf"));
-            ATH_CHECK(config.makePrivateTool(m_electronLLHTool));
-        }
+            if (m_electronLLHTool.empty())
+            {
+                asg::AsgToolConfig config("AsgElectronLikelihoodTool/ElectronLHSelectorVeryLooseNoPix");
+                ATH_CHECK(config.setProperty("ConfigFile", "ElectronPhotonSelectorTools/trigger/rel22_20210611/ElectronLikelihoodVeryLooseTriggerConfig_NoPix.conf"));
+                ATH_CHECK(config.makePrivateTool(m_electronLLHTool));
+            }
 
-        ATH_MSG_DEBUG("Retrieving electron selection tool");
-        ATH_CHECK(m_electronLLHTool.retrieve());
+            ATH_MSG_DEBUG("Retrieving electron selection tool");
+            ATH_CHECK(m_electronLLHTool.retrieve());
+        } 
+
         return StatusCode::SUCCESS;
     }
+
+
+    //////////////////////////////////////////////////////////////////
+    // Check if electron passes ID
+    //////////////////////////////////////////////////////////////////
+    bool ElectronLRTOverlapRemovalTool::electronPassesID(const xAOD::Electron *electron) const
+    {
+
+        if (m_isDAOD)
+        {
+            SG::AuxElement::ConstAccessor<char> DFCommonElectronsLHVeryLooseNoPix("DFCommonElectronsLHVeryLooseNoPix");
+            return bool(DFCommonElectronsLHVeryLooseNoPix(*electron) );
+        } else
+        {
+            return bool(m_electronLLHTool->accept(electron));
+        }
+
+    }
+
 
     //////////////////////////////////////////////////////////////////////
     // Check overlap between the electron collections and save pointer of duplicates
@@ -43,6 +66,13 @@ namespace CP
                                                      std::set<const xAOD::Electron *> &ElectronsToRemove) const
     {
 
+        // Loop over lrt electrons to remove those that do not pass ID.
+        // Needed in case there are no prompt electrons passing ID
+        for (const xAOD::Electron *LRTElectron : LRTElectronCol)
+        {
+            if (!electronPassesID(LRTElectron))  ElectronsToRemove.insert(LRTElectron);
+        }
+
         // loop over prompt electrons
         for (const xAOD::Electron *promptElectron : promptElectronCol)
         {
@@ -50,7 +80,7 @@ namespace CP
             const xAOD::CaloCluster_v1 *prompt_cluster = (*promptClusterLink);
 
             // Skip electrons that do not pass ID threshold
-            if (!m_electronLLHTool->accept(promptElectron))
+            if (!electronPassesID(promptElectron))
             {
                 ElectronsToRemove.insert(promptElectron);
                 continue;
@@ -63,11 +93,7 @@ namespace CP
                 const xAOD::CaloCluster_v1 *lrt_cluster = (*LRTClusterLink);
 
                 // Skip LRT electrons that do not pass ID threshold
-                if (!m_electronLLHTool->accept(LRTElectron))
-                {
-                    ElectronsToRemove.insert(LRTElectron);
-                    continue;
-                }
+                if (!electronPassesID(LRTElectron)) continue;
 
                 // check that clusters exist (necessary? copied from MuonSpec overlap, but all electrons have clusters...)
                 // TODO: This should then fall back to delta R if clusters are missing
@@ -77,11 +103,11 @@ namespace CP
                 // matching based on hottest cell of cluster
                 //  as in ambiguity res for el/ph 
 
-		const double prompt_elEta0 = prompt_cluster->eta0();
-		const double prompt_elPhi0 = prompt_cluster->phi0();
+                const double prompt_elEta0 = prompt_cluster->eta0();
+                const double prompt_elPhi0 = prompt_cluster->phi0();
 
-		const double lrt_elEta0 = lrt_cluster->eta0();
-		const double lrt_elPhi0 = lrt_cluster->phi0();
+                const double lrt_elEta0 = lrt_cluster->eta0();
+                const double lrt_elPhi0 = lrt_cluster->phi0();
 
                 if (prompt_elEta0 == lrt_elEta0 && prompt_elPhi0 == lrt_elPhi0) 
                 {
@@ -92,7 +118,7 @@ namespace CP
                     ElectronsToRemove.insert(LRTElectron);
                 }
             } // end lrt loop
-        }     // end prompt loop
+        }   // end prompt loop
     }
 
 } // end namespace CP

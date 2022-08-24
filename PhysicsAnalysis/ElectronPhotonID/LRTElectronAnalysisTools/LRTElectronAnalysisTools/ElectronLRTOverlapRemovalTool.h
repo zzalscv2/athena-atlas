@@ -52,8 +52,11 @@ namespace CP
     private:
         Gaudi::Property<int> m_strategy{this, "overlapStrategy", CP::IElectronLRTOverlapRemovalTool::defaultStrategy, "Overlap removal strategy to use (0 = default)"}; /** Allows for setting the overlap removal strategy in case of future variations **/
         Gaudi::Property<float> m_ORThreshold{this, "ORThreshold", 0.001, "Delta R threshold for matching in overlap removal."};                                         /** Delta R threshold for matching in overlap removal. */
+        Gaudi::Property<bool> m_isDAOD{this, "isDAOD", true, "Switch for running on AOD (false) or DAOD (true)"}; /** Switches method for retrieving electron ID **/
 
         ToolHandle<IAsgElectronLikelihoodTool> m_electronLLHTool{this, "ElectronLLHTool", "", "Electron LLH tool to use for the overlap removal"}; 
+
+        bool electronPassesID(const xAOD::Electron *electron) const;
 
     }; // end namespace CP
 
