@@ -138,7 +138,9 @@ std::vector<float> LVL1::jFEXPileupAndNoise::CalculatePileup(){
                     }
                 }
                 else if(tmp_eta > 30 && TTID >= FEXAlgoSpaceDefs::jFEX_FCAL_start){
-                    m_FPGA_ET_central_HAD[iphi][ieta] = tmp_energy; //This corrects the FCAL layer 0 (which is an EM layer)
+                    if (ieta < FEXAlgoSpaceDefs::jFEX_thin_algoSpace_width) {
+                      m_FPGA_ET_central_HAD[iphi][ieta] = tmp_energy; //This corrects the FCAL layer 0 (which is an EM layer)
+                    }
                     if(tmp_energy > m_et_low and tmp_energy < m_et_high){ //lower and upper threshold must be get from the L1Calo DB         
                         m_rho_FCAL += tmp_energy / (tmp_HD_Area*tmp_EM_Area); // FCAL is treated differently.. but when HAD layer -> EM_Area = 1 and viceversa with this we dont need to divide into FCAL layers
                         m_count_rho_FCAL++;

@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
 */
 
 //***************************************************************************
@@ -116,9 +116,17 @@ StatusCode eFEXFPGA::execute(eFEXOutputCollection* inputOutputCollection){
   for(int ieta = min_eta; ieta < overflow_eta; ieta++) {
     for(int iphi = 1; iphi < 9; iphi++) {
       int tobtable[3][3]={
-        {m_eTowersIDs[iphi-1][ieta-1], m_eTowersIDs[iphi-1][ieta], m_eTowersIDs[iphi-1][ieta+1]},
-        {m_eTowersIDs[iphi][ieta-1], m_eTowersIDs[iphi][ieta], m_eTowersIDs[iphi][ieta+1]},
-        {m_eTowersIDs[iphi+1][ieta-1], m_eTowersIDs[iphi+1][ieta], m_eTowersIDs[iphi+1][ieta+1]},
+        {ieta > 0 ? m_eTowersIDs[iphi-1][ieta-1] : 0,
+         m_eTowersIDs[iphi-1][ieta],
+         ieta < 5 ? m_eTowersIDs[iphi-1][ieta+1] : 0},
+
+        {ieta > 0 ? m_eTowersIDs[iphi][ieta-1] : 0,
+         m_eTowersIDs[iphi][ieta],
+         ieta < 5 ? m_eTowersIDs[iphi][ieta+1] : 0},
+
+        {ieta > 0 ? m_eTowersIDs[iphi+1][ieta-1] : 0,
+         m_eTowersIDs[iphi+1][ieta],
+         ieta < 5 ? m_eTowersIDs[iphi+1][ieta+1] : 0},
       };
 
       ATH_CHECK( m_eFEXegAlgoTool->safetyTest() );
@@ -241,9 +249,17 @@ StatusCode eFEXFPGA::execute(eFEXOutputCollection* inputOutputCollection){
     for(int iphi = 1; iphi < 9; iphi++)
     {
       int tobtable[3][3]={
-        {m_eTowersIDs[iphi-1][ieta-1], m_eTowersIDs[iphi-1][ieta], m_eTowersIDs[iphi-1][ieta+1]},
-        {m_eTowersIDs[iphi][ieta-1], m_eTowersIDs[iphi][ieta], m_eTowersIDs[iphi][ieta+1]},
-        {m_eTowersIDs[iphi+1][ieta-1], m_eTowersIDs[iphi+1][ieta], m_eTowersIDs[iphi+1][ieta+1]},
+        {ieta > 0 ? m_eTowersIDs[iphi-1][ieta-1] : 0,
+         m_eTowersIDs[iphi-1][ieta],
+         ieta < 5 ? m_eTowersIDs[iphi-1][ieta+1] : 0},
+
+        {ieta > 0 ? m_eTowersIDs[iphi][ieta-1] : 0,
+         m_eTowersIDs[iphi][ieta],
+         ieta < 5 ? m_eTowersIDs[iphi][ieta+1] : 0},
+
+        {ieta > 0 ? m_eTowersIDs[iphi+1][ieta-1] : 0,
+         m_eTowersIDs[iphi+1][ieta],
+         ieta < 5 ? m_eTowersIDs[iphi+1][ieta+1] : 0},
       };
       
       ATH_CHECK( m_eFEXtauAlgoTool->safetyTest() );
@@ -328,11 +344,11 @@ StatusCode eFEXFPGA::execute(eFEXOutputCollection* inputOutputCollection){
         inputOutputCollection->addValue_tau("Eta", ieta);
         inputOutputCollection->addValue_tau("Phi", iphi);
         const LVL1::eTower * centerTower = eTowerContainer->findTower(m_eTowersIDs[iphi][ieta]);
-        const LVL1::eTower * oneOffEtaTower = eTowerContainer->findTower(m_eTowersIDs[iphi][ieta+1]);
-        const LVL1::eTower * oneBelowEtaTower = eTowerContainer->findTower(m_eTowersIDs[iphi][ieta-1]);
+        const LVL1::eTower * oneOffEtaTower = ieta < 5 ? eTowerContainer->findTower(m_eTowersIDs[iphi][ieta+1]) : nullptr;
+        const LVL1::eTower * oneBelowEtaTower = ieta > 0 ? eTowerContainer->findTower(m_eTowersIDs[iphi][ieta-1]) : nullptr;
         inputOutputCollection->addValue_tau("CenterTowerEt", centerTower->getTotalET());
-        inputOutputCollection->addValue_tau("OneOffEtaTowerEt", oneOffEtaTower->getTotalET());
-        inputOutputCollection->addValue_tau("OneBelowEtaTowerEt", oneBelowEtaTower->getTotalET());
+        inputOutputCollection->addValue_tau("OneOffEtaTowerEt", oneOffEtaTower ? oneOffEtaTower->getTotalET() : 0);
+        inputOutputCollection->addValue_tau("OneBelowEtaTowerEt", oneBelowEtaTower ? oneBelowEtaTower->getTotalET() : 0);
         inputOutputCollection->addValue_tau("FloatEta", centerTower->eta() * centerTower->getPosNeg());
         inputOutputCollection->addValue_tau("FloatPhi", centerTower->phi());
         inputOutputCollection->addValue_tau("RCoreCore", rCoreVec[0]);
