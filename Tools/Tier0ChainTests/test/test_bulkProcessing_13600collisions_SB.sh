@@ -23,6 +23,10 @@ Reco_tf.py  \
 rc1=$?
 echo "art-result: $rc1 Reco"
 
+# keep the job alive for up to 5 hours since diff-root doesn't display anything while running.
+(for i in 1 1 1 1 1 ; do sleep 3600 ; touch ./my_art_heartbeat ; done) &
+MY_ART_HEARTBEAT_PID=$!
+
 rc2=-9999
 if [ ${rc1} -eq 0 ]
 then
@@ -37,7 +41,9 @@ rc3=-9999
 if [ ${rc1} -eq 0 ]
 then
   art.py compare ref . /cvmfs/atlas-nightlies.cern.ch/repo/data/data-art/Tier0ChainTests/TCT_Run3-22.0_references_for_comparison/test_bulkProcessing_13600collisions_SB \
-  --entries 100 --mode=semi-detailed --order-trees --ignore-exit-code diff-pool
+  --entries 10 --mode=semi-detailed --order-trees --ignore-exit-code diff-pool
   rc3=$?
 fi
 echo  "art-result: ${rc3} (against reference)"
+
+kill $MY_ART_HEARTBEAT_PID || true
