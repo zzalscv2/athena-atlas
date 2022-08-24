@@ -682,14 +682,30 @@ void Muon::TgcRdoToPrepDataToolMT::selectDecoder(State& state,
 		(rd.slbType()==TgcRawData::SLB_TYPE_INNER_STRIP)) {
 	status = decodeTrackletEIFI(state, rd, coinMap);
       }
-    } else if((rd.type()==TgcRawData::TYPE_HIPT) && 
-	      (rd.isHipt())) {
-      status = decodeHiPt(state, rd, coinMap);
-    } else if((rd.type()==TgcRawData::TYPE_HIPT) && 
-	      ((rd.sector() & 4) != 0)) { // inner
+    } else if((rd.type()==TgcRawData::TYPE_HIPT) && (rd.rodId() < 13) && ((rd.sector() & 4) != 0)) { // inner in Run2 data
       status = decodeInner(state, rd, coinMap);
+    } else if((rd.type()==TgcRawData::TYPE_HIPT) && (rd.rodId() < 13) &&
+	      (rd.isHipt())) { // hipt in Run2 data
+      status = decodeHiPt(state, rd, coinMap);
+    } else if((rd.type()==TgcRawData::TYPE_HIPT) && (rd.rodId() < 20)){ // hipt in Run3 data
+      if (rd.bcTag() != 4 ){
+        //status = decodeHiPt_NSL(state, rd, coinMap);
+      }
+    } else if((rd.type()==TgcRawData::TYPE_INNER_NSW)||
+              (rd.type()==TgcRawData::TYPE_INNER_BIS)||
+              (rd.type()==TgcRawData::TYPE_INNER_EIFI)||
+              (rd.type()==TgcRawData::TYPE_INNER_TMDB)) { // inner in Run3 data
+      if (rd.bcTag() != 4 ){
+        //status = decodeInner(state, rd, coinMap);
+      }
     } else if((rd.type()==TgcRawData::TYPE_SL)) {
-      status = decodeSL(state, rd, rdoColl, coinMap);
+      if (rd.rodId() < 13){
+        status = decodeSL(state, rd, rdoColl, coinMap);
+      }else if (rd.rodId() < 20){
+        if (rd.bcTag() != 4 ){
+          //status = decodeNSL(state, rd, rdoColl, coinMap);
+        }
+      }
     }
     if(!status.isSuccess()) {
       ATH_MSG_WARNING("Cannot decode TGC Coincidences");

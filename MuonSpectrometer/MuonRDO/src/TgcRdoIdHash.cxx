@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2020 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "MuonRDO/TgcRdoIdHash.h" 
@@ -19,23 +19,38 @@ TgcRdoIdHash::TgcRdoIdHash()
   if(isAtlas){
   
       // loop over all RODs
-      for (uint16_t id=0; id<24; ++id)
-      {
+      for (uint16_t id=0; id<30; ++id){
+        if ( id < 24) {
           // map
           m_lookup[id]=m_size;
           m_int2id.push_back(id);
           ++m_size;
-
+          
           // SubDetectorID
           if (id < 12) // A-side
-	      m_int2subDetectorId.push_back(0x67);
+            m_int2subDetectorId.push_back(0x67);
           else
-	      m_int2subDetectorId.push_back(0x68);
-
+            m_int2subDetectorId.push_back(0x68);
+          
           // ROD ID
           m_int2rodId.push_back( (id % 12) + 1);
+        }else{ // SROD
+          // map
+          m_lookup[id]=m_size;
+          m_int2id.push_back(id);
+          ++m_size;
+          
+          // SubDetectorID
+          if (id < 27) // A-side
+            m_int2subDetectorId.push_back(0x67);
+          else
+            m_int2subDetectorId.push_back(0x68);
+          
+          // SROD ID
+          m_int2rodId.push_back( (id - 24) % 3 + 17 ); // 17-19
+        }
       }
-  
+
   } else {
       
      // throw GaudiException("Code not prepared for working with the old TGccabling",

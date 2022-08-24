@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2020 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef MUONTGC_CABLING_TGCCABLING_HH
@@ -53,6 +53,8 @@ class TGCCabling : public TGCCablingBase
   enum MAXMINREADOUTIDS { 
     MAXRODID = 12, 
     MINRODID = 1, 
+    MAXSRODID = 3, 
+    MINSRODID = 1, 
     MAXSSWID = 9, 
     MINSSWID = 0, 
     MAXSBLOC = 31, 

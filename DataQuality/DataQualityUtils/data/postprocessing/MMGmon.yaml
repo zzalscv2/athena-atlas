@@ -107,3 +107,18 @@ Output : ['Muon/MuonRawDataMonitoring/MM/Overview/MMG_Strip_deltat_eta{eta}_E{si
 Parameters: { histo_name : 'Strip_time_ontrack_vs_PCB', start_index : 40, proctype : 'fermiDirac_deltat' }
 Function : MMRawDataMonitoring.MMPostProcessing.map_per_PCB
 Description : map_per_PCB_stripdeltaT_ontrack
+---
+Input : ['Muon/MuonRawDataMonitoring/MM/Occupancy/Occupancy_CSide_PCB', 'Muon/MuonRawDataMonitoring/MM/Occupancy/Occupancy_ASide_PCB']
+Output : ['Muon/MuonRawDataMonitoring/MM/Occupancy/Occupancy_CSide_PCB_pp', 'Muon/MuonRawDataMonitoring/MM/Occupancy/Occupancy_ASide_PCB_pp']
+Function : MMRawDataMonitoring.MMPostProcessing.add_layer_lines
+Description : lines
+---
+Input : ['Muon/MuonRawDataMonitoring/MM/Occupancy/Occupancy_CSide_PCB_ontrack', 'Muon/MuonRawDataMonitoring/MM/Occupancy/Occupancy_ASide_PCB_ontrack']
+Output : ['Muon/MuonRawDataMonitoring/MM/Occupancy/Occupancy_CSide_PCB_ontrack_pp', 'Muon/MuonRawDataMonitoring/MM/Occupancy/Occupancy_ASide_PCB_ontrack_pp']
+Function : MMRawDataMonitoring.MMPostProcessing.add_layer_lines
+Description : lines
+---
+Input : ['Muon/MuonRawDataMonitoring/MM/Occupancy/Occupancy_CSide_PCB_onseg', 'Muon/MuonRawDataMonitoring/MM/Occupancy/Occupancy_ASide_PCB_onseg']
+Output : ['Muon/MuonRawDataMonitoring/MM/Occupancy/Occupancy_CSide_PCB_onseg_pp', 'Muon/MuonRawDataMonitoring/MM/Occupancy/Occupancy_ASide_PCB_onseg_pp']
+Function : MMRawDataMonitoring.MMPostProcessing.add_layer_lines
+Description : lines

@@ -1,12 +1,11 @@
 /*
-  Copyright (C) 2002-2020 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
 */
 
 /***************************************************************************
          ITGCcablingSvc.h
 
-    Author  : H.Kurashige           Aug. 2007
-    Email   : Hisaya.Kurashige@cern.ch
+    Author  : T.Sumida <Toshi.Sumida@cern.ch>, H.Kurashige
     Description : Interface for TGCcavlingSv
                    pure abstract class
 ***************************************************************************/
@@ -54,6 +53,7 @@ class ITGCcablingSvc : public AthService, virtual public IInterface
     // give max value of ReadoutID parameters
   virtual 
    void getReadoutIDRanges( int& maxRodId,
+                            int& maxSRodId,
 			    int& maxSswId,
 			    int& maxSbloc,
 			    int& minChannelId,
@@ -74,8 +74,22 @@ class ITGCcablingSvc : public AthService, virtual public IInterface
 			      int & coverageOfForwardSector
 			      ) const                =0;
 
-  
-  // Readout ID is ored
+  // give phi-range which a SROD covers  
+  virtual 
+    bool getCoveragefromSRodID(const int srodID,
+                               double & startPhi,
+                               double & endPhi
+                               ) const                 =0;
+
+  virtual
+    bool getCoveragefromSRodID(const int srodID,
+                               int & startEndcapSector,
+                               int & coverageOfEndcapSector,
+                               int & startForwardSector,
+                               int & coverageOfForwardSector
+                               ) const                =0;
+
+    // Readout ID is ored
   virtual
     bool isOredChannel(const int subDetectorID,
 		       const int rodID,
@@ -260,12 +274,21 @@ class ITGCcablingSvc : public AthService, virtual public IInterface
   // readout ID -> SL ID
   virtual
     bool getSLIDfromReadoutID(int & phi,
-			      bool & isAside,
-			      bool & isEndcap,
-			      const int subsectorID,
-			      const int rodID,
-			      const int sswID,
-			      const int sbLoc) const  =0;
+                              bool & isAside,
+                              bool & isEndcap,
+                              const int subsectorID,
+                              const int rodID,
+                              const int sswID,
+                              const int sbLoc) const = 0;
+
+  // SROD ID -> SL ID
+  virtual
+    bool getSLIDfromSReadoutID(int & phi,
+                               bool & isAside,
+                               const int subsectorID,
+                               const int srodID,
+                               const int sector,
+                               const bool forward) const = 0;
   
   // SL ID -> readout ID
   virtual
@@ -276,7 +299,16 @@ class ITGCcablingSvc : public AthService, virtual public IInterface
 			      int & rodID,
 			      int & sswID,
 			      int & sbLoc) const  =0;
-  
+
+  // SL ID -> SROD ID
+  virtual
+    bool getSReadoutIDfromSLID(const int phi,
+                               const bool isAside,
+                               const bool isEndcap,
+                               int & subsectorID,
+                               int & srodID,
+                               int & sswID,
+                               int & sbLoc) const  =0;
 
   // HighPtID used in Simulation -> HighPtID in RDO
   virtual

@@ -20,6 +20,7 @@ if __name__=='__main__':
   parser.add_argument('--outputHist', default='RatesHistograms.root', type=str, help='Histogram output ROOT file')
   parser.add_argument('--inputPrescalesHLTJSON', default='', type=str, help='JSON of HLT prescales to simulate applying when computing rates')
   parser.add_argument('--inputPrescalesL1JSON', default='', type=str, help='JSON of L1 prescales to simulate applying when computing rates')
+  parser.add_argument('--ebWeightsDirectory', default='', type=str, help='Path to directory with local EB xml files')
   #
   parser.add_argument('--targetLuminosity', default=2e34, type=float)
   #
@@ -102,6 +103,7 @@ if __name__=='__main__':
   ebw.MCFilterEfficiency = fEff
   ebw.MCKFactor = args.MCKFactor
   ebw.MCIgnoreGeneratorWeights = args.MCIgnoreGeneratorWeights
+  ebw.EBWeightsDirectory = args.ebWeightsDirectory if args.ebWeightsDirectory else ""
   cfg.addPublicTool(ebw)
 
   rates = CompFactory.FullMenu()

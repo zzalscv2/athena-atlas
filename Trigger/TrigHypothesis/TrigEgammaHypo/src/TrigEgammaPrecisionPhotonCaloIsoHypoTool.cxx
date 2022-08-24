@@ -224,8 +224,8 @@ bool TrigEgammaPrecisionPhotonCaloIsoHypoTool::decide( const ITrigEgammaPrecisio
   reletcone.push_back(etcone40);
 
 
-  bool pass_reletcone = false;
-  bool pass_reltopoetcone = false;
+  bool pass_reletcone = true;    // If cut is not succeeded, this will be "AND"ed with a False result
+  bool pass_reltopoetcone = true;
 
   // Loop over three indices 0,1 and 2, each referring to cones 20 30 and 40 and checking whether it passes or not
   for (unsigned int conesize=0; conesize<3; conesize++){
@@ -242,14 +242,14 @@ bool TrigEgammaPrecisionPhotonCaloIsoHypoTool::decide( const ITrigEgammaPrecisio
 	  if (m_RelTopoEtConeCut[conesize] > 900){ // I guess we want to deprecate this?
 		  ATH_MSG_DEBUG(" not applying topoetcone[" << conesize << "] isolation.");
 	  }
-	  bool pass_this_reletcone     = ( m_RelEtConeCut[conesize] > 900 || reletcone[conesize] < m_RelEtConeCut[conesize] + m_CutOffset[conesize] );
-	  bool pass_this_reltopoetcone = ( m_RelTopoEtConeCut[conesize] > 900 || reltopoetcone[conesize] < m_RelTopoEtConeCut[conesize] + m_CutOffset[conesize] );
+	  bool pass_this_reletcone     = ( m_RelEtConeCut[conesize] > 900 || ( reletcone[conesize] < m_RelEtConeCut[conesize] + m_CutOffset[conesize] ));
+	  bool pass_this_reltopoetcone = ( m_RelTopoEtConeCut[conesize] > 900 || ( reltopoetcone[conesize] < m_RelTopoEtConeCut[conesize] + m_CutOffset[conesize] ));
 
 	  ATH_MSG_DEBUG(" pass_reletcone[" << conesize << "] =  "  << pass_this_reletcone );
 	  ATH_MSG_DEBUG(" pass_reltopoetcone[" << conesize << "] =  "  << pass_this_reltopoetcone );
 
-	  pass_reletcone     = pass_reletcone     || pass_this_reletcone     ; 
-	  pass_reltopoetcone = pass_reltopoetcone || pass_this_reltopoetcone ; 
+	  pass_reletcone     = pass_reletcone     && pass_this_reletcone     ; 
+	  pass_reltopoetcone = pass_reltopoetcone && pass_this_reltopoetcone ; 
   }
   // Reach this point successfully  
   pass = pass_reletcone && pass_reltopoetcone;

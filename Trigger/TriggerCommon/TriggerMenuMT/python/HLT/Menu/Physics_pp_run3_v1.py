@@ -326,7 +326,10 @@ def setupMenu():
         ChainProp(name='HLT_mu26_ivarmedium_mu14_idperf_probe_50invmAB130_L1MU18VFCH', l1SeedThresholds=['MU18VFCH','PROBEMU8F'], stream=[PhysicsStream,'express'], groups=MultiMuonGroup+SupportGroup, monGroups=['idMon:shifter','idMon:t0']),
         
         
-        
+        ChainProp(name='HLT_mu20_mucombTag_L1MU20VFC',groups=['PS:Online']+SingleMuonGroup+SupportGroup),
+        ChainProp(name='HLT_mu25_mucombTag_L1MU20VFC',groups=['PS:Online']+SingleMuonGroup+SupportGroup),
+        ChainProp(name='HLT_mu30_mucombTag_L1MU20VFC',groups=['PS:Online']+SingleMuonGroup+SupportGroup),
+        ChainProp(name='HLT_mu50_mucombTag_L1MU20VFC',groups=['PS:Online']+SingleMuonGroup+SupportGroup),
      ]
 
     chains['Egamma'] = [
