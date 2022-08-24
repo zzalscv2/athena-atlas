@@ -70,7 +70,7 @@ class AFPFastReco
 	void recoTracks();
 
 	/// Returns parameters of fitted line
-	std::pair<double, double> linReg(std::vector<std::pair<double, double>> YX) const;
+	std::pair<double, double> linReg(const std::vector<std::pair<double, double>>& YX) const;
 
 	/// Finds hits/clusters around given init element
 	template <class T>

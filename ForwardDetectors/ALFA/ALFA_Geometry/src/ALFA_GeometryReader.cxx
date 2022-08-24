@@ -312,7 +312,7 @@ void ALFA_GeometryReader::TransformFiberPositionsFCSAtlas(PFIBERPARAMS pFiberPar
 			}
 		}
 
-		if(RPPosParams.bIsLow==false) fZOffset=(pFiberParams->nLayerID-1)*CLHEP::mm;
+		if(!RPPosParams.bIsLow) fZOffset=(pFiberParams->nLayerID-1)*CLHEP::mm;
 		else fZOffset=-(pFiberParams->nLayerID-1)*CLHEP::mm;
 
 		break;
@@ -335,7 +335,7 @@ void ALFA_GeometryReader::TransformFiberPositionsFCSAtlas(PFIBERPARAMS pFiberPar
 			}
 		}
 
-		if(RPPosParams.bIsLow==false) fZOffset=2*(pFiberParams->nPlateID-1)*CLHEP::mm+33.65*CLHEP::mm;
+		if(!RPPosParams.bIsLow) fZOffset=2*(pFiberParams->nPlateID-1)*CLHEP::mm+33.65*CLHEP::mm;
 		else fZOffset=-2*(pFiberParams->nPlateID-1)*CLHEP::mm-33.65*CLHEP::mm;
 		break;
 		case EFT_ODFIBERU0:
@@ -357,7 +357,7 @@ void ALFA_GeometryReader::TransformFiberPositionsFCSAtlas(PFIBERPARAMS pFiberPar
 			}
 		}
 
-		if(RPPosParams.bIsLow==false) fZOffset=2*(pFiberParams->nPlateID-1)*CLHEP::mm+32.35*CLHEP::mm;
+		if(!RPPosParams.bIsLow) fZOffset=2*(pFiberParams->nPlateID-1)*CLHEP::mm+32.35*CLHEP::mm;
 		else fZOffset=-2*(pFiberParams->nPlateID-1)*CLHEP::mm-32.35*CLHEP::mm;
 		break;
 	default:
@@ -692,7 +692,7 @@ bool ALFA_GeometryReader::Initialize(const PGEOMETRYCONFIGURATION pConfig, eFibe
 	std::string FilePath;
 	m_eFCoordSystem=eFCoordSystem;
 	
-	if(pConfig!=NULL)
+	if(pConfig!=nullptr)
 	{
 		if(InitializeDefault(pConfig))
 		{
@@ -719,7 +719,7 @@ bool ALFA_GeometryReader::Initialize(const PGEOMETRYCONFIGURATION pConfig, eFibe
 				else FilePath=pConfig->strRPMetrologyConnString;
 				LogStream<<MSG::INFO<<"Metrology data loaded from file "<<FilePath<<endmsg;
 				bRes=ParseRPMetrology(EGST_FILE,FilePath.c_str());
-				if(bRes==true) {
+				if(bRes) {
 					UpdateStationsPosParams();
 				}
 				else return false;
@@ -900,9 +900,8 @@ HepGeom::Transform3D ALFA_GeometryReader::ComputeTransformMatrix(const std::vect
 
 	if(nPointCnt==3 && !bForceUseSVD)
 	{
-		HepGeom::Point3D<double> aux0=VecIdealRefPoints[0]; HepGeom::Point3D<double> aux1=VecIdealRefPoints[1]; HepGeom::Point3D<double> aux2=VecIdealRefPoints[2];
-		HepGeom::Point3D<double> aux3=VecRealRefPoints[0]; HepGeom::Point3D<double> aux4=VecRealRefPoints[1]; HepGeom::Point3D<double> aux5=VecRealRefPoints[2];
-		HepGeom::Transform3D AuxTrans=HepGeom::Transform3D(VecIdealRefPoints[0],VecIdealRefPoints[1],VecIdealRefPoints[2],VecRealRefPoints[0],VecRealRefPoints[1],VecRealRefPoints[2]);
+    HepGeom::Transform3D AuxTrans=HepGeom::Transform3D(VecIdealRefPoints[0],VecIdealRefPoints[1],VecIdealRefPoints[2],
+                                                       VecRealRefPoints[0],VecRealRefPoints[1],VecRealRefPoints[2]);
 		AuxTrans.getDecomposition(Scale,AuxRot,AuxTranslation);
 
 		TransTot=HepGeom::Transform3D(AuxTrans.getRotation(),AuxTrans.getTranslation());
@@ -1009,7 +1008,7 @@ bool ALFA_GeometryReader::ReadFiberGeometry(const PGEOMETRYCONFIGURATION pConfig
 	std::list<eRPotName>::const_iterator iterRPName;
 	MsgStream LogStream(Athena::getMessageSvc(), "ALFA_DetectorReader::ReadGeometry");
 
-	if(pConfig!=NULL)
+	if(pConfig!=nullptr)
 	{
 		LogStream<<MSG::INFO<<"Number of active or inactive Romain Pots: "<<m_ListExistingRPots.size()<<endmsg;
 		
@@ -1022,8 +1021,8 @@ bool ALFA_GeometryReader::ReadFiberGeometry(const PGEOMETRYCONFIGURATION pConfig
 	else //set ideal geometry if pConfig is not provided
 	{
 		for(iterRPName=m_ListExistingRPots.begin();iterRPName!=m_ListExistingRPots.end();++iterRPName){
-			bFailRes|=!ReadSource(EGST_IDEALGEOMETRY, *iterRPName, EFT_FIBERMD, NULL);
-			bFailRes|=!ReadSource(EGST_IDEALGEOMETRY, *iterRPName, EFT_FIBEROD, NULL);
+			bFailRes|=!ReadSource(EGST_IDEALGEOMETRY, *iterRPName, EFT_FIBERMD, nullptr);
+			bFailRes|=!ReadSource(EGST_IDEALGEOMETRY, *iterRPName, EFT_FIBEROD, nullptr);
 		}
 	}
 
@@ -1049,7 +1048,7 @@ bool ALFA_GeometryReader::ReadSource(const eGeoSourceType eSourceType, const eRP
 	case EGST_FILE:
 
 		GeomFile=std::string("geom_")+strDetType+std::string("_")+std::string(GetRPotLabel(eRPName))+std::string(".dat");
-		if(szDataSource==NULL || !strcmp(szDataSource,"")) FilePath = PathResolver::find_file(GeomFile,"DATAPATH", PathResolver::RecursiveSearch);
+		if(szDataSource==nullptr || !strcmp(szDataSource,"")) FilePath = PathResolver::find_file(GeomFile,"DATAPATH", PathResolver::RecursiveSearch);
 		else FilePath=std::string(szDataSource);
 
 		LogStream<<MSG::INFO<<"The "<<strDetType<<" fiber geometry will be loaded from FILE "<<FilePath.c_str()<<" for RP "<<GetRPotLabel(eRPName)<<endmsg;
@@ -1064,7 +1063,7 @@ bool ALFA_GeometryReader::ReadSource(const eGeoSourceType eSourceType, const eRP
 		break;
 	}
 	
-	if(bRes==true){
+	if(bRes){
                 PLATEPARAMS PlateParams {0, 0};
 		for(i=1;i<=ALFAFIBERSCNT;i++){
 			m_MapRPot[eRPName].MapPlates.insert(std::pair<int,PLATEPARAMS>(i,PlateParams));
@@ -1202,14 +1201,14 @@ bool ALFA_GeometryReader::ReadFile(const eRPotName eRPName, const eFiberType eFT
 	if(eFType==EFT_FIBERMD)	m_MapRPot[eRPName].eMDGeometryType=EGST_FILE;
 	else if(eFType==EFT_FIBEROD) m_MapRPot[eRPName].eODGeometryType=EGST_FILE;
 
-	if((pFile=fopen(szFilename,"r"))==NULL){
+	if((pFile=fopen(szFilename,"r"))==nullptr){
 		LogStream<<MSG::ERROR<< "Could not open the file "<<szFilename<<endmsg;
 		return false;
 	}
 	
 	nLine=0;
 	while(!feof(pFile)){
-		if(fgets(szLine,sizeof(szLine),pFile)!=NULL){
+		if(fgets(szLine,sizeof(szLine),pFile)!=nullptr){
 
                         FIBERPARAMS FiberParams;
 			
@@ -1222,7 +1221,7 @@ bool ALFA_GeometryReader::ReadFile(const eRPotName eRPName, const eFiberType eFT
 			for(i=0;i<nLength;i++) { if(*(szLine+i)==' ') continue; else break; }
 			pch1=szLine+i; 
 			pch2=strchr(pch1,' ');
-			if(pch2!=NULL){
+			if(pch2!=nullptr){
 				*pch2='\0';
 				FiberParams.nLayerID=atoi(pch1);
 				FiberParams.nPlateID=FiberParams.nLayerID/2+FiberParams.nLayerID%2;
@@ -1238,7 +1237,7 @@ bool ALFA_GeometryReader::ReadFile(const eRPotName eRPName, const eFiberType eFT
 			for(i=0;i<nLength;i++) { if(*(pch2+i)==' ') continue; else break;}
 			pch1=pch2+i; 
 			pch2=strchr(pch1,' ');
-			if(pch2!=NULL){
+			if(pch2!=nullptr){
 				*pch2='\0';
 				FiberParams.nFiberID=atoi(pch1);
 			}
@@ -1253,7 +1252,7 @@ bool ALFA_GeometryReader::ReadFile(const eRPotName eRPName, const eFiberType eFT
 			for(i=0;i<nLength;i++) { if(*(pch2+i)==' ') continue; else break; }
 			pch1=pch2+i; 
 			pch2=strchr(pch1,' ');
-			if(pch2!=NULL){
+			if(pch2!=nullptr){
 				*pch2='\0';
 				FiberParams.fSlope=atof(pch1);
 			}
@@ -1268,7 +1267,7 @@ bool ALFA_GeometryReader::ReadFile(const eRPotName eRPName, const eFiberType eFT
 			for(i=0;i<nLength;i++) { if(*(pch2+i)==' ') continue; else break; }
 			pch1=pch2+i; 
 			pch2=strchr(pch1,' ');
-			if(pch2!=NULL){
+			if(pch2!=nullptr){
 				*pch2='\0';
 				FiberParams.fOffset=atof(pch1);
 			}
@@ -1316,7 +1315,7 @@ bool ALFA_GeometryReader::ReadFile(const eRPotName eRPName, const eFiberType eFT
 	}
 
 	if(pFile) fclose(pFile);
-	pFile=NULL;
+	pFile=nullptr;
 
 	return bRes;
 }
@@ -1338,10 +1337,10 @@ bool ALFA_GeometryReader::ReadDatabase(const eRPotName eRPName, const eFiberType
 	if(szDataSource) strncpy(szSource, szDataSource, sizeof(szSource)-1);
         char* strtok_ptr = nullptr;
 	pch = strtok_r(szSource,":",&strtok_ptr);
-	while (pch != NULL)
+	while (pch != nullptr)
 	{
-		strDBElements.push_back(pch);
-		pch = strtok_r(NULL, ":",&strtok_ptr);
+		strDBElements.emplace_back(pch);
+		pch = strtok_r(nullptr, ":",&strtok_ptr);
 	}
 	
 	//	LogStream << MSG::INFO << "MARK - elements: " << strDBElements[0] << "  " << strDBElements[1] << "  " << strDBElements[2] << endmsg;
@@ -1731,7 +1730,7 @@ bool ALFA_GeometryReader::StoreReconstructionGeometry(const eRPotName eRPName, c
 	}
 
 	pFile = fopen(szDataDestination, "w");
-	if(pFile==NULL) return false;
+	if(pFile==nullptr) return false;
 
 	fprintf(pFile, "xxxxxxxxxxxxxxxxxxx\n");
 	
@@ -1743,7 +1742,7 @@ bool ALFA_GeometryReader::StoreReconstructionGeometry(const eRPotName eRPName, c
 		for(i=1;i<=ALFAPLATESCNT;i++){
 			//U-fiber
 			for(j=1;j<=ALFAFIBERSCNT;j++){
-				if(GetUFiberParams(&FiberParams, eRPName, i, j)==true){
+				if(GetUFiberParams(&FiberParams, eRPName, i, j)){
 					if(m_eFCoordSystem==EFCS_CLADDING){
 						fX=FiberParams.MainRefPointPos.x();
 						fY=FiberParams.MainRefPointPos.y();
@@ -1764,7 +1763,7 @@ bool ALFA_GeometryReader::StoreReconstructionGeometry(const eRPotName eRPName, c
 			
 			//V-fiber
 			for(j=1;j<=ALFAFIBERSCNT;j++){
-				if(GetVFiberParams(&FiberParams, eRPName, i, j)==true){
+				if(GetVFiberParams(&FiberParams, eRPName, i, j)){
 					if(m_eFCoordSystem==EFCS_CLADDING){
 						fX=FiberParams.MainRefPointPos.x();
 						fY=FiberParams.MainRefPointPos.y();
@@ -1793,7 +1792,7 @@ bool ALFA_GeometryReader::StoreReconstructionGeometry(const eRPotName eRPName, c
 			//V0-ODFiber
 			for(j=1;j<=ODFIBERSCNT;j++)
 			{
-				if(GetODFiberParams(&FiberParams, EFT_ODFIBERV0, eRPName, i, j)==true)
+				if(GetODFiberParams(&FiberParams, EFT_ODFIBERV0, eRPName, i, j))
 				{
 					if(m_eFCoordSystem==EFCS_CLADDING){
 						fX=FiberParams.MainRefPointPos.x();
@@ -1815,7 +1814,7 @@ bool ALFA_GeometryReader::StoreReconstructionGeometry(const eRPotName eRPName, c
 			//U0-ODFiber (note: U0-nFiberID is indexed from 16 to 30)
 			for(j=ODFIBERSCNT+1;j<=ODFIBERSCNT+15;j++)
 			{
-				if(GetODFiberParams(&FiberParams, EFT_ODFIBERU0, eRPName, i, j)==true)
+				if(GetODFiberParams(&FiberParams, EFT_ODFIBERU0, eRPName, i, j))
 				{
 					if(m_eFCoordSystem==EFCS_CLADDING){
 						fX=FiberParams.MainRefPointPos.x();
@@ -1839,7 +1838,7 @@ bool ALFA_GeometryReader::StoreReconstructionGeometry(const eRPotName eRPName, c
 			//for(j=ODFIBERSCNT+1;j<=ODFIBERSCNT+15;j++)
 			for(j=1;j<=ODFIBERSCNT;j++)
 			{
-				if(GetODFiberParams(&FiberParams, EFT_ODFIBERV1, eRPName, i, j)==true)
+				if(GetODFiberParams(&FiberParams, EFT_ODFIBERV1, eRPName, i, j))
 				{
 					if(m_eFCoordSystem==EFCS_CLADDING){
 						fX=FiberParams.MainRefPointPos.x();
@@ -1862,7 +1861,7 @@ bool ALFA_GeometryReader::StoreReconstructionGeometry(const eRPotName eRPName, c
 			//for(j=1;j<=ODFIBERSCNT;j++)
 			for(j=ODFIBERSCNT+1;j<=ODFIBERSCNT+15;j++)
 			{
-				if(GetODFiberParams(&FiberParams, EFT_ODFIBERU1, eRPName, i, j)==true)
+				if(GetODFiberParams(&FiberParams, EFT_ODFIBERU1, eRPName, i, j))
 				{
 					if(m_eFCoordSystem==EFCS_CLADDING){
 						fX=FiberParams.MainRefPointPos.x();
@@ -1913,7 +1912,7 @@ void ALFA_GeometryReader::GetListOfRPotIDs(std::map<eRPotName,std::string>* pMap
 	std::string strLabel;
 	std::map<eRPotName,ROMAPOT>::const_iterator rpiter;
 	
-	if(pMapRPotName!=NULL){
+	if(pMapRPotName!=nullptr){
 		pMapRPotName->clear();
 		
 		for(rpiter=m_MapRPot.begin();rpiter!=m_MapRPot.end();++rpiter){
@@ -1989,7 +1988,7 @@ bool ALFA_GeometryReader::GetMDFiberParams(PFIBERPARAMS pFiberParams, const eFib
 
 	MsgStream LogStream(Athena::getMessageSvc(), "ALFA_GeometryReader::GetMDFiberParams");
 
-	if(pFiberParams==NULL)
+	if(pFiberParams==nullptr)
 	{
 		LogStream<<MSG::ERROR<<"pFiberParams points to NULL"<<endmsg;
 	}
@@ -2503,7 +2502,7 @@ bool ALFA_GeometryReader::ResolveRPotRefPoints(const char* szvalue, eRPotName eR
 	if(eRPointType==ERPT_IDEAL || eRPointType==ERPT_REAL) bRes=ParseRefPoints(szvalue,vecRefPoints,EMCS_STATION);
 	else if(eRPointType==ERPT_DETIDEAL || eRPointType==ERPT_DETREAL) bRes=ParseRefPoints(szvalue,vecRefPoints,EMCS_ROMANPOT);
 
-	if(bRes==true){
+	if(bRes){
 		if(eRPointType==ERPT_IDEAL) m_RPPosParams[eRPName].VecIdealRPRefPoints=vecRefPoints;
 		else if(eRPointType==ERPT_REAL) m_RPPosParams[eRPName].VecRealRPRefPoints=vecRefPoints;
 		else if(eRPointType==ERPT_DETIDEAL) m_RPPosParams[eRPName].VecIdealDetRefPoints=vecRefPoints;
@@ -2517,18 +2516,18 @@ bool ALFA_GeometryReader::ParseRefPoints(const char* szvalue, std::vector<HepGeo
 {
 	double fx,fy,fz,faux;
 	char *ppos1,*ppos2,*ppos3,*ppos4,*pstop;
-	char szbuff[512];
+	char szbuff[513];
 	HepGeom::Point3D<double> RefPoint;
 
 	MsgStream LogStream(Athena::getMessageSvc(), "ALFA_GeometryReader::ParseRefPoints");
 
 	memset(szbuff,0,sizeof(szbuff));
-	memcpy(szbuff,szvalue,strlen(szvalue));
+	strcpy(szbuff,szvalue);
 
 	//get point count
 	int i,nCnt=0;
 	ppos2=szbuff;
-	while((ppos1=strchr(ppos2,'['))!=NULL){
+	while((ppos1=strchr(ppos2,'['))!=nullptr){
 		if(!(ppos2=strchr(ppos1+1,']'))) return false;
 		ppos2++;
 		nCnt++;
@@ -2539,7 +2538,7 @@ bool ALFA_GeometryReader::ParseRefPoints(const char* szvalue, std::vector<HepGeo
 
 	i=0;
 	ppos2=szbuff;
-	while((ppos1=strchr(ppos2,'['))!=NULL){
+	while((ppos1=strchr(ppos2,'['))!=nullptr){
 		if(!(ppos2=strchr(ppos1,']'))) return false;
 
 		//x-coordinate
@@ -2602,8 +2601,8 @@ bool ALFA_GeometryReader::ParseArrayOfValues(const char* szvalue, std::vector<do
 
 	ppos1=szbuff;
 	ppos2=strchr(ppos1,',');
-	if(ppos2!=NULL){
-		while(ppos2!=NULL){
+	if(ppos2!=nullptr){
+		while(ppos2!=nullptr){
 			*ppos2=0;
 
 			faux=strtod(ppos1,&pstop);
@@ -2623,7 +2622,7 @@ bool ALFA_GeometryReader::ParseArrayOfValues(const char* szvalue, std::vector<do
 		else bRes=false;
 	}
 
-	if(bRes==false) vecValues.clear();
+	if(!bRes) vecValues.clear();
 
 	return bRes;
 }
@@ -2740,7 +2739,7 @@ bool ALFA_GeometryReader::SetupRPMetrologyPoints(ALFA_ConfigParams& CfgParams, e
 	RPPOSPARAMS RPPosParams;
 
 	GetRPPosParams(&RPPosParams,eRPName);
-	if(RPPosParams.bIsLow==false){
+	if(!RPPosParams.bIsLow){
 		RPPinNominal=HepGeom::Point3D<double>(77.5*CLHEP::mm,172.2*CLHEP::mm,-124.0*CLHEP::mm);
 	}
 	else{
@@ -2931,7 +2930,7 @@ bool ALFA_GeometryReader::SaveRPGeometryParams(const eRPotName eRPName, const ch
 	double fRotX,fRotY,fRotZ;
 
 	FILE *pfile=fopen(szDataDestination,"w");
-	if(pfile!=NULL)
+	if(pfile!=nullptr)
 	{
 		fprintf(pfile,"Romain pot geometry info: ----------------------------------------\r\n");
 

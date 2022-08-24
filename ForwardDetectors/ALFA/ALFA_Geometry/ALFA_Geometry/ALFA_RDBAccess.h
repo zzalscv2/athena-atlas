@@ -44,7 +44,7 @@ class ALFA_RDBAccess
 	
 	private:
 //		bool ReadFiberGeometry(string element, string tag, string node);
-		bool ReadFiberGeometry(IRDBAccessSvc* iAccessSvc, std::string element, std::string tag, std::string node);
+		bool ReadFiberGeometry(IRDBAccessSvc* iAccessSvc, const std::string& element, const std::string& tag, const std::string& node);
 	
 	public:
 		bool ReadGeometry(const eRPotName eRPName, eFiberType eFType,

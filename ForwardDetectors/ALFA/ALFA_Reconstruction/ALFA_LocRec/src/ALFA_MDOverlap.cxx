@@ -8,8 +8,8 @@ using namespace std;
 ALFA_MDOverlap::ALFA_MDOverlap() :
     AthMessaging("ALFA_MDOverlap")
 {
-	m_histU_PT = NULL;
-	m_histV_PT = NULL;
+	m_histU_PT = nullptr;
+	m_histV_PT = nullptr;
 
 	m_fFiberD = 0.0;
 	m_fHitBU  = 0.0;

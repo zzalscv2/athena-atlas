@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
 */
 
 /// @file   AFPTDBasicToolTrack.cxx
@@ -8,7 +8,7 @@
 /// 
 /// @brief  Implementation file for AFPTDBasicToolTrack used in ToF tracks reconstruction.
 
-#include <math.h>
+#include <cmath>
 
 // debug remove after debugging
 #include<iostream>

@@ -2,10 +2,10 @@
   Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
 */
 
-#include <stdlib.h>
-#include <stdio.h>
-#include <fstream>
 #include <algorithm>
+#include <cstdio>
+#include <cstdlib>
+#include <fstream>
 
 #include "StoreGate/StoreGateSvc.h"
 #include "GaudiKernel/MsgStream.h"

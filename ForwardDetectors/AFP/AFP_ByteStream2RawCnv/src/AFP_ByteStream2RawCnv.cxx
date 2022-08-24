@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
 */
 
 // AFP_ByteStream2RawCnv includes
@@ -203,7 +203,7 @@ StatusCode AFP_ByteStream2RawCnv::fillCollection(const OFFLINE_FRAGMENTS_NAMESPA
               
             // find entry with the same channel number
             auto ToFData_itr=std::find_if( collectionToF->begin(), collectionToF->end(),
-                                           [&](const AFP_ToFRawData entry){return entry.channel()==channel;});
+                                           [&](const AFP_ToFRawData& entry){return entry.channel()==channel;});
 
             if(ToFData_itr==collectionToF->end())
             {
@@ -251,7 +251,7 @@ StatusCode AFP_ByteStream2RawCnv::fillCollection(const OFFLINE_FRAGMENTS_NAMESPA
           {              
             // check if there's already some other trigger word
             auto ToFData_itr=std::find_if( collectionToF->begin(), collectionToF->end(),
-                                           [&](const AFP_ToFRawData e){return e.isTrigger();});
+                                           [&](const AFP_ToFRawData& e){return e.isTrigger();});
             if(ToFData_itr!=collectionToF->end())
             {
               // there shouldn't be any other trigger word
@@ -316,7 +316,7 @@ StatusCode AFP_ByteStream2RawCnv::fillCollection(const OFFLINE_FRAGMENTS_NAMESPA
   // in case of picoTDC, check we always have both words
   for(unsigned int i=0;i<picoTDC1_channels.size();++i)
   {
-    if(picoTDC1_channels.at(i).size()>0 || picoTDC2_channels.at(i).size())
+    if(!picoTDC1_channels.at(i).empty() || !picoTDC2_channels.at(i).empty())
     {
       for(auto ch1 : picoTDC1_channels.at(i))
       {

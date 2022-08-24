@@ -72,7 +72,7 @@ StatusCode ALFA_HalfReco::Execute(Int_t iRPot, const std::list<MDHIT> &ListMDHit
 	m_MapLayers.clear();
 
 	std::list<MDHIT>::const_iterator iter;
-	for (iter=ListMDHits.begin(); iter!=ListMDHits.end(); iter++)
+	for (iter=ListMDHits.begin(); iter!=ListMDHits.end(); ++iter)
 	{
 		if (iRPot == (*iter).iRPot)
 		{
@@ -180,7 +180,7 @@ void ALFA_HalfReco::HistFill(Float_t &b_p, Float_t &b_n, Float_t &Ov_p, Float_t 
 //for(Int_t i=half_ch*10;i<half_ch*10+10;i++)
 	for (Int_t iLayer = ALFAPLATESCNT*m_iHalf; iLayer < m_iHalf*ALFAPLATESCNT+ALFAPLATESCNT; iLayer++)
 	{
-		for (intIter=m_MapLayers[iLayer].ListFibers.begin(); intIter!=m_MapLayers[iLayer].ListFibers.end(); intIter++)
+		for (intIter=m_MapLayers[iLayer].ListFibers.begin(); intIter!=m_MapLayers[iLayer].ListFibers.end(); ++intIter)
 		{
 			iHit = *intIter;
 
@@ -392,7 +392,7 @@ void ALFA_HalfReco::OverLap()
 			gFib_x = 9999;
 			gFib_y = 9999;
 
-			for (intIter=m_MapLayers[iLayer].ListFibers.begin(); intIter!=m_MapLayers[iLayer].ListFibers.end(); intIter++)
+			for (intIter=m_MapLayers[iLayer].ListFibers.begin(); intIter!=m_MapLayers[iLayer].ListFibers.end(); ++intIter)
 			{
 				iHit = *intIter;
 				x_tmp = (m_fRecYPos-m_fbMD[m_iRPot][iLayer][iHit])/m_faMD[m_iRPot][iLayer][iHit];

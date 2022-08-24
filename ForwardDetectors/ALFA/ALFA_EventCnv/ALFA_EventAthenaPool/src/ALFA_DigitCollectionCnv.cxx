@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2020 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "ALFA_EventTPCnv/ALFA_DigitCollectionCnv_p1.h"
@@ -20,7 +20,7 @@ ALFA_DigitCollection* ALFA_DigitCollectionCnv::createTransient() {
     
     ALFA_DigitCollectionCnv_p1   TPConverter_p1;
 
-    ALFA_DigitCollection       *trans_cont(0); // probably inicialization
+    ALFA_DigitCollection       *trans_cont(nullptr); // probably inicialization
     static const pool::Guid p1_guid ("0F21F6BB-6719-41D3-8219-3ABF523826CD");   
  
     if( this->compareClassGuid(p1_guid)) {

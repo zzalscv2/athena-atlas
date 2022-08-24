@@ -31,11 +31,11 @@
 ////////////////////////////////////////////
 class AlfaLocalHit{
 	private:
-		int m_pot;
+		int m_pot = 0;
     	TString m_potname;
-    	int m_ishit;
-    	Float_t m_x, m_y, m_z;
-        const ALFA_LocRecCorrEvent * m_LocRecCorr;
+    	int m_ishit = 0;
+    	Float_t m_x = 0.0F, m_y = 0.0F, m_z = 0.0F;
+        const ALFA_LocRecCorrEvent * m_LocRecCorr = nullptr;
   	public:
     	AlfaLocalHit();
     	AlfaLocalHit(const ALFA_LocRecCorrEvent * LocRecCorrHit);
@@ -74,7 +74,7 @@ class AlfaLocalHits : public AlfaLocalHit {
 	public:
 		AlfaLocalHits(); // .. default ctor.
 		void update();
-		int  AddHit(AlfaLocalHit h);
+		int  AddHit(const AlfaLocalHit& h);
 		void Reset();
 		void ResetPaths();
 		int  size();
@@ -129,7 +129,7 @@ class AlfaTrackCand {
 		void CalcImpactPoints();
 		HepGeom::Point3D<double> * GetNearImpactPoint(){return &m_nearimpactpoint;};
 		HepGeom::Point3D<double> * GetFarImpactPoint(){return &m_farimpactpoint;};
-		void Dump();
+		void Dump() const;
 };
 
 

@@ -43,7 +43,7 @@ void ALFA_EdgeMethod::Initialize(Int_t iRPot, Float_t faMD[RPOTSCNT][ALFALAYERSC
 	memset(&m_bFiberHitsMD, 0, sizeof(m_bFiberHitsMD));
 	memset(&m_iMultiMD, 0, sizeof(m_iMultiMD));
 	std::list<MDHIT>::const_iterator iter;
-	for (iter=ListMDHits.begin(); iter!=ListMDHits.end(); iter++)
+	for (iter=ListMDHits.begin(); iter!=ListMDHits.end(); ++iter)
 	{
 		if (iRPot == (*iter).iRPot)
 		{
@@ -87,11 +87,11 @@ void ALFA_EdgeMethod::findEdges( UInt_t no_Detector, UInt_t no_Orient, std::vect
 				while( nF!=63 && m_bFiberHitsMD[no_Detector][nL][nF+1]){nF++;}						/// WITHOUT OR WITH ADJACENT
 
 				if( m_iMultiMD[no_Detector][nL] > 3 ){
-					edges.push_back( make_pair( make_pair( m_uv_geo[no_Detector][nL][left] - 0.240, kTRUE), kFALSE));
-					edges.push_back( make_pair( make_pair( m_uv_geo[no_Detector][nL][nF] + 0.240, kFALSE), kFALSE));
+					edges.emplace_back( make_pair( m_uv_geo[no_Detector][nL][left] - 0.240, kTRUE), kFALSE);
+					edges.emplace_back( make_pair( m_uv_geo[no_Detector][nL][nF] + 0.240, kFALSE), kFALSE);
 				} else {
-					edges.push_back( make_pair( make_pair( m_uv_geo[no_Detector][nL][left] - 0.240, kTRUE), kTRUE));
-					edges.push_back( make_pair( make_pair( m_uv_geo[no_Detector][nL][nF] + 0.240, kFALSE), kTRUE));
+					edges.emplace_back( make_pair( m_uv_geo[no_Detector][nL][left] - 0.240, kTRUE), kTRUE);
+					edges.emplace_back( make_pair( m_uv_geo[no_Detector][nL][nF] + 0.240, kFALSE), kTRUE);
 				}
 			}
 		}
@@ -134,12 +134,12 @@ void ALFA_EdgeMethod::findCorridors(std::vector< Edge > &edges, std::vector< Cor
 			if( max ){
 				if( edges.at(i+1).first.second ){
 					if( edges.at(i+2).first.second ){
-						corridors.push_back( make_pair( make_pair( 0.5*(leftEd + edges.at(i).first.first), edges.at(i).first.first - leftEd), level+1) );
+						corridors.emplace_back( make_pair( 0.5*(leftEd + edges.at(i).first.first), edges.at(i).first.first - leftEd), level+1 );
 						max = kFALSE;
 					}
 					continue;
 				} else {
-					corridors.push_back( make_pair( make_pair( 0.5*(leftEd + edges.at(i).first.first), edges.at(i).first.first - leftEd), level+1) );
+					corridors.emplace_back( make_pair( 0.5*(leftEd + edges.at(i).first.first), edges.at(i).first.first - leftEd), level+1 );
 					max = kFALSE;
 				}
 			}
@@ -218,7 +218,7 @@ Bool_t ALFA_EdgeMethod::iterationOne(UInt_t no_Detector, std::vector<Track> &tra
 	for(UInt_t i = 0; i < corr_U.size(); i++){
 		for(UInt_t j = 0; j < corr_V.size(); j++){
 			if( testTrack( /*corr_U.at(i), corr_V.at(j)*/ ) ){
-				tracks.push_back(make_pair( corr_U.at(i), corr_V.at(j) ));
+				tracks.emplace_back( corr_U.at(i), corr_V.at(j) );
 			}
 		}
 	}

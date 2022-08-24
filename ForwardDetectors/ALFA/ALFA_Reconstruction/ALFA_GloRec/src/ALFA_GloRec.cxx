@@ -90,7 +90,7 @@ AthAlgorithm(name, pSvcLocator)
 	declareProperty("TruthEventCollectionName",m_TruthCollectionName);   
 
 	m_TObjArrTrackPathPatterns = 0;
-	m_pGloRecEvCollection=NULL;
+	m_pGloRecEvCollection=nullptr;
 	
 	m_px_g_pos = 0.0;
 	m_py_g_pos = 0.0;
@@ -105,42 +105,42 @@ AthAlgorithm(name, pSvcLocator)
 	m_y_g_neg  = 0.0;
 	m_z_g_neg  = 0.0;
 
-	m_th1_x_g                      = 0;
-	m_th1_y_g                      = 0;
-	m_th1_xslope_g                 = 0;
-	m_th1_yslope_g                 = 0;
-	m_th1_xnearuppotresiduals      = 0;
-	m_th1_ynearuppotresiduals      = 0;
-	m_th1_xfaruppotresiduals       = 0;
-	m_th1_yfaruppotresiduals       = 0;
-	m_th1_xnearlwpotresiduals      = 0;
-	m_th1_ynearlwpotresiduals      = 0;
-	m_th1_xfarlwpotresiduals       = 0;
-	m_th1_yfarlwpotresiduals       = 0;
-	m_th2_truexvsrecx              = 0;
-	m_th2_trueyvsrecy              = 0;
-	m_th2_truexslopevsrecxslope    = 0;
-	m_th2_trueyslopevsrecyslope    = 0;
-	m_th1_recxovertruex            = 0;
-	m_th1_recyovertruey            = 0;
-	m_th1_recxslopeovertruexslope  = 0;
-	m_th1_recyslopeovertrueyslope  = 0;
-	m_th1_recxminustruex           = 0;
-	m_th1_recyminustruey           = 0;
-	m_th1_recxslopeminustruexslope = 0;
-	m_th1_recyslopeminustrueyslope = 0;
-	m_th2_extrapxvsrecxnearpot     = 0;
-	m_th2_extrapyvsrecynearpot     = 0;
-	m_th1_recxoverextrapxnearpot   = 0;
-	m_th1_recyoverextrapynearpot   = 0;
-	m_th1_recxminusextrapxnearpot  = 0;
-	m_th1_recyminusextrapynearpot  = 0;
-	m_th2_extrapxvsrecxfarpot      = 0;
-	m_th2_extrapyvsrecyfarpot      = 0;
-	m_th1_recxoverextrapxfarpot    = 0;
-	m_th1_recyoverextrapyfarpot    = 0;
-	m_th1_recxminusextrapxfarpot   = 0;
-	m_th1_recyminusextrapyfarpot   = 0;
+	m_th1_x_g                      = nullptr;
+	m_th1_y_g                      = nullptr;
+	m_th1_xslope_g                 = nullptr;
+	m_th1_yslope_g                 = nullptr;
+	m_th1_xnearuppotresiduals      = nullptr;
+	m_th1_ynearuppotresiduals      = nullptr;
+	m_th1_xfaruppotresiduals       = nullptr;
+	m_th1_yfaruppotresiduals       = nullptr;
+	m_th1_xnearlwpotresiduals      = nullptr;
+	m_th1_ynearlwpotresiduals      = nullptr;
+	m_th1_xfarlwpotresiduals       = nullptr;
+	m_th1_yfarlwpotresiduals       = nullptr;
+	m_th2_truexvsrecx              = nullptr;
+	m_th2_trueyvsrecy              = nullptr;
+	m_th2_truexslopevsrecxslope    = nullptr;
+	m_th2_trueyslopevsrecyslope    = nullptr;
+	m_th1_recxovertruex            = nullptr;
+	m_th1_recyovertruey            = nullptr;
+	m_th1_recxslopeovertruexslope  = nullptr;
+	m_th1_recyslopeovertrueyslope  = nullptr;
+	m_th1_recxminustruex           = nullptr;
+	m_th1_recyminustruey           = nullptr;
+	m_th1_recxslopeminustruexslope = nullptr;
+	m_th1_recyslopeminustrueyslope = nullptr;
+	m_th2_extrapxvsrecxnearpot     = nullptr;
+	m_th2_extrapyvsrecynearpot     = nullptr;
+	m_th1_recxoverextrapxnearpot   = nullptr;
+	m_th1_recyoverextrapynearpot   = nullptr;
+	m_th1_recxminusextrapxnearpot  = nullptr;
+	m_th1_recyminusextrapynearpot  = nullptr;
+	m_th2_extrapxvsrecxfarpot      = nullptr;
+	m_th2_extrapyvsrecyfarpot      = nullptr;
+	m_th1_recxoverextrapxfarpot    = nullptr;
+	m_th1_recyoverextrapyfarpot    = nullptr;
+	m_th1_recxminusextrapxfarpot   = nullptr;
+	m_th1_recyminusextrapyfarpot   = nullptr;
 
 }
 
@@ -229,7 +229,7 @@ StatusCode ALFA_GloRec::execute() {
 	/////////////////////////////////////////////////////////////
 	// ... get LocRecCorr data
 	/////////////////////////////////////////////////////////////
-	const ALFA_LocRecCorrEvCollection* pLocRecCorrCol = NULL;
+	const ALFA_LocRecCorrEvCollection* pLocRecCorrCol = nullptr;
 	sc = evtStore()->retrieve(pLocRecCorrCol, m_strLocRecCorrCollectionName);
 	if(sc.isFailure() || !pLocRecCorrCol)
 	{
@@ -311,7 +311,7 @@ StatusCode ALFA_GloRec::finalize() {
 ///////////////////////////////////////////////////////////
 StatusCode ALFA_GloRec::Truth_info(){
 
-  const McEventCollection* mcTru = 0;      
+  const McEventCollection* mcTru = nullptr;      
   StatusCode sc = evtStore()->retrieve(mcTru,m_TruthCollectionName);
   if(sc.isFailure() || !mcTru){
 	msg(MSG::DEBUG) << "Container "<< m_TruthCollectionName <<" NOT FOUND !!!!!!!" << endmsg;
@@ -331,14 +331,14 @@ StatusCode ALFA_GloRec::Truth_info(){
     //loop over one event
     m_z_g_pos = -1.e10;
     m_z_g_neg =  1.e10;
-    for(auto begGen:  (**mcTruBeg)){
+    for(auto *begGen:  (**mcTruBeg)){
 	 		if(((std::abs(begGen->pdg_id())==2212)||(std::abs(begGen->pdg_id())==211))){
 				double px, py, pz;
 				double x, y, z;
 				px = begGen->momentum().px();	  
 				py = begGen->momentum().py();
 				pz = begGen->momentum().pz();
-				auto  l_prodvert = begGen->production_vertex();
+				auto *  l_prodvert = begGen->production_vertex();
 				x = l_prodvert->position().x();
 				y = l_prodvert->position().y();
 				z = l_prodvert->position().z();

@@ -1,5 +1,5 @@
 /*
-	Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+	Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
 */
 
 /// @file	AFPSiDLinRegTool.h
@@ -99,7 +99,7 @@ private:
     
 	/// Simple linear regression
 	/// Used to calculate track postions and slopes
-	std::pair<double, double> linearRegression(std::vector<std::pair<double, double>> YX) const;
+	std::pair<double, double> linearRegression(const std::vector<std::pair<double, double>>& YX) const;
 	};
 
 

@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2017 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
 */
 
 /* 
@@ -19,10 +19,10 @@
  *   v = returns the right orthogonal transformation matrix
 */
 
-#include <stdio.h>
-#include <stdlib.h>
-#include <math.h>
 #include "ALFA_Geometry/ALFA_SvdCalc.h"
+#include <cmath>
+#include <cstdio>
+#include <cstdlib>
  
 static double PYTHAG(double a, double b)
 {

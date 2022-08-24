@@ -89,16 +89,16 @@ class AFP_ProtonRecoAnalytical : public AFP_ProtonRecoBase {
     std::unique_ptr<AFP::Parameterization> m_parametrization;
 
     /// Distance between near and far station
-    double m_distanceBetweenStations; // [m]
+    double m_distanceBetweenStations = 0.0; // [m]
 
     /// Name of the file containing parameterization
     Gaudi::Property<std::string> m_parametrizationFileName{this, "parametrizationFileName", "none.txt", "Name of the file containing parameterization"};
 
     /// Position for which parameterization was performed
-    double m_parametrizationPosition; // [m]
+    double m_parametrizationPosition = 0.0; // [m]
 
     /// Parameterization energy
-    double m_parametrizationEnergy; // [GeV]
+    double m_parametrizationEnergy = 0.0; // [GeV]
 };
 
 

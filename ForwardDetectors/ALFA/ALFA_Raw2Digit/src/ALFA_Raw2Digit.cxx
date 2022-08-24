@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2017 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "ALFA_Raw2Digit/ALFA_Raw2Digit.h"
@@ -24,15 +24,15 @@ ALFA_Raw2Digit::ALFA_Raw2Digit(const std::string& name, ISvcLocator* pSvcLocator
 	declareProperty("MeasuredDataType", m_strMeasuredDataType = "tunnel");
 
 
-	m_All_Trigger_norm = NULL;
-	m_All_Trigger = NULL;
-	m_ODdigitCollection = NULL;
-	m_ODdigitObject = NULL;
-	m_digitCollection = NULL;
-	m_digitObject = NULL;
+	m_All_Trigger_norm = nullptr;
+	m_All_Trigger = nullptr;
+	m_ODdigitCollection = nullptr;
+	m_ODdigitObject = nullptr;
+	m_digitCollection = nullptr;
+	m_digitObject = nullptr;
 //	m_histSvc = NULL;
-	m_rootOutput = NULL;
-	m_tree = NULL;
+	m_rootOutput = nullptr;
+	m_tree = nullptr;
 
 	m_nEvents = 0;
 	m_mbID      = 0;
@@ -181,7 +181,7 @@ StatusCode ALFA_Raw2Digit::execute()
 //	m_toFile << "Event " << m_nEvents << std::endl;
 
 	// retrieve the RawData RDO container from the TDS
- 	const ALFA_RawDataContainer* container = 0;
+ 	const ALFA_RawDataContainer* container = nullptr;
 	StatusCode sc_read = evtStore()->retrieve(container, m_ALFA_RawDataCollectionKey);
 
 	if ( sc_read != StatusCode::SUCCESS ) {

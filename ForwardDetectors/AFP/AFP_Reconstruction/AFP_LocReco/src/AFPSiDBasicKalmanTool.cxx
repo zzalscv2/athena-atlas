@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
 */
 
 /// @file   AFPSiDBasicKalmanTool.cxx
@@ -210,8 +210,7 @@ void AFPSiDBasicKalmanTool::fillLayersWithClusters(AFPLocRecoStationBasicObj& my
     clearAllLayers(my_stationClusters);
   }
 
-  return;
-}
+  }
 
 bool AFPSiDBasicKalmanTool::areNeighbours(const xAOD::AFPSiHitsCluster* a, const xAOD::AFPSiHitsCluster* b, const double allowedDistanceBetweenClustersInSeed) const
 {
@@ -219,8 +218,7 @@ bool AFPSiDBasicKalmanTool::areNeighbours(const xAOD::AFPSiHitsCluster* a, const
   const double dy = a->yLocal() - b->yLocal();
   const double maxDistanceSq = allowedDistanceBetweenClustersInSeed * allowedDistanceBetweenClustersInSeed;
   
-  if (dx * dx + dy * dy > maxDistanceSq) { return false; }
-  return true;
+  return dx * dx + dy * dy <= maxDistanceSq;
 }
 
 StatusCode AFPSiDBasicKalmanTool::reconstructTracks(std::unique_ptr<xAOD::AFPTrackContainer>& outputContainer, const EventContext& ctx) const
@@ -233,7 +231,7 @@ StatusCode AFPSiDBasicKalmanTool::reconstructTracks(std::unique_ptr<xAOD::AFPTra
   }
   
   
-  typedef std::vector< std::vector<const xAOD::AFPSiHitsCluster*> >::const_iterator LayersIter_t;
+  using LayersIter_t = std::vector<std::vector<const xAOD::AFPSiHitsCluster *>>::const_iterator;
 
   // prepare list for storing temporary reconstructed tracks
   std::list<AFPSiDBasicKalmanToolTrack> reconstructedTracks;
@@ -322,7 +320,7 @@ StatusCode AFPSiDBasicKalmanTool::reconstructTracks(std::unique_ptr<xAOD::AFPTra
 
 void AFPSiDBasicKalmanTool::saveToXAOD (const AFPSiDBasicKalmanToolTrack& recoTrack, std::unique_ptr<xAOD::AFPTrackContainer>& containerToFill, SG::ReadHandle<xAOD::AFPSiHitsClusterContainer>& hitsClusterContainer) const
 {
-  auto track = containerToFill->push_back(std::make_unique<xAOD::AFPTrack>());
+  auto *track = containerToFill->push_back(std::make_unique<xAOD::AFPTrack>());
   
   const xAOD::AFPSiHitsCluster* firstCluster = recoTrack.clustersInTrack().front();
   const CLHEP::HepVector& firstPoint = recoTrack.positionAndSlopeSmooth().back(); // reading from smoothed collection which is done in reversed order

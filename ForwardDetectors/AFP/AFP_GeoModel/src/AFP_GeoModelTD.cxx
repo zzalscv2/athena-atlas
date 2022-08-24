@@ -38,13 +38,13 @@
 #include <fstream>
 #include <string>
 
-#include <math.h>
 #include <algorithm>
+#include <cmath>
 
 #include <list>
 #include <map>
 
-#include <stdlib.h>
+#include <cstdlib>
 
 void AFP_GeoModelFactory::initializeTDParameters()
 {

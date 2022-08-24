@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
 */
 
 /**
@@ -139,7 +139,7 @@ StatusCode AFPSiClusterTool::fillLayersWithHits(std::vector< std::vector<AFPSiCl
 
     try {
       // fill layers with hits
-      for(const auto theHit : *siHitContainer)
+      for(const auto *const theHit : *siHitContainer)
         my_layers.at(theHit->stationID()).at(theHit->pixelLayerID()).hits().push_back(theHit);
     }
     catch (const std::out_of_range& outOfRange) {

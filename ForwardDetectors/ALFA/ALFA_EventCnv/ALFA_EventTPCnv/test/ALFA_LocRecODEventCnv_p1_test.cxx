@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2017 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
 */
 
 // $Id$
@@ -33,7 +33,7 @@ void compare (const ALFA_LocRecODEvent& p1,
 
 void testit (const ALFA_LocRecODEvent& trans1)
 {
-  MsgStream log (0, "test");
+  MsgStream log (nullptr, "test");
   ALFA_LocRecODEventCnv_p1 cnv;
   ALFA_LocRecODEvent_p1 pers;
   cnv.transToPers (&trans1, &pers, log);

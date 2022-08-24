@@ -75,7 +75,7 @@ class ALFA_MDMultiple : public AthMessaging
 	private:
 		void Proj_Store(Int_t iFiberSide, Int_t (&iOver)[72000], Float_t fbRef, Int_t iSideFlag);
 		void Proj_Store(std::vector<Int_t> FiberHit[ALFAPLATESCNT], Int_t (&iOver)[72000], Float_t fbRef, Int_t iSideFlag);
-		void Find_Proj(Int_t iOver[72000], Float_t fbRef, Float_t &fb, Float_t &fOv, Int_t &fNum);
+		void Find_Proj(const Int_t iOver[72000], Float_t fbRef, Float_t &fb, Float_t &fOv, Int_t &fNum);
 		void Finding_Fib(Int_t iFiberSide, Float_t fbRef, Float_t fbRec, Int_t (&iFSel)[ALFAPLATESCNT], Int_t iSideFlag);
 		void Reco_Track(std::vector<double> &b_p, std::vector<double> &b_n,
 						std::vector<double> &Ov_p, std::vector<double> &Ov_n,

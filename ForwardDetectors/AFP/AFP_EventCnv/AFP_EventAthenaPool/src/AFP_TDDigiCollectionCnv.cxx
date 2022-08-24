@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2020 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "AFP_EventTPCnv/AFP_TDDigiCollectionCnv_p1.h"
@@ -24,7 +24,7 @@ AFP_TDDigiCollection* AFP_TDDigiCollectionCnv::createTransient()
 	static const pool::Guid p1_guid("352BE1B9-96FA-46BB-B1AE-51DDF56380EB");
 
 	AFP_TDDigiCollectionCnv_p1 TPConverter_p1;
-	AFP_TDDigiCollection *pTransColl=NULL;
+	AFP_TDDigiCollection *pTransColl=nullptr;
 
 	if(this->compareClassGuid(p1_guid)){
 		std::unique_ptr<AFP_TDDigiCollection_p1> col_vect(this->poolReadObject<AFP_TDDigiCollection_p1>());

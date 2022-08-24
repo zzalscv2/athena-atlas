@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2019 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "src/ALFA_SensitiveDetector.h"
@@ -246,7 +246,7 @@ TEST_F( ALFA_SensitiveDetectortest, EndOfAthenaEvent )
 
 int main( int argc, char** argv ) {
 
-  auto g=new GaudiEnvironment;
+  auto *g=new GaudiEnvironment;
   ::testing::AddGlobalTestEnvironment(g);
   ::testing::InitGoogleTest( &argc, argv );
   return RUN_ALL_TESTS();

@@ -196,7 +196,7 @@ void ALFA_MDGap::Proj_Store(Int_t iFiberSide, Int_t (&iOver)[72000], Float_t fbR
 /************************************************/
 /*   Identifying plateau in projection array	*/
 /************************************************/
-void ALFA_MDGap::Find_Proj(Int_t iOver[72000], Float_t fbRef, Float_t &fb, Float_t &fOv, Int_t&iNum)
+void ALFA_MDGap::Find_Proj(const Int_t iOver[72000], Float_t fbRef, Float_t &fb, Float_t &fOv, Int_t&iNum) const
 {
 	std::vector<int> iSizePlateau;
 	Int_t iNumFib=0;
@@ -534,7 +534,7 @@ void ALFA_MDGap::GetData(Int_t (&iNumU)[MAXTRACKNUM], Int_t (&iNumV)[MAXTRACKNUM
 }
 
 
-Int_t ALFA_MDGap::Silent_Gap(Int_t (&Over)[72000], Float_t b_ref, Float_t b_rec, Int_t FSel[ALFAPLATESCNT], Bool_t (&FGap)[ALFAPLATESCNT], Int_t (&Gap_Fib)[ALFAPLATESCNT][2], Float_t OverLap, Int_t iSideFlag)
+Int_t ALFA_MDGap::Silent_Gap(Int_t (&Over)[72000], Float_t b_ref, Float_t b_rec, const Int_t FSel[ALFAPLATESCNT], Bool_t (&FGap)[ALFAPLATESCNT], Int_t (&Gap_Fib)[ALFAPLATESCNT][2], Float_t OverLap, Int_t iSideFlag)
 {
 	Float_t fSign;
 	Float_t fXInter, fYInter;
@@ -594,7 +594,7 @@ Int_t ALFA_MDGap::Silent_Gap(Int_t (&Over)[72000], Float_t b_ref, Float_t b_rec,
 	return Found_Gap;
 }
 
-Int_t ALFA_MDGap::Active_Gap(Int_t iFiberSide, Int_t (&Over)[72000], Float_t b_ref, Float_t b_rec, Int_t FSel[ALFAPLATESCNT], Float_t OverLap, Int_t iSideFlag)
+Int_t ALFA_MDGap::Active_Gap(Int_t iFiberSide, Int_t (&Over)[72000], Float_t b_ref, Float_t b_rec, const Int_t FSel[ALFAPLATESCNT], Float_t OverLap, Int_t iSideFlag)
 {
 	Float_t fSign;
 	Float_t fXInter, fYInter;

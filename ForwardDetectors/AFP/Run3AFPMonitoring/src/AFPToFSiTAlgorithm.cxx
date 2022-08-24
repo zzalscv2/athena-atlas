@@ -79,7 +79,7 @@ StatusCode AFPToFSiTAlgorithm::fillHistograms( const EventContext& ctx ) const {
         if ( hitsItr->pixelLayerID() != 0 && hitsItr->pixelLayerID() != 2 ) continue;
         int plane = hitsItr->pixelLayerID() / 2;
 
-        fsp[ plane ][ side ].push_back( std::make_pair( hitsItr->pixelRowIDChip(), hitsItr->pixelColIDChip() ) );
+        fsp[ plane ][ side ].emplace_back( hitsItr->pixelRowIDChip(), hitsItr->pixelColIDChip() );
     }
 
     int numToFHitsTrain[ 4 ][ 2 ] = {};

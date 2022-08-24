@@ -71,7 +71,7 @@ StatusCode ALFA_MDTracking::Execute(Int_t iRPot, const std::list<MDHIT> &ListMDH
 	m_MapLayers.clear();
 
 	std::list<MDHIT>::const_iterator iter;
-	for (iter=ListMDHits.begin(); iter!=ListMDHits.end(); iter++)
+	for (iter=ListMDHits.begin(); iter!=ListMDHits.end(); ++iter)
 	{
 		if (iRPot == (*iter).iRPot)
 		{
@@ -174,7 +174,7 @@ void ALFA_MDTracking::HistFill(Float_t &b_p, Float_t &b_n, Float_t &fOverP, Floa
 	std::list<int>::iterator iter;
 	for (Int_t iLayer=0; iLayer<ALFALAYERSCNT*ALFAPLATESCNT; iLayer++)
 	{
-		for (iter=m_MapLayers[iLayer].ListFibers.begin(); iter!=m_MapLayers[iLayer].ListFibers.end(); iter++)
+		for (iter=m_MapLayers[iLayer].ListFibers.begin(); iter!=m_MapLayers[iLayer].ListFibers.end(); ++iter)
 		{
 			iHit = *iter;
 
@@ -394,7 +394,7 @@ void ALFA_MDTracking::OverLap()
 			fMinY = 0.24/cos(TMath::Pi()/4.0);
 
 			iFibSelX = -9999, iFibSelY = -9999;
-			for (iter=m_MapLayers[iLayer].ListFibers.begin(); iter!=m_MapLayers[iLayer].ListFibers.end(); iter++)
+			for (iter=m_MapLayers[iLayer].ListFibers.begin(); iter!=m_MapLayers[iLayer].ListFibers.end(); ++iter)
 			{
 				iHit = *iter;
 				fxTmp = (m_fRecYPos-m_fbMD[m_iRPot][iLayer][iHit])/m_faMD[m_iRPot][iLayer][iHit];

@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2020 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "AFP_EventTPCnv/AFP_SIDSimHitCollectionCnv_p1.h"
@@ -24,7 +24,7 @@ AFP_SIDSimHitCollection* AFP_SIDSimHitCollectionCnv::createTransient()
 	static const pool::Guid p1_guid("AAA03560-D4CC-40C3-80D6-165448375201");
 
 	AFP_SIDSimHitCollectionCnv_p1 TPConverter_p1;
-	AFP_SIDSimHitCollection *pTransColl=NULL;
+	AFP_SIDSimHitCollection *pTransColl=nullptr;
 
 	if(this->compareClassGuid(p1_guid)){
 		std::unique_ptr<AFP_SIDSimHitCollection_p1> col_vect(this->poolReadObject<AFP_SIDSimHitCollection_p1>());

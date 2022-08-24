@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2017 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "ALFA_LocRecCorr.h"
@@ -14,7 +14,7 @@ AthAlgorithm(name, pSvcLocator)
 	//MsgStream LogStream(Athena::getMessageSvc(), "ALFA_LocRecCorr::ALFA_LocRecCorr");
 	ATH_MSG_DEBUG("begin ALFA_LocRecCorr::ALFA_LocRecCorr");
 
-	m_pGeometryReader = 0;
+	m_pGeometryReader = nullptr;
 
 //	m_Config.eOwner=EOT_RECO;
 	m_Config.clear();
@@ -159,8 +159,8 @@ AthAlgorithm(name, pSvcLocator)
 	m_bCoolData = true;
 	declareProperty("CoolData", m_bCoolData);
 
-	m_pLocRecCorrEvCollection   = 0;
-	m_pLocRecCorrODEvCollection = 0;
+	m_pLocRecCorrEvCollection   = nullptr;
+	m_pLocRecCorrODEvCollection = nullptr;
 	m_iEvt = 0;
 
 	ATH_MSG_DEBUG("end ALFA_LocRecCorr::ALFA_LocRecCorr");
@@ -255,8 +255,8 @@ StatusCode ALFA_LocRecCorr::execute()
 	HepGeom::Point3D<double> PointInStatCS;
 	HepGeom::Point3D<double> PointInAtlasCS;
 
-	const ALFA_LocRecEvCollection* pLocRecCorrCol = 0;
-	const ALFA_LocRecODEvCollection* pLocRecCorrODCol = 0;
+	const ALFA_LocRecEvCollection* pLocRecCorrCol = nullptr;
+	const ALFA_LocRecODEvCollection* pLocRecCorrODCol = nullptr;
 
 	sc = evtStore()->retrieve(pLocRecCorrCol, m_strLocRecCollectionName);
 	if(sc.isFailure() || !pLocRecCorrCol)
@@ -614,7 +614,7 @@ StatusCode ALFA_LocRecCorr::COOLUpdate(IOVSVC_CALLBACK_ARGS_P(/*I*/, keys))
 	const CondAttrListCollection* listAttrColl;
 	CondAttrListCollection::const_iterator iterAttr;
 
-	for(iter=keys.begin();iter!=keys.end();iter++)
+	for(iter=keys.begin();iter!=keys.end();++iter)
 	{
 		if((*iter)=="/FWD/ALFA/position_calibration")
 		{
@@ -622,7 +622,7 @@ StatusCode ALFA_LocRecCorr::COOLUpdate(IOVSVC_CALLBACK_ARGS_P(/*I*/, keys))
 
 			if(detStore()->retrieve(listAttrColl,"/FWD/ALFA/position_calibration")==StatusCode::SUCCESS)
 			{
-				for(iterAttr=listAttrColl->begin();iterAttr!=listAttrColl->end();iterAttr++)
+				for(iterAttr=listAttrColl->begin();iterAttr!=listAttrColl->end();++iterAttr)
 				{
 					 iChannel=iterAttr->first; //RPot ID
 					 m_Config.CfgRPosParams[iChannel].swcorr.fXOffset=((iterAttr->second)[0]).data<float>();
@@ -686,13 +686,13 @@ void ALFA_LocRecCorr::SetNominalGeometry()
 	for(int i=0;i<RPOTSCNT;i++)
 	{
 		eRPName=(eRPotName)(i+1);
-		if(m_bIsTransformInDetector[i]==true)
+		if(m_bIsTransformInDetector[i])
 		{
 			m_Config.CfgRPosParams[i].usercorr.bIsEnabledUserTranform=true;
 			m_Config.CfgRPosParams[i].usercorr.UserOriginOfDetTransInRPot=Point3DInDetector(eRPName);
 			m_Config.CfgRPosParams[i].usercorr.UserTransformOfDetInRPot=UserTransform3DInDetector(eRPName);
 		}
-		if(m_bIsTransformInStation[i]==true)
+		if(m_bIsTransformInStation[i])
 		{
 			m_Config.CfgRPosParams[i].usercorr.bIsEnabledUserTranform=true;
 			m_Config.CfgRPosParams[i].usercorr.UserTransformOfRPInStation=UserTransform3DInStation(eRPName);

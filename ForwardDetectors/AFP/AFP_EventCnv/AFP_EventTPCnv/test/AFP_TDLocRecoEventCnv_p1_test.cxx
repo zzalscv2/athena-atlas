@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2019 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
 */
 /**
  * @file AFP_EventTPCnv/test/AFP_TDLocRecoEventCnv_p1_test.cxx
@@ -31,7 +31,7 @@ void compare (const AFP_TDLocRecoEvent& p1,
 
 void testit (const AFP_TDLocRecoEvent& trans1)
 {
-  MsgStream log (0, "test");
+  MsgStream log (nullptr, "test");
   AFP_TDLocRecoEventCnv_p1 cnv;
   AFP_TDLocRecoEvent_p1 pers;
   cnv.transToPers (&trans1, &pers, log);

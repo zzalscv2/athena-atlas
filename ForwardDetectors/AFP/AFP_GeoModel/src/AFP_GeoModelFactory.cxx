@@ -30,11 +30,11 @@
 #include <iostream>
 #include <fstream>
 
-#include <math.h>
 #include <algorithm>
+#include <cmath>
+#include <cstdlib>
 #include <list>
 #include <map>
-#include <stdlib.h>
 #include <string>
 
 
@@ -42,7 +42,7 @@ using namespace Genfun;
 using namespace CLHEP;
 
 AFP_GeoModelFactory::AFP_GeoModelFactory(StoreGateSvc *detStore, AFP_Geometry* pGeometry)
-    :m_pDetectorManager(NULL), m_pDetectorStore(detStore), m_addSeparationWindow(false)
+    :m_pDetectorManager(nullptr), m_pDetectorStore(detStore), m_addSeparationWindow(false)
 {
     pGeometry->getCfgParams(&m_CfgParams);
     m_pGeometry=pGeometry;
@@ -61,7 +61,7 @@ void AFP_GeoModelFactory::defineMaterials()
     int i;
     const double fWl2E=1239.85; //nm<->eV
     std::string matName;
-    GeoMaterialPropertiesTable *pMPT=NULL;
+    GeoMaterialPropertiesTable *pMPT=nullptr;
 
     StoredMaterialManager * materialManager = nullptr;
     if (StatusCode::SUCCESS != m_pDetectorStore->retrieve(materialManager, std::string("MATERIALS")))

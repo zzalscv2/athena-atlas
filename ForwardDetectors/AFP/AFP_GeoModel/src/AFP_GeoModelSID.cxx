@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "AFP_GeoModelFactory.h"
@@ -30,31 +30,30 @@
 
 #include "GeoPrimitives/CLHEPtoEigenConverter.h"
 
-#include <iostream>
-#include <fstream>
-#include <string>
-#include <math.h>
 #include <algorithm>
+#include <cmath>
+#include <cstdlib>
+#include <fstream>
+#include <iostream>
 #include <list>
 #include <map>
-#include <stdlib.h>
+#include <string>
 
 void AFP_GeoModelFactory::addSiDetector(GeoPhysVol* pPhysMotherVol, const char* pszStationName, HepGeom::Transform3D& TransInMotherVolume)
 {
 	char szLabel[32];
-	GeoLogVol* pLogElement=NULL;
+	GeoLogVol* pLogElement=nullptr;
 	GeoFullPhysVol* pPhysElement;
-	AFP_CONSTANTS AfpConstants;
 	eAFPStation eStation=m_pGeometry->parseStationName(pszStationName);
 	AFP_SIDCONFIGURATION sidcfg=m_CfgParams.sidcfg[eStation];
     
 	//create (constant) solids
 	GeoShape* pSolidSIDPlate=createSolidSIDPlate();
-	GeoShape* pSolidSIDSensor=new GeoBox(0.5*AfpConstants.SiT_Pixel_length_totx,0.5*AfpConstants.SiT_Pixel_length_toty,0.5*AfpConstants.SiT_Pixel_thickness);
-	GeoShape* pSolidSIDVacuumSensor=new GeoBox(0.5*180.0*CLHEP::mm,0.5*160.0*CLHEP::mm,0.5*AfpConstants.Stat_GlobalVacuumSensorThickness);
+	GeoShape* pSolidSIDSensor=new GeoBox(0.5*AFP_CONSTANTS::SiT_Pixel_length_totx,0.5*AFP_CONSTANTS::SiT_Pixel_length_toty,0.5*AFP_CONSTANTS::SiT_Pixel_thickness);
+	GeoShape* pSolidSIDVacuumSensor=new GeoBox(0.5*180.0*CLHEP::mm,0.5*160.0*CLHEP::mm,0.5*AFP_CONSTANTS::Stat_GlobalVacuumSensorThickness);
 
 	//add global vacuum sensitive volume (ID=11)
-	int nSpecVacSensorID=AfpConstants.Stat_GlobalVacuumSensorID;
+	int nSpecVacSensorID=AFP_CONSTANTS::Stat_GlobalVacuumSensorID;
 	sprintf(szLabel,"%s_LogSIDVacuumSensor[%i]",pszStationName,nSpecVacSensorID);
 	GeoLogVol* pLogSIDVacuumSensor=new GeoLogVol(szLabel,pSolidSIDVacuumSensor,m_MapMaterials[std::string("std::Vacuum")]);
 	GeoFullPhysVol* pPhysSIDVacuumSensor=new GeoFullPhysVol(pLogSIDVacuumSensor);
@@ -76,7 +75,7 @@ void AFP_GeoModelFactory::addSiDetector(GeoPhysVol* pPhysMotherVol, const char* 
 		pPhysMotherVol->add(pPhysElement);
 
 		// create SID chip
-		GeoShape* pSolidFEI4Chip=new GeoBox(0.5*sidcfg.vecChipXLength[i],0.5*sidcfg.vecChipYLength[i],0.5*AfpConstants.SiT_Chip_thickness);
+		GeoShape* pSolidFEI4Chip=new GeoBox(0.5*sidcfg.vecChipXLength[i],0.5*sidcfg.vecChipYLength[i],0.5*AFP_CONSTANTS::SiT_Chip_thickness);
 		sprintf(szLabel,"%s_LogSIDChip[%i]",pszStationName,i);
 		pLogElement=new GeoLogVol(szLabel,pSolidFEI4Chip,m_MapMaterials[std::string("CE7")]);
 		pPhysElement=new GeoFullPhysVol(pLogElement);
@@ -115,35 +114,34 @@ GeoShape* AFP_GeoModelFactory::createSolidSIDPlate()
 	MsgStream LogStream(Athena::getMessageSvc(), "AFP_GeoModelFactory::CreateSolidSIDPlate");
 
 	double fdelta=0.01*CLHEP::mm;//0.01*CLHEP::mm;
-	AFP_CONSTANTS AfpConstants;
 
-	GeoBox* pMainPlate=new GeoBox(0.5*AfpConstants.SiT_Plate_Main_length_x,0.5*AfpConstants.SiT_Plate_Main_length_y,0.5*AfpConstants.SiT_Plate_Main_thickness);
+	GeoBox* pMainPlate=new GeoBox(0.5*AFP_CONSTANTS::SiT_Plate_Main_length_x,0.5*AFP_CONSTANTS::SiT_Plate_Main_length_y,0.5*AFP_CONSTANTS::SiT_Plate_Main_thickness);
 
 	//cut side edges
-	double fd=std::sqrt(AfpConstants.SiT_Plate_CutEdge_length_x*AfpConstants.SiT_Plate_CutEdge_length_x+AfpConstants.SiT_Plate_CutEdge_length_y*AfpConstants.SiT_Plate_CutEdge_length_y);
-	double falpha=std::atan(AfpConstants.SiT_Plate_CutEdge_length_y/AfpConstants.SiT_Plate_CutEdge_length_x);
+	double fd=std::sqrt(AFP_CONSTANTS::SiT_Plate_CutEdge_length_x*AFP_CONSTANTS::SiT_Plate_CutEdge_length_x+AFP_CONSTANTS::SiT_Plate_CutEdge_length_y*AFP_CONSTANTS::SiT_Plate_CutEdge_length_y);
+	double falpha=std::atan(AFP_CONSTANTS::SiT_Plate_CutEdge_length_y/AFP_CONSTANTS::SiT_Plate_CutEdge_length_x);
 	double fgamma=45.0*CLHEP::deg-falpha; double fbeta=90.0*CLHEP::deg-falpha;
 
 	//--lower cut
 	HepGeom::Vector3D<double> vecL=(fd/std::sqrt(2.0))*(HepGeom::RotateZ3D(-fgamma)*HepGeom::Vector3D<double>(1.0,0.0,0.0));
-	HepGeom::Vector3D<double> vecB=AfpConstants.SiT_Plate_CutEdge_length_x*HepGeom::Vector3D<double>(1.0,0.0,0.0);
+	HepGeom::Vector3D<double> vecB=AFP_CONSTANTS::SiT_Plate_CutEdge_length_x*HepGeom::Vector3D<double>(1.0,0.0,0.0);
 	HepGeom::Vector3D<double> vecX=vecL-vecB;
-	GeoBox* pPlateCut=new GeoBox(0.5*fd, 0.5*fd,0.5*(AfpConstants.SiT_Plate_CutEdge_thickness+fdelta));
-	HepGeom::Transform3D TransCut=HepGeom::Translate3D(vecX.x()+0.5*AfpConstants.SiT_Plate_Main_length_x,vecX.y()-0.5*AfpConstants.SiT_Plate_Main_length_y,0.0)*HepGeom::RotateZ3D(-fbeta);
+	GeoBox* pPlateCut=new GeoBox(0.5*fd, 0.5*fd,0.5*(AFP_CONSTANTS::SiT_Plate_CutEdge_thickness+fdelta));
+	HepGeom::Transform3D TransCut=HepGeom::Translate3D(vecX.x()+0.5*AFP_CONSTANTS::SiT_Plate_Main_length_x,vecX.y()-0.5*AFP_CONSTANTS::SiT_Plate_Main_length_y,0.0)*HepGeom::RotateZ3D(-fbeta);
 	GeoShapeShift* pShiftCut=new GeoShapeShift(pPlateCut, Amg::CLHEPTransformToEigen(TransCut));
 	GeoShapeSubtraction* pShape1=new GeoShapeSubtraction(pMainPlate, pShiftCut);
 
 	//--upper cut
 	vecL=(fd/std::sqrt(2.0))*(HepGeom::RotateZ3D(+fgamma)*HepGeom::Vector3D<double>(1.0,0.0,0.0));
 	vecX=vecL-vecB;
-	pPlateCut=new GeoBox(0.5*fd, 0.5*fd,0.5*(AfpConstants.SiT_Plate_CutEdge_thickness+fdelta));
-	TransCut=HepGeom::Translate3D(vecX.x()+0.5*AfpConstants.SiT_Plate_Main_length_x,vecX.y()+0.5*AfpConstants.SiT_Plate_Main_length_y,0.0)*HepGeom::RotateZ3D(+fbeta);
+	pPlateCut=new GeoBox(0.5*fd, 0.5*fd,0.5*(AFP_CONSTANTS::SiT_Plate_CutEdge_thickness+fdelta));
+	TransCut=HepGeom::Translate3D(vecX.x()+0.5*AFP_CONSTANTS::SiT_Plate_Main_length_x,vecX.y()+0.5*AFP_CONSTANTS::SiT_Plate_Main_length_y,0.0)*HepGeom::RotateZ3D(+fbeta);
 	pShiftCut=new GeoShapeShift(pPlateCut,Amg::CLHEPTransformToEigen(TransCut));
 	GeoShapeSubtraction* pShape2=new GeoShapeSubtraction(pShape1, pShiftCut);
 
 	//cut sensitive area
-	pPlateCut=new GeoBox(0.5*(AfpConstants.SiT_Plate_Window_length_x+fdelta),0.5*AfpConstants.SiT_Plate_Window_length_y,0.5*AfpConstants.SiT_Plate_Window_thickness);
-	TransCut=HepGeom::Translate3D(AfpConstants.SiT_Plate_Window_x+fdelta,AfpConstants.SiT_Plate_Window_y,-(0.5*AfpConstants.SiT_Plate_Main_thickness-0.5*AfpConstants.SiT_Plate_Window_thickness));
+	pPlateCut=new GeoBox(0.5*(AFP_CONSTANTS::SiT_Plate_Window_length_x+fdelta),0.5*AFP_CONSTANTS::SiT_Plate_Window_length_y,0.5*AFP_CONSTANTS::SiT_Plate_Window_thickness);
+	TransCut=HepGeom::Translate3D(AFP_CONSTANTS::SiT_Plate_Window_x+fdelta,AFP_CONSTANTS::SiT_Plate_Window_y,-(0.5*AFP_CONSTANTS::SiT_Plate_Main_thickness-0.5*AFP_CONSTANTS::SiT_Plate_Window_thickness));
 	pShiftCut=new GeoShapeShift(pPlateCut,Amg::CLHEPTransformToEigen(TransCut));
 	GeoShapeSubtraction* pShape3=new GeoShapeSubtraction(pShape2, pShiftCut);
 

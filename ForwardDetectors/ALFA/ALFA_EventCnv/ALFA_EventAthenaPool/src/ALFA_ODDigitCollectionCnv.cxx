@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2020 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "ALFA_EventTPCnv/ALFA_ODDigitCollectionCnv_p1.h"
@@ -20,7 +20,7 @@ ALFA_ODDigitCollection* ALFA_ODDigitCollectionCnv::createTransient() {
     
     ALFA_ODDigitCollectionCnv_p1   TPConverter_p1;
 
-    ALFA_ODDigitCollection       *trans_cont(0); // probably inicialization
+    ALFA_ODDigitCollection       *trans_cont(nullptr); // probably inicialization
     static const pool::Guid p1_guid ("26807BD7-E90A-4FDF-B1BF-0A7F821C5970");
 
     

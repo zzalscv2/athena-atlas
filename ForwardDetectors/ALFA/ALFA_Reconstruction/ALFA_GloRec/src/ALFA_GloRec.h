@@ -90,7 +90,7 @@ private:
     //////////////////////////////////////////////
     //  steerable members
     //////////////////////////////////////////////
-    int m_iDataType;            
+    int m_iDataType = 0;            
     std::string m_strTrackPathPatterns;
     TObjArray m_TObjArrTrackPathPatterns;
     std::string m_strGloRecAnalysisFile;

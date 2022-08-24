@@ -156,7 +156,7 @@ void  AFP_PileUpTool::newXAODHitSi (std::unique_ptr<xAOD::AFPSiHitContainer>& si
   AFP_SiDigiConstIter it    = container->begin();
   AFP_SiDigiConstIter itend = container->end();
   
-  for (; it != itend; it++) {
+  for (; it != itend; ++it) {
     auto * xAODSiHit = siHitContainer->push_back(std::make_unique<xAOD::AFPSiHit>());
     
     xAODSiHit->setStationID(it->m_nStationID);
@@ -193,7 +193,7 @@ void  AFP_PileUpTool::newXAODHitToF (std::unique_ptr<xAOD::AFPToFHitContainer>& 
   AFP_TDDigiConstIter it    = container->begin();
   AFP_TDDigiConstIter itend = container->end();
 
-  for (; it != itend; it++) {
+  for (; it != itend; ++it) {
     auto * xAODToFHit = tofHitContainer->push_back(std::make_unique<xAOD::AFPToFHit>());
     xAODToFHit->setStationID(it->m_nStationID);
     xAODToFHit->setHptdcChannel(-1);
@@ -231,7 +231,7 @@ StatusCode AFP_PileUpTool::processAllSubEvents(const EventContext& ctx)
   else {
     TimedTDSimHitCollList TDSimHitCollList;
     unsigned int numberOfTDSimHits{0};
-    if (not (m_mergeSvc->retrieveSubEvtsData(m_TDSimHitCollectionName, TDSimHitCollList, numberOfTDSimHits).isSuccess()) and TDSimHitCollList.size() == 0) {
+    if (not (m_mergeSvc->retrieveSubEvtsData(m_TDSimHitCollectionName, TDSimHitCollList, numberOfTDSimHits).isSuccess()) and TDSimHitCollList.empty()) {
       ATH_MSG_FATAL ( "Could not fill TimedTDSimHitCollList" );
       return StatusCode::FAILURE;
     }
@@ -263,7 +263,7 @@ StatusCode AFP_PileUpTool::processAllSubEvents(const EventContext& ctx)
   else {
     TimedSIDSimHitCollList SIDSimHitCollList;
     unsigned int numberOfSIDSimHits{0};
-    if (not (m_mergeSvc->retrieveSubEvtsData(m_SIDSimHitCollectionName, SIDSimHitCollList, numberOfSIDSimHits).isSuccess()) and SIDSimHitCollList.size() == 0) {
+    if (not (m_mergeSvc->retrieveSubEvtsData(m_SIDSimHitCollectionName, SIDSimHitCollList, numberOfSIDSimHits).isSuccess()) and SIDSimHitCollList.empty()) {
       ATH_MSG_FATAL ( "Could not fill TimedSIDSimHitCollList" );
       return StatusCode::FAILURE;
     }
@@ -329,7 +329,7 @@ StatusCode AFP_PileUpTool::processBunchXing(int bunchXing, SubEventIterator bSub
                      << " run number : " << iEvt->ptr()->runNumber()
                      );
 
-    const AFP_TDSimHitCollection* tmpColl = 0;
+    const AFP_TDSimHitCollection* tmpColl = nullptr;
 
     if (!seStore.retrieve(tmpColl, m_TDSimHitCollectionName).isSuccess()) {
       ATH_MSG_ERROR ( "SubEvent AFP_TDSimHitCollection not found in StoreGate " << seStore.name() );
@@ -343,7 +343,7 @@ StatusCode AFP_PileUpTool::processBunchXing(int bunchXing, SubEventIterator bSub
 
     for (; iPmt!=ePmt; ++iPmt) m_mergedTDSimHitList.push_back((*iPmt));
 
-    const AFP_SIDSimHitCollection* tmpSiColl = 0;
+    const AFP_SIDSimHitCollection* tmpSiColl = nullptr;
 
     if (!seStore.retrieve(tmpSiColl, m_SIDSimHitCollectionName).isSuccess()) {
       ATH_MSG_ERROR ( "SubEvent AFP_SIDSimHitCollection not found in StoreGate " << seStore.name() );
@@ -634,8 +634,6 @@ void AFP_PileUpTool::createSiDigi(const EventContext& ctx, int Station, int Dete
     
   m_deposited_charge[6*336*80*Station + 80*336*Detector + 80*PixelCol + PixelRow] += depositedCharge;
   m_deposited_energy[6*336*80*Station + 80*336*Detector + 80*PixelCol + PixelRow] += DepEnergy;
-
-  return;
 }
 
 

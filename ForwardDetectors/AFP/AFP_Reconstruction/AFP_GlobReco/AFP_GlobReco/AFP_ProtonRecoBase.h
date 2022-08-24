@@ -89,10 +89,10 @@ class AFP_ProtonRecoBase : public extends<AthAlgTool, IAFP_ProtonRecoTool> {
     void linkTracksToProton (const xAOD::AFPTrack* track, SG::ReadHandle<xAOD::AFPTrackContainer>& trackContainer, xAOD::AFPProton * proton) const;
 
     /// Default position of AFP near station
-    double m_detectorPositionNear;  // [m]
+    double m_detectorPositionNear = 0.0;  // [m]
 
     /// Default position of AFP far station
-    double m_detectorPositionFar;  // [m]
+    double m_detectorPositionFar = 0.0;  // [m]
 
     /// x-Sigma value
     static constexpr double m_xSigma = 10e-6; // [m]

@@ -250,7 +250,7 @@ StatusCode ALFA_LocRec::execute()
 		for(unsigned int i=0; i<m_vecListAlgoMD.size(); i++)
 		{
 			strAlgoMD = m_vecListAlgoMD[i];
-			for(iterRPName=m_ListExistingRPots.begin();iterRPName!=m_ListExistingRPots.end();iterRPName++)
+			for(iterRPName=m_ListExistingRPots.begin();iterRPName!=m_ListExistingRPots.end();++iterRPName)
 			{
 				eRPName = *iterRPName;
 
@@ -269,7 +269,7 @@ StatusCode ALFA_LocRec::execute()
 		for(unsigned int i=0; i<m_vecListAlgoOD.size(); i++)
 		{
 			strAlgoOD = m_vecListAlgoOD[i];
-			for(iterRPName=m_ListExistingRPots.begin();iterRPName!=m_ListExistingRPots.end();iterRPName++)
+			for(iterRPName=m_ListExistingRPots.begin();iterRPName!=m_ListExistingRPots.end();++iterRPName)
 			{
 				eRPName = *iterRPName;
 
@@ -427,7 +427,7 @@ bool ALFA_LocRec::ReadGeometryDetCS()
 		return bRes;
 	}
 
-	for(iterRPName=m_ListExistingRPots.begin();iterRPName!=m_ListExistingRPots.end();iterRPName++)
+	for(iterRPName=m_ListExistingRPots.begin();iterRPName!=m_ListExistingRPots.end();++iterRPName)
 	{
 		eRPName = *iterRPName;
 
@@ -607,7 +607,7 @@ void ALFA_LocRec::SaveGeometry()
 	char szFilename[64];
 	std::list<eRPotName>::const_iterator iterRPName;
 
-	for(iterRPName=m_ListExistingRPots.begin();iterRPName!=m_ListExistingRPots.end();iterRPName++)
+	for(iterRPName=m_ListExistingRPots.begin();iterRPName!=m_ListExistingRPots.end();++iterRPName)
 	{
 		eGeoType=m_pGeometryReader->GetRPGeometryType(*iterRPName, EFT_FIBERMD);
 		switch(eGeoType)
@@ -697,7 +697,7 @@ StatusCode ALFA_LocRec::ExecuteRecoMethod(const std::string& strAlgo, const eRPo
 			sc = pODTracking->Finalize(&listODResults);
 
 			std::list<ODRESULT>::const_iterator iter;
-			for(iter=listODResults.begin(); iter!=listODResults.end(); iter++)
+			for(iter=listODResults.begin(); iter!=listODResults.end(); ++iter)
 			{
 				ODResults.iSide   = (*iter).iSide;
 				ODResults.fRecPos = (*iter).fRecPos;

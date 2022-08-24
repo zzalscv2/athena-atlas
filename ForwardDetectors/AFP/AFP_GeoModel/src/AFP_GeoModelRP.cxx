@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "AFP_GeoModelFactory.h"
@@ -30,13 +30,13 @@
 #include <fstream>
 #include <string>
 
-#include <math.h>
 #include <algorithm>
+#include <cmath>
 
 #include <list>
 #include <map>
 
-#include <stdlib.h>
+#include <cstdlib>
 
 #define RPOT_MAINTUBUS_WNDCUTUP 1
 #define RPOT_MAINTUBUS_LENGTH (70.0*CLHEP::mm)

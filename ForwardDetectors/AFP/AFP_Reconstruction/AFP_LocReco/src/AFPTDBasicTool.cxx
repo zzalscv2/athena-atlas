@@ -143,7 +143,7 @@ StatusCode AFPTDBasicTool::reconstructTracks(std::unique_ptr<xAOD::AFPToFTrackCo
 void AFPTDBasicTool::saveToXAOD (const AFPTDBasicToolTrack& recoTrack, std::unique_ptr<xAOD::AFPToFTrackContainer>& containerToFill, SG::ReadHandle<xAOD::AFPToFHitContainer>& hitContainer) const
 {
     ATH_MSG_DEBUG("AFPTDBasicTool::saveToXAOD");
-    auto track = containerToFill->push_back(std::make_unique<xAOD::AFPToFTrack>());
+    auto *track = containerToFill->push_back(std::make_unique<xAOD::AFPToFTrack>());
   
     track->setStationID(recoTrack.m_stationID);
     track->setTrainID(recoTrack.m_trainID);

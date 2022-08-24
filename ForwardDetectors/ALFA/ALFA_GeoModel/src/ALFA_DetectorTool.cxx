@@ -21,7 +21,7 @@ ALFA_DetectorTool::ALFA_DetectorTool( const std::string& type,
 				      const std::string& name, 
 				      const IInterface* parent )
   : GeoModelTool( type, name, parent), 
-    m_pALFADetectorFactory(NULL),
+    m_pALFADetectorFactory(nullptr),
     m_iovSvc( "IOVDbSvc", name )
 {
 	m_Config.clear();
@@ -147,13 +147,13 @@ StatusCode ALFA_DetectorTool::create()
     return StatusCode::FAILURE; 
   } 
   
-  if(0 == m_detector)
+  if(nullptr == m_detector)
   {
     GeoPhysVol *world=&*theExpt->getPhysVol();
 
     // Get pointer to the RDBAccessSvc
     // Use this pointer later for Geometry DB access
-    IRDBAccessSvc* raccess = 0;
+    IRDBAccessSvc* raccess = nullptr;
     StatusCode sc = service("RDBAccessSvc",raccess);
     if(sc.isFailure()) 
     {
@@ -239,7 +239,7 @@ StatusCode ALFA_DetectorTool::align(IOVSVC_CALLBACK_ARGS)
 
 	if(((eMetrologyType)m_Config.GeometryConfig.eRPMetrologyGeoType)==EMT_SWCORRECTIONS){
 		// debug printout of global positions:
-		StoredPhysVol* pStPhysRPBox=NULL;
+		StoredPhysVol* pStPhysRPBox=nullptr;
 		sc=detStore()->retrieve(pStPhysRPBox,"StRPBox[03]");
 		if(sc.isSuccess()){
 			const GeoFullPhysVol* pPhysRPBox=pStPhysRPBox->getPhysVol();

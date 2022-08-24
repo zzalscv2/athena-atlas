@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2020 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "ALFA_EventTPCnv/ALFA_CLinkEventCnv_p1.h"
@@ -24,7 +24,7 @@ ALFA_CLinkEvent* ALFA_CLinkEventCnv::createTransient()
 
 	ALFA_CLinkEventCnv_p1 TPConverter_p1;
 
-	ALFA_CLinkEvent *trans_cont(0); // probably inicialization
+	ALFA_CLinkEvent *trans_cont(nullptr); // probably inicialization
 	static const pool::Guid p1_guid ("D8FCB0A1-3B3E-4536-B590-1A48347B6E1A");
 
 	if( this->compareClassGuid(p1_guid)){

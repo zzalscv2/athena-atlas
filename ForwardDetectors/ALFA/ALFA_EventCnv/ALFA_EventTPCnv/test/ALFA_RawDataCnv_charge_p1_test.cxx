@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2017 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
 */
 
 // $Id$
@@ -35,7 +35,7 @@ void compare (const ALFA_RawData_charge& p1,
 
 void testit (const ALFA_RawData_charge& trans1)
 {
-  MsgStream log (0, "test");
+  MsgStream log (nullptr, "test");
   ALFA_RawDataCnv_charge_p1 cnv;
   ALFA_RawData_charge_p1 pers;
   cnv.transToPers (&trans1, &pers, log);
@@ -58,8 +58,10 @@ void test1()
   trans1.SetEventCount_PMF (567);
   trans1.SetChargeChan_PMF (678);
   std::vector<uint16_t> v;
-  for (int i=0; i<64; i++)
+  v.reserve(64);
+  for (int i=0; i<64; i++){
     v.push_back (200+i);
+  }
   trans1.SetChargeChanVect_PMF (v);
   trans1.addData (10);
   trans1.addData (11);
