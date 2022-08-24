@@ -1,6 +1,6 @@
 """Configure Truth output for digitization with ComponentAccumulator style
 
-Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
 """
 from AthenaConfiguration.Enums import ProductionStep
 from OutputStreamAthenaPool.OutputStreamConfig import OutputStreamCfg
@@ -8,14 +8,19 @@ from OutputStreamAthenaPool.OutputStreamConfig import OutputStreamCfg
 
 def TruthDigitizationOutputCfg(flags):
     """Return ComponentAccumulator with Truth output items"""
-    ItemList = [
-        "McEventCollection#*",
-        "TrackRecordCollection#*",
-    ]
-
     prefix = ''
     if flags.Common.ProductionStep == ProductionStep.PileUpPresampling:
         prefix = flags.Overlay.BkgPrefix
+
+    ItemList = [
+        f"McEventCollection#{prefix}TruthEvent",
+        f"TrackRecordCollection#{prefix}MuonEntryLayer",
+    ]
+    if not flags.Digitization.PileUp:
+        ItemList += [
+           f"TrackRecordCollection#{prefix}CaloEntryLayer",
+           f"TrackRecordCollection#{prefix}MuonExitLayer",
+        ]
 
     from RunDependentSimComps.PileUpUtils import pileupInputCollections
     puCollections = pileupInputCollections(flags.Digitization.PU.LowPtMinBiasInputCols)
