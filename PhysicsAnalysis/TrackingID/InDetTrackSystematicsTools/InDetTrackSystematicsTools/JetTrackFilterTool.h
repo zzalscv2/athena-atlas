@@ -64,8 +64,6 @@ namespace InDet {
 
   private:
 
-    StatusCode initTIDEEffSystHistogram(float scale, TH1 *&histogram, std::string rootFileName, std::string histogramName) const;
-    float getFractionDropped(float fDefault, TH1 *histogram, const xAOD::Jet*) const;
     float getNomTrkEff(const xAOD::TrackParticle*) const;
 
     int m_seed = 0;
@@ -73,13 +71,12 @@ namespace InDet {
     double m_deltaR = 0.1;
     float m_trkEffSystScale = 1.0;
 
-    TH1* m_effForJetPt = nullptr; //!
     TH2* m_trkNomEff = nullptr; //!
 
-    // allow the user to configure which calibration files to use if desired
+    // allow the user to configure which calibration file to use if desired
     std::string m_calibFileNomEff;
-    std::string m_calibFileJetEff;
 
+    double m_effUncertTIDE = 0.012;
     double m_fakeUncertTIDE = 0.35;
 
     ToolHandle< IInDetTrackTruthOriginTool > m_trackOriginTool;
