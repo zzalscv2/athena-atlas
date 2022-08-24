@@ -944,6 +944,7 @@ def make_peeker(meta_dict):
                 'BeamIntensityPattern'
                 'physicsList',
                 'digiSteeringConf',
+                'pileUp',
             ]
             for item in list(meta_dict[filename]['/Digitization/Parameters']):
                 if item not in keys_to_keep:
