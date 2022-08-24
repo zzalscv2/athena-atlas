@@ -1,7 +1,8 @@
 /*
-  Copyright (C) 2002-2017 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
 */
 
+#include "CxxUtils/checker_macros.h"
 #include "JiveXML/ONCRPCServerThreads.h"
 #include "JiveXML/ONCRPCThreadCollection.h"
 #include "JiveXML/ONCRPCServerProcs.h"
@@ -31,7 +32,7 @@ namespace JiveXML {
  
   //Thread specific data keys
   //These variables are global only within a single thread
-  pthread_key_t ServerSvcKey;    //<! A pointer to the the Athena Service associated with this thread
+  pthread_key_t ServerSvcKey ATLAS_THREAD_SAFE;    //<! A pointer to the the Athena Service associated with this thread
 
   /**
    * This is the dispatch function, which does the actual calls of the

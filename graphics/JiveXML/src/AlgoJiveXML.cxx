@@ -266,13 +266,15 @@ namespace JiveXML{
     size_t found2;
     if (eventInfo->timeStamp() > 0) {
       time_t unixtime = (time_t) eventInfo->timeStamp();
-      struct tm *time = localtime(&unixtime);
-      strftime(dateTime, 32, "%Y-%m-%d %H:%M:%S %Z", time);
-      struct tm *utctime = gmtime(&unixtime);
+      struct tm time;
+      localtime_r(&unixtime, &time);
+      strftime(dateTime, 32, "%Y-%m-%d %H:%M:%S %Z", &time);
+      struct tm utctime;
+      gmtime_r(&unixtime, &utctime);
       found1 = (DataType(dateTime).toString().find("CEST"));
       found2 = (DataType(dateTime).toString().find("CET")); 
       if ( int(found1)<0 && int(found2)<0 ){ // not found is -1
-         strftime(dateTime, 32, "%Y-%m-%d %H:%M:%S UTC", utctime);
+         strftime(dateTime, 32, "%Y-%m-%d %H:%M:%S UTC", &utctime);
          ATH_MSG_DEBUG( " TIME NOT CET/CEST. Adjusted to:" << dateTime );
       }
     } else {
