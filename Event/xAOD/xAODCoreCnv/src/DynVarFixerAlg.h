@@ -8,6 +8,7 @@
 // Gaudi/Athena include(s):
 #include "AthenaBaseComps/AthAlgorithm.h"
 #include "AthContainersInterfaces/AuxTypes.h"
+#include "CxxUtils/checker_macros.h"
 #include "StoreGate/ReadHandleKeyArray.h"
 
 // EDM include(s).
@@ -36,10 +37,8 @@ namespace xAODMaker {
    ///
    /// @author Attila Krasznahorkay <Attila.Krasznahorkay@cern.ch>
    ///
-   /// $Revision: 803546 $
-   /// $Date: 2017-04-25 11:44:26 +0200 (Tue, 25 Apr 2017) $
    ///
-   class DynVarFixerAlg : public AthAlgorithm {
+   class ATLAS_NOT_THREAD_SAFE DynVarFixerAlg : public AthAlgorithm {
 
    public:
       /// Inherit the base class's constructor

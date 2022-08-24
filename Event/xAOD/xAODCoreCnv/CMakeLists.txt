@@ -17,7 +17,7 @@ atlas_add_component( xAODCoreCnv
    src/*.h src/*.cxx src/components/*.cxx
    INCLUDE_DIRS ${ROOT_INCLUDE_DIRS}
    LINK_LIBRARIES ${ROOT_LIBRARIES} AthContainers AthContainersInterfaces
-   AthLinks AthenaBaseComps AthenaKernel SGTools StoreGateLib xAODCore
+   AthLinks AthenaBaseComps AthenaKernel CxxUtils SGTools StoreGateLib xAODCore
    GaudiKernel xAODCoreCnvLib )
 
 # Install files from the package.
