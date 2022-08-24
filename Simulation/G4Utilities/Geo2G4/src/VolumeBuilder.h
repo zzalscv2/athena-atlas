@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef GEO2G4_VolumeBuilder_H
@@ -33,7 +33,7 @@ class VolumeBuilder
   void SetParam(bool flag){m_paramOn = flag;}
   bool GetParam() const {return m_paramOn;}
 
-  virtual G4LogicalVolume* Build(PVConstLink pv, OpticalVolumesMap* optical_volumes = 0) const = 0;
+  virtual G4LogicalVolume* Build(PVConstLink pv, OpticalVolumesMap* optical_volumes = 0) = 0;
 
  protected:
   bool m_paramOn;

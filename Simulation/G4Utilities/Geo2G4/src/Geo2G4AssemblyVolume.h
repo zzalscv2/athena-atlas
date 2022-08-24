@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2017 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef GEO2G4_ASSEMBLYVOLUME_H
@@ -7,6 +7,7 @@
 
 #include "Geo2G4AssemblyTriplet.h"
 #include "G4Transform3D.hh"
+#include <atomic>
 #include <vector>
 
 class G4VPhysicalVolume;
@@ -87,7 +88,7 @@ public:  // with description
 
   void MakeImprint( G4LogicalVolume* pMotherLV,
                     G4ThreeVector& translationInMother,
-                    G4RotationMatrix* pRotationInMother,
+                    const G4RotationMatrix* pRotationInMother,
                     G4int copyNumBase = 0,
                     G4bool ITkScheme = false,
                     G4bool surfCheck = false );
@@ -122,7 +123,6 @@ public:  // with description
 
 protected:
 
-  void SetInstanceCount( unsigned int value );
   void SetAssemblyID( unsigned int value );
 
   void InstanceCountPlus();
@@ -171,7 +171,7 @@ private:
   //
   // Number of imprints of the given assembly volume.
 
-  static unsigned int s_instanceCounter;
+  static std::atomic<unsigned int> s_instanceCounter;
   //
   // Class instance counter.
 

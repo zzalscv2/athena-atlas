@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2017 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "Geo2G4AssemblyVolume.h"
@@ -12,7 +12,7 @@
 
 #include <sstream>
 
-unsigned int Geo2G4AssemblyVolume::s_instanceCounter = 0;
+std::atomic<unsigned int> Geo2G4AssemblyVolume::s_instanceCounter = 0;
 
 // Default constructor
 //
@@ -288,7 +288,7 @@ void Geo2G4AssemblyVolume::MakeImprint( Geo2G4AssemblyVolume* pAssembly,
 
 void Geo2G4AssemblyVolume::MakeImprint( G4LogicalVolume*  pMotherLV,
                                     G4ThreeVector&    translationInMother,
-                                    G4RotationMatrix* pRotationInMother,
+                                    const G4RotationMatrix* pRotationInMother,
                                     G4int copyNumBase,
                                     G4bool ITkScheme,
                                     G4bool surfCheck )
@@ -305,8 +305,7 @@ void Geo2G4AssemblyVolume::MakeImprint( G4LogicalVolume*  pMotherLV,
   {
     // Make it by default an indentity matrix
     //
-    pRotationInMother =
-      const_cast<G4RotationMatrix*>( &G4RotationMatrix::IDENTITY );
+    pRotationInMother = &G4RotationMatrix::IDENTITY;
   }
 
   G4Transform3D transform( *pRotationInMother,
@@ -332,11 +331,6 @@ void Geo2G4AssemblyVolume::MakeImprint( G4LogicalVolume*  pMotherLV,
 unsigned int Geo2G4AssemblyVolume::GetInstanceCount() const
 {
   return Geo2G4AssemblyVolume::s_instanceCounter;
-}
-
-void         Geo2G4AssemblyVolume::SetInstanceCount( unsigned int value )
-{
-  Geo2G4AssemblyVolume::s_instanceCounter = value;
 }
 
 void         Geo2G4AssemblyVolume::InstanceCountPlus()
