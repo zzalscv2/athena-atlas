@@ -22,11 +22,14 @@ def createRecoConfigFlags():
         and prevFlags.Reco.EnableEgamma
         and prevFlags.Reco.EnableCombinedMuon
         and prevFlags.Reco.EnablePFlow))
-    flags.addFlag("Reco.EnablePFlow",
-                  lambda prevFlags: prevFlags.Reco.EnableTracking and
-                  prevFlags.Detector.EnableCalo and prevFlags.InDet.PriVertex.doVertexFinding)
+    flags.addFlag("Reco.EnablePFlow", lambda prevFlags: (
+        prevFlags.Reco.EnableTracking
+        and prevFlags.Detector.EnableCalo
+        and prevFlags.InDet.PriVertex.doVertexFinding))
     flags.addFlag("Reco.EnableTau", lambda prevFlags: prevFlags.Reco.EnableJet)
-    flags.addFlag("Reco.EnableMet", lambda prevFlags: prevFlags.Reco.EnableJet)
+    flags.addFlag("Reco.EnableMet", lambda prevFlags: (
+        prevFlags.Reco.EnableJet
+        and prevFlags.Reco.EnableTau))
     flags.addFlag("Reco.EnableTracking",
                   lambda prevFlags: prevFlags.Detector.EnableID or
                   prevFlags.Detector.EnableITk)
@@ -52,12 +55,12 @@ def createRecoConfigFlags():
     # enable automatically for HI data
     flags.addFlag("Reco.EnableHI",
                   lambda prevFlags: "_hi" in prevFlags.Input.ProjectName)
-    
+
     # enable AFP only if running on data
     flags.addFlag("Reco.EnableAFP",
-                  lambda prevFlags: not prevFlags.Input.isMC and 
+                  lambda prevFlags: not prevFlags.Input.isMC and
                   prevFlags.GeoModel.Run is not LHCPeriod.Run1)
-    
+
     # common thinning and other post-processing
     flags.addFlag("Reco.EnablePostProcessing", True)
     flags.addFlag("Reco.PostProcessing.TRTAloneThinning",
