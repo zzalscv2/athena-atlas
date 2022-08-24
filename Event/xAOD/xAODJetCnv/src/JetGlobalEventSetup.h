@@ -1,7 +1,7 @@
 // emacs, this is -*- c++ -*-
 
 /*
-  Copyright (C) 2002-2017 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef JETREC_GLOBALEVENTSETUP_H
@@ -10,6 +10,7 @@
 
 #include "GaudiKernel/IIncidentListener.h"
 #include "AthenaBaseComps/AthAlgorithm.h"
+#include "CxxUtils/checker_macros.h"
 
 #include <string>
 
@@ -20,8 +21,8 @@
  *
  * @author P.A. Delsart
  */
-class JetGlobalEventSetup : public AthAlgorithm,
-                     virtual public IIncidentListener {
+class ATLAS_NOT_THREAD_SAFE JetGlobalEventSetup : public AthAlgorithm,
+                                                  virtual public IIncidentListener {
 public:
   JetGlobalEventSetup(const std::string& name, ISvcLocator* pSvcLocator);
   virtual StatusCode initialize();
