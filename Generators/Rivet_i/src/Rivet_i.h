@@ -6,6 +6,7 @@
 #define RIVET_I_H
 
 #include "AthenaBaseComps/AthAlgorithm.h"
+#include "CxxUtils/checker_macros.h"
 #include "xAODEventInfo/EventInfo.h"
 
 #include "Rivet/AnalysisHandler.hh"
@@ -33,14 +34,14 @@ public:
   ///
   /// Pass a list of analyses to the Rivet AnalysisHandler, which dynamically
   /// loads the necessary libraries (including user-written analyses).
-  StatusCode initialize();
+  virtual StatusCode initialize ATLAS_NOT_THREAD_SAFE () override;
 
   /// Run the Rivet analyses on one event, which is retrieved from StoreGate.
-  StatusCode execute();
+  virtual StatusCode execute() override;
 
   /// Finalise each analysis and commit the plots to an AIDA tree and the
   /// THistSvc ROOT tree.
-  StatusCode finalize();
+  virtual StatusCode finalize() override;
 
 
 private:

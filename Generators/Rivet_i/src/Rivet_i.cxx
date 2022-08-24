@@ -60,8 +60,8 @@ std::string getenv_str(const std::string& key) {
 }
 
 
-StatusCode Rivet_i::initialize() {
-  ATH_MSG_DEBUG("Rivet_i initializing");
+StatusCode Rivet_i::initialize ATLAS_NOT_THREAD_SAFE () {
+  //                           ^ use of setenv
   ATH_MSG_INFO("Using Rivet version " << Rivet::version());
 
   ATH_CHECK(m_evtInfoKey.initialize());
