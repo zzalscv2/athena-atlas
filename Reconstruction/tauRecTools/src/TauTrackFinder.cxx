@@ -592,9 +592,9 @@ float TauTrackFinder::getZ0(const xAOD::TrackParticle* track, const xAOD::Vertex
 
   if (!track) return MAX;
 
-  const Trk::Perigee* perigee = nullptr;
-  if (vertex) perigee = m_trackToVertexTool->perigeeAtVertex(*track, vertex->position());
-  else        perigee = m_trackToVertexTool->perigeeAtVertex(*track); //will use beamspot or 0,0,0 instead
+  std::unique_ptr<Trk::Perigee> perigee;
+  if (vertex) perigee = m_trackToVertexTool->perigeeAtVertex(Gaudi::Hive::currentContext(), *track, vertex->position());
+  else        perigee = m_trackToVertexTool->perigeeAtVertex(Gaudi::Hive::currentContext(), *track); //will use beamspot or 0,0,0 instead
 
   if (!perigee) {
     ATH_MSG_WARNING("Bad track; can't find perigee at vertex.");
@@ -602,8 +602,6 @@ float TauTrackFinder::getZ0(const xAOD::TrackParticle* track, const xAOD::Vertex
   }
 
   float z0 = perigee->parameters()[Trk::z0];
-
-  delete perigee; //cleanup necessary to prevent mem leak
 
   return z0;
 }

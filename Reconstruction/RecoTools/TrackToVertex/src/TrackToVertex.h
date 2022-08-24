@@ -60,96 +60,76 @@ namespace Reco {
         const InDet::BeamSpotData*)
         const override final; // In C++17 make this [[nodiscard]]
 
-      virtual const InDet::BeamSpotData* GetBeamSpotData(
-        const EventContext& ctx)
-        const override final; // In C++17 make this [[nodiscard]]
-
       /** Interface method for use with TrackParticle and given vertex position
        * - AOD */
-      virtual const Trk::Perigee* perigeeAtVertex(
+      virtual std::unique_ptr<Trk::Perigee> perigeeAtVertex(
+        const EventContext& ctx,
         const Rec::TrackParticle& tp,
         const Amg::Vector3D& gp) const override final;
 
       /** Interface method for use with xAOD::Trackparticle and given vertex
        * position - xAOD */
-      virtual const Trk::Perigee* perigeeAtVertex(
+      virtual std::unique_ptr<Trk::Perigee> perigeeAtVertex(
+        const EventContext& ctx,
         const xAOD::TrackParticle& tp,
         const Amg::Vector3D& gp) const override final;
 
       /** Interface method for use with TrackParticle and default primary vertex
        * from TrackParticle  - AOD */
-      virtual const Trk::Perigee* perigeeAtVertex(
+      virtual std::unique_ptr<Trk::Perigee> perigeeAtVertex(
+        const EventContext& ctx,
         const Rec::TrackParticle& tp) const override final;
 
       /** Interface method for use with TrackParticle and default primary vertex
        * from TrackParticle  - xAOD */
-      virtual const Trk::Perigee* perigeeAtVertex(
+      virtual std::unique_ptr<Trk::Perigee> perigeeAtVertex(
+        const EventContext& ctx,
         const xAOD::TrackParticle& tp) const override final;
 
       /** Interface method for use with Track and given vertex position - ESD */
-      virtual const Trk::Perigee* perigeeAtVertex(
+      virtual std::unique_ptr<Trk::Perigee> perigeeAtVertex(
+        const EventContext& ctx,
         const Trk::Track& trk,
         const Amg::Vector3D& gp) const override final;
 
-      /** Interface method for use with TrackParticle and the beamspot from the
-       * BeamSpotSvc - AOD*/
-      virtual const Trk::Perigee* perigeeAtBeamspot(
-        const Rec::TrackParticle& tp,
-        const InDet::BeamSpotData*) const override final;
-
-      /** Interface method for use with TrackParticle and the beamspot from the
-       * BeamSpotSvc - xAOD*/
-      virtual const Trk::Perigee* perigeeAtBeamspot(
-        const xAOD::TrackParticle& tp,
-        const InDet::BeamSpotData*) const override final;
-
-      /** Interface method for use with Track and the beamspot from the
-       * BeamSpotSvc - ESD */
-      virtual const Trk::Perigee* perigeeAtBeamspot(
-        const Trk::Track& trk,
-        const InDet::BeamSpotData*) const override final;
-
       /** Interface method for use with Track and the beamline from the
        * BeamSpotSvc - ESD */
-      virtual const Trk::Perigee* perigeeAtBeamline(
+      virtual std::unique_ptr<Trk::Perigee> perigeeAtBeamline(
         const EventContext& ctx,
         const Trk::Track& trk,
         const InDet::BeamSpotData*) const override final;
 
       /** Interface method for use with TrackParticle and the beamline from the
        * BeamSpotSvc - AOD*/
-      virtual const Trk::TrackParameters* trackAtBeamline(
+      virtual std::unique_ptr<Trk::TrackParameters> trackAtBeamline(
+        const EventContext& ctx,
         const Rec::TrackParticle& tp) const override final;
 
       /** Interface method for use with TrackParticle and the beamline from the
        * BeamSpotSvc - xAOD*/
-      virtual const Trk::TrackParameters* trackAtBeamline(
+      virtual std::unique_ptr<Trk::TrackParameters> trackAtBeamline(
+        const EventContext& ctx,
         const xAOD::TrackParticle& tp,
         const InDet::BeamSpotData*) const override final;
 
       /** Interface method for use with Track and the beamline from the
        * BeamSpotSvc - ESD */
-      virtual const Trk::TrackParameters* trackAtBeamline(
+      virtual std::unique_ptr<Trk::TrackParameters> trackAtBeamline(
+        const EventContext& ctx,
         const Trk::Track& trk,
         const Trk::StraightLineSurface* beamline) const override final;
 
       /** Interface method for use with Track and the beamline from the
        * BeamSpotSvc - TrackParameters  */
-      virtual const Trk::TrackParameters* trackAtBeamline(
+      virtual std::unique_ptr<Trk::TrackParameters> trackAtBeamline(
+        const EventContext& ctx,
         const Trk::TrackParameters& tpars,
         const Trk::StraightLineSurface* beamline) const override final;
 
     private:
       ToolHandle<Trk::IExtrapolator>
         m_extrapolator {this, "Extrapolator", "Trk::Extrapolator/AtlasExtrapolator"}; //!< ToolHandle for Extrapolator
-      
-      SG::ReadCondHandleKey<InDet::BeamSpotData> m_beamSpotKey{
-        this,
-        "BeamSpotKey",
-        "BeamSpotData",
-        "SG key for beam spot"
-      };
-      Gaudi::Property<bool> m_ForceBeamSpotZero {  "ForceBeamSpotZero", false};
+
       const static Amg::Vector3D s_origin; //!< static origin
   };
 

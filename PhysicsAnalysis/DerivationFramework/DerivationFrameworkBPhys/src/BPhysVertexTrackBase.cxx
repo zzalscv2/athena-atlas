@@ -735,12 +735,12 @@ namespace DerivationFramework {
     
     const Amg::Vector3D   pos = vtx->position();
     const AmgSymMatrix(3) poscov = vtx->covariancePosition();
-    
+    auto ctx = Gaudi::Hive::currentContext();
     if ( track != NULL ) {
       if ( chi2DefToUse < 2 || (chi2DefToUse > 5 && chi2DefToUse < 8) ) {
         // use track perigee method
         std::unique_ptr<const Trk::Perigee>
-          trkPerigee(m_trackToVertexTool->perigeeAtVertex(*track, pos));
+          trkPerigee(m_trackToVertexTool->perigeeAtVertex(ctx, *track, pos));
         if ( trkPerigee != NULL  ) {
           res[0] = trkPerigee->parameters()[Trk::d0];
           res[2] = trkPerigee->parameters()[Trk::z0];

@@ -83,7 +83,7 @@ TrackParticlePerigeeAtPVAssociationTool::get (const Rec::TrackParticle& track)
       return 0;
   }
   
-  return m_trackToVertexTool->perigeeAtVertex(track, vxI->recVertex().position());
+  return m_trackToVertexTool->perigeeAtVertex(Gaudi::Hive::currentContext(), track, vxI->recVertex().position()).release();
 }
 
 
@@ -111,7 +111,7 @@ TrackParticlePerigeeAtPVAssociationTool::get (const xAOD::TrackParticle& track)
 
   for (const xAOD::Vertex* vx : *vxContainer) {
     if (vx->vertexType() == xAOD::VxType::PriVtx)
-      return m_trackToVertexTool->perigeeAtVertex(track, vx->position());
+      return m_trackToVertexTool->perigeeAtVertex(Gaudi::Hive::currentContext(), track, vx->position()).release();
   }
 
   REPORT_MESSAGE (MSG::WARNING) << "No primary vertices reconstructed";

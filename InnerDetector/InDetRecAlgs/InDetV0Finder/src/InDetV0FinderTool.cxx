@@ -431,13 +431,13 @@ StatusCode InDetV0FinderTool::performSearch(xAOD::VertexContainer* v0Container,
 
       bool d0wrtVertex = true;
       if (m_use_vertColl) {
-        if ( !d0Pass(TP1,TP2,vertColl) ) d0wrtVertex = false;
+        if ( !d0Pass(TP1,TP2,vertColl, ctx) ) d0wrtVertex = false;
       }
       if (!m_use_vertColl && m_pv) {
         if (primaryVertex) {
-          if ( !d0Pass(TP1,TP2,primaryVertex) ) d0wrtVertex = false;
+          if ( !d0Pass(TP1,TP2,primaryVertex, ctx) ) d0wrtVertex = false;
         } else {
-          if ( !d0Pass(TP1,TP2,beamspot) ) d0wrtVertex = false;
+          if ( !d0Pass(TP1,TP2,beamspot, ctx) ) d0wrtVertex = false;
         }
       }
       if (!d0wrtVertex) continue;
@@ -732,18 +732,17 @@ bool InDetV0FinderTool::doFit(const xAOD::TrackParticle* track1, const xAOD::Tra
   return pass;
 }
 
-bool InDetV0FinderTool::d0Pass(const xAOD::TrackParticle* track1, const xAOD::TrackParticle* track2, const xAOD::VertexContainer * vertColl) const
+bool InDetV0FinderTool::d0Pass(const xAOD::TrackParticle* track1, const xAOD::TrackParticle* track2, const xAOD::VertexContainer * vertColl, const EventContext& ctx) const
 {
   bool pass = false;
   xAOD::VertexContainer::const_iterator vItr = vertColl->begin();
   for ( vItr=vertColl->begin(); vItr!=vertColl->end(); ++vItr )
   {
     const xAOD::Vertex* PV = (*vItr);
-    const Trk::Perigee* per1 = m_trackToVertexTool->perigeeAtVertex( *track1, PV->position() );
+    auto per1 = m_trackToVertexTool->perigeeAtVertex(ctx, *track1, PV->position() );
     if (per1 == nullptr) return pass;
-    const Trk::Perigee* per2 = m_trackToVertexTool->perigeeAtVertex( *track2, PV->position() );
+    auto per2 = m_trackToVertexTool->perigeeAtVertex(ctx, *track2, PV->position() );
     if (per2 == nullptr) {
-      delete per1;
       return pass;
     }
     double d0_1 = per1->parameters()[Trk::d0];
@@ -751,20 +750,17 @@ bool InDetV0FinderTool::d0Pass(const xAOD::TrackParticle* track1, const xAOD::Tr
     double d0_2 = per2->parameters()[Trk::d0];
     double sig_d0_2 = sqrt((*per2->covariance())(0,0));
     if (fabs(d0_1/sig_d0_1) > m_d0_cut && fabs(d0_2/sig_d0_2) > m_d0_cut) pass = true; 
-    delete per1;
-    delete per2;
   }
   return pass;
 }
 
-bool InDetV0FinderTool::d0Pass(const xAOD::TrackParticle* track1, const xAOD::TrackParticle* track2, const xAOD::Vertex* PV) const
+bool InDetV0FinderTool::d0Pass(const xAOD::TrackParticle* track1, const xAOD::TrackParticle* track2, const xAOD::Vertex* PV, const EventContext& ctx) const
 {
   bool pass = false;
-  const Trk::Perigee* per1 = m_trackToVertexTool->perigeeAtVertex( *track1, PV->position() );
+  auto per1 = m_trackToVertexTool->perigeeAtVertex(ctx, *track1, PV->position() );
   if (per1 == nullptr) return pass;
-  const Trk::Perigee* per2 = m_trackToVertexTool->perigeeAtVertex( *track2, PV->position() );
+  auto per2 = m_trackToVertexTool->perigeeAtVertex(ctx, *track2, PV->position() );
   if (per2 == nullptr) {
-    delete per1;
     return pass;
   }
   double d0_1 = per1->parameters()[Trk::d0];
@@ -772,19 +768,16 @@ bool InDetV0FinderTool::d0Pass(const xAOD::TrackParticle* track1, const xAOD::Tr
   double d0_2 = per2->parameters()[Trk::d0];
   double sig_d0_2 = sqrt((*per2->covariance())(0,0));
   if (fabs(d0_1/sig_d0_1) > m_d0_cut && fabs(d0_2/sig_d0_2) > m_d0_cut) pass = true; 
-  delete per1;
-  delete per2;
   return pass;
 }
 
-bool InDetV0FinderTool::d0Pass(const xAOD::TrackParticle* track1, const xAOD::TrackParticle* track2, const Amg::Vector3D& PV) const
+bool InDetV0FinderTool::d0Pass(const xAOD::TrackParticle* track1, const xAOD::TrackParticle* track2, const Amg::Vector3D& PV, const EventContext& ctx) const
 {
   bool pass = false;
-  const Trk::Perigee* per1 = m_trackToVertexTool->perigeeAtVertex( *track1, PV );
+  auto per1 = m_trackToVertexTool->perigeeAtVertex(ctx, *track1, PV );
   if (per1 == nullptr) return pass;
-  const Trk::Perigee* per2 = m_trackToVertexTool->perigeeAtVertex( *track2, PV );
+  auto per2 = m_trackToVertexTool->perigeeAtVertex(ctx, *track2, PV );
   if (per2 == nullptr) {
-    delete per1;
     return pass;
   }
   double d0_1 = per1->parameters()[Trk::d0];
@@ -792,8 +785,6 @@ bool InDetV0FinderTool::d0Pass(const xAOD::TrackParticle* track1, const xAOD::Tr
   double d0_2 = per2->parameters()[Trk::d0];
   double sig_d0_2 = sqrt((*per2->covariance())(0,0));
   if (fabs(d0_1/sig_d0_1) > m_d0_cut && fabs(d0_2/sig_d0_2) > m_d0_cut) pass = true; 
-  delete per1;
-  delete per2;
   return pass;
 }
 

@@ -12,7 +12,6 @@
 #include "CLHEP/GenericFunctions/CumulativeChiSquare.hh" 
 #include "GeoPrimitives/GeoPrimitives.h"
 #include "GaudiKernel/IToolSvc.h"
-#include <TMath.h>
 #include <string>
 #include <bitset>
 #include <algorithm>
@@ -187,20 +186,20 @@ bool TrackSelector::selectTrack(const Amg::Vector3D& pv,
     if(m_usePerigeeParameters) {
       trackD0 = track->d0();
       trackZ0 = track->z0() - pv.z();
-      tracksigD0 = TMath::Sqrt(track->definingParametersCovMatrix()(0,0));
-      tracksigZ0 = TMath::Sqrt(track->definingParametersCovMatrix()(1,1));
+      tracksigD0 = std::sqrt(track->definingParametersCovMatrix()(0,0));
+      tracksigZ0 = std::sqrt(track->definingParametersCovMatrix()(1,1));
     } else {
       // extrapolate with the TrackToVertex tool:
-      const Trk::Perigee* perigee = m_trackToVertexTool->perigeeAtVertex(*track, pv);
-      if (perigee==0) {
+      auto ctx = Gaudi::Hive::currentContext();
+      auto perigee = m_trackToVertexTool->perigeeAtVertex(ctx, *track, pv);
+      if (perigee==nullptr) {
         ATH_MSG_WARNING("#BTAG#  Extrapolation failed. Rejecting track... ");
         return false;
       }
       trackD0 = perigee->parameters()[Trk::d0];
       trackZ0 = perigee->parameters()[Trk::z0];
-      tracksigD0 = TMath::Sqrt((*perigee->covariance())(Trk::d0,Trk::d0));
-      tracksigZ0 = TMath::Sqrt((*perigee->covariance())(Trk::z0,Trk::z0));
-      delete perigee;
+      tracksigD0 = std::sqrt((*perigee->covariance())(Trk::d0,Trk::d0));
+      tracksigZ0 = std::sqrt((*perigee->covariance())(Trk::z0,Trk::z0));
     }
 
     ATH_MSG_VERBOSE( "#BTAG#  Track "

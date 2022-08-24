@@ -301,14 +301,15 @@ StatusCode TileMuonFillerTool::fill(const xAOD::Muon& p){
 
     if(m_LevelOfDetails > 3){
         if(m_trackToVertexTool){
-            *m_vtxX                         = m_trackToVertexTool->perigeeAtVertex(*muon_track)->parameters()[Trk::x];
-            *m_vtxY                         = m_trackToVertexTool->perigeeAtVertex(*muon_track)->parameters()[Trk::y];
-            *m_vtxZ                         = m_trackToVertexTool->perigeeAtVertex(*muon_track)->parameters()[Trk::z];
-            *m_d0                           = m_trackToVertexTool->perigeeAtVertex(*muon_track)->parameters()[Trk::d0];
-            *m_z0                           = m_trackToVertexTool->perigeeAtVertex(*muon_track)->parameters()[Trk::z0];
-            *m_phi0                         = m_trackToVertexTool->perigeeAtVertex(*muon_track)->parameters()[Trk::phi0];
-            *m_theta                        = m_trackToVertexTool->perigeeAtVertex(*muon_track)->parameters()[Trk::theta];
-            *m_qOverP                       = m_trackToVertexTool->perigeeAtVertex(*muon_track)->parameters()[Trk::qOverP];
+            auto perigee = m_trackToVertexTool->perigeeAtVertex(Gaudi::Hive::currentContext(), *muon_track);
+            *m_vtxX                         = perigee->parameters()[Trk::x];
+            *m_vtxY                         = perigee->parameters()[Trk::y];
+            *m_vtxZ                         = perigee->parameters()[Trk::z];
+            *m_d0                           = perigee->parameters()[Trk::d0];
+            *m_z0                           = perigee->parameters()[Trk::z0];
+            *m_phi0                         = perigee->parameters()[Trk::phi0];
+            *m_theta                        = perigee->parameters()[Trk::theta];
+            *m_qOverP                       = perigee->parameters()[Trk::qOverP];
         } // IF
 
 /*      //THIST NEEDS TO MODIFY TO WORK ON xAODs

@@ -14,7 +14,8 @@ def TrackParticleCreatorToolCfg(flags, name="InDetxAODParticleCreatorTool", **kw
         name = name.replace("InDet", "ITk")
         return ITkTrackParticleCreatorToolCfg(flags, name, **kwargs)
 
-    result = ComponentAccumulator()
+    from BeamSpotConditions.BeamSpotConditionsConfig import BeamSpotCondAlgCfg
+    result = BeamSpotCondAlgCfg(flags) # To produce InDet::BeamSpotData CondHandle
     if "TrackToVertex" not in kwargs:
         from TrackToVertex.TrackToVertexConfig import TrackToVertexCfg
         kwargs.setdefault("TrackToVertex", result.popToolsAndMerge(TrackToVertexCfg(flags)))
@@ -99,7 +100,8 @@ def InDetTrigParticleCreatorToolFTFCfg(flags, name="InDetTrigParticleCreatorTool
     return result
 
 def ITkTrackParticleCreatorToolCfg(flags, name="ITkTrackParticleCreatorTool", **kwargs):
-    result = ComponentAccumulator()
+    from BeamSpotConditions.BeamSpotConditionsConfig import BeamSpotCondAlgCfg
+    result = BeamSpotCondAlgCfg(flags) # To produce InDet::BeamSpotData CondHandle
 
     if "TrackToVertex" not in kwargs:
         from TrackToVertex.TrackToVertexConfig import TrackToVertexCfg
