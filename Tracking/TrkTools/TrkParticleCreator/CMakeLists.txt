@@ -19,6 +19,6 @@ atlas_add_component( TrkParticleCreator
    GaudiKernel InDetIdentifier InDetRecToolInterfaces MuonRecToolInterfaces TrkEventPrimitives
    TrkParameters TrkParticleBase TrkTrack TrkTrackSummary TrkToolInterfaces
    AthContainers AtlasDetDescr GeoPrimitives IdDictDetDescr InDetPrepRawData
-   InDetRIO_OnTrack Particle ITrackToVertex TrkSurfaces
+   InDetRIO_OnTrack Particle ITrackToVertex TrkSurfaces TrkDetDescrInterfaces
    TrkPseudoMeasurementOnTrack VxVertex TrkExInterfaces PixelGeoModelLib
    TrkParticleCreatorLib MagFieldElements MagFieldConditions BeamSpotConditionsData )
