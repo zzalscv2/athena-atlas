@@ -26,23 +26,15 @@ public:
   	typedef std::map<std::string,  LArWheelSolidDef_t> LArWheelSolid_typemap;
 
   Geo2G4SolidFactory();
-  G4VSolid* Build(const GeoShape*, std::string name=std::string("")) const;
+  G4VSolid* Build (const GeoShape*, std::string name=std::string(""));
 
-  /** @brief The standard @c StoreGateSvc/DetectorStore
-    * Returns (kind of) a pointer to the @c StoreGateSvc
-    */
-   StoreGateSvc_t& detStore() const;
 private:
    G4VSolid* createLArWheelSolid(const std::string& name, const LArWheelSolidDef_t & lwsdef, const EMECData &emecData) const;
    G4VSolid* createLArWheelSliceSolid(const GeoUnidentifiedShape* ,const EMECData &emecData) const;
 
    static const LArWheelSolid_typemap s_lwsTypes;
    /// Pointer to StoreGate (detector store by default)
-   mutable StoreGateSvc_t m_detStore;
+   StoreGateSvc_t m_detStore;
 };
-
-inline ServiceHandle<StoreGateSvc>& Geo2G4SolidFactory::detStore() const  {
-	return m_detStore;
-}
 
 #endif

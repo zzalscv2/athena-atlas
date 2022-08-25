@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2017 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef GEO2G4_ASSEMBLYTRIPLET_H
@@ -30,34 +30,38 @@ class Geo2G4AssemblyTriplet
                        G4bool isReflection = false);
       // An explicit constructor for an assembly volume
     
-    Geo2G4AssemblyTriplet( const Geo2G4AssemblyTriplet& second );
+    Geo2G4AssemblyTriplet( const Geo2G4AssemblyTriplet& second ) = default;
       // Copy constructor
 
     ~Geo2G4AssemblyTriplet();    
       // Destructor
 
-    Geo2G4AssemblyTriplet& operator=( const Geo2G4AssemblyTriplet& second );
+    Geo2G4AssemblyTriplet& operator=( const Geo2G4AssemblyTriplet& second ) = default;
       // Assignment operator
 
-    G4LogicalVolume* GetVolume() const;
+    const G4LogicalVolume* GetVolume() const { return m_volume; }
+    G4LogicalVolume* GetVolume() { return m_volume; }
       // Retrieve the logical volume reference
 
     void SetVolume( G4LogicalVolume* pVolume );
       // Update the logical volume reference
 
-    Geo2G4AssemblyVolume* GetAssembly() const;
+    const Geo2G4AssemblyVolume* GetAssembly() const { return m_assembly; }
+    Geo2G4AssemblyVolume* GetAssembly() { return m_assembly; }
       // Retrieve the assembly volume reference
 
     void SetAssembly( Geo2G4AssemblyVolume* pAssembly );
       // Update the assembly volume reference
 
-    G4ThreeVector GetTranslation() const;
+    const G4ThreeVector GetTranslation() const { return m_translation; }
+    G4ThreeVector GetTranslation() { return m_translation; }
       // Retrieve the logical volume translation
 
     void SetTranslation( G4ThreeVector& pVolume );
       // Update the logical volume translation
 
-    G4RotationMatrix* GetRotation() const;
+    const G4RotationMatrix* GetRotation() const { return m_rotation; }
+    G4RotationMatrix* GetRotation() { return m_rotation; }
       // Retrieve the logical volume rotation
 
     void SetRotation( G4RotationMatrix* pVolume );
@@ -117,24 +121,8 @@ Geo2G4AssemblyTriplet::Geo2G4AssemblyTriplet( Geo2G4AssemblyVolume* pAssembly,
 }
 
 inline
-Geo2G4AssemblyTriplet::Geo2G4AssemblyTriplet( const Geo2G4AssemblyTriplet& second )
-{
-  m_volume       = second.GetVolume();
-  m_rotation     = second.GetRotation();
-  m_translation  = second.GetTranslation();
-  m_assembly     = second.GetAssembly();
-  m_isReflection = second.IsReflection();
-}
-
-inline
 Geo2G4AssemblyTriplet::~Geo2G4AssemblyTriplet()
 {
-}
-
-inline
-G4LogicalVolume* Geo2G4AssemblyTriplet::GetVolume() const
-{
-  return m_volume;
 }
 
 inline
@@ -151,12 +139,6 @@ void Geo2G4AssemblyTriplet::SetVolume( G4LogicalVolume* pVolume )
 }
 
 inline
-Geo2G4AssemblyVolume* Geo2G4AssemblyTriplet::GetAssembly() const
-{
-  return m_assembly;
-}
-
-inline
 void Geo2G4AssemblyTriplet::SetAssembly( Geo2G4AssemblyVolume* pAssembly )
 {
   if ( m_volume ) 
@@ -170,21 +152,9 @@ void Geo2G4AssemblyTriplet::SetAssembly( Geo2G4AssemblyVolume* pAssembly )
 }
 
 inline
-G4ThreeVector Geo2G4AssemblyTriplet::GetTranslation() const
-{
-  return m_translation;
-}
-
-inline
 void Geo2G4AssemblyTriplet::SetTranslation( G4ThreeVector& translation )
 {
   m_translation = translation;
-}
-
-inline
-G4RotationMatrix* Geo2G4AssemblyTriplet::GetRotation() const
-{
-  return m_rotation;
 }
 
 inline
@@ -198,21 +168,5 @@ G4bool Geo2G4AssemblyTriplet::IsReflection() const
 {
   return m_isReflection;
 }  
-
-inline
-Geo2G4AssemblyTriplet&
-Geo2G4AssemblyTriplet::operator=( const Geo2G4AssemblyTriplet& second )
-{
-  if( this != &second )
-  {
-    m_volume       = second.GetVolume();
-    m_rotation     = second.GetRotation();
-    m_translation  = second.GetTranslation();
-    m_assembly     = second.GetAssembly();
-    m_isReflection = second.IsReflection();
-  }
-  
-  return *this;
-}
 
 #endif

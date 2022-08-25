@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2020 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "Geo2G4LogicalVolumeFactory.h"
@@ -17,7 +17,7 @@ Geo2G4LogicalVolumeFactory::Geo2G4LogicalVolumeFactory()
 {
 }
 
-G4LogicalVolume *Geo2G4LogicalVolumeFactory::Build(const GeoLogVol* theLog) const
+G4LogicalVolume *Geo2G4LogicalVolumeFactory::Build (const GeoLogVol* theLog) const
 {
   static Geo2G4SolidFactory theSolidFactory;
   static Geo2G4MaterialFactory theMaterialFactory;

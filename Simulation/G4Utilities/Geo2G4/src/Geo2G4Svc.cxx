@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2020 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "Geo2G4Svc.h"
@@ -23,26 +23,18 @@ Geo2G4Svc::~Geo2G4Svc()
 
 StatusCode Geo2G4Svc::initialize()
 {
-  static int initialized=0;
-  if (initialized)
-    {
-      ATH_MSG_VERBOSE (" Geo2G4Svc already initialized.");
-      return StatusCode::SUCCESS;
-    }
-  ATH_MSG_VERBOSE ("Initializing the Geo2G4Svc.");
-  ATH_MSG_VERBOSE ("Creating all builders available.");
+  ATH_MSG_VERBOSE ("Initializing the Geo2G4Svc");
   m_G4AssemblyFactory = std::make_unique<Geo2G4AssemblyFactory>();
   m_builders = InitializeBuilders(m_G4AssemblyFactory.get());
   
   const std::string nameBuilder = "Extended_Parameterised_Volume_Builder"; //TODO Configurable property??
   this->SetDefaultBuilder(nameBuilder);
-  ATH_MSG_VERBOSE (nameBuilder << " --> set as default builder" );
-  ATH_MSG_VERBOSE (nameBuilder << " --> ParamOn flag = " << GetDefaultBuilder()->GetParam());
-  initialized=1;
-  if(msgLvl(MSG::VERBOSE))
-    {
-      this->ListVolumeBuilders();
-    }
+  if(msgLvl(MSG::VERBOSE)) {
+    ATH_MSG_VERBOSE (nameBuilder << " --> set as default builder" );
+    ATH_MSG_VERBOSE (nameBuilder << " --> ParamOn flag = " << GetDefaultBuilder()->GetParam());
+    this->ListVolumeBuilders();
+  }
+
   return StatusCode::SUCCESS;
 }
 

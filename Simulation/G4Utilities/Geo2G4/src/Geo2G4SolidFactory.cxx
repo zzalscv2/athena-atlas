@@ -149,7 +149,7 @@ Geo2G4SolidFactory::Geo2G4SolidFactory() :
 {
 }
 
-G4VSolid *Geo2G4SolidFactory::Build(const GeoShape* geoShape, std::string name) const
+G4VSolid *Geo2G4SolidFactory::Build (const GeoShape* geoShape, std::string name)
 {
   G4VSolid* theSolid(nullptr);
 
@@ -614,7 +614,7 @@ G4VSolid* Geo2G4SolidFactory::createLArWheelSolid(const std::string& name, const
 
         LArWheelSolidDDProxy * theLWS_p = new LArWheelSolidDDProxy(theLWS);
         // ownership is passed to detStore
-        if ( detStore()->record(theLWS_p,  name).isFailure() ) {
+        if ( m_detStore->record(theLWS_p,  name).isFailure() ) {
           ATH_MSG_WARNING("Can't store proxy for LArWheelSolid to the DetectorStore");
                 delete theLWS_p;
         }
@@ -627,7 +627,7 @@ G4VSolid* Geo2G4SolidFactory::createLArWheelSliceSolid(const GeoUnidentifiedShap
 
     LArWheelSolidDDProxy *theLWS_p = new LArWheelSolidDDProxy(theLWS);
     // ownership is passed to detStore
-    if(detStore()->record(theLWS_p, theLWS->GetName()).isFailure()){
+    if(m_detStore->record(theLWS_p, theLWS->GetName()).isFailure()){
         ATH_MSG_WARNING("Can't store proxy for LArWheelSolid to the DetectorStore");
         delete theLWS_p;
     }

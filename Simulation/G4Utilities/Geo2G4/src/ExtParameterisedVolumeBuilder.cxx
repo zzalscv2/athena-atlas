@@ -38,7 +38,7 @@ ExtParameterisedVolumeBuilder::ExtParameterisedVolumeBuilder(const std::string& 
 {
 }
 
-G4LogicalVolume* ExtParameterisedVolumeBuilder::Build(const PVConstLink theGeoPhysVolume, OpticalVolumesMap* optical_volumes) const
+G4LogicalVolume* ExtParameterisedVolumeBuilder::Build(const PVConstLink theGeoPhysVolume, OpticalVolumesMap* optical_volumes)
 {
   PVConstLink theGeoPhysChild;
   const GeoSerialTransformer* serialTransformerChild{nullptr};
@@ -50,7 +50,7 @@ G4LogicalVolume* ExtParameterisedVolumeBuilder::Build(const PVConstLink theGeoPh
 
   if(m_getMatEther) getMatEther();
 
-  static Geo2G4LVFactory LVFactory;
+  static const Geo2G4LVFactory LVFactory;
 
   G4LogicalVolume* theG4LogVolume = LVFactory.Build(theGeoPhysVolume,descend);
 
@@ -185,7 +185,7 @@ G4LogicalVolume* ExtParameterisedVolumeBuilder::Build(const PVConstLink theGeoPh
   return theG4LogVolume;
 }
 
-Geo2G4AssemblyVolume* ExtParameterisedVolumeBuilder::BuildAssembly(const PVConstLink& pv) const
+Geo2G4AssemblyVolume* ExtParameterisedVolumeBuilder::BuildAssembly(const PVConstLink& pv)
 {
   PVConstLink theGeoPhysChild;
   G4LogicalVolume* theG4LogChild{nullptr};
@@ -258,7 +258,7 @@ void ExtParameterisedVolumeBuilder::PrintSTInfo(const std::string& volume) const
   ATH_MSG_INFO ( "********************************************** " );
 }
 
-void ExtParameterisedVolumeBuilder::getMatEther() const
+void ExtParameterisedVolumeBuilder::getMatEther()
 {
   StoreGateSvc* pDetStore{nullptr};
   ISvcLocator* svcLocator = Gaudi::svcLocator();

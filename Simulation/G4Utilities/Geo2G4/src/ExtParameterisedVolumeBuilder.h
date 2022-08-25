@@ -19,19 +19,19 @@ class ExtParameterisedVolumeBuilder: public VolumeBuilder, public AthMessaging
 public:
   ExtParameterisedVolumeBuilder(const std::string& n, Geo2G4AssemblyFactory* G4AssemblyFactory);
   ///
-  G4LogicalVolume* Build(PVConstLink pv, OpticalVolumesMap* optical_volumes = 0) const;
+  virtual G4LogicalVolume* Build(PVConstLink pv, OpticalVolumesMap* optical_volumes = 0) override;
   ///
-  Geo2G4AssemblyVolume* BuildAssembly(const PVConstLink& pv) const;
+  Geo2G4AssemblyVolume* BuildAssembly(const PVConstLink& pv);
 
  private:
   /// Prints info when some PhysVol contains both types (PV and ST) of daughters
   void PrintSTInfo(const std::string& volume) const;
   ///
-  void getMatEther() const;
+  void getMatEther();
 
-  mutable bool               m_getMatEther;
-  mutable const GeoMaterial* m_matEther;
-  mutable const GeoMaterial* m_matHypUr;
+  bool               m_getMatEther;
+  const GeoMaterial* m_matEther;
+  const GeoMaterial* m_matHypUr;
 
   Geo2G4AssemblyFactory* m_G4AssemblyFactory;
 };
