@@ -226,7 +226,7 @@ bool DerivationFramework::SkimmingToolEXOT14::SubcutPreselect() const {
     xAOD::Jet* jetC = new xAOD::Jet();
     jetC->setJetP4(xAOD::JetFourMom_t((*jet_itr)->pt(), (*jet_itr)->eta(), (*jet_itr)->phi(), (*jet_itr)->m()));
     calibJets.push_back(jetC);
-    jet_itr++;
+    ++jet_itr;
   }
 
   // Calibrate the jets
@@ -249,7 +249,7 @@ bool DerivationFramework::SkimmingToolEXOT14::SubcutPreselect() const {
       m_j2TLV.SetPtEtaPhiE((*jet_itr)->pt(), (*jet_itr)->eta(), (*jet_itr)->phi(), (*jet_itr)->e());
     }
     
-    jet_itr++;
+    ++jet_itr;
   }
 
   // save this for this code.

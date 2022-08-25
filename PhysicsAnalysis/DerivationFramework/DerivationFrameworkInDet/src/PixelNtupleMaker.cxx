@@ -56,7 +56,7 @@ bool DerivationFramework::PixelNtupleMaker::eventPassesFilter() const {
 
   std::vector<float> tmpCov(15,0.);
   static const SG::AuxElement::ConstAccessor<MeasurementsOnTrack>  acc_MeasurementsOnTrack("msosLink");
-  for (xAOD::TrackParticleContainer::const_iterator trk=tracks->begin(); trk!=tracks->end(); trk++) {
+  for (xAOD::TrackParticleContainer::const_iterator trk=tracks->begin(); trk!=tracks->end(); ++trk) {
 
     bool passTrack = true;
     if ((*trk)->pt()<1000.0) {

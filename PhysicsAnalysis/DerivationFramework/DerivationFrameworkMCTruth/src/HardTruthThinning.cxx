@@ -300,7 +300,7 @@ StatusCode DerivationFramework::HardTruthThinning::doThinning() const
       xAOD::JetConstituentVector aconst = ajet->getConstituents();
       xAOD::JetConstituentVector::iterator aItr = aconst.begin();
       xAOD::JetConstituentVector::iterator aItrE = aconst.end();
-      for( ; aItr != aItrE; aItr++){
+      for( ; aItr != aItrE; ++aItr){
         const xAOD::JetConstituent* aip = (*aItr);
         const xAOD::IParticle* aipraw = aip->rawConstituent();
         const xAOD::TruthParticle* pp = 
