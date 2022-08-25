@@ -1,6 +1,6 @@
 #!/usr/bin/env python
 
-# Copyright (C) 2002-2019 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
 
 from __future__ import print_function
 import eformat
@@ -8,6 +8,7 @@ from pm.project import Project
 from argparse import ArgumentParser
 from types import MethodType
 from sys import stdout, stderr
+from datetime import datetime
 
 # get the arg parser
 def argparser():
@@ -38,9 +39,12 @@ def make_parser_print_help_on_error(parser):
 
 def get_roses(pfname, pname):
   """
-  Get all the ROSes in the partition
+  Get all the ROSes and swRODs in the partition
   """
-  return Project(pfname).getObject('Partition', pname).get('ROS')
+  partition = Project(pfname).getObject('Partition', pname)
+  roses = partition.get('ROS')
+  swrods = partition.get('SwRodApplication')
+  return roses + swrods
 
 def get_ros2rob(roses):
   """
@@ -53,8 +57,8 @@ def get_ros2rob(roses):
             "second occurrence", file=stderr)
     else:
       ros2rob[ros.id] = get_robs(ros)
+  ros2rob['RoIBuilder'] = get_roib_robs()
   return ros2rob
-
 
 def get_robs(ros):
   """
@@ -62,6 +66,18 @@ def get_robs(ros):
   """
   return [eformat.helper.SourceIdentifier(rol.Id).code() 
           for robin in ros.Contains for rol in robin.Contains]
+
+def get_roib_robs():
+  """
+  Get a hardcoded list of RoIBuilder ROB IDs which are not listed in the partition
+  """
+  return [
+    # CTP
+    0x770001,
+    # L1Calo
+    0x7300a8, 0x7300a9, 0x7300aa, 0x7300ab, 0x7500ac, 0x7500ad,
+    # L1Topo
+    0x910081, 0x910091, 0x910082, 0x910092]
 
 def print_ros2rob(ros2rob, out):
   """
@@ -82,10 +98,35 @@ def print_ros2rob(ros2rob, out):
       print(",", file=out)
   print("\n}", file=out)
 
+def print_header(dbfile, outname, out):
+  header = f"""
+#
+# Copyright (C) 2002-{datetime.now().year} CERN for the benefit of the ATLAS collaboration
+#
+'''
+@file {outname}
+@brief Store ROS to ROB map extracted from {dbfile}
+'''
+"""
+  print(header, file=out)
+
+def print_footer(out):
+  footer = """
+class ROSToROBMap:
+\tdef __init__(self):
+\t\tself.data = ros2rob
+
+\tdef get_mapping(self):
+\t\treturn self.data
+"""
+  print(footer, file=out)
+
 # main
 if __name__ == '__main__':
   args = argparser().parse_args()
   out = open(args.output_file, 'w') if args.output_file else stdout
   print("# Extracting ROS2ROB map", file=stderr)
-  print("# ROS2ROB map extracted from %s:" % args.database_file, file=out)
+  print_header(args.database_file, args.output_file, out)
   print_ros2rob(get_ros2rob(get_roses(args.database_file, args.partition)), out)
+  print_footer(out)
+
