@@ -2,16 +2,16 @@
 
 # art-include: master/AthDerivation
 # art-include: master/Athena
-# art-description: DAOD building EGAM7 EGAM8 EGAM9 JETM3 data18
+# art-description: DAOD building EGAM5 JETM5 mc20
 # art-type: grid
 # art-output: *.pool.root
 
 set -e
 
 Reco_tf.py \
---inputAODFile /cvmfs/atlas-nightlies.cern.ch/repo/data/data-art/Tier0ChainTests/data18_13TeV.00357772.physics_Main.recon.AOD.r13286/AOD.27654050._000557.pool.root.1 \
+--inputAODFile /cvmfs/atlas-nightlies.cern.ch/repo/data/data-art/DerivationFrameworkART/mc20_13TeV.410470.PhPy8EG_A14_ttbar_hdamp258p75_nonallhad.recon.AOD.e6337_s3681_r13167/AOD.27162646._000001.pool.root.1 \
 --outputDAODFile art.pool.root \
---reductionConf EGAM7 EGAM8 EGAM9 JETM3 \
+--reductionConf EGAM5 JETM5 \
 --maxEvents 500 \
 --preExec 'from AthenaCommon.DetFlags import DetFlags; DetFlags.detdescr.all_setOff(); DetFlags.BField_setOn(); DetFlags.digitize.all_setOff(); DetFlags.detdescr.Calo_setOn(); DetFlags.simulate.all_setOff(); DetFlags.pileup.all_setOff(); DetFlags.overlay.all_setOff(); DetFlags.detdescr.Muon_setOn();' \
 --postExec 'from DerivationFrameworkJetEtMiss.JetCommon import swapAlgsInSequence; swapAlgsInSequence(topSequence,"jetalg_ConstitModCorrectPFOCSSKCHS_GPFlowCSSK", "UFOInfoAlgCSSK" );'
