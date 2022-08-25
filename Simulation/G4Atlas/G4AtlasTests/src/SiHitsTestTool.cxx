@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "SiHitsTestTool.h"
@@ -89,7 +89,7 @@ StatusCode SiHitsTestTool::initialize()
 
 StatusCode SiHitsTestTool::processEvent() {
 
-  const DataHandle<SiHitCollection> p_collection;
+  const SiHitCollection* p_collection;
   if (evtStore()->retrieve(p_collection,m_collection).isSuccess())  {
     for (SiHitConstIterator i_hit = p_collection->begin(); 
 	                    i_hit != p_collection->end(); ++i_hit) {

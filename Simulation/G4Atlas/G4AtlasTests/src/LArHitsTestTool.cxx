@@ -174,10 +174,10 @@ StatusCode LArHitsTestTool::processEvent() {
   //For FastCaloSim Container with _Fast postfix, just try to retrieve, if exist, collect information from this container, it not just skip it.
   
   LArHitContainer::const_iterator hi_fast;
-  std::string lArkey_fast="LArHit"+m_detname+"_Fast";
+  const std::string lArkey_fast="LArHit"+m_detname+"_Fast";
   
-  const DataHandle<LArHitContainer> iter_fast;
-  if( evtStore()->contains(iter_fast, lArkey_fast) &&
+  const LArHitContainer* iter_fast;
+  if( evtStore()->contains<LArHitContainer>(lArkey_fast) &&
       (evtStore()->retrieve(iter_fast,lArkey_fast)).isSuccess())
   {
     ATH_MSG_DEBUG ( "Read hit info from FastCaloSim Container" );

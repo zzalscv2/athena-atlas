@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2017 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "TrtHitsTestTool.h"
@@ -62,7 +62,7 @@ StatusCode TrtHitsTestTool::initialize()
 
 StatusCode TrtHitsTestTool::processEvent() {
  
-  const DataHandle<TRTUncompressedHitCollection> p_collection;
+  const TRTUncompressedHitCollection* p_collection;
   if (evtStore()->retrieve(p_collection,m_collection).isSuccess()) {
     for (TRTUncompressedHitConstIter i_hit=p_collection->begin() ; i_hit!=p_collection->end() ; ++i_hit) {
       GeoTRTUncompressedHit ghit(*i_hit);

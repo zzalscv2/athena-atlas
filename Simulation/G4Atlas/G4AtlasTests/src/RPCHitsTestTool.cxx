@@ -76,7 +76,7 @@ StatusCode RPCHitsTestTool::processEvent() {
 
   if (m_DoRPCTest) {
 
-    const DataHandle<RPCSimHitCollection> p_collection;
+    const RPCSimHitCollection* p_collection;
     if (evtStore()->retrieve(p_collection,"RPC_Hits") == StatusCode::SUCCESS) {
       for (RPCSimHitCollection::const_iterator i_hit = p_collection->begin(); i_hit != p_collection->end(); ++i_hit) {
         // Check the Hits identifiers, access the functions that give:

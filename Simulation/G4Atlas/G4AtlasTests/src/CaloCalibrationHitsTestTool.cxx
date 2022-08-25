@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
 */
 
 //================================================================//
@@ -73,7 +73,7 @@ StatusCode CaloCalibrationHitsTestTool::processEvent(){
 
   CaloCalibrationHitContainer::const_iterator hit;
 
-  const DataHandle<CaloCalibrationHitContainer> iter;
+  const CaloCalibrationHitContainer* iter;
   CHECK(evtStore()->retrieve(iter,m_hitcollkey));
   for(hit=(*iter).begin(); hit != (*iter).end(); hit++){
 

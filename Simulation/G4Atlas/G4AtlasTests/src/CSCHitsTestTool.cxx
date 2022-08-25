@@ -87,7 +87,7 @@ StatusCode CSCHitsTestTool::processEvent() {
 
   if (m_DoCSCTest) {
     // -- loop over CSC hit collection --
-    const DataHandle<CSCSimHitCollection> p_collection;
+    const CSCSimHitCollection* p_collection;
     if (evtStore()->retrieve(p_collection,"CSC_Hits") == StatusCode::SUCCESS) {
       for (CSCSimHitCollection::const_iterator i_hit = p_collection->begin(); i_hit != p_collection->end(); ++i_hit) {
 

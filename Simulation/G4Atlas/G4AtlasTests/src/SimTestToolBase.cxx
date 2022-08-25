@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2017 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "SimTestToolBase.h"
@@ -18,7 +18,7 @@ SimTestToolBase::SimTestToolBase(const std::string& type,
 
 HepMC::ConstGenParticlePtr   SimTestToolBase::getPrimary() 
 {
-  const DataHandle<McEventCollection> mcCollection;
+  const McEventCollection* mcCollection;
   if (evtStore()->retrieve(mcCollection,m_key).isSuccess()) {
     DataVector<HepMC::GenEvent>::const_iterator e;
     for (e=mcCollection->begin();e!=mcCollection->end(); e++) {

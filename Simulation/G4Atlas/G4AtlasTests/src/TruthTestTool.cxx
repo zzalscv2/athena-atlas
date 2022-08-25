@@ -150,7 +150,7 @@ StatusCode TruthTestTool::processEvent()
 
   const int evtnum(eventInfo->eventNumber());
 
-  const DataHandle<McEventCollection> mcCollection;
+  const McEventCollection* mcCollection;
   if (evtStore()->retrieve(mcCollection,m_key).isSuccess()) {
     McEventCollection::const_iterator currentGenEventIter = mcCollection->begin();
 

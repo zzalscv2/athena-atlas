@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2017 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
 */
 
 //-----------------------------------------------------------------------
@@ -74,7 +74,7 @@ StatusCode CalibHitValidate::execute()
   double totalEnergyAllContainers=0.;
 
   // calibration hit containers
-  const DataHandle<CaloCalibrationHitContainer> cchc;
+  const CaloCalibrationHitContainer* cchc;
   std::vector<const CaloCalibrationHitContainer *> v_cchc;
   for (containerNameIter=m_CalibrationHitContainerNames.begin();containerNameIter!=m_CalibrationHitContainerNames.end();containerNameIter++) {
 
@@ -85,7 +85,7 @@ StatusCode CalibHitValidate::execute()
       StatusCode sc = evtStore()->retrieve(cchc,*containerNameIter);
       if (sc.isFailure() ) {
         ATH_MSG_ERROR ( "Cannot retrieve calibration hit container " << *containerNameIter );
-        exit(3);
+        return StatusCode::FAILURE;
       }
 
       //loop over cells in calibration container
@@ -116,7 +116,7 @@ StatusCode CalibHitValidate::execute()
       StatusCode sc = evtStore()->retrieve(cchc,*containerNameIter);
       if (sc.isFailure() ) {
         ATH_MSG_ERROR ( "Cannot retrieve DM calibration hit container " << *containerNameIter );
-        exit(3);
+        return StatusCode::FAILURE;
       }
 
       //loop over cells in calibration container
