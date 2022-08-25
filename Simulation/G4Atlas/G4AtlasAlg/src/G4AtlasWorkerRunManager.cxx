@@ -95,7 +95,7 @@ void G4AtlasWorkerRunManager::InitializeGeometry()
   const std::string methodName = "G4AtlasWorkerRunManager::InitializeGeometry";
 
   // I don't think this does anything
-  if(fGeometryHasBeenDestroyed) {
+  if(G4RunManager::IfGeometryHasBeenDestroyed()) {
     G4TransportationManager::GetTransportationManager()->ClearParallelWorlds();
   }
 
