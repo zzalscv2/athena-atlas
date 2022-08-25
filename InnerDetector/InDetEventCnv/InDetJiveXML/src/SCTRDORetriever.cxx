@@ -1,8 +1,8 @@
 /*
-  Copyright (C) 2002-2020 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
 */
 
-#include "InDetJiveXML/SCTRDORetriever.h"
+#include "SCTRDORetriever.h"
 #include "InDetRawData/SCT_RDO_Collection.h"
 #include "InDetRawData/SCT_RDORawData.h"
 #include "InDetRawData/SCT3_RawData.h"
@@ -22,8 +22,7 @@ namespace JiveXML {
    * @param parent AlgTools parent owning this tool
    **/
   SCTRDORetriever::SCTRDORetriever(const std::string& type,const std::string& name,const IInterface* parent):
-    AthAlgTool(type,name,parent),
-    m_typeName("SCTRDO")
+    AthAlgTool(type,name,parent)
   {
     //Declare the interface
     declareInterface<IDataRetriever>(this);
@@ -41,12 +40,12 @@ namespace JiveXML {
   StatusCode SCTRDORetriever::retrieve(ToolHandle<IFormatTool> &FormatTool) {
 
     //be verbose
-    if (msgLvl(MSG::DEBUG)) msg(MSG::DEBUG) << "Retrieving " << dataTypeName() <<endmsg; 
+    ATH_MSG_DEBUG( "Retrieving " << dataTypeName() ); 
 
     //Get an iterator over all containers
     SG::ReadHandle<SCT_RDO_Container> SCTRDOContainer(m_SCTRDOContainerName);
     if (not SCTRDOContainer.isValid()){
-      if (msgLvl(MSG::DEBUG)) msg(MSG::DEBUG) << "Unable to retrieve SCT_RDO_Container with name " << m_SCTRDOContainerName.key() << endmsg;
+      ATH_MSG_DEBUG( "Unable to retrieve SCT_RDO_Container with name " << m_SCTRDOContainerName.key() );
       return StatusCode::RECOVERABLE;
     }
 
@@ -61,10 +60,9 @@ namespace JiveXML {
     // Now find out how much space we need in total
     unsigned long NSCTRDO = 0;
     //Loop over SCTRDO containers 
-    SCT_RDO_Container::const_iterator SCTRDOContItr = SCTRDOContainer->begin();
-    for ( ; SCTRDOContItr!=SCTRDOContainer->end(); ++SCTRDOContItr)
+    for (const auto SCTRDORawCollection : *SCTRDOContainer)
        //and get number of SCTRDO in this collection
-       NSCTRDO+=(*SCTRDOContItr)->size();
+       NSCTRDO+=SCTRDORawCollection->size();
        
     //Define the data vectors we want to fill and create space
     DataVect ident; ident.reserve(NSCTRDO);
@@ -86,19 +84,13 @@ namespace JiveXML {
     DataVect formatterError; formatterError.reserve(NSCTRDO);
 
     //Now loop again over SCTRDO collections to retrieve the data
-    SCTRDOContItr = SCTRDOContainer->begin();
-    for (; SCTRDOContItr!=SCTRDOContainer->end(); ++SCTRDOContItr) {
+    for (const auto SCTRDORawCollection : *SCTRDOContainer) {
 
-      //Get the collection of SCT raw hits
-      const SCT_RDO_Collection* SCTRDORawCollection = (*SCTRDOContItr);
+      //Get the identifier
       const IdentifierHash waferHash = SCTRDORawCollection->identifyHash();
       
       //Loop over raw hit collection
-      SCT_RDO_Collection::const_iterator SCTRDORawCollItr = SCTRDORawCollection->begin();
-      for ( ; SCTRDORawCollItr != SCTRDORawCollection->end(); ++SCTRDORawCollItr) {
-
-        //Get the raw hit object
-        const SCT_RDORawData *rdoData = (*SCTRDORawCollItr);
+      for (const auto rdoData : *SCTRDORawCollection) {
 
         //Get the identifier
         Identifier id = rdoData->identify();
@@ -107,7 +99,7 @@ namespace JiveXML {
         const InDetDD::SiDetectorElement *element = elements->getDetectorElement(waferHash);
         //Make sure we got the detector element
         if (element == nullptr){
-          msg(MSG::WARNING) << "Unable to obtain detector element for SCT_RDO hit with id " << id << endmsg;
+          ATH_MSG_WARNING( "Unable to obtain detector element for SCT_RDO hit with id " << id );
           continue ;
         }
 
@@ -168,7 +160,7 @@ namespace JiveXML {
     dataMap["formatterError"] = formatterError;
 
     //Be verbose
-    if (msgLvl(MSG::DEBUG)) msg(MSG::DEBUG) << dataTypeName() << ": " << ident.size() << endmsg;
+    ATH_MSG_DEBUG( dataTypeName() << ": " << ident.size() );
 
      //forward data to formating tool and return
     return FormatTool->AddToEvent(dataTypeName(), "", &dataMap);

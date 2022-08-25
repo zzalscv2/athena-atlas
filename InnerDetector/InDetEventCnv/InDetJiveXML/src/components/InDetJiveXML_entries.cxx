@@ -1,11 +1,11 @@
-#include "InDetJiveXML/SiSpacePointRetriever.h"
-#include "InDetJiveXML/TRTRetriever.h"
-#include "InDetJiveXML/SiClusterRetriever.h"
-#include "InDetJiveXML/PixelClusterRetriever.h"
-#include "InDetJiveXML/SCTRDORetriever.h"
-#include "InDetJiveXML/PixelRDORetriever.h"
-#include "InDetJiveXML/InDetGeoModelTool.h"
-#include "InDetJiveXML/BeamSpotRetriever.h"
+#include "../SiSpacePointRetriever.h"
+#include "../TRTRetriever.h"
+#include "../SiClusterRetriever.h"
+#include "../PixelClusterRetriever.h"
+#include "../SCTRDORetriever.h"
+#include "../PixelRDORetriever.h"
+#include "../InDetGeoModelTool.h"
+#include "../BeamSpotRetriever.h"
 
 using namespace JiveXML;
 

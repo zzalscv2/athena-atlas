@@ -2,7 +2,7 @@
   Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
 */
 
-#include "InDetJiveXML/TRTRetriever.h"
+#include "TRTRetriever.h"
 #include "StoreGate/DataHandle.h"
 #include "JiveXML/DataType.h"
 
@@ -23,11 +23,13 @@ namespace JiveXML {
    * @param parent AlgTools parent owning this tool
    **/
   TRTRetriever::TRTRetriever(const std::string& type,const std::string& name,const IInterface* parent):
-    AthAlgTool(type,name,parent),
-    m_typeName("TRT")
+    AthAlgTool(type,name,parent)
   {
-    //Only declare the interface
+    //Declare the interface
     declareInterface<IDataRetriever>(this);
+
+    //And properties
+    declareProperty("TRTTruthMap" , m_TRTTruthMapKey = "PRD_MultiTruthTRT");
   }
 
   StatusCode TRTRetriever::initialize() {
@@ -40,31 +42,33 @@ namespace JiveXML {
 
   StatusCode TRTRetriever::retrieve(ToolHandle<IFormatTool> &FormatTool) {
     //be verbose
-    if (msgLvl(MSG::DEBUG)) msg(MSG::DEBUG) << "Retrieving " << dataTypeName() <<endmsg; 
+    ATH_MSG_DEBUG( "Retrieving " << dataTypeName() ); 
   
     //First try to retrieve the DriftCircleContainer
     SG::ReadHandle<InDet::TRT_DriftCircleContainer> DriftCircleContainer( m_TRTDriftCircleCollKey );
     if ( !DriftCircleContainer.isValid() ) {
-      if (msgLvl(MSG::DEBUG)) msg(MSG::DEBUG) << "Unable to retrive TRT_DriftCircleContainer with name " << m_TRTDriftCircleCollKey.key() << endmsg;
+      ATH_MSG_DEBUG( "Unable to retrive TRT_DriftCircleContainer with name " << m_TRTDriftCircleCollKey.key() );
       return StatusCode::RECOVERABLE;
     }
 
     //Also try to obtain the truth container
-    SG::ReadHandle<PRD_MultiTruthCollection> TRTMultiTruthMap( m_TRTTruthMapKey );
-    if ( m_useTRTTruthMap && !TRTMultiTruthMap.isValid() ){
-      //Only warn if this container is not available
-      if (msgLvl(MSG::DEBUG)) msg(MSG::DEBUG) << "Unable to retrieve PRD_MultiTruthCollection with name " << m_TRTTruthMapKey.key() << endmsg;
+    SG::ReadHandle<PRD_MultiTruthCollection> TRTMultiTruthMap;
+    if ( m_useTRTTruthMap ) {
+      TRTMultiTruthMap = SG::makeHandle(m_TRTTruthMapKey);
+      if ( !TRTMultiTruthMap.isValid() ){
+        //Only warn if this container is not available
+        ATH_MSG_DEBUG( "Unable to retrieve PRD_MultiTruthCollection with name " << m_TRTTruthMapKey.key() );
+      }
     }
 
     //Get total size of all all drift circles in all collections
     unsigned long NDriftCircleTotal = 0;
     //Loop over collections in container
-    InDet::TRT_DriftCircleContainer::const_iterator DriftCircleContItr = DriftCircleContainer->begin();
-    for ( ; DriftCircleContItr != DriftCircleContainer->end(); ++DriftCircleContItr)
-      NDriftCircleTotal += (*DriftCircleContItr)->size();
+    for (const auto DriftCircleColl : *DriftCircleContainer)
+      NDriftCircleTotal += DriftCircleColl->size();
 
     //be verbose
-    if (msgLvl(MSG::VERBOSE)) msg(MSG::VERBOSE) << "Reserving space for " << NDriftCircleTotal << " entries" << endmsg;
+    ATH_MSG_VERBOSE( "Reserving space for " << NDriftCircleTotal << " entries" );
     
     //Rerserve space in the map
     DataVect rhoz; rhoz.reserve(NDriftCircleTotal);
@@ -80,27 +84,21 @@ namespace JiveXML {
     DataVect barcodes; barcodes.reserve(NDriftCircleTotal); //< on average less than one, so this should be enough
 
     //Now loop over container to retrieve the data
-    DriftCircleContItr = DriftCircleContainer->begin();
-    for (; DriftCircleContItr != DriftCircleContainer->end(); ++DriftCircleContItr) {
+    for (const auto DriftCircleColl : *DriftCircleContainer) {
       
-      //Get the DriftCircle collection
-      const InDet::TRT_DriftCircleCollection* DriftCircleColl = (*DriftCircleContItr);  
-
-      //Now loop over the collection in the container
-      InDet::TRT_DriftCircleCollection::const_iterator DriftCircleCollItr = DriftCircleColl->begin();
-      for ( ; DriftCircleCollItr != DriftCircleColl->end(); ++DriftCircleCollItr){
+      ////Now loop over the collection in the container
+      for (const auto driftcircle : *DriftCircleColl){
 
         //Get the drift cirlce itself and its unique identifier
-        const InDet::TRT_DriftCircle* driftcircle = (*DriftCircleCollItr);
 
         //In verbose mode, print out drift circle information
-        if (msgLvl(MSG::VERBOSE)) msg(MSG::VERBOSE) << "Retrieving information from " << (*driftcircle) << endmsg;
+        ATH_MSG_VERBOSE( "Retrieving information from " << (*driftcircle) );
 
         Identifier id = driftcircle->identify();
 
         //Check if it is valid
         if (! id.is_valid()) {
-          if (msgLvl(MSG::DEBUG)) msg(MSG::DEBUG) << "Ignoring TRT_DriftCircle with invalid identifier " << id << endmsg;
+          ATH_MSG_DEBUG( "Ignoring TRT_DriftCircle with invalid identifier " << id );
           continue;
         }
 
@@ -114,7 +112,7 @@ namespace JiveXML {
         const InDetDD::TRT_BaseElement* element = m_geo->TRTGeoManager()->getElement(m_geo->TRTIDHelper()->layer_id(id));
 
         //get global coord of straw
-	Amg::Vector3D global  = element->strawTransform(m_geo->TRTIDHelper()->straw(id))*Amg::Vector3D(0.,0.,0.);
+	      Amg::Vector3D global  = element->strawTransform(m_geo->TRTIDHelper()->straw(id))*Amg::Vector3D(0.,0.,0.);
         
         //store the phi value
         phi.push_back(DataType( (global.phi()<0) ? global.phi() + 2*M_PI : global.phi()));
@@ -125,10 +123,9 @@ namespace JiveXML {
         else if (element->type()==InDetDD::TRT_BaseElement::ENDCAP)
           rhoz.push_back(DataType(global.z()*CLHEP::mm/CLHEP::cm)); 
         else 
-          if (msgLvl(MSG::VERBOSE)) msg(MSG::VERBOSE) << "Unknown TRT base element of type " << element->type();
+          ATH_MSG_VERBOSE( "Unknown TRT base element of type " << element->type() );
 
         //Store local position parameters
-	//Amg::Vector2D localPosition = driftcircle->localPosition();
         driftR.push_back(DataType((driftcircle->localPosition())[Trk::driftRadius]*CLHEP::mm/CLHEP::cm));
 
         //Get subdetector number
@@ -186,7 +183,7 @@ namespace JiveXML {
     }
       
     //be verbose
-    if (msgLvl(MSG::DEBUG)) msg(MSG::DEBUG) << dataTypeName() << ": " << rhoz.size() << endmsg;  
+    ATH_MSG_DEBUG( dataTypeName() << ": " << rhoz.size() );  
 
     //forward data to formating tool and return
     return FormatTool->AddToEvent(dataTypeName(), "", &dataMap);  
