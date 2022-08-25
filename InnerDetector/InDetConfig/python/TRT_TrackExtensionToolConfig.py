@@ -21,11 +21,13 @@ def TRT_TrackExtensionToolCosmicsCfg(flags, name='TRT_TrackExtensionToolCosmics'
 
     if 'RIOonTrackToolYesDr' not in kwargs:
         from InDetConfig.TRT_DriftCircleOnTrackToolConfig import TRT_DriftCircleOnTrackUniversalToolCosmicsCfg
-        kwargs.setdefault("RIOonTrackToolYesDr", acc.popToolsAndMerge(TRT_DriftCircleOnTrackUniversalToolCosmicsCfg(flags)))
+        kwargs.setdefault("RIOonTrackToolYesDr", acc.popToolsAndMerge(
+            TRT_DriftCircleOnTrackUniversalToolCosmicsCfg(flags)))
 
     if 'RIOonTrackToolNoDr' not in kwargs:
         from InDetConfig.TRT_DriftCircleOnTrackToolConfig import TRT_DriftCircleOnTrackNoDriftTimeToolCfg
-        kwargs.setdefault("RIOonTrackToolNoDr", acc.popToolsAndMerge(TRT_DriftCircleOnTrackNoDriftTimeToolCfg(flags)))
+        kwargs.setdefault("RIOonTrackToolNoDr", acc.popToolsAndMerge(
+            TRT_DriftCircleOnTrackNoDriftTimeToolCfg(flags)))
 
     kwargs.setdefault("TRT_ClustersContainer", 'TRT_DriftCircles')
     kwargs.setdefault("SearchNeighbour", False)   # needs debugging!!!
@@ -38,58 +40,87 @@ def TRT_TrackExtensionToolPhaseCfg(flags, name='TRT_TrackExtensionToolPhase', **
 
     if 'RIOonTrackToolYesDr' not in kwargs:
         from InDetConfig.TRT_DriftCircleOnTrackToolConfig import TRT_DriftCircleOnTrackUniversalToolCfg
-        kwargs.setdefault("RIOonTrackToolYesDr", acc.popToolsAndMerge(TRT_DriftCircleOnTrackUniversalToolCfg(flags)))
+        kwargs.setdefault("RIOonTrackToolYesDr", acc.popToolsAndMerge(
+            TRT_DriftCircleOnTrackUniversalToolCfg(flags)))
 
     kwargs.setdefault("TRT_ClustersContainer", 'TRT_DriftCirclesUncalibrated')
     kwargs.setdefault("RoadWidth", 20.0)
-    acc.setPrivateTools(acc.popToolsAndMerge(TRT_TrackExtensionToolCosmicsCfg(flags, name, **kwargs)))
+    acc.setPrivateTools(acc.popToolsAndMerge(
+        TRT_TrackExtensionToolCosmicsCfg(flags, name, **kwargs)))
     return acc
 
-def TRT_TrackExtensionTool_xkCfg(flags, name='TRT_TrackExtensionTool_xk', **kwargs):
+def TRT_TrackExtensionTool_xk_BaseCfg(flags, name='TRT_TrackExtensionTool_xk', **kwargs):
     from MagFieldServices.MagFieldServicesConfig import AtlasFieldCacheCondAlgCfg
     acc = AtlasFieldCacheCondAlgCfg(flags)
 
     if 'PropagatorTool' not in kwargs:
         from TrkConfig.TrkExRungeKuttaPropagatorConfig import RungeKuttaPropagatorCfg
-        InDetPatternPropagator = acc.popToolsAndMerge(RungeKuttaPropagatorCfg(flags, name="InDetPatternPropagator"))
+        InDetPatternPropagator = acc.popToolsAndMerge(
+            RungeKuttaPropagatorCfg(flags, name="InDetPatternPropagator"))
         acc.addPublicTool(InDetPatternPropagator)
         kwargs.setdefault("PropagatorTool", InDetPatternPropagator)
 
     if 'UpdatorTool' not in kwargs:
         from TrkConfig.TrkMeasurementUpdatorConfig import KalmanUpdator_xkCfg
-        InDetPatternUpdator = acc.popToolsAndMerge(KalmanUpdator_xkCfg(flags, name="InDetPatternUpdator"))
+        InDetPatternUpdator = acc.popToolsAndMerge(
+            KalmanUpdator_xkCfg(flags, name="InDetPatternUpdator"))
         acc.addPublicTool(InDetPatternUpdator)
         kwargs.setdefault("UpdatorTool", InDetPatternUpdator)
 
-    if 'DriftCircleCutTool' not in kwargs:
-        from InDetConfig.InDetTrackSelectorToolConfig import InDetTRTDriftCircleCutToolCfg
-        kwargs.setdefault("DriftCircleCutTool", acc.popToolsAndMerge(InDetTRTDriftCircleCutToolCfg(flags)))
-
-    if 'RIOonTrackToolYesDr' not in kwargs:
-        from InDetConfig.TRT_DriftCircleOnTrackToolConfig import TRT_DriftCircleOnTrackToolCfg
-        kwargs.setdefault("RIOonTrackToolYesDr", acc.popToolsAndMerge(TRT_DriftCircleOnTrackToolCfg(flags)))
-
-    if 'RIOonTrackToolNoDr' not in kwargs:
-        from InDetConfig.TRT_DriftCircleOnTrackToolConfig import TRT_DriftCircleOnTrackNoDriftTimeToolCfg
-        kwargs.setdefault("RIOonTrackToolNoDr", acc.popToolsAndMerge(TRT_DriftCircleOnTrackNoDriftTimeToolCfg(flags)))
-
     if 'RoadTool' not in kwargs:
         from InDetConfig.TRT_DetElementsRoadToolConfig import TRT_DetElementsRoadMaker_xkCfg
-        kwargs.setdefault("RoadTool", acc.popToolsAndMerge(TRT_DetElementsRoadMaker_xkCfg(flags)))
+        kwargs.setdefault("RoadTool", acc.popToolsAndMerge(
+            TRT_DetElementsRoadMaker_xkCfg(flags)))
 
     kwargs.setdefault("TRT_ClustersContainer", "TRT_DriftCircles")
-    kwargs.setdefault("TrtManagerLocation", "TRT")
-    kwargs.setdefault("UseDriftRadius", not flags.InDet.noTRTTiming)
     kwargs.setdefault("MinNumberDriftCircles", flags.InDet.Tracking.ActivePass.minTRTonTrk)
     kwargs.setdefault("ScaleHitUncertainty", 2)
     kwargs.setdefault("RoadWidth", 20.)
     kwargs.setdefault("UseParameterization", flags.InDet.Tracking.ActivePass.useParameterizedTRTCuts)
+
+    acc.setPrivateTools(CompFactory.InDet.TRT_TrackExtensionTool_xk(name, **kwargs))
+    return acc
+
+def TRT_TrackExtensionTool_xkCfg(flags, name='TRT_TrackExtensionTool_xk', **kwargs):
+    acc = ComponentAccumulator()
+
+    if 'DriftCircleCutTool' not in kwargs:
+        from InDetConfig.InDetTrackSelectorToolConfig import InDetTRTDriftCircleCutToolCfg
+        kwargs.setdefault("DriftCircleCutTool", acc.popToolsAndMerge(
+            InDetTRTDriftCircleCutToolCfg(flags)))
+
+    if 'RIOonTrackToolYesDr' not in kwargs:
+        from InDetConfig.TRT_DriftCircleOnTrackToolConfig import TRT_DriftCircleOnTrackToolCfg
+        kwargs.setdefault("RIOonTrackToolYesDr", acc.popToolsAndMerge(
+            TRT_DriftCircleOnTrackToolCfg(flags)))
+
+    if 'RIOonTrackToolNoDr' not in kwargs:
+        from InDetConfig.TRT_DriftCircleOnTrackToolConfig import TRT_DriftCircleOnTrackNoDriftTimeToolCfg
+        kwargs.setdefault("RIOonTrackToolNoDr", acc.popToolsAndMerge(
+            TRT_DriftCircleOnTrackNoDriftTimeToolCfg(flags)))
+
+    kwargs.setdefault("UseDriftRadius", not flags.InDet.noTRTTiming)
     kwargs.setdefault("maxImpactParameter", 500 if flags.InDet.Tracking.doBeamGas else 50 )  # single beam running, open cuts
 
     if flags.InDet.Tracking.ActivePass.RoISeededBackTracking:
         kwargs.setdefault("minTRTSegmentpT", flags.InDet.Tracking.ActivePass.minSecondaryPt)
 
-    acc.setPrivateTools(CompFactory.InDet.TRT_TrackExtensionTool_xk(name, **kwargs))
+    acc.setPrivateTools(acc.popToolsAndMerge(
+        TRT_TrackExtensionTool_xk_BaseCfg(flags, name, **kwargs)))
+    return acc
+
+def Trig_TRT_TrackExtensionToolCfg(flags, name='Trig_TRT_TrackExtensionTool', **kwargs):
+    acc = ComponentAccumulator()
+
+    if 'DriftCircleCutTool' not in kwargs:
+        from InDetConfig.InDetTrackSelectorToolConfig import InDetTrigTRTDriftCircleCutToolCfg
+        kwargs.setdefault("DriftCircleCutTool", acc.popToolsAndMerge(
+            InDetTrigTRTDriftCircleCutToolCfg(flags)))
+
+    kwargs.setdefault("TRT_ClustersContainer", "TRT_TrigDriftCircles")
+
+    acc.setPrivateTools(acc.popToolsAndMerge(
+        TRT_TrackExtensionTool_xk_BaseCfg(flags, name, **kwargs)))
     return acc
 
 def TRT_TrackExtensionToolCfg(flags, name='TRT_TrackExtensionTool', **kwargs):
