@@ -532,6 +532,8 @@ namespace top {
     virtual const std::vector<std::pair<std::string, int> >& tauTriggers_Loose(const std::string& selection) const;
     virtual const std::vector<std::pair<std::string, int> >& photonTriggers_Loose(const std::string& selection) const;
 
+    inline bool triggerMatchingElementRelink() const { return m_trigMatchElemRelink; }
+
     // StoreGate Keys
     virtual void sgKeyMCParticle(const std::string& s);
     virtual void sgKeyPhotons(const std::string& s);
@@ -2811,6 +2813,9 @@ namespace top {
     std::shared_ptr<std::unordered_map<std::string, std::vector<std::pair<std::string, int> > > > m_tauTriggers_Loose;
     std::shared_ptr<std::unordered_map<std::string, std::vector<std::pair<std::string, int> > > > m_photonTriggers_Loose;
     std::vector<std::pair<std::string, int> > m_dummyTrigger;
+
+    // workaround re-linking element links between offline and online objects, fixing trigger matching in p5226
+    bool m_trigMatchElemRelink;
 
     // Where the sum of event weights
     // before derivation framework is kept
