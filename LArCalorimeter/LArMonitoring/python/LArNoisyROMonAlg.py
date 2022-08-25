@@ -220,7 +220,7 @@ def LArNoisyROMonConfigCore(helper,algoinstance,inputFlags,
                                  title='Yield of events flagged as MNB-Tight - {0} ; Luminosity Block', 
                                  xbins=lArDQGlobals.LB_Bins,xmin=lArDQGlobals.LB_Min,xmax=lArDQGlobals.LB_Max)
 
-       darray.defineHistogram('LBMNBTight_PsVet;MNBTight_PsVetoEvent',type='TH1I', path=hist_path,
+       darray.defineHistogram('LBMNBTight_PsVeto;MNBTight_PsVetoEvent',type='TH1I', path=hist_path,
                                  title='Yield of events flagged as MNB-Tight_PsVeto - {0} ; Luminosity Block', 
                                  xbins=lArDQGlobals.LB_Bins,xmin=lArDQGlobals.LB_Min,xmax=lArDQGlobals.LB_Max)
 
