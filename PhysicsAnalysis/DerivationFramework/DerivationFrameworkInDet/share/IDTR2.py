@@ -53,6 +53,23 @@ ToolSvc += AtlasExtrapolator(name     = "AtlasExtrapolator")
 
 
 IDTR2_V0FinderTools = BPHYV0FinderTools("IDTR2")
+print(IDTR2_V0FinderTools)
+
+IDTR2_V0FinderTools.V0FinderTool.V0ContainerName = "IDTR2RecoV0Candidates"
+IDTR2_V0FinderTools.V0FinderTool.KshortContainerName = "IDTR2RecoKshortCandidates"
+IDTR2_V0FinderTools.V0FinderTool.LambdaContainerName = "IDTR2RecoLambdaCandidates"
+IDTR2_V0FinderTools.V0FinderTool.LambdabarContainerName = "IDTR2RecoLambdabarCandidates"
+
+from InDetV0Finder.InDetV0FinderConf import InDet__V0MainDecorator
+V0Decorator = InDet__V0MainDecorator(name = "IDTR2V0Decorator",
+                                     V0Tools = TrackingCommon.getV0Tools(),
+                                     V0ContainerName = "IDTR2RecoV0Candidates",
+                                     KshortContainerName = "IDTR2RecoKshortCandidates",
+                                     LambdaContainerName = "IDTR2RecoLambdaCandidates",
+                                     LambdabarContainerName = "IDTR2RecoLambdabarCandidates")
+ToolSvc += V0Decorator
+
+
 
 from InDetTrackSelectorTool.InDetTrackSelectorToolConf import InDet__InDetConversionTrackSelectorTool
 IDTR2InDetV0VxTrackSelectorLoose = InDet__InDetConversionTrackSelectorTool(name                = "IDTR2InDetV0VxTrackSelectorLoose",
@@ -81,7 +98,8 @@ from DerivationFrameworkBPhys.DerivationFrameworkBPhysConf import DerivationFram
 IDTR2_Reco_V0Finder   = DerivationFramework__Reco_V0Finder(
     name                   = "IDTR2_Reco_V0Finder",
     V0FinderTool           = IDTR2_V0FinderTools.V0FinderTool,
-    V0Tools                = TrackingCommon.getV0Tools(),
+    Decorator              = V0Decorator,
+    #V0Tools                = TrackingCommon.getV0Tools(),
     #OutputLevel            = DEBUG,
     V0ContainerName        = "IDTR2RecoV0Candidates",
     KshortContainerName    = "IDTR2RecoKshortCandidates",
@@ -169,6 +187,8 @@ IDTR2SlimmingHelper.AllVariables = ["EventInfo",
                                     "PrimaryVertices",
                                     "InDetTrackParticles",
                                     "InDetLargeD0TrackParticles",
+                                    "TruthParticles",
+                                    "TruthVertices"
                                    ]
 
 
