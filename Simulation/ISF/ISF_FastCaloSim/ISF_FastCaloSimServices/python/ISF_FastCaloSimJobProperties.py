@@ -72,37 +72,37 @@ class PunchThroughParamsInputFilename(JobProperty):
     """ Filename of the muon punch through input parametrizations file. """
     statusOn     = True
     allowedTypes = ['str']
-    StoredValue  = 'FastCaloSim/MC16/TFCSparam_mpt_v04.root'
+    StoredValue  = 'FastCaloSim/MC16/TFCSparam_mpt_v05.root'
 
 class PunchThroughParamsInverseCdfFilename(JobProperty):
     """ Filename of the muon punch through param inverse cdf config. """
     statusOn     = True
     allowedTypes = ['str']
-    StoredValue  = 'FastCaloSim/MC16/TFCSparam_mpt_inverseCdf_v01.xml'
+    StoredValue  = 'FastCaloSim/MC16/TFCSparam_mpt_inverseCdf_v02.xml'
 
 class PunchThroughParamsInversePcaFilename(JobProperty):
     """ Filename of the muon punch through param inverse pca config. """
     statusOn     = True
     allowedTypes = ['str']
-    StoredValue  = 'FastCaloSim/MC16/TFCSparam_mpt_inversePca_v01.xml'
+    StoredValue  = 'FastCaloSim/MC16/TFCSparam_mpt_inversePca_v02.xml'
 
 class PunchThroughClassifierScalerFilename(JobProperty):
     """ Filename of the muon punch through classifier input variable MinMaxScaler. """
     statusOn     = True
     allowedTypes = ['str']
-    StoredValue  = 'FastCaloSim/MC16/TFCSparam_mpt_classScaler_v01.xml'
+    StoredValue  = 'FastCaloSim/MC16/TFCSparam_mpt_classScaler_v02.xml'
 
 class PunchThroughClassifierNetworkFilename(JobProperty):
     """ Filename of the muon punch through classifier neural network. """
     statusOn     = True
     allowedTypes = ['str']
-    StoredValue  = 'FastCaloSim/MC16/TFCSparam_mpt_classNet_v01.json'
+    StoredValue  = 'FastCaloSim/MC16/TFCSparam_mpt_classNet_v02.json'
 
 class PunchThroughClassifierCalibratorFilename(JobProperty):
     """ Filename of the muon punch through classifier calibrator. """
     statusOn     = True
     allowedTypes = ['str']
-    StoredValue  = 'FastCaloSim/MC16/TFCSparam_mpt_classCalib_v01.xml'
+    StoredValue  = 'FastCaloSim/MC16/TFCSparam_mpt_classCalib_v02.xml'
 
 
 ##-----------------------------------------------------------------------------
