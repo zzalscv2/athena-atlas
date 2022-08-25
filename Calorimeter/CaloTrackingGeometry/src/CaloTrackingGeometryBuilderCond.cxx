@@ -1070,8 +1070,11 @@ Calo::CaloTrackingGeometryBuilderCond::trackingGeometry(
    matCrack.emplace_back(m_caloMaterial,-1);
    matCrack.emplace_back(mAl,-1);
    //
-   Trk::BinUtility* bun = new Trk::BinUtility(3,-1.8,-1.2,Trk::open,Trk::binEta);
-   Trk::BinUtility* bup = new Trk::BinUtility(3, 1.2,1.8,Trk::open,Trk::binEta);
+   double etadist;
+   // if TileGap3 goes above 1.6 in eta - it's RUN3 geometry
+   int nbins = (caloDDM->is_in(1.65,0.0,CaloCell_ID::TileGap3,etadist)) ? 6 : 3;
+   Trk::BinUtility* bun = new Trk::BinUtility(nbins,-1.8,-1.2,Trk::open,Trk::binEta);
+   Trk::BinUtility* bup = new Trk::BinUtility(nbins, 1.2,1.8,Trk::open,Trk::binEta);
    // array of indices
    std::vector<std::vector<size_t> > indexP;  
    std::vector<std::vector<size_t> > indexN;  
@@ -1086,7 +1089,7 @@ Calo::CaloTrackingGeometryBuilderCond::trackingGeometry(
      steps.clear();
      std::vector<size_t> indx; indx.clear();
      steps.push_back(crackZ1);
-     indx.push_back( i<2 ? 0 : 1);
+     indx.push_back( i<bup->bins()-1 ? 0 : 1);
      steps.push_back(crackZ2);
      indx.push_back(2);
      steps.push_back(keyDim.back().second);
