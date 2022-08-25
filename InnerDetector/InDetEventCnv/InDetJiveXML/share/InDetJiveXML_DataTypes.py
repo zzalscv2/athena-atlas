@@ -21,6 +21,33 @@ if DetFlags.makeRIO.pixel_on():
 ### new datatype, not yet understood by AtlantisJava:
 #theEventData2XML.DataTypes += ["JiveXML::BeamSpotRetriever/BeamSpotRetriever"]
 
+isMC = ConfigFlags.Input.isMC
+
+from InDetJiveXML.InDetJiveXMLConf import JiveXML__PixelClusterRetriever
+thePixelClusterRetriever = JiveXML__PixelClusterRetriever (name = "PixelClusterRetriever")
+if not isMC:
+    thePixelClusterRetriever.PixelTruthMap = ''
+ToolSvc += thePixelClusterRetriever
+
+from InDetJiveXML.InDetJiveXMLConf import JiveXML__SiClusterRetriever
+theSiClusterRetriever = JiveXML__SiClusterRetriever (name = "SiClusterRetriever")
+if not isMC:
+    theSiClusterRetriever.SCT_TruthMap = ''
+ToolSvc += theSiClusterRetriever
+
+from InDetJiveXML.InDetJiveXMLConf import JiveXML__SiSpacePointRetriever
+theSiSpacePointRetriever = JiveXML__SiSpacePointRetriever (name = "SiSpacePointRetriever")
+if not isMC:
+    theSiSpacePointRetriever.PRD_TruthPixel = ''
+    theSiSpacePointRetriever.PRD_TruthSCT = ''
+ToolSvc += theSiSpacePointRetriever
+
+from InDetJiveXML.InDetJiveXMLConf import JiveXML__TRTRetriever
+theTRTRetriever = JiveXML__TRTRetriever (name = "TRTRetriever")
+if not isMC:
+    theTRTRetriever.TRTTruthMap = ''
+ToolSvc += theTRTRetriever
+
 #
 #from InDetJiveXML.InDetJiveXMLConf import JiveXML__PixelClusterRetriever
 #thePixelClusterRetriever = JiveXML__PixelClusterRetriever (name = "PixelClusterRetriever")
