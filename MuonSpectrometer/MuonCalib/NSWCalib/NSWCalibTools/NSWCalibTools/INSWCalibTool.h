@@ -18,24 +18,34 @@
 namespace NSWCalib { 
 
   struct CalibratedStrip {
-    double charge = 0;
-    double time = 0;
-    double resTime = 0;
-    double distDrift = 0;
-    double resTransDistDrift = 0;
-    double resLongDistDrift = 0;
-    double dx = 0;      
+    double charge{0};
+    double time{0};
+    double resTime{0};
+    double distDrift{0};
+    double resTransDistDrift{0};
+    double resLongDistDrift{0};
+    double dx{0};      
     Amg::Vector2D locPos{-FLT_MAX,FLT_MAX};
     Identifier identifier{0};
   };
 
   struct MicroMegaGas{
-      double vDrift{0.};
-      double longDiff{0.};
-      double transDiff{0.};
-      double interactionDensityMean{0.};
-      double interactionDensitySigma{0.};
-      const TF1* lorentzAngleFunction{nullptr};
+        /** //0.050 drift velocity in [mm/ns], driftGap=5 mm +0.128 mm (the amplification gap) */
+      float driftVelocity{0.};
+       /** // 0.350/10 diffusSigma=transverse diffusion (350 microm per 1cm ) for 93:7 @ 600 V/cm, according to garfield  */
+      float longitudinalDiffusionSigma{0.};
+      float transverseDiffusionSigma{0.};
+      float interactionDensityMean{0.};
+      float interactionDensitySigma{0.};
+      using angleFunction = std::function<double(double)>;
+      /// Dummy function to be used for the initialization
+      static angleFunction dummy_func() {
+        return [](float){   
+           throw std::runtime_error("Please do not use the dummy lorentz function");
+           return 0.;
+        };
+      }
+      angleFunction lorentzAngleFunction{dummy_func()};    
   };
 
 }
