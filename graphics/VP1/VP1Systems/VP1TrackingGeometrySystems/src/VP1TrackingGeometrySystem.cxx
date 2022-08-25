@@ -1283,20 +1283,22 @@ void VP1TrackingGeometrySystem::processMsLayDense(const Trk::TrackingVolume* tvo
     }
   }
   // unordered layers
-  const std::vector< const Trk::Layer* >* confALays = tvol->confinedArbitraryLayers();
-  if (confALays){
-    std::vector<const Trk::Layer*>::const_iterator layerIter = confALays->begin();
+  Trk::ArraySpan<const Trk::Layer* const> confALays = tvol->confinedArbitraryLayers();
+  if (!confALays.empty()) {
     // loop over layers
-    for ( ; layerIter != confALays->end(); ++layerIter){
+    for (const Trk::Layer* const layerIter : confALays) {
       // push_back the layer
-      if (*layerIter){
-	SoNode * node = m_d->surface2sonode->translateSurface((*layerIter)->surfaceRepresentation());
-	if (node && layHelper ) {
-          if ((*layerIter)->layerType()>0)
-	    layHelper->addNodeUnderMaterial(node,m_d->colorCodeConverter.getMaterialFromColorCode( color));
+      if (layerIter) {
+        SoNode* node = m_d->surface2sonode->translateSurface(
+          layerIter->surfaceRepresentation());
+        if (node && layHelper) {
+          if (layerIter->layerType() > 0)
+            layHelper->addNodeUnderMaterial(
+              node, m_d->colorCodeConverter.getMaterialFromColorCode(color));
           else
-	    layHelper->addNodeUnderMaterial(node,m_d->colorCodeConverter.getMaterialFromColorCode( 1));
-	}
+            layHelper->addNodeUnderMaterial(
+              node, m_d->colorCodeConverter.getMaterialFromColorCode(1));
+        }
       }
     }
   }

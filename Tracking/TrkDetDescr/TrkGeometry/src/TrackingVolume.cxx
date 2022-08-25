@@ -254,7 +254,7 @@ Trk::TrackingVolume::TrackingVolume(
 Trk::TrackingVolume::TrackingVolume(Amg::Transform3D* htrans,
                                     VolumeBounds* volbounds,
                                     const Material& matprop,
-                                    const std::vector<const Layer*>* layers,
+                                    const std::vector<Layer*>* layers,
                                     const std::string& volumeName)
   : Volume(htrans, volbounds)
   , Material(matprop)
@@ -278,7 +278,7 @@ Trk::TrackingVolume::TrackingVolume(Amg::Transform3D* htrans,
 // 2 c)
 Trk::TrackingVolume::TrackingVolume(const Volume& volume,
                                     const Material& matprop,
-                                    const std::vector<const Layer*>* layers,
+                                    const std::vector<Layer*>* layers,
                                     const std::string& volumeName)
   : Volume(volume)
   , Material(matprop)
@@ -303,7 +303,7 @@ Trk::TrackingVolume::TrackingVolume(const Volume& volume,
 Trk::TrackingVolume::TrackingVolume(
   Amg::Transform3D* htrans,
   VolumeBounds* volbounds,
-  const std::vector<const Layer*>* layers,
+  const std::vector<Layer*>* layers,
   const std::vector<const TrackingVolume*>* unorderedSubVolumes,
   const Material& matprop,
   const std::string& volumeName)
@@ -329,7 +329,7 @@ Trk::TrackingVolume::TrackingVolume(
 // 2 d)
 Trk::TrackingVolume::TrackingVolume(
   const Volume& volume,
-  const std::vector<const Layer*>* layers,
+  const std::vector<Layer*>* layers,
   const std::vector<const TrackingVolume*>* unorderedSubVolumes,
   const Material& matprop,
   const std::string& volumeName)
@@ -446,42 +446,41 @@ Trk::TrackingVolume::TrackingVolume(const Trk::TrackingVolume& trVol,
   }
 
   // confined 'unordered' layers
-  const std::vector<const Trk::Layer*>* confinedArbitraryLayers =
+  Trk::ArraySpan<const Trk::Layer* const> confinedArbitraryLayers =
     trVol.confinedArbitraryLayers();
-  if (confinedArbitraryLayers) {
+  if (!confinedArbitraryLayers.empty()) {
     // clone & apply the transform
-    std::vector<const Trk::Layer*> uLayers;
-    uLayers.reserve(confinedArbitraryLayers->size());
-    for (unsigned int i = 0; i < confinedArbitraryLayers->size(); i++) {
+    std::vector<Trk::Layer*> uLayers;
+    uLayers.reserve(confinedArbitraryLayers.size());
+    for (unsigned int i = 0; i < confinedArbitraryLayers.size(); i++) {
       const Trk::SubtractedPlaneLayer* slayer =
         dynamic_cast<const Trk::SubtractedPlaneLayer*>(
-          (*confinedArbitraryLayers)[i]);
+          confinedArbitraryLayers[i]);
       const Trk::SubtractedCylinderLayer* sclayer =
         dynamic_cast<const Trk::SubtractedCylinderLayer*>(
-          (*confinedArbitraryLayers)[i]);
+          confinedArbitraryLayers[i]);
       const Trk::PlaneLayer* layer =
-        dynamic_cast<const Trk::PlaneLayer*>((*confinedArbitraryLayers)[i]);
+        dynamic_cast<const Trk::PlaneLayer*>(confinedArbitraryLayers[i]);
       const Trk::CylinderLayer* clayer =
-        dynamic_cast<const Trk::CylinderLayer*>((*confinedArbitraryLayers)[i]);
+        dynamic_cast<const Trk::CylinderLayer*>(confinedArbitraryLayers[i]);
 
       if (slayer) {
-        const Trk::SubtractedPlaneLayer* lay =
+        Trk::SubtractedPlaneLayer* lay =
           new Trk::SubtractedPlaneLayer(*slayer, transform);
         uLayers.push_back(lay);
       } else if (layer) {
-        const Trk::PlaneLayer* lay = new Trk::PlaneLayer(*layer, transform);
+        Trk::PlaneLayer* lay = new Trk::PlaneLayer(*layer, transform);
         uLayers.push_back(lay);
       } else if (sclayer) {
-        const Trk::SubtractedCylinderLayer* lay =
+        Trk::SubtractedCylinderLayer* lay =
           new Trk::SubtractedCylinderLayer(*sclayer, transform);
         uLayers.push_back(lay);
       } else if (clayer) {
-        const Trk::CylinderLayer* lay =
-          new Trk::CylinderLayer(*clayer, transform);
+        Trk::CylinderLayer* lay = new Trk::CylinderLayer(*clayer, transform);
         uLayers.push_back(lay);
       }
     }
-    m_confinedArbitraryLayers = new std::vector<const Trk::Layer*>(uLayers);
+    m_confinedArbitraryLayers = new std::vector<Trk::Layer*>(uLayers);
   }
 
   // confined volumes
@@ -1202,21 +1201,21 @@ Trk::TrackingVolume* Trk::TrackingVolume::cloneTV (Amg::Transform3D& transform) 
   }
 
   // clone 'unordered' layers
-  std::vector<const Trk::Layer*>* unorderedLayers = nullptr;
-  const std::vector<const Trk::Layer*>* confArbLayers =
+  std::vector<Trk::Layer*>* unorderedLayers = nullptr;
+  Trk::ArraySpan<const Trk::Layer* const> confArbLayers =
     confinedArbitraryLayers();
-  if (confArbLayers) {
+  if (!confArbLayers.empty()) {
     // clone & apply the transform
-    std::vector<const Trk::Layer*> uLayers;
-    for (unsigned int i = 0; i < confArbLayers->size(); i++) {
+    std::vector<Trk::Layer*> uLayers;
+    for (unsigned int i = 0; i < confArbLayers.size(); i++) {
       const Trk::SubtractedPlaneLayer* slayer =
-        dynamic_cast<const Trk::SubtractedPlaneLayer*>((*confArbLayers)[i]);
+        dynamic_cast<const Trk::SubtractedPlaneLayer*>(confArbLayers[i]);
       const Trk::SubtractedCylinderLayer* sclayer =
-        dynamic_cast<const Trk::SubtractedCylinderLayer*>((*confArbLayers)[i]);
+        dynamic_cast<const Trk::SubtractedCylinderLayer*>(confArbLayers[i]);
       const Trk::PlaneLayer* layer =
-        dynamic_cast<const Trk::PlaneLayer*>((*confArbLayers)[i]);
+        dynamic_cast<const Trk::PlaneLayer*>(confArbLayers[i]);
       const Trk::CylinderLayer* clayer =
-        dynamic_cast<const Trk::CylinderLayer*>((*confArbLayers)[i]);
+        dynamic_cast<const Trk::CylinderLayer*>(confArbLayers[i]);
 
       if (slayer) {
         Trk::SubtractedPlaneLayer* lay = new Trk::SubtractedPlaneLayer(*slayer);
@@ -1237,7 +1236,7 @@ Trk::TrackingVolume* Trk::TrackingVolume::cloneTV (Amg::Transform3D& transform) 
         uLayers.push_back(lay);
       }
     }
-    unorderedLayers = new std::vector<const Trk::Layer*>(uLayers);
+    unorderedLayers = new std::vector<Trk::Layer*>(uLayers);
   }
 
   // cloning confined volumes
@@ -1277,11 +1276,11 @@ Trk::TrackingVolume* Trk::TrackingVolume::cloneTV (Amg::Transform3D& transform) 
 
   // create the Tracking Volume
   Trk::TrackingVolume* newTrkVol = nullptr;
-  if (confArbLayers || confDenseVolumes) {
-    if (confArbLayers && confDenseVolumes) {
+  if (!confArbLayers.empty() || confDenseVolumes) {
+    if (!confArbLayers.empty() && confDenseVolumes) {
       newTrkVol = new Trk::TrackingVolume(
         *vol, unorderedLayers, newDenseVol, *this, volumeName());
-    } else if (confArbLayers) {
+    } else if (!confArbLayers.empty()) {
       newTrkVol =
         new Trk::TrackingVolume(*vol, *this, unorderedLayers, volumeName());
     } else {
@@ -1335,12 +1334,13 @@ ATLAS_NOT_THREAD_SAFE(Amg::Transform3D& transform)
     }
 
   // confined 'unordered' layers
-  const std::vector<const Trk::Layer*>* confArbLayers =
+  Trk::ArraySpan<Trk::Layer* const> confArbLayers =
     confinedArbitraryLayers();
-  if (confArbLayers)
-    for (const Trk::Layer* calayIter : (*confArbLayers)){
-      (const_cast<Trk::Layer*>(calayIter))->moveLayer(transform);
+  if (!confArbLayers.empty()){
+    for (Trk::Layer* calayIter : confArbLayers){
+      calayIter->moveLayer(transform);
     }
+  }
 
   // confined volumes
   Trk::BinnedArray<const Trk::TrackingVolume>* confVolumes = confinedVolumes();
@@ -1406,15 +1406,16 @@ ATLAS_NOT_THREAD_SAFE(size_t& cSurfaces, size_t& tSurfaces) const
     }
   }
   // confined 'unordered' layers
-  const std::vector<const Trk::Layer*>* confArbLayers =
+  Trk::ArraySpan<const Trk::Layer* const>confArbLayers =
     confinedArbitraryLayers();
-  if (confArbLayers) {
-    for (const auto& calayIter : (*confArbLayers)) {
-      if (&(*calayIter) != nullptr)
+  if (!confArbLayers.empty()) {
+    for (const auto& calayIter : confArbLayers) {
+      if (calayIter != nullptr) {
         calayIter->compactify(cSurfaces, tSurfaces);
-      else
+      } else {
         std::cout << "WARNING: Attempt to compactify nullptr layer."
                   << std::endl;
+      }
     }
   }
   // confined volumes

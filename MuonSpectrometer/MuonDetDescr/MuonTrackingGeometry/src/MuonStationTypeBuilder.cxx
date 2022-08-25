@@ -954,7 +954,7 @@ const Trk::TrackingVolume* Muon::MuonStationTypeBuilder::processRpc(Trk::Volume*
                                                                     std::vector<Amg::Transform3D> transfc, Cache& cache) const {
     // layers correspond to DedModules and RpcModules; all substructures averaged
     // in material properties
-    std::vector<const Trk::Layer*> layers;
+    std::vector<Trk::Layer*> layers;
     for (unsigned int ic = 0; ic < gv.size(); ++ic) {
         const GeoLogVol* glv = gv[ic]->getLogVol();
         const GeoShape* shape = glv->getShape();
@@ -1133,7 +1133,7 @@ const Trk::TrackingVolume* Muon::MuonStationTypeBuilder::processRpc(Trk::Volume*
         }
     }  // end loop over Modules
 
-    std::vector<const Trk::Layer*>* rpcLayers = new std::vector<const Trk::Layer*>(layers);
+    std::vector<Trk::Layer*>* rpcLayers = new std::vector<Trk::Layer*>(layers);
     std::string name = "RPC";
     const Trk::TrackingVolume* rpc = new Trk::TrackingVolume(*vol, *m_muonMaterial, rpcLayers, name);
     ATH_MSG_DEBUG(" Rpc component volume processed with" << layers.size() << " layers");
@@ -1144,7 +1144,7 @@ const Trk::TrackingVolume* Muon::MuonStationTypeBuilder::processRpc(Trk::Volume*
 const Trk::TrackingVolume* Muon::MuonStationTypeBuilder::processSpacer(Trk::Volume& vol, std::vector<const GeoVPhysVol*> gv,
                                                                        std::vector<Amg::Transform3D> transf) const {
     // spacers: one level below, assumed boxes
-    std::vector<const Trk::Layer*> layers;
+    std::vector<Trk::Layer*> layers;
     // resolve child volumes
     std::vector<const GeoVPhysVol*>::iterator vIter = gv.begin();
     std::vector<Amg::Transform3D>::iterator tIter = transf.begin();
@@ -1174,7 +1174,7 @@ const Trk::TrackingVolume* Muon::MuonStationTypeBuilder::processSpacer(Trk::Volu
             double ys = box->getYHalfLength();
             double zs = box->getZHalfLength();
             // translating into layer; find minimal size
-            const Trk::PlaneLayer* layer;
+            Trk::PlaneLayer* layer;
             Trk::RectangleBounds* rbounds = nullptr;
             double thickness = 0.;
             Amg::Transform3D cTr;
@@ -1352,22 +1352,22 @@ const Trk::TrackingVolume* Muon::MuonStationTypeBuilder::processSpacer(Trk::Volu
         }
     }
 
-    std::vector<const Trk::Layer*>::iterator lIt = layers.begin();
+    std::vector<Trk::Layer*>::iterator lIt = layers.begin();
     for (; lIt != layers.end(); ++lIt)
         if ((*lIt)->thickness() < 0.) lIt = layers.erase(lIt);
 
-    std::vector<const Trk::Layer*>* spacerLayers = new std::vector<const Trk::Layer*>(layers);
+    std::vector<Trk::Layer*>* spacerLayers = new std::vector<Trk::Layer*>(layers);
     std::string name = "Spacer";
     const Trk::TrackingVolume* spacer = new Trk::TrackingVolume(vol, *m_muonMaterial, spacerLayers, name);
 
     if (!m_resolveSpacer) {  // average into a single material layer
         ATH_MSG_VERBOSE(" !m_resolveSpacer createLayerRepresentation ");
-        std::pair<const Trk::Layer*, const std::vector<const Trk::Layer*>*> laySpacer = createLayerRepresentation(spacer);
+        std::pair<Trk::Layer*, const std::vector<const Trk::Layer*>*> laySpacer = createLayerRepresentation(spacer);
         delete spacer;
         const_cast<Trk::Layer*>(laySpacer.first)->setLayerType(0);
         layers.clear();
         layers.push_back(laySpacer.first);
-        std::vector<const Trk::Layer*>* spacerLays = new std::vector<const Trk::Layer*>(layers);
+        std::vector<Trk::Layer*>* spacerLays = new std::vector<Trk::Layer*>(layers);
         spacer = new Trk::TrackingVolume(vol, *m_muonMaterial, spacerLays, name);
     }
 
@@ -1375,7 +1375,7 @@ const Trk::TrackingVolume* Muon::MuonStationTypeBuilder::processSpacer(Trk::Volu
 }
 
 Trk::TrackingVolume* Muon::MuonStationTypeBuilder::processNSW(const MuonGM::MuonDetectorManager* muonDetMgr,
-                                                              const std::vector<const Trk::Layer*>& layers) const {
+                                                              const std::vector<Trk::Layer*>& layers) const {
     ATH_MSG_DEBUG(name() << " processing NSW station components " << layers.size());
     ///////////////////////////////////////////////////////////////////////////////////////////////////
 
@@ -1438,7 +1438,7 @@ Trk::TrackingVolume* Muon::MuonStationTypeBuilder::processNSW(const MuonGM::Muon
     Trk::TrapezoidVolumeBounds* trdVolBounds = new Trk::TrapezoidVolumeBounds(hMin, hMax, 0.5 * (rMax - rMin), 0.5 * std::abs(zMax - zMin));
     Trk::Volume envelope(cTr, trdVolBounds);
 
-    std::vector<const Trk::Layer*>* nswLayers = new std::vector<const Trk::Layer*>(layers);
+    std::vector<Trk::Layer*>* nswLayers = new std::vector<Trk::Layer*>(layers);
     std::string name = "NSW";
     trVol = new Trk::TrackingVolume(envelope, *m_muonMaterial, nswLayers, name);
 
@@ -2277,10 +2277,10 @@ double Muon::MuonStationTypeBuilder::decodeX(const GeoShape* sh) const {
     return xHalf;
 }
 
-std::pair<const Trk::Layer*, const std::vector<const Trk::Layer*>*> Muon::MuonStationTypeBuilder::createLayerRepresentation(
+std::pair<Trk::Layer*, const std::vector<const Trk::Layer*>*> Muon::MuonStationTypeBuilder::createLayerRepresentation(
     const Trk::TrackingVolume* trVol) const {
-    const Trk::Layer* layRepr = nullptr;
-    if (!trVol) return std::pair<const Trk::Layer*, const std::vector<const Trk::Layer*>*>(layRepr, 0);
+    Trk::Layer* layRepr = nullptr;
+    if (!trVol) return std::pair<Trk::Layer*, const std::vector<const Trk::Layer*>*>(layRepr, 0);
 
     std::vector<const Trk::Layer*>* multi = new std::vector<const Trk::Layer*>;
 
@@ -2421,7 +2421,7 @@ std::pair<const Trk::Layer*, const std::vector<const Trk::Layer*>*> Muon::MuonSt
         delete multi;
         multi = nullptr;
     }
-    return std::pair<const Trk::Layer*, const std::vector<const Trk::Layer*>*>(layRepr, multi);
+    return std::pair<Trk::Layer*, const std::vector<const Trk::Layer*>*>(layRepr, multi);
 }
 
 Identifier Muon::MuonStationTypeBuilder::identifyNSW(const MuonGM::MuonDetectorManager* muonDetMgr, const std::string& vName,
@@ -2671,8 +2671,8 @@ Trk::MaterialProperties Muon::MuonStationTypeBuilder::collectStationMaterial(con
             }
         }
     }
-    if (vol->confinedArbitraryLayers()) {
-        const std::vector<const Trk::Layer*> lays = *(vol->confinedArbitraryLayers());
+    if (!vol->confinedArbitraryLayers().empty()) {
+        Trk::ArraySpan<const Trk::Layer* const> lays = vol->confinedArbitraryLayers();
         for (unsigned il = 0; il < lays.size(); il++) {
             const Trk::MaterialProperties* mLay =
                 lays[il]->layerMaterialProperties()->fullMaterial(lays[il]->surfaceRepresentation().center());
@@ -2706,8 +2706,8 @@ Trk::MaterialProperties Muon::MuonStationTypeBuilder::collectStationMaterial(con
                     }
                 }
             }
-            if (subVols[iv]->confinedArbitraryLayers()) {
-                const std::vector<const Trk::Layer*> lays = *(subVols[iv]->confinedArbitraryLayers());
+            if (!subVols[iv]->confinedArbitraryLayers().empty()) {
+                Trk::ArraySpan<const Trk::Layer* const> lays = (subVols[iv]->confinedArbitraryLayers());
                 for (unsigned il = 0; il < lays.size(); il++) {
                     const Trk::MaterialProperties* mLay =
                         lays[il]->layerMaterialProperties()->fullMaterial(lays[il]->surfaceRepresentation().center());
