@@ -1,7 +1,7 @@
 ///////////////////////// -*- C++ -*- /////////////////////////////
 
 /*
-  Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
 */
 
 // ParticleSelectionAlg.cxx
@@ -288,7 +288,7 @@ StatusCode ParticleSelectionAlg::execute()
   ATH_CHECK( evtStore()->retrieve( inContainer, m_inCollKey.value() ) );
   ATH_MSG_DEBUG ( "Input collection = " << m_inCollKey.value()
                   << " retrieved from StoreGate which has " << inContainer->size() << " entries." );
-
+ 
   // --------------------------------------------------------------------------
   // Do the expression parsing once per event already here
   // --------------------------------------------------------------------------
@@ -297,7 +297,7 @@ StatusCode ParticleSelectionAlg::execute()
   if ( !(m_selection.value().empty()) ){
     resultVec = m_parser->evaluateAsVector();
     // Check that the lengths of the input container and the result vector are the same
-    if ( inContainer && inContainer->size() != resultVec.size() ) {
+    if ( inContainer->size() != resultVec.size() ) {
       ATH_MSG_ERROR("We got an input container, but its size (" << inContainer->size()
                     << ") doesn't match the size of the result vector: " << resultVec.size() );
       return StatusCode::FAILURE;

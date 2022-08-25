@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2019 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
 */
 
 #include <iostream>
@@ -19,6 +19,7 @@ int main ( int argc,char *argv[] ){
   LhoodMM_tools* l = new LhoodMM_tools();
   if (l ==0) {
     std::cout << "null!" << std::endl;
+    return 1;
   }
 
   TH1F* h_ht = new TH1F("ht", "ht", 10, 0, 1000);

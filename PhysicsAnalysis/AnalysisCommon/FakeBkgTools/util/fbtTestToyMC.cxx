@@ -94,7 +94,7 @@ StatusCode setupSystBranchesAsym(const char* baseName,
 
 std::unique_ptr<TFile> openRootFile(fbtTestToyMC_config &config);
 
-StatusCode doMerge( std::vector<std::string> input, std::string name, fbtTestToyMC_config &config, TH1F* h_lep_pt, float &lep_pt, TH1F* h_lep_eta, float &lep_eta, TH2F* h_lep_pt_eta, float &fakes, float &poserr, float &negerr, int icase);
+StatusCode doMerge( const std::vector<std::string> & input, const std::string & name, fbtTestToyMC_config &config, TH1F* h_lep_pt, float &lep_pt, TH1F* h_lep_eta, float &lep_eta, TH2F* h_lep_pt_eta, float &fakes, float &poserr, float &negerr, int icase);
   
 StatusCode Loop(fbtTestToyMC_config config);
 
@@ -580,7 +580,7 @@ StatusCode Loop(fbtTestToyMC_config config){
 	    }
 	  }
 
-	  for (xAOD::IParticleContainer::iterator it = leptons.begin(); it != leptons.end(); it++) {
+	  for (xAOD::IParticleContainer::iterator it = leptons.begin(); it != leptons.end(); ++it) {
 	    if (*it != nullptr) delete *it;
 	  }
 	  leptons.clear();
@@ -985,6 +985,7 @@ StatusCode setupEfficiencies() {
   rootEffFile =  new TFile(rootEffFileName.c_str());
   if (rootEffFile == 0) {
     cout << "Um, no ROOT file!" << endl;
+    return StatusCode::FAILURE;
   }
 
   h_realeff_e = (TH1F*)rootEffFile->Get("RealEfficiency_el_pt");
@@ -1121,7 +1122,7 @@ StatusCode setupSystBranchesAsym(const char* baseName,
   return StatusCode::SUCCESS;
 }
 
-StatusCode doMerge( std::vector<std::string> input, std::string name, fbtTestToyMC_config &config, TH1F* h_lep_pt, float &lep_pt, TH1F* h_lep_eta, float &lep_eta, TH2F* h_lep_pt_eta, float &fakes, float &poserr, float &negerr, int icase) { 
+StatusCode doMerge( const std::vector<std::string> & input, const std::string & name, fbtTestToyMC_config &config, TH1F* h_lep_pt, float &lep_pt, TH1F* h_lep_eta, float &lep_eta, TH2F* h_lep_pt_eta, float &fakes, float &poserr, float &negerr, int icase) { 
 
   std::string haddcmd = "hadd -f "+config.mergeFileNameBase+"_"+name+"_"+to_string(icase)+".root "+config.mergeFileNameBase+"_"+name+"_"+to_string(icase)+"_*.root";
   system(haddcmd.c_str());

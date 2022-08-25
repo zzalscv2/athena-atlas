@@ -271,7 +271,7 @@ StatusCode LhoodMM_tools::addEventCustom() {
   std::vector<Efficiency> fakeEff_vals;  
   std::vector<int> charges;
   std::vector<FakeBkgTools::ParticleData>::const_iterator particles_it;
-  for (particles_it = m_particles.begin(); particles_it != m_particles.end(); particles_it++) { 
+  for (particles_it = m_particles.begin(); particles_it != m_particles.end(); ++particles_it) { 
     const FakeBkgTools::ParticleData& p = *particles_it;
     isTight_vals.push_back(p.tight);
     realEff_vals.push_back(p.real_efficiency);
@@ -362,7 +362,7 @@ StatusCode LhoodMM_tools::incrementMatrices(const LhoodMMEvent& mmevt) {
   }
   
   std::map<TH2*, std::pair<const float*, const float*> >::iterator map2_iter;
-  for (map2_iter = m_values_2dhisto_map.begin(); map2_iter != m_values_2dhisto_map.end(); map2_iter++) {
+  for (map2_iter = m_values_2dhisto_map.begin(); map2_iter != m_values_2dhisto_map.end(); ++map2_iter) {
     std::pair<const float*, const float*> val = map2_iter->second;
     TH2* h = map2_iter->first;
  
@@ -387,7 +387,7 @@ StatusCode LhoodMM_tools::incrementMatrices(const LhoodMMEvent& mmevt) {
   }
 
   std::map<TH3*, std::tuple<const float*, const float*, const float*> >::iterator map3_iter;
-  for (map3_iter = m_values_3dhisto_map.begin(); map3_iter != m_values_3dhisto_map.end(); map3_iter++) {
+  for (map3_iter = m_values_3dhisto_map.begin(); map3_iter != m_values_3dhisto_map.end(); ++map3_iter) {
     std::tuple<const float*, const float*, const float*> val = map3_iter->second;
     TH3* h = map3_iter->first;
     auto histoMap = m_fitInfo_3dhisto_map.find(map3_iter->first);
@@ -903,7 +903,7 @@ double LhoodMM_tools::nfakes(Double_t *poserr, Double_t *negerr) {
     for (unsigned isublep = 0; isublep < m_real_indices[ilep-1].size(); isublep++) {
       TString locsreal = tmpstr;
       char tmpchar2[20];
-      sprintf(tmpchar2, "_%i", isublep);
+      sprintf(tmpchar2, "_%u", isublep);
       locsreal.Append(tmpchar2);
       parameterName.push_back(locsreal);
       if (isublep == 0) {
