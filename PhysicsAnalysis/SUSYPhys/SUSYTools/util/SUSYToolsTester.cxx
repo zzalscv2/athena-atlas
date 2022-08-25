@@ -219,6 +219,7 @@ int main( int argc, char* argv[] ) {
     myGRLs.push_back(PathResolverFindCalibFile("GoodRunsLists/data16_13TeV/20180129/physics_25ns_21.0.19.xml"));
     myGRLs.push_back(PathResolverFindCalibFile("GoodRunsLists/data17_13TeV/20180619/physics_25ns_Triggerno17e33prim.xml"));
     myGRLs.push_back(PathResolverFindCalibFile("GoodRunsLists/data18_13TeV/20190219/physics_25ns_Triggerno17e33prim.xml"));
+    myGRLs.push_back(PathResolverFindCalibFile("GoodRunsLists/data22_13p6TeV/20220820/data22_13p6TeV.periodDE_DetStatus-v108-pro28_MERGED_PHYS_StandardGRL_All_Good_25ns_ignore__TRIG_HLT_MUO_Upstream_Barrel_problem__TRIG_HLT_MUO_Upstream_Endcap_problem__TRIG_L1_MUB_coverage__TRIG_L1_MUE_misconf_electronics__TRIG_L1_MUB_lost_sync.xml"));
 
     ANA_CHECK( m_grl.setProperty("GoodRunsListVec", myGRLs) );
     ANA_CHECK( m_grl.setProperty("PassThrough", false) );

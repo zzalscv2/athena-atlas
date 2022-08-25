@@ -111,6 +111,7 @@ namespace Trig {
   // Need the TrigDecisionTool directly for getChainGroup, features, and GetPreScale
   class TrigDecisionTool;
   class IMatchingTool;
+  class IMatchScoringTool;
   class FeatureContainer;
 }
 
@@ -711,9 +712,9 @@ namespace ST {
     std::string m_IsoCloseByORpassLabel;
 
     bool m_useTRUTH3;
-    bool m_isRun3;
 
     std::map<std::string,bool> m_slices;
+    bool m_isRun3;
 
     std::string m_metJetSelection;
 
@@ -851,6 +852,8 @@ namespace ST {
     asg::AnaToolHandle<TrigConf::ITrigConfigTool> m_trigConfTool;
     asg::AnaToolHandle<Trig::TrigDecisionTool> m_trigDecTool;
     asg::AnaToolHandle<Trig::IMatchingTool> m_trigMatchingTool;
+    asg::AnaToolHandle<Trig::IMatchScoringTool> m_trigMatchScoringTool;
+    asg::AnaToolHandle<Trig::IMatchScoringTool> m_trigDRScoringTool;
     //
     asg::AnaToolHandle<CP::IIsolationCorrectionTool> m_isoCorrTool;
     asg::AnaToolHandle<CP::IIsolationSelectionTool> m_isoTool;
