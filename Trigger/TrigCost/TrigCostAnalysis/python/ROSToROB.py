@@ -1,14 +1,20 @@
-# Copyright (C) 2002-2020 CERN for the benefit of the ATLAS collaboration
 
+#
+# Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+#
 '''
-@file rob2ros.py
-@brief Store ROS to ROS map extracted from /atlas/oks/tdaq-09-02-01/combined/partitions/ATLAS.data.xml
+@file ROSToROB.py
+@brief Store ROS to ROB map extracted from tdaq-09-04-00/combined/partitions/ATLAS.data.xml
 '''
 
 ros2rob = {
 	'ROS-TDQ-CTP-00': 
 	[
 		0x770000 
+	] ,
+	'ROS-TDQ-MUCTPI-00': 
+	[
+		0x760000 
 	] ,
 	'ROS-TDQ-CALPP-00': 
 	[
@@ -141,11 +147,7 @@ ros2rob = {
 		0x140200 ,
 		0x140201 ,
 		0x140202 ,
-		0x140203 ,
-		0x150210 ,
-		0x150211 ,
-		0x150212 ,
-		0x150213 
+		0x140203 
 	] ,
 	'ROS-PIX-BL-00': 
 	[
@@ -751,6 +753,11 @@ ros2rob = {
 		0x341f02 ,
 		0x342001 ,
 		0x342002 
+	] ,
+	'ROS-FWD-BCM-00': 
+	[
+		0x81004a ,
+		0x81004c 
 	] ,
 	'ROS-LAR-EMBA-00': 
 	[
@@ -1416,6 +1423,31 @@ ros2rob = {
 		0x430084 ,
 		0x430089 
 	] ,
+	'ROS-LAR-HECFCAL-00': 
+	[
+		0x450000 ,
+		0x450001 ,
+		0x450002 ,
+		0x450003 ,
+		0x450004 ,
+		0x450005 ,
+		0x450006 ,
+		0x450007 ,
+		0x450008 ,
+		0x450009 ,
+		0x45000a ,
+		0x45000b 
+	] ,
+	'ROS-LAR-HECFCAL-01': 
+	[
+		0x470000 ,
+		0x470001 ,
+		0x470002 ,
+		0x470003 ,
+		0x470004 ,
+		0x470005 ,
+		0x470006 
+	] ,
 	'ROS-LAR-EMECC-00': 
 	[
 		0x440000 ,
@@ -1572,20 +1604,8 @@ ros2rob = {
 		0x440084 ,
 		0x440089 
 	] ,
-	'ROS-LAR-HECFCAL-00': 
+	'ROS-LAR-HECFCAL-02': 
 	[
-		0x450000 ,
-		0x450001 ,
-		0x450002 ,
-		0x450003 ,
-		0x450004 ,
-		0x450005 ,
-		0x450006 ,
-		0x450007 ,
-		0x450008 ,
-		0x450009 ,
-		0x45000a ,
-		0x45000b ,
 		0x460000 ,
 		0x460001 ,
 		0x460002 ,
@@ -1599,15 +1619,8 @@ ros2rob = {
 		0x46000a ,
 		0x46000b 
 	] ,
-	'ROS-LAR-HECFCAL-01': 
+	'ROS-LAR-HECFCAL-03': 
 	[
-		0x470000 ,
-		0x470001 ,
-		0x470002 ,
-		0x470003 ,
-		0x470004 ,
-		0x470005 ,
-		0x470006 ,
 		0x480000 ,
 		0x480001 ,
 		0x480002 ,
@@ -1791,44 +1804,6 @@ ros2rob = {
 		0x540007 ,
 		0x540107 
 	] ,
-	'ROS-CSC-ECA-00': 
-	[
-		0x690080 ,
-		0x690081 ,
-		0x690082 ,
-		0x690083 ,
-		0x690084 ,
-		0x690085 ,
-		0x690086 ,
-		0x690087 ,
-		0x690088 ,
-		0x690089 ,
-		0x69008a ,
-		0x69008b ,
-		0x69008c ,
-		0x69008d ,
-		0x69008e ,
-		0x69008f 
-	] ,
-	'ROS-CSC-ECC-00': 
-	[
-		0x6a0080 ,
-		0x6a0081 ,
-		0x6a0082 ,
-		0x6a0083 ,
-		0x6a0084 ,
-		0x6a0085 ,
-		0x6a0086 ,
-		0x6a0087 ,
-		0x6a0088 ,
-		0x6a0089 ,
-		0x6a008a ,
-		0x6a008b ,
-		0x6a008c ,
-		0x6a008d ,
-		0x6a008e ,
-		0x6a008f 
-	] ,
 	'ROS-MDT-BA-00': 
 	[
 		0x610000 ,
@@ -1887,7 +1862,6 @@ ros2rob = {
 	[
 		0x610030 ,
 		0x610031 ,
-		0x610080 ,
 		0x610032 ,
 		0x610033 
 	] ,
@@ -1949,7 +1923,6 @@ ros2rob = {
 	[
 		0x620030 ,
 		0x620031 ,
-		0x620080 ,
 		0x620032 ,
 		0x620033 
 	] ,
@@ -2220,6 +2193,614 @@ ros2rob = {
 	[
 		0x840000 ,
 		0x840001 
+	] ,
+	'ROS-FWD-ZDC-00': 
+	[
+		0x830000 ,
+		0x830001 ,
+		0x830002 ,
+		0x830003 ,
+		0x830004 ,
+		0x830005 
+	] ,
+	'l1calo-swrod-app-trex6': 
+	[
+		0x711006 ,
+		0x711016 ,
+		0x711026 ,
+		0x711036 
+	] ,
+	'l1calo-swrod-app-trex7': 
+	[
+		0x711007 ,
+		0x711017 ,
+		0x711027 ,
+		0x711037 
+	] ,
+	'l1calo-swrod-app-efex0': 
+	[
+		0x931000 ,
+		0x931010 ,
+		0x931020 ,
+		0x931030 ,
+		0x931040 ,
+		0x931050 ,
+		0x931060 ,
+		0x931070 ,
+		0x931080 ,
+		0x931090 ,
+		0x9310a0 ,
+		0x9310b0 ,
+		0x941000 
+	] ,
+	'l1calo-swrod-app-efex1': 
+	[
+		0x931100 ,
+		0x931110 ,
+		0x931120 ,
+		0x931130 ,
+		0x931140 ,
+		0x931150 ,
+		0x931160 ,
+		0x931170 ,
+		0x931180 ,
+		0x931190 ,
+		0x9311a0 ,
+		0x9311b0 ,
+		0x941100 
+	] ,
+	'l1calo-swrod-app-gfex': 
+	[
+		0x933000 ,
+		0x943000 
+	] ,
+	'l1calo-swrod-app-jfextopo': 
+	[
+		0x932000 ,
+		0x932010 ,
+		0x932020 ,
+		0x932030 ,
+		0x932040 ,
+		0x932050 ,
+		0x942000 ,
+		0x911010 ,
+		0x911020 ,
+		0x911030 ,
+		0x911800 
+	] ,
+	'LARSWROD_SWROD00_EMBA_1': 
+	[
+		0x411000 ,
+		0x411001 
+	] ,
+	'LARSWROD_SWROD00_EMBA_2': 
+	[
+		0x411002 ,
+		0x411003 
+	] ,
+	'LARSWROD_SWROD00_EMBA_EMECA_1': 
+	[
+		0x491000 ,
+		0x491001 
+	] ,
+	'LARSWROD_SWROD00_EMBA_EMECA_2': 
+	[
+		0x491002 ,
+		0x491003 
+	] ,
+	'LARSWROD_SWROD00_EMECA_HECA': 
+	[
+		0x4b1000 ,
+		0x4b1001 
+	] ,
+	'LARSWROD_SWROD01_EMBA_1': 
+	[
+		0x411004 ,
+		0x411005 
+	] ,
+	'LARSWROD_SWROD01_EMBA_2': 
+	[
+		0x411006 ,
+		0x411007 
+	] ,
+	'LARSWROD_SWROD01_EMBA_EMECA_1': 
+	[
+		0x491004 ,
+		0x491005 
+	] ,
+	'LARSWROD_SWROD01_EMBA_EMECA_2': 
+	[
+		0x491006 ,
+		0x491007 
+	] ,
+	'LARSWROD_SWROD01_EMECA_HECA': 
+	[
+		0x4b1002 ,
+		0x4b1003 
+	] ,
+	'LARSWROD_SWROD02_EMECA_1': 
+	[
+		0x431000 ,
+		0x431001 
+	] ,
+	'LARSWROD_SWROD02_EMECA_2': 
+	[
+		0x431002 ,
+		0x431003 
+	] ,
+	'LARSWROD_SWROD02_EMECA_3': 
+	[
+		0x431004 ,
+		0x431005 
+	] ,
+	'LARSWROD_SWROD02_EMECA_4': 
+	[
+		0x431006 ,
+		0x431007 
+	] ,
+	'LARSWROD_SWROD02_FCALA': 
+	[
+		0x471000 
+	] ,
+	'LARSWROD_SWROD03_EMBA_1': 
+	[
+		0x411008 ,
+		0x411009 
+	] ,
+	'LARSWROD_SWROD03_EMBA_2': 
+	[
+		0x41100a ,
+		0x41100b 
+	] ,
+	'LARSWROD_SWROD03_EMBA_EMECA_1': 
+	[
+		0x491008 ,
+		0x491009 
+	] ,
+	'LARSWROD_SWROD03_EMBA_EMECA_2': 
+	[
+		0x49100a ,
+		0x49100b 
+	] ,
+	'LARSWROD_SWROD03_EMECA_HECA': 
+	[
+		0x4b1004 ,
+		0x4b1005 
+	] ,
+	'LARSWROD_SWROD04_EMBA_1': 
+	[
+		0x41100c ,
+		0x41100d 
+	] ,
+	'LARSWROD_SWROD04_EMBA_2': 
+	[
+		0x41100e ,
+		0x41100f 
+	] ,
+	'LARSWROD_SWROD04_EMBA_EMECA_1': 
+	[
+		0x49100c ,
+		0x49100d 
+	] ,
+	'LARSWROD_SWROD04_EMBA_EMECA_2': 
+	[
+		0x49100e ,
+		0x49100f 
+	] ,
+	'LARSWROD_SWROD04_EMECA_HECA': 
+	[
+		0x4b1006 ,
+		0x4b1007 
+	] ,
+	'LARSWROD_SWROD05_EMECA_1': 
+	[
+		0x431008 ,
+		0x431009 
+	] ,
+	'LARSWROD_SWROD05_EMECA_2': 
+	[
+		0x43100a ,
+		0x43100b 
+	] ,
+	'LARSWROD_SWROD05_EMECA_3': 
+	[
+		0x43100c ,
+		0x43100d 
+	] ,
+	'LARSWROD_SWROD05_EMECA_4': 
+	[
+		0x43100e ,
+		0x43100f 
+	] ,
+	'LARSWROD_SWROD05_FCALA': 
+	[
+		0x471001 
+	] ,
+	'LARSWROD_SWROD07_EMBC_1': 
+	[
+		0x421000 ,
+		0x421001 
+	] ,
+	'LARSWROD_SWROD07_EMBC_2': 
+	[
+		0x421002 ,
+		0x421003 
+	] ,
+	'LARSWROD_SWROD07_EMBC_EMECC_1': 
+	[
+		0x4a1000 ,
+		0x4a1001 
+	] ,
+	'LARSWROD_SWROD07_EMBC_EMECC_2': 
+	[
+		0x4a1002 ,
+		0x4a1003 
+	] ,
+	'LARSWROD_SWROD07_EMECC_HECC': 
+	[
+		0x4c1000 ,
+		0x4c1001 
+	] ,
+	'LARSWROD_SWROD08_EMBC_1': 
+	[
+		0x421004 ,
+		0x421005 
+	] ,
+	'LARSWROD_SWROD08_EMBC_2': 
+	[
+		0x421006 ,
+		0x421007 
+	] ,
+	'LARSWROD_SWROD08_EMBC_EMECC_1': 
+	[
+		0x4a1004 ,
+		0x4a1005 
+	] ,
+	'LARSWROD_SWROD08_EMBC_EMECC_2': 
+	[
+		0x4a1006 ,
+		0x4a1007 
+	] ,
+	'LARSWROD_SWROD08_EMECC_HECC': 
+	[
+		0x4c1002 ,
+		0x4c1003 
+	] ,
+	'LARSWROD_SWROD09_EMECC_1': 
+	[
+		0x441000 ,
+		0x441001 
+	] ,
+	'LARSWROD_SWROD09_EMECC_2': 
+	[
+		0x441002 ,
+		0x441003 
+	] ,
+	'LARSWROD_SWROD09_EMECC_3': 
+	[
+		0x441004 ,
+		0x441005 
+	] ,
+	'LARSWROD_SWROD09_EMECC_4': 
+	[
+		0x441006 ,
+		0x441007 
+	] ,
+	'LARSWROD_SWROD09_FCALC': 
+	[
+		0x481000 
+	] ,
+	'LARSWROD_SWROD10_EMBC_1': 
+	[
+		0x421008 ,
+		0x421009 
+	] ,
+	'LARSWROD_SWROD10_EMBC_2': 
+	[
+		0x42100a ,
+		0x42100b 
+	] ,
+	'LARSWROD_SWROD10_EMBC_EMECC_1': 
+	[
+		0x4a1008 ,
+		0x4a1009 
+	] ,
+	'LARSWROD_SWROD10_EMBC_EMECC_2': 
+	[
+		0x4a100a ,
+		0x4a100b 
+	] ,
+	'LARSWROD_SWROD10_EMECC_HECC': 
+	[
+		0x4c1004 ,
+		0x4c1005 
+	] ,
+	'LARSWROD_SWROD11_EMBC_1': 
+	[
+		0x42100c ,
+		0x42100d 
+	] ,
+	'LARSWROD_SWROD11_EMBC_2': 
+	[
+		0x42100e ,
+		0x42100f 
+	] ,
+	'LARSWROD_SWROD11_EMBC_EMECC_1': 
+	[
+		0x4a100c ,
+		0x4a100d 
+	] ,
+	'LARSWROD_SWROD11_EMBC_EMECC_2': 
+	[
+		0x4a100e ,
+		0x4a100f 
+	] ,
+	'LARSWROD_SWROD11_EMECC_HECC': 
+	[
+		0x4c1006 ,
+		0x4c1007 
+	] ,
+	'LARSWROD_SWROD12_EMECC_1': 
+	[
+		0x441008 ,
+		0x441009 
+	] ,
+	'LARSWROD_SWROD12_EMECC_2': 
+	[
+		0x44100a ,
+		0x44100b 
+	] ,
+	'LARSWROD_SWROD12_EMECC_3': 
+	[
+		0x44100c ,
+		0x44100d 
+	] ,
+	'LARSWROD_SWROD12_EMECC_4': 
+	[
+		0x44100e ,
+		0x44100f 
+	] ,
+	'LARSWROD_SWROD12_FCALC': 
+	[
+		0x481001 
+	] ,
+	'NSW-A-S01-swRod': 
+	[
+		0x6b0010 ,
+		0x6b0000 ,
+		0x6d0000 ,
+		0x6d0020 
+	] ,
+	'NSW-A-S02-swRod': 
+	[
+		0x6b0011 ,
+		0x6b0001 ,
+		0x6d0001 ,
+		0x6d0021 
+	] ,
+	'NSW-A-S03-swRod': 
+	[
+		0x6b0012 ,
+		0x6b0002 ,
+		0x6d0002 ,
+		0x6d0022 
+	] ,
+	'NSW-A-S04-swRod': 
+	[
+		0x6b0013 ,
+		0x6b0003 ,
+		0x6d0003 ,
+		0x6d0023 
+	] ,
+	'NSW-A-S05-swRod': 
+	[
+		0x6b0014 ,
+		0x6b0004 ,
+		0x6d0004 ,
+		0x6d0024 
+	] ,
+	'NSW-A-S06-swRod': 
+	[
+		0x6b0015 ,
+		0x6b0005 ,
+		0x6d0005 ,
+		0x6d0025 
+	] ,
+	'NSW-A-S07-swRod': 
+	[
+		0x6b0016 ,
+		0x6b0006 ,
+		0x6d0006 ,
+		0x6d0026 
+	] ,
+	'NSW-A-S08-swRod': 
+	[
+		0x6b0017 ,
+		0x6b0007 ,
+		0x6d0007 ,
+		0x6d0027 
+	] ,
+	'NSW-A-S09-swRod': 
+	[
+		0x6b0018 ,
+		0x6b0008 ,
+		0x6d0008 ,
+		0x6d0028 
+	] ,
+	'NSW-A-S10-swRod': 
+	[
+		0x6b0019 ,
+		0x6b0009 ,
+		0x6d0009 ,
+		0x6d0029 
+	] ,
+	'NSW-A-S11-swRod': 
+	[
+		0x6b001a ,
+		0x6b000a ,
+		0x6d000a ,
+		0x6d002a 
+	] ,
+	'NSW-A-S12-swRod': 
+	[
+		0x6b001b ,
+		0x6b000b ,
+		0x6d000b ,
+		0x6d002b 
+	] ,
+	'NSW-A-S13-swRod': 
+	[
+		0x6b001c ,
+		0x6b000c ,
+		0x6d000c ,
+		0x6d002c 
+	] ,
+	'NSW-A-S14-swRod': 
+	[
+		0x6b001d ,
+		0x6b000d ,
+		0x6d000d ,
+		0x6d002d 
+	] ,
+	'NSW-A-S15-swRod': 
+	[
+		0x6b001e ,
+		0x6b000e ,
+		0x6d000e ,
+		0x6d002e 
+	] ,
+	'NSW-A-S16-swRod': 
+	[
+		0x6b001f ,
+		0x6b000f ,
+		0x6d000f ,
+		0x6d002f 
+	] ,
+	'NSW-C-S01-swRod': 
+	[
+		0x6c0010 ,
+		0x6c0000 ,
+		0x6e0000 ,
+		0x6e0020 
+	] ,
+	'NSW-C-S02-swRod': 
+	[
+		0x6c0011 ,
+		0x6c0001 ,
+		0x6e0001 ,
+		0x6e0021 
+	] ,
+	'NSW-C-S03-swRod': 
+	[
+		0x6c0012 ,
+		0x6c0002 ,
+		0x6e0002 ,
+		0x6e0022 
+	] ,
+	'NSW-C-S04-swRod': 
+	[
+		0x6c0013 ,
+		0x6c0003 ,
+		0x6e0003 ,
+		0x6e0023 
+	] ,
+	'NSW-C-S05-swRod': 
+	[
+		0x6c0014 ,
+		0x6c0004 ,
+		0x6e0004 ,
+		0x6e0024 
+	] ,
+	'NSW-C-S06-swRod': 
+	[
+		0x6c0015 ,
+		0x6c0005 ,
+		0x6e0005 ,
+		0x6e0025 
+	] ,
+	'NSW-C-S07-swRod': 
+	[
+		0x6c0016 ,
+		0x6c0006 ,
+		0x6e0006 ,
+		0x6e0026 
+	] ,
+	'NSW-C-S08-swRod': 
+	[
+		0x6c0017 ,
+		0x6c0007 ,
+		0x6e0007 ,
+		0x6e0027 
+	] ,
+	'NSW-C-S09-swRod': 
+	[
+		0x6c0018 ,
+		0x6c0008 ,
+		0x6e0008 ,
+		0x6e0028 
+	] ,
+	'NSW-C-S10-swRod': 
+	[
+		0x6c0019 ,
+		0x6c0009 ,
+		0x6e0009 ,
+		0x6e0029 
+	] ,
+	'NSW-C-S11-swRod': 
+	[
+		0x6c001a ,
+		0x6c000a ,
+		0x6e000a ,
+		0x6e002a 
+	] ,
+	'NSW-C-S12-swRod': 
+	[
+		0x6c001b ,
+		0x6c000b ,
+		0x6e000b ,
+		0x6e002b 
+	] ,
+	'NSW-C-S13-swRod': 
+	[
+		0x6c001c ,
+		0x6c000c ,
+		0x6e000c ,
+		0x6e002c 
+	] ,
+	'NSW-C-S14-swRod': 
+	[
+		0x6c001d ,
+		0x6c000d ,
+		0x6e000d ,
+		0x6e002d 
+	] ,
+	'NSW-C-S15-swRod': 
+	[
+		0x6c001e ,
+		0x6c000e ,
+		0x6e000e ,
+		0x6e002e 
+	] ,
+	'NSW-C-S16-swRod': 
+	[
+		0x6c001f ,
+		0x6c000f ,
+		0x6e000f ,
+		0x6e002f 
+	] ,
+	'RoIBuilder': 
+	[
+		0x770001 ,
+		0x7300a8 ,
+		0x7300a9 ,
+		0x7300aa ,
+		0x7300ab ,
+		0x7500ac ,
+		0x7500ad ,
+		0x910081 ,
+		0x910091 ,
+		0x910082 ,
+		0x910092 
 	] 
 }
 
@@ -2229,3 +2810,4 @@ class ROSToROBMap:
 
 	def get_mapping(self):
 		return self.data
+
