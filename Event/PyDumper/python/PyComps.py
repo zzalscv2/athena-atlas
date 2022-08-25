@@ -308,6 +308,7 @@ class PySgDumper (PyAthena.Alg):
                 n  = str(p.name())
                 tp = _typename(clid)
                 if n.endswith('Aux.'): continue
+                if n.endswith('_DELETED'): continue
                 excluded = False
                 for exc in elist:
                     if fnmatch (n, exc) or (tp and fnmatch(tp, exc)):
@@ -339,7 +340,7 @@ class PySgDumper (PyAthena.Alg):
                     o = _get (cont_key)
                 else:
                     o = _retrieve (cont_type, cont_key)
-                if not o:
+                if o is None:
                     _add_fail ((cont_key, cont_type, 'retrieve failed'))
                     if self._evt_nbr==1:
                         _warn ('could not retrieve object [%s#%s]',
