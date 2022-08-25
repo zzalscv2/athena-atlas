@@ -1168,10 +1168,10 @@ const Trk::Layer* Muon::MuonTGMeasurementTool::associatedLayer(Identifier id, co
         if (lay) return lay;
     }
 
-    if (vol->confinedArbitraryLayers()) {
-        const std::vector<const Trk::Layer*>* unOrdLay = vol->confinedArbitraryLayers();
-        std::vector<const Trk::Layer*>::const_iterator iter = unOrdLay->begin();
-        while (!lay && iter != unOrdLay->end()) {
+    if (!vol->confinedArbitraryLayers().empty()) {
+        Trk::ArraySpan<const Trk::Layer* const> unOrdLay = vol->confinedArbitraryLayers();
+        Trk::ArraySpan<const Trk::Layer* const>::const_iterator iter = unOrdLay.begin();
+        while (!lay && iter != unOrdLay.end()) {
             lay = match(id, *iter);
             if (lay) break;
             iter++;

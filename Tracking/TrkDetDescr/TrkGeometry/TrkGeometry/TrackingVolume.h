@@ -34,6 +34,7 @@
 // ATH_MSG macros
 #include "AthenaBaseComps/AthMsgStreamMacros.h"
 
+#include "CxxUtils/span.h"
 #include "CxxUtils/CachedUniquePtr.h"
 #include "CxxUtils/checker_macros.h"
 #ifndef TRKGEOMETRY_MAXLAYERATTEMPTS
@@ -59,6 +60,8 @@ using LayerIntersection = FullIntersection<Layer, Surface, T>;
 template<class T>
 using BoundaryIntersection =
   FullIntersection<BoundarySurface<TrackingVolume>, Surface, T>;
+template<class T>
+using ArraySpan = CxxUtils::span<T>;
 
 /**
  @class TrackingVolume
@@ -169,14 +172,14 @@ public:
   TrackingVolume(Amg::Transform3D* htrans,
                  VolumeBounds* volbounds,
                  const Material& matprop,
-                 const std::vector<const Layer*>* arbitraryLayers,
+                 const std::vector<Layer*>* arbitraryLayers,
                  const std::string& volumeName = "undefined");
 
   /** Constructor for a full equipped Tracking Volume with arbitrary layers
     -  mixed =======> 2 c) arbitrarily oriented layers */
   TrackingVolume(const Volume& volume,
                  const Material& matprop,
-                 const std::vector<const Layer*>* arbitraryLayers,
+                 const std::vector<Layer*>* arbitraryLayers,
                  const std::string& volumeName = "undefined");
 
   /** Constructor for a full equipped Tracking Volume with arbitrary layers AND
@@ -184,7 +187,7 @@ public:
     -  mixed =======> 1 e) unordered layers AND unordered subvolumes */
   TrackingVolume(Amg::Transform3D* htrans,
                  VolumeBounds* volbounds,
-                 const std::vector<const Layer*>* arbitraryLayers,
+                 const std::vector<Layer*>* arbitraryLayers,
                  const std::vector<const TrackingVolume*>* unorderedSubVolumes,
                  const Material& matprop,
                  const std::string& volumeName = "undefined");
@@ -193,7 +196,7 @@ public:
     subVolumes -
     -  mixed =======> 2 e) unordered layers AND unordered subvolumes */
   TrackingVolume(const Volume& volume,
-                 const std::vector<const Layer*>* arbitraryLayers,
+                 const std::vector<Layer*>* arbitraryLayers,
                  const std::vector<const TrackingVolume*>* unorderedSubVolumes,
                  const Material& matprop,
                  const std::string& volumeName = "undefined");
@@ -275,11 +278,11 @@ public:
   /** Return the subLayer array */
   LayerArray* confinedLayers();
 
-  /** Return the subLayer array - not the ownership*/
-  const std::vector<const Layer*>* confinedArbitraryLayers() const;
+  /** Return the confined subLayer array */
+  ArraySpan<Layer const * const> confinedArbitraryLayers() const;
 
-  /** Return the subLayer array - not the ownership*/
-  const std::vector<const Layer*>* confinedArbitraryLayers();
+  /** Return the confined subLayer array. Layers are not const */
+  ArraySpan<Layer* const> confinedArbitraryLayers();
 
   /** Return the subLayerarray including the ownership*/
   const LayerArray* checkoutConfinedLayers() const;
@@ -438,7 +441,7 @@ private:
   const std::vector<const TrackingVolume*>* m_confinedDenseVolumes; 
   //(b)
   //!< Unordered Layers inside the Volume
-  const std::vector<const Layer*>* m_confinedArbitraryLayers;
+  const std::vector<Layer*>* m_confinedArbitraryLayers;
 
   ////!< Volumes to glue Volumes from the outside
   CxxUtils::CachedUniquePtrT<GlueVolumesDescriptor> m_outsideGlueVolumes;

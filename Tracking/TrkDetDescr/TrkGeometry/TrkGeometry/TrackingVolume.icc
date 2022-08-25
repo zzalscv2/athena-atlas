@@ -38,16 +38,25 @@ TrackingVolume::confinedLayers()
   return m_confinedLayers;
 }
 
-inline const std::vector<const Layer*>*
+inline ArraySpan<Layer const* const>
 TrackingVolume::confinedArbitraryLayers() const
 {
-  return m_confinedArbitraryLayers;
+  if (m_confinedArbitraryLayers) {
+    return ArraySpan<Layer const* const>(&*m_confinedArbitraryLayers->begin(),
+                                         &*m_confinedArbitraryLayers->end());
+  }
+  return {};
 }
 
-inline const std::vector<const Layer*>*
+inline ArraySpan<Layer* const>
 TrackingVolume::confinedArbitraryLayers()
 {
-  return m_confinedArbitraryLayers;
+
+  if (m_confinedArbitraryLayers) {
+    return ArraySpan<Layer* const>(&*m_confinedArbitraryLayers->begin(),
+                                   &*m_confinedArbitraryLayers->end());
+  }
+  return {};
 }
 
 inline const TrackingVolumeArray*

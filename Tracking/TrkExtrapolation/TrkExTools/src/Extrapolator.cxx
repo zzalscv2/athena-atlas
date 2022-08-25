@@ -753,8 +753,7 @@ Trk::Extrapolator::extrapolateToNextMaterialLayer(const EventContext& ctx,
           if ((*iTer)->trackingVolume()->zOverAtimesRho() != 0. &&
               (!(*iTer)->trackingVolume()->confinedDenseVolumes() ||
                (*iTer)->trackingVolume()->confinedDenseVolumes()->empty()) &&
-              (!(*iTer)->trackingVolume()->confinedArbitraryLayers() ||
-               (*iTer)->trackingVolume()->confinedArbitraryLayers()->empty())) {
+              ((*iTer)->trackingVolume()->confinedArbitraryLayers().empty())) {
             cache.m_denseVols.emplace_back((*iTer)->trackingVolume(), detBounds.size());
 
             for (unsigned int ibb = 0; ibb < detBounds.size(); ibb++) {
@@ -762,19 +761,19 @@ Trk::Extrapolator::extrapolateToNextMaterialLayer(const EventContext& ctx,
               cache.m_denseBoundaries.emplace_back(&surf, true);
             }
           }
-          const std::vector<const Trk::Layer*>* confLays =
+          Trk::ArraySpan<const Trk::Layer* const> confLays =
             (*iTer)->trackingVolume()->confinedArbitraryLayers();
           if ((*iTer)->trackingVolume()->confinedDenseVolumes() ||
-              (confLays && confLays->size() > detBounds.size())) {
+              (confLays.size() > detBounds.size())) {
             cache.m_detachedVols.emplace_back(*iTer, detBounds.size());
             for (unsigned int ibb = 0; ibb < detBounds.size(); ibb++) {
-              const Trk::Surface& surf = (detBounds[ibb].get())->surfaceRepresentation();
+              const Trk::Surface& surf =
+                (detBounds[ibb].get())->surfaceRepresentation();
               cache.m_detachedBoundaries.emplace_back(&surf, true);
             }
-          } else if (confLays) {
-            std::vector<const Trk::Layer*>::const_iterator lIt = confLays->begin();
-            for (; lIt != confLays->end(); ++lIt) {
-              cache.addOneNavigationLayer((*iTer)->trackingVolume(), (*lIt));
+          } else if (!confLays.empty()) {
+            for (const Trk::Layer* const lIt : confLays) {
+              cache.addOneNavigationLayer((*iTer)->trackingVolume(), (lIt));
             }
           }
         }
@@ -953,17 +952,17 @@ Trk::Extrapolator::extrapolateToNextMaterialLayer(const EventContext& ctx,
     }
     // inert material
     const std::vector<const Trk::TrackingVolume*>* confinedDense = dVol->confinedDenseVolumes();
-    const std::vector<const Trk::Layer*>* confinedLays = dVol->confinedArbitraryLayers();
+    Trk::ArraySpan<const Trk::Layer* const> confinedLays = dVol->confinedArbitraryLayers();
 
-    if (!active && !confinedDense && !confinedLays) {
+    if (!active && !confinedDense && confinedLays.empty()) {
       continue;
     }
     const std::vector<SharedObject<const BoundarySurface<TrackingVolume>>>& bounds =
       dVol->boundarySurfaces();
-    if (!active && !confinedDense && confinedLays->size() <= bounds.size()) {
+    if (!active && !confinedDense && confinedLays.size() <= bounds.size()) {
       continue;
     }
-    if (confinedDense || confinedLays) {
+    if (confinedDense || !confinedLays.empty()) {
       cache.m_navigVolsInt.emplace_back(dVol, bounds.size());
       for (unsigned int ib = 0; ib < bounds.size(); ib++) {
         const Trk::Surface& surf = (bounds[ib].get())->surfaceRepresentation();
@@ -983,9 +982,9 @@ Trk::Extrapolator::extrapolateToNextMaterialLayer(const EventContext& ctx,
         }
       }
       // collect unordered layers
-      if (confinedLays) {
-        for (unsigned int il = 0; il < confinedLays->size(); il++) {
-          cache.addOneNavigationLayer(dVol, (*confinedLays)[il]);
+      if (!confinedLays.empty()) {
+        for (unsigned int il = 0; il < confinedLays.size(); il++) {
+          cache.addOneNavigationLayer(dVol, confinedLays[il]);
         }
       }
     } else { // active material
@@ -1038,10 +1037,10 @@ Trk::Extrapolator::extrapolateToNextMaterialLayer(const EventContext& ctx,
           if (nextLayer && nextLayer != lay) {
             cache.addOneNavigationLayer(detVol, nextLayer);
           }
-        } else if (detVol->confinedArbitraryLayers()) {
-          const std::vector<const Trk::Layer*>* layers = detVol->confinedArbitraryLayers();
-          for (unsigned int il = 0; il < layers->size(); il++) {
-            cache.addOneNavigationLayer(detVol, (*layers)[il]);
+        } else if (!detVol->confinedArbitraryLayers().empty()) {
+          Trk::ArraySpan<const Trk::Layer* const> layers = detVol->confinedArbitraryLayers();
+          for (unsigned int il = 0; il < layers.size(); il++) {
+            cache.addOneNavigationLayer(detVol, layers[il]);
           }
         }
       }
@@ -4783,27 +4782,25 @@ Trk::Extrapolator::extrapolateToVolumeWithPathLimit(const EventContext& ctx,
           if ((*iTer)->trackingVolume()->zOverAtimesRho() != 0. &&
               (!(*iTer)->trackingVolume()->confinedDenseVolumes() ||
                (*iTer)->trackingVolume()->confinedDenseVolumes()->empty()) &&
-              (!(*iTer)->trackingVolume()->confinedArbitraryLayers() ||
-               (*iTer)->trackingVolume()->confinedArbitraryLayers()->empty())) {
+              ((*iTer)->trackingVolume()->confinedArbitraryLayers().empty())) {
             cache.m_denseVols.emplace_back((*iTer)->trackingVolume(), detBounds.size());
             for (unsigned int ibb = 0; ibb < detBounds.size(); ibb++) {
               const Trk::Surface& surf = (detBounds[ibb].get())->surfaceRepresentation();
               cache.m_denseBoundaries.emplace_back(&surf, true);
             }
           }
-          const std::vector<const Trk::Layer*>* confLays =
+          Trk::ArraySpan<const Trk::Layer* const> confLays =
             (*iTer)->trackingVolume()->confinedArbitraryLayers();
           if ((*iTer)->trackingVolume()->confinedDenseVolumes() ||
-              (confLays && confLays->size() > detBounds.size())) {
+              (confLays.size() > detBounds.size())) {
             cache.m_detachedVols.emplace_back(*iTer, detBounds.size());
             for (unsigned int ibb = 0; ibb < detBounds.size(); ibb++) {
               const Trk::Surface& surf = (detBounds[ibb].get())->surfaceRepresentation();
               cache.m_detachedBoundaries.emplace_back(&surf, true);
             }
-          } else if (confLays) {
-            std::vector<const Trk::Layer*>::const_iterator lIt = confLays->begin();
-            for (; lIt != confLays->end(); ++lIt) {
-              cache.addOneNavigationLayer((*iTer)->trackingVolume(), *lIt);
+          } else if (!confLays.empty()) {
+            for (const Trk::Layer* const lIt :  confLays) {
+              cache.addOneNavigationLayer((*iTer)->trackingVolume(), lIt);
             }
           }
         }
@@ -4868,17 +4865,17 @@ Trk::Extrapolator::extrapolateToVolumeWithPathLimit(const EventContext& ctx,
     }
     // inert material
     const std::vector<const Trk::TrackingVolume*>* confinedDense = dVol->confinedDenseVolumes();
-    const std::vector<const Trk::Layer*>* confinedLays = dVol->confinedArbitraryLayers();
+    Trk::ArraySpan<const Trk::Layer* const> confinedLays = dVol->confinedArbitraryLayers();
 
-    if (!active && !confinedDense && !confinedLays) {
+    if (!active && !confinedDense && confinedLays.empty()) {
       continue;
     }
     const std::vector<SharedObject<const BoundarySurface<TrackingVolume>>>& bounds =
       dVol->boundarySurfaces();
-    if (!active && !confinedDense && confinedLays->size() <= bounds.size()) {
+    if (!active && !confinedDense && confinedLays.size() <= bounds.size()) {
       continue;
     }
-    if (confinedDense || confinedLays) {
+    if (confinedDense || !confinedLays.empty()) {
       navigVols.emplace_back(dVol, bounds.size());
       for (unsigned int ib = 0; ib < bounds.size(); ib++) {
         const Trk::Surface& surf = (bounds[ib].get())->surfaceRepresentation();
@@ -4898,9 +4895,9 @@ Trk::Extrapolator::extrapolateToVolumeWithPathLimit(const EventContext& ctx,
         }
       }
       // collect unordered layers
-      if (confinedLays) {
-        for (unsigned int il = 0; il < confinedLays->size(); il++) {
-          cache.addOneNavigationLayer(dVol, (*confinedLays)[il]);
+      if (!confinedLays.empty()) {
+        for (unsigned int il = 0; il < confinedLays.size(); il++) {
+          cache.addOneNavigationLayer(dVol, confinedLays[il]);
         }
       }
     } else { // active material
@@ -4960,8 +4957,8 @@ Trk::Extrapolator::extrapolateToVolumeWithPathLimit(const EventContext& ctx,
               cache.addOneNavigationLayer(detVol, nextLayer);
             }
           }
-        } else if (detVol->confinedArbitraryLayers()) {
-          for (const auto & pThisLayer:  *(detVol->confinedArbitraryLayers())) {
+        } else if (!detVol->confinedArbitraryLayers().empty()) {
+          for (const auto & pThisLayer:  detVol->confinedArbitraryLayers()) {
             cache.addOneNavigationLayer(detVol, pThisLayer);
           }
         }

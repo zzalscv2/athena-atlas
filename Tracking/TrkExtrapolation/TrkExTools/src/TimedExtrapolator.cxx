@@ -510,28 +510,25 @@ Trk::TimedExtrapolator::extrapolateToVolumeWithPathLimit(
           if ((*iTer)->trackingVolume()->zOverAtimesRho() != 0. &&
               (!(*iTer)->trackingVolume()->confinedDenseVolumes() ||
                (*iTer)->trackingVolume()->confinedDenseVolumes()->empty())
-              && (!(*iTer)->trackingVolume()->confinedArbitraryLayers() ||
-                  (*iTer)->trackingVolume()->confinedArbitraryLayers()->empty())) {
+              && (*iTer)->trackingVolume()->confinedArbitraryLayers().empty()) {
             cache.m_denseVols.emplace_back((*iTer)->trackingVolume(), detBounds.size());
             for (unsigned int ibb = 0; ibb < detBounds.size(); ibb++) {
               const Trk::Surface &surf = (detBounds[ibb].get())->surfaceRepresentation();
               cache.m_denseBoundaries.emplace_back(&surf, true);
             }
           }
-          const std::vector<const Trk::Layer *> *confLays = (*iTer)->trackingVolume()->confinedArbitraryLayers();
-          if ((*iTer)->trackingVolume()->confinedDenseVolumes() || (confLays && confLays->size() > detBounds.size())) {
-            cache.m_detachedVols.emplace_back(*iTer,
-                                                                                                  detBounds.size());
+          Trk::ArraySpan<const Trk::Layer* const> confLays = (*iTer)->trackingVolume()->confinedArbitraryLayers();
+          if ((*iTer)->trackingVolume()->confinedDenseVolumes() || (confLays.size() > detBounds.size())) {
+            cache.m_detachedVols.emplace_back(*iTer, detBounds.size());
             for (unsigned int ibb = 0; ibb < detBounds.size(); ibb++) {
               const Trk::Surface &surf = (detBounds[ibb].get())->surfaceRepresentation();
               cache.m_detachedBoundaries.emplace_back(&surf, true);
             }
-          } else if (confLays) {
-            std::vector<const Trk::Layer *>::const_iterator lIt = confLays->begin();
-            for (; lIt != confLays->end(); ++lIt) {
-              cache.m_layers.emplace_back(&((*lIt)->surfaceRepresentation()),
-                                                                                     true);
-              cache.m_navigLays.emplace_back((*iTer)->trackingVolume(), *lIt);
+          } else if (!confLays.empty()) {
+            for (const Trk::Layer* const lIt : confLays) {
+              cache.m_layers.emplace_back(&(lIt->surfaceRepresentation()),
+                                          true);
+              cache.m_navigLays.emplace_back((*iTer)->trackingVolume(), lIt);
             }
           }
         }
@@ -591,16 +588,16 @@ Trk::TimedExtrapolator::extrapolateToVolumeWithPathLimit(
     }
     // inert material
     const std::vector<const Trk::TrackingVolume *> *confinedDense = dVol->confinedDenseVolumes();
-    const std::vector<const Trk::Layer *> *confinedLays = dVol->confinedArbitraryLayers();
+    Trk::ArraySpan<const Trk::Layer* const> confinedLays = dVol->confinedArbitraryLayers();
 
-    if (!active && !confinedDense && !confinedLays) {
+    if (!active && !confinedDense && confinedLays.empty()) {
       continue;
     }
     const std::vector< SharedObject<const BoundarySurface<TrackingVolume> > > &bounds = dVol->boundarySurfaces();
-    if (!active && !confinedDense && confinedLays->size() <= bounds.size()) {
+    if (!active && !confinedDense && confinedLays.size() <= bounds.size()) {
       continue;
     }
-    if (confinedDense || confinedLays) {
+    if (confinedDense || !confinedLays.empty()) {
       navigVols.emplace_back(dVol, bounds.size());
       for (unsigned int ib = 0; ib < bounds.size(); ib++) {
         const Trk::Surface &surf = (bounds[ib].get())->surfaceRepresentation();
@@ -620,10 +617,10 @@ Trk::TimedExtrapolator::extrapolateToVolumeWithPathLimit(
         }
       }
       // collect unordered layers
-      if (confinedLays) {
-        for (unsigned int il = 0; il < confinedLays->size(); il++) {
-          cache.m_layers.emplace_back(&((*confinedLays)[il]->surfaceRepresentation()), true);
-          cache.m_navigLays.emplace_back(dVol, (*confinedLays)[il]);
+      if (!confinedLays.empty()) {
+        for (unsigned int il = 0; il < confinedLays.size(); il++) {
+          cache.m_layers.emplace_back(&(confinedLays[il]->surfaceRepresentation()), true);
+          cache.m_navigLays.emplace_back(dVol, confinedLays[il]);
         }
       }
     } else {   // active material
@@ -687,11 +684,11 @@ Trk::TimedExtrapolator::extrapolateToVolumeWithPathLimit(
               cache.m_navigLays.emplace_back(detVol, nextLayer);
             }
           }
-        } else if (detVol->confinedArbitraryLayers()) {
-          const std::vector<const Trk::Layer *> *layers = detVol->confinedArbitraryLayers();
-          for (unsigned int il = 0; il < layers->size(); il++) {
-            cache.m_layers.emplace_back(&((*layers)[il]->surfaceRepresentation()), true);
-            cache.m_navigLays.emplace_back(detVol, (*layers)[il]);
+        } else if (!detVol->confinedArbitraryLayers().empty()) {
+          Trk::ArraySpan<const Trk::Layer* const> layers = detVol->confinedArbitraryLayers();
+          for (unsigned int il = 0; il < layers.size(); il++) {
+            cache.m_layers.emplace_back(&(layers[il]->surfaceRepresentation()), true);
+            cache.m_navigLays.emplace_back(detVol, layers[il]);
           }
         }
       }
@@ -1687,8 +1684,7 @@ Trk::TimedExtrapolator::transportToVolumeWithPathLimit(
         if ((*iTer)->trackingVolume()->zOverAtimesRho() != 0. &&
             (!(*iTer)->trackingVolume()->confinedDenseVolumes() ||
              (*iTer)->trackingVolume()->confinedDenseVolumes()->empty())
-            && (!(*iTer)->trackingVolume()->confinedArbitraryLayers() ||
-                (*iTer)->trackingVolume()->confinedArbitraryLayers()->empty())) {
+            && ((*iTer)->trackingVolume()->confinedArbitraryLayers().empty())) {
           const std::vector< SharedObject<const BoundarySurface<TrackingVolume> > >  &detBounds =
             (*iTer)->trackingVolume()->boundarySurfaces();
           int newB = 0;
@@ -1740,7 +1736,7 @@ Trk::TimedExtrapolator::transportToVolumeWithPathLimit(
             if (newB > 0) {
               cache.m_denseVols.emplace_back((*vIter), newB);
             }
-            if ((*vIter)->confinedDenseVolumes() || (*vIter)->confinedArbitraryLayers()) {
+            if ((*vIter)->confinedDenseVolumes() || !(*vIter)->confinedArbitraryLayers().empty()) {
               ATH_MSG_DEBUG(
                 "  transportToVolumeWithPathLimit() - at " << currPar->position() << ", unresolved sublayers/subvolumes for  "
                                                            << (*vIter)->volumeName());
@@ -1749,11 +1745,10 @@ Trk::TimedExtrapolator::transportToVolumeWithPathLimit(
         }
 
         // confined layers
-        const std::vector<const Trk::Layer *> *confLays = (*iTer)->trackingVolume()->confinedArbitraryLayers();
-        if (confLays) {
-          std::vector<const Trk::Layer *>::const_iterator lIt = confLays->begin();
-          for (; lIt != confLays->end(); ++lIt) {
-            const Trk::Surface &surf = (*lIt)->surfaceRepresentation();
+        Trk::ArraySpan<const Trk::Layer* const>confLays = (*iTer)->trackingVolume()->confinedArbitraryLayers();
+        if (!confLays.empty()) {
+          for (const Trk::Layer* const lIt: confLays) {
+            const Trk::Surface &surf = lIt->surfaceRepresentation();
             Trk::DistanceSolution distSol = surf.straightLineDistanceEstimate(currPar->position(),
                                                                               dir * currPar->momentum().normalized());
             if (distSol.numberOfSolutions() > 0 && distSol.first() > 0.) {
@@ -1761,7 +1756,7 @@ Trk::TimedExtrapolator::transportToVolumeWithPathLimit(
               Amg::Vector3D gp = currPar->position() + distSol.first() * dir * currPar->momentum().normalized();
               if (surf.isOnSurface(gp, true, 0.001, 0.001)) {
                 cache.m_trLays.emplace_back(&surf, distSol.first());
-                cache.m_navigLays.emplace_back((*iTer)->trackingVolume(), *lIt);
+                cache.m_navigLays.emplace_back((*iTer)->trackingVolume(), lIt);
               }   // valid intersection
             }  // along path
           }

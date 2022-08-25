@@ -519,8 +519,8 @@ Trk::TrackingGeometry* Calo::CaloTrackingGeometryBuilder::trackingGeometry(const
                                                          Trk::HomogeneousLayerMaterial(Trk::MaterialProperties(*m_caloMaterial,1.),1.),
                                                          1.*Gaudi::Units::mm);
 
-       m_mbtsNegLayers=new std::vector<const Trk::Layer*>;
-       m_mbtsPosLayers=new std::vector<const Trk::Layer*>;
+       m_mbtsNegLayers=new std::vector<Trk::Layer*>;
+       m_mbtsPosLayers=new std::vector<Trk::Layer*>;
        m_mbtsNegLayers->push_back(mbtsNegLayer);
        m_mbtsPosLayers->push_back(mbtsPosLayer);       
      }

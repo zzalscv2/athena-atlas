@@ -296,9 +296,10 @@ void Trk::TrackingGeometry::dump(MsgStream &out, const std::string &head) const 
       out << head << " [" << counter++  << "] " << volume.first << " volumeBound=";
       volume.second->volumeBounds().dump(out);
       out << std::endl;
-      if (volume.second->confinedArbitraryLayers()) {
+      Trk::ArraySpan<const Trk::Layer* const> confArbLayers = volume.second->confinedArbitraryLayers();
+      if (!confArbLayers.empty()) {
           int j=0;
-          for(const Layer* confined_layer :  *volume.second->confinedArbitraryLayers()) {
+          for(const Layer* confined_layer : confArbLayers) {
             out << head << " [" << counter++  << "] " << volume.first << " confinedArbitrary layer " << j++ << " ";
             dumpLayer(out, "",confined_layer);
           }

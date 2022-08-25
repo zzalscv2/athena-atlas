@@ -105,7 +105,7 @@ namespace Muon {
 
         const Trk::TrackingVolume* processSpacer(Trk::Volume&, std::vector<const GeoVPhysVol*>, std::vector<Amg::Transform3D>) const;
 
-        Trk::TrackingVolume* processNSW(const MuonGM::MuonDetectorManager* muonDetMgr, const std::vector<const Trk::Layer*>&) const;
+        Trk::TrackingVolume* processNSW(const MuonGM::MuonDetectorManager* muonDetMgr, const std::vector<Trk::Layer*>&) const;
 
         Trk::LayerArray* processCSCTrdComponent(const GeoVPhysVol*&, Trk::TrapezoidVolumeBounds*&, Amg::Transform3D*&, Cache&) const;
 
@@ -114,7 +114,7 @@ namespace Muon {
 
         Trk::LayerArray* processTGCComponent(const GeoVPhysVol*&, Trk::TrapezoidVolumeBounds*&, Amg::Transform3D*&, Cache&) const;
 
-        std::pair<const Trk::Layer*, const std::vector<const Trk::Layer*>*> createLayerRepresentation(
+        std::pair<Trk::Layer*, const std::vector<const Trk::Layer*>*> createLayerRepresentation(
             const Trk::TrackingVolume* trVol) const;
 
         Trk::Layer* createLayer(const MuonGM::MuonDetectorManager* detMgr, const Trk::TrackingVolume* trVol, Trk::MaterialProperties*,

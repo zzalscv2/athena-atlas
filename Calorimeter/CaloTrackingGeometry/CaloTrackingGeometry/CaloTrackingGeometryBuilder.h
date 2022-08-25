@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2020 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
 */
 
 ///////////////////////////////////////////////////////////////////
@@ -120,8 +120,8 @@ private:
   mutable RZPairVector m_bpCutouts;
 
   // MBTS layers
-  mutable std::vector<const Trk::Layer*>* m_mbtsNegLayers;
-  mutable std::vector<const Trk::Layer*>* m_mbtsPosLayers;
+  mutable std::vector<Trk::Layer*>* m_mbtsNegLayers;
+  mutable std::vector<Trk::Layer*>* m_mbtsPosLayers;
   // ToolHandle<ICaloSurfaceHelper>                m_caloSurfaceHelper;
 
   /** method to establish a link between the LayerIndex and the CaloCell_ID in an associative container */
