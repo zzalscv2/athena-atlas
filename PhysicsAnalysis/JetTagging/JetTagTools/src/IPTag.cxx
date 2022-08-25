@@ -720,16 +720,18 @@ namespace Analysis {
       lkl.reserve(3);
       if(vectD0Signi.size()>0) {
         lkl = m_likelihoodTool->calculateLikelihood(slices);
+        if (lkl.size() != 3) {
+          ATH_MSG_WARNING("#BTAG# likelihood size is " << lkl.size() << " expected size is 3");
+          lkl.resize(3,0.0);
+        }
       } else {
         lkl.push_back(1.);
         lkl.push_back(1.e9);
-        if(m_useCHypo) lkl.push_back(1.e9);
+        lkl.push_back(1.e9);
       }
-      if(lkl.size()<1) lkl[0] = 0.;
-      if(lkl.size()<2) lkl[1] = 0.;
-      if(lkl.size()<3) lkl[2] = 0.;
-	  ATH_MSG_DEBUG("#BTAG# likelihood : number of values = " << lkl.size() );
-	  ATH_MSG_DEBUG("#BTAG# likelihood : " 
+
+	    ATH_MSG_DEBUG("#BTAG# likelihood : number of values = " << lkl.size() );
+	    ATH_MSG_DEBUG("#BTAG# likelihood : " 
         << "pb= " << lkl[0] << " pu= " << lkl[1] << " pc= " << lkl[2] );
 
       /** fill likelihood information in xaod: */
