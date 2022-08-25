@@ -11,18 +11,17 @@
 #ifndef PIXELDCSCONDTEMPALG
 #define PIXELDCSCONDTEMPALG
 
-#include "AthenaBaseComps/AthReentrantAlgorithm.h"
+#include "AthenaBaseComps/AthReentrantAlgorithm.h" //base class
 
-#include "StoreGate/ReadCondHandleKey.h"
-#include "AthenaPoolUtilities/CondAttrListCollection.h"
+#include "StoreGate/ReadCondHandleKey.h" //templated member
+#include "AthenaPoolUtilities/CondAttrListCollection.h" //template argument
 
-#include "StoreGate/WriteCondHandleKey.h"
-#include "PixelConditionsData/PixelModuleData.h"
-#include "PixelConditionsData/PixelDCSTempData.h"
+#include "StoreGate/WriteCondHandleKey.h"  //templated member
+#include "PixelConditionsData/PixelModuleData.h" //template argument
+#include "PixelConditionsData/PixelDCSTempData.h" //template argument
 
-#include "InDetIdentifier/PixelID.h"
 
-#include "Gaudi/Property.h"
+class PixelID;
 
 class PixelDCSCondTempAlg : public AthReentrantAlgorithm {
   public:
