@@ -100,7 +100,7 @@ StatusCode MDTHitsTestTool::processEvent() {
 
 
   if (m_DoMDTTest) {
-    const DataHandle<MDTSimHitCollection> p_collection;
+    const MDTSimHitCollection* p_collection;
     if (evtStore()->retrieve(p_collection,"MDT_Hits") == StatusCode::SUCCESS) {
       for (MDTSimHitCollection::const_iterator i_hit = p_collection->begin(); i_hit != p_collection->end(); ++i_hit) {
         // Check the Hits identifiers, access the functions that give:

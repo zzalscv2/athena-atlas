@@ -86,7 +86,7 @@ StatusCode TGCHitsTestTool::processEvent() {
   // Enter the main algorithm loop
   if (m_DoTGCTest) {
 
-    const DataHandle<TGCSimHitCollection> p_collection;
+    const TGCSimHitCollection* p_collection;
     if (evtStore()->retrieve(p_collection,"TGC_Hits") == StatusCode::SUCCESS) {
       for (TGCSimHitCollection::const_iterator i_hit=p_collection->begin(); i_hit!=p_collection->end(); ++i_hit) {
         /** Check the Hits identifiers, access the functions that give:

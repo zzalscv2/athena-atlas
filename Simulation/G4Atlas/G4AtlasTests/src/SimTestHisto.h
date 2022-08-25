@@ -1,7 +1,7 @@
 /* -*- C++ -*- */
 
 /*
-  Copyright (C) 2002-2017 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef G4ATLASTESTS_SIMTESTHISTO_H
@@ -13,8 +13,6 @@
 
 #include "AthenaKernel/errorcheck.h"
 #include "GaudiKernel/ITHistSvc.h"
-#include "GaudiKernel/ISvcLocator.h"
-#include "GaudiKernel/Bootstrap.h"
 #include "GaudiKernel/ServiceHandle.h"
 
 #include "TH1.h"
@@ -29,85 +27,40 @@ class SimTestHisto
 
 public:
 
-  SimTestHisto() : m_path("/truth/") {};
-  ~SimTestHisto(){};
-
-  /// Retrieve the message service.
-  /// @fixme there are better ways to do this in Athena.
-  IMessageSvc* msgSvc()
-  {
-    static IMessageSvc* mS = 0;
-    if (!mS) {
-      StatusCode status;
-      ISvcLocator* svcLocator = Gaudi::svcLocator();
-      status = svcLocator->service("MessageSvc", mS);
-      if (status.isFailure())
-        std::cout << " msgSvc(); could not access MessageSvc" << std::endl;
-    }
-    return mS;
-  }
-
-  /// Retrieve the histogram service
-  /// @note this should be done with a ServiceHandle instead
-  ITHistSvc* tHistSvc()
-  {
-    static ITHistSvc* hSvc = 0;
-    if (!hSvc) {
-      ISvcLocator* svcLocator = Gaudi::svcLocator();
-      if (svcLocator->service("THistSvc", hSvc).isFailure()) {
-	MsgStream log(msgSvc(),"SimTestHisto");
-        log<<MSG::ERROR<<"Could not get the THistSvc!!!"<<endmsg;
-      }
-    }
-    return hSvc;
-  }
-
-  StatusCode registerHistogram(const std::string& path, TH1* hist)
-  {
-    if(tHistSvc()->regHist(path, hist).isFailure())
-      return StatusCode::FAILURE;
-    return StatusCode::SUCCESS;
-  }
-
-
-  StatusCode registerHistogram(const std::string& path, TH2* hist)
-  {
-    if(tHistSvc()->regHist(path, hist).isFailure())
-      return StatusCode::FAILURE;
-    return StatusCode::SUCCESS;
-  }
+  SimTestHisto() = default;
+  ~SimTestHisto() = default;
 
 protected:
-  std::string m_path;
-
+  std::string m_path{"/truth/"};
+  ServiceHandle<ITHistSvc> m_histSvc{"THistSvc", "SimTestHisto"};
 };
 
 // note: var should be of type "TH1*" even if it is filled with a TProfile*
 #define _TPROFILE(var,name,nbin,xmin,xmax)		       \
-  if (!tHistSvc()->exists(m_path+name)) {		       \
+  if (!m_histSvc->exists(m_path+name)) {		       \
     var = new TProfile(name,name,nbin,xmin,xmax);	       \
-    CHECK(registerHistogram(m_path+name,var));		       \
+    CHECK(m_histSvc->regHist(m_path+name,var));		   \
   } else {						       \
-    CHECK(tHistSvc()->getHist(m_path+name, var));	       \
+    CHECK(m_histSvc->getHist(m_path+name, var));	       \
   }
 
 #define _TH1D(var,name,nbin,xmin,xmax)			       \
-  if (!tHistSvc()->exists(m_path+name)) {		       \
+  if (!m_histSvc->exists(m_path+name)) {		       \
     var = new TH1D(name,name,nbin,xmin,xmax);		       \
     var->StatOverflows();				       \
-    CHECK(registerHistogram(m_path+name,var));		       \
+    CHECK(m_histSvc->regHist(m_path+name,var));		       \
   } else {						       \
-    CHECK(tHistSvc()->getHist(m_path+name,var));	       \
+    CHECK(m_histSvc->getHist(m_path+name,var));	       \
   }
 
 #define _TH1D_NOCHECK(var,name,nbin,xmin,xmax)			       \
-  if (!tHistSvc()->exists(m_path+name)) {		       \
+  if (!m_histSvc->exists(m_path+name)) {		       \
     var = new TH1D(name,name,nbin,xmin,xmax);		       \
     var->StatOverflows();				       \
-    if(registerHistogram(m_path+name,var).isFailure())        \
+    if(m_histSvc->regHist(m_path+name,var).isFailure())        \
   std::cout<<"Cannot register histogram "<<name<<std::endl;    \
   } else {						       \
-    if(tHistSvc()->getHist(m_path+name,var).isFailure())       \
+    if(m_histSvc->getHist(m_path+name,var).isFailure())       \
       std::cout<<"Cannot get histogram "<<name<<std::endl;     \
   }
 
@@ -116,21 +69,21 @@ protected:
   var->Sumw2();
 
 #define _TH2D_NOCHECK(var,name,nbinx,xmin,xmax,nbiny,ymin,ymax)	       \
-  if (!tHistSvc()->exists(m_path+name)) {		       \
+  if (!m_histSvc->exists(m_path+name)) {		       \
     var = new TH2D(name,name,nbinx,xmin,xmax,nbiny,ymin,ymax); \
-    if(registerHistogram(m_path+name,var).isFailure())	       \
+    if(m_histSvc->regHist(m_path+name,var).isFailure())	       \
       std::cout<<"Cannot register histogram "<<name<<std::endl;\
   } else {						       \
-    if(tHistSvc()->getHist(m_path+name,var).isFailure())       \
+    if(m_histSvc->getHist(m_path+name,var).isFailure())       \
       std::cout<<"Cannot get histogram "<<name<<std::endl;     \
   }
 
 #define _TH2D(var,name,nbinx,xmin,xmax,nbiny,ymin,ymax)	       \
-  if (!tHistSvc()->exists(m_path+name)) {		       \
+  if (!m_histSvc->exists(m_path+name)) {		       \
     var = new TH2D(name,name,nbinx,xmin,xmax,nbiny,ymin,ymax); \
-    CHECK(registerHistogram(m_path+name,var));	               \
+    CHECK(m_histSvc->regHist(m_path+name,var));	               \
   } else {						       \
-    CHECK(tHistSvc()->getHist(m_path+name,var));	       \
+    CHECK(m_histSvc->getHist(m_path+name,var));	       \
   }
 
 #define _TH2D_WEIGHTED(var,name,nbinx,xmin,xmax,nbiny,ymin,ymax)	\

@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2017 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "ZDCHitsTestTool.h"
@@ -50,7 +50,7 @@ StatusCode ZDCHitsTestTool::processEvent() {
 
   ZDC_SimStripHit_ConstIterator hi;
 
-  const DataHandle<ZDC_SimStripHit_Collection> iter;
+  const ZDC_SimStripHit_Collection* iter;
   CHECK( evtStore()->retrieve(iter,"ZDC_SimStripHit_Collection") );
   
   for (hi=(*iter).begin(); hi != (*iter).end(); ++hi) {

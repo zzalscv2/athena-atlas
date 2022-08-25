@@ -40,7 +40,7 @@ StatusCode sTGCHitsTestTool::processEvent() {
   CHECK(executeCheckEventInfo());
 
    if (m_DosTGCTest) {
-    const DataHandle<sTGCSimHitCollection> p_collection;
+    const sTGCSimHitCollection* p_collection;
     CHECK(evtStore()->retrieve(p_collection,"sTGC_Hits"));
     for (sTGCSimHitCollection::const_iterator i_hit = p_collection->begin(); i_hit != p_collection->end(); ++i_hit) { 
       Amg::Vector3D u = (*i_hit).globalPosition();
@@ -51,12 +51,12 @@ StatusCode sTGCHitsTestTool::processEvent() {
       int simId = (*i_hit).sTGCId();
       std::string sim_stationName = hitHelper->GetStationName(simId);
 
-      static std::string QS1C("QS1C");
-      static std::string QS2C("QS2C");
-      static std::string QS3C("QS3C");
-      static std::string QL1P("QL1P");
-      static std::string QL2P("QL2P");
-      static std::string QL3P("QL3P");
+      static const std::string QS1C("QS1C");
+      static const std::string QS2C("QS2C");
+      static const std::string QS3C("QS3C");
+      static const std::string QL1P("QL1P");
+      static const std::string QL2P("QL2P");
+      static const std::string QL3P("QL3P");
 
       if (sim_stationName==QS1C && u.z()>0){
         m_sTgc_TransverseView_QS1C_posZ->Fill(u.x(),u.y());

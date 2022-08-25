@@ -40,7 +40,7 @@ StatusCode MuonHitTestToolBase::executeCheckEventInfo()
   ATH_MSG_VERBOSE("Processing EventInfo event #"<< evt<< " run: " << numrun);
   m_muonevnt->Fill(evt);
   m_muonrun->Fill(numrun);
-  const DataHandle<McEventCollection> mcEvent;
+  const McEventCollection* mcEvent;
   CHECK(evtStore()->retrieve(mcEvent,m_key));
 
   // *AS* Why only if mcEvent ==1? when would there be more than one event?

@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "ALFA_SimHitsTestTool.h"
@@ -80,7 +80,7 @@ StatusCode ALFA_SimHitsTestTool::processEvent() {
 
 
   ALFA_HitConstIter iter;
-  const DataHandle<ALFA_HitCollection> coll_handle;
+  const ALFA_HitCollection* coll_handle;
   CHECK( evtStore()->retrieve(coll_handle,"ALFA_HitCollection") );
 
 

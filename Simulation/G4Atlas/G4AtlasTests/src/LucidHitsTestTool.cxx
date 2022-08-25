@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2020 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "LucidHitsTestTool.h"
@@ -65,7 +65,7 @@ StatusCode LucidHitsTestTool::initialize()
 StatusCode LucidHitsTestTool::processEvent() {
 
   double etot = 0;
-  const DataHandle<LUCID_SimHitCollection> iter;
+  const LUCID_SimHitCollection* iter;
   CHECK(evtStore()->retrieve(iter));
   for (LUCID_SimHitCollection::const_iterator hi=(*iter).begin(); hi != (*iter).end(); ++hi) {
     m_x_v_y_edep->Fill( hi->GetX() , hi->GetY() , hi->GetEnergy() );
