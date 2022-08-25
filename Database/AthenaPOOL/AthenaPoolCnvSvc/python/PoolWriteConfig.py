@@ -99,13 +99,13 @@ def PoolWriteCfg(flags, forceTreeAutoFlush=-1):
             TREE_AUTO_FLUSH = 500
         # By default use split-level 0 except for DAOD_PHYSLITE which is maximally split
         CONTAINER_SPLITLEVEL = 0
-        if "DAOD_PHYSVAL" in FileName:
-            TREE_AUTO_FLUSH = 100
         if "DAOD_PHYS" in FileName:
             TREE_AUTO_FLUSH = 500
         if "DAOD_PHYSLITE" in FileName:
             TREE_AUTO_FLUSH = 1000
             CONTAINER_SPLITLEVEL = 99
+        if "DAOD_PHYSVAL" in FileName:
+            TREE_AUTO_FLUSH = 100
         PoolAttributes += [ pah.setTreeAutoFlush( FileName, "CollectionTree", str(TREE_AUTO_FLUSH) ) ]
         PoolAttributes += [ pah.setContainerSplitLevel( FileName, "CollectionTree", str(CONTAINER_SPLITLEVEL) ) ]
         PoolAttributes += [ pah.setContainerSplitLevel( FileName, "Aux.", str(CONTAINER_SPLITLEVEL) ) ]
