@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2017 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "MonteCarloReactUtils/EffInfo.h"
@@ -359,7 +359,7 @@ template<class T> bool EffInfo::getEntry( const std::string & id, T & value, int
     return false;
     
   const  std::vector< std::string > & vec = mapIter->second;
-  if( i > (int) vec.size() )
+  if( i >= (int) vec.size() )
     return false;
     
   const std::string & svalue = vec.at(i);
