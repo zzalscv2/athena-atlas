@@ -7,7 +7,7 @@ atlas_subdir( TrigTauMonitoring )
 atlas_add_component( TrigTauMonitoring
                      src/*.cxx
                      src/components/*.cxx
-                     LINK_LIBRARIES AthenaMonitoringKernelLib AthenaMonitoringLib CxxUtils xAODTau xAODTrigger xAODTruth )
+                     LINK_LIBRARIES AthenaMonitoringKernelLib AthenaMonitoringLib CxxUtils xAODTau xAODTrigger xAODTruth LArRecEvent)
 
 # Install files from the package:
 atlas_install_python_modules( python/*.py POST_BUILD_CMD ${ATLAS_FLAKE8} )
