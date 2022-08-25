@@ -482,7 +482,7 @@ double SUSYObjDef_xAOD::GetTotalMuonTriggerSF(const xAOD::MuonContainer& sfmuons
 }
 
 
-  double SUSYObjDef_xAOD::GetTotalMuonSF(const xAOD::MuonContainer& muons, const bool recoSF, const bool isoSF, const std::string& trigExpr, const bool bmhptSF) {
+double SUSYObjDef_xAOD::GetTotalMuonSF(const xAOD::MuonContainer& muons, const bool recoSF, const bool isoSF, const std::string& trigExpr, const bool bmhptSF) {
   double sf(1.);
 
   ConstDataVector<xAOD::MuonContainer> sfmuons(SG::VIEW_ELEMENTS);

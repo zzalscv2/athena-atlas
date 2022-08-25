@@ -60,6 +60,7 @@
 
 #include "TrigConfInterfaces/ITrigConfigTool.h"
 #include "TriggerMatchingTool/IMatchingTool.h"
+#include "TriggerMatchingTool/IMatchScoringTool.h"
 #include "TriggerAnalysisInterfaces/ITrigGlobalEfficiencyCorrectionTool.h"
 // Required to use some functions (see header explanation)
 #include "TrigDecisionTool/TrigDecisionTool.h"
@@ -287,9 +288,8 @@ SUSYObjDef_xAOD::SUSYObjDef_xAOD( const std::string& name )
 
     m_useTRUTH3(true),
 
-    m_isRun3(false),
-
     m_slices(std::map<std::string,bool>()),
+    m_isRun3(false),
 
     m_metJetSelection(""),
     m_fatJets(""),
@@ -386,6 +386,8 @@ SUSYObjDef_xAOD::SUSYObjDef_xAOD( const std::string& name )
     m_trigConfTool(""),
     m_trigDecTool(""),
     m_trigMatchingTool(""),
+    m_trigMatchScoringTool(""),
+    m_trigDRScoringTool(""),
     //
     m_isoCorrTool(""),
     m_isoTool(""),
@@ -686,6 +688,8 @@ SUSYObjDef_xAOD::SUSYObjDef_xAOD( const std::string& name )
   m_trigConfTool.declarePropertyFor( this, "TrigConfigTool", "The TrigConfigTool" );
   m_trigDecTool.declarePropertyFor( this, "TrigDecisionTool", "The TrigDecisionTool" );
   m_trigMatchingTool.declarePropertyFor( this, "TrigMatchTool", "The TrigMatchingTool" );
+  m_trigMatchScoringTool.declarePropertyFor( this, "TrigMatchScoringTool", "The TrigMatchScoringTool" );
+  m_trigDRScoringTool.declarePropertyFor( this, "TrigDRScoringTool", "The TrigDRScoringTool" );
   //
   m_isoCorrTool.declarePropertyFor( this, "IsolationCorrectionTool", "The IsolationCorrectionTool" );
   m_isoTool.declarePropertyFor( this, "IsolationSelectionTool", "The IsolationSelectionTool");
@@ -924,7 +928,7 @@ StatusCode SUSYObjDef_xAOD::autoconfigurePileupRWTool(const std::string& PRWfile
     // configure PRW rtag options from m_autoconfigPRWRtags string
     // e.g. "mc16a:r9364_r11505_r11285,mc16c:r9781,mc16d:r10201_r11506_r11279,mc16e:r10724_r11507_r11249,mc16ans:r10740_r10832_r10847_r11008_r11036,mc16dns:r10739_r10833_r10848_r11009_r11037,mc16ens:r10790_r11038_r11265"
     std::map<std::string,std::vector<std::string>> PRWRtags = {};
-    std::string allcampaigns = "mc16a.mc16c.mc16d.mc16e.mc20a.mc20d.mc20e.mc16ans.mc16dns.mc16ens";
+    std::string allcampaigns = "mc16a.mc16c.mc16d.mc16e.mc20a.mc20d.mc20e.mc21a.mc16ans.mc16dns.mc16ens";
     bool standard_like = true;
     for ( const auto& campaign_rtags : split( m_autoconfigPRWRtags, "," ) ) {                                          // split string by ","
        std::string icampaign = campaign_rtags.substr(0, campaign_rtags.find(":"));                              // first field = campaign, split by ":"
@@ -1287,10 +1291,6 @@ StatusCode SUSYObjDef_xAOD::readConfig()
   m_conf_to_prop["Tau.DoTruthMatching"] = "TauDoTruthMatching";
   //
 
-
-  configFromFile(m_isRun3, "IsRun3", rEnv, false);
-
-
   configFromFile(m_slices["ele"],  "Slices.Ele",  rEnv, true);
   configFromFile(m_slices["pho"],  "Slices.Pho",  rEnv, true);
   configFromFile(m_slices["mu"],   "Slices.Mu",   rEnv, true);
@@ -1300,6 +1300,8 @@ StatusCode SUSYObjDef_xAOD::readConfig()
   configFromFile(m_slices["fjet"], "Slices.FJet", rEnv, true);
   configFromFile(m_slices["tjet"], "Slices.TJet", rEnv, true);
   configFromFile(m_slices["met"],  "Slices.MET",  rEnv, true);
+  //
+  configFromFile(m_isRun3, "IsRun3", rEnv, false);
   //
   configFromFile(m_eleBaselinePt, "EleBaseline.Pt", rEnv, 10000.);
   configFromFile(m_eleBaselineEta, "EleBaseline.Eta", rEnv, 2.47);
@@ -1533,7 +1535,7 @@ StatusCode SUSYObjDef_xAOD::readConfig()
   configFromFile(m_autoconfigPRWCombinedmode, "PRW.autoconfigPRWCombinedmode", rEnv, false);
   configFromFile(m_autoconfigPRWRPVmode, "PRW.autoconfigPRWRPVmode", rEnv, false);
   configFromFile(m_autoconfigPRWHFFilter, "PRW.autoconfigPRWHFFilter", rEnv, "None");
-  configFromFile(m_autoconfigPRWRtags, "PRW.autoconfigPRWRtags", rEnv, "mc16a:r9364_r11505_r11285,mc16c:r9781,mc16d:r10201_r11506_r11279,mc16e:r10724_r11507_r11249,mc20a:r13167,mc20d:r13144,mc20e:r13145,mc16ans:r10740_r10832_r10847_r11008_r11036,mc16dns:r10739_r10833_r10848_r11009_r11037,mc16ens:r10790_r11038_r11265");
+  configFromFile(m_autoconfigPRWRtags, "PRW.autoconfigPRWRtags", rEnv, "mc16a:r9364_r11505_r11285,mc16c:r9781,mc16d:r10201_r11506_r11279,mc16e:r10724_r11507_r11249,mc20a:r13167,mc20d:r13144,mc20e:r13145,mc21a:r13829,mc16ans:r10740_r10832_r10847_r11008_r11036,mc16dns:r10739_r10833_r10848_r11009_r11037,mc16ens:r10790_r11038_r11265");
   //
   configFromFile(m_strictConfigCheck, "StrictConfigCheck", rEnv, false);
 
@@ -2823,7 +2825,8 @@ int SUSYObjDef_xAOD::treatAsYear(const int runNumber) const {
   if (theRunNumber<290000) return 2015;
   else if (theRunNumber<320000) return 2016;
   else if (theRunNumber<342000) return 2017;
-  return 2018;
+  else if (theRunNumber<400000) return 2018;
+  return 2022;
 }
 
 SUSYObjDef_xAOD::~SUSYObjDef_xAOD() {

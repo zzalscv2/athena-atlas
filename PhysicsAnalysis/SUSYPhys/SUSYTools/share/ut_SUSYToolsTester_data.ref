@@ -1,9 +1,9 @@
-Package.SUSYToolsTester  INFO    ===== Processing key /cvmfs/atlas-nightlies.cern.ch/repo/data/data-art/SUSYTools/DAOD_PHYS.data18_13TeV.358031.data18_p5057.PHYS.pool.root with value 
+Package.SUSYToolsTester  INFO    ===== Processing key /cvmfs/atlas-nightlies.cern.ch/repo/data/data-art/SUSYTools/DAOD_PHYS.data18_13TeV.356250.data18_p5226.PHYS.pool.root with value 
 Package.SUSYToolsTester  INFO    ===== Processing key maxEvents with value 500
 Package.SUSYToolsTester  INFO    ===== Processing key isData with value 1
 Package.SUSYToolsTester  INFO    ===== Processing key isAtlfast with value 0
 Package.SUSYToolsTester  INFO    ===== Processing key Debug with value 0
-Package.SUSYToolsTester  INFO    Opening file: /cvmfs/atlas-nightlies.cern.ch/repo/data/data-art/SUSYTools/DAOD_PHYS.data18_13TeV.358031.data18_p5057.PHYS.pool.root
+Package.SUSYToolsTester  INFO    Opening file: /cvmfs/atlas-nightlies.cern.ch/repo/data/data-art/SUSYTools/DAOD_PHYS.data18_13TeV.356250.data18_p5226.PHYS.pool.root
 Warning in <TClass::Init>: no dictionary for class DataHeader_p6 is available
 Warning in <TClass::Init>: no dictionary for class DataHeaderForm_p6 is available
 Warning in <TClass::Init>: no dictionary for class DataHeaderForm_p6::DbRecord is available
@@ -22,18 +22,17 @@ Warning in <TClass::Init>: no dictionary for class EventID_p1 is available
 Warning in <TClass::Init>: no dictionary for class EventType_p3 is available
 Warning in <TClass::Init>: no dictionary for class TriggerInfo_p2 is available
 Warning in <TClass::Init>: no dictionary for class EventStreamInfo_p3 is available
-Package.SUSYToolsTester  INFO    Number of events in the file: 41724
+Package.SUSYToolsTester  INFO    Number of events in the file: 96792
 --- TGRLCollection      : Now merging GRLs where possible. Metadata required to be identical.[0m
 Package.SUSYToolsTester  INFO    GRL tool retrieve & initialized... 
 Package.SUSYToolsTester  INFO     ABOUT TO INITIALIZE SUSYTOOLS 
 SUSYObjDef_xAOD          INFO    Initialising... 
 SUSYObjDef_xAOD          INFO    *****     *****     *****     *****
-SUSYObjDef_xAOD          INFO    Configuring from file /home/merlassino/SUSYTools_missingDec_R22/build/x86_64-centos7-gcc11-opt/data/SUSYTools/SUSYTools_Default.conf
+SUSYObjDef_xAOD          INFO    Configuring from file /data/CERN/BGF/MelAnaR22/build/x86_64-centos7-gcc11-opt/data/SUSYTools/SUSYTools_Default.conf
 SUSYObjDef_xAOD          INFO    Config file opened
 SUSYObjDef_xAOD          INFO    readConfig(): Loaded property Jet.InputType with value 9
 SUSYObjDef_xAOD          INFO    readConfig(): Loaded property Muon.Id with value 1
 SUSYObjDef_xAOD          INFO    readConfig(): Loaded property MuonBaseline.Id with value 1
-SUSYObjDef_xAOD          INFO    configFromFile(): Loaded property "IsRun3" with value 0
 SUSYObjDef_xAOD          INFO    configFromFile(): Loaded property "Slices.Ele" with value 1
 SUSYObjDef_xAOD          INFO    configFromFile(): Loaded property "Slices.Pho" with value 1
 SUSYObjDef_xAOD          INFO    configFromFile(): Loaded property "Slices.Mu" with value 1
@@ -43,6 +42,7 @@ SUSYObjDef_xAOD          INFO    configFromFile(): Loaded property "Slices.BJet"
 SUSYObjDef_xAOD          INFO    configFromFile(): Loaded property "Slices.FJet" with value 1
 SUSYObjDef_xAOD          INFO    configFromFile(): Loaded property "Slices.TJet" with value 1
 SUSYObjDef_xAOD          INFO    configFromFile(): Loaded property "Slices.MET" with value 1
+SUSYObjDef_xAOD          INFO    configFromFile(): Loaded property "IsRun3" with value 0
 SUSYObjDef_xAOD          INFO    configFromFile(): Loaded property "EleBaseline.Pt" with value 10000
 SUSYObjDef_xAOD          INFO    configFromFile(): Loaded property "EleBaseline.Eta" with value 2.47
 SUSYObjDef_xAOD          INFO    configFromFile(): Loaded property "EleBaseline.Id" with value LooseAndBLayerLLH
@@ -166,7 +166,7 @@ SUSYObjDef_xAOD          INFO    configFromFile(): Loaded property "FwdJet.JvtCo
 SUSYObjDef_xAOD          INFO    configFromFile(): Loaded property "FwdJet.JvtRecalculate" with value 0
 SUSYObjDef_xAOD          INFO    configFromFile(): Loaded property "Jet.JMSCalib" with value 0
 SUSYObjDef_xAOD          INFO    configFromFile(): Loaded property "Btag.enable" with value 1
-SUSYObjDef_xAOD          INFO    configFromFile(): Loaded property "Btag.Tagger" with value DL1dv00
+SUSYObjDef_xAOD          INFO    configFromFile(): Loaded property "Btag.Tagger" with value DL1dv01
 SUSYObjDef_xAOD          INFO    configFromFile(): Loaded property "Btag.WP" with value FixedCutBEff_85
 SUSYObjDef_xAOD          INFO    configFromFile(): Loaded property "Btag.MinPt" with value 20000
 SUSYObjDef_xAOD          INFO    configFromFile(): Loaded property "Btag.CalibPath" with value xAODBTaggingEfficiency/13TeV/2022-22-13TeV-MC20-CDI-2022-07-28_v1.root
@@ -250,7 +250,7 @@ SUSYObjDef_xAOD          INFO    configFromFile(): Loaded property "PRW.autoconf
 SUSYObjDef_xAOD          INFO    configFromFile(): Loaded property "PRW.autoconfigPRWCombinedmode" with value 0
 SUSYObjDef_xAOD          INFO    configFromFile(): Loaded property "PRW.autoconfigPRWRPVmode" with value 0
 SUSYObjDef_xAOD          INFO    configFromFile(): Loaded property "PRW.autoconfigPRWHFFilter" with value 
-SUSYObjDef_xAOD          INFO    configFromFile(): Loaded property "PRW.autoconfigPRWRtags" with value mc16a:r9364_r11505_r11285,mc16c:r9781,mc16d:r10201_r11506_r11279,mc16e:r10724_r11507_r11249_r12020_r12034_r12405_r12627,mc20a:r13167,mc20d:r13144,mc20e:r13145,mc16ans:r10740_r10832_r10847_r11008_r11036,mc16dns:r10739_r10833_r10848_r11009_r11037,mc16ens:r10790_r11038_r11265
+SUSYObjDef_xAOD          INFO    configFromFile(): Loaded property "PRW.autoconfigPRWRtags" with value mc16a:r9364_r11505_r11285,mc16c:r9781,mc16d:r10201_r11506_r11279,mc16e:r10724_r11507_r11249_r12020_r12034_r12405_r12627,mc20a:r13167,mc20d:r13144,mc20e:r13145,mc21a:r13752_r13829,mc16ans:r10740_r10832_r10847_r11008_r11036,mc16dns:r10739_r10833_r10848_r11009_r11037,mc16ens:r10790_r11038_r11265
 SUSYObjDef_xAOD          INFO    configFromFile(): Loaded property "StrictConfigCheck" with value 1
 SUSYObjDef_xAOD          INFO    Configured for jet collection: AntiKt4EMPFlowJets
 SUSYObjDef_xAOD          INFO    Configured for truth jet collection: AntiKt4TruthDressedWZJets
@@ -263,7 +263,7 @@ Info in <CP::TPileupReweighting::UsePeriodConfig>: Using MC16 Period configurati
 Info in <CP::TPileupReweighting::AddLumiCalcFile>: Adding LumiMetaData (scale factor=0.970874)...
 Info in <CP::TPileupReweighting::AddLumiCalcFile>: Adding LumiMetaData (scale factor=1.010100)...
 Info in <CP::TPileupReweighting::AddLumiCalcFile>: Adding LumiMetaData (scale factor=0.934579)...
-DefaultWeightTool        INFO    AsgTool DefaultWeightTool @ 0xd4ee870
+DefaultWeightTool        INFO    AsgTool DefaultWeightTool @ 0xdf2ac10
 ToolSvc.JetCalibTool_A...INFO    Initializing ToolSvc.JetCalibTool_AntiKt4EMPFlow to calibrate AntiKt4EMPFlowjets
 ToolSvc.JetCalibTool_A...INFO    Reading global JES settings from: JES_MC16Recommendation_Consolidated_PFlow_Apr2019_Rel21.config
 ToolSvc.JetCalibTool_A...INFO    resolved in: /cvmfs/atlas.cern.ch/repo/sw/database/GroupData/JetCalibTools/CalibArea-00-04-82/CalibrationConfigs/JES_MC16Recommendation_Consolidated_PFlow_Apr2019_Rel21.config
@@ -839,7 +839,7 @@ ToolSvc.TauTruthMatch    INFO    Initializing BuildTruthTaus
 ToolSvc.TauTruthMatch....INFO     Initializing MCTruthClassifier
 SUSYObjDef_xAOD          INFO    TrackJet collection set to None: disabling btagging for TrackJets.
 ToolSvc.BTagSF_AntiKt4...INFO     Hello BTaggingEfficiencyTool user... initializing
-ToolSvc.BTagSF_AntiKt4...INFO     TaggerName = DL1dv00
+ToolSvc.BTagSF_AntiKt4...INFO     TaggerName = DL1dv01
 ToolSvc.BTagSF_AntiKt4...INFO     OP = FixedCutBEff_85
 ToolSvc.BTagSF_AntiKt4...INFO     b-jet     SF/eff calibration = default / 410470
 ToolSvc.BTagSF_AntiKt4...INFO     c-jet     SF/eff calibration = default / 410470
@@ -847,20 +847,20 @@ ToolSvc.BTagSF_AntiKt4...INFO     tau-jet   SF/eff calibration = default / 41047
 ToolSvc.BTagSF_AntiKt4...INFO     light-jet SF/eff calibration = default / 410470
 ToolSvc.BTagSF_AntiKt4...INFO     JetAuthor = AntiKt4EMPFlowJets
 === CalibrationDataInterfaceROOT::CalibrationDataInterfaceROOT ===
- taggerName           : DL1dv00
+ taggerName           : DL1dv01
  SF         file name : /cvmfs/atlas.cern.ch/repo/sw/database/GroupData/xAODBTaggingEfficiency/13TeV/2022-22-13TeV-MC20-CDI-2022-07-28_v1.root
 
  CDI file build number: Custom
 
 ======= end of CalibrationDataInterfaceROOT instantiation ========
-CalibrationDataInterface: retrieved container DL1dv00/AntiKt4EMPFlowJets/FixedCutBEff_85/Light/410470_Eff (with comment: 'efficiencies from sample PowhegPythia8' and hadronisation setting 'Pythia8EvtGen')
-CalibrationDataInterface: retrieved container DL1dv00/AntiKt4EMPFlowJets/FixedCutBEff_85/Light/default_SF (with comment: 'negative_tag_Zjet+extrap[Run2MCcalib]' and hadronisation setting 'Pythia8EvtGen')
-CalibrationDataInterface: retrieved container DL1dv00/AntiKt4EMPFlowJets/FixedCutBEff_85/C/410470_Eff (with comment: 'efficiencies from sample PowhegPythia8' and hadronisation setting 'Pythia8EvtGen')
-CalibrationDataInterface: retrieved container DL1dv00/AntiKt4EMPFlowJets/FixedCutBEff_85/C/default_SF (with comment: 'ttbarC+extrap[Run2MCcalib_ttC]' and hadronisation setting 'Pythia8EvtGen')
-CalibrationDataInterface: retrieved container DL1dv00/AntiKt4EMPFlowJets/FixedCutBEff_85/B/410470_Eff (with comment: 'efficiencies from sample PowhegPythia8' and hadronisation setting 'Pythia8EvtGen')
-CalibrationDataInterface: retrieved container DL1dv00/AntiKt4EMPFlowJets/FixedCutBEff_85/B/default_SF (with comment: 'ttbar_PDF+extrap[Run2MCcalib]' and hadronisation setting 'Pythia8EvtGen')
-CalibrationDataInterface: retrieved container DL1dv00/AntiKt4EMPFlowJets/FixedCutBEff_85/T/410470_Eff (with comment: 'efficiencies from sample PowhegPythia8' and hadronisation setting 'Pythia8EvtGen')
-CalibrationDataInterface: retrieved container DL1dv00/AntiKt4EMPFlowJets/FixedCutBEff_85/T/default_SF (with comment: 'ttbarC+addSys[newsys]+extrap[Run2MCcalib_ttC]' and hadronisation setting 'Pythia8EvtGen')
+CalibrationDataInterface: retrieved container DL1dv01/AntiKt4EMPFlowJets/FixedCutBEff_85/Light/410470_Eff (with comment: 'efficiencies from sample PowhegPythia8' and hadronisation setting 'Pythia8EvtGen')
+CalibrationDataInterface: retrieved container DL1dv01/AntiKt4EMPFlowJets/FixedCutBEff_85/Light/default_SF (with comment: 'negative_tag_Zjet+extrap[Run2MCcalib]' and hadronisation setting 'Pythia8EvtGen')
+CalibrationDataInterface: retrieved container DL1dv01/AntiKt4EMPFlowJets/FixedCutBEff_85/C/410470_Eff (with comment: 'efficiencies from sample PowhegPythia8' and hadronisation setting 'Pythia8EvtGen')
+CalibrationDataInterface: retrieved container DL1dv01/AntiKt4EMPFlowJets/FixedCutBEff_85/C/default_SF (with comment: 'ttbarC+extrap[Run2MCcalib_ttC]' and hadronisation setting 'Pythia8EvtGen')
+CalibrationDataInterface: retrieved container DL1dv01/AntiKt4EMPFlowJets/FixedCutBEff_85/B/410470_Eff (with comment: 'efficiencies from sample PowhegPythia8' and hadronisation setting 'Pythia8EvtGen')
+CalibrationDataInterface: retrieved container DL1dv01/AntiKt4EMPFlowJets/FixedCutBEff_85/B/default_SF (with comment: 'ttbar_PDF+extrap[Run2MCcalib]' and hadronisation setting 'Pythia8EvtGen')
+CalibrationDataInterface: retrieved container DL1dv01/AntiKt4EMPFlowJets/FixedCutBEff_85/T/410470_Eff (with comment: 'efficiencies from sample PowhegPythia8' and hadronisation setting 'Pythia8EvtGen')
+CalibrationDataInterface: retrieved container DL1dv01/AntiKt4EMPFlowJets/FixedCutBEff_85/T/default_SF (with comment: 'ttbarC+addSys[newsys]+extrap[Run2MCcalib_ttC]' and hadronisation setting 'Pythia8EvtGen')
 ToolSvc.BTagSF_AntiKt4...INFO    Using systematics model Envelope
 ToolSvc.METMaker_ST_Ti...INFO    Initializing ToolSvc.METMaker_ST_Tight_NOfJVT...
 ToolSvc.METSystTool      INFO    Searching for configFile: TrackSoftTerms-pflow.config
@@ -920,6 +920,12 @@ ToolSvc.xAODConfigTool   INFO    Initialising...
 ToolSvc.TrigDecisionTool INFO    Initializing Trig::TrigDecisionTool (standalone version even for athena)
 ToolSvc.TrigDecisionTool INFO    Initialized TDT
 ToolSvc.TrigMatchFromC...INFO    initializing ToolSvc.TrigMatchFromCompositeTool
+ToolSvc.TrigMatchFromC...INFO    Remap broken links? 1
+ToolSvc.TrigMatchFromC...INFO    Remap: 
+ToolSvc.TrigMatchFromC...INFO    	197081204 -> 736021799
+ToolSvc.TrigMatchFromC...INFO    	260869065 -> 14978963
+ToolSvc.TrigMatchFromC...INFO    	596414444 -> 561286892
+ToolSvc.TrigMatchFromC...INFO    	822336455 -> 646656793
 ToolSvc.TrigGlobal_diLep INFO    Initializing ToolSvc.TrigGlobal_diLep...
 ToolSvc.TrigGlobal_diLep INFO    Initialization successful
 ToolSvc.TrigGlobal_mul...INFO    Initializing ToolSvc.TrigGlobal_multiLep...
@@ -970,67 +976,68 @@ SUSYObjDef_xAOD          INFO    Done initialising SUSYTools
 Package.SUSYToolsTester  INFO    SUSYObjDef_xAOD initialized...
 Package.SUSYToolsTester  INFO    Initialized SUSYTools
 Package.SUSYToolsTester  INFO    Config file opened
-ToolSvc.TrigDecisionTool INFO    Updating config in slot 0 with SMK: 2740 and L1PSK: 23194 and HLTPSK: 17429 and BGSK: 0 getForceConfigUpdate()=1 HLT Chains: 3171
+ToolSvc.TrigDecisionTool INFO    Updating config in slot 0 with SMK: 2730 and L1PSK: 22869 and HLTPSK: 17040 and BGSK: 0 getForceConfigUpdate()=1 HLT Chains: 3196
 Package.SUSYToolsTester  INFO    == cbkname: AllExecutedEvents, description: Number of processed events before any cut, stream: StreamAOD
 Package.SUSYToolsTester  INFO       inputStream: StreamAOD, outputStreams: AllStreams
-Package.SUSYToolsTester  INFO       cycle: 2,  allEvents = 41724
+Package.SUSYToolsTester  INFO       cycle: 2,  allEvents = 96792
 Package.SUSYToolsTester  INFO    == cbkname: TauAugmentationKernelTopAlg, description: N/A, stream: StreamAOD
 Package.SUSYToolsTester  INFO       inputStream: StreamAOD, outputStreams: 
-Package.SUSYToolsTester  INFO       cycle: 2,  allEvents = 41724
+Package.SUSYToolsTester  INFO       cycle: 2,  allEvents = 96792
 Package.SUSYToolsTester  INFO    == cbkname: TauWPDecoratorTopAlg, description: N/A, stream: StreamAOD
 Package.SUSYToolsTester  INFO       inputStream: StreamAOD, outputStreams: 
-Package.SUSYToolsTester  INFO       cycle: 2,  allEvents = 41724
+Package.SUSYToolsTester  INFO       cycle: 2,  allEvents = 96792
 Package.SUSYToolsTester  INFO    == cbkname: PHYSKernel, description: N/A, stream: StreamAOD
 Package.SUSYToolsTester  INFO       inputStream: StreamAOD, outputStreams: StreamDAOD_PHYS
-Package.SUSYToolsTester  INFO       cycle: 2,  allEvents = 41724
+Package.SUSYToolsTester  INFO       cycle: 2,  allEvents = 96792
 Package.SUSYToolsTester  INFO    == cbkname: PHYSLITEKernel, description: N/A, stream: StreamAOD
 Package.SUSYToolsTester  INFO       inputStream: StreamAOD, outputStreams: StreamDAOD_PHYSLITE
-Package.SUSYToolsTester  INFO       cycle: 2,  allEvents = 41724
+Package.SUSYToolsTester  INFO       cycle: 2,  allEvents = 96792
 Package.SUSYToolsTester  INFO    No relevent CutBookKeepers found
 Package.SUSYToolsTester  INFO    Found kernel: PHYSLITE
 Package.SUSYToolsTester  INFO    Found stream: StreamAOD
 Info in <CP::TPileupReweighting::GetLumiBlockMu>: Initializing the subtool..
-Package.SUSYToolsTester  INFO    ===>>>  start processing event #, -1433622078run #358031 0 events processed so far  <<<===
-Info in <SUSYToolsTester>: ===>>>  done processing event #-1433622078, run #358031 1 events processed so far  <<<===
+Package.SUSYToolsTester  INFO    ===>>>  start processing event #, 369006231run #356250 0 events processed so far  <<<===
+Info in <SUSYToolsTester>: ===>>>  done processing event #369006231, run #356250 1 events processed so far  <<<===
+ToolSvc.TopTagger        WARNING One (or more) tagger input variable has an out-of-range value, setting score to -666
+Warning in <SUSYToolsTester>: No PV found for this event! Skipping...
+Warning in <SUSYToolsTester>: No PV found for this event! Skipping...
 ToolSvc.TrigDecisionTool INFO    decision not set on first (?) assert. deciding how to unpack
 ToolSvc.TrigDecisionTool INFO    SG contains xAOD decision, use DecisionUnpackerStandalone
+ToolSvc.TopTagger        WARNING One (or more) tagger input variable has an out-of-range value, setting score to -666
+ToolSvc.TopTagger        WARNING One (or more) tagger input variable has an out-of-range value, setting score to -666
+ToolSvc.TopTagger        WARNING One (or more) tagger input variable has an out-of-range value, setting score to -666
+Package.SUSYToolsTester  INFO    ===>>>  start processing event #, 369075332run #356250 99 events processed so far  <<<===
+Info in <SUSYToolsTester>: ===>>>  done processing event #369075332, run #356250 100 events processed so far  <<<===
+ToolSvc.TopTagger        WARNING One (or more) tagger input variable has an out-of-range value, setting score to -666
+Package.SUSYToolsTester  INFO    ===>>>  start processing event #, 369394433run #356250 199 events processed so far  <<<===
+Info in <SUSYToolsTester>: ===>>>  done processing event #369394433, run #356250 200 events processed so far  <<<===
+ToolSvc.TopTagger        WARNING One (or more) tagger input variable has an out-of-range value, setting score to -666
+ToolSvc.TopTagger        WARNING One (or more) tagger input variable has an out-of-range value, setting score to -666
 Warning in <SUSYToolsTester>: No PV found for this event! Skipping...
+Package.SUSYToolsTester  INFO    ===>>>  start processing event #, 369506220run #356250 299 events processed so far  <<<===
+Info in <SUSYToolsTester>: ===>>>  done processing event #369506220, run #356250 300 events processed so far  <<<===
+ToolSvc.TopTagger        WARNING One (or more) tagger input variable has an out-of-range value, setting score to -666
+Package.SUSYToolsTester  INFO    ===>>>  start processing event #, 369962280run #356250 399 events processed so far  <<<===
+Info in <SUSYToolsTester>: ===>>>  done processing event #369962280, run #356250 400 events processed so far  <<<===
 ToolSvc.TopTagger        WARNING One (or more) tagger input variable has an out-of-range value, setting score to -666
 ToolSvc.TopTagger        WARNING One (or more) tagger input variable has an out-of-range value, setting score to -666
-ToolSvc.TopTagger        WARNING One (or more) tagger input variable has an out-of-range value, setting score to -666
-Warning in <SUSYToolsTester>: No PV found for this event! Skipping...
-Package.SUSYToolsTester  INFO    ===>>>  start processing event #, -1433562229run #358031 99 events processed so far  <<<===
-Info in <SUSYToolsTester>: ===>>>  done processing event #-1433562229, run #358031 100 events processed so far  <<<===
-Package.SUSYToolsTester  INFO    ===>>>  start processing event #, -1433104331run #358031 199 events processed so far  <<<===
-Info in <SUSYToolsTester>: ===>>>  done processing event #-1433104331, run #358031 200 events processed so far  <<<===
-ToolSvc.TopTagger        WARNING One (or more) tagger input variable has an out-of-range value, setting score to -666
-ToolSvc.TopTagger        WARNING One (or more) tagger input variable has an out-of-range value, setting score to -666
-ToolSvc.TopTagger        WARNING One (or more) tagger input variable has an out-of-range value, setting score to -666
-ToolSvc.TopTagger        WARNING One (or more) tagger input variable has an out-of-range value, setting score to -666
-Package.SUSYToolsTester  INFO    ===>>>  start processing event #, -1432733778run #358031 299 events processed so far  <<<===
-Info in <SUSYToolsTester>: ===>>>  done processing event #-1432733778, run #358031 300 events processed so far  <<<===
-ToolSvc.TopTagger        WARNING One (or more) tagger input variable has an out-of-range value, setting score to -666
-Package.SUSYToolsTester  INFO    ===>>>  start processing event #, -1432262825run #358031 399 events processed so far  <<<===
-Info in <SUSYToolsTester>: ===>>>  done processing event #-1432262825, run #358031 400 events processed so far  <<<===
-ToolSvc.TopTagger        WARNING One (or more) tagger input variable has an out-of-range value, setting score to -666
-ToolSvc.TopTagger        WARNING One (or more) tagger input variable has an out-of-range value, setting score to -666
-Package.SUSYToolsTester  INFO    ===>>>  start processing event #, -1431858503run #358031 499 events processed so far  <<<===
-Info in <SUSYToolsTester>: ===>>>  done processing event #-1431858503, run #358031 500 events processed so far  <<<===
+Package.SUSYToolsTester  INFO    ===>>>  start processing event #, 370301029run #356250 499 events processed so far  <<<===
+Info in <SUSYToolsTester>: ===>>>  done processing event #370301029, run #356250 500 events processed so far  <<<===
 Info in <SUSYToolsTester>: Time per event:          (CPU / WALL)
-  Entire loop           - 150.860000 / 151.248006 ms
-  First event           - 680.000000 / 686.191082 ms
-  Excluding first event - 149.799599 / 150.175970 ms
+  Entire loop           - 91.240000 / 191.315264 ms
+  First event           - 380.000000 / 44030.565023 ms
+  Excluding first event - 90.661323 / 103.461056 ms
 Package.SUSYToolsTester  INFO    -- Dummy Cutflow -- >>>> Variation  <<<<
-Package.SUSYToolsTester  INFO    Cut 0(All)-> el: 498, mu: 498
-Package.SUSYToolsTester  INFO    Cut 1(GRL+Cleaning)-> el: 498, mu: 498
-Package.SUSYToolsTester  INFO    Cut 2(TileTrip)-> el: 498, mu: 498
-Package.SUSYToolsTester  INFO    Cut 3(Trigger)-> el: 498, mu: 498
-Package.SUSYToolsTester  INFO    Cut 4(Cosmic veto)-> el: 492, mu: 492
-Package.SUSYToolsTester  INFO    Cut 5(==1 baseline lepton)-> el: 65, mu: 65
-Package.SUSYToolsTester  INFO    Cut 6(==1 signal lepton)-> el: 46, mu: 45
-Package.SUSYToolsTester  INFO    Cut 7(lepton pT>20 GeV)-> el: 44, mu: 40
-Package.SUSYToolsTester  INFO    Cut 8(trig. matched lepton)-> el: 42, mu: 35
-Package.SUSYToolsTester  INFO    Cut 9(Njet(pT>50 GeV)>=2)-> el: 1, mu: 1
+Package.SUSYToolsTester  INFO    Cut 0(All)-> el: 497, mu: 497
+Package.SUSYToolsTester  INFO    Cut 1(GRL+Cleaning)-> el: 497, mu: 497
+Package.SUSYToolsTester  INFO    Cut 2(TileTrip)-> el: 497, mu: 497
+Package.SUSYToolsTester  INFO    Cut 3(Trigger)-> el: 497, mu: 497
+Package.SUSYToolsTester  INFO    Cut 4(Cosmic veto)-> el: 495, mu: 495
+Package.SUSYToolsTester  INFO    Cut 5(==1 baseline lepton)-> el: 72, mu: 75
+Package.SUSYToolsTester  INFO    Cut 6(==1 signal lepton)-> el: 49, mu: 58
+Package.SUSYToolsTester  INFO    Cut 7(lepton pT>20 GeV)-> el: 49, mu: 55
+Package.SUSYToolsTester  INFO    Cut 8(trig. matched lepton)-> el: 46, mu: 55
+Package.SUSYToolsTester  INFO    Cut 9(Njet(pT>50 GeV)>=2)-> el: 3, mu: 0
 ToolSvc.TrigDecisionTool INFO    Finalized
 		CalibrationDataInterfaceROOT object out-of-bounds summary:
 			No issues found

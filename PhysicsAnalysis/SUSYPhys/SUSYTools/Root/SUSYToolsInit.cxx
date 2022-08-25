@@ -60,6 +60,7 @@ using namespace ST;
 
 #include "TrigConfInterfaces/ITrigConfigTool.h"
 #include "TriggerMatchingTool/IMatchingTool.h"
+#include "TriggerMatchingTool/IMatchScoringTool.h"
 #include "TriggerAnalysisInterfaces/ITrigGlobalEfficiencyCorrectionTool.h"
 // Can't use the abstract interface for this one (see header comment)
 #include "TrigDecisionTool/TrigDecisionTool.h"
@@ -1567,25 +1568,40 @@ StatusCode SUSYObjDef_xAOD::SUSYToolsInit()
     m_trigDecTool.setTypeAndName("Trig::TrigDecisionTool/TrigDecisionTool");
     ATH_CHECK( m_trigDecTool.setProperty("ConfigTool", m_trigConfTool.getHandle()) );
     ATH_CHECK( m_trigDecTool.setProperty("TrigDecisionKey", "xTrigDecision") );
+    if (m_isRun3) {
+      ATH_CHECK( m_trigDecTool.setProperty("NavigationFormat", "TrigComposite") );
+      ATH_CHECK( m_trigDecTool.setProperty("HLTSummary", "HLTNav_Summary_DAODSlimmed") );
+    }
     ATH_CHECK( m_trigDecTool.setProperty("OutputLevel", this->msg().level()) );
     ATH_CHECK( m_trigDecTool.retrieve() );
   } else  ATH_CHECK( m_trigDecTool.retrieve() );
-  
+
+  if (m_isRun3) {
+    if (!m_trigDRScoringTool.isUserConfigured()) {
+      m_trigDRScoringTool.setTypeAndName("Trig::DRScoringTool/TrigDRScoringTool");
+      ATH_CHECK( m_trigDRScoringTool.setProperty("OutputLevel", this->msg().level()) );
+      ATH_CHECK( m_trigDRScoringTool.retrieve() );
+    } else  ATH_CHECK( m_trigDRScoringTool.retrieve() );
+  }
 
   if (!m_trigMatchingTool.isUserConfigured()) {
     if (!m_upstreamTriggerMatching){
       m_trigMatchingTool.setTypeAndName("Trig::MatchingTool/TrigMatchingTool");
       ATH_CHECK( m_trigMatchingTool.setProperty("TrigDecisionTool", m_trigDecTool.getHandle()) );
-      ATH_CHECK( m_trigMatchingTool.setProperty("OutputLevel", this->msg().level()) );
-      ATH_CHECK( m_trigMatchingTool.retrieve() );
     } else {
-      m_trigMatchingTool.setTypeAndName("Trig::MatchFromCompositeTool/TrigMatchFromCompositeTool");
-      ATH_CHECK( m_trigMatchingTool.setProperty("OutputLevel", this->msg().level()) );
-      ATH_CHECK( m_trigMatchingTool.setProperty("InputPrefix", m_trigMatchingPrefix) );
-      ATH_CHECK( m_trigMatchingTool.retrieve() );
+      if (m_isRun3) {
+        m_trigMatchingTool.setTypeAndName("Trig::R3MatchingTool/TrigR3MatchingTool");
+        ATH_CHECK( m_trigMatchingTool.setProperty("ScoringTool", m_trigDRScoringTool.getHandle()) );
+      }
+      else {
+        m_trigMatchingTool.setTypeAndName("Trig::MatchFromCompositeTool/TrigMatchFromCompositeTool");
+        ATH_CHECK( m_trigMatchingTool.setProperty("InputPrefix", m_trigMatchingPrefix) );
+        ATH_CHECK( m_trigMatchingTool.setProperty("RemapBrokenLinks", true) );
+      }
     }
+    ATH_CHECK( m_trigMatchingTool.setProperty("OutputLevel", this->msg().level()) );
+    ATH_CHECK( m_trigMatchingTool.retrieve() );
   } else  ATH_CHECK( m_trigMatchingTool.retrieve() );
-  
 
 ///////////////////////////////////////////////////////////////////////////////////////////
 // Initialise trigGlobalEfficiencyCorrection tool

@@ -15,6 +15,7 @@
 #include "xAODTau/TauJetContainer.h"
 #include "xAODMissingET/MissingETContainer.h"
 #include "xAODMissingET/MissingETAuxContainer.h"
+#include "xAODTrigger/TrigCompositeContainer.h"
 
 // For shallow copy containers
 #include "xAODCore/ShallowCopy.h"
@@ -171,15 +172,30 @@ StatusCode SUSYToolsAlg::initialize() {
   m_triggers["el"].push_back("HLT_e60_lhmedium_nod0");
   m_triggers["el"].push_back("HLT_e26_lhtight_nod0_ivarloose");
   m_triggers["el"].push_back("HLT_e140_lhloose_nod0");
+  m_triggers["el"].push_back("HLT_e24_lhtight_ivarloose_L1EM22VHI");
+  m_triggers["el"].push_back("HLT_e24_lhtight_ivarloose_L1eEM26M");
+  m_triggers["el"].push_back("HLT_e26_lhtight_ivarloose_L1EM22VHI");
+  m_triggers["el"].push_back("HLT_e26_lhtight_ivarloose_L1eEM26M");
+  m_triggers["el"].push_back("HLT_e60_lhvloose_L1eEM26M");
+  m_triggers["el"].push_back("HLT_e60_lhvloose_L1EM22VHI");
 
   m_triggers["ph"] = {};
   m_triggers["ph"].push_back("HLT_g120_loose");
   m_triggers["ph"].push_back("HLT_g140_loose");
+  m_triggers["ph"].push_back("HLT_g120_loose_L1eEM26M");
+  m_triggers["ph"].push_back("HLT_g120_loose_L1EM22VHI");
+  m_triggers["ph"].push_back("HLT_g140_loose_L1eEM26M");
+  m_triggers["ph"].push_back("HLT_g140_loose_L1EM22VHI");
 
   m_triggers["mu"] = {};
   m_triggers["mu"].push_back("HLT_mu24_ivarmedium");
-  m_triggers["mu"].push_back("HLT_mu50");
   m_triggers["mu"].push_back("HLT_mu26_ivarmedium");
+  m_triggers["mu"].push_back("HLT_mu50");
+  m_triggers["mu"].push_back("HLT_mu24_ivarmedium_L1MU14FCH");
+  m_triggers["mu"].push_back("HLT_mu24_ivarmedium_L1MU18VFCH");
+  m_triggers["mu"].push_back("HLT_mu26_ivarmedium_L1MU14FCH");
+  m_triggers["mu"].push_back("HLT_mu26_ivarmedium_L1MU18VFCH");
+
 
   // book histograms
   ATH_CHECK( bookHistograms() );
@@ -510,6 +526,9 @@ StatusCode SUSYToolsAlg::execute() {
   //--- Overlap Removal
   ATH_CHECK( m_SUSYTools->OverlapRemoval(electrons_nominal, muons_nominal, jets_nominal, photons_nominal, taus_nominal) );
 
+  //--- Trigger
+  bool isRun3Trig = false;
+  if (evtStore()->contains<xAOD::TrigCompositeContainer>("TrigMatch_HLT_e24_lhtight_ivarloose_L1EM22VHI")) isRun3Trig = true;
 
   //--- Monitoring
   for (auto obj : m_objects) { for (auto lev : m_levels) { m_obj_count[obj][lev] = 0; } }
@@ -540,7 +559,7 @@ StatusCode SUSYToolsAlg::execute() {
             unsigned int idx=1;
             for(const auto& t : m_triggers["el"]){
               ATH_MSG_DEBUG( "  Processing trigger " << t );
-              bool passit = m_SUSYTools->IsTrigMatched(el, t);
+              bool passit = ((isRun3Trig||t.find("_L1")==std::string::npos) ? m_SUSYTools->IsTrigMatched(el, t) : false);
               passTM |= passit;
               if(passit) el_trigmatch_eff_nominal->SetBinContent(idx, el_trigmatch_eff_nominal->GetBinContent(idx)+1);
               m_heffs["Trigger/el_pt_"+t]->Fill(passit,el->pt()/1000.);
@@ -583,7 +602,7 @@ StatusCode SUSYToolsAlg::execute() {
             bool passTM=false;
             unsigned int idx=1;
             for(const auto& t : m_triggers["ph"]){
-              bool passit = m_SUSYTools->IsTrigMatched(ph, t);
+              bool passit = ((isRun3Trig||t.find("_L1")==std::string::npos) ? m_SUSYTools->IsTrigMatched(ph, t) : false);
               passTM |= passit;
               if(passit) ph_trigmatch_eff_nominal->SetBinContent(idx, ph_trigmatch_eff_nominal->GetBinContent(idx)+1);
               m_heffs["Trigger/ph_pt_"+t]->Fill(passit,ph->pt()/1000.);
@@ -626,7 +645,7 @@ StatusCode SUSYToolsAlg::execute() {
             bool passTM=false;
             unsigned int idx=1;
             for(const auto& t : m_triggers["mu"]){
-              bool passit = m_SUSYTools->IsTrigMatched(mu, t);
+              bool passit = ((isRun3Trig||t.find("_L1")==std::string::npos) ? m_SUSYTools->IsTrigMatched(mu, t) : false);
               passTM |= passit;
               if(passit) mu_trigmatch_eff_nominal->SetBinContent(idx, mu_trigmatch_eff_nominal->GetBinContent(idx)+1);
               m_heffs["Trigger/mu_pt_"+t]->Fill(passit,mu->pt()/1000.);
@@ -1000,7 +1019,8 @@ StatusCode SUSYToolsAlg::execute() {
         if( !isData ){
           if (isNominal || syst_affectsElectrons) {
             if ((el->auxdata< char >("signal") == 1) && (isNominal || sysInfo.affectsWeights)) {
-              electrons_weight *= m_SUSYTools->GetSignalElecSF( *el ); // (*el, true, true, false, true) to switch off trigger SF
+              //electrons_weight *= m_SUSYTools->GetSignalElecSF( *el ); // (*el, true, true, false, true) to switch off trigger SF
+              electrons_weight *= m_SUSYTools->GetSignalElecSF(*el, true, true, false, true);
             }
           }
         }
@@ -1210,7 +1230,7 @@ StatusCode SUSYToolsAlg::execute() {
         if( !isData ){
           if (isNominal || syst_affectsTaus) {
             if ((ta->auxdata< char >("signal") == 1) && (isNominal || sysInfo.affectsWeights)) {
-              taus_weight *= m_SUSYTools->GetSignalTauSF(*ta, true, true, "HLT_tau125_medium1_tracktwo");;
+              taus_weight *= m_SUSYTools->GetSignalTauSF(*ta, true, false); //true, "HLT_tau25_medium1_tracktwo");;
             }
           }
         }
