@@ -327,6 +327,21 @@ def PixeldEdxAlgCfg(flags, name="PixeldEdxAlg", **kwargs):
     acc.addCondAlgo(CompFactory.PixeldEdxAlg(name, ReadFromCOOL = True, **kwargs))
     return acc
 
+def PixelSiliconConditionsTestAlgCfg(flags, name="PixelSiliconConditionsTestAlg", **kwargs):
+    """Return a ComponentAccumulator with configured PixelSiliconConditionsTestAlg"""
+    acc = ComponentAccumulator()
+    acc.merge(PixelDCSCondTempAlgCfg(flags))
+    acc.merge(PixelDCSCondHVAlgCfg(flags))
+    if flags.GeoModel.Run >= LHCPeriod.Run3:
+        acc.merge(PixelChargeLUTCalibCondAlgCfg(flags))
+    else:
+        acc.merge(PixelChargeCalibCondAlgCfg(flags))
+    acc.merge(PixelDistortionAlgCfg(flags))
+    from SiLorentzAngleTool.PixelLorentzAngleConfig import PixelLorentzAngleCfg
+    kwargs.setdefault("LorentzAngleTool", acc.popToolsAndMerge(PixelLorentzAngleCfg(flags)))
+    acc.addEventAlgo(CompFactory.PixelSiliconConditionsTestAlg(name, **kwargs))
+    return acc
+
 def PixelDetectorElementStatusCondAlgActiveOnlyCfg(flags, name = "PixelDetectorElementStatusCondAlgNoByteStreamErrorActiveOnly", **kwargs) :
     '''
     Condition alg to precompute the pixel detector element status.
