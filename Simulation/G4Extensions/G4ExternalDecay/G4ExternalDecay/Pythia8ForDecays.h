@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2017 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
 */
 
 // Abused from Geant4 version of Pythai6.hh from extended examples
@@ -15,9 +15,10 @@
 #include <utility>
 // For all the various Pythia8 classes used here
 #include "Pythia8_i/Pythia8_i.h"
-// For unique_ptr and once flag
+// For unique_ptr
 #include <memory>
-#include <mutex>
+// For ATLAS THREAD macros
+#include "CxxUtils/checker_macros.h"
 
 class G4DynamicParticle;
 class G4ParticleDefinition;
@@ -28,7 +29,7 @@ class Pythia8ForDecays
 
    virtual ~Pythia8ForDecays() = default;
 
-   static Pythia8ForDecays *Instance();
+   static Pythia8ForDecays *Instance ATLAS_NOT_THREAD_SAFE ();
 
    /// Function that decays the RHadron; returns products in G4 format
    void Py1ent(const G4Track&, std::vector<G4DynamicParticle*> &);
@@ -48,10 +49,6 @@ class Pythia8ForDecays
    std::pair<int,int> fromIdWithGluino( int idRHad, Pythia8::Rndm* rndmPtr) const;
    std::pair<int,int> fromIdWithSquark( int idRHad) const;
    bool isGluinoRHadron(int pdgId) const;
-
-   /// My own class; singleton pattern; thread safe for future-proofing
-   static std::unique_ptr<Pythia8ForDecays> s_instance;
-   static std::once_flag m_onceFlag;
 
    /// The instance of Pythia8 that will do the work
    std::unique_ptr<Pythia8::Pythia> m_pythia;

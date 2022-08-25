@@ -1,6 +1,4 @@
-################################################################################
-# Package: G4ExternalDecay
-################################################################################
+# Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
 
 # Declare the package name:
 atlas_subdir( G4ExternalDecay )
@@ -37,5 +35,5 @@ atlas_add_library( G4ExternalDecay
                    INCLUDE_DIRS ${XERCESC_INCLUDE_DIRS} ${CLHEP_INCLUDE_DIRS} ${LHAPDF_INCLUDE_DIRS} ${GEANT4_INCLUDE_DIRS} ${PYTHIA8_INCLUDE_DIRS} ${extra_includes}
                    PRIVATE_INCLUDE_DIRS 
                    DEFINITIONS ${CLHEP_DEFINITIONS}
-                   LINK_LIBRARIES ${XERCESC_LIBRARIES} ${CLHEP_LIBRARIES} ${PYTHIA8_LIBRARIES} ${LHAPDF_LIBRARIES} ${GEANT4_LIBRARIES} Pythia8_iLib ${extra_libs}
+                   LINK_LIBRARIES ${XERCESC_LIBRARIES} ${CLHEP_LIBRARIES} ${PYTHIA8_LIBRARIES} ${LHAPDF_LIBRARIES} ${GEANT4_LIBRARIES} CxxUtils Pythia8_iLib ${extra_libs}
                    PRIVATE_LINK_LIBRARIES AtlasHepMCLib )

@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2017 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
 */
 
 // Abused from Pythia6.cc in Geant4 extended examples
@@ -30,15 +30,10 @@
 #include <cmath>
 #include <fstream>
 
-std::unique_ptr<Pythia8ForDecays> Pythia8ForDecays::s_instance(nullptr);
-std::once_flag Pythia8ForDecays::m_onceFlag;
 
-Pythia8ForDecays* Pythia8ForDecays::Instance() {
-  std::call_once(m_onceFlag,
-        [] {
-            s_instance.reset(new Pythia8ForDecays);
-    });
-  return s_instance.get();
+Pythia8ForDecays* Pythia8ForDecays::Instance ATLAS_NOT_THREAD_SAFE () {
+  static Pythia8ForDecays instance;
+  return &instance;
 }
 
 Pythia8ForDecays::Pythia8ForDecays()
