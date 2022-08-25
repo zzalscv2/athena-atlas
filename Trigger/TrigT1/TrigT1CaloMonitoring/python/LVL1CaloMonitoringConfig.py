@@ -50,6 +50,10 @@ def LVL1CaloMonitoringConfig(flags):
             result.merge(OverviewMonitoringConfig(flags))
             result.merge(PPMSimBSMonitoringConfig(flags))
 
+            if  flags.Input.TriggerStream == "physics_Mistimed":
+                from TrigT1CaloMonitoring.MistimedStreamMonitorAlgorithm import MistimedStreamMonitorConfig
+                result.merge(MistimedStreamMonitorConfig(flags))
+
         result.merge(PprMonitoringConfig(flags))
         result.merge(JepJemMonitoringConfig(flags))
 
