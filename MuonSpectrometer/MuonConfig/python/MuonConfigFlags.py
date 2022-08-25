@@ -1,7 +1,7 @@
 # Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
 
 from AthenaConfiguration.AthConfigFlags import AthConfigFlags
-from AthenaConfiguration.Enums import BeamType, ProductionStep, LHCPeriod
+from AthenaConfiguration.Enums import BeamType, LHCPeriod, ProductionStep, Project
     
 import re
 
@@ -121,7 +121,7 @@ def createMuonConfigFlags():
     mcf.addFlag("Muon.MuonTrigger", False) 
     mcf.addFlag("Muon.SAMuonTrigger", False) 
 
-    mcf.addFlag("Muon.enableAlignment",lambda flags: (flags.Common.Project != 'AthSimulation' \
+    mcf.addFlag("Muon.enableAlignment",lambda flags: (flags.Common.Project is not Project.AthSimulation \
                                                       and (flags.Common.ProductionStep != ProductionStep.Simulation or flags.Overlay.DataOverlay)))
 
     # TODO - add configuration for above    

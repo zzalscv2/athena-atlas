@@ -13,7 +13,7 @@ from AthenaConfiguration.Enums import BeamType, ProductionStep
 # todo verify and add suggestions made in todo
 
 
-## GenEventManipulators
+# GenEventManipulators
 def ValidityCheckerCfg(flags, name="GenEventValidityChecker", **kwargs):
     """Return a validity checker tool"""
     acc = ComponentAccumulator()
@@ -55,7 +55,7 @@ def GenEventVertexPositionerCfg(flags, name="GenEventVertexPositioner", **kwargs
     return acc
 
 
-## LorentzVectorGenerators
+# LorentzVectorGenerators
 def VertexBeamCondPositionerCfg(flags, name="VertexBeamCondPositioner", **kwargs):
     """Return a conditional (? todo) vertex positioner tool"""
     from RngComps.RandomServices import AthRNGSvcCfg
@@ -107,9 +107,8 @@ def BeamEffectsAlgCfg(flags, name="BeamEffectsAlg", **kwargs):
     else:
         kwargs.setdefault("InputMcEventCollection", "GEN_EVENT")
 
-
-    if flags.Sim.DoFullChain and flags.Common.isOverlay:
-        kwargs.setdefault('OutputMcEventCollection', 'Sig_TruthEvent')
+    if flags.Common.isOverlay and flags.Sim.DoFullChain:
+        kwargs.setdefault('OutputMcEventCollection', f"{flags.Overlay.SigPrefix}TruthEvent")
     else:
         kwargs.setdefault('OutputMcEventCollection', 'BeamTruthEvent')
 
@@ -170,7 +169,6 @@ if __name__ == "__main__":
     from AthenaConfiguration.MainServicesConfig import MainServicesCfg
     from AthenaPoolCnvSvc.PoolReadConfig import PoolReadCfg
 
-
     from AthenaConfiguration.AllConfigFlags import ConfigFlags
     from SimulationFlags import ConfigFlagsSimulation
 
@@ -179,46 +177,45 @@ if __name__ == "__main__":
     log.setLevel(DEBUG)
 
     import os
-    inputDir = os.environ.get ("ATLAS_REFERENCE_DATA",
-                               "/cvmfs/atlas-nightlies.cern.ch/repo/data/data-art")
-     # Provide input
+    inputDir = os.environ.get("ATLAS_REFERENCE_DATA",
+                              "/cvmfs/atlas-nightlies.cern.ch/repo/data/data-art")
+    # Provide input
     ConfigFlags.Input.Files = [
-         inputDir +
-         "/SimCoreTests/e_E50_eta34_49.EVNT.pool.root"
-         ]
-
+        inputDir +
+        "/SimCoreTests/e_E50_eta34_49.EVNT.pool.root"
+        ]
 
     # Specify output
     ConfigFlags.Output.HITSFileName = "myHITS.pool.root"
 
-    #set the source of vertex positioning
+    # set the source of vertex positioning
     from SimulationConfig.SimEnums import VertexSource
-    #ConfigFlags.Sim.VertexSource = VertexSource.VertexOverrideFile
+    # ConfigFlags.Sim.VertexSource = VertexSource.VertexOverrideFile
     ConfigFlags.Sim.VertexSource = VertexSource.CondDB
-    #ConfigFlags.Sim.VertexSource = VertexSource.LongBeamspotVertexPositioner"
+    # ConfigFlags.Sim.VertexSource = VertexSource.LongBeamspotVertexPositioner"
 
-    #included to stop segmentation error - TODO see why it's failing
+    # included to stop segmentation error - TODO see why it's failing
     ConfigFlags.Input.isMC = True
-    ConfigFlags.IOVDb.GlobalTag = "OFLCOND-MC16-SDR-14" #conditions tag for conddb (which one to use - old one for simulation)
-    ConfigFlags.Input.RunNumber = [284500] # run test job with and without run number and 222510
+    ConfigFlags.IOVDb.GlobalTag = "OFLCOND-MC16-SDR-14"  # conditions tag for conddb (which one to use - old one for simulation)
+    ConfigFlags.Input.RunNumber = [284500]  # run test job with and without run number and 222510
 
     # Finalize
     ConfigFlags.lock()
 
-    ## Initialize a new component accumulator
-    cfg = MainServicesCfg(ConfigFlags) #use this syntax for storegate
+    # Initialize a new component accumulator
+    cfg = MainServicesCfg(ConfigFlags)  # use this syntax for storegate
     # Add configuration to read EVNT pool file
     cfg.merge(PoolReadCfg(ConfigFlags))
 
     # Make use of our defiend function
     cfg.merge(BeamEffectsAlgCfg(ConfigFlags))
 
-    cfg.getService("StoreGateSvc").Dump=True
+    cfg.getService("StoreGateSvc").Dump = True
     cfg.printConfig(withDetails=True)
     ConfigFlags.dump()
 
     # Run it in athena
-    cfg.run(maxEvents = 20)
+    cfg.run(maxEvents=20)
 
     # Store in a pickle file
     with open("BeamEffectsAlg.pkl", "wb") as f:

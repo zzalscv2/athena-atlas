@@ -22,10 +22,16 @@ def EntryLayerToolCfg(flags, name="ISF_EntryLayerTool", **kwargs):
     else:
         kwargs.setdefault("CaloEntryVolumeString", "ITK::ITK")
 
-    if flags.Sim.DoFullChain:
-        OEsvc = CompFactory.StoreGateSvc("OriginalEvent_SG")
-        result.addService(OEsvc)
-        kwargs.setdefault("EvtStore", OEsvc.name) # For Fast Chain
+    from AthenaConfiguration.Enums import ProductionStep
+    if flags.Common.ProductionStep == ProductionStep.FastChain:
+        if flags.Digitization.PileUp:
+            OEsvc = CompFactory.StoreGateSvc("OriginalEvent_SG")
+            result.addService(OEsvc)
+            kwargs.setdefault("EvtStore", OEsvc.name)
+        if flags.Overlay.FastChain:
+            kwargs.setdefault("CaloEntryLayer", f"{flags.Overlay.SigPrefix}CaloEntryLayer")
+            kwargs.setdefault("MuonEntryLayer", f"{flags.Overlay.SigPrefix}MuonEntryLayer")
+            kwargs.setdefault("MuonExitLayer",  f"{flags.Overlay.SigPrefix}MuonExitLayer")
 
     result.setPrivateTools(CompFactory.ISF.EntryLayerTool(name, **kwargs))
     return result
@@ -42,11 +48,6 @@ def EntryLayerToolMTCfg(flags, name="ISF_EntryLayerToolMT", **kwargs):
         kwargs.setdefault("CaloEntryVolumeString", "IDET::IDET")
     else:
         kwargs.setdefault("CaloEntryVolumeString", "ITK::ITK")
-
-    if flags.Sim.DoFullChain:
-        OEsvc = CompFactory.StoreGateSvc("OriginalEvent_SG")
-        result.addService(OEsvc)
-        kwargs.setdefault("EvtStore", OEsvc.name) # For Fast Chain
 
     result.setPrivateTools(CompFactory.ISF.EntryLayerToolMT(name, **kwargs))
     return result
@@ -65,10 +66,16 @@ def AFIIEntryLayerToolCfg(flags, name="ISF_AFIIEntryLayerTool", **kwargs):
     else:
         kwargs.setdefault("CaloEntryVolumeString", "ITK::ITK")
 
-    if flags.Sim.DoFullChain:
-        OEsvc = CompFactory.StoreGateSvc("OriginalEvent_SG")
-        result.addService(OEsvc)
-        kwargs.setdefault("EvtStore", OEsvc.name) # For Fast Chain
+    from AthenaConfiguration.Enums import ProductionStep
+    if flags.Common.ProductionStep == ProductionStep.FastChain:
+        if flags.Digitization.PileUp:
+            OEsvc = CompFactory.StoreGateSvc("OriginalEvent_SG")
+            result.addService(OEsvc)
+            kwargs.setdefault("EvtStore", OEsvc.name)
+        if flags.Overlay.FastChain:
+            kwargs.setdefault("CaloEntryLayer", f"{flags.Overlay.SigPrefix}CaloEntryLayer")
+            kwargs.setdefault("MuonEntryLayer", f"{flags.Overlay.SigPrefix}MuonEntryLayer")
+            kwargs.setdefault("MuonExitLayer",  f"{flags.Overlay.SigPrefix}MuonExitLayer")
 
     result.setPrivateTools(CompFactory.ISF.EntryLayerTool(name, **kwargs))
     return result
@@ -85,11 +92,6 @@ def AFIIEntryLayerToolMTCfg(flags, name="ISF_AFIIEntryLayerToolMT", **kwargs):
         kwargs.setdefault("CaloEntryVolumeString", "IDET::IDET")
     else:
         kwargs.setdefault("CaloEntryVolumeString", "ITK::ITK")
-
-    if flags.Sim.DoFullChain:
-        OEsvc = CompFactory.StoreGateSvc("OriginalEvent_SG")
-        result.addService(OEsvc)
-        kwargs.setdefault("EvtStore", OEsvc.name) # For Fast Chain
 
     result.setPrivateTools(CompFactory.ISF.EntryLayerToolMT(name, **kwargs))
     return result

@@ -29,7 +29,7 @@
 # run simulation on 100 events using the asymmetric Run3 layout
 # the postInclude adds a validation algorithm which writes out an ntuple for sim hit validation
 # (without the postInclude, a standard simulation job would run)
-cond_tag="default:OFLCOND-MC21-SDR-RUN3-05'"
+cond_tag="default:OFLCOND-MC21-SDR-RUN3-05"
 Sim_tf.py --inputEVNTFile /cvmfs/atlas-nightlies.cern.ch/repo/data/data-art/OverlayTests/mc16_13TeV.361107.PowhegPythia8EvtGen_AZNLOCTEQ6L1_Zmumu.merge.EVNT.e3601_e5984/EVNT.12228944._002158.pool.root.1 \
           --maxEvents 100 \
           --imf False \
@@ -253,7 +253,13 @@ fi
 #####################################################################
 # now run diff-root to compare the ESDs made with 5threads and 1thread
 acmd.py diff-root --ignore-leaves index_ref \
-                           xAOD::BTaggingAuxContainer_v1_BTagging_AntiKt4EMTopoAuxDyn  \
+                           xAOD::BTaggingAuxContainer_v1_BTagging_AntiKt4EMTopoAuxDyn \
+                           xAOD::BTaggingAuxContainer_v2_BTagging_AntiKt4EMTopoAuxDyn \
+                           xAOD::BTaggingAuxContainer_v2_BTagging_AntiKt4EMPFlowAuxDyn \
+                           xAOD::JetAuxContainer_v1_AntiKt4EMPFlowJetsAuxDyn \
+                           xAOD::JetAuxContainer_v1_AntiKt4EMTopoJetsAuxDyn \
+                           xAOD::JetAuxContainer_v1_AntiKt4TruthJetsAuxDyn \
+                           xAOD::JetAuxContainer_v1_AntiKt10LCTopoJetsAuxDyn \
                            xAOD::CaloClusterAuxContainer_v2_ForwardElectronClustersAuxDyn \
                   --entries 25 \
                   --order-trees OUT_ESD_5thread.root OUT_ESD_1thread.root &> diff_5_vs_1.txt

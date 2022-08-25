@@ -32,7 +32,7 @@ def TrigDecisionToolCfg(flags):
     msg = logging.getLogger('TrigDecisionToolCfg')
     from AthenaConfiguration.ComponentFactory import CompFactory
     from AthenaConfiguration.ComponentAccumulator import ComponentAccumulator
-    from AthenaConfiguration.Enums import Format
+    from AthenaConfiguration.Enums import Format, Project
     acc = ComponentAccumulator()
 
     from TrigConfxAOD.TrigConfxAODConfig import getxAODConfigSvc
@@ -47,7 +47,7 @@ def TrigDecisionToolCfg(flags):
     if flags.Input.Format is Format.BS and flags.Trigger.EDMVersion in [1, 2]:
         tdt.UseAODDecision = True
 
-    if flags.Common.Project!='AthAnalysis':
+    if flags.Common.Project is not Project.AthAnalysis:
         # Full Athena
         # This pre-loads libraries required to read the run 2 trigger navigation
         from TrigEDMConfig.TriggerEDM import EDMLibraries

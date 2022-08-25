@@ -1,7 +1,8 @@
 """Construct ConfigFlags for Digitization
 
-Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
 """
+from AthenaConfiguration.AutoConfigFlags import GetFileMD
 from AthenaConfiguration.AthConfigFlags import AthConfigFlags
 from AthenaConfiguration.Enums import ProductionStep
 
@@ -36,7 +37,6 @@ def createDigitizationCfgFlags():
     def _checkDigiSteeringConf(prevFlags):
         digiSteeringConf = "StandardPileUpToolsAlg"
         if prevFlags.Input.Files:
-            from AthenaConfiguration.AutoConfigFlags import GetFileMD
             digiSteeringConf = GetFileMD(prevFlags.Input.Files).get("digiSteeringConf", "StandardPileUpToolsAlg")
         return digiSteeringConf
 
@@ -54,7 +54,8 @@ def createDigitizationCfgFlags():
     # Use high-gain ElectroMagnetic EndCap Inner Wheel
     flags.addFlag("Digitization.HighGainEMECIW", True)
     # Do global pileup digitization
-    flags.addFlag("Digitization.PileUp", False)
+    flags.addFlag("Digitization.PileUp",
+                  lambda prevFlags: GetFileMD(prevFlags.Input.Files).get("pileUp", "False") != "False")
     # Temporary TGC flag
     flags.addFlag("Digitization.UseUpdatedTGCConditions", False)
     # Write out truth information?

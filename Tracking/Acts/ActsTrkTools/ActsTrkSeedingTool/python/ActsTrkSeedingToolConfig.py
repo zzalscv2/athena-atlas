@@ -52,8 +52,6 @@ def  ActsTrkSiSpacePointsSeedMakerCfg(ConfigFlags,
                                       InputCollections: list = None,
                                       **kwargs) -> ComponentAccumulator:
     assert isinstance(name, str)
-    if InputCollections is not None:
-        assert isinstance(InputCollections, list)
 
     acc = ComponentAccumulator()
 
@@ -73,7 +71,7 @@ def  ActsTrkSiSpacePointsSeedMakerCfg(ConfigFlags,
     kwargs.setdefault('PixelClusterContainerKey', "ITkPixelClusters")
     kwargs.setdefault('StripClusterContainerKey', "ITkStripClusters")
 
-    if len(InputCollections) > 0 and ConfigFlags.ITk.Tracking.ActivePass.usePrdAssociationTool:
+    if ConfigFlags.ITk.Tracking.ActivePass.usePrdAssociationTool:
         # not all classes have that property !!!
         kwargs.setdefault('PRDtoTrackMap', 'ITkPRDtoTrackMap'+ ConfigFlags.ITk.Tracking.ActivePass.extension)
 

@@ -26,7 +26,8 @@ def writeDigitizationMetadata(ConfigFlags):
                           'finalBunchCrossing' : 'Digitization.PU.FinalBunchCrossing',
                           'initialBunchCrossing' : 'Digitization.PU.InitialBunchCrossing',
                           'physicsList' : 'Sim.PhysicsList', #TODO migrate clients to use /Simulation/Parameters metadata?
-                          'digiSteeringConf' : 'Digitization.DigiSteeringConf'
+                          'digiSteeringConf' : 'Digitization.DigiSteeringConf',
+                          'pileUp' : 'Digitization.PileUp',
                       }
     logDigitizationWriteMetadata.info('Filling Digitization MetaData')
     for testKey, testFlag in digitMetaDataKeys.items():

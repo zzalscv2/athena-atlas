@@ -71,6 +71,8 @@ def getMdtDigitToMdtRDO(name="MdtDigitToMdtRDO", **kwargs):
         kwargs.setdefault("OutputObjectName", overlayFlags.bkgPrefix() + "MDTCSM")
     else:
         kwargs.setdefault("OutputObjectName", "MDTCSM")
+    from AtlasGeoModel.CommonGMJobProperties import CommonGeometryFlags
+    kwargs.setdefault("isPhaseII", CommonGeometryFlags.Run in ["RUN4"])
     return CfgMgr.MdtDigitToMdtRDO(name, **kwargs)
 
 def getRpcDigitToRpcRDO(name="RpcDigitToRpcRDO", **kwargs):
@@ -118,6 +120,8 @@ def getSigMdtDigitToMdtRDO(name="SigMdtDigitToMdtRDO", **kwargs):
     from OverlayCommonAlgs.OverlayFlags import overlayFlags
     kwargs.setdefault("InputObjectName",overlayFlags.evtStore()+"+MDT_DIGITS")
     kwargs.setdefault("OutputObjectName",overlayFlags.evtStore()+"+MDTCSM")
+    from AtlasGeoModel.CommonGMJobProperties import CommonGeometryFlags  
+    kwargs.setdefault("isPhaseII", CommonGeometryFlags.Run in ["RUN4"])
     return CfgMgr.MdtDigitToMdtRDO(name, **kwargs)
 
 
