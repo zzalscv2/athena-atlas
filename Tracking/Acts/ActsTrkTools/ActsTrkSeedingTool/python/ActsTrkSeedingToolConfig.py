@@ -49,7 +49,6 @@ def ActsTrkITkStripSeedingToolCfg(ConfigFlags):
 
 def  ActsTrkSiSpacePointsSeedMakerCfg(ConfigFlags,
                                       name: str = 'ActsTrkSiSpacePointsSeedMaker',
-                                      InputCollections: list = None,
                                       **kwargs) -> ComponentAccumulator:
     assert isinstance(name, str)
 
