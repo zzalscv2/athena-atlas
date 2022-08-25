@@ -29,6 +29,8 @@ NAME:     LArFebSummaryMaker
 #include "StoreGate/WriteHandleKey.h"
 #include "StoreGate/ReadCondHandleKey.h"
 
+#include "CxxUtils/checker_macros.h"
+
 #include <array>
 #include <set>
 

@@ -68,58 +68,55 @@ StatusCode LArDigitThinner::initialize() {
 }
 
 
-void LArDigitThinner::initCutValues(const EventContext& ctx) {
+const std::vector<int>&
+LArDigitThinner::initCutValues(const EventContext& ctx) const
+{
+  if (!m_energyCuts.isValid()) {
+    //Note that the cut values per online-ID depends on the LAr-cabling. Even the cabling is 
+    //formally a time-dependent condition, it changes very rarely. Therefore putting it
+    //into a ConditionsContainer filled by a dedicated conditions algorithm seems an
+    //unecessary overkill. 
 
-  //Note that the cut values per online-ID depends on the LAr-cabling. Even the cabling is
-  //formally a time-dependent condition, it changes very rarely. Therefore putting it
-  //into a ConditionsContainer filled by a dedicated conditions algorithm seems an
-  //unecessary overkill. 
-
-  m_energyCuts.assign(m_onlineID->channelHashMax(),std::numeric_limits<int>::max());
+    std::vector<int> energyCuts;
+    energyCuts.assign(m_onlineID->channelHashMax(),std::numeric_limits<int>::max());
 
 
-  SG::ReadCondHandle<LArOnOffIdMapping> cablingHdl(m_cablingKey,ctx);
-  const LArOnOffIdMapping* cabling=*cablingHdl;
+    SG::ReadCondHandle<LArOnOffIdMapping> cablingHdl(m_cablingKey,ctx);
+    const LArOnOffIdMapping* cabling=*cablingHdl;
 
 
-  CaloCell_ID::id_iterator it=m_caloCellId->cell_begin(CaloCell_ID::LAREM);
-  CaloCell_ID::id_iterator it_e=m_caloCellId->cell_end(CaloCell_ID::LAREM);
-  for(;it!=it_e;++it) {
-    const Identifier id=(*it);
-    HWIdentifier chid=cabling->createSignalChannelID(id);
-    IdentifierHash onlHash=m_onlineID->channel_Hash(chid);
-    int sampling = m_caloCellId->sampling(id);
-    if (sampling < 0) continue;
-    if (m_caloCellId->is_em_barrel(id)) {
-      m_energyCuts[onlHash]=m_energyCuts_barrel[sampling];
-    }
-    else { //endcap
-      m_energyCuts[onlHash]=m_energyCuts_endcap[sampling];
-      continue;
-    }
-  }//end loop over EM cells;
+    for (const Identifier id : m_caloCellId->cell_range(CaloCell_ID::LAREM)) {
+      HWIdentifier chid=cabling->createSignalChannelID(id);
+      IdentifierHash onlHash=m_onlineID->channel_Hash(chid);
+      int sampling = m_caloCellId->sampling(id);
+      if (sampling < 0) continue;
+      if (m_caloCellId->is_em_barrel(id)) {
+        energyCuts[onlHash]=m_energyCuts_barrel[sampling];
+      }
+      else { //endcap
+        energyCuts[onlHash]=m_energyCuts_endcap[sampling];
+        continue;
+      }
+    }//end loop over EM cells;
 
-  it=m_caloCellId->cell_begin(CaloCell_ID::LARHEC);
-  it_e=m_caloCellId->cell_end(CaloCell_ID::LARHEC);
-  for(;it!=it_e;++it) {
-    const Identifier id=(*it);
-    HWIdentifier chid=cabling->createSignalChannelID(id);
-    IdentifierHash onlHash=m_onlineID->channel_Hash(chid);
-    m_energyCuts[onlHash]= m_energyCut_hec;
-  }//End loop over HEC cells
+    for (const Identifier id : m_caloCellId->cell_range(CaloCell_ID::LARHEC)) {
+      HWIdentifier chid=cabling->createSignalChannelID(id);
+      IdentifierHash onlHash=m_onlineID->channel_Hash(chid);
+      energyCuts[onlHash]= m_energyCut_hec;
+    }//End loop over HEC cells
   
-  it=m_caloCellId->cell_begin(CaloCell_ID::LARFCAL);
-  it_e=m_caloCellId->cell_end(CaloCell_ID::LARFCAL);
-  for(;it!=it_e;++it) {
-    const Identifier id=(*it);
-    HWIdentifier chid=cabling->createSignalChannelID(id);
-    IdentifierHash onlHash=m_onlineID->channel_Hash(chid);
-    m_energyCuts[onlHash]= m_energyCut_fcal;
-  }//end loop over FCAL cells
+    for (const Identifier id : m_caloCellId->cell_range(CaloCell_ID::LARFCAL)) {
+      HWIdentifier chid=cabling->createSignalChannelID(id);
+      IdentifierHash onlHash=m_onlineID->channel_Hash(chid);
+      energyCuts[onlHash]= m_energyCut_fcal;
+    }//end loop over FCAL cells
 
-  ATH_MSG_INFO("Done filling cache of cut values");
+    m_energyCuts.set (std::move (energyCuts));
 
-  return;
+    ATH_MSG_INFO("Done filling cache of cut values");
+  }
+
+  return *m_energyCuts.ptr();
 }
 
 
@@ -130,14 +127,8 @@ StatusCode LArDigitThinner::finalize()
 
 
 StatusCode LArDigitThinner::execute(const EventContext& ctx) const {
-
-  // initialize cut values once
-  static std::once_flag flag;
-  std::call_once(flag, [&]{
-      // safe because locked
-      auto this_nc ATLAS_THREAD_SAFE = const_cast<LArDigitThinner*>(this);
-      this_nc->initCutValues(ctx);
-    });
+  
+  const std::vector<int>& energyCuts = initCutValues(ctx); //Should return right away if the cut values are already initialized
 
   //Get event inputs from read handles:
   SG::ReadHandle<LArDigitContainer> inputContainer(m_inputKey,ctx);
@@ -153,7 +144,7 @@ StatusCode LArDigitThinner::execute(const EventContext& ctx) const {
 
   for(const LArRawChannel& chan : *larRawChannelContainer) {
     const IdentifierHash onlHash=m_onlineID->channel_Hash(chan.hardwareID());
-    if (abs(chan.energy())>=m_energyCuts[onlHash]) {
+    if (abs(chan.energy())>=energyCuts[onlHash]) {
       keepSet.set(onlHash);
     }
   }//end loop over raw channels

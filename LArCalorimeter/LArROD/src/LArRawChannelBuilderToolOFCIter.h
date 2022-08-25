@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2017 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
 */
 
 //Dear emacs, this is -*-c++-*-
@@ -19,6 +19,7 @@
 #include "LArElecCalib/ILArPedestal.h"
 #include "LArElecCalib/ILArNoise.h"
 #include "LArRawEvent/LArOFIterResultsContainer.h"
+#include "StoreGate/ReadCondHandleKey.h"
 #include <vector>
 
 #include "LArRawChannelBuilderToolBase.h"
@@ -70,9 +71,10 @@ class LArRawChannelBuilderToolOFCIter : public LArRawChannelBuilderToolBase
   ToolHandle<LArOFPeakRecoTool> m_peakReco;
 
   //For threshold given in pedestal rms:
-  const DataHandle<ILArPedestal> m_larPedestal;
-  std::string m_pedestalKey;
-  const DataHandle<ILArNoise> m_larNoise;
+  SG::ReadCondHandleKey<ILArPedestal> m_pedestalRMSKey
+    { this, "PedestalRMSKey", "", "SG key for pedestal object. Needed only if 'minADCforIterInSigma' is set (for the RMS)" };
+  SG::ReadCondHandleKey<ILArNoise> m_larNoiseKey
+    { this, "LArNoiseKey", "LArNoise", "SG Key of ILArNoise object" };
 
 };
 

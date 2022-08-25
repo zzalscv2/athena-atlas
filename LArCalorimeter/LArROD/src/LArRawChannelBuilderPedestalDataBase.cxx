@@ -1,9 +1,10 @@
 /*
-  Copyright (C) 2002-2017 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
 */
 
 
 #include "LArRawChannelBuilderPedestalDataBase.h"
+#include "StoreGate/ReadCondHandle.h"
 
 LArRawChannelBuilderPedestalDataBase::LArRawChannelBuilderPedestalDataBase(const std::string& type,
 									   const std::string& name,
@@ -16,36 +17,22 @@ LArRawChannelBuilderPedestalDataBase::LArRawChannelBuilderPedestalDataBase(const
   m_helper->setErrorString(0, "no errors");
   m_helper->setErrorString(1, "no DataBase");
   m_helper->setErrorString(2, "no DataBase entry");
-  
-  declareProperty("LArPedestalKey",    m_pedestalKey="LArPedestal");
 }
 
 StatusCode LArRawChannelBuilderPedestalDataBase::initTool()
 {
-  if (detStore()->regHandle(m_larPedestal,m_pedestalKey).isFailure()){
-    msg(MSG::ERROR) << "No pedestals with key <" << m_pedestalKey << "> found in database." << endmsg;
-    m_helper->incrementErrorCount(1);
-    return StatusCode::FAILURE;
-  }
+  ATH_CHECK( m_larPedestalKey.initialize() );
   return StatusCode::SUCCESS;
 }
 
-bool LArRawChannelBuilderPedestalDataBase::pedestal(float& pedestal, MsgStream* pLog)
+bool LArRawChannelBuilderPedestalDataBase::pedestal(float& pedestal, MsgStream* /*pLog*/)
 {
   pedestal = 0;
-  
-  // use database for pedestals
-  if(!bool(m_larPedestal))
-    {
-      if(bool(pLog))
-	(*pLog) << MSG::WARNING << "No pedestal found in database."
-	     << endmsg;
-      m_helper->incrementErrorCount(1);
-      return false;
-    }
-  
+  const EventContext& ctx = Gaudi::Hive::currentContext();
+
+  SG::ReadCondHandle<ILArPedestal> larPedestal (m_larPedestalKey, ctx);
   float DBpedestal 
-    =m_larPedestal->pedestal(m_parent->curr_chid,m_parent->curr_gain);
+    =larPedestal->pedestal(m_parent->curr_chid,m_parent->curr_gain);
   if (DBpedestal <= (1.0+LArElecCalib::ERRORCODE))
     {
       m_helper->incrementErrorCount(2);

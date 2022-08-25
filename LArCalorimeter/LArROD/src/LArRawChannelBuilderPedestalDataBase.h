@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2017 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
 */
 
 /** 
@@ -12,7 +12,7 @@
 #define LARROD_LARRAWCHANNELBUILDERPEDESTALDATABASE_H
 
 #include "LArRawChannelBuilderPedestalToolBase.h"
-#include "StoreGate/DataHandle.h"
+#include "StoreGate/ReadCondHandleKey.h"
 
 #include "CLHEP/Units/SystemOfUnits.h"
 
@@ -31,9 +31,8 @@ class LArRawChannelBuilderPedestalDataBase
   
  private:
   
-  const DataHandle<ILArPedestal> m_larPedestal;
-  
-  std::string m_pedestalKey;
+  SG::ReadCondHandleKey<ILArPedestal> m_larPedestalKey
+    { this, "LArPedestalKey", "LArPedestal", "SG key for pedestal object. Needed only if 'minADCforIterInSigma' is set (for the RMS)" };
 
   LArRawChannelBuilderPedestalDataBase (const LArRawChannelBuilderPedestalDataBase&);
   LArRawChannelBuilderPedestalDataBase& operator= (const LArRawChannelBuilderPedestalDataBase&);

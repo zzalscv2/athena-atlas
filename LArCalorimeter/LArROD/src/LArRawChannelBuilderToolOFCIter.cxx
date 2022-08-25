@@ -1,19 +1,11 @@
 /*
-  Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
 */
 
-
-/* if pool is wanted uncomment this
-#include "DataModel/DataPool.h"
-#define private public
-#define protected public
-#include "LArRawEvent/LArRawChannel.h"
-#undef private
-#undef protected
-*/
 
 #include "LArRawChannelBuilderToolOFCIter.h"
 #include "LArRawChannelBuilderDriver.h"
+#include "StoreGate/ReadCondHandle.h"
 #include "GaudiKernel/MsgStream.h"
 
 #include "LArRawEvent/LArDigit.h"
@@ -58,8 +50,6 @@ LArRawChannelBuilderToolOFCIter::LArRawChannelBuilderToolOFCIter(const std::stri
 		  "Create container of LArOFIterResults in StoreGate");
   declareProperty("TimingContainerKey",        m_timingContKey="LArOFIterResult",
 		  "Key of the LArOFIterResultsContainer in StoreGate");
-  declareProperty("PedestalRMSKey",            m_pedestalKey,
-		  "SG key for pedestal object. Needed only if 'minADCforIterInSigma' is set (for the RMS)");
   declareProperty("doMC",                      m_doMC=false,
                   " take noise from LArNoise instead of LArPedestal");
 
@@ -84,22 +74,10 @@ StatusCode LArRawChannelBuilderToolOFCIter::initTool()
 
   if (m_minADCforIterInSigma>0) {//threshold given in terms of pedestal-rms, get pedestal
     if (m_doMC) {
-      if (detStore()->regHandle(m_larNoise,"LArNoise").isFailure()) {
-         log << MSG::ERROR << " no LArNoise found " << endmsg;
-         m_minADCforIterInSigma=-1;
-      }
-      else
-        log << MSG::INFO << " Min ADC for iteration " << m_minADCforIterInSigma << "* LArNoise " <<endmsg;
+      log << MSG::INFO << " Min ADC for iteration " << m_minADCforIterInSigma << "* LArNoise " <<endmsg;
     }
     else {
-      if (detStore()->regHandle(m_larPedestal,m_pedestalKey).isFailure()) {
-        log << MSG::ERROR << "No pedestals with key <" << m_pedestalKey << "> found in DetectorStore." 
-  	    << "Will only use property minADCforIter ("<<m_minADCforIter <<") as iteration threshold."
-  	    << endmsg;
-        m_minADCforIterInSigma=-1;
-      }
-      else
-        log << MSG::INFO << " Min ADC for iteration " << m_minADCforIterInSigma << "* pedestalRMS " <<endmsg;
+      log << MSG::INFO << " Min ADC for iteration " << m_minADCforIterInSigma << "* pedestalRMS " <<endmsg;
     }
   }
   else
@@ -108,6 +86,8 @@ StatusCode LArRawChannelBuilderToolOFCIter::initTool()
   log << MSG::INFO << " DefaultPhase  "<<m_defaultPhase <<endmsg;
   log << MSG::INFO << " Min and Max Sample "<<m_minSample<< " "<<m_maxSample<<endmsg;
 
+  ATH_CHECK( m_larNoiseKey.initialize (m_doIter && m_minADCforIterInSigma>0 && m_doMC) );
+  ATH_CHECK( m_pedestalRMSKey.initialize (m_doIter && m_minADCforIterInSigma>0 && !m_doMC) );
 
   return StatusCode::SUCCESS;
 }
@@ -134,6 +114,7 @@ bool LArRawChannelBuilderToolOFCIter::buildRawChannel(const LArDigit* digit,
 {
   const HWIdentifier chid=m_parent->curr_chid;
   const CaloGain::CaloGain gain=m_parent->curr_gain;
+  const EventContext& ctx = Gaudi::Hive::currentContext();
 
   uint16_t iprovenance=0;
 
@@ -181,11 +162,13 @@ bool LArRawChannelBuilderToolOFCIter::buildRawChannel(const LArDigit* digit,
   if (m_doIter) {
     if (m_minADCforIterInSigma>0) {//threshold given in terms of pedestal-rms, get pedestal
        if (m_doMC) {
-         float sigma = m_larNoise->noise(chid,gain);
+         SG::ReadCondHandle<ILArNoise> larNoise (m_larNoiseKey, ctx);
+         float sigma = larNoise->noise(chid,gain);
          if (peakval > (sigma*m_minADCforIterInSigma)) doIter=true;
        }
        else {
-         float vRMS=m_larPedestal->pedestalRMS(chid,gain);
+         SG::ReadCondHandle<ILArPedestal> larPedestal (m_pedestalRMSKey, ctx);
+         float vRMS=larPedestal->pedestalRMS(chid,gain);
          if (vRMS >= (1.0+LArElecCalib::ERRORCODE)) { 
 	   if (peakval > (vRMS*m_minADCforIterInSigma)) doIter=true;//enough signal...
          }
