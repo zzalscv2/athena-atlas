@@ -56,7 +56,7 @@ StatusCode FastHitConv::initialize()
       CHECK(m_storeGateFastCalo.retrieve());
     }
   ATH_MSG_DEBUG("StoreGateFastCalo Svc structure at Initialisation"<<(*m_storeGateFastCalo).dump());
-  const DataHandle<CaloIdManager> caloIdManager;
+  const CaloIdManager* caloIdManager;
   CHECK(detStore()->retrieve(caloIdManager));
   m_larEmID = caloIdManager->getEM_ID();
   if(m_larEmID==0)

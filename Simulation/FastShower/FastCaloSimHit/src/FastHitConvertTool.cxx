@@ -8,6 +8,8 @@
 
 #include "FastCaloSimHit/FastHitConvertTool.h"
 
+#include "GaudiKernel/ConcurrencyFlags.h"
+
 #include "AthenaBaseComps/AthCheckMacros.h"
 #include "CaloEvent/CaloCellContainer.h"
 #include "CaloIdentifier/CaloIdManager.h"
@@ -15,6 +17,7 @@
 #include "CaloIdentifier/LArFCAL_ID.h"
 #include "CaloIdentifier/LArHEC_ID.h"
 #include "CaloIdentifier/TileID.h"
+#include "CxxUtils/checker_macros.h"
 #include "EventInfo/PileUpEventInfo.h"
 #include "EventInfo/EventType.h"
 #include "LArSimEvent/LArHitFloat.h"
@@ -57,7 +60,7 @@ StatusCode FastHitConvertTool::initialize()
       CHECK(m_storeGateFastCalo.retrieve());
     }
   ATH_MSG_DEBUG("StoreGateFastCalo Svc structure at Initialisation"<<(*m_storeGateFastCalo).dump());
-  const DataHandle<CaloIdManager> caloIdManager;
+  const CaloIdManager* caloIdManager;
   CHECK(detStore()->retrieve(caloIdManager));
   m_larEmID=caloIdManager->getEM_ID();
   if(m_larEmID==0)
@@ -289,12 +292,13 @@ StatusCode FastHitConvertTool::process(CaloCellContainer* theCellCont, const Eve
 
       // Migration note: this was an evtStore()->retrieve for a non-const pointer
       // Using a const_cast to preserve the old behaviour, but this is MT-unfriendly
-      if (ctx.slot() > 1) {
+      if (Gaudi::Concurrency::ConcurrencyFlags::numConcurrentEvents() > 1) {
          ATH_MSG_ERROR ("FastHitConvertTool doesn't support pileup in AthenaMT");
          return StatusCode::FAILURE;
       }
       auto pOverEventHandle = SG::makeHandle<PileUpEventInfo>(m_pileup_pOverEvent, ctx);
-      auto pOverEvent = const_cast<PileUpEventInfo*>(pOverEventHandle.get());
+      auto pOverEvent ATLAS_THREAD_SAFE =  // we checked above that this is not MT
+        const_cast<PileUpEventInfo*>(pOverEventHandle.get());
       pOverEvent->addSubEvt(0,PileUpTimeEventIndex::Signal,newEvt,&(*m_storeGateFastCalo));
     }
   return StatusCode::SUCCESS;
