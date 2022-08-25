@@ -7,6 +7,7 @@
 #include "TrkSpacePoint/SpacePointContainer.h"
 #include "xAODCore/BaseContainer.h"
 #include "xAODCore/AuxContainerBase.h"
+#include "xAODTracking/TrackParticleContainer.h"
 #include "AthenaBaseComps/AthReentrantAlgorithm.h"
 
 #include <string>
@@ -27,11 +28,13 @@ public:
 private:
   SG::ReadHandleKey<SpacePointContainer> m_pixelSPKey{this, "PixelsSPKey", "PixelSpacePoints", "Pixel SP collection name"};
   SG::ReadHandleKey<SpacePointContainer> m_SCTSPKey{this, "SCTSPKey", "SCT_SpacePoints", "SCT SP collection name"};
+  SG::ReadHandleKey<xAOD::TrackParticleContainer> m_tracksKey{this, "TracksKey", "InDetTrackParticles", "Tracks collection name"};
   SG::WriteHandleKey<xAOD::BaseContainer> m_outputKey{this, "OutputCollectionKey", "SpacePoints", "name of output container"};
 
   Gaudi::Property<size_t> m_maxPixSP{this, "maxPixelSP", std::numeric_limits<size_t>::max(), "Skip conversion in events that have more than this pixel SP"};
   Gaudi::Property<size_t> m_maxSCTSP{this, "maxSCTSP", std::numeric_limits<size_t>::max(), "Skip conversion in events that have more than this SCT SP"};
-  Gaudi::Property<size_t> m_maxTotalSP{this, "maxTotalSP", std::numeric_limits<size_t>::max(), "Skip conversion in events that have more than this totasl SP"};
+  Gaudi::Property<size_t> m_maxTotalSP{this, "maxTotalSP", std::numeric_limits<size_t>::max(), "Skip conversion in events that have more than this total SP"};
+  Gaudi::Property<size_t> m_maxTracks{this, "maxTracks", std::numeric_limits<size_t>::max(), "Skip conversion in events has more tracks"};
 
 };
 
