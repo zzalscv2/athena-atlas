@@ -980,8 +980,11 @@ InDet::SiTrajectoryElement_xk::trackSimpleStateOnSurface
     } else {
       tp = trackParametersWithNewDirection(cov, Q);
     }
-    if (&tp->associatedSurface() != m_surface) {
+    if (!tp) {
       return nullptr;
+    }
+    if (&tp->associatedSurface() != m_surface) {
+       return nullptr;
     }
   }
 
