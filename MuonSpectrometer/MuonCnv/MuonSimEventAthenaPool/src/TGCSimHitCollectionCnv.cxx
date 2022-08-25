@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2020 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "TGCSimHitCollectionCnv.h"
@@ -69,11 +69,10 @@ TGCSimHitCollection* TGCSimHitCollectionCnv::createTransient() {
         AthenaHitsVector<TGCSimHit>* oldColl = this->poolReadObject< AthenaHitsVector<TGCSimHit> >();
         size_t size = oldColl->size();
         p_collection=new TGCSimHitCollection("DefaultCollectionName",size);
-        //p_collection->reserve(size);
+        p_collection->reserve(size);
         //do the copy
-        AthenaHitsVector<TGCSimHit>::const_iterator it = oldColl->begin(), itEnd=oldColl->end();
-        for (;it!=itEnd;it++)  {
-            p_collection->push_back(**it); 
+        for (const TGCSimHit* hit : *oldColl) {
+            p_collection->push_back(*hit); 
         }
         delete oldColl;
     }
