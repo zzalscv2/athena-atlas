@@ -379,81 +379,6 @@ def TRTDataProviderCfg(flags):
   acc.addEventAlgo(dataProviderAlg)
   return acc
 
-def _tracksPostAmbi(flags):
-  return flags.InDet.Tracking.ActivePass.trkTracks_IDTrig+"_Amb"
-
-
-def TRTExtensionToolCfg(flags):
-  acc = ComponentAccumulator()
-
-  from TrkConfig.TrkExRungeKuttaPropagatorConfig import RungeKuttaPropagatorCfg
-  patternPropagator = acc.popToolsAndMerge(RungeKuttaPropagatorCfg(flags, name="InDetTrigPatternPropagator"))
-  acc.addPublicTool(patternPropagator)
-
-  from TrkConfig.TrkMeasurementUpdatorConfig import KalmanUpdator_xkCfg
-  updator = acc.popToolsAndMerge(KalmanUpdator_xkCfg(flags, name="InDetTrigPatternUpdator"))
-  acc.addPublicTool(updator)
-
-  from InDetConfig.TRT_DetElementsRoadToolConfig import TRT_DetElementsRoadMaker_xkCfg
-  roadMaker = acc.popToolsAndMerge(TRT_DetElementsRoadMaker_xkCfg(flags))
-
-  from InDetConfig.InDetTrackSelectorToolConfig import InDetTrigTRTDriftCircleCutToolCfg
-  driftCircleCutTool = acc.popToolsAndMerge(InDetTrigTRTDriftCircleCutToolCfg(flags))
-  acc.addPublicTool(driftCircleCutTool)
-
-  from .InDetTrigCollectionKeys import TrigTRTKeys
-  extensionTool = CompFactory.InDet.TRT_TrackExtensionTool_xk ( name = f"{prefix}TrackExtensionTool_{flags.InDet.Tracking.ActivePass.name}",
-                                                                TRT_ClustersContainer = TrigTRTKeys.DriftCircles,
-                                                                PropagatorTool = patternPropagator,
-                                                                UpdatorTool    = updator,
-                                                                RoadTool       = roadMaker,
-                                                                DriftCircleCutTool = driftCircleCutTool,
-                                                                MinNumberDriftCircles = flags.InDet.Tracking.ActivePass.minTRTonTrk,
-                                                                ScaleHitUncertainty   = 2.,
-                                                                RoadWidth             = 20.,
-                                                                UseParameterization   = flags.InDet.Tracking.ActivePass.useParameterizedTRTCuts )
-
-  acc.addPublicTool( extensionTool, primary=True )
-  return acc
-
-def TRTExtensionAlgCfg(flags):
-  acc = ComponentAccumulator()
-
-  alg = CompFactory.InDet.TRT_TrackExtensionAlg( name = f"{prefix}TrackExtensionAlg_{flags.InDet.Tracking.ActivePass.name}",
-                                                 InputTracksLocation    = _tracksPostAmbi(flags),
-                                                 TrackExtensionTool     = acc.getPrimaryAndMerge(TRTExtensionToolCfg(flags)),
-                                                 ExtendedTracksLocation = 'ExtendedTrackMap' )
-  acc.addEventAlgo(alg)                                                    
-  return acc
-
-
-def TRTExtensionProcessorCfg(flags):
-  acc = ComponentAccumulator()
-
-  from TrkConfig.TrkTrackSummaryToolConfig import InDetTrigTrackSummaryToolCfg
-  from TrkConfig.TrkGlobalChi2FitterConfig import InDetTrigGlobalChi2FitterCfg
-  TrackFitter = acc.popToolsAndMerge(InDetTrigGlobalChi2FitterCfg(flags))
-  acc.addPublicTool(TrackFitter)
-
-  from InDetConfig.InDetTrackScoringToolsConfig import InDetTrigAmbiScoringToolCfg
-  ScoringTool = acc.popToolsAndMerge(InDetTrigAmbiScoringToolCfg(flags))
-  acc.addPublicTool(ScoringTool)
-
-  extensionProcessor = CompFactory.InDet.InDetExtensionProcessor (name         = f"{prefix}ExtensionProcessor_{flags.InDet.Tracking.ActivePass.name}",
-                                                            TrackName          = _tracksPostAmbi(flags),
-                                                            ExtensionMap       = 'ExtendedTrackMap',
-                                                            NewTrackName       = flags.InDet.Tracking.ActivePass.trkTracks_IDTrig,
-                                                            TrackFitter        = TrackFitter,
-                                                            TrackSummaryTool   = acc.popToolsAndMerge(InDetTrigTrackSummaryToolCfg(flags)),
-                                                            ScoringTool        = ScoringTool,
-                                                            suppressHoleSearch = False,
-                                                            RefitPrds = not flags.InDet.Tracking.ActivePass.refitROT )
-
-  #TODO trigger uses only one type of extension, optional tools can be removed in future
-
-  acc.addEventAlgo( extensionProcessor )
-  return acc
-
 
 def TRTExtrensionBuilderCfg(flags):
   acc = ComponentAccumulator()
@@ -463,8 +388,11 @@ def TRTExtrensionBuilderCfg(flags):
   from InDetConfig.InDetPrepRawDataFormationConfig import TrigTRTRIOMakerCfg
   acc.merge( TrigTRTRIOMakerCfg(flags) )
 
-  acc.merge( TRTExtensionAlgCfg(flags) )
-  acc.merge( TRTExtensionProcessorCfg(flags) )
+  from InDetConfig.TRT_TrackExtensionAlgConfig import Trig_TRT_TrackExtensionAlgCfg
+  acc.merge( Trig_TRT_TrackExtensionAlgCfg(flags) )
+
+  from InDetConfig.InDetExtensionProcessorConfig import TrigInDetExtensionProcessorCfg
+  acc.merge( TrigInDetExtensionProcessorCfg(flags) )
 #  'TRTRawDataProvider/InDetTrigMTTRTRawDataProvider_electronLRT', 
 #  'InDet::TRT_RIO_Maker/InDetTrigMTTRTDriftCircleMaker_electronLRT', 
 #  'InDet::TRT_TrackExtensionAlg/InDetTrigMTTrackExtensionAlg_electronLRT', 
