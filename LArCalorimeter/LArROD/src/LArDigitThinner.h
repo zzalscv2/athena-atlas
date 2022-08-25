@@ -23,6 +23,7 @@
 #include "StoreGate/WriteHandle.h"
 #include "StoreGate/ReadCondHandle.h"
 #include "AthContainers/ConstDataVector.h"
+#include "CxxUtils/CachedValue.h"
 
 #include <vector>
 #include <string>
@@ -53,7 +54,7 @@ class LArDigitThinner : public AthReentrantAlgorithm
   enum Position { EMB0=0, EMB1,EMB2,EMB3,EMEC0,EMEC1,EMEC2,EMEC3,HEC,FCAL,DISCONNECTED};
   int getRegion(const HWIdentifier chid) const;
 
-  void initCutValues(const EventContext& ctx);
+  const std::vector<int>& initCutValues(const EventContext& ctx) const;
 
   std::vector<int> m_energyCuts_barrel, m_energyCuts_endcap;
   int m_energyCut_hec, m_energyCut_fcal;
@@ -72,7 +73,7 @@ class LArDigitThinner : public AthReentrantAlgorithm
   //Event output:
   SG::WriteHandleKey<ConstDigitCont_t> m_outputKey{this, "OutputContainerName","LArDigitContainer_Thinned", "SG Key of thinned LArDigitContainer"};
 
-  std::vector<int> m_energyCuts; //cut for each cell - indexed by online hash id
+  CxxUtils::CachedValue<std::vector<int> > m_energyCuts; //cut for each cell - indexed by online hash id
 
 };
 

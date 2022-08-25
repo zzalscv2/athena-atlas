@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "LArCalibDigitsAccumulator.h"
@@ -122,7 +122,7 @@ StatusCode LArCalibDigitsAccumulator::execute()
   const LArCalibDigitContainer* calibDigitContainer=NULL;
 
   // Event info 
-  const DataHandle<xAOD::EventInfo> thisEventInfo;
+  const xAOD::EventInfo* thisEventInfo = nullptr;
   ATH_CHECK( evtStore()->retrieve(thisEventInfo) );
   unsigned eventNb = thisEventInfo->eventNumber();
   eventNb=m_eventNb;
