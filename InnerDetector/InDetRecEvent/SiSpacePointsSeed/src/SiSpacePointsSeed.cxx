@@ -51,9 +51,9 @@ namespace InDet {
   /////////////////////////////////////////////////////////////////////////////////
 
   SiSpacePointsSeed::SiSpacePointsSeed (const SiSpacePointsSeed& Se)
+    : m_spacepoints (Se.m_spacepoints),
+      m_zvertex (Se.m_zvertex)
   {
-    m_spacepoints = Se.m_spacepoints;
-    m_zvertex     = Se.m_zvertex    ;
   }
 
   /////////////////////////////////////////////////////////////////////////////////
