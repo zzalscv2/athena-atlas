@@ -231,7 +231,7 @@ Reco_tf.py --inputRDOFile OUT_RDO.root \
            --autoConfiguration everything \
            --athenaopts="--threads=5" \
            --conditionsTag "${cond_tag}" \
-           --preExec 'from RecExConfig.RecFlags import rec;rec.doZdc.set_Value_and_Lock(False);' \           
+           --preExec 'from RecExConfig.RecFlags import rec;rec.doZdc.set_Value_and_Lock(False);' \
            --outputESDFile OUT_ESD_5thread.root
 exit_code=$?
 echo  "art-result: ${exit_code} Reco_tf.py_5thread"

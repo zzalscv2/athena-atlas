@@ -3,55 +3,7 @@ from AthenaConfiguration.ComponentAccumulator import ComponentAccumulator
 from AthenaConfiguration.ComponentFactory import CompFactory
 from AthenaConfiguration.Enums import BeamType
 
-def ITkSiSpacePointsSeedMakerCfg(flags, name="ITkSpSeedsMaker", InputCollections = None, **kwargs) :
-    acc = ComponentAccumulator()
-    #
-    # --- Space points seeds maker, use different ones for cosmics and collisions
-    #
-    SiSpacePointsSeedMaker = CompFactory.ITk.SiSpacePointsSeedMaker
-
-    kwargs.setdefault("pTmin", flags.ITk.Tracking.ActivePass.minPTSeed )
-    kwargs.setdefault("maxdImpact", flags.ITk.Tracking.ActivePass.maxPrimaryImpactSeed )
-    kwargs.setdefault("maxZ", flags.ITk.Tracking.ActivePass.maxZImpactSeed )
-    kwargs.setdefault("minZ", -flags.ITk.Tracking.ActivePass.maxZImpactSeed )
-    kwargs.setdefault("usePixel", flags.ITk.Tracking.ActivePass.useITkPixel and flags.ITk.Tracking.ActivePass.useITkPixelSeeding)
-    kwargs.setdefault("SpacePointsPixelName", 'ITkPixelSpacePoints')
-    kwargs.setdefault("useStrip", flags.ITk.Tracking.ActivePass.useITkStrip and flags.ITk.Tracking.ActivePass.useITkStripSeeding)
-    kwargs.setdefault("SpacePointsStripName", 'ITkStripSpacePoints')
-    kwargs.setdefault("useOverlapSpCollection", flags.ITk.Tracking.ActivePass.useITkStrip and flags.ITk.Tracking.ActivePass.useITkStripSeeding )
-    kwargs.setdefault("SpacePointsOverlapName", 'ITkOverlapSpacePoints')
-    kwargs.setdefault("radMax", flags.ITk.Tracking.ActivePass.radMax)
-    kwargs.setdefault("etaMax", flags.ITk.Tracking.ActivePass.maxEta )
-
-    if (len(InputCollections) > 0) and flags.ITk.Tracking.ActivePass.usePrdAssociationTool:
-        # not all classes have that property !!!
-        kwargs.setdefault("PRDtoTrackMap", 'ITkPRDtoTrackMap'+ flags.ITk.Tracking.ActivePass.extension)
-    if flags.Beam.Type is not BeamType.Cosmics:
-        kwargs.setdefault("maxRadius1", 0.75*flags.ITk.Tracking.ActivePass.radMax)
-        kwargs.setdefault("maxRadius2", flags.ITk.Tracking.ActivePass.radMax)
-        kwargs.setdefault("maxRadius3", flags.ITk.Tracking.ActivePass.radMax)
-
-    if flags.ITk.Tracking.doFastTracking :
-        kwargs.setdefault("useFastTracking", True)
-        kwargs.setdefault("maxSeedsForSpacePoint", 3)
-
-    if flags.ITk.Tracking.ActivePass.extension == "LargeD0":
-        kwargs.setdefault("maxSeedsForSpacePoint", 5)
-        kwargs.setdefault("isLRT", True)
-        kwargs.setdefault("maxZPPP", flags.ITk.Tracking.ActivePass.maxZSpacePointsPPPSeeds)
-        kwargs.setdefault("maxZSSS", flags.ITk.Tracking.ActivePass.maxZSpacePointsSSSSeeds)
-
-    if flags.ITk.Tracking.writeSeedValNtuple:
-        kwargs.setdefault("WriteNtuple", True)
-        HistService = CompFactory.THistSvc(Output = ["valNtuples DATAFILE='SeedMakerValidation.root' OPT='RECREATE'"])
-        acc.addService(HistService)
-
-    ITkSiSpacePointsSeedMaker = SiSpacePointsSeedMaker (name = name+flags.ITk.Tracking.ActivePass.extension, **kwargs)
-
-    acc.setPrivateTools(ITkSiSpacePointsSeedMaker)
-    return acc
-
-def ITkSiTrackMaker_xkCfg(flags, name="ITkSiTrackMaker", InputCollections = None, **kwargs) :
+def ITkSiTrackMaker_xkCfg(flags, name="ITkSiTrackMaker", **kwargs) :
     acc = ComponentAccumulator()
 
     from InDetConfig.SiDetElementsRoadToolConfig import ITkSiDetElementsRoadMaker_xkCfg
@@ -92,7 +44,7 @@ def ITkSiTrackMaker_xkCfg(flags, name="ITkSiTrackMaker", InputCollections = None
     kwargs.setdefault("EMROIPhiRZContainer", "ITkCaloClusterROIPhiRZ0GeV")
     kwargs.setdefault("HadROIPhiRZContainer", "ITkHadCaloClusterROIPhiRZ")
 
-    kwargs.setdefault("UseAssociationTool", (len(InputCollections) > 0) and (flags.ITk.Tracking.ActivePass.usePrdAssociationTool))
+    kwargs.setdefault("UseAssociationTool", flags.ITk.Tracking.ActivePass.usePrdAssociationTool)
     kwargs.setdefault("ITKGeometry", True)
 
     if flags.Beam.Type is BeamType.Cosmics:
@@ -122,39 +74,37 @@ def ITkSiTrackMaker_xkCfg(flags, name="ITkSiTrackMaker", InputCollections = None
     acc.setPrivateTools(ITkSiTrackMaker)
     return acc
 
-def ITkSiSPSeededTrackFinderCfg(flags, name="ITkSiSpTrackFinder", InputCollections = None, SiSPSeededTrackCollectionKey = None, **kwargs) :
+def ITkSiSPSeededTrackFinderCfg(flags, name="ITkSiSpTrackFinder", **kwargs) :
     acc = ComponentAccumulator()
 
-    # set output track collection name
-    #
-    SiTrackCollection = SiSPSeededTrackCollectionKey
-
-    ITkSiTrackMaker = acc.popToolsAndMerge(ITkSiTrackMaker_xkCfg(flags,
-                                                                 InputCollections = InputCollections ))
+    ITkSiTrackMaker = acc.popToolsAndMerge(ITkSiTrackMaker_xkCfg(flags))
     from TrkConfig.TrkExRungeKuttaPropagatorConfig import ITkPropagatorCfg
     ITkPropagator = acc.popToolsAndMerge(ITkPropagatorCfg(flags))
     acc.addPublicTool(ITkPropagator)
     from TrkConfig.TrkTrackSummaryToolConfig import ITkTrackSummaryToolNoHoleSearchCfg
     ITkTrackSummaryToolNoHoleSearch = acc.getPrimaryAndMerge(ITkTrackSummaryToolNoHoleSearchCfg(flags))
-    ITkSiSpacePointsSeedMaker = None
-    if flags.ITk.Tracking.ActivePass.extension != "ConversionFinding" and flags.Acts.TrackFinding.useSiSpacePointSeedMaker:
-        from ActsTrkSeedingTool.ActsTrkSeedingToolConfig import ActsTrkSiSpacePointsSeedMakerCfg
-        ITkSiSpacePointsSeedMaker = acc.popToolsAndMerge(ActsTrkSiSpacePointsSeedMakerCfg(flags,
-                                                                                          InputCollections = InputCollections))
-    else:
-        ITkSiSpacePointsSeedMaker = acc.popToolsAndMerge(ITkSiSpacePointsSeedMakerCfg(flags,
-                                                                                      InputCollections = InputCollections))
+
+    if "SeedsTool" not in kwargs:
+        ITkSiSpacePointsSeedMaker = None
+
+        if flags.ITk.Tracking.ActivePass.extension != "ConversionFinding" and flags.Acts.TrackFinding.useSiSpacePointSeedMaker:
+            from ActsTrkSeedingTool.ActsTrkSeedingToolConfig import ActsTrkSiSpacePointsSeedMakerCfg
+            ITkSiSpacePointsSeedMaker = acc.popToolsAndMerge(ActsTrkSiSpacePointsSeedMakerCfg(flags))
+        else:
+            from InDetConfig.SiSpacePointsSeedToolConfig import ITkSiSpacePointsSeedMakerCfg
+            ITkSiSpacePointsSeedMaker = acc.popToolsAndMerge(ITkSiSpacePointsSeedMakerCfg(flags))
+
+        kwargs.setdefault("SeedsTool", ITkSiSpacePointsSeedMaker)
+
     #
     # --- Setup Track finder using space points seeds
     #
     kwargs.setdefault("TrackTool", ITkSiTrackMaker)
     kwargs.setdefault("PropagatorTool", ITkPropagator)
-    if (len(InputCollections) > 0) and flags.ITk.Tracking.ActivePass.usePrdAssociationTool:
+    if flags.ITk.Tracking.ActivePass.usePrdAssociationTool:
         # not all classes have that property !!!
         kwargs.setdefault("PRDtoTrackMap", 'ITkPRDtoTrackMap'+ flags.ITk.Tracking.ActivePass.extension)
     kwargs.setdefault("TrackSummaryTool", ITkTrackSummaryToolNoHoleSearch)
-    kwargs.setdefault("TracksLocation", SiTrackCollection)
-    kwargs.setdefault("SeedsTool", ITkSiSpacePointsSeedMaker)
     kwargs.setdefault("useZvertexTool", False)
     kwargs.setdefault("useZBoundFinding", flags.ITk.Tracking.ActivePass.doZBoundary)
     kwargs.setdefault("ITKGeometry", True)
@@ -173,7 +123,7 @@ def ITkSiSPSeededTrackFinderCfg(flags, name="ITkSiSpTrackFinder", InputCollectio
     acc.addEventAlgo(ITkSiSPSeededTrackFinder)
     return acc
 
-def ITkSiSPSeededTrackFinderROIConvCfg(flags, name="ITkSiSpTrackFinderROIConv", InputCollections = None, SiSPSeededTrackCollectionKey = None, **kwargs) :
+def ITkSiSPSeededTrackFinderROIConvCfg(flags, name="ITkSiSpTrackFinderROIConv", **kwargs) :
     from InDetConfig.InDetCaloClusterROISelectorConfig import ITkCaloClusterROIPhiRZContainerMakerCfg
     acc = ITkCaloClusterROIPhiRZContainerMakerCfg(flags)
 
@@ -184,10 +134,7 @@ def ITkSiSPSeededTrackFinderROIConvCfg(flags, name="ITkSiSpTrackFinderROIConv", 
     kwargs.setdefault("useITkConvSeeded", True)
     kwargs.setdefault("EMROIPhiRZContainer", "ITkCaloClusterROIPhiRZ15GeVUnordered")
 
-    acc.merge(ITkSiSPSeededTrackFinderCfg(flags, name = name,
-                                          InputCollections = InputCollections,
-                                          SiSPSeededTrackCollectionKey = SiSPSeededTrackCollectionKey,
-                                          **kwargs))
+    acc.merge(ITkSiSPSeededTrackFinderCfg(flags, name, **kwargs))
     return acc
 
 def ITkCopyAlgForAmbiCfg(flags, name="ITkCopyAlgForAmbi", InputTrackCollection = None, OutputTrackCollection = None, **kwargs) :
@@ -204,12 +151,16 @@ def ITkCopyAlgForAmbiCfg(flags, name="ITkCopyAlgForAmbi", InputTrackCollection =
 # ----------- Setup Si Pattern for New tracking
 #
 # ------------------------------------------------------------
-def ITkTrackingSiPatternCfg(flags, InputCollections = None, ResolvedTrackCollectionKey = None, SiSPSeededTrackCollectionKey = None , ClusterSplitProbContainer=''):
+def ITkTrackingSiPatternCfg(flags,
+                            InputCollections = None,
+                            ResolvedTrackCollectionKey = None,
+                            SiSPSeededTrackCollectionKey = None ,
+                            ClusterSplitProbContainer=''):
     acc = ComponentAccumulator()
     #
     # --- get list of already associated hits (always do this, even if no other tracking ran before)
     #
-    if (len(InputCollections) > 0) and flags.ITk.Tracking.ActivePass.usePrdAssociationTool:
+    if flags.ITk.Tracking.ActivePass.usePrdAssociationTool:
         from InDetConfig.InDetTrackPRD_AssociationConfig import ITkTrackPRD_AssociationCfg
         acc.merge(ITkTrackPRD_AssociationCfg(flags,
                                              name = 'ITkTrackPRD_Association' + flags.ITk.Tracking.ActivePass.extension,
@@ -225,8 +176,7 @@ def ITkTrackingSiPatternCfg(flags, InputCollections = None, ResolvedTrackCollect
     if flags.ITk.Tracking.ActivePass.extension == "ConversionFinding":
         SiSPSeededTrackFinderCfg = ITkSiSPSeededTrackFinderROIConvCfg
     acc.merge(SiSPSeededTrackFinderCfg( flags,
-                                        InputCollections = InputCollections,
-                                        SiSPSeededTrackCollectionKey = SiSPSeededTrackCollectionKey))
+                                        TracksLocation = SiSPSeededTrackCollectionKey))
     # ------------------------------------------------------------
     #
     # ---------- Ambiguity solving

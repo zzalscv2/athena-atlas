@@ -5,6 +5,7 @@ Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
 
 from AthenaConfiguration.ComponentAccumulator import ComponentAccumulator
 from AthenaConfiguration.ComponentFactory import CompFactory
+from AthenaConfiguration.Enums import ProductionStep
 
 
 def CopyCaloCalibrationHitContainerAlgCfg(flags, collectionName, name="CopyCaloCalibrationHitContainer", **kwargs):
@@ -116,7 +117,7 @@ def CopyJetTruthInfoCfg(flags, **kwargs):
 
     # Detect the list of track record collections
     for container in allowedContainers:
-        if not flags.Overlay.DataOverlay and container in flags.Input.Collections: #SecondaryCollections
+        if not flags.Overlay.DataOverlay and container in flags.Input.Collections:  # SecondaryCollections
             availableContainers.append(container)
     if allowedContainers[0] in availableContainers:
         acc.merge(CopyInTimeAntiKt4JetTruthInfoCfg(flags, **kwargs))
@@ -136,7 +137,7 @@ def CopyPileupParticleTruthInfoCfg(flags, name="CopyPileupParticleTruthInfo", **
     requiredContainer = f"{flags.Overlay.BkgPrefix}TruthPileupParticles"
 
     # Detect the list of track record collections
-    if not flags.Overlay.DataOverlay and requiredContainer in flags.Input.Collections: # SecondaryCollections
+    if not flags.Overlay.DataOverlay and requiredContainer in flags.Input.Collections:  # SecondaryCollections
         kwargs.setdefault("BkgInputKey", requiredContainer)
         kwargs.setdefault("OutputKey", "TruthPileupParticles")
 
@@ -209,43 +210,46 @@ def CopyPixelClusterContainerAlgCfg(flags, **kwargs):
     """Return a ComponentAccumulator for the CopyPixelClusterContainer algorithm"""
     acc = ComponentAccumulator()
 
-    kwargs.setdefault("InputKey","PixelClusters")
-    kwargs.setdefault("OutputKey",flags.Overlay.BkgPrefix+"PixelClusters")
+    kwargs.setdefault("InputKey", "PixelClusters")
+    kwargs.setdefault("OutputKey", flags.Overlay.BkgPrefix+"PixelClusters")
 
-    alg=CompFactory.CopyPixelClusterContainer("CopyPixelClusterContainer", **kwargs)
+    alg = CompFactory.CopyPixelClusterContainer("CopyPixelClusterContainer", **kwargs)
     acc.addEventAlgo(alg)
 
     return acc
+
 
 def CopySCT_ClusterContainerAlgCfg(flags, **kwargs):
     """Return a ComponentAccumulator for the CopySCT_ClusterContainer algorithm"""
     acc = ComponentAccumulator()
 
-    kwargs.setdefault("InputKey","SCT_Clusters")
-    kwargs.setdefault("OutputKey",flags.Overlay.BkgPrefix+"SCT_Clusters")
+    kwargs.setdefault("InputKey", "SCT_Clusters")
+    kwargs.setdefault("OutputKey", flags.Overlay.BkgPrefix+"SCT_Clusters")
 
-    alg=CompFactory.CopySCT_ClusterContainer("CopySCT_ClusterContainer", **kwargs)
+    alg = CompFactory.CopySCT_ClusterContainer("CopySCT_ClusterContainer", **kwargs)
     acc.addEventAlgo(alg)
 
     return acc
+
 
 def CopyTRT_DriftCircleContainerAlgCfg(flags, **kwargs):
     """Return a ComponentAccumulator for the CopyTRT_DriftCircleContainer algorithm"""
     acc = ComponentAccumulator()
 
-    kwargs.setdefault("InputKey","TRT_DriftCircles")
-    kwargs.setdefault("OutputKey",flags.Overlay.BkgPrefix+"TRT_DriftCircles")
+    kwargs.setdefault("InputKey", "TRT_DriftCircles")
+    kwargs.setdefault("OutputKey", flags.Overlay.BkgPrefix+"TRT_DriftCircles")
 
-    alg=CompFactory.CopyTRT_DriftCircleContainer("CopyTRT_DriftCircleContainer", **kwargs)
+    alg = CompFactory.CopyTRT_DriftCircleContainer("CopyTRT_DriftCircleContainer", **kwargs)
     acc.addEventAlgo(alg)
 
     return acc
+
 
 def CopyTrackCollectionAlgCfg(flags, collectionName, **kwargs):
     """Return a ComponentAccumulator for the TrackCollection copying"""
     acc = ComponentAccumulator()
 
-    kwargs.setdefault("OutputKey",flags.Overlay.BkgPrefix + collectionName)
+    kwargs.setdefault("OutputKey", flags.Overlay.BkgPrefix + collectionName)
     kwargs.setdefault("InputKey", collectionName)
 
     alg = CompFactory.CopyTrackCollection("CopyTrackCollection"+collectionName)
@@ -263,7 +267,7 @@ def CopyDetailedTrackTruthCollectionAlgCfg(flags, collectionName, **kwargs):
     """Return a ComponentAccumulator for the DetailedTrackTruthCollection copying"""
     acc = ComponentAccumulator()
 
-    kwargs.setdefault("OutputKey",flags.Overlay.BkgPrefix + collectionName)
+    kwargs.setdefault("OutputKey", flags.Overlay.BkgPrefix + collectionName)
     kwargs.setdefault("InputKey", collectionName)
 
     alg = CompFactory.CopyDetailedTrackTruthCollection("CopyDetailedTrackTruthCollection"+collectionName)
@@ -277,11 +281,12 @@ def CopyDetailedTrackTruthCollectionAlgCfg(flags, collectionName, **kwargs):
 
     return acc
 
+
 def CopyPRD_MultiTruthCollectionAlgCfg(flags, collectionName, **kwargs):
     """Return a ComponentAccumulator for the PRD_MultiTruthCollection copying"""
     acc = ComponentAccumulator()
 
-    kwargs.setdefault("OutputKey",flags.Overlay.BkgPrefix + collectionName)
+    kwargs.setdefault("OutputKey", flags.Overlay.BkgPrefix + collectionName)
     kwargs.setdefault("InputKey", collectionName)
 
     alg = CompFactory.CopyPRD_MultiTruthCollection("CopyPRD_MultiTruthCollection"+collectionName)
@@ -345,17 +350,18 @@ def CopyTrackRecordCollectionAlgCfg(flags, collectionName, name="CopyTrackRecord
     kwargs.setdefault("SignalInputKey", flags.Overlay.SigPrefix + collectionName)
     kwargs.setdefault("OutputKey", collectionName)
 
-    from SGComps.SGInputLoaderConfig import SGInputLoaderCfg
-    acc.merge(SGInputLoaderCfg(flags, [f'TrackRecordCollection#{kwargs["SignalInputKey"]}']))
+    if flags.Common.ProductionStep is not ProductionStep.FastChain:
+        from SGComps.SGInputLoaderConfig import SGInputLoaderCfg
+        acc.merge(SGInputLoaderCfg(flags, [f'TrackRecordCollection#{kwargs["SignalInputKey"]}']))
+
+        # Re-map signal address
+        from SGComps.AddressRemappingConfig import AddressRemappingCfg
+        acc.merge(AddressRemappingCfg([
+            f"TrackRecordCollection#{collectionName}->{flags.Overlay.SigPrefix}{collectionName}"
+        ]))
 
     # Copy TrackRecordCollection
     acc.addEventAlgo(CompFactory.CopyTrackRecordCollection(name + collectionName, **kwargs))
-
-    # Re-map signal address
-    from SGComps.AddressRemappingConfig import AddressRemappingCfg
-    acc.merge(AddressRemappingCfg([
-        f"TrackRecordCollection#{collectionName}->{flags.Overlay.SigPrefix}{collectionName}"
-    ]))
 
     # Output
     if flags.Output.doWriteRDO:
@@ -373,6 +379,7 @@ def CopyTrackRecordCollectionAlgCfg(flags, collectionName, name="CopyTrackRecord
 
     return acc
 
+
 def CopyCaloCalibrationHitContainersCfg(flags, **kwargs):
     """Return overlay configuration for the CopyCalibrationHitContainer algorithms"""
 
@@ -388,13 +395,14 @@ def CopyCaloCalibrationHitContainersCfg(flags, **kwargs):
     # Detect the list of calibration hit containers
     for container in allowedContainers:
         if (flags.Overlay.DataOverlay and container in flags.Input.Collections) \
-            or (not flags.Overlay.DataOverlay and container in flags.Input.SecondaryCollections):
+                or (not flags.Overlay.DataOverlay and container in flags.Input.SecondaryCollections):
             availableContainers.append(container)
 
     for container in availableContainers:
         acc.merge(CopyCaloCalibrationHitContainerAlgCfg(flags, container, **kwargs))
 
     return acc
+
 
 def CopyPixelClusterContainerCfg(flags, **kwargs):
     """Return overlay configuration for the CopyPixelClusterContainer algorithm"""
@@ -408,6 +416,7 @@ def CopyPixelClusterContainerCfg(flags, **kwargs):
 
     return acc
 
+
 def CopySCT_ClusterContainerCfg(flags, **kwargs):
     """Return overlay configuration for the CopySCT_ClusterContainer algorithm"""
 
@@ -419,6 +428,7 @@ def CopySCT_ClusterContainerCfg(flags, **kwargs):
         ]))
 
     return acc
+
 
 def CopyTRT_DriftCircleContainerCfg(flags, **kwargs):
     """Return overlay configuration for the CopyTRT_DriftCircleContainer algorithm"""
@@ -446,14 +456,19 @@ def CopyTrackRecordCollectionsCfg(flags, **kwargs):
 
     # Detect the list of track record collections
     for container in allowedContainers:
-        if (flags.Overlay.DataOverlay and container in flags.Input.Collections) \
-            or (not flags.Overlay.DataOverlay and container in flags.Input.SecondaryCollections):
-            availableContainers.append(container)
+        if flags.Common.ProductionStep == ProductionStep.FastChain:
+            availableContainers = allowedContainers
+        else:
+            hardScatterInputCollections = flags.Input.Collections if flags.Overlay.DataOverlay else flags.Input.SecondaryCollections
+            for container in allowedContainers:
+                if container in hardScatterInputCollections:
+                    availableContainers.append(container)
 
     for container in availableContainers:
         acc.merge(CopyTrackRecordCollectionAlgCfg(flags, container, **kwargs))
 
     return acc
+
 
 def CopyTrackCollectionsCfg(flags, **kwargs):
     """ Return overlay configuration for copying tracks"""
@@ -471,14 +486,19 @@ def CopyTrackCollectionsCfg(flags, **kwargs):
 
     # Detect the list of track collections
     for container in allowedContainers:
-        if (flags.Overlay.DataOverlay and container in flags.Input.Collections) \
-            or (not flags.Overlay.DataOverlay and container in flags.Input.SecondaryCollections):
-            availableContainers.append(container)
+        if flags.Common.ProductionStep == ProductionStep.FastChain:
+            availableContainers = allowedContainers
+        else:
+            hardScatterInputCollections = flags.Input.Collections if flags.Overlay.DataOverlay else flags.Input.SecondaryCollections
+            for container in allowedContainers:
+                if container in hardScatterInputCollections:
+                    availableContainers.append(container)
 
     for container in availableContainers:
         acc.merge(CopyTrackCollectionAlgCfg(flags, container, **kwargs))
 
     return acc
+
 
 def CopyDetailedTrackTruthCollectionsCfg(flags, **kwargs):
     """ Return overlay configuration for copying detailed track truth"""
@@ -496,14 +516,19 @@ def CopyDetailedTrackTruthCollectionsCfg(flags, **kwargs):
 
     # Detect the list of detailed track truth collections
     for container in allowedContainers:
-        if (flags.Overlay.DataOverlay and container in flags.Input.Collections) \
-            or (not flags.Overlay.DataOverlay and container in flags.Input.SecondaryCollections):
-            availableContainers.append(container)
+        if flags.Common.ProductionStep == ProductionStep.FastChain:
+            availableContainers = allowedContainers
+        else:
+            hardScatterInputCollections = flags.Input.Collections if flags.Overlay.DataOverlay else flags.Input.SecondaryCollections
+            for container in allowedContainers:
+                if container in hardScatterInputCollections:
+                    availableContainers.append(container)
 
     for container in availableContainers:
         acc.merge(CopyDetailedTrackTruthCollectionAlgCfg(flags, container, **kwargs))
 
     return acc
+
 
 def CopyPRD_MultiTruthCollectionsCfg(flags, **kwargs):
     """ Return overlay configuration for copying detailed track truth"""
@@ -518,11 +543,15 @@ def CopyPRD_MultiTruthCollectionsCfg(flags, **kwargs):
 
     availableContainers = []
 
-    # Detect the list of detailed track truth collections                                                                                                                
+    # Detect the list of detailed track truth collections
     for container in allowedContainers:
-        if (flags.Overlay.DataOverlay and container in flags.Input.Collections) \
-            or (not flags.Overlay.DataOverlay and container in flags.Input.SecondaryCollections):
-            availableContainers.append(container)
+        if flags.Common.ProductionStep == ProductionStep.FastChain:
+            availableContainers = allowedContainers
+        else:
+            hardScatterInputCollections = flags.Input.Collections if flags.Overlay.DataOverlay else flags.Input.SecondaryCollections
+            for container in allowedContainers:
+                if container in hardScatterInputCollections:
+                    availableContainers.append(container)
 
     for container in availableContainers:
         acc.merge(CopyPRD_MultiTruthCollectionAlgCfg(flags, container, **kwargs))

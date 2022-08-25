@@ -367,6 +367,24 @@ class TrigTauMonAlgBuilder:
     defineEachStepHistograms('dPhi',' dPhi(#tau,lep)',8, -3.2, 3.2)
     defineEachStepHistograms('averageMu', 'average pileup', 10, 0., 80.)
 
+    def defineEachStepHistogramsCoarse(xvariable, xlabel, binning):
+ 
+       monGroup.defineHistogram(monGroupName+'_TAndPHLTpass,'+monGroupName+'_'+xvariable+';EffTAndPHLT_'+xvariable+'_wrt_Offline',
+                                title='TAndP HLT Efficiency ' +trigger+';'+xlabel+';Efficiency',
+                                type='TEfficiency',xbins=binning, xmin=binning[0], xmax=binning[-1],opt='kAlwaysCreate')
+
+    binning = [0,500]
+    if 'tau20' in trigger : binning = [10, 15, 20, 25, 30, 35, 40, 50, 60, 80, 150, 250, 500 ]
+    elif 'tau25' in trigger: binning = [15, 20, 25, 30, 35, 40, 50, 60, 80, 150, 250, 500 ]
+    elif 'tau35' in trigger: binning = [25, 30, 35, 40, 50, 60, 80, 150,  250, 500 ]
+    elif 'tau60' in trigger: binning = [50, 55, 60, 65, 70, 80, 110, 150,  250, 500 ]
+    elif 'tau80' in trigger: binning = [70, 75, 80, 85, 90,  110, 150,  250, 500 ]
+    elif 'tau160' in trigger: binning = [150, 155, 160, 165, 170, 180, 200, 240, 300, 500 ]
+    elif 'tau200' in trigger: binning = [190, 195, 200, 205, 210, 240, 300, 500 ]
+
+    defineEachStepHistogramsCoarse('tauPt_coarse', 'p_{T} [GeV]', binning)
+
+
 
   #
   # Booking L1 efficiencies

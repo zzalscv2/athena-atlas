@@ -8,7 +8,7 @@ produced file for xAOD::FileMetaData metadata items.
     Typical usage example
         python -m xAODMetaDataCnv.TestWriteFileMetaDataHITS |tee log
 """
-from AthenaConfiguration import AllConfigFlags, TestDefaults, MainServicesConfig
+from AthenaConfiguration import AllConfigFlags, Enums, TestDefaults, MainServicesConfig
 from AthenaCommon import Constants, Logging
 from OutputStreamAthenaPool import OutputStreamConfig
 from PyUtils import MetaReader
@@ -22,7 +22,7 @@ def writeFileMetaData(flags):
 
     accumulator.merge(
         xAODEventInfoCnvConfig.EventInfoCnvAlgCfg(
-            flags=flags, inputKey="", disableBeamSpot=flags.Common.Project!="Athena"
+            flags=flags, inputKey="", disableBeamSpot=flags.Common.Project is not Enums.Project.Athena
         )
     )
 

@@ -2,7 +2,7 @@
 
 from AtlasGeoModel.GeoModelConfig import GeoModelCfg
 from AthenaConfiguration.ComponentFactory import CompFactory
-from AthenaConfiguration.Enums import LHCPeriod, ProductionStep
+from AthenaConfiguration.Enums import LHCPeriod, ProductionStep, Project
 from IOVDbSvc.IOVDbSvcConfig import addFolders
 
 def LArGMCfg(configFlags):
@@ -10,7 +10,7 @@ def LArGMCfg(configFlags):
     result=GeoModelCfg(configFlags)
 
     doAlignment=configFlags.LAr.doAlign
-    activateCondAlgs = configFlags.Common.Project != "AthSimulation"
+    activateCondAlgs = configFlags.Common.Project is not Project.AthSimulation
     tool = CompFactory.LArDetectorToolNV(ApplyAlignments=doAlignment, EnableMBTS=configFlags.Detector.GeometryMBTS)
     if configFlags.Common.ProductionStep != ProductionStep.Simulation and configFlags.Common.ProductionStep != ProductionStep.FastChain:
         tool.GeometryConfig = "RECO"

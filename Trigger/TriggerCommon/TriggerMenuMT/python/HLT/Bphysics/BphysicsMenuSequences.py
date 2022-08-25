@@ -18,6 +18,7 @@ def bmumuxAlgSequence(ConfigFlags):
     viewCreatorROITool = ViewCreatorCentredOnIParticleROITool(
         RoIEtaWidth = IDConfig.etaHalfWidth,
         RoIPhiWidth = IDConfig.phiHalfWidth,
+        RoIZedWidth = IDConfig.zedHalfWidth,
         RoisWriteHandleKey = recordable('HLT_Roi_Bmumux'))
 
     viewMaker = EventViewCreatorAlgorithm(

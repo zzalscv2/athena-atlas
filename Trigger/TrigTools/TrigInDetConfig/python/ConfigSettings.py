@@ -285,6 +285,7 @@ class _ConfigSettings_bmumux( _ConfigSettingsBase ):
       self._DoPhiFiltering      = False
       self._etaHalfWidth        = 0.75
       self._phiHalfWidth        = 0.75
+      self._zedHalfWidth        = 225
       self._doSeedRedundancyCheck = True
 
 
