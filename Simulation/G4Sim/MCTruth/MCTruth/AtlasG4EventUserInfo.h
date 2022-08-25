@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2020 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef MCTRUTH_ATLASG4EVENTUSERINFO_H
@@ -27,7 +27,7 @@ public:
         const G4ThreeVector GetVertexPosition() const;
         void Print() const {}
 
-        void SetCurrentPrimary(HepMC::GenParticlePtr p) {m_currentPrimary=p;}
+        void SetCurrentPrimary(HepMC::ConstGenParticlePtr p) {m_currentPrimary=p;}
 
         void SetCurrentlyTraced(HepMC::GenParticlePtr p) {m_currentlyTraced=p;}
 
@@ -51,7 +51,7 @@ private:
         int m_secondaryParticleBarCode;
         int m_secondaryVertexBarCode;
         HepMC::GenEvent *m_theEvent;
-        HepMC::GenParticlePtr m_currentPrimary;
+        HepMC::ConstGenParticlePtr m_currentPrimary;
         HepMC::GenParticlePtr m_currentlyTraced;
         // These two are used by calibration hits as event-level flags
         // They correspond to the last barcode and step processed by an SD

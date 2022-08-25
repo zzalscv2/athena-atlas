@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2017 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
 */
 
 // class header
@@ -75,7 +75,7 @@ iGeant4::Geant4TruthIncident::Geant4TruthIncident( const G4Step *step,
 {
 }
 
-const HepMC::FourVector& iGeant4::Geant4TruthIncident::position() const {
+const HepMC::FourVector& iGeant4::Geant4TruthIncident::position() {
   if (!m_positionSet) {
     // post step processes:
     const G4StepPoint *postStepPoint = m_step->GetPostStepPoint();

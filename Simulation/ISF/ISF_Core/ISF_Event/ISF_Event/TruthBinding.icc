@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2020 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
 */
 
 // this file contains all ITruthBinding inline methods
@@ -12,41 +12,13 @@ namespace ISF {
     m_generationZeroTruthParticle(allTruthP) { }
 
   /** constructor setting all truth particle pointers individually */
-  TruthBinding::TruthBinding(HepMC::GenParticlePtr truthP, HepMC::GenParticlePtr primaryTruthP, HepMC::GenParticlePtr genZeroTruthP) :
+  TruthBinding::TruthBinding(HepMC::GenParticlePtr truthP, HepMC::ConstGenParticlePtr primaryTruthP, HepMC::ConstGenParticlePtr genZeroTruthP) :
     m_truthParticle(truthP),
     m_primaryTruthParticle(primaryTruthP),
     m_generationZeroTruthParticle(genZeroTruthP) { }
 
-  /** copy constructor */
-  TruthBinding::TruthBinding(const TruthBinding &rhs) :
-    m_truthParticle(rhs.getTruthParticle()),
-    m_primaryTruthParticle(rhs.getPrimaryTruthParticle()),
-    m_generationZeroTruthParticle(rhs.getGenerationZeroTruthParticle()) { }
-
-  /** move copy constructor */
-  TruthBinding::TruthBinding(TruthBinding&& rhs) :
-    m_truthParticle(rhs.getTruthParticle()),
-    m_primaryTruthParticle(rhs.getPrimaryTruthParticle()),
-    m_generationZeroTruthParticle(rhs.getGenerationZeroTruthParticle()) { }
-
-  /** assignment operator */
-  TruthBinding& TruthBinding::operator=(const TruthBinding &rhs) {
-    m_truthParticle=rhs.getTruthParticle();
-    m_primaryTruthParticle=rhs.getPrimaryTruthParticle();
-    m_generationZeroTruthParticle=rhs.getGenerationZeroTruthParticle();
-    return *this;
-  }
-
-  /** move assignment operator */
-  TruthBinding& TruthBinding::operator=(TruthBinding&& rhs) {
-    m_truthParticle=rhs.getTruthParticle();
-    m_primaryTruthParticle=rhs.getPrimaryTruthParticle();
-    m_generationZeroTruthParticle=rhs.getGenerationZeroTruthParticle();
-    return *this;
-  }
-
   /** destructor */
-  TruthBinding::~TruthBinding() { }
+  TruthBinding::~TruthBinding() = default;
 
   /** comparison operator */
   bool TruthBinding::operator==(const TruthBinding& rhs) const {
@@ -107,10 +79,10 @@ namespace ISF {
   void                TruthBinding::setTruthParticle(HepMC::GenParticlePtr p) { m_truthParticle = p; }
 
   /** pointer to the primary particle in the simulation truth */
-  HepMC::GenParticlePtr TruthBinding::getPrimaryTruthParticle() const { return m_primaryTruthParticle; }
+  HepMC::ConstGenParticlePtr TruthBinding::getPrimaryTruthParticle() const { return m_primaryTruthParticle; }
 
   /** pointer to the simulation truth particle before any regeneration (eg. brem) */
-  HepMC::GenParticlePtr TruthBinding::getGenerationZeroTruthParticle() const { return m_generationZeroTruthParticle; }
+  HepMC::ConstGenParticlePtr TruthBinding::getGenerationZeroTruthParticle() const { return m_generationZeroTruthParticle; }
   void                TruthBinding::setGenerationZeroTruthParticle(HepMC::GenParticlePtr p) { m_generationZeroTruthParticle = p; }
 
 } // end ISF namespace

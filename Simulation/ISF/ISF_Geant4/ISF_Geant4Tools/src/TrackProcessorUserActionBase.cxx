@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2017 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
 */
 
 ///////////////////////////////////////////////////////////////////
@@ -214,7 +214,7 @@ void TrackProcessorUserActionBase::setupSecondary(const G4Track& aTrack)
 }
 
 void TrackProcessorUserActionBase::setCurrentParticle(ISF::ISFParticle* baseISFParticle,
-                                                      HepMC::GenParticlePtr truthPrimary,
+                                                      HepMC::ConstGenParticlePtr truthPrimary,
                                                       HepMC::GenParticlePtr truthCurrentlyTraced)
 {
   m_curBaseISP = baseISFParticle;

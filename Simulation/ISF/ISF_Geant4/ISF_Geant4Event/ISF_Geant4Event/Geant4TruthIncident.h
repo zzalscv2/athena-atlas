@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2017 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef ISF_GEANT4TOOLS_Geant4TruthIncident_H
@@ -45,7 +45,7 @@ namespace iGeant4 {
       virtual ~Geant4TruthIncident() {};
 
       /** Return HepMC position of the truth vertex */
-      const HepMC::FourVector&  position() const override final;
+      const HepMC::FourVector&  position() override final;
 
       /** Return category of the physics process represented by the truth incident (eg hadronic, em, ..) */
       int                       physicsProcessCategory() const override final;
