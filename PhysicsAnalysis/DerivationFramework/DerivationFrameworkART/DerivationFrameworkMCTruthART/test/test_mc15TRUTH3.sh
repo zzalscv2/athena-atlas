@@ -1,6 +1,7 @@
 #!/bin/sh
 
 # art-include: master/AthDerivation
+# art-include: master/Athena
 # art-description: DAOD building TRUTH3 mc15
 # art-type: grid
 # art-output: *.pool.root
@@ -10,7 +11,12 @@
 
 set -e
 
-Derivation_tf.py --CA --inputEVNTFile /cvmfs/atlas-nightlies.cern.ch/repo/data/data-art/DerivationFrameworkART/mc16_13TeV.410637.PhPy8EG_A14_ttbar_hdamp258p75_nonallhad_2000_14000.merge.EVNT.e6685_e5984/EVNT.15803543._000001.pool.root.1 --outputDAODFile art.pool.root --formats TRUTH3 --maxEvents 1000
+Derivation_tf.py \
+--CA \
+--inputEVNTFile /cvmfs/atlas-nightlies.cern.ch/repo/data/data-art/DerivationFrameworkART/mc16_13TeV.410637.PhPy8EG_A14_ttbar_hdamp258p75_nonallhad_2000_14000.merge.EVNT.e6685_e5984/EVNT.15803543._000001.pool.root.1 \
+--outputDAODFile art.pool.root \
+--formats TRUTH3 \
+--maxEvents 1000
 
 echo "art-result: $? reco"
 
