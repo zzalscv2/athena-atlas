@@ -163,6 +163,9 @@ def ITkTrackParticleCnvAlgCfg(flags, name="ITkTrackParticleCnvAlg", TrackContain
 
 def MuonTrackParticleCnvCfg(flags, name = "MuonTrackParticleCnvAlg",**kwargs):
     result=ComponentAccumulator()
+    from BeamSpotConditions.BeamSpotConditionsConfig import BeamSpotCondAlgCfg
+    result.merge(BeamSpotCondAlgCfg(flags))
+
 
     if "TrackParticleCreator" not in kwargs:
         from TrkConfig.TrkParticleCreatorConfig import MuonCombinedParticleCreatorCfg
