@@ -102,6 +102,8 @@ namespace top {
             m_trigMatchTool = trigMatchTool;
           } else {
             Trig::MatchFromCompositeTool* trigMatchTool = new Trig::MatchFromCompositeTool(trig_match_name);
+            top::check(trigMatchTool->setProperty("RemapBrokenLinks", m_config->triggerMatchingElementRelink()),
+                       "Failed to remap broken links for the trig. maching tool");
             top::check(trigMatchTool->initialize(),
                      "Failed to initialize trig. matching tool");
             m_trigMatchTool = trigMatchTool;

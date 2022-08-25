@@ -358,6 +358,7 @@ namespace top {
     m_muonTriggers_Loose(nullptr),
     m_tauTriggers_Loose(nullptr),
     m_photonTriggers_Loose(nullptr),
+    m_trigMatchElemRelink(false),
 
     // Where the sum of event weights
     // before derivation framework is kept
@@ -1822,6 +1823,8 @@ namespace top {
     this->setIsRun3(isRun3 == "True");
 
     m_muon_trigger_SF = settings->value("MuonTriggerSF");
+
+    m_trigMatchElemRelink = settings->retrieve("TriggerMatchingElementRelinking");
 
     if (settings->value("DemandPrimaryVertex") == "False")
       m_demandPriVtx = false;
