@@ -136,7 +136,7 @@ namespace DerivationFramework{
       float dR=999.;
       const xAOD::TruthParticle* hadron=nullptr;
       const xAOD::TruthParticle* parton=nullptr;
-      for(std::map<const xAOD::TruthParticle*, HF_id>::iterator itr = m_partonsOrigin.begin(); itr!=m_partonsOrigin.end(); itr++){
+      for(std::map<const xAOD::TruthParticle*, HF_id>::iterator itr = m_partonsOrigin.begin(); itr!=m_partonsOrigin.end(); ++itr){
 
         if(std::find(matched_partons.begin(), matched_partons.end(), (*itr).first) != matched_partons.end()) continue;
 
@@ -146,7 +146,7 @@ namespace DerivationFramework{
         else // Protection against FPE from eta and phi calculation
           v.SetXYZ(0.,0.,(*itr).first->pz());
 
-        for(std::map<const xAOD::TruthParticle*, int>::iterator it = m_mainHadronMap.begin(); it!=m_mainHadronMap.end(); it++){
+        for(std::map<const xAOD::TruthParticle*, int>::iterator it = m_mainHadronMap.begin(); it!=m_mainHadronMap.end(); ++it){
 
           if(std::find(matched_hadrons.begin(), matched_hadrons.end(), (*it).first) != matched_hadrons.end()) continue;
 
@@ -169,7 +169,7 @@ namespace DerivationFramework{
       m_hadronsPartons[ hadron ] = parton;
     }
 
-    for(std::map<const xAOD::TruthParticle*, int>::iterator it = m_mainHadronMap.begin(); it!=m_mainHadronMap.end(); it++){
+    for(std::map<const xAOD::TruthParticle*, int>::iterator it = m_mainHadronMap.begin(); it!=m_mainHadronMap.end(); ++it){
       const xAOD::TruthParticle* hadron = (*it).first;
       if(m_hadronsPartons.find(hadron)!=m_hadronsPartons.end()){
         m_hadronsOrigin[hadron] = m_partonsOrigin[ m_hadronsPartons[hadron] ];
@@ -722,7 +722,7 @@ namespace DerivationFramework{
     v.SetPtEtaPhi(parton->pt(),parton->eta(),parton->phi());
     float dR=999.;
 
-    for(std::map<const xAOD::TruthParticle*,int>::iterator it = m_mainHadronMap.begin(); it != m_mainHadronMap.end(); it++){
+    for(std::map<const xAOD::TruthParticle*,int>::iterator it = m_mainHadronMap.begin(); it != m_mainHadronMap.end(); ++it){
 
       //      const xAOD::TruthParticle* fhadron=(*it).first;
 

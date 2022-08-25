@@ -97,11 +97,11 @@ const MinBiasPRDAssociation* UnassociatedHitsGetterTool::get (bool /*allowMissin
   // Loop on pixel clusters
   InDet::PixelClusterContainer::const_iterator pixCollItr = pixelClusters->begin();
   InDet::PixelClusterContainer::const_iterator pixCollEnd = pixelClusters->end();
-  for(; pixCollItr!=pixCollEnd; pixCollItr++){
+  for(; pixCollItr!=pixCollEnd; ++pixCollItr){
 
     InDet::PixelClusterCollection::const_iterator pixItr = (*pixCollItr)->begin();
     InDet::PixelClusterCollection::const_iterator pixEnd = (*pixCollItr)->end();
-    for(; pixItr!=pixEnd; pixItr++){
+    for(; pixItr!=pixEnd; ++pixItr){
 
       // ask the association tool if the hit was associated
       if(prd_to_track_map->isUsed(*(*pixItr))) continue;
@@ -140,11 +140,11 @@ const MinBiasPRDAssociation* UnassociatedHitsGetterTool::get (bool /*allowMissin
   // Loop on SCT clusters
   InDet::SCT_ClusterContainer::const_iterator sctCollItr = SCTClusters->begin();
   InDet::SCT_ClusterContainer::const_iterator sctCollEnd = SCTClusters->end();
-  for(; sctCollItr!=sctCollEnd; sctCollItr++){
+  for(; sctCollItr!=sctCollEnd; ++sctCollItr){
 
     InDet::SCT_ClusterCollection::const_iterator sctItr = (*sctCollItr)->begin();
     InDet::SCT_ClusterCollection::const_iterator sctEnd = (*sctCollItr)->end();
-    for(; sctItr!=sctEnd; sctItr++){
+    for(; sctItr!=sctEnd; ++sctItr){
 
       // ask the association tool if the hit was associated
       if(prd_to_track_map->isUsed(*(*sctItr))) continue;
@@ -180,11 +180,11 @@ const MinBiasPRDAssociation* UnassociatedHitsGetterTool::get (bool /*allowMissin
   // Loop on TRT clusters
   InDet::TRT_DriftCircleContainer::const_iterator trtCollItr = TRTDriftCircles->begin();
   InDet::TRT_DriftCircleContainer::const_iterator trtCollEnd = TRTDriftCircles->end();
-  for(; trtCollItr!=trtCollEnd; trtCollItr++){
+  for(; trtCollItr!=trtCollEnd; ++trtCollItr){
 
     InDet::TRT_DriftCircleCollection::const_iterator trtItr = (*trtCollItr)->begin();
     InDet::TRT_DriftCircleCollection::const_iterator trtEnd = (*trtCollItr)->end();
-    for(; trtItr!=trtEnd; trtItr++){
+    for(; trtItr!=trtEnd; ++trtItr){
 
       // ask the association tool if the hit was associated
       if(prd_to_track_map->isUsed(*(*trtItr))) continue;
