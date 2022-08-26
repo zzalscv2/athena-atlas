@@ -250,6 +250,8 @@ bool TFCSEnergyAndHitGAN::fillEnergy(TFCSSimulationState& simulstate, const TFCS
   const Binning& binsInLayers = m_Binning;
   ATH_MSG_VERBOSE("Get binning");
 
+  simulstate.set_E(0);
+
   int vox = 0; 
   for (auto element : binsInLayers){
     int layer = element.first;
@@ -267,7 +269,7 @@ bool TFCSEnergyAndHitGAN::fillEnergy(TFCSSimulationState& simulstate, const TFCS
     ATH_MSG_VERBOSE(" Getting energy for Layer "<< layer);
 
     int yBinNum = h->GetNbinsY();
-
+    
     // First fill energies
     for (int iy = 1; iy <= yBinNum; ++iy){
       for (int ix = 1; ix <= xBinNum; ++ix){
