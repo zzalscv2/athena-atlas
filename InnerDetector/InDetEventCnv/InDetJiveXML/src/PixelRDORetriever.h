@@ -14,6 +14,8 @@
 #include "StoreGate/ReadCondHandleKey.h"
 #include "StoreGate/DataHandle.h"
 
+class PixelID;
+
 namespace JiveXML {
   
   /**
@@ -48,9 +50,7 @@ namespace JiveXML {
     
     private:
       
-      /// A tool handle to the geo model tool
-      const ToolHandle<IInDetGeoModelTool> m_geo
-         {this,"GeoModelTool", "JiveXML::InDetGeoModelTool/InDetGeoModelTool","" };
+      const PixelID* m_pixelID{nullptr};
 
       /// A tool handle to the SiLorentzAngleTool
       ToolHandle<ISiLorentzAngleTool> m_lorentzAngleTool{this, "LorentzAngleTool", "SiLorentzAngleTool/SCTLorentzAngleTool", "Tool to retreive Lorentz angle"};
