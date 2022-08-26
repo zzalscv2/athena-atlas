@@ -1,7 +1,7 @@
 ///////////////////////// -*- C++ -*- /////////////////////////////
 
 /*
-  Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
 */
 
 // GenEventCnv_p1.cxx 
@@ -60,6 +60,7 @@ void GenEventCnv_p1::persToTrans( const GenEvent_p1* persObj,
   }
 
 #ifdef HEPMC3
+  transObj->add_attribute ("barcodes", std::make_shared<HepMC::GenEventBarcodes>());
   transObj->add_attribute("signal_process_id",std::make_shared<HepMC3::IntAttribute>(persObj->m_signalProcessId ));
   transObj->set_event_number(persObj->m_eventNbr);
   transObj->add_attribute("event_scale",std::make_shared<HepMC3::DoubleAttribute>(persObj->m_eventScale));
@@ -156,7 +157,7 @@ GenEventCnv_p1::createGenVertex( const GenEvent_p1& persEvt,
 #ifdef HEPMC3
   vtx->set_position( HepMC::FourVector(persVtx.m_x,persVtx.m_y,persVtx.m_z,persVtx.m_t) );
   vtx->add_attribute("weights",std::make_shared<HepMC3::VectorDoubleAttribute>(persVtx.m_weights));
-  vtx->add_attribute("barcode",std::make_shared<HepMC3::IntAttribute>(persVtx.m_barcode));
+  HepMC::suggest_barcode(vtx,persVtx.m_barcode);
   
   // handle the in-going (orphans) particles
   const unsigned int nPartsIn = persVtx.m_particlesIn.size();
@@ -214,7 +215,7 @@ GenEventCnv_p1::createGenParticle( const GenParticle_p1& persPart,
   p->set_status(persPart.m_status);
   p->add_attribute("phi",std::make_shared<HepMC3::DoubleAttribute>(persPart.m_phiPolarization));
   p->add_attribute("theta",std::make_shared<HepMC3::DoubleAttribute>(persPart.m_thetaPolarization));
-  p->add_attribute("barcode",std::make_shared<HepMC3::IntAttribute>(persPart.m_barcode));
+  HepMC::suggest_barcode(p,persPart.m_barcode);
   // fillin' the flow
   std::vector<int> flows;
   const unsigned int nFlow = persPart.m_flow.size();

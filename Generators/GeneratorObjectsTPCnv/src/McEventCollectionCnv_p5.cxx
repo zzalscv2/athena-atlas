@@ -96,6 +96,7 @@ void McEventCollectionCnv_p5::persToTrans( const McEventCollection_p5* persObj,
       genEvt        =  datapools.getGenEvent();
     }
 #ifdef HEPMC3
+    genEvt->add_attribute ("barcodes", std::make_shared<HepMC::GenEventBarcodes>());
     genEvt->add_attribute("signal_process_id", std::make_shared<HepMC3::IntAttribute>(persEvt.m_signalProcessId));
     genEvt->set_event_number(persEvt.m_eventNbr);
     genEvt->add_attribute("mpi", std::make_shared<HepMC3::IntAttribute>(persEvt.m_mpi));
@@ -583,14 +584,13 @@ McEventCollectionCnv_p5::createGenVertex( const McEventCollection_p5& persEvt,
   //AV ID cannot be assigned in HepMC3. And its meaning in HepMC2 is not clear.
   vtx->set_status(persVtx.m_id);
   vtx->add_attribute("weights",std::make_shared<HepMC3::VectorFloatAttribute>(persVtx.m_weights));
-  vtx->add_attribute("barcode",std::make_shared<HepMC3::IntAttribute>(persVtx.m_barcode));
+  HepMC::suggest_barcode(vtx,persVtx.m_barcode);
   // handle the in-going (orphans) particles
   const unsigned int nPartsIn = persVtx.m_particlesIn.size();
   for ( unsigned int i = 0; i != nPartsIn; ++i ) {
     createGenParticle( persEvt.m_genParticles[persVtx.m_particlesIn[i]], partToEndVtx, datapools, vtx, false );
   }
 
-  HepMC::suggest_barcode(vtx,persVtx.m_barcode);
   // now handle the out-going particles
   const unsigned int nPartsOut = persVtx.m_particlesOut.size();
   for ( unsigned int i = 0; i != nPartsOut; ++i ) {
@@ -648,7 +648,7 @@ McEventCollectionCnv_p5::createGenParticle( const GenParticle_p5& persPart,
   p->set_status(              persPart.m_status);
   p->add_attribute("phi",std::make_shared<HepMC3::DoubleAttribute>(persPart.m_phiPolarization));
   p->add_attribute("theta",std::make_shared<HepMC3::DoubleAttribute>(persPart.m_thetaPolarization));
-  p->add_attribute("barcode",std::make_shared<HepMC3::IntAttribute>(persPart.m_barcode));
+  HepMC::suggest_barcode(p,persPart.m_barcode);
   p->set_generated_mass(persPart.m_generated_mass);
 
   // Note: do the E calculation in extended (long double) precision.
