@@ -157,15 +157,20 @@ def makeInDetTrigFastTracking( config = None, rois = 'EMViewRoIs', doFTF = True,
                                               UseByteStreamFEI4=globalflags.InputFormat.is_bytestream(),
                                               UseByteStreamFEI3=globalflags.InputFormat.is_bytestream())
 
-  from SiClusterizationTool.SiClusterizationToolConf import InDet__MergedPixelsTool
-  InDetMergedPixelsTool = InDet__MergedPixelsTool(name                       = "InDetMergedPixelsTool_" + signature,
-                                                  PixelConditionsSummaryTool = idPixelSummary,
-                                                  globalPosAlg               = InDetClusterMakerTool)
+  from SiClusterizationTool.SiClusterizationToolConf import InDet__MergedPixelsTool, InDet__PixelRDOTool
 
-  # Enable duplcated RDO check for data15 because duplication mechanism was used.
+  InDetPixelRDOTool = InDet__PixelRDOTool(name = "InDetPixelRDOTool_" + signature,
+                                          PixelConditionsSummaryTool = idPixelSummary)
+                                          
+  # Enable dupilcated RDO check for data15 because duplication mechanism was used.
   from RecExConfig.RecFlags import rec
   if len(rec.projectName())>=6 and rec.projectName()[:6]=="data15":
-     InDetMergedPixelsTool.CheckDuplicatedRDO = True
+     InDetPixelRDOTool.CheckDuplicatedRDO = True
+
+  InDetMergedPixelsTool = InDet__MergedPixelsTool(name                       = "InDetMergedPixelsTool_" + signature,
+                                                  globalPosAlg               = InDetClusterMakerTool,
+                                                  PixelRDOTool               = InDetPixelRDOTool)
+
   ToolSvc += InDetMergedPixelsTool
 
   from SiClusterizationTool.SiClusterizationToolConf import InDet__PixelGangedAmbiguitiesFinder

@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2019 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
 */
 
 ///////////////////////////////////////////////////////////////////
@@ -31,12 +31,13 @@ namespace InDet
   public:
 
     // InterfaceID
-    DeclareInterfaceID(IPixelClusteringTool, 1, 0);
+    DeclareInterfaceID(IPixelClusteringTool, 2, 0);
 
     // Clusterize a collection of pixel raw data objects
     virtual PixelClusterCollection* clusterize
     (const InDetRawDataCollection<PixelRDORawData> &RDOs,
-     const PixelID& idHelper) const = 0;
+     const PixelID& idHelper,
+     const EventContext& ctx) const = 0;
 
   };
 

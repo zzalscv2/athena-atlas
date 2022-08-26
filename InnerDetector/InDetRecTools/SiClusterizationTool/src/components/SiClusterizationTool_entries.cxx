@@ -1,3 +1,4 @@
+#include "SiClusterizationTool/PixelRDOTool.h"
 #include "SiClusterizationTool/MergedPixelsTool.h"
 #include "SiClusterizationTool/SCT_ClusteringTool.h"
 #include "SiClusterizationTool/SCT_ReClustering.h"
@@ -13,6 +14,7 @@
 #include "../LWTNNCondAlg.h"
 #include "../TTrainedNetworkCondAlg.h"
 
+DECLARE_COMPONENT( InDet::PixelRDOTool )
 DECLARE_COMPONENT( InDet::MergedPixelsTool )
 DECLARE_COMPONENT( InDet::SCT_ClusteringTool )
 DECLARE_COMPONENT( InDet::PixelGangedAmbiguitiesFinder )
