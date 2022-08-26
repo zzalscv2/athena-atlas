@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2020 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "MDTSimHitCollectionCnv.h"
@@ -60,11 +60,10 @@ MDTSimHitCollection* MDTSimHitCollectionCnv::createTransient() {
         AthenaHitsVector<MDTSimHit>* oldColl = this->poolReadObject< AthenaHitsVector<MDTSimHit> >();
         size_t size = oldColl->size();
         p_collection=new MDTSimHitCollection("DefaultCollectionName",size);
-        //p_collection->reserve(size);
+        p_collection->reserve(size);
         //do the copy
-        AthenaHitsVector<MDTSimHit>::const_iterator it = oldColl->begin(), itEnd=oldColl->end();
-        for (;it!=itEnd;it++)  {
-            p_collection->push_back(**it); 
+        for (const MDTSimHit* hit : *oldColl) {
+            p_collection->push_back(*hit); 
         }
         delete oldColl;
     }
