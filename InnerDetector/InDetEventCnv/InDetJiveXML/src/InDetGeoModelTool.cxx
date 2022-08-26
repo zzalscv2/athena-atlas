@@ -2,7 +2,7 @@
   Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
 */
 
-#include "InDetJiveXML/InDetGeoModelTool.h"
+#include "InDetGeoModelTool.h"
 
 #include "TRT_ReadoutGeometry/TRT_DetectorManager.h"
 #include "InDetIdentifier/TRT_ID.h"
@@ -39,7 +39,7 @@ namespace JiveXML {
 
     // Get identifier helper
     if (detStore()->retrieve(m_PixelIDHelper, "PixelID").isFailure()) {
-        if (msgLvl(MSG::ERROR)) msg(MSG::ERROR) << "Could not get Pixel ID helper" << endmsg;
+        ATH_MSG_ERROR( "Could not get Pixel ID helper" );
         return StatusCode::RECOVERABLE;
     }
   
@@ -49,7 +49,7 @@ namespace JiveXML {
 
     // Get identifier helper
     if (detStore()->retrieve(m_SCTIDHelper, "SCT_ID").isFailure()) {
-        if (msgLvl(MSG::ERROR)) msg(MSG::ERROR) << "Could not get SCT ID helper" << endmsg;
+        ATH_MSG_ERROR( "Could not get SCT ID helper" );
         return StatusCode::RECOVERABLE;
     }
  
@@ -58,12 +58,12 @@ namespace JiveXML {
     bool isSLHC = false;
     const IdDictManager* idDictMgr = nullptr;
     if (detStore()->retrieve(idDictMgr, "IdDict").isFailure()) {
-      if (msgLvl(MSG::ERROR)) msg(MSG::ERROR) << "Could not get IdDictManager !" << endmsg;
+      ATH_MSG_ERROR( "Could not get IdDictManager !" );
       return StatusCode::RECOVERABLE;
     } else {
       const IdDictDictionary* dict = idDictMgr->manager()->find_dictionary("InnerDetector"); 
       if(!dict) {
-	if (msgLvl(MSG::ERROR)) msg(MSG::ERROR) << " Cannot access InnerDetector dictionary "<< endmsg;
+	ATH_MSG_ERROR( " Cannot access InnerDetector dictionary " );
 	return StatusCode::RECOVERABLE;
       }else{
 	//	if (dict->file_name().find("SLHC")!=std::string::npos) isSLHC=true;
@@ -78,13 +78,13 @@ namespace JiveXML {
 
       // Get geo model manager
       if ( detStore()->retrieve(m_TRTGeoManager, "TRT").isFailure()) {
-	if (msgLvl(MSG::ERROR)) msg(MSG::ERROR) << "Could not get TRT GeoModel Manager!" << endmsg;
-	return StatusCode::RECOVERABLE;
+	      ATH_MSG_ERROR( "Could not get TRT GeoModel Manager!" );
+	      return StatusCode::RECOVERABLE;
       }
 
       // Get identifier helper
       if (detStore()->retrieve(m_TRTIDHelper, "TRT_ID").isFailure()) {
-        if (msgLvl(MSG::ERROR)) msg(MSG::ERROR) << "Could not get TRT ID helper" << endmsg;
+        ATH_MSG_ERROR( "Could not get TRT ID helper" );
         return StatusCode::RECOVERABLE;
       }
     }

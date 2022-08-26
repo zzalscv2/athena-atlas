@@ -20,6 +20,10 @@ Reco_tf.py  \
 rc1=$?
 echo "art-result: $rc1 Reco"
 
+# keep the job alive for up to 5 hours since diff-root doesn't display anything while running.
+(for i in 1 1 1 1 1 ; do sleep 3600 ; touch ./my_art_heartbeat ; done) &
+MY_ART_HEARTBEAT_PID=$!
+
 rc2=-9999
 if [ ${rc1} -eq 0 ]
 then
@@ -29,3 +33,5 @@ then
   rc2=$?
 fi
 echo  "art-result: ${rc2} (against previous nightly)"
+
+kill $MY_ART_HEARTBEAT_PID || true

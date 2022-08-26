@@ -2,7 +2,7 @@
   Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
 */
 
-#include "InDetJiveXML/SiSpacePointRetriever.h"
+#include "SiSpacePointRetriever.h"
 #include "StoreGate/DataHandle.h"
 #include "JiveXML/DataType.h"
 
@@ -27,8 +27,7 @@ namespace JiveXML
    * @param parent AlgTools parent owning this tool
    **/
   SiSpacePointRetriever::SiSpacePointRetriever(const std::string& type,const std::string& name,const IInterface* parent):
-    AthAlgTool(type,name,parent),
-    m_typeName("S3D")
+    AthAlgTool(type,name,parent)
   {
 
     //Declare the interface
@@ -94,8 +93,7 @@ namespace JiveXML
       }
 
       //Finally add the list of barcodes to our DataVect
-      std::set<int>::const_iterator barcodeItr = barcodesCommon.begin();
-      for (; barcodeItr != barcodesCommon.end(); ++barcodeItr) barcodes.push_back(DataType(*barcodeItr)); 
+      for (const auto barcodeCommon : barcodesCommon) barcodes.push_back(DataType(barcodeCommon));
 
       //return the number of added barcodes
       return barcodesCommon.size();
@@ -110,25 +108,33 @@ namespace JiveXML
   StatusCode SiSpacePointRetriever::retrieve(ToolHandle<IFormatTool> &FormatTool) {
 
     //be verbose
-    if (msgLvl(MSG::DEBUG)) msg(MSG::DEBUG) << "Retrieving " << dataTypeName() <<endmsg; 
+    ATH_MSG_DEBUG( "Retrieving " << dataTypeName() ); 
    
     /**
-     * Try to retrieve all the relevant collections first
+     * Try to retrieve all the relevant collections
      */
-    SG::ReadHandle<PRD_MultiTruthCollection> PixelPRDTruthColl(m_PixelPRDTruthName);
-    SG::ReadHandle<SpacePointContainer> PixelSPContainer(m_PixelSPContainerName);
-    SG::ReadHandle<PRD_MultiTruthCollection> SCTPRDTruthColl(m_SCTPRDTruthName);
-    SG::ReadHandle<SpacePointContainer> SCTSPContainer(m_SCTSPContainerName);
 
-    //Try to retrieve all four from store gate
+    SG::ReadHandle<SpacePointContainer> PixelSPContainer(m_PixelSPContainerName);
     if ( not PixelSPContainer.isValid() )
-      if (msgLvl(MSG::INFO)) msg(MSG::INFO) << "Unable to retrieve SpacePoint container with name " << m_PixelSPContainerName.key() << endmsg;
-    if ( not PixelPRDTruthColl.isValid() )
-      if (msgLvl(MSG::INFO)) msg(MSG::INFO) << "Unable to retrieve PRD_MultiTruth collection with name " << m_PixelPRDTruthName.key() << endmsg;
+      ATH_MSG_WARNING( "Unable to retrieve SpacePoint container with name " << m_PixelSPContainerName.key() );
+
+    SG::ReadHandle<PRD_MultiTruthCollection> PixelPRDTruthColl;
+    if (m_usePixelTruthMap) {
+      PixelPRDTruthColl = SG::makeHandle(m_PixelPRDTruthName);
+      if ( not PixelPRDTruthColl.isValid() )
+        ATH_MSG_WARNING( "Unable to retrieve PRD_MultiTruth collection with name " << m_PixelPRDTruthName.key() );
+    }
+
+    SG::ReadHandle<SpacePointContainer> SCTSPContainer(m_SCTSPContainerName);
     if ( not SCTSPContainer.isValid() )
-      if (msgLvl(MSG::INFO)) msg(MSG::INFO) << "Unable to retrieve SpacePoint container with name " << m_SCTSPContainerName.key() << endmsg;
-    if ( not SCTPRDTruthColl.isValid() )        
-      if (msgLvl(MSG::INFO)) msg(MSG::INFO) << "Unable to retrieve PRD_MultiTruth collection with name " << m_SCTPRDTruthName.key() << endmsg;
+      ATH_MSG_WARNING( "Unable to retrieve SpacePoint container with name " << m_SCTSPContainerName.key() );
+
+    SG::ReadHandle<PRD_MultiTruthCollection> SCTPRDTruthColl;
+    if (m_useSCTTruthMap) {
+      SCTPRDTruthColl = SG::makeHandle(m_SCTPRDTruthName);
+      if ( not SCTPRDTruthColl.isValid() )        
+        ATH_MSG_WARNING( "Unable to retrieve PRD_MultiTruth collection with name " << m_SCTPRDTruthName.key() );
+    }
 
     /**
      * Now make a list of SpacePoint - PRDTruth collection pairs to run over
@@ -138,29 +144,25 @@ namespace JiveXML
 
     //Add Pixel if there is a collection
     if (PixelSPContainer.isValid())
-      SpacePointTruthPairList.emplace_back(PixelSPContainer.cptr(),PixelPRDTruthColl.cptr());
+      SpacePointTruthPairList.emplace_back(PixelSPContainer.cptr(), m_usePixelTruthMap ? PixelPRDTruthColl.cptr() : nullptr);
     
     //Add SCT if there is a collection
     if (SCTSPContainer.isValid())
-      SpacePointTruthPairList.emplace_back(SCTSPContainer.cptr(),SCTPRDTruthColl.cptr());
+      SpacePointTruthPairList.emplace_back(SCTSPContainer.cptr(), m_useSCTTruthMap ? SCTPRDTruthColl.cptr() : nullptr);
     
     /**
      * Found out how much space we will need
      */
     int NSpacePoints = 0;
     //Loop over all SpacePoint - PRDTruth pairs
-    std::vector<SpacePointTruthPair>::iterator SpacePointTruthPairItr = SpacePointTruthPairList.begin();
-    for ( ; SpacePointTruthPairItr != SpacePointTruthPairList.end() ; ++SpacePointTruthPairItr ){
-
-      //Get an iterator over the SpacePoint container itself  
-      SpacePointContainer::const_iterator SpacePointCollItr = (*SpacePointTruthPairItr).first->begin();
+    for (const auto &SPTruthPair : SpacePointTruthPairList) {
 
       //Add up the size of the SpacePoint collections in the container
-      for (; SpacePointCollItr!=  (*SpacePointTruthPairItr).first->end(); ++SpacePointCollItr)
-        NSpacePoints += (**SpacePointCollItr).size();
+      for (const auto SpacePoint : *(SPTruthPair.first))
+        NSpacePoints += SpacePoint->size();
     }
 
-    if (msgLvl(MSG::DEBUG)) msg(MSG::DEBUG)<<  "Counted  " << NSpacePoints << " in total" << endmsg;
+    ATH_MSG_DEBUG(  "Counted  " << NSpacePoints << " in total" );
 
     /**
      * Declare all the data we want to retrieve
@@ -179,22 +181,16 @@ namespace JiveXML
      */
 
     //Loop over all SpacePoint - PRDTruth pairs
-    SpacePointTruthPairItr = SpacePointTruthPairList.begin();
-    for ( ; SpacePointTruthPairItr != SpacePointTruthPairList.end(); ++SpacePointTruthPairItr ){
+    for (const auto &SPTruthPair : SpacePointTruthPairList) {
 
       // Loop over SpacePoint Collections in the SpacePoint container
-      SpacePointContainer::const_iterator SpacePointCollItr=(*SpacePointTruthPairItr).first->begin();
-      for (;SpacePointCollItr!=(*SpacePointTruthPairItr).first->end();++SpacePointCollItr){
+      for (const auto SpacePointColl : *(SPTruthPair.first)){
 
-        const SpacePointCollection* SpacePointColl=(*SpacePointCollItr);
-        
         //Loop over SpacePoints themselves
-        DataVector<Trk::SpacePoint>::const_iterator SpacePointItr = SpacePointColl->begin() ;
-        for ( ; SpacePointItr != SpacePointColl->end(); ++SpacePointItr) {
+        for (const auto SpacePoint : *SpacePointColl) {
           
           //Get the position of the space point
-          const Trk::SpacePoint* SpacePoint = (*SpacePointItr);
-	  Amg::Vector3D point = SpacePoint->globalPosition();
+	        Amg::Vector3D point = SpacePoint->globalPosition();
           
           //Store position in units of centimeters
           x.push_back(DataType(point.x() * CLHEP::mm/CLHEP::cm));
@@ -217,14 +213,14 @@ namespace JiveXML
           clusters.push_back((idSecond.is_valid()) ? DataType(idSecond.get_compact()) : DataType(-1));
 
           //Stop here if there is no truth
-          const PRD_MultiTruthCollection* PRDTruthColl = (*SpacePointTruthPairItr).second;
+          const PRD_MultiTruthCollection* PRDTruthColl = SPTruthPair.second;
           if ( PRDTruthColl == nullptr ) continue ;
 
           // Finally get barcodes of associated truth particles
           numBarcodes.push_back(SiSpacePointRetrieverHelpers::getTruthBarcodes(idFirst, idSecond, PRDTruthColl, barcodes));
 
-          if (msgLvl(MSG::VERBOSE)) msg(MSG::VERBOSE) << "Found " << numBarcodes.back() << " common barcodes, now " 
-                                                      << barcodes.size() << " in total" << endmsg;
+          ATH_MSG_VERBOSE( "Found " << numBarcodes.back() << " common barcodes, now " 
+                                                      << barcodes.size() << " in total" );
 
         } // loop over SpacePoint collection
       } // loop over SpacePoint container
@@ -248,7 +244,7 @@ namespace JiveXML
       dataMap[bctag] = barcodes;
     }
 
-    if (msgLvl(MSG::DEBUG)) msg(MSG::DEBUG) << dataTypeName() << ": "<< x.size() << endmsg;
+    ATH_MSG_DEBUG( dataTypeName() << ": "<< x.size() );
 
      //forward data to formating tool and return
     return FormatTool->AddToEvent(dataTypeName(), "", &dataMap);
@@ -258,8 +254,10 @@ namespace JiveXML
     // Read Handle Key
     ATH_CHECK(m_PixelSPContainerName.initialize());
     ATH_CHECK(m_SCTSPContainerName.initialize());
-    ATH_CHECK(m_PixelPRDTruthName.initialize());
-    ATH_CHECK(m_SCTPRDTruthName.initialize());
+    m_usePixelTruthMap = !m_PixelPRDTruthName.key().empty();
+    ATH_CHECK(m_PixelPRDTruthName.initialize(m_usePixelTruthMap));
+    m_useSCTTruthMap = !m_SCTPRDTruthName.key().empty();
+    ATH_CHECK(m_SCTPRDTruthName.initialize(m_useSCTTruthMap));
 
     return m_geo.retrieve();
   }

@@ -2,15 +2,12 @@
   Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
 */
 
-#include "InDetJiveXML/PixelClusterRetriever.h"
-#include "StoreGate/DataHandle.h"
+#include "PixelClusterRetriever.h"
 #include "JiveXML/DataType.h"
 
 #include "CLHEP/Geometry/Point3D.h"
 
-#include "InDetPrepRawData/SiClusterContainer.h"
 #include "InDetPrepRawData/PixelCluster.h"
-#include "TrkTruthData/PRD_MultiTruthCollection.h"
 
 #include "InDetReadoutGeometry/SiDetectorElement.h"
 #include "ReadoutGeometryBase/SiLocalPosition.h"
@@ -26,8 +23,7 @@ namespace JiveXML {
    * @param parent AlgTools parent owning this tool
    **/
   PixelClusterRetriever::PixelClusterRetriever(const std::string& type,const std::string& name,const IInterface* parent):
-    AthAlgTool(type,name,parent),
-    m_typeName("PixCluster")
+    AthAlgTool(type,name,parent)
   {
 
     //Only declare the interface
@@ -40,6 +36,9 @@ namespace JiveXML {
 
   StatusCode PixelClusterRetriever::initialize() {
     ATH_CHECK(m_pixelDetEleCollKey.initialize());
+    ATH_CHECK(m_PixelClusterCollName.initialize());
+    m_usePixelTruthMap = !m_PixelTruthMapName.key().empty();
+    ATH_CHECK(m_PixelTruthMapName.initialize(m_usePixelTruthMap));
 
     return m_geo.retrieve();
   }
@@ -54,7 +53,7 @@ namespace JiveXML {
   StatusCode PixelClusterRetriever::retrieve(ToolHandle<IFormatTool> &FormatTool) {
 
     //be verbose
-    if (msgLvl(MSG::DEBUG)) msg(MSG::DEBUG) << "Retrieving " << dataTypeName() <<endmsg; 
+    ATH_MSG_DEBUG( "Retrieving " << dataTypeName() ); 
     
     SG::ReadCondHandle<InDetDD::SiDetectorElementCollection> pixelDetEleHandle(m_pixelDetEleCollKey);
     const InDetDD::SiDetectorElementCollection* elements(*pixelDetEleHandle);
@@ -64,25 +63,26 @@ namespace JiveXML {
     }
 
     //Retrieve the cluster container
-    const InDet::SiClusterContainer* SiClusterCont;
-    if (evtStore()->retrieve(SiClusterCont, m_PixelClusterCollName).isFailure()){
-      if (msgLvl(MSG::WARNING)) msg(MSG::WARNING) << "Could not retrieve SiClusterContainer with name " << m_PixelClusterCollName << endmsg;
+    SG::ReadHandle<InDet::SiClusterContainer> SiClusterCont(m_PixelClusterCollName);
+    if (!SiClusterCont.isValid()) {
+      ATH_MSG_WARNING( "Could not retrieve SiClusterContainer with name " << m_PixelClusterCollName.key() );
       return StatusCode::RECOVERABLE;
     }
    
     //Retrieve the truth collection
-    const PRD_MultiTruthCollection* simClusterMap = nullptr ;
-    if ( evtStore()->contains<PRD_MultiTruthCollection>(m_PixelTruthMapName) ){
-      if ( evtStore()->retrieve(simClusterMap, m_PixelTruthMapName).isFailure() ){
+    SG::ReadHandle<PRD_MultiTruthCollection> simClusterMap;
+    if (m_usePixelTruthMap) {
+      simClusterMap = SG::makeHandle(m_PixelTruthMapName);
+      if (!simClusterMap.isValid()) {
         //Just write out a warning if this fails
-        if (msgLvl(MSG::INFO)) msg(MSG::INFO) << "Could not retrieve PRD_MultiTruthCollection with name " <<  m_PixelTruthMapName << endmsg;
+        ATH_MSG_WARNING( "Could not retrieve PRD_MultiTruthCollection with name " <<  m_PixelTruthMapName.key() );
       }
-    }  
+    }
+
     //Loop over all collections in the container and count the clusters
     unsigned long NClusterTotal = 0;
-    InDet::SiClusterContainer::const_iterator SiClusterCollItr = SiClusterCont->begin();
-    for (; SiClusterCollItr!= SiClusterCont->end(); ++SiClusterCollItr)
-      NClusterTotal += (**SiClusterCollItr).size();
+    for (const auto SiClusterColl : * SiClusterCont)
+      NClusterTotal += SiClusterColl->size();
   
     //Now prepare the output data vectors
     DataVect x0; x0.reserve(NClusterTotal);
@@ -101,20 +101,15 @@ namespace JiveXML {
     DataVect etaModule; etaModule.reserve(NClusterTotal);
 
     //Loop over all cluster collections in the container
-    for (SiClusterCollItr = SiClusterCont->begin(); SiClusterCollItr!= SiClusterCont->end(); ++SiClusterCollItr){
-
-      //Get the collection
-      const InDet::SiClusterCollection* SiClusterColl = (*SiClusterCollItr);
+    for (const auto SiClusterColl : * SiClusterCont) {
 
       //Only run on Pixel clusters
       if ( ! m_geo->PixelIDHelper()->is_pixel(SiClusterColl->identify())) continue ;
 
       //Now loop over all clusters in that collection 
-      InDet::SiClusterCollection::const_iterator SiClusterItr = SiClusterColl->begin();
-      for (; SiClusterItr!=SiClusterColl->end(); ++SiClusterItr){ 
+      for (const auto sicluster : * SiClusterColl) {
 
         //Get the cluster
-        const InDet::SiCluster* sicluster = (*SiClusterItr);
         const InDet::PixelCluster *cluster = dynamic_cast<const InDet::PixelCluster*>(sicluster);
         if (not cluster) continue;
         //and the detector element for that cluster via the id
@@ -122,7 +117,7 @@ namespace JiveXML {
         IdentifierHash wafer_hash = m_geo->PixelIDHelper()->wafer_hash(id);
         const InDetDD::SiDetectorElement* element = elements->getDetectorElement(wafer_hash);
         if (!element){
-          if (msgLvl(MSG::DEBUG)) msg(MSG::DEBUG) << "Could not obtain Detector Element with ID " << id << endmsg;
+          ATH_MSG_DEBUG( "Could not obtain Detector Element with ID " << id );
           continue ;
         }
 
@@ -141,7 +136,7 @@ namespace JiveXML {
         etaModule.push_back(DataType(m_geo->PixelIDHelper()->eta_module(clusterId)));
         
         //Only process truth if its there
-        if ( simClusterMap == nullptr ) continue;
+        if ( !m_usePixelTruthMap || !simClusterMap.isValid() ) continue;
 
         // Count the number of associated truth particles, and store their barcodes
         unsigned long countBarcodes=0;
@@ -179,7 +174,7 @@ namespace JiveXML {
     }
 
     //Be verbose
-    if (msgLvl(MSG::DEBUG)) msg(MSG::DEBUG) << " Retrieved " << dataTypeName() << ": " <<  x0.size() << endmsg;
+    ATH_MSG_DEBUG( " Retrieved " << dataTypeName() << ": " <<  x0.size() );
  
      //forward data to formating tool and return
     return FormatTool->AddToEvent(dataTypeName(), "", &dataMap);

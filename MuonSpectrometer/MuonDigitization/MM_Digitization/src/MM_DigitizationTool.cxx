@@ -116,21 +116,15 @@ StatusCode MM_DigitizationTool::initialize() {
     // get gas properties from calibration tool
     const NSWCalib::MicroMegaGas prop = m_calibrationTool->mmGasProperties();
     const float peakTime = m_calibrationTool->mmPeakTime();
-    m_driftVelocity = prop.vDrift;
-
+   
     MM_StripsResponseSimulation::ConfigModule strip_cfg{};
+    strip_cfg.NSWCalib::MicroMegaGas::operator=(prop);
     strip_cfg.writeOutputFile = m_writeOutputFile;
     strip_cfg.qThreshold = m_qThreshold;
     strip_cfg.driftGapWidth = m_driftGapWidth;
     strip_cfg.crossTalk1 = m_crossTalk1;
     strip_cfg.crossTalk2 = m_crossTalk2;
-    strip_cfg.transverseDiffusionSigma = prop.transDiff;
-    strip_cfg.longitudinalDiffusionSigma = prop.longDiff;
-    strip_cfg.driftVelocity = prop.vDrift;
     strip_cfg.avalancheGain = m_avalancheGain;
-    strip_cfg.interactionDensityMean = prop.interactionDensityMean;
-    strip_cfg.interactionDensitySigma = prop.interactionDensitySigma;
-    strip_cfg.lorentzAngleFunction = prop.lorentzAngleFunction;
     m_StripsResponseSimulation = std::make_unique<MM_StripsResponseSimulation>(std::move(strip_cfg));
    
 
@@ -221,8 +215,6 @@ StatusCode MM_DigitizationTool::initialize() {
     ATH_MSG_DEBUG("Interaction density mean: " << m_StripsResponseSimulation->getInteractionDensityMean());
     ATH_MSG_DEBUG("Interaction density sigma: " << m_StripsResponseSimulation->getInteractionDensitySigma());
     ATH_MSG_DEBUG("DriftVelocity stripResponse: " << m_StripsResponseSimulation->getDriftVelocity());
-    ATH_MSG_DEBUG("LorentzAngleFunktion stripResponse: " << m_StripsResponseSimulation->getLorentzAngleFunction()->GetName());
-    ATH_MSG_DEBUG("DriftVelocity          " << m_driftVelocity);
     ATH_MSG_DEBUG("crossTalk1             " << m_crossTalk1);
     ATH_MSG_DEBUG("crossTalk2             " << m_crossTalk2);
     ATH_MSG_DEBUG("EnergyThreshold        " << m_energyThreshold);
@@ -567,7 +559,7 @@ StatusCode MM_DigitizationTool::doDigitization(const EventContext& ctx) {
             Amg::Vector2D positionOnSurface{hitOnSurface.x(), hitOnSurface.y()};
 
             // Account For Time Offset
-            double shiftTimeOffset = (globalHitTime - tofCorrection) * m_driftVelocity;
+            double shiftTimeOffset = (globalHitTime - tofCorrection) * m_StripsResponseSimulation->getDriftVelocity();
             Amg::Vector3D hitAfterTimeShift(hitOnSurface.x(), hitOnSurface.y(), shiftTimeOffset);
             Amg::Vector3D hitAfterTimeShiftOnSurface = hitAfterTimeShift - (shiftTimeOffset / localDirectionTime.z()) * localDirectionTime;
 
@@ -616,7 +608,7 @@ StatusCode MM_DigitizationTool::doDigitization(const EventContext& ctx) {
             m_idHelperSvc->mmIdHelper().get_module_hash(layerID, moduleHash);
 
             ATH_MSG_DEBUG(" looking up collection using moduleHash "
-                          << (int)moduleHash << " " << m_idHelperSvc->mmIdHelper().print_to_string(layerID)
+                          << static_cast<int>(moduleHash) << " " << m_idHelperSvc->mmIdHelper().print_to_string(layerID)
                           << " digitID: " << m_idHelperSvc->mmIdHelper().print_to_string(digitID));
 
             const MuonGM::MuonChannelDesign* mmChannelDesign = detectorReadoutElement->getDesign(digitID);

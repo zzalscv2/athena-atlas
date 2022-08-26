@@ -2,15 +2,13 @@
   Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
 */
 
-#include "InDetJiveXML/SiClusterRetriever.h"
+#include "SiClusterRetriever.h"
 #include "StoreGate/DataHandle.h"
 #include "StoreGate/ReadCondHandle.h"
 #include "JiveXML/DataType.h"
 
 #include "CLHEP/Geometry/Point3D.h"
 
-#include "InDetPrepRawData/SiClusterContainer.h"
-#include "TrkTruthData/PRD_MultiTruthCollection.h"
 
 #include "InDetReadoutGeometry/SiDetectorElement.h"
 #include "ReadoutGeometryBase/SiLocalPosition.h"
@@ -26,16 +24,15 @@ namespace JiveXML {
    * @param parent AlgTools parent owning this tool
    **/
   SiClusterRetriever::SiClusterRetriever(const std::string& type,const std::string& name,const IInterface* parent):
-    AthAlgTool(type,name,parent),
-    m_typeName("STC")
+    AthAlgTool(type,name,parent)
   {
 
     //Only declare the interface
     declareInterface<IDataRetriever>(this);
     
     //And the properties
-    declareProperty("SCTClusters"  , m_SiClusterCollName = "SCT_Clusters");
-    declareProperty("SCT_TruthMap" , m_SiTruthMapName = "PRD_MultiTruthSCT");
+    declareProperty("SCTClusters"  , m_SiClusterCollName = "SCT_Clusters", "Collection name of SiClusterContainer for SCT");
+    declareProperty("SCT_TruthMap" , m_SiTruthMapName = "PRD_MultiTruthSCT", "Collection name of PRD_MultiTruthCollection> for SCT");
   }
 
   /**
@@ -48,7 +45,7 @@ namespace JiveXML {
   StatusCode SiClusterRetriever::retrieve(ToolHandle<IFormatTool> &FormatTool) {
 
     //be verbose
-    if (msgLvl(MSG::DEBUG)) msg(MSG::DEBUG) << "Retrieving " << dataTypeName() <<endmsg; 
+    ATH_MSG_DEBUG( "Retrieving " << dataTypeName() ); 
 
     // Get SCT_DetectorElementCollection
     SG::ReadCondHandle<InDetDD::SiDetectorElementCollection> sctDetEle(m_SCTDetEleCollKey);
@@ -59,25 +56,26 @@ namespace JiveXML {
     }
 
     //Retrieve the cluster container
-    const InDet::SiClusterContainer* SiClusterCont;
-    if (evtStore()->retrieve(SiClusterCont, m_SiClusterCollName).isFailure()){
-      if (msgLvl(MSG::WARNING)) msg(MSG::WARNING) << "Could not retrieve SiClusterContainer with name " << m_SiClusterCollName << endmsg;
+    SG::ReadHandle<InDet::SiClusterContainer> SiClusterCont(m_SiClusterCollName);
+    if (!SiClusterCont.isValid()) {
+      ATH_MSG_DEBUG( "Could not retrieve SiClusterContainer with name " << m_SiClusterCollName.key() );
       return StatusCode::RECOVERABLE;
     }
    
     //Retrieve the truth collection
-    const PRD_MultiTruthCollection* simClusterMap = nullptr ;
-    if ( evtStore()->contains<PRD_MultiTruthCollection>(m_SiTruthMapName) ){
-      if ( evtStore()->retrieve(simClusterMap, m_SiTruthMapName).isFailure() ){
-        //Just write out a warning if this fails
-        if (msgLvl(MSG::INFO)) msg(MSG::INFO) << "Could not retrieve PRD_MultiTruthCollection with name " <<  m_SiTruthMapName << endmsg;
+    SG::ReadHandle<PRD_MultiTruthCollection> simClusterMap;
+    if (m_useSiTruthMap) {
+      simClusterMap = SG::makeHandle(m_SiTruthMapName);
+      if (!simClusterMap.isValid()) {
+          //Just write out a warning if this fails
+          ATH_MSG_DEBUG( "Could not retrieve PRD_MultiTruthCollection with name " <<  m_SiTruthMapName.key() );
       }
-    }  
+    }
+
     //Loop over all collections in the container and count the clusters
     unsigned long NClusterTotal = 0;
-    InDet::SiClusterContainer::const_iterator SiClusterCollItr = SiClusterCont->begin();
-    for (; SiClusterCollItr!= SiClusterCont->end(); ++SiClusterCollItr)
-      NClusterTotal += (**SiClusterCollItr).size();
+    for (const auto SiClusterColl : *SiClusterCont.cptr())
+      NClusterTotal += SiClusterColl->size();
   
     //Now prepare the output data vectors
     DataVect x0; x0.reserve(NClusterTotal);
@@ -98,10 +96,7 @@ namespace JiveXML {
     DataVect side; side.reserve(NClusterTotal);
 
     //Loop over all cluster collections in the container
-    for (SiClusterCollItr = SiClusterCont->begin(); SiClusterCollItr!= SiClusterCont->end(); ++SiClusterCollItr){
-
-      //Get the collection
-      const InDet::SiClusterCollection* SiClusterColl = (*SiClusterCollItr);
+    for (const auto SiClusterColl : *SiClusterCont.cptr()){
 
       //Only run on silicon (SCT) clusters
       if ( ! m_geo->SCTIDHelper()->is_sct(SiClusterColl->identify())) continue ;
@@ -109,17 +104,13 @@ namespace JiveXML {
       const IdentifierHash waferHash = SiClusterColl->identifyHash();
 
       //Now loop over all clusters in that collection 
-      InDet::SiClusterCollection::const_iterator SiClusterItr = SiClusterColl->begin();
-      for (; SiClusterItr!=SiClusterColl->end(); ++SiClusterItr){ 
+      for (const auto cluster : *SiClusterColl){ 
 
-        //Get the cluster
-        const InDet::SiCluster* cluster = (*SiClusterItr);
-        
         //and the detector element for that cluster via the id
         Identifier id = m_geo->SCTIDHelper()->wafer_id(cluster->identify());
         const InDetDD::SiDetectorElement* element = elements->getDetectorElement(waferHash);
         if (!element){
-          if (msgLvl(MSG::DEBUG)) msg(MSG::DEBUG) << "Could not obtain Detector Element with ID " << id << endmsg;
+          ATH_MSG_DEBUG( "Could not obtain Detector Element with ID " << id );
           continue ;
         }
             
@@ -127,8 +118,8 @@ namespace JiveXML {
         InDetDD::SiLocalPosition pos = element->localPosition(cluster->globalPosition());
         std::pair<Amg::Vector3D, Amg::Vector3D > ends = element->endsOfStrip(pos);
         
-	Amg::Vector3D a = ends.first;   // Top end, first cluster
-	Amg::Vector3D b = ends.second;  // Bottom end, first cluster
+	      Amg::Vector3D a = ends.first;   // Top end, first cluster
+	      Amg::Vector3D b = ends.second;  // Bottom end, first cluster
         
         //Now store all the infromation we've obtained so far
         x0.push_back(DataType(a.x() /10.));
@@ -147,7 +138,7 @@ namespace JiveXML {
         side.push_back(DataType(m_geo->SCTIDHelper()->side(clusterId)));
         
         //Only process truth if its there
-        if ( simClusterMap == nullptr ) continue;
+        if ( !m_useSiTruthMap || !simClusterMap.isValid() ) continue;
 
         // Count the number of associated truth particles, and store their barcodes
         unsigned long countBarcodes=0;
@@ -187,7 +178,7 @@ namespace JiveXML {
     }
 
     //Be verbose
-    if (msgLvl(MSG::DEBUG)) msg(MSG::DEBUG) << " Retrieved " << dataTypeName() << ": " <<  x0.size() << endmsg;
+    ATH_MSG_DEBUG( " Retrieved " << dataTypeName() << ": " <<  x0.size() );
  
      //forward data to formating tool and return
     return FormatTool->AddToEvent(dataTypeName(), "", &dataMap);
@@ -195,6 +186,9 @@ namespace JiveXML {
 
   StatusCode SiClusterRetriever::initialize() {
     ATH_CHECK(m_SCTDetEleCollKey.initialize());
+    ATH_CHECK(m_SiClusterCollName.initialize());
+    m_useSiTruthMap = !m_SiTruthMapName.key().empty();
+    ATH_CHECK(m_SiTruthMapName.initialize(m_useSiTruthMap));
 
     return m_geo.retrieve();
   }

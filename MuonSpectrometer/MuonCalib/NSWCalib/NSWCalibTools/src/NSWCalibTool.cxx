@@ -29,10 +29,11 @@ namespace {
 
   //Functional form fit to agree with Garfield simulations. Fit and parameters from G. Iakovidis
   // For now only the parametrisation for 93:7 is available
-  static const std::map<std::string, std::vector<float>> map_lorentzAngleFunctionPars {
-                              {"ArCo2_937", std::vector<float>{0, 58.87, -2.983, -10.62, 2.818}},
-                              {"ArCo2_8020", std::vector<float>{0, 58.87, -2.983, -10.62, 2.818}},
-                              {"ArCo2iC4H10_9352", std::vector<float>{0, 58.87, -2.983, -10.62, 2.818}}};
+  using angleFunction = NSWCalib::MicroMegaGas::angleFunction;
+  static const std::map<std::string, angleFunction> map_lorentzAngleFunctionPars {
+                              {"ArCo2_937",  [](double x)  {return 0.f + 58.87f*x -2.983f*x*x -10.62f*x*x*x + 2.818f*x*x*x*x;}},
+                              {"ArCo2_8020", [](double x)  {return 0.f + 58.87f*x -2.983f*x*x -10.62f*x*x*x + 2.818f*x*x*x*x;}},
+                              {"ArCo2iC4H10_9352", [](double x)  {return 0.f + 58.87f*x -2.983f*x*x -10.62f*x*x*x + 2.818f*x*x*x*x;}}};
 
   // For now only the parametrisation for 93:7 is available
   static const std::map<std::string, float> map_interactionDensitySigma {{"ArCo2_937", 4.04 / 5.},
@@ -76,12 +77,7 @@ StatusCode Muon::NSWCalibTool::initializeGasProperties() {
   m_longDiff = map_longDiff.find(m_gasMixture)->second;
   m_interactionDensitySigma = map_interactionDensitySigma.find(m_gasMixture)->second;
   m_interactionDensityMean =  map_interactionDensityMean.find(m_gasMixture)->second;
-
-  m_lorentzAngleFunction = std::make_unique<TF1>("lorentzAngleFunction", "[0] + [1]*x + [2]*x*x + [3]*x*x*x + [4]*x*x*x*x", 0, 2);
-  for (uint i_par = 0; i_par < map_lorentzAngleFunctionPars.find(m_gasMixture)->second.size(); i_par++) {
-    m_lorentzAngleFunction -> SetParameter(i_par, map_lorentzAngleFunctionPars.find(m_gasMixture)->second[i_par]);
-  }
-
+  m_lorentzAngleFunction =  map_lorentzAngleFunctionPars.find(m_gasMixture)->second;
   return StatusCode::SUCCESS;
 }
 
@@ -113,7 +109,7 @@ StatusCode Muon::NSWCalibTool::calibrateClus(const EventContext& ctx, const Muon
   if (changeSign) bfield = -bfield;
 
   //// sign of the lorentz angle matches digitization - angle is in radians
-  double lorentzAngle = (bfield>0. ? 1. : -1.)*m_lorentzAngleFunction->Eval(std::abs(bfield)) * toRad;
+  double lorentzAngle = (bfield>0. ? 1. : -1.)*m_lorentzAngleFunction(std::abs(bfield)) * toRad;
 
   /// loop over prepData strips
   for (unsigned int i = 0; i < prepData->stripNumbers().size(); ++i){
@@ -262,7 +258,7 @@ StatusCode Muon::NSWCalibTool::distToTime(const EventContext& ctx, const Muon::M
   int gasGap = m_idHelperSvc->mmIdHelper().gasGap(prepData->identify());
   bool changeSign = ( globalPos.z() < 0. ? (gasGap==1 || gasGap==3) : (gasGap==2 || gasGap==4) );
   if (changeSign) bfield = -bfield;
-  double cos2_lorentzAngle = std::pow(std::cos ( (bfield>0. ? 1. : -1.)*m_lorentzAngleFunction->Eval(std::abs(bfield)) * toRad), 2);
+  double cos2_lorentzAngle = std::pow(std::cos ( (bfield>0. ? 1. : -1.)*m_lorentzAngleFunction(std::abs(bfield)) * toRad), 2);
   /// loop over drift distances                                                                                             
   for (const double dist : driftDistances){
     double time = dist / (m_vDrift*cos2_lorentzAngle);
@@ -400,12 +396,12 @@ Muon::NSWCalibTool::tdoToTime(const EventContext& ctx, const bool inCounts, cons
 
 NSWCalib::MicroMegaGas  Muon::NSWCalibTool::mmGasProperties() const {
   NSWCalib::MicroMegaGas properties{};
-  properties.vDrift = m_vDrift;
-  properties.longDiff = m_longDiff;
-  properties.transDiff = m_transDiff;
+  properties.driftVelocity  = m_vDrift;
+  properties.longitudinalDiffusionSigma = m_longDiff;
+  properties.transverseDiffusionSigma = m_transDiff;
   properties.interactionDensityMean = m_interactionDensityMean;
   properties.interactionDensitySigma = m_interactionDensitySigma;
-  properties.lorentzAngleFunction = m_lorentzAngleFunction.get();
+  properties.lorentzAngleFunction = m_lorentzAngleFunction;
   return properties;
 }
 

@@ -5,7 +5,7 @@
 #ifndef JIVEXML_INDETGEOMODELTOOL_H
 #define JIVEXML_INDETGEOMODELTOOL_H
 
-#include "InDetJiveXML/IInDetGeoModelTool.h"
+#include "IInDetGeoModelTool.h"
 #include "AthenaBaseComps/AthAlgTool.h"
 
 
