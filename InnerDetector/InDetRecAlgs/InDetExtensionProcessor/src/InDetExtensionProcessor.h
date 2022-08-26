@@ -90,27 +90,20 @@ namespace InDet {
     enum StatIndex {
       iAll, iBarrel, iTransi, iEndcap, Nregions
     };
-    typedef std::array<int, Nregions> CounterArray_t;
-    // -- statistics protected by mutex
-    mutable std::mutex m_statMutex;
-    mutable int m_Nevents ATLAS_THREAD_SAFE;
-    mutable CounterArray_t m_Ninput ATLAS_THREAD_SAFE;
-    mutable CounterArray_t m_Nrecognised ATLAS_THREAD_SAFE;
-    mutable CounterArray_t m_Nextended ATLAS_THREAD_SAFE;
-    mutable CounterArray_t m_Nrejected ATLAS_THREAD_SAFE;
-    mutable CounterArray_t m_Nfailed ATLAS_THREAD_SAFE;
-    mutable CounterArray_t m_NrecoveryBremFits ATLAS_THREAD_SAFE;
-    mutable CounterArray_t m_NbremFits ATLAS_THREAD_SAFE;
-    mutable CounterArray_t m_Nfits ATLAS_THREAD_SAFE;
-    mutable CounterArray_t m_NnotExtended ATLAS_THREAD_SAFE;
-    mutable CounterArray_t m_NlowScoreBremFits ATLAS_THREAD_SAFE;
-    mutable CounterArray_t m_NextendedBrem ATLAS_THREAD_SAFE;
 
+    enum StatTrkType {
+      nInput, nRecognised, nExtended, nRejected, nFailed, nRecoveryBremFits, 
+      nBremFits, nFits, nNotExtended, nLowScoreBremFits, nExtendedBrem, nTypes 
+    };
 
+    // -- Using atomics to be multi-thread safe
+    mutable std::array< std::array<std::atomic<int>, Nregions>, nTypes > m_counters ATLAS_THREAD_SAFE;
+    mutable std::atomic<int> m_Nevents ATLAS_THREAD_SAFE;
+    
     std::vector<float>  m_etabounds;           //!< eta intervals for internal monitoring
 
     //! monitoring and validation: does success/failure counting for each detector region
-    void incrementRegionCounter(std::array<int, 4>&, const Trk::Track*, bool = true) const;
+    void incrementRegionCounter(std::array<std::atomic<int>, 4>&, const Trk::Track*, bool = true) const;
   };
 }
 
