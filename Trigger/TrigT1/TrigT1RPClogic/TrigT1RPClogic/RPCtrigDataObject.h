@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef DATAOBJECT_H
@@ -17,7 +17,7 @@ class RPCtrigDataObject : public BaseObject
     int m_number;
 
     public:
-    RPCtrigDataObject (int,std::string);
+    RPCtrigDataObject (int,const std::string&);
     RPCtrigDataObject (int,const char*);
     RPCtrigDataObject (const RPCtrigDataObject&);
     ~RPCtrigDataObject(){}

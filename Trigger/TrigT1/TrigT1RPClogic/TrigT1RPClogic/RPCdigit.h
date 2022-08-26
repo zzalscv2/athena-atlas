@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef RPCDIGIT_H
@@ -30,7 +30,7 @@ class RPCdigit : public RPCtrigDataObject
 
     public:
     RPCdigit();
-    RPCdigit(std::string,int,unsigned int, float vec[4]);
+    RPCdigit(const std::string&,int,unsigned int, float vec[4]);
         
     /*
     RPCdigit(std::string,int,unsigned int, float vec[4],

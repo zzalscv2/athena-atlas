@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2018 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
 */
 
 #include <math.h>
@@ -28,23 +28,16 @@ RPCdigit::RPCdigit() :
 }
 
 
-RPCdigit::RPCdigit(std::string name,int number,unsigned int code,float vec[4]):
-    RPCtrigDataObject(number,name)
+RPCdigit::RPCdigit(const std::string& name,int number,unsigned int code,float vec[4]):
+    RPCtrigDataObject(number,name),
+    m_coding(code),
+    m_x(vec[1]),
+    m_y(vec[2]),
+    m_z(vec[3]),
+    m_time(vec[0]),
+    m_station_radius(0.),
+    m_station_phi(-1.)
 {
-    m_coding(code);
-
-    m_time = vec[0];
-
-    m_x = vec[1];
-    m_y = vec[2];
-    m_z = vec[3];
-    
-    //m_rpcgeo = 0;    
-    
-    m_station_radius = 0.;
-    m_station_phi = -1.;
-
-    m_codes.clear();  
 }
 
 /*
@@ -134,24 +127,16 @@ RPCdigit::set_to_chamber(const int rpc_index)
 */
 
 RPCdigit::RPCdigit(const RPCdigit& digit) :
-    RPCtrigDataObject(digit.number(),digit.name())
+    RPCtrigDataObject(digit.number(),digit.name()),
+    m_coding(digit.decoding()),
+    m_x(digit.x()),
+    m_y(digit.y()),
+    m_z(digit.z()),
+    m_time(digit.time()),
+    m_codes(digit.codes())
 {
-    m_coding = digit.decoding();
-
-    m_time   = digit.time();
-
-    m_x = digit.x();
-    m_y = digit.y();
-    m_z = digit.z();
-
-    //m_rpcgeo =0 ;
-    
-    //m_rpcgeo = digit.rpcgeo();
-    
     if(!digit.station_radius(m_station_radius)) m_station_radius = 0.;
     if(!digit.station_phi(m_station_phi)) m_station_phi = 0.;
-    
-    m_codes  = digit.codes();
 }
 
 RPCdigit RPCdigit::operator = (const RPCdigit& digit)

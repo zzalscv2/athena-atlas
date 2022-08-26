@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
 */
 
 #include <iomanip>
@@ -7,7 +7,7 @@
 
 using namespace std;
 
-RPCtrigDataObject::RPCtrigDataObject(int num,std::string name) : 
+RPCtrigDataObject::RPCtrigDataObject(int num,const std::string& name) : 
     BaseObject(Data,name),m_number(num) {}
 
 RPCtrigDataObject::RPCtrigDataObject(int num,const char* name) : 

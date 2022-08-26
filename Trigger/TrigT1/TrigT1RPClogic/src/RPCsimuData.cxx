@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2018 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "TrigT1RPClogic/RPCsimuData.h"
@@ -12,14 +12,6 @@ RPCsimuData::RPCsimuData() :
     m_muon_tracks.clear();
     m_eta_digits.clear();
     m_phi_digits.clear();
-}
-
-RPCsimuData::RPCsimuData(const RPCsimuData& data) :
-    RPCdata(data)
-{
-    m_muon_tracks = data.muon_tracks();
-    m_eta_digits = data.eta_digits();
-    m_phi_digits = data.phi_digits();
 }
 
 RPCsimuData::~RPCsimuData()

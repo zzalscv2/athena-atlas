@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2018 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "TrigT1RPClogic/RPCrawData.h"
@@ -14,10 +14,10 @@ RPCrawData::RPCrawData() :
 }
 
 RPCrawData::RPCrawData(const RPCrawData& data) :
-    RPCdata(data)
+    RPCdata(data),
+    m_eta_digits(data.eta_digits()),
+    m_phi_digits(data.phi_digits())
 {
-    m_eta_digits = data.eta_digits();
-    m_phi_digits = data.phi_digits();
 }
 
 RPCrawData::~RPCrawData()
