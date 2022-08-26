@@ -66,7 +66,8 @@ namespace JiveXML {
 
         //Get the pixel identifier
         const Identifier id = rdoData->identify();
-        IdentifierHash wafer_hash = m_geo->PixelIDHelper()->wafer_hash(id);
+        const Identifier waferID = m_pixelID->wafer_id(id);
+        IdentifierHash wafer_hash = m_pixelID->wafer_hash(waferID);
 
         //Get the detector element
         const InDetDD::SiDetectorElement *element = elements->getDetectorElement(wafer_hash);
@@ -87,8 +88,8 @@ namespace JiveXML {
         xVec.push_back(DataType(globalPos.x()*CLHEP::mm/CLHEP::cm));
         yVec.push_back(DataType(globalPos.y()*CLHEP::mm/CLHEP::cm));
         zVec.push_back(DataType(globalPos.z()*CLHEP::mm/CLHEP::cm));
-        phiModuleVec.push_back(DataType(m_geo->PixelIDHelper()->phi_module(id)));
-        etaModuleVec.push_back(DataType(m_geo->PixelIDHelper()->eta_module(id)));
+        phiModuleVec.push_back(DataType(m_pixelID->phi_module(waferID)));
+        etaModuleVec.push_back(DataType(m_pixelID->eta_module(waferID)));
       }
     }
 
@@ -123,7 +124,8 @@ namespace JiveXML {
     ATH_CHECK( m_lorentzAngleTool.retrieve() );
     ATH_CHECK(m_pixelDetEleCollKey.initialize());
     ATH_CHECK(m_PixelRDOContainerName.initialize());
+    ATH_CHECK(detStore()->retrieve(m_pixelID, "PixelID"));
 
-    return m_geo.retrieve();
+    return StatusCode::SUCCESS;
   }
 }
