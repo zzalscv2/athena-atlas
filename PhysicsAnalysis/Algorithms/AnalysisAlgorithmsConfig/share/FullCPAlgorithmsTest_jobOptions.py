@@ -12,10 +12,14 @@ athArgsParser.add_argument("--data-type", action = "store", dest = "data_type",
 athArgsParser.add_argument( '--block-config', dest='block_config',
                             action = 'store_true', default = False,
                             help = 'Configure the job with block configuration' )
+athArgsParser.add_argument( '--for-compare', dest='for_compare',
+                            action = 'store_true', default = False,
+                            help = 'Configure the job for comparison of sequences vs blocks' )
 athArgs = athArgsParser.parse_args()
 
 dataType = athArgs.data_type
 blockConfig = athArgs.block_config
+forCompare = athArgs.for_compare
 if not dataType in ["data", "mc", "afii"] :
     raise Exception ("invalid data type: " + dataType)
 
@@ -32,7 +36,7 @@ testFile = os.getenv ( inputfile[dataType] )
 svcMgr.EventSelector.InputCollections = [testFile]
 
 from AnalysisAlgorithmsConfig.FullCPAlgorithmsTest import makeSequence
-algSeq = makeSequence (dataType, blockConfig)
+algSeq = makeSequence (dataType, blockConfig, forCompare=forCompare)
 print (algSeq) # For debugging
 
 # Add all algorithms from the sequence to the job.
