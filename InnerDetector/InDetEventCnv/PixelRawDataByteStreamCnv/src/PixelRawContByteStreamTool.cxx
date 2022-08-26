@@ -82,7 +82,10 @@ StatusCode PixelRawContByteStreamTool::convert(PixelRDO_Container* cont) const {
   ATH_MSG_DEBUG("Found " << cont->size() << " Pixel modules");
 
   SG::ReadCondHandle<PixelCablingCondData> pixCabling(m_condCablingKey);
-
+  if (not pixCabling.isValid()){
+    ATH_MSG_ERROR("The pixel cabling could not be retrieved in PixelRawContByteStreamTool::convert");
+    return StatusCode::FAILURE;
+  }
   for( ; it_coll!=it_coll_end;++it_coll) {
     const InDetRawDataCollection<PixelRDORawData>* coll = (*it_coll) ;
 
