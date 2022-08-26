@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "TrigT1RPClogic/SLdata.h"
@@ -21,10 +21,10 @@ SLdata::SLdata(PADdata* pad_data,unsigned long int debug) :
 }
 
 SLdata::SLdata(const SLdata& sl_data) : 
-    BaseObject(Data,sl_data.name())
+    BaseObject(Data,sl_data.name()),
+    m_debug(sl_data.debug()),
+    m_sl_patterns(sl_data.sl_patterns())
 {
-    m_sl_patterns = sl_data.sl_patterns();    
-    m_debug       = sl_data.debug();
 }
 
 SLdata::~SLdata()

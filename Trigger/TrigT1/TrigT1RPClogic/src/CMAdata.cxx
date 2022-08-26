@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "TrigT1RPClogic/CMAdata.h"
@@ -60,11 +60,11 @@ CMAdata::CMAdata(const RPCdata* rpcData,const RpcCablingCondData* rpcCabling, co
 
 
 CMAdata::CMAdata(const CMAdata& cma_patterns) : 
-    BaseObject(Data,cma_patterns.name())
+    BaseObject(Data,cma_patterns.name()),
+    m_debug(cma_patterns.debug()),
+    m_eta_cma_patterns(cma_patterns.eta_cma_patterns()),
+    m_phi_cma_patterns(cma_patterns.phi_cma_patterns())
 {
-    m_eta_cma_patterns = cma_patterns.eta_cma_patterns();
-    m_phi_cma_patterns = cma_patterns.phi_cma_patterns();    
-    m_debug     = cma_patterns.debug();
 }
 
 CMAdata::~CMAdata()

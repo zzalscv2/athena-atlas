@@ -1,11 +1,11 @@
 /*
-  Copyright (C) 2002-2018 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "TrigT1RPClogic/RPCdata.h"
 
 
-RPCdata::RPCdata(std::string name) : BaseObject(Data,name) {}
+RPCdata::RPCdata(const std::string& name) : BaseObject(Data,name) {}
 
 RPCdata::RPCdata(const char* name) : BaseObject(Data,name) {}
 
