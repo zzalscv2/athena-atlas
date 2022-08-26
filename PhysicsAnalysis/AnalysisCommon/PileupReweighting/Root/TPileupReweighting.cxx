@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2017 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
 */
 
 /******************************************************************************
@@ -19,9 +19,7 @@ Description: Tool to get the calculated MC pileup weight.
 
 
 
-// include math
-#include <math.h>
-#include <algorithm>
+
 
 // ROOT includes
 #include <TROOT.h>
@@ -36,6 +34,9 @@ Description: Tool to get the calculated MC pileup weight.
 #include <TString.h>
 #include <TRandom3.h>
 #include <TObjString.h>
+// include math
+#include <cmath>
+#include <algorithm>
 
 ClassImp(CP::TPileupReweighting)
 
@@ -531,10 +532,9 @@ TTree* CP::TPileupReweighting::GetMetaDataTree() {
       for(std::map<Int_t,Double_t>::iterator it2=(it->second).begin();it2!=(it->second).end();++it2) {
          channels[it2->first]=true; //records which channels we have metadata for
       }
-      if(data.find(it->first)==data.end()) {
-         //new branch
-         data[it->first]=0.;
-         m_metadatatree->Branch(it->first,&(data[it->first]));
+      const auto &[ptr, inserted ] = data.try_emplace(it->first, 0.);
+      if (inserted){
+        m_metadatatree->Branch(it->first,&(data[it->first]));
       }
    }
    //also create branches for the NumberOfEvents and SumOfEventWeights
@@ -642,12 +642,14 @@ void CP::TPileupReweighting::AddDistributionTree(TTree *tree, TFile *file) {
       tree->GetEntry(i);
       TString sHistName(histName);
       TString weightName(customName);
-      if(loadedHistos.find(sHistName)==loadedHistos.end()) {
-         loadedHistos[sHistName]=true;
+      const auto &[ptr, inserted] = loadedHistos.try_emplace(sHistName, true);
+      
+      if(inserted) {
          if(( (!m_ignoreFilePeriods) || m_periods.find(runNbr)==m_periods.end()) && isMC) {
             //if ignoring file periods, will still add the period if it doesnt exist!
             for(unsigned int j=0;j<pStarts->size();j++) {
-               unsigned int start = pStarts->at(j);unsigned int end = pEnds->at(j);
+               unsigned int start = pStarts->at(j);
+               unsigned int end = pEnds->at(j);
                AddPeriod(runNbr,start,end);
             }
          }
@@ -1515,10 +1517,7 @@ ULong64_t CP::TPileupReweighting::GetPRWHash(Int_t periodNumber, Int_t channelNu
 Float_t CP::TPileupReweighting::GetCombinedWeight(Int_t periodNumber, Int_t channelNumber, Float_t x, Float_t y) {
    if(!m_isInitialized) { Info("GetCombinedWeight","Initializing the subtool.."); Initialize(); }
    if(m_countingMode) return 0.;
-   if(m_countingMode) {
-      Error("GetCombinedWeight","You cannot get a weight when in config file generating mode. Please use FillWeight method");
-      throw std::runtime_error("Throwing 2: You cannot get a weight when in config file generating mode. Please use FillWeight method");
-   }
+  
    //decide how many dimensions this weight has - use the emptyHistogram to tell...
    TH1* hist = m_emptyHistogram.get();
    if(!hist) {
@@ -1634,10 +1633,7 @@ Double_t CP::TPileupReweighting::GetDataWeight(Int_t runNumber, const TString& t
 
    if(!m_isInitialized) { Info("GetDataWeight","Initializing the subtool.."); Initialize(); }
    if(m_countingMode) return 0.;
-   if(m_countingMode) {
-      Error("GetDataWeight","You cannot get a weight when in config file generating mode. Please use Fill method");
-      throw std::runtime_error("GetDataWeight: You cannot get a weight when in config file generating mode. Please use Fill method");
-   }
+   
    //determine which period this run number is in
    Int_t periodNumber = GetFirstFoundPeriodNumber(runNumber);
 
