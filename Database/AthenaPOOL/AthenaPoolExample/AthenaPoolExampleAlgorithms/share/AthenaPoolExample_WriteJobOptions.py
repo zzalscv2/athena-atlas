@@ -92,7 +92,7 @@ svcMgr.EventSelector.RunNumber = 1
 #--------------------------------------------------------------
 # Load CutFlowSvc
 from EventBookkeeperTools.CutFlowHelpers import CreateCutFlowSvc
-CreateCutFlowSvc( svcName="CutFlowSvc", seq=topSequence, addMetaDataToAllOutputFiles=True )
+CreateCutFlowSvc( seq=topSequence, addMetaDataToAllOutputFiles=True )
 
 # Load "user algorithm" top algorithms to be run, and the libraries that house them
 from AthenaPoolExampleAlgorithms.AthenaPoolExampleAlgorithmsConf import AthPoolEx__WriteData

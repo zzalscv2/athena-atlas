@@ -44,7 +44,7 @@ from AthenaPoolTools.AthenaPoolToolsConf import MetadataTest
 topSequence += MetadataTest( OutputLevel = INFO, InputStream="StreamAOD" )
 
 from EventBookkeeperTools.CutFlowHelpers import CreateCutFlowSvc
-CreateCutFlowSvc( svcName="CutFlowSvc", seq=topSequence, addMetaDataToAllOutputFiles=False )
+CreateCutFlowSvc( seq=topSequence, addMetaDataToAllOutputFiles=False )
 
 import AthenaPoolCnvSvc.WriteAthenaPool
 
