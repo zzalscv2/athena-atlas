@@ -38,7 +38,7 @@ class TrigEgammaMonitorPhotonAlgorithm: public TrigEgammaMonitorAnalysisAlgorith
     /*! Photon pid word */
     Gaudi::Property<std::string> m_photonPid{this, "PhotonPid","Tight" };
     /*! doUnconverted analysis */
-    Gaudi::Property<bool> m_doUnconverted{this, "DoUnconverted", true};
+    Gaudi::Property<bool> m_doUnconverted{this, "DoUnconverted", false};
      /*! List of triggers from menu */
     Gaudi::Property<std::vector<std::string>> m_trigInputList{this, "TriggerList", {}};
     /*! Directory name for each algorithm */

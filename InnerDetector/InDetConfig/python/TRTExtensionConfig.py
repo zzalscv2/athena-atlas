@@ -1,67 +1,4 @@
 # Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
-from AthenaConfiguration.ComponentAccumulator import ComponentAccumulator
-from AthenaConfiguration.ComponentFactory import CompFactory
-from AthenaConfiguration.Enums import BeamType
-
-#///////////////////////////////////////////////////////////////////////////////////////////////
-def TRT_TrackExtensionAlgCfg(flags, name = 'InDetTRT_ExtensionPhase', SiTrackCollection=None, ExtendedTracksMap="ExtendedTracksMap", **kwargs):
-    acc = ComponentAccumulator()
-
-    if "TrackExtensionTool" not in kwargs:
-        from InDetConfig.TRT_TrackExtensionToolConfig import TRT_TrackExtensionToolCfg
-        kwargs.setdefault("TrackExtensionTool", acc.popToolsAndMerge(TRT_TrackExtensionToolCfg(flags)))
-
-    kwargs.setdefault("InputTracksLocation", SiTrackCollection)
-    kwargs.setdefault("ExtendedTracksLocation", ExtendedTracksMap)
-
-    acc.addEventAlgo(CompFactory.InDet.TRT_TrackExtensionAlg(name = name, **kwargs))
-    return acc
-
-def InDetExtensionProcessorCfg(flags, SiTrackCollection=None, ExtendedTrackCollection = None, ExtendedTracksMap = None, **kwargs):
-    acc = ComponentAccumulator()
-
-    if "TrackFitter" not in kwargs:
-        if flags.InDet.Tracking.ActivePass.extension != "LowPt":
-            from TrkConfig.CommonTrackFitterConfig import InDetTrackFitterHoleSearchCfg
-            InDetExtensionFitter = acc.popToolsAndMerge(InDetTrackFitterHoleSearchCfg(flags, 'InDetTrackFitter_TRTExtension'+flags.InDet.Tracking.ActivePass.extension))
-        else:
-            from TrkConfig.CommonTrackFitterConfig import InDetTrackFitterLowPtHoleSearchCfg
-            InDetExtensionFitter = acc.popToolsAndMerge(InDetTrackFitterLowPtHoleSearchCfg(flags, 'InDetTrackFitter_TRTExtension'+flags.InDet.Tracking.ActivePass.extension))
-        acc.addPublicTool(InDetExtensionFitter)
-        kwargs.setdefault("TrackFitter", InDetExtensionFitter)
-
-
-    #
-    # --- load scoring for extension
-    #
-    if "ScoringTool" not in kwargs:
-        if flags.Beam.Type is BeamType.Cosmics:
-            from InDetConfig.InDetTrackScoringToolsConfig import InDetCosmicExtenScoringToolCfg
-            InDetExtenScoringTool = acc.popToolsAndMerge(InDetCosmicExtenScoringToolCfg(flags))
-        else:
-            from InDetConfig.InDetTrackScoringToolsConfig import InDetExtenScoringToolCfg
-            InDetExtenScoringTool = acc.popToolsAndMerge(InDetExtenScoringToolCfg(flags))
-        acc.addPublicTool(InDetExtenScoringTool)
-        kwargs.setdefault("ScoringTool", InDetExtenScoringTool)
-
-    if "TrackSummaryTool" not in kwargs:
-        from TrkConfig.TrkTrackSummaryToolConfig import InDetTrackSummaryToolCfg
-        kwargs.setdefault("TrackSummaryTool", acc.popToolsAndMerge(InDetTrackSummaryToolCfg(flags)))
-
-    kwargs.setdefault("TrackName", SiTrackCollection)
-    kwargs.setdefault("ExtensionMap", ExtendedTracksMap)
-    kwargs.setdefault("NewTrackName", ExtendedTrackCollection)
-    kwargs.setdefault("suppressHoleSearch", False)
-    kwargs.setdefault("tryBremFit", flags.InDet.Tracking.doBremRecovery)
-    kwargs.setdefault("caloSeededBrem", flags.InDet.Tracking.doCaloSeededBrem and flags.Detector.EnableCalo)
-    kwargs.setdefault("pTminBrem", flags.InDet.Tracking.ActivePass.minPTBrem)
-    kwargs.setdefault("RefitPrds", False)
-    kwargs.setdefault("matEffects", flags.InDet.Tracking.materialInteractionsType if flags.InDet.Tracking.materialInteractions else 0)
-    kwargs.setdefault("Cosmics", flags.Beam.Type is BeamType.Cosmics)
-
-    acc.addEventAlgo(CompFactory.InDet.InDetExtensionProcessor("InDetExtensionProcessor" + flags.InDet.Tracking.ActivePass.extension, **kwargs))
-
-    return acc
 
 ##########################################################################################################################
 # ------------------------------------------------------------
@@ -69,21 +6,25 @@ def InDetExtensionProcessorCfg(flags, SiTrackCollection=None, ExtendedTrackColle
 # ----------- Setup TRT Extension for New tracking
 #
 # ------------------------------------------------------------
-def NewTrackingTRTExtensionCfg(flags, SiTrackCollection = None, ExtendedTrackCollection = None, ExtendedTracksMap = None):
+def NewTrackingTRTExtensionCfg(flags,
+                               SiTrackCollection = None,
+                               ExtendedTrackCollection = None,
+                               ExtendedTracksMap = None):
     from InDetConfig.TRTPreProcessing import TRTPreProcessingCfg
     acc = TRTPreProcessingCfg(flags)
     #
     # Track extension to TRT algorithm
     #
+    from InDetConfig.TRT_TrackExtensionAlgConfig import TRT_TrackExtensionAlgCfg
     acc.merge(TRT_TrackExtensionAlgCfg(flags,
-                                       name = 'InDetTRT_Extension' + flags.InDet.Tracking.ActivePass.extension,
-                                       SiTrackCollection = SiTrackCollection,
-                                       ExtendedTracksMap = ExtendedTracksMap))
+                                       InputTracksLocation = SiTrackCollection,
+                                       ExtendedTracksLocation = ExtendedTracksMap))
 
+    from InDetConfig.InDetExtensionProcessorConfig import InDetExtensionProcessorCfg
     acc.merge(InDetExtensionProcessorCfg(flags,
-                                         SiTrackCollection = SiTrackCollection,
-                                         ExtendedTrackCollection = ExtendedTrackCollection,
-                                         ExtendedTracksMap = ExtendedTracksMap))
+                                         TrackName = SiTrackCollection,
+                                         NewTrackName = ExtendedTrackCollection,
+                                         ExtensionMap = ExtendedTracksMap))
 
     return acc
 ##########################################################################################################################
