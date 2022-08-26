@@ -92,8 +92,7 @@ StatusCode TrigEgammaMonitorPhotonAlgorithm::executeNavigation( const EventConte
                                                        std::vector<std::pair<std::shared_ptr<const xAOD::Egamma>, const TrigCompositeUtils::Decision * >> &pairObjs) 
   const
 {
-  ATH_MSG_DEBUG("Apply navigation selection");
-
+  ATH_MSG_DEBUG("Apply navigation selection for Photons");
 
   SG::ReadHandle<xAOD::PhotonContainer> offPhotons(m_offPhotonKey, ctx);
 
@@ -103,7 +102,6 @@ StatusCode TrigEgammaMonitorPhotonAlgorithm::executeNavigation( const EventConte
 	  return StatusCode::FAILURE;
   }
  
-
   const std::string decor="is"+pidName;
 
   for(const auto *const eg : *offPhotons ){
@@ -112,10 +110,9 @@ StatusCode TrigEgammaMonitorPhotonAlgorithm::executeNavigation( const EventConte
           ATH_MSG_DEBUG("No caloCluster");
           continue;
       } 
-      if( !(getCluster_et(eg) > (etthr-5.)*Gaudi::Units::GeV)) continue; //Take 2GeV above threshold
+      if( !(getCluster_et(eg) > (etthr-5.)*Gaudi::Units::GeV)) continue; //Take 5 GeV above threshold
       
-
-      //if(!eg->passSelection(m_photonPid)) continue;
+      //if(!eg->passSelection(m_photonPid)) continue; // reject offline photons reproved by tight requiriment
       if(m_forcePidSelection){///default is true
         if(!ApplyPhotonPid(eg,pidName)){
 	        ATH_MSG_DEBUG("Fails PhotonID "<< pidName);
@@ -124,7 +121,7 @@ StatusCode TrigEgammaMonitorPhotonAlgorithm::executeNavigation( const EventConte
 	      ATH_MSG_DEBUG("Passes PhotonID "<< pidName);
       }
 
-      
+      // if true: skip converted photons
       if(m_doUnconverted){
           if (eg->vertex()){
               ATH_MSG_DEBUG("Removing converted photons, continuing...");

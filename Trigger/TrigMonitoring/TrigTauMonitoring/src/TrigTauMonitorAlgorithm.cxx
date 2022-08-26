@@ -4,7 +4,8 @@
 
 #include <utility>
 
-
+#include "StoreGate/ReadDecorHandle.h"
+#include "LArRecEvent/LArEventBitInfo.h"
 
 #include "TrigTauMonitorAlgorithm.h"
 
@@ -31,6 +32,7 @@ StatusCode TrigTauMonitorAlgorithm::initialize() {
   ATH_CHECK( m_hltSeedJetKey.initialize());
   ATH_CHECK( m_trigDecTool.retrieve() );
   ATH_CHECK( m_truthParticleKey.initialize(m_isMC) );
+  ATH_CHECK( m_eventInfoKey.initialize() );
 
   for(const auto& trigName:m_trigInputList)
   {
@@ -55,7 +57,14 @@ StatusCode TrigTauMonitorAlgorithm::fillHistograms( const EventContext& ctx ) co
     ATH_MSG_WARNING("HLTResult truncated, skip trigger analysis");
     return StatusCode::SUCCESS; 
   }
-  
+ 
+
+  // Protect against noise bursts
+  SG::ReadDecorHandle<xAOD::EventInfo,uint32_t> currEvent(m_eventInfoKey, ctx);
+  if ( currEvent->isEventFlagBitSet(xAOD::EventInfo::LAr,LArEventBitInfo::NOISEBURSTVETO)) 
+    return StatusCode::SUCCESS;
+
+ 
   ATH_MSG_DEBUG("Chains for Analysis " << m_trigList);
 
   std::vector< std::pair<const xAOD::TauJet*, const TrigCompositeUtils::Decision*>> pairObjs;
