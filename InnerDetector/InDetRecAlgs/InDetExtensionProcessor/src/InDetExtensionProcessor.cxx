@@ -49,8 +49,8 @@ InDet::InDetExtensionProcessor::InDetExtensionProcessor(const std::string& name,
   m_matEffects(3),
   m_suppressHoleSearch(false),
   m_particleHypothesis(Trk::undefined),
-  m_Nevents(0), m_Ninput{0}, m_Nrecognised{0}, m_Nextended{0}, m_Nrejected{0}, m_Nfailed{0},
-  m_NrecoveryBremFits{0}, m_NbremFits{0}, m_Nfits{0}, m_NnotExtended{0}, m_NlowScoreBremFits{0}, m_NextendedBrem{0},
+  m_counters{},
+  m_Nevents(0),
   m_etabounds{0.8, 1.6, 2.10} {
   // Get parameter values from jobOptions file
   declareProperty("TrackName", m_trackName, "Name of the input Trackcollection");
@@ -87,17 +87,6 @@ InDet::InDetExtensionProcessor::initialize() {
   ATH_MSG_DEBUG("Retrieved tool " << m_scoringTool);
   // brem fitting enabled ?
   if (m_tryBremFit) ATH_MSG_DEBUG("Try brem fit and recovery for electron like tracks.");
-  m_Ninput.fill(0);
-  m_Nrecognised.fill(0);
-  m_Nextended.fill(0);
-  m_NextendedBrem.fill(0);
-  m_Nrejected.fill(0);
-  m_Nfailed.fill(0);
-  m_NrecoveryBremFits.fill(0);
-  m_NbremFits.fill(0);
-  m_Nfits.fill(0);
-  m_NnotExtended.fill(0);
-  m_NlowScoreBremFits.fill(0);
   //
   ATH_CHECK(m_trackName.initialize());
   ATH_CHECK(m_extensionMapName.initialize());
@@ -118,9 +107,8 @@ InDet::InDetExtensionProcessor::execute(const EventContext& ctx) const {
   ATH_MSG_DEBUG("Number of Tracks found : " << nTracks);
   // input statistics
   {
-    std::lock_guard<std::mutex> lock(m_statMutex);
     ++m_Nevents;
-    m_Ninput[InDet::InDetExtensionProcessor::iAll] += nTracks;
+    m_counters[InDet::InDetExtensionProcessor::nInput][InDet::InDetExtensionProcessor::iAll] += nTracks;
   }
   ATH_CHECK(extendedTracksResult.record(std::unique_ptr<TrackCollection>(
     createExtendedTracks(ctx, tracks.cptr(), trackExtensionMap.cptr()))));
@@ -136,13 +124,11 @@ InDet::InDetExtensionProcessor::createExtendedTracks(const EventContext& ctx,
                                                      const TrackCollection* pTracks,
                                                      const TrackExtensionMap* trackExtensionMap) const {
   std::unique_ptr<TrackCollection> newTracks(std::make_unique<TrackCollection>());
-  std::array<int, Nregions> Ninput {}, Nrecognised {}, Nextended {}, Nrejected {}, Nfailed {},
-                            NrecoveryBremFits {}, NbremFits {}, Nfits {}, NnotExtended {},
-                            NlowScoreBremFits {}, NextendedBrem {};
+  std::array< std::array<std::atomic<int>, Nregions>, nTypes> counters{};
   // loop over tracks
   for (const Trk::Track* thisTrack : *pTracks) {
     // statistics
-    incrementRegionCounter(Ninput, thisTrack, false);
+    incrementRegionCounter(counters[nInput], thisTrack, false);
     ATH_MSG_DEBUG("evaluate input track : " << thisTrack);
     // try to find this track in extension map
     TrackExtensionMap::const_iterator pThisExtensionPair = trackExtensionMap->find(thisTrack);
@@ -154,11 +140,11 @@ InDet::InDetExtensionProcessor::createExtendedTracks(const EventContext& ctx,
       ntrk->info().setPatternRecognitionInfo(Trk::TrackInfo::InDetExtensionProcessor);
       newTracks->push_back(std::move(ntrk));
       // statistics
-      incrementRegionCounter(NnotExtended, thisTrack);
+      incrementRegionCounter(counters[InDet::InDetExtensionProcessor::nNotExtended], thisTrack);
     } else {
       ATH_MSG_DEBUG("track found in extension map, processing...");
       // statistics
-      incrementRegionCounter(Nrecognised, thisTrack);
+      incrementRegionCounter(counters[InDet::InDetExtensionProcessor::nRecognised], thisTrack);
       // setup new track
       std::unique_ptr<Trk::Track>  newtrack;
       // keep old track info
@@ -183,14 +169,14 @@ InDet::InDetExtensionProcessor::createExtendedTracks(const EventContext& ctx,
           if (m_tryBremFit && thisTrack->info().trackProperties(Trk::TrackInfo::BremFit)) {
             ATH_MSG_DEBUG("brem fit of electron like track");
             //statistics
-            incrementRegionCounter(NbremFits, thisTrack);
+            incrementRegionCounter(counters[InDet::InDetExtensionProcessor::nBremFits], thisTrack);
             // try brem fit of combined track
             newtrack = m_trackFitter->fit(
               ctx, *thisTrack, vecPrd, m_runOutlier, Trk::electron);
           } else {
             ATH_MSG_DEBUG("normal fit track");
             //statistics
-            incrementRegionCounter(Nfits, thisTrack);
+            incrementRegionCounter(counters[InDet::InDetExtensionProcessor::nFits], thisTrack);
             // normal fit of combined track
             newtrack = m_trackFitter->fit(ctx,
               *thisTrack, vecPrd, m_runOutlier, m_particleHypothesis);
@@ -200,7 +186,7 @@ InDet::InDetExtensionProcessor::createExtendedTracks(const EventContext& ctx,
                                         Trk::TrackInfo::TrackInCaloROI))) {
               ATH_MSG_DEBUG("normal fit track failed, try to recover with brem fit");
               // statistics
-              incrementRegionCounter(NrecoveryBremFits, thisTrack);
+              incrementRegionCounter(counters[InDet::InDetExtensionProcessor::nRecoveryBremFits], thisTrack);
               // try brem fit of combined track
               newtrack=m_trackFitter->fit(ctx,*thisTrack, vecPrd, m_runOutlier, Trk::electron);
             }
@@ -213,7 +199,7 @@ InDet::InDetExtensionProcessor::createExtendedTracks(const EventContext& ctx,
           if (!siPerigee) {
             ATH_MSG_DEBUG("no perigee found on track, copy input");
             // statistics
-            incrementRegionCounter(Nfailed, thisTrack);
+            incrementRegionCounter(counters[InDet::InDetExtensionProcessor::nFailed], thisTrack);
             // copy track, set pattern info
             std::unique_ptr<Trk::Track> ntrk(std::make_unique< Trk::Track>(*thisTrack));
             ntrk->info().setPatternRecognitionInfo(Trk::TrackInfo::InDetExtensionProcessor);
@@ -239,7 +225,7 @@ InDet::InDetExtensionProcessor::createExtendedTracks(const EventContext& ctx,
               }
             }
             //statistics
-            incrementRegionCounter(Nfits, thisTrack);
+            incrementRegionCounter(counters[InDet::InDetExtensionProcessor::nFits], thisTrack);
             // normal fit of combined track
             newtrack = m_trackFitter->fit(
               ctx, vecPrdComb, *siPerigee, m_runOutlier, m_particleHypothesis);
@@ -253,13 +239,13 @@ InDet::InDetExtensionProcessor::createExtendedTracks(const EventContext& ctx,
           if (m_tryBremFit && thisTrack->info().trackProperties(Trk::TrackInfo::BremFit)) {
             ATH_MSG_DEBUG("brem fit of electron like track");
             //statistics
-            incrementRegionCounter(NbremFits, thisTrack);
+            incrementRegionCounter(counters[InDet::InDetExtensionProcessor::nBremFits], thisTrack);
             // try brem fit of combined track
             newtrack=m_trackFitter->fit(ctx,*thisTrack, RIOs_OnTrack, m_runOutlier, Trk::electron);
           } else {
             ATH_MSG_DEBUG("normal fit track");
             //statistics
-            incrementRegionCounter(Nfits, thisTrack);
+            incrementRegionCounter(counters[InDet::InDetExtensionProcessor::nFits], thisTrack);
             // fit combined track
             newtrack=m_trackFitter->fit(ctx,*thisTrack, RIOs_OnTrack, m_runOutlier, m_particleHypothesis);
             if (!newtrack && m_tryBremFit &&
@@ -267,7 +253,7 @@ InDet::InDetExtensionProcessor::createExtendedTracks(const EventContext& ctx,
                 (!m_caloSeededBrem || thisTrack->info().patternRecoInfo(Trk::TrackInfo::TrackInCaloROI))) {
               ATH_MSG_DEBUG("normal fit track failed, try to recover with brem fit");
               // statistics
-              incrementRegionCounter(NrecoveryBremFits, thisTrack);
+              incrementRegionCounter(counters[InDet::InDetExtensionProcessor::nRecoveryBremFits], thisTrack);
               // try to recover with brem fit
               newtrack=m_trackFitter->fit(ctx,*thisTrack, RIOs_OnTrack, m_runOutlier, Trk::electron);
             }
@@ -280,7 +266,7 @@ InDet::InDetExtensionProcessor::createExtendedTracks(const EventContext& ctx,
           if (!siPerigee) {
             ATH_MSG_DEBUG("no perigee found on track, copy input");
             // statistics
-            incrementRegionCounter(Nfailed, thisTrack);
+            incrementRegionCounter(counters[InDet::InDetExtensionProcessor::nFailed], thisTrack);
             // copy track, set pattern info
             std::unique_ptr<Trk::Track>  ntrk(std::make_unique< Trk::Track>(*thisTrack));
             ntrk->info().setPatternRecognitionInfo(Trk::TrackInfo::InDetExtensionProcessor);
@@ -304,7 +290,7 @@ InDet::InDetExtensionProcessor::createExtendedTracks(const EventContext& ctx,
             }
             ATH_MSG_DEBUG("normal fit track");
             //statistics
-            incrementRegionCounter(Nfits, thisTrack);
+            incrementRegionCounter(counters[InDet::InDetExtensionProcessor::nFits], thisTrack);
             // fit combined track
             newtrack=m_trackFitter->fit(ctx,rotSet, *siPerigee, m_runOutlier, m_particleHypothesis);
           }
@@ -313,7 +299,7 @@ InDet::InDetExtensionProcessor::createExtendedTracks(const EventContext& ctx,
       if (!newtrack) {
         ATH_MSG_DEBUG("refit of extended track failed, copy original track to output");
         // statistics
-        incrementRegionCounter(Nfailed, thisTrack);
+        incrementRegionCounter(counters[InDet::InDetExtensionProcessor::nFailed], thisTrack);
         // push track into output, does copy, needs fixing
         if (m_keepFailedExtensionOnTrack) {
           newTracks->push_back(trackPlusExtension(ctx,thisTrack, pThisExtensionPair->second));
@@ -339,7 +325,7 @@ InDet::InDetExtensionProcessor::createExtendedTracks(const EventContext& ctx,
             (!m_caloSeededBrem || thisTrack->info().patternRecoInfo(Trk::TrackInfo::TrackInCaloROI))) {
           ATH_MSG_DEBUG("new track has low score, try to recover track using brem fit");
           // statistics
-          incrementRegionCounter(NlowScoreBremFits, thisTrack);
+          incrementRegionCounter(counters[InDet::InDetExtensionProcessor::nLowScoreBremFits], thisTrack);
           std::unique_ptr<Trk::Track> newBremTrack;
           // try to recover with brem fit
           if (m_refitPrds) {
@@ -362,9 +348,9 @@ InDet::InDetExtensionProcessor::createExtendedTracks(const EventContext& ctx,
         if (newScore >= oldScore) {
           ATH_MSG_DEBUG("take extended track, it's better !");
           // statistics
-          incrementRegionCounter(Nextended, newtrack.get());
+          incrementRegionCounter(counters[InDet::InDetExtensionProcessor::nExtended], newtrack.get());
           if (m_tryBremFit && newtrack->info().trackProperties(Trk::TrackInfo::BremFit)) {
-            incrementRegionCounter(NextendedBrem, newtrack.get());
+            incrementRegionCounter(counters[InDet::InDetExtensionProcessor::nExtendedBrem], newtrack.get());
           }
           //storing the precedent info
           newtrack->info().addPatternReco(oldTrackInfo);
@@ -374,7 +360,7 @@ InDet::InDetExtensionProcessor::createExtendedTracks(const EventContext& ctx,
         } else {
           ATH_MSG_DEBUG("take original track, new one is worse !");
           // statistics
-          incrementRegionCounter(Nrejected, newtrack.get());
+          incrementRegionCounter(counters[InDet::InDetExtensionProcessor::nRejected], newtrack.get());
           // push track into output, does copy
           std::unique_ptr<Trk::Track> ntrk;
           if (m_keepFailedExtensionOnTrack) {
@@ -390,25 +376,15 @@ InDet::InDetExtensionProcessor::createExtendedTracks(const EventContext& ctx,
   }
 
   {
-    std::lock_guard<std::mutex> lock(m_statMutex);
-    m_Ninput += Ninput;
-    m_Nrecognised += Nrecognised;
-    m_Nextended += Nextended;
-    m_Nrejected += Nrejected;
-    m_Nfailed += Nfailed;
-    m_NrecoveryBremFits += NrecoveryBremFits;
-    m_NbremFits += NbremFits;
-    m_Nfits += Nfits;
-    m_NnotExtended += NnotExtended;
-    m_NlowScoreBremFits += NlowScoreBremFits;
-    m_NextendedBrem += NextendedBrem;
+
+    for (unsigned int itype = 0; itype < InDet::InDetExtensionProcessor::nTypes; itype++) m_counters[itype] += counters[itype];
   }
   return newTracks.release();
 }
 
 //==================================================================================================
 
-void InDet::InDetExtensionProcessor::incrementRegionCounter(std::array<int, 4>& Ntracks, const Trk::Track* track,
+void InDet::InDetExtensionProcessor::incrementRegionCounter(std::array<std::atomic<int>, 4>& Ntracks, const Trk::Track* track,
                                                             bool updateAll) const {
   if (updateAll) Ntracks[InDet::InDetExtensionProcessor::iAll] += 1;
   // test
@@ -511,85 +487,85 @@ MsgStream &InDet::InDetExtensionProcessor::dumpStat(MsgStream &out) const
     out << "  statistics by eta range          ------All---Barrel---Trans.-- Endcap-- " << std::endl;
     out << "-------------------------------------------------------------------------------" << std::endl;
     out << "  Number of tracks at input       :" << std::setiosflags(std::ios::dec) << std::setw(iw)
-              << m_Ninput[InDet::InDetExtensionProcessor::iAll] << std::setiosflags(std::ios::dec) << std::setw(iw)
-              << m_Ninput[InDet::InDetExtensionProcessor::iBarrel] << std::setiosflags(std::ios::dec) << std::setw(iw)
-              << m_Ninput[InDet::InDetExtensionProcessor::iTransi] << std::setiosflags(std::ios::dec) << std::setw(iw)
-              << m_Ninput[InDet::InDetExtensionProcessor::iEndcap] << std::endl;
+              << m_counters[InDet::InDetExtensionProcessor::nInput][InDet::InDetExtensionProcessor::iAll] << std::setiosflags(std::ios::dec) << std::setw(iw)
+              << m_counters[InDet::InDetExtensionProcessor::nInput][InDet::InDetExtensionProcessor::iBarrel] << std::setiosflags(std::ios::dec) << std::setw(iw)
+              << m_counters[InDet::InDetExtensionProcessor::nInput][InDet::InDetExtensionProcessor::iTransi] << std::setiosflags(std::ios::dec) << std::setw(iw)
+              << m_counters[InDet::InDetExtensionProcessor::nInput][InDet::InDetExtensionProcessor::iEndcap] << std::endl;
     out << "  Number of not extended tracks   :" << std::setiosflags(std::ios::dec) << std::setw(iw)
-              << m_NnotExtended[InDet::InDetExtensionProcessor::iAll] << std::setiosflags(std::ios::dec) <<
+              << m_counters[InDet::InDetExtensionProcessor::nNotExtended][InDet::InDetExtensionProcessor::iAll] << std::setiosflags(std::ios::dec) <<
     std::setw(iw)
-              << m_NnotExtended[InDet::InDetExtensionProcessor::iBarrel] << std::setiosflags(std::ios::dec) <<
+              << m_counters[InDet::InDetExtensionProcessor::nNotExtended][InDet::InDetExtensionProcessor::iBarrel] << std::setiosflags(std::ios::dec) <<
     std::setw(iw)
-              << m_NnotExtended[InDet::InDetExtensionProcessor::iTransi] << std::setiosflags(std::ios::dec) <<
+              << m_counters[InDet::InDetExtensionProcessor::nNotExtended][InDet::InDetExtensionProcessor::iTransi] << std::setiosflags(std::ios::dec) <<
     std::setw(iw)
-              << m_NnotExtended[InDet::InDetExtensionProcessor::iEndcap] << std::endl;
+              << m_counters[InDet::InDetExtensionProcessor::nNotExtended][InDet::InDetExtensionProcessor::iEndcap] << std::endl;
     out << "  Number of proposed ext. roads   :" << std::setiosflags(std::ios::dec) << std::setw(iw)
-              << m_Nrecognised[InDet::InDetExtensionProcessor::iAll] << std::setiosflags(std::ios::dec) << std::setw(iw)
-              << m_Nrecognised[InDet::InDetExtensionProcessor::iBarrel] << std::setiosflags(std::ios::dec) << std::setw(
+              << m_counters[InDet::InDetExtensionProcessor::nRecognised][InDet::InDetExtensionProcessor::iAll] << std::setiosflags(std::ios::dec) << std::setw(iw)
+              << m_counters[InDet::InDetExtensionProcessor::nRecognised][InDet::InDetExtensionProcessor::iBarrel] << std::setiosflags(std::ios::dec) << std::setw(
       iw)
-              << m_Nrecognised[InDet::InDetExtensionProcessor::iTransi] << std::setiosflags(std::ios::dec) << std::setw(
+              << m_counters[InDet::InDetExtensionProcessor::nRecognised][InDet::InDetExtensionProcessor::iTransi] << std::setiosflags(std::ios::dec) << std::setw(
       iw)
-              << m_Nrecognised[InDet::InDetExtensionProcessor::iEndcap] << std::endl;
+              << m_counters[InDet::InDetExtensionProcessor::nRecognised][InDet::InDetExtensionProcessor::iEndcap] << std::endl;
     out << "-------------------------------------------------------------------------------" << std::endl;
     out << "  Number of track fits            :" << std::setiosflags(std::ios::dec) << std::setw(iw)
-              << m_Nfits[InDet::InDetExtensionProcessor::iAll] << std::setiosflags(std::ios::dec) << std::setw(iw)
-              << m_Nfits[InDet::InDetExtensionProcessor::iBarrel] << std::setiosflags(std::ios::dec) << std::setw(iw)
-              << m_Nfits[InDet::InDetExtensionProcessor::iTransi] << std::setiosflags(std::ios::dec) << std::setw(iw)
-              << m_Nfits[InDet::InDetExtensionProcessor::iEndcap] << std::endl;
+              << m_counters[InDet::InDetExtensionProcessor::nFits][InDet::InDetExtensionProcessor::iAll] << std::setiosflags(std::ios::dec) << std::setw(iw)
+              << m_counters[InDet::InDetExtensionProcessor::nFits][InDet::InDetExtensionProcessor::iBarrel] << std::setiosflags(std::ios::dec) << std::setw(iw)
+              << m_counters[InDet::InDetExtensionProcessor::nFits][InDet::InDetExtensionProcessor::iTransi] << std::setiosflags(std::ios::dec) << std::setw(iw)
+              << m_counters[InDet::InDetExtensionProcessor::nFits][InDet::InDetExtensionProcessor::iEndcap] << std::endl;
     if (m_tryBremFit) {
       out << "  + brem fits for electron tracks :" << std::setiosflags(std::ios::dec) << std::setw(iw)
-                << m_NbremFits[InDet::InDetExtensionProcessor::iAll] << std::setiosflags(std::ios::dec) << std::setw(iw)
-                << m_NbremFits[InDet::InDetExtensionProcessor::iBarrel] << std::setiosflags(std::ios::dec) << std::setw(
+                << m_counters[InDet::InDetExtensionProcessor::nBremFits][InDet::InDetExtensionProcessor::iAll] << std::setiosflags(std::ios::dec) << std::setw(iw)
+                << m_counters[InDet::InDetExtensionProcessor::nBremFits][InDet::InDetExtensionProcessor::iBarrel] << std::setiosflags(std::ios::dec) << std::setw(
         iw)
-                << m_NbremFits[InDet::InDetExtensionProcessor::iTransi] << std::setiosflags(std::ios::dec) << std::setw(
+                << m_counters[InDet::InDetExtensionProcessor::nBremFits][InDet::InDetExtensionProcessor::iTransi] << std::setiosflags(std::ios::dec) << std::setw(
         iw)
-                << m_NbremFits[InDet::InDetExtensionProcessor::iEndcap] << std::endl;
+                << m_counters[InDet::InDetExtensionProcessor::nBremFits][InDet::InDetExtensionProcessor::iEndcap] << std::endl;
       out << "  + brem fit to recover failed fit:" << std::setiosflags(std::ios::dec) << std::setw(iw)
-                << m_NrecoveryBremFits[InDet::InDetExtensionProcessor::iAll] << std::setiosflags(std::ios::dec) <<
+                << m_counters[InDet::InDetExtensionProcessor::nRecoveryBremFits][InDet::InDetExtensionProcessor::iAll] << std::setiosflags(std::ios::dec) <<
       std::setw(iw)
-                << m_NrecoveryBremFits[InDet::InDetExtensionProcessor::iBarrel] << std::setiosflags(std::ios::dec) <<
+                << m_counters[InDet::InDetExtensionProcessor::nRecoveryBremFits][InDet::InDetExtensionProcessor::iBarrel] << std::setiosflags(std::ios::dec) <<
       std::setw(iw)
-                << m_NrecoveryBremFits[InDet::InDetExtensionProcessor::iTransi] << std::setiosflags(std::ios::dec) <<
+                << m_counters[InDet::InDetExtensionProcessor::nRecoveryBremFits][InDet::InDetExtensionProcessor::iTransi] << std::setiosflags(std::ios::dec) <<
       std::setw(iw)
-                << m_NrecoveryBremFits[InDet::InDetExtensionProcessor::iEndcap] << std::endl;
+                << m_counters[InDet::InDetExtensionProcessor::nRecoveryBremFits][InDet::InDetExtensionProcessor::iEndcap] << std::endl;
       out << "  + brem fit to recover low score :" << std::setiosflags(std::ios::dec) << std::setw(iw)
-                << m_NlowScoreBremFits[InDet::InDetExtensionProcessor::iAll] << std::setiosflags(std::ios::dec) <<
+                << m_counters[InDet::InDetExtensionProcessor::nLowScoreBremFits][InDet::InDetExtensionProcessor::iAll] << std::setiosflags(std::ios::dec) <<
       std::setw(iw)
-                << m_NlowScoreBremFits[InDet::InDetExtensionProcessor::iBarrel] << std::setiosflags(std::ios::dec) <<
+                << m_counters[InDet::InDetExtensionProcessor::nLowScoreBremFits][InDet::InDetExtensionProcessor::iBarrel] << std::setiosflags(std::ios::dec) <<
       std::setw(iw)
-                << m_NlowScoreBremFits[InDet::InDetExtensionProcessor::iTransi] << std::setiosflags(std::ios::dec) <<
+                << m_counters[InDet::InDetExtensionProcessor::nLowScoreBremFits][InDet::InDetExtensionProcessor::iTransi] << std::setiosflags(std::ios::dec) <<
       std::setw(iw)
-                << m_NlowScoreBremFits[InDet::InDetExtensionProcessor::iEndcap] << std::endl;
+                << m_counters[InDet::InDetExtensionProcessor::nLowScoreBremFits][InDet::InDetExtensionProcessor::iEndcap] << std::endl;
     }
     out << "-------------------------------------------------------------------------------" << std::endl;
     out << "  Number of track fit failing     :" << std::setiosflags(std::ios::dec) << std::setw(iw)
-              << m_Nfailed[InDet::InDetExtensionProcessor::iAll] << std::setiosflags(std::ios::dec) << std::setw(iw)
-              << m_Nfailed[InDet::InDetExtensionProcessor::iBarrel] << std::setiosflags(std::ios::dec) << std::setw(iw)
-              << m_Nfailed[InDet::InDetExtensionProcessor::iTransi] << std::setiosflags(std::ios::dec) << std::setw(iw)
-              << m_Nfailed[InDet::InDetExtensionProcessor::iEndcap] << std::endl;
+              << m_counters[InDet::InDetExtensionProcessor::nFailed][InDet::InDetExtensionProcessor::iAll] << std::setiosflags(std::ios::dec) << std::setw(iw)
+              << m_counters[InDet::InDetExtensionProcessor::nFailed][InDet::InDetExtensionProcessor::iBarrel] << std::setiosflags(std::ios::dec) << std::setw(iw)
+              << m_counters[InDet::InDetExtensionProcessor::nFailed][InDet::InDetExtensionProcessor::iTransi] << std::setiosflags(std::ios::dec) << std::setw(iw)
+              << m_counters[InDet::InDetExtensionProcessor::nFailed][InDet::InDetExtensionProcessor::iEndcap] << std::endl;
     out << "  Number of rejected extensions   :" << std::setiosflags(std::ios::dec) << std::setw(iw)
-              << m_Nrejected[InDet::InDetExtensionProcessor::iAll] << std::setiosflags(std::ios::dec) << std::setw(iw)
-              << m_Nrejected[InDet::InDetExtensionProcessor::iBarrel] << std::setiosflags(std::ios::dec) <<
+              << m_counters[InDet::InDetExtensionProcessor::nRejected][InDet::InDetExtensionProcessor::iAll] << std::setiosflags(std::ios::dec) << std::setw(iw)
+              << m_counters[InDet::InDetExtensionProcessor::nRejected][InDet::InDetExtensionProcessor::iBarrel] << std::setiosflags(std::ios::dec) <<
     std::setw(iw)
-              << m_Nrejected[InDet::InDetExtensionProcessor::iTransi] << std::setiosflags(std::ios::dec) <<
+              << m_counters[InDet::InDetExtensionProcessor::nRejected][InDet::InDetExtensionProcessor::iTransi] << std::setiosflags(std::ios::dec) <<
     std::setw(iw)
-              << m_Nrejected[InDet::InDetExtensionProcessor::iEndcap] << std::endl;
+              << m_counters[InDet::InDetExtensionProcessor::nRejected][InDet::InDetExtensionProcessor::iEndcap] << std::endl;
     out << "  Number of successful extensions :" << std::setiosflags(std::ios::dec) << std::setw(iw)
-              << m_Nextended[InDet::InDetExtensionProcessor::iAll] << std::setiosflags(std::ios::dec) << std::setw(iw)
-              << m_Nextended[InDet::InDetExtensionProcessor::iBarrel] << std::setiosflags(std::ios::dec) <<
+              << m_counters[InDet::InDetExtensionProcessor::nExtended][InDet::InDetExtensionProcessor::iAll] << std::setiosflags(std::ios::dec) << std::setw(iw)
+              << m_counters[InDet::InDetExtensionProcessor::nExtended][InDet::InDetExtensionProcessor::iBarrel] << std::setiosflags(std::ios::dec) <<
     std::setw(iw)
-              << m_Nextended[InDet::InDetExtensionProcessor::iTransi] << std::setiosflags(std::ios::dec) <<
+              << m_counters[InDet::InDetExtensionProcessor::nExtended][InDet::InDetExtensionProcessor::iTransi] << std::setiosflags(std::ios::dec) <<
     std::setw(iw)
-              << m_Nextended[InDet::InDetExtensionProcessor::iEndcap] << std::endl;
+              << m_counters[InDet::InDetExtensionProcessor::nExtended][InDet::InDetExtensionProcessor::iEndcap] << std::endl;
     if (m_tryBremFit) {
       out << "  including brem fitted tracks    :" << std::setiosflags(std::ios::dec) << std::setw(iw)
-                << m_NextendedBrem[InDet::InDetExtensionProcessor::iAll] << std::setiosflags(std::ios::dec) <<
+                << m_counters[InDet::InDetExtensionProcessor::nExtendedBrem][InDet::InDetExtensionProcessor::iAll] << std::setiosflags(std::ios::dec) <<
       std::setw(iw)
-                << m_NextendedBrem[InDet::InDetExtensionProcessor::iBarrel] << std::setiosflags(std::ios::dec) <<
+                << m_counters[InDet::InDetExtensionProcessor::nExtendedBrem][InDet::InDetExtensionProcessor::iBarrel] << std::setiosflags(std::ios::dec) <<
       std::setw(iw)
-                << m_NextendedBrem[InDet::InDetExtensionProcessor::iTransi] << std::setiosflags(std::ios::dec) <<
+                << m_counters[InDet::InDetExtensionProcessor::nExtendedBrem][InDet::InDetExtensionProcessor::iTransi] << std::setiosflags(std::ios::dec) <<
       std::setw(iw)
-                << m_NextendedBrem[InDet::InDetExtensionProcessor::iEndcap] << std::endl;
+                << m_counters[InDet::InDetExtensionProcessor::nExtendedBrem][InDet::InDetExtensionProcessor::iEndcap] << std::endl;
     }
     out << "-------------------------------------------------------------------------------" << std::endl;
     out << std::setiosflags(std::ios::fixed | std::ios::showpoint) << std::setprecision(2)
