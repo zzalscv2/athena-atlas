@@ -335,11 +335,6 @@ topSequence = AlgSequence()
 from AthenaCommon.CFElements import seqOR,parOR
 hltTop = seqOR("HLTTop")
 
-# HLTPreSeq only used for CostMon so far, skip if CostMon disabled
-if ConfigFlags.Trigger.CostMonitoring.doCostMonitoring:
-    hltPreSeq = parOR("HLTPreSeq")
-    hltTop += hltPreSeq
-
 hltBeginSeq = parOR("HLTBeginSeq")
 hltTop += hltBeginSeq
 topSequence += hltTop
@@ -457,6 +452,11 @@ CAtoGlobalWrapper(IOVDbSvcCfg, ConfigFlags)
 #-------------------------------------------------------------
 # Cost Monitoring
 #-------------------------------------------------------------
+# HLTPreSeq only used for CostMon so far, configure it only here
+if ConfigFlags.Trigger.CostMonitoring.doCostMonitoring:
+    hltPreSeq = parOR("HLTPreSeq")
+    hltTop.insert(0, hltPreSeq)
+# The CA below handles doCostMonitoring=False nicely, so we call it unconditionally
 from TrigCostMonitor.TrigCostMonitorConfig import TrigCostMonitorCfg
 CAtoGlobalWrapper(TrigCostMonitorCfg, ConfigFlags, seqName="HLTPreSeq")
 
