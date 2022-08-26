@@ -10,6 +10,7 @@
 //
 
 #include <SystematicsHandles/SysFilterReporterParams.h>
+#include <SystematicsHandles/SysListHandle.h>
 
 #include <AsgMessaging/MessageCheck.h>
 #include <AsgMessaging/StatusCode.h>
@@ -21,13 +22,16 @@
 namespace CP
 {
   StatusCode SysFilterReporterParams ::
-  initialize ()
+  initialize (SysListHandle &sysListHandle)
   {
     if (m_isInitialized)
     {
       ANA_MSG_FATAL ("calling initialize twice on SysFilterReporterParams, aborting");
       return StatusCode::FAILURE;
     }
+
+    ANA_CHECK (m_eventInfoHandle.initialize(sysListHandle));
+    ANA_CHECK (m_eventDecisionOutputDecoration.initialize(sysListHandle, m_eventInfoHandle));
 
     if (m_eventDecisionOutputDecoration.empty())
     {
@@ -47,6 +51,7 @@ namespace CP
       }
     }
 #endif
+
 
     m_isInitialized = true;
     return StatusCode::SUCCESS;
