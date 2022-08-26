@@ -11,6 +11,7 @@
 #include "GeneratorObjects/McEventCollection.h"
 #include "GeneratorObjects/HepMcParticleLink.h"
 #include "GeneratorObjects/HijingEventParams.h"
+#include "GeneratorObjects/xAODTruthParticleLink.h"
 #include "RootUtils/PyROOTIteratorFuncs.h"
 
 #include "AtlasHepMC/GenEvent.h"
