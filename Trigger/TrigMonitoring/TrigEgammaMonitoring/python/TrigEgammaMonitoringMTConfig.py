@@ -429,6 +429,7 @@ class TrigEgammaMonAlgBuilder:
       self.phMonAlg.TriggerList=self.photonList
       self.phMonAlg.DetailedHistograms=self.detailedHistograms
       self.phMonAlg.ForcePidSelection=True
+      self.phMonAlg.DoUnconverted=False
       self.phMonAlg.DoEmulation = False
 
       if self.emulator:
