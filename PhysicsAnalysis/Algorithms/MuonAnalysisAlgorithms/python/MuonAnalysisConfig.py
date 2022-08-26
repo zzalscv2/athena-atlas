@@ -145,7 +145,12 @@ class MuonWorkingPointConfig (ConfigBlock) :
             alg.muons = config.readName (self.containerName)
             alg.preselection = config.getSelection (self.containerName, self.selectionName)
 
-
+        # Set up an algorithm used for decorating baseline muon selection:
+        alg = config.createAlgorithm( 'CP::AsgSelectionAlg',
+                                      'MuonSelectionSummary' + postfix )
+        alg.selectionDecoration = 'baselineSelection' + postfix + ',as_char'
+        alg.particles = config.readName (self.containerName)
+        alg.preselection = config.getSelection (self.containerName, self.selectionName)
 
 
 

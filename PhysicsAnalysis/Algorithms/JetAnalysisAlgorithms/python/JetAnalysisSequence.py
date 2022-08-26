@@ -214,7 +214,7 @@ def makeSmallRJetAnalysisSequence( seq, dataType, jetCollection,
             "Invalid combination of reduction and JEROption settings: "
             "reduction: {0}, JEROption: {1}".format(reduction, JEROption) )
 
-    alg = createAlgorithm( 'CP::JetUncertaintiesAlg', 'JetUncertaintiesTool'+postfix )
+    alg = createAlgorithm( 'CP::JetUncertaintiesAlg', 'JetUncertaintiesAlg'+postfix )
     addPrivateTool( alg, 'uncertaintiesTool', 'JetUncertaintiesTool' )
     alg.uncertaintiesTool.JetDefinition = jetCollectionName[:-4]
     # Add the correct directory on the front

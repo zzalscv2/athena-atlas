@@ -194,11 +194,10 @@ class AnaAlgSequence( AlgSequence ):
 
             # Set up the input name(s) of the algorithm correctly, in case this
             # is needed...
-            for inputLabel, inputKey in meta.inputPropName.items():
-                if inputLabel in currentOutputs:
-                    setattr( alg, inputKey, currentOutputs[ inputLabel ] )
-                    pass
-                pass
+            if meta.inputPropName :
+                for inputLabel, inputKey in meta.inputPropName.items():
+                    if inputLabel in currentOutputs:
+                        setattr( alg, inputKey, currentOutputs[ inputLabel ] )
 
             pass
 
