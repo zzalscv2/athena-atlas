@@ -90,7 +90,7 @@ namespace LArG4 {
       //double m_delta[15];   // zig-zag angles
       // to access G4 geometry
       mutable LArCoudeElectrodes* m_coudeelec; // FIXME needed due to lazy initialization
-      mutable LArCoudeAbsorbers* m_coudeabs; // FIXME needed due to lazy initialization
+      const LArCoudeAbsorbers* m_coudeabs;
       mutable LArStraightElectrodes* m_electrode; // FIXME needed due to lazy initialization
       mutable LArStraightAbsorbers* m_absorber; // FIXME needed due to lazy initialization
 
