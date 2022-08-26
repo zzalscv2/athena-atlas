@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "MdtRdoToPrepDataToolCore.h"
@@ -592,7 +592,6 @@ namespace Muon {
                     std::unique_ptr<MdtDigit>& promptHit_Digit = digit;
                     std::unique_ptr<MdtDigit>& twinHit_Digit = second_digit;
                     Identifier promptHit_channelId = digit->identify();
-                    Identifier twinHit_channelId = second_digit->identify();
 
                     // do lookup once
                     const MdtReadoutElement* descriptor = muDetMgr->getMdtReadoutElement(promptHit_channelId);
