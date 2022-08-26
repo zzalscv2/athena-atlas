@@ -13,4 +13,4 @@ athena.py AnalysisAlgorithmsConfig/FullCPAlgorithmsTest_jobOptions.py --evtMax=5
 athena.py AnalysisAlgorithmsConfig/FullCPAlgorithmsTest_jobOptions.py --evtMax=500 - --data-type $dataType --for-compare --block-config
 
 
-acmd.py diff-root --enforce-leaves -t analysis FullCPAlgorithmsTest.$dataType.hist.root FullCPAlgorithmsConfigTest.$dataType.hist.root
+acmd.py diff-root --error-mode resilient --enforce-leaves -t analysis FullCPAlgorithmsTest.$dataType.hist.root FullCPAlgorithmsConfigTest.$dataType.hist.root
