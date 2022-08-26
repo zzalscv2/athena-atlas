@@ -106,6 +106,8 @@ def _gen_jobo(dct):
         # FIXME: work-around for bug #56185
         from AthenaCommon.DetFlags import DetFlags
         DetFlags.makeRIO.all_setOff()
+        # FIXME: Without this, we get crashes reading ESDs from conditions algs.
+        DetFlags.readRIOPool.all_setOff()
         # FIXME -- end
         include ('RecExCommon/RecExCommon_topOptions.py')
 
