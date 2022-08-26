@@ -5,7 +5,6 @@
 #
 #
 from __future__ import with_statement, print_function
-import six
 
 __author__  = "Sebastien Binet <binet@cern.ch>"
 
@@ -29,10 +28,7 @@ import os
 import shelve
 from builtins import range
 
-if six.PY2:
-    from whichdb import whichdb
-else:
-    from dbm import whichdb
+from dbm import whichdb
 
 from .Helpers import ShutUp
 from .Decorators import forking
@@ -890,7 +886,7 @@ class PoolFile(object):
         import csv, os
         if os.path.exists (fileName):
             os.unlink (fileName)
-        args = {} if six.PY2 else {'newline' : ''}
+        args = {'newline' : ''}
         f = open (fileName, 'w', **args)
         o = csv.writer (f)
         o.writerow (['file name', self._fileInfos['name']])

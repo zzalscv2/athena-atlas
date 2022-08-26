@@ -21,8 +21,6 @@ import re
 
 import PyUtils.Dso as Dso
 
-import six
-
 class Cache:
    """Global cache of already processed files"""
    
@@ -45,7 +43,7 @@ class Cache:
       """Output a line of dot code"""   
       if len(style)>0:
          code += ' ['
-         for k,v in six.iteritems(style):
+         for k,v in style.items():
             code += '%s="%s" ' % (k,v)
          code += ']'
       
@@ -77,7 +75,7 @@ class SharedLib:
       
       # Run readelf to find direct dependencies
       # Note: ldd itself does recursions so we cannot use it here
-      encargs = {} if six.PY2 else {'encoding' : 'utf-8'}
+      encargs = {'encoding' : 'utf-8'}
       p = sp.Popen(["readelf","-d",lib], stdout=sp.PIPE, **encargs)
       output = p.communicate()[0]
       if p.returncode != 0:
@@ -124,7 +122,7 @@ class Color:
 
    @classmethod
    def get(cls, lib):
-      for p,c in six.iteritems(cls.projects):
+      for p,c in cls.projects.items():
          if lib.find(p)!=-1: return "/%s/%s" % (cls.scheme, c)
       return cls.default
 
@@ -195,7 +193,7 @@ def processLib(lib, opt, dotFileName = None):
    anaLib(lib, opt, cache, select, ignore)
 
    # Declare style of all nodes
-   for l,v in six.iteritems(cache.myfiles):
+   for l,v in cache.myfiles.items():
       style = {}
       # Special style for direct dependencies
       if v.distance==1:

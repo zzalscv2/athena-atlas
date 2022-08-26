@@ -12,7 +12,6 @@ __doc__ = "implementation of AthFile-server behind a set of proxies to isolate e
 
 import errno
 import os
-import six
 
 import PyUtils.Helpers as H
 from .timerdecorator import timelimit, TimeoutError
@@ -36,28 +35,6 @@ DEFAULT_AF_TIMEOUT = 20
 '''Default timeout for commands to be completed.'''
 
 ### utils ----------------------------------------------------------------------
-
-# Try to convert long->int in output when we're running with python2,
-# to prevent interoperability problems if we then read with python3.
-def _clean_dict (d):
-    for k, v in d.items():
-        if isinstance(v, dict):
-            _clean_dict(v)
-        elif isinstance(v, list):
-            _clean_list(v)
-        elif type(v) in six.integer_types:
-            d[k] = int(v)
-    return
-def _clean_list (l):
-    for i in range(len(l)):
-        v = l[i]
-        if isinstance(v, dict):
-            _clean_dict(v)
-        elif isinstance(v, list):
-            _clean_list(v)
-        elif type(v) in six.integer_types:
-            l[i] = int(v)
-    return
 
 def _get_real_ext(fname):
     """little helper to get the 'real' extension of a filename, handling 'fake' extensions (e.g. foo.ascii.gz -> .ascii)"""
@@ -491,7 +468,7 @@ class AthFileServer(object):
         msg = self.msg()
         cache = dict(self._cache)
         fids = []
-        for k,v in six.iteritems (cache):
+        for k,v in cache.items():
             v = v.infos
             fid = v.get('file_md5sum', v['file_guid'])
             if fid:
@@ -596,7 +573,7 @@ class AthFileServer(object):
                 return 'file:'+uri
             return uri
         
-        from six.moves.urllib.parse import urlsplit
+        from urllib.parse import urlsplit
         url = urlsplit(_normalize_uri(fname))
         protocol = url.scheme
         def _normalize(fname):
@@ -851,8 +828,6 @@ class AthFileServer(object):
             fd.flush()
             for k in cache:
                 print ("\n## new-entry", file=fd)
-                if six.PY2:
-                    _clean_dict (cache[k].fileinfos)
                 pprint((k, cache[k].fileinfos),
                        stream=fd,
                        width=120)
@@ -868,7 +843,7 @@ class AthFileServer(object):
         import PyUtils.dbsqlite as dbsqlite
         cache = dbsqlite.open(fname)
         d = {}
-        for k,v in six.iteritems (cache):
+        for k,v in cache.items():
             d[k] = AthFile.from_infos(v)
         return d
         
