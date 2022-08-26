@@ -117,17 +117,23 @@ if InDetFlags.doPRDFormation():
       #
       # --- now load the framework for the clustering
       #
-      from SiClusterizationTool.SiClusterizationToolConf import InDet__MergedPixelsTool
-      InDetMergedPixelsTool = InDet__MergedPixelsTool(name                    = "InDetMergedPixelsTool", 
-                                                      globalPosAlg            = InDetClusterMakerTool,
-                                                      PixelDetElStatus          = "PixelDetectorElementStatus")
-      # Enable duplcated RDO check for data15 because duplication mechanism was used.
+      from SiClusterizationTool.SiClusterizationToolConf import InDet__MergedPixelsTool, InDet__PixelRDOTool
+
+      InDetPixelRDOTool = InDet__PixelRDOTool(name = "InDetPixelRDOTool",
+                                              PixelDetElStatus = "PixelDetectorElementStatus")
+                                              
+      # Enable duplicated RDO check for data15 because duplication mechanism was used.
       from RecExConfig.RecFlags import rec
       if len(rec.projectName())>=6 and rec.projectName()[:6]=="data15":
-        InDetMergedPixelsTool.CheckDuplicatedRDO = True
-      
+        InDetPixelRDOTool.CheckDuplicatedRDO = True
+
+      InDetMergedPixelsTool = InDet__MergedPixelsTool(name                    = "InDetMergedPixelsTool", 
+                                                      globalPosAlg            = InDetClusterMakerTool,
+                                                      PixelRDOTool            = InDetPixelRDOTool)
+
       ToolSvc += InDetMergedPixelsTool
       if (InDetFlags.doPrintConfigurables()):
+        printfunc (InDetPixelRDOTool)
         printfunc (InDetMergedPixelsTool)
                     
       #

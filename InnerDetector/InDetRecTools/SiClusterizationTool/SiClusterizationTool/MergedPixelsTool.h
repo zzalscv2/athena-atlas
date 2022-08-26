@@ -14,7 +14,7 @@
 #ifndef SICLUSTERIZATIONTOOL_MERGEDPIXELSTOOL_H
 #define SICLUSTERIZATIONTOOL_MERGEDPIXELSTOOL_H
 
-#include "SiClusterizationTool/PixelClusteringToolBase.h"
+#include "SiClusterizationTool/PixelRDOTool.h"
 
 #include "Identifier/Identifier.h"
 // forward declare not possible (typedef)
@@ -38,32 +38,18 @@ namespace InDetDD {
 
 namespace InDet {
   
-  class rowcolID {
-  public:
-    
-    rowcolID(int ncl, int row, int col, int tot, int lvl1, Identifier id):
-      NCL(ncl), ROW(row), COL(col), TOT(tot), LVL1(lvl1), ID(id) {};
-    
-    int        NCL;
-    int        ROW;
-    int        COL;
-    int        TOT;
-    int       LVL1;
-    Identifier ID ;
-  };
-
   struct network {
   public:
     int               NC{};
     std::array<int,8> CON{};
   };
   
-  const auto pixel_less = [] (rowcolID const&  id1,rowcolID const& id2) -> bool {
+  const auto pixel_less = [] (UnpackedPixelRDO const&  id1,UnpackedPixelRDO const& id2) -> bool {
     if(id1.COL == id2.COL) return id1.ROW < id2.ROW;
     return id1.COL < id2.COL;
   };
  
-  class MergedPixelsTool : public PixelClusteringToolBase{
+  class MergedPixelsTool : public extends<AthAlgTool, IPixelClusteringTool> {
   public:
 
 
@@ -77,12 +63,11 @@ namespace InDet {
     // Called by the PixelPrepRawDataFormation algorithm once for every pixel 
     // module (with non-empty RDO collection...). 
     // It clusters together the RDOs with a pixell cell side in common.
-    // N.B.: This method is called from the clusterization method of the base class
-    PixelClusterCollection* doClusterization(const InDetRawDataCollection<PixelRDORawData>& RDOs,
-					     const PixelID& pixelID,
-					     const InDetDD::SiDetectorElement* element,
-                                             const InDet::SiDetectorElementStatus *pixelDetElStatus) const override;
-
+    // [Implementation of the IPixelClusteringTool interface]
+    virtual PixelClusterCollection* clusterize(const InDetRawDataCollection<PixelRDORawData>& RDOs,
+					       const PixelID& pixelID,
+					       const EventContext& ctx) const override;
+      
     // Once the lists of RDOs which makes up the clusters have been found by the
     // clusterize() method, this method is called for each of these lists.
     // The method computes the local position of the cluster, and create 
@@ -119,19 +104,16 @@ namespace InDet {
     void addClusterNumber(const int& r, 
                           const int& Ncluster,
                           const std::vector<network>& connections,    
-                          std::vector<rowcolID>& collectionID) const;
-                          
-    static bool checkDuplication(const PixelID& pixelID,
-                          const Identifier& rdoID, 
-                          const int& lvl1, 
-                          std::vector<rowcolID>& collectionID) ;
-                       
+                          std::vector<UnpackedPixelRDO>& collectionID) const;
 
-    BooleanProperty m_checkDuplicatedRDO{this, "CheckDuplicatedRDO", false, "Check duplicated RDOs using isDuplicated method"};
-     ToolHandle< ClusterMakerTool > m_clusterMaker{this, "globalPosAlg", "InDet::ClusterMakerTool"};
+    BooleanProperty m_addCorners{this, "AddCorners", true};
 
-     IntegerProperty m_posStrategy{this, "posStrategy", 0};
-     IntegerProperty m_errorStrategy{this, "errorStrategy", 1};
+    ToolHandle<ClusterMakerTool> m_clusterMaker {this, "globalPosAlg", "InDet::ClusterMakerTool"};
+    ToolHandle<PixelRDOTool> m_pixelRDOTool {this, "PixelRDOTool", "InDet::PixelRDOTool"};
+    
+
+    IntegerProperty m_posStrategy{this, "posStrategy", 0};
+    IntegerProperty m_errorStrategy{this, "errorStrategy", 1};
 
     mutable std::atomic_uint m_processedClusters{0};    //!< statistics output
     mutable std::atomic_bool m_printw{true};

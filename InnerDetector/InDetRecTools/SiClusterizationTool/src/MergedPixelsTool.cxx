@@ -34,12 +34,11 @@ namespace InDet {
   MergedPixelsTool::MergedPixelsTool(const std::string &type,
                                      const std::string &name,
                                      const IInterface *parent) :
-                                     PixelClusteringToolBase(type,name,parent)
-    {
-      declareInterface<IPixelClusteringTool>(this);
-    }
+    base_class(type, name, parent) {}
+
   
-  StatusCode  MergedPixelsTool::initialize(){
+  StatusCode  MergedPixelsTool::initialize()
+  {
     if ( m_clusterMaker.retrieve().isFailure() )
     {
       ATH_MSG_FATAL(m_clusterMaker.propertyName() << ": Failed to retrieve tool " << m_clusterMaker.type());
@@ -50,7 +49,12 @@ namespace InDet {
       ATH_MSG_INFO(m_clusterMaker.propertyName() << ": Retrieved tool " << m_clusterMaker.type());
     }
 
-    return PixelClusteringToolBase::initialize();
+    if (m_pixelRDOTool.retrieve().isFailure()) {
+      ATH_MSG_FATAL(m_pixelRDOTool.propertyName() << ": Failed to retrieve tool " << m_pixelRDOTool.type());
+      return StatusCode::FAILURE;
+    }
+
+    return StatusCode::SUCCESS;
   }
 
 
@@ -88,7 +92,6 @@ namespace InDet {
   {
       ATH_MSG_VERBOSE("makeCluster called, number " << clusterNumber);
   
-      Identifier gangedID;
       const Identifier elementID = element->identify();
       const InDetDD::PixelModuleDesign* design
           (dynamic_cast<const InDetDD::PixelModuleDesign*>(&element->design()));
@@ -124,7 +127,9 @@ namespace InDet {
         const int row = pixelID.phi_index(rId);
         const int col = pixelID.eta_index(rId);
         // flag if cluster contains at least a ganged pixel
-        hasGanged = hasGanged || isGanged(rId, element, gangedID);
+	
+        hasGanged = hasGanged ||
+	            m_pixelRDOTool->isGanged(rId, element).has_value();
         DVid.push_back(rId);
         InDetDD::SiLocalPosition siLocalPosition
         (design->positionFromColumnRow(col,row)); 
@@ -281,40 +286,16 @@ namespace InDet {
   // It clusters together the RDOs with a pixell cell side in common
   // using connected component analysis based on four-cell 
   // or eight-cell (if m_addCorners == true) connectivity
-  PixelClusterCollection*  MergedPixelsTool::doClusterization(const InDetRawDataCollection<PixelRDORawData> &collection,
-							      const PixelID& pixelID,
-							      const InDetDD::SiDetectorElement* element,
-							      const InDet::SiDetectorElementStatus *pixelDetElStatus) const {
-    const IdentifierHash idHash = collection.identifyHash();
-    // loop on the rdo collection and save the relevant quantities for each fired pixel
-    // rowcolID contains: number of connected pixels, phi/eta pixel indices, tot, lvl1, rdo identifier
-    std::vector<rowcolID> collectionID;
-    std::unordered_set<Identifier> setOfIdentifiers{};
-    for(const auto *const rdo : collection) {
-      const Identifier rdoID= rdo->identify();
-      if (!isGoodRDO(pixelDetElStatus, idHash, rdoID)) continue;
-      //check for duplication:
-      //add to set of existing identifiers. If it fails (.second = false) then skip it.
-      if (not setOfIdentifiers.insert(rdoID).second)   continue;
-      // note that we don't understand, for now, why these duplicated RDO's occur
-      //
-      const int lvl1= rdo->getLVL1A();      
-      if (m_checkDuplicatedRDO and checkDuplication(pixelID, rdoID, lvl1, collectionID)) continue;
-      
-      const int tot = rdo->getToT();
-      
-      rowcolID   RCI(-1, pixelID.phi_index(rdoID), pixelID.eta_index(rdoID), tot, lvl1, rdoID); 
-      collectionID.push_back(RCI);
-      // check if this is a ganged pixel    
-      Identifier gangedID;
-      const bool ganged = isGanged(rdoID, element, gangedID);  
-      
-      if (not ganged) continue;
-          
-      // if it is a ganged pixel, add its ganged RDO id to the collection
-      rowcolID   RCI_ganged(-1, pixelID.phi_index(gangedID), pixelID.eta_index(gangedID), tot, lvl1, gangedID);
-      collectionID.push_back(RCI_ganged);      
-    }
+  PixelClusterCollection*  MergedPixelsTool::clusterize(const InDetRawDataCollection<PixelRDORawData> &collection,
+							const PixelID& pixelID,
+							const EventContext& ctx) const {
+
+      const InDetDD::SiDetectorElement* element = m_pixelRDOTool->checkCollection(collection, ctx);
+    if (element == nullptr)
+      return nullptr;
+    
+    std::vector<UnpackedPixelRDO> collectionID =
+	m_pixelRDOTool->getUnpackedPixelRDOs(collection, pixelID, element, ctx);
     
     // Sort pixels in ascending columns order
     // 
@@ -399,7 +380,7 @@ namespace InDet {
     //
     if(--collectionSize > 1) {
       for(int i(1); i<collectionSize; ++i ) {
-        rowcolID U  = collectionID.at(i+1);
+        UnpackedPixelRDO U  = collectionID.at(i+1);
         
         int j(i);
         while(collectionID.at(j).NCL > U.NCL) {
@@ -413,6 +394,7 @@ namespace InDet {
     // Make a new pixel cluster collection
     //
     const Identifier elementID = collection.identify();
+    const IdentifierHash idHash = collection.identifyHash();
     PixelClusterCollection  *clusterCollection = new PixelClusterCollection(idHash);
     clusterCollection->setIdentifier(elementID);
     clusterCollection->reserve(Ncluster);
@@ -467,11 +449,12 @@ namespace InDet {
 
     return clusterCollection;
   }
+
   
   void MergedPixelsTool::addClusterNumber(const int& r, 
                                           const int& Ncluster,
                                           const std::vector<network>& connections,                                         
-                                          std::vector<rowcolID>& collectionID) const {
+                                          std::vector<UnpackedPixelRDO>& collectionID) const {
     for(int i=0; i!=connections.at(r).NC; ++i) {  
       const int k = connections.at(r).CON.at(i);
       if(collectionID.at(k).NCL < 0) {
@@ -481,21 +464,5 @@ namespace InDet {
     }
   }
   
-  
-  bool MergedPixelsTool::checkDuplication(const PixelID& pixelID,
-                                          const Identifier& rdoID, 
-                                          const int& lvl1, 
-                                          std::vector<rowcolID>& collectionID) {
-    
-    // check if duplicates are found. If that is the case, update the LVL1 
-    auto isDuplicate=[&](const rowcolID& rc) -> bool {
-      return std::make_tuple(pixelID.phi_index(rdoID), pixelID.eta_index(rdoID)) == std::make_tuple(pixelID.phi_index(rc.ID), pixelID.eta_index(rc.ID));
-    }; 
-    
-    const auto pDuplicate = std::find_if(collectionID.begin(), collectionID.end(),isDuplicate); 
-    const bool foundDuplicate{pDuplicate != collectionID.end()}; 
-    if (foundDuplicate) pDuplicate->LVL1 = std::max(pDuplicate->LVL1, lvl1); 
-    return foundDuplicate;
-  }                                            
 }
 //----------------------------------------------------------------------------

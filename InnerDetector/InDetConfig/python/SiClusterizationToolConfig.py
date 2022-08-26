@@ -59,12 +59,9 @@ def ITkClusterMakerToolCfg(flags, name="ITkClusterMakerTool", **kwargs) :
     acc.setPrivateTools(ITkClusterMakerTool)
     return acc
 
-def MergedPixelsToolCfg(flags, name="InDetMergedPixelsTool", **kwargs) :
+def InDetPixelRDOToolCfg(flags, name="InDetPixelRDOTool", **kwargs):
     acc = ComponentAccumulator()
-    # --- now load the framework for the clustering
-    kwargs.setdefault("globalPosAlg", acc.popToolsAndMerge(ClusterMakerToolCfg(flags)) )
 
-    # PixelClusteringToolBase uses PixelConditionsSummaryTool
     from PixelConditionsTools.PixelConditionsSummaryConfig import PixelConditionsSummaryCfg
     kwargs.setdefault("PixelConditionsSummaryTool", acc.popToolsAndMerge(PixelConditionsSummaryCfg(flags)) )
 
@@ -73,31 +70,60 @@ def MergedPixelsToolCfg(flags, name="InDetMergedPixelsTool", **kwargs) :
          acc.merge( PixelDetectorElementStatusAlgCfg(flags) )
          kwargs.setdefault("PixelDetElStatus", "PixelDetectorElementStatus")
 
-    # Enable duplcated RDO check for data15 because duplication mechanism was used.
+    # Enable duplicated RDO check for data15 because duplication mechanism was used.
     if len(flags.Input.ProjectName)>=6 and flags.Input.ProjectName[:6]=="data15":
         kwargs.setdefault("CheckDuplicatedRDO", True )
+
+    acc.setPrivateTools(CompFactory.InDet.PixelRDOTool(name, **kwargs))
+    return acc
+
+
+def ITkPixelRDOToolCfg(flags, name="ITkPixelRDOTool", **kwargs):
+    acc = ComponentAccumulator()
+
+    from PixelConditionsTools.ITkPixelConditionsSummaryConfig import ITkPixelConditionsSummaryCfg
+    kwargs.setdefault(
+        "PixelConditionsSummaryTool",
+        acc.popToolsAndMerge(ITkPixelConditionsSummaryCfg(flags))
+    )
+    kwargs.setdefault("PixelDetEleCollKey","ITkPixelDetectorElementCollection")
+    kwargs.setdefault("CheckGanged", False)
+
+    acc.setPrivateTools(CompFactory.InDet.PixelRDOTool(name, **kwargs))
+    return acc
+
+
+def TrigPixelRDOToolCfg(flags, name="InDetPixelRDOTool", **kwargs):
+    # Note: see comment in `def TrigMergedPixelsToolCfg' for the name
+    kwargs.setdefault("PixelDetElStatus", "")
+    return InDetPixelRDOToolCfg(flags, name, **kwargs)
+
+
+def MergedPixelsToolCfg(flags, name="InDetMergedPixelsTool", **kwargs) :
+    acc = ComponentAccumulator()
+    # --- now load the framework for the clustering
+    kwargs.setdefault("globalPosAlg", acc.popToolsAndMerge(ClusterMakerToolCfg(flags)))
+    kwargs.setdefault("PixelRDOTool", acc.popToolsAndMerge(InDetPixelRDOToolCfg(flags)))
 
     InDetMergedPixelsTool = CompFactory.InDet.MergedPixelsTool(name, **kwargs)
     acc.setPrivateTools(InDetMergedPixelsTool)
     return acc
 
+
 def TrigMergedPixelsToolCfg(flags, name="InDetMergedPixelsTool", **kwargs) :
     # @TODO if the configuration is different maybe it should also get a new name ?
     #       for the time being to not introduce naming changes, the name of this private
     #       tool is unchanged.
-    kwargs.setdefault("PixelDetElStatus","")
-    return MergedPixelsToolCfg(flags, name=name, **kwargs)
+    acc = ComponentAccumulator()
+    kwargs.setdefault("PixelRDOTool", acc.popToolsAndMerge(TrigPixelRDOToolCfg(flags)))
+    acc.setPrivateTools(acc.popToolsAndMerge(MergedPixelsToolCfg(flags, name, **kwargs)))
+    return acc
 
 def ITkMergedPixelsToolCfg(flags, name="ITkMergedPixelsTool", **kwargs) :
     acc = ComponentAccumulator()
     # --- now load the framework for the clustering
     kwargs.setdefault("globalPosAlg", acc.popToolsAndMerge(ITkClusterMakerToolCfg(flags)))
-
-    # PixelClusteringToolBase uses PixelConditionsSummaryTool
-    from PixelConditionsTools.ITkPixelConditionsSummaryConfig import ITkPixelConditionsSummaryCfg
-    ITkPixelConditionsSummary = acc.popToolsAndMerge(ITkPixelConditionsSummaryCfg(flags))
-    kwargs.setdefault("PixelConditionsSummaryTool", ITkPixelConditionsSummary)
-    kwargs.setdefault("PixelDetEleCollKey","ITkPixelDetectorElementCollection")
+    kwargs.setdefault("PixelRDOTool", acc.popToolsAndMerge(ITkPixelRDOToolCfg(flags)))
 
     ITkMergedPixelsTool = CompFactory.InDet.MergedPixelsTool(name, **kwargs)
     acc.setPrivateTools(ITkMergedPixelsTool)

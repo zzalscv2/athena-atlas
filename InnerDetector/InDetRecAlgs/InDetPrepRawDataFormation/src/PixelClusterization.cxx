@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
 */
 
 /**
@@ -139,7 +139,7 @@ namespace InDet{
         if( lock.OnlineAndPresentInAnotherView() ) continue;
 
         // Use one of the specific clustering AlgTools to make clusters
-        std::unique_ptr<PixelClusterCollection> clusterCollection (m_clusteringTool->clusterize(*RDO_Collection, *m_idHelper));
+        std::unique_ptr<PixelClusterCollection> clusterCollection (m_clusteringTool->clusterize(*RDO_Collection, *m_idHelper, ctx));
 
         if (clusterCollection && !clusterCollection->empty()){
 
@@ -173,7 +173,7 @@ namespace InDet{
           if( lock.OnlineAndPresentInAnotherView() ) continue;
 
           // Use one of the specific clustering AlgTools to make clusters
-          std::unique_ptr<PixelClusterCollection> clusterCollection (m_clusteringTool->clusterize(*RDO_Collection, *m_idHelper));
+          std::unique_ptr<PixelClusterCollection> clusterCollection (m_clusteringTool->clusterize(*RDO_Collection, *m_idHelper, ctx));
           if (clusterCollection && !clusterCollection->empty()){
             ATH_MSG_VERBOSE( "REGTEST: Pixel : clusterCollection contains " 
                 << clusterCollection->size() << " clusters" );
