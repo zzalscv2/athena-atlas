@@ -63,11 +63,6 @@ def IOVDbSvcCfg(flags, **kwargs):
     from AthenaServices.MetaDataSvcConfig import MetaDataSvcCfg
     result.merge(MetaDataSvcCfg(flags, ['IOVDbMetaDataTool']))
 
-    # Enable conditions garbage collection.
-    nConcurrentEvents = max(1,flags.Concurrency.NumConcurrentEvents)
-    cleanerSvc=CompFactory.Athena.DelayedConditionsCleanerSvc(RingSize = 2*nConcurrentEvents)
-    result.addService(cleanerSvc)
-    result.addService(CompFactory.Athena.ConditionsCleanerSvc (CleanerSvc=cleanerSvc))
     return result
 
 

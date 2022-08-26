@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2020 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
 */
 #ifndef NSWCalibTool_h
 #define NSWCalibTool_h
@@ -91,8 +91,10 @@ namespace Muon {
 
     double m_interactionDensitySigma{0.0F};
     double m_interactionDensityMean{0.0F};
-    std::unique_ptr<TF1> m_lorentzAngleFunction{nullptr};
 
+    using angleFunction = NSWCalib::MicroMegaGas::angleFunction;
+    angleFunction m_lorentzAngleFunction{NSWCalib::MicroMegaGas::dummy_func()};
+   
     bool localStripPosition(const Identifier& id, Amg::Vector2D &locPos) const;
 
   };

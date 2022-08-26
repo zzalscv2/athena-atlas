@@ -2,14 +2,12 @@
   Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
 */
 
-#include "InDetJiveXML/PixelRDORetriever.h"
+#include "PixelRDORetriever.h"
 
-//#include "StoreGate/DataHandle.h"
 #include "InDetIdentifier/PixelID.h"
 #include "InDetReadoutGeometry/SiDetectorElement.h"
 //#include "TrkEventPrimitives/LocalPosition.h"
 //#include "GaudiKernel/SystemOfUnits.h"
-#include "InDetRawData/PixelRDO_Container.h"
 
 #include "JiveXML/IFormatTool.h"
 
@@ -22,8 +20,7 @@ namespace JiveXML {
    * @param parent AlgTools parent owning this tool
    **/
   PixelRDORetriever::PixelRDORetriever(const std::string& type,const std::string& name,const IInterface* parent):
-    AthAlgTool(type,name,parent),
-    m_typeName("PixelRDO")
+    AthAlgTool(type,name,parent)
   {
     //Declare the interface
     declareInterface<IDataRetriever>(this);
@@ -42,7 +39,7 @@ namespace JiveXML {
   StatusCode PixelRDORetriever::retrieve(ToolHandle<IFormatTool> &FormatTool) {
   
     //be verbose
-    if (msgLvl(MSG::DEBUG)) msg(MSG::DEBUG) << "Retrieving " << dataTypeName() <<endmsg; 
+    ATH_MSG_DEBUG( "Retrieving " << dataTypeName() ); 
 
     SG::ReadCondHandle<InDetDD::SiDetectorElementCollection> pixelDetEleHandle(m_pixelDetEleCollKey);
     const InDetDD::SiDetectorElementCollection* elements(*pixelDetEleHandle);
@@ -52,9 +49,9 @@ namespace JiveXML {
     }
 
     //retrieve the PixelRDO container
-    const PixelRDO_Container* rdoContainer = nullptr;
-    if (evtStore()->retrieve(rdoContainer,m_PixelRDOContainerName).isFailure()) {
-      if (msgLvl(MSG::DEBUG)) msg() << "Unable to retrieve PixelRDO_Container with name " << m_PixelRDOContainerName << endmsg;
+    SG::ReadHandle<PixelRDO_Container> rdoContainer(m_PixelRDOContainerName);
+    if (!rdoContainer.isValid()) {
+      ATH_MSG_DEBUG( "Unable to retrieve PixelRDO_Container with name " << m_PixelRDOContainerName.key() );
       return StatusCode::RECOVERABLE;
     }
 
@@ -62,18 +59,12 @@ namespace JiveXML {
     DataVect idVec,xVec,yVec,zVec,phiModuleVec,etaModuleVec;
 
     //Loop over pixel RDO container
-    PixelRDO_Container::const_iterator containerItr;
-    for (containerItr=rdoContainer->begin(); containerItr!=rdoContainer->end(); ++containerItr) {
+    for (const auto rdoCollection : *rdoContainer) {
       
-      //Get the vector of raw data objects
-      const DataVector<PixelRDORawData>* rdoCollection = *containerItr;
-
       //Loop over raw data objects
-      DataVector<PixelRDORawData>::const_iterator collectionItr;
-      for (collectionItr=rdoCollection->begin(); collectionItr!=rdoCollection->end(); ++collectionItr) {
+      for (const auto rdoData : *rdoCollection) {
 
         //Get the pixel identifier
-        const PixelRDORawData *rdoData = *collectionItr;
         const Identifier id = rdoData->identify();
         const Identifier waferID = m_pixelID->wafer_id(id);
         IdentifierHash wafer_hash = m_pixelID->wafer_hash(waferID);
@@ -83,17 +74,17 @@ namespace JiveXML {
 
         //Make sure we got the detector element
         if (element == nullptr){
-          msg(MSG::WARNING) << "Unable to obtain detector element for PixelRDO hit with id " << id << endmsg;
+          ATH_MSG_WARNING( "Unable to obtain detector element for PixelRDO hit with id " << id );
           continue;
         }
 
         //Get the global position from the local position
         Amg::Vector2D localPos = element->rawLocalPositionOfCell(id);
         localPos[Trk::distPhi] += m_lorentzAngleTool->getLorentzShift(element->identifyHash());
-	Amg::Vector3D globalPos = element->globalPosition(localPos);
+	      Amg::Vector3D globalPos = element->globalPosition(localPos);
 
         //Fill in all the data in our data vectors
-	idVec.push_back(DataType( id.get_compact() ));
+	      idVec.push_back(DataType( id.get_compact() ));
         xVec.push_back(DataType(globalPos.x()*CLHEP::mm/CLHEP::cm));
         yVec.push_back(DataType(globalPos.y()*CLHEP::mm/CLHEP::cm));
         zVec.push_back(DataType(globalPos.z()*CLHEP::mm/CLHEP::cm));
@@ -103,7 +94,7 @@ namespace JiveXML {
     }
 
     //be verbose about the amount of data we retrieved
-    if (msgLvl(MSG::DEBUG)) msg(MSG::DEBUG) << "Retrieved " << idVec.size() << " PixelRDO objects" << endmsg;
+    ATH_MSG_DEBUG( "Retrieved " << idVec.size() << " PixelRDO objects" );
 
     //Create a data map
     DataMap dataMap;
@@ -123,7 +114,7 @@ namespace JiveXML {
       return StatusCode::RECOVERABLE;
 
     //Clean up and exit
-    if (msgLvl(MSG::DEBUG)) msg() << dataTypeName() << " retrieved" << endmsg;
+    ATH_MSG_DEBUG( dataTypeName() << " retrieved" );
     
     return StatusCode::SUCCESS;
   }
@@ -132,6 +123,7 @@ namespace JiveXML {
   StatusCode PixelRDORetriever::initialize() {
     ATH_CHECK( m_lorentzAngleTool.retrieve() );
     ATH_CHECK(m_pixelDetEleCollKey.initialize());
+    ATH_CHECK(m_PixelRDOContainerName.initialize());
     ATH_CHECK(detStore()->retrieve(m_pixelID,"PixelID"));
 
     return StatusCode::SUCCESS;

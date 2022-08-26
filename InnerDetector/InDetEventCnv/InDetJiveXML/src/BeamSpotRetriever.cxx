@@ -1,8 +1,8 @@
 /*
-  Copyright (C) 2002-2017 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
 */
 
-#include "InDetJiveXML/BeamSpotRetriever.h"
+#include "BeamSpotRetriever.h"
 
 #include "JiveXML/IFormatTool.h"
 
@@ -15,7 +15,7 @@ namespace JiveXML {
    * @param parent AlgTools parent owning this tool
    **/
   BeamSpotRetriever::BeamSpotRetriever(const std::string& type,const std::string& name,const IInterface* parent):
-    AthAlgTool(type,name,parent), m_typeName("BeamSpot") {
+    AthAlgTool(type,name,parent) {
     
     //Declare the interface
     declareInterface<IDataRetriever>(this);
@@ -36,7 +36,7 @@ namespace JiveXML {
   StatusCode BeamSpotRetriever::retrieve(ToolHandle<IFormatTool> &FormatTool) {
 
     //be verbose
-    if (msgLvl(MSG::DEBUG)) msg(MSG::DEBUG) << "Retrieving " << dataTypeName() <<endmsg; 
+    ATH_MSG_DEBUG( "Retrieving " << dataTypeName() ); 
 
     DataVect x; x.reserve( 1 );  
     DataVect y; y.reserve( 1 );  
@@ -54,7 +54,7 @@ namespace JiveXML {
     SG::ReadCondHandle<InDet::BeamSpotData> beamSpotHandle { m_beamSpotKey };
 // add the following into the initialize routine.
   if ( !beamSpotHandle.isValid() ) {
-    if (msgLvl(MSG::ERROR)) msg(MSG::ERROR) << "Failed to retrieve beamspot " <<  endmsg;
+    ATH_MSG_ERROR( "Failed to retrieve beamspot " );
     return StatusCode::RECOVERABLE;
   } else {
 
@@ -96,23 +96,19 @@ namespace JiveXML {
 
     status.push_back( beamSpotHandle->beamStatus() );
 
-  if (msgLvl(MSG::DEBUG)) {
-    msg(MSG::DEBUG)  << "BeamSpot Position: "
-                   << beamSpotHandle->beamPos() << endmsg;
-    msg(MSG::DEBUG)  << "BeamSpot Sigma "
+    ATH_MSG_DEBUG( "BeamSpot Position: "
+                   << beamSpotHandle->beamPos() );
+    ATH_MSG_DEBUG( "BeamSpot Sigma "
                    << beamSpotHandle->beamSigma(0) << ", "
                    << beamSpotHandle->beamSigma(1) << ", "
-                   << beamSpotHandle->beamSigma(2) 
-                   << endmsg;
-    msg(MSG::DEBUG)  << "BeamSpot Tilt: "
+                   << beamSpotHandle->beamSigma(2) );
+    ATH_MSG_DEBUG( "BeamSpot Tilt: "
                    << beamSpotHandle->beamTilt(0) << ", "
-                   << beamSpotHandle->beamTilt(1) 
-                   << endmsg;
-    msg(MSG::DEBUG) << "Beamspot position at PV z-position" << endmsg;
-  }
+                   << beamSpotHandle->beamTilt(1) );
+    ATH_MSG_DEBUG( "Beamspot position at PV z-position" );
 
     //be verbose about the amount of data we retrieved
-    if (msgLvl(MSG::DEBUG)) msg(MSG::DEBUG) << "Retrieved " << label.size() << "Beamspot" << endmsg;
+    ATH_MSG_DEBUG( "Retrieved " << label.size() << "Beamspot" );
 
     //Create a data map
     DataMap dataMap;
@@ -134,7 +130,7 @@ namespace JiveXML {
       return StatusCode::RECOVERABLE;
 
     //Clean up and exit
-    if (msgLvl(MSG::DEBUG)) msg() << dataTypeName() << " retrieved" << endmsg;
+    ATH_MSG_DEBUG( dataTypeName() << " retrieved" );
     
     return StatusCode::SUCCESS;
     }

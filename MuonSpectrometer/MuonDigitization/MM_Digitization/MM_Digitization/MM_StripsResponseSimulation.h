@@ -39,7 +39,7 @@ Comments to be added here...
 #include "MM_Digitization/MM_DigitToolInput.h"
 #include "MM_Digitization/MM_IonizationCluster.h"
 #include "MM_Digitization/MM_StripToolOutput.h"
-
+#include "NSWCalibTools/INSWCalibTool.h"
 /// STD'S
 #include <sys/stat.h>
 
@@ -63,13 +63,11 @@ namespace CLHEP {
 class MM_StripsResponseSimulation : public AthMessaging {
 public:
 
-    struct ConfigModule{
+    struct ConfigModule: public NSWCalib::MicroMegaGas {
+        ConfigModule() = default;
         /** qThreshold=2e, we accept a good strip if the charge is >=2e */
         float qThreshold{0.};
 
-        /** // 0.350/10 diffusSigma=transverse diffusion (350 microm per 1cm ) for 93:7 @ 600 V/cm, according to garfield  */
-        float transverseDiffusionSigma{0.};
-        float longitudinalDiffusionSigma{0.};
         /** crosstalk of neighbor strips, it's 15%  */
         float crossTalk1{0.};  // 0.10; //
         /** // crosstalk of second neighbor strips, it's 6% */
@@ -77,21 +75,13 @@ public:
 
         float driftGapWidth{0.};
 
-        /** //0.050 drift velocity in [mm/ns], driftGap=5 mm +0.128 mm (the amplification gap) */
-        float driftVelocity{0.};
-
         // Avalanche gain
         float avalancheGain{0.};
         int maxPrimaryIons{300};
-
-        float interactionDensityMean{0.};
-        float interactionDensitySigma{0.};
-
+      
         bool writeOutputFile{false};
         bool writeEventDisplays{false};
-
-        /// ToDo: random number from custom functions
-        const TF1* lorentzAngleFunction{nullptr};
+        
     };
     MM_StripsResponseSimulation(ConfigModule&& cfg);
 
@@ -102,13 +92,12 @@ public:
    
     float getQThreshold() const { return m_cfg.qThreshold; };
     float getDriftGapWidth() const { return m_cfg.driftGapWidth; };
-    float getDriftVelocity() const { return m_cfg.driftVelocity; };
+    double getDriftVelocity() const { return m_cfg.driftVelocity; };
     float getInteractionDensityMean() const { return m_cfg.interactionDensityMean; }
     float getInteractionDensitySigma() const { return m_cfg.interactionDensitySigma; }
     float getLongitudinalDiffusionSigma() const { return m_cfg.longitudinalDiffusionSigma; }
     float getTransversDiffusionSigma() const { return m_cfg.transverseDiffusionSigma; }
-    const TF1* getLorentzAngleFunction() const { return m_cfg.lorentzAngleFunction; }
-
+    
 private:
     void initHistos();  
     void writeHistos(); 
@@ -141,7 +130,7 @@ private:
 protected:
     // seperate random number generation for performance monitoring
     float generateTransverseDiffusion(float posY, CLHEP::HepRandomEngine* rndmEngine) const;
-    float getTransverseDiffusion(float posY, CLHEP::HepRandomEngine* rndmEngine);
+    float getTransverseDiffusion(float posY, CLHEP::HepRandomEngine* rndmEngine) const;
     float getLongitudinalDiffusion(float posY, CLHEP::HepRandomEngine* rndmEngine) const;
     float getEffectiveCharge(CLHEP::HepRandomEngine* rndmEngine) const;
     float getPathLengthTraveled(CLHEP::HepRandomEngine* rndmEngine) const;

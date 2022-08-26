@@ -3,10 +3,15 @@
 */
 
 #include "PixelDCSCondTempAlg.h"
+#include "InDetIdentifier/PixelID.h"
 #include "Identifier/IdentifierHash.h"
 #include "GaudiKernel/EventIDRange.h"
 
 #include <memory>
+
+namespace {
+  const std::string parameterName{"temperature"};
+}
 
 PixelDCSCondTempAlg::PixelDCSCondTempAlg(const std::string& name, ISvcLocator* pSvcLocator):
   ::AthReentrantAlgorithm(name, pSvcLocator)
@@ -46,7 +51,11 @@ StatusCode PixelDCSCondTempAlg::execute(const EventContext& ctx) const {
   const EventIDBase stop {EventIDBase::UNDEFNUM, EventIDBase::UNDEFEVT, EventIDBase::UNDEFNUM-1, EventIDBase::UNDEFNUM-1, EventIDBase::UNDEFNUM, EventIDBase::UNDEFNUM};
 
   EventIDRange rangeW{start, stop};
-
+  //
+  std::vector<int> channelsOutOfRange{}; //keep track of which channels are out of range, if any
+  std::vector<int> channelsWithNoMeasurement{}; //similar for those with no value
+  const float defaultTemperature = modData->getDefaultTemperature();
+  int countChannels=0;
   if (!m_readKey.empty()) {
     SG::ReadCondHandle<CondAttrListCollection> readHandle(m_readKey, ctx);
     const CondAttrListCollection* readCdo(*readHandle); 
@@ -63,31 +72,54 @@ StatusCode PixelDCSCondTempAlg::execute(const EventContext& ctx) const {
     ATH_MSG_INFO("Range of input is " << rangeW);
 
     // Read temperature info
-    const std::string param{"temperature"};
-    for (CondAttrListCollection::const_iterator attrList=readCdo->begin(); attrList!=readCdo->end(); ++attrList) {
-      CondAttrListCollection::ChanNum channelNumber{attrList->first};
-      const CondAttrListCollection::AttributeList& payload{attrList->second};
-      if (payload.exists(param) and not payload[param].isNull()) {
-        float val = payload[param].data<float>();
-        if (val>100.0 || val<-80.0) {
-          writeCdo->setTemperature((int)channelNumber, modData->getDefaultTemperature());
-        }
-        else {
-          writeCdo->setTemperature((int)channelNumber, val);
-        }
-      } 
-      else {
-        ATH_MSG_WARNING(param << " does not exist for ChanNum " << channelNumber);
-        writeCdo->setTemperature((int)channelNumber, modData->getDefaultTemperature());
+    auto outsideValidRange = [] (const float t){
+      return ( (t > 100.0f)  or ( t< -80.f) ) ;
+    };
+    
+    countChannels=readCdo->size();
+    for (auto attrList=readCdo->begin(); attrList!=readCdo->end(); ++attrList) {
+      const auto channelNumber{attrList->first};
+      const auto & payload{attrList->second};
+      if (payload.exists(parameterName) and not payload[parameterName].isNull()) {
+        float val = payload[parameterName].data<float>();
+        if (outsideValidRange(val)) {
+          channelsOutOfRange.push_back(channelNumber);
+          val = defaultTemperature;
+        };
+        writeCdo->setTemperature((int)channelNumber, val);
+      } else {
+        channelsWithNoMeasurement.push_back(channelNumber);
+        writeCdo->setTemperature((int)channelNumber, defaultTemperature);
       }
     }
-  }
-  else {
+  } else {
     for (int i=0; i<(int)m_pixelID->wafer_hash_max(); i++) {
-      writeCdo->setTemperature(i, modData->getDefaultTemperature());
+      writeCdo->setTemperature(i, defaultTemperature);
     }
   }
-
+  if (const int nInvalid = channelsWithNoMeasurement.size(); nInvalid>0){
+    ATH_MSG_INFO("Out of "<<countChannels<<", "<<nInvalid<<" channels have no temperature measurement, and were set to "<<defaultTemperature);
+    if ( msgLevel( MSG::DEBUG )){
+      std::string dbgMsg{"Enumerating the channel numbers:\n"};
+      for (auto i:channelsWithNoMeasurement){
+        dbgMsg += std::to_string(i) + " ";
+      }
+      dbgMsg +="\n";
+      ATH_MSG_DEBUG(dbgMsg);
+    }
+  }
+  if (const int nOutOfRange = channelsOutOfRange.size(); nOutOfRange>0){
+    ATH_MSG_INFO("Out of "<<countChannels<<", "<<nOutOfRange<<" channels have temperatures outside the range -80 to 100, and were set to "<<defaultTemperature);
+    if ( msgLevel( MSG::DEBUG )){
+      std::string dbgMsg{"Enumerating the channel numbers:\n"};
+      for (auto i:channelsOutOfRange){
+        dbgMsg += std::to_string(i) + " ";
+      }
+      dbgMsg +="\n";
+      ATH_MSG_DEBUG(dbgMsg);
+    }
+  }
+  
   if (writeHandle.record(rangeW, std::move(writeCdo)).isFailure()) {
     ATH_MSG_FATAL("Could not record PixelDCSTempData " << writeHandle.key() << " with EventRange " 
 		  << writeHandle.getRange() << " into Conditions Store");

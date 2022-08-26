@@ -327,9 +327,9 @@ StatusCode TrigMETMonitorAlgorithm::fillHistograms( const EventContext& ctx ) co
       hlt_el_mult = hlt_electron_cont->size();
       if (hlt_el_mult > 0) fill(tool,hlt_el_mult);
       for (auto Electron: *hlt_electron_cont) {
-        hlt_el_pt = (Electron->pt())*0.001;
-        if((Electron->pt()) * 0.001 > leadingElectronPt){
-          leadingElectronPt = (Electron->pt() * 0.001);
+        hlt_el_pt = Electron->pt()/Gaudi::Units::GeV;
+        if(hlt_el_pt > leadingElectronPt){
+          leadingElectronPt = hlt_el_pt;
           leadingElectronEta = (Electron->eta());
         }
 
@@ -345,10 +345,10 @@ StatusCode TrigMETMonitorAlgorithm::fillHistograms( const EventContext& ctx ) co
       hlt_mu_mult = hlt_muon_cont->size();
       if (hlt_mu_mult > 0) fill(tool,hlt_mu_mult);
       for(auto Muon : *hlt_muon_cont){
-        hlt_mu_pt = (Muon->pt())*0.001;
+        hlt_mu_pt = Muon->pt()/Gaudi::Units::GeV;
 
-        if(Muon->pt() * 0.001 > leadingMuonPt){
-          leadingMuonPt = (Muon->pt()*0.001);
+        if(hlt_mu_pt > leadingMuonPt){
+          leadingMuonPt = hlt_mu_pt;
           leadingMuonEta = (Muon->eta());
         }
 
@@ -362,7 +362,7 @@ StatusCode TrigMETMonitorAlgorithm::fillHistograms( const EventContext& ctx ) co
     if(hlt_topoclusters_cont.isValid() && hlt_topoclusters_cont->size() > 0){
       hlt_topoclusters_mult = hlt_topoclusters_cont->size();
       for(auto topoclusters : *hlt_topoclusters_cont){
-        hlt_topoclusters_pt = (topoclusters->pt())*0.001;
+        hlt_topoclusters_pt = topoclusters->pt()/Gaudi::Units::GeV;
         if(hlt_topoclusters_pt > 0){
           fill(tool, hlt_topoclusters_pt);
         }
@@ -380,7 +380,7 @@ StatusCode TrigMETMonitorAlgorithm::fillHistograms( const EventContext& ctx ) co
       float scalarSumPx = 0.0;
       float scalarSumPy = 0.0;
       for(auto tracks : *hlt_tracks_cont){
-        float i_track_pt = (tracks->pt())*0.001;
+        float i_track_pt = tracks->pt()/Gaudi::Units::GeV;
         hlt_tracks_pt = i_track_pt;
         scalarSumPt += i_track_pt;
         scalarSumPx += (tracks->p4().Px());
@@ -401,7 +401,7 @@ StatusCode TrigMETMonitorAlgorithm::fillHistograms( const EventContext& ctx ) co
         }
       }
       
-      hlt_tracks_vec_sumPt = std::sqrt(scalarSumPx*scalarSumPx + scalarSumPy*scalarSumPy)*0.001;
+      hlt_tracks_vec_sumPt = std::sqrt(scalarSumPx*scalarSumPx + scalarSumPy*scalarSumPy)/Gaudi::Units::GeV;
       hlt_tracks_sca_sumPt = scalarSumPt;
 
       fill(tool, hlt_tracks_mult, hlt_tracks_leading_pt, hlt_tracks_vec_sumPt, hlt_tracks_sca_sumPt);
@@ -447,25 +447,24 @@ StatusCode TrigMETMonitorAlgorithm::fillHistograms( const EventContext& ctx ) co
     fill(tool, act_IPBC, hlt_vertex_mult_mu);
 
     // access offline MET values
-    const xAOD::MissingET *offline_met = 0;
     const xAOD::MissingET *finalTrkMET = 0;
     const xAOD::MissingET *muonsMET = 0;
     if ( offline_met_cont.isValid() && offline_met_cont->size() > 0 ) {
-      offline_met = offline_met_cont->at(0);
-      offline_Ex = - (offline_met->mpx())/1000.;
-      offline_Ey = - (offline_met->mpy())/1000.;
-      offline_sumEt = (offline_met->sumet())/1000.;
+      finalTrkMET = ((*offline_met_cont)["FinalTrk"]);
+      muonsMET = ((*offline_met_cont)["Muons"]);
+      
+      offline_Ex = - finalTrkMET->mpx()/Gaudi::Units::GeV;
+      offline_Ey = - finalTrkMET->mpy()/Gaudi::Units::GeV;
+      offline_sumEt = finalTrkMET->sumet()/Gaudi::Units::GeV;
       offline_Et = std::sqrt(offline_Ex*offline_Ex + offline_Ey*offline_Ey);
       offline_Et_eff = std::sqrt(offline_Ex*offline_Ex + offline_Ey*offline_Ey);
       fill(tool,offline_Ex,offline_Ey,offline_Et,offline_sumEt);
-	  
-      finalTrkMET = ((*offline_met_cont)["FinalTrk"]);
-      muonsMET = ((*offline_met_cont)["Muons"]);
+
       if(finalTrkMET && muonsMET){
         xAOD::MissingET finalTrkNoMuMET = *finalTrkMET - *muonsMET;
-        offline_NoMu_Ex = - (finalTrkNoMuMET.mpx())/1000.;
-        offline_NoMu_Ey = - (finalTrkNoMuMET.mpy())/1000.;	
-        offline_NoMu_sumEt = (finalTrkNoMuMET.sumet())/1000.;
+        offline_NoMu_Ex = - finalTrkNoMuMET.mpx()/Gaudi::Units::GeV;
+        offline_NoMu_Ey = - finalTrkNoMuMET.mpy()/Gaudi::Units::GeV;	
+        offline_NoMu_sumEt = finalTrkNoMuMET.sumet()/Gaudi::Units::GeV;
         offline_NoMu_Et = std::sqrt(offline_NoMu_Ex*offline_NoMu_Ex + offline_NoMu_Ey*offline_NoMu_Ey);
         offline_NoMu_Et_eff = std::sqrt(offline_NoMu_Ex*offline_NoMu_Ex + offline_NoMu_Ey*offline_NoMu_Ey);
         fill(tool,offline_NoMu_Ex,offline_NoMu_Ey,offline_NoMu_Et,offline_NoMu_sumEt);
@@ -493,10 +492,10 @@ StatusCode TrigMETMonitorAlgorithm::fillHistograms( const EventContext& ctx ) co
 
       if ( l1_met_cont.isValid() ) {
         if ((l1_met_cont->energyX())>-9e12 && (l1_met_cont->energyX())<9e12 && (l1_met_cont->energyY())>-9e12 && (l1_met_cont->energyY())<9e12) {
-          float L1_met_Ex = - (l1_met_cont->energyX())/1000.;
-          float L1_met_Ey = - (l1_met_cont->energyY())/1000.;
+          float L1_met_Ex = - l1_met_cont->energyX()/Gaudi::Units::GeV;
+          float L1_met_Ey = - l1_met_cont->energyY()/Gaudi::Units::GeV;
           float L1_met_Et = std::sqrt(L1_met_Ex*L1_met_Ex + L1_met_Ey*L1_met_Ey);
-          float L1_met_sumEt = (l1_met_cont->energyT())/1000.;
+          float L1_met_sumEt = l1_met_cont->energyT()/Gaudi::Units::GeV;
           float L1_met_Ex_log = signed_log(L1_met_Ex, epsilon);
           float L1_met_Ey_log = signed_log(L1_met_Ey, epsilon);
           float L1_met_Et_log = signed_log(L1_met_Et, epsilon);
@@ -521,8 +520,8 @@ StatusCode TrigMETMonitorAlgorithm::fillHistograms( const EventContext& ctx ) co
       float L1_met_Ex = 0;
       float L1_met_Ey = 0;
       for (const auto l1_jmet: *l1_jFexMet_cont) {
-        L1_met_Ex += l1_jmet->Ex()*0.001;
-        L1_met_Ey += l1_jmet->Ey()*0.001;
+        L1_met_Ex += l1_jmet->Ex()/Gaudi::Units::GeV;
+        L1_met_Ey += l1_jmet->Ey()/Gaudi::Units::GeV;
       }
       float L1_met_Et = std::sqrt(L1_met_Ex*L1_met_Ex + L1_met_Ey*L1_met_Ey);
       float L1_met_Ex_log = signed_log(L1_met_Ex, epsilon);
@@ -539,7 +538,7 @@ StatusCode TrigMETMonitorAlgorithm::fillHistograms( const EventContext& ctx ) co
     if (l1_jFexSumEt_cont.isValid() && l1_jFexSumEt_cont->size() > 0) {
       float L1_met_sumEt = 0;
       for (const auto l1_jsumEt: *l1_jFexSumEt_cont) {
-        L1_met_sumEt += l1_jsumEt->Et_lower()*0.001 + l1_jsumEt->Et_upper()*0.001;
+        L1_met_sumEt += l1_jsumEt->Et_lower()/Gaudi::Units::GeV + l1_jsumEt->Et_upper()/Gaudi::Units::GeV;
       }
       float L1_met_sumEt_log = signed_log(L1_met_sumEt, epsilon);
       auto L1_sumEt = Monitored::Scalar<float>("L1_jFex_sumEt", static_cast<float>(L1_met_sumEt));
@@ -554,8 +553,8 @@ StatusCode TrigMETMonitorAlgorithm::fillHistograms( const EventContext& ctx ) co
     // This will be properly implemented when it's ready
     if (l1_gFexJwojScalar_cont.isValid() && l1_gFexJwojScalar_cont->size() > 0) {
       l1_gmet = l1_gFexJwojScalar_cont->at(0);
-      float L1_met_Et = l1_gmet->METquantityOne()*0.001;
-      float L1_met_sumEt = l1_gmet->METquantityTwo()*0.001;
+      float L1_met_Et = l1_gmet->METquantityOne()/Gaudi::Units::GeV;
+      float L1_met_sumEt = l1_gmet->METquantityTwo()/Gaudi::Units::GeV;
       float L1_met_Et_log = signed_log(L1_met_Et, epsilon);
       float L1_met_sumEt_log = signed_log(L1_met_sumEt, epsilon);
       auto L1_Et = Monitored::Scalar<float>("L1_gFexJwoj_Et", static_cast<float>(L1_met_Et));
@@ -567,9 +566,9 @@ StatusCode TrigMETMonitorAlgorithm::fillHistograms( const EventContext& ctx ) co
 
     if (l1_gFexJwojMETComponents_cont.isValid() && l1_gFexJwojMETComponents_cont->size() > 0) {
       l1_gmet = l1_gFexJwojMETComponents_cont->at(0);
-      float L1_met_Ex = l1_gmet->METquantityOne()*0.001;
+      float L1_met_Ex = l1_gmet->METquantityOne()/Gaudi::Units::GeV;
       float L1_met_Ex_log = signed_log(L1_met_Ex, epsilon);
-      float L1_met_Ey = l1_gmet->METquantityTwo()*0.001;
+      float L1_met_Ey = l1_gmet->METquantityTwo()/Gaudi::Units::GeV;
       float L1_met_Ey_log = signed_log(L1_met_Ey, epsilon);
       auto L1_Ex = Monitored::Scalar<float>("L1_gFexJwoj_Ex", static_cast<float>(L1_met_Ex));
       auto L1_Ey = Monitored::Scalar<float>("L1_gFexJwoj_Ey", static_cast<float>(L1_met_Ey));
@@ -580,9 +579,9 @@ StatusCode TrigMETMonitorAlgorithm::fillHistograms( const EventContext& ctx ) co
 
     if (l1_gFexJwojMHTComponents_cont.isValid() && l1_gFexJwojMHTComponents_cont->size() > 0) {
       l1_gmet = l1_gFexJwojMHTComponents_cont->at(0);
-      float L1_met_HT_Ex = l1_gmet->METquantityOne()*0.001;
+      float L1_met_HT_Ex = l1_gmet->METquantityOne()/Gaudi::Units::GeV;
       float L1_met_HT_Ex_log = signed_log(L1_met_HT_Ex, epsilon);
-      float L1_met_HT_Ey = l1_gmet->METquantityTwo()*0.001;
+      float L1_met_HT_Ey = l1_gmet->METquantityTwo()/Gaudi::Units::GeV;
       float L1_met_HT_Ey_log = signed_log(L1_met_HT_Ey, epsilon);
       auto L1_HT_Ex = Monitored::Scalar<float>("L1_gFexJwoj_HT_Ex", static_cast<float>(L1_met_HT_Ex));
       auto L1_HT_Ey = Monitored::Scalar<float>("L1_gFexJwoj_HT_Ey", static_cast<float>(L1_met_HT_Ey));
@@ -593,9 +592,9 @@ StatusCode TrigMETMonitorAlgorithm::fillHistograms( const EventContext& ctx ) co
 	
     if (l1_gFexJwojMSTComponents_cont.isValid() && l1_gFexJwojMSTComponents_cont->size() > 0) {
       l1_gmet = l1_gFexJwojMSTComponents_cont->at(0);
-      float L1_met_ST_Ex = l1_gmet->METquantityOne()*0.001;
+      float L1_met_ST_Ex = l1_gmet->METquantityOne()/Gaudi::Units::GeV;
       float L1_met_ST_Ex_log = signed_log(L1_met_ST_Ex, epsilon);
-      float L1_met_ST_Ey = l1_gmet->METquantityTwo()*0.001;
+      float L1_met_ST_Ey = l1_gmet->METquantityTwo()/Gaudi::Units::GeV;
       float L1_met_ST_Ey_log = signed_log(L1_met_ST_Ey, epsilon);
       auto L1_ST_Ex = Monitored::Scalar<float>("L1_gFexJwoj_ST_Ex", static_cast<float>(L1_met_ST_Ex));
       auto L1_ST_Ey = Monitored::Scalar<float>("L1_gFexJwoj_ST_Ey", static_cast<float>(L1_met_ST_Ey));
@@ -606,8 +605,8 @@ StatusCode TrigMETMonitorAlgorithm::fillHistograms( const EventContext& ctx ) co
     
     if (l1_gFexNCMETScalar_cont.isValid() && l1_gFexNCMETScalar_cont->size() > 0) {
       l1_gmet = l1_gFexNCMETScalar_cont->at(0);
-      float L1_met_Et = l1_gmet->METquantityOne()*0.001;
-      float L1_met_sumEt = l1_gmet->METquantityTwo()*0.001;
+      float L1_met_Et = l1_gmet->METquantityOne()/Gaudi::Units::GeV;
+      float L1_met_sumEt = l1_gmet->METquantityTwo()/Gaudi::Units::GeV;
       float L1_met_Et_log = signed_log(L1_met_Et, epsilon);
       float L1_met_sumEt_log = signed_log(L1_met_sumEt, epsilon);
       auto L1_Et = Monitored::Scalar<float>("L1_gFexNC_Et", static_cast<float>(L1_met_Et));
@@ -619,9 +618,9 @@ StatusCode TrigMETMonitorAlgorithm::fillHistograms( const EventContext& ctx ) co
     
     if (l1_gFexNCMETComponents_cont.isValid() && l1_gFexNCMETComponents_cont->size() > 0) {
       l1_gmet = l1_gFexNCMETComponents_cont->at(0);
-      float L1_met_Ex = l1_gmet->METquantityOne()*0.001;
+      float L1_met_Ex = l1_gmet->METquantityOne()/Gaudi::Units::GeV;
       float L1_met_Ex_log = signed_log(L1_met_Ex, epsilon);
-      float L1_met_Ey = l1_gmet->METquantityTwo()*0.001;
+      float L1_met_Ey = l1_gmet->METquantityTwo()/Gaudi::Units::GeV;
       float L1_met_Ey_log = signed_log(L1_met_Ey, epsilon);
       auto L1_Ex = Monitored::Scalar<float>("L1_gFexNC_Ex", static_cast<float>(L1_met_Ex));
       auto L1_Ey = Monitored::Scalar<float>("L1_gFexNC_Ey", static_cast<float>(L1_met_Ey));
@@ -632,8 +631,8 @@ StatusCode TrigMETMonitorAlgorithm::fillHistograms( const EventContext& ctx ) co
 	
     if (l1_gFexRhoMETScalar_cont.isValid() && l1_gFexRhoMETScalar_cont->size() > 0) {
       l1_gmet = l1_gFexRhoMETScalar_cont->at(0);
-      float L1_met_Et = l1_gmet->METquantityOne()*0.001;
-      float L1_met_sumEt = l1_gmet->METquantityTwo()*0.001;
+      float L1_met_Et = l1_gmet->METquantityOne()/Gaudi::Units::GeV;
+      float L1_met_sumEt = l1_gmet->METquantityTwo()/Gaudi::Units::GeV;
       float L1_met_Et_log = signed_log(L1_met_Et, epsilon);
       float L1_met_sumEt_log = signed_log(L1_met_sumEt, epsilon);
       auto L1_Et = Monitored::Scalar<float>("L1_gFexRho_Et", static_cast<float>(L1_met_Et));
@@ -645,9 +644,9 @@ StatusCode TrigMETMonitorAlgorithm::fillHistograms( const EventContext& ctx ) co
     
     if (l1_gFexRhoMETComponents_cont.isValid() && l1_gFexRhoMETComponents_cont->size() > 0) {
       l1_gmet = l1_gFexRhoMETComponents_cont->at(0);
-      float L1_met_Ex = l1_gmet->METquantityOne()*0.001;
+      float L1_met_Ex = l1_gmet->METquantityOne()/Gaudi::Units::GeV;
       float L1_met_Ex_log = signed_log(L1_met_Ex, epsilon);
-      float L1_met_Ey = l1_gmet->METquantityTwo()*0.001;
+      float L1_met_Ey = l1_gmet->METquantityTwo()/Gaudi::Units::GeV;
       float L1_met_Ey_log = signed_log(L1_met_Ey, epsilon);
       auto L1_Ex = Monitored::Scalar<float>("L1_gFexRho_Ex", static_cast<float>(L1_met_Ex));
       auto L1_Ey = Monitored::Scalar<float>("L1_gFexRho_Ey", static_cast<float>(L1_met_Ey));
@@ -676,8 +675,8 @@ StatusCode TrigMETMonitorAlgorithm::fillHistograms( const EventContext& ctx ) co
       }
 
       for (int i=0; i<nComponent; ++i) { //component loop
-        float ex = hlt_met->exComponent(i)*0.001;
-        float ey = hlt_met->eyComponent(i)*0.001;
+        float ex = hlt_met->exComponent(i)/Gaudi::Units::GeV;
+        float ey = hlt_met->eyComponent(i)/Gaudi::Units::GeV;
         component_Et = sqrt(ex*ex+ey*ey);
         auto mon2 = Monitored::Scalar<std::string>( "HLT_MET_component",m_compNames[i]);
         fill(tool,mon2,component_Et);
@@ -702,8 +701,8 @@ StatusCode TrigMETMonitorAlgorithm::fillHistograms( const EventContext& ctx ) co
     float L1_roiMet_Et = 0;
     if ( l1_roi_cont.isValid() ) {
       if ((l1_roi_cont->energyX())>-9e12 && (l1_roi_cont->energyX())<9e12 && (l1_roi_cont->energyY())>-9e12 && (l1_roi_cont->energyY())<9e12) {
-	      float Ex = - (l1_roi_cont->energyX())/1000.;
-	      float Ey = - (l1_roi_cont->energyY())/1000.;
+	      float Ex = - l1_roi_cont->energyX()/Gaudi::Units::GeV;
+	      float Ey = - l1_roi_cont->energyY()/Gaudi::Units::GeV;
            L1_roiMet_Et = std::sqrt(Ex*Ex + Ey*Ey);
       }
     }
@@ -747,11 +746,11 @@ StatusCode TrigMETMonitorAlgorithm::fillHistograms( const EventContext& ctx ) co
       }
 
       if ( hlt_met ) {
-        float hlt_Ex = (hlt_met->ex())/1000.;
-        float hlt_Ey = (hlt_met->ey())/1000.;
-        float hlt_Ez = (hlt_met->ez())/1000.;
+        float hlt_Ex = hlt_met->ex()/Gaudi::Units::GeV;
+        float hlt_Ey = hlt_met->ey()/Gaudi::Units::GeV;
+        float hlt_Ez = hlt_met->ez()/Gaudi::Units::GeV;
         float hlt_Et = std::sqrt(hlt_Ex*hlt_Ex + hlt_Ey*hlt_Ey);
-        float hlt_sumEt = (hlt_met->sumEt())/1000.;
+        float hlt_sumEt = hlt_met->sumEt()/Gaudi::Units::GeV;
         float hlt_Ex_log = signed_log(hlt_Ex, epsilon);
         float hlt_Ey_log = signed_log(hlt_Ey, epsilon);
         float hlt_Et_log = signed_log(hlt_Et, epsilon);
@@ -773,7 +772,51 @@ StatusCode TrigMETMonitorAlgorithm::fillHistograms( const EventContext& ctx ) co
         fill(tool,met_Ex,met_Ey,met_Et,met_sumEt,
              met_Ex_log,met_Ey_log,met_Et_log,met_sumEt_log,
              met_eta,met_phi);
-        ATH_MSG_DEBUG(alg << ": hlt_Et = " << hlt_Et);
+      }
+    }
+    
+    // access HLT pre-selection MET values
+    for (const std::string& alg : m_algsHLTPreSel) {
+      if (alg == "cell" && hlt_cell_met_cont.isValid() && hlt_cell_met_cont->size() > 0) {
+        hlt_met = hlt_cell_met_cont->at(0);
+      } else if (alg == "mht" && hlt_mht_met_cont.isValid() && hlt_mht_met_cont->size() > 0) {
+        hlt_met = hlt_mht_met_cont->at(0);
+      } else if (alg == "tc" && hlt_tc_met_cont.isValid() && hlt_tc_met_cont->size() > 0) {
+        hlt_met = hlt_tc_met_cont->at(0);
+      } else if (alg == "tc_em" && hlt_tc_em_met_cont.isValid() && hlt_tc_em_met_cont->size() > 0) {
+        hlt_met = hlt_tc_em_met_cont->at(0);
+      } else if (alg == "tcpufit" && hlt_tcpufit_met_cont.isValid() && hlt_tcpufit_met_cont->size() > 0) {
+        hlt_met = hlt_tcpufit_met_cont->at(0);
+      } else if (alg == "tcpufit_sig30" && hlt_tcpufit_sig30_met_cont.isValid() && hlt_tcpufit_sig30_met_cont->size() > 0) {
+        hlt_met = hlt_tcpufit_sig30_met_cont->at(0);
+      } else if (alg == "trkmht" && hlt_trkmht_met_cont.isValid() && hlt_trkmht_met_cont->size() > 0) {
+        hlt_met = hlt_trkmht_met_cont->at(0);
+      } else if (alg == "pfsum" && hlt_pfsum_met_cont.isValid() && hlt_pfsum_met_cont->size() > 0) {
+        hlt_met = hlt_pfsum_met_cont->at(0);
+      } else if (alg == "pfsum_cssk" && hlt_pfsum_cssk_met_cont.isValid() && hlt_pfsum_cssk_met_cont->size() > 0) {
+        hlt_met = hlt_pfsum_cssk_met_cont->at(0);
+      } else if (alg == "pfsum_vssk" && hlt_pfsum_vssk_met_cont.isValid() && hlt_pfsum_vssk_met_cont->size() > 0) {
+        hlt_met = hlt_pfsum_vssk_met_cont->at(0);
+      } else if (alg == "pfopufit" && hlt_pfopufit_met_cont.isValid() && hlt_pfopufit_met_cont->size() > 0) {
+        hlt_met = hlt_pfopufit_met_cont->at(0);
+      } else if (alg == "pfopufit_sig30" && hlt_pfopufit_sig30_met_cont.isValid() && hlt_pfopufit_sig30_met_cont->size() > 0) {
+        hlt_met = hlt_pfopufit_sig30_met_cont->at(0);
+      } else if (alg == "cvfpufit" && hlt_cvfpufit_met_cont.isValid() && hlt_cvfpufit_met_cont->size() > 0) {
+        hlt_met = hlt_cvfpufit_met_cont->at(0);
+      } else if (alg == "mhtpufit_pf" && hlt_mhtpufit_pf_met_cont.isValid() && hlt_mhtpufit_pf_met_cont->size() > 0) {
+        hlt_met = hlt_mhtpufit_pf_met_cont->at(0);
+      } else if (alg == "mhtpufit_em" && hlt_mhtpufit_em_met_cont.isValid() && hlt_mhtpufit_em_met_cont->size() > 0) {
+        hlt_met = hlt_mhtpufit_em_met_cont->at(0);
+      } else if (alg == "met_nn" && hlt_met_nn_cont.isValid() && hlt_met_nn_cont->size() > 0) {
+        hlt_met = hlt_met_nn_cont->at(0);
+      } else {
+        hlt_met = 0;
+      }
+
+      if ( hlt_met ) {
+        float hlt_Ex = hlt_met->ex()/Gaudi::Units::GeV;
+        float hlt_Ey = hlt_met->ey()/Gaudi::Units::GeV;
+        float hlt_Et = std::sqrt(hlt_Ex*hlt_Ex + hlt_Ey*hlt_Ey);
         if (L1_roiMet_Et > 50.) {
           auto met_presel_Et = Monitored::Scalar<float>(alg+"_presel_Et", static_cast<float>(hlt_Et));
           fill(tool,met_presel_Et);
@@ -813,11 +856,11 @@ StatusCode TrigMETMonitorAlgorithm::fillHistograms( const EventContext& ctx ) co
       }
 
       if ( hlt_met ) {
-        float hlt_Ex = (hlt_met->ex())/1000.;
-        float hlt_Ey = (hlt_met->ey())/1000.;
-        float hlt_Ez = (hlt_met->ez())/1000.;
+        float hlt_Ex = hlt_met->ex()/Gaudi::Units::GeV;
+        float hlt_Ey = hlt_met->ey()/Gaudi::Units::GeV;
+        float hlt_Ez = hlt_met->ez()/Gaudi::Units::GeV;
         float hlt_Et = std::sqrt(hlt_Ex*hlt_Ex + hlt_Ey*hlt_Ey);
-        float hlt_sumEt = (hlt_met->sumEt())/1000.;
+        float hlt_sumEt = hlt_met->sumEt()/Gaudi::Units::GeV;
         float hlt_Ex_log = signed_log(hlt_Ex, epsilon);
         float hlt_Ey_log = signed_log(hlt_Ey, epsilon);
         float hlt_Et_log = signed_log(hlt_Et, epsilon);
@@ -841,7 +884,7 @@ StatusCode TrigMETMonitorAlgorithm::fillHistograms( const EventContext& ctx ) co
             met_Ex_log,met_Ey_log,met_Et_log,met_sumEt_log,
             met_eta,met_phi);  
         }
-		
+
         if(leadingMuonPt > m_muonPtCut && fabs(leadingMuonEta) < m_muonEtaCut){
           auto met_Ex = Monitored::Scalar<float>(alg+"_SigMu_Ex", static_cast<float>(hlt_Ex));
           auto met_Ey = Monitored::Scalar<float>(alg+"_SigMu_Ey", static_cast<float>(hlt_Ey));
@@ -881,10 +924,10 @@ StatusCode TrigMETMonitorAlgorithm::fillHistograms( const EventContext& ctx ) co
 
       if ( l1_met_cont.isValid() ) {
         if ((l1_met_cont->energyX())>-9e12 && (l1_met_cont->energyX())<9e12 && (l1_met_cont->energyY())>-9e12 && (l1_met_cont->energyY())<9e12) {
-          float L1_met_Ex = - (l1_met_cont->energyX())/1000.;
-          float L1_met_Ey = - (l1_met_cont->energyY())/1000.;
+          float L1_met_Ex = - l1_met_cont->energyX()/Gaudi::Units::GeV;
+          float L1_met_Ey = - l1_met_cont->energyY()/Gaudi::Units::GeV;
           float L1_met_Et = std::sqrt(L1_met_Ex*L1_met_Ex + L1_met_Ey*L1_met_Ey);
-          float L1_met_sumEt = (l1_met_cont->energyT())/1000.;
+          float L1_met_sumEt = l1_met_cont->energyT()/Gaudi::Units::GeV;
 
           auto L1_Ex = Monitored::Scalar<float>("L1_"+alg+"_Ex", static_cast<float>(L1_met_Ex));
           auto L1_Ey = Monitored::Scalar<float>("L1_"+alg+"_Ey", static_cast<float>(L1_met_Ey));
@@ -934,10 +977,10 @@ StatusCode TrigMETMonitorAlgorithm::fillHistograms( const EventContext& ctx ) co
       }
 
       if ( hlt_met ) {
-        float hlt_Ex = (hlt_met->ex())/1000.;
-        float hlt_Ey = (hlt_met->ey())/1000.;
+        float hlt_Ex = hlt_met->ex()/Gaudi::Units::GeV;
+        float hlt_Ey = hlt_met->ey()/Gaudi::Units::GeV;
         float hlt_Et = std::sqrt(hlt_Ex*hlt_Ex + hlt_Ey*hlt_Ey);
-        float hlt_sumEt = (hlt_met->sumEt())/1000.;
+        float hlt_sumEt = hlt_met->sumEt()/Gaudi::Units::GeV;
 
         auto met_Ex = Monitored::Scalar<float>(alg+"_Ex", static_cast<float>(hlt_Ex));
         auto met_Ey = Monitored::Scalar<float>(alg+"_Ey", static_cast<float>(hlt_Ey));
@@ -985,13 +1028,13 @@ StatusCode TrigMETMonitorAlgorithm::fillHistograms( const EventContext& ctx ) co
 
       if(hlt_met && hlt_tcpufit_met_cont.isValid() && hlt_tcpufit_met_cont->size() > 0){
         hlt_tcpufit_met = hlt_tcpufit_met_cont->at(0); 
-        float hlt_Ex = (hlt_met->ex())/1000.;
-        float hlt_Ey = (hlt_met->ey())/1000.;
+        float hlt_Ex = hlt_met->ex()/Gaudi::Units::GeV;
+        float hlt_Ey = hlt_met->ey()/Gaudi::Units::GeV;
         float hlt_Et = std::sqrt(hlt_Ex*hlt_Ex + hlt_Ey*hlt_Ey);
         auto met_Et = Monitored::Scalar<float>(alg+"_2D_Et", static_cast<float>(hlt_Et));
         
-        float hlt_tcpufit_Ex = (hlt_tcpufit_met->ex())/1000.;
-        float hlt_tcpufit_Ey = (hlt_tcpufit_met->ey())/1000.;
+        float hlt_tcpufit_Ex = hlt_tcpufit_met->ex()/Gaudi::Units::GeV;
+        float hlt_tcpufit_Ey = hlt_tcpufit_met->ey()/Gaudi::Units::GeV;
         float hlt_tcpufit_Et = std::sqrt(hlt_tcpufit_Ex*hlt_tcpufit_Ex + hlt_tcpufit_Ey*hlt_tcpufit_Ey);
         auto tcpufit_met_Et = Monitored::Scalar<float>("tcpufit_2D_Et", static_cast<float>(hlt_tcpufit_Et));
         fill(tool, met_Et, tcpufit_met_Et);

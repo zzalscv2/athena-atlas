@@ -165,6 +165,16 @@ def TrigMETMonConfig(inputFlags):
                "tcpufit", 
                "pfopufit", 
                "met_nn"]
+    algsHLTPreSel = ["cell", 
+               "tcpufit", 
+               "tcpufit_sig30", 
+               "pfsum_cssk", 
+               "pfsum_vssk", 
+               "pfopufit", 
+               "pfopufit_sig30", 
+               "mhtpufit_pf", 
+               "mhtpufit_em",
+               "met_nn"] 
     algsHLT2d = ["cell", 
                  "tcpufit", 
                  "pfopufit"]
@@ -187,6 +197,7 @@ def TrigMETMonConfig(inputFlags):
     TrigMETMonAlg.algsL1 = algsL1
     TrigMETMonAlg.algsL1Expert = algsL1Expert
     TrigMETMonAlg.algsHLT = algsHLT
+    TrigMETMonAlg.algsHLTPreSel = algsHLTPreSel
     TrigMETMonAlg.algsHLT2d = algsHLT2d
     TrigMETMonAlg.algsHLTExpert = algsHLTExpert
     TrigMETMonAlg.algsMET2d_tcpufit = algsMET2d_tcpufit
@@ -513,6 +524,8 @@ def TrigMETMonConfig(inputFlags):
                              weight='{}_Et'.format(alg),
                              path='Shifter/HLT_{}'.format(alg),
                              xbins=phi_bins,xmin=phi_min,xmax=phi_max)
+    ## HLT Preselection
+    for alg in algsHLTPreSel:
       metGroup.defineHistogram('{}_presel_Et'.format(alg),
                              title='{} Missing E_{{T}};E_{{T}} [GeV];Events'.format(alg),
                              path='Shifter/preSel',
@@ -640,27 +653,27 @@ def TrigMETMonConfig(inputFlags):
 
     ## L1 efficiency
     for chain in L1Chains:
-       metGroup.defineHistogram('offline_Et_eff,pass_{};{}_eff'.format(chain,chain),
+       metGroup.defineHistogram('offline_NoMu_Et_eff,pass_{};{}_eff'.format(chain,chain),
                                 type='TProfile',
                                 title='{} efficiency;offline E_{{T}} [GeV];Efficiency'.format(chain),
                                 path='Shifter/eff',
                                 xbins=eff_bins, xmin=eff_min, xmax=eff_max)
     ## HLT efficiency
     for chain in HLTChains:
-       metGroup.defineHistogram('offline_Et_eff,pass_{};{}_eff'.format(chain,chain),
+       metGroup.defineHistogram('offline_NoMu_Et_eff,pass_{};{}_eff'.format(chain,chain),
                                 type='TProfile',
                                 title='{} efficiency;offline E_{{T}} [GeV];Efficiency'.format(chain),
                                 path='Shifter/eff',
                                 xbins=eff_bins, xmin=eff_min, xmax=eff_max)
     ## HLT efficiency for expert
     for chain in HLTChainsVal:
-       metGroup.defineHistogram('offline_Et_eff,pass_{};{}_eff'.format(chain,chain),
+       metGroup.defineHistogram('offline_NoMu_Et_eff,pass_{};{}_eff'.format(chain,chain),
                                 type='TProfile',
                                 title='{} efficiency;offline E_{{T}} [GeV];Efficiency'.format(chain),
                                 path='Expert/eff',
                                 xbins=eff_bins, xmin=eff_min, xmax=eff_max)
     for chain in HLTChainsT0:
-       metGroup.defineHistogram('offline_Et_eff,pass_{};{}_eff'.format(chain,chain),
+       metGroup.defineHistogram('offline_NoMu_Et_eff,pass_{};{}_eff'.format(chain,chain),
                                 type='TProfile',
                                 title='{} efficiency;offline E_{{T}} [GeV];Efficiency'.format(chain),
                                 path='Expert/eff',

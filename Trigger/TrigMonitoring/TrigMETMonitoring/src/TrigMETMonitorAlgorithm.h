@@ -96,6 +96,7 @@ class TrigMETMonitorAlgorithm : public AthMonitorAlgorithm {
   Gaudi::Property<std::vector<std::string>> m_hltChainsT0{this, "HLTChainsT0", {}, "The HLT t0 chains to monitor"};
   Gaudi::Property<std::vector<std::string>> m_algsL1{this, "algsL1", {}, "L1 algorithms to monitor"};
   Gaudi::Property<std::vector<std::string>> m_algsHLT{this, "algsHLT", {}, "HLT algorithms to monitor"};
+  Gaudi::Property<std::vector<std::string>> m_algsHLTPreSel{this, "algsHLTPreSel", {}, "HLTPreSel algorithms to monitor"};
   Gaudi::Property<std::vector<std::string>> m_algsHLT2d{this, "algsHLT2d", {}, "HLT algorithms for 2d eta-phi plots"};
   Gaudi::Property<std::vector<std::string>> m_algsL1Expert{this, "algsL1Expert", {}, "L1 algorithms for Expert"};
   Gaudi::Property<std::vector<std::string>> m_algsHLTExpert{this, "algsHLTExpert", {}, "HLT algorithms for Expert"};

@@ -49,7 +49,7 @@ MM_StripsResponseSimulation::MM_StripsResponseSimulation(ConfigModule&& mod) :
         NelectronProb.push_back(21.6 / ((Nelectron) * (Nelectron)));
 
     m_randNelectrons =
-        std::make_unique<CLHEP::RandGeneral>(&NelectronProb[0], s_NelectronPropBins, 1);  // 1 means non-continious random numbers
+        std::make_unique<CLHEP::RandGeneral>(NelectronProb.data(), NelectronProb.size(), 1);  // 1 means non-continious random numbers
 
     ATH_MSG_DEBUG("MM_StripsResponseSimulation::initializationFrom set values");
     }
@@ -133,7 +133,7 @@ void MM_StripsResponseSimulation::whichStrips(DataCache& cache,
 
     // Still need to understand which sign is which... But I think this is correct...
 
-    float lorentzAngle = (b.y() > 0. ? 1. : -1.) * m_cfg.lorentzAngleFunction->Eval(std::abs(b.y())) * TMath::DegToRad();  // in radians
+    float lorentzAngle = (b.y() > 0. ? 1. : -1.) * m_cfg.lorentzAngleFunction(std::abs(b.y())) * TMath::DegToRad();  // in radians
     if (m_cfg.writeOutputFile) {
         m_mapOf2DHistograms["lorentzAngleVsTheta"]->Fill(lorentzAngle, theta);
         m_mapOf2DHistograms["lorentzAngleVsBy"]->Fill(lorentzAngle, b.y());
@@ -204,7 +204,7 @@ void MM_StripsResponseSimulation::whichStrips(DataCache& cache,
 
         ATH_MSG_DEBUG("Path length traveled: " << pathLengthTraveled);
 
-        nPrimaryIons++;
+        ++nPrimaryIons;
         if (nPrimaryIons >= m_cfg.maxPrimaryIons) break;  // don't create more than "MaxPrimaryIons" along a track....
 
     }  // end of clusters loop
@@ -265,14 +265,14 @@ float MM_StripsResponseSimulation::generateTransverseDiffusion(float posY, CLHEP
     if (posY <= 0.) posY = 0.001;
 
     // need to scale weigths since initial distributions were not normalized
-    double scale = 0.001 / (posY * m_cfg.transverseDiffusionSigma);
+    const double scale = 0.001 / (posY * m_cfg.transverseDiffusionSigma);
 
-    double uni = CLHEP::RandFlat::shoot(rndmEngine, 0, 1.0 + scale);
+    const double uni = CLHEP::RandFlat::shoot(rndmEngine, 0, 1.0 + scale);
     if (uni < scale) return CLHEP::RandGaussZiggurat::shoot(rndmEngine, 0.0, 1.0);
     return CLHEP::RandGaussZiggurat::shoot(rndmEngine, 0., m_cfg.transverseDiffusionSigma * posY);
 }
 
-float MM_StripsResponseSimulation::getTransverseDiffusion(float posY, CLHEP::HepRandomEngine* rndmEngine) {
+float MM_StripsResponseSimulation::getTransverseDiffusion(float posY, CLHEP::HepRandomEngine* rndmEngine) const {
     // the random numbers are generate from the following function:
     // "1.*TMath::Exp(-TMath::Power(x,2.)/(2.*[0]*[0])) + 0.001*TMath::Exp(-TMath::Power(x,2)/(2.*[1]*[1]))"
     // in the range from -1 to 1
@@ -282,23 +282,30 @@ float MM_StripsResponseSimulation::getTransverseDiffusion(float posY, CLHEP::Hep
     // this approach seems to be around 20000 times faster
 
     // if one of the diffusions is off, the tail is not present
+    float diffusion{0.};
     if (m_cfg.longitudinalDiffusionSigma == 0 || m_cfg.transverseDiffusionSigma == 0) {
-        float tmp = CLHEP::RandGaussZiggurat::shoot(rndmEngine, 0.0, posY * m_cfg.transverseDiffusionSigma);
-        // limit random number to be -1 < x < 1
-        while (std::abs(tmp) > 1.) tmp = CLHEP::RandGaussZiggurat::shoot(rndmEngine, 0.0, posY * m_cfg.transverseDiffusionSigma);
-        return tmp;
+         // limit random number to be -1 < x < 1
+        do {
+            diffusion = CLHEP::RandGaussZiggurat::shoot(rndmEngine, 0.0, posY * m_cfg.transverseDiffusionSigma);
+            ATH_MSG_VERBOSE("getTransverseDiffusion() -- posY x transverseSigma: "<<(posY* m_cfg.transverseDiffusionSigma)<<" engine seed: "<<rndmEngine->getSeed()<<" "<<rndmEngine->flat()<<" diffusion "<<diffusion); 
+        } while (std::abs(diffusion) > 1.);
+        return diffusion;        
     }
-    float tmp = generateTransverseDiffusion(posY, rndmEngine);
-    while (std::abs(tmp) > 1.) { tmp = generateTransverseDiffusion(posY, rndmEngine); }
-
-    return tmp;
+    do {
+        diffusion =  generateTransverseDiffusion(posY, rndmEngine);
+        ATH_MSG_VERBOSE("getTransverseDiffusion() -- posY: "<<posY<<" engine seed: "<<rndmEngine->getSeed()<<" "<<rndmEngine->flat()<<" diffusion "<<diffusion); 
+    } while (std::abs(diffusion)> 1.);
+    return diffusion;    
 }
 
 float MM_StripsResponseSimulation::getLongitudinalDiffusion(float posY, CLHEP::HepRandomEngine* rndmEngine) const {
-    float tmp = CLHEP::RandGaussZiggurat::shoot(rndmEngine, 0.0, posY * m_cfg.longitudinalDiffusionSigma);
+    float diffusion{0.};
     // We only want random numbers between -5 and 5
-    while (std::abs(tmp) > 5) { tmp = CLHEP::RandGaussZiggurat::shoot(rndmEngine, 0.0, posY * m_cfg.longitudinalDiffusionSigma); }
-    return tmp;
+    do {
+        diffusion= CLHEP::RandGaussZiggurat::shoot(rndmEngine, 0.0, posY * m_cfg.longitudinalDiffusionSigma);
+        ATH_MSG_VERBOSE("getLongitudinalDiffusion() -- posY: "<<posY<<" engine seed: "<<rndmEngine->getSeed()<<" "<<rndmEngine->flat()<<" diffusion "<<diffusion);
+    } while (std::abs(diffusion) > 5);
+    return diffusion;
 }
 
 float MM_StripsResponseSimulation::getEffectiveCharge(CLHEP::HepRandomEngine* rndmEngine) const {
@@ -310,12 +317,13 @@ float MM_StripsResponseSimulation::getEffectiveCharge(CLHEP::HepRandomEngine* rn
 
 float MM_StripsResponseSimulation::getPathLengthTraveled(CLHEP::HepRandomEngine* rndmEngine) const {
     // Probability of having an interaction (per unit length traversed) is sampled from a gaussian provided by G. Iakovidis
-    float rndGaus = CLHEP::RandGaussZiggurat::shoot(rndmEngine, m_cfg.interactionDensityMean, m_cfg.interactionDensitySigma);
+    float rndGaus{0.};
 
     // gaussian random number should be in the range from 0 to 10
-    while (rndGaus < 0. || rndGaus > 10.) {
+    do {
         rndGaus = CLHEP::RandGaussZiggurat::shoot(rndmEngine, m_cfg.interactionDensityMean, m_cfg.interactionDensitySigma);
-    }
+        ATH_MSG_VERBOSE("getPathLengthTraveled() --  engine seed: "<<rndmEngine->getSeed()<<" "<<rndmEngine->flat()<<" rndGaus: "<<rndGaus);
+    } while (rndGaus < 0. || rndGaus > 10.) ;
 
     return (1. / rndGaus) * -1. * std::log(CLHEP::RandFlat::shoot(rndmEngine));
 }

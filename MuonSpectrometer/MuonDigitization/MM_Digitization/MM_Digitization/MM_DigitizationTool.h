@@ -195,7 +195,6 @@ private:
     std::unique_ptr<MM_StripsResponseSimulation> m_StripsResponseSimulation{};
     std::unique_ptr<MM_ElectronicsResponseSimulation> m_ElectronicsResponseSimulation{};
 
-    double m_driftVelocity{0};
     double m_noiseSlope{0.};
     double m_noiseIntercept{0.};
 };
