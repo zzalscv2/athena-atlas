@@ -1,12 +1,12 @@
 /*
-  Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "TrigT1RPClogic/bitPATTERN.h"
 
 using namespace std;
 
-bitPATTERN::bitPATTERN(std::string name,const PATTERNidentity& id,int size) : 
+bitPATTERN::bitPATTERN(const std::string& name,const PATTERNidentity& id,int size) : 
     RPCtrigDataObject(0,name),
     m_id(id),
     m_size(size)
@@ -31,6 +31,7 @@ bitPATTERN::~bitPATTERN()
 }
 
 bitPATTERN&
+// cppcheck-suppress operatorEqVarError; m_size not assigned
 bitPATTERN::operator=(const bitPATTERN& pattern)
 {
     if(pattern.size() != m_size) return *this;

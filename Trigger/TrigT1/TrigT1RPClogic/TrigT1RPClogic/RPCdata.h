@@ -1,7 +1,7 @@
 /* // -*- C++ -*- */
 
 /*
-  Copyright (C) 2002-2018 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
 */
 
 
@@ -21,7 +21,7 @@ class RPCdata : public BaseObject
     typedef std::list < const RPCdigit* > digitList;
 
     public:
-    RPCdata(std::string);
+    RPCdata(const std::string&);
     RPCdata(const char*);
     RPCdata(const RPCdata&);
     virtual ~RPCdata();

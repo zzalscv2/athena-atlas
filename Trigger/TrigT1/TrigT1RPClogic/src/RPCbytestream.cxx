@@ -1,7 +1,7 @@
 /* // -*- C++ -*- */
 
 /*
-  Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
 */
 
 
@@ -51,20 +51,19 @@ RPCbytestream::RPCbytestream(CMAdata& data,std::string filename,MsgStream& log,
 }
 
 RPCbytestream::RPCbytestream(const RPCbytestream& readout) :
-    RPCtrigDataObject(readout.number(),readout.name())
+    RPCtrigDataObject(readout.number(),readout.name()),
+    m_cma_ro_debug(readout.cma_ro_debug()),
+    m_pad_ro_debug(readout.pad_ro_debug()),
+    m_rx_ro_debug(readout.rx_ro_debug()),
+    m_sl_ro_debug(readout.sl_ro_debug()),
+    m_cma_rostruct_debug(readout.cma_rostruct_debug()),
+    m_pad_rostruct_debug(readout.pad_rostruct_debug()),
+    m_rx_rostruct_debug(readout.rx_rostruct_debug()),
+    m_sl_rostruct_debug(readout.sl_rostruct_debug()),
+    m_filename(readout.filename()),
+    m_cma_readout(readout.cma_readout()),
+    m_pad_readout(readout.pad_readout())
 {
-    m_filename           = readout.filename();
-    m_cma_ro_debug       = readout.cma_ro_debug();
-    m_pad_ro_debug       = readout.pad_ro_debug();
-    m_rx_ro_debug        = readout.rx_ro_debug();
-    m_sl_ro_debug        = readout.sl_ro_debug();
-    m_cma_rostruct_debug = readout.cma_rostruct_debug();
-    m_pad_rostruct_debug = readout.pad_rostruct_debug();
-    m_rx_rostruct_debug  = readout.rx_rostruct_debug();
-    m_sl_rostruct_debug  = readout.sl_rostruct_debug();
-
-    m_cma_readout = readout.cma_readout();
-    m_pad_readout = readout.pad_readout();
 }
 
 
