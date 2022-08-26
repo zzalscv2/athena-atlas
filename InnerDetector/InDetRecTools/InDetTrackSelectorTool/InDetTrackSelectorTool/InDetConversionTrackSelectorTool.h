@@ -8,6 +8,7 @@
 #include "TrkToolInterfaces/ITrackSelectorTool.h"
 #include "AthenaBaseComps/AthAlgTool.h"
 #include "BeamSpotConditionsData/BeamSpotData.h"
+#include "xAODEventInfo/EventInfo.h"
 #include "GaudiKernel/EventContext.h"
 #include "GaudiKernel/ToolHandle.h"
 #include "TrkExInterfaces/IExtrapolator.h"
@@ -78,7 +79,9 @@ private:
     "BeamSpotData",
     "SG key for beam spot"
   };
-
+  SG::ReadHandleKey<xAOD::EventInfo> m_eventInfo_key{this, "EventInfo", "EventInfo", "Input event information"};
+  Gaudi::Property<bool> m_useEventInfoBs{this,"UseEventInfoBS",false};
+  Trk::Vertex* getBeamSpot(const EventContext& ctx) const;
   /** Properties for track selection:all cuts are ANDed */
   double m_maxSiD0;    //!< Maximal d0 at (0,0,0) for tracks with Si hits
   double m_maxTrtD0;   //!< Maximal d0 at (0,0,0) for standalone TRT tracks
