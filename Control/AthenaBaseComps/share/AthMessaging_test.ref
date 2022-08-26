@@ -2,6 +2,7 @@
 Athena::getMessageSvc: WARNING MessageSvc not found, will use std::cout
 MyObj1            WARNING Hello
 MyObj1               INFO World
+Athena::getMessageSvc: WARNING MessageSvc not found, will use std::cout
 MyObj2            WARNING Hello
 MyObj2               INFO World
 
