@@ -7,30 +7,26 @@
 
 #include "PhysicalVolumeAccessor.h"
 #include <string>
-#include <mutex>
 
 class LArStraightAbsorbers {
 private:
-  static PhysicalVolumeAccessor* s_theAbsorbers;
+  LArStraightAbsorbers(const std::string& strDetector="") ;
+  void initXYCentAbs(const PhysicalVolumeAccessor& theAbsorbers, int stackid, int cellid);
+  void initHalfLength(const PhysicalVolumeAccessor& theAbsorbers, int stackid, int cellid);
+  double SlantAbs(const PhysicalVolumeAccessor& theAbsorbers, int stackid, int cellid) const;
   double m_xcent[1024][14]{};
   double m_ycent[1024][14]{};
   double m_cosu[1024][14]{};
   double m_sinu[1024][14]{};
   double m_halflength[1024][14]{};
-  bool m_filled;
-  static LArStraightAbsorbers* s_instance;
   int m_parity;
-  static std::once_flag s_flag;
 public:
-  static LArStraightAbsorbers* GetInstance(const std::string& strDetector="") ;
-  double XCentAbs(int stackid, int cellid) const;
-  double YCentAbs(int stackid, int cellid) const;
-  double SlantAbs(int stackid, int cellid) const;
-  double HalfLength(int stackid, int cellid) const;
-  double Cosu(int stackid, int cellid) const;
-  double Sinu(int stackid, int cellid) const;
-protected:
-  LArStraightAbsorbers(const std::string& strDetector="") ;
+  static const LArStraightAbsorbers* GetInstance(const std::string& strDetector="") ;
+  double XCentAbs(int stackid, int cellid) const { return m_xcent[cellid][stackid]; }
+  double YCentAbs(int stackid, int cellid) const { return m_ycent[cellid][stackid]; }
+  double HalfLength(int stackid, int cellid) const { return m_halflength[cellid][stackid]; }
+  double Cosu(int stackid, int cellid) const { return m_cosu[cellid][stackid]; }
+  double Sinu(int stackid, int cellid) const { return m_sinu[cellid][stackid]; }
 };
 
 #endif // LARG4BARREL_LArStraightAbsorbers_H

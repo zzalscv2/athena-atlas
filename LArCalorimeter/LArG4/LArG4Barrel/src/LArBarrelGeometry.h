@@ -92,7 +92,7 @@ namespace LArG4 {
       const LArCoudeElectrodes* m_coudeelec;
       const LArCoudeAbsorbers* m_coudeabs;
       mutable LArStraightElectrodes* m_electrode; // FIXME needed due to lazy initialization
-      mutable LArStraightAbsorbers* m_absorber; // FIXME needed due to lazy initialization
+      const LArStraightAbsorbers* m_absorber;
 
       // to handle small difference (mostly phi wrapping and +-z symmetry)
       // between atlas and test beam
