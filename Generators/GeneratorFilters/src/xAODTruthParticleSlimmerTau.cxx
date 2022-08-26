@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "AthenaKernel/errorcheck.h"
@@ -28,8 +28,8 @@ xAODTruthParticleSlimmerTau::xAODTruthParticleSlimmerTau(const string &name, ISv
   declareProperty("xAODTruthParticleContainerName", m_xaodTruthParticleContainerName = "TruthParticles");
   declareProperty("xAODTruthTauParticleContainerName", m_xaodTruthTauParticleContainerName = "TruthTaus");
   declareProperty("ForceRerun", m_forceRerun = false);
-  declareProperty("tau_pt_selection", m_tau_pt_selection = 1. * Gaudi::Units::GeV); //User provides units in MeV!
-  declareProperty("abseta_selection", m_abseta_selection = 4.5);
+  declareProperty("tau_pt_selection", m_tau_pt_selection = 0.001 * Gaudi::Units::GeV); //User provides units in MeV!
+  declareProperty("abseta_selection", m_abseta_selection = 10.);
 }
 
 StatusCode xAODTruthParticleSlimmerTau::initialize()
@@ -113,14 +113,14 @@ StatusCode xAODTruthParticleSlimmerTau::execute()
     float this_pt = theParticle->pt();
     int this_status = theParticle->status();
 
-    //Save Taus above 1 GeV, & within detector acceptance (4.5)
+    //Save Taus above 0.001 GeV, & with any eta (may be changed on JOs level eg. to dectector acceptance of eta 4.5)
+    // see GeneratorFilters/share/common/xAODTauFilter_Common.py
     // we want to avoid status 3 taus
     if (this_status != 3 && this_absPdgID == 15 && this_pt >= m_tau_pt_selection && this_abseta < m_abseta_selection)
     {
       xAOD::TruthParticle *xTruthParticle = new xAOD::TruthParticle();
 
       xTruthTauParticleContainer->push_back(xTruthParticle);
-
       // Fill with numerical content
       xTruthParticle->setPdgId(theParticle->pdgId());
       xTruthParticle->setBarcode(theParticle->barcode());
