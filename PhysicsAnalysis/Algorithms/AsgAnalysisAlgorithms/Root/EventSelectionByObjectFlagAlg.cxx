@@ -27,8 +27,8 @@ StatusCode EventSelectionByObjectFlagAlg ::initialize() {
     ANA_CHECK(m_particleHandle.initialize (m_systematicsList));
     ANA_CHECK(m_preselection.initialize (m_systematicsList, m_particleHandle, SG::AllowEmpty));
     ANA_CHECK(m_veto.initialize (m_systematicsList, m_particleHandle));
+    ANA_CHECK(m_filterParams.initialize(m_systematicsList));
     ANA_CHECK(m_systematicsList.initialize());
-    ANA_CHECK(m_filterParams.initialize());
 
     return StatusCode::SUCCESS;
 }
