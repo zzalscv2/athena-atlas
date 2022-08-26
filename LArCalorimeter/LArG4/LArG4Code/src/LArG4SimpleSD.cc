@@ -69,8 +69,6 @@ LArG4SimpleSD::LArG4SimpleSD(G4String a_name, StoreGateSvc* detStore)
 
 LArG4SimpleSD::~LArG4SimpleSD()
 {
-  // I owned my own calculator
-  delete m_calculator;
   if(verboseLevel>5 && m_numberInvalidHits>0) {
     G4cout << "Destructor: Sensitive Detector <" << SensitiveDetectorName << "> had " << m_numberInvalidHits
            << " G4Step energy deposits outside the region determined by its Calculator." << G4endl;

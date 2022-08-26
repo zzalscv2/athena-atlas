@@ -31,8 +31,6 @@ LArG4CalibSD::LArG4CalibSD(G4String a_name, ILArCalibCalculatorSvc* calc, bool d
 
 LArG4CalibSD::~LArG4CalibSD()
 {
-  // I owned my own calculator
-  delete m_calculator;
   if(verboseLevel>5 && m_numberInvalidHits>0) {
     G4cout << "Destructor: Sensitive Detector <" << SensitiveDetectorName << "> had " << m_numberInvalidHits
            << " G4Step energy deposits outside the region determined by its Calculator." << G4endl;
