@@ -26,7 +26,6 @@ for tag in test_tags:
 
     # test flags that change with time
     assert flags.Detector.EnableBCM == (tag != 'ATLAS-P2-RUN4-01-00-00')
-    assert flags.Detector.EnableDBM == (tag in ['ATLAS-R2-2016-01-00-01', 'ATLAS-R3S-2021-01-00-01'])
     assert flags.Detector.EnablePixel == (tag != 'ATLAS-P2-RUN4-01-00-00')
     assert flags.Detector.EnableSCT == (tag != 'ATLAS-P2-RUN4-01-00-00')
     assert flags.Detector.EnableTRT == (tag != 'ATLAS-P2-RUN4-01-00-00')

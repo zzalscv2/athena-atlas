@@ -43,9 +43,6 @@ class AtlasSimSkeleton(SimSkeleton):
 
         AtlasG4Eng.G4Eng.log.verbose('AtlasSimSkeleton._do_jobproperties :: starting')
 
-        ## Tidy up DBM DetFlags: temporary measure
-        DetFlags.DBM_setOff()
-
         from AtlasGeoModel.MuonGMJobProperties import MuonGeometryFlags
         if not MuonGeometryFlags.hasCSC(): DetFlags.CSC_setOff()
         if not MuonGeometryFlags.hasSTGC(): DetFlags.sTGC_setOff()

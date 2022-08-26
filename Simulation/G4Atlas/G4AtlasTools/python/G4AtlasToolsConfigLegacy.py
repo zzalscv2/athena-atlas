@@ -84,7 +84,7 @@ def generateCaloCellContainerSensitiveDetectorList():
 def generateInDetSensitiveDetectorList():
     SensitiveDetectorList=[]
     from AthenaCommon.DetFlags import DetFlags
-    #if isRUN2 and DetFlags.simulation.DBM_on():
+    # DBM is disabled
     #    SensitiveDetectorList += [ 'DBMSensorSD' ]
     if DetFlags.simulate.pixel_on():
         if DetFlags.simulate.BCM_on():
