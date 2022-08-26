@@ -9,6 +9,10 @@
 #include <sstream>
 #include <utility>
 
+namespace{
+  constexpr Identifier invalidId{};
+}
+
 
 PixelCablingCondData::PixelCablingCondData():
   m_idMap_onoff(),
@@ -106,12 +110,13 @@ uint64_t PixelCablingCondData::find_entry_offon(const Identifier offlineId) cons
   return onlineId; // return found online identifier
 }
 
-uint32_t PixelCablingCondData::find_entry_offrob(Identifier offlineId) const {
-  uint32_t robid; // declare ROBId
-  std::unordered_map<Identifier, uint32_t, idHasher>::const_iterator iter(m_idMap_offrob.find(offlineId)); // find offline identifier in m_idMap_offrob map
-  if (iter == m_idMap_offrob.end()) { // if offline identifier not found in m_idMap_offrob map -> ERROR
-    robid = 0; // fill ROBId with empty identifier
-    return robid; // return empty ROBId
+uint32_t 
+PixelCablingCondData::find_entry_offrob(Identifier offlineId) const {
+  uint32_t robid{}; 
+  if (offlineId == invalidId) return robid;
+  const auto iter = m_idMap_offrob.find(offlineId); 
+  if (iter == m_idMap_offrob.end()) { 
+    return robid; 
   }
   robid = (*iter).second; // fill ROBId with found ROBId
   return robid; // return found ROBId
