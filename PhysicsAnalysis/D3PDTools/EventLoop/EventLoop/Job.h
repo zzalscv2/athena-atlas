@@ -197,6 +197,11 @@ namespace EL
     static const std::string optUniqueDateFormat;
 
 
+    /// \brief a boolean flag for whether to add a timer for the
+    /// algorithms
+    static const std::string optAlgorithmTimer;
+
+
     /// description: the name of the option used for setting the
     ///   maximum number of events to process per sample
     /// rationale: this is used for test runs where you don't want to
