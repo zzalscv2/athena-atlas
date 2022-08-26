@@ -42,4 +42,8 @@
 
   <class name="HepMC::PdfInfo" />
   <class name="HepMC::GenCrossSection" />
+
+  <class name="xAODTruthParticleLink"/>
+  <class name="DataVector<xAODTruthParticleLink>"/>
+  <class name="xAODTruthParticleLinkVector"/>
 </lcgdict>
