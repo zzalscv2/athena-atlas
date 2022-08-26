@@ -1,7 +1,7 @@
 # Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
 
 from AthenaCommon.SystemOfUnits import TeV
-from AthenaConfiguration.AthConfigFlags import AthConfigFlags
+from AthenaConfiguration.AthConfigFlags import AthConfigFlags, isGaudiEnv
 from AthenaConfiguration.AutoConfigFlags import GetFileMD, getInitialTimeStampsFromRunNumbers, getRunToTimestampDict, getSpecialConfigurationMetadata
 from AthenaConfiguration.Enums import BeamType, Format, ProductionStep, BunchStructureSource, Project
 from PyUtils.moduleExists import moduleExists
@@ -17,6 +17,84 @@ def _createCfgFlags():
 
     acf=AthConfigFlags()
 
+    def _checkProject():
+        import os
+        if "AthSimulation_DIR" in os.environ:
+            return Project.AthSimulation
+        if "AthGeneration_DIR" in os.environ:
+            return Project.AthGeneration
+        if "AthAnalysis_DIR" in os.environ:
+            return Project.AthAnalysis
+        if "AthDerivation_DIR" in os.environ:
+            return Project.AthDerivation
+        if "AnalysisBase_DIR" in os.environ:
+            return Project.AnalysisBase
+        #TODO expand this method.
+        return Project.Athena
+    acf.addFlag('Common.Project', _checkProject(), enum=Project)
+
+    #Flags describing the input data 
+    acf.addFlag('Input.Files', ["_ATHENA_GENERIC_INPUTFILE_NAME_",]) # former global.InputFiles
+    acf.addFlag('Input.isMC', lambda prevFlags : "IS_SIMULATION" in GetFileMD(prevFlags.Input.Files).get("eventTypes", [])) # former global.isMC
+    acf.addFlag('Input.RunNumber', lambda prevFlags : list(GetFileMD(prevFlags.Input.Files).get("runNumbers", []))) # former global.RunNumber
+    acf.addFlag('Input.MCChannelNumber', lambda prevFlags : GetFileMD(prevFlags.Input.Files).get("mc_channel_number", 0))
+    acf.addFlag('Input.LumiBlockNumber', lambda prevFlags : list(GetFileMD(prevFlags.Input.Files).get("lumiBlockNumbers", []))) # former global.RunNumber
+    acf.addFlag('Input.ProcessingTags', lambda prevFlags : GetFileMD(prevFlags.Input.Files).get("processingTags", []) ) # list of names of streams written to this file
+
+
+    def _inputCollections(inputFile):
+        rawCollections = [type_key[1] for type_key in GetFileMD(inputFile).get("itemList", [])]
+        collections = [col for col in rawCollections if not col.endswith('Aux.')]
+        return collections
+
+    def _typedInputCollections(inputFile):
+        collections = ['%s#%s' % type_key for type_key in GetFileMD(inputFile).get("itemList", [])]
+        return collections
+
+    acf.addFlag('Input.Collections', lambda prevFlags : _inputCollections(prevFlags.Input.Files) )
+    acf.addFlag('Input.TypedCollections', lambda prevFlags : _typedInputCollections(prevFlags.Input.Files) )
+
+    # replace global.Beam*
+    acf.addFlag('Beam.BunchSpacing', 25) # former global.BunchSpacing
+    acf.addFlag('Beam.Type', lambda prevFlags : BeamType(GetFileMD(prevFlags.Input.Files).get('beam_type', 'collisions')), enum=BeamType)# former global.BeamType
+    acf.addFlag("Beam.NumberOfCollisions", lambda prevFlags : 2. if prevFlags.Beam.Type is BeamType.Collisions else 0.) # former global.NumberOfCollisions
+    acf.addFlag('Beam.Energy', lambda prevFlags : GetFileMD(prevFlags.Input.Files).get('beam_energy',7*TeV)) # former global.BeamEnergy
+    acf.addFlag('Beam.estimatedLuminosity', lambda prevFlags : ( 1E33*(prevFlags.Beam.NumberOfCollisions)/2.3 ) *\
+        (25./prevFlags.Beam.BunchSpacing)) # former flobal.estimatedLuminosity
+    acf.addFlag('Beam.BunchStructureSource', lambda prevFlags: BunchStructureSource.MC if prevFlags.Input.isMC else BunchStructureSource.TrigConf)
+
+    if not isGaudiEnv():
+        # Pick up things otherwise grabbed by functions below in Athena
+        def EDMVersion(flags):
+            # POOL files: decide based on HLT output type present in the file
+            default_version = 3
+            collections = flags.Input.Collections
+            if "HLTResult_EF" in collections:
+                return 1
+            elif "TrigNavigation" in collections:
+                return 2
+            elif any("HLTNav_Summary" in s for s in collections):
+                return 3
+            elif not flags.Input.Collections:
+                # Special case for empty input files (can happen in merge jobs on the grid)
+                # The resulting version doesn't really matter as there's nothing to be done, but we want a valid configuration
+                return 3
+
+            return default_version
+
+        acf.addFlag('Trigger.EDMVersion', lambda prevFlags: EDMVersion(prevFlags))
+
+        acf.addFlag("Sim.ISF.Simulator", lambda prevFlags: GetFileMD(prevFlags.Input.Files).get('simFlavour', 'Unkown'))
+
+        acf.addFlag('GeoModel.Layout', 'atlas') # replaces global.GeoLayout
+        acf.addFlag("GeoModel.AtlasVersion",
+                lambda prevFlags : (GetFileMD(prevFlags.Input.Files).get("GeoAtlas", None)
+                                    or "ATLAS-R2-2016-01-00-01"))
+        acf.addFlag("Overlay.DataOverlay", lambda prevFlags: GetFileMD(prevFlags.Input.Files).get('isDataOverlay', False))
+
+        # If this is AnalysisBase, that's all folks
+        return acf
+
     #Flags steering the job execution:
     from AthenaCommon.Constants import INFO
     acf.addFlag('Exec.OutputLevel',INFO) #Global Output Level
@@ -28,15 +106,10 @@ def _createCfgFlags():
     acf.addFlag('ExecutorSplitting.Step', -1)
     acf.addFlag('ExecutorSplitting.TotalEvents', -1)
 
-    #Flags describing the input data
-    acf.addFlag('Input.Files', ["_ATHENA_GENERIC_INPUTFILE_NAME_",]) # former global.InputFiles
+    #Flags describing the input data 
     acf.addFlag('Input.SecondaryFiles', []) # secondary input files for DoubleEventSelector
-    acf.addFlag('Input.isMC', lambda prevFlags : "IS_SIMULATION" in GetFileMD(prevFlags.Input.Files).get("eventTypes", [])) # former global.isMC
     acf.addFlag('Input.OverrideRunNumber', False )
     acf.addFlag("Input.ConditionsRunNumber", -1) # Override the HITS file Run Number with one from a data run (TODO merge with Input.RunNumber)
-    acf.addFlag('Input.RunNumber', lambda prevFlags : list(GetFileMD(prevFlags.Input.Files).get("runNumbers", []))) # former global.RunNumber
-    acf.addFlag('Input.MCChannelNumber', lambda prevFlags : GetFileMD(prevFlags.Input.Files).get("mc_channel_number", 0))
-    acf.addFlag('Input.LumiBlockNumber', lambda prevFlags : list(GetFileMD(prevFlags.Input.Files).get("lumiBlockNumbers", []))) # former global.RunNumber
     acf.addFlag('Input.TimeStamp', lambda prevFlags : getInitialTimeStampsFromRunNumbers(prevFlags.Input.RunNumber) if prevFlags.Input.OverrideRunNumber else [])
     # Configure EvtIdModifierSvc with a list of dictionaries of the form:
     # {'run': 152166, 'lb': 202, 'starttstamp': 1269948352889940910, 'evts': 1, 'mu': 0.005}
@@ -49,21 +122,9 @@ def _createCfgFlags():
     acf.addFlag('Input.TriggerStream', lambda prevFlags : GetFileMD(prevFlags.Input.Files).get("stream", "") if prevFlags.Input.Format == Format.BS
                                                           else GetFileMD(prevFlags.Input.Files).get("triggerStreamOfFile", "")) # former global.TriggerStream
     acf.addFlag('Input.Format', lambda prevFlags : Format.BS if GetFileMD(prevFlags.Input.Files).get("file_type", "BS") == "BS" else Format.POOL, enum=Format) # former global.InputFormat
-    acf.addFlag('Input.ProcessingTags', lambda prevFlags : GetFileMD(prevFlags.Input.Files).get("processingTags", []) ) # list of names of streams written to this file
     acf.addFlag('Input.SpecialConfiguration', lambda prevFlags : getSpecialConfigurationMetadata(prevFlags.Input.Files, prevFlags.Input.SecondaryFiles))  # special Configuration options read from input file metadata
 
-    def _inputCollections(inputFile):
-        rawCollections = [type_key[1] for type_key in GetFileMD(inputFile).get("itemList", [])]
-        collections = [col for col in rawCollections if not col.endswith('Aux.')]
-        return collections
-
-    def _typedInputCollections(inputFile):
-        collections = ['%s#%s' % type_key for type_key in GetFileMD(inputFile).get("itemList", [])]
-        return collections
-
-    acf.addFlag('Input.Collections', lambda prevFlags : _inputCollections(prevFlags.Input.Files) )
     acf.addFlag('Input.SecondaryCollections', lambda prevFlags : _inputCollections(prevFlags.Input.SecondaryFiles) )
-    acf.addFlag('Input.TypedCollections', lambda prevFlags : _typedInputCollections(prevFlags.Input.Files) )
     acf.addFlag('Input.SecondaryTypedCollections', lambda prevFlags : _typedInputCollections(prevFlags.Input.SecondaryFiles) )
 
     def _metadataItems(inputFile):
@@ -114,31 +175,6 @@ def _createCfgFlags():
     acf.addFlag('Common.doExpressProcessing', False)
     acf.addFlag('Common.ProductionStep', ProductionStep.Default, enum=ProductionStep)
 
-    def _checkProject():
-        import os
-        if "AthSimulation_DIR" in os.environ:
-            return Project.AthSimulation
-        if "AthGeneration_DIR" in os.environ:
-            return Project.AthGeneration
-        if "AthAnalysis_DIR" in os.environ:
-            return Project.AthAnalysis
-        if "AthDerivation_DIR" in os.environ:
-            return Project.AthDerivation
-        #TODO expand this method.
-        return Project.Athena
-    acf.addFlag('Common.Project', _checkProject(), enum=Project)
-
-    # replace global.Beam*
-    acf.addFlag('Beam.BunchSpacing', 25) # former global.BunchSpacing
-    acf.addFlag('Beam.Type', lambda prevFlags : BeamType(GetFileMD(prevFlags.Input.Files).get('beam_type', 'collisions')), enum=BeamType)# former global.BeamType
-    acf.addFlag("Beam.NumberOfCollisions", lambda prevFlags : 2. if prevFlags.Beam.Type is BeamType.Collisions else 0.) # former global.NumberOfCollisions
-    acf.addFlag('Beam.Energy', lambda prevFlags : GetFileMD(prevFlags.Input.Files).get('beam_energy',7*TeV)) # former global.BeamEnergy
-    acf.addFlag('Beam.estimatedLuminosity', lambda prevFlags : ( 1E33*(prevFlags.Beam.NumberOfCollisions)/2.3 ) *\
-        (25./prevFlags.Beam.BunchSpacing)) # former flobal.estimatedLuminosity
-    acf.addFlag('Beam.BunchStructureSource', lambda prevFlags: BunchStructureSource.MC if prevFlags.Input.isMC else BunchStructureSource.TrigConf)
-
-
-
     acf.addFlag('Output.EVNTFileName', '')
     acf.addFlag('Output.EVNT_TRFileName', '')
     acf.addFlag('Output.HITSFileName', '')
@@ -147,7 +183,6 @@ def _createCfgFlags():
     acf.addFlag('Output.ESDFileName',  '')
     acf.addFlag('Output.AODFileName',  '')
     acf.addFlag('Output.HISTFileName', '')
-
 
     acf.addFlag('Output.doWriteRDO', lambda prevFlags: bool(prevFlags.Output.RDOFileName)) # write out RDO file
     acf.addFlag('Output.doWriteRDO_SGNL', lambda prevFlags: bool(prevFlags.Output.RDO_SGNLFileName)) # write out RDO_SGNL file

@@ -2,7 +2,13 @@
 
 from copy import copy, deepcopy
 from AthenaCommon.Logging import logging
+from PyUtils.moduleExists import moduleExists
 _msg = logging.getLogger('AthConfigFlags')
+
+def isGaudiEnv():
+    """Return whether or not this is a gaudi-based (athena) environment"""
+
+    return moduleExists('Gaudi')
 
 class CfgFlag(object):
     """The base flag object.
