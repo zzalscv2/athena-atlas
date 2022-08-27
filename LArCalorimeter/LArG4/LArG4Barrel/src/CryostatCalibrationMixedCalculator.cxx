@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2017 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
 */
 
 // LArG4::BarrelCryostat::CalibrationMixedCalculator
@@ -105,8 +105,8 @@ namespace LArG4 {
           // The fixed parameters (only a couple of which are readily
           // accessible from the database):
 
-          static const double oneOverDeta = 10.;       //   1/Deta = 1./0.1 = 10.
-          static const double oneOverDphi = 32./M_PI;  //   1/Dphi
+          constexpr double oneOverDeta = 10.;       //   1/Deta = 1./0.1 = 10.
+          constexpr double oneOverDphi = 32./M_PI;  //   1/Dphi
 
           // Calculate the mid-point of the step, and the simple geometry variables.
           G4VPhysicalVolume* physical = step->GetPreStepPoint()->GetPhysicalVolume();
@@ -136,8 +136,8 @@ namespace LArG4 {
           G4int phiBin = (int) ( phi * oneOverDphi );
           if (phiBin>63) phiBin=0;
 
-          static double rho12 = 1386.+10.; // use old hardcoded 1386 for Sampling 1-2 transition
-                                           // and add 10mm for safety (misalignment)
+          constexpr double rho12 = 1386.+10.; // use old hardcoded 1386 for Sampling 1-2 transition
+                                              // and add 10mm for safety (misalignment)
 
           if ( eta < 1.0 )
             {
@@ -199,8 +199,8 @@ namespace LArG4 {
                phiBin   <  0 )
             {
 #if defined (DEBUG_VOLUMES) || defined (DEBUG_HITS)
-              static const G4int messageMax = 10;
-              static G4int messageCount = 0;
+              constexpr G4int messageMax = 10;
+              static std::atomic<G4int> messageCount = 0;
               if ( messageCount++ < messageMax )
                 {
                   std::cout << "LArG4::BarrelCryostat::CalibrationMixedCalculator::Process"

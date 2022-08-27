@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2017 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
 */
 
 // LArG4::BarrelCryostat::CalibrationLArCalculator
@@ -23,6 +23,7 @@
 #include "G4ThreeVector.hh"
 #include "globals.hh"
 
+#include <atomic>
 #include <map>
 #include <algorithm>
 #include <cmath>
@@ -90,32 +91,25 @@ namespace LArG4 {
           // The fixed parameters (only a couple of which are readily
           // accessible from the database):
 
-          // static ?
-          static const double oneOverDeta = 10.;       //   1/Deta = 1./0.1 = 10.
-          static const double oneOverDphi = 32./M_PI;  //   1/Dphi
+          constexpr double oneOverDeta = 10.;       //   1/Deta = 1./0.1 = 10.
+          constexpr double oneOverDphi = 32./M_PI;  //   1/Dphi
 
-          static const double rhoMinPresamplerMother = 1385.*CLHEP::mm;
-          static const double rhoMiddlePresampler = (1385.*CLHEP::mm + 1447.*CLHEP::mm)/2.;
+          constexpr double rhoMinPresamplerMother = 1385.*CLHEP::mm;
+          constexpr double rhoMiddlePresampler = (1385.*CLHEP::mm + 1447.*CLHEP::mm)/2.;
           // from PresParameterDef.icc
           //   rMinPresamplerMother = 1385*CLHEP::mm;
           //   rMaxPresamplerMother = 1447*CLHEP::mm - 0.001*CLHEP::mm;
 
-          static const double rhoAlignmentSafety = 10.*CLHEP::mm;
-          static const double rhoInFrontOfColdWall = rhoMinPresamplerMother - rhoAlignmentSafety;
-          static double RIN_AC  = INT_MIN;
-          if ( RIN_AC < 0.)
-            RIN_AC = m_parameters->GetValue("LArEMBRadiusInnerAccordion"); // 1500.024*CLHEP::mm; from ACCG
-          static const double RCUT12  = 1593.9*CLHEP::mm;
-          static const double RCUT23  = 1866.1*CLHEP::mm;
-          static double ROUT_AC = INT_MIN;
-          if ( ROUT_AC < 0. )
-            ROUT_AC = m_parameters->GetValue("LArEMBRadiusOuterAccordion"); // 1960.*CLHEP::mm;
+          constexpr double rhoAlignmentSafety = 10.*CLHEP::mm;
+          constexpr double rhoInFrontOfColdWall = rhoMinPresamplerMother - rhoAlignmentSafety;
+          static const double RIN_AC = m_parameters->GetValue("LArEMBRadiusInnerAccordion"); // 1500.024*CLHEP::mm; from ACCG
+          constexpr double RCUT12  = 1593.9*CLHEP::mm;
+          constexpr double RCUT23  = 1866.1*CLHEP::mm;
+          static const double ROUT_AC = m_parameters->GetValue("LArEMBRadiusOuterAccordion"); // 1960.*CLHEP::mm;
           static const double rhoOuterAccordionWithSafety = ROUT_AC - rhoAlignmentSafety;
-          static double LArEMBZmax = INT_MIN;
-          if ( LArEMBZmax < 0. )
-            LArEMBZmax = m_parameters->GetValue("LArEMBZmax"); // 3165.*CLHEP::mm
+          static const double LArEMBZmax = m_parameters->GetValue("LArEMBZmax"); // 3165.*CLHEP::mm
 
-          const double zMaxAccordionWithSafety = LArEMBZmax - 10.*CLHEP::mm;
+          static const double zMaxAccordionWithSafety = LArEMBZmax - 10.*CLHEP::mm;
 
 
           // Calculate the mid-point of the step, and the simple geometry variables.
@@ -253,8 +247,8 @@ namespace LArG4 {
                phiBin   <  0 )
             {
 #if defined (DEBUG_VOLUMES) || defined (DEBUG_HITS)
-              static const G4int messageMax = 10;
-              static G4int messageCount = 0;
+              constexpr G4int messageMax = 10;
+              static std::atomic<G4int> messageCount = 0;
               if ( messageCount++ < messageMax )
                 {
                   std::cout << "LArG4::BarrelCryostat::CalibrationLArCalculator::Process"
