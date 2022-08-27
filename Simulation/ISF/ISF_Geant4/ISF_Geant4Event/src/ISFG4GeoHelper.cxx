@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "ISF_Geant4Event/ISFG4GeoHelper.h"
@@ -22,25 +22,28 @@
 AtlasDetDescr::AtlasRegion
 iGeant4::ISFG4GeoHelper::nextGeoId(const G4Step* aStep, int truthVolLevel, ISF::IGeoIDSvc *geoIDSvc)
 {
+  struct VolumeHolder {
+    G4LogicalVolume *BP, *ID, *CALO, *MU, *TTR;
+  };
 
-  static G4LogicalVolume * BPholder=nullptr , * IDholder=nullptr , * CALOholder=nullptr , * MUholder=nullptr , * TTRholder=nullptr ;
-  if (!BPholder){ // Initialize
-
+  // one time initialization of volumes
+  static const VolumeHolder vh = [&]() {
+    VolumeHolder h{};
     G4LogicalVolumeStore * lvs = G4LogicalVolumeStore::GetInstance();
     for (size_t i=0;i<lvs->size();++i) {
 
       if ( !(*lvs)[i] ) { continue; }
-      if ( (*lvs)[i]->GetName() == "BeamPipe::BeamPipe" ) { BPholder = (*lvs)[i]; }
-      else if ( (*lvs)[i]->GetName() == "IDET::IDET" || (*lvs)[i]->GetName() == "ITK::ITK" ) { IDholder = (*lvs)[i]; }
-      else if ( (*lvs)[i]->GetName() == "CALO::CALO" ) { CALOholder = (*lvs)[i]; }
-      else if ( (*lvs)[i]->GetName() == "MUONQ02::MUONQ02" ) { MUholder = (*lvs)[i]; }
-      else if ( (*lvs)[i]->GetName() == "TTR_BARREL::TTR_BARREL" ) {TTRholder = (*lvs)[i]; }
-
+      if ( (*lvs)[i]->GetName() == "BeamPipe::BeamPipe" ) { h.BP = (*lvs)[i]; }
+      else if ( (*lvs)[i]->GetName() == "IDET::IDET" || (*lvs)[i]->GetName() == "ITK::ITK" ) { h.ID = (*lvs)[i]; }
+      else if ( (*lvs)[i]->GetName() == "CALO::CALO" ) { h.CALO = (*lvs)[i]; }
+      else if ( (*lvs)[i]->GetName() == "MUONQ02::MUONQ02" ) { h.MU = (*lvs)[i]; }
+      else if ( (*lvs)[i]->GetName() == "TTR_BARREL::TTR_BARREL" ) { h.TTR = (*lvs)[i]; }
     }
 
     const auto& worldVolume = G4TransportationManager::GetTransportationManager()->GetNavigatorForTracking()->GetWorldVolume()->GetLogicalVolume();
     ISFG4GeoHelper::checkVolumeDepth(worldVolume, truthVolLevel);
-  }
+    return h;
+  }();
 
   AtlasDetDescr::AtlasRegion nextGeoID = truthVolLevel > 1 ? AtlasDetDescr::fAtlasCavern
                                                            : AtlasDetDescr::fUndefinedAtlasRegion;
@@ -60,19 +63,19 @@ iGeant4::ISFG4GeoHelper::nextGeoId(const G4Step* aStep, int truthVolLevel, ISF::
   }
 
   // Ordering inside out (most truth in the ID anyway...)
-  if ( IDholder==G4StepHelper::getPostStepLogicalVolume(aStep,truthVolLevel) ) {
+  if ( vh.ID==G4StepHelper::getPostStepLogicalVolume(aStep,truthVolLevel) ) {
     nextGeoID = AtlasDetDescr::fAtlasID;
   }
-  else if ( CALOholder==G4StepHelper::getPostStepLogicalVolume(aStep,truthVolLevel) ) {
+  else if ( vh.CALO==G4StepHelper::getPostStepLogicalVolume(aStep,truthVolLevel) ) {
     nextGeoID = AtlasDetDescr::fAtlasCalo;
   }
-  else if ( MUholder==G4StepHelper::getPostStepLogicalVolume(aStep,truthVolLevel) ) {
+  else if ( vh.MU==G4StepHelper::getPostStepLogicalVolume(aStep,truthVolLevel) ) {
     nextGeoID = AtlasDetDescr::fAtlasMS;
   }
-  else if ( BPholder==G4StepHelper::getPostStepLogicalVolume(aStep,truthVolLevel) ) {
+  else if ( vh.BP==G4StepHelper::getPostStepLogicalVolume(aStep,truthVolLevel) ) {
     nextGeoID = (G4StepHelper::postStepBranchDepth(aStep)>truthVolLevel && G4StepHelper::getPostStepLogicalVolumeName(aStep,truthVolLevel+1)=="BeamPipe::BeamPipeCentral")?AtlasDetDescr::fAtlasID:AtlasDetDescr::fAtlasForward;
   }
-  else if ( TTRholder==G4StepHelper::getPostStepLogicalVolume(aStep,truthVolLevel) ) {
+  else if ( vh.TTR==G4StepHelper::getPostStepLogicalVolume(aStep,truthVolLevel) ) {
     nextGeoID = AtlasDetDescr::fAtlasCavern;
   }
   else if (truthVolLevel>0 && G4StepHelper::getPostStepLogicalVolumeName(aStep,truthVolLevel-1).find("CavernInfra")!=std::string::npos) {
