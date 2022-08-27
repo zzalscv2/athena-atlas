@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2017 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
 */
 
 ///////////////////////////////////////////////////////////////////
@@ -17,6 +17,8 @@
 
 // ISF includes
 #include "ISF_Interfaces/IEventFilterTool.h"
+
+#include <atomic>
 
 namespace ISF {
 
@@ -44,8 +46,8 @@ namespace ISF {
     virtual bool eventPassesFilter() const override final;
 
   private:
-    mutable unsigned int m_ntot;
-    mutable unsigned int m_npass;
+    mutable std::atomic<unsigned int> m_ntot;
+    mutable std::atomic<unsigned int> m_npass;
     SG::ReadHandleKeyArray<TrackRecordCollection> m_VolumeNames;
     bool   m_useANDFilter;
     int    m_magicID;
