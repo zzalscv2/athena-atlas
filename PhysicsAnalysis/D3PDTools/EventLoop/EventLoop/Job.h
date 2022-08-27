@@ -23,11 +23,14 @@
 
 #include <EventLoop/Global.h>
 
-#include <vector>
+
 #include <AnaAlgorithm/Global.h>
 #include <EventLoop/JobConfig.h>
 #include <SampleHandler/SampleHandler.h>
 #include <SampleHandler/MetaObject.h>
+#include <vector>
+#include <memory>
+class AnaReentrantAlgorithmConfig;
 
 namespace asg
 {

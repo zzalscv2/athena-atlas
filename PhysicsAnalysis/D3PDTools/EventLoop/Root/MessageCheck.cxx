@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2019 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
 */
 
 /// @author Nils Krumnack
@@ -24,12 +24,14 @@ namespace EL
 
   namespace Detail
   {
-    void report_exception ()
+    void report_exception (std::exception_ptr eptr)
     {
       using namespace msgEventLoop;
       try
       {
-        throw;
+        if (eptr) {
+            std::rethrow_exception(eptr);
+        }
       } catch (std::exception& e)
       {
         ANA_MSG_ERROR ("caught exception: " << e.what());

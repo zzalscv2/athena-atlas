@@ -59,6 +59,7 @@ namespace SH
 	return result;
     }
     RCU_THROW_MSG ("failed to open file: " + name);
+    //cppcheck-suppress rethrowNoCurrentException
     throw; //compiler dummy
   }
 
