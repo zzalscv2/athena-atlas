@@ -263,8 +263,7 @@ StatusCode ISF::SimKernelMT::execute() {
 
     // Delete simulated particles
     for ( auto usedParticle : particles ) {
-      ISF::ISFParticle *curPart = const_cast<ISF::ISFParticle*>(usedParticle); //FIXME const_cast badness
-      delete curPart;
+      delete usedParticle;
     }
     particles.clear();
   }

@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2017 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef ISF_ALGS_SIMHITTREECREATOR_H
@@ -34,9 +34,9 @@ namespace ISF {
     virtual ~SimHitTreeCreator();
 
     /** Athena algorithm's interface method initialize() */
-    StatusCode  initialize() override final;
+    virtual StatusCode  initialize() override final;
     /** Athena algorithm's interface method execute() */
-    StatusCode  execute() override final;
+    virtual StatusCode  execute() override final;
 
   private:
 
@@ -51,18 +51,18 @@ namespace ISF {
     std::string                                                  m_validationStream; //!< validation THist stream name
     /** Validation output TTree (+variables) */
     TTree                                                       *m_t_simHits;        //!< ROOT tree containing simulated hit info
-    mutable int                                                  m_pileup;
-    mutable int                                                  m_type;
-    mutable int                                                  m_id;
-    mutable int                                                  m_mother;
-    mutable int                                                  m_barcode;
-    mutable float                                                m_time;
-    mutable float                                                m_drift;
-    mutable float                                                m_edeposit;
-    mutable float                                                m_momentum;
-    mutable float                                                m_theta;
-    mutable float                                                m_phi;
-    mutable float                                                m_eta;
+    int                                                  m_pileup;
+    int                                                  m_type;
+    int                                                  m_id;
+    int                                                  m_mother;
+    int                                                  m_barcode;
+    float                                                m_time;
+    float                                                m_drift;
+    float                                                m_edeposit;
+    float                                                m_momentum;
+    float                                                m_theta;
+    float                                                m_phi;
+    float                                                m_eta;
 
 
     //Inner Detector

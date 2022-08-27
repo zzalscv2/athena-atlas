@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2020 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
 */
 
 /**
@@ -13,17 +13,14 @@
 // Framework
 #include "TestTools/initGaudi.h"
 
-// ATLAS C++
-
 // Google Test
 #include "gtest/gtest.h"
-// Google Mock
-// #include "gmock/gmock.h"
 
 // Tested AthAlgorithm
 #include "../src/CollectionMerger.h"
 
-
+#include "CxxUtils/checker_macros.h"
+ATLAS_NO_CHECK_FILE_THREAD_SAFETY;  // unit test
 
 namespace ISFTesting {
 

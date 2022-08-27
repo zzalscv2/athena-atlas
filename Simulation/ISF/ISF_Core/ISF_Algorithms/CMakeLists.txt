@@ -30,7 +30,7 @@ atlas_add_test( CollectionMerger_test
    SOURCES test/CollectionMerger_test.cxx src/CollectionMerger.h
    src/CollectionMerger.cxx
    INCLUDE_DIRS ${GTEST_INCLUDE_DIRS} #${GMOCK_INCLUDE_DIRS}
-   LINK_LIBRARIES TestTools GaudiKernel AthenaBaseComps AtlasDetDescr
+   LINK_LIBRARIES TestTools GaudiKernel AthenaBaseComps AtlasDetDescr CxxUtils
    ISF_Event ISF_InterfacesLib PmbCxxUtils InDetSimEvent CaloSimEvent LArSimEvent
    TileSimEvent MuonSimEvent RecEvent ${GTEST_LIBRARIES} #${GMOCK_LIBRARIES}
    POST_EXEC_SCRIPT nopost.sh
