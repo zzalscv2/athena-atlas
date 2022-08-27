@@ -49,7 +49,7 @@ namespace JiveXML {
       virtual StatusCode initialize();
     
     private:
-
+      
       const PixelID* m_pixelID{nullptr};
 
       /// A tool handle to the SiLorentzAngleTool

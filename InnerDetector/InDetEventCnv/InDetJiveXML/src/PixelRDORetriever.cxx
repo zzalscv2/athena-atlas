@@ -124,7 +124,7 @@ namespace JiveXML {
     ATH_CHECK( m_lorentzAngleTool.retrieve() );
     ATH_CHECK(m_pixelDetEleCollKey.initialize());
     ATH_CHECK(m_PixelRDOContainerName.initialize());
-    ATH_CHECK(detStore()->retrieve(m_pixelID,"PixelID"));
+    ATH_CHECK(detStore()->retrieve(m_pixelID, "PixelID"));
 
     return StatusCode::SUCCESS;
   }

@@ -32,15 +32,17 @@ isOfflineTest     = False
 #for the time being, running over file is not possible ONLINE (please see RecExOnline_File_Offline.py) 
 useEmon           = True
 #The number of machines per single monitoring task we run with helpfully labelled "keycount"
-keycount          = 10 # equal or greater than the number of DCMs for beam splashes
+keycount          = 3 # equal or greater than the number of DCMs for beam splashes
 buffersize        = 10 # three times of keycount for beam splashes
 updateperiod      = 200
 timeout           = 600000 # 144000000 (40 hrs) for beam splashes
 
 keyname           = 'dcm'
 
-#Blank to read all
-streamName          = '' # 'MinBias' for beam splashes
+# Empty list to read all
+# 'MinBias' for beam splashes
+# An explicit list for nominal data taking to exclude some high rate streams
+streamName          = 'ZeroBias:CosmicCalo:IDCosmic:CosmicMuons:Background:Standby:L1Calo:Main'
 
 #Read Physics
 streamType        = 'physics'          #Progonal Does not specify  these
@@ -87,9 +89,9 @@ InputFormat       = 'bytestream'
 fileName          = './0.data'
 
 #COND tag
-ConditionsTag     = 'CONDBR2-HLTP-2022-01'
+ConditionsTag     = 'CONDBR2-HLTP-2022-02'
 #Current DetDesc
-DetDescrVersion   = 'ATLAS-R3S-2021-02-00-00'
+DetDescrVersion   = 'ATLAS-R3S-2021-03-00-00'
 
 doESD             = True
 writeESD          = True # False - Jiggins_12Feb_v2 working version switch 
@@ -164,7 +166,7 @@ jobproperties.Beam.bunchSpacing.set_Value_and_Lock(25) # Needed for collisions
 
 if (partitionName != 'ATLAS'): # Can't get some information from the test partition
      ConfigFlags.Input.RunNumber = [412343]
-     ConfigFlags.Input.ProjectName = 'data22_cos'
+     ConfigFlags.Input.ProjectName = 'data22_13p6TeV'
      ## ERROR Missing ROBFragment with ID 0x760001 requested ATR-24151 13 Oct 2021 lshi
      ConfigFlags.Trigger.L1.doMuon=False;
      ConfigFlags.Trigger.L1.doCalo=False;
@@ -183,7 +185,7 @@ topSequence.LArRawDataReadingAlg.FailOnCorruption=False
 
 include ("EventDisplaysOnline/JiveXMLServer_jobOptions.py")
 include ("EventDisplaysOnline/Atlantis_jobOptions.py")
-#include ("EventDisplaysOnline/VP1_jobOptions.py")
+include ("EventDisplaysOnline/VP1_jobOptions.py")
 
 ## Disable histogramming
 svcMgr.ByteStreamInputSvc.ISServer=''
