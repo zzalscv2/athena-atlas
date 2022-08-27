@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2019 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
 */
 
 //          
@@ -455,6 +455,7 @@ namespace SH
     std::unique_ptr<TFile> file (TFile::Open (fileList[0].c_str(), "READ"));
     if (file == nullptr)
       RCU_THROW_MSG ("could not open file " + fileList[0]);
+    //cppcheck-suppress nullPointerRedundantCheck 
     TObject *object = file->Get (name.c_str());
     if (object != nullptr)
       RCU::SetDirectory (object, nullptr);

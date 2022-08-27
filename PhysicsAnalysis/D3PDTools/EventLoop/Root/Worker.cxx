@@ -55,6 +55,7 @@
 #include <TObjString.h>
 #include <fstream>
 #include <memory>
+#include <exception>
 
 //
 // method implementations
@@ -575,7 +576,7 @@ namespace EL
       inputFile = SH::openFile (inputFileUrl, *metaData());
     } catch (...)
     {
-      Detail::report_exception ();
+      Detail::report_exception (std::current_exception());
     }
     if (inputFile.get() == 0)
     {
@@ -664,7 +665,7 @@ namespace EL
       }
     } catch (...)
     {
-      Detail::report_exception ();
+      Detail::report_exception (std::current_exception());
       ANA_MSG_ERROR ("while calling execute() on algorithm " << iter->m_algorithm->getName());
       return ::StatusCode::FAILURE;
     }
@@ -684,7 +685,7 @@ namespace EL
       }
     } catch (...)
     {
-      Detail::report_exception ();
+      Detail::report_exception (std::current_exception());
       ANA_MSG_ERROR ("while calling postExecute() on algorithm " << iter->m_algorithm->getName());
       return ::StatusCode::FAILURE;
     }
@@ -883,7 +884,7 @@ namespace EL
       return ::StatusCode::SUCCESS;
     } catch (...)
     {
-      Detail::report_exception ();
+      Detail::report_exception (std::current_exception());
       return ::StatusCode::FAILURE;
     }
   }
