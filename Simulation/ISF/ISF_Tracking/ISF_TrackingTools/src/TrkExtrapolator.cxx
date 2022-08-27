@@ -75,7 +75,7 @@ ISF::ISFParticle* ISF::TrkExtrapolator::extrapolate( const ISF::ISFParticle &par
     return 0;
   }
 
-  if ( !m_trackingVolume ) {
+  if ( !m_trackingVolume.get() ) {
     // ------------------------------- get the trackingGeometry at first place
     SG::ReadCondHandle<Trk::TrackingGeometry> readHandle{m_trackingGeometryReadKey};
     if (!readHandle.isValid() || *readHandle == nullptr) {
@@ -84,11 +84,12 @@ ISF::ISFParticle* ISF::TrkExtrapolator::extrapolate( const ISF::ISFParticle &par
     }
 
     const Trk::TrackingGeometry* trackingGeometry = *readHandle;
-    m_trackingVolume = trackingGeometry->trackingVolume( m_trackingVolumeName);
-    if (!m_trackingVolume) {
+    const Trk::TrackingVolume* trackingVolume = trackingGeometry->trackingVolume( m_trackingVolumeName);
+    if (!trackingVolume) {
       ATH_MSG_FATAL("Failed to retrieve TrackingVolume: " << m_trackingVolumeName);
       return 0;
     }
+    m_trackingVolume.set(trackingVolume);
   }
   
   // create objects from ISFParticle needed for extrapolation
@@ -106,7 +107,7 @@ ISF::ISFParticle* ISF::TrkExtrapolator::extrapolate( const ISF::ISFParticle &par
   // extrapolate to calorimeter entry
   const Trk::TrackParameters* extrapolatedPars = m_extrapolator->extrapolateToVolume(ctx,
                                                                                      par,
-                                                                                     *m_trackingVolume,
+                                                                                     *m_trackingVolume.get(),
                                                                                      Trk::alongMomentum,
                                                                                      particleHypo).release();
   

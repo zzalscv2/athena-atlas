@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2017 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
 */
 
 ///////////////////////////////////////////////////////////////////
@@ -18,6 +18,8 @@
 // FrameWork includes
 #include "GaudiKernel/ToolHandle.h"
 #include "AthenaBaseComps/AthAlgTool.h"
+#include "CxxUtils/CachedPointer.h"
+#include "CxxUtils/checker_macros.h"
 
 // ISF includes
 #include "ISF_Event/ISFParticle.h"
@@ -51,12 +53,12 @@ namespace ISF {
       ~TrkExtrapolator();
 
       /** Athena AlgTool initialization **/
-      StatusCode  initialize();
+      virtual StatusCode  initialize() override;
       /** Athena AlgTool finalization **/
-      StatusCode  finalize();
+      virtual StatusCode  finalize() override;
 
       /** Extrapolate the given ISFParticle */
-      ISF::ISFParticle* extrapolate( const ISF::ISFParticle &particle ) const;
+      virtual ISF::ISFParticle* extrapolate( const ISF::ISFParticle &particle ) const override;
 
     private:
 
@@ -67,7 +69,7 @@ namespace ISF {
       ToolHandle<Trk::IExtrapolator>       m_extrapolator;              //!< ToolHandle for track extrapolator
 
       std::string                               m_trackingVolumeName;   //!< name of the volume within the extrapolation is carried out
-      mutable const Trk::TrackingVolume*        m_trackingVolume;       //!< volume within the extrapolation is carried out
+      mutable CxxUtils::CachedPointer<const Trk::TrackingVolume> m_trackingVolume ATLAS_THREAD_SAFE;       //!< volume within the extrapolation is carried out
 
       Trk::PdgToParticleHypothesis*             m_pdgToParticleHypothesis; //!< converts PDG ID to hypothesis for TrackParameters
 
