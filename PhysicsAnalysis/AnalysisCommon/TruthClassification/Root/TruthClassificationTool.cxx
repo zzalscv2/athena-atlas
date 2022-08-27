@@ -99,7 +99,7 @@ StatusCode TruthClassificationTool::classifyElectron(const xAOD::IParticle &elec
   int type = isTruthParticle ? m_classifierParticleType(electron) : m_truthType(electron);
   int origin = isTruthParticle ? m_classifierParticleOrigin(electron) : m_truthOrigin(electron);
   int pdgId = isTruthParticle ? truthParticle->pdgId() : m_truthPdgId(electron);
-  if (m_useTruthParticleDecorations && !isTruthParticle && truthParticle != nullptr)
+  if (m_useTruthParticleDecorations && !isTruthParticle)
   {
     type = m_classifierParticleType(*truthParticle);
     origin = m_classifierParticleOrigin(*truthParticle);
