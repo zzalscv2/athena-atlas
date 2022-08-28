@@ -192,9 +192,10 @@ StatusCode MuonSegmentFinderAlg::execute(const EventContext& ctx) const {
 void MuonSegmentFinderAlg::createSegmentsFromClusters(const EventContext& ctx, const Muon::MuonPatternCombination* patt, Trk::SegmentCollection* segments, Trk::SegmentCollection* segmentsNSW) const {
     // turn the PRD into MuonCluster
     std::map<int, std::vector<const Muon::MuonClusterOnTrack*> > clustersPerSector;
+    std::vector<std::unique_ptr<const Muon::MuonClusterOnTrack>> garbage{};
     for (const Muon::MuonPatternChamberIntersect&  it :patt->chamberData()) {
         if (it.prepRawDataVec().empty()) continue;
-        const Identifier& id = it.prepRawDataVec().front()->identify();
+        const Identifier id = it.prepRawDataVec().front()->identify();
         if (!m_idHelperSvc->isMM(id) && !m_idHelperSvc->issTgc(id)) continue;
         for (const Trk::PrepRawData* pit : it.prepRawDataVec()) {
             const Muon::MuonCluster* cl = dynamic_cast<const Muon::MuonCluster*>(pit);
@@ -203,12 +204,11 @@ void MuonSegmentFinderAlg::createSegmentsFromClusters(const EventContext& ctx, c
             std::vector<const Muon::MuonClusterOnTrack*>& clusters = clustersPerSector[sector];
 
             if (m_idHelperSvc->isMM(pit->identify())) {
-                const Muon::MuonClusterOnTrack* clust = m_mmClusterCreator->createRIO_OnTrack(*cl, cl->globalPosition());
-                clusters.push_back(clust);
+                clusters.push_back(m_mmClusterCreator->createRIO_OnTrack(*cl, cl->globalPosition()));
             } else {  //  must be an sTGC prd
-                const Muon::MuonClusterOnTrack* clust = m_clusterCreator->createRIO_OnTrack(*cl, cl->globalPosition());
-                clusters.push_back(clust);
+                clusters.push_back(m_clusterCreator->createRIO_OnTrack(*cl, cl->globalPosition()));
             }
+            garbage.emplace_back(clusters.back());
         }
     }
 
@@ -216,9 +216,6 @@ void MuonSegmentFinderAlg::createSegmentsFromClusters(const EventContext& ctx, c
         std::vector<const Muon::MuonClusterOnTrack*>& clusters = sit.second;
         std::vector<std::unique_ptr<Muon::MuonSegment>> segVec;
         m_clusterSegMakerNSW->find(ctx, clusters, segVec, segments, segmentsNSW);
-
-        // cleanup the memory
-        for (const Muon::MuonClusterOnTrack* clus : clusters) { delete clus; }
     }
 }
 
