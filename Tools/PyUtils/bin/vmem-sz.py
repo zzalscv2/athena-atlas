@@ -15,6 +15,7 @@ import os
 ## 3rd-party imports
 from PyUtils.Decorators import forking as forking
 from PerfMonComps.PyMonUtils import loaded_libs, pymon
+import six
 
 _veto_libs = [
     'resource.so', # from python std-lib 'resource'...
@@ -128,7 +129,7 @@ def save_stats (lib_stats, fname=None):
     o = csv.writer (open(fname, "w"), delimiter=';')
     o.writerow (['nbr libraries', len(lib_stats)])
     o.writerow (['lib name', 'dvmem-self (Mb)', 'dvmem-all (Mb)', 'nbr linked-libs'])
-    for k,v in lib_stats.items():
+    for k,v in six.iteritems(lib_stats):
         o.writerow ([os.path.basename(k), v['vmem_self'], v['vmem_all'], v['nbr_linked']])
 
     print (":: saving vmem statistics in [%s]... [done]"%fname)

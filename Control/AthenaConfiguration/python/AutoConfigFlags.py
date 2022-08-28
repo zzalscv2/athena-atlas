@@ -2,7 +2,6 @@
 
 from PyUtils.MetaReader import read_metadata
 from AthenaCommon.Logging import logging
-from AthenaConfiguration.AthConfigFlags import isGaudiEnv
 from functools import lru_cache
 
 msg = logging.getLogger('AutoConfigFlags')
@@ -25,12 +24,6 @@ class DynamicallyLoadMetadata:
 
     def get(self, key, default):
         if key in self.metadata:
-            return self.metadata[key]
-        if not isGaudiEnv() and key == 'itemList':
-            import ROOT
-            finput = ROOT.TFile.Open(self.filename, 'READ')
-            tcoll = finput.Get('CollectionTree')
-            self.metadata['itemList'] = [ (b.GetClassName(), b.GetName()) for b in tcoll.GetListOfBranches() ]
             return self.metadata[key]
         if self.metAccessLevel != 'peeker':
             msg.info("Looking into the file in 'peeker' mode as the configuration requires more details: %s ", key)
