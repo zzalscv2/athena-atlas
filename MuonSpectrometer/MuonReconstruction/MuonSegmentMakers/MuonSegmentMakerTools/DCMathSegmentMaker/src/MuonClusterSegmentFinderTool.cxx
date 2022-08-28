@@ -18,8 +18,7 @@
 #include "TrkTrack/Track.h"
 #include "FourMomUtils/xAODP4Helpers.h"
 
-namespace Muon {
-
+namespace Muon {    
 
     //============================================================================
     MuonClusterSegmentFinderTool::MuonClusterSegmentFinderTool(const std::string& type, const std::string& name, const IInterface* parent) 
@@ -80,7 +79,7 @@ namespace Muon {
     //============================================================================
     // find the precision (eta) segments
     void MuonClusterSegmentFinderTool::findPrecisionSegments(const EventContext& ctx, 
-                                                             std::vector<const Muon::MuonClusterOnTrack*>& muonClusters,
+                                                             const std::vector<const Muon::MuonClusterOnTrack*>& muonClusters,
                                                              std::vector<std::unique_ptr<Muon::MuonSegment>>& etaSegs,
                                                              int singleWedge /*= 0*/) const {
 
@@ -95,13 +94,12 @@ namespace Muon {
 
         // create segment seeds
         std::vector<std::pair<Amg::Vector3D, Amg::Vector3D> > seeds = segmentSeed(orderedClusters, false);
-        ATH_MSG_VERBOSE("  Found " << seeds.size() << " 2D seeds");
-
+        ATH_MSG_VERBOSE("  Found " << seeds.size() << " 2D seeds");       
         // Loop on seeds: find all clusters near the seed and try to fit
         std::vector<const Muon::MuonClusterOnTrack*> etaHitVec, phiHitVec;
         std::unique_ptr<TrackCollection> segTrkColl = std::make_unique<TrackCollection>();
 
-        for (std::pair<Amg::Vector3D, Amg::Vector3D>& seed : seeds) {
+        for (const std::pair<Amg::Vector3D, Amg::Vector3D>& seed : seeds) {
 
             std::vector<const Muon::MuonClusterOnTrack*> hitVecTmp;
             getClustersOnSegment(orderedClusters, seed, hitVecTmp);
@@ -125,15 +123,15 @@ namespace Muon {
             // local position and direction of the eta-seed on the surface of the first cluster
             const Trk::PlaneSurface& psurf = static_cast<const Trk::PlaneSurface&>(surf);
             Trk::Intersection intersect = psurf.straightLineIntersection(seed.first, seed.second, false, false);
-            Amg::Vector2D lpos_seed;
-            Trk::LocalDirection ldir_seed;
+            Amg::Vector2D lpos_seed{Amg::Vector2D::Zero()};
+            Trk::LocalDirection ldir_seed{};
             psurf.globalToLocal(intersect.position, intersect.position, lpos_seed);
             psurf.globalToLocalDirection(seed.second, ldir_seed);
 
             // use the seed info to generate start parameters (dummy values for phi)
             Amg::Vector2D lpos(lpos_seed[Trk::locX], 0.);
             Trk::LocalDirection ldir(ldir_seed.angleXZ(), -M_PI_2);
-            Amg::Vector3D gpos_seg, gdir_seg;
+            Amg::Vector3D gpos_seg{Amg::Vector3D::Zero()}, gdir_seg{Amg::Vector3D::Zero()};
             psurf.localToGlobal(lpos, gpos_seg, gpos_seg);
             psurf.localToGlobalDirection(ldir, gdir_seg);
 
@@ -174,7 +172,7 @@ namespace Muon {
                 
                 
     //============================================================================
-    void MuonClusterSegmentFinderTool::find3DSegments(const EventContext& ctx, std::vector<const Muon::MuonClusterOnTrack*>& muonClusters,
+    void MuonClusterSegmentFinderTool::find3DSegments(const EventContext& ctx, const std::vector<const Muon::MuonClusterOnTrack*>& muonClusters,
                                                       std::vector<std::unique_ptr<Muon::MuonSegment>>& etaSegs, 
                                                       std::vector<std::unique_ptr<Muon::MuonSegment>>& segments,
                                                       Trk::SegmentCollection* segColl,
@@ -257,21 +255,21 @@ namespace Muon {
             double  etaSegLocX  = etaSeg->localParameters()[Trk::locX];
             double  etaSegLocXZ = etaSeg->localDirection().angleXZ();
 
-            for (std::pair<Amg::Vector3D, Amg::Vector3D>& seed : seeds) {
+            for (const std::pair<Amg::Vector3D, Amg::Vector3D>& seed : seeds) {
 
                 // calculate start parameters for the fit
                 // combine the local position and direction of the eta-seed (segment) 
                 // and local position and direction of the phi-seed to generate 3D starting parameters
                 Trk::Intersection intersect = etaSegSurf.straightLineIntersection(seed.first, seed.second, false, false);
-                Amg::Vector2D lpos_seed;
-                Trk::LocalDirection ldir_seed;
+                Amg::Vector2D lpos_seed{Amg::Vector2D::Zero()};
+                Trk::LocalDirection ldir_seed{};
                 etaSegSurf.globalToLocal(intersect.position, intersect.position, lpos_seed);
                 etaSegSurf.globalToLocalDirection(seed.second, ldir_seed);
 
                 Amg::Vector2D lpos_seg(etaSegLocX, lpos_seed[Trk::locY]);
                 Trk::LocalDirection ldir_seg(etaSegLocXZ, ldir_seed.angleYZ());
 
-                Amg::Vector3D gpos_seg, gdir_seg;
+                Amg::Vector3D gpos_seg{Amg::Vector3D::Zero()}, gdir_seg{Amg::Vector3D::Zero()};
                 etaSegSurf.localToGlobal(lpos_seg, gpos_seg, gpos_seg);
                 etaSegSurf.localToGlobalDirection(ldir_seg, gdir_seg);
 
@@ -288,7 +286,7 @@ namespace Muon {
 
                 int nPhiHits = getClustersOnSegment(orderedPadClusters,  seed3D, phiHitsPads,  singleWedge); // add pad hits  (from the requested wedge if any)
                 nPhiHits    += getClustersOnSegment(orderedWireClusters, seed3D, phiHitsWires, singleWedge); // add wire hits (from the requested wedge if any)
-		if (nPhiHits < 2) continue; // at least two phi hits
+		        if (nPhiHits < 2) continue; // at least two phi hits
 
                 // pad and wire hits sorted by their z-coordinate
                 std::merge(phiHitsPads.begin(), phiHitsPads.end(), phiHitsWires.begin(), phiHitsWires.end(), std::back_inserter(phiHitsTmp), 
@@ -362,8 +360,8 @@ namespace Muon {
 
 
     //============================================================================
-    bool MuonClusterSegmentFinderTool::hitsToTrack(const EventContext& ctx, std::vector<const Muon::MuonClusterOnTrack*>& etaHitVec, 
-                                                                            std::vector<const Muon::MuonClusterOnTrack*>& phiHitVec, 
+    bool MuonClusterSegmentFinderTool::hitsToTrack(const EventContext& ctx, const std::vector<const Muon::MuonClusterOnTrack*>& etaHitVec, 
+                                                                            const std::vector<const Muon::MuonClusterOnTrack*>& phiHitVec, 
                                                                             const Trk::TrackParameters& startpar,
                                                                             TrackCollection& segTrkColl) const {
                                                 
@@ -374,15 +372,14 @@ namespace Muon {
         vecFitPts.reserve(nHitsEta + nHitsPhi + 2 + m_ipConstraint);
 
         std::unique_ptr<Trk::PseudoMeasurementOnTrack> pseudoVtx{nullptr}, pseudoPhi1{nullptr}, pseudoPhi2{nullptr};
-        
         // is chosen, add a pseudo measurement as vtx at the center of ATLAS
         if (m_ipConstraint) {
             constexpr double errVtx{100.};
             Amg::MatrixX covVtx(1, 1);
             covVtx(0, 0) = errVtx * errVtx;
-            Amg::Vector3D vtx(0., 0., 0.);
-            Trk::PerigeeSurface perVtx(vtx);
-            pseudoVtx = std::make_unique<Trk::PseudoMeasurementOnTrack>(Trk::LocalParameters(Trk::DefinedParameter(0, Trk::locX)), std::move(covVtx), std::move(perVtx));
+            /// Beamspot constraint?
+            Trk::PerigeeSurface perVtx(Amg::Vector3D::Zero());
+            pseudoVtx = std::make_unique<Trk::PseudoMeasurementOnTrack>(Trk::LocalParameters(Trk::DefinedParameter(0, Trk::locX)), std::move(covVtx), std::move(perVtx));;
             vecFitPts.push_back(pseudoVtx.get());
         }
 
@@ -394,9 +391,9 @@ namespace Muon {
             double errPos = (nMM) ? 1000. : 0.1;
             Amg::MatrixX cov(1, 1);
             cov(0, 0) = errPos * errPos;
-
-            pseudoPhi1 = std::make_unique<Trk::PseudoMeasurementOnTrack>(Trk::LocalParameters(Trk::DefinedParameter(0, Trk::locY)), cov, etaHitVec.front()->associatedSurface());
-            pseudoPhi2 = std::make_unique<Trk::PseudoMeasurementOnTrack>(Trk::LocalParameters(Trk::DefinedParameter(0, Trk::locY)), cov, etaHitVec.back()->associatedSurface());
+            static const Trk::LocalParameters loc_pseudopars{Trk::DefinedParameter(0, Trk::locY)};
+            pseudoPhi1 = std::make_unique<Trk::PseudoMeasurementOnTrack>(loc_pseudopars, cov, etaHitVec.front()->associatedSurface());
+            pseudoPhi2 = std::make_unique<Trk::PseudoMeasurementOnTrack>(loc_pseudopars, cov, etaHitVec.back()->associatedSurface());
              
             // add the first pseudo phi hit, the hit vector, and the second pseudo phi hit
             vecFitPts.push_back(pseudoPhi1.get());
@@ -445,7 +442,7 @@ namespace Muon {
 
 
     //============================================================================
-    std::vector<const Muon::MuonClusterOnTrack*> MuonClusterSegmentFinderTool::cleanClusters(std::vector<const Muon::MuonClusterOnTrack*>& muonClusters, 
+    std::vector<const Muon::MuonClusterOnTrack*> MuonClusterSegmentFinderTool::cleanClusters(const std::vector<const Muon::MuonClusterOnTrack*>& muonClusters, 
                                                                                              bool selectPhiHits, int singleWedge /*= 0*/) const {
         
         // Keep only eta (MM && sTGC) or phi (sTGC) clusters
@@ -453,11 +450,9 @@ namespace Muon {
         std::vector<const Muon::MuonClusterOnTrack*> clusters;
         clusters.reserve(muonClusters.size());
         for (const Muon::MuonClusterOnTrack* cluster : muonClusters) {
-
             if (!cluster) continue;
             if (selectPhiHits != m_idHelperSvc->measuresPhi(cluster->identify())) continue;
             if (singleWedge && singleWedge != wedgeNumber(cluster)) continue;
-
             clusters.push_back(cluster);
         }
 
@@ -467,7 +462,7 @@ namespace Muon {
 
     //============================================================================
     std::vector<std::vector<const Muon::MuonClusterOnTrack*> > MuonClusterSegmentFinderTool::classifyByLayer(
-        std::vector<const Muon::MuonClusterOnTrack*>& clusters, bool useWires) const {
+        const std::vector<const Muon::MuonClusterOnTrack*>& clusters, bool useWires) const {
 
         // Classifies clusters by layer, starting from the layer closest to the IP and moving outwards.
         // "clusters" is expected to contain only eta (MM+sTGC strip) or only phi hits (sTGC pads XOR wires).
@@ -493,13 +488,13 @@ namespace Muon {
                 hasEta = true;
             } else if (m_idHelperSvc->issTgc(id)) {
                 (m_idHelperSvc->stgcIdHelper().measuresPhi(id) ? hasPhi : hasEta) = true;
-	        int channelType = m_idHelperSvc->stgcIdHelper().channelType(id);
-	        //skip sTGC pads if using wires, or skip wires if using pads
-	        if ( useWires && channelType == sTgcIdHelper::Pad) continue;
-	        if (!useWires && channelType == sTgcIdHelper::Wire) continue;
-                int     ml = m_idHelperSvc->stgcIdHelper().multilayer(id);
-                int  layer = m_idHelperSvc->stgcIdHelper().gasGap(id);
-                iorder = 12*(ml - 1) + (layer - 1); // 0 - 3 (IP) and 12 - 15 (HO)    
+                int channelType = m_idHelperSvc->stgcIdHelper().channelType(id);
+                //skip sTGC pads if using wires, or skip wires if using pads
+                if ( useWires && channelType == sTgcIdHelper::Pad) continue;
+                if (!useWires && channelType == sTgcIdHelper::Wire) continue;
+                    int     ml = m_idHelperSvc->stgcIdHelper().multilayer(id);
+                    int  layer = m_idHelperSvc->stgcIdHelper().gasGap(id);
+                    iorder = 12*(ml - 1) + (layer - 1); // 0 - 3 (IP) and 12 - 15 (HO)    
             } else {
                 ++nBad;
                 continue;
@@ -522,7 +517,7 @@ namespace Muon {
 
     //============================================================================
     std::vector<std::pair<Amg::Vector3D, Amg::Vector3D> > MuonClusterSegmentFinderTool::segmentSeed(
-        std::vector<std::vector<const Muon::MuonClusterOnTrack*> >& orderedClusters, bool usePhi) const {
+        const std::vector<std::vector<const Muon::MuonClusterOnTrack*> >& orderedClusters, bool usePhi) const {
         std::vector<std::pair<Amg::Vector3D, Amg::Vector3D> > seeds;
 
         // oderedClusters should contain either eta clusters (MM and sTGC) 
@@ -563,9 +558,9 @@ namespace Muon {
                         // If the two hits are in distant panels (in z), define the seed direction 
                         // from their difference, otherwise define it from the IP and the hit mean position. 
                         if (std::abs(gpR.z() - gpL.z()) >= 200.) {
-                          seeds.emplace_back(gpL, gpR - gpL);
+                          seeds.emplace_back(gpL, (gpR - gpL).unit());
                         } else {
-                          seeds.emplace_back(gpL, 0.5*(gpR + gpL));
+                          seeds.emplace_back(gpL, (0.5*(gpR + gpL)).unit());
                         }
                     }
                     if (usedLayerR) ++seedingLayersR;
@@ -606,9 +601,9 @@ namespace Muon {
                 const Amg::Vector3D& gpR = hitR->prepRawData()->globalPosition();
        
                 if (std::abs(gpR.z() - gpL.z()) >= 200.) {
-                    seeds.emplace_back(gpL, gpR - gpL);
+                    seeds.emplace_back(gpL, (gpR - gpL).unit());
                 } else {
-                    seeds.emplace_back(gpL, 0.5*(gpR + gpL));
+                    seeds.emplace_back(gpL, (0.5*(gpR + gpL)).unit());
                 }
             }
         }
@@ -630,8 +625,8 @@ namespace Muon {
 
 
     //============================================================================
-    int MuonClusterSegmentFinderTool::getClustersOnSegment(std::vector<std::vector<const Muon::MuonClusterOnTrack*> >& orderedclusters, 
-                                                           std::pair<Amg::Vector3D, Amg::Vector3D>& seed,
+    int MuonClusterSegmentFinderTool::getClustersOnSegment(const std::vector<std::vector<const Muon::MuonClusterOnTrack*> >& orderedclusters, 
+                                                           const std::pair<Amg::Vector3D, Amg::Vector3D>& seed,
                                                            std::vector<const Muon::MuonClusterOnTrack*>& clusOnSeg,
                                                            int singleWedge /*= 0*/) const {
 
@@ -639,19 +634,14 @@ namespace Muon {
         int layer{0};
         int nHitsAdded{0};
 
-        for (std::vector<const Muon::MuonClusterOnTrack*>& surfHits : orderedclusters) {
+        for (const std::vector<const Muon::MuonClusterOnTrack*>& surfHits : orderedclusters) {
             const  Muon::MuonClusterOnTrack* layerBestHit{nullptr};
             double minDist{9999.};
-            bool   wedgeChecked{false};
-
             // get the best hit candidate on this layer
             for (const Muon::MuonClusterOnTrack* hit : surfHits) {
 
-                if (!wedgeChecked && singleWedge) {
-                    wedgeChecked = true;
-                    if (singleWedge != wedgeNumber(hit)) {
-                        break;
-                    }
+                if (singleWedge && singleWedge != wedgeNumber(hit)) {
+                    break;                    
                 }
 
                 double dist  = clusterDistanceToSeed(hit, seed);
@@ -679,13 +669,13 @@ namespace Muon {
     }
 
     //============================================================================
-    double MuonClusterSegmentFinderTool::clusterDistanceToSeed(const Muon::MuonClusterOnTrack* clus, std::pair<Amg::Vector3D, Amg::Vector3D>& seed) const {
+    double MuonClusterSegmentFinderTool::clusterDistanceToSeed(const Muon::MuonClusterOnTrack* clus, const std::pair<Amg::Vector3D, Amg::Vector3D>& seed) const {
 
         // Get the seed intersection with the surface in local plane coordiantes
         const Trk::Surface&    surf = clus->associatedSurface();
         Trk::Intersection intersect = surf.straightLineIntersection(seed.first, seed.second, false, false);
 
-        Amg::Vector2D lpos_seed;
+        Amg::Vector2D lpos_seed{Amg::Vector2D::Zero()};
         surf.globalToLocal(intersect.position, intersect.position, lpos_seed);
 
         // case it's an sTgc pad: just check that the seed is on the hit pad
@@ -718,15 +708,15 @@ namespace Muon {
 
     //============================================================================
     std::vector<std::pair<Amg::Vector3D, Amg::Vector3D> > MuonClusterSegmentFinderTool::segmentSeedFromPads(
-                                                     std::vector<std::vector<const Muon::MuonClusterOnTrack*> >& orderedClusters, 
+                                                     const std::vector<std::vector<const Muon::MuonClusterOnTrack*> >& orderedClusters, 
                                                      const Muon::MuonSegment* etaSeg) const {
 
         std::vector<std::pair<Amg::Vector3D, Amg::Vector3D> > seeds;
         /// Do not run an empty container
         if (orderedClusters.empty()) return seeds;
 
-        std::vector<std::vector<const Muon::MuonClusterOnTrack*> > sTgcIP(4); // IP: layers nearest to the IP will be added first
-        std::vector<std::vector<const Muon::MuonClusterOnTrack*> > sTgcHO(4); // HO: layers furthest from the IP will be added first
+        std::vector<std::vector<const Muon::sTgcPrepData*> > sTgcIP(4); // IP: layers nearest to the IP will be added first
+        std::vector<std::vector<const Muon::sTgcPrepData*> > sTgcHO(4); // HO: layers furthest from the IP will be added first
  
         // Process clusters separately for each multilayer
         for (int iml : {1, 2}) {
@@ -744,30 +734,30 @@ namespace Muon {
                     sTgcIP.resize(nLayersWithHitMatch + 1);
                     sTgcHO.resize(nLayersWithHitMatch + 1);
                 }
-                std::vector<const Muon::MuonClusterOnTrack*>& matchedHits = (iml == 1) ? sTgcIP.at(nLayersWithHitMatch) : sTgcHO.at(nLayersWithHitMatch);
+                std::vector<const Muon::sTgcPrepData*>& matchedHits = (iml == 1) ? sTgcIP.at(nLayersWithHitMatch) : sTgcHO.at(nLayersWithHitMatch);
                                       
                 // Loop on the hits on this layer. Find the one closest (in eta) to the segment intersection.
-                for (const Muon::MuonClusterOnTrack* padHit : orderedClusters[il]) {
+                for (const Muon::MuonClusterOnTrack* rio : orderedClusters[il]) {
+
+                    const sTgcPrepData* padHit = dynamic_cast<const sTgcPrepData*>(rio->prepRawData());
+                    if (!padHit) continue;
 
                     // check the multilayer the hit is on
                     if (m_idHelperSvc->stgcIdHelper().multilayer(padHit->identify()) != iml) continue;
 
-                    const sTgcPrepData* prd = dynamic_cast<const sTgcPrepData*>(padHit->prepRawData());
-                    if (!prd) continue;
-
-                    const MuonGM::MuonPadDesign* design = prd->detectorElement()->getPadDesign(padHit->identify());
+                    const MuonGM::MuonPadDesign* design = padHit->detectorElement()->getPadDesign(padHit->identify());
                     if (!design) continue;
                 
                     // local position of the segment intersection with the plane
-                    const Trk::Surface& surf = padHit->associatedSurface();
+                    const Trk::Surface& surf = padHit->detectorElement()->surface(padHit->identify());
                     Trk::Intersection intersect = surf.straightLineIntersection(etaSeg->globalPosition(), etaSeg->globalDirection(), false, false);
-                    Amg::Vector2D segLocPosOnSurf{0.,0.};
+                    Amg::Vector2D segLocPosOnSurf{Amg::Vector2D::Zero()};
                     surf.globalToLocal(intersect.position, intersect.position, segLocPosOnSurf);
                                               
                     // eta distance between the hit and the segment intersection with the plane
                     // check that it's no more than half of the pad eta-pitch.
-                    double chWidth = design->channelWidth(prd->localPosition(), false);
-                    double etaDistance = std::abs(prd->localPosition().y() - segLocPosOnSurf[1]);
+                    double chWidth = design->channelWidth(padHit->localPosition(), false);
+                    double etaDistance = std::abs(padHit->localPosition().y() - segLocPosOnSurf[1]);
                     if (etaDistance > 0.5*chWidth) continue;
                     ATH_MSG_DEBUG(" etaDistance "<<etaDistance<<" between pad center and position on the pad.");
                     
@@ -787,7 +777,6 @@ namespace Muon {
                     } else {
                         continue;
                     }
-
                     lastDistance = etaDistance;
                 } // end of loop on hits
 
@@ -803,28 +792,28 @@ namespace Muon {
         // get refined phi ranges on each ml, by taking into account pad staggering
         std::vector<std::pair<double, double> > sTgcIP_phiRanges = getPadPhiOverlap(sTgcIP);
         std::vector<std::pair<double, double> > sTgcHO_phiRanges = getPadPhiOverlap(sTgcHO);
-
+        
         // reference prds on the outermost hit surfaces
-        const sTgcPrepData* prdL1 = dynamic_cast<const sTgcPrepData*>(sTgcIP.front().front()->prepRawData());
-        const sTgcPrepData* prdL2 = dynamic_cast<const sTgcPrepData*>(sTgcHO.front().front()->prepRawData());
+        const sTgcPrepData* prdL1 = sTgcIP.front().front();
+        const sTgcPrepData* prdL2 = sTgcHO.front().front();
 
         // create a seed for each combination of IP and HO points
         std::vector<Amg::Vector3D> seedPointIP, seedPointHO;
-        for (std::pair<double, double>& range1 : sTgcIP_phiRanges) {
+        for (const std::pair<double, double>& range1 : sTgcIP_phiRanges) {
             double midPhi1 = 0.5 * (range1.first + range1.second);
             Amg::Vector2D lp1(midPhi1, prdL1->localPosition().y());
-            Amg::Vector3D gpL1;
+            Amg::Vector3D gpL1{Amg::Vector3D::Zero()};
             prdL1->detectorElement()->surface().localToGlobal(lp1, gpL1, gpL1);
 
-            for (std::pair<double, double>& range2 : sTgcHO_phiRanges) {
+            for (const std::pair<double, double>& range2 : sTgcHO_phiRanges) {
                 double midPhi2 = 0.5 * (range2.first + range2.second);
                 Amg::Vector2D lp2(midPhi2, prdL2->localPosition().y());
-                Amg::Vector3D gpL2;
+                Amg::Vector3D gpL2{Amg::Vector3D::Zero()};
                 prdL2->detectorElement()->surface().localToGlobal(lp2, gpL2, gpL2);
 
                 // create the seed taking the average position (w.r.t. IP)
                 // as global direction (as for an infinite momentum track).
-                Amg::Vector3D gDir = (gpL2 + gpL1).unit();
+                Amg::Vector3D gDir = (gpL2 + gpL1).unit();               
                 seeds.emplace_back(gpL1, gDir);
             }
         }
@@ -836,7 +825,7 @@ namespace Muon {
 
     //============================================================================
     std::vector<std::pair<Amg::Vector3D, Amg::Vector3D>>
-    MuonClusterSegmentFinderTool::segmentSeedFromMM(std::vector<Amg::Vector3D> &phiStereo) const
+    MuonClusterSegmentFinderTool::segmentSeedFromMM(const std::vector<Amg::Vector3D> &phiStereo) const
     {
 
         std::vector<std::pair<Amg::Vector3D, Amg::Vector3D>> seeds;
@@ -847,28 +836,25 @@ namespace Muon {
         double dz_tmp = 0;
 
         std::vector<std::pair<unsigned int, unsigned int>> good_indices;
-        for (unsigned int ipoint = 0; ipoint < phiStereo.size(); ipoint++)
+        for (unsigned int ipoint = 0; ipoint < phiStereo.size(); ++ipoint)
         {
-            for (unsigned int jpoint = ipoint + 1; jpoint < phiStereo.size(); jpoint++)
+            for (unsigned int jpoint = ipoint + 1; jpoint < phiStereo.size(); ++jpoint)
             {
                 dz_tmp = std::abs(phiStereo[jpoint].z() - phiStereo[ipoint].z());
-                if (dz_tmp > dz)
-                {
+                if (dz_tmp > dz) {
                     dz = dz_tmp;
                     good_indices.clear();
                     good_indices.emplace_back(ipoint, jpoint);
                 }
-                else if (dz_tmp == dz)
-                {
+                else if ( std::abs(dz_tmp - dz) < DBL_EPSILON) {
                     good_indices.emplace_back(ipoint, jpoint);
                 }
             } // end jpoint
         }     // end ipoint
 
-        for (unsigned int i = 0; i < good_indices.size(); i++)
-        {
-            const Amg::Vector3D segdir = phiStereo[good_indices[i].second] - phiStereo[good_indices[i].first];
-            seeds.emplace_back(phiStereo[good_indices[i].first], segdir);
+        for (const std::pair<unsigned int ,unsigned int> & good :  good_indices) {
+            const Amg::Vector3D segdir = phiStereo[good.second] - phiStereo[good.first];           
+            seeds.emplace_back(phiStereo[good.first], segdir.unit());
         }
 
         return seeds;
@@ -886,24 +872,21 @@ namespace Muon {
             double phi2 = (it->first + it->second).phi();
 
             if (std::find_if(std::next(it), seeds.end(),
-                             [&phi1, &phi2](std::pair<Amg::Vector3D, Amg::Vector3D> &s)
-                             {
-                    double dphi1 = std::abs(xAOD::P4Helpers::deltaPhi(phi1, s.first.phi()));
-                    double dphi2 = std::abs(xAOD::P4Helpers::deltaPhi(phi2, (s.first + s.second).phi()));
+                             [&phi1, &phi2](const std::pair<Amg::Vector3D, Amg::Vector3D> &s){
+                    const double dphi1 = std::abs(xAOD::P4Helpers::deltaPhi(phi1, s.first.phi()));
+                    const double dphi2 = std::abs(xAOD::P4Helpers::deltaPhi(phi2, (s.first + s.second).phi()));
                     return ( dphi1 < 0.05 && dphi2 < 0.05); }) == seeds.end())
             {
 
                 uniqueSeeds.push_back(*it);
             }
         }
-
-        if (uniqueSeeds.size() != seeds.size())
-            seeds.assign(uniqueSeeds.begin(), uniqueSeeds.end());
+        seeds = std::move(uniqueSeeds);
     }
 
     //============================================================================
     std::vector<std::pair<double, double> > MuonClusterSegmentFinderTool::getPadPhiOverlap(
-        std::vector<std::vector<const Muon::MuonClusterOnTrack*> >& pads) const {
+        const std::vector<std::vector<const Muon::sTgcPrepData*> >& pads) const {
 
         // 'pads' contains segment hit candidates, classified in four layers (IP or HO). 
         // Layers are ordered; for IP, the layer with hits that is nearest to 
@@ -913,20 +896,12 @@ namespace Muon {
         std::vector<double> padsPhiC;
 
         // Loop on layers
-        for (std::vector<const Muon::MuonClusterOnTrack*>& surfHits : pads) {
+        for (const std::vector<const Muon::sTgcPrepData*>& surfHits : pads) {
 
             // Loop on layer hits
             std::vector<double> surfPadsPhiL, surfPadsPhiR;
-            for (const Muon::MuonClusterOnTrack* hit : surfHits) {
-
-                Identifier id = hit->identify();
-
-                const sTgcPrepData* prd = dynamic_cast<const sTgcPrepData*>(hit->prepRawData());
-                if (!prd) {
-                    ATH_MSG_WARNING("No prd available for " << m_idHelperSvc->toString(id));
-                    continue;
-                }
-
+            for (const Muon::sTgcPrepData* prd : surfHits) {
+                const Identifier id = prd->identify();
                 const MuonGM::MuonPadDesign* design = prd->detectorElement()->getPadDesign(id);
                 if (!design) {
                     ATH_MSG_WARNING("No design available for " << m_idHelperSvc->toString(id));
@@ -934,18 +909,15 @@ namespace Muon {
                 }
 
                 // Phi boundaries of this pad in local coordinates
-                double halfWidthX = 0.5 * design->channelWidth(prd->localPosition(), true);
-                double hitPadX    = prd->localPosition().x(); // x is in the phi direction
+                const double halfWidthX = 0.5 * design->channelWidth(prd->localPosition(), true);
+                const double hitPadX    = prd->localPosition().x(); // x is in the phi direction
 
                 // Reject hit candidates on pads too close (in phi) to any pad kept so far 
                 // (pad fuzziness) to constrain the number of combinations.
-                bool samePhi{false};
-                for (double& prevPadPhi : padsPhiC) {              
-                    if (std::abs( hitPadX - prevPadPhi ) < 0.9*halfWidthX ) {
-                        samePhi = true;
-                        break;
-                    }
-                }
+                bool samePhi = std::find_if (padsPhiC.begin(),padsPhiC.end(), [&hitPadX, &halfWidthX](const double prevPadPhi){
+                        return std::abs( hitPadX - prevPadPhi ) < 0.9*halfWidthX;
+                }) != padsPhiC.end();
+
                 if (samePhi) continue;
 
                 // Store the new pad candidate
@@ -964,10 +936,9 @@ namespace Muon {
         // number of combinations we can make out of pads in different layers
         // we want to keep combinations of overlapping pads.
         unsigned int nCombos{1};
-        std::for_each(padsPhiR.begin(), padsPhiR.end(), 
-                      [&nCombos](std::vector<double>& surfPadsPhiR) { 
-                          if (!surfPadsPhiR.empty()) nCombos *= surfPadsPhiR.size(); 
-                      });
+        for (const std::vector<double>& surfPadsPhiR: padsPhiR) { 
+            if (!surfPadsPhiR.empty()) nCombos *= surfPadsPhiR.size(); 
+        }
      
         std::vector<std::pair<double, double> > phiOverlap;
         phiOverlap.reserve(nCombos);
@@ -987,8 +958,8 @@ namespace Muon {
                         phiOverlap.emplace_back(padsPhiL[isurf][padIdx], padsPhiR[isurf][padIdx]);
                     } else {
                         // subsequent surfaces: use staggering to narrow the phi ranges
-                        if (padsPhiL[isurf][padIdx] > phiOverlap[icombo].first)  phiOverlap[icombo].first  = padsPhiL[isurf][padIdx];
-                        if (padsPhiR[isurf][padIdx] < phiOverlap[icombo].second) phiOverlap[icombo].second = padsPhiR[isurf][padIdx];
+                       phiOverlap[icombo].first  = std::max(padsPhiL[isurf][padIdx], phiOverlap[icombo].first);
+                       phiOverlap[icombo].second = std::min(padsPhiR[isurf][padIdx], phiOverlap[icombo].second);
                     }
                 }
             }
@@ -1017,10 +988,10 @@ namespace Muon {
 
     //============================================================================
     std::vector<const Muon::MuonClusterOnTrack*> MuonClusterSegmentFinderTool::getCalibratedClusters(
-        std::vector<const Muon::MuonClusterOnTrack*>& clusters, std::pair<Amg::Vector3D, Amg::Vector3D>& seed) const {
+        const std::vector<const Muon::MuonClusterOnTrack*>& clusters,const std::pair<Amg::Vector3D, Amg::Vector3D>& seed) const {
         std::vector<const Muon::MuonClusterOnTrack*> calibratedClusters;
 
-        ATH_MSG_VERBOSE("seed global position " << seed.first << " seed direction " << seed.second.unit());
+        ATH_MSG_VERBOSE("seed global position " << seed.first << " seed direction " << seed.second);
         ATH_MSG_VERBOSE("seed global position theta " << seed.first.theta() << " seed direction theta " << seed.second.theta());
         ATH_MSG_VERBOSE("seed global position phi " << seed.first.phi() << " seed direction phi " << seed.second.phi());
 
@@ -1029,21 +1000,15 @@ namespace Muon {
             const Muon::MuonClusterOnTrack* newClus = nullptr;
             
             // get the intercept of the seed direction with the cluster surface
-            Identifier hitID = clus->identify();
+            const Identifier hitID = clus->identify();
             const Trk::Surface& surf = clus->associatedSurface();
             Trk::Intersection intersect = surf.straightLineIntersection(seed.first, seed.second, false, false);
-
+            
             if (m_idHelperSvc->isMM(hitID)) {
                  // build a  new MM cluster on track with correct position
-                 newClus = m_mmClusterCreator->calibratedCluster(*(clus->prepRawData()), intersect.position,seed.second);
-
-                 if (msgLvl(MSG::VERBOSE)) {
-                     const Amg::Vector3D& gpos_hit = clus->globalPosition();
-                     const Amg::Vector3D& gpos_new = newClus->globalPosition();
-                     ATH_MSG_VERBOSE("Position before correction: " << gpos_hit.x() << " " << gpos_hit.y() << " " << gpos_hit.z());
-                     ATH_MSG_VERBOSE("Position after correction: "  << gpos_new.x() << " " << gpos_new.y() << " " << gpos_new.z());
-                 }
-
+                 newClus = m_mmClusterCreator->calibratedCluster(*clus->prepRawData(), intersect.position, seed.second);
+                 ATH_MSG_VERBOSE("Position before correction: " <<  clus->globalPosition()); 
+                 ATH_MSG_VERBOSE("Position after correction: "  << newClus->globalPosition());
             } else if (m_idHelperSvc->issTgc(hitID)) {
                 // calibration to be added for sTGCs
                 newClus = m_stgcClusterCreator->createRIO_OnTrack(*(clus->prepRawData()), intersect.position);
@@ -1058,14 +1023,14 @@ namespace Muon {
 
     //============================================================================
     std::vector<Amg::Vector3D>
-    MuonClusterSegmentFinderTool::getPhiFromStereo( std::vector<const Muon::MuonClusterOnTrack*>& clusters  ) const
+    MuonClusterSegmentFinderTool::getPhiFromStereo(const std::vector<const Muon::MuonClusterOnTrack*>& clusters  ) const
     {
   
       //vector of 3D points of all phi obtained from the stereo-stereo combination                                                                              
       std::vector<Amg::Vector3D> phiStereo;
       
       /// loop on the clusters and look for the stereo                                                                                                       
-      for ( unsigned int iclu1 = 0; iclu1 < clusters.size(); ++iclu1 ) {
+      for ( unsigned int iclu1 = 0; iclu1 < clusters.size()-1; ++iclu1 ) {
         Identifier id1 = clusters[iclu1]->identify();
         if ( !m_idHelperSvc->isMM(id1) ) continue;
         if ( !m_idHelperSvc->mmIdHelper().isStereo(id1) ) continue;
@@ -1091,7 +1056,7 @@ namespace Muon {
   	  Trk::LocalParameters loc2(prd2->localPosition());
   	  Amg::Vector3D gPos2 = clusters[iclu2]->associatedSurface().localToGlobal(loc2);
   
-  	  Amg::Vector3D gPos;
+  	  Amg::Vector3D gPos{Amg::Vector3D::Zero()};
 	  bool spacePoint = prd1->detectorElement()->spacePointPosition(id1,id2,gPos1,gPos2,gPos);
   	  if ( spacePoint ) phiStereo.push_back(gPos);
   	  else ATH_MSG_VERBOSE("Could not build phi measurement from MM stereo");

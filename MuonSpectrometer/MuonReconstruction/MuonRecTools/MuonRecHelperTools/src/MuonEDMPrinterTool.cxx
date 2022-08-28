@@ -151,12 +151,12 @@ std::string
 MuonEDMPrinterTool::printMeasurements(const Trk::Track& track) const
 {
     std::ostringstream                                sout;
-    const DataVector<const Trk::TrackStateOnSurface>* states = track.trackStateOnSurfaces();
+    const Trk::TrackStates* states = track.trackStateOnSurfaces();
     if (!states) return "";
-    DataVector<const Trk::TrackStateOnSurface>::const_iterator it      = states->begin();
-    DataVector<const Trk::TrackStateOnSurface>::const_iterator it_end  = states->end();
-    DataVector<const Trk::TrackStateOnSurface>::const_iterator it2     = states->begin();
-    DataVector<const Trk::TrackStateOnSurface>::const_iterator it2_end = states->end();
+    Trk::TrackStates::const_iterator it      = states->begin();
+    Trk::TrackStates::const_iterator it_end  = states->end();
+    Trk::TrackStates::const_iterator it2     = states->begin();
+    Trk::TrackStates::const_iterator it2_end = states->end();
     // Build map of AEOTs and the measurements they affect
     std::multimap<const Trk::MeasurementBase*, const Trk::AlignmentEffectsOnTrack*> measAndTheirAlignmentEffects;
     const Trk::MeasurementBase*                                                     m    = nullptr;
@@ -362,9 +362,7 @@ MuonEDMPrinterTool::print(const MuonSegment& segment) const
     const MuonSegmentQuality* q = dynamic_cast<const MuonSegmentQuality*>(fq);
     if (q) sout << std::setw(2) << " nholes " << q->numberOfHoles();
 
-    // sout << " r "     << std::fixed << std::setprecision(0) << std::setw(5) << segment.globalPosition().perp()
-    // << " phi "   << std::fixed << std::setprecision(3) << std::setw(6) << segment.globalPosition().phi()
-    //<< " z "     << std::fixed << std::setprecision(0) << std::setw(6) << segment.globalPosition().z()
+   
     sout << " theta " << std::fixed << std::setprecision(5) << std::setw(7) << segment.globalDirection().theta()
          << " phi " << std::fixed << std::setprecision(3) << std::setw(6) << segment.globalDirection().phi();
 
@@ -373,7 +371,7 @@ MuonEDMPrinterTool::print(const MuonSegment& segment) const
              << std::setw(5) << segment.errorTime();
 
     if (mdtDetEl) {
-        double posAlongTube = fabs(mdtDetEl->globalToLocalCoords(segment.globalPosition(), shortestTubeId).z());
+        double posAlongTube = std::abs(mdtDetEl->globalToLocalCoords(segment.globalPosition(), shortestTubeId).z());
         double distFromEdge = posAlongTube - shortestTubeLen;
         if (distFromEdge < -100.)
             sout << " inside chamber";
@@ -416,7 +414,8 @@ MuonEDMPrinterTool::print(const Trk::PrepRawData& prd) const
         double h_z     = pos->z();
         double h_phi   = pos->phi();
         double h_theta = pos->theta();
-
+        double error = std::sqrt(prd.localCovariance()(0, 0));
+         
         // add time for RPC
         double             rpcTime = 0.0;
         const RpcPrepData* rpc     = dynamic_cast<const RpcPrepData*>(&prd);
@@ -424,7 +423,8 @@ MuonEDMPrinterTool::print(const Trk::PrepRawData& prd) const
 
         sout << "r " << std::fixed << std::setprecision(0) << std::setw(5) << h_r << " z " << std::fixed
              << std::setprecision(0) << std::setw(5) << h_z << " theta " << std::fixed << std::setprecision(3)
-             << std::setw(4) << h_theta << " phi " << std::fixed << std::setprecision(3) << std::setw(4) << h_phi;
+             << std::setw(4) << h_theta << " phi " << std::fixed << std::setprecision(3) << std::setw(4) << h_phi
+              << " error " << std::fixed << std::setprecision(2) << std::setw(5) << error;
         if (rpc) sout << "  time " << std::fixed << std::setprecision(2) << std::setw(5) << rpcTime;
     }
     return sout.str();
@@ -901,20 +901,23 @@ MuonEDMPrinterTool::printData(const Trk::MeasurementBase& measurement) const
     double h_z     = measurement.globalPosition().z();
     double h_phi   = measurement.globalPosition().phi();
     double h_theta = measurement.globalPosition().theta();
-
+    double error = std::sqrt(measurement.localCovariance()(0, 0));
+    double local_pos = measurement.localParameters()[Trk::locX];
     sout << "r " << std::fixed << std::setprecision(0) << std::setw(5) << h_r << " z " << std::fixed
          << std::setprecision(0) << std::setw(5) << h_z << " phi " << std::fixed << std::setprecision(3) << std::setw(4)
-         << h_phi << " theta " << std::fixed << std::setprecision(3) << std::setw(4) << h_theta;
+         << h_phi << " theta " << std::fixed << std::setprecision(3) << std::setw(4) << h_theta
+         << " lPos " << std::fixed << std::setprecision(2) << std::setw(5) << local_pos
+         << " error " << std::fixed << std::setprecision(2) << std::setw(5) << error;
+   
 
     // print measurement data
     const Trk::RIO_OnTrack* rot = dynamic_cast<const Trk::RIO_OnTrack*>(&measurement);
     if (rot) {
         // add drift time for MDT
         const MdtDriftCircleOnTrack* mdt = dynamic_cast<const MdtDriftCircleOnTrack*>(rot);
-        if (mdt) {
-            double error = std::sqrt(measurement.localCovariance()(0, 0));
-            sout << "  r_drift " << std::fixed << std::setprecision(2) << std::setw(5) << mdt->driftRadius()
-                 << " error " << std::fixed << std::setprecision(2) << std::setw(5) << error;
+        if (mdt) {            
+            sout << "  r_drift " << std::fixed << std::setprecision(2) << std::setw(5) << mdt->driftRadius();
+                 
         } else {
             // add time for RPC
             const RpcClusterOnTrack* rpc = dynamic_cast<const RpcClusterOnTrack*>(rot);

@@ -347,9 +347,9 @@ namespace MuonGM {
         const ALineMapContainer* alineMap = mgr->ALineContainer();
         Identifier id = mgr->mmIdHelper()->elementID(getStationName(), getStationEta(), getStationPhi());
         Identifier idMult = mgr->mmIdHelper()->multilayerID(id, m_ml);
-        auto it = alineMap->find(idMult);
+        ALineMapContainer::const_iterator it = alineMap->find(idMult);
 
-        if (it == alineMap->cend()) {
+        if (it == alineMap->end()) {
             clearALinePar();
             MsgStream log(Athena::getMessageSvc(), "MMReadoutElement");
             if (log.level() <= MSG::DEBUG) { log << MSG::DEBUG << "m_aLineMapContainer does not contain ALine for MM" << endmsg; }
@@ -361,11 +361,9 @@ namespace MuonGM {
  
     //============================================================================
     void MMReadoutElement::setBLinePar(const BLinePar& bLine) {
-#ifndef NDEBUG
         MsgStream log(Athena::getMessageSvc(), "MMReadoutElement");
         if (log.level() <= MSG::DEBUG)
             log << MSG::DEBUG << "Setting B-line for " << getStationName().substr(0, 3) << " at eta/phi " << getStationEta() << "/" << getStationPhi() << endmsg;
-#endif
         m_BLinePar = &bLine;
     }
 
@@ -375,9 +373,9 @@ namespace MuonGM {
         const BLineMapContainer* blineMap = mgr->BLineContainer();
         Identifier id     = mgr->mmIdHelper()->elementID(getStationName(), getStationEta(), getStationPhi());
         Identifier idMult = mgr->mmIdHelper()->multilayerID(id, m_ml);
-        auto it = blineMap->find(idMult);
+        BLineMapContainer::const_iterator it = blineMap->find(idMult);
 
-        if (it == blineMap->cend()) {
+        if (it == blineMap->end()) {
             clearBLinePar();
             MsgStream log(Athena::getMessageSvc(), "MMReadoutElement");
             if (log.level() <= MSG::DEBUG) { log << MSG::DEBUG << "m_bLineMapContainer does not contain BLine for MM" << endmsg; }
@@ -502,7 +500,7 @@ namespace MuonGM {
         // we are still at the layer reference frame
         //*********************
         if (!conditionsApplied) {
-            pos[0] = locXpos + locYseed*tan(design->sAngle);
+            pos[0] = locXpos + locYseed*std::tan(design->sAngle);
             pos[1] = locYseed;
             pos[2] = 0.;
         }
@@ -518,7 +516,7 @@ namespace MuonGM {
              pos = trfToML*pos;
           }
           posOnDefChamber(pos);
-        }
+       }
 
         // back to nominal layer frame from where we started
         if (conditionsApplied) pos = trfToML.inverse()*pos;
