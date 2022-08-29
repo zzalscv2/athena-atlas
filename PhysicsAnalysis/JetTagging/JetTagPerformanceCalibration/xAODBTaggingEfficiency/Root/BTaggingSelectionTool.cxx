@@ -135,9 +135,9 @@ StatusCode BTaggingSelectionTool::initialize() {
     //0% efficiency => MVXWP=+infinity
     m_continuouscuts[5]= +1.e4;
 
-    if(m_taggerName.find("DL1") != string::npos){
+    if(m_taggerName.find("DL1") != string::npos || m_taggerName.find("GN") != string::npos){
       //this call will extract the c-fraction value and set it in m_tagger
-      //which is needed in case the user calls getTaggerWeight to compute the DL1 score
+      //which is needed in case the user calls getTaggerWeight to compute the DL1 score or the GNx scores
       ExtractTaggerProperties(m_tagger,m_taggerName , "FixedCutBEff_60");
     }
   }
@@ -171,9 +171,9 @@ void BTaggingSelectionTool::ExtractTaggerProperties(taggerproperties &tagger, st
     tagger.spline = nullptr;
   }
 
-  //retrive the "fraction" used in the DL1 log likelihood from the CDI, if its not there, use the hard coded values
+  //retrive the "fraction" used in the DL1/GNx log likelihood from the CDI, if its not there, use the hard coded values
   // (backwards compatibility)
-  if(taggerName.find("DL1") != string::npos){
+  if(taggerName.find("DL1") != string::npos || taggerName.find("GN") != string::npos){
 
     TString fraction_data_name = taggerName+"/"+m_jetAuthor+"/"+OP+"/fraction";
     TVector *fraction_data = (TVector*) m_inf->Get(fraction_data_name);
@@ -238,7 +238,7 @@ CorrectionCode BTaggingSelectionTool::getTaggerWeight( const xAOD::Jet& jet, dou
     return  CorrectionCode::Ok;
   }
 
- else if(taggerName.find("DL1") != string::npos){
+ else if(taggerName.find("DL1") != string::npos || taggerName.find("GN") != string::npos){
 
   double dl1_pb(-10.);
   double dl1_pc(-10.);
@@ -294,7 +294,7 @@ CorrectionCode BTaggingSelectionTool::getTaggerWeight( double pb, double pc, dou
 
 
   tagweight = -100.;
-  if( taggerName.find("DL1") != string::npos ){
+  if( taggerName.find("DL1") != string::npos || m_taggerName.find("GN") != string::npos){
 
     bool valid_input = (!std::isnan(pu) && pb>=0 && pc>=0 && pu>=0);
 
@@ -319,7 +319,7 @@ CorrectionCode BTaggingSelectionTool::getTaggerWeight( double pb, double pc, dou
   }
 
   //if we got here the tagger name is not configured properly
-  ATH_MSG_ERROR("this call to getTaggerWeight only works for DL1 taggers");
+  ATH_MSG_ERROR("this call to getTaggerWeight only works for DL1/GNx taggers");
   return CorrectionCode::Error;
 
 }
@@ -390,7 +390,7 @@ asg::AcceptData BTaggingSelectionTool::accept( const xAOD::Jet& jet ) const {
     ATH_MSG_VERBOSE( "MV2c100 " <<  weight_mv2c100 );
     return accept(pT, eta, weight_mv2cl100, weight_mv2c100 );
 
-  }else if(m_taggerName.find("DL1") != string::npos || m_taggerName.find("MV2") != string::npos){
+  }else if(m_taggerName.find("DL1") != string::npos || m_taggerName.find("MV2") != string::npos || m_taggerName.find("GN") != string::npos){
 
 
     //for all other taggers, use the same method
