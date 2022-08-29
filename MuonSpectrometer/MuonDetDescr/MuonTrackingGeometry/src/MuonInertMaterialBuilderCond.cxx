@@ -449,7 +449,8 @@ Trk::TrackingVolume* Muon::MuonInertMaterialBuilderCond::simplifyShape(
             auto tempconfinedvols = confinedVols.get();
             newVol = new Trk::TrackingVolume(*envelope, m_muonMaterial, confinedVols.release(), envName);
             for (unsigned int iv = 0; iv < tempconfinedvols->size(); iv++)
-                Trk::TrackingVolumeManipulator::confineVolume(*((*tempconfinedvols)[iv]), newVol);
+                // we need the const_cast until we fix all ctors for TrackingVolumes
+                Trk::TrackingVolumeManipulator::confineVolume(const_cast<Trk::TrackingVolume&>(*((*confinedVols)[iv])), newVol);
             delete trVol;
         }
     } else {  // enclose the exact transcript

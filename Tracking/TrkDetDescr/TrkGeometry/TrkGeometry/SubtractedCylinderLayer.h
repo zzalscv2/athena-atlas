@@ -61,6 +61,7 @@ public:
 
   /** Transforms the layer into a Surface representation for extrapolation */
   virtual const SubtractedCylinderSurface& surfaceRepresentation() const override final;
+  virtual SubtractedCylinderSurface& surfaceRepresentation() override final;
 
 
   /** getting the MaterialProperties back - for pre-update*/

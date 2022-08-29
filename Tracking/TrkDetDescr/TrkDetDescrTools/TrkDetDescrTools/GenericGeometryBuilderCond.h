@@ -56,7 +56,7 @@ namespace Trk {
         virtual
         std::unique_ptr<Trk::TrackingGeometry > trackingGeometry(
           const EventContext& ctx,
-          const Trk::TrackingVolume* tVol,
+          Trk::TrackingVolume* tVol,
           SG::WriteCondHandle<TrackingGeometry>& whandle) const override;
 
         /** The unique signature */

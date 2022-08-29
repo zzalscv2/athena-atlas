@@ -96,11 +96,11 @@ void Trk::TrackingVolumeHelper::glueTrackingVolumes(Trk::TrackingVolume& firstVo
     // ----------------------------------------------------------------------------------------
     // create a MaterialLayer as a boundary
     if (buildBoundaryLayer){
-        const auto& bSurfacesFirst  =  firstVol.boundarySurfaces();
-        const auto& bSurfacesSecond =  secondVol.boundarySurfaces();
+        auto& bSurfacesFirst  =  firstVol.boundarySurfaces();
+        auto& bSurfacesSecond =  secondVol.boundarySurfaces();
         // get the boundary surfaces
-        const Trk::Surface& firstFaceSurface  = bSurfacesFirst[firstFace]->surfaceRepresentation(); 
-        const Trk::Surface& secondFaceSurface  = bSurfacesSecond[secondFace]->surfaceRepresentation(); 
+        Trk::Surface& firstFaceSurface  = bSurfacesFirst[firstFace]->surfaceRepresentation(); 
+        Trk::Surface& secondFaceSurface  = bSurfacesSecond[secondFace]->surfaceRepresentation(); 
         // dynamic_cast to the right type
         std::unique_ptr<Trk::LayerMaterialProperties> lmps( layerMaterialProperties(firstFaceSurface) );
         // LayerMaterialProperties will be cloned in MaterialLayer
@@ -109,9 +109,9 @@ void Trk::TrackingVolumeHelper::glueTrackingVolumes(Trk::TrackingVolume& firstVo
         if (lmps){
             Trk::Layer* mLayer = new Trk::MaterialLayer(firstFaceSurface, *lmps);
             ATH_MSG_VERBOSE( "Set MaterialLayer to the BoundarySurface of first volume." );
-            (const_cast<Trk::Surface&>(firstFaceSurface)).setMaterialLayer(*mLayer);
+            firstFaceSurface.setMaterialLayer(*mLayer);
             ATH_MSG_VERBOSE("Set MaterialLayer to the BoundarySurface of second volume.");
-            (const_cast<Trk::Surface&>(secondFaceSurface)).setMaterialLayer(*mLayer);
+            secondFaceSurface.setMaterialLayer(*mLayer);
         }
     }
 }
@@ -136,14 +136,14 @@ void Trk::TrackingVolumeHelper::glueTrackingVolumes(Trk::TrackingVolume& firstVo
     // create a MaterialLayer as a boundary
     if (buildBoundaryLayer){
         // the first face surface 
-        const Trk::Surface& firstFaceSurface = firstVol.boundarySurfaces()[firstFace]->surfaceRepresentation();
+        Trk::Surface& firstFaceSurface = firstVol.boundarySurfaces()[firstFace]->surfaceRepresentation();
         std::unique_ptr<Trk::LayerMaterialProperties> lmps( layerMaterialProperties(firstFaceSurface) );
         // LayerMaterialProperties are cloned by MaterialLayer
 
         // the material layer is ready - it can be assigned
         mLayer = new Trk::MaterialLayer(firstFaceSurface, *lmps);
         ATH_MSG_VERBOSE( "Set MaterialLayer to the BoundarySurface of first volume (may be shared with second volume)." );
-        (const_cast<Trk::Surface&>(firstFaceSurface)).setMaterialLayer(*mLayer);
+        firstFaceSurface.setMaterialLayer(*mLayer);
     }  
     // if only one volume was given in the vector call the standard one-to-one glueing
     // 1-to-1 case
@@ -170,7 +170,7 @@ void Trk::TrackingVolumeHelper::glueTrackingVolumes(Trk::TrackingVolume& firstVo
             // creating only one boundary surface
             ATH_MSG_VERBOSE("Creating a joint boundary surface for 1-to-n glueing case.");
             // get the dimension of boundary surface of the first volume
-            const Trk::SharedObject< const BoundarySurface<TrackingVolume> > bSurface = firstVol.boundarySurfaces()[firstFace];
+            Trk::SharedObject<BoundarySurface<TrackingVolume> > bSurface = firstVol.boundarySurfaces()[firstFace];
             // replace the boundary surface
             for ( const auto & volIter: secondVolumes )             
                 setBoundarySurface(*volIter, bSurface, secondFace);
@@ -194,8 +194,8 @@ void Trk::TrackingVolumeHelper::glueTrackingVolumes(Trk::TrackingVolume& firstVo
                     setInsideTrackingVolume(*volIter, secondGlueFace, (&(firstVol)));
                 // if existing, set the material Layer
                 // get the second face surface and set the new MaterialLayer
-                const Trk::Surface& secondFaceSurface = volIter->boundarySurfaces()[secondFace]->surfaceRepresentation();
-                (const_cast<Trk::Surface&>(secondFaceSurface)).setMaterialLayer(mLayer);
+                Trk::Surface& secondFaceSurface = volIter->boundarySurfaces()[secondFace]->surfaceRepresentation();
+                secondFaceSurface.setMaterialLayer(mLayer);
             }
         }
     } // 1-to-n case    
@@ -215,7 +215,7 @@ void Trk::TrackingVolumeHelper::glueTrackingVolumes(const std::vector<Trk::Track
     Trk::BinnedArray<Trk::TrackingVolume>* navArrayOne = nullptr;
     Trk::BinnedArray<Trk::TrackingVolume>* navArrayTwo = nullptr;
 
-    std::unique_ptr<const Trk::Surface>     mLayerSurface;
+    std::unique_ptr<Trk::Surface>     mLayerSurface;
     std::unique_ptr<Trk::Layer>       mLayer;
 
     ATH_MSG_VERBOSE("Glue configuration firstFace | secondFace = " << firstFace << " | " << secondFace );
@@ -245,13 +245,13 @@ void Trk::TrackingVolumeHelper::glueTrackingVolumes(const std::vector<Trk::Track
               mLayerSurface =
                 std::make_unique<Trk::DiscSurface>(mLayerTransform, rmin, rmax);
               // create a MaterialLayer
-              std::unique_ptr<const Trk::LayerMaterialProperties> lmps(
+              std::unique_ptr<Trk::LayerMaterialProperties> lmps(
                 layerMaterialProperties(*mLayerSurface));
               // MaterialLayer clones the LayerMaterialPropteries.
 
               if (lmps) {
                 mLayer = std::make_unique<Trk::MaterialLayer>(
-                  std::shared_ptr<const Trk::Surface>(std::move(mLayerSurface)),
+                  std::shared_ptr<Trk::Surface>(std::move(mLayerSurface)),
                   *lmps);
                 }
             }
@@ -275,12 +275,11 @@ void Trk::TrackingVolumeHelper::glueTrackingVolumes(const std::vector<Trk::Track
                 Trk::SharedObject< Trk::BinnedArray<Trk::TrackingVolume> >  navArrayInside(navArrayOne);
                 Trk::SharedObject< Trk::BinnedArray<Trk::TrackingVolume> >  navArrayOutside(navArrayTwo);
                 Trk::BoundaryDiscSurface<Trk::TrackingVolume>* boundarySurface = new Trk::BoundaryDiscSurface<Trk::TrackingVolume>(navArrayInside,navArrayOutside,dSurface);
-                Trk::SharedObject<const Trk::BoundarySurface<Trk::TrackingVolume> > sharedBoundarySurface(boundarySurface);
+                Trk::SharedObject<Trk::BoundarySurface<Trk::TrackingVolume> > sharedBoundarySurface(boundarySurface);
                 // attach the material layer to the shared boundary if existing
                 if (mLayer) {
                     ATH_MSG_VERBOSE( "Set MaterialLayer to the BoundarySurface of volume from second array." );
-                    (const_cast<Trk::Surface&>(boundarySurface->surfaceRepresentation()))
-                      .setMaterialLayer(*(mLayer.release()));
+                    boundarySurface->surfaceRepresentation().setMaterialLayer(*(mLayer.release()));
                 }
                 // set the boundary surface to the volumes of both sides
                 for (const auto & volIter : firstVolumes){
@@ -328,7 +327,7 @@ void Trk::TrackingVolumeHelper::glueTrackingVolumes(const std::vector<Trk::Track
                 std::unique_ptr<const Trk::LayerMaterialProperties>  lmps( layerMaterialProperties(*mLayerSurface) );
                 // LayerMaterialProperties will be cloned in MaterialLayer
                 if (lmps) mLayer = std::make_unique<Trk::MaterialLayer>( 
-                                                               std::shared_ptr<const Trk::Surface>(std::move(mLayerSurface)), 
+                                                               std::shared_ptr<Trk::Surface>(std::move(mLayerSurface)), 
                                                                *lmps );
             }
             // check if boundary face should be exchanged
@@ -360,13 +359,12 @@ void Trk::TrackingVolumeHelper::glueTrackingVolumes(const std::vector<Trk::Track
                 Trk::SharedObject< Trk::BinnedArray<Trk::TrackingVolume> >  navArrayInside(navArrayOne);
                 Trk::SharedObject< Trk::BinnedArray<Trk::TrackingVolume> >  navArrayOutside(navArrayTwo);
                 Trk::BoundaryCylinderSurface<Trk::TrackingVolume>* boundarySurface = new Trk::BoundaryCylinderSurface<Trk::TrackingVolume>(navArrayInside,navArrayOutside,cSurface);
-                Trk::SharedObject<const Trk::BoundarySurface<Trk::TrackingVolume> > sharedBoundarySurface(boundarySurface);
+                Trk::SharedObject<Trk::BoundarySurface<Trk::TrackingVolume> > sharedBoundarySurface(boundarySurface);
                 // attach the material layer to the shared boundary if existing
                 if (mLayer) {
                   ATH_MSG_VERBOSE("Set MaterialLayer to the BoundarySurface of volume from second array.");
                   // assume that now the mlayer onwership goes over to the TrackingVolume
-                  (const_cast<Trk::Surface&>(boundarySurface->surfaceRepresentation()))
-                    .setMaterialLayer(*(mLayer.release()));
+                  boundarySurface->surfaceRepresentation().setMaterialLayer(*(mLayer.release()));
                 }
                 // set the boundary surface to the volumes of both sides
                 for (const auto & volIter : firstVolumes){
@@ -406,10 +404,10 @@ void Trk::TrackingVolumeHelper::glueTrackingVolumes(const std::vector<Trk::Track
         // set the boundary layer if it exists
         if (mLayer_ptr) {
             ATH_MSG_VERBOSE( "Set MaterialLayer to the BoundarySurface of volume from first array." );
-            const Trk::Surface& firstFaceSurface = tVolIter->boundarySurfaces()[firstFace]->surfaceRepresentation();
+            Trk::Surface& firstFaceSurface = tVolIter->boundarySurfaces()[firstFace]->surfaceRepresentation();
             // assume that now the mlayer onwership goes over to the TrackingVolume
             mLayer.release();
-            (const_cast<Trk::Surface&>(firstFaceSurface)).setMaterialLayer(*mLayer_ptr);
+            firstFaceSurface.setMaterialLayer(*mLayer_ptr);
         }
                     
     }
@@ -425,10 +423,10 @@ void Trk::TrackingVolumeHelper::glueTrackingVolumes(const std::vector<Trk::Track
         }
         if (mLayer_ptr) {
             ATH_MSG_VERBOSE( "Set MaterialLayer to the BoundarySurface of volume from second array." );
-            const Trk::Surface& secondFaceSurface = tVolIter->boundarySurfaces()[secondFace]->surfaceRepresentation();
+            Trk::Surface& secondFaceSurface = tVolIter->boundarySurfaces()[secondFace]->surfaceRepresentation();
             // assume that now the mlayer onwership goes over to the TrackingVolume
             mLayer.release();
-            (const_cast<Trk::Surface&>(secondFaceSurface)).setMaterialLayer(*mLayer_ptr);
+            secondFaceSurface.setMaterialLayer(*mLayer_ptr);
         }
     }    
     // coverity will report a bug here for mLayer running out of scope, but the memory management is done later in the TrackingVolume
@@ -762,16 +760,16 @@ Trk::LayerMaterialProperties* Trk::TrackingVolumeHelper::layerMaterialProperties
 
 
 /** Simply forward to base class method to enhance friendship relation */
-void Trk::TrackingVolumeHelper::setInsideTrackingVolume(const Trk::TrackingVolume& tvol,
+void Trk::TrackingVolumeHelper::setInsideTrackingVolume(Trk::TrackingVolume& tvol,
                                                         Trk::BoundarySurfaceFace face,
-                                                        const Trk::TrackingVolume* insidevol) const
+                                                        Trk::TrackingVolume* insidevol) const
 {
     Trk::TrackingVolumeManipulator::setInsideVolume( tvol, face, insidevol );
 }
 
 
 /** Simply forward to base class method to enhance friendship relation */
-void Trk::TrackingVolumeHelper::setInsideTrackingVolumeArray(const Trk::TrackingVolume& tvol,
+void Trk::TrackingVolumeHelper::setInsideTrackingVolumeArray(Trk::TrackingVolume& tvol,
                                                              Trk::BoundarySurfaceFace face,
                                                              Trk::BinnedArray<Trk::TrackingVolume>* insidevolarray) const
 {
@@ -780,7 +778,7 @@ void Trk::TrackingVolumeHelper::setInsideTrackingVolumeArray(const Trk::Tracking
 
 
 /** Simply forward to base class method to enhance friendship relation */
-void Trk::TrackingVolumeHelper::setInsideTrackingVolumeArray(const Trk::TrackingVolume& tvol,
+void Trk::TrackingVolumeHelper::setInsideTrackingVolumeArray(Trk::TrackingVolume& tvol,
                                                              Trk::BoundarySurfaceFace face,
                                                              Trk::SharedObject<Trk::BinnedArray<Trk::TrackingVolume> > insidevolarray) const
 {
@@ -789,9 +787,9 @@ void Trk::TrackingVolumeHelper::setInsideTrackingVolumeArray(const Trk::Tracking
 
 
 /** Simply forward to base class method to enhance friendship relation */
-void Trk::TrackingVolumeHelper::setOutsideTrackingVolume(const Trk::TrackingVolume& tvol,
+void Trk::TrackingVolumeHelper::setOutsideTrackingVolume(Trk::TrackingVolume& tvol,
                                                          Trk::BoundarySurfaceFace face,
-                                                         const Trk::TrackingVolume* outsidevol) const
+                                                         Trk::TrackingVolume* outsidevol) const
 { 
     ATH_MSG_VERBOSE( "     -> Glue '" << outsidevol->volumeName() << "' at face " << face << " to '" << tvol.volumeName() << "'.");
     Trk::TrackingVolumeManipulator::setOutsideVolume( tvol, face, outsidevol );
@@ -799,7 +797,7 @@ void Trk::TrackingVolumeHelper::setOutsideTrackingVolume(const Trk::TrackingVolu
 
 
 /** Simply forward to base class method to enhance friendship relation */
-void Trk::TrackingVolumeHelper::setOutsideTrackingVolumeArray(const Trk::TrackingVolume& tvol,
+void Trk::TrackingVolumeHelper::setOutsideTrackingVolumeArray(Trk::TrackingVolume& tvol,
                                                               Trk::BoundarySurfaceFace face,
                                                               Trk::BinnedArray<Trk::TrackingVolume>* outsidevolarray) const
 { 
@@ -810,7 +808,7 @@ void Trk::TrackingVolumeHelper::setOutsideTrackingVolumeArray(const Trk::Trackin
 
 
 /** Simply forward to base class method to enhance friendship relation */
-void Trk::TrackingVolumeHelper::setOutsideTrackingVolumeArray(const Trk::TrackingVolume& tvol,
+void Trk::TrackingVolumeHelper::setOutsideTrackingVolumeArray(Trk::TrackingVolume& tvol,
                                                               Trk::BoundarySurfaceFace face,
                                                               Trk::SharedObject<Trk::BinnedArray<Trk::TrackingVolume> > outsidevolarray) const
 { 

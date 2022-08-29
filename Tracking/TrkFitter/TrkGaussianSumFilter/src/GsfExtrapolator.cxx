@@ -169,16 +169,14 @@ radialDirectionCheck(const EventContext& ctx,
   // the 3D distance to the layer intersection
   double distToLayer = (startPosition - onLayerPosition).mag();
   // get the innermost contained surface for crosscheck
-  const std::vector<
-    Trk::SharedObject<const Trk::BoundarySurface<Trk::TrackingVolume>>>&
-    boundarySurfaces = tvol.boundarySurfaces();
+  const auto& boundarySurfaces = tvol.boundarySurfaces();
   // only for tubes the crossing makes sense to check for validity
   if (boundarySurfaces.size() == 4) {
     // propagate to the inside surface and compare the distance:
     // it can be either the next layer from the initial point, or the inner tube
     // boundary surface
     const Trk::Surface& insideSurface =
-      (boundarySurfaces[Trk::tubeInnerCover].get())->surfaceRepresentation();
+      (boundarySurfaces[Trk::tubeInnerCover])->surfaceRepresentation();
     auto parsOnInsideSurface =
       prop.propagateParameters(ctx,
                                *(startParm.begin()->first),

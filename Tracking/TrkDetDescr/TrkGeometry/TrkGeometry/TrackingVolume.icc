@@ -104,18 +104,18 @@ TrackingVolume::onVolumeBoundary(const T& pars) const
 {
   // get the associated Surface
   const Surface* pSurface = &pars.associatedSurface();
-  auto& bSurfaces = boundarySurfaces();
+  const auto& bSurfaces = boundarySurfaces();
   // fast loop pointer comparison of the surfaces
-  for (auto& bsIter : bSurfaces) {
-    const BoundarySurface<TrackingVolume>* bSurface = bsIter.get();
+  for (size_t i = 0; i < bSurfaces.size(); ++i) {
+    const BoundarySurface<TrackingVolume>* bSurface = bSurfaces[i];
     // pointer of the parameter surface is identical with one of the boundary
     // surface pointers
     if (pSurface == &bSurface->surfaceRepresentation())
       return true;
   }
   // slow loop - checking the onSurface (does pointer comparison as well)
-  for (auto& bsIter : bSurfaces) {
-    const BoundarySurface<TrackingVolume>* bSurface = bsIter.get();
+  for (size_t i = 0; i < bSurfaces.size(); ++i) {
+    const BoundarySurface<TrackingVolume>* bSurface = bSurfaces[i];
     // pointer of the parameter surface is identical with one of the boundary
     // surface pointers
     if (bSurface->onBoundary(pars))
@@ -233,9 +233,9 @@ TrackingVolume::boundarySurfacesOrdered(const T& pars,
                            : Amg::Vector3D(-1 * pars.momentum().unit()));
   // loop over boundarySurfaces and calculate the intersection
   std::vector<BoundaryIntersection<T>> bIntersections;
-  auto& bSurfaces = boundarySurfaces();
-  for (auto& bsIter : bSurfaces) {
-    const BoundarySurface<TrackingVolume>* bSurface = bsIter.get();
+  const auto& bSurfaces = boundarySurfaces();
+  for (size_t i = 0; i < bSurfaces.size(); ++i) {
+    const BoundarySurface<TrackingVolume>* bSurface = bSurfaces[i];
     Intersection bsIntersection =
       bSurface->surfaceRepresentation().straightLineIntersection(
         pars.position(), dir, true, false);

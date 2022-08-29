@@ -92,6 +92,7 @@ public:
 
   /** Transforms the layer into a Surface representation for extrapolation */
   virtual const ConeSurface& surfaceRepresentation() const override final;
+  virtual ConeSurface& surfaceRepresentation() override final;
 
   /** getting the MaterialProperties back - for pre-update*/
   virtual double preUpdateMaterialFactor(

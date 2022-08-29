@@ -58,15 +58,13 @@ StatusCode Trk::GeometryTTreeDumper::processNode(const Trk::TrackingVolume& tvol
    // make the boundary surface branch
    Trk::SurfaceNtupleBranch boundarySurfaceBranch;
    
-   const std::vector< Trk::SharedObject<const Trk::BoundarySurface<Trk::TrackingVolume> > >& bSurfaces = tvol.boundarySurfaces();
-   std::vector< Trk::SharedObject<const Trk::BoundarySurface<Trk::TrackingVolume> > >::const_iterator bSurfIter  = bSurfaces.begin();
-   std::vector< Trk::SharedObject<const Trk::BoundarySurface<Trk::TrackingVolume> > >::const_iterator bSurfIterE = bSurfaces.end();
-   for (size_t ib = 0 ; bSurfIter != bSurfIterE; ++bSurfIter, ++ib ){
+   const auto& bSurfaces = tvol.boundarySurfaces();
+   for (size_t ib = 0 ; ib < bSurfaces.size(); ++ib ){
         TString bSurfId  = "bsurf_";
                 bSurfId += ib;
         // initialize 
         boundarySurfaceBranch.initForWrite(*m_currentTree,bSurfId.Data());
-        boundarySurfaceBranch.fill((**bSurfIter).surfaceRepresentation());
+        boundarySurfaceBranch.fill(bSurfaces[ib]->surfaceRepresentation());
    }
    
    return StatusCode::SUCCESS;

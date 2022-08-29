@@ -144,11 +144,9 @@ Trk::TargetSurfaces::initFrameVolume(const Amg::Vector3D& pos,
   m_tempSurfaces.clear();
 
   // static frame boundaries
-  const std::vector<
-    Trk::SharedObject<const Trk::BoundarySurface<Trk::TrackingVolume>>>&
-    bounds = fVol->boundarySurfaces();
+  const auto& bounds = fVol->boundarySurfaces();
   for (unsigned int ib = 0; ib < bounds.size(); ++ib) {
-    const Trk::Surface& surf = (bounds[ib].get())->surfaceRepresentation();
+    const Trk::Surface& surf = (bounds[ib])->surfaceRepresentation();
     Trk::TargetSurface bb(&surf,
                           true,
                           Trk::SurfNavigType::BoundaryFrame,
@@ -176,7 +174,7 @@ Trk::TargetSurfaces::initFrameVolume(const Amg::Vector3D& pos,
         Amg::Vector3D probe = pos + dir * dist;
         if ((*is).surf->isOnSurface(probe, true, m_tolerance, m_tolerance)) {
           const Trk::TrackingVolume* nextVolume =
-            bounds[(*is).index].get()->attachedVolume(
+            bounds[(*is).index]->attachedVolume(
               probe, dir, Trk::alongMomentum);
           if (nextVolume != fVol) {
             dExit = dist;

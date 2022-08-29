@@ -62,7 +62,7 @@ public:
   virtual std::unique_ptr<TrackingGeometry> trackingGeometry
   ATLAS_NOT_THREAD_SAFE(
     const EventContext& ctx,
-    const Trk::TrackingVolume* tVol,
+    Trk::TrackingVolume* tVol,
     SG::WriteCondHandle<TrackingGeometry>& whandle) const = 0;
 
   /** The unique signature */

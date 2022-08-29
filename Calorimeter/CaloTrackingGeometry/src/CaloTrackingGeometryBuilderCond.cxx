@@ -192,7 +192,7 @@ StatusCode Calo::CaloTrackingGeometryBuilderCond::finalize()
 std::unique_ptr<Trk::TrackingGeometry>
 Calo::CaloTrackingGeometryBuilderCond::trackingGeometry(
   const EventContext& ctx, 
-  const Trk::TrackingVolume* innerVol,
+  Trk::TrackingVolume* innerVol,
   SG::WriteCondHandle<Trk::TrackingGeometry>& /*whandle*/) const
 {
 
@@ -573,8 +573,7 @@ Calo::CaloTrackingGeometryBuilderCond::trackingGeometry(
    // glue MBTS volumes with ID
    std::vector<Trk::TrackingVolume*> inBufferVolumes;
    inBufferVolumes.push_back(negativeInnerGap);     
-   //we can pass a const to the builder ... so const_cast
-   inBufferVolumes.push_back(const_cast<Trk::TrackingVolume*>(innerVol));     
+   inBufferVolumes.push_back(innerVol);     
    inBufferVolumes.push_back(positiveInnerGap);
 
    Trk::TrackingVolume* inDetEnclosed =

@@ -80,7 +80,7 @@ public:
   virtual
   std::unique_ptr<Trk::TrackingGeometry> trackingGeometry(
     const EventContext& ctx,
-    const Trk::TrackingVolume* innerVol,
+    Trk::TrackingVolume* innerVol,
     SG::WriteCondHandle<Trk::TrackingGeometry>& whandle) const override;
 
   /** The unique signature */

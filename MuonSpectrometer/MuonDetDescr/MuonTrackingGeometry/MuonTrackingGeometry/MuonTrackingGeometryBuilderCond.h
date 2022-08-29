@@ -68,7 +68,7 @@ namespace Muon {
         virtual
         std::unique_ptr<Trk::TrackingGeometry> trackingGeometry(
             const EventContext& ctx,
-            const Trk::TrackingVolume* tvol,
+            Trk::TrackingVolume* tvol,
             SG::WriteCondHandle<Trk::TrackingGeometry>& whandle) const override;
 
         /** The unique signature */

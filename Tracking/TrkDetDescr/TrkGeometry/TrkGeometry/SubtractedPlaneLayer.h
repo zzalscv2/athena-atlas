@@ -57,7 +57,8 @@ public:
   ~SubtractedPlaneLayer() override {}
 
   /** Transforms the layer into a Surface representation for extrapolation */
-  const SubtractedPlaneSurface& surfaceRepresentation() const override final;
+  virtual const SubtractedPlaneSurface& surfaceRepresentation() const override final;
+  virtual SubtractedPlaneSurface& surfaceRepresentation() override final;
 
   /** getting the MaterialProperties back - for pre-update*/
   double preUpdateMaterialFactor(const Trk::TrackParameters& par,

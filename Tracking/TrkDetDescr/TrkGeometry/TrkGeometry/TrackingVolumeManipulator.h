@@ -28,14 +28,15 @@ class TrackingVolume;
    @author Andreas.Salzburger@cern.ch
   */
 
-class TrackingVolumeManipulator {
- public:
+class TrackingVolumeManipulator
+{
+public:
   /** constructor */
   TrackingVolumeManipulator() {}
   /** Destructor */
   ~TrackingVolumeManipulator() {}
 
- protected:
+protected:
   /** protected method to glue two Volumes together
       input:
        - first TrackingVolume that keeps boundary surface
@@ -43,78 +44,80 @@ class TrackingVolumeManipulator {
        - second volume that gets glued to the first volume
        - face of the BoundarySurface to be shared
       */
-  void glueVolumes ATLAS_NOT_THREAD_SAFE(const TrackingVolume& firstVol,
-                                         BoundarySurfaceFace firstFace,
-                                         const TrackingVolume& secondVol,
-                                         BoundarySurfaceFace secondFace) const;
+  void glueVolumes(TrackingVolume& firstVol,
+                   BoundarySurfaceFace firstFace,
+                   TrackingVolume& secondVol,
+                   BoundarySurfaceFace secondFace) const;
 
   /** protected method to set the boundary surface of a tracking volume */
-  static void setBoundarySurface ATLAS_NOT_THREAD_SAFE(
-      const TrackingVolume& tvol,
-      SharedObject<const BoundarySurface<TrackingVolume> > bsurf,
-      BoundarySurfaceFace face) ;
+  static void setBoundarySurface(
+    TrackingVolume& tvol,
+    SharedObject<BoundarySurface<TrackingVolume>> bsurf,
+    BoundarySurfaceFace face);
 
   /** protected method to set inside Volume of a BoundarySurface:
       input:
        - the volume that holdes the BoundarySurface
        - the face type of the boundary to be set
        - the volume to be set as inside volume */
-  static void setInsideVolume
-  ATLAS_NOT_THREAD_SAFE(const TrackingVolume& tvol, BoundarySurfaceFace face,
-                        const TrackingVolume* insidevol) ;
+  static void setInsideVolume(TrackingVolume& tvol,
+                              BoundarySurfaceFace face,
+                              TrackingVolume* insidevol);
 
   /** protected method to set inside VolumeArray of a BoundarySurface:
       input:
        - ithe volume that holdes the BoundarySurface
        - the face type of the boundary to be set
        - the volume array to be set as inside volume array */
-  static void setInsideVolumeArray
-  ATLAS_NOT_THREAD_SAFE(const TrackingVolume& tvol, BoundarySurfaceFace face,
-                        BinnedArray<TrackingVolume>* insidevolarray) ;
+  static void setInsideVolumeArray(TrackingVolume& tvol,
+                                   BoundarySurfaceFace face,
+                                   BinnedArray<TrackingVolume>* insidevolarray);
 
   /** protected method to set inside VolumeArray of a BoundarySurface:
       input:
        - ithe volume that holdes the BoundarySurface
        - the face type of the boundary to be set
        - the volume array to be set as inside volume array */
-  static void setInsideVolumeArray ATLAS_NOT_THREAD_SAFE(
-      const TrackingVolume& tvol, BoundarySurfaceFace face,
-      const SharedObject<BinnedArray<TrackingVolume> >& insidevolarray) ;
+  static void setInsideVolumeArray(
+    TrackingVolume& tvol,
+    BoundarySurfaceFace face,
+    const SharedObject<BinnedArray<TrackingVolume>>& insidevolarray);
 
   /** protected method to set outside Volume of a BoundarySurface:
       input:
        - the volume that holdes the BoundarySurface
        - the face type of the boundary to be set
        - the volume to be set as outside volume */
-  static void setOutsideVolume
-  ATLAS_NOT_THREAD_SAFE(const TrackingVolume& tvol, BoundarySurfaceFace face,
-                        const TrackingVolume* outsidevol) ;
+  static void setOutsideVolume(TrackingVolume& tvol,
+                               BoundarySurfaceFace face,
+                               TrackingVolume* outsidevol);
 
   /** protected method to set outside VolumeArray of a BoundarySurface:
       input:
        - the volume that holdes the BoundarySurface
        - the face type of the boundary to be set
        - the volume array to be set as outside volume array */
-  static void setOutsideVolumeArray
-  ATLAS_NOT_THREAD_SAFE(const TrackingVolume& tvol, BoundarySurfaceFace face,
-                        BinnedArray<TrackingVolume>* outsidevolarray) ;
+  static void setOutsideVolumeArray(
+    TrackingVolume& tvol,
+    BoundarySurfaceFace face,
+    BinnedArray<TrackingVolume>* outsidevolarray);
 
   /** protected method to set outside VolumeArray of a BoundarySurface:
       input:
        - the volume that holdes the BoundarySurface
        - the face type of the boundary to be set
        - the volume array to be set as outside volume array */
-  static void setOutsideVolumeArray ATLAS_NOT_THREAD_SAFE(
-      const TrackingVolume& tvol, BoundarySurfaceFace face,
-      const SharedObject<BinnedArray<TrackingVolume> >& outsidevolarray) ;
+  static void setOutsideVolumeArray(
+    TrackingVolume& tvol,
+    BoundarySurfaceFace face,
+    const SharedObject<BinnedArray<TrackingVolume>>& outsidevolarray);
 
   /** protected method to confine (dense) volumes:
       input:
        - the volume that holdes the BoundarySurfaces (embedded)
        - the volume to be set as outside volume  */
-  static void confineVolume ATLAS_NOT_THREAD_SAFE(
-      const TrackingVolume& tvol, const TrackingVolume* outsidevol) ;
+  static void confineVolume(TrackingVolume& tvol, TrackingVolume* outsidevol);
 };
-}  // namespace Trk
+} // namespace Trk
 
 #endif

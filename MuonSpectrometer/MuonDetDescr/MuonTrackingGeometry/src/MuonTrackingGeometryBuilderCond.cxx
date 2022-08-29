@@ -117,7 +117,7 @@ StatusCode Muon::MuonTrackingGeometryBuilderCond::initialize() {
 std::unique_ptr<Trk::TrackingGeometry>
 Muon::MuonTrackingGeometryBuilderCond::trackingGeometry(
     const EventContext& ctx,
-    const Trk::TrackingVolume* tvol,
+    Trk::TrackingVolume* tvol,
     SG::WriteCondHandle<Trk::TrackingGeometry>& whandle) const
 {
     ATH_MSG_INFO(name() << " building tracking geometry");
@@ -306,7 +306,7 @@ Muon::MuonTrackingGeometryBuilderCond::trackingGeometry(
         double enclosedDetectorHalfZ = enclosedDetectorBounds->halflengthZ();
         double enclosedDetectorOuterRadius = enclosedDetectorBounds->outerRadius();
         // get subvolumes at navigation level and check THEIR dimensions
-        Trk::GlueVolumesDescriptor& enclosedDetGlueVolumes = mutabletvol->glueVolumesDescriptor();
+        Trk::GlueVolumesDescriptor& enclosedDetGlueVolumes = tvol->glueVolumesDescriptor();
         std::vector<Trk::TrackingVolume*> enclosedCentralFaceVolumes = enclosedDetGlueVolumes.glueVolumes(Trk::cylinderCover);
         std::vector<Trk::TrackingVolume*> enclosedNegativeFaceVolumes = enclosedDetGlueVolumes.glueVolumes(Trk::negativeFaceXY);
         std::vector<Trk::TrackingVolume*> enclosedPositiveFaceVolumes = enclosedDetGlueVolumes.glueVolumes(Trk::positiveFaceXY);

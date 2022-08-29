@@ -93,6 +93,7 @@ class BoundarySurface {
 
   /** The Surface Representation of this */
   virtual const Surface& surfaceRepresentation() const = 0;
+  virtual Surface& surfaceRepresentation() = 0;
 
   /**Virtual Destructor*/
   virtual ~BoundarySurface() {}

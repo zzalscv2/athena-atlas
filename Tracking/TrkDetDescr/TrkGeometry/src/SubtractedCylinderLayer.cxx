@@ -42,7 +42,14 @@ Trk::SubtractedCylinderLayer& Trk::SubtractedCylinderLayer::operator=(
 }
 
 const Trk::SubtractedCylinderSurface&
-Trk::SubtractedCylinderLayer::surfaceRepresentation() const {
+Trk::SubtractedCylinderLayer::surfaceRepresentation() const
+{
+  return (*this);
+}
+
+Trk::SubtractedCylinderSurface&
+Trk::SubtractedCylinderLayer::surfaceRepresentation()
+{
   return (*this);
 }
 

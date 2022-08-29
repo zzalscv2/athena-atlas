@@ -98,7 +98,7 @@ public:
    * ITrackingVolumeCreator::createGapTrackingVolume(Material&,,double,double,double,double,int,bool,const
    * std::string&) const;
    */
- virtual TrackingVolume* createGapTrackingVolume ATLAS_NOT_THREAD_SAFE( 
+ virtual TrackingVolume* createGapTrackingVolume ( 
     Material& matprop,
     double rMin,
     double rMax,
@@ -112,7 +112,7 @@ public:
    * ITrackingVolumeCreator::createGaoTrackingVolume(Material&,,std::vector<double>&,int,bool,const
    * std::string&) const;
    */
-  virtual TrackingVolume* createGapTrackingVolume ATLAS_NOT_THREAD_SAFE(
+  virtual TrackingVolume* createGapTrackingVolume (
     Material& matprop,
     double rMin,
     double rMax,
@@ -128,7 +128,7 @@ public:
           const std::string&) const;
    */
   virtual TrackingVolume* createContainerTrackingVolume
-  ATLAS_NOT_THREAD_SAFE(const std::vector<TrackingVolume*>& volumes,
+  (const std::vector<TrackingVolume*>& volumes,
                         Material& matprop,
                         const std::string& volumeName = "UndefinedVolume",
                         bool buildBoundaryLayers = false,
@@ -155,25 +155,23 @@ private:
   /** Private method - interglue all volumes contained by a TrackingVolume
               and set the outside glue volumes in the descriptor */
   StatusCode interGlueTrackingVolume
-  ATLAS_NOT_THREAD_SAFE(TrackingVolume& tVolume,
+  (TrackingVolume& tVolume,
                         bool rBinned,
                         bool buildBoundaryLayers,
                         bool replaceBoundaryFace = false) const;
 
   /** Private method - helper method not to duplicate code */
-  void addFaceVolumes
-  ATLAS_NOT_THREAD_SAFE(TrackingVolume& tvol,
-                        Trk::BoundarySurfaceFace bsf,
-                        std::vector<Trk::TrackingVolume*>& vols) const;
+  void addFaceVolumes(TrackingVolume& tvol,
+                      Trk::BoundarySurfaceFace bsf,
+                      std::vector<Trk::TrackingVolume*>& vols) const;
 
   /** Private method - glue volume to the other -- use trackingVolume helper */
-  void glueTrackingVolumes
-  ATLAS_NOT_THREAD_SAFE(TrackingVolume& volumeOne,
-                        BoundarySurfaceFace faceOne,
-                        TrackingVolume& volumeTwo,
-                        BoundarySurfaceFace faceTwo,
-                        bool buildBoundaryLayers,
-                        bool replaceBoundaryFace = false) const;
+  void glueTrackingVolumes(TrackingVolume& volumeOne,
+                           BoundarySurfaceFace faceOne,
+                           TrackingVolume& volumeTwo,
+                           BoundarySurfaceFace faceTwo,
+                           bool buildBoundaryLayers,
+                           bool replaceBoundaryFace = false) const;
 
   /** Private method - helper method to save some code */
   CylinderLayer* createCylinderLayer(double z,
@@ -192,13 +190,12 @@ private:
                              int binsR) const;
 
   // helper tools
-  ToolHandle<ILayerArrayCreator>
-    m_layerArrayCreator; //!< A Tool for coherent LayerArray creation
-  ToolHandle<ITrackingVolumeArrayCreator>
-    m_trackingVolumeArrayCreator; //!< Helper Tool to create TrackingVolume
-                                  //!< Arrays
-  ToolHandle<ITrackingVolumeHelper>
-    m_trackingVolumeHelper; //!< TrackingVolume helper
+  //!< A Tool for coherent LayerArray creation
+  ToolHandle<ILayerArrayCreator> m_layerArrayCreator;
+  //!< Helper Tool to create TrackingVolume Arrays
+  ToolHandle<ITrackingVolumeArrayCreator> m_trackingVolumeArrayCreator;
+  //!< TrackingVolume helper
+  ToolHandle<ITrackingVolumeHelper> m_trackingVolumeHelper;
 
   double m_passiveLayerThickness; //!< thickness of passive layers
   int m_passiveLayerPhiBins;      //!< bins in phi for the passive layer

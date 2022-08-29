@@ -2924,10 +2924,10 @@ namespace Trk {
       }
     }
 
-    const std::vector<SharedObject<const BoundarySurface<TrackingVolume>>> & bsurf = tvol->boundarySurfaces();
+    const auto & bsurf = tvol->boundarySurfaces();
     
-    for (const auto & it : bsurf) {
-      const Layer *layer = it->surfaceRepresentation().materialLayer();
+    for (size_t ib = 0 ; ib < bsurf.size(); ++ib) {
+      const Layer *layer = bsurf[ib]->surfaceRepresentation().materialLayer();
       
       if (layer == nullptr) continue;
       

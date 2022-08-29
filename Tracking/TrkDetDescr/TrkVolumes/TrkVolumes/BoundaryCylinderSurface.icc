@@ -12,6 +12,14 @@ BoundaryCylinderSurface<Tvol>::surfaceRepresentation() const
 {
   return *this;
 }
+
+template<class Tvol>
+inline Surface&
+BoundaryCylinderSurface<Tvol>::surfaceRepresentation()
+{
+  return *this;
+}
+
 template<class Tvol>
 inline const Tvol*
 BoundaryCylinderSurface<Tvol>::attachedVolume(const TrackParameters& parms,

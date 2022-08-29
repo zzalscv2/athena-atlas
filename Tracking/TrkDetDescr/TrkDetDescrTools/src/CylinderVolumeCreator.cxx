@@ -286,16 +286,17 @@ Trk::CylinderVolumeCreator::createGapTrackingVolume(Trk::Material& matprop,
 
 }
 
-Trk::TrackingVolume* Trk::CylinderVolumeCreator::createGapTrackingVolume
-ATLAS_NOT_THREAD_SAFE(Trk::Material& matprop,
-                      double rMin,
-                      double rMax,
-                      double zMin,
-                      double zMax,
-                      const std::vector<double>& layerPositions,
-                      bool cylinder,
-                      const std::string& volumeName,
-                      BinningType btype) const
+Trk::TrackingVolume*
+Trk::CylinderVolumeCreator::createGapTrackingVolume(
+  Trk::Material& matprop,
+  double rMin,
+  double rMax,
+  double zMin,
+  double zMax,
+  const std::vector<double>& layerPositions,
+  bool cylinder,
+  const std::string& volumeName,
+  BinningType btype) const
 {
 
   // screen output
@@ -342,12 +343,13 @@ ATLAS_NOT_THREAD_SAFE(Trk::Material& matprop,
     layers, matprop, rMin, rMax, zMin, zMax, volumeName, btype);
 }
 
-Trk::TrackingVolume* Trk::CylinderVolumeCreator::createContainerTrackingVolume
-ATLAS_NOT_THREAD_SAFE(const std::vector<Trk::TrackingVolume*>& volumes,
-                      Trk::Material& matprop,
-                      const std::string& volumeName,
-                      bool buildBoundaryLayers,
-                      bool replaceBoundaryFace) const
+Trk::TrackingVolume*
+Trk::CylinderVolumeCreator::createContainerTrackingVolume(
+  const std::vector<Trk::TrackingVolume*>& volumes,
+  Trk::Material& matprop,
+  const std::string& volumeName,
+  bool buildBoundaryLayers,
+  bool replaceBoundaryFace) const
 {
   // check if you have more than one volume
   if (volumes.size() <= (unsigned int)1) {

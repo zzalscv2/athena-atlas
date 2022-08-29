@@ -155,7 +155,7 @@ struct LayerSetupCond
       std::unique_ptr<Trk::TrackingGeometry> trackingGeometry
       ATLAS_NOT_THREAD_SAFE(
         const EventContext& ctx,
-        const Trk::TrackingVolume* tVol,
+        Trk::TrackingVolume* tVol,
         SG::WriteCondHandle<Trk::TrackingGeometry>& whandle) const override;
 
       /** The unique signature */

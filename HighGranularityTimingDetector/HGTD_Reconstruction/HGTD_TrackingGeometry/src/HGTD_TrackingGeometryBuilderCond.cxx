@@ -96,9 +96,9 @@ StatusCode HGTD_TrackingGeometryBuilderCond::finalize()
 
 std::unique_ptr<Trk::TrackingGeometry>
 HGTD_TrackingGeometryBuilderCond::trackingGeometry
-  ATLAS_NOT_THREAD_SAFE // Thread unsafe TrackingGeometry::indexStaticLayers method is used.
+  ATLAS_NOT_THREAD_SAFE 
   (const EventContext& ctx,
-   const Trk::TrackingVolume* innerVol,
+   Trk::TrackingVolume* innerVol,
    SG::WriteCondHandle<Trk::TrackingGeometry>& whandle) const
 
 {
@@ -234,7 +234,7 @@ HGTD_TrackingGeometryBuilderCond::trackingGeometry
   std::vector<Trk::TrackingVolume*> inBufferVolumes;
   inBufferVolumes.push_back(negativeInnerGapVolume);  
   //we pass this as const to the builder ... so const_cast for now
-  inBufferVolumes.push_back(const_cast<Trk::TrackingVolume*>(innerVol));     
+  inBufferVolumes.push_back(innerVol);     
   inBufferVolumes.push_back(positiveInnerGapVolume);     
    
   Trk::TrackingVolume* inDetEnclosed = 

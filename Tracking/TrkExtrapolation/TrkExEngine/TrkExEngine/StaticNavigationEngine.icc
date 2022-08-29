@@ -60,11 +60,12 @@ template <class T> Trk::ExtrapolationCode Trk::StaticNavigationEngine::resolveBo
     // [2] ------------------------ slow boundary access : take all boundary surfaces and simply try --------------
     EX_MSG_VERBOSE(eCell.navigationStep, "navigation", "", "fast boundary navigation did not succeeed - trying slow navigation now.");
     // ignore the ones you have tried already 
-    for (auto& bSurface : eCell.leadVolume->boundarySurfaces() ){
+    const auto& bSurface = eCell.leadVolume->boundarySurfaces();
+    for (size_t ib=0 ; ib< bSurface.size(); ++ib){
         // we tried this one already, no point to do it again
-        if ( bSurfacesTried.size() && bSurfacesTried.find(bSurface.get()) != bSurfacesTried.end() ) continue;
+        if ( bSurfacesTried.size() && bSurfacesTried.find(bSurface[ib]) != bSurfacesTried.end() ) continue;
         // skip if it's the last boundary surface
-        if ( &bSurface->surfaceRepresentation() == eCell.lastBoundarySurface ) continue;
+        if ( &bSurface[ib]->surfaceRepresentation() == eCell.lastBoundarySurface ) continue;
         EX_MSG_VERBOSE(eCell.navigationStep, "navigation", "", "trying a boundary surface.");
         // there is now loop protection in the slow access, needs to be done by hand
         // check this boudnary, possible return codes are:
@@ -72,7 +73,7 @@ template <class T> Trk::ExtrapolationCode Trk::StaticNavigationEngine::resolveBo
         // - SuccessMaterialLimit : boundary was reached and material update on boundary reached limit
         // - InProgress           : boundary was reached and ready for continueing the navigation
         // - UnSet                : boundary was not reached, try the next one
-        eCode = handleBoundaryT<T>(eCell,*bSurface.get(),pDir);
+        eCode = handleBoundaryT<T>(eCell,*bSurface[ib],pDir);
         CHECK_ECODE_SUCCESS(eCell, eCode);
         // Failure or Unset are not triggering a return, try more sophisticated navigation 
         if (!eCode.inProgress()){
@@ -82,7 +83,7 @@ template <class T> Trk::ExtrapolationCode Trk::StaticNavigationEngine::resolveBo
         }
         EX_MSG_VERBOSE(eCell.navigationStep, "navigation", "", "boundary surface handling yielded code " << eCode.toString());
         // set that this was the last boundary surface
-        eCell.lastBoundarySurface = &bSurface->surfaceRepresentation();
+        eCell.lastBoundarySurface = &bSurface[ib]->surfaceRepresentation();
         // and return the code yielded by the handleBoundaryT 
         return eCode;
     }

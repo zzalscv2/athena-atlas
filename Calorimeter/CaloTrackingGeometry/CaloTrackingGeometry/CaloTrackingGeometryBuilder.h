@@ -73,7 +73,7 @@ public:
   StatusCode finalize();
 
   /** TrackingGeometry Interface methode */
-  Trk::TrackingGeometry* trackingGeometry(const Trk::TrackingVolume* tvol = 0) const;
+  Trk::TrackingGeometry* trackingGeometry(Trk::TrackingVolume* tvol = 0) const;
 
   /** The unique signature */
   Trk::GeometrySignature geometrySignature() const { return Trk::Calo; }

@@ -195,14 +195,13 @@ namespace Muon {
         if (!msEntrance) return 0;
 
         // get boundary surfaces of muon entry record
-        const std::vector<Trk::SharedObject<const Trk::BoundarySurface<Trk::TrackingVolume> > > &boundarySurfs =
-            msEntrance->boundarySurfaces();
+        const auto& boundarySurfs = msEntrance->boundarySurfaces();
 
         double minDistance = 1e9;
 
         // loop over surfaces and find the closest to the parameters
-        for (const auto &bit : boundarySurfs) {
-            const Trk::Surface &surf = bit->surfaceRepresentation();
+        for (size_t ib =0 ; boundarySurfs.size();++ib) {
+            const Trk::Surface &surf = boundarySurfs[ib]->surfaceRepresentation();
             Trk::DistanceSolution solution = surf.straightLineDistanceEstimate(pars.position(), pars.momentum());
             double distance = solution.currentDistance();
             if (distance < minDistance) minDistance = distance;

@@ -200,20 +200,18 @@ Trk::PositionAtBoundary Trk::MaterialValidation::collectMaterialAndExit(const Tr
         
         std::map<double, Trk::VolumeExit > volumeExits;
         // now find the exit point
-        const std::vector< Trk::SharedObject<const Trk::BoundarySurface<Trk::TrackingVolume> > >& bSurfaces = tvol.boundarySurfaces();
-        auto bSurfIter  = bSurfaces.begin();
-        auto bSurfIterE = bSurfaces.end();
-        for ( ; bSurfIter != bSurfIterE; ++bSurfIter){
+        const auto & bSurfaces = tvol.boundarySurfaces();
+        for (size_t ib = 0; ib < bSurfaces.size(); ++ib){
             // omit positions on the surface
-            if (  !(*bSurfIter)->surfaceRepresentation().isOnSurface(lastPosition, true, 0.1, 0.1)  ){
-                Trk::Intersection evIntersection = (*bSurfIter)->surfaceRepresentation().straightLineIntersection(lastPosition, direction, true, true);
+            if (  !bSurfaces[ib]->surfaceRepresentation().isOnSurface(lastPosition, true, 0.1, 0.1)  ){
+                Trk::Intersection evIntersection = bSurfaces[ib]->surfaceRepresentation().straightLineIntersection(lastPosition, direction, true, true);
                 ATH_MSG_VERBOSE("[>>>>] boundary surface intersection / validity :" << Amg::toString(evIntersection.position) << " / " << evIntersection.valid);
 	            ATH_MSG_VERBOSE("[>>>>] with path length = " << evIntersection.pathLength );
                 if (evIntersection.valid){
                     // next attached Tracking Volume
-                    const Trk::TrackingVolume* naVolume = (*bSurfIter)->attachedVolume(evIntersection.position, direction, Trk::alongMomentum);
+                    const Trk::TrackingVolume* naVolume = bSurfaces[ib]->attachedVolume(evIntersection.position, direction, Trk::alongMomentum);
                     // put it into the map
-                    volumeExits[evIntersection.pathLength] = Trk::VolumeExit(naVolume, (&(*bSurfIter)->surfaceRepresentation()), evIntersection.position);
+                    volumeExits[evIntersection.pathLength] = Trk::VolumeExit(naVolume, &(bSurfaces[ib]->surfaceRepresentation()), evIntersection.position);
                     // volume exit
                     ATH_MSG_VERBOSE("[>>>>] found volume exit - at " << Amg::toString(evIntersection.position) );
               }

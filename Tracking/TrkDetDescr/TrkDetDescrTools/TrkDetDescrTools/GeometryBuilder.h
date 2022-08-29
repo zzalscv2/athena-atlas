@@ -61,7 +61,7 @@ namespace Trk {
         
         /** TrackingGeometry Interface method - optionally a pointer to Bounds */
         TrackingGeometry* trackingGeometry
-        ATLAS_NOT_THREAD_SAFE(const TrackingVolume* tvol = 0) const;
+        ATLAS_NOT_THREAD_SAFE(TrackingVolume* tvol = 0) const;
 
         /** The unique signature */
         GeometrySignature geometrySignature() const { return Trk::Global; }

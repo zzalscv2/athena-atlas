@@ -120,6 +120,7 @@ public:
 
   /** Transforms the layer into a Surface representation for extrapolation */
   virtual const CylinderSurface& surfaceRepresentation() const override final;
+  virtual CylinderSurface& surfaceRepresentation() override final;
 
   /** getting the MaterialProperties back - for pre-update*/
   virtual double preUpdateMaterialFactor(

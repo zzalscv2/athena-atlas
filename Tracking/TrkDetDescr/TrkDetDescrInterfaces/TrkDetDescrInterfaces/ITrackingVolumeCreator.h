@@ -106,7 +106,7 @@ public:
      @param volumeName  : volume name to be given
 
    */
-  virtual TrackingVolume* createGapTrackingVolume ATLAS_NOT_THREAD_SAFE(
+  virtual TrackingVolume* createGapTrackingVolume (
     Material& matprop,
     double loc1Min,
     double loc1Max,
@@ -126,16 +126,16 @@ public:
      @param volumeName  : volume name to be given
 
    */
-  virtual TrackingVolume* createGapTrackingVolume
-  ATLAS_NOT_THREAD_SAFE(Material& matprop,
-                        double loc1Min,
-                        double loc1Max,
-                        double loc2Min,
-                        double loc2Max,
-                        const std::vector<double>& layerPositions,
-                        bool cylinder = true,
-                        const std::string& volumeName = "UndefinedVolume",
-                        BinningType btype = arbitrary) const = 0;
+  virtual TrackingVolume* createGapTrackingVolume(
+    Material& matprop,
+    double loc1Min,
+    double loc1Max,
+    double loc2Min,
+    double loc2Max,
+    const std::vector<double>& layerPositions,
+    bool cylinder = true,
+    const std::string& volumeName = "UndefinedVolume",
+    BinningType btype = arbitrary) const = 0;
 
   /** Create a one level higher TrackingVolue
 
@@ -144,12 +144,12 @@ public:
       @param volumeName  : volume name to be given
 
   */
-  virtual TrackingVolume* createContainerTrackingVolume
-  ATLAS_NOT_THREAD_SAFE(const std::vector<TrackingVolume*>& volumes,
-                        Material& matprop,
-                        const std::string& volumeName = "UndefinedVolume",
-                        bool buildBoundaryLayers = false,
-                        bool replaceBoundaryFace = false) const = 0;
+  virtual TrackingVolume* createContainerTrackingVolume(
+    const std::vector<TrackingVolume*>& volumes,
+    Material& matprop,
+    const std::string& volumeName = "UndefinedVolume",
+    bool buildBoundaryLayers = false,
+    bool replaceBoundaryFace = false) const = 0;
 };
 
 } // end of namespace

@@ -107,7 +107,14 @@ Trk::DiscLayer& Trk::DiscLayer::operator=(const DiscLayer& dlay) {
   return (*this);
 }
 
-const Trk::DiscSurface& Trk::DiscLayer::surfaceRepresentation() const {
+const Trk::DiscSurface&
+Trk::DiscLayer::surfaceRepresentation() const
+{
+  return (*this);
+}
+Trk::DiscSurface&
+Trk::DiscLayer::surfaceRepresentation()
+{
   return (*this);
 }
 

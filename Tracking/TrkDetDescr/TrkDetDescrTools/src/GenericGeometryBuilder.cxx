@@ -86,7 +86,7 @@ StatusCode Trk::GenericGeometryBuilder::initialize()
 }
 
 
-Trk::TrackingGeometry* Trk::GenericGeometryBuilder::trackingGeometry(const Trk::TrackingVolume* innerVol) const
+Trk::TrackingGeometry* Trk::GenericGeometryBuilder::trackingGeometry(Trk::TrackingVolume* innerVol) const
 {
 
     ATH_MSG_VERBOSE("Starting to build TrackingGeometry for GeometrySignature : " << m_geometrySignature );
