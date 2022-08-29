@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
 */
 /**
  * @file  src/DataModelCompatSvc.cxx
@@ -18,9 +18,9 @@
 #include "RootConversions/TConvertingStreamerInfo.h"
 #include "RootConversions/TConvertingBranchElement.h"
 #include "AthenaKernel/errorcheck.h"
-#include "GaudiKernel/MsgStream.h"
 #include "GaudiKernel/IIncidentSvc.h"
 
+#include <mutex>
 
 //============================================================================
 // Standard service methods.
@@ -34,10 +34,8 @@
  */
 DataModelCompatSvc::DataModelCompatSvc (const std::string& name,
                                         ISvcLocator* svc)
-  : AthService (name, svc),
-    m_initialized (false)
+  : AthService (name, svc)
 {
-  // no properties...
 }
 
 
@@ -46,15 +44,12 @@ DataModelCompatSvc::DataModelCompatSvc (const std::string& name,
  */
 StatusCode DataModelCompatSvc::initialize()
 {
-  // Base class initialization.
-  CHECK( AthService::initialize() );
-
   // We're going to want to scan all types, looking for @c DataVector
   // instantiations.  We can't do that, though, until the data file
   // has been open and we've set up the proxies.  So defer the real
   // work until there's a BeginProcessing/BeginEvent incident.
   IIncidentSvc* incsvc = 0;
-  REPORT_MESSAGE(MSG::DEBUG) << "running";
+  ATH_MSG_DEBUG("running");
   CHECK( service("IncidentSvc", incsvc) );
   incsvc->addListener (this, "BeginProcessing");
   incsvc->addListener (this, "BeginEvent");
@@ -78,13 +73,12 @@ void DataModelCompatSvc::handle (const Incident& inc)
 {
   if (inc.type() == "BeginProcessing" || inc.type() == "BeginEvent")
   {
-    std::scoped_lock lock (m_mutex);
-    if (!m_initialized) {
+    static std::once_flag flag;
+    std::call_once(flag, [&]() {
       // Do our initialization.
-      REPORT_MESSAGE(MSG::DEBUG) << "handling incident " << inc.type();
+      ATH_MSG_DEBUG("handling incident " << inc.type());
       DataModelAthenaPool::DataVectorConvert::initialize (this);
-      m_initialized = true;
-    }
+    });
   }
 }
 
@@ -95,7 +89,7 @@ void DataModelCompatSvc::handle (const Incident& inc)
  */
 void DataModelCompatSvc::debug (const char* msg)
 {
-  REPORT_MESSAGE(MSG::DEBUG) << msg;
+  ATH_MSG_DEBUG(msg);
 }
 
 
@@ -105,5 +99,5 @@ void DataModelCompatSvc::debug (const char* msg)
  */
 void DataModelCompatSvc::error (const char* msg)
 {
-  REPORT_MESSAGE(MSG::ERROR) << msg;
+  ATH_MSG_ERROR(msg);
 }
