@@ -34,7 +34,6 @@ m_preserveAncestors(false),
 m_tauHandling(true),
 m_geantOffset(200000)
 {
-    declareProperty("VerticesKey", m_verticesKey);
     declareProperty("EventsKey", m_eventsKey);
     declareProperty("ParticleSelectionString", m_partString);
     //declareProperty("VertexSelectionString", m_vtxString);
