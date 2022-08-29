@@ -129,14 +129,6 @@ namespace Trk
       double upperBound;
     };
 
-    // functor to compare two TrackEntry values based on their lower limits (low to high)
-    struct pred_entry_by_min {
-      bool operator()(const TrackEntry& left, const TrackEntry& right) const
-      {
-        return left.lowerBound < right.lowerBound;
-      }
-    };
-
     // functor to compare two TrackEntry values based on their upper limits (low to high)
     struct pred_entry_by_max {
       bool operator()(const TrackEntry& left, const TrackEntry& right) const
@@ -180,14 +172,6 @@ namespace Trk
     typedef std::map< GaussianTrackDensity::TrackEntry,
                       Perigee,
                       GaussianTrackDensity::pred_entry_by_max >::const_iterator lowerMapIterator;
-
-    typedef std::map< GaussianTrackDensity::TrackEntry,
-                      Perigee,
-                      GaussianTrackDensity::pred_entry_by_min > upperMap;
-
-    typedef std::map< GaussianTrackDensity::TrackEntry,
-                      Perigee,
-                      GaussianTrackDensity::pred_entry_by_min >::const_iterator upperMapIterator;
 
 
     class TrackDensity final: public ITrackDensity
@@ -265,7 +249,6 @@ namespace Trk
       //  Cache for track information
       trackMap m_trackMap;
       lowerMap m_lowerMap;
-      upperMap m_upperMap;
 
       double m_maxRange = 0;
     };
