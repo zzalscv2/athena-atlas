@@ -120,7 +120,7 @@ StatusCode BasicGPUToAthenaImporter::convert (const EventContext & ctx,
     {
       if (ed.m_clusters->seedCellID[i] >= 0)
         {
-          cell_links.emplace_back(std::move(std::make_unique<CaloClusterCellLink>(cell_collection_link)));
+          cell_links.emplace_back(std::make_unique<CaloClusterCellLink>(cell_collection_link));
           cell_links.back()->reserve(256);
           //To be adjusted.
         }

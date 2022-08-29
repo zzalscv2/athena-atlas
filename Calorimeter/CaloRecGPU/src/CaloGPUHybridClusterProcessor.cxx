@@ -138,16 +138,16 @@ StatusCode CaloGPUHybridClusterProcessor::initialize()
 
 StatusCode CaloGPUHybridClusterProcessor::execute(const EventContext & ctx, xAOD::CaloClusterContainer * cluster_collection_ptr) const
 {
-  if (m_deferConstantDataToFirstEvent && !m_constantDataSent)
-    {
+  if (m_deferConstantDataToFirstEvent){
+  if (!m_constantDataSent.load()){
       std::lock_guard<std::mutex> lock_guard(m_mutex);
-      if (!m_constantDataSent)
-        {
-          ConstantDataHolder * cdh_ptr ATLAS_THREAD_SAFE = &m_constantData;
-          ATH_CHECK( m_transformConstantData->convert(ctx, *cdh_ptr) );
-          m_constantDataSent = true;
-        }
+      if(!m_constantDataSent.load()){
+        ConstantDataHolder * cdh_ptr ATLAS_THREAD_SAFE = &m_constantData;
+        ATH_CHECK( m_transformConstantData->convert(ctx, *cdh_ptr) );
+        m_constantDataSent.store(true);
+      }
     }
+  }
 
   EventDataHolder * event_data_ptr = nullptr;
 

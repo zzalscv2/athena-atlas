@@ -497,7 +497,7 @@ struct TimePlotter : public BasePlotter
     return runs[num_threads];
   }
 
-  ~TimePlotter()
+  virtual ~TimePlotter()
   {
   }
 
