@@ -269,9 +269,6 @@ namespace Trk
     m_lowerMap.emplace(std::piecewise_construct,
                        std::forward_as_tuple(constantTerm, linearTerm, quadraticTerm, zMin, zMax),
                        std::forward_as_tuple(itrk));
-    m_upperMap.emplace(std::piecewise_construct,
-                       std::forward_as_tuple(constantTerm, linearTerm, quadraticTerm, zMin, zMax),
-                       std::forward_as_tuple(itrk));
   }
 
 
