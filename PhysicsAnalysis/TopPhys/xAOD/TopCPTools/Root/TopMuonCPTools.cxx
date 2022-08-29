@@ -1,5 +1,5 @@
 /*
-   Copyright (C) 2002-2020 CERN for the benefit of the ATLAS collaboration
+   Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "TopCPTools/TopMuonCPTools.h"
@@ -15,7 +15,6 @@
 #include "PathResolver/PathResolver.h"
 
 // Muon include(s):
-#include "MuonMomentumCorrections/MuonCalibrationAndSmearingTool.h"
 #include "MuonMomentumCorrections/MuonCalibTool.h"
 #include "MuonSelectorTools/MuonSelectionTool.h"
 #include "MuonEfficiencyCorrections/MuonTriggerScaleFactors.h"

@@ -180,7 +180,7 @@ bool SUSYObjDef_xAOD::IsSignalPhoton(const xAOD::Photon& input, float ptcut, flo
 
   if (m_photonCrackVeto){
     if  ( std::abs( input.caloCluster()->etaBE(2) ) >1.37 &&  std::abs( input.caloCluster()->etaBE(2) ) <1.52) {
-      return StatusCode::SUCCESS; 
+      return false; 
     }
   }
 

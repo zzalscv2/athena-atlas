@@ -1,4 +1,4 @@
-# Copyright (C) 2002-2018 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
 
 # AnaAlgorithm import(s):
 from AsgAnalysisAlgorithms.AnalysisObjectSharedSequence import makeSharedObjectSequence
@@ -123,8 +123,8 @@ def makeMuonCalibrationSequence( seq, dataType,
     alg = createAlgorithm( 'CP::MuonCalibrationAndSmearingAlg',
                            'MuonCalibrationAndSmearingAlg' + postfix )
     addPrivateTool( alg, 'calibrationAndSmearingTool',
-                    'CP::MuonCalibrationPeriodTool' )
-    alg.calibrationAndSmearingTool.calibrationMode = 2 # choose ID+MS with no sagitta bias
+                    'CP::MuonCalibTool' )
+    alg.calibrationAndSmearingTool.calibMode = 2 # choose ID+MS with no sagitta bias
     seq.append( alg, inputPropName = 'muons', outputPropName = 'muonsOut',
                 stageName = 'calibration',
                 dynConfig = {'preselection' : lambda meta : "&&".join (meta["selectionDecorNamesOutput"])})

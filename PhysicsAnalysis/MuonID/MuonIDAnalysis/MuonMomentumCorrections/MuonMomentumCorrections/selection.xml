@@ -2,8 +2,6 @@
 
   <!-- Tools in this package -->
   <class name="CP::MuonCalibTool" />
-  <class name="CP::MuonCalibrationAndSmearingTool" />
-  <class name="CP::MuonCalibrationPeriodTool" />
   <class name="CP::MuonCalibIntSagittaTool" />
   <class name="CP::MuonCalibIntHighpTSmearTool" />
   <class name="CP::MuonCalibIntScaleSmearTool" />

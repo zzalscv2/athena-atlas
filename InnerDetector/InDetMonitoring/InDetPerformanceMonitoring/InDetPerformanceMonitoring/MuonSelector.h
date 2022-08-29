@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+ * Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
  */
 
 #ifndef IDPERFMON_MUONSELECTOR_H
@@ -20,7 +20,7 @@
 #include "GaudiKernel/ServiceHandle.h"
 #include "AsgTools/ToolHandle.h" 
 #include "MuonAnalysisInterfaces/IMuonSelectionTool.h"
-#include "MuonMomentumCorrections/MuonCalibrationAndSmearingTool.h"
+
 
 #include "CLHEP/Units/SystemOfUnits.h"
 #include "CLHEP/Units/PhysicalConstants.h"

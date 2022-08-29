@@ -47,8 +47,8 @@ class MuonCalibrationConfig (ConfigBlock):
         alg = config.createAlgorithm( 'CP::MuonCalibrationAndSmearingAlg',
                                'MuonCalibrationAndSmearingAlg' + self.postfix )
         config.addPrivateTool( 'calibrationAndSmearingTool',
-                        'CP::MuonCalibrationPeriodTool' )
-        alg.calibrationAndSmearingTool.calibrationMode = 2 # choose ID+MS with no sagitta bias
+                        'CP::MuonCalibTool' )
+        alg.calibrationAndSmearingTool.calibMode = 2 # choose ID+MS with no sagitta bias
         alg.muons = config.readName (self.containerName)
         alg.muonsOut = config.copyName (self.containerName)
         alg.preselection = config.getSelection (self.containerName, '')

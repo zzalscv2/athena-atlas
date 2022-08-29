@@ -9,7 +9,7 @@ from AthenaConfiguration.Enums import LHCPeriod
 def setupMCastToolCfg(flags, name="MuonMomentumCorrections", **kwargs):
     acc = ComponentAccumulator()
     kwargs.setdefault("IsRun3Geo", flags.GeoModel.Run >= LHCPeriod.Run3 )
-    from MuonSelectionTool.MuonSelectorToolsConfig import MuonSelectionToolCfg
+    from MuonSelectorTools.MuonSelectorToolsConfig import MuonSelectionToolCfg
     kwargs.setdefault("MuonSelectionTool", acc.popToolsAndMerge(MuonSelectionToolCfg(flags,
                                                                                      MaxEta=2.7,
                                                                                      MuQuality=1)))
