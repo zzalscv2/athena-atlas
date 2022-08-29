@@ -1,9 +1,9 @@
-# Copyright (C) 2002-2020 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
 
 from AthenaConfiguration.ComponentAccumulator import ComponentAccumulator
 from AthenaConfiguration.ComponentFactory import CompFactory
 from BTagging.InDetImprovedJetFitterVxFinderConfig import InDetImprovedJetFitterVxFinderCfg
-from BTagging.InDetVKalVxInJetToolConfig import InDetVKalVxInJetToolCfg
+from InDetConfig.InDetVKalVxInJetToolConfig import InDetVKalVxInJetToolCfg, MSV_InDetVKalVxInJetToolCfg
 
 
 def JetSecVtxFindingAlgCfg(ConfigFlags, BTagVxSecVertexInfoName, SVAlgName, JetCollection, PrimaryVertexCollectionName="", SVFinder="", TracksToTag="", **options):
@@ -26,7 +26,7 @@ def JetSecVtxFindingAlgCfg(ConfigFlags, BTagVxSecVertexInfoName, SVAlgName, JetC
     elif SVFinder == 'SV1Flip':
         secVtxFinder = acc.popToolsAndMerge(InDetVKalVxInJetToolCfg(ConfigFlags, "IDVKalVxInJetFlip"))
     elif SVFinder == 'MSV':
-        secVtxFinder = acc.popToolsAndMerge(InDetVKalVxInJetToolCfg(ConfigFlags, "IDVKalMultiVxInJet", MSV = True))
+        secVtxFinder = acc.popToolsAndMerge(MSV_InDetVKalVxInJetToolCfg(ConfigFlags, "IDVKalMultiVxInJet"))
     else:
         return acc
 
