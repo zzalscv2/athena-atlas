@@ -1,0 +1,181 @@
+# Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+#!/usr/bin/env python
+
+from AthenaConfiguration.ComponentAccumulator import ComponentAccumulator
+from AthenaConfiguration.ComponentFactory import CompFactory
+from AthenaConfiguration.Enums import BeamType
+from AthenaCommon.SystemOfUnits import GeV
+
+
+def TCAL1TrackToolsCfg(flags, **kwargs):
+    """ Configure the TrackTools tool """
+
+    acc = ComponentAccumulator()
+    from TrkConfig.AtlasExtrapolatorConfig import AtlasExtrapolatorCfg
+    extrapolator = acc.popToolsAndMerge(AtlasExtrapolatorCfg(flags))
+    caloExtentionTool = CompFactory.Trk.ParticleCaloExtensionTool(Extrapolator=extrapolator)
+
+    kwargs.setdefault('ParticleCaloExtensionTool', caloExtentionTool)
+    kwargs.setdefault('IsCollision', flags.Beam.Type is BeamType.Collisions)
+
+    TrackTools = CompFactory.TileCal.TrackTools
+    acc.setPrivateTools(TrackTools(**kwargs))
+
+    return acc
+
+def TCAL1TileCellsMuonDecoratorCfg(flags, **kwargs):
+    """ Configure the Tile Cells Muon decorator augmentation tool """
+
+    acc = ComponentAccumulator()
+
+    from TileGeoModel.TileGMConfig import TileGMCfg
+    acc.merge(TileGMCfg(flags))
+
+    kwargs.setdefault('name', 'TCAL1TileCellsMuonDecorator')
+    kwargs.setdefault('Prefix', 'TCAL1_')
+    kwargs.setdefault('SelectMuons', flags.Beam.Type is BeamType.Collisions)
+    kwargs.setdefault('MinMuonPt', 10 * GeV)
+    kwargs.setdefault('MaxAbsMuonEta', 1.7)
+    kwargs.setdefault('IsoCone', 0.4)
+
+    kwargs.setdefault('TrackTools', acc.popToolsAndMerge(TCAL1TrackToolsCfg(flags)) )
+
+    TileCellsDecorator = CompFactory.DerivationFramework.TileCellsDecorator
+    kwargs.setdefault('CellsDecorator', TileCellsDecorator(Prefix=kwargs['Prefix']))
+
+    kwargs.setdefault('TracksInConeTool', CompFactory.xAOD.TrackParticlesInConeTool())
+
+    TileCellsMuonDecorator = CompFactory.DerivationFramework.TileCellsMuonDecorator
+    acc.addPublicTool(TileCellsMuonDecorator(**kwargs), primary = True)
+
+    return acc
+
+
+def TCAL1StringSkimmingToolCfg(flags, **kwargs):
+    """Configure TCAL1 derivation framework skimming tool"""
+
+    prefix = kwargs.pop('Prefix', 'TCAL1_')
+
+    from TrigDecisionTool.TrigDecisionToolConfig import TrigDecisionToolCfg
+    acc = ComponentAccumulator()
+    tdt = acc.getPrimaryAndMerge(TrigDecisionToolCfg(flags))
+
+    selectionExpression = f'Muons.{prefix}SelectedMuon' if flags.Beam.Type is BeamType.Collisions else 'abs(Muons.eta) < 1.7'
+    skimmingExpression = f'count({selectionExpression}) > 0'
+
+    kwargs.setdefault('name', 'TCAL1StringSkimmingTool')
+    kwargs.setdefault('expression', skimmingExpression)
+    kwargs.setdefault('TrigDecisionTool', tdt)
+
+    xAODStringSkimmingTool = CompFactory.DerivationFramework.xAODStringSkimmingTool
+    acc.addPublicTool(xAODStringSkimmingTool(**kwargs), primary = True)
+
+    return acc
+
+
+def TCAL1MuonTPThinningToolCfg(flags, streamName, **kwargs):
+    """Configure TCAL1 derivation framework thinning tool"""
+
+    acc = ComponentAccumulator()
+
+    kwargs['StreamName'] = streamName
+    kwargs.setdefault('name', 'TCAL1MuonTPThinningTool')
+    kwargs.setdefault('MuonKey', 'Muons')
+    kwargs.setdefault('InDetTrackParticlesKey', 'InDetTrackParticles')
+
+    from DerivationFrameworkInDet.InDetToolsConfig import MuonTrackParticleThinningCfg
+    muonTPThinningTool = acc.getPrimaryAndMerge(MuonTrackParticleThinningCfg(flags, **kwargs))
+
+    acc.addPublicTool(muonTPThinningTool, primary = True)
+
+    return acc
+
+
+def TCAL1KernelCfg(flags, name='TCAL1Kernel', **kwargs):
+    """Configure the TCAL1 derivation framework driving algorithm (kernel)"""
+
+    acc = ComponentAccumulator()
+
+    prefix = kwargs.pop('Prefix', 'TCAL1_')
+    streamName = kwargs.pop('StreamName', 'OutputStreamDAOD_TCAL1')
+
+    # Common augmentations
+    triggerListsHelper = kwargs.pop('TriggerListsHelper', 'TriggerListsHelper')
+    from DerivationFrameworkPhys.PhysCommonConfig import PhysCommonAugmentationsCfg
+    acc.merge(PhysCommonAugmentationsCfg(flags, TriggerListsHelper = triggerListsHelper))
+    
+    cellsMuonDecorator = acc.getPrimaryAndMerge( TCAL1TileCellsMuonDecoratorCfg(flags, Prefix=prefix) )
+    kwargs.setdefault('AugmentationTools', [cellsMuonDecorator])
+
+    skimmingTool = acc.getPrimaryAndMerge(TCAL1StringSkimmingToolCfg(flags, Prefix=prefix))
+    kwargs.setdefault('SkimmingTools', [skimmingTool])
+
+    thinningTool = acc.getPrimaryAndMerge(TCAL1MuonTPThinningToolCfg(flags, streamName=streamName))
+    kwargs.setdefault('ThinningTools', [thinningTool])
+
+    DerivationKernel = CompFactory.DerivationFramework.DerivationKernel
+    acc.addEventAlgo(DerivationKernel(name, **kwargs))
+
+    return acc
+
+
+def TCAL1Cfg(ConfigFlags):
+    """Configure the TCAL1 derivation framework"""
+
+    TCAL1Prefix = 'TCAL1_'
+    from DerivationFrameworkPhys.TriggerListsHelper import TriggerListsHelper
+    TCAL1TriggerListsHelper = TriggerListsHelper()
+    
+    acc = ComponentAccumulator()
+    acc.merge(TCAL1KernelCfg(ConfigFlags, name="TCAL1Kernel", StreamName="OutputStreamDAOD_TCAL1", Prefix=TCAL1Prefix,  TriggerListsHelper=TCAL1TriggerListsHelper))
+
+    from OutputStreamAthenaPool.OutputStreamConfig import OutputStreamCfg
+    from DerivationFrameworkCore.SlimmingHelper import SlimmingHelper
+    TCAL1SlimmingHelper = SlimmingHelper("TCAL1SlimmingHelper", NamesAndTypes = ConfigFlags.Input.TypedCollections)
+    TCAL1SlimmingHelper.SmartCollections = ['EventInfo', 'Muons', 'AntiKt4EMTopoJets', 'AntiKt4EMPFlowJets', 'MET_Baseline_AntiKt4EMTopo', 'MET_Baseline_AntiKt4EMPFlow', 'PrimaryVertices']
+
+    TCAL1ExtraVariables = f'Muons.{TCAL1Prefix}etrkcone40'
+
+    TCAL1ExtraVariables += f'.{TCAL1Prefix}cells_'.join(['', 'energy', 'et', 'eta', 'phi', 'gain', 'bad', 'time', 'quality'])
+    TCAL1ExtraVariables += f'.{TCAL1Prefix}cells_'.join(['', 'sampling', 'sinTh', 'cosTh', 'cotTh', 'x', 'y', 'z'])
+
+    TCAL1ExtraVariables += f'.{TCAL1Prefix}cells_'.join(['', 'side', 'section', 'module', 'tower', 'sample'])
+    TCAL1ExtraVariables += f'.{TCAL1Prefix}cells_'.join(['', 'r', 'dx', 'dy', 'dz', 'dr', 'dphi', 'deta', 'volume'])
+
+    TCAL1ExtraVariables += f'.{TCAL1Prefix}cells_muon_'.join(['', 'dx', 'dedx', 'x', 'y', 'z', 'eta', 'phi'])
+    TCAL1ExtraVariables += f'.{TCAL1Prefix}cells_to_muon_'.join(['', 'dx', 'dy', 'dz', 'deta', 'dphi'])
+
+    for pmt in ['pmt1', 'pmt2']:
+        TCAL1ExtraVariables += f'.{TCAL1Prefix}cells_{pmt}_'.join(['', 'ros', 'drawer', 'channel', 'energy', 'time', 'quality', 'qbit', 'bad', 'gain'])
+
+    TCAL1SlimmingHelper.ExtraVariables = [TCAL1ExtraVariables]
+
+
+    # Trigger matching
+    # Run 2
+    if ConfigFlags.Trigger.EDMVersion == 2:
+        from DerivationFrameworkPhys.TriggerMatchingCommonConfig import AddRun2TriggerMatchingToSlimmingHelper
+        AddRun2TriggerMatchingToSlimmingHelper(SlimmingHelper = TCAL1SlimmingHelper, 
+                                               OutputContainerPrefix = "TrigMatch_", 
+                                               TriggerList = TCAL1TriggerListsHelper.Run2TriggerNamesTau)
+        AddRun2TriggerMatchingToSlimmingHelper(SlimmingHelper = TCAL1SlimmingHelper, 
+                                               OutputContainerPrefix = "TrigMatch_",
+                                               TriggerList = TCAL1TriggerListsHelper.Run2TriggerNamesNoTau)
+    # Run 3
+    if ConfigFlags.Trigger.EDMVersion == 3:
+        from TrigNavSlimmingMT.TrigNavSlimmingMTConfig import AddRun3TrigNavSlimmingCollectionsToSlimmingHelper
+        AddRun3TrigNavSlimmingCollectionsToSlimmingHelper(TCAL1SlimmingHelper)        
+        # Run 2 is added here temporarily to allow testing/comparison/debugging
+        from DerivationFrameworkPhys.TriggerMatchingCommonConfig import AddRun2TriggerMatchingToSlimmingHelper
+        AddRun2TriggerMatchingToSlimmingHelper(SlimmingHelper = TCAL1SlimmingHelper, 
+                                               OutputContainerPrefix = "TrigMatch_", 
+                                               TriggerList = TCAL1TriggerListsHelper.Run3TriggerNamesTau)
+        AddRun2TriggerMatchingToSlimmingHelper(SlimmingHelper = TCAL1SlimmingHelper, 
+                                               OutputContainerPrefix = "TrigMatch_",
+                                               TriggerList = TCAL1TriggerListsHelper.Run3TriggerNamesNoTau)
+    
+
+    TCAL1ItemList = TCAL1SlimmingHelper.GetItemList()
+    acc.merge(OutputStreamCfg(ConfigFlags, "DAOD_TCAL1", ItemList=TCAL1ItemList, AcceptAlgs=["TCAL1Kernel"]))
+
+    return acc
