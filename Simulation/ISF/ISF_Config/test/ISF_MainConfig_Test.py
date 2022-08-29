@@ -51,7 +51,7 @@ if __name__ == '__main__':
     ConfigFlags.IOVDb.GlobalTag = "OFLCOND-MC16-SDR-14"
     ConfigFlags.GeoModel.Align.Dynamic = False
 
-    detectors =['Bpipe', 'BCM', 'DBM',  'Pixel', 'SCT', 'TRT', 'LAr', 'Tile', 'CSC', 'MDT', 'RPC', 'TGC', 'FwdRegion']
+    detectors = ['Bpipe', 'BCM', 'Pixel', 'SCT', 'TRT', 'LAr', 'Tile', 'CSC', 'MDT', 'RPC', 'TGC', 'FwdRegion']
     # Setup detector flags
     from AthenaConfiguration.DetectorConfigFlags import setupDetectorsFromList
     setupDetectorsFromList(ConfigFlags, detectors, toggle_geometry=True)
