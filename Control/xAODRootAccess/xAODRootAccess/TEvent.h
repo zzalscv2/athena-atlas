@@ -436,6 +436,9 @@ namespace xAOD {
 
       /// Collection of all the managed input objects
       Object_t m_inputObjects;
+      /// Objects that have been asked for, but were found to be missing
+      /// in the current input
+      std::set< std::string > m_inputMissingObjects;
       /// Collection of all the managed output object
       Object_t m_outputObjects;
 
