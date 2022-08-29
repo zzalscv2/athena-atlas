@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2020 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef MUONMOMENTUMCORRECTIONS_MUONMOMENTUMCORRECTIONSDICT_H
@@ -10,8 +10,7 @@
 #endif  // __GCCXML__
 
 #include "MuonAnalysisInterfaces/IMuonCalibrationAndSmearingTool.h"
-#include "MuonMomentumCorrections/MuonCalibrationAndSmearingTool.h"
-#include "MuonMomentumCorrections/MuonCalibrationPeriodTool.h"
+
 
 
 #include "MuonMomentumCorrections/MuonCalibTool.h"

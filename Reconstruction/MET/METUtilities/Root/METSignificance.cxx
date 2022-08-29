@@ -98,6 +98,7 @@ namespace met {
     declareProperty("IsDataJet",   m_isDataJet     = false   );
     declareProperty("IsDataMuon",  m_isDataMuon    = false   );
     declareProperty("IsAFII",      m_isAFII        = false   );
+    m_muonCalibrationAndSmearingTool.declarePropertyFor(this, "MuonCalibTool", "");
 
     m_file = nullptr;
   }
@@ -152,7 +153,11 @@ namespace met {
 
     ATH_MSG_INFO("Set up MuonCalibrationAndSmearing tools");
     toolName = "MuonCalibrationAndSmearingTool";
-    m_muonCalibrationAndSmearingTool.setTypeAndName("CP::MuonCalibrationAndSmearingTool/METSigAutoConf_"+toolName);
+    if (m_muonCalibrationAndSmearingTool.empty()) {
+        ATH_MSG_WARNING("Setup the muon calibration tool with calib mode 1. Please consider to configure the tool via the 'MuonCalibTool' property.");
+        m_muonCalibrationAndSmearingTool.setTypeAndName("CP::MuonCalibTool/METSigAutoConf_"+toolName);
+        ATH_CHECK(m_muonCalibrationAndSmearingTool.setProperty("calibMode", 1));
+    }
     ATH_CHECK(m_muonCalibrationAndSmearingTool.retrieve());
 
     ATH_MSG_DEBUG( "Initialising EgcalibTool " );

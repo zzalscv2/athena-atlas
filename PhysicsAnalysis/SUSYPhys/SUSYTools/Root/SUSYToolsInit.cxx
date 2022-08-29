@@ -1551,6 +1551,7 @@ StatusCode SUSYObjDef_xAOD::SUSYToolsInit()
         ATH_MSG_WARNING("Object-based METSignificance recommendations only exist for EMTopo and PFlow, falling back to AntiKt4EMTopo");
         ATH_CHECK( m_metSignif.setProperty("JetCollection", "AntiKt4EMTopo") );
       }
+      ATH_CHECK( m_metSignif.setProperty("MuonCalibTool",m_muonCalibTool.getHandle()));
       ATH_CHECK( m_metSignif.setProperty("OutputLevel", this->msg().level()) );
       ATH_CHECK( m_metSignif.retrieve() );
     } else ATH_CHECK( m_metSignif.retrieve() );

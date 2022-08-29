@@ -37,6 +37,7 @@
 #include "xAODMuon/MuonContainer.h"
 
 ANA_MSG_HEADER(msgMMC)
+ANA_MSG_SOURCE(msgMMC, "MCASTTest")
 
 #include <MuonMomentumCorrections/CalibContainer.h>
 #include <MuonMomentumCorrections/CalibInitializer.h>
