@@ -11,6 +11,20 @@ def mapUserName (name) :
 
 
 
+class SelectionConfig :
+    """all the data for a given selection that has been registered"""
+
+    def __init__ (self, selectionName, decoration,
+                  bits, preselection=None) :
+        self.name = selectionName
+        self.bits = bits
+        self.decoration = decoration
+        if preselection is not None :
+            self.preselection = preselection
+        else :
+            self.preselection = (selectionName == '')
+
+
 
 class ContainerConfig :
     """all the auto-generated meta-configuration data for a single container
@@ -24,10 +38,7 @@ class ContainerConfig :
         self.index = 0
         self.maxIndex = None
         self.viewIndex = 1
-        self.selection = {}
-        self.selection[''] = []
-        self.selectionBits = {}
-        self.selectionBits[''] = []
+        self.selections = []
 
     def currentName (self) :
         if self.index == 0 :
@@ -41,11 +52,7 @@ class ContainerConfig :
         self.maxIndex = self.index
         self.index = 0
         self.viewIndex = 1
-        self.selection = {}
-        self.selection[''] = []
-        self.selectionBits = {}
-        self.selectionBits[''] = []
-
+        self.selections = []
 
 
 
@@ -177,20 +184,39 @@ class ConfigAccumulator :
         self._currentAlg = None
 
 
-    def getSelection (self, containerName, selectionName) :
+    def getPreselection (self, containerName, selectionName) :
 
-        """get the selection string for the given selection on the given
-        container"""
+        """get the preselection string for the given selection on the given
+        container
+        """
         if containerName not in self._containerConfig :
             return ""
         config = self._containerConfig[containerName]
-        selection = config.selection['']
-        if selectionName != '' and selectionName in config.selection :
-            selection = selection + config.selection[selectionName]
-        return '&&'.join (selection)
+        decorations = []
+        for selection in config.selections :
+            if (selection.name == '' or selection.name == selectionName) and \
+               selection.preselection :
+                decorations += [selection.decoration]
+        return '&&'.join (decorations)
 
 
-    def addSelection (self, containerName, selectionName, selectionDecoration, selectionBits) :
+    def getFullSelection (self, containerName, selectionName) :
+
+        """get the preselection string for the given selection on the given
+        container
+        """
+        if containerName not in self._containerConfig :
+            return ""
+        config = self._containerConfig[containerName]
+        decorations = []
+        for selection in config.selections :
+            if (selection.name == '' or selection.name == selectionName) :
+                decorations += [selection.decoration]
+        return '&&'.join (decorations)
+
+
+    def addSelection (self, containerName, selectionName, decoration,
+                      **kwargs) :
         """add another selection decoration to the selection of the given
         name for the given container
 
@@ -199,8 +225,5 @@ class ConfigAccumulator :
         if containerName not in self._containerConfig :
             self._containerConfig[containerName] = ContainerConfig (containerName, containerName)
         config = self._containerConfig[containerName]
-        if selectionName not in config.selection :
-            config.selection[selectionName] = []
-            config.selectionBits[selectionName] = []
-        config.selection[selectionName].append (selectionDecoration)
-        config.selectionBits[selectionName].append (selectionBits)
+        selection = SelectionConfig (selectionName, decoration, **kwargs)
+        config.selections.append (selection)

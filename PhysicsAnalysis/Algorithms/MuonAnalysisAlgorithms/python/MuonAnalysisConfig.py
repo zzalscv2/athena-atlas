@@ -28,9 +28,9 @@ class MuonCalibrationConfig (ConfigBlock):
         alg.selectionTool.maxEta = 2.5
         alg.selectionDecoration = 'selectEta' + self.postfix + ',as_bits'
         alg.particles = config.readName (self.containerName, "Muons")
-        alg.preselection = config.getSelection (self.containerName, '')
-        config.addSelection (self.containerName, '', alg.selectionDecoration, 2)
-        config.addSelection (self.containerName, 'output', alg.selectionDecoration, 2)
+        alg.preselection = config.getPreselection (self.containerName, '')
+        config.addSelection (self.containerName, '', alg.selectionDecoration,
+                             bits=2)
 
         # Set up the track selection algorithm:
         alg = config.createAlgorithm( 'CP::AsgLeptonTrackSelectionAlg',
@@ -39,9 +39,9 @@ class MuonCalibrationConfig (ConfigBlock):
         alg.maxD0Significance = 3
         alg.maxDeltaZ0SinTheta = 0.5
         alg.particles = config.readName (self.containerName)
-        alg.preselection = config.getSelection (self.containerName, '')
-        config.addSelection (self.containerName, '', alg.selectionDecoration, 3)
-        config.addSelection (self.containerName, 'output', alg.selectionDecoration, 3)
+        alg.preselection = config.getPreselection (self.containerName, '')
+        config.addSelection (self.containerName, '', alg.selectionDecoration,
+                             bits=3)
 
         # Set up the muon calibration and smearing algorithm:
         alg = config.createAlgorithm( 'CP::MuonCalibrationAndSmearingAlg',
@@ -51,7 +51,7 @@ class MuonCalibrationConfig (ConfigBlock):
         alg.calibrationAndSmearingTool.calibrationMode = 2 # choose ID+MS with no sagitta bias
         alg.muons = config.readName (self.containerName)
         alg.muonsOut = config.copyName (self.containerName)
-        alg.preselection = config.getSelection (self.containerName, '')
+        alg.preselection = config.getPreselection (self.containerName, '')
 
         # Set up the the pt selection
         alg = config.createAlgorithm( 'CP::AsgSelectionAlg', 'MuonPtCutAlg' + self.postfix )
@@ -59,10 +59,9 @@ class MuonCalibrationConfig (ConfigBlock):
         config.addPrivateTool( 'selectionTool', 'CP::AsgPtEtaSelectionTool' )
         alg.particles = config.readName (self.containerName)
         alg.selectionTool.minPt = 3e3
-        alg.preselection = config.getSelection (self.containerName, '')
-        config.addSelection (self.containerName, '', alg.selectionDecoration, 2)
-        if self.ptSelectionOutput :
-            config.addSelection (self.containerName, 'output', alg.selectionDecoration, 2)
+        alg.preselection = config.getPreselection (self.containerName, '')
+        config.addSelection (self.containerName, '', alg.selectionDecoration,
+                             bits=2, preselection = self.ptSelectionOutput)
 
 
 
@@ -115,10 +114,10 @@ class MuonWorkingPointConfig (ConfigBlock) :
         alg.selectionDecoration = 'good_muon' + postfix + ',as_bits'
         alg.badMuonVetoDecoration = 'is_bad' + postfix + ',as_char'
         alg.muons = config.readName (self.containerName)
-        alg.preselection = config.getSelection (self.containerName, self.selectionName)
-        config.addSelection (self.containerName, self.selectionName, alg.selectionDecoration, 4)
-        if self.qualitySelectionOutput:
-            config.addSelection (self.containerName, 'output', alg.selectionDecoration, 4)
+        alg.preselection = config.getPreselection (self.containerName, self.selectionName)
+        config.addSelection (self.containerName, self.selectionName,
+                             alg.selectionDecoration,
+                             bits=4, preselection=self.qualitySelectionOutput)
 
         # Set up the isolation calculation algorithm:
         if self.isolation != 'NonIso' :
@@ -127,10 +126,10 @@ class MuonWorkingPointConfig (ConfigBlock) :
             config.addPrivateTool( 'isolationTool', 'CP::IsolationSelectionTool' )
             alg.isolationDecoration = 'isolated_muon' + postfix + ',as_bits'
             alg.muons = config.readName (self.containerName)
-            alg.preselection = config.getSelection (self.containerName, self.selectionName)
-            config.addSelection (self.containerName, self.selectionName, alg.isolationDecoration, 1)
-            if self.qualitySelectionOutput:
-                config.addSelection (self.containerName, 'output', alg.isolationDecoration, 1)
+            alg.preselection = config.getPreselection (self.containerName, self.selectionName)
+            config.addSelection (self.containerName, self.selectionName,
+                                 alg.isolationDecoration,
+                                 bits=1, preselection=self.qualitySelectionOutput)
 
         # Set up the efficiency scale factor calculation algorithm:
         if config.dataType() != 'data':
@@ -143,14 +142,14 @@ class MuonWorkingPointConfig (ConfigBlock) :
             alg.outOfValidityDeco = 'bad_eff' + postfix
             alg.efficiencyScaleFactorTool.WorkingPoint = self.quality
             alg.muons = config.readName (self.containerName)
-            alg.preselection = config.getSelection (self.containerName, self.selectionName)
+            alg.preselection = config.getPreselection (self.containerName, self.selectionName)
 
         # Set up an algorithm used for decorating baseline muon selection:
         alg = config.createAlgorithm( 'CP::AsgSelectionAlg',
                                       'MuonSelectionSummary' + postfix )
         alg.selectionDecoration = 'baselineSelection' + postfix + ',as_char'
         alg.particles = config.readName (self.containerName)
-        alg.preselection = config.getSelection (self.containerName, self.selectionName)
+        alg.preselection = config.getFullSelection (self.containerName, self.selectionName)
 
 
 
