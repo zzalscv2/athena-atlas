@@ -17,6 +17,8 @@ triggerChains = [
 
 electronMinPt = 10e3
 electronMaxEta = None
+photonMinPt = 10e3
+photonMaxEta = None
 muonMinPt = None
 muonMaxEta = None
 
@@ -159,11 +161,12 @@ def makeSequenceOld (dataType, algSeq, vars, forCompare) :
     photonSequence.configure( inputName = 'Photons',
                               outputName = 'AnaPhotons_%SYS%' )
     algSeq += photonSequence
-    if not forCompare :
-        vars += [ 'OutPhotons_%SYS%.pt  -> ph_pt_%SYS%',
-                  'OutPhotons_NOSYS.phi -> ph_phi',
-                  'OutPhotons_NOSYS.eta -> ph_eta',
-                  'OutPhotons_%SYS%.baselineSelection_tight -> ph_select_tight_%SYS%', ]
+    vars += [ 'OutPhotons_%SYS%.pt  -> ph_pt_%SYS%',
+              'OutPhotons_NOSYS.phi -> ph_phi',
+              'OutPhotons_NOSYS.eta -> ph_eta',
+              'OutPhotons_%SYS%.baselineSelection_tight -> ph_select_tight_%SYS%', ]
+    if dataType != 'data':
+        vars += [ 'OutPhotons_%SYS%.ph_effSF_tight_%SYS% -> ph_effSF_tight_%SYS%', ]
 
 
     # Include, and then set up the tau analysis algorithm sequence:
@@ -208,8 +211,10 @@ def makeSequenceOld (dataType, algSeq, vars, forCompare) :
 
     selalg = createAlgorithm( 'CP::AsgSelectionAlg', 'UserPhotonsSelectionAlg' )
     addPrivateTool( selalg, 'selectionTool', 'CP::AsgPtEtaSelectionTool' )
-    selalg.selectionTool.minPt = 10e3
-    #selalg.selectionTool.maxEta = 2.47
+    if photonMinPt :
+        selalg.selectionTool.minPt = photonMinPt
+    if photonMaxEta :
+        selalg.selectionTool.maxEta = photonMaxEta
     selalg.selectionDecoration = 'selectPtEta'
     selalg.particles = 'AnaPhotons_%SYS%'
     algSeq += selalg
@@ -435,6 +440,19 @@ def makeSequenceBlocks (dataType, algSeq, vars, forCompare) :
         vars += [ 'OutElectrons_%SYS%.effSF_loose_%SYS% -> el_effSF_loose_%SYS%', ]
 
 
+    # Include, and then set up the photon analysis algorithm sequence:
+    from EgammaAnalysisAlgorithms.PhotonAnalysisConfig import makePhotonCalibrationConfig, makePhotonWorkingPointConfig
+
+    makePhotonCalibrationConfig (configSeq, 'AnaPhotons', recomputeIsEM=False)
+    makePhotonWorkingPointConfig (configSeq, 'AnaPhotons', 'Tight.FixedCutTight', postfix = 'tight', recomputeIsEM=False)
+    vars += [ 'OutPhotons_NOSYS.eta -> ph_eta',
+              'OutPhotons_NOSYS.phi -> ph_phi',
+              'OutPhotons_%SYS%.pt  -> ph_pt_%SYS%',
+              'OutPhotons_%SYS%.baselineSelection_tight -> ph_select_tight_%SYS%', ]
+    if dataType != 'data':
+        vars += [ 'OutPhotons_%SYS%.ph_effSF_tight_%SYS% -> ph_effSF_tight_%SYS%', ]
+
+
     # Include, and then set up the muon analysis algorithm sequence:
     from MuonAnalysisAlgorithms.MuonAnalysisConfig import makeMuonCalibrationConfig, makeMuonWorkingPointConfig
 
@@ -464,6 +482,18 @@ def makeSequenceBlocks (dataType, algSeq, vars, forCompare) :
     algSeq += selalg
     addOutputCopyAlgorithms (algSeq, 'Electrons', 'AnaElectrons_%SYS%', 'OutElectrons_%SYS%',
                              'selectPtEta&&baselineSelection_loose,as_char')
+
+    selalg = createAlgorithm( 'CP::AsgSelectionAlg', 'UserPhotonsSelectionAlg' )
+    addPrivateTool( selalg, 'selectionTool', 'CP::AsgPtEtaSelectionTool' )
+    if photonMinPt :
+        selalg.selectionTool.minPt = photonMinPt
+    if photonMaxEta :
+        selalg.selectionTool.maxEta = photonMaxEta
+    selalg.selectionDecoration = 'selectPtEta'
+    selalg.particles = 'AnaPhotons_%SYS%'
+    algSeq += selalg
+    addOutputCopyAlgorithms (algSeq, 'Photons', 'AnaPhotons_%SYS%', 'OutPhotons_%SYS%',
+                             'selectPtEta&&baselineSelection_tight,as_char')
 
     selalg = createAlgorithm( 'CP::AsgSelectionAlg', 'UserMuonsSelectionAlg' )
     addPrivateTool( selalg, 'selectionTool', 'CP::AsgPtEtaSelectionTool' )
