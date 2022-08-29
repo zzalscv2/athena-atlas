@@ -39,9 +39,6 @@ if __name__ == "__main__":
     ConfigFlags.Beam.NumberOfCollisions = 0.
     ConfigFlags.Output.RDOFileName = "myRDO.pool.root"
 
-    # TODO: temporary
-    ConfigFlags.Digitization.TruthOutput = True
-
     ConfigFlags.fillFromArgs()
     ConfigFlags.lock()
 

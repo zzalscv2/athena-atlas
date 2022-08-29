@@ -103,7 +103,7 @@ def TileTTL1OutputCfg(flags, TileHitToTTL1):
 
     acc = ComponentAccumulator()
     if flags.Output.doWriteRDO:
-        if flags.Digitization.TruthOutput:
+        if flags.Digitization.EnableTruth:
             outputItemList += ["CaloCalibrationHitContainer#*"]
             from Digitization.TruthDigitizationOutputConfig import TruthDigitizationOutputCfg
             acc.merge(TruthDigitizationOutputCfg(flags))

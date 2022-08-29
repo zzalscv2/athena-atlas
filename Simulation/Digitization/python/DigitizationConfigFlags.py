@@ -47,8 +47,8 @@ def createDigitizationCfgFlags():
     flags.addFlag("Digitization.DoXingByXingPileUp", False)
     # Run Calorimeter noise simulation
     flags.addFlag("Digitization.DoCaloNoise", True)
-    # Compute and store DigiTruth information
-    flags.addFlag("Digitization.DoDigiTruth", False)
+    # Compute and store hard scatter truth information
+    flags.addFlag("Digitization.DoHardScatterTruth", False)
     # Use high-gain Forward Calorimeters
     flags.addFlag("Digitization.HighGainFCal", False)
     # Use high-gain ElectroMagnetic EndCap Inner Wheel
@@ -58,8 +58,8 @@ def createDigitizationCfgFlags():
                   lambda prevFlags: GetFileMD(prevFlags.Input.Files).get("pileUp", "False") != "False")
     # Temporary TGC flag
     flags.addFlag("Digitization.UseUpdatedTGCConditions", False)
-    # Write out truth information?
-    flags.addFlag("Digitization.TruthOutput", False)
+    # Write out truth information
+    flags.addFlag("Digitization.EnableTruth", True)
     # Write out calorimeter digits
     flags.addFlag("Digitization.AddCaloDigi", False)
     # Write out thinned calorimeter digits

@@ -91,7 +91,7 @@ def MM_OutputCfg(flags):
     acc = ComponentAccumulator()
     if flags.Output.doWriteRDO:
         ItemList = ["Muon::MM_RawDataContainer#*"]
-        if flags.Digitization.TruthOutput:
+        if flags.Digitization.EnableTruth:
             ItemList += ["MuonSimDataCollection#*"]
             acc.merge(TruthDigitizationOutputCfg(flags))
         acc.merge(OutputStreamCfg(flags, "RDO", ItemList))

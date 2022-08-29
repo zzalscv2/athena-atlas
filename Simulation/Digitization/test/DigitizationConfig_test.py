@@ -22,9 +22,6 @@ ConfigFlags.Concurrency.NumThreads = 1
 ConfigFlags.Concurrency.NumConcurrentEvents=1
 ConfigFlags.Beam.NumberOfCollisions = 0.
 
-# TODO: temporary
-ConfigFlags.Digitization.TruthOutput = True
-
 ConfigFlags.lock()
 
 # Construct our accumulator to run

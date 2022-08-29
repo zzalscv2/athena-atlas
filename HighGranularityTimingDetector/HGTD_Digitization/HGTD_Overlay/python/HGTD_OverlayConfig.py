@@ -77,6 +77,7 @@ def HGTD_OverlayCfg(flags):
     # Add HGTD overlay algorithm
     acc.merge(HGTD_OverlayAlgCfg(flags))
     # Add HGTD truth overlay
-    acc.merge(HGTD_TruthOverlayCfg(flags))
+    if flags.Digitization.EnableTruth:
+        acc.merge(HGTD_TruthOverlayCfg(flags))
 
     return acc

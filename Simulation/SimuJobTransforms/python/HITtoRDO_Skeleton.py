@@ -53,7 +53,6 @@ def fromRunArgs(runArgs):
     log.info('Running with pile-up: %s', ConfigFlags.Digitization.PileUp)
 
     # Setup detector flags
-    ConfigFlags.Digitization.TruthOutput = True  # TODO: temporary
     if detectors:
         from AthenaConfiguration.DetectorConfigFlags import setupDetectorsFromList
         setupDetectorsFromList(ConfigFlags, detectors)

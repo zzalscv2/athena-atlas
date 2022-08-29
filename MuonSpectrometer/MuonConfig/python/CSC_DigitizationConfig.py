@@ -94,7 +94,7 @@ def CSC_OutputCfg(flags):
     acc = ComponentAccumulator()
     if flags.Output.doWriteRDO:
         ItemList = ["CscRawDataContainer#*"]
-        if flags.Digitization.TruthOutput:
+        if flags.Digitization.EnableTruth:
             ItemList += ["CscSimDataCollection#*CSC_SDO"]
             acc.merge(TruthDigitizationOutputCfg(flags))
         acc.merge(OutputStreamCfg(flags, "RDO", ItemList))

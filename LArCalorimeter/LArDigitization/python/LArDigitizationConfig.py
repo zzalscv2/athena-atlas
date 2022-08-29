@@ -88,7 +88,7 @@ def LArPileUpToolCfg(flags, name="LArPileUpTool", **kwargs):
         # No noise should be added during Data Overlay
         kwargs.setdefault("NoiseOnOff", not flags.Overlay.DataOverlay)
     kwargs.setdefault("NoiseOnOff", flags.Digitization.DoCaloNoise) # For other jobs go with the noise flag setting.
-    kwargs.setdefault("DoDigiTruthReconstruction", flags.Digitization.DoDigiTruth)
+    kwargs.setdefault("DoDigiTruthReconstruction", flags.Digitization.DoHardScatterTruth)
     kwargs.setdefault("RandomSeedOffset", flags.Digitization.RandomSeedOffset)
     if flags.Digitization.PileUp:
         intervals = []
@@ -187,7 +187,7 @@ def LArHitEMapToDigitAlgCfg(flags, name="LArHitEMapToDigitAlgCfg", **kwargs):
         kwargs.setdefault("NoiseOnOff", not flags.Overlay.DataOverlay)
     else :
         kwargs.setdefault("NoiseOnOff", flags.Digitization.DoCaloNoise)
-    kwargs.setdefault("DoDigiTruthReconstruction", flags.Digitization.DoDigiTruth)
+    kwargs.setdefault("DoDigiTruthReconstruction", flags.Digitization.DoHardScatterTruth)
     kwargs.setdefault("RandomSeedOffset", flags.Digitization.RandomSeedOffset)
     if (not flags.Digitization.HighGainFCal) and (not flags.Common.isOverlay):
         kwargs.setdefault("HighGainThreshFCAL", 0)
@@ -221,7 +221,7 @@ def LArOutputCfg(flags):
             ItemList.append("LArDigitContainer#LArDigitContainer_MC_Thinned")
         if flags.Common.ProductionStep != ProductionStep.PileUpPresampling:
             ItemList.append("LArRawChannelContainer#LArRawChannels")
-        if flags.Digitization.TruthOutput:
+        if flags.Digitization.EnableTruth:
             ItemList.append("CaloCalibrationHitContainer#*")
             acc.merge(TruthDigitizationOutputCfg(flags))
         acc.merge(OutputStreamCfg(flags, "RDO", ItemList))

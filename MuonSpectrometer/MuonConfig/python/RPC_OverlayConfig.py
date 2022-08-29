@@ -99,7 +99,8 @@ def RPC_OverlayCfg(flags):
     # Add RPC overlay algorithm
     acc.merge(RPC_OverlayAlgCfg(flags))
     # Add RPC truth overlay
-    acc.merge(RPC_TruthOverlayCfg(flags))
+    if flags.Digitization.EnableTruth:
+        acc.merge(RPC_TruthOverlayCfg(flags))
     # Add RPC digit to RDO config
     from MuonConfig.MuonByteStreamCnvTestConfig import RpcDigitToRpcRDOCfg
     acc.merge(RpcDigitToRpcRDOCfg(flags))
