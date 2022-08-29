@@ -21,6 +21,8 @@ photonMinPt = 10e3
 photonMaxEta = None
 muonMinPt = None
 muonMaxEta = None
+tauMinPt = None
+tauMaxEta = None
 
 def addOutputCopyAlgorithms (algSeq, postfix, inputContainer, outputContainer, selection) :
     """add a uniformly filtered set of deep copies based on the
@@ -177,11 +179,12 @@ def makeSequenceOld (dataType, algSeq, vars, forCompare) :
 
     # Add the sequence to the job:
     algSeq += tauSequence
-    if not forCompare :
-        vars += [ 'OutTauJets_%SYS%.pt  -> tau_pt_%SYS%',
-                'OutTauJets_NOSYS.phi -> tau_phi',
-                  'OutTauJets_NOSYS.eta -> tau_eta',
-                  'OutTauJets_%SYS%.baselineSelection_tight -> tau_select_tight_%SYS%', ]
+    vars += [ 'OutTauJets_%SYS%.pt  -> tau_pt_%SYS%',
+              'OutTauJets_NOSYS.phi -> tau_phi',
+              'OutTauJets_NOSYS.eta -> tau_eta',
+              'OutTauJets_%SYS%.baselineSelection_tight -> tau_select_tight_%SYS%', ]
+    if dataType != 'data':
+        vars += [ 'OutTauJets_%SYS%.tau_effSF_tight_%SYS% -> tau_effSF_tight_%SYS%', ]
 
 
     # temporarily disabled until di-taus are supported in R22
@@ -231,8 +234,10 @@ def makeSequenceOld (dataType, algSeq, vars, forCompare) :
 
     selalg = createAlgorithm( 'CP::AsgSelectionAlg', 'UserTauJetsSelectionAlg' )
     addPrivateTool( selalg, 'selectionTool', 'CP::AsgPtEtaSelectionTool' )
-    #selalg.selectionTool.minPt = 10e3
-    #selalg.selectionTool.maxEta = 2.47
+    if tauMinPt :
+        selalg.selectionTool.minPt = tauMinPt
+    if tauMaxEta :
+        selalg.selectionTool.maxEta = tauMaxEta
     selalg.selectionDecoration = 'selectPtEta'
     selalg.particles = 'AnaTauJets_%SYS%'
     algSeq += selalg
@@ -468,6 +473,19 @@ def makeSequenceBlocks (dataType, algSeq, vars, forCompare) :
         vars += [ 'OutMuons_%SYS%.muon_effSF_medium_%SYS% -> mu_effSF_medium_%SYS%', ]
         vars += [ 'OutMuons_%SYS%.muon_effSF_tight_%SYS% -> mu_effSF_tight_%SYS%', ]
 
+
+    # Include, and then set up the tau analysis algorithm sequence:
+    from TauAnalysisAlgorithms.TauAnalysisConfig import makeTauCalibrationConfig, makeTauWorkingPointConfig
+
+    makeTauCalibrationConfig (configSeq, 'AnaTauJets')
+    makeTauWorkingPointConfig (configSeq, 'AnaTauJets', workingPoint='Tight', postfix='tight')
+    vars += [ 'OutTauJets_NOSYS.eta -> tau_eta',
+              'OutTauJets_NOSYS.phi -> tau_phi',
+              'OutTauJets_%SYS%.pt  -> tau_pt_%SYS%',
+              'OutTauJets_%SYS%.baselineSelection_tight  -> tau_select_tight_%SYS%', ]
+    if dataType != 'data':
+        vars += [ 'OutTauJets_%SYS%.tau_effSF_tight_%SYS% -> tau_effSF_tight_%SYS%', ]
+
     configAccumulator = ConfigAccumulator (dataType, algSeq)
     configSeq.fullConfigure (configAccumulator)
 
@@ -506,6 +524,18 @@ def makeSequenceBlocks (dataType, algSeq, vars, forCompare) :
     algSeq += selalg
     addOutputCopyAlgorithms (algSeq, 'Muons', 'AnaMuons_%SYS%', 'OutMuons_%SYS%',
                              'selectPtEta&&baselineSelection_medium,as_char')
+
+    selalg = createAlgorithm( 'CP::AsgSelectionAlg', 'UserTausSelectionAlg' )
+    addPrivateTool( selalg, 'selectionTool', 'CP::AsgPtEtaSelectionTool' )
+    if tauMinPt :
+        selalg.selectionTool.minPt = tauMinPt
+    if tauMaxEta :
+        selalg.selectionTool.maxEta = tauMaxEta
+    selalg.selectionDecoration = 'selectPtEta'
+    selalg.particles = 'AnaTauJets_%SYS%'
+    algSeq += selalg
+    addOutputCopyAlgorithms (algSeq, 'TauJets', 'AnaTauJets_%SYS%', 'OutTauJets_%SYS%',
+                             'selectPtEta&&baselineSelection_tight,as_char')
 
 
 
