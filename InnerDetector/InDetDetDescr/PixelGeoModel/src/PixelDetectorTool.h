@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2020 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef PIXELGEOMODEL_PIXELDETECTORTOOL_H
@@ -10,9 +10,7 @@
 #include "GaudiKernel/ServiceHandle.h"
 
 #include "GeoModelInterfaces/IGeoSubDetTool.h"
-#include "GeoModelInterfaces/IGeoDbTagSvc.h"
 #include "GeometryDBSvc/IGeometryDBSvc.h"
-#include "RDBAccessSvc/IRDBAccessSvc.h"
 #include "PixelGeoModel/IBLParameterSvc.h"
 #include "InDetGeoModelUtils/IInDetServMatBuilderTool.h"
 
@@ -59,8 +57,6 @@ private:
   ToolHandle< IGeoSubDetTool > m_bcmTool{this,"BCM_Tool","",""};
   ToolHandle< IGeoSubDetTool > m_blmTool{this,"BLM_Tool","",""};
   PublicToolHandle< IInDetServMatBuilderTool > m_serviceBuilderTool{this,"ServiceBuilderTool","",""};
-  ServiceHandle< IGeoDbTagSvc > m_geoDbTagSvc{this,"GeoDbTagSvc","GeoDbTagSvc",""};
-  ServiceHandle< IRDBAccessSvc > m_rdbAccessSvc{this,"RDBAccessSvc","RDBAccessSvc",""};
   ServiceHandle< IGeometryDBSvc > m_geometryDBSvc{this,"GeometryDBSvc","InDetGeometryDBSvc",""};
   const InDetDD::PixelDetectorManager * m_manager{};
   std::string m_overrideVersionName;
