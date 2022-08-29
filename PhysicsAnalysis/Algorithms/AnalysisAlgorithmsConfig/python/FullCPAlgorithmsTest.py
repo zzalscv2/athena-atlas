@@ -149,11 +149,12 @@ def makeSequenceOld (dataType, algSeq, vars, forCompare) :
     electronSequence.configure( inputName = 'Electrons',
                                 outputName = 'AnaElectrons_%SYS%' )
     algSeq += electronSequence
-    if not forCompare :
-        vars += [ 'OutElectrons_%SYS%.pt  -> el_pt_%SYS%',
-                  'OutElectrons_NOSYS.phi -> el_phi',
-                  'OutElectrons_NOSYS.eta -> el_eta',
-                  'OutElectrons_%SYS%.baselineSelection_loose -> el_select_loose_%SYS%', ]
+    vars += [ 'OutElectrons_%SYS%.pt  -> el_pt_%SYS%',
+              'OutElectrons_NOSYS.phi -> el_phi',
+              'OutElectrons_NOSYS.eta -> el_eta',
+              'OutElectrons_%SYS%.baselineSelection_loose -> el_select_loose_%SYS%', ]
+    if dataType != 'data':
+        vars += [ 'OutElectrons_%SYS%.effSF_loose_%SYS% -> el_effSF_loose_%SYS%', ]
 
 
     # Include, and then set up the photon analysis sequence:
@@ -205,9 +206,9 @@ def makeSequenceOld (dataType, algSeq, vars, forCompare) :
 
     selalg = createAlgorithm( 'CP::AsgSelectionAlg', 'UserElectronsSelectionAlg' )
     addPrivateTool( selalg, 'selectionTool', 'CP::AsgPtEtaSelectionTool' )
-    if electronMinPt is not None :
+    if electronMinPt :
         selalg.selectionTool.minPt = electronMinPt
-    if electronMaxEta is not None :
+    if electronMaxEta :
         selalg.selectionTool.maxEta = electronMaxEta
     selalg.selectionDecoration = 'selectPtEta'
     selalg.particles = 'AnaElectrons_%SYS%'
@@ -463,8 +464,6 @@ def makeSequenceBlocks (dataType, algSeq, vars, forCompare) :
 
     # Include, and then set up the muon analysis algorithm sequence:
     from MuonAnalysisAlgorithms.MuonAnalysisConfig import makeMuonCalibrationConfig, makeMuonWorkingPointConfig
-
-    configSeq = ConfigSequence ()
 
     makeMuonCalibrationConfig (configSeq, 'AnaMuons')
     makeMuonWorkingPointConfig (configSeq, 'AnaMuons', workingPoint='Medium.Iso', postfix='medium')
