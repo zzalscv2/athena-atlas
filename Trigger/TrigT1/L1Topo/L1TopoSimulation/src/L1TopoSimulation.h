@@ -16,6 +16,7 @@
 
 #include "xAODTrigger/L1TopoSimResultsContainer.h"
 #include "xAODTrigger/L1TopoSimResultsAuxContainer.h"
+#include "xAODTrigL1Calo/L1TopoRawDataContainer.h"
 
 #include "CxxUtils/checker_macros.h"
 #include "StoreGate/ReadHandleKey.h"
@@ -42,6 +43,8 @@ namespace LVL1 {
       // make algorithm is clonable
       virtual bool isClonable() const override;
      
+
+   private:
       /**
          @brief Retrieve the L1Topo hardware bits from the DAQ RODs
          
@@ -49,9 +52,11 @@ namespace LVL1 {
          them to TopoSteering, which will then do all the work with
          them.
       */
-      StatusCode retrieveHardwareDecision();
+      StatusCode retrieveHardwareDecision(bool isLegacy, const EventContext& ctx);
 
-   private:
+      StatusCode hardwareDecisionPhase1(const EventContext& ctx);
+      StatusCode hardwareDecisionLegacy();
+     
       void WriteEDM(std::unique_ptr<xAOD::L1TopoSimResultsContainer> &container, const std::string &name, unsigned int clock, uint32_t word);
       void WriteEDM(std::unique_ptr<xAOD::L1TopoSimResultsContainer> &container, const std::string &name, unsigned int clock, uint64_t word);
 
@@ -79,6 +84,9 @@ namespace LVL1 {
       // Writing L1Topo EDMs
       SG::WriteHandleKey< xAOD::L1TopoSimResultsContainer > m_legacyL1topoKey {this,"Key_LegacyL1TopoSimContainer","L1_LegacyTopoSimResults","Output legacy l1topo container"};
       SG::WriteHandleKey< xAOD::L1TopoSimResultsContainer > m_l1topoKey {this,"Key_L1TopoSimContainer","L1_TopoSimResults","Output l1topo container"};
+
+      SG::ReadHandleKey<xAOD::L1TopoRawDataContainer> m_l1topoRawDataKey {this, "L1_TopoRawDataKey", "L1_Phase1L1TopoRAWData", "l1topo Raw Data"};
+
 
       Gaudi::Property<bool> m_isLegacyTopo { this, "IsLegacyTopo", false, "Simulation of Legacy L1Topo boards" };
       Gaudi::Property<bool> m_enableInputDump { this, "EnableInputDump", false, "Enable writing of input data for standalone running" };
