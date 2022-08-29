@@ -21,6 +21,7 @@ def BPHY12Cfg(ConfigFlags):
     from DerivationFrameworkBPhys.commonBPHYMethodsCfg import (BPHY_V0ToolCfg,  BPHY_InDetDetailedTrackSelectorToolCfg, BPHY_VertexPointEstimatorCfg, BPHY_TrkVKalVrtFitterCfg)
     from JpsiUpsilonTools.JpsiUpsilonToolsConfig import PrimaryVertexRefittingToolCfg
     acc = ComponentAccumulator()
+    print("ERROR NOT WORKING - UPDATE to match share/BPHY12 when metadata tools are fixed")
     isSimulation = ConfigFlags.Input.isMC
 
     triggerList = [
