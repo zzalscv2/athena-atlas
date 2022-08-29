@@ -29,11 +29,7 @@
 
 namespace Trk
 {
-  class Track;
-  class TrackParticleBase;
   class IExtrapolator;
-  //class IVxCandidateXAODVertex;
-
   /** This class implements a vertex fitting algorithm optimised for V0 finding.
   The algorithm fits the full track information, incorporating the
   possibility of performing full kinematic constraints at the same time.

@@ -11,14 +11,9 @@
 #include "TrkSurfaces/CylinderSurface.h"
 #include "TrkExInterfaces/IExtrapolator.h"
 #include "TrkDetDescrUtils/GeometryStatics.h"
-#include "TrkTrack/TrackCollection.h"
-#include "TrkTrack/LinkToTrack.h"
-#include "TrkParticleBase/LinkToTrackParticleBase.h"
-#include "TrkTrack/Track.h"
-#include "TrkParticleBase/TrackParticleBase.h"
 #include "TrkParameters/TrackParameters.h"
-#include "TrkLinks/LinkToXAODTrackParticle.h"
-//#include "TrkVxEdmCnv/IVxCandidateXAODVertex.h"
+#include "xAODTracking/TrackParticleContainer.h"
+#include "TrkParameters/TrackParameters.h"
 #include "xAODTracking/Vertex.h"
 #include "xAODTracking/TrackParticle.h"
 
@@ -30,10 +25,10 @@ within anonymous namespace. They contain temporary calculations of matrices
 and vectors resulting from the vertex calculation. */
 namespace
 {
-  struct V0FitterTrack
+  struct V0FitterTrack final
   {
     V0FitterTrack() : originalPerigee(nullptr), chi2(-1.) {}
-    virtual ~V0FitterTrack() = default;
+    ~V0FitterTrack() = default;
     const Trk::TrackParameters * originalPerigee;
     double chi2;
     AmgVector(5) TrkPar;
@@ -50,7 +45,7 @@ namespace Trk
       m_maxZ(5000.),
       m_firstMeas(true),
       m_deltaR(false),
-      m_extrapolator("Trk::Extrapolator/InDetExtrapolator")
+      m_extrapolator("Trk::Extrapolator/InDetExtrapolator", this)
   {
     declareProperty("MaxIterations",             m_maxIterations);
     declareProperty("MaxChi2PerNdf",             m_maxDchi2PerNdf);
@@ -131,9 +126,9 @@ namespace Trk
         unsigned int indexFMP;
         if (p->indexOfParameterAtPosition(indexFMP, xAOD::FirstMeasurement)) {
           measuredPerigees.push_back(new CurvilinearParameters(p->curvilinearParameters(indexFMP)));
-          msg(MSG::DEBUG) << "first measurement on track exists" << endmsg;
-          msg(MSG::DEBUG) << "first measurement " << p->curvilinearParameters(indexFMP) << endmsg;
-          msg(MSG::DEBUG) << "first measurement covariance " << *(p->curvilinearParameters(indexFMP)).covariance() << endmsg;
+          ATH_MSG_DEBUG("first measurement on track exists");
+          ATH_MSG_DEBUG("first measurement " << p->curvilinearParameters(indexFMP));
+          ATH_MSG_DEBUG("first measurement covariance " << *(p->curvilinearParameters(indexFMP)).covariance());
         } else {
           Amg::Transform3D CylTrf;
           CylTrf.setIdentity();
@@ -149,7 +144,7 @@ namespace Trk
                                                             Trk::pion,
                                                             mode).release();
           if (extrapolatedPerigee != nullptr) {
-            msg(MSG::DEBUG) << "extrapolated to first measurement" << endmsg;
+            ATH_MSG_DEBUG("extrapolated to first measurement");
             measuredPerigees.push_back (extrapolatedPerigee);
             measuredPerigees_delete.push_back (extrapolatedPerigee);
           } else {
@@ -161,11 +156,11 @@ namespace Trk
                                                   true,
                                                   Trk::pion).release();
             if (extrapolatedPerigee != nullptr) {
-              msg(MSG::DEBUG) << "extrapolated (direct) to first measurement" << endmsg;
+              ATH_MSG_DEBUG( "extrapolated (direct) to first measurement");
               measuredPerigees.push_back (extrapolatedPerigee);
               measuredPerigees_delete.push_back (extrapolatedPerigee);
             } else {
-              msg(MSG::DEBUG) << "Failed to extrapolate to the first measurement on track, using Perigee parameters" << endmsg;
+              ATH_MSG_DEBUG("Failed to extrapolate to the first measurement on track, using Perigee parameters");
               measuredPerigees.push_back (&p->perigeeParameters());
             }
           }
@@ -353,11 +348,8 @@ namespace Trk
     v0FitterTracks.clear();
     Trk::PerigeeSurface perigeeSurface(*globalPosition);
     // Extrapolate the perigees to the startpoint of the fit
-    std::vector<const Trk::TrackParameters*>::const_iterator iter(originalPerigees.begin());
-    for (; iter != originalPerigees.end() ; ++iter)
+    for (const Trk::TrackParameters* chargeParameters : originalPerigees)
     {
-      const Trk::TrackParameters* chargeParameters(nullptr);
-      chargeParameters = dynamic_cast<const Trk::TrackParameters*> (*iter);
       if (chargeParameters != nullptr)
       {
         // Correct material changes
@@ -395,7 +387,7 @@ namespace Trk
         locV0FitterTrack.TrkPar[3] = extrapolatedPerigee->parameters()[Trk::theta];
         locV0FitterTrack.TrkPar[4] = extrapolatedPerigee->parameters()[Trk::qOverP];
         locV0FitterTrack.Wi_mat = extrapolatedPerigee->covariance()->inverse().eval();
-        locV0FitterTrack.originalPerigee = *iter;
+        locV0FitterTrack.originalPerigee = chargeParameters;
         v0FitterTracks.push_back(locV0FitterTrack);
       } else {
         ATH_MSG_DEBUG("Track parameters are not charged tracks ... fit aborted");
@@ -798,11 +790,8 @@ namespace Trk
         v0FitterTracks.clear();
         Trk::PerigeeSurface perigeeSurfaceItr(*globalPositionItr);
         // Extrapolate the perigees to the new startpoint of the fit
-        std::vector<const Trk::TrackParameters*>::const_iterator iter(originalPerigees.begin());
-        for (; iter != originalPerigees.end() ; ++iter)
+        for (const Trk::TrackParameters* chargeParameters : originalPerigees)
         {
-          const Trk::TrackParameters* chargeParameters(nullptr);
-          chargeParameters = dynamic_cast<const Trk::TrackParameters*> (*iter);
           if (chargeParameters != nullptr)
           {
             // Correct material changes
@@ -841,7 +830,7 @@ namespace Trk
             locV0FitterTrack.TrkPar[3] = extrapolatedPerigee->parameters()[Trk::theta];
             locV0FitterTrack.TrkPar[4] = extrapolatedPerigee->parameters()[Trk::qOverP];
             locV0FitterTrack.Wi_mat = extrapolatedPerigee->covariance()->inverse().eval();
-            locV0FitterTrack.originalPerigee = *iter;
+            locV0FitterTrack.originalPerigee = chargeParameters;
             v0FitterTracks.push_back(locV0FitterTrack);
           } else {
             ATH_MSG_DEBUG("Track parameters are not charged tracks ... fit aborted");
