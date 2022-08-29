@@ -733,15 +733,13 @@ struct EventData
       }
 
 
-    int cell_diff_type[4];
-    int cell_diff_reg[4];
-    int cell_count_type[4];
-    int cell_count_reg[4];
+    int cell_diff_type[4]={};
+    int cell_diff_reg[4]={};
+    int cell_count_type[4]={};
+    int cell_count_reg[4]={};
 
     for (int i = 0; i < 4; ++i)
       {
-        cell_diff_type[i] = 0;
-        cell_diff_reg[i] = 0;
         cluster_same_cells[i].resize(ref_clusters.size(), true);
       }
 
@@ -849,7 +847,7 @@ struct ClusterPlotter : public BasePlotter
   ClusterPlotter & operator= (const ClusterPlotter &) = delete;
   ClusterPlotter & operator= (ClusterPlotter &&) = default;
 
-  ~ClusterPlotter()
+  virtual ~ClusterPlotter()
   {
   }
 

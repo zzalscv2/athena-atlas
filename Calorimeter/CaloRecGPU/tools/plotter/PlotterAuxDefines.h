@@ -1037,7 +1037,7 @@ struct BasePlotter
   struct plotter_base
   {
     std::string hist_name, hist_title, x_label, y_label;
-    const BasePlotter * parent;
+    const BasePlotter * parent{};
 
     virtual PlotterKind plotter_kind() const = 0;
 
@@ -1093,9 +1093,9 @@ struct BasePlotter
     using plotter_base::plot;
     using plotter_base::calc_data_range;
 
-    bool can_be_negative;
+    bool can_be_negative{};
 
-    int cumulative;
+    int cumulative{};
     //0 means no, < 0 means backward, > 0 means forward accumulation
 
     StyleKinds style_ref;
@@ -1591,12 +1591,12 @@ struct BasePlotter
         }
     }
 
-    PlotterKind plotter_kind() const
+    PlotterKind plotter_kind() const override
     {
       return PlotterKind::graph;
     }
 
-    graph_group_1D construct_group(const std::string & title_override = "") const
+    graph_group_1D construct_group(const std::string & title_override = "") const override
     {
       std::array<double, 4> min, max;
 
@@ -1615,7 +1615,7 @@ struct BasePlotter
 
     graph_group_1D construct_group(const std::array<double, 4> & wanted_min, const std::array<double, 4> & wanted_max,
                                    const std::string & title_override = "",
-                                   const bool force_range = false) const
+                                   const bool force_range = false) const override
     {
       std::array<double, 4> min, max;
 
@@ -1646,12 +1646,12 @@ struct BasePlotter
     graph_group_1D construct_group(const std::array<double, 4> & min, const std::array<double, 4> & max,
                                    const std::array<double, 4> & /*ignore1*/, const std::array<double, 4> & /*ignore2*/,
                                    const std::string & title_override = "",
-                                   const bool force_range = false) const
+                                   const bool force_range = false) const override
     {
       return this->construct_group(min, max, title_override, force_range);
     }
 
-    void save(const std::string & base_name, const graph_group_1D & group) const
+    void save(const std::string & base_name, const graph_group_1D & group) const override
     {
       TCanvas cv("cv", "canvas", parent->canvas_x, parent->canvas_y);
       plot_one(&cv, group.global.get(), base_name, parent->file_extensions, parent->print_options);
@@ -2196,12 +2196,12 @@ struct BasePlotter
     using joined_plotter::do_plots;
     using joined_plotter::calc_data_range;
     
-    PlotterKind plotter_kind() const
+    PlotterKind plotter_kind() const override
     {
       return PlotterKind::graph;
     }
 
-    virtual hist_stacker create_stack() const
+    virtual hist_stacker create_stack() const override
     {
       std::cout << "ERROR: You shouldn't be seeing this!" << std::endl;
       return hist_stacker{};
@@ -2216,7 +2216,7 @@ struct BasePlotter
     }
 
 
-    virtual void save(const std::string & /*base_name*/, const hist_stacker & /*stacker*/) const
+    virtual void save(const std::string & /*base_name*/, const hist_stacker & /*stacker*/) const override
     {
       std::cout << "ERROR: You shouldn't be seeing this!" << std::endl;
       return;
@@ -2257,9 +2257,11 @@ struct BasePlotter
   plotter_base * add_plot(Args && ... args)
   {
     std::unique_ptr<plotter_base> ptr = std::make_unique<T>(this, std::forward<Args>(args)...);
-    auto it = plots.try_emplace(ptr->hist_name, std::move(ptr));
-    //std::cout << "Added plot '" << it.first->second->hist_name << "'" << std::endl;
-    return it.first->second.get();
+    if (ptr){
+      auto it = plots.try_emplace(ptr->hist_name, std::move(ptr));
+      return it.first->second.get();
+    }
+    return nullptr;
   }
 
 
@@ -2374,7 +2376,7 @@ struct BasePlotter
 
 
 template <class PlotT>
-void plot_together_helper(const std::string & name, PlotT * p)
+void plot_together_helper(const std::string & /*name*/, PlotT * /*p*/)
 {
 }
 

@@ -1,3 +1,6 @@
+//
+// Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+//
 #include <cstdlib>
 #include <iostream>
 #include <algorithm>
@@ -105,24 +108,24 @@ struct ProgArgs
   std::vector<std::string> in_paths;
   std::vector<std::string> names;
   std::string out_path;
-  double min_similarity;
-  double term_weight;
-  double grow_weight;
-  double seed_weight;
-  bool place_titles;
+  double min_similarity = 0.;
+  double term_weight= 0.;
+  double grow_weight= 0.;
+  double seed_weight= 0.;
+  bool place_titles{};
   std::string plot_label;
   std::vector<PlotDefs> plot_reqs;
   std::vector<PlotDefs> togetherplot_reqs;
   std::vector<PlotDefs> timeplot_reqs;
   std::vector<PlotDefs> timetogetherplot_reqs;
-  bool normalize_hists;
-  bool skip_almost_everything;
-  bool use_ATLAS_style;
+  bool normalize_hists{};
+  bool skip_almost_everything{};
+  bool use_ATLAS_style{};
   std::string file_filter;
-  int max_events;
-  bool just_png;
-  bool do_clusters;
-  bool do_times;
+  int max_events{};
+  bool just_png{};
+  bool do_clusters{};
+  bool do_times{};
   std::string constant_foldername;
   std::string reference_foldername;
   std::string test_foldername;

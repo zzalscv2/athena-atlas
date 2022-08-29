@@ -19,20 +19,17 @@ CaloGPUOutput::CaloGPUOutput(const std::string & type, const std::string & name,
 
 StatusCode CaloGPUOutput::execute(const EventContext & ctx, const ConstantDataHolder & constant_data, EventDataHolder & event_data) const
 {
-  if (!m_constantDataSaved)
-    {
+  if (!m_constantDataSaved.load()){
       std::lock_guard<std::mutex> lock_guard(m_mutex);
-      if (!m_constantDataSaved)
-        {
-          const auto err1 = StandaloneDataIO::save_constants_to_folder(std::string(m_savePath), constant_data.m_geometry,
-                            constant_data.m_cell_noise, m_filePrefix, m_fileSuffix);
-          if (err1 != StandaloneDataIO::ErrorState::OK)
-            {
-              return StatusCode::FAILURE;
-            }
-          m_constantDataSaved = true;
+      if (!m_constantDataSaved.load()){
+        const auto err1 = StandaloneDataIO::save_constants_to_folder(std::string(m_savePath), constant_data.m_geometry,
+                          constant_data.m_cell_noise, m_filePrefix, m_fileSuffix);
+        if (err1 != StandaloneDataIO::ErrorState::OK){
+            return StatusCode::FAILURE;
         }
-    }
+        m_constantDataSaved.store(true);
+      }
+  }
 
   Helpers::CPU_object<CellInfoArr> cell_info(event_data.m_cell_info_dev);
   Helpers::CPU_object<CellStateArr> cell_state(event_data.m_cell_state_dev);
