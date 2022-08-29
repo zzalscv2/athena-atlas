@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2020 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
 */
 
 
@@ -21,7 +21,7 @@
 #include "xAODEgamma/ElectronContainer.h" 
 #include "xAODEgamma/PhotonContainer.h" 
 #include "xAODEgamma/EgammaContainer.h" 
-
+#include "xAODEventInfo/EventInfo.h"
 namespace CP {
 
 class CalibratedEgammaProvider : public AthAlgorithm {
@@ -36,11 +36,11 @@ public:
   virtual StatusCode execute();
   
 private:
-   std::string m_inputEventInfo;
-  std::string m_inputKey;
-  std::string m_outputKey;
-  
-  ToolHandle<CP::IEgammaCalibrationAndSmearingTool> m_tool;
+   SG::ReadHandleKey<xAOD::EventInfo> m_evtInfoKey{this, "EvtInfoKey","EventInfo", "Specify an Event info"};
+   SG::ReadHandleKey<xAOD::EgammaContainer> m_inputKey{this, "Input","Electrons", "Electron or photon input collection to calibrate"};
+   SG::WriteHandleKey<xAOD::EgammaContainer> m_outputKey{this, "Output","CalibratedElectrons", "Name of output collection. If same as input key, will try to modify in-situ"};
+   ToolHandle<CP::IEgammaCalibrationAndSmearingTool> m_tool{this, "Tool", "", "Leave blank to get an autoconfigured instance"  };
+   
 
 }; // class 
 

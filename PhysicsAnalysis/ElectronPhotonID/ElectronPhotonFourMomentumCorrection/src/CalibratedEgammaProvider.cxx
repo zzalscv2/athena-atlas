@@ -4,7 +4,7 @@
 
 // EDM include(s):
 
-#include "xAODEventInfo/EventInfo.h"
+
 
 // local include
 #include "CalibratedEgammaProvider.h"
@@ -16,79 +16,74 @@
 namespace CP {
 
 CalibratedEgammaProvider::CalibratedEgammaProvider( const std::string& name, ISvcLocator* svcLoc )
-  : AthAlgorithm( name, svcLoc ),
-    m_tool("")
-{
-  declareProperty( "InputEventInfo", m_inputEventInfo = "", "Specify an EventInfo, if blank, will try to retrieve without key" );
-  declareProperty( "Input", m_inputKey = "Electrons", "Electron or photon input collection to calibrate" );
-  declareProperty( "Output", m_outputKey = "CalibratedElectrons", "Name of output collection. If same as input key, will try to modify in-situ" );
-  declareProperty( "Tool", m_tool, "Leave blank to get an autoconfigured instance");
-}
+  : AthAlgorithm( name, svcLoc ) { }
 
 StatusCode CalibratedEgammaProvider::initialize() {
   ATH_MSG_INFO( "Initialising..." );
-
+  ATH_CHECK(m_evtInfoKey.initialize());
+  ATH_CHECK(m_inputKey.initialize());
+  ATH_CHECK(m_outputKey.initialize());
   if(m_tool.empty()) { //set up a default tool with the es2012c calibration
       m_tool.setTypeAndName("CP::EgammaCalibrationAndSmearingTool/AutoConfiguredEgammaCalibTool");
       ServiceHandle<Gaudi::Interfaces::IOptionsSvc> josvc("JobOptionsSvc",name());
       josvc->set("ToolSvc.AutoConfiguredEgammaCalibTool.esModel", "es2012c");
   }
-
    ATH_CHECK(m_tool.retrieve());
 
   return StatusCode::SUCCESS;
 }
 
 StatusCode CalibratedEgammaProvider::execute() {
+   const EventContext& ctx = Gaudi::Hive::currentContext();
 
-   const xAOD::EventInfo* event_info = nullptr;
-   if(m_inputEventInfo.length()>0) ATH_CHECK( evtStore()->retrieve( event_info, m_inputEventInfo) );
-   else ATH_CHECK( evtStore()->retrieve( event_info) );
+   SG::ReadHandle<xAOD::EventInfo> event_info{m_evtInfoKey,ctx};
+   if (!event_info.isValid()) {
+      ATH_MSG_FATAL("Failed to retrieve the event info "<<m_evtInfoKey.fullKey());
+   }
 
-   xAOD::EgammaContainer* nonconst_egamma = nullptr;
-   const xAOD::EgammaContainer* egamma = nullptr;
-   std::pair< xAOD::EgammaContainer*, xAOD::ShallowAuxContainer* > out;
-   const xAOD::ElectronContainer* a = nullptr;
-   const xAOD::PhotonContainer* b = nullptr;
-   if(m_inputKey==m_outputKey) { //attempt to modify in-situ, but must retrieve as non-const
-      CHECK( evtStore()->retrieve( nonconst_egamma, m_inputKey ) );
-      egamma = nonconst_egamma;
-      out.first = nonconst_egamma;
-   } else {
-      CHECK( evtStore()->retrieve( egamma, m_inputKey ) );
-      if( (a = dynamic_cast<const xAOD::ElectronContainer*>(egamma)) ) {
-         out = xAOD::shallowCopyContainer( *a );
-         if(!setOriginalObjectLink( *a, *out.first )) {
-            ATH_MSG_ERROR("Failed to add original object links to shallow copy of " << m_inputKey);
+    SG::ReadHandle<xAOD::EgammaContainer> readHandle{m_inputKey, ctx};
+    if (!readHandle.isValid()) {
+          ATH_MSG_FATAL("No Egamma container found");
+          return StatusCode::FAILURE;
+    }
+    const xAOD::EgammaContainer* egamma{readHandle.cptr()};
+    const xAOD::ElectronContainer* electrons = dynamic_cast<const xAOD::ElectronContainer*>(egamma);
+    const xAOD::PhotonContainer* photons = dynamic_cast<const xAOD::PhotonContainer*>(egamma);
+    xAOD::EgammaContainer* outcontainer{nullptr};
+    if (electrons) {
+      std::pair<std::unique_ptr<xAOD::ElectronContainer>, std::unique_ptr<xAOD::ShallowAuxContainer>> output = xAOD::shallowCopyContainer(*electrons, ctx);
+      if (!output.first || !output.second) {
+            ATH_MSG_FATAL("Creation of shallow copy failed");
             return StatusCode::FAILURE;
-         }
-      } else if( (b = dynamic_cast<const xAOD::PhotonContainer*>(egamma)) ) {
-         out = xAOD::shallowCopyContainer( *b );
-         if(!setOriginalObjectLink( *b, *out.first )) {
-            ATH_MSG_ERROR("Failed to add original object links to shallow copy of " << m_inputKey);
-            return StatusCode::FAILURE;
-         }
       }
-      else { ATH_MSG_ERROR("Egamma container " << m_inputKey << " is not photons or electrons!!??"); return StatusCode::FAILURE; }
+      outcontainer = output.first.get();
+      SG::WriteHandle<xAOD::EgammaContainer> writeHandle{m_outputKey, ctx};
+      ATH_CHECK(writeHandle.recordNonConst(std::move(output.first), std::move(output.second)));
 
-   }
-
-   for(auto iParticle : *(out.first)) {
-         if(msg().level()==MSG::VERBOSE) std::cout << name() << " Old pt=" << iParticle->pt();
-         if(m_tool->applyCorrection(*iParticle).code()==CorrectionCode::Error) return StatusCode::FAILURE;
-         if(msg().level()==MSG::VERBOSE) std::cout << " New pt=" << iParticle->pt() << std::endl;
-   }
-
-   //record to storegate (if not modifying insitu) .. must ensure we record with the proper type
-   if(m_inputKey!=m_outputKey) {
-      if(a) CHECK( evtStore()->record( static_cast<xAOD::ElectronContainer*>(out.first), m_outputKey ) );
-      else CHECK( evtStore()->record( static_cast<xAOD::PhotonContainer*>(out.first), m_outputKey ) );
-      CHECK( evtStore()->record( out.second, m_outputKey+"Aux.") );
-   }
-
-
-
-  return StatusCode::SUCCESS;
+    } else if (photons) {
+         std::pair<std::unique_ptr<xAOD::PhotonContainer>, std::unique_ptr<xAOD::ShallowAuxContainer>> output = xAOD::shallowCopyContainer(*photons, ctx);
+         if (!output.first || !output.second) {
+               ATH_MSG_FATAL("Creation of shallow copy failed");
+               return StatusCode::FAILURE;
+         }
+         outcontainer = output.first.get();
+         SG::WriteHandle<xAOD::EgammaContainer> writeHandle{m_outputKey, ctx};
+         ATH_CHECK(writeHandle.recordNonConst(std::move(output.first), std::move(output.second)));
+    } else {
+         ATH_MSG_FATAL("Unknown Egamma container "<<m_inputKey.fullKey());
+         return StatusCode::FAILURE;
+    }
+    if (!setOriginalObjectLink(*egamma, *outcontainer)) {
+          ATH_MSG_ERROR("Failed to add original object links to shallow copy of " << m_inputKey);
+          return StatusCode::FAILURE;
+    }
+  
+      for(xAOD::Egamma* iParticle : *outcontainer) {
+            ATH_MSG_VERBOSE(" Old pt=" << iParticle->pt());
+            if(m_tool->applyCorrection(*iParticle).code()==CorrectionCode::Error) return StatusCode::FAILURE;
+            ATH_MSG_VERBOSE(" New pt=" << iParticle->pt());
+      }
+      return StatusCode::SUCCESS;
 }
 
 }
