@@ -13,114 +13,113 @@
 #include "TrkGeometry/TrackingVolume.h"
 #include "TrkVolumes/CylinderVolumeBounds.h"
 
-void Trk::TrackingVolumeManipulator::glueVolumes ATLAS_NOT_THREAD_SAFE(
-    const Trk::TrackingVolume& firstVol, Trk::BoundarySurfaceFace firstFace,
-    const Trk::TrackingVolume& secondVol,
-    Trk::BoundarySurfaceFace secondFace) const {
+void
+Trk::TrackingVolumeManipulator::glueVolumes(
+  Trk::TrackingVolume& firstVol,
+  Trk::BoundarySurfaceFace firstFace,
+  Trk::TrackingVolume& secondVol,
+  Trk::BoundarySurfaceFace secondFace) const
+{
   // check if it is a cylinder volume
   const Trk::CylinderVolumeBounds* cylBounds =
-      dynamic_cast<const Trk::CylinderVolumeBounds*>(
-          &(firstVol.volumeBounds()));
+    dynamic_cast<const Trk::CylinderVolumeBounds*>(&(firstVol.volumeBounds()));
 
   if (firstFace == Trk::tubeOuterCover && secondFace == Trk::tubeInnerCover)
     return glueVolumes(secondVol, secondFace, firstVol, firstFace);
 
   // the second volume gets the face of the first volume assigned
-  ((*secondVol.m_boundarySurfaces))[secondFace] =
-      (*(firstVol.m_boundarySurfaces))[firstFace];
+  (secondVol.m_boundarySurfaces)[secondFace] =
+    (firstVol.m_boundarySurfaces)[firstFace];
   // the face of the first volume has been an inner tube
   if (cylBounds && firstFace == Trk::tubeInnerCover &&
-      secondFace == Trk::tubeOuterCover){
-    const_cast<Trk::BoundarySurface<Trk::TrackingVolume>*>(
-      (*secondVol.m_boundarySurfaces)[secondFace].get())
-      ->setInsideVolume(&secondVol);
+      secondFace == Trk::tubeOuterCover) {
+    (secondVol.m_boundarySurfaces)[secondFace]->setInsideVolume(&secondVol);
   } else {
-    const_cast<Trk::BoundarySurface<Trk::TrackingVolume>*>(
-      (*secondVol.m_boundarySurfaces)[secondFace].get())
-      ->setOutsideVolume(&secondVol);
+    (secondVol.m_boundarySurfaces)[secondFace]->setOutsideVolume(&secondVol);
   }
 }
 
-void Trk::TrackingVolumeManipulator::setBoundarySurface ATLAS_NOT_THREAD_SAFE(
-    const Trk::TrackingVolume& tvol,
-    Trk::SharedObject<const Trk::BoundarySurface<Trk::TrackingVolume> > bsurf,
-    Trk::BoundarySurfaceFace face) {
-  (*(tvol.m_boundarySurfaces))[face] = std::move(bsurf);
+void
+Trk::TrackingVolumeManipulator::setBoundarySurface(
+  Trk::TrackingVolume& tvol,
+  Trk::SharedObject<Trk::BoundarySurface<Trk::TrackingVolume>> bsurf,
+  Trk::BoundarySurfaceFace face)
+{
+  (tvol.m_boundarySurfaces)[face] = std::move(bsurf);
 }
 
-void Trk::TrackingVolumeManipulator::setInsideVolume ATLAS_NOT_THREAD_SAFE(
-    const Trk::TrackingVolume& tvol, Trk::BoundarySurfaceFace face,
-    const Trk::TrackingVolume* insidevol) {
+void
+Trk::TrackingVolumeManipulator::setInsideVolume(Trk::TrackingVolume& tvol,
+                                                Trk::BoundarySurfaceFace face,
+                                                Trk::TrackingVolume* insidevol)
+{
 
-  const_cast<Trk::BoundarySurface<Trk::TrackingVolume>*>(
-    (*tvol.m_boundarySurfaces)[face].get())
-    ->setInsideVolume(insidevol);
+  (tvol.m_boundarySurfaces)[face]->setInsideVolume(insidevol);
 }
 
-void Trk::TrackingVolumeManipulator::setInsideVolumeArray ATLAS_NOT_THREAD_SAFE(
-    const Trk::TrackingVolume& tvol, Trk::BoundarySurfaceFace face,
-    Trk::BinnedArray<Trk::TrackingVolume>* insidevolarray) {
+void
+Trk::TrackingVolumeManipulator::setInsideVolumeArray(
+  Trk::TrackingVolume& tvol,
+  Trk::BoundarySurfaceFace face,
+  Trk::BinnedArray<Trk::TrackingVolume>* insidevolarray)
+{
 
-  const_cast<Trk::BoundarySurface<Trk::TrackingVolume>*>(
-    (*tvol.m_boundarySurfaces)[face].get())
-    ->setInsideVolumeArray(
-      Trk::SharedObject<Trk::BinnedArray<Trk::TrackingVolume>>(insidevolarray));
+  (tvol.m_boundarySurfaces)[face]->setInsideVolumeArray(
+    Trk::SharedObject<Trk::BinnedArray<Trk::TrackingVolume>>(insidevolarray));
 }
 
-void Trk::TrackingVolumeManipulator::setInsideVolumeArray ATLAS_NOT_THREAD_SAFE(
-    const Trk::TrackingVolume& tvol, Trk::BoundarySurfaceFace face,
-    const Trk::SharedObject<Trk::BinnedArray<Trk::TrackingVolume> >&
-        insidevolarray) {
-  const_cast<Trk::BoundarySurface<Trk::TrackingVolume>*>(
-    (*tvol.m_boundarySurfaces)[face].get())
-    ->setInsideVolumeArray(insidevolarray);
+void
+Trk::TrackingVolumeManipulator::setInsideVolumeArray(
+  Trk::TrackingVolume& tvol,
+  Trk::BoundarySurfaceFace face,
+  const Trk::SharedObject<Trk::BinnedArray<Trk::TrackingVolume>>&
+    insidevolarray)
+{
+  (tvol.m_boundarySurfaces)[face]->setInsideVolumeArray(insidevolarray);
 }
 
-void Trk::TrackingVolumeManipulator::setOutsideVolume ATLAS_NOT_THREAD_SAFE(
-    const Trk::TrackingVolume& tvol, Trk::BoundarySurfaceFace face,
-    const Trk::TrackingVolume* outsidevol) {
-  const_cast<Trk::BoundarySurface<Trk::TrackingVolume>*>(
-    (*tvol.m_boundarySurfaces)[face].get())
-    ->setOutsideVolume(outsidevol);
+void
+Trk::TrackingVolumeManipulator::setOutsideVolume(
+  Trk::TrackingVolume& tvol,
+  Trk::BoundarySurfaceFace face,
+  Trk::TrackingVolume* outsidevol)
+{
+  (tvol.m_boundarySurfaces)[face]->setOutsideVolume(outsidevol);
 }
 
-void Trk::TrackingVolumeManipulator::setOutsideVolumeArray
-ATLAS_NOT_THREAD_SAFE(
-    const Trk::TrackingVolume& tvol, Trk::BoundarySurfaceFace face,
-    Trk::BinnedArray<Trk::TrackingVolume>* outsidevolarray) {
+void
+Trk::TrackingVolumeManipulator::setOutsideVolumeArray(
+  Trk::TrackingVolume& tvol,
+  Trk::BoundarySurfaceFace face,
+  Trk::BinnedArray<Trk::TrackingVolume>* outsidevolarray)
+{
 
-  const_cast<Trk::BoundarySurface<Trk::TrackingVolume>*>(
-    (*tvol.m_boundarySurfaces)[face].get())
-    ->setOutsideVolumeArray(
-      Trk::SharedObject<Trk::BinnedArray<Trk::TrackingVolume>>(
-        outsidevolarray));
+  (tvol.m_boundarySurfaces)[face]->setOutsideVolumeArray(
+    Trk::SharedObject<Trk::BinnedArray<Trk::TrackingVolume>>(outsidevolarray));
 }
 
-void Trk::TrackingVolumeManipulator::setOutsideVolumeArray
-ATLAS_NOT_THREAD_SAFE(
-  const Trk::TrackingVolume& tvol,
+void
+Trk::TrackingVolumeManipulator::setOutsideVolumeArray(
+  Trk::TrackingVolume& tvol,
   Trk::BoundarySurfaceFace face,
   const Trk::SharedObject<Trk::BinnedArray<Trk::TrackingVolume>>&
     outsidevolarray)
 {
-  const_cast<Trk::BoundarySurface<Trk::TrackingVolume>*>(
-    (*tvol.m_boundarySurfaces)[face].get())
-    ->setOutsideVolumeArray(outsidevolarray);
+  (tvol.m_boundarySurfaces)[face]->setOutsideVolumeArray(outsidevolarray);
 }
 
-void Trk::TrackingVolumeManipulator::confineVolume ATLAS_NOT_THREAD_SAFE(
-    const TrackingVolume& tvol, const TrackingVolume* outsideVol) {
+void
+Trk::TrackingVolumeManipulator::confineVolume(TrackingVolume& tvol,
+                                              TrackingVolume* outsideVol)
+{
 
-  const std::vector<SharedObject<const BoundarySurface<TrackingVolume>>>& bounds =
-    tvol.boundarySurfaces();
+  const auto& bounds = tvol.boundarySurfaces();
   for (unsigned int ib = 0; ib < bounds.size(); ib++) {
-    if (bounds[ib].get()->outsideVolume() == nullptr) {
-      const_cast<Trk::BoundarySurface<Trk::TrackingVolume>*>(bounds[ib].get())
-        ->setOutsideVolume(outsideVol);
+    if (bounds[ib]->outsideVolume() == nullptr) {
+      bounds[ib]->setOutsideVolume(outsideVol);
     }
     if (bounds[ib].get()->insideVolume() == nullptr) {
-      const_cast<Trk::BoundarySurface<Trk::TrackingVolume>*>(bounds[ib].get())
-        ->setInsideVolume(outsideVol);
+      bounds[ib]->setInsideVolume(outsideVol);
     }
   }
 }

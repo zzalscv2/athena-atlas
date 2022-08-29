@@ -145,6 +145,7 @@ public:
 
   /** Transforms the layer into a Surface representation for extrapolation */
   virtual const PlaneSurface& surfaceRepresentation() const override final;
+  virtual PlaneSurface& surfaceRepresentation() override final;
 
 
   /** getting the MaterialProperties back - for pre-update*/

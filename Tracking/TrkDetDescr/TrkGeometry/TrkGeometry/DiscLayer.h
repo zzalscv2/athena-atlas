@@ -99,6 +99,7 @@ public:
 
   /** Transforms the layer into a Surface representation for extrapolation */
   virtual const DiscSurface& surfaceRepresentation() const override final;
+  virtual DiscSurface& surfaceRepresentation() override final;
 
   /** Surface seen on approach - if not defined differently, it is the
    * surfaceRepresentation() */

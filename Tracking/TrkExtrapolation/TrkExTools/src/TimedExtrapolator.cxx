@@ -400,9 +400,9 @@ Trk::TimedExtrapolator::extrapolateToVolumeWithPathLimit(
   if (destVol) {
     const Trk::TrackingVolume *tgVol = m_navigator->trackingGeometry(ctx)->trackingVolume(destVol->volumeName());
     if (!tgVol || tgVol != destVol) {
-      const std::vector< SharedObject<const BoundarySurface<TrackingVolume> > >& bounds = destVol->boundarySurfaces();
+      const auto & bounds = destVol->boundarySurfaces();
       for (unsigned int ib = 0; ib < bounds.size(); ib++) {
-        const Trk::Surface &surf = (bounds[ib].get())->surfaceRepresentation();
+        const Trk::Surface &surf = (bounds[ib])->surfaceRepresentation();
         cache.m_navigSurfs.emplace_back(&surf, true);
       }
       iDest = bounds.size();
@@ -451,10 +451,9 @@ Trk::TimedExtrapolator::extrapolateToVolumeWithPathLimit(
   // update if new static volume
   if (updateStatic) {    // retrieve boundaries
     cache.m_staticBoundaries.clear();
-    const std::vector< SharedObject<const BoundarySurface<TrackingVolume> > > &bounds =
-      cache.m_currentStatic->boundarySurfaces();
+    const auto& bounds = cache.m_currentStatic->boundarySurfaces();
     for (unsigned int ib = 0; ib < bounds.size(); ib++) {
-      const Trk::Surface &surf = (bounds[ib].get())->surfaceRepresentation();
+      const Trk::Surface &surf = (bounds[ib])->surfaceRepresentation();
       cache.m_staticBoundaries.emplace_back(&surf, true);
     }
 
@@ -491,29 +490,30 @@ Trk::TimedExtrapolator::extrapolateToVolumeWithPathLimit(
         // active station ?
         const Trk::Layer *layR = (*iTer)->layerRepresentation();
         bool active = layR && layR->layerType();
-        const std::vector< SharedObject<const BoundarySurface<TrackingVolume> > >  &detBounds =
-          (*iTer)->trackingVolume()->boundarySurfaces();
+        const auto& detBounds = (*iTer)->trackingVolume()->boundarySurfaces();
         if (active) {
           cache.m_detachedVols.emplace_back(*iTer,
-                                                                                                 detBounds.size());
+                                            detBounds.size());
           for (unsigned int ibb = 0; ibb < detBounds.size(); ibb++) {
-            const Trk::Surface &surf = (detBounds[ibb].get())->surfaceRepresentation();
+            const Trk::Surface &surf = (detBounds[ibb])->surfaceRepresentation();
             cache.m_detachedBoundaries.emplace_back(&surf, true);
           }
         } else if (cache.m_currentStatic->geometrySignature() != Trk::MS ||
-                   !m_useMuonMatApprox || (*iTer)->name().substr((*iTer)->name().size() - 4, 4) == "PERM") {  // retrieve
-                                                                                                              // inert
-                                                                                                              // detached
-                                                                                                              // objects
-                                                                                                              // only if
-                                                                                                              // needed
+                   !m_useMuonMatApprox ||
+                   (*iTer)->name().substr((*iTer)->name().size() - 4, 4) ==
+                     "PERM") { // retrieve
+                               // inert
+                               // detached
+                               // objects
+                               // only if
+                               // needed
           if ((*iTer)->trackingVolume()->zOverAtimesRho() != 0. &&
               (!(*iTer)->trackingVolume()->confinedDenseVolumes() ||
                (*iTer)->trackingVolume()->confinedDenseVolumes()->empty())
               && (*iTer)->trackingVolume()->confinedArbitraryLayers().empty()) {
             cache.m_denseVols.emplace_back((*iTer)->trackingVolume(), detBounds.size());
             for (unsigned int ibb = 0; ibb < detBounds.size(); ibb++) {
-              const Trk::Surface &surf = (detBounds[ibb].get())->surfaceRepresentation();
+              const Trk::Surface &surf = (detBounds[ibb])->surfaceRepresentation();
               cache.m_denseBoundaries.emplace_back(&surf, true);
             }
           }
@@ -521,7 +521,7 @@ Trk::TimedExtrapolator::extrapolateToVolumeWithPathLimit(
           if ((*iTer)->trackingVolume()->confinedDenseVolumes() || (confLays.size() > detBounds.size())) {
             cache.m_detachedVols.emplace_back(*iTer, detBounds.size());
             for (unsigned int ibb = 0; ibb < detBounds.size(); ibb++) {
-              const Trk::Surface &surf = (detBounds[ibb].get())->surfaceRepresentation();
+              const Trk::Surface &surf = (detBounds[ibb])->surfaceRepresentation();
               cache.m_detachedBoundaries.emplace_back(&surf, true);
             }
           } else if (!confLays.empty()) {
@@ -593,25 +593,24 @@ Trk::TimedExtrapolator::extrapolateToVolumeWithPathLimit(
     if (!active && !confinedDense && confinedLays.empty()) {
       continue;
     }
-    const std::vector< SharedObject<const BoundarySurface<TrackingVolume> > > &bounds = dVol->boundarySurfaces();
+    const auto  &bounds = dVol->boundarySurfaces();
     if (!active && !confinedDense && confinedLays.size() <= bounds.size()) {
       continue;
     }
     if (confinedDense || !confinedLays.empty()) {
       navigVols.emplace_back(dVol, bounds.size());
       for (unsigned int ib = 0; ib < bounds.size(); ib++) {
-        const Trk::Surface &surf = (bounds[ib].get())->surfaceRepresentation();
+        const Trk::Surface &surf = (bounds[ib])->surfaceRepresentation();
         cache.m_navigBoundaries.emplace_back(&surf, true);
       }
       // collect dense volume boundary
       if (confinedDense) {
         std::vector<const Trk::TrackingVolume *>::const_iterator vIter = confinedDense->begin();
         for (; vIter != confinedDense->end(); ++vIter) {
-          const std::vector< SharedObject<const BoundarySurface<TrackingVolume> > > &bounds =
-            (*vIter)->boundarySurfaces();
+          const auto& bounds = (*vIter)->boundarySurfaces();
           cache.m_denseVols.emplace_back(*vIter, bounds.size());
           for (unsigned int ib = 0; ib < bounds.size(); ib++) {
-            const Trk::Surface &surf = (bounds[ib].get())->surfaceRepresentation();
+            const Trk::Surface &surf = (bounds[ib])->surfaceRepresentation();
             cache.m_denseBoundaries.emplace_back(&surf, true);
           }
         }
@@ -644,16 +643,16 @@ Trk::TimedExtrapolator::extrapolateToVolumeWithPathLimit(
         vExit = false;
       }
       if (!vExit) {
-        const std::vector< SharedObject<const BoundarySurface<TrackingVolume> > > &bounds = detVol->boundarySurfaces();
+        const auto &bounds = detVol->boundarySurfaces();
         navigVols.emplace_back(detVol, bounds.size());
         for (unsigned int ib = 0; ib < bounds.size(); ib++) {
-          const Trk::Surface &surf = (bounds[ib].get())->surfaceRepresentation();
+          const Trk::Surface &surf = (bounds[ib])->surfaceRepresentation();
           cache.m_navigBoundaries.emplace_back(&surf, true);
         }
         if (detVol->zOverAtimesRho() != 0.) {
           cache.m_denseVols.emplace_back(detVol, bounds.size());
           for (unsigned int ib = 0; ib < bounds.size(); ib++) {
-            const Trk::Surface &surf = (bounds[ib].get())->surfaceRepresentation();
+            const Trk::Surface &surf = (bounds[ib])->surfaceRepresentation();
             cache.m_denseBoundaries.emplace_back(&surf, true);
           }
         }
@@ -926,7 +925,7 @@ Trk::TimedExtrapolator::extrapolateToVolumeWithPathLimit(
         unsigned int index = solutions[iSol] - iDest;
 
         // use global coordinates to retrieve attached volume (just for static!)
-        nextVol = (cache.m_currentStatic->boundarySurfaces())[index].get()->attachedVolume(
+        nextVol = (cache.m_currentStatic->boundarySurfaces())[index]->attachedVolume(
           nextPar->position(), nextPar->momentum(), dir);
         // double check the next volume
         if (nextVol && !(nextVol->inside(nextPar->position() + 0.01 * dir * nextPar->momentum().normalized(), 0.))) {
@@ -1052,7 +1051,7 @@ Trk::TimedExtrapolator::extrapolateToVolumeWithPathLimit(
         }
         if (dIter != cache.m_denseVols.end()) {
           currVol = (*dIter).first;
-          nextVol = (currVol->boundarySurfaces())[index].get()->attachedVolume(*nextPar, dir);
+          nextVol = (currVol->boundarySurfaces())[index]->attachedVolume(*nextPar, dir);
           // the boundary orientation is not reliable
           Amg::Vector3D tp = nextPar->position() + 2 * m_tolerance * dir * nextPar->momentum().normalized();
           if (!nextVol || !nextVol->inside(tp, m_tolerance)) {   // search for dense volumes
@@ -1086,7 +1085,7 @@ Trk::TimedExtrapolator::extrapolateToVolumeWithPathLimit(
         }
         if (nIter != navigVols.end()) {
           currVol = (*nIter).first;
-          nextVol = ((*nIter).first->boundarySurfaces())[index].get()->attachedVolume(*nextPar, dir);
+          nextVol = ((*nIter).first->boundarySurfaces())[index]->attachedVolume(*nextPar, dir);
           if (!nextVol) {
             ATH_MSG_DEBUG("  [+] Navigation volume boundary, leaving volume '"
                           << currVol->volumeName() << "'.");
@@ -1114,7 +1113,7 @@ Trk::TimedExtrapolator::extrapolateToVolumeWithPathLimit(
         if (dIter != cache.m_detachedVols.end()) {
           currVol = (*dIter).first->trackingVolume();
           nextVol =
-            ((*dIter).first->trackingVolume()->boundarySurfaces())[index].get()->attachedVolume(*nextPar, dir);
+            ((*dIter).first->trackingVolume()->boundarySurfaces())[index]->attachedVolume(*nextPar, dir);
           if (!nextVol) {
             ATH_MSG_DEBUG("  [+] Detached volume boundary, leaving volume '" << currVol->volumeName() << "'.");
           } else {
@@ -1476,9 +1475,9 @@ Trk::TimedExtrapolator::transportToVolumeWithPathLimit(
   if (destVol) {
     const Trk::TrackingVolume *tgVol = m_navigator->trackingGeometry(ctx)->trackingVolume(destVol->volumeName());
     if (!tgVol || tgVol != destVol) {
-      const std::vector< SharedObject<const BoundarySurface<TrackingVolume> > >& bounds = destVol->boundarySurfaces();
+      const auto& bounds = destVol->boundarySurfaces();
       for (unsigned int ib = 0; ib < bounds.size(); ib++) {
-        const Trk::Surface &surf = (bounds[ib].get())->surfaceRepresentation();
+        const Trk::Surface &surf = (bounds[ib])->surfaceRepresentation();
         Trk::DistanceSolution distSol = surf.straightLineDistanceEstimate(currPar->position(),
                                                                           dir * currPar->momentum().normalized());
         if (distSol.numberOfSolutions() > 0 && distSol.first() > 0.) {
@@ -1544,10 +1543,9 @@ Trk::TimedExtrapolator::transportToVolumeWithPathLimit(
   // distance to static volume boundaries recalculated
   // retrieve boundaries along path
   cache.m_trStaticBounds.clear();
-  const std::vector< SharedObject<const BoundarySurface<TrackingVolume> > > &bounds =
-    cache.m_currentStatic->boundarySurfaces();
-  for (unsigned int ib = 0; ib < bounds.size(); ib++) {
-    const Trk::Surface &surf = (bounds[ib].get())->surfaceRepresentation();
+  const auto& bounds = cache.m_currentStatic->boundarySurfaces();
+  for (unsigned int ib = 0; ib < bounds.size(); ++ib) {
+    const Trk::Surface &surf = (bounds[ib])->surfaceRepresentation();
     Trk::DistanceSolution distSol = surf.straightLineDistanceEstimate(currPar->position(),
                                                                       dir * currPar->momentum().normalized());
     if (distSol.numberOfSolutions() > 0 &&
@@ -1574,7 +1572,7 @@ Trk::TimedExtrapolator::transportToVolumeWithPathLimit(
         }
       }
     }  // along path
-  } // end loop over boundaries
+  }    // end loop over boundaries
 
   if (cache.m_trStaticBounds.empty()) {
     ATH_MSG_WARNING(
@@ -1596,7 +1594,7 @@ Trk::TimedExtrapolator::transportToVolumeWithPathLimit(
 
 
     for (unsigned int ib = 0; ib < bounds.size(); ib++) {
-      const Trk::Surface &surf = (bounds[ib].get())->surfaceRepresentation();
+      const Trk::Surface &surf = (bounds[ib])->surfaceRepresentation();
       Trk::DistanceSolution distSol = surf.straightLineDistanceEstimate(currPar->position(),
                                                                         dir * currPar->momentum().unit());
       ATH_MSG_DEBUG(
@@ -1685,11 +1683,10 @@ Trk::TimedExtrapolator::transportToVolumeWithPathLimit(
             (!(*iTer)->trackingVolume()->confinedDenseVolumes() ||
              (*iTer)->trackingVolume()->confinedDenseVolumes()->empty())
             && ((*iTer)->trackingVolume()->confinedArbitraryLayers().empty())) {
-          const std::vector< SharedObject<const BoundarySurface<TrackingVolume> > >  &detBounds =
-            (*iTer)->trackingVolume()->boundarySurfaces();
+          const auto& detBounds = (*iTer)->trackingVolume()->boundarySurfaces();
           int newB = 0;
           for (unsigned int ibb = 0; ibb < detBounds.size(); ibb++) {
-            const Trk::Surface &surf = (detBounds[ibb].get())->surfaceRepresentation();
+            const Trk::Surface &surf = (detBounds[ibb])->surfaceRepresentation();
             Trk::DistanceSolution distSol = surf.straightLineDistanceEstimate(currPar->position(),
                                                                               dir * currPar->momentum().normalized());
             if (distSol.numberOfSolutions() > 0 && distSol.first() > 0.) {
@@ -1717,11 +1714,10 @@ Trk::TimedExtrapolator::transportToVolumeWithPathLimit(
         if (confinedDense && !confinedDense->empty()) {
           std::vector<const Trk::TrackingVolume *>::const_iterator vIter = confinedDense->begin();
           for (; vIter != confinedDense->end(); ++vIter) {
-            const std::vector< SharedObject<const BoundarySurface<TrackingVolume> > >  &bounds =
-              (*vIter)->boundarySurfaces();
+            const auto& bounds = (*vIter)->boundarySurfaces();
             int newB = 0;
             for (unsigned int ibb = 0; ibb < bounds.size(); ibb++) {
-              const Trk::Surface &surf = (bounds[ibb].get())->surfaceRepresentation();
+              const Trk::Surface &surf = (bounds[ibb])->surfaceRepresentation();
               Trk::DistanceSolution distSol = surf.straightLineDistanceEstimate(currPar->position(),
                                                                                 dir * currPar->momentum().normalized());
               if (distSol.numberOfSolutions() > 0 && distSol.first() > 0.) {
@@ -2020,7 +2016,7 @@ Trk::TimedExtrapolator::transportToVolumeWithPathLimit(
       // static volume boundary; return to the main loop
       unsigned int index = cache.m_trStaticBounds[sols[is] - iDest].bIndex;
       // use global coordinates to retrieve attached volume (just for static!)
-      nextVol = (cache.m_currentStatic->boundarySurfaces())[index].get()->attachedVolume(
+      nextVol = (cache.m_currentStatic->boundarySurfaces())[index]->attachedVolume(
         nextPar->position(), nextPar->momentum(), dir);
       // double check the next volume
       if (nextVol && !(nextVol->inside(nextPar->position() + 0.01 * dir * nextPar->momentum().normalized(), 0.))) {
@@ -2251,9 +2247,9 @@ Trk::TimedExtrapolator::transportInAlignableTV(Trk::TimedExtrapolator::Cache &ca
   // resolve exit from the volume
 
   cache.m_trStaticBounds.clear();
-  const std::vector< SharedObject<const BoundarySurface<TrackingVolume> > > &bounds = aliTV->boundarySurfaces();
+  const auto &bounds = aliTV->boundarySurfaces();
   for (unsigned int ib = 0; ib < bounds.size(); ib++) {
-    const Trk::Surface &surf = (bounds[ib].get())->surfaceRepresentation();
+    const Trk::Surface &surf = (bounds[ib])->surfaceRepresentation();
     Trk::DistanceSolution distSol = surf.straightLineDistanceEstimate(currPar->position(),
                                                                       dir * currPar->momentum().normalized());
     double dist = distSol.first();
@@ -2266,7 +2262,7 @@ Trk::TimedExtrapolator::transportInAlignableTV(Trk::TimedExtrapolator::Cache &ca
     // std::cout<<"alignable volume boundary:"<< ib<<","<<dist<<","<<
     // surf.isOnSurface(gp,true,m_tolerance,m_tolerance)<<std::endl;
     if (dist > m_tolerance && surf.isOnSurface(gp, true, m_tolerance, m_tolerance)) {
-      const Trk::TrackingVolume *attachedVol = (bounds[ib].get())->attachedVolume(gp, currPar->momentum(), dir);
+      const Trk::TrackingVolume *attachedVol = (bounds[ib])->attachedVolume(gp, currPar->momentum(), dir);
 
       if (attachedVol && !(attachedVol->inside(gp + 0.01 * dir * currPar->momentum().normalized(), m_tolerance))) {
         ATH_MSG_DEBUG(
@@ -2283,7 +2279,7 @@ Trk::TimedExtrapolator::transportInAlignableTV(Trk::TimedExtrapolator::Cache &ca
         nextVol = attachedVol;
         cache.m_trStaticBounds.insert(cache.m_trStaticBounds.begin(), Trk::DestBound(&surf, dist, ib));
       } else if (dist > 0.001) {
-        const Trk::TrackingVolume *testVol = (bounds[ib].get())->attachedVolume(gp,
+        const Trk::TrackingVolume *testVol = (bounds[ib])->attachedVolume(gp,
                                                                                    currPar->momentum(),
                                                                                    Trk::oppositeMomentum);
         ATH_MSG_WARNING(
@@ -2550,9 +2546,9 @@ Trk::TimedExtrapolator::extrapolateInAlignableTV(Trk::TimedExtrapolator::Cache &
   // assume new static volume, retrieve boundaries
   cache.m_currentStatic = staticVol;
   cache.m_staticBoundaries.clear();
-  const std::vector< SharedObject<const BoundarySurface<TrackingVolume> > > &bounds = staticVol->boundarySurfaces();
-  for (unsigned int ib = 0; ib < bounds.size(); ib++) {
-    const Trk::Surface &surf = (bounds[ib].get())->surfaceRepresentation();
+  const auto &bounds = staticVol->boundarySurfaces();
+  for (unsigned int ib = 0; ib < bounds.size(); ++ib) {
+    const Trk::Surface &surf = (bounds[ib])->surfaceRepresentation();
     cache.m_staticBoundaries.emplace_back(&surf, true);
   }
 
@@ -2664,7 +2660,7 @@ Trk::TimedExtrapolator::extrapolateInAlignableTV(Trk::TimedExtrapolator::Cache &
           // static volume boundary; return to the main loop : TODO move from misaligned to static
           unsigned int index = solutions[iSol];
           // use global coordinates to retrieve attached volume (just for static!)
-          nextVol = (cache.m_currentStatic->boundarySurfaces())[index].get()->attachedVolume(
+          nextVol = (cache.m_currentStatic->boundarySurfaces())[index]->attachedVolume(
             nextPar->position(), nextPar->momentum(), dir);
           // double check the next volume
           if (nextVol && !(nextVol->inside(nextPar->position() + 0.01 * dir * nextPar->momentum().normalized(), 0.))) {

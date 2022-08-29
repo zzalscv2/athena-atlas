@@ -343,9 +343,9 @@ Trk::Navigator::atVolumeBoundary(const Trk::TrackParameters* parms,
   if (!vol) {
     return isAtBoundary;
   }
-  const std::vector< SharedObject<const BoundarySurface<TrackingVolume> > > &bounds = vol->boundarySurfaces();
+  const auto& bounds = vol->boundarySurfaces();
   for (unsigned int ib = 0; ib < bounds.size(); ib++) {
-    const Trk::Surface &surf = (bounds[ib].get())->surfaceRepresentation();
+    const Trk::Surface &surf = bounds[ib]->surfaceRepresentation();
     if (surf.isOnSurface(parms->position(), true, tol, tol)) {
       // isAtBoundary = true;
       // const Trk::TrackingVolume* attachedVol =
@@ -358,7 +358,7 @@ Trk::Navigator::atVolumeBoundary(const Trk::TrackParameters* parms,
       if (distSol.currentDistance(false) < tol && distSol.numberOfSolutions() > 0) {
         isAtBoundary = true;
         const Trk::TrackingVolume* attachedVol =
-          (bounds[ib].get())
+          (bounds[ib])
             ->attachedVolume(parms->position(), parms->momentum(), dir);
         if (!nextVol && attachedVol) {
           nextVol = attachedVol;
@@ -366,8 +366,14 @@ Trk::Navigator::atVolumeBoundary(const Trk::TrackParameters* parms,
         // double good solution indicate tangential intersection : revert the attached volumes
         if (distSol.numberOfSolutions() > 1 && fabs(distSol.first()) < tol && fabs(distSol.second()) < tol) {
          if (!nextVol) {
-            ATH_MSG_WARNING("Tracking volume "<<(*vol)<<" has loose ends. because the navigation of "<<std::endl<<(*parms)<<std::endl<<" failed. Please consult the experts or have a look at ATLASRECTS-7147");
-            continue;
+           ATH_MSG_WARNING("Tracking volume "
+                           << (*vol)
+                           << " has loose ends. because the navigation of "
+                           << std::endl
+                           << (*parms) << std::endl
+                           << " failed. Please consult the experts or have a "
+                              "look at ATLASRECTS-7147");
+           continue;
           } 
           //surfing the beampipe seems to happen particularly often in a Trigger test, see https://its.cern.ch/jira/browse/ATR-24234
           //in this case, I downgrade the 'warning' to 'verbose'          

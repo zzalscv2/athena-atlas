@@ -185,7 +185,7 @@ StatusCode Calo::CaloTrackingGeometryBuilder::finalize()
   return StatusCode::SUCCESS;
 }
 
-Trk::TrackingGeometry* Calo::CaloTrackingGeometryBuilder::trackingGeometry(const Trk::TrackingVolume* innerVol) const
+Trk::TrackingGeometry* Calo::CaloTrackingGeometryBuilder::trackingGeometry(Trk::TrackingVolume* innerVol) const
 {
 
   ATH_MSG_VERBOSE( "Starting to build CaloTrackingGeometry ..." );   
@@ -569,8 +569,7 @@ Trk::TrackingGeometry* Calo::CaloTrackingGeometryBuilder::trackingGeometry(const
    // glue MBTS volumes with ID
    std::vector<Trk::TrackingVolume*> inBufferVolumes;
    inBufferVolumes.push_back(negativeInnerGap); 
-   //we pass this as const to the builder ...
-   inBufferVolumes.push_back(const_cast<Trk::TrackingVolume*>(innerVol));     
+   inBufferVolumes.push_back(innerVol);     
    inBufferVolumes.push_back(positiveInnerGap);
 
    Trk::TrackingVolume* inDetEnclosed =

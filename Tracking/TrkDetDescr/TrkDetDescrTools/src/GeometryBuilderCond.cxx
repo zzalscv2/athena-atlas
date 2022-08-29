@@ -132,7 +132,7 @@ StatusCode Trk::GeometryBuilderCond::initialize()
 
 std::unique_ptr< Trk::TrackingGeometry>
 Trk::GeometryBuilderCond::trackingGeometry(const EventContext& ctx,
-                                           const Trk::TrackingVolume* /*tVol*/,
+                                           Trk::TrackingVolume* /*tVol*/,
                                            SG::WriteCondHandle<TrackingGeometry>& whandle) const
 {
 

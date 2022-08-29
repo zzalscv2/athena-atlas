@@ -12,6 +12,15 @@ BoundaryPlaneSurface<Tvol>::surfaceRepresentation() const
 {
   return *this;
 }
+
+template<class Tvol>
+inline Surface&
+BoundaryPlaneSurface<Tvol>::surfaceRepresentation()
+{
+  return *this;
+}
+
+
 template<class Tvol>
 inline const Tvol*
 BoundaryPlaneSurface<Tvol>::attachedVolume(const TrackParameters& parms,

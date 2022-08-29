@@ -81,6 +81,13 @@ Trk::ConeLayer::surfaceRepresentation() const
   return (*this);
 }
 
+Trk::ConeSurface&
+Trk::ConeLayer::surfaceRepresentation()
+{
+  return (*this);
+}
+
+
 double
 Trk::ConeLayer::preUpdateMaterialFactor(const Trk::TrackParameters& parm,
                                         Trk::PropDirection dir) const

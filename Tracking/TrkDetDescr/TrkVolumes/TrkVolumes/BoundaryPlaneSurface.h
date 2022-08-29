@@ -83,6 +83,7 @@ class BoundaryPlaneSurface final : virtual public BoundarySurface<Tvol>,
 
   /** The Surface Representation of this */
   virtual const Surface& surfaceRepresentation() const override final;
+  virtual Surface& surfaceRepresentation() override final;
 };
 
 // Hash include inline functions

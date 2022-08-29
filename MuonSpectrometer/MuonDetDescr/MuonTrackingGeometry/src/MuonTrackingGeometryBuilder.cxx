@@ -117,7 +117,7 @@ StatusCode Muon::MuonTrackingGeometryBuilder::initialize() {
     return StatusCode::SUCCESS;
 }
 
-Trk::TrackingGeometry* Muon::MuonTrackingGeometryBuilder::trackingGeometry(const Trk::TrackingVolume* tvol) const {
+Trk::TrackingGeometry* Muon::MuonTrackingGeometryBuilder::trackingGeometry(Trk::TrackingVolume* tvol) const {
     ATH_MSG_INFO(name() << " building tracking geometry");
     m_chronoStatSvc->chronoStart("MS::build-up");
     // load local variables to container
@@ -129,8 +129,6 @@ Trk::TrackingGeometry* Muon::MuonTrackingGeometryBuilder::trackingGeometry(const
     aLVC.m_adjustStatic = m_adjustStatic;
     aLVC.m_static3d = m_static3d;
 
-    // we pass const TrackingVolume so for now const_cast 
-    Trk::TrackingVolume* mutabletvol = const_cast<Trk::TrackingVolume*>(tvol); 
     ///////////////////////////////////////////////////////////////////////////////////////////////////
     // check setup
     if (m_muonInert && m_blendInertMaterial) {
@@ -288,7 +286,7 @@ Trk::TrackingGeometry* Muon::MuonTrackingGeometryBuilder::trackingGeometry(const
         double enclosedDetectorHalfZ = enclosedDetectorBounds->halflengthZ();
         double enclosedDetectorOuterRadius = enclosedDetectorBounds->outerRadius();
         // get subvolumes at navigation level and check THEIR dimensions
-        Trk::GlueVolumesDescriptor& enclosedDetGlueVolumes = mutabletvol->glueVolumesDescriptor();
+        Trk::GlueVolumesDescriptor& enclosedDetGlueVolumes = tvol->glueVolumesDescriptor();
         std::vector<Trk::TrackingVolume*> enclosedCentralFaceVolumes = enclosedDetGlueVolumes.glueVolumes(Trk::cylinderCover);
         std::vector<Trk::TrackingVolume*> enclosedNegativeFaceVolumes = enclosedDetGlueVolumes.glueVolumes(Trk::negativeFaceXY);
         std::vector<Trk::TrackingVolume*> enclosedPositiveFaceVolumes = enclosedDetGlueVolumes.glueVolumes(Trk::positiveFaceXY);
@@ -334,7 +332,7 @@ Trk::TrackingGeometry* Muon::MuonTrackingGeometryBuilder::trackingGeometry(const
             return nullptr;
         } else {
             aLVC.m_innerBarrelRadius = enclosedDetectorOuterRadius;
-            barrelR = mutabletvol;
+            barrelR = tvol;
         }
         // adjust z
         if (enclosedDetectorHalfZ > m_barrelZ) {

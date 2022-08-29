@@ -113,9 +113,10 @@ ATLAS_NOT_THREAD_SAFE(const Trk::TrackingVolume& tvol,
   }
   /** register the boundary layers */
   // boundary layers
-  for (const auto& bSurface : tvol.boundarySurfaces()) {
+  const auto& bounds = tvol.boundarySurfaces();
+  for (size_t ib = 0; ib < bounds.size(); ++ib) {
     const Trk::Layer* bLayer =
-      bSurface->surfaceRepresentation().materialLayer();
+      bounds[ib]->surfaceRepresentation().materialLayer();
     if (bLayer) {
       auto bfIter = m_boundaryLayers.find(bLayer);
       if (bfIter != m_boundaryLayers.end())
@@ -247,10 +248,9 @@ Trk::TrackingGeometry::atVolumeBoundary(const Amg::Vector3D& gp,
   bool isAtBoundary = false;
   if (!vol)
     return isAtBoundary;
-  const std::vector<SharedObject<const BoundarySurface<TrackingVolume>>>&
-    bounds = vol->boundarySurfaces();
-  for (unsigned int ib = 0; ib < bounds.size(); ib++) {
-    const Trk::Surface& surf = (bounds[ib].get())->surfaceRepresentation();
+  const auto& bounds = vol->boundarySurfaces();
+  for (size_t ib = 0; ib < bounds.size(); ++ib) {
+    const Trk::Surface& surf = bounds[ib]->surfaceRepresentation();
     if (surf.isOnSurface(gp, true, tol, tol))
       isAtBoundary = true;
   }
@@ -270,14 +270,13 @@ Trk::TrackingGeometry::atVolumeBoundary(const Amg::Vector3D& gp,
   nextVol = nullptr;
   if (!vol)
     return isAtBoundary;
-  const std::vector<SharedObject<const BoundarySurface<TrackingVolume>>>&
-    bounds = vol->boundarySurfaces();
-  for (unsigned int ib = 0; ib < bounds.size(); ib++) {
-    const Trk::Surface& surf = (bounds[ib].get())->surfaceRepresentation();
+  const auto& bounds = vol->boundarySurfaces();
+  for (size_t ib = 0; ib < bounds.size(); ++ib) {
+    const Trk::Surface& surf = bounds[ib]->surfaceRepresentation();
     if (surf.isOnSurface(gp, true, tol, tol)) {
       isAtBoundary = true;
       const Trk::TrackingVolume* attachedVol =
-        (bounds[ib].get())->attachedVolume(gp, mom, dir);
+        bounds[ib]->attachedVolume(gp, mom, dir);
       if (!nextVol && attachedVol)
         nextVol = attachedVol;
     }

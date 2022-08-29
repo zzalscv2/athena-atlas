@@ -12,6 +12,14 @@ BoundarySubtractedCylinderSurface<Tvol>::surfaceRepresentation() const
 {
   return *this;
 }
+
+template<class Tvol>
+inline Surface&
+BoundarySubtractedCylinderSurface<Tvol>::surfaceRepresentation()
+{
+  return *this;
+}
+
 template<class Tvol>
 inline const Tvol*
 BoundarySubtractedCylinderSurface<Tvol>::attachedVolume(

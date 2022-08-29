@@ -61,6 +61,7 @@ class NavigationLayer final : public Layer {
   /** Transforms the layer into a Surface representation for extrapolation
    */
   virtual const Surface& surfaceRepresentation() const override final;
+  virtual Surface& surfaceRepresentation() override final;
 
   /** isOnLayer() method, using isOnSurface() with Layer specific
    * tolerance */
@@ -105,10 +106,17 @@ class NavigationLayer final : public Layer {
   NavigationLayer() {}
 };
 
-inline const Surface& NavigationLayer::surfaceRepresentation() const {
+inline const Surface&
+NavigationLayer::surfaceRepresentation() const
+{
   return (*m_surfaceRepresentation);
 }
 
+inline Surface&
+NavigationLayer::surfaceRepresentation()
+{
+  return (*m_surfaceRepresentation);
+}
 
 inline const MaterialProperties* NavigationLayer::fullUpdateMaterialProperties()
     const {

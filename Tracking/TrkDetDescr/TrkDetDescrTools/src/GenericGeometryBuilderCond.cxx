@@ -89,7 +89,7 @@ StatusCode Trk::GenericGeometryBuilderCond::initialize()
 std::unique_ptr<Trk::TrackingGeometry>
 Trk::GenericGeometryBuilderCond::trackingGeometry(
   const EventContext& /*ctx*/,
-  const Trk::TrackingVolume* innerVol,
+  Trk::TrackingVolume* innerVol,
   SG::WriteCondHandle<TrackingGeometry>& /*whandle*/) const
 {
 
@@ -192,7 +192,7 @@ Trk::GenericGeometryBuilderCond::trackingGeometry(
     // wrap the inner volume into a centralSector 
     if (cvb){ 
         //Inner volume is passed in the builder as const
-        auto centralVolumes = std::vector<Trk::TrackingVolume*>{const_cast<Trk::TrackingVolume*>(innerVol), cSector};
+        auto centralVolumes = std::vector<Trk::TrackingVolume*>{innerVol, cSector};
         // override barrelVolume if enclosing is needed -> memory ownership shifted to container
         cSector = m_trackingVolumeCreator->createContainerTrackingVolume(centralVolumes,
                                                                          vacuum,

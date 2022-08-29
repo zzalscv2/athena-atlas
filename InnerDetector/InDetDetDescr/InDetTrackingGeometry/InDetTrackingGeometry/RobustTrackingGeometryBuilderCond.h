@@ -83,7 +83,7 @@ namespace InDet {
       std::unique_ptr<Trk::TrackingGeometry> trackingGeometry
       ATLAS_NOT_THREAD_SAFE(
         const EventContext& ctx,
-        const Trk::TrackingVolume* tVolPair,
+        Trk::TrackingVolume* tVolPair,
         SG::WriteCondHandle<Trk::TrackingGeometry>& whandle) const override;
 
       /** The unique signature */

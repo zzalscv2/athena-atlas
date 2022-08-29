@@ -118,7 +118,7 @@ StatusCode Trk::GeometryBuilder::initialize()
 }
 
 
-Trk::TrackingGeometry* Trk::GeometryBuilder::trackingGeometry(const Trk::TrackingVolume*) const
+Trk::TrackingGeometry* Trk::GeometryBuilder::trackingGeometry(Trk::TrackingVolume*) const
 {
 
     // the geometry to be constructed

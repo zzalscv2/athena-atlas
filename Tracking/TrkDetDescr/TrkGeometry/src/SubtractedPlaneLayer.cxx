@@ -42,7 +42,14 @@ Trk::SubtractedPlaneLayer& Trk::SubtractedPlaneLayer::operator=(
 }
 
 const Trk::SubtractedPlaneSurface&
-Trk::SubtractedPlaneLayer::surfaceRepresentation() const {
+Trk::SubtractedPlaneLayer::surfaceRepresentation() const
+{
+  return (*this);
+}
+
+Trk::SubtractedPlaneSurface&
+Trk::SubtractedPlaneLayer::surfaceRepresentation()
+{
   return (*this);
 }
 

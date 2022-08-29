@@ -120,6 +120,8 @@ class Layer {
 
   /** Transforms the layer into a Surface representation for extrapolation */
   virtual const Surface& surfaceRepresentation() const = 0;
+  virtual Surface& surfaceRepresentation()  = 0;
+
 
   /** Return the Thickness of the Layer */
   double thickness() const;

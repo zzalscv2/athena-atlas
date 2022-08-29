@@ -38,10 +38,10 @@ class MaterialLayer final : public Layer
 public:
   /** Constructor with already existing boundary surface
     - the surface representation is the according boundary surface */
-  MaterialLayer(const Surface& sf, const LayerMaterialProperties& mlprop);
+  MaterialLayer(Surface& sf, const LayerMaterialProperties& mlprop);
 
   /** Constructor with new surface, as of a combined boundary surface */
-  MaterialLayer(const SharedObject<const Surface>& sfso,
+  MaterialLayer(const SharedObject<Surface>& sfso,
                 const LayerMaterialProperties& mlprop);
 
   /**Copy Constructor - */
@@ -55,6 +55,7 @@ public:
 
   /** Transforms the layer into a Surface representation for extrapolation */
   virtual const Surface& surfaceRepresentation() const override final;
+  virtual Surface& surfaceRepresentation() override final;
 
   /** isOnLayer() method, using isOnSurface() with Layer specific
    * tolerance */
@@ -71,7 +72,7 @@ public:
                                         const Amg::Vector3D&,
                                         double) override final {}
 
-  SharedObject<const Surface>
+  SharedObject<Surface>
       m_surfaceRepresentation;  //!< for the navigation Volume the surface is
                                 //!< a private member */
 
@@ -81,6 +82,11 @@ public:
 };
 
 inline const Surface& MaterialLayer::surfaceRepresentation() const {
+  return (*(m_surfaceRepresentation.get()));
+}
+
+
+inline Surface& MaterialLayer::surfaceRepresentation(){
   return (*(m_surfaceRepresentation.get()));
 }
 

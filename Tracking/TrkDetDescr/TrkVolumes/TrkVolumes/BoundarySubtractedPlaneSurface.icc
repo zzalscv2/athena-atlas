@@ -12,6 +12,14 @@ BoundarySubtractedPlaneSurface<Tvol>::surfaceRepresentation() const
 {
   return *this;
 }
+
+template<class Tvol>
+inline Surface&
+BoundarySubtractedPlaneSurface<Tvol>::surfaceRepresentation()
+{
+  return *this;
+}
+
 template<class Tvol>
 inline const Tvol*
 BoundarySubtractedPlaneSurface<Tvol>::attachedVolume(

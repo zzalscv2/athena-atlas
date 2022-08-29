@@ -127,7 +127,14 @@ Trk::PlaneLayer& Trk::PlaneLayer::operator=(const PlaneLayer& play) {
   return (*this);
 }
 
-const Trk::PlaneSurface& Trk::PlaneLayer::surfaceRepresentation() const {
+const Trk::PlaneSurface&
+Trk::PlaneLayer::surfaceRepresentation() const
+{
+  return (*this);
+}
+Trk::PlaneSurface&
+Trk::PlaneLayer::surfaceRepresentation()
+{
   return (*this);
 }
 

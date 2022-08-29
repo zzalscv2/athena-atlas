@@ -126,8 +126,8 @@ StatusCode InDet::StagedTrackingGeometryBuilder::initialize()
 }
 
 
-Trk::TrackingGeometry* InDet::StagedTrackingGeometryBuilder::trackingGeometry ATLAS_NOT_THREAD_SAFE // Thread unsafe TrackingGeometry::indexStaticLayers method is used.
-(const Trk::TrackingVolume*) const
+Trk::TrackingGeometry* InDet::StagedTrackingGeometryBuilder::trackingGeometry ATLAS_NOT_THREAD_SAFE
+(Trk::TrackingVolume*) const
 {
    // only one assumption: 
    // layer builders are ordered in increasing r

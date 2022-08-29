@@ -35,11 +35,11 @@ template<class T> Trk::ExtrapolationCode Trk::StepEngine::targetSurfacesT(Trk::E
     }
 
     // static frame boundaries
-    const std::vector< Trk::SharedObject< const Trk::BoundarySurface< Trk::TrackingVolume> > > &bounds = eCell.leadVolume->boundarySurfaces();
+    const auto &bounds = eCell.leadVolume->boundarySurfaces();
     // count number of non-trivial solutions
     unsigned int iInt=0;
     for (unsigned int ib=0; ib< bounds.size(); ib++ ){
-      const Trk::Surface& surf = (bounds[ib].get())->surfaceRepresentation();
+      const Trk::Surface& surf = (bounds[ib])->surfaceRepresentation();
       Trk::TargetSurface bb(&surf,true,Trk::SurfNavigType::BoundaryFrame,ib,eCell.leadVolume,Trk::TVNavigType::Frame);
       evaluateDistance(bb,gp,mom*dir,ts,trueOrderedIntersections);  
       if (ts.size() && ts.back().surf==&surf && ts.back().distanceAlongPath>m_tolerance) iInt++;
@@ -77,11 +77,11 @@ template<class T> Trk::ExtrapolationCode Trk::StepEngine::targetSurfacesT(Trk::E
 template<class T> Trk::ExtrapolationCode Trk::StepEngine::resolveFrameBoundaryT(Trk::ExtrapolationCell<T>& eCell, Amg::Vector3D gp,
                                                                                 unsigned int bIndex ) const
 {                                                                                                                    
-   const std::vector< Trk::SharedObject< const Trk::BoundarySurface< Trk::TrackingVolume> > > &bounds = eCell.leadVolume->boundarySurfaces();
+   const auto &bounds = eCell.leadVolume->boundarySurfaces();
 
    EX_MSG_VERBOSE(eCell.navigationStep, "navigation", "","current lead volume:"<<eCell.leadVolume->volumeName());
    
-   const Trk::TrackingVolume* nextVolume = bounds[bIndex].get()->attachedVolume(gp, 
+   const Trk::TrackingVolume* nextVolume = bounds[bIndex]->attachedVolume(gp, 
 										   eCell.leadParameters->momentum(), 
 									           eCell.propDirection);  
 

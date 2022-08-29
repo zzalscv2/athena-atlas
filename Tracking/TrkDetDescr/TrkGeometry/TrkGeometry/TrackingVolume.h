@@ -63,6 +63,23 @@ using BoundaryIntersection =
 template<class T>
 using ArraySpan = CxxUtils::span<T>;
 
+//Helper for const correct access to boundary surfaces 
+template<class T>
+class ConstSharedPtrSpan
+{
+public:
+  ConstSharedPtrSpan(const std::vector<std::shared_ptr<T>>& m_var)
+    : m_span(&*(m_var.begin()), &*(m_var.end()))
+  {
+  }
+  // access the ptr
+  const T * operator[](size_t i) const { return m_span[i].get(); }
+  constexpr bool empty() const noexcept { return m_span.empty(); }
+  constexpr size_t size() const noexcept { return m_span.size(); }
+
+private:
+  CxxUtils::span<const std::shared_ptr<T>> m_span;
+};
 /**
  @class TrackingVolume
 
@@ -304,9 +321,9 @@ public:
   const std::string& volumeName() const;
 
   /** Method to return the BoundarySurfaces */
-  const std::vector<SharedObject<const BoundarySurface<TrackingVolume>>>&
-  boundarySurfaces() const;
-
+  std::vector<SharedObject<BoundarySurface<TrackingVolume>>>&
+  boundarySurfaces() ;
+  ConstSharedPtrSpan<BoundarySurface<TrackingVolume>> boundarySurfaces() const;
   /** Returns the boundary surfaces ordered in probability to hit them based on
    * straight line intersection */
   template<class T>
@@ -428,7 +445,7 @@ private:
   const TrackingVolume* m_motherVolume; //!< mother volume of this volume
 
   //!< boundary Surfaces
-  std::vector<SharedObject<const BoundarySurface<TrackingVolume>>>* m_boundarySurfaces{};
+  std::vector<SharedObject<BoundarySurface<TrackingVolume>>> m_boundarySurfaces{};
   //(a)
   LayerArray* m_confinedLayers; //!< Array of Layers inside the Volume
   //!< Array of Volumes inside the Volume

@@ -150,10 +150,17 @@ Trk::CylinderLayer& Trk::CylinderLayer::operator=(const CylinderLayer& clay) {
   return (*this);
 }
 
-const Trk::CylinderSurface& Trk::CylinderLayer::surfaceRepresentation() const {
+const Trk::CylinderSurface&
+Trk::CylinderLayer::surfaceRepresentation() const
+{
   return (*this);
 }
 
+Trk::CylinderSurface&
+Trk::CylinderLayer::surfaceRepresentation()
+{
+  return (*this);
+}
 
 double Trk::CylinderLayer::preUpdateMaterialFactor(
     const Trk::TrackParameters& parm, Trk::PropDirection dir) const {

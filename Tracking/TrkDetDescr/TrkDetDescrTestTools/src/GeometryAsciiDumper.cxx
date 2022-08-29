@@ -69,11 +69,9 @@ StatusCode Trk::GeometryAsciiDumper::processNode(const Trk::TrackingVolume& tvol
    m_outputFile << levelBuffer.str() << "  - transform       : " << Amg::toString( tvol.transform(), 
                                                                                    m_outputPrecision, rotationOffset )   << std::endl;
    m_outputFile << levelBuffer.str() << "  - listing Trk::BoundarySurface objects :" << std::endl;
-   const std::vector< Trk::SharedObject<const Trk::BoundarySurface<Trk::TrackingVolume> > >& bSurfaces = tvol.boundarySurfaces();
-   std::vector< Trk::SharedObject<const Trk::BoundarySurface<Trk::TrackingVolume> > >::const_iterator bSurfIter  = bSurfaces.begin();
-   std::vector< Trk::SharedObject<const Trk::BoundarySurface<Trk::TrackingVolume> > >::const_iterator bSurfIterE = bSurfaces.end();
-   for (size_t ib = 0 ; bSurfIter != bSurfIterE; ++bSurfIter, ++ib ){
-         if ( processNode((**bSurfIter).surfaceRepresentation(), level+4).isFailure() )
+   const auto& bSurfaces = tvol.boundarySurfaces();
+   for (size_t ib = 0 ; ib < bSurfaces.size(); ++ib ){
+         if ( processNode(bSurfaces[ib]->surfaceRepresentation(), level+4).isFailure() )
          ATH_MSG_WARNING("Problem to write out the boundary surfaces of TrackingVolume '" << tvol.volumeName() << "'." );
    }
 

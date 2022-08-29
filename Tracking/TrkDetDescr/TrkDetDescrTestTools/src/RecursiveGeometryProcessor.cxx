@@ -89,10 +89,10 @@ StatusCode Trk::RecursiveGeometryProcessor::process(const Trk::TrackingVolume& t
 
    // Process the boundary surface layers 
    const auto & bSurfaces = tvol.boundarySurfaces();
-   for (const auto & bsIter : bSurfaces ){
-       if (bsIter->surfaceRepresentation().associatedLayer()){
+   for (size_t ib =0 ; ib < bSurfaces.size() ; ++ib){
+       if (bSurfaces[ib]->surfaceRepresentation().associatedLayer()){
            ATH_MSG_VERBOSE(displayBuffer.str() << "--> has a boundary layer." ); 
-           if ( process(*bsIter->surfaceRepresentation().associatedLayer(), level).isFailure() ){
+           if ( process(*bSurfaces[ib]->surfaceRepresentation().associatedLayer(), level).isFailure() ){
               ATH_MSG_FATAL("Failed to call process(const Layer&) on boundary layer. Aborting.");
               return StatusCode::FAILURE;
            }
