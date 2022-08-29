@@ -6,10 +6,14 @@
 # art-include: master/Athena
 # art-output: RUN4_presampling.mu140.RDO.pool.root
 
+if [ -z ${ATLAS_REFERENCE_DATA+x} ]; then
+  ATLAS_REFERENCE_DATA="/cvmfs/atlas-nightlies.cern.ch/repo/data/data-art"
+fi
+
 Events=25
-HSHitsFile="/cvmfs/atlas-nightlies.cern.ch/repo/data/data-art/PhaseIIUpgrade/HITS/ATLAS-P2-RUN4-01-00-00/mc15_14TeV.900149.PG_single_nu_Pt50.simul.HITS.e8371_s3856/HITS.29179777._000918.pool.root.1"
-HighPtMinbiasHitsFiles="/cvmfs/atlas-nightlies.cern.ch/repo/data/data-art/PhaseIIUpgrade/HITS/ATLAS-P2-RUN4-01-00-00/mc15_14TeV.800381.Py8EG_A3NNPDF23LO_minbias_inelastic_high_keepJets.merge.HITS.e8205_s3856_s3857/*"
-LowPtMinbiasHitsFiles="/cvmfs/atlas-nightlies.cern.ch/repo/data/data-art/PhaseIIUpgrade/HITS/ATLAS-P2-RUN4-01-00-00/mc15_14TeV.800380.Py8EG_A3NNPDF23LO_minbias_inelastic_low_keepJets.merge.HITS.e8205_s3856_s3857/*"
+HSHitsFile="${ATLAS_REFERENCE_DATA}/PhaseIIUpgrade/HITS/ATLAS-P2-RUN4-01-00-00/mc15_14TeV.900149.PG_single_nu_Pt50.simul.HITS.e8371_s3856/HITS.29179777._000918.pool.root.1"
+HighPtMinbiasHitsFiles="${ATLAS_REFERENCE_DATA}/PhaseIIUpgrade/HITS/ATLAS-P2-RUN4-01-00-00/mc15_14TeV.800381.Py8EG_A3NNPDF23LO_minbias_inelastic_high_keepJets.merge.HITS.e8205_s3856_s3857/*"
+LowPtMinbiasHitsFiles="${ATLAS_REFERENCE_DATA}/PhaseIIUpgrade/HITS/ATLAS-P2-RUN4-01-00-00/mc15_14TeV.800380.Py8EG_A3NNPDF23LO_minbias_inelastic_low_keepJets.merge.HITS.e8205_s3856_s3857/*"
 DigiOutFileName="RUN4_presampling.mu140.RDO.pool.root"
 
 Digi_tf.py \
@@ -33,12 +37,14 @@ rc=$?
 status=$rc
 echo "art-result: $rc digiCA"
 
-rc2=-9999
-if [ $rc -eq 0 ]; then
-  art.py compare grid --entries 10 "${1}" "${2}" --mode=semi-detailed --file="$DigiOutFileName"
-  rc2=$?
-  status=$rc2
+if command -v art.py >/dev/null 2>&1; then
+  rc2=-9999
+  if [ $rc -eq 0 ]; then
+    art.py compare grid --entries 10 "${1}" "${2}" --mode=semi-detailed --file="$DigiOutFileName"
+    rc2=$?
+    status=$rc2
+  fi
+  echo "art-result: $rc2 regression"
 fi
-echo "art-result: $rc2 regression"
 
 exit $status

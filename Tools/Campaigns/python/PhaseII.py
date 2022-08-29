@@ -18,6 +18,23 @@ def PhaseIIPileUpBase(flags, collisions=200):
     flags.Tile.correctTime = False
 
 
+def PhaseIIPileUp1(flags):
+    """Phase-II Upgrade / Run 4 flags for MC with pile-up, mu=1, conditions like mu=60"""
+    PhaseIIPileUpBase(flags, collisions=60)
+
+    flags.Digitization.PU.NumberOfLowPtMinBias = 1.996
+    flags.Digitization.PU.NumberOfHighPtMinBias = 0.004
+    flags.Digitization.PU.BunchStructureConfig = 'RunDependentSimData.BunchStructure_2017'
+    flags.Digitization.PU.CustomProfile={
+        'run': 242006,
+        'startmu': 1.0,
+        'endmu': 2.0,
+        'stepmu': 1.0,
+        'startlb': 1,
+        'timestamp': 1412006000
+    }
+
+
 def PhaseIIPileUp60(flags):
     """Phase-II Upgrade / Run 4 flags for MC with pile-up, mu=60"""
     PhaseIIPileUpBase(flags, collisions=60)
@@ -85,6 +102,16 @@ def PhaseIIPileUp200(flags):
         'startlb': 1,
         'timestamp': 1412020000
     }
+
+
+def PhaseIIPileUpMC21a(flags):
+    """Phase-II Upgrade / Run 4 flags for MC with pile-up, MC21a pile-up profile"""
+    PhaseIIPileUpBase(flags, collisions=60)
+
+    flags.Digitization.PU.NumberOfLowPtMinBias = 84.335
+    flags.Digitization.PU.NumberOfHighPtMinBias = 0.165
+    flags.Digitization.PU.BunchStructureConfig = 'RunDependentSimData.BunchStructure_Fill7314_BCMSPattern_Flat'
+    flags.Digitization.PU.ProfileConfig = 'RunDependentSimData.PileUpProfile_run242006_MC21a_SingleBeamspot'
 
 
 def PhaseIINoPileUp(flags):
