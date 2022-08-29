@@ -49,11 +49,13 @@ ATH_ENABLE_VECTORIZATION;
 
 
 namespace{
+
+using Cache = Trk::STEP_Propagator::Cache;
 /////////////////////////////////////////////////////////////////////////////////
 // methods for magnetic field information
 /////////////////////////////////////////////////////////////////////////////////
 void
-getField(Trk::STEP_Propagator::Cache& cache, const double* R, double* H)
+getField(Cache& cache, const double* R, double* H)
 {
   if (cache.m_solenoid) {
     cache.m_fieldCache.getFieldZR(R, H);
@@ -63,7 +65,7 @@ getField(Trk::STEP_Propagator::Cache& cache, const double* R, double* H)
 }
 
 void
-getFieldGradient(Trk::STEP_Propagator::Cache& cache, const double* R, double* H, double* dH)
+getFieldGradient(Cache& cache, const double* R, double* H, double* dH)
 {
   if (cache.m_solenoid) {
     cache.m_fieldCache.getFieldZR(R, H, dH);
@@ -71,6 +73,55 @@ getFieldGradient(Trk::STEP_Propagator::Cache& cache, const double* R, double* H,
     cache.m_fieldCache.getField(R, H, dH);
   }
 }
+
+/////////////////////////////////////////////////////////////////////////////////
+// Get the magnetic field and gradients
+// Input: Globalposition
+// Output: BG, which contains Bx, By, Bz, dBx/dx, dBx/dy, dBx/dz, dBy/dx,
+// dBy/dy, dBy/dz, dBz/dx, dBz/dy, dBz/dz
+/////////////////////////////////////////////////////////////////////////////////
+
+void
+getMagneticField(Cache& cache,
+                 const Amg::Vector3D& position,
+                 bool getGradients,
+                 double* ATH_RESTRICT BG)
+{
+  constexpr double magScale = 10000.;
+  const double* R = position.data();
+  double H[3];
+  double dH[9];
+
+  if (getGradients &&
+      cache.m_includeBgradients) { // field gradients needed and available
+
+    getFieldGradient(cache, R, H, dH);
+    BG[0] = H[0] * magScale;
+    BG[1] = H[1] * magScale;
+    BG[2] = H[2] * magScale;
+    BG[3] = dH[0] * magScale;
+    BG[4] = dH[1] * magScale;
+    BG[5] = dH[2] * magScale;
+    BG[6] = dH[3] * magScale;
+    BG[7] = dH[4] * magScale;
+    BG[8] = dH[5] * magScale;
+    BG[9] = dH[6] * magScale;
+    BG[10] = dH[7] * magScale;
+    BG[11] = dH[8] * magScale;
+
+  } else { // Homogenous field or no gradients needed, only retrieve the field
+           // strength.
+    getField(cache, R, H);
+    BG[0] = H[0] * magScale;
+    BG[1] = H[1] * magScale;
+    BG[2] = H[2] * magScale;
+
+    for (int i = 3; i < 12; ++i) { // Set gradients to zero
+      BG[i] = 0.;
+    }
+  }
+}
+
 /////////////////////////////////////////////////////////////////////////////////
 // Create straight line in case of q/p = 0
 /////////////////////////////////////////////////////////////////////////////////
@@ -193,12 +244,266 @@ propagateNeutral(const Trk::TrackParameters& parm,
 }
 
 void
-clearCache(Trk::STEP_Propagator::Cache& cache)
+clearMaterialEffects(Trk::STEP_Propagator::Cache& cache)
 {
   cache.m_delIoni = 0.;
   cache.m_delRad = 0.;
   cache.m_sigmaIoni = 0.;
   cache.m_sigmaRad = 0.;
+}
+
+/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+// Calculate energy loss in MeV/mm.
+/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+double
+dEds(Cache& cache, double p)
+{
+  cache.m_delIoni = 0.;
+  cache.m_delRad = 0.;
+  cache.m_kazL = 0.;
+
+  if (cache.m_particle == Trk::geantino || cache.m_particle == Trk::nonInteractingMuon)
+    return 0.;
+  if (cache.m_material->x0() == 0 || cache.m_material->averageZ() == 0)
+    return 0.;
+
+  cache.m_delIoni =
+    Trk::MaterialInteraction::dEdl_ionization(p, cache.m_material, cache.m_particle, cache.m_sigmaIoni, cache.m_kazL);
+
+  cache.m_delRad = Trk::MaterialInteraction::dEdl_radiation(p, cache.m_material, cache.m_particle, cache.m_sigmaRad);
+
+  double eLoss = cache.m_MPV ? 0.9 * cache.m_delIoni + 0.15 * cache.m_delRad : cache.m_delIoni + cache.m_delRad;
+
+  return eLoss;
+}
+
+/////////////////////////////////////////////////////////////////////////////////
+// dg/dlambda for non-electrons (g=dEdX and lambda=q/p).
+/////////////////////////////////////////////////////////////////////////////////
+
+double
+dgdlambda(Cache& cache, double l)
+{
+  if (cache.m_particle == Trk::geantino || cache.m_particle == Trk::nonInteractingMuon)
+    return 0.;
+  if (cache.m_material->x0() == 0 || cache.m_material->averageZ() == 0)
+    return 0.;
+  if (cache.m_material->zOverAtimesRho() == 0)
+    return 0.;
+
+  double p = std::abs(1. / l);
+  double m = Trk::ParticleMasses::mass[cache.m_particle];
+  double me = Trk::ParticleMasses::mass[Trk::electron];
+  double E = std::sqrt(p * p + m * m);
+  double beta = p / E;
+  double gamma = E / m;
+  double I = 16.e-6 * std::pow(cache.m_material->averageZ(), 0.9);
+  double kaz = 0.5 * 30.7075 * cache.m_material->zOverAtimesRho();
+
+  // Bethe-Bloch
+  double lnCore = 4. * me * me / (m * m * m * m * I * I * l * l * l * l) / (1. + 2. * gamma * me / m + me * me / m * m);
+  double lnCore_deriv =
+    -4. * me * me / (m * m * m * m * I * I) *
+    std::pow(l * l * l * l + 2. * gamma * l * l * l * l * me / m + l * l * l * l * me * me / (m * m), -2) *
+    (4. * l * l * l + 8. * me * l * l * l * gamma / m - 2. * me * l / (m * m * m * gamma) +
+     4. * l * l * l * me * me / (m * m));
+  double ln_deriv = 2. * l * m * m * std::log(lnCore) + lnCore_deriv / (lnCore * beta * beta);
+  double Bethe_Bloch_deriv = -kaz * ln_deriv;
+
+  // density effect, only valid for high energies (gamma > 10 -> p > 1GeV for muons)
+  if (gamma > 10.) {
+    double delta = 2. * std::log(28.816e-6 * std::sqrt(1000. * cache.m_material->zOverAtimesRho()) / I) +
+                   2. * std::log(beta * gamma) - 1.;
+    double delta_deriv = -2. / (l * beta * beta) + 2. * delta * l * m * m;
+    Bethe_Bloch_deriv += kaz * delta_deriv;
+  }
+
+  // Bethe-Heitler
+  double Bethe_Heitler_deriv = me * me / (m * m * cache.m_material->x0() * l * l * l * E);
+
+  // Radiative corrections (e+e- pair production + photonuclear) for muons at energies above 8 GeV and below 1 TeV
+  double radiative_deriv = 0.;
+  if ((cache.m_particle == Trk::muon) && (E > 8000.)) {
+    if (E < 1.e6) {
+      radiative_deriv = 6.803e-5 / (cache.m_material->x0() * l * l * l * E) +
+                        2. * 2.278e-11 / (cache.m_material->x0() * l * l * l) -
+                        3. * 9.899e-18 * E / (cache.m_material->x0() * l * l * l);
+    } else {
+      radiative_deriv = 9.253e-5 / (cache.m_material->x0() * l * l * l * E);
+    }
+  }
+
+  // return the total derivative
+  if (cache.m_MPV) {
+    return 0.9 * Bethe_Bloch_deriv + 0.15 * Bethe_Heitler_deriv + 0.15 * radiative_deriv; // Most probable value
+  } else {
+    return Bethe_Bloch_deriv + Bethe_Heitler_deriv + radiative_deriv; // Mean value
+  }
+}
+
+////////////////////////////////////////////////////////////////////////////////////////////////////////
+// update material effects   // to follow change of material
+////////////////////////////////////////////////////////////////////////////////////////////////////////
+void
+updateMaterialEffects(Cache& cache, double mom, double sinTheta, double path)
+{
+  // collects material effects in between material dumps ( m_covariance )
+
+  // collect straggling
+  if (cache.m_straggling) {
+    cache.m_covariance(4, 4) += cache.m_stragglingVariance;
+    cache.m_stragglingVariance = 0.;
+  }
+
+  if (!cache.m_multipleScattering)
+    return;
+
+  double totalMomentumLoss = mom - cache.m_matupd_lastmom;
+  double pathSinceLastUpdate = path - cache.m_matupd_lastpath;
+
+  double pathAbs = std::abs(pathSinceLastUpdate);
+
+  if (pathAbs < 1.e-03)
+    return;
+
+  double matX0 = cache.m_material->x0();
+
+  // calculate number of layers : TODO : thickness to be adjusted
+  int msLayers = int(pathAbs / cache.m_layXmax / matX0) + 1;
+
+  double massSquared = Trk::ParticleMasses::mass[cache.m_particle] * Trk::ParticleMasses::mass[cache.m_particle];
+  double layerThickness = pathAbs / msLayers;
+  double radiationLengths = layerThickness / matX0;
+  sinTheta = std::max(sinTheta, 1e-20); // avoid division by zero
+  double remainingPath = pathAbs;
+  double momentum = 0.;
+  double mom2 = 0.;
+  double E = 0.;
+  double beta = 0.;
+  double dLambdads = 0.;
+  double thetaVariance = 0.;
+
+  double average_dEds = totalMomentumLoss / pathAbs;
+
+  double cumulatedVariance = cache.m_inputThetaVariance + cache.m_combinedCovariance(3, 3) + cache.m_covariance(3, 3);
+  if (cumulatedVariance < 0) {
+    cumulatedVariance = 0;
+  }
+  double cumulatedX0 = 0.;
+
+  bool useCache = cache.m_extrapolationCache != nullptr;
+  if (useCache) {
+    double dX0 = std::abs(cache.m_combinedThickness) - pathAbs / matX0;
+    if (dX0 < 0)
+      dX0 = 0.;
+    if (cache.m_extrapolationCache->x0tot() > 0)
+      cumulatedX0 = cache.m_extrapolationCache->x0tot() + dX0;
+  }
+
+  // calculate multiple scattering by summing the contributions from the layers
+  for (int layer = 1; layer <= msLayers; ++layer) {
+
+    // calculate momentum in the middle of the layer by assuming a linear momentum loss
+    momentum = cache.m_matupd_lastmom + totalMomentumLoss * (layer - 0.5) / msLayers;
+
+    mom2 = momentum * momentum;
+    E = std::sqrt(mom2 + massSquared);
+    beta = momentum / E;
+
+    double C0 = 13.6 * 13.6 / mom2 / beta / beta;
+    double C1 = 2 * 0.038 * C0;
+    double C2 = 0.038 * 0.038 * C0;
+
+    double MS2 = radiationLengths;
+
+    dLambdads = -cache.m_charge * average_dEds * E / (momentum * momentum * momentum);
+    remainingPath -= layerThickness;
+
+    // simple - step dependent formula
+    // thetaVariance = C0*MS2 + C1*MS2*log(MS2) + C2*MS2*log(MS2)*log(MS2);
+
+    // replaced by the step-size independent code below
+    if (!useCache) {
+      cumulatedX0 = cumulatedVariance / C0;
+      if (cumulatedX0 > 0.001) {
+        double lX0 = log(cumulatedX0);
+        cumulatedX0 = cumulatedX0 / (1 + 2 * 0.038 * lX0 + 0.038 * 0.038 * lX0 * lX0);
+      }
+    }
+
+    double MS2s = MS2 + cumulatedX0;
+    thetaVariance = C0 * MS2 + C1 * MS2s * log(MS2s) + C2 * MS2s * log(MS2s) * log(MS2s);
+
+    if (cumulatedX0 > 0.001) {
+      double lX0 = log(cumulatedX0);
+      thetaVariance += -C1 * cumulatedX0 * lX0 - C2 * cumulatedX0 * lX0 * lX0;
+    }
+
+    // Calculate ms covariance contributions and scale
+    double varScale = cache.m_scatteringScale * cache.m_scatteringScale;
+    double positionVariance = thetaVariance * (layerThickness * layerThickness / 3. + remainingPath * layerThickness +
+                                               remainingPath * remainingPath);
+    cache.m_covariance(0, 0) += varScale * positionVariance;
+    cache.m_covariance(1, 1) += varScale * positionVariance;
+    cache.m_covariance.fillSymmetric(
+      2, 0, cache.m_covariance(2, 0) + varScale * thetaVariance / (sinTheta) * (layerThickness / 2. + remainingPath));
+    cache.m_covariance(2, 2) += varScale * thetaVariance / (sinTheta * sinTheta);
+    cache.m_covariance.fillSymmetric(
+      3, 1, cache.m_covariance(3, 1) + varScale * thetaVariance * (-layerThickness / 2. - remainingPath));
+    cache.m_covariance(3, 3) += varScale * thetaVariance;
+    cache.m_covariance(4, 4) +=
+      varScale * 3. * thetaVariance * thetaVariance * layerThickness * layerThickness * dLambdads * dLambdads;
+    cumulatedVariance += varScale * thetaVariance;
+    cumulatedX0 += MS2;
+  }
+
+  cache.m_matupd_lastmom = mom;
+  cache.m_matupd_lastpath = path;
+}
+
+/////////////////////////////////////////////////////////////////////////////////
+// Multiple scattering and straggling contribution to the covariance matrix
+/////////////////////////////////////////////////////////////////////////////////
+
+void
+covarianceContribution(Cache& cache,
+                       const Trk::TrackParameters* trackParameters,
+                       double path,
+                       const Trk::TrackParameters* targetParms,
+                       AmgSymMatrix(5) * measurementCovariance)
+{
+  // kinematics
+  double finalMomentum = targetParms->momentum().mag();
+
+  // first update to make sure all material counted
+  updateMaterialEffects(cache, finalMomentum, sin(trackParameters->momentum().theta()), path);
+
+  double Jac[21];
+  Trk::RungeKuttaUtils::jacobianTransformCurvilinearToLocal(*targetParms, Jac);
+
+  // Transform multiple scattering and straggling covariance from curvilinear to local system
+  AmgSymMatrix(5) localMSCov =
+    Trk::RungeKuttaUtils::newCovarianceMatrix(Jac, cache.m_combinedCovariance + cache.m_covariance);
+
+  *measurementCovariance += localMSCov;
+}
+
+/////////////////////////////////////////////////////////////////////////////////////////////////////////
+// Multiple scattering and straggling contribution to the covariance matrix in curvilinear representation
+/////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+void
+covarianceContribution(Cache& cache,
+                       const Trk::TrackParameters* trackParameters,
+                       double path,
+                       double finalMomentum,
+                       AmgSymMatrix(5) * measurementCovariance)
+{
+  // first update to make sure all material counted
+  updateMaterialEffects(cache, finalMomentum, sin(trackParameters->momentum().theta()), path);
+
+  // Add measurement errors and multiple scattering + straggling covariance
+  *measurementCovariance += cache.m_combinedCovariance + cache.m_covariance;
 }
 
 } // end of anonymous namespace
@@ -333,9 +638,14 @@ clearCache(Trk::STEP_Propagator::Cache& cache)
 
         // Get field cache object
         getFieldCacheObject(cache, ctx);
-
+        cache.m_includeBgradients = m_includeBgradients;
         cache.m_detailedElossFlag = m_detailedEloss;
-        clearCache(cache);
+        cache.m_MPV = m_MPV;
+        cache.m_multipleScattering = m_multipleScattering;
+        cache.m_straggling = m_straggling;
+        cache.m_scatteringScale = m_scatteringScale;
+        cache.m_layXmax = m_layXmax;
+        clearMaterialEffects(cache);
 
         // Check for tracking volume (materialproperties)
         cache.m_trackingVolume = tVol;
@@ -387,9 +697,14 @@ clearCache(Trk::STEP_Propagator::Cache& cache)
 
         // Get field cache object
         getFieldCacheObject(cache, ctx);
-
+        cache.m_includeBgradients = m_includeBgradients;
         cache.m_detailedElossFlag = m_detailedEloss;
-        clearCache(cache);
+        cache.m_MPV = m_MPV;
+        cache.m_multipleScattering = m_multipleScattering;
+        cache.m_straggling = m_straggling;
+        cache.m_scatteringScale = m_scatteringScale;
+        cache.m_layXmax = m_layXmax;
+        clearMaterialEffects(cache);
 
         // Check for tracking volume (materialproperties)
         cache.m_trackingVolume = tVol;
@@ -456,9 +771,14 @@ clearCache(Trk::STEP_Propagator::Cache& cache)
 
         // Get field cache object
         getFieldCacheObject(cache, ctx);
-
+        cache.m_includeBgradients = m_includeBgradients;
         cache.m_detailedElossFlag = m_detailedEloss;
-        clearCache(cache);
+        cache.m_MPV = m_MPV;
+        cache.m_multipleScattering = m_multipleScattering;
+        cache.m_straggling = m_straggling;
+        cache.m_scatteringScale = m_scatteringScale;
+        cache.m_layXmax = m_layXmax;
+        clearMaterialEffects(cache);
 
         // cache particle mass
         cache.m_particleMass = Trk::ParticleMasses::mass[particle]; // Get particle mass from ParticleHypothesis
@@ -561,9 +881,14 @@ clearCache(Trk::STEP_Propagator::Cache& cache)
 
         // Get field cache object
         getFieldCacheObject(cache, ctx);
-
+        cache.m_includeBgradients = m_includeBgradients;
         cache.m_detailedElossFlag = m_detailedEloss;
-        clearCache(cache);
+        cache.m_MPV = m_MPV;
+        cache.m_multipleScattering = m_multipleScattering;
+        cache.m_straggling = m_straggling;
+        cache.m_scatteringScale = m_scatteringScale;
+        cache.m_layXmax = m_layXmax;
+        clearMaterialEffects(cache);
 
         // Check for tracking volume (materialproperties)
         cache.m_trackingVolume = tVol;
@@ -633,9 +958,14 @@ clearCache(Trk::STEP_Propagator::Cache& cache)
 
         // Get field cache object
         getFieldCacheObject(cache, ctx);
-
+        cache.m_includeBgradients = m_includeBgradients;
         cache.m_detailedElossFlag = m_detailedEloss;
-        clearCache(cache);
+        cache.m_MPV = m_MPV;
+        cache.m_multipleScattering = m_multipleScattering;
+        cache.m_straggling = m_straggling;
+        cache.m_scatteringScale = m_scatteringScale;
+        cache.m_layXmax = m_layXmax;
+        clearMaterialEffects(cache);
 
         // Check for tracking volume (materialproperties)
         cache.m_trackingVolume = tVol;
@@ -698,9 +1028,14 @@ clearCache(Trk::STEP_Propagator::Cache& cache)
 
         // Get field cache object
         getFieldCacheObject(cache, ctx);
-
+        cache.m_includeBgradients = m_includeBgradients;
         cache.m_detailedElossFlag = m_detailedEloss;
-        clearCache(cache);
+        cache.m_MPV = m_MPV;
+        cache.m_multipleScattering = m_multipleScattering;
+        cache.m_straggling = m_straggling;
+        cache.m_scatteringScale = m_scatteringScale;
+        cache.m_layXmax = m_layXmax;
+        clearMaterialEffects(cache);
 
         // Check for tracking volume (materialproperties)
         cache.m_trackingVolume = tVol;
@@ -747,9 +1082,14 @@ clearCache(Trk::STEP_Propagator::Cache& cache)
 
         // Get field cache object
         getFieldCacheObject(cache, ctx);
-
+        cache.m_includeBgradients = m_includeBgradients;
         cache.m_detailedElossFlag = m_detailedEloss;
-        clearCache(cache);
+        cache.m_MPV = m_MPV;
+        cache.m_multipleScattering = m_multipleScattering;
+        cache.m_straggling = m_straggling;
+        cache.m_scatteringScale = m_scatteringScale;
+        cache.m_layXmax = m_layXmax;
+        clearMaterialEffects(cache);
 
         // Check for tracking volume (materialproperties)
         cache.m_trackingVolume = tVol;
@@ -803,9 +1143,14 @@ clearCache(Trk::STEP_Propagator::Cache& cache)
 
         // Get field cache object
         getFieldCacheObject(cache, ctx);
-
+        cache.m_includeBgradients = m_includeBgradients;
         cache.m_detailedElossFlag = m_detailedEloss;
-        clearCache(cache);
+        cache.m_MPV = m_MPV;
+        cache.m_multipleScattering = m_multipleScattering;
+        cache.m_straggling = m_straggling;
+        cache.m_scatteringScale = m_scatteringScale;
+        cache.m_layXmax = m_layXmax;
+        clearMaterialEffects(cache);
 
         cache.m_particle = particle; // Store for later use
 
@@ -977,9 +1322,14 @@ clearCache(Trk::STEP_Propagator::Cache& cache)
 
         // Get field cache object
         getFieldCacheObject(cache, ctx);
-
+        cache.m_includeBgradients = m_includeBgradients;
         cache.m_detailedElossFlag = m_detailedEloss;
-        clearCache(cache);
+        cache.m_MPV = m_MPV;
+        cache.m_multipleScattering = m_multipleScattering;
+        cache.m_straggling = m_straggling;
+        cache.m_scatteringScale = m_scatteringScale;
+        cache.m_layXmax = m_layXmax;
+        clearMaterialEffects(cache);
 
         cache.m_particle = particle; // Store for later use
 
@@ -1124,7 +1474,7 @@ clearCache(Trk::STEP_Propagator::Cache& cache)
                                   (cache.m_material->zOverAtimesRho() != cache.m_material->zOverAtimesRho()))) {
           cache.m_matPropOK = false;
         }
-        if (cache.m_matPropOK && m_straggling)
+        if (cache.m_matPropOK && cache.m_straggling)
           cache.m_stragglingVariance = 0.;
         if (errorPropagation || cache.m_matstates) {
           cache.m_combinedCovariance.setZero();
@@ -1245,7 +1595,7 @@ clearCache(Trk::STEP_Propagator::Cache& cache)
           AmgSymMatrix(5) measurementCovariance =
             Trk::RungeKuttaUtils::newCovarianceMatrix(Jacobian, *trackParameters->covariance());
 
-          if (cache.m_matPropOK && (m_multipleScattering || m_straggling) && std::abs(path) > 0.)
+          if (cache.m_matPropOK && (cache.m_multipleScattering || cache.m_straggling) && std::abs(path) > 0.)
             covarianceContribution(
               cache, trackParameters.get(), path, std::abs(1. / cache.m_P[6]), &measurementCovariance);
 
@@ -1275,7 +1625,7 @@ clearCache(Trk::STEP_Propagator::Cache& cache)
           Trk::RungeKuttaUtils::newCovarianceMatrix(Jacobian, *trackParameters->covariance());
 
         // Calculate multiple scattering and straggling covariance contribution.
-        if (cache.m_matPropOK && (m_multipleScattering || m_straggling) && std::abs(path) > 0.)
+        if (cache.m_matPropOK && (cache.m_multipleScattering || cache.m_straggling) && std::abs(path) > 0.)
           covarianceContribution(cache, trackParameters.get(), path, onTargetSurf.get(), &measurementCovariance);
 
         return targetSurface.createUniqueTrackParameters(
@@ -1339,7 +1689,7 @@ clearCache(Trk::STEP_Propagator::Cache& cache)
           errorPropagation = false;
         }
 
-        if (cache.m_matPropOK && errorPropagation && m_straggling)
+        if (cache.m_matPropOK && errorPropagation && cache.m_straggling)
           cache.m_stragglingVariance = 0.;
         cache.m_combinedCovariance.setZero();
         cache.m_covariance.setZero();
@@ -1394,7 +1744,7 @@ clearCache(Trk::STEP_Propagator::Cache& cache)
               AmgSymMatrix(5) measurementCovariance =
                 Trk::RungeKuttaUtils::newCovarianceMatrix(Jacobian, *trackParameters->covariance());
               // Calculate multiple scattering and straggling covariance contribution.
-              if (cache.m_matPropOK && (m_multipleScattering || m_straggling) && std::abs(totalPath) > 0.) {
+              if (cache.m_matPropOK && (cache.m_multipleScattering || cache.m_straggling) && std::abs(totalPath) > 0.) {
                 covarianceContribution(
                   cache, trackParameters.get(), totalPath, std::abs(1. / cache.m_P[6]), &measurementCovariance);
               }
@@ -1481,7 +1831,7 @@ clearCache(Trk::STEP_Propagator::Cache& cache)
           return nullptr;
 
         // Calculate multiple scattering and straggling covariance contribution.
-        if (cache.m_matPropOK && (m_multipleScattering || m_straggling) && std::abs(totalPath) > 0.) {
+        if (cache.m_matPropOK && (cache.m_multipleScattering || cache.m_straggling) && std::abs(totalPath) > 0.) {
           if (returnCurv || targetSurfaces[solutions[0]].first->type() == Trk::SurfaceType::Cone) {
             covarianceContribution(
               cache, trackParameters.get(), totalPath, std::abs(1. / cache.m_P[6]), &measurementCovariance);
@@ -1555,7 +1905,7 @@ clearCache(Trk::STEP_Propagator::Cache& cache)
               cache.m_sigmaIoni - cache.m_kazL * log(std::abs(distanceStepped)); // the non-linear term
           }
           // update straggling covariance
-          if (errorPropagation && m_straggling) {
+          if (errorPropagation && cache.m_straggling) {
             double sigTot2 = cache.m_sigmaIoni * cache.m_sigmaIoni + cache.m_sigmaRad * cache.m_sigmaRad;
             // /(beta*beta*p*p*p*p) transforms Var(E) to Var(q/p)
             mom = std::abs(1. / P[6]);
@@ -1568,7 +1918,7 @@ clearCache(Trk::STEP_Propagator::Cache& cache)
                                          cache.m_sigmaIoni * std::abs(distanceStepped),
                                          cache.m_delRad * distanceStepped,
                                          cache.m_sigmaRad * std::abs(distanceStepped),
-                                         m_MPV);
+                                         cache.m_MPV);
           // Calculate new distance to target
           previousDistance = std::abs(distanceToTarget);
           distanceToTarget = distance(surfaceType, targetSurface, P, distanceEstimationSuccessful);
@@ -1794,7 +2144,7 @@ clearCache(Trk::STEP_Propagator::Cache& cache)
               cache.m_sigmaIoni = cache.m_sigmaIoni - cache.m_kazL * log(std::abs(distanceStepped));
             }
             // update straggling covariance
-            if (errorPropagation && m_straggling) {
+            if (errorPropagation && cache.m_straggling) {
               // 15% of the Radition moves the MOP value thus only 85% is accounted for by the Mean-MOP shift
               double sigTot2 = cache.m_sigmaIoni * cache.m_sigmaIoni + cache.m_sigmaRad * cache.m_sigmaRad;
               // /(beta*beta*p*p*p*p) transforms Var(E) to Var(q/p)
@@ -1806,7 +2156,7 @@ clearCache(Trk::STEP_Propagator::Cache& cache)
                                            cache.m_sigmaIoni * std::abs(distanceStepped),
                                            cache.m_delRad * distanceStepped,
                                            cache.m_sigmaRad * std::abs(distanceStepped),
-                                           m_MPV);
+                                           cache.m_MPV);
             }
             if (cache.m_material && cache.m_material->x0() != 0.) {
               cache.m_combinedThickness += propDir * distanceStepped / cache.m_material->x0();
@@ -1825,7 +2175,7 @@ clearCache(Trk::STEP_Propagator::Cache& cache)
           if (std::abs(distanceStepped) > 0.001)
             cache.m_sigmaIoni = cache.m_sigmaIoni - cache.m_kazL * log(std::abs(distanceStepped));
           // update straggling covariance
-          if (errorPropagation && m_straggling) {
+          if (errorPropagation && cache.m_straggling) {
             // 15% of the Radition moves the MOP value thus only 85% is accounted for by the Mean-MOP shift
             double sigTot2 = cache.m_sigmaIoni * cache.m_sigmaIoni + cache.m_sigmaRad * cache.m_sigmaRad;
             // /(beta*beta*p*p*p*p) transforms Var(E) to Var(q/p)
@@ -1837,7 +2187,7 @@ clearCache(Trk::STEP_Propagator::Cache& cache)
                                          cache.m_sigmaIoni * std::abs(distanceStepped),
                                          cache.m_delRad * distanceStepped,
                                          cache.m_sigmaRad * std::abs(distanceStepped),
-                                         m_MPV);
+                                         cache.m_MPV);
           }
           if (cache.m_material && cache.m_material->x0() != 0.) {
             cache.m_combinedThickness += propDir * distanceStepped / cache.m_material->x0();
@@ -2616,166 +2966,9 @@ Trk::STEP_Propagator::rungeKuttaStep(Cache& cache,
   }
 }
 
-/////////////////////////////////////////////////////////////////////////////////
-// Get the magnetic field and gradients
-// Input: Globalposition
-// Output: BG, which contains Bx, By, Bz, dBx/dx, dBx/dy, dBx/dz, dBy/dx, dBy/dy, dBy/dz, dBz/dx, dBz/dy, dBz/dz
-/////////////////////////////////////////////////////////////////////////////////
-
-void
-Trk::STEP_Propagator::getMagneticField(Cache& cache,
-                                       const Amg::Vector3D& position,
-                                       bool getGradients,
-                                       double* ATH_RESTRICT BG) const
-{
-  const double magScale = 10000.;
-  const double* R = position.data();
-  double H[3];
-  double dH[9];
-
-  if (getGradients && m_includeBgradients) { // field gradients needed and available
-
-    getFieldGradient(cache, R, H, dH);
-    BG[0] = H[0] * magScale;
-    BG[1] = H[1] * magScale;
-    BG[2] = H[2] * magScale;
-    BG[3] = dH[0] * magScale;
-    BG[4] = dH[1] * magScale;
-    BG[5] = dH[2] * magScale;
-    BG[6] = dH[3] * magScale;
-    BG[7] = dH[4] * magScale;
-    BG[8] = dH[5] * magScale;
-    BG[9] = dH[6] * magScale;
-    BG[10] = dH[7] * magScale;
-    BG[11] = dH[8] * magScale;
-
-  } else { // Homogenous field or no gradients needed, only retrieve the field
-           // strength.
-
-    getField(cache, R, H);
-    BG[0] = H[0] * magScale;
-    BG[1] = H[1] * magScale;
-    BG[2] = H[2] * magScale;
-
-    for (int i = 3; i < 12; ++i) { // Set gradients to zero
-      BG[i] = 0.;
-    }
-  }
-}
-
-/////////////////////////////////////////////////////////////////////////////////
-// dg/dlambda for non-electrons (g=dEdX and lambda=q/p).
-/////////////////////////////////////////////////////////////////////////////////
-
-double
-Trk::STEP_Propagator::dgdlambda(Cache& cache, double l) const
-{
-  if (cache.m_particle == Trk::geantino || cache.m_particle == Trk::nonInteractingMuon)
-    return 0.;
-  if (cache.m_material->x0() == 0 || cache.m_material->averageZ() == 0)
-    return 0.;
-  if (cache.m_material->zOverAtimesRho() == 0)
-    return 0.;
-
-  double p = std::abs(1. / l);
-  double m = Trk::ParticleMasses::mass[cache.m_particle];
-  double me = Trk::ParticleMasses::mass[Trk::electron];
-  double E = std::sqrt(p * p + m * m);
-  double beta = p / E;
-  double gamma = E / m;
-  double I = 16.e-6 * std::pow(cache.m_material->averageZ(), 0.9);
-  double kaz = 0.5 * 30.7075 * cache.m_material->zOverAtimesRho();
-
-  // Bethe-Bloch
-  double lnCore = 4. * me * me / (m * m * m * m * I * I * l * l * l * l) / (1. + 2. * gamma * me / m + me * me / m * m);
-  double lnCore_deriv =
-    -4. * me * me / (m * m * m * m * I * I) *
-    std::pow(l * l * l * l + 2. * gamma * l * l * l * l * me / m + l * l * l * l * me * me / (m * m), -2) *
-    (4. * l * l * l + 8. * me * l * l * l * gamma / m - 2. * me * l / (m * m * m * gamma) +
-     4. * l * l * l * me * me / (m * m));
-  double ln_deriv = 2. * l * m * m * std::log(lnCore) + lnCore_deriv / (lnCore * beta * beta);
-  double Bethe_Bloch_deriv = -kaz * ln_deriv;
-
-  // density effect, only valid for high energies (gamma > 10 -> p > 1GeV for muons)
-  if (gamma > 10.) {
-    double delta = 2. * std::log(28.816e-6 * std::sqrt(1000. * cache.m_material->zOverAtimesRho()) / I) +
-                   2. * std::log(beta * gamma) - 1.;
-    double delta_deriv = -2. / (l * beta * beta) + 2. * delta * l * m * m;
-    Bethe_Bloch_deriv += kaz * delta_deriv;
-  }
-
-  // Bethe-Heitler
-  double Bethe_Heitler_deriv = me * me / (m * m * cache.m_material->x0() * l * l * l * E);
-
-  // Radiative corrections (e+e- pair production + photonuclear) for muons at energies above 8 GeV and below 1 TeV
-  double radiative_deriv = 0.;
-  if ((cache.m_particle == Trk::muon) && (E > 8000.)) {
-    if (E < 1.e6) {
-      radiative_deriv = 6.803e-5 / (cache.m_material->x0() * l * l * l * E) +
-                        2. * 2.278e-11 / (cache.m_material->x0() * l * l * l) -
-                        3. * 9.899e-18 * E / (cache.m_material->x0() * l * l * l);
-    } else {
-      radiative_deriv = 9.253e-5 / (cache.m_material->x0() * l * l * l * E);
-    }
-  }
-
-  // return the total derivative
-  if (m_MPV) {
-    return 0.9 * Bethe_Bloch_deriv + 0.15 * Bethe_Heitler_deriv + 0.15 * radiative_deriv; // Most probable value
-  } else {
-    return Bethe_Bloch_deriv + Bethe_Heitler_deriv + radiative_deriv; // Mean value
-  }
-}
-
-/////////////////////////////////////////////////////////////////////////////////
-// Multiple scattering and straggling contribution to the covariance matrix
-/////////////////////////////////////////////////////////////////////////////////
-
-void
-Trk::STEP_Propagator::covarianceContribution(Cache& cache,
-                                             const Trk::TrackParameters* trackParameters,
-                                             double path,
-                                             const Trk::TrackParameters* targetParms,
-                                             AmgSymMatrix(5) * measurementCovariance) const
-{
-  // kinematics
-  double finalMomentum = targetParms->momentum().mag();
-
-  // first update to make sure all material counted
-  updateMaterialEffects(cache, finalMomentum, sin(trackParameters->momentum().theta()), path);
-
-  double Jac[21];
-  Trk::RungeKuttaUtils::jacobianTransformCurvilinearToLocal(*targetParms, Jac);
-
-  // Transform multiple scattering and straggling covariance from curvilinear to local system
-  AmgSymMatrix(5) localMSCov =
-    Trk::RungeKuttaUtils::newCovarianceMatrix(Jac, cache.m_combinedCovariance + cache.m_covariance);
-
-  *measurementCovariance += localMSCov;
-}
-
-/////////////////////////////////////////////////////////////////////////////////////////////////////////
-// Multiple scattering and straggling contribution to the covariance matrix in curvilinear representation
-/////////////////////////////////////////////////////////////////////////////////////////////////////////
-
-void
-Trk::STEP_Propagator::covarianceContribution(Cache& cache,
-                                             const Trk::TrackParameters* trackParameters,
-                                             double path,
-                                             double finalMomentum,
-                                             AmgSymMatrix(5) * measurementCovariance) const
-{
-  // first update to make sure all material counted
-  updateMaterialEffects(cache, finalMomentum, sin(trackParameters->momentum().theta()), path);
-
-  // Add measurement errors and multiple scattering + straggling covariance
-  *measurementCovariance += cache.m_combinedCovariance + cache.m_covariance;
-}
-
-/////////////////////////////////////////////////////////////////////////////////////////////////////////
-// Multiple scattering and straggling contribution to the covariance matrix in curvilinear representation
-/////////////////////////////////////////////////////////////////////////////////////////////////////////
-
+////////////////////////////////////////////////////////////////////////////////////////////////////////
+// dump material effects
+////////////////////////////////////////////////////////////////////////////////////////////////////////
 void
 Trk::STEP_Propagator::dumpMaterialEffects(Cache& cache, const Trk::CurvilinearParameters* parms, double path) const
 {
@@ -2825,153 +3018,6 @@ Trk::STEP_Propagator::dumpMaterialEffects(Cache& cache, const Trk::CurvilinearPa
   cache.m_combinedEloss.set(0., 0., 0., 0., 0., 0.);
 }
 
-/////////////////////////////////////////////////////////////////////////////////////////////////////////
-// Multiple scattering and straggling contribution to the covariance matrix in global coordinates
-/////////////////////////////////////////////////////////////////////////////////////////////////////////
-
-void
-Trk::STEP_Propagator::updateMaterialEffects(Cache& cache, double mom, double sinTheta, double path) const
-{
-  // collects material effects in between material dumps ( m_covariance )
-
-  // collect straggling
-  if (m_straggling) {
-    cache.m_covariance(4, 4) += cache.m_stragglingVariance;
-    cache.m_stragglingVariance = 0.;
-  }
-
-  if (!m_multipleScattering)
-    return;
-
-  double totalMomentumLoss = mom - cache.m_matupd_lastmom;
-  double pathSinceLastUpdate = path - cache.m_matupd_lastpath;
-
-  double pathAbs = std::abs(pathSinceLastUpdate);
-
-  if (pathAbs < 1.e-03)
-    return;
-
-  double matX0 = cache.m_material->x0();
-
-  // calculate number of layers : TODO : thickness to be adjusted
-  int msLayers = int(pathAbs / m_layXmax / matX0) + 1;
-
-  double massSquared = Trk::ParticleMasses::mass[cache.m_particle] * Trk::ParticleMasses::mass[cache.m_particle];
-  double layerThickness = pathAbs / msLayers;
-  double radiationLengths = layerThickness / matX0;
-  sinTheta = std::max(sinTheta, 1e-20); // avoid division by zero
-  double remainingPath = pathAbs;
-  double momentum = 0.;
-  double mom2 = 0.;
-  double E = 0.;
-  double beta = 0.;
-  double dLambdads = 0.;
-  double thetaVariance = 0.;
-
-  double average_dEds = totalMomentumLoss / pathAbs;
-
-  double cumulatedVariance = cache.m_inputThetaVariance + cache.m_combinedCovariance(3, 3) + cache.m_covariance(3, 3);
-  if (cumulatedVariance < 0) {
-    ATH_MSG_WARNING("Cumulated variance for material effects is "
-                    "negative. Setting to 0");
-    cumulatedVariance = 0;
-  }
-  double cumulatedX0 = 0.;
-
-  bool useCache = cache.m_extrapolationCache != nullptr;
-  if (useCache) {
-    double dX0 = std::abs(cache.m_combinedThickness) - pathAbs / matX0;
-    if (dX0 < 0)
-      dX0 = 0.;
-    if (cache.m_extrapolationCache->x0tot() > 0)
-      cumulatedX0 = cache.m_extrapolationCache->x0tot() + dX0;
-  }
-
-  // calculate multiple scattering by summing the contributions from the layers
-  for (int layer = 1; layer <= msLayers; ++layer) {
-
-    // calculate momentum in the middle of the layer by assuming a linear momentum loss
-    momentum = cache.m_matupd_lastmom + totalMomentumLoss * (layer - 0.5) / msLayers;
-
-    mom2 = momentum * momentum;
-    E = std::sqrt(mom2 + massSquared);
-    beta = momentum / E;
-
-    double C0 = 13.6 * 13.6 / mom2 / beta / beta;
-    double C1 = 2 * 0.038 * C0;
-    double C2 = 0.038 * 0.038 * C0;
-
-    double MS2 = radiationLengths;
-
-    dLambdads = -cache.m_charge * average_dEds * E / (momentum * momentum * momentum);
-    remainingPath -= layerThickness;
-
-    // simple - step dependent formula
-    // thetaVariance = C0*MS2 + C1*MS2*log(MS2) + C2*MS2*log(MS2)*log(MS2);
-
-    // replaced by the step-size independent code below
-    if (!useCache) {
-      cumulatedX0 = cumulatedVariance / C0;
-      if (cumulatedX0 > 0.001) {
-        double lX0 = log(cumulatedX0);
-        cumulatedX0 = cumulatedX0 / (1 + 2 * 0.038 * lX0 + 0.038 * 0.038 * lX0 * lX0);
-      }
-    }
-
-    double MS2s = MS2 + cumulatedX0;
-    thetaVariance = C0 * MS2 + C1 * MS2s * log(MS2s) + C2 * MS2s * log(MS2s) * log(MS2s);
-
-    if (cumulatedX0 > 0.001) {
-      double lX0 = log(cumulatedX0);
-      thetaVariance += -C1 * cumulatedX0 * lX0 - C2 * cumulatedX0 * lX0 * lX0;
-    }
-
-    // Calculate ms covariance contributions and scale
-    double varScale = m_scatteringScale * m_scatteringScale;
-    double positionVariance = thetaVariance * (layerThickness * layerThickness / 3. + remainingPath * layerThickness +
-                                               remainingPath * remainingPath);
-    cache.m_covariance(0, 0) += varScale * positionVariance;
-    cache.m_covariance(1, 1) += varScale * positionVariance;
-    cache.m_covariance.fillSymmetric(
-      2, 0, cache.m_covariance(2, 0) + varScale * thetaVariance / (sinTheta) * (layerThickness / 2. + remainingPath));
-    cache.m_covariance(2, 2) += varScale * thetaVariance / (sinTheta * sinTheta);
-    cache.m_covariance.fillSymmetric(
-      3, 1, cache.m_covariance(3, 1) + varScale * thetaVariance * (-layerThickness / 2. - remainingPath));
-    cache.m_covariance(3, 3) += varScale * thetaVariance;
-    cache.m_covariance(4, 4) +=
-      varScale * 3. * thetaVariance * thetaVariance * layerThickness * layerThickness * dLambdads * dLambdads;
-    cumulatedVariance += varScale * thetaVariance;
-    cumulatedX0 += MS2;
-  }
-
-  cache.m_matupd_lastmom = mom;
-  cache.m_matupd_lastpath = path;
-}
-
-/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-// Calculate energy loss in MeV/mm.
-/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-double
-Trk::STEP_Propagator::dEds(Cache& cache, double p) const
-{
-  cache.m_delIoni = 0.;
-  cache.m_delRad = 0.;
-  cache.m_kazL = 0.;
-
-  if (cache.m_particle == Trk::geantino || cache.m_particle == Trk::nonInteractingMuon)
-    return 0.;
-  if (cache.m_material->x0() == 0 || cache.m_material->averageZ() == 0)
-    return 0.;
-
-  cache.m_delIoni =
-    Trk::MaterialInteraction::dEdl_ionization(p, cache.m_material, cache.m_particle, cache.m_sigmaIoni, cache.m_kazL);
-
-  cache.m_delRad = Trk::MaterialInteraction::dEdl_radiation(p, cache.m_material, cache.m_particle, cache.m_sigmaRad);
-
-  double eLoss = m_MPV ? 0.9 * cache.m_delIoni + 0.15 * cache.m_delRad : cache.m_delIoni + cache.m_delRad;
-
-  return eLoss;
-}
 
 // Smear momentum ( simulation mode )
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////

@@ -325,6 +325,10 @@ public:
     bool m_solenoid{ false };
     bool m_matPropOK{ true }; //!< Switch for turning off material effects temporarily
     bool m_brem{ false };
+    bool m_includeBgradients{true};
+    bool m_MPV{false};
+    bool m_multipleScattering{true};
+    bool m_straggling {true};
     int m_propagateWithPathLimit{};
     size_t m_currentLayerBin{};
     double m_matupd_lastmom{};
@@ -345,6 +349,8 @@ public:
     double m_particleMass{ 0 }; //!< cache
     double m_charge{};
     double m_combinedThickness{};
+    double m_scatteringScale{1.};
+    double m_layXmax{1.};
     // secondary interactions
     double m_timeIn{};
     double m_bremMom{ 0. };
@@ -353,20 +359,20 @@ public:
     double m_P[45];
 
     const Trk::BinnedMaterial* m_binMat{ nullptr };
-    std::vector<const Trk::TrackStateOnSurface*>* m_matstates{
-      nullptr
-    }; //!< cache of TrackStateOnSurfaces
-    std::vector<std::pair<std::unique_ptr<Trk::TrackParameters>, int>>* m_identifiedParameters{
-      nullptr
-    };                                                 //!< cache of intersections
-    std::vector<Trk::HitInfo>* m_hitVector{ nullptr }; //!< cache of intersections/hit info
+    //!< cache of TrackStateOnSurfaces
+    std::vector<const Trk::TrackStateOnSurface*>* m_matstates{ nullptr }; //!< cache of TrackStateOnSurfaces
+
+    //!< cache of intersections
+    std::vector<std::pair<std::unique_ptr<Trk::TrackParameters>, int>>* m_identifiedParameters{ nullptr };
+
+    //!< cache of intersections/hit info
+    std::vector<Trk::HitInfo>* m_hitVector{ nullptr };
 
     ParticleHypothesis m_particle{};
     const TrackingVolume* m_trackingVolume{ nullptr };
     const Material* m_material{ nullptr };
-    Trk::ExtrapolationCache* m_extrapolationCache{
-      nullptr
-    }; //!< cache for collecting the total X0 ans Elos
+    //!< cache for collecting the total X0 ans Elos
+    Trk::ExtrapolationCache* m_extrapolationCache{ nullptr };
     // cache for combined covariance matrix contribution
     AmgSymMatrix(5) m_combinedCovariance;
     // cache for differential covariance matrix contribution ( partial material dump )
@@ -444,42 +450,6 @@ private:
                       bool& firstStep,
                       double& distanceStepped) const;
 
-  /////////////////////////////////////////////////////////////////////////////////
-  // Get the magnetic field and gradients
-  // Input: Globalposition
-  // Output: BG, which contains Bx, By, Bz, dBx/dx, dBx/dy, dBx/dz, dBy/dx,
-  // dBy/dy, dBy/dz, dBz/dx, dBz/dy, dBz/dz
-  /////////////////////////////////////////////////////////////////////////////////
-  void getMagneticField(Cache& cache,
-                        const Amg::Vector3D& position,
-                        bool getGradients,
-                        double* ATH_RESTRICT BG) const;
-
-  /////////////////////////////////////////////////////////////////////////////////
-  // dg/dlambda for non-electrons (g=dEdX and lambda=q/p).
-  /////////////////////////////////////////////////////////////////////////////////
-  double dgdlambda(Cache& cache, double l) const;
-
-  /////////////////////////////////////////////////////////////////////////////////
-  // Multiple scattering and straggling contributionto the covariance matrix
-  // local covariance - to be phased out
-  /////////////////////////////////////////////////////////////////////////////////
-  void covarianceContribution(Cache& cache,
-                              const Trk::TrackParameters* trackParameters,
-                              double path,
-                              const Trk::TrackParameters* targetParms,
-                              AmgSymMatrix(5) * measurementCovariance) const;
-
-  ////////////////////////////////////////////////////////////////////////////////////////////////////////
-  // Multiple scattering and straggling contributionto the covariance matrix in
-  // curvilinear representation
-  ////////////////////////////////////////////////////////////////////////////////////////////////////////
-  void covarianceContribution(Cache& cache,
-                              const Trk::TrackParameters* trackParameters,
-                              double path,
-                              double finalMomentum,
-                              AmgSymMatrix(5) * measurementCovariance) const;
-
   ////////////////////////////////////////////////////////////////////////////////////////////////////////
   // dump material effects
   ////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -487,21 +457,6 @@ private:
   void dumpMaterialEffects(Cache& cache,
                            const Trk::CurvilinearParameters* trackParameters,
                            double path) const;
-
-  ////////////////////////////////////////////////////////////////////////////////////////////////////////
-  // update material effects   // to follow change of material
-  ////////////////////////////////////////////////////////////////////////////////////////////////////////
-
-  void updateMaterialEffects(Cache& cache,
-                             double p,
-                             double sinTh,
-                             double path) const;
-
-  /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-  // Calculate energy loss in MeV/mm. The radiative effects are scaled by
-  // m_radiationScale (1=mean, 0.5=mean(log10), 0.1=mpv)
-  /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-  double dEds(Cache& cache, double p) const;
 
   /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
   // Momentum smearing (simulation mode)
