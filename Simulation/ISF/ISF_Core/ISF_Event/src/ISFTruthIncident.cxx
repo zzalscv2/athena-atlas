@@ -30,14 +30,6 @@ ISF::ISFTruthIncident::ISFTruthIncident( ISF::ISFParticle &parent,
   m_killsPrimary(killsPrimary),
   m_position(position)
 {
-}
-
-ISF::ISFTruthIncident::~ISFTruthIncident() {
-  delete m_position;
-}
-
-const HepMC::FourVector& ISF::ISFTruthIncident::position() {
-
   if ( !m_position) {
     // no position was given, compute it
     //  (1.) try retrieve the position from the first child particle
@@ -49,7 +41,13 @@ const HepMC::FourVector& ISF::ISFTruthIncident::position() {
     double time = 0.;  //<! TODO: FIXME
     m_position = new HepMC::FourVector( pos.x(), pos.y(), pos.z(), time );
   }
+}
 
+ISF::ISFTruthIncident::~ISFTruthIncident() {
+  delete m_position;
+}
+
+const HepMC::FourVector& ISF::ISFTruthIncident::position() const {
   return *m_position;
 }
 

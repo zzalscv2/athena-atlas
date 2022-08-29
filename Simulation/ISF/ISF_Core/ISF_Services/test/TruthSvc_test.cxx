@@ -75,7 +75,7 @@ namespace ISFTesting {
     { };
 
     virtual ~DummyTruthIncident() {};
-    virtual const HepMC::FourVector&  position() {return m_myPosition;};
+    virtual const HepMC::FourVector&  position() const {return m_myPosition;};
     virtual int                       physicsProcessCategory() const { return 1;};
     virtual Barcode::PhysicsProcessCode physicsProcessCode() const {return 1;};
     virtual double                    parentP2() const {return 1.0;};
