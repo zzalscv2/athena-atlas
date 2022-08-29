@@ -9,6 +9,7 @@
 #include "DerivationFrameworkBPhys/VertexTrackIsolation.h"
 #include "DerivationFrameworkBPhys/BPhysMetadataBase.h"
 #include "DerivationFrameworkBPhys/Bmumu_metadata.h"
+#include "DerivationFrameworkBPhys/BdKstarMuMu_metadata.h"
 //#include "DerivationFrameworkBPhys/CfAthAlgTool.h"
 #include "DerivationFrameworkBPhys/Bmumu_reco_mumu.h"
 #include "DerivationFrameworkBPhys/Reco_mumu.h"
@@ -49,6 +50,7 @@ DECLARE_COMPONENT( VertexCaloIsolation )
 DECLARE_COMPONENT( VertexTrackIsolation )
 DECLARE_COMPONENT( BPhysMetadataBase )
 DECLARE_COMPONENT( Bmumu_metadata )
+DECLARE_COMPONENT( BdKstarMuMu_metadata )
 //DECLARE_COMPONENT( CfAthAlgTool )
 //DECLARE_COMPONENT( Bmumu_reco_mumu )
 DECLARE_COMPONENT( FourMuonTool )
