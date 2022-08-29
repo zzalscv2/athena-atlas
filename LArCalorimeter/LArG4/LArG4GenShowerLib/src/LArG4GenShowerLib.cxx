@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
 */
 
 /**
@@ -10,7 +10,6 @@
  *
  *  @author Wolfgang Ehrenfeld, University of Hamburg, Germany
  *  @author Sasha Glazov, DESY Hamburg, Germany
- * @version $Revision: 770430 $
  *
  */
 
@@ -22,7 +21,7 @@
 #include "LArG4GenShowerLib/StepInfoCollection.h"
 
 // athena includes
-#include "GeneratorObjects/McEventCollection.h"// For MC Truth information:
+#include "GeneratorObjects/McEventCollection.h" // For MC Truth information:
 #include "GeoModelInterfaces/IGeoModelSvc.h"
 #include "GaudiKernel/IToolSvc.h"
 #include "LArG4ShowerLib/ShowerEnergySpot.h"
@@ -275,7 +274,7 @@ StatusCode LArG4GenShowerLib::execute()
 
 HepMC::ConstGenParticlePtr LArG4GenShowerLib::getParticleFromMC()
 {
-  const DataHandle<McEventCollection> mcEvent;
+  const McEventCollection* mcEvent;
   if (evtStore()->retrieve(mcEvent,"GEN_EVENT").isFailure()) return 0;
 
   // Return the first particle of the first event
