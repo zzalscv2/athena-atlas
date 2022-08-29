@@ -175,11 +175,12 @@ def makeSequenceOld (dataType, algSeq, vars, forCompare) :
 
     # Add the sequence to the job:
     algSeq += tauSequence
-    if not forCompare :
-        vars += [ 'OutTauJets_%SYS%.pt  -> tau_pt_%SYS%',
-                'OutTauJets_NOSYS.phi -> tau_phi',
-                  'OutTauJets_NOSYS.eta -> tau_eta',
-                  'OutTauJets_%SYS%.baselineSelection_tight -> tau_select_tight_%SYS%', ]
+    vars += [ 'OutTauJets_%SYS%.pt  -> tau_pt_%SYS%',
+              'OutTauJets_NOSYS.phi -> tau_phi',
+              'OutTauJets_NOSYS.eta -> tau_eta',
+              'OutTauJets_%SYS%.baselineSelection_tight -> tau_select_tight_%SYS%', ]
+    if dataType != 'data':
+        vars += [ 'OutTauJets_%SYS%.tau_effSF_tight_%SYS% -> tau_effSF_tight_%SYS%', ]
 
 
     # temporarily disabled until di-taus are supported in R22
