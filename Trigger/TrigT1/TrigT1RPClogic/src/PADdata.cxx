@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2020 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "TrigT1RPClogic/PADdata.h"
@@ -22,10 +22,10 @@ PADdata::PADdata(CMAdata* cma_data,unsigned long int debug) :
 }
 
 PADdata::PADdata(const PADdata& pad_data) : 
-    BaseObject(Data,pad_data.name())
+    BaseObject(Data,pad_data.name()),
+    m_debug(pad_data.debug()),
+    m_pad_patterns(pad_data.pad_patterns())
 {
-    m_pad_patterns = pad_data.pad_patterns();    
-    m_debug        = pad_data.debug();
 }
 
 PADdata::~PADdata()

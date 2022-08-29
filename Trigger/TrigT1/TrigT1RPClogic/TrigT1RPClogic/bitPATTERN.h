@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef BITPATTERN_H
@@ -20,7 +20,7 @@ class bitPATTERN : public RPCtrigDataObject
     void shift_right(void);
 
     public:
-    bitPATTERN(std::string,const PATTERNidentity&,int);
+    bitPATTERN(const std::string&,const PATTERNidentity&,int);
     bitPATTERN(const bitPATTERN&);
     ~bitPATTERN();
 
