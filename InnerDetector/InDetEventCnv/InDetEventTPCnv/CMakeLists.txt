@@ -1,4 +1,4 @@
-# Copyright (C) 2002-2020 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
 
 # Declare the package name:
 atlas_subdir( InDetEventTPCnv )
@@ -44,7 +44,7 @@ foreach( name SiWidthCnv_p1_test SiWidthCnv_p2_test PixelClusterCnv_p1_test
       SOURCES test/${name}.cxx
       LINK_LIBRARIES InDetEventTPCnv GaudiKernel IdDictParser
       SGTools InDetReadoutGeometry TestTools InDetIdentifier
-      LOG_IGNORE_PATTERN "^ *DEBUG |Strip range"
+      LOG_IGNORE_PATTERN "^ *DEBUG |Strip range|WARNING MessageSvc not found"
       ENVIRONMENT "JOBOPTSEARCHPATH=${_jobOPath}" )
 
 endforeach()
