@@ -24,7 +24,7 @@ namespace DerivationFramework {
     m_fourMuonTool("DerivationFramework::FourMuonTool",this),
     m_pvRefitter("Analysis::PrimaryVertexRefitter",this)
     {
-        declareInterface<DerivationFramework::ISkimmingTool>(this);
+        declareInterface<DerivationFramework::IAugmentationTool>(this);
         
         // Declare tools
         declareProperty("V0Tools"   , m_v0Tools);
@@ -71,20 +71,20 @@ namespace DerivationFramework {
     
     // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
     
-    bool Reco_4mu::eventPassesFilter() const
+    StatusCode Reco_4mu::addBranches() const
     {
         // Output containers and its auxilliary store
         xAOD::VertexContainer*    pairContainer = NULL;
         xAOD::VertexAuxContainer* pairAuxContainer = NULL;
         xAOD::VertexContainer*    quadContainer = NULL;
         xAOD::VertexAuxContainer* quadAuxContainer = NULL;
-        bool acceptEvent(false); 
+        bool acceptEvent = false; // this is a dummy
         //----------------------------------------------------
         // call  finder
         //----------------------------------------------------
         if( !m_fourMuonTool->performSearch(pairContainer, pairAuxContainer, quadContainer, quadAuxContainer, acceptEvent).isSuccess() ) {
             ATH_MSG_FATAL("4mu tool (" << m_fourMuonTool << ") failed.");
-            return(false);
+            return StatusCode::FAILURE;
         }
         
         //----------------------------------------------------
@@ -106,7 +106,7 @@ namespace DerivationFramework {
         auto sc = evtStore()->retrieve(pvContainer, m_pvContainerName);
         if(sc.isFailure()){
             ATH_MSG_FATAL("Cannot find PV Container");
-            return false;
+            return StatusCode::FAILURE;
         }
         //----------------------------------------------------
         // Refit primary vertices
@@ -127,14 +127,14 @@ namespace DerivationFramework {
                 StatusCode SC = helper.FillCandwithRefittedVertices(quadContainer,  pvContainer, refPvContainer, &(*m_pvRefitter) , m_PV_max, m_DoVertexType);
                 if(SC.isFailure()){
                     ATH_MSG_FATAL("refitting failed - check the vertices you passed");
-                    return false;
+                    return StatusCode::FAILURE;
                 }
             }
             if(pairContainer->size()>0) {
                 StatusCode SC = helper.FillCandwithRefittedVertices(pairContainer,  pvContainer, refPvContainer, &(*m_pvRefitter) , m_PV_max, m_DoVertexType);
                 if(SC.isFailure()){
                     ATH_MSG_FATAL("refitting failed - check the vertices you passed");
-                    return false;
+                    return StatusCode::FAILURE;
                 }
             }
         }else{
@@ -232,7 +232,7 @@ namespace DerivationFramework {
             evtStore()->record(refPvAuxContainer, m_refPVContainerName+"Aux.").ignore();
         }
         
-        return(acceptEvent);
+        return StatusCode::SUCCESS;
     }
     
     

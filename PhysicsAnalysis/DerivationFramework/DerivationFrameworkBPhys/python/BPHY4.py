@@ -56,11 +56,17 @@ def BPHY4Cfg(ConfigFlags):
                                                                                GSFTrackParticlesKey    = "GSFTrackParticles",
                                                                                StreamName = streamName,
                                                                                InDetTrackParticlesKey  = "InDetTrackParticles")
-    BPHY4ThinningTools = [BPHY4MuonTPThinningTool, BPHY4ElectronTPThinningTool]
-    BPHY4SlimTools     = [BPHY4_Reco_4mu]
 
-    for t in BPHY4ThinningTools +BPHY4SlimTools : acc.addPublicTool(t)
-    acc.addEventAlgo(CompFactory.DerivationFramework.DerivationKernel("BPHY4Kernel",   SkimmingTools     = BPHY4SlimTools,  ThinningTools     = BPHY4ThinningTools  ))
+    # Skim events accepted by the muon selection
+    BPHY4_SelectEvent = CompFactory.DerivationFramework.xAODStringSkimmingTool(name = 'BPHY4_SelectEvent',
+                      expression = '(count(Muons.BPHY4MuonIndex>=0)>0)')
+
+    BPHY4ThinningTools = [BPHY4MuonTPThinningTool, BPHY4ElectronTPThinningTool]
+    BPHY4SlimTools     = [BPHY4_SelectEvent]
+    BPHY4AugTools      = [BPHY4_Reco_4mu]
+    for t in BPHY4ThinningTools + BPHY4SlimTools + BPHY4AugTools: acc.addPublicTool(t)
+    acc.addEventAlgo(CompFactory.DerivationFramework.DerivationKernel("BPHY4Kernel", 
+                AugmentationTools= BPHY4AugTools,  SkimmingTools     = BPHY4SlimTools,  ThinningTools     = BPHY4ThinningTools  ))
 
     from DerivationFrameworkCore.SlimmingHelper import SlimmingHelper
     from OutputStreamAthenaPool.OutputStreamConfig import OutputStreamCfg
