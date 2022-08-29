@@ -211,7 +211,7 @@ StatusCode ALFA_BeamTransport::execute()
 ///////////////
 void ALFA_BeamTransport::MeVToGeV (HepMC::GenEvent* evt)
 {
-  for (auto *p:  *evt) {
+  for (HepMC::GenParticlePtr p:  *evt) {
     // std::cout << " PDG, BAR " << (*p)->pdg_id() << " " << (*p)->barcode() << std::endl;
     const HepMC::FourVector fv(p->momentum().px() / 1000.,
 			       p->momentum().py() / 1000.,
@@ -226,7 +226,7 @@ void ALFA_BeamTransport::MeVToGeV (HepMC::GenEvent* evt)
 ///////////////
 void ALFA_BeamTransport::GeVToMeV (HepMC::GenEvent* evt)
 {
-     for ( auto *p: *evt) {
+     for ( HepMC::GenParticlePtr p: *evt) {
 	  const HepMC::FourVector fv(p->momentum().px() * 1000.,
 				      p->momentum().py() * 1000.,
 				      p->momentum().pz() * 1000.,
@@ -335,7 +335,7 @@ int ALFA_BeamTransport::TransportSelectedParticle(HepMC::GenEvent* evt, int evt_
      
      
      //First we have to select the final state particles from the MC
-     for ( auto *p: *evt)
+     for ( HepMC::GenParticlePtr p: *evt)
      {
 	  
 	  //Simple Eta Pt cut to remove particles from BeamTransportation which have no chance to reach RP plane

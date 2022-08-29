@@ -331,14 +331,14 @@ StatusCode ALFA_GloRec::Truth_info(){
     //loop over one event
     m_z_g_pos = -1.e10;
     m_z_g_neg =  1.e10;
-    for(auto *begGen:  (**mcTruBeg)){
+    for(HepMC::ConstGenParticlePtr begGen:  (**mcTruBeg)){
 	 		if(((std::abs(begGen->pdg_id())==2212)||(std::abs(begGen->pdg_id())==211))){
 				double px, py, pz;
 				double x, y, z;
 				px = begGen->momentum().px();	  
 				py = begGen->momentum().py();
 				pz = begGen->momentum().pz();
-				auto *  l_prodvert = begGen->production_vertex();
+                                HepMC::ConstGenVertexPtr l_prodvert = begGen->production_vertex();
 				x = l_prodvert->position().x();
 				y = l_prodvert->position().y();
 				z = l_prodvert->position().z();
