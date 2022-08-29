@@ -27,6 +27,7 @@ enum class Status : StatusCode::code_t {
 } // namespace Athena
 
 // Register the enum as StatusCode
+// cppcheck-suppress unknownMacro
 STATUSCODE_ENUM_DECL(Athena::Status)
 
 #endif
