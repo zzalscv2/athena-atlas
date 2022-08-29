@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
 */
 
 /**
@@ -24,6 +24,7 @@
 
 #include "AthenaBaseComps/AthAlgorithm.h" 
 #include "AthenaKernel/IOVSvcDefs.h"
+#include "CxxUtils/checker_macros.h"
 
 #include "StoreGate/ReadCondHandleKey.h"
 #include "LArCabling/LArOnOffIdMapping.h"
@@ -36,7 +37,7 @@ class LArOnlineID;
 class GenericDbTable; 
 class LArRampMC;
 
-class LArConditionsTestAlg : public AthAlgorithm
+class ATLAS_NOT_THREAD_SAFE LArConditionsTestAlg : public AthAlgorithm
 {
 
 public:
@@ -56,7 +57,7 @@ private:
 
     StatusCode createCompareObjects();
     StatusCode testCondObjects();
-    StatusCode testEachCondObject(const LArRampMC* ramps);
+    StatusCode testEachCondObject ATLAS_NOT_THREAD_SAFE (const LArRampMC* ramps);
     StatusCode testChannelSet();
     StatusCode printCondObjects();
     StatusCode streamOutCondObjects();

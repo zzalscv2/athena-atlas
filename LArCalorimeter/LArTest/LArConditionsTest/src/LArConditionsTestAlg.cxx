@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
 */
 
 /**
@@ -10,8 +10,7 @@
  *
  * @author RD Schaffer  <R.D.Schaffer@cern.ch>
  * @author Hong Ma      <hma@bnl.gov>
- *
- * $Id: LArConditionsTestAlg.cxx,v 1.21 2009-04-27 15:53:09 gunal Exp $ */
+ */
 
 #include "LArConditionsTest/LArConditionsTestAlg.h"
 
@@ -263,7 +262,7 @@ LArConditionsTestAlg::testCondObjects()
 {
     ATH_MSG_INFO ("in testCondObjects()" );
 
-    static bool first = true;
+    static std::atomic<bool> first = true;
     if (!first) {
         ATH_MSG_INFO ("Multiple entries - returning" );
 	return StatusCode::SUCCESS; 
@@ -465,7 +464,7 @@ LArConditionsTestAlg::testCondObjects()
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * 
 
 StatusCode
-LArConditionsTestAlg::testEachCondObject(const LArRampMC* ramps)
+LArConditionsTestAlg::testEachCondObject ATLAS_NOT_THREAD_SAFE (const LArRampMC* ramps)
 {
     ATH_MSG_INFO ("in testEachCondObject()" );
     bool error = false;
