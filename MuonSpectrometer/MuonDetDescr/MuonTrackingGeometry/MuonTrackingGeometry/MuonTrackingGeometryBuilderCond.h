@@ -34,7 +34,7 @@ namespace Trk {
     class VolumeBounds;
     class ITrackingVolumeBuilder;
 
-    typedef std::pair<SharedObject<const TrackingVolume>, Amg::Vector3D> TrackingVolumeOrderPosition;
+    typedef std::pair<SharedObject<TrackingVolume>, Amg::Vector3D> TrackingVolumeOrderPosition;
     typedef std::pair<SharedObject<const TrackingVolume>, const Amg::Transform3D*> TrackingVolumeNavOrder;
 
 }  // namespace Trk
@@ -93,10 +93,10 @@ namespace Muon {
             std::vector<std::vector<std::vector<std::vector<std::pair<int, float> > > > > m_hPartitions;
             std::vector<double> m_shieldZPart;
             std::vector<std::vector<std::pair<int, float> > > m_shieldHPart;
-            std::map<const Trk::DetachedTrackingVolume*, std::vector<const Trk::TrackingVolume*>*> m_blendMap;
-            std::vector<const Trk::DetachedTrackingVolume*> m_blendVols;
-            const std::vector<std::vector<std::pair<const Trk::DetachedTrackingVolume*, const Span*> >*>* m_stationSpan{nullptr};
-            const std::vector<std::vector<std::pair<const Trk::DetachedTrackingVolume*, const Span*> >*>* m_inertSpan{nullptr};
+            std::map<Trk::DetachedTrackingVolume*, std::vector<Trk::TrackingVolume*>*> m_blendMap;
+            std::vector<Trk::DetachedTrackingVolume*> m_blendVols;
+            const std::vector<std::vector<std::pair<Trk::DetachedTrackingVolume*, const Span*> >*>* m_stationSpan{nullptr};
+            const std::vector<std::vector<std::pair<Trk::DetachedTrackingVolume*, const Span*> >*>* m_inertSpan{nullptr};
             RZPairVector m_msCutoutsIn;
             RZPairVector m_msCutoutsOut;
             Trk::Material m_muonMaterial;                     //!< the (empty) material
@@ -107,22 +107,22 @@ namespace Muon {
         /** Private method to find z/phi span of detached volumes */
         const Span* findVolumeSpan(const Trk::VolumeBounds* volBounds, const Amg::Transform3D& transf, double zTol, double phiTol,
                                    LocalVariablesContainer& aLVC) const;
-        const std::vector<std::vector<std::pair<const Trk::DetachedTrackingVolume*, const Span*> >*>* findVolumesSpan(
-            const std::vector<std::unique_ptr<const Trk::DetachedTrackingVolume> >* objs, double zTol, double phiTol,
+        std::vector<std::vector<std::pair<Trk::DetachedTrackingVolume*, const Span*> >*>* findVolumesSpan(
+            const std::vector<std::unique_ptr<Trk::DetachedTrackingVolume> >* objs, double zTol, double phiTol,
             LocalVariablesContainer& aLVC) const;
         /** Private methods to define subvolumes and fill them with detached volumes */
         Trk::TrackingVolume* processVolume(const Trk::Volume*, int, int, const std::string&, LocalVariablesContainer& aLVC,
                                            bool hasStations) const;
         Trk::TrackingVolume* processVolume(const Trk::Volume*, int, const std::string&, LocalVariablesContainer& aLVC,
                                            bool hasStations) const;
-        const Trk::TrackingVolume* processShield(const Trk::Volume*, int, const std::string&, LocalVariablesContainer& aLVC,
+        Trk::TrackingVolume* processShield(const Trk::Volume*, int, const std::string&, LocalVariablesContainer& aLVC,
                                                  bool hasStations) const;
         /** Private method to check volume properties */
-        static void checkVolume(const Trk::TrackingVolume*) ;
+        static void checkVolume(Trk::TrackingVolume*) ;
         /** Private method to find detached volumes */
-        std::vector<const Trk::DetachedTrackingVolume*>* getDetachedObjects(const Trk::Volume*,
-                                                                            std::vector<const Trk::DetachedTrackingVolume*>&,
-                                                                            LocalVariablesContainer& aLVC, int mode = 0) const;
+        std::vector<Trk::DetachedTrackingVolume*>* getDetachedObjects(const Trk::Volume*,
+                                                                      std::vector<Trk::DetachedTrackingVolume*>&,
+                                                                      LocalVariablesContainer& aLVC, int mode = 0) const;
         /** Private method to check if constituent enclosed */
         bool enclosed(const Trk::Volume*, const Muon::Span*, LocalVariablesContainer& aLVC) const;
         /** Private method to retrieve z partition */

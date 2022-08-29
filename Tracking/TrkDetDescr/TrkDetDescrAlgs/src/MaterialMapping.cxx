@@ -393,7 +393,7 @@ void Trk::MaterialMapping::assignLayerMaterialProperties( const Trk::TrackingVol
     }
 
     // ----------------------------------- loop over confined volumes -----------------------------
-    const Trk::BinnedArray< const Trk::TrackingVolume >* confinedVolumes = tvol.confinedVolumes();
+    const Trk::BinnedArray<Trk::TrackingVolume >* confinedVolumes = tvol.confinedVolumes();
     if (confinedVolumes) {
         // get the objects in a vector-like format
         Trk::BinnedArraySpan<Trk::TrackingVolume const * const> volumes = confinedVolumes->arrayObjects();
@@ -571,7 +571,7 @@ void Trk::MaterialMapping::registerVolume(const Trk::TrackingVolume& tvol, int l
            insertLayerMaterialRecord(*lIter);
    
     // step dopwn the navigation tree to reach the confined volumes
-    const Trk::BinnedArray< const Trk::TrackingVolume >* confinedVolumes = tvol.confinedVolumes();
+    const Trk::BinnedArray<Trk::TrackingVolume >* confinedVolumes = tvol.confinedVolumes();
     if (confinedVolumes) {
         Trk::BinnedArraySpan<Trk::TrackingVolume const * const> volumes = confinedVolumes->arrayObjects();
 

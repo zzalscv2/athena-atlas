@@ -68,7 +68,7 @@ public:
   virtual StatusCode finalize() override final;
 
   /** TrackingVolumeBuilder interface method - returns vector of Volumes */
-  virtual const std::vector<Trk::TrackingVolume*>* trackingVolumes(
+  virtual std::vector<Trk::TrackingVolume*>* trackingVolumes(
     const CaloDetDescrManager& caloDDM) const override final;
 
 private:

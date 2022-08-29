@@ -156,7 +156,7 @@ ATLAS_NOT_THREAD_SAFE(const Trk::TrackingVolume& tvol,
    } 
 
    // Process the contained TrackingVolumes (recursively) if they exist
-   const Trk::BinnedArray<const Trk::TrackingVolume >* confinedVolumes = tvol.confinedVolumes();
+   const Trk::BinnedArray<Trk::TrackingVolume >* confinedVolumes = tvol.confinedVolumes();
    // register the next round
    if (confinedVolumes) {
        Trk::BinnedArraySpan<Trk::TrackingVolume const * const> volumes = confinedVolumes->arrayObjects();

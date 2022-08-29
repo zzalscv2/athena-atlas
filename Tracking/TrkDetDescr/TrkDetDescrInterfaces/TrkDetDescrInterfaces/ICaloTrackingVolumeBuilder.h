@@ -41,7 +41,7 @@ public:
   }
 
   /** TrackingVolumeBuilder interface method - returns vector of Volumes */
-  virtual const std::vector<TrackingVolume*>* trackingVolumes(
+  virtual std::vector<TrackingVolume*>* trackingVolumes(
     const CaloDetDescrManager& caloDDM) const = 0;
 };
 

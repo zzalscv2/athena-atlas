@@ -318,9 +318,9 @@ InDet::RobustTrackingGeometryBuilderCond::trackingGeometry ATLAS_NOT_THREAD_SAFE
    // (III) create the sub volumes -------------------------------------------------------------
    ATH_MSG_DEBUG( "[ STEP 3 ] : Create the sub volumes." );   
    
-   std::vector<const Trk::TrackingVolume*> centralSectorVolumes;
-   std::vector<const Trk::TrackingVolume*> negativeSectorVolumes;
-   std::vector<const Trk::TrackingVolume*> positiveSectorVolumes;
+   std::vector<Trk::TrackingVolume*> centralSectorVolumes;
+   std::vector<Trk::TrackingVolume*> negativeSectorVolumes;
+   std::vector<Trk::TrackingVolume*> positiveSectorVolumes;
    
    // --------------------------------------------------------------------------------------------------
    // first the beampipe volume
@@ -345,7 +345,7 @@ InDet::RobustTrackingGeometryBuilderCond::trackingGeometry ATLAS_NOT_THREAD_SAFE
     beamPipeVolume->registerColorCode(46);
    
    // beampipe + detectors / prepared                                                                   
-   std::vector<const Trk::TrackingVolume*> idVolumes;
+   std::vector<Trk::TrackingVolume*> idVolumes;
    idVolumes.push_back(beamPipeVolume);     
    
    // --------------------------------------------------------------------------------------------------   
@@ -424,7 +424,7 @@ InDet::RobustTrackingGeometryBuilderCond::trackingGeometry ATLAS_NOT_THREAD_SAFE
           // in the radial wrapping case : take the smaller radius, assumes that packing is possible               
           double currentOuterR = currentCentralOuterR < currentEndcapOuterR ? currentCentralOuterR : currentEndcapOuterR;
           // create the tiple container
-          const Trk::TrackingVolume* tripleContainer = packVolumeTriple((*pndlIter),
+          Trk::TrackingVolume* tripleContainer = packVolumeTriple((*pndlIter),
                                                                         (*pclIter),
                                                                         (*ppdlIter),
                                                                         lastCentralOuterR, currentOuterR,
@@ -532,7 +532,7 @@ InDet::RobustTrackingGeometryBuilderCond::trackingGeometry ATLAS_NOT_THREAD_SAFE
    
    bool enclose = (!m_enclosingEnvelopeSvc.empty());
  
-   const Trk::TrackingVolume* detectorContainer = packVolumeTriple(negativeSectorVolumes,
+   Trk::TrackingVolume* detectorContainer = packVolumeTriple(negativeSectorVolumes,
                                                                    centralSectorVolumes,
                                                                    positiveSectorVolumes,
                                                                    "Container");
@@ -544,7 +544,7 @@ InDet::RobustTrackingGeometryBuilderCond::trackingGeometry ATLAS_NOT_THREAD_SAFE
    double enclosingVolumeHalfZ  = fabs(envelopeDefs[1].second);
                                                                    
    // central enclosure volume
-   const Trk::TrackingVolume* centralEnclosure =  enclose ?
+   Trk::TrackingVolume* centralEnclosure =  enclose ?
                            m_trackingVolumeCreator->createGapTrackingVolume(*m_materialProperties,
                                                                            overallRmax, enclosingVolumeRadius,
                                                                            -overallExtendZ, overallExtendZ,
@@ -600,7 +600,7 @@ InDet::RobustTrackingGeometryBuilderCond::trackingGeometry ATLAS_NOT_THREAD_SAFE
                                                                             1, false,
                                                                             m_namespace+"Gaps::PositiveEnclosure");
   
-      std::vector<const Trk::TrackingVolume*> enclosedVolumes;
+      std::vector<Trk::TrackingVolume*> enclosedVolumes;
         enclosedVolumes.push_back(negativeEnclosure);
         enclosedVolumes.push_back(detectorWithBp);
         enclosedVolumes.push_back(positiveEnclosure);
@@ -638,7 +638,7 @@ StatusCode InDet::RobustTrackingGeometryBuilderCond::finalize()
 }
 
 
-const Trk::TrackingVolume* InDet::RobustTrackingGeometryBuilderCond::packVolumeTriple ATLAS_NOT_THREAD_SAFE ( // Thread unsafe TrackingVolume::registerColorCode method is used.
+Trk::TrackingVolume* InDet::RobustTrackingGeometryBuilderCond::packVolumeTriple ATLAS_NOT_THREAD_SAFE ( // Thread unsafe TrackingVolume::registerColorCode method is used.
                                      const std::vector<Trk::Layer*>& negLayers,
                                      const std::vector<Trk::Layer*>& centralLayers,
                                      const std::vector<Trk::Layer*>& posLayers,
@@ -696,13 +696,13 @@ const Trk::TrackingVolume* InDet::RobustTrackingGeometryBuilderCond::packVolumeT
   positiveVolume->registerColorCode(colorCode);
 
   // pack them together
-  std::vector<const Trk::TrackingVolume*> tripleVolumes;
+  std::vector<Trk::TrackingVolume*> tripleVolumes;
   tripleVolumes.push_back(negativeVolume);
   tripleVolumes.push_back(centralVolume);
   tripleVolumes.push_back(positiveVolume);
 
   // create the tiple container
-  const Trk::TrackingVolume* tripleContainer =
+  Trk::TrackingVolume* tripleContainer =
     m_trackingVolumeCreator->createContainerTrackingVolume(
       tripleVolumes,
       *m_materialProperties,
@@ -716,10 +716,10 @@ const Trk::TrackingVolume* InDet::RobustTrackingGeometryBuilderCond::packVolumeT
   return tripleContainer;
 }
 
-const Trk::TrackingVolume* InDet::RobustTrackingGeometryBuilderCond::packVolumeTriple(
-                                     const std::vector<const Trk::TrackingVolume*>& negVolumes,
-                                     const std::vector<const Trk::TrackingVolume*>& centralVolumes,
-                                     const std::vector<const Trk::TrackingVolume*>& posVolumes,
+Trk::TrackingVolume* InDet::RobustTrackingGeometryBuilderCond::packVolumeTriple(
+                                     const std::vector<Trk::TrackingVolume*>& negVolumes,
+                                     const std::vector<Trk::TrackingVolume*>& centralVolumes,
+                                     const std::vector<Trk::TrackingVolume*>& posVolumes,
                                      const std::string& baseName) const
 {
   ATH_MSG_VERBOSE( '\t' << '\t'<< "Pack provided Volumes from '" << baseName << "' triple into a container volume. " );
@@ -733,14 +733,14 @@ const Trk::TrackingVolume* InDet::RobustTrackingGeometryBuilderCond::packVolumeT
     // create the strings
   std::string volumeBase = m_namespace+"Containers::"+baseName;
   
-  const Trk::TrackingVolume* negativeVolume = (negVolSize > 1) ?
+  Trk::TrackingVolume* negativeVolume = (negVolSize > 1) ?
        m_trackingVolumeCreator->createContainerTrackingVolume(negVolumes,
                                                        *m_materialProperties,
                                                        volumeBase+"::NegativeSector",
                                                        m_buildBoundaryLayers,
                                                        m_replaceJointBoundaries) : 
                                              (negVolSize ? negVolumes[0] : nullptr);
-  const Trk::TrackingVolume* centralVolume = (cenVolSize > 1) ?
+  Trk::TrackingVolume* centralVolume = (cenVolSize > 1) ?
          m_trackingVolumeCreator->createContainerTrackingVolume(centralVolumes,
                                                        *m_materialProperties,
                                                        volumeBase+"::CentralSector",
@@ -748,7 +748,7 @@ const Trk::TrackingVolume* InDet::RobustTrackingGeometryBuilderCond::packVolumeT
                                                        m_replaceJointBoundaries) :
                                               (cenVolSize ? centralVolumes[0] : nullptr) ;
                                               
-   const Trk::TrackingVolume* positiveVolume = ( posVolSize > 1) ?
+   Trk::TrackingVolume* positiveVolume = ( posVolSize > 1) ?
          m_trackingVolumeCreator->createContainerTrackingVolume(posVolumes,
                                                        *m_materialProperties,
                                                        volumeBase+"::PositiveSector",
@@ -761,12 +761,12 @@ const Trk::TrackingVolume* InDet::RobustTrackingGeometryBuilderCond::packVolumeT
        return centralVolume;
    }
    // pack them together
-   std::vector<const Trk::TrackingVolume*> tripleVolumes;
+   std::vector<Trk::TrackingVolume*> tripleVolumes;
    if (negativeVolume) tripleVolumes.push_back(negativeVolume);
    if (centralVolume) tripleVolumes.push_back(centralVolume);
    if (positiveVolume) tripleVolumes.push_back(positiveVolume);
    // create the tiple container
-   const Trk::TrackingVolume* tripleContainer = 
+   Trk::TrackingVolume* tripleContainer = 
          m_trackingVolumeCreator->createContainerTrackingVolume(tripleVolumes,
                                                                 *m_materialProperties,
                                                                 volumeBase,

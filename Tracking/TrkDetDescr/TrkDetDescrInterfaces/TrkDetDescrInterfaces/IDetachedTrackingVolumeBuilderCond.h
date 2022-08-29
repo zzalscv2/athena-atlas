@@ -41,7 +41,7 @@ namespace Trk {
       /** AlgTool and IAlgTool interface methods */
       static const InterfaceID& interfaceID() { return IID_IDetachedTrackingVolumeBuilderCond; }
 
-      virtual std::unique_ptr<const std::vector<std::unique_ptr<const DetachedTrackingVolume> > >
+      virtual std::unique_ptr<std::vector<std::unique_ptr<DetachedTrackingVolume> > >
       buildDetachedTrackingVolumes(const EventContext& ctx,
                                    SG::WriteCondHandle<TrackingGeometry>& whandle,
                                    bool blend=false ) const = 0 ;

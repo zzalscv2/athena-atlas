@@ -53,7 +53,7 @@ class DetachedTrackingVolume;
 class VolumeBounds;
 
 typedef BinnedArray<Layer> LayerArray;
-typedef BinnedArray<const TrackingVolume> TrackingVolumeArray;
+typedef BinnedArray<TrackingVolume> TrackingVolumeArray;
 
 template<class T>
 using LayerIntersection = FullIntersection<Layer, Surface, T>;
@@ -141,7 +141,7 @@ public:
     Amg::Transform3D* htrans,
     VolumeBounds* volbounds,
     const Material& matprop,
-    const std::vector<const DetachedTrackingVolume*>* detachedSubVolumes,
+    std::vector<DetachedTrackingVolume*>* detachedSubVolumes,
     const std::string& volumeName = "undefined");
 
   /** Constructor for a full equipped Tracking Volume with detached subvolumes
@@ -149,7 +149,7 @@ public:
   TrackingVolume(
     const Volume& volume,
     const Material& matprop,
-    const std::vector<const DetachedTrackingVolume*>* detachedSubVolumes,
+    std::vector<DetachedTrackingVolume*>* detachedSubVolumes,
     const std::string& volumeName = "undefined");
 
   /** Constructor for a full equipped Tracking Volume with unordered subvolumes
@@ -294,9 +294,9 @@ public:
   TrackingVolumeArray* confinedVolumes();
 
  /** Return detached subVolumes - not the ownership */
-  const std::vector<const DetachedTrackingVolume*>* confinedDetachedVolumes()
-    const;
-
+  ArraySpan<DetachedTrackingVolume const * const>  confinedDetachedVolumes() const;
+  ArraySpan<DetachedTrackingVolume * const>  confinedDetachedVolumes();
+  
   /** Return unordered subVolumes - not the ownership */
   const std::vector<const TrackingVolume*>* confinedDenseVolumes() const;
 
@@ -382,11 +382,11 @@ protected:
 private:
   /** reIndex the static layers of the TrackingVolume */
   void indexContainedStaticLayers
-  ATLAS_NOT_THREAD_SAFE(GeometrySignature geoSig, int& offset) const;
+  ATLAS_NOT_THREAD_SAFE(GeometrySignature geoSig, int& offset);
 
   /** reIndex the material layers of the TrackingVolume */
   void indexContainedMaterialLayers
-  ATLAS_NOT_THREAD_SAFE(GeometrySignature geoSig, int& offset) const;
+  ATLAS_NOT_THREAD_SAFE(GeometrySignature geoSig, int& offset);
 
   /** Create Boundary Surface */
   void createBoundarySurfaces();
@@ -405,7 +405,7 @@ private:
       - adapts the layer dimensions to the new volumebounds + envelope
       - adapts entry layer position where necessary to the new volumebounds
   */
-  void synchronizeLayers ATLAS_NOT_THREAD_SAFE(MsgStream& msgstream, double envelope = 1.) const;
+  void synchronizeLayers (MsgStream& msgstream, double envelope = 1.);
 
   /** Register Next - Previous for Layers, set volumelink */
   void interlinkLayers ();
@@ -435,7 +435,7 @@ private:
   TrackingVolumeArray* m_confinedVolumes;
   //(b)
   //!< Detached subvolumes
-  const std::vector<const DetachedTrackingVolume*>* m_confinedDetachedVolumes;
+  const std::vector<DetachedTrackingVolume*>* m_confinedDetachedVolumes;
   // additionally
   //!< Unordered subvolumes
   const std::vector<const TrackingVolume*>* m_confinedDenseVolumes; 

@@ -47,7 +47,7 @@ namespace Muon {
         virtual StatusCode initialize() override;
 
         virtual
-        std::unique_ptr<const std::vector<std::unique_ptr<const Trk::DetachedTrackingVolume>>>
+        std::unique_ptr<std::vector<std::unique_ptr<Trk::DetachedTrackingVolume>>>
         buildDetachedTrackingVolumes(const EventContext& ctx,
                                      SG::WriteCondHandle<Trk::TrackingGeometry>& whandle,
                                      bool blend = false) const override;
@@ -58,10 +58,10 @@ namespace Muon {
         std::vector<std::unique_ptr<Trk::DetachedTrackingVolume>> buildDetachedTrackingVolumeTypes(
                                                                     bool blend, const MuonGM::MuonDetectorManager* muonMgr) const;
 
-        void glueComponents(const Trk::DetachedTrackingVolume*) const;
+        void glueComponents(Trk::DetachedTrackingVolume*) const;
         void encloseLayers(const Trk::DetachedTrackingVolume*) const;
         void identifyLayers(const Trk::DetachedTrackingVolume*, int, int, const MuonGM::MuonDetectorManager*) const;
-        void identifyPrototype(const Trk::TrackingVolume*, int, int, const Amg::Transform3D&, const MuonGM::MuonDetectorManager*) const;
+        void identifyPrototype(Trk::TrackingVolume*, int, int, const Amg::Transform3D&, const MuonGM::MuonDetectorManager*) const;
         void getNSWStationsForTranslation(
             const GeoVPhysVol* pv, const std::string& name, const Amg::Transform3D&,
             std::vector<std::pair<std::pair<const GeoLogVol*, Trk::MaterialProperties*>, std::vector<Amg::Transform3D>>>& vols,

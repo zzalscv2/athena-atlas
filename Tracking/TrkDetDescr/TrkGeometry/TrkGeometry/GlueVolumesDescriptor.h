@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
 */
 
 ///////////////////////////////////////////////////////////////////
@@ -23,10 +23,10 @@ namespace Trk {
 class TrackingVolume;
 
 typedef std::map<BoundarySurfaceFace,
-                 std::vector<const TrackingVolume*> >::iterator
+                 std::vector<TrackingVolume*> >::iterator
     GlueVolumeIterator;
 typedef std::map<BoundarySurfaceFace,
-                 std::vector<const TrackingVolume*> >::const_iterator
+                 std::vector<TrackingVolume*> >::const_iterator
     GlueVolumeConstIterator;
 /** @class GlueVolumesDescriptor
 
@@ -44,7 +44,7 @@ class GlueVolumesDescriptor {
 
   /**Constructor - with arguments*/
   GlueVolumesDescriptor(
-      const std::map<BoundarySurfaceFace, std::vector<const TrackingVolume*> >&
+      const std::map<BoundarySurfaceFace, std::vector<TrackingVolume*> >&
           glv);
 
   /**Desctructor */
@@ -52,20 +52,20 @@ class GlueVolumesDescriptor {
 
   /** register the volumes */
   void registerGlueVolumes(BoundarySurfaceFace,
-                           std::vector<const TrackingVolume*>&);
+                           std::vector<TrackingVolume*>&);
 
   /** retrieve them again */
-  const std::vector<const TrackingVolume*>& glueVolumes(
-      BoundarySurfaceFace) const;
+  const std::vector<TrackingVolume*>& glueVolumes(
+      BoundarySurfaceFace);
 
   /** retrieve the available Glue Faces */
   const std::vector<BoundarySurfaceFace>& glueFaces() const;
 
  private:
-  std::map<BoundarySurfaceFace, std::vector<const TrackingVolume*> >
+  std::map<BoundarySurfaceFace, std::vector<TrackingVolume*> >
       m_glueVolumes;
   std::vector<BoundarySurfaceFace> m_glueFaces;
-  static const std::vector<const TrackingVolume*> s_emptyVector;
+  static const std::vector<TrackingVolume*> s_emptyVector;
 };
 
 inline const std::vector<BoundarySurfaceFace>&
@@ -75,8 +75,8 @@ GlueVolumesDescriptor::glueFaces() const {
 
 /**Overload of << operator for both, MsgStream and std::ostream for debug
  * output*/
-MsgStream& operator<<(MsgStream& sl, const GlueVolumesDescriptor& mprop);
-std::ostream& operator<<(std::ostream& sl, const GlueVolumesDescriptor& mprop);
+MsgStream& operator<<(MsgStream& sl, GlueVolumesDescriptor& mprop);
+std::ostream& operator<<(std::ostream& sl, GlueVolumesDescriptor& mprop);
 
 }  // namespace Trk
 

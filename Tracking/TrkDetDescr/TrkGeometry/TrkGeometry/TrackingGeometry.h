@@ -203,11 +203,11 @@ private:
     m_muonInertMaterialConstituents;
   // muon chambers
   std::unique_ptr<
-    const std::vector<std::unique_ptr<const Trk::DetachedTrackingVolume>>>
+    const std::vector<std::unique_ptr<Trk::DetachedTrackingVolume>>>
     m_muonStations;
   // muon inert material
   std::unique_ptr<
-    const std::vector<std::unique_ptr<const Trk::DetachedTrackingVolume>>>
+    const std::vector<std::unique_ptr<Trk::DetachedTrackingVolume>>>
     m_muonInertObjs;
 };
 

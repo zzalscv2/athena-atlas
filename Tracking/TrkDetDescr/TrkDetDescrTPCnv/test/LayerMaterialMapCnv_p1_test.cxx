@@ -139,16 +139,16 @@ void compare (const Trk::LayerMaterialMap& m1,
     const Trk::LayerMaterialProperties* p1 = p.second;
     const Trk::LayerMaterialProperties* p2 = it->second;
 
-    if (auto* pp1 = dynamic_cast<const Trk::BinnedLayerMaterial*> (p1))
+    if (const auto* pp1 = dynamic_cast<const Trk::BinnedLayerMaterial*> (p1))
     {
-      auto* pp2 = dynamic_cast<const Trk::BinnedLayerMaterial*> (p2);
+      const auto* pp2 = dynamic_cast<const Trk::BinnedLayerMaterial*> (p2);
       assert (pp2 != nullptr);
       compare (*pp1, *pp2);
     }
 
-    else if (auto* pp1 = dynamic_cast<const Trk::CompressedLayerMaterial*> (p1))
+    else if (const auto* pp1 = dynamic_cast<const Trk::CompressedLayerMaterial*> (p1))
     {
-      auto* pp2 = dynamic_cast<const Trk::CompressedLayerMaterial*> (p2);
+      const auto* pp2 = dynamic_cast<const Trk::CompressedLayerMaterial*> (p2);
       assert (pp2 != nullptr);
       compare (*pp1, *pp2);
     }

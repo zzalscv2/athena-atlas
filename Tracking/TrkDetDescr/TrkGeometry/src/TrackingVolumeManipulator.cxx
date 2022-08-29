@@ -59,17 +59,17 @@ void Trk::TrackingVolumeManipulator::setInsideVolume ATLAS_NOT_THREAD_SAFE(
 
 void Trk::TrackingVolumeManipulator::setInsideVolumeArray ATLAS_NOT_THREAD_SAFE(
     const Trk::TrackingVolume& tvol, Trk::BoundarySurfaceFace face,
-    Trk::BinnedArray<const Trk::TrackingVolume>* insidevolarray) {
+    Trk::BinnedArray<Trk::TrackingVolume>* insidevolarray) {
 
   const_cast<Trk::BoundarySurface<Trk::TrackingVolume>*>(
     (*tvol.m_boundarySurfaces)[face].get())
     ->setInsideVolumeArray(
-      Trk::SharedObject<Trk::BinnedArray<const Trk::TrackingVolume>>(insidevolarray));
+      Trk::SharedObject<Trk::BinnedArray<Trk::TrackingVolume>>(insidevolarray));
 }
 
 void Trk::TrackingVolumeManipulator::setInsideVolumeArray ATLAS_NOT_THREAD_SAFE(
     const Trk::TrackingVolume& tvol, Trk::BoundarySurfaceFace face,
-    const Trk::SharedObject<Trk::BinnedArray<const Trk::TrackingVolume> >&
+    const Trk::SharedObject<Trk::BinnedArray<Trk::TrackingVolume> >&
         insidevolarray) {
   const_cast<Trk::BoundarySurface<Trk::TrackingVolume>*>(
     (*tvol.m_boundarySurfaces)[face].get())
@@ -87,12 +87,12 @@ void Trk::TrackingVolumeManipulator::setOutsideVolume ATLAS_NOT_THREAD_SAFE(
 void Trk::TrackingVolumeManipulator::setOutsideVolumeArray
 ATLAS_NOT_THREAD_SAFE(
     const Trk::TrackingVolume& tvol, Trk::BoundarySurfaceFace face,
-    Trk::BinnedArray<const Trk::TrackingVolume>* outsidevolarray) {
+    Trk::BinnedArray<Trk::TrackingVolume>* outsidevolarray) {
 
   const_cast<Trk::BoundarySurface<Trk::TrackingVolume>*>(
     (*tvol.m_boundarySurfaces)[face].get())
     ->setOutsideVolumeArray(
-      Trk::SharedObject<Trk::BinnedArray<const Trk::TrackingVolume>>(
+      Trk::SharedObject<Trk::BinnedArray<Trk::TrackingVolume>>(
         outsidevolarray));
 }
 
@@ -100,7 +100,7 @@ void Trk::TrackingVolumeManipulator::setOutsideVolumeArray
 ATLAS_NOT_THREAD_SAFE(
   const Trk::TrackingVolume& tvol,
   Trk::BoundarySurfaceFace face,
-  const Trk::SharedObject<Trk::BinnedArray<const Trk::TrackingVolume>>&
+  const Trk::SharedObject<Trk::BinnedArray<Trk::TrackingVolume>>&
     outsidevolarray)
 {
   const_cast<Trk::BoundarySurface<Trk::TrackingVolume>*>(

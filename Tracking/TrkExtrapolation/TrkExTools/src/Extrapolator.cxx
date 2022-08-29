@@ -715,11 +715,11 @@ Trk::Extrapolator::extrapolateToNextMaterialLayer(const EventContext& ctx,
     cache.m_layers.clear();
     cache.m_navigLays.clear();
 
-    const std::vector<const Trk::DetachedTrackingVolume*>* detVols =
+    Trk::ArraySpan<const Trk::DetachedTrackingVolume* const> detVols =
       staticVol->confinedDetachedVolumes();
-    if (detVols) {
-      std::vector<const Trk::DetachedTrackingVolume*>::const_iterator iTer = detVols->begin();
-      for (; iTer != detVols->end(); ++iTer) {
+    if (!detVols.empty()) {
+      Trk::ArraySpan<const Trk::DetachedTrackingVolume* const>::const_iterator iTer = detVols.begin();
+      for (; iTer != detVols.end(); ++iTer) {
         // active station ?
         const Trk::Layer* layR = (*iTer)->layerRepresentation();
         bool active = layR && layR->layerType();
@@ -792,7 +792,7 @@ Trk::Extrapolator::extrapolateToNextMaterialLayer(const EventContext& ctx,
     cache.m_dense = (staticVol->geometrySignature() == Trk::MS && m_useMuonMatApprox) ||
                     (staticVol->geometrySignature() != Trk::MS && m_useDenseVolumeDescription);
   }
-  while (currPar && staticVol && !staticVol->confinedDetachedVolumes()) {
+  while (currPar && staticVol && staticVol->confinedDetachedVolumes().empty()) {
     // propagate to closest surface
     solutions.resize(0);
     const Trk::TrackingVolume* propagVol = cache.m_dense ? staticVol : cache.m_highestVolume;
@@ -900,7 +900,7 @@ Trk::Extrapolator::extrapolateToNextMaterialLayer(const EventContext& ctx,
     return {};
   }
 
-  if (!staticVol || (!staticVol->confinedDetachedVolumes()) || !currPar) {
+  if (!staticVol || (staticVol->confinedDetachedVolumes().empty()) || !currPar) {
     return {};
   }
 
@@ -2960,7 +2960,7 @@ Trk::Extrapolator::extrapolateInsideVolume(const EventContext& ctx,
                                            MaterialUpdateMode matupmode) const
 {
   // ---> C) detached volumes exist
-  if (tvol.confinedDetachedVolumes()) {
+  if (!tvol.confinedDetachedVolumes().empty()) {
     return extrapolateWithinDetachedVolumes(
       ctx, cache, prop, parm, sf, tvol, dir, bcheck, particle, matupmode);
   }
@@ -3189,7 +3189,7 @@ Trk::Extrapolator::extrapolateToVolumeBoundary(const EventContext& ctx,
                                                MaterialUpdateMode matupmode) const
 {
   // ---> C) detached volumes exist
-  if (tvol.confinedDetachedVolumes()) {
+  if (!tvol.confinedDetachedVolumes().empty()) {
     ATH_MSG_WARNING(
       "  [!] toVolumeBoundaryDetachedVolumes(...) with confined detached volumes? This should "
       "not happen ! volume name and signature: "
@@ -4759,11 +4759,11 @@ Trk::Extrapolator::extrapolateToVolumeWithPathLimit(const EventContext& ctx,
     cache.m_navigLays.clear();
 
     // detached volume boundaries
-    const std::vector<const Trk::DetachedTrackingVolume*>* detVols =
+    Trk::ArraySpan<const Trk::DetachedTrackingVolume* const> detVols =
       cache.m_currentStatic->confinedDetachedVolumes();
-    if (detVols) {
-      std::vector<const Trk::DetachedTrackingVolume*>::const_iterator iTer = detVols->begin();
-      for (; iTer != detVols->end(); ++iTer) {
+    if (!detVols.empty()) {
+      Trk::ArraySpan<const Trk::DetachedTrackingVolume* const>::const_iterator iTer = detVols.begin();
+      for (; iTer != detVols.end(); ++iTer) {
         // active station ?
         const Trk::Layer* layR = (*iTer)->layerRepresentation();
         bool active = layR && layR->layerType();

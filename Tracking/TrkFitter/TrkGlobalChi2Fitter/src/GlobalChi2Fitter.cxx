@@ -2971,7 +2971,7 @@ namespace Trk {
       }
     }
     
-    const Trk::BinnedArray<const Trk::TrackingVolume> *confinedVolumes = tvol->confinedVolumes();
+    const TrackingVolumeArray* confinedVolumes = tvol->confinedVolumes();
     // get the confined volumes and loop over it -> call recursively
     if (confinedVolumes != nullptr) {
       Trk::BinnedArraySpan<Trk::TrackingVolume const * const> volumes = confinedVolumes->arrayObjects();

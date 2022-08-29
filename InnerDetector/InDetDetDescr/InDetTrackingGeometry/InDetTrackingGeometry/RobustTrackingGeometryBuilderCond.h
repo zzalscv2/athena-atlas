@@ -92,7 +92,7 @@ namespace InDet {
     private:
       /** Private method, creates and packs a triple containing of
        * NegEndcap-Barrel-PosEndcap layers */
-      const Trk::TrackingVolume* packVolumeTriple
+      Trk::TrackingVolume* packVolumeTriple
       ATLAS_NOT_THREAD_SAFE(const std::vector<Trk::Layer*>& negLayers,
                             const std::vector<Trk::Layer*>& centralLayers,
                             const std::vector<Trk::Layer*>& posLayers,
@@ -106,10 +106,10 @@ namespace InDet {
 
       /** Private method, creates and packs a triple containing of
        * NegEndcap-Barrel-PosEndcap volumes */
-      const Trk::TrackingVolume* packVolumeTriple ATLAS_NOT_THREAD_SAFE(
-        const std::vector<const Trk::TrackingVolume*>& negVolumes,
-        const std::vector<const Trk::TrackingVolume*>& centralVolumes,
-        const std::vector<const Trk::TrackingVolume*>& posVolumes,
+      Trk::TrackingVolume* packVolumeTriple ATLAS_NOT_THREAD_SAFE(
+        const std::vector<Trk::TrackingVolume*>& negVolumes,
+        const std::vector<Trk::TrackingVolume*>& centralVolumes,
+        const std::vector<Trk::TrackingVolume*>& posVolumes,
         const std::string& baseName = "UndefinedVolume") const;
 
       // helper tools for the geometry building

@@ -195,7 +195,7 @@ InDet::StagedTrackingGeometryBuilderCond::trackingGeometry ATLAS_NOT_THREAD_SAFE
    
    // create a volume cache for:
    // - ID volume, i.e. those that can be stacked into the overall container
-   std::vector<const Trk::TrackingVolume*> idVolumes;
+   std::vector<Trk::TrackingVolume*> idVolumes;
    
    // create a layer setup cache for flushing when necessary
    std::vector<InDet::LayerSetupCond> layerSetupCache;
@@ -227,7 +227,7 @@ InDet::StagedTrackingGeometryBuilderCond::trackingGeometry ATLAS_NOT_THREAD_SAFE
             // create the outer boundary
             double flushRadius = 0.5*(layerSetupCache[layerSetupCache.size()-1].rMax + lSetup.rMin);
             // create a flush volume - clears the cache
-            const Trk::TrackingVolume* fVolume = createFlushVolume(layerSetupCache,lastFlushRadius,flushRadius,maximumLayerExtendZ);
+            Trk::TrackingVolume* fVolume = createFlushVolume(layerSetupCache,lastFlushRadius,flushRadius,maximumLayerExtendZ);
             // stuff it into the idVolume
             idVolumes.push_back(fVolume);
             // remember the last flush radius                                                                                    
@@ -242,7 +242,7 @@ InDet::StagedTrackingGeometryBuilderCond::trackingGeometry ATLAS_NOT_THREAD_SAFE
        ATH_MSG_DEBUG( "[ STEP 3 ] : Flush the remaining cache into the ID detector volume vector." );
        // set the maximum radius to the last layer radius    
        double flushRadius = 0.5*(maximumLayerRadius  + envelopeVolumeRadius);
-       const Trk::TrackingVolume* fVolume = createFlushVolume(layerSetupCache,lastFlushRadius,flushRadius,maximumLayerExtendZ);
+       Trk::TrackingVolume* fVolume = createFlushVolume(layerSetupCache,lastFlushRadius,flushRadius,maximumLayerExtendZ);
        // push it into the vector
        idVolumes.push_back(fVolume);
        lastFlushRadius = flushRadius;
@@ -250,7 +250,7 @@ InDet::StagedTrackingGeometryBuilderCond::trackingGeometry ATLAS_NOT_THREAD_SAFE
    
    ATH_MSG_DEBUG( "[ STEP 4 ] : Create the ID detector volumes" );
    // build the central enclosure first
-   const Trk::TrackingVolume* centralEnclosure =  m_trackingVolumeCreator->createGapTrackingVolume(*m_materialProperties,
+   Trk::TrackingVolume* centralEnclosure =  m_trackingVolumeCreator->createGapTrackingVolume(*m_materialProperties,
                                                                            lastFlushRadius, envelopeVolumeRadius,
                                                                            -maximumLayerExtendZ, maximumLayerExtendZ,
                                                                            1, true,
@@ -258,27 +258,27 @@ InDet::StagedTrackingGeometryBuilderCond::trackingGeometry ATLAS_NOT_THREAD_SAFE
    idVolumes.push_back(centralEnclosure);
    // now lets create the container
    std::string volumeName = m_namespace+"Detectors::Container";
-   const Trk::TrackingVolume* idContainer = 
+   Trk::TrackingVolume* idContainer = 
          m_trackingVolumeCreator->createContainerTrackingVolume(idVolumes,
                                                                 *m_materialProperties,
                                                                 volumeName,
                                                                 m_buildBoundaryLayers,
                                                                 m_replaceJointBoundaries);
    // finally create the two endplates: negative
-   const Trk::TrackingVolume* negativeEnclosure =  m_trackingVolumeCreator->createGapTrackingVolume(*m_materialProperties,
+   Trk::TrackingVolume* negativeEnclosure =  m_trackingVolumeCreator->createGapTrackingVolume(*m_materialProperties,
                                                                                                    0., envelopeVolumeRadius,
                                                                                                    -envelopeVolumeHalfZ, -maximumLayerExtendZ,
                                                                                                    1, false,
                                                                                                    m_namespace+"Gaps::NegativeEnclosure");
   
    // finally create the two endplates: positive
-   const Trk::TrackingVolume* positiveEnclosure =  m_trackingVolumeCreator->createGapTrackingVolume(*m_materialProperties,
+   Trk::TrackingVolume* positiveEnclosure =  m_trackingVolumeCreator->createGapTrackingVolume(*m_materialProperties,
                                                                                                    0., envelopeVolumeRadius,
                                                                                                    maximumLayerExtendZ,envelopeVolumeHalfZ,
                                                                                                    1, false,
                                                                                                    m_namespace+"Gaps::PositiveEnclosure");
    // and the final tracking volume
-   std::vector<const Trk::TrackingVolume*> enclosedVolumes;
+   std::vector<Trk::TrackingVolume*> enclosedVolumes;
    enclosedVolumes.push_back(negativeEnclosure);
    enclosedVolumes.push_back(idContainer);
    enclosedVolumes.push_back(positiveEnclosure);
@@ -308,7 +308,7 @@ StatusCode InDet::StagedTrackingGeometryBuilderCond::finalize()
     return StatusCode::SUCCESS;
 }
 
-const Trk::TrackingVolume*
+Trk::TrackingVolume*
   InDet::StagedTrackingGeometryBuilderCond::packVolumeTriple
     ATLAS_NOT_THREAD_SAFE // Thread unsafe TrackingVolume::registerColorCodemethod is used.
   (InDet::LayerSetupCond& layerSetup,
@@ -363,13 +363,13 @@ const Trk::TrackingVolume*
   positiveVolume->registerColorCode(layerSetup.colorCode);
 
   // pack them together
-  std::vector<const Trk::TrackingVolume*> tripleVolumes;
+  std::vector<Trk::TrackingVolume*> tripleVolumes;
   tripleVolumes.push_back(negativeVolume);
   tripleVolumes.push_back(centralVolume);
   tripleVolumes.push_back(positiveVolume);
 
   // create the tiple container
-  const Trk::TrackingVolume* tripleContainer =
+  Trk::TrackingVolume* tripleContainer =
     m_trackingVolumeCreator->createContainerTrackingVolume(
       tripleVolumes,
       *m_materialProperties,
@@ -600,7 +600,7 @@ InDet::StagedTrackingGeometryBuilderCond::createTrackingVolume(
         ATH_MSG_INFO("Ring layout is present for volume '" << volumeName << "' dealing with it.");
         // create the vector for the sub volumes
         std::vector<Trk::TrackingVolume* > ringVolumes;
-        std::vector<const Trk::TrackingVolume* > const_ringVolumes;
+        std::vector<Trk::TrackingVolume* > const_ringVolumes;
 
         // now sort the necessary layers --- for the sub volumes
         std::vector< std::vector<Trk::Layer*> > groupedDiscs(ringRmins.size(), std::vector<Trk::Layer*>() );
@@ -702,16 +702,16 @@ InDet::StagedTrackingGeometryBuilderCond::createTrackingVolume(
  
                              
 /** Private helper method to flush the cache into the id volumes - return volume is the one to be provided */
-const Trk::TrackingVolume*
+Trk::TrackingVolume*
   InDet::StagedTrackingGeometryBuilderCond::createFlushVolume
-    ATLAS_NOT_THREAD_SAFE // Thread unsafe TrackingVolume::registerColorCode method is used.
+    ATLAS_NOT_THREAD_SAFE 
   (std::vector<InDet::LayerSetupCond>& layerSetupCache,
    double innerRadius,
    double& outerRadius,
    double extendZ) const
 {
   // the return volume 
-  const Trk::TrackingVolume* flushVolume = nullptr;
+  Trk::TrackingVolume* flushVolume = nullptr;
   // 
   if (layerSetupCache.size() == 1 ){
     ATH_MSG_VERBOSE("       -> single sector setup - synchronising from inner (" << innerRadius << ") to outer (" << outerRadius << ") radius.");
@@ -731,9 +731,9 @@ const Trk::TrackingVolume*
    } else {
        ATH_MSG_VERBOSE("       -> setup with " << layerSetupCache.size() << " entries - synchronising from inner (" << innerRadius << ") to outer (" << outerRadius << ") radius.");
        // prepare the volume vectors & name identification
-       std::vector<const Trk::TrackingVolume*> negVolumes;
-       std::vector<const Trk::TrackingVolume*> centralVolumes;
-       std::vector<const Trk::TrackingVolume*> posVolumes;
+       std::vector<Trk::TrackingVolume*> negVolumes;
+       std::vector<Trk::TrackingVolume*> centralVolumes;
+       std::vector<Trk::TrackingVolume*> posVolumes;
        std::string combinedName;
        for (size_t ilS = 0; ilS < layerSetupCache.size(); ++ilS){
            // take the given inner radius for the first one - median otherwise
@@ -798,10 +798,10 @@ const Trk::TrackingVolume*
     
 }  
 
-const Trk::TrackingVolume* InDet::StagedTrackingGeometryBuilderCond::packVolumeTriple(
-                                     const std::vector<const Trk::TrackingVolume*>& negVolumes,
-                                     const std::vector<const Trk::TrackingVolume*>& centralVolumes,
-                                     const std::vector<const Trk::TrackingVolume*>& posVolumes,
+Trk::TrackingVolume* InDet::StagedTrackingGeometryBuilderCond::packVolumeTriple(
+                                     const std::vector<Trk::TrackingVolume*>& negVolumes,
+                                     const std::vector<Trk::TrackingVolume*>& centralVolumes,
+                                     const std::vector<Trk::TrackingVolume*>& posVolumes,
                                      const std::string& baseName) const
 {
   ATH_MSG_VERBOSE( '\t' << '\t'<< "Pack provided Volumes from '" << baseName << "' triple into a container volume. " );
@@ -815,14 +815,14 @@ const Trk::TrackingVolume* InDet::StagedTrackingGeometryBuilderCond::packVolumeT
     // create the strings
   std::string volumeBase = m_namespace+"Containers::"+baseName;
   
-  const Trk::TrackingVolume* negativeVolume = (negVolSize > 1) ?
+  Trk::TrackingVolume* negativeVolume = (negVolSize > 1) ?
        m_trackingVolumeCreator->createContainerTrackingVolume(negVolumes,
                                                        *m_materialProperties,
                                                        volumeBase+"::NegativeSector",
                                                        m_buildBoundaryLayers,
                                                        m_replaceJointBoundaries) : 
                                              (negVolSize ? negVolumes[0] : nullptr);
-  const Trk::TrackingVolume* centralVolume = (cenVolSize > 1) ?
+  Trk::TrackingVolume* centralVolume = (cenVolSize > 1) ?
          m_trackingVolumeCreator->createContainerTrackingVolume(centralVolumes,
                                                        *m_materialProperties,
                                                        volumeBase+"::CentralSector",
@@ -830,7 +830,7 @@ const Trk::TrackingVolume* InDet::StagedTrackingGeometryBuilderCond::packVolumeT
                                                        m_replaceJointBoundaries) :
                                               (cenVolSize ? centralVolumes[0] : nullptr) ;
                                               
-   const Trk::TrackingVolume* positiveVolume = ( posVolSize > 1) ?
+   Trk::TrackingVolume* positiveVolume = ( posVolSize > 1) ?
          m_trackingVolumeCreator->createContainerTrackingVolume(posVolumes,
                                                        *m_materialProperties,
                                                        volumeBase+"::PositiveSector",
@@ -843,12 +843,12 @@ const Trk::TrackingVolume* InDet::StagedTrackingGeometryBuilderCond::packVolumeT
        return centralVolume;
    }
    // pack them together
-   std::vector<const Trk::TrackingVolume*> tripleVolumes;
+   std::vector<Trk::TrackingVolume*> tripleVolumes;
    if (negativeVolume) tripleVolumes.push_back(negativeVolume);
    if (centralVolume) tripleVolumes.push_back(centralVolume);
    if (positiveVolume) tripleVolumes.push_back(positiveVolume);
    // create the tiple container
-   const Trk::TrackingVolume* tripleContainer = 
+   Trk::TrackingVolume* tripleContainer = 
          m_trackingVolumeCreator->createContainerTrackingVolume(tripleVolumes,
                                                                 *m_materialProperties,
                                                                 volumeBase,

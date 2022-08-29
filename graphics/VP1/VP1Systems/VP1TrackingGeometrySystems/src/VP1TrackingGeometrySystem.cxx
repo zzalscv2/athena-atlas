@@ -1126,7 +1126,7 @@ void VP1TrackingGeometrySystem::processTrkVolume(const Trk::TrackingVolume* tvol
     }
   }
   
-  const Trk::BinnedArray< const Trk::TrackingVolume >* confinedVolumes = tvol->confinedVolumes();
+  const Trk::BinnedArray<Trk::TrackingVolume >* confinedVolumes = tvol->confinedVolumes();
   // get the confined volumes and loop over it -> call recursively
   if (confinedVolumes){
     Trk::BinnedArraySpan<Trk::TrackingVolume const * const> volumes = confinedVolumes->arrayObjects();
@@ -1175,7 +1175,7 @@ void VP1TrackingGeometrySystem::processMsVolume(const Trk::TrackingVolume* tvol,
     }
 
   } else {
-    const Trk::BinnedArray< const Trk::TrackingVolume >* confinedVolumes = tvol->confinedVolumes();
+    const Trk::BinnedArray<Trk::TrackingVolume >* confinedVolumes = tvol->confinedVolumes();
     // get the confined volumes and loop over it -> call recursively
     if (confinedVolumes){
       Trk::BinnedArraySpan<Trk::TrackingVolume const * const> volumes = confinedVolumes->arrayObjects();
@@ -1186,11 +1186,11 @@ void VP1TrackingGeometrySystem::processMsVolume(const Trk::TrackingVolume* tvol,
     }
   }
 
-  const std::vector<const Trk::DetachedTrackingVolume*>* detVols = tvol->confinedDetachedVolumes();
-  if (detVols) {
+  Trk::ArraySpan<const Trk::DetachedTrackingVolume* const> detVols = tvol->confinedDetachedVolumes();
+  if (!detVols.empty()) {
     // identify separators
-    std::vector<const Trk::DetachedTrackingVolume*>::const_iterator dIter = detVols->begin();
-    for ( ;dIter!=detVols->end(); ++dIter) {
+    Trk::ArraySpan<const Trk::DetachedTrackingVolume* const>::const_iterator dIter = detVols.begin();
+    for ( ;dIter!=detVols.end(); ++dIter) {
       if ( (tvol->inside((*dIter)->trackingVolume()->center(),0.) || (*dIter)->trackingVolume()->center().perp()<0.001) ) {
 	std::string name = (*dIter)->name();
         if ( name.substr(0,2) == "BI" ) { sepHelper = m_d->sephelper_msBI; layHelper =  m_d->sephelper_msBIlay; }

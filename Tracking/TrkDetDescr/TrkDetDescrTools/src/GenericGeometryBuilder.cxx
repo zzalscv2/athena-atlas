@@ -189,7 +189,8 @@ Trk::TrackingGeometry* Trk::GenericGeometryBuilder::trackingGeometry(const Trk::
     cSector->registerColorCode(m_geometryColorCode);
     // wrap the inner volume into a centralSector 
     if (cvb){ 
-        auto centralVolumes = std::vector<const Trk::TrackingVolume*>{innerVol, cSector};
+        //inner volume is passed as const in the Builder here
+        auto centralVolumes = std::vector<Trk::TrackingVolume*>{const_cast<Trk::TrackingVolume*> (innerVol), cSector};
         // override barrelVolume if enclosing is needed -> memory ownership shifted to container
         cSector = m_trackingVolumeCreator->createContainerTrackingVolume(centralVolumes,
                                                                          vacuum,
@@ -220,9 +221,9 @@ Trk::TrackingGeometry* Trk::GenericGeometryBuilder::trackingGeometry(const Trk::
         m_geometryName + "::Generic::PositiveEndcap");
     pSector->registerColorCode(m_geometryColorCode);
 
-    auto allVolumes = std::vector<const Trk::TrackingVolume*>();
+    auto allVolumes = std::vector<Trk::TrackingVolume*>();
     // if extended barrel is to be built
-    auto extendedVolumes = std::vector<const Trk::TrackingVolume*>();
+    auto extendedVolumes = std::vector<Trk::TrackingVolume*>();
     if ( m_extendedEndcap){
         auto names = std::vector<std::string>{ "Negative", "Positive"};
         for ( size_t it = 0; it < 2; ++it){ 
@@ -255,7 +256,7 @@ Trk::TrackingGeometry* Trk::GenericGeometryBuilder::trackingGeometry(const Trk::
           // sign it with one higher volume id
           exrVolume->sign( Trk::GeometrySignature(int(geometrySignature())+1) );
           // pack it into a container
-          auto exVolumes = std::vector<const Trk::TrackingVolume*>{exVolume, exrVolume};
+          auto exVolumes = std::vector<Trk::TrackingVolume*>{exVolume, exrVolume};
           Trk::TrackingVolume* exSector =
             m_trackingVolumeCreator->createContainerTrackingVolume(
               exVolumes,
@@ -266,8 +267,8 @@ Trk::TrackingGeometry* Trk::GenericGeometryBuilder::trackingGeometry(const Trk::
        }
     }
     // and now create the triple
-    allVolumes = !extendedVolumes.empty() ?  std::vector<const Trk::TrackingVolume*>{extendedVolumes[0],nSector,cSector,pSector,extendedVolumes[1]} : 
-                                           std::vector<const Trk::TrackingVolume*>{nSector,cSector,pSector};
+    allVolumes = !extendedVolumes.empty() ?  std::vector<Trk::TrackingVolume*>{extendedVolumes[0],nSector,cSector,pSector,extendedVolumes[1]} : 
+                                           std::vector<Trk::TrackingVolume*>{nSector,cSector,pSector};
     Trk::TrackingVolume* tVolume =
       m_trackingVolumeCreator->createContainerTrackingVolume(
         allVolumes, vacuum, m_geometryName + "::Container");
