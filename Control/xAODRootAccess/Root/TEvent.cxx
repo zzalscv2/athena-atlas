@@ -132,7 +132,7 @@ namespace xAOD {
         m_inChain( nullptr ), m_inChainTracker( nullptr ),
         m_inTreeNumber( -1 ), m_inMetaTree( nullptr ),
         m_entry( -1 ), m_outTree( nullptr ),
-        m_inputObjects(), m_outputObjects(),
+        m_inputObjects(), m_inputMissingObjects(), m_outputObjects(),
         m_inputMetaObjects(), m_outputMetaObjects(),
         m_inputEventFormat(), m_outputEventFormat( nullptr ),
         m_auxItemList(), m_listeners(), m_nameRemapping() {
@@ -165,7 +165,7 @@ namespace xAOD {
         m_inChain( nullptr ), m_inChainTracker( nullptr ),
         m_inTreeNumber( -1 ), m_inMetaTree( nullptr ),
         m_entry( -1 ), m_outTree( nullptr ),
-        m_inputObjects(), m_outputObjects(),
+        m_inputObjects(), m_inputMissingObjects(), m_outputObjects(),
         m_inputMetaObjects(), m_outputMetaObjects(),
         m_inputEventFormat(), m_outputEventFormat( nullptr ),
         m_auxItemList(), m_listeners(), m_nameRemapping() {
@@ -201,7 +201,7 @@ namespace xAOD {
         m_inChain( nullptr ), m_inChainTracker( nullptr ),
         m_inTreeNumber( -1 ), m_inMetaTree( nullptr ),
         m_entry( -1 ), m_outTree( nullptr ),
-        m_inputObjects(), m_outputObjects(),
+        m_inputObjects(), m_inputMissingObjects(), m_outputObjects(),
         m_inputMetaObjects(), m_outputMetaObjects(),
         m_inputEventFormat(), m_outputEventFormat( nullptr ),
         m_auxItemList(), m_listeners(), m_nameRemapping() {
@@ -372,6 +372,7 @@ namespace xAOD {
          delete itr->second;
       }
       m_inputObjects.clear();
+      m_inputMissingObjects.clear();
       m_branches.clear();
 
       // Clear the cached input meta-objects:
@@ -2415,6 +2416,15 @@ namespace xAOD {
       if( m_inputObjects.find( key ) != m_inputObjects.end() ) {
          return StatusCode::SUCCESS;
       }
+      // Check if it was already found to be missing.
+      if( m_inputMissingObjects.find( key ) != m_inputMissingObjects.end() ) {
+         if( ! silent ) {
+            ::Warning( "xAOD::TEvent::connectBranch",
+                       "Branch \"%s\" not available on input",
+                       key.c_str() );
+         }
+         return StatusCode::RECOVERABLE;
+      }
 
       // Check if we have metadata about this branch:
       const xAOD::EventFormatElement* ef = 0;
@@ -2429,15 +2439,21 @@ namespace xAOD {
       }
 
       // Check if the branch exists in our input tree:
-      ::TBranch* br = m_inTree->GetBranch( key.c_str() );
-      if( ! br ) {
+      assert( m_inTree->GetListOfBranches() != nullptr );
+      ::TObject* brObject =
+         m_inTree->GetListOfBranches()->FindObject( key.c_str() );
+      if( ! brObject ) {
          if( ! silent ) {
             ::Warning( "xAOD::TEvent::connectBranch",
                        "Branch \"%s\" not available on input",
                        key.c_str() );
          }
+         m_inputMissingObjects.insert( key );
          return StatusCode::RECOVERABLE;
       }
+
+      // Statically cast it to a TBranch.
+      ::TBranch* br = static_cast< TBranch* >( brObject );
 
       // Make sure that it's not in "MakeClass mode":
       br->SetMakeClass( 0 );
