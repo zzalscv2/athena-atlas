@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2020 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef TILEBYTESTREAM_TILERAWCHANNEL2BYTES5_H 
@@ -93,11 +93,11 @@ class TileRawChannel2Bytes5
     inline bool unpack_reco_bin(unsigned int w, int &fmt, int &gain, int &amp, int &time) const;
 
     /** Get SumEt, SumEz, SumE value **/
-    inline double getSum(uint32_t* ptr_frag, int n) const;
+    inline double getSum(const uint32_t* ptr_frag, int n) const;
     
-    inline double getSumEt(uint32_t* ptr_frag) const;
-    inline double getSumEz(uint32_t* ptr_frag) const;
-    inline double getSumE (uint32_t* ptr_frag) const;
+    inline double getSumEt(const uint32_t* ptr_frag) const;
+    inline double getSumEz(const uint32_t* ptr_frag) const;
+    inline double getSumE (const uint32_t* ptr_frag) const;
 
     /** Sets verbose mode true or false. */
     inline void setVerbose(bool /*verbose*/) {  }  
@@ -268,15 +268,15 @@ inline void TileRawChannel2Bytes5::unpack_reco(unsigned int w, unsigned int unit
   }
 }
 
-inline double TileRawChannel2Bytes5::getSum(uint32_t* ptr_frag, int n) const
+inline double TileRawChannel2Bytes5::getSum(const uint32_t* ptr_frag, int n) const
 {
   int unit = ptr_frag[2] >> (32 - 2);
   int amp_bin = (int) (ptr_frag[3 + 48 + n]); // Header + Reco + [SumEt, SumEz, SumE]
   return Frag5_unpack_bin2sum(unit, amp_bin);
 }
 
-inline double TileRawChannel2Bytes5::getSumEt(uint32_t* ptr_frag) const { return getSum(ptr_frag, 0); }
-inline double TileRawChannel2Bytes5::getSumEz(uint32_t* ptr_frag) const { return getSum(ptr_frag, 1); }
-inline double TileRawChannel2Bytes5::getSumE (uint32_t* ptr_frag) const { return getSum(ptr_frag, 2); }
+inline double TileRawChannel2Bytes5::getSumEt(const uint32_t* ptr_frag) const { return getSum(ptr_frag, 0); }
+inline double TileRawChannel2Bytes5::getSumEz(const uint32_t* ptr_frag) const { return getSum(ptr_frag, 1); }
+inline double TileRawChannel2Bytes5::getSumE (const uint32_t* ptr_frag) const { return getSum(ptr_frag, 2); }
 
 #endif
