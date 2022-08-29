@@ -8,8 +8,10 @@ atlas_add_library( TrkV0FitterLib
                    src/*.cxx
                    PUBLIC_HEADERS TrkV0Fitter
                    LINK_LIBRARIES AthenaBaseComps xAODTracking GaudiKernel MagFieldConditions StoreGateLib TrkParameters TrkVertexFitterInterfaces
-                   PRIVATE_LINK_LIBRARIES TrkDetDescrUtils TrkSurfaces TrkLinks TrkParticleBase TrkTrack VxVertex TrkExInterfaces )
+                   PRIVATE_LINK_LIBRARIES TrkDetDescrUtils TrkSurfaces VxVertex TrkExInterfaces )
 
 atlas_add_component( TrkV0Fitter
                      src/components/*.cxx
                      LINK_LIBRARIES TrkV0FitterLib )
+
+atlas_install_python_modules( python/*.py POST_BUILD_CMD ${ATLAS_FLAKE8} )
