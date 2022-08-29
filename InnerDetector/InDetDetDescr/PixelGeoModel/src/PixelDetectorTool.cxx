@@ -18,6 +18,7 @@
 #include "GaudiKernel/ServiceHandle.h"
 #include "GeoModelInterfaces/IGeoDbTagSvc.h"
 #include "GeoModelUtilities/DecodeVersionKey.h"
+#include "GeoModelRead/ReadGeoModel.h"
 
 #include "RDBAccessSvc/IRDBAccessSvc.h"
 #include "RDBAccessSvc/IRDBRecord.h"
@@ -83,45 +84,51 @@ StatusCode PixelDetectorTool::create()
 
   ServiceHandle<IRDBAccessSvc> rdbAccessSvc(geoDbTagSvc->getParamSvcName(),name());
   ATH_CHECK(rdbAccessSvc.retrieve());
-  
-  DecodeVersionKey versionKey(geoDbTagSvc.operator->(), "Pixel");
 
-  ATH_MSG_INFO("Building Pixel Detector with Version Tag: " << versionKey.tag() 
-	       << " at Node: " << versionKey.node());
 
-  std::string pixelVersionTag;
+  GeoModelExperiment* theExpt = nullptr;
+  ATH_CHECK(detStore()->retrieve(theExpt,"ATLAS"));
 
-  // Print the version tag:
-  pixelVersionTag = rdbAccessSvc->getChildTag("Pixel", versionKey.tag(), versionKey.node());
-  ATH_MSG_INFO("Pixel Version: " << pixelVersionTag );
+  GeoPhysVol *world=theExpt->getPhysVol();
+  GeoModelIO::ReadGeoModel* sqliteReader = geoDbTagSvc->getSqliteReader();
   
-  
-  // Check if version is empty. If so, then the SCT cannot be built. This may or may not be intentional. We
-  // just issue an INFO message. 
-  if (pixelVersionTag.empty()) { 
-    ATH_MSG_INFO("No Pixel Version. Pixel Detector will not be built." );
-     
-  } else {
-  
+  if(sqliteReader) {
+  }
+  else {
+    
+    DecodeVersionKey versionKey(geoDbTagSvc.operator->(), "Pixel");
+    
+    ATH_MSG_INFO("Building Pixel Detector with Version Tag: " << versionKey.tag() 
+		 << " at Node: " << versionKey.node());
+		 
+    ATH_MSG_INFO("Building the geometry in the standard way");
+
+    // Print the version tag:
+    std::string pixelVersionTag = rdbAccessSvc->getChildTag("Pixel", versionKey.tag(), versionKey.node());
+    ATH_MSG_INFO("Pixel Version: " << pixelVersionTag );
+
+    // Check if version is empty. If so, then the Pixel cannot be built. This may or may not be intentional.
+    // We just issue an INFO message.
+    if (pixelVersionTag.empty()) { 
+      ATH_MSG_INFO("No Pixel Version. Pixel Detector will not be built." );
+      return StatusCode::SUCCESS;
+    }
+
     // Unless we are using custom pixel, the switch positions are going to
     // come from the database:
     
     std::string versionName;
     std::string descrName="noDescr";
-
-    if (versionKey.custom()) {
-
+      
+    if(versionKey.custom()) {
       ATH_MSG_WARNING("PixelDetectorTool:  Detector Information coming from a custom configuration!!" );
- 
-    } else {
-
+    } 
+    else {
       ATH_MSG_DEBUG("PixelDetectorTool:  Detector Information coming from the database and job options IGNORED." );
       ATH_MSG_DEBUG("Keys for Pixel Switches are "  << versionKey.tag()  << "  " << versionKey.node() );
       IRDBRecordset_ptr switchSet = rdbAccessSvc->getRecordsetPtr("PixelSwitches", versionKey.tag(), versionKey.node());
       const IRDBRecord    *switchTable   = (*switchSet)[0];
-      
-      //m_services           = switchTable->getInt("BUILDSERVICES");
-      //m_alignable          = switcheTable->getInt("ALIGNABLE");
+
       m_dc1Geometry        = switchTable->getInt("DC1GEOMETRY");
       m_initialLayout      = switchTable->getInt("INITIALLAYOUT");
       if (!switchTable->isFieldNull("VERSIONNAME")) {
@@ -131,43 +138,44 @@ StatusCode PixelDetectorTool::create()
 	descrName        = switchTable->getString("DESCRIPTION");
       }
       m_buildDBM        = switchTable->getInt("BUILDDBM");
-   }
+    }
 
-   if (versionName.empty()) {
+    if (versionName.empty()) {
       if (m_dc1Geometry) {
 	versionName = "DC1"; 
-      } else {
-	versionName = "DC2"; 
       } 
-   }
-
-   if (!m_overrideVersionName.empty()) {
-     versionName = m_overrideVersionName;
-     ATH_MSG_INFO("Overriding version name: " << versionName );
-   }
-   
-   ATH_MSG_DEBUG("Creating the Pixel " );
-   ATH_MSG_DEBUG("Pixel Geometry Options:" );
-   ATH_MSG_DEBUG("  Services           = " << (m_services ? "true" : "false") );
-   ATH_MSG_DEBUG("  Alignable          = " << (m_alignable ? "true" : "false"));
-   ATH_MSG_DEBUG("  DC1Geometry        = " << (m_dc1Geometry ? "true" : "false"));
-   ATH_MSG_DEBUG("  InitialLayout      = " << (m_initialLayout ? "true" : "false"));
-   ATH_MSG_DEBUG("  VersioName         = " << versionName  );
-
+      else {
+	versionName = "DC2"; 
+      }
+    }
+    
+    if (!m_overrideVersionName.empty()) {
+      versionName = m_overrideVersionName;
+      ATH_MSG_INFO("Overriding version name: " << versionName );
+    }
+    
+    ATH_MSG_DEBUG("Creating the Pixel " );
+    ATH_MSG_DEBUG("Pixel Geometry Options:" );
+    ATH_MSG_DEBUG("  Services           = " << (m_services ? "true" : "false") );
+    ATH_MSG_DEBUG("  Alignable          = " << (m_alignable ? "true" : "false"));
+    ATH_MSG_DEBUG("  DC1Geometry        = " << (m_dc1Geometry ? "true" : "false"));
+    ATH_MSG_DEBUG("  InitialLayout      = " << (m_initialLayout ? "true" : "false"));
+    ATH_MSG_DEBUG("  VersioName         = " << versionName  );
+    
     if (m_IBLParameterSvc.retrieve().isFailure()) {
-       ATH_MSG_WARNING( "Could not retrieve IBLParameterSvc");
+      ATH_MSG_WARNING( "Could not retrieve IBLParameterSvc");
     }
     else {
-	m_IBLParameterSvc->setBoolParameters(m_alignable,"alignable");
+      m_IBLParameterSvc->setBoolParameters(m_alignable,"alignable");
     }
 
     //
     // Initialize the geometry manager
     //
-
+    
     // Initialize switches
     PixelSwitches switches;
-    
+      
     switches.setServices(m_services);
     switches.setDC1Geometry(m_dc1Geometry);
     switches.setAlignable(m_alignable);
@@ -175,18 +183,14 @@ StatusCode PixelDetectorTool::create()
     if (versionName == "IBL") switches.setIBL();
     switches.setDBM(m_buildDBM); //DBM flag
     switches.setDynamicAlignFolders(m_useDynamicAlignFolders);
-
+      
     //JBdV
     switches.setServicesOnLadder(m_servicesOnLadder);
     switches.setServices(m_services); //Overwrite there for the time being.
-
+    
     const PixelID * idHelper = nullptr;
-    if (detStore()->retrieve(idHelper, "PixelID").isFailure()) {
-      ATH_MSG_FATAL("Could not get Pixel ID helper" );
-      return StatusCode::FAILURE;
-    }
-
-
+    ATH_CHECK(detStore()->retrieve(idHelper, "PixelID"));
+    
     // Retrieve the Geometry DB Interface
     ATH_CHECK(m_geometryDBSvc.retrieve());
 
@@ -197,7 +201,7 @@ StatusCode PixelDetectorTool::create()
     m_athenaComps->setRDBAccessSvc(&*rdbAccessSvc);
     m_athenaComps->setGeometryDBSvc(&*m_geometryDBSvc);
     m_athenaComps->setIdHelper(idHelper);
-
+    
     // BCM Tool.
     if (!m_bcmTool.empty()) {
       if (!m_bcmTool.retrieve().isFailure()) {
@@ -206,105 +210,89 @@ StatusCode PixelDetectorTool::create()
 	ATH_MSG_INFO("Could not retrieve " << m_bcmTool << " -  BCM will not be built" );
       }
       m_athenaComps->setBCM(&*m_bcmTool);
-      //IGeoSubDetTool* tt = m_bcmTool;
-
-    } else {
+    } 
+    else {
       ATH_MSG_INFO("BCM not requested." );
     }
-
-
-   // BLM Tool.
+    
+    // BLM Tool.
     if (!m_blmTool.empty()) {
       if (!m_blmTool.retrieve().isFailure()) {
 	ATH_MSG_INFO("BLM_GeoModel tool retrieved: " << m_blmTool );
-      } else {
+      } 
+      else {
 	ATH_MSG_INFO("Could not retrieve " << m_blmTool << " -  BLM will not be built" );
       }
       m_athenaComps->setBLM(&*m_blmTool);
-
-    } else {
+    } 
+    else {
       ATH_MSG_INFO("BLM not requested." );
     }
-
+    
     // Service builder tool
     if (!m_serviceBuilderTool.empty()) {
       if (!m_serviceBuilderTool.retrieve().isFailure()) {
 	ATH_MSG_INFO("Service builder tool retrieved: " << m_serviceBuilderTool );
 	m_athenaComps->setServiceBuilderTool(&*m_serviceBuilderTool);
-      } else {
+      } 
+      else {
 	ATH_MSG_ERROR("Could not retrieve " <<  m_serviceBuilderTool << ",  some services will not be built." );
       }
-    } else {
+    } 
+    else {
       if (versionName == "SLHC") { // TODO
 	ATH_MSG_ERROR("Service builder tool not specified. Some services will not be built" );
-      } else {
+      } 
+      else {
 	ATH_MSG_INFO("Service builder tool not specified." ); 
-      }	
+      }
     }
-
-
-    // 
-    // Locate the top level experiment node 
-    // 
-    GeoModelExperiment * theExpt; 
-    if (StatusCode::SUCCESS != detStore()->retrieve( theExpt, "ATLAS" )) { 
-      ATH_MSG_ERROR("Could not find GeoModelExperiment ATLAS"); 
-      return (StatusCode::FAILURE); 
-    } 
     
-    GeoPhysVol *world=&*theExpt->getPhysVol();
-    m_manager = nullptr;
- 
     if (!m_devVersion) {
       
       if(versionName == "DC1" || versionName == "DC2") {	
-        // DC1/DC2 version
-        PixelDetectorFactoryDC2 thePixel(m_athenaComps, switches);
-        thePixel.create(world);      
+	// DC1/DC2 version
+	PixelDetectorFactoryDC2 thePixel(m_athenaComps, switches);
+	thePixel.create(world);      
 	m_manager  = thePixel.getDetectorManager();
-      } else if (versionName == "SR1") {
+      } 
+      else if (versionName == "SR1") {
 	// SR1. Same a DC3 but only 1 part (barrel, ec A or ec C) built
 	PixelDetectorFactorySR1 thePixel(m_athenaComps, switches);
-        thePixel.create(world);      
-        m_manager  = thePixel.getDetectorManager();
-      } else {
+	thePixel.create(world);      
+	m_manager  = thePixel.getDetectorManager();
+      } 
+      else {
 	// DC3, SLHC, IBL
-        PixelDetectorFactory thePixel(m_athenaComps, switches);
-	if(descrName.compare("TrackingGeometry")!=0)
-	  thePixel.create(world);      
-	else
+	PixelDetectorFactory thePixel(m_athenaComps, switches);
+	if(descrName.compare("TrackingGeometry")!=0) {
+	  thePixel.create(world);
+	}
+	else {
 	  ATH_MSG_INFO("Pixel - TrackingGeometry tag - no geometry built" ); 
-        m_manager  = thePixel.getDetectorManager();
-      }	  
+	}
+	m_manager  = thePixel.getDetectorManager();
+      }
       
-
-
-    } else {
-      //
+    } 
+    else {
       // DEVELOPMENT VERSIONS
-      //
       PixelDetectorFactory thePixel(m_athenaComps, switches);
       thePixel.create(world);      
       m_manager  = thePixel.getDetectorManager();
     }
 
     // Register the manager to the Det Store    
-    if (StatusCode::FAILURE == detStore()->record(m_manager, m_manager->getName()) ) {
-      ATH_MSG_ERROR("Could not register Pixel detector manager" );
-      return( StatusCode::FAILURE );
-    }
+    ATH_CHECK(detStore()->record(m_manager, m_manager->getName()));
     // Add the manager to the experiment 
     theExpt->addManager(m_manager);
     
     // Symlink the manager
     const SiDetectorManager * siDetManager = m_manager;
-    if (StatusCode::FAILURE == detStore()->symLink(m_manager, siDetManager) ) { 
-      ATH_MSG_ERROR("Could not make link between PixelDetectorManager and SiDetectorManager" );
-      return( StatusCode::FAILURE );
-    }
-  } 
-
-    return StatusCode::SUCCESS;
+    ATH_CHECK(detStore()->symLink(m_manager, siDetManager));
+  }
+  
+  return StatusCode::SUCCESS;
 }
 
 StatusCode PixelDetectorTool::clear()

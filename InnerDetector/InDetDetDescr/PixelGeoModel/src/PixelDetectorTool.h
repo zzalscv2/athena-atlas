@@ -58,7 +58,7 @@ private:
   ToolHandle< IGeoSubDetTool > m_blmTool{this,"BLM_Tool","",""};
   PublicToolHandle< IInDetServMatBuilderTool > m_serviceBuilderTool{this,"ServiceBuilderTool","",""};
   ServiceHandle< IGeometryDBSvc > m_geometryDBSvc{this,"GeometryDBSvc","InDetGeometryDBSvc",""};
-  const InDetDD::PixelDetectorManager * m_manager{};
+  const InDetDD::PixelDetectorManager * m_manager{nullptr};
   std::string m_overrideVersionName;
 
   PixelGeoModelAthenaComps * m_athenaComps{};
