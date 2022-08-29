@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
 */
 
 //////////////////////////////////////////////////
@@ -1788,7 +1788,7 @@ TTCobj_t* COOLCORALClient::GetTTC(int ttc_id){
   // query on dtmroc
 
   coral::IQuery* query2 = m_session->nominalSchema().tableHandle(DTMROC_TABLE).newQuery();
-
+  
   query2->addToOutputList( "ChipID" ); 
   query2->addToOutputList( "ChipValid" ); 
   query2->addToOutputList( "RODGroup" ); 
@@ -3073,7 +3073,9 @@ TTCobj_t* COOLCORALClient::GetTTCOOL(int ttc_id){
   // QUERY on TTC
 
   coral::IQuery* query0 = m_session->nominalSchema().tableHandle(TTC_TABLE).newQuery();
-    
+  if (not query0){
+    throw std::runtime_error("Attempted dereference of nullptr 'query0' in CoolCoralClient");
+  }
   query0->addToOutputList("DetID" ); 
   query0->addToOutputList("VMESlot" ); 
   query0->addToOutputList("Delay" ); 
@@ -3111,7 +3113,9 @@ TTCobj_t* COOLCORALClient::GetTTCOOL(int ttc_id){
   // query on TTCGROUP
 
   coral::IQuery* query1 = m_session->nominalSchema().tableHandle(TTCGR_TABLE).newQuery();
-
+  if (not query1){
+    throw std::runtime_error("Attempted dereference of nullptr 'query1' in CoolCoralClient");
+  }
   query1->addToOutputList("Group" );
   query1->addToOutputList("DutyCycle" );
   query1->addToOutputList("EdgeSelect");
@@ -3141,7 +3145,9 @@ TTCobj_t* COOLCORALClient::GetTTCOOL(int ttc_id){
   // query on dtmroc
 
   coral::IQuery* query2 = m_session->nominalSchema().tableHandle(DTMROC_TABLE).newQuery();
-
+  if (not query2){
+    throw std::runtime_error("Attempted dereference of nullptr 'query2' in CoolCoralClient");
+  }
   query2->addToOutputList( "ChipID" ); 
   query2->addToOutputList( "ChipValid" ); 
   query2->addToOutputList( "RODGroup" ); 
@@ -3200,6 +3206,9 @@ TTCobj_t* COOLCORALClient::GetTTCOOL(int ttc_id){
       FromString(fk,obj.payloadValue("ttcgr_iovfk"));
     }
     ttcgr_condData[2].data<long long>() = fk;
+    if (not query1){
+       throw std::runtime_error("'query1' nullptr dereference in CoolCoralClient");
+    }
     coral::ICursor& cursor1 = query1->execute();
     while ( cursor1.next() ) {
       const coral::AttributeList &row1 = cursor1.currentRow();
@@ -6057,7 +6066,9 @@ void COOLCORALClient::GetLastValues(Detector_t& detector){
   delete query1;
 
   coral::IQuery* query2 = m_session->nominalSchema().tableHandle(ROD_TABLE).newQuery();
-    
+  if (not query2){
+    throw std::runtime_error("Attempted dereference of nullptr 'query2' in CoolCoralClient");
+  }
   query2->addToOutputList("rod_UID"); 
   query2->addToOutputList("rod_iovfk"); 
   query2->addToOutputList("RODByteSwapping"); 
@@ -7343,7 +7354,9 @@ Detector_t COOLCORALClient::GetHistValues(const std::string& tag,long long tstam
   delete query1;
 
   coral::IQuery* query2 = m_session->nominalSchema().tableHandle(ROD_TABLE).newQuery();
-    
+  if (not query2){
+    throw std::runtime_error("Attempted dereference of nullptr 'query2' in CoolCoralClient");
+  }
   query2->addToOutputList("rod_UID"); 
   query2->addToOutputList("rod_iovfk"); 
   query2->addToOutputList("RODByteSwapping"); 

@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2020 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
 */
 #include <fstream>
 #include <sstream>
@@ -64,10 +64,13 @@ void ResizePalette(TH2* hist){
 
 }
 
-string trim(string s){
-  while(s.find_first_of(" ")==0) s=s.substr(1,s.size());
-  while(s.find_last_of(" ")==s.size()-1) s=s.substr(0,(s.size())-1);
-  return s;
+string trim(const string & str){
+  size_t first = str.find_first_not_of(' ');
+  if (string::npos == first){
+    return str;
+  }
+  size_t last = str.find_last_not_of(' ');
+  return str.substr(first, (last - first + 1));
 }
 
 
@@ -4988,7 +4991,11 @@ int tt_remove(int argc, char* argv[]){
 }
 
 int main(int argc, char* argv[]){
-
+  if (argc < 3){
+    cout << "Command needs at least two arguments;\n";
+    cout << "The first argument is 'itersum' or 'restore'\n";
+    cout << "and the second argument is a ROOT filename."<<std::endl;
+  }
   gErrorIgnoreLevel = kFatal; // Explicitly remove all messages
 
   if ((string(argv[1])).find("itersum")!=std::string::npos) {
