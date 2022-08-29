@@ -24,6 +24,8 @@
 #include "L1TopoRDO/Helpers.h"
 #include "L1TopoRDO/L1TopoTOB.h"
 #include "L1TopoRDO/L1TopoRDOCollection.h"
+#include "L1TopoRDO/L1TopoROD.h"
+#include "L1TopoRDO/L1TopoFPGA.h"
 
 // xAOD
 #include "xAODTrigger/L1TopoSimResults.h"
@@ -67,6 +69,8 @@ L1TopoSimulation::initialize ATLAS_NOT_THREAD_SAFE () {
 
    ATH_MSG_DEBUG("retrieving " << m_muonInputProvider);
    CHECK( m_muonInputProvider.retrieve(DisableTool{m_isLegacyTopo}) );
+
+   CHECK(m_l1topoRawDataKey.initialize(m_fillHistogramsBasedOnHardwareDecision));
 
    CHECK(m_legacyTopoCTPLocation.initialize(m_isLegacyTopo));
    CHECK(m_legacyTopoOverflowCTPLocation.initialize(m_isLegacyTopo));
@@ -199,7 +203,7 @@ L1TopoSimulation::execute() {
    
    if(m_fillHistogramsBasedOnHardwareDecision){
        if(m_scaler->decision(m_prescaleForDAQROBAccess) and
-          retrieveHardwareDecision()){
+          retrieveHardwareDecision(m_isLegacyTopo, ctx)){
            m_topoSteering->propagateHardwareBitsToAlgos();
            m_topoSteering->setOutputAlgosSkipHistograms(false);
        } else {
@@ -327,7 +331,14 @@ L1TopoSimulation::WriteEDM(std::unique_ptr<xAOD::L1TopoSimResultsContainer> &con
 }
 
 StatusCode
-L1TopoSimulation::retrieveHardwareDecision()
+L1TopoSimulation::retrieveHardwareDecision(bool isLegacy, const EventContext& ctx)
+{
+  if (isLegacy) {return hardwareDecisionLegacy();}
+  else          {return hardwareDecisionPhase1(ctx);}
+}
+
+StatusCode
+L1TopoSimulation::hardwareDecisionLegacy()
 {
     // some duplication with L1TopoRDO::Helpers
     // getDecisionAndOverflowBits() ?
@@ -381,4 +392,70 @@ L1TopoSimulation::retrieveHardwareDecision()
                                         hardwareDaqRobOvrflowBits);
     }
     return sc;
+}
+
+
+StatusCode
+L1TopoSimulation::hardwareDecisionPhase1(const EventContext& ctx)
+{
+    // some duplication with L1TopoRDO::Helpers
+    // getDecisionAndOverflowBits() ?
+  StatusCode sc = StatusCode::SUCCESS;
+    
+  std::bitset<TCS::TopoSteering::numberOfL1TopoBits> hardwareDaqRobTriggerBits;
+  std::bitset<TCS::TopoSteering::numberOfL1TopoBits> hardwareDaqRobOvrflowBits;
+
+  SG::ReadHandle<xAOD::L1TopoRawDataContainer> cont(m_l1topoRawDataKey, ctx);
+  if(!cont.isValid()){
+    ATH_MSG_FATAL("Could not retrieve L1Topo RAW Data Container from the BS data.");
+    return StatusCode::FAILURE;
+  }
+
+  std::unique_ptr<L1Topo::L1TopoFPGA> l1topoFPGA;
+  
+  for(const xAOD::L1TopoRawData* l1topo_raw : *cont) {
+    const std::vector<uint32_t>& dataWords = l1topo_raw->dataWords();
+    size_t nWords = dataWords.size();
+    uint32_t rodTrailer2 = dataWords[--nWords];
+    uint32_t rodTrailer1 = dataWords[--nWords];
+
+    L1Topo::L1TopoROD l1topoROD(rodTrailer1, rodTrailer2);
+
+    ATH_MSG_VERBOSE(l1topoROD);
+
+    for (size_t i = nWords; i --> 0;) {
+      if ((i+1)%8==0) {
+	uint32_t fpgaTrailer2 = dataWords[i];
+	uint32_t fpgaTrailer1 = dataWords[--i];
+
+	l1topoFPGA.reset(new L1Topo::L1TopoFPGA(fpgaTrailer1, fpgaTrailer2));
+
+	ATH_MSG_VERBOSE(*l1topoFPGA.get());
+    
+      }
+      else {
+	if (l1topoFPGA->topoNumber() != 1) {
+	  i-=3;
+	  uint32_t overflowWord = dataWords[--i];
+	  uint32_t triggerWord = dataWords[--i];
+	  for (size_t iBit=0;iBit<32;iBit++) {
+	    uint32_t topo = l1topoFPGA->topoNumber();
+	    uint32_t fpga = l1topoFPGA->fpgaNumber();
+	    unsigned int index = L1Topo::triggerBitIndexPhase1(topo, fpga, iBit);
+	    hardwareDaqRobTriggerBits[index] = (overflowWord>>iBit)&1;
+	    hardwareDaqRobOvrflowBits[index] = (triggerWord>>iBit)&1;
+	  }
+	  ATH_MSG_DEBUG("trigger word: " << std::hex << std::showbase << triggerWord << std::dec);
+	  ATH_MSG_DEBUG("overflow word: " << std::hex << std::showbase << overflowWord << std::dec);
+	}
+      }
+    }
+  }
+
+  hardwareDaqRobTriggerBits = hardwareDaqRobTriggerBits & ~hardwareDaqRobOvrflowBits;
+  
+  m_topoSteering->setHardwareBits(hardwareDaqRobTriggerBits,
+				  hardwareDaqRobOvrflowBits);
+  
+  return sc;
 }

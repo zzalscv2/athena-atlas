@@ -41,7 +41,7 @@ def L1TopoOnlineMonitorHypoToolGen(chainDict):
     return tool
 
 def getL1TopoLabels(flags,connectors = {0: 'LegacyTopo0', 1: 'LegacyTopo1'}, bmax = 128):
-    topo_trigline_labels = [str(i) for i in range(bmax)]
+    topo_trigline_labels = ["" for i in range(bmax)]
     lvl1name = getL1MenuFileName(flags)
     lvl1access  = L1MenuAccess(lvl1name)
     for connector_id, connectorKey in connectors.items():
