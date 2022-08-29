@@ -15,6 +15,10 @@ triggerChains = [
     'HLT_2e17_lhvloose_nod0'
 ]
 
+electronMinPt = 10e3
+electronMaxEta = None
+photonMinPt = 10e3
+photonMaxEta = None
 muonMinPt = None
 muonMaxEta = None
 tauMinPt = None
@@ -160,11 +164,12 @@ def makeSequenceOld (dataType, algSeq, vars, forCompare) :
     photonSequence.configure( inputName = 'Photons',
                               outputName = 'AnaPhotons_%SYS%' )
     algSeq += photonSequence
-    if not forCompare :
-        vars += [ 'OutPhotons_%SYS%.pt  -> ph_pt_%SYS%',
-                  'OutPhotons_NOSYS.phi -> ph_phi',
-                  'OutPhotons_NOSYS.eta -> ph_eta',
-                  'OutPhotons_%SYS%.baselineSelection_tight -> ph_select_tight_%SYS%', ]
+    vars += [ 'OutPhotons_%SYS%.pt  -> ph_pt_%SYS%',
+              'OutPhotons_NOSYS.phi -> ph_phi',
+              'OutPhotons_NOSYS.eta -> ph_eta',
+              'OutPhotons_%SYS%.baselineSelection_tight -> ph_select_tight_%SYS%', ]
+    if dataType != 'data':
+        vars += [ 'OutPhotons_%SYS%.ph_effSF_tight_%SYS% -> ph_effSF_tight_%SYS%', ]
 
 
     # Include, and then set up the tau analysis algorithm sequence:
@@ -418,6 +423,42 @@ def makeSequenceBlocks (dataType, algSeq, vars, forCompare) :
     algSeq += pileupSequence
     vars += [ 'EventInfo.runNumber     -> runNumber',
               'EventInfo.eventNumber   -> eventNumber', ]
+
+
+    configSeq = ConfigSequence ()
+
+
+    # Include, and then set up the electron analysis algorithm sequence:
+    from EgammaAnalysisAlgorithms.ElectronAnalysisConfig import makeElectronCalibrationConfig, makeElectronWorkingPointConfig
+
+    likelihood = True
+    recomputeLikelihood=False
+    if likelihood:
+        workingpoint = 'LooseLHElectron.Loose_VarRad'
+    else:
+        workingpoint = 'LooseDNNElectron.Loose_VarRad'
+    makeElectronCalibrationConfig (configSeq, 'AnaElectrons')
+    makeElectronWorkingPointConfig (configSeq, 'AnaElectrons', workingpoint, postfix = 'loose',
+                                    recomputeLikelihood=recomputeLikelihood)
+    vars += [ 'OutElectrons_NOSYS.eta -> el_eta',
+              'OutElectrons_NOSYS.phi -> el_phi',
+              'OutElectrons_%SYS%.pt  -> el_pt_%SYS%',
+              'OutElectrons_%SYS%.baselineSelection_loose -> el_select_loose_%SYS%', ]
+    if dataType != 'data':
+        vars += [ 'OutElectrons_%SYS%.effSF_loose_%SYS% -> el_effSF_loose_%SYS%', ]
+
+
+    # Include, and then set up the photon analysis algorithm sequence:
+    from EgammaAnalysisAlgorithms.PhotonAnalysisConfig import makePhotonCalibrationConfig, makePhotonWorkingPointConfig
+
+    makePhotonCalibrationConfig (configSeq, 'AnaPhotons', recomputeIsEM=False)
+    makePhotonWorkingPointConfig (configSeq, 'AnaPhotons', 'Tight.FixedCutTight', postfix = 'tight', recomputeIsEM=False)
+    vars += [ 'OutPhotons_NOSYS.eta -> ph_eta',
+              'OutPhotons_NOSYS.phi -> ph_phi',
+              'OutPhotons_%SYS%.pt  -> ph_pt_%SYS%',
+              'OutPhotons_%SYS%.baselineSelection_tight -> ph_select_tight_%SYS%', ]
+    if dataType != 'data':
+        vars += [ 'OutPhotons_%SYS%.ph_effSF_tight_%SYS% -> ph_effSF_tight_%SYS%', ]
 
 
     # Include, and then set up the muon analysis algorithm sequence:
