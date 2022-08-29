@@ -3,7 +3,6 @@
 from L1TopoSimulation.L1TopoSimulationConf import LVL1__L1TopoSimulation, LVL1__RoiB2TopoInputDataCnv
 from AthenaConfiguration.ComponentAccumulator import ComponentAccumulator
 from AthenaConfiguration.ComponentFactory import CompFactory
-from AthenaConfiguration.Enums import Format
 
 class L1TopoSimulation ( LVL1__L1TopoSimulation ):
 
@@ -34,8 +33,7 @@ def L1LegacyTopoSimulationCfg(flags):
                                                     InputDumpFile = "inputdump_legacy.txt",
                                                     EnableInputDump = flags.Trigger.enableL1TopoDump,
                                                     UseBitwise = flags.Trigger.enableL1TopoBWSimulation,
-                                                    MonHistBaseDir = "L1/L1LegacyTopoAlgorithms",
-                                                    FillHistoBasedOnHardware = (flags.Input.Format is Format.BS)
+                                                    MonHistBaseDir = "L1/L1LegacyTopoAlgorithms"
                                                    )
 
     # No muon inputs to legacy Topo
@@ -89,8 +87,7 @@ def L1TopoSimulationCfg(flags):
                                                     EnergyInputProvider = energyProvider,
                                                     IsLegacyTopo = False,
                                                     EnableInputDump = flags.Trigger.enableL1TopoDump,
-                                                    UseBitwise = flags.Trigger.enableL1TopoBWSimulation,
-                                                    FillHistoBasedOnHardware = (flags.Input.Format is Format.BS)
+                                                    UseBitwise = flags.Trigger.enableL1TopoBWSimulation
                                                     )
 
     acc.addEventAlgo(topoSimAlg)
@@ -194,8 +191,7 @@ def L1TopoSimulationStandaloneCfg(flags, outputEDM=[]):
                                                     EnergyInputProvider = gfexProvider,
                                                     IsLegacyTopo = False,
                                                     EnableInputDump = True,
-                                                    UseBitwise = True,
-                                                    FillHistoBasedOnHardware = False
+                                                    UseBitwise = flags.Trigger.enableL1TopoBWSimulation
                                                     )
 
     acc.addEventAlgo(topoSimAlg)
@@ -219,6 +215,7 @@ if __name__ == '__main__':
   parser.add_argument("-i","--inputs",nargs='*',action="store", dest="inputs", help="Inputs will be used in commands", required=True)
   parser.add_argument("-m","--module",action="store", dest="module", help="Input modules wants to be simulated.",default="", required=False)
   parser.add_argument("-fCtp","--forceCtp",action="store_true", dest="forceCtp", help="Force to CTP monitoring as primary in Sim/Hdw comparison.",default=False, required=False)
+  parser.add_argument("-hdwMon","--algoHdwMon",action="store_true", dest="algoHdwMon", help="Fill algorithm histograms based on hardware decision.",default=False, required=False)
   parser.add_argument("-l","--logLevel",action="store", dest="log", help="Log level.",default="warning", required=False)
   parser.add_argument("-n","--nevent", type=int, action="store", dest="nevent", help="Maximum number of events will be executed.",default=0, required=False)
   parser.add_argument("-s","--skipEvents", type=int, action="store", dest="skipEvents", help="How many events will be skipped.",default=0, required=False)
@@ -347,8 +344,14 @@ if __name__ == '__main__':
   acc.merge(L1TopoByteStreamCfg(flags), sequenceName='AthAlgSeq')
   outputEDM += addEDM('xAOD::L1TopoRawDataContainer', 'L1TopoRawData')
   acc.merge(L1LegacyTopoSimulationCfg(flags), sequenceName='AthAlgSeq')
+  if args.algoHdwMon:
+      acc.getEventAlgo('L1LegacyTopoSimulation').FillHistoBasedOnHardware = True
+      acc.getEventAlgo('L1LegacyTopoSimulation').PrescaleDAQROBAccess = 1
 
   acc.merge(L1TopoSimulationStandaloneCfg(flags,outputEDM), sequenceName='AthAlgSeq')
+  if args.algoHdwMon:
+      acc.getEventAlgo('L1TopoSimulation').FillHistoBasedOnHardware = True
+      acc.getEventAlgo('L1TopoSimulation').PrescaleDAQROBAccess = 1
   outputEDM += ['xAOD::L1TopoSimResultsContainer#L1_TopoSimResults']
 
   # phase1 mon

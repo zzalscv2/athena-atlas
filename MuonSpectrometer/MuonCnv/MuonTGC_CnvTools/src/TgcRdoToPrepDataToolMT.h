@@ -215,15 +215,25 @@ namespace Muon
       StatusCode decodeHiPt(State& state,
                             const TgcRawData& rd,
                             std::vector< std::unordered_map<IdentifierHash, std::unique_ptr<TgcCoinDataCollection> > >& coinMap) const;
+      StatusCode decodeHiPt_NSL(State& state,
+                                const TgcRawData& rd,
+                                std::vector< std::unordered_map<IdentifierHash, std::unique_ptr<TgcCoinDataCollection> > >& coinMap) const;
       /** Decode RDO's of Inner */
       StatusCode decodeInner(State& state,
                              const TgcRawData& rd,
                              std::vector< std::unordered_map<IdentifierHash, std::unique_ptr<TgcCoinDataCollection> > >& coinMap) const;
+      StatusCode decodeInner_NSL(State& state,
+                                 const TgcRawData& rd,
+                                 std::vector< std::unordered_map<IdentifierHash, std::unique_ptr<TgcCoinDataCollection> > >& coinMap) const;
       /** Decode RDO's of SectorLogic */
       StatusCode decodeSL(State& state,
                           const TgcRawData& rd,
                           const TgcRdo* rdoColl,
                           std::vector< std::unordered_map<IdentifierHash, std::unique_ptr<TgcCoinDataCollection> > >& coinMap) const;
+      StatusCode decodeNSL(State& state,
+                           const TgcRawData& rd,
+                           const TgcRdo* rdoColl,
+                           std::vector< std::unordered_map<IdentifierHash, std::unique_ptr<TgcCoinDataCollection> > >& coinMap) const;
       
       /** Get bitpos from channel and SlbType */
       int getbitpos(int channel, TgcRawData::SlbType slbType) const;

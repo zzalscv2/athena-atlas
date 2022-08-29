@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "MMClusterOnTrackCreator.h"
@@ -101,19 +101,10 @@ const Muon::MuonClusterOnTrack* Muon::MMClusterOnTrackCreator::calibratedCluster
 
     // MuClusterOnTrack production
     //
-    Trk::LocalParameters locpar(RIO.localPosition());
-
-    if (RIO.localCovariance().cols() != RIO.localCovariance().rows()) { ATH_MSG_FATAL("Rows and colums not equal!"); }
-
-    if (RIO.localCovariance().cols() > 1) {
-        ATH_MSG_VERBOSE("Making 2-dim local parameters: " << m_idHelperSvc->toString(RIO.identify()));
-    } else {
-        Trk::DefinedParameter radiusPar(RIO.localPosition().x(), Trk::locX);
-        locpar = Trk::LocalParameters(radiusPar);
-        ATH_MSG_VERBOSE("Making 1-dim local parameters: " << m_idHelperSvc->toString(RIO.identify()));
-    }
-
-    Amg::Vector2D lp;
+    Trk::LocalParameters locpar =  RIO.localCovariance().cols() > 1 ? Trk::LocalParameters{RIO.localPosition()} : 
+                                  Trk::LocalParameters{Trk::DefinedParameter{RIO.localPosition().x(), Trk::locX}};
+  
+    Amg::Vector2D lp{Amg::Vector2D::Zero()};
     double positionAlongStrip = 0;
 
     if (!EL->surface(RIO.identify()).globalToLocal(GP, GP, lp)) {
@@ -127,12 +118,12 @@ const Muon::MuonClusterOnTrack* Muon::MMClusterOnTrackCreator::calibratedCluster
     /// correct the local x-coordinate for the stereo angle (stereo strips only),
     /// as-built conditions and b-lines (eta and stereo strips), if enabled.
     /// note: there's no point in correcting the seeded y-coordinate.
-    Amg::Vector3D localposition3D;
+    Amg::Vector3D localposition3D{Amg::Vector3D::Zero()};
     const MuonGM::MMReadoutElement* mmEL = dynamic_cast<const MuonGM::MMReadoutElement*>(EL);
     mmEL->spacePointPosition(RIO.identify(), locpar[Trk::locX], positionAlongStrip, localposition3D);
     locpar[Trk::locX] = localposition3D.x();
     double offsetZ = localposition3D.z();
-
+   
     /// calibrate the input
     const MMPrepData* MClus = dynamic_cast<const MMPrepData*>(&RIO);
     std::vector<NSWCalib::CalibratedStrip> calibratedStrips;
@@ -142,11 +133,9 @@ const Muon::MuonClusterOnTrack* Muon::MMClusterOnTrackCreator::calibratedCluster
         return cluster;
     }
 
-    Amg::Vector2D localposition2D;
-    Amg::MatrixX loce = RIO.localCovariance();
-    localposition2D[Trk::locX] = locpar[Trk::locX];
-    localposition2D[Trk::locY] = 0.0;
-
+     Amg::Vector2D localposition2D{locpar[Trk::locX],0.};
+     Amg::MatrixX loce = RIO.localCovariance();
+   
     /// calibrate the cluster position along the precision coordinate
     sc = m_clusterBuilderTool->getCalibratedClusterPosition(MClus, calibratedStrips, GD.theta(), localposition2D, loce);
     if (sc != StatusCode::SUCCESS) {
