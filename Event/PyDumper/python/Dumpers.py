@@ -4780,6 +4780,12 @@ def dump_EventBookkeeper (p, f, level=0):
     return
 
 
+def dump_xAODTruthParticleLink (p, f):
+    dump_HepMcParticleLink (p.first, f)
+    dump_EL (p.second, f)
+    return
+
+
 def format_int(x): return '%d'%x
 def format_float(x): return '%.1f'%x
 def format_float_vector(v): return ''.join ([format_float(x) for x in v])
@@ -5002,6 +5008,8 @@ dumpspecs = [
     ['CaloCellLinkContainer',                dump_CaloCellLink],
     ['CaloCellContainer',                    dump_CaloCell],
     ['CaloClusterCellLinkContainer',         dump_CaloClusterCellLink],
+    ['TileContainer<TileCell>',              dump_CaloCell],
+    ['TileCellContainer',                    dump_CaloCell],
     ["VxContainer",                          dump_VxCandidate],
     ["EventInfo",                            dump_EventInfo],
     ["PileUpEventInfo",                      dump_PileUpEventInfo],
@@ -5265,6 +5273,16 @@ dumpspecs = [
     ['xAOD::MissingETComponentMap',          dump_xAOD],
     ['DataVector<xAOD::FlowElement_v1>',     dump_xAOD],
     ['xAOD::FlowElementContainer',           dump_xAOD],
+    ['DataVector<xAOD::AFPSiHitsCluster_v1>',dump_xAOD],
+    ['xAOD::AFPSiHitsClusterContainer',      dump_xAOD],
+    ['DataVector<xAOD::AFPProton_v1>',       dump_xAOD],
+    ['xAOD::AFPProtonContainer',             dump_xAOD],
+    ['DataVector<xAOD::AFPVertex_v1>',       dump_xAOD],
+    ['xAOD::AFPVertexContainer',             dump_xAOD],
+    ['DataVector<xAOD::AFPTrack_v2>',        dump_xAOD],
+    ['xAOD::AFPTrackContainer',              dump_xAOD],
+    ['DataVector<xAOD::AFPToFTrack_v1>',     dump_xAOD],
+    ['xAOD::AFPToFTrackContainer',           dump_xAOD],
     ['xAOD::EventInfo_v1',                   dump_xAODObject],
     ['xAOD::EventInfo',                      dump_xAODObject],
     ['xAOD::EventShape_v1',                  dump_xAODObjectNL],
@@ -5280,6 +5298,8 @@ dumpspecs = [
     ['xAOD::TrigNavigation',                 dump_xAODObject],
     ['xAOD::RoiDescriptorStore_v1',          dump_xAODObject],
     ['xAOD::RoiDescriptorStore',             dump_xAODObject],
+    ['DataVector<xAODTruthParticleLink>',    dump_xAODTruthParticleLink],
+    ['xAODTruthParticleLinkVector',          dump_xAODTruthParticleLink],
 
     # Make some of these more compact?
 
