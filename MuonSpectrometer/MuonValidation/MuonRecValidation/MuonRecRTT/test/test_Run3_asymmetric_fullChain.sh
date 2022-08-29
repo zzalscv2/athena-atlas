@@ -4,6 +4,7 @@
 #
 # art-type: grid
 # art-include: master/Athena
+# art-include: 22.0/Athena
 # art-athena-mt: 5
 # art-output: OUT_HITS.root
 # art-output: NSWPRDValAlg.sim.ntuple.root
