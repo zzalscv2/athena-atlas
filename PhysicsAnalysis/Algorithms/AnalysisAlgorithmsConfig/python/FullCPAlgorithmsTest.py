@@ -15,6 +15,8 @@ triggerChains = [
     'HLT_2e17_lhvloose_nod0'
 ]
 
+electronMinPt = 10e3
+electronMaxEta = None
 muonMinPt = None
 muonMaxEta = None
 
@@ -141,11 +143,12 @@ def makeSequenceOld (dataType, algSeq, vars, forCompare) :
     electronSequence.configure( inputName = 'Electrons',
                                 outputName = 'AnaElectrons_%SYS%' )
     algSeq += electronSequence
-    if not forCompare :
-        vars += [ 'OutElectrons_%SYS%.pt  -> el_pt_%SYS%',
-                  'OutElectrons_NOSYS.phi -> el_phi',
-                  'OutElectrons_NOSYS.eta -> el_eta',
-                  'OutElectrons_%SYS%.baselineSelection_loose -> el_select_loose_%SYS%', ]
+    vars += [ 'OutElectrons_%SYS%.pt  -> el_pt_%SYS%',
+              'OutElectrons_NOSYS.phi -> el_phi',
+              'OutElectrons_NOSYS.eta -> el_eta',
+              'OutElectrons_%SYS%.baselineSelection_loose -> el_select_loose_%SYS%', ]
+    if dataType != 'data':
+        vars += [ 'OutElectrons_%SYS%.effSF_loose_%SYS% -> el_effSF_loose_%SYS%', ]
 
 
     # Include, and then set up the photon analysis sequence:
@@ -195,8 +198,10 @@ def makeSequenceOld (dataType, algSeq, vars, forCompare) :
 
     selalg = createAlgorithm( 'CP::AsgSelectionAlg', 'UserElectronsSelectionAlg' )
     addPrivateTool( selalg, 'selectionTool', 'CP::AsgPtEtaSelectionTool' )
-    selalg.selectionTool.minPt = 10e3
-    #selalg.selectionTool.maxEta = 2.47
+    if electronMinPt :
+        selalg.selectionTool.minPt = electronMinPt
+    if electronMaxEta :
+        selalg.selectionTool.maxEta = electronMaxEta
     selalg.selectionDecoration = 'selectPtEta'
     selalg.particles = 'AnaElectrons_%SYS%'
     algSeq += selalg
@@ -407,10 +412,31 @@ def makeSequenceBlocks (dataType, algSeq, vars, forCompare) :
               'EventInfo.eventNumber   -> eventNumber', ]
 
 
+    configSeq = ConfigSequence ()
+
+
+    # Include, and then set up the electron analysis algorithm sequence:
+    from EgammaAnalysisAlgorithms.ElectronAnalysisConfig import makeElectronCalibrationConfig, makeElectronWorkingPointConfig
+
+    likelihood = True
+    recomputeLikelihood=False
+    if likelihood:
+        workingpoint = 'LooseLHElectron.Loose_VarRad'
+    else:
+        workingpoint = 'LooseDNNElectron.Loose_VarRad'
+    makeElectronCalibrationConfig (configSeq, 'AnaElectrons')
+    makeElectronWorkingPointConfig (configSeq, 'AnaElectrons', workingpoint, postfix = 'loose',
+                                    recomputeLikelihood=recomputeLikelihood)
+    vars += [ 'OutElectrons_NOSYS.eta -> el_eta',
+              'OutElectrons_NOSYS.phi -> el_phi',
+              'OutElectrons_%SYS%.pt  -> el_pt_%SYS%',
+              'OutElectrons_%SYS%.baselineSelection_loose -> el_select_loose_%SYS%', ]
+    if dataType != 'data':
+        vars += [ 'OutElectrons_%SYS%.effSF_loose_%SYS% -> el_effSF_loose_%SYS%', ]
+
+
     # Include, and then set up the muon analysis algorithm sequence:
     from MuonAnalysisAlgorithms.MuonAnalysisConfig import makeMuonCalibrationConfig, makeMuonWorkingPointConfig
-
-    configSeq = ConfigSequence ()
 
     makeMuonCalibrationConfig (configSeq, 'AnaMuons')
     makeMuonWorkingPointConfig (configSeq, 'AnaMuons', workingPoint='Medium.Iso', postfix='medium')
@@ -427,6 +453,17 @@ def makeSequenceBlocks (dataType, algSeq, vars, forCompare) :
     configAccumulator = ConfigAccumulator (dataType, algSeq)
     configSeq.fullConfigure (configAccumulator)
 
+    selalg = createAlgorithm( 'CP::AsgSelectionAlg', 'UserElectronsSelectionAlg' )
+    addPrivateTool( selalg, 'selectionTool', 'CP::AsgPtEtaSelectionTool' )
+    if electronMinPt :
+        selalg.selectionTool.minPt = electronMinPt
+    if electronMaxEta :
+        selalg.selectionTool.maxEta = electronMaxEta
+    selalg.selectionDecoration = 'selectPtEta'
+    selalg.particles = 'AnaElectrons_%SYS%'
+    algSeq += selalg
+    addOutputCopyAlgorithms (algSeq, 'Electrons', 'AnaElectrons_%SYS%', 'OutElectrons_%SYS%',
+                             'selectPtEta&&baselineSelection_loose,as_char')
 
     selalg = createAlgorithm( 'CP::AsgSelectionAlg', 'UserMuonsSelectionAlg' )
     addPrivateTool( selalg, 'selectionTool', 'CP::AsgPtEtaSelectionTool' )
