@@ -200,7 +200,7 @@ HGTD_TrackingGeometryBuilderCond::trackingGeometry
   Amg::Transform3D* negativeInnerGapTrans = new Amg::Transform3D(Amg::Translation3D(Amg::Vector3D(0.,0.,-zGapPos)));
   Trk::CylinderVolumeBounds* negativeInnerGapBounds = new Trk::CylinderVolumeBounds(enclosedInnerRadius,enclosedOuterRadius,gapHalfLengthZ);
   
-  const Trk::TrackingVolume * negativeInnerGapVolume = 
+  Trk::TrackingVolume * negativeInnerGapVolume = 
       new Trk::TrackingVolume(negativeInnerGapTrans,
                               negativeInnerGapBounds,
                               *materialProperties,
@@ -210,7 +210,7 @@ HGTD_TrackingGeometryBuilderCond::trackingGeometry
   Amg::Transform3D* positiveInnerGapTrans = new Amg::Transform3D(Amg::Translation3D(Amg::Vector3D(0.,0.,zGapPos)));
   Trk::CylinderVolumeBounds* positiveInnerGapBounds = new Trk::CylinderVolumeBounds(enclosedInnerRadius,enclosedOuterRadius,gapHalfLengthZ);
   
-  const Trk::TrackingVolume * positiveInnerGapVolume = 
+  Trk::TrackingVolume * positiveInnerGapVolume = 
        new Trk::TrackingVolume(positiveInnerGapTrans,
                                positiveInnerGapBounds,
                                *materialProperties,
@@ -231,9 +231,10 @@ HGTD_TrackingGeometryBuilderCond::trackingGeometry
                                        "HGTD::GapVolumes::DummyID");
   }
   
-  std::vector<const Trk::TrackingVolume*> inBufferVolumes;
+  std::vector<Trk::TrackingVolume*> inBufferVolumes;
   inBufferVolumes.push_back(negativeInnerGapVolume);  
-  inBufferVolumes.push_back(innerVol);     
+  //we pass this as const to the builder ... so const_cast for now
+  inBufferVolumes.push_back(const_cast<Trk::TrackingVolume*>(innerVol));     
   inBufferVolumes.push_back(positiveInnerGapVolume);     
    
   Trk::TrackingVolume* inDetEnclosed = 
@@ -267,13 +268,13 @@ HGTD_TrackingGeometryBuilderCond::trackingGeometry
   positiveVolume->registerColorCode(m_colorCodeConfig);
                                                         
   // pack them together
-  std::vector<const Trk::TrackingVolume*> tripleVolumes;
+  std::vector<Trk::TrackingVolume*> tripleVolumes;
   tripleVolumes.push_back(negativeVolume);
   tripleVolumes.push_back(inDetEnclosed);
   tripleVolumes.push_back(positiveVolume);
   
   // create the tiple container
-  const Trk::TrackingVolume* tripleContainer =
+  Trk::TrackingVolume* tripleContainer =
     m_trackingVolumeCreator->createContainerTrackingVolume(tripleVolumes,
                                                            *materialProperties,
                                                            "HGTD::Containers::" + m_layerBuilder->identification(),
@@ -283,7 +284,7 @@ HGTD_TrackingGeometryBuilderCond::trackingGeometry
   ATH_MSG_VERBOSE( '\t' << '\t'<< "Created container volume with bounds: " << tripleContainer->volumeBounds() );
 
   // finally create the two endplates: negative
-  const Trk::TrackingVolume* negativeEnclosure = m_trackingVolumeCreator->createGapTrackingVolume(
+  Trk::TrackingVolume* negativeEnclosure = m_trackingVolumeCreator->createGapTrackingVolume(
     *materialProperties,
     enclosedInnerRadius,
     enclosedOuterRadius,
@@ -294,7 +295,7 @@ HGTD_TrackingGeometryBuilderCond::trackingGeometry
     "HGTD::Gaps::NegativeEnclosure" + m_layerBuilder->identification());
 
   // finally create the two endplates: positive
-  const Trk::TrackingVolume* positiveEnclosure = m_trackingVolumeCreator->createGapTrackingVolume(
+  Trk::TrackingVolume* positiveEnclosure = m_trackingVolumeCreator->createGapTrackingVolume(
     *materialProperties,
     enclosedInnerRadius,
     enclosedOuterRadius,
@@ -304,7 +305,7 @@ HGTD_TrackingGeometryBuilderCond::trackingGeometry
     false,
     "HGTD::Gaps::PositiveEnclosure" + m_layerBuilder->identification());
   // and the final tracking volume
-  std::vector<const Trk::TrackingVolume*> enclosedVolumes;
+  std::vector<Trk::TrackingVolume*> enclosedVolumes;
   enclosedVolumes.push_back(negativeEnclosure);
   enclosedVolumes.push_back(tripleContainer);
   enclosedVolumes.push_back(positiveEnclosure);

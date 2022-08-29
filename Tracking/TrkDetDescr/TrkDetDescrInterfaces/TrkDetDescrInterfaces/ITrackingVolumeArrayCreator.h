@@ -25,7 +25,7 @@ namespace Trk {
 
   /** @typedef TrackingVolumeArray
       simply for the eye */
-  typedef BinnedArray<const TrackingVolume> TrackingVolumeArray;
+  typedef BinnedArray<TrackingVolume> TrackingVolumeArray;
   
   /** Interface ID for ITrackingVolumeArrayCreator*/  
   static const InterfaceID IID_ITrackingVolumeArrayCreator("ITrackingVolumeArrayCreator", 1, 0);
@@ -54,49 +54,49 @@ namespace Trk {
 
       /** TrackingVolumeArrayCreator interface method -
           create a R-binned cylindrical volume array*/
-      virtual TrackingVolumeArray* cylinderVolumesArrayInR(const std::vector< const TrackingVolume* >& vols,
+      virtual TrackingVolumeArray* cylinderVolumesArrayInR(const std::vector< TrackingVolume* >& vols,
                                                            bool navigationtype=false) const = 0; 
       
       /** TrackingVolumeArrayCreator interface method -
           create a R-binned cylindrical volume array*/
-      virtual TrackingVolumeArray* cylinderVolumesArrayInZ(const std::vector< const TrackingVolume* >& vols,
+      virtual TrackingVolumeArray* cylinderVolumesArrayInZ(const std::vector< TrackingVolume* >& vols,
                                                            bool navigationtype=false) const = 0; 
 
       /** TrackingVolumeArrayCreator interface method -
           create a Phi-binned cylindrical volume array*/
-      virtual TrackingVolumeArray* cylinderVolumesArrayInPhi(const std::vector< const TrackingVolume* >& vols,
+      virtual TrackingVolumeArray* cylinderVolumesArrayInPhi(const std::vector< TrackingVolume* >& vols,
                                                            bool navigationtype=false) const = 0; 
 
       /** TrackingVolumeArrayCreator interface method -
           create a 2dim cylindrical volume array*/
-      virtual TrackingVolumeArray* cylinderVolumesArrayInPhiR(const std::vector< const TrackingVolume* >& vols,
+      virtual TrackingVolumeArray* cylinderVolumesArrayInPhiR(const std::vector< TrackingVolume* >& vols,
                                                            bool navigationtype=false) const = 0; 
 
       /** TrackingVolumeArrayCreator interface method -
           create a 2dim cylindrical volume array*/
-      virtual TrackingVolumeArray* cylinderVolumesArrayInPhiZ(const std::vector< const TrackingVolume* >& vols,
+      virtual TrackingVolumeArray* cylinderVolumesArrayInPhiZ(const std::vector< TrackingVolume* >& vols,
                                                            bool navigationtype=false) const = 0; 
 
       /** TrackingVolumeArrayCreator interface method -
            create a Z-binned cuboid volume array*/
-      virtual TrackingVolumeArray* cuboidVolumesArrayInZ(const std::vector< const TrackingVolume* >& vols,
+      virtual TrackingVolumeArray* cuboidVolumesArrayInZ(const std::vector< TrackingVolume* >& vols,
                                                             bool navigationtype=false) const = 0;
 
       /** TrackingVolumeArrayCreator interface method -
            create a cuboid volume array*/
-      virtual TrackingVolumeArray* cuboidVolumesArrayNav(const std::vector< const TrackingVolume* >& vols,
+      virtual TrackingVolumeArray* cuboidVolumesArrayNav(const std::vector< TrackingVolume* >& vols,
                                                          Trk::BinUtility* binUtil,
                                                          bool navigationtype=false) const = 0;
 
       /** TrackingVolumeArrayCreator interface method -
            create a trapezoid volume array*/
-       virtual TrackingVolumeArray* trapezoidVolumesArrayNav(const std::vector< const TrackingVolume* >& vols,
+       virtual TrackingVolumeArray* trapezoidVolumesArrayNav(const std::vector< TrackingVolume* >& vols,
                                                              Trk::BinUtility* binUtil,
                                                              bool navigationtype=false) const = 0;
 
       /** TrackingVolumeArrayCreator interface method -
            create a doubleTrapezoid volume array*/
-       virtual TrackingVolumeArray* doubleTrapezoidVolumesArrayNav(const std::vector< const TrackingVolume* >& vols,
+       virtual TrackingVolumeArray* doubleTrapezoidVolumesArrayNav(const std::vector< TrackingVolume* >& vols,
                                                                    Trk::BinUtility* binUtil,
                                                                    bool navigationtype=false) const = 0;
   

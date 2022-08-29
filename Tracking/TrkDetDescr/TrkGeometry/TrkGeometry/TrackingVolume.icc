@@ -71,10 +71,24 @@ TrackingVolume::confinedVolumes()
   return m_confinedVolumes;
 }
 
-inline const std::vector<const DetachedTrackingVolume*>*
+inline ArraySpan<DetachedTrackingVolume const* const>
 TrackingVolume::confinedDetachedVolumes() const
 {
-  return m_confinedDetachedVolumes;
+  if (m_confinedDetachedVolumes) {
+    return ArraySpan<DetachedTrackingVolume const* const>(
+      &*m_confinedDetachedVolumes->begin(), &*m_confinedDetachedVolumes->end());
+  }
+  return {};
+}
+
+inline ArraySpan<DetachedTrackingVolume* const>
+TrackingVolume::confinedDetachedVolumes()
+{
+  if (m_confinedDetachedVolumes) {
+    return ArraySpan<DetachedTrackingVolume* const>(
+      &*m_confinedDetachedVolumes->begin(), &*m_confinedDetachedVolumes->end());
+  }
+  return {};
 }
 
 inline const std::vector<const TrackingVolume*>*

@@ -60,6 +60,7 @@ class DetachedTrackingVolume {
 
   /** returns the TrackingVolume */
   const TrackingVolume* trackingVolume() const;
+  TrackingVolume* trackingVolume();
 
   /** returns the Name */
   std::string name() const;
@@ -68,8 +69,8 @@ class DetachedTrackingVolume {
   void move ATLAS_NOT_THREAD_SAFE(Amg::Transform3D& shift) const;
 
   /** clone with transform*/
-  const DetachedTrackingVolume* clone
-  ATLAS_NOT_THREAD_SAFE(const std::string& name, Amg::Transform3D& shift) const;
+  DetachedTrackingVolume* clone(const std::string& name,
+                                      Amg::Transform3D& shift) const;
 
   /** returns layer representation */
   const Layer* layerRepresentation() const;
@@ -116,6 +117,11 @@ class DetachedTrackingVolume {
 inline const TrackingVolume* DetachedTrackingVolume::trackingVolume() const {
   return (m_trkVolume);
 }
+
+inline TrackingVolume* DetachedTrackingVolume::trackingVolume(){
+  return (m_trkVolume);
+}
+
 
 inline std::string DetachedTrackingVolume::name() const { return (m_name); }
 

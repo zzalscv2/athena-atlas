@@ -75,7 +75,7 @@ namespace Muon {
 
         /** Method returning cloned and positioned material objects */
         virtual
-        std::pair<std::unique_ptr<const std::vector<std::unique_ptr<const Trk::DetachedTrackingVolume> > >,
+        std::pair<std::unique_ptr<std::vector<std::unique_ptr<Trk::DetachedTrackingVolume> > >,
                   std::unique_ptr<std::vector<std::vector<std::pair<std::unique_ptr<const Trk::Volume>, float> > > > >
         buildDetachedTrackingVolumes(const EventContext& ctx,
                                      SG::WriteCondHandle<Trk::TrackingGeometry>& whandle,
@@ -83,7 +83,7 @@ namespace Muon {
 
     private:
         /** Method creating material object prototypes */
-        std::pair<const std::vector<std::pair<const Trk::DetachedTrackingVolume*, std::vector<Amg::Transform3D> > >*,
+        std::pair<std::vector<std::pair<Trk::DetachedTrackingVolume*, std::vector<Amg::Transform3D> > >*,
                   std::unique_ptr<std::vector<std::vector<std::pair<std::unique_ptr<const Trk::Volume>, float> > > > >
         buildDetachedTrackingVolumeTypes(const EventContext& ctx,
                                          SG::WriteCondHandle<Trk::TrackingGeometry>& whandle,

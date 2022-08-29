@@ -128,7 +128,7 @@ public:
           const std::string&) const;
    */
   virtual TrackingVolume* createContainerTrackingVolume
-  ATLAS_NOT_THREAD_SAFE(const std::vector<const TrackingVolume*>& volumes,
+  ATLAS_NOT_THREAD_SAFE(const std::vector<TrackingVolume*>& volumes,
                         Material& matprop,
                         const std::string& volumeName = "UndefinedVolume",
                         bool buildBoundaryLayers = false,
@@ -162,15 +162,15 @@ private:
 
   /** Private method - helper method not to duplicate code */
   void addFaceVolumes
-  ATLAS_NOT_THREAD_SAFE(const TrackingVolume& tvol,
+  ATLAS_NOT_THREAD_SAFE(TrackingVolume& tvol,
                         Trk::BoundarySurfaceFace bsf,
-                        std::vector<const Trk::TrackingVolume*>& vols) const;
+                        std::vector<Trk::TrackingVolume*>& vols) const;
 
   /** Private method - glue volume to the other -- use trackingVolume helper */
   void glueTrackingVolumes
-  ATLAS_NOT_THREAD_SAFE(const TrackingVolume& volumeOne,
+  ATLAS_NOT_THREAD_SAFE(TrackingVolume& volumeOne,
                         BoundarySurfaceFace faceOne,
-                        const TrackingVolume& volumeTwo,
+                        TrackingVolume& volumeTwo,
                         BoundarySurfaceFace faceTwo,
                         bool buildBoundaryLayers,
                         bool replaceBoundaryFace = false) const;

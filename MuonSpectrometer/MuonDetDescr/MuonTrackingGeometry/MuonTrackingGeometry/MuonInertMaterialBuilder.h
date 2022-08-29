@@ -72,11 +72,11 @@ namespace Muon {
         StatusCode finalize();
 
         /** Method returning cloned and positioned material objects */
-        const std::vector<const Trk::DetachedTrackingVolume*>* buildDetachedTrackingVolumes(bool blend = false);
+        std::vector<Trk::DetachedTrackingVolume*>* buildDetachedTrackingVolumes(bool blend = false);
 
     private:
         /** Method creating material object prototypes */
-        const std::vector<std::pair<const Trk::DetachedTrackingVolume*, std::vector<Amg::Transform3D> > >* buildDetachedTrackingVolumeTypes(
+        std::vector<std::pair<Trk::DetachedTrackingVolume*, std::vector<Amg::Transform3D> > >* buildDetachedTrackingVolumeTypes(
             bool blend);
         /** Method extracting material objects from GeoModel tree */
         void getObjsForTranslation(const GeoVPhysVol* pv, const Amg::Transform3D&,

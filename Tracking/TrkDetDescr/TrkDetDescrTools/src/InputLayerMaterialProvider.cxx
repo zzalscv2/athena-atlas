@@ -97,7 +97,7 @@ StatusCode Trk::InputLayerMaterialProvider::process(const Trk::TrackingVolume& t
    } 
 
    // Process the contained TrackingVolumes (recursively) if they exist
-   const Trk::BinnedArray< const Trk::TrackingVolume >* confinedVolumes = tvol.confinedVolumes();
+   const Trk::BinnedArray< Trk::TrackingVolume >* confinedVolumes = tvol.confinedVolumes();
    // register the next round
    if (confinedVolumes) {
        Trk::BinnedArraySpan<Trk::TrackingVolume const * const> volumes = confinedVolumes->arrayObjects();
@@ -135,7 +135,7 @@ StatusCode Trk::InputLayerMaterialProvider::process(const Trk::Layer& lay, size_
     ATH_MSG_VERBOSE(displayBuffer.str() << "                 Layer memory adress is : " << &lay);
     
     Trk::HomogeneousLayerMaterial hLayerMaterial = Trk::HomogeneousLayerMaterial(m_constantMaterialProperties, 1.);
-    // assign it to the layer
+    // assign it to the layer , const layer is passed so const cast ...
     (const_cast<Trk::Layer&>(lay)).assignMaterialProperties(hLayerMaterial);
     
     return StatusCode::SUCCESS;

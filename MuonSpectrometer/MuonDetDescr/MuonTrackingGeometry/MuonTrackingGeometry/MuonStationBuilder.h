@@ -46,17 +46,17 @@ namespace Muon {
         virtual ~MuonStationBuilder() = default;
         StatusCode initialize();
 
-        const std::vector<const Trk::DetachedTrackingVolume*>* buildDetachedTrackingVolumes(bool blend = false);
+        std::vector<Trk::DetachedTrackingVolume*>* buildDetachedTrackingVolumes(bool blend = false);
 
     private:
         ServiceHandle<Muon::IMuonIdHelperSvc> m_idHelperSvc{this, "MuonIdHelperSvc", "Muon::MuonIdHelperSvc/MuonIdHelperSvc"};
 
         std::vector<std::unique_ptr<Trk::DetachedTrackingVolume>> buildDetachedTrackingVolumeTypes(bool blend);
 
-        void glueComponents(const Trk::DetachedTrackingVolume*) const;
+        void glueComponents(Trk::DetachedTrackingVolume*) const;
         void encloseLayers(const Trk::DetachedTrackingVolume*) const;
         void identifyLayers(const Trk::DetachedTrackingVolume*, int, int) const;
-        void identifyPrototype(const Trk::TrackingVolume*, int, int, const Amg::Transform3D&) const;
+        void identifyPrototype(Trk::TrackingVolume*, int, int, const Amg::Transform3D&) const;
         void getNSWStationsForTranslation(
             const GeoVPhysVol* pv, const std::string& name, const Amg::Transform3D&,
             std::vector<std::pair<std::pair<const GeoLogVol*, Trk::MaterialProperties*>, std::vector<Amg::Transform3D> > >& vols,

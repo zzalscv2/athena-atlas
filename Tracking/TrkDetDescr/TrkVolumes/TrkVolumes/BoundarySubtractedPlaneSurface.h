@@ -38,7 +38,7 @@ class BoundarySubtractedPlaneSurface final
     : virtual public BoundarySurface<Tvol>,
       public SubtractedPlaneSurface {
   /** typedef the BinnedArray */
-  typedef BinnedArray<const Tvol> VolumeArray;
+  typedef BinnedArray<Tvol> VolumeArray;
 
  public:
   /** Default Constructor - needed for pool and inherited classes */

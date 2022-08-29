@@ -111,16 +111,16 @@ StatusCode Muon::MuonInertMaterialBuilder::initialize() {
     return StatusCode::SUCCESS;
 }
 
-const std::vector<const Trk::DetachedTrackingVolume*>* Muon::MuonInertMaterialBuilder::buildDetachedTrackingVolumes(bool blend) {
+std::vector<Trk::DetachedTrackingVolume*>* Muon::MuonInertMaterialBuilder::buildDetachedTrackingVolumes(bool blend) {
     // split output into objects to be kept and objects which may be released from memory (blended)
-    std::pair<std::vector<const Trk::DetachedTrackingVolume*>, std::vector<const Trk::DetachedTrackingVolume*> > mInert;
+    std::pair<std::vector<Trk::DetachedTrackingVolume*>, std::vector<Trk::DetachedTrackingVolume*> > mInert;
 
     // retrieve muon station prototypes from GeoModel
-    const std::vector<std::pair<const Trk::DetachedTrackingVolume*, std::vector<Amg::Transform3D> > >* msTypes =
+    std::vector<std::pair<Trk::DetachedTrackingVolume*, std::vector<Amg::Transform3D> > >* msTypes =
         buildDetachedTrackingVolumeTypes(blend);
     ATH_MSG_INFO(name() << " obtained " << msTypes->size() << " prototypes");
 
-    std::vector<std::pair<const Trk::DetachedTrackingVolume*, std::vector<Amg::Transform3D> > >::const_iterator msTypeIter =
+    std::vector<std::pair<Trk::DetachedTrackingVolume*, std::vector<Amg::Transform3D> > >::const_iterator msTypeIter =
         msTypes->begin();
 
     for (; msTypeIter != msTypes->end(); ++msTypeIter) {
@@ -137,14 +137,16 @@ const std::vector<const Trk::DetachedTrackingVolume*>* Muon::MuonInertMaterialBu
         }
         if (perm) msTypeName +=  "PERM";
         //
-        const Trk::DetachedTrackingVolume* msTV = (*msTypeIter).first;
+        Trk::DetachedTrackingVolume* msTV = (*msTypeIter).first;
         for (unsigned int it = 0; it < (*msTypeIter).second.size(); it++) {
             Amg::Transform3D combTr((*msTypeIter).second[it]);
-            const Trk::DetachedTrackingVolume* newStat = msTV->clone(msTypeName, combTr);
-            if (perm)
+            Trk::DetachedTrackingVolume* newStat = msTV->clone(msTypeName, combTr);
+            if (perm){
                 mInert.first.push_back(newStat);
-            else
+            }
+            else{
                 mInert.second.push_back(newStat);
+            }
         }
     }
 
@@ -153,12 +155,12 @@ const std::vector<const Trk::DetachedTrackingVolume*>* Muon::MuonInertMaterialBu
     delete msTypes;
 
     // merge
-    const std::vector<const Trk::DetachedTrackingVolume*>* muonObjects = nullptr;
+    std::vector<Trk::DetachedTrackingVolume*>* muonObjects = nullptr;
     if (mInert.first.empty())
-        muonObjects = new std::vector<const Trk::DetachedTrackingVolume*>(mInert.second);
+        muonObjects = new std::vector<Trk::DetachedTrackingVolume*>(mInert.second);
     else {
         for (unsigned int i = 0; i < mInert.second.size(); i++) mInert.first.push_back(mInert.second[i]);
-        muonObjects = new std::vector<const Trk::DetachedTrackingVolume*>(mInert.first);
+        muonObjects = new std::vector<Trk::DetachedTrackingVolume*>(mInert.first);
     }
 
     ATH_MSG_INFO(name() << " returns  " << (*muonObjects).size() << " objects (detached volumes)");
@@ -166,10 +168,10 @@ const std::vector<const Trk::DetachedTrackingVolume*>* Muon::MuonInertMaterialBu
     return muonObjects;
 }
 
-const std::vector<std::pair<const Trk::DetachedTrackingVolume*, std::vector<Amg::Transform3D> > >*
+std::vector<std::pair<Trk::DetachedTrackingVolume*, std::vector<Amg::Transform3D> > >*
 Muon::MuonInertMaterialBuilder::buildDetachedTrackingVolumeTypes(bool blend) {
     ATH_MSG_INFO(name() << " building muon object types");
-    std::vector<std::pair<const Trk::DetachedTrackingVolume*, std::vector<Amg::Transform3D> > > objs;
+    std::vector<std::pair<Trk::DetachedTrackingVolume*, std::vector<Amg::Transform3D> > > objs;
 
     std::vector<std::string> objName;
     if (!m_muonMgr) {
@@ -325,8 +327,8 @@ Muon::MuonInertMaterialBuilder::buildDetachedTrackingVolumeTypes(bool blend) {
     }
     //
 
-    const std::vector<std::pair<const Trk::DetachedTrackingVolume*, std::vector<Amg::Transform3D> > >* mObjects =
-        new std::vector<std::pair<const Trk::DetachedTrackingVolume*, std::vector<Amg::Transform3D> > >(objs);
+    std::vector<std::pair<Trk::DetachedTrackingVolume*, std::vector<Amg::Transform3D> > >* mObjects =
+        new std::vector<std::pair<Trk::DetachedTrackingVolume*, std::vector<Amg::Transform3D> > >(objs);
 
     int count = 0;
     for (unsigned int i = 0; i < mObjects->size(); i++) count += (*mObjects)[i].second.size();

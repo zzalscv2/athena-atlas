@@ -98,11 +98,11 @@ StatusCode Muon::MuonStationBuilderCond::initialize() {
     return StatusCode::SUCCESS;
 }
 
-std::unique_ptr<const std::vector<std::unique_ptr<const Trk::DetachedTrackingVolume> > >
+std::unique_ptr<std::vector<std::unique_ptr<Trk::DetachedTrackingVolume> > >
 Muon::MuonStationBuilderCond::buildDetachedTrackingVolumes(const EventContext& ctx,
                                                            SG::WriteCondHandle<Trk::TrackingGeometry>& whandle,
                                                            bool blend) const {
-    auto mStations = std::make_unique<std::vector<std::unique_ptr<const Trk::DetachedTrackingVolume> > >();
+    auto mStations = std::make_unique<std::vector<std::unique_ptr<Trk::DetachedTrackingVolume> > >();
 
     SG::ReadCondHandle<MuonGM::MuonDetectorManager> readHandle{m_muonMgrReadKey, ctx};
     if (!readHandle.isValid() || !(*readHandle)) {
@@ -291,7 +291,7 @@ Muon::MuonStationBuilderCond::buildDetachedTrackingVolumes(const EventContext& c
             std::pair<const Trk::Layer*, const std::vector<const Trk::Layer*>*> layerReprL =
                 m_muonStationTypeBuilder->createLayerRepresentation(newTypeL);
             // create prototype as detached tracking volume
-            std::unique_ptr<const Trk::DetachedTrackingVolume> typeL{
+            std::unique_ptr<Trk::DetachedTrackingVolume> typeL{
                 newTypeL ? new Trk::DetachedTrackingVolume("NSWL", newTypeL, layerReprL.first, layerReprL.second) : nullptr};
             // objs.push_back(std::pair<const Trk::DetachedTrackingVolume*,std::vector<Amg::Transform3D> >(typeStat,vols[ish].second));
             Trk::TrackingVolume* newTypeS = m_muonStationTypeBuilder->processNSW(muonMgr, sectorS);
@@ -299,7 +299,7 @@ Muon::MuonStationBuilderCond::buildDetachedTrackingVolumes(const EventContext& c
             std::pair<const Trk::Layer*, const std::vector<const Trk::Layer*>*> layerReprS =
                 m_muonStationTypeBuilder->createLayerRepresentation(newTypeS);
 
-            std::unique_ptr<const Trk::DetachedTrackingVolume> typeS{
+            std::unique_ptr<Trk::DetachedTrackingVolume> typeS{
                 newTypeS ? new Trk::DetachedTrackingVolume("NSWS", newTypeS, layerReprS.first, layerReprS.second) : nullptr};
 
             if (typeL) {
@@ -309,10 +309,10 @@ Muon::MuonStationBuilderCond::buildDetachedTrackingVolumes(const EventContext& c
                 for (int it = 1; it < 8; it++) {
                     // clone station from prototype :: CHECK z<0 side, probably turns in wrong direction
                     Amg::Transform3D ntransf(Amg::AngleAxis3D(it * 0.25 * M_PI, Amg::Vector3D(0., 0., 1.)));
-                    std::unique_ptr<const Trk::DetachedTrackingVolume> newStat{typeLptr->clone("NSWL", ntransf)};
+                    std::unique_ptr<Trk::DetachedTrackingVolume> newStat{typeLptr->clone("NSWL", ntransf)};
                     ATH_MSG_DEBUG("cloned 1 NSWL station:" << newStat->trackingVolume()->center());
                     // no detailed identification of NSW layer representation
-                    Trk::ArraySpan<const Trk::Layer* const> lays = newStat->trackingVolume()->confinedArbitraryLayers();
+                    Trk::ArraySpan<Trk::Layer* const> lays = newStat->trackingVolume()->confinedArbitraryLayers();
                     for (unsigned int il = 0; il < lays.size(); il++) {
                         int iType = lays[il]->layerType();
                         if (iType != 0) {
@@ -341,10 +341,10 @@ Muon::MuonStationBuilderCond::buildDetachedTrackingVolumes(const EventContext& c
 
                 if (nClones == 16) {  // have to mirror stations as well
                     Amg::Transform3D ntransf(Amg::AngleAxis3D(M_PI, Amg::Vector3D(1., 0., 0.)));
-                    std::unique_ptr<const Trk::DetachedTrackingVolume> mtypeL{typeLptr->clone("NSWL", ntransf)};
+                    std::unique_ptr<Trk::DetachedTrackingVolume> mtypeL{typeLptr->clone("NSWL", ntransf)};
                     ATH_MSG_DEBUG("cloned 2 NSWL station mtypeL :" << mtypeL->trackingVolume()->center());
                     // recalculate identifier
-                    Trk::ArraySpan<const Trk::Layer* const> lays = mtypeL->trackingVolume()->confinedArbitraryLayers();
+                    Trk::ArraySpan<Trk::Layer* const> lays = mtypeL->trackingVolume()->confinedArbitraryLayers();
                     for (unsigned int il = 0; il < lays.size(); il++) {
                         int iType = lays[il]->layerType();
                         if (iType != 0) {
@@ -365,7 +365,7 @@ Muon::MuonStationBuilderCond::buildDetachedTrackingVolumes(const EventContext& c
                             if (!is_valid) continue;
 
                             unsigned int nType = nid.get_identifier32().get_compact();
-                            const_cast< Trk::Layer*>(lays[il])->setLayerType(nType);
+                            lays[il]->setLayerType(nType);
                         }
                     }
                     const auto *mtypeLptr = mtypeL.get();
@@ -373,10 +373,10 @@ Muon::MuonStationBuilderCond::buildDetachedTrackingVolumes(const EventContext& c
                     for (unsigned int it = 1; it < 8; it++) {
                         // clone station from prototype :: CHECK z<0 side, probably turns in wrong direction
                         Amg::Transform3D ntransf(Amg::AngleAxis3D(it * 0.25 * M_PI, Amg::Vector3D(0., 0., 1.)));
-                        std::unique_ptr<const Trk::DetachedTrackingVolume> newStat{mtypeLptr->clone("NSWL", ntransf)};
+                        std::unique_ptr<Trk::DetachedTrackingVolume> newStat{mtypeLptr->clone("NSWL", ntransf)};
                         ATH_MSG_DEBUG("cloned NSWL station:" << newStat->trackingVolume()->center());
                         // recalculate identifiers
-                        Trk::ArraySpan<const Trk::Layer* const> lays = newStat->trackingVolume()->confinedArbitraryLayers();
+                        Trk::ArraySpan<Trk::Layer* const> lays = newStat->trackingVolume()->confinedArbitraryLayers();
                         for (unsigned int il = 0; il < lays.size(); il++) {
                             int iType = lays[il]->layerType();
                             if (iType != 0) {
@@ -397,7 +397,7 @@ Muon::MuonStationBuilderCond::buildDetachedTrackingVolumes(const EventContext& c
                                 if (!is_valid) continue;
 
                                 unsigned int nType = nid.get_identifier32().get_compact();
-                                const_cast< Trk::Layer*>(lays[il])->setLayerType(nType);
+                                lays[il]->setLayerType(nType);
                             }
                         }
                         mStations->push_back(std::move(newStat));
@@ -412,10 +412,10 @@ Muon::MuonStationBuilderCond::buildDetachedTrackingVolumes(const EventContext& c
                 for (unsigned int it = 1; it < 8; it++) {
                     // clone station from prototype
                     Amg::Transform3D ntransf(Amg::AngleAxis3D(it * 0.25 * M_PI, Amg::Vector3D(0., 0., 1.)));
-                    std::unique_ptr<const Trk::DetachedTrackingVolume> newStat{typeSptr->clone("NSWS", ntransf)};
+                    std::unique_ptr<Trk::DetachedTrackingVolume> newStat{typeSptr->clone("NSWS", ntransf)};
                     ATH_MSG_DEBUG("cloned NSWS station:" << newStat->trackingVolume()->center());
                     // recalculate identifiers
-                    Trk::ArraySpan<const Trk::Layer* const> lays = newStat->trackingVolume()->confinedArbitraryLayers();
+                    Trk::ArraySpan<Trk::Layer* const> lays = newStat->trackingVolume()->confinedArbitraryLayers();
                     for (unsigned int il = 0; il < lays.size(); il++) {
                         int iType = lays[il]->layerType();
                         if (iType != 0) {
@@ -436,7 +436,7 @@ Muon::MuonStationBuilderCond::buildDetachedTrackingVolumes(const EventContext& c
                             if (!is_valid) continue;
 
                             unsigned int nType = nid.get_identifier32().get_compact();
-                            const_cast<Trk::Layer*>(lays[il])->setLayerType(nType);
+                            lays[il]->setLayerType(nType);
                         }
                     }
                     mStations->push_back(std::move(newStat));
@@ -447,10 +447,10 @@ Muon::MuonStationBuilderCond::buildDetachedTrackingVolumes(const EventContext& c
                     Amg::Transform3D ntransf(Amg::AngleAxis3D(+phiS, Amg::Vector3D(0., 0., 1.)) *
                                              Amg::AngleAxis3D(+M_PI, Amg::Vector3D(1., 0., 0.)) *
                                              Amg::AngleAxis3D(-phiS, Amg::Vector3D(0., 0., 1.)));
-                    std::unique_ptr<const Trk::DetachedTrackingVolume> mtypeS{typeSptr->clone("NSWL", ntransf)};
+                    std::unique_ptr<Trk::DetachedTrackingVolume> mtypeS{typeSptr->clone("NSWL", ntransf)};
                     ATH_MSG_DEBUG("cloned NSWS station:" << mtypeS->trackingVolume()->center());
                     // recalculate identifiers
-                    Trk::ArraySpan<const Trk::Layer* const> lays = mtypeS->trackingVolume()->confinedArbitraryLayers();
+                    Trk::ArraySpan<Trk::Layer* const> lays = mtypeS->trackingVolume()->confinedArbitraryLayers();
                     for (unsigned int il = 0; il < lays.size(); il++) {
                         int iType = lays[il]->layerType();
                         if (iType != 0) {
@@ -479,10 +479,10 @@ Muon::MuonStationBuilderCond::buildDetachedTrackingVolumes(const EventContext& c
                     for (unsigned int it = 1; it < 8; it++) {
                         // clone station from prototype :: CHECK z<0 side, probably turns in wrong direction
                         Amg::Transform3D ntransf(Amg::AngleAxis3D(it * 0.25 * M_PI, Amg::Vector3D(0., 0., 1.)));
-                        std::unique_ptr<const Trk::DetachedTrackingVolume> newStat{mtypeSptr->clone("NSWL", ntransf)};
+                        std::unique_ptr<Trk::DetachedTrackingVolume> newStat{mtypeSptr->clone("NSWL", ntransf)};
                         ATH_MSG_DEBUG("cloned NSWS station:" << newStat->trackingVolume()->center());
                         // recalculate identifiers
-                        Trk::ArraySpan<const Trk::Layer* const> lays = newStat->trackingVolume()->confinedArbitraryLayers();
+                        Trk::ArraySpan<Trk::Layer* const> lays = newStat->trackingVolume()->confinedArbitraryLayers();
                         for (unsigned int il = 0; il < lays.size(); il++) {
                             int iType = lays[il]->layerType();
                             if (iType != 0) {
@@ -503,7 +503,7 @@ Muon::MuonStationBuilderCond::buildDetachedTrackingVolumes(const EventContext& c
                                 if (!is_valid) continue;
 
                                 unsigned int nType = nid.get_identifier32().get_compact();
-                                const_cast<Trk::Layer*>(lays[il])->setLayerType(nType);
+                                lays[il]->setLayerType(nType);
                             }
                         }
                         mStations->push_back(std::move(newStat));
@@ -613,7 +613,7 @@ Muon::MuonStationBuilderCond::buildDetachedTrackingVolumes(const EventContext& c
                         }
                         unsigned int iD = stId.get_identifier32().get_compact();
                         // clone station from prototype
-                        std::unique_ptr<const Trk::DetachedTrackingVolume> newStat{msTV->clone(vname, transf)};
+                        std::unique_ptr<Trk::DetachedTrackingVolume> newStat{msTV->clone(vname, transf)};
                         // identify layer representation
                         Trk::Layer* mutableLayer = const_cast< Trk::Layer*>(newStat->layerRepresentation());
                         mutableLayer->setLayerType(iD);
@@ -818,11 +818,11 @@ std::vector<std::unique_ptr<Trk::DetachedTrackingVolume>> Muon::MuonStationBuild
     return stations;
 }
 
-void Muon::MuonStationBuilderCond::glueComponents(const Trk::DetachedTrackingVolume* stat) const {
-    const Trk::TrackingVolumeArray* volArray = stat->trackingVolume()->confinedVolumes();
+void Muon::MuonStationBuilderCond::glueComponents(Trk::DetachedTrackingVolume* stat) const {
+    Trk::TrackingVolumeArray* volArray = stat->trackingVolume()->confinedVolumes();
     if (volArray) {
         if (volArray->arrayObjectsNumber() > 1) {
-            Trk::BinnedArraySpan<Trk::TrackingVolume const * const> components = volArray->arrayObjects();
+            Trk::BinnedArraySpan<Trk::TrackingVolume* const> components = volArray->arrayObjects();
             const Trk::BinUtility* binUtilityX = volArray->binUtility();
             const Trk::CuboidVolumeBounds* cubVolBounds = dynamic_cast<const Trk::CuboidVolumeBounds*>(&(components[0]->volumeBounds()));
 
@@ -1054,7 +1054,7 @@ void Muon::MuonStationBuilderCond::identifyLayers(const Trk::DetachedTrackingVol
     // end identification check
 }
 
-void Muon::MuonStationBuilderCond::identifyPrototype(const Trk::TrackingVolume* station, int eta, int phi, const Amg::Transform3D& transf,
+void Muon::MuonStationBuilderCond::identifyPrototype(Trk::TrackingVolume* station, int eta, int phi, const Amg::Transform3D& transf,
                                                      const MuonGM::MuonDetectorManager* muonMgr) const {
     ATH_MSG_VERBOSE(name() << " identifying prototype ");
 
@@ -1092,7 +1092,7 @@ void Muon::MuonStationBuilderCond::identifyPrototype(const Trk::TrackingVolume* 
         }    
 
         // RPC ?
-        const Trk::BinnedArray<const Trk::TrackingVolume>* confinedVolumes = station->confinedVolumes();
+        const Trk::BinnedArray<Trk::TrackingVolume>* confinedVolumes = station->confinedVolumes();
         if (confinedVolumes) {
             Trk::BinnedArraySpan<Trk::TrackingVolume const * const> vols = confinedVolumes->arrayObjects();
             for (unsigned int iv = 0; iv < vols.size(); iv++) {
@@ -1177,10 +1177,10 @@ void Muon::MuonStationBuilderCond::identifyPrototype(const Trk::TrackingVolume* 
 
     // by now, all the layers should be identified - verify
     if (station->confinedVolumes()) {
-        Trk::BinnedArraySpan<Trk::TrackingVolume const * const> cVols = station->confinedVolumes()->arrayObjects();
+        Trk::BinnedArraySpan<Trk::TrackingVolume * const> cVols = station->confinedVolumes()->arrayObjects();
         for (unsigned int i = 0; i < cVols.size();++i) {
             if (cVols[i]->confinedLayers()) {
-                Trk::BinnedArraySpan<Trk::Layer const * const> cLays = cVols[i]->confinedLayers()->arrayObjects();
+                Trk::BinnedArraySpan<Trk::Layer * const> cLays = cVols[i]->confinedLayers()->arrayObjects();
                 for (unsigned int il = 0; il < cLays.size(); il++) {
                     Identifier id(cLays[il]->layerType());
                     if (id == 1)
@@ -1188,7 +1188,7 @@ void Muon::MuonStationBuilderCond::identifyPrototype(const Trk::TrackingVolume* 
                 }
             }
             if (!cVols[i]->confinedArbitraryLayers().empty()) {
-                Trk::ArraySpan<const Trk::Layer* const> cLays = cVols[i]->confinedArbitraryLayers();
+                Trk::ArraySpan<Trk::Layer* const> cLays = cVols[i]->confinedArbitraryLayers();
                 for (unsigned int il = 0; il < cLays.size(); il++) {
                     Identifier id(cLays[il]->layerType());
                     if (id == 1)
@@ -1198,7 +1198,7 @@ void Muon::MuonStationBuilderCond::identifyPrototype(const Trk::TrackingVolume* 
         }
     }
     if (station->confinedLayers()) {
-        Trk::BinnedArraySpan<Trk::Layer const * const> cLays = station->confinedLayers()->arrayObjects();
+        Trk::BinnedArraySpan<Trk::Layer * const> cLays = station->confinedLayers()->arrayObjects();
         for (unsigned int il = 0; il < cLays.size(); il++) {
             Identifier id(cLays[il]->layerType());
             if (id == 1) ATH_MSG_DEBUG(station->volumeName() << "," << station->volumeName() << ", unidentified active layer:" << il);

@@ -484,10 +484,10 @@ Trk::TimedExtrapolator::extrapolateToVolumeWithPathLimit(
     // }
 
     // detached volume boundaries
-    const std::vector<const Trk::DetachedTrackingVolume *> *detVols = cache.m_currentStatic->confinedDetachedVolumes();
-    if (detVols) {
-      std::vector<const Trk::DetachedTrackingVolume *>::const_iterator iTer = detVols->begin();
-      for (; iTer != detVols->end(); ++iTer) {
+    Trk::ArraySpan<const Trk::DetachedTrackingVolume* const> detVols = cache.m_currentStatic->confinedDetachedVolumes();
+    if (!detVols.empty()) {
+      Trk::ArraySpan<const Trk::DetachedTrackingVolume* const>::const_iterator iTer = detVols.begin();
+      for (; iTer != detVols.end(); ++iTer) {
         // active station ?
         const Trk::Layer *layR = (*iTer)->layerRepresentation();
         bool active = layR && layR->layerType();
@@ -1639,10 +1639,10 @@ Trk::TimedExtrapolator::transportToVolumeWithPathLimit(
   cache.m_navigLays.clear();
 
   // detached volume boundaries
-  const std::vector<const Trk::DetachedTrackingVolume *> *detVols = cache.m_currentStatic->confinedDetachedVolumes();
-  if (detVols) {
-    std::vector<const Trk::DetachedTrackingVolume *>::const_iterator iTer = detVols->begin();
-    for (; iTer != detVols->end(); ++iTer) {
+  Trk::ArraySpan<const Trk::DetachedTrackingVolume* const> detVols = cache.m_currentStatic->confinedDetachedVolumes();
+  if (!detVols.empty()) {
+    Trk::ArraySpan<const Trk::DetachedTrackingVolume* const>::const_iterator iTer = detVols.begin();
+    for (; iTer != detVols.end(); ++iTer) {
       // active station ?
       const Trk::Layer *layR = (*iTer)->layerRepresentation();
       bool active = layR && layR->layerType();

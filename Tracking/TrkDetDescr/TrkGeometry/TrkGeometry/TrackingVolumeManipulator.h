@@ -70,7 +70,7 @@ class TrackingVolumeManipulator {
        - the volume array to be set as inside volume array */
   static void setInsideVolumeArray
   ATLAS_NOT_THREAD_SAFE(const TrackingVolume& tvol, BoundarySurfaceFace face,
-                        BinnedArray<const TrackingVolume>* insidevolarray) ;
+                        BinnedArray<TrackingVolume>* insidevolarray) ;
 
   /** protected method to set inside VolumeArray of a BoundarySurface:
       input:
@@ -79,7 +79,7 @@ class TrackingVolumeManipulator {
        - the volume array to be set as inside volume array */
   static void setInsideVolumeArray ATLAS_NOT_THREAD_SAFE(
       const TrackingVolume& tvol, BoundarySurfaceFace face,
-      const SharedObject<BinnedArray<const TrackingVolume> >& insidevolarray) ;
+      const SharedObject<BinnedArray<TrackingVolume> >& insidevolarray) ;
 
   /** protected method to set outside Volume of a BoundarySurface:
       input:
@@ -97,7 +97,7 @@ class TrackingVolumeManipulator {
        - the volume array to be set as outside volume array */
   static void setOutsideVolumeArray
   ATLAS_NOT_THREAD_SAFE(const TrackingVolume& tvol, BoundarySurfaceFace face,
-                        BinnedArray<const TrackingVolume>* outsidevolarray) ;
+                        BinnedArray<TrackingVolume>* outsidevolarray) ;
 
   /** protected method to set outside VolumeArray of a BoundarySurface:
       input:
@@ -106,7 +106,7 @@ class TrackingVolumeManipulator {
        - the volume array to be set as outside volume array */
   static void setOutsideVolumeArray ATLAS_NOT_THREAD_SAFE(
       const TrackingVolume& tvol, BoundarySurfaceFace face,
-      const SharedObject<BinnedArray<const TrackingVolume> >& outsidevolarray) ;
+      const SharedObject<BinnedArray<TrackingVolume> >& outsidevolarray) ;
 
   /** protected method to confine (dense) volumes:
       input:

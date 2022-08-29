@@ -75,9 +75,9 @@ namespace Trk {
             --- Necessary as friendship cannot be inherited: your father's friend isn't necessary yours ---
          */
         void glueTrackingVolumes
-        ATLAS_NOT_THREAD_SAFE(const TrackingVolume& firstVol,
+        ATLAS_NOT_THREAD_SAFE(TrackingVolume& firstVol,
                               BoundarySurfaceFace firstFace,
-                              const TrackingVolume& secondVol,
+                              TrackingVolume& secondVol,
                               BoundarySurfaceFace secondFace,
                               bool buildBoundaryLayer = false) const;
 
@@ -91,9 +91,9 @@ namespace Trk {
             --- Necessary as friendship cannot be inherited: your father's friend isn't necessary yours ---
          */
         void glueTrackingVolumes ATLAS_NOT_THREAD_SAFE(
-          const TrackingVolume& firstVol,
+          TrackingVolume& firstVol,
           BoundarySurfaceFace firstFace,
-          const std::vector<const TrackingVolume*>& secondVolumes,
+          const std::vector<TrackingVolume*>& secondVolumes,
           BoundarySurfaceFace secondFace,
           bool buildBoundaryLayer = false,
           bool boundaryFaceExchange = false) const;
@@ -110,9 +110,9 @@ namespace Trk {
             --- Necessary as friendship cannot be inherited: your father's friend isn't necessary yours ---
         */
         void glueTrackingVolumes ATLAS_NOT_THREAD_SAFE(
-          const std::vector<const TrackingVolume*>& firstVolumes,
+          const std::vector<TrackingVolume*>& firstVolumes,
           BoundarySurfaceFace firstFace,
-          const std::vector<const TrackingVolume*>& secondVolumes,
+          const std::vector<TrackingVolume*>& secondVolumes,
           BoundarySurfaceFace secondFace,
           bool buildBoundaryLayer = false,
           bool boundaryFaceExchange = false) const;
@@ -130,9 +130,9 @@ namespace Trk {
             --- Necessary as friendship cannot be inherited: your father's friend isn't necessary yours ---
          */
         Trk::TrackingVolume* glueTrackingVolumeArrays
-        ATLAS_NOT_THREAD_SAFE(const TrackingVolume& firstVol,
+        ATLAS_NOT_THREAD_SAFE(TrackingVolume& firstVol,
                               BoundarySurfaceFace firstFace,
-                              const TrackingVolume& secondVol,
+                              TrackingVolume& secondVol,
                               BoundarySurfaceFace secondFace,
                               std::string name) const;
 
@@ -160,12 +160,12 @@ namespace Trk {
         void setInsideTrackingVolumeArray ATLAS_NOT_THREAD_SAFE(
           const TrackingVolume& tvol,
           BoundarySurfaceFace face,
-          BinnedArray<const TrackingVolume>* insidevolarray) const;
+          BinnedArray<TrackingVolume>* insidevolarray) const;
 
         void setInsideTrackingVolumeArray ATLAS_NOT_THREAD_SAFE(
           const TrackingVolume& tvol,
           BoundarySurfaceFace face,
-          SharedObject<BinnedArray<const TrackingVolume>> insidevolarray) const;
+          SharedObject<BinnedArray<TrackingVolume>> insidevolarray) const;
 
         /** protected method to set outside Volume of a BoundarySurface:
             input:
@@ -188,12 +188,12 @@ namespace Trk {
         void setOutsideTrackingVolumeArray ATLAS_NOT_THREAD_SAFE(
           const TrackingVolume& tvol,
           BoundarySurfaceFace face,
-          BinnedArray<const TrackingVolume>* outsidevolarray) const;
+          BinnedArray<TrackingVolume>* outsidevolarray) const;
 
         void setOutsideTrackingVolumeArray ATLAS_NOT_THREAD_SAFE(
           const TrackingVolume& tvol,
           BoundarySurfaceFace face,
-          SharedObject<BinnedArray<const TrackingVolume>> outsidevolarray) const;
+          SharedObject<BinnedArray<TrackingVolume>> outsidevolarray) const;
 
       private:
 
@@ -206,14 +206,14 @@ namespace Trk {
                              and adds either the volume itself or the associated subvolume
                            - volumes on glueVols level are all on navigation level*/
         static void fillGlueVolumes ATLAS_NOT_THREAD_SAFE(
-          const std::vector<const TrackingVolume*>& topLevelVolumes,
-          const std::vector<const TrackingVolume*>& envelopeFaceVolumes,
+          const std::vector<TrackingVolume*>& topLevelVolumes,
+          const std::vector<TrackingVolume*>& envelopeFaceVolumes,
           BoundarySurfaceFace glueFace,
-          std::vector<const Trk::TrackingVolume*>& glueVols) ;
+          std::vector<Trk::TrackingVolume*>& glueVols) ;
 
         /** Execute the glueing  - the input volumes are all on navigation level */
         void glueTrackingVolumes ATLAS_NOT_THREAD_SAFE(
-          const std::vector<const Trk::TrackingVolume*>& glueVols,
+          const std::vector<Trk::TrackingVolume*>& glueVols,
           BoundarySurfaceFace glueFace,
           BoundarySurfaceFace secondFace) const;
 

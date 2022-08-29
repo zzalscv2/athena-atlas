@@ -133,7 +133,7 @@ StatusCode LAr::LArVolumeBuilder::finalize()
   return StatusCode::SUCCESS;
 }
 
-const std::vector<Trk::TrackingVolume*>*
+std::vector<Trk::TrackingVolume*>*
 LAr::LArVolumeBuilder::trackingVolumes(const CaloDetDescrManager& caloDDM) const
 {
   // the return vector
@@ -380,20 +380,20 @@ LAr::LArVolumeBuilder::trackingVolumes(const CaloDetDescrManager& caloDDM) const
 
     Amg::Transform3D* align=nullptr;
     
-    const Trk::AlignableTrackingVolume* lArBarrelPos = new Trk::AlignableTrackingVolume(lArBPosTransform,align,
+    Trk::AlignableTrackingVolume* lArBarrelPos = new Trk::AlignableTrackingVolume(lArBPosTransform,align,
 											lArBarrelBoundsPos,
 											lArBarrelMaterialBinPos,
 											1,
 											"Calo::Detectors::LAr::BarrelPos");
     
-    const Trk::AlignableTrackingVolume* lArBarrelNeg = new Trk::AlignableTrackingVolume(lArBNegTransform,align,
+    Trk::AlignableTrackingVolume* lArBarrelNeg = new Trk::AlignableTrackingVolume(lArBNegTransform,align,
 											lArBarrelBoundsNeg,
 											lArBarrelMaterialBinNeg,
 											1,
 											"Calo::Detectors::LAr::BarrelNeg");
     
     // glue barrel EM 
-    std::vector<const Trk::TrackingVolume*> volsB;
+    std::vector<Trk::TrackingVolume*> volsB;
     volsB.push_back(lArBarrelNeg);
     volsB.push_back(lArBarrelPos);
 
@@ -553,7 +553,7 @@ LAr::LArVolumeBuilder::trackingVolumes(const CaloDetDescrManager& caloDDM) const
 											    "Calo::Detectors::LAr::BarrelPresamplerNeg");
       
     // glue barrel presampler 
-    std::vector<const Trk::TrackingVolume*> volsBP;
+    std::vector<Trk::TrackingVolume*> volsBP;
     volsBP.push_back(lArBarrelPresamplerNeg);
     volsBP.push_back(lArBarrelPresamplerPos);
 

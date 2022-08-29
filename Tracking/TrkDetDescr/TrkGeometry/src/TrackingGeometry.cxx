@@ -67,7 +67,7 @@ Trk::TrackingGeometry::lowestStaticTrackingVolume(const Amg::Vector3D& gp) const
   const Trk::TrackingVolume* currentVolume = nullptr;
   while (currentVolume != searchVolume && searchVolume) {
     currentVolume = searchVolume;
-    if (!(searchVolume->confinedDetachedVolumes()))
+    if (searchVolume->confinedDetachedVolumes().empty())
       searchVolume = searchVolume->associatedSubVolume(gp);
   }
   return (currentVolume);
@@ -85,7 +85,7 @@ ATLAS_NOT_THREAD_SAFE(const Trk::TrackingVolume& tvol,
 
   const_cast<Trk::TrackingVolume&>(tvol).setMotherVolume(mvol);
   m_trackingVolumes[tvol.volumeName()] = (&tvol);
-  const Trk::BinnedArray<const Trk::TrackingVolume>* confinedVolumes = tvol.confinedVolumes();
+  const Trk::BinnedArray<Trk::TrackingVolume>* confinedVolumes = tvol.confinedVolumes();
   if (confinedVolumes) {
     Trk::BinnedArraySpan<Trk::TrackingVolume const * const> volumes =
       confinedVolumes->arrayObjects();
@@ -102,10 +102,10 @@ ATLAS_NOT_THREAD_SAFE(const Trk::TrackingVolume& tvol,
         registerTrackingVolumes(*volumesIter, &tvol, sublvl);
   }
   /** should detached tracking volumes be part of the tracking geometry ? */
-  const std::vector<const Trk::DetachedTrackingVolume*>*
+  Trk::ArraySpan<const Trk::DetachedTrackingVolume* const>
     confinedDetachedVolumes = tvol.confinedDetachedVolumes();
-  if (confinedDetachedVolumes) {
-    for (const auto& volumesIter : (*confinedDetachedVolumes))
+  if (!confinedDetachedVolumes.empty()) {
+    for (const auto& volumesIter : confinedDetachedVolumes)
       if (volumesIter &&
           tvol.inside(volumesIter->trackingVolume()->center(), 0.))
         registerTrackingVolumes(
@@ -202,7 +202,7 @@ Trk::TrackingGeometry::printVolumeInformation(MsgStream& msg,
     msg << "- found : " << layers.size() << " confined Layers" << std::endl;
   }
 
-  const Trk::BinnedArray<const Trk::TrackingVolume>* confinedVolumes = tvol.confinedVolumes();
+  const Trk::BinnedArray<Trk::TrackingVolume>* confinedVolumes = tvol.confinedVolumes();
   if (confinedVolumes) {
     Trk::BinnedArraySpan<Trk::TrackingVolume const * const> volumes = confinedVolumes->arrayObjects();
 

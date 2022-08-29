@@ -100,21 +100,21 @@ StatusCode Muon::MuonInertMaterialBuilderCond::initialize() {
     return StatusCode::SUCCESS;
 }
 
-std::pair<std::unique_ptr<const std::vector<std::unique_ptr<const Trk::DetachedTrackingVolume>>>,
+std::pair<std::unique_ptr<std::vector<std::unique_ptr<Trk::DetachedTrackingVolume>>>,
           std::unique_ptr<std::vector<std::vector<std::pair<std::unique_ptr<const Trk::Volume>, float>>>>>
 Muon::MuonInertMaterialBuilderCond::buildDetachedTrackingVolumes(const EventContext& ctx,
                                                                  SG::WriteCondHandle<Trk::TrackingGeometry>& whandle,
                                                                  bool blend) const {
     // split output into objects to be kept and objects which may be released from memory (blended)
-    std::pair<std::vector<std::unique_ptr<const Trk::DetachedTrackingVolume>>,
-              std::vector<std::unique_ptr<const Trk::DetachedTrackingVolume>>>
+    std::pair<std::vector<std::unique_ptr<Trk::DetachedTrackingVolume>>,
+              std::vector<std::unique_ptr<Trk::DetachedTrackingVolume>>>
         mInert;
 
     // retrieve muon station prototypes from GeoModel
     auto [msTypes, constituentsVector] = buildDetachedTrackingVolumeTypes(ctx, whandle, blend);
     ATH_MSG_INFO(name() << " obtained " << msTypes->size() << " prototypes");
 
-    std::vector<std::pair<const Trk::DetachedTrackingVolume*, std::vector<Amg::Transform3D>>>::const_iterator msTypeIter = msTypes->begin();
+    std::vector<std::pair<Trk::DetachedTrackingVolume*, std::vector<Amg::Transform3D>>>::const_iterator msTypeIter = msTypes->begin();
 
     for (; msTypeIter != msTypes->end(); ++msTypeIter) {
         std::string msTypeName = (*msTypeIter).first->name();
@@ -133,11 +133,13 @@ Muon::MuonInertMaterialBuilderCond::buildDetachedTrackingVolumes(const EventCont
         const Trk::DetachedTrackingVolume* msTV = (*msTypeIter).first;
         for (unsigned int it = 0; it < (*msTypeIter).second.size(); it++) {
             Amg::Transform3D combTr((*msTypeIter).second[it]);
-            std::unique_ptr<const Trk::DetachedTrackingVolume> newStat{msTV->clone(msTypeName, combTr)};
-            if (perm)
+            std::unique_ptr<Trk::DetachedTrackingVolume> newStat{msTV->clone(msTypeName, combTr)};
+            if (perm){
                 mInert.first.push_back(std::move(newStat));
-            else
+            }
+            else{
                 mInert.second.push_back(std::move(newStat));
+            }
         }
     }
 
@@ -146,12 +148,12 @@ Muon::MuonInertMaterialBuilderCond::buildDetachedTrackingVolumes(const EventCont
     delete msTypes;
 
     // merge
-    std::unique_ptr<const std::vector<std::unique_ptr<const Trk::DetachedTrackingVolume>>> muonObjects = nullptr;
+    std::unique_ptr<std::vector<std::unique_ptr<Trk::DetachedTrackingVolume>>> muonObjects = nullptr;
     if (mInert.first.empty())
-        muonObjects = std::make_unique<std::vector<std::unique_ptr<const Trk::DetachedTrackingVolume>>>(std::move(mInert.second));
+        muonObjects = std::make_unique<std::vector<std::unique_ptr<Trk::DetachedTrackingVolume>>>(std::move(mInert.second));
     else {
         for (unsigned int i = 0; i < mInert.second.size(); i++) mInert.first.push_back(std::move(mInert.second[i]));
-        muonObjects = std::make_unique<std::vector<std::unique_ptr<const Trk::DetachedTrackingVolume>>>(std::move(mInert.first));
+        muonObjects = std::make_unique<std::vector<std::unique_ptr<Trk::DetachedTrackingVolume>>>(std::move(mInert.first));
     }
 
     ATH_MSG_INFO(name() << " returns  " << (*muonObjects).size() << " objects (detached volumes)");
@@ -159,13 +161,13 @@ Muon::MuonInertMaterialBuilderCond::buildDetachedTrackingVolumes(const EventCont
     return {std::move(muonObjects), std::move(constituentsVector)};
 }
 
-std::pair<const std::vector<std::pair<const Trk::DetachedTrackingVolume*, std::vector<Amg::Transform3D>>>*,
+std::pair<std::vector<std::pair<Trk::DetachedTrackingVolume*, std::vector<Amg::Transform3D>>>*,
           std::unique_ptr<std::vector<std::vector<std::pair<std::unique_ptr<const Trk::Volume>, float>>>>>
 Muon::MuonInertMaterialBuilderCond::buildDetachedTrackingVolumeTypes(const EventContext& ctx,
                                                                      SG::WriteCondHandle<Trk::TrackingGeometry>& whandle,
                                                                      bool blend) const {
     ATH_MSG_INFO(name() << " building muon object types");
-    std::vector<std::pair<const Trk::DetachedTrackingVolume*, std::vector<Amg::Transform3D>>> objs;
+    std::vector<std::pair<Trk::DetachedTrackingVolume*, std::vector<Amg::Transform3D>>> objs;
 
     std::vector<std::string> objName;
 
@@ -339,8 +341,8 @@ Muon::MuonInertMaterialBuilderCond::buildDetachedTrackingVolumeTypes(const Event
     }
     //
 
-    const std::vector<std::pair<const Trk::DetachedTrackingVolume*, std::vector<Amg::Transform3D>>>* mObjects =
-        new std::vector<std::pair<const Trk::DetachedTrackingVolume*, std::vector<Amg::Transform3D>>>(std::move(objs));
+    std::vector<std::pair<Trk::DetachedTrackingVolume*, std::vector<Amg::Transform3D>>>* mObjects =
+        new std::vector<std::pair<Trk::DetachedTrackingVolume*, std::vector<Amg::Transform3D>>>(std::move(objs));
 
     int count = 0;
     for (unsigned int i = 0; i < mObjects->size(); i++) count += (*mObjects)[i].second.size();

@@ -173,12 +173,12 @@ Trk::GeometryBuilderCond::atlasTrackingGeometry(const EventContext& ctx,
     // get the Inner Detector and/or HGTD and/or Calorimeter trackingGeometry
 
     // the volumes to be given to higher level tracking geometry builders
-    const Trk::TrackingVolume* inDetVolume    = nullptr;
-    const Trk::TrackingVolume* hgtdVolume     = nullptr;
-    const Trk::TrackingVolume* caloVolume     = nullptr;
+    Trk::TrackingVolume* inDetVolume    = nullptr;
+    Trk::TrackingVolume* hgtdVolume     = nullptr;
+    Trk::TrackingVolume* caloVolume     = nullptr;
 
     // mark the highest volume
-    const Trk::TrackingVolume* highestVolume  = nullptr;
+    Trk::TrackingVolume* highestVolume  = nullptr;
 
 #ifdef TRKDETDESCR_MEMUSAGE       
     m_memoryLogger.refresh(getpid());
@@ -331,15 +331,15 @@ Trk::GeometryBuilderCond::atlasTrackingGeometry(const EventContext& ctx,
         // wrapping and world creation has been switched on
         ATH_MSG_VERBOSE( "Enclosing world is going to be built for: " << highestVolume->volumeName() );
         // get the glue volumes
-        const Trk::GlueVolumesDescriptor& innerGlueVolumes = highestVolume->glueVolumesDescriptor();
+        Trk::GlueVolumesDescriptor& innerGlueVolumes = highestVolume->glueVolumesDescriptor();
         // some screen output
         ATH_MSG_VERBOSE( "Retrieved with following glue volumes: " << innerGlueVolumes );
         // at negative face
-        const std::vector<const Trk::TrackingVolume*>& innerNegativeFaceVolumes = innerGlueVolumes.glueVolumes(Trk::negativeFaceXY);
+        const std::vector<Trk::TrackingVolume*>& innerNegativeFaceVolumes = innerGlueVolumes.glueVolumes(Trk::negativeFaceXY);
         // at cylinder cover
-        const std::vector<const Trk::TrackingVolume*>& innerCentralFaceVolumes = innerGlueVolumes.glueVolumes(Trk::cylinderCover);
+        const std::vector<Trk::TrackingVolume*>& innerCentralFaceVolumes = innerGlueVolumes.glueVolumes(Trk::cylinderCover);
         // at positive face
-        const std::vector<const Trk::TrackingVolume*>& innerPositiveFaceVolumes = innerGlueVolumes.glueVolumes(Trk::positiveFaceXY);
+        const std::vector<Trk::TrackingVolume*>& innerPositiveFaceVolumes = innerGlueVolumes.glueVolumes(Trk::positiveFaceXY);
 
         // get the dimensions
         // cast them to CylinderVolumeBounds
@@ -388,10 +388,10 @@ Trk::GeometryBuilderCond::atlasTrackingGeometry(const EventContext& ctx,
         ATH_MSG_VERBOSE( "Inner Negative/Positive Sectors built successfully." );
 
         // create the subvolume Array
-        auto atlasInnerSectorVolumes = std::vector<const Trk::TrackingVolume*>{atlasInnerNegativeSector,highestVolume,atlasInnerPositiveSector}; 
+        auto atlasInnerSectorVolumes = std::vector<Trk::TrackingVolume*>{atlasInnerNegativeSector,highestVolume,atlasInnerPositiveSector}; 
 
         ATH_MSG_VERBOSE( "Create the Atlas Inner Sector volumes. " );
-        Trk::BinnedArray<const Trk::TrackingVolume>* atlasInnerSectorVolumeArray = m_trackingVolumeArrayCreator ?
+        Trk::BinnedArray<Trk::TrackingVolume>* atlasInnerSectorVolumeArray = m_trackingVolumeArrayCreator ?
                 m_trackingVolumeArrayCreator->cylinderVolumesArrayInZ(atlasInnerSectorVolumes) : nullptr;
 
 
@@ -419,9 +419,9 @@ Trk::GeometryBuilderCond::atlasTrackingGeometry(const EventContext& ctx,
         ATH_MSG_VERBOSE( "Atlas Inner/Outer Sectors built successfully." );
 
         // create the array of Inner and Outer sector
-        auto atlasVolumes =  std::vector<const Trk::TrackingVolume*>{atlasInnerSector, atlasOuterSector};
+        auto atlasVolumes =  std::vector<Trk::TrackingVolume*>{atlasInnerSector, atlasOuterSector};
 
-        Trk::BinnedArray<const Trk::TrackingVolume>* atlasVolumeArray = m_trackingVolumeArrayCreator ?
+        Trk::BinnedArray<Trk::TrackingVolume>* atlasVolumeArray = m_trackingVolumeArrayCreator ?
                 m_trackingVolumeArrayCreator->cylinderVolumesArrayInR(atlasVolumes) : nullptr;
 
         // create the Atlas volume bounds
@@ -452,7 +452,7 @@ Trk::GeometryBuilderCond::atlasTrackingGeometry(const EventContext& ctx,
         auto volIterEnd = innerCentralFaceVolumes.end();
 
         // glue outer and inner sector together
-        std::vector<const Trk::TrackingVolume*> atlasInnerOuterVolumes;
+        std::vector<Trk::TrackingVolume*> atlasInnerOuterVolumes;
         atlasInnerOuterVolumes.push_back(atlasInnerNegativeSector);
         for ( ; volIter != volIterEnd; ++volIter)
             if (*volIter) atlasInnerOuterVolumes.push_back(*volIter);

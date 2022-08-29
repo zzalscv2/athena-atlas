@@ -71,10 +71,12 @@ void Trk::DetachedTrackingVolume::move ATLAS_NOT_THREAD_SAFE(
   }
 }
 
-const Trk::DetachedTrackingVolume* Trk::DetachedTrackingVolume::clone
-ATLAS_NOT_THREAD_SAFE(const std::string& name, Amg::Transform3D& shift) const {
+Trk::DetachedTrackingVolume*
+Trk::DetachedTrackingVolume::clone(const std::string& name,
+                                   Amg::Transform3D& shift) const
+{
   Trk::TrackingVolume* newTV =
-      new TrackingVolume(*(this->trackingVolume()), shift);
+    new TrackingVolume(*(this->trackingVolume()), shift);
   Trk::DetachedTrackingVolume* newStat = nullptr;
   // layer representation ?
   Trk::PlaneLayer* newLay = nullptr;
@@ -114,23 +116,21 @@ ATLAS_NOT_THREAD_SAFE(const std::string& name, Amg::Transform3D& shift) const {
   //
   // enclose layers
   if (newTV->confinedVolumes()) {
-    BinnedArraySpan<Trk::TrackingVolume const * const> vols =
+    BinnedArraySpan<Trk::TrackingVolume * const> vols =
         newTV->confinedVolumes()->arrayObjects();
     for (unsigned int ivol = 0; ivol < vols.size(); ivol++) {
-      const Trk::LayerArray* layAr = vols[ivol]->confinedLayers();
-      Trk::ArraySpan<const Trk::Layer* const> alays =
+      Trk::LayerArray* layAr = vols[ivol]->confinedLayers();
+      Trk::ArraySpan<Trk::Layer* const> alays =
           vols[ivol]->confinedArbitraryLayers();
       if (layAr) {
-        Trk::BinnedArraySpan<const Trk::Layer* const> lays = layAr->arrayObjects();
+        Trk::BinnedArraySpan<Trk::Layer* const> lays = layAr->arrayObjects();
         for (unsigned int il = 0; il < lays.size(); il++) {
-          (const_cast<Trk::Layer*>(lays[il]))
-            ->encloseDetachedTrackingVolume(*newStat);
+          (lays[il])->encloseDetachedTrackingVolume(*newStat);
         }
       }
       if (!alays.empty()) {
         for (unsigned int il = 0; il < alays.size(); il++) {
-          (const_cast<Trk::Layer*>(alays[il]))
-            ->encloseDetachedTrackingVolume(*newStat);
+          (alays[il])->encloseDetachedTrackingVolume(*newStat);
         }
       }
     }
@@ -139,8 +139,7 @@ ATLAS_NOT_THREAD_SAFE(const std::string& name, Amg::Transform3D& shift) const {
     BinnedArraySpan<Trk::Layer* const> lays =
         newTV->confinedLayers()->arrayObjects();
     for (unsigned int il = 0; il < lays.size(); il++){
-      (const_cast<Trk::Layer*>(lays[il]))
-        ->encloseDetachedTrackingVolume(*newStat);
+      (lays[il])->encloseDetachedTrackingVolume(*newStat);
     }
   }
   if (!newTV->confinedArbitraryLayers().empty()) {

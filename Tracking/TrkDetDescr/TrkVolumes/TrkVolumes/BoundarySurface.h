@@ -45,11 +45,11 @@ class Surface;
  @author Andreas.Salzburger@cern.ch
 */
 
+
 template <class Tvol>
 class BoundarySurface {
   /** typedef the BinnedArray */
-  typedef BinnedArray<const Tvol> VolumeArray;
-
+  typedef BinnedArray<Tvol> VolumeArray;
  public:
   /** Default Constructor - needed for pool and inherited classes */
   BoundarySurface()
@@ -139,24 +139,24 @@ void BoundarySurface<Tvol>::setOutsideVolume(const Tvol* vol) {
 }
 
 template <class Tvol>
-const SharedObject<BinnedArray<const Tvol>>&
+const SharedObject<BinnedArray<Tvol>>&
 BoundarySurface<Tvol>::insideVolumeArray() const {
   return m_insideVolumeArray;
 }
 template <class Tvol>
 void BoundarySurface<Tvol>::setInsideVolumeArray(
-    const SharedObject<BinnedArray<const Tvol>>& volArray) {
+    const SharedObject<BinnedArray<Tvol>>& volArray) {
   m_insideVolumeArray = volArray;
 }
 
 template <class Tvol>
-const SharedObject<BinnedArray<const Tvol>>&
+const SharedObject<BinnedArray<Tvol>>&
 BoundarySurface<Tvol>::outsideVolumeArray() const {
   return m_outsideVolumeArray;
 }
 template <class Tvol>
 void BoundarySurface<Tvol>::setOutsideVolumeArray(
-    const SharedObject<BinnedArray<const Tvol>>& volArray) {
+    const SharedObject<BinnedArray<Tvol>>& volArray) {
   m_outsideVolumeArray = volArray;
 }
 

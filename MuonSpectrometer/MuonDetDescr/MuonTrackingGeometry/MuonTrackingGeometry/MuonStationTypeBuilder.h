@@ -97,13 +97,13 @@ namespace Muon {
         std::vector<Trk::TrackingVolume*> processTgcStation(const GeoVPhysVol* cv, Cache&) const;
 
         /** components */
-        const Trk::TrackingVolume* processMdtBox(Trk::Volume*&, const GeoVPhysVol*&, Amg::Transform3D*, double, Cache&) const;
+        Trk::TrackingVolume* processMdtBox(Trk::Volume*&, const GeoVPhysVol*&, Amg::Transform3D*, double, Cache&) const;
 
-        const Trk::TrackingVolume* processMdtTrd(Trk::Volume*&, const GeoVPhysVol*&, Amg::Transform3D*, Cache&) const;
+        Trk::TrackingVolume* processMdtTrd(Trk::Volume*&, const GeoVPhysVol*&, Amg::Transform3D*, Cache&) const;
 
-        const Trk::TrackingVolume* processRpc(Trk::Volume*&, std::vector<const GeoVPhysVol*>, std::vector<Amg::Transform3D>, Cache&) const;
+        Trk::TrackingVolume* processRpc(Trk::Volume*&, std::vector<const GeoVPhysVol*>, std::vector<Amg::Transform3D>, Cache&) const;
 
-        const Trk::TrackingVolume* processSpacer(Trk::Volume&, std::vector<const GeoVPhysVol*>, std::vector<Amg::Transform3D>) const;
+        Trk::TrackingVolume* processSpacer(Trk::Volume&, std::vector<const GeoVPhysVol*>, std::vector<Amg::Transform3D>) const;
 
         Trk::TrackingVolume* processNSW(const MuonGM::MuonDetectorManager* muonDetMgr, const std::vector<Trk::Layer*>&) const;
 

@@ -343,7 +343,7 @@ ATLAS_NOT_THREAD_SAFE(Trk::Material& matprop,
 }
 
 Trk::TrackingVolume* Trk::CylinderVolumeCreator::createContainerTrackingVolume
-ATLAS_NOT_THREAD_SAFE(const std::vector<const Trk::TrackingVolume*>& volumes,
+ATLAS_NOT_THREAD_SAFE(const std::vector<Trk::TrackingVolume*>& volumes,
                       Trk::Material& matprop,
                       const std::string& volumeName,
                       bool buildBoundaryLayers,
@@ -432,7 +432,7 @@ ATLAS_NOT_THREAD_SAFE(const std::vector<const Trk::TrackingVolume*>& volumes,
       ? new Trk::CylinderVolumeBounds(rMin, rMax, 0.5 * fabs(zMax - zMin))
       : new Trk::CylinderVolumeBounds(rMax, 0.5 * fabs(zMax - zMin));
   // create the volume array to fill in
-  Trk::BinnedArray<const Trk::TrackingVolume>* volumeArray =
+  Trk::BinnedArray<Trk::TrackingVolume>* volumeArray =
     (rCase) ? m_trackingVolumeArrayCreator->cylinderVolumesArrayInR(volumes)
             : m_trackingVolumeArrayCreator->cylinderVolumesArrayInZ(volumes);
   if (!volumeArray) {
@@ -639,7 +639,7 @@ StatusCode Trk::CylinderVolumeCreator::interGlueTrackingVolume(Trk::TrackingVolu
     Trk::GlueVolumesDescriptor& glueDescr  = tVolume.glueVolumesDescriptor();
     
     // so far we know that we can do that (private method)
-    BinnedArraySpan<Trk::TrackingVolume const * const> volumes = tVolume.confinedVolumes()->arrayObjects();
+    BinnedArraySpan<Trk::TrackingVolume * const> volumes = tVolume.confinedVolumes()->arrayObjects();
 
     // the needed iterators
     const auto *tVolIter = volumes.begin();
@@ -648,10 +648,10 @@ StatusCode Trk::CylinderVolumeCreator::interGlueTrackingVolume(Trk::TrackingVolu
     const auto *tVolEnd  = volumes.end();
 
     // the glue volumes for the description
-    std::vector<const Trk::TrackingVolume*> glueVolumesInnerTube;
-    std::vector<const Trk::TrackingVolume*> glueVolumesOuterTube;
-    std::vector<const Trk::TrackingVolume*> glueVolumesNegativeFace;
-    std::vector<const Trk::TrackingVolume*> glueVolumesPositiveFace;
+    std::vector<Trk::TrackingVolume*> glueVolumesInnerTube;
+    std::vector<Trk::TrackingVolume*> glueVolumesOuterTube;
+    std::vector<Trk::TrackingVolume*> glueVolumesNegativeFace;
+    std::vector<Trk::TrackingVolume*> glueVolumesPositiveFace;
 
     // volumes of increasing r
     if (rBinned) {
@@ -669,8 +669,8 @@ StatusCode Trk::CylinderVolumeCreator::interGlueTrackingVolume(Trk::TrackingVolu
                 addFaceVolumes((**tVolIter),Trk::tubeOuterCover,glueVolumesOuterTube);
                 ++tVolIter;
             } else {
-                const Trk::TrackingVolume* tVol1 = (*tVolIter);
-                const Trk::TrackingVolume* tVol2 = (*(++tVolIter));
+                Trk::TrackingVolume* tVol1 = (*tVolIter);
+                Trk::TrackingVolume* tVol2 = (*(++tVolIter));
                 glueTrackingVolumes(*tVol1,Trk::tubeOuterCover, *tVol2, Trk::tubeInnerCover, createBoundaryLayers, replaceBoundaryFace);
             }
         }
@@ -688,8 +688,8 @@ StatusCode Trk::CylinderVolumeCreator::interGlueTrackingVolume(Trk::TrackingVolu
                 addFaceVolumes((**tVolIter),Trk::positiveFaceXY,glueVolumesPositiveFace);
                 ++tVolIter;
             } else {
-                const Trk::TrackingVolume* tVol1 = (*tVolIter);
-                const Trk::TrackingVolume* tVol2 = (*(++tVolIter));
+                Trk::TrackingVolume* tVol1 = (*tVolIter);
+                Trk::TrackingVolume* tVol2 = (*(++tVolIter));
                 glueTrackingVolumes(*tVol1,Trk::positiveFaceXY,*tVol2,Trk::negativeFaceXY, createBoundaryLayers, replaceBoundaryFace);
             }
         }
@@ -707,19 +707,19 @@ StatusCode Trk::CylinderVolumeCreator::interGlueTrackingVolume(Trk::TrackingVolu
 
 
 /** Private method - helper method not to duplicate code */
-void Trk::CylinderVolumeCreator::addFaceVolumes(const Trk::TrackingVolume& tvol,
+void Trk::CylinderVolumeCreator::addFaceVolumes(Trk::TrackingVolume& tvol,
                                                 Trk::BoundarySurfaceFace glueFace,
-                                                std::vector<const Trk::TrackingVolume*>& vols) const
+                                                std::vector<Trk::TrackingVolume*>& vols) const
 {
 
     ATH_MSG_VERBOSE( "Adding face volumes of face " << glueFace << " for the volume '" << tvol.volumeName() << "'." );
     // retrieve the gluevolume descriptor
-    const Trk::GlueVolumesDescriptor& gvDescriptor = tvol.glueVolumesDescriptor();
+    Trk::GlueVolumesDescriptor& gvDescriptor = tvol.glueVolumesDescriptor();
     // if volumes are registered: take them
     if (!gvDescriptor.glueVolumes(glueFace).empty()) {
         // get the navigation level subvolumes
-        std::vector<const Trk::TrackingVolume*>::const_iterator volIter = gvDescriptor.glueVolumes(glueFace).begin();
-        std::vector<const Trk::TrackingVolume*>::const_iterator volEnd  = gvDescriptor.glueVolumes(glueFace).end();
+        std::vector<Trk::TrackingVolume*>::const_iterator volIter = gvDescriptor.glueVolumes(glueFace).begin();
+        std::vector<Trk::TrackingVolume*>::const_iterator volEnd  = gvDescriptor.glueVolumes(glueFace).end();
         for ( ; volIter != volEnd; ++volIter){
             ATH_MSG_VERBOSE( "     -> adding volumes : " << (*volIter)->volumeName() );
             vols.push_back(*volIter);
@@ -735,17 +735,17 @@ void Trk::CylinderVolumeCreator::addFaceVolumes(const Trk::TrackingVolume& tvol,
 
 
 /** private helper method to fill the glue volumes (or the volume itself in) */
-void Trk::CylinderVolumeCreator::glueTrackingVolumes(const Trk::TrackingVolume& tvolOne,
+void Trk::CylinderVolumeCreator::glueTrackingVolumes(Trk::TrackingVolume& tvolOne,
                                                      Trk::BoundarySurfaceFace faceOne,
-                                                     const Trk::TrackingVolume& tvolTwo,
+                                                     Trk::TrackingVolume& tvolTwo,
                                                      Trk::BoundarySurfaceFace faceTwo,
                                                      bool createBoundaryLayers,
                                                      bool replaceBoundaryFace) const
 {
 
     // get the two gluevolume descriptors
-    const Trk::GlueVolumesDescriptor& gvDescriptorOne = tvolOne.glueVolumesDescriptor();
-    const Trk::GlueVolumesDescriptor& gvDescriptorTwo = tvolTwo.glueVolumesDescriptor();
+    Trk::GlueVolumesDescriptor& gvDescriptorOne = tvolOne.glueVolumesDescriptor();
+    Trk::GlueVolumesDescriptor& gvDescriptorTwo = tvolTwo.glueVolumesDescriptor();
 
     ATH_MSG_VERBOSE( "Glue method called with " << (replaceBoundaryFace ? "joint boundaries." : "individual boundaries." ) ); 
 
@@ -757,10 +757,10 @@ void Trk::CylinderVolumeCreator::glueTrackingVolumes(const Trk::TrackingVolume& 
             << volTwoGlueVols << " @ " << faceTwo );
 
     // they could still be a container though
-    const TrackingVolume* glueVolOne = volOneGlueVols ?
+    TrackingVolume* glueVolOne = volOneGlueVols ?
             gvDescriptorOne.glueVolumes(faceOne)[0] : &tvolOne;
 
-    const TrackingVolume* glueVolTwo = volTwoGlueVols ?
+    TrackingVolume* glueVolTwo = volTwoGlueVols ?
             gvDescriptorTwo.glueVolumes(faceTwo)[0] : &tvolTwo;
 
     // check the cases

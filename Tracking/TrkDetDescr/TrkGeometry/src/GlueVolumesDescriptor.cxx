@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
 */
 
 ///////////////////////////////////////////////////////////////////
@@ -11,12 +11,12 @@
 
 #include "TrkGeometry/TrackingVolume.h"
 
-const std::vector<const Trk::TrackingVolume*>
+const std::vector<Trk::TrackingVolume*>
     Trk::GlueVolumesDescriptor::s_emptyVector;
 
 Trk::GlueVolumesDescriptor::GlueVolumesDescriptor(
     const std::map<Trk::BoundarySurfaceFace,
-                   std::vector<const Trk::TrackingVolume*> >& glv)
+                   std::vector<Trk::TrackingVolume*> >& glv)
     : m_glueVolumes(glv) {
   Trk::GlueVolumeIterator searchIter = m_glueVolumes.begin();
   Trk::GlueVolumeIterator endIter = m_glueVolumes.end();
@@ -27,7 +27,7 @@ Trk::GlueVolumesDescriptor::GlueVolumesDescriptor(
 
 void Trk::GlueVolumesDescriptor::registerGlueVolumes(
     Trk::BoundarySurfaceFace bsf,
-    std::vector<const Trk::TrackingVolume*>& gvs) {
+    std::vector<Trk::TrackingVolume*>& gvs) {
   // register the face
   Trk::GlueVolumeIterator searchIter = m_glueVolumes.begin();
   searchIter = m_glueVolumes.find(bsf);
@@ -36,8 +36,8 @@ void Trk::GlueVolumesDescriptor::registerGlueVolumes(
   m_glueVolumes[bsf] = gvs;  //!< @todo change to addGlueVolumes principle
 }
 
-const std::vector<const Trk::TrackingVolume*>&
-Trk::GlueVolumesDescriptor::glueVolumes(Trk::BoundarySurfaceFace bsf) const {
+const std::vector<Trk::TrackingVolume*>&
+Trk::GlueVolumesDescriptor::glueVolumes(Trk::BoundarySurfaceFace bsf){
   Trk::GlueVolumeConstIterator searchIter = m_glueVolumes.begin();
   Trk::GlueVolumeConstIterator endIter = m_glueVolumes.end();
 
@@ -47,7 +47,7 @@ Trk::GlueVolumesDescriptor::glueVolumes(Trk::BoundarySurfaceFace bsf) const {
 }
 
 MsgStream& Trk::operator<<(MsgStream& sl,
-                           const Trk::GlueVolumesDescriptor& gvd) {
+                           Trk::GlueVolumesDescriptor& gvd) {
   sl << "Trk::GlueVolumesDescriptor: " << std::endl;
   const std::vector<Trk::BoundarySurfaceFace>& glueFaceVector = gvd.glueFaces();
   sl << "     has Tracking Volumes registered for : " << glueFaceVector.size()
@@ -58,12 +58,10 @@ MsgStream& Trk::operator<<(MsgStream& sl,
       glueFaceVector.end();
   // loop over the faces
   for (; glueFaceIter != glueFaceIterEnd; ++glueFaceIter) {
-    const std::vector<const Trk::TrackingVolume*>& glueVolumesVector =
-        gvd.glueVolumes(*glueFaceIter);
-    std::vector<const Trk::TrackingVolume*>::const_iterator glueVolumeIter =
-        glueVolumesVector.begin();
-    std::vector<const Trk::TrackingVolume*>::const_iterator glueVolumeIterEnd =
-        glueVolumesVector.end();
+    const std::vector<Trk::TrackingVolume*>& glueVolumesVector =
+      gvd.glueVolumes(*glueFaceIter);
+    auto glueVolumeIter = glueVolumesVector.begin();
+    auto glueVolumeIterEnd = glueVolumesVector.end();
     // loop over the TrackingVolumes
     sl << "        -----> Processing Face: " << int(*glueFaceIter) << " - has ";
     sl << glueVolumesVector.size()
@@ -76,7 +74,7 @@ MsgStream& Trk::operator<<(MsgStream& sl,
 }
 
 std::ostream& Trk::operator<<(std::ostream& sl,
-                              const GlueVolumesDescriptor& gvd) {
+                              GlueVolumesDescriptor& gvd) {
   sl << "Trk::GlueVolumesDescriptor: " << std::endl;
   const std::vector<Trk::BoundarySurfaceFace>& glueFaceVector = gvd.glueFaces();
   sl << "     has Tracking Volumes registered for : " << glueFaceVector.size()
@@ -87,12 +85,10 @@ std::ostream& Trk::operator<<(std::ostream& sl,
       glueFaceVector.end();
   // loop over the faces
   for (; glueFaceIter != glueFaceIterEnd; ++glueFaceIter) {
-    const std::vector<const Trk::TrackingVolume*>& glueVolumesVector =
+    const std::vector<Trk::TrackingVolume*>& glueVolumesVector =
         gvd.glueVolumes(*glueFaceIter);
-    std::vector<const Trk::TrackingVolume*>::const_iterator glueVolumeIter =
-        glueVolumesVector.begin();
-    std::vector<const Trk::TrackingVolume*>::const_iterator glueVolumeIterEnd =
-        glueVolumesVector.end();
+    auto glueVolumeIter = glueVolumesVector.begin();
+    auto glueVolumeIterEnd = glueVolumesVector.end();
     // loop over the TrackingVolumes
     sl << "        -----> Processing Face: " << int(*glueFaceIter) << " - has ";
     sl << glueVolumesVector.size()

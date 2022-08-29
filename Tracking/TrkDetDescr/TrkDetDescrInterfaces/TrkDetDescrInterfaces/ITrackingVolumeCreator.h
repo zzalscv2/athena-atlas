@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2017 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
 */
 
 ///////////////////////////////////////////////////////////////////
@@ -145,7 +145,7 @@ public:
 
   */
   virtual TrackingVolume* createContainerTrackingVolume
-  ATLAS_NOT_THREAD_SAFE(const std::vector<const TrackingVolume*>& volumes,
+  ATLAS_NOT_THREAD_SAFE(const std::vector<TrackingVolume*>& volumes,
                         Material& matprop,
                         const std::string& volumeName = "UndefinedVolume",
                         bool buildBoundaryLayers = false,

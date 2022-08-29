@@ -101,7 +101,7 @@ StatusCode Trk::RecursiveGeometryProcessor::process(const Trk::TrackingVolume& t
 
 
    // Process the contained TrackingVolumes (recursively) if they exist
-   const Trk::BinnedArray< const Trk::TrackingVolume >* confinedVolumes = tvol.confinedVolumes();
+   const Trk::BinnedArray< Trk::TrackingVolume >* confinedVolumes = tvol.confinedVolumes();
    // register the next round
    if (confinedVolumes) {
        const auto & volumes = confinedVolumes->arrayObjects();

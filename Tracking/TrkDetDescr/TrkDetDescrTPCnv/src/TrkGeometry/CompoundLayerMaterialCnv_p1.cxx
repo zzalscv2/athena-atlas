@@ -108,7 +108,7 @@ void CompoundLayerMaterialCnv_p1::transToPers( const Trk::CompoundLayerMaterial 
             for (size_t iic=0; iic < icBins; ++iic){
                 persObj->composition[ioc][iic] = CVector();
                 persObj->composition[ioc][iic].reserve(transObj->m_composition[ioc][iic].size());
-                for (auto& ic : transObj->m_composition[ioc][iic]){
+                for (const auto& ic : transObj->m_composition[ioc][iic]){
                      persObj->composition[ioc][iic].push_back(ic);
                 }
         

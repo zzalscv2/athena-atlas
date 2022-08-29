@@ -58,9 +58,9 @@ public:
      isn't necessary yours ---
       */
   virtual void glueTrackingVolumes
-  ATLAS_NOT_THREAD_SAFE(const TrackingVolume& firstVol,
+  ATLAS_NOT_THREAD_SAFE(TrackingVolume& firstVol,
                         BoundarySurfaceFace firstFace,
-                        const TrackingVolume& secondVol,
+                        TrackingVolume& secondVol,
                         BoundarySurfaceFace secondFace,
                         bool buildBoundaryLayer = false) const = 0;
 
@@ -69,9 +69,9 @@ public:
      isn't necessary yours ---
       */
   virtual void glueTrackingVolumes
-  ATLAS_NOT_THREAD_SAFE(const TrackingVolume& firstVol,
+  ATLAS_NOT_THREAD_SAFE(TrackingVolume& firstVol,
                         BoundarySurfaceFace firstFace,
-                        const std::vector<const TrackingVolume*>& secondVolumes,
+                        const std::vector<TrackingVolume*>& secondVolumes,
                         BoundarySurfaceFace secondFace,
                         bool buildBoundaryLayer = false,
                         bool boundaryFaceExchange = false) const = 0;
@@ -82,9 +82,9 @@ public:
      necessary yours ---
   */
   virtual void glueTrackingVolumes
-  ATLAS_NOT_THREAD_SAFE(const std::vector<const TrackingVolume*>& firstVolumes,
+  ATLAS_NOT_THREAD_SAFE(const std::vector<TrackingVolume*>& firstVolumes,
                         BoundarySurfaceFace firstFace,
-                        const std::vector<const TrackingVolume*>& secondVolumes,
+                        const std::vector<TrackingVolume*>& secondVolumes,
                         BoundarySurfaceFace secondFace,
                         bool buildBoundaryLayer = false,
                         bool boundaryFaceExchange = false) const = 0;
@@ -94,9 +94,9 @@ public:
      isn't necessary yours ---
       */
   virtual Trk::TrackingVolume* glueTrackingVolumeArrays
-  ATLAS_NOT_THREAD_SAFE(const TrackingVolume& firstVol,
+  ATLAS_NOT_THREAD_SAFE(TrackingVolume& firstVol,
                         BoundarySurfaceFace firstFace,
-                        const TrackingVolume& secondVol,
+                        TrackingVolume& secondVol,
                         BoundarySurfaceFace secondFace,
                         std::string name) const = 0;
 
@@ -116,12 +116,12 @@ public:
   virtual void setInsideTrackingVolumeArray ATLAS_NOT_THREAD_SAFE(
     const TrackingVolume& tvol,
     BoundarySurfaceFace face,
-    BinnedArray<const TrackingVolume>* insidevolarray) const = 0;
+    BinnedArray<TrackingVolume>* insidevolarray) const = 0;
 
   virtual void setInsideTrackingVolumeArray ATLAS_NOT_THREAD_SAFE(
     const TrackingVolume& tvol,
     BoundarySurfaceFace face,
-    SharedObject<BinnedArray<const TrackingVolume>> insidevolarray) const = 0;
+    SharedObject<BinnedArray<TrackingVolume>> insidevolarray) const = 0;
 
   /**  Glue Volume method: set outside Volume
        --- Neccessary as friendship cannot be inherited: your father's friend
@@ -139,12 +139,12 @@ public:
   virtual void setOutsideTrackingVolumeArray
   ATLAS_NOT_THREAD_SAFE(const TrackingVolume& tvol,
                         BoundarySurfaceFace face,
-                        BinnedArray<const TrackingVolume>* outsidevolarray) const = 0;
+                        BinnedArray<TrackingVolume>* outsidevolarray) const = 0;
 
   virtual void setOutsideTrackingVolumeArray ATLAS_NOT_THREAD_SAFE(
     const TrackingVolume& tvol,
     BoundarySurfaceFace face,
-    SharedObject<BinnedArray<const TrackingVolume>> outsidevolarray) const = 0;
+    SharedObject<BinnedArray<TrackingVolume>> outsidevolarray) const = 0;
 
 protected:
   /** Protected method to register the Layer to the Surface */

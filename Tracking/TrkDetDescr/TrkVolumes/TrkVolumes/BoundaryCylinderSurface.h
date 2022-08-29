@@ -36,7 +36,7 @@ template <class Tvol>
 class BoundaryCylinderSurface final : virtual public BoundarySurface<Tvol>,
                                       public CylinderSurface {
   /** typedef the BinnedArray */
-  typedef BinnedArray<const Tvol> VolumeArray;
+  typedef BinnedArray<Tvol> VolumeArray;
 
  public:
   /** Default Constructor - needed for pool and inherited classes */
