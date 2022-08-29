@@ -14,8 +14,8 @@
 #include "TileConditions/TileCablingService.h"
 #include "TileIdentifier/TileHWID.h"
 #include "IdDictParser/IdDictParser.h"
-#include "TestTools/initGaudi.h"
 #include "TestTools/leakcheck.h"
+#include "AthenaKernel/getMessageSvc.h"
 #include "CxxUtils/checker_macros.h"
 #include "GaudiKernel/MsgStream.h"
 #include <cassert>
@@ -80,6 +80,7 @@ void test1 ATLAS_NOT_THREAD_SAFE ()
 
 int main ATLAS_NOT_THREAD_SAFE ()
 {
+  Athena::getMessageSvcQuiet = true;
   IdDictParser parser;
   TileCablingSvc::init_idhelpers(parser);
   test1();
