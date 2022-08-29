@@ -221,6 +221,8 @@ class PySgDumper (PyAthena.Alg):
     'algorithm to retrieve and dump a list of keys from storegate'
     _ignore_clids = (
         1118613496, # old ParticleJetContainer class
+        222376821,  # DataHeader
+        55596997,   # EventContext
         )
     def __init__(self, name='PySgDumper', **kw):
         ## init base class
@@ -307,6 +309,7 @@ class PySgDumper (PyAthena.Alg):
                     continue
                 n  = str(p.name())
                 tp = _typename(clid)
+                if n == 'Input': continue
                 if n.endswith('Aux.'): continue
                 if n.endswith('_DELETED'): continue
                 excluded = False
