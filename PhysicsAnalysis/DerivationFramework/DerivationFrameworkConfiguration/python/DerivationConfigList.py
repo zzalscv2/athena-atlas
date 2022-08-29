@@ -49,6 +49,10 @@ from DerivationFrameworkBPhys.BPHY5 import BPHY5Cfg
 from DerivationFrameworkBPhys.BPHY6 import BPHY6Cfg
 from DerivationFrameworkBPhys.BPHY12 import BPHY12Cfg
 
+# TileCal derivations
+from DerivationFrameworkTileCal.TCAL1 import TCAL1Cfg
+from DerivationFrameworkTileCal.TCAL2 import TCAL2Cfg
+
 # Avoids compilation warnings from Flake8
 __all__ = ['TEST1Cfg','TEST2Cfg','TEST3Cfg','TEST4Cfg','TEST5Cfg','TEST6Cfg',
            'TRUTH0Cfg','TRUTH1Cfg','TRUTH3Cfg',
@@ -58,5 +62,6 @@ __all__ = ['TEST1Cfg','TEST2Cfg','TEST3Cfg','TEST4Cfg','TEST5Cfg','TEST6Cfg',
            'LLP1Cfg',
            'BPHY1Cfg','BPHY2Cfg', 'BPHY3Cfg', 'BPHY4Cfg', 'BPHY5Cfg',
            'BPHY6Cfg',
-           'BPHY12Cfg']
+           'BPHY12Cfg',
+           'TCAL1Cfg', 'TCAL2Cfg']
 
