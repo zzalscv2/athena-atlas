@@ -45,12 +45,12 @@
 #include <string>
 #include <ctime>
 
-const char *cern_local_time(time_t unix_time)
+std::string cern_local_time(time_t unix_time)
 {
     using namespace boost::local_time;
     using namespace boost::posix_time;
     
-    static char dateTime[32];
+    char dateTime[32];
 
 /*
     // just an example how to read file with time zones
@@ -67,7 +67,7 @@ const char *cern_local_time(time_t unix_time)
     }
 */
     //"Europe/Zurich","CET","CET","CEST","CEST","+01:00:00","+01:00:00","-1;0;3","+02:00:00","-1;0;10","+03:00:00"
-    static time_zone_ptr gva_tz(new posix_time_zone((std::string)"CET+01CEST01:00:00,M3.5.0/02:00:00,M10.5.0/03:00:00"));
+    static const time_zone_ptr gva_tz(new posix_time_zone((std::string)"CET+01CEST01:00:00,M3.5.0/02:00:00,M10.5.0/03:00:00"));
     local_date_time gva_time(from_time_t(unix_time),gva_tz);
 
     //std::ostringstream otime;
@@ -151,6 +151,7 @@ TileTBDump::TileTBDump(std::string name, ISvcLocator* pSvcLocator)
   m_frag5found = false;
   m_sizeOverhead = 3;
   m_unit = -1;
+  m_digi_mode = 0;
 }
 
 
@@ -215,7 +216,7 @@ StatusCode TileTBDump::finalize() {
 StatusCode TileTBDump::execute() {
 
 
-  static bool notFirst = false;
+  static std::atomic<bool> notFirst = false;
   if (m_dumpOnce && notFirst) return StatusCode::SUCCESS;
   notFirst = true;
   boost::io::ios_base_all_saver coutsave(std::cout);
@@ -487,7 +488,7 @@ void TileTBDump::dump_digi(unsigned int subdet_id, const uint32_t* roddata, unsi
 
   int s, c, f, nfrag, ngain, nchan, nsamp, size, ch, extra = 0, pmt, fragType, nhits = 0;
   int id, type, rflag, unit, pulse, nsmpl, algor, niter;
-  unsigned int* data;
+  const unsigned int* data;
   unsigned short time, flag, prev, edge, chan, bad/*, res1,last,res2*/;
   char fr[2] = { 'F', 'R' };
   char gb[2] = { 'G', 'B' };
@@ -496,7 +497,7 @@ void TileTBDump::dump_digi(unsigned int subdet_id, const uint32_t* roddata, unsi
   std::string algName[8] = { "Unknown", "OF1", "OF2", "Fit", "ManyAmps", "Flat", "Alg6", "Alg7" };
   boost::io::ios_base_all_saver coutsave(std::cout);
 
-  T_RodDataFrag* frag[MAX_ROD_FRAG];
+  const T_RodDataFrag* frag[MAX_ROD_FRAG];
   T_TileRawComp rawcomp[MAX_DIGI_CHAN];
   T_TileDigiChannel channel[MAX_DIGI_CHAN];
   T_TileRecoChannel recochan[MAX_DIGI_CHAN];
@@ -517,7 +518,7 @@ void TileTBDump::dump_digi(unsigned int subdet_id, const uint32_t* roddata, unsi
     version &= 0xFFFF; // keep just minor version number
   }
 
-  find_frag(roddata, rodsize, version, verbosity, frag, &nfrag);
+  find_frag(roddata, rodsize, version, verbosity, frag, nfrag);
 
   if (verbosity > 9) return;
 
@@ -536,8 +537,8 @@ void TileTBDump::dump_digi(unsigned int subdet_id, const uint32_t* roddata, unsi
 
     if (type==0x40 || type==0x41 || type==0x42){
 
-      unsigned char * adc;
-      unsigned short * result;
+      const unsigned char * adc;
+      const unsigned short * result;
       int tmdb_ch1 = std::min(5U,((robsourceid)>>16)&0xF);
       bool EB = (tmdb_ch1>2);
       int nmod = (EB)?8:4; // we have 8 modules per fragment in ext.barrel, 4 modules in barrel
@@ -572,7 +573,7 @@ void TileTBDump::dump_digi(unsigned int subdet_id, const uint32_t* roddata, unsi
               std::cout << "    S"<<ind;
             }
             std::cout << std::endl;
-            adc = reinterpret_cast<unsigned char *>(data);
+            adc = reinterpret_cast<const unsigned char *>(data);
             for (int pword=0;pword<nch;++pword) {
               int pword1=pword%nchmod;
               if (!EB && nchmod==8) {
@@ -623,7 +624,7 @@ void TileTBDump::dump_digi(unsigned int subdet_id, const uint32_t* roddata, unsi
             nchmod = nch/nmod;
             std::cout << "nn   name   " << dr56hl[3] << dr56hl[2]
                       << dr56hl[1] << dr56hl[0] << std::endl; 
-            result = reinterpret_cast<unsigned short *>(data);
+            result = reinterpret_cast<const unsigned short *>(data);
             if (size!=2) ntd=size*2;
             for (int pword=0;pword<ntd;++pword) {
               count=(EB)?pword*3:pword*4+1;
@@ -762,7 +763,7 @@ void TileTBDump::dump_digi(unsigned int subdet_id, const uint32_t* roddata, unsi
             if (size != 31) {
               std::cout<<"CRITICAL ERROR! Unknown format!"<<std::endl;
             } else {
-              unsigned int * p;
+              const unsigned int * p;
               int Counter = 0;
               int Filter = 0, ReqAmp = 0, MeasAmp = 0, Delay = 0, TDC1 = 0, TDC2 = 0;
               p = data;
@@ -964,20 +965,20 @@ void TileTBDump::dump_digi(unsigned int subdet_id, const uint32_t* roddata, unsi
     
               std::cout << std::endl << "          |  Date & Time (GMT)  |  Date & Time (CERN)" << std::endl;
     
-              struct tm* TimeInfo;
+              struct tm TimeInfo;
               char buf[80];
-              TimeInfo = gmtime(&Ped_Last_Run);
-              strftime(buf, 80, "%d.%m.%Y %H:%M:%S", TimeInfo);
+              gmtime_r(&Ped_Last_Run, &TimeInfo);
+              strftime(buf, 80, "%d.%m.%Y %H:%M:%S", &TimeInfo);
     
               std::cout << " Pedestal | " << buf << " | " << cern_local_time(Ped_Last_Run) << std::endl;
     
-              TimeInfo = gmtime(&Alpha_Last_Run);
-              strftime(buf, 80, "%d.%m.%Y %H:%M:%S", TimeInfo);
+              gmtime_r(&Alpha_Last_Run, &TimeInfo);
+              strftime(buf, 80, "%d.%m.%Y %H:%M:%S", &TimeInfo);
     
               std::cout << "    Alpha | " << buf << " | " << cern_local_time(Alpha_Last_Run) << std::endl;
     
-              TimeInfo = gmtime(&PedAlpha_Last_Run);
-              strftime(buf, 80, "%d.%m.%Y %H:%M:%S", TimeInfo);
+              gmtime_r(&PedAlpha_Last_Run, &TimeInfo);
+              strftime(buf, 80, "%d.%m.%Y %H:%M:%S", &TimeInfo);
     
               std::cout << " PedAlpha | " << buf << " | " << cern_local_time(PedAlpha_Last_Run) << std::endl;
     
@@ -1070,7 +1071,7 @@ void TileTBDump::dump_digi(unsigned int subdet_id, const uint32_t* roddata, unsi
               };
               
               time_t tim;
-              struct tm* TimeInfo;
+              struct tm TimeInfo;
               char buf[80];
     
               const unsigned int * p = data;
@@ -1130,8 +1131,8 @@ void TileTBDump::dump_digi(unsigned int subdet_id, const uint32_t* roddata, unsi
                 std::cout << std::endl << "  FPGA Global Status: 0x" << std::hex 
                           << status.to_ulong() << " => " << status.to_string() << std::dec << std::endl; 
                 tim = *(p++);
-                TimeInfo = gmtime(&tim);
-                strftime(buf, 80, "%d.%m.%Y %H:%M:%S", TimeInfo);
+                gmtime_r(&tim, &TimeInfo);
+                strftime(buf, 80, "%d.%m.%Y %H:%M:%S", &TimeInfo);
                 std::cout << "DCS Time Stamp (GMT): " << buf << " => " << cern_local_time(tim) << std::endl;
                 std::cout << " PhotoDiode Polarity: " << std::setw(5) << (*p++) << std::endl;
                 p+=4; // skip 4 free words
@@ -1140,8 +1141,8 @@ void TileTBDump::dump_digi(unsigned int subdet_id, const uint32_t* roddata, unsi
               if (second_half_present) {
                 std::cout << "    Calibration Type: " << std::setw(5) << (*p++) << std::endl;
                 tim = p[97];
-                TimeInfo = gmtime(&tim);
-                strftime(buf, 80, "%d.%m.%Y %H:%M:%S", TimeInfo);
+                gmtime_r(&tim, &TimeInfo);
+                strftime(buf, 80, "%d.%m.%Y %H:%M:%S", &TimeInfo);
                 std::cout << "    Time Stamp (GMT): " << buf << " => " << cern_local_time(tim) << std::endl;
                 
                 double nevt = double(p[96]);
@@ -1207,7 +1208,7 @@ void TileTBDump::dump_digi(unsigned int subdet_id, const uint32_t* roddata, unsi
           std::cout << std::endl;
 
           if (size == 4 || size == 16 || size == 110) {
-            unsigned int *p = data;
+            const unsigned int *p = data;
             int Counter = 0, Mode = 0, Samples = 0, Pipeline = 0, I3Delay = 0, Event = 0, Phase = 0,
                 DAC = 0, Capacity = 0, Card = 0, RunType = 0, microsec = 0;
             time_t Time;
@@ -1261,10 +1262,10 @@ void TileTBDump::dump_digi(unsigned int subdet_id, const uint32_t* roddata, unsi
                 default: ModeText = "Unknown"; break;
               }
 
-              struct tm* TimeInfo;
+              struct tm TimeInfo;
               char buf[80];
-              TimeInfo = gmtime(&Time);
-              strftime(buf, 80, "%d.%m.%Y %H:%M:%S", TimeInfo);
+              gmtime_r(&Time, &TimeInfo);
+              strftime(buf, 80, "%d.%m.%Y %H:%M:%S", &TimeInfo);
               std::cout << std::endl;
               std::cout << "   Time (GMT): " << buf << " => " << cern_local_time(Time) << std::endl;
               std::cout << "    Microsec.: " << microsec << std::endl << std::endl;
@@ -1647,12 +1648,12 @@ void TileTBDump::dump_digi(unsigned int subdet_id, const uint32_t* roddata, unsi
             } // fill OFC
             ofw = &(OFC[0]);
 
-            int size_L2 = (*((uint32_t*) data - 3 + 2) >> (32 - 2 - 3)) & 0x7;
+            int size_L2 = (*((const uint32_t*) data - 3 + 2) >> (32 - 2 - 3)) & 0x7;
             std::cout << "size_L2: " << size_L2 << " |";
             if (size_L2 == 3) {
-              double SumEt = m_rc2bytes5.getSumEt((uint32_t*) data - 3);
-              double SumEz = m_rc2bytes5.getSumEz((uint32_t*) data - 3);
-              double SumE = m_rc2bytes5.getSumE((uint32_t*) data - 3);
+              double SumEt = m_rc2bytes5.getSumEt((const uint32_t*) data - 3);
+              double SumEz = m_rc2bytes5.getSumEz((const uint32_t*) data - 3);
+              double SumE = m_rc2bytes5.getSumE((const uint32_t*) data - 3);
               std::cout << " SumEt: " << SumEt << ", SumEz: " << SumEz << ", SumE: " << SumE << std::endl;
             }
             std::cout << std::endl;
@@ -1837,9 +1838,9 @@ void dump_it(unsigned int nw, unsigned int * data) {
 /* ------------------------------------------------------------------------ */
 
 void TileTBDump::find_frag(const uint32_t* data, unsigned int size, unsigned int version
-                           , int verbosity, T_RodDataFrag** frag, int* nfrag) {
+                           , int verbosity, const T_RodDataFrag* frag[], int& nfrag) {
   unsigned int offset = 0;
-  *nfrag = 0;
+  nfrag = 0;
   m_v3Format = (*(data) == 0xff1234ff); // additional frag marker since Sep 2005
   m_v3Format |= (*(data) == 0x00123400); // another possible frag marker (can appear in buggy ROD frags)
   if (m_v3Format || (version > 0xff)) {
@@ -1857,16 +1858,16 @@ void TileTBDump::find_frag(const uint32_t* data, unsigned int size, unsigned int
     m_sizeOverhead = 2;
   }
 
-  while (offset < size && *nfrag < MAX_ROD_FRAG) {
-    //std::cout << "nfrag="<<(*nfrag) << " offset="<<offset<<" data[offset]="<<data[offset]<<std::endl;
-    frag[*nfrag] = (T_RodDataFrag *) (data + offset);
+  while (offset < size && nfrag < MAX_ROD_FRAG) {
+    //std::cout << "nfrag="<<(nfrag) << " offset="<<offset<<" data[offset]="<<data[offset]<<std::endl;
+    frag[nfrag] = (const T_RodDataFrag *) (data + offset);
 
-    if (frag[*nfrag]->size < m_sizeOverhead
-        || frag[*nfrag]->size > size - offset + m_sizeOverhead - 2) {
+    if (frag[nfrag]->size < m_sizeOverhead
+        || frag[nfrag]->size > size - offset + m_sizeOverhead - 2) {
     
-      std::cout << "\nWarning: garbage in frag "  << *nfrag << " of current ROD -> ignore it"  << std::endl;
-      std::cout << "Size:         \t"  << std::setw(10) << (frag[*nfrag]->size) << "\tMin/Max Size: \t" << std::setw(10) << m_sizeOverhead << "\t" <<  std::setw(10) << size - offset + m_sizeOverhead - 2 << std::endl;
-      std::cout << "Id:           \t"  << std::setw(10) << (frag[*nfrag]->id) << std::endl;
+      std::cout << "\nWarning: garbage in frag "  << nfrag << " of current ROD -> ignore it"  << std::endl;
+      std::cout << "Size:         \t"  << std::setw(10) << (frag[nfrag]->size) << "\tMin/Max Size: \t" << std::setw(10) << m_sizeOverhead << "\t" <<  std::setw(10) << size - offset + m_sizeOverhead - 2 << std::endl;
+      std::cout << "Id:           \t"  << std::setw(10) << (frag[nfrag]->id) << std::endl;
       std::cout << "Bad data:"  << std::endl;
       std::cout << "Before:\t"  << offset-1 << "\t" << data[offset-1] << "\t0x" << std::hex << data[offset-1] << std::dec << std::endl;
       
@@ -1881,11 +1882,11 @@ void TileTBDump::find_frag(const uint32_t* data, unsigned int size, unsigned int
         ++offset; // go to next good frag or jump outside ROD, if at the end
       }
       
-    } else if (frag[*nfrag]->size < size - offset && m_v3Format && data[offset + frag[*nfrag]->size - 1] != 0xff1234ff && data[offset + frag[*nfrag]->size - 1] != 0x00123400) {
+    } else if (frag[nfrag]->size < size - offset && m_v3Format && data[offset + frag[nfrag]->size - 1] != 0xff1234ff && data[offset + frag[nfrag]->size - 1] != 0x00123400) {
 
-      std::cout << "\nWarning: frag "  << *nfrag << " of current ROD is damaged"  << std::endl;
-      std::cout << "Size:         \t"  << std::setw(10) << (frag[*nfrag]->size) << "\tMin/Max Size: \t" << std::setw(10) << m_sizeOverhead << "\t" <<  std::setw(10) << size - offset + m_sizeOverhead - 2 << std::endl;
-      std::cout << "Id:           \t"  << std::setw(10) << (frag[*nfrag]->id) << std::endl;
+      std::cout << "\nWarning: frag "  << nfrag << " of current ROD is damaged"  << std::endl;
+      std::cout << "Size:         \t"  << std::setw(10) << (frag[nfrag]->size) << "\tMin/Max Size: \t" << std::setw(10) << m_sizeOverhead << "\t" <<  std::setw(10) << size - offset + m_sizeOverhead - 2 << std::endl;
+      std::cout << "Id:           \t"  << std::setw(10) << (frag[nfrag]->id) << std::endl;
       std::cout << "Bad data:"  << std::endl; 
       unsigned int newsize = 0;
       std::cout << "Before:\t"  << offset-1 << "\t" << data[offset-1] << "\t0x" << std::hex << data[offset-1] << std::dec << std::endl;
@@ -1903,9 +1904,9 @@ void TileTBDump::find_frag(const uint32_t* data, unsigned int size, unsigned int
       std::cout << "Correct size is:\t" << std::setw(10) << newsize << std::endl;
 
     } else {
-      offset += frag[*nfrag]->size;
+      offset += frag[nfrag]->size;
       // if (version == 0x1 && offset < size) offset += 7; // skip extra header - was needed for 2001-2003 TB data only
-      ++(*nfrag);
+      ++nfrag;
     }
   }
 
@@ -1914,11 +1915,11 @@ void TileTBDump::find_frag(const uint32_t* data, unsigned int size, unsigned int
   }
   
   if (offset > size) {
-    --(*nfrag);
+    --nfrag;
     std::cout << "\nWarning: last fragment in current ROD is garbage -> ignore it" << std::endl;
-    std::cout << "N good frag:  \t" << std::setw(10) << *nfrag << std::endl;
+    std::cout << "N good frag:  \t" << std::setw(10) << nfrag << std::endl;
     std::cout << "Last frag:" << std::endl;
-    for (unsigned int i = offset - frag[*nfrag]->size; i < size; ++i) {
+    for (unsigned int i = offset - frag[nfrag]->size; i < size; ++i) {
       std::cout << "\t" << i << "\t" << data[i] << "\t0x" << std::hex  << data[i] << std::dec << std::endl;
     }
   }
@@ -1927,13 +1928,13 @@ void TileTBDump::find_frag(const uint32_t* data, unsigned int size, unsigned int
 
 
 /*--------------------------------------------------------------------------*/
-int TileTBDump::tile_unpack_quality(T_RodDataFrag *frag, T_TileRecoQuality & DQword) {
+int TileTBDump::tile_unpack_quality(const T_RodDataFrag *frag, T_TileRecoQuality & DQword) {
   /*--------------------------------------------------------------------------*/
 // Errors are defined by a bit value of 1, while 0 means OK
   unsigned int status = 0;
 
   //int size = frag->size - m_sizeOverhead; /* size of the data part in the fragment */
-  unsigned int *data = frag->data; /* first word of data */
+  const unsigned int *data = frag->data; /* first word of data */
 
   unsigned int w;
   w = (*data);
@@ -2003,7 +2004,7 @@ int TileTBDump::tile_unpack_quality(T_RodDataFrag *frag, T_TileRecoQuality & DQw
 
 
 /*--------------------------------------------------------------------------*/
-int TileTBDump::tile_unpack_reco(T_RodDataFrag *frag, T_TileRecoChannel * channel
+int TileTBDump::tile_unpack_reco(const T_RodDataFrag *frag, T_TileRecoChannel * channel
                                  , int nchannel_max, unsigned int /* version */
                                  , int /* verbosity */, int *ngain, int *nchannel) {
 /*--------------------------------------------------------------------------*/
@@ -2011,7 +2012,7 @@ int TileTBDump::tile_unpack_reco(T_RodDataFrag *frag, T_TileRecoChannel * channe
   int status = 0;
 
   int size = frag->size - m_sizeOverhead; /* size of the data part in the fragment */
-  unsigned int *data = frag->data; /* first word of data */
+  const unsigned int *data = frag->data; /* first word of data */
 
   int ch = 0;
   for (; ch < size && ch < nchannel_max; ++ch) {
@@ -2036,7 +2037,7 @@ int TileTBDump::tile_unpack_reco(T_RodDataFrag *frag, T_TileRecoChannel * channe
 
 
 /*--------------------------------------------------------------------------*/
-int TileTBDump::tile_unpack_reco_calib(T_RodDataFrag* frag, T_TileRecoCalib* recocalib
+int TileTBDump::tile_unpack_reco_calib(const T_RodDataFrag* frag, T_TileRecoCalib* recocalib
                                        , int nchannel_max, unsigned int /* version */
                                        , unsigned int unit
                                        , int /* verbosity */, int *ngain, int *nchannel) {// Baxo
@@ -2045,7 +2046,7 @@ int TileTBDump::tile_unpack_reco_calib(T_RodDataFrag* frag, T_TileRecoCalib* rec
   int status = 0;
 
   int size = frag->size - m_sizeOverhead; // size of the data part in the fragment
-  unsigned int *data = frag->data;       // first word of data
+  const unsigned int *data = frag->data;       // first word of data
 
   int ch = 0;
   for (; ch < size && ch < nchannel_max; ++ch) {
@@ -2070,7 +2071,7 @@ int TileTBDump::tile_unpack_reco_calib(T_RodDataFrag* frag, T_TileRecoCalib* rec
 
 
 /*--------------------------------------------------------------------------*/
-int TileTBDump::tile_unpack_raw_comp(T_RodDataFrag* frag, T_TileRawComp* rawcomp
+int TileTBDump::tile_unpack_raw_comp(const T_RodDataFrag* frag, T_TileRawComp* rawcomp
                                      , int nchannel_max, unsigned int /* version */, int /* verbosity */
                                      , int* ngain, int* nchannel, int* nsample) {
 /*--------------------------------------------------------------------------*/
@@ -2097,7 +2098,7 @@ int TileTBDump::tile_unpack_raw_comp(T_RodDataFrag* frag, T_TileRawComp* rawcomp
     *nchannel = nchan;
     *nsample = nsamp;
 
-    unsigned int *data = frag->data;
+    const unsigned int *data = frag->data;
     int i = 0;
 
     if (data != 0) {
@@ -2140,7 +2141,7 @@ int TileTBDump::tile_unpack_raw_comp(T_RodDataFrag* frag, T_TileRawComp* rawcomp
     *ngain = 1;
     *nchannel = nchan;
     *nsample = nsamp;
-    unsigned int *p = frag->data;
+    const unsigned int *p = frag->data;
 
     if ((nchan) > 48 || ((nbchanformat1 * 3) + (nbchanformat2 * 5) > SizeOfFrag1)) {
       std::cout << " Format Type 1: Raw compressed : ERROR" << " fragId=0x" << std::hex
@@ -2270,16 +2271,16 @@ int TileTBDump::tile_unpack_raw_comp(T_RodDataFrag* frag, T_TileRawComp* rawcomp
 
 
 /*--------------------------------------------------------------------------*/
-int TileTBDump::tile_unpack_digi(T_RodDataFrag* frag, T_TileDigiChannel* channel
+int TileTBDump::tile_unpack_digi(const T_RodDataFrag* frag, T_TileDigiChannel* channel
                                  , int nchannel_max, unsigned int version, int verbosity
                                  , int* ngain, int* nchannel, int* nsample) {
 /*--------------------------------------------------------------------------*/
 
-  static int first = 1;
-  static int digi_mode = 0;
+  static std::atomic<bool> first = true;
   int m, c, s/*,id*/, size, ch, dm, dgm = 0, digim[5], digm[4] = { 0, 0, 0, 0 }, status = 0;
   int nchip, nchip2, nchan, nchan2, nsamp, nsamp1, nsamp2, gain_offs;
-  unsigned int *data, val, headword, firstword, crcword;
+  const unsigned int *data;
+  unsigned int val, headword, firstword, crcword;
   unsigned int hlflags, word1, word2, word3, word4, word5;
   unsigned short samp[3][MAX_CHAN_SAMP], smin, smax;
 
@@ -2341,41 +2342,41 @@ int TileTBDump::tile_unpack_digi(T_RodDataFrag* frag, T_TileDigiChannel* channel
 
     if (m == nchip && dm == 0) {
       if (first) {
-        first = 0;
+        first = false;
         if (nsamp2 == 17) {
-          digi_mode = 1;
+          m_digi_mode = 1;
           std::cout << "Warning: No valid header found, calibration running mode(=1) assumed" << std::endl;
         } else {
-          digi_mode = 0;
+          m_digi_mode = 0;
           std::cout << "Warning: No valid header found, normal running mode(=0) assumed" << std::endl;
         }
       } else {
         if (verbosity > 3) {
-          std::cout << "Warning: No valid header found, keeping  previous running mode(=" << (int) digi_mode << ")" << std::endl;
+          std::cout << "Warning: No valid header found, keeping  previous running mode(=" << (int) m_digi_mode << ")" << std::endl;
         }
       }
       status |= 2;
     } else {
-      digi_mode = dgm; /* last found digi mode */
+      m_digi_mode = dgm; /* last found digi mode */
       if (dm > 2) { /* more than 2 good headers found */
         for (c = 0; c < dm; ++c) {
           ++digm[digim[c]]; /* count different digi_modes */
         }
         for (c = 0; c < 4; ++c) {
-          if (digm[c] > digm[digi_mode]) {/* find most frequent digi_mode */
-            digi_mode = c;
+          if (digm[c] > digm[m_digi_mode]) {/* find most frequent digi_mode */
+            m_digi_mode = c;
           }
         }
       }
       if (first) {
-        first = 0;
-        if (digi_mode > 0) m <<= 1;
+        first = false;
+        if (m_digi_mode > 0) m <<= 1;
         if (tile_check_parity(data, 1) == 0) {
-          std::cout << "\nMode=" << digi_mode << " found in header of chip " << m << std::endl;
+          std::cout << "\nMode=" << m_digi_mode << " found in header of chip " << m << std::endl;
         } else {
-          std::cout << "\nMode=" << digi_mode << " found in header of chip " << m << " with bad parity" << std::endl;
+          std::cout << "\nMode=" << m_digi_mode << " found in header of chip " << m << " with bad parity" << std::endl;
         }
-        if (digi_mode > 0) {
+        if (m_digi_mode > 0) {
           std::cout << "\nCalibration mode selected, effective number of chips is twice bigger" << std::endl;
         }
       }
@@ -2383,7 +2384,7 @@ int TileTBDump::tile_unpack_digi(T_RodDataFrag* frag, T_TileDigiChannel* channel
   }
 
   /* put offset in the gain_offs variable */
-  if (digi_mode > 0) {
+  if (m_digi_mode > 0) {
     nchip *= 2; /* number of chips is twice bigger in calib mode*/
     nchan = nchip * 3;
     nchan2 = nchan / 2; /* real number of channels is one half of total */
@@ -2483,7 +2484,7 @@ int TileTBDump::tile_unpack_digi(T_RodDataFrag* frag, T_TileDigiChannel* channel
   return status;
 }
 
-unsigned int TileTBDump::tile_check_parity(unsigned int *frame, int length) {
+unsigned int TileTBDump::tile_check_parity(const unsigned int *frame, int length) {
 /*--------------------------------------------------------------------------*/
 /* Name: tile_check_parity                                                  */
 /*                                                                          */
@@ -2530,7 +2531,7 @@ unsigned int TileTBDump::tile_check_parity(unsigned int *frame, int length) {
 }
 
 /*--------------------------------------------------------------------------*/
-unsigned int TileTBDump::tile_check_startbit(unsigned int* frame, int length, unsigned int startbit) {
+unsigned int TileTBDump::tile_check_startbit(const unsigned int* frame, int length, unsigned int startbit) {
 /*--------------------------------------------------------------------------*/
 /* Name: tile_check_startbit                                                */
 /*                                                                          */
@@ -2571,7 +2572,7 @@ unsigned int TileTBDump::tile_check_startbit(unsigned int* frame, int length, un
 }
 
 /*--------------------------------------------------------------------------*/
-unsigned int TileTBDump::tile_check_CRC(unsigned int *frame, int framelen, int delta) {
+unsigned int TileTBDump::tile_check_CRC(const unsigned int *frame, int framelen, int delta) {
 /*--------------------------------------------------------------------------*/
 /* Name: tile_check_CRC                                                     */
 /*                                                                          */
@@ -2603,7 +2604,7 @@ unsigned int TileTBDump::tile_check_CRC(unsigned int *frame, int framelen, int d
 #endif
 
   unsigned int CRC_error = CRC_ok;
-  static unsigned int error[3] = { CRC_error_0, CRC_error_1, CRC_do_not_match };
+  static const unsigned int error[3] = { CRC_error_0, CRC_error_1, CRC_do_not_match };
 
   int i, j, k, length;
   unsigned int *data, word, CRC_word;
@@ -2674,7 +2675,7 @@ unsigned int TileTBDump::tile_check_CRC(unsigned int *frame, int framelen, int d
 }
 
 /*--------------------------------------------------------------------------*/
-void TileTBDump::tile_min_max ( unsigned short *frame, int frame_length, unsigned short *smin, unsigned short *smax ) {
+void TileTBDump::tile_min_max ( const unsigned short *frame, int frame_length, unsigned short *smin, unsigned short *smax ) {
 /*--------------------------------------------------------------------------*/
 /* Name: tile_min_max                                                       */
 /*                                                                          */
