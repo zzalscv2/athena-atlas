@@ -4,7 +4,6 @@
 
 // Header include
 #include "InDetVKalVxInJetTool/InDetVKalVxInJetTool.h"
-#include "GeoPrimitives/GeoPrimitivesHelpers.h"
 //-------------------------------------------------
 // Other stuff
 #include  "AnalysisUtils/AnalysisMisc.h"
