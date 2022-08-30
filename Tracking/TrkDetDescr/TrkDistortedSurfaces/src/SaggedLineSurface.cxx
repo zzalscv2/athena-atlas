@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
 */
 
 ///////////////////////////////////////////////////////////////////
@@ -89,7 +89,7 @@ Trk::StraightLineSurface* Trk::SaggedLineSurface::correctedSurface(const Amg::Ve
   // prepare
   std::unique_ptr<Amg::Transform3D> newHepTransform =nullptr;
   if (!m_saggedLineDirection.isValid()) {
-    m_saggedLineDirection.set(transform().rotation().col(3));
+    m_saggedLineDirection.set(transform().rotation().col(2));
   }
   if (m_saggingDescriptor){
     // first get the hep transform from the distortion descriptor
