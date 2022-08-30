@@ -72,18 +72,15 @@ iGeant4::Geant4TruthIncident::Geant4TruthIncident( const G4Step *step,
 {
   // prepare children:
   prepareChildren();
+
+  // calculate position:
+  const G4StepPoint *postStepPoint = m_step->GetPostStepPoint();
+  const G4ThreeVector         &pos = postStepPoint->GetPosition();
+  const G4double              time = postStepPoint->GetGlobalTime()*Gaudi::Units::c_light;
+  m_position.set( pos.x(), pos.y(), pos.z(), time );
 }
 
-const HepMC::FourVector& iGeant4::Geant4TruthIncident::position() {
-  if (!m_positionSet) {
-    // post step processes:
-    const G4StepPoint *postStepPoint = m_step->GetPostStepPoint();
-    const G4ThreeVector         &pos = postStepPoint->GetPosition();
-    const G4double              time = postStepPoint->GetGlobalTime()*Gaudi::Units::c_light;
-    m_position.set( pos.x(), pos.y(), pos.z(), time );
-    m_positionSet = true;
-  }
-
+const HepMC::FourVector& iGeant4::Geant4TruthIncident::position() const {
   return m_position;
 }
 

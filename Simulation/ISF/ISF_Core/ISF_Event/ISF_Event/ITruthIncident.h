@@ -57,7 +57,7 @@ namespace ISF {
     AtlasDetDescr::AtlasRegion geoID() { return m_geoID; };
 
     /** Return HepMC position of the truth vertex */
-    virtual const HepMC::FourVector&  position() = 0;
+    virtual const HepMC::FourVector&  position() const = 0;
 
     /** Return category of the physics process represented by the truth incident (eg hadronic, em, ..) */
     virtual int                       physicsProcessCategory() const = 0;
