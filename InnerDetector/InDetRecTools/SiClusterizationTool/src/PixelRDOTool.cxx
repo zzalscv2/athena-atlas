@@ -128,22 +128,20 @@ namespace InDet
     IdentifierHash idHash = collection.identifyHash();
 
     const InDet::SiDetectorElementStatus *pixelDetElStatus = getPixelDetElStatus(ctx);
-
-    // If module is bad, do not create a cluster collection
-    VALIDATE_STATUS_ARRAY (
-      m_useModuleMap && pixelDetElStatus,
-      pixelDetElStatus->isGood(idHash),
-      m_summaryTool->isGood(idHash)
-    );
-
-    if (m_useModuleMap &&
-	(pixelDetElStatus ?
-	   !pixelDetElStatus->isGood(idHash)
-	 : !(m_summaryTool->isGood(idHash))))
+    if (pixelDetElStatus){
+      // If module is bad, do not create a cluster collection
+      VALIDATE_STATUS_ARRAY (
+        m_useModuleMap,
+        pixelDetElStatus->isGood(idHash),
+        m_summaryTool->isGood(idHash)
+      );
+    }
+    //
+    if (m_useModuleMap && (pixelDetElStatus ? !pixelDetElStatus->isGood(idHash): !(m_summaryTool->isGood(idHash)))) {
       return nullptr;
+    }
 
-    SG::ReadCondHandle<InDetDD::SiDetectorElementCollection>
-	pixelDetEleHandle(m_pixelDetEleCollKey, ctx);
+    SG::ReadCondHandle<InDetDD::SiDetectorElementCollection> pixelDetEleHandle(m_pixelDetEleCollKey, ctx);
     const InDetDD::SiDetectorElementCollection* pixelDetEle(*pixelDetEleHandle);
     if (not pixelDetEleHandle.isValid() or pixelDetEle == nullptr) {
       ATH_MSG_FATAL(m_pixelDetEleCollKey.fullKey() << " is not available.");
