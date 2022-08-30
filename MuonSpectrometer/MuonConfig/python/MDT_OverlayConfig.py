@@ -101,7 +101,8 @@ def MDT_OverlayCfg(flags):
     # Add MDT overlay algorithm
     acc.merge(MDT_OverlayAlgCfg(flags))
     # Add MDT truth overlay
-    acc.merge(MDT_TruthOverlayCfg(flags))
+    if flags.Digitization.EnableTruth:
+        acc.merge(MDT_TruthOverlayCfg(flags))
     # Add MDT digit to RDO config
     from MuonConfig.MuonByteStreamCnvTestConfig import MdtDigitToMdtRDOCfg
     acc.merge(MdtDigitToMdtRDOCfg(flags))

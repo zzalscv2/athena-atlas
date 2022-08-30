@@ -99,7 +99,8 @@ def sTGC_OverlayCfg(flags):
     # Add sTGC overlay algorithm
     acc.merge(sTGC_OverlayAlgCfg(flags))
     # Add sTGC truth overlay
-    acc.merge(sTGC_TruthOverlayCfg(flags))
+    if flags.Digitization.EnableTruth:
+        acc.merge(sTGC_TruthOverlayCfg(flags))
     # Add sTGC digit to RDO config
     from MuonConfig.MuonByteStreamCnvTestConfig import STGC_DigitToRDOCfg
     acc.merge(STGC_DigitToRDOCfg(flags))

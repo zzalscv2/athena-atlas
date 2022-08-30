@@ -82,6 +82,7 @@ def ITkPixelOverlayCfg(flags):
     # Add ITk Pixel overlay algorithm
     acc.merge(ITkPixelOverlayAlgCfg(flags))
     # Add ITk Pixel truth overlay
-    acc.merge(ITkPixelTruthOverlayCfg(flags))
+    if flags.Digitization.EnableTruth:
+        acc.merge(ITkPixelTruthOverlayCfg(flags))
 
     return acc

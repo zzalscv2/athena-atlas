@@ -110,6 +110,7 @@ def CSC_OverlayCfg(flags):
     # Add CSC overlay algorithm
     acc.merge(CSC_OverlayAlgCfg(flags))
     # Add CSC truth overlay
-    acc.merge(CSC_TruthOverlayCfg(flags))
+    if flags.Digitization.EnableTruth:
+        acc.merge(CSC_TruthOverlayCfg(flags))
 
     return acc

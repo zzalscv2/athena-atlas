@@ -97,7 +97,7 @@ def TileDigitsMakerCfg(flags, **kwargs):
         kwargs.setdefault('TileDigitsContainer', 'TileDigitsCnt')
 
 
-    kwargs.setdefault('DoHSTruthReconstruction', flags.Digitization.DoDigiTruth)
+    kwargs.setdefault('DoHSTruthReconstruction', flags.Digitization.DoHardScatterTruth)
     if kwargs['DoHSTruthReconstruction']:
         kwargs.setdefault('TileHitContainer_DigiHSTruth', 'TileHitCnt_DigiHSTruth')
         kwargs.setdefault('TileDigitsContainer_DigiHSTruth', 'TileDigitsCnt_DigiHSTruth')
@@ -149,7 +149,7 @@ def TileDigitsMakerOutputCfg(flags, **kwargs):
         outputItemList = ['TileDigitsContainer#' + tileDigitsContainer]
 
     if flags.Output.doWriteRDO:
-        if flags.Digitization.TruthOutput:
+        if flags.Digitization.EnableTruth:
             outputItemList += ["CaloCalibrationHitContainer#*"]
             from Digitization.TruthDigitizationOutputConfig import TruthDigitizationOutputCfg
             acc.merge(TruthDigitizationOutputCfg(flags))
