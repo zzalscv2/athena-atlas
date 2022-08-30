@@ -39,6 +39,7 @@ class TrigEgammaMonitorAnalysisAlgorithm: public TrigEgammaMonitorBaseAlgorithm
     void fillL1eEM( const std::string &trigger, const std::vector< const xAOD::eFexEMRoI* >& l1_vec ) const;
     void fillL2Calo(const std::string &trigger, const std::vector< const xAOD::TrigEMCluster*>& emCluster_vec ) const;
     void fillL2Electron(const std::string &trigger, const std::vector<const xAOD::TrigElectron*>& el_vec) const;
+    void fillL2Photon(const std::string &trigger, const std::vector<const xAOD::TrigPhoton*>& eg_vec) const;
     void fillEFCalo(const std::string &trigger, const std::vector<const xAOD::CaloCluster*>& clus_vec) const;
     void fillShowerShapes(const std::string &trigger, const std::vector<const xAOD::Egamma*>& eg_vec, bool online) const; 
     void fillTracking(const std::string &trigger, const std::vector<const xAOD::Electron *>& eg_vec, bool online ) const;

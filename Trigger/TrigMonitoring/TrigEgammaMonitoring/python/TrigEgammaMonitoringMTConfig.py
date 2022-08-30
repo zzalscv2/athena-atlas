@@ -543,7 +543,7 @@ class TrigEgammaMonAlgBuilder:
           self.bookHLTElectronResolutions( monAlg, trigger, info.isIsolated() )
 
         elif info.isPhoton():
-          # Should we include L2 for photon in the future?
+          self.bookL2PhotonDistributions( monAlg, trigger )
           self.bookShowerShapesDistributions( monAlg, trigger, "HLT", online=True )
           self.bookShowerShapesDistributions( monAlg, trigger, "HLT", online=False)
           self.bookHLTResolutions( monAlg, trigger,"HLT" )
@@ -639,7 +639,7 @@ class TrigEgammaMonAlgBuilder:
 
 
   #
-  # book L2 Electron distributions
+  # book Fast Electron distributions
   #
   def bookL2ElectronDistributions( self, monAlg, trigger ):
 
@@ -651,7 +651,19 @@ class TrigEgammaMonAlgBuilder:
     self.addHistogram(monGroup, TH1F("eta", "eta; eta ; Count", self._nEtabins, self._etabins))
     self.addHistogram(monGroup, TH1F("phi", "phi; phi ; Count", 20, -3.2, 3.2))
 
+  #
+  # book Fast Photon distributions
+  #
 
+  def bookL2PhotonDistributions( self, monAlg, trigger ):
+
+    from TrigEgammaMonitoring.TrigEgammaMonitorHelper import TH1F
+    monGroup = self.addGroup( monAlg, trigger+'_Distributions_L2Photon', self.basePath+'/Shifter/'+trigger+'/Distributions/FastPhoton' )
+    
+    self.addHistogram(monGroup, TH1F("et", "ET; ET [GeV] ; Count", 100, 0., 100.))
+    self.addHistogram(monGroup, TH1F("highet", "ET; ET [GeV] ; Count", 100, 0., 500.))
+    self.addHistogram(monGroup, TH1F("eta", "eta; eta ; Count", self._nEtabins, self._etabins))
+    self.addHistogram(monGroup, TH1F("phi", "phi; phi ; Count", 20, -3.2, 3.2))
   #
   # Book EFCalo distributions
   #
