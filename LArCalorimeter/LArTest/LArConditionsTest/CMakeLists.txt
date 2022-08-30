@@ -9,7 +9,7 @@ atlas_add_component( LArConditionsTest
                      src/LArCondDataTest.cxx
                      src/LArConditionsTestAlg.cxx
                      src/LArCablingTest.cxx
-                     LINK_LIBRARIES AthenaBaseComps StoreGateLib Identifier GaudiKernel LArCablingLib LArElecCalib LArIdentifier LArRawConditions LArRawUtilsLib LArRecConditions CaloDetDescrLib CaloEvent CaloIdentifier AthenaKernel CaloInterfaceLib CaloConditions )
+                     LINK_LIBRARIES AthenaBaseComps CxxUtils StoreGateLib Identifier GaudiKernel LArCablingLib LArElecCalib LArIdentifier LArRawConditions LArRawUtilsLib LArRecConditions CaloDetDescrLib CaloEvent CaloIdentifier AthenaKernel CaloInterfaceLib CaloConditions )
 
 # Install files from the package:
 atlas_install_joboptions( share/*.py )
