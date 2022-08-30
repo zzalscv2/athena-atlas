@@ -24,6 +24,7 @@ class StatusCode;
 
 namespace CP
 {
+  class SysListHandle;
   /// \brief the properties and persistent data for systematics aware
   /// filter reporters
   ///
@@ -55,7 +56,7 @@ namespace CP
     /// \par Failures
     ///   configuration/initialization errors
   public:
-    StatusCode initialize ();
+    StatusCode initialize (SysListHandle &sysListHandle);
 
 
     /// \brief do anything we need to do in finalize
