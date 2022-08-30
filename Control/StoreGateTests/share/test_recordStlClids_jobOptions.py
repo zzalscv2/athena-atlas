@@ -33,8 +33,6 @@ theApp.EvtMax = EVTMAX
 #--------------------------------------------------------------
 # Private Application Configuration options
 #--------------------------------------------------------------
-from AthenaCommon.AppMgr import ServiceMgr as svcMgr
-svcMgr.MessageSvc.OutputLevel = ERROR
 
 ## schedule StoreGate CLIDs test
 ###################################
@@ -51,9 +49,7 @@ topSequence += CfgMgr.AthenaOutputStream(
 topSequence.stream_stl.ItemList += [
     "EventInfo#*",
     "std::vector<int>#*",
-    ## note lack of space 'unsignedint' !!
-    ## FIXME: https://savannah.cern.ch/bugs/index.php?39528
-    "std::vector<unsignedint>#*",
+    "std::vector<unsigned int>#*",
     ##
     "std::vector<float>#*",
     "std::vector<double>#*",
