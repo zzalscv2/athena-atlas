@@ -38,8 +38,11 @@ class TrigMuonClusterHypoToolMonitoring(GenericMonitoringTool_v1):
         self.defineHistogram('nRoIBarrel,nRoIBarrelPass', path='EXPERT', type='TH2F', title="MuCluHypoTool: nRoI in All Barrel Clusters vs nRoI in all Passing Clusters; number of Barrel RoI; number of Passing Barrel RoI", xbins=25, xmin=0., xmax=25., ybins=25, ymin=0., ymax=25.)
         self.defineHistogram('nRoIEndcap,nRoIEndcapPass', path='EXPERT', type='TH2F', title="MuCluHypoTool: nRoI in All Endcap Clusters vs nRoI in all Passing Clusters; number of Endcap RoI; number of Passing Endcap RoI", xbins=25, xmin=0., xmax=25., ybins=25, ymin=0., ymax=25.)
         self.defineHistogram('result', path='EXPERT', type='TH1F', title="MuCluHypoTool: Number of MuonRoIClusters accepted by the trigger; bool; nclusters", xbins=2, xmin=0., xmax=2.)
+        self.defineHistogram('chainActive', path='EXPERT', type='TH1F', title='MuCluHypoTool: Bool if number of previous Decision IDs matching this cahin > 0; bool; nCallsToHypoTool', xbins=2, xmin=0., xmax=2.)
         self.defineHistogram('phiClust,etaClust', path='EXPERT', type='TH2F', title="MuCluHypoTool: 2D Phi vs Eta of All muon RoI clusters; phi; eta", xbins=128, xmin=-math.pi, xmax=math.pi,  ybins=120, ymin=-3., ymax=3.)
         self.defineHistogram('phiClustPass,etaClustPass', path='EXPERT', type='TH2F', title="MuCluHypoTool: 2D Phi vs Eta of Passing muon RoI clusters; phi; eta", xbins=128, xmin=-math.pi, xmax=math.pi,  ybins=120, ymin=-3., ymax=3.)
+
+        self.defineHistogram('numberRoI,etaClustPass', path='EXPERT', type='TH2F', title="MuCluHypoTool: 2D Number of RoIs in Passing muon RoI clusters vs Eta of Passing muon RoI clusters; nRoIs; eta", xbins=10, xmin=0., xmax=10., ybins=60, ymin=-3., ymax=3.)
 
         self.defineHistogram('TIME_HypoTool', path='EXPERT', type='TH1F', title='MuClusHypoTool: Timing Variable for entire HypoTool Execution; time (us); nTools', xbins=100, xmin=-20., xmax=1500.)
         self.defineHistogram('TIME_HypoTool_GetCluster', path='EXPERT', type='TH1F', title='MuClusHypoTool: Timing Variable for HypoTool to Locate MuonRoICluster Object; time (us); nTools', xbins=100, xmin=-20., xmax=1500.)
