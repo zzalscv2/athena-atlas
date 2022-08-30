@@ -1,7 +1,7 @@
 // This file's extension implies that it's C, but it's really -*- C++ -*-.
 
 /*
-  Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
 */
 /**
  * @file  DataModelAthenaPool/DataModelCompatSvc.h
@@ -29,13 +29,12 @@
 #include "RootUtils/ILogger.h"
 #include "AthenaBaseComps/AthService.h"
 #include "GaudiKernel/IIncidentListener.h"
-#include <mutex>
 
 
 /**
  * @brief Service for @c DataVector backwards compatibility.
  */
-class ATLAS_CHECK_THREAD_SAFETY DataModelCompatSvc
+class DataModelCompatSvc
   : public AthService,
     public RootUtils::ILogger,
     virtual public IIncidentListener
@@ -75,11 +74,6 @@ public:
    */
   virtual void error (const char* msg);
 
-
-private:
-  /// True if we've already scanned the types.
-  bool m_initialized;
-  std::mutex m_mutex;
 };
 
 #endif // not DATAMODELCOMPATSVC_H
