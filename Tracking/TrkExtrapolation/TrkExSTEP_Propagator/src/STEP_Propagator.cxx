@@ -34,7 +34,7 @@
 // CLHEP
 #include "CLHEP/Random/RandFlat.h"
 #include "CLHEP/Random/RandGauss.h"
-#include "CLHEP/Units/PhysicalConstants.h"
+#include "GaudiKernel/PhysicalConstants.h"
 // Gaudi
 #include "EventPrimitives/EventPrimitives.h"
 #include "EventPrimitives/EventPrimitivesHelpers.h"
@@ -506,6 +506,361 @@ covarianceContribution(Cache& cache,
   *measurementCovariance += cache.m_combinedCovariance + cache.m_covariance;
 }
 
+/////////////////////////////////////////////////////////////////////////////////
+// Runge Kutta trajectory model (units->mm,MeV,kGauss)
+//
+// Runge Kutta method is adaptive Runge-Kutta-Nystrom.
+// This is the default STEP method
+/////////////////////////////////////////////////////////////////////////////////
+
+#if defined(__GNUC__)
+// We compile this package with optimization, even in debug builds; otherwise,
+// the heavy use of Eigen makes it too slow.  However, from here we may call
+// to out-of-line Eigen code that is linked from other DSOs; in that case,
+// it would not be optimized.  Avoid this by forcing all Eigen code
+// to be inlined here if possible.
+[[gnu::flatten]]
+#endif
+bool
+rungeKuttaStep(Cache& cache,
+               bool errorPropagation,
+               double& h,
+               double* P,
+               double* dDir,
+               double* BG1,
+               bool& firstStep,
+               double& distanceStepped)
+{
+  constexpr double sol = 0.0299792458; //speed of light * kilogauss in method units
+  double charge = 0;
+  P[6] >= 0. ? charge = 1. : charge = -1.; // Set charge
+  double lambda1 = P[6];
+  double lambda2 = P[6]; // Store inverse momentum for Jacobian transport
+  double lambda3 = P[6];
+  double lambda4 = P[6];
+  double dP1 = 0.;
+  double dP2 = 0.;
+  double dP3 = 0.;
+  double dP4 = 0.; // dp/ds = -g*E/p for positive g=dE/ds
+  double dL1 = 0.;
+  double dL2 = 0.;
+  double dL3 = 0.;
+  double dL4 = 0.;                              // factor used for calculating dCM/dCM, P[41], in the Jacobian.
+  double initialMomentum = std::abs(1. / P[6]); // Set initial momentum
+  Amg::Vector3D initialPos(P[0], P[1], P[2]);   // Set initial values for position
+  Amg::Vector3D initialDir(P[3], P[4], P[5]);   // Set initial values for direction.
+  // Directions at the different points. Used by the error propagation
+  Amg::Vector3D dir1;
+  Amg::Vector3D dir2;
+  Amg::Vector3D dir3;
+  Amg::Vector3D dir4;
+  // Bx, By, Bz, dBx/dx, dBx/dy, dBx/dz, dBy/dx, dBy/dy, dBy/dz, dBz/dx, dBz/dy,dBz/dz
+  double BG23[12] = { 0., 0., 0., 0., 0., 0., 0., 0., 0., 0., 0., 0. };
+  // The gradients are used by the error propagation
+  double BG4[12] = { 0., 0., 0., 0., 0., 0., 0., 0., 0., 0., 0., 0. };
+  double g = 0.;                                                 // Energyloss in Mev/mm.
+  double dgdl = 0.;                                              // dg/dlambda in Mev/mm.
+  double particleMass = Trk::ParticleMasses::mass[cache.m_particle]; // Get particle mass from ParticleHypothesis
+  int steps = 0;
+
+  // POINT 1. Only calculate this once per step, even if step is rejected. This
+  // point is independant of the step length, h
+  double momentum = initialMomentum; // Current momentum
+  if (cache.m_energyLoss && cache.m_matPropOK) {
+    g = dEds(cache, momentum); // Use the same energy loss throughout the step.
+    double E = std::sqrt(momentum * momentum + particleMass * particleMass);
+    dP1 = g * E / momentum;
+    if (errorPropagation) {
+      if (cache.m_includeGgradient) {
+        dgdl = dgdlambda(cache, lambda1); // Use this value throughout the step.
+      }
+      dL1 =
+        -lambda1 * lambda1 * g * E * (3. - (momentum * momentum) / (E * E)) - lambda1 * lambda1 * lambda1 * E * dgdl;
+    }
+  }
+
+  Amg::Vector3D pos = initialPos; // Coordinate solution
+  Amg::Vector3D dir = initialDir; // Direction solution
+  dir1 = dir;
+  if (firstStep) { // Poll BG1 if this is the first step, else use recycled BG4
+    firstStep = false;
+    // Get the gradients needed for the error propagation if errorPropagation=true
+    getMagneticField(cache,
+                     pos,
+                     errorPropagation,
+                     BG1); // Get the gradients needed for the error propagation if errorPropagation=true
+  }
+  // Lorentz force, d2r/ds2 = lambda * (dir x B)
+  Amg::Vector3D k1(
+    dir.y() * BG1[2] - dir.z() * BG1[1], dir.z() * BG1[0] - dir.x() * BG1[2], dir.x() * BG1[1] - dir.y() * BG1[0]);
+  k1 = sol * lambda1 * k1;
+
+  while (true) { // Repeat step until error estimate is within the requested tolerance
+    if (steps++ > cache.m_maxSteps)
+      return false; // Abort propagation
+    // POINT 2
+    if (cache.m_energyLoss && cache.m_matPropOK) {
+      momentum = initialMomentum + (h / 2.) * dP1;
+      if (momentum <= cache.m_momentumCutOff)
+        return false; // Abort propagation
+      double E = std::sqrt(momentum * momentum + particleMass * particleMass);
+      dP2 = g * E / momentum;
+      lambda2 = charge / momentum;
+      if (errorPropagation) {
+        dL2 =
+          -lambda2 * lambda2 * g * E * (3. - (momentum * momentum) / (E * E)) - lambda2 * lambda2 * lambda2 * E * dgdl;
+      }
+    }
+    pos = initialPos + (h / 2.) * initialDir + (h * h / 8.) * k1;
+    dir = initialDir + (h / 2.) * k1;
+    dir2 = dir;
+
+    getMagneticField(cache, pos, errorPropagation, BG23);
+    Amg::Vector3D k2(dir.y() * BG23[2] - dir.z() * BG23[1],
+                     dir.z() * BG23[0] - dir.x() * BG23[2],
+                     dir.x() * BG23[1] - dir.y() * BG23[0]);
+    k2 = sol * lambda2 * k2;
+
+    // POINT 3. Same position and B-field as point 2.
+    if (cache.m_energyLoss && cache.m_matPropOK) {
+      momentum = initialMomentum + (h / 2.) * dP2;
+      if (momentum <= cache.m_momentumCutOff)
+        return false; // Abort propagation
+      double E = std::sqrt(momentum * momentum + particleMass * particleMass);
+      dP3 = g * E / momentum;
+      lambda3 = charge / momentum;
+      if (errorPropagation) {
+        dL3 =
+          -lambda3 * lambda3 * g * E * (3. - (momentum * momentum) / (E * E)) - lambda3 * lambda3 * lambda3 * E * dgdl;
+      }
+    }
+    dir = initialDir + (h / 2.) * k2;
+    dir3 = dir;
+    Amg::Vector3D k3(dir.y() * BG23[2] - dir.z() * BG23[1],
+                     dir.z() * BG23[0] - dir.x() * BG23[2],
+                     dir.x() * BG23[1] - dir.y() * BG23[0]);
+    k3 = sol * lambda3 * k3;
+
+    // POINT 4
+    if (cache.m_energyLoss && cache.m_matPropOK) {
+      momentum = initialMomentum + h * dP3;
+      if (momentum <= cache.m_momentumCutOff)
+        return false; // Abort propagation
+      double E = std::sqrt(momentum * momentum + particleMass * particleMass);
+      dP4 = g * E / momentum;
+      lambda4 = charge / momentum;
+      if (errorPropagation) {
+        dL4 =
+          -lambda4 * lambda4 * g * E * (3. - (momentum * momentum) / (E * E)) - lambda4 * lambda4 * lambda4 * E * dgdl;
+      }
+    }
+    pos = initialPos + h * initialDir + (h * h / 2.) * k3;
+    dir = initialDir + h * k3;
+    dir4 = dir;
+
+    // MT Field cache is stored in cache
+    getMagneticField(cache, pos, errorPropagation, BG4);
+    Amg::Vector3D k4(
+      dir.y() * BG4[2] - dir.z() * BG4[1], dir.z() * BG4[0] - dir.x() * BG4[2], dir.x() * BG4[1] - dir.y() * BG4[0]);
+    k4 = sol * lambda4 * k4;
+
+    // Estimate local error and avoid division by zero
+    Amg::Vector3D errorPos((h * h) * (k1 - k2 - k3 + k4));
+    double errorEstimate = std::max(errorPos.mag(), 1e-20);
+
+    // Use the error estimate to calculate new step length. h is returned by reference.
+    distanceStepped = h; // Store old step length.
+    h = h * std::min(std::max(0.25, std::sqrt(std::sqrt(cache.m_tolerance / errorEstimate))), 4.);
+
+    // Repeat step with the new step size if error is too big.
+    if (errorEstimate > 4. * cache.m_tolerance)
+      continue;
+
+    // Step was ok. Store solutions.
+    // Update positions.
+    pos = initialPos + distanceStepped * initialDir + (distanceStepped * distanceStepped / 6.) * (k1 + k2 + k3);
+    P[0] = pos.x();
+    P[1] = pos.y();
+    P[2] = pos.z();
+
+    // update directions
+    dir = initialDir + (distanceStepped / 6.) * (k1 + 2. * k2 + 2. * k3 + k4);
+    P[3] = dir.x();
+    P[4] = dir.y();
+    P[5] = dir.z();
+
+    // Normalize direction
+    double norm = 1. / std::sqrt(P[3] * P[3] + P[4] * P[4] + P[5] * P[5]);
+    P[3] = norm * P[3];
+    P[4] = norm * P[4];
+    P[5] = norm * P[5];
+
+    // Update inverse momentum if energyloss is switched on
+    if (cache.m_energyLoss && cache.m_matPropOK) {
+      momentum = initialMomentum + (distanceStepped / 6.) * (dP1 + 2. * dP2 + 2. * dP3 + dP4);
+      if (momentum <= cache.m_momentumCutOff)
+        return false; // Abort propagation
+      P[6] = charge / momentum;
+    }
+
+    // dDir provides a small correction to the final tiny step in PropagateWithJacobian
+    dDir[0] = k4.x();
+    dDir[1] = k4.y();
+    dDir[2] = k4.z();
+
+    // Transport Jacobian using the same step length, points and magnetic fields as for the track parameters
+    // BG contains Bx, By, Bz, dBx/dx, dBx/dy, dBx/dz, dBy/dx, dBy/dy, dBy/dz, dBz/dx, dBz/dy, dBz/dz
+    //                0   1   2   3       4       5       6       7       8       9       10      11
+    if (errorPropagation) {
+      double initialjLambda = P[41]; // dLambda/dLambda
+      double jLambda = initialjLambda;
+      double jdL1 = 0.;
+      double jdL2 = 0.;
+      double jdL3 = 0.;
+      double jdL4 = 0.;
+
+      for (int i = 7; i < 42; i += 7) {
+
+        // POINT 1
+        Amg::Vector3D initialjPos(P[i], P[i + 1], P[i + 2]);
+        Amg::Vector3D jPos = initialjPos;
+        Amg::Vector3D initialjDir(P[i + 3], P[i + 4], P[i + 5]);
+        Amg::Vector3D jDir = initialjDir;
+
+        // B-field terms
+        Amg::Vector3D jk1(jDir.y() * BG1[2] - jDir.z() * BG1[1],
+                          jDir.z() * BG1[0] - jDir.x() * BG1[2],
+                          jDir.x() * BG1[1] - jDir.y() * BG1[0]);
+
+        // B-field gradient terms
+        if (cache.m_includeBgradients) {
+          Amg::Vector3D C(
+            (dir1.y() * BG1[9] - dir1.z() * BG1[6]) * jPos.x() + (dir1.y() * BG1[10] - dir1.z() * BG1[7]) * jPos.y() +
+              (dir1.y() * BG1[11] - dir1.z() * BG1[8]) * jPos.z(),
+            (dir1.z() * BG1[3] - dir1.x() * BG1[9]) * jPos.x() + (dir1.z() * BG1[4] - dir1.x() * BG1[10]) * jPos.y() +
+              (dir1.z() * BG1[5] - dir1.x() * BG1[11]) * jPos.z(),
+            (dir1.x() * BG1[6] - dir1.y() * BG1[3]) * jPos.x() + (dir1.x() * BG1[7] - dir1.y() * BG1[4]) * jPos.y() +
+              (dir1.x() * BG1[8] - dir1.y() * BG1[5]) * jPos.z());
+          jk1 = jk1 + C;
+        }
+        jk1 = sol * lambda1 * jk1;
+
+        // Last column of the A-matrix
+        if (i == 35) {          // Only dLambda/dLambda, in the last row of the jacobian, is different from zero
+          jdL1 = dL1 * jLambda; // Energy loss term. dL1 = 0 if no material effects -> jLambda = P[41] is unchanged
+          jk1 = jk1 + k1 * jLambda / lambda1; // B-field terms
+        }
+
+        // POINT 2
+        jPos = initialjPos + (distanceStepped / 2.) * initialjDir + (distanceStepped * distanceStepped / 8.) * jk1;
+        jDir = initialjDir + (distanceStepped / 2.) * jk1;
+
+        Amg::Vector3D jk2(jDir.y() * BG23[2] - jDir.z() * BG23[1],
+                          jDir.z() * BG23[0] - jDir.x() * BG23[2],
+                          jDir.x() * BG23[1] - jDir.y() * BG23[0]);
+
+        if (cache.m_includeBgradients) {
+          Amg::Vector3D C((dir2.y() * BG23[9] - dir2.z() * BG23[6]) * jPos.x() +
+                            (dir2.y() * BG23[10] - dir2.z() * BG23[7]) * jPos.y() +
+                            (dir2.y() * BG23[11] - dir2.z() * BG23[8]) * jPos.z(),
+                          (dir2.z() * BG23[3] - dir2.x() * BG23[9]) * jPos.x() +
+                            (dir2.z() * BG23[4] - dir2.x() * BG23[10]) * jPos.y() +
+                            (dir2.z() * BG23[5] - dir2.x() * BG23[11]) * jPos.z(),
+                          (dir2.x() * BG23[6] - dir2.y() * BG23[3]) * jPos.x() +
+                            (dir2.x() * BG23[7] - dir2.y() * BG23[4]) * jPos.y() +
+                            (dir2.x() * BG23[8] - dir2.y() * BG23[5]) * jPos.z());
+          jk2 = jk2 + C;
+        }
+        jk2 = sol * lambda2 * jk2;
+
+        if (i == 35) {
+          jLambda = initialjLambda + (distanceStepped / 2.) * jdL1;
+          jdL2 = dL2 * jLambda;
+          jk2 = jk2 + k2 * jLambda / lambda2;
+        }
+
+        // POINT 3
+        jDir = initialjDir + (distanceStepped / 2.) * jk2;
+
+        Amg::Vector3D jk3(jDir.y() * BG23[2] - jDir.z() * BG23[1],
+                          jDir.z() * BG23[0] - jDir.x() * BG23[2],
+                          jDir.x() * BG23[1] - jDir.y() * BG23[0]);
+
+        if (cache.m_includeBgradients) {
+          Amg::Vector3D C((dir3.y() * BG23[9] - dir3.z() * BG23[6]) * jPos.x() +
+                            (dir3.y() * BG23[10] - dir3.z() * BG23[7]) * jPos.y() +
+                            (dir3.y() * BG23[11] - dir3.z() * BG23[8]) * jPos.z(),
+                          (dir3.z() * BG23[3] - dir3.x() * BG23[9]) * jPos.x() +
+                            (dir3.z() * BG23[4] - dir3.x() * BG23[10]) * jPos.y() +
+                            (dir3.z() * BG23[5] - dir3.x() * BG23[11]) * jPos.z(),
+                          (dir3.x() * BG23[6] - dir3.y() * BG23[3]) * jPos.x() +
+                            (dir3.x() * BG23[7] - dir3.y() * BG23[4]) * jPos.y() +
+                            (dir3.x() * BG23[8] - dir3.y() * BG23[5]) * jPos.z());
+          jk3 = jk3 + C;
+        }
+        jk3 = sol * lambda3 * jk3;
+
+        if (i == 35) {
+          jLambda = initialjLambda + (distanceStepped / 2.) * jdL2;
+          jdL3 = dL3 * jLambda;
+          jk3 = jk3 + k3 * jLambda / lambda3;
+        }
+
+        // POINT 4
+        jPos = initialjPos + distanceStepped * initialjDir + (distanceStepped * distanceStepped / 2.) * jk3;
+        jDir = initialjDir + distanceStepped * jk3;
+
+        Amg::Vector3D jk4(jDir.y() * BG4[2] - jDir.z() * BG4[1],
+                          jDir.z() * BG4[0] - jDir.x() * BG4[2],
+                          jDir.x() * BG4[1] - jDir.y() * BG4[0]);
+
+        if (cache.m_includeBgradients) {
+          Amg::Vector3D C(
+            (dir4.y() * BG4[9] - dir4.z() * BG4[6]) * jPos.x() + (dir4.y() * BG4[10] - dir4.z() * BG4[7]) * jPos.y() +
+              (dir4.y() * BG4[11] - dir4.z() * BG4[8]) * jPos.z(),
+            (dir4.z() * BG4[3] - dir4.x() * BG4[9]) * jPos.x() + (dir4.z() * BG4[4] - dir4.x() * BG4[10]) * jPos.y() +
+              (dir4.z() * BG4[5] - dir4.x() * BG4[11]) * jPos.z(),
+            (dir4.x() * BG4[6] - dir4.y() * BG4[3]) * jPos.x() + (dir4.x() * BG4[7] - dir4.y() * BG4[4]) * jPos.y() +
+              (dir4.x() * BG4[8] - dir4.y() * BG4[5]) * jPos.z());
+          jk4 = jk4 + C;
+        }
+        jk4 = sol * lambda4 * jk4;
+
+        if (i == 35) {
+          jLambda = initialjLambda + distanceStepped * jdL3;
+          jdL4 = dL4 * jLambda;
+          jk4 = jk4 + k4 * jLambda / lambda4;
+        }
+
+        // solution
+        jPos =
+          initialjPos + distanceStepped * initialjDir + (distanceStepped * distanceStepped / 6.) * (jk1 + jk2 + jk3);
+        jDir = initialjDir + (distanceStepped / 6.) * (jk1 + 2. * jk2 + 2. * jk3 + jk4);
+        if (i == 35) {
+          jLambda = initialjLambda + (distanceStepped / 6.) * (jdL1 + 2. * jdL2 + 2. * jdL3 + jdL4);
+        }
+
+        // Update positions
+        P[i] = jPos.x();
+        P[i + 1] = jPos.y();
+        P[i + 2] = jPos.z();
+
+        // update directions
+        P[i + 3] = jDir.x();
+        P[i + 4] = jDir.y();
+        P[i + 5] = jDir.z();
+      }
+      P[41] = jLambda; // update dLambda/dLambda
+    }
+
+    // Store BG4 for use as BG1 in the next step
+    for (int i = 0; i < 12; ++i) {
+      BG1[i] = BG4[i];
+    }
+    return true;
+  }
+}
+
 } // end of anonymous namespace
 
       /////////////////////////////////////////////////////////////////////////////////
@@ -638,13 +993,7 @@ covarianceContribution(Cache& cache,
 
         // Get field cache object
         getFieldCacheObject(cache, ctx);
-        cache.m_includeBgradients = m_includeBgradients;
-        cache.m_detailedElossFlag = m_detailedEloss;
-        cache.m_MPV = m_MPV;
-        cache.m_multipleScattering = m_multipleScattering;
-        cache.m_straggling = m_straggling;
-        cache.m_scatteringScale = m_scatteringScale;
-        cache.m_layXmax = m_layXmax;
+        setCacheFromProperties(cache);
         clearMaterialEffects(cache);
 
         // Check for tracking volume (materialproperties)
@@ -697,13 +1046,7 @@ covarianceContribution(Cache& cache,
 
         // Get field cache object
         getFieldCacheObject(cache, ctx);
-        cache.m_includeBgradients = m_includeBgradients;
-        cache.m_detailedElossFlag = m_detailedEloss;
-        cache.m_MPV = m_MPV;
-        cache.m_multipleScattering = m_multipleScattering;
-        cache.m_straggling = m_straggling;
-        cache.m_scatteringScale = m_scatteringScale;
-        cache.m_layXmax = m_layXmax;
+        setCacheFromProperties(cache);
         clearMaterialEffects(cache);
 
         // Check for tracking volume (materialproperties)
@@ -771,13 +1114,7 @@ covarianceContribution(Cache& cache,
 
         // Get field cache object
         getFieldCacheObject(cache, ctx);
-        cache.m_includeBgradients = m_includeBgradients;
-        cache.m_detailedElossFlag = m_detailedEloss;
-        cache.m_MPV = m_MPV;
-        cache.m_multipleScattering = m_multipleScattering;
-        cache.m_straggling = m_straggling;
-        cache.m_scatteringScale = m_scatteringScale;
-        cache.m_layXmax = m_layXmax;
+        setCacheFromProperties(cache);
         clearMaterialEffects(cache);
 
         // cache particle mass
@@ -881,13 +1218,7 @@ covarianceContribution(Cache& cache,
 
         // Get field cache object
         getFieldCacheObject(cache, ctx);
-        cache.m_includeBgradients = m_includeBgradients;
-        cache.m_detailedElossFlag = m_detailedEloss;
-        cache.m_MPV = m_MPV;
-        cache.m_multipleScattering = m_multipleScattering;
-        cache.m_straggling = m_straggling;
-        cache.m_scatteringScale = m_scatteringScale;
-        cache.m_layXmax = m_layXmax;
+        setCacheFromProperties(cache);
         clearMaterialEffects(cache);
 
         // Check for tracking volume (materialproperties)
@@ -958,13 +1289,7 @@ covarianceContribution(Cache& cache,
 
         // Get field cache object
         getFieldCacheObject(cache, ctx);
-        cache.m_includeBgradients = m_includeBgradients;
-        cache.m_detailedElossFlag = m_detailedEloss;
-        cache.m_MPV = m_MPV;
-        cache.m_multipleScattering = m_multipleScattering;
-        cache.m_straggling = m_straggling;
-        cache.m_scatteringScale = m_scatteringScale;
-        cache.m_layXmax = m_layXmax;
+        setCacheFromProperties(cache);
         clearMaterialEffects(cache);
 
         // Check for tracking volume (materialproperties)
@@ -1028,13 +1353,7 @@ covarianceContribution(Cache& cache,
 
         // Get field cache object
         getFieldCacheObject(cache, ctx);
-        cache.m_includeBgradients = m_includeBgradients;
-        cache.m_detailedElossFlag = m_detailedEloss;
-        cache.m_MPV = m_MPV;
-        cache.m_multipleScattering = m_multipleScattering;
-        cache.m_straggling = m_straggling;
-        cache.m_scatteringScale = m_scatteringScale;
-        cache.m_layXmax = m_layXmax;
+        setCacheFromProperties(cache);
         clearMaterialEffects(cache);
 
         // Check for tracking volume (materialproperties)
@@ -1082,13 +1401,7 @@ covarianceContribution(Cache& cache,
 
         // Get field cache object
         getFieldCacheObject(cache, ctx);
-        cache.m_includeBgradients = m_includeBgradients;
-        cache.m_detailedElossFlag = m_detailedEloss;
-        cache.m_MPV = m_MPV;
-        cache.m_multipleScattering = m_multipleScattering;
-        cache.m_straggling = m_straggling;
-        cache.m_scatteringScale = m_scatteringScale;
-        cache.m_layXmax = m_layXmax;
+        setCacheFromProperties(cache);
         clearMaterialEffects(cache);
 
         // Check for tracking volume (materialproperties)
@@ -1143,13 +1456,7 @@ covarianceContribution(Cache& cache,
 
         // Get field cache object
         getFieldCacheObject(cache, ctx);
-        cache.m_includeBgradients = m_includeBgradients;
-        cache.m_detailedElossFlag = m_detailedEloss;
-        cache.m_MPV = m_MPV;
-        cache.m_multipleScattering = m_multipleScattering;
-        cache.m_straggling = m_straggling;
-        cache.m_scatteringScale = m_scatteringScale;
-        cache.m_layXmax = m_layXmax;
+        setCacheFromProperties(cache);
         clearMaterialEffects(cache);
 
         cache.m_particle = particle; // Store for later use
@@ -1169,11 +1476,11 @@ covarianceContribution(Cache& cache,
         mft.magneticFieldMode() == Trk::FastField ? cache.m_solenoid = true : cache.m_solenoid = false;
 
         // Check inputvalues
-        if (m_tolerance <= 0.)
+        if (cache.m_tolerance <= 0.)
           return nullptr;
-        if (m_momentumCutOff < 0.)
+        if (cache.m_momentumCutOff < 0.)
           return nullptr;
-        if (std::abs(1. / trackParameters.parameters()[Trk::qOverP]) <= m_momentumCutOff) {
+        if (std::abs(1. / trackParameters.parameters()[Trk::qOverP]) <= cache.m_momentumCutOff) {
           return nullptr;
         }
 
@@ -1322,13 +1629,7 @@ covarianceContribution(Cache& cache,
 
         // Get field cache object
         getFieldCacheObject(cache, ctx);
-        cache.m_includeBgradients = m_includeBgradients;
-        cache.m_detailedElossFlag = m_detailedEloss;
-        cache.m_MPV = m_MPV;
-        cache.m_multipleScattering = m_multipleScattering;
-        cache.m_straggling = m_straggling;
-        cache.m_scatteringScale = m_scatteringScale;
-        cache.m_layXmax = m_layXmax;
+        setCacheFromProperties(cache);
         clearMaterialEffects(cache);
 
         cache.m_particle = particle; // Store for later use
@@ -1347,7 +1648,7 @@ covarianceContribution(Cache& cache,
         mft.magneticFieldMode() == Trk::FastField ? cache.m_solenoid = true : cache.m_solenoid = false;
 
         // Check inputvalues
-        if (m_tolerance <= 0.)
+        if (cache.m_tolerance <= 0.)
           return;
 
         double PP[7];
@@ -1449,9 +1750,9 @@ covarianceContribution(Cache& cache,
         mft.magneticFieldMode() == Trk::FastField ? cache.m_solenoid = true : cache.m_solenoid = false;
 
         // Check inputvalues
-        if (m_tolerance <= 0.)
+        if (cache.m_tolerance <= 0.)
           return nullptr;
-        if (m_momentumCutOff < 0.)
+        if (cache.m_momentumCutOff < 0.)
           return nullptr;
 
         // Set momentum to 1e10 (straight line) and charge to + if q/p is zero
@@ -1465,7 +1766,7 @@ covarianceContribution(Cache& cache,
           trackParameters.reset(inputTrackParameters.clone());
         }
 
-        if (std::abs(1. / trackParameters->parameters()[Trk::qOverP]) <= m_momentumCutOff) {
+        if (std::abs(1. / trackParameters->parameters()[Trk::qOverP]) <= cache.m_momentumCutOff) {
           return nullptr;
         }
 
@@ -1660,9 +1961,9 @@ covarianceContribution(Cache& cache,
         mft.magneticFieldMode() == Trk::FastField ? cache.m_solenoid = true : cache.m_solenoid = false;
 
         // Check inputvalues
-        if (m_tolerance <= 0.)
+        if (cache.m_tolerance <= 0.)
           return nullptr;
-        if (m_momentumCutOff < 0.)
+        if (cache.m_momentumCutOff < 0.)
           return nullptr;
 
         // Set momentum to 1e10 (straight line) and charge to + if q/p is zero
@@ -1675,7 +1976,7 @@ covarianceContribution(Cache& cache,
           trackParameters.reset(inputTrackParameters.clone());
         }
 
-        if (std::abs(1. / trackParameters->parameters()[Trk::qOverP]) <= m_momentumCutOff) {
+        if (std::abs(1. / trackParameters->parameters()[Trk::qOverP]) <= cache.m_momentumCutOff) {
           return nullptr;
         }
 
@@ -1891,7 +2192,7 @@ covarianceContribution(Cache& cache,
         // Keep distanceTolerance within [1 nanometer, 10 microns].
         // This means that no final Taylor expansions beyond 10 microns and no
         // Runge-Kutta steps less than 1 nanometer are allowed.
-        double distanceTolerance = std::min(std::max(std::abs(distanceToTarget) * m_tolerance, 1e-6), 1e-2);
+        double distanceTolerance = std::min(std::max(std::abs(distanceToTarget) * cache.m_tolerance, 1e-6), 1e-2);
 
         while (std::abs(distanceToTarget) > distanceTolerance) { // Step until within tolerance
           // Do the step. Stop the propagation if the energy goes below m_momentumCutOff
@@ -1938,7 +2239,7 @@ covarianceContribution(Cache& cache,
           if ((targetPassed > 3 && std::abs(distanceToTarget) >= previousDistance) || (absolutePath > maxPath))
             return false;
 
-          if (steps++ > m_maxSteps)
+          if (steps++ > cache.m_maxSteps)
             return false; // Too many steps, something is wrong
         }
 
@@ -2104,7 +2405,7 @@ covarianceContribution(Cache& cache,
         // Keep distanceTolerance within [1 nanometer, 10 microns].
         // This means that no final Taylor expansions beyond 10 microns and no
         // Runge-Kutta steps less than 1 nanometer are allowed.
-        double distanceTolerance = std::min(std::max(std::abs(distanceToTarget) * m_tolerance, 1e-6), 1e-2);
+        double distanceTolerance = std::min(std::max(std::abs(distanceToTarget) * cache.m_tolerance, 1e-6), 1e-2);
 
         // bremstrahlung : sample if activated
         if (cache.m_brem) {
@@ -2138,7 +2439,7 @@ covarianceContribution(Cache& cache,
             // timing
             mom = std::abs(1. / P[6]);
             beta = mom / std::sqrt(mom * mom + cache.m_particleMass * cache.m_particleMass);
-            cache.m_timeStep += distanceStepped / beta / CLHEP::c_light;
+            cache.m_timeStep += distanceStepped / beta / Gaudi::Units::c_light;
 
             if (std::abs(distanceStepped) > 0.001) {
               cache.m_sigmaIoni = cache.m_sigmaIoni - cache.m_kazL * log(std::abs(distanceStepped));
@@ -2560,7 +2861,7 @@ covarianceContribution(Cache& cache,
           if (std::abs(path) > maxPath)
             return false;
 
-          if (steps++ > m_maxSteps)
+          if (steps++ > cache.m_maxSteps)
             return false; // Too many steps, something is wrong
         }
 
@@ -2610,361 +2911,6 @@ covarianceContribution(Cache& cache,
 
         return true;
       }
-
-      /////////////////////////////////////////////////////////////////////////////////
-      // Runge Kutta trajectory model (units->mm,MeV,kGauss)
-      //
-      // Runge Kutta method is adaptive Runge-Kutta-Nystrom.
-      // This is the default STEP method
-      /////////////////////////////////////////////////////////////////////////////////
-
-#if defined(__GNUC__)
-// We compile this package with optimization, even in debug builds; otherwise,
-// the heavy use of Eigen makes it too slow.  However, from here we may call
-// to out-of-line Eigen code that is linked from other DSOs; in that case,
-// it would not be optimized.  Avoid this by forcing all Eigen code
-// to be inlined here if possible.
-[[gnu::flatten]]
-#endif
-bool
-Trk::STEP_Propagator::rungeKuttaStep(Cache& cache,
-                                     bool errorPropagation,
-                                     double& h,
-                                     double* P,
-                                     double* dDir,
-                                     double* BG1,
-                                     bool& firstStep,
-                                     double& distanceStepped) const
-{
-  double sol = 0.0299792458; // Speed of light
-  double charge = 0;
-  P[6] >= 0. ? charge = 1. : charge = -1.; // Set charge
-  double lambda1 = P[6];
-  double lambda2 = P[6]; // Store inverse momentum for Jacobian transport
-  double lambda3 = P[6];
-  double lambda4 = P[6];
-  double dP1 = 0.;
-  double dP2 = 0.;
-  double dP3 = 0.;
-  double dP4 = 0.; // dp/ds = -g*E/p for positive g=dE/ds
-  double dL1 = 0.;
-  double dL2 = 0.;
-  double dL3 = 0.;
-  double dL4 = 0.;                              // factor used for calculating dCM/dCM, P[41], in the Jacobian.
-  double initialMomentum = std::abs(1. / P[6]); // Set initial momentum
-  Amg::Vector3D initialPos(P[0], P[1], P[2]);   // Set initial values for position
-  Amg::Vector3D initialDir(P[3], P[4], P[5]);   // Set initial values for direction.
-  // Directions at the different points. Used by the error propagation
-  Amg::Vector3D dir1;
-  Amg::Vector3D dir2;
-  Amg::Vector3D dir3;
-  Amg::Vector3D dir4;
-  // Bx, By, Bz, dBx/dx, dBx/dy, dBx/dz, dBy/dx, dBy/dy, dBy/dz, dBz/dx, dBz/dy,dBz/dz
-  double BG23[12] = { 0., 0., 0., 0., 0., 0., 0., 0., 0., 0., 0., 0. };
-  // The gradients are used by the error propagation
-  double BG4[12] = { 0., 0., 0., 0., 0., 0., 0., 0., 0., 0., 0., 0. };
-  double g = 0.;                                                 // Energyloss in Mev/mm.
-  double dgdl = 0.;                                              // dg/dlambda in Mev/mm.
-  double particleMass = Trk::ParticleMasses::mass[cache.m_particle]; // Get particle mass from ParticleHypothesis
-  int steps = 0;
-
-  // POINT 1. Only calculate this once per step, even if step is rejected. This
-  // point is independant of the step length, h
-  double momentum = initialMomentum; // Current momentum
-  if (m_energyLoss && cache.m_matPropOK) {
-    g = dEds(cache, momentum); // Use the same energy loss throughout the step.
-    double E = std::sqrt(momentum * momentum + particleMass * particleMass);
-    dP1 = g * E / momentum;
-    if (errorPropagation) {
-      if (m_includeGgradient) {
-        dgdl = dgdlambda(cache, lambda1); // Use this value throughout the step.
-      }
-      dL1 =
-        -lambda1 * lambda1 * g * E * (3. - (momentum * momentum) / (E * E)) - lambda1 * lambda1 * lambda1 * E * dgdl;
-    }
-  }
-
-  Amg::Vector3D pos = initialPos; // Coordinate solution
-  Amg::Vector3D dir = initialDir; // Direction solution
-  dir1 = dir;
-  if (firstStep) { // Poll BG1 if this is the first step, else use recycled BG4
-    firstStep = false;
-    // Get the gradients needed for the error propagation if errorPropagation=true
-    getMagneticField(cache,
-                     pos,
-                     errorPropagation,
-                     BG1); // Get the gradients needed for the error propagation if errorPropagation=true
-  }
-  // Lorentz force, d2r/ds2 = lambda * (dir x B)
-  Amg::Vector3D k1(
-    dir.y() * BG1[2] - dir.z() * BG1[1], dir.z() * BG1[0] - dir.x() * BG1[2], dir.x() * BG1[1] - dir.y() * BG1[0]);
-  k1 = sol * lambda1 * k1;
-
-  while (true) { // Repeat step until error estimate is within the requested tolerance
-    if (steps++ > m_maxSteps)
-      return false; // Abort propagation
-    // POINT 2
-    if (m_energyLoss && cache.m_matPropOK) {
-      momentum = initialMomentum + (h / 2.) * dP1;
-      if (momentum <= m_momentumCutOff)
-        return false; // Abort propagation
-      double E = std::sqrt(momentum * momentum + particleMass * particleMass);
-      dP2 = g * E / momentum;
-      lambda2 = charge / momentum;
-      if (errorPropagation) {
-        dL2 =
-          -lambda2 * lambda2 * g * E * (3. - (momentum * momentum) / (E * E)) - lambda2 * lambda2 * lambda2 * E * dgdl;
-      }
-    }
-    pos = initialPos + (h / 2.) * initialDir + (h * h / 8.) * k1;
-    dir = initialDir + (h / 2.) * k1;
-    dir2 = dir;
-
-    getMagneticField(cache, pos, errorPropagation, BG23);
-    Amg::Vector3D k2(dir.y() * BG23[2] - dir.z() * BG23[1],
-                     dir.z() * BG23[0] - dir.x() * BG23[2],
-                     dir.x() * BG23[1] - dir.y() * BG23[0]);
-    k2 = sol * lambda2 * k2;
-
-    // POINT 3. Same position and B-field as point 2.
-    if (m_energyLoss && cache.m_matPropOK) {
-      momentum = initialMomentum + (h / 2.) * dP2;
-      if (momentum <= m_momentumCutOff)
-        return false; // Abort propagation
-      double E = std::sqrt(momentum * momentum + particleMass * particleMass);
-      dP3 = g * E / momentum;
-      lambda3 = charge / momentum;
-      if (errorPropagation) {
-        dL3 =
-          -lambda3 * lambda3 * g * E * (3. - (momentum * momentum) / (E * E)) - lambda3 * lambda3 * lambda3 * E * dgdl;
-      }
-    }
-    dir = initialDir + (h / 2.) * k2;
-    dir3 = dir;
-    Amg::Vector3D k3(dir.y() * BG23[2] - dir.z() * BG23[1],
-                     dir.z() * BG23[0] - dir.x() * BG23[2],
-                     dir.x() * BG23[1] - dir.y() * BG23[0]);
-    k3 = sol * lambda3 * k3;
-
-    // POINT 4
-    if (m_energyLoss && cache.m_matPropOK) {
-      momentum = initialMomentum + h * dP3;
-      if (momentum <= m_momentumCutOff)
-        return false; // Abort propagation
-      double E = std::sqrt(momentum * momentum + particleMass * particleMass);
-      dP4 = g * E / momentum;
-      lambda4 = charge / momentum;
-      if (errorPropagation) {
-        dL4 =
-          -lambda4 * lambda4 * g * E * (3. - (momentum * momentum) / (E * E)) - lambda4 * lambda4 * lambda4 * E * dgdl;
-      }
-    }
-    pos = initialPos + h * initialDir + (h * h / 2.) * k3;
-    dir = initialDir + h * k3;
-    dir4 = dir;
-
-    // MT Field cache is stored in cache
-    getMagneticField(cache, pos, errorPropagation, BG4);
-    Amg::Vector3D k4(
-      dir.y() * BG4[2] - dir.z() * BG4[1], dir.z() * BG4[0] - dir.x() * BG4[2], dir.x() * BG4[1] - dir.y() * BG4[0]);
-    k4 = sol * lambda4 * k4;
-
-    // Estimate local error and avoid division by zero
-    Amg::Vector3D errorPos((h * h) * (k1 - k2 - k3 + k4));
-    double errorEstimate = std::max(errorPos.mag(), 1e-20);
-
-    // Use the error estimate to calculate new step length. h is returned by reference.
-    distanceStepped = h; // Store old step length.
-    h = h * std::min(std::max(0.25, std::sqrt(std::sqrt(m_tolerance / errorEstimate))), 4.);
-
-    // Repeat step with the new step size if error is too big.
-    if (errorEstimate > 4. * m_tolerance)
-      continue;
-
-    // Step was ok. Store solutions.
-    // Update positions.
-    pos = initialPos + distanceStepped * initialDir + (distanceStepped * distanceStepped / 6.) * (k1 + k2 + k3);
-    P[0] = pos.x();
-    P[1] = pos.y();
-    P[2] = pos.z();
-
-    // update directions
-    dir = initialDir + (distanceStepped / 6.) * (k1 + 2. * k2 + 2. * k3 + k4);
-    P[3] = dir.x();
-    P[4] = dir.y();
-    P[5] = dir.z();
-
-    // Normalize direction
-    double norm = 1. / std::sqrt(P[3] * P[3] + P[4] * P[4] + P[5] * P[5]);
-    P[3] = norm * P[3];
-    P[4] = norm * P[4];
-    P[5] = norm * P[5];
-
-    // Update inverse momentum if energyloss is switched on
-    if (m_energyLoss && cache.m_matPropOK) {
-      momentum = initialMomentum + (distanceStepped / 6.) * (dP1 + 2. * dP2 + 2. * dP3 + dP4);
-      if (momentum <= m_momentumCutOff)
-        return false; // Abort propagation
-      P[6] = charge / momentum;
-    }
-
-    // dDir provides a small correction to the final tiny step in PropagateWithJacobian
-    dDir[0] = k4.x();
-    dDir[1] = k4.y();
-    dDir[2] = k4.z();
-
-    // Transport Jacobian using the same step length, points and magnetic fields as for the track parameters
-    // BG contains Bx, By, Bz, dBx/dx, dBx/dy, dBx/dz, dBy/dx, dBy/dy, dBy/dz, dBz/dx, dBz/dy, dBz/dz
-    //                0   1   2   3       4       5       6       7       8       9       10      11
-    if (errorPropagation) {
-      double initialjLambda = P[41]; // dLambda/dLambda
-      double jLambda = initialjLambda;
-      double jdL1 = 0.;
-      double jdL2 = 0.;
-      double jdL3 = 0.;
-      double jdL4 = 0.;
-
-      for (int i = 7; i < 42; i += 7) {
-
-        // POINT 1
-        Amg::Vector3D initialjPos(P[i], P[i + 1], P[i + 2]);
-        Amg::Vector3D jPos = initialjPos;
-        Amg::Vector3D initialjDir(P[i + 3], P[i + 4], P[i + 5]);
-        Amg::Vector3D jDir = initialjDir;
-
-        // B-field terms
-        Amg::Vector3D jk1(jDir.y() * BG1[2] - jDir.z() * BG1[1],
-                          jDir.z() * BG1[0] - jDir.x() * BG1[2],
-                          jDir.x() * BG1[1] - jDir.y() * BG1[0]);
-
-        // B-field gradient terms
-        if (m_includeBgradients) {
-          Amg::Vector3D C(
-            (dir1.y() * BG1[9] - dir1.z() * BG1[6]) * jPos.x() + (dir1.y() * BG1[10] - dir1.z() * BG1[7]) * jPos.y() +
-              (dir1.y() * BG1[11] - dir1.z() * BG1[8]) * jPos.z(),
-            (dir1.z() * BG1[3] - dir1.x() * BG1[9]) * jPos.x() + (dir1.z() * BG1[4] - dir1.x() * BG1[10]) * jPos.y() +
-              (dir1.z() * BG1[5] - dir1.x() * BG1[11]) * jPos.z(),
-            (dir1.x() * BG1[6] - dir1.y() * BG1[3]) * jPos.x() + (dir1.x() * BG1[7] - dir1.y() * BG1[4]) * jPos.y() +
-              (dir1.x() * BG1[8] - dir1.y() * BG1[5]) * jPos.z());
-          jk1 = jk1 + C;
-        }
-        jk1 = sol * lambda1 * jk1;
-
-        // Last column of the A-matrix
-        if (i == 35) {          // Only dLambda/dLambda, in the last row of the jacobian, is different from zero
-          jdL1 = dL1 * jLambda; // Energy loss term. dL1 = 0 if no material effects -> jLambda = P[41] is unchanged
-          jk1 = jk1 + k1 * jLambda / lambda1; // B-field terms
-        }
-
-        // POINT 2
-        jPos = initialjPos + (distanceStepped / 2.) * initialjDir + (distanceStepped * distanceStepped / 8.) * jk1;
-        jDir = initialjDir + (distanceStepped / 2.) * jk1;
-
-        Amg::Vector3D jk2(jDir.y() * BG23[2] - jDir.z() * BG23[1],
-                          jDir.z() * BG23[0] - jDir.x() * BG23[2],
-                          jDir.x() * BG23[1] - jDir.y() * BG23[0]);
-
-        if (m_includeBgradients) {
-          Amg::Vector3D C((dir2.y() * BG23[9] - dir2.z() * BG23[6]) * jPos.x() +
-                            (dir2.y() * BG23[10] - dir2.z() * BG23[7]) * jPos.y() +
-                            (dir2.y() * BG23[11] - dir2.z() * BG23[8]) * jPos.z(),
-                          (dir2.z() * BG23[3] - dir2.x() * BG23[9]) * jPos.x() +
-                            (dir2.z() * BG23[4] - dir2.x() * BG23[10]) * jPos.y() +
-                            (dir2.z() * BG23[5] - dir2.x() * BG23[11]) * jPos.z(),
-                          (dir2.x() * BG23[6] - dir2.y() * BG23[3]) * jPos.x() +
-                            (dir2.x() * BG23[7] - dir2.y() * BG23[4]) * jPos.y() +
-                            (dir2.x() * BG23[8] - dir2.y() * BG23[5]) * jPos.z());
-          jk2 = jk2 + C;
-        }
-        jk2 = sol * lambda2 * jk2;
-
-        if (i == 35) {
-          jLambda = initialjLambda + (distanceStepped / 2.) * jdL1;
-          jdL2 = dL2 * jLambda;
-          jk2 = jk2 + k2 * jLambda / lambda2;
-        }
-
-        // POINT 3
-        jDir = initialjDir + (distanceStepped / 2.) * jk2;
-
-        Amg::Vector3D jk3(jDir.y() * BG23[2] - jDir.z() * BG23[1],
-                          jDir.z() * BG23[0] - jDir.x() * BG23[2],
-                          jDir.x() * BG23[1] - jDir.y() * BG23[0]);
-
-        if (m_includeBgradients) {
-          Amg::Vector3D C((dir3.y() * BG23[9] - dir3.z() * BG23[6]) * jPos.x() +
-                            (dir3.y() * BG23[10] - dir3.z() * BG23[7]) * jPos.y() +
-                            (dir3.y() * BG23[11] - dir3.z() * BG23[8]) * jPos.z(),
-                          (dir3.z() * BG23[3] - dir3.x() * BG23[9]) * jPos.x() +
-                            (dir3.z() * BG23[4] - dir3.x() * BG23[10]) * jPos.y() +
-                            (dir3.z() * BG23[5] - dir3.x() * BG23[11]) * jPos.z(),
-                          (dir3.x() * BG23[6] - dir3.y() * BG23[3]) * jPos.x() +
-                            (dir3.x() * BG23[7] - dir3.y() * BG23[4]) * jPos.y() +
-                            (dir3.x() * BG23[8] - dir3.y() * BG23[5]) * jPos.z());
-          jk3 = jk3 + C;
-        }
-        jk3 = sol * lambda3 * jk3;
-
-        if (i == 35) {
-          jLambda = initialjLambda + (distanceStepped / 2.) * jdL2;
-          jdL3 = dL3 * jLambda;
-          jk3 = jk3 + k3 * jLambda / lambda3;
-        }
-
-        // POINT 4
-        jPos = initialjPos + distanceStepped * initialjDir + (distanceStepped * distanceStepped / 2.) * jk3;
-        jDir = initialjDir + distanceStepped * jk3;
-
-        Amg::Vector3D jk4(jDir.y() * BG4[2] - jDir.z() * BG4[1],
-                          jDir.z() * BG4[0] - jDir.x() * BG4[2],
-                          jDir.x() * BG4[1] - jDir.y() * BG4[0]);
-
-        if (m_includeBgradients) {
-          Amg::Vector3D C(
-            (dir4.y() * BG4[9] - dir4.z() * BG4[6]) * jPos.x() + (dir4.y() * BG4[10] - dir4.z() * BG4[7]) * jPos.y() +
-              (dir4.y() * BG4[11] - dir4.z() * BG4[8]) * jPos.z(),
-            (dir4.z() * BG4[3] - dir4.x() * BG4[9]) * jPos.x() + (dir4.z() * BG4[4] - dir4.x() * BG4[10]) * jPos.y() +
-              (dir4.z() * BG4[5] - dir4.x() * BG4[11]) * jPos.z(),
-            (dir4.x() * BG4[6] - dir4.y() * BG4[3]) * jPos.x() + (dir4.x() * BG4[7] - dir4.y() * BG4[4]) * jPos.y() +
-              (dir4.x() * BG4[8] - dir4.y() * BG4[5]) * jPos.z());
-          jk4 = jk4 + C;
-        }
-        jk4 = sol * lambda4 * jk4;
-
-        if (i == 35) {
-          jLambda = initialjLambda + distanceStepped * jdL3;
-          jdL4 = dL4 * jLambda;
-          jk4 = jk4 + k4 * jLambda / lambda4;
-        }
-
-        // solution
-        jPos =
-          initialjPos + distanceStepped * initialjDir + (distanceStepped * distanceStepped / 6.) * (jk1 + jk2 + jk3);
-        jDir = initialjDir + (distanceStepped / 6.) * (jk1 + 2. * jk2 + 2. * jk3 + jk4);
-        if (i == 35) {
-          jLambda = initialjLambda + (distanceStepped / 6.) * (jdL1 + 2. * jdL2 + 2. * jdL3 + jdL4);
-        }
-
-        // Update positions
-        P[i] = jPos.x();
-        P[i + 1] = jPos.y();
-        P[i + 2] = jPos.z();
-
-        // update directions
-        P[i + 3] = jDir.x();
-        P[i + 4] = jDir.y();
-        P[i + 5] = jDir.z();
-      }
-      P[41] = jLambda; // update dLambda/dLambda
-    }
-
-    // Store BG4 for use as BG1 in the next step
-    for (int i = 0; i < 12; ++i) {
-      BG1[i] = BG4[i];
-    }
-    return true;
-  }
-}
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////////
 // dump material effects
@@ -3062,7 +3008,7 @@ Trk::STEP_Propagator::sampleBrem(Cache& cache, double mom) const
   double rnde = CLHEP::RandFlat::shoot(m_randomEngine);
 
   // sample visible fraction of the mother momentum taken according to 1/f
-  double eps = m_momentumCutOff / mom;
+  double eps = cache.m_momentumCutOff / mom;
   cache.m_bremMom = pow(eps, pow(rndx, exp(1.))) * mom; // adjustment here ?
   cache.m_bremSampleThreshold = mom - cache.m_bremMom;
   cache.m_bremEmitThreshold = mom - rnde * cache.m_bremMom;

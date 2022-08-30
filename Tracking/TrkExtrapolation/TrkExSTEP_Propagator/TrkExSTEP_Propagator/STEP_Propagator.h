@@ -319,16 +319,21 @@ public:
   // Private methods:
   /////////////////////////////////////////////////////////////////////////////////
 
+  /** stuct to pass information to the heavy lifting
+   * calculation internal methods
+   */
   struct Cache
   {
+    bool m_energyLoss{ true };
     bool m_detailedElossFlag{ true };
+    bool m_straggling {true};
     bool m_solenoid{ false };
     bool m_matPropOK{ true }; //!< Switch for turning off material effects temporarily
     bool m_brem{ false };
     bool m_includeBgradients{true};
+    bool m_includeGgradient{false};
     bool m_MPV{false};
     bool m_multipleScattering{true};
-    bool m_straggling {true};
     int m_propagateWithPathLimit{};
     size_t m_currentLayerBin{};
     double m_matupd_lastmom{};
@@ -342,14 +347,16 @@ public:
     // cache for input variance
     double m_inputThetaVariance{};
     double m_stragglingVariance{};
-
     double m_pathLimit{};
     double m_timeOfFlight{};
     double m_timeStep{};
     double m_particleMass{ 0 }; //!< cache
     double m_charge{};
     double m_combinedThickness{};
+    double m_tolerance{1e-05};
+    double m_momentumCutOff{50.};
     double m_scatteringScale{1.};
+    double m_maxSteps {10000};
     double m_layXmax{1.};
     // secondary interactions
     double m_timeIn{};
@@ -385,6 +392,24 @@ public:
   };
 
 private:
+  ///initialize cache with the variables we need to take from
+  //the configured properties.
+  void setCacheFromProperties(Cache& cache) const
+  {
+    cache.m_includeBgradients = m_includeBgradients;
+    cache.m_includeGgradient = m_includeGgradient;
+    cache.m_energyLoss = m_energyLoss;
+    cache.m_detailedElossFlag = m_detailedEloss;
+    cache.m_MPV = m_MPV;
+    cache.m_multipleScattering = m_multipleScattering;
+    cache.m_straggling = m_straggling;
+    cache.m_tolerance = m_tolerance;
+    cache.m_momentumCutOff = m_momentumCutOff;
+    cache.m_scatteringScale = m_scatteringScale;
+    cache.m_maxSteps = m_maxSteps;
+    cache.m_layXmax = m_layXmax;
+  }
+
   /////////////////////////////////////////////////////////////////////////////////
   // Main functions for propagation
   /////////////////////////////////////////////////////////////////////////////////
@@ -437,18 +462,6 @@ private:
                              std::vector<unsigned int>& solutions,
                              double& path,
                              double sumPath) const;
-
-  /////////////////////////////////////////////////////////////////////////////////
-  // Trajectory model
-  /////////////////////////////////////////////////////////////////////////////////
-  bool rungeKuttaStep(Cache& cache,
-                      bool errorPropagation,
-                      double& h,
-                      double* P,
-                      double* dDir,
-                      double* BG1,
-                      bool& firstStep,
-                      double& distanceStepped) const;
 
   ////////////////////////////////////////////////////////////////////////////////////////////////////////
   // dump material effects
