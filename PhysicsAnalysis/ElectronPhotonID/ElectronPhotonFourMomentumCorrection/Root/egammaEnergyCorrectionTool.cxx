@@ -2142,7 +2142,7 @@ namespace AtlasRoot {
         m_esmodel == egEnergyCorr::es2015cPRE or m_esmodel == egEnergyCorr::es2015cPRE_res_improved or
         m_esmodel == egEnergyCorr::es2015c_summer or m_esmodel == egEnergyCorr::es2016PRE or m_esmodel == egEnergyCorr::es2017
 	or m_esmodel == egEnergyCorr::es2017_summer or m_esmodel == egEnergyCorr::es2017_summer_improved or m_esmodel == egEnergyCorr::es2017_summer_final
-	or m_esmodel == egEnergyCorr::es2017_R21_PRE or m_esmodel == egEnergyCorr::es2017_R21_v0 or m_esmodel == egEnergyCorr::es2017_R21_v1 or m_esmodel == egEnergyCorr::es2017_R21_ofc0_v1 or m_esmodel == egEnergyCorr::es2018_R21_v0 or m_esmodel == egEnergyCorr::es2018_R21_v1) {
+	or m_esmodel == egEnergyCorr::es2017_R21_PRE or m_esmodel == egEnergyCorr::es2017_R21_v0 or m_esmodel == egEnergyCorr::es2017_R21_v1 or m_esmodel == egEnergyCorr::es2017_R21_ofc0_v1 or m_esmodel == egEnergyCorr::es2018_R21_v0 or m_esmodel == egEnergyCorr::es2018_R21_v1 or m_esmodel == egEnergyCorr::es2022_R22_PRE) {
 
       if (m_esmodel == egEnergyCorr::es2017_R21_v1 || m_esmodel == egEnergyCorr::es2017_R21_ofc0_v1 || m_esmodel == egEnergyCorr::es2018_R21_v0 ||  m_esmodel == egEnergyCorr::es2018_R21_v1 || m_esmodel == egEnergyCorr::es2022_R22_PRE ) {
 //
