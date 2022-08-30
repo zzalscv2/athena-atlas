@@ -23,6 +23,8 @@ muonMinPt = None
 muonMaxEta = None
 tauMinPt = None
 tauMaxEta = None
+jetMinPt = None
+jetMaxEta = None
 
 def addOutputCopyAlgorithms (algSeq, postfix, inputContainer, outputContainer, selection) :
     """add a uniformly filtered set of deep copies based on the
@@ -90,15 +92,15 @@ def makeSequenceOld (dataType, algSeq, vars, forCompare) :
     # Add the sequences to the job:
     algSeq += jetSequence
     algSeq += jvtSequence
-    if not forCompare :
-        vars += ['OutJets_%SYS%.pt  -> jet_pt_%SYS%',
-                 'OutJets_NOSYS.phi -> jet_phi',
-                 'OutJets_NOSYS.eta -> jet_eta', ]
-        if dataType != 'data':
+    vars += ['OutJets_%SYS%.pt  -> jet_pt_%SYS%',
+             'OutJets_NOSYS.phi -> jet_phi',
+             'OutJets_NOSYS.eta -> jet_eta', ]
+    if dataType != 'data':
+        vars += [ 'OutJets_%SYS%.jvt_effSF_%SYS% -> jet_jvtEfficiency_%SYS%', ]
+        if not forCompare :
             vars += [
                 # 'EventInfo.jvt_effSF_%SYS% -> jvtSF_%SYS%',
                 # 'EventInfo.fjvt_effSF_%SYS% -> fjvtSF_%SYS%',
-                'OutJets_%SYS%.jvt_effSF_%SYS% -> jet_jvtEfficiency_%SYS%',
                 # 'OutJets_%SYS%.fjvt_effSF_NOSYS -> jet_fjvtEfficiency_%SYS%',
             ]
 
@@ -204,9 +206,9 @@ def makeSequenceOld (dataType, algSeq, vars, forCompare) :
 
     selalg = createAlgorithm( 'CP::AsgSelectionAlg', 'UserElectronsSelectionAlg' )
     addPrivateTool( selalg, 'selectionTool', 'CP::AsgPtEtaSelectionTool' )
-    if electronMinPt :
+    if electronMinPt is not None :
         selalg.selectionTool.minPt = electronMinPt
-    if electronMaxEta :
+    if electronMaxEta is not None :
         selalg.selectionTool.maxEta = electronMaxEta
     selalg.selectionDecoration = 'selectPtEta'
     selalg.particles = 'AnaElectrons_%SYS%'
@@ -214,9 +216,9 @@ def makeSequenceOld (dataType, algSeq, vars, forCompare) :
 
     selalg = createAlgorithm( 'CP::AsgSelectionAlg', 'UserPhotonsSelectionAlg' )
     addPrivateTool( selalg, 'selectionTool', 'CP::AsgPtEtaSelectionTool' )
-    if photonMinPt :
+    if photonMinPt is not None :
         selalg.selectionTool.minPt = photonMinPt
-    if photonMaxEta :
+    if photonMaxEta is not None :
         selalg.selectionTool.maxEta = photonMaxEta
     selalg.selectionDecoration = 'selectPtEta'
     selalg.particles = 'AnaPhotons_%SYS%'
@@ -224,9 +226,9 @@ def makeSequenceOld (dataType, algSeq, vars, forCompare) :
 
     selalg = createAlgorithm( 'CP::AsgSelectionAlg', 'UserMuonsSelectionAlg' )
     addPrivateTool( selalg, 'selectionTool', 'CP::AsgPtEtaSelectionTool' )
-    if muonMinPt :
+    if muonMinPt is not None :
         selalg.selectionTool.minPt = muonMinPt
-    if muonMaxEta :
+    if muonMaxEta is not None :
         selalg.selectionTool.maxEta = muonMaxEta
     selalg.selectionDecoration = 'selectPtEta'
     selalg.particles = 'AnaMuons_%SYS%'
@@ -234,9 +236,9 @@ def makeSequenceOld (dataType, algSeq, vars, forCompare) :
 
     selalg = createAlgorithm( 'CP::AsgSelectionAlg', 'UserTauJetsSelectionAlg' )
     addPrivateTool( selalg, 'selectionTool', 'CP::AsgPtEtaSelectionTool' )
-    if tauMinPt :
+    if tauMinPt is not None :
         selalg.selectionTool.minPt = tauMinPt
-    if tauMaxEta :
+    if tauMaxEta is not None :
         selalg.selectionTool.maxEta = tauMaxEta
     selalg.selectionDecoration = 'selectPtEta'
     selalg.particles = 'AnaTauJets_%SYS%'
@@ -244,8 +246,10 @@ def makeSequenceOld (dataType, algSeq, vars, forCompare) :
 
     selalg = createAlgorithm( 'CP::AsgSelectionAlg', 'UserJetsSelectionAlg' )
     addPrivateTool( selalg, 'selectionTool', 'CP::AsgPtEtaSelectionTool' )
-    #selalg.selectionTool.minPt = 10e3
-    #selalg.selectionTool.maxEta = 2.47
+    if jetMinPt is not None :
+        selalg.selectionTool.minPt = jetMinPt
+    if jetMaxEta is not None :
+        selalg.selectionTool.maxEta = jetMaxEta
     selalg.selectionDecoration = 'selectPtEta'
     selalg.particles = 'AnaJets_%SYS%'
     algSeq += selalg
@@ -486,14 +490,30 @@ def makeSequenceBlocks (dataType, algSeq, vars, forCompare) :
     if dataType != 'data':
         vars += [ 'OutTauJets_%SYS%.tau_effSF_tight_%SYS% -> tau_effSF_tight_%SYS%', ]
 
+    # Include, and then set up the jet analysis algorithm sequence:
+    from JetAnalysisAlgorithms.JetAnalysisConfig import makeJetAnalysisConfig
+    jetContainer = 'AntiKt4EMPFlowJets'
+    makeJetAnalysisConfig( configSeq, 'AnaJets', jetContainer )
+    vars += ['OutJets_%SYS%.pt  -> jet_pt_%SYS%',
+             'OutJets_NOSYS.phi -> jet_phi',
+             'OutJets_NOSYS.eta -> jet_eta', ]
+
+    from JetAnalysisAlgorithms.JetJvtAnalysisConfig import makeJetJvtAnalysisConfig
+    makeJetJvtAnalysisConfig( configSeq, 'AnaJets', jetContainer )
+    if dataType != 'data':
+        vars += [
+            'OutJets_%SYS%.jvt_effSF_%SYS% -> jet_jvtEfficiency_%SYS%',
+        ]
+
+
     configAccumulator = ConfigAccumulator (dataType, algSeq)
     configSeq.fullConfigure (configAccumulator)
 
     selalg = createAlgorithm( 'CP::AsgSelectionAlg', 'UserElectronsSelectionAlg' )
     addPrivateTool( selalg, 'selectionTool', 'CP::AsgPtEtaSelectionTool' )
-    if electronMinPt :
+    if electronMinPt is not None :
         selalg.selectionTool.minPt = electronMinPt
-    if electronMaxEta :
+    if electronMaxEta is not None :
         selalg.selectionTool.maxEta = electronMaxEta
     selalg.selectionDecoration = 'selectPtEta'
     selalg.particles = 'AnaElectrons_%SYS%'
@@ -503,9 +523,9 @@ def makeSequenceBlocks (dataType, algSeq, vars, forCompare) :
 
     selalg = createAlgorithm( 'CP::AsgSelectionAlg', 'UserPhotonsSelectionAlg' )
     addPrivateTool( selalg, 'selectionTool', 'CP::AsgPtEtaSelectionTool' )
-    if photonMinPt :
+    if photonMinPt is not None :
         selalg.selectionTool.minPt = photonMinPt
-    if photonMaxEta :
+    if photonMaxEta is not None :
         selalg.selectionTool.maxEta = photonMaxEta
     selalg.selectionDecoration = 'selectPtEta'
     selalg.particles = 'AnaPhotons_%SYS%'
@@ -515,9 +535,9 @@ def makeSequenceBlocks (dataType, algSeq, vars, forCompare) :
 
     selalg = createAlgorithm( 'CP::AsgSelectionAlg', 'UserMuonsSelectionAlg' )
     addPrivateTool( selalg, 'selectionTool', 'CP::AsgPtEtaSelectionTool' )
-    if muonMinPt :
+    if muonMinPt is not None :
         selalg.selectionTool.minPt = muonMinPt
-    if muonMaxEta :
+    if muonMaxEta is not None :
         selalg.selectionTool.maxEta = muonMaxEta
     selalg.selectionDecoration = 'selectPtEta'
     selalg.particles = 'AnaMuons_%SYS%'
@@ -527,15 +547,27 @@ def makeSequenceBlocks (dataType, algSeq, vars, forCompare) :
 
     selalg = createAlgorithm( 'CP::AsgSelectionAlg', 'UserTausSelectionAlg' )
     addPrivateTool( selalg, 'selectionTool', 'CP::AsgPtEtaSelectionTool' )
-    if tauMinPt :
+    if tauMinPt is not None :
         selalg.selectionTool.minPt = tauMinPt
-    if tauMaxEta :
+    if tauMaxEta is not None :
         selalg.selectionTool.maxEta = tauMaxEta
     selalg.selectionDecoration = 'selectPtEta'
     selalg.particles = 'AnaTauJets_%SYS%'
     algSeq += selalg
     addOutputCopyAlgorithms (algSeq, 'TauJets', 'AnaTauJets_%SYS%', 'OutTauJets_%SYS%',
                              'selectPtEta&&baselineSelection_tight,as_char')
+
+    selalg = createAlgorithm( 'CP::AsgSelectionAlg', 'UserJetsSelectionAlg' )
+    addPrivateTool( selalg, 'selectionTool', 'CP::AsgPtEtaSelectionTool' )
+    if jetMinPt is not None :
+        selalg.selectionTool.minPt = jetMinPt
+    if jetMaxEta is not None :
+        selalg.selectionTool.maxEta = jetMaxEta
+    selalg.selectionDecoration = 'selectPtEta'
+    selalg.particles = 'AnaJets_%SYS%'
+    algSeq += selalg
+    addOutputCopyAlgorithms (algSeq, 'Jets', 'AnaJets_%SYS%', 'OutJets_%SYS%',
+                             'selectPtEta')
 
 
 
