@@ -16,6 +16,7 @@
 #include "GaudiKernel/ToolHandle.h"
 #include "GaudiKernel/ServiceHandle.h"
 #include "AthenaBaseComps/AthMessaging.h"
+#include "CxxUtils/checker_macros.h"
 
 // G4Atlas includes
 #include "G4AtlasInterfaces/IPhysicsListSvc.h"
@@ -38,7 +39,7 @@ class G4AtlasMTRunManager: public G4MTRunManager, public AthMessaging {
 public:
 
   /// Get the (pure) singleton instance
-  static G4AtlasMTRunManager* GetG4AtlasMTRunManager();
+  static G4AtlasMTRunManager* GetG4AtlasMTRunManager ATLAS_NOT_THREAD_SAFE ();
 
   /// G4 function called at end of run
   void RunTermination() override final;

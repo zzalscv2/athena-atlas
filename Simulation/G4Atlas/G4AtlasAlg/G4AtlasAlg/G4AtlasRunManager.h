@@ -14,6 +14,7 @@
 
 // Athena headers
 #include "AthenaBaseComps/AthMessaging.h"
+#include "CxxUtils/checker_macros.h"
 #include "G4AtlasInterfaces/ISensitiveDetectorMasterTool.h"
 #include "G4AtlasInterfaces/IFastSimulationMasterTool.h"
 #include "G4AtlasInterfaces/IPhysicsListSvc.h"
@@ -33,7 +34,7 @@ public:
   virtual ~G4AtlasRunManager() {}
 
   /// Retrieve the singleton instance
-  static G4AtlasRunManager* GetG4AtlasRunManager();
+  static G4AtlasRunManager* GetG4AtlasRunManager ATLAS_NOT_THREAD_SAFE ();
 
   /// Does the work of simulating an ATLAS event
   bool ProcessEvent(G4Event* event);

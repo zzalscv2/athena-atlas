@@ -8,6 +8,7 @@
 #include "G4AtlasAlg/G4AtlasActionInitialization.h"
 
 #include "AthenaKernel/RNGWrapper.h"
+#include "CxxUtils/checker_macros.h"
 
 // Can we safely include all of these?
 #include "G4AtlasAlg/G4AtlasMTRunManager.h"
@@ -114,7 +115,8 @@ void G4AtlasAlg::initializeOnce()
   // Create the (master) run manager
   if(m_useMT) {
 #ifdef G4MULTITHREADED
-    auto* runMgr = G4AtlasMTRunManager::GetG4AtlasMTRunManager();
+    auto* runMgr ATLAS_THREAD_SAFE = // protected by std::call_once above
+      G4AtlasMTRunManager::GetG4AtlasMTRunManager();
     m_physListSvc->SetPhysicsList();
     runMgr->SetDetGeoSvc( m_detGeoSvc.typeAndName() );
     runMgr->SetFastSimMasterTool(m_fastSimTool.typeAndName() );
@@ -134,7 +136,8 @@ void G4AtlasAlg::initializeOnce()
   }
   // Single-threaded run manager
   else {
-    auto* runMgr = G4AtlasRunManager::GetG4AtlasRunManager();
+    auto* runMgr ATLAS_THREAD_SAFE = // safe because single-threaded
+      G4AtlasRunManager::GetG4AtlasRunManager();
     m_physListSvc->SetPhysicsList();
     runMgr->SetRecordFlux( m_recordFlux, std::make_unique<G4AtlasFluxRecorder>() );
     runMgr->SetLogLevel( int(msg().level()) ); // Synch log levels
@@ -275,7 +278,7 @@ void G4AtlasAlg::finalizeOnce()
 
 StatusCode G4AtlasAlg::execute()
 {
-  static int n_Event=0;
+  static std::atomic<unsigned int> n_Event=0;
   ATH_MSG_DEBUG("++++++++++++  G4AtlasAlg execute  ++++++++++++");
 
 #ifdef G4MULTITHREADED
@@ -357,7 +360,8 @@ StatusCode G4AtlasAlg::execute()
 #endif
   }
   else {
-    auto* workerRM = G4AtlasRunManager::GetG4AtlasRunManager();
+    auto* workerRM ATLAS_THREAD_SAFE = // single-threaded case
+      G4AtlasRunManager::GetG4AtlasRunManager();
     abort = workerRM->ProcessEvent(inputEvent);
   }
   if (abort) {
