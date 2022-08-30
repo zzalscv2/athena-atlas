@@ -1,6 +1,9 @@
-# Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
 
 from AthenaMonitoringKernel.GenericMonitoringTool import GenericMonitoringTool, defineHistogram
+
+# Default set opt histogram options to use for per-LBN histograms
+_LBN_OPTIONS = "kLBNHistoryDepth=1 kAlwaysCreate"
 
 
 class BaseMonitoringTool:
@@ -22,7 +25,7 @@ class BaseMonitoringTool:
         )]
 
     def makeLBNHisto1D(self, name, type, xbins, xmin, xmax, title, path='EXPERT', opt="", **kw):
-        opt = "kLBNHistoryDepth=1 " + opt if opt else "kLBNHistoryDepth=1"
+        opt = _LBN_OPTIONS + " " + opt if opt else _LBN_OPTIONS
         self.makeHisto1D(
             name, type, xbins, xmin, xmax, title, path=path, opt=opt, **kw,
         )
@@ -39,7 +42,7 @@ class BaseMonitoringTool:
 
     def makeLBNHisto2D(self, nameX, nameY, type, xbins, xmin, xmax,
                        ybins, ymin, ymax, title, path='EXPERT', opt="", **kw):
-        opt = "kLBNHistoryDepth=1 " + opt if opt else "kLBNHistoryDepth=1"
+        opt = _LBN_OPTIONS + " " + opt if opt else _LBN_OPTIONS
         self.makeHisto2D(
             nameX, nameY, type, xbins, xmin, xmax, ybins, ymin, ymax, title,
             path=path, opt=opt, **kw,
@@ -53,7 +56,7 @@ class BaseMonitoringTool:
         )]
 
     def makeLBNProfile(self, nameX, nameY, xbins, xmin, xmax, title, path='EXPERT', opt="", **kw):
-        opt = "kLBNHistoryDepth=1 " + opt if opt else "kLBNHistoryDepth=1"
+        opt = _LBN_OPTIONS + " " + opt if opt else _LBN_OPTIONS
         self.makeProfile(
             nameX, nameY, xbins, xmin, xmax, title, path=path, opt=opt, **kw,
         )
