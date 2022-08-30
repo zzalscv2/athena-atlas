@@ -92,7 +92,7 @@ StatusCode jFEXFPGA::execute(jFEXOutputCollection* inputOutputCollection) {
     
     // Retrieve the L1 menu configuration
     SG::ReadHandle<TrigConf::L1Menu> l1Menu (m_l1MenuKey/*, ctx*/);
-
+    
     const TrigConf::L1ThrExtraInfo_jTAU & thr_jTAU = l1Menu->thrExtraInfo().jTAU(); 
     const TrigConf::L1ThrExtraInfo_jJ   & thr_jJ   = l1Menu->thrExtraInfo().jJ();  
     const TrigConf::L1ThrExtraInfo_jLJ  & thr_jLJ  = l1Menu->thrExtraInfo().jLJ(); 
@@ -172,21 +172,27 @@ StatusCode jFEXFPGA::execute(jFEXOutputCollection* inputOutputCollection) {
         
         m_jFEXsumETAlgoTool->setFPGAEnergy(m_map_Etvalues_FPGA);
         m_jFEXmetAlgoTool->setFPGAEnergy(m_map_Etvalues_FPGA);
-           
-           
+        
         unsigned int bin_pos = thr_jTE.etaBoundary_fw(m_jfex_string[m_jfexid]);
+        
+        std::unique_ptr<jFEXTOB> jXE_tob = std::make_unique<jFEXTOB>(); 
+        uint32_t jXE_tobword = 0;
+        
+        std::unique_ptr<jFEXTOB> jTE_tob = std::make_unique<jFEXTOB>(); 
+        uint32_t jTE_tobword = 0;
+                      
+                         
+        
 
         if(m_jfexid > 0 && m_jfexid < 5) {
 
             //-----------------jFEXsumETAlgo-----------------
             m_jFEXsumETAlgoTool->setup(m_jTowersIDs_Thin);
             m_jFEXsumETAlgoTool->buildBarrelSumET();
-            m_sumET_tobwords.push_back(m_IjFEXFormTOBsTool->formSumETTOB(m_jFEXsumETAlgoTool->getETlowerEta(bin_pos),m_jFEXsumETAlgoTool->getETupperEta(bin_pos),thr_jTE.resolutionMeV()));
 
             //-----------------jFEXmetAlgo-----------------
             m_jFEXmetAlgoTool->setup(m_jTowersIDs_Thin);
             m_jFEXmetAlgoTool->buildBarrelmet();
-            m_Met_tobwords.push_back(m_IjFEXFormTOBsTool->formMetTOB(m_jFEXmetAlgoTool->GetMetXComponent(),m_jFEXmetAlgoTool->GetMetYComponent(),thr_jXE.resolutionMeV()));
         }
         else if(m_jfexid == 0 ) {
             int flipped_jTowersIDs      [FEXAlgoSpaceDefs::jFEX_algoSpace_height][FEXAlgoSpaceDefs::jFEX_wide_algoSpace_width] = {{0}};
@@ -200,24 +206,28 @@ StatusCode jFEXFPGA::execute(jFEXOutputCollection* inputOutputCollection) {
             //-----------------jFEXsumETAlgo-----------------
             m_jFEXsumETAlgoTool->setup(flipped_jTowersIDs);
             m_jFEXsumETAlgoTool->buildFWDSumET();
-            m_sumET_tobwords.push_back(m_IjFEXFormTOBsTool->formSumETTOB(m_jFEXsumETAlgoTool->getETlowerEta(bin_pos),m_jFEXsumETAlgoTool->getETupperEta(bin_pos),thr_jTE.resolutionMeV()));
 
             //-----------------jFEXmetAlgo-----------------
             m_jFEXmetAlgoTool->setup(flipped_jTowersIDs);
             m_jFEXmetAlgoTool->buildFWDmet();
-            m_Met_tobwords.push_back(m_IjFEXFormTOBsTool->formMetTOB(m_jFEXmetAlgoTool->GetMetXComponent(),m_jFEXmetAlgoTool->GetMetYComponent(),thr_jXE.resolutionMeV()));
         }
         else if(m_jfexid == 5) {
             //-----------------jFEXsumETAlgo-----------------
             m_jFEXsumETAlgoTool->setup(m_jTowersIDs_Wide);
             m_jFEXsumETAlgoTool->buildFWDSumET();
-            m_sumET_tobwords.push_back(m_IjFEXFormTOBsTool->formSumETTOB(m_jFEXsumETAlgoTool->getETlowerEta(bin_pos),m_jFEXsumETAlgoTool->getETupperEta(bin_pos),thr_jTE.resolutionMeV()));
 
             //-----------------jFEXmetAlgo-----------------
             m_jFEXmetAlgoTool->setup(m_jTowersIDs_Wide);
             m_jFEXmetAlgoTool->buildFWDmet();
-            m_Met_tobwords.push_back(m_IjFEXFormTOBsTool->formMetTOB(m_jFEXmetAlgoTool->GetMetXComponent(),m_jFEXmetAlgoTool->GetMetYComponent(),thr_jXE.resolutionMeV()));
         }
+        
+        jXE_tobword = m_IjFEXFormTOBsTool->formMetTOB(m_jFEXmetAlgoTool->GetMetXComponent(),m_jFEXmetAlgoTool->GetMetYComponent(),thr_jXE.resolutionMeV());
+        jXE_tob->initialize(m_id,m_jfexid,jXE_tobword,thr_jXE.resolutionMeV(),0);
+        m_Met_tobwords.push_back(std::move(jXE_tob));
+        
+        jTE_tobword = m_IjFEXFormTOBsTool->formSumETTOB(m_jFEXsumETAlgoTool->getETlowerEta(bin_pos),m_jFEXsumETAlgoTool->getETupperEta(bin_pos),thr_jTE.resolutionMeV());
+        jTE_tob->initialize(m_id,m_jfexid,jTE_tobword,thr_jTE.resolutionMeV(),0);
+        m_sumET_tobwords.push_back(std::move(jTE_tob));
     }
 
     //-----------jFEXSmallRJet & Large R Jet Algo-----------------
@@ -293,14 +303,19 @@ StatusCode jFEXFPGA::execute(jFEXOutputCollection* inputOutputCollection) {
                     //Creating SR TOB
                     int SRj_Et = m_jFEXSmallRJetAlgoTool->getSmallClusterET();
                     uint32_t SRJet_tobword = m_IjFEXFormTOBsTool->formSRJetTOB(m_jfexid, mphi_LM, meta_LM, SRj_Et, thr_jJ.resolutionMeV(), thr_jJ.ptMinToTopoMeV(m_jfex_string[m_jfexid]));
-                    std::vector<uint32_t> SRtob_aux{SRJet_tobword,(uint32_t) m_jTowersIDs_Thin[mphi_LM][meta_LM]};
-                    if ( SRJet_tobword != 0 ) m_SRJet_tobwords.push_back( SRtob_aux);
+                    
+                    std::unique_ptr<jFEXTOB> jJ_tob = std::make_unique<jFEXTOB>(); 
+                    jJ_tob->initialize(m_id,m_jfexid,SRJet_tobword,thr_jJ.resolutionMeV(),m_jTowersIDs_Thin[mphi_LM][meta_LM]);              
+                    if ( SRJet_tobword != 0 ) m_SRJet_tobwords.push_back(std::move(jJ_tob));
                     
                     //Creating LR TOB
                     int LRj_Et = m_jFEXLargeRJetAlgoTool->getLargeClusterET(SRj_Et,m_jFEXLargeRJetAlgoTool->getRingET());
                     uint32_t LRJet_tobword = m_IjFEXFormTOBsTool->formLRJetTOB(m_jfexid, mphi_LM, meta_LM, LRj_Et, thr_jLJ.resolutionMeV(), thr_jLJ.ptMinToTopoMeV(m_jfex_string[m_jfexid]));
-                    std::vector<uint32_t> LRtob_aux{LRJet_tobword,(uint32_t) m_jTowersIDs_Thin[mphi_LM][meta_LM]};
-                    if ( LRJet_tobword != 0 ) m_LRJet_tobwords.push_back(LRtob_aux);
+
+                    std::unique_ptr<jFEXTOB> jLJ_tob = std::make_unique<jFEXTOB>(); 
+                    jLJ_tob->initialize(m_id,m_jfexid,LRJet_tobword,thr_jLJ.resolutionMeV(),m_jTowersIDs_Thin[mphi_LM][meta_LM]);              
+                    if ( LRJet_tobword != 0 ) m_LRJet_tobwords.push_back(std::move(jLJ_tob));                    
+                    
                 }
                 // ********  jTau algorithm  ********
                 ATH_CHECK( m_jFEXtauAlgoTool->safetyTest());
@@ -315,7 +330,6 @@ StatusCode jFEXFPGA::execute(jFEXOutputCollection* inputOutputCollection) {
                     m_jFEXtauAlgoTool->setFirstEtRing(TT_First_ETring);
                     
                     uint32_t jTau_tobword = m_IjFEXFormTOBsTool->formTauTOB(mphi,meta,m_jFEXtauAlgoTool->getClusterEt(),m_jFEXtauAlgoTool->getFirstEtRing(),thr_jTAU.resolutionMeV(),thr_jTAU.ptMinToTopoMeV(m_jfex_string[m_jfexid]));
-                    std::vector<uint32_t> TAUtob_aux{jTau_tobword,(uint32_t) m_jTowersIDs_Thin[mphi][meta]};
 
                     std::unique_ptr<jFEXTOB> jTau_tob = std::make_unique<jFEXTOB>();
                     jTau_tob->initialize(m_id,m_jfexid,jTau_tobword,thr_jTAU.resolutionMeV(),m_jTowersIDs_Thin[mphi][meta]);
@@ -342,7 +356,6 @@ StatusCode jFEXFPGA::execute(jFEXOutputCollection* inputOutputCollection) {
 
             uint32_t TTID = it->first;
             jFEXForwardJetsInfo FCALJets = it->second;
-            
 
             int iphi = FCALJets.getCentreLocalTTPhi();
             int ieta = FCALJets.getCentreLocalTTEta();
@@ -350,16 +363,18 @@ StatusCode jFEXFPGA::execute(jFEXOutputCollection* inputOutputCollection) {
             m_SRJetET = FCALJets.getSeedET() + FCALJets.getFirstEnergyRingET();
             m_LRJetET = m_SRJetET + FCALJets.getSecondEnergyRingET();
             
-            
-            
             uint32_t SRFCAL_Jet_tobword = m_IjFEXFormTOBsTool->formSRJetTOB(m_jfexid, iphi, ieta, m_SRJetET, thr_jJ.resolutionMeV(), thr_jJ.ptMinToTopoMeV(m_jfex_string[m_jfexid]));
-            std::vector<uint32_t> SRtob_aux{SRFCAL_Jet_tobword,TTID};
-            if ( SRFCAL_Jet_tobword != 0 ) m_SRJet_tobwords.push_back(SRtob_aux);
+            
+            std::unique_ptr<jFEXTOB> jJ_tob = std::make_unique<jFEXTOB>(); 
+            jJ_tob->initialize(m_id,m_jfexid,SRFCAL_Jet_tobword,thr_jJ.resolutionMeV(),TTID);              
+            if ( SRFCAL_Jet_tobword != 0 ) m_SRJet_tobwords.push_back(std::move(jJ_tob));
             
             if(std::fabs(FCALJets.getCentreTTEta())<2.6){
                 uint32_t LRFCAL_Jet_tobword = m_IjFEXFormTOBsTool->formLRJetTOB(m_jfexid, iphi, ieta, m_LRJetET, thr_jLJ.resolutionMeV(),thr_jLJ.ptMinToTopoMeV(m_jfex_string[m_jfexid]));
-                std::vector<uint32_t> LRtob_aux{LRFCAL_Jet_tobword,TTID};
-                if ( LRFCAL_Jet_tobword != 0 ) m_LRJet_tobwords.push_back(LRtob_aux);                
+
+                std::unique_ptr<jFEXTOB> jLJ_tob = std::make_unique<jFEXTOB>(); 
+                jLJ_tob->initialize(m_id,m_jfexid,LRFCAL_Jet_tobword,thr_jLJ.resolutionMeV(),TTID);              
+                if ( LRFCAL_Jet_tobword != 0 ) m_LRJet_tobwords.push_back(std::move(jLJ_tob));                   
             }
             
         }
@@ -473,12 +488,9 @@ StatusCode jFEXFPGA::execute(jFEXOutputCollection* inputOutputCollection) {
                     m_jFEXtauAlgoTool->setFirstEtRing(TT_First_ETring);
                     
                     uint32_t jTau_tobword = m_IjFEXFormTOBsTool->formTauTOB(mphi,meta,m_jFEXtauAlgoTool->getClusterEt(),m_jFEXtauAlgoTool->getFirstEtRing(),thr_jTAU.resolutionMeV(),thr_jTAU.ptMinToTopoMeV(m_jfex_string[m_jfexid]));
-                    std::vector<uint32_t> TAUtob_aux{jTau_tobword,(uint32_t) jTowersIDs[mphi][meta]};
                     
                     std::unique_ptr<jFEXTOB> jTau_tob = std::make_unique<jFEXTOB>();
-
                     jTau_tob->initialize(m_id,m_jfexid,jTau_tobword,thr_jTAU.resolutionMeV(),jTowersIDs[mphi][meta]);
-                                        
                     if ( jTau_tobword != 0 ) m_tau_tobwords.push_back(std::move(jTau_tob));  
                 }
             }
@@ -528,41 +540,40 @@ void jFEXFPGA::SetTowersAndCells_SG(int tmp_jTowersIDs_subset[][FEXAlgoSpaceDefs
 
 }
 
-std::vector <std::vector <uint32_t>> jFEXFPGA::getSmallRJetTOBs()
+std::vector <std::unique_ptr<jFEXTOB>> jFEXFPGA::getSmallRJetTOBs()
 {
-    auto tobsSort = m_SRJet_tobwords;
+        
+    std::vector<std::unique_ptr<jFEXTOB>> tobsSort;
+    tobsSort.clear();
     
-    ATH_MSG_DEBUG("number of smallRJet tobs: " << tobsSort.size() << " in FPGA: " << m_id<< " before truncation");
-    // sort tobs by their et ( 11 bits of the 32 bit tob word)
-    std::sort (tobsSort.begin(), tobsSort.end(), etSRJetSort);
-    
-    while(tobsSort.size()<7){
-        std::vector <uint32_t> v{0,0};
-        tobsSort.push_back(v);
+    // We need the copy since we cannot move a member of the class, since it will not be part of it anymore
+    for(auto &j : m_SRJet_tobwords) {
+        tobsSort.push_back(std::move(j));
     }
-    tobsSort.resize(7);
-
-    return tobsSort;
+    std::sort (tobsSort.begin(), tobsSort.end(), std::bind(TOBetSort<std::unique_ptr<jFEXTOB>>, std::placeholders::_1, std::placeholders::_2, FEXAlgoSpaceDefs::jJ_etBit, 0x7ff));
+    
+    if(tobsSort.size()>7) tobsSort.resize(7);
+    
+    return tobsSort;    
 
 }
 
-std::vector <std::vector <uint32_t>> jFEXFPGA::getLargeRJetTOBs()
+std::vector <std::unique_ptr<jFEXTOB>> jFEXFPGA::getLargeRJetTOBs()
 {
-    auto tobsSort = m_LRJet_tobwords;
-
-    ATH_MSG_DEBUG("number of largeRJet tobs: " << tobsSort.size() << " in FPGA: " << m_id<< " before truncation");
-    //sort tobs by their et ( 13 bits of the 32 bit tob word)
-    std::sort (tobsSort.begin(), tobsSort.end(), etLRJetSort);
     
-    while(tobsSort.size()<1) {
-        std::vector <uint32_t> v{0,0};
-        tobsSort.push_back(v);
+        
+    std::vector<std::unique_ptr<jFEXTOB>> tobsSort;
+    tobsSort.clear();
+    
+    // We need the copy since we cannot move a member of the class, since it will not be part of it anymore
+    for(auto &j : m_LRJet_tobwords) {
+        tobsSort.push_back(std::move(j));
     }
-    tobsSort.resize(1);
-
-
-
-    return tobsSort;
+    std::sort (tobsSort.begin(), tobsSort.end(), std::bind(TOBetSort<std::unique_ptr<jFEXTOB>>, std::placeholders::_1, std::placeholders::_2, FEXAlgoSpaceDefs::jLJ_etBit, 0x1fff));
+    
+    if(tobsSort.size()>1) tobsSort.resize(1);
+    
+    return tobsSort;    
 
 }
 
@@ -604,21 +615,33 @@ std::vector <std::unique_ptr<jFEXTOB>> jFEXFPGA::getTauTOBs() {
     return tobsSort;
 }
 
-std::vector <uint32_t> jFEXFPGA::getSumEtTOBs() {
-    auto tobsSort = m_sumET_tobwords;
-
-    ATH_MSG_DEBUG("number of SumEt tobs: " << tobsSort.size() << " in FPGA: " << m_id);
-    return tobsSort;
+std::vector<std::unique_ptr<jFEXTOB>> jFEXFPGA::getSumEtTOBs() {
+    
+    std::vector<std::unique_ptr<jFEXTOB>> tobsSort;
+    tobsSort.clear();
+    
+    // We need the copy since we cannot move a member of the class, since it will not be part of it anymore
+    for(auto &j : m_sumET_tobwords) {
+        tobsSort.push_back(std::move(j));
+    }
+    
+    return tobsSort;    
 
 }
 
 
 
-std::vector <uint32_t> jFEXFPGA::getMetTOBs() {
-    auto tobsSort = m_Met_tobwords;
-
-    ATH_MSG_DEBUG("number of Met tobs: " << tobsSort.size() << " in FPGA: " << m_id);
-    return tobsSort;
+std::vector<std::unique_ptr<jFEXTOB>> jFEXFPGA::getMetTOBs() {
+    
+    std::vector<std::unique_ptr<jFEXTOB>> tobsSort;
+    tobsSort.clear();
+    
+    // We need the copy since we cannot move a member of the class, since it will not be part of it anymore
+    for(auto &j : m_Met_tobwords) {
+        tobsSort.push_back(std::move(j));
+    }
+    
+    return tobsSort;    
 
 }
 
