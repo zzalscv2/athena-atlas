@@ -14,7 +14,7 @@ class GeoShape;
 class GeoPixelTMT : public GeoPixelStaveSupport {
 
 public:  
-  GeoPixelTMT(InDetDD::PixelDetectorManager* ddmgr, PixelGeometryManager* mgr);
+  GeoPixelTMT(InDetDD::PixelDetectorManager* ddmgr, PixelGeometryManager* mgr, GeoModelIO::ReadGeoModel* sqliteReader);
   virtual ~GeoPixelTMT();
   virtual GeoVPhysVol* Build() override;
   virtual GeoVPhysVol* getPhysVol () override {return m_physVol;}

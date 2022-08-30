@@ -112,8 +112,9 @@
 
 GeoPixelServices::GeoPixelServices(InDetDD::PixelDetectorManager* ddmgr,
                                    PixelGeometryManager* mgr,
+				   GeoModelIO::ReadGeoModel* sqliteReader,
                                    InDetDD::Zone * pixZone) 
-  : GeoVPixelFactory(ddmgr, mgr),
+  : GeoVPixelFactory(ddmgr, mgr, sqliteReader),
     m_pixServBuilder(nullptr),
     m_servMatBuilder(nullptr),
     m_layerShift(0)

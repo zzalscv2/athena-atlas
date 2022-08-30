@@ -121,7 +121,7 @@ void PixelDetectorFactoryLite::create(GeoPhysVol*)
     
   //
   // Create the Lite Pixel Envelope...
-  GeoPixelEnvelope pe(m_detectorManager, m_geometryManager.get());
+  GeoPixelEnvelope pe(m_detectorManager, m_geometryManager.get(), m_sqliteReader);
   pe.Build() ;
 
   GeoAlignableTransform * transform = mapAX["Pixel_Envelope"];

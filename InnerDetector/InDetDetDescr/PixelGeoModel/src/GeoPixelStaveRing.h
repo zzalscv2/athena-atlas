@@ -11,7 +11,8 @@ class GeoPixelStaveRing :  public GeoVPixelFactory {
 
 public:  
   GeoPixelStaveRing(InDetDD::PixelDetectorManager* ddmgr,
-                    PixelGeometryManager* mgr);
+                    PixelGeometryManager* mgr,
+		    GeoModelIO::ReadGeoModel* sqliteReader);
   virtual GeoVPhysVol* Build() override;
 
   GeoVPhysVol* SetParametersAndBuild(const std::string&,const std::string&);

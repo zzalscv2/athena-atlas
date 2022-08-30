@@ -28,7 +28,8 @@ class DBM_Module : public GeoVPixelFactory {
   public:
 
   DBM_Module(InDetDD::PixelDetectorManager* ddmgr,
-             PixelGeometryManager* mgr);
+             PixelGeometryManager* mgr,
+	     GeoModelIO::ReadGeoModel* sqliteReader);
   virtual GeoVPhysVol* Build() override;
 
   private:

@@ -10,8 +10,9 @@
 #include "GeoModelKernel/GeoTransform.h"
 
 GeoPixelPigtail::GeoPixelPigtail(InDetDD::PixelDetectorManager* ddmgr,
-                                 PixelGeometryManager* mgr)
-  : GeoVPixelFactory (ddmgr, mgr)
+                                 PixelGeometryManager* mgr,
+				 GeoModelIO::ReadGeoModel* sqliteReader)
+  : GeoVPixelFactory (ddmgr, mgr, sqliteReader)
 {
 }
 

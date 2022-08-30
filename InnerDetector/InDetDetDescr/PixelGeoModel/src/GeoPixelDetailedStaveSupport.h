@@ -16,7 +16,8 @@ class GeoPixelDetailedStaveSupport : public GeoPixelStaveSupport {
 
 public:  
   GeoPixelDetailedStaveSupport(InDetDD::PixelDetectorManager* ddmgr,
-                               PixelGeometryManager* mgr);
+                               PixelGeometryManager* mgr,
+			       GeoModelIO::ReadGeoModel* sqliteReader);
   virtual GeoVPhysVol* Build() override;
   virtual GeoVPhysVol* getPhysVol() override {return m_physVol;}
   virtual const GeoTrf::Transform3D & transform() const override {return m_transform;}

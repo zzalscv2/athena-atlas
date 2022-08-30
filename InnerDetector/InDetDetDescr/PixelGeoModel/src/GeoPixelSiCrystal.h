@@ -21,6 +21,7 @@ class GeoPixelSiCrystal : public GeoVPixelFactory {
  public:
   GeoPixelSiCrystal(InDetDD::PixelDetectorManager* ddmgr,
                     PixelGeometryManager* mgr,
+		    GeoModelIO::ReadGeoModel* sqliteReader,
                     bool isBLayer, bool isModule3D=false);
   virtual GeoVPhysVol* Build() override;
   inline Identifier getID();

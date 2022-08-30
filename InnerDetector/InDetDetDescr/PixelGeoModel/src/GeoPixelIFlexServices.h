@@ -19,7 +19,7 @@ class GeoPixelIFlexServices :  public GeoVPixelFactory {
 public:  
 
   GeoPixelIFlexServices(InDetDD::PixelDetectorManager* ddmgr,
-                        PixelGeometryManager* mgr, int iSection);
+                        PixelGeometryManager* mgr, GeoModelIO::ReadGeoModel* sqliteReader, int iSection);
   virtual GeoVPhysVol* Build() override;
 
   GeoPhysVol* getSupportA(){ return m_supportPhysA; }

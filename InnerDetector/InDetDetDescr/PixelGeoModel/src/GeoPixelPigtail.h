@@ -11,7 +11,8 @@ class GeoLogVol;
 class GeoPixelPigtail : public GeoVPixelFactory {
  public:
   GeoPixelPigtail(InDetDD::PixelDetectorManager* ddmgr,
-                  PixelGeometryManager* mgr);
+                  PixelGeometryManager* mgr,
+		  GeoModelIO::ReadGeoModel* sqliteReader);
   virtual GeoVPhysVol* Build() override;
 
  private:

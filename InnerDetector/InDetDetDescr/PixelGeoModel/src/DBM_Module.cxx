@@ -21,8 +21,9 @@
 using namespace InDetDD;
 
 DBM_Module::DBM_Module(InDetDD::PixelDetectorManager* ddmgr,
-                       PixelGeometryManager* mgr)
-  : GeoVPixelFactory (ddmgr, mgr)
+                       PixelGeometryManager* mgr,
+		       GeoModelIO::ReadGeoModel* sqliteReader)
+  : GeoVPixelFactory (ddmgr, mgr, sqliteReader)
 {
 
   double thickness = 0.5;

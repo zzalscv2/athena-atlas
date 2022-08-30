@@ -25,8 +25,9 @@
 
 GeoPixelLadderServices::GeoPixelLadderServices(InDetDD::PixelDetectorManager* m_DDmgr,
                                                PixelGeometryManager* mgr,
+					       GeoModelIO::ReadGeoModel* sqliteReader,
                                                int ladderType)
-  : GeoVPixelFactory(m_DDmgr, mgr),
+  : GeoVPixelFactory(m_DDmgr, mgr, sqliteReader),
     m_ladderType(ladderType)
 {
   //std::cout << "Building GeoPixelLadderServices with ladder type : " << ladderType << std::endl; 
@@ -119,7 +120,7 @@ GeoVPhysVol* GeoPixelLadderServices::Build() {
   //
   // Put the fluid/gaz mixture
   //
-  GeoPixelFluid fluid(m_DDmgr, m_gmt_mgr, m_ladderType);
+  GeoPixelFluid fluid(m_DDmgr, m_gmt_mgr, m_sqliteReader, m_ladderType);
   double xpos = fluid.posX() + m_xOffset;
   double ypos = fluid.posY() + m_yOffset;
   double zpos = fluid.posZ();
@@ -138,7 +139,7 @@ GeoVPhysVol* GeoPixelLadderServices::Build() {
   //
   // Cables
   //
-  GeoPixelCable cable (m_DDmgr, m_gmt_mgr);
+  GeoPixelCable cable (m_DDmgr, m_gmt_mgr, m_sqliteReader);
   for (int ii = 0; ii < cable.numElements(); ii++) {
     cable.setElement(ii);
     GeoVPhysVol* phys = cable.Build();

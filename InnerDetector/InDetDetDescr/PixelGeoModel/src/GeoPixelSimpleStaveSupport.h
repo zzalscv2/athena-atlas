@@ -13,7 +13,8 @@ class GeoPixelSimpleStaveSupport : public GeoPixelStaveSupport {
 
 public:  
   GeoPixelSimpleStaveSupport(InDetDD::PixelDetectorManager* ddmgr,
-                             PixelGeometryManager* mgr);
+                             PixelGeometryManager* mgr,
+			     GeoModelIO::ReadGeoModel* sqliteReader);
   virtual ~GeoPixelSimpleStaveSupport();
   virtual GeoVPhysVol* Build() override;
   virtual GeoVPhysVol* getPhysVol() override {return m_physVol;}

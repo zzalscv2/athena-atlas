@@ -17,9 +17,10 @@
 #include <iostream>
 
 DBM_Det::DBM_Det(InDetDD::PixelDetectorManager* ddmgr,
-                 PixelGeometryManager* mgr)
+                 PixelGeometryManager* mgr,
+		 GeoModelIO::ReadGeoModel* sqliteReader)
   : GeoVPixelFactory (ddmgr,
-                      mgr)
+                      mgr, sqliteReader)
 {
   double Trans_Y = 0.;
   
@@ -49,7 +50,7 @@ GeoVPhysVol* DBM_Det::Build()
   GeoFullPhysVol* Phys = new GeoFullPhysVol(Log);
 
   // add PP0 board
-  DBM_PP0 pp0Board (m_DDmgr, m_gmt_mgr);
+  DBM_PP0 pp0Board (m_DDmgr, m_gmt_mgr, m_sqliteReader);
   GeoVPhysVol* pp0BoardPhys = pp0Board.Build();
   GeoTrf::Translate3D pp0Pos(0., 0., -halflength + m_gmt_mgr->DBMPP0Thick()/2. + safety);
   GeoTransform* pp0xform = new GeoTransform(pp0Pos);
@@ -59,7 +60,7 @@ GeoVPhysVol* DBM_Det::Build()
   Phys->add(pp0BoardPhys);	      
 
   //we are now adding four DBM telescopes
-  DBM_Telescope dbm (m_DDmgr, m_gmt_mgr);
+  DBM_Telescope dbm (m_DDmgr, m_gmt_mgr, m_sqliteReader);
   for(int i=0; i<4; i++)
     {
       m_gmt_mgr->SetEta(0);

@@ -19,8 +19,8 @@
 #include <algorithm>
 
 GeoPixelFrame::GeoPixelFrame(InDetDD::PixelDetectorManager* ddmgr,
-                             PixelGeometryManager* mgr)
-  : GeoVPixelFactory (ddmgr, mgr)
+                             PixelGeometryManager* mgr, GeoModelIO::ReadGeoModel* sqliteReader)
+  : GeoVPixelFactory (ddmgr, mgr, sqliteReader)
 {
 }
 

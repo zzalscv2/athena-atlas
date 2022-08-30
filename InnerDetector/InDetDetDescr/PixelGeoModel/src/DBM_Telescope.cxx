@@ -86,7 +86,7 @@ GeoVPhysVol* DBM_Telescope::Build() {
 
   GeoTrf::RotateX3D rmX10(-10.*Gaudi::Units::deg);
 
-  DBM_ModuleCage moduleCage (m_DDmgr, m_gmt_mgr);
+  DBM_ModuleCage moduleCage (m_DDmgr, m_gmt_mgr, m_sqliteReader);
   GeoVPhysVol* moduleCagePhys = moduleCage.Build();
 
   // parameters for rotating the 3-layer unit

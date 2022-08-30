@@ -12,8 +12,9 @@
 #include <sstream>
 
 GeoPixelDiskSupports::GeoPixelDiskSupports(InDetDD::PixelDetectorManager* ddmgr,
-                                           PixelGeometryManager* mgr)
-  : GeoVPixelFactory (ddmgr, mgr)
+                                           PixelGeometryManager* mgr,
+					   GeoModelIO::ReadGeoModel* sqliteReader)
+  : GeoVPixelFactory (ddmgr, mgr, sqliteReader)
 {
   //
   // Initialize the vectors

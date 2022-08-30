@@ -10,7 +10,9 @@ class GeoLogVol;
 
 class GeoPixelDisk : public GeoVPixelFactory {
  public:
-  GeoPixelDisk(InDetDD::PixelDetectorManager* ddmgr, PixelGeometryManager* mgr);
+  GeoPixelDisk(InDetDD::PixelDetectorManager* ddmgr
+	       , PixelGeometryManager* mgr
+	       , GeoModelIO::ReadGeoModel* sqliteReader);
   virtual GeoVPhysVol* Build() override;
   double Thickness();
   double RMax();

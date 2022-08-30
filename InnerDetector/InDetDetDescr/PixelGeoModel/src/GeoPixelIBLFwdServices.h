@@ -19,7 +19,7 @@ class GeoPixelIBLFwdServices :  public GeoVPixelFactory {
 public:  
 
   GeoPixelIBLFwdServices(InDetDD::PixelDetectorManager* ddmgr,
-                         PixelGeometryManager* mgr, int);
+                         PixelGeometryManager* mgr, GeoModelIO::ReadGeoModel* sqliteReader, int);
   virtual GeoVPhysVol* Build() override;
 
   bool isComplexShapeDefined();

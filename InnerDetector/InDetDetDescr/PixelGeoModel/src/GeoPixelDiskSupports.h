@@ -12,7 +12,8 @@ class GeoPixelDiskSupports : public GeoVPixelFactory {
 
  public:
   GeoPixelDiskSupports(InDetDD::PixelDetectorManager* ddmgr,
-                       PixelGeometryManager* mgr);
+                       PixelGeometryManager* mgr,
+		       GeoModelIO::ReadGeoModel* sqliteReader);
   virtual GeoVPhysVol* Build() override;
 
   int NCylinders(){return m_rmin.size();}

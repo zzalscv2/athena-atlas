@@ -11,8 +11,9 @@
 #include <sstream>
 
 GeoPixelCable::GeoPixelCable(InDetDD::PixelDetectorManager* ddmgr,
-                             PixelGeometryManager* mgr)
-  :   GeoVPixelFactory(ddmgr, mgr),
+                             PixelGeometryManager* mgr,
+			     GeoModelIO::ReadGeoModel* sqliteReader)
+  :   GeoVPixelFactory(ddmgr, mgr, sqliteReader),
       m_currentElement(-1)
 {
   fillElements(m_gmt_mgr->GetLD(), m_gmt_mgr->Phi());

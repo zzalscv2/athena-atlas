@@ -129,7 +129,7 @@ void PixelDetectorFactory::create(GeoPhysVol *world)
 
   //
   // Create the Pixel Envelope...
-  GeoPixelEnvelope pe (m_detectorManager, m_geometryManager.get());
+  GeoPixelEnvelope pe (m_detectorManager, m_geometryManager.get(), nullptr);
   GeoVPhysVol* pephys = pe.Build() ;
 
   //

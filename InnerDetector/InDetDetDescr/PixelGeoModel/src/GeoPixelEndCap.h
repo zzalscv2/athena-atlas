@@ -12,6 +12,7 @@ class GeoPixelEndCap : public GeoVPixelFactory {
  public:
   GeoPixelEndCap(InDetDD::PixelDetectorManager* ddmgr,
                  PixelGeometryManager* mgr,
+		 GeoModelIO::ReadGeoModel* sqliteReader,
                  GeoPixelServices * pixServices);
   virtual GeoVPhysVol* Build() override;
  private:

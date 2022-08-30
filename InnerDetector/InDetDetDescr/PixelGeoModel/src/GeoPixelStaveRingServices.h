@@ -20,7 +20,7 @@ class GeoPixelStaveRingServices :  public GeoVPixelFactory {
 public:  
 
   GeoPixelStaveRingServices(InDetDD::PixelDetectorManager* ddmgr,
-                            PixelGeometryManager* mgr,
+                            PixelGeometryManager* mgr, GeoModelIO::ReadGeoModel* sqliteReader,
                             GeoPixelLadder& ladder, GeoPixelStaveSupport& staveSupport);
   virtual GeoVPhysVol* Build() override;
 

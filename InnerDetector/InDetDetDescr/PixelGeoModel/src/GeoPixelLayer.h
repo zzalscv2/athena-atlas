@@ -15,7 +15,8 @@ class GeoPixelLayer : public GeoVPixelFactory {
 
  public:
   GeoPixelLayer(InDetDD::PixelDetectorManager* ddmgr,
-                PixelGeometryManager* mgr);
+                PixelGeometryManager* mgr,
+		GeoModelIO::ReadGeoModel* sqliteReader);
   virtual GeoVPhysVol* Build() override;
 
   GeoPhysVol* getSupportA(){ return m_supportPhysA; }

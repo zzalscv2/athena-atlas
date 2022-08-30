@@ -12,6 +12,7 @@ class GeoPixelBarrel : public GeoVPixelFactory {
  public:
   GeoPixelBarrel(InDetDD::PixelDetectorManager* ddmgr,
                  PixelGeometryManager* mgr,
+		 GeoModelIO::ReadGeoModel* sqliteReader,
                  GeoPixelServices * pixServices);
   virtual GeoVPhysVol* Build() override;
  private:

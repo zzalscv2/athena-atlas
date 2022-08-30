@@ -25,9 +25,9 @@
 using std::max;
 
 GeoPixelStaveRingServices::GeoPixelStaveRingServices(InDetDD::PixelDetectorManager* ddmgr,
-                                                     PixelGeometryManager* mgr,
+                                                     PixelGeometryManager* mgr, GeoModelIO::ReadGeoModel* sqliteReader,
                                                      GeoPixelLadder& ladder, GeoPixelStaveSupport& staveSupport):
-  GeoVPixelFactory (ddmgr, mgr),
+  GeoVPixelFactory (ddmgr, mgr, sqliteReader),
   m_ladder(ladder),m_staveSupport(staveSupport),
   m_supportPhysA(nullptr),m_supportPhysC(nullptr),m_supportMidRing(nullptr),
   m_xformSupportA(nullptr), m_xformSupportC(nullptr), m_xformSupportMidRing(nullptr)
@@ -72,7 +72,7 @@ GeoVPhysVol* GeoPixelStaveRingServices::Build()
   } 
   
   // Define staveRing for side A
-  GeoPixelStaveRing staveRing (m_DDmgr, m_gmt_mgr);
+  GeoPixelStaveRing staveRing (m_DDmgr, m_gmt_mgr, m_sqliteReader);
   std::ostringstream lnameA;
   lnameA << "Brl0A_StaveRing";
   GeoVPhysVol* ringphysA = staveRing.SetParametersAndBuild(lnameA.str(),"AC");

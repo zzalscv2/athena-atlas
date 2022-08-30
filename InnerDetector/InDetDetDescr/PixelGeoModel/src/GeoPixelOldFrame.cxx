@@ -21,8 +21,9 @@
 // Satisfy interface
 
 GeoPixelOldFrame::GeoPixelOldFrame(InDetDD::PixelDetectorManager* ddmgr,
-                                   PixelGeometryManager* mgr)
-  : GeoVPixelFactory (ddmgr, mgr)
+                                   PixelGeometryManager* mgr,
+				   GeoModelIO::ReadGeoModel* sqliteReader)
+  : GeoVPixelFactory (ddmgr, mgr, sqliteReader)
 {
   m_legacyManager = m_gmt_mgr->legacyManager();
 }
