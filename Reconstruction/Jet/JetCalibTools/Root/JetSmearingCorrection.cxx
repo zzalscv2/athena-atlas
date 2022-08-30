@@ -432,13 +432,14 @@ StatusCode JetSmearingCorrection::calibrate(xAOD::Jet& jet, JetEventInfo&) const
     unsigned long seed = static_cast<unsigned long>(1.e5*fabs(jet.phi()));
     // SetSeed(0) uses the clock, so avoid this
     if(seed == 0) seed = 45583453; // arbitrary number which the seed couldn't otherwise be
+    TRandom3* rng = getTLSRandomGen(seed);
 
     // Get the Gaussian-distributed random number
     // Force this to be a positive value
     // Negative values should be extraordinarily rare, but they do exist
     double smearingFactor = -1;
     while (smearingFactor < 0)
-        smearingFactor = getTLSRandomGen(seed)->Gaus(1.,sigmaSmear);
+        smearingFactor = rng->Gaus(1.,sigmaSmear);
 
     // Apply the smearing factor to the jet as appropriate
     xAOD::JetFourMom_t calibP4 = jet.jetP4();
