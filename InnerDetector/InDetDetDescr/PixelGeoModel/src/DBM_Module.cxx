@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
 */
 
 
@@ -63,8 +63,23 @@ DBM_Module::DBM_Module(InDetDD::PixelDetectorManager* ddmgr,
 
 GeoVPhysVol* DBM_Module::Build()  
 {
-
-  GeoIdentifierTag* diamondTag = new GeoIdentifierTag(400);
+  const PixelID * idHelper = m_gmt_mgr->getIdHelper();
+  int dbmdet = 4*m_gmt_mgr->GetSide();
+  Identifier idwafer;
+  idwafer = idHelper->wafer_id(dbmdet,m_gmt_mgr->GetLD(),m_gmt_mgr->Phi(),m_gmt_mgr->Eta());
+  
+  if(m_sqliteReader) {
+    std::map<std::string, GeoFullPhysVol*> mapFPV = m_sqliteReader->getPublishedNodes<std::string, GeoFullPhysVol*>("Pixel");
+    std::map<std::string, GeoAlignableTransform*> mapAX = m_sqliteReader->getPublishedNodes<std::string, GeoAlignableTransform*>("Pixel");
+    std::string key ="DBMDiamond_" + std::to_string(dbmdet) +"_"+ std::to_string(m_gmt_mgr->GetLD()) +"_"+ std::to_string(m_gmt_mgr->Phi()) +"_"+ std::to_string(m_gmt_mgr->Eta());
+    SiDetectorElement* element = new SiDetectorElement(idwafer, m_design, mapFPV[key], m_gmt_mgr->commonItems());
+    // add the element to the manager
+    m_DDmgr->addDetectorElement(element);
+    m_DDmgr->addAlignableTransform(0, idwafer, mapAX[key], mapFPV[key]);
+    return nullptr;
+  }
+  else {
+    GeoIdentifierTag* diamondTag = new GeoIdentifierTag(400);
 
 
     double safety = 0.003*Gaudi::Units::mm;
@@ -131,16 +146,6 @@ GeoVPhysVol* DBM_Module::Build()
     }
   
     const GeoMaterial* chip_mat = m_mat_mgr->getMaterial("pix::ChipBase");
-    /*if(chip == NULL)
-    {
-  	std::cout << "MATERIAL ERROR: NO CHIPIBL FOUND\n";
-  	chip = m_mat_mgr->getMaterial("pix::Chip");
-  	if(chip == NULL)
-  	     std::cout << "MATERIAL ERROR: NO CHIP FOUND\n";
-    }
-    else
-        std::cout << "MATERIAL WARNING: CHIPIBL FOUND\n";
-    */
     
     double max_thick = diamond_Z + air_gap + chip_thick + substrate_Z;
     
@@ -156,15 +161,7 @@ GeoVPhysVol* DBM_Module::Build()
     const GeoLogVol* dbmDiamondLog = new GeoLogVol("dbmDiamondLog", dbmDiamondBox, diamond);
     GeoFullPhysVol* dbmDiamondPhys = new GeoFullPhysVol(dbmDiamondLog);
 
-    //*******************************
-    // Create id and add element
-    //*******************************
-    const PixelID * idHelper = m_gmt_mgr->getIdHelper();
-    int dbmdet = 4*m_gmt_mgr->GetSide();
-    Identifier idwafer;
-    idwafer = idHelper->wafer_id(dbmdet,m_gmt_mgr->GetLD(),m_gmt_mgr->Phi(),m_gmt_mgr->Eta());
-    SiDetectorElement * element = new SiDetectorElement(idwafer, m_design, dbmDiamondPhys, m_gmt_mgr->commonItems());
-    
+    SiDetectorElement* element= new SiDetectorElement(idwafer, m_design, dbmDiamondPhys, m_gmt_mgr->commonItems());
     // add the element to the manager
     m_DDmgr->addDetectorElement(element);
 
@@ -218,6 +215,7 @@ GeoVPhysVol* DBM_Module::Build()
     //-----------------------------------------------------
 
     return dbmModulePhys;
+  }
 }
 
 
