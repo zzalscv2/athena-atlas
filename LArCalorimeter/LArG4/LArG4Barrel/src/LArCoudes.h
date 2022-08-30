@@ -9,7 +9,8 @@
 
 class LArCoudes {
 private:
-  static PhysicalVolumeAccessor* s_theCoudes;
+  static const PhysicalVolumeAccessor& theCoudes(const std::string& strDetector="");
+
 public:
   LArCoudes(const std::string& strDetector="") ;
   double XCentCoude(int stackid, int cellid) const;
