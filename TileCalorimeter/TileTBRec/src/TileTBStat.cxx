@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2018 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
 */
 
 //*****************************************************************************
@@ -201,8 +201,8 @@ StatusCode TileTBStat::execute() {
   const EventContext& ctx = Gaudi::Hive::currentContext();
   const TileDQstatus* dqStatus = SG::makeHandle (m_dqStatusKey, ctx).get();
 
-  static bool first=true;
-  static bool firstORsecond=true;
+  static std::atomic<bool> first=true;
+  static std::atomic<bool> firstORsecond=true;
   
   if ( first ) {
 
@@ -459,6 +459,7 @@ StatusCode TileTBStat::finalize() {
   // has to make one hour correction to convert to UNIX (UTC) time
 
   time_t tim;
+  struct tm buf;
   char ctim[50];
   char format[30] = "%a, %d %b %Y %H:%M:%S %Z (%z)";
   
@@ -473,18 +474,18 @@ StatusCode TileTBStat::finalize() {
     std::cout << "Begin time " << m_timeBegin;
     tim = m_timeBegin - 3600; 
     std::cout << "-3600=" << tim;
-    strftime(ctim, 50, format, localtime(&tim) );
+    strftime(ctim, 50, format, localtime_r(&tim, &buf) );
     std::cout << "  " << ctim;
-    strftime(ctim, 50, format, gmtime(&tim) );
+    strftime(ctim, 50, format, gmtime_r(&tim, &buf) );
     std::cout << "  " << ctim;
     std::cout << std::endl;
 
     std::cout << "End   time " << m_evTime;
     tim = m_evTime - 3600; 
     std::cout << "-3600=" << tim;
-    strftime(ctim, 50, format, localtime(&tim) );
+    strftime(ctim, 50, format, localtime_r(&tim, &buf) );
     std::cout << "  " << ctim;
-    strftime(ctim, 50, format, gmtime(&tim) );
+    strftime(ctim, 50, format, gmtime_r(&tim, &buf) );
     std::cout << "  " << ctim;
     std::cout << std::endl;
 
@@ -492,16 +493,16 @@ StatusCode TileTBStat::finalize() {
 
     std::cout << "Begin time " << m_timeBegin;
     tim = m_timeBegin; 
-    strftime(ctim, 50, format, localtime(&tim) );
+    strftime(ctim, 50, format, localtime_r(&tim, &buf) );
     std::cout << "  " << ctim;
-    strftime(ctim, 50, format, gmtime(&tim) );
+    strftime(ctim, 50, format, gmtime_r(&tim, &buf) );
     std::cout << "  " << ctim;
     std::cout << std::endl;
     std::cout << "End   time " << m_timeLast;
     tim = m_timeLast; 
-    strftime(ctim, 50, format, localtime(&tim) );
+    strftime(ctim, 50, format, localtime_r(&tim, &buf) );
     std::cout << "  " << ctim;
-    strftime(ctim, 50, format, gmtime(&tim) );
+    strftime(ctim, 50, format, gmtime_r(&tim, &buf) );
     std::cout << "  " << ctim;
     std::cout << std::endl;
   }
@@ -613,7 +614,7 @@ void TileTBStat::find_frag(const uint32_t * data, unsigned int size, T_RobRodFra
   }
   
   while (offset < size ) {
-    T_RodDataFrag* frag = (T_RodDataFrag *)(data + offset);
+    const T_RodDataFrag* frag = (const T_RodDataFrag *)(data + offset);
     if ( frag->size < sizeOverhead ) { // too small size, frag contains garbage
       break;
     }

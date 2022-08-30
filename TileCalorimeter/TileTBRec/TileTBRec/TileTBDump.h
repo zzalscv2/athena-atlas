@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
 */
 
 //****************************************************************************
@@ -107,7 +107,8 @@ class TileTBDump: public AthAlgorithm {
     int m_bc_id;
     int m_lvl1_trigger_type;
     int m_nlvl1_trigger_info;
- 
+    int m_digi_mode;
+
     /* the ROD data sub-fragment */
     typedef struct T_RodDataFrag {
         unsigned int size;
@@ -191,36 +192,35 @@ class TileTBDump: public AthAlgorithm {
 
     void dump_it(unsigned int nw, unsigned int* data);
 
-    void find_frag(const uint32_t* rod, unsigned int size, unsigned int version, int verbosity, T_RodDataFrag** frag, int* nfrag);
+    void find_frag(const uint32_t* rod, unsigned int size, unsigned int version, int verbosity, const T_RodDataFrag* frag[], int& nfrag);
 
-    int tile_unpack_raw_comp(T_RodDataFrag* frag, T_TileRawComp* rawcomp, int nchannel_max
+    int tile_unpack_raw_comp(const T_RodDataFrag* frag, T_TileRawComp* rawcomp, int nchannel_max
                              , unsigned int version, int verbosity, int* ngain, int* nchannel, int* nsample); // Baxo
 
-    int tile_unpack_digi(T_RodDataFrag* frag, T_TileDigiChannel* channel, int nchannel_max
+    int tile_unpack_digi(const T_RodDataFrag* frag, T_TileDigiChannel* channel, int nchannel_max
                          , unsigned int version, int verbosity, int* ngain, int* nchannel, int* nsample);
 
-    int tile_unpack_reco(T_RodDataFrag* frag, T_TileRecoChannel* channel, int nchannel_max
+    int tile_unpack_reco(const T_RodDataFrag* frag, T_TileRecoChannel* channel, int nchannel_max
                          , unsigned int version, int verbosity, int* ngain, int* nchannel);
 
-    int tile_unpack_reco_calib(T_RodDataFrag* frag, T_TileRecoCalib* recocalib, int nchannel_max
+    int tile_unpack_reco_calib(const T_RodDataFrag* frag, T_TileRecoCalib* recocalib, int nchannel_max
                                , unsigned int version
                                , unsigned int unit
                                , int verbosity, int* ngain, int* nchannel); // Baxo
 
-    int tile_unpack_quality(T_RodDataFrag* frag, T_TileRecoQuality & DQword);
+    int tile_unpack_quality(const T_RodDataFrag* frag, T_TileRecoQuality & DQword);
 
-    unsigned int tile_check_parity(unsigned int* frame, int length);
+    unsigned int tile_check_parity(const unsigned int* frame, int length);
 
-    unsigned int tile_check_startbit(unsigned int* frame, int length, unsigned int startbit);
+    unsigned int tile_check_startbit(const unsigned int* frame, int length, unsigned int startbit);
 
-    unsigned int tile_check_CRC(unsigned int* frame, int framelen, int delta);
+    unsigned int tile_check_CRC(const unsigned int* frame, int framelen, int delta);
 
-    void tile_min_max(unsigned short* frame, int frame_length, unsigned short* smin, unsigned short* smax);
+    void tile_min_max(const unsigned short* frame, int frame_length, unsigned short* smin, unsigned short* smax);
 
     TileRawChannel2Bytes2 m_rc2bytes2;
     TileRawChannel2Bytes4 m_rc2bytes4;
     TileRawChannel2Bytes5 m_rc2bytes5;
-
 };
 
 #endif
