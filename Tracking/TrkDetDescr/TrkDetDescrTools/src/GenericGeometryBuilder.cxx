@@ -190,7 +190,7 @@ Trk::TrackingGeometry* Trk::GenericGeometryBuilder::trackingGeometry(Trk::Tracki
     // wrap the inner volume into a centralSector 
     if (cvb){ 
         //inner volume is passed as const in the Builder here
-        auto centralVolumes = std::vector<Trk::TrackingVolume*>{const_cast<Trk::TrackingVolume*> (innerVol), cSector};
+        auto centralVolumes = std::vector<Trk::TrackingVolume*>{innerVol, cSector};
         // override barrelVolume if enclosing is needed -> memory ownership shifted to container
         cSector = m_trackingVolumeCreator->createContainerTrackingVolume(centralVolumes,
                                                                          vacuum,

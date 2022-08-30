@@ -104,7 +104,7 @@ namespace Trk {
         void registerVolume(const Trk::TrackingVolume& tvol, int lvl);
 
         //!< private void Method to map the layer material
-        void assignLayerMaterialProperties(const Trk::TrackingVolume& tvol, Trk::LayerMaterialMap* propSet);
+        void assignLayerMaterialProperties(Trk::TrackingVolume& tvol, Trk::LayerMaterialMap* propSet);
 
         //!< create the LayerMaterialRecord */
         void insertLayerMaterialRecord(const Trk::Layer& lay);

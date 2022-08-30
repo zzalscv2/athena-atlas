@@ -752,8 +752,7 @@ Trk::Extrapolator::extrapolateToNextMaterialLayer(const EventContext& ctx,
                                // only if
                                // needed
           if ((*iTer)->trackingVolume()->zOverAtimesRho() != 0. &&
-              (!(*iTer)->trackingVolume()->confinedDenseVolumes() ||
-               (*iTer)->trackingVolume()->confinedDenseVolumes()->empty()) &&
+              ((*iTer)->trackingVolume()->confinedDenseVolumes().empty()) &&
               ((*iTer)->trackingVolume()->confinedArbitraryLayers().empty())) {
             cache.m_denseVols.emplace_back((*iTer)->trackingVolume(), detBounds.size());
 
@@ -764,7 +763,7 @@ Trk::Extrapolator::extrapolateToNextMaterialLayer(const EventContext& ctx,
           }
           Trk::ArraySpan<const Trk::Layer* const> confLays =
             (*iTer)->trackingVolume()->confinedArbitraryLayers();
-          if ((*iTer)->trackingVolume()->confinedDenseVolumes() ||
+          if (!(*iTer)->trackingVolume()->confinedDenseVolumes().empty() ||
               (confLays.size() > detBounds.size())) {
             cache.m_detachedVols.emplace_back(*iTer, detBounds.size());
             for (unsigned int ibb = 0; ibb < detBounds.size(); ibb++) {
@@ -952,26 +951,26 @@ Trk::Extrapolator::extrapolateToNextMaterialLayer(const EventContext& ctx,
       continue;
     }
     // inert material
-    const std::vector<const Trk::TrackingVolume*>* confinedDense = dVol->confinedDenseVolumes();
-    Trk::ArraySpan<const Trk::Layer* const> confinedLays = dVol->confinedArbitraryLayers();
+    const auto confinedDense = dVol->confinedDenseVolumes();
+    const auto confinedLays = dVol->confinedArbitraryLayers();
 
-    if (!active && !confinedDense && confinedLays.empty()) {
+    if (!active && confinedDense.empty() && confinedLays.empty()) {
       continue;
     }
     const auto bounds = dVol->boundarySurfaces();
-    if (!active && !confinedDense && confinedLays.size() <= bounds.size()) {
+    if (!active && confinedDense.empty() && confinedLays.size() <= bounds.size()) {
       continue;
     }
-    if (confinedDense || !confinedLays.empty()) {
+    if (!confinedDense.empty() || !confinedLays.empty()) {
       cache.m_navigVolsInt.emplace_back(dVol, bounds.size());
       for (unsigned int ib = 0; ib < bounds.size(); ib++) {
         const Trk::Surface& surf = (bounds[ib])->surfaceRepresentation();
         cache.m_navigBoundaries.emplace_back(&surf, true);
       }
       // collect dense volume boundary
-      if (confinedDense) {
-        std::vector<const Trk::TrackingVolume*>::const_iterator vIter = confinedDense->begin();
-        for (; vIter != confinedDense->end(); ++vIter) {
+      if (!confinedDense.empty()) {
+        const auto *vIter = confinedDense.begin();
+        for (; vIter != confinedDense.end(); ++vIter) {
           const auto bounds = (*vIter)->boundarySurfaces();
           cache.m_denseVols.emplace_back(*vIter, bounds.size());
           for (unsigned int ib = 0; ib < bounds.size(); ib++) {
@@ -4776,8 +4775,7 @@ Trk::Extrapolator::extrapolateToVolumeWithPathLimit(const EventContext& ctx,
           // retrieve inert detached
           // objects only if needed
           if ((*iTer)->trackingVolume()->zOverAtimesRho() != 0. &&
-              (!(*iTer)->trackingVolume()->confinedDenseVolumes() ||
-               (*iTer)->trackingVolume()->confinedDenseVolumes()->empty()) &&
+              ((*iTer)->trackingVolume()->confinedDenseVolumes().empty()) &&
               ((*iTer)->trackingVolume()->confinedArbitraryLayers().empty())) {
             cache.m_denseVols.emplace_back((*iTer)->trackingVolume(), detBounds.size());
             for (unsigned int ibb = 0; ibb < detBounds.size(); ibb++) {
@@ -4787,7 +4785,7 @@ Trk::Extrapolator::extrapolateToVolumeWithPathLimit(const EventContext& ctx,
           }
           Trk::ArraySpan<const Trk::Layer* const> confLays =
             (*iTer)->trackingVolume()->confinedArbitraryLayers();
-          if ((*iTer)->trackingVolume()->confinedDenseVolumes() ||
+          if (!(*iTer)->trackingVolume()->confinedDenseVolumes().empty() ||
               (confLays.size() > detBounds.size())) {
             cache.m_detachedVols.emplace_back(*iTer, detBounds.size());
             for (unsigned int ibb = 0; ibb < detBounds.size(); ibb++) {
@@ -4860,26 +4858,26 @@ Trk::Extrapolator::extrapolateToVolumeWithPathLimit(const EventContext& ctx,
       continue;
     }
     // inert material
-    const std::vector<const Trk::TrackingVolume*>* confinedDense = dVol->confinedDenseVolumes();
-    Trk::ArraySpan<const Trk::Layer* const> confinedLays = dVol->confinedArbitraryLayers();
+    const auto confinedDense = dVol->confinedDenseVolumes();
+    const auto confinedLays = dVol->confinedArbitraryLayers();
 
-    if (!active && !confinedDense && confinedLays.empty()) {
+    if (!active && confinedDense.empty() && confinedLays.empty()) {
       continue;
     }
     const auto& bounds = dVol->boundarySurfaces();
-    if (!active && !confinedDense && confinedLays.size() <= bounds.size()) {
+    if (!active && confinedDense.empty() && confinedLays.size() <= bounds.size()) {
       continue;
     }
-    if (confinedDense || !confinedLays.empty()) {
+    if (!confinedDense.empty() || !confinedLays.empty()) {
       navigVols.emplace_back(dVol, bounds.size());
       for (unsigned int ib = 0; ib < bounds.size(); ib++) {
         const Trk::Surface& surf = (bounds[ib])->surfaceRepresentation();
         cache.m_navigBoundaries.emplace_back(&surf, true);
       }
       // collect dense volume boundary
-      if (confinedDense) {
-        std::vector<const Trk::TrackingVolume*>::const_iterator vIter = confinedDense->begin();
-        for (; vIter != confinedDense->end(); ++vIter) {
+      if (!confinedDense.empty()) {
+        const auto *vIter = confinedDense.begin();
+        for (; vIter != confinedDense.end(); ++vIter) {
           const auto& bounds = (*vIter)->boundarySurfaces();
           cache.m_denseVols.emplace_back(*vIter, bounds.size());
           for (unsigned int ib = 0; ib < bounds.size(); ib++) {

@@ -404,7 +404,7 @@ Trk::TrackingVolume* Muon::MuonInertMaterialBuilder::simplifyShape(Trk::Tracking
     // simplification
 
     Trk::TrackingVolume* newVol = nullptr;
-    std::vector<const Trk::TrackingVolume*>* confinedVols = new std::vector<const Trk::TrackingVolume*>;
+    std::vector<Trk::TrackingVolume*>* confinedVols = new std::vector<Trk::TrackingVolume*>;
 
     std::string envName = trVol->volumeName();
 
@@ -434,8 +434,7 @@ Trk::TrackingVolume* Muon::MuonInertMaterialBuilder::simplifyShape(Trk::Tracking
             envName = trVol->volumeName() + "_envelope";
             newVol = new Trk::TrackingVolume(*envelope, m_muonMaterial, confinedVols, envName);
             for (unsigned int iv = 0; iv < confinedVols->size(); iv++)
-               // we need the const_cast until we fix all ctors for TrackingVolumes 
-                Trk::TrackingVolumeManipulator::confineVolume(const_cast<Trk::TrackingVolume&>(*((*confinedVols)[iv])), newVol);
+                Trk::TrackingVolumeManipulator::confineVolume((*((*confinedVols)[iv])), newVol);
             delete trVol;
         }
     } else {  // enclose the exact transcript

@@ -38,6 +38,18 @@ TrackingVolume::confinedLayers()
   return m_confinedLayers;
 }
 
+inline const TrackingVolumeArray*
+TrackingVolume::confinedVolumes() const
+{
+  return m_confinedVolumes;
+}
+
+inline TrackingVolumeArray*
+TrackingVolume::confinedVolumes()
+{
+  return m_confinedVolumes;
+}
+
 inline ArraySpan<Layer const* const>
 TrackingVolume::confinedArbitraryLayers() const
 {
@@ -59,19 +71,7 @@ TrackingVolume::confinedArbitraryLayers()
   return {};
 }
 
-inline const TrackingVolumeArray*
-TrackingVolume::confinedVolumes() const
-{
-  return m_confinedVolumes;
-}
-
-inline TrackingVolumeArray*
-TrackingVolume::confinedVolumes()
-{
-  return m_confinedVolumes;
-}
-
-inline ArraySpan<DetachedTrackingVolume const* const>
+inline ArraySpan<DetachedTrackingVolume const * const>
 TrackingVolume::confinedDetachedVolumes() const
 {
   if (m_confinedDetachedVolumes) {
@@ -91,12 +91,25 @@ TrackingVolume::confinedDetachedVolumes()
   return {};
 }
 
-inline const std::vector<const TrackingVolume*>*
+inline ArraySpan<TrackingVolume const* const>
 TrackingVolume::confinedDenseVolumes() const
 {
-  return m_confinedDenseVolumes;
+  if (m_confinedDenseVolumes) {
+    return ArraySpan<TrackingVolume const* const>(
+      &*m_confinedDenseVolumes->begin(), &*m_confinedDenseVolumes->end());
+  }
+  return {};
 }
 
+inline ArraySpan<Trk::TrackingVolume* const>
+TrackingVolume::confinedDenseVolumes()
+{
+  if (m_confinedDenseVolumes) {
+    return ArraySpan<TrackingVolume* const>(&*m_confinedDenseVolumes->begin(),
+                                            &*m_confinedDenseVolumes->end());
+  }
+  return {};
+}
 
 template<class T>
 bool

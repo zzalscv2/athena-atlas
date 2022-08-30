@@ -811,7 +811,7 @@ void Tile::TileVolumeBuilder::printCheckResult(MsgStream& log, const Trk::Tracki
 
 
 
-void Tile::TileVolumeBuilder::printInfo(const PVConstLink pv) const
+void Tile::TileVolumeBuilder::printInfo(const PVConstLink& pv) const
 {
   const GeoLogVol* lv = pv->getLogVol();
   std::cout << "New Tile Object:"<<lv->getName()<<", made of"<<lv->getMaterial()->getName()<<","<<lv->getShape()->type()<<std::endl;
@@ -821,7 +821,7 @@ void Tile::TileVolumeBuilder::printInfo(const PVConstLink pv) const
   printChildren(pv,igen,transf);
 }
 
-void Tile::TileVolumeBuilder::printChildren(const PVConstLink pv,int igen, Amg::Transform3D trIn) const
+void Tile::TileVolumeBuilder::printChildren(const PVConstLink& pv,int igen, const Amg::Transform3D& trIn) const
 {
   // subcomponents
   unsigned int nc = pv->getNChildVols();

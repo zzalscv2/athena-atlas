@@ -6092,7 +6092,7 @@ namespace Trk {
         continue;
       }
       const InDet::PixelCluster* pixelCluster = static_cast<const InDet::PixelCluster*> ( prd );
-      auto &splitProb = splitProbContainer->splitProbability(pixelCluster);
+      const auto &splitProb = splitProbContainer->splitProbability(pixelCluster);
       if (!splitProb.isSplit()) {
         ATH_MSG_DEBUG( "Pixel cluster is not split so no need to update" );
         continue;

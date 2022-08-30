@@ -223,12 +223,12 @@ void Trk::Layer::assignMaterialProperties(const LayerMaterialProperties& prop,
 }
 
 void
-Trk::Layer::compactify(size_t& cSurfaces, size_t& tSurfaces) const
+Trk::Layer::compactify(size_t& cSurfaces, size_t& tSurfaces)
 {
   // set the layer surface representation
   ++tSurfaces;
   if (surfaceRepresentation().owner() == Trk::noOwn) {
-    const_cast<Trk::Surface&>(surfaceRepresentation()).setOwner(Trk::TGOwn);
+    surfaceRepresentation().setOwner(Trk::TGOwn);
     ++cSurfaces;
   }
   // set the subsurface representation, usually already owned by DetElement

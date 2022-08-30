@@ -71,12 +71,10 @@ class TrackingGeometry
   // gives ownership over MuonTG constituents
   friend class Muon::MuonTrackingGeometryBuilderCond;
 
-
 public:
   /** Constructor */
   TrackingGeometry(TrackingVolume* highestVolume,
-                   NavigationLevel navlevel = globalSearch)
-    ATLAS_CTORDTOR_NOT_THREAD_SAFE; // unsafe registerTrackingVolumes called;
+                   NavigationLevel navlevel = globalSearch);
   /** Destructor */
   virtual ~TrackingGeometry();
 
@@ -138,38 +136,32 @@ public:
    * geometrySignature */
   void indexStaticLayers ATLAS_NOT_THREAD_SAFE(GeometrySignature geosit,
                                                int offset = 0);
-  
-  
-  
-  void dump(MsgStream &out, const std::string &head) const;
+
+  void dump(MsgStream& out, const std::string& head) const;
 
 private:
   /** Geometry Builder busineess:
       the geometry builder has to sign*/
-  void sign ATLAS_NOT_THREAD_SAFE(GeometrySignature geosit,
-                                  GeometryType geotype = Static);
+  void sign(GeometrySignature geosit, GeometryType geotype = Static);
 
   /** Geometry Builder busineess:
       set all contained surfaces TG owned - this should save memory and avoid
      surface copying
       - prints compactification statistics */
   void compactify ATLAS_NOT_THREAD_SAFE(MsgStream& msgstream,
-                                        const TrackingVolume* vol = nullptr);
+                                        TrackingVolume* vol = nullptr);
 
-  /**  Geometry Builder busineess:
+  /**  Geometry Builder business:
        synchronize all layers to enclosed volume dimensions */
-  void synchronizeLayers
-  ATLAS_NOT_THREAD_SAFE(MsgStream& msgstream,
-                        const TrackingVolume* vol = nullptr);
+  void synchronizeLayers(MsgStream& msgstream, TrackingVolume* vol = nullptr);
 
   /** private method the Navigation Level */
   void registerNavigationLevel(NavigationLevel navlevel);
 
   /** private method to register recursively the tracking volumes */
-  void registerTrackingVolumes
-  ATLAS_NOT_THREAD_SAFE(const TrackingVolume& tvol,
-                        const TrackingVolume* mvol = nullptr,
-                        int lvl = 0);
+  void registerTrackingVolumes(TrackingVolume& tvol,
+                               TrackingVolume* mvol = nullptr,
+                               int lvl = 0);
 
   /**  private method to be called from GeometryBuilder: return the world with
    * ownership */
@@ -181,10 +173,10 @@ private:
                               const TrackingVolume& tvol,
                               int lvl) const;
 
-  static void dumpLayer(MsgStream &out, const std::string &head, const Layer *layer);
+  static void dumpLayer(MsgStream& out,
+                        const std::string& head,
+                        const Layer* layer);
 
-  
-  
   /** The known world - and the beam */
   TrackingVolume* m_world;
 
