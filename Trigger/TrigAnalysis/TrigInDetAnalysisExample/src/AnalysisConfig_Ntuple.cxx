@@ -734,7 +734,6 @@ void AnalysisConfig_Ntuple::loop() {
 	m_provider->msg(MSG::INFO) << " Offline tracks " << endmsg;
 
 	selectorRef.clear();
-
 #ifdef XAODTRACKING_TRACKPARTICLE_H
 	if (m_provider->evtStore()->contains<xAOD::TrackParticleContainer>("InDetTrackParticles")) {
 	  selectTracks<xAOD::TrackParticleContainer>( &selectorRef, "InDetTrackParticles" );
@@ -826,8 +825,8 @@ void AnalysisConfig_Ntuple::loop() {
 	  }
 	}
 
-#endif	
-	
+#endif
+
 
 	/// add offline Vertices to the Offline chain
 	
@@ -853,10 +852,10 @@ void AnalysisConfig_Ntuple::loop() {
 
 	/// offline object counters 
 
-	int Noff  = 0;
-	int Nmu   = 0;
-	int Nel   = 0;
-        int Ntau  = 0;
+	int Noff    = 0;
+	int Nmu     = 0;
+	int Nel     = 0;
+    int Ntau  = 0;
 
 
 	/// now add the offline vertices
@@ -982,15 +981,17 @@ void AnalysisConfig_Ntuple::loop() {
 	  //	  std::cout << "\tElectrons selection " << ielec << " " << m_electronType[ielec] 
 	  //		    << "\t" << itype << " " << ElectronRef[itype] << "\t" << m_rawElectrons[ielec] << std::endl;
 	  
-	  int Nel_ = processElectrons( selectorRef, &elevec, itype, ( m_rawElectrons[ielec]=="raw" ? true : false ) );
+	  std::string echain = std::string("Electrons");
+	  if (m_electronIsLRT[ielec]) echain = std::string("LRTElectrons");
+
+	  int Nel_ = processElectrons( selectorRef, &elevec, itype, ( m_rawElectrons[ielec]=="raw" ? true : false ), 0.0, echain );
 	  
 	  	  
-          if ( Nel_ < 1 ) continue;
+      if ( Nel_ < 1 ) continue;
       
-          Nel += Nel_;	
+      Nel += Nel_;	
 
-	  std::string echain = std::string("Electrons");
-          if ( m_electronType[ielec]!="" )    echain += "_" + m_electronType[ielec];
+      if ( m_electronType[ielec]!="" )    echain += "_" + m_electronType[ielec];
 	  if ( m_rawElectrons[ielec]=="raw" ) echain += "_raw";
 	  
 	  m_event->addChain( echain );
@@ -1012,7 +1013,6 @@ void AnalysisConfig_Ntuple::loop() {
 
 	}
 	
-       
 
 	std::string MuonRef[5] =  { "", "Tight", "Medium", "Loose", "VeryLoose" };
 
@@ -1025,7 +1025,10 @@ void AnalysisConfig_Ntuple::loop() {
           for ( int it=0 ; it<5 ; it++ ) if ( m_muonType[imuon] == MuonRef[it] ) muonType=it; 
           if ( muonType<0 ) continue; 
 
-	  int Nmu_ = processMuons( selectorRef, muonType );
+      std::string mchain = "Muons";
+	  if (m_muonIsLRT[imuon]) mchain = "MuonsLRT";
+
+	  int Nmu_ = processMuons( selectorRef, muonType, 0, mchain );
 
           if ( Nmu_ < 1 ) continue;
 
@@ -1033,7 +1036,6 @@ void AnalysisConfig_Ntuple::loop() {
 
 	  m_provider->msg(MSG::INFO) << "found " << Nmu << " offline muons " << endmsg; 
 
-          std::string mchain = "Muons";
           if ( m_muonType[imuon]!="" )  mchain += "_" + m_muonType[imuon];
 
 	  m_event->addChain(mchain);
@@ -1053,8 +1055,6 @@ void AnalysisConfig_Ntuple::loop() {
 	  for ( int ii=selectorRef.tracks().size() ; ii-- ; ) m_provider->msg(MSG::INFO) << "  ref muon track " << ii << " " << *selectorRef.tracks()[ii] << endmsg;  
 	}
 	
-
-
 
 	/// get muons 
 	if ( m_doMuonsSP ) { 
