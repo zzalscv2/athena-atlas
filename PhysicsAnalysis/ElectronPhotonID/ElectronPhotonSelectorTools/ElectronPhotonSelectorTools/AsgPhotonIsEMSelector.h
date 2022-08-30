@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2020 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
 */
 
 // Dear emacs, this is -*-c++-*-
@@ -20,13 +20,14 @@
 */
 
 // Atlas includes
+#include "AsgDataHandles/ReadHandleKey.h"
 #include "AsgTools/AsgTool.h"
 // Include the interfaces
 #include "EgammaAnalysisInterfaces/IAsgPhotonIsEMSelector.h"
 #include "xAODEgamma/PhotonFwd.h"
 #include "xAODEgamma/EgammaFwd.h"
 #include "xAODEgamma/ElectronFwd.h"
-#include "xAODTracking/VertexFwd.h"
+#include "xAODEventInfo/EventInfo.h"
 
 class EventContext;
 
@@ -97,6 +98,12 @@ private:
 
   // Skip amboguyity check when emulating the HLT 
   bool m_skipAmbiguityCut;
+
+  // To retrieve mu
+  bool m_isMuDep;
+  float getMu(const EventContext& ctx) const;
+  SG::ReadHandleKey<xAOD::EventInfo> m_EvtInfoKey{ this,
+      "EventInfo", "EventInfo", "The event info object key" };
 
 }; // End: class definition
 
