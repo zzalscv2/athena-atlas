@@ -14,6 +14,7 @@
 
 // Include this class's header
 #include "ElectronPhotonSelectorTools/AsgPhotonIsEMSelector.h"
+#include "AsgDataHandles/ReadHandle.h"
 #include "AsgTools/CurrentContext.h"
 #include "EGSelectorConfigurationMapping.h"
 #include "EgammaAnalysisHelpers/AsgEGammaConfigHelper.h"
@@ -26,7 +27,6 @@
 #include "xAODEgamma/EgammaxAODHelpers.h"
 #include "xAODEgamma/Electron.h"
 #include "xAODEgamma/Photon.h"
-#include "xAODEventInfo/EventInfo.h"
 
 //=============================================================================
 // Standard constructor
@@ -71,7 +71,8 @@ AsgPhotonIsEMSelector::AsgPhotonIsEMSelector(const std::string& myname)
                   "Flag to tell the tool if its a calo only cutbase");
   declareProperty("trigEtTh", m_trigEtTh = -999., "Trigger threshold");
 
-  declareProperty("skipAmbiguityCut",m_skipAmbiguityCut = false, "If true, it will skip the ambiguity cut. This is useful for HLT photon emulation");
+  declareProperty("skipAmbiguityCut",m_skipAmbiguityCut = false,
+		  "If true, it will skip the ambiguity cut. This is useful for HLT photon emulation");
 }
 
 // =================================================================
@@ -84,9 +85,6 @@ AsgPhotonIsEMSelector::~AsgPhotonIsEMSelector()
 StatusCode
 AsgPhotonIsEMSelector::initialize()
 {
-  // The standard status code
-  StatusCode sc = StatusCode::SUCCESS;
-
   if (!m_WorkingPoint.empty()) {
     m_configFile = AsgConfigHelper::findConfigFile(
       m_WorkingPoint, EgammaSelectors::PhotonCutPointToConfFile);
@@ -97,8 +95,7 @@ AsgPhotonIsEMSelector::initialize()
   std::string filename = PathResolverFindCalibFile(m_configFile);
   if (filename.empty()) {
     ATH_MSG_ERROR("Could not locate " << m_configFile);
-    sc = StatusCode::FAILURE;
-    return sc;
+    return StatusCode::FAILURE;
   }
   ATH_MSG_INFO("Configfile to use  " << m_configFile);
   TEnv env;
@@ -196,11 +193,20 @@ AsgPhotonIsEMSelector::initialize()
   // We need to initialize the underlying ROOT TSelectorTool
   if (m_rootTool->initialize().isFailure()) {
     ATH_MSG_ERROR("Could not initialize the TPhotonIsEMSelector!");
-    sc = StatusCode::FAILURE;
-    return sc;
+    return StatusCode::FAILURE;
   }
 
-  return sc;
+  // if we use mu-dependent menu
+  m_isMuDep =
+    m_rootTool->m_cutBinMu_photonsNonConverted.size() ||
+    m_rootTool->m_cutBinMu_photonsConverted.size() ||
+    m_rootTool->m_cutBinMuStrips_photonsNonConverted.size() ||
+    m_rootTool->m_cutBinMuStrips_photonsConverted.size();
+  ATH_CHECK(m_EvtInfoKey.initialize(m_isMuDep));
+  if (m_isMuDep)
+    ATH_MSG_INFO("Running a mu-dependent photon ID menu");
+
+  return StatusCode::SUCCESS;
 }
 
 //=============================================================================
@@ -411,12 +417,7 @@ AsgPhotonIsEMSelector::execute(const EventContext& ctx,
     et = m_trigEtTh * 1.01;
 
   // pileup
-  float mu(-999);
-  const xAOD::EventInfo* eventInfo = nullptr;
-  if (evtStore()->retrieve(eventInfo,"EventInfo").isFailure()) {
-    ATH_MSG_ERROR ( " Cannot access event info, will use mu = " << mu );
-  }
-  mu = eventInfo->actualInteractionsPerCrossing();
+  float mu = m_isMuDep ? this->getMu(ctx) : -999;
 
   // apply calorimeter selection for photons
   isEM = m_rootTool->calcIsEm(eta2,
@@ -444,11 +445,19 @@ AsgPhotonIsEMSelector::execute(const EventContext& ctx,
 	  static const SG::AuxElement::Accessor<uint8_t> acc("ambiguityType");
 	  int AmbiguityType = acc(*eg);
 	  if (eg->author() == xAOD::EgammaParameters::AuthorAmbiguous &&
-			  AmbiguityType == xAOD::AmbiguityTool::ambiguousNoInnermost) {
-		  isEM |= (0x1 << egammaPID::AmbiguityResolution_Photon);
+	      AmbiguityType == xAOD::AmbiguityTool::ambiguousNoInnermost) {
+	    isEM |= (0x1 << egammaPID::AmbiguityResolution_Photon);
 	  }
   }
 
   return StatusCode::SUCCESS;
 }
 
+float AsgPhotonIsEMSelector::getMu(const EventContext& ctx) const {
+  SG::ReadHandle<xAOD::EventInfo> evtI(m_EvtInfoKey, ctx);
+  if (!evtI.isValid()) {
+    ATH_MSG_WARNING("Cannot find EventInfo, returning -999.");
+    return -999;
+  }
+  return evtI->actualInteractionsPerCrossing();
+}
