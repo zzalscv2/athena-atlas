@@ -150,7 +150,14 @@ namespace CP
       }
 
       if (m_minPtCutIndex >= 0) {
-        accept.setCutResult (m_minPtCutIndex, pt >= m_minPt);
+        if (!std::isfinite(pt) || pt <= 0.)
+        {
+          ANA_MSG_WARNING ("invalid pt value, setting object to fail pt-cut: " << pt);
+          accept.setCutResult (m_minPtCutIndex, false);
+        } else
+        {
+          accept.setCutResult (m_minPtCutIndex, pt >= m_minPt);
+        }
       }
       if (m_maxPtCutIndex >= 0) {
         accept.setCutResult (m_maxPtCutIndex, pt < m_maxPt);
