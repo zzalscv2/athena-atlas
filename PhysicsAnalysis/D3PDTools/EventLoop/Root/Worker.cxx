@@ -19,6 +19,7 @@
 
 #include <AnaAlgorithm/IAlgorithmWrapper.h>
 #include <EventLoop/AlgorithmStateModule.h>
+#include <EventLoop/AlgorithmTimerModule.h>
 #include <EventLoop/BatchJob.h>
 #include <EventLoop/BatchSample.h>
 #include <EventLoop/BatchSegment.h>
@@ -363,7 +364,6 @@ namespace EL
     RCU_CHANGE_INVARIANT (this);
     for (std::unique_ptr<IAlgorithmWrapper>& alg : jobConfig.extractAlgorithms())
     {
-      // alg->m_wk = this;
       m_algs.push_back (std::move (alg));
     }
   }
@@ -383,6 +383,8 @@ namespace EL
       m_modules.push_back (std::make_unique<Detail::TEventModule> ());
     m_modules.push_back (std::make_unique<Detail::LeakCheckModule> ());
     m_modules.push_back (std::make_unique<Detail::StopwatchModule> ());
+    if (metaData()->castBool (Job::optAlgorithmTimer, false))
+      m_modules.push_back (std::make_unique<Detail::AlgorithmTimerModule> ());
     m_modules.push_back (std::make_unique<Detail::FileExecutedModule> ());
     m_modules.push_back (std::make_unique<Detail::EventCountModule> ());
     m_modules.push_back (std::make_unique<Detail::AlgorithmStateModule> ());
