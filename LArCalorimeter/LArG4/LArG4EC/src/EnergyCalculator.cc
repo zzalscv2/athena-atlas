@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2020 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
 */
 
 // EnergyCalculator
@@ -68,7 +68,6 @@
 #include "EnergyCalculator.h"
 #include "AthenaKernel/Units.h"
 
-#include "HVHelper.h"
 
 #define MSG_VECTOR(v) "(" << v.x() << ", " << v.y() << ", " << v.z() << ")"
 
@@ -138,10 +137,6 @@ StatusCode EnergyCalculator::finalize() {
   delete m_lwc;
   m_lwc = nullptr;
 
-    if(m_HVHelper){
-        delete m_HVHelper;
-        m_HVHelper = nullptr;
-    }
   return StatusCode::SUCCESS;
 }
 
@@ -194,7 +189,6 @@ EnergyCalculator::EnergyCalculator(const std::string& name, ISvcLocator *pSvcLoc
   , m_zside(1)
   , m_birksLaw(nullptr)
   , m_lwc(nullptr)
-  , m_HVHelper(nullptr)
     // ****************************************************************************
 {
   ATH_MSG_DEBUG("constructor started");

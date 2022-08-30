@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "LArHV/LArHVManager.h"
@@ -22,10 +22,6 @@ const G4double HVHelper::s_EtaLimit[s_NofEtaSection + 1] = {
     1.375, 1.5, 1.6, 1.8, 2., 2.1, 2.3, 2.5, 2.8, 3.2
 };
 
-G4bool HVHelper::s_NeedToReadMaps = true;
-G4double HVHelper::s_Values[s_NofAtlasSide][s_NofEtaSection][s_NofElectrodeSide][s_NofElectrodesOut];
-
-G4int *HVHelperV00::s_StartPhi = nullptr;
 
 HVHelper::HVHelper(
     const LArWheelCalculator *calc,
@@ -45,10 +41,7 @@ HVHelper::HVHelper(
 
 void HVHelper::AcquireMaps(const G4String &version, G4bool from_DB)
 {
-    if(s_NeedToReadMaps){
-        ReadMapFromFile(version); // always have values from file as defaults
-        s_NeedToReadMaps = false;
-    }
+    ReadMapFromFile(version); // always have values from file as defaults
     if(from_DB) GetMapFromDB(); // update them from DB if necessary
 }
 
@@ -125,17 +118,21 @@ void HVHelperV00::ReadMapFromFile(const G4String &version)
                 const G4String ElectrodeSide = buf1;
                 ATH_MSG_DEBUG("EtaSection = " << EtaSection
                             << " ElectrodeSide = " << ElectrodeSide);
-                if(fscanf(F, "%i", &(StartPhi(i, j, k))) < 1){
+                G4int startPhi{0};
+                if(fscanf(F, "%i", &startPhi) < 1){
                     ATH_MSG_ERROR("ReadMapFromFile: Error reading map file");
                 }
+                else {
+                    SetStartPhi(startPhi, i, j, k);
+                }
                 ATH_MSG_DEBUG("i, j, k = " << i << ", " << j << ", " << k
-                            << " " <<" HV_Start_phi = " << StartPhi(i, j, k));
+                            << " " <<" HV_Start_phi = " << startPhi);
                 for(G4int l = 0; l < m_NofPhiSections; ++ l){
-                    if(fscanf(F, "%lg", &s_Values[i][j][k][l]) < 1){
+                    if(fscanf(F, "%lg", &m_Values[i][j][k][l]) < 1){
                         ATH_MSG_ERROR("ReadMapFromFile: Error reading map file");
                     }
                     if(l == 0){
-                        ATH_MSG_DEBUG("HV_Values = " << s_Values[i][j][k][l]);
+                        ATH_MSG_DEBUG("HV_Values = " << m_Values[i][j][k][l]);
                     }
                 } // phi section
             } // electrode side
@@ -175,11 +172,11 @@ void HVHelperV02::ReadMapFromFile(const G4String &version)
             }*/
             for(G4int k = 0; k < s_NofEtaSection; ++ k){
                 for(G4int l = 0; l < s_NofElectrodeSide; ++ l){
-                    if(fscanf(F, "%lg", &s_Values[i][k][l][j]) < 1){
+                    if(fscanf(F, "%lg", &m_Values[i][k][l][j]) < 1){
                         ATH_MSG_ERROR("ReadMapFromFile: Error reading map file");
                     }
 /*                    if(j <iprmx || j==s_NofElectrodesOut-1) {
-                        printf("%8.2f", s_Values[i][k][l][j]);
+                        printf("%8.2f", m_Values[i][k][l][j]);
                     }*/
                 }
             }
@@ -249,19 +246,19 @@ void HVHelper::GetMapFromDB(void)
                 ATH_MSG_DEBUG("Side, Eta, Elec, Gap, hv "
                               << jSide << " " << jEta << " "
                               << jElec << " " << iGap << " "
-                              << s_Values[jSide][jEta][iGap][jElec]
+                              << m_Values[jSide][jEta][iGap][jElec]
                               << " -> " << hv);
-                if(fabs((s_Values[jSide][jEta][iGap][jElec] - hv)/s_Values[jSide][jEta][iGap][jElec]) > 0.05){
+                if(fabs((m_Values[jSide][jEta][iGap][jElec] - hv)/m_Values[jSide][jEta][iGap][jElec]) > 0.05){
                   ATH_MSG_INFO("eta: " << dsc.getEtaBinning().binCenter(iEta) * (jSide == 0? 1: -1) << " "
                                << "phi: " << dsc.getPhiBinning().binCenter(iPhi) << " "
                                << "ele phi: " << electrode.getPhi()
                                << " side " << iGap
                                << " change HV from "
-                               << s_Values[jSide][jEta][iGap][jElec]
+                               << m_Values[jSide][jEta][iGap][jElec]
                                << " to " << hv);
                 }
                 if(hv > -999.){
-                  s_Values[jSide][jEta][iGap][jElec] = hv;
+                  m_Values[jSide][jEta][iGap][jElec] = hv;
                   ++ counter;
                 }
               }
@@ -339,7 +336,7 @@ G4double HVHelper::GetVoltageBarrett(
         igap, atlas_side, eta_section, electrode_side
     );
 
-    return s_Values[atlas_side][eta_section][electrode_side][phi_section];
+    return m_Values[atlas_side][eta_section][electrode_side][phi_section];
 }
 
 G4double HVHelper::GetVoltage(
@@ -357,7 +354,7 @@ G4double HVHelper::GetVoltage(
         phigap - 1, atlas_side, eta_section, electrode_side
     );
 
-    return s_Values[atlas_side][eta_section][electrode_side][phi_section];
+    return m_Values[atlas_side][eta_section][electrode_side][phi_section];
 }
 
 G4int HVHelperV00::GetPhiSection(
@@ -418,7 +415,7 @@ G4double HVHelper::GetVoltage(
         atlas_side, eta_section, electrode_side
     );
 
-    return s_Values[atlas_side][eta_section][electrode_side][phi_section];
+    return m_Values[atlas_side][eta_section][electrode_side][phi_section];
 }
 
 G4int HVHelper::GetEtaSection(const G4ThreeVector &p) const
@@ -439,14 +436,14 @@ G4int HVHelper::GetEtaSection(const G4ThreeVector &p) const
     return eta_section;
 }
 
-HVHelper *HVHelper::CreateHelper(
+std::unique_ptr<const HVHelper> HVHelper::CreateHelper(
     const LArWheelCalculator *calc,
     const G4String &version,
     G4bool fromDB
 ) {
     if(version == "v00" || version == "v01"){
-        return new HVHelperV00(calc, version, fromDB);
+        return std::make_unique<HVHelperV00>(calc, version, fromDB);
     } else {
-        return new HVHelperV02(calc, version, fromDB);
+        return std::make_unique<HVHelperV02>(calc, version, fromDB);
     }
 }
