@@ -30,8 +30,8 @@ namespace NswAsBuilt {
 
      /* A reference point along a strip, and the pitchvector to be added to find the neighbouring strips */
       struct stripPoint_t {
-        Amg::Vector3D pos{0,0,0};         // a point along the central strip
-        Amg::Vector3D pitchvector{0,0,0}; // the pitch vector to add to get the other strips
+        Amg::Vector3D pos{Amg::Vector3D::Zero()};         // a point along the central strip
+        Amg::Vector3D pitchvector{Amg::Vector3D::Zero()}; // the pitch vector to add to get the other strips
       };
 
      /* The strip configuration: three reference points along the central strip of this PCB. */
@@ -43,13 +43,13 @@ namespace NswAsBuilt {
       };
 
      /* Constructor */
-      PcbElement(stripConfiguration_t config, std::reference_wrapper<Element> element);
+      PcbElement(stripConfiguration_t config, const Element& element);
 
      /* The return type of the getStrip method: three points along the strip, in quadruplet coordinate */
       struct strip_t {
-        Amg::Vector3D center{0,0,0};
-        Amg::Vector3D left{0,0,0};
-        Amg::Vector3D right{0,0,0};
+        Amg::Vector3D center{Amg::Vector3D::Zero()};
+        Amg::Vector3D left{Amg::Vector3D::Zero()};
+        Amg::Vector3D right{Amg::Vector3D::Zero()};
       };
 
      /* Returns three points (center, left, right) of a given strip, in quadruplet coordinates. */
@@ -60,7 +60,7 @@ namespace NswAsBuilt {
 
     private:
       stripConfiguration_t m_config;
-      std::reference_wrapper<Element> m_element; // reference element of a PCB
+      const Element& m_element; // reference element of a PCB
   };
 }
 

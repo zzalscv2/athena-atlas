@@ -37,7 +37,7 @@ void Element::transform(ParameterClass iclass, VectorSetRef local) const
 
 
 //===============================================================================
-void Element::transformToFrame(ParameterClass iclass, VectorSetRef local, Element* frame) const 
+void Element::transformToFrame(ParameterClass iclass, VectorSetRef local, const Element* frame) const 
 {
   const Element* el = this;
   while ((el!=nullptr) && (el!=frame)) {
@@ -103,8 +103,11 @@ void Element::addDaughter(std::unique_ptr<Element> daughter)
 void Element::traverseTree(std::function<void(Element&)> callback) 
 {
   struct tree_t {
-    daughterVec_t::iterator it;
-    daughterVec_t::iterator end;
+    using iter = daughterVec_t::iterator;
+    tree_t(iter _it, iter _end):
+      it{_it},end{_end}{}
+    iter it;
+    iter end;
   };
   std::list<tree_t> dtree;
   callback(*this);
@@ -114,7 +117,7 @@ void Element::traverseTree(std::function<void(Element&)> callback)
     if (it != dtree.back().end) {
       Element& el = **it;
       callback(el);
-      dtree.push_back({el.m_daughters.begin(), el.m_daughters.end()});
+      dtree.emplace_back(el.m_daughters.begin(), el.m_daughters.end());
       ++it;
     } else {
       dtree.pop_back();

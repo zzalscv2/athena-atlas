@@ -84,7 +84,7 @@ namespace NswAsBuilt {
       
      /* Repeatedly call the transform method using all mothers up to frame.
       * Set frame to nullptr to loop on all mothers. */
-      void transformToFrame(ParameterClass iclass, VectorSetRef local, Element* frame) const;
+      void transformToFrame(ParameterClass iclass, VectorSetRef local, const Element* frame) const;
 
      /* Cache the rigid component of the transform, for quicker access */
       void cacheTransforms();
@@ -113,9 +113,9 @@ namespace NswAsBuilt {
       ParameterVector m_correctedPar; // The parameter vector for the CORRECTION class
 
       daughterVec_t m_daughters;      // The list of daughter Elements
-      Element* m_mother = nullptr;    // The mother Element
+      Element* m_mother{nullptr};    // The mother Element
 
-      std::string m_asapId;           // Optional string identifier (imported from ASAP)
+      std::string m_asapId{""};           // Optional string identifier (imported from ASAP)
   };
 }
 
