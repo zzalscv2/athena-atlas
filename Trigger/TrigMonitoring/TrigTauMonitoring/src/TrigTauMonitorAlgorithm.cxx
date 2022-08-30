@@ -941,7 +941,7 @@ void TrigTauMonitorAlgorithm::fillRNNTrack(const std::string& trigger, const std
       }
       */
 
-      auto n_track = Monitored::Scalar<float>("n_track",0.0);
+      auto n_track = Monitored::Scalar<int>("n_track",0);
       n_track = tracks.size();
 
       auto track_pt_log = Monitored::Collection("track_pt_log", tracks, [](const xAOD::TauTrack *track){return TMath::Log10( track->pt()); }); 
@@ -1046,7 +1046,7 @@ void TrigTauMonitorAlgorithm::fillRNNCluster(const std::string& trigger, const s
     }
     */
 
-    auto n_cluster = Monitored::Scalar<float>("n_cluster",0.0); 
+    auto n_cluster = Monitored::Scalar<int>("n_cluster",0); 
     n_cluster = clusters.size();
 
     auto cluster_et_log = Monitored::Collection("cluster_et_log",clusters, [](const xAOD::CaloCluster *cluster){return TMath::Log10( cluster->et()); });

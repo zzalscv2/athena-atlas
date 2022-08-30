@@ -1014,6 +1014,14 @@ namespace MuonGM {
                     log << MSG::INFO << "NSW B-lines are already set via external ascii file " << m_NSWABLineAsciiPath << endmsg;
                     continue;
                 }
+                 // record this B-line in the historical B-line container
+                auto [it, flag] = m_bLineContainer.insert_or_assign(BLineId, BLine);
+                if (log.level() <= MSG::DEBUG) {
+                    if (flag)
+                        log << MSG::DEBUG << "New B-line entry for Station " << stType << " at Jzz/Jff/Job " << jzz << "/" << jff << "/" << job << endmsg;
+                    else 
+                        log << MSG::DEBUG << "Updating existing B-line for Station " << stType << " at Jzz/Jff/Job " << jzz << "/" << jff << "/" << job << endmsg;
+                }
 
                 if (stType[0] == 'M') {
                     // Micromegas                        
@@ -1026,9 +1034,7 @@ namespace MuonGM {
                             << endmsg;
                         return StatusCode::FAILURE;
                     }
-                
-                    RE->setBLinePar(BLine);
-
+                    RE->setBLinePar(it->second);
                 } else if (stType[0] == 'S') {
                     // sTGC
                     const int array_idx    = stgcIdentToArrayIdx(BLineId);
@@ -1040,19 +1046,8 @@ namespace MuonGM {
                             << endmsg;
                         return StatusCode::FAILURE;
                     }
-                
-                    RE->setBLinePar(BLine);
+                    RE->setBLinePar(it->second);
                 }
-
-                // record this B-line in the historical B-line container
-                auto [it, flag] = m_bLineContainer.insert_or_assign(BLineId, BLine);
-                if (log.level() <= MSG::DEBUG) {
-                    if (flag)
-                        log << MSG::DEBUG << "New B-line entry for Station " << stType << " at Jzz/Jff/Job " << jzz << "/" << jff << "/" << job << endmsg;
-                    else 
-                        log << MSG::DEBUG << "Updating existing B-line for Station " << stType << " at Jzz/Jff/Job " << jzz << "/" << jff << "/" << job << endmsg;
-                }
-                
                 continue;
             }
             
