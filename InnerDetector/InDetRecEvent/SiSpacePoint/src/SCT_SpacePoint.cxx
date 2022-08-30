@@ -78,6 +78,7 @@ namespace InDet
     Amg::MatrixX cov(2,2);
     cov<<
       1.*deltaY,   25.*deltaY,
+      // cppcheck-suppress constStatement; false positive
       25.*deltaY, 1600.*deltaY;
     
     Trk::MeasurementBase::m_localCovariance = cov;
