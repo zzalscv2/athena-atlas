@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2020 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "GeoPixelBarrel.h"
@@ -29,37 +29,44 @@
 #include <sstream>
 
 using namespace std;
-GeoPixelBarrel::GeoPixelBarrel(InDetDD::PixelDetectorManager* ddmgr,
-                               PixelGeometryManager* mgr,
-			       GeoModelIO::ReadGeoModel* sqliteReader,
-                               GeoPixelServices * pixServices)
+GeoPixelBarrel::GeoPixelBarrel(InDetDD::PixelDetectorManager* ddmgr
+                               , PixelGeometryManager* mgr
+			       , GeoModelIO::ReadGeoModel* sqliteReader
+                               , GeoPixelServices * pixServices)
   : GeoVPixelFactory (ddmgr, mgr, sqliteReader),
     m_pixServices(pixServices)
 {}
 
 GeoVPhysVol* GeoPixelBarrel::Build( ) {
 
-  //
-  // create the Barrel Mother volume
-  // 
-  double rmin = m_gmt_mgr->PixelBarrelRMin();
-  double rmax = m_gmt_mgr->PixelBarrelRMax();
-  double halflength = m_gmt_mgr->PixelBarrelHalfLength();
-  const GeoMaterial* air = m_mat_mgr->getMaterial("std::Air");
-  const GeoTube* barrelTube = new GeoTube(rmin,rmax,halflength);
-  const GeoLogVol* barrelLog = new GeoLogVol("Barrel",barrelTube,air);
-  GeoFullPhysVol* barrelPhys = new GeoFullPhysVol(barrelLog);
+  GeoFullPhysVol* barrelPhys{nullptr};
+  std::map<std::string, GeoFullPhysVol*> mapFPV;
+  std::map<std::string, GeoAlignableTransform*> mapAX;
+
+  if(m_sqliteReader) {
+    mapFPV = m_sqliteReader->getPublishedNodes<std::string, GeoFullPhysVol*>("Pixel");
+    mapAX  = m_sqliteReader->getPublishedNodes<std::string, GeoAlignableTransform*>("Pixel");
+    barrelPhys = mapFPV["Barrel"];
+  }
+  else {
+    //
+    // create the Barrel Mother volume
+    // 
+    double rmin = m_gmt_mgr->PixelBarrelRMin();
+    double rmax = m_gmt_mgr->PixelBarrelRMax();
+    double halflength = m_gmt_mgr->PixelBarrelHalfLength();
+    const GeoMaterial* air = m_mat_mgr->getMaterial("std::Air");
+    const GeoTube* barrelTube = new GeoTube(rmin,rmax,halflength);
+    const GeoLogVol* barrelLog = new GeoLogVol("Barrel",barrelTube,air);
+    barrelPhys = new GeoFullPhysVol(barrelLog);
+  }
 
   // Set numerology
   m_DDmgr->numerology().setNumLayers(m_gmt_mgr->PixelBarrelNLayer());
 
   // In case of IBL stave detailed description -> add stave ring support and emdblocks
-  bool bAddIBLStaveRings=false;
   m_gmt_mgr->SetCurrentLD(0);
-  if(m_gmt_mgr->ibl()&&m_gmt_mgr->PixelStaveLayout()>3&&m_gmt_mgr->PixelStaveLayout()<7)
-    {
-      bAddIBLStaveRings=true;
-    }
+  bool bAddIBLStaveRings = m_gmt_mgr->ibl()&&m_gmt_mgr->PixelStaveLayout()>3&&m_gmt_mgr->PixelStaveLayout()<7;
 
   //
   // Build the layers inside
@@ -71,73 +78,90 @@ GeoVPhysVol* GeoPixelBarrel::Build( ) {
     if(m_gmt_mgr->isLDPresent()){
       std::ostringstream lname;
       lname << "Layer" << ii;
-      //      GeoAlignableTransform * xform = new GeoAlignableTransform(GeoTrf::Transform3D()); 
 
-      // IBL layer shift ( 2mm shift issue )
-      double layerZshift = m_gmt_mgr->PixelLayerGlobalShift();
-      GeoAlignableTransform* xform = new GeoAlignableTransform(GeoTrf::Translate3D(0.,0.,layerZshift));
-
-      GeoVPhysVol* layerphys = layer.Build();
-      GeoNameTag *tag = new GeoNameTag(lname.str());         
-      barrelPhys->add(tag);
-      barrelPhys->add(new GeoIdentifierTag(ii));
-      barrelPhys->add(xform);
-      barrelPhys->add(layerphys);
-	  
-      // Store the transform (at level 1)
       Identifier id = m_gmt_mgr->getIdHelper()->wafer_id(0,ii,0,0);
-      m_DDmgr->addAlignableTransform(1, id, xform, layerphys);
 
-      // IBL stave ring service area  ( ring + endblocks + flexes + pipe + ...)
-      if(m_pixServices&&bAddIBLStaveRings&&ii==0)
-	{
-	  // ----------- end of stave services (side A)
-	  GeoNameTag * tagSupportA = new GeoNameTag("StaveRingAndEndblocks_A");
-	  GeoTransform *xformSupportA = layer.getSupportTrfA();
-	  GeoPhysVol *supportPhys_A = layer.getSupportA();
-	  barrelPhys->add(tagSupportA);
-	  barrelPhys->add(xformSupportA);
-	  barrelPhys->add(supportPhys_A);
-	  
-	  // ----------- end of stave services (side C)
-	  GeoNameTag * tagSupportC = new GeoNameTag("StaveRingAndEndblocks_C");
-	  GeoTransform *xformSupportC = layer.getSupportTrfC();
-	  GeoPhysVol *supportPhys_C =  layer.getSupportC();
-	  barrelPhys->add(tagSupportC);
-	  barrelPhys->add(xformSupportC);
-	  barrelPhys->add(supportPhys_C);
+      if(m_sqliteReader) {
+	GeoAlignableTransform* xform = mapAX[lname.str()];
+	layer.Build();
+	GeoFullPhysVol* layerFPV = mapFPV [lname.str()];
+	// Store the transform (at level 1)
+	m_DDmgr->addAlignableTransform(1, id, xform, layerFPV);
 
-	  // ----------- middle of stave services 
-	  if(m_gmt_mgr->PixelStaveAxe()==0) {
-	    GeoNameTag *tagM = new GeoNameTag("Brl0M_StaveRing");         
-	    GeoTransform *xformSupportMidRing = layer.getSupportTrfMidRing();
-	    GeoVPhysVol *supportPhysMidRing = layer.getSupportMidRing();
-	    barrelPhys->add(tagM);
-	    barrelPhys->add(xformSupportMidRing);
-	    barrelPhys->add(supportPhysMidRing);
-	  }
-	  
-	  // ----------- end of stave PP0 services (insde barrel)
-	  
-	  if(m_gmt_mgr->IBLFlexAndWingDefined()){
-	    GeoPixelIFlexServices iFlexSrv(m_DDmgr, m_gmt_mgr, m_sqliteReader, 0);
-	    iFlexSrv.Build();
+	// Extra Material. 
+	// From Marilena: I don't think there is much room but we provide the hooks anyway
+	// NB this has been taken from the GeoPixelLayer class .. needed to be moved here cause here
+	// we have the GeoFullPhysVol available from the SQLite DB
+	InDetDD::ExtraMaterial xMat(m_gmt_mgr->distortedMatManager());
+	xMat.add(layerFPV,"PixelLayer");
+	std::ostringstream ostr; ostr << m_gmt_mgr->GetLD();
+	xMat.add(layerFPV,"PixelLayer"+ostr.str());
+      }
+      else {
+	// IBL layer shift ( 2mm shift issue )
+	double layerZshift = m_gmt_mgr->PixelLayerGlobalShift();
+	GeoAlignableTransform* xform = new GeoAlignableTransform(GeoTrf::Translate3D(0.,0.,layerZshift));
+	GeoVPhysVol* layerphys = layer.Build();
+	GeoNameTag *tag = new GeoNameTag(lname.str());         
+	barrelPhys->add(tag);
+	barrelPhys->add(new GeoIdentifierTag(ii));
+	barrelPhys->add(xform);
+	barrelPhys->add(layerphys);
+
+	// Store the transform (at level 1)
+	m_DDmgr->addAlignableTransform(1, id, xform, layerphys);
+
+	// IBL stave ring service area  ( ring + endblocks + flexes + pipe + ...)
+	if(m_pixServices&&bAddIBLStaveRings&&ii==0)
+	  {
+	    // ----------- end of stave services (side A)
+	    GeoNameTag * tagSupportA = new GeoNameTag("StaveRingAndEndblocks_A");
+	    GeoTransform *xformSupportA = layer.getSupportTrfA();
+	    GeoPhysVol *supportPhys_A = layer.getSupportA();
+	    barrelPhys->add(tagSupportA);
+	    barrelPhys->add(xformSupportA);
+	    barrelPhys->add(supportPhys_A);
 	    
-	    GeoNameTag * tagFlexA = new GeoNameTag("PP0Flex_A");
-	    GeoTransform *xformFlexA = iFlexSrv.getSupportTrfA();
-	    GeoPhysVol *flexPhys_A = iFlexSrv.getSupportA();
-	    barrelPhys->add(tagFlexA);
-	    barrelPhys->add(xformFlexA);
-	    barrelPhys->add(flexPhys_A);
+	    // ----------- end of stave services (side C)
+	    GeoNameTag * tagSupportC = new GeoNameTag("StaveRingAndEndblocks_C");
+	    GeoTransform *xformSupportC = layer.getSupportTrfC();
+	    GeoPhysVol *supportPhys_C =  layer.getSupportC();
+	    barrelPhys->add(tagSupportC);
+	    barrelPhys->add(xformSupportC);
+	    barrelPhys->add(supportPhys_C);
 	    
-	    GeoNameTag * tagFlexC = new GeoNameTag("PP0Flex_C");
-	    GeoTransform *xformFlexC = iFlexSrv.getSupportTrfC();
-	    GeoPhysVol *flexPhys_C = iFlexSrv.getSupportC();
-	    barrelPhys->add(tagFlexC);
-	    barrelPhys->add(xformFlexC);
-	    barrelPhys->add(flexPhys_C);
+	    // ----------- middle of stave services 
+	    if(m_gmt_mgr->PixelStaveAxe()==0) {
+	      GeoNameTag *tagM = new GeoNameTag("Brl0M_StaveRing");         
+	      GeoTransform *xformSupportMidRing = layer.getSupportTrfMidRing();
+	      GeoVPhysVol *supportPhysMidRing = layer.getSupportMidRing();
+	      barrelPhys->add(tagM);
+	      barrelPhys->add(xformSupportMidRing);
+	      barrelPhys->add(supportPhysMidRing);
+	    }
+	    
+	    // ----------- end of stave PP0 services (insde barrel)
+	    
+	    if(m_gmt_mgr->IBLFlexAndWingDefined()){
+	      GeoPixelIFlexServices iFlexSrv(m_DDmgr, m_gmt_mgr, m_sqliteReader, 0);
+	      iFlexSrv.Build();
+	      
+	      GeoNameTag * tagFlexA = new GeoNameTag("PP0Flex_A");
+	      GeoTransform *xformFlexA = iFlexSrv.getSupportTrfA();
+	      GeoPhysVol *flexPhys_A = iFlexSrv.getSupportA();
+	      barrelPhys->add(tagFlexA);
+	      barrelPhys->add(xformFlexA);
+	      barrelPhys->add(flexPhys_A);
+	      
+	      GeoNameTag * tagFlexC = new GeoNameTag("PP0Flex_C");
+	      GeoTransform *xformFlexC = iFlexSrv.getSupportTrfC();
+	      GeoPhysVol *flexPhys_C = iFlexSrv.getSupportC();
+	      barrelPhys->add(tagFlexC);
+	      barrelPhys->add(xformFlexC);
+	      barrelPhys->add(flexPhys_C);
+	    }
 	  }
-	}
+      }
     }
     else 
       {
@@ -145,7 +169,7 @@ GeoVPhysVol* GeoPixelBarrel::Build( ) {
       }
   }
   
-  if(m_pixServices) {
+  if(!m_sqliteReader && m_pixServices) {
     //
     // Add the services inside the barrel volume
     //
