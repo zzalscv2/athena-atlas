@@ -14,4 +14,3 @@ atlas_add_component( TrkV0Fitter
                      src/components/*.cxx
                      LINK_LIBRARIES TrkV0FitterLib )
 
-atlas_install_python_modules( python/*.py POST_BUILD_CMD ${ATLAS_FLAKE8} )
