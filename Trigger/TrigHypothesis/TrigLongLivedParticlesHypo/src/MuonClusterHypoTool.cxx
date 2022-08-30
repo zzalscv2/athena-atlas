@@ -52,10 +52,10 @@ StatusCode  MuonClusterHypoTool::decide( DecisionInfo& input ) const
 {
     auto monNumberRoI    = Monitored::Scalar<int>( "numberRoI",  -99 );
 
-    auto monEtaClust     = Monitored::Scalar<double>( "etaClust", -99 );
-    auto monPhiClust     = Monitored::Scalar<double>( "phiClust", -99 );
-    auto monEtaClustPass = Monitored::Scalar<double>( "etaClustPass", -99 );
-    auto monPhiClustPass = Monitored::Scalar<double>( "phiClustPass", -99 );
+    auto monEtaClust     = Monitored::Scalar<float>( "etaClust", -99 );
+    auto monPhiClust     = Monitored::Scalar<float>( "phiClust", -99 );
+    auto monEtaClustPass = Monitored::Scalar<float>( "etaClustPass", -99 );
+    auto monPhiClustPass = Monitored::Scalar<float>( "phiClustPass", -99 );
 
     auto monNumRoIB      = Monitored::Scalar<int>( "nRoIBarrel",  -99 );
     auto monNumRoIE      = Monitored::Scalar<int>( "nRoIEndcap",  -99 );
@@ -63,6 +63,7 @@ StatusCode  MuonClusterHypoTool::decide( DecisionInfo& input ) const
     auto monNumRoIEPass  = Monitored::Scalar<int>( "nRoIEndcapPass",  -99 );
 
     auto result          = Monitored::Scalar<Bool_t>( "result", false );
+    auto chainActive     = Monitored::Scalar<Bool_t>( "chainActive", false );
 
     auto t1              = Monitored::Timer("TIME_HypoTool"); // microseconds
     auto t2              = Monitored::Timer("TIME_HypoTool_GetCluster");
@@ -70,7 +71,7 @@ StatusCode  MuonClusterHypoTool::decide( DecisionInfo& input ) const
 
     auto monitorIt = Monitored::Group( m_monTool, monNumberRoI, monEtaClust, monPhiClust,
                                        monNumRoIB, monNumRoIE, monEtaClustPass, monPhiClustPass,
-                                       result, monNumRoIBPass, monNumRoIEPass,
+                                       result, monNumRoIBPass, monNumRoIEPass, chainActive,
                                        t1, t2, t3 );
 
     const xAOD::TrigCompositeContainer *compCont = input.Composites;
@@ -80,8 +81,8 @@ StatusCode  MuonClusterHypoTool::decide( DecisionInfo& input ) const
     ATH_MSG_DEBUG("Found  " << compCont->size() << " TrigComposite objects");
 
     int numberRoI = 0;
-    double etaClust = -99;
-    double phiClust = -99;
+    float etaClust = -99;
+    float phiClust = -99;
 
     bool foundMuonRoICluster = false;
 
@@ -159,7 +160,7 @@ StatusCode  MuonClusterHypoTool::decide( DecisionInfo& input ) const
             }
 
         } else {
-            ATH_MSG_DEBUG("Cluster does not satisfy all the conditions... event not accepted");
+            ATH_MSG_DEBUG("Cluster location past maximum permitted eta... event not accepted");
             result = false;
         }
 
@@ -167,8 +168,15 @@ StatusCode  MuonClusterHypoTool::decide( DecisionInfo& input ) const
 
     }
 
+    ATH_MSG_INFO( "Writing out active chains:" );
+    for (DecisionID activeChain : prev)
+    {
+        ATH_MSG_INFO( HLT::Identifier( activeChain ) );
+    }
+
     // Checking if this HypoTool's chain is active in this event...
-    if( (prev.count(m_decisionId.numeric() ) > 0 ) )
+    chainActive = prev.count(m_decisionId.numeric()) > 0;
+    if( (prev.count(m_decisionId.numeric()) > 0 ) )
     {
         // If it's active, then check selection. ie nothing should pass if its not active.
         if( result ) {

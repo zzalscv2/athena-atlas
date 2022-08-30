@@ -252,6 +252,11 @@ L1TopoErrorFlagVars = '.'.join(['hasGenericRoiError', 'hasGenericDaqError', 'has
 TauTrackToKeep = ['pt', 'eta', 'phi', 'flagSet', 'trackLinks', 'd0TJVA', 'd0SigTJVA', 'z0sinthetaTJVA', 'z0sinthetaSigTJVA']
 TauTrackVars = '.'.join(TauTrackToKeep)
 
+# ===========
+# === LLP ===
+MuRoiToKeep = ['ClusterEta','ClusterPhi','nRoIs']
+MuRoiVars = '.'.join(MuRoiToKeep)
+
 
 # ------------------------------------------------------------
 # List of tuples with variables [0] and associated collections 
@@ -1111,6 +1116,11 @@ TriggerHLTListRun3 = [
     ('TrigRoiDescriptorCollection#HLT_Roi_DJ',                   'BS ESD AODFULL', 'Jet'),
     ('xAOD::TrackParticleContainer#HLT_IDTrack_DJLRT_FTF',          'BS ESD AODFULL', 'Jet', 'inViews:DJRoIViews'),
     ('xAOD::TrackParticleAuxContainer#HLT_IDTrack_DJLRT_FTFAux.',   'BS ESD AODFULL', 'Jet'),
+
+    # muon roi clusters
+    ('xAOD::TrigCompositeContainer#HLT_MuRoICluster_Composites',                      'BS ESD AODFULL AODSLIM', 'Muon'),
+    ('xAOD::TrigCompositeAuxContainer#HLT_MuRoICluster_CompositesAux.'+MuRoiVars,     'BS ESD AODFULL AODSLIM', 'Muon'),
+
 ]
 
 

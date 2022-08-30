@@ -19,6 +19,9 @@ class TrigMuonClusterAlgorithmMonitoring(GenericMonitoringTool_v1):
         self.defineHistogram('RoiPhi', path='EXPERT', type='TH1F', title="MuClu: Phi of all Input Muon RoIs (From Vectors); phi; nevents", xbins=32, xmin=-math.pi*1.05, xmax=math.pi*1.05)
 
         self.defineHistogram('CluPhi,CluEta', path='EXPERT', type='TH2F', title='MuClu: 2D Phi vs Eta of RoI clusters; phi; eta', xbins=128, xmin=-math.pi*1.05, xmax=math.pi*1.05,  ybins=120, ymin=-3., ymax=3.)
+        self.defineHistogram('nL1RoIs,nRoIinClusters', path='EXPERT', type='TH2F', title='MuClu: Number of L1 RoIs vs Number of RoI in Clusters;nL1RoIs;nCluRoIs', xbins=20, xmin=0, xmax=20, ybins=20, ymin=0, ymax=20)
+        self.defineHistogram('nL1RoIs,nClusters', path='EXPERT', type='TH2F', title='MuClu: Number of L1 RoIs vs Number of RoI-Clusters;nL1RoIs;nClusters', xbins=20, xmin=0, xmax=20, ybins=20, ymin=0, ymax=20)
+        self.defineHistogram('nRoIinClusters,nClusters', path='EXPERT', type='TH2F', title='MuClu: Number of RoI in Clusters vs Number of RoI-Clusters;nCluRoIs;nClusters', xbins=20, xmin=0, xmax=20, ybins=20, ymin=0, ymax=20)
 
         self.defineHistogram('dPhiCluSeed', path='EXPERT', type='TH1F', title='MuClu: dPhi between Cluster & Seed RoI; dPhi; nClusters', xbins=64, xmin=-0.8, xmax=0.8)
         self.defineHistogram('dEtaCluSeed', path='EXPERT', type='TH1F', title='MuClu: dEta between Cluster & Seed RoI; dEta; nClusters', xbins=60, xmin=-1., xmax=1.)

@@ -43,7 +43,7 @@ auto intAccessors = initAccessors<int>(
   "hitDV_seed_type","hitDV_n_track_qual",
   "dEdxTrk_id","dEdxTrk_dedx_n_usedhits",
   "dEdxTrk_n_hits_innermost","dEdxTrk_n_hits_inner","dEdxTrk_n_hits_pix","dEdxTrk_n_hits_sct",
-  "dEdxHit_trkid","dEdxHit_iblovfl","dEdxHit_loc","dEdxHit_layer","NumPV");
+  "dEdxHit_trkid","dEdxHit_iblovfl","dEdxHit_loc","dEdxHit_layer","NumPV", "nRoIs");
 
 auto int16Accessors = initAccessors<int16_t>("view",
   "HPtdEdxTrk_n_hdedx_hits_1p45","HPtdEdxTrk_n_hdedx_hits_1p50","HPtdEdxTrk_n_hdedx_hits_1p55","HPtdEdxTrk_n_hdedx_hits_1p60",
@@ -147,7 +147,8 @@ auto floatAccessors = initAccessors<float>(
   "vsi_vrtFit_r", "vsi_vrtFit_chi2", "vsi_vPos", "vsi_vPosMomAngT", "vsi_dphi1", "vsi_dphi2",
   "vsiHypo_nVtx", "vsiHypo_pTcut", "vsiHypo_rCut", "vsiHypo_nTrkCut", "vsiHypo_counts",
   "eProbabilityNN",
-  "trk_d0","cl_eta2","cl_phi2", "deltaEta1PearDistortion"
+  "trk_d0","cl_eta2","cl_phi2", "deltaEta1PearDistortion",
+  "ClusterEta", "ClusterPhi"
   );
 
 auto doubleAccessors = initAccessors<double>("ptcone02", "ptcone03", "JetDensityEMPFlow",
