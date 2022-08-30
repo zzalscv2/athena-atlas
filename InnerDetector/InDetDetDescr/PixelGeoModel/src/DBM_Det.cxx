@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2020 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "DBM_Det.h"
@@ -16,11 +16,10 @@
 
 #include <iostream>
 
-DBM_Det::DBM_Det(InDetDD::PixelDetectorManager* ddmgr,
-                 PixelGeometryManager* mgr,
-		 GeoModelIO::ReadGeoModel* sqliteReader)
-  : GeoVPixelFactory (ddmgr,
-                      mgr, sqliteReader)
+DBM_Det::DBM_Det(InDetDD::PixelDetectorManager* ddmgr
+                 , PixelGeometryManager* mgr
+		 , GeoModelIO::ReadGeoModel* sqliteReader)
+  : GeoVPixelFactory(ddmgr,mgr,sqliteReader)
 {
   double Trans_Y = 0.;
   
@@ -38,26 +37,29 @@ DBM_Det::DBM_Det(InDetDD::PixelDetectorManager* ddmgr,
 
 GeoVPhysVol* DBM_Det::Build()
 {
-  double safety = 0.001;
+  GeoFullPhysVol* Phys{nullptr};
+  if(!m_sqliteReader) {
+    double safety = 0.001;
 
-  //create a cylinder 8mm smaller than the BPSS outer radius to place the 4 DBM telescopes
-  double rmin = 45.*Gaudi::Units::mm;//41.0*Gaudi::Units::mm;
-  double rmax = 150.*Gaudi::Units::mm; //244.*Gaudi::Units::mm;
-  double halflength = m_gmt_mgr->DBMTelescopeZ()/2.;//200.*Gaudi::Units::mm
-  GeoTube * Shape = new GeoTube(rmin,rmax,halflength);
-  const GeoMaterial* air = m_mat_mgr->getMaterial("std::Air");
-  const GeoLogVol* Log = new GeoLogVol("OutsideDBM",Shape,air);
-  GeoFullPhysVol* Phys = new GeoFullPhysVol(Log);
-
-  // add PP0 board
-  DBM_PP0 pp0Board (m_DDmgr, m_gmt_mgr, m_sqliteReader);
-  GeoVPhysVol* pp0BoardPhys = pp0Board.Build();
-  GeoTrf::Translate3D pp0Pos(0., 0., -halflength + m_gmt_mgr->DBMPP0Thick()/2. + safety);
-  GeoTransform* pp0xform = new GeoTransform(pp0Pos);
-  GeoNameTag* pp0tag = new GeoNameTag("DBM_PP0"); 
-  Phys->add(pp0tag);
-  Phys->add(pp0xform);
-  Phys->add(pp0BoardPhys);	      
+    //create a cylinder 8mm smaller than the BPSS outer radius to place the 4 DBM telescopes
+    double rmin = 45.*Gaudi::Units::mm;//41.0*Gaudi::Units::mm;
+    double rmax = 150.*Gaudi::Units::mm; //244.*Gaudi::Units::mm;
+    double halflength = m_gmt_mgr->DBMTelescopeZ()/2.;//200.*Gaudi::Units::mm
+    GeoTube * Shape = new GeoTube(rmin,rmax,halflength);
+    const GeoMaterial* air = m_mat_mgr->getMaterial("std::Air");
+    const GeoLogVol* Log = new GeoLogVol("OutsideDBM",Shape,air);
+    Phys = new GeoFullPhysVol(Log);
+    
+    // add PP0 board
+    DBM_PP0 pp0Board (m_DDmgr, m_gmt_mgr, m_sqliteReader);
+    GeoVPhysVol* pp0BoardPhys = pp0Board.Build();
+    GeoTrf::Translate3D pp0Pos(0., 0., -halflength + m_gmt_mgr->DBMPP0Thick()/2. + safety);
+    GeoTransform* pp0xform = new GeoTransform(pp0Pos);
+    GeoNameTag* pp0tag = new GeoNameTag("DBM_PP0"); 
+    Phys->add(pp0tag);
+    Phys->add(pp0xform);
+    Phys->add(pp0BoardPhys);	      
+  }
 
   //we are now adding four DBM telescopes
   DBM_Telescope dbm (m_DDmgr, m_gmt_mgr, m_sqliteReader);
@@ -71,18 +73,23 @@ GeoVPhysVol* DBM_Det::Build()
       else if ((m_gmt_mgr->GetSide() < 0) && (i == 2)) m_gmt_mgr->SetPhi(0);
 
       //setting transformation
-      GeoTrf::Transform3D rm  = GeoTrf::RotateZ3D(m_module[i].at(5)*Gaudi::Units::deg)
-	* GeoTrf::RotateY3D(m_module[i].at(4)*Gaudi::Units::deg)
-	* GeoTrf::RotateX3D(m_module[i].at(3)*Gaudi::Units::deg);
-      GeoTrf::Translation3D pos(m_module[i].at(0), m_module[i].at(1), m_module[i].at(2));
-      GeoTransform* xform = new GeoTransform(GeoTrf::Transform3D(pos*rm));
-
-      GeoNameTag* tag = new GeoNameTag("DBM Module"); 
-      GeoVPhysVol* dbmModPhys = dbm.Build();
-      Phys->add(tag);
-      Phys->add(new GeoIdentifierTag(i));
-      Phys->add(xform);
-      Phys->add(dbmModPhys);	      
+      if(m_sqliteReader) {
+	dbm.Build();
+      }
+      else {
+	GeoTrf::Transform3D rm  = GeoTrf::RotateZ3D(m_module[i].at(5)*Gaudi::Units::deg)
+	  * GeoTrf::RotateY3D(m_module[i].at(4)*Gaudi::Units::deg)
+	  * GeoTrf::RotateX3D(m_module[i].at(3)*Gaudi::Units::deg);
+	GeoTrf::Translation3D pos(m_module[i].at(0), m_module[i].at(1), m_module[i].at(2));
+	GeoTransform* xform = new GeoTransform(GeoTrf::Transform3D(pos*rm));
+	
+	GeoNameTag* tag = new GeoNameTag("DBM Module"); 
+	GeoVPhysVol* dbmModPhys = dbm.Build();
+	Phys->add(tag);
+	Phys->add(new GeoIdentifierTag(i));
+	Phys->add(xform);
+	Phys->add(dbmModPhys);	      
+      }
     }
 
 
@@ -101,5 +108,12 @@ GeoVPhysVol* DBM_Det::Build()
     }
   }
 
-  return Phys;
+  if(m_sqliteReader) {
+    std::map<std::string, GeoFullPhysVol*> mapFPV = m_sqliteReader->getPublishedNodes<std::string, GeoFullPhysVol*>("Pixel");
+    std::string key="DBM_Det_"+std::to_string(m_gmt_mgr->GetLD())+"_"+std::to_string(m_gmt_mgr->Phi())+"_"+std::to_string(m_gmt_mgr->Eta());
+    return mapFPV[key];
+  }
+  else {
+    return Phys;
+  }
 }

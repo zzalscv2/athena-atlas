@@ -1,34 +1,25 @@
 /*
-  Copyright (C) 2002-2020 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
 */
 
-///////////////////////////////////////////////////////////////////
-// DBM_Det.h, (c) ATLAS Detector software
-///////////////////////////////////////////////////////////////////
-#ifndef DBMDET_H
-#define DBMDET_H
+#ifndef PIXELGEOMODEL_DBMDET_H
+#define PIXELGEOMODEL_DBMDET_H
 
+/**
+ * @class DBM_Det
+ * @brief Diamond Beam Monitor detector builder
+ **/
 
 #include "GeoVPixelFactory.h"
-#include "GaudiKernel/MsgStream.h"
-#include <iostream>
-
-
-
-  /** @class DBM_Det 
-
-  Diamond Beam Monitor detector builder
-  */  
 
 class DBM_Det : public GeoVPixelFactory {
  public:
-  DBM_Det(InDetDD::PixelDetectorManager* ddmgr, PixelGeometryManager* mgr, GeoModelIO::ReadGeoModel* sqliteReader);
+  DBM_Det(InDetDD::PixelDetectorManager* ddmgr
+	  , PixelGeometryManager* mgr
+	  , GeoModelIO::ReadGeoModel* sqliteReader);
   virtual  GeoVPhysVol* Build() override;
   
  private:
-  
-  /** member variables for algorithm properties: */
-  // int/double/bool  m_propertyName;
   std::vector<double> m_module[4];
 };
 
