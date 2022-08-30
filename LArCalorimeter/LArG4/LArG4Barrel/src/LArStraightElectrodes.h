@@ -7,30 +7,27 @@
 
 #include "PhysicalVolumeAccessor.h"
 #include <string>
-#include <mutex>
 
 class LArStraightElectrodes {
 private:
-  static PhysicalVolumeAccessor* s_theElectrodes;
+  LArStraightElectrodes(const std::string& strDetector="");
+  void initXYCentEle(const PhysicalVolumeAccessor& theElectrodes, int stackid, int cellid);
+  void initHalfLength(const PhysicalVolumeAccessor& theElectrodes, int stackid, int cellid);
+  double SlantEle(const PhysicalVolumeAccessor& theElectrodes, int stackid, int cellid) const;
   double m_xcent[1024][14]{};
   double m_ycent[1024][14]{};
   double m_cosu[1024][14]{};
   double m_sinu[1024][14]{};
   double m_halflength[1024][14]{};
-  bool m_filled;
-  static LArStraightElectrodes* s_instance;
   int m_parity;
-  static std::once_flag s_flag;
+
 public:
-  static LArStraightElectrodes* GetInstance(const std::string& strDetector="") ;
-  double XCentEle(int stackid, int cellid) const;
-  double YCentEle(int stackid, int cellid) const;
-  double SlantEle(int stackid, int cellid) const;
-  double HalfLength(int stackid, int cellid) const;
-  double Cosu(int stackid, int cellid) const;
-  double Sinu(int stackid, int cellid) const;
-protected:
-  LArStraightElectrodes(const std::string& strDetector="");
+  static const LArStraightElectrodes* GetInstance(const std::string& strDetector="");
+  double XCentEle(int stackid, int cellid) const { return m_xcent[cellid][stackid]; }
+  double YCentEle(int stackid, int cellid) const { return m_ycent[cellid][stackid]; }
+  double HalfLength(int stackid, int cellid) const { return m_halflength[cellid][stackid]; }
+  double Cosu(int stackid, int cellid) const { return m_cosu[cellid][stackid]; }
+  double Sinu(int stackid, int cellid) const { return m_sinu[cellid][stackid]; }
 };
 
 #endif // LARG4BARREL_LArStraightElectrodes_H
