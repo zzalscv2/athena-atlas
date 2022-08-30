@@ -31,12 +31,12 @@ namespace NswAsBuilt {
       * separately from second or any i-strip   
       */
       struct stgcStripPoint_t {
-        Amg::Vector3D pos;         // a point along the strip
-        Amg::Vector3D pitch; // the pitch vector to add in order to get the other strips
+        Amg::Vector3D pos{Amg::Vector3D::Zero()};         // a point along the strip
+        Amg::Vector3D pitch{Amg::Vector3D::Zero()}; // the pitch vector to add in order to get the other strips
       };
 
       struct stgcStripConfiguration_t {
-        int lastStripNumber;            // the strip number of the last strip i.e the number of strips
+        int lastStripNumber{0};            // the strip number of the last strip i.e the number of strips
         stgcStripPoint_t fCenterPoint;  // the center of the first strip
         stgcStripPoint_t fLeftPoint;    // the left (X<0) point of the first strip
         stgcStripPoint_t fRightPoint;   // the right(X>0) point of the first strip
@@ -52,16 +52,16 @@ namespace NswAsBuilt {
       /**
        * Constructor
        */
-      CathodeBoardElement(stgcStripConfiguration_t config, std::reference_wrapper<Element> element);
+      CathodeBoardElement(stgcStripConfiguration_t config, const Element& element);
 
       /**
        * The return type of the getStrip method: three points along the strip,
        * in quadruplet coordinate
        */
       struct stgcStrip_t {
-        Amg::Vector3D center;
-        Amg::Vector3D left;
-        Amg::Vector3D right;
+        Amg::Vector3D center{Amg::Vector3D::Zero()};
+        Amg::Vector3D left{Amg::Vector3D::Zero()};
+        Amg::Vector3D right{Amg::Vector3D::Zero()};
       };
 
       /**
@@ -79,7 +79,7 @@ namespace NswAsBuilt {
 
     private:
       stgcStripConfiguration_t m_config_stgc;
-      std::reference_wrapper<Element> m_element_stgc; // reference element of a PCB
+      const Element& m_element_stgc; // reference element of a PCB
   };
 }
 

@@ -35,24 +35,23 @@ namespace NswAsBuilt {
       using ipar_t = unsigned int;
       using VectorSet = Eigen::Matrix<double, 3, Eigen::Dynamic, Eigen::ColMajor|Eigen::AutoAlign, 3, 5>;
       using VectorSetRef = Eigen::Ref<VectorSet>;
-
-      virtual ~ElementModel() = default;
+  	  virtual ~ElementModel() = default;
 
      /* The ParameterVector: a wrapper around a std::vector<double> containing
       * the actual model parameters.
       * In addition, this struct may save the cache-able rigid component of the
       * transformation represented by the parameter vector */
       struct ParameterVector {
-        std::vector<double> parameters;
-        Eigen::Affine3d transformCache;
-        bool transformCacheValid = false;
+        std::vector<double> parameters{};
+        Eigen::Affine3d transformCache{Eigen::Affine3d::Identity()};
+        bool transformCacheValid{false};
 
         // Contructed: provide the number of parameters
         ParameterVector(size_t npars) : parameters(npars, 0.0) {}
 
         // accessors
-        double operator[] (size_t ipar) const { return parameters[ipar]; }
-        double& operator[] (size_t ipar) { return parameters[ipar]; }
+        double operator[] (size_t ipar) const { return parameters.at(ipar); }
+        double& operator[] (size_t ipar) { return parameters.at(ipar); }
       };
 
      /* The number of parameters used */

@@ -75,9 +75,9 @@ namespace NswAsBuilt {
       Amg::Vector3D stgcNonPar(double npar, Amg::Vector3D d0) const;
 
       // Properties and scales needed for the calculation
-      double m_lenX = 0.0;
-      double m_lenY = 0.0;
-      Amg::Vector3D m_defo0 = Amg::Vector3D::Zero();
+      double m_lenX{0.};
+      double m_lenY{0.};
+      Amg::Vector3D m_defo0 {Amg::Vector3D::Zero()};
   };
 }
 

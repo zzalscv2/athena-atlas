@@ -5,7 +5,7 @@
 #include "MuonNSWAsBuilt/CathodeBoardElement.h"
 using namespace NswAsBuilt;
 
-CathodeBoardElement::CathodeBoardElement(stgcStripConfiguration_t config, std::reference_wrapper<Element> element)
+CathodeBoardElement::CathodeBoardElement(stgcStripConfiguration_t config, const Element& element)
   : m_config_stgc(config), m_element_stgc(element)
 {
 }
@@ -14,7 +14,7 @@ CathodeBoardElement::CathodeBoardElement(stgcStripConfiguration_t config, std::r
 * separately from second or any i-strip   
 */
 CathodeBoardElement::stgcStrip_t CathodeBoardElement::getStgcStrip(ParameterClass iclass, int stripNumber) const {
-  Eigen::Matrix3d vectorset;
+  Eigen::Matrix3d vectorset{Eigen::Matrix3d::Identity()};
   if (stripNumber == 1){
     vectorset.col(0) = m_config_stgc.fCenterPoint.pos;
     vectorset.col(1) = m_config_stgc.fLeftPoint.pos;
@@ -31,8 +31,7 @@ CathodeBoardElement::stgcStrip_t CathodeBoardElement::getStgcStrip(ParameterClas
     vectorset.col(2) = m_config_stgc.sRightPoint.pos + (stripNumber - 2) * m_config_stgc.sRightPoint.pitch;
   }
 
-  Element& element = m_element_stgc;
-  element.transformToFrame(iclass, vectorset, nullptr);
+  m_element_stgc.transformToFrame(iclass, vectorset, nullptr);
 
   stgcStrip_t ret;
   ret.center = vectorset.col(0);
@@ -42,8 +41,7 @@ CathodeBoardElement::stgcStrip_t CathodeBoardElement::getStgcStrip(ParameterClas
 }
 
 Amg::Vector3D CathodeBoardElement::getPositionAlongStgcStrip(ParameterClass iclass, int stripNumber, double s) const {
-  Eigen::Matrix3d vectorset;
-  Amg::Vector3D center, left, right;
+  Amg::Vector3D center{Amg::Vector3D::Zero()}, left{Amg::Vector3D::Zero()}, right{Amg::Vector3D::Zero()};
   if (stripNumber == 1){
     center = m_config_stgc.fCenterPoint.pos;
     left = m_config_stgc.fLeftPoint.pos;
@@ -70,8 +68,7 @@ Amg::Vector3D CathodeBoardElement::getPositionAlongStgcStrip(ParameterClass icla
     ret = (1.0-s)*center + s*right;
   }
 
-  Element& element = m_element_stgc;
-  element.transformToFrame(iclass, ret, nullptr);
+  m_element_stgc.transformToFrame(iclass, ret, nullptr);
   return ret;
 }
 
