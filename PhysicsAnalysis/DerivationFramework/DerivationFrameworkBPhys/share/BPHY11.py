@@ -477,8 +477,7 @@ BPHY11_ElectronTPThinningTool = DerivationFramework__EgammaTrackParticleThinning
   InDetTrackParticlesKey     = "InDetTrackParticles",
   SelectionString            = "",
   BestMatchOnly              = True,
-  ConeSize                   = 0.3,
-  ApplyAnd                   = False
+  ConeSize                   = 0.3
 )
 
 ToolSvc+=BPHY11_ElectronTPThinningTool
