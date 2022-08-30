@@ -324,65 +324,62 @@ namespace LArG4 {
                             G4int& iregion, G4int& isampling, G4int& ieta,
                             G4int& isamp2, G4int& ieta2) const
     {
-      static G4double Eta_max,Eta_max_s1,Eta_max_s3,R_max_acc,Z_max_acc,R_min_acc,R_min_highz;
-      static G4double Dr_s12;
-      static G4double deltaz,Z_max_lowr,dzdr;
-      static G4double deta;
-      static G4double zmax1,zmax2,zmax3,zmax4,zmax5,zmax6,zmax7,rmax1,rmax2,rmax3,rmax4;
-      static bool FILL = true;
-      if (FILL) {
+      // Helper struct to hold pre-calculated geometry information
+      struct Geo {
+        G4double Eta_max,R_max_acc,Z_max_acc,R_min_acc,Z_max_lowr,dzdr;
+        G4double zmax1,zmax2,zmax3,zmax4,zmax5,zmax6,zmax7,rmax1,rmax2,rmax3,rmax4;
+      };
 
+      // Fill it once
+      static const Geo g = []() {
         const LArVG4DetectorParameters* parameters = LArVG4DetectorParameters::GetInstance();
+        Geo g;
 
         // maximum eta barrel 1.475 (at r=1500.024)
-        Eta_max = parameters->GetValue("LArEMBMaxEtaAcceptance");
+        g.Eta_max = parameters->GetValue("LArEMBMaxEtaAcceptance");
         // minimum active radius 1500.024
-        R_min_acc= parameters->GetValue("LArEMBRadiusInnerAccordion");
+        g.R_min_acc= parameters->GetValue("LArEMBRadiusInnerAccordion");
         // maximum active radius 1960.
-        R_max_acc = parameters->GetValue("LArEMBFiducialRmax");
+        g.R_max_acc = parameters->GetValue("LArEMBFiducialRmax");
         // maximum active z (before subtracting edge for signal readout)
         //   currently 3150, should be changed in database to become 3164
-        Z_max_acc = parameters->GetValue("LArEMBfiducialMothZmax");
+        g.Z_max_acc = parameters->GetValue("LArEMBfiducialMothZmax");
         // minimum radius at z max for active region
-        R_min_highz=1548.;     //FIXME should be taken from database
-
-        // inactive thickness between S1 and S2 FIXME should be taken from database
-        Dr_s12=1.1;
-
-        Eta_max_s1=1.4;     // maximum eta region 0
-        Eta_max_s3=1.325;   // maximum eta for S3 in region 0
-        deta=0.025;         // basic granularity
+        const G4double R_min_highz=1548.;     //FIXME should be taken from database
 
         // compute z edge taken by readout strips on the edge
-
-        deltaz=7.;   // this include copper 6mm + 2*0.5mm empty space on each side
-
-        zmax1=Z_max_acc-deltaz;
-        zmax2=Z_max_acc-2.*deltaz;
-        zmax3=Z_max_acc-3.*deltaz;
-        zmax4=Z_max_acc-4.*deltaz;
-        zmax5=Z_max_acc-5.*deltaz;
-        zmax6=Z_max_acc-6.*deltaz;
-        zmax7=Z_max_acc-7.*deltaz;
-        rmax1=R_max_acc-deltaz;
-        rmax2=R_max_acc-2.*deltaz;
-        rmax3=R_max_acc-3.*deltaz;
-        rmax4=R_max_acc-4.*deltaz;
-
+        const G4double deltaz=7.;   // this include copper 6mm + 2*0.5mm empty space on each side
+        g.zmax1=g.Z_max_acc-deltaz;
+        g.zmax2=g.Z_max_acc-2.*deltaz;
+        g.zmax3=g.Z_max_acc-3.*deltaz;
+        g.zmax4=g.Z_max_acc-4.*deltaz;
+        g.zmax5=g.Z_max_acc-5.*deltaz;
+        g.zmax6=g.Z_max_acc-6.*deltaz;
+        g.zmax7=g.Z_max_acc-7.*deltaz;
+        g.rmax1=g.R_max_acc-deltaz;
+        g.rmax2=g.R_max_acc-2.*deltaz;
+        g.rmax3=g.R_max_acc-3.*deltaz;
+        g.rmax4=g.R_max_acc-4.*deltaz;
 
         // maximum z at r=1500.024
-        Z_max_lowr = sinh(Eta_max)*R_min_acc;
+        g.Z_max_lowr = sinh(g.Eta_max)*g.R_min_acc;
         // slope of z vs r edge (which is not projective in eta...)
-        dzdr = (Z_max_acc-Z_max_lowr)/(R_min_highz-R_min_acc);
+        g.dzdr = (g.Z_max_acc-g.Z_max_lowr)/(R_min_highz-g.R_min_acc);
 
         //     ATH_MSG_VERBOSE("Initialization of SampSet ");
-        //     ATH_MSG_VERBOSE(" Rmin/Rmax      " << R_min_acc << " " << R_max_acc);
-        //     ATH_MSG_VERBOSE(" Zmax/Zmax_lowR " << Z_max_acc << " " << Z_max_lowr);
+        //     ATH_MSG_VERBOSE(" Rmin/Rmax      " << g.R_min_acc << " " << g.R_max_acc);
+        //     ATH_MSG_VERBOSE(" Zmax/Zmax_lowR " << g.Z_max_acc << " " << g.Z_max_lowr);
         //     ATH_MSG_VERBOSE(" Rmin_highz     " << R_min_highz);
-        //     ATH_MSG_VERBOSE(" dzdr           " << dzdr);
+        //     ATH_MSG_VERBOSE(" dzdr           " << g.dzdr);
+        return g;
+      }();
 
-        FILL=false;
-      };
+      // inactive thickness between S1 and S2 FIXME should be taken from database
+      const G4double Dr_s12=1.1;
+      const G4double Eta_max_s1=1.4;     // maximum eta region 0
+      const G4double Eta_max_s3=1.325;   // maximum eta for S3 in region 0
+      const G4double deta=0.025;         // basic granularity
+
 
       // iactive = 1 if active region, 0 if region considered as inactive
       G4int iactive = 1;
@@ -450,41 +447,41 @@ namespace LArG4 {
             // for radius >r23 we have to take care of the readout strips at high z
             //   and attribute some of the energy to other cells
             else {     // radius>r23
-              if (z>zmax1) {
+              if (z>g.zmax1) {
                 isampling=2;
                 ieta=55;
               }
-              else if (z>zmax2) {
+              else if (z>g.zmax2) {
                 isampling=2;
                 ieta=54;
               }
-              else if (z>zmax3) {
+              else if (z>g.zmax3) {
                 isampling=2;
                 ieta=53;
               }
-              else if (z>zmax4) {
+              else if (z>g.zmax4) {
                 isampling=3;
                 ieta=26;
               }
-              else if (aeta<1.3 && z>zmax5) {
+              else if (aeta<1.3 && z>g.zmax5) {
                 isampling=2;
                 ieta=52;
               }
-              else if (aeta<1.3 && z>zmax6) {
+              else if (aeta<1.3 && z>g.zmax6) {
                 isampling=2;
                 ieta=51;
               }
-              else if (radius>rmax4 && z<zmax5 && aeta>1.2) {
-                if (radius>rmax1) {
+              else if (radius>g.rmax4 && z<g.zmax5 && aeta>1.2) {
+                if (radius>g.rmax1) {
                   isampling=2;
                   ieta=51;
                 }
-                else if(radius>rmax2) {
+                else if(radius>g.rmax2) {
                   isampling=3;
                   ieta=25;
                 }
-                else if (radius>rmax3) {
-                  if (z<zmax7) {
+                else if (radius>g.rmax3) {
+                  if (z<g.zmax7) {
                     isampling=2;
                     ieta=50;
                   }
@@ -515,7 +512,7 @@ namespace LArG4 {
               ieta2=imid/2;
             }   // end radius>r23
             // put into middle energy deposited along readout strips across the back
-            if (isampling==3 && z<zmax4 && (radius<rmax4 || aeta<1.2) ) {
+            if (isampling==3 && z<g.zmax4 && (radius<g.rmax4 || aeta<1.2) ) {
               const double etastr = (imid%2==0) ? 0.025*imid : 0.025*(imid+1);
               const double delta=radius*(sinh(etastr)-sinh(aeta))/cosh(etastr);
               double deltastr;
@@ -534,10 +531,10 @@ namespace LArG4 {
           else {
             isampling=2;
             ieta=imid;
-            if (z>zmax1) {
+            if (z>g.zmax1) {
               ieta=55;
             }
-            else if (z>zmax2 && aeta<1.375) {
+            else if (z>g.zmax2 && aeta<1.375) {
               ieta=54;
             }
             isamp2=2;
@@ -548,11 +545,11 @@ namespace LArG4 {
 
       // eta between 1.4 and 1.475
 
-      if (aeta>=Eta_max_s1 && aeta<Eta_max) {
+      if (aeta>=Eta_max_s1 && aeta<g.Eta_max) {
         r12 = Rmax1[447];   // radius for end of sampling 1
-        r23=Z_max_acc/sinh(aeta);   // radius of end of sampling 2, bounded by high z end
+        r23=g.Z_max_acc/sinh(aeta);   // radius of end of sampling 2, bounded by high z end
 
-        const double zmax = Z_max_lowr + dzdr*(radius-R_min_acc);
+        const double zmax = g.Z_max_lowr + g.dzdr*(radius-g.R_min_acc);
 
         iregion=1;
         if (radius <=r12) {
@@ -580,7 +577,7 @@ namespace LArG4 {
       }
       // eta above 1.475, not fiducial region, but still returns something
       //  for calibration hits
-      if (aeta>Eta_max) {
+      if (aeta>g.Eta_max) {
         iregion=1;
         r12 = Rmax1[447];
         if (radius <=r12) {
@@ -597,7 +594,7 @@ namespace LArG4 {
       }
 
       // cross-check of active region
-      if (z>Z_max_acc || radius>R_max_acc || radius<R_min_acc || aeta > Eta_max) iactive=0;
+      if (z>g.Z_max_acc || radius>g.R_max_acc || radius<g.R_min_acc || aeta > g.Eta_max) iactive=0;
 
       return iactive;
     }
