@@ -1,9 +1,12 @@
 /*
-  Copyright (C) 2002-2017 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef MCTruthBase_TruthStrategyManager_H
 #define MCTruthBase_TruthStrategyManager_H
+
+// Framework include
+#include "CxxUtils/checker_macros.h"
 
 // ISF include
 #include "ISF_Interfaces/ITruthSvc.h"
@@ -21,8 +24,11 @@ class TruthStrategyManager
 
 public:
 
-  /// Retrieve the singleton instance
-  static TruthStrategyManager* GetStrategyManager();
+  /// Retrieve the (const) singleton instance
+  static const TruthStrategyManager& GetStrategyManager();
+
+  /// Retrieve the (non-const) singleton instance
+  static TruthStrategyManager& GetStrategyManager_nc ATLAS_NOT_THREAD_SAFE ();
 
   /// Returns true if any of the truth strategies return true
   bool CreateTruthIncident(const G4Step*, int subDetVolLevel) const;

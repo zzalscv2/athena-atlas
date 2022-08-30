@@ -61,7 +61,7 @@ G4AtlasAlg::G4AtlasAlg(const std::string& name, ISvcLocator* pSvcLocator)
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
 
-StatusCode G4AtlasAlg::initialize()
+StatusCode G4AtlasAlg::initialize ATLAS_NOT_THREAD_SAFE ()
 {
   ATH_MSG_DEBUG("Start of initialize()");
 
@@ -89,9 +89,9 @@ StatusCode G4AtlasAlg::initialize()
   ATH_CHECK( m_geoIDSvc.retrieve() );
   ATH_MSG_INFO( "- Using ISF GeoIDSvc       : " << m_geoIDSvc.typeAndName() );
 
-  TruthStrategyManager* sManager = TruthStrategyManager::GetStrategyManager();
-  sManager->SetISFTruthSvc( &(*m_truthRecordSvc) );
-  sManager->SetISFGeoIDSvc( &(*m_geoIDSvc) );
+  TruthStrategyManager& sManager = TruthStrategyManager::GetStrategyManager_nc();
+  sManager.SetISFTruthSvc( &(*m_truthRecordSvc) );
+  sManager.SetISFGeoIDSvc( &(*m_geoIDSvc) );
 
   // I/O
   ATH_CHECK( m_inputTruthCollectionKey.initialize());
