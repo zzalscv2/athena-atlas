@@ -301,32 +301,29 @@ bool InDet::SiTrajectory_xk::isNewTrack
   const Trk::PrepRawData* prd   [100];
   std::multimap<const Trk::PrepRawData*,const Trk::Track*>::const_iterator 
     ti,t[100],te = map.end();
-
-  int     n   = 0    ;
+  int n = 0 ;
+  if (m_firstElement==-100) return false;//i.e. the int array never had elements inserted
   for (int i=m_firstElement; i<=m_lastElement; ++i) {
-   
     int m = m_elementsMap[i];
-
-    if     (m_elements[m].cluster()     ) {
-      
+    
+    if (m_elements[m].cluster()) {
       prd[n] = m_elements[m].cluster();
-      t  [n] = map.find(prd[n]); if (t[n]==te) return true; ++n;
-    }
-    else if (m_elements[m].clusterNoAdd()) {
-      
+      t[n] = map.find(prd[n]); 
+      if (t[n]==te) return true; 
+      ++n;
+    } else if (m_elements[m].clusterNoAdd()) {
       prd[n] = m_elements[m].clusterNoAdd();
-      t  [n] = map.find(prd[n]); if (t[n]==te) return true; ++n;
+      t  [n] = map.find(prd[n]); 
+      if (t[n]==te) return true; 
+      ++n;
     }
   }
 
   int nclt = m_nclusters + m_nclustersNoAdd;
   
   for (int i=0; i!=n; ++i) {
-
     int nclmax = 0;
-
     for (ti=t[i]; ti!=te; ++ti) {
-
       if ( (*ti).first != prd[i] ) break;
       int ncl = (*ti).second->measurementsOnTrack()->size();
       if (ncl > nclmax) nclmax = ncl;
