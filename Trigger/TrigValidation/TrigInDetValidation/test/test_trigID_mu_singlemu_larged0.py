@@ -38,7 +38,7 @@ GridFiles=True
 preinclude_file = 'all:TrigInDetValidation/TIDV_cond_fix.py' #conditions fix for ATR-23982. In future find a more recent RDO  
 
 Jobs = [ ( "Truth",       " TIDAdata-run3-larged0.dat                    -o data-hists.root -p 13",   "Test_bin_larged0.dat" ),
-         ( "Offline",     " TIDAdata-run3-offline-larged0.dat -r Offline -o data-hists-offline.root", "Test_bin_larged0.dat" ) ]
+         ( "Offline",     " TIDAdata-run3-offline-larged0.dat -r Offline+InDetLargeD0TrackParticles -o data-hists-offline.root", "Test_bin_larged0.dat" ) ]
 
 Comp = [ ( "L2muon",              "L2muon",      "data-hists.root",         " -c TIDAhisto-panel.dat  -d HLTL2-plots " ),
          ( "L2muon-lowpt",        "L2muonLowpt", "data-hists.root",         " -c TIDAhisto-panel.dat  -d HLTL2-plots-lowpt " ),

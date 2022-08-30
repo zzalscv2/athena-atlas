@@ -401,7 +401,7 @@ void AnalysisConfigMT_Ntuple::loop() {
 	int Noff  = 0;
 	int Nmu   = 0;
 	int Nel   = 0;
-        int Ntau  = 0;
+	int Ntau  = 0;
 
 	/// now add the offline tracks
 
@@ -552,14 +552,16 @@ void AnalysisConfigMT_Ntuple::loop() {
 
 	  std::vector<TrackTrigObject> elevec;
 	  
-	  int Nel_ = processElectrons( selectorRef, &elevec, itype, ( m_rawElectrons[ielec]=="raw" ? true : false ) );
-	  
-	  if ( Nel_ < 1 ) continue;
-      
-          Nel += Nel_;	
-
 	  std::string echain = std::string("Electrons");
-          if ( m_electronType[ielec]!="" )    echain += "_" + m_electronType[ielec];
+	  if (m_electronIsLRT[ielec]) echain = std::string("LRTElectrons");
+
+	  int Nel_ = processElectrons( selectorRef, &elevec, itype, ( m_rawElectrons[ielec]=="raw" ? true : false ), 0.0, echain );
+	  
+      if ( Nel_ < 1 ) continue;
+      
+      Nel += Nel_;	
+
+      if ( m_electronType[ielec]!="" )    echain += "_" + m_electronType[ielec];
 	  if ( m_rawElectrons[ielec]=="raw" ) echain += "_raw";
 	  
 	  m_event->addChain( echain );
@@ -577,7 +579,6 @@ void AnalysisConfigMT_Ntuple::loop() {
 
 	}
 	
-       
 
 	std::string MuonRef[5] =  { "", "Tight", "Medium", "Loose", "VeryLoose" };
 
@@ -590,7 +591,10 @@ void AnalysisConfigMT_Ntuple::loop() {
           for ( int it=0 ; it<5 ; it++ ) if ( m_muonType[imuon] == MuonRef[it] ) muonType=it; 
           if ( muonType<0 ) continue; 
 
-	  int Nmu_ = processMuons( selectorRef, muonType );
+      	std::string mchain = "Muons";
+	  	if (m_muonIsLRT[imuon]) mchain = "MuonsLRT";
+
+	  	int Nmu_ = processMuons( selectorRef, muonType, 0, mchain );
 
           if ( Nmu_ < 1 ) continue;
 
@@ -598,7 +602,6 @@ void AnalysisConfigMT_Ntuple::loop() {
 
 	  m_provider->msg(MSG::DEBUG) << "found " << Nmu << " offline muons " << endmsg; 
 
-          std::string mchain = "Muons";
           if ( m_muonType[imuon]!="" )  mchain += "_" + m_muonType[imuon];
 
 	  m_event->addChain(mchain);
@@ -616,8 +619,6 @@ void AnalysisConfigMT_Ntuple::loop() {
 	  m_provider->msg(MSG::DEBUG) << "ref muon tracks.size() " << selectorRef.tracks().size() << endmsg; 
 	  for ( int ii=selectorRef.tracks().size() ; ii-- ; ) m_provider->msg(MSG::DEBUG) << "  ref muon track " << ii << " " << *selectorRef.tracks()[ii] << endmsg;  
 	}
-	
-
 
 
 	/// get muons 
