@@ -56,17 +56,28 @@ from EventBookkeeperTools.EventBookkeeperToolsConf import TestFilterReentrantAlg
 topSequence += TestFilterReentrantAlg("TestReentrant1", FilterKey="TestReentrant1", Modulo=2)
 topSequence += TestFilterReentrantAlg("TestReentrant2", FilterKey="TestReentrant2", Modulo=4)
 
+# for tests
+from AthenaCommon.ConcurrencyFlags import jobproperties as Concurrency
+suffix = f"_legacy_{Concurrency.ConcurrencyFlags.NumThreads()}_{Concurrency.ConcurrencyFlags.NumProcs()}"
+if 'alternativeInput' in dir() and alternativeInput is True:  # noqa: F821
+    suffix += "_alt"
+
+if Concurrency.ConcurrencyFlags.NumProcs() > 0:
+    from AthenaMP.AthenaMPFlags import jobproperties as AthenaMPJobProps
+    # shared writer
+    if 'sharedWriter' in dir() and sharedWriter is True:  # noqa: F821
+        AthenaMPJobProps.AthenaMPFlags.UseSharedWriter = True
+        suffix += "_sharedWriter"
+
+    AthenaMPJobProps.AthenaMPFlags.WorkerTopDir = f"athenaMP_workers{suffix}"
+    AthenaMPJobProps.AthenaMPFlags.EventOrdersFile = f"athenamp_eventorders{suffix}.txt"
+
 # output options
 from AthenaPoolCnvSvc.WriteAthenaPool import AthenaPoolOutputStream
-Stream1 = AthenaPoolOutputStream('Stream1', 'OutputAOD.root', asAlg=True)
+Stream1 = AthenaPoolOutputStream('Stream1', f'OutputAOD{suffix}.root', asAlg=True)
 Stream1.ItemList = ['xAOD::EventInfo#*', 'xAOD::EventAuxInfo#*']
 Stream1.MetadataItemList += ['xAOD::CutBookkeeperContainer#CutBookkeepers*', 'xAOD::CutBookkeeperAuxContainer#CutBookkeepers*Aux.']
 Stream1.MetadataItemList += ['xAOD::CutBookkeeperContainer#IncompleteCutBookkeepers*', 'xAOD::CutBookkeeperAuxContainer#IncompleteCutBookkeepers*Aux.']
-
-# shared writer
-if 'sharedWriter' in dir() and sharedWriter is True:  # noqa: F821
-    from AthenaMP.AthenaMPFlags import jobproperties as ampjp
-    ampjp.AthenaMPFlags.UseSharedWriter = True
 
 # set debug logging
 ServiceMgr.MessageSvc.defaultLimit = 9999999

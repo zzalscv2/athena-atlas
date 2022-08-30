@@ -309,7 +309,7 @@ if rec.doFileMetaData():
     #EventBookkeepers
     if not hasattr(svcMgr,"CutFlowSvc"):
         from EventBookkeeperTools.CutFlowHelpers import CreateCutFlowSvc
-        CreateCutFlowSvc( svcName="CutFlowSvc", seq=topSequence, addMetaDataToAllOutputFiles=False )
+        CreateCutFlowSvc( seq=topSequence, addMetaDataToAllOutputFiles=False )
         pass
     if rec.readAOD() or rec.readESD():
         #force CutFlowSvc execution (necessary for file merging)

@@ -24,7 +24,7 @@ topSequence += xAODMaker__EventInfoCnvAlg()
 
 # setup the CutFlowSvc
 from EventBookkeeperTools.CutFlowHelpers import CreateCutFlowSvc
-CreateCutFlowSvc(svcName="CutFlowSvc", seq=topSequence, addMetaDataToAllOutputFiles=True)
+CreateCutFlowSvc(seq=topSequence, addMetaDataToAllOutputFiles=True)
 
 # setup the test alg
 from EventBookkeeperTools.PyFilterTester import PyFilterTester

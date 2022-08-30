@@ -1,4 +1,4 @@
-# Copyright (C) 2002-2019 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
 #
 # @author Tadej Novak
 
@@ -29,7 +29,7 @@ svcMgr.EventSelector.InputCollections = [testFile]
 
 # Needed for filtering, Athena only for now
 from EventBookkeeperTools.CutFlowHelpers import CreateCutFlowSvc
-CreateCutFlowSvc(svcName="CutFlowSvc", seq=athAlgSeq, addMetaDataToAllOutputFiles=False)
+CreateCutFlowSvc(seq=athAlgSeq, addMetaDataToAllOutputFiles=False)
 
 from TriggerAnalysisAlgorithms.TriggerAnalysisAlgorithmsTest import makeSequence
 algSeq = makeSequence (dataType)

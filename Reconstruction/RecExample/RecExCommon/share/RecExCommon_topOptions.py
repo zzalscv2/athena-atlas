@@ -799,7 +799,7 @@ if rec.doTrigger and rec.doTriggerFilter() and globalflags.DataSource() == 'data
 
         from EventBookkeeperTools.CutFlowHelpers import CreateCutFlowSvc
         logRecExCommon_topOptions.debug("Calling CreateCutFlowSvc")
-        CreateCutFlowSvc( svcName="CutFlowSvc", seq=seq, addMetaDataToAllOutputFiles=True )
+        CreateCutFlowSvc( seq=seq, addMetaDataToAllOutputFiles=True )
 
         seq+=topSequence.RoIBResultToxAOD
         seq+=topSequence.TrigBSExtraction
@@ -1025,7 +1025,7 @@ if rec.doDPD():
             # Only the configurables that are not already present will be created
             from EventBookkeeperTools.CutFlowHelpers import CreateCutFlowSvc
             logRecExCommon_topOptions.debug("Calling CreateCutFlowSvc")
-            CreateCutFlowSvc( svcName="CutFlowSvc", seq=topSequence, addMetaDataToAllOutputFiles=True )
+            CreateCutFlowSvc( seq=topSequence, addMetaDataToAllOutputFiles=True )
 
             #Explicitly add file metadata from the transient store
             MSMgr.AddMetaDataItemToAllStreams(dfMetadataItemList())
@@ -1098,7 +1098,7 @@ if rec.doFileMetaData() or rec.OutputFileNameForRecoStep() == 'EVNTtoDAOD':
     if hasBookkeepers or rec.OutputFileNameForRecoStep() in ['EVNTtoDAOD', 'AODtoDAOD']:
         from EventBookkeeperTools.CutFlowHelpers import CreateCutFlowSvc
         logRecExCommon_topOptions.debug("Going to call CreateCutFlowSvc")
-        CreateCutFlowSvc( svcName="CutFlowSvc", seq=topSequence, addMetaDataToAllOutputFiles=True )
+        CreateCutFlowSvc( seq=topSequence, addMetaDataToAllOutputFiles=True )
         if rec.readAOD() or rec.readESD():
             #force CutFlowSvc execution (necessary for file merging)
             theApp.CreateSvc+=['CutFlowSvc']

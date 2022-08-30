@@ -29,14 +29,14 @@ def GetCurrentStreamName( msg ):
             return class_name
     return 'unknownStream'
 
-def CreateCutFlowSvc( svcName="CutFlowSvc", seq=None, addMetaDataToAllOutputFiles=True ):
+def CreateCutFlowSvc( seq=None, addMetaDataToAllOutputFiles=True ):
     """
     Helper to create the CutFlowSvc, extract the needed information from
     the input file, and also schedule all the needed stuff.
     """
     # Create a message logger
     from AthenaCommon.Logging import logging
-    msg = logging.getLogger( "Create"+svcName )
+    msg = logging.getLogger( "CreateCutFlowSvc" )
 
     # Get the service manager
     from AthenaCommon.AppMgr import ServiceMgr as svcMgr
@@ -47,9 +47,13 @@ def CreateCutFlowSvc( svcName="CutFlowSvc", seq=None, addMetaDataToAllOutputFile
 
     # Create the CutFlowSvc instance
     import AthenaCommon.CfgMgr as CfgMgr
-    if not hasattr(svcMgr,"CutFlowSvc"): svcMgr += CfgMgr.CutFlowSvc()
-    svcMgr.CutFlowSvc.Configured  = True
-    svcMgr.CutFlowSvc.InputStream = inputStreamName
+    if not hasattr(svcMgr,"CutFlowSvc"):
+        cutFlowSvc = CfgMgr.CutFlowSvc()
+        svcMgr += cutFlowSvc
+    else:
+        cutFlowSvc = svcMgr.CutFlowSvc
+    cutFlowSvc.Configured  = True
+    cutFlowSvc.InputStream = inputStreamName
 
     # Make sure MetaDataSvc is ready
     if not hasattr(svcMgr,'MetaDataSvc'):

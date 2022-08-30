@@ -86,7 +86,7 @@ svcMgr += AthenaPoolCnvSvc()
 include( "AthenaPoolMultiTest/ExampleStreamConfig.py" )
 
 from EventBookkeeperTools.CutFlowHelpers import CreateCutFlowSvc
-CreateCutFlowSvc( svcName="CutFlowSvc", seq=topSequence, addMetaDataToAllOutputFiles=True )
+CreateCutFlowSvc( seq=topSequence, addMetaDataToAllOutputFiles=True )
 
 from AthenaPoolCnvSvc.WriteAthenaPool import AthenaPoolOutputStream
 DataStream = AthenaPoolOutputStream( "DataStream" , "AthenaPoolMultiTest_Splittable0.root", False, noTag=False )
