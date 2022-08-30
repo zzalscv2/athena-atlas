@@ -217,15 +217,6 @@ StatusCode gFexByteStreamTool::convertFromBS(const std::vector<const ROBF*>& vro
 
         unsigned int n_words = rob->rod_ndata();
 
-       //do not remove, checks will be needed when P1 data available
-        int aux = 1; //delete, for debug
-        for (const uint32_t word : dataArray) {
-
-            printf("\t %3d  raw word: 0x%08x \t bits: %32s\n",aux,word, (std::bitset<32>(word).to_string()).c_str() );
-            aux++; //delete, for debug
-
-        }
-        
         //saving Jet TOBs into the EDM container
         for(unsigned int iWord=0; iWord<n_words/2; iWord++) {
             ATH_MSG_DEBUG("Raw word  0x" << std::hex << dataArray[iWord]  << "    " << std::bitset<32> (dataArray[iWord]));
