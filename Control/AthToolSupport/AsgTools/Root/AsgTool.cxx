@@ -10,19 +10,10 @@
 #include "AsgTools/ToolStore.h"
 
 #ifndef XAOD_STANDALONE
-
-
-namespace asg {
+namespace {
 
 // Helpers to pack/unpack the PTR#TYPE/NAME string set up by the macros
 // in AsgToolMacros.h.
-
-std::string ptrToString (const void* p)
-{
-  char buf[80];
-  snprintf (buf, 80, "%p", p);
-  return std::string(buf);
-}
 
 std::string getType (const std::string& s)
 {
@@ -67,7 +58,7 @@ namespace asg {
    AsgTool::AsgTool( const std::string& name )
       : AsgToolBase(
 #ifndef XAOD_STANDALONE
-                    getType(name), getName(name), getParent(name)
+                    ::getType(name), ::getName(name), ::getParent(name)
 #else // not XAOD_STANDALONE
                     name
 #endif // not XAOD_STANDALONE
@@ -110,6 +101,31 @@ namespace asg {
    const std::string& AsgTool::msg_level_name() const {
 
       return MSG::name( msg().level() );
+   }
+
+   const std::string& AsgTool::getName( const void* ptr ) const {
+
+#ifdef XAOD_STANDALONE
+      // In case we use @c xAOD::TEvent, we have a direct function call
+      // for this.
+      return evtStore()->event()->getName( ptr );
+#else
+      const SG::DataProxy* proxy = evtStore()->proxy( ptr );
+      static const std::string dummy = "";
+      return ( proxy == nullptr ? dummy : proxy->name() );
+#endif // XAOD_STANDALONE
+   }
+
+   SG::sgkey_t AsgTool::getKey( const void* ptr ) const {
+
+#ifdef XAOD_STANDALONE
+      // In case we use @c xAOD::TEvent, we have a direct function call
+      // for this.
+      return evtStore()->event()->getKey( ptr );
+#else
+      const SG::DataProxy* proxy = evtStore()->proxy( ptr );
+      return ( proxy == nullptr ? 0 : proxy->sgkey() );
+#endif // XAOD_STANDALONE
    }
 
    void AsgTool::print() const {
