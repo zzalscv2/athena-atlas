@@ -32,8 +32,9 @@ G4AtlasRunManager::G4AtlasRunManager()
 
 G4AtlasRunManager* G4AtlasRunManager::GetG4AtlasRunManager ATLAS_NOT_THREAD_SAFE ()
 {
-  static G4AtlasRunManager thisManager;
-  return &thisManager;
+  static G4AtlasRunManager *thisManager = nullptr;
+  if (!thisManager) { thisManager = new G4AtlasRunManager; } // Leaked
+  return thisManager;
 }
 
 

@@ -33,8 +33,9 @@ G4AtlasMTRunManager::G4AtlasMTRunManager()
 
 G4AtlasMTRunManager* G4AtlasMTRunManager::GetG4AtlasMTRunManager ATLAS_NOT_THREAD_SAFE ()
 {
-  static G4AtlasMTRunManager thisManager;
-  return &thisManager;
+  static G4AtlasMTRunManager* thisManager = nullptr;
+  if (!thisManager) { thisManager = new G4AtlasMTRunManager; }
+  return thisManager;
 }
 
 
