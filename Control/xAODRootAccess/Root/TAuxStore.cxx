@@ -1,6 +1,7 @@
-// Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+// Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
 
 // System include(s):
+#include <cassert>
 #include <string.h>
 #include <sstream>
 #include <stdexcept>
@@ -178,12 +179,16 @@ namespace xAOD {
 
       // Check if we'll be likely to be able to read the "static"
       // variables:
-      TBranch* br = m_inTree->GetBranch( m_prefix.c_str() );
-      if( ! br ) {
+      assert( m_inTree != nullptr );
+      assert( m_inTree->GetListOfBranches() != nullptr );
+      TObject* brObject =
+         m_inTree->GetListOfBranches()->FindObject( m_prefix.c_str() );
+      if( ! brObject ) {
          // We might not even have static branches, so this is not an error
          // by itself...
          return StatusCode::SUCCESS;
       }
+      TBranch* br = static_cast< TBranch* >( brObject );
       // In order to read complex objects, like smart pointers from an
       // auxiliary container variable-by-variable, the split level of the
       // branch must be exactly 1.
@@ -890,12 +895,14 @@ namespace xAOD {
       // Check if the branch exists:
       Bool_t staticBranch = kTRUE;
       TString brName = statBrName;
-      ::TBranch* br = m_inTree->GetBranch( statBrName );
-      if( ! br ) {
-         br = m_inTree->GetBranch( dynBrName );
-         if( ! br ) {
-            // Since TTree::GetBranch is expensive, remember that we didn't
-            // find this branch in this file.
+      TObjArray* branches = m_inTree->GetListOfBranches();
+      assert( branches != nullptr );
+      TObject* brObject = branches->FindObject( statBrName );
+      if( ! brObject ) {
+         brObject = branches->FindObject( dynBrName );
+         if( ! brObject ) {
+            // Since TTree::GetBranch / TTObjArray::FindObject is expensive,
+            // remember that we didn't find this branch in this file.
             if( m_missingBranches.size() <= auxid ) {
                m_missingBranches.resize( auxid + 1 );
             }
@@ -908,6 +915,7 @@ namespace xAOD {
          staticBranch = kFALSE;
          brName = dynBrName;
       }
+      TBranch* br = static_cast< TBranch* >( brObject );
 
       // Check if it's a "primitive branch":
       const Bool_t primitiveBranch = isPrimitiveBranch( br );
@@ -1012,8 +1020,10 @@ namespace xAOD {
                                                  m_vecs[ auxid ]->toPtr() ),
                                                auxid, &m_prefix );
 
-      // Set the tree in the "right mode":
-      m_inTree->SetMakeClass( staticBranch );
+      // Set the tree/branch in the "right mode":
+      if( staticBranch ) {
+         br->SetMakeClass();
+      }
 
       // Connect to the branch:
       ::Int_t status = 0;
