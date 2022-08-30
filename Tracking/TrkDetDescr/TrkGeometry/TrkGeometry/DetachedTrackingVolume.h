@@ -79,8 +79,7 @@ class DetachedTrackingVolume {
   const std::vector<const Layer*>* multilayerRepresentation() const;
 
   /** sign the volume - the geometry builder has to do that */
-  void sign ATLAS_NOT_THREAD_SAFE(GeometrySignature signat,
-                                  GeometryType geotype) const;
+  void sign(GeometrySignature signat, GeometryType geotype);
 
   /** return the Signature */
   GeometrySignature geometrySignature() const;

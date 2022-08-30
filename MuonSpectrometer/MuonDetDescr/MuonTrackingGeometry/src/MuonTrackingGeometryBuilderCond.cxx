@@ -412,7 +412,7 @@ Muon::MuonTrackingGeometryBuilderCond::trackingGeometry(
 
         if (!enclosedBounds) enclosedBounds = new Trk::CylinderVolumeBounds(aLVC.m_innerBarrelRadius, m_barrelZ);
         enclosed = new Trk::TrackingVolume(nullptr, enclosedBounds, aLVC.m_muonMaterial, dummyLayers, dummyVolumes, m_entryVolume);
-        const_cast<Trk::TrackingVolume*>(enclosed)->registerColorCode(0);
+        enclosed->registerColorCode(0);
         ATH_MSG_DEBUG(" register Barrel m_entryVolume " << m_entryVolume);
     }
 
@@ -2799,7 +2799,9 @@ void Muon::MuonTrackingGeometryBuilderCond::blendMaterial(LocalVariablesContaine
         const Trk::Material* detMat = (*viter)->trackingVolume();
         // if ( (*mIter).first->trackingVolume()->confinedDenseVolumes()) detMat =
         // (*(*mIter).first->trackingVolume()->confinedDenseVolumes())[0];
-        if ((*viter)->trackingVolume()->confinedDenseVolumes()) detMat = (*(*viter)->trackingVolume()->confinedDenseVolumes())[0];
+        if (!(*viter)->trackingVolume()->confinedDenseVolumes().empty()){
+          detMat = ((*viter)->trackingVolume()->confinedDenseVolumes())[0];
+        }
         for (unsigned int ic = 0; ic < cs->size(); ic++) {
             // const Trk::Volume* nCs = new Trk::Volume(*((*cs)[ic].first),(*mIter).first->trackingVolume()->transform());
             const Trk::Volume nCs(*((*cs)[ic].first), (*viter)->trackingVolume()->transform());

@@ -74,8 +74,8 @@ public:
 private:
   void printCheckResult(MsgStream& log, const Trk::TrackingVolume* vol) const;
 
-  void printInfo(GeoPVConstLink pv) const;
-  void printChildren(GeoPVConstLink pv, int igen, Amg::Transform3D trIn) const;
+  void printInfo(const GeoPVConstLink& pv) const;
+  void printChildren(const GeoPVConstLink& pv, int igen, const Amg::Transform3D& trIn) const;
 
   void throwIntoGarbage(std::unique_ptr<Trk::Material> mat) const;
 

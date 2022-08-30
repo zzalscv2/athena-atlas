@@ -1303,10 +1303,10 @@ void VP1TrackingGeometrySystem::processMsLayDense(const Trk::TrackingVolume* tvo
     }
   }
   // dense volumes
-  const std::vector< const Trk::TrackingVolume* >* confVols = tvol->confinedDenseVolumes();
-  if (confVols){
-    std::vector<const Trk::TrackingVolume*>::const_iterator volIter = confVols->begin();
-    for ( ; volIter != confVols->end(); ++volIter){
+  const auto confVols = tvol->confinedDenseVolumes();
+  if (!confVols.empty()){
+    const auto *volIter = confVols.begin();
+    for ( ; volIter != confVols.end(); ++volIter){
       if (*volIter && sepHelper ) processMsVolume( *volIter, 0, layHelper );
     }
   }

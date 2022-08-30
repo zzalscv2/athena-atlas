@@ -33,8 +33,9 @@ Trk::TrackingGeometry::~TrackingGeometry()
   delete m_world;
   auto bLayerIter = m_boundaryLayers.begin();
   auto bLayerIterE = m_boundaryLayers.end();
-  for (; bLayerIter != bLayerIterE; ++bLayerIter)
+  for (; bLayerIter != bLayerIterE; ++bLayerIter) {
     delete bLayerIter->first;
+  }
 }
 
 const Trk::TrackingVolume*
@@ -73,37 +74,38 @@ Trk::TrackingGeometry::lowestStaticTrackingVolume(const Amg::Vector3D& gp) const
   return (currentVolume);
 }
 
-void Trk::TrackingGeometry::registerTrackingVolumes
-ATLAS_NOT_THREAD_SAFE(const Trk::TrackingVolume& tvol,
-                      const Trk::TrackingVolume* mvol,
-                      int lvl)
+void
+Trk::TrackingGeometry::registerTrackingVolumes(Trk::TrackingVolume& tvol,
+                                               Trk::TrackingVolume* mvol,
+                                               int lvl)
 {
   int sublvl = lvl + 1;
   std::string indent = "";
   for (int l = 0; l < lvl; ++l, indent += "  ")
     ;
 
-  const_cast<Trk::TrackingVolume&>(tvol).setMotherVolume(mvol);
+  tvol.setMotherVolume(mvol);
   m_trackingVolumes[tvol.volumeName()] = (&tvol);
-  const Trk::BinnedArray<Trk::TrackingVolume>* confinedVolumes = tvol.confinedVolumes();
+  Trk::BinnedArray<Trk::TrackingVolume>* confinedVolumes =
+    tvol.confinedVolumes();
   if (confinedVolumes) {
-    Trk::BinnedArraySpan<Trk::TrackingVolume const * const> volumes =
+    Trk::BinnedArraySpan<Trk::TrackingVolume* const> volumes =
       confinedVolumes->arrayObjects();
     for (const auto& volumesIter : volumes)
       if (volumesIter)
         registerTrackingVolumes(*volumesIter, &tvol, sublvl);
   }
 
-  const std::vector<const Trk::TrackingVolume*>* confinedDenseVolumes =
+  Trk::ArraySpan<Trk::TrackingVolume* const> confinedDenseVolumes =
     tvol.confinedDenseVolumes();
-  if (confinedDenseVolumes) {
-    for (const auto& volumesIter : (*confinedDenseVolumes))
+  if (!confinedDenseVolumes.empty()) {
+    for (const auto& volumesIter : confinedDenseVolumes)
       if (volumesIter)
         registerTrackingVolumes(*volumesIter, &tvol, sublvl);
   }
   /** should detached tracking volumes be part of the tracking geometry ? */
-  Trk::ArraySpan<const Trk::DetachedTrackingVolume* const>
-    confinedDetachedVolumes = tvol.confinedDetachedVolumes();
+  Trk::ArraySpan<Trk::DetachedTrackingVolume* const> confinedDetachedVolumes =
+    tvol.confinedDetachedVolumes();
   if (!confinedDetachedVolumes.empty()) {
     for (const auto& volumesIter : confinedDetachedVolumes)
       if (volumesIter &&
@@ -128,15 +130,15 @@ ATLAS_NOT_THREAD_SAFE(const Trk::TrackingVolume& tvol,
 }
 
 void Trk::TrackingGeometry::compactify
-ATLAS_NOT_THREAD_SAFE(MsgStream& msg, const TrackingVolume* vol)
+ATLAS_NOT_THREAD_SAFE(MsgStream& msg, TrackingVolume* vol)
 {
   msg << MSG::VERBOSE
       << "====== Calling TrackingGeometry::compactify() ===== " << std::endl;
-  const Trk::TrackingVolume* tVolume = vol ? vol : m_world;
+  Trk::TrackingVolume* tVolume = vol ? vol : m_world;
   size_t cSurfaces = 0;
   size_t tSurfaces = 0;
   if (tVolume) {
-    const_cast<TrackingVolume*>(tVolume)->compactify(cSurfaces, tSurfaces);
+    tVolume->compactify(cSurfaces, tSurfaces);
   }
   msg << MSG::VERBOSE << "  --> set TG ownership of " << cSurfaces << " out of "
       << tSurfaces << std::endl;
@@ -151,13 +153,12 @@ ATLAS_NOT_THREAD_SAFE(MsgStream& msg, const TrackingVolume* vol)
   msg << MSG::VERBOSE << endmsg;
 }
 
-void Trk::TrackingGeometry::synchronizeLayers
-ATLAS_NOT_THREAD_SAFE(MsgStream& msg, const TrackingVolume* vol)
+void
+Trk::TrackingGeometry::synchronizeLayers(MsgStream& msg, TrackingVolume* vol)
 {
-  const Trk::TrackingVolume* tVolume = vol ? vol : m_world;
-  const_cast<TrackingVolume*>(tVolume)->synchronizeLayers(msg);
+  Trk::TrackingVolume* tVolume = vol ? vol : m_world;
+  tVolume->synchronizeLayers(msg);
 }
-
 
 Trk::TrackingVolume*
 Trk::TrackingGeometry::checkoutHighestTrackingVolume()
@@ -168,8 +169,6 @@ Trk::TrackingGeometry::checkoutHighestTrackingVolume()
   m_boundaryLayers.clear();
   return checkoutVolume;
 }
-
-
 
 void
 Trk::TrackingGeometry::printVolumeHierarchy(MsgStream& msg) const
@@ -196,16 +195,18 @@ Trk::TrackingGeometry::printVolumeInformation(MsgStream& msg,
 
   const Trk::BinnedArray<Trk::Layer>* confinedLayers = tvol.confinedLayers();
   if (confinedLayers) {
-    Trk::BinnedArraySpan<Trk::Layer const * const> layers =
+    Trk::BinnedArraySpan<Trk::Layer const* const> layers =
       confinedLayers->arrayObjects();
     for (int indent = 0; indent < sublevel; ++indent)
       msg << "  ";
     msg << "- found : " << layers.size() << " confined Layers" << std::endl;
   }
 
-  const Trk::BinnedArray<Trk::TrackingVolume>* confinedVolumes = tvol.confinedVolumes();
+  const Trk::BinnedArray<Trk::TrackingVolume>* confinedVolumes =
+    tvol.confinedVolumes();
   if (confinedVolumes) {
-    Trk::BinnedArraySpan<Trk::TrackingVolume const * const> volumes = confinedVolumes->arrayObjects();
+    Trk::BinnedArraySpan<Trk::TrackingVolume const* const> volumes =
+      confinedVolumes->arrayObjects();
 
     for (int indent = 0; indent < sublevel; ++indent)
       msg << "  ";
@@ -217,17 +218,19 @@ Trk::TrackingGeometry::printVolumeInformation(MsgStream& msg,
         printVolumeInformation(msg, *volumesIter, sublevel);
   }
 
-  const std::vector<const Trk::TrackingVolume*>* confinedDenseVolumes =
+  Trk::ArraySpan<const Trk::TrackingVolume* const> confinedDenseVolumes =
     tvol.confinedDenseVolumes();
-  if (confinedDenseVolumes) {
-    for (int indent = 0; indent < sublevel; ++indent)
+  if (!confinedDenseVolumes.empty()) {
+    for (int indent = 0; indent < sublevel; ++indent) {
       msg << "  ";
-    msg << "- found : " << confinedDenseVolumes->size()
+    }
+    msg << "- found : " << confinedDenseVolumes.size()
         << " confined unordered (dense) TrackingVolumes" << std::endl;
 
-    for (const auto& volumesIter : (*confinedDenseVolumes))
-      if (volumesIter)
+    for (const auto& volumesIter : (confinedDenseVolumes))
+      if (volumesIter) {
         printVolumeInformation(msg, *volumesIter, sublevel);
+      }
   }
 }
 
@@ -284,41 +287,56 @@ Trk::TrackingGeometry::atVolumeBoundary(const Amg::Vector3D& gp,
   return isAtBoundary;
 }
 
-void Trk::TrackingGeometry::dump(MsgStream &out, const std::string &head) const {
-    out <<MSG::ALWAYS;
-    for(const std::pair<const Layer* const ,int> &bound_layers : m_boundaryLayers) {
-      out << head << " [" << bound_layers.second  << "] ";
-      dumpLayer(out, "",bound_layers.first);     
-    }
-    int counter=0;
-    for (const std::pair<const std::string, const TrackingVolume*> &volume : m_trackingVolumes) {
-      out << head << " [" << counter++  << "] " << volume.first << " volumeBound=";
-      volume.second->volumeBounds().dump(out);
-      out << std::endl;
-      Trk::ArraySpan<const Trk::Layer* const> confArbLayers = volume.second->confinedArbitraryLayers();
-      if (!confArbLayers.empty()) {
-          int j=0;
-          for(const Layer* confined_layer : confArbLayers) {
-            out << head << " [" << counter++  << "] " << volume.first << " confinedArbitrary layer " << j++ << " ";
-            dumpLayer(out, "",confined_layer);
-          }
-      }
-      if (volume.second->confinedLayers()) {
-          int j=0;
-          for(const Layer* confined_layer :  volume.second->confinedLayers()->arrayObjects()) {
-            out << head << " [" << counter++  << "] " << volume.first << " confined layer" << j++ << " ";
-            dumpLayer(out,"",confined_layer);
-          }
-      }
-    }
-    out<<endmsg;
-}
-void Trk::TrackingGeometry::dumpLayer(MsgStream &out, const std::string &head, const Layer *layer) {
-    if (!layer) { return;}
-    out << head << layer->layerIndex().value() << " [t=" << layer->layerType() << "] d=" << layer->thickness();
-    if (layer->representingVolume()) {
-        out << " vol=" << layer->representingVolume()->volumeBounds();
-    }
-    out << layer->surfaceRepresentation();
+void
+Trk::TrackingGeometry::dump(MsgStream& out, const std::string& head) const
+{
+  out << MSG::ALWAYS;
+  for (const std::pair<const Layer* const, int>& bound_layers :
+       m_boundaryLayers) {
+    out << head << " [" << bound_layers.second << "] ";
+    dumpLayer(out, "", bound_layers.first);
+  }
+  int counter = 0;
+  for (const std::pair<const std::string, const TrackingVolume*>& volume :
+       m_trackingVolumes) {
+    out << head << " [" << counter++ << "] " << volume.first << " volumeBound=";
+    volume.second->volumeBounds().dump(out);
     out << std::endl;
+    Trk::ArraySpan<const Trk::Layer* const> confArbLayers =
+      volume.second->confinedArbitraryLayers();
+    if (!confArbLayers.empty()) {
+      int j = 0;
+      for (const Layer* confined_layer : confArbLayers) {
+        out << head << " [" << counter++ << "] " << volume.first
+            << " confinedArbitrary layer " << j++ << " ";
+        dumpLayer(out, "", confined_layer);
+      }
+    }
+    if (volume.second->confinedLayers()) {
+      int j = 0;
+      for (const Layer* confined_layer :
+           volume.second->confinedLayers()->arrayObjects()) {
+        out << head << " [" << counter++ << "] " << volume.first
+            << " confined layer" << j++ << " ";
+        dumpLayer(out, "", confined_layer);
+      }
+    }
+  }
+  out << endmsg;
+}
+void
+Trk::TrackingGeometry::dumpLayer(MsgStream& out,
+                                 const std::string& head,
+                                 const Layer* layer)
+{
+  if (!layer) {
+    return;
+  }
+  out << head << layer->layerIndex().value() << " [t=" << layer->layerType()
+      << "] d=" << layer->thickness();
+  if (layer->representingVolume()) {
+    out << " vol=" << layer->representingVolume()->volumeBounds();
+  }
+  out << layer->surfaceRepresentation();
+  out << std::endl;
 }

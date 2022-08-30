@@ -21,8 +21,8 @@ TrackingGeometry::registerNavigationLevel(NavigationLevel navLevel)
   m_navigationLevel = navLevel;
 }
 
-inline void TrackingGeometry::sign
-ATLAS_NOT_THREAD_SAFE(GeometrySignature geosit, GeometryType geotype)
+inline void
+TrackingGeometry::sign(GeometrySignature geosit, GeometryType geotype)
 {
   m_world->sign(geosit, geotype);
 }
@@ -33,8 +33,9 @@ TrackingGeometry::trackingVolume(const std::string& name) const
   std::map<const std::string, const TrackingVolume*>::const_iterator sVol =
     m_trackingVolumes.begin();
   sVol = m_trackingVolumes.find(name);
-  if (sVol != m_trackingVolumes.end())
+  if (sVol != m_trackingVolumes.end()) {
     return (sVol->second);
+  }
   return nullptr;
 }
 

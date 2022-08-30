@@ -182,8 +182,10 @@ void Trk::DetachedTrackingVolume::compactify ATLAS_NOT_THREAD_SAFE(
   //<< !@ TODO include volumes
 }
 
-void Trk::DetachedTrackingVolume::sign ATLAS_NOT_THREAD_SAFE(
-    GeometrySignature signat, GeometryType geotype) const {
+void
+Trk::DetachedTrackingVolume::sign(GeometrySignature signat,
+                                  GeometryType geotype)
+{
   m_trkVolume->sign(signat, geotype);
 }
 

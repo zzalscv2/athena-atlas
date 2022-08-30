@@ -358,7 +358,7 @@ bool Trk::MaterialMapping::associateHit( const Trk::Layer& associatedLayer,
 }
 
 
-void Trk::MaterialMapping::assignLayerMaterialProperties( const Trk::TrackingVolume& tvol,
+void Trk::MaterialMapping::assignLayerMaterialProperties( Trk::TrackingVolume& tvol,
                                                           Trk::LayerMaterialMap* propSet)
 {
 
@@ -367,14 +367,14 @@ void Trk::MaterialMapping::assignLayerMaterialProperties( const Trk::TrackingVol
     ATH_MSG_INFO("Processing TrackingVolume: "<< tvol.volumeName() );
 
     // ----------------------------------- loop over confined layers ------------------------------------------
-    const Trk::BinnedArray< Trk::Layer >* confinedLayers = tvol.confinedLayers();
+    Trk::BinnedArray< Trk::Layer >* confinedLayers = tvol.confinedLayers();
     if (confinedLayers) {
         // get the objects in a vector-like format
-        Trk::BinnedArraySpan<Trk::Layer const * const> layers = confinedLayers->arrayObjects();
+        Trk::BinnedArraySpan<Trk::Layer * const> layers = confinedLayers->arrayObjects();
         ATH_MSG_INFO("--> found : "<< layers.size() << "confined Layers");
         // the iterator over the vector
         // loop over layers
-        for (const Trk::Layer* layer : layers) {
+        for (Trk::Layer* layer : layers) {
             // assign the material and output
             if (layer && (*layer).layerIndex().value() ) {
                 ATH_MSG_INFO("  > LayerIndex: "<< (*layer).layerIndex() );
@@ -385,7 +385,7 @@ void Trk::MaterialMapping::assignLayerMaterialProperties( const Trk::TrackingVol
                     if (curIt != propSet->end()) {
                         ATH_MSG_INFO("LayerMaterial assigned for Layer with index: "<< (*layer).layerIndex() );
                         // set it to the layer
-                        (const_cast<Trk::Layer*>(layer))->assignMaterialProperties(*((*curIt).second), 1.);
+                        layer->assignMaterialProperties(*((*curIt).second), 1.);
                     }
                 }
             }
@@ -393,10 +393,10 @@ void Trk::MaterialMapping::assignLayerMaterialProperties( const Trk::TrackingVol
     }
 
     // ----------------------------------- loop over confined volumes -----------------------------
-    const Trk::BinnedArray<Trk::TrackingVolume >* confinedVolumes = tvol.confinedVolumes();
+    Trk::BinnedArray<Trk::TrackingVolume >* confinedVolumes = tvol.confinedVolumes();
     if (confinedVolumes) {
         // get the objects in a vector-like format
-        Trk::BinnedArraySpan<Trk::TrackingVolume const * const> volumes = confinedVolumes->arrayObjects();
+        Trk::BinnedArraySpan<Trk::TrackingVolume * const> volumes = confinedVolumes->arrayObjects();
         ATH_MSG_INFO("--> found : "<< volumes.size() << "confined TrackingVolumes");
         // loop over volumes
         for (const auto & volume : volumes) {

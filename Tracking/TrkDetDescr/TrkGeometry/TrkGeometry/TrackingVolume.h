@@ -52,18 +52,16 @@ class TrackingVolume;
 class DetachedTrackingVolume;
 class VolumeBounds;
 
+//Binned Array arrayObjects returns a span
 typedef BinnedArray<Layer> LayerArray;
 typedef BinnedArray<TrackingVolume> TrackingVolumeArray;
 
-template<class T>
-using LayerIntersection = FullIntersection<Layer, Surface, T>;
-template<class T>
-using BoundaryIntersection =
-  FullIntersection<BoundarySurface<TrackingVolume>, Surface, T>;
+// For local spans (typedef to make it easier for C++20 std:: one)
 template<class T>
 using ArraySpan = CxxUtils::span<T>;
 
-//Helper for const correct access to boundary surfaces 
+//Helper for const correct access to boundary surfaces  via a span
+//We want const correct access to the underlying plain ptrs.
 template<class T>
 class ConstSharedPtrSpan
 {
@@ -80,6 +78,14 @@ public:
 private:
   CxxUtils::span<const std::shared_ptr<T>> m_span;
 };
+
+
+template<class T>
+using LayerIntersection = FullIntersection<Layer, Surface, T>;
+template<class T>
+using BoundaryIntersection =
+  FullIntersection<BoundarySurface<TrackingVolume>, Surface, T>;
+
 /**
  @class TrackingVolume
 
@@ -174,14 +180,14 @@ public:
   TrackingVolume(Amg::Transform3D* htrans,
                  VolumeBounds* volbounds,
                  const Material& matprop,
-                 const std::vector<const TrackingVolume*>* unorderedSubVolumes,
+                 const std::vector<TrackingVolume*>* unorderedSubVolumes,
                  const std::string& volumeName = "undefined");
 
   /** Constructor for a full equipped Tracking Volume with unordered subvolumes
     - mixed =======> 2 d) unordered volumes  */
   TrackingVolume(const Volume& volume,
                  const Material& matprop,
-                 const std::vector<const TrackingVolume*>* unorderedSubVolumes,
+                 const std::vector<TrackingVolume*>* unorderedSubVolumes,
                  const std::string& volumeName = "undefined");
 
   /** Constructor for a full equipped Tracking Volume with arbitrary layers
@@ -205,7 +211,7 @@ public:
   TrackingVolume(Amg::Transform3D* htrans,
                  VolumeBounds* volbounds,
                  const std::vector<Layer*>* arbitraryLayers,
-                 const std::vector<const TrackingVolume*>* unorderedSubVolumes,
+                 const std::vector<TrackingVolume*>* unorderedSubVolumes,
                  const Material& matprop,
                  const std::string& volumeName = "undefined");
 
@@ -214,7 +220,7 @@ public:
     -  mixed =======> 2 e) unordered layers AND unordered subvolumes */
   TrackingVolume(const Volume& volume,
                  const std::vector<Layer*>* arbitraryLayers,
-                 const std::vector<const TrackingVolume*>* unorderedSubVolumes,
+                 const std::vector<TrackingVolume*>* unorderedSubVolumes,
                  const Material& matprop,
                  const std::string& volumeName = "undefined");
 
@@ -315,7 +321,8 @@ public:
   ArraySpan<DetachedTrackingVolume * const>  confinedDetachedVolumes();
   
   /** Return unordered subVolumes - not the ownership */
-  const std::vector<const TrackingVolume*>* confinedDenseVolumes() const;
+  ArraySpan<TrackingVolume const * const> confinedDenseVolumes() const;
+  ArraySpan<TrackingVolume * const> confinedDenseVolumes();
 
   /** Returns the VolumeName - for debug reason, might be depreciated later */
   const std::string& volumeName() const;
@@ -353,8 +360,7 @@ public:
   const GlueVolumesDescriptor& glueVolumesDescriptor() const;
 
   /** sign the volume - the geometry builder has to do that */
-  void sign ATLAS_NOT_THREAD_SAFE(GeometrySignature signat,
-                                  GeometryType gtype = Static) const;
+  void sign(GeometrySignature signat, GeometryType gtype = Static);
 
   /** return the Signature */
   GeometrySignature geometrySignature() const;
@@ -398,8 +404,7 @@ protected:
 
 private:
   /** reIndex the static layers of the TrackingVolume */
-  void indexContainedStaticLayers
-  ATLAS_NOT_THREAD_SAFE(GeometrySignature geoSig, int& offset);
+  void indexContainedStaticLayers(GeometrySignature geoSig, int& offset);
 
   /** reIndex the material layers of the TrackingVolume */
   void indexContainedMaterialLayers
@@ -416,7 +421,7 @@ private:
     total surfaces
   */
   void compactify ATLAS_NOT_THREAD_SAFE(size_t& rSurfaces,
-                                        size_t& tSurfaces) const;
+                                        size_t& tSurfaces);
 
   /** method to synchronize the layers with potentially updated volume bounds:
       - adapts the layer dimensions to the new volumebounds + envelope
@@ -434,7 +439,7 @@ private:
                               const Layer& second);
 
   /** move the Tracking Volume*/
-  void moveTV ATLAS_NOT_THREAD_SAFE(Amg::Transform3D& transform);
+  void moveTV (Amg::Transform3D& transform);
 
   /** Forbidden copy constructor */
   TrackingVolume(const TrackingVolume&) = delete;
@@ -446,18 +451,18 @@ private:
 
   //!< boundary Surfaces
   std::vector<SharedObject<BoundarySurface<TrackingVolume>>> m_boundarySurfaces{};
-  //(a)
-  LayerArray* m_confinedLayers; //!< Array of Layers inside the Volume
+  ////!< Array of Layers inside the Volume
+  LayerArray* m_confinedLayers; 
   //!< Array of Volumes inside the Volume
   TrackingVolumeArray* m_confinedVolumes;
-  //(b)
   //!< Detached subvolumes
   const std::vector<DetachedTrackingVolume*>* m_confinedDetachedVolumes;
-  // additionally
-  //!< Unordered subvolumes
-  const std::vector<const TrackingVolume*>* m_confinedDenseVolumes; 
+  
+  
+  //!< Additionally, Unordered subvolumes (we ownd them)
+  const std::vector<TrackingVolume*>* m_confinedDenseVolumes; 
   //(b)
-  //!< Unordered Layers inside the Volume
+  //!< Additionally, Unordered Layers inside the Volume (we own them)
   const std::vector<Layer*>* m_confinedArbitraryLayers;
 
   ////!< Volumes to glue Volumes from the outside
