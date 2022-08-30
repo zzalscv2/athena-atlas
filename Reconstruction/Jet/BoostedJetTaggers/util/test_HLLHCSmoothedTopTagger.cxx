@@ -154,7 +154,7 @@ int main( int argc, char* argv[] ) {
   Tree->Branch( "pass", &pass, "pass/I" );
   Tree->Branch( "passMass", &passMass, "passMass/I" );
   Tree->Branch( "passSphericity", &passSphericity, "passSphericity/I" );
-  Tree->Branch( "massCut", &massCut, "passMass/F" );
+  Tree->Branch( "massCut", &massCut, "massCut/F" );
   Tree->Branch( "sphericityCut", &sphericityCut, "sphericityCut/F" );
   Tree->Branch( "validJetContent", &validJet, "validJetContent/I" );
 
@@ -188,6 +188,9 @@ int main( int argc, char* argv[] ) {
     decorationName = "HLLHCSmoothedTop80MassSphericity";
   }
 
+  // flag to ensure config files are correctly retrieved when using "Local" CalibArea
+  if (useLocalCalibArea) configFile = "SmoothedTopTaggers/" + configFile;
+
   ////////////////////////////////////////////////////
   //::: Tool setup
   // setup the tool handle as per the
@@ -218,7 +221,10 @@ int main( int argc, char* argv[] ) {
   if(verbose) m_Tagger.setProperty("OutputLevel", MSG::DEBUG);
   m_Tagger.setProperty( "ConfigFile", configFile);
   if (useLocalCalibArea) m_Tagger.setProperty("CalibArea", "Local"); 
-  else m_Tagger.setProperty("CalibArea", "SmoothedTopTaggers/HLLHC/July2022/"); 
+  else {
+    Info( APP_NAME, "Using CVMFS CalibArea : 'SmoothedTopTaggers/HLLHC/July2022/'");
+    m_Tagger.setProperty("CalibArea", "SmoothedTopTaggers/HLLHC/July2022/");
+  } 
   if (decorateJets) m_Tagger.setProperty("DecorateJet", decorateJets);
   m_Tagger.retrieve();
 
