@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2017 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "LArG4GenShowerLib/TestActionShowerLib.h"
@@ -24,7 +24,6 @@ namespace G4UA
 
   TestActionShowerLib::TestActionShowerLib():
     m_evtStore("StoreGateSvc/StoreGateSvc","TestActionShowerLib"),
-    m_detStore("StoreGateSvc/DetectorStore","TestActionShowerLib"),
     m_current_calculator("","TestActionShowerLib"),
     m_current_solid(nullptr),
     m_current_transform(nullptr),
@@ -172,7 +171,7 @@ namespace G4UA
     bool emptydet = (m_eventSteps->detector[0] == '\0'); //empty string. man, i hate pure C!
     if (emptydet) { //give name to the detector, set calculator, transformation and G4Solid for the whole shower
       G4ThreeVector pos = aStep->GetPostStepPoint()->GetPosition();
-      G4TouchableHistory* theTouchable = (G4TouchableHistory*)(aStep->GetPostStepPoint()->GetTouchable());
+      const G4TouchableHistory* theTouchable = static_cast<const G4TouchableHistory*>(aStep->GetPostStepPoint()->GetTouchable());
       int depth = theTouchable->GetHistoryDepth();
       bool correct_volume = false;
       if (depth < 2) { //this is obviously the wrong volume
