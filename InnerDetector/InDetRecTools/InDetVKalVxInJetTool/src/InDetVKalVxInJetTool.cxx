@@ -165,6 +165,10 @@ InDetVKalVxInJetTool::InDetVKalVxInJetTool(const std::string& type,
    StatusCode InDetVKalVxInJetTool::initialize(){
      ATH_MSG_DEBUG("InDetVKalVxInJetTool initialize() called");
  
+     m_useTrackClassificator = !(m_trackClassificator.empty());
+     ATH_CHECK(m_trackClassificator.retrieve( DisableTool{!m_useTrackClassificator} ));
+     if(!m_useTrackClassificator) ATH_MSG_INFO("TrackClassificator disabled");
+
      m_useEtaDependentCuts = !(m_etaDependentCutsSvc.name().empty());
      if (m_useEtaDependentCuts){
        ATH_CHECK(m_etaDependentCutsSvc.retrieve());
