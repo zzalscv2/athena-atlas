@@ -1029,7 +1029,8 @@ namespace Muon {
       //vector of 3D points of all phi obtained from the stereo-stereo combination                                                                              
       std::vector<Amg::Vector3D> phiStereo;
       
-      /// loop on the clusters and look for the stereo                                                                                                       
+      /// loop on the clusters and look for the stereo  
+      if (clusters.empty()) return phiStereo;
       for ( unsigned int iclu1 = 0; iclu1 < clusters.size()-1; ++iclu1 ) {
         Identifier id1 = clusters[iclu1]->identify();
         if ( !m_idHelperSvc->isMM(id1) ) continue;

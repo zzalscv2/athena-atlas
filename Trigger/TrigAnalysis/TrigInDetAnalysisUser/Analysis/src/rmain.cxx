@@ -16,6 +16,7 @@
 #include <vector>
 #include <map>
 #include <set>
+#include <sstream>
 
 /// stack trace headers
 #include <execinfo.h>
@@ -333,7 +334,7 @@ int usage(const std::string& name, int status) {
   s << "\nOptions: \n";
   s << " -o, -f, --file      value\toutput filename, \n";
   s << "     -b, --binConfig value\tconfig file for histogram configuration, \n";
-  s << "     -r, --refChain  value\treference chain, \n";
+  s << "     -r, --refChain  value\treference chain.  + separated keys will be merged, \n";
   s << "     -t, --testChain value\ttest chain, \n";
   s << "     -p, --pdgId     value\tpdg ID of truth particle if requiring truth particle processing,\n";
   s << "         --vt        value\tuse value as the test vertex selector - overrides value in the config file,\n";
@@ -418,6 +419,7 @@ int main(int argc, char** argv)
 
   std::string datafile = "";
 
+  std::vector<std::string> refChains = {};
   std::string refChain = "";
 
   int pdgId = 0;
@@ -450,6 +452,18 @@ int main(int argc, char** argv)
     else if ( std::string(argv[i])=="-r" || std::string(argv[i])=="--refChain" ) { 
       if ( ++i>=argc ) return usage(argv[0], -1);
       refChain = argv[i];
+
+      // Merge multiple references
+      if (refChain.find("+") != string::npos){
+        std::istringstream iss(refChain);
+        std::string token;
+        while (std::getline(iss, token, '+')){ // tokenize string based on '+' delimeter
+          refChains.push_back(token);
+        }
+      }
+      else {         
+        refChains.push_back(argv[i]); // standard single reference 
+      }
     }
     else if ( std::string(argv[i])=="--rms" )   useoldrms = false;
     else if ( std::string(argv[i])=="-n" || std::string(argv[i])=="--nofit" ) nofit = true;
@@ -650,12 +664,20 @@ int main(int argc, char** argv)
  
   /// only if not set from the command line
   if ( refChain=="" ) { 
-    if ( inputdata.isTagDefined("refChain") )  refChain = inputdata.GetString("refChain"); 
+    if ( inputdata.isTagDefined("refChain") )  {
+      refChain = inputdata.GetString("refChain"); 
+      refChains.push_back(refChain);
+    }
     else { 
       std::cerr << "Error: no reference chain defined\n" << std::endl;
       //  return usage(argv[0], -1);
       return -1;
     }
+  }
+
+  if (refChains.size() == 0){
+    std::cerr << "Error: refChains is empty\n" <<std::endl;
+    return -1;
   }
 
   /// get the test chains 
@@ -952,7 +974,8 @@ int main(int argc, char** argv)
 
 
   std::cout << "using reference " << refChain << std::endl;
-  if ( refChain=="Truth" ) std::cout << "using pdgId " << pdgId << std::endl;
+  if ( refChain.find("Truth") != string::npos ) std::cout << "using pdgId " << pdgId << std::endl;
+  if ( refChains.size() > 1 ) std::cout<<"Multiple reference chains split to: " << refChains <<std::endl;
 
   /// track filters 
 
@@ -1034,14 +1057,17 @@ int main(int argc, char** argv)
     }
   }
   else { 
-    if      ( refChain=="Offline" )             refFilter = &filter_off;
-    else if ( contains( refChain, "Electrons") ) refFilter = &filter_off;
-    else if ( contains( refChain, "Muons"  ) )   refFilter = &filter_muon;
-    else if ( contains( refChain, "Taus"   ) )   refFilter = &filter_off;  // tau ref chains
-    else if ( contains( refChain, "1Prong" ) )   refFilter = &filter_off;  // tau ref chains
-    else if ( contains( refChain, "3Prong" ) )   refFilter = &filter_off;  // tau ref chains
-    else if ( refChain=="Truth" && pdgId!=0 )   refFilter = &filter_truth;
-    else if ( refChain=="Truth" && pdgId==0 )   refFilter = &filter_off;
+    if      ( refChains[0]=="Offline" )                    refFilter = &filter_off;
+    else if ( refChains[0]=="InDetLargeD0TrackParticles" ) refFilter = &filter_off;
+    else if ( contains( refChains[0], "Electrons") )       refFilter = &filter_off;
+    else if ( contains( refChains[0], "LRTElectrons") )    refFilter = &filter_off;
+    else if ( contains( refChains[0], "Muons"  ) )         refFilter = &filter_muon;
+    else if ( contains( refChains[0], "MuonsLRT"  ) )      refFilter = &filter_muon;
+    else if ( contains( refChains[0], "Taus"   ) )         refFilter = &filter_off;  // tau ref chains
+    else if ( contains( refChains[0], "1Prong" ) )         refFilter = &filter_off;  // tau ref chains
+    else if ( contains( refChains[0], "3Prong" ) )         refFilter = &filter_off;  // tau ref chains
+    else if ( refChains[0]=="Truth" && pdgId!=0 )          refFilter = &filter_truth;
+    else if ( refChains[0]=="Truth" && pdgId==0 )          refFilter = &filter_off;
     else { 
       std::cerr << "unknown reference chain defined" << std::endl;
       return (-1);
@@ -1130,7 +1156,7 @@ int main(int argc, char** argv)
 	/// could perhaps be done with a unique_ptrt
 	const double massMin = 40;
 	const double massMax = 150;
-	TnP_tool = new TagNProbe(refChain, massMin, massMax);
+	TnP_tool = new TagNProbe(refChains[0], massMin, massMax);
 	TnP_tool->tag(tag);
 	TnP_tool->probe(probe);
 	std::cout <<  "Tag and probe pair found! \nTag  : " <<  tag << "\nProbe: " << probe <<std::endl;
@@ -1626,16 +1652,17 @@ int main(int argc, char** argv)
     }
 
     //// get the reference tracks
-    for (unsigned int ic=0 ; ic<chains.size() ; ic++ ) {
-      if ( chains[ic].name()==refChain ) {
-        offTracks.selectTracks( chains[ic][0].tracks() );
-        //extract beamline position values from rois
-        beamline_ref = chains[ic][0].user();
-        // std::cout << "beamline: " << chains[ic].name() << "  " << beamline_ref << std::endl;
-        break;
+    for (std::string rc : refChains){
+      for (unsigned int ic=0 ; ic<chains.size() ; ic++ ) {
+        if ( chains[ic].name()==rc ) {
+          offTracks.selectTracks( chains[ic][0].tracks() );
+          //extract beamline position values from rois
+          beamline_ref = chains[ic][0].user();
+          // std::cout << "beamline: " << chains[ic].name() << "  " << beamline_ref << std::endl;
+          break;
+        }
       }
     }
-
     /// select the reference offline vertices
 
     std::vector<TIDA::Vertex> vertices; // keep for now as needed for line 1709
@@ -1719,28 +1746,30 @@ int main(int argc, char** argv)
 
     TrigObjectMatcher tom;
 
-    for (unsigned int ic=0 ; ic<chains.size() ; ic++ ) { 
-      if ( chains[ic].name()==refChain ) { 
+    for (std::string rc : refChains){
+      for (unsigned int ic=0 ; ic<chains.size() ; ic++ ) { 
+        if ( chains[ic].name()==rc ) { 
 
-        refchain = &chains[ic];
-        foundReference = true;
+          refchain = &chains[ic];
+          foundReference = true;
 
-        //Get tracks from within reference roi
-        //        ibl_filter( chains[ic].rois()[0].tracks() ); 
+          //Get tracks from within reference roi
+          //        ibl_filter( chains[ic].rois()[0].tracks() ); 
 
-        refTracks.selectTracks( chains[ic].rois()[0].tracks() );
+          refTracks.selectTracks( chains[ic].rois()[0].tracks() );
 
-        /// get objects if requested
+          /// get objects if requested
 
-        if ( chains[ic].rois()[0].objects().size()>0 ) { 
-          tom = TrigObjectMatcher( &refTracks, chains[ic].rois()[0].objects(), SelectObjectETovPT );
+          if ( chains[ic].rois()[0].objects().size()>0 ) { 
+            tom = TrigObjectMatcher( &refTracks, chains[ic].rois()[0].objects(), SelectObjectETovPT );
+          }
+
+          break;
+
         }
-
-        break;
-
       }
     }
-    
+
     if ( !foundReference ) continue;
     
     if ( debugPrintout ) { 

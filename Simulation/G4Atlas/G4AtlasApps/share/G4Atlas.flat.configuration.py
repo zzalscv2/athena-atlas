@@ -24,8 +24,6 @@ else:
 globalflags.DetDescrVersion = simFlags.SimLayout.get_Value()
 
 from AthenaCommon.DetFlags import DetFlags
-## Tidy up DBM DetFlags: temporary measure
-DetFlags.DBM_setOff()
 
 from AtlasGeoModel.MuonGMJobProperties import MuonGeometryFlags
 if not MuonGeometryFlags.hasSTGC(): DetFlags.sTGC_setOff()

@@ -25,11 +25,11 @@ StgcStripCalculator::stgcStrip_t StgcStripCalculator::getStgcStrip(ParameterClas
   auto it = m_pcbMap.find(pcb_id);
 
   if (it == m_pcbMap.end()) {
-    return { INVALID, {0.0,0.0,0.0}, {0.0,0.0,0.0}, {0.0,0.0,0.0} };
+    return {};
   }
 
   auto strip = it->second.getStgcStrip(iclass, strip_id.istrip);
-  return { VALID, strip.center, strip.left, strip.right };
+  return { IsValid::VALID, strip.center, strip.left, strip.right };
 }
 StgcStripCalculator::position_t StgcStripCalculator::getPositionAlongStgcStrip(ParameterClass iclass, stripIdentifier_t strip_id, double s) const {
   int ipcb = 9; // since sTGC strip boards are identical  
@@ -37,10 +37,10 @@ StgcStripCalculator::position_t StgcStripCalculator::getPositionAlongStgcStrip(P
   auto it = m_pcbMap.find(pcb_id);
 
   if (it == m_pcbMap.end()) {
-    return { INVALID, {0.0,0.0,0.0} };
+    return {};
   }
 
-  return { VALID, it->second.getPositionAlongStgcStrip(iclass, strip_id.istrip, s) };
+  return { IsValid::VALID, it->second.getPositionAlongStgcStrip(iclass, strip_id.istrip, s) };
 }
 
 void StgcStripCalculator::parseJSON(std::string& in) {
@@ -50,7 +50,7 @@ void StgcStripCalculator::parseJSON(std::string& in) {
     for (const json& jmodule : jroot.at("elementarray")) {
       parseRootElement(jmodule);
     }
-  } catch (std::exception& e) {
+  } catch (const std::exception& e) {
     throw std::runtime_error(e.what());
   }
 }

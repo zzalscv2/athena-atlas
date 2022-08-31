@@ -83,12 +83,16 @@ atlas_add_citest( RecoRun2MC_PileUp
    SCRIPT RunWorkflowTests_Run2.py --CI -p -w MCPileUpReco -e '--maxEvents 5 --inputRDO_BKGFile=../../PileUpPresamplingRun2/run_d1730/myRDO.pool.root' --no-output-checks  # go two levels up as the test runs in a subfolder
    DEPENDS_SUCCESS PileUpPresamplingRun2 )
 
-atlas_add_citest( RecoRun3Data_Collisions
-   SCRIPT RunWorkflowTests_Run3.py --CI -r -w DataReco -a q449 -e '--maxEvents 500 --inputBSFile=/cvmfs/atlas-nightlies.cern.ch/repo/data/data-art/Tier0ChainTests/TCT_Run3/data22_900GeV.00424070.express_express.merge.RAW._lb0100._SFO-ALL._0001.1' --threads 8 --no-output-checks
+atlas_add_citest( RecoRun3Data
+   SCRIPT RunWorkflowTests_Run3.py --CI -r -w DataReco -a q449 -e '--maxEvents 100 --conditionsTag=CONDBR2-BLKPA-2022-07 --inputBSFile=/cvmfs/atlas-nightlies.cern.ch/repo/data/data-art/Tier0ChainTests/TCT_Run3/data22_13p6TeV.00431493.physics_Main.daq.RAW._lb0525._SFO-16._0001.data' --threads 8 --no-output-checks
    PROPERTIES PROCESSORS 8 )
 
-atlas_add_citest( RecoRun3Data_Collisions_Express
-   SCRIPT RunWorkflowTests_Run3.py --CI -r -w DataReco -a x676 -e '--maxEvents 100 --inputBSFile=/cvmfs/atlas-nightlies.cern.ch/repo/data/data-art/Tier0ChainTests/TCT_Run3/data22_13p6TeV.00428353.express_express.merge.RAW._lb0800._SFO-ALL._0001.1' --threads 8 --no-output-checks
+atlas_add_citest( RecoRun3Data_Bulk
+   SCRIPT RunWorkflowTests_Run3.py --CI -r -w DataReco -a f1262 -e '--skipEvents 100 --maxEvents 500 --inputBSFile=/cvmfs/atlas-nightlies.cern.ch/repo/data/data-art/Tier0ChainTests/TCT_Run3/data22_13p6TeV.00431493.physics_Main.daq.RAW._lb0525._SFO-16._0001.data' --threads 8 --no-output-checks
+   PROPERTIES PROCESSORS 8 )
+
+atlas_add_citest( RecoRun3Data_Express
+   SCRIPT RunWorkflowTests_Run3.py --CI -r -w DataReco -a x686 -e '--maxEvents 200 --inputBSFile=/cvmfs/atlas-nightlies.cern.ch/repo/data/data-art/Tier0ChainTests/TCT_Run3/data22_13p6TeV.00428353.express_express.merge.RAW._lb0800._SFO-ALL._0001.1' --threads 8 --no-output-checks
    PROPERTIES PROCESSORS 8 )
 
 atlas_add_citest( RecoRun3Data_Cosmics

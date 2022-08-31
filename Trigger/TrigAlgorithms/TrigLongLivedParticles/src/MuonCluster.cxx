@@ -14,6 +14,7 @@
 #include "GaudiKernel/ITHistSvc.h"
 #include "StoreGate/ReadHandle.h"
 #include "StoreGate/WriteHandle.h"
+#include "StoreGate/WriteDecorHandle.h"
 
 //LVL1 ROIS
 #include "TrigSteeringEvent/TrigRoiDescriptor.h"
@@ -55,6 +56,10 @@ StatusCode MuonCluster::initialize(){
     ATH_CHECK( m_outputCompositesKey.initialize() );
     ATH_CHECK( m_outputRoiDescriptorKey.initialize() );
 
+    ATH_CHECK( m_muRoiClusEtaKey.initialize() );
+    ATH_CHECK( m_muRoiClusPhiKey.initialize() );
+    ATH_CHECK( m_muRoiClusNRoiKey.initialize() );
+
     if (!m_monTool.empty()) ATH_CHECK(m_monTool.retrieve());
 
     ATH_MSG_INFO("initialize() success");
@@ -74,6 +79,10 @@ StatusCode MuonCluster::execute(const EventContext& ctx) const
     auto CluPhi = Monitored::Scalar<double>("CluPhi", -99.);
     auto CluNum = Monitored::Scalar<int>("NumRoi", 0);
 
+    auto nL1RoIs = Monitored::Scalar<int>("nL1RoIs",-99);
+    auto nRoIinClusters = Monitored::Scalar<int>("nRoIinClusters",-99);
+    auto nClusters = Monitored::Scalar<int>("nClusters",-99);
+
     auto dPhi_cluSeed = Monitored::Scalar<float>("dPhiCluSeed", -99.);
     auto dEta_cluSeed = Monitored::Scalar<float>("dEtaCluSeed", -99.);
     auto dR_cluSeed = Monitored::Scalar<float>("dRCluSeed", -99.);
@@ -90,6 +99,7 @@ StatusCode MuonCluster::execute(const EventContext& ctx) const
 
     auto mon = Monitored::Group(m_monTool, mon_roiEta, mon_roiPhi,
                                 CluEta, CluPhi, CluNum,
+                                nL1RoIs, nRoIinClusters, nClusters,
                                 dPhi_cluSeed, dR_cluSeed, dEta_cluSeed,
                                 t1, t2);
 
@@ -100,6 +110,11 @@ StatusCode MuonCluster::execute(const EventContext& ctx) const
     ATH_CHECK(
       trigCompColl.record(std::make_unique<xAOD::TrigCompositeContainer>(),std::make_unique<xAOD::TrigCompositeAuxContainer>())
     );
+
+    //Setup Decorator Handlers
+    SG::WriteDecorHandle<xAOD::TrigCompositeContainer, float> muRoiClusEta(m_muRoiClusEtaKey, ctx);
+    SG::WriteDecorHandle<xAOD::TrigCompositeContainer, float> muRoiClusPhi(m_muRoiClusPhiKey, ctx);
+    SG::WriteDecorHandle<xAOD::TrigCompositeContainer, int> muRoiClusNRoi(m_muRoiClusNRoiKey, ctx);
 
     //Setup the RoI Descriptor container we will put the MuonRoIDescriptors in
     SG::WriteHandle<TrigRoiDescriptorCollection> trigDescColl = TrigCompositeUtils::createAndStoreNoAux(m_outputRoiDescriptorKey, ctx);
@@ -124,6 +139,8 @@ StatusCode MuonCluster::execute(const EventContext& ctx) const
         ATH_MSG_WARNING("Can't get any TrigRoiDescriptor from m_roiCollectionKey!");
         return StatusCode::FAILURE;
     } else {
+        nL1RoIs = roiCollection->size();
+        nRoIinClusters = 0;
         for (const TrigRoiDescriptor *roi : *roiCollection)
         {
             if(iter_cl>= kMAX_ROI) {
@@ -217,7 +234,9 @@ StatusCode MuonCluster::execute(const EventContext& ctx) const
     // find the cluster with max number of rois
     int ncl_max = 0;
     int sel_cl = -1;
+    int nRoisInClu = 0;
     for(int i_cl=0; i_cl<n_cl; ++i_cl) { // loop on cluster
+        nRoisInClu += muonClu[i_cl].nroi;
         if(muonClu[i_cl].nroi>ncl_max){
             CluEta = muonClu[i_cl].eta;
             CluPhi = muonClu[i_cl].phi;
@@ -227,6 +246,8 @@ StatusCode MuonCluster::execute(const EventContext& ctx) const
             ATH_MSG_DEBUG("  -- ncl_max loop: i_cl = " << i_cl << " with ncl_max = " << ncl_max);
         }
     }
+    nRoIinClusters = nRoisInClu;
+    nClusters = n_cl;
 
     dPhi_cluSeed = CxxUtils::wrapToPi(muonClu0[sel_cl].phi)-CxxUtils::wrapToPi(muonClu[sel_cl].phi);
     dEta_cluSeed = muonClu0[sel_cl].eta-muonClu[sel_cl].eta;
@@ -248,9 +269,9 @@ StatusCode MuonCluster::execute(const EventContext& ctx) const
 
 
     compClu->setName("Cluster");
-    compClu->setDetail( "ClusterEta", static_cast<double>(CluEta) );
-    compClu->setDetail( "ClusterPhi", static_cast<double>(CluPhi) );
-    compClu->setDetail( "nRoIs", static_cast<int>(CluNum) );
+    muRoiClusEta(*compClu) = static_cast<float>(CluEta);
+    muRoiClusPhi(*compClu) = static_cast<float>(CluPhi);
+    muRoiClusNRoi(*compClu) = static_cast<int>(CluNum);
 
 
     //create a TrigRoiDescriptor to send to ID tracking, to seed track-finding

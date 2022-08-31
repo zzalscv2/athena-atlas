@@ -69,12 +69,12 @@ StatusCode MuonClusterHypoAlg::execute(const EventContext& ctx) const
 
     auto CluNum = Monitored::Scalar("NumClu", 3);
 
-    auto acceptAll     = Monitored::Scalar("AcceptAll", false);
-    auto nRoIEndCap    = Monitored::Scalar("nRoIEndCap", 4);
-    auto nRoIBarrel    = Monitored::Scalar("nRoIBarrel", 3);
-    auto etaMax        = Monitored::Scalar("maxEta", 2.5);
-    auto etaMid        = Monitored::Scalar("midEta", 1.0);
-    auto isPass        = Monitored::Scalar("isPass", 0);
+    auto acceptAll     = Monitored::Scalar<bool>("AcceptAll", false);
+    auto nRoIEndCap    = Monitored::Scalar<int>("nRoIEndCap", 4);
+    auto nRoIBarrel    = Monitored::Scalar<int>("nRoIBarrel", 3);
+    auto etaMax        = Monitored::Scalar<float>("maxEta", 2.5);
+    auto etaMid        = Monitored::Scalar<float>("midEta", 1.0);
+    auto isPass        = Monitored::Scalar<bool>("isPass", 0);
 
     auto t1            = Monitored::Timer("TIME_HypoAlg");
     auto t2            = Monitored::Timer("TIME_HypoAlg_DecisionLoop");
@@ -107,6 +107,7 @@ StatusCode MuonClusterHypoAlg::execute(const EventContext& ctx) const
 
     // Creating a DecisionIDContainer to hold all active chain IDs
     DecisionIDContainer prev;
+    decisionIDs(previousDecision, prev);
 
     // Create new decisions and link to previous decision
     Decision* d = newDecisionIn(decisions, previousDecision, hypoAlgNodeName(), ctx);
@@ -125,7 +126,7 @@ StatusCode MuonClusterHypoAlg::execute(const EventContext& ctx) const
 
     t2.start();
     // We only have 1 decision. If more decisions are needed in the future, wrap 'if' in a loop over the decision container.
-    if (!allFailed(d)) {isPass = 1;}
+    if (!allFailed(d)) {isPass = 1;}    // allFailed returns true is d is empty, else returns false.
     t2.stop();
 
     return StatusCode::SUCCESS;

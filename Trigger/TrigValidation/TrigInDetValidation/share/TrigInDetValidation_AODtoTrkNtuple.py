@@ -1,9 +1,12 @@
 #Skeleton joboption for a simple analysis job
 
+from AthenaCommon.AthenaCommonFlags import athenaCommonFlags
 
-FilesInput = [ "AOD.pool.root" ]
-if len(jps.AthenaCommonFlags.FilesInput.get_Value())>0:
-   FilesInput = jps.AthenaCommonFlags.FilesInput.get_Value()
+if athenaCommonFlags.FilesInput() != []:
+    FilesInput = athenaCommonFlags.FilesInput()
+else:
+    FilesInput = ["AOD.pool.root"]
+
 
 theApp.EvtMax=-1                                       #says how many events to run over. Set to -1 for all events
 
@@ -104,6 +107,12 @@ if ( True ) :
     if LRT == True :
       TestMonTool.FiducialRadius = 500.
 
+      TestMonTool.ntupleChainNames += [
+        ":InDetLargeD0TrackParticles",
+        "Muons::LRT",
+        "Muons",
+        "Electrons::LRT"
+      ]
   if 'ptmin' in dir():
      TestMonTool.pTCutOffline = ptmin
 

@@ -741,14 +741,35 @@ void jFEXSim::SetTowersAndCells_SG(int tmp_jTowersIDs_subset[FEXAlgoSpaceDefs::j
   
 }
 
-std::vector<std::vector<std::vector<uint32_t>>> jFEXSim::getSmallRJetTOBs()
+std::vector<std::unique_ptr<jFEXTOB>> jFEXSim::getSmallRJetTOBs()
 { 
-  return m_smallRJet_tobWords;
+    std::vector<std::unique_ptr<jFEXTOB>> sjTOBs;
+    sjTOBs.clear();
+    
+    // We need the copy since we cannot move a member of the class, since it will not be part of it anymore
+    for (unsigned int i = 0; i < m_smallRJet_tobWords.size(); ++i){
+        for(unsigned int j = 0; j < m_smallRJet_tobWords[i].size(); ++j){
+            sjTOBs.push_back(std::move(m_smallRJet_tobWords[i][j]));
+        }
+    } 
+    
+    return sjTOBs;   
+        
 }
 
-std::vector<std::vector<std::vector<uint32_t>>> jFEXSim::getLargeRJetTOBs()
+std::vector<std::unique_ptr<jFEXTOB>> jFEXSim::getLargeRJetTOBs()
 {
-   return m_largeRJet_tobWords;
+    std::vector<std::unique_ptr<jFEXTOB>> ljTOBs;
+    ljTOBs.clear();
+    
+    // We need the copy since we cannot move a member of the class, since it will not be part of it anymore
+    for (unsigned int i = 0; i < m_largeRJet_tobWords.size(); ++i){
+        for(unsigned int j = 0; j < m_largeRJet_tobWords[i].size(); ++j){
+            ljTOBs.push_back(std::move(m_largeRJet_tobWords[i][j]));
+        }
+    } 
+    
+    return ljTOBs;    
 }
 
 std::vector<std::unique_ptr<jFEXTOB>> jFEXSim::getTauTOBs()
@@ -766,18 +787,40 @@ std::vector<std::unique_ptr<jFEXTOB>> jFEXSim::getTauTOBs()
     return tauTOBs;    
 }
 
-std::vector<std::vector<std::vector<uint32_t>>> jFEXSim::getFwdElTOBs()
-  {
+std::vector<std::vector<std::vector<uint32_t>>> jFEXSim::getFwdElTOBs(){
+    
     return m_fwdEl_tobWords;
-  }
-std::vector<std::vector<uint32_t>> jFEXSim::getSumEtTOBs()
-{
-  return m_sumET_tobWords;
+    
+}
+  
+std::vector<std::unique_ptr<jFEXTOB>> jFEXSim::getSumEtTOBs(){
+    
+    std::vector<std::unique_ptr<jFEXTOB>> sumetTOBs;
+    sumetTOBs.clear();
+    
+    // We need the copy since we cannot move a member of the class, since it will not be part of it anymore
+    for (unsigned int i = 0; i < m_sumET_tobWords.size(); ++i){
+        for(unsigned int j = 0; j < m_sumET_tobWords[i].size(); ++j){
+            sumetTOBs.push_back(std::move(m_sumET_tobWords[i][j]));
+        }
+    } 
+    
+    return sumetTOBs;        
 }
 
-std::vector<std::vector<uint32_t>> jFEXSim::getMetTOBs()
-{
-  return m_Met_tobWords;
+std::vector<std::unique_ptr<jFEXTOB>> jFEXSim::getMetTOBs(){
+    
+    std::vector<std::unique_ptr<jFEXTOB>> metTOBs;
+    metTOBs.clear();
+    
+    // We need the copy since we cannot move a member of the class, since it will not be part of it anymore
+    for (unsigned int i = 0; i < m_Met_tobWords.size(); ++i){
+        for(unsigned int j = 0; j < m_Met_tobWords[i].size(); ++j){
+            metTOBs.push_back(std::move(m_Met_tobWords[i][j]));
+        }
+    } 
+    
+    return metTOBs;     
 }
 
 

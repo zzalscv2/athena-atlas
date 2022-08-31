@@ -191,9 +191,9 @@ class transformExecutor(object):
         self._memLeakResult = {}
         self._memFullFile = None
         self._eventCount = None
-        self._athenaMP = None
-        self._athenaMT = None
-        self._athenaConcurrentEvents = None
+        self._athenaMP = 0
+        self._athenaMT = 0
+        self._athenaConcurrentEvents = 0
         self._dbMonitor = None
         self._resimevents = None
 
@@ -1014,26 +1014,20 @@ class athenaExecutor(scriptExecutor):
             ('ATHENA_CORE_NUMBER' not in os.environ)):
             # At least one of the parallel command-line flags has been provided but ATHENA_CORE_NUMBER environment has not been set
             msg.warning('either --multithreaded or --multiprocess argument used but ATHENA_CORE_NUMBER environment not set. Athena will continue in Serial mode')
-            self._athenaMP = 0
-            self._athenaMT = 0
-            self._athenaConcurrentEvents = 0
         else:
             # Try to detect AthenaMT mode, number of threads and number of concurrent events
-            if self._disableMT:
-                self._athenaMT = 0
-            else:
+            if not self._disableMT:
                 self._athenaMT, self._athenaConcurrentEvents = detectAthenaMTThreads(self.conf.argdict, self.name, legacyThreadingRelease)
 
             # Try to detect AthenaMP mode and number of workers
-            if self._disableMP:
-                self._athenaMP = 0
-            else:
+            if not self._disableMP:
                 self._athenaMP = detectAthenaMPProcs(self.conf.argdict, self.name, legacyThreadingRelease)
 
             # Check that we actually support MT
-            if self._onlyMP and self._athenaMT and not self._athenaMP:
+            if self._onlyMP and self._athenaMT > 0:
                 msg.info("This configuration does not support MT, falling back to MP")
-                self._athenaMP = self._athenaMT
+                if self._athenaMP == 0:
+                    self._athenaMP = self._athenaMT
                 self._athenaMT = 0
                 self._athenaConcurrentEvents = 0
 
@@ -1055,7 +1049,7 @@ class athenaExecutor(scriptExecutor):
                 msg.info("Updated athena output filename for {0} to {1}".format(dataType, self.conf._dataDictionary[dataType].value[0]))
 
         # And if this is (still) athenaMP, then set some options for workers and output file report
-        if self._athenaMP:
+        if self._athenaMP > 0:
             self._athenaMPWorkerTopDir = 'athenaMP-workers-{0}-{1}'.format(self._name, self._substep)
             self._athenaMPFileReport = 'athenaMP-outputs-{0}-{1}'.format(self._name, self._substep)
             self._athenaMPEventOrdersFile = 'athenamp_eventorders.txt.{0}'.format(self._name)
@@ -1190,14 +1184,14 @@ class athenaExecutor(scriptExecutor):
 
         # Handle executor substeps
         if self.conf.totalExecutorSteps > 1:
-            if self._athenaMP:
+            if self._athenaMP > 0:
                 outputDataDictionary = dict([ (dataType, self.conf.dataDictionary[dataType]) for dataType in self._output ])
                 athenaMPOutputHandler(self._athenaMPFileReport, self._athenaMPWorkerTopDir, outputDataDictionary, self._athenaMP, False, self.conf.argdict)
             if self.conf.executorStep == self.conf.totalExecutorSteps - 1:
                 # first loop over datasets for the output
                 for dataType in self._output:
                     newValue = []
-                    if self._athenaMP:
+                    if self._athenaMP > 0:
                         # assume the same number of workers all the time
                         for i in range(self.conf.totalExecutorSteps):
                             for v in self.conf.dataDictionary[dataType].value:
@@ -1215,7 +1209,7 @@ class athenaExecutor(scriptExecutor):
                         self._smartMerge(self.conf.dataDictionary[dataType])
 
         # If this was an athenaMP run then we need to update output files
-        elif self._athenaMP:
+        elif self._athenaMP > 0:
             outputDataDictionary = dict([ (dataType, self.conf.dataDictionary[dataType]) for dataType in self._output ])
             ## @note Update argFile values to have the correct outputs from the MP workers
             skipFileChecks=False
@@ -1473,13 +1467,13 @@ class athenaExecutor(scriptExecutor):
             msg.info('Skipping test for "--drop-and-reload" in this executor')
             
         # For AthenaMT apply --threads=N if threads have been configured via ATHENA_CORE_NUMBER + multithreaded
-        if self._athenaMT != 0 and not self._disableMT:
+        if self._athenaMT > 0 and not self._disableMT:
             if not ('athenaopts' in self.conf.argdict and
                 any('--threads' in opt for opt in self.conf.argdict['athenaopts'].value[currentSubstep])):
                 self._cmd.append('--threads=%s' % str(self._athenaMT))
 
         # For AthenaMP apply --nprocs=N if threads have been configured via ATHENA_CORE_NUMBER + multiprocess
-        if self._athenaMP != 0 and not self._disableMP:
+        if self._athenaMP > 0 and not self._disableMP:
             if not ('athenaopts' in self.conf.argdict and
                 any('--nprocs' in opt for opt in self.conf.argdict['athenaopts'].value[currentSubstep])):
                 self._cmd.append('--nprocs=%s' % str(self._athenaMP))

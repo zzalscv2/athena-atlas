@@ -15,8 +15,6 @@ def setupDigitizationLegacyDetectorFlags(detectors):
     # Other subdetectors
     if not detectors or 'BCM' in detectors or 'ID' in detectors:
         DetFlags.BCM_setOn()
-    if not detectors or 'DBM' in detectors or 'ID' in detectors:
-        DetFlags.DBM_setOn()
     if not detectors or 'Pixel' in detectors or 'ID' in detectors:
         DetFlags.pixel_setOn()
     if not detectors or 'SCT' in detectors or 'ID' in detectors:

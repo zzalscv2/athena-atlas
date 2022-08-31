@@ -92,7 +92,8 @@ Amg::Vector3D ElementModelSTGC::stgcScale(double scl, Amg::Vector3D d0) const {
 Amg::Vector3D ElementModelSTGC::stgcNonPar(double npar, Amg::Vector3D d0) const {
 // Non-parallelism measured by CMM/Faro at construction sites
   double npar_eff = npar * d0[1]/(0.5*m_lenY);
-  double delta = npar_eff * d0[0]/1000.;
+  constexpr double DivBy1k = 1.e-3;
+  double delta = npar_eff * d0[0]*DivBy1k;
   return Amg::Vector3D(0., delta, 0.);
 }
 

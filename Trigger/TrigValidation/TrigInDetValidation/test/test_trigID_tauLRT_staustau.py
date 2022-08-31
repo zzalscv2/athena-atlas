@@ -36,7 +36,7 @@ ExtraAna = " -c 'LRT=True;parentpdgid=15' "
 
 preinclude_file = 'all:TrigInDetValidation/TIDAlrt_preinclude.py'
 
-Jobs = [ ( "Offline",  " TIDAdata-run3-offline-lrt.dat -r Offline -o data-hists-offline-lrt.root", "Test_bin_lrt.dat" ),
+Jobs = [ ( "Offline",  " TIDAdata-run3-offline-lrt.dat -r Offline+InDetLargeD0TrackParticles -o data-hists-offline-lrt.root", "Test_bin_lrt.dat" ),
          ( "Truth",    " TIDAdata-run3-lrt.dat                    -o data-hists-lrt.root",         "Test_bin_lrt.dat" ) ]
 
 Comp = [ ( "EFtauLRT",       "EFtauLRT",      "data-hists-lrt.root",         " -c TIDAhisto-panel.dat  -d HLTEF-plots " ),

@@ -88,21 +88,23 @@ namespace LVL1 {
     
     SG::ReadHandleKey<TrigConf::L1Menu> m_l1MenuKey{this, "L1TriggerMenu", "DetectorStore+L1TriggerMenu","Name of the L1Menu object to read configuration from"};
 
-    SG::WriteHandleKey< xAOD::jFexSRJetRoIContainer> m_jFexSRJetOutKey {this,"Key_jFexSRJetOutputContainer","L1_jFexSRJetRoI","Output jFexEM container"};
-    SG::WriteHandleKey< xAOD::jFexLRJetRoIContainer> m_jFexLRJetOutKey {this,"Key_jFexLRJetOutputContainer","L1_jFexLRJetRoI","Output jFexEM container"};
-    SG::WriteHandleKey< xAOD::jFexTauRoIContainer>   m_jFexTauOutKey   {this,"Key_jFexTauOutputContainer","L1_jFexTauRoI","Output jFexEDM tau container"};
-    SG::WriteHandleKey< xAOD::jFexFwdElRoIContainer>   m_jFexFwdElOutKey   {this,"Key_jFexFwdElOutputContainer","L1_jFexFwdElRoI","Output jFexEDM fwdEl container"};
-    SG::WriteHandleKey< xAOD::jFexSumETRoIContainer> m_jFexSumETOutKey {this,"Key_jFexSumETOutputContainer","L1_jFexSumETRoI","Output jFexEDM SumET container"};
-    SG::WriteHandleKey< xAOD::jFexMETRoIContainer>   m_jFexMETOutKey   {this,"Key_jFexMETOutputContainer","L1_jFexMETRoI","Output jFexEDM Met container"};
+    SG::WriteHandleKey< xAOD::jFexSRJetRoIContainer> m_jFexSRJetOutKey   {this,"Key_jFexSRJetOutputContainer","L1_jFexSRJetRoI","Output jFexEM container"};
+    SG::WriteHandleKey< xAOD::jFexLRJetRoIContainer> m_jFexLRJetOutKey   {this,"Key_jFexLRJetOutputContainer","L1_jFexLRJetRoI","Output jFexEM container"};
+    SG::WriteHandleKey< xAOD::jFexTauRoIContainer>   m_jFexTauOutKey     {this,"Key_jFexTauOutputContainer"  ,"L1_jFexTauRoI"  ,"Output jFexEDM tau container"};
+    SG::WriteHandleKey< xAOD::jFexFwdElRoIContainer>   m_jFexFwdElOutKey {this,"Key_jFexFwdElOutputContainer","L1_jFexFwdElRoI","Output jFexEDM fwdEl container"};
+    SG::WriteHandleKey< xAOD::jFexSumETRoIContainer> m_jFexSumETOutKey   {this,"Key_jFexSumETOutputContainer","L1_jFexSumETRoI","Output jFexEDM SumET container"};
+    SG::WriteHandleKey< xAOD::jFexMETRoIContainer>   m_jFexMETOutKey     {this,"Key_jFexMETOutputContainer"  ,"L1_jFexMETRoI"  ,"Output jFexEDM Met container"};
 
     std::unordered_map<int,jTower> m_jTowersColl;
-    std::unordered_map<uint8_t, std::vector<std::vector<std::vector<uint32_t>>> > m_allSmallRJetTobs; 
-    std::unordered_map<uint8_t, std::vector<std::vector<std::vector<uint32_t>>> > m_allLargeRJetTobs;
-    std::unordered_map<uint8_t, std::vector<std::unique_ptr<jFEXTOB>>> m_alltauTobs;
+
     std::unordered_map<uint8_t, std::vector<std::vector<std::vector<uint32_t>>> > m_allfwdElTobs;
-    std::unordered_map<uint8_t, std::vector<std::vector<uint32_t>> > m_allsumEtTobs;
-    std::unordered_map<uint8_t, std::vector<std::vector<uint32_t>> > m_allMetTobs;
-    
+
+    std::unordered_map<uint8_t, std::vector<std::unique_ptr<jFEXTOB>> > m_alltauTobs;
+    std::unordered_map<uint8_t, std::vector<std::unique_ptr<jFEXTOB>> > m_allSmallRJetTobs; 
+    std::unordered_map<uint8_t, std::vector<std::unique_ptr<jFEXTOB>> > m_allLargeRJetTobs;
+    std::unordered_map<uint8_t, std::vector<std::unique_ptr<jFEXTOB>> > m_allsumEtTobs;
+    std::unordered_map<uint8_t, std::vector<std::unique_ptr<jFEXTOB>> > m_allMetTobs; 
+       
   };
   
 } // end of namespace

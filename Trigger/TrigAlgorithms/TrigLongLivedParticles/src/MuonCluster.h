@@ -56,14 +56,29 @@ public:
       "input RoICollection"};
 
   SG::WriteHandleKey<xAOD::TrigCompositeContainer> m_outputCompositesKey{ this,
-      "TrigCompositeContainer",                             // property name
-      "HLT_RoICluster_Composites",                          // default value of StoreGatekey
+      "TrigRoIs_CompositeContainer",                        // property name
+      "HLT_MuRoICluster_Composites",                        // default value of StoreGatekey
       "output Composites container"};
 
   SG::WriteHandleKey<TrigRoiDescriptorCollection> m_outputRoiDescriptorKey{ this,
       "TrigRoiDescriptorDataVector",
-      "HLT_RoICluster_Descriptors",
+      "HLT_MuRoICluster_Descriptors",
       "output RoI Descriptor container with descriptor for cluster with maximum number of RoIs. For ID."};
+
+  SG::WriteDecorHandleKey<xAOD::TrigCompositeContainer> m_muRoiClusEtaKey{ this,
+      "MuonRoiClusterEta",
+      "HLT_MuRoICluster_Composites.ClusterEta",
+      "Average Eta of the muon RoI Cluster"};
+
+  SG::WriteDecorHandleKey<xAOD::TrigCompositeContainer> m_muRoiClusPhiKey{ this,
+      "MuonRoiClusterPhi",
+      "HLT_MuRoICluster_Composites.ClusterPhi",
+      "Average Phi of the muonRoI Cluster"};
+
+  SG::WriteDecorHandleKey<xAOD::TrigCompositeContainer> m_muRoiClusNRoiKey{ this,
+      "MuonRoiClusterNRoIs",
+      "HLT_MuRoICluster_Composites.nRoIs",
+      "Number of muon RoIs used to construct this muon RoI cluster"};
 
   /** hltInitialize() */
   virtual StatusCode initialize() override;
@@ -78,8 +93,8 @@ private:
 protected:
 
   typedef struct  {
-    double eta;
-    double phi;
+    float eta;
+    float phi;
     int nroi;
   } lvl1_muclu_roi;
 

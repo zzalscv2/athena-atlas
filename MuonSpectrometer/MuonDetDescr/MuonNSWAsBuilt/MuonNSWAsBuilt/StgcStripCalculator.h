@@ -35,7 +35,7 @@ namespace NswAsBuilt {
       /**
        * VALID: strip is found, INVALID: strip is not found
        */
-      enum IsValid {
+      enum class IsValid {
         INVALID=0,
         VALID=1
       };
@@ -45,10 +45,10 @@ namespace NswAsBuilt {
        * strip are provided, in the coordinate system of the quadruplet.
        */
       struct stgcStrip_t {
-        IsValid isvalid;
-        Amg::Vector3D center;
-        Amg::Vector3D left;
-        Amg::Vector3D right;
+        IsValid isvalid{IsValid::INVALID};
+        Amg::Vector3D center{Amg::Vector3D::Zero()};
+        Amg::Vector3D left{Amg::Vector3D::Zero()};
+        Amg::Vector3D right{Amg::Vector3D::Zero()};
       };
 
       /**
@@ -65,8 +65,8 @@ namespace NswAsBuilt {
        * coordinate system of the quadruplet
        */
       struct position_t {
-        IsValid isvalid;
-        Amg::Vector3D pos;
+        IsValid isvalid{IsValid::INVALID};
+        Amg::Vector3D pos{Amg::Vector3D::Zero()};
       };
 
       /**

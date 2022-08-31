@@ -289,9 +289,6 @@ checkHGTDOff = getattr(DetFlags, 'HGTD_setOff', None)
 if checkHGTDOff is not None:
     checkHGTDOff() #Default for now
 
-    ## Tidy up DBM DetFlags: temporary measure
-DetFlags.DBM_setOff()
-
 # turn off DetFlags for muon detectors which are not part of the layout
 if not MuonGeometryFlags.hasCSC(): DetFlags.CSC_setOff()
 if not MuonGeometryFlags.hasSTGC(): DetFlags.sTGC_setOff()
