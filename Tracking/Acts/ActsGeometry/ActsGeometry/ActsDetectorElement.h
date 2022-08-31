@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2020 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef ACTSGEOMETRY_ACTSDETECTORELEMENT_H
@@ -16,6 +16,7 @@
 #include "InDetReadoutGeometry/SiDetectorElement.h"
 #include "TRT_ReadoutGeometry/TRT_BaseElement.h"
 #include "TrkSurfaces/AnnulusBounds.h"
+#include "CxxUtils/CachedValue.h"
 
 // ACTS
 #include "Acts/Geometry/DetectorElementBase.hpp"
@@ -91,10 +92,7 @@ private:
   std::shared_ptr<const Acts::Surface> m_surface;
   std::vector<std::shared_ptr<const Acts::Surface>> m_surfaces;
 
-  // this is pretty much only used single threaded, so
-  // the mutex does not hurt
-  mutable std::mutex m_cacheMutex;
-  mutable std::optional<Acts::Transform3> m_defTransform;
+  CxxUtils::CachedValue<Acts::Transform3> m_defTransform;
 
   Acts::Transform3 m_extraTransform{Acts::Transform3::Identity()};
 

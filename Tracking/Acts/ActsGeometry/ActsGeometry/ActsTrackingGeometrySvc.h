@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2019 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef ACTSGEOMETRY_ACTSTRACKINGGEOMETRYSVC_H
@@ -14,6 +14,7 @@
 #include "ActsGeometryInterfaces/IActsTrackingGeometrySvc.h"
 #include "ActsGeometryInterfaces/IActsTrackingVolumeBuilder.h"
 #include "ActsGeometry/ActsLayerBuilder.h"
+#include "ActsGeometry/ActsElementVector.h"
 
 // ACTS
 #include "Acts/Geometry/CylinderVolumeBuilder.hpp"
@@ -88,7 +89,7 @@ private:
   const InDetDD::SiDetectorManager* p_ITkStripManager;
   const BeamPipeDetectorManager* p_beamPipeMgr;
 
-  std::shared_ptr<std::vector<std::shared_ptr<const ActsDetectorElement>>> m_elementStore;
+  std::shared_ptr<ActsElementVector> m_elementStore;
   std::shared_ptr<const Acts::TrackingGeometry> m_trackingGeometry;
 
   const TRT_ID *m_TRT_idHelper;

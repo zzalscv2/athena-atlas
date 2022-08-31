@@ -1,12 +1,12 @@
 /*
-  Copyright (C) 2002-2020 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef ACTSMATERIALMAPPING_H
 #define ACTSMATERIALMAPPING_H
 
 // ATHENA
-#include "AthenaBaseComps/AthReentrantAlgorithm.h"
+#include "AthenaBaseComps/AthAlgorithm.h"
 #include "GaudiKernel/ToolHandle.h"
 #include "GaudiKernel/ServiceHandle.h"
 #include "Gaudi/Property.h"  /*no forward decl: typedef*/
@@ -48,11 +48,12 @@ class IActsSurfaceMappingTool;
 class IActsVolumeMappingTool;
 class IActsMaterialJsonWriterTool;
 
-class ActsMaterialMapping : public AthReentrantAlgorithm {
+// Not reentrant due to the mutable State variables.
+class ActsMaterialMapping : public AthAlgorithm {
 public:
   ActsMaterialMapping (const std::string& name, ISvcLocator* pSvcLocator);
   virtual StatusCode initialize() override;
-  virtual StatusCode execute(const EventContext& ctx) const override;
+  virtual StatusCode execute() override;
   virtual StatusCode finalize() override;
 
 private:

@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2018 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "ActsGeometry/ActsDetectorElement.h"
@@ -149,9 +149,10 @@ ActsDetectorElement::ActsDetectorElement(
 
 ActsDetectorElement::ActsDetectorElement(
     const Acts::Transform3 &trf, const InDetDD::TRT_BaseElement &detElem,
-    const Identifier &id) {
+    const Identifier &id)
+  : m_defTransform (trf)
+{
   m_detElement = &detElem;
-  m_defTransform = trf;
   m_explicitIdentifier = id;
 
   // we know this is a straw
@@ -234,10 +235,11 @@ void ActsDetectorElement::storeTransform(ActsAlignmentStore *gas) const {
     trf = l2g;
   } else if (const auto *detElem =
                  dynamic_cast<const InDetDD::TRT_BaseElement *>(m_detElement);
-             detElem != nullptr) {
+             detElem != nullptr && m_defTransform.isValid())
+  {
     // So far: NO ALIGNMENT for the ACTS TRT version. Default transform set in
     // constructor, should be safe to access without mutex.
-    trf = *m_defTransform;
+    trf = *m_defTransform.ptr();
   } else {
     throw std::runtime_error{"Unknown detector element type"};
   }
@@ -251,33 +253,31 @@ void ActsDetectorElement::storeTransform(ActsAlignmentStore *gas) const {
 
 const Acts::Transform3 &
 ActsDetectorElement::getDefaultTransformMutexed() const {
-  std::lock_guard<std::mutex> guard(m_cacheMutex);
-  if (m_defTransform) {
-    return *m_defTransform;
-  }
-  // transform not yet set
-  if (const auto *detElem =
-          dynamic_cast<const InDetDD::SiDetectorElement *>(m_detElement);
-      detElem != nullptr) {
-    Amg::Transform3D l2g =
+  if (!m_defTransform.isValid()) {
+    // transform not yet set
+    if (const auto *detElem =
+        dynamic_cast<const InDetDD::SiDetectorElement *>(m_detElement);
+        detElem != nullptr) {
+      Amg::Transform3D l2g =
         detElem->getMaterialGeom()->getDefAbsoluteTransform() *
         Amg::CLHEPTransformToEigen(detElem->recoToHitTransform());
 
-    l2g.translation() *= 1.0 / CLHEP::mm * length_unit;
+      l2g.translation() *= 1.0 / CLHEP::mm * length_unit;
 
-    l2g = l2g * m_extraTransform;
+      l2g = l2g * m_extraTransform;
 
-    m_defTransform = l2g;
-  } else if (const auto *detElem =
-                 dynamic_cast<const InDetDD::TRT_BaseElement *>(m_detElement);
-             detElem != nullptr) {
-    throw std::logic_error{
+      m_defTransform.set (l2g);
+    } else if (const auto *detElem =
+               dynamic_cast<const InDetDD::TRT_BaseElement *>(m_detElement);
+               detElem != nullptr) {
+      throw std::logic_error{
         "TRT transform should have been set in the constructor"};
-  } else {
-    throw std::runtime_error{"Unknown detector element type"};
+    } else {
+      throw std::runtime_error{"Unknown detector element type"};
+    }
   }
 
-  return *m_defTransform;
+  return *m_defTransform.ptr();
 }
 
 const Acts::Surface &ActsDetectorElement::surface() const {

@@ -164,7 +164,7 @@ ActsATLASConverterTool::ATLASMeasurementToSourceLink(
     covpc = xyzToPcJac * covpc * xyzToPcJac.transpose();
 
     if (m_visualDebugOutput) {
-      static std::mt19937 gen{42};
+      std::mt19937 gen{42 + surface.geometryId().value()};
       std::normal_distribution<double> normal{0, 1};
       std::uniform_real_distribution<double> uniform{-1, 1};
 
@@ -353,7 +353,7 @@ ActsATLASConverterTool::ActsTrackParameterToATLAS(const Acts::BoundTrackParamete
           }
           std::cout << std::endl;
 
-          static std::mt19937 gen{42};
+          std::mt19937 gen{4242 + actsParameter.referenceSurface().geometryId().value()};
           std::normal_distribution<double> normal{0, 1};
 
           Acts::ActsMatrix<2, 2> lltxy = targetCov.topLeftCorner<2, 2>().llt().matrixL();

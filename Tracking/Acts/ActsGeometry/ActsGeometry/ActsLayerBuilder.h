@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2020 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef ACTSGEOMETRY_ACTSLAYERBUILDER_H
@@ -7,8 +7,11 @@
 
 // PACKAGE
 #include "ActsGeometry/ActsDetectorElement.h"
+#include "ActsGeometry/ActsElementVector.h"
 
 // ATHENA
+#include "CxxUtils/checker_macros.h"
+#include <mutex>
 
 // ACTS
 #include "Acts/Geometry/ILayerBuilder.hpp"
@@ -36,8 +39,7 @@ public:
     Undefined, Pixel, SCT, TRT, ITkPixelInner, ITkPixelOuter, ITkStrip,
   };
 
-  using ElementVector
-      = std::vector<std::shared_ptr<const ActsDetectorElement>>;
+  using ElementVector = ActsElementVector;
 
   /// @struct Config
   /// nested configuration struct for steering of the layer builder
@@ -133,7 +135,7 @@ public:
   setLogger(std::unique_ptr<const Acts::Logger> logger);
 
 private:
-  /// configruation object
+  /// configuration object
   Config m_cfg;
 
   /// Private access to the logger
@@ -157,10 +159,10 @@ private:
   // @param layers is goint to be filled
   // @param type is the indication which ones to build -1 | 0 | 1
   void
-  buildBarrel(const Acts::GeometryContext& gctx, Acts::LayerVector& layersOutput);
+  buildBarrel(const Acts::GeometryContext& gctx, Acts::LayerVector& layersOutput) const;
 
   void
-  buildEndcap(const Acts::GeometryContext& gctx, Acts::LayerVector& layersOutput, int type = 0);
+  buildEndcap(const Acts::GeometryContext& gctx, Acts::LayerVector& layersOutput, int type = 0) const;
 
 };
 
