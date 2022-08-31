@@ -526,9 +526,11 @@ StatusCode TileCellMonitorAlgorithm::fillHistograms( const EventContext& ctx ) c
             overThrOccupChannel[partition1].push_back(channel1);
             overThrOccupWeight[partition1].push_back(weight);
 
-            overThrOccupGainModule[partition1][gain1].push_back(module);
-            overThrOccupGainChannel[partition1][gain1].push_back(channel1);
-            overThrOccupGainWeight[partition1][gain1].push_back(weight);
+            if (energy1 > m_energyThresholdForGain[gain1]) {
+              overThrOccupGainModule[partition1][gain1].push_back(module);
+              overThrOccupGainChannel[partition1][gain1].push_back(channel1);
+              overThrOccupGainWeight[partition1][gain1].push_back(weight);
+            }
 
             if (energy1 > 30000.) {
               overThr30GeVOccupModule[partition1].push_back(module);
@@ -546,9 +548,11 @@ StatusCode TileCellMonitorAlgorithm::fillHistograms( const EventContext& ctx ) c
             overThrOccupChannel[partition2].push_back(channel2);
             overThrOccupWeight[partition2].push_back(1.0F);
 
-            overThrOccupGainModule[partition2][gain2].push_back(module);
-            overThrOccupGainChannel[partition2][gain2].push_back(channel2);
-            overThrOccupGainWeight[partition2][gain2].push_back(1.0F);
+            if (energy2 > m_energyThresholdForGain[gain2]) {
+              overThrOccupGainModule[partition2][gain2].push_back(module);
+              overThrOccupGainChannel[partition2][gain2].push_back(channel2);
+              overThrOccupGainWeight[partition2][gain2].push_back(1.0F);
+            }
 
             if (energy2 > 30000.) {
               overThr30GeVOccupModule[partition2].push_back(module);

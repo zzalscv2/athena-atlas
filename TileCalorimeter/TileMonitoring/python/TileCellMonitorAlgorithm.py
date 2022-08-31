@@ -39,6 +39,7 @@ def TileCellMonitoringConfig(flags, **kwargs):
 
     from AthenaCommon.SystemOfUnits import MeV, GeV, ns
     kwargs.setdefault('EnergyThreshold', 300.0 * MeV)
+    kwargs.setdefault('EnergyThresholdForGain', [10 * GeV, 300.0 * MeV])
     kwargs.setdefault('NegativeEnergyThreshold', -2000.0 * MeV)
     kwargs.setdefault('EnergyBalanceThreshold', 3)
     kwargs.setdefault('TimeBalanceThreshold', 25 * ns)
@@ -75,7 +76,7 @@ def TileCellMonitoringConfig(flags, **kwargs):
 
 
     from TileCalibBlobObjs.Classes import TileCalibUtils as Tile
-    from TileMonitoring.TileMonitoringCfgHelper import getPartitionName
+    from TileMonitoring.TileMonitoringCfgHelper import getPartitionName, getGainName
 
     # 2) Configure histogram with average number of Tile bad cells in partition
     labelsPartitions = [getPartitionName(ros) for ros in range(1, Tile.MAX_ROS)]
@@ -147,8 +148,14 @@ def TileCellMonitoringConfig(flags, **kwargs):
                                   run = run, triggers = l1Triggers, separator = '_')
 
     # 11) Configure histograms with occupancy maps over threshold per partition
+    titleMapOvThrGain = {}
+    for gain in range(0, Tile.MAX_GAIN):
+        gainName = getGainName(gain)
+        energyThresholdForGain = kwargs['EnergyThresholdForGain'][gain]
+        energyThreshold = f'{energyThresholdForGain} MeV' if energyThresholdForGain < 1000.0 else f'{energyThresholdForGain/GeV} GeV'
+        titleMapOvThrGain[gainName] = f'Occupancy Map Over Threshod {energyThreshold}'
     addTileModuleChannelMapsArray(helper, tileCellMonAlg, name = 'TileCellDetailOccMapOvThrGain',
-                                  weight = 'weight', title = titleMapOvThr, path = 'Tile/Cell', subDirectory = True,
+                                  weight = 'weight', title = titleMapOvThrGain, path = 'Tile/Cell', subDirectory = True,
                                   run = run, triggers = l1Triggers, perGain = True, separator = '_')
 
 
