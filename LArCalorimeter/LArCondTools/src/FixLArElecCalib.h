@@ -6,6 +6,7 @@
 #define FIXLARELECCALIB_H
 
 #include "AthenaBaseComps/AthAlgorithm.h"
+#include "CxxUtils/checker_macros.h"
 #include "Identifier/HWIdentifier.h"
 #include "StoreGate/StoreGateSvc.h"
 #include "StoreGate/ReadCondHandleKey.h"
@@ -43,25 +44,25 @@ class FixLArElecCalib : public AthAlgorithm
   virtual StatusCode initialize() override;
   virtual StatusCode execute() override;
   virtual StatusCode finalize() override {return StatusCode::SUCCESS;}  
-  virtual StatusCode stop() override;  
+  virtual StatusCode stop ATLAS_NOT_THREAD_SAFE () override;
 
   StatusCode fix1(const LArOnOffIdMapping *cabling);  
   StatusCode fix2(const LArOnOffIdMapping *cabling);  
-  StatusCode fix3(const LArOnOffIdMapping *cabling);  
-  StatusCode fix4(const LArOnOffIdMapping *cabling);  
-  StatusCode fix5(const LArOnOffIdMapping *cabling);  
-  StatusCode fix6(const LArOnOffIdMapping *cabling);  
-  StatusCode fix7(const LArOnOffIdMapping *cabling);  
-  StatusCode fix8(const LArOnOffIdMapping *cabling);  
-  StatusCode fix9(const LArOnOffIdMapping *cabling);  
-  StatusCode fix10(const LArOnOffIdMapping *cabling);  
-  StatusCode fix11(const LArOnOffIdMapping *cabling);  
+  StatusCode fix3 ATLAS_NOT_THREAD_SAFE (const LArOnOffIdMapping *cabling);
+  StatusCode fix4 ATLAS_NOT_THREAD_SAFE (const LArOnOffIdMapping *cabling);
+  StatusCode fix5 ATLAS_NOT_THREAD_SAFE (const LArOnOffIdMapping *cabling);
+  StatusCode fix6 ATLAS_NOT_THREAD_SAFE (const LArOnOffIdMapping *cabling);
+  StatusCode fix7 ATLAS_NOT_THREAD_SAFE (const LArOnOffIdMapping *cabling);
+  StatusCode fix8 ATLAS_NOT_THREAD_SAFE (const LArOnOffIdMapping *cabling);
+  StatusCode fix9 ATLAS_NOT_THREAD_SAFE (const LArOnOffIdMapping *cabling);
+  StatusCode fix10 ATLAS_NOT_THREAD_SAFE (const LArOnOffIdMapping *cabling);
+  StatusCode fix11 ATLAS_NOT_THREAD_SAFE (const LArOnOffIdMapping *cabling);
   StatusCode fix12(const LArOnOffIdMapping *cabling);  
   StatusCode fix13(const LArOnOffIdMapping *cabling);  
   StatusCode fix14(const LArOnOffIdMapping *cabling);  
-  StatusCode fix15();  
-  StatusCode fix16();  
-  StatusCode fix17(const LArOnOffIdMapping *cabling);  
+  StatusCode fix15 ATLAS_NOT_THREAD_SAFE ();
+  StatusCode fix16 ATLAS_NOT_THREAD_SAFE ();
+  StatusCode fix17 ATLAS_NOT_THREAD_SAFE (const LArOnOffIdMapping *cabling);
   StatusCode fix18(const LArCalibLineMapping *clmap);  
 
  private: 
@@ -82,10 +83,10 @@ class FixLArElecCalib : public AthAlgorithm
   //StatusCode update_Shape(const std::string& em_filename,const std::string& hec_filename);
 
   template <class T>
-  StatusCode update_EM_HEC(const std::string& em_filename,const std::string& hec_filename, const LArOnOffIdMapping *cabling,
+  StatusCode update_EM_HEC ATLAS_NOT_THREAD_SAFE (const std::string& em_filename,const std::string& hec_filename, const LArOnOffIdMapping *cabling,
                            bool withGain, int nvar);
   template <class T>
-  StatusCode update_All(const std::string& filename, const LArOnOffIdMapping *cabling, bool withGain, int nvar);
+  StatusCode update_All ATLAS_NOT_THREAD_SAFE (const std::string& filename, const LArOnOffIdMapping *cabling, bool withGain, int nvar);
 
   void print_object(const std::string& msg, const LArNoiseMC::LArCondObj& obj); 
   void set_object(LArNoiseMC::LArCondObj& obj, const std::vector<float>& v ); 
@@ -110,13 +111,13 @@ class FixLArElecCalib : public AthAlgorithm
 
   StatusCode addMphysOverMcal(const LArOnOffIdMapping *cabling) ; // add new one with default for FCAL
 
-  StatusCode fixDACuAMeV() ; // remove -100000000 
+  StatusCode fixDACuAMeV ATLAS_NOT_THREAD_SAFE () ; // remove -100000000
 
 
-  StatusCode updateEMfSampl(const std::string& filename, const LArOnOffIdMapping *cabling);
-  StatusCode updateMinBias(const std::string& filename, const LArOnOffIdMapping *cabling);
-  StatusCode updateEM_DACuAMeV(const std::string& filename, const LArOnOffIdMapping *cabling);
-  StatusCode updateHADfSampl(const LArOnOffIdMapping *cabling);
+  StatusCode updateEMfSampl ATLAS_NOT_THREAD_SAFE (const std::string& filename, const LArOnOffIdMapping *cabling);
+  StatusCode updateMinBias ATLAS_NOT_THREAD_SAFE (const std::string& filename, const LArOnOffIdMapping *cabling);
+  StatusCode updateEM_DACuAMeV ATLAS_NOT_THREAD_SAFE (const std::string& filename, const LArOnOffIdMapping *cabling);
+  StatusCode updateHADfSampl ATLAS_NOT_THREAD_SAFE (const LArOnOffIdMapping *cabling);
 
   int  m_fixFlag ; 
   std::string m_g4Phys; 
@@ -144,7 +145,7 @@ class FixLArElecCalib : public AthAlgorithm
 };
 
 template <class T >
-  StatusCode FixLArElecCalib::update_EM_HEC(const std::string& em_filename,const std::string& hec_filename, const LArOnOffIdMapping *cabling, bool withGain, int nvar)
+  StatusCode FixLArElecCalib::update_EM_HEC ATLAS_NOT_THREAD_SAFE (const std::string& em_filename,const std::string& hec_filename, const LArOnOffIdMapping *cabling, bool withGain, int nvar)
 {
    // read in the file
 
@@ -215,7 +216,7 @@ template <class T >
 
 
 template <class T >
-  StatusCode FixLArElecCalib::update_All(const std::string& filename, const LArOnOffIdMapping *cabling, bool withGain, int nvar)
+  StatusCode FixLArElecCalib::update_All ATLAS_NOT_THREAD_SAFE (const std::string& filename, const LArOnOffIdMapping *cabling, bool withGain, int nvar)
 {
    // read in the file
 

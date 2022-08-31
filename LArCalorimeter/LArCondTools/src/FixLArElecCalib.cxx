@@ -163,7 +163,7 @@ StatusCode FixLArElecCalib::execute() {
   return StatusCode::SUCCESS;
 }
 
-StatusCode FixLArElecCalib::stop() {
+StatusCode FixLArElecCalib::stop ATLAS_NOT_THREAD_SAFE () {
 
    ATH_MSG_INFO ( " in stop " );
 
@@ -445,7 +445,7 @@ StatusCode FixLArElecCalib::fix2(const LArOnOffIdMapping *cabling) {
     return StatusCode::SUCCESS;    
 }
 
-StatusCode FixLArElecCalib::fix3(const LArOnOffIdMapping *cabling) {
+StatusCode FixLArElecCalib::fix3 ATLAS_NOT_THREAD_SAFE (const LArOnOffIdMapping *cabling) {
 
     ATH_MSG_INFO ( " in fix3() " );
     std::string filename ;
@@ -472,12 +472,12 @@ StatusCode FixLArElecCalib::fix3(const LArOnOffIdMapping *cabling) {
 }
 
 
-StatusCode FixLArElecCalib::fix4(const LArOnOffIdMapping *cabling) {
+StatusCode FixLArElecCalib::fix4 ATLAS_NOT_THREAD_SAFE (const LArOnOffIdMapping *cabling) {
   ATH_MSG_INFO ( " in fix4() " );
   return updateEM_DACuAMeV( "dac2ua_ua2mev_rel13.txt", cabling ); 
 }
 
-StatusCode FixLArElecCalib::updateHADfSampl(const LArOnOffIdMapping *cabling) {
+StatusCode FixLArElecCalib::updateHADfSampl ATLAS_NOT_THREAD_SAFE (const LArOnOffIdMapping *cabling) {
 
   float fsampl_fcal1,fsampl_fcal2,fsampl_fcal3; 
   float fsampl_hec1,fsampl_hec2;
@@ -586,7 +586,7 @@ StatusCode FixLArElecCalib::updateHADfSampl(const LArOnOffIdMapping *cabling) {
 }
 
 
-StatusCode FixLArElecCalib::updateEMfSampl(const std::string& filename, const LArOnOffIdMapping *cabling) {
+StatusCode FixLArElecCalib::updateEMfSampl ATLAS_NOT_THREAD_SAFE (const std::string& filename, const LArOnOffIdMapping *cabling) {
 
    ATH_MSG_INFO ( " in updateEMfSampl() " );
 
@@ -654,7 +654,7 @@ StatusCode FixLArElecCalib::updateEMfSampl(const std::string& filename, const LA
 }
 
 
-StatusCode FixLArElecCalib::updateEM_DACuAMeV(const std::string& filename, const LArOnOffIdMapping *cabling) {
+StatusCode FixLArElecCalib::updateEM_DACuAMeV ATLAS_NOT_THREAD_SAFE (const std::string& filename, const LArOnOffIdMapping *cabling) {
    // read in the file
 
    const LArDAC2uAMC * dac2ua_c = nullptr;
@@ -749,7 +749,7 @@ StatusCode FixLArElecCalib::updateEM_DACuAMeV(const std::string& filename, const
 
 
 
-StatusCode FixLArElecCalib::fix5(const LArOnOffIdMapping *cabling) {
+StatusCode FixLArElecCalib::fix5 ATLAS_NOT_THREAD_SAFE (const LArOnOffIdMapping *cabling) {
     
     ATH_MSG_INFO ( " in fix5() " );
 
@@ -873,7 +873,7 @@ StatusCode FixLArElecCalib::fix5(const LArOnOffIdMapping *cabling) {
      return StatusCode::SUCCESS;
 }
 
-StatusCode FixLArElecCalib::updateMinBias(const std::string& filename, const LArOnOffIdMapping *cabling) {
+StatusCode FixLArElecCalib::updateMinBias ATLAS_NOT_THREAD_SAFE (const std::string& filename, const LArOnOffIdMapping *cabling) {
 
    ATH_MSG_INFO ( " in updateMinBias(), filename =  "<<filename );
 
@@ -957,7 +957,7 @@ StatusCode FixLArElecCalib::updateMinBias(const std::string& filename, const LAr
 }
 
 
-StatusCode FixLArElecCalib::fix6(const LArOnOffIdMapping *cabling) {
+StatusCode FixLArElecCalib::fix6 ATLAS_NOT_THREAD_SAFE (const LArOnOffIdMapping *cabling) {
 
     ATH_MSG_INFO ( " in fix6() " );
 
@@ -1104,7 +1104,7 @@ StatusCode FixLArElecCalib::fix6(const LArOnOffIdMapping *cabling) {
 }
 
 
-StatusCode FixLArElecCalib::fix7(const LArOnOffIdMapping *cabling) {
+StatusCode FixLArElecCalib::fix7 ATLAS_NOT_THREAD_SAFE (const LArOnOffIdMapping *cabling) {
 
     ATH_MSG_INFO ( " in fix7() " );
     std::string filename ;
@@ -1122,7 +1122,7 @@ StatusCode FixLArElecCalib::fix7(const LArOnOffIdMapping *cabling) {
     return StatusCode::SUCCESS;
 }
 
-StatusCode FixLArElecCalib::fix8(const LArOnOffIdMapping *cabling) {
+StatusCode FixLArElecCalib::fix8 ATLAS_NOT_THREAD_SAFE (const LArOnOffIdMapping *cabling) {
 
     ATH_MSG_INFO ( " in fix8() " );
     // update EM/HEC 7 data objects.
@@ -1530,7 +1530,7 @@ StatusCode FixLArElecCalib::addMphysOverMcal(const LArOnOffIdMapping *cabling) {
 }
 
 
-StatusCode FixLArElecCalib::fixDACuAMeV()
+StatusCode FixLArElecCalib::fixDACuAMeV ATLAS_NOT_THREAD_SAFE ()
 {
    // the old data has -10000000 for invalid. change it to {ERRORCODE = -999};
 
@@ -1603,7 +1603,7 @@ StatusCode FixLArElecCalib::fixDACuAMeV()
 }
 
 
-StatusCode FixLArElecCalib::fix9(const LArOnOffIdMapping *cabling) {
+StatusCode FixLArElecCalib::fix9 ATLAS_NOT_THREAD_SAFE (const LArOnOffIdMapping *cabling) {
 
     ATH_MSG_INFO ( " in fix9(), replace FCAL AutoCorr " );
 
@@ -1669,7 +1669,7 @@ StatusCode FixLArElecCalib::fix9(const LArOnOffIdMapping *cabling) {
 }
 
 
-StatusCode FixLArElecCalib::fix10(const LArOnOffIdMapping *cabling) {
+StatusCode FixLArElecCalib::fix10 ATLAS_NOT_THREAD_SAFE (const LArOnOffIdMapping *cabling) {
 
     ATH_MSG_INFO ( " in fix10() " );
     // fix medium and low gain ramp
@@ -1731,7 +1731,7 @@ StatusCode FixLArElecCalib::fix10(const LArOnOffIdMapping *cabling) {
 }
 
 
-StatusCode FixLArElecCalib::fix11(const LArOnOffIdMapping *cabling) {
+StatusCode FixLArElecCalib::fix11 ATLAS_NOT_THREAD_SAFE (const LArOnOffIdMapping *cabling) {
 
     ATH_MSG_INFO ( " in fix8() " );
     // update EM/HEC 7 data objects.
@@ -2143,7 +2143,7 @@ StatusCode FixLArElecCalib::fix14(const LArOnOffIdMapping *cabling) {
      return StatusCode::SUCCESS;
 }
 
-StatusCode FixLArElecCalib::fix15() {
+StatusCode FixLArElecCalib::fix15 ATLAS_NOT_THREAD_SAFE () {
 
    ATH_MSG_INFO ( " in fix15  " );
 
@@ -2181,7 +2181,7 @@ StatusCode FixLArElecCalib::fix15() {
    return StatusCode::SUCCESS;
 }
 
-StatusCode FixLArElecCalib::fix16() {
+StatusCode FixLArElecCalib::fix16 ATLAS_NOT_THREAD_SAFE () {
 
     ATH_MSG_INFO ( " in fix16() " );
 
@@ -2230,7 +2230,7 @@ StatusCode FixLArElecCalib::fix16() {
     return StatusCode::SUCCESS;
 }
 
-StatusCode FixLArElecCalib::fix17(const LArOnOffIdMapping *cabling) {
+StatusCode FixLArElecCalib::fix17 ATLAS_NOT_THREAD_SAFE (const LArOnOffIdMapping *cabling) {
 
     ATH_MSG_INFO ( " in fix17() " );
 
