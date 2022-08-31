@@ -1,4 +1,4 @@
-# Copyright (C) 2002-2020 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
 
 # Declare the package name:
 atlas_subdir( CaloIdentifier )
@@ -39,96 +39,101 @@ atlas_add_executable( caloCellLookup
                       utils/caloCellLookup.cxx
                       LINK_LIBRARIES CaloIdentifier IdDictParser )
 
+# Tests in the package:
+
+set( _ignore "mask/zero|Reading file|^AtlasDetectorID(Helper)?::|WARNING MessageSvc not found" )
+
 #atlas_add_test( GTower_ID_test
 #                SOURCES
 #                test/GTower_ID_test.cxx
 #                INCLUDE_DIRS ${Boost_INCLUDE_DIRS} ${ROOT_INCLUDE_DIRS}
 #                LINK_LIBRARIES ${Boost_LIBRARIES} ${ROOT_LIBRARIES} CaloGeoHelpers AthenaKernel AtlasDetDescr IdDict Identifier GaudiKernel TestTools CxxUtils StoreGateLib IdDictParser PathResolver CaloIdentifier
-#                LOG_IGNORE_PATTERN "mask/zero|Reading file|^AtlasDetectorID(Helper)?::" )
+#                LOG_IGNORE_PATTERN ${_ignore} )
 
 #atlas_add_test( JTower_ID_test
 #                SOURCES
 #                test/JTower_ID_test.cxx
 #                INCLUDE_DIRS ${Boost_INCLUDE_DIRS} ${ROOT_INCLUDE_DIRS}
 #                LINK_LIBRARIES ${Boost_LIBRARIES} ${ROOT_LIBRARIES} CaloGeoHelpers AthenaKernel AtlasDetDescr IdDict Identifier GaudiKernel TestTools CxxUtils StoreGateLib IdDictParser PathResolver CaloIdentifier
-#                LOG_IGNORE_PATTERN "mask/zero|Reading file|^AtlasDetectorID(Helper)?::" )
+#                LOG_IGNORE_PATTERN ${_ignore} )
 
 atlas_add_test( LArEM_ID_test
                 SOURCES
                 test/LArEM_ID_test.cxx
                 LINK_LIBRARIES CaloIdentifier IdDictParser
-                LOG_IGNORE_PATTERN "mask/zero|Reading file|^AtlasDetectorID(Helper)?::" )
+                LOG_IGNORE_PATTERN ${_ignore} )
 
 atlas_add_test( LArEM_SuperCell_ID_test
                 SOURCES
                 test/LArEM_SuperCell_ID_test.cxx
                 LINK_LIBRARIES CaloIdentifier IdDictParser
-                LOG_IGNORE_PATTERN "mask/zero|Reading file|^AtlasDetectorID(Helper)?::" )
+                LOG_IGNORE_PATTERN ${_ignore} )
 
 atlas_add_test( LArHEC_ID_test
                 SOURCES
                 test/LArHEC_ID_test.cxx
                 LINK_LIBRARIES CaloIdentifier IdDictParser
-                LOG_IGNORE_PATTERN "mask/zero|Reading file|^AtlasDetectorID(Helper)?::" )
+                LOG_IGNORE_PATTERN ${_ignore} )
 
 atlas_add_test( LArHEC_SuperCell_ID_test
                 SOURCES
                 test/LArHEC_SuperCell_ID_test.cxx
                 LINK_LIBRARIES CaloIdentifier IdDictParser
-                LOG_IGNORE_PATTERN "mask/zero|Reading file|^AtlasDetectorID(Helper)?::" )
+                LOG_IGNORE_PATTERN ${_ignore} )
 
 atlas_add_test( LArFCAL_ID_test
                 SOURCES
                 test/LArFCAL_ID_test.cxx
                 LINK_LIBRARIES CaloIdentifier IdDictParser
-                LOG_IGNORE_PATTERN "mask/zero|Reading file|^AtlasDetectorID(Helper)?::" )
+                LOG_IGNORE_PATTERN ${_ignore} )
 
 atlas_add_test( LArFCAL_SuperCell_ID_test
                 SOURCES
                 test/LArFCAL_SuperCell_ID_test.cxx
                 LINK_LIBRARIES CaloIdentifier IdDictParser
-                LOG_IGNORE_PATTERN "mask/zero|Reading file|^AtlasDetectorID(Helper)?::" )
+                LOG_IGNORE_PATTERN ${_ignore} )
 
 atlas_add_test( LArMiniFCAL_ID_test
                 SOURCES
                 test/LArMiniFCAL_ID_test.cxx
                 LINK_LIBRARIES CaloIdentifier IdDictParser
-                LOG_IGNORE_PATTERN "mask/zero|Reading file|^AtlasDetectorID(Helper)?::" )
+                LOG_IGNORE_PATTERN ${_ignore} )
 
 atlas_add_test( TileID_test
                 SOURCES
                 test/TileID_test.cxx
                 LINK_LIBRARIES CaloIdentifier IdDictParser
-                LOG_IGNORE_PATTERN "mask/zero|Reading file|^AtlasDetectorID(Helper)?::" )
+                LOG_IGNORE_PATTERN ${_ignore} )
 
 atlas_add_test( Tile_SuperCell_ID_test
                 SOURCES
                 test/Tile_SuperCell_ID_test.cxx
                 LINK_LIBRARIES CaloIdentifier IdDictParser
-                LOG_IGNORE_PATTERN "mask/zero|Reading file|^AtlasDetectorID(Helper)?::" )
+                LOG_IGNORE_PATTERN ${_ignore} )
 
 atlas_add_test( CaloCell_ID_test
                 SOURCES
                 test/CaloCell_ID_test.cxx
                 LINK_LIBRARIES CaloIdentifier IdDictParser
-                LOG_IGNORE_PATTERN "mask/zero|Reading file|^AtlasDetectorID(Helper)?::" )
+                LOG_IGNORE_PATTERN ${_ignore} )
 
 atlas_add_test( CaloCell_SuperCell_ID_test
                 SOURCES
                 test/CaloCell_SuperCell_ID_test.cxx
                 LINK_LIBRARIES CaloIdentifier IdDictParser
-                LOG_IGNORE_PATTERN "mask/zero|Reading file|^AtlasDetectorID(Helper)?::" )
+                LOG_IGNORE_PATTERN ${_ignore} )
 
 atlas_add_test( CaloIDHelper_test
                 SOURCES
                 test/CaloIDHelper_test.cxx
                 LINK_LIBRARIES CaloIdentifier IdDictParser
-                LOG_IGNORE_PATTERN "mask/zero|Reading file|^AtlasDetectorID(Helper)?::" )
+                LOG_IGNORE_PATTERN ${_ignore} )
 
 atlas_add_test( CaloHelpersTest_test
                 SOURCES
                 test/CaloHelpersTest_test.cxx
-                LINK_LIBRARIES CaloIdentifier IdDictParser)
+                LINK_LIBRARIES CaloIdentifier IdDictParser
+                LOG_IGNORE_PATTERN ${_ignore} )
 
 # Install files from the package:
 atlas_install_python_modules( python/*.py POST_BUILD_CMD ${ATLAS_FLAKE8} )

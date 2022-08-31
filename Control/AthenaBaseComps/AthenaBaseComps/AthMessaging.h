@@ -6,7 +6,7 @@
 
 // AthMessaging.h 
 // Header file for class AthMessaging
-// Author: S.Binet<binet@cern.ch>
+// Author: S.Binet<binet@cern.ch>, Frank Winklmeier
 /////////////////////////////////////////////////////////////////// 
 #ifndef ATHENABASECOMPS_ATHMESSAGING_H
 #define ATHENABASECOMPS_ATHMESSAGING_H 1
@@ -21,18 +21,35 @@
 #include "GaudiKernel/MsgStream.h"
 #include "Gaudi/Property.h"
 #include "AthenaBaseComps/AthMsgStreamMacros.h"
+
 #include <boost/thread/tss.hpp>
+
 
 /** @class AthMessaging AthMessaging.h AthenaBaseComps/AthMessaging.h
  *
- *  Mixin class to provide easy @c MsgStream access and capabilities.
- *  One usually inherits from this class and use it like so:
+ *  @brief Class to provide easy @c MsgStream access and capabilities.
+ *
+ *  All the expensive operations (e.g. retrieval of MessageSvc) are
+ *  done lazily, i.e. only when a message is printed to keep the
+ *  construction of this class as fast as possible.
+ *
+ *  One usually inherits from this class and uses it like so:
  *  @code
- *   void some_method (AthMessaging& o) 
- *   { o.msg() << "foo" << endmsg; }
+ *   class MyClass : public AthMessaging, ... {
+ *    public:
+ *     MyClass() : AthMessaging("MyName") {}
+ *     void print() {
+ *       ATH_MSG_INFO("Hello World");
+ *     }
+ *   };
+ *  @endcode
+ *
+ *  The above will retrieve the pointer to the MessageSvc when needed.
+ *  If you have access to it already, it is preferred to pass it explicitly:
+ *  @code
+ *     MyClass() : AthMessaging(msgSvc, "MyName") {}
  *  @endcode
  */
-
 class AthMessaging
 { 
 
@@ -99,30 +116,36 @@ class AthMessaging
   AthMessaging( const AthMessaging& rhs ); //> not implemented
   AthMessaging& operator=( const AthMessaging& rhs ); //> not implemented
 
-  /////////////////////////////////////////////////////////////////// 
+  /// Initialize our message level and MessageSvc
+  void initMessaging() const;
+
+  ///////////////////////////////////////////////////////////////////
   // Private data: 
   /////////////////////////////////////////////////////////////////// 
  private: 
 
   /// Current logging level.
-  std::atomic<MSG::Level> m_lvl;
+  mutable std::atomic<MSG::Level> m_lvl{ MSG::NIL };
 
   /// MsgStream instance (a std::cout like with print-out levels)
   mutable boost::thread_specific_ptr<MsgStream> m_msg_tls;
 
-  IMessageSvc* m_imsg { nullptr };
+  /// MessageSvc pointer
+  mutable std::atomic<IMessageSvc*> m_imsg{ nullptr };
+
+  /// Message source name
   std::string m_nm;
 }; 
 
 /////////////////////////////////////////////////////////////////// 
 // Inline methods: 
 /////////////////////////////////////////////////////////////////// 
-//std::ostream& operator<<( std::ostream& out, const AthMessaging& o );
 
 inline
 bool
 AthMessaging::msgLvl (const MSG::Level lvl) const
 {
+  if (m_lvl == MSG::NIL) initMessaging();
   if (m_lvl <= lvl) {
     msg() << lvl;
     return true;
@@ -137,6 +160,7 @@ AthMessaging::msg() const
 {
   MsgStream* ms = m_msg_tls.get();
   if (!ms) {
+    if (m_lvl == MSG::NIL) initMessaging();
     ms = new MsgStream(m_imsg,m_nm);
     m_msg_tls.reset( ms );
   }

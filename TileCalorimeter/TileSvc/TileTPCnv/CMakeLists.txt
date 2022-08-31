@@ -1,4 +1,4 @@
-# Copyright (C) 2002-2020 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
 
 # Declare the package name:
 atlas_subdir( TileTPCnv )
@@ -24,80 +24,80 @@ atlas_add_dictionary( OLD_TileTPCnvDict
 atlas_add_test( TileBeamElemCnv_p1_test
                 SOURCES
                 test/TileBeamElemCnv_p1_test.cxx
-                LINK_LIBRARIES LINK_LIBRARIES GaudiKernel IdDictParser TestTools TileConditionsLib TileIdentifier TileTPCnv )
+                LINK_LIBRARIES AthenaKernel CxxUtils GaudiKernel IdDictParser TestTools TileConditionsLib TileIdentifier TileTPCnv )
 
 atlas_add_test( TileBeamElemContainerCnv_p1_test
                 SOURCES
                 test/TileBeamElemContainerCnv_p1_test.cxx
-                LINK_LIBRARIES LINK_LIBRARIES GaudiKernel IdDictParser TestTools TileConditionsLib TileIdentifier TileTPCnv
+                LINK_LIBRARIES CxxUtils GaudiKernel IdDictParser TestTools TileConditionsLib TileIdentifier TileTPCnv
                 LOG_IGNORE_PATTERN "initialize_from_dictionary" )
 
 atlas_add_test( TileCosmicMuonCnv_p1_test
                 SOURCES
                 test/TileCosmicMuonCnv_p1_test.cxx
-                LINK_LIBRARIES GaudiKernel TestTools TileTPCnv )
+                LINK_LIBRARIES CxxUtils GaudiKernel TestTools TileTPCnv )
 
 atlas_add_test( TileCosmicMuonCnv_p2_test
                 SOURCES
                 test/TileCosmicMuonCnv_p2_test.cxx
-                LINK_LIBRARIES LINK_LIBRARIES GaudiKernel TestTools TileTPCnv )
+                LINK_LIBRARIES CxxUtils GaudiKernel TestTools TileTPCnv )
 
 atlas_add_test( TileDigitsCnv_p1_test
                 SOURCES
                 test/TileDigitsCnv_p1_test.cxx
-                LINK_LIBRARIES LINK_LIBRARIES GaudiKernel IdDictParser TestTools TileConditionsLib TileIdentifier TileTPCnv )
+                LINK_LIBRARIES AthenaKernel CxxUtils GaudiKernel IdDictParser TestTools TileConditionsLib TileIdentifier TileTPCnv )
 
 atlas_add_test( TileDigitsCnv_p2_test
                 SOURCES
                 test/TileDigitsCnv_p2_test.cxx
-                LINK_LIBRARIES GaudiKernel IdDictParser TestTools TileConditionsLib TileIdentifier TileTPCnv )
+                LINK_LIBRARIES AthenaKernel CxxUtils GaudiKernel IdDictParser TestTools TileConditionsLib TileIdentifier TileTPCnv )
 
 atlas_add_test( TileDigitsCnv_p3_test
                 SOURCES
                 test/TileDigitsCnv_p3_test.cxx
-                LINK_LIBRARIES GaudiKernel IdDictParser TestTools TileConditionsLib TileIdentifier TileTPCnv )
+                LINK_LIBRARIES AthenaKernel CxxUtils GaudiKernel IdDictParser TestTools TileConditionsLib TileIdentifier TileTPCnv )
 
 atlas_add_test( TileDigitsContainerCnv_p1_test
                 SOURCES
                 test/TileDigitsContainerCnv_p1_test.cxx
-                LINK_LIBRARIES GaudiKernel IdDictParser TestTools TileConditionsLib TileIdentifier TileTPCnv
+                LINK_LIBRARIES CxxUtils GaudiKernel IdDictParser TestTools TileConditionsLib TileIdentifier TileTPCnv
                 LOG_IGNORE_PATTERN "initialize_from_dictionary" )
 
 atlas_add_test( TileDigitsContainerCnv_p2_test
                 SOURCES
                 test/TileDigitsContainerCnv_p2_test.cxx
-                LINK_LIBRARIES GaudiKernel IdDictParser TestTools TileConditionsLib TileIdentifier TileTPCnv
+                LINK_LIBRARIES CxxUtils GaudiKernel IdDictParser TestTools TileConditionsLib TileIdentifier TileTPCnv
                 LOG_IGNORE_PATTERN "initialize_from_dictionary" )
 
 atlas_add_test( TileDigitsContainerCnv_p3_test
                 SOURCES
                 test/TileDigitsContainerCnv_p3_test.cxx
-                LINK_LIBRARIES GaudiKernel IdDictParser TestTools TileConditionsLib TileIdentifier TileTPCnv
+                LINK_LIBRARIES CxxUtils GaudiKernel IdDictParser TestTools TileConditionsLib TileIdentifier TileTPCnv
                 LOG_IGNORE_PATTERN "initialize_from_dictionary" )
 
 atlas_add_test( TileHitContainerCnv_p1_test
                 SOURCES
                 test/TileHitContainerCnv_p1_test.cxx
-                LINK_LIBRARIES LINK_LIBRARIES GaudiKernel IdDictParser TestTools TileConditionsLib TileIdentifier TileTPCnv
+                LINK_LIBRARIES CxxUtils GaudiKernel IdDictParser TestTools TileConditionsLib TileIdentifier TileTPCnv
                 LOG_IGNORE_PATTERN "initialize_from_dictionary" )
 
 atlas_add_test( TileRawChannelCnv_p1_test
                 SOURCES
                 test/TileRawChannelCnv_p1_test.cxx
-                LINK_LIBRARIES LINK_LIBRARIES GaudiKernel IdDictParser TestTools TileConditionsLib TileIdentifier TileTPCnv )
+                LINK_LIBRARIES AthenaKernel CxxUtils GaudiKernel IdDictParser TestTools TileConditionsLib TileIdentifier TileTPCnv )
 
 atlas_add_test( TileRawChannelContainerCnv_p1_test
                 SOURCES
                 test/TileRawChannelContainerCnv_p1_test.cxx
-                LINK_LIBRARIES GaudiKernel IdDictParser TestTools TileConditionsLib TileIdentifier TileTPCnv
+                LINK_LIBRARIES CxxUtils GaudiKernel IdDictParser TestTools TileConditionsLib TileIdentifier TileTPCnv
                 LOG_IGNORE_PATTERN "initialize_from_dictionary" )
 
 atlas_add_test( TileTTL1CellCnv_p1_test
                 SOURCES
                 test/TileTTL1CellCnv_p1_test.cxx
-                LINK_LIBRARIES GaudiKernel TestTools TileTPCnv )
+                LINK_LIBRARIES CxxUtils GaudiKernel TestTools TileTPCnv )
 
 atlas_add_test( TileTTL1Cnv_p1_test
                 SOURCES
                 test/TileTTL1Cnv_p1_test.cxx
-                LINK_LIBRARIES GaudiKernel TestTools TileTPCnv )
+                LINK_LIBRARIES CxxUtils GaudiKernel TestTools TileTPCnv )

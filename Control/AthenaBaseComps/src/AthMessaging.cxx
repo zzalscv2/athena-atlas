@@ -4,7 +4,7 @@
 
 // AthMessaging.cxx 
 // Implementation file for class AthMessaging
-// Author: S.Binet<binet@cern.ch>
+// Author: S.Binet<binet@cern.ch>, Frank Winklmeier
 /////////////////////////////////////////////////////////////////// 
 
 #include "AthenaBaseComps/AthMessaging.h"
@@ -13,20 +13,34 @@
 AthMessaging::AthMessaging (IMessageSvc* msgSvc,
                             const std::string& name) :
   m_imsg(msgSvc), m_nm(name)
-{
-  MsgStream ms (msgSvc, name);
-  m_lvl = ms.level();
-}
+{}
+
 
 AthMessaging::AthMessaging (const std::string& name) :
-  AthMessaging(Athena::getMessageSvc(), name)
-{
-}
+  m_nm(name)
+{}
+
 
 AthMessaging::~AthMessaging()
 {}
 
+
 void AthMessaging::setLevel (MSG::Level lvl)
 {
+  if (m_lvl == MSG::NIL) initMessaging();
   m_lvl = lvl;
+}
+
+
+/**
+ * Initialize our message level and MessageSvc.
+ *
+ * This method is only called once when m_lvl == MSG::NIL.
+ */
+void AthMessaging::initMessaging() const
+{
+  m_imsg = Athena::getMessageSvc();
+  m_lvl = m_imsg ?
+    static_cast<MSG::Level>( m_imsg.load()->outputLevel(m_nm) ) :
+    MSG::INFO;
 }
