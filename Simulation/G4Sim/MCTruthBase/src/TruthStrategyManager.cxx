@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2017 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
 */
 
 // class header
@@ -37,10 +37,15 @@ TruthStrategyManager::TruthStrategyManager()
 {
 }
 
-TruthStrategyManager* TruthStrategyManager::GetStrategyManager()
+const TruthStrategyManager& TruthStrategyManager::GetStrategyManager()
 {
-  static TruthStrategyManager theMgr;
-  return &theMgr;
+  static const TruthStrategyManager theMgr;
+  return theMgr;
+}
+
+TruthStrategyManager& TruthStrategyManager::GetStrategyManager_nc ATLAS_NOT_THREAD_SAFE ()
+{
+  return const_cast<TruthStrategyManager&>(GetStrategyManager());
 }
 
 void TruthStrategyManager::SetISFTruthSvc(ISF::ITruthSvc *truthSvc)

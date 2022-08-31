@@ -1,6 +1,4 @@
-################################################################################
-# Package: MCTruthBase
-################################################################################
+# Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
 
 # Declare the package name:
 atlas_subdir( MCTruthBase )
@@ -17,7 +15,7 @@ atlas_add_library( MCTruthBaseLib
                    PUBLIC_HEADERS MCTruthBase
                    INCLUDE_DIRS ${GEANT4_INCLUDE_DIRS} ${XERCESC_INCLUDE_DIRS} ${CLHEP_INCLUDE_DIRS}
                    DEFINITIONS ${CLHEP_DEFINITIONS}
-                   LINK_LIBRARIES ${GEANT4_LIBRARIES} ${XERCESC_LIBRARIES} ${CLHEP_LIBRARIES} AtlasHepMCLib AthenaKernel GaudiKernel StoreGateLib G4AtlasToolsLib TrackRecordLib
+                   LINK_LIBRARIES ${GEANT4_LIBRARIES} ${XERCESC_LIBRARIES} ${CLHEP_LIBRARIES} AtlasHepMCLib AthenaKernel CxxUtils GaudiKernel StoreGateLib G4AtlasToolsLib TrackRecordLib
                    PRIVATE_LINK_LIBRARIES AthenaBaseComps
                    G4AtlasInterfaces MCTruth SimHelpers ISF_InterfacesLib
                    AtlasDetDescr ISF_Geant4Event

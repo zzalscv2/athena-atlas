@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef G4ATLASALG_G4AtlasAlg_H
@@ -17,6 +17,7 @@
 #include "GaudiKernel/ToolHandle.h"
 
 // Athena headers
+#include "CxxUtils/checker_macros.h"
 #include "StoreGate/ReadHandleKey.h"
 #include "StoreGate/WriteHandleKey.h"
 #include "AthenaKernel/IAthRNGSvc.h"
@@ -65,7 +66,7 @@ public:
   /// - force intialization of the UserActionSvc
   /// - apply custom G4 UI commands (like custom physics list)
   /// - configure the particle generator and random generator svc
-  StatusCode initialize() override;
+  StatusCode initialize ATLAS_NOT_THREAD_SAFE () override;
 
   /// Finalize the algorithm and invoke G4 run termination.
   StatusCode finalize() override;

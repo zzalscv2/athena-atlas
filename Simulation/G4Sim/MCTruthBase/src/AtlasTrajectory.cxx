@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2017 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "MCTruthBase/AtlasTrajectory.h"
@@ -35,9 +35,9 @@ void AtlasTrajectory::AppendStep(const G4Step* aStep)
       TrackHelper tHelper(aStep->GetTrack());
       if (!tHelper.IsSecondary())
         {
-          TruthStrategyManager* sManager =
+          const TruthStrategyManager& sManager =
             TruthStrategyManager::GetStrategyManager();
-          sManager->CreateTruthIncident(aStep, m_subDetVolLevel);
+          sManager.CreateTruthIncident(aStep, m_subDetVolLevel);
         }
     }
 

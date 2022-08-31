@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2017 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "MCTruthSteppingAction.h"
@@ -94,8 +94,8 @@ namespace G4UA
 
     if (preVol == postVol) return;
 
-    G4TouchableHistory* preTHist = (G4TouchableHistory*) preStep->GetTouchable();
-    G4TouchableHistory* postTHist = (G4TouchableHistory*) postStep->GetTouchable();
+    const G4TouchableHistory* preTHist = static_cast<const G4TouchableHistory*>(preStep->GetTouchable());
+    const G4TouchableHistory* postTHist = static_cast<const G4TouchableHistory*>(postStep->GetTouchable());
     const int preStepVolDepth = preTHist->GetHistoryDepth();
     const int postStepVolDepth = postTHist->GetHistoryDepth();
 
