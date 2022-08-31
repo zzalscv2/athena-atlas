@@ -15,7 +15,6 @@
 #include "xAODEventInfo/EventInfo.h"
 #include "xAODMuon/MuonContainer.h"
 #include "xAODTracking/VertexContainer.h"
-
 /**
  * @brief Algorithm that refits all possible four lepton combinations to a common space point.
  *        Leptons are selected by exploting the common CP tools / Loose cut on the delta Z0
@@ -28,6 +27,7 @@ namespace DerivationFramework {
         FourLeptonVertexingAlgorithm(const std::string& n, ISvcLocator* p);
         StatusCode initialize() override;
         StatusCode execute(const EventContext& ctx) const override;
+        StatusCode finalize() override;
 
         using LeptonQuadruplet = std::array<const xAOD::IParticle*, 4>;
 
@@ -41,6 +41,7 @@ namespace DerivationFramework {
         std::unique_ptr<xAOD::Vertex> fitQuadruplet(const EventContext& ctx, const LeptonQuadruplet& quad) const;
 
         const xAOD::TrackParticle* trackParticle(const xAOD::IParticle* part) const;
+        int charge(const xAOD::IParticle* part) const;
 
         /// Input containers
         SG::ReadHandleKey<xAOD::MuonContainer> m_muonKey{this, "MuonContainer", "Muons",
@@ -68,10 +69,34 @@ namespace DerivationFramework {
         Gaudi::Property<bool> m_elecUseGSF{this, "PickElecGsfTrk", true,
                                            "If this property is set to true it will pick up the electron GSF track"};
 
-        Gaudi::Property<float> m_z0Cut{this, "DeltaZ0Cut", 5. * Gaudi::Units::GeV,
+        Gaudi::Property<float> m_z0Cut{this, "DeltaZ0Cut", 7.5 * Gaudi::Units::mm,
                                        "All leptons in the quadruplet have to be seperated from each other by maximum"};
 
+        
+        Gaudi::Property<float> m_lowSFOS_Cut{this, "LowSFOSMass", 3.5 * Gaudi::Units::GeV, "Minimal mass for the lower SFOS pair"};
+        Gaudi::Property<float> m_highPair_Cut{this, "HighMassPair", 40.*Gaudi::Units::GeV, "Minimum mass for the largest lepton pair"};
+
+        Gaudi::Property<float> m_LeadPtCut{this, "LeadingLeptonPt", 15. *Gaudi::Units::GeV,"Minimal momentum of the leading lepton in the quad "};
+        Gaudi::Property<float> m_SubLeadPtCut{this, "SubLeadingLeptonPt", 10. *Gaudi::Units::GeV,"Minimal momentum of the leading lepton in the quad "};
+     
+        Gaudi::Property<float> m_VtxChi2Cut{this, "VertexChi2Cut", 20, "Maximal chii n.D.o.F cut on the reconstructed vertex" };
+        
+        
         SG::WriteHandleKey<xAOD::VertexContainer> m_vtxKey{this, "OutVertexContainer", "FourLeptonVertices", "Output vertex container"};
+        Gaudi::Property<bool> m_pruneCov{this, "PruneCovariance", true, "Clears the covariance vector"};
+        Gaudi::Property<bool> m_pruneWeight{this, "PruneTrackWeights", true, "Clears the track weight vector"};
+        
+        /// Simple counter to evaluate the number of leptons per event
+        mutable std::array<std::atomic<unsigned int>, 8>  m_num_lep{};        
+        mutable std::array<std::atomic<unsigned int>, 8>  m_num_ele{};        
+        mutable std::array<std::atomic<unsigned int>, 8>  m_num_muo{};        
+     
+        /// How many vertex fits were attempted
+        mutable std::atomic<unsigned int>  m_tried_fits{0};
+        /// How many vertex fits were actually successful
+        mutable std::atomic<unsigned int>  m_good_fits{0};
+        
+
     };
 
 }  // namespace DerivationFramework

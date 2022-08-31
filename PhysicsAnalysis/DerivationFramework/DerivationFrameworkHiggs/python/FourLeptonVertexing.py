@@ -5,6 +5,7 @@ from AthenaConfiguration.ComponentAccumulator import ComponentAccumulator
 from AthenaConfiguration.ComponentFactory import CompFactory
 
 
+
 def FourLeptonVertexerCfg(flags, name="FourLeptonVertexAlg", **kwargs):
     result = ComponentAccumulator()
     ### Setup muon selection tool
@@ -16,11 +17,18 @@ def FourLeptonVertexerCfg(flags, name="FourLeptonVertexAlg", **kwargs):
                                                                 )) )
 
     ### Electron selection tool, the Higgs group needs to decide
-    #from ElectronPhotonSelectorTools.AsgElectronLikelihoodToolsConfig import AsgElectronLikelihoodToolCfg
-    ### 
-    from DerivationFrameworkBPhys.commonBPHYMethodsCfg import BPHY_TrkVKalVrtFitterCfg
-    kwargs.setdefault("VertexFitter",result.popToolsAndMerge(BPHY_TrkVKalVrtFitterCfg(flags,
-                                                                                     BPHYDerivationName="VertexingTool")) )
+    from ElectronPhotonSelectorTools.AsgElectronLikelihoodToolsConfig import AsgElectronLikelihoodToolCfg
+    from ElectronPhotonSelectorTools.ElectronLikelihoodToolMapping import  electronLHmenu
+    from ElectronPhotonSelectorTools.LikelihoodEnums import LikeEnum
+    from AthenaConfiguration.Enums import LHCPeriod
+    kwargs.setdefault("ElectronSelectionTool", result.popToolsAndMerge(AsgElectronLikelihoodToolCfg(flags,
+                                                                           name= "ElectronSelTool",
+                                                                           quality = LikeEnum.VeryLoose,
+                                                                           menu=electronLHmenu.offlineMC21 if flags.GeoModel.Run >= LHCPeriod.Run3 else electronLHmenu.offlineMC20)))
+    ###
+    from TrkConfig.TrkVKalVrtFitterConfig import TrkVKalVrtFitterCfg
+    kwargs.setdefault("VertexFitter", result.popToolsAndMerge(TrkVKalVrtFitterCfg(flags,
+                                                                               FirstMeasuredPoint = False))) 
     kwargs.setdefault("MinMuonPt", 4000)
     kwargs.setdefault("MinElecPt", 6000)    
     vtx_tool = CompFactory.DerivationFramework.FourLeptonVertexingAlgorithm(name , **kwargs)
