@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2020 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef ISF_FASTCALOSIMPARAMETRIZATION_CALOGEOMETRY_H
@@ -16,6 +16,7 @@
 #include "ISF_FastCaloSimParametrization/MeanAndRMS.h"
 #include "ISF_FastCaloSimParametrization/FSmap.h"
 #include "LArReadoutGeometry/FCAL_ChannelMap.h"
+#include "CxxUtils/checker_macros.h"
 
 class CaloDetDescrElement;
 class TCanvas;
@@ -26,15 +27,15 @@ class CaloGeometry : virtual public ICaloGeometry {
   public :
     static const int MAX_SAMPLING;
 
-    static Identifier m_debug_identify;
-    static bool m_debug;
+    static const Identifier m_debug_identify;
+    static std::atomic<bool> m_debug;
 
     CaloGeometry();
     virtual ~CaloGeometry();
 
     virtual bool PostProcessGeometry();
 
-    virtual void Validate(int nrnd=100);
+    virtual void Validate ATLAS_NOT_THREAD_SAFE (int nrnd=100);
 
     virtual const CaloDetDescrElement* getDDE(Identifier identify);
     virtual const CaloDetDescrElement* getDDE(int sampling, Identifier identify);

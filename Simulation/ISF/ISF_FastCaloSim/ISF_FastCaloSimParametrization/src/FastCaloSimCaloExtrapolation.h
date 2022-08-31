@@ -5,6 +5,8 @@
 #ifndef FastCaloSimCaloExtrapolation_H
 #define FastCaloSimCaloExtrapolation_H
 
+#include "CxxUtils/CachedPointer.h"
+
 #include "ISF_FastCaloSimParametrization/IFastCaloSimCaloExtrapolation.h"
 #include "ISF_FastCaloSimEvent/TFCSExtrapolationState.h"
 
@@ -136,7 +138,7 @@ protected:
   std::vector<int> m_surfacelist;
 
   ToolHandle<Trk::ITimedExtrapolator>    m_extrapolator;
-  mutable const Trk::TrackingVolume*     m_caloEntrance{nullptr};
+  CxxUtils::CachedPointer<const Trk::TrackingVolume> m_caloEntrance;
   std::string                            m_caloEntranceName{""};
 
   Trk::PdgToParticleHypothesis           m_pdgToParticleHypothesis;

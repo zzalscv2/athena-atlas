@@ -255,9 +255,9 @@ std::unique_ptr<std::vector<Trk::HitInfo>> FastCaloSimCaloExtrapolation::caloHit
   ATH_MSG_DEBUG( "[ fastCaloSim transport ] before calo entrance ");
 
   // get CaloEntrance if not done already
-  if(!m_caloEntrance){
-    m_caloEntrance = m_extrapolator->trackingGeometry()->trackingVolume(m_caloEntranceName);
-    if(!m_caloEntrance)
+  if(!m_caloEntrance.get()){
+    m_caloEntrance.set(m_extrapolator->trackingGeometry()->trackingVolume(m_caloEntranceName));
+    if(!m_caloEntrance.get())
       ATH_MSG_WARNING("CaloEntrance not found");
     else
       ATH_MSG_DEBUG("CaloEntrance found");
@@ -267,7 +267,7 @@ std::unique_ptr<std::vector<Trk::HitInfo>> FastCaloSimCaloExtrapolation::caloHit
 
   std::unique_ptr<const Trk::TrackParameters> caloEntry = nullptr;
 
-  if(m_caloEntrance && m_caloEntrance->inside(pos, 0.001) && !m_extrapolator->trackingGeometry()->atVolumeBoundary(pos,m_caloEntrance, 0.001)){
+  if(m_caloEntrance.get() && m_caloEntrance.get()->inside(pos, 0.001) && !m_extrapolator->trackingGeometry()->atVolumeBoundary(pos,m_caloEntrance.get(), 0.001)){
       std::vector<Trk::HitInfo>* dummyHitVector = nullptr;
       if (charge == 0){
         caloEntry =
@@ -278,7 +278,7 @@ std::unique_ptr<std::vector<Trk::HitInfo>> FastCaloSimCaloExtrapolation::caloHit
                                                          pHypothesis,
                                                          dummyHitVector,
                                                          nextGeoID,
-                                                         m_caloEntrance);
+                                                         m_caloEntrance.get());
       }else{
         caloEntry = m_extrapolator->extrapolateWithPathLimit(inputPar,
                                                              pathLim,
@@ -287,7 +287,7 @@ std::unique_ptr<std::vector<Trk::HitInfo>> FastCaloSimCaloExtrapolation::caloHit
                                                              pHypothesis,
                                                              dummyHitVector,
                                                              nextGeoID,
-                                                             m_caloEntrance);
+                                                             m_caloEntrance.get());
       }
   } else
     caloEntry = inputPar.uniqueClone();

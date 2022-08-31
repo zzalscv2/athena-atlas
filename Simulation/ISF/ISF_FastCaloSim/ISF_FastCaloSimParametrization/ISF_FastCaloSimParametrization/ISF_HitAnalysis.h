@@ -14,6 +14,8 @@
 #include "StoreGate/ReadCondHandle.h"
 
 #include "AthenaBaseComps/AthAlgorithm.h"
+#include "CxxUtils/checker_macros.h"
+#include "CxxUtils/CachedPointer.h"
 #include "LArElecCalib/ILArfSampl.h"
 #include "GeoModelInterfaces/IGeoModelSvc.h"
 #include "CaloDetDescr/CaloDetDescrManager.h"
@@ -75,8 +77,8 @@ class ISF_HitAnalysis : public AthAlgorithm {
    ISF_HitAnalysis(const std::string& name, ISvcLocator* pSvcLocator);
    ~ISF_HitAnalysis();
 
-   virtual StatusCode initialize() override;
-   virtual StatusCode finalize() override;
+   virtual StatusCode initialize ATLAS_NOT_THREAD_SAFE () override;
+   virtual StatusCode finalize ATLAS_NOT_THREAD_SAFE () override;
    virtual StatusCode execute() override;
    StatusCode updateMetaData(IOVSVC_CALLBACK_ARGS);
 
@@ -226,7 +228,7 @@ class ISF_HitAnalysis : public AthAlgorithm {
 
    /** The new Extrapolator setup */
    ToolHandle<Trk::ITimedExtrapolator>  m_extrapolator;
-   mutable const Trk::TrackingVolume*   m_caloEntrance{nullptr};
+   CxxUtils::CachedPointer<const Trk::TrackingVolume> m_caloEntrance;
    std::string                          m_caloEntranceName;
    // extrapolation through Calo
    std::vector<Trk::HitInfo>* caloHits(const HepMC::GenParticle& part ) const;
