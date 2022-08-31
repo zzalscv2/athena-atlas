@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2020 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "ActsGeometry/ActsMaterialMapping.h"
@@ -40,7 +40,7 @@
 
 ActsMaterialMapping::ActsMaterialMapping(const std::string &name,
                                            ISvcLocator *pSvcLocator)
-    : AthReentrantAlgorithm(name, pSvcLocator),
+    : AthAlgorithm(name, pSvcLocator),
       m_materialTrackWriterSvc("ActsMaterialTrackWriterSvc", name),
       m_inputMaterialStepCollection("MaterialStepRecords"),
       m_mappingState(m_gctx,m_mctx),
@@ -70,29 +70,26 @@ StatusCode ActsMaterialMapping::initialize() {
   return StatusCode::SUCCESS;
 }
 
-StatusCode ActsMaterialMapping::execute(const EventContext &ctx) const {
+StatusCode ActsMaterialMapping::execute() {
   ATH_MSG_VERBOSE(name() << "::" << __FUNCTION__);
+  const EventContext& ctx = Gaudi::Hive::currentContext();
 
   Acts::RecordedMaterialTrack mTrack;
   SG::ReadHandle<Trk::MaterialStepCollection> materialStepCollection(m_inputMaterialStepCollection, ctx);
   mTrack = m_materialStepConverterTool->convertToMaterialTrack(*materialStepCollection);
 
   if(m_mapSurfaces){
-    auto mappingState
-         = const_cast<Acts::SurfaceMaterialMapper::State *>(&m_mappingState);
     auto context = m_surfaceMappingTool->trackingGeometryTool()->getNominalGeometryContext().context();
     std::reference_wrapper<const Acts::GeometryContext> geoContext(context);
-    mappingState->geoContext = geoContext;
+    m_mappingState.geoContext = geoContext;
 
-    m_surfaceMappingTool->mapper()->mapMaterialTrack(*mappingState, mTrack);
+    m_surfaceMappingTool->mapper()->mapMaterialTrack(m_mappingState, mTrack);
   }
   if(m_mapVolumes){
-    auto mappingStateVol
-         = const_cast<Acts::VolumeMaterialMapper::State *>(&m_mappingStateVol);
     auto context = m_volumeMappingTool->trackingGeometryTool()->getNominalGeometryContext().context();
     std::reference_wrapper<const Acts::GeometryContext> geoContext(context);
-    mappingStateVol->geoContext = geoContext;       
-    m_volumeMappingTool->mapper()->mapMaterialTrack(*mappingStateVol, mTrack);
+    m_mappingStateVol.geoContext = geoContext;       
+    m_volumeMappingTool->mapper()->mapMaterialTrack(m_mappingStateVol, mTrack);
   }
   m_materialTrackWriterSvc->write(mTrack);
   ATH_MSG_VERBOSE(name() << " execute done");

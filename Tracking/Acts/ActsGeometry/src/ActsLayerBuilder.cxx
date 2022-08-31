@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2019 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
 */
 // ATHENA
 #include "InDetReadoutGeometry/SiDetectorElement.h"
@@ -49,30 +49,24 @@ ActsLayerBuilder::ActsLayerBuilder(const Config&                cfg,
 const Acts::LayerVector
 ActsLayerBuilder::negativeLayers(const Acts::GeometryContext &gctx) const {
   ACTS_VERBOSE("Building negative layers");
-  // @todo Remove this hack once the m_elementStore mess is sorted out
-  auto mutableThis = const_cast<ActsLayerBuilder *>(this);
   Acts::LayerVector nVector;
-  mutableThis->buildEndcap(gctx, nVector, -1);
+  buildEndcap(gctx, nVector, -1);
   return nVector;
 }
 
 const Acts::LayerVector
 ActsLayerBuilder::centralLayers(const Acts::GeometryContext &gctx) const {
   ACTS_VERBOSE("Building central layers");
-  // @todo Remove this hack once the m_elementStore mess is sorted out
-  auto mutableThis = const_cast<ActsLayerBuilder *>(this);
   Acts::LayerVector cVector;
-  mutableThis->buildBarrel(gctx, cVector);
+  buildBarrel(gctx, cVector);
   return cVector;
 }
 
 const Acts::LayerVector
 ActsLayerBuilder::positiveLayers(const Acts::GeometryContext &gctx) const {
   ACTS_VERBOSE("Building positive layers");
-  // @todo Remove this hack once the m_elementStore mess is sorted out
-  auto mutableThis = const_cast<ActsLayerBuilder *>(this);
   Acts::LayerVector pVector;
-  mutableThis->buildEndcap(gctx, pVector, 1);
+  buildEndcap(gctx, pVector, 1);
   return pVector;
 }
 
@@ -109,7 +103,7 @@ ActsLayerBuilder::getDetectorElements() const {
 }
 
 void ActsLayerBuilder::buildBarrel(const Acts::GeometryContext &gctx,
-                                   Acts::LayerVector &layersOutput) {
+                                   Acts::LayerVector &layersOutput) const {
 
   ACTS_VERBOSE("Build layers: BARREL");
   std::vector<std::shared_ptr<const ActsDetectorElement>> elements =
@@ -318,7 +312,8 @@ void ActsLayerBuilder::buildBarrel(const Acts::GeometryContext &gctx,
 }
 
 void ActsLayerBuilder::buildEndcap(const Acts::GeometryContext &gctx,
-                                   Acts::LayerVector &layersOutput, int type) {
+                                   Acts::LayerVector &layersOutput, int type) const
+{
 
   ACTS_VERBOSE("Build layers: " << (type < 0 ? "NEGATIVE" : "POSITIVE")
                                 << " ENDCAP");

@@ -48,8 +48,7 @@ using namespace Acts::UnitLiterals;
 ActsTrackingGeometrySvc::ActsTrackingGeometrySvc(const std::string &name,
                                                  ISvcLocator *svc)
     : base_class(name, svc), m_detStore("StoreGateSvc/DetectorStore", name) {
-  m_elementStore = std::make_shared<
-      std::vector<std::shared_ptr<const ActsDetectorElement>>>();
+  m_elementStore = std::make_shared<ActsElementVector>();
 }
 
 StatusCode ActsTrackingGeometrySvc::initialize() {

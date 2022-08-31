@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2018 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef ACTSGEOMETRY_ACTSSTRAWLAYERBUILDER_H
@@ -9,6 +9,7 @@
 // ATHENA
 
 // PACKAGE
+#include "ActsGeometry/ActsElementVector.h"
 
 // ACTS
 #include "Acts/Geometry/ILayerBuilder.hpp"
@@ -28,8 +29,7 @@ class LayerCreator;
 class ActsStrawLayerBuilder : public Acts::ILayerBuilder
 {
 public:
-  using ElementVector
-      = std::vector<std::shared_ptr<const ActsDetectorElement>>;
+  using ElementVector = ActsElementVector;
 
   struct Config
   {
@@ -61,9 +61,6 @@ public:
   centralLayers(const Acts::GeometryContext& gctx) const override;
 
   const Acts::LayerVector
-  centralLayers(const Acts::GeometryContext& gctx);
-
-  const Acts::LayerVector
   positiveLayers(const Acts::GeometryContext& gctx) const override;
 
   const std::string&
@@ -73,7 +70,7 @@ public:
   }
 
   const Acts::LayerVector
-  endcapLayers(const Acts::GeometryContext& gctx, int side);
+  endcapLayers(const Acts::GeometryContext& gctx, int side) const;
 
 private:
   /// configruation object

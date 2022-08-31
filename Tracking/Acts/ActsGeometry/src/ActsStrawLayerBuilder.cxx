@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2019 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
 */
 
 // ATHENA
@@ -33,31 +33,19 @@ using namespace Acts::UnitLiterals;
 const Acts::LayerVector
 ActsStrawLayerBuilder::negativeLayers(const Acts::GeometryContext& gctx) const
 {
-  // @todo Remove this hack once the m_elementStore mess is sorted out
-  auto        mutableThis = const_cast<ActsStrawLayerBuilder*>(this);
-  return mutableThis->endcapLayers(gctx, -1);
-}
-
-const Acts::LayerVector
-ActsStrawLayerBuilder::centralLayers(const Acts::GeometryContext& gctx) const
-{
-  // @todo Remove this hack once the m_elementStore mess is sorted out
-  auto        mutableThis = const_cast<ActsStrawLayerBuilder*>(this);
-  return mutableThis->centralLayers(gctx);
+  return endcapLayers(gctx, -1);
 }
 
 const Acts::LayerVector
 ActsStrawLayerBuilder::positiveLayers(const Acts::GeometryContext& gctx) const
 {
-  // @todo Remove this hack once the m_elementStore mess is sorted out
-  auto        mutableThis = const_cast<ActsStrawLayerBuilder*>(this);
-  return mutableThis->endcapLayers(gctx, 1);
+  return endcapLayers(gctx, 1);
 
 }
 
 
 const Acts::LayerVector
-ActsStrawLayerBuilder::centralLayers(const Acts::GeometryContext& gctx)
+ActsStrawLayerBuilder::centralLayers(const Acts::GeometryContext& gctx) const
 {
   ACTS_VERBOSE("Building central Straw layers");
 
@@ -166,7 +154,7 @@ ActsStrawLayerBuilder::centralLayers(const Acts::GeometryContext& gctx)
 }
 
 const Acts::LayerVector
-ActsStrawLayerBuilder::endcapLayers(const Acts::GeometryContext& gctx, int side)
+ActsStrawLayerBuilder::endcapLayers(const Acts::GeometryContext& gctx, int side) const
 {
   ACTS_VERBOSE("Building endcap Straw layers");
   using LBBV = Acts::LineBounds::BoundValues;
