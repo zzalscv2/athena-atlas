@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2020 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
 */
 
 /*
@@ -13,18 +13,17 @@
 
 #include "AsgTools/IAsgTool.h"
 #include "AtlasHepMC/GenEvent.h"
-
+#include "TruthRivetTools/HiggsTemplateCrossSectionsDefs.h"
 namespace HTXS {
   struct HiggsClassification;
+ 
 }
 
 class IHiggsTruthCategoryTool : public virtual asg::IAsgTool {
  public:
   ASG_TOOL_INTERFACE( IHiggsTruthCategoryTool ) //declares the interface to athena
-    virtual ~IHiggsTruthCategoryTool() {};
- public:
-  virtual StatusCode initialize() = 0;
-  virtual StatusCode finalize () = 0;  
+    virtual ~IHiggsTruthCategoryTool() = default;
+ public: 
   virtual HTXS::HiggsClassification* getHiggsTruthCategoryObject(const HepMC::GenEvent& HepMCEvent, const HTXS::HiggsProdMode prodMode) const =0;
 };
 

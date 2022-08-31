@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2020 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
 */
 
 // TruthRivetTools includes
@@ -24,7 +24,7 @@ StatusCode HiggsTruthCategoryTool::initialize() {
   // create an instance of the Rivet analysis handler
   rivetAnaHandler = new Rivet::AnalysisHandler();
   // Add the Higgs truth classifier class to the handler
-  rivetAnaHandler->addAnalysis(&(*higgsTemplateCrossSections));
+  rivetAnaHandler->addAnalysis(higgsTemplateCrossSections);
   return StatusCode::SUCCESS;
 }
 

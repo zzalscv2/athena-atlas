@@ -33,3 +33,5 @@ atlas_add_component( TruthRivetTools
 atlas_add_dictionary( TruthRivetToolsDict
    TruthRivetTools/TruthRivetToolsDict.h TruthRivetTools/selection.xml
    LINK_LIBRARIES TruthRivetToolsLib )
+
+atlas_install_python_modules( python/*.py POST_BUILD_CMD ${ATLAS_FLAKE8} )
