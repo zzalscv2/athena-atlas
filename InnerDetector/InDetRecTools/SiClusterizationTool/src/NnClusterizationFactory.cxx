@@ -37,6 +37,19 @@
 #include <algorithm>
 #include <limits>
 
+namespace {
+  std::pair<int, bool>
+  coerceToIntRange(double v){
+    constexpr double minint = std::numeric_limits<int>::min();
+    constexpr double maxint = std::numeric_limits<int>::max();
+    auto d = std::clamp(v, minint, maxint);
+    
+    return {static_cast<int>(d), d != v};
+  }
+  
+ 
+
+}
 
 
 namespace InDet {
@@ -677,8 +690,13 @@ namespace InDet {
         posYid=output[2*u+1]+columnWeightedPosition;
       }
       ATH_MSG_VERBOSE(" N. particle: " << u << " idx posX " << posXid << " posY " << posYid );
-      int posXid_int=(int)(posXid+0.5);
-      int posYid_int=(int)(posYid+0.5);
+      //ATLASRECTS-7155 : Pixel Charge Calibration needs investigating
+      const auto & [posXid_int, coercedX]=coerceToIntRange(posXid+0.5);
+      const auto & [posYid_int, coercedY]=coerceToIntRange(posYid+0.5);
+      if (coercedX or coercedY){
+        ATH_MSG_WARNING("X or Y position value has been limited in range; original values are (" << posXid<<", "<<posYid<<")");
+        //we cannot skip these values, it seems client code relies on the size of input vector and output vector being the same
+      }
       ATH_MSG_VERBOSE(" N. particle: " << u << " TO INTEGER idx posX " << posXid_int << " posY " << posYid_int );
       InDetDD::SiLocalPosition siLocalPositionDiscrete(design->positionFromColumnRow(posYid_int,posXid_int));
       InDetDD::SiCellId cellIdOfPositionDiscrete=design->cellIdOfPosition(siLocalPositionDiscrete);
@@ -921,6 +939,7 @@ namespace InDet {
             input.matrixOfToT[absrow][abscol]*=3;
           }
         }
+       
       }
       if (std::abs(pitchY-0.4)>1e-5){
         input.vectorOfPitchesY[abscol]=pitchY;
