@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2017 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "TList.h"
@@ -13,6 +13,9 @@
 #include "DataQualityInterfaces/HanUtils.h"
 
 namespace dqi {
+
+std::mutex root_mutex;
+
 TSeqCollection* newTList( const char *name, TObject *obj )
 {
   TList *ret = new TList();
@@ -131,7 +134,5 @@ getObject()
   if (TH1* hptr = dynamic_cast<TH1*>(rv)) { hptr->SetDirectory(0); }
   return rv; */
 }
-
-boost::mutex root_mutex;
 
 }

@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2017 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "DataQualityInterfaces/HanInputRootFile.h"
@@ -9,6 +9,9 @@
 #include "TGraph.h"
 #include "TDirectoryFile.h"
 #include "TEfficiency.h"
+
+#include "dqm_core/exceptions.h"
+
 #include <iostream>
 #include <cstring>
 
@@ -29,9 +32,8 @@ HanInputRootFile( std::string& rootFileName, const std::string& path )
   , m_histNamesBuilt(false)
 {
 	if( m_rootFile.get() == 0 ) {
-    // FIXME: Should throw a dqm_core::Exception
     std::cerr << "HanInputRootFile -> "<< rootFileName << " is not readable.\n";
-    exit(-1);
+    throw dqm_core::FileNotReadable(ERS_HERE, rootFileName);
 	}
 
   if( path != "" ) {
@@ -108,20 +110,6 @@ addListener(const std::string& name, dqm_core::InputListener *listener)
   m_monObjects.push_back( MonBundle(name,key,listener) );
 }
 
-
-TFile*
-HanInputRootFile::
-file() const
-{
-  return m_rootFile.get();
-}
-
-const TDirectory*
-HanInputRootFile::
-getBasedir() const
-{
-	return m_basedir;
-}
 
 } // end namespace dqi
 

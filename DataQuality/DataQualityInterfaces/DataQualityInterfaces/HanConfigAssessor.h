@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2017 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef dqiHanConfigAssessor_h
@@ -39,7 +39,7 @@ public:
   public:
     virtual ~Visitor() { }
     virtual boost::shared_ptr<dqm_core::Node>
-    Visit( const HanConfigAssessor* node, boost::shared_ptr<dqm_core::Region> dqParent ) const = 0;
+    Visit( const HanConfigAssessor* node, boost::shared_ptr<dqm_core::Region> dqParent ) = 0;
   };
 #endif
   
@@ -89,7 +89,7 @@ public:
 
 
 #ifndef __CINT__
-  virtual void           Accept( const Visitor& visitor, boost::shared_ptr<dqm_core::Region> dqParent ) const;
+  virtual void           Accept( Visitor& visitor, boost::shared_ptr<dqm_core::Region> dqParent ) const;
 #endif // __CINT__
 
   virtual void           PrintIOStream( std::ostream& o ) const;

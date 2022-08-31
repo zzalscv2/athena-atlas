@@ -1,12 +1,10 @@
 /*
-  Copyright (C) 2002-2017 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
 */
 
 /**
  * Han is a histogram analysis program using
  * the data-quality monitoring framework (DQMF)
- *
- * $Id: han.cxx,v 1.7 2009-02-09 15:19:59 ponyisi Exp $
  */
 
 #include <iostream>
@@ -18,11 +16,10 @@
 
 namespace {
 
-void usage( const std::string& command_name, int exit_code );
+int usage( const std::string& command_name, int exit_code );
 
-class CmdLineArgs {
-public:
-  CmdLineArgs( int argc, char *argv[] );
+struct CmdLineArgs {
+  int parse( int argc, char *argv[] );
   
   std::string command;
   std::string hconfig;
@@ -37,8 +34,10 @@ public:
 
 int main( int argc, char *argv[] )
 {
-  CmdLineArgs arg( argc, argv );
-  
+  CmdLineArgs arg;
+  int rc = arg.parse( argc, argv );
+  if (rc!=0) return rc;
+
   std::string inputName( arg.data );
   std::string configName( arg.hconfig );
   std::string pathName( arg.path );
@@ -69,7 +68,7 @@ int main( int argc, char *argv[] )
 
 namespace {
 
-void usage( const std::string& command_name, int exit_code )
+int usage( const std::string& command_name, int exit_code )
 {
   std::string message;
   message += "\n";
@@ -86,22 +85,22 @@ void usage( const std::string& command_name, int exit_code )
   std::cout << "\n";
   std::cout << "Usage: " << short_name << " <config_file> <data_file> [path [results_file]]\n";
   std::cout << message << "\n";
-  exit(exit_code);
+  return exit_code;
 }
 
 
-CmdLineArgs::
-CmdLineArgs( int argc, char *argv[] )
+int CmdLineArgs::parse( int argc, char *argv[] )
 {
   command = argv[0];
-  if( argc > 6 ) usage( command, 1 );
-  if( argc < 3 ) usage( command, 0 );
+  if( argc > 6 ) return usage( command, 1 );
+  if( argc < 3 ) return usage( command, 0 );
   
   hconfig = argv[1];
   data = argv[2];
   path = (argc == 4 || argc == 5 ||argc ==6) ? argv[3] : "";
   output = (argc == 5 || argc== 6) ? argv[4] : "";
   cmdlineConditions = (argc == 6) ? argv[5] : "";  
+  return 0;
 }
 
 } // unnamed namespace
