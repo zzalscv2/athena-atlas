@@ -1,4 +1,3 @@
-# $Id: CMakeLists.txt 785966 2016-11-23 12:31:31Z will $
 ################################################################################
 # Package: ReweightUtils
 ################################################################################
@@ -54,7 +53,7 @@ atlas_add_test( ut_ParticleScaleFactorTool_test
    LINK_LIBRARIES ${ROOT_LIBRARIES} AsgTools AsgAnalysisInterfaces
    PATInterfaces xAODEgamma CxxUtils
    PROPERTIES TIMEOUT 600
-   LOG_IGNORE_PATTERN "Package.AsgTool...  DEBUG")
+   LOG_IGNORE_PATTERN "Package.AsgTool...  DEBUG|WARNING MessageSvc not found")
 
 # Install files from the package:
 atlas_install_python_modules( python/*.py  POST_BUILD_CMD ${ATLAS_FLAKE8} )
