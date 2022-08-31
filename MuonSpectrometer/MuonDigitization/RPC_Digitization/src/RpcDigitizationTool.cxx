@@ -50,6 +50,7 @@
 #include <string>
 #include <utility>
 
+
 #include "AIDA/IHistogram1D.h"
 #include "EventInfoMgt/ITagInfoMgr.h"
 #include "PathResolver/PathResolver.h"
@@ -73,6 +74,10 @@ namespace {
         {1.0000, 1.0000, 1.0000, 1.0000, 1.0000, 0.9993, 0.9990, 0.9951, 0.9935, 0.9886, 0.9419, 0.9277, 0.9422, 0.9686, 0.9700},
         {1.0000, 1.0000, 1.0000, 1.0000, 1.0000, 1.0000, 0.9998, 0.9996, 0.9980, 0.9966, 0.9786, 0.9718, 0.9748, 0.9875, 0.9882},
         {1.0000, 1.0000, 1.0000, 1.0000, 1.0000, 1.0000, 0.9998, 1.0000, 0.9991, 0.9988, 0.9913, 0.9872, 0.9917, 0.9970, 0.9964}};
+    bool
+    validIndex(int idx, int arraySize){
+      return (idx>=0) and (idx<arraySize);
+    }
 }  // namespace
 
 using namespace MuonGM;
@@ -2897,9 +2902,9 @@ double RpcDigitizationTool::FCPEfficiency(HepMC::ConstGenParticlePtr genParticle
     // calculate the efficiency according to charge and velocity. Using linear function to calculate efficiency of a specific velocity
     // between velocity1 and velocity2
     double eff_fcp = 1.0, eff_muon = 1.0;
-    const double delta_v = Velocity[i_v] - Velocity[j_v];
     if (i_e >= 0 && i_e <= 11) {
-        if (j_v >= 0 && j_v <= 14 && i_v >= 0 && i_v <= 14 && (j_v - i_v) == 1) {
+        if (validIndex(j_v, N_Velocity) && validIndex(i_v, N_Velocity) && (j_v - i_v) == 1) {
+            const double delta_v = Velocity[i_v] - Velocity[j_v];
             eff_fcp = (Eff_garfield[i_e][i_v] - Eff_garfield[i_e][j_v]) / delta_v * qbetagamma +
                       (Eff_garfield[i_e][j_v] * Velocity[i_v] - Eff_garfield[i_e][i_v] * Velocity[j_v]) / delta_v;
             eff_muon = (Eff_garfield[11][i_v] - Eff_garfield[11][j_v]) / delta_v * qbetagamma +
