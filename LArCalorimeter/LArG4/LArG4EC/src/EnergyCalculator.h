@@ -36,8 +36,8 @@
 #include "GeoSpecialShapes/LArWheelCalculatorEnums.h"
 
 #include "G4ThreeVector.hh"
+#include "HVHelper.h"
 #include "globals.hh"
-
 
 class ILArCalibCalculatorSvc;
 class LArG4BirksLaw;
@@ -45,8 +45,6 @@ class LArG4BirksLaw;
 namespace LArG4 {
 
   namespace EC {
-
-    class HVHelper;
 
     class EnergyCalculator : public LArCalculatorSvcImp
     {
@@ -350,7 +348,7 @@ namespace LArG4 {
       G4double getPhiStartOfPhiDiv(const G4Step* step) const;
 
   private:
-    HVHelper *m_HVHelper;
+    std::unique_ptr<const HVHelper> m_HVHelper;
     const static G4double s_GA_SubstepSize;
     G4double DistanceToEtaLine(const G4ThreeVector &p, G4double eta) const;
 

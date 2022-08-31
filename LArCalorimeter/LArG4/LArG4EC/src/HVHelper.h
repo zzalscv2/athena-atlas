@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2019 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef LARG4_EC_HVHELPER_H
@@ -16,6 +16,8 @@
 #include "G4ThreeVector.hh"
 #include "globals.hh"
 
+#include <memory>
+
 namespace LArG4 { namespace EC {
 
 class HVHelper : public AthMessaging
@@ -28,8 +30,7 @@ class HVHelper : public AthMessaging
 
     static const G4double s_EtaLimit[s_NofEtaSection + 1];
 
-    static G4double s_Values[s_NofAtlasSide][s_NofEtaSection][s_NofElectrodeSide][s_NofElectrodesOut];
-    static G4bool s_NeedToReadMaps;
+    G4double m_Values[s_NofAtlasSide][s_NofEtaSection][s_NofElectrodeSide][s_NofElectrodesOut];
 
     const LArWheelCalculator *m_calculator;
     const LArWheelCalculator *lwc(void) const { return m_calculator; }
@@ -66,7 +67,7 @@ class HVHelper : public AthMessaging
         const G4ThreeVector&, const std::pair<G4int, G4int> &
     ) const;
 
-    static HVHelper *CreateHelper(
+    static std::unique_ptr<const HVHelper> CreateHelper(
         const LArWheelCalculator *calc,
         const G4String &version,
         G4bool fromDB
@@ -78,10 +79,15 @@ class HVHelper : public AthMessaging
 class HVHelperV00 : public HVHelper // This serves map versions 00 and 01
 {
   private:
-    static G4int *s_StartPhi;
-    static G4int &StartPhi(G4int side, G4int eta, G4int ele)
+    G4int m_StartPhi[s_NofAtlasSide * s_NofEtaSection * s_NofElectrodeSide];
+    G4int StartPhi(G4int side, G4int eta, G4int ele) const
     {
-        return s_StartPhi[(side*s_NofEtaSection + eta)*s_NofElectrodeSide + ele];
+        return m_StartPhi[(side*s_NofEtaSection + eta)*s_NofElectrodeSide + ele];
+    }
+
+    void SetStartPhi(G4int value, G4int side, G4int eta, G4int ele)
+    {
+        m_StartPhi[(side*s_NofEtaSection + eta)*s_NofElectrodeSide + ele] = value;
     }
 
     const G4int m_NumberOfElectrodesInPhiSection;
@@ -100,11 +106,6 @@ class HVHelperV00 : public HVHelper // This serves map versions 00 and 01
     ) : HVHelper(calc, version)
       , m_NumberOfElectrodesInPhiSection(lwc()->GetNumberOfFans() / m_NofPhiSections)
     {
-        if(s_StartPhi == nullptr){
-            s_StartPhi = new G4int [
-                s_NofAtlasSide * s_NofEtaSection * s_NofElectrodeSide
-            ];
-        }
         AcquireMaps(version, fromDB);
     }
 };
