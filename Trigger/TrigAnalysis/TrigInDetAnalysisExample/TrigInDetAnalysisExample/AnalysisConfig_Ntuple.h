@@ -57,8 +57,10 @@ public:
     m_doMuons(false),
     m_doMuonsSP(false),
     m_muonType(),
+    m_muonIsLRT(),
     m_electronType(),
     m_rawElectrons(),
+    m_electronIsLRT(),
     m_tauType(),
     m_tauProngs(),
     m_vertexType(),
@@ -74,7 +76,7 @@ public:
   {  
     /// leave in this debug printout ...
     /// std::cout << "AnalysisConfig_Ntuple::AnalysisConfig_Ntuple() " << chainNames.size() << std::endl;
-
+    
     this->keepAllEvents( _keepAllEvents ); /// this is now i nthe base class
 
     for ( unsigned i=0 ; i<chainNames.size() ; i++ ) {
@@ -92,10 +94,17 @@ public:
         m_doVertices    = true;
       }    
       else if ( cs=="MuonsSP" )     m_doMuonsSP     = true;
-      else if ( cs=="Muons" )       m_muonType.push_back(chain.tail());
+      else if ( cs=="Muons" ){
+        m_muonType.push_back(chain.tail());
+        if (chain.roi() == "LRT") m_muonIsLRT.push_back(true);        
+        else m_muonIsLRT.push_back(false);
+      }
       else if ( cs=="Electrons" ) { 
         m_electronType.push_back(chain.tail());
         m_rawElectrons.push_back(chain.roi()); /// abuse the ChainString, now use the roi as the default third field
+
+        if (chain.roi() == "LRT") m_electronIsLRT.push_back(true);  // more abuse
+        else m_electronIsLRT.push_back(false);
       }
       else if ( cs=="Taus" ) { 
         m_tauType.push_back(chain.tail());
@@ -159,9 +168,11 @@ protected:
   bool m_doMuonsSP;
 
   std::vector<std::string>  m_muonType;
+  std::vector<bool>         m_muonIsLRT;
 
   std::vector<std::string>  m_electronType;
   std::vector<std::string>  m_rawElectrons;
+  std::vector<bool>         m_electronIsLRT;
 
   std::vector<std::string>  m_tauType;
   std::vector<std::string>  m_tauProngs;

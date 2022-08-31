@@ -105,6 +105,7 @@ def BCMOverlayCfg(flags):
     # Add BCM overlay algorithm
     acc.merge(BCMOverlayAlgCfg(flags))
     # Add BCM truth overlay
-    acc.merge(BCMTruthOverlayCfg(flags))
+    if flags.Digitization.EnableTruth:
+        acc.merge(BCMTruthOverlayCfg(flags))
 
     return acc

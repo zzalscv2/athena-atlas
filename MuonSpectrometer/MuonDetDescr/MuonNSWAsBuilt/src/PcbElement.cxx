@@ -7,7 +7,7 @@ using namespace NswAsBuilt;
 
 
 //===============================================================================
-PcbElement::PcbElement(stripConfiguration_t config, std::reference_wrapper<Element> element)
+PcbElement::PcbElement(stripConfiguration_t config, const Element& element)
   : m_config(config), m_element(element)
 { }
 
@@ -21,8 +21,7 @@ PcbElement::strip_t PcbElement::getStrip(ParameterClass iclass, int stripNumber)
   vectorset.col(1) = m_config.leftPoint.pos + npitch * m_config.leftPoint.pitchvector;
   vectorset.col(2) = m_config.rightPoint.pos + npitch * m_config.rightPoint.pitchvector;
 
-  Element& element = m_element;
-  element.transformToFrame(iclass, vectorset, nullptr);
+  m_element.transformToFrame(iclass, vectorset, nullptr);
 
   strip_t ret;
   ret.center = vectorset.col(0);
@@ -45,14 +44,13 @@ Amg::Vector3D PcbElement::getPositionAlongStrip(ParameterClass iclass, int strip
   // Get strip-local coordinate of point along strip
   // Note: left, center and right are exactly in line in local coordinates
   // (i.e. strip is not deformed in local coordinates)
-  Amg::Vector3D ret;
+  Amg::Vector3D ret{Amg::Vector3D::Zero()};
   if (sx < 0.0) 
     ret = (sx+1.0)*center - sx*left;
   else
     ret = (1.0-sx)*center + sx*right;
 
-  Element& element = m_element;
-  element.transformToFrame(iclass, ret, nullptr);
+  m_element.transformToFrame(iclass, ret, nullptr);
   return ret;
 }
 

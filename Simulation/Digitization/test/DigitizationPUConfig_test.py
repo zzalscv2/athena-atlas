@@ -38,7 +38,7 @@ ConfigFlags.Tile.BestPhaseFromCOOL = False
 ConfigFlags.Tile.correctTime = False
 
 ConfigFlags.Digitization.PileUp = True
-ConfigFlags.Digitization.DoDigiTruth = False
+ConfigFlags.Digitization.DoHardScatterTruth = False
 ConfigFlags.Digitization.RandomSeedOffset = 170
 
 ConfigFlags.Digitization.DigiSteeringConf = 'StandardSignalOnlyTruthPileUpToolsAlg'
@@ -49,9 +49,6 @@ ConfigFlags.Digitization.PU.CavernIgnoresBeamInt = True
 ConfigFlags.Digitization.PU.NumberOfCavern = 0.0
 ConfigFlags.Digitization.PU.NumberOfHighPtMinBias = 0.2099789464
 ConfigFlags.Digitization.PU.NumberOfLowPtMinBias = 80.290021063135
-
-# TODO: temporary
-ConfigFlags.Digitization.TruthOutput = True
 
 cols = generateBackgroundInputCollections(ConfigFlags, defaultTestFiles.HITS_RUN2_MINBIAS_HIGH,
                                           ConfigFlags.Digitization.PU.NumberOfHighPtMinBias, True)

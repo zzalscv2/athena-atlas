@@ -8,8 +8,10 @@ class MuonClusterConfig(MuonCluster):
         super(MuonClusterConfig, self).__init__(name)
 
         from TrigLongLivedParticles.TrigLongLivedParticlesMonitoring import TrigMuonClusterAlgorithmMonitoring
+        from TrigEDMConfig.TriggerEDMRun3 import recordable
 
         self.MonTool = TrigMuonClusterAlgorithmMonitoring()
+        self.TrigRoIs_CompositeContainer = recordable("HLT_MuRoICluster_Composites")
 
         # muClu Parameters
         self.DeltaR      = 0.4

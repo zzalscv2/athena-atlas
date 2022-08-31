@@ -4,6 +4,7 @@
 # 
 # art-type: grid
 # art-include: master/Athena
+# art-include: 22.0/Athena
 # art-output: OUT_HITS.root
 # art-output: OUT_RDO.root
 # art-output: OUT_ESD.root

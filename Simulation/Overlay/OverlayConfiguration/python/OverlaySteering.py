@@ -60,11 +60,12 @@ def OverlayMainContentCfg(configFlags):
     # Add truth overlay (needed downstream)
     if not configFlags.Overlay.FastChain:
         acc.merge(CopyMcEventCollectionCfg(configFlags))
-    acc.merge(CopyJetTruthInfoCfg(configFlags))
-    acc.merge(CopyPileupParticleTruthInfoCfg(configFlags))
-    acc.merge(CopyTimingsCfg(configFlags))
-    acc.merge(CopyCaloCalibrationHitContainersCfg(configFlags))
-    acc.merge(CopyTrackRecordCollectionsCfg(configFlags))
+    if configFlags.Digitization.EnableTruth:
+        acc.merge(CopyJetTruthInfoCfg(configFlags))
+        acc.merge(CopyPileupParticleTruthInfoCfg(configFlags))
+        acc.merge(CopyTimingsCfg(configFlags))
+        acc.merge(CopyCaloCalibrationHitContainersCfg(configFlags))
+        acc.merge(CopyTrackRecordCollectionsCfg(configFlags))
 
     # Beam spot reweighting
     if configFlags.Digitization.InputBeamSigmaZ > 0:
@@ -130,7 +131,7 @@ def OverlayMainContentCfg(configFlags):
         from PerfMonComps.PerfMonCompsConfig import PerfMonMTSvcCfg
         acc.merge(PerfMonMTSvcCfg(configFlags))
 
-    #track overlay
+    # Track overlay
     if configFlags.Overlay.doTrackOverlay:
         #need this to ensure that the ElementLinks to the PRDs are handled correctly (since the name is hardcoded in the converters)
         from TrkEventCnvTools.TrkEventCnvToolsConfigCA import TrkEventCnvSuperToolCfg

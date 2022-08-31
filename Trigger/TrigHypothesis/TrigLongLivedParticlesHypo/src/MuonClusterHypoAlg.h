@@ -64,7 +64,7 @@ class MuonClusterHypoAlg: public HypoBase {
 
     SG::ReadHandleKey<xAOD::TrigCompositeContainer> m_outputCompositesKey{ this,
         "TrigCluCompositeContainer",                  // property name
-        "HLT_RoICluster_Composites",                  // default value of StoreGatekey
+        "HLT_MuRoICluster_Composites",                // default value of StoreGatekey
         "output Composites container"};
 
     /** method to initialize. */

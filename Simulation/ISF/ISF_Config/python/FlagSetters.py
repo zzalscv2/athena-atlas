@@ -14,7 +14,6 @@ def configureFlagsBase():
         DetFlags.Truth_setOn() # FIXME redundant?
         DetFlags.LVL1_setOff() # LVL1 is not part of G4 sim
         DetFlags.Forward_setOff() # Forward dets are off by default
-        DetFlags.geometry.DBM_setOff()
 
     ## Configure tasks
     DetFlags.digitize.all_setOff()

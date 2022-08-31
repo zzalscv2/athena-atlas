@@ -124,8 +124,6 @@ def getDefaultDetectors(geoTag):
     # TODO: wait for special table in the geo DB
     # if DetDescrInfo(geoTag)['Common']['Run'] == 'RUN4':
     #     detectors.add('BCMPrime')
-    if DetDescrInfo(geoTag)['Common']['Run'] in ['RUN1', 'RUN2', 'RUN3'] and DetDescrInfo(geoTag)['Pixel']['DBM']:
-        detectors.add('DBM')
 
     if DetDescrInfo(geoTag)['Common']['Run'] not in ['RUN1', 'RUN2', 'RUN3']: # RUN4 and beyond
         detectors.add('HGTD')

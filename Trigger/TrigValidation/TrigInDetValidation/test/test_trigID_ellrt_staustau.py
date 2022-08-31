@@ -41,7 +41,7 @@ preinclude_file = 'all:TrigInDetValidation/TIDAlrt_preinclude.py'
 
 
 Jobs = [ ( "Truth",  " TIDAdata-run3-lrt.dat -o data-hists.root -p 11", "Test_bin_lrt.dat" ),
-         ( "Offline",    " TIDAdata-run3-offline-lrt.dat -r Offline -o data-hists-offline.root", "Test_bin_lrt.dat" ) ]
+         ( "Offline",    " TIDAdata-run3-offline-lrt.dat -r Offline+InDetLargeD0TrackParticles -o data-hists-offline.root", "Test_bin_lrt.dat" ) ]
 
 Comp = [ ( "L2electronLRT",  "L2electronLRT",  "data-hists.root",  " -c TIDAhisto-panel.dat -d HLTL2-plots -sx Reference Truth " ),
          ( "EFelectronLRT",  "EFelectronLRT", "data-hists.root",   " -c TIDAhisto-panel.dat -d HLTEF-plots -sx Reference Truth " ),

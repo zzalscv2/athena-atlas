@@ -6,7 +6,9 @@
 #include <stdexcept>
 
 using namespace NswAsBuilt;
-
+namespace {
+    constexpr double DivBy1k = 1.e-3;
+}
 //===============================================================================
 ElementModelScaleSag::ElementModelScaleSag(double lenX, double lenY, Amg::Vector3D defo0)
 : m_lenX(lenX), m_lenY(lenY), m_defo0(defo0)
@@ -104,7 +106,7 @@ std::string ElementModelScaleSag::getParameterName(ipar_t ipar) const
 Amg::Vector3D ElementModelScaleSag::DEg( double egx, double egy, double egz, const Amg::Vector3D& d0) const 
 {
   // Calculate thermal expansion
-  return d0.array() * Eigen::Array3d{egx*0.001, egy*0.001, egz*0.001};
+  return d0.array() * Eigen::Array3d{egx*DivBy1k, egy*DivBy1k, egz*DivBy1k};
 }
 
 
@@ -158,7 +160,7 @@ Amg::Vector3D ElementModelScaleSag::DDSagY(double dsagy, const Amg::Vector3D& d0
 Amg::Vector3D ElementModelScaleSag::DDegX(double degx, const Amg::Vector3D& d0) const 
 {
   double egx_eff = degx * d0[1]/(0.5*m_lenY);
-  double delta = egx_eff * d0[0]/1000.;
+  double delta = egx_eff * d0[0]*DivBy1k;
   return Amg::Vector3D(delta, 0., 0.);
 }
 
@@ -167,7 +169,7 @@ Amg::Vector3D ElementModelScaleSag::DDegX(double degx, const Amg::Vector3D& d0) 
 Amg::Vector3D ElementModelScaleSag::DDegY(double degy, const Amg::Vector3D& d0) const 
 {
   double egy_eff = degy * d0[0]/(0.5*m_lenX);
-  double delta = egy_eff * d0[1]/1000.;
+  double delta = egy_eff * d0[1]*DivBy1k;
   return Amg::Vector3D(0., delta, 0.);
 }
 
@@ -240,7 +242,7 @@ void ElementModelScaleSag::applyDeformation2(const ParameterVector& parvec, Vect
 
   // EGX, EGY, EGZ:
   // d0.{x,y,z} * {egx, egy, egz}
-  local.array() += d0.array().colwise() * Eigen::Array3d{egx*0.001, egy*0.001, egz*0.001};
+  local.array() += d0.array().colwise() * Eigen::Array3d{egx*DivBy1k, egy*DivBy1k, egz*DivBy1k};
 
   // SAGX, SAGY:
   // p2.{y,x} * {sagx, sagy}
@@ -252,7 +254,7 @@ void ElementModelScaleSag::applyDeformation2(const ParameterVector& parvec, Vect
 
   // DEGX, DEGY:
   // d0.{x,y} * {degx*r.y, degy*r.x}
-  local.topRows<2>().array() += (d0.topRows<2>().array() * r.topRows<2>().array().colwise().reverse()).colwise() * Eigen::Array2d{degx*0.001, degy*0.001};
+  local.topRows<2>().array() += (d0.topRows<2>().array() * r.topRows<2>().array().colwise().reverse()).colwise() * Eigen::Array2d{degx*DivBy1k, degy*DivBy1k};
 
   // PGX, PGY:
   // r.{y,x} * {pgx, pgy}

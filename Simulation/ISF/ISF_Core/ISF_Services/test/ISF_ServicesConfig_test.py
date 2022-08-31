@@ -21,7 +21,7 @@ if __name__ == '__main__':
 
   ConfigFlags.Sim.WorldRRange = 15000
   ConfigFlags.Sim.WorldZRange = 27000 #change defaults?
-  detectors =['Bpipe', 'BCM', 'DBM',  'Pixel', 'SCT', 'TRT', 'LAr', 'Tile', 'CSC', 'MDT', 'RPC', 'TGC']
+  detectors = ['Bpipe', 'BCM', 'Pixel', 'SCT', 'TRT', 'LAr', 'Tile', 'CSC', 'MDT', 'RPC', 'TGC']
   # Setup detector flags
   from AthenaConfiguration.DetectorConfigFlags import setupDetectorsFromList
   setupDetectorsFromList(ConfigFlags, detectors, toggle_geometry=True)

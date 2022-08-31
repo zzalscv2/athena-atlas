@@ -58,14 +58,16 @@ namespace LVL1 {
     virtual StatusCode ExecuteForwardASide(int tmp [FEXAlgoSpaceDefs::jFEX_algoSpace_height][FEXAlgoSpaceDefs::jFEX_wide_algoSpace_width], jFEXOutputCollection* inputOutputCollection) override;
     virtual StatusCode ExecuteForwardCSide(int tmp [FEXAlgoSpaceDefs::jFEX_algoSpace_height][FEXAlgoSpaceDefs::jFEX_wide_algoSpace_width], jFEXOutputCollection* inputOutputCollection) override;
     virtual StatusCode ExecuteBarrel(int tmp [FEXAlgoSpaceDefs::jFEX_algoSpace_height][FEXAlgoSpaceDefs::jFEX_thin_algoSpace_width], jFEXOutputCollection* inputOutputCollection) override;
-    virtual std::vector<std::vector<std::vector<uint32_t>>> getSmallRJetTOBs() override;
-    virtual std::vector<std::vector<std::vector<uint32_t>>> getLargeRJetTOBs() override;
-    virtual std::vector<std::vector<std::vector<uint32_t>>> getFwdElTOBs() override;
-    virtual std::vector<std::vector<uint32_t>> getSumEtTOBs() override;
-    virtual std::vector<std::vector<uint32_t>> getMetTOBs() override;
-    
-    virtual std::vector<std::unique_ptr<jFEXTOB>> getTauTOBs() override;
 
+    virtual std::vector<std::vector<std::vector<uint32_t>>> getFwdElTOBs() override;
+
+    virtual std::vector<std::unique_ptr<jFEXTOB>> getTauTOBs() override;
+    virtual std::vector<std::unique_ptr<jFEXTOB>> getSmallRJetTOBs() override;
+    virtual std::vector<std::unique_ptr<jFEXTOB>> getLargeRJetTOBs() override;
+    virtual std::vector<std::unique_ptr<jFEXTOB>> getSumEtTOBs() override;
+    virtual std::vector<std::unique_ptr<jFEXTOB>> getMetTOBs() override;    
+    
+    
     /** Internal data */
   private:
   
@@ -77,15 +79,16 @@ namespace LVL1 {
     CaloCellContainer m_sCellsCollection;
     std::vector<jFEXFPGA*> m_jFEXFPGACollection;
    
-    std::vector<std::vector<std::vector<uint32_t>>> m_smallRJet_tobWords;
-    std::vector<std::vector<std::vector<uint32_t>>> m_largeRJet_tobWords;
-    std::vector< std::vector<std::unique_ptr<jFEXTOB>> > m_tau_tobWords;
     std::vector<std::vector<std::vector<uint32_t>>> m_fwdEl_tobWords;
-    std::vector<std::vector<uint32_t>> m_sumET_tobWords;
-    std::vector<std::vector<uint32_t>> m_Met_tobWords;
+
     ToolHandle<IjFEXFPGA> m_jFEXFPGATool {this, "jFEXFPGATool", "LVL1::jFEXFPGA", "Tool that simulates the FPGA hardware"};
 
-    
+
+    std::vector< std::vector<std::unique_ptr<jFEXTOB>> > m_tau_tobWords;
+    std::vector< std::vector<std::unique_ptr<jFEXTOB>> > m_smallRJet_tobWords;
+    std::vector< std::vector<std::unique_ptr<jFEXTOB>> > m_largeRJet_tobWords;
+    std::vector< std::vector<std::unique_ptr<jFEXTOB>> > m_sumET_tobWords;
+    std::vector< std::vector<std::unique_ptr<jFEXTOB>> > m_Met_tobWords;    
   };
   
 } // end of namespace

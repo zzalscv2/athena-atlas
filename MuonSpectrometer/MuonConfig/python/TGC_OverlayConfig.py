@@ -99,7 +99,8 @@ def TGC_OverlayCfg(flags):
     # Add TGC overlay algorithm
     acc.merge(TGC_OverlayAlgCfg(flags))
     # Add TGC truth overlay
-    acc.merge(TGC_TruthOverlayCfg(flags))
+    if flags.Digitization.EnableTruth:
+        acc.merge(TGC_TruthOverlayCfg(flags))
     # Add TGC digit to RDO config
     from MuonConfig.MuonByteStreamCnvTestConfig import TgcDigitToTgcRDOCfg
     acc.merge(TgcDigitToTgcRDOCfg(flags))

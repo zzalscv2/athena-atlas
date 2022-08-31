@@ -32,7 +32,7 @@ namespace NswAsBuilt {
       using ParameterClass = Element::ParameterClass;
 
      /* VALID: strip is found, INVALID: strip is not found */
-      enum IsValid {
+      enum class IsValid {
         INVALID=0,
         VALID=1
       };
@@ -41,9 +41,9 @@ namespace NswAsBuilt {
       * strip are provided, in the coordinate system of the quadruplet.*/
       struct strip_t {
         IsValid isvalid{IsValid::INVALID};
-        Amg::Vector3D center{0,0,0};
-        Amg::Vector3D left{0,0,0};
-        Amg::Vector3D right{0,0,0};
+        Amg::Vector3D center{Amg::Vector3D::Zero()};
+        Amg::Vector3D left{Amg::Vector3D::Zero()};
+        Amg::Vector3D right{Amg::Vector3D::Zero()};
       };
 
      /* Computes 3 reference points along a strip identified by strip_id, in
@@ -57,7 +57,7 @@ namespace NswAsBuilt {
       * coordinate system of the quadruplet */
       struct position_t {
         IsValid isvalid{IsValid::INVALID};
-        Amg::Vector3D pos{0,0,0};
+        Amg::Vector3D pos{Amg::Vector3D::Zero()};
       };
 
      /* Returns a the position of a point within a band of 1 pitch around the strip (sx in [-0.5,0.5]), 

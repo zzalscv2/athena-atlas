@@ -89,7 +89,6 @@ def DigitizationMainContentCfg(flags):
         acc.merge(NoPileUpMuWriterCfg(flags))
 
     # Signal-only truth information
-    # TODO: is another flag needed for this?
     if flags.Digitization.PileUp:
         from MCTruthSimAlgs.MCTruthSimAlgsConfig import (
             SignalOnlyMcEventCollCfg,
@@ -99,17 +98,18 @@ def DigitizationMainContentCfg(flags):
             MergeMuonEntryLayerCfg,
             MergeCalibHitsCfg,
         )
-        if flags.Common.ProductionStep!=ProductionStep.FastChain:
+        if flags.Common.ProductionStep is not ProductionStep.FastChain:
             acc.merge(SignalOnlyMcEventCollCfg(flags))
-        puCollections = pileupInputCollections(flags.Digitization.PU.LowPtMinBiasInputCols)
-        if "AntiKt4TruthJets" in puCollections:
-            acc.merge(MergeAntiKt4TruthJetsCfg(flags))
-        if "AntiKt6TruthJets" in puCollections:
-            acc.merge(MergeAntiKt6TruthJetsCfg(flags))
-        if "TruthPileupParticles" in puCollections:
-            acc.merge(MergeTruthParticlesCfg(flags))
-        acc.merge(MergeMuonEntryLayerCfg(flags))
-        acc.merge(MergeCalibHitsCfg(flags))
+        if flags.Digitization.EnableTruth:
+            puCollections = pileupInputCollections(flags.Digitization.PU.LowPtMinBiasInputCols)
+            if "AntiKt4TruthJets" in puCollections:
+                acc.merge(MergeAntiKt4TruthJetsCfg(flags))
+            if "AntiKt6TruthJets" in puCollections:
+                acc.merge(MergeAntiKt6TruthJetsCfg(flags))
+            if "TruthPileupParticles" in puCollections:
+                acc.merge(MergeTruthParticlesCfg(flags))
+            acc.merge(MergeMuonEntryLayerCfg(flags))
+            acc.merge(MergeCalibHitsCfg(flags))
 
         from Digitization.TruthDigitizationOutputConfig import TruthDigitizationOutputCfg
         acc.merge(TruthDigitizationOutputCfg(flags))
@@ -182,7 +182,9 @@ def DigitizationMainContentCfg(flags):
         acc.merge(PerfMonMTSvcCfg(flags))
 
     # Timing
-    acc.merge(MergeRecoTimingObjCfg(flags))
+    # TODO: do we even care about this anymore?
+    if flags.Digitization.EnableTruth:
+        acc.merge(MergeRecoTimingObjCfg(flags))
 
     return acc
 

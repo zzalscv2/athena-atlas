@@ -5,7 +5,7 @@ from AthenaConfiguration.AutoConfigFlags import getDefaultDetectors
 # This module is based upon Control/AthenaCommon/python/DetFlags.py
 # Only some flags have been migrated. A full list of what the old
 # DetFlags provided is given for reference below:
-# detectors : ID = bpipe pixel SCT TRT BCM DBM
+# detectors : ID = bpipe pixel SCT TRT BCM
 #             ITk = bpipe ITkPixel ITkStrip BCMPrime (in future maybe PLR)
 #             Forward = Lucid ZDC ALFA AFP FwdRegion
 #             LAr = em HEC FCal
@@ -36,7 +36,7 @@ from AthenaConfiguration.AutoConfigFlags import getDefaultDetectors
 # all detectors - used in helper functions
 allDetectors = [
     'Bpipe', 'Cavern',
-    'BCM', 'DBM', 'Pixel', 'SCT', 'TRT',
+    'BCM', 'Pixel', 'SCT', 'TRT',
     'BCMPrime', 'PLR', 'ITkPixel', 'ITkStrip', 'HGTD',
     'LAr', 'Tile', 'MBTS',
     'CSC', 'MDT', 'RPC', 'TGC', 'sTGC', 'MM',
@@ -44,7 +44,7 @@ allDetectors = [
 ]
 # all detector groups - used in helper functions
 allGroups = {
-    'ID': ['BCM', 'DBM', 'Pixel', 'SCT', 'TRT'],
+    'ID': ['BCM', 'Pixel', 'SCT', 'TRT'],
     'ITk': ['BCMPrime', 'ITkPixel', 'ITkStrip', 'PLR'],
     'Calo': ['LAr', 'Tile', 'MBTS'],
     'Muon': ['CSC', 'MDT', 'RPC', 'TGC', 'sTGC', 'MM'],
@@ -61,11 +61,10 @@ def createDetectorConfigFlags():
 
     # Inner Detector
     dcf.addFlag('Detector.GeometryBCM',   lambda prevFlags : 'BCM' in getDefaultDetectors(prevFlags.GeoModel.AtlasVersion))
-    dcf.addFlag('Detector.GeometryDBM',   lambda prevFlags : 'DBM' in getDefaultDetectors(prevFlags.GeoModel.AtlasVersion))
     dcf.addFlag('Detector.GeometryPixel', lambda prevFlags : 'Pixel' in getDefaultDetectors(prevFlags.GeoModel.AtlasVersion))
     dcf.addFlag('Detector.GeometrySCT',   lambda prevFlags : 'SCT' in getDefaultDetectors(prevFlags.GeoModel.AtlasVersion))
     dcf.addFlag('Detector.GeometryTRT',   lambda prevFlags : 'TRT' in getDefaultDetectors(prevFlags.GeoModel.AtlasVersion))
-    dcf.addFlag('Detector.GeometryID',    lambda prevFlags : (prevFlags.Detector.GeometryBCM or prevFlags.Detector.GeometryDBM
+    dcf.addFlag('Detector.GeometryID',    lambda prevFlags : (prevFlags.Detector.GeometryBCM
                                                               or prevFlags.Detector.GeometryPixel or prevFlags.Detector.GeometrySCT
                                                               or prevFlags.Detector.GeometryTRT))
 
@@ -116,12 +115,11 @@ def createDetectorConfigFlags():
     ## autoconfigured from geometry flags
     # Inner Detector
     dcf.addFlag('Detector.EnableBCM',   lambda prevFlags : prevFlags.Detector.GeometryBCM)
-    dcf.addFlag('Detector.EnableDBM',   lambda prevFlags : prevFlags.Detector.GeometryDBM)
     dcf.addFlag('Detector.EnablePixel', lambda prevFlags : prevFlags.Detector.GeometryPixel)
     dcf.addFlag('Detector.EnableSCT',   lambda prevFlags : prevFlags.Detector.GeometrySCT)
     dcf.addFlag('Detector.EnableTRT',   lambda prevFlags : prevFlags.Detector.GeometryTRT)
     dcf.addFlag('Detector.EnableID',    lambda prevFlags : prevFlags.Detector.GeometryID and
-                                                           (prevFlags.Detector.EnableBCM or prevFlags.Detector.EnableDBM
+                                                           (prevFlags.Detector.EnableBCM
                                                             or prevFlags.Detector.EnablePixel or prevFlags.Detector.EnableSCT
                                                             or prevFlags.Detector.EnableTRT))
 

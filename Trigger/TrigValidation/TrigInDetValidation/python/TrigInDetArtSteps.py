@@ -325,6 +325,7 @@ class TrigInDetRdictStep(Step):
             os.system( 'get_files -data TIDAdata-run3-offline-cosmic.dat &> /dev/null' )
             os.system( 'get_files -data TIDAdata_cuts-offline.dat &> /dev/null' )
             os.system( 'get_files -data TIDAdata-chains-run3.dat &> /dev/null' )
+            os.system( 'get_files -data TIDAdata-chains-run3-lrt.dat &> /dev/null' )
         super(TrigInDetRdictStep, self).configure(test)
 
 

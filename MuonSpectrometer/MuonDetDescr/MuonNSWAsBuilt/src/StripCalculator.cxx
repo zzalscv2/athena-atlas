@@ -30,11 +30,11 @@ StripCalculator::strip_t StripCalculator::getStrip(ParameterClass iclass, stripI
   auto it = m_pcbMap.find(pcb_id);
 
   if (it == m_pcbMap.end()) {
-    return { INVALID, {0.0,0.0,0.0}, {0.0,0.0,0.0}, {0.0,0.0,0.0} };
+    return {};
   }
 
   auto strip = it->second.getStrip(iclass, strip_id.istrip);
-  return { VALID, strip.center, strip.left, strip.right };
+  return {  IsValid::VALID, strip.center, strip.left, strip.right };
 }
 
 
@@ -48,10 +48,10 @@ StripCalculator::position_t StripCalculator::getPositionAlongStrip(ParameterClas
   auto it = m_pcbMap.find(pcb_id);
 
   if (it == m_pcbMap.end()) {
-    return { INVALID, {0.0,0.0,0.0} };
+    return {};
   }
 
-  return { VALID, it->second.getPositionAlongStrip(iclass, strip_id.istrip, sx, sy) };
+  return {  IsValid::VALID, it->second.getPositionAlongStrip(iclass, strip_id.istrip, sx, sy) };
 }
 
 

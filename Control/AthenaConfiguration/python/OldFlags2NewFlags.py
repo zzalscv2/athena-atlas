@@ -57,7 +57,7 @@ def getNewConfigFlags():
     # Let's build a map whose key is new flagname, and whose value is old flagname.
     geom_flag_map = {}
     # Geometry - InnerDetector
-    geom_flag_map.update({ 'Bpipe':'bpipe', 'BCM':'BCM', 'DBM':'DBM', 'Pixel':'pixel', 'SCT':'SCT', 'TRT':'TRT'})
+    geom_flag_map.update({ 'Bpipe':'bpipe', 'BCM':'BCM', 'Pixel':'pixel', 'SCT':'SCT', 'TRT':'TRT'})
 
     # Geometry - Upgrade Phase-2 - TODO
     # geom_flag_map.update({ 'BCMPrime':'', 'ITkPixel':'', 'ITkStrip':'', 'HGTD':''})

@@ -306,7 +306,7 @@ def PixelOutputCfg(flags):
     acc = ComponentAccumulator()
     if flags.Output.doWriteRDO:
         ItemList = ["PixelRDO_Container#*"]
-        if flags.Digitization.TruthOutput:
+        if flags.Digitization.EnableTruth:
             ItemList += ["InDetSimDataCollection#*"]
             acc.merge(TruthDigitizationOutputCfg(flags))
         acc.merge(OutputStreamCfg(flags, "RDO", ItemList))

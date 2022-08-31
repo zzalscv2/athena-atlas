@@ -82,6 +82,7 @@ def ITkStripOverlayCfg(flags):
     # Add ITk Strip overlay algorithm
     acc.merge(ITkStripOverlayAlgCfg(flags))
     # Add ITk Strip truth overlay
-    acc.merge(ITkStripTruthOverlayCfg(flags))
+    if flags.Digitization.EnableTruth:
+        acc.merge(ITkStripTruthOverlayCfg(flags))
 
     return acc
