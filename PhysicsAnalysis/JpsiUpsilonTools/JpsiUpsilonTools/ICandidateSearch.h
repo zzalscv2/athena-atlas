@@ -1,10 +1,9 @@
 /*
-  Copyright (C) 2002-2019 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
 */
 #ifndef ICANDIDATESEARCH_H
 #define ICANDIDATESEARCH_H
-#include "xAODTracking/VertexContainer.h"
-#include "xAODTracking/VertexAuxContainer.h"
+#include "xAODTracking/VertexContainerFwd.h"
 #include "GaudiKernel/IAlgTool.h"
 namespace Analysis {
 

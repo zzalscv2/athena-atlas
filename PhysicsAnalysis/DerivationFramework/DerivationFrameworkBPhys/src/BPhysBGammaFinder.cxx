@@ -3,7 +3,6 @@
 */
 
 #include "DerivationFrameworkBPhys/BPhysBGammaFinder.h"
-#include "DerivationFrameworkBPhys/BPhysPVTools.h"
 #include "xAODBPhys/BPhysHypoHelper.h"
 #include "xAODTracking/VertexContainer.h"
 #include "xAODTracking/VertexAuxContainer.h"
@@ -165,12 +164,12 @@ StatusCode BPhysBGammaFinder::addBranches() const {
           const Trk::Perigee& trackPerigee2 = trackParticle2->perigeeParameters();
 
           // Track pair selection
-          TLorentzVector e1, e2, m_gamma, BcStar;
+          TLorentzVector e1, e2, gamma_m, BcStar;
           e1.SetPtEtaPhiM(trackParticle1->pt(), trackParticle1->eta(), trackParticle1->phi(), Trk::electron);
           e2.SetPtEtaPhiM(trackParticle2->pt(), trackParticle2->eta(), trackParticle2->phi(), Trk::electron);
 
-          m_gamma = e1 + e2;
-          if (m_gamma.M() > m_maxGammaMass) continue;
+          gamma_m = e1 + e2;
+          if (gamma_m.M() > m_maxGammaMass) continue;
 
           TLorentzVector mu1 = Bc.refTrk(0, Trk::muon);
           TLorentzVector mu2 = Bc.refTrk(1, Trk::muon);
@@ -242,9 +241,9 @@ StatusCode BPhysBGammaFinder::addBranches() const {
             muon2.SetXYZM(B_Px.at(1), B_Py.at(1), B_Pz.at(1), Trk::muon);
             muon3.SetXYZM(B_Px.at(2), B_Py.at(2), B_Pz.at(2), Trk::muon);
 
-            TLorentzVector m_B = muon1 + muon2 + muon3;
+            TLorentzVector B_m = muon1 + muon2 + muon3;
 
-            const double deltaQ = (m_B + photon).M() - Bc.mass() - 2 * Trk::electron;
+            const double deltaQ = (B_m + photon).M() - Bc.mass() - 2 * Trk::electron;
             const double mass = photon.M();
 
             RefTrackPx.push_back(trackMomentum(convVertexCandidate, 0).Px());
@@ -282,7 +281,7 @@ StatusCode BPhysBGammaFinder::addBranches() const {
 
 
             ATH_MSG_DEBUG( "pt = " << photon.Pt() << " ph " << ph.Pt() << " mass " << photon.M() << " px size " << RefTrackPx.size() );
-            ATH_MSG_DEBUG( "Candidate DeltaM = " << (m_B + photon).M() << " MeV DiMuon " << " ( Mass = " << m_B.M() << " MeV )");
+            ATH_MSG_DEBUG( "Candidate DeltaM = " << (B_m + photon).M() << " MeV DiMuon " << " ( Mass = " << B_m.M() << " MeV )");
 
             // Decorate selected conversions
             ATH_MSG_DEBUG( "Decorating conversion vertices" );

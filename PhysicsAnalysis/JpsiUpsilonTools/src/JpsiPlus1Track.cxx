@@ -20,6 +20,7 @@
 #include "InDetConversionFinderTools/VertexPointEstimator.h"
 #include <memory>
 #include "JpsiUpsilonTools/JpsiUpsilonCommon.h"
+#include "xAODEgamma/ElectronContainer.h"
 
 namespace Analysis {
 
@@ -45,6 +46,7 @@ namespace Analysis {
         if(m_MuonsUsedInJpsi.key() == "NONE") m_MuonsUsedInJpsi = "";//for backwards compatability
         ATH_CHECK(m_MuonsUsedInJpsi.initialize(!m_MuonsUsedInJpsi.key().empty()));
         ATH_CHECK(m_TrkParticleGSFCollection.initialize(!m_TrkParticleGSFCollection.key().empty()));
+        ATH_CHECK(m_electronCollectionKey.initialize(SG::AllowEmpty));
 
         if (m_requiredNMuons > 0 && !m_excludeJpsiMuonsOnly) {
           ATH_MSG_FATAL("Invalid configuration");
@@ -89,10 +91,8 @@ namespace Analysis {
     m_trkTrippletMassLower(-1.0),
     m_trkTrippletPt(-1.0),
     m_trkDeltaZ(-1.0),
-    m_requiredNMuons(0),
-    m_TrkParticleGSFCollection("")
-    m_requiredNElectrons(0),
-    m_electronCollectionKey("Electrons")
+    m_TrkParticleGSFCollection(""),
+    m_electronCollectionKey("")
     {
         declareInterface<JpsiPlus1Track>(this);
         declareProperty("pionHypothesis",m_piMassHyp);
@@ -127,7 +127,7 @@ namespace Analysis {
         declareProperty("UseGSFTrackIndices",    m_useGSFTrackIndices  );
         declareProperty("GSFCollection",         m_TrkParticleGSFCollection);
         declareProperty("ElectronCollection",    m_electronCollectionKey);
-
+        declareProperty("SkipNoElectron",    m_skipNoElectron);
     }
     
     JpsiPlus1Track::~JpsiPlus1Track() {}
@@ -187,14 +187,18 @@ namespace Analysis {
         
         // Get the electrons from StoreGate
         const xAOD::ElectronContainer* importedElectronCollection = nullptr;
-        sc = evtStore()->retrieve(importedElectronCollection,m_electronCollectionKey);
-        if (sc.isFailure()) {
-           ATH_MSG_WARNING("No electron collection with key " << m_electronCollectionKey << " found in StoreGate. JpsiEECandidates will be EMPTY!");
-           return StatusCode::SUCCESS;;
-        } else {
-            ATH_MSG_DEBUG("Found electron collections with key " << m_electronCollectionKey);
+        if (!m_electronCollectionKey.empty()){
+            SG::ReadHandle<xAOD::ElectronContainer> h(m_electronCollectionKey,ctx);
+            if (!h.isValid()){
+                ATH_MSG_ERROR("No Electron collection with name " << m_electronCollectionKey.key() << " found in StoreGate!");
+                return StatusCode::FAILURE;
+            } else {
+                importedElectronCollection = h.cptr();
+                ATH_MSG_DEBUG("Found Electron collection " << m_electronCollectionKey.key() << " in StoreGate!");
+            }
+            ATH_MSG_DEBUG("Electron container size "<< importedElectronCollection->size());
         }
-        ATH_MSG_DEBUG("Electron container size " << importedElectronCollection->size());
+
         
         // Typedef for vectors of tracks and VxCandidates
         typedef std::vector<const xAOD::TrackParticle*> TrackBag;
@@ -279,7 +283,7 @@ namespace Analysis {
         
         TrackBag electronTracks;
         ElectronBag theElectronsAfterSelection;
-        if (!importedElectronCollection->empty()) {
+        if (importedElectronCollection && !importedElectronCollection->empty()) {
           for(auto electron : *importedElectronCollection) {
               if (!electron->trackParticleLink().isValid()) continue; // No electrons without ID tracks
               const xAOD::TrackParticle* elTrk(0);
@@ -288,8 +292,8 @@ namespace Analysis {
               theElectronsAfterSelection.push_back(electron); 
               electronTracks.push_back(elTrk); 
           }
-          if (theElectronsAfterSelection.size() == 0) return StatusCode::SUCCESS;
-            ATH_MSG_DEBUG("Number of electrons after selection: " << theElectronsAfterSelection.size());
+          if (m_skipNoElectron && theElectronsAfterSelection.size() == 0) return StatusCode::SUCCESS;
+          ATH_MSG_DEBUG("Number of electrons after selection: " << theElectronsAfterSelection.size());
         }
         
         std::vector<const xAOD::TrackParticle*> tracks(3, nullptr);
@@ -320,13 +324,18 @@ namespace Analysis {
                     
                   }
                 }
-                
-                int linkedElectronTrk = 0;
-                linkedElectronTrk = JpsiUpsilonCommon::isContainedIn(*trkItr, electronTracks);
-                if (linkedElectronTrk) ATH_MSG_DEBUG("This id track is an electron track!");
-                if (JpsiUpsilonCommon::isContainedIn(*trkItr,jpsiTracks)) {
-                    if (linkedElectronTrk) ATH_MSG_DEBUG("ID track removed: id track is selected to build Jpsi!");
-                    continue;
+                if(!m_electronCollectionKey.empty()){
+                   int linkedElectronTrk = 0;
+                   linkedElectronTrk = JpsiUpsilonCommon::isContainedIn(*trkItr, electronTracks);
+                   if (linkedElectronTrk) ATH_MSG_DEBUG("This id track is an electron track!");
+                   if (JpsiUpsilonCommon::isContainedIn(*trkItr,jpsiTracks)) {
+                       if (linkedElectronTrk) ATH_MSG_DEBUG("ID track removed: id track is selected to build Jpsi!");
+                       continue;
+                   }
+                   if (linkedElectronTrk < m_requiredNElectrons) {
+                       ATH_MSG_DEBUG("Skipping Tracks with Electron " << linkedElectronTrk << " Limited to " << m_requiredNElectrons);
+                       continue;
+                   }
                 }
                 
                 // Convert to TrackParticleBase
@@ -341,10 +350,6 @@ namespace Analysis {
                     continue;
                 }
                  
-                if (linkedElectronTrk < m_requiredNElectrons) {
-                  ATH_MSG_DEBUG("Skipping Tracks with Electron " << linkedElectronTrk << " Limited to " << m_requiredNElectrons);
-                  continue;
-                }
                 // apply mass cut on track tripplet if requested
                 bool passRoughMassCuts(true);
 

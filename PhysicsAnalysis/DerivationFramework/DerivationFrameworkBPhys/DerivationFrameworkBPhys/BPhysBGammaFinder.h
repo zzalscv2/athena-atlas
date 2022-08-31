@@ -40,8 +40,6 @@ namespace InDet
 
 namespace DerivationFramework {
 	
-class BPhysPVTools;
-
 class BPhysBGammaFinder : public AthAlgTool, public IAugmentationTool {
 
     public:
@@ -76,7 +74,6 @@ class BPhysBGammaFinder : public AthAlgTool, public IAugmentationTool {
         float m_Chi2Cut;
         float m_maxGammaMass;
         
-        std::unique_ptr< BPhysPVTools > m_BPhysPVTools;
 
   };
 }

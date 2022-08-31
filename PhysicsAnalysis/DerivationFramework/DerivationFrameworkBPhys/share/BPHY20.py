@@ -149,9 +149,9 @@ print(BcJpsiMuVertexFit)
 from JpsiUpsilonTools.JpsiUpsilonToolsConf import Analysis__JpsiPlus1Track
 BPHY20BcJpsiMu = Analysis__JpsiPlus1Track(
     name                    = "BPHY20BcJpsiMu",
-    OutputLevel             = INFO, #DEBUG,
-    pionHypothesis          = True, #False,
-    kaonHypothesis        = True,#True,
+    OutputLevel             = INFO,
+    pionHypothesis          = True,
+    kaonHypothesis        = True,
     trkThresholdPt        = 1000,
     trkMaxEta               = 3.0,
     BThresholdPt            = 1000.0,
@@ -163,7 +163,7 @@ BPHY20BcJpsiMu = Analysis__JpsiPlus1Track(
     ExcludeCrossJpsiTracks		= False,
     TrkVertexFitterTool     = BcJpsiMuVertexFit,
     TrackSelectorTool       = BPHY20_VertexTools.InDetTrackSelectorTool,
-    UseMassConstraint       = True, 
+    UseMassConstraint       = True,
     RequireNMuonTracks      = 1,
     Chi2Cut                 = 1000, #5
     TrkTrippletMassUpper    = 10000.0,
@@ -218,16 +218,16 @@ BcJpsiEVertexFit = Trk__TrkVKalVrtFitter(
     MakeExtendedVertex = True)
 
 ToolSvc += BcJpsiEVertexFit
-print      BcJpsiEVertexFit
+print      (BcJpsiEVertexFit)
 
 #--------------------------------------------------------------------
 ## b/ setup the Jpsi+1 track finder for Bc->Jpsie+
 from JpsiUpsilonTools.JpsiUpsilonToolsConf import Analysis__JpsiPlus1Track
 BPHY20BcJpsiE = Analysis__JpsiPlus1Track(
     name                    = "BPHY20BcJpsiE",
-    OutputLevel             = INFO, #DEBUG,
-    pionHypothesis          = True, #False,
-    kaonHypothesis        = True,#True,
+    OutputLevel             = INFO,
+    pionHypothesis          = True,
+    kaonHypothesis        = True,
     trkThresholdPt        = 500.0,
     trkMaxEta               = 3.0,
     BThresholdPt            = 1000.0,
@@ -238,6 +238,7 @@ BPHY20BcJpsiE = Analysis__JpsiPlus1Track(
     MuonsUsedInJpsi         = "Muons",
     ExcludeCrossJpsiTracks		= False,
     ElectronCollection      = "Electrons",
+    SkipNoElectron          = True,
     TrkVertexFitterTool     = BcJpsiEVertexFit,
     TrackSelectorTool       = BPHY20_VertexTools.InDetTrackSelectorTool,
     UseMassConstraint       = True, 
@@ -249,23 +250,22 @@ BPHY20BcJpsiE = Analysis__JpsiPlus1Track(
     UseGSFTrackIndices      = [2])
         
 ToolSvc += BPHY20BcJpsiE
-print      BPHY20BcJpsiE    
+print      (BPHY20BcJpsiE)
 
 #--------------------------------------------------------------------
 ## c/ setup the combined augmentation/skimming tool for the Bc+>J/psi e
-from DerivationFrameworkBPhys.DerivationFrameworkBPhysConf import DerivationFramework__Reco_dimuTrk
-BPHY20BcJpsiESelectAndWrite = DerivationFramework__Reco_dimuTrk(
+BPHY20BcJpsiESelectAndWrite = DerivationFramework__Reco_Vertex(
     name                   = "BPHY20BcJpsiESelectAndWrite",
-    OutputLevel            = INFO,
-    Jpsi1PlusTrackName     = BPHY20BcJpsiE,
+    V0Tools                = TrackingCommon.getV0Tools(),
+    VertexSearchTool       = BPHY20BcJpsiE,
     OutputVtxContainerName = "BPHY20BcJpsiECandidates",
     PVContainerName        = "PrimaryVertices",
     RefPVContainerName     = "BPHY20RefittedPrimaryVertices",
     RefitPV                = True,
     MaxPVrefit           = 1000)
 
-ToolSvc += BPHY20BcJpsiESelectAndWrite 
-print      BPHY20BcJpsiESelectAndWrite
+ToolSvc += BPHY20BcJpsiESelectAndWrite
+print      (BPHY20BcJpsiESelectAndWrite)
 
 #--------------------------------------------------------------------
 ## c/ augment and select B_c+>Jpsi e candidates
@@ -280,7 +280,7 @@ BPHY20_Select_Bc2JpsiE = DerivationFramework__Select_onia2mumu(
     Chi2Max               = 1000)
 
 ToolSvc += BPHY20_Select_Bc2JpsiE
-print      BPHY20_Select_Bc2JpsiE
+print      (BPHY20_Select_Bc2JpsiE)
 
 
 #--------------------------------------------------------------------
@@ -299,7 +299,7 @@ GammaVertexFit = Trk__TrkVKalVrtFitter(
     )
 
 ToolSvc += GammaVertexFit
-print      GammaVertexFit
+print      (GammaVertexFit)
 
 
 from DerivationFrameworkBPhys.DerivationFrameworkBPhysConf import DerivationFramework__BPhysBGammaFinder
@@ -319,7 +319,7 @@ BPHY20_GammaFinder  		= DerivationFramework__BPhysBGammaFinder(
     Chi2Cut                 = 20.0 )
 
 ToolSvc += BPHY20_GammaFinder
-print	 BPHY20_GammaFinder
+print	 (BPHY20_GammaFinder)
 
 #====================================================================
 # Isolation
@@ -342,7 +342,7 @@ ToolSvc += BPHY20TrackIsolationDecorator
 from IsolationTool.IsolationToolConf import xAOD__CaloIsolationTool
 BPHY20CaloIsolationTool = xAOD__CaloIsolationTool(
   name                            = "BPHY20CaloIsolationTool",
-  OutputLevel                     = WARNING,                  
+  OutputLevel                     = WARNING,
   saveOnlyRequestedCorrections    = True,
   IsoLeakCorrectionTool           = "" ) #Workaround for a bug in older versions
 
@@ -352,7 +352,7 @@ ToolSvc += BPHY20CaloIsolationTool
 from DerivationFrameworkBPhys.DerivationFrameworkBPhysConf import DerivationFramework__VertexCaloIsolation
 BPHY20CaloIsolationDecorator = DerivationFramework__VertexCaloIsolation(
   name                            = "BPHY20CaloIsolationDecorator",
-  OutputLevel                     = INFO,                  
+  OutputLevel                     = INFO,
   CaloIsoTool                     = BPHY20CaloIsolationTool,  #"xAOD::CaloIsolationTool",
   TrackContainer                  = "InDetTrackParticles",
   InputVertexContainer            = "BPHY20BcJpsiMuCandidates",
@@ -389,7 +389,7 @@ BPHY20_SelectBcJpsiEEvent = DerivationFramework__xAODStringSkimmingTool(
      expression = "count(BPHY20BcJpsiECandidates.passed_Bc) >= 1 ")
    
 ToolSvc += BPHY20_SelectBcJpsiEEvent
-print      BPHY20_SelectBcJpsiEEvent
+print      (BPHY20_SelectBcJpsiEEvent)
 
 
 #====================================================================
@@ -402,7 +402,7 @@ BPHY20SkimmingOR = CfgMgr.DerivationFramework__FilterCombinationOR(
        FilterList = [BPHY20_SelectBcJpsiMuEvent, BPHY20_SelectBcJpsiEEvent] )
        
 ToolSvc += BPHY20SkimmingOR
-print      BPHY20SkimmingOR   
+print      (BPHY20SkimmingOR)
    
 
 #====================================================================
@@ -467,7 +467,6 @@ ToolSvc += BPHY20MuonTPThinningTool
 from DerivationFrameworkInDet.DerivationFrameworkInDetConf import DerivationFramework__EgammaTrackParticleThinning
 BPHY20EgammaTPThinningTool = DerivationFramework__EgammaTrackParticleThinning(
     name                   = "BPHY20EgammaTPThinningTool",
-    ThinningService        = "BPHY20ThinningSvc",
     SGKey                  = "Electrons",
     GSFTrackParticlesKey = "GSFTrackParticles",
     SelectionString = "",
@@ -476,7 +475,6 @@ ToolSvc += BPHY20EgammaTPThinningTool
 
 from DerivationFrameworkBPhys.DerivationFrameworkBPhysConf import DerivationFramework__BPhysPVThinningTool
 BPHY20_thinningTool_PV = DerivationFramework__BPhysPVThinningTool(name                       = "BPHY20_thinningTool_PV",
-                                                                 CandidateCollections       = ["BPHY20BcJpsiMuCandidates"],
                                                                  CandidateCollections       = ["BPHY20BcJpsiMuCandidates", "BPHY20BcJpsiECandidates"],
                                                                  KeepPVTracks  =True)
 
@@ -508,7 +506,6 @@ ToolSvc += BPHY20TruthThinNoChainTool
 from DerivationFrameworkBPhys.DerivationFrameworkBPhysConf import DerivationFramework__Thin_vtxTrk
 BPHY20Thin_ConvTrk = DerivationFramework__Thin_vtxTrk(
   name                       = "BPHY20Thin_ConvTrk",
-  ThinningService            = "BPHY20ThinningSvc",
   TrackParticleContainerName = "InDetTrackParticles",
   VertexContainerNames       = ["BPHY20ConversionCandidates"],
   PassFlags                  = ["passed_Gamma"] 
