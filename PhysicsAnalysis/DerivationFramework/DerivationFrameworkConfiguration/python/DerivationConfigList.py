@@ -53,6 +53,7 @@ from DerivationFrameworkBPhys.BPHY13 import BPHY13Cfg
 from DerivationFrameworkBPhys.BPHY15 import BPHY15Cfg
 from DerivationFrameworkBPhys.BPHY16 import BPHY16Cfg
 from DerivationFrameworkBPhys.BPHY21 import BPHY21Cfg
+from DerivationFrameworkBPhys.BPHY22 import BPHY22Cfg
 
 # TileCal derivations
 from DerivationFrameworkTileCal.TCAL1 import TCAL1Cfg
@@ -69,7 +70,7 @@ __all__ = ['TEST1Cfg','TEST2Cfg','TEST3Cfg','TEST4Cfg','TEST5Cfg','TEST6Cfg',
            'BPHY6Cfg',
            'BPHY10Cfg', 'BPHY12Cfg', 'BPHY13Cfg', 'BPHY15Cfg',
            'BPHY16Cfg',
-           'BPHY21Cfg',
+           'BPHY21Cfg', 'BPHY22Cfg',
            'TCAL1Cfg', 'TCAL2Cfg'
            ]
 

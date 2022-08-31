@@ -55,7 +55,6 @@ BPHY22MuPiFinder = Analysis__JpsiFinder(
     Chi2Cut                    = 10.,
     oppChargesOnly             = False,
     allChargeCombinations      = True,
-   # combOnly                   = False,
     atLeastOneComb             = False, # True by default
     useCombinedMeasurement     = False, # Only takes effect if combOnly=True
     muonCollectionKey          = "Muons",
@@ -154,10 +153,7 @@ BPHY22DiTrkSelectAndWrite = DerivationFramework__Reco_Vertex(
     PVContainerName        = "PrimaryVertices",
     V0Tools                = TrackingCommon.getV0Tools(),
     PVRefitter             = BPHY22_VertexTools.PrimaryVertexRefitter,
-    #RefPVContainerName     = "BPHY22RefittedPrimaryVertices",#"SHOULDNOTBEUSED",
     RefPVContainerName     = "SHOULDNOTBEUSED",
-    #RefitPV                = True,
-    #MaxPVrefit             = 100000,
     CheckCollections       = True,
     CheckVertexContainers  = ['BPHY22MuPiCandidates'])
   
@@ -190,7 +186,6 @@ BPHY22_Select_D0b = DerivationFramework__Select_onia2mumu(
     VtxMassHypo           = 1864.83,
     MassMin               = 1864.83-200,
     MassMax               = 1864.83+200,
-    #LxyMin                = 0.0,
     Chi2Max               = 50)
 
 ToolSvc += BPHY22_Select_D0b
