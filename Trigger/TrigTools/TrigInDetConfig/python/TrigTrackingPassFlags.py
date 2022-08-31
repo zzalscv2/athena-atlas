@@ -13,10 +13,14 @@ def __flagsFromConfigSettings(settings):
     flags = createTrackingPassFlags()
     for setting, value in settings.__dict__.items():
         setting = setting.lstrip("_")
-        if value is None:
-            flags.addFlag(setting, lambda pf: None)
+        if setting in flags._flagdict:
+            if value is not None: 
+                flags._flagdict[setting] = value
         else:
-            flags.addFlag(setting, value)
+            if value is None: 
+                flags.addFlag(setting, lambda pf: None)
+            else:
+                flags.addFlag(setting, value)
 
     flags.addFlag("trkTracks_FTF", f'HLT_IDTrkTrack_{flags.suffix}_FTF')
     flags.addFlag("tracks_FTF", f'HLT_IDTrack_{flags.suffix}_FTF')
