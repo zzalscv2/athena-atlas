@@ -1,7 +1,7 @@
 //Dear emacs, this is -*- c++ -*-
 
 /*
-  Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
 */
 
 // LArOFC: Algorithm to calculate optimal filtering constants.
@@ -354,6 +354,11 @@ StatusCode LArOFCAlg::stop()
   if (nFailed) 
     ATH_MSG_ERROR( "Number of channels * gains with failed OFC verification: " <<  nFailed );
 
+  if ( m_dumpOFCfile.size()) {
+    ATH_MSG_INFO( "Dumping OFCs to file " << m_dumpOFCfile ) ;
+    larOFCComplete->dumpOFC(m_dumpOFCfile) ;
+  }
+
   // record and symlink LArOFCComplete object
   LArOFCComplete* larOFCCompletePtr=larOFCComplete.get();
   sc = detStore()->record(std::move(larOFCComplete),m_ofcKey);
@@ -387,11 +392,6 @@ StatusCode LArOFCAlg::stop()
       return StatusCode::FAILURE;
     } 
     ATH_MSG_INFO( "Symlink with ILArOFC done" ) ;
-  }
-
-  if ( m_dumpOFCfile.size()) {
-    ATH_MSG_INFO( "Dumping OFCs to file " << m_dumpOFCfile ) ;
-    larOFCComplete->dumpOFC(m_dumpOFCfile) ;
   }
 
   if (larOFCBinComplete) {
