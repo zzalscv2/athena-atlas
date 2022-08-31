@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
 */
 
 // Local include(s):
@@ -2421,31 +2421,88 @@ ST::SystInfo SUSYObjDef_xAOD::getSystInfo(const CP::SystematicVariation& sys) co
     }
   }
 
+  //List of R10 JET systematics affecting weights - https://twiki.cern.ch/twiki/bin/viewauth/AtlasProtected/JetUncertaintiesRel21ConsolidatedLargeRTaggerSF
 
    if (!m_fatjetUncertaintiesTool.empty()) {
     if ( m_fatjetUncertaintiesTool->isAffectedBySystematic( CP::SystematicVariation(sys.basename(), CP::SystematicVariation::CONTINUOUS) ) ) {
-      sysInfo.affectsKinematics = true;
-      sysInfo.affectsType = SystObjType::Jet;
+      if( sys.name().find("JET_JetTag")!= std::string::npos || 
+          sys.name().find("JET_TopTag")!= std::string::npos || 
+          sys.name().find("JET_WTag")  != std::string::npos){
+        sysInfo.affectsWeights = true;
+        sysInfo.affectsType = SystObjType::Jet;
+        sysInfo.affectedWeights.insert(ST::Weights::Jet::JetTaggingSF);
+      }
+      else if (sys.name().find("bTag_B_")!= std::string::npos || sys.name().find("bTag_Light_")!= std::string::npos){
+        sysInfo.affectsWeights = true;
+        sysInfo.affectsType = SystObjType::Jet;
+        sysInfo.affectedWeights.insert(ST::Weights::Jet::JetTaggingSF_Btag);
+      }
+      else{
+        sysInfo.affectsKinematics = true;
+        sysInfo.affectsType = SystObjType::Jet;
+      }
     }
   }
 
    if (!m_WTagjetUncertaintiesTool.empty()) {
     if ( m_WTagjetUncertaintiesTool->isAffectedBySystematic( CP::SystematicVariation(sys.basename(), CP::SystematicVariation::CONTINUOUS) ) ) {
-      sysInfo.affectsKinematics = true;
-      sysInfo.affectsType = SystObjType::Jet;
+      if( sys.name().find("JET_JetTag")!= std::string::npos || 
+          sys.name().find("JET_TopTag")!= std::string::npos || 
+          sys.name().find("JET_WTag")  != std::string::npos){
+        sysInfo.affectsWeights = true;
+        sysInfo.affectsType = SystObjType::Jet;
+        sysInfo.affectedWeights.insert(ST::Weights::Jet::JetTaggingSF);
+      }
+      else if (sys.name().find("bTag_B_")!= std::string::npos || sys.name().find("bTag_Light_")!= std::string::npos){
+        sysInfo.affectsWeights = true;
+        sysInfo.affectsType = SystObjType::Jet;
+        sysInfo.affectedWeights.insert(ST::Weights::Jet::JetTaggingSF_Btag);
+      }
+      else{
+        sysInfo.affectsKinematics = true;
+        sysInfo.affectsType = SystObjType::Jet;
+      }
     }
   }
    if (!m_ZTagjetUncertaintiesTool.empty()) {
     if ( m_ZTagjetUncertaintiesTool->isAffectedBySystematic( CP::SystematicVariation(sys.basename(), CP::SystematicVariation::CONTINUOUS) ) ) {
-      sysInfo.affectsKinematics = true;
-      sysInfo.affectsType = SystObjType::Jet;
+      if( sys.name().find("JET_JetTag")!= std::string::npos || 
+          sys.name().find("JET_TopTag")!= std::string::npos || 
+          sys.name().find("JET_WTag")  != std::string::npos){
+        sysInfo.affectsWeights = true;
+        sysInfo.affectsType = SystObjType::Jet;
+        sysInfo.affectedWeights.insert(ST::Weights::Jet::JetTaggingSF);
+      }
+      else if (sys.name().find("bTag_B_")!= std::string::npos || sys.name().find("bTag_Light_")!= std::string::npos){
+        sysInfo.affectsWeights = true;
+        sysInfo.affectsType = SystObjType::Jet;
+        sysInfo.affectedWeights.insert(ST::Weights::Jet::JetTaggingSF_Btag);
+      }
+      else{
+        sysInfo.affectsKinematics = true;
+        sysInfo.affectsType = SystObjType::Jet;
+      }
     }
   }
 
    if (!m_TopTagjetUncertaintiesTool.empty()) {
     if ( m_TopTagjetUncertaintiesTool->isAffectedBySystematic( CP::SystematicVariation(sys.basename(), CP::SystematicVariation::CONTINUOUS) ) ) {
-      sysInfo.affectsKinematics = true;
-      sysInfo.affectsType = SystObjType::Jet;
+      if( sys.name().find("JET_JetTag")!= std::string::npos || 
+          sys.name().find("JET_TopTag")!= std::string::npos || 
+          sys.name().find("JET_WTag")  != std::string::npos){
+        sysInfo.affectsWeights = true;
+        sysInfo.affectsType = SystObjType::Jet;
+        sysInfo.affectedWeights.insert(ST::Weights::Jet::JetTaggingSF);
+      }
+      else if (sys.name().find("bTag_B_")!= std::string::npos || sys.name().find("bTag_Light_")!= std::string::npos){
+        sysInfo.affectsWeights = true;
+        sysInfo.affectsType = SystObjType::Jet;
+        sysInfo.affectedWeights.insert(ST::Weights::Jet::JetTaggingSF_Btag);
+      }
+      else{
+        sysInfo.affectsKinematics = true;
+        sysInfo.affectsType = SystObjType::Jet;
+      }
     }
   }
 
@@ -2564,11 +2621,11 @@ ST::SystInfo SUSYObjDef_xAOD::getSystInfo(const CP::SystematicVariation& sys) co
     if ( m_egammaCalibTool->isAffectedBySystematic(sys) ) {
       sysInfo.affectsKinematics = true;
       if (sys.basename().compare(0, 3, "EG_") == 0) {
-	sysInfo.affectsType = SystObjType::Egamma;
+        sysInfo.affectsType = SystObjType::Egamma;
       } else if (sys.basename().compare(0, 3, "PH_") == 0) {
-	sysInfo.affectsType = SystObjType::Photon;
+	      sysInfo.affectsType = SystObjType::Photon;
       } else if (sys.basename().compare(0, 3, "EL_") == 0) {
-	sysInfo.affectsType = SystObjType::Electron;
+	      sysInfo.affectsType = SystObjType::Electron;
       }
     }
   }

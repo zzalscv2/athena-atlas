@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2019 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
 */
 
 // $Id: SUSYToolsTester_opt.cxx 696994 2015-09-26 20:40:26Z khoo $
@@ -781,6 +781,9 @@ est.pool.root",relN,(isData?"Data":"MC"),SUSYx);
       bool syst_affectsBTag = ST::testAffectsObject(xAOD::Type::BTag, sysInfo.affectsType);
       //      bool syst_affectsMET = ST::testAffectsObject(xAOD::Type::MissingET, sysInfo.affectsType);
 
+      if (entry==0) {
+        Info( APP_NAME,"Name:%s | Kin:%i, Wei:%i | J:%i, bJ:%i | E:%i, P:%i | Mu:%i | T:%i |",(sys.name()).c_str(), sysInfo.affectsKinematics, sysInfo.affectsWeights,syst_affectsJets,syst_affectsBTag,syst_affectsElectrons,syst_affectsPhotons,syst_affectsMuons,syst_affectsTaus);
+      }
 
       if (sysInfo.affectsKinematics) {
         if (syst_affectsElectrons) {
