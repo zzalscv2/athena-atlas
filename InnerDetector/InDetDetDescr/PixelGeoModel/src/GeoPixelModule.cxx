@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "GeoPixelModule.h"
@@ -20,12 +20,12 @@
 
 using std::max;
 
-GeoPixelModule::GeoPixelModule(InDetDD::PixelDetectorManager* m_DDmgr,
-                               PixelGeometryManager* mgr,
-			       GeoModelIO::ReadGeoModel* sqliteReader,
-                               GeoPixelSiCrystal& theSensor) :
-  GeoVPixelFactory (m_DDmgr, mgr, sqliteReader),
-  m_theSensor(theSensor)
+GeoPixelModule::GeoPixelModule(InDetDD::PixelDetectorManager* m_DDmgr
+                               , PixelGeometryManager* mgr
+			       , GeoModelIO::ReadGeoModel* sqliteReader
+                               , GeoPixelSiCrystal& theSensor) 
+  : GeoVPixelFactory (m_DDmgr, mgr, sqliteReader)
+  , m_theSensor(theSensor)
 {
   //
   // Define the log volume in the constructor, so I do it only once.
@@ -36,61 +36,61 @@ GeoPixelModule::GeoPixelModule(InDetDD::PixelDetectorManager* m_DDmgr,
   // z in the eta (z) direction
 
   m_isModule3D=m_theSensor.GetModule3DFlag();
-  m_moduleSvcThickness = 0.;
-  m_moduleSvcWidth = 0.;
   m_nbModuleSvc = m_gmt_mgr->PixelModuleServiceNumber();
-  int svcType = (m_isModule3D) ? 1 : 0;
 
-  //
-  // The Dimensions are in separate routines
-  //
-  double length = this->Length();
-  double thickness = this->Thickness();
-  double width = this->Width();
-  const GeoMaterial* air = m_mat_mgr->getMaterial("std::Air");
+  if(!m_sqliteReader) {
+    int svcType = (m_isModule3D) ? 1 : 0;
 
-  //  const GeoShape * moduleShape = 0;
-  std::string logName = m_gmt_mgr->isBarrel() ? "ModuleBrl" : "ModuleEC";
-
-  if (ThicknessP() == ThicknessN()) {
-    const GeoBox* moduleBox = new GeoBox(thickness/2.,width/2.,length/2.);
-    const GeoShape * moduleShape = moduleBox;
-    m_theModule = new GeoLogVol(logName,moduleShape,air);
-    m_theModule->ref();
-  } 
-  else {
-
-    // Shift so the center of the box is the center of the sensor.
-    double shift = 0.5 * (ThicknessP() - ThicknessN_noSvc());
-    //    const GeoShape & shiftedBox = (*moduleBox) << GeoTrf::TranslateX3D(shift);
-    //    moduleShape = &shiftedBox;
+    //
+    // The Dimensions are in separate routines
+    //
+    double length = this->Length();
+    double thickness = this->Thickness();
+    double width = this->Width();
+    const GeoMaterial* air = m_mat_mgr->getMaterial("std::Air");
     
-    thickness = ThicknessP()+ThicknessN_noSvc();
-    const GeoBox* moduleBox = new GeoBox(thickness/2.,width/2.,length/2.);
-    const GeoShape & shiftedBox = (*moduleBox) << GeoTrf::TranslateX3D(shift);
-    const GeoShape * moduleShape = &shiftedBox;
-
-    if(m_moduleSvcThickness<0.001) {
+    //  const GeoShape * moduleShape = 0;
+    std::string logName = m_gmt_mgr->isBarrel() ? "ModuleBrl" : "ModuleEC";
+    
+    if (ThicknessP() == ThicknessN()) {
+      const GeoBox* moduleBox = new GeoBox(thickness/2.,width/2.,length/2.);
+      const GeoShape * moduleShape = moduleBox;
       m_theModule = new GeoLogVol(logName,moduleShape,air);
       m_theModule->ref();
-    }
+    } 
     else {
-      const GeoShape * gblShape = nullptr;
-      gblShape = addShape(gblShape, moduleShape, GeoTrf::Transform3D::Identity() );
-
-      double svcWidth = width*.6;
-      m_moduleSvcWidth = svcWidth;
-      const GeoBox* moduleSvcBox1 = new GeoBox(m_moduleSvcThickness*.5,svcWidth*.25,length*.5);
-      double yShift = width*.5-svcWidth*.75;
-      double xShift = thickness*.5+m_moduleSvcThickness*.5; 
-      gblShape = addShape(gblShape, moduleSvcBox1, (GeoTrf::TranslateX3D(-xShift)*GeoTrf::TranslateY3D(-yShift)) );
-
-      const GeoBox* moduleSvcBox2 = new GeoBox(m_moduleSvcThickness*.25,svcWidth*.25,length*.5);
-      yShift = width*.5-svcWidth*.25;
-      xShift = thickness*.5+m_moduleSvcThickness*.25; 
-      gblShape = addShape(gblShape, moduleSvcBox2, (GeoTrf::TranslateX3D(-xShift)*GeoTrf::TranslateY3D(-yShift)) );
-
-      for(int iSvc=0; iSvc<m_nbModuleSvc; iSvc++)
+      
+      // Shift so the center of the box is the center of the sensor.
+      double shift = 0.5 * (ThicknessP() - ThicknessN_noSvc());
+      //    const GeoShape & shiftedBox = (*moduleBox) << GeoTrf::TranslateX3D(shift);
+      //    moduleShape = &shiftedBox;
+      
+      thickness = ThicknessP()+ThicknessN_noSvc();
+      const GeoBox* moduleBox = new GeoBox(thickness/2.,width/2.,length/2.);
+      const GeoShape & shiftedBox = (*moduleBox) << GeoTrf::TranslateX3D(shift);
+      const GeoShape * moduleShape = &shiftedBox;
+      
+      if(m_moduleSvcThickness<0.001) {
+	m_theModule = new GeoLogVol(logName,moduleShape,air);
+	m_theModule->ref();
+      }
+      else {
+	const GeoShape * gblShape = nullptr;
+	gblShape = addShape(gblShape, moduleShape, GeoTrf::Transform3D::Identity() );
+	
+	double svcWidth = width*.6;
+	m_moduleSvcWidth = svcWidth;
+	const GeoBox* moduleSvcBox1 = new GeoBox(m_moduleSvcThickness*.5,svcWidth*.25,length*.5);
+	double yShift = width*.5-svcWidth*.75;
+	double xShift = thickness*.5+m_moduleSvcThickness*.5; 
+	gblShape = addShape(gblShape, moduleSvcBox1, (GeoTrf::TranslateX3D(-xShift)*GeoTrf::TranslateY3D(-yShift)) );
+	
+	const GeoBox* moduleSvcBox2 = new GeoBox(m_moduleSvcThickness*.25,svcWidth*.25,length*.5);
+	yShift = width*.5-svcWidth*.25;
+	xShift = thickness*.5+m_moduleSvcThickness*.25; 
+	gblShape = addShape(gblShape, moduleSvcBox2, (GeoTrf::TranslateX3D(-xShift)*GeoTrf::TranslateY3D(-yShift)) );
+	
+	for(int iSvc=0; iSvc<m_nbModuleSvc; iSvc++)
 	{
 	  int type = m_gmt_mgr->PixelModuleServiceModuleType(iSvc);
 	  std::string name = m_gmt_mgr->PixelModuleServiceName(iSvc);
@@ -105,20 +105,27 @@ GeoPixelModule::GeoPixelModule(InDetDD::PixelDetectorManager* m_DDmgr,
 	    gblShape = addShape(gblShape, moduleSvcBox3, (GeoTrf::TranslateX3D(xPos)*GeoTrf::TranslateY3D(offsetY)) );
 	  }
 	}
-
-      m_theModule = new GeoLogVol(logName,gblShape,air);
-      m_theModule->ref();	
+	
+	m_theModule = new GeoLogVol(logName,gblShape,air);
+	m_theModule->ref();	
+      }
     }
   }
-  
 }
 
 GeoPixelModule::~GeoPixelModule(){
-  m_theModule->unref();
+  if(m_theModule) m_theModule->unref();
 }
 
 
 GeoVPhysVol* GeoPixelModule::Build( ) {
+
+  if(m_sqliteReader) {
+    m_theSensor.Build();
+    m_id = m_theSensor.getID();
+    return nullptr;
+  }
+
   GeoFullPhysVol* modulePhys = new GeoFullPhysVol(m_theModule);
   //
   // Place the Si Crystal
