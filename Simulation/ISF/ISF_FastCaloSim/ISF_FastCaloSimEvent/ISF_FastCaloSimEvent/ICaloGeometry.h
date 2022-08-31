@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2018 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef ICaloGeometry_h
@@ -8,13 +8,14 @@
 #include "Identifier/Identifier.h"
 #include "ISF_FastCaloSimEvent/FastCaloSim_CaloCell_ID.h"
 #include "CaloDetDescr/CaloDetDescrElement.h"
+#include "CxxUtils/checker_macros.h"
 
 class CaloDetDescrElement;
 class ICaloGeometry {
 public :
    virtual bool PostProcessGeometry() = 0;
 
-   virtual void Validate(int nrnd=100) = 0;
+   virtual void Validate ATLAS_NOT_THREAD_SAFE (int nrnd=100) = 0;
 
    virtual const CaloDetDescrElement* getDDE(Identifier identify) = 0;
    virtual const CaloDetDescrElement* getDDE(int sampling,float eta,float phi,float* distance=0,int* steps=0) = 0;

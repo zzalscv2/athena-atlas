@@ -24,19 +24,19 @@
 
 using namespace std;
 
-int CaloGeometry_calocol[24]={1,2,3,4, // LAr barrel
-                     1,2,3,4, // LAr EM endcap
-                     1,2,3,4, // Hadronic end cap cal.
-                     1,2,3,   // Tile barrel
-                     -42,-28,6, // Tile gap (ITC & scint)
-                     1,2,3,   // Tile extended barrel
-                     1,2,3    // Forward EM endcap
-                    }; 
+const int CaloGeometry_calocol[24]={1,2,3,4, // LAr barrel
+                                    1,2,3,4, // LAr EM endcap
+                                    1,2,3,4, // Hadronic end cap cal.
+                                    1,2,3,   // Tile barrel
+                                    -42,-28,6, // Tile gap (ITC & scint)
+                                    1,2,3,   // Tile extended barrel
+                                    1,2,3    // Forward EM endcap
+};
 
 const int CaloGeometry::MAX_SAMPLING = CaloCell_ID_FCS::MaxSample; //number of calorimeter layers/samplings
 
-Identifier CaloGeometry::m_debug_identify;
-bool CaloGeometry::m_debug=false;
+const Identifier CaloGeometry::m_debug_identify;
+std::atomic<bool> CaloGeometry::m_debug=false;
 
 CaloGeometry::CaloGeometry() : m_cells_in_sampling(MAX_SAMPLING),m_cells_in_sampling_for_phi0(MAX_SAMPLING),m_cells_in_regions(MAX_SAMPLING),m_isCaloBarrel(MAX_SAMPLING),m_dographs(false),m_FCal_ChannelMap(0)
 {
@@ -652,7 +652,8 @@ bool CaloGeometry::PostProcessGeometry()
   return true;
 }
 
-void CaloGeometry::Validate(int nrnd)
+void CaloGeometry::Validate ATLAS_NOT_THREAD_SAFE (int nrnd)
+//                          ^ use of gRandom
 {
   int ntest=0;
   cout<<"start CaloGeometry::Validate()"<<endl;

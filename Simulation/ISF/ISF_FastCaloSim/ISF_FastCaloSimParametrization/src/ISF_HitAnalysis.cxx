@@ -138,7 +138,7 @@ StatusCode ISF_HitAnalysis::updateMetaData( IOVSVC_CALLBACK_ARGS_P( I, keys ) )
  // silently...
  if( ! run_update ) return StatusCode::SUCCESS;
 
- const DataHandle< AthenaAttributeList > simParam;
+ const AthenaAttributeList* simParam;
  if( detStore()->retrieve( simParam, m_MC_SIM_PARAM ).isFailure() )
  {
    ATH_MSG_WARNING("Retrieving MC SIM metadata failed");
@@ -159,7 +159,7 @@ StatusCode ISF_HitAnalysis::updateMetaData( IOVSVC_CALLBACK_ARGS_P( I, keys ) )
 }
 
 
-StatusCode ISF_HitAnalysis::initialize()
+StatusCode ISF_HitAnalysis::initialize ATLAS_NOT_THREAD_SAFE ()
 {
   ATH_MSG_INFO( "Initializing ISF_HitAnalysis" );
   //
@@ -472,7 +472,7 @@ StatusCode ISF_HitAnalysis::initialize()
   return StatusCode::SUCCESS;
 } //initialize
 
-StatusCode ISF_HitAnalysis::finalize()
+StatusCode ISF_HitAnalysis::finalize ATLAS_NOT_THREAD_SAFE ()
 {
 
  ATH_MSG_INFO( "doing finalize()" );
@@ -776,7 +776,7 @@ StatusCode ISF_HitAnalysis::execute()
 
  //Get truth particle info
  //Note that there can be more truth particles, the first one is usually the one we need.
- const DataHandle<McEventCollection> mcEvent;
+ const McEventCollection* mcEvent;
  sc = evtStore()->retrieve(mcEvent,"TruthEvent");
  if(sc.isFailure()) {
    ATH_MSG_WARNING( "No truth event!");
@@ -959,7 +959,7 @@ StatusCode ISF_HitAnalysis::execute()
 
  // Get the reco clusters if available
 // retreiving cluster container
- const DataHandle<xAOD::CaloClusterContainer > theClusters;
+ const xAOD::CaloClusterContainer* theClusters;
  std::string clusterContainerName = "CaloCalTopoClusters";  //Local hadron calibrated Topo-clusters , raw is the EM scale
   sc = evtStore()->retrieve(theClusters, clusterContainerName);
   if (sc.isFailure()) {
@@ -1037,7 +1037,7 @@ StatusCode ISF_HitAnalysis::execute()
  std::string  lArKey [4] = {"LArHitEMB", "LArHitEMEC", "LArHitFCAL", "LArHitHEC"};
  for (unsigned int i=0;i<4;i++)
  {
-  const DataHandle<LArHitContainer> iter;
+  const LArHitContainer* iter;
   ATH_MSG_DEBUG( "Checking G4Hits: "<<lArKey[i]);
   if(evtStore()->retrieve(iter,lArKey[i])==StatusCode::SUCCESS)
   {
@@ -1502,20 +1502,20 @@ std::vector<Trk::HitInfo>* ISF_HitAnalysis::caloHits(const HepMC::GenParticle& p
  ATH_MSG_DEBUG( "[ fastCaloSim transport ] before calo entrance ");
 
  // get CaloEntrance if not done already
- if (!m_caloEntrance)
+ if (!m_caloEntrance.get())
  {
-  m_caloEntrance = m_extrapolator->trackingGeometry()->trackingVolume(m_caloEntranceName);
-  if(!m_caloEntrance)
-   ATH_MSG_INFO("CaloEntrance not found ");
-  else
-   ATH_MSG_INFO("CaloEntrance found ");
+   m_caloEntrance.set(m_extrapolator->trackingGeometry()->trackingVolume(m_caloEntranceName));
+   if(!m_caloEntrance.get())
+     ATH_MSG_INFO("CaloEntrance not found ");
+   else
+     ATH_MSG_INFO("CaloEntrance found ");
  }
 
  ATH_MSG_DEBUG( "[ fastCaloSim transport ] after calo entrance ");
 
  std::unique_ptr<const Trk::TrackParameters> caloEntry = nullptr;
 
- if(m_caloEntrance && m_caloEntrance->inside(pos,0.001) && !m_extrapolator->trackingGeometry()->atVolumeBoundary(pos,m_caloEntrance,0.001))
+ if(m_caloEntrance.get() && m_caloEntrance.get()->inside(pos,0.001) && !m_extrapolator->trackingGeometry()->atVolumeBoundary(pos,m_caloEntrance.get(),0.001))
  {
   std::vector<Trk::HitInfo>*     dummyHitVector = nullptr;
   if (charge == 0) {
@@ -1527,7 +1527,7 @@ std::vector<Trk::HitInfo>* ISF_HitAnalysis::caloHits(const HepMC::GenParticle& p
                                                      pHypothesis,
                                                      dummyHitVector,
                                                      nextGeoID,
-                                                     m_caloEntrance);
+                                                     m_caloEntrance.get());
   } else {
     caloEntry = m_extrapolator->extrapolateWithPathLimit(inputPar,
                                                          pathLim,
@@ -1536,7 +1536,7 @@ std::vector<Trk::HitInfo>* ISF_HitAnalysis::caloHits(const HepMC::GenParticle& p
                                                          pHypothesis,
                                                          dummyHitVector,
                                                          nextGeoID,
-                                                         m_caloEntrance);
+                                                         m_caloEntrance.get());
   }
  } else{
    caloEntry = inputPar.uniqueClone();
