@@ -2070,12 +2070,12 @@ StatusCode FixLArElecCalib::fix12(const LArOnOffIdMapping *cabling) {
 
      ATH_MSG_INFO(" number of channels in intuple ="<<ncell);
 
+     ATH_MSG_INFO ( "Stored container " << minbias->totalNumberOfConditions() << " conditions, key LArMinBias " );
      ATH_CHECK( detStore()->record(std::move(minbias),"LArMinBias") );
      ATH_CHECK( detStore()->symLink(minbias.get(), dynamic_cast<ILArMinBias*>(minbias.get())) );
-     ATH_MSG_INFO ( "Stored container " << minbias->totalNumberOfConditions() << " conditions, key LArMinBias " );
+     ATH_MSG_INFO ( "Stored container " << minbias_av->totalNumberOfConditions() << " conditions, key LArMinBiasAverage " );
      ATH_CHECK( detStore()->record(std::move(minbias_av),"LArMinBiasAverage") );
      ATH_CHECK( detStore()->symLink(minbias_av.get(), dynamic_cast<ILArMinBiasAverage*>(minbias_av.get())) );
-     ATH_MSG_INFO ( "Stored container " << minbias_av->totalNumberOfConditions() << " conditions, key LArMinBiasAverage " );
 
      return StatusCode::SUCCESS;
 }
@@ -2136,9 +2136,9 @@ StatusCode FixLArElecCalib::fix14(const LArOnOffIdMapping *cabling) {
 
      ATH_MSG_INFO(" number of channels in intuple ="<<ncell);
 
+     ATH_MSG_INFO ( "Stored container " << minbias_av->totalNumberOfConditions() << " conditions, key LArPileupAverage " );
      ATH_CHECK( detStore()->record(std::move(minbias_av),"LArPileupAverage") );
      ATH_CHECK( detStore()->symLink(minbias_av.get(), dynamic_cast<ILArMinBiasAverage*>(minbias_av.get())) );
-     ATH_MSG_INFO ( "Stored container " << minbias_av->totalNumberOfConditions() << " conditions, key LArPileupAverage " );
 
      return StatusCode::SUCCESS;
 }
