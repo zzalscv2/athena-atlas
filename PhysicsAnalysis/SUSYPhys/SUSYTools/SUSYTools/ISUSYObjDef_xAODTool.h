@@ -94,6 +94,8 @@ namespace ST {
       static const unsigned int JVT = 1002;
       static const unsigned int Btag_Track = 1003;
       static const unsigned int FJVT = 1004;
+      static const unsigned int JetTaggingSF = 1005;
+      static const unsigned int JetTaggingSF_Btag = 1006; 
     }
 
     namespace Muon {
