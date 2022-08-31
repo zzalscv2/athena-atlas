@@ -372,6 +372,11 @@ class TrigFastTrackFinderBase(TrigFastTrackFinder):
             nClustersMin = config.nClustersMin
         else:
             nClustersMin = TrackingCuts.minClusters()
+        
+        if config.Xi2max is not None:
+            Xi2max = config.Xi2max
+        else:
+            Xi2max = TrackingCuts.Xi2max()
 
         TrackMaker_FTF = InDet__SiTrackMaker_xk(name = 'InDetTrigSiTrackMaker_FTF_'+slice_name,
                                               RoadTool       = InDetTrigSiDetElementsRoadMaker_FTF,
@@ -381,10 +386,10 @@ class TrigFastTrackFinderBase(TrigFastTrackFinder):
                                               nHolesMax      = TrackingCuts.nHolesMax(),
                                               nHolesGapMax   = TrackingCuts.nHolesGapMax(),
                                               SeedsFilterLevel = 0, # Do not use built-in seeds filter
-                                              Xi2max         = TrackingCuts.Xi2max(),
+                                              Xi2max         = Xi2max,
                                               Xi2maxNoAdd    = TrackingCuts.Xi2maxNoAdd(),
                                               nWeightedClustersMin= TrackingCuts.nWeightedClustersMin(),
-                                              Xi2maxMultiTracks         = TrackingCuts.Xi2max(),
+                                              Xi2maxMultiTracks         = Xi2max,
                                               UseAssociationTool       = False)
 
         from InDetTrigRecExample.InDetTrigFlags import InDetTrigFlags
