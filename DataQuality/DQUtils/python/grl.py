@@ -43,7 +43,7 @@ def load_grl_string(data, IOVSet_class=IOVSet):
     xml = cElementTree.fromstring(data)
     result = []
 
-    for lbc in xml.getiterator('LumiBlockCollection'):
+    for lbc in xml.iter('LumiBlockCollection'):
         run = int(lbc.find('Run').text)
         for lbr in lbc.findall('LBRange'):
             since, until = int(lbr.get('Start')), int(lbr.get('End')) + 1
