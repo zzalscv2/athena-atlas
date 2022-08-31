@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2017 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef ATHLINKS_ASSOCIATIONMAP_H
@@ -63,6 +63,9 @@ class AssociationMap
   typedef typename std::map<object_link,asso_store>                store_type;
   typedef typename store_type::iterator                   store_iterator_type;
   /*@}*/
+
+  // Dummy to allow defining an end iterator for an empty map.
+  static const asso_store s_dum_asso_store;
 
   /*! \name Constructors and Destructor */
   /*@{*/

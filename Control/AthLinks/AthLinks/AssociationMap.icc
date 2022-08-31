@@ -1,6 +1,10 @@
 /*
-  Copyright (C) 2002-2017 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
 */
+
+template<class OBJCONT,class ASSCONT>
+const typename AssociationMap<OBJCONT,ASSCONT>::asso_store
+  AssociationMap<OBJCONT,ASSCONT>::s_dum_asso_store;
 
 /////////////////////////////////
 // Constructors and Destructor //
@@ -126,8 +130,7 @@ AssociationMap<OBJCONT,ASSCONT>::beginAssociation(const object_type*
   // dummy end()
   else
     {
-      return object_iterator(m_associationMap, 
-			     m_associationMap.end()).getLastAssociation();
+      return asso_iterator (s_dum_asso_store, s_dum_asso_store.end());
     }
 }
 
@@ -148,8 +151,7 @@ AssociationMap<OBJCONT,ASSCONT>::endAssociation(const object_type*
   // dummy end()
   else
     {
-      return object_iterator(m_associationMap, 
-			     m_associationMap.end()).getLastAssociation();
+      return asso_iterator (s_dum_asso_store, s_dum_asso_store.end());
     }
 }
 
@@ -185,8 +187,7 @@ AssociationMap<OBJCONT,ASSCONT>::findAssociation(const object_type* objectPointe
   object_iterator foundIter = object_iterator(m_associationMap).find(objectPointer);
   if ( foundIter == this->endObject() )
     {
-      return object_iterator(m_associationMap, 
-			     m_associationMap.end()).getLastAssociation();
+      return asso_iterator (s_dum_asso_store, s_dum_asso_store.end());
     }
   // find association
   return (foundIter.second()).find(assoPointer);
