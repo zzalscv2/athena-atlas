@@ -3744,7 +3744,7 @@ SinDependence::SinDependence(TFile* file, bool isba = true, bool isht = false, b
 //================================================================
 
 int itersum(int argc, char* argv[]) {
-
+  //cppcheck-suppress ctuArrayIndex
   TFile* datafile = new TFile(argv[2]);  
   if (datafile->IsZombie()){
     cout << "ERROR! INPUT FILE DOES NOT EXIST!" << endl;
@@ -4971,7 +4971,7 @@ if(do_expert)  if (rtcol1) rtcol1->Print("itersum.ps"); c1->Clear();
 }
 
 int tt_remove(int argc, char* argv[]){
-
+  //cppcheck-suppress ctuArrayIndex
   TFile* itersumfile = new TFile(argv[2],"UPDATE");
   if (itersumfile->FindKey("tracktuple")) {
         itersumfile->Delete("tracktuple;*");
