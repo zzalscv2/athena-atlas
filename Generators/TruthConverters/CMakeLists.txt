@@ -21,3 +21,5 @@ atlas_add_component( TruthConverters
 atlas_add_dictionary( TruthConvertersDict
    TruthConverters/xAODtoHepMCDict.h TruthConverters/selection.xml
    LINK_LIBRARIES TruthConvertersLib )
+
+atlas_install_python_modules( python/*.py POST_BUILD_CMD ${ATLAS_FLAKE8} )
