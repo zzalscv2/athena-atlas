@@ -33,15 +33,77 @@
 #include "PixelReadoutGeometry/PixelDetectorManager.h"
 
 GeoVPhysVol* GeoPixelEnvelope::Build( ) {
+
   //
   // Control which parts get built. This is mainly of use for
   // Cosmic runs where the whole detector is not present
   //
   
-
   bool barrelPresent   = m_gmt_mgr->partPresent("Barrel");
   bool endcapAPresent  = m_gmt_mgr->partPresent("EndcapA");
   bool endcapCPresent  = m_gmt_mgr->partPresent("EndcapC");
+
+
+  if(m_sqliteReader) {
+    std::map<std::string, GeoFullPhysVol*>        mapFPV = m_sqliteReader->getPublishedNodes<std::string, GeoFullPhysVol*>("Pixel");
+    std::map<std::string, GeoAlignableTransform*> mapAX  = m_sqliteReader->getPublishedNodes<std::string, GeoAlignableTransform*>("Pixel");
+    
+    GeoFullPhysVol* pPixelEnvelopeVol=mapFPV["Pixel_Envelope"];
+
+    // Add Barrel
+    if (barrelPresent) {    
+      m_DDmgr->numerology().addBarrel(0);
+      m_gmt_mgr->SetBarrel();
+      GeoPixelBarrel brl(m_DDmgr, m_gmt_mgr, m_sqliteReader, nullptr);
+      brl.Build();
+    }
+
+    // Add EndCaps
+    if (endcapAPresent || endcapCPresent) {
+      m_gmt_mgr->SetEndcap();
+
+      GeoPixelEndCap pec(m_DDmgr, m_gmt_mgr, m_sqliteReader, nullptr);
+
+      // EndCap A
+      if (endcapAPresent) {
+	m_DDmgr->numerology().addEndcap(2);
+	m_gmt_mgr->SetPos();
+        pec.Build();
+      }
+    
+      // EndCap C
+      if (endcapCPresent) {
+	m_DDmgr->numerology().addEndcap(-2);
+	m_gmt_mgr->SetEndcap();
+	m_gmt_mgr->SetNeg();
+        pec.Build();      
+      }
+    }
+    // Extra Material 
+    InDetDD::ExtraMaterial xMat(m_gmt_mgr->distortedMatManager());
+    xMat.add(pPixelEnvelopeVol,"Pixel");
+    
+    // DBM
+    if(m_gmt_mgr->dbm()) {
+      m_gmt_mgr->SetPartsDBM();
+      m_gmt_mgr->SetPos();
+      DBM_Det theDBM (m_DDmgr, m_gmt_mgr, m_sqliteReader);
+      theDBM.Build() ;
+      
+      m_gmt_mgr->SetNeg();
+      theDBM.Build() ;
+    } 
+    else {
+      m_DDmgr->numerology().setNumDisksDBM(0);
+      m_DDmgr->numerology().setNumBarrelDBM(0);
+    }
+    
+    // reset BarrelEndcap value to zero
+    m_gmt_mgr->SetBarrel();
+    
+    return pPixelEnvelopeVol;
+  }
+    
 
    // NB. We apply the part transforms only to the active parts.
   // In general though they should always be zero. It would make more sense to apply
