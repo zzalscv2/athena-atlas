@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2017 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef dqiMiniConfigTreeNode_h
@@ -19,8 +19,6 @@ namespace dqi {
  * attributes, and a node inherits the attributes of parent nodes if those attributes
  * are not redefined.
  *
- * $Id: MiniConfigTreeNode.h,v 1.5 2008-12-04 16:40:16 ponyisi Exp $
- *
  * @author Michael Wilson, CERN, March 2007
  */
 
@@ -30,7 +28,7 @@ public:
   class Visitor {
   public:
     virtual ~Visitor() { }
-    virtual void Visit( const MiniConfigTreeNode* node ) const = 0;
+    virtual void Visit( const MiniConfigTreeNode* node ) = 0;
   };
 
   class Writer {
@@ -45,7 +43,7 @@ public:
 
   virtual const char* GetName() const;
 
-  virtual const char* GetPathName() const;
+  virtual std::string GetPathName() const;
 
 
  /**
@@ -57,7 +55,8 @@ public:
 
   virtual MiniConfigTreeNode*        GetDaughter( std::string name_ ) const;
 
-  virtual MiniConfigTreeNode*        GetParent() const;
+  virtual const MiniConfigTreeNode*  GetParent() const { return m_parent; }
+  virtual MiniConfigTreeNode*        GetParent() { return m_parent; }
 
   virtual std::map<std::string,dqi::MiniConfigTreeNode*> GetDaughters() const;
 
@@ -82,7 +81,7 @@ public:
   virtual void                   GetAttributeNamesLocal( std::set<std::string>& attSet ) const;
 
 
-  virtual void                   Accept( const Visitor& visitor ) const;
+  virtual void                   Accept( Visitor& visitor ) const;
 
   virtual void                   Accept(Writer& writer );
 
@@ -99,7 +98,6 @@ protected:
   typedef AttMap_t::const_iterator               AttIter_t;
 
   const std::string  m_name;
-  mutable std::string  m_path;
   MiniConfigTreeNode*    m_parent;
 
   NodeMap_t          m_daughters;

@@ -361,7 +361,7 @@ RefVisitor( TFile* outfile_, HanConfig::DirMap_t& directories_, TMap* refsourced
 
 void
 HanConfig::RefVisitor::
-Visit( const MiniConfigTreeNode* node ) const
+Visit( const MiniConfigTreeNode* node )
 {
   TObject* obj;
   std::string name = node->GetAttribute("name");
@@ -448,7 +448,7 @@ AssessmentVisitorBase( HanConfigGroup* root_, const MiniConfig& algConfig_,
 
 std::shared_ptr<TFile>
 HanConfig::AssessmentVisitorBase::
-GetROOTFile( std::string& fname ) const
+GetROOTFile( std::string& fname )
 {
   auto it = m_filecache.find(fname);
   if (it != end(m_filecache)) {
@@ -469,14 +469,14 @@ GetROOTFile( std::string& fname ) const
 
 void
 HanConfig::AssessmentVisitorBase::
-PopulateKeyCache(std::string& fname, std::shared_ptr<TFile> file) const {
+PopulateKeyCache(std::string& fname, std::shared_ptr<TFile> file) {
   auto& vec = m_keycache[fname];
   dolsr(file.get(), vec);
 }
 
 void
 HanConfig::AssessmentVisitorBase::
-EnsureKeyCache(std::string& fname) const {
+EnsureKeyCache(std::string& fname) {
   DisableMustClean dmc;
   auto file = GetROOTFile(fname);
   if (file) {
@@ -511,7 +511,7 @@ float AttribToFloat(const MiniConfigTreeNode* node, const std::string& attrib,
 void
 HanConfig::AssessmentVisitorBase::
 GetAlgorithmConfiguration( HanConfigAssessor* dqpar, const std::string& algID,
-                           const std::string& assessorName ) const
+                           const std::string& assessorName )
 {
   // bool hasName(false);
   std::set<std::string> algAtt;
@@ -559,7 +559,6 @@ GetAlgorithmConfiguration( HanConfigAssessor* dqpar, const std::string& algID,
       std::string tmpRefID=m_algConfig.GetStringAttribute(algID,"reference");
       //std::cout<<"Got tmpRefID=\""<<tmpRefID<<"\""<<std::endl;
       dqi::ConditionsSingleton &CS=dqi::ConditionsSingleton::getInstance();
-      std::string refCond=CS.getCondition();
       //parses
       std::vector<std::pair<std::string,std::string> > condPairs=CS.getConditionReferencePairs(tmpRefID);
       std::stringstream newRefString;
@@ -802,7 +801,7 @@ RegionVisitor( HanConfigGroup* root_, const MiniConfig& algConfig_,
 
 void
 HanConfig::RegionVisitor::
-Visit( const MiniConfigTreeNode* node ) const
+Visit( const MiniConfigTreeNode* node )
 {
   const MiniConfigTreeNode* parent = node->GetParent();
   if( parent == 0 )
@@ -848,7 +847,7 @@ RegexVisitor( std::set<std::string>& regexes_ )
 
 boost::shared_ptr<dqm_core::Node>
 HanConfig::RegexVisitor::
-Visit( const HanConfigAssessor* node, boost::shared_ptr<dqm_core::Region> ) const
+Visit( const HanConfigAssessor* node, boost::shared_ptr<dqm_core::Region> )
 {
   // ignore Groups
   if (dynamic_cast<const HanConfigGroup*>(node) != NULL) {
@@ -871,7 +870,7 @@ AssessmentVisitor( HanConfigGroup* root_, const MiniConfig& algConfig_,
 
 void
 HanConfig::AssessmentVisitor::
-Visit( const MiniConfigTreeNode* node ) const
+Visit( const MiniConfigTreeNode* node )
 {
   std::set<std::string> histAtt;
   node->GetAttributeNames( histAtt );
@@ -1127,7 +1126,7 @@ ConfigVisitor( TFile* file_, dqm_core::Output* output_ )
 
 boost::shared_ptr<dqm_core::Node>
 HanConfig::ConfigVisitor::
-Visit( const HanConfigAssessor* node, boost::shared_ptr<dqm_core::Region> dqParent ) const
+Visit( const HanConfigAssessor* node, boost::shared_ptr<dqm_core::Region> dqParent )
 {
   const HanConfigGroup* gnode = dynamic_cast<const HanConfigGroup*>( node );
   std::string algName( node->GetAlgName() );
@@ -1169,7 +1168,7 @@ CompAlgVisitor(TFile* outfile_, const MiniConfig& compAlgConfig_)
 
 void
 HanConfig::CompAlgVisitor::
-Visit( const MiniConfigTreeNode* node ) const
+Visit( const MiniConfigTreeNode* node )
 {
   m_outfile->cd();
   std::map<std::string,MiniConfigTreeNode*> daughters = node->GetDaughters();
@@ -1220,7 +1219,7 @@ MetadataVisitor(TFile* outfile_, const MiniConfig& metadataConfig_)
 
 void
 HanConfig::MetadataVisitor::
-Visit( const MiniConfigTreeNode* node ) const
+Visit( const MiniConfigTreeNode* node )
 {
   // maybe already existing?
   if (m_outfile->Get("HanMetadata")) {

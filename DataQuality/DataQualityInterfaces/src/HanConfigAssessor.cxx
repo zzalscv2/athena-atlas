@@ -1,9 +1,8 @@
 /*
-  Copyright (C) 2002-2017 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
 */
 
 // **********************************************************************
-// $Id: HanConfigAssessor.cxx,v 1.17 2009-02-04 09:39:47 ponyisi Exp $
 // **********************************************************************
 
 #include "DataQualityInterfaces/HanConfigAssessor.h"
@@ -459,7 +458,7 @@ GetList( TDirectory* basedir, std::map<std::string,TSeqCollection*>& mp )
 
 void
 HanConfigAssessor::
-Accept( const Visitor& visitor, boost::shared_ptr<dqm_core::Region> dqParent ) const
+Accept( Visitor& visitor, boost::shared_ptr<dqm_core::Region> dqParent ) const
 {
   visitor.Visit( this, std::move(dqParent) );
 }

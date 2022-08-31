@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2017 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef dqiMiniConfig_h
@@ -18,7 +18,6 @@ namespace dqi {
 /**
  * description
  *
- * $Id: MiniConfig.h,v 1.2 2008-10-02 12:37:44 ponyisi Exp $
  *
  * @author Michael Wilson, CERN, March 2007
  */
@@ -46,7 +45,7 @@ public:
 
   virtual void GetAttributeNames( std::string objName, std::set<std::string>& attSet ) const;
 
-  virtual void SendVisitor( const MiniConfigTreeNode::Visitor& visitor ) const;
+  virtual void SendVisitor( MiniConfigTreeNode::Visitor& visitor ) const;
 
   virtual void SendWriter(MiniConfigTreeNode::Writer& writer );
 

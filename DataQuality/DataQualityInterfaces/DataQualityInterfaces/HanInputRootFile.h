@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2017 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef dqiHanInputRootFile_h
@@ -22,15 +22,16 @@ public:
   HanInputRootFile( std::string& rootFileName, const std::string& path = "" );
   ~HanInputRootFile();
 
-  virtual void addListener( const boost::regex& regex, dqm_core::InputListener* listener );
+  virtual void addListener( const boost::regex& regex, dqm_core::InputListener* listener ) override;
 
-  virtual void addListener( const std::vector<std::string>& names, dqm_core::InputListener* listener );
+  virtual void addListener( const std::vector<std::string>& names, dqm_core::InputListener* listener ) override;
 
-  virtual void addListener( const std::string& name, dqm_core::InputListener *listener );
+  virtual void addListener( const std::string& name, dqm_core::InputListener *listener ) override;
 
-  virtual TFile* file() const;
+  TFile* file() const { return m_rootFile.get(); }
 
-  virtual const TDirectory* getBasedir() const;
+  const TDirectory* getBasedir() const { return m_basedir; }
+  TDirectory* getBasedir() { return m_basedir; }
 
 protected:
 

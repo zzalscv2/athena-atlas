@@ -1,10 +1,6 @@
 /*
-  Copyright (C) 2002-2020 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
 */
-
-/**
- * $Id: han_config_gen.cxx,v 1.3 2009-02-09 15:19:59 ponyisi $
- */
 
 #include <iostream>
 #include <string>
@@ -18,13 +14,11 @@
 
 namespace {
 
-void usage( const std::string& command_name, int exit_code );
+int usage( const std::string& command_name, int exit_code );
 
-class CmdLineArgs {
-public:
-  CmdLineArgs( int argc, char *argv[] );
+struct CmdLineArgs {
+  int parse( int argc, char *argv[] );
 
-  
   std::string m_connectionString =  "sqlite://;schema=/afs/cern.ch/user/a/atlasdqm/dqmdisk1/cherrypy-devel/RefDB.db;dbname=REFDB";
   long m_runNumber = 2147483646;
   bool m_bulk = false; 
@@ -41,8 +35,10 @@ int main( int argc, char *argv[] )
 {
   CxxUtils::ubsan_suppress ([]() { TInterpreter::Instance(); });
 
-  CmdLineArgs arg( argc, argv );
-  
+  CmdLineArgs arg;
+  int rc = arg.parse( argc, argv );
+  if (rc!=0) return rc;
+
   std::string infileName( arg.mconfig );
   dqi::ConditionsSingleton::getInstance().setCondition(arg.conds);
   //std::cout<<__PRETTY_FUNCTION__<<"Input Conditions="<<dqi::ConditionsSingleton::getInstance().getCondition()
@@ -66,12 +62,11 @@ int main( int argc, char *argv[] )
 
 namespace {
 
-CmdLineArgs::
-CmdLineArgs( int argc, char *argv[] )
+int CmdLineArgs::parse( int argc, char *argv[] )
 {
   command = argv[0];
-  if( argc > 10 ) usage( command, 1 );
-  if( argc < 2 ) usage( command, 0 );
+  if( argc > 10 ) return usage( command, 1 );
+  if( argc < 2 ) return usage( command, 0 );
   
   mconfig = argv[1];
   
@@ -108,10 +103,11 @@ CmdLineArgs( int argc, char *argv[] )
       ++ic;
     }
   }
+  return 0;
 }
 
 
-void usage( const std::string& command_name, int exit_code )
+int usage( const std::string& command_name, int exit_code )
 {
   std::string message;
   message += "\n";
@@ -126,7 +122,7 @@ void usage( const std::string& command_name, int exit_code )
   std::cout << "\n";
   std::cout << "Usage: " << short_name << " <filename>\n";
   std::cout << message << "\n";
-  exit(exit_code);
+  return exit_code;
 }
 
 
