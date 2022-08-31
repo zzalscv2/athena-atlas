@@ -147,18 +147,29 @@ def L1TriggerByteStreamDecoderCfg(flags):
   ########################################
   # Run-3 L1Calo decoding
   ########################################
-  if flags.Trigger.L1.doCalo and flags.Trigger.enableL1CaloPhase1 and flags.Trigger.doHLT:
-    eFexByteStreamTool = eFexByteStreamToolCfg("eFexBSDecoderTool",
-                                               flags=flags,
-                                               writeBS=False,
-                                               multiSlice=False)
-    jFexRoiByteStreamTool = jFexRoiByteStreamToolCfg("jFexBSDecoderTool",
-                                               flags=flags,
-                                               writeBS=False)
-    decoderTools += [eFexByteStreamTool, jFexRoiByteStreamTool]
-    # During commissioning of the phase-1 L1Calo (2022), allow the data to be missing
-    maybeMissingRobs += eFexByteStreamTool.ROBIDs
-    maybeMissingRobs += jFexRoiByteStreamTool.ROBIDs
+  if flags.Trigger.L1.doCalo and flags.Trigger.enableL1CaloPhase1:
+    # online case in HLT
+    if flags.Trigger.doHLT:
+      eFexByteStreamTool = eFexByteStreamToolCfg("eFexBSDecoderTool",
+                                                 flags=flags,
+                                                 writeBS=False,
+                                                 multiSlice=False)
+      jFexRoiByteStreamTool = jFexRoiByteStreamToolCfg("jFexBSDecoderTool",
+                                                       flags=flags,
+                                                       writeBS=False)
+      gFexByteStreamTool = gFexByteStreamToolCfg("gFexBSDecoderTool",
+                                                 flags=flags,
+                                                 writeBS=False)
+      decoderTools += [eFexByteStreamTool, jFexRoiByteStreamTool, gFexByteStreamTool]
+      # During commissioning of the phase-1 L1Calo (2022), allow the data to be missing
+      maybeMissingRobs += eFexByteStreamTool.ROBIDs
+      maybeMissingRobs += jFexRoiByteStreamTool.ROBIDs
+      maybeMissingRobs += gFexByteStreamTool.ROBIDs
+
+    # reco/monitoring case (either online but downstream from HLT, or at Tier-0)
+    else:
+      # Placeholder for MR !55807
+      pass
 
   ########################################
   # Run-3 L1Topo decoding
