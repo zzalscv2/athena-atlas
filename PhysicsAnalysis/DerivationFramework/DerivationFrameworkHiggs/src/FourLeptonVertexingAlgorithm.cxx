@@ -11,8 +11,7 @@
 namespace {
     using LeptonQuadruplet = DerivationFramework::FourLeptonVertexingAlgorithm::LeptonQuadruplet;
     using TrkLink = ElementLink<xAOD::TrackParticleContainer>;
-
-    constexpr double MeVtoGeV = 1. / Gaudi::Units::GeV;
+    constexpr double MeVtoGeV = 1. / Gaudi::Units::GeV;   
 } // anonymous namespace
 
 std::ostream& operator<<(std::ostream& sstr, const xAOD::IParticle* part) {
@@ -60,6 +59,17 @@ namespace DerivationFramework {
         m_muonTrk = static_cast<MuonTrk>(m_muonTrkProp.value());
         return StatusCode::SUCCESS;
     }
+    StatusCode FourLeptonVertexingAlgorithm::finalize() {
+        unsigned int n_processed = std::accumulate(m_num_lep.begin(), m_num_lep.end(), 0, [](const std::atomic<unsigned int>& l, unsigned int n){
+            return n +l;
+        });
+        ATH_MSG_INFO("Proccessed in total "<<n_processed<<" events. Lepton multiplicities observed:");
+        for (unsigned int l = 0 ; l < m_num_lep.size(); ++l) {
+            ATH_MSG_INFO("    ---- Events with "<<l<<" leptons: "<<m_num_lep[l]<<" (elec/muon) "<<m_num_ele[l]<<"/"<<m_num_muo[l]<<" ("<<(100.*m_num_lep[l] /n_processed)<<"%)" );            
+        }
+        ATH_MSG_INFO("---> Attempted fits "<<m_tried_fits<<" out of which "<<m_good_fits<<" ("<<(100.* m_good_fits / m_tried_fits )<<"%) succeeded." );
+        return StatusCode::SUCCESS;
+    }
     StatusCode FourLeptonVertexingAlgorithm::execute(const EventContext& ctx) const {
         /// Setup the output container
         SG::WriteHandle<xAOD::VertexContainer> vtxContainer{m_vtxKey, ctx};
@@ -101,36 +111,52 @@ namespace DerivationFramework {
         const size_t num_lep = elecContainer->size() + muonContainer->size();
         if (num_lep < 4) {
             ATH_MSG_DEBUG("Less than four objects reconstructed");
+            ++m_num_lep[num_lep];
+            ++m_num_ele[elecContainer->size()];
+            ++m_num_muo[muonContainer->size()];            
             return to_ret;
         }
         selected_lep.reserve(num_lep);
-
+        size_t n_ele{0},n_muo{0};
         for (const xAOD::Muon* muon : *muonContainer) {
             if (passSelection(muon)) {
                 ATH_MSG_DEBUG("Add " << muon);
                 selected_lep.push_back(muon);
+                ++n_ele;
             }
         }
         for (const xAOD::Electron* elec : *elecContainer) {
             if (passSelection(elec)) {
                 ATH_MSG_DEBUG("Add " << elec);
                 selected_lep.push_back(elec);
+                ++n_muo;
             }
         }
-
+        /// Increment the lepton counter
+        ++m_num_lep[std::min(m_num_lep.size() -1 , n_ele + n_muo)];
+        ++m_num_ele[std::min(m_num_ele.size() -1 , n_ele)];
+        ++m_num_muo[std::min(m_num_muo.size() -1 , n_muo)];
+        
         if (selected_lep.size() < 4) {
             ATH_MSG_DEBUG("Less than four leptons survived.");
             return to_ret;
         }
+        std::sort(selected_lep.begin(),selected_lep.end(),
+                        [](const xAOD::IParticle* a, const xAOD::IParticle* b) {                            
+                            return a->pt() > b->pt();});
+        /// None of the leptons has enough momentum to be selected in the offline analysis
+        if (selected_lep[0]->pt() < m_LeadPtCut || selected_lep[1]->pt() < m_SubLeadPtCut) return to_ret;
+
+        to_ret.reserve(std::pow(selected_lep.size(), 4));
         for (PartVec::const_iterator itr1 = selected_lep.begin() + 3; itr1 != selected_lep.end(); ++itr1) {
             for (PartVec::const_iterator itr2 = selected_lep.begin() + 2; itr2 != itr1; ++itr2) {
                 for (PartVec::const_iterator itr3 = selected_lep.begin() + 1; itr3 != itr2; ++itr3) {
+                    if ( (*itr3)->pt() < m_SubLeadPtCut) return to_ret;
                     for (PartVec::const_iterator itr4 = selected_lep.begin(); itr4 != itr3; ++itr4) {
-                        LeptonQuadruplet quad{*itr1, *itr2, *itr3, *itr4};
-                        std::sort(quad.begin(), quad.end(), [](const xAOD::IParticle* a, const xAOD::IParticle* b) {
-                            if (a->type() != b->type()) return a->type() == xAOD::Type::ObjectType::Muon;
-                            return a->pt() > b->pt();
-                        });
+                        LeptonQuadruplet quad{*itr4, *itr3, *itr2, *itr1};
+                        /// The leading lepton has too little momentum. All subsequent combinations will 
+                        ///  have even less. Bail out of the loop                        
+                        if (quad[0]->pt() < m_LeadPtCut) return to_ret;
                         ATH_MSG_DEBUG("Create new quaduplet " << quad);
                         to_ret.push_back(std::move(quad));
                     }
@@ -140,15 +166,20 @@ namespace DerivationFramework {
         return to_ret;
     }
     const xAOD::TrackParticle* FourLeptonVertexingAlgorithm::trackParticle(const xAOD::IParticle* part) const {
-        if (part->type() == xAOD::Type::ObjectType::Muon)
+        if (part->type() == xAOD::Type::Muon)
             return static_cast<const xAOD::Muon*>(part)->trackParticle(m_muonTrk);
         else if (part->type() == xAOD::Type::Electron)
             return xAOD::EgammaHelpers::getTrackParticlesVec(static_cast<const xAOD::Electron*>(part), !m_elecUseGSF)[0];
         return dynamic_cast<const xAOD::TrackParticle*>(part);
     }
-
+    int FourLeptonVertexingAlgorithm::charge(const xAOD::IParticle* part) const{
+        static const SG::AuxElement::ConstAccessor<float> acc_charge{"charge"};
+        if (acc_charge.isAvailable(*part)) return acc_charge(*part);
+        return trackParticle(part)->charge();
+    }
     std::unique_ptr<xAOD::Vertex> FourLeptonVertexingAlgorithm::fitQuadruplet(const EventContext& ctx, const LeptonQuadruplet& quad) const {
         if (!passSelection(quad)) return nullptr;
+        ++m_tried_fits;
         std::vector<const xAOD::TrackParticle*> trks{};
         trks.reserve(4);
         for (const xAOD::IParticle* lep : quad) { trks.push_back(trackParticle(lep)); }
@@ -165,16 +196,57 @@ namespace DerivationFramework {
             ATH_MSG_DEBUG("Fit from  " << quad << " failed.");
             return nullptr;
         }
+        const float redChi2 = (common_vtx->chiSquared() / common_vtx->numberDoF());
         ATH_MSG_DEBUG("Fit from " << quad << " gave a vertex with position at " << common_vtx->position() << " with chi2 "
-                                  << (common_vtx->chiSquared() / common_vtx->numberDoF()) << " nDoF: " << common_vtx->numberDoF());
+                                  << redChi2 << " nDoF: " << common_vtx->numberDoF());
+        if (redChi2 > m_VtxChi2Cut) {
+            ATH_MSG_DEBUG("Reject due to bad chi2");
+            return nullptr;
+        }
+        static const std::vector<float> empty_vec{};
+        if (m_pruneWeight) common_vtx->setTrackWeights(empty_vec);
+        if (m_pruneCov) common_vtx->setCovariance(empty_vec);
+        std::vector<TrkLink> track_links{};
+        for (const xAOD::TrackParticle* trk : trks) {
+            const xAOD::TrackParticleContainer* cont = dynamic_cast<const xAOD::TrackParticleContainer*>(trk->container());
+            TrkLink link{*cont, trk->index(), ctx};
+            link.toPersistent();
+            track_links.push_back(std::move(link));
+        }
+        common_vtx->setTrackParticleLinks(track_links);
+        ++m_good_fits;
         return common_vtx;
     }
     bool FourLeptonVertexingAlgorithm::passSelection(const LeptonQuadruplet& quad) const {
+        float max_m{-1.};
         for (unsigned int i = 1; i < quad.size(); ++i) {
             for (unsigned int j = 0; j < i; ++j) {
-                if (std::abs(trackParticle(quad[i])->z0() - trackParticle(quad[j])->z0()) > m_z0Cut) return false;
+                const xAOD::TrackParticle* trk_a = trackParticle(quad[i]);
+                const xAOD::TrackParticle* trk_b = trackParticle(quad[j]);                
+                
+                if (std::abs(trk_b->z0() - trk_a->z0()) > m_z0Cut) return false;
+                
+                /// Check the di lepton masses in the quad
+                const float di_m1 = (quad[i]->p4() + quad[j]->p4()).M();
+                const bool isSFOS1 = charge(quad[i])*charge(quad[j]) < 0 && quad[i]->type() == quad[j]->type();
+                /// If the pair is SFOS check the mass
+                if (isSFOS1 && di_m1 < m_lowSFOS_Cut) return false;
+                max_m = std::max(di_m1, max_m);                
+                for (unsigned int k = 1 ; k < quad.size(); ++k) {
+                    if (k == i || k == j) continue;
+                    for (unsigned int l = 0; l < k ; ++l) {
+                        if (l == i || l == j) continue;
+                        const float di_m2 =  (quad[k]->p4() + quad[l]->p4()).M();
+                        const bool isSFOS2 = charge(quad[k])*charge(quad[l]) < 0 && quad[k]->type() == quad[l]->type();
+                        if (isSFOS2 && di_m2 < m_lowSFOS_Cut) return false;
+                        max_m = std::max(max_m, di_m2);
+                    }
+                }          
             }
-        }
+        }      
+        /// The high mass pair must at least satisfy a certain threshold
+        if (m_highPair_Cut > max_m) return false;
+
         return true;
     }
 }  // namespace DerivationFramework
