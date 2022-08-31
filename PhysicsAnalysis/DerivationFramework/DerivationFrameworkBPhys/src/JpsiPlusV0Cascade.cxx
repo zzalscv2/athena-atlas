@@ -391,7 +391,7 @@ namespace DerivationFramework {
     m_constrV0(true),
     m_constrJpsi(true),
     m_iVertexFitter("Trk::TrkVKalVrtFitter"),
-    m_pvRefitter("Analysis::PrimaryVertexRefitter"),
+    m_pvRefitter("Analysis::PrimaryVertexRefitter", this),
     m_V0Tools("Trk::V0Tools"),
     m_CascadeTools("DerivationFramework::CascadeTools")
     {

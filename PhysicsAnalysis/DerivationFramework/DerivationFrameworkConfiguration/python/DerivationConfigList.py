@@ -47,7 +47,11 @@ from DerivationFrameworkBPhys.BPHY3 import BPHY3Cfg
 from DerivationFrameworkBPhys.BPHY4 import BPHY4Cfg
 from DerivationFrameworkBPhys.BPHY5 import BPHY5Cfg
 from DerivationFrameworkBPhys.BPHY6 import BPHY6Cfg
+from DerivationFrameworkBPhys.BPHY10 import BPHY10Cfg
 from DerivationFrameworkBPhys.BPHY12 import BPHY12Cfg
+from DerivationFrameworkBPhys.BPHY15 import BPHY15Cfg
+from DerivationFrameworkBPhys.BPHY16 import BPHY16Cfg
+from DerivationFrameworkBPhys.BPHY21 import BPHY21Cfg
 
 # TileCal derivations
 from DerivationFrameworkTileCal.TCAL1 import TCAL1Cfg
@@ -62,6 +66,8 @@ __all__ = ['TEST1Cfg','TEST2Cfg','TEST3Cfg','TEST4Cfg','TEST5Cfg','TEST6Cfg',
            'LLP1Cfg',
            'BPHY1Cfg','BPHY2Cfg', 'BPHY3Cfg', 'BPHY4Cfg', 'BPHY5Cfg',
            'BPHY6Cfg',
-           'BPHY12Cfg',
-           'TCAL1Cfg', 'TCAL2Cfg']
+           'BPHY10Cfg', 'BPHY12Cfg', 'BPHY15Cfg', 'BPHY16Cfg',
+           'BPHY21Cfg',
+           'TCAL1Cfg', 'TCAL2Cfg'
+           ]
 

@@ -44,6 +44,7 @@ def V0InDetConversionTrackSelectorToolCfg(flags, name='InDetV0VxTrackSelector', 
     kwargs.setdefault("significanceZ0_Trt", 3.)
     kwargs.setdefault("minPt", 400.0)
     kwargs.setdefault("IsConversion", False)
+    kwargs.setdefault("UseEventInfoBS", True)
 
     acc.setPrivateTools(CompFactory.InDet.InDetConversionTrackSelectorTool(name, **kwargs))
     return acc

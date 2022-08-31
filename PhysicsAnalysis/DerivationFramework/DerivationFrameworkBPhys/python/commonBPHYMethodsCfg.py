@@ -5,24 +5,25 @@ from AthenaConfiguration.ComponentAccumulator import ComponentAccumulator
 from AthenaConfiguration.ComponentFactory import CompFactory
 
 
-def BPHY_TrkVKalVrtFitterCfg(flags, BPHYDerivationName):
+def BPHY_TrkVKalVrtFitterCfg(flags, BPHYDerivationName, **kwargs):
     acc = ComponentAccumulator()
-    from TrkConfig.AtlasExtrapolatorConfig import InDetExtrapolatorCfg
-    extrap = acc.popToolsAndMerge(InDetExtrapolatorCfg(flags))
+    if "Extrapolator" not in kwargs:
+        from TrkConfig.AtlasExtrapolatorConfig import InDetExtrapolatorCfg
+        kwargs.setdefault("Extrapolator", acc.popToolsAndMerge(InDetExtrapolatorCfg(flags)))
+    if "FirstMeasuredPoint" not in kwargs:
+        kwargs.setdefault("FirstMeasuredPoint", False)
+    if "MakeExtendedVertex" not in kwargs:
+        kwargs.setdefault("MakeExtendedVertex", True)
     tool = CompFactory.Trk.TrkVKalVrtFitter( name       = BPHYDerivationName+"_VKalVrtFitter",
-                                                 Extrapolator        = extrap,
-                                                 FirstMeasuredPoint  = False,
-                                                 MakeExtendedVertex  = True)
+                                                 **kwargs)
     acc.setPrivateTools(tool)
     return acc
 
 
 
 def BPHY_V0ToolCfg(flags, BPHYDerivationName):
-    acc = ComponentAccumulator()
-    tool =CompFactory.Trk.V0Tools(name = BPHYDerivationName + "_V0Tools",Extrapolator = None, DisableExtrapolator = True)
-    acc.setPrivateTools(tool)
-    return acc
+    from TrkConfig.TrkVertexAnalysisUtilsConfig import V0ToolsNoExtrapCfg
+    return V0ToolsNoExtrapCfg(flags, BPHYDerivationName+"_V0Tools")
 
 def BPHY_VertexPointEstimatorCfg(flags, BPHYDerivationName):
     acc = ComponentAccumulator()
@@ -65,14 +66,5 @@ def BPHY_InDetDetailedTrackSelectorToolCfg(flags,BPHYDerivationName, **kwargs):
                                 Extrapolator         = extrap
                                )
     acc.setPrivateTools(InDetTrackSelectorTool)
-    print("UseEventInfoBS       = True,")
     return acc
 
-
-def BPHY_TrkV0VertexFitterCfg(flags) :
-    acc = ComponentAccumulator()
-    from TrkConfig.AtlasExtrapolatorConfig import InDetExtrapolatorCfg
-    extrap = acc.popToolsAndMerge(InDetExtrapolatorCfg(flags))
-    tool = CompFactory.Trk.TrkV0VertexFitter("TrkV0VertexFitter", MaxIterations=10, Use_deltaR=False, Extrapolator=extrap )
-    acc.setPrivateTools(tool)
-    return acc
