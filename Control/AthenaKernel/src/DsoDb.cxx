@@ -328,10 +328,8 @@ DsoDb::build_repository()
     if (!boost::filesystem::exists(*itr)) {
       continue;
     }
-    Paths_t dir_content;
-    std::copy(fs::directory_iterator(p), 
-              fs::directory_iterator(), 
-              std::back_inserter(dir_content));
+    Paths_t dir_content {fs::directory_iterator(p),
+                         fs::directory_iterator()};
     std::sort(dir_content.begin(),
               dir_content.end());
     for (Paths_t::iterator ipath = dir_content.begin(),
