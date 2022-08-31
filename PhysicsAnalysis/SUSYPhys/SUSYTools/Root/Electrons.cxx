@@ -121,6 +121,10 @@ StatusCode SUSYObjDef_xAOD::FillElectron(xAOD::Electron& input, float etcut, flo
   ATH_CHECK( evtStore()->retrieve( evtInfo, "EventInfo" ) );
   const xAOD::Vertex* pv = this->GetPrimVtx();
   const xAOD::TrackParticle* track =  input.trackParticle();
+  if (!track) {
+    ATH_MSG_DEBUG("No primary track particle for this electron. Skipping.");
+    return StatusCode::SUCCESS;
+  }
   double primvertex_z = pv ? pv->z() : 0;
   double el_z0 = track->z0() + track->vz() - primvertex_z;
   dec_z0sinTheta(input) = el_z0 * TMath::Sin(input.p4().Theta());
