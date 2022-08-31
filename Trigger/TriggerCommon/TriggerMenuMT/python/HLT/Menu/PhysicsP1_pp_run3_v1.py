@@ -150,6 +150,9 @@ def addP1Signatures(chains):
         ChainProp(name='HLT_idcalib_trk4_IDCalibPEB_L1J30', stream=['IDCalib'], groups=SupportLegGroup+['PS:Online','RATE:Calibration','BW:Detector'], l1SeedThresholds=['FSNOSEED']), 
         ChainProp(name='HLT_idcalib_trk4_IDCalibPEB_L1XE35', stream=['IDCalib'], groups=SupportLegGroup+['PS:Online','RATE:Calibration','BW:Detector'], l1SeedThresholds=['FSNOSEED']), 
 
+        #ATR-26256 PixelNoise Stream
+        ChainProp(name='HLT_noalg_LumiPEB_L1RD0_EMPTY', l1SeedThresholds=['FSNOSEED'], stream=['PixelNoise'], groups=['PS:Online']+SupportGroup),
+
         #ATR-25327 Test the definition for the 'PixelBeam' and 'VdM' streams
         ChainProp(name='HLT_noalg_LumiPEB_L1RD0_FILLED', l1SeedThresholds=['FSNOSEED'], stream=['PixelBeam'], groups=['PS:Online']+SupportGroup),
         ChainProp(name='HLT_noalg_vdm_LumiPEB_L1RD0_BGRP11', l1SeedThresholds=['FSNOSEED'], stream=['VdM'], groups=['PS:Online']+SupportGroup),
