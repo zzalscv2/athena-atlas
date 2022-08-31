@@ -1,9 +1,9 @@
 /*
-  Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
 */
 
-#ifndef GEOPIXELDETAILEDSTAVESUPPORT_H
-#define GEOPIXELDETAILEDSTAVESUPPORT_H
+#ifndef PIXELGEOMODEL_GEOPIXELDETAILEDSTAVESUPPORT_H
+#define PIXELGEOMODEL_GEOPIXELDETAILEDSTAVESUPPORT_H
 
 #include "GeoPixelStaveSupport.h"
 #include "GeoPrimitives/GeoPrimitives.h"

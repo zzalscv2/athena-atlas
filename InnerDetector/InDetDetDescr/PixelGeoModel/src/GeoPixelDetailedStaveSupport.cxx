@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
 */
 
 
@@ -44,10 +44,9 @@ GeoVPhysVol* GeoPixelDetailedStaveSupport::Build ( ) {
 
   m_gmt_mgr->msg(MSG::INFO) <<"Build detailed stave support description :  layout "<<m_gmt_mgr->PixelStaveLayout()<<endmsg;
 
-  bool isBLayer = false;
-  if(m_gmt_mgr->GetLD() == 0) isBLayer = true;
+  bool isBLayer = m_gmt_mgr->GetLD() == 0;
   int staveLayout = m_gmt_mgr->PixelStaveLayout();
-  
+
   // Module geometry
   GeoPixelSiCrystal theSensor(m_DDmgr, m_gmt_mgr, m_sqliteReader, isBLayer);
   GeoPixelModule pm(m_DDmgr, m_gmt_mgr, m_sqliteReader, theSensor);
@@ -152,6 +151,13 @@ GeoVPhysVol* GeoPixelDetailedStaveSupport::Build ( ) {
   m_gmt_mgr->msg(MSG::INFO) <<"Module length/gap : "<<ModuleLength<<" / "<<Module3DLength<<" "<<ModuleGap<<"  -> Stave length : "<<m_StaveLength<<endmsg;
   m_gmt_mgr->msg(MSG::INFO) <<"   planar/3D/endblock/NonActive lengths : "<<lgPlanar<<" "<<lg3D<<" "<<lgEndBlock<<" "<<lgNAStave<<endmsg;
 
+  m_SafetyMargin=.001*Gaudi::Units::mm;
+
+  if(m_sqliteReader) {
+    // No more actions required when building from SQLite file
+    return nullptr;
+  }
+
   // ------------------------------------------------------------------------------------------------------------
   // ------------------------------------------------------------------------------------------------------------
   // Stave geometry
@@ -207,7 +213,6 @@ GeoVPhysVol* GeoPixelDetailedStaveSupport::Build ( ) {
   double halfMecStaveWidth=MechanicalStaveWidth*0.5;
 
   // SafetyMargin
-  m_SafetyMargin=.001*Gaudi::Units::mm;
   double xGblOffset=FacePlateThick+m_SafetyMargin;
   double safetyMarginZ=.001*Gaudi::Units::mm;
 
