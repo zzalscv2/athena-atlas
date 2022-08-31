@@ -2,8 +2,8 @@
   Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
 */
 
-#ifndef GEOPIXELTMT_H
-#define GEOPIXELTMT_H
+#ifndef PIXELGEOMODEL_GEOPIXELTMT_H
+#define PIXELGEOMODEL_GEOPIXELTMT_H
 
 #include "GeoPixelStaveSupport.h"
 #include "GeoPrimitives/GeoPrimitives.h"
@@ -36,7 +36,7 @@ public:
 private:
   const GeoShape * addShape(const GeoShape * lastShape, const GeoShape * nextShape, const GeoTrf::Transform3D & trans);
 
-  GeoVPhysVol* m_physVol;
+  GeoVPhysVol* m_physVol{nullptr};
   GeoTrf::Transform3D m_transform;
 };
 
