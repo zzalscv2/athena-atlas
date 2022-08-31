@@ -22,9 +22,9 @@ namespace CP {
 
   /** @brief Class-algorithm for muon particle collection merging*/
   class MuonLRTOverlapRemovalTool : virtual public CP::IMuonLRTOverlapRemovalTool, public asg::AsgTool {
-      
+
     public:
-      
+
       ///////////////////////////////////////////////////////////////////
       /** @brief Standard Algotithm methods:                           */
       ///////////////////////////////////////////////////////////////////
@@ -58,6 +58,9 @@ namespace CP {
       /// returns true if they do overlap and false if they don't.
       virtual bool hasOverlap(const xAOD::Muon* promptMuon,
                               const xAOD::Muon* lrtMuon) const;
+
+      /// checks the eta difference between the ID and ME track particles which is used for the final overlap resolution.
+      virtual float getIDMEdEta(const xAOD::Muon* muon) const;
 
     private:
       /// This allows to configure the OR strategy in the future, if more than one is supported by MCP. 

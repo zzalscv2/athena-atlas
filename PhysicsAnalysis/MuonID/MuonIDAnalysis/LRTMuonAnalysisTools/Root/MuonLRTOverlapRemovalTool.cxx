@@ -117,23 +117,35 @@ namespace CP {
     // still here? Next prefer combined muons over others 
     bool promptIsCombined = promptMuon->muonType() == xAOD::Muon::Combined;
     bool lrtIsCombined = lrtMuon->muonType() == xAOD::Muon::Combined;
-    /// we are still here! 
+
     if (promptIsCombined && !lrtIsCombined) {
       return {true,false};
     }
     else if (!promptIsCombined && lrtIsCombined) {
       return {false,true};
     }
-    // Both or neither are combined. For now, we keep both muons. TODO: To be resolved in the future
-    ATH_MSG_DEBUG("Found a yet-to-be-resolved overlap!");
-    return {true,true};
+
+    // still here? Next choose the muon with a lower ID-ME delta eta value
+    float promptIDMEdEta = getIDMEdEta(promptMuon);
+    float lrtIDMEdEta    = getIDMEdEta(lrtMuon);
+
+    if (promptIDMEdEta <= lrtIDMEdEta) {
+      return {true,false};
+    }
+    else {
+      return {false,true};
+    }
+
+    // fail-safe case: choose prompt over LRT.
+    ATH_MSG_DEBUG("Resolution reached the fail-safe point. Why?");
+    return {true,false};
   }
 
   void MuonLRTOverlapRemovalTool::checkOverlapAndDecor(const xAOD::Muon* promptMuon,
                                                        const xAOD::Muon* lrtMuon) const{
 
     static const SG::AuxElement::Decorator<int> MuonLRTOverlapDecision("MuonLRTOverlapDecision"); //0 if no overlap, 1 if overlaps and rejected, 2 if overlaps and retained
-        
+
     if (!hasOverlap(promptMuon, lrtMuon)){
       MuonLRTOverlapDecision(*promptMuon) = 0;
       MuonLRTOverlapDecision(*lrtMuon) = 0;
@@ -144,14 +156,18 @@ namespace CP {
         MuonLRTOverlapDecision(*promptMuon) = 2;
         MuonLRTOverlapDecision(*lrtMuon) = 1;
       }
-      else if (!overlapDecision.first && overlapDecision.second) {
+      else {
         MuonLRTOverlapDecision(*promptMuon) = 1;
-        MuonLRTOverlapDecision(*lrtMuon) = 2;
-      }
-      else if (overlapDecision.first && overlapDecision.second) {
-        MuonLRTOverlapDecision(*promptMuon) = 2;
         MuonLRTOverlapDecision(*lrtMuon) = 2;
       }
     }
   }
+
+  float MuonLRTOverlapRemovalTool::getIDMEdEta(const xAOD::Muon* muon) const{
+    const xAOD::TrackParticle* ID_track = muon->trackParticle(xAOD::Muon::InnerDetectorTrackParticle);
+    const xAOD::TrackParticle* ME_track = muon->trackParticle(xAOD::Muon::ExtrapolatedMuonSpectrometerTrackParticle);
+    if (!ID_track || !ME_track) return FLT_MAX;
+    return ( std::abs( ID_track->eta() - ME_track->eta() ) );
+  }
+
 } // end namespace CP
