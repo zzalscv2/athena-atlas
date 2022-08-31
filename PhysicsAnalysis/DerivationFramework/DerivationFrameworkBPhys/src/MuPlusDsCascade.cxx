@@ -661,7 +661,7 @@ namespace DerivationFramework {
                }
            }
 
-           if(std::abs(m_Dx_pid==411)) { // D+/-
+           if(std::abs(m_Dx_pid)==411) { // D+/-
                SG::AuxElement::Accessor<Char_t> flagAcc1("passed_Dp");
                SG::AuxElement::Accessor<Char_t> flagAcc2("passed_Dm");
                bool isDp(true);
