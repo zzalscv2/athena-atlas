@@ -81,6 +81,9 @@ class TileCellMonitorAlgorithm : public TileMonitorAlgorithm {
     Gaudi::Property<std::vector<float>> m_timeRangeForMuon{this,
          "TimeRangeForMuon", {-60.0F, 60.F}, "Cell time range for muon in ns"};
 
+    Gaudi::Property<std::vector<float>> m_energyThresholdForGain{this,
+         "EnergyThresholdForGain", {10000.0F, 300.F}, "Channel energy threshold per gain for over thershold occupnacy maps"};
+
     /**
      * @brief Name of Tile cabling service
      */
