@@ -1,9 +1,10 @@
 /*
-  Copyright (C) 2002-2019 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "BarcodeServices/BitCalculator.h"
 #include <iostream>
+#include <bitset>
 
 ClassImp(Barcode::BitCalculator)
 
@@ -15,11 +16,6 @@ Barcode::BitCalculator::BitCalculator()
   , m_nbitshs(1)
   , m_nbitssimulator(3)
   , m_nbitsbcid( 8*sizeof(int) - m_nbitsparent - m_nbitspid - m_nbitshs - m_nbitssimulator )
-  //  , m_nbitsparent(16)
-  //  , m_nbitspid(6)
-  //  , m_nbitshs(4)
-  //  , m_nbitssimulator(0)
-  //  , m_nbitsbcid(6)
   , m_parentOne(0)
   , m_pidOne(0)
   , m_hsOne(0)
@@ -206,12 +202,7 @@ Barcode::BitCalculator::SetBCID(int& barcode, const int& bcid) const // also to 
 void
 Barcode::BitCalculator::PrintBits(const int& barcode) const
 {
-  for (int i = sizeof(int)*8 -1 ; i>=0; --i) {
-    int j = 1<<i;
-    int pos = barcode & j ;
-    std::cout << (pos!=0 ? "1" : "0") << "";
-  }
-  std::cout << std::endl;
+  std::cout << std::bitset<sizeof(int)*8>(barcode).to_string()<<std::endl;
 }
 
 
