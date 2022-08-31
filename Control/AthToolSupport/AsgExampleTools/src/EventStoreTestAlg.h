@@ -1,6 +1,6 @@
 // Dear emacs, this is -*- c++ -*-
 //
-// Copyright (C) 2002-20222 CERN for the benefit of the ATLAS collaboration
+// Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
 //
 #ifndef ASGEXAMPLETOOLS_EVENTSTORETESTALG_H
 #define ASGEXAMPLETOOLS_EVENTSTORETESTALG_H
