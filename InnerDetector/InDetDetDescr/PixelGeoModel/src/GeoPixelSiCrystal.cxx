@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
 */
 
 //
@@ -134,39 +134,39 @@ GeoPixelSiCrystal::GeoPixelSiCrystal(InDetDD::PixelDetectorManager* ddmgr,
   
 }
 GeoVPhysVol* GeoPixelSiCrystal::Build() {
-  //(sar) code moved from c'tor..
-  const double thickness = m_gmt_mgr->PixelBoardThickness(m_isModule3D);
-  const double length = m_gmt_mgr->PixelBoardLength(m_isModule3D);
-  const double width = m_gmt_mgr->PixelBoardWidth(m_isModule3D);
-  //
-  std::string matName = m_gmt_mgr->getMaterialName("Sensor");
-  const GeoMaterial* siMat = m_mat_mgr->getMaterial(matName);
-  const GeoBox* siBox = new GeoBox(thickness*0.5,width*0.5,length*0.5);
-  std::string logname{"siLog"};
-  // There is not a strong need to give the blayer a different name but leave it for now. 
-  if(m_isBLayer) logname = "siBLayLog";
-  auto *logVolume = new GeoLogVol(logname,siBox,siMat);
-  //(sar) ...to here
+
+  GeoFullPhysVol* siPhys{nullptr};
+  int brl_ec= m_gmt_mgr->isEndcap() ? 2*m_gmt_mgr->GetSide() : 0;
+
+  if(m_sqliteReader) {
+    std::string siName ="SiPhys_" + std::to_string(brl_ec) +"_"+ std::to_string(m_gmt_mgr->GetLD()) +"_"+ std::to_string(m_gmt_mgr->Phi()) +"_"+ std::to_string(m_gmt_mgr->Eta());
+    std::map<std::string, GeoFullPhysVol*> mapFPV = m_sqliteReader->getPublishedNodes<std::string, GeoFullPhysVol*>("Pixel");
+    siPhys = mapFPV[siName];
+  }
+  else {
+    //(sar) code moved from c'tor..
+    const double thickness = m_gmt_mgr->PixelBoardThickness(m_isModule3D);
+    const double length = m_gmt_mgr->PixelBoardLength(m_isModule3D);
+    const double width = m_gmt_mgr->PixelBoardWidth(m_isModule3D);
+    //
+    std::string matName = m_gmt_mgr->getMaterialName("Sensor");
+    const GeoMaterial* siMat = m_mat_mgr->getMaterial(matName);
+    const GeoBox* siBox = new GeoBox(thickness*0.5,width*0.5,length*0.5);
+    std::string logname{"siLog"};
+    // There is not a strong need to give the blayer a different name but leave it for now. 
+    if(m_isBLayer) logname = "siBLayLog";
+    auto *logVolume = new GeoLogVol(logname,siBox,siMat);
+    //(sar) ...to here
 
 
-  GeoFullPhysVol* siPhys = new GeoFullPhysVol(logVolume);
-
-  //
-  // Add this to the list of detector elements:
-  //
-  int brl_ec=0;
+    siPhys = new GeoFullPhysVol(logVolume);
+  }
 
   // Build the Identifier for the silicon:
   //
-  if(m_gmt_mgr->isBarrel() ) brl_ec = 0;
-  if(m_gmt_mgr->isEndcap() ) brl_ec = 2*m_gmt_mgr->GetSide();
   const PixelID * idHelper = m_gmt_mgr->getIdHelper();
-  Identifier idwafer;
-  idwafer = idHelper->wafer_id(brl_ec,m_gmt_mgr->GetLD(),m_gmt_mgr->Phi(),m_gmt_mgr->Eta());
- 
-  m_id=idwafer;
-  SiDetectorElement * element = new SiDetectorElement(idwafer, m_design, siPhys, m_gmt_mgr->commonItems());
-  
+  m_id = idHelper->wafer_id(brl_ec,m_gmt_mgr->GetLD(),m_gmt_mgr->Phi(),m_gmt_mgr->Eta());
+  SiDetectorElement * element = new SiDetectorElement(m_id, m_design, siPhys, m_gmt_mgr->commonItems());
   
   // add the element to the manager
   m_DDmgr->addDetectorElement(element);
