@@ -1,6 +1,6 @@
 
 //
-//  Copyright (C) 2002-2020 CERN for the benefit of the ATLAS collaboration
+//  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
 //
 
 #include "xAODJet/Jet.h"
@@ -10,6 +10,12 @@
 using ::testing::Return;
 using ::testing::_;
 using ::testing::SetArgReferee;
+
+// Suppress a false positive from gtest.
+#if __GNUC__ >= 12
+# pragma GCC diagnostic ignored "-Wmaybe-uninitialized"
+#endif
+
 
 namespace Athena_test {
 
