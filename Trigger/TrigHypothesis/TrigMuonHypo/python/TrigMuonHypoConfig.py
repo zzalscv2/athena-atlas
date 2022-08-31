@@ -109,6 +109,12 @@ muCombThresholds = {
     '70GeV_v15a'             : [ [0,1.05,1.5,2.0,9.9], [ 49.0, 49.0, 49.0, 49.0] ],
     '80GeV_v15a'             : [ [0,1.05,1.5,2.0,9.9], [ 56.0, 56.0, 56.0, 56.0] ],
     '100GeV_v15a'            : [ [0,1.05,1.5,2.0,9.9], [ 70.0, 70.0, 70.0, 70.0] ],
+
+    '15GeV_v16'             : [ [0,1.05,1.5,2.0,9.9], [ 14.50, 14.00, 14.00, 14.50] ],
+    '20GeV_v16'             : [ [0,1.05,1.5,2.0,9.9], [ 19.31, 19.19, 18.80, 17.95] ],
+    '25GeV_v16'            : [ [0,1.05,1.5,2.0,9.9], [ 24.2, 23.2, 23.2, 22.6] ],
+    '30GeV_v16'            : [ [0,1.05,1.5,2.0,9.9], [ 29.0, 28.0, 28.0, 27.0] ],
+    '50GeV_v16'            : [ [0,1.05,1.5,2.0,9.9], [ 40.0, 40.0, 40.0, 40.0] ],
     }
 
 trigMuonEFSAThresholds = {
@@ -435,10 +441,16 @@ def TrigmuCombHypoToolFromDict( chainDict ):
     tight = False # can be probably decoded from some of the proprties of the chain, expert work
 
     acceptAll = False
+
+    if 'mucombTag' in chainDict['chainParts'][0]['extra']:
+        domuCombTag = True
+    else:
+        domuCombTag = False
+
     if chainDict['chainParts'][0]['signature'] == 'Bphysics':
         acceptAll = True
 
-    tool = config.ConfigurationHypoTool( chainDict['chainName'], thresholds, tight, acceptAll )
+    tool = config.ConfigurationHypoTool( chainDict['chainName'], thresholds, tight, acceptAll, domuCombTag )
 
     if monitorAll:
         tool.MonTool = TrigmuCombHypoMonitoring("TrigmuCombHypoTool/"+chainDict['chainName'])
@@ -470,8 +482,12 @@ def TrigmuCombHypoToolwORFromDict( chainDict ):
     tight = False # can be probably decoded from some of the proprties of the chain, expert work
 
     acceptAll = False
+    if 'mucombTag' in chainDict['chainParts'][0]['extra']:
+        domuCombTag = True
+    else:
+        domuCombTag = False
 
-    tool = config.ConfigurationHypoTool( chainDict['chainName'], thresholds, tight, acceptAll )
+    tool = config.ConfigurationHypoTool( chainDict['chainName'], thresholds, tight, acceptAll, domuCombTag )
 
     if monitorAll:
         tool.MonTool = TrigL2MuonOverlapRemoverMonitoringMucomb("TrigmuCombHypoTool/"+chainDict['chainName'])
@@ -503,8 +519,9 @@ def Trigl2IOHypoToolwORFromDict( chainDict ):
     tight = False # can be probably decoded from some of the proprties of the chain, expert work
 
     acceptAll = False
+    domuCombTag=False
 
-    tool=config.ConfigurationHypoTool( chainDict['chainName'], thresholds, tight, acceptAll )
+    tool=config.ConfigurationHypoTool( chainDict['chainName'], thresholds, tight, acceptAll, domuCombTag )
 
     # Overlap Removal
     tool.ApplyOR = True
@@ -533,8 +550,9 @@ def Trigl2mtCBHypoToolwORFromDict( chainDict ):
     tight = False # can be probably decoded from some of the proprties of the chain, expert work
 
     acceptAll = False
+    domuCombTag = False
 
-    tool=config.ConfigurationHypoTool( chainDict['chainName'], thresholds, tight, acceptAll )
+    tool=config.ConfigurationHypoTool( chainDict['chainName'], thresholds, tight, acceptAll, domuCombTag )
 
     # Overlap Removal
     tool.ApplyOR = True
@@ -554,7 +572,7 @@ class TrigmuCombHypoConfig(object):
 
     log = logging.getLogger('TrigmuCombHypoConfig')
 
-    def ConfigurationHypoTool( self, thresholdHLT, thresholds, tight, acceptAll ):
+    def ConfigurationHypoTool( self, thresholdHLT, thresholds, tight, acceptAll, domuCombTag ):
 
         tool = CompFactory.TrigmuCombHypoTool( thresholdHLT )
         tool.AcceptAll = acceptAll
@@ -575,7 +593,11 @@ class TrigmuCombHypoConfig(object):
                 #    thvaluename = '22GeV_v15a'
                 #else:
                 #    thvaluename = thvalue + 'GeV_v15a'
-                thvaluename = thvalue + 'GeV_v15a'
+                if domuCombTag:
+                    thvaluename = thvalue + 'GeV_v16'
+                else:
+                    thvaluename = thvalue + 'GeV_v15a'
+
                 if int(thvalue)==3:
                     thvaluename = thvalue + 'GeV_v22a'
                 log.debug('Number of threshold = %d, Value of threshold = %s', th, thvaluename)
