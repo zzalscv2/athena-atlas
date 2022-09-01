@@ -638,7 +638,7 @@ StatusCode InDet::RobustTrackingGeometryBuilder::finalize()
 }
 
 
-Trk::TrackingVolume* InDet::RobustTrackingGeometryBuilder::packVolumeTriple ATLAS_NOT_THREAD_SAFE (
+Trk::TrackingVolume* InDet::RobustTrackingGeometryBuilder::packVolumeTriple(
                                      const std::vector<Trk::Layer*>& negLayers,
                                      const std::vector<Trk::Layer*>& centralLayers,
                                      const std::vector<Trk::Layer*>& posLayers,

@@ -92,21 +92,21 @@ namespace InDet {
     private:
       /** Private method, creates and packs a triple containing of
        * NegEndcap-Barrel-PosEndcap layers */
-      Trk::TrackingVolume* packVolumeTriple
-      ATLAS_NOT_THREAD_SAFE(const std::vector<Trk::Layer*>& negLayers,
-                            const std::vector<Trk::Layer*>& centralLayers,
-                            const std::vector<Trk::Layer*>& posLayers,
-                            double rMin,
-                            double rMax,
-                            double zMin,
-                            double zPosCentral,
-                            const std::string& baseName = "UndefinedVolume",
-                            int colorCode = 21,
-                            Trk::BinningType bintype = Trk::arbitrary) const;
+      Trk::TrackingVolume* packVolumeTriple(
+        const std::vector<Trk::Layer*>& negLayers,
+        const std::vector<Trk::Layer*>& centralLayers,
+        const std::vector<Trk::Layer*>& posLayers,
+        double rMin,
+        double rMax,
+        double zMin,
+        double zPosCentral,
+        const std::string& baseName = "UndefinedVolume",
+        int colorCode = 21,
+        Trk::BinningType bintype = Trk::arbitrary) const;
 
       /** Private method, creates and packs a triple containing of
        * NegEndcap-Barrel-PosEndcap volumes */
-      Trk::TrackingVolume* packVolumeTriple ATLAS_NOT_THREAD_SAFE(
+      Trk::TrackingVolume* packVolumeTriple(
         const std::vector<Trk::TrackingVolume*>& negVolumes,
         const std::vector<Trk::TrackingVolume*>& centralVolumes,
         const std::vector<Trk::TrackingVolume*>& posVolumes,

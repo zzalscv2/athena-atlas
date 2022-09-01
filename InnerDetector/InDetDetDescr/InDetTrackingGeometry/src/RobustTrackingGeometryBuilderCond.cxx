@@ -638,7 +638,7 @@ StatusCode InDet::RobustTrackingGeometryBuilderCond::finalize()
 }
 
 
-Trk::TrackingVolume* InDet::RobustTrackingGeometryBuilderCond::packVolumeTriple ATLAS_NOT_THREAD_SAFE ( // Thread unsafe TrackingVolume::registerColorCode method is used.
+Trk::TrackingVolume* InDet::RobustTrackingGeometryBuilderCond::packVolumeTriple(
                                      const std::vector<Trk::Layer*>& negLayers,
                                      const std::vector<Trk::Layer*>& centralLayers,
                                      const std::vector<Trk::Layer*>& posLayers,
