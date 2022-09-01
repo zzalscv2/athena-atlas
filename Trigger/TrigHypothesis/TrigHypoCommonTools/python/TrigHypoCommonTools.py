@@ -28,7 +28,7 @@ def TrigGenericHypoToolFromDict(chainDict):
 
     passString=''
     if 'mistimemonj400' in chainDict['chainParts'][0]['monType']:
-        passString = "TrigCompositeMistimeJ400.pass"
+        passString = "HLT_TrigCompositeMistimeJ400.pass"
     config = TrigGenericHypoToolConfig()
     tool = config.ConfigurationHypoTool(name=chainDict['chainName'], passKey=passString)
 

@@ -15,6 +15,7 @@ from AthenaConfiguration.AllConfigFlags import ConfigFlags
 from AthenaConfiguration.Enums import Format
 from TrigHypoCommonTools.TrigHypoCommonToolsConf import TrigGenericHypoAlg
 from TrigHypoCommonTools.TrigHypoCommonTools import TrigGenericHypoToolFromDict
+from TrigEDMConfig.TriggerEDMRun3 import recordable
 
 #----------------------------------------------------------------
 # fragments generating configuration will be functions in New JO, 
@@ -76,7 +77,7 @@ def MistimeMonSequenceCfg(flags):
         inputMaker.RoITool = ViewCreatorInitialROITool()
         inputMaker.RoIs="MistimeMonInputRoIs"
 
-        outputName = "TrigCompositeMistimeJ400"
+        outputName = recordable("HLT_TrigCompositeMistimeJ400")
         recoAlg = L1CorrelationAlgCfg("MistimeMonj400", ItemList=['L1_J400'], 
                                       TrigCompositeWrieHandleKey=outputName, trigCompPassKey=outputName+".pass",
                                       l1AKey=outputName+".l1a_type", otherTypeKey=outputName+".other_type",
