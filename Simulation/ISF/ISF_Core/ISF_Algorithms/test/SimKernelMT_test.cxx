@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
 */
 
 /**
@@ -34,6 +34,11 @@
 #include "gmock/gmock.h"
 
 #include "AtlasHepMC/Operators.h"
+
+#if __GNUC__ >= 12
+// gcc12 gives maybe-uninitialized warnings about uses of testing::_.
+# pragma GCC diagnostic ignored "-Wmaybe-uninitialized"
+#endif
 
 namespace ISFTesting {
 
