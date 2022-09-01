@@ -1,10 +1,11 @@
 /*
-  Copyright (C) 2002-2017 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "TCollection.h"
 #include "TNamed.h"
-#include <boost/thread.hpp>
+
+#include <mutex>
 
 class TSeqCollection;
 class TKey;
@@ -15,8 +16,6 @@ namespace dqi {
   TSeqCollection* newTObjArray( const char *name, TObject *obj = 0, Int_t size = TCollection::kInitCapacity);
   TKey* getObjKey( TDirectory* dir, const std::string& path );
   void dolsr(const TDirectory* dir, std::vector<std::string>& hists, const TDirectory* topdir = nullptr);
-
-  extern boost::mutex root_mutex;
 
   class HanHistogramLink : public TNamed {
   public:
@@ -33,7 +32,7 @@ namespace dqi {
     DisableMustClean();
     ~DisableMustClean();
   private:
-    boost::mutex::scoped_lock m_lock;
+    std::unique_lock<std::mutex> m_lock;
     bool m_useRecursiveDelete;
   };
 }

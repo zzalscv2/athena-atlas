@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2017 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "DataQualityInterfaces/ConditionsSingleton.h"
@@ -14,44 +14,23 @@
 #include <boost/algorithm/string.hpp>
 #include "boost/algorithm/string/erase.hpp"
 #include "boost/algorithm/string/split.hpp"
-#include "boost/thread/thread.hpp"
-#include "boost/thread/mutex.hpp"
 
-namespace{
-  boost::mutex ConditionsSingletonMutex;
-}
+
 namespace dqi{
-  ConditionsSingleton* ConditionsSingleton::s_instance = 0;
-  
-  ConditionsSingleton::ConditionsCleanup::~ConditionsCleanup() {
-    boost::mutex::scoped_lock guard(ConditionsSingletonMutex);
-    
-    if (ConditionsSingleton::s_instance)
-      {
-	delete ConditionsSingleton::s_instance;
-	ConditionsSingleton::s_instance=0;
-      }
-  }
 
   ConditionsSingleton& ConditionsSingleton::getInstance(){
-    static ConditionsCleanup cleanup;
-    if(true){
-      boost::mutex::scoped_lock guard(ConditionsSingletonMutex);
-      if(!s_instance){
-	s_instance=new ConditionsSingleton();
-      }
-    }
-    return *s_instance;
+    static ConditionsSingleton instance;
+    return instance;
   }
 
   void ConditionsSingleton::setCondition(const std::string& cond){
     m_currentConditions=cond;
   }
 
-  std::string& ConditionsSingleton::getCondition(){
+  const std::string& ConditionsSingleton::getCondition() const {
     return m_currentConditions;
   }
-  int ConditionsSingleton::getNumReferenceHistos(){
+  int ConditionsSingleton::getNumReferenceHistos() const {
     return m_numRefHisto;
   }
 
@@ -62,7 +41,7 @@ namespace dqi{
     m_refsourcedata = refsourcedata;
   }
 
-  std::string ConditionsSingleton::getRefSourceData(const std::string& rawref) {
+  std::string ConditionsSingleton::getRefSourceData(const std::string& rawref) const {
     if (! m_refsourcedata) {
       // Suppress error message as it will occur in cases of backwards compatibility
       // std::cerr << "Null refsourcedata: THIS IS REALLY BAD!!!" << std::endl;
@@ -85,7 +64,7 @@ namespace dqi{
     return oss.str();
   }
 
-  std::vector<std::string> ConditionsSingleton::getAllReferenceNames(std::string inp){
+  std::vector<std::string> ConditionsSingleton::getAllReferenceNames(std::string inp) const {
     boost::algorithm::erase_all(inp," ");
     //    if(cleanCond.empty())return inp;
     //std::set<std::string> referenceSet;
@@ -162,7 +141,7 @@ namespace dqi{
   }
 
   bool ConditionsSingleton::conditionsMatch(std::map<std::string, std::string>& refConds,
-					    std::map<std::string, std::string>& currentConds) {
+					    std::map<std::string, std::string>& currentConds) const {
     for (std::map<std::string, std::string>::const_iterator cond_iter = refConds.begin();
 	 cond_iter != refConds.end(); ++cond_iter) {
       // reject if reference key is not in current conditions
@@ -236,7 +215,7 @@ namespace dqi{
   // This method is needed to replace the reference names in algorithm with conditions
   //
 
-  std::vector<std::pair<std::string,std::string> > ConditionsSingleton::getConditionReferencePairs(std::string inp){
+  std::vector<std::pair<std::string,std::string> > ConditionsSingleton::getConditionReferencePairs(std::string inp) const {
     std::vector<std::pair<std::string,std::string> > condPairs;
     std::map<std::string,std::string>  pairMap;//unique condition-reference pairs;
     boost::algorithm::erase_all(inp," ");
@@ -301,17 +280,18 @@ namespace dqi{
       return;
     }
   }
-  std::string ConditionsSingleton::getNewReferenceName(const std::string& oldName,bool quiet){
-    std::string newName("");
+  std::string ConditionsSingleton::getNewReferenceName(const std::string& oldName,bool quiet) const {
     if(oldName.empty()){
       std::cerr<<"Reference must have a name"<<std::endl;
-      return newName;
+      return {};
     }
-    if(m_referenceMap.find(oldName)==m_referenceMap.end()){
+
+    const auto itr = m_referenceMap.find(oldName);
+    if(itr==m_referenceMap.end()){
       if(!quiet)std::cerr<<"Non-existent reference\""<<oldName<<"\". Returning empty string"<<std::endl;
-      return newName;
+      return {};
     }
-    return m_referenceMap[oldName];
+    return itr->second;
   }
 
 }

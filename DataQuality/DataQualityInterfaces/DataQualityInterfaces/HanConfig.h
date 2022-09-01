@@ -72,7 +72,7 @@ protected:
   class RefVisitor : public MiniConfigTreeNode::Visitor {
   public:
     RefVisitor( TFile* outfile_, HanConfig::DirMap_t& directories_, TMap* refsourcedata );
-    virtual void Visit( const MiniConfigTreeNode* node ) const;
+    virtual void Visit( const MiniConfigTreeNode* node );
   protected:
     TFile* m_outfile;
     HanConfig::DirMap_t& m_directories;
@@ -98,7 +98,7 @@ protected:
   protected:
 
     void GetAlgorithmConfiguration( HanConfigAssessor* dqpar, const std::string& algID,
-                                    const std::string& assessorName = "" ) const;
+                                    const std::string& assessorName = "" );
 
     HanConfigGroup* m_root;
     const MiniConfig& m_algConfig;
@@ -108,15 +108,15 @@ protected:
     HanConfig::DirMap_t& m_directories;
     TMap* m_refsourcedata;
     // File cache
-    mutable std::map<std::string, std::shared_ptr<TFile> > m_filecache;
+    std::map<std::string, std::shared_ptr<TFile> > m_filecache;
     // following is so we can skip repeated attempts to open nonexistent files
-    mutable std::unordered_set<std::string> m_badPaths;
+    std::unordered_set<std::string> m_badPaths;
     // following is a cache of the set of keys in each TFile
     // vector since we are going to iterate through them
-    mutable std::map<std::string, std::vector<std::string>> m_keycache;
-    std::shared_ptr<TFile> GetROOTFile(std::string& fname) const;
-    void PopulateKeyCache(std::string& fname, std::shared_ptr<TFile> file) const;
-    void EnsureKeyCache(std::string& fname) const;
+    std::map<std::string, std::vector<std::string>> m_keycache;
+    std::shared_ptr<TFile> GetROOTFile(std::string& fname);
+    void PopulateKeyCache(std::string& fname, std::shared_ptr<TFile> file);
+    void EnsureKeyCache(std::string& fname);
   };
 
 
@@ -125,7 +125,7 @@ protected:
     RegionVisitor( HanConfigGroup* root_, const MiniConfig& algConfig_,
                    const MiniConfig& thrConfig_, const MiniConfig& refConfig_,
                    HanConfig::DirMap_t& directories_ );
-    virtual void Visit( const MiniConfigTreeNode* node ) const;
+    virtual void Visit( const MiniConfigTreeNode* node );
   };
 
 
@@ -135,7 +135,7 @@ protected:
                        const MiniConfig& thrConfig_, const MiniConfig& refConfig_,
                        TFile* outfile_, HanConfig::DirMap_t& directories_,
 		       TMap* refsourcedata_ );
-    virtual void Visit( const MiniConfigTreeNode* node ) const;
+    virtual void Visit( const MiniConfigTreeNode* node );
   };
 
 #ifndef __CINT__
@@ -143,7 +143,7 @@ protected:
   public:
     RegexVisitor( std::set<std::string>& regexes_ );
     virtual boost::shared_ptr<dqm_core::Node>
-      Visit( const HanConfigAssessor* node, boost::shared_ptr<dqm_core::Region> ) const;
+      Visit( const HanConfigAssessor* node, boost::shared_ptr<dqm_core::Region> );
   protected:
     std::set<std::string>& m_regexes;
   };
@@ -152,7 +152,7 @@ protected:
   public:
     ConfigVisitor( TFile* file_, dqm_core::Output* output_ );
     virtual boost::shared_ptr<dqm_core::Node>
-      Visit( const HanConfigAssessor* node, boost::shared_ptr<dqm_core::Region> dqParent ) const;
+      Visit( const HanConfigAssessor* node, boost::shared_ptr<dqm_core::Region> dqParent );
   protected:
     TFile* m_file;
     dqm_core::Output* m_output;
@@ -162,7 +162,7 @@ protected:
   class CompAlgVisitor : public MiniConfigTreeNode::Visitor {
   public:
     CompAlgVisitor( TFile* outfile_ , const MiniConfig& compAlgConfig_);
-    virtual void Visit( const MiniConfigTreeNode* node ) const;
+    virtual void Visit( const MiniConfigTreeNode* node );
   protected:
     TFile* m_outfile;
     const MiniConfig& m_compAlgConfig;
@@ -171,7 +171,7 @@ protected:
   class MetadataVisitor : public MiniConfigTreeNode::Visitor {
   public:
     MetadataVisitor( TFile* outfile_ , const MiniConfig& metadataConfig_);
-    virtual void Visit( const MiniConfigTreeNode* node ) const;
+    virtual void Visit( const MiniConfigTreeNode* node );
   protected:
     TFile* m_outfile;
     const MiniConfig& m_metadataConfig;

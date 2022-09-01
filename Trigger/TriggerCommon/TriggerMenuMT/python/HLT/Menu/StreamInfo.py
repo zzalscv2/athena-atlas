@@ -68,6 +68,7 @@ _all_streams = [
     StreamInfo('TgcNoiseBurst', 'calibration', False, True),
     StreamInfo('CostMonitoring', 'calibration', False, False),
     StreamInfo('SCTNoise', 'calibration', False, False),
+    StreamInfo('PixelNoise', 'calibration', False, False),
     StreamInfo('Tile', 'calibration', False, False),
     StreamInfo('ALFACalib', 'calibration', False, False),
     StreamInfo('LArPEB', 'calibration', False, False),

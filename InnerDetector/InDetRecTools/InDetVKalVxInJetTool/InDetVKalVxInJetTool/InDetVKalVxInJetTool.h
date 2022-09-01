@@ -237,7 +237,8 @@ namespace InDet {
       Trk::TrkVKalVrtFitter*   m_fitSvc{};
       IChronoStatSvc * m_timingProfile{}; 
 
-      ToolHandle < IInDetTrkInJetType >       m_trackClassificator;
+      bool m_useTrackClassificator = true;
+      ToolHandle < IInDetTrkInJetType >  m_trackClassificator;
       SG::ReadHandleKey<xAOD::EventInfo> m_eventInfoKey {this,"EventInfoName", "EventInfo"};
 
       bool m_useEtaDependentCuts = false;

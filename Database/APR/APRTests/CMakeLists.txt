@@ -46,8 +46,10 @@ function( _add_test name )
 endfunction( _add_test )
 
 # Declare the test(s) of the package:
+# Make them all run sequentially so PRE_EXEC cleanups do not interfere
 _add_test( FileCatalog_Functionality )
-_add_test( StorageSvc_BasicFunctionality )
+_add_test( StorageSvc_BasicFunctionality
+  DEPENDS FileCatalog_Functionality_test )
 _add_test( StorageSvc_AuxStore
   DICTHEADER StorageSvc_AuxStore/AuxStoreTest.h
   DEPENDS StorageSvc_BasicFunctionality_test )

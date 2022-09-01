@@ -1,9 +1,8 @@
 /*
-  Copyright (C) 2002-2017 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
 */
 
 /**
- * $Id: han_config_print.cxx,v 1.3 2009-02-09 15:19:59 ponyisi Exp $
  */
 
 #include <iostream>
@@ -20,12 +19,11 @@
 
 namespace {
 
-void usage( const std::string& command_name, int exit_code );
+int usage( const std::string& command_name, int exit_code );
 
-class CmdLineArgs {
-public:
-  CmdLineArgs( int argc, char *argv[] );
-  
+struct CmdLineArgs {
+  int parse( int argc, char *argv[] );
+
   std::string command;
   std::string hconfig;
   std::string conditions;
@@ -36,8 +34,10 @@ public:
 
 int main( int argc, char *argv[] )
 {
-  CmdLineArgs arg( argc, argv );
-  
+  CmdLineArgs arg;
+  int rc = arg.parse( argc, argv );
+  if (rc!=0) return rc;
+
   dqi::ConditionsSingleton::getInstance().setCondition(arg.conditions);
   //std::cout<<__PRETTY_FUNCTION__<<"Input Conditions="<<dqi::ConditionsSingleton::getInstance().getCondition()
   //	   <<std::endl;
@@ -90,19 +90,19 @@ int main( int argc, char *argv[] )
 
 namespace {
 
-CmdLineArgs::
-CmdLineArgs( int argc, char *argv[] )
+int CmdLineArgs::parse( int argc, char *argv[] )
 {
   command = argv[0];
-  if( argc > 3 ) usage( command, 1 );
-  if( argc < 2 ) usage( command, 0 );
+  if( argc > 3 ) return usage( command, 1 );
+  if( argc < 2 ) return usage( command, 0 );
   
   hconfig = argv[1];
   if(argc==3)conditions = argv[2];
+  return 0;
 }
 
 
-void usage( const std::string& command_name, int exit_code )
+int usage( const std::string& command_name, int exit_code )
 {
   std::string message;
   message += "\n";
@@ -116,7 +116,7 @@ void usage( const std::string& command_name, int exit_code )
   std::cout << "\n";
   std::cout << "Usage: " << short_name << " <filename>\n";
   std::cout << message << "\n";
-  exit(exit_code);
+  return exit_code;
 }
 
 

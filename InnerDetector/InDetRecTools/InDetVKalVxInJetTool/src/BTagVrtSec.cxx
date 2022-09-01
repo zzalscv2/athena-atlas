@@ -127,6 +127,7 @@ namespace InDet{
       AnalysisUtils::Sort::pT(&trkFromV0);
     }
 
+    std::vector<const xAOD::TrackParticle*> saveSecondTracks(listSecondTracks);
     removeDoubleEntries(listSecondTracks);
     AnalysisUtils::Sort::pT (&listSecondTracks);
     for(const auto *iv0 : trkFromV0){
@@ -140,11 +141,17 @@ namespace InDet{
     //--Ranking of selected tracks
     std::vector<float> trkRank(0);
     for(const auto *tk : listSecondTracks){
-      trkRank.push_back( m_trackClassificator->trkTypeWgts(tk, primVrt, jetDir)[0] );
+      float rank = m_useTrackClassificator ?
+	m_trackClassificator->trkTypeWgts(tk, primVrt, jetDir)[0] :
+	std::count(saveSecondTracks.begin(), saveSecondTracks.end(), tk); // Number of 2tr vertices where each track is used
+      trkRank.push_back(rank);
     }
-    while( median(trkRank)<0.3 && trkRank.size()>3 ) {
-      int Smallest = std::min_element(trkRank.begin(),trkRank.end()) - trkRank.begin();
-      removeEntryInList(listSecondTracks,trkRank,Smallest);
+
+    if(m_useTrackClassificator){
+      while( median(trkRank)<0.3 && trkRank.size()>3 ) {
+	int Smallest = std::min_element(trkRank.begin(),trkRank.end()) - trkRank.begin();
+	removeEntryInList(listSecondTracks,trkRank,Smallest);
+      }
     }
 
     //
@@ -190,8 +197,10 @@ namespace InDet{
       for (const auto *i_ntrk : selectedTracks) {
 	if( find( listSecondTracks.begin(), listSecondTracks.end(), i_ntrk) != listSecondTracks.end() ) continue; // Track is used already
 
-	std::vector<float> trkScore=m_trackClassificator->trkTypeWgts(i_ntrk, primVrt, jetDir);
-	if(trkScore[0] < 0.1) continue; //Remove very low track HF score
+	if(m_useTrackClassificator){
+	  std::vector<float> trkScore=m_trackClassificator->trkTypeWgts(i_ntrk, primVrt, jetDir);
+	  if(trkScore[0] < 0.1) continue; //Remove very low track HF score
+	}
 
 	double Signif3DS = m_fitSvc->VKalGetImpact(i_ntrk, fitVertex         , 1, Impact, ImpactError);
 	if(Signif3DS > 10.) continue;
@@ -218,7 +227,10 @@ namespace InDet{
       while (AdditionalTracks.size()>3) AdditionalTracks.erase(AdditionalTracks.begin());//Tracks are in increasing DIFF order.
       for (auto atrk : AdditionalTracks) listSecondTracks.push_back(atrk.second);        //3tracks with max DIFF are selected
       trkRank.clear();
-      for(const auto *tk : listSecondTracks) trkRank.push_back( m_trackClassificator->trkTypeWgts(tk, primVrt, jetDir)[0] );
+      for(const auto *tk : listSecondTracks){
+	float rank = m_useTrackClassificator ? m_trackClassificator->trkTypeWgts(tk, primVrt, jetDir)[0] : 1;
+	trkRank.push_back( rank );
+      }
       Chi2 = fitCommonVrt(listSecondTracks, trkRank, primVrt, jetDir, inpMass, fitVertex, errorMatrix, Momentum, TrkAtVrt);
       ATH_MSG_DEBUG("Added track fitCommonVrt output="<< Chi2);
       if(Chi2 < 0) return nullptr;
@@ -495,7 +507,7 @@ namespace InDet{
 	   if(sc.isFailure()) continue;
 	   if(projSV_PV(tmpVertex,primVrt,jetDir)<0.) continue; // Drop negative direction
 
-	   Chi2 += trkRank[it];                                 // Remove preferably non-HF-tracks
+	   if(m_useTrackClassificator) Chi2 += trkRank[it];     // Remove preferably non-HF-tracks
 
 	   if(Momentum.M()<minM  && minM>c_vrtBCMassLimit){
 	     minM = Momentum.M();
@@ -582,7 +594,7 @@ namespace InDet{
       int hitIBL=0, hitBL=0, hL1=0, nLays=0;
       getPixelLayers(selectedTracks[i] , hitIBL, hitBL, hL1, nLays );
 
-      trkScore[i] = m_trackClassificator->trkTypeWgts(selectedTracks[i], primVrt, jetDir);
+      if(m_useTrackClassificator) trkScore[i] = m_trackClassificator->trkTypeWgts(selectedTracks[i], primVrt, jetDir);
 
       if(m_fillHist){
 	Hists& h = getHists();
@@ -602,9 +614,9 @@ namespace InDet{
 	  h.m_curTup->idMC[i]   = getG4Inter(selectedTracks[i]);
 	  if(getIdHF(selectedTracks[i]))     h.m_curTup->idMC[i] = 2;
 	  if(getMCPileup(selectedTracks[i])) h.m_curTup->idMC[i] = 3;
-	  h.m_curTup->wgtB[i]   = trkScore[i][0];
-	  h.m_curTup->wgtL[i]   = trkScore[i][1];
-	  h.m_curTup->wgtG[i]   = trkScore[i][2];
+	  h.m_curTup->wgtB[i]   = m_useTrackClassificator ? trkScore[i][0] : -1.;
+	  h.m_curTup->wgtL[i]   = m_useTrackClassificator ? trkScore[i][1] : -1.;
+	  h.m_curTup->wgtG[i]   = m_useTrackClassificator ? trkScore[i][2] : -1.;
 	  h.m_curTup->sig3D[i]  = TrkSig3D;
 	  h.m_curTup->chg[i]    = tmpPerigee[4]<0. ? 1: -1;
 	  h.m_curTup->ibl[i]    = hitIBL;
@@ -634,19 +646,23 @@ namespace InDet{
     Amg::Vector3D iniVrt(0.,0.,0.);
 
     for (int i=0; i<NTracks-1; i++) {
-      if(m_multiWithPrimary){
-	if(trkScore[i][2] > 0.75) continue;  //---- Use classificator to remove Pileup+Interactions only
-      }
-      else{
-	if(trkScore[i][0]==0.)continue;  //Explicitly remove non-classified tracks
+      if(m_useTrackClassificator){
+	if(m_multiWithPrimary){
+	  if(trkScore[i][2] > 0.75) continue;  //---- Use classificator to remove Pileup+Interactions only
+	}
+	else{
+	  if(trkScore[i][0]==0.) continue;  //Explicitly remove non-classified tracks
+	}
       }
 
       for (int j=i+1; j<NTracks; j++) {
-	if(m_multiWithPrimary) {  // For multi-vertex with primary one search
-	  if(trkScore[j][2] > 0.75)continue;
-	}else{
-	  if(trkScore[j][0]==0.)continue;
-	  if(getVrtScore(i,j,trkScore) < m_cutBVrtScore) continue;
+	if(m_useTrackClassificator){
+	  if(m_multiWithPrimary) {  // For multi-vertex with primary one search
+	    if(trkScore[j][2] > 0.75)continue;
+	  }else{
+	    if(trkScore[j][0]==0.)continue;
+	    if(getVrtScore(i,j,trkScore) < m_cutBVrtScore) continue;
+	  }
 	}
 
 	int badTracks = 0;                                       //Bad tracks identification
@@ -684,7 +700,7 @@ namespace InDet{
 	if(Dist2D > 180. )                       continue;          // can't be from B decay
 
 	double vrErr = vrtRadiusError(tmpVrt.fitVertex, tmpVrt.errorMatrix);
-	if(m_useFrozenVersion){
+	if(m_useFrozenVersion && m_useTrackClassificator){
 	  if(vrErr>1.5&&getVrtScore(i,j,trkScore) < 4.*m_cutBVrtScore) continue;
 	}
 
@@ -834,7 +850,7 @@ namespace InDet{
 	  int bin = m_ITkPixMaterialMap->FindBin(zvt,Rvt);
 	  if(m_ITkPixMaterialMap->GetBinContent(bin)>0) badTracks = 4;
 	} else {
-	  float minWgtI = std::min(trkScore[i][2],trkScore[j][2]);
+	  float minWgtI = m_useTrackClassificator ? std::min(trkScore[i][2],trkScore[j][2]) : 1.0; // Use dummy value of 1.0 to pass minWgt requirement in case trackClassificator is not used
 	  if(minWgtI > 0.50 && Dist2D > m_beampipeR-vrtRadiusError(tmpVrt.fitVertex, tmpVrt.errorMatrix)) badTracks = 4;
 	}
 
@@ -860,11 +876,11 @@ namespace InDet{
     //============================================================================
     //-- Save results
     listSecondTracks.clear();
-    std::map<float,int> trkHF;
+    std::map<int,int> trkHF; // use map with track index as key + value to get list of tracks in 2-track vertices without duplicates
     for(auto &vv : all2TrVrt){
       if(m_multiWithPrimary || m_multiVertex) add_edge(vv.i,vv.j,compatibilityGraph);
-      trkHF[trkScore[vv.i][0]] = vv.i;
-      trkHF[trkScore[vv.j][0]] = vv.j;
+      trkHF[vv.i] = vv.i;
+      trkHF[vv.j] = vv.j;
     }
 
     for(auto it : trkHF) listSecondTracks.push_back(selectedTracks[it.second]);

@@ -1,9 +1,8 @@
 /*
-  Copyright (C) 2002-2017 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
 */
 
 // **********************************************************************
-// $Id: MiniConfig.cxx,v 1.4 2009-03-30 12:55:40 ponyisi Exp $
 // **********************************************************************
 
 #include <fstream>
@@ -316,7 +315,7 @@ GetAttributeNames( std::string objName, std::set<std::string>& attSet ) const
 
 void
 MiniConfig::
-SendVisitor( const MiniConfigTreeNode::Visitor& visitor ) const
+SendVisitor( MiniConfigTreeNode::Visitor& visitor ) const
 {
   if( m_tree == 0 ) {
     std::cerr << "MiniConfig::SendVisitor(): "

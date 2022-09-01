@@ -15,8 +15,8 @@ def InDetVKalVxInJetToolCfg(flags, name="InDetVKalVxInJetTool", **kwargs):
     acc = ComponentAccumulator()
 
     if "TrackClassTool" not in kwargs:
-        kwargs.setdefault("TrackClassTool", acc.popToolsAndMerge(
-            InDetTrkInJetTypeCfg(flags)))
+         kwargs.setdefault("TrackClassTool", acc.popToolsAndMerge(
+             InDetTrkInJetTypeCfg(flags)))
 
     kwargs.setdefault("ExistIBL", flags.GeoModel.Run in [LHCPeriod.Run2, LHCPeriod.Run3])
     kwargs.setdefault("getNegativeTag", "Flip" in name)

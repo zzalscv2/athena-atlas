@@ -324,6 +324,7 @@ def addTile2DHistogramsArray(helper, algorithm, name = '', xvalue = '', yvalue =
                                perSample = perSample, perGain = perGain)
 
         partition = kwargs['partition'] if 'partition' in kwargs else ''
+
         nxlabels = getLabels(xlabels, partition)
         nylabels = getLabels(ylabels, partition)
 
@@ -331,7 +332,10 @@ def addTile2DHistogramsArray(helper, algorithm, name = '', xvalue = '', yvalue =
         fullName += getTileHistogramName(name = name,separator = separator, **kwargs)
 
         subPath = getTileHistogramPath(path = '', subDirectory = subDirectory, **kwargs)
-        partitionTitle = title[partition] if builtins.type(title) is dict else title
+
+        gain = kwargs.get('gain', None)
+        gainTitle = title.get(gain, title) if gain and builtins.type(title) is dict else title
+        partitionTitle = gainTitle[partition] if builtins.type(gainTitle) is dict else gainTitle
         fullTitle = getTileHistogramTitle(title = partitionTitle, run = run, **kwargs)
 
         tool.defineHistogram( fullName, path = subPath, type = type, title = fullTitle,
