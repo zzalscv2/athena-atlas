@@ -1,9 +1,8 @@
 /*
-  Copyright (C) 2002-2017 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
 */
 
 // **********************************************************************
-// $Id: HanConfigGroup.cxx,v 1.14 2008-12-04 16:40:16 ponyisi Exp $
 // **********************************************************************
 
 #include "DataQualityInterfaces/HanConfigGroup.h"
@@ -224,7 +223,7 @@ GetList( TDirectory* basedir, std::map<std::string,TSeqCollection*>& mp )
 
 void
 HanConfigGroup::
-Accept( const Visitor& visitor, boost::shared_ptr<dqm_core::Region> dqParent ) const
+Accept( Visitor& visitor, boost::shared_ptr<dqm_core::Region> dqParent ) const
 {
   std::string nodeName( GetName() );
   boost::shared_ptr<dqm_core::Region> dqr;

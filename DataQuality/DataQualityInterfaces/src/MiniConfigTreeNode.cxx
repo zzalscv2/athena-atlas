@@ -1,9 +1,8 @@
 /*
-  Copyright (C) 2002-2017 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
 */
 
 // **********************************************************************
-// $Id: MiniConfigTreeNode.cxx,v 1.5 2008-12-04 16:40:16 ponyisi Exp $
 // **********************************************************************
 
 #include <utility>
@@ -51,20 +50,20 @@ GetName() const
 }
 
 
-const char*
+std::string
 MiniConfigTreeNode::
 GetPathName() const
 {
-  m_path = "";
+  std::string path;
   if( m_parent != 0 ) {
     std::string parentPath( m_parent->GetPathName() );
-    if( parentPath != "" ) {
-      m_path += parentPath;
-      m_path += std::string("/");
+    if( !parentPath.empty() ) {
+      path += parentPath;
+      path += std::string("/");
     }
-    m_path += m_name;
+    path += m_name;
   }
-  return m_path.c_str();
+  return path;
 }
 
 
@@ -94,14 +93,6 @@ GetDaughter( std::string name_ ) const
     return i->second;
   }
   return 0;
-}
-
-
-MiniConfigTreeNode*
-MiniConfigTreeNode::
-GetParent() const
-{
-  return m_parent;
 }
 
 
@@ -214,7 +205,7 @@ GetAttributeNamesLocal( std::set<std::string>& attSet ) const
 
 void
 MiniConfigTreeNode::
-Accept( const Visitor& visitor ) const
+Accept( Visitor& visitor ) const
 {
   visitor.Visit(this);
   NodeIter_t daugEnd = m_daughters.end();

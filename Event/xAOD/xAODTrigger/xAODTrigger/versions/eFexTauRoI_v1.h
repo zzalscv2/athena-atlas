@@ -160,7 +160,7 @@ namespace xAOD {
       static const int s_updownBit       = 15;
       static const int s_maxBit          = 14;
       static const int s_etBit           =  0;
-      static const int s_etBitXTOB       =  3;
+      static const int s_etBitXTOB       =  2;
       static const int s_bcn4Bit         = 28;
       static const int s_shelfBit        = 24;
       static const int s_eFexBit         = 20;

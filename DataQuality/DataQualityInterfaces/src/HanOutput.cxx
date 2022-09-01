@@ -2,10 +2,6 @@
   Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
 */
 
-// **********************************************************************
-// $Id: HanOutput.cxx,v 1.19 2009-03-30 12:52:21 ponyisi Exp $
-// **********************************************************************
-
 #include "DataQualityInterfaces/HanOutput.h"
 
 #include <iomanip>
@@ -37,7 +33,7 @@
 #include "DataQualityInterfaces/HanConfig.h"
 #include "DataQualityInterfaces/HanUtils.h"
 
-#include <boost/algorithm/string/replace.hpp>
+#include <boost/algorithm/string.hpp>
 
 namespace
 {
@@ -476,13 +472,15 @@ namespace dqi
       tmpList = dynamic_cast<TSeqCollection*>(obj);
       if (tmpList != 0)
       {
-        // Work with dirs
-        char* str = (char*)tmpList->GetName(), * tmp = strtok((char*)str, "/");
-        while (tmp != 0)
-        {
-          str = tmp;
-          tmp = strtok(0, "/");
+        // Find last directory name
+        std::vector<std::string> dirs;
+        std::string str;
+        boost::split(dirs, tmpList->GetName(), boost::is_any_of("/"));
+        if (!dirs.empty()) {
+          if (dirs.back().empty()) dirs.pop_back();  // empty item if trailing "/"
+          str = dirs.back();
         }
+
         if (HanOutput_FileVersion == 2)
         {
           TString listname = tmpList->GetName();
@@ -506,9 +504,9 @@ namespace dqi
         }
 
         TDirectory* daughter;
-        if (!dir->FindKey(str))
+        if (!dir->FindKey(str.c_str()))
         {
-          daughter = dir->mkdir(str);
+          daughter = dir->mkdir(str.c_str());
         }
         else
         {

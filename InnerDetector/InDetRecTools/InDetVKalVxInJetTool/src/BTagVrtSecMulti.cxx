@@ -343,7 +343,7 @@ InDetVKalVxInJetTool::getVrtSecMulti(workVectorArrxAOD* xAODwrk,
   }
 
   std::vector< std::vector<float> > trkScore(0);
-  if(xAODwrk){
+  if(xAODwrk && m_useTrackClassificator){
     for(auto &trk : xAODwrk->listJetTracks) trkScore.push_back(m_trackClassificator->trkTypeWgts(trk, primVrt, jetDir));
   }
 
