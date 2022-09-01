@@ -15,7 +15,7 @@ int main(int, char**)
 {
   // some random values for checking things, just put them all up here
   const int roadid(8675309);
-  const double qoverpt(-0.123456), chi2(3.14159);
+  const double qoverpt(-0.123456), chi2(3.41159);
 
   HTTLogicalEventOutputHeader header;
 

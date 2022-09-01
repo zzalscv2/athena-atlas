@@ -443,7 +443,7 @@ bool HTTHitFilteringTool::check_hit_stub(const HTTHit& innerHit, const HTTHit& o
 
   if(!m_useNstrips) {
     // calculate dphi - accounting for 2 pi wrapping
-    float pi = 3.14159265358979;
+    float pi = M_PI;
     float dPhi = (outerHit.getGPhi() - innerHit.getGPhi());
     if(dPhi > pi)
       dPhi -= 2*pi;
