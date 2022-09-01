@@ -18,7 +18,6 @@
 #include "xAODTracking/TrackParticle.h"
 
 #include "StoreGate/ReadCondHandle.h"
-#include <sstream>
 
 /* These are some local helper classes only needed for convenience, therefore
 within anonymous namespace. They contain temporary calculations of matrices
@@ -65,7 +64,7 @@ namespace Trk
       ATH_MSG_FATAL("Failed to retrieve tool " << m_extrapolator);
       return StatusCode::FAILURE;
     }
-      ATH_MSG_INFO( "Retrieved tool " << m_extrapolator );
+      ATH_MSG_DEBUG( "Retrieved tool " << m_extrapolator );
 
 
     ATH_CHECK( m_fieldCacheCondObjInputKey.initialize() );
@@ -321,11 +320,11 @@ namespace Trk
     ATH_MSG_DEBUG("globalPosition of starting point: " << (*globalPosition)[0] << ", " << (*globalPosition)[1] << ", " << (*globalPosition)[2]);
     if (globalPosition->perp() > m_maxR && globalPosition->z() > m_maxZ) return nullptr;
 
-    SG::ReadCondHandle<AtlasFieldCacheCondObj> readHandle{m_fieldCacheCondObjInputKey, Gaudi::Hive::currentContext()};
+    SG::ReadCondHandle<AtlasFieldCacheCondObj> readHandle{m_fieldCacheCondObjInputKey, ctx};
     if (!readHandle.isValid()) {
-       std::stringstream msg;
-       msg << "Failed to retrieve magmnetic field conditions data " << m_fieldCacheCondObjInputKey.key() << ".";
-       throw std::runtime_error(msg.str());
+       std::string msg = "Failed to retrieve magmnetic field conditions data ";
+       msg += m_fieldCacheCondObjInputKey.key();
+       throw std::runtime_error(msg);
     }
     const AtlasFieldCacheCondObj* fieldCondObj{*readHandle};
 

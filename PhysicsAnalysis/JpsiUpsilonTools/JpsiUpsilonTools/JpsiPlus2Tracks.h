@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2019 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
 */
 
 // ****************************************************************************
@@ -12,14 +12,13 @@
 // ****************************************************************************
 #ifndef JPSIPLUS2TRACKS_H
 #define JPSIPLUS2TRACKS_H
-#include "AthenaBaseComps/AthAlgorithm.h"
+#include "AthenaBaseComps/AthAlgTool.h"
 #include "GaudiKernel/ToolHandle.h"
-#include "TrkVKalVrtFitter/TrkVKalVrtFitter.h"
-#include "xAODTracking/TrackParticle.h"
-#include "xAODTracking/Vertex.h"
-#include "xAODTracking/VertexContainer.h"
-#include "xAODTracking/VertexAuxContainer.h"
+#include "xAODTracking/TrackParticleFwd.h"
+#include "xAODTracking/VertexFwd.h"
+#include "xAODTracking/VertexContainerFwd.h"
 #include "StoreGate/ReadHandleKey.h"
+#include <bitset>
 #include <vector>
 #include <string>
 #include "xAODMuon/MuonContainer.h"
@@ -28,8 +27,8 @@
 
 namespace Trk {
     class IVertexFitter;
-    class VxTrackAtVertex;
     class ITrackSelectorTool;
+    class TrkVKalVrtFitter;
 }
 namespace InDet { class VertexPointEstimator; }
 

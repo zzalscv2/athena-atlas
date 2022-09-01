@@ -9,7 +9,7 @@
 #include "AthenaBaseComps/AthAlgTool.h"
 #include "GaudiKernel/ToolHandle.h"
 #include "DerivationFrameworkInterfaces/IAugmentationTool.h"
-#include "JpsiUpsilonTools/JpsiFinder.h"
+#include "JpsiUpsilonTools/ICandidateSearch.h"
 #include "JpsiUpsilonTools/PrimaryVertexRefitter.h"
 #include "xAODEventInfo/EventInfo.h"
 /** forward declarations
@@ -36,7 +36,7 @@ namespace DerivationFramework {
       /** tools
        */
       ToolHandle<Trk::V0Tools>                    m_v0Tools{this, "V0Tools", "Trk::V0Tools"};
-      ToolHandle<Analysis::JpsiFinder>            m_jpsiFinder{this,"JpsiFinder", "Analysis::JpsiFinder"};
+      ToolHandle<Analysis::ICandidateSearch>      m_jpsiFinder{this,"JpsiFinder", "Analysis::JpsiFinder"};
       ToolHandle<Analysis::PrimaryVertexRefitter> m_pvRefitter{this, "PVRefitter", "Analysis::PrimaryVertexRefitter"};
       SG::ReadHandleKey<xAOD::EventInfo> m_eventInfo_key{this, "EventInfo", "EventInfo", "Input event information"};
       

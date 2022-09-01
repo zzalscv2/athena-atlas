@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2019 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
 */
 
 // ****************************************************************************
@@ -12,10 +12,8 @@
 // ****************************************************************************
 #ifndef JPSIFINDER_H
 #define JPSIFINDER_H
-#include "AthenaBaseComps/AthAlgorithm.h"
+#include "AthenaBaseComps/AthAlgTool.h"
 #include "GaudiKernel/ToolHandle.h"
-#include "TrkVKalVrtFitter/TrkVKalVrtFitter.h"
-#include "HepPDT/ParticleDataTable.hh"
 #include "xAODMuon/MuonContainer.h"
 #include "xAODMuon/Muon.h"
 #include "StoreGate/ReadHandleKeyArray.h"
@@ -26,7 +24,6 @@
 
 namespace Trk {
     class IVertexFitter;
-    class TrkV0VertexFitter;
     class ITrackSelectorTool;
 }
 
@@ -99,8 +96,8 @@ namespace Analysis {
         bool m_oppChOnly;
         bool m_sameChOnly;
         bool m_allChCombs;
-        SG::ReadHandleKey<xAOD::MuonContainer> m_muonCollectionKey{this, "muonCollectionKey", "StacoMuonCollection"};
-        SG::ReadHandleKey<xAOD::TrackParticleContainer> m_TrkParticleCollection {this, "TrackParticleCollection", "TrackParticleCandidate" };
+        SG::ReadHandleKey<xAOD::MuonContainer> m_muonCollectionKey{this, "muonCollectionKey", "Muons"};
+        SG::ReadHandleKey<xAOD::TrackParticleContainer> m_TrkParticleCollection {this, "TrackParticleCollection", "InDetTrackParticles" };
         SG::ReadHandleKeyArray<xAOD::TrackParticleContainer> m_MuonTrackKeys{this, "MuonTrackKeys", {}};
         ToolHandle < Trk::IVertexFitter > m_iVertexFitter;
         ToolHandle < Trk::IVertexFitter > m_iV0VertexFitter;

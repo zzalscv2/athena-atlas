@@ -7,7 +7,6 @@
 #include "xAODEventInfo/EventInfo.h"
 #include "TrkSurfaces/DiscSurface.h"
 #include "TrkSurfaces/CylinderSurface.h"
-#include "TrkExInterfaces/IExtrapolator.h"
 #include "TVector2.h"
 #include "xAODMuon/MuonContainer.h"
 //**********************************************************************

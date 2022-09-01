@@ -10,8 +10,7 @@
 // options and collect the J/psi candidates from StoreGate. Example is in JpsiExample. 
 
 #include "JpsiUpsilonTools/JpsiAlg.h"
-
-
+#include "xAODTracking/VertexContainer.h"
 #include "xAODTracking/VertexAuxContainer.h"
 
 
@@ -20,7 +19,7 @@
 JpsiAlg::JpsiAlg(const std::string& name, ISvcLocator* pSvcLocator) :
   AthAlgorithm(name, pSvcLocator),
   m_eventCntr(0), m_jpsiCntr(0),
-  m_jpsiFinder("Analysis::JpsiFinder"),
+  m_jpsiFinder("Analysis::JpsiFinder", this),
   m_jpsiContainerName("JpsiCandidates")
 {
   
@@ -72,7 +71,7 @@ StatusCode JpsiAlg::execute() {
   // save in the StoreGate
   ATH_MSG_DEBUG("Recording to StoreGate: " << m_jpsiContainerName.key() << " size:" <<jpsiContainer->size());
   
-  SG::WriteHandle<xAOD::VertexContainer> whandle (m_jpsiContainerName);
+  SG::WriteHandle<xAOD::VertexContainer> whandle (m_jpsiContainerName, ctx);
   ATH_CHECK(whandle.record(std::move(jpsiContainer), std::move(jpsiAuxContainer)));
   // END OF ANALYSIS
   return StatusCode::SUCCESS;

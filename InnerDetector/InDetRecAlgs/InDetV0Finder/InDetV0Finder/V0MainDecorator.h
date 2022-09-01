@@ -7,7 +7,7 @@
 
 #include "AthenaBaseComps/AthAlgTool.h"
 #include "GaudiKernel/ToolHandle.h"
-#include "xAODTracking/VertexContainer.h"
+#include "xAODTracking/VertexContainerFwd.h"
 #include "TrkVertexAnalysisUtils/V0Tools.h"
 
 

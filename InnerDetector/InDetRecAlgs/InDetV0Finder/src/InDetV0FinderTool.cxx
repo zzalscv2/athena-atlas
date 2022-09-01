@@ -27,11 +27,9 @@
 
 #include "ITrackToVertex/ITrackToVertex.h"
 
-
 #include "GaudiKernel/IPartPropSvc.h"
 
 #include "xAODTracking/TrackingPrimitives.h"
-
 #include "HepPDT/ParticleDataTable.hh"
 #include "xAODTracking/VertexContainer.h"
 #include "EventKernel/PdtPdg.h"

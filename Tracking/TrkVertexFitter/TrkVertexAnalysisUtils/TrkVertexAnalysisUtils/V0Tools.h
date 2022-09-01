@@ -8,8 +8,9 @@
 #include "AthenaBaseComps/AthAlgTool.h"
 #include "GaudiKernel/ToolHandle.h"
 #include "EventPrimitives/EventPrimitives.h"
-#include "xAODTracking/Vertex.h"
-#include "xAODTracking/TrackParticle.h"
+#include "GeoPrimitives/GeoPrimitives.h"
+#include "xAODTracking/VertexFwd.h"
+#include "xAODTracking/TrackParticle.h" //Full include needed for FourMom_t
 
 /**
  *  @class V0Tools

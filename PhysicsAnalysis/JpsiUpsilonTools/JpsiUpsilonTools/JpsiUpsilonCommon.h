@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2019 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
 */
 
 
@@ -7,10 +7,12 @@
 #define JPSIUPSILONCOMMON
 
 #include <vector>
-#include "xAODTracking/TrackParticle.h"
+#include "xAODTracking/TrackParticleFwd.h"
 #include "xAODMuon/MuonContainer.h"
 #include <algorithm>
-#include "xAODTracking/VertexContainer.h"
+#include "xAODTracking/VertexContainerFwd.h"
+#include "xAODTracking/Vertex.h"
+#include <array>
 namespace xAOD{
    class BPhysHelper;
 }
@@ -25,7 +27,7 @@ namespace Analysis {
        ~CleanUpVertex(){ if (m_cleanup) delete  m_vtx; }
        CleanUpVertex(const xAOD::Vertex* vtx, bool cleanup) : m_vtx(vtx), m_cleanup(cleanup) {}
        CleanUpVertex(const CleanUpVertex&) = delete;
-       CleanUpVertex(CleanUpVertex&& vtx){
+       CleanUpVertex(CleanUpVertex&& vtx) noexcept {
            m_vtx = vtx.m_vtx;
            m_cleanup = vtx.m_cleanup;
            vtx.m_cleanup = false;

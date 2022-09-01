@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2019 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
 */
 
 // ****************************************************************************
@@ -12,24 +12,21 @@
 // ****************************************************************************
 #ifndef JpsiFinder_ee_H
 #define JpsiFinder_ee_H
-#include "AthenaBaseComps/AthAlgorithm.h"
+#include "AthenaBaseComps/AthAlgTool.h"
 #include "GaudiKernel/ToolHandle.h"
-#include "TrkVKalVrtFitter/TrkVKalVrtFitter.h"
-#include "HepPDT/ParticleDataTable.hh"
 
-#include "xAODEgamma/Electron.h"
+#include "xAODEgamma/ElectronFwd.h"
 
 #include <vector>
 #include <string>
 #include "JpsiUpsilonTools/ICandidateSearch.h"
 #include "xAODMuon/MuonContainer.h"
-#include "xAODEgamma/ElectronContainer.h"
-#include "xAODTracking/TrackParticleContainer.h"
+#include "xAODEgamma/ElectronContainerFwd.h"
+#include "xAODTracking/TrackParticleContainerFwd.h"
 /////////////////////////////////////////////////////////////////////////////
 
 namespace Trk {
     class IVertexFitter;
-    class TrkV0VertexFitter;
     class ITrackSelectorTool;
 }
 

@@ -12,10 +12,9 @@
 
 #include "AthenaBaseComps/AthAlgTool.h"
 #include "DerivationFrameworkInterfaces/IAugmentationTool.h"
-#include "JpsiUpsilonTools/JpsiFinder.h"
 #include "xAODBPhys/BPhysHelper.h"
 #include <string>
-
+#include "xAODTracking/VertexContainerFwd.h"
 /** forward declarations
  */
 namespace Trk {

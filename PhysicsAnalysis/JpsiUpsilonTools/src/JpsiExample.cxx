@@ -10,15 +10,17 @@
 #include "JpsiUpsilonTools/JpsiExample.h"
 
 #include "VxVertex/VxTrackAtVertex.h"
-
+#include "xAODTracking/Vertex.h"
+#include "xAODTracking/TrackParticle.h"
+#include "xAODTracking/VertexContainer.h"
 #include "CLHEP/Vector/LorentzVector.h"
 #include "CLHEP/Matrix/Vector.h"
 #include "CLHEP/Matrix/Matrix.h"
 #include "CLHEP/Matrix/SymMatrix.h"
-
 #include "TFile.h"
 #include "TTree.h"
 #include "TVector3.h"
+#include "TLorentzVector.h"
 #include "StoreGate/ReadDecorHandle.h"
 
 //////////////////////////////////////////////////////////////

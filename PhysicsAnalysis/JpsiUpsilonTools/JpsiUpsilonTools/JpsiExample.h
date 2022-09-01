@@ -8,9 +8,9 @@
 #include "AthenaBaseComps/AthAlgorithm.h"
 #include "GaudiKernel/ToolHandle.h"
 
-#include "xAODTracking/TrackParticle.h"
-#include "xAODTracking/VertexContainer.h"
-#include "xAODTracking/VertexAuxContainer.h"
+#include "xAODTracking/TrackParticleFwd.h"
+#include "xAODTracking/VertexContainerFwd.h"
+#include "EventPrimitives/EventPrimitives.h" //Needed for Amg::MatrixX
 #include "StoreGate/ReadDecorHandleKey.h"
 
 class TFile;

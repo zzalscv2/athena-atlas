@@ -31,7 +31,6 @@
 #include "DerivationFrameworkBPhys/CfAthAlgTool.h"
 #include "DerivationFrameworkInterfaces/IAugmentationTool.h"
 #include "MuonAnalysisInterfaces/IMuonSelectionTool.h"
-#include "JpsiUpsilonTools/JpsiFinder.h"
 #include "xAODBPhys/BPhysHelper.h"
 
 /** forward declarations

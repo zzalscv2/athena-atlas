@@ -14,6 +14,7 @@
 #include "TrkVertexFitterInterfaces/IVertexFitter.h"
 #include "TrkVKalVrtFitter/TrkVKalVrtFitter.h"
 #include "TrkVKalVrtFitter/VxCascadeInfo.h"
+#include "TLorentzVector.h"
 
 namespace DerivationFramework {
 
