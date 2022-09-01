@@ -63,6 +63,8 @@ def getAssociator(configFlags, config,suffix,doPFlow=False,
         tool = CompFactory.getComp("met::METJetAssocTool")('MET_EMJetAssocTool_'+suffix)
     if config.objType == 'PFlowJet':
         tool = CompFactory.getComp("met::METJetAssocTool")('MET_PFlowJetAssocTool_'+suffix)
+    if config.objType == 'CustomJet':
+        tool = CompFactory.getComp("met::METJetAssocTool")('MET_CustomJetAssocTool_'+suffix)
     if config.objType == 'Muon':
         tool = CompFactory.getComp("met::METMuonAssociator")('MET_MuonAssociator_'+suffix)
     if config.objType == 'Soft':

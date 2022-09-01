@@ -31,8 +31,10 @@ def HIGG1D1KernelCfg(ConfigFlags, name='HIGG1D1Kernel', **kwargs):
     
     from DerivationFrameworkFlavourTag.FtagRun3DerivationConfig import FtagJetCollectionsCfg
     acc.merge(FtagJetCollectionsCfg(ConfigFlags,['AntiKt4EMPFlowCustomVtxJets'],['HggPrimaryVertices']))
-    # 
-    #TODO MET
+
+    #Custom MET
+    from DerivationFrameworkJetEtMiss.METCommonConfig import METCustomVtxCfg
+    acc.merge(METCustomVtxCfg(ConfigFlags, 'HggPrimaryVertices', 'AntiKt4EMPFlowCustomVtx', 'CHSGCustomVtxParticleFlowObjects'))
 
     # Thinning tools...
     from DerivationFrameworkInDet.InDetToolsConfig import TrackParticleThinningCfg, MuonTrackParticleThinningCfg, TauTrackParticleThinningCfg, DiTauTrackParticleThinningCfg  
@@ -258,6 +260,8 @@ def HIGG1D1Cfg(ConfigFlags):
 
     #  Additional content for HIGG1D1   
     HIGG1D1SlimmingHelper.AppendToDictionary.update({  "AntiKt4EMPFlowCustomVtxJets": "xAOD::JetContainer", "AntiKt4EMPFlowCustomVtxJetsAux":"xAOD::JetAuxContainer",
+          "METAssoc_AntiKt4EMPFlowCustomVtx": "xAOD::MissingETAssociationMap", "METAssoc_AntiKt4EMPFlowCustomVtxAux":"xAOD::MissingETAuxAssociationMap",
+          "MET_Core_AntiKt4EMPFlowCustomVtx": "xAOD::MissingETContainer", "MET_Core_AntiKt4EMPFlowCustomVtxAux":"xAOD::MissingETAuxContainer",
           "HggPrimaryVertices":"xAOD::VertexContainer", "HggPrimaryVerticesAux":"xAOD::ShallowAuxContainer",
           "Kt4EMPFlowCustomVtxEventShape":"xAOD::EventShape", "Kt4EMPFlowCustomVtxEventShapeAux":"xAOD::EventShapeAuxInfo",
           "Kt4EMPFlowEventShape":"xAOD::EventShape", "Kt4EMPFlowEventShapeAux":"xAOD::EventShapeAuxInfo",
@@ -267,7 +271,7 @@ def HIGG1D1Cfg(ConfigFlags):
           "BTagging_AntiKt4EMPFlowCustomVtx":"xAOD::BTaggingContainer","BTagging_AntiKt4EMPFlowCustomVtxAux":"xAOD:BTaggingAuxContainer"
         })
 
-    HIGG1D1SlimmingHelper.AllVariables += ["HggPrimaryVertices","ZeeRefittedPrimaryVertices","AntiKt4EMPFlowCustomVtxJets","Kt4EMPFlowCustomVtxEventShape","Kt4EMPFlowEventShape"]
+    HIGG1D1SlimmingHelper.AllVariables += ["HggPrimaryVertices","ZeeRefittedPrimaryVertices","AntiKt4EMPFlowCustomVtxJets","Kt4EMPFlowCustomVtxEventShape","Kt4EMPFlowEventShape","METAssoc_AntiKt4EMPFlowCustomVtx","MET_Core_AntiKt4EMPFlowCustomVtx"]
     
     # Add AFP information
     HIGG1D1SlimmingHelper.AllVariables += ["AFPSiHitContainer","AFPToFHitContainer"]

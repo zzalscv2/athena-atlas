@@ -206,7 +206,7 @@ def PHYSLITEKernelCfg(ConfigFlags, name='PHYSLITEKernel', **kwargs):
                                   associators,
                                   doPFlow=True,
                                   usePFOLinks=True)
-    components_PHYSLITE_cfg = getAssocCA(PHYSLITE_cfg,sequencename='SeqPHYSLITE',METName='AnalysisMET')
+    components_PHYSLITE_cfg = getAssocCA(PHYSLITE_cfg,METName='AnalysisMET')
     acc.merge(components_PHYSLITE_cfg)
 
     # The derivation kernel itself
