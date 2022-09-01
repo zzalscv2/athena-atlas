@@ -27,7 +27,7 @@ namespace JetTagDQA{
   class BTaggingValidationPlots : public PlotBase, public AthMessaging {
     public:
       // constructor
-      BTaggingValidationPlots(PlotBase* pParent, const std::string& sDir, std::string sParticleType);
+      BTaggingValidationPlots(PlotBase* pParent, const std::string& sDir, std::string sParticleType, bool hasJetFitterNN = false);
 
       // fill methods
       void fillJetKinVars(const xAOD::Jet* jet, const int& truth_label, const bool& onZprime, const xAOD::EventInfo* event);
@@ -563,6 +563,7 @@ namespace JetTagDQA{
       float m_JVT_cut = 0.0F;
       bool m_JVTLargerEta_defined;
       float m_JVTLargerEta_cut = 0.0F;
+      bool m_hasJetFitterNN = false;
 
     private:
       virtual void initializePlots();     
