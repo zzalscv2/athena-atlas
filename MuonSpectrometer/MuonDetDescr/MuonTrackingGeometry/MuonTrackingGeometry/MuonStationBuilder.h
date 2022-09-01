@@ -55,7 +55,7 @@ namespace Muon {
 
         void glueComponents(Trk::DetachedTrackingVolume*) const;
         void encloseLayers(const Trk::DetachedTrackingVolume*) const;
-        void identifyLayers(const Trk::DetachedTrackingVolume*, int, int) const;
+        void identifyLayers(Trk::DetachedTrackingVolume*, int, int) const;
         void identifyPrototype(Trk::TrackingVolume*, int, int, const Amg::Transform3D&) const;
         void getNSWStationsForTranslation(
             const GeoVPhysVol* pv, const std::string& name, const Amg::Transform3D&,

@@ -1645,7 +1645,7 @@ Trk::TimedExtrapolator::transportToVolumeWithPathLimit(
       bool active = layR && layR->layerType();
 
       if (active) {
-        if (!m_resolveMultilayers || !(*iTer)->multilayerRepresentation()) {
+        if (!m_resolveMultilayers || (*iTer)->multilayerRepresentation().empty()) {
           const Trk::Surface &surf = layR->surfaceRepresentation();
           Trk::DistanceSolution distSol = surf.straightLineDistanceEstimate(currPar->position(),
                                                                             dir * currPar->momentum().normalized());
@@ -1658,9 +1658,9 @@ Trk::TimedExtrapolator::transportToVolumeWithPathLimit(
             }
           }
         } else {
-          const std::vector<const Trk::Layer *> *multi = (*iTer)->multilayerRepresentation();
-          for (unsigned int i = 0; i < multi->size(); i++) {
-            const Trk::Surface &surf = (*multi)[i]->surfaceRepresentation();
+          const auto& multi = (*iTer)->multilayerRepresentation();
+          for (unsigned int i = 0; i < multi.size(); i++) {
+            const Trk::Surface &surf = multi[i]->surfaceRepresentation();
             Trk::DistanceSolution distSol = surf.straightLineDistanceEstimate(currPar->position(),
                                                                               dir * currPar->momentum().normalized());
             if (distSol.numberOfSolutions() > 0 && distSol.first() > 0.) {
@@ -1668,7 +1668,7 @@ Trk::TimedExtrapolator::transportToVolumeWithPathLimit(
               Amg::Vector3D gp = currPar->position() + distSol.first() * dir * currPar->momentum().normalized();
               if (surf.isOnSurface(gp, true, 0.001, 0.001)) {
                 cache.m_trLays.emplace_back(&surf, distSol.first());
-                cache.m_navigLays.emplace_back((*iTer)->trackingVolume(), (*multi)[i]);
+                cache.m_navigLays.emplace_back((*iTer)->trackingVolume(), (multi)[i]);
               }
             }
           }   // end loop over multilayers

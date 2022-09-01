@@ -114,7 +114,7 @@ namespace Muon {
 
         Trk::LayerArray* processTGCComponent(const GeoVPhysVol*&, Trk::TrapezoidVolumeBounds*&, Amg::Transform3D*&, Cache&) const;
 
-        std::pair<Trk::Layer*, const std::vector<const Trk::Layer*>*> createLayerRepresentation(
+        std::pair<Trk::Layer*, const std::vector<Trk::Layer*>*> createLayerRepresentation(
             const Trk::TrackingVolume* trVol) const;
 
         Trk::Layer* createLayer(const MuonGM::MuonDetectorManager* detMgr, const Trk::TrackingVolume* trVol, Trk::MaterialProperties*,

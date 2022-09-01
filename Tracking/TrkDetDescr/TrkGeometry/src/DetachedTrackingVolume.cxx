@@ -36,8 +36,8 @@ Trk::DetachedTrackingVolume::DetachedTrackingVolume(std::string name,
 Trk::DetachedTrackingVolume::DetachedTrackingVolume(
   std::string name,
   Trk::TrackingVolume* volume,
-  const Trk::Layer* lay,
-  const std::vector<const Trk::Layer*>* multilay)
+  Trk::Layer* lay,
+  const std::vector<Trk::Layer*>* multilay)
   : m_trkVolume(volume)
   , m_name(std::move(name))
   , m_layerRepresentation(lay)
@@ -57,16 +57,16 @@ Trk::DetachedTrackingVolume::~DetachedTrackingVolume() {
   delete m_baseTransform;
 }
 
-void Trk::DetachedTrackingVolume::move ATLAS_NOT_THREAD_SAFE(
-    Amg::Transform3D& shift) const {
+void
+Trk::DetachedTrackingVolume::move(Amg::Transform3D& shift)
+{
   m_trkVolume->moveTV(shift);
-  if (m_layerRepresentation){
-    (const_cast<Trk::Layer*>(m_layerRepresentation))->moveLayer(shift);
+  if (m_layerRepresentation) {
+    m_layerRepresentation->moveLayer(shift);
   }
   if (m_multilayerRepresentation) {
     for (unsigned int i = 0; i < m_multilayerRepresentation->size(); i++) {
-      (const_cast<Trk::Layer*>((*m_multilayerRepresentation)[i]))->moveLayer(
-        shift);
+      (*m_multilayerRepresentation)[i]->moveLayer(shift);
     }
   }
 }
@@ -81,18 +81,18 @@ Trk::DetachedTrackingVolume::clone(const std::string& name,
   // layer representation ?
   Trk::PlaneLayer* newLay = nullptr;
   if (this->layerRepresentation()) {
-    std::vector<const Trk::Layer*>* newMulti = nullptr;
+    std::vector<Trk::Layer*>* newMulti = nullptr;
     const Trk::PlaneLayer* pl =
         dynamic_cast<const Trk::PlaneLayer*>(this->layerRepresentation());
     if (pl) {
       newLay = new Trk::PlaneLayer(*pl);
       newLay->moveLayer(shift);
-      if (this->multilayerRepresentation()) {
-        newMulti = new std::vector<const Trk::Layer*>;
-        for (unsigned int i = 0; i < this->multilayerRepresentation()->size();
+      if (!this->multilayerRepresentation().empty()) {
+        newMulti = new std::vector<Trk::Layer*>;
+        for (unsigned int i = 0; i < this->multilayerRepresentation().size();
              i++) {
           const Trk::PlaneLayer* mpl = dynamic_cast<const Trk::PlaneLayer*>(
-              (*(this->multilayerRepresentation()))[i]);
+            (this->multilayerRepresentation())[i]);
           if (mpl) {
             Trk::PlaneLayer* newPl = new Trk::PlaneLayer(*mpl);
             newPl->moveLayer(shift);
@@ -155,7 +155,7 @@ Trk::DetachedTrackingVolume::clone(const std::string& name,
 }
 
 void Trk::DetachedTrackingVolume::compactify ATLAS_NOT_THREAD_SAFE(
-    size_t& cSurfaces, size_t& tSurfaces) const {
+    size_t& cSurfaces, size_t& tSurfaces){
   // deal with the Tracking Volume representation
   if (m_trkVolume) m_trkVolume->compactify(cSurfaces, tSurfaces);
 
@@ -163,18 +163,16 @@ void Trk::DetachedTrackingVolume::compactify ATLAS_NOT_THREAD_SAFE(
   if (layerRepresentation()) {
     ++tSurfaces;
     if (layerRepresentation()->surfaceRepresentation().owner() == Trk::noOwn) {
-      const_cast<Trk::Surface&>(layerRepresentation()->surfaceRepresentation())
-        .setOwner(Trk::TGOwn);
+      layerRepresentation()->surfaceRepresentation().setOwner(Trk::TGOwn);
       ++cSurfaces;
     }
   }
   // deal with the multi-layer representation
-  if (multilayerRepresentation()) {
+  if (!multilayerRepresentation().empty()) {
     tSurfaces += m_multilayerRepresentation->size();
     for (const auto& mLayerIter : (*m_multilayerRepresentation)) {
       if ((*mLayerIter).surfaceRepresentation().owner() == Trk::noOwn) {
-        const_cast<Trk::Surface&>((*mLayerIter).surfaceRepresentation())
-          .setOwner(Trk::TGOwn);
+        (*mLayerIter).surfaceRepresentation().setOwner(Trk::TGOwn);
         ++cSurfaces;
       }
     }

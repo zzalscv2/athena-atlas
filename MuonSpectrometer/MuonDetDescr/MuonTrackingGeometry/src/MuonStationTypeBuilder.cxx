@@ -1361,9 +1361,9 @@ Trk::TrackingVolume* Muon::MuonStationTypeBuilder::processSpacer(Trk::Volume& vo
 
     if (!m_resolveSpacer) {  // average into a single material layer
         ATH_MSG_VERBOSE(" !m_resolveSpacer createLayerRepresentation ");
-        std::pair<Trk::Layer*, const std::vector<const Trk::Layer*>*> laySpacer = createLayerRepresentation(spacer);
+        std::pair<Trk::Layer*, const std::vector<Trk::Layer*>*> laySpacer = createLayerRepresentation(spacer);
         delete spacer;
-        const_cast<Trk::Layer*>(laySpacer.first)->setLayerType(0);
+        laySpacer.first->setLayerType(0);
         layers.clear();
         layers.push_back(laySpacer.first);
         std::vector<Trk::Layer*>* spacerLays = new std::vector<Trk::Layer*>(layers);
@@ -2276,12 +2276,12 @@ double Muon::MuonStationTypeBuilder::decodeX(const GeoShape* sh) const {
     return xHalf;
 }
 
-std::pair<Trk::Layer*, const std::vector<const Trk::Layer*>*> Muon::MuonStationTypeBuilder::createLayerRepresentation(
+std::pair<Trk::Layer*, const std::vector<Trk::Layer*>*> Muon::MuonStationTypeBuilder::createLayerRepresentation(
     const Trk::TrackingVolume* trVol) const {
     Trk::Layer* layRepr = nullptr;
-    if (!trVol) return std::pair<Trk::Layer*, const std::vector<const Trk::Layer*>*>(layRepr, 0);
+    if (!trVol) return std::pair<Trk::Layer*, const std::vector<Trk::Layer*>*>(layRepr, 0);
 
-    std::vector<const Trk::Layer*>* multi = new std::vector<const Trk::Layer*>;
+    std::vector<Trk::Layer*>* multi = new std::vector<Trk::Layer*>;
 
     // retrieve volume envelope
 
@@ -2420,7 +2420,7 @@ std::pair<Trk::Layer*, const std::vector<const Trk::Layer*>*> Muon::MuonStationT
         delete multi;
         multi = nullptr;
     }
-    return std::pair<Trk::Layer*, const std::vector<const Trk::Layer*>*>(layRepr, multi);
+    return std::pair<Trk::Layer*, const std::vector<Trk::Layer*>*>(layRepr, multi);
 }
 
 Identifier Muon::MuonStationTypeBuilder::identifyNSW(const MuonGM::MuonDetectorManager* muonDetMgr, const std::string& vName,
