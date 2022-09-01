@@ -2804,7 +2804,7 @@ void Muon::MuonTrackingGeometryBuilderCond::blendMaterial(LocalVariablesContaine
         }
         for (unsigned int ic = 0; ic < cs->size(); ic++) {
             // const Trk::Volume* nCs = new Trk::Volume(*((*cs)[ic].first),(*mIter).first->trackingVolume()->transform());
-            const Trk::Volume nCs(*((*cs)[ic].first), (*viter)->trackingVolume()->transform());
+            Trk::Volume nCs(*((*cs)[ic].first), (*viter)->trackingVolume()->transform());
             double fraction = (*cs)[ic].second;
             double csVol = fraction * calculateVolume(&nCs);
             const Muon::Span* s = findVolumeSpan(&(nCs.volumeBounds()), nCs.transform(), 0., 0., aLVC);
@@ -2829,9 +2829,11 @@ void Muon::MuonTrackingGeometryBuilderCond::blendMaterial(LocalVariablesContaine
                 if (dil > 0.) {
                     for (fIter = vv->begin(); fIter != vv->end(); ++fIter) {
                         if (fEncl[fIter - vv->begin()]) {
-                            Trk::TrackingVolume* mutablevol = const_cast<Trk::TrackingVolume*>(*fIter);
-                            mutablevol->addMaterial(*detMat, dil);
-                            if (m_colorCode == 0) mutablevol->registerColorCode(12);
+                            Trk::TrackingVolume* vol = (*fIter);
+                            vol->addMaterial(*detMat, dil);
+                            if (m_colorCode == 0) {
+                              vol->registerColorCode(12);
+                            }
                             // ATH_MSG_VERBOSE((*fIter)->volumeName()<<" acquires material from "<<  (*mIter).first->name());  }
                             ATH_MSG_VERBOSE((*fIter)->volumeName() << " acquires material from " << (*viter)->name());
                         }

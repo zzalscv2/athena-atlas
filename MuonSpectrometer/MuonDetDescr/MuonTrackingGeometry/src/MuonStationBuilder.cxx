@@ -279,7 +279,7 @@ std::vector<Trk::DetachedTrackingVolume*>* Muon::MuonStationBuilder::buildDetach
             // create station prototypes
             Trk::TrackingVolume* newTypeL = m_muonStationTypeBuilder->processNSW(m_muonMgr, sectorL);
             // create layer representation
-            std::pair<const Trk::Layer*, const std::vector<const Trk::Layer*>*> layerReprL =
+            std::pair<Trk::Layer*, const std::vector<Trk::Layer*>*> layerReprL =
                 m_muonStationTypeBuilder->createLayerRepresentation(newTypeL);
             // create prototype as detached tracking volume
             Trk::DetachedTrackingVolume* typeL =
@@ -287,7 +287,7 @@ std::vector<Trk::DetachedTrackingVolume*>* Muon::MuonStationBuilder::buildDetach
             // objs.push_back(std::pair<const Trk::DetachedTrackingVolume*,std::vector<Amg::Transform3D> >(typeStat,vols[ish].second));
             Trk::TrackingVolume* newTypeS = m_muonStationTypeBuilder->processNSW(m_muonMgr, sectorS);
             // create layer representation
-            std::pair<const Trk::Layer*, const std::vector<const Trk::Layer*>*> layerReprS =
+            std::pair<Trk::Layer*, const std::vector<Trk::Layer*>*> layerReprS =
                 m_muonStationTypeBuilder->createLayerRepresentation(newTypeS);
             Trk::DetachedTrackingVolume* typeS =
                 newTypeS ? new Trk::DetachedTrackingVolume("NSWS", newTypeS, layerReprS.first, layerReprS.second) : nullptr;
@@ -585,7 +585,7 @@ std::vector<Trk::DetachedTrackingVolume*>* Muon::MuonStationBuilder::buildDetach
                         // clone station from prototype
                         Trk::DetachedTrackingVolume* newStat = msTV->clone(vname, transf);
                         // identify layer representation
-                        const_cast<Trk::Layer*>(newStat->layerRepresentation())->setLayerType(iD);
+                        newStat->layerRepresentation()->setLayerType(iD);
                         // resolved stations only:
                         // glue components
                         glueComponents(newStat);
@@ -670,7 +670,7 @@ std::vector<Trk::DetachedTrackingVolume*>* Muon::MuonStationBuilder::buildDetach
                             if (name.substr(0, 2) == "CS") {
                                 Trk::TrackingVolume* csc_station = m_muonStationTypeBuilder->processCscStation(cv, name, cache);
                                 // create layer representation
-                                std::pair<const Trk::Layer*, const std::vector<const Trk::Layer*>*> layerRepr =
+                                std::pair<Trk::Layer*, const std::vector<Trk::Layer*>*> layerRepr =
                                     m_muonStationTypeBuilder->createLayerRepresentation(csc_station);
                                 // create prototype as detached tracking volume
                                 Trk::DetachedTrackingVolume* typeStat =
@@ -681,7 +681,7 @@ std::vector<Trk::DetachedTrackingVolume*>* Muon::MuonStationBuilder::buildDetach
                                     m_muonStationTypeBuilder->processTgcStation(cv, cache);
                                 for (unsigned int i = 0; i < tgc_stations.size(); i++) {
                                     // create layer representation
-                                    std::pair<const Trk::Layer*, const std::vector<const Trk::Layer*>*> layerRepr =
+                                    std::pair<Trk::Layer*, const std::vector<Trk::Layer*>*> layerRepr =
                                         m_muonStationTypeBuilder->createLayerRepresentation(tgc_stations[i]);
                                     // create prototype as detached tracking volume
                                     Trk::DetachedTrackingVolume* typeStat =
@@ -771,7 +771,7 @@ std::vector<Trk::DetachedTrackingVolume*>* Muon::MuonStationBuilder::buildDetach
                                     identifyPrototype(newType, eta, phi, Amg::CLHEPTransformToEigen(gmStation->getTransform()));
 
                                 // create layer representation
-                                std::pair<const Trk::Layer*, const std::vector<const Trk::Layer*>*> layerRepr =
+                                std::pair<Trk::Layer*, const std::vector<Trk::Layer*>*> layerRepr =
                                     m_muonStationTypeBuilder->createLayerRepresentation(newType);
 
                                 // create prototype as detached tracking volume
@@ -819,7 +819,7 @@ void Muon::MuonStationBuilder::glueComponents(Trk::DetachedTrackingVolume* stat)
     }
 }
 
-void Muon::MuonStationBuilder::identifyLayers(const Trk::DetachedTrackingVolume* station, int eta, int phi) const {
+void Muon::MuonStationBuilder::identifyLayers(Trk::DetachedTrackingVolume* station, int eta, int phi) const {
     ATH_MSG_VERBOSE(name() << " identifying layers ");
 
     const std::string stationName = station->trackingVolume()->volumeName().substr(0,3);
@@ -945,10 +945,10 @@ void Muon::MuonStationBuilder::identifyLayers(const Trk::DetachedTrackingVolume*
 
         int nameIndex = m_idHelperSvc->mdtIdHelper().stationNameIndex(stationName.substr(0, 3));
         if (station->trackingVolume()->confinedVolumes()) {
-            Trk::BinnedArraySpan<Trk::TrackingVolume const * const> cVols = station->trackingVolume()->confinedVolumes()->arrayObjects();
+            Trk::BinnedArraySpan<Trk::TrackingVolume * const> cVols = station->trackingVolume()->confinedVolumes()->arrayObjects();
             for (unsigned int i = 0; i < cVols.size(); i++) {
                 if (cVols[i]->confinedLayers()) {
-                    Trk::BinnedArraySpan<Trk::Layer const * const> cLays = cVols[i]->confinedLayers()->arrayObjects();
+                    Trk::BinnedArraySpan<Trk::Layer * const> cLays = cVols[i]->confinedLayers()->arrayObjects();
                     const MuonGM::MdtReadoutElement* mdtROE = nullptr;
                     for (unsigned int il = 0; il < cLays.size(); il++) {
                         Identifier id(cLays[il]->layerType());
@@ -958,7 +958,7 @@ void Muon::MuonStationBuilder::identifyLayers(const Trk::DetachedTrackingVolume*
                                 m_idHelperSvc->mdtIdHelper().tubeLayer(id), m_idHelperSvc->mdtIdHelper().tube(id));
                             if (!mdtROE) mdtROE = m_muonMgr->getMdtReadoutElement(newId);
                             unsigned int newid = newId.get_identifier32().get_compact();
-                            const_cast<Trk::Layer*>(cLays[il])->setLayerType(newid);
+                            cLays[il]->setLayerType(newid);
                             // check reference position
                             if (mdtROE) {
                                 double ref = cLays[il]->getRef();
@@ -981,7 +981,7 @@ void Muon::MuonStationBuilder::identifyLayers(const Trk::DetachedTrackingVolume*
                     }
                 }
                 if (!cVols[i]->confinedArbitraryLayers().empty()) {
-                    Trk::ArraySpan<const Trk::Layer* const> cLays = cVols[i]->confinedArbitraryLayers();
+                    Trk::ArraySpan<Trk::Layer* const> cLays = cVols[i]->confinedArbitraryLayers();
                     for (unsigned int il = 0; il < cLays.size(); il++) {
                         Identifier id(cLays[il]->layerType());
                         if (m_idHelperSvc->hasRPC() && id.get_compact() > 0 && m_idHelperSvc->isRpc(id)) {
@@ -990,7 +990,7 @@ void Muon::MuonStationBuilder::identifyLayers(const Trk::DetachedTrackingVolume*
                                 m_idHelperSvc->rpcIdHelper().doubletPhi(id), m_idHelperSvc->rpcIdHelper().gasGap(id),
                                 m_idHelperSvc->rpcIdHelper().measuresPhi(id), m_idHelperSvc->rpcIdHelper().strip(id));
                             int newid = newId.get_identifier32().get_compact();
-                            const_cast<Trk::Layer*>(cLays[il])->setLayerType(newid);
+                            cLays[il]->setLayerType(newid);
                         }
                     }
                 }
@@ -1000,17 +1000,17 @@ void Muon::MuonStationBuilder::identifyLayers(const Trk::DetachedTrackingVolume*
 
     // by now, all the layers should be identified - verify
     if (station->trackingVolume()->confinedVolumes()) {
-         Trk::BinnedArraySpan<Trk::TrackingVolume const * const> cVols = station->trackingVolume()->confinedVolumes()->arrayObjects();
+         Trk::BinnedArraySpan<Trk::TrackingVolume * const> cVols = station->trackingVolume()->confinedVolumes()->arrayObjects();
         for (unsigned int i = 0; i < cVols.size(); i++) {
             if (cVols[i]->confinedLayers()) {
-                Trk::BinnedArraySpan<Trk::Layer const * const> cLays = cVols[i]->confinedLayers()->arrayObjects();
+                Trk::BinnedArraySpan<Trk::Layer * const> cLays = cVols[i]->confinedLayers()->arrayObjects();
                 for (unsigned int il = 0; il < cLays.size(); il++) {
                     Identifier id(cLays[il]->layerType());
                     if (id == 1) ATH_MSG_DEBUG(station->name() << "," << cVols[i]->volumeName() << ", unidentified active layer:" << il);
                 }
             }
             if (!cVols[i]->confinedArbitraryLayers().empty()) {
-                Trk::ArraySpan<const Trk::Layer* const> cLays = cVols[i]->confinedArbitraryLayers();
+                Trk::ArraySpan<Trk::Layer* const> cLays = cVols[i]->confinedArbitraryLayers();
                 for (unsigned int il = 0; il < cLays.size(); il++) {
                     Identifier id(cLays[il]->layerType());
                     if (id == 1) ATH_MSG_DEBUG(station->name() << "," << cVols[i]->volumeName() << ", unidentified active layer:" << il);
@@ -1019,7 +1019,7 @@ void Muon::MuonStationBuilder::identifyLayers(const Trk::DetachedTrackingVolume*
         }
     }
     if (station->trackingVolume()->confinedLayers()) {
-        Trk::BinnedArraySpan<Trk::Layer const * const> cLays = station->trackingVolume()->confinedLayers()->arrayObjects();
+        Trk::BinnedArraySpan<Trk::Layer * const> cLays = station->trackingVolume()->confinedLayers()->arrayObjects();
         for (unsigned int il = 0; il < cLays.size(); il++) {
             Identifier id(cLays[il]->layerType());
             if (id == 1) ATH_MSG_DEBUG(station->name() << "," << station->name() << ", unidentified active layer:" << il);

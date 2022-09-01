@@ -233,7 +233,6 @@ HGTD_TrackingGeometryBuilderCond::trackingGeometry
   
   std::vector<Trk::TrackingVolume*> inBufferVolumes;
   inBufferVolumes.push_back(negativeInnerGapVolume);  
-  //we pass this as const to the builder ... so const_cast for now
   inBufferVolumes.push_back(innerVol);     
   inBufferVolumes.push_back(positiveInnerGapVolume);     
    

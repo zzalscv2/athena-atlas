@@ -732,13 +732,13 @@ Trk::Extrapolator::extrapolateToNextMaterialLayer(const EventContext& ctx,
               cache.m_detachedBoundaries.emplace_back(&surf, true);
             }
           } else {
-            if (!m_resolveMultilayers || !(*iTer)->multilayerRepresentation()) {
+            if (!m_resolveMultilayers || (*iTer)->multilayerRepresentation().empty()) {
               cache.addOneNavigationLayer((*iTer)->trackingVolume(), layR);
               
             } else {
-              const std::vector<const Trk::Layer*>* multi = (*iTer)->multilayerRepresentation();
-              for (unsigned int i = 0; i < multi->size(); i++) {
-                cache.addOneNavigationLayer((*iTer)->trackingVolume(), (*multi)[i]);
+              const auto& multi = (*iTer)->multilayerRepresentation();
+              for (unsigned int i = 0; i < multi.size(); i++) {
+                cache.addOneNavigationLayer((*iTer)->trackingVolume(), (multi)[i]);
               }
             }
           }
