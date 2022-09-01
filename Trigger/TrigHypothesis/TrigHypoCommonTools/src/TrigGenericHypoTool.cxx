@@ -21,12 +21,12 @@ StatusCode TrigGenericHypoTool::decide(const std::vector<TrigGenericHypoTool::Hy
     ATH_MSG_DEBUG("Executing decide() of " << name());
 
     std::vector<TrigGenericHypoTool::HypoToolInfo* > positive( input.size() );
-    SG::ReadDecorHandle<xAOD::TrigCompositeContainer, bool> trigCompositePassed(m_passKey);
+    SG::ReadDecorHandle<xAOD::TrigCompositeContainer, int> trigCompositePassed(m_passKey);
 
     for ( const TrigGenericHypoTool::HypoToolInfo& hypoInfo : input ) {
       if ( TrigCompositeUtils::passed( m_decisionId.numeric(), hypoInfo.previousDecisionIDs ) ) {
-	  bool decisionPassed = trigCompositePassed(*hypoInfo.trigComp);
-	  if (decisionPassed) {
+	  int decisionPassed = trigCompositePassed(*hypoInfo.trigComp);
+	  if (decisionPassed==1) {
 	    TrigCompositeUtils::addDecisionID( m_decisionId.numeric(), hypoInfo.decision );
 	  }
         }

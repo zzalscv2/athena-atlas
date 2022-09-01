@@ -141,7 +141,7 @@ StatusCode L1CorrelationAlg::execute(const EventContext& ctx) const {
   SG::WriteDecorHandle<xAOD::TrigCompositeContainer, int> trigCompL1A(m_l1AKey, ctx);
   SG::WriteDecorHandle<xAOD::TrigCompositeContainer, int> trigCompOther(m_otherTypeKey, ctx);
   SG::WriteDecorHandle<xAOD::TrigCompositeContainer, int> trigCompBeforeAfter(m_beforeAfterKey, ctx);
-  SG::WriteDecorHandle<xAOD::TrigCompositeContainer, bool> trigCompPass(m_passKey, ctx);
+  SG::WriteDecorHandle<xAOD::TrigCompositeContainer, int> trigCompPass(m_passKey, ctx);
 
   //CTP ROB
   std::vector<const OFFLINE_FRAGMENTS_NAMESPACE::ROBFragment*> robFragments;
@@ -168,23 +168,10 @@ StatusCode L1CorrelationAlg::execute(const EventContext& ctx) const {
   uint32_t l1a = CTPfragment::lvl1AcceptBunch(rbf);
 
   std::vector<uint32_t> tbp;
-  bool firedbc[3];
-  firedbc[0]=0;
-  firedbc[1]=0;
-  firedbc[2]=0;
-
-  bool firedbc_ele[3];
-  firedbc_ele[0]=0;
-  firedbc_ele[1]=0;
-  firedbc_ele[2]=0;
-  bool firedbc_mu[3];
-  firedbc_mu[0]=0;
-  firedbc_mu[1]=0;
-  firedbc_mu[2]=0;
-  bool firedbc_jet[3];
-  firedbc_jet[0]=0;
-  firedbc_jet[1]=0;
-  firedbc_jet[2]=0;  
+  bool firedbc[3] = {0,0,0};
+  bool firedbc_ele[3] = {0,0,0};
+  bool firedbc_mu[3] = {0,0,0};
+  bool firedbc_jet[3] = {0,0,0};
 
   // if currentBCincl flag is toggled don't ask for any specific trigger in the central BCID
   if(m_currentBCincl){
@@ -215,11 +202,11 @@ StatusCode L1CorrelationAlg::execute(const EventContext& ctx) const {
   int l1a_type = 0;
   int beforeafterflag=0;
   int other_type=0;
-  bool isPassed = false;
+  int isPassed = 0;
   if ((firedbc[0] && firedbc[1]) || (firedbc[1] && firedbc[2])){
 
     ATH_MSG_DEBUG("Event fired bc[0]: "<<firedbc[0]<<", bc[1]: "<<firedbc[1]<<", bc[2]: "<<firedbc[2]);
-    isPassed = true;
+    isPassed = 1;
 
     if(firedbc_ele[1])  l1a_type = 1;
     if(firedbc_mu[1])  l1a_type = 2;

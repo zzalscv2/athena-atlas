@@ -43,7 +43,8 @@ auto intAccessors = initAccessors<int>(
   "hitDV_seed_type","hitDV_n_track_qual",
   "dEdxTrk_id","dEdxTrk_dedx_n_usedhits",
   "dEdxTrk_n_hits_innermost","dEdxTrk_n_hits_inner","dEdxTrk_n_hits_pix","dEdxTrk_n_hits_sct",
-  "dEdxHit_trkid","dEdxHit_iblovfl","dEdxHit_loc","dEdxHit_layer","NumPV", "nRoIs");
+  "dEdxHit_trkid","dEdxHit_iblovfl","dEdxHit_loc","dEdxHit_layer","NumPV", "nRoIs",
+  "l1a_type", "other_type", "beforeafterflag","pass");
 
 auto int16Accessors = initAccessors<int16_t>("view",
   "HPtdEdxTrk_n_hdedx_hits_1p45","HPtdEdxTrk_n_hdedx_hits_1p50","HPtdEdxTrk_n_hdedx_hits_1p55","HPtdEdxTrk_n_hdedx_hits_1p60",
