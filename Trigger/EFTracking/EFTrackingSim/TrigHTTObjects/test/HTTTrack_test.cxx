@@ -13,7 +13,7 @@
 
 int main(int, char**)
 {
-  const double qoverpt(-0.123456), chi2(3.14159);
+  const double qoverpt(-0.123456), chi2(3.41159);
 
   HTTTrack track;
   HTTHit hits[8];
