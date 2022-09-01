@@ -121,8 +121,8 @@ atlas_add_citest( RecoRun4MC
 
 atlas_add_citest( RecoRun4MC_DAODPHYS
    SCRIPT RunWorkflowTests_Run4.py --CI -d -e '--maxEvents 5 --inputAODFile=../../RecoRun4MC/run_q447/myAOD.pool.root'  # go two levels up as the test runs in a subfolder
-   DEPENDS_SUCCESS RecoRun4MC
-   PROPERTIES PROCESSORS 2 )
+   PROPERTIES PROCESSORS 2
+   DEPENDS_SUCCESS RecoRun4MC )
 
 #################################################################################
 # Data Quality
