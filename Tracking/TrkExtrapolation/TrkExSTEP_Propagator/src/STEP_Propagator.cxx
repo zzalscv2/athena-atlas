@@ -2912,118 +2912,124 @@ rungeKuttaStep(Cache& cache,
         return true;
       }
 
-////////////////////////////////////////////////////////////////////////////////////////////////////////
-// dump material effects
-////////////////////////////////////////////////////////////////////////////////////////////////////////
-void
-Trk::STEP_Propagator::dumpMaterialEffects(Cache& cache, const Trk::CurvilinearParameters* parms, double path) const
-{
+      ////////////////////////////////////////////////////////////////////////////////////////////////////////
+      // dump material effects
+      ////////////////////////////////////////////////////////////////////////////////////////////////////////
+      void
+      Trk::STEP_Propagator::dumpMaterialEffects(Cache& cache,
+                                                const Trk::CurvilinearParameters* parms,
+                                                double path) const
+      {
 
-  // kinematics
-  double mom = parms->momentum().mag();
+        // kinematics
+        double mom = parms->momentum().mag();
 
-  // first update to make sure all material counted
-  updateMaterialEffects(cache, mom, sin(parms->momentum().theta()), path);
+        // first update to make sure all material counted
+        updateMaterialEffects(cache, mom, sin(parms->momentum().theta()), path);
 
-  if (cache.m_extrapolationCache) {
-    cache.m_extrapolationCache->updateX0(cache.m_combinedThickness);
-    cache.m_extrapolationCache->updateEloss(cache.m_combinedEloss.meanIoni(),
-                                            cache.m_combinedEloss.sigmaIoni(),
-                                            cache.m_combinedEloss.meanRad(),
-                                            cache.m_combinedEloss.sigmaRad());
-  }
-  // output
-  if (cache.m_matstates) {
-    auto eloss = !m_detailedEloss ? std::make_unique<Trk::EnergyLoss>(cache.m_combinedEloss.deltaE(),
-                                                                      cache.m_combinedEloss.sigmaDeltaE())
-                                  : std::make_unique<Trk::EnergyLoss>(cache.m_combinedEloss.deltaE(),
-                                                                      cache.m_combinedEloss.sigmaDeltaE(),
-                                                                      cache.m_combinedEloss.sigmaDeltaE(),
-                                                                      cache.m_combinedEloss.sigmaDeltaE(),
-                                                                      cache.m_combinedEloss.meanIoni(),
-                                                                      cache.m_combinedEloss.sigmaIoni(),
-                                                                      cache.m_combinedEloss.meanRad(),
-                                                                      cache.m_combinedEloss.sigmaRad(),
-                                                                      path);
+        if (cache.m_extrapolationCache) {
+          cache.m_extrapolationCache->updateX0(cache.m_combinedThickness);
+          cache.m_extrapolationCache->updateEloss(cache.m_combinedEloss.meanIoni(),
+                                                  cache.m_combinedEloss.sigmaIoni(),
+                                                  cache.m_combinedEloss.meanRad(),
+                                                  cache.m_combinedEloss.sigmaRad());
+        }
+        // output
+        if (cache.m_matstates) {
+          auto eloss = !m_detailedEloss ? std::make_unique<Trk::EnergyLoss>(cache.m_combinedEloss.deltaE(),
+                                                                            cache.m_combinedEloss.sigmaDeltaE())
+                                        : std::make_unique<Trk::EnergyLoss>(cache.m_combinedEloss.deltaE(),
+                                                                            cache.m_combinedEloss.sigmaDeltaE(),
+                                                                            cache.m_combinedEloss.sigmaDeltaE(),
+                                                                            cache.m_combinedEloss.sigmaDeltaE(),
+                                                                            cache.m_combinedEloss.meanIoni(),
+                                                                            cache.m_combinedEloss.sigmaIoni(),
+                                                                            cache.m_combinedEloss.meanRad(),
+                                                                            cache.m_combinedEloss.sigmaRad(),
+                                                                            path);
 
-    auto sa = Trk::ScatteringAngles(0., 0., std::sqrt(cache.m_covariance(2, 2)), std::sqrt(cache.m_covariance(3, 3)));
+          auto sa =
+            Trk::ScatteringAngles(0., 0., std::sqrt(cache.m_covariance(2, 2)), std::sqrt(cache.m_covariance(3, 3)));
 
-    auto cvlTP = parms->uniqueClone();
-    auto mefot = std::make_unique<Trk::MaterialEffectsOnTrack>(
-      cache.m_combinedThickness, sa, std::move(eloss), cvlTP->associatedSurface());
+          auto cvlTP = parms->uniqueClone();
+          auto mefot = std::make_unique<Trk::MaterialEffectsOnTrack>(
+            cache.m_combinedThickness, sa, std::move(eloss), cvlTP->associatedSurface());
 
-    cache.m_matstates->push_back(new TrackStateOnSurface(nullptr, std::move(cvlTP), nullptr, std::move(mefot)));
-  }
+          cache.m_matstates->push_back(new TrackStateOnSurface(nullptr, std::move(cvlTP), nullptr, std::move(mefot)));
+        }
 
-  cache.m_matdump_lastpath = path;
+        cache.m_matdump_lastpath = path;
 
-  // clean-up
-  cache.m_combinedCovariance += cache.m_covariance;
-  cache.m_covariance.setZero();
-  cache.m_combinedThickness = 0.;
-  cache.m_combinedEloss.set(0., 0., 0., 0., 0., 0.);
-}
+        // clean-up
+        cache.m_combinedCovariance += cache.m_covariance;
+        cache.m_covariance.setZero();
+        cache.m_combinedThickness = 0.;
+        cache.m_combinedEloss.set(0., 0., 0., 0., 0., 0.);
+      }
 
+      // Smear momentum ( simulation mode )
+      ///////////////////////////////////////////////////////////////////////////////////////////////////////
+      void
+      Trk::STEP_Propagator::smear(Cache& cache,
+                                  double& phi,
+                                  double& theta,
+                                  const Trk::TrackParameters* parms,
+                                  double radDist) const
+      {
+        if (cache.m_particle == Trk::geantino)
+          return;
+        if (!parms)
+          return;
 
-// Smear momentum ( simulation mode )
-/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-void
-Trk::STEP_Propagator::smear(Cache& cache, double& phi, double& theta, const Trk::TrackParameters* parms, double radDist)
-  const
-{
-  if (cache.m_particle == Trk::geantino)
-    return;
-  if (!parms)
-    return;
+        // Calculate polar angle
+        double particleMass = Trk::ParticleMasses::mass[cache.m_particle]; // Get particle mass from
+                                                                           // ParticleHypothesis
+        double momentum = parms->momentum().mag();
+        double energy = std::sqrt(momentum * momentum + particleMass * particleMass);
+        double beta = momentum / energy;
+        double th = std::sqrt(2.) * 15. * std::sqrt(radDist) / (beta * momentum) *
+                    CLHEP::RandGauss::shoot(m_randomEngine); // Moliere
+        // double th = (sqrt(2.)*13.6*std::sqrt(radDist)/(beta*momentum)) *
+        // (1.+0.038*log(radDist/(beta*beta))) * m_gaussian->shoot(); //Highland
 
-  // Calculate polar angle
-  double particleMass = Trk::ParticleMasses::mass[cache.m_particle]; // Get particle mass from ParticleHypothesis
-  double momentum = parms->momentum().mag();
-  double energy = std::sqrt(momentum * momentum + particleMass * particleMass);
-  double beta = momentum / energy;
-  double th =
-    std::sqrt(2.) * 15. * std::sqrt(radDist) / (beta * momentum) * CLHEP::RandGauss::shoot(m_randomEngine); // Moliere
-  // double th = (sqrt(2.)*13.6*std::sqrt(radDist)/(beta*momentum)) * (1.+0.038*log(radDist/(beta*beta))) *
-  // m_gaussian->shoot(); //Highland
+        // Calculate azimuthal angle
+        double ph = 2. * M_PI * CLHEP::RandFlat::shoot(m_randomEngine);
 
-  // Calculate azimuthal angle
-  double ph = 2. * M_PI * CLHEP::RandFlat::shoot(m_randomEngine);
+        Amg::Transform3D rot(Amg::AngleAxis3D(-theta, Amg::Vector3D(0., 1., 0.)) *
+                             Amg::AngleAxis3D(-phi, Amg::Vector3D(0., 0., 1.)));
+        Amg::Vector3D dir0(0., 0., 1.);
+        Amg::Vector3D rotated = rot.inverse() * Amg::AngleAxis3D(ph, Amg::Vector3D(0., 0., 1.)) *
+                                Amg::AngleAxis3D(th, Amg::Vector3D(0., 1., 0.)) * dir0;
 
-  Amg::Transform3D rot(Amg::AngleAxis3D(-theta, Amg::Vector3D(0., 1., 0.)) *
-                       Amg::AngleAxis3D(-phi, Amg::Vector3D(0., 0., 1.)));
-  Amg::Vector3D dir0(0., 0., 1.);
-  Amg::Vector3D rotated = rot.inverse() * Amg::AngleAxis3D(ph, Amg::Vector3D(0., 0., 1.)) *
-                          Amg::AngleAxis3D(th, Amg::Vector3D(0., 1., 0.)) * dir0;
+        theta = rotated.theta();
+        phi = rotated.phi();
+      }
 
-  theta = rotated.theta();
-  phi = rotated.phi();
-}
+      // Sample momentum of brem photon ( simulation mode )
+      /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+      void
+      Trk::STEP_Propagator::sampleBrem(Cache& cache, double mom) const
+      {
+        double rndx = CLHEP::RandFlat::shoot(m_randomEngine);
+        double rnde = CLHEP::RandFlat::shoot(m_randomEngine);
 
-// Sample momentum of brem photon ( simulation mode )
-/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-void
-Trk::STEP_Propagator::sampleBrem(Cache& cache, double mom) const
-{
-  double rndx = CLHEP::RandFlat::shoot(m_randomEngine);
-  double rnde = CLHEP::RandFlat::shoot(m_randomEngine);
+        // sample visible fraction of the mother momentum taken according to 1/f
+        double eps = cache.m_momentumCutOff / mom;
+        cache.m_bremMom = pow(eps, pow(rndx, exp(1.))) * mom; // adjustment here ?
+        cache.m_bremSampleThreshold = mom - cache.m_bremMom;
+        cache.m_bremEmitThreshold = mom - rnde * cache.m_bremMom;
+      }
 
-  // sample visible fraction of the mother momentum taken according to 1/f
-  double eps = cache.m_momentumCutOff / mom;
-  cache.m_bremMom = pow(eps, pow(rndx, exp(1.))) * mom; // adjustment here ?
-  cache.m_bremSampleThreshold = mom - cache.m_bremMom;
-  cache.m_bremEmitThreshold = mom - rnde * cache.m_bremMom;
-}
-
-void
-Trk::STEP_Propagator::getFieldCacheObject(Cache& cache, const EventContext& ctx) const
-{
-  SG::ReadCondHandle<AtlasFieldCacheCondObj> readHandle{ m_fieldCacheCondObjInputKey, ctx };
-  const AtlasFieldCacheCondObj* fieldCondObj{ *readHandle };
-  if (fieldCondObj == nullptr) {
-    ATH_MSG_ERROR("extrapolate: Failed to retrieve AtlasFieldCacheCondObj with key "
-                  << m_fieldCacheCondObjInputKey.key());
-    return;
-  }
-  fieldCondObj->getInitializedCache(cache.m_fieldCache);
-}
+      void
+      Trk::STEP_Propagator::getFieldCacheObject(Cache& cache, const EventContext& ctx) const
+      {
+        SG::ReadCondHandle<AtlasFieldCacheCondObj> readHandle{ m_fieldCacheCondObjInputKey, ctx };
+        const AtlasFieldCacheCondObj* fieldCondObj{ *readHandle };
+        if (fieldCondObj == nullptr) {
+          ATH_MSG_ERROR("extrapolate: Failed to retrieve AtlasFieldCacheCondObj with key "
+                        << m_fieldCacheCondObjInputKey.key());
+          return;
+        }
+        fieldCondObj->getInitializedCache(cache.m_fieldCache);
+      }
 
