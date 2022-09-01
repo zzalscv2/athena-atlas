@@ -1,7 +1,7 @@
 # Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
 
 from AthenaConfiguration.AthConfigFlags import AthConfigFlags
-from AthenaConfiguration.Enums import LHCPeriod
+from AthenaConfiguration.Enums import LHCPeriod, ProductionStep
 
 Run1Grades = [ "Good", "BlaShared", "PixShared", "SctShared", "0HitBLayer" ]
 Run2Grades = [ "0HitIn0HitNInExp2","0HitIn0HitNInExpIn","0HitIn0HitNInExpNIn","0HitIn0HitNIn",
@@ -65,14 +65,14 @@ def createBTaggingConfigFlags():
     btagcf.addFlag("BTagging.Grades", getGrades)
 
     # Taggers for validation
-    btagcf.addFlag("BTagging.SaveSV1Probabilities", lambda prevFlags: prevFlags.GeoModel.Run>=LHCPeriod.Run4)
+    btagcf.addFlag("BTagging.SaveSV1Probabilities", lambda prevFlags: prevFlags.Common.ProductionStep is ProductionStep.Derivation or prevFlags.GeoModel.Run >= LHCPeriod.Run4)
     btagcf.addFlag("BTagging.RunJetFitterNN",False)
     #Do we really need this in AthConfigFlags?
     #Comments in BTaggingConfiguration.py
     btagcf.addFlag("BTagging.OutputFiles.Prefix", "BTagging_")
     btagcf.addFlag("BTagging.GeneralToolSuffix",'') #Not sure it will stay like that later on. Was '', 'Trig, or 'AODFix'
     # Run the flip taggers
-    btagcf.addFlag("BTagging.RunFlipTaggers", False)
+    btagcf.addFlag("BTagging.RunFlipTaggers", lambda prevFlags: prevFlags.Common.ProductionStep is ProductionStep.Derivation and prevFlags.GeoModel.Run < LHCPeriod.Run4)
 
     # experimental flags
     btagcf.addFlag("BTagging.Trackless", False)

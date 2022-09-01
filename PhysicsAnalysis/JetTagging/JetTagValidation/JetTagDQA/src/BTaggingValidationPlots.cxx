@@ -12,12 +12,14 @@ using CLHEP::GeV;
 namespace JetTagDQA{
   BTaggingValidationPlots::BTaggingValidationPlots(PlotBase* pParent, 
                                                    const std::string& sDir, 
-                                                   std::string sParticleType) :
+                                                   std::string sParticleType,
+                                                   bool hasJetFitterNN) :
                                                    PlotBase(pParent, sDir),
                                                    AthMessaging("BTaggingValidationPlots"),
                                                    m_sParticleType(std::move(sParticleType)),
                                                    m_JVT_defined(false),
-                                                   m_JVTLargerEta_defined(false)
+                                                   m_JVTLargerEta_defined(false),
+                                                   m_hasJetFitterNN(hasJetFitterNN)
   {
     //std::cout << "m_sParticleType=" << m_sParticleType << std::endl;
   }     
@@ -1423,7 +1425,12 @@ namespace JetTagDQA{
     // calculate the GN1 discriminant value
     double weight_GN1 = log( GN1_pb / ( GN1_pc * m_GN1_fc + GN1_pu * (1-m_GN1_fc) ) );
    
-    updateNJetsThatPassedWPCutsMap(nJetsThatPassedWPCuts, btag->IP3D_loglikelihoodratio(), btag->IP2D_loglikelihoodratio(), weight_RNNIP, weight_DIPS, btag->SV1_loglikelihoodratio(), btag->JetFitter_loglikelihoodratio(), weight_DL1dv00, weight_DL1dv01, weight_DL1r, weight_GN1);
+    float jetFitter_loglikelihoodratio{-1.F};
+    if (m_hasJetFitterNN) {
+      jetFitter_loglikelihoodratio = btag->JetFitter_loglikelihoodratio();
+    }
+
+    updateNJetsThatPassedWPCutsMap(nJetsThatPassedWPCuts, btag->IP3D_loglikelihoodratio(), btag->IP2D_loglikelihoodratio(), weight_RNNIP, weight_DIPS, btag->SV1_loglikelihoodratio(), jetFitter_loglikelihoodratio, weight_DL1dv00, weight_DL1dv01, weight_DL1r, weight_GN1);
 
     // fill the histograms with the tagger discriminants
     for(std::map<std::string, TH1*>::const_iterator hist_iter=m_weight_histos.begin(); hist_iter!=m_weight_histos.end(); ++hist_iter){
@@ -1451,7 +1458,7 @@ namespace JetTagDQA{
 
         // JetFitter
         bool pass_nTracksCut_JetFitter = nGTinSV1 > 0 && nIP3DTracks > 0;
-        BTaggingValidationPlots::fillDiscriminantHistograms("JetFitter_", btag->JetFitter_loglikelihoodratio(), m_JetFitter_workingPoints, truth_label, hist_iter, label_iter, pass_nTracksCut_JetFitter, jet->pt(), jet_Lxy, onZprime, event);
+        BTaggingValidationPlots::fillDiscriminantHistograms("JetFitter_", jetFitter_loglikelihoodratio, m_JetFitter_workingPoints, truth_label, hist_iter, label_iter, pass_nTracksCut_JetFitter, jet->pt(), jet_Lxy, onZprime, event);
 
         // DL1 taggers
         bool pass_nTracksCut_DL1 = nGTinSV1 > 0 && nIP3DTracks > 0;
