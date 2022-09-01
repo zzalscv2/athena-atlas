@@ -211,10 +211,10 @@ def getTransform():
     exeSet = set()
     msg.info("Transform arguments %s = " % sys.argv[1:])
     if "--outputEVNTFile" in str(sys.argv[1:]):
-       exeSet.add(EvgenExecutor(name="generate", skeleton="EvgenJobTransforms/skel.GENtoEVGEN.py", inData=["inNULL"], outData=["EVNT", "EVNT_Pre", "TXT" ]))
+       exeSet.add(EvgenExecutor(name="generate", skeleton="EvgenJobTransforms/skel.GENtoEVGEN.py", inData=["inNULL"], outData=["EVNT", "EVNT_Pre", "TXT", "YODA" ]))
        msg.info("Output file = EVNT")
     elif "--outputYODAFile" in str(sys.argv[1:]):
-       exeSet.add(EvgenExecutor(name="generate", skeleton="EvgenJobTransforms/skel.GENtoEVGEN.py", inData=["inNULL"], outData=["outNULL", "TXT" ]))
+       exeSet.add(EvgenExecutor(name="generate", skeleton="EvgenJobTransforms/skel.GENtoEVGEN.py", inData=["inNULL"], outData=["TXT", "YODA" ]))
        msg.info("Output file = YODA")
     elif "--outputTXTFile" in str(sys.argv[1:]):
        exeSet.add(EvgenExecutor(name="generate", skeleton="EvgenJobTransforms/skel.GENtoTXT.py", inData=["inNULL"], outData=["TXT"]))
