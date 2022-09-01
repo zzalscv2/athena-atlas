@@ -63,6 +63,7 @@ atlas_add_citest( Test2 ...
 )
 ```
 Use `DEPENDS_SUCCESS` if the test should only run if the dependee(s) succeeded.
+If used, `DEPENDS[_SUCCESS]` needs to be specified as the **last argument** of `atlas_add_citest`.
 
 Additional requirements can be specified via e.g.
 ```cmake

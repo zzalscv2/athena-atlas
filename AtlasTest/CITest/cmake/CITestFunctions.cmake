@@ -46,6 +46,9 @@ function( atlas_add_citest testName )
    # test dependencies that are only run on success of the dependee(s):
    if( ARG_DEPENDS_SUCCESS )
       foreach( _test ${ARG_DEPENDS_SUCCESS} )
+         if( NOT TEST "CITest_${_test}_ctest" )
+            message( SEND_ERROR "${testName} declares dependency on ${_test} which does not exist" )
+         endif()
          set_property( TEST CITest_${testName}_ctest
             APPEND PROPERTY FIXTURES_REQUIRED "CITest_${_test}_fixture" )
       endforeach()
