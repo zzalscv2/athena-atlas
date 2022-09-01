@@ -909,13 +909,13 @@ StatusCode TrigVrtSecInclusive::findNtrackVerticesVSI
    // Graph method: Trk::pgraphm_()
    // used in order to find compatible sub-graphs from the incompatible graph
 
-   // List of edgeds between imcompatible nodes
-   // This weit is the data model of imcompatible graph used in Trk::pgraphm_().
-   std::vector<long int> weit;
+   // List of edges between incompatible nodes
+   // This weight is the data model of incompatible graph used in Trk::pgraphm_().
+   std::vector<long int> weight;
 
    for( auto& pair : incomp ) {
-      weit.emplace_back( pair.first  + 1 ); /* +1 is needed for PGRAPH due to FORTRAN-style counting */
-      weit.emplace_back( pair.second + 1 ); /* +1 is needed for PGRAPH due to FORTRAN-style counting */
+      weight.emplace_back( pair.first  + 1 ); /* +1 is needed for PGRAPH due to FORTRAN-style counting */
+      weight.emplace_back( pair.second + 1 ); /* +1 is needed for PGRAPH due to FORTRAN-style counting */
    }
 
    // Solution of the graph method routine (minimal covering of the graph)
@@ -942,8 +942,8 @@ StatusCode TrigVrtSecInclusive::findNtrackVerticesVSI
 
    // Main iteration
    while(true) {
-      // Find a solution from the given set of incompatible tracks (==weit)
-      pgraph->pgraphm_( weit.data(), nEdges, nTracks, solution.data(), &solutionSize, nth);
+      // Find a solution from the given set of incompatible tracks (==weight)
+      pgraph->pgraphm_( weight.data(), nEdges, nTracks, solution.data(), &solutionSize, nth);
 
       ATH_MSG_VERBOSE(" > " << __FUNCTION__ << ": Trk::pgraphm_() output: solutionSize = " << solutionSize );
 
@@ -1248,13 +1248,13 @@ StatusCode TrigVrtSecInclusive::mergeVertexFromDiTrkVrt
   ATH_MSG_DEBUG(" > " << __FUNCTION__ << ": compatible track pair size   = " << compSize );
   ATH_MSG_DEBUG(" > " << __FUNCTION__ << ": incompatible track pair size = " << incomp.size() );
 
-  // List of edgeds between imcompatible nodes
-  // This weit is the data model of imcompatible graph used in Trk::pgraphm_().
-  std::vector<long int> weit;
+  // List of edges between incompatible nodes
+  // This weight is the data model of incompatible graph used in Trk::pgraphm_().
+  std::vector<long int> weight;
 
   for( auto& pair : incomp ) {
-    weit.emplace_back( dict_trk_idx[pair.first]  + 1 ); /* +1 is needed for PGRAPH due to FORTRAN-style counting */
-    weit.emplace_back( dict_trk_idx[pair.second] + 1 ); /* +1 is needed for PGRAPH due to FORTRAN-style counting */
+    weight.emplace_back( dict_trk_idx[pair.first]  + 1 ); /* +1 is needed for PGRAPH due to FORTRAN-style counting */
+    weight.emplace_back( dict_trk_idx[pair.second] + 1 ); /* +1 is needed for PGRAPH due to FORTRAN-style counting */
   }
 
   // Solution of the graph method routine (minimal covering of the graph)
@@ -1280,8 +1280,8 @@ StatusCode TrigVrtSecInclusive::mergeVertexFromDiTrkVrt
   // Main iteration
   while(true) {
 
-    // Find a solution from the given set of incompatible tracks (==weit)
-    pgraph->pgraphm_( weit.data(), nEdges, nTracks, solution.data(), &solutionSize, nth);
+    // Find a solution from the given set of incompatible tracks (==weight)
+    pgraph->pgraphm_( weight.data(), nEdges, nTracks, solution.data(), &solutionSize, nth);
 
     ATH_MSG_VERBOSE(" > " << __FUNCTION__ << ": Trk::pgraphm_() output: solutionSize = " << solutionSize );
     ATH_MSG_INFO( "UTT>    TrigVrtSecInclusive::mergeVertexFromDiTrkVrt : Trk::pgraphm_() output: solutionSize = " << solutionSize );
