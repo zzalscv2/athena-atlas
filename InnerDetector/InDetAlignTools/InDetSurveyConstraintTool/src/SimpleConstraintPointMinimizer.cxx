@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2017 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
 */
 
 // ------------------------------------------------------------------------------
@@ -153,8 +153,8 @@ double  SimpleConstraintPointMinimizer::secondMinimum(const std::vector<SurveyCo
     aRotat2 = Amg::Vector3D(Rota[0],Rota[1],Rota[2]);
     translate2 -= aRotat2.cross(wPoint);
   }else{
-    aRotat2 = Amg::Vector3D();
-    translate2 = Amg::Vector3D();
+    aRotat2.setZero();
+    translate2.setZero();
   }  
   // now compute the 'goodness of fit' as average distance/point
   double retval = -1.0;
