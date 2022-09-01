@@ -12,7 +12,7 @@
 
 AthMessaging::AthMessaging (IMessageSvc* msgSvc,
                             const std::string& name) :
-  m_imsg(msgSvc), m_nm(name)
+  m_nm(name), m_imsg(msgSvc)
 {}
 
 
@@ -27,7 +27,6 @@ AthMessaging::~AthMessaging()
 
 void AthMessaging::setLevel (MSG::Level lvl)
 {
-  if (m_lvl == MSG::NIL) initMessaging();
   m_lvl = lvl;
 }
 
@@ -35,7 +34,7 @@ void AthMessaging::setLevel (MSG::Level lvl)
 /**
  * Initialize our message level and MessageSvc.
  *
- * This method is only called once when m_lvl == MSG::NIL.
+ * This method should only be called once.
  */
 void AthMessaging::initMessaging() const
 {

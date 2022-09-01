@@ -21,6 +21,7 @@
 #include "GaudiKernel/MsgStream.h"
 #include "Gaudi/Property.h"
 #include "AthenaBaseComps/AthMsgStreamMacros.h"
+#include "CxxUtils/checker_macros.h"
 
 #include <boost/thread/tss.hpp>
 
@@ -124,8 +125,8 @@ class AthMessaging
   /////////////////////////////////////////////////////////////////// 
  private: 
 
-  /// Current logging level.
-  mutable std::atomic<MSG::Level> m_lvl{ MSG::NIL };
+  /// Message source name
+  std::string m_nm;
 
   /// MsgStream instance (a std::cout like with print-out levels)
   mutable boost::thread_specific_ptr<MsgStream> m_msg_tls;
@@ -133,8 +134,12 @@ class AthMessaging
   /// MessageSvc pointer
   mutable std::atomic<IMessageSvc*> m_imsg{ nullptr };
 
-  /// Message source name
-  std::string m_nm;
+  /// Current logging level.
+  mutable std::atomic<MSG::Level> m_lvl{ MSG::NIL };
+
+  /// Messaging initialized (initMessaging)
+  mutable std::atomic_flag m_initialized ATLAS_THREAD_SAFE = ATOMIC_FLAG_INIT;
+
 }; 
 
 /////////////////////////////////////////////////////////////////// 
@@ -145,7 +150,7 @@ inline
 bool
 AthMessaging::msgLvl (const MSG::Level lvl) const
 {
-  if (m_lvl == MSG::NIL) initMessaging();
+  if (!m_initialized.test_and_set()) initMessaging();
   if (m_lvl <= lvl) {
     msg() << lvl;
     return true;
@@ -160,7 +165,7 @@ AthMessaging::msg() const
 {
   MsgStream* ms = m_msg_tls.get();
   if (!ms) {
-    if (m_lvl == MSG::NIL) initMessaging();
+    if (!m_initialized.test_and_set()) initMessaging();
     ms = new MsgStream(m_imsg,m_nm);
     m_msg_tls.reset( ms );
   }
