@@ -34,6 +34,7 @@ class ProductionStep(FlagEnum):
     FastChain = 'FastChain'
     Digitization = 'Digitization'
     Reconstruction = 'Reconstruction'
+    Derivation = 'Derivation'
 
 
 def validrunformat(lhcperiod):

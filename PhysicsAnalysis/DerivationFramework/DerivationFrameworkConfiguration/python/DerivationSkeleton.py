@@ -2,12 +2,11 @@
 
 import sys
 
-from PyJobTransforms.CommonRunArgsToFlags import commonRunArgsToFlags
-from DerivationFrameworkConfiguration import DerivationConfigList
-from PyJobTransforms.TransformUtils import processPreExec, processPreInclude, processPostExec, processPostInclude
-from AthenaPoolCnvSvc.PoolReadConfig import PoolReadCfg
-from AthenaPoolCnvSvc.PoolWriteConfig import PoolWriteCfg
 from AthenaConfiguration.ComponentFactory import CompFactory
+from AthenaConfiguration.Enums import ProductionStep
+from DerivationFrameworkConfiguration import DerivationConfigList
+from PyJobTransforms.CommonRunArgsToFlags import commonRunArgsToFlags
+from PyJobTransforms.TransformUtils import processPreExec, processPreInclude, processPostExec, processPostInclude
 
 
 def fromRunArgs(runArgs):
@@ -21,6 +20,8 @@ def fromRunArgs(runArgs):
     logDerivation.info('**** Setting-up configuration flags')
     from AthenaConfiguration.AllConfigFlags import ConfigFlags
     commonRunArgsToFlags(runArgs, ConfigFlags)
+
+    ConfigFlags.Common.ProductionStep = ProductionStep.Derivation
 
     # Switch on PerfMon
     ConfigFlags.PerfMon.doFullMonMT = True
@@ -38,10 +39,6 @@ def fromRunArgs(runArgs):
     if hasattr(runArgs, 'formats'):
         formats = runArgs.formats
         logDerivation.info('Will attempt to make the following derived formats: {0}'.format(formats))
-        if 'PHYSVAL' in getattr(runArgs, 'formats'):
-            ConfigFlags.BTagging.SaveSV1Probabilities = True
-            ConfigFlags.BTagging.RunJetFitterNN = True
-            ConfigFlags.BTagging.RunFlipTaggers = True
     else:
         logDerivation.error('Derivation job started, but with no output formats specified - aborting')
         raise ValueError('No derived formats specified')
@@ -68,7 +65,9 @@ def fromRunArgs(runArgs):
     cfg = MainServicesCfg(ConfigFlags)
 
     # Pool file reading and writing
+    from AthenaPoolCnvSvc.PoolReadConfig import PoolReadCfg
     cfg.merge(PoolReadCfg(ConfigFlags))
+    from AthenaPoolCnvSvc.PoolWriteConfig import PoolWriteCfg
     cfg.merge(PoolWriteCfg(ConfigFlags))
 
     for formatName in formats:

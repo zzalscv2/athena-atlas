@@ -23,6 +23,7 @@ def PhysValBTagCfg(flags, **kwargs):
     from PhysValMonitoring.PhysValUtils import getHistogramDefinitions
     kwargs.setdefault("HistogramDefinitions", getHistogramDefinitions(path, 'PHYSVAL', 'ALL'))
     kwargs.setdefault("JetEtaCut", 2.5 if flags.GeoModel.Run <= LHCPeriod.Run3 else 4.0)
+    kwargs.setdefault("hasJetFitterNN", flags.BTagging.RunJetFitterNN)
 
     tool = CompFactory.JetTagDQA.PhysValBTag(**kwargs)
     acc.setPrivateTools(tool)
