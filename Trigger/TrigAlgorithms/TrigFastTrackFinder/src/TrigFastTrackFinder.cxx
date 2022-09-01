@@ -1051,17 +1051,31 @@ void TrigFastTrackFinder::fillMon(const TrackCollection& tracks, const TrigVerte
   auto mnt_roi_etaWidth = Monitored::Scalar<float>("roi_etaWidth", 0.0);
   auto mnt_roi_phiWidth = Monitored::Scalar<float>("roi_phiWidth", 0.0);
   auto mnt_roi_z        = Monitored::Scalar<float>("roi_z",        0.0);
-  auto mnt_roi_zWidth   = Monitored::Scalar<float>("roi_zWidith",  0.0);
+  auto mnt_roi_zWidth   = Monitored::Scalar<float>("roi_zWidth",  0.0);
   auto mnt_roi_nTracks  = Monitored::Scalar<int>("roi_nTracks", 0);
   auto monRoI           = Monitored::Group(m_monTool, mnt_roi_eta, mnt_roi_phi, mnt_roi_etaWidth, mnt_roi_phiWidth, mnt_roi_z, mnt_roi_zWidth, mnt_roi_nTracks);
 
-  for(unsigned int i=0; i<roi.size(); i++) {
-     mnt_roi_eta      = (roi.at(i))->eta();
-     mnt_roi_phi      = (roi.at(i))->phi();
-     mnt_roi_etaWidth = (roi.at(i))->etaPlus() - (roi.at(i))->etaMinus();
-     mnt_roi_phiWidth = CxxUtils::wrapToPi((roi.at(i))->phiPlus() - (roi.at(i))->phiMinus());
-     mnt_roi_z        = (roi.at(i))->zed();
-     mnt_roi_zWidth   = (roi.at(i))->zedPlus() - (roi.at(i))->zedMinus();
+  if (roi.composite()){
+    for(unsigned int i=0; i<roi.size(); i++) {
+      const IRoiDescriptor *subroi = roi.at(i);
+      if (subroi){
+	mnt_roi_eta      = subroi->eta();
+	mnt_roi_phi      = subroi->phi();
+	mnt_roi_etaWidth = subroi->etaPlus() - subroi->etaMinus();
+	mnt_roi_phiWidth = CxxUtils::wrapToPi(subroi->phiPlus() - subroi->phiMinus());
+	mnt_roi_z        = subroi->zed();
+	mnt_roi_zWidth   = subroi->zedPlus() - subroi->zedMinus();
+	monRoI.fill();
+      }
+    }
+  } 
+  else {
+    mnt_roi_eta      = roi.eta();
+    mnt_roi_phi      = roi.phi();
+    mnt_roi_etaWidth = roi.etaPlus() - roi.etaMinus();
+    mnt_roi_phiWidth = CxxUtils::wrapToPi(roi.phiPlus() - roi.phiMinus());
+    mnt_roi_z        = roi.zed();
+    mnt_roi_zWidth   = roi.zedPlus() - roi.zedMinus();
   }
 
   std::vector<float> mnt_trk_pt;
