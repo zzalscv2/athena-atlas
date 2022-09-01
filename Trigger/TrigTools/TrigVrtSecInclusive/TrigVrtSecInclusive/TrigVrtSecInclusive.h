@@ -117,22 +117,22 @@ private:
       inline double fitQuality() const { return chi2 / ndof(); }
 
       struct AlgParam {
-         double               twoCirc_dphi;
-         double               twoCirc_dr;
-         double               twoCirc_int_r;
+         double               twoCirc_dphi = 0;
+         double               twoCirc_dr = 0;
+         double               twoCirc_int_r = 0;
 
-         double               vPos;
-         double               vPosMomAngT;
-         double               dphi1;
-         double               dphi2;
+         double               vPos = 0;
+         double               vPosMomAngT = 0;
+         double               dphi1 = 0;
+         double               dphi2 = 0;
 
-         double               vrtFast_r;
-         double               vrtFast_eta;
-         double               vrtFast_phi;
+         double               vrtFast_r = 0;
+         double               vrtFast_eta = 0;
+         double               vrtFast_phi = 0;
          std::vector<float>   vrtFast_trkd0;
          std::vector<float>   vrtFast_trkz0;
 
-         bool                 isPassMMV;
+         bool                 isPassMMV = false;
       };
 
       struct AlgCuts {
