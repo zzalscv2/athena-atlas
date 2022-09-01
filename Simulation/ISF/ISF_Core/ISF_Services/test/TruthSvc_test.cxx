@@ -48,6 +48,10 @@
 // STL includes
 #include <cstdlib> // quick_exit
 
+#if __GNUC__ >= 12
+// gcc12 gives maybe-uninitialized warnings about uses of testing::_.
+# pragma GCC diagnostic ignored "-Wmaybe-uninitialized"
+#endif
 
 namespace ISFTesting {
 
