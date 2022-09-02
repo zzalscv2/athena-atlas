@@ -25,6 +25,7 @@ def createTriggerFlags(doTriggerRecoFlags):
     flags.addFlag('Trigger.enableL1MuonPhase1', lambda prevFlags: prevFlags.Trigger.EDMVersion >= 3 or prevFlags.Detector.EnableMM or prevFlags.Detector.EnablesTGC)
 
     # Enable Run-3 LVL1 calo simulation and/or decoding
+    # TODO: when Fex decoders work reliably, change it to: "lambda prevFlags: (prevFlags.Trigger.EDMVersion >= 3 or prevFlags.GeoModel.Run >= LHCPeriod.Run3) and not prevFlags.Trigger.doHLT"
     flags.addFlag('Trigger.enableL1CaloPhase1', False)
 
     # Enable L1Topo simulation to write inputs to txt
@@ -164,6 +165,9 @@ def createTriggerFlags(doTriggerRecoFlags):
 
     # enable L1Calo ByteStream conversion / simulation
     flags.addFlag('Trigger.L1.doCalo', True)
+
+    # enable L1Calo Input ([ejg]Towers) ByteStream conversion / simulation
+    flags.addFlag('Trigger.L1.doCaloInputs', lambda prevFlags: prevFlags.Trigger.enableL1CaloPhase1 and not prevFlags.Trigger.doHLT)
 
     # enable L1Topo ByteStream conversion / simulation
     flags.addFlag('Trigger.L1.doTopo', True)

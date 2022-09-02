@@ -7,6 +7,7 @@ from TrigT1ResultByteStream.TrigT1ResultByteStreamConfig import L1TriggerByteStr
 from TrigConfigSvc.TrigConfigSvcCfg import TrigConfigSvcCfg, L1PrescaleCondAlgCfg, HLTPrescaleCondAlgCfg
 from TriggerJobOpts.TriggerByteStreamConfig import ByteStreamReadCfg
 from TrigEDMConfig.TriggerEDM import getTriggerEDMList
+from TrigEDMConfig.Utils import edmDictToList
 from OutputStreamAthenaPool.OutputStreamConfig import addToAOD, addToESD
 
 from AthenaCommon.Logging import logging
@@ -64,11 +65,6 @@ def TriggerRecoCfg(flags):
 
     return acc
 
-
-def _asList(edm):
-    """Helper to convert EMD dictionary to flat list"""
-    return [ f"{type}#{name}" for type, names in edm.items() for name in names ]
-
 def TriggerMetadataWriterCfg(flags):
     """Sets up access to HLT, L1, BGRP, Monitoring, HLT PS and L1 PS JSON files from 'FILE' or 'DB', writes JSON to metaStore and keys to eventStore"""
     acc = ComponentAccumulator()
@@ -93,8 +89,8 @@ def TriggerEDMCfg(flags):
         menuMetadata += ['xAOD::TriggerMenuAuxContainer#*', 'xAOD::TriggerMenuContainer#*',]
         # Add LVL1 collections (for Run-3 they are part of the "regular" EDM lists)
         from TrigEDMConfig.TriggerEDM import getLvl1ESDList, getLvl1AODList
-        acc.merge(addToESD(flags, _asList(getLvl1ESDList())))
-        acc.merge(addToAOD(flags, _asList(getLvl1AODList())))
+        acc.merge(addToESD(flags, edmDictToList(getLvl1ESDList())))
+        acc.merge(addToAOD(flags, edmDictToList(getLvl1AODList())))
 
     _TriggerESDList = getTriggerEDMList(flags.Trigger.ESDEDMSet,  flags.Trigger.EDMVersion)
     _TriggerAODList = getTriggerEDMList(flags.Trigger.AODEDMSet,  flags.Trigger.EDMVersion)
@@ -113,8 +109,8 @@ def TriggerEDMCfg(flags):
         log.info("AOD list is subset of ESD list - good.")
 
     # there is internal gating in addTo* if AOD or ESD do not need to be written out
-    acc.merge(addToESD(flags, _asList(_TriggerESDList), MetadataItemList = menuMetadata))
-    acc.merge(addToAOD(flags, _asList(_TriggerAODList), MetadataItemList = menuMetadata))
+    acc.merge(addToESD(flags, edmDictToList(_TriggerESDList), MetadataItemList = menuMetadata))
+    acc.merge(addToAOD(flags, edmDictToList(_TriggerAODList), MetadataItemList = menuMetadata))
     
     log.info("AOD content set according to the AODEDMSet flag: %s and EDM version %d", flags.Trigger.AODEDMSet, flags.Trigger.EDMVersion)
     # navigation for Run 3
@@ -274,8 +270,8 @@ def Run1xAODConversionCfg(flags):
     acc.setPrivateTools(bstoxaodTool)
 
     # write the xAOD (Run-2) classes to the output
-    acc.merge(addToESD(flags, _asList(getTriggerEDMList(flags.Trigger.ESDEDMSet, runVersion=2))))
-    acc.merge(addToAOD(flags, _asList(getTriggerEDMList(flags.Trigger.AODEDMSet, runVersion=2))))
+    acc.merge(addToESD(flags, edmDictToList(getTriggerEDMList(flags.Trigger.ESDEDMSet, runVersion=2))))
+    acc.merge(addToAOD(flags, edmDictToList(getTriggerEDMList(flags.Trigger.AODEDMSet, runVersion=2))))
 
     return acc
 
