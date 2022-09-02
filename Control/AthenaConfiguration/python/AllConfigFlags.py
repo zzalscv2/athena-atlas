@@ -1,7 +1,7 @@
 # Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
 
 from AthenaCommon.SystemOfUnits import TeV
-from AthenaConfiguration.AthConfigFlags import AthConfigFlags
+from AthenaConfiguration.AthConfigFlags import AthConfigFlags, isGaudiEnv
 from AthenaConfiguration.AutoConfigFlags import GetFileMD, getInitialTimeStampsFromRunNumbers, getRunToTimestampDict, getSpecialConfigurationMetadata
 from AthenaConfiguration.Enums import BeamType, Format, ProductionStep, Project
 from PyUtils.moduleExists import moduleExists
@@ -198,13 +198,14 @@ def _createCfgFlags():
     _addFlagsCategory(acf, "Reco", __reco, 'RecJobTransforms')
 
 #IOVDbSvc Flags:
-    from IOVDbSvc.IOVDbAutoCfgFlags import getLastGlobalTag, getDatabaseInstanceDefault
-    acf.addFlag("IOVDb.GlobalTag", getLastGlobalTag) # Retrieve last global tag used from metadata
-    acf.addFlag("IOVDb.DatabaseInstance",getDatabaseInstanceDefault)
-    # Run dependent simulation
-    # map from runNumber to timestamp; migrated from RunDMCFlags.py
-    acf.addFlag("IOVDb.RunToTimestampDict", lambda prevFlags: getRunToTimestampDict())
-    acf.addFlag("IOVDb.DBConnection", lambda prevFlags : "sqlite://;schema=mycool.db;dbname=" + prevFlags.IOVDb.DatabaseInstance)
+    if isGaudiEnv():
+        from IOVDbSvc.IOVDbAutoCfgFlags import getLastGlobalTag, getDatabaseInstanceDefault
+        acf.addFlag("IOVDb.GlobalTag", getLastGlobalTag) # Retrieve last global tag used from metadata
+        acf.addFlag("IOVDb.DatabaseInstance",getDatabaseInstanceDefault)
+        # Run dependent simulation
+        # map from runNumber to timestamp; migrated from RunDMCFlags.py
+        acf.addFlag("IOVDb.RunToTimestampDict", lambda prevFlags: getRunToTimestampDict())
+        acf.addFlag("IOVDb.DBConnection", lambda prevFlags : "sqlite://;schema=mycool.db;dbname=" + prevFlags.IOVDb.DatabaseInstance)
 
 #PoolSvc Flags:
     acf.addFlag("PoolSvc.MaxFilesOpen", lambda prevFlags : 2 if prevFlags.MP.UseSharedReader else 0)
@@ -237,7 +238,8 @@ def _createCfgFlags():
     def __trigger():
         from TriggerJobOpts.TriggerConfigFlags import createTriggerFlags
         return createTriggerFlags(acf.Common.Project is not Project.AthAnalysis)
-    _addFlagsCategory(acf, "Trigger", __trigger, 'TriggerJobOpts' )
+    if isGaudiEnv():
+        _addFlagsCategory(acf, "Trigger", __trigger, 'TriggerJobOpts' )
 
     def __indet():
         from InDetConfig.InDetConfigFlags import createInDetConfigFlags
@@ -314,6 +316,26 @@ def _createCfgFlags():
         from PerfMonComps.PerfMonConfigFlags import createPerfMonConfigFlags
         return createPerfMonConfigFlags()
     _addFlagsCategory(acf, "PerfMon", __perfmon, 'PerfMonComps')
+
+    # For AnalysisBase, pick up things grabbed in Athena by the functions above
+    if not isGaudiEnv():
+        def EDMVersion(flags):
+            # POOL files: decide based on HLT output type present in the file
+            default_version = 3
+            collections = flags.Input.Collections
+            if "HLTResult_EF" in collections:
+                return 1
+            elif "TrigNavigation" in collections:
+                return 2
+            elif any("HLTNav_Summary" in s for s in collections):
+                return 3
+            elif not flags.Input.Collections:
+                # Special case for empty input files (can happen in merge jobs on the grid)
+                # The resulting version doesn't really matter as there's nothing to be done, but we want a valid configuration
+                return 3
+
+            return default_version
+        acf.addFlag('Trigger.EDMVersion', lambda prevFlags: EDMVersion(prevFlags))
 
     return acf
 
