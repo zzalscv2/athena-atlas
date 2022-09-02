@@ -23,7 +23,7 @@ def getMonTool_TrigJetAlgorithm(path):
   monTool.defineHistogram( 'JET_eta',   path='EXPERT', type='TH1F', title='Counts',
                            xbins=50, xmin=-5, xmax=5 )
   monTool.defineHistogram( 'JET_phi',   path='EXPERT', type='TH1F', title='Counts',
-                           ybins=64, ymin=-3.2, ymax=3.2)
+                           xbins=64, xmin=-3.2, xmax=3.2)
 
   monTool.defineHistogram( 'JET_eta,JET_phi',   path='EXPERT', type='TH2F', title='Counts',
                            xbins=50, xmin=-5, xmax=5,
