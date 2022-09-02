@@ -25,12 +25,12 @@ private:
   Gaudi::Property<double> m_PtMinParent{this,"PtMinParent",0.,"Min parent Pt"};
   Gaudi::Property<double> m_PtMaxParent{this,"PtMaxParent",1e9,"Max parent Pt"};
   Gaudi::Property<double> m_MassMinParent{this,"MassMinParent",-1e9,"Min parent mass"};
-  Gaudi::Property<double> m_MassMaxParent{this,"MassMaxParent",-1e9,"Max parent mass"};
+  Gaudi::Property<double> m_MassMaxParent{this,"MassMaxParent",1e9,"Max parent mass"};
   Gaudi::Property<std::vector<int>> m_PDGParent{this,"PDGParent",0,"PDG ID of parents"};
   Gaudi::Property<double> m_EtaRangeParent{this,"EtaRangeParent",10.0,"Parent eta range"};
   Gaudi::Property<std::vector<int>> m_PDGChild{this,"PDGChild",0,"PDG ID of child"};
   Gaudi::Property<double> m_PtMinChild{this,"PtMinChild",0.,"Min child Pt"};
-  Gaudi::Property<double> m_EtaRangeChild{this,"EtaRangeChild",0.,"Child eta range"};
+  Gaudi::Property<double> m_EtaRangeChild{this,"EtaRangeChild",10.,"Child eta range"};
 
 
   /** calculate the rapidity of a particle */
