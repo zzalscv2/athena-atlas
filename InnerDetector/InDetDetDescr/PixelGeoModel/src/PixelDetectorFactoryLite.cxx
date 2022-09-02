@@ -116,10 +116,8 @@ void PixelDetectorFactoryLite::create(GeoPhysVol*)
   std::map<std::string, GeoAlignableTransform*> mapAX  = m_sqliteReader->getPublishedNodes<std::string, GeoAlignableTransform*>("Pixel");
   
   // The top level volume
-  //GeoFullPhysVol *pPixelVol = mapFPV["Pixel"];
   GeoFullPhysVol *pPixelEnvelopeVol = mapFPV["Pixel_Envelope"];
     
-  //
   // Create the Lite Pixel Envelope...
   GeoPixelEnvelope pe(m_detectorManager, m_geometryManager.get(), m_sqliteReader);
   pe.Build() ;
@@ -131,8 +129,6 @@ void PixelDetectorFactoryLite::create(GeoPhysVol*)
   m_detectorManager->addAlignableTransform(2, id, transform, pPixelEnvelopeVol);
 
   // Add this to the list of top level physical volumes:             
-  //
-  //m_detectorManager->addTreeTop(pephys);
   m_detectorManager->addTreeTop(pPixelEnvelopeVol);
 
   
@@ -146,7 +142,6 @@ void PixelDetectorFactoryLite::create(GeoPhysVol*)
   }
   
   // Register the callbacks and keys and the level corresponding to the key.
-  //if (0) 
   if (m_geometryManager->Alignable()) {
 
     if (!m_useDynamicAlignFolders){
@@ -242,7 +237,6 @@ void PixelDetectorFactoryLite::doChecks()
 	m_geometryManager->SetCurrentLD(iLayer);
 	int etaCorrection = 0;
 	if (!m_geometryManager->allowSkipEtaZero() && manager->numerology().skipEtaZeroForLayer(iLayer)) {
-	  //std::cout << "ETA CORRECTION" << std::endl;
 	  etaCorrection = 1;
 	}
 	// END TEMPORARY FIX
