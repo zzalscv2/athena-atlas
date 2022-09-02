@@ -35,8 +35,8 @@ namespace G4UA
                         LMDTo,LMDTm,LMDTi,BMDTo,BMDTm,BMDTi,SWo,SWm,SWi,SWc,SWt,
                         bflz,bfhz,bslz,bshz,btlz,bthz,ffle,ffme,ffhe,fsle,fsme,fshe,ftle,ftme,fthe,
                         CY1,CY2,lastVol};
-    TH1D * m_flux[lastVol][9][2];
-    TH1D * m_fluxE[lastVol][9];
+    TH1D * m_flux[lastVol][9][2] = {};
+    TH1D * m_fluxE[lastVol][9] = {};
 
     double m_nev;
     std::vector<int> m_list;
