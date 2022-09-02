@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2020 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef IACTSGeantFollowerHelper_H
@@ -24,11 +24,11 @@ class IActsGeantFollowerHelper : virtual public IAlgTool {
 
     // Follower interface
     // a) begin event - initialize follower process
-    virtual void beginEvent() const = 0;
+    virtual void beginEvent() = 0;
     // b) track the particle
-    virtual void trackParticle(const G4ThreeVector& pos, const G4ThreeVector& mom, int pdg, double charge, float t, float X0, bool isSensitive) const = 0;
+    virtual void trackParticle(const G4ThreeVector& pos, const G4ThreeVector& mom, int pdg, double charge, float t, float X0, bool isSensitive) = 0;
     // c) end event - ntuple writing
-    virtual void endEvent() const = 0;
+    virtual void endEvent() = 0;
 
 };
 
