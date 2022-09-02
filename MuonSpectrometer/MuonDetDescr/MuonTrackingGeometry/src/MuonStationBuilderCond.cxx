@@ -218,7 +218,7 @@ Muon::MuonStationBuilderCond::buildDetachedTrackingVolumes(const EventContext& c
                     Amg::Transform3D ident(Trk::s_idTransform);
                     std::unique_ptr<const Trk::Volume> trObject { m_geoShapeConverter->translateGeoShape(input_shapes[ish], &ident)};
                     if (trObject) {
-                        std::unique_ptr<const Trk::TrackingVolume> newType = 
+                        std::unique_ptr<Trk::TrackingVolume> newType = 
                             std::make_unique<Trk::TrackingVolume>(*trObject, vols[ish].first.second->material(), nullptr, nullptr, protoName);
                         layer = m_muonStationTypeBuilder->createLayer(muonMgr, newType.get(), vols[ish].first.second, vols[ish].second[0]);
                         if (layer) layer->moveLayer(vols[ish].second[0]);                      

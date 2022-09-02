@@ -2277,7 +2277,7 @@ double Muon::MuonStationTypeBuilder::decodeX(const GeoShape* sh) const {
 }
 
 std::pair<Trk::Layer*, const std::vector<Trk::Layer*>*> Muon::MuonStationTypeBuilder::createLayerRepresentation(
-    const Trk::TrackingVolume* trVol) const {
+    Trk::TrackingVolume* trVol) const {
     Trk::Layer* layRepr = nullptr;
     if (!trVol) return std::pair<Trk::Layer*, const std::vector<Trk::Layer*>*>(layRepr, 0);
 
@@ -2285,20 +2285,20 @@ std::pair<Trk::Layer*, const std::vector<Trk::Layer*>*> Muon::MuonStationTypeBui
 
     // retrieve volume envelope
 
-    const Trk::CuboidVolumeBounds* cubBounds = dynamic_cast<const Trk::CuboidVolumeBounds*>(&(trVol->volumeBounds()));
-    const Trk::TrapezoidVolumeBounds* trdBounds = dynamic_cast<const Trk::TrapezoidVolumeBounds*>(&(trVol->volumeBounds()));
-    const Trk::DoubleTrapezoidVolumeBounds* dtrdBounds = dynamic_cast<const Trk::DoubleTrapezoidVolumeBounds*>(&(trVol->volumeBounds()));
+    Trk::CuboidVolumeBounds* cubBounds = dynamic_cast<Trk::CuboidVolumeBounds*>(&(trVol->volumeBounds()));
+    Trk::TrapezoidVolumeBounds* trdBounds = dynamic_cast<Trk::TrapezoidVolumeBounds*>(&(trVol->volumeBounds()));
+    Trk::DoubleTrapezoidVolumeBounds* dtrdBounds = dynamic_cast<Trk::DoubleTrapezoidVolumeBounds*>(&(trVol->volumeBounds()));
 
     Amg::Transform3D subt = Trk::s_idTransform;
 
-    const Trk::SubtractedVolumeBounds* subBounds = dynamic_cast<const Trk::SubtractedVolumeBounds*>(&(trVol->volumeBounds()));
+    Trk::SubtractedVolumeBounds* subBounds = dynamic_cast<Trk::SubtractedVolumeBounds*>(&(trVol->volumeBounds()));
     if (subBounds) {
         subt *= Amg::AngleAxis3D(0.5 * M_PI, Amg::Vector3D(0., 1., 0.)) * Amg::AngleAxis3D(0.5 * M_PI, Amg::Vector3D(0., 0., 1.));
         while (subBounds) {
-            cubBounds = dynamic_cast<const Trk::CuboidVolumeBounds*>(&(subBounds->outer()->volumeBounds()));
-            trdBounds = dynamic_cast<const Trk::TrapezoidVolumeBounds*>(&(subBounds->outer()->volumeBounds()));
-            dtrdBounds = dynamic_cast<const Trk::DoubleTrapezoidVolumeBounds*>(&(subBounds->outer()->volumeBounds()));
-            subBounds = dynamic_cast<const Trk::SubtractedVolumeBounds*>(&(subBounds->outer()->volumeBounds()));
+            cubBounds = dynamic_cast<Trk::CuboidVolumeBounds*>(&(subBounds->outer()->volumeBounds()));
+            trdBounds = dynamic_cast<Trk::TrapezoidVolumeBounds*>(&(subBounds->outer()->volumeBounds()));
+            dtrdBounds = dynamic_cast<Trk::DoubleTrapezoidVolumeBounds*>(&(subBounds->outer()->volumeBounds()));
+            subBounds = dynamic_cast<Trk::SubtractedVolumeBounds*>(&(subBounds->outer()->volumeBounds()));
         }
     }
 
@@ -2333,7 +2333,7 @@ std::pair<Trk::Layer*, const std::vector<Trk::Layer*>*> Muon::MuonStationTypeBui
         // delete surfs;
         // multilayers
         if (m_multilayerRepresentation && trVol->confinedVolumes()) {
-            Trk::BinnedArraySpan<Trk::TrackingVolume const * const> vols = trVol->confinedVolumes()->arrayObjects();
+            Trk::BinnedArraySpan<Trk::TrackingVolume * const> vols = trVol->confinedVolumes()->arrayObjects();
             if (vols.size() > 1) {
                 for (unsigned int i = 0; i < vols.size(); i++) {
                     Trk::MaterialProperties matMulti = collectStationMaterial(vols[i], sf);
@@ -2349,7 +2349,7 @@ std::pair<Trk::Layer*, const std::vector<Trk::Layer*>*> Muon::MuonStationTypeBui
         double thickness = 2 * trdBounds->halflengthZ();
         double sf = 2 * (trdBounds->minHalflengthX() + trdBounds->maxHalflengthX()) * trdBounds->halflengthY();
         const std::vector<const Trk::Surface*>* surfs = 
-          const_cast<Trk::TrapezoidVolumeBounds*>(trdBounds)->decomposeToSurfaces(Trk::s_idTransform);
+          trdBounds->decomposeToSurfaces(Trk::s_idTransform);
         const Trk::TrapezoidBounds* tbounds = dynamic_cast<const Trk::TrapezoidBounds*>(&(*(surfs))[0]->bounds());
         Trk::SharedObject<const Trk::SurfaceBounds> bounds(new Trk::TrapezoidBounds(*tbounds));
         Trk::OverlapDescriptor* od = nullptr;
@@ -2368,7 +2368,7 @@ std::pair<Trk::Layer*, const std::vector<Trk::Layer*>*> Muon::MuonStationTypeBui
         delete surfs;
         // multilayers
         if (m_multilayerRepresentation && trVol->confinedVolumes()) {
-          Trk::BinnedArraySpan<Trk::TrackingVolume const * const> vols = trVol->confinedVolumes()->arrayObjects();
+          Trk::BinnedArraySpan<Trk::TrackingVolume * const> vols = trVol->confinedVolumes()->arrayObjects();
             if (vols.size() > 1) {
                 for (unsigned int i = 0; i < vols.size(); i++) {
                     Trk::MaterialProperties matMulti = collectStationMaterial(vols[i], sf);
@@ -2383,7 +2383,7 @@ std::pair<Trk::Layer*, const std::vector<Trk::Layer*>*> Muon::MuonStationTypeBui
         double sf = 2 * (dtrdBounds->minHalflengthX() + dtrdBounds->medHalflengthX()) * dtrdBounds->halflengthY1() +
                     2 * (dtrdBounds->medHalflengthX() + dtrdBounds->maxHalflengthX()) * dtrdBounds->halflengthY2();
         const std::vector<const Trk::Surface*>* surfs = 
-          const_cast<Trk::DoubleTrapezoidVolumeBounds*>(dtrdBounds)->decomposeToSurfaces(Trk::s_idTransform);
+          dtrdBounds->decomposeToSurfaces(Trk::s_idTransform);
         const Trk::DiamondBounds* dbounds = dynamic_cast<const Trk::DiamondBounds*>(&(*(surfs))[0]->bounds());
         Trk::SharedObject<const Trk::SurfaceBounds> bounds(new Trk::DiamondBounds(*dbounds));
         Trk::OverlapDescriptor* od = nullptr;
@@ -2402,7 +2402,7 @@ std::pair<Trk::Layer*, const std::vector<Trk::Layer*>*> Muon::MuonStationTypeBui
         delete surfs;
         // multilayers
         if (m_multilayerRepresentation && trVol->confinedVolumes()) {
-          Trk::BinnedArraySpan<Trk::TrackingVolume const * const> vols = trVol->confinedVolumes()->arrayObjects();
+          Trk::BinnedArraySpan<Trk::TrackingVolume * const> vols = trVol->confinedVolumes()->arrayObjects();
             if (vols.size() > 1) {
                 for (unsigned int i = 0; i < vols.size(); i++) {
                     Trk::MaterialProperties matMulti = collectStationMaterial(vols[i], sf);
@@ -2466,7 +2466,7 @@ Identifier Muon::MuonStationTypeBuilder::identifyNSW(const MuonGM::MuonDetectorM
     return id;
 }
 
-Trk::Layer* Muon::MuonStationTypeBuilder::createLayer(const MuonGM::MuonDetectorManager* muonDetMgr, const Trk::TrackingVolume* trVol,
+Trk::Layer* Muon::MuonStationTypeBuilder::createLayer(const MuonGM::MuonDetectorManager* muonDetMgr, Trk::TrackingVolume* trVol,
                                                       Trk::MaterialProperties* matEx, Amg::Transform3D& transf) const {
     // identification first
 
@@ -2532,10 +2532,10 @@ Trk::Layer* Muon::MuonStationTypeBuilder::createLayer(const MuonGM::MuonDetector
 
     // retrieve volume envelope
 
-    const Trk::CuboidVolumeBounds* cubBounds = dynamic_cast<const Trk::CuboidVolumeBounds*>(&(trVol->volumeBounds()));
-    const Trk::TrapezoidVolumeBounds* trdBounds = dynamic_cast<const Trk::TrapezoidVolumeBounds*>(&(trVol->volumeBounds()));
-    const Trk::DoubleTrapezoidVolumeBounds* dtrdBounds = dynamic_cast<const Trk::DoubleTrapezoidVolumeBounds*>(&(trVol->volumeBounds()));
-    const Trk::SimplePolygonBrepVolumeBounds* pbBounds = dynamic_cast<const Trk::SimplePolygonBrepVolumeBounds*>(&(trVol->volumeBounds()));
+    Trk::CuboidVolumeBounds* cubBounds = dynamic_cast<Trk::CuboidVolumeBounds*>(&(trVol->volumeBounds()));
+    Trk::TrapezoidVolumeBounds* trdBounds = dynamic_cast<Trk::TrapezoidVolumeBounds*>(&(trVol->volumeBounds()));
+    Trk::DoubleTrapezoidVolumeBounds* dtrdBounds = dynamic_cast<Trk::DoubleTrapezoidVolumeBounds*>(&(trVol->volumeBounds()));
+    Trk::SimplePolygonBrepVolumeBounds* pbBounds = dynamic_cast<Trk::SimplePolygonBrepVolumeBounds*>(&(trVol->volumeBounds()));
 
     if (cubBounds)
         ATH_MSG_VERBOSE("before loop -- cubBounds ");
@@ -2550,26 +2550,26 @@ Trk::Layer* Muon::MuonStationTypeBuilder::createLayer(const MuonGM::MuonDetector
 
     Amg::Transform3D subt(Trk::s_idTransform);
 
-    const Trk::SubtractedVolumeBounds* subBounds = dynamic_cast<const Trk::SubtractedVolumeBounds*>(&(trVol->volumeBounds()));
+    Trk::SubtractedVolumeBounds* subBounds = dynamic_cast<Trk::SubtractedVolumeBounds*>(&(trVol->volumeBounds()));
     if (subBounds) {
         subt *= Amg::AngleAxis3D(0.5 * M_PI, Amg::Vector3D(0., 1., 0.)) * Amg::AngleAxis3D(0.5 * M_PI, Amg::Vector3D(0., 0., 1.));
         while (subBounds) {
             ATH_MSG_VERBOSE("looping over subtracted volume bounds:outer,inner position:" << subBounds->outer()->center() << ","
                                                                                           << subBounds->inner()->center());
-            const Trk::CuboidVolumeBounds* ocubBounds = dynamic_cast<const Trk::CuboidVolumeBounds*>(&(subBounds->outer()->volumeBounds()));
-            const Trk::TrapezoidVolumeBounds* otrdBounds =
-                dynamic_cast<const Trk::TrapezoidVolumeBounds*>(&(subBounds->outer()->volumeBounds()));
-            const Trk::DoubleTrapezoidVolumeBounds* odtrdBounds =
-                dynamic_cast<const Trk::DoubleTrapezoidVolumeBounds*>(&(subBounds->outer()->volumeBounds()));
-            const Trk::SimplePolygonBrepVolumeBounds* opbBounds =
-                dynamic_cast<const Trk::SimplePolygonBrepVolumeBounds*>(&(subBounds->outer()->volumeBounds()));
+            Trk::CuboidVolumeBounds* ocubBounds = dynamic_cast<Trk::CuboidVolumeBounds*>(&(subBounds->outer()->volumeBounds()));
+            Trk::TrapezoidVolumeBounds* otrdBounds =
+                dynamic_cast<Trk::TrapezoidVolumeBounds*>(&(subBounds->outer()->volumeBounds()));
+            Trk::DoubleTrapezoidVolumeBounds* odtrdBounds =
+                dynamic_cast<Trk::DoubleTrapezoidVolumeBounds*>(&(subBounds->outer()->volumeBounds()));
+            Trk::SimplePolygonBrepVolumeBounds* opbBounds =
+                dynamic_cast<Trk::SimplePolygonBrepVolumeBounds*>(&(subBounds->outer()->volumeBounds()));
             ATH_MSG_VERBOSE("outer volume:box,trd,dtrd,spb,subtr:" << ocubBounds << "," << otrdBounds << "," << odtrdBounds << ","
                                                                    << opbBounds << "," << subBounds);
             if (ocubBounds) cubBounds = ocubBounds;
             if (otrdBounds) trdBounds = otrdBounds;
             if (odtrdBounds) dtrdBounds = odtrdBounds;
             if (opbBounds) pbBounds = opbBounds;
-            subBounds = dynamic_cast<const Trk::SubtractedVolumeBounds*>(&(subBounds->outer()->volumeBounds()));
+            subBounds = dynamic_cast<Trk::SubtractedVolumeBounds*>(&(subBounds->outer()->volumeBounds()));
         }
     }
 
@@ -2624,7 +2624,7 @@ Trk::Layer* Muon::MuonStationTypeBuilder::createLayer(const MuonGM::MuonDetector
             transf *= Amg::Translation3D(mrg_pos - mtg_pos);
         } else {
             const std::vector<const Trk::Surface*>* surfs = 
-              const_cast<Trk::TrapezoidVolumeBounds*>(trdBounds)->decomposeToSurfaces(Amg::Transform3D(Trk::s_idTransform));
+              trdBounds->decomposeToSurfaces(Amg::Transform3D(Trk::s_idTransform));
             const Trk::TrapezoidBounds* tbounds = dynamic_cast<const Trk::TrapezoidBounds*>(&(*(surfs))[0]->bounds());
             Trk::SharedObject<const Trk::SurfaceBounds> bounds(new Trk::TrapezoidBounds(*tbounds));
             layer = new Trk::PlaneLayer(Amg::Transform3D(subt * trVol->transform()), bounds, mat, thickness, od, 1);
@@ -2632,7 +2632,7 @@ Trk::Layer* Muon::MuonStationTypeBuilder::createLayer(const MuonGM::MuonDetector
     } else if (dtrdBounds) {
         double thickness = 2 * dtrdBounds->halflengthZ();
         const std::vector<const Trk::Surface*>* surfs = 
-          const_cast<Trk::DoubleTrapezoidVolumeBounds*>(dtrdBounds)->decomposeToSurfaces(Amg::Transform3D(Trk::s_idTransform));
+          dtrdBounds->decomposeToSurfaces(Amg::Transform3D(Trk::s_idTransform));
         const Trk::DiamondBounds* dbounds = dynamic_cast<const Trk::DiamondBounds*>(&(*(surfs))[0]->bounds());
         Trk::SharedObject<const Trk::SurfaceBounds> bounds(new Trk::DiamondBounds(*dbounds));
         Trk::OverlapDescriptor* od = nullptr;

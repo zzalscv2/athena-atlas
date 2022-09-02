@@ -73,9 +73,11 @@ class SubtractedVolumeBounds final: public VolumeBounds {
 
   /**This method returns the outer Volume*/
   const Volume* outer() const;
+  Volume* outer();
 
   /**This method returns the inner Volume*/
   const Volume* inner() const;
+  Volume* inner();
 
   /**This method returns bounds orientation*/
   std::vector<bool> boundsOrientation() const;
@@ -110,8 +112,10 @@ inline bool SubtractedVolumeBounds::inside(const Amg::Vector3D& pos,
 }
 
 inline const Volume* SubtractedVolumeBounds::outer() const { return m_outer; }
+inline Volume* SubtractedVolumeBounds::outer() { return m_outer; }
 
 inline const Volume* SubtractedVolumeBounds::inner() const { return m_inner; }
+inline Volume* SubtractedVolumeBounds::inner() { return m_inner; }
 
 inline ObjectAccessor SubtractedVolumeBounds::boundarySurfaceAccessor(
     const Amg::Vector3D&, const Amg::Vector3D&, bool) const {
