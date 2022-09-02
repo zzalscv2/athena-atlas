@@ -180,7 +180,8 @@ namespace CP
         mu.setP4(muonObj.CB.calib_pt * GeVtoMeV, muonObj.CB.eta, muonObj.CB.phi);
         dec_idPt(mu) = muonObj.ID.calib_pt * GeVtoMeV;
         dec_mePt(mu) = muonObj.ME.calib_pt * GeVtoMeV;
-        muonObj.raw_mst_category = (CP::IMuonSelectionTool::ResolutionCategory) m_MuonSelectionTool->getResolutionCategory(mu);
+        if(!m_validationMode)
+          muonObj.raw_mst_category = (CP::IMuonSelectionTool::ResolutionCategory) m_MuonSelectionTool->getResolutionCategory(mu);
 
         // Special case: if the proper flags are selected (m_extra_highpt_smearing or m_2stations_highpt_smearing)
         // an ad-hoc smearing of the combined momentum has to be applied
@@ -490,7 +491,9 @@ namespace CP
         TRandom3 loc_random3;
         // Get Event Number, Retrieve the event information:
         SG::ReadHandle<xAOD::EventInfo> evtInfo(m_eventInfo);
-        const unsigned long long eventNumber = evtInfo->eventNumber();
+        unsigned long long eventNumber = 0;
+        if(m_expertMode_EvtNumber.value()!=0) eventNumber=m_expertMode_EvtNumber.value();
+        else eventNumber = evtInfo->eventNumber();
         // Construct a seed for the random number generator:
         const UInt_t seed = 1 + std::abs(muonObj.CB.phi) * 1E6 + std::abs(muonObj.CB.eta) * 1E3 + eventNumber;
         loc_random3.SetSeed(seed);
@@ -522,7 +525,9 @@ namespace CP
 
 
         SG::ReadHandle<xAOD::EventInfo> evtInfo(m_eventInfo);
-        unsigned int run = evtInfo->runNumber();
+        unsigned int run = 0;
+        if(m_expertMode_RunNumber.value()!=0) run=m_expertMode_RunNumber.value();
+        else run = evtInfo->runNumber();
         // retrieve the random run number
         if (!isData && m_useRndRun) {
             if (acc_rnd.isAvailable(*evtInfo))

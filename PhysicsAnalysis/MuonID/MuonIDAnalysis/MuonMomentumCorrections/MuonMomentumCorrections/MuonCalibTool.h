@@ -79,6 +79,8 @@ namespace CP {
 
         Gaudi::Property<bool> m_validationMode{this, "expert_validationMode", false, "Expert only option. Puts the tool in the validation mode setup"};
         Gaudi::Property<bool> m_expertMode_isData{this, "expertMode_isData", false, "Expert only option. Overwrites the isData Flag"};
+        Gaudi::Property<int> m_expertMode_RunNumber{this, "expertMode_RunNumber", 0, "Expert only option. Overwrites RunNumber"};
+        Gaudi::Property<unsigned long long> m_expertMode_EvtNumber{this, "expertMode_EvtNumber", 0, "Expert only option. Overwrites EventNumber"};
         Gaudi::Property<bool> m_useRndRun{this, "useRandomRunNumber", false, "To use the random run number for deciding which calibration to apply"};
 
         Gaudi::Property<int> m_calibMode{this, "calibMode", -1, "Calib mode"};
