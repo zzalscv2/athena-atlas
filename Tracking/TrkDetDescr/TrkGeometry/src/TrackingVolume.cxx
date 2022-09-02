@@ -576,6 +576,23 @@ Trk::TrackingVolume::associatedLayer(const Amg::Vector3D& gp) const
   return nullptr;
 }
 
+Trk::Layer*
+Trk::TrackingVolume::associatedLayer(const Amg::Vector3D& gp)
+{
+  // confined layers
+  if (m_confinedLayers)
+    return (confinedLayers()->object(gp));
+  // confined arbitrary
+  if (m_confinedArbitraryLayers) {
+    for (unsigned int i = 0; i < m_confinedArbitraryLayers->size(); i++)
+      if ((*m_confinedArbitraryLayers)[i]->isOnLayer(gp))
+        return (*m_confinedArbitraryLayers)[i];
+  }
+  return nullptr;
+}
+
+
+
 const Trk::Layer*
 Trk::TrackingVolume::nextLayer(const Amg::Vector3D& gp,
                                const Amg::Vector3D& mom,
@@ -702,6 +719,29 @@ Trk::TrackingVolume::associatedSubVolume(const Amg::Vector3D& gp) const
 
   return this;
 }
+
+Trk::TrackingVolume*
+Trk::TrackingVolume::associatedSubVolume(const Amg::Vector3D& gp)
+{
+  if (m_confinedVolumes)
+    return (m_confinedVolumes->object(gp));
+
+  if (m_confinedDetachedVolumes) {
+    for (size_t i = 0; i < m_confinedDetachedVolumes->size(); i++) {
+      if ((*m_confinedDetachedVolumes)[i]->trackingVolume()->inside(gp, 0.001))
+        return ((*m_confinedDetachedVolumes)[i])->trackingVolume();
+    }
+  }
+
+  if (m_confinedDenseVolumes) {
+    for (size_t i = 0; i < m_confinedDenseVolumes->size(); i++)
+      if ((*m_confinedDenseVolumes)[i]->inside(gp, 0.001))
+        return (*m_confinedDenseVolumes)[i];
+  }
+
+  return this;
+}
+
 
 const Trk::TrackingVolume*
 Trk::TrackingVolume::nextVolume(const Amg::Vector3D& gp,
