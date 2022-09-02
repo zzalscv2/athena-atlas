@@ -27,6 +27,7 @@ LArRAWtoSuperCell::initialize()
 
         ATH_CHECK( m_sCellContainerInKey.initialize() );
         ATH_CHECK( m_sCellContainerOutKey.initialize() );
+        ATH_CHECK( m_cablingKey.initialize() );
 	ATH_CHECK(detStore()->retrieve(m_laronline_id,"LArOnline_SuperCellID"));
 	ATH_CHECK( m_caloMgrKey.initialize());
         return StatusCode::SUCCESS;
@@ -44,6 +45,9 @@ LArRAWtoSuperCell::execute(const EventContext& context) const
           ATH_MSG_ERROR("Did not get CaloCellContainer input");
           return StatusCode::FAILURE;
         }
+	const LArOnOffIdMapping* cabling;
+	SG::ReadCondHandle<LArOnOffIdMapping> cablingHdl{m_cablingKey,context};
+	cabling=*cablingHdl;
         
         const LArRawSCContainer* scells_from_sg = cellsHandle.cptr();
         ATH_MSG_DEBUG("Got a CaloCellContainer input with size : "<<scells_from_sg->size());
@@ -60,8 +64,8 @@ LArRAWtoSuperCell::execute(const EventContext& context) const
                 if ( !sc ) continue;
                 // calculate the BCID for all the cells associated to the SC
                 // since this is emulation
-                IdentifierHash hash_id = m_laronline_id->channel_Hash(sc->hardwareID()); 
-                const CaloDetDescrElement* dde = sem_mgr ->get_element(hash_id);
+                Identifier off_id = cabling->cnvToIdentifier(sc->hardwareID()); 
+                const CaloDetDescrElement* dde = sem_mgr ->get_element(off_id);
 		CaloCell* cell = new CaloCell();
 		cell->setCaloDDE(dde);
 		const std::vector< unsigned short >& bcids = sc->bcids();
@@ -70,7 +74,9 @@ LArRAWtoSuperCell::execute(const EventContext& context) const
 		float energy(0.);
 		bool saturation(false);
 		for(unsigned int i=0;i<bcids.size();i++) if ( bcids[i]==bcid ) {energy=energies[i]; saturation = satur[i];}
-                cell->setEnergy( energy );
+		// convert ET (coming from LATOMEs) into Energy and
+		// apply magic 12.5 factor
+                cell->setEnergy( 12.5*energy*cosh(cell->eta()) );
 		// we probably should soon associate some quality information to the saturation, maybe the bcid to provenance
 		cell->setQuality((unsigned short)saturation);
                 new_scell_cont->push_back( std::move(cell) );
