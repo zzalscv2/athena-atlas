@@ -44,6 +44,7 @@ StatusCode xAODForwardProtonFilter::filterEvent()
     {
       const xAOD::TruthParticle *pitr = genEvt->truthParticle(iPart);
       // We're only interested in stable (status == 1) particles
+
       if (pitr->status() != 1)
         continue;
       // We are specifically looking for protons
@@ -68,10 +69,10 @@ StatusCode xAODForwardProtonFilter::filterEvent()
         return StatusCode::SUCCESS;
 
       if (!m_DoubleTag)
-        continue;
-      // if Single tag is not requested, do or
-      if (!m_Single_tagA && !m_Single_tagC && (accepted_A || accepted_C))
-        return StatusCode::SUCCESS;
+       
+        // if Single tag is not requested, do or
+        if (!m_Single_tagA && !m_Single_tagC && (accepted_A || accepted_C))
+          return StatusCode::SUCCESS;
 
       // if single tag request - check for presence on particular side
       if (m_Single_tagA && accepted_A)
