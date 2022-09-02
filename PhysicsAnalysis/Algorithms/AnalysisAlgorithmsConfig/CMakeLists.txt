@@ -45,16 +45,16 @@ else()
    atlas_add_test( testJobDataConfig
       SCRIPT ${CMAKE_CURRENT_SOURCE_DIR}/share/BlockConfigurationAthenaTest.sh data
       POST_EXEC_SCRIPT nopost.sh
-      PROPERTIES TIMEOUT 600 )
+      PROPERTIES TIMEOUT 1800 )
 
    atlas_add_test( testJobFullSumConfig
       SCRIPT ${CMAKE_CURRENT_SOURCE_DIR}/share/BlockConfigurationAthenaTest.sh mc
       POST_EXEC_SCRIPT nopost.sh
-      PROPERTIES TIMEOUT 600 )
+      PROPERTIES TIMEOUT 1800 )
 
    atlas_add_test( testJobFastSimConfig
       SCRIPT ${CMAKE_CURRENT_SOURCE_DIR}/share/BlockConfigurationAthenaTest.sh afii
       POST_EXEC_SCRIPT nopost.sh
-      PROPERTIES TIMEOUT 600 )
+      PROPERTIES TIMEOUT 1800 )
 
 endif()
