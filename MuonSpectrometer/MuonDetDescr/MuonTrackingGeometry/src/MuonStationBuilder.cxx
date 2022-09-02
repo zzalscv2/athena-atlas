@@ -838,15 +838,15 @@ void Muon::MuonStationBuilder::identifyLayers(Trk::DetachedTrackingVolume* stati
                 Identifier idi = m_idHelperSvc->cscIdHelper().channelID(cscRE->identify(), cscRE->ChamberLayer(), gasgap + 1, 0, 1);
                 const Trk::PlaneSurface* stripSurf = dynamic_cast<const Trk::PlaneSurface*>(&(cscRE->surface(idi)));
                 const Amg::Vector3D& gpi = stripSurf->center();
-                const Trk::TrackingVolume* assocVol = station->trackingVolume()->associatedSubVolume(gpi);
-                const Trk::Layer* assocLay = nullptr;
+                Trk::TrackingVolume* assocVol = station->trackingVolume()->associatedSubVolume(gpi);
+                Trk::Layer* assocLay = nullptr;
                 if (assocVol) assocLay = assocVol->associatedLayer(gpi);
                 unsigned int iD = idi.get_identifier32().get_compact();
                 if (assocVol && assocLay) {
-                  const_cast<Trk::Layer*>(assocLay)->setLayerType(iD);
+                  assocLay->setLayerType(iD);
                 }
                 if (assocLay) {
-                  const_cast<Trk::Layer*>(assocLay)->setRef(
+                  assocLay->setRef(
                     (assocLay->surfaceRepresentation().transform().inverse() *
                      gpi)[1]);
                 }
@@ -896,7 +896,7 @@ void Muon::MuonStationBuilder::identifyLayers(Trk::DetachedTrackingVolume* stati
                     const int stationId = m_idHelperSvc->tgcIdHelper().stationName(oldId);
                     const int stationEta = m_idHelperSvc->tgcIdHelper().stationEta(oldId);
                     Identifier stId = m_idHelperSvc->tgcIdHelper().elementID(stationId, stationEta, phi);
-                    const_cast<Trk::Layer*>(station->layerRepresentation())->setLayerType(stId.get_identifier32().get_compact());
+                    station->layerRepresentation()->setLayerType(stId.get_identifier32().get_compact());
                     break;
                 }
                 ++phit;
@@ -911,18 +911,18 @@ void Muon::MuonStationBuilder::identifyLayers(Trk::DetachedTrackingVolume* stati
             Identifier wireId = m_idHelperSvc->tgcIdHelper().channelID(stationName, etaSt, phiSt, 1, 0, 1, validId);
             if (!validId) ATH_MSG_ERROR("invalid TGC channel:" << wireId);
             const Amg::Vector3D gp = tgc->channelPos(wireId);
-            const Trk::TrackingVolume* assocVol = station->trackingVolume()->associatedSubVolume(gp);
+            Trk::TrackingVolume* assocVol = station->trackingVolume()->associatedSubVolume(gp);
             if (!assocVol) ATH_MSG_DEBUG("wrong tgcROE?" << stationName << "," << etaSt << "," << phiSt);
             if (assocVol && assocVol->confinedLayers()) {
-                Trk::BinnedArraySpan<Trk::Layer const * const> layers = assocVol->confinedLayers()->arrayObjects();
+                Trk::BinnedArraySpan<Trk::Layer * const> layers = assocVol->confinedLayers()->arrayObjects();
                 for (unsigned int il = 0; il < layers.size(); il++) {
                     wireId = m_idHelperSvc->tgcIdHelper().channelID(stationName, etaSt, phiSt, il + 1, 0, 1, validId);
                     if (!validId)
-                        const_cast<Trk::Layer*>(layers[il])->setLayerType(1);
+                      layers[il]->setLayerType(1);
                     else {
                         if (!validId) ATH_MSG_ERROR("invalid TGC channel:" << wireId);
                         unsigned int id = wireId.get_identifier32().get_compact();
-                        const_cast<Trk::Layer*>(layers[il])->setLayerType(id);
+                        layers[il]->setLayerType(id);
                         // validation
                         Identifier checkId(layers[il]->layerType());
                         const Trk::PlaneSurface* stripSurf = dynamic_cast<const Trk::PlaneSurface*>(&(tgc->surface(checkId)));
@@ -970,11 +970,11 @@ void Muon::MuonStationBuilder::identifyLayers(Trk::DetachedTrackingVolume* stati
                                     int dec = int(ref / 1e5);
                                     ref = ref - dec * 1e5 - 0.5 * (sign + 1) * 1e5;
                                     if (std::abs(ref - loc) > 0.001) { // re-pack
-                                      (const_cast<Trk::Layer*>(cLays[il]))
-                                        ->setRef(loc + dec * 1e5 + 0.5 * (sign + 1) * 1e5);
+                                      cLays[il]->setRef(loc + dec * 1e5 +
+                                                        0.5 * (sign + 1) * 1e5);
                                     }
                                 } else if (std::abs(ref - loc) > 0.001){
-                                  (const_cast<Trk::Layer*>(cLays[il]))->setRef(loc);
+                                   cLays[il]->setRef(loc);
                                 }
                             }
                         }
@@ -1045,7 +1045,7 @@ void Muon::MuonStationBuilder::identifyPrototype(Trk::TrackingVolume* station, i
             if (!multilayer) {
                 continue;
             }
-            const Trk::TrackingVolume* assocVol = station->associatedSubVolume(transf.inverse() * multilayer->center());
+            Trk::TrackingVolume* assocVol = station->associatedSubVolume(transf.inverse() * multilayer->center());
             if (!assocVol) { 
                 ATH_MSG_WARNING("valid multilayer outside station:" << stationName); 
                 continue;
@@ -1056,21 +1056,21 @@ void Muon::MuonStationBuilder::identifyPrototype(Trk::TrackingVolume* station, i
                 if (id.get_compact() > 0) {
                 // retrieve associated layer
                 Amg::Vector3D gp = multilayer->tubePos(id);
-                const Trk::Layer* assocLay = assocVol->associatedLayer(transf.inverse() * gp);
+                Trk::Layer* assocLay = assocVol->associatedLayer(transf.inverse() * gp);
                 unsigned int iD = id.get_identifier32().get_compact();
-                if (assocLay) const_cast<Trk::Layer*>(assocLay)->setLayerType(iD);
+                if (assocLay) assocLay->setLayerType(iD);
                 }
             }
         }
 
         // RPC ?
-        const Trk::BinnedArray<Trk::TrackingVolume>* confinedVolumes = station->confinedVolumes();
+        Trk::BinnedArray<Trk::TrackingVolume>* confinedVolumes = station->confinedVolumes();
         if (confinedVolumes) {
-            Trk::BinnedArraySpan<Trk::TrackingVolume const * const> vols = confinedVolumes->arrayObjects();
+            Trk::BinnedArraySpan<Trk::TrackingVolume * const> vols = confinedVolumes->arrayObjects();
             for (unsigned int iv = 0; iv < vols.size(); ++iv)
                 if (m_idHelperSvc->hasRPC() && vols[iv]->volumeName() == "RPC") {
                     // for active layers do a search of associated ROE
-                    Trk::ArraySpan<const Trk::Layer* const> layers = vols[iv]->confinedArbitraryLayers();
+                    Trk::ArraySpan<Trk::Layer* const> layers = vols[iv]->confinedArbitraryLayers();
                     int nameIndex = m_idHelperSvc->rpcIdHelper().stationNameIndex(stationNameShort);
                     if (stationNameShort == "BME") continue;  // BME chambers do not have RPCs
                     if (stationNameShort == "BMG") continue;  // BMG chambers do not have RPCs
@@ -1128,11 +1128,11 @@ void Muon::MuonStationBuilder::identifyPrototype(Trk::TrackingVolume* station, i
                                                         rpc->surface(etaId).transform().inverse() * rpc->stripPos(etaId);
                                                     double swap = (std::abs(locPos1[1] - locPos2[0]) > 0.001) ? 20000. : 0.;
                                                     unsigned int id = etaId.get_identifier32().get_compact();
-                                                    const_cast<Trk::Layer*>(layers[il])->setLayerType(id);
+                                                    layers[il]->setLayerType(id);
                                                     const Amg::Vector3D locPos =
                                                         layers[il]->surfaceRepresentation().transform().inverse() * transf.inverse() *
                                                         rpc->surface(etaId).center();
-                                                    (const_cast<Trk::Layer*>(layers[il]))->setRef(swap + locPos[0]);
+                                                    layers[il]->setRef(swap + locPos[0]);
                                                 }
                                             }
                                         }

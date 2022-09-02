@@ -232,6 +232,8 @@ public:
 
   /** Return the associated Layer */
   const Layer* associatedLayer(const Amg::Vector3D& gp) const;
+  Layer* associatedLayer(const Amg::Vector3D& gp);
+
 
   /** Return the next Layer if existing, NULL if no next layer corresponds */
   const Layer* nextLayer(const Amg::Vector3D& gp,
@@ -273,6 +275,7 @@ public:
 
   /** Return the associated sub Volume, returns THIS if no subVolume exists */
   const TrackingVolume* associatedSubVolume(const Amg::Vector3D& gp) const;
+  TrackingVolume* associatedSubVolume(const Amg::Vector3D& gp);
 
   /** Return the next volume along the navigation stream */
   const TrackingVolume* nextVolume(const Amg::Vector3D& gp,
