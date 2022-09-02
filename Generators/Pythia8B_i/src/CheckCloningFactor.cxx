@@ -62,6 +62,7 @@ StatusCode CheckCloningFactor::execute() {
         double thisPt=(*bItr)->momentum().perp();
         if (thisPt>lastPt) { recordedBQuarkIt=bItr; }
     }
+    //cppcheck-suppress uninitvar
     auto BQMom=(*recordedBQuarkIt)->momentum();
     double b_pt = BQMom.perp();
     double b_rapid = BQMom.pseudoRapidity();
