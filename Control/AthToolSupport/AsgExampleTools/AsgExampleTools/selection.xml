@@ -1,8 +1,9 @@
-<!-- $Id: selection.xml 773002 2016-09-13 13:21:21Z krumnack $ -->
+<!-- Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration -->
 <lcgdict>
 
    <!-- Unit test types: -->
    <class name="asg::DataHandleTestTool" />
+   <class name="asg::EventStoreTestTool" />
    <class name="asg::UnitTestTool3" />
    <class name="asg::UnitTestTool2" />
    <class name="asg::UnitTestTool1A" />
