@@ -208,7 +208,7 @@ std::vector<Trk::DetachedTrackingVolume*>* Muon::MuonStationBuilder::buildDetach
                     // m_geoShapeConverter->decodeShape(input_shapes[ish]);
                     std::unique_ptr<const Trk::Volume> trObject {m_geoShapeConverter->translateGeoShape(input_shapes[ish], &ident)};
                     if (trObject) {
-                        std::unique_ptr<const Trk::TrackingVolume> newType = std::unique_ptr<const Trk::TrackingVolume>(
+                        std::unique_ptr<Trk::TrackingVolume> newType = std::unique_ptr<Trk::TrackingVolume>(
                             new Trk::TrackingVolume(*trObject, vols[ish].first.second->material(), nullptr, nullptr, protoName));
                         layer =
                             m_muonStationTypeBuilder->createLayer(m_muonMgr, newType.get(), vols[ish].first.second, vols[ish].second[0]);
