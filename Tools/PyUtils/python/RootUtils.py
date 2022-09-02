@@ -16,7 +16,6 @@ __all__ = [
 ### imports -------------------------------------------------------------------
 import os
 import re
-import six
 from functools import cache
 
 ### functions -----------------------------------------------------------------
@@ -147,17 +146,13 @@ def _pythonize_tfile():
         """
         SZ = 4096
 
-        # FIXME: Once we drop py2, we can simplify this by using a bytes
-        # object directly instead of PyBytes.
         if size>=0:
             #size = _adjust_sz(size)
             #print ("-->0",self.tell(),size)
             c_buf = read_root_file(self, size)
             if c_buf and c_buf.sz:
                 v = c_buf.buf
-                if six.PY3:
-                    return bytes([ord(v[i]) for i in range(v.size())])
-                return ''.join([v[i] for i in range(v.size())])
+                return bytes([ord(v[i]) for i in range(v.size())])
             return ''
         else:
             size = SZ
@@ -167,16 +162,11 @@ def _pythonize_tfile():
                 c_buf = read_root_file(self, size)
                 if c_buf and c_buf.sz:
                     v = c_buf.buf
-                    if six.PY3:
-                        chunk = bytes([ord(v[i]) for i in range(v.size())])
-                    else:
-                        chunk = ''.join([v[i] for i in range(v.size())])
+                    chunk = bytes([ord(v[i]) for i in range(v.size())])
                     out.append(chunk)
                 else:
                     break
-            if six.PY3:
-                return b''.join(out)
-            return ''.join(out)
+            return b''.join(out)
             
     root.TFile.read = read
     del read

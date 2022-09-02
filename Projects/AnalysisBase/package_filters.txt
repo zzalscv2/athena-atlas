@@ -26,6 +26,8 @@
 + Calorimeter/CaloGeoHelpers
 + Control/AthContainers
 + Control/AthContainersInterfaces
++ Control/AthenaCommon
++ Control/AthenaConfiguration
 + Control/AthLinksSA
 + Control/AthToolSupport/.*
 + Control/CxxUtils
@@ -112,6 +114,7 @@
 + Tools/ART
 + Tools/DirectIOART
 + Tools/PathResolver
++ Tools/PyUtils
 + Trigger/TrigAnalysis/TrigAnalysisInterfaces
 + Trigger/TrigAnalysis/TrigBunchCrossingTool
 + Trigger/TrigAnalysis/TrigDecisionTool

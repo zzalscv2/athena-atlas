@@ -17,7 +17,6 @@ __author__  = "Sebastien Binet <binet@cern.ch>, " \
 import sys
 import os
 import re
-import six
 import operator
 
 from optparse import OptionParser
@@ -337,7 +336,7 @@ if __name__ == "__main__":
         if options.csvFileName and ( len( fileNames ) == 1 ):
             # Open the output file:
             import csv
-            args = {} if six.PY2 else {'newline' : ''}
+            args = {'newline' : ''}
             with open( options.csvFileName, "w", **args ) as f:
                 writer = csv.writer( f )
                 # Set up the formatting of the file:
