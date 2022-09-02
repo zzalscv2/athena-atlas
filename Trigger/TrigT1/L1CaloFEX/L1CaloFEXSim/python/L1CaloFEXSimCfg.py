@@ -25,16 +25,17 @@ def ReadSCellFromByteStreamCfg(flags, key='SCell'):
     from TileGeoModel.TileGMConfig import TileGMCfg
     from LArGeoAlgsNV.LArGMConfig import LArGMCfg
     from LArCabling.LArCablingConfig import LArLATOMEMappingCfg
+    from LArCabling.LArCablingConfig import LArOnOffIdMappingSCCfg
     acc.merge(TileGMCfg(flags))
     acc.merge(LArGMCfg(flags))
     acc.merge(LArLATOMEMappingCfg(flags))
+    acc.merge(LArOnOffIdMappingSCCfg(flags))
 
     # Conversion from ByteStream to LArRawSCContainer
     decoderTool = CompFactory.LArLATOMEDecoder('LArLATOMEDecoder', ProtectSourceId = True)
     decoderAlg = CompFactory.LArRawSCDataReadingAlg('LArRawSCDataReadingAlg', LATOMEDecoder=decoderTool)
     acc.addEventAlgo(decoderAlg)
 
-    # Conversion from LArRawSCContainer to SCell
     scellAlg = CompFactory.LArRAWtoSuperCell('LArRAWtoSuperCell', SCellContainerOut=key)
     acc.addEventAlgo(scellAlg)
 
