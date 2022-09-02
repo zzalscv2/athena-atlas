@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2019 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
 */
 
 // ****************************************************************************
@@ -111,7 +111,8 @@ namespace Analysis {
     m_requiredNMuons(0),
     m_requiredNElectrons(0),
     m_TrkParticleGSFCollection("GSFTrackParticles"),
-    m_electronCollectionKey("Electrons")
+    m_electronCollectionKey(""),
+    m_skipNoElectron(false)
     {
         declareInterface<JpsiPlus1Track>(this);
         declareProperty("pionHypothesis",m_piMassHyp);
@@ -146,6 +147,7 @@ namespace Analysis {
         declareProperty("UseGSFTrackIndices",    m_useGSFTrackIndices  );
         declareProperty("GSFCollection",         m_TrkParticleGSFCollection);
         declareProperty("ElectronCollection",    m_electronCollectionKey);
+        declareProperty("SkipNoElectron",    m_skipNoElectron);
 
     }
     
@@ -214,15 +216,16 @@ namespace Analysis {
         
         // Get the electrons from StoreGate
         const xAOD::ElectronContainer* importedElectronCollection = nullptr;
-        sc = evtStore()->retrieve(importedElectronCollection,m_electronCollectionKey);
-        if (sc.isFailure()) {
-           ATH_MSG_WARNING("No electron collection with key " << m_electronCollectionKey << " found in StoreGate. JpsiEECandidates will be EMPTY!");
-           return StatusCode::SUCCESS;;
-        } else {
-            ATH_MSG_DEBUG("Found electron collections with key " << m_electronCollectionKey);
+        if(!m_electronCollectionKey.empty()){
+            sc = evtStore()->retrieve(importedElectronCollection,m_electronCollectionKey);
+            if (sc.isFailure()) {
+               ATH_MSG_WARNING("No electron collection with key " << m_electronCollectionKey << " found in StoreGate. JpsiEECandidates will be EMPTY!");
+               return StatusCode::SUCCESS;;
+            } else {
+                ATH_MSG_DEBUG("Found electron collections with key " << m_electronCollectionKey);
+            }
+            ATH_MSG_DEBUG("Electron container size " << importedElectronCollection->size());
         }
-        ATH_MSG_DEBUG("Electron container size " << importedElectronCollection->size());
-        
         // Typedef for vectors of tracks and VxCandidates
         typedef std::vector<const xAOD::TrackParticle*> TrackBag;
         typedef std::vector<const xAOD::Electron*> ElectronBag;
@@ -306,7 +309,7 @@ namespace Analysis {
         
         TrackBag electronTracks;
         ElectronBag theElectronsAfterSelection;
-        if (!importedElectronCollection->empty()) {
+        if (importedElectronCollection && !importedElectronCollection->empty()) {
           for(auto electron : *importedElectronCollection) {
               if (!electron->trackParticleLink().isValid()) continue; // No electrons without ID tracks
               const xAOD::TrackParticle* elTrk(0);
@@ -315,7 +318,7 @@ namespace Analysis {
               theElectronsAfterSelection.push_back(electron); 
               electronTracks.push_back(elTrk); 
           }
-          if (theElectronsAfterSelection.size() == 0) return StatusCode::SUCCESS;
+          if (m_skipNoElectron && theElectronsAfterSelection.size() == 0) return StatusCode::SUCCESS;
             ATH_MSG_DEBUG("Number of electrons after selection: " << theElectronsAfterSelection.size());
         }
         

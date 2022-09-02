@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2019 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
 */
 
 // ****************************************************************************
@@ -88,6 +88,7 @@ namespace Analysis {
         std::string         m_TrkParticleGSFCollection;
         std::bitset<3>      m_useGSFTrack;
         std::string         m_electronCollectionKey;
+        bool m_skipNoElectron;
 
     };
 } // end of namespace
