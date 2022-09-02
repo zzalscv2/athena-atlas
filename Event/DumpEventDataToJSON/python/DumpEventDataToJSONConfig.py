@@ -60,7 +60,7 @@ if __name__ == "__main__":
     ConfigFlags.Concurrency.NumThreads = 1
     ConfigFlags.Concurrency.NumConcurrentEvents = 1
 
-    ConfigFlags.lock()
+    ConfigFlags.dump()
     log.debug('Lock config flags now.')
     ConfigFlags.lock()
 

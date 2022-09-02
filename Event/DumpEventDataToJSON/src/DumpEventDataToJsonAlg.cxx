@@ -234,10 +234,12 @@ nlohmann::json DumpEventDataToJsonAlg::getData(const xAOD::TrackParticle &tp)
 
   if (!m_extrapolateTrackParticless)
   {
-    data["pos"] = {{tp.perigeeParameters().position().x(), tp.perigeeParameters().position().y(), tp.perigeeParameters().position().z()}};
+    data["pos"] = {tp.perigeeParameters().position().x(), tp.perigeeParameters().position().y(), tp.perigeeParameters().position().z()};
     for (unsigned int i = 0; i < tp.numberOfParameters(); ++i)
     {
-      data["pos"].push_back({tp.parameterX(i), tp.parameterY(i), tp.parameterZ(i)});
+      data["pos"].push_back(tp.parameterX(i));
+      data["pos"].push_back(tp.parameterY(i));
+      data["pos"].push_back(tp.parameterZ(i));
     }
   }
   else
@@ -272,7 +274,9 @@ nlohmann::json DumpEventDataToJsonAlg::getData(const xAOD::TrackParticle &tp)
       // Now add the positions to the output
       for (auto pos : positions)
       {
-        data["pos"].push_back({pos.x(), pos.y(), pos.z()});
+        data["pos"].push_back(pos.x());
+        data["pos"].push_back(pos.y());
+        data["pos"].push_back(pos.z());
       }
     }
     else
@@ -298,11 +302,11 @@ nlohmann::json DumpEventDataToJsonAlg::getData(const Trk::Track &track)
   {
     data["dparams"] = {peri->parameters()[Trk::d0], peri->parameters()[Trk::z0], peri->parameters()[Trk::phi0], peri->parameters()[Trk::theta], peri->parameters()[Trk::qOverP]};
 
-    data["pos"] = {{peri->position().x(), peri->position().y(), peri->position().z()}};
+    data["pos"] = {peri->position().x(), peri->position().y(), peri->position().z()};
   }
   else
   {
-    data["pos"] = {{}};
+    data["pos"] = {};
   }
 
   const DataVector<const Trk::TrackParameters> *parameters = track.trackParameters();
@@ -310,7 +314,9 @@ nlohmann::json DumpEventDataToJsonAlg::getData(const Trk::Track &track)
   {
     for (const Trk::TrackParameters *param : *parameters)
     {
-      data["pos"].push_back({param->position().x(), param->position().y(), param->position().z()});
+      data["pos"].push_back(param->position().x());
+      data["pos"].push_back(param->position().y());
+      data["pos"].push_back(param->position().z());
     }
   }
   else
@@ -320,7 +326,9 @@ nlohmann::json DumpEventDataToJsonAlg::getData(const Trk::Track &track)
     {
       for (const Trk::MeasurementBase *meas : *measurements)
       {
-        data["pos"].push_back({meas->globalPosition().x(), meas->globalPosition().y(), meas->globalPosition().z()});
+        data["pos"].push_back(meas->globalPosition().x());
+        data["pos"].push_back(meas->globalPosition().y());
+        data["pos"].push_back(meas->globalPosition().z());
       }
     }
   }
