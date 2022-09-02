@@ -35,6 +35,7 @@
 #include "GeoModelRead/ReadGeoModel.h"
 
 #include "AthenaKernel/ClassID_traits.h"
+#include "CxxUtils/checker_macros.h"
 #include "SGTools/DataProxy.h"
 
 
@@ -164,8 +165,15 @@ StatusCode TileDetectorTool::create()
     else {
         if(m_switches.testBeam)
         {
-            TileTBFactory theTileTBFactory(detStore().operator->(),m_manager,m_switches,&log);
+          // TileTBFactory is not thread-safe. But since this code should only be
+          // ever called once (and this is "only" for test beam geometry), we use
+          // this rather ugly hack to silence the thread-checker warnings:
+          [[maybe_unused]] static const bool do_once ATLAS_THREAD_SAFE = [&]() ATLAS_NOT_THREAD_SAFE {
+            TileCablingService::getInstance_nc()->setTestBeam(true);
+            TileTBFactory theTileTBFactory = TileTBFactory(detStore().operator->(),m_manager,m_switches,&log);
             theTileTBFactory.create(world);
+            return true;
+          }();
         }
         else if (m_useNewFactory)
         {
@@ -224,15 +232,13 @@ StatusCode TileDetectorTool::initIds()
   m_manager->set_helper(tileHWID);
 
   // instantiate Cabling Svc to initialize pointers to helpers there
-  TileCablingService * cabling = TileCablingService::getInstance_nc();
+  const TileCablingService * cabling = TileCablingService::getInstance();
   if(cabling==0)
   {
     ATH_MSG_ERROR("Could not get instance of TileCablingService");
     return StatusCode::FAILURE;
   }
   
-  cabling->setTestBeam(m_switches.testBeam);
-
   return StatusCode::SUCCESS;
 }
 
