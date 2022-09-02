@@ -57,9 +57,7 @@ Calo::CaloTrackingGeometryBuilder::CaloTrackingGeometryBuilder(const std::string
   m_buildMBTS(true),
   //m_mbstSurfaceShape(2),
   m_entryVolume("Calo::Container::EntryVolume"),
-  m_exitVolume("Calo::Container"),
-  m_mbtsNegLayers(nullptr),
-  m_mbtsPosLayers(nullptr)
+  m_exitVolume("Calo::Container")
 {
   declareInterface<Trk::IGeometryBuilder>(this);
   // declare the properties via Python
@@ -81,14 +79,6 @@ Calo::CaloTrackingGeometryBuilder::CaloTrackingGeometryBuilder(const std::string
   declareProperty("LayerIndexCaloSampleMapName",      m_layerIndexCaloSampleMapName);
   // MBTS like detectors 
   declareProperty("BuildMBTS",                        m_buildMBTS);
-  //declareProperty("MBTS_SurfaceShape",                m_mbstSurfaceShape);
-  //declareProperty("MBTS_Radii",                       m_mbtsRadii);
-  //declareProperty("MBTS_RadiusGap",                   m_mbtsRadiusGap);
-  //declareProperty("MBTS_PhiSegments",                 m_mbtsPhiSegments);
-  //declareProperty("MBTS_PhiGap",                      m_mbtsPhiGap);
-  //declareProperty("MBTS_PositionZ",                   m_mbtsPositionZ);
-  //declareProperty("MBTS_StaggeringZ",                 m_mbtsStaggeringZ);
-  // calo entry volume & exit volume
   declareProperty("EntryVolumeName",                  m_entryVolume);
   declareProperty("ExitVolumeName",                   m_exitVolume);
   
@@ -484,6 +474,9 @@ Trk::TrackingGeometry* Calo::CaloTrackingGeometryBuilder::trackingGeometry(Trk::
 
    double z = 0.5*(keyDim.back().second+keyDim[0].second);
 
+   auto mbtsNegLayers=std::make_unique<std::vector<Trk::Layer*>>();
+   auto mbtsPosLayers=std::make_unique<std::vector<Trk::Layer*>>();
+ 
    if (lArPositiveMBTS && lArNegativeMBTS) {
      // Disc
      const Trk::CylinderVolumeBounds* mbtsBounds 
@@ -515,10 +508,8 @@ Trk::TrackingGeometry* Calo::CaloTrackingGeometryBuilder::trackingGeometry(Trk::
                                                          Trk::HomogeneousLayerMaterial(Trk::MaterialProperties(*m_caloMaterial,1.),1.),
                                                          1.*Gaudi::Units::mm);
 
-       m_mbtsNegLayers=new std::vector<Trk::Layer*>;
-       m_mbtsPosLayers=new std::vector<Trk::Layer*>;
-       m_mbtsNegLayers->push_back(mbtsNegLayer);
-       m_mbtsPosLayers->push_back(mbtsPosLayer);       
+       mbtsNegLayers->push_back(mbtsNegLayer);
+       mbtsPosLayers->push_back(mbtsPosLayer);       
      }
    }
       
@@ -534,7 +525,7 @@ Trk::TrackingGeometry* Calo::CaloTrackingGeometryBuilder::trackingGeometry(Trk::
    lArPositiveSectorInnerGap  = new Trk::TrackingVolume(lArG1P,
 							lArG1Bounds,
 							lArSectorInnerGapMaterial, 
-							m_mbtsPosLayers, 
+							mbtsPosLayers.release(), 
 							"Calo::GapVolumes::LAr::PositiveSectorInnerGap");
 
    Amg::Transform3D* lArG1N =
@@ -542,7 +533,7 @@ Trk::TrackingGeometry* Calo::CaloTrackingGeometryBuilder::trackingGeometry(Trk::
    lArNegativeSectorInnerGap  = new Trk::TrackingVolume(lArG1N,
 							lArG1Bounds->clone(),
 							lArSectorInnerGapMaterial, 
-							m_mbtsNegLayers,
+							mbtsNegLayers.release(),
 							"Calo::GapVolumes::LAr::NegativeSectorInnerGap");
 
    // glue InnerGap with beam pipe volumes
