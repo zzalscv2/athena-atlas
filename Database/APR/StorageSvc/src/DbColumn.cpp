@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
 */
 
 // $Id: DbColumn.cpp 726071 2016-02-25 09:23:05Z krasznaa $
@@ -83,7 +83,9 @@ DbStatus DbColumn::fromString( const string& string_rep)  {
   const char* p1 = tmp.c_str();
   int nread = 0;
   for(size_t i = 0; i < sizeof(itm)/sizeof(itm[0]); ++i)   {
+    //cppcheck-suppress nullPointerRedundantCheck
     p1 = ::strstr(p1, itm[i]);
+    //cppcheck-suppress nullPointerRedundantCheck
     if ( p1 )    {
       const char* pp1 = p1+strlen(itm[i]);
       const char* p2 = ::strstr(pp1, "}");
