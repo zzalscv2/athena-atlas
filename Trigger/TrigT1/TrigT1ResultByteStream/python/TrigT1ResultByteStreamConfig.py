@@ -1,10 +1,12 @@
 #
 # Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
 #
+from AthenaCommon.Logging import logging
 from AthenaConfiguration.ComponentAccumulator import ComponentAccumulator
 from AthenaConfiguration.ComponentFactory import CompFactory
 from AthenaConfiguration.Enums import Format
 from TrigEDMConfig.TriggerEDMRun3 import recordable
+from TrigEDMConfig.Utils import getEDMListFromWriteHandles
 from libpyeformat_helper import SourceIdentifier, SubDetector
 
 from L1CaloFEXByteStream.L1CaloFEXByteStreamConfig import eFexByteStreamToolCfg, jFexRoiByteStreamToolCfg, jFexInputByteStreamToolCfg, gFexByteStreamToolCfg, gFexInputByteStreamToolCfg
@@ -13,7 +15,7 @@ from TrigT1MuonRecRoiTool.TrigT1MuonRecRoiToolConfig import getRun3RPCRecRoiTool
 from TrigT1MuonRecRoiTool.TrigT1MuonRecRoiToolConfig import getRun3TGCRecRoiTool
 from TrigT1MuctpiPhase1.TrigT1MuctpiPhase1Config import getTrigThresholdDecisionTool
 
-# Phase-1 L1Calo/L1Topo converters
+_log = logging.getLogger('TrigT1ResultByteStreamConfig')
 
 def RoIBResultByteStreamToolCfg(name, flags, writeBS=False):
   tool = CompFactory.RoIBResultByteStreamTool(name)
@@ -112,7 +114,7 @@ def doRoIBResult(flags):
   # Otherwise don't need RoIBResult
   return False
 
-def L1TriggerByteStreamDecoderCfg(flags):
+def L1TriggerByteStreamDecoderCfg(flags, returnEDM=False):
 
   decoderTools = []
   maybeMissingRobs = []
@@ -168,8 +170,36 @@ def L1TriggerByteStreamDecoderCfg(flags):
 
     # reco/monitoring case (either online but downstream from HLT, or at Tier-0)
     else:
-      # Placeholder for MR !55807
-      pass
+      # Decode eFex and jFex xTOBs (TOBs are already decoded in HLT, gFex doesn't have xTOBs)
+      eFexByteStreamTool = eFexByteStreamToolCfg("eFexBSDecoderTool",
+                                                 flags=flags,
+                                                 writeBS=False,
+                                                 TOBs=False,
+                                                 xTOBs=True,
+                                                 multiSlice=True,
+                                                 decodeInputs=flags.Trigger.L1.doCaloInputs)
+      jFexRoiByteStreamTool = jFexRoiByteStreamToolCfg("jFexBSDecoderTool",
+                                                       flags=flags,
+                                                       writeBS=False,
+                                                       xTOBs=True)
+      decoderTools += [eFexByteStreamTool, jFexRoiByteStreamTool]
+
+      if flags.Trigger.L1.doCaloInputs:
+        # Decode jFex and gFex inputs (towers), eFex inputs already included in the tool above
+        jFexInputByteStreamTool = jFexInputByteStreamToolCfg('jFexInputBSDecoderTool',
+                                                             flags=flags,
+                                                             writeBS=False)
+        gFexInputByteStreamTool = gFexInputByteStreamToolCfg('gFexInputByteStreamTool',
+                                                             flags=flags,
+                                                             writeBS=False)
+        decoderTools += [jFexInputByteStreamTool, gFexInputByteStreamTool]
+
+      # During commissioning of the phase-1 L1Calo (2022), allow the data to be missing
+      maybeMissingRobs += eFexByteStreamTool.ROBIDs
+      maybeMissingRobs += jFexRoiByteStreamTool.ROBIDs
+      if flags.Trigger.L1.doCaloInputs:
+        maybeMissingRobs += jFexInputByteStreamTool.ROBIDs
+        maybeMissingRobs += gFexInputByteStreamTool.ROBIDs
 
   ########################################
   # Run-3 L1Topo decoding
@@ -181,8 +211,6 @@ def L1TriggerByteStreamDecoderCfg(flags):
     decoderTools += [topoByteStreamTool]
     # During commissioning of the phase-1 L1Topo (2022), allow the data to be missing
     maybeMissingRobs += topoByteStreamTool.ROBIDs
-
-  # TODO: gFex, CTP
 
   decoderAlg = CompFactory.L1TriggerByteStreamDecoderAlg(name="L1TriggerByteStreamDecoder",
                                                          DecoderTools=decoderTools,
@@ -198,6 +226,19 @@ def L1TriggerByteStreamDecoderCfg(flags):
     ('ByteStreamMetadataContainer', 'InputMetaDataStore+ByteStreamMetadata')]
   acc.merge(readBSAcc)
 
+  # In reconstruction/monitoring jobs add the decoders' output EDM to the output file
+  if not flags.Trigger.doHLT:
+    from OutputStreamAthenaPool.OutputStreamConfig import addToESD, addToAOD
+    outputEDM = getEDMListFromWriteHandles([tool for tool in decoderAlg.DecoderTools if 'RoIBResult' not in tool.getName()])
+    _log.info('Adding the following output EDM to ItemList: %s', outputEDM)
+    acc.merge(addToESD(flags, outputEDM))
+    acc.merge(addToAOD(flags, outputEDM))
+
+  # Return outputEDM as a second object to be used for compatibility with RecExCommon output configuration,
+  # because the above calls to addToESD/addtoAOD are no-op when this fragment is wrapped in RecExCommon.
+  # See discussions in https://gitlab.cern.ch/atlas/athena/-/merge_requests/55891#note_5912844
+  if returnEDM:
+    return acc, outputEDM
   return acc
 
 def L1TriggerByteStreamEncoderCfg(flags):
@@ -227,7 +268,6 @@ def L1TriggerByteStreamEncoderCfg(flags):
 
 if __name__ == '__main__':
   from AthenaConfiguration.AllConfigFlags import ConfigFlags as flags
-  from AthenaCommon.Logging import logging
   import glob
   import sys
 
@@ -242,9 +282,7 @@ if __name__ == '__main__':
                       help="What data to decode and output.")
   args = parser.parse_args()
 
-
-  log = logging.getLogger('TrigT1ResultByteStreamConfig')
-  log.setLevel(logging.DEBUG)
+  _log.setLevel(logging.DEBUG)
 
   from AthenaCommon import Constants
   algLogLevel = getattr(Constants,args.outputLevel)
@@ -339,12 +377,6 @@ if __name__ == '__main__':
         maybeMissingRobs.append(module_id)
 
     decoderTools += [jFexTool]
-    outputEDM += addEDM('xAOD::jFexSRJetRoIContainer', jFexTool.jJRoIContainerWriteKey.Path)
-    outputEDM += addEDM('xAOD::jFexLRJetRoIContainer', jFexTool.jLJRoIContainerWriteKey.Path)
-    outputEDM += addEDM('xAOD::jFexTauRoIContainer'  , jFexTool.jTauRoIContainerWriteKey.Path)
-    outputEDM += addEDM('xAOD::jFexFwdElRoIContainer', jFexTool.jEMRoIContainerWriteKey.Path)
-    outputEDM += addEDM('xAOD::jFexSumETRoIContainer', jFexTool.jTERoIContainerWriteKey.Path)
-    outputEDM += addEDM('xAOD::jFexMETRoIContainer'  , jFexTool.jXERoIContainerWriteKey.Path)
     
   ########################################
   # jFEX input Data
@@ -355,8 +387,6 @@ if __name__ == '__main__':
         maybeMissingRobs.append(module_id)
 
     decoderTools += [inputjFexTool]
-    # saving/adding the jTower xAOD container
-    outputEDM += addEDM('xAOD::jFexTowerContainer', inputjFexTool.jTowersWriteKey.Path)
     
   ########################################
   # eFEX ROIs and Input data
@@ -365,20 +395,6 @@ if __name__ == '__main__':
     eFexTool = eFexByteStreamToolCfg('eFexBSDecoder', flags,TOBs='eTOBs' in args.outputs,xTOBs='exTOBs' in args.outputs,decodeInputs='eTowers' in args.outputs)
     # eFexTool_xTOBs = eFexByteStreamToolCfg('eFexBSDecoder_xTOBs', flags,xTOBs=True)
     decoderTools += [eFexTool]
-
-    # TOB containers
-    if len(eFexTool.eEMContainerWriteKey.Path):
-      outputEDM += addEDM('xAOD::eFexEMRoIContainer', eFexTool.eEMContainerWriteKey.Path)
-    if len(eFexTool.eTAUContainerWriteKey.Path):
-      outputEDM += addEDM('xAOD::eFexTauRoIContainer', eFexTool.eTAUContainerWriteKey.Path)
-    # xTOB containers
-    if len(eFexTool.eEMContainerWriteKey.Path):
-      outputEDM += addEDM('xAOD::eFexEMRoIContainer', eFexTool.eEMxContainerWriteKey.Path)
-    if len(eFexTool.eTAUContainerWriteKey.Path):
-      outputEDM += addEDM('xAOD::eFexTauRoIContainer', eFexTool.eTAUxContainerWriteKey.Path)
-    # efexTower containers
-    if len(eFexTool.eTowerContainerWriteKey.Path):
-      outputEDM += addEDM('xAOD::eFexTowerContainer', eFexTool.eTowerContainerWriteKey.Path)
 
     # allow for missing ROBs for eFEX decoding:
     maybeMissingRobs += eFexTool.ROBIDs
@@ -389,17 +405,6 @@ if __name__ == '__main__':
   if 'gTOBs' in args.outputs:
     gFexTool = gFexByteStreamToolCfg('gFexBSDecoder', flags)
     decoderTools += [gFexTool]
-    outputEDM += addEDM('xAOD::gFexJetRoIContainer',    gFexTool.gFexRhoOutputContainerWriteKey.Path)
-    outputEDM += addEDM('xAOD::gFexJetRoIContainer',    gFexTool.gFexSRJetOutputContainerWriteKey.Path)
-    outputEDM += addEDM('xAOD::gFexJetRoIContainer',    gFexTool.gFexLRJetOutputContainerWriteKey.Path)
-    outputEDM += addEDM('xAOD::gFexGlobalRoIContainer', gFexTool.gScalarEJwojOutputContainerWriteKey.Path)
-    outputEDM += addEDM('xAOD::gFexGlobalRoIContainer', gFexTool.gMETComponentsJwojOutputContainerWriteKey.Path)
-    outputEDM += addEDM('xAOD::gFexGlobalRoIContainer', gFexTool.gMHTComponentsJwojOutputContainerWriteKey.Path)
-    outputEDM += addEDM('xAOD::gFexGlobalRoIContainer', gFexTool.gMSTComponentsJwojOutputContainerWriteKey.Path)
-    outputEDM += addEDM('xAOD::gFexGlobalRoIContainer', gFexTool.gMETComponentsNoiseCutOutputContainerWriteKey.Path)
-    outputEDM += addEDM('xAOD::gFexGlobalRoIContainer', gFexTool.gMETComponentsRmsOutputContainerWriteKey.Path)
-    outputEDM += addEDM('xAOD::gFexGlobalRoIContainer', gFexTool.gScalarENoiseCutOutputContainerWriteKey.Path)
-    outputEDM += addEDM('xAOD::gFexGlobalRoIContainer', gFexTool.gScalarERmsOutputContainerWriteKey.Path)
 
   ########################################
   # gFEX input Data
@@ -407,16 +412,15 @@ if __name__ == '__main__':
   if 'gCaloTowers' in args.outputs:
     inputgFexTool = gFexInputByteStreamToolCfg('gFexInputBSDecoder', flags)
     decoderTools += [inputgFexTool]
-    # saving/adding the gTower xAOD container
-    outputEDM += addEDM('xAOD::gFexTowerContainer', inputgFexTool.gTowersWriteKey.Path)
 
   ########################################
-  # Topop ROIs  
+  # Topo data
   ########################################
   if 'Topo' in args.outputs:
-    l1topoBSTool = L1TopoPhase1ByteStreamToolCfg()
+    l1topoBSTool = L1TopoPhase1ByteStreamToolCfg("L1TopoBSDecoderTool", flags)
     decoderTools += [l1topoBSTool]
-    outputEDM += addEDM('xAOD::L1TopoRawDataContainer', l1topoBSTool.L1TopoPhase1RAWDataWriteContainer.Path)
+    # allow for missing Topo ROBs:
+    maybeMissingRobs += l1topoBSTool.ROBIDs
 
   decoderAlg = CompFactory.L1TriggerByteStreamDecoderAlg(name="L1TriggerByteStreamDecoder",
                                                          DecoderTools=decoderTools, OutputLevel=algLogLevel, MaybeMissingROBs=maybeMissingRobs)
@@ -424,7 +428,8 @@ if __name__ == '__main__':
   acc.addEventAlgo(decoderAlg, sequenceName='AthAlgSeq')
 
   from OutputStreamAthenaPool.OutputStreamConfig import OutputStreamCfg
-  log.debug('Adding the following output EDM to ItemList: %s', outputEDM)
+  outputEDM += getEDMListFromWriteHandles([tool for tool in decoderAlg.DecoderTools if 'RoIBResult' not in tool.getName()])
+  _log.debug('Adding the following output EDM to ItemList: %s', outputEDM)
   acc.merge(OutputStreamCfg(flags, 'AOD', ItemList=outputEDM))
 
   # get rid of warning about propagating input attribute list ... since there is none
