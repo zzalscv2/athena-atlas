@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef ActsGeantFollowerHelper_H
@@ -46,11 +46,11 @@ class ActsGeantFollowerHelper : public extends<AthAlgTool, IActsGeantFollowerHel
 
     // Follower interface
     // a) begin event - initialize follower process
-    void beginEvent() const;
+    virtual void beginEvent() override;
     // b) track the particle
-    void trackParticle(const G4ThreeVector& pos, const G4ThreeVector& mom, int pdg, double charge, float t, float X0, bool isSensitive) const;
+    virtual void trackParticle(const G4ThreeVector& pos, const G4ThreeVector& mom, int pdg, double charge, float t, float X0, bool isSensitive) override;
     // c) end event - ntuple writing
-    void endEvent() const;
+    virtual void endEvent() override;
 
   private:
 
@@ -60,17 +60,17 @@ class ActsGeantFollowerHelper : public extends<AthAlgTool, IActsGeantFollowerHel
     bool                                 m_extrapolateDirectly;
     bool                                 m_extrapolateIncrementally;
 
-    mutable const Trk::TrackParameters* m_parameterCache;
-    mutable std::unique_ptr<const Acts::BoundTrackParameters> m_actsParameterCache;
-    mutable std::unique_ptr<std::vector<Acts::SurfaceHit>> m_actsSurfaceCache;
-    mutable std::vector<Acts::SurfaceHit>::iterator m_actsSurfaceIterator;
+    const Trk::TrackParameters* m_parameterCache;
+    std::unique_ptr<const Acts::BoundTrackParameters> m_actsParameterCache;
+    std::unique_ptr<std::vector<Acts::SurfaceHit>> m_actsSurfaceCache;
+    std::vector<Acts::SurfaceHit>::iterator m_actsSurfaceIterator;
     // Hypothesis to pdg converter
     Trk::PdgToParticleHypothesis m_pdgToParticleHypothesis;
-    mutable float m_tX0Cache;
-    mutable float m_tX0NonSensitiveCache;
-    mutable float m_tNonSensitiveCache;
-    mutable float m_tX0CacheActs;
-    mutable float m_tX0CacheATLAS;
+    float m_tX0Cache;
+    float m_tX0NonSensitiveCache;
+    float m_tNonSensitiveCache;
+    float m_tX0CacheActs;
+    float m_tX0CacheATLAS;
 
     // put some validation code is
     std::string                    m_validationTreeName;        //!< validation tree name - to be acessed by this from root
@@ -83,57 +83,57 @@ class ActsGeantFollowerHelper : public extends<AthAlgTool, IActsGeantFollowerHel
         Otherwise, the CaloCellNoiseAlg is so large that it violates
         the ubsan sanity checks. **/
     struct TreeData {
-        mutable float                  m_t_x {0};
-        mutable float                  m_t_y {0};
-        mutable float                  m_t_z {0};
-        mutable float                  m_t_theta {0};
-        mutable float                  m_t_eta {0};
-        mutable float                  m_t_phi {0};
-        mutable float                  m_t_p {0};
-        mutable float                  m_t_charge {0};
-        mutable int                    m_t_pdg {0};
+        float                  m_t_x {0};
+        float                  m_t_y {0};
+        float                  m_t_z {0};
+        float                  m_t_theta {0};
+        float                  m_t_eta {0};
+        float                  m_t_phi {0};
+        float                  m_t_p {0};
+        float                  m_t_charge {0};
+        int                    m_t_pdg {0};
         /** Ntuple variables : g4 step parameters */
-        mutable int                    m_g4_steps {0};
-        mutable float                  m_g4_pt[MAXPROBES] {0};
-        mutable float                  m_g4_eta[MAXPROBES] {0};
-        mutable float                  m_g4_theta[MAXPROBES] {0};
-        mutable float                  m_g4_phi[MAXPROBES] {0};
-        mutable float                  m_g4_x[MAXPROBES] {0};
-        mutable float                  m_g4_y[MAXPROBES] {0};
-        mutable float                  m_g4_z[MAXPROBES] {0};
-        mutable float                  m_g4_tX0[MAXPROBES] {0};
-        mutable float                  m_g4_accX0[MAXPROBES] {0};        
-        mutable float                  m_g4_t[MAXPROBES] {0};
-        mutable float                  m_g4_X0[MAXPROBES] {0};
+        int                    m_g4_steps {0};
+        float                  m_g4_pt[MAXPROBES] {0};
+        float                  m_g4_eta[MAXPROBES] {0};
+        float                  m_g4_theta[MAXPROBES] {0};
+        float                  m_g4_phi[MAXPROBES] {0};
+        float                  m_g4_x[MAXPROBES] {0};
+        float                  m_g4_y[MAXPROBES] {0};
+        float                  m_g4_z[MAXPROBES] {0};
+        float                  m_g4_tX0[MAXPROBES] {0};
+        float                  m_g4_accX0[MAXPROBES] {0};
+        float                  m_g4_t[MAXPROBES] {0};
+        float                  m_g4_X0[MAXPROBES] {0};
         /** Ntuple variables : trk follow up parameters */
-        mutable int                    m_trk_status[MAXPROBES] {0};
-        mutable float                  m_trk_pt[MAXPROBES] {0};
-        mutable float                  m_trk_eta[MAXPROBES] {0};
-        mutable float                  m_trk_theta[MAXPROBES] {0};
-        mutable float                  m_trk_phi[MAXPROBES] {0};
-        mutable float                  m_trk_x[MAXPROBES] {0};
-        mutable float                  m_trk_y[MAXPROBES] {0};
-        mutable float                  m_trk_z[MAXPROBES] {0};
-        mutable float                  m_trk_lx[MAXPROBES] {0};
-        mutable float                  m_trk_ly[MAXPROBES] {0};
-        mutable float                  m_trk_tX0[MAXPROBES] {0};
-        mutable float                  m_trk_accX0[MAXPROBES] {0};        
-        mutable float                  m_trk_t[MAXPROBES] {0};
-        mutable float                  m_trk_X0[MAXPROBES] {0};
+        int                    m_trk_status[MAXPROBES] {0};
+        float                  m_trk_pt[MAXPROBES] {0};
+        float                  m_trk_eta[MAXPROBES] {0};
+        float                  m_trk_theta[MAXPROBES] {0};
+        float                  m_trk_phi[MAXPROBES] {0};
+        float                  m_trk_x[MAXPROBES] {0};
+        float                  m_trk_y[MAXPROBES] {0};
+        float                  m_trk_z[MAXPROBES] {0};
+        float                  m_trk_lx[MAXPROBES] {0};
+        float                  m_trk_ly[MAXPROBES] {0};
+        float                  m_trk_tX0[MAXPROBES] {0};
+        float                  m_trk_accX0[MAXPROBES] {0};
+        float                  m_trk_t[MAXPROBES] {0};
+        float                  m_trk_X0[MAXPROBES] {0};
         /** Ntuple variables : acts follow up parameters */
-        mutable int                    m_acts_status[MAXPROBES] {0};
-        mutable int                    m_acts_volumeID[MAXPROBES] {0};
-        mutable float                  m_acts_pt[MAXPROBES] {0};
-        mutable float                  m_acts_eta[MAXPROBES] {0};
-        mutable float                  m_acts_theta[MAXPROBES] {0};
-        mutable float                  m_acts_phi[MAXPROBES] {0};
-        mutable float                  m_acts_x[MAXPROBES] {0};
-        mutable float                  m_acts_y[MAXPROBES] {0};
-        mutable float                  m_acts_z[MAXPROBES] {0};
-        mutable float                  m_acts_tX0[MAXPROBES] {0};
-        mutable float                  m_acts_accX0[MAXPROBES] {0};        
-        mutable float                  m_acts_t[MAXPROBES] {0};
-        mutable float                  m_acts_X0[MAXPROBES] {0};
+        int                    m_acts_status[MAXPROBES] {0};
+        int                    m_acts_volumeID[MAXPROBES] {0};
+        float                  m_acts_pt[MAXPROBES] {0};
+        float                  m_acts_eta[MAXPROBES] {0};
+        float                  m_acts_theta[MAXPROBES] {0};
+        float                  m_acts_phi[MAXPROBES] {0};
+        float                  m_acts_x[MAXPROBES] {0};
+        float                  m_acts_y[MAXPROBES] {0};
+        float                  m_acts_z[MAXPROBES] {0};
+        float                  m_acts_tX0[MAXPROBES] {0};
+        float                  m_acts_accX0[MAXPROBES] {0};
+        float                  m_acts_t[MAXPROBES] {0};
+        float                  m_acts_X0[MAXPROBES] {0};
     };
     std::unique_ptr<TreeData> m_treeData;
 };

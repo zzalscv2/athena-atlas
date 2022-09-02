@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
 */
 
 ///////////////////////////////////////////////////////////////////
@@ -156,7 +156,7 @@ StatusCode ActsGeantFollowerHelper::finalize()
   return StatusCode::SUCCESS;
 }
 
-void ActsGeantFollowerHelper::beginEvent() const
+void ActsGeantFollowerHelper::beginEvent()
 {
   m_treeData->m_t_x        = 0.;
   m_treeData->m_t_y        = 0.;
@@ -178,7 +178,7 @@ void ActsGeantFollowerHelper::beginEvent() const
 void ActsGeantFollowerHelper::trackParticle(const G4ThreeVector& pos,
                                              const G4ThreeVector& mom,
                                              int pdg, double charge,
-                                             float t, float X0, bool isSensitive) const
+                                             float t, float X0, bool isSensitive)
 {
   // const EventContext ctx;
   const EventContext &ctx = Gaudi::Hive::currentContext();
@@ -367,7 +367,7 @@ void ActsGeantFollowerHelper::trackParticle(const G4ThreeVector& pos,
   ++m_treeData->m_g4_steps;
 }
 
-void ActsGeantFollowerHelper::endEvent() const
+void ActsGeantFollowerHelper::endEvent()
 {
   if (m_tX0Cache != 0)
   {
