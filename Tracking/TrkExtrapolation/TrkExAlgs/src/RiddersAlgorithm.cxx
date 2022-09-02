@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
 */
 
 ///////////////////////////////////////////////////////////////////
@@ -284,7 +284,8 @@ StatusCode Trk::RiddersAlgorithm::execute()
                                                   10e3,10e3);
 
    // make a covariance Matrix
-   AmgMatrix(5,5)* covMat = new AmgMatrix(5,5);
+   AmgMatrix(5,5) covMat;
+   covMat.setZero();
 
    // the initial perigee with random numbers
    Trk::AtaPlane startParameters(loc1,
@@ -293,7 +294,7 @@ StatusCode Trk::RiddersAlgorithm::execute()
                                          theta,
                                          qOverP,
                                          startSurface,
-                                         AmgMatrix(5,5)(covMat->inverse().eval())); 
+                                         covMat);
 
    ATH_MSG_VERBOSE( "Start Parameters : " << startParameters );
 
