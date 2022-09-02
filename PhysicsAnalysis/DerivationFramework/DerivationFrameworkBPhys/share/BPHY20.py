@@ -231,6 +231,7 @@ BPHY20BcJpsiE = Analysis__JpsiPlus1Track(
     MuonsUsedInJpsi         = "Muons",
     ExcludeCrossJpsiTracks		= False,
     ElectronCollection      = "Electrons",
+    SkipNoElectron          = True,
     TrkVertexFitterTool     = BcJpsiEVertexFit,
     TrackSelectorTool       = BPHY20_VertexTools.InDetTrackSelectorTool,
     UseMassConstraint       = True, 
