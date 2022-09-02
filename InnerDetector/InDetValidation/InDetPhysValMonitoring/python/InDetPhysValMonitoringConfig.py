@@ -66,7 +66,7 @@ def GoodRunsListSelectionToolCfg(flags, **kwargs):
 
     tool = CompFactory.GoodRunsListSelectionTool(
         name="GoodRunsListSelectionTool",
-        GoodRunsListVec=[grldict[p] for p in flags.IDPVM.GRL],
+        GoodRunsListVec=[grldict[p] for p in flags.PhysVal.IDPVM.GRL],
         **kwargs
     )
     acc.setPrivateTools(tool)
