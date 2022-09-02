@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2017 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
 */
 
 // LArG4::EndcapCryostat::CalibrationCalculator
@@ -320,12 +320,64 @@ namespace LArG4 {
     static const G4int numberOfVolumes = sizeof(volumes) / sizeof(VolumeInfo_t);
 
     typedef std::map < G4int, const IdentifierInfo_t* > identifierMap_t;
-    typedef identifierMap_t::iterator                   identifierMap_ptr_t;
     typedef std::map < G4String, identifierMap_t > volumeMap_t;
-    typedef volumeMap_t::iterator                  volumeMap_ptr_t;
-    static volumeMap_t volumeMap; // used as const after initialization
 
-    static G4bool notInitialized = true;  // used as const after initialization
+    static const volumeMap_t& volumeMap() {
+      static const volumeMap_t instance = []() {
+        volumeMap_t vmap;
+        // For each volume managed by this calculator...
+        for (G4int v = 0; v != numberOfVolumes; v++)
+          {
+            const VolumeInfo_t& volume = volumes[v];
+
+#if defined (DEBUG_HITS) || defined (DEBUG_MAPS)
+            G4cout << "LArG4::EndcapCryostat::CalibrationCalculator::CalibrationCalculator - "
+                   << "   volume '"
+                   << volume.volumeName
+                   << "' has number of entries=" << volume.numberOfCopies
+                   << G4endl;
+#endif
+
+            identifierMap_t identifierMap;
+            const CopyNumberInfo_t* copyInfo = volume.copyInfo;
+
+            // For each range copy numbers that can be found in a volume with this name...
+            for (G4int c = 0; c != volume.numberOfCopies; c++, copyInfo++)
+              {
+                // For each copy in the range of copy numbers
+                for (G4int copy = copyInfo->copyNumberLow;
+                     copy <= copyInfo->copyNumberHigh;
+                     copy++)
+                {
+#if defined (DEBUG_HITS) || defined (DEBUG_MAPS)
+                  G4cout << "LArG4::EndcapCryostat::CalibrationCalculator::CalibrationCalculator - "
+                         << "   adding copy=" << copy
+                         << " to identifierMap"
+                         << G4endl;
+#endif
+                  // Add to the map that's based on copy number.
+                  identifierMap[copy] = &(copyInfo->identifierInfo);
+                }
+              }
+
+            // Add to the map that's based on volume name; it
+            // contains maps based on copy number.
+            vmap[volume.volumeName] = identifierMap;
+
+#if defined (DEBUG_HITS) || defined (DEBUG_MAPS)
+            G4cout << "LArG4::EndcapCryostat::CalibrationCalculator::CalibrationCalculator - "
+                   << "   volume '"
+                   << volume.volumeName
+                   << "' added to map."
+                   << G4endl;
+#endif
+
+          }
+        return vmap;
+      }();
+      return instance;
+    }
+
 
     ///////////////////////////////////////////////////////////
     // Methods
@@ -345,74 +397,20 @@ namespace LArG4 {
 
 #if defined (DEBUG_HITS) || defined (DEBUG_MAPS)
       G4cout << "LArG4::EndcapCryostat::CalibrationCalculator::CalibrationCalculator - "
-             << "   notInitialized="
-             << notInitialized
-             << ", numberOfVolumes=" << numberOfVolumes
+             << "numberOfVolumes=" << numberOfVolumes
              << ", sizeof(volumes)=" << sizeof(volumes)
              << ", sizeof(VolumeInfo_t)=" << sizeof(VolumeInfo_t)
              << G4endl;
 #endif
 
       // Intialize the maps.
-      if ( notInitialized )
-        {
-          notInitialized = false;
-
-          // For each volume managed by this calculator...
-          for (G4int v = 0; v != numberOfVolumes; v++)
-            {
-              const VolumeInfo_t& volume = volumes[v];
-
-#if defined (DEBUG_HITS) || defined (DEBUG_MAPS)
-              G4cout << "LArG4::EndcapCryostat::CalibrationCalculator::CalibrationCalculator - "
-                     << "   volume '"
-                     << volume.volumeName
-                     << "' has number of entries=" << volume.numberOfCopies
-                     << G4endl;
-#endif
-
-              identifierMap_t identifierMap;
-              const CopyNumberInfo_t* copyInfo = volume.copyInfo;
-
-              // For each range copy numbers that can be found in a volume with this name...
-              for (G4int c = 0; c != volume.numberOfCopies; c++, copyInfo++)
-                {
-                  // For each copy in the range of copy numbers
-                  for (G4int copy = copyInfo->copyNumberLow;
-                       copy <= copyInfo->copyNumberHigh;
-                       copy++)
-                    {
-#if defined (DEBUG_HITS) || defined (DEBUG_MAPS)
-                      G4cout << "LArG4::EndcapCryostat::CalibrationCalculator::CalibrationCalculator - "
-                             << "   adding copy=" << copy
-                             << " to identifierMap"
-                             << G4endl;
-#endif
-                      // Add to the map that's based on copy number.
-                      identifierMap[copy] = &(copyInfo->identifierInfo);
-                    }
-                }
-
-              // Add to the map that's based on volume name; it
-              // contains maps based on copy number.
-              volumeMap[volume.volumeName] = identifierMap;
-
-#if defined (DEBUG_HITS) || defined (DEBUG_MAPS)
-              G4cout << "LArG4::EndcapCryostat::CalibrationCalculator::CalibrationCalculator - "
-                     << "   volume '"
-                     << volume.volumeName
-                     << "' added to map."
-                     << G4endl;
-#endif
-
-            }
-        } // if not initialized
+      volumeMap();
 
 #if defined (DEBUG_HITS) || defined (DEBUG_MAPS)
       G4cout << "LArG4::EndcapCryostat::CalibrationCalculator::CalibrationCalculator - "
              << G4endl
              << "   initialization complete; map size="
-             << volumeMap.size()
+             << volumeMap().size()
              << G4endl;
 #endif
 
@@ -470,8 +468,8 @@ namespace LArG4 {
 #endif
 
           // Search the maps for this volume/copy number combination.
-          volumeMap_ptr_t v = volumeMap.find( volumeName );
-          if ( v != volumeMap.end() )
+          const auto v = volumeMap().find( volumeName );
+          if ( v != volumeMap().end() )
             {
 
               // Recall that maps are made from pair <key,value>, and
@@ -480,8 +478,8 @@ namespace LArG4 {
               // need to copy the entire map; it's enough to get its
               // reference.
 
-              identifierMap_t& identifierMap = (*v).second;
-              identifierMap_ptr_t i = identifierMap.find( copyNumber );
+              const identifierMap_t& identifierMap = (*v).second;
+              const auto i = identifierMap.find( copyNumber );
 
               if ( i != identifierMap.end() )
                 {

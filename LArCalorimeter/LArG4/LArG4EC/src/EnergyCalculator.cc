@@ -75,14 +75,8 @@ using namespace LArG4::EC;
 namespace Units = Athena::Units;
 
 // ****************************************************************************
-EnergyCalculator::Wheel_Efield_Map EnergyCalculator::s_ChCollInner;
-EnergyCalculator::Wheel_Efield_Map EnergyCalculator::s_ChCollOuter;
-
 const G4double            EnergyCalculator::s_GridSize        =0.1; //[mm]
 const G4double            EnergyCalculator::s_AverageGap      = 1.3*CLHEP::mm;
-G4bool              EnergyCalculator::s_FieldMapsRead   =false;
-G4String            EnergyCalculator::s_FieldMapVersion = "";
-// ****************************************************************************
 const G4double EnergyCalculator::s_LArTemperature_ECC0=88.15; //K
 const G4double EnergyCalculator::s_LArTemperature_ECC1=88.37;
 const G4double EnergyCalculator::s_LArTemperature_ECC5=87.97;
@@ -101,16 +95,10 @@ G4double EnergyCalculator::s_CHCStotal=0.;
 #endif
 // ****************************************************************************
 
-static const G4String
-ECorr_t_option = "type",
+static const G4String ECorr_t_option = "type",
                                                                         CHC_Map_option = "chcmap",
                                                                         CHC_Esr_option = "chcesr",
                                                                         GApower_option = "gapower";
-
-static G4double zsep12[44]; // used as const after initialization
-static G4double ziw[7];     // used as const after initialization
-static G4double zsep23[22]; // used as const after initialization
-// ****************************************************************************
 
 // ****************************************************************************
 G4double EnergyCalculator::DistanceToEtaLine(const G4ThreeVector &p, G4double eta) const {
@@ -305,7 +293,7 @@ StatusCode EnergyCalculator::initialize()
                     << " while 'electrode' type is requested.");
       return StatusCode::FAILURE;
     }
-  s_RefzDist = lwc()->GetElecFocaltoWRP() +
+  m_RefzDist = lwc()->GetElecFocaltoWRP() +
     lwc()->GetdWRPtoFrontFace() + lwc()->GetWheelThickness() +
     lwc()->GetdWRPtoFrontFace() + s_LongBarThickness - s_DistOfEndofCuFromBack;
 
@@ -331,21 +319,21 @@ StatusCode EnergyCalculator::initialize()
     A0STR << "_" << i;
     const std::string A0 = A0STR.str();
     const std::string colName = "ZIW" + A0;
-    ziw[i] = (*emecSamplingSep)[0]->getDouble(colName)*CLHEP::cm;
+    m_ziw[i] = (*emecSamplingSep)[0]->getDouble(colName)*CLHEP::cm;
   }
   for(int i = 0; i < 44; i ++){
     std::ostringstream A0STR;
     A0STR << "_" << i;
     const std::string A0 = A0STR.str();
     const std::string colName = "ZSEP12" + A0;
-    zsep12[i] = (*emecSamplingSep)[0]->getDouble(colName)*CLHEP::cm;
+    m_zsep12[i] = (*emecSamplingSep)[0]->getDouble(colName)*CLHEP::cm;
   }
   for(int i = 0; i < 22; i ++){
     std::ostringstream A0STR;
     A0STR << "_" << i;
     const std::string A0 = A0STR.str();
     const std::string colName = "ZSEP23" + A0;
-    zsep23[i] = (*emecSamplingSep)[0]->getDouble(colName)*CLHEP::cm;
+    m_zsep23[i] = (*emecSamplingSep)[0]->getDouble(colName)*CLHEP::cm;
   }
 
   m_ElectrodeFanHalfThickness = lwc()->GetFanHalfThickness(LArG4::InnerElectrodWheel);
@@ -445,40 +433,37 @@ StatusCode EnergyCalculator::initialize()
   if(m_correction_type == EMEC_ECOR_CHCL ||  m_correction_type ==  EMEC_ECOR_CHCL1) {
     if(!lwc()->GetisElectrode()) {
       // get fieldmap from file
-      if(s_FieldMapsRead == false) {
-        s_ChCollInner.FieldMapPrepared=false;
-        s_ChCollOuter.FieldMapPrepared=false;
-        // Determine which version of the file by examining the user option.
-        //if(m_suffix.empty()) FieldMapVersion = "v00";
-        //else FieldMapVersion = m_suffix;
-        s_FieldMapVersion = m_suffix.empty() ? "v00" : m_suffix;
+      m_ChCollInner.FieldMapPrepared=false;
+      m_ChCollOuter.FieldMapPrepared=false;
+      // Determine which version of the file by examining the user option.
+      //if(m_suffix.empty()) FieldMapVersion = "v00";
+      //else FieldMapVersion = m_suffix;
+      m_FieldMapVersion = m_suffix.empty() ? "v00" : m_suffix;
 
-        ATH_MSG_DEBUG("EnergyCalculator: field map version = " << s_FieldMapVersion);
+      ATH_MSG_DEBUG("EnergyCalculator: field map version = " << m_FieldMapVersion);
 
-        IniGeomforFieldMaps();
+      IniGeomforFieldMaps();
 
-        // Now we have to get the full path to the file.  In
-        // stand-alone, we use AFS.  In Athena, we use
-        // PathResolver.
-        const G4String FieldMapFileName   = "ec.fieldz" + m_suffix;
-        const G4String FieldMapPath       = "LArG4EC";
-        const G4String partialPath        = FieldMapPath + "/" + FieldMapFileName;
-        const G4String FieldMapLocation   = PathResolver::find_file(partialPath, "ATLASCALDATA");
+      // Now we have to get the full path to the file.  In
+      // stand-alone, we use AFS.  In Athena, we use
+      // PathResolver.
+      const G4String FieldMapFileName   = "ec.fieldz" + m_suffix;
+      const G4String FieldMapPath       = "LArG4EC";
+      const G4String partialPath        = FieldMapPath + "/" + FieldMapFileName;
+      const G4String FieldMapLocation   = PathResolver::find_file(partialPath, "ATLASCALDATA");
 
-        LoadFieldMaps(FieldMapLocation.c_str());
-        s_FieldMapsRead=true;
-      } // finish to read the fieldmap
+      LoadFieldMaps(FieldMapLocation.c_str());
 
       // prepare the fieldmaps for further calculation
 
-      if(s_FieldMapVersion != "v00"){
+      if(m_FieldMapVersion != "v00"){
         m_FanEleThicknessOld  = FanEleThickness();
         m_FanEleFoldRadiusOld = lwc()->GetFanFoldRadius();
       }
 
       //	if(lwc()->GetisInner()) ChCollWheelType=&ChCollInner;
       //	else        ChCollWheelType=&ChCollOuter;
-      m_ChCollWheelType = lwc()->GetisInner() ? &s_ChCollInner : &s_ChCollOuter;
+      m_ChCollWheelType = lwc()->GetisInner() ? &m_ChCollInner : &m_ChCollOuter;
 
       if(ChCollWheelType()->FieldMapPrepared == false){
         PrepareFieldMap(m_ChCollWheelType);
@@ -685,8 +670,8 @@ G4bool EnergyCalculator::FindIdentifier_Default(
         if (ipad<0) ipad=0;
         if (ipad>6) ipad=6;
       }
-      if(z < ziw[ipad]) compartment = 1;
-      else              compartment = 2;
+      if(z < m_ziw[ipad]) compartment = 1;
+      else                compartment = 2;
     } else { // !isInner
     G4int ipad = G4int((eta - 1.4) / 0.025);
     if(ipad < 0) ipad = 0;   // first electrode starts below eta=1.4
@@ -696,7 +681,7 @@ G4bool EnergyCalculator::FindIdentifier_Default(
       validhit=false;
       ipad=43;
     }
-    if(z < zsep12[ipad]){
+    if(z < m_zsep12[ipad]){
       if     (eta > 2.4)   compartment = 3;
       else if(eta > 2.0)   compartment = 4;
       else if(eta > 1.8)   compartment = 5;
@@ -704,7 +689,7 @@ G4bool EnergyCalculator::FindIdentifier_Default(
       else if(eta > 1.425) compartment = 7;
       else                 compartment = 10;
     } else {
-      if(z < zsep23[ipad/2]){
+      if(z < m_zsep23[ipad/2]){
         if(eta > 1.425) compartment = 8;
         else            compartment = 11;
       } else                  compartment = 9;

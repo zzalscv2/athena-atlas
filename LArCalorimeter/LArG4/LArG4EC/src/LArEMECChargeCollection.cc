@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2020 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
 */
 
 // LArEMECChargeCollection.cc
@@ -44,7 +44,7 @@
 //        Modification of the code to read either the Old or New map          *
 //         was done.                                                          *
 //        The desired version (New or Old) of the fieldmap should be set      *
-//        to s_FieldMapVersion variable of the LArEMECEnergyCorrrection.cc      *
+//        to m_FieldMapVersion variable of the LArEMECEnergyCorrrection.cc      *
 //        The file name which contains the map should also be set             *
 //        to FieldMapFileName variable of the LArEMECEnergyCorrrection.cc     *
 //                                                                            *
@@ -133,257 +133,257 @@ void LArG4::EC::EnergyCalculator::CreateArrays(Wheel_Efield_Map &wheel, G4int n)
 void LArG4::EC::EnergyCalculator::IniGeomforFieldMaps(void){
   // ***************************************************************************
   ATH_MSG_INFO("***IniGeomforFieldMaps() called for FieldMapVersion = "
-               << s_FieldMapVersion);
+               << m_FieldMapVersion);
 
-  if(s_FieldMapVersion == "v00" || s_FieldMapVersion == "v01" ||
-     s_FieldMapVersion == "v02"){
+  if(m_FieldMapVersion == "v00" || m_FieldMapVersion == "v01" ||
+     m_FieldMapVersion == "v02"){
 
-    s_ChCollInner.Fold1.FieldMapPrepared=true;
-    s_ChCollOuter.Fold1.FieldMapPrepared=true;
+    m_ChCollInner.Fold1.FieldMapPrepared=true;
+    m_ChCollOuter.Fold1.FieldMapPrepared=true;
 
-    s_ChCollInner.Fold0.FieldMapPrepared=false;
-    s_ChCollOuter.Fold0.FieldMapPrepared=false;
+    m_ChCollInner.Fold0.FieldMapPrepared=false;
+    m_ChCollOuter.Fold0.FieldMapPrepared=false;
 
-    if(s_FieldMapVersion == "v00") {
+    if(m_FieldMapVersion == "v00") {
 
       G4int nlayer=6; // number of radial layers
       ATH_MSG_INFO(" ***IniGeomforFieldMaps calls CreateArrays");
-      CreateArrays(s_ChCollInner,nlayer);
-      CreateArrays(s_ChCollOuter,nlayer);
+      CreateArrays(m_ChCollInner,nlayer);
+      CreateArrays(m_ChCollOuter,nlayer);
 
-      s_ChCollInner.RadiusOfLayers[0]=300.;//[mm]
-      s_ChCollInner.RadiusOfLayers[1]=400.;
-      s_ChCollInner.RadiusOfLayers[2]=500.;
-      s_ChCollInner.RadiusOfLayers[3]=600.;
-      s_ChCollInner.RadiusOfLayers[4]=700.;
-      s_ChCollInner.RadiusOfLayers[5]=800.;
+      m_ChCollInner.RadiusOfLayers[0]=300.;//[mm]
+      m_ChCollInner.RadiusOfLayers[1]=400.;
+      m_ChCollInner.RadiusOfLayers[2]=500.;
+      m_ChCollInner.RadiusOfLayers[3]=600.;
+      m_ChCollInner.RadiusOfLayers[4]=700.;
+      m_ChCollInner.RadiusOfLayers[5]=800.;
 
-      s_ChCollOuter.RadiusOfLayers[0]= 600.; //[mm]
-      s_ChCollOuter.RadiusOfLayers[1]= 900.;
-      s_ChCollOuter.RadiusOfLayers[2]=1200.;
-      s_ChCollOuter.RadiusOfLayers[3]=1500.;
-      s_ChCollOuter.RadiusOfLayers[4]=1800.;
-      s_ChCollOuter.RadiusOfLayers[5]=2100.;
+      m_ChCollOuter.RadiusOfLayers[0]= 600.; //[mm]
+      m_ChCollOuter.RadiusOfLayers[1]= 900.;
+      m_ChCollOuter.RadiusOfLayers[2]=1200.;
+      m_ChCollOuter.RadiusOfLayers[3]=1500.;
+      m_ChCollOuter.RadiusOfLayers[4]=1800.;
+      m_ChCollOuter.RadiusOfLayers[5]=2100.;
 
-      s_ChCollInner.FoldinAngleOfLayers[0]= 112.7;//[degree]
-      s_ChCollInner.FoldinAngleOfLayers[1]=  92.2;
-      s_ChCollInner.FoldinAngleOfLayers[2]=  78.7;
-      s_ChCollInner.FoldinAngleOfLayers[3]=  68.8;
-      s_ChCollInner.FoldinAngleOfLayers[4]=  61.3;
-      s_ChCollInner.FoldinAngleOfLayers[5]=  55.2;
+      m_ChCollInner.FoldinAngleOfLayers[0]= 112.7;//[degree]
+      m_ChCollInner.FoldinAngleOfLayers[1]=  92.2;
+      m_ChCollInner.FoldinAngleOfLayers[2]=  78.7;
+      m_ChCollInner.FoldinAngleOfLayers[3]=  68.8;
+      m_ChCollInner.FoldinAngleOfLayers[4]=  61.3;
+      m_ChCollInner.FoldinAngleOfLayers[5]=  55.2;
 
-      s_ChCollInner.HalfLArGapSizeOfLayers[0]= 1.44; //[mm]
-      s_ChCollInner.HalfLArGapSizeOfLayers[1]= 1.94;
-      s_ChCollInner.HalfLArGapSizeOfLayers[2]= 2.29;
-      s_ChCollInner.HalfLArGapSizeOfLayers[3]= 2.56;
-      s_ChCollInner.HalfLArGapSizeOfLayers[4]= 2.78;
-      s_ChCollInner.HalfLArGapSizeOfLayers[5]= 2.96;
+      m_ChCollInner.HalfLArGapSizeOfLayers[0]= 1.44; //[mm]
+      m_ChCollInner.HalfLArGapSizeOfLayers[1]= 1.94;
+      m_ChCollInner.HalfLArGapSizeOfLayers[2]= 2.29;
+      m_ChCollInner.HalfLArGapSizeOfLayers[3]= 2.56;
+      m_ChCollInner.HalfLArGapSizeOfLayers[4]= 2.78;
+      m_ChCollInner.HalfLArGapSizeOfLayers[5]= 2.96;
 
-      s_ChCollOuter.FoldinAngleOfLayers[0]=129.;//[degree]
-      s_ChCollOuter.FoldinAngleOfLayers[1]=101.4;
-      s_ChCollOuter.FoldinAngleOfLayers[2]= 84.8;
-      s_ChCollOuter.FoldinAngleOfLayers[3]= 73.2;
-      s_ChCollOuter.FoldinAngleOfLayers[4]= 64.5;
-      s_ChCollOuter.FoldinAngleOfLayers[5]= 57.7;
+      m_ChCollOuter.FoldinAngleOfLayers[0]=129.;//[degree]
+      m_ChCollOuter.FoldinAngleOfLayers[1]=101.4;
+      m_ChCollOuter.FoldinAngleOfLayers[2]= 84.8;
+      m_ChCollOuter.FoldinAngleOfLayers[3]= 73.2;
+      m_ChCollOuter.FoldinAngleOfLayers[4]= 64.5;
+      m_ChCollOuter.FoldinAngleOfLayers[5]= 57.7;
 
-      s_ChCollOuter.HalfLArGapSizeOfLayers[0]=0.87; //[mm]
-      s_ChCollOuter.HalfLArGapSizeOfLayers[1]=1.5;
-      s_ChCollOuter.HalfLArGapSizeOfLayers[2]=1.96;
-      s_ChCollOuter.HalfLArGapSizeOfLayers[3]=2.31;
-      s_ChCollOuter.HalfLArGapSizeOfLayers[4]=2.58;
-      s_ChCollOuter.HalfLArGapSizeOfLayers[5]=2.79;
+      m_ChCollOuter.HalfLArGapSizeOfLayers[0]=0.87; //[mm]
+      m_ChCollOuter.HalfLArGapSizeOfLayers[1]=1.5;
+      m_ChCollOuter.HalfLArGapSizeOfLayers[2]=1.96;
+      m_ChCollOuter.HalfLArGapSizeOfLayers[3]=2.31;
+      m_ChCollOuter.HalfLArGapSizeOfLayers[4]=2.58;
+      m_ChCollOuter.HalfLArGapSizeOfLayers[5]=2.79;
     }
 
-    if(s_FieldMapVersion == "v01") {
+    if(m_FieldMapVersion == "v01") {
 
       G4int nlayer=6;
-      CreateArrays(s_ChCollInner,nlayer);
-      CreateArrays(s_ChCollOuter,nlayer);
+      CreateArrays(m_ChCollInner,nlayer);
+      CreateArrays(m_ChCollOuter,nlayer);
 
-      s_ChCollInner.RadiusOfLayers[0]=300.;//[mm]
-      s_ChCollInner.RadiusOfLayers[1]=400.;
-      s_ChCollInner.RadiusOfLayers[2]=500.;
-      s_ChCollInner.RadiusOfLayers[3]=600.;
-      s_ChCollInner.RadiusOfLayers[4]=700.;
-      s_ChCollInner.RadiusOfLayers[5]=800.;
+      m_ChCollInner.RadiusOfLayers[0]=300.;//[mm]
+      m_ChCollInner.RadiusOfLayers[1]=400.;
+      m_ChCollInner.RadiusOfLayers[2]=500.;
+      m_ChCollInner.RadiusOfLayers[3]=600.;
+      m_ChCollInner.RadiusOfLayers[4]=700.;
+      m_ChCollInner.RadiusOfLayers[5]=800.;
 
-      s_ChCollOuter.RadiusOfLayers[0]= 600.; //[mm]
-      s_ChCollOuter.RadiusOfLayers[1]= 900.;
-      s_ChCollOuter.RadiusOfLayers[2]=1200.;
-      s_ChCollOuter.RadiusOfLayers[3]=1500.;
-      s_ChCollOuter.RadiusOfLayers[4]=1800.;
-      s_ChCollOuter.RadiusOfLayers[5]=2100.;
+      m_ChCollOuter.RadiusOfLayers[0]= 600.; //[mm]
+      m_ChCollOuter.RadiusOfLayers[1]= 900.;
+      m_ChCollOuter.RadiusOfLayers[2]=1200.;
+      m_ChCollOuter.RadiusOfLayers[3]=1500.;
+      m_ChCollOuter.RadiusOfLayers[4]=1800.;
+      m_ChCollOuter.RadiusOfLayers[5]=2100.;
 
-      s_ChCollInner.FoldinAngleOfLayers[0]= 112.742024;  //[degree]
-      s_ChCollInner.FoldinAngleOfLayers[1]=  92.2379512;
-      s_ChCollInner.FoldinAngleOfLayers[2]=  78.6993545;
-      s_ChCollInner.FoldinAngleOfLayers[3]=  68.8423119;
-      s_ChCollInner.FoldinAngleOfLayers[4]=  61.2714745;
-      s_ChCollInner.FoldinAngleOfLayers[5]=  55.2462062;
+      m_ChCollInner.FoldinAngleOfLayers[0]= 112.742024;  //[degree]
+      m_ChCollInner.FoldinAngleOfLayers[1]=  92.2379512;
+      m_ChCollInner.FoldinAngleOfLayers[2]=  78.6993545;
+      m_ChCollInner.FoldinAngleOfLayers[3]=  68.8423119;
+      m_ChCollInner.FoldinAngleOfLayers[4]=  61.2714745;
+      m_ChCollInner.FoldinAngleOfLayers[5]=  55.2462062;
 
-      s_ChCollInner.HalfLArGapSizeOfLayers[0]= 1.47806735;  //[mm]
-      s_ChCollInner.HalfLArGapSizeOfLayers[1]= 1.95080191;
-      s_ChCollInner.HalfLArGapSizeOfLayers[2]= 2.30318731;
-      s_ChCollInner.HalfLArGapSizeOfLayers[3]= 2.57486515;
-      s_ChCollInner.HalfLArGapSizeOfLayers[4]= 2.79014569;
-      s_ChCollInner.HalfLArGapSizeOfLayers[5]= 2.96463479;
+      m_ChCollInner.HalfLArGapSizeOfLayers[0]= 1.47806735;  //[mm]
+      m_ChCollInner.HalfLArGapSizeOfLayers[1]= 1.95080191;
+      m_ChCollInner.HalfLArGapSizeOfLayers[2]= 2.30318731;
+      m_ChCollInner.HalfLArGapSizeOfLayers[3]= 2.57486515;
+      m_ChCollInner.HalfLArGapSizeOfLayers[4]= 2.79014569;
+      m_ChCollInner.HalfLArGapSizeOfLayers[5]= 2.96463479;
 
-      s_ChCollOuter.FoldinAngleOfLayers[0]= 129.00197;  //[degree]
-      s_ChCollOuter.FoldinAngleOfLayers[1]= 101.408128;
-      s_ChCollOuter.FoldinAngleOfLayers[2]=  84.7966382;
-      s_ChCollOuter.FoldinAngleOfLayers[3]=  73.1643989;
-      s_ChCollOuter.FoldinAngleOfLayers[4]=  64.4458572;
-      s_ChCollOuter.FoldinAngleOfLayers[5]=  57.6301588;
+      m_ChCollOuter.FoldinAngleOfLayers[0]= 129.00197;  //[degree]
+      m_ChCollOuter.FoldinAngleOfLayers[1]= 101.408128;
+      m_ChCollOuter.FoldinAngleOfLayers[2]=  84.7966382;
+      m_ChCollOuter.FoldinAngleOfLayers[3]=  73.1643989;
+      m_ChCollOuter.FoldinAngleOfLayers[4]=  64.4458572;
+      m_ChCollOuter.FoldinAngleOfLayers[5]=  57.6301588;
 
-      s_ChCollOuter.HalfLArGapSizeOfLayers[0]= 0.877808149;  //[mm]
-      s_ChCollOuter.HalfLArGapSizeOfLayers[1]= 1.5116158;
-      s_ChCollOuter.HalfLArGapSizeOfLayers[2]= 1.97238634;
-      s_ChCollOuter.HalfLArGapSizeOfLayers[3]= 2.31937997;
-      s_ChCollOuter.HalfLArGapSizeOfLayers[4]= 2.58864056;
-      s_ChCollOuter.HalfLArGapSizeOfLayers[5]= 2.80290925;
+      m_ChCollOuter.HalfLArGapSizeOfLayers[0]= 0.877808149;  //[mm]
+      m_ChCollOuter.HalfLArGapSizeOfLayers[1]= 1.5116158;
+      m_ChCollOuter.HalfLArGapSizeOfLayers[2]= 1.97238634;
+      m_ChCollOuter.HalfLArGapSizeOfLayers[3]= 2.31937997;
+      m_ChCollOuter.HalfLArGapSizeOfLayers[4]= 2.58864056;
+      m_ChCollOuter.HalfLArGapSizeOfLayers[5]= 2.80290925;
     }
 
-    if(s_FieldMapVersion == "v02") {
+    if(m_FieldMapVersion == "v02") {
 
       G4int nilayer=6;  // number of layers for inner/outer wheel
       G4int nolayer=11;
-      CreateArrays(s_ChCollInner,nilayer);
-      CreateArrays(s_ChCollOuter,nolayer);
+      CreateArrays(m_ChCollInner,nilayer);
+      CreateArrays(m_ChCollOuter,nolayer);
 
-      s_ChCollInner.RadiusOfLayers[0]=300.;//[mm]
-      s_ChCollInner.RadiusOfLayers[1]=400.;
-      s_ChCollInner.RadiusOfLayers[2]=500.;
-      s_ChCollInner.RadiusOfLayers[3]=600.;
-      s_ChCollInner.RadiusOfLayers[4]=700.;
-      s_ChCollInner.RadiusOfLayers[5]=800.;
+      m_ChCollInner.RadiusOfLayers[0]=300.;//[mm]
+      m_ChCollInner.RadiusOfLayers[1]=400.;
+      m_ChCollInner.RadiusOfLayers[2]=500.;
+      m_ChCollInner.RadiusOfLayers[3]=600.;
+      m_ChCollInner.RadiusOfLayers[4]=700.;
+      m_ChCollInner.RadiusOfLayers[5]=800.;
 
-      s_ChCollOuter.RadiusOfLayers[0] = 600.; //[mm]
-      s_ChCollOuter.RadiusOfLayers[1] = 900.;
-      s_ChCollOuter.RadiusOfLayers[2] =1200.;
-      s_ChCollOuter.RadiusOfLayers[3] =1250.;
-      s_ChCollOuter.RadiusOfLayers[4] =1300.;
-      s_ChCollOuter.RadiusOfLayers[5] =1350.;
-      s_ChCollOuter.RadiusOfLayers[6] =1400.;
-      s_ChCollOuter.RadiusOfLayers[7] =1450.;
-      s_ChCollOuter.RadiusOfLayers[8] =1500.;
-      s_ChCollOuter.RadiusOfLayers[9] =1800.;
-      s_ChCollOuter.RadiusOfLayers[10]=2100.;
+      m_ChCollOuter.RadiusOfLayers[0] = 600.; //[mm]
+      m_ChCollOuter.RadiusOfLayers[1] = 900.;
+      m_ChCollOuter.RadiusOfLayers[2] =1200.;
+      m_ChCollOuter.RadiusOfLayers[3] =1250.;
+      m_ChCollOuter.RadiusOfLayers[4] =1300.;
+      m_ChCollOuter.RadiusOfLayers[5] =1350.;
+      m_ChCollOuter.RadiusOfLayers[6] =1400.;
+      m_ChCollOuter.RadiusOfLayers[7] =1450.;
+      m_ChCollOuter.RadiusOfLayers[8] =1500.;
+      m_ChCollOuter.RadiusOfLayers[9] =1800.;
+      m_ChCollOuter.RadiusOfLayers[10]=2100.;
 
-      s_ChCollInner.FoldinAngleOfLayers[0]= 112.742024;  //[degree]
-      s_ChCollInner.FoldinAngleOfLayers[1]=  92.2379512;
-      s_ChCollInner.FoldinAngleOfLayers[2]=  78.6993545;
-      s_ChCollInner.FoldinAngleOfLayers[3]=  68.8423119;
-      s_ChCollInner.FoldinAngleOfLayers[4]=  61.2714745;
-      s_ChCollInner.FoldinAngleOfLayers[5]=  55.2462062;
+      m_ChCollInner.FoldinAngleOfLayers[0]= 112.742024;  //[degree]
+      m_ChCollInner.FoldinAngleOfLayers[1]=  92.2379512;
+      m_ChCollInner.FoldinAngleOfLayers[2]=  78.6993545;
+      m_ChCollInner.FoldinAngleOfLayers[3]=  68.8423119;
+      m_ChCollInner.FoldinAngleOfLayers[4]=  61.2714745;
+      m_ChCollInner.FoldinAngleOfLayers[5]=  55.2462062;
 
-      s_ChCollInner.HalfLArGapSizeOfLayers[0]= 1.47806735;  //[mm]
-      s_ChCollInner.HalfLArGapSizeOfLayers[1]= 1.95080191;
-      s_ChCollInner.HalfLArGapSizeOfLayers[2]= 2.30318731;
-      s_ChCollInner.HalfLArGapSizeOfLayers[3]= 2.57486515;
-      s_ChCollInner.HalfLArGapSizeOfLayers[4]= 2.79014569;
-      s_ChCollInner.HalfLArGapSizeOfLayers[5]= 2.96463479;
+      m_ChCollInner.HalfLArGapSizeOfLayers[0]= 1.47806735;  //[mm]
+      m_ChCollInner.HalfLArGapSizeOfLayers[1]= 1.95080191;
+      m_ChCollInner.HalfLArGapSizeOfLayers[2]= 2.30318731;
+      m_ChCollInner.HalfLArGapSizeOfLayers[3]= 2.57486515;
+      m_ChCollInner.HalfLArGapSizeOfLayers[4]= 2.79014569;
+      m_ChCollInner.HalfLArGapSizeOfLayers[5]= 2.96463479;
 
-      s_ChCollOuter.FoldinAngleOfLayers[0]= 129.00197;  //[degree]
-      s_ChCollOuter.FoldinAngleOfLayers[1]= 101.408128;
-      s_ChCollOuter.FoldinAngleOfLayers[2]=  84.7966382;
-      s_ChCollOuter.FoldinAngleOfLayers[3]=  82.5893317;
-      s_ChCollOuter.FoldinAngleOfLayers[4]=  80.5022136;
-      s_ChCollOuter.FoldinAngleOfLayers[5]=  78.524804;
-      s_ChCollOuter.FoldinAngleOfLayers[6]=  76.6479315;
-      s_ChCollOuter.FoldinAngleOfLayers[7]=  74.8635164;
-      s_ChCollOuter.FoldinAngleOfLayers[8]=  73.1643989;
-      s_ChCollOuter.FoldinAngleOfLayers[9]=  64.4458572;
-      s_ChCollOuter.FoldinAngleOfLayers[10]= 57.6301588;
+      m_ChCollOuter.FoldinAngleOfLayers[0]= 129.00197;  //[degree]
+      m_ChCollOuter.FoldinAngleOfLayers[1]= 101.408128;
+      m_ChCollOuter.FoldinAngleOfLayers[2]=  84.7966382;
+      m_ChCollOuter.FoldinAngleOfLayers[3]=  82.5893317;
+      m_ChCollOuter.FoldinAngleOfLayers[4]=  80.5022136;
+      m_ChCollOuter.FoldinAngleOfLayers[5]=  78.524804;
+      m_ChCollOuter.FoldinAngleOfLayers[6]=  76.6479315;
+      m_ChCollOuter.FoldinAngleOfLayers[7]=  74.8635164;
+      m_ChCollOuter.FoldinAngleOfLayers[8]=  73.1643989;
+      m_ChCollOuter.FoldinAngleOfLayers[9]=  64.4458572;
+      m_ChCollOuter.FoldinAngleOfLayers[10]= 57.6301588;
 
-      s_ChCollOuter.HalfLArGapSizeOfLayers[0]= 0.877808149;  //[mm]
-      s_ChCollOuter.HalfLArGapSizeOfLayers[1]= 1.5116158;
-      s_ChCollOuter.HalfLArGapSizeOfLayers[2]= 1.97238634;
-      s_ChCollOuter.HalfLArGapSizeOfLayers[3]= 2.03692756;
-      s_ChCollOuter.HalfLArGapSizeOfLayers[4]= 2.09855584;
-      s_ChCollOuter.HalfLArGapSizeOfLayers[5]= 2.15745335;
-      s_ChCollOuter.HalfLArGapSizeOfLayers[6]= 2.21378826;
-      s_ChCollOuter.HalfLArGapSizeOfLayers[7]= 2.26771591;
-      s_ChCollOuter.HalfLArGapSizeOfLayers[8]= 2.31937997;
-      s_ChCollOuter.HalfLArGapSizeOfLayers[9]= 2.58864056;
-      s_ChCollOuter.HalfLArGapSizeOfLayers[10]=2.80290925;
+      m_ChCollOuter.HalfLArGapSizeOfLayers[0]= 0.877808149;  //[mm]
+      m_ChCollOuter.HalfLArGapSizeOfLayers[1]= 1.5116158;
+      m_ChCollOuter.HalfLArGapSizeOfLayers[2]= 1.97238634;
+      m_ChCollOuter.HalfLArGapSizeOfLayers[3]= 2.03692756;
+      m_ChCollOuter.HalfLArGapSizeOfLayers[4]= 2.09855584;
+      m_ChCollOuter.HalfLArGapSizeOfLayers[5]= 2.15745335;
+      m_ChCollOuter.HalfLArGapSizeOfLayers[6]= 2.21378826;
+      m_ChCollOuter.HalfLArGapSizeOfLayers[7]= 2.26771591;
+      m_ChCollOuter.HalfLArGapSizeOfLayers[8]= 2.31937997;
+      m_ChCollOuter.HalfLArGapSizeOfLayers[9]= 2.58864056;
+      m_ChCollOuter.HalfLArGapSizeOfLayers[10]=2.80290925;
     }
   }
-  else if(s_FieldMapVersion == "v03"){
+  else if(m_FieldMapVersion == "v03"){
 
-    s_ChCollInner.Fold1.FieldMapPrepared=true;
-    s_ChCollOuter.Fold1.FieldMapPrepared=true;
+    m_ChCollInner.Fold1.FieldMapPrepared=true;
+    m_ChCollOuter.Fold1.FieldMapPrepared=true;
 
-    s_ChCollInner.Fold0.FieldMapPrepared=true;
-    s_ChCollOuter.Fold0.FieldMapPrepared=true;
+    m_ChCollInner.Fold0.FieldMapPrepared=true;
+    m_ChCollOuter.Fold0.FieldMapPrepared=true;
 
     G4int nilayer=6; //number of radial layers; should be the same for
     G4int nolayer=16;// all fold type
-    CreateArrays(s_ChCollInner,nilayer);
-    CreateArrays(s_ChCollOuter,nolayer);
+    CreateArrays(m_ChCollInner,nilayer);
+    CreateArrays(m_ChCollOuter,nolayer);
 
     for(G4int i=0;i<nilayer;++i){
-      s_ChCollInner.RadiusOfLayers[i]=300.+i*100.;
+      m_ChCollInner.RadiusOfLayers[i]=300.+i*100.;
     }
-    s_ChCollInner.FoldinAngleOfLayers[0]= 112.7420;  //[degree]
-    s_ChCollInner.FoldinAngleOfLayers[1]=  92.238;
-    s_ChCollInner.FoldinAngleOfLayers[2]=  78.6994;
-    s_ChCollInner.FoldinAngleOfLayers[3]=  68.8423;
-    s_ChCollInner.FoldinAngleOfLayers[4]=  61.2715;
-    s_ChCollInner.FoldinAngleOfLayers[5]=  55.2462;
+    m_ChCollInner.FoldinAngleOfLayers[0]= 112.7420;  //[degree]
+    m_ChCollInner.FoldinAngleOfLayers[1]=  92.238;
+    m_ChCollInner.FoldinAngleOfLayers[2]=  78.6994;
+    m_ChCollInner.FoldinAngleOfLayers[3]=  68.8423;
+    m_ChCollInner.FoldinAngleOfLayers[4]=  61.2715;
+    m_ChCollInner.FoldinAngleOfLayers[5]=  55.2462;
 
-    s_ChCollInner.HalfLArGapSizeOfLayers[0]= 1.5326;  //[mm]
-    s_ChCollInner.HalfLArGapSizeOfLayers[1]= 2.0053;
-    s_ChCollInner.HalfLArGapSizeOfLayers[2]= 2.3577;
-    s_ChCollInner.HalfLArGapSizeOfLayers[3]= 2.6294;
-    s_ChCollInner.HalfLArGapSizeOfLayers[4]= 2.8446;
-    s_ChCollInner.HalfLArGapSizeOfLayers[5]= 3.0191;
+    m_ChCollInner.HalfLArGapSizeOfLayers[0]= 1.5326;  //[mm]
+    m_ChCollInner.HalfLArGapSizeOfLayers[1]= 2.0053;
+    m_ChCollInner.HalfLArGapSizeOfLayers[2]= 2.3577;
+    m_ChCollInner.HalfLArGapSizeOfLayers[3]= 2.6294;
+    m_ChCollInner.HalfLArGapSizeOfLayers[4]= 2.8446;
+    m_ChCollInner.HalfLArGapSizeOfLayers[5]= 3.0191;
 
     for(G4int i=0;i<nolayer;++i){
-      s_ChCollOuter.RadiusOfLayers[i]=600.+i*100.;
+      m_ChCollOuter.RadiusOfLayers[i]=600.+i*100.;
     }
 
-    s_ChCollOuter.FoldinAngleOfLayers[0]= 129.002;  //[degree]
-    s_ChCollOuter.FoldinAngleOfLayers[1]= 117.7235;
-    s_ChCollOuter.FoldinAngleOfLayers[2]= 108.8045;
-    s_ChCollOuter.FoldinAngleOfLayers[3]= 101.4081;
-    s_ChCollOuter.FoldinAngleOfLayers[4]=  95.1012;
-    s_ChCollOuter.FoldinAngleOfLayers[5]=  89.6220;
-    s_ChCollOuter.FoldinAngleOfLayers[6]=  84.7966;
-    s_ChCollOuter.FoldinAngleOfLayers[7]=  80.5022;
-    s_ChCollOuter.FoldinAngleOfLayers[8]=  76.6479;
-    s_ChCollOuter.FoldinAngleOfLayers[9]=  73.1644;
-    s_ChCollOuter.FoldinAngleOfLayers[10]= 69.9972;
-    s_ChCollOuter.FoldinAngleOfLayers[11]= 67.1028;
-    s_ChCollOuter.FoldinAngleOfLayers[12]= 64.4459;
-    s_ChCollOuter.FoldinAngleOfLayers[13]= 61.9970;
-    s_ChCollOuter.FoldinAngleOfLayers[14]= 59.7320;
-    s_ChCollOuter.FoldinAngleOfLayers[15]= 57.6302;
+    m_ChCollOuter.FoldinAngleOfLayers[0]= 129.002;  //[degree]
+    m_ChCollOuter.FoldinAngleOfLayers[1]= 117.7235;
+    m_ChCollOuter.FoldinAngleOfLayers[2]= 108.8045;
+    m_ChCollOuter.FoldinAngleOfLayers[3]= 101.4081;
+    m_ChCollOuter.FoldinAngleOfLayers[4]=  95.1012;
+    m_ChCollOuter.FoldinAngleOfLayers[5]=  89.6220;
+    m_ChCollOuter.FoldinAngleOfLayers[6]=  84.7966;
+    m_ChCollOuter.FoldinAngleOfLayers[7]=  80.5022;
+    m_ChCollOuter.FoldinAngleOfLayers[8]=  76.6479;
+    m_ChCollOuter.FoldinAngleOfLayers[9]=  73.1644;
+    m_ChCollOuter.FoldinAngleOfLayers[10]= 69.9972;
+    m_ChCollOuter.FoldinAngleOfLayers[11]= 67.1028;
+    m_ChCollOuter.FoldinAngleOfLayers[12]= 64.4459;
+    m_ChCollOuter.FoldinAngleOfLayers[13]= 61.9970;
+    m_ChCollOuter.FoldinAngleOfLayers[14]= 59.7320;
+    m_ChCollOuter.FoldinAngleOfLayers[15]= 57.6302;
 
-    s_ChCollOuter.HalfLArGapSizeOfLayers[0]= 0.9367;  //[mm]
-    s_ChCollOuter.HalfLArGapSizeOfLayers[1]= 1.1723;
-    s_ChCollOuter.HalfLArGapSizeOfLayers[2]= 1.3824;
-    s_ChCollOuter.HalfLArGapSizeOfLayers[3]= 1.5705;
-    s_ChCollOuter.HalfLArGapSizeOfLayers[4]= 1.7398;
-    s_ChCollOuter.HalfLArGapSizeOfLayers[5]= 1.8927;
-    s_ChCollOuter.HalfLArGapSizeOfLayers[6]= 2.0313;
-    s_ChCollOuter.HalfLArGapSizeOfLayers[7]= 2.1575;
-    s_ChCollOuter.HalfLArGapSizeOfLayers[8]= 2.2727;
-    s_ChCollOuter.HalfLArGapSizeOfLayers[9]= 2.3783;
-    s_ChCollOuter.HalfLArGapSizeOfLayers[10]=2.4754;
-    s_ChCollOuter.HalfLArGapSizeOfLayers[11]=2.5648;
-    s_ChCollOuter.HalfLArGapSizeOfLayers[12]=2.6476;
-    s_ChCollOuter.HalfLArGapSizeOfLayers[13]=2.7242;
-    s_ChCollOuter.HalfLArGapSizeOfLayers[14]=2.7955;
-    s_ChCollOuter.HalfLArGapSizeOfLayers[15]=2.8618;
+    m_ChCollOuter.HalfLArGapSizeOfLayers[0]= 0.9367;  //[mm]
+    m_ChCollOuter.HalfLArGapSizeOfLayers[1]= 1.1723;
+    m_ChCollOuter.HalfLArGapSizeOfLayers[2]= 1.3824;
+    m_ChCollOuter.HalfLArGapSizeOfLayers[3]= 1.5705;
+    m_ChCollOuter.HalfLArGapSizeOfLayers[4]= 1.7398;
+    m_ChCollOuter.HalfLArGapSizeOfLayers[5]= 1.8927;
+    m_ChCollOuter.HalfLArGapSizeOfLayers[6]= 2.0313;
+    m_ChCollOuter.HalfLArGapSizeOfLayers[7]= 2.1575;
+    m_ChCollOuter.HalfLArGapSizeOfLayers[8]= 2.2727;
+    m_ChCollOuter.HalfLArGapSizeOfLayers[9]= 2.3783;
+    m_ChCollOuter.HalfLArGapSizeOfLayers[10]=2.4754;
+    m_ChCollOuter.HalfLArGapSizeOfLayers[11]=2.5648;
+    m_ChCollOuter.HalfLArGapSizeOfLayers[12]=2.6476;
+    m_ChCollOuter.HalfLArGapSizeOfLayers[13]=2.7242;
+    m_ChCollOuter.HalfLArGapSizeOfLayers[14]=2.7955;
+    m_ChCollOuter.HalfLArGapSizeOfLayers[15]=2.8618;
 
   }
   else{
     ATH_MSG_FATAL("IniGeomforFieldMaps -  FieldMapVersion = '"
-                  << s_FieldMapVersion << "' not found!");
+                  << m_FieldMapVersion << "' not found!");
   }
 
-  s_ChCollInner.GridShift=0.050;
-  s_ChCollOuter.GridShift=0.0667;
+  m_ChCollInner.GridShift=0.050;
+  m_ChCollOuter.GridShift=0.0667;
 }
 
 // ***********************************************************
@@ -402,7 +402,7 @@ void LArG4::EC::EnergyCalculator::LoadFieldMaps(const G4String fname){
     throw std::runtime_error("LArEMECChargeCollection: File not found!");
   }
 
-  if(s_FieldMapVersion != "v00"){
+  if(m_FieldMapVersion != "v00"){
     if (fscanf(lun, "%9s", fieldmapversion) < 1) {
       ATH_MSG_ERROR("GetFieldMaps Error reading field map");
     }
@@ -411,14 +411,14 @@ void LArG4::EC::EnergyCalculator::LoadFieldMaps(const G4String fname){
 
   // Check which fold should have a map
 
-  if     (s_ChCollInner.Fold1.FieldMapPrepared &&
-          s_ChCollOuter.Fold1.FieldMapPrepared &&
-          s_ChCollInner.Fold0.FieldMapPrepared &&
-          s_ChCollOuter.Fold0.FieldMapPrepared)     foldtypemx=2;
-  else if(s_ChCollInner.Fold1.FieldMapPrepared &&
-          s_ChCollOuter.Fold1.FieldMapPrepared &&
-          !s_ChCollInner.Fold0.FieldMapPrepared &&
-          !s_ChCollOuter.Fold0.FieldMapPrepared)     foldtypemx=1;
+  if     (m_ChCollInner.Fold1.FieldMapPrepared &&
+          m_ChCollOuter.Fold1.FieldMapPrepared &&
+          m_ChCollInner.Fold0.FieldMapPrepared &&
+          m_ChCollOuter.Fold0.FieldMapPrepared)     foldtypemx=2;
+  else if(m_ChCollInner.Fold1.FieldMapPrepared &&
+          m_ChCollOuter.Fold1.FieldMapPrepared &&
+          !m_ChCollInner.Fold0.FieldMapPrepared &&
+          !m_ChCollOuter.Fold0.FieldMapPrepared)     foldtypemx=1;
   else{
 
     ATH_MSG_FATAL(" ***GetFieldMaps file format is incompatible");
@@ -428,7 +428,7 @@ void LArG4::EC::EnergyCalculator::LoadFieldMaps(const G4String fname){
 
   for(G4int foldtype  = 0; foldtype  < foldtypemx; ++ foldtype) {
     for(G4int wheeltype = 0; wheeltype < 2; ++ wheeltype) {
-      Wheel_Efield_Map *ChCollWheelType = (wheeltype == 0) ? &s_ChCollInner : &s_ChCollOuter;
+      Wheel_Efield_Map *ChCollWheelType = (wheeltype == 0) ? &m_ChCollInner : &m_ChCollOuter;
 
       Fold_Efield_Map *ChCollFoldType = ( foldtype == 0 ) ? &(ChCollWheelType->Fold1) : &(ChCollWheelType->Fold0);
 
@@ -489,7 +489,7 @@ void LArG4::EC::EnergyCalculator::LoadFieldMaps(const G4String fname){
   }   //end for foldtypes
 
   rewind(lun);
-  if(s_FieldMapVersion != "v00") {
+  if(m_FieldMapVersion != "v00") {
     if (fscanf(lun, "%9s", fieldmapversion) < 1) {
       ATH_MSG_ERROR( "GetFieldMaps Error reading field map");
     }
@@ -499,7 +499,7 @@ void LArG4::EC::EnergyCalculator::LoadFieldMaps(const G4String fname){
 
   for(G4int foldtype  = 0; foldtype  < foldtypemx; ++ foldtype) {
     for(G4int wheeltype = 0; wheeltype < 2; ++ wheeltype){
-      Wheel_Efield_Map *ChCollWheelType = (wheeltype == 0) ? &s_ChCollInner : &s_ChCollOuter;
+      Wheel_Efield_Map *ChCollWheelType = (wheeltype == 0) ? &m_ChCollInner : &m_ChCollOuter;
 
       Fold_Efield_Map *ChCollFoldType = ( foldtype == 0 ) ? &(ChCollWheelType->Fold1) : &(ChCollWheelType->Fold0);
 
@@ -530,7 +530,6 @@ void LArG4::EC::EnergyCalculator::LoadFieldMaps(const G4String fname){
     }           // end of loop on wheeltype
   }    // end of loop for foldtypes
   fclose(lun);
-  s_FieldMapsRead = true;
 }
 
 // **********************************************************
@@ -598,7 +597,7 @@ void LArG4::EC::EnergyCalculator::PrepareFieldMap(Wheel_Efield_Map* ChCollWheelT
           if(z<maxz) {  // only grid points within quarterwavelength is to be included
             ++ipnt;
             if( w<0.00001 ) {  // check weight in the file
-              if(s_FieldMapVersion != "v00") {
+              if(m_FieldMapVersion != "v00") {
                 wx=0.; // new map
               } else {                               // old map
                 WheelGeometry wg;

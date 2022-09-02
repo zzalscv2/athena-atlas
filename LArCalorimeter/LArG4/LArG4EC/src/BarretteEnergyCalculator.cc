@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2019 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
 */
 
 #include <cmath>
@@ -33,10 +33,6 @@ const G4double EnergyCalculator::s_DistOfEndofCuFromBack  = 22.77*Units::mm/s_Co
 const G4double EnergyCalculator::s_DistOfStartofCuFromBack= 31.*Units::mm; // frontface of the barrette
 const G4double EnergyCalculator::s_ZmaxOfSignal           = s_DistOfStartofCuFromBack
                                                                         - s_DistOfEndofCuFromBack + s_EdgeWidth;
-G4double EnergyCalculator::s_RefzDist           = 0.;
-G4bool EnergyCalculator::s_SetConstOuterBarrett = false;
-G4bool EnergyCalculator::s_SetConstInnerBarrett = false;
-
 const G4double EnergyCalculator::s_S3_Etalim[21]={
   1.50, 1.55, 1.60, 1.65, 1.70, 1.75, 1.80, 1.85, 1.90, 1.95,
   2.00, 2.05, 2.10, 2.15, 2.20, 2.25, 2.30, 2.35, 2.40, 2.45, 2.5
@@ -49,10 +45,6 @@ const G4double EnergyCalculator::s_Rmeas_outer[50]={
   23.57, 34.64, 55.32, 65.39, 76.34, 10.83,  94.84,  98.00, -99.,   -99.
 };
 const G4double EnergyCalculator::s_Zmeas_outer[2]={3.81, 7.81};
-
-G4double EnergyCalculator::s_S3_Rlim[21];
-G4double EnergyCalculator::s_rlim[50];
-G4double EnergyCalculator::s_zlim[4];
 
 
 G4double EnergyCalculator::getPhiStartOfPhiDiv(const G4Step* step) const {
@@ -138,99 +130,86 @@ G4bool EnergyCalculator::Process_Barrett(const G4Step* step, std::vector<LArHitD
 }
 
 // ****************************************************************************
-void EnergyCalculator::SetConst_InnerBarrett(void){
-  // ****************************************************************************
-  if(s_SetConstInnerBarrett) return;
-  s_SetConstInnerBarrett=true;
-
-  std::cout <<" ===>>> ERROR!!  SetConst_InnerBarrett is called!!!" <<std::endl;
-  exit(99);
-}
-
-// ****************************************************************************
 void EnergyCalculator::SetConst_OuterBarrett(void){
   // ****************************************************************************
 
-  if(s_SetConstOuterBarrett) return;
-  s_SetConstOuterBarrett=true;
-
   for(G4int i=0;i<=20;++i){
     const G4double teta = 2.*atan( exp(-s_S3_Etalim[i]));
-    s_S3_Rlim[i] = s_RefzDist*tan(teta);
+    m_S3_Rlim[i] = m_RefzDist*tan(teta);
   }
 
   const G4double inv_ColdCorrection = 1. / s_ColdCorrection;
-  s_rlim[0] = s_S3_Rlim[3] + s_KapGap    +  s_Rmeas_outer[0] /*11.59 */  * inv_ColdCorrection;
-  s_rlim[1] = s_S3_Rlim[3] + s_KapGap    +  s_Rmeas_outer[1] /*25.22 */  * inv_ColdCorrection;
-  s_rlim[2] = s_S3_Rlim[3] + s_KapGap    +  s_Rmeas_outer[2] /*57.28 */  * inv_ColdCorrection;
-  s_rlim[3] = s_S3_Rlim[3] + s_KapGap    +  s_Rmeas_outer[3] /*71.30 */  * inv_ColdCorrection;
-  s_rlim[4] = s_S3_Rlim[3] + s_KapGap    +  s_Rmeas_outer[4] /*85.90 */  * inv_ColdCorrection;
-  s_rlim[5] = s_S3_Rlim[3] + s_KapGap    +  s_Rmeas_outer[5] /*98.94 */  * inv_ColdCorrection;
-  s_rlim[6] = s_S3_Rlim[3] + s_KapGap    +  s_Rmeas_outer[6] /*103.09 */ * inv_ColdCorrection;
-  s_rlim[7] = s_S3_Rlim[3] + s_KapGap    +  s_Rmeas_outer[7] /*116.68 */ * inv_ColdCorrection;
-  s_rlim[8] = s_S3_Rlim[3] + s_KapGap    +  s_Rmeas_outer[8] /*130.42 */ * inv_ColdCorrection;
-  s_rlim[9] = s_S3_Rlim[3] + s_KapGap/2. +  s_Rmeas_outer[9] /*146.27 */ * inv_ColdCorrection + s_EdgeWidth;
-  s_rlim[10]= s_rlim[8]                +  s_Rmeas_outer[10]/*147.19 */ * inv_ColdCorrection;
+  m_rlim[0] = m_S3_Rlim[3] + s_KapGap    +  s_Rmeas_outer[0] /*11.59 */  * inv_ColdCorrection;
+  m_rlim[1] = m_S3_Rlim[3] + s_KapGap    +  s_Rmeas_outer[1] /*25.22 */  * inv_ColdCorrection;
+  m_rlim[2] = m_S3_Rlim[3] + s_KapGap    +  s_Rmeas_outer[2] /*57.28 */  * inv_ColdCorrection;
+  m_rlim[3] = m_S3_Rlim[3] + s_KapGap    +  s_Rmeas_outer[3] /*71.30 */  * inv_ColdCorrection;
+  m_rlim[4] = m_S3_Rlim[3] + s_KapGap    +  s_Rmeas_outer[4] /*85.90 */  * inv_ColdCorrection;
+  m_rlim[5] = m_S3_Rlim[3] + s_KapGap    +  s_Rmeas_outer[5] /*98.94 */  * inv_ColdCorrection;
+  m_rlim[6] = m_S3_Rlim[3] + s_KapGap    +  s_Rmeas_outer[6] /*103.09 */ * inv_ColdCorrection;
+  m_rlim[7] = m_S3_Rlim[3] + s_KapGap    +  s_Rmeas_outer[7] /*116.68 */ * inv_ColdCorrection;
+  m_rlim[8] = m_S3_Rlim[3] + s_KapGap    +  s_Rmeas_outer[8] /*130.42 */ * inv_ColdCorrection;
+  m_rlim[9] = m_S3_Rlim[3] + s_KapGap/2. +  s_Rmeas_outer[9] /*146.27 */ * inv_ColdCorrection + s_EdgeWidth;
+  m_rlim[10]= m_rlim[8]                +  s_Rmeas_outer[10]/*147.19 */ * inv_ColdCorrection;
 
-  s_rlim[11]= s_S3_Rlim[3] + s_KapGap    +  s_Rmeas_outer[11]/*11.59 */ * inv_ColdCorrection; //eta=1.65
-  s_rlim[12]= s_S3_Rlim[3] - s_KapGap    -  s_Rmeas_outer[12]/*15.   */ * inv_ColdCorrection;
+  m_rlim[11]= m_S3_Rlim[3] + s_KapGap    +  s_Rmeas_outer[11]/*11.59 */ * inv_ColdCorrection; //eta=1.65
+  m_rlim[12]= m_S3_Rlim[3] - s_KapGap    -  s_Rmeas_outer[12]/*15.   */ * inv_ColdCorrection;
 
-  s_rlim[13]= s_S3_Rlim[4] + s_KapGap    +  s_Rmeas_outer[13]/*56.91 */ * inv_ColdCorrection; //eta=1.7
-  s_rlim[14]= s_S3_Rlim[4] - s_KapGap    -  s_Rmeas_outer[14]/*44.37 */ * inv_ColdCorrection;
+  m_rlim[13]= m_S3_Rlim[4] + s_KapGap    +  s_Rmeas_outer[13]/*56.91 */ * inv_ColdCorrection; //eta=1.7
+  m_rlim[14]= m_S3_Rlim[4] - s_KapGap    -  s_Rmeas_outer[14]/*44.37 */ * inv_ColdCorrection;
 
-  s_rlim[15]= s_S3_Rlim[5] + s_KapGap    +  s_Rmeas_outer[15]/*15.13 */ * inv_ColdCorrection; //eta=1.75
-  s_rlim[16]= s_S3_Rlim[5] - s_KapGap    -  s_Rmeas_outer[16]/*14.93 */ * inv_ColdCorrection;
+  m_rlim[15]= m_S3_Rlim[5] + s_KapGap    +  s_Rmeas_outer[15]/*15.13 */ * inv_ColdCorrection; //eta=1.75
+  m_rlim[16]= m_S3_Rlim[5] - s_KapGap    -  s_Rmeas_outer[16]/*14.93 */ * inv_ColdCorrection;
 
-  s_rlim[17]= s_S3_Rlim[6] + s_KapGap    +  s_Rmeas_outer[17]/*45.87 */ * inv_ColdCorrection; //eta=1.80
-  s_rlim[18]= s_S3_Rlim[6] - s_KapGap    -  s_Rmeas_outer[18]/*35.03 */ * inv_ColdCorrection;
+  m_rlim[17]= m_S3_Rlim[6] + s_KapGap    +  s_Rmeas_outer[17]/*45.87 */ * inv_ColdCorrection; //eta=1.80
+  m_rlim[18]= m_S3_Rlim[6] - s_KapGap    -  s_Rmeas_outer[18]/*35.03 */ * inv_ColdCorrection;
 
-  s_rlim[19]= s_S3_Rlim[7] + s_KapGap    +  s_Rmeas_outer[19]/*15.40 */ * inv_ColdCorrection; //eta=1.85
-  s_rlim[20]= s_S3_Rlim[7] - s_KapGap    -  s_Rmeas_outer[20]/*14.04 */ * inv_ColdCorrection;
+  m_rlim[19]= m_S3_Rlim[7] + s_KapGap    +  s_Rmeas_outer[19]/*15.40 */ * inv_ColdCorrection; //eta=1.85
+  m_rlim[20]= m_S3_Rlim[7] - s_KapGap    -  s_Rmeas_outer[20]/*14.04 */ * inv_ColdCorrection;
 
-  s_rlim[21]= s_S3_Rlim[8] + s_KapGap    +  s_Rmeas_outer[21]/*39.67 */ * inv_ColdCorrection; //eta=1.90
-  s_rlim[22]= s_S3_Rlim[8] - s_KapGap    -  s_Rmeas_outer[22]/*26.83 */ * inv_ColdCorrection;
+  m_rlim[21]= m_S3_Rlim[8] + s_KapGap    +  s_Rmeas_outer[21]/*39.67 */ * inv_ColdCorrection; //eta=1.90
+  m_rlim[22]= m_S3_Rlim[8] - s_KapGap    -  s_Rmeas_outer[22]/*26.83 */ * inv_ColdCorrection;
 
-  s_rlim[23]= s_S3_Rlim[9] + s_KapGap    +  s_Rmeas_outer[23]/*15.64 */ * inv_ColdCorrection; //eta=1.95
-  s_rlim[24]= s_S3_Rlim[9] - s_KapGap    -  s_Rmeas_outer[24]/*14.90 */ * inv_ColdCorrection;
+  m_rlim[23]= m_S3_Rlim[9] + s_KapGap    +  s_Rmeas_outer[23]/*15.64 */ * inv_ColdCorrection; //eta=1.95
+  m_rlim[24]= m_S3_Rlim[9] - s_KapGap    -  s_Rmeas_outer[24]/*14.90 */ * inv_ColdCorrection;
 
-  s_rlim[25]= s_S3_Rlim[10] + s_KapGap   +  s_Rmeas_outer[25]/*30.26 */ * inv_ColdCorrection; //eta=2.00
-  s_rlim[26]= s_S3_Rlim[10] - s_KapGap   -  s_Rmeas_outer[26]/*14.70 */ * inv_ColdCorrection;
+  m_rlim[25]= m_S3_Rlim[10] + s_KapGap   +  s_Rmeas_outer[25]/*30.26 */ * inv_ColdCorrection; //eta=2.00
+  m_rlim[26]= m_S3_Rlim[10] - s_KapGap   -  s_Rmeas_outer[26]/*14.70 */ * inv_ColdCorrection;
 
-  s_rlim[27]= s_S3_Rlim[10] - s_KapGap   -  s_Rmeas_outer[27]/*29.09 */ * inv_ColdCorrection; //eta=2.05
-  s_rlim[28]= s_S3_Rlim[10] - s_KapGap   -  s_Rmeas_outer[28]/*43.12 */ * inv_ColdCorrection; //SHAPE CHANGE!!ZZ
+  m_rlim[27]= m_S3_Rlim[10] - s_KapGap   -  s_Rmeas_outer[27]/*29.09 */ * inv_ColdCorrection; //eta=2.05
+  m_rlim[28]= m_S3_Rlim[10] - s_KapGap   -  s_Rmeas_outer[28]/*43.12 */ * inv_ColdCorrection; //SHAPE CHANGE!!ZZ
 
-  s_rlim[29]= s_S3_Rlim[12] + s_KapGap   +  s_Rmeas_outer[29]/*34.51 */ * inv_ColdCorrection; //eta=2.10
-  s_rlim[30]= s_S3_Rlim[12] - s_KapGap   -  s_Rmeas_outer[30]/*25.08 */ * inv_ColdCorrection;
+  m_rlim[29]= m_S3_Rlim[12] + s_KapGap   +  s_Rmeas_outer[29]/*34.51 */ * inv_ColdCorrection; //eta=2.10
+  m_rlim[30]= m_S3_Rlim[12] - s_KapGap   -  s_Rmeas_outer[30]/*25.08 */ * inv_ColdCorrection;
 
-  s_rlim[31]= s_S3_Rlim[13] + s_KapGap   +  s_Rmeas_outer[31]/*11.88 */ * inv_ColdCorrection; //eta=2.15
-  s_rlim[32]= s_S3_Rlim[13] - s_KapGap   -  s_Rmeas_outer[32]/*14.39 */ * inv_ColdCorrection;
+  m_rlim[31]= m_S3_Rlim[13] + s_KapGap   +  s_Rmeas_outer[31]/*11.88 */ * inv_ColdCorrection; //eta=2.15
+  m_rlim[32]= m_S3_Rlim[13] - s_KapGap   -  s_Rmeas_outer[32]/*14.39 */ * inv_ColdCorrection;
 
-  s_rlim[33]= s_S3_Rlim[14] + s_KapGap   +  s_Rmeas_outer[33]/*19.54 */ * inv_ColdCorrection; //eta=2.20
-  s_rlim[34]= s_S3_Rlim[14] - s_KapGap   -  s_Rmeas_outer[34]/*17.80 */ * inv_ColdCorrection; // !!ZZ
+  m_rlim[33]= m_S3_Rlim[14] + s_KapGap   +  s_Rmeas_outer[33]/*19.54 */ * inv_ColdCorrection; //eta=2.20
+  m_rlim[34]= m_S3_Rlim[14] - s_KapGap   -  s_Rmeas_outer[34]/*17.80 */ * inv_ColdCorrection; // !!ZZ
 
-  s_rlim[35]= s_S3_Rlim[15] + s_KapGap   +  s_Rmeas_outer[35]/*12.70 */ * inv_ColdCorrection; //eta=2.25
-  s_rlim[36]= s_S3_Rlim[15] - s_KapGap   -  s_Rmeas_outer[36]/*15.31 */ * inv_ColdCorrection;
+  m_rlim[35]= m_S3_Rlim[15] + s_KapGap   +  s_Rmeas_outer[35]/*12.70 */ * inv_ColdCorrection; //eta=2.25
+  m_rlim[36]= m_S3_Rlim[15] - s_KapGap   -  s_Rmeas_outer[36]/*15.31 */ * inv_ColdCorrection;
 
-  s_rlim[37]= s_S3_Rlim[16] + s_KapGap   +  s_Rmeas_outer[37]/*13.96 */ * inv_ColdCorrection; //eta=2.30
-  s_rlim[38]= s_S3_Rlim[16] - s_KapGap   -  s_Rmeas_outer[38]/*11.79 */ * inv_ColdCorrection; // !!ZZ!!
+  m_rlim[37]= m_S3_Rlim[16] + s_KapGap   +  s_Rmeas_outer[37]/*13.96 */ * inv_ColdCorrection; //eta=2.30
+  m_rlim[38]= m_S3_Rlim[16] - s_KapGap   -  s_Rmeas_outer[38]/*11.79 */ * inv_ColdCorrection; // !!ZZ!!
 
-  s_rlim[40]= s_S3_Rlim[16] - s_KapGap   -  s_Rmeas_outer[40]/*23.57 */ * inv_ColdCorrection;
-  s_rlim[41]= s_S3_Rlim[16] - s_KapGap   -  s_Rmeas_outer[41]/*34.64 */ * inv_ColdCorrection;
-  s_rlim[42]= s_S3_Rlim[16] - s_KapGap   -  s_Rmeas_outer[42]/*55.32 */ * inv_ColdCorrection;
-  s_rlim[43]= s_S3_Rlim[16] - s_KapGap   -  s_Rmeas_outer[43]/*65.39 */ * inv_ColdCorrection;
-  s_rlim[44]= s_S3_Rlim[16] - s_KapGap   -  s_Rmeas_outer[44]/*76.34 */ * inv_ColdCorrection;
-  s_rlim[45]= s_rlim[44]               -  s_Rmeas_outer[45]/*10.83 */ * inv_ColdCorrection;
-  s_rlim[46]= s_S3_Rlim[16] - s_KapGap/2.-  s_Rmeas_outer[46]/*94.84 */ * inv_ColdCorrection - s_EdgeWidth;
-  s_rlim[47]= s_S3_Rlim[16] - s_KapGap/2.-  s_Rmeas_outer[47]/*98.00 */ * inv_ColdCorrection - s_EdgeWidth;
+  m_rlim[40]= m_S3_Rlim[16] - s_KapGap   -  s_Rmeas_outer[40]/*23.57 */ * inv_ColdCorrection;
+  m_rlim[41]= m_S3_Rlim[16] - s_KapGap   -  s_Rmeas_outer[41]/*34.64 */ * inv_ColdCorrection;
+  m_rlim[42]= m_S3_Rlim[16] - s_KapGap   -  s_Rmeas_outer[42]/*55.32 */ * inv_ColdCorrection;
+  m_rlim[43]= m_S3_Rlim[16] - s_KapGap   -  s_Rmeas_outer[43]/*65.39 */ * inv_ColdCorrection;
+  m_rlim[44]= m_S3_Rlim[16] - s_KapGap   -  s_Rmeas_outer[44]/*76.34 */ * inv_ColdCorrection;
+  m_rlim[45]= m_rlim[44]               -  s_Rmeas_outer[45]/*10.83 */ * inv_ColdCorrection;
+  m_rlim[46]= m_S3_Rlim[16] - s_KapGap/2.-  s_Rmeas_outer[46]/*94.84 */ * inv_ColdCorrection - s_EdgeWidth;
+  m_rlim[47]= m_S3_Rlim[16] - s_KapGap/2.-  s_Rmeas_outer[47]/*98.00 */ * inv_ColdCorrection - s_EdgeWidth;
 
-  s_zlim[0] = - s_EdgeWidth    +  s_Zmeas_outer[0]/*3.81*/ * inv_ColdCorrection; //rel. to the end_of_HV_Cu
-  s_zlim[1] = - s_KapGap/2.    +  s_Zmeas_outer[1]/*7.81*/ * inv_ColdCorrection;
-  s_zlim[2] =  s_StripWidth + 1./2. * s_KapGap;
-  s_zlim[3] =2*s_StripWidth + 3./2. * s_KapGap;
+  m_zlim[0] = - s_EdgeWidth    +  s_Zmeas_outer[0]/*3.81*/ * inv_ColdCorrection; //rel. to the end_of_HV_Cu
+  m_zlim[1] = - s_KapGap/2.    +  s_Zmeas_outer[1]/*7.81*/ * inv_ColdCorrection;
+  m_zlim[2] =  s_StripWidth + 1./2. * s_KapGap;
+  m_zlim[3] =2*s_StripWidth + 3./2. * s_KapGap;
 
   for (G4int i=0; i<=3; ++i){
-    s_zlim[i]= (s_ZmaxOfSignal-s_EdgeWidth) - s_zlim[i]; //rel to start of the Barrette
-    if(s_zlim[i] < 0.) s_zlim[i]=0.;
+    m_zlim[i]= (s_ZmaxOfSignal-s_EdgeWidth) - m_zlim[i]; //rel to start of the Barrette
+    if(m_zlim[i] < 0.) m_zlim[i]=0.;
   }
 
   return;
@@ -249,16 +228,16 @@ G4bool EnergyCalculator::GetCompartment_Barrett(
   b_compartment=-99;
   etabin=-99;
 
-  if(r_inb > s_rlim[10] || r_inb < s_rlim[47] )
+  if(r_inb > m_rlim[10] || r_inb < m_rlim[47] )
     {validhit=false; goto label99;}
   if(z_inb > s_ZmaxOfSignal ){validhit=false; goto label99;}
 
-  if(r_inb > s_rlim[0]) {  // Upper corner
+  if(r_inb > m_rlim[0]) {  // Upper corner
 
-    if(r_inb > s_rlim[9])      {
-      if(z_inb > s_zlim[0])   {validhit=false; goto label99;}
+    if(r_inb > m_rlim[9])      {
+      if(z_inb > m_zlim[0])   {validhit=false; goto label99;}
     label1:
-      if(z_inb > s_zlim[1])   {
+      if(z_inb > m_zlim[1])   {
         b_compartment = 8;
         etabin        = 4;
         goto label99;
@@ -268,21 +247,21 @@ G4bool EnergyCalculator::GetCompartment_Barrett(
       etabin        = 0;
       goto label99;
     }
-    if(r_inb > s_rlim[8])  goto label1;
-    if(r_inb > s_rlim[7])  goto label2;
-    if(r_inb > s_rlim[6])      {
+    if(r_inb > m_rlim[8])  goto label1;
+    if(r_inb > m_rlim[7])  goto label2;
+    if(r_inb > m_rlim[6])      {
       b_compartment = 8;
       etabin        = 5;
       goto label99;
     }
-    if(r_inb > s_rlim[5])      {
+    if(r_inb > m_rlim[5])      {
     label3:
       b_compartment = 8;
       etabin        = 6;
       goto label99;
     }
-    if(r_inb > s_rlim[4])      {
-      if(z_inb >  s_zlim[1])   goto label3;
+    if(r_inb > m_rlim[4])      {
+      if(z_inb >  m_zlim[1])   goto label3;
 
     label4:
       b_compartment = 9;
@@ -290,42 +269,42 @@ G4bool EnergyCalculator::GetCompartment_Barrett(
       goto label99;
     }
 
-    if(r_inb > s_rlim[3])  goto label4;
+    if(r_inb > m_rlim[3])  goto label4;
 
-    if(r_inb > s_rlim[2])      {
+    if(r_inb > m_rlim[2])      {
       b_compartment = 8;
       etabin        = 7;
       goto label99;
     }
 
-    if(r_inb > s_rlim[1])      {
+    if(r_inb > m_rlim[1])      {
       b_compartment = 8;
       etabin        = 8;
       goto label99;
     }
-    if(r_inb > s_rlim[0])      {
+    if(r_inb > m_rlim[0])      {
       b_compartment = 9;
       etabin        = 2;
       goto label99;
     }
   }
 
-  if(r_inb < s_rlim[38]){    // lower corner
+  if(r_inb < m_rlim[38]){    // lower corner
 
-    if( r_inb > s_rlim[40] ) {
+    if( r_inb > m_rlim[40] ) {
       b_compartment = 9;
       etabin        = 16;
       goto label99;
     }
 
-    if( r_inb > s_rlim[41] ) {
+    if( r_inb > m_rlim[41] ) {
     label5:
       b_compartment = 8;
       etabin        = 37;
       goto label99;
     }
 
-    if( r_inb > s_rlim[42] ) {
+    if( r_inb > m_rlim[42] ) {
 
       d=DistanceToEtaLine( pforcell,2.35);
       if(fabs(d) < s_StripWidth+s_KapGap) {
@@ -337,7 +316,7 @@ G4bool EnergyCalculator::GetCompartment_Barrett(
           goto label99;
         }
       label7:
-        if( z_inb < s_zlim[3] ) goto label5;
+        if( z_inb < m_zlim[3] ) goto label5;
         goto label6;
       }
 
@@ -348,21 +327,21 @@ G4bool EnergyCalculator::GetCompartment_Barrett(
       goto label99;
     }
 
-    if( r_inb > s_rlim[43] ) {
+    if( r_inb > m_rlim[43] ) {
       b_compartment = 8;
       etabin        = 39;
       goto label99;
     }
 
-    if( r_inb > s_rlim[44] ) {
+    if( r_inb > m_rlim[44] ) {
     label8:
       b_compartment = 8;
       etabin        = 40;
       goto label99;
     }
 
-    if( r_inb > s_rlim[45] ) {
-      if( z_inb < s_zlim[3] ) goto label8;
+    if( r_inb > m_rlim[45] ) {
+      if( z_inb < m_zlim[3] ) goto label8;
 
     label9:
       b_compartment = 9;
@@ -370,15 +349,15 @@ G4bool EnergyCalculator::GetCompartment_Barrett(
       goto label99;
     }
 
-    if( r_inb > s_rlim[46] ) goto label9;
+    if( r_inb > m_rlim[46] ) goto label9;
 
-    if( z_inb < s_ZmaxOfSignal/(s_rlim[46]-s_rlim[47])*(r_inb-s_rlim[47])) goto label9;
+    if( z_inb < s_ZmaxOfSignal/(m_rlim[46]-m_rlim[47])*(r_inb-m_rlim[47])) goto label9;
 
     validhit=false;
     goto label99;
   }
 
-  // medium r region:   s_rlim[0] > r > s_rlim[38];
+  // medium r region:   m_rlim[0] > r > m_rlim[38];
   //   from middle of cellno 2 to middle of cellno. 16
   //
 
@@ -393,14 +372,14 @@ G4bool EnergyCalculator::GetCompartment_Barrett(
 
   eta1    = s_S3_Etalim[i-1];
   eta2    = s_S3_Etalim[i];
-  rlim1   = s_rlim[2*i+5 - 1];
-  rlim2   = s_rlim[2*i+5];
-  zlim1   = s_zlim[2];
-  zlim2   = s_zlim[3];
+  rlim1   = m_rlim[2*i+5 - 1];
+  rlim2   = m_rlim[2*i+5];
+  zlim1   = m_zlim[2];
+  zlim2   = m_zlim[3];
 
   if( i == 15 || i == 17) {
-    zlim1   = s_zlim[3];
-    zlim2   = s_zlim[2];
+    zlim1   = m_zlim[3];
+    zlim2   = m_zlim[2];
   }
 
   switch(i){
@@ -458,7 +437,7 @@ G4bool EnergyCalculator::GetCompartment_Barrett(
     //========================================================
   case 11:
 
-    rlim3 = s_rlim[28];
+    rlim3 = m_rlim[28];
 
     d1=fabs( DistanceToEtaLine( pforcell, eta1) );
     d2=fabs( DistanceToEtaLine( pforcell, eta2) );

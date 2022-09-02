@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
 */
 
 // EnergyCalculator.h
@@ -96,11 +96,8 @@ namespace LArG4 {
 
       ServiceHandle<ILArCalibCalculatorSvc> m_supportCalculator;
 
-      static void SetConst_OuterBarrett(void); // used only for initialization
-      static void SetConst_InnerBarrett(void); // used only for initialization
+      void SetConst_OuterBarrett(void); // used only for initialization
       G4bool GetVolumeIndex(const G4Step *, G4int &, G4int &) const;
-      static       G4bool   s_SetConstOuterBarrett;   // used as const after init
-      static       G4bool   s_SetConstInnerBarrett;   // used as const after init
       static const G4double s_LongBarThickness;//       =   20. *mm;
       static const G4double s_ColdCorrection;//         =1.0036256;
       static const G4double s_StripWidth;//             =3.*mm/ColdCorrection;
@@ -109,16 +106,17 @@ namespace LArG4 {
       static const G4double s_DistOfEndofCuFromBack;//  =22.77*mm/ColdCorrection;
       static const G4double s_DistOfStartofCuFromBack;//=31.*mm; // frontface of the barrette
       static const G4double s_ZmaxOfSignal;// DistOfStartofCuFromBack - DistOfEndofCuFromBack + EdgeWidth;
-      static       G4double s_RefzDist; // = dElecFocaltoWRP+dWRPtoFrontFace+WheelThickness+  // used as const after
-      // +dWRPtoFrontFace+ LongBarThickness                 // initialization
-      // -DistOfEndofCuFromBack
 
       static const G4double s_S3_Etalim[21];
       static const G4double s_Rmeas_outer[50];
       static const G4double s_Zmeas_outer[2];
-      static       G4double s_S3_Rlim[21]; // used as const after init
-      static       G4double s_rlim[50];    // used as const after init
-      static       G4double s_zlim[4];     // used as const after init
+      G4double m_RefzDist; // = dElecFocaltoWRP+dWRPtoFrontFace+WheelThickness+  // used as const after
+      // +dWRPtoFrontFace+ LongBarThickness                 // initialization
+      // -DistOfEndofCuFromBack
+
+      G4double m_S3_Rlim[21]; // used as const after init
+      G4double m_rlim[50];    // used as const after init
+      G4double m_zlim[4];     // used as const after init
 
       UnsignedIntegerProperty m_corrProp;
       EnergyCorrection_t m_correction_type;
@@ -172,6 +170,11 @@ namespace LArG4 {
       G4double m_FanEleThickness = 0.0;             // used as const after init
       G4double m_WaveLength = 0.0;                  // used as const after init
 
+      G4double m_zsep12[44]; // used as const after initialization
+      G4double m_ziw[7];     // used as const after initialization
+      G4double m_zsep23[22]; // used as const after initialization
+
+
       inline G4double ElectrodeFanHalfThickness() const { return m_ElectrodeFanHalfThickness; };
       inline G4double FanEleThicknessOld() const { return m_FanEleThicknessOld; };
       inline G4double FanEleFoldRadiusOld() const { return m_FanEleFoldRadiusOld; };
@@ -181,8 +184,7 @@ namespace LArG4 {
 
       //variables specific for Efield calculation
 
-      static       G4bool   s_FieldMapsRead;   // used as const after init
-      static       G4String s_FieldMapVersion; // used as const after init
+      G4String m_FieldMapVersion; // used as const after init
 
       static const G4double s_GridSize;
       static const G4double s_AverageGap;
@@ -212,7 +214,7 @@ namespace LArG4 {
         G4double  GridShift;
       };
 
-      static Wheel_Efield_Map s_ChCollInner,s_ChCollOuter; // used as const after init
+      Wheel_Efield_Map m_ChCollInner,m_ChCollOuter; // used as const after init
       Wheel_Efield_Map* m_ChCollWheelType = nullptr;             // used as const after init
 
       inline const Wheel_Efield_Map* ChCollWheelType() const { return m_ChCollWheelType; };
