@@ -15,8 +15,16 @@ triggerChains = [
     'HLT_2e17_lhvloose_nod0'
 ]
 
+electronMinPt = 10e3
+electronMaxEta = None
+photonMinPt = 10e3
+photonMaxEta = None
 muonMinPt = None
 muonMaxEta = None
+tauMinPt = None
+tauMaxEta = None
+jetMinPt = None
+jetMaxEta = None
 
 def addOutputCopyAlgorithms (algSeq, postfix, inputContainer, outputContainer, selection) :
     """add a uniformly filtered set of deep copies based on the
@@ -84,15 +92,15 @@ def makeSequenceOld (dataType, algSeq, vars, forCompare) :
     # Add the sequences to the job:
     algSeq += jetSequence
     algSeq += jvtSequence
-    if not forCompare :
-        vars += ['OutJets_%SYS%.pt  -> jet_pt_%SYS%',
-                 'OutJets_NOSYS.phi -> jet_phi',
-                 'OutJets_NOSYS.eta -> jet_eta', ]
-        if dataType != 'data':
+    vars += ['OutJets_%SYS%.pt  -> jet_pt_%SYS%',
+             'OutJets_NOSYS.phi -> jet_phi',
+             'OutJets_NOSYS.eta -> jet_eta', ]
+    if dataType != 'data':
+        vars += [ 'OutJets_%SYS%.jvt_effSF_%SYS% -> jet_jvtEfficiency_%SYS%', ]
+        if not forCompare :
             vars += [
                 # 'EventInfo.jvt_effSF_%SYS% -> jvtSF_%SYS%',
                 # 'EventInfo.fjvt_effSF_%SYS% -> fjvtSF_%SYS%',
-                'OutJets_%SYS%.jvt_effSF_%SYS% -> jet_jvtEfficiency_%SYS%',
                 # 'OutJets_%SYS%.fjvt_effSF_NOSYS -> jet_fjvtEfficiency_%SYS%',
             ]
 
@@ -141,11 +149,12 @@ def makeSequenceOld (dataType, algSeq, vars, forCompare) :
     electronSequence.configure( inputName = 'Electrons',
                                 outputName = 'AnaElectrons_%SYS%' )
     algSeq += electronSequence
-    if not forCompare :
-        vars += [ 'OutElectrons_%SYS%.pt  -> el_pt_%SYS%',
-                  'OutElectrons_NOSYS.phi -> el_phi',
-                  'OutElectrons_NOSYS.eta -> el_eta',
-                  'OutElectrons_%SYS%.baselineSelection_loose -> el_select_loose_%SYS%', ]
+    vars += [ 'OutElectrons_%SYS%.pt  -> el_pt_%SYS%',
+              'OutElectrons_NOSYS.phi -> el_phi',
+              'OutElectrons_NOSYS.eta -> el_eta',
+              'OutElectrons_%SYS%.baselineSelection_loose -> el_select_loose_%SYS%', ]
+    if dataType != 'data':
+        vars += [ 'OutElectrons_%SYS%.effSF_loose_%SYS% -> el_effSF_loose_%SYS%', ]
 
 
     # Include, and then set up the photon analysis sequence:
@@ -156,11 +165,12 @@ def makeSequenceOld (dataType, algSeq, vars, forCompare) :
     photonSequence.configure( inputName = 'Photons',
                               outputName = 'AnaPhotons_%SYS%' )
     algSeq += photonSequence
-    if not forCompare :
-        vars += [ 'OutPhotons_%SYS%.pt  -> ph_pt_%SYS%',
-                  'OutPhotons_NOSYS.phi -> ph_phi',
-                  'OutPhotons_NOSYS.eta -> ph_eta',
-                  'OutPhotons_%SYS%.baselineSelection_tight -> ph_select_tight_%SYS%', ]
+    vars += [ 'OutPhotons_%SYS%.pt  -> ph_pt_%SYS%',
+              'OutPhotons_NOSYS.phi -> ph_phi',
+              'OutPhotons_NOSYS.eta -> ph_eta',
+              'OutPhotons_%SYS%.baselineSelection_tight -> ph_select_tight_%SYS%', ]
+    if dataType != 'data':
+        vars += [ 'OutPhotons_%SYS%.ph_effSF_tight_%SYS% -> ph_effSF_tight_%SYS%', ]
 
 
     # Include, and then set up the tau analysis algorithm sequence:
@@ -171,11 +181,12 @@ def makeSequenceOld (dataType, algSeq, vars, forCompare) :
 
     # Add the sequence to the job:
     algSeq += tauSequence
-    if not forCompare :
-        vars += [ 'OutTauJets_%SYS%.pt  -> tau_pt_%SYS%',
-                'OutTauJets_NOSYS.phi -> tau_phi',
-                  'OutTauJets_NOSYS.eta -> tau_eta',
-                  'OutTauJets_%SYS%.baselineSelection_tight -> tau_select_tight_%SYS%', ]
+    vars += [ 'OutTauJets_%SYS%.pt  -> tau_pt_%SYS%',
+              'OutTauJets_NOSYS.phi -> tau_phi',
+              'OutTauJets_NOSYS.eta -> tau_eta',
+              'OutTauJets_%SYS%.baselineSelection_tight -> tau_select_tight_%SYS%', ]
+    if dataType != 'data':
+        vars += [ 'OutTauJets_%SYS%.tau_effSF_tight_%SYS% -> tau_effSF_tight_%SYS%', ]
 
 
     # temporarily disabled until di-taus are supported in R22
@@ -195,25 +206,29 @@ def makeSequenceOld (dataType, algSeq, vars, forCompare) :
 
     selalg = createAlgorithm( 'CP::AsgSelectionAlg', 'UserElectronsSelectionAlg' )
     addPrivateTool( selalg, 'selectionTool', 'CP::AsgPtEtaSelectionTool' )
-    selalg.selectionTool.minPt = 10e3
-    #selalg.selectionTool.maxEta = 2.47
+    if electronMinPt is not None :
+        selalg.selectionTool.minPt = electronMinPt
+    if electronMaxEta is not None :
+        selalg.selectionTool.maxEta = electronMaxEta
     selalg.selectionDecoration = 'selectPtEta'
     selalg.particles = 'AnaElectrons_%SYS%'
     algSeq += selalg
 
     selalg = createAlgorithm( 'CP::AsgSelectionAlg', 'UserPhotonsSelectionAlg' )
     addPrivateTool( selalg, 'selectionTool', 'CP::AsgPtEtaSelectionTool' )
-    selalg.selectionTool.minPt = 10e3
-    #selalg.selectionTool.maxEta = 2.47
+    if photonMinPt is not None :
+        selalg.selectionTool.minPt = photonMinPt
+    if photonMaxEta is not None :
+        selalg.selectionTool.maxEta = photonMaxEta
     selalg.selectionDecoration = 'selectPtEta'
     selalg.particles = 'AnaPhotons_%SYS%'
     algSeq += selalg
 
     selalg = createAlgorithm( 'CP::AsgSelectionAlg', 'UserMuonsSelectionAlg' )
     addPrivateTool( selalg, 'selectionTool', 'CP::AsgPtEtaSelectionTool' )
-    if muonMinPt :
+    if muonMinPt is not None :
         selalg.selectionTool.minPt = muonMinPt
-    if muonMaxEta :
+    if muonMaxEta is not None :
         selalg.selectionTool.maxEta = muonMaxEta
     selalg.selectionDecoration = 'selectPtEta'
     selalg.particles = 'AnaMuons_%SYS%'
@@ -221,16 +236,20 @@ def makeSequenceOld (dataType, algSeq, vars, forCompare) :
 
     selalg = createAlgorithm( 'CP::AsgSelectionAlg', 'UserTauJetsSelectionAlg' )
     addPrivateTool( selalg, 'selectionTool', 'CP::AsgPtEtaSelectionTool' )
-    #selalg.selectionTool.minPt = 10e3
-    #selalg.selectionTool.maxEta = 2.47
+    if tauMinPt is not None :
+        selalg.selectionTool.minPt = tauMinPt
+    if tauMaxEta is not None :
+        selalg.selectionTool.maxEta = tauMaxEta
     selalg.selectionDecoration = 'selectPtEta'
     selalg.particles = 'AnaTauJets_%SYS%'
     algSeq += selalg
 
     selalg = createAlgorithm( 'CP::AsgSelectionAlg', 'UserJetsSelectionAlg' )
     addPrivateTool( selalg, 'selectionTool', 'CP::AsgPtEtaSelectionTool' )
-    #selalg.selectionTool.minPt = 10e3
-    #selalg.selectionTool.maxEta = 2.47
+    if jetMinPt is not None :
+        selalg.selectionTool.minPt = jetMinPt
+    if jetMaxEta is not None :
+        selalg.selectionTool.maxEta = jetMaxEta
     selalg.selectionDecoration = 'selectPtEta'
     selalg.particles = 'AnaJets_%SYS%'
     algSeq += selalg
@@ -407,10 +426,44 @@ def makeSequenceBlocks (dataType, algSeq, vars, forCompare) :
               'EventInfo.eventNumber   -> eventNumber', ]
 
 
+    configSeq = ConfigSequence ()
+
+
+    # Include, and then set up the electron analysis algorithm sequence:
+    from EgammaAnalysisAlgorithms.ElectronAnalysisConfig import makeElectronCalibrationConfig, makeElectronWorkingPointConfig
+
+    likelihood = True
+    recomputeLikelihood=False
+    if likelihood:
+        workingpoint = 'LooseLHElectron.Loose_VarRad'
+    else:
+        workingpoint = 'LooseDNNElectron.Loose_VarRad'
+    makeElectronCalibrationConfig (configSeq, 'AnaElectrons')
+    makeElectronWorkingPointConfig (configSeq, 'AnaElectrons', workingpoint, postfix = 'loose',
+                                    recomputeLikelihood=recomputeLikelihood)
+    vars += [ 'OutElectrons_NOSYS.eta -> el_eta',
+              'OutElectrons_NOSYS.phi -> el_phi',
+              'OutElectrons_%SYS%.pt  -> el_pt_%SYS%',
+              'OutElectrons_%SYS%.baselineSelection_loose -> el_select_loose_%SYS%', ]
+    if dataType != 'data':
+        vars += [ 'OutElectrons_%SYS%.effSF_loose_%SYS% -> el_effSF_loose_%SYS%', ]
+
+
+    # Include, and then set up the photon analysis algorithm sequence:
+    from EgammaAnalysisAlgorithms.PhotonAnalysisConfig import makePhotonCalibrationConfig, makePhotonWorkingPointConfig
+
+    makePhotonCalibrationConfig (configSeq, 'AnaPhotons', recomputeIsEM=False)
+    makePhotonWorkingPointConfig (configSeq, 'AnaPhotons', 'Tight.FixedCutTight', postfix = 'tight', recomputeIsEM=False)
+    vars += [ 'OutPhotons_NOSYS.eta -> ph_eta',
+              'OutPhotons_NOSYS.phi -> ph_phi',
+              'OutPhotons_%SYS%.pt  -> ph_pt_%SYS%',
+              'OutPhotons_%SYS%.baselineSelection_tight -> ph_select_tight_%SYS%', ]
+    if dataType != 'data':
+        vars += [ 'OutPhotons_%SYS%.ph_effSF_tight_%SYS% -> ph_effSF_tight_%SYS%', ]
+
+
     # Include, and then set up the muon analysis algorithm sequence:
     from MuonAnalysisAlgorithms.MuonAnalysisConfig import makeMuonCalibrationConfig, makeMuonWorkingPointConfig
-
-    configSeq = ConfigSequence ()
 
     makeMuonCalibrationConfig (configSeq, 'AnaMuons')
     makeMuonWorkingPointConfig (configSeq, 'AnaMuons', workingPoint='Medium.Iso', postfix='medium')
@@ -424,21 +477,97 @@ def makeSequenceBlocks (dataType, algSeq, vars, forCompare) :
         vars += [ 'OutMuons_%SYS%.muon_effSF_medium_%SYS% -> mu_effSF_medium_%SYS%', ]
         vars += [ 'OutMuons_%SYS%.muon_effSF_tight_%SYS% -> mu_effSF_tight_%SYS%', ]
 
+
+    # Include, and then set up the tau analysis algorithm sequence:
+    from TauAnalysisAlgorithms.TauAnalysisConfig import makeTauCalibrationConfig, makeTauWorkingPointConfig
+
+    makeTauCalibrationConfig (configSeq, 'AnaTauJets')
+    makeTauWorkingPointConfig (configSeq, 'AnaTauJets', workingPoint='Tight', postfix='tight')
+    vars += [ 'OutTauJets_NOSYS.eta -> tau_eta',
+              'OutTauJets_NOSYS.phi -> tau_phi',
+              'OutTauJets_%SYS%.pt  -> tau_pt_%SYS%',
+              'OutTauJets_%SYS%.baselineSelection_tight  -> tau_select_tight_%SYS%', ]
+    if dataType != 'data':
+        vars += [ 'OutTauJets_%SYS%.tau_effSF_tight_%SYS% -> tau_effSF_tight_%SYS%', ]
+
+    # Include, and then set up the jet analysis algorithm sequence:
+    from JetAnalysisAlgorithms.JetAnalysisConfig import makeJetAnalysisConfig
+    jetContainer = 'AntiKt4EMPFlowJets'
+    makeJetAnalysisConfig( configSeq, 'AnaJets', jetContainer )
+    vars += ['OutJets_%SYS%.pt  -> jet_pt_%SYS%',
+             'OutJets_NOSYS.phi -> jet_phi',
+             'OutJets_NOSYS.eta -> jet_eta', ]
+
+    from JetAnalysisAlgorithms.JetJvtAnalysisConfig import makeJetJvtAnalysisConfig
+    makeJetJvtAnalysisConfig( configSeq, 'AnaJets', jetContainer )
+    if dataType != 'data':
+        vars += [
+            'OutJets_%SYS%.jvt_effSF_%SYS% -> jet_jvtEfficiency_%SYS%',
+        ]
+
+
     configAccumulator = ConfigAccumulator (dataType, algSeq)
     configSeq.fullConfigure (configAccumulator)
 
+    selalg = createAlgorithm( 'CP::AsgSelectionAlg', 'UserElectronsSelectionAlg' )
+    addPrivateTool( selalg, 'selectionTool', 'CP::AsgPtEtaSelectionTool' )
+    if electronMinPt is not None :
+        selalg.selectionTool.minPt = electronMinPt
+    if electronMaxEta is not None :
+        selalg.selectionTool.maxEta = electronMaxEta
+    selalg.selectionDecoration = 'selectPtEta'
+    selalg.particles = 'AnaElectrons_%SYS%'
+    algSeq += selalg
+    addOutputCopyAlgorithms (algSeq, 'Electrons', 'AnaElectrons_%SYS%', 'OutElectrons_%SYS%',
+                             'selectPtEta&&baselineSelection_loose,as_char')
+
+    selalg = createAlgorithm( 'CP::AsgSelectionAlg', 'UserPhotonsSelectionAlg' )
+    addPrivateTool( selalg, 'selectionTool', 'CP::AsgPtEtaSelectionTool' )
+    if photonMinPt is not None :
+        selalg.selectionTool.minPt = photonMinPt
+    if photonMaxEta is not None :
+        selalg.selectionTool.maxEta = photonMaxEta
+    selalg.selectionDecoration = 'selectPtEta'
+    selalg.particles = 'AnaPhotons_%SYS%'
+    algSeq += selalg
+    addOutputCopyAlgorithms (algSeq, 'Photons', 'AnaPhotons_%SYS%', 'OutPhotons_%SYS%',
+                             'selectPtEta&&baselineSelection_tight,as_char')
 
     selalg = createAlgorithm( 'CP::AsgSelectionAlg', 'UserMuonsSelectionAlg' )
     addPrivateTool( selalg, 'selectionTool', 'CP::AsgPtEtaSelectionTool' )
-    if muonMinPt :
+    if muonMinPt is not None :
         selalg.selectionTool.minPt = muonMinPt
-    if muonMaxEta :
+    if muonMaxEta is not None :
         selalg.selectionTool.maxEta = muonMaxEta
     selalg.selectionDecoration = 'selectPtEta'
     selalg.particles = 'AnaMuons_%SYS%'
     algSeq += selalg
     addOutputCopyAlgorithms (algSeq, 'Muons', 'AnaMuons_%SYS%', 'OutMuons_%SYS%',
                              'selectPtEta&&baselineSelection_medium,as_char')
+
+    selalg = createAlgorithm( 'CP::AsgSelectionAlg', 'UserTausSelectionAlg' )
+    addPrivateTool( selalg, 'selectionTool', 'CP::AsgPtEtaSelectionTool' )
+    if tauMinPt is not None :
+        selalg.selectionTool.minPt = tauMinPt
+    if tauMaxEta is not None :
+        selalg.selectionTool.maxEta = tauMaxEta
+    selalg.selectionDecoration = 'selectPtEta'
+    selalg.particles = 'AnaTauJets_%SYS%'
+    algSeq += selalg
+    addOutputCopyAlgorithms (algSeq, 'TauJets', 'AnaTauJets_%SYS%', 'OutTauJets_%SYS%',
+                             'selectPtEta&&baselineSelection_tight,as_char')
+
+    selalg = createAlgorithm( 'CP::AsgSelectionAlg', 'UserJetsSelectionAlg' )
+    addPrivateTool( selalg, 'selectionTool', 'CP::AsgPtEtaSelectionTool' )
+    if jetMinPt is not None :
+        selalg.selectionTool.minPt = jetMinPt
+    if jetMaxEta is not None :
+        selalg.selectionTool.maxEta = jetMaxEta
+    selalg.selectionDecoration = 'selectPtEta'
+    selalg.particles = 'AnaJets_%SYS%'
+    algSeq += selalg
+    addOutputCopyAlgorithms (algSeq, 'Jets', 'AnaJets_%SYS%', 'OutJets_%SYS%',
+                             'selectPtEta')
 
 
 
