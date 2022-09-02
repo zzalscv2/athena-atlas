@@ -163,13 +163,11 @@ StatusCode Calo::CaloTrackingGeometryBuilder::initialize()
 // finalize
 StatusCode Calo::CaloTrackingGeometryBuilder::finalize()
 {
-  // empty the material garbage 
-  std::map<const Trk::Material*, bool>::iterator garbageIter  = m_materialGarbage.begin();
-  std::map<const Trk::Material*, bool>::iterator garbageEnd   = m_materialGarbage.end();
-  
-  for ( ; garbageIter != garbageEnd; ++garbageIter ){
-    delete (garbageIter->first);
+  // empty the material garbage
+  for ( auto ptr : m_materialGarbage ) {
+    delete ptr;
   }
+  m_materialGarbage.clear();
 
   ATH_MSG_INFO( "finalize() successful" );
   return StatusCode::SUCCESS;
@@ -268,12 +266,18 @@ Trk::TrackingGeometry* Calo::CaloTrackingGeometryBuilder::trackingGeometry(Trk::
     }
     // end outer (MS) cutouts
   }
-  for (unsigned int i=0; i<msCutouts.size(); i++) ATH_MSG_VERBOSE( "MS cutouts to be processed by Calo:"<< i<<":"<< msCutouts[i].first<<","<<msCutouts[i].second );
-  // first member of msCutouts redefines the default central cylinder dimension     
+
+  if (msgLvl(MSG::VERBOSE)) {
+    for (unsigned int i=0; i<msCutouts.size(); i++) ATH_MSG_VERBOSE( "MS cutouts to be processed by Calo:"<< i<<":"<< msCutouts[i].first<<","<<msCutouts[i].second );
+  }
+
+  // first member of msCutouts redefines the default central cylinder dimension
+  double caloDefaultRadius = m_caloDefaultRadius;
+  double caloDefaultHalflengthZ = m_caloDefaultHalflengthZ;
   if (!msCutouts.empty()) {
-    m_caloDefaultRadius = msCutouts[0].first;
-    m_caloDefaultHalflengthZ = msCutouts[0].second;
-    ATH_MSG_VERBOSE(" Calo central cylinder dimensions adjusted using EnvelopeSvc:"<<m_caloDefaultRadius<<","<< m_caloDefaultHalflengthZ );
+    caloDefaultRadius = msCutouts[0].first;
+    caloDefaultHalflengthZ = msCutouts[0].second;
+    ATH_MSG_VERBOSE(" Calo central cylinder dimensions adjusted using EnvelopeSvc:"<<caloDefaultRadius<<","<< caloDefaultHalflengthZ );
   }
 
   // create dummy ID if not built already
@@ -294,25 +298,26 @@ Trk::TrackingGeometry* Calo::CaloTrackingGeometryBuilder::trackingGeometry(Trk::
   //std::cout <<"envelope svc : number of BeamPipe Volumes:"<< m_enclosingEnvelopeSvc->getBeamPipeNumVols()<< std::endl;  
   const RZPairVector& bpDefs = m_enclosingEnvelopeSvc->getBeamPipeRZBoundary();
   
-  ATH_MSG_VERBOSE( "BeamPipe envelope definition retrieved:" );   
-  m_bpCutouts.clear();
+  ATH_MSG_VERBOSE( "BeamPipe envelope definition retrieved:" );
+
+  RZPairVector bpCutouts;
   for (unsigned int i=0; i<bpDefs.size(); i++) {
     ATH_MSG_VERBOSE( "Rz pair:"<< i<<":"<< bpDefs[i].first<<","<<bpDefs[i].second );   
     // beam pipe within calo : pick 10. < R < 200;  envEnclosingVolumeHalfZ   =< z  <= msCutouts.back().second;
     if ( bpDefs[i].first > 10. && bpDefs[i].first < 200. && bpDefs[i].second>=envEnclosingVolumeHalfZ  && bpDefs[i].second <= msCutouts.back().second ) {
-      m_bpCutouts.push_back( bpDefs[i] );
+      bpCutouts.push_back( bpDefs[i] );
     }
     if (i>0 && i<4) keyDim.push_back(bpDefs[i]);
   }
  
   // no beam pipe within ID
-  //if (m_bpCutouts[0].second == envEnclosingVolumeHalfZ && m_bpCutouts[0].first > 0 )  m_bpCutouts[0].first=0.;
+  //if (bpCutouts[0].second == envEnclosingVolumeHalfZ && bpCutouts[0].first > 0 )  bpCutouts[0].first=0.;
   // last not needed
-  if (m_bpCutouts.size()>1 && m_bpCutouts.back().second==m_bpCutouts[m_bpCutouts.size()-2].second) m_bpCutouts.erase(m_bpCutouts.end()-1);
+  if (bpCutouts.size()>1 && bpCutouts.back().second==bpCutouts[bpCutouts.size()-2].second) bpCutouts.erase(bpCutouts.end()-1);
   // end beam pipe envelope within Calo
-  for (unsigned int i=0; i<m_bpCutouts.size(); i++) ATH_MSG_VERBOSE( "Beam pipe dimensions to be used by Calo:"<< i<<":"<< m_bpCutouts[i].first<<","<<m_bpCutouts[i].second );
+  for (unsigned int i=0; i<bpCutouts.size(); i++) ATH_MSG_VERBOSE( "Beam pipe dimensions to be used by Calo:"<< i<<":"<< bpCutouts[i].first<<","<<bpCutouts[i].second );
 
-  keyDim.push_back(RZPair(m_caloDefaultRadius,m_caloDefaultHalflengthZ)); 
+  keyDim.push_back(RZPair(caloDefaultRadius,caloDefaultHalflengthZ));
 
    // get the dimensions from the envelope service
    //std::cout <<"envelope svc : number of MS Volumes:"<< m_enclosingEnvelopeSvc->getMuonNumVols()<< std::endl;  
@@ -447,10 +452,13 @@ Trk::TrackingGeometry* Calo::CaloTrackingGeometryBuilder::trackingGeometry(Trk::
    Trk::Material* mScint = new Trk::Material(424.35, 707.43, 11.16, 5.61, 0.001);  // from G4 definition
    const Trk::Material* crackMaterial = new Trk::Material(424.35, 707.43, 11.16, 5.61, 0.001);  // Scintillator/Glue (G4 def.)
 
-   throwIntoGarbage(mAr);
-   throwIntoGarbage(mAl);
-   throwIntoGarbage(mScint);
-   throwIntoGarbage(crackMaterial);
+   {
+     std::scoped_lock lock (m_garbageMutex);
+     m_materialGarbage.push_back(mAr);
+     m_materialGarbage.push_back(mAl);
+     m_materialGarbage.push_back(mScint);
+     m_materialGarbage.push_back(crackMaterial);
+   }
 
    // No. 1
    // building dense volume here
@@ -467,10 +475,12 @@ Trk::TrackingGeometry* Calo::CaloTrackingGeometryBuilder::trackingGeometry(Trk::
 
    // create beam pipe volumes for InnerGap/MBTS and return their outer radius 
    float rInnerGapBP=0.;
-   std::pair<Trk::TrackingVolume*,Trk::TrackingVolume*> innerGapBP = createBeamPipeVolumes(keyDim[0].second, 
-							//lArPositiveEndcap->center().z()-lArPositiveEndcapBounds->halflengthZ(),
-												       keyDim.back().second,
-												       "InnerGap", rInnerGapBP);
+   std::pair<Trk::TrackingVolume*,Trk::TrackingVolume*> innerGapBP =
+     createBeamPipeVolumes(bpCutouts,
+                           keyDim[0].second,
+                           //lArPositiveEndcap->center().z()-lArPositiveEndcapBounds->halflengthZ(),
+                           keyDim.back().second,
+                           "InnerGap", rInnerGapBP);
 
    double z = 0.5*(keyDim.back().second+keyDim[0].second);
 
@@ -576,10 +586,11 @@ Trk::TrackingGeometry* Calo::CaloTrackingGeometryBuilder::trackingGeometry(Trk::
 
    // create beam pipe volumes for Endcap and return their outer radius 
    float rEndcapBP=0.;
-   std::pair<Trk::TrackingVolume*,Trk::TrackingVolume*> endcapBP = createBeamPipeVolumes( 
-							  keyDim.back().second,
-							  lArPositiveEndcap->center().z()+lArPositiveEndcapBounds->halflengthZ(),
-							  "Endcap", rEndcapBP);
+   std::pair<Trk::TrackingVolume*,Trk::TrackingVolume*> endcapBP =
+     createBeamPipeVolumes(bpCutouts,
+                           keyDim.back().second,
+                           lArPositiveEndcap->center().z()+lArPositiveEndcapBounds->halflengthZ(),
+                           "Endcap", rEndcapBP);
 
    // build lAr vessel around EC Presampler
    const Trk::CylinderVolumeBounds* ecpBounds 
@@ -744,10 +755,11 @@ Trk::TrackingGeometry* Calo::CaloTrackingGeometryBuilder::trackingGeometry(Trk::
 
    // create beam pipe volumes for Hec and return their outer radius 
    float rHecBP=0.;
-   std::pair<Trk::TrackingVolume*,Trk::TrackingVolume*> hecBP = createBeamPipeVolumes( 
-							  lArPositiveHec->center().z()-lArPositiveHecBounds->halflengthZ(),
-							  lArPositiveHec->center().z()+lArPositiveHecBounds->halflengthZ(),
-												       "Hec", rHecBP);
+   std::pair<Trk::TrackingVolume*,Trk::TrackingVolume*> hecBP =
+     createBeamPipeVolumes( bpCutouts,
+                            lArPositiveHec->center().z()-lArPositiveHecBounds->halflengthZ(),
+                            lArPositiveHec->center().z()+lArPositiveHecBounds->halflengthZ(),
+                            "Hec", rHecBP);
    // HecInnerGap (new gap volume )
    Trk::Material lArHecInnerGapMaterial = Trk::Material(390., 1223., 18.,9., 0.0014);
 
@@ -814,10 +826,11 @@ Trk::TrackingGeometry* Calo::CaloTrackingGeometryBuilder::trackingGeometry(Trk::
 
    // create beam pipe volumes for Fcal and return their outer radius 
    float rFcalBP=0.;
-   std::pair<Trk::TrackingVolume*,Trk::TrackingVolume*> fcalBP = createBeamPipeVolumes( 
-							  lArPositiveFcal->center().z()-lArPositiveFcalBounds->halflengthZ(),
-							  lArPositiveFcal->center().z()+lArPositiveFcalBounds->halflengthZ(),
-												       "Fcal", rFcalBP);
+   std::pair<Trk::TrackingVolume*,Trk::TrackingVolume*> fcalBP =
+     createBeamPipeVolumes( bpCutouts,
+                            lArPositiveFcal->center().z()-lArPositiveFcalBounds->halflengthZ(),
+                            lArPositiveFcal->center().z()+lArPositiveFcalBounds->halflengthZ(),
+                            "Fcal", rFcalBP);
    // FcalInnerGap (new gap volume )
    //Trk::Material lArFcalInnerGapMaterial = Trk::Material(390., 1223., 40.,18., 0.0014);
 
@@ -894,9 +907,11 @@ Trk::TrackingGeometry* Calo::CaloTrackingGeometryBuilder::trackingGeometry(Trk::
 
    // create beam pipe volumes for Outer sector and return their outer radius 
    float rOutBP=0.;
-   std::pair<Trk::TrackingVolume*,Trk::TrackingVolume*> outBP = createBeamPipeVolumes( lArPositiveOuterBoundary, 
-												   caloPositiveOuterBoundary,
-												   "Outer", rOutBP);
+   std::pair<Trk::TrackingVolume*,Trk::TrackingVolume*> outBP =
+     createBeamPipeVolumes( bpCutouts,
+                            lArPositiveOuterBoundary,
+                            caloPositiveOuterBoundary,
+                            "Outer", rOutBP);
 
    Trk::Material lArSectorOuterGapMat = Trk::Material(20.5, 723., 64., 28., 0.0084);
    
@@ -1223,16 +1238,16 @@ Trk::TrackingGeometry* Calo::CaloTrackingGeometryBuilder::trackingGeometry(Trk::
    Trk::TrackingVolume* ecPosBuffer = nullptr;
    Trk::TrackingVolume* ecNegBuffer = nullptr;
     
-   if ( caloVolsOuterRadius >  m_caloDefaultRadius ) {
+   if ( caloVolsOuterRadius >  caloDefaultRadius ) {
      ATH_MSG_VERBOSE( "Calo volumes exceeds envelope radius: adjusting envelope (de-synchronizing...)" );
-     m_caloDefaultRadius = caloVolsOuterRadius;
+     caloDefaultRadius = caloVolsOuterRadius;
    }
 
-   if ( caloVolsOuterRadius <  m_caloDefaultRadius ) {
-     ATH_MSG_VERBOSE( "Build radial buffer to synchronize the boundaries in between R "<< caloVolsOuterRadius<<" and "<< m_caloDefaultRadius );
+   if ( caloVolsOuterRadius <  caloDefaultRadius ) {
+     ATH_MSG_VERBOSE( "Build radial buffer to synchronize the boundaries in between R "<< caloVolsOuterRadius<<" and "<< caloDefaultRadius );
      
      Trk::CylinderVolumeBounds* centralSynBounds = new Trk::CylinderVolumeBounds(caloVolsOuterRadius,
-										 m_caloDefaultRadius,
+										 caloDefaultRadius,
 										 caloVolsExtendZ);
      centralBuffer = new Trk::TrackingVolume(nullptr, centralSynBounds,
 					     *m_caloMaterial,
@@ -1240,15 +1255,15 @@ Trk::TrackingGeometry* Calo::CaloTrackingGeometryBuilder::trackingGeometry(Trk::
 					     "Calo::GapVolumes::EnvelopeBuffer");
    }
 
-   if ( caloVolsExtendZ <  m_caloDefaultHalflengthZ ) {
-     ATH_MSG_VERBOSE( "Build longitudinal buffers to synchronize the boundaries in between Z "<< caloVolsExtendZ<<" and "<< m_caloDefaultHalflengthZ );
+   if ( caloVolsExtendZ <  caloDefaultHalflengthZ ) {
+     ATH_MSG_VERBOSE( "Build longitudinal buffers to synchronize the boundaries in between Z "<< caloVolsExtendZ<<" and "<< caloDefaultHalflengthZ );
      
-     Trk::CylinderVolumeBounds* endcapSynBounds = new Trk::CylinderVolumeBounds(0., m_caloDefaultRadius,
-										0.5*(m_caloDefaultHalflengthZ-caloVolsExtendZ));
+     Trk::CylinderVolumeBounds* endcapSynBounds = new Trk::CylinderVolumeBounds(0., caloDefaultRadius,
+										0.5*(caloDefaultHalflengthZ-caloVolsExtendZ));
      // endcap buffers not empty 
      Trk::Material ecBuffMat(53./0.38, 355./0.38, 20., 10., 0.0053*pow(0.38,3));
      
-     float zPos = 0.5*(m_caloDefaultHalflengthZ+caloVolsExtendZ);
+     float zPos = 0.5*(caloDefaultHalflengthZ+caloVolsExtendZ);
      ecPosBuffer = new Trk::TrackingVolume(new Amg::Transform3D(Amg::Translation3D(Amg::Vector3D(0.,0.,zPos))),
 					   endcapSynBounds,
 					   *mAr,
@@ -1303,8 +1318,8 @@ Trk::TrackingGeometry* Calo::CaloTrackingGeometryBuilder::trackingGeometry(Trk::
        ss << i;
        // get beam pipe volumes
        float rCutOutBP = 0.;
-       std::pair<Trk::TrackingVolume*,Trk::TrackingVolume*> cutOutBP = createBeamPipeVolumes(zlow,zup,  
-												       "CutOuts"+ss.str(), rCutOutBP);
+       std::pair<Trk::TrackingVolume*,Trk::TrackingVolume*> cutOutBP =
+         createBeamPipeVolumes(bpCutouts, zlow, zup, "CutOuts"+ss.str(), rCutOutBP);
 
        // build inner part ( -> Calo )
        unsigned int mindex = i>1 ? 1 : i;
@@ -1488,6 +1503,7 @@ void Calo::CaloTrackingGeometryBuilder::registerInLayerIndexCaloSampleMap(
 
 std::pair<Trk::TrackingVolume*, Trk::TrackingVolume*>
 Calo::CaloTrackingGeometryBuilder::createBeamPipeVolumes(
+  const RZPairVector& bpCutouts,
   float zmin,
   float zmax,
   const std::string& name,
@@ -1500,17 +1516,17 @@ Calo::CaloTrackingGeometryBuilder::createBeamPipeVolumes(
   Trk::TrackingVolumeArray* dummyVolumes = nullptr;
 
   // beam pipe thickness along the z distance
-  if (m_bpCutouts.empty()) {
+  if (bpCutouts.empty()) {
     return std::pair<Trk::TrackingVolume*,Trk::TrackingVolume*> (0,0);
   }
 
   RZPairVector dim; 
-  dim.push_back(RZPair(m_bpCutouts[0].first,zmin));
-  float rOut = m_bpCutouts[0].first;
-  for (unsigned int i=0; i<m_bpCutouts.size(); i++) {
-    if (m_bpCutouts[i].second<=dim[0].second) dim[0].first=m_bpCutouts[i].first;
-    else if ( m_bpCutouts[i].second<=zmax ) dim.push_back(m_bpCutouts[i]);
-    if ( m_bpCutouts[i].second<=zmax ) rOut = m_bpCutouts[i].first;
+  dim.push_back(RZPair(bpCutouts[0].first,zmin));
+  float rOut = bpCutouts[0].first;
+  for (unsigned int i=0; i<bpCutouts.size(); i++) {
+    if (bpCutouts[i].second<=dim[0].second) dim[0].first=bpCutouts[i].first;
+    else if ( bpCutouts[i].second<=zmax ) dim.push_back(bpCutouts[i]);
+    if ( bpCutouts[i].second<=zmax ) rOut = bpCutouts[i].first;
   }
   
   if (dim.back().second < zmax) dim.push_back(RZPair(rOut,zmax));

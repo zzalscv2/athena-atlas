@@ -1,4 +1,4 @@
-# Copyright (C) 2002-2020 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
 
 # Declare the package name:
 atlas_subdir( CaloTrackingGeometry )
@@ -6,7 +6,7 @@ atlas_subdir( CaloTrackingGeometry )
 atlas_add_library( CaloTrackingGeometryLib
                    INTERFACE
                    PUBLIC_HEADERS CaloTrackingGeometry
-                   LINK_LIBRARIES AthenaBaseComps CaloDetDescrLib CaloGeoHelpers CaloIdentifier GaudiKernel GeoPrimitives SubDetectorEnvelopesLib TrkDetDescrInterfaces TrkDetDescrUtils )
+                   LINK_LIBRARIES AthenaBaseComps CaloDetDescrLib CaloGeoHelpers CaloIdentifier CxxUtils GaudiKernel GeoPrimitives SubDetectorEnvelopesLib TrkDetDescrInterfaces TrkDetDescrUtils )
 
 # Component(s) in the package:
 atlas_add_component( CaloTrackingGeometry
