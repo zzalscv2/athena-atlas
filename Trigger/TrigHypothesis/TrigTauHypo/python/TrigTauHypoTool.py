@@ -23,6 +23,7 @@ thresholdsEF = {
     ('mediumRNN', 0): TauCuts(3, 1, 0.0, 2),
     ('mediumRNN', 20): TauCuts(3, 1, 20000.0, 2),
     ('mediumRNN', 25): TauCuts(3, 1, 25000.0, 2),
+    ('mediumRNN', 30): TauCuts(3, 1, 30000.0, 2),
     ('mediumRNN', 35): TauCuts(3, 1, 35000.0, 2),
     ('mediumRNN', 40): TauCuts(3, 1, 40000.0, 2),
     ('mediumRNN', 50): TauCuts(3, 1, 50000.0, 2),

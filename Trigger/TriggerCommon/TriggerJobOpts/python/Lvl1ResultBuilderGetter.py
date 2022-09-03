@@ -8,6 +8,7 @@ from AthenaCommon.GlobalFlags import jobproperties
 from AthenaConfiguration.AllConfigFlags import ConfigFlags
 from AthenaConfiguration.ComponentAccumulator import CAtoGlobalWrapper
 from AthenaConfiguration.Enums import Format
+from TrigEDMConfig.Utils import edmListToDict
 
 from RecExConfig.RecFlags import rec
 
@@ -26,9 +27,17 @@ class Lvl1ResultBuilderGetter(Configured):
             if (rec.doESD() or rec.doAOD()) and (not(rec.readAOD() or \
                                                          rec.readESD())):
                 if jobproperties.Global.InputFormat() == 'bytestream':
-                    # Decode ROIB::RoIBResult from ByteStream
+                    # Decode L1 data from ByteStream
                     from TrigT1ResultByteStream.TrigT1ResultByteStreamConfig import L1TriggerByteStreamDecoderCfg
-                    CAtoGlobalWrapper(L1TriggerByteStreamDecoderCfg, ConfigFlags)
+                    l1decodingAcc, l1EDMDict = CAtoGlobalWrapper(L1TriggerByteStreamDecoderCfg, ConfigFlags, returnEDM=True)
+
+                    # This is *only* for the old job-options system compatibility (RecExCommon)
+                    # because as of 15/08/2022 adding collections to output ESD/AOD file from ComponentAccumulator-based
+                    # JO fragments imported in RecExCommon through CAtoGlobalWrapper is intentionally disabled.
+                    # Normally L1TriggerByteStreamDecoderCfg above takes care of this, but in RecExCommon this doesn't work.
+                    # See discussions in https://gitlab.cern.ch/atlas/athena/-/merge_requests/55891#note_5912844
+                    objKeyStore.addManyTypesStreamESD(edmListToDict(l1EDMDict))
+                    objKeyStore.addManyTypesStreamAOD(edmListToDict(l1EDMDict))
 
                 from AnalysisTriggerAlgs.AnalysisTriggerAlgsCAConfig import RoIBResultToxAODCfg
                 CAtoGlobalWrapper(RoIBResultToxAODCfg, ConfigFlags)

@@ -1,6 +1,6 @@
 #!/usr/bin/env python
 #
-# Copyright (C) 2002-2020 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
 #
 
 import sys
@@ -173,18 +173,13 @@ def print_failed_ref_comp(all_test_results, failed_tests):
 
 def prep_dirs(topdir, scripts):
     """ Creates test result structure if missing, if present clears the area only for the tests to be run"""
-    import errno
-    try:
-        os.mkdir(topdir)
-    except OSError as e:
-        if e.errno != errno.EEXIST:
-            raise e
+
     shutil.rmtree(topdir+'/test', ignore_errors=True)
-    os.mkdir(topdir+'/test')
+    os.makedirs(topdir+'/test', exist_ok=True)
 
     # clear results dir
     for script in scripts:
-        toerase = topdir+'/result/'+os.path.basename(script).replace('.sh', '')
+        toerase = topdir+'/results/runTrigART/'+os.path.splitext(os.path.basename(script))[0]
         shutil.rmtree(toerase, ignore_errors=True)
 
 

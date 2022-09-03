@@ -12,7 +12,7 @@ def TrkEventCnvSuperToolCfg(flags):
         DoID=flags.Reco.EnableTracking,
         DoMuons=flags.Detector.EnableMuon,
     )
-    if (flags.Common.isOverlay or flags.Output.doWriteRDO) and flags.Overlay.TrackOverlay:
+    if (flags.Common.isOverlay or flags.Output.doWriteRDO) and flags.Overlay.doTrackOverlay:
         EventCnvSuperTool.DoTrackOverlay=True
     acc.addPublicTool(EventCnvSuperTool)
     return acc

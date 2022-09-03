@@ -5,7 +5,7 @@ from AthenaConfiguration.ComponentFactory import CompFactory
 from libpyeformat_helper import SourceIdentifier, SubDetector
 
 
-def eFexByteStreamToolCfg(name, flags, TOBs=True, writeBS=False, xTOBs=False, multiSlice=False, decodeInputs=False):
+def eFexByteStreamToolCfg(name, flags, writeBS=False, TOBs=True, xTOBs=False, multiSlice=False, decodeInputs=False):
   tool = CompFactory.eFexByteStreamTool(name)
   efex_roi_moduleids = [0x1000,0x1100]
   tool.ROBIDs = [int(SourceIdentifier(SubDetector.TDAQ_CALO_FEAT_EXTRACT_ROI, moduleid)) for moduleid in efex_roi_moduleids]
@@ -26,8 +26,8 @@ def eFexByteStreamToolCfg(name, flags, TOBs=True, writeBS=False, xTOBs=False, mu
       tool.eEMxContainerWriteKey = "L1_eEMxRoI"
       tool.eTAUxContainerWriteKey = "L1_eTauxRoI"
     if multiSlice:
-      tool.eEMSliceContainerWriteKey = "L1_EMxRoIOutOfTime"
-      tool.eTAUSliceContainerWriteKey = "L1_TauxRoIOutOfTime"
+      tool.eEMSliceContainerWriteKey = "L1_eEMxRoIOutOfTime"
+      tool.eTAUSliceContainerWriteKey = "L1_eTauxRoIOutOfTime"
 
   if decodeInputs:
     efex_raw_ids = []

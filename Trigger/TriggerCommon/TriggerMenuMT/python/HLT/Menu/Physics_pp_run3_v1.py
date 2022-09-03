@@ -2742,7 +2742,10 @@ def setupMenu():
         ChainProp(name='HLT_noalg_L1MBTS_2_UNPAIRED_ISO', l1SeedThresholds=['FSNOSEED'], stream=['MinBias'], groups=MinBiasGroup+['PS:Online']+MinBiasGroup+SupportGroup),
         ChainProp(name='HLT_noalg_L1MBTS_1_1_UNPAIRED_ISO', l1SeedThresholds=['FSNOSEED'], stream=['MinBias'], groups=MinBiasGroup+['PS:Online']+MinBiasGroup+SupportGroup),
 
-
+        #Muon streamers for L1Topo validation
+        ChainProp(name='HLT_noalg_L1BPH-2M9-0DR15-2MU3VF',  l1SeedThresholds=['FSNOSEED'], stream=[PhysicsStream], groups=['PS:Online']+SupportGroup+MuonXStreamersGroup+Topo2Group),
+        ChainProp(name='HLT_noalg_L1BPH-8M15-0DR22-2MU5VF',  l1SeedThresholds=['FSNOSEED'], stream=[PhysicsStream], groups=['PS:Online']+SupportGroup+MuonXStreamersGroup+Topo2Group),
+        ChainProp(name='HLT_noalg_L12MU5VF',  l1SeedThresholds=['FSNOSEED'], stream=[PhysicsStream], groups=['PS:Online']+SupportGroup+MuonXStreamersGroup),
     ]
 
     chains['Beamspot'] += [

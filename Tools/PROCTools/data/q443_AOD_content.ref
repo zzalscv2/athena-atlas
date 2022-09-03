@@ -2044,7 +2044,6 @@ TauJetsAuxDyn.etHotShotWin
 TauJetsAuxDyn.etHotShotWinOverPtLeadTrk
 TauJetsAuxDyn.etaCombined
 TauJetsAuxDyn.hadLeakFracFixed
-TauJetsAuxDyn.leadTrackProbHT
 TauJetsAuxDyn.mCombined
 TauJetsAuxDyn.nConversionTracks
 TauJetsAuxDyn.nFakeTracks

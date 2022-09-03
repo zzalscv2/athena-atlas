@@ -48,14 +48,14 @@ StatusCode HIEventShapeJetIteration::initialize()
 int HIEventShapeJetIteration::execute() const
 {
   ///
-  ATH_MSG_INFO( "Starting HIEventShapeJetIteration execution" );
+  ATH_MSG_DEBUG( "Starting HIEventShapeJetIteration execution" );
   const xAOD::HIEventShapeContainer* input_shape=nullptr;
   xAOD::HIEventShapeContainer* output_shape=nullptr;
   getShapes(input_shape,output_shape,true).ignore();
 
   const HIEventShapeIndex* es_index = m_eventShapeMapTool->getIndexFromShape(input_shape);
   //New implementation after moving away from mutable
-  ATH_MSG_INFO("HIEventShapeJetIteration: found index for  " << m_inputEventShapeKey.key());
+  ATH_MSG_DEBUG("HIEventShapeJetIteration: found index for  " << m_inputEventShapeKey.key());
   if(es_index==nullptr)
   {
     ATH_MSG_FATAL("No HIEventShapeIndex w/ name " << m_inputEventShapeKey.key() << ". Shape not TOWER nor COMPACT");
@@ -94,7 +94,7 @@ int HIEventShapeJetIteration::execute() const
   if(theTrackJets) ATH_CHECK(makeClusterList(assoc_clusters,theTrackJets,used_indices,used_eta_bins), 1);
   updateShape(output_shape,assoc_clusters,es_index);
 
-  ATH_MSG_INFO( "Checking Modulation Scheme" );
+  ATH_MSG_DEBUG( "Checking Modulation Scheme" );
 
   //compute ES for modulation
   if(m_modulationScheme)

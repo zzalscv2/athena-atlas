@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2020 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
 */
 
 /**
@@ -34,7 +34,6 @@ StatusCode TauIDVarCalculator::execute(xAOD::TauJet& tau) const {
   
   //everything below is just for EleBDT!
   static const SG::AuxElement::Accessor<float> acc_absEtaLead("ABS_ETA_LEAD_TRACK"); 
-  static const SG::AuxElement::Accessor<float> acc_leadTrackProbHT("leadTrackProbHT");
   static const SG::AuxElement::Accessor<float> acc_absDeltaEta("TAU_ABSDELTAETA");
   static const SG::AuxElement::Accessor<float> acc_absDeltaPhi("TAU_ABSDELTAPHI");
   static const SG::AuxElement::ConstAccessor<float> acc_sumEMCellEtOverLeadTrkPt("sumEMCellEtOverLeadTrkPt");
@@ -110,10 +109,6 @@ StatusCode TauIDVarCalculator::execute(xAOD::TauJet& tau) const {
     //TAU_SEEDTRK_SECMAXSTRIPETOVERPT:
     acc_seedTrkSecMaxStripEtOverPt(tau) = (track->pt() != 0.) ? acc_secMaxStripEt(tau) / track->pt() : LOW_NUMBER;
 
-    float fTracksEProbabilityHT;
-    track->summaryValue( fTracksEProbabilityHT, xAOD::eProbabilityHT);
-    acc_leadTrackProbHT(tau) = fTracksEProbabilityHT;
-    
     // hadLeakFracFixed
     acc_hadLeakFracFixed(tau) = (track->p4().P() != 0.) ? eHad1AtEMScaleFixed / track->p4().P() : LOW_NUMBER;
 
