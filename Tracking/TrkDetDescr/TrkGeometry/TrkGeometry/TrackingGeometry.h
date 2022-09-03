@@ -20,6 +20,9 @@
 #include <map>
 // ATH_MSG macros
 #include "AthenaBaseComps/AthMsgStreamMacros.h"
+//boost
+#include <boost/iterator/transform_iterator.hpp>
+#include <boost/range.hpp>
 
 #include "CxxUtils/checker_macros.h"
 
@@ -71,7 +74,23 @@ class TrackingGeometry
   // gives ownership over MuonTG constituents
   friend class Muon::MuonTrackingGeometryBuilderCond;
 
+  class constTransformLayerMap
+  {
+  public:
+    std::pair<const Trk::Layer*, int> operator()(
+      const std::pair<Trk::Layer*, int>& in) const
+    {
+      return std::pair<const Trk::Layer*, int>{ in.first, in.second };
+    }
+  };
+
+  using iterator_convert_const_t =
+    boost::transform_iterator<constTransformLayerMap,
+                              std::map<Trk::Layer*, int>::const_iterator>;
+
 public:
+
+  using constMapRange_t = boost::iterator_range<iterator_convert_const_t>;
   /** Constructor */
   TrackingGeometry(TrackingVolume* highestVolume,
                    NavigationLevel navlevel = globalSearch);
@@ -123,8 +142,10 @@ public:
                                double tol);
 
   /** Return the unique BoundarySurfaces with MaterialInformation */
-  const std::map<const Layer*, int>& boundaryLayers() const;
+  const std::map<Layer*, int>& boundaryLayers() ;
+  constMapRange_t  boundaryLayers() const;
 
+  size_t  numBoundaryLayers() const;
   /** Return the Navigation Level - only one TrackingGeometry can have full
      association to GeoModel */
   NavigationLevel navigationLevel() const;
@@ -181,7 +202,7 @@ private:
   TrackingVolume* m_world;
 
   /** The unique boundary Layers */
-  std::map<const Layer*, int> m_boundaryLayers;
+  std::map<Layer*, int> m_boundaryLayers;
 
   /** The Volumes in a map for later finding */
   std::map<const std::string, const TrackingVolume*> m_trackingVolumes;

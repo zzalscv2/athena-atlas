@@ -521,12 +521,11 @@ StatusCode Trk::MaterialMapping::handleTrackingGeometry()
     registerVolume(*trackingVolume, 0);
     
     ATH_MSG_INFO("Add "<< m_layerRecords.size() << " confined volume layers to mapping setup.");
-    ATH_MSG_INFO("Add "<< trackingGeometry().boundaryLayers().size() << " boundary layers to mapping setup.");
+    ATH_MSG_INFO("Add "<< trackingGeometry().numBoundaryLayers() << " boundary layers to mapping setup.");
     
     // register the layers from boundary surfaces
-    auto bLayerIter = trackingGeometry().boundaryLayers().begin();
-    for (; bLayerIter != trackingGeometry().boundaryLayers().end(); ++bLayerIter)
-        insertLayerMaterialRecord(*bLayerIter->first);
+    for (const auto& bLayerIter : trackingGeometry().boundaryLayers())
+        insertLayerMaterialRecord(*(bLayerIter.first));
 
     ATH_MSG_INFO("Map for "<< m_layerRecords.size() << " layers booked & prepared for mapping procedure");
 
