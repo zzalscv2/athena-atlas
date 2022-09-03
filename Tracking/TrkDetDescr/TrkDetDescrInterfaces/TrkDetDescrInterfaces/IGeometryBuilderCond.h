@@ -59,8 +59,7 @@ public:
    *   - corresponding TrackingVolume, from which
    *     we retrieve the volume to wrap the TrackingGeometry around.
    */
-  virtual std::unique_ptr<TrackingGeometry> trackingGeometry
-  ATLAS_NOT_THREAD_SAFE(
+  virtual std::unique_ptr<TrackingGeometry> trackingGeometry(
     const EventContext& ctx,
     Trk::TrackingVolume* tVol,
     SG::WriteCondHandle<TrackingGeometry>& whandle) const = 0;

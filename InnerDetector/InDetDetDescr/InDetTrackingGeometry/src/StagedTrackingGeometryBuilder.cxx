@@ -126,7 +126,7 @@ StatusCode InDet::StagedTrackingGeometryBuilder::initialize()
 }
 
 
-Trk::TrackingGeometry* InDet::StagedTrackingGeometryBuilder::trackingGeometry ATLAS_NOT_THREAD_SAFE
+Trk::TrackingGeometry* InDet::StagedTrackingGeometryBuilder::trackingGeometry
 (Trk::TrackingVolume*) const
 {
    // only one assumption: 

@@ -95,11 +95,10 @@ StatusCode HGTD_TrackingGeometryBuilderCond::finalize()
 }
 
 std::unique_ptr<Trk::TrackingGeometry>
-HGTD_TrackingGeometryBuilderCond::trackingGeometry
-  ATLAS_NOT_THREAD_SAFE 
-  (const EventContext& ctx,
-   Trk::TrackingVolume* innerVol,
-   SG::WriteCondHandle<Trk::TrackingGeometry>& whandle) const
+HGTD_TrackingGeometryBuilderCond::trackingGeometry(
+  const EventContext& ctx,
+  Trk::TrackingVolume* innerVol,
+  SG::WriteCondHandle<Trk::TrackingGeometry>& whandle) const
 
 {
 

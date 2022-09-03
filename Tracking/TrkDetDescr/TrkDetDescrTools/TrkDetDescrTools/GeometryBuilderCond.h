@@ -43,7 +43,7 @@ class ITrackingVolumeArrayCreator;
   @author Andreas.Salzburger@cern.ch
  */
 
-class GeometryBuilderCond
+class ATLAS_NOT_THREAD_SAFE GeometryBuilderCond
   : public AthAlgTool
   , public TrackingVolumeManipulator
   , virtual public IGeometryBuilderCond
@@ -63,10 +63,10 @@ public:
    * TrackingGeometry Interface method - optionally a pointer to Bounds
    * Interface marked as not thread safe
    */
-  virtual std::unique_ptr<Trk::TrackingGeometry> trackingGeometry
-  ATLAS_NOT_THREAD_SAFE(const EventContext& ctx,
-                        Trk::TrackingVolume* tVol,
-                        SG::WriteCondHandle<TrackingGeometry>& whandle) const override;
+  virtual std::unique_ptr<Trk::TrackingGeometry> trackingGeometry(
+    const EventContext& ctx,
+    Trk::TrackingVolume* tVol,
+    SG::WriteCondHandle<TrackingGeometry>& whandle) const override;
 
   /** The unique signature */
   virtual GeometrySignature geometrySignature() const override { return Trk::Global; }

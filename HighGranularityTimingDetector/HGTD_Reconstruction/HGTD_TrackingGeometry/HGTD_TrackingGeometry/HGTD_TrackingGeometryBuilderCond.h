@@ -33,8 +33,10 @@ namespace Trk {
 
 class IEnvelopeDefSvc;
 
-class HGTD_TrackingGeometryBuilderCond : public AthAlgTool,
-                                     virtual public Trk::IGeometryBuilderCond {
+class ATLAS_NOT_THREAD_SAFE HGTD_TrackingGeometryBuilderCond //not safe indexStaticLayers
+  : public AthAlgTool
+  , virtual public Trk::IGeometryBuilderCond
+{
 
 public:
   /** Constructor */
@@ -51,8 +53,7 @@ public:
 
   /** TrackingGeometry Interface method */
   virtual
-  std::unique_ptr<Trk::TrackingGeometry> trackingGeometry
-  ATLAS_NOT_THREAD_SAFE(
+  std::unique_ptr<Trk::TrackingGeometry> trackingGeometry(
     const EventContext& ctx,
     Trk::TrackingVolume* innerVol,
     SG::WriteCondHandle<Trk::TrackingGeometry>& whandle) const override;
@@ -79,7 +80,6 @@ private:
   int                                            m_layerBinningType;
   /** Color code for layers */
   unsigned int                                   m_colorCodeConfig;
-
 };
 
 #endif // HGTD_TRACKINGGEOMETRY_HGTD_TRACKINGGEOMETRYBUILDERCOND_H

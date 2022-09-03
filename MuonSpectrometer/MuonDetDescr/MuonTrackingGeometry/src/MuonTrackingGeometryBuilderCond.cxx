@@ -122,7 +122,6 @@ Muon::MuonTrackingGeometryBuilderCond::trackingGeometry(
 {
     ATH_MSG_INFO(name() << " building tracking geometry");
 
-    Trk::TrackingVolume* mutabletvol = const_cast<Trk::TrackingVolume*>(tvol); 
     // process muon material objects
     std::unique_ptr<const std::vector<std::unique_ptr<Trk::DetachedTrackingVolume> > > stations;
     if (m_muonActive && m_stationBuilder) {
@@ -352,7 +351,7 @@ Muon::MuonTrackingGeometryBuilderCond::trackingGeometry(
             return nullptr;
         } else {
             aLVC.m_innerBarrelRadius = enclosedDetectorOuterRadius;
-            barrelR = mutabletvol;
+            barrelR = tvol;
         }
         // adjust z
         if (enclosedDetectorHalfZ > m_barrelZ) {

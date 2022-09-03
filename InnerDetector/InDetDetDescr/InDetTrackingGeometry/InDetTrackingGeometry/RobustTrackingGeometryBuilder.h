@@ -62,7 +62,7 @@ namespace InDet {
     
     */
     
-  class RobustTrackingGeometryBuilder
+  class ATLAS_NOT_THREAD_SAFE RobustTrackingGeometryBuilder //not safe indexStaticLayers
      : public AthAlgTool
      , public Trk::TrackingVolumeManipulator
      , virtual public Trk::IGeometryBuilder
@@ -80,7 +80,7 @@ namespace InDet {
       /** AlgTool finalize method */
       StatusCode finalize();
       /** TrackingGeometry Interface methode */
-      Trk::TrackingGeometry* trackingGeometry ATLAS_NOT_THREAD_SAFE (Trk::TrackingVolume* tvol = 0) const; 
+      Trk::TrackingGeometry* trackingGeometry (Trk::TrackingVolume* tvol = 0) const; 
 
       /** The unique signature */
       Trk::GeometrySignature geometrySignature() const { return Trk::ID; }

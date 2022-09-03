@@ -126,9 +126,10 @@ namespace InDet {
     
     */
     
-  class StagedTrackingGeometryBuilder : public AthAlgTool, 
-                                        public Trk::TrackingVolumeManipulator,
-                                        virtual public Trk::IGeometryBuilder {
+  class ATLAS_NOT_THREAD_SAFE StagedTrackingGeometryBuilder : //not safe  indexStaticLayers  and const_cast 
+    public AthAlgTool, 
+    public Trk::TrackingVolumeManipulator,
+    virtual public Trk::IGeometryBuilder {
     
     
     public:
@@ -143,7 +144,7 @@ namespace InDet {
       /** AlgTool finalize method */
       StatusCode finalize();
       /** TrackingGeometry Interface methode */
-      Trk::TrackingGeometry* trackingGeometry ATLAS_NOT_THREAD_SAFE (Trk::TrackingVolume* tvol = 0) const; 
+      Trk::TrackingGeometry* trackingGeometry(Trk::TrackingVolume* tvol = 0) const; 
 
       /** The unique signature */
       Trk::GeometrySignature geometrySignature() const { return Trk::ID; }

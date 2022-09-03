@@ -44,9 +44,10 @@ namespace Trk {
       @author Andreas.Salzburger@cern.ch   
      */
 
-    class GeometryBuilder : public AthAlgTool,
-                            public TrackingVolumeManipulator,
-                    virtual public IGeometryBuilder {
+    class ATLAS_NOT_THREAD_SAFE GeometryBuilder :  // Not safe compactify and tools/sub builder are not all safe
+      public AthAlgTool,
+      public TrackingVolumeManipulator,
+      virtual public IGeometryBuilder {
 
       public:
         /** Constructor */
@@ -60,8 +61,7 @@ namespace Trk {
 
         
         /** TrackingGeometry Interface method - optionally a pointer to Bounds */
-        TrackingGeometry* trackingGeometry
-        ATLAS_NOT_THREAD_SAFE(TrackingVolume* tvol = 0) const;
+        TrackingGeometry* trackingGeometry(TrackingVolume* tvol = 0) const;
 
         /** The unique signature */
         GeometrySignature geometrySignature() const { return Trk::Global; }
