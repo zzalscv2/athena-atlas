@@ -11,7 +11,7 @@ ATLAS_EXT_PROJECT_NAME="AthAnalysisExternals"
 ATLAS_BUILDTYPE="RelWithDebInfo"
 ATLAS_EXTRA_CMAKE_ARGS=(-DLCG_VERSION_NUMBER=101
                         -DLCG_VERSION_POSTFIX="_ATLAS_26"
-                        -DATLAS_GAUDI_TAG="v36r6.000"
+                        -DATLAS_GAUDI_TAG="v36r6.001"
                         -DATLAS_ONNXRUNTIME_USE_CUDA=FALSE)
 ATLAS_EXTRA_MAKE_ARGS=()
 
