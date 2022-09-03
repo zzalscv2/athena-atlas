@@ -131,7 +131,7 @@ StatusCode InDet::RobustTrackingGeometryBuilderCond::initialize()
 
 
 std::unique_ptr<Trk::TrackingGeometry> 
-InDet::RobustTrackingGeometryBuilderCond::trackingGeometry ATLAS_NOT_THREAD_SAFE // Thread unsafe TrackingGeometry::indexStaticLayers method is used.
+InDet::RobustTrackingGeometryBuilderCond::trackingGeometry
 (const EventContext& ctx,
  Trk::TrackingVolume*,
  SG::WriteCondHandle<Trk::TrackingGeometry>& whandle) const

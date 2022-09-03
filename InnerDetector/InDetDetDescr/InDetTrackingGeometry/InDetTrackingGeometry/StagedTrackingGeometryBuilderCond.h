@@ -134,9 +134,10 @@ struct LayerSetupCond
     
     */
     
-  class StagedTrackingGeometryBuilderCond : public AthAlgTool, 
-                                        public Trk::TrackingVolumeManipulator,
-                                        virtual public Trk::IGeometryBuilderCond {
+  class ATLAS_NOT_THREAD_SAFE StagedTrackingGeometryBuilderCond : //not safe  indexStaticLayers  and const_cast
+    public AthAlgTool, 
+    public Trk::TrackingVolumeManipulator,
+    virtual public Trk::IGeometryBuilderCond {
     
     
     public:
@@ -152,8 +153,7 @@ struct LayerSetupCond
       virtual StatusCode finalize() override;
       /** TrackingGeometry Interface method */
       virtual
-      std::unique_ptr<Trk::TrackingGeometry> trackingGeometry
-      ATLAS_NOT_THREAD_SAFE(
+      std::unique_ptr<Trk::TrackingGeometry> trackingGeometry(
         const EventContext& ctx,
         Trk::TrackingVolume* tVol,
         SG::WriteCondHandle<Trk::TrackingGeometry>& whandle) const override;

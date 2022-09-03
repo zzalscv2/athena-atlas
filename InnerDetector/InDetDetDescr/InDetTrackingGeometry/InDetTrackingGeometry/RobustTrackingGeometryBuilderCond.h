@@ -61,7 +61,7 @@ namespace InDet {
       @author Andreas.Salzburger@cern.ch
     
     */
-  class RobustTrackingGeometryBuilderCond
+  class ATLAS_NOT_THREAD_SAFE RobustTrackingGeometryBuilderCond // not safe indexStaticLayers
     : public AthAlgTool
     , public Trk::TrackingVolumeManipulator
     , virtual public Trk::IGeometryBuilderCond
@@ -79,9 +79,7 @@ namespace InDet {
       /** AlgTool finalize method */
       virtual StatusCode finalize() override;
       /** TrackingGeometry Interface method */
-      virtual
-      std::unique_ptr<Trk::TrackingGeometry> trackingGeometry
-      ATLAS_NOT_THREAD_SAFE(
+      virtual std::unique_ptr<Trk::TrackingGeometry> trackingGeometry(
         const EventContext& ctx,
         Trk::TrackingVolume* tVolPair,
         SG::WriteCondHandle<Trk::TrackingGeometry>& whandle) const override;

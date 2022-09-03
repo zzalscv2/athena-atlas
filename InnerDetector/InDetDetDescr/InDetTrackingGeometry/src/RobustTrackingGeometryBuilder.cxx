@@ -129,7 +129,7 @@ StatusCode InDet::RobustTrackingGeometryBuilder::initialize()
 }
 
 
-Trk::TrackingGeometry* InDet::RobustTrackingGeometryBuilder::trackingGeometry ATLAS_NOT_THREAD_SAFE 
+Trk::TrackingGeometry* InDet::RobustTrackingGeometryBuilder::trackingGeometry
 (Trk::TrackingVolume*) const
 {
    // only one assumption: 
