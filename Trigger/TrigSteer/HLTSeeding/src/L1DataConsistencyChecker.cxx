@@ -42,6 +42,10 @@ StatusCode L1DataConsistencyChecker::start() {
   TrigConf::LogicParser logicParser;
 
   m_thresholdMap.clear();
+  m_thresholdNames.clear();
+  m_thresholdTypes.clear();
+  m_monitoredThresholds.clear();
+
   for (const TrigConf::Chain& chain : *hltMenu) {
     try {
       // For chains with multiple seeds, we cannot determine in this tool which seed passed and which didn't,
@@ -68,7 +72,9 @@ StatusCode L1DataConsistencyChecker::start() {
   }
 
   for (const std::shared_ptr<TrigConf::L1Threshold>& thr : l1Menu->thresholds()) {
-    m_thresholdNames[HLT::Identifier(thr->name()).numeric()] = thr->name();
+    TrigCompositeUtils::DecisionID thrNameHash = HLT::Identifier(thr->name());
+    m_thresholdNames[thrNameHash] = thr->name();
+    m_thresholdTypes[thrNameHash] = thr->type();
   }
 
   return StatusCode::SUCCESS;
@@ -83,6 +89,7 @@ StatusCode L1DataConsistencyChecker::consistencyCheck(const HLT::IDVec& l1Seeded
   // ---------------------------------------------------------------------------
   std::ostringstream ssPassedThresholds; // ss for debug printouts, allocate before loop
   std::unordered_map<TrigCompositeUtils::DecisionID, size_t> tobThresholdCounts; // {thrName hash, nTOBs passing thr}
+  std::unordered_set<std::string> overflowThresholdTypes; // threshold types for which overflow was detected
   // Loop over threshold types
   for (const auto& [thrType, decisionsKey] : m_thresholdToDecisionMap.value()) {
     SG::ReadHandle<TrigCompositeUtils::DecisionContainer> decisions{decisionsKey, ctx.getExtension<Atlas::ExtendedEventContext>().proxy()->name()};
@@ -99,8 +106,15 @@ StatusCode L1DataConsistencyChecker::consistencyCheck(const HLT::IDVec& l1Seeded
         ATH_MSG_ERROR("Detail \"thresholds\" missing from Decision in the container " << decisionsKey);
         return StatusCode::FAILURE;
       }
+      bool overflow{false};
+      if (d->hasDetail<char>("overflow")) {
+        overflow = static_cast<bool>(d->getDetail<char>("overflow"));
+      }
       if (doDebug()) {ssPassedThresholds.str("");}
       for (const TrigCompositeUtils::DecisionID thrNameHash : passedThresholdIDs) {
+        if (overflow) {
+          overflowThresholdTypes.insert(m_thresholdTypes.at(thrNameHash));
+        }
         if (tobThresholdCounts.find(thrNameHash)==tobThresholdCounts.end()) {
           tobThresholdCounts[thrNameHash] = 1;
         }
@@ -166,13 +180,22 @@ StatusCode L1DataConsistencyChecker::consistencyCheck(const HLT::IDVec& l1Seeded
       return StatusCode::FAILURE;
     }
     const std::string& thrName = it->second;
+    const std::string& thrType = m_thresholdTypes.at(thrNameHash);
+
+    // Check if overflow was detected
+    bool overflow{overflowThresholdTypes.find(thrType)!=overflowThresholdTypes.end()};
+    if (overflow) {
+      ATH_MSG_DEBUG("Threshold " << thrName << " accepted by the CTP with multiplicity " << ctpCount
+                    << " is flagged as overflow and thus may be missing TOBs");
+    }
 
     // True if no TOBs found for this threshold but CTP accepted
     bool missing = (tobThresholdCounts.find(thrNameHash)==tobThresholdCounts.end());
 
     if (missing) {
       ATH_MSG_WARNING("No TOBs found passing the threshold " << thrName
-                      << " accepted by the CTP with multiplicity " << ctpCount);
+                      << " accepted by the CTP with multiplicity " << ctpCount
+                      << (overflow ? ", likely due to overflow" : ""));
     }
     else {
       tobCount = tobThresholdCounts.at(thrNameHash);
@@ -182,13 +205,20 @@ StatusCode L1DataConsistencyChecker::consistencyCheck(const HLT::IDVec& l1Seeded
 
     if (tooFew) {
       ATH_MSG_WARNING("Too few (" << tobCount << ") TOBs found passing the threshold " << thrName
-                      << " accepted by the CTP with multiplicity " << ctpCount);
+                      << " accepted by the CTP with multiplicity " << ctpCount
+                      << (overflow ? ", likely due to overflow" : ""));
     }
 
     if (missing || tooFew) {
-      // Fill the histogram
-      Monitored::Scalar monMissingTOBs{"MissingTOBs", thrName};
-      Monitored::Group{m_monTool, monMissingTOBs};
+      // Fill the histograms
+      Monitored::Scalar monMissingTOBsIncludingOverflow{"MissingTOBsIncludingOverflow", thrName};
+      if (overflow) {
+        Monitored::Group{m_monTool, monMissingTOBsIncludingOverflow};
+      }
+      else {
+        Monitored::Scalar monMissingTOBs{"MissingTOBs", thrName};
+        Monitored::Group{m_monTool, monMissingTOBs, monMissingTOBsIncludingOverflow};
+      }
     }
     else {
       ATH_MSG_DEBUG("Check passed. Found " << tobCount << " TOBs passing the threshold " << thrName

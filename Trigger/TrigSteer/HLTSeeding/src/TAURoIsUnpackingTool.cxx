@@ -57,6 +57,11 @@ StatusCode TAURoIsUnpackingTool::unpack(const EventContext& ctx,
   std::optional<ThrVecRef> tauThresholds;
   ATH_CHECK(getL1Thresholds(*l1Menu, "TAU", tauThresholds));
 
+  // Flag if there was an overflow in the TOB transmission to CMX (there were more TOBs than can be transferred)
+  bool overflow{false};
+  constexpr static unsigned int s_maxTauTOBs{5}; // Hardcoded in L1Calo firmware, see ATR-23697 and ATR-12285
+  std::unordered_map<unsigned int, std::unordered_map<unsigned int, unsigned int>> tobCounts; // {crate, {module, count}}
+
   // RoIBResult contains vector of TAU fragments
   for ( const auto & emTauFragment : roib.eMTauResult() ) {
     for ( const auto & roi : emTauFragment.roIVec() ) {
@@ -64,6 +69,12 @@ StatusCode TAURoIsUnpackingTool::unpack(const EventContext& ctx,
       if ( not ( LVL1::TrigT1CaloDefs::TauRoIWordType == roi.roIType() ) )  {
         ATH_MSG_DEBUG( "Skipping RoI as it is not TAU threshold " << roIWord );
         continue;
+      }
+
+      if (!overflow) {
+        unsigned int crate = m_cpDecoder.crate(roIWord);
+        unsigned int module = m_cpDecoder.module(roIWord);
+        overflow = (++tobCounts[crate][module] > s_maxTauTOBs);
       }
 
       recRoIs->push_back( std::make_unique<LVL1::RecEmTauRoI>(roIWord, l1Menu.cptr()) );
@@ -105,6 +116,14 @@ StatusCode TAURoIsUnpackingTool::unpack(const EventContext& ctx,
       decisionProbe->setObjectLink( initialRecRoIString(),
                                     ElementLink<DataVector<LVL1::RecEmTauRoI>>(m_recRoIsKey.key(), recRoIs->size()-1) );
     }
+  }
+
+  // Decorate the decisions with overflow information
+  if (overflow) {
+    ATH_MSG_WARNING("L1Calo overflow for TAU TOBs to CMX detected");
+  }
+  for (Decision* decision : *decisionOutput) {
+    decision->setDetail("overflow", static_cast<char>(overflow));
   }
 
   for ( auto roi: *trigRoIs ) {

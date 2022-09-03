@@ -1,11 +1,12 @@
 /*
-  Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
 */
 #ifndef HLTSEEDING_JROISUNPACKINGTOOL_H
 #define HLTSEEDING_JROISUNPACKINGTOOL_H
 
 #include "RoIsUnpackingToolBase.h"
 #include "TrigT1Interfaces/RecJetRoI.h"
+#include "TrigT1Interfaces/JEPRoIDecoder.h"
 
 #include <string>
 
@@ -33,6 +34,8 @@ private:
 
   Gaudi::Property<std::string> m_fsRoIKey{
     this, "FSRoIKey", "HLT_FSRoI", "The key of FS RoI made earlier by the HLTSeeding" };
+
+  LVL1::JEPRoIDecoder m_jepDecoder;
 };
 
 #endif //> !HLTSEEDING_JROISUNPACKINGTOOL_H
