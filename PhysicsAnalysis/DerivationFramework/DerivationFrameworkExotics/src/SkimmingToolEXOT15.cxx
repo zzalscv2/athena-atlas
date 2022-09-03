@@ -24,6 +24,8 @@
 #include "xAODTracking/TrackParticleContainer.h"
 #include "xAODTracking/TrackParticleAuxContainer.h"
 #include "TLorentzVector.h"
+#include "JetSelectorTools/JetCleaningTool.h"
+#include "AsgMessaging/AsgMessaging.h"
 
 namespace {
   constexpr float MeVtoGeV = 1.e-3;
@@ -39,7 +41,9 @@ DerivationFramework::SkimmingToolEXOT15::SkimmingToolEXOT15(const std::string& t
 							    const IInterface* p) :
   AthAlgTool(t, n, p),
   m_ntot (0),
-  m_npass(0) {
+  m_npass(0),
+  m_jetCleaningTool("JetCleaningTool/JetCleaningTool") 
+  {
 
   declareInterface<DerivationFramework::ISkimmingTool>(this);
   
@@ -58,6 +62,7 @@ DerivationFramework::SkimmingToolEXOT15::SkimmingToolEXOT15(const std::string& t
   declareProperty("cutNMSVtx",               m_cutNMSVtx= false, "Flag asking a minimum multiplicity of MS vertices in the event.");
   declareProperty("minNMSVtx",               m_minNMSVtx = 1, "Minimum multiplicity of MS vertices in the event.");
   
+
 }
 
 /**
@@ -89,6 +94,15 @@ StatusCode DerivationFramework::SkimmingToolEXOT15::initialize()
   ATH_MSG_INFO("Property minNMSRoIs:  \t "<< m_minNMSRoIs);
   ATH_MSG_INFO("Property cutNMSVtx:   \t "<< m_cutNMSVtx);
   ATH_MSG_INFO("Property minNMSVtx:   \t "<< m_minNMSVtx);
+
+  
+  /*
+   * Retreiving the JetCleaningTool
+   */
+  m_jetCleaningTool.declarePropertyFor(this, "JetCleaningTool");
+  ATH_CHECK(m_jetCleaningTool.setProperty("CutLevel", "LooseBadLLP" ));
+  ATH_CHECK(m_jetCleaningTool.retrieve());
+
 
   return StatusCode::SUCCESS;
 }
@@ -180,28 +194,10 @@ bool DerivationFramework::SkimmingToolEXOT15::eventPassesFilter() const
     
 
     /*
-     * In case m_cleanLLP = true: the trackless jet is counted  is passes (!largeFMax && !poorQuality && !negE)
+     * In case m_cleanLLP = true: the trackless jet is counted  is passes (!largeFMax && !poorQuality && !negE) corresopnding to LooseBadLLP condition.
      */
     if (m_cleanLLP){
-      /*
-       * Reproduing the LooseBadLLP selection
-       */
-
-      static const SG::AuxElement::ConstAccessor<float> acc_fmax("FracSamplingMax");
-      bool largeFMax = ( ( acc_fmax(*j) > 0.99 ) && ( std::abs (j->eta()) < 2. ) );
-      if (largeFMax) continue;
-      
-      static const SG::AuxElement::ConstAccessor<float> acc_hecFrac("HECFrac");
-      static const SG::AuxElement::ConstAccessor<float> acc_hecQ("HECQuality");
-      static const SG::AuxElement::ConstAccessor<float> acc_avgLArQF("AverageLArQF");
-      // 65535 = number of bits to express the LAr Quality factor 
-      bool poorQuality = ( ( acc_hecFrac(*j) > 0.5 ) && ( std::abs (acc_hecQ(*j)) < 0.5 ) && ( acc_avgLArQF(*j)/65535. > 0.8 ) );
-      if (poorQuality) continue;
-            
-      static const SG::AuxElement::ConstAccessor<float> acc_negE("NegativeE");
-      bool negE = ( (std::abs(acc_negE(*j)*0.001) > 4) && (acc_fmax(*j) > 0.85) );
-      if (negE) continue;
-
+      if (!m_jetCleaningTool->keep(*j)) continue;   
     }
     if (nt_in_dR==0) nj_trackless++;
   }

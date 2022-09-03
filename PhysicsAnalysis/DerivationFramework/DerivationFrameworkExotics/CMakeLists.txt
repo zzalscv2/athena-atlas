@@ -31,6 +31,7 @@ atlas_depends_on_subdirs( PUBLIC
                           Trigger/TrigAnalysis/TrigAnalysisInterfaces
 			  InDetTrackSelectionTool/InDetTrackSelectionTool
 			  Reconstruction/Jet/JetEDM
+			  PhysicsAnalysis/JetMissingEtID/JetSelectorTools
                          )
 
 
