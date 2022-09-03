@@ -52,7 +52,7 @@ atlas_add_citest( OverlayRun3MC_CAConfig
 #################################################################################
 
 atlas_add_citest( RecoRun2Data
-   SCRIPT RunWorkflowTests_Run2.py --CI -r -w DataReco -e '--maxEvents 25' )
+   SCRIPT RunWorkflowTests_Run2.py --CI -r -w DataReco -e '--maxEvents 25' --no-output-checks )
 
 atlas_add_citest( RecoRun2Data_CAConfig
    SCRIPT RunWorkflowTests_Run2.py --CI -r -w DataReco -e '--CA --maxEvents 5' --no-output-checks )
