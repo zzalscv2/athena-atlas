@@ -52,6 +52,9 @@ def L1DataConsistencyMonitoring(flags):
     tool.defineHistogram('MissingTOBs', path='EXPERT', type='TH1F',
                          title='L1 thresholds with missing TOBs;Threshold name;Events with missing TOBs',
                          xbins=10, xmin=0, xmax=10)
+    tool.defineHistogram('MissingTOBsIncludingOverflow', path='EXPERT', type='TH1F',
+                         title='L1 thresholds with missing TOBs (incl. overflow);Threshold name;Events with missing TOBs',
+                         xbins=10, xmin=0, xmax=10)
     tool.defineHistogram('ThrName,CtpCount', path='EXPERT', type='TH2F',
                          title='Max threshold multiplicity accepted by CTP;Threshold name;Multiplicity',
                          xbins=50, xmin=0, xmax=50, ybins=20, ymin=0, ymax=20)

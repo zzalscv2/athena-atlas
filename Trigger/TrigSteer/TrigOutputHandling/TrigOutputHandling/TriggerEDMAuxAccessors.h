@@ -28,7 +28,8 @@ auto charAccessors = initAccessors<char>(
   "IP2D_isDefaults", "IP3D_isDefaults", "SV1_isDefaults", "rnnip_isDefaults",
   "JetFitterSecondaryVertex_isDefaults", "JetFitter_isDefaults", "passPFTrackPresel",
   "muonCaloTag", "tagFakeTrack", "tagIsoTrack", "tagMuonTrack",
-  "vsi_isFake", "vsi_isPassMMV", "vsi_trkd0cut", "vsi_twoCircErrcut", "vsi_twoCircRcut", "vsi_fastErrcut", "vsi_fastRcut", "vsi_fitErrcut", "vsi_chi2cut");
+  "vsi_isFake", "vsi_isPassMMV", "vsi_trkd0cut", "vsi_twoCircErrcut", "vsi_twoCircRcut", "vsi_fastErrcut", "vsi_fastRcut", "vsi_fitErrcut", "vsi_chi2cut",
+  "overflow");
 
 auto intAccessors = initAccessors<int>(
   "SctSpBarrel", "SctSpEndcapA", "SctSpEndcapC", "pixClBarrel", "pixClEndcapA", "pixClEndcapC",
