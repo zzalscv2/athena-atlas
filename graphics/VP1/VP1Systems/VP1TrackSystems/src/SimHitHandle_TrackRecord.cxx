@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2017 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
 */
 
 
@@ -59,5 +59,10 @@ Trk::TrackParameters * SimHitHandle_TrackRecord::createTrackParameters() const
       VP1Msg::messageVerbose("Looked up particle charge for track record with pdg code "+VP1Msg::str(pdg())+": "+VP1Msg::str(charge));
   }
   return new Trk::AtaPlane(posStart(), Amg::Hep3VectorToEigen(m_trkrecord->GetMomentum()),charge,*surf);
+}
+
+const HepMcParticleLink& SimHitHandle_TrackRecord::particleLink() const
+{
+  return *m_link;
 }
 

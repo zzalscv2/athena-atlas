@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2017 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
 */
 
 
@@ -31,16 +31,16 @@ public:
   SimHitHandle_TrackRecord(const TrackRecord*);
   virtual ~SimHitHandle_TrackRecord();
 
-  QString type() const { return "TrackRecord"; };
+  virtual QString type() const override { return "TrackRecord"; };
 
-  Amg::Vector3D momentumDirection() const;
-  double actualMomentum() const;
-  Amg::Vector3D posStart() const;
-  Amg::Vector3D posEnd() const;//We fake this one as a point 0.1mm away from posStart, in the momentumDirection.
-  double hitTime() const;
-  int actualPDGCodeFromSimHit() const;
-  const HepMcParticleLink& particleLink() const;
-  Trk::TrackParameters * createTrackParameters() const;
+  virtual Amg::Vector3D momentumDirection() const override;
+  virtual double actualMomentum() const override;
+  virtual Amg::Vector3D posStart() const override;
+  virtual Amg::Vector3D posEnd() const override;//We fake this one as a point 0.1mm away from posStart, in the momentumDirection.
+  virtual double hitTime() const override;
+  virtual int actualPDGCodeFromSimHit() const override;
+  virtual const HepMcParticleLink& particleLink() const override;
+  virtual Trk::TrackParameters * createTrackParameters() const override;
 
 private:
 
@@ -82,11 +82,6 @@ inline double SimHitHandle_TrackRecord::hitTime() const
 inline int SimHitHandle_TrackRecord::actualPDGCodeFromSimHit() const
 {
   return m_trkrecord->GetPDGCode();
-}
-
-inline const HepMcParticleLink& SimHitHandle_TrackRecord::particleLink() const
-{
-  return *m_link;
 }
 
 #endif
