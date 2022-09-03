@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2020 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2020-2022 CERN for the benefit of the ATLAS collaboration
 */
 
 #include <TROOT.h>
@@ -33,7 +33,7 @@ void fitParameter(TH1F * hist) {
 /// Draw the Geant Following plots. Compare for each step the position of the G4 step and the ATLAS and Acts extrapolation.
 /// Also compare the G4 material with the one collected by the Acts
 
-void Geant_Following(std::string File = "", std::string Detector = "", std::string name = "") {
+void Geant_Following(const std::string& File = "", const std::string& Detector = "", const std::string& name = "") {
 
   std::vector<int> detectors;
   if(Detector == ""){

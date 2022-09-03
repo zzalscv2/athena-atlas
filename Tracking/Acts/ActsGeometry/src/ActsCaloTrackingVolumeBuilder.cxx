@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2020 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "ActsGeometry/ActsCaloTrackingVolumeBuilder.h"
@@ -491,25 +491,24 @@ ActsCaloTrackingVolumeBuilder::build_endcap(double z,
   double z_max     = z + dz;
 
   double         r_min, r_max;
-  Acts::Vector3 p1, p2, p3, p4, p5, p6, p7, p8;
 
   // inner face
   r_min = std::tan(theta_min) * z_min;
   r_max = std::tan(theta_max) * z_min;
 
-  p1 << r_min * std::cos(phi_min), r_min * std::sin(phi_min), z_min;
-  p2 << r_min * std::cos(phi_max), r_min * std::sin(phi_max), z_min;
-  p3 << r_max * std::cos(phi_max), r_max * std::sin(phi_max), z_min;
-  p4 << r_max * std::cos(phi_min), r_max * std::sin(phi_min), z_min;
+  Acts::Vector3 p1(r_min * std::cos(phi_min), r_min * std::sin(phi_min), z_min);
+  Acts::Vector3 p2(r_min * std::cos(phi_max), r_min * std::sin(phi_max), z_min);
+  Acts::Vector3 p3(r_max * std::cos(phi_max), r_max * std::sin(phi_max), z_min);
+  Acts::Vector3 p4(r_max * std::cos(phi_min), r_max * std::sin(phi_min), z_min);
 
   // outer face
   r_min = std::tan(theta_min) * z_max;
   r_max = std::tan(theta_max) * z_max;
 
-  p5 << r_min * std::cos(phi_min), r_min * std::sin(phi_min), z_max;
-  p6 << r_min * std::cos(phi_max), r_min * std::sin(phi_max), z_max;
-  p7 << r_max * std::cos(phi_max), r_max * std::sin(phi_max), z_max;
-  p8 << r_max * std::cos(phi_min), r_max * std::sin(phi_min), z_max;
+  Acts::Vector3 p5(r_min * std::cos(phi_min), r_min * std::sin(phi_min), z_max);
+  Acts::Vector3 p6(r_min * std::cos(phi_max), r_min * std::sin(phi_max), z_max);
+  Acts::Vector3 p7(r_max * std::cos(phi_max), r_max * std::sin(phi_max), z_max);
+  Acts::Vector3 p8(r_max * std::cos(phi_min), r_max * std::sin(phi_min), z_max);
 
   double         r_mid = std::tan(theta) * z_min;
   Acts::Vector3 center;
@@ -564,25 +563,24 @@ ActsCaloTrackingVolumeBuilder::build_barrel(double r,
   double r_max = r + dr;
 
   double         z_min, z_max;
-  Acts::Vector3 p1, p2, p3, p4, p5, p6, p7, p8;
 
   // inner face
   z_min = r_min / std::tan(theta_min);
   z_max = r_min / std::tan(theta_max);
 
-  p1 << r_min * std::cos(phi_min), r_min * std::sin(phi_min), z_min;
-  p2 << r_min * std::cos(phi_min), r_min * std::sin(phi_min), z_max;
-  p3 << r_min * std::cos(phi_max), r_min * std::sin(phi_max), z_max;
-  p4 << r_min * std::cos(phi_max), r_min * std::sin(phi_max), z_min;
+  Acts::Vector3 p1(r_min * std::cos(phi_min), r_min * std::sin(phi_min), z_min);
+  Acts::Vector3 p2(r_min * std::cos(phi_min), r_min * std::sin(phi_min), z_max);
+  Acts::Vector3 p3(r_min * std::cos(phi_max), r_min * std::sin(phi_max), z_max);
+  Acts::Vector3 p4(r_min * std::cos(phi_max), r_min * std::sin(phi_max), z_min);
 
   // outer face
   z_min = r_max / std::tan(theta_min);
   z_max = r_max / std::tan(theta_max);
 
-  p5 << r_max * std::cos(phi_min), r_max * std::sin(phi_min), z_min;
-  p6 << r_max * std::cos(phi_min), r_max * std::sin(phi_min), z_max;
-  p7 << r_max * std::cos(phi_max), r_max * std::sin(phi_max), z_max;
-  p8 << r_max * std::cos(phi_max), r_max * std::sin(phi_max), z_min;
+  Acts::Vector3 p5(r_max * std::cos(phi_min), r_max * std::sin(phi_min), z_min);
+  Acts::Vector3 p6(r_max * std::cos(phi_min), r_max * std::sin(phi_min), z_max);
+  Acts::Vector3 p7(r_max * std::cos(phi_max), r_max * std::sin(phi_max), z_max);
+  Acts::Vector3 p8(r_max * std::cos(phi_max), r_max * std::sin(phi_max), z_min);
 
   Acts::Vector3 center;
   center.x() = r * std::cos(phi);
@@ -628,19 +626,17 @@ ActsCaloTrackingVolumeBuilder::build_box(double x, double dx, double y, double d
   z_min = z - dz;
   z_max = z + dz;
 
-  Acts::Vector3 p1, p2, p3, p4, p5, p6, p7, p8;
-
   // inner face
-  p1 << x_min, y_min, z_min;
-  p2 << x_min, y_max, z_min;
-  p3 << x_max, y_max, z_min;
-  p4 << x_max, y_min, z_min;
+  Acts::Vector3 p1(x_min, y_min, z_min);
+  Acts::Vector3 p2(x_min, y_max, z_min);
+  Acts::Vector3 p3(x_max, y_max, z_min);
+  Acts::Vector3 p4(x_max, y_min, z_min);
 
   // outer face
-  p5 << x_min, y_min, z_max;
-  p6 << x_min, y_max, z_max;
-  p7 << x_max, y_max, z_max;
-  p8 << x_max, y_min, z_max;
+  Acts::Vector3 p5(x_min, y_min, z_max);
+  Acts::Vector3 p6(x_min, y_max, z_max);
+  Acts::Vector3 p7(x_max, y_max, z_max);
+  Acts::Vector3 p8(x_max, y_min, z_max);
 
   Acts::Transform3 glob2vol = Acts::Transform3::Identity();
   glob2vol
