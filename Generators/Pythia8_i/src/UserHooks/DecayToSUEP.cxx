@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2020 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2020-2022 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "UserHooksUtils.h"
@@ -7,7 +7,7 @@
 #include "Pythia8_i/UserHooksFactory.h"
 // #include "boost/lexical_cast.hpp"
 //#include "boost/bind.hpp"
-#include <boost/spirit/include/phoenix_bind.hpp>
+#include <boost/phoenix/bind.hpp>
 #include <boost/math/tools/roots.hpp>
 #include <math.h>
 #include <stdexcept>
