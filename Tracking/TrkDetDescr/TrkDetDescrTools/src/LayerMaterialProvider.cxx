@@ -67,12 +67,10 @@ ATLAS_NOT_THREAD_SAFE(const Trk::TrackingGeometry& tgeo) const
       }
       // Boundary layers
       if (!tgeo.boundaryLayers().empty()){
-          ATH_MSG_VERBOSE("TrackingGeometry has " <<  tgeo.boundaryLayers().size() << " unique bounday layers, loading material.");
-          auto bLayerIter = tgeo.boundaryLayers().begin();
-          auto bLayerE    = tgeo.boundaryLayers().end();
-          for ( ; bLayerIter != bLayerE; ++bLayerIter ){
-              const Trk::Layer* lay = (*bLayerIter).first;
-              int layCount = (*bLayerIter).second;
+          ATH_MSG_VERBOSE("TrackingGeometry has " <<  tgeo.numBoundaryLayers() << " unique boundary layers, loading material.");
+          for (const auto& bLayerIter : tgeo.boundaryLayers() ){
+              const Trk::Layer* lay = bLayerIter.first;
+              int layCount = bLayerIter.second;
               int layIndex = lay->layerIndex().value();  
               // only move on if layer index is different from 0
               if (layIndex){

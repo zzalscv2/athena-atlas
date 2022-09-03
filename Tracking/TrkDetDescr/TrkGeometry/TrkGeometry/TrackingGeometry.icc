@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
 */
 namespace Trk {
 
@@ -55,10 +55,28 @@ TrackingGeometry::nextLayer(const Amg::Vector3D& gp,
   return lowestVol->nextLayer(gp, mom, true, skipNavLayer);
 }
 
-inline const std::map<const Layer*, int>&
-TrackingGeometry::boundaryLayers() const
+inline const std::map<Layer*, int>&
+TrackingGeometry::boundaryLayers()
 {
   return m_boundaryLayers;
+}
+
+inline TrackingGeometry::constMapRange_t
+TrackingGeometry::boundaryLayers() const
+{
+  iterator_convert_const_t begin = boost::make_transform_iterator(
+    m_boundaryLayers.begin(), constTransformLayerMap());
+
+  iterator_convert_const_t end = boost::make_transform_iterator(
+    m_boundaryLayers.end(), constTransformLayerMap());
+
+  return TrackingGeometry::constMapRange_t(begin, end);
+}
+
+inline size_t
+TrackingGeometry::numBoundaryLayers() const
+{
+  return m_boundaryLayers.size();
 }
 
 template<class T>

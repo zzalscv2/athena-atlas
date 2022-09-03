@@ -117,7 +117,7 @@ Trk::TrackingGeometry::registerTrackingVolumes(Trk::TrackingVolume& tvol,
   // boundary layers
   const auto& bounds = tvol.boundarySurfaces();
   for (size_t ib = 0; ib < bounds.size(); ++ib) {
-    const Trk::Layer* bLayer =
+    Trk::Layer* bLayer =
       bounds[ib]->surfaceRepresentation().materialLayer();
     if (bLayer) {
       auto bfIter = m_boundaryLayers.find(bLayer);
@@ -142,11 +142,8 @@ ATLAS_NOT_THREAD_SAFE(MsgStream& msg, TrackingVolume* vol)
   }
   msg << MSG::VERBOSE << "  --> set TG ownership of " << cSurfaces << " out of "
       << tSurfaces << std::endl;
-  for (auto bLayerIter = m_boundaryLayers.begin();
-       bLayerIter != m_boundaryLayers.end();
-       ++bLayerIter) {
-    const_cast<Trk::Surface&>(bLayerIter->first->surfaceRepresentation())
-      .setOwner(Trk::TGOwn);
+  for (const auto& bLayerIter : m_boundaryLayers) {
+    bLayerIter.first->surfaceRepresentation().setOwner(Trk::TGOwn);
   }
   msg << MSG::VERBOSE << "  --> set TG ownership of " << m_boundaryLayers.size()
       << " boundary layers." << std::endl;
@@ -291,8 +288,7 @@ void
 Trk::TrackingGeometry::dump(MsgStream& out, const std::string& head) const
 {
   out << MSG::ALWAYS;
-  for (const std::pair<const Layer* const, int>& bound_layers :
-       m_boundaryLayers) {
+  for (const auto& bound_layers : m_boundaryLayers) {
     out << head << " [" << bound_layers.second << "] ";
     dumpLayer(out, "", bound_layers.first);
   }
