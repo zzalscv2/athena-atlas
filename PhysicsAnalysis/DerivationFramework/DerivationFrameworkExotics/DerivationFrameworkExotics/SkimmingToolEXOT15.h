@@ -44,7 +44,11 @@
 #include "TrigDecisionTool/TrigDecisionTool.h"
 
 #include "GaudiKernel/ToolHandle.h"
+#include "AsgTools/AsgTool.h"
+#include "AsgTools/AnaToolHandle.h"
 #include "AthenaBaseComps/AthAlgorithm.h"
+#include "JetInterface/IJetSelector.h"
+#include "JetSelectorTools/JetCleaningTool.h"
 
 class JetCalibrationTool;
 
@@ -87,6 +91,12 @@ namespace DerivationFramework {
       bool m_cutLeptonPt;
       bool m_cutNMSRoIs;
       bool m_cutNMSVtx;
+
+
+      /* 
+       * Tool for a proper definition of LooseBadLLP
+       */
+      asg::AnaToolHandle<IJetSelector> m_jetCleaningTool;
   }; 
 
 }
