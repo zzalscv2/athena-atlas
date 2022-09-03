@@ -182,33 +182,34 @@ bool TrigEgammaPrecisionPhotonCaloIsoHypoTool::decide( const ITrigEgammaPrecisio
   ATH_MSG_DEBUG( " topoetcone40 = " << topoetcone40 ) ;
 
   // Monitor showershapes                      
+  float photon_eT = input.photon->caloCluster()->et();
   mon_etcone20 = etcone20;
-  reletcone20 = etcone20/input.photon->caloCluster()->et();
+  reletcone20 = etcone20/photon_eT;
   ATH_MSG_DEBUG("reletcone20 = " <<reletcone20  );
   mon_reletcone20 = reletcone20;
 
   mon_topoetcone20 = topoetcone20;
-  reltopoetcone20 = topoetcone20/input.photon->caloCluster()->et();
+  reltopoetcone20 = topoetcone20/photon_eT;
   ATH_MSG_DEBUG("reltopoetcone20 = " <<reltopoetcone20  );
   mon_reltopoetcone20 = reltopoetcone20;
 
   mon_etcone30 = etcone30;
-  reletcone30 = etcone30/input.photon->caloCluster()->et();
+  reletcone30 = etcone30/photon_eT;
   ATH_MSG_DEBUG("reletcone30 = " <<reletcone30  );
   mon_reletcone30 = reletcone30;
 
   mon_topoetcone30 = topoetcone30;
-  reltopoetcone30 = topoetcone30/input.photon->caloCluster()->et();
+  reltopoetcone30 = topoetcone30/photon_eT;
   ATH_MSG_DEBUG("reltopoetcone30 = " <<reltopoetcone30  );
   mon_reltopoetcone30 = reltopoetcone30;
 
   mon_etcone40 = etcone40;
-  reletcone40 = etcone40/input.photon->caloCluster()->et();
+  reletcone40 = etcone40/photon_eT;
   ATH_MSG_DEBUG("reletcone40 = " <<reletcone40  );
   mon_reletcone40 = reletcone40;
 
   mon_topoetcone40 = topoetcone40;
-  reltopoetcone40 = topoetcone40/input.photon->caloCluster()->et();
+  reltopoetcone40 = topoetcone40/photon_eT;
   ATH_MSG_DEBUG("reltopoetcone40 = " <<reltopoetcone40  );
   mon_reltopoetcone40 = reltopoetcone40;
 
@@ -242,11 +243,11 @@ bool TrigEgammaPrecisionPhotonCaloIsoHypoTool::decide( const ITrigEgammaPrecisio
 	  if (m_RelTopoEtConeCut[conesize] > 900){ // I guess we want to deprecate this?
 		  ATH_MSG_DEBUG(" not applying topoetcone[" << conesize << "] isolation.");
 	  }
-	  bool pass_this_reletcone     = ( m_RelEtConeCut[conesize] > 900 || ( reletcone[conesize] < m_RelEtConeCut[conesize] + m_CutOffset[conesize] ));
-	  bool pass_this_reltopoetcone = ( m_RelTopoEtConeCut[conesize] > 900 || ( reltopoetcone[conesize] < m_RelTopoEtConeCut[conesize] + m_CutOffset[conesize] ));
+	  bool pass_this_reletcone     = ( m_RelEtConeCut[conesize] > 900 || ( reletcone[conesize] - m_CutOffset[conesize]/photon_eT < m_RelEtConeCut[conesize]));
+	  bool pass_this_reltopoetcone = ( m_RelTopoEtConeCut[conesize] > 900 || ( reltopoetcone[conesize] - m_CutOffset[conesize]/photon_eT  < m_RelTopoEtConeCut[conesize]));
 
-	  ATH_MSG_DEBUG(" pass_reletcone[" << conesize << "] =  "  << pass_this_reletcone );
-	  ATH_MSG_DEBUG(" pass_reltopoetcone[" << conesize << "] =  "  << pass_this_reltopoetcone );
+	  ATH_MSG_DEBUG(" pass_reletcone[" << conesize << "] =  "  << reletcone[conesize] << " - " << m_CutOffset[conesize] << "/" << photon_eT << "  < " << m_RelEtConeCut[conesize]  << " = " << pass_reletcone);
+	  ATH_MSG_DEBUG(" pass_reltopoetcone[" << conesize << "] =  "  << reltopoetcone[conesize] << " - " << m_CutOffset[conesize] << "/" << photon_eT << "  < " << m_RelEtConeCut[conesize] << " = " << pass_reltopoetcone);
 
 	  pass_reletcone     = pass_reletcone     && pass_this_reletcone     ; 
 	  pass_reltopoetcone = pass_reltopoetcone && pass_this_reltopoetcone ; 
