@@ -108,6 +108,7 @@ StatusCode ActsExtrapolationAlg::execute(const EventContext &ctx) const {
     ATH_MSG_VERBOSE("Pseudo-particle: eta: " << eta << " phi: " << phi);
 
     Acts::BoundVector pars;
+    // cppcheck-suppress constStatement; will be able to initialize this directly with eigen 3.4
     pars << d0, z0, phi, theta, qop, t;
     std::optional<Acts::BoundSymMatrix> cov = std::nullopt;
 
