@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
  */
 
 /////////////////////////////////////////////////////////////////////////////////
@@ -18,7 +18,7 @@
 #define STEP_Propagator_H
 
 #include "AthenaBaseComps/AthAlgTool.h"
-#include "AthenaKernel/IAtRndmGenSvc.h"
+#include "AthenaKernel/IAthRNGSvc.h"
 #include "GaudiKernel/ToolHandle.h"
 #include "TrkEventPrimitives/PropDirection.h"
 #include "TrkEventPrimitives/SurfaceTypes.h"
@@ -41,6 +41,11 @@
 #include <list>
 #include <vector>
 
+namespace CLHEP{
+  class HepRandomEngine;
+}
+
+#include "TrkExInterfaces/ITimedMatEffUpdator.h"
 namespace Trk {
 class Surface;
 class TrackingVolume;
@@ -170,7 +175,7 @@ public:
 
   virtual ~STEP_Propagator();
 
-  /** AlgTool initailize method.*/
+  /** AlgTool initialize method.*/
   virtual StatusCode initialize() override final;
 
   /** AlgTool finalize method */
@@ -418,8 +423,10 @@ public:
     Trk::EnergyLoss m_combinedEloss;
     std::vector<std::pair<int, std::pair<double, double>>> m_currentDist;
     MagField::AtlasFieldCache m_fieldCache;
+    CLHEP::HepRandomEngine* m_randomEngine { nullptr };
+    const EventContext& m_ctx;
 
-    Cache() { m_currentDist.reserve(100); }
+    Cache (const EventContext& ctx) : m_ctx (ctx) { m_currentDist.reserve(100); }
   };
 
 private:
@@ -512,9 +519,9 @@ private:
   /** secondary interactions (brem photon emission)*/
   ToolHandle<ITimedMatEffUpdator> m_simMatUpdator;
   /** Random Generator service */
-  ServiceHandle<IAtRndmGenSvc> m_rndGenSvc;
+  ServiceHandle<IAthRNGSvc> m_rndGenSvc;
   /** Random engine */
-  CLHEP::HepRandomEngine* m_randomEngine;
+  ATHRNG::RNGWrapper*                   m_rngWrapper;
   std::string m_randomEngineName;
 
   // Read handle for conditions object to get the field cache
@@ -525,6 +532,8 @@ private:
     "Name of the Magnetic Field conditions object key"
   };
   void getFieldCacheObject(Cache& cache, const EventContext& ctx) const;
+
+  CLHEP::HepRandomEngine* getRandomEngine (const EventContext& ctx) const;
 };
 
 } // end of namespace Trk
