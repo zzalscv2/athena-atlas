@@ -50,9 +50,9 @@ atlas_add_citest( OverlayRun3MC_CAConfig
 #################################################################################
 # Standard reconstruction workflows
 #################################################################################
+
 atlas_add_citest( RecoRun2Data
-   SCRIPT RunWorkflowTests_Run2.py --CI -r -w DataReco -e '--maxEvents 500' --threads 8 --no-output-checks
-   PROPERTIES PROCESSORS 8 )
+   SCRIPT RunWorkflowTests_Run2.py --CI -r -w DataReco -e '--maxEvents 25' --no-output-checks )
 
 atlas_add_citest( RecoRun2Data_CAConfig
    SCRIPT RunWorkflowTests_Run2.py --CI -r -w DataReco -e '--CA --maxEvents 5' --no-output-checks )
@@ -92,8 +92,7 @@ atlas_add_citest( RecoRun3Data_Bulk
    PROPERTIES PROCESSORS 8 )
 
 atlas_add_citest( RecoRun3Data_Express
-   SCRIPT RunWorkflowTests_Run3.py --CI -r -w DataReco -a x686 -e '--maxEvents 200 --inputBSFile=/cvmfs/atlas-nightlies.cern.ch/repo/data/data-art/Tier0ChainTests/TCT_Run3/data22_13p6TeV.00428353.express_express.merge.RAW._lb0800._SFO-ALL._0001.1' --threads 8 --no-output-checks
-   PROPERTIES PROCESSORS 8 )
+   SCRIPT RunWorkflowTests_Run3.py --CI -r -w DataReco -a x686 -e '--maxEvents 25 --inputBSFile=/cvmfs/atlas-nightlies.cern.ch/repo/data/data-art/Tier0ChainTests/TCT_Run3/data22_13p6TeV.00428353.express_express.merge.RAW._lb0800._SFO-ALL._0001.1' --no-output-checks )
 
 atlas_add_citest( RecoRun3Data_Cosmics
    SCRIPT RunWorkflowTests_Run3.py --CI -r -w DataReco -a q450 -e '--maxEvents 25' --no-output-checks )

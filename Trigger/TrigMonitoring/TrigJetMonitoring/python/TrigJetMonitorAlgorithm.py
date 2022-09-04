@@ -13,6 +13,9 @@ logger = logging.getLogger(__name__)
 
 from TrigDecisionTool.TrigDecisionToolConfig import getRun3NavigationContainerFromInput
 
+from JetMonitoring.JetStandardHistoSpecs import knownHistos
+import math
+
 #####################################
 # Offline jet collections to monitor
 #####################################
@@ -733,13 +736,19 @@ def basicJetMonAlgSpec(jetcoll,isOnline,athenaMT):
     jetcollFolder = JetCollRemapping.JetCollRun2ToRun3[jetcoll]
   Conf = JetMonAlgSpec(jetcoll+"Mon",JetContainerName = jetcoll, defaultPath = path, topLevelDir=TopLevelDir, bottomLevelDir=jetcollFolder, failureOnMissingContainer=False)
 
-  # Now start filling the histo spec list    
+  # Now start filling the histo spec list
+  knownHistos['phi_tight'] = HistoSpec('phi_tight',
+                                       (50,-math.pi,math.pi),
+                                       title='#phi;#phi;Entries',
+                                       xvar='phi')
   Conf.appendHistos(
-    # See knownHistos in JetStandardHistoSpecs.py for the list of standard specification.
+    # See knownHistos in JetStandardHistoSpecs.py
+    # for the list of standard specification.
     "pt",  
     "m",
     "eta",
     "phi",
+    "phi_tight",
     "e",
     "et",
     # or we can directly add our custom histo specification in the form of a HistoSpec:
@@ -760,6 +769,7 @@ def basicJetMonAlgSpec(jetcoll,isOnline,athenaMT):
     "eta;phi", # phi vs eta
     "eta;e",   # energy vs eta
     "phi;e",   # energy vs phi
+    "phi_tight;e", # energy vs phi
 
     SelectSpec( 'central', '|eta|<3.2', path, FillerTools = ["pt","et","m"] ),
     SelectSpec( 'forward', '3.2<|eta|', path, FillerTools = ["pt","et","m"] ),
@@ -874,7 +884,10 @@ def jetMonitoringConfig(inputFlags,jetcoll,athenaMT):
      for hist in ExtraOfflineHists: conf.appendHistos(hist)
      if 'AntiKt4' in jetcoll: conf.appendHistos(SelectSpec('LooseBadFailedJets', 'LooseBad',
                                                            InverseJetSel=True,
-                                                           FillerTools = ["pt","phi","eta"])) #cleaning variables not applicable for large-R collections
+                                                           FillerTools = ["pt",
+                                                                          "phi",
+                                                                          "phi_tight",
+                                                                          "eta"])) #cleaning variables not applicable for large-R collections
      
      if 'PF' in jetcoll: # dedicated histograms for offline PFlow jets
        conf.appendHistos("SumPtChargedPFOPt500[0]")
@@ -1005,6 +1018,8 @@ def jetChainMonitoringConfig(inputFlags,jetcoll,chain,athenaMT,onlyUsePassingJet
            "eta",
            "et",
            "phi",
+           "phi_tight",
+     
    )
    for hist in ExtraOnlineNJetHists: trigConf.appendHistos(EventHistoSpec(hist, (20,0,25), title=hist+';'+hist+';Entries'))
    # Add NjetEt and NjetPt histograms for simple scenarios

@@ -9,6 +9,7 @@ def createHIRecConfigFlags():
   flags.addFlag("HeavyIon.Global.doEventShapeSummary", True)
 
   flags.addFlag("HeavyIon.doJet", True)
+  flags.addFlag("HeavyIon.Jet.doTrackJetSeed", True)
 
   flags.addFlag("HeavyIon.doEgamma", True)
   # expand as needed

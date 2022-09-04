@@ -27,18 +27,21 @@ StatusCode TrigGenericHypoAlg::execute(const EventContext& context) const {
 
     std::vector<TrigGenericHypoTool::HypoToolInfo> hypoToolInput;
     for (const TrigCompositeUtils::Decision* previousDecision: *previousDecisionsHandle) {
-      TrigCompositeUtils::LinkInfo<TrigRoiDescriptorCollection> featureLinkInfo = TrigCompositeUtils::findLink<TrigRoiDescriptorCollection>(previousDecision, TrigCompositeUtils::initialRoIString());
       TrigCompositeUtils::DecisionIDContainer previousDecisionIDs;
       TrigCompositeUtils::decisionIDs(previousDecision, previousDecisionIDs);
       
       SG::ReadHandle<xAOD::TrigCompositeContainer> trigComposite(m_trigCompKey, context);
-      
-      if(trigComposite->size() != 1) continue; //should have 1 trig composite
+      if(trigComposite->size()==0) continue;
+      if(trigComposite->size() > 1){
+	ATH_MSG_ERROR("Expect at most 1 TrigComposite, but received: "<<trigComposite->size());//should have at most 1 trig composite
+	return StatusCode::FAILURE;
+      }
       const xAOD::TrigComposite* tc = trigComposite->at(0);
+      ElementLink<TrigCompositeUtils::DecisionContainer> featureLink = TrigCompositeUtils::decisionToElementLink(tc, context);
       
       auto newd = TrigCompositeUtils::newDecisionIn( decisions, TrigCompositeUtils::hypoAlgNodeName() );
       hypoToolInput.emplace_back(newd, tc, previousDecision );
-      newd -> setObjectLink( TrigCompositeUtils::featureString(), featureLinkInfo.link );
+      newd -> setObjectLink( TrigCompositeUtils::featureString(), featureLink );
       TrigCompositeUtils::linkToPrevious( newd, previousDecision, context );
     }
 

@@ -1,6 +1,9 @@
-# Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
 
 from functools import lru_cache
+from collections import defaultdict
+import re
+from GaudiKernel.DataHandle import DataHandle
 from AthenaCommon.Logging import logging
 log = logging.getLogger('TrigEDMConfig')
 
@@ -60,3 +63,67 @@ def getEDMVersionFromBS(filename):
        log.info("Determined EDMVersion to be 3 based on BS file run number (runNumber > %d)",
                  boundary_run23)
        return 3
+
+
+def edmDictToList(edmDict):
+    '''
+    Convert EDM dictionary in the format:
+        {'type1': ['key1','key2'], 'type2': ['key3']}
+    to a flat list in the format:
+        ['type1#key1', 'type1#key2', 'type2#key3']
+    '''
+    return [ f"{type}#{name}" for type, names in edmDict.items() for name in names ]
+
+
+def edmListToDict(edmList):
+    '''
+    Convert EDM list in the format:
+        ['type1#key1', 'type1#key2', 'type2#key3']
+    to a dictionary in the format:
+        {'type1': ['key1','key2'], 'type2': ['key3']}
+    '''
+    edmDict = defaultdict(list)
+    for typeName in edmList:
+        edmType, edmKey = typeName.split('#')
+        edmDict[edmType].append(edmKey)
+    return edmDict
+
+
+def getEDMListFromWriteHandles(configurables):
+    '''
+    Build OutputStream ItemList from all WriteHandles in a list of components (configurables),
+    for example a list of AlgTools. The output is in flat list format:
+        ['type1#key1', 'type1#key2', 'type2#key3']
+    '''
+
+    def getWriteHandles(comp):
+        properties = [getattr(comp,propName) for propName in comp.getDefaultProperties().keys()]
+        return [prop for prop in properties if isinstance(prop,DataHandle) and prop.mode()=='W']
+
+    def formatItem(containerType, containerKey):
+        auxType = containerType.replace('Container','AuxContainer')
+        return [f'{containerType}#{containerKey}',
+                f'{auxType}#{containerKey}Aux.']
+
+    def containerTypedef(containerType):
+        if containerType.startswith('xAOD::') and containerType.endswith('Container'):
+            # Already the right typedef
+            return containerType
+        m = re.match(r'DataVector<xAOD::(\w+)_v[0-9]+,', containerType)
+        if m and len(m.groups()) > 0:
+            return f'xAOD::{m.group(1)}Container'
+        raise RuntimeError(f'Failed to convert type {containerType} into a container typedef')
+
+    def itemListFromConfigurable(comp):
+        items = []
+        for handle in getWriteHandles(comp):
+            sgKey = handle.Path.replace('StoreGateSvc+','')
+            if not sgKey:
+                continue
+            items += formatItem(containerTypedef(handle.Type), handle.Path)
+        return items
+
+    itemList = []
+    for comp in configurables:
+        itemList += itemListFromConfigurable(comp)
+    return itemList

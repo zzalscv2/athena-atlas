@@ -51,6 +51,8 @@ private:
         { this, "SCellContainerOut", "SCell_ET",
                 "SG key for the output supercell LAr channel container"};
 
+  SG::ReadCondHandleKey<LArOnOffIdMapping> m_cablingKey{this,"CablingKey","LArOnOffIdMapSC","SG Key of LArOnOffIdMapping object"};
+
   /// Geometry manager.
   SG::ReadCondHandleKey<CaloSuperCellDetDescrManager> m_caloMgrKey
         {this, "CaloSuperCellDetDescrManager", "CaloSuperCellDetDescrManager", "SG Key for CaloDetDescrManager in the Condition Store" };
