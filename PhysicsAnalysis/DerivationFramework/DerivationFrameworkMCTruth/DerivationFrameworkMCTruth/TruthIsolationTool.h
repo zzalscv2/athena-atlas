@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef DERIVATIONFRAMEWORK_TRUTHISOLATIONTOOL_H
@@ -19,9 +19,8 @@ namespace DerivationFramework {
     public: 
       TruthIsolationTool(const std::string& t, const std::string& n, const IInterface* p);
       ~TruthIsolationTool();
-      StatusCode initialize();
-      StatusCode finalize();
-      virtual StatusCode addBranches() const;
+      virtual StatusCode initialize() override;
+      virtual StatusCode addBranches() const override;
 
     private:
       /// Parameter: input collection key
@@ -43,8 +42,7 @@ namespace DerivationFramework {
       /// Parameter: Use variable radius?
       bool m_variableR;
 
-      std::vector<float> *m_coneSizesSort;
-      std::vector<float> *m_coneSizes2;
+      std::vector<float> m_coneSizesSort;
 
       //private helper functions
       void calcIsos(const xAOD::TruthParticle* particle,
