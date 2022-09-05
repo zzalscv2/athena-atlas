@@ -87,6 +87,13 @@ namespace ActsTrk {
       ATH_MSG_DEBUG("   " << m_seedConfForwardNTopSmallR);
     }
     ATH_MSG_DEBUG("   " << m_useDetailedDoubleMeasurementInfo);
+    ATH_MSG_DEBUG("   " << m_toleranceParam);
+    ATH_MSG_DEBUG("   " << m_phiMin);
+    ATH_MSG_DEBUG("   " << m_phiMax);
+    ATH_MSG_DEBUG("   " << m_rMin);
+    ATH_MSG_DEBUG("   " << m_zAlign);
+    ATH_MSG_DEBUG("   " << m_rAlign);
+    ATH_MSG_DEBUG("   " << m_sigmaError);
 
     ATH_MSG_DEBUG(" * Used by SeedFilterConfig:");
     ATH_MSG_DEBUG("   " << m_deltaRMin);
@@ -113,6 +120,10 @@ namespace ActsTrk {
     ATH_MSG_DEBUG("   " << m_compatSeedLimit);
     ATH_MSG_DEBUG("   " << m_seedWeightIncrement);
     ATH_MSG_DEBUG("   " << m_numSeedIncrement);
+    ATH_MSG_DEBUG("   " << m_deltaInvHelixDiameter);
+    ATH_MSG_DEBUG("   " << m_seedConfMinBottomRadius);
+    ATH_MSG_DEBUG("   " << m_seedConfMaxZOrigin);
+    ATH_MSG_DEBUG("   " << m_minImpactSeedConf);
 
     if (m_zBinEdges.size() - 1 !=
       m_zBinNeighborsTop.size() and
@@ -216,7 +227,7 @@ namespace ActsTrk {
 
     for (auto it = spBegin; it != spEnd; ++it) {
       const auto& sp = *it;
-      rRangeSPExtent.check({sp->x(), sp->y(), sp->z()});
+      rRangeSPExtent.extend({sp->x(), sp->y(), sp->z()});
     }
 
 
@@ -309,6 +320,13 @@ namespace ActsTrk {
     finderCfg.forwardSeedConfirmationRange.nTopForLargeR = m_seedConfForwardNTopLargeR;
     finderCfg.forwardSeedConfirmationRange.nTopForSmallR = m_seedConfForwardNTopSmallR;
     finderCfg.useDetailedDoubleMeasurementInfo = m_useDetailedDoubleMeasurementInfo;
+    finderCfg.toleranceParam = m_toleranceParam;
+    finderCfg.phiMin = m_phiMin;
+    finderCfg.phiMax = m_phiMax;
+    finderCfg.rMin = m_rMin;
+    finderCfg.zAlign = m_zAlign;
+    finderCfg.rAlign = m_rAlign;
+    finderCfg.sigmaError = m_sigmaError;
 
     if (m_useDetailedDoubleMeasurementInfo) {
       finderCfg.getTopHalfStripLength.connect(
@@ -353,6 +371,10 @@ namespace ActsTrk {
     filterCfg.compatSeedLimit = m_compatSeedLimit;
     filterCfg.seedWeightIncrement = m_seedWeightIncrement;
     filterCfg.numSeedIncrement = m_numSeedIncrement;
+    filterCfg.deltaInvHelixDiameter = m_deltaInvHelixDiameter;
+    filterCfg.seedConfMinBottomRadius = m_seedConfMinBottomRadius;
+    filterCfg.seedConfMaxZOrigin = m_seedConfMaxZOrigin;
+    filterCfg.minImpactSeedConf = m_minImpactSeedConf;
 
     finderCfg.seedFilter = std::make_unique<Acts::SeedFilter< external_spacepoint_t > >(filterCfg);
 

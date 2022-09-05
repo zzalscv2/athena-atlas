@@ -183,6 +183,15 @@ namespace ActsTrk {
     Gaudi::Property< bool > m_useDetailedDoubleMeasurementInfo {this, "useDetailedDoubleMeasurementInfo", false,
       "enable use of double measurement details"};
 
+    Gaudi::Property<float> m_toleranceParam {this, "toleranceParam", 1.1 * Acts::UnitConstants::mm, 
+      "tolerance parameter used to check the compatibility of SPs coordinates in xyz"};
+    Gaudi::Property<float> m_phiMin {this, "phiMin", -M_PI, ""};
+    Gaudi::Property<float> m_phiMax {this, "phiMax", M_PI, ""};
+    Gaudi::Property<float> m_rMin {this, "rMin", 33 * Acts::UnitConstants::mm, ""};    
+    Gaudi::Property<float> m_zAlign {this, "zAlign", 0 * Acts::UnitConstants::mm, ""};
+    Gaudi::Property<float> m_rAlign {this, "rAlign", 0 * Acts::UnitConstants::mm, ""};
+    Gaudi::Property<float> m_sigmaError {this, "sigmaError", 5, ""};
+
     // Properties to set SeedFilterConfig
     Gaudi::Property< float > m_impactWeightFactor {this, "impactWeightFactor", 100.,
       "the impact parameters (d0) is multiplied by this factor and subtracted from weight"};
@@ -204,6 +213,14 @@ namespace ActsTrk {
       "Maximum number of quality seeds for each middle-bottom SP-duplet in seed confirmation."};
     Gaudi::Property< bool > m_useDeltaRorTopRadius {this, "useDeltaRorTopRadius", true,
       "use deltaR (top radius - middle radius) instead of top radius"};
+    Gaudi::Property<float> m_deltaInvHelixDiameter {this, "deltaInvHelixDiameter", 0.00003 * 1. / Acts::UnitConstants::mm, 
+      "the allowed delta between two inverted seed radii for them to be considered compatible"};
+    Gaudi::Property<float> m_seedConfMinBottomRadius {this, "seedConfMinBottomRadius", 60. * Acts::UnitConstants::mm,
+      "increment in seed weight if the number of compatible seeds is larger than numSeedIncrement, this is used in case of high occupancy scenarios if we want to increase the weight of the seed by seedWeightIncrement when the number of compatible seeds is higher than a certain value"};
+    Gaudi::Property<float> m_seedConfMaxZOrigin {this, "seedConfMaxZOrigin", 150. * Acts::UnitConstants::mm, 
+      "maximum zOrigin in seed confirmation"};
+    Gaudi::Property<float> m_minImpactSeedConf {this, "minImpactSeedConf", 1. * Acts::UnitConstants::mm,
+      "minimum impact parameter for seed confirmation"};
 
     // Properties to set other objects used in
     // seeding algorithm

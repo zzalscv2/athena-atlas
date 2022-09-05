@@ -1,3 +1,4 @@
+
 /*
   Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
 */
@@ -67,8 +68,47 @@ struct ATLASSourceLinkCalibrator final {
   ///
   /// @tparam gctx The geometry context
   /// @param trackState The track state to calibrate
-  static void calibrate(const Acts::GeometryContext& gctx,
-                   Acts::MultiTrajectory::TrackStateProxy trackState);
+  template<typename trajectory_t>
+    static
+    void calibrate(const Acts::GeometryContext& gctx,
+                   typename Acts::MultiTrajectory<trajectory_t>::TrackStateProxy trackState);
 };
+
+template<typename trajectory_t>
+void ATLASSourceLinkCalibrator::calibrate(const Acts::GeometryContext& /*gctx*/,
+					  typename Acts::MultiTrajectory<trajectory_t>::TrackStateProxy trackState) {
+  const auto& sourceLink = static_cast<const ATLASSourceLink&>(trackState.uncalibrated());
+  if (sourceLink.dim() == 0) {
+    throw std::runtime_error("Cannot create dim 0 measurement");
+  } else if (sourceLink.dim() == 1) {
+    // return Acts::makeMeasurement(sourceLink, sourceLink.values().head<1>(), sourceLink.cov().topLeftCorner<1, 1>(), Acts::eBoundLoc0);
+    trackState.calibrated().template head<1>() = sourceLink.values().head<1>();
+    trackState.calibratedCovariance().template topLeftCorner<1, 1>() = sourceLink.cov().topLeftCorner<1, 1>();
+    trackState.calibratedSize() = sourceLink.dim();
+    // Create a 1D projection matrix
+    Acts::ActsMatrix<Acts::MultiTrajectory<trajectory_t>::MeasurementSizeMax, 1> proj;
+    proj.setZero();
+    proj(Acts::eBoundLoc0,Acts::eBoundLoc0) = 1;
+    trackState.setProjector(proj);
+  }
+  else if (sourceLink.dim() == 2)
+    {
+      // return Acts::makeMeasurement(sourceLink, sourceLink.values().head<2>(), sourceLink.cov().topLeftCorner<2, 2>(), Acts::eBoundLoc0, Acts::eBoundLoc1);
+      trackState.calibrated().template head<2>() = sourceLink.values().head<2>();
+      trackState.calibratedCovariance().template topLeftCorner<2, 2>() = sourceLink.cov().topLeftCorner<2, 2>();
+      trackState.calibratedSize() = sourceLink.dim();
+      // Create a 2D projection matrix
+      Acts::ActsMatrix<Acts::MultiTrajectory<trajectory_t>::MeasurementSizeMax, 2> proj;
+      proj.setZero();
+      proj(Acts::eBoundLoc0, Acts::eBoundLoc0) = 1;
+      proj(Acts::eBoundLoc1, Acts::eBoundLoc1) = 1;
+      trackState.setProjector(proj);
+    }
+  else
+    {
+      throw std::runtime_error("Dim " + std::to_string(sourceLink.dim()) +
+			       " currently not supported.");
+    }
+}
 
 #endif
