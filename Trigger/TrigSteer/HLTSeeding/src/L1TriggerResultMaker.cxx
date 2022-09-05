@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "L1TriggerResultMaker.h"
@@ -128,30 +128,33 @@ StatusCode L1TriggerResultMaker::createCombinedTauRoIs(xAOD::TrigComposite& l1tr
                             std::make_unique<xAOD::eFexTauRoIAuxContainer>()));
 
   // Match jTaus to eTaus and add the resulting cTaus to the container
+  // Unmatched eTaus get added as cTau with invalid link to jTau, ATR-25927
   size_t i_eTau{0};
+  size_t n_matched{0};
   for (const xAOD::eFexTauRoI* eTau : *eTauRoIs) {
-    const size_t i_jTau = TCS::cTauMultiplicity::cTauMatching(*eTau, *jTauRoIs);
-    if (i_jTau==std::numeric_limits<size_t>::max()) {
-      ATH_MSG_DEBUG("No matching jTau for eTau index " << i_eTau);
-      ++i_eTau;
-      continue;
-    }
-    ATH_MSG_DEBUG("Matched jTau index " << i_jTau << " to eTau index " << i_eTau);
-
     // Add new eTau to the cTau container
     cTauRoIs->push_back(std::make_unique<xAOD::eFexTauRoI>());
     // Copy over all variables from the original eTau
     *cTauRoIs->back() = *eTau;
-    // Link the matched jTau
-    cjTauLink(*cTauRoIs->back()) = jTauLink_t(m_jFexTauRoIKey.key(), i_jTau, eventContext);
 
+    const size_t i_jTau = TCS::cTauMultiplicity::cTauMatching(*eTau, *jTauRoIs);
+    if (i_jTau==std::numeric_limits<size_t>::max()) {
+      ATH_MSG_DEBUG("No matching jTau for eTau index " << i_eTau);
+      // Add an invalid link to jTau
+      cjTauLink(*cTauRoIs->back()) = jTauLink_t{};
+    } else {
+      ++n_matched;
+      ATH_MSG_DEBUG("Matched jTau index " << i_jTau << " to eTau index " << i_eTau);
+      // Link the matched jTau
+      cjTauLink(*cTauRoIs->back()) = jTauLink_t{m_jFexTauRoIKey.key(), i_jTau, eventContext};
+    }
     ++i_eTau;
   }
 
   // Link the cTaus to the L1TriggerResult
   ATH_MSG_DEBUG(m_eFexTauRoIKey.key() << " size: " << eTauRoIs->size());
   ATH_MSG_DEBUG(m_jFexTauRoIKey.key() << " size: " << jTauRoIs->size());
-  ATH_MSG_DEBUG(m_cTauRoIKey.key() << " size: " << cTauRoIs->size());
+  ATH_MSG_DEBUG(m_cTauRoIKey.key() << " size: " << cTauRoIs->size() << ", matched: " << n_matched);
   if (not cTauRoIs->empty()) {
     makeLink(m_cTauRoIKey, l1tr, m_cTauRoIKey.key(), eventContext);
   }
