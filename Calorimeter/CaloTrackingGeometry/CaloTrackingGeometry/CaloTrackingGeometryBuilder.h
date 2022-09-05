@@ -72,7 +72,7 @@ public:
   virtual StatusCode finalize() override;
 
   /** TrackingGeometry Interface methode */
-  virtual Trk::TrackingGeometry* trackingGeometry ATLAS_NOT_THREAD_SAFE (Trk::TrackingVolume* tvol = 0) const override;
+  virtual Trk::TrackingGeometry* trackingGeometry(Trk::TrackingVolume* tvol = 0) const override;
 
   /** The unique signature */
   virtual Trk::GeometrySignature geometrySignature() const override { return Trk::Calo; }
