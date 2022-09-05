@@ -6,16 +6,16 @@
 #define IsolationSelectionDict_H
 
 // Includes for the dictionary generation:
+#include "IsolationSelection/IIsolationCloseByCorrectionTool.h"
+#include "IsolationSelection/IIsolationLowPtPLVTool.h"
 #include "IsolationSelection/IIsolationSelectionTool.h"
-#include "IsolationSelection/IsolationSelectionTool.h"
-#include "IsolationSelection/IsolationCondition.h"
-#include "IsolationSelection/IsolationConditionFormula.h"
-#include "IsolationSelection/IsolationConditionCombined.h"
-#include "IsolationSelection/IsolationConditionHist.h"
-#include "IsolationSelection/IsolationWP.h"
 #include "IsolationSelection/Interp3D.h"
 #include "IsolationSelection/IsolationCloseByCorrectionTool.h"
-#include "IsolationSelection/IIsolationCloseByCorrectionTool.h"
+#include "IsolationSelection/IsolationCondition.h"
+#include "IsolationSelection/IsolationConditionCombined.h"
+#include "IsolationSelection/IsolationConditionFormula.h"
+#include "IsolationSelection/IsolationConditionHist.h"
 #include "IsolationSelection/IsolationLowPtPLVTool.h"
-#include "IsolationSelection/IIsolationLowPtPLVTool.h"
-#endif // IsolationSelectionDict_H
+#include "IsolationSelection/IsolationSelectionTool.h"
+#include "IsolationSelection/IsolationWP.h"
+#endif  // IsolationSelectionDict_H
