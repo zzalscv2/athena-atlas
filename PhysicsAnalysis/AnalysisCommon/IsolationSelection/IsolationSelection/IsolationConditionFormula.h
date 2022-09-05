@@ -8,6 +8,7 @@
 #define ISOLATIONSELECTION_ISOLATIONCONDITIONFORMULA_H
 
 #include <memory>
+
 #include "IsolationSelection/IsolationCondition.h"
 
 // Forward Declaration(s)
@@ -15,23 +16,19 @@ class TF1;
 class TH3F;
 
 namespace CP {
-    class IsolationConditionFormula: public IsolationCondition {
-        public:
-            IsolationConditionFormula(std::string name, xAOD::Iso::IsolationType isoType, const std::string& cutFunction, bool invertCut = false);
-            IsolationConditionFormula(std::string name, std::string isoType, const std::string& cutFunction, bool invertCut = false);
-            virtual ~IsolationConditionFormula() {
-            }
+    class IsolationConditionFormula : public IsolationCondition {
+    public:
+        IsolationConditionFormula(std::string name, xAOD::Iso::IsolationType isoType, const std::string& cutFunction,
+                                  bool invertCut = false);
+        IsolationConditionFormula(std::string name, std::string isoType, const std::string& cutFunction, bool invertCut = false);
+        virtual ~IsolationConditionFormula() = default;
 
-            IsolationConditionFormula(const IsolationConditionFormula& rhs) = delete;
-            IsolationConditionFormula& operator=(const IsolationConditionFormula& rhs) = delete;
-       
-            virtual bool accept(const xAOD::IParticle& x, std::map<xAOD::Iso::IsolationType, float>* cutValues = 0) override;
-            virtual bool accept(const strObj& x, std::map<xAOD::Iso::IsolationType, float>* cutValues = 0) override;
-            void getCutValue(const float pt);
+        virtual bool accept(const xAOD::IParticle& x) const override;
+        virtual bool accept(const strObj& x) const override;
 
-        private:
-            std::shared_ptr<TF1> m_cutFunction;
-            bool m_invertCut;
+    private:
+        std::shared_ptr<TF1> m_cutFunction{nullptr};
+        bool m_invertCut{false};
     };
-}
+}  // namespace CP
 #endif
