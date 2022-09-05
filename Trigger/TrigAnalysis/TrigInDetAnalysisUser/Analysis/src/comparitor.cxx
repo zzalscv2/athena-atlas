@@ -1918,10 +1918,14 @@ int main(int argc, char** argv) {
 	    //	    std::exit(-1);
 
 	  }
-	
+
 	  if ( hreft!=0 ) { 
 	    href = (TH1F*)hreft->Clone();
 	    href->SetDirectory(0);
+	  }
+	  else { 
+	    noreftmp = true;
+	    href = 0;
 	  }
 
 	  std::cout << " \tget " << (chains[j]+"/"+reghist)    << "\thtest " << htest << std::endl;
