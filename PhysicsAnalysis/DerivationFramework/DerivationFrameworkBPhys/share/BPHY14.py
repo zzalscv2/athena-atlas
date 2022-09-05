@@ -209,8 +209,7 @@ BPHY14PhotonTPThinningTool = DerivationFramework__EgammaTrackParticleThinning(na
                                                                               InDetTrackParticlesKey = "InDetTrackParticles",
                                                                               SelectionString        = photonRequirements,
                                                                               BestMatchOnly          = False,
-                                                                              ConeSize               = 0.6,
-                                                                              ApplyAnd               = False)
+                                                                              ConeSize               = 0.6)
 ToolSvc += BPHY14PhotonTPThinningTool
 
 

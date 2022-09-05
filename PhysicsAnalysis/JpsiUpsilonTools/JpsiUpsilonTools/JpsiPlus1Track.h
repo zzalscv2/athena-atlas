@@ -17,9 +17,9 @@
 #include "TrkVKalVrtFitter/TrkVKalVrtFitter.h"
 #include "xAODTracking/TrackParticle.h"
 #include "xAODMuon/MuonContainer.h"
-#include "xAODTracking/Vertex.h"
-#include "xAODTracking/VertexContainer.h"
-#include "xAODTracking/VertexAuxContainer.h"
+#include "xAODTracking/VertexFwd.h"
+#include "xAODTracking/VertexContainerFwd.h"
+#include "xAODEgamma/ElectronContainerFwd.h"
 #include <vector>
 #include <string>
 #include "JpsiUpsilonTools/ICandidateSearch.h"
@@ -81,11 +81,14 @@ namespace Analysis {
         double m_trkTrippletMassLower;
         double m_trkTrippletPt       ;
         double m_trkDeltaZ           ;
-        int m_requiredNMuons;
+        int m_requiredNMuons=0;
+        int m_requiredNElectrons=0;
         std::vector<double> m_muonMasses;
         std::vector<int>    m_useGSFTrackIndices;
         SG::ReadHandleKey<xAOD::TrackParticleContainer>   m_TrkParticleGSFCollection;
         std::bitset<3>      m_useGSFTrack;
+        SG::ReadHandleKey<xAOD::ElectronContainer>    m_electronCollectionKey;
+        bool m_skipNoElectron = false;
 
     };
 } // end of namespace

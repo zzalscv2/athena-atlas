@@ -10,6 +10,8 @@
 #include "DerivationFrameworkBPhys/BPhysMetadataBase.h"
 #include "DerivationFrameworkBPhys/Bmumu_metadata.h"
 #include "DerivationFrameworkBPhys/BdKstarMuMu_metadata.h"
+#include "DerivationFrameworkBPhys/MuPlusDpstCascade.h"
+#include "DerivationFrameworkBPhys/MuPlusDsCascade.h"
 //#include "DerivationFrameworkBPhys/CfAthAlgTool.h"
 #include "DerivationFrameworkBPhys/Bmumu_reco_mumu.h"
 #include "DerivationFrameworkBPhys/Reco_mumu.h"
@@ -35,6 +37,7 @@
 #include "DerivationFrameworkBPhys/ReVertex.h"
 #include "DerivationFrameworkBPhys/BPhysConversionFinder.h"
 #include "DerivationFrameworkBPhys/Cascade3Plus1.h"
+#include "DerivationFrameworkBPhys/BPhysBGammaFinder.h"
 
 using namespace DerivationFramework;
 
@@ -51,6 +54,8 @@ DECLARE_COMPONENT( VertexTrackIsolation )
 DECLARE_COMPONENT( BPhysMetadataBase )
 DECLARE_COMPONENT( Bmumu_metadata )
 DECLARE_COMPONENT( BdKstarMuMu_metadata )
+DECLARE_COMPONENT( MuPlusDpstCascade )
+DECLARE_COMPONENT( MuPlusDsCascade )
 //DECLARE_COMPONENT( CfAthAlgTool )
 //DECLARE_COMPONENT( Bmumu_reco_mumu )
 DECLARE_COMPONENT( FourMuonTool )
@@ -75,4 +80,4 @@ DECLARE_COMPONENT( JpsiPlusDs1Cascade )
 DECLARE_COMPONENT( ReVertex )
 DECLARE_COMPONENT( BPhysConversionFinder )
 DECLARE_COMPONENT( Cascade3Plus1 )
-
+DECLARE_COMPONENT( BPhysBGammaFinder )

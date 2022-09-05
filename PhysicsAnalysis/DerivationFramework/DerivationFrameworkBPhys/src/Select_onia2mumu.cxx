@@ -14,7 +14,7 @@
 
 #include "TrkVertexAnalysisUtils/V0Tools.h"
 #include "xAODBPhys/BPhysHypoHelper.h"
-
+#include "xAODTracking/VertexContainer.h"
 #include <vector>
 #include <string>
 

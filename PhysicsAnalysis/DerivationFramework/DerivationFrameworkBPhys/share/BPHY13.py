@@ -123,12 +123,12 @@ print(BPHY13Plus2Tracks)
 from DerivationFrameworkBPhys.DerivationFrameworkBPhysConf import DerivationFramework__Reco_Vertex	
 BPHY13FourTrackSelectAndWrite = DerivationFramework__Reco_Vertex(
     name                     = "BPHY13FourTrackSelectAndWrite",
-    Jpsi2PlusTrackName       = BPHY13Plus2Tracks,
+    VertexSearchTool         = BPHY13Plus2Tracks,
     OutputVtxContainerName   = "BPHY13FourTrack",
     PVContainerName          = "PrimaryVertices",
     V0Tools                  = TrackingCommon.getV0Tools(),
     PVRefitter               = BPHY13_VertexTools.PrimaryVertexRefitter,
-    RefPVContainerName       = "BPHY13RefittedPrimaryVertices",
+    RefPVContainerName       = "BPHY13RefittedPrimaryVertices1",
     RefitPV                  = True,
     MaxPVrefit               = 10000,
     DoVertexType             = 7)
@@ -139,19 +139,145 @@ print(BPHY13FourTrackSelectAndWrite)
 
 from DerivationFrameworkBPhys.DerivationFrameworkBPhysConf import DerivationFramework__Select_onia2mumu
 
-BPHY13_Select_FourTrack      = DerivationFramework__Select_onia2mumu(
-    name                       = "BPHY13_Select_FourTrack",
-    V0Tools                    = TrackingCommon.getV0Tools(),
-    HypothesisName             = "FourTracks",
-    InputVtxContainerName      = "BPHY13FourTrack",
-    TrkMasses                  = [105.658, 105.658, 105.658, 105.658],
-    VtxMassHypo                = 6900.0, # for decay time
-    MassMin                    = 0.,
-    MassMax                    = 25000.,
-    Chi2Max                    = 200.)
+do_blinding = 'doBlinding' in vars() and doBlinding==True and not isSimulation
+do_unblinding1 = not do_blinding and 'doUnblinding1' in vars() and doUnblinding1==True and not isSimulation
+do_unblinding2 = not do_blinding and 'doUnblinding2' in vars() and doUnblinding2==True and not isSimulation
 
-ToolSvc += BPHY13_Select_FourTrack
-print(BPHY13_Select_FourTrack)
+if do_blinding:
+    #
+    # select 4 regions (before unblinding)
+    #
+    BPHY13_Select1_FourTrack     = DerivationFramework__Select_onia2mumu(
+        name                       = "BPHY13_Select1_FourTrack",
+        HypothesisName             = "FourTracks1",
+        InputVtxContainerName      = "BPHY13FourTrack",
+        V0Tools                  = TrackingCommon.getV0Tools(),
+        TrkMasses                  = [105.658, 105.658, 105.658, 105.658],
+        VtxMassHypo                = 6900.0, # for decay time
+        MassMin                    = 7500.,
+        MassMax                    = 9000.,
+        Chi2Max                    = 200.)
+    
+    ToolSvc += BPHY13_Select1_FourTrack
+    print      (BPHY13_Select1_FourTrack)
+   
+    BPHY13_Select2_FourTrack     = DerivationFramework__Select_onia2mumu(
+        name                       = "BPHY13_Select2_FourTrack",
+        HypothesisName             = "FourTracks2",
+        InputVtxContainerName      = "BPHY13FourTrack",
+        V0Tools                  = TrackingCommon.getV0Tools(),
+        TrkMasses                  = [105.658, 105.658, 105.658, 105.658],
+        VtxMassHypo                = 6900.0, # for decay time
+        MassMin                    = 10000.,
+        MassMax                    = 12000.,
+        Chi2Max                    = 200.)
+   
+    ToolSvc += BPHY13_Select2_FourTrack
+    print      (BPHY13_Select2_FourTrack)
+   
+    BPHY13_Select3_FourTrack     = DerivationFramework__Select_onia2mumu(
+        name                       = "BPHY13_Select3_FourTrack",
+        HypothesisName             = "FourTracks3",
+        InputVtxContainerName      = "BPHY13FourTrack",
+        V0Tools                  = TrackingCommon.getV0Tools(),
+        TrkMasses                  = [105.658, 105.658, 105.658, 105.658],
+        VtxMassHypo                = 6900.0,  #for decay time
+        MassMin                    = 14000.,
+        MassMax                    = 17500.,
+        Chi2Max                    = 200.)
+   
+    ToolSvc += BPHY13_Select3_FourTrack
+    print      (BPHY13_Select3_FourTrack)
+   
+    BPHY13_Select4_FourTrack     = DerivationFramework__Select_onia2mumu(
+        name                       = "BPHY13_Select4_FourTrack",
+        HypothesisName             = "FourTracks4",
+        InputVtxContainerName      = "BPHY13FourTrack",
+        V0Tools                  = TrackingCommon.getV0Tools(),
+        TrkMasses                  = [105.658, 105.658, 105.658, 105.658],
+        VtxMassHypo                = 6900.0,  #for decay time
+        MassMin                    = 19500.,
+        MassMax                    = 25000.,
+        Chi2Max                    = 200.)
+   
+    ToolSvc += BPHY13_Select4_FourTrack
+    print      (BPHY13_Select4_FourTrack)
+elif do_unblinding1 or do_unblinding2:
+ if do_unblinding1:
+     #
+     # select 2 regions (unblinding part 1)
+     #
+     BPHY13_Select1_FourTrack     = DerivationFramework__Select_onia2mumu(
+         name                       = "BPHY13_Select1_FourTrack",
+         HypothesisName             = "FourTracks1",
+         InputVtxContainerName      = "BPHY13FourTrack",
+         V0Tools                  = TrackingCommon.getV0Tools(),
+         TrkMasses                  = [105.658, 105.658, 105.658, 105.658],
+         VtxMassHypo                = 6900.0, # for decay time
+         MassMin                    = 0.,
+         MassMax                    = 7500.,
+         Chi2Max                    = 200.)
+ 
+     ToolSvc += BPHY13_Select1_FourTrack
+     print      (BPHY13_Select1_FourTrack)
+
+     BPHY13_Select2_FourTrack     = DerivationFramework__Select_onia2mumu(
+         name                       = "BPHY13_Select2_FourTrack",
+         HypothesisName             = "FourTracks2",
+         InputVtxContainerName      = "BPHY13FourTrack",
+         V0Tools                  = TrackingCommon.getV0Tools(),
+         TrkMasses                  = [105.658, 105.658, 105.658, 105.658],
+         VtxMassHypo                = 6900.0, # for decay time
+         MassMin                    = 9000.,
+         MassMax                    = 10000.,
+         Chi2Max                    = 200.)
+
+     ToolSvc += BPHY13_Select2_FourTrack
+     print      (BPHY13_Select2_FourTrack)
+ if do_unblinding2:
+     #
+     # select 2 regions (unblinding part 2)
+     #
+     BPHY13_Select3_FourTrack     = DerivationFramework__Select_onia2mumu(
+         name                       = "BPHY13_Select3_FourTrack",
+         HypothesisName             = "FourTracks3",
+         InputVtxContainerName      = "BPHY13FourTrack",
+         V0Tools                  = TrackingCommon.getV0Tools(),
+         TrkMasses                  = [105.658, 105.658, 105.658, 105.658],
+         VtxMassHypo                = 6900.0,  #for decay time
+         MassMin                    = 12000.,
+         MassMax                    = 14000.,
+         Chi2Max                    = 200.)
+
+     ToolSvc += BPHY13_Select3_FourTrack
+     print      (BPHY13_Select3_FourTrack)
+
+     BPHY13_Select4_FourTrack     = DerivationFramework__Select_onia2mumu(
+         name                       = "BPHY13_Select4_FourTrack",
+         HypothesisName             = "FourTracks4",
+         InputVtxContainerName      = "BPHY13FourTrack",
+         V0Tools                  = TrackingCommon.getV0Tools(),
+         TrkMasses                  = [105.658, 105.658, 105.658, 105.658],
+         VtxMassHypo                = 6900.0,  #for decay time
+         MassMin                    = 17500.,
+         MassMax                    = 19500.,
+         Chi2Max                    = 200.)
+
+     ToolSvc += BPHY13_Select4_FourTrack
+     print      (BPHY13_Select4_FourTrack)
+else:
+    BPHY13_Select_FourTrack      = DerivationFramework__Select_onia2mumu(
+     name                       = "BPHY13_Select_FourTrack",
+     HypothesisName             = "FourTracks",
+     InputVtxContainerName      = "BPHY13FourTrack",
+     V0Tools                  = TrackingCommon.getV0Tools(),
+     TrkMasses                  = [105.658, 105.658, 105.658, 105.658],
+     VtxMassHypo                = 6900.0, # for decay time
+     MassMin                    = 0.,
+     MassMax                    = 25000.,
+     Chi2Max                    = 200.)
+    ToolSvc += BPHY13_Select_FourTrack
+    print      (BPHY13_Select_FourTrack)
 
 
 #====================================================================
@@ -166,7 +292,7 @@ BPHY13TrackIsolationDecorator = DerivationFramework__VertexTrackIsolation(
   TrackIsoTool                    = "xAOD::TrackIsolationTool",
   TrackContainer                  = "InDetTrackParticles",
   InputVertexContainer            = "BPHY13FourTrack",
-  PassFlags                       = ["passed_FourTracks"],
+  PassFlags                       = ["passed_FourTracks","passed_FourTracks1","passed_FourTracks2","passed_FourTracks3","passed_FourTracks4"],
   DoIsoPerTrk                     = True,
   RemoveDuplicate                 = 2
 )
@@ -185,7 +311,7 @@ BPHY13_Revertex_2mu            = DerivationFramework__ReVertex(
     InputVtxContainerName      = "BPHY13FourTrack",
     TrackIndices               = [ 0, 1 ],
     RefitPV                    = True,
-    RefPVContainerName         = "BPHY13RefittedPrimaryVertices", # use existing refitted PVs
+    RefPVContainerName         = "BPHY13RefittedPrimaryVertices2", # cannot use existing refitted PVs
     UseMassConstraint          = True,
     V0Tools                    = TrackingCommon.getV0Tools(),
     VertexMass                 = 3096.916,
@@ -216,7 +342,7 @@ BPHY13_Revertex_2trk           = DerivationFramework__ReVertex(
     TrackIndices               = [ 2, 3 ],
     RefitPV                    = True,
     V0Tools                    = TrackingCommon.getV0Tools(),
-    RefPVContainerName         = "BPHY13RefittedPrimaryVertices", # use existing refitted PVs
+    RefPVContainerName         = "BPHY13RefittedPrimaryVertices3", # cannot use existing refitted PVs
     UseMassConstraint          = True,
     VertexMass                 = 3096.916,
     MassInputParticles         = [105.658, 105.658],
@@ -247,7 +373,7 @@ BPHY13_Revertex_2muHi          = DerivationFramework__ReVertex(
     TrackIndices               = [ 0, 1 ],
     RefitPV                    = True,
     V0Tools                    = TrackingCommon.getV0Tools(),
-    RefPVContainerName         = "BPHY13RefittedPrimaryVertices", # use existing refitted PVs
+    RefPVContainerName         = "BPHY13RefittedPrimaryVertices4", # cannot use existing refitted PVs
     UseMassConstraint          = True,
     VertexMass                 = 9460.30,
     MassInputParticles         = [105.658, 105.658],
@@ -277,7 +403,7 @@ BPHY13_Revertex_2trkHi         = DerivationFramework__ReVertex(
     TrackIndices               = [ 2, 3 ],
     RefitPV                    = True,
     V0Tools                    = TrackingCommon.getV0Tools(),
-    RefPVContainerName         = "BPHY13RefittedPrimaryVertices", # use existing refitted PVs
+    RefPVContainerName         = "BPHY13RefittedPrimaryVertices5", # cannot use existing refitted PVs
     UseMassConstraint          = True,
     VertexMass                 = 9460.30,
     MassInputParticles         = [105.658, 105.658],
@@ -308,7 +434,7 @@ BPHY13_Revertex_2muMed         = DerivationFramework__ReVertex(
     TrackIndices               = [ 0, 1 ],
     RefitPV                    = True,
     V0Tools                    = TrackingCommon.getV0Tools(),
-    RefPVContainerName         = "BPHY13RefittedPrimaryVertices", # use existing refitted PVs
+    RefPVContainerName         = "BPHY13RefittedPrimaryVertices6", # cannot use existing refitted PVs
     UseMassConstraint          = True,
     VertexMass                 = 3686.10,
     MassInputParticles         = [105.658, 105.658],
@@ -338,7 +464,7 @@ BPHY13_Revertex_2trkMed        = DerivationFramework__ReVertex(
     TrackIndices               = [ 2, 3 ],
     RefitPV                    = True,
     V0Tools                    = TrackingCommon.getV0Tools(),
-    RefPVContainerName         = "BPHY13RefittedPrimaryVertices", # use existing refitted PVs
+    RefPVContainerName         = "BPHY13RefittedPrimaryVertices7", # cannot use existing refitted PVs
     UseMassConstraint          = True,
     VertexMass                 = 3686.10,
     MassInputParticles         = [105.658, 105.658],
@@ -371,14 +497,34 @@ print(BPHY13_Select_TwoTrackMed)
 ##    where "ContainerName" is output container from some Reco_* tool, "HypoName" is the hypothesis name setup in some "Select_*"
 ##    tool and "count" is the number of candidates passing the selection you want to keep. 
 
-#expression = "count(BPHY13FourTrack.passed_FourTracks) > 0"
-expression = "count(BPHY13FourTrack.passed_FourTracks) > 0 && ( count(BPHY13TwoMuon.passed_TwoMuons) + count(BPHY13TwoTrack.passed_TwoTracks) > 1 || count(BPHY13TwoMuonMed.passed_TwoMuonsMed) + count(BPHY13TwoTrackMed.passed_TwoTracksMed) > 1 || count(BPHY13TwoMuon.passed_TwoMuons) + count(BPHY13TwoTrackMed.passed_TwoTracksMed) > 1 || count(BPHY13TwoMuonMed.passed_TwoMuonsMed) + count(BPHY13TwoTrack.passed_TwoTracks) > 1 || count(BPHY13TwoMuonHi.passed_TwoMuonsHi) + count(BPHY13TwoTrackHi.passed_TwoTracksHi) > 0 )"
+expression = "( count(BPHY13TwoMuon.passed_TwoMuons) + count(BPHY13TwoTrack.passed_TwoTracks) > 1 || count(BPHY13TwoMuonMed.passed_TwoMuonsMed) + count(BPHY13TwoTrackMed.passed_TwoTracksMed) > 1 || count(BPHY13TwoMuon.passed_TwoMuons) + count(BPHY13TwoTrackMed.passed_TwoTracksMed) > 1 || count(BPHY13TwoMuonMed.passed_TwoMuonsMed) + count(BPHY13TwoTrack.passed_TwoTracks) > 1 || count(BPHY13TwoMuonHi.passed_TwoMuonsHi) + count(BPHY13TwoTrackHi.passed_TwoTracksHi) > 0 )"
+
+if do_blinding or (do_unblinding1 and do_unblinding2):
+    expression = expression + " && count(BPHY13FourTrack.passed_FourTracks1)+count(BPHY13FourTrack.passed_FourTracks2)+count(BPHY13FourTrack.passed_FourTracks3)+count(BPHY13FourTrack.passed_FourTracks4) > 0"
+elif do_unblinding1:
+    expression = expression + " && count(BPHY13FourTrack.passed_FourTracks1)+count(BPHY13FourTrack.passed_FourTracks2) > 0"
+elif do_unblinding2:
+    expression = expression + " && count(BPHY13FourTrack.passed_FourTracks3)+count(BPHY13FourTrack.passed_FourTracks4) > 0"
+else:
+    expression = expression + " && count(BPHY13FourTrack.passed_FourTracks) > 0"
 
 from DerivationFrameworkTools.DerivationFrameworkToolsConf import DerivationFramework__xAODStringSkimmingTool
-BPHY13_SelectEvent = DerivationFramework__xAODStringSkimmingTool(name = "BPHY13_SelectEvent",
-                                                                 expression = expression)
+BPHY13_SelectEvent = DerivationFramework__xAODStringSkimmingTool(name = "BPHY13_SelectEvent", expression = expression)
 ToolSvc += BPHY13_SelectEvent
 print(BPHY13_SelectEvent)
+
+augmentation_tools = [BPHY13_Reco_mumu, BPHY13FourTrackSelectAndWrite]
+if do_blinding or (do_unblinding1 and do_unblinding2):
+    augmentation_tools += [BPHY13_Select1_FourTrack, BPHY13_Select2_FourTrack, BPHY13_Select3_FourTrack, BPHY13_Select4_FourTrack]
+elif do_unblinding1:
+    augmentation_tools += [BPHY13_Select1_FourTrack, BPHY13_Select2_FourTrack]
+elif do_unblinding2:
+    augmentation_tools += [BPHY13_Select3_FourTrack, BPHY13_Select4_FourTrack]
+else:
+    augmentation_tools += [BPHY13_Select_FourTrack]
+
+augmentation_tools += [BPHY13TrackIsolationDecorator, BPHY13_Revertex_2mu, BPHY13_Select_TwoMuon, BPHY13_Revertex_2trk, BPHY13_Select_TwoTrack, BPHY13_Revertex_2muHi, BPHY13_Select_TwoMuonHi, BPHY13_Revertex_2trkHi, BPHY13_Select_TwoTrackHi, BPHY13_Revertex_2muMed, BPHY13_Select_TwoMuonMed, BPHY13_Revertex_2trkMed, BPHY13_Select_TwoTrackMed]
+
 
 #--------------------------------------------------------------------
 ## 8/ track and vertex thinning. We want to remove all reconstructed secondary vertices
@@ -404,9 +550,9 @@ print(BPHY13_SelectEvent)
 # The name of the kernel (BPHY13Kernel in this case) must be unique to this derivation
 from DerivationFrameworkCore.DerivationFrameworkCoreConf import DerivationFramework__DerivationKernel
 DerivationFrameworkJob += CfgMgr.DerivationFramework__DerivationKernel(
-  "BPHY13Kernel",
-   AugmentationTools = [BPHY13_Reco_mumu, BPHY13FourTrackSelectAndWrite, BPHY13_Select_FourTrack, BPHY13TrackIsolationDecorator, BPHY13_Revertex_2mu, BPHY13_Select_TwoMuon, BPHY13_Revertex_2trk, BPHY13_Select_TwoTrack, BPHY13_Revertex_2muHi, BPHY13_Select_TwoMuonHi, BPHY13_Revertex_2trkHi, BPHY13_Select_TwoTrackHi, BPHY13_Revertex_2muMed, BPHY13_Select_TwoMuonMed, BPHY13_Revertex_2trkMed, BPHY13_Select_TwoTrackMed],
-   SkimmingTools     = [BPHY13_SelectEvent]
+    "BPHY13Kernel",
+    AugmentationTools = augmentation_tools,
+    SkimmingTools     = [BPHY13_SelectEvent]
    )
 
 #====================================================================
@@ -432,8 +578,9 @@ BPHY13SlimmingHelper.IncludeBPhysTriggerContent = True
 
 ## primary vertices
 BPHY13_AllVariables += ["PrimaryVertices"]
-BPHY13_StaticContent += ["xAOD::VertexContainer#BPHY13RefittedPrimaryVertices"]
-BPHY13_StaticContent += ["xAOD::VertexAuxContainer#BPHY13RefittedPrimaryVerticesAux."]
+for i in range(1,8):
+    BPHY13_StaticContent += ["xAOD::VertexContainer#BPHY13RefittedPrimaryVertices%s" %str(i) ]
+    BPHY13_StaticContent += ["xAOD::VertexAuxContainer#BPHY13RefittedPrimaryVertices%sAux." %str(i)]
 
 ## ID track particles
 BPHY13_AllVariables += ["InDetTrackParticles"]
