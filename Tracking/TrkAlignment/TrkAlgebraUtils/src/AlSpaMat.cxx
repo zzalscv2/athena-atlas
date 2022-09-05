@@ -34,42 +34,42 @@ namespace Trk {
 
 //______________________________________________________________________________
 AlSpaMat::AlSpaMat()
+  : m_ptr_row(nullptr)
+  , m_ptr_col(nullptr)
 {
   m_matrix_type = 2;
   m_size = 0;
   m_nele = 0;
-  m_ptr_row = nullptr;
-  m_ptr_col = nullptr;    // set pointer to null
 }
 
 //______________________________________________________________________________
 AlSpaMat::AlSpaMat(long int N)
+  : m_ptr_row(nullptr)
+  , m_ptr_col(nullptr)
 {
   m_matrix_type = 2;
   m_size = N;
   m_nele = 0;
-  m_ptr_row = nullptr;
-  m_ptr_col = nullptr;    // set pointer to null
 }
 
 //______________________________________________________________________________
 AlSpaMat::AlSpaMat(const AlSpaMat& m)
- : AlSymMatBase(m)
+  : AlSymMatBase(m)
+  , m_ptr_row(nullptr)
+  , m_ptr_col(nullptr)
 {
   m_matrix_type = 2;
   m_size = m.size();
-  m_ptr_row = nullptr;
-  m_ptr_col = nullptr;    // set pointer to null
   copy(m);
 }
 
 //______________________________________________________________________________
 AlSpaMat::AlSpaMat(const AlSymMat& m)
+  : m_ptr_row(nullptr)
+  , m_ptr_col(nullptr)
 {
   m_matrix_type = 2;
   m_size = m.size();
-  m_ptr_row = nullptr;
-  m_ptr_col = nullptr;    // set pointer to null
   copy(m);
 }
 

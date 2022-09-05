@@ -139,10 +139,14 @@ void applyConstraints(VKVertex * vk)
 //
 //                   Pointing constraint
 //
-  VKPointConstraint::VKPointConstraint(int NTRK, const double vrt[3], VKVertex *vk, bool onlyZ=false):
-    VKConstraintBase(2,NTRK, VKContraintType::Point, vk)
+  VKPointConstraint::VKPointConstraint(int NTRK,
+                                       const double vrt[3],
+                                       VKVertex* vk,
+                                       bool onlyZ = false)
+    : VKConstraintBase(2, NTRK, VKContraintType::Point, vk)
+    , m_onlyZ(onlyZ)
   { m_originVertex = vk;m_targetVertex[0]=vrt[0]; m_targetVertex[1]=vrt[1]; m_targetVertex[2]=vrt[2];
-    m_onlyZ=onlyZ;  // For Z only constraint
+    // For Z only constraint
   }
   VKPointConstraint::~VKPointConstraint()= default;
   std::ostream &  operator << ( std::ostream& out, const VKPointConstraint & cnst  )
@@ -164,9 +168,19 @@ void applyConstraints(VKVertex * vk)
 //
 //                   Vertex in plane constraint
 //
-  VKPlaneConstraint::VKPlaneConstraint(int NTRK, double a, double b, double c, double d, VKVertex *vk):
-    VKConstraintBase(1,NTRK, VKContraintType::Plane, vk)
-  {m_A=a; m_B=b; m_C=c; m_D=d; }
+  VKPlaneConstraint::VKPlaneConstraint(int NTRK,
+                                       double a,
+                                       double b,
+                                       double c,
+                                       double d,
+                                       VKVertex* vk)
+    : VKConstraintBase(1, NTRK, VKContraintType::Plane, vk)
+    , m_A(a)
+    , m_B(b)
+    , m_C(c)
+    , m_D(d)
+  {
+  }
   VKPlaneConstraint::~VKPlaneConstraint()= default;
   std::ostream &  operator << ( std::ostream& out, const VKPlaneConstraint & cnst  )
   {     const VKVertex * vk = cnst.getOriginVertex();

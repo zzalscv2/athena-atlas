@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2020 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
 */
 
 /***************************************************************************
@@ -224,15 +224,14 @@ void VxJetCandidate::setTrackParticlesOrigin(const Trk::TrackParticleBaseCollect
 
 }
 
-
-VxJetCandidate::VxJetCandidate(const VxJetCandidate& rhs):
-  VxCandidate(rhs)
+VxJetCandidate::VxJetCandidate(const VxJetCandidate& rhs)
+  : VxCandidate(rhs)
+  , m_fittedPositions(rhs.m_fittedPositions)
+  , m_linearizationPositions(rhs.m_linearizationPositions)
+  , m_constraintPositions(rhs.m_constraintPositions)
 {
 
   m_recVertex = rhs.m_recVertex;
-  m_fittedPositions = rhs.m_fittedPositions;
-  m_linearizationPositions = rhs.m_linearizationPositions;
-  m_constraintPositions = rhs.m_constraintPositions;
 
   //you need this map to update all the VxVertexOnJetAxis which only have 
   //pointers to the objects... (with persistency it will be a mess anyway)

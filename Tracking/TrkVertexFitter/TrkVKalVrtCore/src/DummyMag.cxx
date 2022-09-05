@@ -16,23 +16,14 @@
 
 namespace Trk {
 
-vkalMagFld::vkalMagFld():
-   m_cnstBMAG(1.997),                  /* Const mag. field in Tesla */
-   m_vkalCnvMagFld(vkalMagCnvCst)      /* Conversion constant is defined in CommonPars.h */
+vkalMagFld::vkalMagFld()
+  : m_cnstBMAG(1.997)
+  , /* Const mag. field in Tesla */
+  m_vkalCnvMagFld(vkalMagCnvCst)
 {
-
 //   vkalCnvMagFld = 0.0029979246;   /* For GeV and cm and Tesla*/
 //   m_vkalCnvMagFld = 0.29979246;   /* For MeV and mm and Tesla*/
-   m_saveXpos=-10000000000.;
-   m_saveYpos=-20000000000.;
-   m_saveZpos=-30000000000.;
-   m_saveBX=0.;
-   m_saveBY=0.;
-   m_saveBZ=0.;
 }
-
-
-
 
 baseMagFld::baseMagFld() = default;
 baseMagFld::~baseMagFld() = default;

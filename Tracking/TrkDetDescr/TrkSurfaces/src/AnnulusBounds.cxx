@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
 */
 
 ///////////////////////////////////////////////////////////////////
@@ -119,7 +119,10 @@ public:
       return deltaR >= R - std::sqrt(x * x + y * y);
 
   }
-  EllipseCollisionTest(int maxIterations) { this->m_maxIterations = maxIterations; }
+  EllipseCollisionTest(int maxIterations)
+    : m_maxIterations(maxIterations)
+  {
+  }
 };
 
 //////////////////////////////////////////////////////////////////////////////////////////////////////////

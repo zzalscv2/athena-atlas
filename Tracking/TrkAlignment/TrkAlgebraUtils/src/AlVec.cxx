@@ -17,30 +17,35 @@
 namespace Trk {
 
 //______________________________________________________________________________
-AlVec::AlVec() {
-  m_size = 0;
-  m_ptr_data = nullptr;  // set pointer to null
-  m_pathbin="./";
-  m_pathtxt="./";
+AlVec::AlVec()
+  : m_size(0)
+  , m_ptr_data(nullptr)
+  , m_pathbin("./")
+  , m_pathtxt("./")
+{
+
+  // set pointer to null
 }
 
 //______________________________________________________________________________
-AlVec::AlVec(int N) {
-  m_size = N;
-  m_ptr_data = new double[m_size];
-  m_pathbin="./";
-  m_pathtxt="./";
+AlVec::AlVec(int N)
+  : m_size(N)
+  , m_ptr_data(new double[m_size])
+  , m_pathbin("./")
+  , m_pathtxt("./")
+{
 
   double*  p = m_ptr_data + m_size;
   while (p > m_ptr_data) *(--p) = 0.;
 }
 
 //______________________________________________________________________________
-AlVec::AlVec(const AlVec& v) {
-  m_size   = v.m_size;
-  m_pathbin = v.m_pathbin;
-  m_pathtxt = v.m_pathtxt;
-  m_ptr_data = new double[m_size];
+AlVec::AlVec(const AlVec& v)
+  : m_size(v.m_size)
+  , m_ptr_data(new double[m_size])
+  , m_pathbin(v.m_pathbin)
+  , m_pathtxt(v.m_pathtxt)
+{
 
   copy(v);
 }

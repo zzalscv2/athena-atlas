@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2017 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
 */
 
 
@@ -14,23 +14,29 @@ IntVec::IntVec()
   : m_Nele(0), m_ptr_data(nullptr)
 {}
 
-IntVec::IntVec(int N) {
-  m_Nele = N;
-  m_ptr_data = new int[m_Nele];
+IntVec::IntVec(int N)
+  : m_Nele(N)
+  , m_ptr_data(new int[m_Nele])
+{
+
   for(int i=0;i<m_Nele;i++)
     *(m_ptr_data+i)=0;
 }
 
-IntVec::IntVec(int N, int init) {
-  m_Nele = N;
-  m_ptr_data = new int[m_Nele];
+IntVec::IntVec(int N, int init)
+  : m_Nele(N)
+  , m_ptr_data(new int[m_Nele])
+{
+
   for(int i=0;i<m_Nele;i++)
     *(m_ptr_data+i)=init;
 }
 
-IntVec::IntVec(const IntVec& v) {
-  m_Nele = v.m_Nele;
-  m_ptr_data = new int[m_Nele];
+IntVec::IntVec(const IntVec& v)
+  : m_Nele(v.m_Nele)
+  , m_ptr_data(new int[m_Nele])
+{
+
   for(int i=0;i<m_Nele;i++)
     *(m_ptr_data+i)=v[i];
 }

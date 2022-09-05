@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2019 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "MVAUtils/ForestTMVA.h"
@@ -9,10 +9,10 @@
 
 using namespace MVAUtils;
 
-ForestTMVA::ForestTMVA(TTree* tree) : ForestWeighted<NodeTMVA>()
+ForestTMVA::ForestTMVA(TTree* tree)
+  : ForestWeighted<NodeTMVA>()
+  , m_max_var(0)
 {
-    m_max_var = 0;
-
     // variables read from the TTree
     std::vector<int> *vars = nullptr;
     std::vector<float> *values = nullptr;

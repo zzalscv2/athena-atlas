@@ -106,7 +106,8 @@ class AlMat {
   void copy(const AlSymMatBase&  m);
 
  protected:
-  int m_ncol, m_nrow;
+  int m_ncol;
+  int m_nrow;
   int m_nele;
   std::string m_pathbin;
   std::string m_pathtxt;

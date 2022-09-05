@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2017 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "GaudiKernel/StatusCode.h"
@@ -18,34 +18,41 @@
 
 namespace Trk {
 
-AlMat::AlMat() {
-  m_ncol = 0; m_nrow = 0; m_nele = 0;
-  m_ptr_data = nullptr;  // set pointer to null
-  m_transpose = false;
-  m_pathbin="./";
-  m_pathtxt="./";
+AlMat::AlMat()
+  : m_ncol(0)
+  , m_nrow(0)
+  , m_nele(0)
+  , m_pathbin("./")
+  , m_pathtxt("./")
+  , m_ptr_data(nullptr)
+  , m_transpose(false)
+{
 }
 
-AlMat::AlMat(int N, int M) {
-  m_nrow = N;
-  m_ncol = M;
-  m_nele = N*M;
-  m_ptr_data = new double[m_nele];
-  m_transpose = false;
-  m_pathbin="./";
-  m_pathtxt="./";
+AlMat::AlMat(int N, int M)
+  : m_ncol(M)
+  , m_nrow(N)
+  , m_nele(N * M)
+  , m_pathbin("./")
+  , m_pathtxt("./")
+  , m_ptr_data(new double[m_nele])
+  , m_transpose(false)
+{
 
   double*  p = m_ptr_data + m_nele;
   while (p > m_ptr_data) *(--p) = 0.;
-
 }
 
-AlMat::AlMat(const AlMat& m) {
-  m_nrow = m.nrow(); m_ncol = m.ncol(); m_nele = m_nrow*m_ncol;
-  m_ptr_data = new double[m_nele];
-  m_transpose = false;
-  m_pathbin = m.m_pathbin;
-  m_pathtxt = m.m_pathtxt;
+AlMat::AlMat(const AlMat& m)
+  : m_ncol(m.ncol())
+  , m_nrow(m.nrow())
+  , m_nele(m_nrow * m_ncol)
+  , m_pathbin(m.m_pathbin)
+  , m_pathtxt(m.m_pathtxt)
+  , m_ptr_data(new double[m_nele])
+  , m_transpose(false)
+{
+
   copy(m);
 }
 

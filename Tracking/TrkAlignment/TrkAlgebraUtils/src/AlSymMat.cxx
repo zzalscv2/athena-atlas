@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2017 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "GaudiKernel/StatusCode.h"
@@ -38,25 +38,26 @@ namespace Trk {
 
 //______________________________________________________________________________
 AlSymMat::AlSymMat()
+  : m_ptr_data(nullptr)
+  , m_pathbin("./")
+  , m_pathtxt("./")
 {
   m_matrix_type = 1;
   m_size = 0;
   m_nele = 0;
-  m_ptr_data = nullptr;  // set pointer to null
-  m_pathbin="./";
-  m_pathtxt="./";
+  // set pointer to null
 }
 
 
 //______________________________________________________________________________
 AlSymMat::AlSymMat(long int N)
+  : m_ptr_data(new double[m_nele])
+  , m_pathbin("./")
+  , m_pathtxt("./")
 {
   m_matrix_type = 1;
   m_size = N;
   m_nele = N*(N+1)/2;
-  m_ptr_data = new double[m_nele];
-  m_pathbin="./";
-  m_pathtxt="./";
 
   double*  p = m_ptr_data + m_nele;
   while (p > m_ptr_data) *(--p) = 0.;
@@ -66,26 +67,27 @@ AlSymMat::AlSymMat(long int N)
 //______________________________________________________________________________
 AlSymMat::AlSymMat(const AlSymMat& m)
   : AlSymMatBase(m)
+  , m_ptr_data(new double[m_nele])
+  , m_pathbin(m.m_pathbin)
+  , m_pathtxt(m.m_pathtxt)
 {
   m_matrix_type = 1;
   m_size      = m.size();
   m_nele      = m.m_nele;
-  m_pathbin = m.m_pathbin;
-  m_pathtxt = m.m_pathtxt;
-  m_ptr_data = new double[m_nele];
+
   copy(m);
 }
 
-
 //______________________________________________________________________________
 AlSymMat::AlSymMat(const AlSpaMat& m)
+  : m_ptr_data(new double[m_nele])
 {
   m_matrix_type = 1;
   m_size      = m.size();
   m_nele      = m_size*(m_size+1)/2;
   m_pathbin = m.pathBin();
   m_pathtxt = m.pathTxt();
-  m_ptr_data = new double[m_nele];
+
   copy(m);
 }
 
