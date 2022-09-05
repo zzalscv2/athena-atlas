@@ -101,8 +101,8 @@ def MistimedStreamMonitorConfig(flags):
         
         
         groupMapsHAD         = helper.addGroup(MistimedMonAlg, 'EventofInterest_'+str(i)+'_TT_HAD', mainDir)
-        groupMapsHAD.defineHistogram('etaTT_2D,phiTT_2D,pulseCat;EventofInterest_'+str(i)+'_had_2d_etaPhi_tt_classification_mistimedStreamAna', title='#eta - #phi Map of TT classification, EM layer: event of interest no. '+str(i)+';#eta;#phi'  , xbins=etabins, ybins=phibins, ymin=phimin, ymax=phibins,  type='TProfile2D', path=histPath)
-        groupMapsHAD.defineHistogram('etaTT_2D,phiTT_2D,bcidWord;EventofInterest_'+str(i)+'_had_2d_etaPhi_tt_pseBits_mistimedStreamAna', title='#eta - #phi Map of TT PSE Bits, EM layer: event of interest no. '+str(i)+';#eta;#phi', xbins=etabins, ybins=phibins, ymin=phimin, ymax=phibins, type='TProfile2D', path=histPath)
+        groupMapsHAD.defineHistogram('etaTT_2D,phiTT_2D,pulseCat;EventofInterest_'+str(i)+'_had_2d_etaPhi_tt_classification_mistimedStreamAna', title='#eta - #phi Map of TT classification, HAD layer: event of interest no. '+str(i)+';#eta;#phi'  , xbins=etabins, ybins=phibins, ymin=phimin, ymax=phibins,  type='TProfile2D', path=histPath)
+        groupMapsHAD.defineHistogram('etaTT_2D,phiTT_2D,bcidWord;EventofInterest_'+str(i)+'_had_2d_etaPhi_tt_pseBits_mistimedStreamAna', title='#eta - #phi Map of TT PSE Bits, HAD layer: event of interest no. '+str(i)+';#eta;#phi', xbins=etabins, ybins=phibins, ymin=phimin, ymax=phibins, type='TProfile2D', path=histPath)
 
     
         groupMapsEM0         = helper.addGroup(MistimedMonAlg,  'EventofInterest_'+str(i)+'_lut_EM0', mainDir)

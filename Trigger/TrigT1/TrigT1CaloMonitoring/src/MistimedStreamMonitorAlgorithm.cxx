@@ -58,7 +58,7 @@ StatusCode MistimedStreamMonitorAlgorithm::fillHistograms( const EventContext& c
 
   //the readout config ID tells you, which readoutConfig is loaded. now you can retrieve the l1aFadcSlice from this DB entry
   if (  readoutConfig->readoutConfig(readoutConfigID)->channelId() == readoutConfigID){
-    ATH_MSG_INFO("readoutConfigID " <<  readoutConfigID);
+    ATH_MSG_DEBUG("readoutConfigID " <<  readoutConfigID);
     channelID =  readoutConfig->readoutConfig(readoutConfigID)->channelId();
     numFadcSlices = readoutConfig->readoutConfig(readoutConfigID)->numFadcSlices();
     l1aFadcSlice = readoutConfig->readoutConfig(readoutConfigID)->l1aFadcSlice();
@@ -318,7 +318,7 @@ StatusCode MistimedStreamMonitorAlgorithm::fillHistograms( const EventContext& c
 
   
   if( m_event_counter[lumiNo] <=1){ 
-    ATH_MSG_INFO( "EventID :: " <<  m_event_counter[lumiNo]);
+    ATH_MSG_DEBUG( "EventID :: " <<  m_event_counter[lumiNo]);
     if (eventCounter < m_maxEvents) { // save less than MaxEvents
 
     
@@ -337,7 +337,7 @@ StatusCode MistimedStreamMonitorAlgorithm::fillHistograms( const EventContext& c
       //Create the trigger tower objects and calculate scaled phi
       for (const xAOD::TriggerTower* tt : *ttContainer) {
 	ATH_CHECK( makeTowerPPM(tt, vecMonTTDecor) );     
-	ATH_MSG_INFO( "tt->pulseClassification :: " <<  tt->auxdata<float>("pulseClassification"));
+	ATH_MSG_DEBUG( "tt->pulseClassification :: " <<  tt->auxdata<float>("pulseClassification"));
 	
       }
 
