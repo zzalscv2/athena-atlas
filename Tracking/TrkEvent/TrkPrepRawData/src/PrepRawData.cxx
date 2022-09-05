@@ -154,10 +154,8 @@ PrepRawData::dump(std::ostream& stream) const
   stream << "Collection Hash: " << m_indexAndHash.collHash()
          << "\tIndex in collection: " << m_indexAndHash.objIndex() << std::endl;
   stream << "RDO List = [";
-  for (std::vector<Identifier>::const_iterator it = m_rdoList.begin();
-       it != m_rdoList.end();
-       ++it) {
-    stream << *it << std::endl;
+  for (auto it : m_rdoList) {
+    stream << it << std::endl;
   }
   stream << "], ";
   return stream;

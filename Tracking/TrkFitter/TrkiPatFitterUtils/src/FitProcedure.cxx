@@ -129,12 +129,9 @@ FitProcedure::constructTrack(
 
   // append leading TSOS to perigee
   if (leadingTSOS) {
-    for (DataVector<const TrackStateOnSurface>::const_iterator t =
-           leadingTSOS->begin();
-         t != leadingTSOS->end();
-         ++t) {
-      if (!(**t).type(Trk::TrackStateOnSurface::Perigee)) {
-        trackStateOnSurfaces.push_back((**t).clone());
+    for (const auto *t : *leadingTSOS) {
+      if (!(*t).type(Trk::TrackStateOnSurface::Perigee)) {
+        trackStateOnSurfaces.push_back((*t).clone());
         ++tsos;
       }
     }

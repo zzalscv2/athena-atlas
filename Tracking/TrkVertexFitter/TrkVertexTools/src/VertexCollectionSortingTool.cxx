@@ -81,12 +81,10 @@ VertexCollectionSortingTool::sortVertexContainer(
 
   SG::AuxElement::Accessor<float> sigWeightDec(m_decorationName);
   unsigned int vtxCount(1);
-  for (std::vector<Vertex_pair>::const_iterator iter = MyVertex_pairs.begin();
-       iter != MyVertex_pairs.end();
-       ++iter) {
-    ATH_MSG_DEBUG("Weight after sorting: " << (*iter).first);
+  for (auto MyVertex_pair : MyVertex_pairs) {
+    ATH_MSG_DEBUG("Weight after sorting: " << MyVertex_pair.first);
     xAOD::Vertex* vxCand = new xAOD::Vertex(
-      *(iter->second)); // use copy-constructor, creates a private store
+      *(MyVertex_pair.second)); // use copy-constructor, creates a private store
     NewContainer->push_back(
       vxCand); // private store is now copied to the container store
     if (vtxCount == 1) {
@@ -94,7 +92,7 @@ VertexCollectionSortingTool::sortVertexContainer(
     } else {
       vxCand->setVertexType(xAOD::VxType::PileUp);
     }
-    sigWeightDec(*vxCand) = iter->first;
+    sigWeightDec(*vxCand) = MyVertex_pair.first;
     vtxCount++;
   }
 

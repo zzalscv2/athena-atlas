@@ -170,9 +170,9 @@ namespace Trk
 
 			BilloirVertex billoirVertex;
                         // unsigned int count(0);
-			for ( std::vector<const Trk::TrackParameters*>::const_iterator iter = originalPerigees.begin() ; iter != originalPerigees.end() ; ++iter )
+			for (const auto *originalPerigee : originalPerigees)
 			{
-				LinearizedTrack* linTrack = m_linFactory->linearizedTrack ( *iter, linPoint );
+				LinearizedTrack* linTrack = m_linFactory->linearizedTrack ( originalPerigee, linPoint );
 				if ( linTrack==nullptr )
 				{
 					ATH_MSG_DEBUG("Could not linearize track! Skipping this track!");
@@ -212,7 +212,7 @@ namespace Trk
 					billoirVertex.DtWD_Sum += locBilloirTrack.DtWD;
 					locBilloirTrack.DtWDx = ((D.transpose())*billoirWeightMat*D)*locXpVec;
 					billoirVertex.DtWDx_Sum += locBilloirTrack.DtWDx;
-					locBilloirTrack.originalPerigee = *iter;
+					locBilloirTrack.originalPerigee = originalPerigee;
 					billoirTracks.push_back ( locBilloirTrack );
 				}
 			        delete linTrack; linTrack=nullptr;
@@ -368,9 +368,9 @@ namespace Trk
  		   //making a list of perigee out of the vector of tracks   
  		   std::vector<const Trk::TrackParameters*> measuredPerigees; 
  		    
- 		   for(std::vector<const xAOD::TrackParticle*>::const_iterator i = vectorTrk.begin(); i!= vectorTrk.end();++i) 
+ 		   for(const auto *i : vectorTrk) 
  		   { 
- 		    const Trk::TrackParameters * tmpMeasPer = &((*i)->perigeeParameters()); 
+ 		    const Trk::TrackParameters * tmpMeasPer = &(i->perigeeParameters()); 
  		   
  		    if(tmpMeasPer!=nullptr) measuredPerigees.push_back(tmpMeasPer); 
  		    else  msg(MSG::INFO)<<"Failed to dynamic_cast this track parameters to perigee"<<endmsg; //TODO: Failed to implicit cast the perigee parameters to track parameters?

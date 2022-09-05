@@ -98,16 +98,14 @@ namespace Trk {
     // calculate the 'center' of this module
     double sumx(0),sumy(0),sumz(0);
     size_t n(0);
-    for (int i=0;i<(int)detelementsVec.size();i++) {
-      DetElementCollection* detelements=detelementsVec[i];
+    for (auto *detelements : detelementsVec) {
       if (!detelements)
         continue;
 
-      for(DetElementCollection::const_iterator it = detelements->begin() ;
-          it != detelements->end(); ++it) {
-        sumx += (*it)->surface().center().x();
-        sumy += (*it)->surface().center().y();
-        sumz += (*it)->surface().center().z();
+      for(const auto *detelement : *detelements) {
+        sumx += detelement->surface().center().x();
+        sumy += detelement->surface().center().y();
+        sumz += detelement->surface().center().z();
       }
       n += detelements->size();
     }
@@ -220,15 +218,13 @@ namespace Trk {
     double sumx(0),sumy(0),sumz(0);
     double sumRx(0),sumRy(0),sumRz(0);
     size_t n(0);
-    for (int i=0;i<(int)m_detelements.size();i++) {
-      DetElementCollection* detelements=m_detelements[i];
+    for (auto *detelements : m_detelements) {
       if (!detelements)
         continue;
 
       double trans[6];
-      for(DetElementCollection::const_iterator it = detelements->begin() ;
-          it != detelements->end(); ++it) {
-        decomposeTransform( (*it)->transform(), trans);
+      for(const auto *detelement : *detelements) {
+        decomposeTransform( detelement->transform(), trans);
         sumx += trans[0];
         sumy += trans[1];
         sumz += trans[2];

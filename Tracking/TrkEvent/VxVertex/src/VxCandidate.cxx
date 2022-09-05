@@ -50,9 +50,9 @@ std::atomic<unsigned int> VxCandidate::s_numberOfInstantiations=0;
       m_recVertex(rhs.m_recVertex),
       m_vxTrackAtVertex(std::vector<Trk::VxTrackAtVertex*>())
     {
-      for (std::vector<Trk::VxTrackAtVertex*>::const_iterator itr = rhs.m_vxTrackAtVertex.begin(); itr != rhs.m_vxTrackAtVertex.end(); ++itr)
+      for (auto *itr : rhs.m_vxTrackAtVertex)
       {
-        m_vxTrackAtVertex.push_back((*itr)->clone());
+        m_vxTrackAtVertex.push_back(itr->clone());
       }
 #ifndef NDEBUG
       s_numberOfInstantiations++;
@@ -67,18 +67,16 @@ std::atomic<unsigned int> VxCandidate::s_numberOfInstantiations=0;
       m_vertexType = rhs.m_vertexType;
       // delete objects where pointers pointed to
       // (otherwise -> memory leak)
-      for (std::vector<Trk::VxTrackAtVertex*>::iterator i = m_vxTrackAtVertex.begin();
-              i != m_vxTrackAtVertex.end() ; ++i)
+      for (auto & i : m_vxTrackAtVertex)
       {
-          delete (*i);
-          (*i) = 0;
+          delete i;
+          i = 0;
       }
       // and clear the vector
       m_vxTrackAtVertex.clear();
-      for (std::vector<Trk::VxTrackAtVertex*>::const_iterator itr = rhs.m_vxTrackAtVertex.begin();
-              itr != rhs.m_vxTrackAtVertex.end(); ++itr)
+      for (auto *itr : rhs.m_vxTrackAtVertex)
       {
-          m_vxTrackAtVertex.push_back((*itr)->clone());
+          m_vxTrackAtVertex.push_back(itr->clone());
       }
     }
     return *this;
@@ -98,10 +96,9 @@ std::atomic<unsigned int> VxCandidate::s_numberOfInstantiations=0;
   }
 
   VxCandidate::~VxCandidate() {
-    for (std::vector<Trk::VxTrackAtVertex*>::iterator i = m_vxTrackAtVertex.begin();
-	 i != m_vxTrackAtVertex.end() ; ++i) {
-      delete (*i);
-      (*i) = 0;
+    for (auto & i : m_vxTrackAtVertex) {
+      delete i;
+      i = 0;
     }
     // and clear the vector
     m_vxTrackAtVertex.clear();

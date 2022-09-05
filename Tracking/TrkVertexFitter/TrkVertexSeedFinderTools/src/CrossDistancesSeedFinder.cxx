@@ -75,12 +75,11 @@ namespace Trk
 
     //create perigees from track list
     std::vector<const TrackParameters*> perigeeList;
-    for (std::vector<const Trk::Track*>::const_iterator iter=VectorTrk.begin();
-	 iter!=VectorTrk.end();iter++) {
-      if (std::isnan((*iter)->perigeeParameters()->parameters()[Trk::d0])) {
+    for (const auto *iter : VectorTrk) {
+      if (std::isnan(iter->perigeeParameters()->parameters()[Trk::d0])) {
 	continue;
       }  
-      perigeeList.push_back((*iter)->perigeeParameters());
+      perigeeList.push_back(iter->perigeeParameters());
     }
 
     if (perigeeList.size()<2)

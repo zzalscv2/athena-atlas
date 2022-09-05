@@ -300,9 +300,9 @@ StatusCode Trk::CETmaterial::execute()
           delete precPar;
           // collect material
           if (nextPrec) {
-            for (unsigned int i=0; i< nextPrec->size(); i++) {
-              const Trk::MaterialEffectsBase* mEff = (*nextPrec)[i]->materialEffectsOnTrack();
-              const Trk::TrackParameters* trPar = (*nextPrec)[i]->trackParameters();
+            for (const auto *i : *nextPrec) {
+              const Trk::MaterialEffectsBase* mEff = i->materialEffectsOnTrack();
+              const Trk::TrackParameters* trPar = i->trackParameters();
               if (mEff && trPar) {
                 matApp += mEff->thicknessInX0();
               }
@@ -312,8 +312,8 @@ StatusCode Trk::CETmaterial::execute()
           if (!lay || !nextPrec || nextPrec->empty() || !nextPrec->back() ) break;
           precPar = nextPrec->back()->trackParameters();
           double mat=0.;
-          if (!material.empty()) for (unsigned int i=0; i< material.size(); i++) {
-            if (material[i]->materialEffectsOnTrack()) mat += material[i]->materialEffectsOnTrack()->thicknessInX0();
+          if (!material.empty()) for (auto & i : material) {
+            if (i->materialEffectsOnTrack()) mat += i->materialEffectsOnTrack()->thicknessInX0();
           }
           if ( precPar ) printMatComp(theta,phi,currPar,lay->enclosingDetachedTrackingVolume()->name(),mat,matApp,currPar->parameters()[0]-precPar->parameters()[0],
                       currPar->parameters()[1]-precPar->parameters()[1]);
@@ -326,8 +326,8 @@ StatusCode Trk::CETmaterial::execute()
           int id = 0;
           if (lay) id = lay->layerType();
           double matc=0.;
-          if (!material.empty()) for (unsigned int i=0; i< material.size(); i++) {
-            if (material[i]->materialEffectsOnTrack()) matc += material[i]->materialEffectsOnTrack()->thicknessInX0();
+          if (!material.empty()) for (auto & i : material) {
+            if (i->materialEffectsOnTrack()) matc += i->materialEffectsOnTrack()->thicknessInX0();
           }
           else ATH_MSG_INFO( "mat & error:" << theta << "," << phi << "," << matc << ","
                   << Amg::error(nextPar->covariance()->inverse().eval(),Trk::theta) << ","
@@ -339,9 +339,9 @@ StatusCode Trk::CETmaterial::execute()
       }
       if (m_printMaterial) {
         double mat=0.;
-        if (!material.empty()) for (unsigned int i=0; i< material.size(); i++) {
-          if (material[i]->materialEffectsOnTrack()) {
-            mat += material[i]->materialEffectsOnTrack()->thicknessInX0();
+        if (!material.empty()) for (auto & i : material) {
+          if (i->materialEffectsOnTrack()) {
+            mat += i->materialEffectsOnTrack()->thicknessInX0();
           }
         }
         printMat(theta,phi,mat);
@@ -357,9 +357,9 @@ StatusCode Trk::CETmaterial::execute()
 
       if (m_printMaterial) {
         double mat=0.;
-        if (destParameters) for (unsigned int i=0; i< destParameters->size(); i++) {
-          const Trk::MaterialEffectsBase* mEff = (*destParameters)[i]->materialEffectsOnTrack();
-          const Trk::TrackParameters* trPar = (*destParameters)[i]->trackParameters();
+        if (destParameters) for (const auto *destParameter : *destParameters) {
+          const Trk::MaterialEffectsBase* mEff = destParameter->materialEffectsOnTrack();
+          const Trk::TrackParameters* trPar = destParameter->trackParameters();
           if (trPar) {
             //const Trk::MeasuredTrackParameters* mdest = dynamic_cast<const Trk::MeasuredTrackParameters*> (trPar);
             //if (mdest) ATH_MSG_INFO( "radiation thickness and errors(theta,phi):" << theta << "," << phi << "," << mat << "," <<

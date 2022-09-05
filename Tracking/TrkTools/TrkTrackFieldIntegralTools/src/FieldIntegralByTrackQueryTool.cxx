@@ -106,16 +106,13 @@ double Trk::FieldIntegralByTrackQueryTool::fieldIntegral(const Trk::Track& track
     parameters = nullptr;
 
     // there is no defined state for MS entrance? Instead search a bit on the parameter vector...
-    for (DataVector<const Trk::TrackStateOnSurface>::const_iterator
-	   s = track.trackStateOnSurfaces()->begin();
-	 s != track.trackStateOnSurfaces()->end();
-	 ++s) {
-      if ((**s).trackParameters() == nullptr) continue;
-      if ( !m_caloVolume->inside((**s).trackParameters()->position()) &&
-	   (**s).type(Trk::TrackStateOnSurface::Measurement) &&
-	   !(**s).type(Trk::TrackStateOnSurface::Outlier) && 
-	   dynamic_cast<const Trk::PseudoMeasurementOnTrack*>((**s).measurementOnTrack())==nullptr) break;
-      parameters = (**s).trackParameters(); // gets us the pars before 1st MS meas't
+    for (const auto *s : *track.trackStateOnSurfaces()) {
+      if ((*s).trackParameters() == nullptr) continue;
+      if ( !m_caloVolume->inside((*s).trackParameters()->position()) &&
+	   (*s).type(Trk::TrackStateOnSurface::Measurement) &&
+	   !(*s).type(Trk::TrackStateOnSurface::Outlier) && 
+	   dynamic_cast<const Trk::PseudoMeasurementOnTrack*>((*s).measurementOnTrack())==nullptr) break;
+      parameters = (*s).trackParameters(); // gets us the pars before 1st MS meas't
     }
   }
   if (!parameters) {
@@ -129,25 +126,22 @@ double Trk::FieldIntegralByTrackQueryTool::fieldIntegral(const Trk::Track& track
   
 
   // loop over TSOS to integrate vector Bdl
-  for (DataVector<const Trk::TrackStateOnSurface>::const_iterator
-	 s = track.trackStateOnSurfaces()->begin();
-       s != track.trackStateOnSurfaces()->end();
-       ++s)
+  for (const auto *s : *track.trackStateOnSurfaces())
     {
       // filter out stated that don't carry parameters or are in the wrong tracking system
-      if (! (**s).trackParameters() || (**s).type(Trk::TrackStateOnSurface::Perigee)) continue;
-      if (!takeMS && !m_indetVolume->inside((**s).trackParameters()->position()) ) continue;
-      if (takeMS && m_caloVolume->inside((**s).trackParameters()->position()) ) continue;
+      if (! (*s).trackParameters() || (*s).type(Trk::TrackStateOnSurface::Perigee)) continue;
+      if (!takeMS && !m_indetVolume->inside((*s).trackParameters()->position()) ) continue;
+      if (takeMS && m_caloVolume->inside((*s).trackParameters()->position()) ) continue;
         
       Amg::Vector3D startMomentum       = parameters->momentum();
-      parameters                              = (**s).trackParameters();      
+      parameters                              = (*s).trackParameters();      
       Amg::Vector3D endDirection       = parameters->momentum().unit();
         
       // subtract scattering angle
-      if ((**s).materialEffectsOnTrack())
+      if ((*s).materialEffectsOnTrack())
         {
 	  const Trk::MaterialEffectsOnTrack* meot =
-	    dynamic_cast<const Trk::MaterialEffectsOnTrack*>((**s).materialEffectsOnTrack());
+	    dynamic_cast<const Trk::MaterialEffectsOnTrack*>((*s).materialEffectsOnTrack());
 	  if (meot && meot->scatteringAngles())
             {
 	      double theta    = endDirection.theta() - meot->scatteringAngles()->deltaTheta();
@@ -163,12 +157,12 @@ double Trk::FieldIntegralByTrackQueryTool::fieldIntegral(const Trk::Track& track
       integratedMomentumKick                  += momentumKick;
 
       // accumulate abs(Bdl) between measurements
-      const Trk::MeasurementBase* haveMeasurement = (**s).measurementOnTrack();
+      const Trk::MeasurementBase* haveMeasurement = (*s).measurementOnTrack();
       if (! haveMeasurement
-	  || (**s).type(Trk::TrackStateOnSurface::Outlier))			continue;
+	  || (*s).type(Trk::TrackStateOnSurface::Outlier))			continue;
 
       // skip spectrometer phi measurements
-      if (! m_caloVolume->inside((**s).trackParameters()->position()))
+      if (! m_caloVolume->inside((*s).trackParameters()->position()))
       {
 	  // Identifier id       = m_helper->getIdentifier(*(**s).measurementOnTrack());
 	  // isPreciseHit        = (id.is_valid() && ! m_idHelper->measuresPhi(id)); // avoid MS dependency

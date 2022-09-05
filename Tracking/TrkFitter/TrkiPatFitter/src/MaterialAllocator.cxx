@@ -146,18 +146,16 @@ namespace Trk
     const TrackSurfaceIntersection* intersection = nullptr;
     int leadingScatterers = 0;
     Trk::FitMeasurement* leadingScatterer = nullptr;
-    for (std::vector<Trk::FitMeasurement*>::const_iterator m = measurements.begin();
-         m != measurements.end();
-         ++m) {
-      if ((**m).isMaterialDelimiter()) {
+    for (auto *measurement : measurements) {
+      if ((*measurement).isMaterialDelimiter()) {
         haveDelimiter = true;
-      } else if ((**m).isScatterer()) {
+      } else if ((*measurement).isScatterer()) {
         // count unfitted scatterers
-        if (!(**m).numberDoF()) {
+        if (!(*measurement).numberDoF()) {
           ++leadingScatterers;
-          leadingScatterer = *m;
+          leadingScatterer = measurement;
         } else {
-          if (std::abs(1. / (**m).qOverP()) > p) energyGain = true;
+          if (std::abs(1. / (*measurement).qOverP()) > p) energyGain = true;
           break;
         }
       }
@@ -172,29 +170,27 @@ namespace Trk
       Trk::FitMeasurement* leadingOutlier = nullptr;
       std::vector<Trk::FitMeasurement*> leadingOutliers;
       const Surface* surface = nullptr;
-      for (std::vector<Trk::FitMeasurement*>::const_iterator m = measurements.begin();
-           m != measurements.end();
-           ++m) {
-        if ((**m).isMaterialDelimiter()) {
+      for (auto *measurement : measurements) {
+        if ((*measurement).isMaterialDelimiter()) {
           haveDelimiter = true;
-          endPosition = (**m).position();
-          surface = (**m).surface();
-        } else if ((**m).isPositionMeasurement()) {
-          if ((**m).isOutlier()) {
-            if (!firstMeasurementSurface) leadingOutliers.push_back(*m);
+          endPosition = (*measurement).position();
+          surface = (*measurement).surface();
+        } else if ((*measurement).isPositionMeasurement()) {
+          if ((*measurement).isOutlier()) {
+            if (!firstMeasurementSurface) leadingOutliers.push_back(measurement);
           } else {
             if (!firstMeasurementSurface && !intersection) {
-              firstMeasurementSurface = (**m).surface();
+              firstMeasurementSurface = (*measurement).surface();
               intersection =
-                new TrackSurfaceIntersection((**m).intersection(FittedTrajectory));
+                new TrackSurfaceIntersection((*measurement).intersection(FittedTrajectory));
             }
             if (!haveDelimiter) continue;
             // surface	= (**m).surface();
           }
-        } else if ((**m).isScatterer()) {
+        } else if ((*measurement).isScatterer()) {
           if (!surface) continue;
           // FIXME: update p for Perigee in case of gain??
-          if (std::abs(1. / (**m).qOverP()) > p) energyGain = true;
+          if (std::abs(1. / (*measurement).qOverP()) > p) energyGain = true;
           break;
         }
       }
@@ -716,17 +712,15 @@ namespace Trk
     leadingTSOS->reserve(extrapolatedTSOS->size());
     double outgoingEnergy = spectrometerParameters.momentum().mag();
     double particleMass = Trk::ParticleMasses::mass[Trk::muon];
-    for (std::vector<const TrackStateOnSurface*>::const_iterator s = extrapolatedTSOS->begin();
-         s != extrapolatedTSOS->end();
-         ++s) {
-      if (!(**s).trackParameters()) continue;
-      std::unique_ptr<FitMeasurement> measurement (measurementFromTSOS(**s, outgoingEnergy, particleMass));
-      outgoingEnergy = (**s).trackParameters()->momentum().mag();
+    for (const auto *s : *extrapolatedTSOS) {
+      if (!(*s).trackParameters()) continue;
+      std::unique_ptr<FitMeasurement> measurement (measurementFromTSOS(*s, outgoingEnergy, particleMass));
+      outgoingEnergy = (*s).trackParameters()->momentum().mag();
 
       if (measurement) {
         leadingMeasurements.emplace(leadingMeasurements.begin(), std::move(measurement));
       } else {
-        leadingTSOS->push_back((**s).clone());
+        leadingTSOS->push_back((*s).clone());
       }
     }
 
@@ -767,15 +761,13 @@ namespace Trk
     double previousDistance = -m_orderingTolerance;
     std::vector< std::pair<double, FitMeasurement*> > measurementOrder;
     std::vector< std::pair<double, FitMeasurement*> > originalOrder;
-    for (std::vector<FitMeasurement*>::const_iterator m = measurements.begin();
-         m != measurements.end();
-         ++m) {
+    for (auto *measurement : measurements) {
       double distance =
-        startDirection.dot((**m).intersection(FittedTrajectory).position() - startPosition);
+        startDirection.dot((*measurement).intersection(FittedTrajectory).position() - startPosition);
       if (distance < previousDistance) distance += m_orderingTolerance;
       previousDistance = distance - m_orderingTolerance;
-      measurementOrder.emplace_back(distance, *m);
-      originalOrder.emplace_back(distance, *m);
+      measurementOrder.emplace_back(distance, measurement);
+      originalOrder.emplace_back(distance, measurement);
     }
     std::sort(measurementOrder.begin(), measurementOrder.end(), compareByDistance());
     std::vector< std::pair<double, FitMeasurement*> >::const_iterator orig = originalOrder.begin();
@@ -814,21 +806,19 @@ namespace Trk
     ATH_MSG_DEBUG(" reallocateSpectrometerMaterial ");
 
     int n = 0;
-    for (std::vector<Trk::FitMeasurement*>::iterator m = measurements.begin();
-         m != measurements.end();
-         ++m) {
-      if (!(**m).isMaterialDelimiter()) continue;
+    for (auto & measurement : measurements) {
+      if (!(*measurement).isMaterialDelimiter()) continue;
 
-      double distance = ((**m).intersection(FittedTrajectory).position() - (**m).position()).mag();
+      double distance = ((*measurement).intersection(FittedTrajectory).position() - (*measurement).position()).mag();
       ATH_MSG_INFO(std::setiosflags(std::ios::fixed) << std::setw(5) << ++n
                                                      << std::setw(10) << std::setprecision(3) << distance
-                                                     << "  " << (**m).type()
+                                                     << "  " << (*measurement).type()
                                                      << std::setw(10) << std::setprecision(1)
-                                                     << (**m).intersection(FittedTrajectory).position().perp()
+                                                     << (*measurement).intersection(FittedTrajectory).position().perp()
                                                      << std::setw(9) << std::setprecision(4)
-                                                     << (**m).intersection(FittedTrajectory).position().phi()
+                                                     << (*measurement).intersection(FittedTrajectory).position().phi()
                                                      << std::setw(10) << std::setprecision(1)
-                                                     << (**m).intersection(FittedTrajectory).position().z());
+                                                     << (*measurement).intersection(FittedTrajectory).position().z());
     }
 
     // put iterator at MS entrance
@@ -903,11 +893,8 @@ namespace Trk
         delete fms.second;
         //ATH_MSG_INFO( " delete TSOS " );
 
-        for (std::vector<const TrackStateOnSurface*>::const_iterator s =
-               spectrometerMaterial->begin();
-             s != spectrometerMaterial->end();
-             ++s)
-          delete *s;
+        for (const auto *s : *spectrometerMaterial)
+          delete s;
       }
       // ATH_MSG_INFO( " delete material " );
       delete spectrometerMaterial;
@@ -1802,27 +1789,25 @@ namespace Trk
       int n = 0;
       Amg::Vector3D startPosition = measurements.front()->intersection(FittedTrajectory).position();
       Amg::Vector3D startDirection = measurements.front()->intersection(FittedTrajectory).direction();
-      for (std::vector<Trk::FitMeasurement*>::const_iterator m = measurements.begin();
-           m != measurements.end();
-           ++m) {
-        Amg::Vector3D position = (**m).intersection(FittedTrajectory).position();
+      for (auto *measurement : measurements) {
+        Amg::Vector3D position = (*measurement).intersection(FittedTrajectory).position();
         double distance = std::abs(startDirection.dot(position - startPosition));
         msg(MSG::VERBOSE) << std::setiosflags(std::ios::fixed)
                           << std::setw(5) << ++n
                           << std::setw(10) << std::setprecision(3) << distance
-                          << "  " << (**m).type();
-        if ((**m).isOutlier()) {
+                          << "  " << (*measurement).type();
+        if ((*measurement).isOutlier()) {
           msg() << "  outlier ";
-        } else if ((**m).materialEffects()) {
+        } else if ((*measurement).materialEffects()) {
           msg() << std::setw(8) << std::setprecision(3)
-                << (**m).materialEffects()->thicknessInX0() << "  ";
+                << (*measurement).materialEffects()->thicknessInX0() << "  ";
         } else {
           msg() << "          ";
         }
-        if (!(**m).isMaterialDelimiter()) {
-          msg() << std::setw(10) << std::setprecision(1) << (**m).position().perp()
-                << std::setw(9) << std::setprecision(4) << (**m).position().phi()
-                << std::setw(10) << std::setprecision(1) << (**m).position().z();
+        if (!(*measurement).isMaterialDelimiter()) {
+          msg() << std::setw(10) << std::setprecision(1) << (*measurement).position().perp()
+                << std::setw(9) << std::setprecision(4) << (*measurement).position().phi()
+                << std::setw(10) << std::setprecision(1) << (*measurement).position().z();
         }
         msg() << endmsg;
       }
@@ -1830,19 +1815,15 @@ namespace Trk
 
     // loops to erase material delimiters and set energy gain when appropriate
     bool energyGain = false;
-    for (std::vector<Trk::FitMeasurement*>::iterator m = measurements.begin();
-         m != measurements.end();
-         ++m) {
-      if ((**m).materialEffects()
-          && (**m).numberDoF()
-          && (**m).energyLoss() < 0.) energyGain = true;
+    for (auto & measurement : measurements) {
+      if ((*measurement).materialEffects()
+          && (*measurement).numberDoF()
+          && (*measurement).energyLoss() < 0.) energyGain = true;
     }
 
     if (energyGain) {
-      for (std::vector<Trk::FitMeasurement*>::iterator m = measurements.begin();
-           m != measurements.end();
-           ++m) {
-        if ((**m).materialEffects()) (**m).setEnergyGain();
+      for (auto & measurement : measurements) {
+        if ((*measurement).materialEffects()) (*measurement).setEnergyGain();
       }
     }
   }
@@ -1889,61 +1870,59 @@ namespace Trk
     double leadingELoss = 0.;
     double sumELoss = 0.;
     int n = 0;
-    for (std::vector<Trk::FitMeasurement*>::iterator m = measurements.begin();
-         m != measurements.end();
-         ++m) {
-      double distance = direction.dot((**m).intersection(FittedTrajectory).position() - startPosition);
+    for (auto & measurement : measurements) {
+      double distance = direction.dot((*measurement).intersection(FittedTrajectory).position() - startPosition);
       msg(MSG::VERBOSE) << std::setiosflags(std::ios::fixed)
                         << std::setw(5) << ++n
-                        << "  " << (**m).type()
+                        << "  " << (*measurement).type()
                         << std::setw(11) << std::setprecision(3) << distance;
-      if ((**m).isOutlier()) {
+      if ((*measurement).isOutlier()) {
         msg() << "  outlier " << std::setw(44);
-      } else if ((**m).materialEffects()) {
+      } else if ((*measurement).materialEffects()) {
         double deltaE = 0.;
         const MaterialEffectsOnTrack* materialEffects =
-          dynamic_cast<const MaterialEffectsOnTrack*>((**m).materialEffects());
+          dynamic_cast<const MaterialEffectsOnTrack*>((*measurement).materialEffects());
         if (materialEffects && materialEffects->energyLoss()) deltaE = materialEffects->energyLoss()->deltaE();
-        if ((**m).isEnergyDeposit()) deltaE = -deltaE;
+        if ((*measurement).isEnergyDeposit()) deltaE = -deltaE;
         msg() << std::setw(10) << std::setprecision(3)
-              << (**m).materialEffects()->thicknessInX0()
+              << (*measurement).materialEffects()->thicknessInX0()
               << std::setw(9) << std::setprecision(1) << deltaE << "  ";
         if (distance > 0.) {
           ++scatterers;
-          sumX0 += (**m).materialEffects()->thicknessInX0();
+          sumX0 += (*measurement).materialEffects()->thicknessInX0();
           sumELoss -= deltaE;
         } else {
           ++leadingMaterial;
-          leadingX0 += (**m).materialEffects()->thicknessInX0();
+          leadingX0 += (*measurement).materialEffects()->thicknessInX0();
           leadingELoss -= deltaE;
         }
 
-        if ((**m).qOverP()) {
+        if ((*measurement).qOverP()) {
           msg() << std::setw(11) << std::setprecision(4)
-                << 1. / std::abs((**m).qOverP() * Gaudi::Units::GeV)
+                << 1. / std::abs((*measurement).qOverP() * Gaudi::Units::GeV)
                 << std::setw(10) << std::setprecision(3)
-                << (**m).intersection(FittedTrajectory).direction().perp() / ((**m).qOverP() * Gaudi::Units::GeV)
+                << (*measurement).intersection(FittedTrajectory).direction().perp() / ((*measurement).qOverP() * Gaudi::Units::GeV)
                 << std::setw(12);
         }
       } else {
         msg() << std::setw(54);
       }
-      if ((**m).isMaterialDelimiter()) {
-        msg() << std::setprecision(1) << (**m).intersection(FittedTrajectory).position().perp()
+      if ((*measurement).isMaterialDelimiter()) {
+        msg() << std::setprecision(1) << (*measurement).intersection(FittedTrajectory).position().perp()
               << std::setw(9) << std::setprecision(4)
-              << (**m).intersection(FittedTrajectory).position().phi()
+              << (*measurement).intersection(FittedTrajectory).position().phi()
               << std::setw(10) << std::setprecision(1)
-              << (**m).intersection(FittedTrajectory).position().z()
+              << (*measurement).intersection(FittedTrajectory).position().z()
               << std::setw(14) << std::setprecision(4)
-              << (**m).intersection(FittedTrajectory).direction().phi()
+              << (*measurement).intersection(FittedTrajectory).direction().phi()
               << std::setw(9) << std::setprecision(4)
-              << (**m).intersection(FittedTrajectory).direction().theta()
+              << (*measurement).intersection(FittedTrajectory).direction().theta()
               << endmsg;
       } else {
-        msg() << std::setprecision(1) << (**m).position().perp()
-              << std::setw(9) << std::setprecision(4) << (**m).position().phi()
-              << std::setw(10) << std::setprecision(1) << (**m).position().z()
-              << std::setw(5) << (**m).numberDoF() << endmsg;
+        msg() << std::setprecision(1) << (*measurement).position().perp()
+              << std::setw(9) << std::setprecision(4) << (*measurement).position().phi()
+              << std::setw(10) << std::setprecision(1) << (*measurement).position().z()
+              << std::setw(5) << (*measurement).numberDoF() << endmsg;
       }
     }
 
@@ -2200,27 +2179,24 @@ namespace Trk
       double p1 = 0.;
       if (spectrometerMaterial->front()->trackParameters()) p1 =
           spectrometerMaterial->front()->trackParameters()->momentum().mag();
-      for (std::vector<const TrackStateOnSurface*>::const_iterator
-           ss = spectrometerMaterial->begin();
-           ss != spectrometerMaterial->end();
-           ++ss) {
-        if (!(**ss).trackParameters() || !(**ss).materialEffectsOnTrack()) continue;
-        double distance = startDirection.dot((**ss).trackParameters()->position() - startPosition);
+      for (const auto *ss : *spectrometerMaterial) {
+        if (!(*ss).trackParameters() || !(*ss).materialEffectsOnTrack()) continue;
+        double distance = startDirection.dot((*ss).trackParameters()->position() - startPosition);
         double deltaE = 0.;
-        double thickness = (**ss).materialEffectsOnTrack()->thicknessInX0();
+        double thickness = (*ss).materialEffectsOnTrack()->thicknessInX0();
         const MaterialEffectsOnTrack* materialEffects =
-          dynamic_cast<const MaterialEffectsOnTrack*>((**ss).materialEffectsOnTrack());
+          dynamic_cast<const MaterialEffectsOnTrack*>((*ss).materialEffectsOnTrack());
         if (materialEffects && materialEffects->energyLoss()) deltaE = materialEffects->energyLoss()->deltaE();
-        double p2 = (**ss).trackParameters()->momentum().mag();
+        double p2 = (*ss).trackParameters()->momentum().mag();
         ATH_MSG_VERBOSE(std::setiosflags(std::ios::fixed) << "         material: RZ"
                                                           << std::setw(9) << std::setprecision(3)
-                                                          << (**ss).trackParameters()->position().perp()
+                                                          << (*ss).trackParameters()->position().perp()
                                                           << std::setw(10) << std::setprecision(3)
-                                                          << (**ss).trackParameters()->position().z()
+                                                          << (*ss).trackParameters()->position().z()
                                                           << "   distance " << std::setw(10) << std::setprecision(3)
                                                           << distance
                                                           << "   pt " << std::setw(8) << std::setprecision(3)
-                                                          << (**ss).trackParameters()->momentum().perp() / Gaudi::Units::GeV
+                                                          << (*ss).trackParameters()->momentum().perp() / Gaudi::Units::GeV
                                                           << "  X0thickness " << std::setw(8) << std::setprecision(4)
                                                           << thickness
                                                           << "  deltaE " << std::setw(8) << std::setprecision(4)
