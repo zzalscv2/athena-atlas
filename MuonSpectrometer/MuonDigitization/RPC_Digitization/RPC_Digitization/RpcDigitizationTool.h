@@ -39,7 +39,6 @@
 #include "AthenaKernel/IAthRNGSvc.h"
 #include "HitManagement/TimedHitCollection.h"
 #include "MuonCondData/RpcCondDbData.h"
-#include "MuonCondInterface/IRPCConditionsSvc.h"
 #include "MuonSimEvent/RPCSimHit.h"
 #include "MuonSimEvent/RPCSimHitCollection.h"
 #include "PileUpTools/PileUpMergeSvc.h"
