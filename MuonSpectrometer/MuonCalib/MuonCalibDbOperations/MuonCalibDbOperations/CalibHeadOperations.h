@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2017 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef CalibHeadOperations_h
@@ -25,7 +25,7 @@ namespace MuonCalib {
         virtual ~CalibHeadOperations();
         //=====================publlic member functions=================================
         // Get latest HeadId
-        int GetLatestHeadId() const;
+        int GetLatestHeadId();
         // Get header information
         bool GetHeadInfo(int &head_id, int &lowrun, int &uprun, int &lowtime, int &uptime);
         // Open data connection for given head_id. head_id=-1 => Get latest header
