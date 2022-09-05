@@ -34,11 +34,16 @@ from six.moves import xmlrpc_client as xmlrpclib
 import math
 from DataQualityUtils import pathExtract         
 
+sys.path.append("/afs/cern.ch/user/l/larmon/public/prod/Misc")
+from LArMonCoolLib import GetLBTimeStamps,GetOnlineLumiFromCOOL
+
 import ROOT as R
 
+############################################################################################################################################################################
+############################################################################################################################################################################
 def lbStr(lb):
   """Return formatted lumiblock string"""
-  return "_lb"+lb.zfill(5)  # is this still the case?
+  return "_lb"+lb.zfill(5) 
 
 ### The method below was added by someone unknown in 2016-2022 period but never really used
 ### It was commented by B.Trocme on March 2022
@@ -78,6 +83,8 @@ def lbStr(lb):
 ###  return histPathList
   
 
+############################################################################################################################################################################
+############################################################################################################################################################################
 def getHistoInfo(objectType, runNumber):
   """Histo path definition base on object type"""
   # histoPath   : Histogram path in the ROOT file
@@ -93,51 +100,58 @@ def getHistoInfo(objectType, runNumber):
 
   runstr = "run_"+str(runNumber)
 
-  if "TopoCluster" in objectType:
-    #histoPath  = {"Et10GeV":runstr+"/CaloMonitoring/ClusterMon/CaloCalTopoClustersNoTrigSel/2d_Rates/m_clus_etaphi_Et_thresh1",
-    #              "Et25GeV":runstr+"/CaloMonitoring/ClusterMon/CaloCalTopoClustersNoTrigSel/2d_Rates/m_clus_etaphi_Et_thresh2",
-    #              "Et50GeV":runstr+"/CaloMonitoring/ClusterMon/CaloCalTopoClustersNoTrigSel/2d_Rates/m_clus_etaphi_Et_thresh3"}
-    #histoLegend = {"Et10GeV":"Et > 10GeV",
-    #               "Et25GeV":"Et > 25GeV",
-    #               "Et50GeV":"Et > 50GeV"}
-    histoPath = {"ECA_thr0":runstr+"/CaloTopoClusters/CalECA/Thresh0ECAOcc",
-                 "ECA_thr1":runstr+"/CaloTopoClusters/CalECA/Thresh1ECAOcc",
+  if objectType == "TopoClusters": # Release 22 : OK
+    histoPath = {"ECA_thr1":runstr+"/CaloTopoClusters/CalECA/Thresh1ECAOcc",
                  "ECA_thr2":runstr+"/CaloTopoClusters/CalECA/Thresh2ECAOcc",
                  "ECA_thr3":runstr+"/CaloTopoClusters/CalECA/Thresh3ECAOcc",
-                 "ECC_thr0":runstr+"/CaloTopoClusters/CalECC/Thresh0ECCOcc",
                  "ECC_thr1":runstr+"/CaloTopoClusters/CalECC/Thresh1ECCOcc",
                  "ECC_thr2":runstr+"/CaloTopoClusters/CalECC/Thresh2ECCOcc",
                  "ECC_thr3":runstr+"/CaloTopoClusters/CalECC/Thresh3ECCOcc",
-                 "BAR_thr0":runstr+"/CaloTopoClusters/CalBAR/Thresh0BAROcc",
                  "BAR_thr1":runstr+"/CaloTopoClusters/CalBAR/Thresh1BAROcc",
                  "BAR_thr2":runstr+"/CaloTopoClusters/CalBAR/Thresh2BAROcc",
                  "BAR_thr3":runstr+"/CaloTopoClusters/CalBAR/Thresh3BAROcc"}
-    histoLegend = {"ECA_thr0":"ECA thr0",
-                   "ECA_thr1":"ECA thr1",
-                   "ECA_thr2":"ECA thr2",
-                   "ECA_thr3":"ECA thr3",
-                   "ECC_thr0":"ECC thr0",
-                   "ECC_thr1":"ECC thr1",
-                   "ECC_thr2":"ECC thr2",
-                   "ECC_thr3":"ECC thr3",
-                   "BAR_thr0":"BAR thr0",
-                   "BAR_thr1":"BAR thr1",
-                   "BAR_thr2":"BAR thr2",
-                   "BAR_thr3":"BAR thr3"}
+    histoLegend = {"ECA_thr1":"ECA - Et > 10 GeV",
+                   "ECA_thr2":"ECA - Et > 15 GeV",
+                   "ECA_thr3":"ECA - Et > 25 GeV",
+                   "ECC_thr1":"ECC - Et > 10 GeV",
+                   "ECC_thr2":"ECC - Et > 15 GeV",
+                   "ECC_thr3":"ECC - Et > 25 GeV",
+                   "BAR_thr1":"BAR - Et > 10 GeV",
+                   "BAR_thr2":"BAR - Et > 15 GeV",
+                   "BAR_thr3":"BAR - Et > 25 GeV"}
     histoType = "2d_etaPhiHotSpot"
     histoName = "TopoClusters"
 
-  elif "EMTopoCluster" in objectType:
+  elif objectType == "EMTopoClusters": # Release 22 : OK
     histoPath  = {"Et4GeV":runstr+"/CaloMonitoring/ClusterMon/LArClusterEMNoTrigSel/2d_Rates/m_clus_etaphi_Et_thresh1",
                   "Et10GeV":runstr+"/CaloMonitoring/ClusterMon/LArClusterEMNoTrigSel/2d_Rates/m_clus_etaphi_Et_thresh2",
                   "Et25GeV":runstr+"/CaloMonitoring/ClusterMon/LArClusterEMNoTrigSel/2d_Rates/m_clus_etaphi_Et_thresh3"}
     histoLegend = {"Et4GeV":"Et > 4GeV",
                    "Et10GeV":"Et > 10GeV",
                    "Et25GeV":"Et > 25GeV"}
+    histoPath = {"ECA_thr1":runstr+"/CaloTopoClusters/CalEMECA/EMThresh1ECAOcc",
+                 "ECA_thr2":runstr+"/CaloTopoClusters/CalEMECA/EMThresh2ECAOcc",
+                 "ECA_thr3":runstr+"/CaloTopoClusters/CalEMECA/EMThresh3ECAOcc",
+                 "ECC_thr1":runstr+"/CaloTopoClusters/CalEMECC/EMThresh1ECCOcc",
+                 "ECC_thr2":runstr+"/CaloTopoClusters/CalEMECC/EMThresh2ECCOcc",
+                 "ECC_thr3":runstr+"/CaloTopoClusters/CalEMECC/EMThresh3ECCOcc",
+                 "BAR_thr1":runstr+"/CaloTopoClusters/CalEMBAR/EMThresh1BAROcc",
+                 "BAR_thr2":runstr+"/CaloTopoClusters/CalEMBAR/EMThresh2BAROcc",
+                 "BAR_thr3":runstr+"/CaloTopoClusters/CalEMBAR/EMThresh3BAROcc"}
+    histoLegend = {"ECA_thr1":"ECA - Et > 4 GeV",
+                   "ECA_thr2":"ECA - Et > 10 GeV",
+                   "ECA_thr3":"ECA - Et > 15 GeV",
+                   "ECC_thr1":"ECC - Et > 4 GeV",
+                   "ECC_thr2":"ECC - Et > 10 GeV",
+                   "ECC_thr3":"ECC - Et > 15 GeV",
+                   "BAR_thr1":"BAR - Et > 4 GeV",
+                   "BAR_thr2":"BAR - Et > 10 GeV",
+                   "BAR_thr3":"BAR - Et > 15 GeV"}
+
     histoType = "2d_etaPhiHotSpot"
     histoName = "EMTopoClusters"
 
-  elif "EMTopoJet" in objectType and "_eta" not in objectType:
+  elif objectType == "EMTopoJet": # Missing histograms
     histoPath  = {"noCut":runstr+"/Jets/AntiKt4EMTopoJets/OccupancyEtaPhi",
                   "cut1":runstr+"/Jets/AntiKt4EMTopoJets/OccupancyEtaPhisel_20000_inf_pt_inf_500000",
                   "cut2":runstr+"/Jets/AntiKt4EMTopoJets/OccupancyEtaPhisel_500000_inf_pt_inf_1000000",
@@ -151,7 +165,7 @@ def getHistoInfo(objectType, runNumber):
     histoType = "2d_etaPhiHotSpot"
     histoName = "EMTopoJets"
 
-  elif (objectType == "EMTopoJets_eta"):
+  elif (objectType == "EMTopoJets_eta"): # Missing histograms
     histoPath  = {"cut1":runstr+"/Jets/AntiKt4EMTopoJets/etasel_20000_inf_pt_inf_500000",
                   "cut2":runstr+"/Jets/AntiKt4EMTopoJets/etasel_500000_inf_pt_inf_1000000",
                   "cut3":runstr+"/Jets/AntiKt4EMTopoJets/etasel_1000000_inf_pt_inf_2000000",
@@ -163,61 +177,57 @@ def getHistoInfo(objectType, runNumber):
     histoType = "1d_etaHotSpot"
     histoName = "EMTopoJets"
 
-  elif objectType == "Tau":
+  elif objectType == "Tau": # Release 22 : OK
     histoPath  = {"NoCut":runstr+"/Tau/tauPhiVsEta",
-                  "Et15GeV":runstr+"/Tau/tauPhiVsEtaEt15",
-                  "Et15GeVBdtLoose":runstr+"/Tau/tauPhiVsEtaEt15BDTLoose"}
-    histoLegend = {"NoCut":"Et > 4GeV",
-                   "Et15GeV":"Et > 10GeV",
-                   "Et15GeVBdtLoose":"Et > 15GeV-BDT loose"}
+                  "Et15GeV":runstr+"/Tau/tauPhiVsEta_et15"}
+    histoLegend = {"NoCut":"Et > 0 GeV (tbc)",
+                   "Et15GeV":"Et > 15 GeV"}
     histoType = "2d_etaPhiHotSpot"
     histoName = "Tau"
 
-  elif objectType == "Tau_phi":
+  elif objectType == "Tau_phi": # Release 22 : OK
     histoPath  = {"single":runstr+"/Tau/tauPhi"}
     histoLegend = {"single":"All candidates"}
     histoType = "1d_phiHotSpot"
     histoName = "Tau"
 
-  elif objectType == "Tau_eta":
+  elif objectType == "Tau_eta": # Release 22 : OK
     histoPath  = {"single":runstr+"/Tau/tauEta"}
     histoLegend = {"single":"All candidates"}
     histoType = "1d_etaHotSpot"
     histoName = "Tau"
 
-  elif objectType == "NumberTau":
-    histoPath  = {"allTau":runstr+"/Tau/nTauCandidates",
-                  "highPt":runstr+"/Tau/nHighPtTauCandidates"}
-    histoLegend = {"allTau":"All candidates",
-                   "highPt":"High Pt (>100GeV) candidates"}
+  elif objectType == "NumberTau": # Release 22 : OK
+    histoPath  = {"highPt":runstr+"/Tau/nHighPtTauCandidates"}
+    histoLegend = {"highPt":"High Pt (>100GeV) candidates"}
     histoType = "1d_integralAbove"
     histoName = "Number of Tau candidates"
 
-  elif objectType == "TightFwdElectrons":
+  elif objectType == "TightFwdElectrons": # Missing histogram
     histoPath  = {"single":runstr+"/egamma/forwardElectrons/forwardElectronTightEtaPhi"}
     histoLegend = {"single":"10GeV"}
     histoType = "2d_etaPhiHotSpot"
     histoName = "Tight electrons"
 
-  elif objectType == "LoosePhotons":
+  elif objectType == "LoosePhotons": # Missing histogram
     histoPath  = {"single":runstr+"/egamma/CBLoosePhotons/Eta_Phi_distribution_with_Pt.gt.4GeV"}
     histoLegend = {"single":"4GeV"}
     histoType = "2d_etaPhiHotSpot"
     histoName = "Loose photons"
 
-  elif objectType == "NumberTightFwdElectrons":
+  elif objectType == "NumberTightFwdElectrons": # Missing histogram
     histoPath  = {"single":runstr+"/egamma/forwardElectrons/forwardElectronTightN"}
     histoLegend = {"single":"All candidates"}
     histoType = "1d_integralAbove"
     histoName = "Number of tight forward electrons"
 
-  elif objectType == "forwardElectronEtaPhi":
+  elif objectType == "forwardElectronEtaPhi": # Missing histogram
     histoPath  = {"single":runstr+"/egamma/forwardElectrons/forwardElectronEtaPhi"}
     histoLegend = {"single":"All candidates"}
     histoType = "2d_etaPhiHotSpot"
     histoName = "Forward electrons"
 
-  elif objectType == "NumberHLTJet":
+  elif objectType == "NumberHLTJet": # Missing histogram
     histoPath  = {"HLTJet":runstr+"/HLT/JetMon/HLT/10j40_L14J20/HLTJet_n"}
     histoLegend = {"HLTJet":"All candidates"}
     histoType = "1d_integralAbove"
@@ -246,9 +256,12 @@ def getHistoInfo(objectType, runNumber):
 
   return histoPath, histoLegend, histoColor, histoType, histoName
 
+############################################################################################################################################################################
+############################################################################################################################################################################
 def main(args):
   histoPath, histoLegend, histoColor, histoType, histoName = getHistoInfo(args.objectType, args.runNumber)
 
+  #########################################################################
   # Depending of the histo/check type, define the summary title and
   # check that the position of the "hot spot" (or lower bound of the integral) is defined
   b_wholeHisto = False
@@ -288,8 +301,7 @@ def main(args):
     if (args.integralAbove==-999.):
       print("No lwoer bound defined -> whole histogram considered!")
       b_wholeHisto = True
-  #    print "You must define the lower bound of your integral"
-  #    sys.exit()
+
   # Definition of Canvas option depending on histogram type
   if (args.objectType == "NumberTightFwdElectrons" or args.objectType == "NumberTau"):
     canvasOption = "logy"
@@ -298,7 +310,8 @@ def main(args):
 
   #########################################################################
   # Look for the final merged HIST file
-  # and plot the histogram
+  # and retrieve all relevant merged histograms
+  #########################################################################
   runFilePath = "root://eosatlas.cern.ch/%s"%(pathExtract.returnEosHistPath(args.runNumber,args.stream,args.amiTag,args.tag)).rstrip()
   if ("FILE NOT FOUND" in runFilePath):
     print("No merged file found...")
@@ -306,79 +319,23 @@ def main(args):
 
   f = R.TFile.Open(runFilePath)
 
-  #histPathList = getStruct(f) # this isn't working as expected with xrootd
-
   histo = {}
-  #hists = [ k.GetName() for k in t.GetListOfKeys() ]
-  #print(hists)
+
   # print("Looking in file",runFilePath)
   for iHisto in histoPath.keys():
     #if histoPath[iHisto] not in histPathList:
     #  print("The desired histo path",histoPath[iHisto],"is not in the input file!")
     #  print(histPathList)
     #  sys.exit()
+    print(histoPath[iHisto])
     histo[iHisto] = f.Get(histoPath[iHisto])
     histo[iHisto].SetTitle("%s (%s) - Run %d"%(histo[iHisto].GetTitle(),histoLegend[iHisto],args.runNumber))
-
-  # Display the Tier0 merged histograms
-  c = {}
-  box = {}
-  line = {}
-  line2 = {}
-  arrow = {}
-  for iHisto in histoPath.keys():
-    c[iHisto] = R.TCanvas(histoLegend[iHisto])
-    if "logy" in canvasOption:
-      c[iHisto].SetLogy(1)
-    # draw line, arrows, box to highlight the suspicious region considered
-    if histoType.startswith("2d"):
-      R.gStyle.SetPalette(1)
-      R.gStyle.SetOptStat("")
-      print(iHisto, histo[iHisto].GetEntries())
-      histo[iHisto].Draw("COLZ")
-      if not b_wholeHisto:
-        if histoType == "2d_etaPhiHotSpot":
-          box[iHisto] = R.TBox(args.etaSpot-args.deltaSpot,args.phiSpot-args.deltaSpot,args.etaSpot+args.deltaSpot,args.phiSpot+args.deltaSpot)
-        elif (histoType == "2d_xyHotSpot"):
-          box[iHisto] = R.TBox(args.xSpot-args.deltaSpot,args.ySpot-args.deltaSpot,args.xSpot+args.deltaSpot,args.ySpot+args.deltaSpot)
-        box[iHisto].SetLineColor(R.kRed+1)
-        box[iHisto].SetLineWidth(3)
-        box[iHisto].SetFillStyle(0)
-        box[iHisto].Draw()
-
-    elif histoType.startswith("1d"):
-      maxH = histo[iHisto].GetMaximum()*1.2
-      histo[iHisto].SetMaximum(maxH)
-      if histoType == "1d_etaHotSpot" or histoType == "1d_phiHotSpot":
-        minH = histo[iHisto].GetMinimum()*0.8
-        histo[iHisto].SetMinimum(minH)
-      histo[iHisto].Draw()
-
-      if not b_wholeHisto:
-        if histoType == "1d_etaHotSpot" or histoType == "1d_phiHotSpot":
-          if maxH >0.:
-            if histoType == "1d_etaHotSpot": 
-              box[iHisto] = R.TBox(args.etaSpot-args.deltaSpot,minH,args.etaSpot+args.deltaSpot,maxH)
-            if histoType == "1d_phiHotSpot": 
-              box[iHisto] = R.TBox(args.phiSpot-args.deltaSpot,minH,args.phiSpot+args.deltaSpot,maxH)
-            box[iHisto].SetLineColor(R.kRed+1)
-            box[iHisto].SetLineWidth(3)
-            box[iHisto].SetFillStyle(0)
-            box[iHisto].Draw()
-        elif histoType == "1d_integralAbove":
-          line[iHisto] = R.TLine(args.integralAbove,0,args.integralAbove,maxH)
-          line[iHisto].SetLineColor(R.kRed+1)
-          line[iHisto].SetLineWidth(3)
-          line[iHisto].Draw()
-          arrow[iHisto] = R.TArrow(args.integralAbove,0.2*histo[iHisto].GetMaximum(),histo[iHisto].GetBinLowEdge(histo[iHisto].GetNbinsX()),0.2*histo[iHisto].GetMaximum(),0.02,">")
-          arrow[iHisto].SetLineColor(R.kRed+1)
-          arrow[iHisto].SetLineWidth(3)
-          arrow[iHisto].Draw()
 
   #########################################################################
   # Extract the list of bins where to count.
   # Scans the window to find all bins that fall in the window
   # The regionBins is defined for each histogram allowing different binning
+  #########################################################################
   regionBins = {}
   for iHisto in histoPath.keys():
     if b_wholeHisto:
@@ -425,7 +382,75 @@ def main(args):
         for iBin in range(histo[iHisto].FindBin(args.integralAbove),histo[iHisto].GetNbinsX()):
           regionBins[iHisto].append(iBin)          
 
-  # Extract all the unmerged files available with the LB range
+  #########################################################################
+  # Display the Tier0 merged histograms
+  #########################################################################
+
+  c = {}
+  box = {}
+  line = {}
+  line2 = {}
+  arrow = {}
+  for iHisto in histoPath.keys():
+    total_tmp = 0
+    for iBin in regionBins[iHisto]:
+      total_tmp = total_tmp + histo[iHisto].GetBinContent(iBin)
+    if total_tmp == 0: # If no entry in the concerned area, do not display the merged histogram
+      continue
+
+    c[iHisto] = R.TCanvas(histoLegend[iHisto])
+    if "logy" in canvasOption:
+      c[iHisto].SetLogy(1)
+    # draw line, arrows, box to highlight the suspicious region considered
+    if histoType.startswith("2d"):
+      R.gStyle.SetPalette(1)
+      R.gStyle.SetOptStat("")
+      #print(iHisto, histo[iHisto].GetEntries())
+      histo[iHisto].Draw("COLZ")
+      if not b_wholeHisto:
+        if histoType == "2d_etaPhiHotSpot":
+          box[iHisto] = R.TBox(args.etaSpot-args.deltaSpot,args.phiSpot-args.deltaSpot,args.etaSpot+args.deltaSpot,args.phiSpot+args.deltaSpot)
+        elif (histoType == "2d_xyHotSpot"):
+          box[iHisto] = R.TBox(args.xSpot-args.deltaSpot,args.ySpot-args.deltaSpot,args.xSpot+args.deltaSpot,args.ySpot+args.deltaSpot)
+        box[iHisto].SetLineColor(R.kRed+1)
+        box[iHisto].SetLineWidth(3)
+        box[iHisto].SetFillStyle(0)
+        box[iHisto].Draw()
+
+    elif histoType.startswith("1d"):
+      maxH = histo[iHisto].GetMaximum()*1.2
+      histo[iHisto].SetMaximum(maxH)
+      if histoType == "1d_etaHotSpot" or histoType == "1d_phiHotSpot":
+        minH = histo[iHisto].GetMinimum()*0.8
+        histo[iHisto].SetMinimum(minH)
+      histo[iHisto].Draw()
+
+      if not b_wholeHisto:
+        if histoType == "1d_etaHotSpot" or histoType == "1d_phiHotSpot":
+          if maxH >0.:
+            if histoType == "1d_etaHotSpot": 
+              box[iHisto] = R.TBox(args.etaSpot-args.deltaSpot,minH,args.etaSpot+args.deltaSpot,maxH)
+            if histoType == "1d_phiHotSpot": 
+              box[iHisto] = R.TBox(args.phiSpot-args.deltaSpot,minH,args.phiSpot+args.deltaSpot,maxH)
+            box[iHisto].SetLineColor(R.kRed+1)
+            box[iHisto].SetLineWidth(3)
+            box[iHisto].SetFillStyle(0)
+            box[iHisto].Draw()
+        elif histoType == "1d_integralAbove":
+          line[iHisto] = R.TLine(args.integralAbove,0,args.integralAbove,maxH)
+          line[iHisto].SetLineColor(R.kRed+1)
+          line[iHisto].SetLineWidth(3)
+          line[iHisto].Draw()
+          arrow[iHisto] = R.TArrow(args.integralAbove,0.2*histo[iHisto].GetMaximum(),histo[iHisto].GetBinLowEdge(histo[iHisto].GetNbinsX()),0.2*histo[iHisto].GetMaximum(),0.02,">")
+          arrow[iHisto].SetLineColor(R.kRed+1)
+          arrow[iHisto].SetLineWidth(3)
+          arrow[iHisto].Draw()
+
+  #########################################################################
+  # Loop on all unmerged files available
+  # and count the number of hits in the concerned area
+  #########################################################################
+
   lbFilePathList = pathExtract.returnEosHistPathLB(args.runNumber,args.lowerLumiBlock,args.upperLumiBlock,args.stream,args.amiTag,args.tag)
   nbHitInHot = []
 
@@ -461,12 +486,14 @@ def main(args):
       if (histoLB[iHisto] != None):
         for iBin in regionBins[iHisto]:
           nbHitInHot[iHisto][ilb] = nbHitInHot[iHisto][ilb] + histoLB[iHisto].GetBinContent(iBin)
-  #  sys.stdout.write("->%d "%(nbHitInHot[ilb]))
 
     fLB[lbFile].Close()
 
   #########################################################################
-  # Loop on all histos and extract the luminosity block range to be displayed
+  # Loop on all histos and extract range of luminosity block for which
+  # the number of hits is above the thereshold
+  #########################################################################
+  
   for iHisto in histoPath.keys():
     for ilb in range(len(nbHitInHot[iHisto])):
       if (nbHitInHot[iHisto][ilb]>=args.minInLB):
@@ -481,12 +508,13 @@ def main(args):
   print(statement)
 
   maxNbInHot = 0
+  maxNbInHot_histo = ""
   totalInRegionRecomp = {} 
   totalInRegion = {} 
   suspiciousLBlist = []
 
   # Initialize the number of events in suspicious regions for both the merged
-  # and the remerged file. 
+  # and the remerged files. 
   for iHisto in histoPath.keys():
     totalInRegionRecomp[iHisto] = 0
     totalInRegion[iHisto] = 0
@@ -508,10 +536,13 @@ def main(args):
         suspiciousLBlist.append(i)
       if (nbHitInHot[iHisto][i]>maxNbInHot):
         maxNbInHot = nbHitInHot[iHisto][i]
+        maxNbInHot_histo = iHisto
 
     sortedLB[iHisto].sort(key=dict(zip(sortedLB[iHisto],nbHitInHot[iHisto])).get,reverse=True)
+    nLB_aboveThreshold = 0
     for i in range(nLB):
       if nbHitInHot[iHisto][sortedLB[iHisto][i]]>=args.minInLB:
+        nLB_aboveThreshold = nLB_aboveThreshold + 1
         if not b_ValueNotEntries:
           print("%d-LB: %d -> %d hits"%(i,sortedLB[iHisto][i],nbHitInHot[iHisto][sortedLB[iHisto][i]]))
         else:
@@ -529,32 +560,40 @@ def main(args):
     else:
       print("In the whole run, the value is %.2f"%(totalInRegion[iHisto]))
 
+  affectedLB_forSummaryBinning = []
+  if (maxNbInHot != 0):
+    for i in range(35):
+      if (nbHitInHot[maxNbInHot_histo][sortedLB[maxNbInHot_histo][i]] > 0.05*maxNbInHot):
+        affectedLB_forSummaryBinning.append(sortedLB[maxNbInHot_histo][i])
+
   #########################################################################
   ## Plot evolution vs LB
-  #ncoll = math.ceil(len(histoPath.keys())/4)
-  leg = R.TLegend(0.72, 0.90-0.05*len(histoPath.keys()),
+  #########################################################################
+  leg = R.TLegend(0.855, 0.90-0.05*len(histoPath.keys()),
                   0.98, 0.9 )
-  #leg.SetNColumns(ncoll)
   leg.SetBorderSize(0)
-  #leg.SetHeader("Run %d"%args.runNumber)
 
   if (upperLB>=lowerLB): # check that at least one noisy LB was found
-    c0 = R.TCanvas()
+    c0 = R.TCanvas("c0","Evolution vs LB",1400,550)
     R.gStyle.SetOptStat("")
     if histoType != "2d_xyHotSpot":
       c0.SetLogy(1)
-    c0.SetRightMargin(.3)
+    c0.SetLeftMargin(.045)
+    c0.SetRightMargin(.15)
     h0Evol = {}
     first = True
     for iHisto in histoPath.keys():
       h0Evol[iHisto] = R.TH1I("h0Evol%s"%(iHisto),summaryTitle,upperLB-lowerLB+1,lowerLB-0.5,upperLB+0.5)
-      h0Evol[iHisto].SetXTitle("LumiBlock (Only LB with >= %.0f entries)"%(args.minInLB))
+      h0Evol[iHisto].SetXTitle("Run %d - LumiBlock (Only LB with >= %.0f entries)"%(args.runNumber,args.minInLB))
       h0Evol[iHisto].SetLineColor(histoColor[iHisto])
       h0Evol[iHisto].SetMarkerColor(histoColor[iHisto])
       h0Evol[iHisto].SetMarkerStyle(20)
-      leg.AddEntry(h0Evol[iHisto],"%s (%d entries in the run)"%(histoLegend[iHisto],totalInRegion[iHisto]))
       for i in range(lowerLB,upperLB+1):
         h0Evol[iHisto].Fill(i,nbHitInHot[iHisto][i])  
+
+      if (h0Evol[iHisto].GetMaximum() >= args.minInLB):
+        leg.AddEntry(h0Evol[iHisto],"#splitline{%s}{(%d entries in the run)}"%(histoLegend[iHisto],totalInRegion[iHisto]))
+
       if first:
         h0Evol[iHisto].Draw("P HIST")
         if histoType != "2d_xyHotSpot":
@@ -566,6 +605,61 @@ def main(args):
     leg.Draw()
     c0.Update()
 
+
+  leg2 = R.TLegend(0.855, 0.90-0.05*len(histoPath.keys()),
+                  0.98, 0.9 )
+  leg2.SetBorderSize(0)
+
+  h_affectedLB = {}
+  
+  print("Affected luminosity blocks sorted by the noise amplitude",affectedLB_forSummaryBinning)
+
+  if (len(affectedLB_forSummaryBinning)>0):
+    c0_2 = R.TCanvas("c0_2","Most affected LB summary", 1400,550)
+    R.gStyle.SetOptStat("")
+    if histoType != "2d_xyHotSpot":
+      c0_2.SetLogy(1)
+    c0_2.SetLeftMargin(.045)
+    c0_2.SetRightMargin(.15)
+
+    onlineLumi = GetOnlineLumiFromCOOL(args.runNumber,0)
+    cumulatedAffectedLumi = 0.
+
+    first = True
+    for iHisto in histoPath.keys():
+      h_affectedLB[iHisto] = R.TH1F("affectedLB%s"%(iHisto),"%s - Most affected LB"%summaryTitle,len(affectedLB_forSummaryBinning),0.5,len(affectedLB_forSummaryBinning)+0.5)
+        
+      h_affectedLB[iHisto].SetXTitle("Run %d - LumiBlock / Cumulated luminosity in pb-1"%(args.runNumber))
+      h_affectedLB[iHisto].SetLineColor(histoColor[iHisto])
+      h_affectedLB[iHisto].SetMarkerColor(histoColor[iHisto])
+      h_affectedLB[iHisto].SetMarkerStyle(20)
+
+      for i in range(1,len(affectedLB_forSummaryBinning)+1):
+        cumulatedAffectedLumi = cumulatedAffectedLumi + onlineLumi[affectedLB_forSummaryBinning[i-1]]*60/1e6
+        h_affectedLB[iHisto].GetXaxis().SetBinLabel(i,"%d / %.1f"%(affectedLB_forSummaryBinning[i-1],cumulatedAffectedLumi))
+        h_affectedLB[iHisto].GetXaxis().SetTitleOffset(1.4)
+        h_affectedLB[iHisto].Fill(i,nbHitInHot[iHisto][affectedLB_forSummaryBinning[i-1]])
+
+      if (h_affectedLB[iHisto].GetMaximum() >= args.minInLB):
+        leg2.AddEntry(h_affectedLB[iHisto],"#splitline{%s}{(%d entries in the run)}"%(histoLegend[iHisto],totalInRegion[iHisto]))
+        
+      if first:
+        h_affectedLB[iHisto].Draw("P HIST")
+        if histoType != "2d_xyHotSpot":
+          h_affectedLB[iHisto].SetMinimum(args.minInLB-0.8)
+          h_affectedLB[iHisto].SetMaximum(maxNbInHot*1.5)
+        first = False
+      else:
+        h_affectedLB[iHisto].Draw("PSAME HIST")
+
+    leg2.Draw()
+
+    c0_2.SetGridx()
+    c0_2.Update()
+
+    print("WARNING: only the 35 most affected LB are displayed in the summary plot")
+
+      
   if args.defectQuery:
     print("I am looking for LAr/Tile/Calo defects defined for the suspicious LB")
     from DQDefects import DefectsDB
@@ -583,9 +677,12 @@ def main(args):
         else:
           print("%s: %d->%d set by %s - %s"%(iDef.channel,iDef.since.lumi,iDef.until.lumi-1,iDef.user,iDef.comment))
 
-  input("I am done...")
+  input("Please press the Enter key to proceed")
 
+  sys.exit()
 
+############################################################################################################################################################################
+############################################################################################################################################################################
 if __name__ == "__main__":
   R.gStyle.SetPalette(1)
   R.gStyle.SetOptStat("em")
