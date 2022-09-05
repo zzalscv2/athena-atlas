@@ -15,7 +15,7 @@ class GeoPhysVol;
 class GeoPixelLadderServices : public GeoVPixelFactory {
  public:
   GeoPixelLadderServices(InDetDD::PixelDetectorManager* ddmgr,
-                         PixelGeometryManager* mgr ,int ladderType);
+                         PixelGeometryManager* mgr , GeoModelIO::ReadGeoModel* sqliteReader, int ladderType);
   GeoPixelLadderServices (const GeoPixelLadderServices&) = delete;
   GeoPixelLadderServices& operator= (const GeoPixelLadderServices&) = delete;
   virtual ~GeoPixelLadderServices();

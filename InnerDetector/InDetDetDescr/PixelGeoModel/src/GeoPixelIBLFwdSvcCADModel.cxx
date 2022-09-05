@@ -34,8 +34,9 @@ using std::max;
 
 GeoPixelIBLFwdSvcCADModel::GeoPixelIBLFwdSvcCADModel(InDetDD::PixelDetectorManager* ddmgr,
                                                      PixelGeometryManager* mgr,
+						     GeoModelIO::ReadGeoModel* sqliteReader,
                                                      int /*section*/)
-  : GeoVPixelFactory(ddmgr, mgr), 
+  : GeoVPixelFactory(ddmgr, mgr, sqliteReader), 
   m_supportPhysA(nullptr),
   m_supportPhysC(nullptr),
   m_xformSupportA(nullptr),

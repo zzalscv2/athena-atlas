@@ -17,8 +17,9 @@
 
 GeoPixelFluid::GeoPixelFluid(InDetDD::PixelDetectorManager* ddmgr,
                              PixelGeometryManager* mgr,
+			     GeoModelIO::ReadGeoModel* sqliteReader,
                              int type)
-  : GeoVPixelFactory (ddmgr, mgr)
+  : GeoVPixelFactory (ddmgr, mgr, sqliteReader)
 {
   m_index    = m_gmt_mgr->PixelFluidIndex(type);
   double z1  = m_gmt_mgr->PixelFluidZ1(m_index);

@@ -13,7 +13,7 @@ class GeoLogVol;
 class GeoPixelFluid : public GeoVPixelFactory {
 public:
   GeoPixelFluid(InDetDD::PixelDetectorManager* ddmgr,
-                PixelGeometryManager* mgr, int type);
+                PixelGeometryManager* mgr, GeoModelIO::ReadGeoModel* sqliteReader, int type);
   virtual GeoVPhysVol* Build() override;
   double posX() {return m_posX;}
   double posY() {return m_posY;}

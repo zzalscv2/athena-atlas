@@ -24,8 +24,9 @@ using std::max;
 using namespace std;
 
 GeoPixelStaveRing::GeoPixelStaveRing(InDetDD::PixelDetectorManager* ddmgr,
-                                     PixelGeometryManager* mgr)
-  : GeoVPixelFactory (ddmgr, mgr),
+                                     PixelGeometryManager* mgr,
+				     GeoModelIO::ReadGeoModel* sqliteReader)
+  : GeoVPixelFactory (ddmgr, mgr, sqliteReader),
     m_physVol (nullptr),
     m_zPosition (0),
     m_innerRadius (0),
@@ -52,8 +53,8 @@ GeoVPhysVol* GeoPixelStaveRing::Build(){
   double safety = 0.001*Gaudi::Units::mm; 
   bool isBLayer = false;
   if(m_gmt_mgr->GetLD() == 0) isBLayer = true;
-  GeoPixelSiCrystal theSensor(m_DDmgr, m_gmt_mgr, isBLayer);
-  GeoPixelModule pm(m_DDmgr, m_gmt_mgr, theSensor);
+  GeoPixelSiCrystal theSensor(m_DDmgr, m_gmt_mgr, m_sqliteReader, isBLayer);
+  GeoPixelModule pm(m_DDmgr, m_gmt_mgr, m_sqliteReader, theSensor);
   // Ladder geometry
 
   double endBlockFixingPoint= m_gmt_mgr->IBLStaveMechanicalStaveEndBlockFixPoint();

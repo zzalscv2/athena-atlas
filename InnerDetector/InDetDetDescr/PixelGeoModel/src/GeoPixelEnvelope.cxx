@@ -81,7 +81,7 @@ GeoVPhysVol* GeoPixelEnvelope::Build( ) {
   GeoPixelServices * pixServices = nullptr;
   if(m_gmt_mgr->DoServices() ) {
     // Takes ownership of pixZone
-    pixServices = new GeoPixelServices(m_DDmgr, m_gmt_mgr, pixZone);
+    pixServices = new GeoPixelServices(m_DDmgr, m_gmt_mgr, m_sqliteReader, pixZone);
   } else {
     delete pixZone;
   }
@@ -95,7 +95,7 @@ GeoVPhysVol* GeoPixelEnvelope::Build( ) {
     GeoTrf::Transform3D barrelTransform = m_gmt_mgr->partTransform("Barrel");
     
     m_gmt_mgr->SetBarrel();
-    GeoPixelBarrel brl(m_DDmgr, m_gmt_mgr, pixServices);
+    GeoPixelBarrel brl(m_DDmgr, m_gmt_mgr, m_sqliteReader, pixServices);
     GeoNameTag* tag = new GeoNameTag("Barrel");
     GeoVPhysVol* barrelPhys =  brl.Build() ;
     envelopePhys->add(tag);
@@ -108,7 +108,7 @@ GeoVPhysVol* GeoPixelEnvelope::Build( ) {
   if (endcapAPresent || endcapCPresent) {
     m_gmt_mgr->SetEndcap();
 
-    GeoPixelEndCap pec(m_DDmgr, m_gmt_mgr, pixServices);
+    GeoPixelEndCap pec(m_DDmgr, m_gmt_mgr, m_sqliteReader, pixServices);
     double zpos = (m_gmt_mgr->PixelEndcapZMax()+m_gmt_mgr->PixelEndcapZMin())/2.;
 
     // EndCap A
@@ -148,7 +148,7 @@ GeoVPhysVol* GeoPixelEnvelope::Build( ) {
     if(m_gmt_mgr->DoServices() ) {
       // Pixel Frame. In recent versions this taken care of in the general services.
       if (m_gmt_mgr->oldFrame()) {
-	GeoPixelOldFrame frame (m_DDmgr, m_gmt_mgr);
+	GeoPixelOldFrame frame (m_DDmgr, m_gmt_mgr, m_sqliteReader);
 	frame.BuildOutBarrel(envelopePhys);
       }
     }
@@ -176,7 +176,7 @@ GeoVPhysVol* GeoPixelEnvelope::Build( ) {
 
 	    // ----------- end of stave PP0 services (insde barrel)
 	    
-	    GeoPixelIFlexServices iFlexSrv(m_DDmgr, m_gmt_mgr, iSection);
+	    GeoPixelIFlexServices iFlexSrv(m_DDmgr, m_gmt_mgr, m_sqliteReader, iSection);
 	    iFlexSrv.Build();
 
 	    GeoNameTag * tagFlexA = new GeoNameTag("PP0Flex_A");
@@ -196,7 +196,7 @@ GeoVPhysVol* GeoPixelEnvelope::Build( ) {
 
 	// Build IBL fwd services (wavy shapes)
 	int iSection=2;
-	GeoPixelIBLFwdServices fwdSrv(m_DDmgr, m_gmt_mgr, iSection);
+	GeoPixelIBLFwdServices fwdSrv(m_DDmgr, m_gmt_mgr, m_sqliteReader, iSection);
 	if(fwdSrv.isComplexShapeDefined()){
 	  
 	  fwdSrv.Build();
@@ -221,7 +221,7 @@ GeoVPhysVol* GeoPixelEnvelope::Build( ) {
   // Build detailed frame
   if(m_gmt_mgr->detailedFrame() && m_gmt_mgr->DoServices()) {
     int numSections = m_gmt_mgr->PixelFrameSections();
-    GeoPixelFrame frame (m_DDmgr, m_gmt_mgr);
+    GeoPixelFrame frame (m_DDmgr, m_gmt_mgr, m_sqliteReader);
     for (int iSection = 0; iSection <  numSections; iSection++) {
       //GeoVPhysVol * framePhys =  frame.Build(iSection);
       //envelopePhys->add(framePhys);
@@ -243,7 +243,7 @@ GeoVPhysVol* GeoPixelEnvelope::Build( ) {
     //m_DDmgr->numerology().addEndcap(4);
     m_gmt_mgr->SetPartsDBM();
     m_gmt_mgr->SetPos();
-    DBM_Det theDBM (m_DDmgr, m_gmt_mgr);
+    DBM_Det theDBM (m_DDmgr, m_gmt_mgr, m_sqliteReader);
     GeoNameTag* tag1 = new GeoNameTag("DBMA");
     GeoVPhysVol* dbmPhys1 =  theDBM.Build() ;
     envelopePhys->add(tag1);

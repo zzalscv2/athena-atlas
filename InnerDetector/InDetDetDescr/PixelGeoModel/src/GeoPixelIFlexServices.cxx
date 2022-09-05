@@ -24,8 +24,9 @@ using std::max;
 
 GeoPixelIFlexServices::GeoPixelIFlexServices(InDetDD::PixelDetectorManager* ddmgr,
                                              PixelGeometryManager* mgr,
+					     GeoModelIO::ReadGeoModel* sqliteReader,
                                              int iSection)
-  : GeoVPixelFactory(ddmgr, mgr),
+  : GeoVPixelFactory(ddmgr, mgr, sqliteReader),
   m_section(iSection),
   m_supportPhysA(nullptr),
   m_supportPhysC(nullptr),

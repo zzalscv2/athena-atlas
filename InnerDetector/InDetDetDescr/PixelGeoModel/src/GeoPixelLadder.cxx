@@ -27,9 +27,10 @@ using std::max;
 
 GeoPixelLadder::GeoPixelLadder(InDetDD::PixelDetectorManager* m_DDmgr,
                                PixelGeometryManager* mgr,
+			       GeoModelIO::ReadGeoModel* sqliteReader,
                                GeoPixelSiCrystal& theSensor,
 			       GeoPixelStaveSupport* staveSupport) :
-  GeoVPixelFactory (m_DDmgr, mgr),
+  GeoVPixelFactory (m_DDmgr, mgr, sqliteReader),
   m_theLadder(nullptr),
   m_theSensor(theSensor),
   m_staveSupport(staveSupport)
@@ -166,13 +167,13 @@ GeoVPhysVol* GeoPixelLadder::Build( ) {
   //
   // Place the Modules
   //
-  GeoPixelModule pm(m_DDmgr, m_gmt_mgr, m_theSensor);
+  GeoPixelModule pm(m_DDmgr, m_gmt_mgr, m_sqliteReader, m_theSensor);
   
   bool isBLayer=(m_gmt_mgr->GetLD() == 0);
   bool isModule3D=true;
   if (m_gmt_mgr->PixelStaveLayout()<5) isModule3D=false;
-  GeoPixelSiCrystal theSensor3D(m_DDmgr, m_gmt_mgr, isBLayer,isModule3D);
-  GeoPixelModule pm3D(m_DDmgr, m_gmt_mgr, theSensor3D);
+  GeoPixelSiCrystal theSensor3D(m_DDmgr, m_gmt_mgr, m_sqliteReader, isBLayer,isModule3D);
+  GeoPixelModule pm3D(m_DDmgr, m_gmt_mgr, m_sqliteReader, theSensor3D);
   //  double pm3DLength=pm3D.Length();
 
   // Pixel module parameters

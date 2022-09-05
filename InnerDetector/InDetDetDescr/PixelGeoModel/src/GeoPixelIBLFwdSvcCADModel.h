@@ -21,7 +21,7 @@ class GeoPixelIBLFwdSvcCADModel :  public GeoVPixelFactory {
 public:  
 
   GeoPixelIBLFwdSvcCADModel(InDetDD::PixelDetectorManager* ddmgr,
-                            PixelGeometryManager* mgr, int);
+                            PixelGeometryManager* mgr, GeoModelIO::ReadGeoModel* sqliteReader,int);
   virtual GeoVPhysVol* Build() override;
 
   GeoPhysVol* getSupportA() { return m_supportPhysA; }

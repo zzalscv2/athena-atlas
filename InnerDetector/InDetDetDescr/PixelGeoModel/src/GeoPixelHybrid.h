@@ -12,8 +12,9 @@ class GeoPixelHybrid : public GeoVPixelFactory {
  public:
     GeoPixelHybrid(InDetDD::PixelDetectorManager* ddmgr,
                    PixelGeometryManager* mgr,
+		   GeoModelIO::ReadGeoModel* sqliteReader,
                    bool isModule3D)
-      : GeoVPixelFactory (ddmgr, mgr),
+      : GeoVPixelFactory (ddmgr, mgr, sqliteReader),
         m_isModule3D(isModule3D) {};
     virtual GeoVPhysVol* Build() override;
 

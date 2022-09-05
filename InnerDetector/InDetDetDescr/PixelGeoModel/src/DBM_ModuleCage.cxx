@@ -132,7 +132,7 @@ GeoVPhysVol* DBM_ModuleCage::Build() {
     // set telescope layer number 
     m_gmt_mgr->SetCurrentLD(i);
 
-    DBM_Module module (m_DDmgr, m_gmt_mgr);
+    DBM_Module module (m_DDmgr, m_gmt_mgr, m_sqliteReader);
     GeoVPhysVol* modulePhys = module.Build();
 
     Rspacing = m_gmt_mgr->DBMSpacingRadial();

@@ -1,8 +1,8 @@
 /*
-  Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
 */
 
-#include "PixelDetectorFactory.h"
+#include "PixelDetectorFactoryLite.h"
 #include "StoreGate/StoreGateSvc.h"
 #include "PixelSwitches.h" 
 
@@ -12,7 +12,8 @@
 // GeoModel includes
 #include "GeoModelKernel/GeoNameTag.h"  
 #include "GeoModelKernel/GeoPhysVol.h"  
-#include "GeoModelKernel/GeoAlignableTransform.h"  
+#include "GeoModelKernel/GeoAlignableTransform.h"
+#include "GeoModelRead/ReadGeoModel.h"
 #include "GaudiKernel/SystemOfUnits.h"
 
 // InDetReadoutGeometry
@@ -32,11 +33,11 @@
 using InDetDD::PixelDetectorManager; 
 using InDetDD::SiCommonItems; 
 
-PixelDetectorFactory::PixelDetectorFactory(PixelGeoModelAthenaComps * athenaComps,
-					   const PixelSwitches & switches)
-  : InDetDD::DetectorFactoryBase(athenaComps),
-    m_detectorManager(nullptr),
-    m_useDynamicAlignFolders(false)
+PixelDetectorFactoryLite::PixelDetectorFactoryLite(GeoModelIO::ReadGeoModel *sqliteReader
+						   , PixelGeoModelAthenaComps * athenaComps
+						   , const PixelSwitches & switches)
+  : InDetDD::DetectorFactoryBase(athenaComps)
+  , m_sqliteReader (sqliteReader)    
 {
   // Create the detector manager
   m_detectorManager = new PixelDetectorManager(detStore());
@@ -67,12 +68,9 @@ PixelDetectorFactory::PixelDetectorFactory(PixelGeoModelAthenaComps * athenaComp
   // Determine if initial layer and tag from the id dict are consistent
   bool initialLayoutIdDict = (m_detectorManager->tag() == "initial_layout");
   if (m_geometryManager->InitialLayout() != initialLayoutIdDict ) {
-    if(msgLvl(MSG::WARNING)) 
-      msg(MSG::WARNING) << "IdDict tag is \"" << m_detectorManager->tag() 
-			<< "\" which is inconsistent with the layout choosen!"
-			<< endmsg;
+    msg(MSG::WARNING) << "IdDict tag is \"" << m_detectorManager->tag() 
+		      << "\" which is inconsistent with the layout choosen!" << endmsg;
   } 
-
 
   //
   // Set Version information
@@ -99,54 +97,39 @@ PixelDetectorFactory::PixelDetectorFactory(PixelGeoModelAthenaComps * athenaComp
   m_detectorManager->setVersion(version);
 
   m_useDynamicAlignFolders = switches.dynamicAlignFolders();
-
-}
-
-
-PixelDetectorFactory::~PixelDetectorFactory()
-{
 }
 
 
 //## Other Operations (implementation)
-void PixelDetectorFactory::create(GeoPhysVol *world)
+void PixelDetectorFactoryLite::create(GeoPhysVol*)
 {
-  if(msgLvl(MSG::INFO)) {
-    msg(MSG::INFO) << "Building Pixel Detector" << endmsg;
-    msg(MSG::INFO) << " " << m_detectorManager->getVersion().fullDescription() << endmsg;
-  }
+  msg(MSG::INFO) << "Building Pixel Detector" << endmsg;
+  msg(MSG::INFO) << " " << m_detectorManager->getVersion().fullDescription() << endmsg;
+
   // Printout the parameters that are different in DC1 and DC2.
   m_geometryManager->SetCurrentLD(0);
   m_geometryManager->SetBarrel();
-  if(msgLvl(MSG::DEBUG)) {
-    msg(MSG::DEBUG) << " B-Layer basic eta pitch: " << m_geometryManager->DesignPitchZ()/Gaudi::Units::micrometer << "um" << endmsg;  
-    msg(MSG::DEBUG) << " B-Layer sensor thickness: " << m_geometryManager->PixelBoardThickness()/Gaudi::Units::micrometer << "um" << endmsg;   
-  }
+  msg(MSG::DEBUG) << " B-Layer basic eta pitch: " << m_geometryManager->DesignPitchZ()/Gaudi::Units::micrometer << "um"  << endmsg;  
+  msg(MSG::DEBUG) << " B-Layer sensor thickness: " << m_geometryManager->PixelBoardThickness()/Gaudi::Units::micrometer << "um"  << endmsg;   
+    
+  std::map<std::string, GeoFullPhysVol*>        mapFPV = m_sqliteReader->getPublishedNodes<std::string, GeoFullPhysVol*>("Pixel");
+  std::map<std::string, GeoAlignableTransform*> mapAX  = m_sqliteReader->getPublishedNodes<std::string, GeoAlignableTransform*>("Pixel");
+  
+  // The top level volume
+  GeoFullPhysVol *pPixelEnvelopeVol = mapFPV["Pixel_Envelope"];
+    
+  // Create the Lite Pixel Envelope...
+  GeoPixelEnvelope pe(m_detectorManager, m_geometryManager.get(), m_sqliteReader);
+  pe.Build() ;
 
-  // Top level transform
-  GeoTrf::Transform3D topTransform = m_geometryManager->partTransform("Pixel");
-
-
-  //
-  // Create the Pixel Envelope...
-  GeoPixelEnvelope pe (m_detectorManager, m_geometryManager.get(), nullptr);
-  GeoVPhysVol* pephys = pe.Build() ;
-
-  //
-  // Add this to the world
-  //
-  world->add(new GeoNameTag("Pixel"));
-  GeoAlignableTransform * transform = new GeoAlignableTransform(topTransform);
-  world->add(transform);
-  world->add(pephys);
+  GeoAlignableTransform * transform = mapAX["Pixel_Envelope"];
 
   // Store alignable transform
   Identifier id = m_geometryManager->getIdHelper()->wafer_id(0,0,0,0);
-  m_detectorManager->addAlignableTransform(2, id, transform, pephys);
+  m_detectorManager->addAlignableTransform(2, id, transform, pPixelEnvelopeVol);
 
   // Add this to the list of top level physical volumes:             
-  //
-  m_detectorManager->addTreeTop(pephys);                                       
+  m_detectorManager->addTreeTop(pPixelEnvelopeVol);
 
   
   // Initialize the neighbours
@@ -209,13 +192,7 @@ void PixelDetectorFactory::create(GeoPhysVol *world)
   }
 }
 
-const PixelDetectorManager * PixelDetectorFactory::getDetectorManager() const
-{
-  return m_detectorManager;
-}
-
-void 
-PixelDetectorFactory::doChecks()
+void PixelDetectorFactoryLite::doChecks()
 {
   const PixelID * idHelper = m_geometryManager->athenaComps()->getIdHelper();
   const PixelDetectorManager * manager = m_detectorManager;
@@ -250,41 +227,48 @@ PixelDetectorFactory::doChecks()
   // Barrel
   int barrelCount = 0;
   int barrelCountError = 0;
-  for (int iBarrelIndex = 0; iBarrelIndex < manager->numerology().numBarrels(); iBarrelIndex++) {
-    int iBarrel = manager->numerology().barrelId(iBarrelIndex);
-    for (int iLayer = 0; iLayer < manager->numerology().numLayers(); iLayer++) {
-
-      // TEMPORARY FIX
-      // Temporary fix for IBL. Numerology class needs to be fixed.
-      m_geometryManager->SetCurrentLD(iLayer);
-      int etaCorrection = 0;
-      if (!m_geometryManager->allowSkipEtaZero() && manager->numerology().skipEtaZeroForLayer(iLayer)) {
-	//std::cout << "ETA CORRECTION" << std::endl;
-	etaCorrection = 1;
-      }
-      // END TEMPORARY FIX
-
-      if (manager->numerology().useLayer(iLayer)) {
-	for (int iPhi = 0; iPhi < manager->numerology().numPhiModulesForLayer(iLayer); iPhi++) {
-	  for (int iEta = manager->numerology().beginEtaModuleForLayer(iLayer); 
-	       iEta < manager->numerology().endEtaModuleForLayer(iLayer) - etaCorrection; 
-	       iEta++) {
-	    //if (!iEta && manager->numerology().skipEtaZeroForLayer(iLayer)) continue;
-	    if (!etaCorrection && !iEta && manager->numerology().skipEtaZeroForLayer(iLayer)) continue; // TEMPORARY FIX
-	    Identifier id = idHelper->wafer_id(iBarrel,iLayer,iPhi,iEta);
-	    const InDetDD::SiDetectorElement * element = manager->getDetectorElement(id);
-	    barrelCount++;
-	    std::stringstream ostr;
-	    ostr << "[2.1 . " << iBarrel << " . " << iLayer << " . " << iPhi << " . " << iEta << " . 0]"; 
-	    if (!element) {
-	      barrelCountError++;
-	      msg(MSG::WARNING) << "   No element found for id: " << ostr.str() << " " << idHelper->show_to_string(id) << endmsg;
-	    }
-	  } // iEta
-	} //iPhi
-      }
-    } //iLayer
-  } // Barrel
+  for (int iBarrelIndex = 0; iBarrelIndex < manager->numerology().numBarrels(); iBarrelIndex++)
+    {
+      int iBarrel = manager->numerology().barrelId(iBarrelIndex);
+      for (int iLayer = 0; iLayer < manager->numerology().numLayers(); iLayer++) {
+            
+	// TEMPORARY FIX
+	// Temporary fix for IBL. Numerology class needs to be fixed.
+	m_geometryManager->SetCurrentLD(iLayer);
+	int etaCorrection = 0;
+	if (!m_geometryManager->allowSkipEtaZero() && manager->numerology().skipEtaZeroForLayer(iLayer)) {
+	  etaCorrection = 1;
+	}
+	// END TEMPORARY FIX
+            
+	if (manager->numerology().useLayer(iLayer)) {
+	  for (int iPhi = 0; iPhi < manager->numerology().numPhiModulesForLayer(iLayer); iPhi++)
+	    {
+	      for (int iEta = manager->numerology().beginEtaModuleForLayer(iLayer);
+		   iEta < manager->numerology().endEtaModuleForLayer(iLayer) - etaCorrection;
+		   iEta++)
+		{
+		  if (!etaCorrection && !iEta && manager->numerology().skipEtaZeroForLayer(iLayer)) continue; // TEMPORARY FIX
+		  Identifier id = idHelper->wafer_id(iBarrel,iLayer,iPhi,iEta);
+		  const InDetDD::SiDetectorElement * element = manager->getDetectorElement(id);
+		  barrelCount++;
+		  std::stringstream ostr;
+		  ostr << "[2.1 . " << iBarrel << " . " << iLayer << " . " << iPhi << " . " << iEta << " . 0]";
+		  if (!element) {
+		    barrelCountError++;
+		    msg(MSG::WARNING) << "   No element found for id: " << ostr.str() << " " << idHelper->show_to_string(id) << endmsg;
+                            
+		  }
+                        
+		} // iEta
+                    
+	    } //iPhi
+                
+	}
+            
+      } //iLayer
+        
+    } // Barrel
 
 
   // Endcap
@@ -315,8 +299,6 @@ PixelDetectorFactory::doChecks()
   int endcapCountDBM = 0;
   int endcapCountErrorDBM = 0;
   if (m_geometryManager->dbm()) {
-    //    endcapCount += 24;
-
     // Endcap
     for (int iEndcapIndex = 0; iEndcapIndex < manager->numerology().numEndcapsDBM(); iEndcapIndex++) {
       int iEndcap = manager->numerology().endcapIdDBM(iEndcapIndex);
@@ -348,20 +330,18 @@ PixelDetectorFactory::doChecks()
   }
 
   if ( barrelCount+endcapCount+endcapCountDBM != int(maxHash)) { 
-     msg(MSG::ERROR) << "Total count does not match maxHash." << endmsg;
-     msg(MSG::INFO) << "Number of barrel elements       : " << barrelCount << endmsg;
-     msg(MSG::INFO) << "Number of endcap elements       : " << endcapCount << endmsg;
-     msg(MSG::INFO) << "Number of endcap elements (DBM) : " << endcapCountDBM << endmsg;
-     msg(MSG::INFO) << "Total                           : " << barrelCount+endcapCount+endcapCountDBM << endmsg;
-     msg(MSG::INFO) << "MaxHash                         : " << maxHash << endmsg;
+    msg(MSG::ERROR) << "Total count does not match maxHash." << endmsg;
+    msg(MSG::INFO) << "Number of barrel elements       : " << barrelCount << endmsg;
+    msg(MSG::INFO) << "Number of endcap elements       : " << endcapCount << endmsg;
+    msg(MSG::INFO) << "Number of endcap elements (DBM) : " << endcapCountDBM << endmsg;
+    msg(MSG::INFO) << "Total                           : " << barrelCount+endcapCount+endcapCountDBM << endmsg;
+    msg(MSG::INFO) << "MaxHash                         : " << maxHash << endmsg;
   }
 
-     msg(MSG::INFO) << "Number of barrel elements       : " << barrelCount << endmsg;
-     msg(MSG::INFO) << "Number of endcap elements       : " << endcapCount << endmsg;
-     msg(MSG::INFO) << "Number of endcap elements (DBM) : " << endcapCountDBM << endmsg;
-     msg(MSG::INFO) << "Total                           : " << barrelCount+endcapCount+endcapCountDBM << endmsg;
-     msg(MSG::INFO) << "MaxHash                         : " << maxHash << endmsg;
+  msg(MSG::INFO) << "Number of barrel elements       : " << barrelCount << endmsg;
+  msg(MSG::INFO) << "Number of endcap elements       : " << endcapCount << endmsg;
+  msg(MSG::INFO) << "Number of endcap elements (DBM) : " << endcapCountDBM << endmsg;
+  msg(MSG::INFO) << "Total                           : " << barrelCount+endcapCount+endcapCountDBM << endmsg;
+  msg(MSG::INFO) << "MaxHash                         : " << maxHash << endmsg;
 
 }
-
-

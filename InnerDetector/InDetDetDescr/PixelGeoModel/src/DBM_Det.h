@@ -22,7 +22,7 @@
 
 class DBM_Det : public GeoVPixelFactory {
  public:
-  DBM_Det(InDetDD::PixelDetectorManager* ddmgr, PixelGeometryManager* mgr);
+  DBM_Det(InDetDD::PixelDetectorManager* ddmgr, PixelGeometryManager* mgr, GeoModelIO::ReadGeoModel* sqliteReader);
   virtual  GeoVPhysVol* Build() override;
   
  private:

@@ -14,6 +14,7 @@ class GeoPixelModule : public GeoVPixelFactory {
  public:
   GeoPixelModule(InDetDD::PixelDetectorManager* ddmgr,
                  PixelGeometryManager* mgr,
+		 GeoModelIO::ReadGeoModel* sqliteReader,
                  GeoPixelSiCrystal &theSensor);
   GeoPixelModule (const GeoPixelModule&) = delete;
   GeoPixelModule& operator= (const GeoPixelModule&) = delete;

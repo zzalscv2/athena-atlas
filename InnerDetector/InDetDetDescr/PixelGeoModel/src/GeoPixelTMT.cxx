@@ -23,8 +23,9 @@
 #include <cmath>
 
 GeoPixelTMT::GeoPixelTMT(InDetDD::PixelDetectorManager* ddmgr,
-                         PixelGeometryManager* mgr):
-  GeoPixelStaveSupport(ddmgr, mgr),
+                         PixelGeometryManager* mgr,
+			 GeoModelIO::ReadGeoModel* sqliteReader):
+  GeoPixelStaveSupport(ddmgr, mgr, sqliteReader),
   m_transform(GeoTrf::Transform3D::Identity())
 {
   m_physVol = GeoPixelTMT::Build();

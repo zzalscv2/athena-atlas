@@ -14,6 +14,7 @@ class GeoPixelLadder : public GeoVPixelFactory {
  public:
   GeoPixelLadder(InDetDD::PixelDetectorManager* ddmgr,
                  PixelGeometryManager* mgr,
+		 GeoModelIO::ReadGeoModel* sqliteReader,
                  GeoPixelSiCrystal& theSensor,
 		 GeoPixelStaveSupport * staveSupport);
   GeoPixelLadder (const GeoPixelLadder&) = delete;

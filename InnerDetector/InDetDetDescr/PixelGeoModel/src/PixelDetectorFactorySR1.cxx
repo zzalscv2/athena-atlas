@@ -138,7 +138,7 @@ void PixelDetectorFactorySR1::create (GeoPhysVol *world)
 
   GeoPixelServices * pixServices = nullptr;
   if(m_geometryManager->DoServices() ) {
-    pixServices = new GeoPixelServices(m_detectorManager, m_geometryManager, nullptr);
+    pixServices = new GeoPixelServices(m_detectorManager, m_geometryManager, nullptr, nullptr);
   } 
   
   // Top level transform
@@ -149,7 +149,7 @@ void PixelDetectorFactorySR1::create (GeoPhysVol *world)
     // Add the Barrel:
     //
     m_geometryManager->SetBarrel();
-    GeoPixelBarrel brl(m_detectorManager, m_geometryManager, pixServices);
+    GeoPixelBarrel brl(m_detectorManager, m_geometryManager, nullptr, pixServices);
     physVol = brl.Build();   
 
     GeoTrf::Transform3D barrelTransform = m_geometryManager->partTransform("Barrel");
@@ -169,7 +169,7 @@ void PixelDetectorFactorySR1::create (GeoPhysVol *world)
   if (endcapAPresent || endcapCPresent) {
     m_geometryManager->SetEndcap();
 
-    GeoPixelEndCap pec(m_detectorManager, m_geometryManager, pixServices);
+    GeoPixelEndCap pec(m_detectorManager, m_geometryManager, nullptr, pixServices);
     double zpos = (m_geometryManager->PixelEndcapZMax()+m_geometryManager->PixelEndcapZMin())/2.;
     
 

@@ -11,7 +11,7 @@ class GeoPixelFrame : public GeoVPixelFactory {
 
 public:  
   GeoPixelFrame(InDetDD::PixelDetectorManager* ddmgr,
-                PixelGeometryManager* mgr);
+                PixelGeometryManager* mgr, GeoModelIO::ReadGeoModel* sqliteReader);
   void BuildAndPlace(GeoFullPhysVol * parent, int section);
 
 private:

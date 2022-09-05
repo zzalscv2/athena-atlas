@@ -14,7 +14,8 @@ class PixelLegacyManager;
 class GeoPixelOldFrame : public GeoVPixelFactory {
  public:
   GeoPixelOldFrame(InDetDD::PixelDetectorManager* ddmgr,
-                   PixelGeometryManager* mgr);
+                   PixelGeometryManager* mgr,
+		   GeoModelIO::ReadGeoModel* sqliteReader);
   virtual GeoVPhysVol* Build() override;
 
   void BuildInBarrel(GeoFullPhysVol * parent);

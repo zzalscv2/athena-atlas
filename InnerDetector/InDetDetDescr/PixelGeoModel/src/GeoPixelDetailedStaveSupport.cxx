@@ -30,8 +30,9 @@
 using std::max;
 
 GeoPixelDetailedStaveSupport::GeoPixelDetailedStaveSupport(InDetDD::PixelDetectorManager* ddmgr,
-                                                           PixelGeometryManager* mgr)
-  : GeoPixelStaveSupport (ddmgr, mgr),
+                                                           PixelGeometryManager* mgr,
+							   GeoModelIO::ReadGeoModel* sqliteReader)
+  : GeoPixelStaveSupport (ddmgr, mgr, sqliteReader),
     m_transform(GeoTrf::Transform3D::Identity())
 {
   m_bVerbose = (m_gmt_mgr->msgLvl(MSG::DEBUG));
@@ -48,8 +49,8 @@ GeoVPhysVol* GeoPixelDetailedStaveSupport::Build ( ) {
   int staveLayout = m_gmt_mgr->PixelStaveLayout();
   
   // Module geometry
-  GeoPixelSiCrystal theSensor(m_DDmgr, m_gmt_mgr, isBLayer);
-  GeoPixelModule pm(m_DDmgr, m_gmt_mgr, theSensor);
+  GeoPixelSiCrystal theSensor(m_DDmgr, m_gmt_mgr, m_sqliteReader, isBLayer);
+  GeoPixelModule pm(m_DDmgr, m_gmt_mgr, m_sqliteReader, theSensor);
   double pmThicknessN=pm.ThicknessN_noSvc();
   double pmThicknessP=pm.ThicknessP();
   double pmWidth=pm.Width();
@@ -68,8 +69,8 @@ GeoVPhysVol* GeoPixelDetailedStaveSupport::Build ( ) {
 
   if(staveLayout==5||staveLayout==6||staveLayout==7)     // 75/25 or 50/50
     {
-      GeoPixelSiCrystal theSensor3D(m_DDmgr, m_gmt_mgr, isBLayer,true);
-      GeoPixelModule pm3D(m_DDmgr, m_gmt_mgr, theSensor3D);
+      GeoPixelSiCrystal theSensor3D(m_DDmgr, m_gmt_mgr, m_sqliteReader, isBLayer,true);
+      GeoPixelModule pm3D(m_DDmgr, m_gmt_mgr, m_sqliteReader, theSensor3D);
 
       pmThicknessN3D=pm3D.ThicknessN();
       pmThicknessP3D=pm3D.ThicknessP();
@@ -110,8 +111,8 @@ GeoVPhysVol* GeoPixelDetailedStaveSupport::Build ( ) {
     {
       // Get the 3D module description
       bool isModule3D=true;
-      GeoPixelSiCrystal theSensor3D(m_DDmgr, m_gmt_mgr, isBLayer,isModule3D);
-      GeoPixelModule pm3D(m_DDmgr, m_gmt_mgr, theSensor3D);
+      GeoPixelSiCrystal theSensor3D(m_DDmgr, m_gmt_mgr, m_sqliteReader, isBLayer,isModule3D);
+      GeoPixelModule pm3D(m_DDmgr, m_gmt_mgr, m_sqliteReader, theSensor3D);
       Module3DLength=pm3D.Length();
 
       if(staveLayout==5||staveLayout==7)  // 75/25

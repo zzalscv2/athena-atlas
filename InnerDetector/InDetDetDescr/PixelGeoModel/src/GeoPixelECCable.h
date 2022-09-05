@@ -11,7 +11,8 @@ class GeoLogVol;
 class GeoPixelECCable : public GeoVPixelFactory {
  public:
   GeoPixelECCable(InDetDD::PixelDetectorManager* ddmgr,
-                  PixelGeometryManager* mgr);
+                  PixelGeometryManager* mgr,
+		  GeoModelIO::ReadGeoModel* sqliteReader);
   virtual GeoVPhysVol* Build() override;
 };
 

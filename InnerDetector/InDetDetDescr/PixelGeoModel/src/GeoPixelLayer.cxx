@@ -35,8 +35,9 @@
 #include <sstream>
 
 GeoPixelLayer::GeoPixelLayer(InDetDD::PixelDetectorManager* ddmgr,
-                             PixelGeometryManager* mgr)
-  : GeoVPixelFactory (ddmgr, mgr),
+                             PixelGeometryManager* mgr,
+			     GeoModelIO::ReadGeoModel* sqliteReader)
+  : GeoVPixelFactory (ddmgr, mgr, sqliteReader),
     m_supportPhysA (nullptr),
     m_supportPhysC (nullptr),
     m_supportMidRing (nullptr),
@@ -70,17 +71,17 @@ GeoVPhysVol* GeoPixelLayer::Build() {
   // Likewise the TMT and the "Ladder"
   bool isBLayer = false;
   if(m_gmt_mgr->GetLD() == 0) isBLayer = true;
-  GeoPixelSiCrystal theSensor(m_DDmgr, m_gmt_mgr, isBLayer);
+  GeoPixelSiCrystal theSensor(m_DDmgr, m_gmt_mgr, m_sqliteReader, isBLayer);
   std::unique_ptr<GeoPixelStaveSupport> staveSupport;
   if (staveLayout ==0 || staveLayout==1) {
-    staveSupport = std::make_unique<GeoPixelTMT>( m_DDmgr, m_gmt_mgr );
+    staveSupport = std::make_unique<GeoPixelTMT>( m_DDmgr, m_gmt_mgr, m_sqliteReader );
   }
   if (staveLayout == 3) {
-    staveSupport = std::make_unique<GeoPixelSimpleStaveSupport>( m_DDmgr, m_gmt_mgr );
+    staveSupport = std::make_unique<GeoPixelSimpleStaveSupport>( m_DDmgr, m_gmt_mgr, m_sqliteReader );
   }
   else if (staveLayout >3 && staveLayout <7)
   {
-    staveSupport = std::make_unique<GeoPixelDetailedStaveSupport>( m_DDmgr, m_gmt_mgr);
+    staveSupport = std::make_unique<GeoPixelDetailedStaveSupport>( m_DDmgr, m_gmt_mgr, m_sqliteReader);
   }
 
   if (staveLayout >3 && staveLayout <7)
@@ -98,7 +99,7 @@ GeoVPhysVol* GeoPixelLayer::Build() {
   m_gmt_mgr->msg(MSG::INFO)<<"*** LAYER "<<m_gmt_mgr->GetLD()<<"  planar/3D modules : "<< staveSupport->PixelNPlanarModule()<<" "<<staveSupport->PixelN3DModule()<<endmsg;
 
 
-  GeoPixelLadder pixelLadder(m_DDmgr, m_gmt_mgr, theSensor, staveSupport.get());
+  GeoPixelLadder pixelLadder(m_DDmgr, m_gmt_mgr, m_sqliteReader, theSensor, staveSupport.get());
 
   //
   // layer radius, number of sectors and tilt used in various places
@@ -200,7 +201,7 @@ GeoVPhysVol* GeoPixelLayer::Build() {
       //int biStave    = iPhi % 2;  // Should only be 0 or 1
       if (ladderType < 0) std::cout << "ERROR: Unexpected value of ladderType: " << ladderType << std::endl;
       if (!ladderServicesArray[biStave*(maxLadType+1) + ladderType]) {
-	GeoPixelLadderServices *ladderServices = new GeoPixelLadderServices(m_DDmgr, m_gmt_mgr, ladderType);
+	GeoPixelLadderServices *ladderServices = new GeoPixelLadderServices(m_DDmgr, m_gmt_mgr, m_sqliteReader, ladderType);
 	// build the physical volume for each type
 	ladderServicesArray[biStave*(maxLadType+1) + ladderType] = ladderServices->Build();
 	if (!firstLadderServices) {
@@ -277,7 +278,7 @@ GeoVPhysVol* GeoPixelLayer::Build() {
     //
     // The Pigtail
     //
-    GeoPixelPigtail pigtail (m_DDmgr, m_gmt_mgr);
+    GeoPixelPigtail pigtail (m_DDmgr, m_gmt_mgr, m_sqliteReader);
     pigtailPhysVol = pigtail.Build();
     transPigtail = GeoTrf::Translate3D(m_gmt_mgr->PixelPigtailBendX() + m_gmt_mgr->PixelLadderCableOffsetX(), 
 				  m_gmt_mgr->PixelPigtailBendY() + m_gmt_mgr->PixelLadderCableOffsetY(), 
@@ -449,7 +450,7 @@ GeoVPhysVol* GeoPixelLayer::Build() {
     {
       m_gmt_mgr->msg(MSG::INFO) << "IBL stave ring support"<< endmsg;
 
-      GeoPixelStaveRingServices staveRingService(m_DDmgr, m_gmt_mgr, pixelLadder, *staveSupport);
+      GeoPixelStaveRingServices staveRingService(m_DDmgr, m_gmt_mgr, m_sqliteReader, pixelLadder, *staveSupport);
       staveRingService.Build();
 
       m_supportPhysA = staveRingService.getSupportA();

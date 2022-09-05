@@ -34,8 +34,9 @@ using namespace InDetDD;
 
 GeoPixelSiCrystal::GeoPixelSiCrystal(InDetDD::PixelDetectorManager* ddmgr,
                                      PixelGeometryManager* mgr,
+				     GeoModelIO::ReadGeoModel* sqliteReader,
                                      bool isBLayer, bool isModule3D)
-  : GeoVPixelFactory (ddmgr, mgr)
+  : GeoVPixelFactory (ddmgr, mgr, sqliteReader)
 {
   // 
   //Builds the design for this crystal

@@ -25,8 +25,9 @@
 
 GeoPixelEndCap::GeoPixelEndCap(InDetDD::PixelDetectorManager* ddmgr,
                                PixelGeometryManager* mgr,
+			       GeoModelIO::ReadGeoModel* sqliteReader,
                                GeoPixelServices * pixServices)
-  : GeoVPixelFactory(ddmgr, mgr),
+  : GeoVPixelFactory(ddmgr, mgr, sqliteReader),
     m_pixServices(pixServices)
 {}
 
@@ -56,8 +57,8 @@ GeoVPhysVol* GeoPixelEndCap::Build( ) {
   //
   // Place the disks and cables on both sides
   //
-  GeoPixelDisk * pd = new GeoPixelDisk (m_DDmgr, m_gmt_mgr);
-  GeoPixelECCable * pecc = new GeoPixelECCable (m_DDmgr, m_gmt_mgr);
+  GeoPixelDisk * pd = new GeoPixelDisk (m_DDmgr, m_gmt_mgr, m_sqliteReader);
+  GeoPixelECCable * pecc = new GeoPixelECCable (m_DDmgr, m_gmt_mgr, m_sqliteReader);
   for(int idisk = 0; idisk < ndisks; idisk++) {
     m_gmt_mgr->SetCurrentLD(idisk);
     // Some method is accessing the eta before the disk is built so we set it 

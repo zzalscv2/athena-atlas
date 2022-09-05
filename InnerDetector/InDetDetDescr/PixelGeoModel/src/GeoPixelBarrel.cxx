@@ -31,8 +31,9 @@
 using namespace std;
 GeoPixelBarrel::GeoPixelBarrel(InDetDD::PixelDetectorManager* ddmgr,
                                PixelGeometryManager* mgr,
+			       GeoModelIO::ReadGeoModel* sqliteReader,
                                GeoPixelServices * pixServices)
-  : GeoVPixelFactory (ddmgr, mgr),
+  : GeoVPixelFactory (ddmgr, mgr, sqliteReader),
     m_pixServices(pixServices)
 {}
 
@@ -63,7 +64,7 @@ GeoVPhysVol* GeoPixelBarrel::Build( ) {
   //
   // Build the layers inside
   //
-  GeoPixelLayer layer (m_DDmgr, m_gmt_mgr);
+  GeoPixelLayer layer (m_DDmgr, m_gmt_mgr, m_sqliteReader);
   for(int ii = 0; ii < m_gmt_mgr->PixelBarrelNLayer(); ii++){
     //cout << "Layer" << ii << endl;
     m_gmt_mgr->SetCurrentLD(ii);
@@ -119,7 +120,7 @@ GeoVPhysVol* GeoPixelBarrel::Build( ) {
 	  // ----------- end of stave PP0 services (insde barrel)
 	  
 	  if(m_gmt_mgr->IBLFlexAndWingDefined()){
-	    GeoPixelIFlexServices iFlexSrv(m_DDmgr, m_gmt_mgr, 0);
+	    GeoPixelIFlexServices iFlexSrv(m_DDmgr, m_gmt_mgr, m_sqliteReader, 0);
 	    iFlexSrv.Build();
 	    
 	    GeoNameTag * tagFlexA = new GeoNameTag("PP0Flex_A");
@@ -157,7 +158,7 @@ GeoVPhysVol* GeoPixelBarrel::Build( ) {
     // Add the pixel frame inside the barrel volume
     // In recent versions this taken care of in the general services.
     if (m_gmt_mgr->oldFrame()) {
-      GeoPixelOldFrame frame (m_DDmgr, m_gmt_mgr);
+      GeoPixelOldFrame frame (m_DDmgr, m_gmt_mgr, m_sqliteReader);
       frame.BuildInBarrel(barrelPhys);      
     }
   }

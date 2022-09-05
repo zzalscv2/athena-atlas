@@ -11,7 +11,8 @@
 class GeoPixelCable : public GeoVPixelFactory {
  public:
   GeoPixelCable(InDetDD::PixelDetectorManager* ddmgr,
-                PixelGeometryManager* mgr);
+                PixelGeometryManager* mgr,
+		GeoModelIO::ReadGeoModel* sqliteReader);
   virtual GeoVPhysVol* Build() override;
   int numElements() const {return m_elements.size();}
   void setElement(int i) {m_currentElement = i;}
