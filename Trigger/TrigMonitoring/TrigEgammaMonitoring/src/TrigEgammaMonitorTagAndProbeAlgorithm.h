@@ -5,6 +5,7 @@
 #define TrigEgammaMonitorTagAndProbeAlgorithm_H
 
 #include "TrigEgammaMonitorAnalysisAlgorithm.h"
+#include "StoreGate/ReadDecorHandleKey.h"
 
 
 
@@ -92,6 +93,7 @@ class TrigEgammaMonitorTagAndProbeAlgorithm: public TrigEgammaMonitorAnalysisAlg
     SG::ReadHandleKey<xAOD::ElectronContainer> m_offElectronKey{ this, "ElectronKey", "Electrons", ""};
     /*! Jet container for probe selection */
     SG::ReadHandleKey<xAOD::JetContainer> m_jetKey{ this, "JetKey" , "AntiKt4LCTopoJets", ""};
+    SG::ReadDecorHandleKey<xAOD::EventInfo> m_eventInfoKey{this, "LArStatusFlag", "EventInfo.larFlag", "Key for EventInfo object"};
 };
 
 #endif

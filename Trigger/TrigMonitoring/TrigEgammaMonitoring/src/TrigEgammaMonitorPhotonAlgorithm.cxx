@@ -3,6 +3,8 @@
 */
 
 #include "TrigEgammaMonitorPhotonAlgorithm.h"
+#include "LArRecEvent/LArEventBitInfo.h"
+#include "StoreGate/ReadDecorHandle.h"
 
 
 using namespace Trig;
@@ -24,6 +26,7 @@ StatusCode TrigEgammaMonitorPhotonAlgorithm::initialize()
 
   ATH_CHECK(m_offPhotonKey.initialize());
   ATH_CHECK(m_offPhotonIsolationKeys.initialize());
+  ATH_CHECK( m_eventInfoKey.initialize() );
   
   for(auto& trigName : m_trigInputList)
   {
@@ -49,7 +52,13 @@ StatusCode TrigEgammaMonitorPhotonAlgorithm::fillHistograms( const EventContext&
         return StatusCode::SUCCESS; 
     }
     
-    
+    // Noise burst protection 
+    SG::ReadDecorHandle<xAOD::EventInfo,uint32_t> thisEvent(m_eventInfoKey, ctx);
+    if ( thisEvent->isEventFlagBitSet(xAOD::EventInfo::LAr,LArEventBitInfo::NOISEBURSTVETO)) {
+        ATH_MSG_DEBUG("LAr Noise Burst Veto, skip trigger analysis");
+        return StatusCode::SUCCESS;
+    }
+
     ATH_MSG_DEBUG("Chains for Analysis " << m_trigList);
 
     for(const auto& trigger : m_trigList){
