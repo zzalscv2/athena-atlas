@@ -402,7 +402,7 @@ PixelConditionsSummaryTool::getDetectorElementStatus(const EventContext& ctx,
    // module state
    {
       SG::ReadCondHandle<PixelDCSStateData> dcs_state_handle(m_condDCSStateKey, ctx);
-      setStatus(dcs_state_handle->moduleStatusMap(),   m_activeStateMask,  status);
+      andStatus(dcs_state_handle->moduleStatusMap(),   m_activeStateMask,  status);
       if (whandle) {
         whandle->addDependency (dcs_state_handle);
       }
