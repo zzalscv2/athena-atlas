@@ -1138,7 +1138,7 @@ StatusCode AthenaEventLoopMgr::execAtPreFork(const EventContext& ctx) const {
   for (const std::string& name : m_execAtPreFork) {
     if ( algMgr->getAlgorithm(name, alg) ) {
       ATH_MSG_INFO("Executing " << alg->name() << "...");
-      sc &= alg->execute(ctx);
+      sc &= alg->sysExecute(ctx);
     }
     else ATH_MSG_WARNING("Cannot find algorithm or sequence " << name);
   }
