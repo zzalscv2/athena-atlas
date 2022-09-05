@@ -180,7 +180,7 @@ namespace TrkDriftCircleMath {
 
             if (m_debugLevel >= 1) {
                 std::cout << " two layer scan " << std::endl;
-                for (SegCit it = segments.data().begin(); it != segments.data().end(); ++it) { std::cout << "  " << *it << std::endl; }
+                for (const auto & it : segments.data()) { std::cout << "  " << it << std::endl; }
             }
 
             // reset segments so it contains only the cleaned segments
@@ -189,11 +189,11 @@ namespace TrkDriftCircleMath {
 
             if (m_debugLevel >= 1) {
                 std::cout << " after cleaning " << std::endl;
-                for (SegCit it = segments.data().begin(); it != segments.data().end(); ++it) { std::cout << "  " << *it << std::endl; }
+                for (const auto & it : segments.data()) { std::cout << "  " << it << std::endl; }
             }
 
             unsigned int usedHits(0);
-            for (SegCit it = segments.data().begin(); it != segments.data().end(); ++it) { usedHits += it->hitsOnTrack(); }
+            for (const auto & it : segments.data()) { usedHits += it.hitsOnTrack(); }
 
             // if remaining dcs not associated with selected track smaller then 2 no additional segments can be formed
             // thus no further search in single multi layers is needed
@@ -204,14 +204,14 @@ namespace TrkDriftCircleMath {
 
                 if (m_debugLevel >= 1) {
                     std::cout << " segments after scan multilayer 1 " << std::endl;
-                    for (SegCit it = segments.data().begin(); it != segments.data().end(); ++it) { std::cout << "  " << *it << std::endl; }
+                    for (const auto & it : segments.data()) { std::cout << "  " << it << std::endl; }
                 }
 
                 fullScan(seedsMl2, dcsPerMl.second, clsIn, segments);
 
                 if (m_debugLevel >= 1) {
                     std::cout << " segments after scan multilayer 2 " << std::endl;
-                    for (SegCit it = segments.data().begin(); it != segments.data().end(); ++it) { std::cout << "  " << *it << std::endl; }
+                    for (const auto & it : segments.data()) { std::cout << "  " << it << std::endl; }
                 }
             }
 
@@ -246,7 +246,7 @@ namespace TrkDriftCircleMath {
 
         if (m_debugLevel >= 1) {
             std::cout << " final segments " << std::endl;
-            for (SegIt it = selectedSegments.begin(); it != selectedSegments.end(); ++it) { std::cout << *it << std::endl; }
+            for (auto & selectedSegment : selectedSegments) { std::cout << selectedSegment << std::endl; }
         }
 
         return selectedSegments;
@@ -631,7 +631,7 @@ namespace TrkDriftCircleMath {
 
         if (m_debugLevel >= 3) {
             std::cout << " sorting segments " << std::endl;
-            for (SegIt it = segments.begin(); it != segments.end(); ++it) { std::cout << *it << std::endl; }
+            for (auto & segment : segments) { std::cout << segment << std::endl; }
         }
         // first segment is automatically accepted
         selectedSegments.push_back(segments.front());
@@ -645,33 +645,33 @@ namespace TrkDriftCircleMath {
         for (; it != it_end; ++it) {
             unsigned int shareHits(0);
             bool addSeg(true);
-            for (SegIt sit = selectedSegments.begin(); sit != selectedSegments.end(); ++sit) {
+            for (auto & selectedSegment : selectedSegments) {
                 // count number of shared hits
-                shareHits = sharedHits(*it, *sit);
+                shareHits = sharedHits(*it, selectedSegment);
                 if (shareHits != 0) {
                     unsigned int nmdtHitsIt = it->hitsOnTrack();
-                    unsigned int nmdtHitsSit = sit->hitsOnTrack();
+                    unsigned int nmdtHitsSit = selectedSegment.hitsOnTrack();
 
                     // deal with curved segments
                     if (it->hasCurvatureParameters()) {
-                        if (sit->hasCurvatureParameters()) continue;
+                        if (selectedSegment.hasCurvatureParameters()) continue;
                         if (shareHits == it->hitsOnTrack()) {
-                            if ((sit->chi2() < it->chi2()) || (std::abs(it->deltaAlpha()) < 0.01)) {
+                            if ((selectedSegment.chi2() < it->chi2()) || (std::abs(it->deltaAlpha()) < 0.01)) {
                                 addSeg = false;
                                 break;
                             }
-                        } else if (sit->hasCurvatureParameters()) {
-                            if (std::abs(it->line().phi() - sit->line().phi()) < 0.05 &&
-                                std::abs(it->deltaAlpha() - sit->deltaAlpha()) < 0.01) {
+                        } else if (selectedSegment.hasCurvatureParameters()) {
+                            if (std::abs(it->line().phi() - selectedSegment.line().phi()) < 0.05 &&
+                                std::abs(it->deltaAlpha() - selectedSegment.deltaAlpha()) < 0.01) {
                                 ResidualWithLine resWithLine(it->line());
-                                if (std::abs(resWithLine.residual(sit->line().position())) < 0.1) {
+                                if (std::abs(resWithLine.residual(selectedSegment.line().position())) < 0.1) {
                                     addSeg = false;
                                     break;
                                 }
                             }
                         } else {
                             // if the curved segment has unique hits, keep both
-                            sit->ambigue(2);
+                            selectedSegment.ambigue(2);
                             continue;
                         }
                     }
@@ -683,26 +683,26 @@ namespace TrkDriftCircleMath {
                     }
 
                     // reject segment if slected has clusters and current doesn't
-                    if (!sit->clusters().empty() && it->clusters().empty()) {
+                    if (!selectedSegment.clusters().empty() && it->clusters().empty()) {
                         addSeg = false;
                         break;
                     }
-                    if (std::abs(it->chi2() - sit->chi2()) > sit->hitsOnTrack()) {
+                    if (std::abs(it->chi2() - selectedSegment.chi2()) > selectedSegment.hitsOnTrack()) {
                         addSeg = false;
                         break;
                     }
 
                     // if number of hits the same reject if difference in angle smaller 0.05 and distance between lines small 0.1 mm
-                    if (std::abs(it->line().phi() - sit->line().phi()) < 0.05) {
+                    if (std::abs(it->line().phi() - selectedSegment.line().phi()) < 0.05) {
                         ResidualWithLine resWithLine(it->line());
-                        if (std::abs(resWithLine.residual(sit->line().position())) < 0.1) {
+                        if (std::abs(resWithLine.residual(selectedSegment.line().position())) < 0.1) {
                             addSeg = false;
                             break;
                         }
                     }
 
                     // mark segment as ambiguous
-                    sit->ambigue(2);
+                    selectedSegment.ambigue(2);
                 }
             }
             if (addSeg) {
@@ -722,17 +722,17 @@ namespace TrkDriftCircleMath {
         TangentToCircles::LineVec lines = TrkDriftCircleMath::TangentToCircles::tangentLines(seed1, seed2);
 
         // loop over tangent lines match dcs with line
-        for (TangentToCircles::LineVec::const_iterator lit = lines.begin(); lit != lines.end(); ++lit) {
+        for (const auto & line : lines) {
             // only accept segments with reasonable angle
-            if (!directionCheck(lit->direction())) {
+            if (!directionCheck(line.direction())) {
                 if (m_debugLevel >= 19) {
-                    std::cout << " failed direction cut " << lit->direction() * m_roadDir << " line: " << lit->phi() << " road "
+                    std::cout << " failed direction cut " << line.direction() * m_roadDir << " line: " << line.phi() << " road "
                               << atan2(m_roadDir.y(), m_roadDir.x()) << " chamber " << atan2(m_chamberDir.y(), m_chamberDir.x())
                               << std::endl;
                 }
                 continue;
             }
-            matchWithLine.set(*lit, m_roadWidth, MatchDCWithLine::Road, tubeRadius());
+            matchWithLine.set(line, m_roadWidth, MatchDCWithLine::Road, tubeRadius());
             const DCOnTrackVec& hitsOnLine = matchWithLine.match(dcs);
 
             if (matchWithLine.hitsOnTrack() <= 2) {
@@ -748,7 +748,7 @@ namespace TrkDriftCircleMath {
             }
 
             Segment result(Line(0., 0., 0.), DCOnTrackVec());
-            if (!m_fitter->fit(result, *lit, hitsOnLine, m_hitSelector.selectHitsOnTrack(hitsOnLine))) {
+            if (!m_fitter->fit(result, line, hitsOnLine, m_hitSelector.selectHitsOnTrack(hitsOnLine))) {
                 if (m_debugLevel >= 3) std::cout << " failed fit " << std::endl;
                 continue;
             }
@@ -854,10 +854,10 @@ namespace TrkDriftCircleMath {
         if (seeds_ml1.size() * seeds_ml2.size() > 2500) return;
 
         // combine a dc from the first set with a dc from the second set
-        for (DCCit it1 = seeds_ml1.begin(); it1 != seeds_ml1.end(); ++it1) {
+        for (const auto & it1 : seeds_ml1) {
             for (DCVec::const_reverse_iterator it2 = seeds_ml2.rbegin(); it2 != seeds_ml2.rend(); ++it2) {
                 // find segments using the two seeds
-                handleSeedPair(*it1, *it2, dcs, cls, matchWithLine, segments);
+                handleSeedPair(it1, *it2, dcs, cls, matchWithLine, segments);
             }
         }
     }
@@ -897,9 +897,9 @@ namespace TrkDriftCircleMath {
 
         for (; dit != dit_end; ++dit) {
             bool found(false);
-            for (SegCit sit = segs.begin(); sit != segs.end(); ++sit) {
-                DCOnTrackCit pos = std::lower_bound(sit->dcs().begin(), sit->dcs().end(), *dit, SortDcsByY());
-                if (pos != sit->dcs().end() && pos->state() != DCOnTrack::CloseDC && sameTube(*pos, *dit)) {
+            for (const auto & seg : segs) {
+                DCOnTrackCit pos = std::lower_bound(seg.dcs().begin(), seg.dcs().end(), *dit, SortDcsByY());
+                if (pos != seg.dcs().end() && pos->state() != DCOnTrack::CloseDC && sameTube(*pos, *dit)) {
                     found = true;
                     break;
                 }

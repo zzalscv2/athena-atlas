@@ -190,14 +190,14 @@ namespace Trk
 
 			/* Extrapolate the perigees to the startpoint of the fit */
 			unsigned int count(0);
-			for ( std::vector<const Trk::TrackParameters*>::const_iterator iter = originalPerigees.begin(); iter != originalPerigees.end() ; ++iter )
+			for (const auto *originalPerigee : originalPerigees)
 			{
 
 				if ( niter == 0 )
 				{
 					// need to cast to access parameters() (this is to guarantee that the code knows if it is neutrals or charged parameters)
 					const Trk::TrackParameters* chargedParameters ( nullptr );
-					chargedParameters = dynamic_cast<const Trk::TrackParameters*> ( *iter );
+					chargedParameters = dynamic_cast<const Trk::TrackParameters*> ( originalPerigee );
 					if ( chargedParameters==nullptr )
 					{
 						ATH_MSG_ERROR("Track parameters are not charged tracks ... full fit aborted (this will be handled correctly soon)");
@@ -218,7 +218,7 @@ namespace Trk
 				// in all other cases it did not extrapolate because the reference surface of the original perigee
 				// is already given to the extrapolation point (or very close nearby)
 
-				LinearizedTrack* linTrack = m_linFactory->linearizedTrack ( *iter, linPoint );
+				LinearizedTrack* linTrack = m_linFactory->linearizedTrack ( originalPerigee, linPoint );
 				if ( linTrack==nullptr )
 				{
 					ATH_MSG_DEBUG("Could not linearize track! Skipping this track!");
@@ -227,7 +227,7 @@ namespace Trk
 				{
 					BilloirTrack locBilloirTrack;
 					
-					locBilloirTrack.originalPerigee = *iter;
+					locBilloirTrack.originalPerigee = originalPerigee;
                                         locBilloirTrack.linTrack = linTrack;
 					double d0 = linTrack->expectedParametersAtPCA()[Trk::d0];
 					double z0 = linTrack->expectedParametersAtPCA()[Trk::z0];
@@ -506,9 +506,9 @@ namespace Trk
  		   //making a list of perigee out of the vector of tracks   
  		   std::vector<const Trk::TrackParameters*> measuredPerigees; 
  		    
- 		   for(std::vector<const xAOD::TrackParticle*>::const_iterator i = vectorTrk.begin(); i!= vectorTrk.end();++i) 
+ 		   for(const auto *i : vectorTrk) 
  		   { 
- 		    const Trk::TrackParameters * tmpMeasPer = &((*i)->perigeeParameters()); 
+ 		    const Trk::TrackParameters * tmpMeasPer = &(i->perigeeParameters()); 
  		   
  		    if(tmpMeasPer!=nullptr) measuredPerigees.push_back(tmpMeasPer); 
  		    else  msg(MSG::INFO)<<"Failed to dynamic_cast this track parameters to perigee"<<endmsg; //TODO: Failed to implicit cast the perigee parameters to track parameters?

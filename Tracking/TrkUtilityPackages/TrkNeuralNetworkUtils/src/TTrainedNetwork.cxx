@@ -102,13 +102,11 @@ TTrainedNetwork::TTrainedNetwork(std::vector<TTrainedNetwork::Input> inputs,
   }
 
   unsigned node_n = 0; 
-  for (std::vector<Input>::const_iterator itr = inputs.begin(); 
-       itr != inputs.end(); 
-       ++itr) { 
-    m_input_node_offset.push_back(itr->offset); 
-    m_input_node_scale.push_back(itr->scale); 
-    if (!itr->name.empty()) { 
-      m_inputStringToNode[itr->name] = node_n; 
+  for (const auto & input : inputs) { 
+    m_input_node_offset.push_back(input.offset); 
+    m_input_node_scale.push_back(input.scale); 
+    if (!input.name.empty()) { 
+      m_inputStringToNode[input.name] = node_n; 
     }
     node_n++; 
   }
@@ -124,8 +122,8 @@ TTrainedNetwork::TTrainedNetwork(std::vector<TTrainedNetwork::Input> inputs,
   }
 
   int nlayer_max(m_nOutput);
-  for (unsigned i = 0; i < m_nHiddenLayerSize.size(); ++i)
-    nlayer_max = std::max(nlayer_max, m_nHiddenLayerSize[i]);
+  for (int & i : m_nHiddenLayerSize)
+    nlayer_max = std::max(nlayer_max, i);
   m_bufferSizeMax=nlayer_max;
 
   unsigned n_zero = std::count(m_input_node_scale.begin(), 
@@ -169,10 +167,8 @@ std::vector<TTrainedNetwork::Input> TTrainedNetwork::getInputs() const {
   assert(m_input_node_scale.size() == m_input_node_offset.size()); 
 
   std::map<int,std::string> input_n_to_name; 
-  for (std::map<std::string,int>::const_iterator 
-	 itr = m_inputStringToNode.begin(); 
-       itr != m_inputStringToNode.end(); ++itr){ 
-    input_n_to_name[itr->second] = itr->first; 
+  for (const auto & itr : m_inputStringToNode){ 
+    input_n_to_name[itr.second] = itr.first; 
   }
 
   std::vector<Input> inputs_vector; 
@@ -231,19 +227,17 @@ TTrainedNetwork::calculateNormalized(const TTrainedNetwork::DMap& in)
 
   std::vector<Double_t> inputs(m_nInput); 
   size_t n_filled = 0;
-  for (std::map<std::string,double>::const_iterator itr = in.begin(); 
-       itr != in.end(); 
-       ++itr){ 
+  for (const auto & itr : in){ 
     std::map<std::string,int>::const_iterator input_node_ptr = 
-      m_inputStringToNode.find(itr->first); 
+      m_inputStringToNode.find(itr.first); 
     if (input_node_ptr == m_inputStringToNode.end()) { 
-      throw std::runtime_error(itr->first + "not found in NN"); 
+      throw std::runtime_error(itr.first + "not found in NN"); 
     }
 
     const int node_n = input_node_ptr->second; 
 
     // get and scale the raw input value
-    double raw_value = itr->second; 
+    double raw_value = itr.second; 
     raw_value += m_input_node_offset.at(node_n); 
     raw_value *= m_input_node_scale.at(node_n); 
 
@@ -256,16 +250,13 @@ TTrainedNetwork::calculateNormalized(const TTrainedNetwork::DMap& in)
   if (n_filled != m_inputStringToNode.size() ) { 
     assert(n_filled < m_inputStringToNode.size() ); 
     std::set<std::string> input_set;
-    for (DMapI itr = in.begin(); itr != in.end(); ++itr) { 
-      input_set.insert(itr->first); 
+    for (const auto & itr : in) { 
+      input_set.insert(itr.first); 
     }
     std::string err = "nodes not filled in NN: "; 
-    for (std::map<std::string,int>::const_iterator itr = 
-	   m_inputStringToNode.begin(); 
-	 itr != m_inputStringToNode.end(); 
-	 ++itr){
-      if (input_set.find(itr->first) == input_set.end() ) 
-	err.append(itr->first + " "); 
+    for (const auto & itr : m_inputStringToNode){
+      if (input_set.find(itr.first) == input_set.end() ) 
+	err.append(itr.first + " "); 
     }
     throw std::runtime_error(err); 
   }

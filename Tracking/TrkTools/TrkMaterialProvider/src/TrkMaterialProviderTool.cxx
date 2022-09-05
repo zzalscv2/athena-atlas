@@ -500,13 +500,13 @@ void Trk::TrkMaterialProviderTool::getCaloMEOT(const Trk::Track& idTrack, const 
       return;
     }
 
-  for (unsigned int i=0;i<caloTSOS->size(); i++){
-    const Trk::MaterialEffectsOnTrack *meot=dynamic_cast<const Trk::MaterialEffectsOnTrack *>((*caloTSOS)[i]->materialEffectsOnTrack());
+  for (auto && i : *caloTSOS){
+    const Trk::MaterialEffectsOnTrack *meot=dynamic_cast<const Trk::MaterialEffectsOnTrack *>(i->materialEffectsOnTrack());
     if (!meot) {
       throw std::logic_error("TrackStateOnSurface without material effects on track." );
     }
-    double sintheta=std::sin((*caloTSOS)[i]->trackParameters()->parameters()[Trk::theta]);
-    double qoverp=(*caloTSOS)[i]->trackParameters()->parameters()[Trk::qOverP];
+    double sintheta=std::sin(i->trackParameters()->parameters()[Trk::theta]);
+    double qoverp=i->trackParameters()->parameters()[Trk::qOverP];
     const CaloEnergy *eloss=nullptr;
     if (meot) eloss=dynamic_cast<const CaloEnergy *>(meot->energyLoss());
 
@@ -522,9 +522,9 @@ void Trk::TrkMaterialProviderTool::getCaloMEOT(const Trk::Track& idTrack, const 
       meot->thicknessInX0(),
       newsa,
       std::move(neweloss),
-      (*caloTSOS)[i]->trackParameters()->associatedSurface());
+      i->trackParameters()->associatedSurface());
     calomeots.push_back(newmeot);
-    delete (*caloTSOS)[i];
+    delete i;
   }
   delete caloTSOS;
 }

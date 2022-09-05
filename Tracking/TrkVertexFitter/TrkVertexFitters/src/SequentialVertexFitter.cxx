@@ -286,12 +286,12 @@ namespace Trk{
 
     //defining the output vector
     std::vector<Trk::VxTrackAtVertex> out_tracks(0);
-    for(std::vector<const Trk::TrackParameters*>::const_iterator i = perigeeList.begin();i!= perigeeList.end();++i)
+    for(const auto *i : perigeeList)
     {
   
       //creating new meas perigees, since the will be deleted 
       //by VxTrackAtVertex in destructor
-      const Trk::Perigee * loc_per = dynamic_cast<const Trk::Perigee *>(*i);
+      const Trk::Perigee * loc_per = dynamic_cast<const Trk::Perigee *>(i);
       if( loc_per != nullptr)
       {
         Trk::Perigee * mPer = new Trk::Perigee(*loc_per);
@@ -313,12 +313,12 @@ namespace Trk{
     }//end of loop over all the perigee states
 
     //same for neutrals
-    for(std::vector<const Trk::NeutralParameters*>::const_iterator i = neutralPerigeeList.begin();i!= neutralPerigeeList.end();++i)
+    for(const auto *i : neutralPerigeeList)
     {
 
       //creating new meas perigees, since the will be deleted
       //by VxTrackAtVertex in destructor
-      const Trk::NeutralPerigee * loc_per = dynamic_cast<const Trk::NeutralPerigee *>(*i);
+      const Trk::NeutralPerigee * loc_per = dynamic_cast<const Trk::NeutralPerigee *>(i);
       if( loc_per != nullptr)
       {
         Trk::NeutralPerigee * mPer  = new Trk::NeutralPerigee(*loc_per);

@@ -207,9 +207,9 @@ namespace Trk
 }
         const std::vector<const TrackParameters*> trackParameters = this->trackParameters();
         sl << "TrackParticle has " << trackParameters.size() << " track parameters. Printing them:" << endmsg;
-        for (std::vector<const TrackParameters*>::const_iterator itr = trackParameters.begin() ; itr != trackParameters.end() ; ++itr)
+        for (const auto *trackParameter : trackParameters)
         {
-          sl << (**itr) << endmsg;
+          sl << (*trackParameter) << endmsg;
         }
 	sl<<"TrackInfo inherited from original Track comes below:"<<endmsg;
 	sl<<m_trackInfo.dumpInfo();
@@ -235,9 +235,9 @@ namespace Trk
 }
         const std::vector<const TrackParameters*> trackParameters = this->trackParameters();
         sl << "TrackParticle has " << trackParameters.size() << " track parameters. Printing them:" << std::endl;
-        for (std::vector<const TrackParameters*>::const_iterator itr = trackParameters.begin() ; itr != trackParameters.end() ; ++itr)
+        for (const auto *trackParameter : trackParameters)
         {
-          sl << (**itr) << std::endl;
+          sl << (*trackParameter) << std::endl;
         }
 	sl<<"TrackInfo inherited from original Track comes below:"<<std::endl;
 	sl<<m_trackInfo.dumpInfo();

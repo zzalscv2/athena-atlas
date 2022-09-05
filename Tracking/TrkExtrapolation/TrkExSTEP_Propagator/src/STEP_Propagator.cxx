@@ -2120,8 +2120,8 @@ rungeKuttaStep(Cache& cache,
 
         // Errormatrix is included. Use Jacobian to calculate new covariance
         /// Check first that the jacobian does not have crazy entries
-        for (int i = 0; i < 21; ++i) {
-          if (!Amg::saneCovarianceElement(Jacobian[i])) {
+        for (double i : Jacobian) {
+          if (!Amg::saneCovarianceElement(i)) {
             return nullptr;
           }
         }

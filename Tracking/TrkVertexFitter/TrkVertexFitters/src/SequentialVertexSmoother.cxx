@@ -51,7 +51,7 @@ namespace  Trk
      //updating the tracks one by one
      if(!tracks.empty())
      {
-       for(std::vector<Trk::VxTrackAtVertex>::iterator i = tracks.begin(); i!=tracks.end(); ++i)
+       for(auto & track : tracks)
        {
            //TODO: There were previously null pointer checks on both the contents and vector itself
            //      of std::vector<Trk::VxTrackAtVertex*>* in VxCandidate
@@ -59,7 +59,7 @@ namespace  Trk
            //      pointer checks are not possible
            //
            //      -David S.
-           m_vertexTrackUpdator->update( *i, vtx );
+           m_vertexTrackUpdator->update( track, vtx );
        }//end of loop over all tracks in particular vertex
      }
      else{

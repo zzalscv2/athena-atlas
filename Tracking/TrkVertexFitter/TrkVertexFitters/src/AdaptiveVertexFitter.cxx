@@ -265,12 +265,11 @@ namespace Trk
     ATH_MSG_DEBUG("Called Adaptive vertex with Trk::Track. N. Tracks = " << VectorTrk.size());
 
     std::vector<const Trk::TrackParameters*> perigeeList;
-    for (std::vector<const Trk::Track*>::const_iterator iter=VectorTrk.begin();
-         iter!=VectorTrk.end();++iter) {
-      if (std::isnan((*iter)->perigeeParameters()->parameters()[Trk::d0])) {
+    for (const auto *iter : VectorTrk) {
+      if (std::isnan(iter->perigeeParameters()->parameters()[Trk::d0])) {
         continue;
       }
-      perigeeList.push_back((*iter)->perigeeParameters());
+      perigeeList.push_back(iter->perigeeParameters());
     }
 
     xAOD::Vertex * FittedVertex = _fit(perigeeList,constraint,startingPoint,IsConstraint,IsStartingPoint);
@@ -620,11 +619,8 @@ namespace Trk
     // making a list of perigee out of the vector of tracks
     std::vector<const Trk::TrackParameters*> measuredPerigees;
 
-    for (std::vector<const xAOD::TrackParticle*>::const_iterator i =
-           vectorTrk.begin();
-         i != vectorTrk.end();
-         ++i) {
-      const Trk::TrackParameters* tmpMeasPer = &((*i)->perigeeParameters());
+    for (const auto *i : vectorTrk) {
+      const Trk::TrackParameters* tmpMeasPer = &(i->perigeeParameters());
 
       if (tmpMeasPer != nullptr)
         measuredPerigees.push_back(tmpMeasPer);
@@ -638,11 +634,8 @@ namespace Trk
     // making a list of perigee out of the vector of neutrals
     std::vector<const Trk::NeutralParameters*> measuredNeutralPerigees;
 
-    for (std::vector<const xAOD::NeutralParticle*>::const_iterator i =
-           vectorNeut.begin();
-         i != vectorNeut.end();
-         ++i) {
-      const Trk::NeutralParameters* tmpMeasPer = &((*i)->perigeeParameters());
+    for (const auto *i : vectorNeut) {
+      const Trk::NeutralParameters* tmpMeasPer = &(i->perigeeParameters());
 
       if (tmpMeasPer != nullptr)
         measuredNeutralPerigees.push_back(tmpMeasPer);
@@ -778,9 +771,9 @@ namespace Trk
    //making a list of perigee out of the vector of tracks
    std::vector<const Trk::TrackParameters*> measuredPerigees;
    
-   for(std::vector<const xAOD::TrackParticle*>::const_iterator i = vectorTrk.begin(); i!= vectorTrk.end();++i)
+   for(const auto *i : vectorTrk)
    {
-     const Trk::TrackParameters * tmpMeasPer = &((*i)->perigeeParameters());
+     const Trk::TrackParameters * tmpMeasPer = &(i->perigeeParameters());
   
      if(tmpMeasPer!=nullptr) measuredPerigees.push_back(tmpMeasPer);
      else  msg(MSG::INFO)<<"Failed to dynamic_cast this track parameters to perigee"<<endmsg; //TODO: Failed to implicit cast the perigee parameters to track parameters?
@@ -789,9 +782,9 @@ namespace Trk
    //making a list of perigee out of the vector of neutrals
    std::vector<const Trk::NeutralParameters*> measuredNeutralPerigees;
 
-   for(std::vector<const xAOD::NeutralParticle*>::const_iterator i = vectorNeut.begin(); i!= vectorNeut.end();++i)
+   for(const auto *i : vectorNeut)
    {
-     const Trk::NeutralParameters * tmpMeasPer = &((*i)->perigeeParameters());
+     const Trk::NeutralParameters * tmpMeasPer = &(i->perigeeParameters());
   
      if(tmpMeasPer!=nullptr) measuredNeutralPerigees.push_back(tmpMeasPer);
      else  msg(MSG::INFO)<<"Failed to dynamic_cast this neutral parameters to perigee"<<endmsg; //TODO: Failed to implicit cast the perigee parameters to neutral parameters?

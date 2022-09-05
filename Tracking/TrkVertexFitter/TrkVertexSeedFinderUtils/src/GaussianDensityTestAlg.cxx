@@ -124,11 +124,9 @@ StatusCode GaussianDensityTestAlg::execute()
 void GaussianDensityTestAlg::analyzeTracks(const std::vector<Trk::ITrackLink*>& trackVector,
 					 std::vector<const Trk::TrackParameters*>& perigeeList)
 {
-  for (auto seedtrkAtVtxIter = trackVector.begin();
-       seedtrkAtVtxIter != trackVector.end();
-       ++seedtrkAtVtxIter) 
+  for (auto *seedtrkAtVtxIter : trackVector) 
   {
-    perigeeList.push_back( (*seedtrkAtVtxIter)->parameters() );
+    perigeeList.push_back( seedtrkAtVtxIter->parameters() );
   }
 }
 

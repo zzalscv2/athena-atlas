@@ -575,16 +575,14 @@ Mode3dFromFsmw1dFinder::CheckCorrelation( [[maybe_unused]] Mode3dFromFsmw1dInfo&
 
   double mindistcut = 999999999.9 , mindist = 999999999.9 ;
 
-  for ( unsigned int i = 0 ; i < aa.size() ; i ++ )
+  for (auto ax : aa)
   {
-    std::vector< std::pair<int,int>> ax = aa[i];
-
     double Awght = 0. ;
     double aX = 0., aY = 0., aZ = 0. ;
     std::vector<int > axidx ;
-    for ( unsigned int ia = 0 ; ia < ax.size() ; ia ++ )
+    for (auto & ia : ax)
     {
-      int idxA = ( ax[ia]  ).first ;
+      int idxA = ia.first ;
       axidx.push_back( idxA ) ;
 
       std::vector<Trk::PositionAndWeight>::const_iterator Aposi = vectorOfPoints.begin() + idxA ;
@@ -608,13 +606,11 @@ Mode3dFromFsmw1dFinder::CheckCorrelation( [[maybe_unused]] Mode3dFromFsmw1dInfo&
 
     std::vector< std::pair<int,int> > supp ;  // merge crossings in both modes if correlated
     double bX = 0., bY = 0., bZ = 0., Bwght = 0. ;
-    for ( unsigned int j = 0 ; j < bb.size() ; j ++ )
+    for (auto bx : bb)
     {
-      std::vector< std::pair<int,int>> bx = bb[j];
-
-      for ( unsigned int ib = 0 ; ib < bx.size() ; ib ++ )
+      for (auto & ib : bx)
       {
-        int idxB = ( bx[ib] ).first ;
+        int idxB = ib.first ;
         std::vector<Trk::PositionAndWeight>::const_iterator Bposi = vectorOfPoints.begin() + idxB ;
 
         double wght = Bposi->second ;
@@ -654,10 +650,10 @@ Mode3dFromFsmw1dFinder::CheckCorrelation( [[maybe_unused]] Mode3dFromFsmw1dInfo&
         supp.clear() ;
         corre.clear() ;
 
-        for ( unsigned int m = 0 ; m < bx.size() ; m ++ )
+        for (auto & m : bx)
         {
-          std::vector<int>::iterator it = std::find( axidx.begin(), axidx.end(), bx[m].first ) ;
-          if ( it == axidx.end() ) supp.emplace_back( bx[m].first, bx[m].second ) ;
+          std::vector<int>::iterator it = std::find( axidx.begin(), axidx.end(), m.first ) ;
+          if ( it == axidx.end() ) supp.emplace_back( m.first, m.second ) ;
         }
         supp.insert( supp.end(), ax.begin(), ax.end() ) ;
         corre.push_back( supp ) ;
@@ -896,16 +892,14 @@ Mode3dFromFsmw1dFinder::Mode2Seed( Mode3dFromFsmw1dInfo& info,
 {
   double seedX = 0., seedY = 0., seedZ = 0. ;
   double maxWght = -99.9 ;
-  for ( unsigned int c = 0 ; c < phiradiZol.size() ; c ++ ) 
+  for (auto modes : phiradiZol) 
   {
-    std::vector< std::pair<int,int> > modes = phiradiZol[c];
-
     double totwght = 0. ;
     double seedX0 = 0., seedY0 = 0., seedZ0 = 0. ;
-    for ( unsigned int m = 0 ; m < modes.size() ; m ++ ) 
+    for (auto & mode : modes) 
     {
 
-      int idx = ( modes[m] ).first ;
+      int idx = mode.first ;
       ATH_MSG_DEBUG(" Mode idx accepted with full phi-radius-Z correlation : " << idx );
 
       std::vector<Trk::PositionAndWeight>::const_iterator posi = vectorOfPoints.begin() + idx ;
@@ -942,15 +936,13 @@ Mode3dFromFsmw1dFinder::Mode2Seed( Mode3dFromFsmw1dInfo& info,
   double mindistcut = 999999999.9 , mindist = 999999999.9 ;
   double seedX = 0., seedY = 0., seedZ = 0. ;
 
-  for ( unsigned int xy = 0 ; xy < phiradi.size() ; xy ++ )
+  for (auto xymodes : phiradi)
   {
-    std::vector< std::pair<int,int> > xymodes = phiradi[xy];
-
     double xywght = 0. ;
     double xyX = 0., xyY = 0., xyZ = 0. ;
-    for ( unsigned int m = 0 ; m < xymodes.size() ; m ++ )
+    for (auto & xymode : xymodes)
     {
-      int idxXY = ( xymodes[m]  ).first ;
+      int idxXY = xymode.first ;
       std::vector<Trk::PositionAndWeight>::const_iterator posi = vectorOfPoints.begin() + idxXY ;
 
       ATH_MSG_DEBUG( " Mode idx accepted with full phi-radius correlation : " << idxXY );
@@ -971,12 +963,11 @@ Mode3dFromFsmw1dFinder::Mode2Seed( Mode3dFromFsmw1dInfo& info,
       continue ;
 
     double zX = 0., zY = 0., zZ = 0., zwght = 0. ;
-    for ( unsigned int z = 0 ; z < Z.size() ; z ++ ) 
+    for (auto zmodes : Z) 
     {
-      std::vector< std::pair<int,int> > zmodes = Z[z];
-      for ( unsigned int m = 0 ; m < zmodes.size() ; m ++ )
+      for (auto & zmode : zmodes)
       {
-        int idxZ = ( zmodes[m] ).first ;
+        int idxZ = zmode.first ;
         std::vector<Trk::PositionAndWeight>::const_iterator zposi = vectorOfPoints.begin() + idxZ ;
 
         double wghtZ = zposi->second ;
@@ -1036,15 +1027,14 @@ Mode3dFromFsmw1dFinder::Mode2Seed( Mode3dFromFsmw1dInfo& info,
   double mindistcut = 999999999.9 , mindist = 999999999.9 ;
   double seedX = 0., seedY = 0., seedZ = 0. ;
 
-  for ( unsigned int p = 0 ; p < phi.size() ; p ++ )
+  for (auto pmodes : phi)
   {
-    std::vector< std::pair<int,int>> pmodes = phi[p];
     double pwght = 0. ;
     double pX = 0., pY = 0., pZ = 0. ;
 
-    for ( unsigned int m = 0 ; m < pmodes.size() ; m ++ )
+    for (auto & pmode : pmodes)
     {
-      int idxp = ( pmodes[m]  ).first ;
+      int idxp = pmode.first ;
       std::vector<Trk::PositionAndWeight>::const_iterator pposi = vectorOfPoints.begin() + idxp ;
       double xw = pposi->second ;
       pX += pposi->first.x()*xw ;
@@ -1061,15 +1051,14 @@ Mode3dFromFsmw1dFinder::Mode2Seed( Mode3dFromFsmw1dInfo& info,
     } else
       continue ;
 
-    for ( unsigned int r = 0 ; r < radi.size() ; r ++ )
+    for (auto rmodes : radi)
     {
-      std::vector< std::pair<int,int>> rmodes = radi[r];
       double rwght = 0. ;
       double rX = 0., rY = 0., rZ = 0. ;
 
-      for ( unsigned int m = 0 ; m < rmodes.size() ; m ++ )
+      for (auto & rmode : rmodes)
       {
-        int idxr = ( rmodes[m]  ).first ;
+        int idxr = rmode.first ;
         std::vector<Trk::PositionAndWeight>::const_iterator rposi = vectorOfPoints.begin() + idxr ;
         double xw = rposi->second ;
         rX += rposi->first.x()*xw ;
@@ -1089,15 +1078,14 @@ Mode3dFromFsmw1dFinder::Mode2Seed( Mode3dFromFsmw1dInfo& info,
       double Dxy = (   ( pX - rX )*( pX - rX ) + ( pY - rY )*( pY - rY ) 
                      + ( pZ - rZ )*( pZ - rZ ) )/( pwght + rwght ) ;
 
-      for ( unsigned int z = 0 ; z < Z.size() ; z ++ )
+      for (auto zmodes : Z)
       {
-        std::vector< std::pair<int,int>> zmodes = Z[z];
         double zwght = 0. ;
         double zX = 0., zY = 0., zZ = 0. ;
 
-        for ( unsigned int m = 0 ; m < zmodes.size() ; m ++ )
+        for (auto & zmode : zmodes)
         {
-          int idxz = ( zmodes[m]  ).first ;
+          int idxz = zmode.first ;
           std::vector<Trk::PositionAndWeight>::const_iterator zposi = vectorOfPoints.begin() + idxz ;
           double xw = zposi->second ;
           zX += zposi->first.x()*xw ;
@@ -1230,9 +1218,9 @@ Mode3dFromFsmw1dFinder::Mode3dFromFsmw1dInfo::perigeesAtSeed
 
   std::sort( trklist.begin(), trklist.end() ) ;
 
-  for ( unsigned int t = 0 ; t < trklist.size() ; t++ )
+  for (int t : trklist)
   {
-    perigees.push_back( perigeeList[trklist[t]] ) ;
+    perigees.push_back( perigeeList[t] ) ;
   }
 
   return perigees.size() ;

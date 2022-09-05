@@ -281,9 +281,9 @@ MeasurementProcessor::calculateFittedTrajectory(int /*iteration*/)
     m_derivQOverP1		= 1./(m_delta[DeltaQOverP1]*Gaudi::Units::TeV);
 
     // and set qOverP
-    for (int typ = 0; typ != ExtrapolationTypes; ++typ)
+    for (double & typ : m_qOverP)
     {
-	m_qOverP[typ] = m_parameters->qOverP();
+	typ = m_parameters->qOverP();
     }
     m_qOverP[DeltaQOverP0]	+= m_delta[DeltaQOverP0];
 

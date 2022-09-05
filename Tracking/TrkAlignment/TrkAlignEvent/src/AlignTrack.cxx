@@ -448,7 +448,7 @@ namespace Trk {
   
         if (meb) {
           //meot is just used as observer, not owner, so can safely duplicate the pointer
-          auto meot=dynamic_cast<const Trk::MaterialEffectsOnTrack*>(meb.get());
+          const auto *meot=dynamic_cast<const Trk::MaterialEffectsOnTrack*>(meb.get());
           if (meot) {
             double tinX0=meot->thicknessInX0();
             std::unique_ptr<Trk::EnergyLoss> eLoss =
