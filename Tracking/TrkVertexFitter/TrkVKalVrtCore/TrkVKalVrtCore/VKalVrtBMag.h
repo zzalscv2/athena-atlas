@@ -47,12 +47,6 @@ namespace Trk {
    private:
      const double m_cnstBMAG;
      const double m_vkalCnvMagFld;
-     double m_saveXpos;
-     double m_saveYpos;
-     double m_saveZpos;
-     double m_saveBX;
-     double m_saveBY;
-     double m_saveBZ;
    };
 
 }

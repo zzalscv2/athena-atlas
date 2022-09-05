@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2020 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "MVAUtils/ForestXGBoost.h"
@@ -9,9 +9,11 @@
 
 using namespace MVAUtils;
 
-ForestXGBoost::ForestXGBoost(TTree* tree) : ForestXGBoostBase<NodeXGBoost>()
+ForestXGBoost::ForestXGBoost(TTree* tree)
+  : ForestXGBoostBase<NodeXGBoost>()
+  , m_max_var(0)
 {
-    m_max_var = 0;
+    
 
     // variables read from the TTree
     std::vector<int> *vars = nullptr;

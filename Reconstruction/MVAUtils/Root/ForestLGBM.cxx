@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2019 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "MVAUtils/ForestLGBM.h"
@@ -9,9 +9,11 @@
 
 using namespace MVAUtils;
 
-ForestLGBMSimple::ForestLGBMSimple(TTree* tree) : ForestLGBMBase<NodeLGBMSimple>()
+ForestLGBMSimple::ForestLGBMSimple(TTree* tree)
+  : ForestLGBMBase<NodeLGBMSimple>()
+  , m_max_var(0)
 {
-    m_max_var = 0;
+    
 
     // variables read from the TTree
     std::vector<int> *vars = nullptr;
@@ -83,10 +85,11 @@ void ForestLGBMSimple::PrintForest() const
     Forest::PrintForest();
 }
 
-
-ForestLGBM::ForestLGBM(TTree* tree) : ForestLGBMBase<NodeLGBM>()
+ForestLGBM::ForestLGBM(TTree* tree)
+  : ForestLGBMBase<NodeLGBM>()
+  , m_max_var(0)
 {
-    m_max_var = 0;
+    
 
     // variables read from the TTree
     std::vector<int> *vars = nullptr;

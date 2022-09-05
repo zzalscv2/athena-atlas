@@ -54,10 +54,9 @@ Trk::SaggedLineSurface::SaggedLineSurface(const Trk::TrkDetElementBase& deteleme
                                           double wireLength, double wireTension, double linearDensity) :
   Trk::DistortedSurface(),
   Trk::StraightLineSurface(detelement,id),
-  m_saggingDescriptor(),
-  m_saggedLineDirection{}
+  m_saggingDescriptor(new Trk::LineSaggingDescriptor(wireLength, wireTension, linearDensity)), m_saggedLineDirection{}
 {
-     m_saggingDescriptor = new Trk::LineSaggingDescriptor(wireLength, wireTension, linearDensity);
+     
 }
 
 Trk::SaggedLineSurface::SaggedLineSurface(const Trk::SaggedLineSurface& sls) :

@@ -241,7 +241,7 @@ CaloCluster_OnTrackBuilder::getClusterErrorMatrix(
     // The two coordinates for a cyclinder are
     // Trk::locRPhi = 0 (ie phi)
     // Trk::locZ    = 1(ie z)
-    Amg::Vector3D surfRefPoint = surf.globalReferencePoint();
+    const Amg::Vector3D& surfRefPoint = surf.globalReferencePoint();
     double r = surfRefPoint.perp();
     double r2 = r*r;
     int indexCount(0);

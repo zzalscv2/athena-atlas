@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2020 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "TrkTrack/TrackInfo.h"
@@ -7,16 +7,21 @@
 #include <iostream>
 #include <sstream>
 
-Trk::TrackInfo::TrackInfo(const TrackFitter fitter, const ParticleHypothesis partHyp)
+Trk::TrackInfo::TrackInfo(
+  const TrackFitter fitter,
+  const ParticleHypothesis partHyp,
+  const std::bitset<NumberOfTrackProperties>& properties,
+  const std::bitset<NumberOfTrackRecoInfo>& patternRecognition)
   : m_fitter(fitter)
   , m_particleHypo(partHyp)
-  , m_properties{}
-  , m_patternRecognition{}
+  , m_properties(properties)
+  , m_patternRecognition(patternRecognition)
 {
+
   if (m_particleHypo == undefined) {
-    switch (m_fitter) // switch on fitter of type TrackFitter (ok)
+    switch (m_fitter) // switch on TrackFitter
     {
-      case GaussianSumFilter: // GaussianSumFilter of type TrackFitter (ok, =4)
+      case GaussianSumFilter: // GaussianSumFilter as TrackFitter (electron)
         m_particleHypo = electron;
         break;
       case DeterministicAnnealingFilter:
@@ -31,16 +36,9 @@ Trk::TrackInfo::TrackInfo(const TrackFitter fitter, const ParticleHypothesis par
 }
 
 Trk::TrackInfo::TrackInfo(const TrackFitter fitter,
-                          const ParticleHypothesis partHyp,
-                          const std::bitset<NumberOfTrackProperties>& properties,
-                          const std::bitset<NumberOfTrackRecoInfo>& patternRecognition)
-  : TrackInfo(fitter, partHyp)
+                          const ParticleHypothesis partHyp)
+  : TrackInfo(fitter, partHyp, {}, {})
 {
-  // Can't put these in initializer list due to the use of delegation.
-  // cppcheck-suppress useInitializationList
-  m_properties = properties;
-  // cppcheck-suppress useInitializationList
-  m_patternRecognition = patternRecognition;
 }
 
 std::string

@@ -41,11 +41,22 @@ namespace Trk {
   { 
   }
 
-  VKTrack::VKTrack(long int iniId, const double Perigee[], const double Covariance[], VKVertex * vk, double m):
-  Chi2(0), m_mass(m)
+  VKTrack::VKTrack(long int iniId,
+                   const double Perigee[],
+                   const double Covariance[],
+                   VKVertex* vk,
+                   double m)
+    : Id(iniId)
+    , Charge(1)
+    , Chi2(0)
+    , m_mass(m)
   {
-     Id = iniId; Charge=1; if(Perigee[4]<0)Charge=-1;
-     for(int i=0; i<3;  i++) {fitP[i]=0; cnstP[i]=0.; iniP[i]=0.;}
+    if (Perigee[4] < 0)
+      Charge = -1;
+    for (int i = 0; i < 3; i++) {
+      fitP[i] = 0;
+      cnstP[i] = 0.;
+      iniP[i] = 0.;}
      for(int i=0; i<5;  i++) {Perig[i]=refPerig[i]=Perigee[i]; rmnd[i]=0;}
      for(int i=0; i<15; i++) {refCovar[i]=Covariance[i];}
      m_originVertex = vk;
