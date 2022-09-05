@@ -8,7 +8,7 @@ from DerivationFrameworkCore.DerivationFrameworkMaster import DerivationFramewor
 
 from DerivationFrameworkPhys import PhysCommon
 
-from JetRecConfig.StandardSmallRJets import AntiKt4PV0Track, AntiKt4EMPFlow, AntiKt4EMPFlowNoPtCut, AntiKt4EMTopoLowPt, AntiKt4EMPFlowCSSK
+from JetRecConfig.StandardSmallRJets import AntiKt4PV0Track, AntiKt4EMPFlow, AntiKt4EMPFlowNoPtCut, AntiKt4EMTopoLowPt, AntiKt4EMPFlowCSSK, AntiKt4UFOCSSK
 
 from DerivationFrameworkJetEtMiss.JetCommon import addJetOutputs, addDAODJets, OutputJets
 
@@ -147,13 +147,34 @@ if DerivationFrameworkIsMonteCarlo:
     jetList += [AntiKt4EMPFlowNoPtCut, AntiKt4EMTopoLowPt]
 
 #=======================================
-# CSSK R = 0.4 EMPFlow jets
+# CSSK R = 0.4 EMPFlow and UFO jets
 #=======================================
-jetList += [AntiKt4EMPFlowCSSK]
+jetList += [AntiKt4EMPFlowCSSK, AntiKt4UFOCSSK]
 
 addDAODJets(jetList,DerivationFrameworkJob)
 
-OutputJets["JETM1"] = ["AntiKt4PV0TrackJets","AntiKt4EMPFlowCSSKJets","AntiKt4EMPFlowNoPtCutJets","AntiKt4EMTopoLowPtJets"]
+#======================================= 
+# UFO CSSK event shape
+#======================================= 
+from JetRecConfig.StandardJetConstits import stdConstitDic as cst
+from JetRecConfig.JetInputConfig import buildEventShapeAlg
+from AthenaConfiguration.ComponentAccumulator import conf2toConfigurable
+
+#Need to add non-standard jets explicitly
+OutputJets["JETM1"] = ["AntiKt4PV0TrackJets","AntiKt4EMPFlowCSSKJets","AntiKt4UFOCSSKJets","AntiKt4EMPFlowNoPtCutJets","AntiKt4EMTopoLowPtJets"]
+
+eventshapealg = buildEventShapeAlg(cst.UFOCSSK,'')
+if not hasattr(DerivationFrameworkJob, eventshapealg.getName()):
+  DerivationFrameworkJob += conf2toConfigurable(eventshapealg)
+
+#=======================================
+# More detailed truth information
+#=======================================
+
+if DerivationFrameworkIsMonteCarlo:
+    from DerivationFrameworkMCTruth import MCTruthCommon
+    MCTruthCommon.addBosonsAndDownstreamParticles(generations=4,rejectHadronChildren=True)
+    MCTruthCommon.addTopQuarkAndDownstreamParticles(generations=4,rejectHadronChildren=True)
 
 #====================================================================
 # Add the containers to the output stream - slimming done here
@@ -180,33 +201,25 @@ JETM1SlimmingHelper.ExtraVariables  = ["AntiKt4EMTopoJets.DFCommonJets_QGTagger_
                                        "TruthVertices.barcode.z"]
 
 JETM1SlimmingHelper.AllVariables = [ "MuonSegments", "EventInfo",
-                                     "Kt4EMTopoOriginEventShape","Kt4EMPFlowEventShape","Kt4EMPFlowPUSBEventShape","Kt4EMPFlowNeutEventShape",
+                                     "Kt4EMTopoOriginEventShape","Kt4EMPFlowEventShape","Kt4EMPFlowPUSBEventShape","Kt4EMPFlowNeutEventShape","Kt4UFOCSSKEventShape",
                                      "CaloCalFwdTopoTowers"]
 
 
-if DerivationFrameworkIsMonteCarlo:
-    from DerivationFrameworkMCTruth import MCTruthCommon
-    MCTruthCommon.addBosonsAndDownstreamParticles(generations=4,rejectHadronChildren=True)
-    MCTruthCommon.addTopQuarkAndDownstreamParticles(generations=4,rejectHadronChildren=True)
+JETM1SlimmingHelper.AppendToDictionary['Kt4UFOCSSKEventShape'] = 'xAOD::EventShape'
+JETM1SlimmingHelper.AppendToDictionary['Kt4UFOCSSKEventShapeAux'] = 'xAOD::EventShapeAuxInfo'
 
-    JETM1SlimmingHelper.AppendToDictionary = {
-        'TruthElectrons':'xAOD::TruthParticleContainer','TruthElectronsAux':'xAOD::TruthParticleAuxContainer',
-        'TruthMuons':'xAOD::TruthParticleContainer','TruthMuonsAux':'xAOD::TruthParticleAuxContainer',
-        'TruthPhotons':'xAOD::TruthParticleContainer','TruthPhotonsAux':'xAOD::TruthParticleAuxContainer',
-        'TruthBosonsWithDecayParticles':'xAOD::TruthParticleContainer','TruthBosonsWithDecayParticlesAux':'xAOD::TruthParticleAuxContainer',
-        'TruthBosonsWithDecayVertices':'xAOD::TruthVertexContainer','TruthBosonsWithDecayVerticesAux':'xAOD::TruthVertexAuxContainer',
-        'TruthTopQuarkWithDecayParticles':'xAOD::TruthParticleContainer','TruthTopQuarkWithDecayParticlesAux':'xAOD::TruthParticleAuxContainer',
-        'TruthTopQuarkWithDecayVertices':'xAOD::TruthVertexContainer','TruthTopQuarkWithDecayVerticesAux':'xAOD::TruthVertexAuxContainer',
-        'TruthParticles':'xAOD::TruthParticleContainer','TruthParticlesAux':'xAOD::TruthParticleAuxContainer',
-        'Kt4EMPFlowNeutEventShape':'xAOD::EventShape','Kt4EMPFlowNeutEventShapeAux':'xAOD::EventShapeAuxInfo'
-    }
+if DerivationFrameworkIsMonteCarlo:
+    JETM1SlimmingHelper.AppendToDictionary['TruthTopQuarkWithDecayParticles'] = 'xAOD::TruthParticleContainer'
+    JETM1SlimmingHelper.AppendToDictionary['TruthTopQuarkWithDecayParticlesAux'] = 'xAOD::TruthParticleAuxContainer'
+    JETM1SlimmingHelper.AppendToDictionary['TruthTopQuarkWithDecayVertices'] = 'xAOD::TruthVertexContainer'
+    JETM1SlimmingHelper.AppendToDictionary['TruthTopQuarkWithDecayVerticesAux'] = 'xAOD::TruthVertexAuxContainer'
+    JETM1SlimmingHelper.AppendToDictionary['TruthParticles'] = 'xAOD::TruthParticleContainer'
+    JETM1SlimmingHelper.AppendToDictionary['TruthParticlesAux'] = 'xAOD::TruthParticleAuxContainer'
+
     JETM1SlimmingHelper.AllVariables += ["TruthMuons", "TruthElectrons", "TruthPhotons", "TruthTopQuarkWithDecayParticles", "TruthBosonsWithDecayParticles"]
+    JETM1SlimmingHelper.AllVariables += ["TruthBosonsWithDecayVertices", "TruthTopQuarkWithDecayVertices"]
     JETM1SlimmingHelper.AllVariables += ["AntiKt4TruthJets", "InTimeAntiKt4TruthJets", "OutOfTimeAntiKt4TruthJets", "TruthParticles"]
     JETM1SlimmingHelper.SmartCollections += ["AntiKt4TruthWZJets"]
-else:
-    JETM1SlimmingHelper.AppendToDictionary = {
-        'Kt4EMPFlowNeutEventShape':'xAOD::EventShape','Kt4EMPFlowNeutEventShapeAux':'xAOD::EventShapeAuxInfo'
-    }
 
 # Trigger content
 JETM1SlimmingHelper.IncludeJetTriggerContent = True
@@ -214,10 +227,7 @@ JETM1SlimmingHelper.IncludeJetTriggerContent = True
 # Add the jet containers to the stream
 addJetOutputs(JETM1SlimmingHelper,
               ["JETM1"],
-              JETM1SlimmingHelper.SmartCollections,
-              ["AntiKt10EMPFlowJets", "AntiKt10EMPFlowCSSKJets"]# veto list
+              JETM1SlimmingHelper.SmartCollections
 )
 
 JETM1SlimmingHelper.AppendContentToStream(JETM1Stream)
-JETM1Stream.RemoveItem("xAOD::TrigNavigation#*")
-JETM1Stream.RemoveItem("xAOD::TrigNavigationAuxInfo#*")

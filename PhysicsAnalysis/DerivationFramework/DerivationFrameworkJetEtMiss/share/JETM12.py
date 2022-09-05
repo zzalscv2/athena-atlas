@@ -191,8 +191,6 @@ jetm12Seq += CfgMgr.DerivationFramework__DerivationKernel("JETM12Kernel",
                                                          AugmentationTools = AugmentationTools)
 
 
-OutputJets["JETM12"] = []
-
 #====================================================================
 # Add the containers to the output stream - slimming done here
 #====================================================================

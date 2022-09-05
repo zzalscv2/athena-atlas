@@ -13,7 +13,7 @@ import JetRecConfig.StandardSmallRJets # noqa: F401
 standardghosts =  ["Track","MuonSegment","Truth"]
 
 
-flavourghosts = [ "BHadronsFinal",
+flavourghosts = [ "BHadronsFinal","CHadronsFinal",
                   "WBosons", "ZBosons", "HBosons", "TQuarksFinal",
                   "Partons",]
 
@@ -94,10 +94,9 @@ AntiKt10UFOCSSK = JetDefinition("AntiKt",1.0,cst.UFOCSSK,
                                 )
 
 AntiKt10UFOCSSKSoftDrop = JetSoftDrop(AntiKt10UFOCSSK,
-                                      modifiers = standardrecomods+substrmods+ufo_softdrop_mods+truthlabels+("JetGhostLabel",),
+                                      modifiers = ("Calib:SoftDrop:mc","Filter:100000")+standardrecomods+substrmods+ufo_softdrop_mods+truthlabels+("JetGhostLabel",),
                                       Beta = 1., ZCut= 0.1,
-                                      )
-
+                                     )
 
 
 

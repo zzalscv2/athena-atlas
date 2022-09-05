@@ -107,6 +107,16 @@ AntiKt4EMPFlowCSSK = JetDefinition("AntiKt",0.4,cst.GPFlowCSSK,
 )
 
 # *********************************************************
+# UFO CSSK jets
+# *********************************************************
+AntiKt4UFOCSSK = JetDefinition("AntiKt",0.4,cst.UFOCSSK,
+                               ghostdefs = standardghosts+flavourghosts,
+                               modifiers = ("ConstitFourMom","Sort","Filter:1","JetPtAssociation","Width","TrackMoments","TrackSumMoments","JVF","JVT","Charge",)+truthmods,
+                               ptmin = 2000,
+                               lock = True
+)
+
+# *********************************************************
 # Low and no pT cut containers used in JETMX derivations
 # *********************************************************
 AntiKt4EMPFlowNoPtCut = JetDefinition("AntiKt",0.4,cst.GPFlow,
@@ -172,9 +182,6 @@ AntiKtVRTruthCharged = JetDefinition("AntiKt",0.4, cst.TruthCharged,
                                      lock = True
 )
 
-
-#**************
-# TEMPORARY : special inputs for EVTGEN jobs (as long as gen-level and reco-level definitions are not harmonized)
 AntiKt4TruthGEN = JetDefinition("AntiKt",0.4, cst.TruthGEN,
                                 ptmin = 5000, 
                                 ghostdefs = [],
