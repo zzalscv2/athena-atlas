@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "MuonCalibExtraTreeEvent/EventHandler.h"
@@ -39,7 +39,7 @@ namespace MuonCalib {
     const EventHandler::TrackVec& EventHandler::extendedTracks(int author) const {
         AuthorTrackVecMap::const_iterator itr = m_extendedTracks.find(author);
         if (itr != m_extendedTracks.end()) return itr->second;
-        static TrackVec dummy_vec;
+        static const TrackVec dummy_vec;
         return dummy_vec;
     }
 
@@ -47,7 +47,7 @@ namespace MuonCalib {
     const EventHandler::SegmentVec& EventHandler::extendedSegments(int author) const {
         AuthorSegmentVecMap::const_iterator itr = m_extendedSegments.find(author);
         if (itr != m_extendedSegments.end()) return itr->second;
-        static SegmentVec dummy_vec;
+        static const SegmentVec dummy_vec;
         return dummy_vec;
     }
 

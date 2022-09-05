@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2020 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef MUONCALIBTRACKSUMMARY_H
@@ -9,13 +9,12 @@
 #include <string>
 #include <vector>
 
-#include "CxxUtils/checker_macros.h"
 #include "MuonCalibExtraUtils/MuonFixedIdManipulator.h"
 #include "MuonCalibIdentifier/MuonFixedId.h"
 
 namespace MuonCalib {
 
-    class ATLAS_NOT_THREAD_SAFE MuonCalibTrackSummary {
+    class MuonCalibTrackSummary {
     public:
         struct ChamberHitSummary {
             struct Projection {
