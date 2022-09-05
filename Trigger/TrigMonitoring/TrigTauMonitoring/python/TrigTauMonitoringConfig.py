@@ -318,6 +318,9 @@ class TrigTauMonAlgBuilder:
     elif 'HLT_tau200' in trigger: binning = [190, 195, 200, 205, 210, 240, 300, 500 ]
     defineEachStepHistogramsCoarse('tauPt_coarse', 'p_{T} [GeV]', binning)
 
+    # save quantities in TTree for offline analysis
+    monGroup.defineTree(monGroupName+'_tauPt,'+monGroupName+'_tauEta,'+monGroupName+'_tauPhi,'+monGroupName+'_averageMu,'+monGroupName+'_HLTpass;HLTEffTree', treedef=monGroupName+'_tauPt/F:'+monGroupName+'_tauEta/F:'+monGroupName+'_tauPhi/F:'+monGroupName+'_averageMu/F:'+monGroupName+'_HLTpass/I')
+
   #
   # Booking DiTau efficiencies
   #
@@ -340,6 +343,10 @@ class TrigTauMonAlgBuilder:
     defineEachStepHistograms('dEta',' dEta(#tau,#tau)',20,0,4)
     defineEachStepHistograms('dPhi',' dPhi(#tau,#tau)',8, -3.2, 3.2)
     defineEachStepHistograms('averageMu', 'average pileup', 10, 0., 80.)
+
+
+    # save quantities in TTree for offline analysis
+    monGroup.defineTree(monGroupName+'_dR,'+monGroupName+'_dEta,'+monGroupName+'_dPhi,'+monGroupName+'_averageMu,'+monGroupName+'_DiTauHLTpass;DiTauHLTEffTree', treedef=monGroupName+'_dR/F:'+monGroupName+'_dEta/F:'+monGroupName+'_dPhi/F:'+monGroupName+'_averageMu/F:'+monGroupName+'_DiTauHLTpass/I')
 
   #
   # Booking TAndP efficiencies
@@ -367,6 +374,7 @@ class TrigTauMonAlgBuilder:
     defineEachStepHistograms('dPhi',' dPhi(#tau,lep)',8, -3.2, 3.2)
     defineEachStepHistograms('averageMu', 'average pileup', 10, 0., 80.)
 
+     
     def defineEachStepHistogramsCoarse(xvariable, xlabel, binning):
  
        monGroup.defineHistogram(monGroupName+'_TAndPHLTpass,'+monGroupName+'_'+xvariable+';EffTAndPHLT_'+xvariable+'_wrt_Offline',
@@ -384,7 +392,8 @@ class TrigTauMonAlgBuilder:
 
     defineEachStepHistogramsCoarse('tauPt_coarse', 'p_{T} [GeV]', binning)
 
-
+    # save quantities in TTree for offline analysis
+    monGroup.defineTree(monGroupName+'_tauPt,'+monGroupName+'_tauEta,'+monGroupName+'_tauPhi,'+monGroupName+'_dR,'+monGroupName+'_dEta,'+monGroupName+'_dPhi,'+monGroupName+'_averageMu,'+monGroupName+'_TAndPHLTpass;TAndPHLTEffTree', treedef=monGroupName+'_tauPt/F:'+monGroupName+'_tauEta/F:'+monGroupName+'_tauPhi/F:'+monGroupName+'_dR/F:'+monGroupName+'_dEta/F:'+monGroupName+'_dPhi/F:'+monGroupName+'_averageMu/F:'+monGroupName+'_TAndPHLTpass/I')
 
   #
   # Booking L1 efficiencies
