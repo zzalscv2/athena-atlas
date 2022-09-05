@@ -1,20 +1,13 @@
-################################################################################
-# Package: MdtCalibIOSvc
-################################################################################
+# Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
 
 # Declare the package name:
 atlas_subdir( MdtCalibIOSvc )
 
 # Component(s) in the package:
-atlas_add_library( MdtCalibIOSvcLib
-                   src/*.cxx
-                   PUBLIC_HEADERS MdtCalibIOSvc
-                   LINK_LIBRARIES AthenaBaseComps GaudiKernel MdtCalibUtils MuonCalibStandAloneBaseLib StoreGateLib MuonIdHelpersLib
-                   PRIVATE_LINK_LIBRARIES Identifier MdtCalibData MdtCalibRt MdtCalibT0 MuonCalibIdentifier MuonCalibMath MuonReadoutGeometry )
-
 atlas_add_component( MdtCalibIOSvc
+                     src/*.cxx
                      src/components/*.cxx
-                     LINK_LIBRARIES AthenaBaseComps GaudiKernel MdtCalibUtils MuonCalibStandAloneBaseLib StoreGateLib Identifier MdtCalibData MdtCalibRt MdtCalibT0 MuonCalibIdentifier MuonCalibMath MuonReadoutGeometry MuonIdHelpersLib MdtCalibIOSvcLib )
+                     LINK_LIBRARIES AthenaBaseComps CxxUtils GaudiKernel MdtCalibData MdtCalibInterfacesLib MdtCalibRt MdtCalibT0 MdtCalibUtils MuonCalibIdentifier MuonCalibMath MuonCalibStandAloneBaseLib MuonIdHelpersLib MuonReadoutGeometry )
 
 # Install files from the package:
 atlas_install_joboptions( share/*.py )
