@@ -126,7 +126,8 @@ TLAJetVars='.'.join(TLAJetVarsToKeep)
 ElToKeep = ['ptcone20', 'ptvarcone20', 'ptcone30', 'ptvarcone30', 'trk_d0','cl_eta2','cl_phi2', 'deltaEta1PearDistortion']
 ElVars = '.'.join(ElToKeep)
 
-PhToKeep = ['topoetcone20', 'etcone20']
+PhToKeep = ['topoetcone20', 'topoetcone40', 'etcone20']
+
 PhVars = '.'.join(PhToKeep)
 
 # =============

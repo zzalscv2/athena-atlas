@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "JRoIsUnpackingTool.h"
@@ -45,6 +45,11 @@ StatusCode JRoIsUnpackingTool::unpack(const EventContext& ctx,
   std::optional<ThrVecRef> jetThresholds;
   ATH_CHECK(getL1Thresholds(*l1Menu, "JET", jetThresholds));
 
+  // Flag if there was an overflow in the TOB transmission to CMX (there were more TOBs than can be transferred)
+  bool overflow{false};
+  constexpr static unsigned int s_maxJetTOBs{4}; // Hardcoded in L1Calo firmware, see ATR-23697 and ATR-12285
+  std::unordered_map<unsigned int, std::unordered_map<unsigned int, unsigned int>> tobCounts; // {crate, {module, count}}
+
   // RoIBResult contains vector of jet fragments
   for ( const auto & jetFragment : roib.jetEnergyResult() ) {
     for ( const auto & roi : jetFragment.roIVec() ) {
@@ -52,6 +57,12 @@ StatusCode JRoIsUnpackingTool::unpack(const EventContext& ctx,
       if ( not ( LVL1::TrigT1CaloDefs::JetRoIWordType == roi.roIType() ) )  {
         ATH_MSG_DEBUG( "Skipping RoI as it is not JET threshold " << roIWord <<" Type "<< roi.roIType() );
         continue;
+      }
+
+      if (!overflow) {
+        unsigned int crate = m_jepDecoder.crate(roIWord);
+        unsigned int module = m_jepDecoder.module(roIWord);
+        overflow = (++tobCounts[crate][module] > s_maxJetTOBs);
       }
 
       recRoIs->push_back( std::make_unique<LVL1::RecJetRoI>(roIWord, l1Menu.cptr()) );
@@ -88,6 +99,14 @@ StatusCode JRoIsUnpackingTool::unpack(const EventContext& ctx,
       decision->setObjectLink( initialRecRoIString(),
                                ElementLink<DataVector<LVL1::RecJetRoI>>(m_recRoIsKey.key(), recRoIs->size()-1) );
     }
+  }
+
+  // Decorate the decisions with overflow information
+  if (overflow) {
+    ATH_MSG_WARNING("L1Calo overflow for JET TOBs to CMX detected");
+  }
+  for (Decision* decision : *decisionOutput) {
+    decision->setDetail("overflow", static_cast<char>(overflow));
   }
 
   if ( msgLvl(MSG::DEBUG) ) {

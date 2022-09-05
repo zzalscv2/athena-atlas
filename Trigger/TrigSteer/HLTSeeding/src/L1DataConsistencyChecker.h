@@ -58,6 +58,7 @@ private:
   using MultiplicityInfo = std::unordered_map<TrigCompositeUtils::DecisionID, unsigned int>; //< {L1ThresholdHash, multiplicity}
   std::unordered_map<TrigCompositeUtils::DecisionID, MultiplicityInfo> m_thresholdMap; //< {HLTChainHash, MultiplicityInfo}
   std::unordered_map<TrigCompositeUtils::DecisionID, std::string> m_thresholdNames; //< {L1ThresholdHash, L1ThresholdName}
+  std::unordered_map<TrigCompositeUtils::DecisionID, std::string> m_thresholdTypes; //< {L1ThresholdHash, L1ThresholdType}
   std::set<TrigCompositeUtils::DecisionID> m_monitoredThresholds;
 
   /// Shorter alias for a check whether we are in DEBUG logging mode
