@@ -70,7 +70,7 @@ else:
 if IOVEndLB <= 0:
    svcMgr.EventSelector.FirstEvent        = 1
 else:   
-   svcMgr.EventSelector.FirstEvent        = 0
+   svcMgr.EventSelector.FirstEvent        = 1
    svcMgr.EventSelector.FirstLB           = IOVEndLB
 
 ## get a handle to the default top-level algorithm sequence

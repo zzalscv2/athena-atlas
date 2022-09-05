@@ -6,7 +6,6 @@ Py:JobPropertyContainer::    INFO  setting folder /LAR/Identifier/FebRodMap with
 ApplicationMgr       INFO Application Manager Configured successfully
 AthDictLoaderSvc     INFO in initialize...
 AthDictLoaderSvc     INFO acquired Dso-registry
-CoreDumpSvc          INFO Handling signals: 11(Segmentation fault) 7(Bus error) 4(Illegal instruction) 8(Floating point exception) 
 IOVDbFolder          INFO Read from meta data only for folder /TagInfo
 IOVSvc               INFO No IOVSvcTool associated with store "StoreGateSvc"
 DetDescrCnvSvc       INFO  initializing 
@@ -148,7 +147,7 @@ AtlasDetectorID      INFO initialize_from_dictionary - OK
 AtlasDetectorID      INFO initialize_from_dictionary - OK
 CaloIdMgrDetDes...   INFO  Finished 
 CaloIdMgrDetDes...   INFO Initializing CaloIdMgr from values in CaloIdMgrDetDescrCnv 
-AthenaEventLoopMgr   INFO   ===>>>  start processing event #0, run #0 0 events processed so far  <<<===
+AthenaEventLoopMgr   INFO   ===>>>  start processing event #1, run #0 0 events processed so far  <<<===
 LArAlignCondAlg      INFO recorded new GeoAlignmentStore object for LAr with key LArAlignmentStore and range {[0,l:0] - [INVALID]}
 CaloAlignCondAlg     INFO recorded new CaloDetDescr Manager condition object with key CaloDetDescrManager and range {[0,l:0] - [INVALID]}
 LArOnOffMappingAlg   INFO Done reading online/offline identifier mapping
@@ -6735,7 +6734,7 @@ LArConditionsTe...  DEBUG Gain:  2 number of conditions: 8320
 LArConditionsTe...  DEBUG Total number of conditions objects 25088
 LArConditionsTe...  DEBUG Total number of correction objects 20
 LArConditionsTe...  DEBUG End of testCondObjects 
-AthenaEventLoopMgr   INFO   ===>>>  done processing event #0, run #0 1 events processed so far  <<<===
+AthenaEventLoopMgr   INFO   ===>>>  done processing event #1, run #0 1 events processed so far  <<<===
 ApplicationMgr       INFO Application Manager Stopped successfully
 IdDictDetDescrCnv    INFO in finalize
 IOVDbFolder       WARNING Folder /LAR/Identifier/LArTTCellMapAtlas is requested but no data retrieved

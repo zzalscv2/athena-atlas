@@ -272,7 +272,7 @@ if jobproperties.Beam.beamType.get_Value() == 'cosmics':
         #print runArgs.firstEvent
         svcMgr.EventSelector.FirstEvent = runArgs.firstEvent
     else:
-        svcMgr.EventSelector.FirstEvent = 0
+        svcMgr.EventSelector.FirstEvent = 1
 
 # Set AutoFlush to 10 as per ATLASSIM-4274
 # These outputs are meant to be read sequentially

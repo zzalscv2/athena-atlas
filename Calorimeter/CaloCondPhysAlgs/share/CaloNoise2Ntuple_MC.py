@@ -92,7 +92,7 @@ if "folderTag" in dir():
 #--------------------------------------------------------------
 svcMgr.EventSelector.RunNumber         = RunNumber
 svcMgr.EventSelector.EventsPerRun      = 1
-svcMgr.EventSelector.FirstEvent        = 0
+svcMgr.EventSelector.FirstEvent        = 1
 svcMgr.EventSelector.EventsPerLB       = 1
 svcMgr.EventSelector.FirstLB           = 1
 svcMgr.EventSelector.InitialTimeStamp  = 0

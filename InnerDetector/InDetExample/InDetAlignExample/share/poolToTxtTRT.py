@@ -242,7 +242,7 @@ if ('runNumber' in dir()):
     import AthenaCommon.AtlasUnixGeneratorJob
     from AthenaCommon.AppMgr import ServiceMgr as svcMgr
     svcMgr.EventSelector.RunNumber         = runNumber
-    #svcMgr.EventSelector.FirstEvent        = 0
+    #svcMgr.EventSelector.FirstEvent        = 1
     #svcMgr.EventSelector.FirstLB           = 0
 
 

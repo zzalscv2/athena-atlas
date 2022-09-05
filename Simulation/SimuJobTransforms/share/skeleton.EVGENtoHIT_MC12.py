@@ -296,7 +296,7 @@ if jobproperties.Beam.beamType.get_Value() == 'cosmics':
         #print runArgs.firstEvent
         svcMgr.EventSelector.FirstEvent = runArgs.firstEvent
     else:
-        svcMgr.EventSelector.FirstEvent = 0
+        svcMgr.EventSelector.FirstEvent = 1
 
 if nThreads > 0:
     from AthenaCommon.AlgSequence import AthSequencer

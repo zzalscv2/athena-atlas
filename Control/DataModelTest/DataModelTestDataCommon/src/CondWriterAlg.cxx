@@ -135,7 +135,7 @@ StatusCode CondWriterAlg::writeTSTest (unsigned int count)
 StatusCode CondWriterAlg::execute()
 {
   SG::ReadHandle<xAOD::EventInfo> eventInfo (m_eventInfoKey);
-  unsigned int count = eventInfo->eventNumber();
+  unsigned int count = eventInfo->eventNumber() - 1; // events start with 1
 
   auto attrList = std::make_unique<AthenaAttributeList>();
   attrList->extend ("xint", "int");

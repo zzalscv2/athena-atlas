@@ -203,7 +203,7 @@ svcMgr.IOVDbSvc.dbConnection="sqlite://;schema=hvcorrections.sqlite;dbname=L1CAL
 #--------------------------------------------------------------
 svcMgr.EventSelector.RunNumber         = RunNumber
 svcMgr.EventSelector.EventsPerRun      = 1
-svcMgr.EventSelector.FirstEvent        = 0
+svcMgr.EventSelector.FirstEvent        = 1
 svcMgr.EventSelector.EventsPerLB       = 1
 svcMgr.EventSelector.FirstLB           = LumiBlock
 svcMgr.EventSelector.InitialTimeStamp  = int(TimeStamp/1e9)

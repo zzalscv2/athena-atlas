@@ -160,7 +160,7 @@ AthenaEventLoopMgr   INFO   ===>>>  start of run 1    <<<===
 IOVDbSvc             INFO Only 5 POOL conditions files will be open at once
 IOVDbSvc             INFO Initialised with 1 connections and 0 folders
 IOVDbSvc             INFO Service IOVDbSvc initialised successfully
-AthenaEventLoopMgr   INFO   ===>>>  start processing event #0, run #1 0 events processed so far  <<<===
+AthenaEventLoopMgr   INFO   ===>>>  start processing event #1, run #1 0 events processed so far  <<<===
 Stream1             DEBUG addItemObjects(2101,"*") called
 Stream1             DEBUG            Key:*
 Stream1             DEBUG      Comp Attr 0 with 7 mantissa bits.
@@ -359,7 +359,7 @@ Stream1.FileMet...  DEBUG Retrieved  'EventInfoKey':'EventInfo'
 Stream1.FileMet...  DEBUG setting xAOD::FileMetaData::mcProcID to 0
 Stream1.FileMet...  DEBUG Retrieved  'StreamName':'Stream1'
 Stream1.FileMet...  DEBUG set xAOD::FileMetaData::dataType to Stream1
-AthenaEventLoopMgr   INFO   ===>>>  done processing event #0, run #1 1 events processed so far  <<<===
+AthenaEventLoopMgr   INFO   ===>>>  done processing event #1, run #1 1 events processed so far  <<<===
 EventSelector       DEBUG Get AttributeList from the collection
 EventSelector       DEBUG AttributeList size 3
 EventSelector       DEBUG record AthenaAttribute, name = Token = [DB=F2313678-C96A-964F-89E8-08BAB39F2DA7][CNT=POOLContainer(DataHeader)][CLID=4DDBD295-EFCE-472A-9EC8-15CD35A9EB8D][TECH=00000203][OID=00000005-00000001].
@@ -368,7 +368,7 @@ EventSelector       DEBUG found AthenaAttribute, name = eventRef = [DB=F2313678-
 AthenaPoolAddre...  DEBUG The current Event contains: 3 objects
 AthenaPoolAddre...  DEBUG loadAddresses: DataObject address, clid = 2101, name = McEventInfo
 AthenaPoolAddre...  DEBUG loadAddresses: DataObject address, clid = 9102, name = MyHits
-AthenaEventLoopMgr   INFO   ===>>>  start processing event #1, run #1 1 events processed so far  <<<===
+AthenaEventLoopMgr   INFO   ===>>>  start processing event #2, run #1 1 events processed so far  <<<===
 Stream1             DEBUG addItemObjects(2101,"*") called
 Stream1             DEBUG            Key:*
 Stream1             DEBUG      Comp Attr 0 with 7 mantissa bits.
@@ -385,7 +385,7 @@ Stream1             DEBUG  Object/count: ExampleHitContainer_MyHits, 2
 Stream1             DEBUG connectOutput done for SimplePoolReplica1.root
 Stream1.FileMet...  DEBUG retrieved existing list of runNumbers
 Stream1.FileMet...  DEBUG retrieved existing list of lumiBlocks
-AthenaEventLoopMgr   INFO   ===>>>  done processing event #1, run #1 2 events processed so far  <<<===
+AthenaEventLoopMgr   INFO   ===>>>  done processing event #2, run #1 2 events processed so far  <<<===
 EventSelector       DEBUG Get AttributeList from the collection
 EventSelector       DEBUG AttributeList size 3
 EventSelector       DEBUG record AthenaAttribute, name = Token = [DB=F2313678-C96A-964F-89E8-08BAB39F2DA7][CNT=POOLContainer(DataHeader)][CLID=4DDBD295-EFCE-472A-9EC8-15CD35A9EB8D][TECH=00000203][OID=00000005-00000002].
@@ -394,7 +394,7 @@ EventSelector       DEBUG found AthenaAttribute, name = eventRef = [DB=F2313678-
 AthenaPoolAddre...  DEBUG The current Event contains: 3 objects
 AthenaPoolAddre...  DEBUG loadAddresses: DataObject address, clid = 2101, name = McEventInfo
 AthenaPoolAddre...  DEBUG loadAddresses: DataObject address, clid = 9102, name = MyHits
-AthenaEventLoopMgr   INFO   ===>>>  start processing event #2, run #1 2 events processed so far  <<<===
+AthenaEventLoopMgr   INFO   ===>>>  start processing event #3, run #1 2 events processed so far  <<<===
 Stream1             DEBUG addItemObjects(2101,"*") called
 Stream1             DEBUG            Key:*
 Stream1             DEBUG      Comp Attr 0 with 7 mantissa bits.
@@ -411,7 +411,7 @@ Stream1             DEBUG  Object/count: ExampleHitContainer_MyHits, 3
 Stream1             DEBUG connectOutput done for SimplePoolReplica1.root
 Stream1.FileMet...  DEBUG retrieved existing list of runNumbers
 Stream1.FileMet...  DEBUG retrieved existing list of lumiBlocks
-AthenaEventLoopMgr   INFO   ===>>>  done processing event #2, run #1 3 events processed so far  <<<===
+AthenaEventLoopMgr   INFO   ===>>>  done processing event #3, run #1 3 events processed so far  <<<===
 EventSelector       DEBUG Get AttributeList from the collection
 EventSelector       DEBUG AttributeList size 3
 EventSelector       DEBUG record AthenaAttribute, name = Token = [DB=F2313678-C96A-964F-89E8-08BAB39F2DA7][CNT=POOLContainer(DataHeader)][CLID=4DDBD295-EFCE-472A-9EC8-15CD35A9EB8D][TECH=00000203][OID=00000005-00000003].
@@ -420,7 +420,7 @@ EventSelector       DEBUG found AthenaAttribute, name = eventRef = [DB=F2313678-
 AthenaPoolAddre...  DEBUG The current Event contains: 3 objects
 AthenaPoolAddre...  DEBUG loadAddresses: DataObject address, clid = 2101, name = McEventInfo
 AthenaPoolAddre...  DEBUG loadAddresses: DataObject address, clid = 9102, name = MyHits
-AthenaEventLoopMgr   INFO   ===>>>  start processing event #3, run #1 3 events processed so far  <<<===
+AthenaEventLoopMgr   INFO   ===>>>  start processing event #4, run #1 3 events processed so far  <<<===
 Stream1             DEBUG addItemObjects(2101,"*") called
 Stream1             DEBUG            Key:*
 Stream1             DEBUG      Comp Attr 0 with 7 mantissa bits.
@@ -437,7 +437,7 @@ Stream1             DEBUG  Object/count: ExampleHitContainer_MyHits, 4
 Stream1             DEBUG connectOutput done for SimplePoolReplica1.root
 Stream1.FileMet...  DEBUG retrieved existing list of runNumbers
 Stream1.FileMet...  DEBUG retrieved existing list of lumiBlocks
-AthenaEventLoopMgr   INFO   ===>>>  done processing event #3, run #1 4 events processed so far  <<<===
+AthenaEventLoopMgr   INFO   ===>>>  done processing event #4, run #1 4 events processed so far  <<<===
 EventSelector       DEBUG Get AttributeList from the collection
 EventSelector       DEBUG AttributeList size 3
 EventSelector       DEBUG record AthenaAttribute, name = Token = [DB=F2313678-C96A-964F-89E8-08BAB39F2DA7][CNT=POOLContainer(DataHeader)][CLID=4DDBD295-EFCE-472A-9EC8-15CD35A9EB8D][TECH=00000203][OID=00000005-00000004].
@@ -446,7 +446,7 @@ EventSelector       DEBUG found AthenaAttribute, name = eventRef = [DB=F2313678-
 AthenaPoolAddre...  DEBUG The current Event contains: 3 objects
 AthenaPoolAddre...  DEBUG loadAddresses: DataObject address, clid = 2101, name = McEventInfo
 AthenaPoolAddre...  DEBUG loadAddresses: DataObject address, clid = 9102, name = MyHits
-AthenaEventLoopMgr   INFO   ===>>>  start processing event #4, run #1 4 events processed so far  <<<===
+AthenaEventLoopMgr   INFO   ===>>>  start processing event #5, run #1 4 events processed so far  <<<===
 Stream1             DEBUG addItemObjects(2101,"*") called
 Stream1             DEBUG            Key:*
 Stream1             DEBUG      Comp Attr 0 with 7 mantissa bits.
@@ -463,7 +463,7 @@ Stream1             DEBUG  Object/count: ExampleHitContainer_MyHits, 5
 Stream1             DEBUG connectOutput done for SimplePoolReplica1.root
 Stream1.FileMet...  DEBUG retrieved existing list of runNumbers
 Stream1.FileMet...  DEBUG retrieved existing list of lumiBlocks
-AthenaEventLoopMgr   INFO   ===>>>  done processing event #4, run #1 5 events processed so far  <<<===
+AthenaEventLoopMgr   INFO   ===>>>  done processing event #5, run #1 5 events processed so far  <<<===
 EventSelector       DEBUG Get AttributeList from the collection
 EventSelector       DEBUG AttributeList size 3
 EventSelector       DEBUG record AthenaAttribute, name = Token = [DB=F2313678-C96A-964F-89E8-08BAB39F2DA7][CNT=POOLContainer(DataHeader)][CLID=4DDBD295-EFCE-472A-9EC8-15CD35A9EB8D][TECH=00000203][OID=00000005-00000005].
@@ -472,7 +472,7 @@ EventSelector       DEBUG found AthenaAttribute, name = eventRef = [DB=F2313678-
 AthenaPoolAddre...  DEBUG The current Event contains: 3 objects
 AthenaPoolAddre...  DEBUG loadAddresses: DataObject address, clid = 2101, name = McEventInfo
 AthenaPoolAddre...  DEBUG loadAddresses: DataObject address, clid = 9102, name = MyHits
-AthenaEventLoopMgr   INFO   ===>>>  start processing event #5, run #1 5 events processed so far  <<<===
+AthenaEventLoopMgr   INFO   ===>>>  start processing event #6, run #1 5 events processed so far  <<<===
 Stream1             DEBUG addItemObjects(2101,"*") called
 Stream1             DEBUG            Key:*
 Stream1             DEBUG      Comp Attr 0 with 7 mantissa bits.
@@ -489,7 +489,7 @@ Stream1             DEBUG  Object/count: ExampleHitContainer_MyHits, 6
 Stream1             DEBUG connectOutput done for SimplePoolReplica1.root
 Stream1.FileMet...  DEBUG retrieved existing list of runNumbers
 Stream1.FileMet...  DEBUG retrieved existing list of lumiBlocks
-AthenaEventLoopMgr   INFO   ===>>>  done processing event #5, run #1 6 events processed so far  <<<===
+AthenaEventLoopMgr   INFO   ===>>>  done processing event #6, run #1 6 events processed so far  <<<===
 EventSelector       DEBUG Get AttributeList from the collection
 EventSelector       DEBUG AttributeList size 3
 EventSelector       DEBUG record AthenaAttribute, name = Token = [DB=F2313678-C96A-964F-89E8-08BAB39F2DA7][CNT=POOLContainer(DataHeader)][CLID=4DDBD295-EFCE-472A-9EC8-15CD35A9EB8D][TECH=00000203][OID=00000005-00000006].
@@ -498,7 +498,7 @@ EventSelector       DEBUG found AthenaAttribute, name = eventRef = [DB=F2313678-
 AthenaPoolAddre...  DEBUG The current Event contains: 3 objects
 AthenaPoolAddre...  DEBUG loadAddresses: DataObject address, clid = 2101, name = McEventInfo
 AthenaPoolAddre...  DEBUG loadAddresses: DataObject address, clid = 9102, name = MyHits
-AthenaEventLoopMgr   INFO   ===>>>  start processing event #6, run #1 6 events processed so far  <<<===
+AthenaEventLoopMgr   INFO   ===>>>  start processing event #7, run #1 6 events processed so far  <<<===
 Stream1             DEBUG addItemObjects(2101,"*") called
 Stream1             DEBUG            Key:*
 Stream1             DEBUG      Comp Attr 0 with 7 mantissa bits.
@@ -515,7 +515,7 @@ Stream1             DEBUG  Object/count: ExampleHitContainer_MyHits, 7
 Stream1             DEBUG connectOutput done for SimplePoolReplica1.root
 Stream1.FileMet...  DEBUG retrieved existing list of runNumbers
 Stream1.FileMet...  DEBUG retrieved existing list of lumiBlocks
-AthenaEventLoopMgr   INFO   ===>>>  done processing event #6, run #1 7 events processed so far  <<<===
+AthenaEventLoopMgr   INFO   ===>>>  done processing event #7, run #1 7 events processed so far  <<<===
 EventSelector       DEBUG Get AttributeList from the collection
 EventSelector       DEBUG AttributeList size 3
 EventSelector       DEBUG record AthenaAttribute, name = Token = [DB=F2313678-C96A-964F-89E8-08BAB39F2DA7][CNT=POOLContainer(DataHeader)][CLID=4DDBD295-EFCE-472A-9EC8-15CD35A9EB8D][TECH=00000203][OID=00000005-00000007].
@@ -524,7 +524,7 @@ EventSelector       DEBUG found AthenaAttribute, name = eventRef = [DB=F2313678-
 AthenaPoolAddre...  DEBUG The current Event contains: 3 objects
 AthenaPoolAddre...  DEBUG loadAddresses: DataObject address, clid = 2101, name = McEventInfo
 AthenaPoolAddre...  DEBUG loadAddresses: DataObject address, clid = 9102, name = MyHits
-AthenaEventLoopMgr   INFO   ===>>>  start processing event #7, run #1 7 events processed so far  <<<===
+AthenaEventLoopMgr   INFO   ===>>>  start processing event #8, run #1 7 events processed so far  <<<===
 Stream1             DEBUG addItemObjects(2101,"*") called
 Stream1             DEBUG            Key:*
 Stream1             DEBUG      Comp Attr 0 with 7 mantissa bits.
@@ -541,7 +541,7 @@ Stream1             DEBUG  Object/count: ExampleHitContainer_MyHits, 8
 Stream1             DEBUG connectOutput done for SimplePoolReplica1.root
 Stream1.FileMet...  DEBUG retrieved existing list of runNumbers
 Stream1.FileMet...  DEBUG retrieved existing list of lumiBlocks
-AthenaEventLoopMgr   INFO   ===>>>  done processing event #7, run #1 8 events processed so far  <<<===
+AthenaEventLoopMgr   INFO   ===>>>  done processing event #8, run #1 8 events processed so far  <<<===
 EventSelector       DEBUG Get AttributeList from the collection
 EventSelector       DEBUG AttributeList size 3
 EventSelector       DEBUG record AthenaAttribute, name = Token = [DB=F2313678-C96A-964F-89E8-08BAB39F2DA7][CNT=POOLContainer(DataHeader)][CLID=4DDBD295-EFCE-472A-9EC8-15CD35A9EB8D][TECH=00000203][OID=00000005-00000008].
@@ -550,7 +550,7 @@ EventSelector       DEBUG found AthenaAttribute, name = eventRef = [DB=F2313678-
 AthenaPoolAddre...  DEBUG The current Event contains: 3 objects
 AthenaPoolAddre...  DEBUG loadAddresses: DataObject address, clid = 2101, name = McEventInfo
 AthenaPoolAddre...  DEBUG loadAddresses: DataObject address, clid = 9102, name = MyHits
-AthenaEventLoopMgr   INFO   ===>>>  start processing event #8, run #1 8 events processed so far  <<<===
+AthenaEventLoopMgr   INFO   ===>>>  start processing event #9, run #1 8 events processed so far  <<<===
 Stream1             DEBUG addItemObjects(2101,"*") called
 Stream1             DEBUG            Key:*
 Stream1             DEBUG      Comp Attr 0 with 7 mantissa bits.
@@ -567,7 +567,7 @@ Stream1             DEBUG  Object/count: ExampleHitContainer_MyHits, 9
 Stream1             DEBUG connectOutput done for SimplePoolReplica1.root
 Stream1.FileMet...  DEBUG retrieved existing list of runNumbers
 Stream1.FileMet...  DEBUG retrieved existing list of lumiBlocks
-AthenaEventLoopMgr   INFO   ===>>>  done processing event #8, run #1 9 events processed so far  <<<===
+AthenaEventLoopMgr   INFO   ===>>>  done processing event #9, run #1 9 events processed so far  <<<===
 EventSelector       DEBUG Get AttributeList from the collection
 EventSelector       DEBUG AttributeList size 3
 EventSelector       DEBUG record AthenaAttribute, name = Token = [DB=F2313678-C96A-964F-89E8-08BAB39F2DA7][CNT=POOLContainer(DataHeader)][CLID=4DDBD295-EFCE-472A-9EC8-15CD35A9EB8D][TECH=00000203][OID=00000005-00000009].
@@ -576,7 +576,7 @@ EventSelector       DEBUG found AthenaAttribute, name = eventRef = [DB=F2313678-
 AthenaPoolAddre...  DEBUG The current Event contains: 3 objects
 AthenaPoolAddre...  DEBUG loadAddresses: DataObject address, clid = 2101, name = McEventInfo
 AthenaPoolAddre...  DEBUG loadAddresses: DataObject address, clid = 9102, name = MyHits
-AthenaEventLoopMgr   INFO   ===>>>  start processing event #9, run #1 9 events processed so far  <<<===
+AthenaEventLoopMgr   INFO   ===>>>  start processing event #10, run #1 9 events processed so far  <<<===
 Stream1             DEBUG addItemObjects(2101,"*") called
 Stream1             DEBUG            Key:*
 Stream1             DEBUG      Comp Attr 0 with 7 mantissa bits.
@@ -593,7 +593,7 @@ Stream1             DEBUG  Object/count: ExampleHitContainer_MyHits, 10
 Stream1             DEBUG connectOutput done for SimplePoolReplica1.root
 Stream1.FileMet...  DEBUG retrieved existing list of runNumbers
 Stream1.FileMet...  DEBUG retrieved existing list of lumiBlocks
-AthenaEventLoopMgr   INFO   ===>>>  done processing event #9, run #1 10 events processed so far  <<<===
+AthenaEventLoopMgr   INFO   ===>>>  done processing event #10, run #1 10 events processed so far  <<<===
 EventSelector       DEBUG Get AttributeList from the collection
 EventSelector       DEBUG AttributeList size 3
 EventSelector       DEBUG record AthenaAttribute, name = Token = [DB=F2313678-C96A-964F-89E8-08BAB39F2DA7][CNT=POOLContainer(DataHeader)][CLID=4DDBD295-EFCE-472A-9EC8-15CD35A9EB8D][TECH=00000203][OID=00000005-0000000A].
@@ -602,7 +602,7 @@ EventSelector       DEBUG found AthenaAttribute, name = eventRef = [DB=F2313678-
 AthenaPoolAddre...  DEBUG The current Event contains: 3 objects
 AthenaPoolAddre...  DEBUG loadAddresses: DataObject address, clid = 2101, name = McEventInfo
 AthenaPoolAddre...  DEBUG loadAddresses: DataObject address, clid = 9102, name = MyHits
-AthenaEventLoopMgr   INFO   ===>>>  start processing event #10, run #1 10 events processed so far  <<<===
+AthenaEventLoopMgr   INFO   ===>>>  start processing event #11, run #1 10 events processed so far  <<<===
 Stream1             DEBUG addItemObjects(2101,"*") called
 Stream1             DEBUG            Key:*
 Stream1             DEBUG      Comp Attr 0 with 7 mantissa bits.
@@ -619,7 +619,7 @@ Stream1             DEBUG  Object/count: ExampleHitContainer_MyHits, 11
 Stream1             DEBUG connectOutput done for SimplePoolReplica1.root
 Stream1.FileMet...  DEBUG retrieved existing list of runNumbers
 Stream1.FileMet...  DEBUG retrieved existing list of lumiBlocks
-AthenaEventLoopMgr   INFO   ===>>>  done processing event #10, run #1 11 events processed so far  <<<===
+AthenaEventLoopMgr   INFO   ===>>>  done processing event #11, run #1 11 events processed so far  <<<===
 EventSelector       DEBUG Get AttributeList from the collection
 EventSelector       DEBUG AttributeList size 3
 EventSelector       DEBUG record AthenaAttribute, name = Token = [DB=F2313678-C96A-964F-89E8-08BAB39F2DA7][CNT=POOLContainer(DataHeader)][CLID=4DDBD295-EFCE-472A-9EC8-15CD35A9EB8D][TECH=00000203][OID=00000005-0000000B].
@@ -628,7 +628,7 @@ EventSelector       DEBUG found AthenaAttribute, name = eventRef = [DB=F2313678-
 AthenaPoolAddre...  DEBUG The current Event contains: 3 objects
 AthenaPoolAddre...  DEBUG loadAddresses: DataObject address, clid = 2101, name = McEventInfo
 AthenaPoolAddre...  DEBUG loadAddresses: DataObject address, clid = 9102, name = MyHits
-AthenaEventLoopMgr   INFO   ===>>>  start processing event #11, run #1 11 events processed so far  <<<===
+AthenaEventLoopMgr   INFO   ===>>>  start processing event #12, run #1 11 events processed so far  <<<===
 Stream1             DEBUG addItemObjects(2101,"*") called
 Stream1             DEBUG            Key:*
 Stream1             DEBUG      Comp Attr 0 with 7 mantissa bits.
@@ -645,7 +645,7 @@ Stream1             DEBUG  Object/count: ExampleHitContainer_MyHits, 12
 Stream1             DEBUG connectOutput done for SimplePoolReplica1.root
 Stream1.FileMet...  DEBUG retrieved existing list of runNumbers
 Stream1.FileMet...  DEBUG retrieved existing list of lumiBlocks
-AthenaEventLoopMgr   INFO   ===>>>  done processing event #11, run #1 12 events processed so far  <<<===
+AthenaEventLoopMgr   INFO   ===>>>  done processing event #12, run #1 12 events processed so far  <<<===
 EventSelector       DEBUG Get AttributeList from the collection
 EventSelector       DEBUG AttributeList size 3
 EventSelector       DEBUG record AthenaAttribute, name = Token = [DB=F2313678-C96A-964F-89E8-08BAB39F2DA7][CNT=POOLContainer(DataHeader)][CLID=4DDBD295-EFCE-472A-9EC8-15CD35A9EB8D][TECH=00000203][OID=00000005-0000000C].
@@ -654,7 +654,7 @@ EventSelector       DEBUG found AthenaAttribute, name = eventRef = [DB=F2313678-
 AthenaPoolAddre...  DEBUG The current Event contains: 3 objects
 AthenaPoolAddre...  DEBUG loadAddresses: DataObject address, clid = 2101, name = McEventInfo
 AthenaPoolAddre...  DEBUG loadAddresses: DataObject address, clid = 9102, name = MyHits
-AthenaEventLoopMgr   INFO   ===>>>  start processing event #12, run #1 12 events processed so far  <<<===
+AthenaEventLoopMgr   INFO   ===>>>  start processing event #13, run #1 12 events processed so far  <<<===
 Stream1             DEBUG addItemObjects(2101,"*") called
 Stream1             DEBUG            Key:*
 Stream1             DEBUG      Comp Attr 0 with 7 mantissa bits.
@@ -671,7 +671,7 @@ Stream1             DEBUG  Object/count: ExampleHitContainer_MyHits, 13
 Stream1             DEBUG connectOutput done for SimplePoolReplica1.root
 Stream1.FileMet...  DEBUG retrieved existing list of runNumbers
 Stream1.FileMet...  DEBUG retrieved existing list of lumiBlocks
-AthenaEventLoopMgr   INFO   ===>>>  done processing event #12, run #1 13 events processed so far  <<<===
+AthenaEventLoopMgr   INFO   ===>>>  done processing event #13, run #1 13 events processed so far  <<<===
 EventSelector       DEBUG Get AttributeList from the collection
 EventSelector       DEBUG AttributeList size 3
 EventSelector       DEBUG record AthenaAttribute, name = Token = [DB=F2313678-C96A-964F-89E8-08BAB39F2DA7][CNT=POOLContainer(DataHeader)][CLID=4DDBD295-EFCE-472A-9EC8-15CD35A9EB8D][TECH=00000203][OID=00000005-0000000D].
@@ -680,7 +680,7 @@ EventSelector       DEBUG found AthenaAttribute, name = eventRef = [DB=F2313678-
 AthenaPoolAddre...  DEBUG The current Event contains: 3 objects
 AthenaPoolAddre...  DEBUG loadAddresses: DataObject address, clid = 2101, name = McEventInfo
 AthenaPoolAddre...  DEBUG loadAddresses: DataObject address, clid = 9102, name = MyHits
-AthenaEventLoopMgr   INFO   ===>>>  start processing event #13, run #1 13 events processed so far  <<<===
+AthenaEventLoopMgr   INFO   ===>>>  start processing event #14, run #1 13 events processed so far  <<<===
 Stream1             DEBUG addItemObjects(2101,"*") called
 Stream1             DEBUG            Key:*
 Stream1             DEBUG      Comp Attr 0 with 7 mantissa bits.
@@ -697,7 +697,7 @@ Stream1             DEBUG  Object/count: ExampleHitContainer_MyHits, 14
 Stream1             DEBUG connectOutput done for SimplePoolReplica1.root
 Stream1.FileMet...  DEBUG retrieved existing list of runNumbers
 Stream1.FileMet...  DEBUG retrieved existing list of lumiBlocks
-AthenaEventLoopMgr   INFO   ===>>>  done processing event #13, run #1 14 events processed so far  <<<===
+AthenaEventLoopMgr   INFO   ===>>>  done processing event #14, run #1 14 events processed so far  <<<===
 EventSelector       DEBUG Get AttributeList from the collection
 EventSelector       DEBUG AttributeList size 3
 EventSelector       DEBUG record AthenaAttribute, name = Token = [DB=F2313678-C96A-964F-89E8-08BAB39F2DA7][CNT=POOLContainer(DataHeader)][CLID=4DDBD295-EFCE-472A-9EC8-15CD35A9EB8D][TECH=00000203][OID=00000005-0000000E].
@@ -706,7 +706,7 @@ EventSelector       DEBUG found AthenaAttribute, name = eventRef = [DB=F2313678-
 AthenaPoolAddre...  DEBUG The current Event contains: 3 objects
 AthenaPoolAddre...  DEBUG loadAddresses: DataObject address, clid = 2101, name = McEventInfo
 AthenaPoolAddre...  DEBUG loadAddresses: DataObject address, clid = 9102, name = MyHits
-AthenaEventLoopMgr   INFO   ===>>>  start processing event #14, run #1 14 events processed so far  <<<===
+AthenaEventLoopMgr   INFO   ===>>>  start processing event #15, run #1 14 events processed so far  <<<===
 Stream1             DEBUG addItemObjects(2101,"*") called
 Stream1             DEBUG            Key:*
 Stream1             DEBUG      Comp Attr 0 with 7 mantissa bits.
@@ -723,7 +723,7 @@ Stream1             DEBUG  Object/count: ExampleHitContainer_MyHits, 15
 Stream1             DEBUG connectOutput done for SimplePoolReplica1.root
 Stream1.FileMet...  DEBUG retrieved existing list of runNumbers
 Stream1.FileMet...  DEBUG retrieved existing list of lumiBlocks
-AthenaEventLoopMgr   INFO   ===>>>  done processing event #14, run #1 15 events processed so far  <<<===
+AthenaEventLoopMgr   INFO   ===>>>  done processing event #15, run #1 15 events processed so far  <<<===
 EventSelector       DEBUG Get AttributeList from the collection
 EventSelector       DEBUG AttributeList size 3
 EventSelector       DEBUG record AthenaAttribute, name = Token = [DB=F2313678-C96A-964F-89E8-08BAB39F2DA7][CNT=POOLContainer(DataHeader)][CLID=4DDBD295-EFCE-472A-9EC8-15CD35A9EB8D][TECH=00000203][OID=00000005-0000000F].
@@ -732,7 +732,7 @@ EventSelector       DEBUG found AthenaAttribute, name = eventRef = [DB=F2313678-
 AthenaPoolAddre...  DEBUG The current Event contains: 3 objects
 AthenaPoolAddre...  DEBUG loadAddresses: DataObject address, clid = 2101, name = McEventInfo
 AthenaPoolAddre...  DEBUG loadAddresses: DataObject address, clid = 9102, name = MyHits
-AthenaEventLoopMgr   INFO   ===>>>  start processing event #15, run #1 15 events processed so far  <<<===
+AthenaEventLoopMgr   INFO   ===>>>  start processing event #16, run #1 15 events processed so far  <<<===
 Stream1             DEBUG addItemObjects(2101,"*") called
 Stream1             DEBUG            Key:*
 Stream1             DEBUG      Comp Attr 0 with 7 mantissa bits.
@@ -749,7 +749,7 @@ Stream1             DEBUG  Object/count: ExampleHitContainer_MyHits, 16
 Stream1             DEBUG connectOutput done for SimplePoolReplica1.root
 Stream1.FileMet...  DEBUG retrieved existing list of runNumbers
 Stream1.FileMet...  DEBUG retrieved existing list of lumiBlocks
-AthenaEventLoopMgr   INFO   ===>>>  done processing event #15, run #1 16 events processed so far  <<<===
+AthenaEventLoopMgr   INFO   ===>>>  done processing event #16, run #1 16 events processed so far  <<<===
 EventSelector       DEBUG Get AttributeList from the collection
 EventSelector       DEBUG AttributeList size 3
 EventSelector       DEBUG record AthenaAttribute, name = Token = [DB=F2313678-C96A-964F-89E8-08BAB39F2DA7][CNT=POOLContainer(DataHeader)][CLID=4DDBD295-EFCE-472A-9EC8-15CD35A9EB8D][TECH=00000203][OID=00000005-00000010].
@@ -758,7 +758,7 @@ EventSelector       DEBUG found AthenaAttribute, name = eventRef = [DB=F2313678-
 AthenaPoolAddre...  DEBUG The current Event contains: 3 objects
 AthenaPoolAddre...  DEBUG loadAddresses: DataObject address, clid = 2101, name = McEventInfo
 AthenaPoolAddre...  DEBUG loadAddresses: DataObject address, clid = 9102, name = MyHits
-AthenaEventLoopMgr   INFO   ===>>>  start processing event #16, run #1 16 events processed so far  <<<===
+AthenaEventLoopMgr   INFO   ===>>>  start processing event #17, run #1 16 events processed so far  <<<===
 Stream1             DEBUG addItemObjects(2101,"*") called
 Stream1             DEBUG            Key:*
 Stream1             DEBUG      Comp Attr 0 with 7 mantissa bits.
@@ -775,7 +775,7 @@ Stream1             DEBUG  Object/count: ExampleHitContainer_MyHits, 17
 Stream1             DEBUG connectOutput done for SimplePoolReplica1.root
 Stream1.FileMet...  DEBUG retrieved existing list of runNumbers
 Stream1.FileMet...  DEBUG retrieved existing list of lumiBlocks
-AthenaEventLoopMgr   INFO   ===>>>  done processing event #16, run #1 17 events processed so far  <<<===
+AthenaEventLoopMgr   INFO   ===>>>  done processing event #17, run #1 17 events processed so far  <<<===
 EventSelector       DEBUG Get AttributeList from the collection
 EventSelector       DEBUG AttributeList size 3
 EventSelector       DEBUG record AthenaAttribute, name = Token = [DB=F2313678-C96A-964F-89E8-08BAB39F2DA7][CNT=POOLContainer(DataHeader)][CLID=4DDBD295-EFCE-472A-9EC8-15CD35A9EB8D][TECH=00000203][OID=00000005-00000011].
@@ -784,7 +784,7 @@ EventSelector       DEBUG found AthenaAttribute, name = eventRef = [DB=F2313678-
 AthenaPoolAddre...  DEBUG The current Event contains: 3 objects
 AthenaPoolAddre...  DEBUG loadAddresses: DataObject address, clid = 2101, name = McEventInfo
 AthenaPoolAddre...  DEBUG loadAddresses: DataObject address, clid = 9102, name = MyHits
-AthenaEventLoopMgr   INFO   ===>>>  start processing event #17, run #1 17 events processed so far  <<<===
+AthenaEventLoopMgr   INFO   ===>>>  start processing event #18, run #1 17 events processed so far  <<<===
 Stream1             DEBUG addItemObjects(2101,"*") called
 Stream1             DEBUG            Key:*
 Stream1             DEBUG      Comp Attr 0 with 7 mantissa bits.
@@ -801,7 +801,7 @@ Stream1             DEBUG  Object/count: ExampleHitContainer_MyHits, 18
 Stream1             DEBUG connectOutput done for SimplePoolReplica1.root
 Stream1.FileMet...  DEBUG retrieved existing list of runNumbers
 Stream1.FileMet...  DEBUG retrieved existing list of lumiBlocks
-AthenaEventLoopMgr   INFO   ===>>>  done processing event #17, run #1 18 events processed so far  <<<===
+AthenaEventLoopMgr   INFO   ===>>>  done processing event #18, run #1 18 events processed so far  <<<===
 EventSelector       DEBUG Get AttributeList from the collection
 EventSelector       DEBUG AttributeList size 3
 EventSelector       DEBUG record AthenaAttribute, name = Token = [DB=F2313678-C96A-964F-89E8-08BAB39F2DA7][CNT=POOLContainer(DataHeader)][CLID=4DDBD295-EFCE-472A-9EC8-15CD35A9EB8D][TECH=00000203][OID=00000005-00000012].
@@ -810,7 +810,7 @@ EventSelector       DEBUG found AthenaAttribute, name = eventRef = [DB=F2313678-
 AthenaPoolAddre...  DEBUG The current Event contains: 3 objects
 AthenaPoolAddre...  DEBUG loadAddresses: DataObject address, clid = 2101, name = McEventInfo
 AthenaPoolAddre...  DEBUG loadAddresses: DataObject address, clid = 9102, name = MyHits
-AthenaEventLoopMgr   INFO   ===>>>  start processing event #18, run #1 18 events processed so far  <<<===
+AthenaEventLoopMgr   INFO   ===>>>  start processing event #19, run #1 18 events processed so far  <<<===
 Stream1             DEBUG addItemObjects(2101,"*") called
 Stream1             DEBUG            Key:*
 Stream1             DEBUG      Comp Attr 0 with 7 mantissa bits.
@@ -827,7 +827,7 @@ Stream1             DEBUG  Object/count: ExampleHitContainer_MyHits, 19
 Stream1             DEBUG connectOutput done for SimplePoolReplica1.root
 Stream1.FileMet...  DEBUG retrieved existing list of runNumbers
 Stream1.FileMet...  DEBUG retrieved existing list of lumiBlocks
-AthenaEventLoopMgr   INFO   ===>>>  done processing event #18, run #1 19 events processed so far  <<<===
+AthenaEventLoopMgr   INFO   ===>>>  done processing event #19, run #1 19 events processed so far  <<<===
 EventSelector       DEBUG Get AttributeList from the collection
 EventSelector       DEBUG AttributeList size 3
 EventSelector       DEBUG record AthenaAttribute, name = Token = [DB=F2313678-C96A-964F-89E8-08BAB39F2DA7][CNT=POOLContainer(DataHeader)][CLID=4DDBD295-EFCE-472A-9EC8-15CD35A9EB8D][TECH=00000203][OID=00000005-00000013].
@@ -836,7 +836,7 @@ EventSelector       DEBUG found AthenaAttribute, name = eventRef = [DB=F2313678-
 AthenaPoolAddre...  DEBUG The current Event contains: 3 objects
 AthenaPoolAddre...  DEBUG loadAddresses: DataObject address, clid = 2101, name = McEventInfo
 AthenaPoolAddre...  DEBUG loadAddresses: DataObject address, clid = 9102, name = MyHits
-AthenaEventLoopMgr   INFO   ===>>>  start processing event #19, run #1 19 events processed so far  <<<===
+AthenaEventLoopMgr   INFO   ===>>>  start processing event #20, run #1 19 events processed so far  <<<===
 Stream1             DEBUG addItemObjects(2101,"*") called
 Stream1             DEBUG            Key:*
 Stream1             DEBUG      Comp Attr 0 with 7 mantissa bits.
@@ -853,7 +853,7 @@ Stream1             DEBUG  Object/count: ExampleHitContainer_MyHits, 20
 Stream1             DEBUG connectOutput done for SimplePoolReplica1.root
 Stream1.FileMet...  DEBUG retrieved existing list of runNumbers
 Stream1.FileMet...  DEBUG retrieved existing list of lumiBlocks
-AthenaEventLoopMgr   INFO   ===>>>  done processing event #19, run #1 20 events processed so far  <<<===
+AthenaEventLoopMgr   INFO   ===>>>  done processing event #20, run #1 20 events processed so far  <<<===
 StorageSvc          DEBUG Disconnect request for database: FID=F2313678-C96A-964F-89E8-08BAB39F2DA7 PFN=SimplePoolFile1.root
 StorageSvc          DEBUG Closing database: FID=F2313678-C96A-964F-89E8-08BAB39F2DA7
 AthenaEventLoopMgr   INFO No more events in event selection 

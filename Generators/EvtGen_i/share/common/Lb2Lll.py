@@ -80,7 +80,7 @@ if oldTypeSetup:
 theApp.EvtMax = EvtMax
 svcMgr.EventSelector.RunNumber   = 18900
 #EventSelector.RunNumber   = MYDSN
-svcMgr.EventSelector.FirstEvent  = 0
+svcMgr.EventSelector.FirstEvent  = 1
 #EventSelector.FirstEvent  = MYSKIP
 
 #--------------------------------------------------------------

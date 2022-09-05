@@ -38,7 +38,7 @@ from McEventSelector.McEventSelectorConf import McEventSelector
 svcMgr += McEventSelector("EventSelector")
 svcMgr.EventSelector.RunNumber = runNumber
 svcMgr.EventSelector.EventsPerRun      = 1
-svcMgr.EventSelector.FirstEvent        = 0
+svcMgr.EventSelector.FirstEvent        = 1
 svcMgr.EventSelector.InitialTimeStamp  = 0
 svcMgr.EventSelector.TimeStampInterval = 1
 

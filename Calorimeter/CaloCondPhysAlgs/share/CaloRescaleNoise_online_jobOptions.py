@@ -125,7 +125,7 @@ topSequence += theCaloRescaleNoise
 #--------------------------------------------------------------
 svcMgr.EventSelector.RunNumber         = RunNumberOld
 svcMgr.EventSelector.EventsPerRun      = 1
-svcMgr.EventSelector.FirstEvent        = 0
+svcMgr.EventSelector.FirstEvent        = 1
 svcMgr.EventSelector.EventsPerLB       = 1
 svcMgr.EventSelector.FirstLB           = LumiBlock
 svcMgr.EventSelector.InitialTimeStamp  = int(TimeStamp/1e9)

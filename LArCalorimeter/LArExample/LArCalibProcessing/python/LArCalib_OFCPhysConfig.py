@@ -142,7 +142,7 @@ def LArOFCPhysCfg(flags):
     result.merge(McEventSelectorCfg(flags,
                                     RunNumber         = flags.LArCalib.Input.RunNumbers[0],
                                     EventsPerRun      = 1,
-                                    FirstEvent	      = 0,
+                                    FirstEvent	      = 1,
                                     InitialTimeStamp  = 0,
                                     TimeStampInterval = 1))
     return result

@@ -66,7 +66,7 @@ topSequence+=theTestCoolRecRead
 # and timestampsjob
 svcMgr.EventSelector.RunNumber         = %i
 svcMgr.EventSelector.EventsPerRun      = 999999
-svcMgr.EventSelector.FirstEvent        = 0
+svcMgr.EventSelector.FirstEvent        = 1
 # initial time stamp - this is number of seconds since 1st Jan 1970 GMT
 svcMgr.EventSelector.InitialTimeStamp  = %i
 # increment of 3 minutes

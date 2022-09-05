@@ -34,7 +34,7 @@ if not 'RunNumber' in dir():
 
 svcMgr.EventSelector.RunNumber         = RunNumber
 svcMgr.EventSelector.EventsPerRun      = 500000
-svcMgr.EventSelector.FirstEvent        = 0
+svcMgr.EventSelector.FirstEvent        = 1
 
 if not 'OutputLevel' in dir():
     OutputLevel = 3
