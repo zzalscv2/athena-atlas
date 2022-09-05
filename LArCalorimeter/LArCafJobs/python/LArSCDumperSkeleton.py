@@ -10,6 +10,10 @@ from AthenaConfiguration.MainServicesConfig import MainServicesCfg
 
 
 def fromRunArgs(runArgs):
+
+    from AthenaCommon.Logging import logging
+    mlog_SCD = logging.getLogger( 'LArSCDumpSkeleton' )
+
     from AthenaConfiguration.AllConfigFlags import ConfigFlags    
 
     from LArCafJobs.LArSCDumperFlags import addSCDumpFlags
@@ -26,13 +30,39 @@ def fromRunArgs(runArgs):
     # real geom not working yet
     ConfigFlags.LArSCDump.doGeom=False
 
-    # this should be later deduced from SCRunLog
-    ConfigFlags.LArSCDump.doEt=True
-    ConfigFlags.LArSCDump.nSamples=5
-    ConfigFlags.LArSCDump.nEt=1
-    ConfigFlags.LArSCDump.doRawChan=True
-    ConfigFlags.LArSCDump.digitsKey=""
-    CKeys=["SC_ET","LArRawChannels"]    
+    from LArConditionsCommon.LArRunFormat import getLArDTInfoForRun
+    try:
+       runinfo=getLArDTInfoForRun(ConfigFlags.Input.RunNumber[0], connstring="COOLONL_LAR/CONDBR2")
+    except Exception:
+       mlog_SCD.warning("Could not get DT run info, using defaults !")   
+       ConfigFlags.LArSCDump.doEt=True
+       ConfigFlags.LArSCDump.nSamples=5
+       ConfigFlags.LArSCDump.nEt=1
+       CKeys=["SC_ET"]    
+    else:   
+       CKeys=[]
+       ConfigFlags.LArSCDump.digitsKey=""
+       for i in range(0,len(runinfo.streamTypes())):
+          if runinfo.streamTypes()[i] ==  "SelectedEnergy":
+                CKeys += ["SC_ET_ID"]
+                ConfigFlags.LArSCDump.doEt=True
+                ConfigFlags.LArSCDump.nEt=runinfo.streamLengths()[i]
+          elif runinfo.streamTypes()[i] ==  "Energy":
+                CKeys += ["SC_ET"]
+                ConfigFlags.LArSCDump.doEt=True
+                ConfigFlags.LArSCDump.nEt=runinfo.streamLengths()[i]
+          elif runinfo.streamTypes()[i] ==  "RawADC":
+                ConfigFlags.LArSCDump.digitsKey="SC"
+                ConfigFlags.LArSCDump.nSamples=runinfo.streamLengths()[i]
+          elif runinfo.streamTypes()[i] ==  "ADC":
+                CKeys += ["SC_ADC_BAS"]
+                ConfigFlags.LArSCDump.nSamples=runinfo.streamLengths()[i]
+                
+    finally:
+       ConfigFlags.LArSCDump.doRawChan=True
+       CKeys+=["LArRawChannels"]
+
+    mlog_SCD.debug("CKeys generated %s",str(CKeys))   
 
     ConfigFlags.lock()
     
