@@ -17,7 +17,7 @@ atlas_add_component( TrigEgammaMonitoring
                      TrigDecisionToolLib TrigEgammaMatchingToolLib
                      TrigEgammaEmulationToolLib xAODBase xAODEgamma xAODEventInfo xAODJet
                      xAODMissingET xAODTracking xAODTrigCalo xAODTrigEgamma xAODTrigger 
-                     xAODTruth egammaRecEvent)
+                     xAODTruth egammaRecEvent LArRecEvent)
 
 # Install files from the package:
 atlas_install_python_modules( python/*.py POST_BUILD_CMD ${ATLAS_FLAKE8} )
