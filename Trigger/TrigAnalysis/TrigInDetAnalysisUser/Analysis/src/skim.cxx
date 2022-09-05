@@ -17,7 +17,9 @@
 #include <string>
 #include <regex>
 #include <algorithm>
+#include <cstdio>
 
+#include "simpletimer.h"
 
 #include "TChain.h"
 #include "TFile.h"
@@ -101,6 +103,8 @@ int main(int argc, char** argv) {
   if ( argc<1 ) return usage(-1);
   
   std::set<std::string>   require_chains;
+  std::vector<std::string>   rchains;
+
   bool require  = false;
   bool deleting = false;
 
@@ -126,6 +130,7 @@ int main(int argc, char** argv) {
     if ( arg.find('-')!=0 ) { 
       if ( adding_chains || deleting_chains ) { 
 	require_chains.insert(argv[i]); 
+	rchains.push_back(argv[i]); 
 	continue;
       }
     }
@@ -195,12 +200,15 @@ int main(int argc, char** argv) {
   std::cout << "writing to file   " << outfile << std::endl;
 
 
-
   /// open output file
   TIDA::Event* track_ev = new TIDA::Event();
   TIDA::Event* h = track_ev;
 
+  std::cout << "opening outfile: " << outfile << std::endl;
+
   TFile fout( outfile.c_str(), "recreate");
+
+  fout.cd();
 
   /// create the main event TTree ... 
 
@@ -210,8 +218,6 @@ int main(int argc, char** argv) {
   tree->Branch("TIDA::Event", "TIDA::Event",&h,6400, 1);
     
   h->clear();
-
-
 
   /// event counters
 
@@ -235,7 +241,7 @@ int main(int argc, char** argv) {
     /// now the main event TTree    
 
     //   TChain* data = new TChain("tree");
-    
+
     TTree* data = (TTree*)finput.Get("tree");
 
     TIDA::Event* track_iev = new TIDA::Event();
@@ -244,10 +250,43 @@ int main(int argc, char** argv) {
     //    data->AddFile( argv[i] );
     
 
-    
+    unsigned entries = data->GetEntries();
+
+    std::cout << "input has " << entries << " events" << std::endl; 
+
+    std::string cck = "|/-\\";
+        
+    int ii=0;
+
+    struct timeval tm = simpletimer_start();
+
+    std::cout << "processing ..." << std::endl;
+
     for (unsigned int i=0; i<data->GetEntries() ; i++ ) {
 
       if ( verbose ) std::cout << "event " << i;
+
+      if ( i%100==0 ) {
+
+	double frac = i*1.0/entries;
+
+	double t = simpletimer_stop(tm);
+	
+	double est = 0;
+
+	if ( frac > 0 ) est = t/frac - t;
+	
+	double eventsps = 1000*i/t;
+
+	std::printf( "\r%c    %6.2lf %%     time: %6.2lf s    remaining %6.2lf s   (%d at %5.2lf ps) ", 
+		     cck[ii%4], ((1000*(i+1)/entries)*0.1), t*0.001, est*0.001, i, eventsps );   
+
+	std::fflush(stdout);
+
+	ii++;
+      }
+      
+      
 
       track_iev->clear();
       track_ev->clear();
@@ -263,19 +302,31 @@ int main(int argc, char** argv) {
       //      std::cout << "track_ev  names " << track_ev->chainnames()  << std::endl;
       //      std::cout << "track_iev names " << track_iev->chainnames() << std::endl;
 
-      if ( verbose ) std::cout << "\tN chains " << track_ev->size() << " -> ";
+      if ( verbose ) std::cout << "----------------------------------------\n\tN chains " << track_ev->size() << " -> ";
 
       std::vector<TIDA::Chain>& chains = track_ev->chains();
 
 
       /// this bit of code will drop any event where the HLT hasn't passed
+
       bool skip = true;
 
       std::vector<TIDA::Chain>::iterator citr = chains.begin();
       for ( ; citr!=chains.end() ; citr++ ) {
-	if ( citr->name().find("L2_")!=std::string::npos || 
-	     citr->name().find("EF_")!=std::string::npos ||
-	     citr->name().find("HLT_")!=std::string::npos ) skip = false;
+
+	if ( citr->name().find("HLT")==std::string::npos ) continue;
+
+	if ( require ) { 
+	  for ( unsigned j=rchains.size() ; j-- ; ) { 
+	    if ( rchains[j].find("HLT")==std::string::npos ) continue;
+	    if ( citr->name().find(rchains[j])!=std::string::npos ) { 
+	      skip = false;
+	      if ( verbose ) std::cout << "keepin' " << citr->name()  << " " << rchains[j] << std::endl;
+	    }
+
+	  }
+	}
+
       }
 
       if ( skip ) continue;
@@ -289,14 +340,18 @@ int main(int argc, char** argv) {
 
 	std::vector<std::string> chainnames = track_ev->chainnames();
 
-	for ( size_t ic=chainnames.size() ; ic-- ; ) {
+	for ( size_t ic=0 ; ic<chainnames.size() ; ic++ ) {
 	  
 	  bool matched = false;
 	  for ( std::set<std::string>::iterator it=require_chains.begin() ; it!=require_chains.end() ; it++ ) { 
-	    matched |= std::regex_match( chainnames[ic], std::regex(*it) );
+
+	    matched |= std::regex_match( chainnames[ic], std::regex(*it+".*") );
+
+	    if ( verbose && matched ) std::cout << "chain: " << chainnames[ic] << "\t :: reg " << *it << "\tmatched: " << matched << std::endl;
+
 	  }
 	    
-	  if ( ( require && !matched ) || ( deleting && matched ) ) track_ev->erase( chainnames[ic] );
+	  if ( ( require && !matched ) ) track_ev->erase( chainnames[ic] );
 	}
 	        
 	if ( verbose ) std::cout << track_ev->size() << std::endl;
@@ -379,6 +434,9 @@ int main(int argc, char** argv) {
 
 	}
 	
+
+	if ( verbose ) std::cout << *track_ev << std::endl;
+
 	//      std::cout << "writing event " << track_ev->event_number() << " <<<<<<<<<<<<<<<<<<<<" << std::endl; 
 	tree->Fill();
 	ev_out++;
@@ -400,11 +458,19 @@ int main(int argc, char** argv) {
 #endif     
 	
       }
+
     }
-    
+
+
+    double t = simpletimer_stop(tm);
+	
+    std::printf( "\r%c    %6.2lf %%     time: %6.2lf s\n", 
+		 cck[ii%4], 100., t*0.001 );   
+
+
     finput.Close();
     
-  }
+ }
 
   std::cout << "skim::done        " << time_str() << std::endl; 
 
