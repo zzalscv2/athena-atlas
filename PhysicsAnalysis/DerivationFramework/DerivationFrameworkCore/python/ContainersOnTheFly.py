@@ -97,6 +97,8 @@ ContainersOnTheFly = [
                         ["AntiKt10UFOCSSKSoftDropBeta100Zcut10JetsAux","xAOD::JetAuxContainer"],
                         ["AntiKt10TruthSoftDropBeta100Zcut10Jets","xAOD::JetContainer"],
                         ["AntiKt10TruthSoftDropBeta100Zcut10JetsAux","xAOD::JetAuxContainer"],
+                        ["AntiKt10TruthJets","xAOD::JetContainer"],
+                        ["AntiKt10TruthJetsAux","xAOD::JetAuxContainer"],
 
                         ["Kt4EMPFlowEventShape","xAOD::EventShape"],
                         ["Kt4EMPFlowEventShapeAux","xAOD::EventShapeAuxInfo"],

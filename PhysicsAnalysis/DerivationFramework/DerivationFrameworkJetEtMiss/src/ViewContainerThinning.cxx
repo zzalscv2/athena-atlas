@@ -55,13 +55,13 @@ namespace DerivationFramework {
   {
     ATH_MSG_INFO ("Initializing " << name() << "...");
 
-    ATH_CHECK( m_trackParticleKey.initialize (m_streamName, SG::AllowEmpty) );
-    ATH_CHECK( m_caloClusterKey.initialize   (m_streamName, SG::AllowEmpty) );
-    ATH_CHECK( m_truthParticleKey.initialize (m_streamName, SG::AllowEmpty) );
+    ATH_CHECK( m_trackParticleKey.initialize (m_streamName, !m_trackParticleKey.empty()) );
+    ATH_CHECK( m_caloClusterKey.initialize   (m_streamName, !m_caloClusterKey.empty()) );
+    ATH_CHECK( m_truthParticleKey.initialize (m_streamName, !m_truthParticleKey.empty()) );
 
-    ATH_CHECK( m_trackParticleViewKey.initialize (SG::AllowEmpty) );
-    ATH_CHECK( m_caloClusterViewKey.initialize   (SG::AllowEmpty) );
-    ATH_CHECK( m_truthParticleViewKey.initialize (SG::AllowEmpty) );
+    ATH_CHECK( m_trackParticleViewKey.initialize (!m_trackParticleViewKey.empty()) );
+    ATH_CHECK( m_caloClusterViewKey.initialize   (!m_caloClusterViewKey.empty()) );
+    ATH_CHECK( m_truthParticleViewKey.initialize (!m_truthParticleViewKey.empty()) );
 
     return StatusCode::SUCCESS;
   }
@@ -75,12 +75,15 @@ namespace DerivationFramework {
 
   StatusCode ViewContainerThinning::doThinning() const
   {
+
     if (!m_trackParticleKey.empty()) {
       ATH_CHECK( doThinningT (m_trackParticleKey, m_trackParticleViewKey) );
     }
+
     if (!m_caloClusterKey.empty()) {
       ATH_CHECK( doThinningT (m_caloClusterKey, m_caloClusterViewKey) );
     }
+
     if (!m_truthParticleKey.empty()) {
       ATH_CHECK( doThinningT (m_truthParticleKey, m_truthParticleViewKey) );
     }

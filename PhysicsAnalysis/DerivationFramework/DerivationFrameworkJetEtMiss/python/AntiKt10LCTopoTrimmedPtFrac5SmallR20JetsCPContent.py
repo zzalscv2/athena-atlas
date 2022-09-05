@@ -9,6 +9,8 @@ AntiKt10LCTopoTrimmedPtFrac5SmallR20JetsCPContent = [
 "AntiKt10LCTopoTrimmedPtFrac5SmallR20JetsAux.R10TruthLabel_R21Consolidated.R10TruthLabel_R21Precision",
 "AntiKt10LCTopoJets",
 "AntiKt10LCTopoJetsAux.GhostAntiKtVR30Rmax4Rmin02PV0TrackJets.NumTrkPt500",
+"AntiKt10TruthJets",
+"AntiKt10TruthJetsAux.pt.eta.phi.m.Split12.Split23.GhostCHadronsFinalCount.GhostBHadronsFinalCount",
 "AntiKt10TruthTrimmedPtFrac5SmallR20Jets",
 "AntiKt10TruthTrimmedPtFrac5SmallR20JetsAux.D2.Tau1_wta.Tau2_wta.Tau3_wta.GhostBHadronsFinalCount",
 ]

@@ -4,8 +4,6 @@
 #====================================================================
 
 from DerivationFrameworkCore.DerivationFrameworkMaster import DerivationFrameworkIsMonteCarlo, DerivationFrameworkJob, buildFileName
-from DerivationFrameworkJetEtMiss.JetCommon import addJetOutputs
-from DerivationFrameworkJetEtMiss.METCommon import addMETOutputs
 from DerivationFrameworkPhys import PhysCommon
 
 #====================================================================
@@ -133,22 +131,5 @@ JETM5SlimmingHelper.AllVariables = ["CaloCalTopoClusters",
 # Add QG tagger variables
 JETM5SlimmingHelper.ExtraVariables  += ["AntiKt4EMTopoJets.DFCommonJets_QGTagger_NTracks.DFCommonJets_QGTagger_TracksWidth.DFCommonJets_QGTagger_TracksC1",
                                         "AntiKt4EMPFlowJets.DFCommonJets_QGTagger_NTracks.DFCommonJets_QGTagger_TracksWidth.DFCommonJets_QGTagger_TracksC1"]
-
-for truthc in [
-    "TruthMuons",
-    "TruthElectrons",
-    "TruthPhotons",
-    "TruthTaus",
-#    "TruthNeutrinos"
-    ]:
-    JETM5SlimmingHelper.StaticContent.append("xAOD::TruthParticleContainer#"+truthc)
-    JETM5SlimmingHelper.StaticContent.append("xAOD::TruthParticleAuxContainer#"+truthc+"Aux.")
-
-# No trigger objects for now
-
-# Add the jet containers to the stream
-addJetOutputs(JETM5SlimmingHelper,["SmallR"])
-# Add the MET containers to the stream
-addMETOutputs(JETM5SlimmingHelper,["Diagnostic","AntiKt4EMTopo","AntiKt4EMPFlow","Track"])
 
 JETM5SlimmingHelper.AppendContentToStream(JETM5Stream)

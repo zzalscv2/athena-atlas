@@ -4,9 +4,6 @@
 #====================================================================
 
 from DerivationFrameworkCore.DerivationFrameworkMaster import DerivationFrameworkIsMonteCarlo, DerivationFrameworkJob, buildFileName
-from DerivationFrameworkJetEtMiss.JetCommon import OutputJets, addJetOutputs, addDAODJets
-from JetRecConfig.StandardSmallRJets import AntiKt4LCTopo
-from DerivationFrameworkJetEtMiss.METCommon import addMETTruthMap, scheduleMETAssocAlg, addMETOutputs
 from DerivationFrameworkPhys import PhysCommon
 
 #====================================================================
@@ -140,11 +137,6 @@ jetm4Seq += CfgMgr.DerivationFramework__DerivationKernel("JETM4Kernel" ,
                                                          SkimmingTools = JETM4SkimmingTools,
                                                          ThinningTools = thinningTools,
                                                          AugmentationTools = [TrigMatchAug])
-#====================================================================
-# Special jets
-#====================================================================
-
-OutputJets["JETM4"] = []
 
 #====================================================================
 # ADD PFLOW AUG INFORMATION 
@@ -152,27 +144,28 @@ OutputJets["JETM4"] = []
 from DerivationFrameworkJetEtMiss.PFlowCommon import applyPFOAugmentation
 applyPFOAugmentation(DerivationFrameworkJob)
 
-#=======================================
-# SCHEDULE CUSTOM MET RECONSTRUCTION
-#=======================================
-if DerivationFrameworkIsMonteCarlo:
-  from JetRecConfig.StandardSmallRJets import calibmods, standardmods, clustermods
-  AntiKt4LCTopo_deriv = AntiKt4LCTopo.clone(modifiers = calibmods+("Filter:1","OriginSetPV")+standardmods+clustermods)
-  addDAODJets([AntiKt4LCTopo_deriv],DerivationFrameworkJob)
-  addMETTruthMap('AntiKt4EMPFlow',"JETMX")
-  scheduleMETAssocAlg(sequence=DerivationFrameworkJob,configlist="JETMX")
-
 #====================================================================
 # Add the containers to the output stream - slimming done here
 #====================================================================
 from DerivationFrameworkCore.SlimmingHelper import SlimmingHelper
 JETM4SlimmingHelper = SlimmingHelper("JETM4SlimmingHelper")
+
+JETM4SlimmingHelper.AppendToDictionary['GlobalChargedParticleFlowObjects'] ='xAOD::FlowElementContainer'
+JETM4SlimmingHelper.AppendToDictionary['GlobalChargedParticleFlowObjectsAux'] ='xAOD::FlowElementAuxContainer'
+JETM4SlimmingHelper.AppendToDictionary['GlobalNeutralParticleFlowObjects'] = 'xAOD::FlowElementContainer'
+JETM4SlimmingHelper.AppendToDictionary['GlobalNeutralParticleFlowObjectsAux'] = 'xAOD::FlowElementAuxContainer'
+JETM4SlimmingHelper.AppendToDictionary['CHSGChargedParticleFlowObjects'] = 'xAOD::FlowElementContainer'
+JETM4SlimmingHelper.AppendToDictionary['CHSGChargedParticleFlowObjectsAux'] = 'xAOD::ShallowAuxContainer'
+JETM4SlimmingHelper.AppendToDictionary['CHSGNeutralParticleFlowObjects'] = 'xAOD::FlowElementContainer'
+JETM4SlimmingHelper.AppendToDictionary['CHSGNeutralParticleFlowObjectsAux'] = 'xAOD::ShallowAuxContainer'
+
 JETM4SlimmingHelper.SmartCollections = ["EventInfo",
                                         "Electrons", "Photons", "Muons", "TauJets",
                                         "InDetTrackParticles", "PrimaryVertices",
                                         "MET_Baseline_AntiKt4EMTopo",
                                         "MET_Baseline_AntiKt4EMPFlow",
                                         "AntiKt4EMPFlowJets","AntiKt4EMTopoJets",
+                                        "AntiKt4TruthJets",
                                         "AntiKt10TruthJets",
                                         "AntiKt10LCTopoJets",
                                         "AntiKt10UFOCSSKJets",
@@ -195,36 +188,7 @@ JETM4SlimmingHelper.ExtraVariables = ["CaloCalTopoClusters.calE.calEta.calPhi.ca
                                       "Photons."+NewTrigVars["Photons"],
                                       "TauJets.truthJetLink.truthParticleLink.IsTruthMatched"]
 
-JETM4SlimmingHelper.AppendToDictionary = {'GlobalChargedParticleFlowObjects':'xAOD::FlowElementContainer','GlobalChargedParticleFlowObjectsAux':'xAOD::FlowElementAuxContainer',
-                                          'GlobalNeutralParticleFlowObjects':'xAOD::FlowElementContainer', 'GlobalNeutralParticleFlowObjectsAux':'xAOD::FlowElementAuxContainer',
-                                          'CHSGChargedParticleFlowObjects':'xAOD::FlowElementContainer','CHSGChargedParticleFlowObjectsAux':'xAOD::ShallowAuxContainer',
-                                          'CHSGNeutralParticleFlowObjects':'xAOD::FlowElementContainer','CHSGNeutralParticleFlowObjectsAux':'xAOD::ShallowAuxContainer',
-                                          'Kt4EMPFlowNeutEventShape':'xAOD::EventShape','Kt4EMPFlowNeutEventShapeAux':'xAOD::EventShapeAuxInfo'
-}
-
-for truthc in [
-    "TruthMuons",
-    "TruthElectrons",
-    "TruthPhotons",
-    "TruthTaus",
-    ]:
-    JETM4SlimmingHelper.StaticContent.append("xAOD::TruthParticleContainer#"+truthc)
-    JETM4SlimmingHelper.StaticContent.append("xAOD::TruthParticleAuxContainer#"+truthc+"Aux.")
-
 # Trigger content
 JETM4SlimmingHelper.IncludeEGammaTriggerContent = True
-
-# Add the jet containers to the stream
-addJetOutputs(
-    slimhelper = JETM4SlimmingHelper,
-    contentlist = [
-      "SmallR",
-      "JETM4"
-      ],
-    smartlist = JETM4SlimmingHelper.SmartCollections,
-    )
-
-# Add the MET containers to the stream
-addMETOutputs(JETM4SlimmingHelper,["Diagnostic","Assocs","TruthAssocs","Track",])
 
 JETM4SlimmingHelper.AppendContentToStream(JETM4Stream)
