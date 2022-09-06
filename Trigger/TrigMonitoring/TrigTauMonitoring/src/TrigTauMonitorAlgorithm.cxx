@@ -136,6 +136,9 @@ StatusCode TrigTauMonitorAlgorithm::executeNavigation( const EventContext& ctx,
 
     const TrigCompositeUtils::Decision *dec=nullptr; 
 
+    // consider only offline taus outside of the crack region
+    if( std::abs(Tau->eta()) > 1.37 &&  std::abs(Tau->eta()) < 1.52) continue;
+
     // consider only offline taus which pass RNN medium WP 
     if( !Tau->isTau(xAOD::TauJetParameters::JetRNNSigMedium)) continue;
 
@@ -850,7 +853,7 @@ void TrigTauMonitorAlgorithm::fillRNNInputVars(const std::string& trigger, const
   auto etOverPtLeadTrk    = Monitored::Collection("etOverPtLeadTrk", tau_vec,  [] (const xAOD::TauJet* tau){
                                                     float detail = -999;
                                                     if (tau->detail(xAOD::TauJetParameters::etOverPtLeadTrk, detail)){
-                                                      detail = TMath::Log10(std::max(detail, 0.1f));
+                                                      detail = std::log10(std::max(detail, 0.1f));
                                                     } return detail;});
   auto dRmax              = Monitored::Collection("dRmax", tau_vec,  [] (const xAOD::TauJet* tau){
                                                     float detail = -999;
@@ -859,7 +862,7 @@ void TrigTauMonitorAlgorithm::fillRNNInputVars(const std::string& trigger, const
   
   auto absipSigLeadTrk    = Monitored::Collection("absipSigLeadTrk", tau_vec,  [] (const xAOD::TauJet* tau){
                                                         float detail = (tau->nTracks()>0) ? std::abs(tau->track(0)->d0SigTJVA()) : 0.;
-                                                        detail = std::min(TMath::Abs(detail), 30.0f);
+                                                        detail = std::min(std::abs(detail), 30.0f);
                                                         return detail;});
    
   auto sumPtTrkFrac       = Monitored::Collection("sumPtTrkFrac", tau_vec,  [] (const xAOD::TauJet* tau){
@@ -869,7 +872,7 @@ void TrigTauMonitorAlgorithm::fillRNNInputVars(const std::string& trigger, const
   auto emPOverTrkSysP     = Monitored::Collection("emPOverTrkSysP", tau_vec,  [] (const xAOD::TauJet* tau){
                                                     float detail = -999;
                                                     if (tau->detail(xAOD::TauJetParameters::EMPOverTrkSysP, detail)){
-                                                      detail = TMath::Log10(std::max(detail, 1e-3f));
+                                                      detail = std::log10(std::max(detail, 1e-3f));
                                                     } return detail;});
   auto ptRatioEflowApprox = Monitored::Collection("ptRatioEflowApprox", tau_vec,  [] (const xAOD::TauJet* tau){
                                                     float detail = -999;
@@ -879,14 +882,17 @@ void TrigTauMonitorAlgorithm::fillRNNInputVars(const std::string& trigger, const
   auto mEflowApprox       = Monitored::Collection("mEflowApprox", tau_vec,  [] (const xAOD::TauJet* tau){
                                                     float detail = -999;
                                                     if (tau->detail(xAOD::TauJetParameters::mEflowApprox, detail)){
-                                                      detail = TMath::Log10(std::max(detail, 140.0f));
+                                                      detail = std::log10(std::max(detail, 140.0f));
                                                     }return detail;});
   auto ptDetectorAxis     = Monitored::Collection("ptDetectorAxis", tau_vec,  [] (const xAOD::TauJet* tau){
-                                                    return TMath::Log10(std::min(tau->ptDetectorAxis() / 1000.0, 100.0));});
+                                                    float detail = -999;
+                                                    if( tau->ptDetectorAxis() > 0){
+                                                       detail = std::log10(std::min(tau->ptDetectorAxis() / 1000.0, 100.0));
+                                                    } return detail;});
   auto massTrkSys         = Monitored::Collection("massTrkSys", tau_vec,  [&nProng] (const xAOD::TauJet* tau){
                                                 float detail = -999;
                                                 if ( tau->detail(xAOD::TauJetParameters::massTrkSys, detail) && (nProng.find("MP") != std::string::npos || nProng.find("3P") != std::string::npos)){
-                                                  detail = TMath::Log10(std::max(detail, 140.0f));
+                                                  detail = std::log10(std::max(detail, 140.0f));
                                                 }return detail;});
   
   auto trFlightPathSig    = Monitored::Collection("trFlightPathSig", tau_vec,  [&nProng] (const xAOD::TauJet* tau){
@@ -908,7 +914,7 @@ void TrigTauMonitorAlgorithm::fillRNNTrack(const std::string& trigger, const std
 
   auto monGroup = getGroup(trigger+( online ? "_RNN_HLT_InputTrack" : "_RNN_Offline_InputTrack"));
 
-  auto track_pt_jetseed_log           = Monitored::Collection("track_pt_jetseed_log", tau_vec,  [] (const xAOD::TauJet* tau){ return TMath::Log10( tau->ptJetSeed());});
+  auto track_pt_jetseed_log           = Monitored::Collection("track_pt_jetseed_log", tau_vec,  [] (const xAOD::TauJet* tau){ return std::log10( tau->ptJetSeed());});
   fill(monGroup,track_pt_jetseed_log);
   
     for(const auto *tau: tau_vec){
@@ -944,7 +950,7 @@ void TrigTauMonitorAlgorithm::fillRNNTrack(const std::string& trigger, const std
       auto n_track = Monitored::Scalar<int>("n_track",0);
       n_track = tracks.size();
 
-      auto track_pt_log = Monitored::Collection("track_pt_log", tracks, [](const xAOD::TauTrack *track){return TMath::Log10( track->pt()); }); 
+      auto track_pt_log = Monitored::Collection("track_pt_log", tracks, [](const xAOD::TauTrack *track){return std::log10( track->pt()); }); 
  
       auto track_eta = Monitored::Collection("track_eta", tracks, [&tau](const xAOD::TauTrack *track){return track->eta(); });
    
@@ -956,7 +962,7 @@ void TrigTauMonitorAlgorithm::fillRNNTrack(const std::string& trigger, const std
 
       auto track_z0sinThetaTJVA_abs_log = Monitored::Collection("track_z0sinThetaTJVA_abs_log", tracks, [&tau](const xAOD::TauTrack *track){return track->z0sinThetaTJVA(*tau); }); 
 
-      auto track_d0_abs_log = Monitored::Collection("track_d0_abs_log", tracks, [](const xAOD::TauTrack *track){return  TMath::Log10( TMath::Abs(track->track()->d0()) + 1e-6); }); 
+      auto track_d0_abs_log = Monitored::Collection("track_d0_abs_log", tracks, [](const xAOD::TauTrack *track){return  std::log10( std::abs(track->track()->d0()) + 1e-6); }); 
 
       auto track_nIBLHitsAndExp = Monitored::Collection("track_nIBLHitsAndExp", tracks, [](const xAOD::TauTrack *track){
                                                     uint8_t inner_pixel_hits, inner_pixel_exp;
@@ -998,7 +1004,7 @@ void TrigTauMonitorAlgorithm::fillRNNCluster(const std::string& trigger, const s
   
   for(const auto *tau: tau_vec){
 
-    auto cluster_pt_jetseed_log = Monitored::Collection("cluster_pt_jetseed_log", tau_vec,  [] (const xAOD::TauJet* tau){ return TMath::Log10( tau->ptJetSeed());});
+    auto cluster_pt_jetseed_log = Monitored::Collection("cluster_pt_jetseed_log", tau_vec,  [] (const xAOD::TauJet* tau){ return std::log10( tau->ptJetSeed());});
 
     std::vector<const xAOD::CaloCluster *> clusters;
 
@@ -1049,7 +1055,7 @@ void TrigTauMonitorAlgorithm::fillRNNCluster(const std::string& trigger, const s
     auto n_cluster = Monitored::Scalar<int>("n_cluster",0); 
     n_cluster = clusters.size();
 
-    auto cluster_et_log = Monitored::Collection("cluster_et_log",clusters, [](const xAOD::CaloCluster *cluster){return TMath::Log10( cluster->et()); });
+    auto cluster_et_log = Monitored::Collection("cluster_et_log",clusters, [](const xAOD::CaloCluster *cluster){return std::log10( cluster->et()); });
     auto cluster_eta =  Monitored::Collection("cluster_eta", clusters, [&tau](const xAOD::CaloCluster *cluster){return cluster->eta();});
     auto cluster_phi =  Monitored::Collection("cluster_phi", clusters, [&tau](const xAOD::CaloCluster *cluster){return cluster->phi();});
     auto cluster_dEta = Monitored::Collection("cluster_dEta", clusters, [&tau](const xAOD::CaloCluster *cluster){auto ddeta=cluster->eta()- tau->eta();return ddeta; });
@@ -1057,19 +1063,19 @@ void TrigTauMonitorAlgorithm::fillRNNCluster(const std::string& trigger, const s
     auto cluster_SECOND_R_log10 = Monitored::Collection("cluster_SECOND_R_log10", clusters, [](const xAOD::CaloCluster *cluster){
                                               double detail = -999.;
                                               const auto success_SECOND_R = cluster->retrieveMoment(xAOD::CaloCluster::MomentType::SECOND_R,detail);
-                                              if (success_SECOND_R) detail = TMath::Log10(detail + 0.1);
+                                              if (success_SECOND_R) detail = std::log10(detail + 0.1);
                                               return detail;});
 
     auto cluster_SECOND_LAMBDA_log10 = Monitored::Collection("cluster_SECOND_LAMBDA_log10", clusters, [](const xAOD::CaloCluster *cluster){
                                               double detail = -999.;
                                               const auto success_SECOND_LAMBDA = cluster->retrieveMoment(xAOD::CaloCluster::MomentType::SECOND_LAMBDA, detail);
-                                              if (success_SECOND_LAMBDA) detail = TMath::Log10(detail + 0.1); 
+                                              if (success_SECOND_LAMBDA) detail = std::log10(detail + 0.1); 
                                               return detail;});
 
     auto cluster_CENTER_LAMBDA_log10 = Monitored::Collection("cluster_CENTER_LAMBDA_log10", clusters, [](const xAOD::CaloCluster *cluster){
                                               double detail = -999.;
                                               const auto success_CENTER_LAMBDA = cluster->retrieveMoment(xAOD::CaloCluster::MomentType::CENTER_LAMBDA, detail);
-                                              if (success_CENTER_LAMBDA) detail = TMath::Log10(detail + 1e-6); 
+                                              if (success_CENTER_LAMBDA) detail = std::log10(detail + 1e-6); 
                                               return detail;});                                                  
 
     fill(monGroup,n_cluster,cluster_pt_jetseed_log,cluster_et_log,cluster_eta,cluster_phi,cluster_dEta,cluster_dPhi,cluster_SECOND_R_log10,cluster_SECOND_LAMBDA_log10,cluster_CENTER_LAMBDA_log10);
