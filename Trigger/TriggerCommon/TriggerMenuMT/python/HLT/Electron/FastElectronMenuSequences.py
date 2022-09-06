@@ -5,7 +5,7 @@
 from AthenaConfiguration.AllConfigFlags import ConfigFlags 
 
 # menu components   
-from TriggerMenuMT.HLT.Config.MenuComponents import MenuSequence, RecoFragmentsPool
+from TriggerMenuMT.HLT.Config.MenuComponents import MenuSequence, RecoFragmentsPool, algorithmCAToGlobalWrapper
 from AthenaCommon.CFElements import parOR, seqAND
 from ViewAlgs.ViewAlgsConf import EventViewCreatorAlgorithm
 from DecisionHandling.DecisionHandlingConf import ViewCreatorCentredOnClusterROITool
@@ -62,10 +62,7 @@ def fastElectronSequence(ConfigFlags, variant=''):
     l2ElectronViewsMaker.ViewNodeName = "electronInViewAlgs"+variant
 
     from TrigGenericAlgs.TrigGenericAlgsConfig import ROBPrefetchingAlgCfg_Si
-    robPrefetchAlg = RecoFragmentsPool.retrieve(ROBPrefetchingAlgCfg_Si,
-                                                ConfigFlags,
-                                                nameSuffix=l2ElectronViewsMaker.name(),
-                                                inputMaker=l2ElectronViewsMaker)
+    robPrefetchAlg = algorithmCAToGlobalWrapper(ROBPrefetchingAlgCfg_Si, ConfigFlags, nameSuffix=l2ElectronViewsMaker.name())[0]
 
     electronAthSequence = seqAND("electronAthSequence"+variant, [l2ElectronViewsMaker, robPrefetchAlg, electronInViewAlgs ] )
     return (electronAthSequence, l2ElectronViewsMaker)

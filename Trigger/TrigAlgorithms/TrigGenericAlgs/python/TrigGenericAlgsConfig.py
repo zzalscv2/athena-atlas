@@ -1,9 +1,12 @@
 # Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
 
+from AthenaConfiguration.ComponentAccumulator import ComponentAccumulator
 from AthenaConfiguration.ComponentFactory import CompFactory
 from TrigPartialEventBuilding.TrigPartialEventBuildingConfig import getRegSelTools
 
-class TimeBurnerCfg(CompFactory.TimeBurner):
+# The hack below works only for old configurables, because Conf2 uses __slots__ and cannot be extended
+from TrigGenericAlgs.TrigGenericAlgsConf import TimeBurner
+class TimeBurnerCfg(TimeBurner):
     def __init__(self, name="TimeBurner", **kwargs):
         super(TimeBurnerCfg, self).__init__(name, **kwargs)
         # Decorate the Configurable with a HypoTools property which is only required
@@ -42,17 +45,19 @@ def L1CorrelationAlgCfg(name, **kwargs):
     kwargs.setdefault("MonTool",L1CorrelationMonitoringCfg("L1CorrelationAlg"))
     return CompFactory.L1CorrelationAlg(name, **kwargs)
 
-def ROBPrefetchingAlgCfg(flags, name, inputMaker=None, regSelDets=[]):
-    alg = CompFactory.ROBPrefetchingAlg(name)
-    alg.RegionSelectorTools = getRegSelTools(flags, regSelDets)
+def ROBPrefetchingAlgCfg(flags, name, regSelDets=[], **kwargs):
+    acc = ComponentAccumulator()
+    alg = CompFactory.ROBPrefetchingAlg(name, **kwargs)
+    alg.RegionSelectorTools = acc.popToolsAndMerge(getRegSelTools(flags, regSelDets))
+    acc.addEventAlgo(alg, primary=True)
 
-    return alg
+    return acc
 
-def ROBPrefetchingAlgCfg_Si(flags, nameSuffix, inputMaker=None):
-    return ROBPrefetchingAlgCfg(flags, 'ROBPrefetchingAlg_Si_'+nameSuffix, inputMaker, ['Pixel', 'SCT'])
+def ROBPrefetchingAlgCfg_Si(flags, nameSuffix, **kwargs):
+    return ROBPrefetchingAlgCfg(flags, 'ROBPrefetchingAlg_Si_'+nameSuffix, ['Pixel', 'SCT'], **kwargs)
 
-def ROBPrefetchingAlgCfg_Calo(flags, nameSuffix, inputMaker=None):
-    return ROBPrefetchingAlgCfg(flags, 'ROBPrefetchingAlg_Calo_'+nameSuffix, inputMaker, ['TTEM', 'TTHEC', 'FCALEM', 'FCALHAD', 'TILE'])
+def ROBPrefetchingAlgCfg_Calo(flags, nameSuffix, **kwargs):
+    return ROBPrefetchingAlgCfg(flags, 'ROBPrefetchingAlg_Calo_'+nameSuffix, ['TTEM', 'TTHEC', 'FCALEM', 'FCALHAD', 'TILE'], **kwargs)
 
-def ROBPrefetchingAlgCfg_Muon(flags, nameSuffix, inputMaker=None):
-    return ROBPrefetchingAlgCfg(flags, 'ROBPrefetchingAlg_Muon_'+nameSuffix, inputMaker, ['MDT', 'RPC', 'TGC', 'CSC', 'MM', 'sTGC'])
+def ROBPrefetchingAlgCfg_Muon(flags, nameSuffix, **kwargs):
+    return ROBPrefetchingAlgCfg(flags, 'ROBPrefetchingAlg_Muon_'+nameSuffix, ['MDT', 'RPC', 'TGC', 'CSC', 'MM', 'sTGC'], **kwargs)

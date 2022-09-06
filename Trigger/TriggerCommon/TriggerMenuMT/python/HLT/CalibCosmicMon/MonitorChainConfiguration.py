@@ -10,7 +10,6 @@ from DecisionHandling.DecisionHandlingConf import InputMakerForRoI, ViewCreatorI
 from AthenaCommon.CFElements import seqAND, parOR
 from TrigGenericAlgs.TrigGenericAlgsConfig import TimeBurnerCfg, TimeBurnerHypoToolGen, L1CorrelationAlgCfg
 from L1TopoOnlineMonitoring import L1TopoOnlineMonitoringConfig as TopoMonConfig
-from AthenaConfiguration.ComponentAccumulator import conf2toConfigurable
 from AthenaConfiguration.AllConfigFlags import ConfigFlags
 from AthenaConfiguration.Enums import Format
 from TrigHypoCommonTools.TrigHypoCommonToolsConf import TrigGenericHypoAlg
@@ -29,7 +28,7 @@ def TimeBurnerSequenceCfg(flags):
         inputMakerSeq = seqAND("TimeBurnerSequence", [inputMaker])
 
         # TimeBurner alg works as a reject-all hypo
-        hypoAlg = conf2toConfigurable(TimeBurnerCfg())
+        hypoAlg = TimeBurnerCfg()
         hypoAlg.SleepTimeMillisec = 200
 
         return MenuSequence(

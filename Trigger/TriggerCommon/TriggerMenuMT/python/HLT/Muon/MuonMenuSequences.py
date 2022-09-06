@@ -84,10 +84,7 @@ def muFastAlgSequence(ConfigFlags):
     l2MuViewsMaker.ViewNodeName = muFastSequence.name()
 
     from TrigGenericAlgs.TrigGenericAlgsConfig import ROBPrefetchingAlgCfg_Muon
-    robPrefetchAlg = RecoFragmentsPool.retrieve(ROBPrefetchingAlgCfg_Muon,
-                                                ConfigFlags,
-                                                nameSuffix=l2MuViewsMaker.name(),
-                                                inputMaker=l2MuViewsMaker)
+    robPrefetchAlg = algorithmCAToGlobalWrapper(ROBPrefetchingAlgCfg_Muon, ConfigFlags, nameSuffix=l2MuViewsMaker.name())[0]
 
     l2muFastSequence = seqAND("l2muFastSequence", [ l2MuViewsMaker, robPrefetchAlg, muFastSequence ])
     return (l2muFastSequence, l2MuViewsMaker, sequenceOut)
@@ -116,10 +113,7 @@ def muFastCalibAlgSequence(ConfigFlags):
     l2MuViewsMaker.ViewNodeName = muFastSequence.name()
 
     from TrigGenericAlgs.TrigGenericAlgsConfig import ROBPrefetchingAlgCfg_Muon
-    robPrefetchAlg = RecoFragmentsPool.retrieve(ROBPrefetchingAlgCfg_Muon,
-                                                ConfigFlags,
-                                                nameSuffix=l2MuViewsMaker.name(),
-                                                inputMaker=l2MuViewsMaker)
+    robPrefetchAlg = algorithmCAToGlobalWrapper(ROBPrefetchingAlgCfg_Muon, ConfigFlags, nameSuffix=l2MuViewsMaker.name())[0]
 
     l2muFastSequence = seqAND("l2muFastCalibSequence", [ l2MuViewsMaker, robPrefetchAlg, muFastSequence ])
     return (l2muFastSequence, l2MuViewsMaker, sequenceOut)
@@ -281,10 +275,7 @@ def muCombAlgSequence(ConfigFlags):
     l2muCombViewsMaker.ViewNodeName = muCombIDSequence.name()
 
     from TrigGenericAlgs.TrigGenericAlgsConfig import ROBPrefetchingAlgCfg_Si
-    robPrefetchAlg = RecoFragmentsPool.retrieve(ROBPrefetchingAlgCfg_Si,
-                                                ConfigFlags,
-                                                nameSuffix=l2muCombViewsMaker.name(),
-                                                inputMaker=l2muCombViewsMaker)
+    robPrefetchAlg = algorithmCAToGlobalWrapper(ROBPrefetchingAlgCfg_Si, ConfigFlags, nameSuffix=l2muCombViewsMaker.name())[0]
 
     l2muCombSequence = seqAND("l2muCombSequence", [l2muCombViewsMaker, robPrefetchAlg, muCombIDSequence] )
 
@@ -346,10 +337,7 @@ def muCombLRTAlgSequence(ConfigFlags):
     l2muCombLRTViewsMaker.ViewNodeName = muCombLRTIDSequence.name()
 
     from TrigGenericAlgs.TrigGenericAlgsConfig import ROBPrefetchingAlgCfg_Si
-    robPrefetchAlg = RecoFragmentsPool.retrieve(ROBPrefetchingAlgCfg_Si,
-                                                ConfigFlags,
-                                                nameSuffix=l2muCombLRTViewsMaker.name(),
-                                                inputMaker=l2muCombLRTViewsMaker)
+    robPrefetchAlg = algorithmCAToGlobalWrapper(ROBPrefetchingAlgCfg_Si, ConfigFlags, nameSuffix=l2muCombLRTViewsMaker.name())[0]
 
     l2muCombLRTSequence = seqAND("l2muCombLRTSequence", [l2muCombLRTViewsMaker, robPrefetchAlg, muCombLRTIDSequence] )
 
@@ -464,10 +452,7 @@ def muEFSAAlgSequence(ConfigFlags):
     efsaViewsMaker.ViewNodeName = muefSASequence.name()
 
     from TrigGenericAlgs.TrigGenericAlgsConfig import ROBPrefetchingAlgCfg_Muon
-    robPrefetchAlg = RecoFragmentsPool.retrieve(ROBPrefetchingAlgCfg_Muon,
-                                                ConfigFlags,
-                                                nameSuffix=efsaViewsMaker.name(),
-                                                inputMaker=efsaViewsMaker)
+    robPrefetchAlg = algorithmCAToGlobalWrapper(ROBPrefetchingAlgCfg_Muon, ConfigFlags, nameSuffix=efsaViewsMaker.name())[0]
 
     muonEFSAonlySequence = seqAND( "muonEFSAonlySequence", [efsaViewsMaker, robPrefetchAlg, muefSASequence ] )
 
@@ -829,10 +814,7 @@ def efLateMuAlgSequence(ConfigFlags):
     eflateViewsMaker.ViewNodeName = lateMuRecoSequence.name()
 
     from TrigGenericAlgs.TrigGenericAlgsConfig import ROBPrefetchingAlgCfg_Muon
-    robPrefetchAlg = RecoFragmentsPool.retrieve(ROBPrefetchingAlgCfg_Muon,
-                                                ConfigFlags,
-                                                nameSuffix=eflateViewsMaker.name(),
-                                                inputMaker=eflateViewsMaker)
+    robPrefetchAlg = algorithmCAToGlobalWrapper(ROBPrefetchingAlgCfg_Muon, ConfigFlags, nameSuffix=eflateViewsMaker.name())[0]
 
     muonSequence = seqAND("lateMuonOutSequence", [eflateViewsMaker, robPrefetchAlg, lateMuRecoSequence])
 
@@ -896,10 +878,7 @@ def muEFIsoAlgSequence(ConfigFlags, doMSiso=False):
     efmuIsoViewsMaker.ViewNodeName = efmuisoRecoSequence.name()
 
     from TrigGenericAlgs.TrigGenericAlgsConfig import ROBPrefetchingAlgCfg_Si
-    robPrefetchAlg = RecoFragmentsPool.retrieve(ROBPrefetchingAlgCfg_Si,
-                                                ConfigFlags,
-                                                nameSuffix=efmuIsoViewsMaker.name(),
-                                                inputMaker=efmuIsoViewsMaker)
+    robPrefetchAlg = algorithmCAToGlobalWrapper(ROBPrefetchingAlgCfg_Si, ConfigFlags, nameSuffix=efmuIsoViewsMaker.name())[0]
 
     ### Define a Sequence to run for muIso ###
     efmuIsoSequence = seqAND("efmuIsoSequence"+name, [ efmuIsoViewsMaker, robPrefetchAlg, efmuisoRecoSequence ] )
