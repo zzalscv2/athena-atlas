@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
 */
 #include "MuonCalibDbOperations/CalibHeadOperations.h"
 
@@ -26,7 +26,7 @@ namespace MuonCalib {
     CalibHeadOperations::~CalibHeadOperations() {}
     CalibHeadOperations::CalibHeadOperations(CalibDbConnection& db_conn) : m_meta_connection(&db_conn) {}
 
-    int CalibHeadOperations::GetLatestHeadId() const {
+    int CalibHeadOperations::GetLatestHeadId() {
         try {
             m_meta_connection->OpenTransaction();
             coral::IQuery* query = m_meta_connection->GetQuery();
