@@ -31,7 +31,8 @@ Sim_tf.py \
     --firstEvent="40001" \
     --outputHITSFile="test.CA.HITS.pool.root" \
     --simulator="FullG4MT_QS" \
-    --postExec 'with open("ConfigSimCA.pkl", "wb") as f: cfg.store(f)'
+    --postExec 'with open("ConfigSimCA.pkl", "wb") as f: cfg.store(f)' \
+    --imf=False
 
 rc=$?
 mv log.EVNTtoHITS log.EVNTtoHITS.CA
@@ -58,7 +59,8 @@ then
         --firstEvent="40001" \
         --outputHITSFile="test.CA.HITS.pool.root" \
         --simulator="FullG4MT_QS" \
-        --athenaopts '"--config-only=ConfigSimCG.pkl"'
+        --athenaopts '"--config-only=ConfigSimCG.pkl"' \
+        --imf=False
 
     Sim_tf.py \
         --inputEVNTFile="/cvmfs/atlas-nightlies.cern.ch/repo/data/data-art/ISF_Validation/mc21_13p6TeV.950542.MGPy8EG_DYSpinHalfMonopoles_1gD_1500GeV_valid.merge.EVNT.e8467_e8455.29631249._000005.pool.root.1" \
@@ -76,7 +78,8 @@ then
         --jobNumber="41" \
         --firstEvent="40001" \
         --outputHITSFile="test.CG.HITS.pool.root" \
-        --simulator="FullG4MT_QS"
+        --simulator="FullG4MT_QS" \
+        --imf=False
 
     rc2=$?
     status=$rc2
