@@ -140,6 +140,7 @@ namespace Trig {
     void setRun2NavigationKeyPtr(SG::ReadHandleKey<xAOD::TrigNavigation>* k) { m_run2NavigationKeyPtr = k; }
     void setRun3NavigationKeyPtr(SG::ReadHandleKey<TrigCompositeUtils::DecisionContainer>* k) { m_run3NavigationKeyPtr = k; }
     const SG::ReadHandleKey<TrigCompositeUtils::DecisionContainer>& getRun3NavigationKey() const { return *m_run3NavigationKeyPtr; }
+    const SG::ReadHandleKey<TrigCompositeUtils::DecisionContainer>* getRun3NavigationKeyPtr() const { return m_run3NavigationKeyPtr; }
 
 #ifndef XAOD_ANALYSIS // Full Athena only
     void setOldDecisionKeyPtr(SG::ReadHandleKey<TrigDec::TrigDecision>* k) { m_oldDecisionKeyPtr = k; }
