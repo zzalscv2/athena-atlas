@@ -305,8 +305,11 @@ namespace xAOD {
     numberOfInnermostPixelLayerEndcapHits    = 77,  //!< these are the hits in the 0th pixel layer endcap rings [unit8_t].
     numberOfNextToInnermostPixelLayerEndcapHits = 78,  //!< these are the hits in the 0.5th and 1st pixel layer endcap rings [unit8_t].
 
+    // HGTD SummaryTypes
+    hasValidTime = 79,
+
     // -- numbers...
-    numberOfTrackSummaryTypes       = 79
+    numberOfTrackSummaryTypes       = 80
   };
 
   /// Enumerates the different types of information stored in Summary. 

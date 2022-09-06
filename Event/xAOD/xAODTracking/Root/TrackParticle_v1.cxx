@@ -142,6 +142,12 @@ namespace xAOD {
   AUXSTORE_PRIMITIVE_GETTER(TrackParticle_v1, float, theta)
   AUXSTORE_PRIMITIVE_GETTER(TrackParticle_v1, float, qOverP)
 
+  float TrackParticle_v1::time() const {
+    static const SG::AuxElement::Accessor< float > acc("time");
+    if( !acc.isAvailable( *this) ) throw std::runtime_error( "Unavailable TrackParticle time requested" );
+    return acc( *this );
+  }
+
   DefiningParameters_t TrackParticle_v1::definingParameters() const{
     DefiningParameters_t tmp;
     tmp << d0() , z0() , phi0() , theta() , qOverP();
@@ -171,6 +177,17 @@ namespace xAOD {
     acc5( *this ) = qOverP;
 
     return;
+  }
+
+  void TrackParticle_v1::setDefiningParameters(float d0, float z0, float phi0, float theta, float qOverP, float time) {
+    setDefiningParameters(d0, z0, phi0, theta, qOverP);
+    setTime(time);
+    return;
+  }
+
+  void TrackParticle_v1::setTime(float time) {
+    static const SG::AuxElement::Accessor< float > acc("time");
+    acc( *this ) = time;
   }
 
   static const SG::AuxElement::Accessor< std::vector< float > >
@@ -701,6 +718,21 @@ namespace xAOD {
     const xAOD::TrackParticle_v1::Accessor< float >* acc = trackSummaryAccessorV1<float>( information );
   // Set the value:
     ( *acc )( *this ) = value;
+  }
+
+  bool TrackParticle_v1::hasValidTime() const {
+    uint8_t valid = 0;
+    if (summaryValue(valid, xAOD::hasValidTime)) {
+      // succeeded in retrieving validity value
+      if (valid) {
+        return true;
+      } else {
+        return false;
+      }
+    } else {
+      // failed in retrieving validity value -> assume no valid time
+      return false;
+    }
   }
 
   const TrackParticle_v1::covMatrixIndexPairVec& TrackParticle_v1::covMatrixComprIndexPairs(){

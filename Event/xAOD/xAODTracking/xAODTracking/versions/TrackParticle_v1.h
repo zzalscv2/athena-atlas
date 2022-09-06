@@ -105,6 +105,8 @@ namespace xAOD {
         float theta() const;
         /// Returns the \f$q/p\f$  parameter
         float qOverP() const;
+        /// Returns the time.
+        float time() const;
         /// @brief Returns a SVector of the Perigee track parameters.
         /// i.e. a vector of
         ///  \f$\left(\begin{array}{c}d_0\\z_0\\\phi_0\\\theta\\q/p\end{array}\right)\f$
@@ -122,6 +124,8 @@ namespace xAOD {
         bool definingParametersCovMatrixOffDiagCompr() const ;
         /// Set the defining parameters.
         void setDefiningParameters(float d0, float z0, float phi0, float theta, float qOverP);
+        void setDefiningParameters(float d0, float z0, float phi0, float theta, float qOverP, float time);
+        void setTime(float time);
         /// Set the defining parameters covariance matrix.
         void setDefiningParametersCovMatrix(const ParametersCovMatrix_t& cov);
         /// Set the defining parameters covariance matrix using a length 15 vector.
@@ -313,6 +317,9 @@ namespace xAOD {
 		///  @copydoc TrackParticle_v1::setSummaryValue(uint8_t& value, const SummaryType &information)
         void setSummaryValue(float& value, const SummaryType &information);
       /// @}
+
+      /// Returns true if the time parameter is valid based on the hasValidTime SummaryType
+      bool hasValidTime() const;
 
       /// @name Links
       /// @{
