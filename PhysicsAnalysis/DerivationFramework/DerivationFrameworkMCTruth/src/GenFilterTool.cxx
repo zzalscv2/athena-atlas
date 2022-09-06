@@ -53,7 +53,7 @@ namespace DerivationFramework {
 
   bool GenFilterTool::isPrompt( const xAOD::TruthParticle* tp ) const
   {
-    ParticleOrigin orig = getPartOrigin(tp);
+    ParticleOrigin orig = m_classif->particleTruthClassifier( tp ).second;
     ATH_MSG_VERBOSE("Particle has origin " << orig);
 
     switch(orig) {
@@ -82,16 +82,6 @@ namespace DerivationFramework {
     return true;
   }
 
-  MCTruthPartClassifier::ParticleOrigin GenFilterTool::getPartOrigin( const xAOD::TruthParticle* tp ) const
-  {
-    if(m_originMap.find(tp)==m_originMap.end()) {
-      std::pair<ParticleType, ParticleOrigin> classification = m_classif->particleTruthClassifier( tp );
-      m_originMap[tp] = classification.second;
-    }
-    return m_originMap[tp];
-  }
-
-
   StatusCode GenFilterTool::addBranches() const{
     ATH_MSG_VERBOSE("GenFilterTool::addBranches()");
 
@@ -106,8 +96,6 @@ namespace DerivationFramework {
       ATH_MSG_ERROR("WARNING could not retrieve TruthParticleContainer " <<m_mcName);
       return StatusCode::FAILURE;
     }
-
-    m_originMap.clear();
 
     float genFiltHT(0.), genFiltMET(0.), genFiltPTZ(0.), genFiltFatJ(0.);
     ATH_CHECK( getGenFiltVars(truthPC, genFiltHT, genFiltMET, genFiltPTZ, genFiltFatJ) );

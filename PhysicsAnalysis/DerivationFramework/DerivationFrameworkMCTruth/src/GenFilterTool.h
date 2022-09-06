@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2020 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
 */
 
 /*
@@ -37,14 +37,12 @@ namespace DerivationFramework {
   public:
     GenFilterTool(const std::string& t, const std::string& n, const IInterface* p);
     ~GenFilterTool();
-    virtual StatusCode addBranches() const;
+    virtual StatusCode addBranches() const override;
 
+  private:
     StatusCode getGenFiltVars(const xAOD::TruthParticleContainer* tpc, float& genFiltHT, float& genFiltMET, float& genFiltPTZ, float& genFiltFatJ) const;
 
     bool isPrompt( const xAOD::TruthParticle* tp ) const;
-    MCTruthPartClassifier::ParticleOrigin getPartOrigin(const xAOD::TruthParticle* tp) const;
-
-  private:
 
     std::string m_eventInfoName;
     std::string m_mcName;
@@ -56,7 +54,6 @@ namespace DerivationFramework {
     float m_MaxLepEta; //!< Max eta for the truth leptons
     int m_SimBarcodeOffset; //!< G4 particle barcode offset value (Particles having a barcode greater than this value are defined to be G4 particles)
 
-    mutable std::map<const xAOD::TruthParticle*,MCTruthPartClassifier::ParticleOrigin> m_originMap;
     ToolHandle<IMCTruthClassifier> m_classif;
   }; /// class
 

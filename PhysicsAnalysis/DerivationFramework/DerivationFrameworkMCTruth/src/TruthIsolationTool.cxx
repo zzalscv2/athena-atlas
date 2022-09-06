@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
 */
 
 /////////////////////////////////////////////////////////////////
@@ -19,9 +19,7 @@
 DerivationFramework::TruthIsolationTool::TruthIsolationTool(const std::string& t,
         const std::string& n,
         const IInterface* p ) :
-  AthAlgTool(t,n,p),
-  m_coneSizesSort(nullptr),
-  m_coneSizes2(nullptr)
+  AthAlgTool(t,n,p)
 {
     declareInterface<DerivationFramework::IAugmentationTool>(this);
     declareProperty ("isoParticlesKey",
@@ -44,25 +42,19 @@ DerivationFramework::TruthIsolationTool::TruthIsolationTool(const std::string& t
             "Include non-interacting particles in the isolation definition");
     declareProperty ("VariableR", m_variableR  = false,
             "Use radius that shrinks with pT in isolation");
-    m_coneSizes2 = new std::vector<float>();
-    m_coneSizesSort = new std::vector<float>();
 }
 
 // Destructor
 DerivationFramework::TruthIsolationTool::~TruthIsolationTool() {
-  delete m_coneSizes2;
-  delete m_coneSizesSort;
 }
 
-// Athena initialize and finalize
+// Athena initialize
 StatusCode DerivationFramework::TruthIsolationTool::initialize()
 {
-    return StatusCode::SUCCESS;
-}
+    //sort (descsending) the cone sizes vector to optimize calculation
+    m_coneSizesSort = m_coneSizes;
+    std::sort(m_coneSizesSort.begin(), m_coneSizesSort.end(), [](float a, float b){return a>b;});
 
-StatusCode DerivationFramework::TruthIsolationTool::finalize()
-{
-    ATH_MSG_VERBOSE("finalize() TruthIsolationTool");
     return StatusCode::SUCCESS;
 }
 
@@ -81,13 +73,9 @@ StatusCode DerivationFramework::TruthIsolationTool::addBranches() const
         return StatusCode::FAILURE;
     }
 
-    //sort (descsending) the cone sizes vector to optimize calculation
-    m_coneSizesSort->assign(m_coneSizes.begin(), m_coneSizes.end());
-    std::sort(m_coneSizesSort->begin(), m_coneSizesSort->end(), [](float a, float b){return a>b;});
-
     //define the output variables
     std::vector<SG::AuxElement::Decorator< float > > decorators_iso;
-    for ( auto csize_itr : *m_coneSizesSort ) {
+    for ( auto csize_itr : m_coneSizesSort ) {
       std::ostringstream sizess;
       if (m_variableR) sizess << "var";
       sizess << m_isoVarNamePrefix << (int)((csize_itr)*100.);
@@ -108,18 +96,12 @@ StatusCode DerivationFramework::TruthIsolationTool::addBranches() const
     //make a list of all candidate particles that could fall inside the cone of the particle of interest from listOfParticlesForIso
     decayHelper.constructListOfFinalParticles(importedAllTruthParticles, candidateParticlesList, emptyList, true, m_chargedOnly);
 
-    //create the cached conesize^2 vector
-    m_coneSizes2->clear();
-    for ( auto csize_itr : *m_coneSizesSort ) {
-      m_coneSizes2->push_back(csize_itr * csize_itr);
-    }
-
     // Standard particle loop over final state particles of interest
     for (const auto& part : listOfParticlesForIso) {
-      std::vector<float> isolationsCalcs(m_coneSizes2->size(), 0.0);
+      std::vector<float> isolationsCalcs(m_coneSizesSort.size(), 0.0);
       calcIsos(part, candidateParticlesList, isolationsCalcs);
 
-      for ( unsigned int icone = 0; icone < m_coneSizesSort->size(); ++icone ) {
+      for ( unsigned int icone = 0; icone < m_coneSizesSort.size(); ++icone ) {
         decorators_iso.at(icone)(*part) = isolationsCalcs.at(icone);
       }
     }
@@ -148,9 +130,10 @@ void DerivationFramework::TruthIsolationTool::calcIsos(const xAOD::TruthParticle
       }
       if (cand_part->barcode() != particle->barcode()) {
         //iteration over sorted cone sizes
-        for ( unsigned int icone = 0; icone < m_coneSizes2->size(); ++icone ) {
-          float dr2 = calculateDeltaR2(cand_part, part_eta, part_phi);
-          if (dr2 < m_coneSizes2->at(icone) &&
+        for ( unsigned int icone = 0; icone < m_coneSizesSort.size(); ++icone ) {
+          const float dr2 = calculateDeltaR2(cand_part, part_eta, part_phi);
+          const float coneSize = m_coneSizesSort.at(icone);
+          if (dr2 < coneSize*coneSize &&
               (!m_variableR || dr2*particle->pt()*particle->pt() < 100000000.)) {
             //sum the transverse momenta
             isoCalcs.at(icone) = isoCalcs.at(icone) + cand_part->pt();
