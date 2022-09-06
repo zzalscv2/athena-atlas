@@ -1,9 +1,12 @@
 /*
-  Copyright (C) 2002-2017 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
 */
 
 // this
 #include "MdtCalibIOSvc/CalibrationFileIOTool.h"
+
+// Framework
+#include "CxxUtils/checker_macros.h"
 
 // MdtCalibUtils
 #include "MdtCalibUtils/RtDataFromFile.h"
@@ -88,12 +91,14 @@ namespace MuonCalib {
         return StatusCode::SUCCESS;
     }
 
-    StatusCode CalibrationFileIOTool::LoadT0(std::map<NtupleStationId, MdtStationT0Container *> &t0s, int /*iov_id*/) {
+    StatusCode CalibrationFileIOTool::LoadT0 (std::map<NtupleStationId, MdtStationT0Container *> &t0s, int /*iov_id*/) {
         ATH_MSG_INFO("Reading calibration from '" << (m_calib_dir + "/t0s") << "'");
         t0s.clear();
         DIR *directory(opendir((m_calib_dir + "/t0s").c_str()));
         if (directory == nullptr) return StatusCode::SUCCESS;
-        struct dirent *dent;
+        // According to `man readdir` this is thread-safe in "modern glibc" if
+        // used on different directory streams, which would be the case here:
+        struct dirent *dent ATLAS_THREAD_SAFE;
         // loop on all files in directory
         while ((dent = readdir(directory)) != nullptr) {
             std::string nm(dent->d_name);
@@ -124,7 +129,9 @@ namespace MuonCalib {
         res.clear();
         DIR *directory(opendir((m_calib_dir + "/rts").c_str()));
         if (directory == nullptr) return StatusCode::SUCCESS;
-        struct dirent *dent;
+        // According to `man readdir` this is thread-safe in "modern glibc" if
+        // used on different directory streams, which would be the case here:
+        struct dirent *dent ATLAS_THREAD_SAFE;
         // loop on all files in directory
         while ((dent = readdir(directory)) != nullptr) {
             std::string nm(dent->d_name);
