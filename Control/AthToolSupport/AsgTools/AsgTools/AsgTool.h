@@ -1,9 +1,12 @@
 /*
-  Copyright (C) 2002-2019 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef ASGTOOLS_ASGTOOL_H
 #define ASGTOOLS_ASGTOOL_H
+
+// Athena include(s).
+#include "CxxUtils/sgkey_t.h"
 
 // Local include(s):
 #include "AsgTools/IAsgTool.h"
@@ -20,6 +23,8 @@
 #   include "AthenaBaseComps/AthAlgTool.h"
 #endif // XAOD_STANDALONE
 
+// System include(s).
+#include <string>
 
 namespace asg {
 
@@ -37,8 +42,6 @@ namespace asg {
    ///
    /// @author David Adams <dladams@bnl.gov>
    ///
-   /// $Revision: 790657 $
-   /// $Date: 2016-12-20 21:54:06 +0100 (Tue, 20 Dec 2016) $
    ///
    class AsgTool : public virtual IAsgTool,
                    public AsgToolBase {
@@ -81,6 +84,44 @@ namespace asg {
 
        /// A deprecated function for getting the message level's name
       const std::string& msg_level_name() const __attribute__ ((deprecated));
+
+      /// Get the name of an object that is / should be in the event store
+      ///
+      /// This is a bit of a special one. @c StoreGateSvc and @c xAOD::TEvent
+      /// both provide ways for getting the @c std::string name for an object
+      /// that is in the store, based on a bare pointer. But they provide
+      /// different interfaces for doing so.
+      ///
+      /// In order to allow tools to efficiently perform this operation, they
+      /// can use this helper function.
+      ///
+      /// @see asg::AsgTool::getKey
+      ///
+      /// @param ptr The bare pointer to the object that the event store should
+      ///            know about
+      /// @return The string name of the object in the store. If not found, an
+      ///         empty string.
+      ///
+      const std::string& getName( const void* ptr ) const;
+
+      /// Get the (hashed) key of an object that is in the event store
+      ///
+      /// This is a bit of a special one. @c StoreGateSvc and @c xAOD::TEvent
+      /// both provide ways for getting the @c SG::sgkey_t key for an object
+      /// that is in the store, based on a bare pointer. But they provide
+      /// different interfaces for doing so.
+      ///
+      /// In order to allow tools to efficiently perform this operation, they
+      /// can use this helper function.
+      ///
+      /// @see asg::AsgTool::getName
+      ///
+      /// @param ptr The bare pointer to the object that the event store should
+      ///            know about
+      /// @return The hashed key of the object in the store. If not found, an
+      ///         invalid (zero) key.
+      ///
+      SG::sgkey_t getKey( const void* ptr ) const;
 
       /// @}
 

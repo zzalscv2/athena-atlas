@@ -1,7 +1,7 @@
 ///////////////////////// -*- C++ -*- /////////////////////////////
 
 /*
-  Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
 */
 
 // METMaker.cxx
@@ -275,6 +275,24 @@ namespace met {
     std::vector<float>& uniqueWeights = dec_constitObjWeights(*met);
     uniqueLinks.reserve(collection->size());
     uniqueWeights.reserve(collection->size());
+
+    // Get the hashed key of this collection, if we can. Though his only works
+    // if
+    //   1. the container is an owning container, and not just a view;
+    //   2. the container is in the event store already.
+    // Since we will be creating ElementLink-s to these objects later on in the
+    // code, and it should work in AnalysisBase, only the first one of these
+    // is checked. Since the code can not work otherwise.
+    SG::sgkey_t collectionSgKey = 0;
+    if(collection->ownPolicy() == SG::OWN_ELEMENTS) {
+      collectionSgKey = getKey(collection);
+      if(collectionSgKey == 0) {
+        ATH_MSG_ERROR("Could not find the collection with pointer: "
+                      << collection);
+        return StatusCode::FAILURE;
+      }
+    }
+
     if(!collection->empty()) {
       bool originalInputs = !acc_originalObject.isAvailable(*collection->front());
       bool isShallowCopy = dynamic_cast<const xAOD::ShallowAuxContainer*>(collection->front()->container()->getConstStore());
@@ -347,8 +365,16 @@ namespace met {
           }
         }
         if(selected) {
-          uniqueLinks.emplace_back( iplink_t(*static_cast<const IParticleContainer*>(obj->container()),obj->index()) );
-          uniqueWeights.emplace_back( 1. );
+          iplink_t objLink;
+          if(collectionSgKey == 0) {
+            const xAOD::IParticleContainer* ipc =
+              static_cast<const xAOD::IParticleContainer*>(obj->container());
+            objLink = iplink_t(*ipc, obj->index());
+          } else {
+            objLink = iplink_t(collectionSgKey, obj->index());
+          }
+          uniqueLinks.push_back( objLink );
+          uniqueWeights.push_back( 1. );
         }
       }
     }
@@ -575,6 +601,21 @@ namespace met {
     std::vector<iplink_t> softJetLinks;
     std::vector<float> softJetWeights;
     bool originalInputs = jets->empty() ? false : !acc_originalObject.isAvailable(*jets->front());
+
+    // Get the hashed key of this jet, if we can. Though his only works if
+    //   1. the container is an owning container, and not just a view;
+    //   2. the container is in the event store already.
+    // Since we will be creating ElementLink-s to these jets later on in the
+    // code, and it should work in AnalysisBase, only the first one of these
+    // is checked. Since the code can not work otherwise.
+    SG::sgkey_t jetsSgKey = 0;
+    if(jets->ownPolicy() == SG::OWN_ELEMENTS) {
+      jetsSgKey = getKey(jets);
+      if(jetsSgKey == 0) {
+        ATH_MSG_ERROR("Could not find the jets with pointer: " << jets);
+        return StatusCode::FAILURE;
+      }
+    }
 
     for(const auto *const jet : *jets) {
       const MissingETAssociation* assoc = nullptr;
@@ -870,17 +911,27 @@ namespace met {
             }
           }  // hard jet selection
 
+          // Create the appropriate ElementLink for this jet just the once.
+          iplink_t jetLink;
+          if(jetsSgKey == 0) {
+            const xAOD::IParticleContainer* ipc =
+              static_cast<const xAOD::IParticleContainer*>(jet->container());
+            jetLink = iplink_t(*ipc, jet->index());
+          } else {
+            jetLink = iplink_t(jetsSgKey, jet->index());
+          }
+
           if(hardJet){
             ATH_MSG_VERBOSE("Jet added at full scale");
-            uniqueLinks.emplace_back( iplink_t(*static_cast<const IParticleContainer*>(jet->container()),jet->index()) );
-            uniqueWeights.emplace_back( uniquefrac );
+            uniqueLinks.push_back( jetLink );
+            uniqueWeights.push_back( uniquefrac );
           } else {
             if(metSoftClus && !JVT_reject) {
               // add fractional contribution
               ATH_MSG_VERBOSE("Jet added at const scale");
               if (fabs(jet->eta())<2.5 || !(coreSoftClus->source()&MissingETBase::Source::Central)) {
-                softJetLinks.emplace_back( iplink_t(*static_cast<const xAOD::JetContainer*>(jet->container()),jet->index()) );
-                softJetWeights.emplace_back( uniquefrac );
+                softJetLinks.push_back( jetLink );
+                softJetWeights.push_back( uniquefrac );
                 metSoftClus->add(opx,opy,opt);
               }
 
@@ -922,8 +973,8 @@ namespace met {
               metSoftTrk->add(opx,opy,opt);
               // Don't need to add if already done for softclus.
               if(!metSoftClus) {
-                softJetLinks.emplace_back( iplink_t(*static_cast<const xAOD::JetContainer*>(jet->container()),jet->index()) );
-                softJetWeights.emplace_back( uniquefrac );
+                softJetLinks.push_back( jetLink );
+                softJetWeights.push_back( uniquefrac );
               }
 
               // Fill a vector with the soft constituents, if one was provided.

@@ -1,13 +1,13 @@
-# Copyright (C) 2002-2020 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
 
 # Declare the package name:
 atlas_subdir( AsgTools )
 
 # Dependencies are taken based on what environment we are in:
 if( XAOD_STANDALONE )
-   set( libs AsgMessagingLib xAODRootAccessInterfaces xAODRootAccess )
+   set( libs xAODRootAccessInterfaces xAODRootAccess )
 else()
-   set( libs AsgMessagingLib AthenaBaseComps AthenaKernel GaudiKernel )
+   set( libs AthenaBaseComps AthenaKernel GaudiKernel )
 endif()
 
 # Decide which sources to use:
@@ -16,19 +16,17 @@ if( XAOD_STANDALONE )
 else()
    set( sources Root/AsgTool.cxx Root/AsgMetadataTool.cxx
       Root/MessageCheckAsgTools.cxx Root/ToolStore.cxx Root/AnaToolHandle.cxx
-      Root/AsgComponentConfig.cxx Root/AsgToolConfig.cxx src/*.cxx )
+      Root/AsgComponentConfig.cxx Root/AsgToolConfig.cxx Root/AsgToolMacros.cxx
+      src/*.cxx )
 endif()
 
 # Component(s) in the package:
 atlas_add_library( AsgTools
    AsgTools/*.h AsgTools/*.icc ${sources}
    PUBLIC_HEADERS AsgTools
-   PRIVATE_INCLUDE_DIRS
-   LINK_LIBRARIES ${libs}
-   PRIVATE_LINK_LIBRARIES )
+   LINK_LIBRARIES AsgMessagingLib CxxUtils ${libs} )
 
 # Select which xml files to use for dictionary generation
-
 atlas_add_dictionary( AsgToolsDict
    AsgTools/AsgToolsDict.h AsgTools/selection.xml
    LINK_LIBRARIES AsgTools )
@@ -45,11 +43,13 @@ if( APPLE AND TARGET AsgTools )
    target_compile_options( AsgTools PUBLIC -Wno-tautological-undefined-compare )
 endif()
 
-# Test(s) in the package:
-
+# Utilities.
 atlas_add_executable (asg_tools_test_init util/asg_tools_test_init.cxx
                       LINK_LIBRARIES AsgTools )
 
-# This ought to work, but I can't figure it out.
-#atlas_add_test (asg_tools_test_init_test COMMAND asg_tools_test_init asg::AsgTool)
-#atlas_add_test (asg_tools_test_init_test SCRIPT asg_tools_test_init asg::AsgTool)
+# Test(s) in the package:
+if( XAOD_STANDALONE )
+   atlas_add_test( BaseToolInit
+      SCRIPT $<TARGET_FILE:asg_tools_test_init> "asg::AsgTool"
+      POST_EXEC_SCRIPT nopost.sh )
+endif()
