@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2020 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
 */
 /**
  * @file CaloLumiConditions/CaloBCIDLumi_test.cxx
@@ -9,6 +9,7 @@
  */
 
 #undef NDEBUG
+#include "AthenaKernel/getMessageSvc.h"
 #include "CaloLumiConditions/CaloBCIDLumi.h"
 #include "CaloLumiConditions/CaloBCIDCoeffs.h"
 #include "LArElecCalib/ILArOFC.h"
@@ -417,6 +418,7 @@ void test1 (const size_t nofc, const LArOnlineID& online_id)
 int main()
 {
   std::cout << "CaloLumiConditions/CaloBCIDLumi_test\n";
+  Athena::getMessageSvcQuiet = true;
   LArOnlineIDTest larhelpers;
   test1 (5, larhelpers.onlineID());
   test1 (4, larhelpers.onlineID());
