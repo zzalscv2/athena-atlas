@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2020 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
 */
 
 /*
@@ -49,7 +49,6 @@ class HiggsTruthCategoryTool
    StatusCode finalize () override;
    HTXS::HiggsClassification* getHiggsTruthCategoryObject(const HepMC::GenEvent& HepMCEvent, const HTXS::HiggsProdMode prodMode) const override;
  private:
-   mutable std::atomic<bool> m_isInitialized;
    bool m_outHistos;
 };
 
