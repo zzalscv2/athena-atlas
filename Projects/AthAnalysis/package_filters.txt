@@ -136,7 +136,7 @@
 #+ Trigger/TriggerSimulation/TrigBtagEmulationTool
 #+ Reconstruction/RecoTools/IsolationTool
 + Reconstruction/RecoTools/RecoToolInterfaces
-
++ MuonSpectrometer/MuonValidation/MuonTesterTree
 ### Here follows the Athena-specific parts of the analysis release
 
 # Core Athena (would like to reduce) :
