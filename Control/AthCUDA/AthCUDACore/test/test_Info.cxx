@@ -1,5 +1,5 @@
 //
-// Copyright (C) 2002-2020 CERN for the benefit of the ATLAS collaboration
+// Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
 //
 
 // Local include(s).
@@ -12,7 +12,7 @@
 int main() {
 
    // Access the singleton object.
-   AthCUDA::Info& info = AthCUDA::Info::instance();
+   const AthCUDA::Info& info = AthCUDA::Info::instance();
 
    // Make sure that we can check whether a GPU is available.
    const std::size_t nDevices = static_cast< std::size_t >( info.nDevices() );
