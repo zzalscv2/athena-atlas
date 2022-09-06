@@ -7,9 +7,9 @@
 #ifndef ISOLATIONSELECTION_ISOLATIONCONDITIONHIST_H
 #define ISOLATIONSELECTION_ISOLATIONCONDITIONHIST_H
 
+#include <map>
 #include <memory>
 #include <vector>
-#include <map>
 
 #include "IsolationSelection/IsolationCondition.h"
 
@@ -20,29 +20,22 @@ class TH3F;
 class Interp3D;
 
 namespace CP {
-    class IsolationConditionHist: public IsolationCondition {
-        public:
-            IsolationConditionHist(std::string name, xAOD::Iso::IsolationType isoType, const std::string& isolationFunction, const std::shared_ptr<TH3F> efficiencyHisto3D);
-            virtual ~IsolationConditionHist() {
-            }
+    class IsolationConditionHist : public IsolationCondition {
+    public:
+        IsolationConditionHist(std::string name, xAOD::Iso::IsolationType isoType, const std::string& isolationFunction,
+                               std::unique_ptr<TH3F> efficiencyHisto3D);
+        virtual ~IsolationConditionHist() = default;
 
-            IsolationConditionHist(const IsolationConditionHist& rhs) = delete;
-            IsolationConditionHist& operator=(const IsolationConditionHist& rhs) = delete;
-         
-            virtual bool accept(const xAOD::IParticle& x, std::map<xAOD::Iso::IsolationType, float>* cutValues = 0) override;
-            virtual bool accept(const strObj& x, std::map<xAOD::Iso::IsolationType, float>* cutValues = 0) override;
-            void getCutValue(const float pt, const float eta);
+        bool accept(const xAOD::IParticle& x) const override;
+        bool accept(const strObj& x) const override;
+        void setInterp(std::shared_ptr<Interp3D> interp) { m_interp = interp; }
 
-            void setInterp(Interp3D* interp) {
-                m_interp = interp;
-            }
-
-
-        private:
-            std::shared_ptr<TH3F> m_efficiencyHisto3D;
-            std::shared_ptr<TF1> m_isolationFunction;
-            bool m_ptGeV;
-            Interp3D* m_interp;
+    private:
+        float getCutValue(const float pt, const float eta) const;
+        std::shared_ptr<TH3F> m_efficiencyHisto3D{nullptr};
+        std::unique_ptr<TF1> m_isolationFunction{nullptr};
+        bool m_ptGeV{false};
+        std::shared_ptr<Interp3D> m_interp;
     };
-}
+}  // namespace CP
 #endif

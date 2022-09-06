@@ -1,25 +1,31 @@
 /*
- Copyright (C) 2002-2017 CERN for the benefit of the ATLAS collaboration
+ Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
  */
 
 #include "IsolationSelection/Interp3D.h"
 
-#include <iostream>
-
 #include <TH3F.h>
 
-double Interp3D::Interpol3d(double x, double y, double z, std::shared_ptr<TH3F> h) {
+#include <iostream>
 
+double Interp3D::Interpol3d(double x, double y, double z, std::shared_ptr<TH3F> h) const {
     int nx = h->GetNbinsX(), ny = h->GetNbinsY(), nz = h->GetNbinsZ();
     int ibx = h->GetXaxis()->FindBin(x), iby = h->GetYaxis()->FindBin(y), ibz = h->GetZaxis()->FindBin(z);
-    int ibx2, iby2, ibz2;
-    double z000, z010, z110, z100, z001, z011, z111, z101, xc, yc, zc, xc2, yc2, zc2, u, t, v, r;
-    if (ibx > nx) ibx = nx;
-    else if (ibx == 0) ibx = 1;
-    if (iby > ny) iby = ny;
-    else if (iby == 0) iby = 1;
-    if (ibz > nz) ibz = nz;
-    else if (ibz == 0) ibz = 1;
+    int ibx2{0}, iby2{0}, ibz2{0};
+    double z000{0.}, z010{0.}, z110{0.}, z100{0.}, z001{0.}, z011{0.}, z111{0.}, z101{0.}, xc{0.}, yc{0.}, zc{0.}, xc2{0.}, yc2{0.},
+        zc2{0.}, u{0.}, t{0.}, v{0.}, r{0.};
+    if (ibx > nx)
+        ibx = nx;
+    else if (ibx == 0)
+        ibx = 1;
+    if (iby > ny)
+        iby = ny;
+    else if (iby == 0)
+        iby = 1;
+    if (ibz > nz)
+        ibz = nz;
+    else if (ibz == 0)
+        ibz = 1;
     xc = h->GetXaxis()->GetBinCenter(ibx);
     yc = h->GetYaxis()->GetBinCenter(iby);
     zc = h->GetZaxis()->GetBinCenter(ibz);
@@ -29,16 +35,19 @@ double Interp3D::Interpol3d(double x, double y, double z, std::shared_ptr<TH3F> 
     // Test no interp for egamma object in the vicinity of the crack
     bool doX = true;
     bool doY = true;
-    if (m_NoInterp.find(h->GetName()) != m_NoInterp.end()) {
-        for (auto rangeX : m_NoInterp[h->GetName()].xRange) {
+    auto itr = m_NoInterp.find(h->GetName());
+    if (itr != m_NoInterp.end()) {
+        for (auto rangeX : itr->second.xRange) {
             if (x > rangeX.first && x < rangeX.second) doX = false;
         }
-        double ay = fabs(y);
-        for (auto rangeY : m_NoInterp[h->GetName()].yRange) {
+        double ay = std::abs(y);
+        for (auto rangeY : itr->second.yRange) {
             if (ay > rangeY.first && ay < rangeY.second) doY = false;
         }
     }
-    if (m_debug) std::cout << "Isolation type = " << h->GetName() << " pT = " << x << " pT interp ? " << doX << " eta = " << y << " eta interp ? " << doY << " No interp cut = " << z111 << std::endl;
+    if (m_debug)
+        std::cout << "Isolation type = " << h->GetName() << " pT = " << x << " pT interp ? " << doX << " eta = " << y << " eta interp ? "
+                  << doY << " No interp cut = " << z111 << std::endl;
 
     if (!doX && !doY) return z111;
 
@@ -66,7 +75,8 @@ double Interp3D::Interpol3d(double x, double y, double z, std::shared_ptr<TH3F> 
 
                 //
                 if (m_debug) {
-                    std::cout << "Normal situation " << x << " " << ibx << " " << ibx2 << " " << y << " " << iby << " " << iby2 << " " << z << " " << ibz << " " << ibz2 << std::endl;
+                    std::cout << "Normal situation " << x << " " << ibx << " " << ibx2 << " " << y << " " << iby << " " << iby2 << " " << z
+                              << " " << ibz << " " << ibz2 << std::endl;
                     std::cout << "Bin centers " << xc << " " << xc2 << " " << yc << " " << yc2 << " " << zc << " " << zc2 << std::endl;
                 }
                 //
@@ -85,11 +95,14 @@ double Interp3D::Interpol3d(double x, double y, double z, std::shared_ptr<TH3F> 
                 if (!doY) u = 1;
 
                 if (m_debug) {
-                    std::cout << "Cuts " << z000 << " " << z100 << " " << z010 << " " << z110 << " " << z001 << " " << z101 << " " << z011 << " " << z111 << std::endl;
+                    std::cout << "Cuts " << z000 << " " << z100 << " " << z010 << " " << z110 << " " << z001 << " " << z101 << " " << z011
+                              << " " << z111 << std::endl;
                     std::cout << "interp coeff " << t << " " << u << " " << v << std::endl;
                 }
 
-                r = z111 * t * u * v + z001 * (1. - t) * (1. - u) * v + z011 * (1. - t) * u * v + z101 * t * (1. - u) * v + z110 * t * u * (1. - v) + z000 * (1. - t) * (1. - u) * (1. - v) + z010 * (1. - t) * u * (1. - v) + z100 * t * (1. - u) * (1. - v);
+                r = z111 * t * u * v + z001 * (1. - t) * (1. - u) * v + z011 * (1. - t) * u * v + z101 * t * (1. - u) * v +
+                    z110 * t * u * (1. - v) + z000 * (1. - t) * (1. - u) * (1. - v) + z010 * (1. - t) * u * (1. - v) +
+                    z100 * t * (1. - u) * (1. - v);
             } else {
                 z011 = h->GetBinContent(ibx2, iby, ibz);
                 z001 = h->GetBinContent(ibx2, iby2, ibz);
@@ -107,13 +120,6 @@ double Interp3D::Interpol3d(double x, double y, double z, std::shared_ptr<TH3F> 
                 ibz2 = ibz - 1;
             }
 
-            /*
-             std::cout << "No y interpolation situation "
-             << x << " " << ibx << " " << ibx2 << " "
-             << y << " " << iby << " " << iby2 << " "
-             << z << " " << ibz << " " << ibz2 << std::endl;
-             */
-
             z110 = h->GetBinContent(ibx, iby, ibz2);
             z010 = h->GetBinContent(ibx2, iby, ibz2);
             z011 = h->GetBinContent(ibx2, iby, ibz);
@@ -123,8 +129,6 @@ double Interp3D::Interpol3d(double x, double y, double z, std::shared_ptr<TH3F> 
             if (!doX) t = 1;
             v = (z - zc2) / (zc - zc2);
             r = z111 * t * v + z011 * (1. - t) * v + z110 * t * (1. - v) + z010 * (1. - t) * (1. - v);
-
-            //std::cout << "interpolate for " << t << " " << v << " between " << z110 << " " << z010 << " " << z011 << " " << z111 << std::endl;
 
         } else {
             z011 = h->GetBinContent(ibx2, iby, ibz);

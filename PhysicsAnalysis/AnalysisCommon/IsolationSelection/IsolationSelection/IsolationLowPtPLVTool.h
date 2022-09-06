@@ -1,40 +1,38 @@
 /*
- Copyright (C) 2002-2019 CERN for the benefit of the ATLAS collaboration
+ Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
  */
 
 #ifndef IsolationSelection_IsolationLowPtPLVTool_H
 #define IsolationSelection_IsolationLowPtPLVTool_H
 
-#include <IsolationSelection/IIsolationLowPtPLVTool.h>
-#include <IsolationSelection/Defs.h>
-
 #include <AsgTools/AsgTool.h>
+#include <AsgTools/PropertyWrapper.h>
+#include <IsolationSelection/Defs.h>
+#include <IsolationSelection/IIsolationLowPtPLVTool.h>
 
 // TMVA
 #include "TMVA/Reader.h"
 
-#include <memory>
-
 namespace CP {
-    class IsolationLowPtPLVTool: public asg::AsgTool, public virtual IIsolationLowPtPLVTool {
+    class IsolationLowPtPLVTool : public asg::AsgTool, public virtual IIsolationLowPtPLVTool {
+    public:
+        IsolationLowPtPLVTool(const std::string& name);
+        ASG_TOOL_CLASS(IsolationLowPtPLVTool, IIsolationLowPtPLVTool)
+        virtual StatusCode initialize() override;
+        virtual StatusCode augmentPLV(const xAOD::IParticle& particle) override;
 
-        public:
-            IsolationLowPtPLVTool(const std::string& name);
-	    ASG_TOOL_CLASS(IsolationLowPtPLVTool, IIsolationLowPtPLVTool)
-            virtual StatusCode initialize() override;
-	    virtual StatusCode augmentPLV( const xAOD::IParticle& particle ) override;
-	    
-        private:
-	    std::string m_muonCalibFile = "";
-	    std::string m_elecCalibFile = "";
-	    std::string m_muonMethodName = "";
-	    std::string m_elecMethodName = "";
-	    std::unique_ptr<TMVA::Reader> m_TMVAReader_Muon;
-	    std::unique_ptr<TMVA::Reader> m_TMVAReader_Elec;
-	    static const int N_VARIABLES = 6;
-	    float m_varTMVA_Muon[ N_VARIABLES ];
-	    float m_varTMVA_Elec[ N_VARIABLES ];
+    private:
+        Gaudi::Property<std::string> m_muonCalibFile{
+            this, "MuonCalibFile", "IsolationCorrections/v5/TMVAClassification_BDT_Muon_LowPtPromptLeptonTagger_20191107.weights.xml",
+            "XML file holding the TMVA configuration for muons"};
+        Gaudi::Property<std::string> m_elecCalibFile{
+            this, "ElecCalibFile", "IsolationCorrections/v5/TMVAClassification_BDT_Electron_LowPtPromptLeptonTagger_20191107.weights.xml",
+            "XML file holding the TMVA configuration for electrons"};
+        Gaudi::Property<std::string> m_muonMethodName{this, "MuonMethodName", "LowPtPLT_Muon", "Method name for electron LowPtPLV"};
+        Gaudi::Property<std::string> m_elecMethodName{this, "ElecMethodName", "LowPtPLT_Elec", "Method name for muon LowPtPLV"};
+        std::unique_ptr<TMVA::Reader> m_TMVAReader_Muon{nullptr};
+        std::unique_ptr<TMVA::Reader> m_TMVAReader_Elec{nullptr};
     };
 
-}
+}  // namespace CP
 #endif

@@ -1,37 +1,27 @@
-// Dear emacs, this is -*- c++ -*-
-
 /*
- Copyright (C) 2002-2017 CERN for the benefit of the ATLAS collaboration
+ Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
  */
 
 #ifndef ISOLATIONSELECTION_ISOLATIONCONDITIONCOMBINED_H
 #define ISOLATIONSELECTION_ISOLATIONCONDITIONCOMBINED_H
 
-#include <memory>
+#include <TF1.h>
+
 #include "IsolationSelection/IsolationCondition.h"
 
-// Forward Declaration(s)
-class TF1;
-class TF2;
-class TH3F;
-
 namespace CP {
-    class IsolationConditionCombined: public IsolationCondition {
-        public:
-            IsolationConditionCombined(std::string name, std::vector<xAOD::Iso::IsolationType> isoType, const TF2& isoFunction, const std::string& cutFunction);
-            virtual ~IsolationConditionCombined() {
-            }
+    class IsolationConditionCombined : public IsolationCondition {
+    public:
+        IsolationConditionCombined(const std::string& name, const std::vector<xAOD::Iso::IsolationType>& isoType,
+                                   std::unique_ptr<TF1> isoFunction, const std::string& cutFunction);
+        virtual ~IsolationConditionCombined() = default;
 
-            IsolationConditionCombined(const IsolationConditionCombined& rhs) = delete;
-            IsolationConditionCombined& operator=(const IsolationConditionCombined& rhs) = delete;
-           
-            bool accept(const xAOD::IParticle& x, std::map<xAOD::Iso::IsolationType, float>* cutValues = 0);
-            bool accept(const strObj& x, std::map<xAOD::Iso::IsolationType, float>* cutValues = 0);
-            void getCutValue(const float pt);
+        bool accept(const xAOD::IParticle& x) const override;
+        bool accept(const strObj& x) const override;
 
-        private:
-            std::shared_ptr<TF1> m_cutFunction;
-            std::shared_ptr<TF1> m_isoFunction;
+    private:
+        std::unique_ptr<TF1> m_cutFunction;
+        std::unique_ptr<TF1> m_isoFunction;
     };
-}
+}  // namespace CP
 #endif
