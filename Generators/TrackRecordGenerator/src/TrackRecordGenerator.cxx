@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2017 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
 */
 
 // -------------------------------------------------------------
@@ -54,8 +54,7 @@ StatusCode TrackRecordGenerator::callGenerator() {
   m_polarization.clear();
   m_pdgCode.clear();
 
-  //const DataHandle <TimedTrackRecordCollection> coll;
-  const DataHandle <TrackRecordCollection> coll;
+  const TrackRecordCollection* coll;
   CHECK( evtStore()->retrieve(coll,m_recordName) );
 
   ATH_MSG_INFO("retrieved "<<coll->size()<<" TTR hits; will smear position by "<< (m_smearTR>0?m_smearTR:0.) <<" mm and momentum by "<< (m_smearTRp>0?m_smearTRp:0.) <<" radians");
