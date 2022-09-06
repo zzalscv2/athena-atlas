@@ -117,10 +117,16 @@ def TileCellMonitoringConfig(flags, **kwargs):
                                     subDirectory = True, run = run, triggers = l1Triggers, separator = '_')
 
 
-    # 7) Configure histograms with everagy energy maps per partition
+    # 7) Configure histograms with average energy maps per partition
     addTileModuleChannelMapsArray(helper, tileCellMonAlg, name = 'TileCellDetailOccMap', type='TProfile2D',
                                   value = 'energy', title = 'Occupancy Map [MeV]', path = 'Tile/Cell',
                                   subDirectory = True, run = run, triggers = l1Triggers, separator = '_')
+
+
+    # 7.2) Configure histograms with average energy maps per partition and gain
+    addTileModuleChannelMapsArray(helper, tileCellMonAlg, name = 'TileCellDetailOccMapGain', type='TProfile2D',
+                                  value = 'energy', title = 'Occupancy Map [MeV]', path = 'Tile/Cell',
+                                  subDirectory = True, run = run, triggers = l1Triggers, perGain = True, separator = '_')
 
 
     # 8) Configure histograms with occupancy maps over threshold per partition

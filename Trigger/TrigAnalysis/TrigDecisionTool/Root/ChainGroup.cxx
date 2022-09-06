@@ -198,14 +198,14 @@ bool Trig::ChainGroup::isPassed(unsigned int condition) const
     RESULT = RESULT || L1Result(item->name(),condition);
   }
 
-  if (condition == TrigDefs::Express_passed) {
-    ATH_MSG_ERROR("Calling isPassed with TrigDefs::Express_passed is currently not supported");
+  if (condition & TrigDefs::Express_passed) {
+    ATH_MSG_ERROR("Incorrect use of Express_passed bit. Please use isPassedBits() and test for TrigDefs::Express_passed in the returned bit-map.");
   }
 
   return RESULT;
 }
 
-unsigned int Trig::ChainGroup::HLTBits(const std::string& chain, const std::string& level) const {
+unsigned int Trig::ChainGroup::HLTBits(const std::string& chain, const std::string& level, const TrigCompositeUtils::DecisionIDContainer& passExpress) const {
   unsigned int chainRESULT = 0;
   if (chain.empty()) return chainRESULT;
   const HLT::Chain* fchain = cgm_assert().chain(chain);
@@ -220,6 +220,10 @@ unsigned int Trig::ChainGroup::HLTBits(const std::string& chain, const std::stri
     if (fchain->isPassedThrough()) chainRESULT = chainRESULT | TrigDefs::EF_passThrough;
     if (fchain->isPrescaled())     chainRESULT = chainRESULT | TrigDefs::EF_prescaled;
     if (fchain->isResurrected())   chainRESULT = chainRESULT | TrigDefs::EF_resurrected;
+
+    if (passExpress.count( HLT::Identifier(chain).numeric() ) == 1) {
+      chainRESULT = chainRESULT | TrigDefs::Express_passed; 
+    }
   }
   return chainRESULT;
 }
@@ -245,13 +249,26 @@ unsigned int Trig::ChainGroup::isPassedBits() const
 {
   unsigned int RESULT = 0;
 
+  // This is for the express decision (R3 only), we read this directly from the navigation (not from bits)
+  const SG::ReadHandleKey<TrigCompositeUtils::DecisionContainer>* navRHK = cgm().getRun3NavigationKeyPtr();
+  TrigCompositeUtils::DecisionIDContainer passExpress;
+  if (navRHK && !navRHK->empty()) {
+    SG::ReadHandle<TrigCompositeUtils::DecisionContainer> navRH(*navRHK); // No good way to pass in the context here?
+    if (navRH.isValid()) {
+      const TrigCompositeUtils::Decision* expressTerminusNode = TrigCompositeUtils::getExpressTerminusNode(*navRH);
+      if (expressTerminusNode) {
+        TrigCompositeUtils::decisionIDs(expressTerminusNode, passExpress);
+      }
+    }
+  }
+
   for ( const TrigConf::HLTChain* ch : m_confChains ) {
 
-    RESULT = RESULT | HLTBits(ch->chain_name(),ch->level());
+    RESULT = RESULT | HLTBits(ch->chain_name(), ch->level(), passExpress);
 
     if (ch->level()=="EF") {
       const std::string& nexttwo = getLowerName(ch->chain_name());
-      RESULT = RESULT | HLTBits(nexttwo,"L2");
+      RESULT = RESULT | HLTBits(nexttwo,"L2", passExpress);
       RESULT = RESULT | L1Bits(getLowerName(nexttwo));
       
     } else if (ch->level()=="L2") {
