@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2019 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
 */
 
 /**
@@ -9,7 +9,6 @@
  * finds the appropriate CORAL object in storegate and stores 
  * them in a POOL collection. 
  *
- * $Id: DummyLumirangeTool.cxx,v 1.2 2009-05-01 13:41:51 cranshaw Exp $
  *
  */
 
@@ -61,7 +60,7 @@ DummyLumirangeTool::DummyLumirangeTool(const std::string& name,
 
 // initialize data writer
 StatusCode 
-DummyLumirangeTool::initialize() 
+DummyLumirangeTool::initialize ATLAS_NOT_THREAD_SAFE ()
 {
    ATH_MSG_DEBUG("In initialize ");
 
