@@ -1,11 +1,12 @@
 /*
-  Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
 */
 #ifndef HLTSEEDING_TAUROISUNPACKINGTOOL_H
 #define HLTSEEDING_TAUROISUNPACKINGTOOL_H
 
 #include "RoIsUnpackingToolBase.h"
 #include "TrigT1Interfaces/RecEmTauRoI.h"
+#include "TrigT1Interfaces/CPRoIDecoder.h"
 
 class TAURoIsUnpackingTool : public RoIsUnpackingToolBase { 
 public: 
@@ -30,6 +31,8 @@ private:
 
   Gaudi::Property<float> m_roIWidthPhi {
     this, "RoIWidthPhi", M_PI/8., "Size of RoI in phi"};
+
+  LVL1::CPRoIDecoder m_cpDecoder;
 }; 
 
 #endif //> !HLTSEEDING_TAUROISUNPACKINGTOOL_H

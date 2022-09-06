@@ -98,7 +98,8 @@ class TrigEgammaPrecisionPhotonCaloIsoHypoToolConfig:
 
     if self.isoInfo() not in self.__caloIsolationCut.keys():
         self.__log.error('Isolation cut %s not defined!', self.isoInfo())
-    self.__log.debug('Configuring Isolation cut %s with value %d',self.isoInfo(),self.__caloIsolationCut[self.isoInfo()])
+    self.__log.debug('Configuring Isolation cut %s with values %s for [topoetcone20/et, topoetcone30/et, topoetcone40/et]',self.isoInfo(),str(self.__caloIsolationCut[self.isoInfo()]))
+    self.__log.debug('                       and offset values %s for [topoetcone20/et, topoetcone30/et, topoetcone40/et]',self.isoInfo(),str(self.__caloIsolationOffset[self.isoInfo()]))
     self.isoCut()
 
 

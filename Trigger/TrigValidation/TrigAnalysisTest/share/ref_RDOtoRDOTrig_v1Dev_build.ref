@@ -8330,7 +8330,7 @@ HLT_g25_tight_icalotight_L1EM20VH:
     1: 9
     2: 9
     3: 4
-    4: 5
+    4: 4
 HLT_g25_tight_icalotight_L1EM22VHI:
   eventCount: 4
   stepCounts:
@@ -8344,7 +8344,7 @@ HLT_g25_tight_icalotight_L1EM22VHI:
     1: 7
     2: 7
     3: 4
-    4: 5
+    4: 4
 HLT_g25_tight_icalotight_xe40_cell_xe40_tcpufit_xe40_pfopufit_18dphiAB_18dphiAC_80mTAC_L1EM22VHI:
   eventCount: 1
   stepCounts:
@@ -8360,7 +8360,7 @@ HLT_g25_tight_icalotight_xe40_cell_xe40_tcpufit_xe40_pfopufit_18dphiAB_18dphiAC_
     1: 7
     2: 7
     3: 4
-    4: 5
+    4: 4
     5: 7
     6: 1
 HLT_g25_tight_icalotight_xe40_cell_xe40_tcpufit_xe40_pfopufit_80mTAC_L1EM22VHI:
@@ -8378,7 +8378,7 @@ HLT_g25_tight_icalotight_xe40_cell_xe40_tcpufit_xe40_pfopufit_80mTAC_L1EM22VHI:
     1: 7
     2: 7
     3: 4
-    4: 5
+    4: 4
     5: 7
     6: 1
 HLT_g25_tight_icalotight_xe40_cell_xe40_tcpufit_xe40_pfopufit_80mTAC_L1eEM26M:
@@ -8396,7 +8396,7 @@ HLT_g25_tight_icalotight_xe40_cell_xe40_tcpufit_xe40_pfopufit_80mTAC_L1eEM26M:
     1: 8
     2: 7
     3: 4
-    4: 5
+    4: 4
     5: 7
     6: 1
 HLT_g25_tight_icalotight_xe40_cell_xe50_tcpufit_18dphiAB_18dphiAC_80mTAC_L1EM22VHI:
@@ -8413,7 +8413,7 @@ HLT_g25_tight_icalotight_xe40_cell_xe50_tcpufit_18dphiAB_18dphiAC_80mTAC_L1EM22V
     1: 7
     2: 7
     3: 4
-    4: 5
+    4: 4
     5: 3
 HLT_g25_tight_icalotight_xe40_cell_xe50_tcpufit_18dphiAB_18dphiAC_L1EM22VHI:
   eventCount: 1
@@ -8429,7 +8429,7 @@ HLT_g25_tight_icalotight_xe40_cell_xe50_tcpufit_18dphiAB_18dphiAC_L1EM22VHI:
     1: 7
     2: 7
     3: 4
-    4: 5
+    4: 4
     5: 3
 HLT_g25_tight_icalotight_xe40_cell_xe50_tcpufit_18dphiAB_L1EM22VHI:
   eventCount: 1
@@ -8445,7 +8445,7 @@ HLT_g25_tight_icalotight_xe40_cell_xe50_tcpufit_18dphiAB_L1EM22VHI:
     1: 7
     2: 7
     3: 4
-    4: 5
+    4: 4
     5: 3
 HLT_g25_tight_icalotight_xe40_cell_xe50_tcpufit_18dphiAC_L1EM22VHI:
   eventCount: 1
@@ -8461,7 +8461,7 @@ HLT_g25_tight_icalotight_xe40_cell_xe50_tcpufit_18dphiAC_L1EM22VHI:
     1: 7
     2: 7
     3: 4
-    4: 5
+    4: 4
     5: 3
 HLT_g25_tight_icalotight_xe40_cell_xe50_tcpufit_80mTAC_L1EM22VHI:
   eventCount: 1
@@ -8477,7 +8477,7 @@ HLT_g25_tight_icalotight_xe40_cell_xe50_tcpufit_80mTAC_L1EM22VHI:
     1: 7
     2: 7
     3: 4
-    4: 5
+    4: 4
     5: 3
 HLT_g25_tight_icalotight_xe40_cell_xe50_tcpufit_80mTAC_L1eEM26M:
   eventCount: 1
@@ -8493,7 +8493,7 @@ HLT_g25_tight_icalotight_xe40_cell_xe50_tcpufit_80mTAC_L1eEM26M:
     1: 8
     2: 7
     3: 4
-    4: 5
+    4: 4
     5: 3
 HLT_g25_tight_icalotight_xe40_cell_xe50_tcpufit_L1EM22VHI:
   eventCount: 1
@@ -8509,7 +8509,7 @@ HLT_g25_tight_icalotight_xe40_cell_xe50_tcpufit_L1EM22VHI:
     1: 7
     2: 7
     3: 4
-    4: 5
+    4: 4
     5: 3
 HLT_g25_tight_icalotight_xe40_cell_xe50_tcpufit_L1eEM26M:
   eventCount: 1
@@ -8525,7 +8525,7 @@ HLT_g25_tight_icalotight_xe40_cell_xe50_tcpufit_L1eEM26M:
     1: 8
     2: 7
     3: 4
-    4: 5
+    4: 4
     5: 3
 HLT_g25_tight_icalotight_xe40_cell_xe50_tcpufit_xe70_nn_80mTAD_L1EM22VHI:
   eventCount: 0
@@ -8541,7 +8541,7 @@ HLT_g25_tight_icalotight_xe40_cell_xe50_tcpufit_xe70_nn_80mTAD_L1EM22VHI:
     1: 7
     2: 7
     3: 4
-    4: 5
+    4: 4
     5: 7
 HLT_g25_tight_j35_0eta290_020jvt_bdl1d77_3j35a_j0_DJMASS700j35_pf_ftf_L1EM22VHI:
   eventCount: 1
@@ -9279,7 +9279,7 @@ HLT_g35_tight_icalotight_mu15noL1_mu2noL1_L1EM24VHI:
     1: 7
     2: 6
     3: 3
-    4: 4
+    4: 3
 HLT_g35_tight_icalotight_mu18noL1_L1EM24VHI:
   eventCount: 0
   stepCounts:
@@ -9293,7 +9293,7 @@ HLT_g35_tight_icalotight_mu18noL1_L1EM24VHI:
     1: 7
     2: 6
     3: 3
-    4: 4
+    4: 3
 HLT_g35_tight_j35_0eta290_020jvt_bdl1d77_3j35a_j0_DJMASS700j35_pf_ftf_presela20b85XX3a20_L1EM22VHI:
   eventCount: 0
   stepCounts:

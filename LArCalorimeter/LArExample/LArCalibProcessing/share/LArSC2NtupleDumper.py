@@ -37,6 +37,7 @@ if __name__=='__main__':
   parser.add_argument('-k','--addCalib', dest='calib', default=False, help='Add calib. info to output ntuple', type=bool)
   parser.add_argument('-t','--addGeom', dest='geom', default=False, help='Add real geom info to output ntuple', type=bool)
   parser.add_argument('-u','--addBC', dest='bc', default=False, help='Add Bad. chan info to output ntuple', type=bool)
+  parser.add_argument('-w','--addROD', dest='rod', default=False, help='Add ROD energies sum to output ntuple', type=bool)
 
   args = parser.parse_args()
   if help in args and args.help is not None and args.help:
@@ -49,6 +50,9 @@ if __name__=='__main__':
 
   #Import the flag-container that is the arguemnt to the configuration methods
   from AthenaConfiguration.AllConfigFlags import ConfigFlags
+  #add SC dumping specific flags
+  from LArCafJobs.LArSCDumperFlags import addSCDumpFlags
+  addSCDumpFlags(ConfigFlags)
 
   # now set flags according parsed options
   if len(args.infile) > 0:
@@ -75,6 +79,8 @@ if __name__=='__main__':
   if args.lheader:
      CKeys += ["SC_LATOME_HEADER"]
 
+  if args.rod:
+     ConfigFlags.LArSCDump.doRawChan=True  
 
   # now construct the job
   ConfigFlags.Input.ProjectName="data22_calib"
