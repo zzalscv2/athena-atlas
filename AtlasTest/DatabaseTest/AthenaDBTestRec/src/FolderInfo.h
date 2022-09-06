@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2017 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef ATHENADBTESTREC_FOLDERINFO_H
@@ -11,9 +11,10 @@
 #include "DBConnection.h"
 #include "CoolKernel/IFolder.h"
 #include "CoolKernel/RecordSpecification.h"
+#include "CxxUtils/checker_macros.h"
 #include "PersistentDataModel/Placement.h"
 
-class FolderInfo {
+class ATLAS_NOT_THREAD_SAFE FolderInfo {
  public:
   enum PayloadTime {
 		    PTimeUndefined=0,
@@ -44,7 +45,7 @@ class FolderInfo {
 
   // accessor functions
   const std::string name() const;
-  DBConnection* dbConnection() const;
+  DBConnection* dbConnection();
   int ndbconn() const;
   int nchan() const;
   PayloadTime ptime() const;
@@ -52,10 +53,9 @@ class FolderInfo {
   int size() const;
   int period() const;
   const std::string tag() const;
-  Placement* poolplace() const;
+  const Placement* poolplace() const;
 
-  // const set function (on mutable datamember)
-  void setpoolplace(Placement* const poolplace) const;
+  void setpoolplace(Placement* const poolplace);
   
   void printSpec(const cool::IRecordSpecification& catrspec) const;
 
@@ -73,12 +73,12 @@ class FolderInfo {
   std::string m_tag;
   bool m_paytable;
 
-  mutable Placement* m_poolplace;
+  Placement* m_poolplace;
 
 };
 
 inline const std::string FolderInfo::name() const {return m_name;}
-inline DBConnection* FolderInfo::dbConnection() const {return m_dbconn;}
+inline DBConnection* FolderInfo::dbConnection() {return m_dbconn;}
 inline int FolderInfo::ndbconn() const { return m_ndbconn; }
 
 inline int FolderInfo::nchan() const {return m_nchan;}
@@ -88,8 +88,8 @@ inline int FolderInfo::size() const {return m_size;}
 inline int FolderInfo::period() const {return m_period;}
 inline const std::string FolderInfo::tag() const {return m_tag;}
 
-inline Placement* FolderInfo::poolplace() const {return m_poolplace;}
-inline void FolderInfo::setpoolplace(Placement* const poolplace) const {
+inline const Placement* FolderInfo::poolplace() const {return m_poolplace;}
+inline void FolderInfo::setpoolplace(Placement* const poolplace) {
   m_poolplace=poolplace; }
 
 // helper functions
