@@ -5,6 +5,7 @@ import os
 import re
 from fnmatch import fnmatchcase
 from AthenaCommon.Logging import logging
+from AthenaConfiguration.AthConfigFlags import isGaudiEnv
 from ROOT import gSystem
 
 msg = logging.getLogger('MetaReader')
@@ -151,20 +152,21 @@ def read_metadata(filenames, file_type = None, mode = 'lite', promote = None, me
 
                 # set the filters for name
                 if mode == 'lite':
-                    meta_filter = {
-                        '/TagInfo': 'IOVMetaDataContainer_p1',
-                        'IOVMetaDataContainer_p1__TagInfo': 'IOVMetaDataContainer_p1',
-                        '*': 'EventStreamInfo_p*'
-                    }
+                    if isGaudiEnv():
+                        meta_filter = {
+                            '/TagInfo': 'IOVMetaDataContainer_p1',
+                            'IOVMetaDataContainer_p1__TagInfo': 'IOVMetaDataContainer_p1',
+                            '*': 'EventStreamInfo_p*'
+                        }
+                    else:
+                        meta_filter = {
+                            'FileMetaData': '*',
+                            'FileMetaDataAux.': 'xAOD::FileMetaDataAuxInfo_v1',
+                        }
 
                 # set the filters for name
                 if mode == 'peeker':
                     meta_filter = {
-                        '/TagInfo': 'IOVMetaDataContainer_p1',
-                        'IOVMetaDataContainer_p1__TagInfo': 'IOVMetaDataContainer_p1',
-                        '/Simulation/Parameters': 'IOVMetaDataContainer_p1',
-                        '/Digitization/Parameters': 'IOVMetaDataContainer_p1',
-                        '/EXT/DCS/MAGNETS/SENSORDATA': 'IOVMetaDataContainer_p1',
                         'TriggerMenu': 'DataVector<xAOD::TriggerMenu_v1>', # R2 trigger metadata format AOD (deprecated)
                         'TriggerMenuAux.': 'xAOD::TriggerMenuAuxContainer_v1',
                         'DataVector<xAOD::TriggerMenu_v1>_TriggerMenu': 'DataVector<xAOD::TriggerMenu_v1>', # R2 trigger metadata format ESD (deprecated)
@@ -190,15 +192,28 @@ def read_metadata(filenames, file_type = None, mode = 'lite', promote = None, me
                         'DataVector<xAOD::TriggerMenuJson_v1>_TriggerMenuJson_L1': 'DataVector<xAOD::TriggerMenuJson_v1>', # R3 trigger metadata format ESD
                         'xAOD::TriggerMenuJsonAuxContainer_v1_TriggerMenuJson_L1Aux.': 'xAOD::TriggerMenuJsonAuxContainer_v1',
                         'DataVector<xAOD::TriggerMenuJson_v1>_TriggerMenuJson_L1PS': 'DataVector<xAOD::TriggerMenuJson_v1>', # R3 trigger metadata format ESD
-                        'xAOD::TriggerMenuJsonAuxContainer_v1_TriggerMenuJson_L1PSAux.': 'xAOD::TriggerMenuJsonAuxContainer_v1',
-                        '*': 'EventStreamInfo_p*'
+                        'xAOD::TriggerMenuJsonAuxContainer_v1_TriggerMenuJson_L1PSAux.': 'xAOD::TriggerMenuJsonAuxContainer_v1'
                     }
+
+                    if isGaudiEnv():
+                        meta_filter.update({
+                            '/TagInfo': 'IOVMetaDataContainer_p1',
+                            'IOVMetaDataContainer_p1__TagInfo': 'IOVMetaDataContainer_p1',
+                            '/Simulation/Parameters': 'IOVMetaDataContainer_p1',
+                            '/Digitization/Parameters': 'IOVMetaDataContainer_p1',
+                            '/EXT/DCS/MAGNETS/SENSORDATA': 'IOVMetaDataContainer_p1',
+                            '*': 'EventStreamInfo_p*'
+                        })
 
                 if mode == 'full' and meta_key_filter:
                     meta_filter = {f: '*' for f in meta_key_filter}
                 # store all persistent classes for metadata container existing in a POOL/ROOT file.
                 persistent_instances = {}
                 dynamic_fmd_items = {}
+
+                # Protect non-Gaudi environments from meta-data classes it doesn't know about
+                if not isGaudiEnv():
+                    metadata_tree.SetBranchStatus("*", False)
 
                 for i in range(0, nr_of_branches):
                     branch = metadata_branches.At(i)
@@ -229,6 +244,9 @@ def read_metadata(filenames, file_type = None, mode = 'lite', promote = None, me
 
                         if not keep:
                             continue
+
+                    if not isGaudiEnv():
+                        branch.SetStatus(True)
 
                     # assign the corresponding persistent class based of the name of the metadata container
                     if regexEventStreamInfo.match(class_name):
@@ -364,6 +382,10 @@ def read_metadata(filenames, file_type = None, mode = 'lite', promote = None, me
 
             if promote:
                 meta_dict = promote_keys(meta_dict)
+
+            # If AnalysisBase the itemList must be grabbed another way
+            if not isGaudiEnv():
+                meta_dict[filename]['itemList'] = _extract_itemlist_from_collectiontree(current_file)
 
         # ----- retrieves metadata from bytestream (BS) files (RAW, DRAW) ------------------------------------------#
         elif current_file_type == 'BS':
@@ -831,6 +853,10 @@ def _extract_fields_triggermenujson(interface, aux):
 
     return result
 
+def _extract_itemlist_from_collectiontree(current_file):
+    tcoll = current_file.Get('CollectionTree')
+    return [ (b.GetClassName(), b.GetName()) for b in tcoll.GetListOfBranches() ]
+
 def _convert_event_type_user_type(value):
     if 'user_type' in value:
         items = value['user_type'].split('#')[3:]
@@ -975,6 +1001,45 @@ def promote_keys(meta_dict):
                 
                 if 'processingTags' in md[key]:
                     md['processingTags'] = md[key]['processingTags']
+
+                meta_dict[filename].pop(key)
+                break
+
+            if not isGaudiEnv() and key in md['metadata_items'] and 'FileMetaData' in key:
+                md.update(md[key])
+
+                if 'beamType' in md[key]:
+                    md['beam_type'] = md[key]['beamType']
+
+                if 'runNumbers' in md[key]:
+                    md['mc_event_number'] = md[key]['runNumbers'][0]
+
+                if 'mcProcID' in md[key]:
+                    md['mc_channel_number'] = int(md[key]['mcProcID'])
+
+                if 'lumiBlocks' in md[key]:
+                    md['lumiBlockNumbers'] = md[key]['lumiBlocks']
+                
+                if 'amiTag' in md[key]:
+                    md['processingTags'] = md[key]['amiTag']
+
+                if 'beamEnergy' in md[key]:
+                    md['beam_energy'] = md[key]['beamEnergy']
+
+                if 'geometryVersion' in md[key]:
+                    md['GeoAtlas'] = md[key]['geometryVersion']
+
+                # EventType checks
+                md['eventTypes'] = []
+                if 'simFlavour' in md[key] and ('FullG4' in md[key]['simFlavour'] or 'ATLFAST' in md[key]['simFlavour']):
+                    md['eventTypes'].append('IS_SIMULATION')
+                else:
+                    md['eventTypes'].append('IS_DATA')
+
+                if 'GeoAtlas' in md and 'ATLAS' in md['GeoAtlas']:
+                  md['eventTypes'].append('IS_ATLAS')
+                else:
+                  md['eventTypes'].append('IS_TESTBEAM')
 
                 meta_dict[filename].pop(key)
                 break
