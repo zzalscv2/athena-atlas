@@ -41,8 +41,8 @@ class ActsGeantFollowerHelper : public extends<AthAlgTool, IActsGeantFollowerHel
     virtual ~ActsGeantFollowerHelper ();
 
     // Athena hooks
-    virtual StatusCode initialize();
-    virtual StatusCode finalize  ();
+    virtual StatusCode initialize() override;
+    virtual StatusCode finalize  () override;
 
     // Follower interface
     // a) begin event - initialize follower process
