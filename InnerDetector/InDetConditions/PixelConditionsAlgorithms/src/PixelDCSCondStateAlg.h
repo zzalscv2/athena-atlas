@@ -41,6 +41,8 @@ class PixelDCSCondStateAlg : public AthReentrantAlgorithm {
     SG::WriteCondHandleKey<PixelDCSStateData> m_writeKeyState
     {this, "WriteKeyState", "PixelDCSStateCondData",  "Key of output DCS state data"};
 
+    std::unordered_map<std::string, PixelDCSStateData::DCSModuleState> m_stateMap;
+
 };
 
 #endif

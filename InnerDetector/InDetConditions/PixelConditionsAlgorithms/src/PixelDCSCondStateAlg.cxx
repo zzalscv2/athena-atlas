@@ -6,6 +6,7 @@
 #include "Identifier/IdentifierHash.h"
 #include "GaudiKernel/EventIDRange.h"
 #include <memory>
+#include <unordered_map>
 
 PixelDCSCondStateAlg::PixelDCSCondStateAlg(const std::string& name, ISvcLocator* pSvcLocator):
   ::AthReentrantAlgorithm(name, pSvcLocator)
@@ -18,6 +19,15 @@ StatusCode PixelDCSCondStateAlg::initialize() {
   ATH_CHECK(detStore()->retrieve(m_pixelID,"PixelID"));
   ATH_CHECK(m_readKeyState.initialize(SG::AllowEmpty));
   ATH_CHECK(m_writeKeyState.initialize());
+
+  m_stateMap.insert(std::make_pair(std::string("READY"),      PixelDCSStateData::DCSModuleState::READY));
+  m_stateMap.insert(std::make_pair(std::string("ON"),         PixelDCSStateData::DCSModuleState::ON));
+  m_stateMap.insert(std::make_pair(std::string("UNKNOWN"),    PixelDCSStateData::DCSModuleState::UNKNOWN));
+  m_stateMap.insert(std::make_pair(std::string("TRANSITION"), PixelDCSStateData::DCSModuleState::TRANSITION));
+  m_stateMap.insert(std::make_pair(std::string("UNDEFINED"),  PixelDCSStateData::DCSModuleState::UNDEFINED));
+  m_stateMap.insert(std::make_pair(std::string("DISABLED"),   PixelDCSStateData::DCSModuleState::DISABLED));
+  m_stateMap.insert(std::make_pair(std::string("LOCKED_OUT"), PixelDCSStateData::DCSModuleState::LOCKED_OUT));
+  m_stateMap.insert(std::make_pair(std::string("OFF"),        PixelDCSStateData::DCSModuleState::OFF));
 
   return StatusCode::SUCCESS;
 }
@@ -61,12 +71,15 @@ StatusCode PixelDCSCondStateAlg::execute(const EventContext& ctx) const {
       const CondAttrListCollection::AttributeList &payload = attrListState->second;
       if (payload.exists(paramState.c_str()) and not payload[paramState.c_str()].isNull()) {
         std::string val = payload[paramState.c_str()].data<std::string>();
-        if      (val=="READY")      { writeCdoState->setModuleStatus(channelNumber,PixelDCSStateData::DCSModuleState::READY); }
-        else if (val=="ON")         { writeCdoState->setModuleStatus(channelNumber,PixelDCSStateData::DCSModuleState::ON); }
-        else if (val=="UNKNOWN")    { writeCdoState->setModuleStatus(channelNumber,PixelDCSStateData::DCSModuleState::UNKNOWN); }
-        else if (val=="TRANSITION") { writeCdoState->setModuleStatus(channelNumber,PixelDCSStateData::DCSModuleState::TRANSITION); }
-        else if (val=="UNDEFINED")  { writeCdoState->setModuleStatus(channelNumber,PixelDCSStateData::DCSModuleState::UNDEFINED); }
-      } 
+         std::unordered_map<std::string,PixelDCSStateData::DCSModuleState>::const_iterator iter = m_stateMap.find(val);
+         if (iter == m_stateMap.end()) {
+            ATH_MSG_WARNING( "DCS state " << val  << " is not handled  (channel=" << channelNumber << ") settting to NOSTATE");
+            writeCdoState->setModuleStatus(channelNumber,PixelDCSStateData::DCSModuleState::NOSTATE);
+         }
+         else {
+            writeCdoState->setModuleStatus(channelNumber,iter->second);
+         }
+      }
       else {
         ATH_MSG_WARNING(paramState << " does not exist for ChanNum " << channelNumber);
         writeCdoState->setModuleStatus(channelNumber,PixelDCSStateData::DCSModuleState::NOSTATE);
