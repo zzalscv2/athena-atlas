@@ -154,10 +154,12 @@ Trk::DetachedTrackingVolume::clone(const std::string& name,
   return newStat;
 }
 
-void Trk::DetachedTrackingVolume::compactify ATLAS_NOT_THREAD_SAFE(
-    size_t& cSurfaces, size_t& tSurfaces){
+void
+Trk::DetachedTrackingVolume::compactify(size_t& cSurfaces, size_t& tSurfaces)
+{
   // deal with the Tracking Volume representation
-  if (m_trkVolume) m_trkVolume->compactify(cSurfaces, tSurfaces);
+  if (m_trkVolume)
+    m_trkVolume->compactify(cSurfaces, tSurfaces);
 
   // deal with the layer representation
   if (layerRepresentation()) {

@@ -292,7 +292,7 @@ InDet::TRT_LayerBuilderCond::cylindricalLayers(const EventContext& ctx,
               double layerPhiMax         = -10;
 
               // per phi sector we make a 2D binnin in phi-z
-              std::vector< std::pair<Trk::BinnedArray<const Trk::Surface>*, Amg::Vector3D >  > layerSectorArrays;
+              std::vector< std::pair<Trk::BinnedArray<Trk::Surface>*, Amg::Vector3D >  > layerSectorArrays;
               Amg::Vector3D layerSectorPosition(0.,0.,0.);
 
               // the sector approaching surfaces
@@ -365,9 +365,22 @@ InDet::TRT_LayerBuilderCond::cylindricalLayers(const EventContext& ctx,
                        Amg::Vector3D strawOrderPos(currentStraw->center());
                        /*
                         * The above line was using the nodel (not delete option for the old shared object
-                        * now that SharedObject is a shared_ptr typeded do the same with empty deleter
+                        * now that SharedObject is a shared_ptr typedef do the same with empty deleter
                         */
-                       Trk::SharedObject<const Trk::Surface> sharedSurface(currentStraw, Trk::do_not_delete<const Trk::Surface>);
+                       // Something like
+                       // Trk::SharedObject<Trk::Surface>  =
+                       // std::make_shared<Trk::Surface>(.....)) could be fine
+                       //
+                       // As things are now
+                       // 1) Notice that basically we couple the DetElement owned
+                       // surface to the Tracking Geometry passing a no-op deleter
+                       // (no delete happens) to the shared_ptr(SharedObject is
+                       // typedef of shared_ptr)
+                       // 2) The const_cast here make the
+                       // code non MT safe. For now we handle this by being careful
+                       // on lifetimes and non-re-entrant TG construction.
+                       Trk::SharedObject<Trk::Surface> sharedSurface(const_cast<Trk::Surface*>(currentStraw), 
+                                                                     Trk::do_not_delete<Trk::Surface>);
                        strawsPerPhiSecLayer.emplace_back(sharedSurface, strawOrderPos);
                        // and record
                        ++sectorStraws;
@@ -390,7 +403,7 @@ InDet::TRT_LayerBuilderCond::cylindricalLayers(const EventContext& ctx,
                  Trk::BinUtility* layerStrawPhiZUtility     = new Trk::BinUtility(sectorStraws/2,phiMin,phiMax,Trk::open, Trk::binPhi);
                                  (*layerStrawPhiZUtility)  += Trk::BinUtility(2,-layerZmax, layerZmax, Trk::open, Trk::binZ);
                  // create the 2D BinnedArray
-                 Trk::BinnedArray2D<const Trk::Surface>* layerStrawPhiSector = new Trk::BinnedArray2D<const Trk::Surface>(strawsPerPhiSecLayer,layerStrawPhiZUtility);
+                 Trk::BinnedArray2D<Trk::Surface>* layerStrawPhiSector = new Trk::BinnedArray2D<Trk::Surface>(strawsPerPhiSecLayer,layerStrawPhiZUtility);
                  ATH_MSG_VERBOSE("---> Sector " << phisec << " - BinnedArray for straws prepared for " << strawsPerPhiSecLayer.size() << " straws.");
                  // fill the array
                  layerSectorArrays.emplace_back(layerStrawPhiSector, layerSectorPosition);
@@ -425,7 +438,7 @@ InDet::TRT_LayerBuilderCond::cylindricalLayers(const EventContext& ctx,
 
               // the sector surfaces
               Trk::BinUtility* layerSectorBinUtility = new Trk::BinUtility(nBarrelPhiSectors,layerPhiMinCorrected,layerPhiMaxCorrected,Trk::closed,Trk::binPhi);
-              Trk::BinnedArrayArray<const Trk::Surface>* strawArray = new Trk::BinnedArrayArray<const Trk::Surface>(layerSectorArrays, layerSectorBinUtility );
+              Trk::BinnedArrayArray<Trk::Surface>* strawArray = new Trk::BinnedArrayArray<Trk::Surface>(layerSectorArrays, layerSectorBinUtility );
 
               ATH_MSG_VERBOSE("--> Layer " << layer << " has been built with " << strawArray->arrayObjects().size() << " straws.");
 
@@ -676,7 +689,20 @@ InDet::TRT_LayerBuilderCond::discLayers(const EventContext& ctx,
                     double zPos = currentStraw->center().z();
                     takeSmaller(zMin,zPos);
                     takeBigger(zMax,zPos);
-                    Trk::SharedObject<const Trk::Surface> sharedSurface(currentStraw, [](const Trk::Surface*){});
+                    // Something like
+                    // Trk::SharedObject<Trk::Surface>  =
+                    // std::make_shared<Trk::Surface>(currentElement)) could be fine
+                    //
+                    // As things are now
+                    // 1) Notice that basically we couple the DetElement owned
+                    // surface to the Tracking Geometry passing a no-op deleter
+                    // (no delete happens) to the shared_ptr(SharedObject is
+                    // typedef of shared_ptr) 
+                    // 2) The const_cast here make the
+                    // code non MT safe. For now we handle this by being careful
+                    // on lifetimes and non-re-entrant TG construction.
+                    Trk::SharedObject<Trk::Surface> sharedSurface(const_cast<Trk::Surface*>(currentStraw),
+                                                                  [](Trk::Surface*) {});
                     strawPerEndcapLayer.emplace_back(sharedSurface, strawOrderPos);
                     ++numberOfStraws;
                 }
@@ -686,7 +712,7 @@ InDet::TRT_LayerBuilderCond::discLayers(const EventContext& ctx,
              return nullptr;
            }
            Trk::BinUtility* currentBinUtility = new Trk::BinUtility(numberOfStraws, -M_PI, M_PI, Trk::closed, Trk::binPhi);
-           Trk::BinnedArray<const Trk::Surface>*  strawArray = new Trk::BinnedArray1D<const Trk::Surface>(strawPerEndcapLayer, currentBinUtility);
+           Trk::BinnedArray<Trk::Surface>*  strawArray = new Trk::BinnedArray1D<Trk::Surface>(strawPerEndcapLayer, currentBinUtility);
            Trk::DiscLayer* currentLayer = nullptr;
 
            // redefine the discZ

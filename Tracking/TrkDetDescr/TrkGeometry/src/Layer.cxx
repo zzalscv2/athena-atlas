@@ -233,10 +233,10 @@ Trk::Layer::compactify(size_t& cSurfaces, size_t& tSurfaces)
   }
   // set the subsurface representation, usually already owned by DetElement
   if (m_surfaceArray) {
-    BinnedArraySpan<Trk::Surface const * const> surfaces = m_surfaceArray->arrayObjects();
-    for (const auto* sIter : surfaces) {
+    BinnedArraySpan<Trk::Surface * const> surfaces = m_surfaceArray->arrayObjects();
+    for (Trk::Surface * const sIter : surfaces) {
       if (sIter && (*sIter).owner() == Trk::noOwn) {
-        const_cast<Trk::Surface&>((*sIter)).setOwner(Trk::TGOwn);
+        (*sIter).setOwner(Trk::TGOwn);
         ++cSurfaces;
       }
       ++tSurfaces;

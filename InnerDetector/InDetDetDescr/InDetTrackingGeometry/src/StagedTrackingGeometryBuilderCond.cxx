@@ -950,12 +950,12 @@ Trk::Layer* InDet::StagedTrackingGeometryBuilderCond::mergeDiscLayers (std::vect
     id++;
   }
   
-  std::vector<float> rsteps; std::vector<const Trk::Surface*> surfs; 
+  std::vector<float> rsteps; std::vector<Trk::Surface*> surfs; 
   std::vector<Trk::BinUtility*>* binUtils=new std::vector<Trk::BinUtility*>(); 
   rsteps.push_back(rbounds[0].first);
   for (unsigned int id=0; id<discOrder.size(); id++) {
     unsigned int index=discOrder[id];
-    const Trk::SurfaceArray* surfArray = inputDiscs[index]->surfaceArray();    
+    Trk::SurfaceArray* surfArray = inputDiscs[index]->surfaceArray();    
     if (surfArray) {
       if (surfArray->binUtility()->binningValue()!=Trk::binPhi) {
         ATH_MSG_WARNING("attempt to merge 2D disc arrays, bailing out");
@@ -963,24 +963,24 @@ Trk::Layer* InDet::StagedTrackingGeometryBuilderCond::mergeDiscLayers (std::vect
       }
       binUtils->push_back(surfArray->binUtility()->clone());
       if (id+1<discOrder.size()) rsteps.push_back( 0.5*(rbounds[id].second+rbounds[id+1].first));
-      Trk::BinnedArraySpan<Trk::Surface const * const> ringSurf =surfArray->arrayObjects();
+      Trk::BinnedArraySpan<Trk::Surface * const> ringSurf =surfArray->arrayObjects();
       surfs.insert(surfs.end(),ringSurf.begin(),ringSurf.end());
             
     }  
   }
   rsteps.push_back(rbounds.back().second);
 
-  std::vector< std::pair< Trk::SharedObject<const Trk::Surface>, Amg::Vector3D >  > surfaces;
-  for ( const auto *  sf : surfs ) {
-    Trk::SharedObject<const Trk::Surface> sharedSurface(sf,Trk::do_not_delete<const Trk::Surface>);
-    std::pair< Trk::SharedObject<const Trk::Surface>, Amg::Vector3D >  surfaceOrder(sharedSurface, sf->center());
+  std::vector< std::pair< Trk::SharedObject<Trk::Surface>, Amg::Vector3D >  > surfaces;
+  for ( auto *  sf : surfs ) {
+    Trk::SharedObject<Trk::Surface> sharedSurface(sf,Trk::do_not_delete<Trk::Surface>);
+    std::pair< Trk::SharedObject<Trk::Surface>, Amg::Vector3D >  surfaceOrder(sharedSurface, sf->center());
     surfaces.push_back(surfaceOrder);
   }
 
   // create merged binned array
   // a two-dimensional BinnedArray is needed ; takes possession of binUtils and
   // will delete it on destruction.
-  Trk::BinnedArray<const Trk::Surface>* mergeBA = new Trk::BinnedArray1D1D<const Trk::Surface>(surfaces,new Trk::BinUtility(rsteps,Trk::open,Trk::binR),binUtils);
+  Trk::BinnedArray<Trk::Surface>* mergeBA = new Trk::BinnedArray1D1D<Trk::Surface>(surfaces,new Trk::BinUtility(rsteps,Trk::open,Trk::binR),binUtils);
 
   //DiscOverlapDescriptor takes possession of clonedBinUtils, will delete it on destruction.
   // but *does not* manage mergeBA.      
@@ -1007,7 +1007,7 @@ Trk::Layer* InDet::StagedTrackingGeometryBuilderCond::mergeDiscLayers (std::vect
                        olDescriptor);
 
   // register the layer to the surfaces 
-  Trk::BinnedArraySpan<Trk::Surface const * const> layerSurfaces     = mergeBA->arrayObjects();
+  Trk::BinnedArraySpan<Trk::Surface * const> layerSurfaces     = mergeBA->arrayObjects();
    for (const auto *sf : layerSurfaces) {
      const InDetDD::SiDetectorElement* detElement = dynamic_cast<const InDetDD::SiDetectorElement*>(sf->associatedDetectorElement());
      const std::vector<const Trk::Surface*>& allSurfacesVector = detElement->surfaces();

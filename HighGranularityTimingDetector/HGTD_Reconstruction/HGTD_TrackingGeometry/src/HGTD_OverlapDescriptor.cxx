@@ -23,7 +23,7 @@
 #include "Identifier/Identifier.h"
 
 
-HGTD_OverlapDescriptor::HGTD_OverlapDescriptor(const Trk::BinnedArray<const Trk::Surface>* bin_array,
+HGTD_OverlapDescriptor::HGTD_OverlapDescriptor(const Trk::BinnedArray<Trk::Surface>* bin_array,
                                                std::vector < float > valuesR,
                                                std::vector < std::vector< float> > valuesPhi,
                                                int nStepsR, int nStepsPhi):

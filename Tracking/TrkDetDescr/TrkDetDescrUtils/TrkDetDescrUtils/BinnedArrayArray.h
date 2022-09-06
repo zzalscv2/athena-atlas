@@ -51,7 +51,7 @@ public:
       // binned array ordering
       m_binnedArrays[bUtility->bin(barray.second, 0)] = barray.first;
       // get the array objects
-      BinnedArraySpan<T const * const > aObjects = barray.first->arrayObjects();
+      BinnedArraySpan<T * const > aObjects = barray.first->arrayObjects();
       for (auto& o : aObjects)
         m_arrayObjects.push_back(o);
     }

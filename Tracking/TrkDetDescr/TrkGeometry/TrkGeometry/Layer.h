@@ -36,7 +36,7 @@ class DetachedTrackingVolume;
 class ICompatibilityEstimator;
 
 typedef ObjectIntersection<Surface> SurfaceIntersection;
-typedef BinnedArray<const Surface> SurfaceArray;
+typedef BinnedArray<Surface> SurfaceArray;
 
 /**
    @enum LayerType
@@ -260,7 +260,7 @@ class Layer {
       const ICompatibilityEstimator* ice = nullptr) const;
 
   //!< propagate TrackingGeometry owner downstream
-  void compactify ATLAS_NOT_THREAD_SAFE(size_t& cSurfaces, size_t& tSurfaces);
+  void compactify(size_t& cSurfaces, size_t& tSurfaces);
 
   //!< register layer index for material map registration
   void registerLayerIndex(const LayerIndex& lIdx);

@@ -61,7 +61,7 @@ getSCT_ID(StoreGateSvc const * const detStore)
 
 } // end anonymous namespace
 
-InDet::DiscOverlapDescriptor::DiscOverlapDescriptor(const Trk::BinnedArray<const Trk::Surface>* bin_array, 
+InDet::DiscOverlapDescriptor::DiscOverlapDescriptor(const Trk::BinnedArray<Trk::Surface>* bin_array, 
                                                     std::vector<Trk::BinUtility*>* singleBinUtils,
                                                     bool isPixel):
   m_bin_array(bin_array),

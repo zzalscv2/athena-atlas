@@ -33,7 +33,7 @@ namespace Trk {
   class DiscLayer;
   class PlaneLayer;
   class BinnedLayerMaterial;
-  typedef std::pair< SharedObject<const Surface>, Amg::Vector3D > SurfaceOrderPosition;
+  typedef std::pair< SharedObject<Surface>, Amg::Vector3D > SurfaceOrderPosition;
 }
 
 /** @class HGTD_LayerBuilderCond
@@ -84,7 +84,7 @@ public AthAlgTool, virtual public Trk::ILayerBuilderCond {
     const Trk::BinnedLayerMaterial discLayerMaterial(double rMin, double rMax) const;
 
     //!< layer association
-    void registerSurfacesToLayer( Trk::BinnedArraySpan<Trk::Surface const * const>& surfaces,const Trk::Layer& layer) const;
+    void registerSurfacesToLayer( Trk::BinnedArraySpan<Trk::Surface * const>& surfaces,const Trk::Layer& layer) const;
 
     static void evaluateBestBinning(std::vector<Trk::SurfaceOrderPosition>& surfaces,
                              std::vector<float>& rBins,

@@ -410,8 +410,7 @@ private:
   void indexContainedStaticLayers(GeometrySignature geoSig, int& offset);
 
   /** reIndex the material layers of the TrackingVolume */
-  void indexContainedMaterialLayers
-  ATLAS_NOT_THREAD_SAFE(GeometrySignature geoSig, int& offset);
+  void indexContainedMaterialLayers(GeometrySignature geoSig, int& offset);
 
   /** Create Boundary Surface */
   void createBoundarySurfaces();
@@ -423,8 +422,7 @@ private:
     TackingGeometry the referenced types are the number of registered surfaces &
     total surfaces
   */
-  void compactify ATLAS_NOT_THREAD_SAFE(size_t& rSurfaces,
-                                        size_t& tSurfaces);
+  void compactify(size_t& rSurfaces, size_t& tSurfaces);
 
   /** method to synchronize the layers with potentially updated volume bounds:
       - adapts the layer dimensions to the new volumebounds + envelope

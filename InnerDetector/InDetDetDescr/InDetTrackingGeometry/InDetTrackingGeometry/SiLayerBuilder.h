@@ -42,7 +42,7 @@ namespace Trk {
   class DiscLayer;
   class PlaneLayer;
   class LayerMaterialProperties;
-  typedef std::pair< SharedObject<const Surface>, Amg::Vector3D > SurfaceOrderPosition;
+  typedef std::pair< SharedObject<Surface>, Amg::Vector3D > SurfaceOrderPosition;
 }
 
 namespace InDet {
@@ -102,7 +102,7 @@ namespace InDet {
       const Trk::LayerMaterialProperties* barrelLayerMaterial(double r, double hz) const;  //!< helper method to construct barrel material
       const Trk::LayerMaterialProperties* endcapLayerMaterial(double rMin, double rMax) const; //!< helper method to construct endcap material
         
-      void registerSurfacesToLayer(Trk::BinnedArraySpan<Trk::Surface const * const >& surfaces, const Trk::Layer& layer) const; //!< layer association
+      void registerSurfacesToLayer(Trk::BinnedArraySpan<Trk::Surface * const >& surfaces, const Trk::Layer& layer) const; //!< layer association
 
       bool                                           m_pixelCase;                      //!< flag for pixel/sct
                                                      
