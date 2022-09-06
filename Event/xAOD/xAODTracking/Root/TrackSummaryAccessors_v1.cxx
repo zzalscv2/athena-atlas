@@ -51,7 +51,7 @@ namespace xAOD {
           "expectInnermostPixelLayerHit");
         return &a;
       } break;
-        DEFINE_ACCESSOR(uint8_t, numberOfPixelHits);
+        DEFINE_ACCESSOR( uint8_t, numberOfPixelHits);
         DEFINE_ACCESSOR( uint8_t, numberOfPixelOutliers             );
         DEFINE_ACCESSOR( uint8_t, numberOfPixelHoles                );
         DEFINE_ACCESSOR( uint8_t, numberOfPixelSharedHits           );	
@@ -108,6 +108,7 @@ namespace xAOD {
         DEFINE_ACCESSOR( uint8_t, numberOfPixelEndcapHoles                );
         DEFINE_ACCESSOR( uint8_t, numberOfInnermostPixelLayerEndcapHits   );
         DEFINE_ACCESSOR( uint8_t, numberOfNextToInnermostPixelLayerEndcapHits);
+        DEFINE_ACCESSOR( uint8_t, hasValidTime);
 
       default:                  
          std::cerr << "xAOD::TrackParticle_v1 ERROR Unknown SummaryType ("
