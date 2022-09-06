@@ -4,7 +4,7 @@ from AthenaCommon.CFElements import (seqAND, parOR)
 from TriggerMenuMT.HLT.Config.MenuComponents import MenuSequence
 from AthenaCommon.Logging import logging
 
-from ..Config.MenuComponents import RecoFragmentsPool
+from ..Config.MenuComponents import RecoFragmentsPool, algorithmCAToGlobalWrapper
 from AthenaConfiguration.AllConfigFlags import ConfigFlags
 from TrigEDMConfig.TriggerEDMRun3 import recordable
 from ViewAlgs.ViewAlgsConf import EventViewCreatorAlgorithm
@@ -58,10 +58,7 @@ def DJDispFragment(ConfigFlags):
     InputMakerAlg.ViewNodeName = reco_seq.name()
 
     from TrigGenericAlgs.TrigGenericAlgsConfig import ROBPrefetchingAlgCfg_Si
-    robPrefetchAlg = RecoFragmentsPool.retrieve(ROBPrefetchingAlgCfg_Si,
-                                                ConfigFlags,
-                                                nameSuffix=InputMakerAlg.name(),
-                                                inputMaker=InputMakerAlg)
+    robPrefetchAlg = algorithmCAToGlobalWrapper(ROBPrefetchingAlgCfg_Si, ConfigFlags, nameSuffix=InputMakerAlg.name())[0]
 
     return (seqAND("UncTrkrecoSeqDJTrigDisp", [InputMakerAlg, robPrefetchAlg, reco_seq]), InputMakerAlg)
 

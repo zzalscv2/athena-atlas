@@ -2,7 +2,7 @@
 #
 
 from enum import Enum
-from TriggerMenuMT.HLT.Config.MenuComponents import RecoFragmentsPool, MenuSequence
+from TriggerMenuMT.HLT.Config.MenuComponents import RecoFragmentsPool, MenuSequence, algorithmCAToGlobalWrapper
 from AthenaCommon.CFElements import seqAND, parOR
 from AthenaConfiguration.ComponentAccumulator import conf2toConfigurable
 from AthenaConfiguration.ComponentFactory import CompFactory
@@ -247,10 +247,7 @@ def jetRoITrackJetTagHypoMenuSequence(configFlags, jetsIn, isPresel=True, **jetR
     jetAthRecoSeq = seqAND(f"jetRoITrackJetTagHypo_{jetDefString}_RecoSequence",[ftaggedJetsCopyAlg,jetTrkFtagSeq,jetViewAlg])
 
     from TrigGenericAlgs.TrigGenericAlgsConfig import ROBPrefetchingAlgCfg_Si
-    robPrefetchAlg = RecoFragmentsPool.retrieve(ROBPrefetchingAlgCfg_Si,
-                                                configFlags,
-                                                nameSuffix=InputMakerAlg.name(),
-                                                inputMaker=InputMakerAlg)
+    robPrefetchAlg = algorithmCAToGlobalWrapper(ROBPrefetchingAlgCfg_Si, configFlags, nameSuffix=InputMakerAlg.name())[0]
 
     jetAthMenuSeq = seqAND(f"jetRoITrackJetTagHypo_{jetDefString}_MenuSequence",
                        [InputMakerAlg,robPrefetchAlg,jetAthRecoSeq])

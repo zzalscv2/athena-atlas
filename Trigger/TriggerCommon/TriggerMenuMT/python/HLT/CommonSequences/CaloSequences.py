@@ -2,7 +2,7 @@
 #  Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
 #
 
-from TriggerMenuMT.HLT.Config.MenuComponents import RecoFragmentsPool, MenuSequence
+from TriggerMenuMT.HLT.Config.MenuComponents import RecoFragmentsPool, MenuSequence, algorithmCAToGlobalWrapper
 from AthenaCommon.CFElements import seqAND, parOR
 from TrigEDMConfig.TriggerEDMRun3 import recordable
 from .FullScanDefs import caloFSRoI
@@ -26,10 +26,7 @@ def fastCaloSequence(flags, name="fastCaloSequence"):
     (fastCaloInViewSequence, sequenceOut) = fastCaloRecoSequence(InViewRoIs, doRinger=True)
 
     from TrigGenericAlgs.TrigGenericAlgsConfig import ROBPrefetchingAlgCfg_Calo
-    robPrefetchAlg = RecoFragmentsPool.retrieve(ROBPrefetchingAlgCfg_Calo,
-                                                flags,
-                                                nameSuffix=fastCaloViewsMaker.name(),
-                                                inputMaker=fastCaloViewsMaker)
+    robPrefetchAlg = algorithmCAToGlobalWrapper(ROBPrefetchingAlgCfg_Calo, flags, nameSuffix=fastCaloViewsMaker.name())[0]
 
      # connect EVC and reco
     fastCaloSequence = seqAND(name, [fastCaloViewsMaker, robPrefetchAlg, fastCaloInViewSequence ])
