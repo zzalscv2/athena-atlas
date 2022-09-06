@@ -1,4 +1,4 @@
-# Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
 
 # Declare the package name:
 atlas_subdir( AsgExampleTools )
@@ -21,7 +21,9 @@ atlas_add_root_dictionary( AsgExampleToolsLib AsgExampleToolsCintDict
 atlas_add_library( AsgExampleToolsLib
    AsgExampleTools/*.h Root/*.cxx ${AsgExampleToolsCintDict}
    PUBLIC_HEADERS AsgExampleTools
-   LINK_LIBRARIES AsgTools AsgServicesLib AsgDataHandlesLib AsgTestingLib ${extra_lib} )
+   LINK_LIBRARIES AsgTools AsgServicesLib AsgDataHandlesLib AsgTestingLib
+                  ${extra_lib}
+   PRIVATE_LINK_LIBRARIES xAODBase xAODCore )
 
 if( NOT XAOD_STANDALONE )
    atlas_add_component( AsgExampleTools
@@ -142,3 +144,17 @@ atlas_add_test( gt_asgtools_toolstore
    LINK_LIBRARIES ${GMOCK_LIBRARIES} AsgTools AsgExampleToolsLib AsgTestingLib
    POST_EXEC_SCRIPT nopost.sh )
 set_tests_properties (AsgExampleTools_gt_asgtools_toolstore_ctest PROPERTIES LABELS "AsgTools;AsgExampleTools" )
+
+if( XAOD_STANDALONE )
+   atlas_add_test( EventStoreTest
+      SOURCES test/gt_EventStoreTest.cxx
+      INCLUDE_DIRS ${GTEST_INCLUDE_DIRS}
+      LINK_LIBRARIES ${GTEST_LIBRARIES} AsgExampleToolsLib AsgTestingLib xAODRootAccess
+      POST_EXEC_SCRIPT nopost.sh )
+else()
+   atlas_add_test( EventStoreTest
+      SCRIPT athena.py "${CMAKE_CURRENT_SOURCE_DIR}/share/EventStoreTest_jobOptions.py"
+      POST_EXEC_SCRIPT nopost.sh )
+endif()
+set_tests_properties( AsgExampleTools_EventStoreTest_ctest PROPERTIES
+   LABELS "AsgTools;AsgExampleTools" )
