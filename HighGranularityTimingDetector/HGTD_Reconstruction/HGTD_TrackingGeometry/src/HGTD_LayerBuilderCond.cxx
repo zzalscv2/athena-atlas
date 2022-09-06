@@ -196,9 +196,21 @@ HGTD_LayerBuilderCond::discLayers(const EventContext& ctx,
      const Amg::Vector3D& orderPosition = (*hgtdDetIter)->center();
      
      // register the chosen side in the object array
-     Trk::SharedObject<const Trk::Surface> sharedSurface(&((*hgtdDetIter)->surface()), [](const Trk::Surface*){});
+     // This line is problematic for MT  . 
+     // Something like 
+     // Trk::SharedObject<Trk::Surface>  = std::make_shared<Trk::Surface>((*hgtdDetIter)) could be fine
+     //
+     // As things are now 
+     // 1) Notice that basically we couple the DetElement owned surface to the Tracking Geometry
+     // passing a no-op deleter (no delete happens) to the shared_ptr(SharedObject is typedef of shared_ptr)
+     // 2)
+     // The const_cast here make the code non MT safe. For now we handle this
+     // by being careful on lifetimes and non-re-entrant TG construction.
+     Trk::SharedObject<Trk::Surface> sharedSurface(
+       const_cast<Trk::Surface*>(&((*hgtdDetIter)->surface())),
+       [](Trk::Surface*) {});
      Trk::SurfaceOrderPosition surfaceOrder(sharedSurface, orderPosition);
-     
+
      discSurfaces[currentlayer].push_back(surfaceOrder);    
      
    } else if (!(*hgtdDetIter))
@@ -242,8 +254,8 @@ HGTD_LayerBuilderCond::discLayers(const EventContext& ctx,
     }
     
     // prepare the binned array, it can be with one to several rings
-    Trk::BinnedArray<const Trk::Surface>* currentBinnedArray =
-      new Trk::BinnedArray1D1D<const Trk::Surface>(discSurfaces[discCounter], BinUtilityR, subBinUtilitiesPhi);
+    Trk::BinnedArray<Trk::Surface>* currentBinnedArray =
+      new Trk::BinnedArray1D1D<Trk::Surface>(discSurfaces[discCounter], BinUtilityR, subBinUtilitiesPhi);
 
     ATH_MSG_DEBUG( "... done!" ); 
     
@@ -259,7 +271,7 @@ HGTD_LayerBuilderCond::discLayers(const EventContext& ctx,
       std::map< const Trk::Surface*,Amg::Vector3D > uniqueSurfaceMap;
       std::map< const Trk::Surface*,Amg::Vector3D >::iterator usmIter = uniqueSurfaceMap.end();
       // check the registered surfaces in the binned array
-      Trk::BinnedArraySpan<Trk::Surface const * const> arraySurfaces = currentBinnedArray->arrayObjects();
+      Trk::BinnedArraySpan<Trk::Surface * const> arraySurfaces = currentBinnedArray->arrayObjects();
       size_t dsumCheckSurfaces = 0;
       double lastPhi = 0.;
       for (const auto & asurfIter : arraySurfaces){
@@ -305,7 +317,7 @@ HGTD_LayerBuilderCond::discLayers(const EventContext& ctx,
                                                      olDescriptor);
     
     // register the layer to the surfaces
-    Trk::BinnedArraySpan<Trk::Surface const * const> layerSurfaces = currentBinnedArray->arrayObjects();
+    Trk::BinnedArraySpan<Trk::Surface * const> layerSurfaces = currentBinnedArray->arrayObjects();
     registerSurfacesToLayer(layerSurfaces,*activeLayer);
     discLayers->push_back(activeLayer);
     // increase the disc counter by one
@@ -335,7 +347,7 @@ const Trk::BinnedLayerMaterial HGTD_LayerBuilderCond::discLayerMaterial(double r
   return Trk::BinnedLayerMaterial(layerBinUtilityR);  
 }     
 
-void HGTD_LayerBuilderCond::registerSurfacesToLayer(Trk::BinnedArraySpan<Trk::Surface const * const>& layerSurfaces, const Trk::Layer& lay) const
+void HGTD_LayerBuilderCond::registerSurfacesToLayer(Trk::BinnedArraySpan<Trk::Surface * const>& layerSurfaces, const Trk::Layer& lay) const
 {
    if (!m_setLayerAssociation) return;    
    // register the surfaces to the layer
@@ -343,7 +355,7 @@ void HGTD_LayerBuilderCond::registerSurfacesToLayer(Trk::BinnedArraySpan<Trk::Su
      if (surfaces) { 
        // register the current surfaces --------------------------------------------------------
        // Needs care for Athena MT 
-       Trk::ILayerBuilderCond::associateLayer(lay, const_cast<Trk::Surface&>(*surfaces));
+       Trk::ILayerBuilderCond::associateLayer(lay, (*surfaces));
      }
    }
    }

@@ -129,8 +129,7 @@ Trk::TrackingGeometry::registerTrackingVolumes(Trk::TrackingVolume& tvol,
   }
 }
 
-void Trk::TrackingGeometry::compactify
-ATLAS_NOT_THREAD_SAFE(MsgStream& msg, TrackingVolume* vol)
+void Trk::TrackingGeometry::compactify(MsgStream& msg, TrackingVolume* vol)
 {
   msg << MSG::VERBOSE
       << "====== Calling TrackingGeometry::compactify() ===== " << std::endl;
@@ -231,8 +230,7 @@ Trk::TrackingGeometry::printVolumeInformation(MsgStream& msg,
   }
 }
 
-void Trk::TrackingGeometry::indexStaticLayers
-ATLAS_NOT_THREAD_SAFE(GeometrySignature geosit, int offset)
+void Trk::TrackingGeometry::indexStaticLayers(GeometrySignature geosit, int offset)
 {
   if (m_world) {
     m_world->indexContainedStaticLayers(geosit, offset);

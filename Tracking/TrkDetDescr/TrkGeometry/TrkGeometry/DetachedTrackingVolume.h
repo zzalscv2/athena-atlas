@@ -109,16 +109,15 @@ class DetachedTrackingVolume {
 
  private:
   /** Compactify -- set TG as owner to surfaces */
-  void compactify ATLAS_NOT_THREAD_SAFE(size_t& cSurfaces,
-                                        size_t& tSurfaces);
+   void compactify(size_t& cSurfaces, size_t& tSurfaces);
 
-  TrackingVolume* m_trkVolume;
-  const std::string m_name;
-  Layer* m_layerRepresentation;
-  const std::vector<Layer*>* m_multilayerRepresentation;
-  Amg::Transform3D* m_baseTransform;  // optional use (for alignment purpose)
-  const std::vector<std::pair<std::unique_ptr<const Trk::Volume>, float>>*
-      m_constituents;
+   TrackingVolume* m_trkVolume;
+   const std::string m_name;
+   Layer* m_layerRepresentation;
+   const std::vector<Layer*>* m_multilayerRepresentation;
+   Amg::Transform3D* m_baseTransform; // optional use (for alignment purpose)
+   const std::vector<std::pair<std::unique_ptr<const Trk::Volume>, float>>*
+     m_constituents;
 };
 
 inline const TrackingVolume* DetachedTrackingVolume::trackingVolume() const {

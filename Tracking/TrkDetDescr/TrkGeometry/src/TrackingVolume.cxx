@@ -848,8 +848,9 @@ Trk::TrackingVolume::indexContainedStaticLayers(GeometrySignature geoSig,
   }
 }
 
-void Trk::TrackingVolume::indexContainedMaterialLayers
-ATLAS_NOT_THREAD_SAFE (GeometrySignature geoSig, int& offset)
+void
+Trk::TrackingVolume::indexContainedMaterialLayers(GeometrySignature geoSig,
+                                                  int& offset)
 {
   // the offset gets increased internally
   // the static layers first and check if they have surfaces with material
@@ -862,20 +863,20 @@ ATLAS_NOT_THREAD_SAFE (GeometrySignature geoSig, int& offset)
       if (layerIter) {
         Trk::SurfaceArray* surfArray = layerIter->surfaceArray();
         if (surfArray) {
-          Trk::BinnedArraySpan<Trk::Surface const * const> layerSurfaces = surfArray->arrayObjects();
+          Trk::BinnedArraySpan<Trk::Surface * const> layerSurfaces = surfArray->arrayObjects();
           // loop over the surfaces - there can be 0 entries
-          for (const Trk::Surface* laySurf : layerSurfaces) {
-            const Trk::Layer* materialLayer = laySurf ? laySurf->materialLayer() : nullptr;
+          for (Trk::Surface* const laySurf : layerSurfaces) {
+            Trk::Layer* materialLayer = laySurf ? laySurf->materialLayer() : nullptr;
             if (materialLayer && materialLayer->layerIndex().value() < 0) {
               // sign only those with material properties - rest goes to 0
-              const Trk::LayerIndex layIndex =
+              Trk::LayerIndex layIndex =
                 materialLayer->layerMaterialProperties()
                   ? Trk::LayerIndex(int(geoSig) *
                                       TRKDETDESCR_GEOMETRYSIGNATUREWEIGHT +
                                     (++offset))
                   : Trk::LayerIndex(0);
               // now register the index
-              (const_cast<Trk::Layer*>(materialLayer))->registerLayerIndex(layIndex);
+              materialLayer->registerLayerIndex(layIndex);
             }
           }
         }
@@ -1440,8 +1441,8 @@ Trk::TrackingVolume::synchronizeLayers(MsgStream& msgstream, double envelope)
   }
 }
 
-void Trk::TrackingVolume::compactify
-ATLAS_NOT_THREAD_SAFE(size_t& cSurfaces, size_t& tSurfaces)
+void
+Trk::TrackingVolume::compactify(size_t& cSurfaces, size_t& tSurfaces)
 {
   // confined 'ordered' layers
   Trk::BinnedArray<Trk::Layer>* confLayers = confinedLayers();

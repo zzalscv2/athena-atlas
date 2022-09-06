@@ -40,7 +40,7 @@ namespace Trk {
   class CylinderLayer;
   class DiscLayer;
   class ExtendedMaterialProperties;
-  typedef std::pair< SharedObject<const Surface>, Amg::Vector3D > SurfaceOrderPosition;
+  typedef std::pair< SharedObject<Surface>, Amg::Vector3D > SurfaceOrderPosition;
 }
 
 namespace InDet {
@@ -49,8 +49,9 @@ namespace InDet {
      
      @author Andreas.Salzburger@cern.ch
     */
-  class TRT_LayerBuilderCond : public AthAlgTool,
-                           virtual public Trk::ILayerBuilderCond {
+  class ATLAS_NOT_THREAD_SAFE TRT_LayerBuilderCond :  //const_cast
+    public AthAlgTool, 
+    virtual public Trk::ILayerBuilderCond {
     
     /** Declare the TRT_VolumeBuilder as friend */
     friend class TRT_VolumeBuilder;

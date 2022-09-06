@@ -43,7 +43,7 @@ namespace Trk {
   class DiscLayer;
   class PlaneLayer;
   class BinnedLayerMaterial;
-  typedef std::pair< SharedObject<const Surface>, Amg::Vector3D > SurfaceOrderPosition;
+  typedef std::pair< SharedObject<Surface>, Amg::Vector3D > SurfaceOrderPosition;
 }
 
 namespace InDet {
@@ -61,7 +61,7 @@ namespace InDet {
      
      @author Andreas.Salzburger@cern.ch
     */
-  class ATLAS_NOT_THREAD_SAFE SiLayerBuilderCond : // static member variables are used.
+  class ATLAS_NOT_THREAD_SAFE SiLayerBuilderCond : // const_cast
     public AthAlgTool, virtual public Trk::ILayerBuilderCond {
     
     public:
@@ -122,7 +122,7 @@ namespace InDet {
       const Trk::BinnedLayerMaterial endcapLayerMaterial(double rMin,
                                                          double rMax) const;
 
-      void registerSurfacesToLayer(Trk::BinnedArraySpan<Trk::Surface const * const >& surfaces, Trk::Layer& layer) const; //!< layer association
+      void registerSurfacesToLayer(Trk::BinnedArraySpan<Trk::Surface * const >& surfaces, Trk::Layer& layer) const; //!< layer association
 
       bool                                           m_pixelCase;                      //!< flag for pixel/sct
                                                      

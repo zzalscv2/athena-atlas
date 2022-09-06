@@ -310,10 +310,22 @@ const std::vector<Trk::CylinderLayer*>* InDet::SiLayerBuilder::cylindricalLayers
        // decide which one to register on the Radius: always the one with smaller radius
        bool takeIt =  (!otherSide || (*sidetIter)->center().perp() < otherSide->center().perp() );
        const Trk::Surface* moduleSurface = takeIt ? (&((*sidetIter)->surface())) : (&(otherSide->surface()));
-  
+
        // register the module surface
-       Trk::SharedObject<const Trk::Surface> sharedSurface(moduleSurface, Trk::do_not_delete<const Trk::Surface>);
-  
+       // Trk::SharedObject<Trk::Surface>  =
+       // std::make_shared<Trk::Surface>(.... some det element)) could be fine
+       //
+       // As things are now
+       // 1) Notice that basically we couple the DetElement owned
+       // surface to the Tracking Geometry passing a no-op deleter
+       // (no delete happens) to the shared_ptr(SharedObject is
+       // typedef of shared_ptr)
+       // 2) The const_cast here make the
+       // code non MT safe. For now we handle this by being careful
+       // on lifetimes and non-re-entrant TG construction.
+       Trk::SharedObject<Trk::Surface> sharedSurface(const_cast<Trk::Surface*>(moduleSurface),
+                                                     Trk::do_not_delete<Trk::Surface>);
+
        Trk::SurfaceOrderPosition surfaceOrder(sharedSurface, orderPosition);
        if (takeIt) (layerSurfaces[currentlayer]).push_back(surfaceOrder);
      
@@ -397,10 +409,10 @@ const std::vector<Trk::CylinderLayer*>* InDet::SiLayerBuilder::cylindricalLayers
       ATH_MSG_VERBOSE("Creating the binned array for the sensitive detector elements with BinUtility :");
       ATH_MSG_VERBOSE( *currentBinUtility );
       // the binned array for the senstive surfaces to be built            
-      Trk::BinnedArray<const Trk::Surface>* currentBinnedArray = 
-            new Trk::BinnedArray2D<const Trk::Surface>(layerSurfaces[layerCounter],currentBinUtility);       
+      Trk::BinnedArray<Trk::Surface>* currentBinnedArray = 
+            new Trk::BinnedArray2D<Trk::Surface>(layerSurfaces[layerCounter],currentBinUtility);       
       // unit test for sub surface ordering
-      Trk::BinnedArraySpan<Trk::Surface const * const> arraySurfaces = currentBinnedArray->arrayObjects();          
+      Trk::BinnedArraySpan<Trk::Surface * const> arraySurfaces = currentBinnedArray->arrayObjects();          
 
       if (m_runGeometryValidation){
          // checking for :
@@ -485,7 +497,7 @@ const std::vector<Trk::CylinderLayer*>* InDet::SiLayerBuilder::cylindricalLayers
       // cleanup of the layer material --------------------------------------------------------------
       delete layerMaterial; 
       // register the layer to the surfaces
-      Trk::BinnedArraySpan<Trk::Surface const* const> layerSurfaces    = currentBinnedArray->arrayObjects();
+      Trk::BinnedArraySpan<Trk::Surface * const> layerSurfaces    = currentBinnedArray->arrayObjects();
       registerSurfacesToLayer(layerSurfaces,*activeLayer);
 
       // (3) register the layers --- either in the split vector or in the return vector 
@@ -723,7 +735,8 @@ std::vector<Trk::DiscLayer* >* InDet::SiLayerBuilder::createDiscLayers(std::vect
         // get the center position
         const Amg::Vector3D& orderPosition = chosenSide->center();
         // register the chosen side in the object array
-        Trk::SharedObject<const Trk::Surface> sharedSurface(&(chosenSide->surface()), [](const Trk::Surface*){});
+        Trk::SharedObject<Trk::Surface> sharedSurface(const_cast<Trk::Surface*>(&(chosenSide->surface())), 
+                                                      [](Trk::Surface*){});
         Trk::SurfaceOrderPosition surfaceOrder(sharedSurface, orderPosition);
         if (takeIt) (discSurfaces[currentlayer]).push_back(surfaceOrder);      
     }      
@@ -771,7 +784,7 @@ std::vector<Trk::DiscLayer* >* InDet::SiLayerBuilder::createDiscLayers(std::vect
          ATH_MSG_DEBUG( " --> " << irings <<  " R sector has " << discPhiSectors[discCounter][irings] << " phi sectors. " );
             
        // prepare the binned array, it can be with one to several rings            
-       Trk::BinnedArray<const Trk::Surface>* currentBinnedArray = nullptr;
+       Trk::BinnedArray<Trk::Surface>* currentBinnedArray = nullptr;
        std::vector<Trk::BinUtility*>* singleBinUtils = new std::vector<Trk::BinUtility*>;
        bool weOwnSingleBinUtils{true};
        if (discRsectors==1){
@@ -803,7 +816,7 @@ std::vector<Trk::DiscLayer* >* InDet::SiLayerBuilder::createDiscLayers(std::vect
                                                                      Trk::closed,
                                                                      Trk::binPhi);
             // a one-dimensional BinnedArray is sufficient
-            currentBinnedArray = new Trk::BinnedArray1D<const Trk::Surface>(discSurfaces[discCounter],currentBinUtility);
+            currentBinnedArray = new Trk::BinnedArray1D<Trk::Surface>(discSurfaces[discCounter],currentBinUtility);
         } else {
             ATH_MSG_VERBOSE("Constructing a two-dimensional BinnedArray.");
             // get the binning in R first (can still be improved with non-aequidistant binning) 
@@ -847,7 +860,7 @@ std::vector<Trk::DiscLayer* >* InDet::SiLayerBuilder::createDiscLayers(std::vect
             // a two-dimensional BinnedArray is needed ; takes possession of singleBinUtils and
             // will delete it on destruction.
             weOwnSingleBinUtils=false;                                                       
-            currentBinnedArray = new Trk::BinnedArray1D1D<const Trk::Surface>(discSurfaces[discCounter],
+            currentBinnedArray = new Trk::BinnedArray1D1D<Trk::Surface>(discSurfaces[discCounter],
                                                                         currentSteerBinUtility,
                                                                         singleBinUtils);
         }
@@ -861,10 +874,10 @@ std::vector<Trk::DiscLayer* >* InDet::SiLayerBuilder::createDiscLayers(std::vect
         // checking for :
         //   - empty surface bins
         //   - doubly filled bins
-        std::map< const Trk::Surface*,Amg::Vector3D > uniqueSurfaceMap;
-        std::map< const Trk::Surface*,Amg::Vector3D >::iterator usmIter = uniqueSurfaceMap.end();
+        std::map< Trk::Surface*,Amg::Vector3D > uniqueSurfaceMap;
+        std::map< Trk::Surface*,Amg::Vector3D >::iterator usmIter = uniqueSurfaceMap.end();
         // check the registered surfaces in the binned array
-        Trk::BinnedArraySpan<Trk::Surface const * const> arraySurfaces = currentBinnedArray->arrayObjects();
+        Trk::BinnedArraySpan<Trk::Surface * const> arraySurfaces = currentBinnedArray->arrayObjects();
         size_t dsumCheckSurfaces = 0;
         double lastPhi = 0.;
         for (const auto & asurfIter : arraySurfaces){
@@ -923,7 +936,7 @@ std::vector<Trk::DiscLayer* >* InDet::SiLayerBuilder::createDiscLayers(std::vect
         // cleanup
         delete layerMaterial;
         // register the layer to the surfaces --- if necessary to the other sie as well
-        Trk::BinnedArraySpan<Trk::Surface const* const> layerSurfaces     = currentBinnedArray->arrayObjects();
+        Trk::BinnedArraySpan<Trk::Surface * const> layerSurfaces     = currentBinnedArray->arrayObjects();
         registerSurfacesToLayer(layerSurfaces,*activeLayer);
         if (m_splitMode){
             ATH_MSG_DEBUG( "[ Split mode ] Checking if this layer needs to be cached." );
@@ -1140,7 +1153,19 @@ std::vector<Trk::DiscLayer*>* InDet::SiLayerBuilder::createRingLayers() const {
         // get the center position
         const Amg::Vector3D& orderPosition = detElement->center();
         // register the chosen side in the object array
-        Trk::SharedObject<const Trk::Surface> sharedSurface(&(detElement->surface()), Trk::do_not_delete<const Trk::Surface>);
+        // Trk::SharedObject<Trk::Surface>  =
+        // std::make_shared<Trk::Surface>(.... some det element)) could be fine
+        //
+        // As things are now
+        // 1) Notice that basically we couple the DetElement owned
+        // surface to the Tracking Geometry passing a no-op deleter
+        // (no delete happens) to the shared_ptr(SharedObject is
+        // typedef of shared_ptr)
+        // 2) The const_cast here make the
+        // code non MT safe. For now we handle this by being careful
+        // on lifetimes and non-re-entrant TG construction.
+        Trk::SharedObject<Trk::Surface> sharedSurface(const_cast<Trk::Surface*>(&(detElement->surface())), 
+                                                      Trk::do_not_delete<Trk::Surface>);
         Trk::SurfaceOrderPosition surfaceOrder(sharedSurface, orderPosition);
         discSurfaces[currentlayer].push_back(surfaceOrder);
         
@@ -1175,7 +1200,7 @@ std::vector<Trk::DiscLayer*>* InDet::SiLayerBuilder::createRingLayers() const {
     ATH_MSG_DEBUG( "  -> With Rmin/Rmax (est) :  " << discRmin[discCounter] << " / " << discRmax[discCounter] );
     
     // prepare the binned array, it can be with one to several rings            
-    Trk::BinnedArray<const Trk::Surface>* currentBinnedArray = nullptr;
+    Trk::BinnedArray<Trk::Surface>* currentBinnedArray = nullptr;
     
     double halfPhiStep = M_PI/discPhiSectors[discCounter];
     // protection in case phi value was fluctuating around 0 or M_PI in parsing
@@ -1207,7 +1232,7 @@ std::vector<Trk::DiscLayer*>* InDet::SiLayerBuilder::createRingLayers() const {
                                                              Trk::binPhi);
     
     // a one-dimensional BinnedArray is sufficient
-    currentBinnedArray = new Trk::BinnedArray1D<const Trk::Surface>(discSurfaces[discCounter],currentBinUtility);
+    currentBinnedArray = new Trk::BinnedArray1D<Trk::Surface>(discSurfaces[discCounter],currentBinUtility);
     
     int discSurfacesNum = (discSurfaces[discCounter]).size();
     ATH_MSG_DEBUG( "Constructed BinnedArray for DiscLayer with "<< discSurfacesNum << " SubSurfaces." );
@@ -1217,10 +1242,10 @@ std::vector<Trk::DiscLayer*>* InDet::SiLayerBuilder::createRingLayers() const {
     // checking for :
     //   - empty surface bins
     //   - doubly filled bins
-    std::map< const Trk::Surface*,Amg::Vector3D > uniqueSurfaceMap;
-    std::map< const Trk::Surface*,Amg::Vector3D >::iterator usmIter = uniqueSurfaceMap.end();
+    std::map< Trk::Surface*,Amg::Vector3D > uniqueSurfaceMap;
+    std::map< Trk::Surface*,Amg::Vector3D >::iterator usmIter = uniqueSurfaceMap.end();
     // check the registered surfaces in the binned array
-    Trk::BinnedArraySpan<Trk::Surface const * const> arraySurfaces = currentBinnedArray->arrayObjects();
+    Trk::BinnedArraySpan<Trk::Surface * const> arraySurfaces = currentBinnedArray->arrayObjects();
     size_t dsumCheckSurfaces = 0;
     double lastPhi = 0.;
     for (const auto & asurfIter : arraySurfaces){
@@ -1261,7 +1286,7 @@ std::vector<Trk::DiscLayer*>* InDet::SiLayerBuilder::createRingLayers() const {
     // cleanup
     delete layerMaterial;
     // register the layer to the surfaces --- if necessary to the other sie as well
-    Trk::BinnedArraySpan<Trk::Surface const * const> layerSurfaces     = currentBinnedArray->arrayObjects();
+    Trk::BinnedArraySpan<Trk::Surface * const> layerSurfaces     = currentBinnedArray->arrayObjects();
     registerSurfacesToLayer(layerSurfaces,*activeLayer);
     discLayers->push_back(activeLayer);
     // increase the disc counter by one
@@ -1455,18 +1480,18 @@ const Trk::LayerMaterialProperties* InDet::SiLayerBuilder::endcapLayerMaterial(d
   return layerMaterial;    
 }     
 
-void InDet::SiLayerBuilder::registerSurfacesToLayer(Trk::BinnedArraySpan<Trk::Surface const * const >& layerSurfaces, const Trk::Layer& lay) const
+void InDet::SiLayerBuilder::registerSurfacesToLayer(Trk::BinnedArraySpan<Trk::Surface * const >& layerSurfaces, const Trk::Layer& lay) const
 {
     if (!m_setLayerAssociation) return;
     
-    Trk::BinnedArraySpan<Trk::Surface const * const >::const_iterator laySurfIter    = layerSurfaces.begin();
-    Trk::BinnedArraySpan<Trk::Surface const * const >::const_iterator laySurfIterEnd = layerSurfaces.end();
+    Trk::BinnedArraySpan<Trk::Surface * const >::const_iterator laySurfIter    = layerSurfaces.begin();
+    Trk::BinnedArraySpan<Trk::Surface * const >::const_iterator laySurfIterEnd = layerSurfaces.end();
     // register the surfaces to the layer
     for (; laySurfIter != laySurfIterEnd; ++laySurfIter){
         if (*laySurfIter) { 
             // register the current surface --------------------------------------------------------
             // Needs care in Athena MT
-            Trk::ILayerBuilder::associateLayer(lay, const_cast<Trk::Surface&>(**laySurfIter));
+            Trk::ILayerBuilder::associateLayer(lay, (**laySurfIter));
             const InDetDD::SiDetectorElement* detElement 
                 = dynamic_cast<const InDetDD::SiDetectorElement*>((*laySurfIter)->associatedDetectorElement());             
             // register the backise if necessary ---------------------------------------------------
@@ -1475,6 +1500,7 @@ void InDet::SiLayerBuilder::registerSurfacesToLayer(Trk::BinnedArraySpan<Trk::Su
                                 
             if (otherSideSurface) {
               //Needs care in Athena MT 
+              //Note that we again couple directly to the det element surface not a 
               Trk::ILayerBuilder::associateLayer(lay, const_cast<Trk::Surface&>(*otherSideSurface));
             }
         }

@@ -155,8 +155,7 @@ public:
 
   /** indexLayers : method to re-set the index of the layers, depending on
    * geometrySignature */
-  void indexStaticLayers ATLAS_NOT_THREAD_SAFE(GeometrySignature geosit,
-                                               int offset = 0);
+  void indexStaticLayers(GeometrySignature geosit, int offset = 0);
 
   void dump(MsgStream& out, const std::string& head) const;
 
@@ -169,8 +168,7 @@ private:
       set all contained surfaces TG owned - this should save memory and avoid
      surface copying
       - prints compactification statistics */
-  void compactify ATLAS_NOT_THREAD_SAFE(MsgStream& msgstream,
-                                        TrackingVolume* vol = nullptr);
+  void compactify(MsgStream& msgstream, TrackingVolume* vol = nullptr);
 
   /**  Geometry Builder business:
        synchronize all layers to enclosed volume dimensions */
