@@ -9,7 +9,6 @@
 
 #include "GaudiKernel/ThreadLocalContext.h"
 #include "MuonCnvToolInterfaces/IDC_Helper.h"
-#include "MuonCondInterface/IRPCConditionsSvc.h"
 #include "MuonPrepRawData/MuonPrepDataContainer.h"
 #include "MuonReadoutGeometry/RpcReadoutElement.h"
 #include "MuonTrigCoinData/RpcCoinDataContainer.h"

@@ -50,8 +50,6 @@
 #include <string>
 #include <utility>
 
-
-#include "AIDA/IHistogram1D.h"
 #include "EventInfoMgt/ITagInfoMgr.h"
 #include "PathResolver/PathResolver.h"
 

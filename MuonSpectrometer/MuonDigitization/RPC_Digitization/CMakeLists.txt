@@ -1,22 +1,18 @@
-################################################################################
-# Package: RPC_Digitization
-################################################################################
+# Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
 
 # Declare the package name:
 atlas_subdir( RPC_Digitization )
 
 # External dependencies:
-find_package( AIDA )
-find_package( Boost COMPONENTS filesystem thread system )
 find_package( CLHEP )
-find_package( CORAL COMPONENTS CoralBase CoralKernel RelationalAccess )
+find_package( ROOT COMPONENTS Core )
 
 # Component(s) in the package:
 atlas_add_component( RPC_Digitization
                      src/*.cxx
                      src/components/*.cxx
-                     INCLUDE_DIRS ${AIDA_INCLUDE_DIRS} ${Boost_INCLUDE_DIRS} ${CORAL_INCLUDE_DIRS} ${CLHEP_INCLUDE_DIRS} 
-                     LINK_LIBRARIES ${Boost_LIBRARIES} ${CORAL_LIBRARIES} ${CLHEP_LIBRARIES} AtlasHepMCLib AthenaBaseComps PileUpToolsLib xAODEventInfo GaudiKernel MuonSimData MuonSimEvent HitManagement AthenaKernel GeneratorObjects MuonCondInterface MuonCondData MuonReadoutGeometry MuonDigitContainer MuonIdHelpersLib PathResolver GeometryDBSvcLib EventInfoMgtLib )
+                     INCLUDE_DIRS ${CLHEP_INCLUDE_DIRS} ${ROOT_INCLUDE_DIRS}
+                     LINK_LIBRARIES ${CLHEP_LIBRARIES} ${ROOT_LIBRARIES} AtlasHepMCLib AthenaBaseComps PileUpToolsLib xAODEventInfo GaudiKernel MuonSimData MuonSimEvent HitManagement AthenaKernel GeneratorObjects MuonCondData MuonReadoutGeometry MuonDigitContainer MuonIdHelpersLib PathResolver GeoModelInterfaces GeometryDBSvcLib EventInfoMgtLib RDBAccessSvcLib )
 
 # Install files from the package:
 atlas_install_python_modules( python/*.py POST_BUILD_CMD ${ATLAS_FLAKE8} )
