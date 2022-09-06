@@ -53,7 +53,7 @@ StatusCode DerivationFramework::UFOTrackParticleThinning::initialize()
 
   if (!m_selectionString.empty()){
     // order must match enum order EJetTrPThinningParser
-    ATH_CHECK( initializeParser( {m_selectionString} ));
+    ATH_CHECK( initializeParser( m_selectionString ));
   }
 
   return StatusCode::SUCCESS;
