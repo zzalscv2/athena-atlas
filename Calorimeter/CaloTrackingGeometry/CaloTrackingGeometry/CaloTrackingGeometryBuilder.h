@@ -53,7 +53,7 @@ namespace Calo {
   
     @author Andreas.Salzburger@cern.ch
     */
-class ATLAS_NOT_THREAD_SAFE CaloTrackingGeometryBuilder // Thread unsafe TrackingGeometry::indexStaticLayers
+class CaloTrackingGeometryBuilder
   : public AthAlgTool
   , virtual public Trk::IGeometryBuilder
 {

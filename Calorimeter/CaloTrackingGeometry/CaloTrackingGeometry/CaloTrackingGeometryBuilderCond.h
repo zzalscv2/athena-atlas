@@ -54,11 +54,7 @@ namespace Calo {
   @author Andreas.Salzburger@cern.ch
   */
 
-// Not thread safe due to mutable
-// It is handled via the TrackingGeometryCond
-// asssuming that the calo tracking geometry
-// Calo usually does not change inside a job
-class ATLAS_NOT_THREAD_SAFE CaloTrackingGeometryBuilderCond
+class CaloTrackingGeometryBuilderCond
   : public AthAlgTool
   , virtual public Trk::IGeometryBuilderCond
 {
@@ -71,20 +67,20 @@ public:
   virtual ~CaloTrackingGeometryBuilderCond();
 
   /** AlgTool initailize method.*/
-  virtual StatusCode initialize() override;
+  virtual StatusCode initialize() override final;
 
   /** AlgTool finalize method */
-  virtual StatusCode finalize() override;
+  virtual StatusCode finalize() override final;
 
   /** TrackingGeometry Interface method */
   virtual
   std::unique_ptr<Trk::TrackingGeometry> trackingGeometry(
     const EventContext& ctx,
     Trk::TrackingVolume* innerVol,
-    SG::WriteCondHandle<Trk::TrackingGeometry>& whandle) const override;
+    SG::WriteCondHandle<Trk::TrackingGeometry>& whandle) const override final;
 
   /** The unique signature */
-  virtual Trk::GeometrySignature geometrySignature() const override { return Trk::Calo; }
+  virtual Trk::GeometrySignature geometrySignature() const override final{ return Trk::Calo; }
 
 private:
   ToolHandle<Trk::ITrackingVolumeArrayCreator>
@@ -106,8 +102,8 @@ private:
   // enclosing endcap/cylindervolume
   ServiceHandle<IEnvelopeDefSvc> m_enclosingEnvelopeSvc;
 
-  mutable double m_caloDefaultRadius;      //!< the radius if not built from GeoModel
-  mutable double m_caloDefaultHalflengthZ; //!< the halflength in z if not built from GeoModel
+  double m_caloDefaultRadius;      //!< the radius if not built from GeoModel
+  double m_caloDefaultHalflengthZ; //!< the halflength in z if not built from GeoModel
 
   bool m_indexStaticLayers; //!< forces robust indexing for layers
 
@@ -126,7 +122,6 @@ private:
   std::string m_entryVolume; //!< name of the Calo entrance
   std::string m_exitVolume;  //!< name of the Calo container
 
-  mutable RZPairVector m_bpCutouts;
 
   /** method to establish a link between the LayerIndex and the CaloCell_ID in an associative container */
   void registerInLayerIndexCaloSampleMap(Trk::LayerIndexSampleMap& licsMAp,
@@ -135,22 +130,19 @@ private:
                                          int side = 1) const;
 
   /** method to build enclosed beam pipe volumes */
-  std::pair<Trk::TrackingVolume*, Trk::TrackingVolume*>
-  createBeamPipeVolumes(float, float, const std::string&, float&) const;
+  std::pair<Trk::TrackingVolume*, Trk::TrackingVolume*> createBeamPipeVolumes(
+    const RZPairVector& bpCutouts,
+    float,
+    float,
+    const std::string&,
+    float&) const;
 
-  /** cleanup of material */
-  mutable std::map<const Trk::Material*, bool> m_materialGarbage;
-  void throwIntoGarbage(const Trk::Material* mat) const;
+  mutable std::mutex m_garbageMutex;
+  mutable std::vector<const Trk::Material*> m_materialGarbage ATLAS_THREAD_SAFE;
+
 };
 
 } // end of namespace
-
-inline void
-Calo::CaloTrackingGeometryBuilderCond::throwIntoGarbage(const Trk::Material* mat) const
-{
-  if (mat)
-    m_materialGarbage[mat] = true;
-}
 
 #endif // CALORIMETER_CALOTRACKINGGEOMETRYBUILDERCOND_H
 
