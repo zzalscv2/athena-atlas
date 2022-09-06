@@ -480,7 +480,7 @@ if not globalflags.InputFormat.is_bytestream():
 
 if rec.doTrigger:
     from TriggerJobOpts.TriggerRecoGetter import TriggerRecoGetter
-    triggerGetter = TriggerRecoGetter()
+    triggerGetter = TriggerRecoGetter(ConfigFlags)
 
 AODFix.AODFix_postTrigger()
 
