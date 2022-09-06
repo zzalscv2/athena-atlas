@@ -22,7 +22,11 @@ dqconfig.config         = "Collisions Data"
 dqconfig.hcfg           = os.environ.get('DQC_HCFG_COLLISIONS_RUN', "%s/collisions_run.hcfg" % hcfg_dir)
 dqconfig.hcfg_min10     = os.environ.get('DQC_HCFG_COLLISIONS_MINUTES10', "%s/collisions_minutes10.hcfg" % hcfg_dir)
 dqconfig.hcfg_min30     = os.environ.get('DQC_HCFG_COLLISIONS_MINUTES30', "%s/collisions_minutes30.hcfg" % hcfg_dir)
-dqconfig.server         = os.environ.get('DQC_SERVERS', "aiatlas016.cern.ch,aiatlas011.cern.ch").split(',') if isprod else []
+serverstring = os.environ.get('DQC_SERVERS', "aiatlas016.cern.ch,aiatlas011.cern.ch")
+if serverstring == '':
+    dqconfig.server = []
+else:
+    dqconfig.server = serverstring.split(',') if isprod else []
 dqconfig.eosResultsDir  = "root://eosatlas.cern.ch//eos/atlas/atlascerngroupdisk/data-dqm/han_results/tier0/collisions/" if isprod else ""
 dqconfig.histogramCache = "/afs/cern.ch/user/a/atlasdqm/w1/histogram_web_display_cache" if isprod else ''
 dqconfig.hanResultsDir  = "/dqmdisk0/han_results/tier0/collisions" if isprod else '/afs/cern.ch/user/a/atlasdqm/dqmdisk/han_results/test'
