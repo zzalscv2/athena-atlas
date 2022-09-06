@@ -41,18 +41,28 @@ StatusCode PixelConditionsSummaryTool::initialize(){
   ATH_CHECK(m_pixelDetElStatusEventKey.initialize( !m_pixelDetElStatusEventKey.empty()));
   ATH_CHECK(m_pixelDetElStatusCondKey.initialize( !m_pixelDetElStatusCondKey.empty()));
 
+  std::unordered_map<std::string, PixelDCSStateData::DCSModuleState> state_map;
+  state_map.insert(std::make_pair(std::string("READY"),      PixelDCSStateData::DCSModuleState::READY));
+  state_map.insert(std::make_pair(std::string("ON"),         PixelDCSStateData::DCSModuleState::ON));
+  state_map.insert(std::make_pair(std::string("UNKNOWN"),    PixelDCSStateData::DCSModuleState::UNKNOWN));
+  state_map.insert(std::make_pair(std::string("TRANSITION"), PixelDCSStateData::DCSModuleState::TRANSITION));
+  state_map.insert(std::make_pair(std::string("UNDEFINED"),  PixelDCSStateData::DCSModuleState::UNDEFINED));
+  state_map.insert(std::make_pair(std::string("DISABLED"),   PixelDCSStateData::DCSModuleState::DISABLED));
+  state_map.insert(std::make_pair(std::string("LOCKED_OUT"), PixelDCSStateData::DCSModuleState::LOCKED_OUT));
+  state_map.insert(std::make_pair(std::string("OFF"),        PixelDCSStateData::DCSModuleState::OFF));
+  state_map.insert(std::make_pair(std::string("NOSTATE"),    PixelDCSStateData::DCSModuleState::NOSTATE));
+
   m_activeStateMask=0;
-  for (unsigned int istate=0; istate<m_isActiveStates.size(); istate++) {
-    if      (m_isActiveStates[istate]=="READY")      { m_activeState.push_back(PixelDCSStateData::DCSModuleState::READY); }
-    else if (m_isActiveStates[istate]=="ON")         { m_activeState.push_back(PixelDCSStateData::DCSModuleState::ON); }
-    else if (m_isActiveStates[istate]=="UNKNOWN")    { m_activeState.push_back(PixelDCSStateData::DCSModuleState::UNKNOWN); }
-    else if (m_isActiveStates[istate]=="TRANSITION") { m_activeState.push_back(PixelDCSStateData::DCSModuleState::TRANSITION); }
-    else if (m_isActiveStates[istate]=="UNDEFINED")  { m_activeState.push_back(PixelDCSStateData::DCSModuleState::UNDEFINED); }
-    else if (m_isActiveStates[istate]=="NOSTATE")    { m_activeState.push_back(PixelDCSStateData::DCSModuleState::NOSTATE); }
-    else {
-      ATH_MSG_ERROR("No matching DCS state " << m_isActiveStates[istate] << " in DCSModuleState");
-      return StatusCode::FAILURE;
-    }
+  for (std::string &active_state :  m_isActiveStates) {
+     std::unordered_map<std::string,PixelDCSStateData::DCSModuleState>::const_iterator iter = state_map.find(active_state);
+     if (iter == state_map.end()) {
+        ATH_MSG_ERROR("No matching DCS state " << active_state << " in DCSModuleState");
+        return StatusCode::FAILURE;
+     }
+     else {
+        m_activeState.push_back(iter->second);
+     }
+
     if (m_activeState.back()<0 || m_activeState.back()>31) {
       ATH_MSG_FATAL("Logic error: state id too large. Cannot be represented by a bit");
       return StatusCode::FAILURE;
