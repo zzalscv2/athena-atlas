@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef MUONCALIBEXTENDEDTRACK_H
@@ -32,7 +32,7 @@ namespace MuonCalib {
     class MuonCalibExtendedTrack : public MuonCalibTrack_E {
     public:
         /**  Constructor taking input track. */
-        MuonCalibExtendedTrack(const MuonCalibTrack_E& track, int pdgCode = 0, int barCode = 0);
+        MuonCalibExtendedTrack(const MuonCalibTrack_E& track, int pdgCode = 0, int barCode = 0) ATLAS_CTORDTOR_NOT_THREAD_SAFE;
         virtual ~MuonCalibExtendedTrack();
 
         /** returns trackparameter d0 at IP */
