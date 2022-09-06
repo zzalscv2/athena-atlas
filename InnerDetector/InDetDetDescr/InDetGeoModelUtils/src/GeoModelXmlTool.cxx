@@ -74,6 +74,7 @@ const GeoVPhysVol* GeoModelXmlTool::createTopVolume(GeoPhysVol* world, GmxInterf
       // the & takes its address.
       envVol = &*world->getChildVol(iChild);
       foundContainingDetector = true;
+      if(envelopeName=="") {topVol = envVol;break;}
       unsigned int nGrandchildren = envVol->getNChildVols();    
     for (int iGchild = nGrandchildren - 1; iGchild>=0; --iGchild) {
      if (envVol->getNameOfChildVol(iGchild) == envelopeName) {  
@@ -85,7 +86,7 @@ const GeoVPhysVol* GeoModelXmlTool::createTopVolume(GeoPhysVol* world, GmxInterf
    }
   }
   if(!foundContainingDetector) ATH_MSG_ERROR("Couldn't find the containing detector "<<containingDetector<<" in the world hierarchy!");
-  else if(!foundEnvelope) ATH_MSG_ERROR("Couldn't find the envelope volume "<<envelopeName<<" in the world hierarchy!");
+  else if(envelopeName!="" && !foundEnvelope) ATH_MSG_ERROR("Couldn't find the envelope volume "<<envelopeName<<" in the world hierarchy!");
   return topVol;
 }
 
