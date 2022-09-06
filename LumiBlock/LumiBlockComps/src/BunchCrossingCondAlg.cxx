@@ -37,8 +37,8 @@ namespace {
 StatusCode BunchCrossingCondAlg::initialize() {
   if (m_mode == 2) {
     ATH_CHECK( m_trigConfigSvc.retrieve() );
-    ATH_CHECK( m_bunchGroupCondDataKey.initialize( SG::AllowEmpty ) );
   }
+  ATH_CHECK( m_bunchGroupCondDataKey.initialize( m_mode == 2 && !m_bunchGroupCondDataKey.empty() ) );
   ATH_CHECK( m_fillParamsFolderKey.initialize( m_mode == 0 || m_mode == 1 ) );
   ATH_CHECK( m_lumiCondDataKey.initialize( m_mode == 3 ) );
   ATH_CHECK( m_outputKey.initialize() );
