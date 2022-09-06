@@ -1,11 +1,17 @@
 /*
-  Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration 
+  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration 
 */
 // -*- C++ -*-
 //
 // powhegLesHouchesFileReader.cc - (c) Silvia Ferrario Ravasio and Tomas Jezo
 // inspired by LesHouchesFileReader.cc which is a part of ThePEG
 //
+
+#if __GNUC__ >= 12
+// Suppress a gcc12 false positive
+#pragma GCC diagnostic ignored "-Wuse-after-free"
+#endif
+
 #include "Herwig7_i/PowhegLesHouchesFileReader.h"
 #include "ThePEG/Interface/ClassDocumentation.h"
 #include "ThePEG/Interface/Reference.h"
