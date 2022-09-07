@@ -289,7 +289,7 @@ StatusCode xAODTauFilter::filterEvent() {
 
   if(m_NewOpt && m_HasTightRegion) {
     // Get MC event collection for setting weight
-    const DataHandle<McEventCollection> mecc = 0;
+    const McEventCollection* mecc = 0;
     if ( evtStore()->retrieve( mecc ).isFailure() || !mecc ){
       setFilterPassed(false);
       ATH_MSG_ERROR("Could not retrieve MC Event Collection - weight might not work");

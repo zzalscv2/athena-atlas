@@ -5,7 +5,6 @@
 // Header for this module
 #include "GeneratorFilters/xAODVBFMjjIntervalFilter.h"
 
-#include "StoreGate/DataHandle.h"
 #include "AthenaKernel/IAtRndmGenSvc.h" // For random numbers...
 #include "CLHEP/Random/RandomEngine.h"
 #include "GaudiKernel/PhysicalConstants.h"
@@ -76,7 +75,7 @@ StatusCode xAODVBFMjjIntervalFilter::filterEvent()
     }
 
     // Retrieve jet container
-    const DataHandle<xAOD::JetContainer> truthJetCollection = 0;
+    const xAOD::JetContainer* truthJetCollection = 0;
     if (!evtStore()->contains<xAOD::JetContainer>(m_TruthJetContainerName) ||
         evtStore()->retrieve(truthJetCollection, m_TruthJetContainerName).isFailure() ||
         !truthJetCollection)
@@ -209,7 +208,7 @@ StatusCode xAODVBFMjjIntervalFilter::filterEvent()
         }
 
         // Get MC event collection for setting weight
-        const DataHandle<McEventCollection> mecc = 0;
+        const McEventCollection* mecc = 0;
         if (evtStore()->retrieve(mecc).isFailure() || !mecc)
         {
             setFilterPassed(false);

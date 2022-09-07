@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2020 CERN for the benefit of the ATLAS collaboration 
+  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
 */
 // This is a general-purpose multi-b-jet filter. It can cut on:
 //    - Multiplicity of b-jets (both min and max can be specified)
@@ -153,7 +153,7 @@ StatusCode MultiBjetFilter::filterEvent() {
 	m_NPass++;
 	m_SumOfWeights_Pass += weight/m_inclusiveEff;
 
-	const DataHandle<McEventCollection> mecc = 0;   
+	const McEventCollection* mecc = 0;
 	CHECK(evtStore()->retrieve(mecc));   
 	ATH_MSG_DEBUG("Adding prescaled inclusive event.  Will mod event weights by " << 1./m_inclusiveEff << " rnd " << rnd);   
 	double orig = 1.;   
