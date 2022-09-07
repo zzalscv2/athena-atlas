@@ -32,20 +32,8 @@ class ItemDef:
 
     otherTopoNames = ddict(list)
 
-
     @staticmethod
-    def registerItems(tc, menuName):
-        """Register L1 items for further use"""
-
-        # dear Menu Experts, please note that it is only necessary to
-        # check the menu name if a certain item needs to be defined
-        # differently in different menus
-
-        # define local flag for menu version
-        isV8 = '_v8' in menuName or 'run3_v1' in menuName
-        isHIV5 = 'HI_v5' in menuName
-        isPhaseII = '_PhaseII' in menuName
-
+    def threshold_conditions(tc):
         class d(with_metaclass(meta_d)): pass
 
         # ... and make them accessible by their name
@@ -60,6 +48,23 @@ class ItemDef:
 
         for i in range( Limits.NumRndmTriggers ):
             setattr (d, "RNDM%i"%i, InternalTrigger('RNDM%i'%i))
+
+        return d
+
+    @staticmethod
+    def registerItems(tc, menuName):
+        """Register L1 items for further use"""
+
+        # dear Menu Experts, please note that it is only necessary to
+        # check the menu name if a certain item needs to be defined
+        # differently in different menus
+
+        # define local flag for menu version
+        isV8 = '_v8' in menuName or 'run3_v1' in menuName
+        isHIV5 = 'HI_v5' in menuName
+        isPhaseII = '_PhaseII' in menuName
+
+        d = ItemDef.threshold_conditions(tc)
 
         # Setting up bunch group and BPTX conditions
         physcond            = d.BGRP0 & d.BGRP1
@@ -87,7 +92,6 @@ class ItemDef:
 
 
         MenuItem.currentPartition = 1
-
 
         # ZDC
 
@@ -1163,7 +1167,7 @@ class ItemDef:
         MenuItem('L1_ZDC_C_BGRP9'      ).setLogic( ZDC_C & bgrp9cond & physcond)
         MenuItem('L1_ZDC_A_C_BGRP11'     ).setLogic( ZDC_A_C & bgrp11cond & physcond)
 
-  # ATR-12470
+# ATR-12470
         ZDC_XOR = (ZDC_A & Not(ZDC_C)) | (ZDC_C & Not(ZDC_A))
         MenuItem('L1_ZDC_A_VZDC_C'                  ).setLogic(ZDC_A & Not(ZDC_C) & physcond)
         MenuItem('L1_ZDC_C_VZDC_A'                  ).setLogic(ZDC_C & Not(ZDC_A) & physcond)
@@ -1516,12 +1520,12 @@ class ItemDef:
 
 
         MenuItem('L1_ALFA_ELAST1').setLogic( d.ALFA_B7L1U & d.ALFA_A7L1U & d.ALFA_A7R1L & d.ALFA_B7R1L &
-                                                 Not(d.ALFA3_B7L1L | d.ALFA3_A7L1L | d.ALFA3_A7R1U | d.ALFA3_B7R1U)
-                                                 & physcond).setTriggerType(TT.alfa)
+                                                Not(d.ALFA3_B7L1L | d.ALFA3_A7L1L | d.ALFA3_A7R1U | d.ALFA3_B7R1U)
+                                                & physcond).setTriggerType(TT.alfa)
 
         MenuItem('L1_ALFA_ELAST2').setLogic( d.ALFA_B7L1L & d.ALFA_A7L1L & d.ALFA_A7R1U & d.ALFA_B7R1U &
-                                                 Not(d.ALFA3_B7L1U | d.ALFA3_A7L1U | d.ALFA3_A7R1L | d.ALFA3_B7R1L)
-                                                 & physcond).setTriggerType(TT.alfa)
+                                                Not(d.ALFA3_B7L1U | d.ALFA3_A7L1U | d.ALFA3_A7R1L | d.ALFA3_B7R1L)
+                                                & physcond).setTriggerType(TT.alfa)
 
         MenuItem('L1_ALFA_ELAST11').setLogic( d.ALFA_B7L1U & d.ALFA_A7L1U & d.ALFA_A7R1L & d.ALFA_B7R1L    & physcond).setTriggerType(TT.alfa)
         MenuItem('L1_ALFA_ELAST12').setLogic( d.ALFA_B7L1L & d.ALFA_A7L1L & d.ALFA_A7R1U & d.ALFA_B7R1U    & physcond).setTriggerType(TT.alfa)
@@ -1536,20 +1540,20 @@ class ItemDef:
 
 
         MenuItem('L1_ALFA_SDIFF1').setLogic( d.ALFA_B7L1U & d.ALFA_A7L1U &
-                                                 Not(d.ALFA3_B7L1L | d.ALFA3_A7L1L | d.ALFA3_A7R1U | d.ALFA3_A7R1L | d.ALFA3_B7R1U | d.ALFA3_B7R1L)
-                                                 & physcond).setTriggerType(TT.alfa)
+                                                Not(d.ALFA3_B7L1L | d.ALFA3_A7L1L | d.ALFA3_A7R1U | d.ALFA3_A7R1L | d.ALFA3_B7R1U | d.ALFA3_B7R1L)
+                                                & physcond).setTriggerType(TT.alfa)
 
         MenuItem('L1_ALFA_SDIFF2').setLogic( d.ALFA_A7R1L & d.ALFA_B7R1L &
-                                                 Not(d.ALFA3_B7L1U | d.ALFA3_B7L1L | d.ALFA3_A7L1U | d.ALFA3_A7L1L | d.ALFA3_A7R1U | d.ALFA3_B7R1U)
-                                                 & physcond).setTriggerType(TT.alfa)
+                                                Not(d.ALFA3_B7L1U | d.ALFA3_B7L1L | d.ALFA3_A7L1U | d.ALFA3_A7L1L | d.ALFA3_A7R1U | d.ALFA3_B7R1U)
+                                                & physcond).setTriggerType(TT.alfa)
 
         MenuItem('L1_ALFA_SDIFF3').setLogic( d.ALFA_B7L1L & d.ALFA_A7L1L &
-                                                 Not(d.ALFA3_B7L1U | d.ALFA3_A7L1U | d.ALFA3_A7R1U | d.ALFA3_A7R1L | d.ALFA3_B7R1U | d.ALFA3_B7R1L)
-                                                 & physcond).setTriggerType(TT.alfa)
+                                                Not(d.ALFA3_B7L1U | d.ALFA3_A7L1U | d.ALFA3_A7R1U | d.ALFA3_A7R1L | d.ALFA3_B7R1U | d.ALFA3_B7R1L)
+                                                & physcond).setTriggerType(TT.alfa)
 
         MenuItem('L1_ALFA_SDIFF4').setLogic( d.ALFA_A7R1U & d.ALFA_B7R1U &
-                                                 Not(d.ALFA3_B7L1U | d.ALFA3_B7L1L | d.ALFA3_A7L1U | d.ALFA3_A7L1L | d.ALFA3_A7R1L | d.ALFA3_B7R1L)
-                                                 & physcond).setTriggerType(TT.alfa)
+                                                Not(d.ALFA3_B7L1U | d.ALFA3_B7L1L | d.ALFA3_A7L1U | d.ALFA3_A7L1L | d.ALFA3_A7R1L | d.ALFA3_B7R1L)
+                                                & physcond).setTriggerType(TT.alfa)
 
         MenuItem('L1_ALFA_SDIFF5').setLogic( d.ALFA_B7L1U & d.ALFA_A7L1U &  physcond).setTriggerType(TT.alfa)
         MenuItem('L1_ALFA_SDIFF6').setLogic( d.ALFA_A7R1L & d.ALFA_B7R1L &  physcond).setTriggerType(TT.alfa)
@@ -1858,8 +1862,96 @@ class ItemDef:
         # reset to partition 1
         MenuItem.currentPartition = 1
 
+        MenuItem.l1configForRegistration = None
+
+    @staticmethod
+    def registerItems_AllCTPIn(tc):
+        """
+        CTP maps the L1 items to its inputs via two switch matrices.
+        The first one is used to identify all CTP inputs, and is constructed
+        using a dummy menu which accesses every input item.
+        We construct this menu dynamically by reading all of the thresholds
+        on every connector.
+        The real L1 menu is used to generate the second switch matrix only.
+        """
+
+        MenuItem.l1configForRegistration = tc
+
+        d = ItemDef.threshold_conditions(tc)
+
+        # Use this as a default
+        physcond = d.BGRP0 & d.BGRP1
+
+        for board in list(L1MenuFlags.boards().values()) + list(L1MenuFlags.legacyBoards().values()):
+            log.info(f"Currently reading config for board {board['name']}")
+
+            # Only neededed for the direct CTPIN cables
+            if board['name'] not in ['Ctpin7','Ctpin8','Ctpin9']:
+                continue
+
+            # Ignore the sub-boards, just use the merger board
+            if board['name'] in ['LegacyTopo0','LegacyTopo1']:
+                continue
+
+            for conn in board['connectors']:
+                itemname = f"L1_{conn['name']}_Thresholds"
+                
+                # Handling for Phase-I topo algorithms
+                if conn['name'] in ['Topo2El','Topo3El','MuCTPiEl']:
+                    # Accumulate list of thresholds for the connector
+                    thresholds = []
+
+                    prefix = 'MUTOPO' if conn['name'] == 'MuCTPiEl' else 'TOPO'
+
+                    for g in conn['algorithmGroups']:
+                        for a in g['algorithms']:
+                            for l in a.outputlines:
+                                thresholds.append(f"{prefix}_{l}")
+                    log.info(f"Combining {len(thresholds)} thresholds into item {itemname} for connector {conn['name']}")
+                    
+                    # Need to do AND here because the AND logic occurs in the fully connected CAM,
+                    # while OR is later in the LUTs which support fewer inputs
+                    item_str = '&'.join(f"d.{t.replace('-','_')}" for t in thresholds)
+                    log.info(item_str)
+                    MenuItem(itemname).setLogic(eval(item_str) & physcond)
 
 
+                # ALFA and LegacyTopoMerged have a different convention
+                elif conn['name'] in ['AlfaCtpin','LegacyTopoMerged']:
+                    # Accumulate list of thresholds for the connector
+                    thresholds = []
+                    for g in conn['signalGroups']:
+                        for s in g['signals']:
+                            if s.__class__==str:
+                                thresholds.append(s)
+                            elif s.__class__==tuple and s[0]:
+                                thresholds.append(s[0])
+                    log.info(f"Combining {len(thresholds)} thresholds into item {itemname} for connector {conn['name']}")
 
+                    # Need to do AND here because the AND logic occurs in the fully connected CAM,
+                    # while OR is later in the LUTs which support fewer inputs
+                    item_str = '&'.join(f"d.{t.replace('-','_')}" for t in thresholds)
+                    log.info(item_str)
+                    MenuItem(itemname).setLogic(eval(item_str) & physcond)
+
+
+                # Handling for multiplicity thresholds
+                else:
+
+                    # Accumulate list of thresholds for the connector
+                    thresholds = []
+                    for t in conn['thresholds']:
+                        if t.__class__==str and 'SPARE' not in t:
+                            thresholds.append(t)
+                        elif t.__class__==tuple and t[0] and 'SPARE' not in t[0]:
+                            thresholds.append(t[0])
+                    log.info(f"Combining {len(thresholds)} thresholds into item {itemname} for connector {conn['name']}")
+                    
+                    # Need to do AND here because the AND logic occurs in the fully connected CAM,
+                    # while OR is later in the LUTs which support fewer inputs
+                    # For some reason we drop the 'p' (Run 2 '.') here
+                    item_str = '&'.join(f"d.{t.replace('p','')}" for t in thresholds)
+                    log.info(item_str)
+                    MenuItem(itemname).setLogic(eval(item_str) & physcond)
 
         MenuItem.l1configForRegistration = None
