@@ -14,6 +14,31 @@ using std::abs;
 
 #ifndef XAOD_ANALYSIS
 std::pair<ParticleType, ParticleOrigin>
+MCTruthClassifier::particleTruthClassifier(const HepMcParticleLink& theLink, Info* info /*= nullptr*/) const
+{
+  // Retrieve the links between HepMC and xAOD::TruthParticle
+  const EventContext& ctx =
+    info ? info->eventContext : Gaudi::Hive::currentContext();
+
+  SG::ReadHandle<xAODTruthParticleLinkVector> truthParticleLinkVecReadHandle(
+    m_truthLinkVecReadHandleKey, ctx);
+  if (!truthParticleLinkVecReadHandle.isValid()) {
+    ATH_MSG_WARNING(
+      " Invalid ReadHandle for xAODTruthParticleLinkVector with key: "
+      << truthParticleLinkVecReadHandle.key());
+    return std::make_pair(Unknown, NonDefined);
+  }
+
+  ElementLink<xAOD::TruthParticleContainer> tplink = truthParticleLinkVecReadHandle->find (theLink);
+  if (tplink.isValid()) {
+    return particleTruthClassifier (*tplink, info);
+  }
+
+  return std::make_pair(Unknown, NonDefined);
+}
+
+
+std::pair<ParticleType, ParticleOrigin>
 MCTruthClassifier::particleTruthClassifier(HepMC::ConstGenParticlePtr thePart, Info* info /*= nullptr*/) const
 {
   //---------------------------------------------------------------------------------------
@@ -36,9 +61,10 @@ MCTruthClassifier::particleTruthClassifier(HepMC::ConstGenParticlePtr thePart, I
     return std::make_pair(partType, partOrig);
   }
 
+  int theBC = HepMC::barcode(thePart);
   for (const auto entry : *truthParticleLinkVecReadHandle) {
     if (entry->first.isValid() && entry->second.isValid() &&
-        HepMC::barcode(entry->first.cptr()) == HepMC::barcode(thePart)) {
+        entry->first.barcode() == theBC) {
       const xAOD::TruthParticle* truthParticle = *entry->second;
       if (!compareTruthParticles(thePart, truthParticle)) {
         // if the barcode/pdg id / status of the pair does not match

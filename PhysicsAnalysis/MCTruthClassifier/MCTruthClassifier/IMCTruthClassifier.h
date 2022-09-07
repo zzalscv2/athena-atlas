@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2020 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
 */
 
 ///////////////////////////////////////////////////////////////////
@@ -38,6 +38,7 @@
 
 #ifndef XAOD_ANALYSIS // Can not be used in AnalysisBase
 #include <AtlasHepMC/GenParticle.h>
+class HepMcParticleLink;
 #endif
 
 #if !defined(XAOD_ANALYSIS) &&                                                 \
@@ -133,7 +134,12 @@ public:
 
 
 
-#ifndef XAOD_ANALYSIS /*This can not run in Analysis Base*/
+#ifndef XAOD_ANALYSIS /*These can not run in Analysis Base*/
+  virtual std::pair<MCTruthPartClassifier::ParticleType,
+                    MCTruthPartClassifier::ParticleOrigin>
+  particleTruthClassifier(const HepMcParticleLink& theLink,
+                          Info* info = nullptr) const = 0;
+
   virtual std::pair<MCTruthPartClassifier::ParticleType,
                     MCTruthPartClassifier::ParticleOrigin>
   particleTruthClassifier(HepMC::ConstGenParticlePtr,
