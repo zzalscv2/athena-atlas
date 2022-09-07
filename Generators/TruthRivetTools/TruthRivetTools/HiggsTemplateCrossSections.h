@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2017 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef TRUTHRIVETTOOLS_HIGGSTEMPLATECROSSSECTIONS_H
@@ -107,8 +107,8 @@ namespace Rivet {
       ++m_errorCount[err];
 
       // Print warning message to the screen/log
-      static int Nwarnings = 0;
-      if ( msg!="" && ++Nwarnings < NmaxWarnings )
+      static std::atomic<int> Nwarnings = 0;
+      if ( !msg.empty() && ++Nwarnings < NmaxWarnings )
           MSG_WARNING(msg);
 
       return cat;
@@ -668,13 +668,13 @@ namespace Rivet {
       m_hist_stage0->fill( cat.stage0_cat/10*2+F, weight );
       
       // Stage 1 enum offsets for each production mode: GGF=12, VBF=6, WH= 5, QQ2ZH=5, GG2ZH=4, TTH=2, BBH=2, TH=2
-      static vector<int> offset({0,1,13,19,24,29,33,35,37,39});
+      static const vector<int> offset({0,1,13,19,24,29,33,35,37,39});
       int off = offset[P];
       // Stage 1.2 enum offsets for each production mode: GGF=17, VBF=11, WH= 6, QQ2ZH=6, GG2ZH=6, TTH=6, BBH=2, TH=2
-      static vector<int> offset1_2({0,1,18,29,35,41,47,53,55,57});
+      static const vector<int> offset1_2({0,1,18,29,35,41,47,53,55,57});
       int off1_2 = offset1_2[P];
       // Stage 1.2-Fine enum offsets for each production mode: GGF=28, VBF=25, WH= 16, QQ2ZH=16, GG2ZH=16, TTH=7, BBH=2, TH=2
-      static vector<int> offset1_2_Fine({0,1,29,54,70,86,102,109,111,113});
+      static const vector<int> offset1_2_Fine({0,1,29,54,70,86,102,109,111,113});
       int off1_2_Fine = offset1_2_Fine[P];
 
       m_hist_stage1_pTjet25->fill(cat.stage1_cat_pTjet25GeV%100 + off, weight);

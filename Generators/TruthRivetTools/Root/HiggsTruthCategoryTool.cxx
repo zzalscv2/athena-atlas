@@ -5,6 +5,8 @@
 // TruthRivetTools includes
 #include "TruthRivetTools/HiggsTruthCategoryTool.h"
 
+#include <mutex>
+
 HiggsTruthCategoryTool::HiggsTruthCategoryTool( const std::string& name) 
 : asg::AsgTool( name ),
   rivetAnaHandler(nullptr),
@@ -12,8 +14,7 @@ HiggsTruthCategoryTool::HiggsTruthCategoryTool( const std::string& name)
 {
   // cannot be set to true until the issue with the beam protons in the truth event record is fixed..
   // see JIRA ticket: https://its.cern.ch/jira/browse/ATLASRECTS-3072?filter=-2
-  m_outHistos = false; 
-  m_isInitialized = false;
+  m_outHistos = false;
 }
 
 
@@ -46,11 +47,12 @@ StatusCode HiggsTruthCategoryTool :: finalize () {
 }
 
 HTXS::HiggsClassification* HiggsTruthCategoryTool :: getHiggsTruthCategoryObject (const HepMC::GenEvent& HepMCEvent, const HTXS::HiggsProdMode prodMode) const {
-  if ( !m_isInitialized ) {
-    higgsTemplateCrossSections->setHiggsProdMode(prodMode); 
-    rivetAnaHandler->init(HepMCEvent); 
-    m_isInitialized=true;
-  }
+
+  static std::once_flag flag;
+  std::call_once(flag, [&]() {
+    higgsTemplateCrossSections->setHiggsProdMode(prodMode);
+    rivetAnaHandler->init(HepMCEvent);
+  });
   // fill histos if flag is specified
   if ( m_outHistos ) rivetAnaHandler->analyze(HepMCEvent);
   // get the category output object containing the template cross section category,
