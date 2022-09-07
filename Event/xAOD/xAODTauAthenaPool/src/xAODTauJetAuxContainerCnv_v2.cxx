@@ -2,8 +2,6 @@
   Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
 */
 
-// $Id: xAODTauJetAuxContainerCnv_v2.cxx 653224 2015-03-11 09:59:03Z will $
-
 // System include(s):
 #include <stdexcept>
 
@@ -24,16 +22,6 @@
 #include "StoreGate/StoreGateSvc.h"
 #include "GaudiKernel/ServiceHandle.h"
 
-/// Convenience macro for setting the level of output messages
-#define MSGLVL MSG::DEBUG
-
-/// Another convenience macro for printing messages in the converter
-#define ATH_MSG( MSG )                          \
-   do {                                         \
-      if( log.level() <= MSGLVL ) {             \
-         log << MSGLVL << MSG << endmsg;        \
-      }                                         \
-   } while( 0 )
 
 xAODTauJetAuxContainerCnv_v2::xAODTauJetAuxContainerCnv_v2()
 {
@@ -48,15 +36,11 @@ persToTransWithKey( const xAOD::TauJetAuxContainer_v2* oldObj,
 
   ServiceHandle<StoreGateSvc> evtStore ("StoreGateSvc", "tauJetCnv_v2");
   if (evtStore.retrieve().isFailure()) {
-    ATH_MSG("Cannot get StoreGateHandle");
+    log << MSG::ERROR << "Cannot get StoreGateHandle" << endmsg;
     return;
   }
 
-
-   // Greet the user:
-   ATH_MSG( "Converting xAOD::TauJetAuxContainer_v2 to current version..." );
-
-   xAOD::TauTrackContainer* pTracks = nullptr; 
+   xAOD::TauTrackContainer* pTracks = nullptr;
    xAOD::TauTrackAuxContainer* pAuxTracks = nullptr; 
    if(key.length()){
      //if reading data, then trigger calls T/P converter directly
@@ -334,22 +318,18 @@ persToTransWithKey( const xAOD::TauJetAuxContainer_v2* oldObj,
        if(tauTrackContName.find("HLT") != std::string::npos) tauTrackContName+="Tracks";
      }
      else {
-       ATH_MSG("Cannot decipher name TauTrackConatiner should have");
+       log << MSG::ERROR << "Cannot decipher name TauTrackConatiner should have" << endmsg;
        return;
      }
    
      std::string tauTrackAuxContName=tauTrackContName+"Aux.";
 
      if(evtStore->record(pTracks, tauTrackContName).isFailure() ||
-	evtStore->record(pAuxTracks, tauTrackAuxContName)){
-       ATH_MSG("Couldn't Record TauTracks");
+        evtStore->record(pAuxTracks, tauTrackAuxContName)){
+       log << MSG::DEBUG << "Couldn't Record TauTracks" << endmsg;
        return;
      }
    }
-
-   // Print what happened:
-   ATH_MSG( "Converting xAOD::TauJetAuxContainer_v2 to current version "
-	    "[OK]" );
 
    return;
 }

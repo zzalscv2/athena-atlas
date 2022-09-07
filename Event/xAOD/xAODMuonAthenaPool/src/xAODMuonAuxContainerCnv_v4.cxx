@@ -1,8 +1,6 @@
 /*
-  Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
 */
-
-// $Id:  $
 
 // System include(s):
 #include <stdexcept>
@@ -18,16 +16,6 @@
 #include "xAODMuon/MuonContainer.h"
 #include "xAODMuon/versions/MuonContainer_v1.h"
 
-/// Convenience macro for setting the level of output messages
-#define MSGLVL MSG::DEBUG
-
-/// Another convenience macro for printing messages in the converter
-#define ATH_MSG( MSG )                          \
-   do {                                         \
-      if( log.level() <= MSGLVL ) {             \
-         log << MSGLVL << MSG << endmsg;        \
-      }                                         \
-   } while( 0 )
 
 xAODMuonAuxContainerCnv_v4::xAODMuonAuxContainerCnv_v4()
 {
@@ -36,10 +24,7 @@ xAODMuonAuxContainerCnv_v4::xAODMuonAuxContainerCnv_v4()
 void xAODMuonAuxContainerCnv_v4::
 persToTrans( const xAOD::MuonAuxContainer_v4* oldObj,
              xAOD::MuonAuxContainer* newObj,
-             MsgStream& log ) const {
-
-   // Greet the user:
-   ATH_MSG( "Converting xAOD::MuonAuxContainer_v4 to current version..." );
+             MsgStream& /*log*/ ) const {
 
    // Clear the transient object:
    newObj->resize( 0 );
@@ -47,10 +32,6 @@ persToTrans( const xAOD::MuonAuxContainer_v4* oldObj,
    // Copy the payload of the v1 object into the latest one by misusing
    // the thinning code a bit...
    SG::copyAuxStoreThinned( *oldObj, *newObj, nullptr );
-
-   // Print what happened:
-   ATH_MSG( "Converting xAOD::MuonAuxContainer_v4 to current version "
-            "[OK]" );
 
    return;
 }
