@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2019 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef ATHENAPOOLMULTITEST_DUMMYLUMIRANGETOOL_H
@@ -12,13 +12,13 @@
  *
  * @author Jack Cranshaw <Jack.Cranshaw@cern.ch>
  *
- * $Id: DummyLumirangeTool.h,v 1.1 2009-04-28 19:04:06 cranshaw Exp $
  *
  */
 
 //<<<<<< INCLUDES                                                       >>>>>>
 
 #include "AthenaBaseComps/AthAlgorithm.h"
+#include "CxxUtils/checker_macros.h"
 #include "Gaudi/Property.h"
 #include "GaudiKernel/ServiceHandle.h"
 #include "StoreGate/WriteHandleKey.h"
@@ -47,7 +47,7 @@ public:
                             ISvcLocator* pSvcLocator);
 
   /// Initialize DummyLumirangeTool
-  virtual StatusCode initialize() override;
+  virtual StatusCode initialize ATLAS_NOT_THREAD_SAFE () override;
   virtual StatusCode execute() override;
 
   /// Terminate DummyLumirangeTool
