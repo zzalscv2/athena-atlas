@@ -118,7 +118,7 @@ namespace G4UA
           currentBarcode = HepMC::barcode(atlasG4EvtUserInfo->GetCurrentlyTraced());
         }
 
-        bool p1 = m_config.targetTrack<0 && m_config.targetBarcode<0;
+        bool p1 = m_config.targetTrack<0 && m_config.targetBarcode<0 && m_config.targetPdgIDs.empty();
         bool p2 = trackID==m_config.targetTrack;
         bool p3 = currentBarcode==m_config.targetBarcode;
         bool p4 = false;

@@ -1,6 +1,6 @@
 #!/bin/sh
 #
-# art-description: MC21-style simulation of monopole samples using FullG4MT_QS
+# art-description: MC21-style simulation of smuon samples using FullG4MT_QS - input needs to be updated to an official sample when available.
 # art-include: 22.0/Athena
 # art-include: 22.0/AthSimulation
 # art-include: master/Athena
@@ -16,8 +16,8 @@ export ATHENA_PROC_NUMBER=8
 export ATHENA_CORE_NUMBER=8
 Sim_tf.py \
     --CA \
-    --inputEVNTFile="/cvmfs/atlas-nightlies.cern.ch/repo/data/data-art/ISF_Validation/mc21_13p6TeV.950542.MGPy8EG_DYSpinHalfMonopoles_1gD_1500GeV_valid.merge.EVNT.e8467_e8455.29631249._000005.pool.root.1" \
-    --maxEvents="100" \
+    --inputEVNTFile="/cvmfs/atlas-nightlies.cern.ch/repo/data/data-art/ISF_Validation/mc21_13p6TeV.temp.DisplacedSmuonPairProduction.10events.pool.root" \
+    --maxEvents="10" \
     --multithreaded="True" \
     --preInclude "EVNTtoHITS:Campaigns.MC21SimulationMultiBeamSpot" \
     --skipEvents="0" \
@@ -43,8 +43,8 @@ rc2=-9999
 if [ $rc -eq 0 ]
 then
     Sim_tf.py \
-        --inputEVNTFile="/cvmfs/atlas-nightlies.cern.ch/repo/data/data-art/ISF_Validation/mc21_13p6TeV.950542.MGPy8EG_DYSpinHalfMonopoles_1gD_1500GeV_valid.merge.EVNT.e8467_e8455.29631249._000005.pool.root.1" \
-        --maxEvents="100" \
+        --inputEVNTFile="/cvmfs/atlas-nightlies.cern.ch/repo/data/data-art/ISF_Validation/mc21_13p6TeV.temp.DisplacedSmuonPairProduction.10events.pool.root" \
+        --maxEvents="10" \
         --multithreaded="True" \
         --postInclude "default:PyJobTransforms/UseFrontier.py" \
         --preInclude "EVNTtoHITS:Campaigns/MC21SimulationMultiBeamSpot.py,SimulationJobOptions/preInclude.ExtraParticles.py,SimulationJobOptions/preInclude.G4ExtraProcesses.py" \
@@ -63,11 +63,11 @@ then
         --athenaopts '"--config-only=ConfigSimCG.pkl"'
 
     Sim_tf.py \
-        --inputEVNTFile="/cvmfs/atlas-nightlies.cern.ch/repo/data/data-art/ISF_Validation/mc21_13p6TeV.950542.MGPy8EG_DYSpinHalfMonopoles_1gD_1500GeV_valid.merge.EVNT.e8467_e8455.29631249._000005.pool.root.1" \
-        --maxEvents="100" \
+        --inputEVNTFile="/cvmfs/atlas-nightlies.cern.ch/repo/data/data-art/ISF_Validation/mc21_13p6TeV.temp.DisplacedSmuonPairProduction.10events.pool.root" \
+        --maxEvents="10" \
         --multithreaded="True" \
         --postInclude "default:PyJobTransforms/UseFrontier.py" \
-        --preInclude "EVNTtoHITS:Campaigns/MC21SimulationMultiBeamSpot.py,SimulationJobOptions/preInclude.ExtraParticles.py,SimulationJobOptions/preInclude.G4ExtraProcesses.py,SimulationJobOptions/preInclude.DebugMonopoles.py" \
+        --preInclude "EVNTtoHITS:Campaigns/MC21SimulationMultiBeamSpot.py,SimulationJobOptions/preInclude.ExtraParticles.py,SimulationJobOptions/preInclude.G4ExtraProcesses.py,SimulationJobOptions/preInclude.DebugSleptonsLLP.py" \
         --skipEvents="0" \
         --randomSeed="41" \
         --DBRelease="all:300.0.4" \
