@@ -56,6 +56,8 @@ theApp.EvtMax = 5
 from AthenaPoolTest.AthenaPoolTestConf import AthenaPoolTestDataReader
 topSequence += AthenaPoolTestDataReader( "AthenaPoolTestDataReader" )
 
+svcMgr.PoolSvc.ReadCatalog = ['file:AthenaPoolTestWriteDoubleSelector_catalog.xml']
+
 #--------------------------------------------------------------
 # Set output level threshold (2=DEBUG, 3=INFO, 4=WARNING, 5=ERROR, 6=FATAL )
 #--------------------------------------------------------------
@@ -85,7 +87,6 @@ svcMgr.AthenaPoolCnvSvc.InputPoolAttributes += [ "DatabaseName = '*'; TREE_CACHE
 # event. However, the cache only works on one tree - the main event
 # tree (CollectionTree) - and we read some things from other trees, so
 # one does see a small increase event-by-event.
-svcMgr.PoolSvc.OutputLevel = INFO
 svcMgr.AthenaPoolCnvSvc.PrintInputAttrPerEvt += [ "DatabaseName = '*'; BYTES_READ = 'double'" ]
 svcMgr.AthenaPoolCnvSvc.PrintInputAttrPerEvt += [ "DatabaseName = '*'; READ_CALLS = 'int'" ]
 
