@@ -8,7 +8,7 @@ from ViewAlgs.ViewAlgsConf import EventViewCreatorAlgorithm
 from DecisionHandling.DecisionHandlingConf import ViewCreatorInitialROITool, ViewCreatorFetchFromViewROITool, ViewCreatorPreviousROITool
 from TrigT2CaloCommon.CaloDef import HLTLCTopoRecoSequence
 from TrigEDMConfig.TriggerEDMRun3 import recordable
-from TriggerMenuMT.HLT.Config.MenuComponents import RecoFragmentsPool
+from TriggerMenuMT.HLT.Config.MenuComponents import RecoFragmentsPool, algorithmCAToGlobalWrapper
 from TrigGenericAlgs.TrigGenericAlgsConfig import ROBPrefetchingAlgCfg_Si, ROBPrefetchingAlgCfg_Calo
 import AthenaCommon.CfgMgr as CfgMgr
 
@@ -174,10 +174,7 @@ def tauCaloMVASequence(flags):
                                      ( 'SG::AuxElement' , 'StoreGateSvc+EventInfo.averageInteractionsPerCrossing' )]
     tauCaloMVAInViewSequence += tauCaloMVARecoVDV
 
-    robPrefetchAlg = RecoFragmentsPool.retrieve(ROBPrefetchingAlgCfg_Calo,
-                                                flags,
-                                                nameSuffix=tauCaloMVAViewsMaker.name(),
-                                                inputMaker=tauCaloMVAViewsMaker)
+    robPrefetchAlg = algorithmCAToGlobalWrapper(ROBPrefetchingAlgCfg_Calo, flags, nameSuffix=tauCaloMVAViewsMaker.name())[0]
 
     tauCaloMVASequence = seqAND("tauCaloMVASequence", [tauCaloMVAViewsMaker, robPrefetchAlg, tauCaloMVAInViewSequence ])
     return (tauCaloMVASequence, tauCaloMVAViewsMaker, sequenceOut)
@@ -311,10 +308,7 @@ def tauFTFCoreSequence(flags):
     ftfCoreViewsMaker.RequireParentView = True
     ftfCoreViewsMaker.ViewNodeName      = RecoSequenceName
 
-    robPrefetchAlg = RecoFragmentsPool.retrieve(ROBPrefetchingAlgCfg_Si,
-                                                flags,
-                                                nameSuffix=ftfCoreViewsMaker.name(),
-                                                inputMaker=ftfCoreViewsMaker)
+    robPrefetchAlg = algorithmCAToGlobalWrapper(ROBPrefetchingAlgCfg_Si, flags, nameSuffix=ftfCoreViewsMaker.name())[0]
 
     (tauFTFCoreInViewSequence, sequenceOut) = tauFTFSequence( ftfCoreViewsMaker.InViewRoIs, RecoSequenceName)
 
@@ -348,10 +342,7 @@ def tauFTFLRTSequence(ConfigFlags):
     ftfLRTViewsMaker.RequireParentView = True
     ftfLRTViewsMaker.ViewNodeName      = RecoSequenceName
 
-    robPrefetchAlg = RecoFragmentsPool.retrieve(ROBPrefetchingAlgCfg_Si,
-                                                ConfigFlags,
-                                                nameSuffix=ftfLRTViewsMaker.name(),
-                                                inputMaker=ftfLRTViewsMaker)
+    robPrefetchAlg = algorithmCAToGlobalWrapper(ROBPrefetchingAlgCfg_Si, ConfigFlags, nameSuffix=ftfLRTViewsMaker.name())[0]
 
     (tauFTFLRTInViewSequence, sequenceOut) = tauFTFSequence( ftfLRTViewsMaker.InViewRoIs, RecoSequenceName)
 
@@ -379,10 +370,7 @@ def tauFTFIsoSequence(flags):
     ftfIsoViewsMaker.RequireParentView = True
     ftfIsoViewsMaker.ViewNodeName      = RecoSequenceName
 
-    robPrefetchAlg = RecoFragmentsPool.retrieve(ROBPrefetchingAlgCfg_Si,
-                                                flags,
-                                                nameSuffix=ftfIsoViewsMaker.name(),
-                                                inputMaker=ftfIsoViewsMaker)
+    robPrefetchAlg = algorithmCAToGlobalWrapper(ROBPrefetchingAlgCfg_Si, flags, nameSuffix=ftfIsoViewsMaker.name())[0]
 
     (tauFTFIsoInViewSequence, sequenceOut) = tauFTFSequence( ftfIsoViewsMaker.InViewRoIs, RecoSequenceName)
 
@@ -410,10 +398,7 @@ def tauFTFIsoBDTSequence(flags):
     ftfIsoViewsMaker.RequireParentView = True
     ftfIsoViewsMaker.ViewNodeName      = RecoSequenceName
 
-    robPrefetchAlg = RecoFragmentsPool.retrieve(ROBPrefetchingAlgCfg_Si,
-                                                flags,
-                                                nameSuffix=ftfIsoViewsMaker.name(),
-                                                inputMaker=ftfIsoViewsMaker)
+    robPrefetchAlg = algorithmCAToGlobalWrapper(ROBPrefetchingAlgCfg_Si, flags, nameSuffix=ftfIsoViewsMaker.name())[0]
 
     (tauFTFIsoBDTInViewSequence, sequenceOut) = tauFTFSequence( ftfIsoViewsMaker.InViewRoIs, RecoSequenceName)
 

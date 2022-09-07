@@ -108,16 +108,16 @@ def MistimedStreamMonitorConfig(flags):
         groupMapsEM0         = helper.addGroup(MistimedMonAlg,  'EventofInterest_'+str(i)+'_lut_EM0', mainDir)
         groupMapsEM0.defineHistogram('etalut,philut,emLUT0;EventofInterest_'+str(i)+'_em_2d_etaPhi_tt_lut0_mistimedStreamAna', title='#eta - #phi Map of TT LUT in timeslice 0 = BCID-1, EM layer: event of interest no. '+str(i)+';#eta;#phi'  , xbins=etabins, ybins=phibins, ymin=phimin, ymax=phibins, type='TProfile2D', path=histPath)
         groupMapsEM1         = helper.addGroup(MistimedMonAlg,  'EventofInterest_'+str(i)+'_lut_EM1', mainDir)
-        groupMapsEM1.defineHistogram('etalut,philut,emLUT1;EventofInterest_'+str(i)+'_em_2d_etaPhi_tt_lut1_mistimedStreamAna', title='#eta - #phi Map of TT LUT in timeslice 1 = BCID-1, EM layer: event of interest no. '+str(i)+';#eta;#phi'  , xbins=etabins, ybins=phibins, ymin=phimin, ymax=phibins, type='TProfile2D', path=histPath)
+        groupMapsEM1.defineHistogram('etalut,philut,emLUT1;EventofInterest_'+str(i)+'_em_2d_etaPhi_tt_lut1_mistimedStreamAna', title='#eta - #phi Map of TT LUT in timeslice 1 = BCID, EM layer: event of interest no. '+str(i)+';#eta;#phi'  , xbins=etabins, ybins=phibins, ymin=phimin, ymax=phibins, type='TProfile2D', path=histPath)
         groupMapsEM2         = helper.addGroup(MistimedMonAlg,  'EventofInterest_'+str(i)+'_lut_EM2', mainDir)
-        groupMapsEM2.defineHistogram('etalut,philut,emLUT2;EventofInterest_'+str(i)+'_em_2d_etaPhi_tt_lut2_mistimedStreamAna', title='#eta - #phi Map of TT LUT in timeslice 2 = BCID-1, EM layer: event of interest no. '+str(i)+';#eta;#phi'  , xbins=etabins, ybins=phibins, ymin=phimin, ymax=phibins,  type='TProfile2D', path=histPath)
+        groupMapsEM2.defineHistogram('etalut,philut,emLUT2;EventofInterest_'+str(i)+'_em_2d_etaPhi_tt_lut2_mistimedStreamAna', title='#eta - #phi Map of TT LUT in timeslice 2 = BCID+1, EM layer: event of interest no. '+str(i)+';#eta;#phi'  , xbins=etabins, ybins=phibins, ymin=phimin, ymax=phibins,  type='TProfile2D', path=histPath)
     
         groupMapsHAD0         = helper.addGroup(MistimedMonAlg, 'EventofInterest_'+str(i)+'_lut_HAD0', mainDir)
         groupMapsHAD0.defineHistogram('etalut,philut,hadLUT0;EventofInterest_'+str(i)+'_had_2d_etaPhi_tt_lut0_mistimedStreamAna', title='#eta - #phi Map of TT LUT in timeslice 0 = BCID-1, HAD layer: event of interest no. '+str(i)+';#eta;#phi'  , xbins=etabins, ybins=phibins, ymin=phimin, ymax=phibins, type='TProfile2D', path=histPath)
         groupMapsHAD1         = helper.addGroup(MistimedMonAlg, 'EventofInterest_'+str(i)+'_lut_HAD1', mainDir)
-        groupMapsHAD1.defineHistogram('etalut,philut,hadLUT1;EventofInterest_'+str(i)+'_had_2d_etaPhi_tt_lut1_mistimedStreamAna', title='#eta - #phi Map of TT LUT in timeslice 1 = BCID-1, HAD layer: event of interest no. '+str(i)+';#eta;#phi'  , xbins=etabins, ybins=phibins, ymin=phimin, ymax=phibins, type='TProfile2D', path=histPath)
+        groupMapsHAD1.defineHistogram('etalut,philut,hadLUT1;EventofInterest_'+str(i)+'_had_2d_etaPhi_tt_lut1_mistimedStreamAna', title='#eta - #phi Map of TT LUT in timeslice 1 = BCID, HAD layer: event of interest no. '+str(i)+';#eta;#phi'  , xbins=etabins, ybins=phibins, ymin=phimin, ymax=phibins, type='TProfile2D', path=histPath)
         groupMapsHAD2         = helper.addGroup(MistimedMonAlg, 'EventofInterest_'+str(i)+'_lut_HAD2', mainDir)
-        groupMapsHAD2.defineHistogram('etalut,philut,hadLUT2;EventofInterest_'+str(i)+'_had_2d_etaPhi_tt_lut2_mistimedStreamAna', title='#eta - #phi Map of TT LUT in timeslice 2 = BCID-1, HAD layer: eventof interest no. '+str(i)+';#eta;#phi'   , xbins=etabins, ybins=phibins, ymin=phimin, ymax=phibins, type='TProfile2D', path=histPath)
+        groupMapsHAD2.defineHistogram('etalut,philut,hadLUT2;EventofInterest_'+str(i)+'_had_2d_etaPhi_tt_lut2_mistimedStreamAna', title='#eta - #phi Map of TT LUT in timeslice 2 = BCID+1, HAD layer: eventof interest no. '+str(i)+';#eta;#phi'   , xbins=etabins, ybins=phibins, ymin=phimin, ymax=phibins, type='TProfile2D', path=histPath)
         
        
                

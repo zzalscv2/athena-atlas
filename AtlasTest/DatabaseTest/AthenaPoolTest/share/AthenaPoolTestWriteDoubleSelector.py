@@ -91,6 +91,11 @@ Stream2.ItemList = [ o for o in Stream2.ItemList if not o in 'AthenaPoolTestMatr
 printfunc ("Stream1.ItemList ",Stream1.ItemList)
 printfunc ("Stream2.ItemList ",Stream2.ItemList)
 
+# Change output file catalog to avoid collisions.
+from PoolSvc import PoolSvcConf
+PoolSvc = PoolSvcConf.PoolSvc()
+PoolSvc.WriteCatalog = 'file:AthenaPoolTestWriteDoubleSelector_catalog.xml'
+
 #--------------------------------------------------------------
 # Set output level threshold (2=DEBUG, 3=INFO, 4=WARNING, 5=ERROR, 6=FATAL )
 #--------------------------------------------------------------

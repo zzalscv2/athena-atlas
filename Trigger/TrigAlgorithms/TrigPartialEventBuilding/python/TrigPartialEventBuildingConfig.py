@@ -1,8 +1,10 @@
 #
-#  Copyright (C) 2002-2019 CERN for the benefit of the ATLAS collaboration
+#  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
 #
 
+from AthenaCommon.Configurable import ConfigurableRun3Behavior
 from AthenaConfiguration.ComponentFactory import CompFactory
+from AthenaConfiguration.ComponentAccumulator import ComponentAccumulator, appendCAtoAthena, conf2toConfigurable
 from TrigEDMConfig.DataScoutingInfo import getFullHLTResultID
 from libpyeformat_helper import SourceIdentifier, SubDetector
 from RegionSelector import RegSelToolConfig
@@ -54,12 +56,16 @@ def getRegSelTools(flags, detNames):
     # ID
     _regSelToDetFlagMap |= dict([(d,d) for d in ['Pixel', 'SCT', 'TRT']])
     # Muon
-    _regSelToDetFlagMap |= dict([(d,d) for d in ['MDT', 'RPC', 'TGC', 'CSC', 'MM', 'sTGC']])
+    _regSelToDetFlagMap |= dict([(d,d) for d in ['MDT', 'RPC', 'TGC', 'CSC', 'MM']])
+    _regSelToDetFlagMap['STGC'] = 'sTGC'  # inconsistent capitalisation, regSelTool_STGC_Cfg should be regSelTool_sTGC_Cfg
     if 'All' in detNames:
         detNames = _regSelToDetFlagMap.keys()
 
+    acc = ComponentAccumulator()
     regSelTools = []
     for det in detNames:
+        if det=='sTGC':
+            det='STGC'  # inconsistent capitalisation, regSelTool_STGC_Cfg should be regSelTool_sTGC_Cfg
         if det not in _regSelToDetFlagMap:
             raise RuntimeError('Cannot add detector "' + det + '" because it is not in _regSelToDetFlagMap')
         detFlag = 'Enable'+_regSelToDetFlagMap[det]
@@ -68,20 +74,26 @@ def getRegSelTools(flags, detNames):
         if not detEnabled:
             _log.debug('addRegSelDets: skip adding detector "%s" because the flag Detector.%s is False', det, detFlag)
             continue
-        funcName = 'makeRegSelTool_' + det
+        funcName = f'regSelTool_{det}_Cfg'
         if not hasattr(RegSelToolConfig, funcName):
             raise RuntimeError('Cannot add detector "' + det + '", RegSelToolConfig does not have a function ' + funcName)
         func = getattr(RegSelToolConfig, funcName)
         if not callable(func):
             raise RuntimeError('Cannot add detector "' + det + '", RegSelToolConfig.' + funcName + ' is not callable')
-        regSelTools += [func()]
-    return regSelTools
+        with ConfigurableRun3Behavior():
+            regSelTools += [acc.popToolsAndMerge(func(flags))]
+    acc.setPrivateTools(regSelTools)
+    return acc
 
 
 def RoIPEBInfoWriterToolCfg(name='RoIPEBInfoWriterTool'):
     def addRegSelDets(self, flags, detNames):
         '''Add RegionSelector tools for given detector look-up tables for RoI-based PEB'''
-        self.RegionSelectorTools += getRegSelTools(flags, detNames)
+        acc = getRegSelTools(flags, detNames)
+        self.RegionSelectorTools += [conf2toConfigurable(tool) for tool in acc.popPrivateTools()]
+        # Hack: remove empty AthAlgSeq to avoid AthAlgSeq->TopAlg renaming throwing "AttributeError: 'AthSequencer' object attribute 'name' is read-only"
+        acc._allSequences = [s for s in acc._allSequences if len(s.Members)>0]
+        appendCAtoAthena(acc)
 
     def addROBs(self, robs):
         '''Add extra fixed list of ROBs independent of RoI'''

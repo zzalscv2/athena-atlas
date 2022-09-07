@@ -52,7 +52,8 @@ def defineInputsMenu():
                 ('MBTS_A',3),         # 1x MBTS_A
                 'NIML1A',             # L1A for CTP monitoring itself
                 'NIMLHCF',            # LHCF
-                'AFP_NSA', 'AFP_FSA', 'AFP_FSA_TOF_T0', 'AFP_FSA_TOF_T1', 'AFP_FSA_TOF_T2', 'AFP_FSA_TOF_T3'   # 2xAFP
+                'AFP_NSA', 'AFP_FSA', 'AFP_FSA_TOF_T0', 'AFP_FSA_TOF_T1', 'AFP_FSA_TOF_T2', 'AFP_FSA_TOF_T3',   # 2xAFP
+                'BMA2', 'BMA3',  # 2x BMA demonstrator
             ]
         },
         {

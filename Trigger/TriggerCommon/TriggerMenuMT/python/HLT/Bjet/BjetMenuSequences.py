@@ -8,7 +8,7 @@ from AthenaCommon.Configurable import ConfigurableRun3Behavior
 from TrigInDetConfig.ConfigSettings import getInDetTrigConfig
 from TrigEDMConfig.TriggerEDMRun3 import recordable
 
-from ..Config.MenuComponents import MenuSequence,RecoFragmentsPool
+from ..Config.MenuComponents import MenuSequence,algorithmCAToGlobalWrapper
 # ====================================================================================================
 #    Get MenuSequences
 # ====================================================================================================
@@ -96,10 +96,7 @@ def getBJetSequence(flags, jc_name=None):
     InputMakerAlg.ViewNodeName = f"bJetBtagSequence_{jc_name}"
 
     from TrigGenericAlgs.TrigGenericAlgsConfig import ROBPrefetchingAlgCfg_Si
-    robPrefetchAlg = RecoFragmentsPool.retrieve(ROBPrefetchingAlgCfg_Si,
-                                                flags,
-                                                nameSuffix=InputMakerAlg.name(),
-                                                inputMaker=InputMakerAlg)
+    robPrefetchAlg = algorithmCAToGlobalWrapper(ROBPrefetchingAlgCfg_Si, flags, nameSuffix=InputMakerAlg.name())[0]
 
     # Sequence
     BjetAthSequence = seqAND( f"BjetAthSequence_{jc_name}_step2",[InputMakerAlg,robPrefetchAlg,bJetBtagSequence] )

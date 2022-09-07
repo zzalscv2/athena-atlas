@@ -3,7 +3,7 @@
 #
 
 # menu components   
-from TriggerMenuMT.HLT.Config.MenuComponents import MenuSequence, RecoFragmentsPool
+from TriggerMenuMT.HLT.Config.MenuComponents import MenuSequence, RecoFragmentsPool, algorithmCAToGlobalWrapper
 from AthenaCommon.CFElements import seqAND
 from ViewAlgs.ViewAlgsConf import EventViewCreatorAlgorithm
 from DecisionHandling.DecisionHandlingConf import ViewCreatorPreviousROITool
@@ -55,10 +55,7 @@ def precisionCaloSequence(flags, ion=False, variant=''):
         theSequence += egammaFSRecoSequence
 
     from TrigGenericAlgs.TrigGenericAlgsConfig import ROBPrefetchingAlgCfg_Calo
-    robPrefetchAlg = RecoFragmentsPool.retrieve(ROBPrefetchingAlgCfg_Calo,
-                                                ConfigFlags,
-                                                nameSuffix=precisionCaloViewsMaker.name(),
-                                                inputMaker=precisionCaloViewsMaker)
+    robPrefetchAlg = algorithmCAToGlobalWrapper(ROBPrefetchingAlgCfg_Calo, ConfigFlags, nameSuffix=precisionCaloViewsMaker.name())[0]
 
     # connect EVC and reco
     theSequence += [precisionCaloViewsMaker, robPrefetchAlg, precisionCaloInViewSequence]

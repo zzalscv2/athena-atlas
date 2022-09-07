@@ -16,6 +16,7 @@ from .Base.TopoAlgorithms import AlgCategory
 from .Base.L1Menu2JSON import L1MenuJSONConverter
 from .Config.TriggerTypeDef import TT
 from .Config.TopoAlgoDefMultiplicity import TopoAlgoDefMultiplicity 
+from .Config.ItemDef import ItemDef
 
 """
 L1MenuConfig is responsible for building the L1 Menu
@@ -336,7 +337,6 @@ class L1MenuConfig(object):
         log.info("... registered %i legacy topo thresholds", self._registeredThresholdsStats[AlgCategory.LEGACY])
 
         log.info("Reading TriggerMenuMT.Config.ItemDef")
-        from .Config.ItemDef import ItemDef
         ItemDef.registerItems(self, self.menuFullName)
         log.info("... registered %i defined items", len(self.registeredItems))
 
@@ -522,6 +522,11 @@ class L1MenuConfig(object):
 
         allBoards = (list(L1MenuFlags.boards().items()) + list(L1MenuFlags.legacyBoards().items()))
         
+        # Only after we know all boards are defined, in the special case
+        # that we are running the dummy L1 menu for CTP input configuration
+        # we need to register more items that access every input
+        ItemDef.registerItems_AllCTPIn(self)
+
         list_of_undefined_thresholds = []
         # new thresholds
         for (boardName, boardDef) in L1MenuFlags.boards().items():

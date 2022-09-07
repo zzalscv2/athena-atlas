@@ -25,4 +25,7 @@ menuMap = {
     #HI
     "PhysicsP1_HI_run3_v1"                      : ["MC_HI_run3_v1",     "Physics_pp_run3_v1_inputs","MC_HI_run3_v1_inputs_legacy"],
     "Dev_HI_run3_v1"                            : ["MC_HI_run3_v1",     "Physics_pp_run3_v1_inputs","MC_HI_run3_v1_inputs_legacy"],
+
+    #Special dummy menu needed for compiling CTPIN switch matrix
+    "AllCTPIn_run3_v1"                          : ["AllCTPIn_run3_v1","Physics_pp_run3_v1_inputs","MC_pp_run3_v1_inputs_legacy"],
 }
