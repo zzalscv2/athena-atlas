@@ -83,14 +83,15 @@ StatusCode CountHepMC::execute() {
   }
 
   xAOD::EventInfo* outputEvtInfo{nullptr};
-  if(m_corEvtID||m_corRunNumber) {
+  int inpRunNumber{-1};
+  if(m_corEvtID||m_corRunNumber||m_copyRunNumber) {
     SG::ReadHandle<xAOD::EventInfo> inputEvtInfoHandle(m_inputEvtInfoKey);
     SG::WriteHandle<xAOD::EventInfo> outputEvtInfoHandle(m_outputEvtInfoKey);
     ATH_CHECK(outputEvtInfoHandle.record(std::make_unique<xAOD::EventInfo>(), std::make_unique<xAOD::EventAuxInfo>()));
 
     outputEvtInfo = outputEvtInfoHandle.ptr();
     *outputEvtInfo = *inputEvtInfoHandle;
-
+    inpRunNumber = inputEvtInfoHandle->runNumber();
     if(!m_mcWeightsKey.empty()) {
       SG::ReadDecorHandle<xAOD::EventInfo,std::vector<float>> mcWeights(m_mcWeightsKey);
       outputEvtInfo->setMCEventWeights(mcWeights(0));
@@ -116,6 +117,7 @@ StatusCode CountHepMC::execute() {
 
   // Copy generation run number into mc channel number
   if (m_copyRunNumber) {
+    // Legacy Event Info
     const EventInfo* pInputEvt(nullptr);
     if (evtStore()->retrieve(pInputEvt).isSuccess()) {
       assert(pInputEvt);
@@ -126,17 +128,16 @@ StatusCode CountHepMC::execute() {
       eventType->set_mc_channel_number(run_number);
       eventType->set_mc_event_number  (newnum);
 
-      outputEvtInfo->setRunNumber(run_number);
-      outputEvtInfo->setMCChannelNumber(run_number);
-      outputEvtInfo->setMCEventNumber(newnum);
-      outputEvtInfo->setEventNumber(newnum);
-
       ATH_MSG_DEBUG("Copied run number into mc channel number: " << run_number);
     } else {
       ATH_MSG_ERROR("No EventInfo object found");
       return StatusCode::FAILURE;
     }
 
+    // xAOD::EventInfo
+    outputEvtInfo->setMCChannelNumber(inpRunNumber);
+    outputEvtInfo->setMCEventNumber(newnum);
+    outputEvtInfo->setEventNumber(newnum);
   }
 
 
