@@ -78,10 +78,22 @@ namespace Trk{
 
    double trkWeight = trk.weight();
 
+   AmgSymMatrix(3)   vrt_inverse;
+   bool invertible;
+   vtx.covariancePosition().computeInverseWithCheck(vrt_inverse,invertible);
+
+   if(!invertible) {
+     ATH_MSG_VERBOSE ("The vertex's cov is not invertible, quit updating.");
+     return &vtx;
+   }
    const IVertexUpdator::positionUpdateOutcome & fit_vrt = positionUpdate( vtx, trk.linState(), trkWeight, mode);
 
    double chi2 = vtx.chiSquared();
    double trk_chi = trackParametersChi2( fit_vrt, trk.linState() );
+   if(trk_chi==-999.){
+     ATH_MSG_VERBOSE ("The track's cov is not invertible, quit updating.");
+     return &vtx;
+   }
 
    const int sign = (mode == IVertexUpdator::addTrack ? 1 : -1); 
    chi2 += sign * (vertexPositionChi2(vtx, fit_vrt) + trkWeight * trk_chi);
@@ -169,8 +181,14 @@ namespace Trk{
 
    //calculation of S matrix
      AmgSymMatrix(3) Sm = B.transpose()*(trkParametersWeight*B);
+     AmgSymMatrix(3)   Sm_inverse;
+     bool invertible;
+     Sm.computeInverseWithCheck(Sm_inverse,invertible);
+     if(!invertible) {
+       return -999.;
+     }
+     Sm= Sm_inverse.eval();
 
-     Sm = Sm.inverse().eval();
      const AmgVector(5)& theResidual = trk->constantTerm();
 
    //refitted track momentum
