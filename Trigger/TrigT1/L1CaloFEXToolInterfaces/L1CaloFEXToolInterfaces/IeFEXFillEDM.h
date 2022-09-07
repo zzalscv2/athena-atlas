@@ -35,8 +35,8 @@ Interface definition for eFEXFillEDM
     virtual StatusCode initialize() = 0;
     virtual StatusCode finalize() = 0;
     virtual StatusCode execute() = 0;
-    virtual void fillEmEDM(std::unique_ptr<xAOD::eFexEMRoIContainer> &container, uint8_t eFEXNumber, const eFEXegTOB& tobObject) = 0;
-    virtual void fillTauEDM(std::unique_ptr<xAOD::eFexTauRoIContainer> &container, uint8_t eFEXNumber, const eFEXtauTOB& tobObject) = 0;
+    virtual void fillEmEDM(std::unique_ptr<xAOD::eFexEMRoIContainer> &container, uint8_t eFEXNumber, const std::unique_ptr<eFEXegTOB>& tobObject, bool xTOB=false) = 0;
+    virtual void fillTauEDM(std::unique_ptr<xAOD::eFexTauRoIContainer> &container, uint8_t eFEXNumber, const std::unique_ptr<eFEXtauTOB>& tobObject, bool xTOB=false) = 0;
 
   private:
 

@@ -42,58 +42,60 @@ namespace LVL1 {
     return StatusCode::SUCCESS;
   }
   
-  void eFEXFillEDM::fillEmEDM(std::unique_ptr<xAOD::eFexEMRoIContainer> &container, uint8_t eFexNum, const eFEXegTOB& tobObject)
-  {
-    uint32_t tobWord0 = tobObject.getTobword();
-    // Only needed for xTOBs, which aren't filled yet
-    // uint32_t tobWord1 = 0;
-
-    // Translate eFEX index into Shelf+eFEX:
-    uint8_t shelf = int(eFexNum/12);
-    uint8_t eFEX  = eFexNum%12;
-    
-    // Now create the object and fill it
-    xAOD::eFexEMRoI* myEmEDM = new xAOD::eFexEMRoI();
-    
+  void eFEXFillEDM::fillEmEDM(std::unique_ptr<xAOD::eFexEMRoIContainer> &container, uint8_t eFexNum, const std::unique_ptr<eFEXegTOB>& tobObject, bool xTOB)
+  {   
+    // Create the object and fill it
+    xAOD::eFexEMRoI* myEmEDM = new xAOD::eFexEMRoI();    
     container->push_back(myEmEDM);
     
-    myEmEDM->initialize(eFEX, shelf, tobWord0); 
+    // Initialise either xTOB or TOB object as requested
+    if (xTOB) 
+      myEmEDM->initialize(tobObject->getxTobword0(), tobObject->getxTobword1()); 
+    else {
+      // For TOB we must translate eFEX index into Shelf+eFEX and add these when initialising
+      uint8_t shelf = int(eFexNum/12);
+      uint8_t eFEX  = eFexNum%12;
+      myEmEDM->initialize(eFEX, shelf, tobObject->getTobword());       
+    }
 
-    myEmEDM->setRetaCore(tobObject.getRetaCore());
-    myEmEDM->setRetaEnv(tobObject.getRetaEnv());
-    myEmEDM->setRhadEM(tobObject.getRhadEM());
-    myEmEDM->setRhadHad(tobObject.getRhadHad());
-    myEmEDM->setWstotNumerator(tobObject.getWstotNum());
-    myEmEDM->setWstotDenominator(tobObject.getWstotDen());
+    // Supplementary information is the same either way
+    myEmEDM->setRetaCore(tobObject->getRetaCore());
+    myEmEDM->setRetaEnv(tobObject->getRetaEnv());
+    myEmEDM->setRhadEM(tobObject->getRhadEM());
+    myEmEDM->setRhadHad(tobObject->getRhadHad());
+    myEmEDM->setWstotNumerator(tobObject->getWstotNum());
+    myEmEDM->setWstotDenominator(tobObject->getWstotDen());
 
-    ATH_MSG_DEBUG(" setting eFEX Number:  " << +myEmEDM->eFexNumber() << " shelf: " << +myEmEDM->shelfNumber() << " et: " << myEmEDM->et() << " eta: " << myEmEDM->eta() <<  " phi: " << myEmEDM->phi() << " input eFexNum: " << +eFexNum << " TOB word: " << tobWord0 << MSG::dec );
+    ATH_MSG_DEBUG(" setting Type: " << myEmEDM->type() << " eFEX Number:  " << +myEmEDM->eFexNumber() << " shelf: " << +myEmEDM->shelfNumber() << " et: " << myEmEDM->et() << " MeV, " << myEmEDM->etTOB() << " TOB, " << myEmEDM->etXTOB() << " xTOB, eta: " << myEmEDM->eta() <<  " phi: " << myEmEDM->phi() << " input eFexNum: " << +eFexNum << " TOB word: " << tobObject->getTobword() << MSG::dec );
 
   }
 
-  void eFEXFillEDM::fillTauEDM(std::unique_ptr<xAOD::eFexTauRoIContainer> &container, uint8_t eFexNum, const eFEXtauTOB& tobObject)
+  void eFEXFillEDM::fillTauEDM(std::unique_ptr<xAOD::eFexTauRoIContainer> &container, uint8_t eFexNum, const std::unique_ptr<eFEXtauTOB>& tobObject, bool xTOB)
   {
-    uint32_t tobWord0 = tobObject.getTobword();
-    // Only needed for xTOBs, which aren't filled yet
-    //  uint32_t tobWord1 = 0;
 
-    // Translate eFEX index into Shelf+eFEX:
-    uint8_t shelf = int(eFexNum/12);
-    uint8_t eFEX  = eFexNum%12;
-    
+    // Create the object and fill it:
     xAOD::eFexTauRoI* myTauEDM = new xAOD::eFexTauRoI();
-
     container->push_back(myTauEDM);
 
-    myTauEDM->initialize(eFEX, shelf, tobWord0);
+    // Initialise either xTOB or TOB object as requested
+    if (xTOB) 
+      myTauEDM->initialize(tobObject->getxTobword0(), tobObject->getxTobword1()); 
+    else {
+      // For TOB we must translate eFEX index into Shelf+eFEX and add these when initialising
+      uint8_t shelf = int(eFexNum/12);
+      uint8_t eFEX  = eFexNum%12;
+      myTauEDM->initialize(eFEX, shelf, tobObject->getTobword());      
+    }
+
     // There is some ambiguity in what 'numerator'/'denominator' mean in each of the tau isolation 
     // variables rCore and rHad below, since in the more 'physical' definition, we would consider core/(core+env),
     // whereas in the firmware we calculate core/env. Here, I store core->numerator, env->denominator. 
     // Provided we remember this when using them, we can then calculate either the 'physical' or the 'firmware' values.
-    myTauEDM->setRCoreNumerator(tobObject.getRcoreCore());
-    myTauEDM->setRCoreDenominator(tobObject.getRcoreEnv());
-    myTauEDM->setRHadNumerator(tobObject.getRhadCore());
-    myTauEDM->setRHadDenominator(tobObject.getRhadEnv());
-    ATH_MSG_DEBUG(" setting tau eFEX Number: " << +myTauEDM->eFexNumber() << " shelf: " << +myTauEDM->shelfNumber() << " et: " << myTauEDM->et() << " eta: " << myTauEDM->eta() << " phi: " << myTauEDM->phi() << " input eFexNum: " << +eFexNum << " TOB word: " << tobWord0 << MSG::dec);
+    myTauEDM->setRCoreNumerator(tobObject->getRcoreCore());
+    myTauEDM->setRCoreDenominator(tobObject->getRcoreEnv());
+    myTauEDM->setRHadNumerator(tobObject->getRhadCore());
+    myTauEDM->setRHadDenominator(tobObject->getRhadEnv());
+    ATH_MSG_DEBUG(" setting tau eFEX Number: " << +myTauEDM->eFexNumber() << " shelf: " << +myTauEDM->shelfNumber() << " et: " << myTauEDM->et() << " eta: " << myTauEDM->eta() << " phi: " << myTauEDM->phi() << " input eFexNum: " << +eFexNum << " TOB word: " << tobObject->getTobword() << MSG::dec);
 
   }
 

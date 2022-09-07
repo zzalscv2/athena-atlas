@@ -59,21 +59,19 @@ namespace LVL1 {
 
     virtual StatusCode NewExecute(int tmp[10][18], eFEXOutputCollection* inputOutputCollection) override;
 
-    virtual std::vector<eFEXegTOB> getEmTOBs() override;
-    virtual std::vector<eFEXtauTOB> getTauTOBs() override;
+    virtual std::vector<std::unique_ptr<eFEXegTOB>> getEmTOBs() override;
+    virtual std::vector<std::unique_ptr<eFEXtauTOB>> getTauTOBs() override;
 
     /** Internal data */
   private:
-    template <class TOBObjectClass> static bool TOBetSort(const TOBObjectClass& i, const TOBObjectClass& j ) {return (((i.getTobword() >> 0 ) & 0xfff)>((j.getTobword() >> 0 ) & 0xfff)); }
-    
     int m_id;
     int m_eTowersIDs [10][18];
     //std::map<int,eTower> m_eTowersColl;
     CaloCellContainer m_sCellsCollection;
     std::vector<eFEXFPGA*> m_eFEXFPGACollection;
 
-    std::vector<std::vector<eFEXegTOB> > m_emTobObjects;
-    std::vector<std::vector<eFEXtauTOB> > m_tauTobObjects;
+    std::vector<std::vector<std::unique_ptr<eFEXegTOB>> > m_emTobObjects;
+    std::vector<std::vector<std::unique_ptr<eFEXtauTOB>> > m_tauTobObjects;
 
     ToolHandle<IeFEXFPGA> m_eFEXFPGATool {this, "eFEXFPGATool", "LVL1::eFEXFPGA", "Tool that simulates the FPGA hardware"};
 

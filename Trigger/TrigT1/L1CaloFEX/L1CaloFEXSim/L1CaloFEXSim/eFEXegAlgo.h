@@ -56,6 +56,7 @@ namespace LVL1 {
     virtual void getWindowET(int layer, int jPhi, int SCID, unsigned int &) override;
     virtual bool hasSeed() override {return m_hasSeed;};
     virtual unsigned int getSeed() override {return m_seedID;};
+    virtual unsigned int getUnD() override {return m_seed_UnD;};
     virtual void getCoreEMTowerET(unsigned int & et) override;
     virtual void getCoreHADTowerET(unsigned int & et) override;
   private:
