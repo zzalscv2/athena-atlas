@@ -209,12 +209,15 @@ if DerivationFrameworkIsMonteCarlo:
   dataType = "mc"
 
 # Create a pile-up analysis sequence
-from AsgAnalysisAlgorithms.PileupAnalysisSequence import makePileupAnalysisSequence
-from RecExConfig.RecoFunctions import InputFileNames
-pileupSequence = makePileupAnalysisSequence( dataType, files=InputFileNames(), useDefaultConfig=True )
-pileupSequence.configure( inputName = {}, outputName = {} )
-print( pileupSequence ) # For debugging
-SeqPHYSLITE += pileupSequence
+if DerivationFrameworkIsMonteCarlo:
+  from AsgAnalysisAlgorithms.PileupAnalysisSequence import makePileupAnalysisSequence
+  from RecExConfig.RecoFunctions import InputFileNames
+  from AthenaCommon.AthenaCommonFlags  import athenaCommonFlags
+  from Campaigns.Utils import Campaign
+  pileupSequence = makePileupAnalysisSequence( dataType, campaign=Campaign(athenaCommonFlags.MCCampaign()), files=InputFileNames(), useDefaultConfig=True )
+  pileupSequence.configure( inputName = {}, outputName = {} )
+  print( pileupSequence ) # For debugging
+  SeqPHYSLITE += pileupSequence
 
 # Include, and then set up the electron analysis sequence:
 from EgammaAnalysisAlgorithms.ElectronAnalysisSequence import  makeElectronAnalysisSequence

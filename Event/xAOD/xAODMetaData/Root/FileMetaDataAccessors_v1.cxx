@@ -50,6 +50,7 @@ namespace xAOD {
          DECLARE_STRING_ACCESSOR( conditionsTag );
          DECLARE_STRING_ACCESSOR( beamType );
          DECLARE_STRING_ACCESSOR( simFlavour );
+         DECLARE_STRING_ACCESSOR( mcCampaign );
 
       default:
          std::cerr << "xAOD::FileMetaData_v1    ERROR No string accessor for "

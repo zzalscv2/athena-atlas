@@ -1,11 +1,11 @@
 # Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
-from Campaigns.Utils import getMCCampaign
+from Campaigns.Utils import Campaign, getMCCampaign
 
 
 def getLumicalcFiles(campaign):
     list = []
 
-    if campaign in ['mc16a', 'mc20a']:
+    if campaign in [Campaign.MC16a, Campaign.MC20a]:
         list.append(
             'GoodRunsLists/data15_13TeV/20170619/PHYS_StandardGRL_All_Good_25ns_276262-284484_OflLumi-13TeV-008.root'
         )
@@ -13,17 +13,17 @@ def getLumicalcFiles(campaign):
             'GoodRunsLists/data16_13TeV/20180129/PHYS_StandardGRL_All_Good_25ns_297730-311481_OflLumi-13TeV-009.root'
         )
 
-    elif campaign in ['mc16d', 'mc20d']:
+    elif campaign in [Campaign.MC16d, Campaign.MC20d]:
         list.append(
             'GoodRunsLists/data17_13TeV/20180619/physics_25ns_Triggerno17e33prim.lumicalc.OflLumi-13TeV-010.root'
         )
 
-    elif campaign in ['mc16e', 'mc20e']:
+    elif campaign in [Campaign.MC16e, Campaign.MC20e]:
         list.append(
             'GoodRunsLists/data18_13TeV/20190318/ilumicalc_histograms_None_348885-364292_OflLumi-13TeV-010.root'
         )
 
-    elif campaign in ['mc21a']:
+    elif campaign in [Campaign.MC21a]:
         list.append(
             'GoodRunsLists/data22_13p6TeV/20220902/ilumicalc_histograms_None_430536-430648_OflLumi-Run3-001.root'
         )
@@ -31,7 +31,7 @@ def getLumicalcFiles(campaign):
     else:
         raise ValueError(f'Unsupported campaign {campaign}')
 
-    if campaign in ['mc16a', 'mc20a']:
+    if campaign in [Campaign.MC16a, Campaign.MC20a]:
         assert(len(list) == 2)
     else:
         assert(len(list) == 1)
@@ -42,16 +42,16 @@ def getLumicalcFiles(campaign):
 def actualMuFiles(campaign):
     list = []
 
-    if campaign in ['mc16d', 'mc20d']:
+    if campaign in [Campaign.MC16d, Campaign.MC20d]:
         list.append(
             'GoodRunsLists/data17_13TeV/20180619/physics_25ns_Triggerno17e33prim.actualMu.OflLumi-13TeV-010.root'
         )
-    elif campaign in ['mc16e', 'mc20e']:
+    elif campaign in [Campaign.MC16e, Campaign.MC20e]:
         list.append(
             'GoodRunsLists/data18_13TeV/20190318/physics_25ns_Triggerno17e33prim.actualMu.OflLumi-13TeV-010.root'
         )
 
-    if campaign in ['mc16d', 'mc20d', 'mc16e', 'mc20e']:
+    if campaign in [Campaign.MC16d, Campaign.MC20d, Campaign.MC16e, Campaign.MC20e]:
         assert(len(list) == 1)
     else:
         assert(len(list) == 0)
@@ -62,19 +62,19 @@ def actualMuFiles(campaign):
 def defaultConfigFiles(campaign):
     list = []
 
-    if campaign in ['mc20a']:
+    if campaign in [Campaign.MC20a]:
         list.append(
             'PileupReweighting/mc20_common/mc20a.284500.physlite.prw.v1.root'
         )
-    elif campaign in ['mc20d']:
+    elif campaign in [Campaign.MC20d]:
         list.append(
             'PileupReweighting/mc20_common/mc20d.300000.physlite.prw.v1.root'
         )
-    elif campaign in ['mc20e']:
+    elif campaign in [Campaign.MC20e]:
         list.append(
             'PileupReweighting/mc20_common/mc20e.310000.physlite.prw.v1.root'
         )
-    elif campaign in ['mc21a']:
+    elif campaign in [Campaign.MC21a]:
         list.append(
             'PileupReweighting/mc21_common/mc21a.410000.physlite.prw.v1.root'
         )
@@ -93,7 +93,7 @@ def getConfigurationFiles(campaign=None, dsid=None, data_type=None, files=None, 
 
     if files is not None and (campaign is None or dsid is None or data_type is None):
         if campaign is None:
-            campaign = getMCCampaign(files=files)
+            campaign = getMCCampaign(files)
 
         if dsid is None or data_type is None:
             from AthenaConfiguration.AutoConfigFlags import GetFileMD

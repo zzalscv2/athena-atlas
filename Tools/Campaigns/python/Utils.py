@@ -1,39 +1,46 @@
 # Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+from AthenaConfiguration.Enums import FlagEnum
+class Campaign(FlagEnum):
+    Unknown = ''
+    MC16a = 'mc16a'
+    MC16d = 'mc16d'
+    MC16e = 'mc16e'
+    MC20a = 'mc20a'
+    MC20d = 'mc20d'
+    MC20e = 'mc20e'
+    MC21a = 'mc21a'
 
-# Production r-tags for different campaigns
-reco_campaigns = { 
-    'mc16a': ['r9280', 'r9287', 'r9364'],
-    'mc16d': ['r10069', 'r10201', 'r10211','r10212'],
-    'mc16e': ['r10724'],
-    'mc20a': ['r13167'],
-    'mc20d': ['r13144'],
-    'mc20e': ['r13145'],
-    'mc21a': ['r13768', 'r13829'],
+# Campaign run numbers (only latest campaigns)
+campaign_runs = {
+    284500: Campaign.MC20a,
+    300000: Campaign.MC20d,
+    310000: Campaign.MC20e,
+    410000: Campaign.MC21a,
 }
 
 # Function to get the campaign
-def getMCCampaign(ami_tag=None, project_name=None, files=None):
+def getMCCampaign(files):
     # Auto-configure from file
-    if files is not None and ami_tag is None and project_name is None:
-        from AthenaConfiguration.AutoConfigFlags import GetFileMD
-        metadata = GetFileMD(files)
-        ami_tag = metadata.get('AMITag', '')
-        project_name = metadata.get('project_name', '')
+    from AthenaConfiguration.AutoConfigFlags import GetFileMD
+    metadata = GetFileMD(files)
+    mc_campaign = Campaign(metadata.get('mc_campaign', ''))
+    project_name = metadata.get('project_name', '')
+    run_numbers = metadata.get('runNumbers', [])
 
-    assert ami_tag is not None
-    assert project_name is not None
+    if mc_campaign is not Campaign.Unknown:
+        return mc_campaign
 
-    for c in reco_campaigns:
-        for r in reco_campaigns[c]:
-            if r in ami_tag:
-                return c
+    if run_numbers:
+        mc_campaign = campaign_runs.get(run_numbers[0], Campaign.Unknown)
 
     # MC-equivalent projects for data
-    if 'data18' in project_name:
-        return 'mc20e'
+    if 'data22' in project_name:
+        return Campaign.MC21a
+    elif 'data18' in project_name:
+        return Campaign.MC20e
     elif 'data17' in project_name:
-        return 'mc20d'
+        return Campaign.MC20d
     elif 'data16' in project_name or 'data15' in project_name:
-        return 'mc20a'
+        return Campaign.MC20a
 
-    return None
+    return mc_campaign

@@ -1,13 +1,15 @@
 # Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
-from SimulationConfig.SimEnums import SimulationFlavour, TruthStrategy
 from AthenaConfiguration.Enums import ProductionStep
-from LArConfiguration.LArConfigRun3 import LArConfigRun3PileUp, LArConfigRun3NoPileUp
+from Campaigns.Utils import Campaign
 
 
 def MC21a(flags):
     """MC21a flags for MC to match initial Run 3 data"""
+    flags.Input.MCCampaign = Campaign.MC21a
+
     flags.Beam.NumberOfCollisions = 60.
 
+    from LArConfiguration.LArConfigRun3 import LArConfigRun3PileUp
     LArConfigRun3PileUp(flags)
 
     flags.Tile.BestPhaseFromCOOL = False
@@ -45,6 +47,7 @@ def MC21NoPileUp(flags):
     flags.Beam.NumberOfCollisions = 0.
     flags.Input.ConditionsRunNumber = 410000
 
+    from LArConfiguration.LArConfigRun3 import LArConfigRun3NoPileUp
     LArConfigRun3NoPileUp(flags)
 
     flags.Tile.BestPhaseFromCOOL = False
@@ -64,6 +67,7 @@ def BeamspotSplitMC21a():
 
 def MC21SimulationBase(flags):
     """MC21 base flags for simulation"""
+    from SimulationConfig.SimEnums import SimulationFlavour, TruthStrategy
     flags.Sim.PhysicsList = 'FTFP_BERT_ATL'
     flags.Sim.TruthStrategy = TruthStrategy.MC15aPlus
 

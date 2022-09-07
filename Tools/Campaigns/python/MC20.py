@@ -1,16 +1,18 @@
 # Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
-
 from AthenaConfiguration.Enums import ProductionStep
-from LArConfiguration.LArConfigRun2 import LArConfigRun2PileUp, LArConfigRun2NoPileUp
+from Campaigns.Utils import Campaign
 
 
 def MC20a(flags):
     """MC20a flags for MC to match 2015 and 2016 data"""
+    flags.Input.MCCampaign = Campaign.MC20a
+
     flags.Beam.NumberOfCollisions = 20.
     flags.Digitization.InputBeamSigmaZ = 42
 
     flags.Digitization.UseUpdatedTGCConditions = True
 
+    from LArConfiguration.LArConfigRun2 import LArConfigRun2PileUp
     LArConfigRun2PileUp(flags)
     flags.Digitization.HighGainEMECIW = True
 
@@ -35,11 +37,14 @@ def MC20a(flags):
 
 def MC20d(flags):
     """MC20d flags for MC to match 2017 data"""
+    flags.Input.MCCampaign = Campaign.MC20d
+
     flags.Beam.NumberOfCollisions = 20.
     flags.Digitization.InputBeamSigmaZ = 42
 
     flags.Digitization.UseUpdatedTGCConditions = True
 
+    from LArConfiguration.LArConfigRun2 import LArConfigRun2PileUp
     LArConfigRun2PileUp(flags)
 
     flags.Tile.BestPhaseFromCOOL = False
@@ -63,11 +68,14 @@ def MC20d(flags):
 
 def MC20e(flags):
     """MC20e flags for MC to match 2018 data"""
+    flags.Input.MCCampaign = Campaign.MC20e
+
     flags.Beam.NumberOfCollisions = 20.
     flags.Digitization.InputBeamSigmaZ = 42
 
     flags.Digitization.UseUpdatedTGCConditions = True
 
+    from LArConfiguration.LArConfigRun2 import LArConfigRun2PileUp
     LArConfigRun2PileUp(flags)
 
     flags.Tile.BestPhaseFromCOOL = False
@@ -96,6 +104,7 @@ def MC20NoPileUp(flags):
 
     flags.Digitization.UseUpdatedTGCConditions = True
 
+    from LArConfiguration.LArConfigRun2 import LArConfigRun2NoPileUp
     LArConfigRun2NoPileUp(flags)
 
     flags.Tile.BestPhaseFromCOOL = False
