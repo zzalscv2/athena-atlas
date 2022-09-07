@@ -10,7 +10,6 @@
 ## Output: 5 output streams<br>
 ##         8 root collections<br>
 ## @author JackCranshaw (Jack.Cranshaw@cern.ch)
-## $Id: EventNoSplit_jo.py,v 1.27 2009-05-20 13:34:21 cranshaw Exp $
 #====================================================================
 
 #--------------------------------------------------------------
@@ -42,7 +41,7 @@ from PoolSvc.PoolSvcConf import PoolSvc
 svcMgr += PoolSvc()
 svcMgr.PoolSvc.ReadCatalog = [ "XMLFileCatalog_file:SplittableData.xml" ]
 # Or if you need to change the name of the output file catalog
-svcMgr.PoolSvc.WriteCatalog = "XMLFileCatalog_file:EventSplit.xml"
+svcMgr.PoolSvc.WriteCatalog = "XMLFileCatalog_file:EventNoSplit.xml"
  
 svcMgr.EventSelector.InputCollections =  ["AthenaPoolMultiTest_Splittable0.root"]
 

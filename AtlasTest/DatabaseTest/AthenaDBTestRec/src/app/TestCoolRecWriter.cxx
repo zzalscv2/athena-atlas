@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2017 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
 */
 
 // TestCoolRecWriter.cxx
@@ -209,7 +209,7 @@ int TestCoolRecWriter::fillDB() {
     unsigned int fseq=0;
     for (std::vector<FolderInfo*>::const_iterator ifold=m_folders.begin();
 	 ifold!=m_folders.end();++ifold,++fseq) {
-      const FolderInfo* folderi=*ifold;
+      FolderInfo* folderi=*ifold;
       std::cout << "Run " << irun << " folder " << folderi->name() <<
 	std::endl;
 
@@ -371,10 +371,10 @@ int TestCoolRecWriter::fillDB() {
     bool first=true;
     for (std::vector<FolderInfo*>::const_iterator ifold=m_folders.begin();
 	 ifold!=m_folders.end();++ifold) {
-      const FolderInfo* folderi=*ifold;
+      FolderInfo* folderi=*ifold;
       if (m_usepool && folderi->poolplace()!=0 && (m_poolmode &2)) {
 	if ((m_poolmode & 1) || first) {
-	  Placement* placement=folderi->poolplace();
+	  const Placement* placement=folderi->poolplace();
 	  delete placement;
 	  folderi->setpoolplace(0);
 	} else {
@@ -615,7 +615,7 @@ void TestCoolRecWriter::setPoolPayload(const FolderInfo* folderi,
 }
 
 
-int main(int argc, const char* argv[]) {
+int main ATLAS_NOT_THREAD_SAFE (int argc, const char* argv[]) {
   if (argc<4) {
     std::cout << "Syntax: TestCoolRecWriter <coolDBconnection> <mode> <config_file> {<nrun> <run0> <nevent> <time0> <timerun>}" << std::endl;
     return 1;
