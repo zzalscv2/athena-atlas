@@ -80,7 +80,7 @@ class MonitorDef:
 #                    'MBTS_A8', 'MBTS_A9', 'MBTS_A10', 'MBTS_A11', 'MBTS_A12', 'MBTS_A13', 'MBTS_A14', 'MBTS_A15',
 #                    'MBTS_C0', 'MBTS_C1', 'MBTS_C2',  'MBTS_C3',  'MBTS_C4',  'MBTS_C5',  'MBTS_C6',  'MBTS_C7',
 #                    'MBTS_C8', 'MBTS_C9', 'MBTS_C10', 'MBTS_C11', 'MBTS_C12', 'MBTS_C13', 'MBTS_C14', 'MBTS_C15'
-                    'BMA0', 'BMA1',
+                    'BMA0', 'BMA1', 'BMA2', 'BMA3',
                    ]
 
         for mult in cThr:
@@ -317,8 +317,8 @@ class MonitorDef:
                 log.error("   this menu requires %i monitoring LUTs while only %i are available", (lutsLF + lutsHF), maxLUTs)
                 raise RuntimeError("Reduce the number of monitored items") 
 
-
-        MonitorDef.checkForNonExistingMonItems(items, monItems)
+        if 'AllCTPIn' not in menuName:
+            MonitorDef.checkForNonExistingMonItems(items, monItems)
 
         # for each item set the monitor flags
         for item in items:
@@ -347,11 +347,11 @@ class MonitorDef:
             allMonitorItems.update(monItems[i])
 
         # register all monitems that don't exist in here
-        nonExistiginMonItems = []
+        nonExistingMonItems = []
         
         for monItem in allMonitorItems:
             if monItem not in allItemNames:
-                nonExistiginMonItems += [monItem]
+                nonExistingMonItems += [monItem]
 
-        if len(nonExistiginMonItems)>0:
-            raise RuntimeError("These monitoring items are not part of the menu: %s" % ','.join(nonExistiginMonItems))
+        if len(nonExistingMonItems)>0:
+            raise RuntimeError("These monitoring items are not part of the menu: %s" % ','.join(nonExistingMonItems))
