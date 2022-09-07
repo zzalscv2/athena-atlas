@@ -166,6 +166,8 @@ StatusCode EtaPtFilterTool::buildGenEvent( const HepMC::GenEvent* in, HepMC::Gen
   }
 
   // loop over vertices
+  VertexMap_t vmap;
+  ParticleMap_t pmap;
 #ifdef HEPMC3
   for ( auto vtx: in->vertices() ) {
 #else
@@ -179,7 +181,8 @@ StatusCode EtaPtFilterTool::buildGenEvent( const HepMC::GenEvent* in, HepMC::Gen
       continue;
     }
     
-    if ( addVertex( vtx, out, isSignalVertex ).isFailure() ) {
+    if ( addVertex( vtx, out, vmap, pmap, isSignalVertex ).isFailure() )
+    {
       ATH_MSG_WARNING("Could not add vertex [" << HepMC::barcode(vtx) << "]");
     }
 
@@ -299,6 +302,8 @@ bool EtaPtFilterTool::isSignalProcessVertex( HepMC::ConstGenVertexPtr vtx, const
 }
 
 StatusCode EtaPtFilterTool::addVertex( HepMC::ConstGenVertexPtr srcVtx, HepMC::GenEvent* evt,
+                                       VertexMap_t& vmap,
+                                       ParticleMap_t& pmap,
 				       bool isSignalVertex) const
 {
   if ( 0 == srcVtx || 0 == evt ) {
@@ -308,20 +313,20 @@ StatusCode EtaPtFilterTool::addVertex( HepMC::ConstGenVertexPtr srcVtx, HepMC::G
     return StatusCode::FAILURE;
   }
 #ifdef HEPMC3
-  HepMC::GenVertexPtr vtx = HepMC::barcode_to_vertex(evt,HepMC::barcode(srcVtx));
+  HepMC::GenVertexPtr& vtx = vmap[srcVtx.get()];
   if ( !vtx ) {
     vtx = HepMC::newGenVertexPtr();
     evt->add_vertex(vtx); 
     vtx->set_position( srcVtx->position() );
     vtx->set_status( srcVtx->status() );
-    HepMC::suggest_barcode(vtx, HepMC::barcode(srcVtx) );
+    HepMC::suggest_barcode(vtx, HepMC::barcode(srcVtx));
     vtx->add_attribute("weights",srcVtx->attribute<HepMC3::VectorFloatAttribute> ("weights"));
     if (isSignalVertex) HepMC::set_signal_process_vertex(evt,vtx);
   }
   ////////////////////////////
   /// Fill the parent branch
   for ( auto  parent:  srcVtx->particles_in()) {
-    HepMC::GenParticlePtr  p = HepMC::barcode_to_particle(evt, HepMC::barcode(parent) );
+    HepMC::GenParticlePtr& p = pmap[parent.get()];
     if ( !p ) {
       p = HepMC::newGenParticlePtr();
       vtx->add_particle_in( p );
@@ -331,7 +336,7 @@ StatusCode EtaPtFilterTool::addVertex( HepMC::ConstGenVertexPtr srcVtx, HepMC::G
       p->set_status( parent->status() );
       HepMC::set_flow(p, HepMC::flow(parent) );
       HepMC::set_polarization(p, HepMC::polarization( parent) );
-      HepMC::suggest_barcode(p,HepMC::barcode(parent) );
+      HepMC::suggest_barcode(p, HepMC::barcode(parent));
     }
     // set the mother's decay to our (new) vertex
     vtx->add_particle_in( p );
@@ -341,7 +346,7 @@ StatusCode EtaPtFilterTool::addVertex( HepMC::ConstGenVertexPtr srcVtx, HepMC::G
   //////////////////////////////
   /// Fill the children branch
   for (auto child: srcVtx->particles_out()) {
-    HepMC::GenParticlePtr p = HepMC::barcode_to_particle(evt,HepMC::barcode(child) );
+    HepMC::GenParticlePtr& p = pmap[child.get()];
     if ( !p ) {
       p = HepMC::newGenParticlePtr();
       vtx->add_particle_out( p );
@@ -361,8 +366,8 @@ StatusCode EtaPtFilterTool::addVertex( HepMC::ConstGenVertexPtr srcVtx, HepMC::G
   }//> loop over outgoing particles
 #else
 
-  HepMC::GenVertex * vtx = evt->barcode_to_vertex(srcVtx->barcode());
-  if ( 0 == vtx ) {
+  HepMC::GenVertexPtr& vtx = vmap[srcVtx];
+  if ( !vtx ) {
     vtx = new HepMC::GenVertex();
     vtx->set_position( srcVtx->position() );
     vtx->set_id( srcVtx->id() );
@@ -379,8 +384,8 @@ StatusCode EtaPtFilterTool::addVertex( HepMC::ConstGenVertexPtr srcVtx, HepMC::G
 	  parentEnd = srcVtx->particles_in_const_end();
 	parent != parentEnd;
 	++parent ) {
-    HepMC::GenParticle * p = evt->barcode_to_particle( (*parent)->barcode() );
-    if ( 0 == p ) {
+    HepMC::GenParticlePtr& p = pmap[*parent];
+    if ( !p ) {
       p = new HepMC::GenParticle;
       p->set_momentum( (*parent)->momentum() );
       p->set_generated_mass( (*parent)->generated_mass() );
@@ -402,8 +407,8 @@ StatusCode EtaPtFilterTool::addVertex( HepMC::ConstGenVertexPtr srcVtx, HepMC::G
 	  childEnd = srcVtx->particles_out_const_end();
 	child != childEnd;
 	++child ) {
-    HepMC::GenParticle * p = evt->barcode_to_particle( (*child)->barcode() );
-    if ( 0 == p ) {
+    HepMC::GenParticlePtr& p = pmap[*child];
+    if ( !p ) {
       p = new HepMC::GenParticle;
       p->set_momentum( (*child)->momentum() );
       p->set_generated_mass( (*child)->generated_mass() );
