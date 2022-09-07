@@ -15,7 +15,6 @@
 #include "xAODBPhys/BPhysHelper.h"
 #include "TrkVertexAnalysisUtils/V0Tools.h"
 #include "TrkVertexFitterInterfaces/IVertexFitter.h"
-#include "TrkVKalVrtFitter/TrkVKalVrtFitter.h"
 #include "TrkV0Fitter/TrkV0VertexFitter.h"
 #include "InDetConversionFinderTools/ConversionFinderUtils.h"
 #include "InDetConversionFinderTools/VertexPointEstimator.h"

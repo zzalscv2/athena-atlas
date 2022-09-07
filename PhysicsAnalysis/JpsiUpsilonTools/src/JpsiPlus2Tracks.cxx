@@ -15,7 +15,9 @@
 #include "TrkVertexFitterInterfaces/IVertexFitter.h"
 #include "TrkVKalVrtFitter/TrkVKalVrtFitter.h"
 #include "TrkToolInterfaces/ITrackSelectorTool.h"
-#include "GaudiKernel/IPartPropSvc.h"
+#include "xAODTracking/TrackParticle.h"
+#include "xAODTracking/Vertex.h"
+#include "xAODTracking/VertexContainer.h"
 #include "AthLinks/ElementLink.h"
 #include "InDetConversionFinderTools/VertexPointEstimator.h"
 #include <memory>

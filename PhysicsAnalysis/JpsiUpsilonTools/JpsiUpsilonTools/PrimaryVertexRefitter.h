@@ -15,19 +15,15 @@
 #define PRIMARYVERTEXREFITTER_H
 #include "AthenaBaseComps/AthAlgTool.h"
 #include "GaudiKernel/ToolHandle.h"
-#include "xAODTracking/Vertex.h"
-#include "xAODTracking/TrackParticle.h"
-#include "TrkVertexFitterUtils/TrackToVertexIPEstimator.h"
-
-
-
-namespace Rec { class TrackParticle; }
+#include "xAODTracking/VertexFwd.h"
+#include "xAODTracking/TrackParticleFwd.h"
+#include "TrkVertexFitterInterfaces/ITrackToVertexIPEstimator.h"
 
 namespace Analysis {
 
 static const InterfaceID IID_PrimaryVertexRefitter("PrimaryVertexRefitter", 1, 0);
 
-class PrimaryVertexRefitter:  virtual public AthAlgTool {
+class PrimaryVertexRefitter:  public AthAlgTool {
 public:
         PrimaryVertexRefitter(const std::string& t, const std::string& n, const IInterface*  p);
         ~PrimaryVertexRefitter();

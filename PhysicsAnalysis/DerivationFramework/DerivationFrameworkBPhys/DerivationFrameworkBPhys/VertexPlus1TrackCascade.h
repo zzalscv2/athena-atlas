@@ -16,7 +16,7 @@
 #include "xAODTracking/TrackParticleContainer.h"
 #include "xAODTracking/VertexContainer.h"
 #include <vector>
-
+#include "TrkVKalVrtFitter/TrkVKalVrtFitter.h"
 
 namespace Trk {
     class IVertexFitter;

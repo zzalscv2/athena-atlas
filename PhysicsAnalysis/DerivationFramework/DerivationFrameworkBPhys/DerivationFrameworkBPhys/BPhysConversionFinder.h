@@ -18,7 +18,7 @@
 #include "InDetConversionFinderTools/ConversionPostSelector.h"
 #include "TrkVertexSeedFinderUtils/ITrkDistanceFinder.h"
 
-#include "TLorentzVector.h"
+class TLorentzVector;
 
 namespace Trk
 {
@@ -27,12 +27,6 @@ namespace Trk
     class TrkVKalVrtFitter;
 }
 
-namespace InDet
-{
-    class VertexPointEstimator;
-    class TrackPairsSelector;
-    class ConversionPostSelector;
-}
 
 namespace DerivationFramework {
 

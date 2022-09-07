@@ -14,11 +14,10 @@ find_package( ROOT COMPONENTS Core MathCore pthread )
 atlas_add_library( JpsiUpsilonToolsLib
                    src/*.cxx
                    PUBLIC_HEADERS JpsiUpsilonTools
-                   INCLUDE_DIRS ${HEPPDT_INCLUDE_DIRS}
-                   PRIVATE_INCLUDE_DIRS ${ROOT_INCLUDE_DIRS} ${CLHEP_INCLUDE_DIRS}
+                   PRIVATE_INCLUDE_DIRS ${ROOT_INCLUDE_DIRS} ${CLHEP_INCLUDE_DIRS} ${HEPPDT_INCLUDE_DIRS}
                    PRIVATE_DEFINITIONS ${CLHEP_DEFINITIONS}
-                   LINK_LIBRARIES ${HEPPDT_LIBRARIES} AthenaBaseComps xAODMuon xAODTracking GaudiKernel InDetConversionFinderToolsLib TrkVKalVrtFitterLib TrkV0FitterLib xAODEgamma TrkVertexFitterUtilsLib
-                   PRIVATE_LINK_LIBRARIES ${ROOT_LIBRARIES} ${CLHEP_LIBRARIES} FourMomUtils VxVertex TrkToolInterfaces TrkVertexFitterInterfaces xAODBPhysLib AthLinks  )
+                   LINK_LIBRARIES  AthenaBaseComps xAODMuon xAODTracking GaudiKernel xAODEgamma TrkVertexFitterInterfaces
+                   PRIVATE_LINK_LIBRARIES ${HEPPDT_LIBRARIES} ${ROOT_LIBRARIES} ${CLHEP_LIBRARIES} FourMomUtils TrkV0FitterLib VxVertex TrkToolInterfaces xAODBPhysLib AthLinks TrkVKalVrtFitterLib InDetConversionFinderToolsLib)
 
 atlas_add_component( JpsiUpsilonTools
                      src/components/*.cxx
@@ -29,3 +28,7 @@ atlas_add_component( JpsiUpsilonTools
 atlas_install_python_modules( python/*.py POST_BUILD_CMD ${ATLAS_FLAKE8})
 atlas_install_joboptions( share/*.py )
 
+atlas_add_test( JpsiAlgConfig_test
+                 SCRIPT python -m JpsiUpsilonTools.runJpsiAlg
+                 PROPERTIES TIMEOUT 300
+                 POST_EXEC_SCRIPT nopost.sh)

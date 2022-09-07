@@ -5,7 +5,7 @@
 
 #include "AthenaBaseComps/AthAlgorithm.h"
 #include "JpsiUpsilonTools/ICandidateSearch.h"
-#include "xAODTracking/VertexContainer.h"
+#include "xAODTracking/VertexContainerFwd.h"
 /////////////////////////////////////////////////////////////////////////////
 class JpsiAlg : public AthAlgorithm {
 

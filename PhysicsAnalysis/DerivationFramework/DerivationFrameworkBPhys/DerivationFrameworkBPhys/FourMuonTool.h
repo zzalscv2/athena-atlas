@@ -12,9 +12,8 @@
 // ****************************************************************************
 #ifndef BPHY4TOOL_H
 #define BPHY4TOOL_H
-#include "AthenaBaseComps/AthAlgorithm.h"
+#include "AthenaBaseComps/AthAlgTool.h"
 #include "GaudiKernel/ToolHandle.h"
-#include "TrkVKalVrtFitter/TrkVKalVrtFitter.h"
 #include "InDetConversionFinderTools/InDetConversionFinderTools.h"
 #include "xAODEventInfo/EventInfo.h"
 #include "xAODMuon/Muon.h"

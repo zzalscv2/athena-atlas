@@ -2,13 +2,12 @@
   Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
 */
 #include "InDetV0Finder/V0MainDecorator.h"
-#include "TrkVertexAnalysisUtils/V0Tools.h"
 #include "StoreGate/WriteDecorHandle.h"
 #include "HepPDT/ParticleDataTable.hh"
 #include "EventKernel/PdtPdg.h"
 #include "GaudiKernel/IPartPropSvc.h"
-
-
+#include "xAODTracking/Vertex.h"
+#include "xAODTracking/VertexContainer.h"
 namespace InDet
 {
 V0MainDecorator::V0MainDecorator(const std::string& t, const std::string& n, const IInterface* p)

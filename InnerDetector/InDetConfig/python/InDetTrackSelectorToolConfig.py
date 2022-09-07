@@ -51,9 +51,11 @@ def V0InDetConversionTrackSelectorToolCfg(flags, name='InDetV0VxTrackSelector', 
 
 def InDetTrackSelectorToolCfg(flags, name='InDetTrackSelectorTool', **kwargs):
 
-    from BeamSpotConditions.BeamSpotConditionsConfig import BeamSpotCondAlgCfg
     from MagFieldServices.MagFieldServicesConfig import AtlasFieldCacheCondAlgCfg
-    result = BeamSpotCondAlgCfg(flags) # To produce the input InDet::BeamSpotData CondHandle
+    result = ComponentAccumulator()
+    if "UseEventInfoBS" not in kwargs or kwargs["UseEventInfoBS"] is False:
+        from BeamSpotConditions.BeamSpotConditionsConfig import BeamSpotCondAlgCfg
+        result.merge(BeamSpotCondAlgCfg(flags)) # To produce the input InDet::BeamSpotData CondHandle
     result.merge(AtlasFieldCacheCondAlgCfg(flags)) # To produce the input AtlasFieldCacheCondObj
 
     if "Extrapolator" not in kwargs:

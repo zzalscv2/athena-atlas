@@ -21,10 +21,9 @@
 #include "TrkToolInterfaces/ITrackSelectorTool.h"
 #include "GaudiKernel/IPartPropSvc.h"
 #include "AthLinks/ElementLink.h"
-
+#include "HepPDT/ParticleDataTable.hh"
 #include "xAODTracking/Vertex.h"
 #include "xAODTracking/VertexContainer.h"
-#include "xAODTracking/VertexAuxContainer.h"
 #include "xAODTracking/TrackParticle.h"
 #include "EventKernel/PdtPdg.h"
 #include "FourMomUtils/xAODP4Helpers.h"

@@ -21,6 +21,8 @@
 #include "xAODTracking/TrackParticleContainer.h"
 #include "StoreGate/WriteDecorHandleKey.h"
 #include "xAODEventInfo/EventInfo.h"
+#include "TrkParameters/TrackParameters.h"
+#include "GeoPrimitives/GeoPrimitives.h" //Needed for Amg::Vector3D
 #include <atomic>
 /**
    The InDetV0FinderTool reads in the TrackParticle container from StoreGate,

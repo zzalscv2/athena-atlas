@@ -11,11 +11,14 @@
 
 #include "AthenaBaseComps/AthAlgTool.h"
 #include "GaudiKernel/ToolHandle.h"
-#include "HepPDT/ParticleDataTable.hh"
 #include "DerivationFrameworkInterfaces/IAugmentationTool.h"
 #include "JpsiUpsilonTools/PrimaryVertexRefitter.h"
 #include <vector>
 #include "xAODEventInfo/EventInfo.h"
+
+namespace HepPDT{
+  class ParticleDataTable;
+}
 
 namespace Trk {
     class IVertexFitter;
@@ -23,7 +26,6 @@ namespace Trk {
     class IVertexCascadeFitter;
     class VxCascadeInfo;
     class V0Tools;
-    class ParticleDataTable;
 }
 
 namespace DerivationFramework {

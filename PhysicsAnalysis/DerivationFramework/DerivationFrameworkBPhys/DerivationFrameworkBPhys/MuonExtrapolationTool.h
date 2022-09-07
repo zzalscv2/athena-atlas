@@ -13,10 +13,8 @@
 #include "xAODTracking/TrackParticle.h"
 #include "xAODMuon/Muon.h"
 #include "TrkParameters/TrackParameters.h"
+#include "TrkExInterfaces/IExtrapolator.h"
 
-namespace Trk { 
-  class IExtrapolator; 
-}
 
 namespace DerivationFramework {
   class MuonExtrapolationTool : public AthAlgTool, public IAugmentationTool {

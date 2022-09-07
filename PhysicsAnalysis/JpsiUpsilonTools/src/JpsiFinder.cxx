@@ -15,16 +15,14 @@
 #include "JpsiUpsilonTools/JpsiFinder.h"
 #include "xAODBPhys/BPhysHelper.h"
 #include "TrkVertexFitterInterfaces/IVertexFitter.h"
-#include "TrkVKalVrtFitter/TrkVKalVrtFitter.h"
 #include "TrkV0Fitter/TrkV0VertexFitter.h"
 #include "InDetConversionFinderTools/VertexPointEstimator.h"
 #include "TrkToolInterfaces/ITrackSelectorTool.h"
 #include "GaudiKernel/IPartPropSvc.h"
+#include "HepPDT/ParticleDataTable.hh"
 #include "AthLinks/ElementLink.h"
-#include "InDetConversionFinderTools/ConversionFinderUtils.h"
 #include "xAODTracking/Vertex.h"
 #include "xAODTracking/VertexContainer.h"
-#include "xAODTracking/VertexAuxContainer.h"
 #include "xAODTracking/TrackParticle.h"
 #include "xAODTracking/TrackParticleContainer.h"
 #include "EventKernel/PdtPdg.h"
@@ -181,7 +179,10 @@ namespace Analysis {
         ATH_MSG_DEBUG( "JpsiFinder::performSearch" );
         
         SG::ReadHandle<xAOD::MuonContainer> muonhandle(m_muonCollectionKey,ctx);
-        ATH_CHECK(muonhandle.isValid());
+        if(!muonhandle.isValid()){
+            ATH_MSG_ERROR("Could not retrieve " << m_muonCollectionKey.key());
+            return StatusCode::FAILURE;
+        }
         // Get the muons from StoreGate
         const xAOD::MuonContainer* importedMuonCollection = muonhandle.cptr();
         ATH_MSG_DEBUG("Muon container size "<<importedMuonCollection->size());
