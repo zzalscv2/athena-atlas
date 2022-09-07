@@ -157,7 +157,7 @@ def PostJetMCTruthAugmentationsCfg(ConfigFlags, **kwargs):
     from DerivationFrameworkSUSY.DecorateSUSYProcessConfig import IsSUSYSignalRun3
     if IsSUSYSignalRun3(ConfigFlags):
         from DerivationFrameworkSUSY.DecorateSUSYProcessConfig import DecorateSUSYProcessCfg
-        augmentationToolsList += DecorateSUSYProcessCfg('MCTruthCommon')
+        augmentationToolsList += DecorateSUSYProcessCfg(ConfigFlags, 'MCTruthCommon')
 
     CommonAugmentation = CompFactory.DerivationFramework.CommonAugmentation
     acc.addEventAlgo(CommonAugmentation(name              = "MCTruthCommonPostJetKernel", 
