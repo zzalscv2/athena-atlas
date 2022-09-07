@@ -21,6 +21,8 @@
 #include "AthenaKernel/DataBucketBase.h"
 #include "AthenaKernel/BaseInfo.h"
 
+#include "RootUtils/PyAthenaGILStateEnsure.h"
+
 extern const CLID PyCLID;
 
 // ROOT includes
@@ -101,7 +103,11 @@ namespace SG {
     /**
      * @brief Destructor.
      */
-    virtual ~PyDataBucket() override { Py_DECREF( m_pyObj ); }
+    virtual ~PyDataBucket() override { 
+      RootUtils::PyGILStateEnsure gil;
+      Py_DECREF( m_pyObj ); 
+    }
+
     /**
      * @brief Return the held object.
      */

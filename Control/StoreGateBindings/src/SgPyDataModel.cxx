@@ -5,7 +5,6 @@
 
 #include "SgPyDataModel.h"
 #include "GaudiKernel/ServiceHandle.h"
-#include "RootUtils/PyAthenaGILStateEnsure.h"
 
 // Called from python, so only excuted single-threaded (GIL).
 #include "CxxUtils/checker_macros.h"
