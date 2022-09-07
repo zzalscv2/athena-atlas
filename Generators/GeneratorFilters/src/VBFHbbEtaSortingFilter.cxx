@@ -62,7 +62,7 @@ StatusCode VBFHbbEtaSortingFilter::filterEvent() {
   
   m_total++;
   
-  const DataHandle<xAOD::JetContainer> truthjetTES = 0;
+  const xAOD::JetContainer* truthjetTES = 0;
   if (!evtStore()->contains<xAOD::JetContainer>(m_TruthJetContainerName) ||  
       evtStore()->retrieve(truthjetTES, m_TruthJetContainerName).isFailure() || !truthjetTES) {
     ATH_MSG_ERROR("No xAOD::JetContainer found in StoreGate with key " << m_TruthJetContainerName);

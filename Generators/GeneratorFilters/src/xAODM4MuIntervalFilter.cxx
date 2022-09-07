@@ -5,7 +5,6 @@
 // Header for this module
 #include "GeneratorFilters/xAODM4MuIntervalFilter.h"
 
-#include "StoreGate/DataHandle.h"
 #include "AthenaKernel/IAtRndmGenSvc.h" // For random numbers...
 #include "CLHEP/Random/RandomEngine.h"
 
@@ -99,7 +98,7 @@ for (itr = xTruthEventContainer->begin(); itr!=xTruthEventContainer->end(); ++it
     }
 
     // Get MC event collection for setting weight
-    const DataHandle<McEventCollection> mecc = 0;
+    const McEventCollection* mecc = 0;
     if ( evtStore()->retrieve( mecc ).isFailure() || !mecc ){
       setFilterPassed(false);
       ATH_MSG_ERROR("Could not retrieve MC Event Collection - weight might not work");

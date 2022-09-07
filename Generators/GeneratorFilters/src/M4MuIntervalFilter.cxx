@@ -1,11 +1,10 @@
 /*
-  Copyright (C) 2020-2021 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2020-2022 CERN for the benefit of the ATLAS collaboration
 */
 
 // Header for this module
 #include "GeneratorFilters/M4MuIntervalFilter.h"
 
-#include "StoreGate/DataHandle.h"
 #include "AthenaKernel/IAtRndmGenSvc.h" // For random numbers...
 #include "CLHEP/Random/RandomEngine.h"
 
@@ -107,7 +106,7 @@ StatusCode M4MuIntervalFilter::filterEvent() {
     }
 
     // Get MC event collection for setting weight
-    const DataHandle<McEventCollection> mecc = 0;
+    const McEventCollection* mecc = 0;
     if ( evtStore()->retrieve( mecc ).isFailure() || !mecc ){
       setFilterPassed(false);
       ATH_MSG_ERROR("Could not retrieve MC Event Collection - weight might not work");

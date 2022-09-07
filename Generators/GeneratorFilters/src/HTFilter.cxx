@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2017 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
 */
 
 // Header for this module
@@ -13,7 +13,6 @@
 #include "xAODTruth/TruthParticle.h"
 #include "xAODTruth/TruthVertex.h"
 #include "StoreGate/StoreGateSvc.h"
-#include "StoreGate/DataHandle.h"
 
 // Other classes used by this class
 #include "TruthUtils/PIDHelpers.h"
@@ -77,7 +76,7 @@ StatusCode HTFilter::filterEvent() {
   m_total++; // Book keeping
 
   // Get jet container out
-  const DataHandle<xAOD::JetContainer> truthjetTES = 0;
+  const xAOD::JetContainer* truthjetTES = 0;
   if ( !evtStore()->contains<xAOD::JetContainer>( m_TruthJetContainerName ) ||
         evtStore()->retrieve( truthjetTES, m_TruthJetContainerName).isFailure() || !truthjetTES ){
     ATH_MSG_INFO( "No xAOD::JetContainer found in StoreGate with key " << m_TruthJetContainerName ); 
@@ -101,7 +100,7 @@ StatusCode HTFilter::filterEvent() {
   // If we are asked to include neutrinos or leptons...
   if (m_UseLep || m_UseNu){  
     // Get MC event collection
-    const DataHandle<McEventCollection> mecc = 0;
+    const McEventCollection* mecc = 0;
     if ( evtStore()->retrieve(mecc).isFailure() || !mecc || mecc->size()<1 || !((*mecc)[0]) ){
       ATH_MSG_WARNING( "Could not retrieve MC Event Collection - weight might not work" );
       return StatusCode::SUCCESS;

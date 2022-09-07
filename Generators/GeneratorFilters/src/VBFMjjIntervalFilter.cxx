@@ -1,12 +1,12 @@
 /*
-  Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
 */
 
 // Header for this module
 #include "GeneratorFilters/VBFMjjIntervalFilter.h"
 
-#include "StoreGate/DataHandle.h"
 #include "AthenaKernel/IAtRndmGenSvc.h" // For random numbers...
+#include "AthContainers/ConstDataVector.h"
 #include "CLHEP/Random/RandomEngine.h"
 #include "GaudiKernel/PhysicalConstants.h"
 
@@ -75,7 +75,7 @@ StatusCode VBFMjjIntervalFilter::filterEvent() {
   }
 
   // Retrieve jet container
-  const DataHandle<xAOD::JetContainer> truthJetCollection = 0;
+  const xAOD::JetContainer* truthJetCollection = 0;
   if ( !evtStore()->contains<xAOD::JetContainer>( m_TruthJetContainerName ) ||
        evtStore()->retrieve( truthJetCollection, m_TruthJetContainerName).isFailure() ||
        !truthJetCollection ) {
@@ -135,7 +135,7 @@ StatusCode VBFMjjIntervalFilter::filterEvent() {
   }
 
   // Filter based on rapidity acceptance and sort
-  xAOD::JetContainer filteredJets(SG::VIEW_ELEMENTS);
+  ConstDataVector<xAOD::JetContainer> filteredJets(SG::VIEW_ELEMENTS);
   for (xAOD::JetContainer::const_iterator jitr = truthJetCollection->begin(); jitr != truthJetCollection->end(); ++jitr) {
     if (std::abs( (*jitr)->rapidity() ) < m_yMax && (*jitr)->pt() >= m_olapPt) {
       bool JetOverlapsWithPhoton   = false;
@@ -153,7 +153,7 @@ StatusCode VBFMjjIntervalFilter::filterEvent() {
       }
 
       if (!JetOverlapsWithPhoton && !JetOverlapsWithElectron && !JetOverlapsWithTau ) {
-	filteredJets.push_back(const_cast<xAOD::Jet*>(*jitr));
+	filteredJets.push_back(*jitr);
       }
     }
   }
@@ -162,7 +162,7 @@ StatusCode VBFMjjIntervalFilter::filterEvent() {
   if(m_ApplyWeighting){
 
     double eventWeight = 1.0;
-    eventWeight = getEventWeight(&filteredJets);
+    eventWeight = getEventWeight(filteredJets.asDataVector());
     double rnd = rndm->flat();
     if (1.0/eventWeight < rnd) {
       setFilterPassed(false);
@@ -171,7 +171,7 @@ StatusCode VBFMjjIntervalFilter::filterEvent() {
     }
 
     // Get MC event collection for setting weight
-    const DataHandle<McEventCollection> mecc = 0;
+    const McEventCollection* mecc = 0;
     if ( evtStore()->retrieve( mecc ).isFailure() || !mecc ){
       setFilterPassed(false);
       ATH_MSG_ERROR("Could not retrieve MC Event Collection - weight might not work");
@@ -192,7 +192,7 @@ StatusCode VBFMjjIntervalFilter::filterEvent() {
  }//Apply weighting 
   else {
     //just compute mjj, dphi etc 
-    bool pass = ApplyMassDphi(&filteredJets);
+    bool pass = ApplyMassDphi(filteredJets.asDataVector());
     if(!pass){
       setFilterPassed(false);
       ATH_MSG_DEBUG("Event failed filter");
@@ -251,7 +251,7 @@ bool VBFMjjIntervalFilter::checkOverlap(double eta, double phi, const std::vecto
   return false;
 }
 
-bool VBFMjjIntervalFilter::ApplyMassDphi(xAOD::JetContainer *jets){
+bool VBFMjjIntervalFilter::ApplyMassDphi(const xAOD::JetContainer *jets){
   if(jets->size()<2) return false; 
   double mjj = (jets->at(0)->p4() + jets->at(1)->p4()).M();
   double dphi = std::abs(jets->at(0)->p4().DeltaPhi(jets->at(1)->p4()));
@@ -264,7 +264,7 @@ bool VBFMjjIntervalFilter::ApplyMassDphi(xAOD::JetContainer *jets){
   return pass; 
 }
 
-double VBFMjjIntervalFilter::getEventWeight(xAOD::JetContainer *jets) {
+double VBFMjjIntervalFilter::getEventWeight(const xAOD::JetContainer *jets) {
   double weight = 1.0;
   if (jets->size() == 0) {
     weight /= m_prob0;

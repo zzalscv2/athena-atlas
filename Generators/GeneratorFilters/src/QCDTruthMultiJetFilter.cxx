@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2017 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "GeneratorFilters/QCDTruthMultiJetFilter.h"
@@ -68,7 +68,7 @@ StatusCode QCDTruthMultiJetFilter::filterEvent() {
   }
 
   // Get jet container out
-  const DataHandle<xAOD::JetContainer> truthjetTES = 0;
+  const xAOD::JetContainer* truthjetTES = 0;
   if (!evtStore()->contains<xAOD::JetContainer>(m_TruthJetContainerName) ||
       evtStore()->retrieve(truthjetTES, m_TruthJetContainerName).isFailure() || !truthjetTES) {
     ATH_MSG_ERROR("No xAOD::JetContainer found in StoreGate with key " << m_TruthJetContainerName);
@@ -118,7 +118,7 @@ StatusCode QCDTruthMultiJetFilter::filterEvent() {
   setFilterPassed(true);
 
   // Get MC event collection for setting weight
-  const DataHandle<McEventCollection> mecc = 0;
+  const McEventCollection* mecc = 0;
   CHECK(evtStore()->retrieve(mecc));
   ATH_MSG_DEBUG("Event passed.  Will mod event weights by " << w*m_norm << " for pt_lead of " << pt_lead << " norm " << m_norm << " w " << w << " high " << m_high << " rnd " << rnd);
   double orig = 1.;
