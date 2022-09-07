@@ -22,4 +22,5 @@ atlas_add_test( ExpressionParser_test
                 SOURCES test/ExpressionParser_test.cxx
                 LINK_LIBRARIES AthenaKernel ExpressionEvaluationLib GaudiKernel StoreGateLib TestTools xAODMuon xAODTracking
                 POST_EXEC_SCRIPT nopost.sh
+                PROPERTIES TIMEOUT 300
                 ENVIRONMENT "JOBOPTSEARCHPATH=${CMAKE_CURRENT_SOURCE_DIR}/share" )
