@@ -98,7 +98,7 @@ private:
 
   Gaudi::Property<bool> m_useMaterialMap{this, "UseMaterialMap", false, ""};
   Gaudi::Property<bool> m_objDebugOutput{this, "ObjDebugOutput", false, ""};
-  Gaudi::Property<std::string> m_materialMapInputFile{this, "MaterialMapInputFile", "", ""};
+  Gaudi::Property<std::string> m_materialMapInputFileBase{this, "MaterialMapInputFile", "", ""};
   Gaudi::Property<bool> m_buildBeamPipe{this, "BuildBeamPipe", false, ""};
 
   Gaudi::Property<std::vector<size_t>> m_barrelMaterialBins{this, "BarrelMaterialBins", {10, 10}};

@@ -121,19 +121,19 @@ StatusCode ActsTrackingGeometrySvc::initialize() {
   if (m_useMaterialMap) {
     std::shared_ptr<const Acts::IMaterialDecorator> matDeco = nullptr;
 
-    std::string matFile = PathResolverFindCalibFile(m_materialMapInputFile.value());
-    if (matFile.empty()) {
-      ATH_MSG_ERROR( "Material Map Input File " << m_materialMapInputFile.value() << " not found.");
+    std::string matFileFullPath = PathResolverFindCalibFile(m_materialMapInputFileBase.value());
+    if (matFileFullPath.empty()) {
+      ATH_MSG_ERROR( "Material Map Input File " << m_materialMapInputFileBase.value() << " not found.");
       return StatusCode::FAILURE;
     }
-    ATH_MSG_INFO("Configured to use material input: " << matFile);
+    ATH_MSG_INFO("Configured to use material input: " << matFileFullPath);
 
-    if (matFile.find(".json") != std::string::npos) {
+    if (matFileFullPath.find(".json") != std::string::npos) {
       // Set up the converter first
       Acts::MaterialMapJsonConverter::Config jsonGeoConvConfig;
       // Set up the json-based decorator
       matDeco = std::make_shared<const Acts::JsonMaterialDecorator>(
-          jsonGeoConvConfig, m_materialMapInputFile, Acts::Logging::INFO);
+          jsonGeoConvConfig, matFileFullPath, Acts::Logging::INFO);
     }
     tgbConfig.materialDecorator = matDeco;
   }
