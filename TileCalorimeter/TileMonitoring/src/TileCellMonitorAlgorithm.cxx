@@ -79,6 +79,9 @@ StatusCode TileCellMonitorAlgorithm::initialize() {
   m_overThrOccupGainGroups = buildToolMap<std::vector<std::vector<int>>>(m_tools, "TileCellDetailOccMapOvThrGain",
                                                                          Tile::MAX_ROS - 1, Tile::MAX_GAIN, nL1Triggers);
 
+  m_detailOccupGainGroups = buildToolMap<std::vector<std::vector<int>>>(m_tools, "TileCellDetailOccMapGain",
+                                                                        Tile::MAX_ROS - 1, Tile::MAX_GAIN, nL1Triggers);
+
   if (m_fillGapScintHistograms) {
     m_energyGapScintGroups = buildToolMap<std::vector<std::vector<int>>>(m_tools, "TileGapScintilatorEnergy", 2 /* EBA and EBC */,
                                                                          Tile::MAX_DRAWER, 4 /* E1-E4 */);
@@ -187,6 +190,10 @@ StatusCode TileCellMonitorAlgorithm::fillHistograms( const EventContext& ctx ) c
   std::vector<int> detailOccupModule[Tile::MAX_ROS - 1];
   std::vector<int> detailOccupChannel[Tile::MAX_ROS - 1];
   std::vector<float> detailOccupEnergies[Tile::MAX_ROS - 1];
+
+  std::vector<int> detailOccupGainModule[Tile::MAX_ROS - 1][Tile::MAX_GAIN];
+  std::vector<int> detailOccupGainChannel[Tile::MAX_ROS - 1][Tile::MAX_GAIN];
+  std::vector<float> detailOccupGainEnergies[Tile::MAX_ROS - 1][Tile::MAX_GAIN];
 
   std::vector<int> overThrOccupModule[Tile::MAX_ROS - 1];
   std::vector<int> overThrOccupChannel[Tile::MAX_ROS - 1];
@@ -457,12 +464,20 @@ StatusCode TileCellMonitorAlgorithm::fillHistograms( const EventContext& ctx ) c
             detailOccupModule[partition1].push_back(module);
             detailOccupChannel[partition1].push_back(channel1);
             detailOccupEnergies[partition1].push_back(energy1 * weight);
+
+            detailOccupGainModule[partition1][gain1].push_back(module);
+            detailOccupGainChannel[partition1][gain1].push_back(channel1);
+            detailOccupGainEnergies[partition1][gain1].push_back(energy1 * weight);
           }
 
           if (isOkChannel2) {
             detailOccupModule[partition2].push_back(module);
             detailOccupChannel[partition2].push_back(channel2);
             detailOccupEnergies[partition2].push_back(energy2);
+
+            detailOccupGainModule[partition2][gain2].push_back(module);
+            detailOccupGainChannel[partition2][gain2].push_back(channel2);
+            detailOccupGainEnergies[partition2][gain2].push_back(energy2);
           }
 
         } else {
@@ -830,6 +845,15 @@ StatusCode TileCellMonitorAlgorithm::fillHistograms( const EventContext& ctx ) c
         auto monWeight = Monitored::Collection("weight", overThrOccupGainWeight[partition][gain]);
         for (int l1TriggerIdx : l1TriggersIndices) {
           fill(m_tools[m_overThrOccupGainGroups[partition][gain][l1TriggerIdx]], monModule, monChannel, monWeight);
+        }
+      }
+
+      if (!detailOccupGainModule[partition][gain].empty()) {
+        auto monModule = Monitored::Collection("module", detailOccupGainModule[partition][gain]);
+        auto monChannel = Monitored::Collection("channel", detailOccupGainChannel[partition][gain]);
+        auto monEnergies = Monitored::Collection("energy", detailOccupGainEnergies[partition][gain]);
+        for (int l1TriggerIdx : l1TriggersIndices) {
+          fill(m_tools[m_detailOccupGainGroups[partition][gain][l1TriggerIdx]], monModule, monChannel, monEnergies);
         }
       }
     }

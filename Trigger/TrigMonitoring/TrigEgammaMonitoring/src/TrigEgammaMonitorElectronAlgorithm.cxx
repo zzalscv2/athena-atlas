@@ -3,6 +3,8 @@
 */
 
 #include "TrigEgammaMonitorElectronAlgorithm.h"
+#include "LArRecEvent/LArEventBitInfo.h"
+#include "StoreGate/ReadDecorHandle.h"
 
 using namespace Trig;
 
@@ -21,7 +23,7 @@ StatusCode TrigEgammaMonitorElectronAlgorithm::initialize()
   ATH_CHECK(TrigEgammaMonitorAnalysisAlgorithm::initialize());
 
   ATH_CHECK(m_offElectronKey.initialize());
-
+  ATH_CHECK( m_eventInfoKey.initialize() );
   
   for(auto& trigName : m_trigInputList)
   {
@@ -48,8 +50,14 @@ StatusCode TrigEgammaMonitorElectronAlgorithm::fillHistograms( const EventContex
         ATH_MSG_DEBUG("HLTResult truncated, skip trigger analysis");
         return StatusCode::SUCCESS; 
     }
-    
 
+    // Noise burst protection 
+    SG::ReadDecorHandle<xAOD::EventInfo,uint32_t> thisEvent(m_eventInfoKey, ctx);
+    if ( thisEvent->isEventFlagBitSet(xAOD::EventInfo::LAr,LArEventBitInfo::NOISEBURSTVETO)) {
+        ATH_MSG_DEBUG("LAr Noise Burst Veto, skip trigger analysis");
+        return StatusCode::SUCCESS;
+    }
+    
     ATH_MSG_DEBUG("Chains for Analysis " << m_trigList);
 
     for(const auto& trigger : m_trigList){

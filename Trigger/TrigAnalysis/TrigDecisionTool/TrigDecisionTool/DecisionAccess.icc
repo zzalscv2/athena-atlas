@@ -1,4 +1,4 @@
-#if !defined(XAOD_STANDALONE) && !defined(XAOD_ANALYSIS) // Full athena
+#if !defined(XAOD_STANDALONE) && !defined(XAOD_ANALYSIS) // Full athena 
 
 template<class T> 
 Trig::Feature<T> Trig::DecisionAccess::ancestor(const HLT::TriggerElement* te, std::string label) const {
@@ -59,6 +59,12 @@ std::vector< TrigCompositeUtils::LinkInfo<CONTAINER> > Trig::DecisionAccess::fea
                                                                   const unsigned int featureCollectionMode,
                                                                   const std::string& navElementLinkKey,
                                                                   const int          restrictToLegIndex) const {
+  const SG::ReadHandleKey<TrigCompositeUtils::DecisionContainer>* navRHK = cgm()->getRun3NavigationKeyPtr();
+  if (!navRHK || navRHK->empty()) {
+    ATH_MSG_ERROR("Trig::DecisionAccess::features: Run 3 Trigger Navigation ReadHandleKey not set. Check that the TDT's 'NavigationFormat' property is set to 'TrigComposite' for R3, "
+      "and the 'HLTSummary' property is set to the correct HLTNav_Summary_OnlineSlimmed / HLTNav_Summary_AODSlimmed / HLTNav_Summary_DAODSlimmed collection for the given input file.");
+    return std::vector< TrigCompositeUtils::LinkInfo<CONTAINER> >();
+  }
   return group->features<CONTAINER>(cgm()->store(), cgm()->getRun3NavigationKey(), condition, containerSGKey, featureCollectionMode, navElementLinkKey, restrictToLegIndex);
 }
 

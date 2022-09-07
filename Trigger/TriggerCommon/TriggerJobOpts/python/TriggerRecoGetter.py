@@ -1,38 +1,28 @@
 # Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
 
 from AthenaConfiguration.ComponentAccumulator import CAtoGlobalWrapper
-from RecExConfig.Configured import Configured
 from AthenaCommon.Logging import logging
-log = logging.getLogger( "TriggerRecoGetter.py" )
+_log = logging.getLogger( "TriggerRecoGetter.py" )
 
-class TriggerRecoGetter(Configured):
-
-    _configured=True
-    _done=False
-    
-    def configure(self):
-        if self._done:
-            log.info("configuration already done, who is calling it again?")
-            return True
-        self._done=True
-
-        # setup configuration services
-        from TriggerJobOpts.TriggerConfigGetter import TriggerConfigGetter
-        cfg = TriggerConfigGetter()  # noqa: F841
-
-        # configure TrigDecisionTool
+def TriggerRecoGetter(flags=None):
+    if flags is None:
         from AthenaConfiguration.AllConfigFlags import ConfigFlags
-        from TrigDecisionTool.TrigDecisionToolConfig import TrigDecisionToolCfg
-        CAtoGlobalWrapper(TrigDecisionToolCfg, ConfigFlags)
+        flags = ConfigFlags
 
-        if 'L1' in ConfigFlags.Trigger.availableRecoMetadata:
-            log.info("configuring lvl1")
-            from TriggerJobOpts.Lvl1ResultBuilderGetter import Lvl1ResultBuilderGetter
-            lvl1 = Lvl1ResultBuilderGetter()  # noqa: F841
+    # setup configuration services
+    from TriggerJobOpts.TriggerConfigGetter import TriggerConfigGetter
+    cfg = TriggerConfigGetter(flags)  # noqa: F841
 
-        if 'HLT' in ConfigFlags.Trigger.availableRecoMetadata:
-            log.info("configuring hlt")
-            from TriggerJobOpts.HLTTriggerResultGetter import HLTTriggerResultGetter
-            hlt = HLTTriggerResultGetter()   # noqa: F841
+    # configure TrigDecisionTool
+    from TrigDecisionTool.TrigDecisionToolConfig import TrigDecisionToolCfg
+    CAtoGlobalWrapper(TrigDecisionToolCfg, flags)
 
-        return True
+    if 'L1' in flags.Trigger.availableRecoMetadata:
+        _log.info("configuring lvl1")
+        from TriggerJobOpts.Lvl1ResultBuilderGetter import Lvl1ResultBuilderGetter
+        lvl1 = Lvl1ResultBuilderGetter(flags)  # noqa: F841
+
+    if 'HLT' in flags.Trigger.availableRecoMetadata:
+        _log.info("configuring hlt")
+        from TriggerJobOpts.HLTTriggerResultGetter import HLTTriggerResultGetter
+        hlt = HLTTriggerResultGetter(flags)   # noqa: F841

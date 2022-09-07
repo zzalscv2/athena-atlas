@@ -158,7 +158,7 @@ namespace Trig {
       bool HLTResult(const std::string& chain, unsigned int condition) const;
       bool L1Result(const std::string& item, unsigned int condition) const;
 
-      unsigned int HLTBits(const std::string& chain, const std::string& level) const;
+      unsigned int HLTBits(const std::string& chain, const std::string& level, const TrigCompositeUtils::DecisionIDContainer& passExpress) const;
       unsigned int L1Bits(const std::string& item) const;
 
       float HLTPrescale(const std::string& chain, unsigned int condition) const;

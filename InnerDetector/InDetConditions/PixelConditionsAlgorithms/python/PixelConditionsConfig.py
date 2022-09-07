@@ -10,7 +10,6 @@ from IOVDbSvc.IOVDbSvcConfig import addFolders,addFoldersSplitOnline
 def PixelConfigCondAlgCfg(flags, name="PixelConfigCondAlg", **kwargs):
     """Return a ComponentAccumulator with configured PixelConfigCondAlg"""
     acc = ComponentAccumulator()
-    runNum = flags.Input.RunNumber[0]
 
     # FIXME commented properties are not currently accepted by PixelConfigCondAlg
     CondArgs = {}
@@ -58,7 +57,10 @@ def PixelConfigCondAlgCfg(flags, name="PixelConfigCondAlg", **kwargs):
                 IdMappingDat="PixelCabling/Pixels_Atlas_IdMapping_Run2.dat"
         else:
             IdMappingDat="PixelCabling/Pixels_Atlas_IdMapping.dat"
+    elif not flags.Input.RunNumber:
+        IdMappingDat="PixelCabling/Pixels_Atlas_IdMapping_344494.dat"
     else:
+        runNum = flags.Input.RunNumber[0]
         if runNum < 222222:
             IdMappingDat="PixelCabling/Pixels_Atlas_IdMapping_May08.dat"
         else:
@@ -118,7 +120,7 @@ def PixelCablingCondAlgCfg(flags, name="PixelCablingCondAlg", **kwargs):
     if not flags.Input.isMC and not flags.Overlay.DataOverlay:
         acc.merge(addFoldersSplitOnline(flags, "PIXEL", "/PIXEL/Onl/CablingMap","/PIXEL/CablingMap", className="AthenaAttributeList"))
         kwargs.setdefault("ReadKey", "/PIXEL/CablingMap")
-        if flags.Input.RunNumber[0]<222222:
+        if flags.Input.RunNumber and flags.Input.RunNumber[0]<222222:
             kwargs.setdefault("ReadKey", "")
     else:
         kwargs.setdefault("ReadKey", "")
