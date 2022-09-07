@@ -24,10 +24,10 @@ namespace CP {
             const FloatAccessor& acc_ele = accessor(acc);
 
             if (!acc_ele.isAvailable(x)) {
-                Warning("IsolationConditionFormula", Form("Accessor %s is not available. Expected when using primary AODs, post-p3793 "
-                                                          "derivations (only for *FixedRad or FixedCutPflow* for electrons), pre-p3517 "
-                                                          "derivations (only for FC*), or pre-p3830 derivations (for other electron WPs)",
-                                                          SG::AuxTypeRegistry::instance().getName(acc_ele.auxid()).c_str()));
+                Warning("IsolationConditionFormula", "Accessor %s is not available. Expected when using primary AODs, post-p3793 "
+                                                     "derivations (only for *FixedRad or FixedCutPflow* for electrons), pre-p3517 "
+                                                     "derivations (only for FC*), or pre-p3830 derivations (for other electron WPs)",
+                                                     SG::AuxTypeRegistry::instance().getName(acc_ele.auxid()).c_str());
                 isoVars.push_back(FLT_MAX);
             } else
                 isoVars.push_back(acc_ele(x));
