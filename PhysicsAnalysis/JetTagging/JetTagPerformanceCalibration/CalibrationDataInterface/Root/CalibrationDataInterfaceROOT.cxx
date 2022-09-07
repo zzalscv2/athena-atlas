@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2020 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
 */
 
 //////////////////////////////////////////////////////////////////////////////////////////////
@@ -813,8 +813,11 @@ Analysis::CalibrationDataInterfaceROOT::getScaleFactor (const CalibrationDataVar
      cerr << " Please correct your configuration first. Nominal uncertainties used. " << endl;
   }
   if (unc == SFEigen || unc == SFNamed) {
-    const CalibrationDataEigenVariations* eigenVariation=m_eigenVariationsMap[container];
-    if (! eigenVariation) {
+    const CalibrationDataEigenVariations* eigenVariation = nullptr;
+    try {
+      eigenVariation=m_eigenVariationsMap.at(container);
+    }
+    catch (const std::out_of_range&) {
       cerr << " Could not retrieve eigenvector variation, while it should have been there." << endl;
       return Analysis::kError;
     }
@@ -1600,8 +1603,11 @@ Analysis::CalibrationDataInterfaceROOT::getWeightScaleFactor (const CalibrationD
      cerr << "                             Please correct your .env config file first. Nominal uncertainties used. " << endl;
   }
   if (unc == SFEigen || unc == SFNamed) {
-    const CalibrationDataEigenVariations* eigenVariation=m_eigenVariationsMap[container];
-    if (! eigenVariation) {
+    const CalibrationDataEigenVariations* eigenVariation = nullptr;
+    try {
+      eigenVariation = m_eigenVariationsMap.at(container);
+    }
+    catch (const std::out_of_range&) {
       cerr << "getWeightScaleFactor: could not retrieve eigenvector variation, while it should have been there." << endl;
       return Analysis::kError;
     }
@@ -2003,7 +2009,7 @@ Analysis::CalibrationDataInterfaceROOT::listScaleFactorUncertainties(unsigned in
     if (named) {
       // Find out which uncertainties are excluded from eigenvector construction
       if (! m_runEigenVectorMethod) return dummy;
-      const CalibrationDataEigenVariations* eigenVariation=m_eigenVariationsMap[container];
+      const CalibrationDataEigenVariations* eigenVariation=m_eigenVariationsMap.at(container);
       std::vector<string> unordered = eigenVariation->listNamedVariations();
       std::vector<string> ordered(unordered.size());
       for (unsigned int i = 0; i < unordered.size(); ++i)
@@ -2053,7 +2059,7 @@ Analysis::CalibrationDataInterfaceROOT::getNumVariations(unsigned int index,
   if (! (unc == SFEigen || unc == SFNamed)) return 0;
   CalibrationDataContainer* container = m_objects[index];
   if (! container) return 0;
-  const CalibrationDataEigenVariations* eigenVariation=m_eigenVariationsMap[container];
+  const CalibrationDataEigenVariations* eigenVariation=m_eigenVariationsMap.at(container);
   return (unc == SFEigen) ?
     eigenVariation->getNumberOfEigenVariations() :
     eigenVariation->getNumberOfNamedVariations();
@@ -2204,8 +2210,11 @@ Analysis::CalibrationDataInterfaceROOT::runEigenVectorRecomposition (const std::
   }
 
   // Retrieve eigenvariation
-  const CalibrationDataEigenVariations* eigenVariation=m_eigenVariationsMap[container];
-  if (! eigenVariation) {
+  const CalibrationDataEigenVariations* eigenVariation = nullptr;
+  try {
+    eigenVariation = m_eigenVariationsMap.at(container);
+  }
+  catch (const std::out_of_range&) {
     cerr << "runEigenVectorRecomposition: Could not retrieve eigenvector variation, while it should have been there." << endl;
     return Analysis::kError;
   }
