@@ -137,6 +137,9 @@ svcMgr.TagInfoMgr.ExtraTagValuePairs.update({"beam_type": jobproperties.Beam.bea
                                             "project_name": str(rec.projectName()),
                                             "AtlasRelease_" + rec.OutputFileNameForRecoStep(): rec.AtlasReleaseVersion()
                                             })
+if athenaCommonFlags.MCCampaign():
+    svcMgr.TagInfoMgr.ExtraTagValuePairs.update({"mc_campaign": athenaCommonFlags.MCCampaign()})
+
 # Set AMITag in /TagInfo
 from PyUtils import AMITagHelper
 AMITagHelper.SetAMITag(outputTag=rec.AMITag())

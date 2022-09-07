@@ -432,6 +432,7 @@ std::ostream& operator<< ( std::ostream& out,
       PRINT_TYPE( mcProcID );
       PRINT_TYPE( simFlavour );
       PRINT_TYPE( isDataOverlay );
+      PRINT_TYPE( mcCampaign );
 
    default:
       out << "UNKNOWN (" << static_cast< int >( type ) << ")";

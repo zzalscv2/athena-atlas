@@ -108,8 +108,10 @@
 + Reconstruction/egamma/egammaRecEvent
 + Reconstruction/egamma/egammaUtils
 + Reconstruction/tauRecTools
++ Simulation/SimulationConfig
 + Tools/PathResolver
 + Tools/ART
++ Tools/Campaigns
 + Tools/DirectIOART
 + Trigger/TrigAnalysis/TrigAnalysisInterfaces
 + Trigger/TrigAnalysis/TrigBunchCrossingTool

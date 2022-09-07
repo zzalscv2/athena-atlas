@@ -4,6 +4,7 @@ from AthenaCommon.SystemOfUnits import TeV
 from AthenaConfiguration.AthConfigFlags import AthConfigFlags, isGaudiEnv
 from AthenaConfiguration.AutoConfigFlags import GetFileMD, getInitialTimeStampsFromRunNumbers, getRunToTimestampDict, getSpecialConfigurationMetadata
 from AthenaConfiguration.Enums import BeamType, Format, ProductionStep, BunchStructureSource, Project
+from Campaigns.Utils import Campaign
 from PyUtils.moduleExists import moduleExists
 
 
@@ -46,6 +47,7 @@ def _createCfgFlags():
     acf.addFlag('Input.FailOnUnknownCollections', False)
 
     acf.addFlag('Input.ProjectName', lambda prevFlags : GetFileMD(prevFlags.Input.Files).get("project_name", "data17_13TeV")) # former global.ProjectName
+    acf.addFlag('Input.MCCampaign', lambda prevFlags : Campaign(GetFileMD(prevFlags.Input.Files).get("mc_campaign", "")), enum=Campaign)
     acf.addFlag('Input.TriggerStream', lambda prevFlags : GetFileMD(prevFlags.Input.Files).get("stream", "") if prevFlags.Input.Format == Format.BS
                                                           else GetFileMD(prevFlags.Input.Files).get("triggerStreamOfFile", "")) # former global.TriggerStream
     acf.addFlag('Input.Format', lambda prevFlags : Format.BS if GetFileMD(prevFlags.Input.Files).get("file_type", "BS") == "BS" else Format.POOL, enum=Format) # former global.InputFormat
