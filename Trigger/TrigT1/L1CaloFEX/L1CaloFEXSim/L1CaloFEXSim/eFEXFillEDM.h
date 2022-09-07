@@ -47,9 +47,9 @@ namespace LVL1 {
     virtual StatusCode execute() override;
 
     /** Create and fill a new fillEmEDM object (corresponding to this window), and return a pointer to it */
-    virtual void fillEmEDM(std::unique_ptr<xAOD::eFexEMRoIContainer> &container, uint8_t eFEXNumber, const eFEXegTOB& tobObject) override;
+    virtual void fillEmEDM(std::unique_ptr<xAOD::eFexEMRoIContainer> &container, uint8_t eFEXNumber, const std::unique_ptr<eFEXegTOB> &tobObject, bool xTOB=false) override;
     /** Create and fill a new fillTauEDM object (corresponding to this window), and return a pointer to it */
-    virtual void fillTauEDM(std::unique_ptr<xAOD::eFexTauRoIContainer> &container, uint8_t eFEXNumber, const eFEXtauTOB& tobObject) override;
+    virtual void fillTauEDM(std::unique_ptr<xAOD::eFexTauRoIContainer> &container, uint8_t eFEXNumber, const std::unique_ptr<eFEXtauTOB> &tobObject, bool xTOB=false) override;
 
     /** Internal data */
   private:

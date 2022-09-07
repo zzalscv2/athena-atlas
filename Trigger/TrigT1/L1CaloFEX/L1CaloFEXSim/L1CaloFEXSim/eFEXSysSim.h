@@ -67,11 +67,19 @@ namespace LVL1 {
 
     /** Internal data */
   private:
+    // TOB sorting function
+    template <class TOBObjectClass> static bool TOBetSort(const TOBObjectClass& i, const TOBObjectClass& j ) {return (((i->getTobword() >> 0 ) & 0xfff)>((j->getTobword() >> 0 ) & 0xfff)); }
+    // EM TOBs and xTOBS
     std::unique_ptr< xAOD::eFexEMRoIContainer > m_eContainer;
     std::unique_ptr< xAOD::eFexEMRoIAuxContainer > m_eAuxContainer;
+    std::unique_ptr< xAOD::eFexEMRoIContainer > m_xeContainer;
+    std::unique_ptr< xAOD::eFexEMRoIAuxContainer > m_xeAuxContainer;
 
+    // Tau TOBs and xTOBs
     std::unique_ptr< xAOD::eFexTauRoIContainer > m_tauContainer;
     std::unique_ptr< xAOD::eFexTauRoIAuxContainer > m_tauAuxContainer;
+    std::unique_ptr< xAOD::eFexTauRoIContainer > m_xtauContainer;
+    std::unique_ptr< xAOD::eFexTauRoIAuxContainer > m_xtauAuxContainer;
 
     std::vector<eFEXSim*>  m_eFEXCollection;
     
@@ -81,16 +89,18 @@ namespace LVL1 {
 
     SG::ReadHandleKey<LVL1::eTowerContainer> m_eTowerContainerSGKey {this, "MyETowers", "eTowerContainer", "Input container for eTowers"};
 
-    SG::WriteHandleKey< xAOD::eFexEMRoIContainer > m_eFexOutKey {this,"Key_eFexEMOutputContainer","L1_eEMRoI","Output eFexEM container"};
-    SG::WriteHandleKey< xAOD::eFexTauRoIContainer > m_eFexTauOutKey {this,"Key_eFexTauOutputContainer","L1_eTauRoI","Output eFexTau container"};
+    SG::WriteHandleKey< xAOD::eFexEMRoIContainer > m_eFexOutKey {this,"Key_eFexEMOutputContainer","L1_eEMRoI","Output eFexEM TOB container"};
+    SG::WriteHandleKey< xAOD::eFexEMRoIContainer > m_eFexEMxTOBOutKey {this,"Key_eFexEMxTOBOutputContainer","L1_eEMxRoI","Output eFexEM xTOB container"};
+    SG::WriteHandleKey< xAOD::eFexTauRoIContainer > m_eFexTauOutKey {this,"Key_eFexTauOutputContainer","L1_eTauRoI","Output eFexTau TOB container"};
+    SG::WriteHandleKey< xAOD::eFexTauRoIContainer > m_eFexTauxTOBOutKey {this,"Key_eFexTauxTOBOutputContainer","L1_eTauxRoI","Output eFexTau xTOB container"};
     ToolHandle<IeFEXFPGATowerIdProvider> m_eFEXFPGATowerIdProviderTool {this, "eFEXFPGATowerIdProviderTool", "LVL1::eFEXFPGATowerIdProvider", "Tool that provides tower-FPGA mapping"};
     ToolHandle<IeFEXFPGA> m_eFEXFPGATool {this, "eFEXFPGATool", "LVL1::eFEXFPGA", "Tool that simulates the FPGA hardware"};
 
     //std::map<int,eTower> m_eTowersColl;
 
-    std::map<int, std::vector<eFEXegTOB> > m_allEmTobObjects;
+    std::map<int, std::vector<std::unique_ptr<eFEXegTOB>> > m_allEmTobObjects;
 
-    std::map<int, std::vector<eFEXtauTOB> > m_allTauTobObjects;
+    std::map<int, std::vector<std::unique_ptr<eFEXtauTOB>> > m_allTauTobObjects;
 
   };
   

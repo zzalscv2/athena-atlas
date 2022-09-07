@@ -41,8 +41,8 @@ Interface definition for eFEXSim
     virtual void SetTowersAndCells_SG(int tmp[10][18]) = 0;
 
     virtual StatusCode NewExecute(int tmp[10][18], eFEXOutputCollection* inputOutputCollection) = 0;
-    virtual std::vector<eFEXegTOB> getEmTOBs() = 0;
-    virtual std::vector<eFEXtauTOB> getTauTOBs() = 0;
+    virtual std::vector<std::unique_ptr<eFEXegTOB>> getEmTOBs() = 0;
+    virtual std::vector<std::unique_ptr<eFEXtauTOB>> getTauTOBs() = 0;
 
   private:
 

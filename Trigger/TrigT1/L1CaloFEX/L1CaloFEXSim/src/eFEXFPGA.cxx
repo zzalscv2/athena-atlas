@@ -129,13 +129,14 @@ StatusCode eFEXFPGA::execute(eFEXOutputCollection* inputOutputCollection){
          ieta < 5 ? m_eTowersIDs[iphi+1][ieta+1] : 0},
       };
 
+
       ATH_CHECK( m_eFEXegAlgoTool->safetyTest() );
       m_eFEXegAlgoTool->setup(tobtable, m_efexid, m_id, ieta);
 
       // ignore any tobs without a seed, move on to the next window
       if (m_eFEXegAlgoTool->hasSeed() == false) continue;
-      unsigned int seed = 0;
-      seed = m_eFEXegAlgoTool->getSeed();
+      unsigned int seed = m_eFEXegAlgoTool->getSeed();
+      unsigned int und = (m_eFEXegAlgoTool->getUnD() ? 1 : 0);
 
       // the minimum energy to send to topo (not eta dependent yet, but keep inside loop as it will be eventually?)
       unsigned int ptMinToTopoCounts = 0;
@@ -201,8 +202,9 @@ StatusCode eFEXFPGA::execute(eFEXOutputCollection* inputOutputCollection){
       int eta_ind = ieta; // No need to offset eta index with new 0-5 convention
       int phi_ind = iphi - 1;
 
-      //form the egamma tob word
-      uint32_t tobword = m_eFEXFormTOBsTool->formEmTOBWord(m_id,eta_ind,phi_ind,RhadWP,WstotWP,RetaWP,seed,eEMTobEt,ptMinToTopoCounts);
+      //form the egamma tob word and xTOB words
+      uint32_t tobword = m_eFEXFormTOBsTool->formEmTOBWord(m_id,eta_ind,phi_ind,RhadWP,WstotWP,RetaWP,seed,und,eEMTobEt,ptMinToTopoCounts);
+      std::vector<uint32_t> xtobwords = m_eFEXFormTOBsTool->formEmxTOBWords(m_efexid,m_id,eta_ind,phi_ind,RhadWP,WstotWP,RetaWP,seed,und,eEMTobEt,ptMinToTopoCounts);
 
       std::unique_ptr<eFEXegTOB> tmp_tob = m_eFEXegAlgoTool->geteFEXegTOB();
       
@@ -211,10 +213,11 @@ StatusCode eFEXFPGA::execute(eFEXOutputCollection* inputOutputCollection){
       tmp_tob->setEta(ieta);
       tmp_tob->setPhi(iphi);
       tmp_tob->setTobword(tobword);
-      if ( (tobword != 0) && (eEMTobEt != 0) ) m_emTobObjects.push_back(*tmp_tob);
+      tmp_tob->setxTobword0(xtobwords[0]);
+      tmp_tob->setxTobword1(xtobwords[1]);
 
       // for plotting
-      if (inputOutputCollection->getdooutput()) {
+      if (inputOutputCollection->getdooutput() && (tobword != 0) && (eEMTobEt != 0)) {
         inputOutputCollection->addeFexNumber(m_efexid);
         inputOutputCollection->addEMtob(tobword);
         inputOutputCollection->addValue_eg("WstotNum", tmp_tob->getWstotNum());
@@ -239,6 +242,10 @@ StatusCode eFEXFPGA::execute(eFEXOutputCollection* inputOutputCollection){
         inputOutputCollection->addValue_eg("had", had_et);
         inputOutputCollection->fill_eg();
       }
+
+      // Now we've finished with that object we can move it into the class results store
+      if ( (tobword != 0) && (eEMTobEt != 0) ) m_emTobObjects.push_back(std::move(tmp_tob));
+
 
     }
   }
@@ -320,22 +327,23 @@ StatusCode eFEXFPGA::execute(eFEXOutputCollection* inputOutputCollection){
       // Seed as returned is supercell value within 3x3 area, here want it within central cell
       seed = seed - 4;      
 
-      unsigned int und = 0;
-      und = m_eFEXtauAlgoTool->getUnD();
+      unsigned int und = (m_eFEXtauAlgoTool->getUnD() ? 1 : 0);
 
       int eta_ind = ieta; // No need to offset eta index with new 0-5 convention
       int phi_ind = iphi - 1;
 
-      // Form the tau tob word
+      // Form the tau TOB word and xTOB words
       uint32_t tobword = m_eFEXFormTOBsTool->formTauTOBWord(m_id, eta_ind, phi_ind, eTauTobEt, rHadWP, rCoreWP, seed, und, ptTauMinToTopoCounts);
+      std::vector<uint32_t> xtobwords = m_eFEXFormTOBsTool->formTauxTOBWords(m_efexid, m_id, eta_ind, phi_ind, eTauTobEt, rHadWP, rCoreWP, seed, und, ptTauMinToTopoCounts);
+
       std::unique_ptr<eFEXtauTOB> tmp_tau_tob = m_eFEXtauAlgoTool->getTauTOB();
       tmp_tau_tob->setFPGAID(m_id);
       tmp_tau_tob->seteFEXID(m_efexid);
       tmp_tau_tob->setEta(ieta);
       tmp_tau_tob->setPhi(iphi);
       tmp_tau_tob->setTobword(tobword);
-
-      if ( tobword != 0 ) m_tauTobObjects.push_back(*tmp_tau_tob);
+      tmp_tau_tob->setxTobword0(xtobwords[0]);
+      tmp_tau_tob->setxTobword1(xtobwords[1]);
 
       // for plotting
       if ((inputOutputCollection->getdooutput()) && ( tobword != 0 )) {
@@ -367,6 +375,9 @@ StatusCode eFEXFPGA::execute(eFEXOutputCollection* inputOutputCollection){
         
         inputOutputCollection->fill_tau();
       }
+      // Now we've finished with that object we can move it into the class results store
+      if ( tobword != 0 ) m_tauTobObjects.push_back(std::move(tmp_tau_tob));
+
     }
   }
 
@@ -376,8 +387,11 @@ StatusCode eFEXFPGA::execute(eFEXOutputCollection* inputOutputCollection){
 
 
 
-std::vector<eFEXegTOB> eFEXFPGA::getEmTOBs()
+std::vector<std::unique_ptr<eFEXegTOB>> eFEXFPGA::getEmTOBs()
 {
+  // TOB sorting moved to eFEXSysSim to simplify xTOB production
+  // But leave this here in case more subtle requirement is uncovered in future
+  /*
   auto tobsSort = m_emTobObjects;
 
   ATH_MSG_DEBUG("number of tobs: " <<tobsSort.size() << " in FPGA: " << m_id << " before truncation");
@@ -388,11 +402,28 @@ std::vector<eFEXegTOB> eFEXFPGA::getEmTOBs()
   // return the top 6 highest ET TOBs from the FPGA
   if (tobsSort.size() > 6) tobsSort.resize(6);
   return tobsSort;
+  */
+
+  /* Returning a vector of unique_pointers means this class will lose ownership.
+     This shouldn't be an issue since all this class does is create and return the 
+     objects, but you should bear it in mind if you make changes */
+
+  // This copy seems to be needed - it won't let me pass m_emTobOjects directly (to do with being a class member?)
+  std::vector<std::unique_ptr<eFEXegTOB>> tobsSort;
+  tobsSort.clear();
+  for(auto &j : m_emTobObjects){
+      tobsSort.push_back(std::move(j));
+  }
+
+  return tobsSort;
 
 }
 
-std::vector<eFEXtauTOB> eFEXFPGA::getTauTOBs()
+std::vector<std::unique_ptr<eFEXtauTOB>> eFEXFPGA::getTauTOBs()
 {
+  // TOB sorting moved to eFEXSysSim to simplify xTOB production
+  // But leave this here in case more subtle requirement is uncovered in future
+  /*
   auto tobsSort = m_tauTobObjects;
 
   ATH_MSG_DEBUG("number of tobs: " <<tobsSort.size() << " in FPGA: " << m_id << " before truncation");
@@ -402,6 +433,20 @@ std::vector<eFEXtauTOB> eFEXFPGA::getTauTOBs()
 
   // return the top 6 highest ET TOBs from the FPGA
   if (tobsSort.size() > 6) tobsSort.resize(6);
+  return tobsSort;
+  */
+
+  /* Returning a vector of unique_pointers means this class will lose ownership.
+     This shouldn't be an issue since all this class does is create and return the 
+     objects, but you should bear it in mind if you make changes */
+
+  // This copy seems to be needed - it won't let me pass m_tauTobOjects directly (to do with being a class member?)
+  std::vector<std::unique_ptr<eFEXtauTOB>> tobsSort;
+  tobsSort.clear();
+  for(auto &j : m_tauTobObjects){
+      tobsSort.push_back(std::move(j));
+  }
+
   return tobsSort;
 
 }
