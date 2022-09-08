@@ -67,25 +67,25 @@ def RpcMonitoringConfig(inputFlags):
                         xbins=67, xmin=-104.6875, xmax=104.6875)
 
     myGroup_track.defineHistogram('prd_sec,prd_layer;NPRDHit_sectorVSlayer', 
-                        title="NPRDHit_sectorVSlayer;Sector;layer((dbR-1)*2+gasGap);NHit",
+                        title="NPRDHit_sectorVSlayer;Sector(- for C side, + for A side);layer((dbR-1)*2+gasGap);NHit",
                         type='TH2I', 
                         path='RpcOccupancy',
                         xbins=33, xmin=-16.5, xmax=16.5, 
                         ybins=8, ymin=0.5, ymax=8.5)
     myGroup_track.defineHistogram('prd_sec_1214,prd_layer_1214;NPRDHit_sectorVSlayer_Sector1214', 
-                        title="NPRDHit_sectorVSlayer_Sector1214;Sector;layer((dbR-1)*2+gasGap);NHit",
+                        title="NPRDHit_sectorVSlayer_Sector1214;Sector(- for C side, + for A side);layer((dbR-1)*2+gasGap);NHit",
                         type='TH2I', 
                         path='RpcOccupancy',
                         xbins=[-14.5,-13.5,-12.5,-11.5, 11.5, 12.5, 13.5, 14.5],
                         ybins=8, ymin=0.5, ymax=8.5)
     myGroup_track.defineHistogram('prd_sec_eta,prd_layer_eta;NPRDHit_sectorVSlayer_Eta', 
-                        title="NPRDHit_sectorVSlayer_eta;Sector;layer((dbR-1)*2+gasGap);NHit",
+                        title="NPRDHit_sectorVSlayer_eta;Sector(- for C side, + for A side);layer((dbR-1)*2+gasGap);NHit",
                         type='TH2I', 
                         path='RpcOccupancy',
                         xbins=33, xmin=-16.5, xmax=16.5, 
                         ybins=8, ymin=0.5, ymax=8.5)
     myGroup_track.defineHistogram('prd_sec_phi,prd_layer_phi;NPRDHit_sectorVSlayer_Phi', 
-                        title="NPRDHit_sectorVSlayer_phi;Sector;layer((dbR-1)*2+gasGap);NHit",
+                        title="NPRDHit_sectorVSlayer_phi;Sector(- for C side, + for A side);layer((dbR-1)*2+gasGap);NHit",
                         type='TH2I', 
                         path='RpcOccupancy',
                         xbins=33, xmin=-16.5, xmax=16.5, 
@@ -106,101 +106,129 @@ def RpcMonitoringConfig(inputFlags):
     ## Rpc Track Analysis
     ######################################################################################################
     trackPath = 'TrackMatch'
-    myGroup_track.defineHistogram('hitMultiplicity_eta;HitMultiplicity_eta', 
+
+    myGroup_track.defineHistogram('LB_nrpchit,PhiSector;NPRDHitFromMuon_PhiSector_vs_LB', 
+                            title='Number of RPC hits for muons decayed from Z candidates;Luminosity Block;#phi sector(- for C side, + for A side);NHit',
+                            type='TH2I', 
+                            path=trackPath,
+                            xbins=1200, xmin=0.5, xmax=1200.5, ybins=33, ymin=-16.5, ymax=16.5)
+
+    ## Z muon
+    myGroup_track.defineHistogram('muPt_MuonFromZ;Pt_MuonFromZ',
+                            title='Pt of muons decayed from Z candidates;Pt[MeV];NMuon',
+                            type='TH1D',
+                            path='PlotCand',
+                            xbins=100,xmin=0,xmax=400e3)
+    myGroup_track.defineHistogram('muEta_MuonFromZ;Eta_MuonFromZ',
+                            title='#eta of muons decayed from Z candidates;#eta;NMuon',
+                            type='TH1D',
+                            path='PlotCand',
+                            xbins=42, xmin=-1.05,  xmax=1.05)
+    myGroup_track.defineHistogram('muPhi_MuonFromZ;Phi_MuonFromZ',
+                            title='#phi of muons decayed from Z candidates;#phi;NMuon',
+                            type='TH1D',
+                            path='PlotCand',
+                            ybins=32,ymin=-3.1415926,ymax=3.1415926)
+
+    myGroup_track.defineHistogram('hitMulti_eta;HitMultiplicity_eta', 
                             type='TH1I', 
-                            title='Hit Multiplicity_eta All Panel;#eta strip hit Multiplicity;muon entries',
+                            title='Hit multiplicity in #eta view for muons decayed from Z candidates;#eta strip hit Multiplicity;muon entries',
                             path=trackPath,
                             xbins=11,xmin=-0.5,   xmax=10.5)
 
-    myGroup_track.defineHistogram('hitMultiplicity_phi;HitMultiplicity_phi', 
+    myGroup_track.defineHistogram('hitMulti_phi;HitMultiplicity_phi', 
                             type='TH1I', 
-                            title='Hit Multiplicity_phi All Panel;#phi strip hit Multiplicity;muon entries',
+                            title='Hit multiplicity in #phi view for muons decayed from Z candidates;#phi strip hit Multiplicity;muon entries',
                             path=trackPath,
                             xbins=11,xmin=-0.5,   xmax=10.5)
 
-    myGroup_track.defineHistogram('hitMultiplicity,panelInd_hM;HitMultiplicity_Panels', 
-                            title='Hit Multiplicity;Hit Multiplicity;Panel Index;NMuon',
+    myGroup_track.defineHistogram('hitMulti,panelInd_hM;HitMultiplicity_Panels', 
+                            title='Hit multiplicity for muons decayed from Z candidates;Hit Multiplicity;Panel Index;NMuon',
                             type='TH2I', 
                             path=trackPath,
                             xbins=11, xmin=-0.5, xmax=10.5, ybins=8592, ymin=-0.5, ymax=8591.5)
 
-    myGroup_track.defineHistogram('clustMultiplicity_eta;ClusterSize_etaView', 
+    myGroup_track.defineHistogram('clusterSize_eta;ClusterSize_etaView', 
                             type='TH1I', 
-                            title='Cluster size(#eta view);Cluster size;NCluster',
+                            title='Cluster size in #eta view for muons decayed from Z candidates;Cluster size;NCluster',
                             path=trackPath,
                             xbins=11,xmin=-0.5,   xmax=10.5)
 
-    myGroup_track.defineHistogram('clustMultiplicity_phi;ClusterSize_phiView', 
+    myGroup_track.defineHistogram('clusterSize_phi;ClusterSize_phiView', 
                             type='TH1I', 
-                            title='Cluster size(#phi view);Cluster size;NCluster',
+                            title='Cluster size in #phi view for muons decayed from Z candidates;Cluster size;NCluster',
                             path=trackPath,
                             xbins=11,xmin=-0.5,   xmax=10.5)
 
-    myGroup_track.defineHistogram('clustMultiplicity,panelInd_clust;ClusterSize_Panels', 
-                            title='Cluste Multiplicity;Cluste Multiplicity;Panel Index;NCluster',
+    myGroup_track.defineHistogram('clusterSize,panelInd_clust;ClusterSize_Panels', 
+                            title='Cluster size for muons decayed from Z candidates;Cluster size;Panel Index;NCluster',
                             type='TH2I', 
                             path=trackPath,
                             xbins=11, xmin=-0.5, xmax=10.5, ybins=8592, ymin=-0.5, ymax=8591.5)
 
-    myGroup_track.defineHistogram('muon_passExtrap,panelInd_hM;Panel_Efficiency', 
-                            title='Panels Detection Efficiency;Panel Index;Efficiency',
+    myGroup_track.defineHistogram('muon_passExtrap,panelInd_hM;Panel_Efficiency_MuonFromZ', 
+                            title='Panels detection efficiency for muons decayed from Z candidates;Panel Index;Efficiency',
                             type='TEfficiency',
                             path=trackPath,
                             xbins=8592, xmin=-0.5, xmax=8591.5)
 
-    myGroup_track.defineHistogram('detPar_localY_allPanel,panelInd_detpar;DetPar_localY_allPanel', 
-                            type='TH2F', 
-                            title='Detector Parameter localY;Local Y;panelID;N matched Gasgap',
+    myGroup_track.defineHistogram('muon_passExtrap,LB_detEff;Panel_Efficiency_LB_MuonFromZ', 
+                            title='Panels detection efficiency for muons decayed from Z candidates;Luminosity Block;Efficiency',
+                            type='TEfficiency',
                             path=trackPath,
-                            xbins=270,xmin=-2700., xmax=+2700., ybins=8592, ymin=-0.5, ymax=8591.5)
-
-    myGroup_track.defineHistogram('detPar_localZ_allPanel,panelInd_detpar;DetPar_localZ_allPanel', 
-                            type='TH2F', 
-                            title='Detector Parameter localZ;Local Z;panelID;N matched Gasgap',
-                            path=trackPath,
-                            xbins=140,xmin=-700., xmax=700., ybins=8592, ymin=-0.5, ymax=8591.5)
-
-    myGroup_track.defineHistogram('detPar_globalX_allPanel,panelInd_detpar;DetPar_globalX_allPanel', 
-                            type='TH2F', 
-                            title='Detector Parameter globalX;Global X;panelID;N matched Gasgap',
-                            path=trackPath,
-                            xbins=300,xmin=-15000., xmax=15000., ybins=8592, ymin=-0.5, ymax=8591.5)
-
-    myGroup_track.defineHistogram('detPar_globalY_allPanel,panelInd_detpar;DetPar_globalY_allPanel', 
-                            type='TH2F', 
-                            title='Detector Parameter globalY;Global Y;panelID;N matched Gasgap',
-                            path=trackPath,
-                            xbins=300,xmin=-15000., xmax=15000., ybins=8592, ymin=-0.5, ymax=8591.5)
-
-    myGroup_track.defineHistogram('detPar_globalR_allPanel,panelInd_detpar;DetPar_globalR_allPanel', 
-                            type='TH2F', 
-                            title='Detector Parameter globalR;Global R;panelID;N matched Gasgap',
-                            path=trackPath,
-                            xbins=220,xmin=-22000., xmax=22000., ybins=8592, ymin=-0.5, ymax=8591.5)
-
-    myGroup_track.defineHistogram('detPar_globalZ_allPanel,panelInd_detpar;DetPar_globalZ_allPanel', 
-                            type='TH2F', 
-                            title='Detector Parameter globalZ;Global Z;panelID;N matched Gasgap',
-                            path=trackPath,
-                            xbins=300,xmin=-15000., xmax=15000., ybins=8592, ymin=-0.5, ymax=8591.5)
-
-    myGroup_track.defineHistogram('dR_TrackGasGap_allPanel,panelInd_detpar;DR_TrackGasGap_allPanel', 
-                            type='TH2F', 
-                            title='DR between track and gasgap on panel;#Delta R_trackAndgasgap;panelID;N matched Gasgap',
-                            path=trackPath,
-                            xbins=50,xmin=0., xmax=1., ybins=8592, ymin=-0.5, ymax=8591.5)
-
+                            xbins=1200, xmin=0.5, xmax=1200.5)
+                            
     myGroup_track.defineHistogram('isOutTime_prd,panelInd_prd;OuttimeHitFraction_PRDHit', 
-                            title='Outtime Hit Fraction of PRD Hit;Panel Index;Outtime Hit Fraction',
+                            title='Fraction of out-of-time hits for muons decayed from Z candidates;Panel Index;Fraction of out-of-time hits',
                             type='TEfficiency',
                             path=trackPath,
                             xbins=8592, xmin=-0.5, xmax=8591.5) 
 
     myGroup_track.defineHistogram('isOutTime_prd_onTrack,panelInd_prd_onTrack;OuttimeHitFraction_PRDHit_onTrack',
-                            title='Outtime Hit Fraction of PRD Hit on Muon Track;Panel Index;Outtime Hit Fraction',
+                            title='Fraction of out-of-time hits on tracks of muons decayed from Z candidates;Panel Index;Fraction of out-of-time hits',
                             type='TEfficiency',
                             path=trackPath,
                             xbins=8592, xmin=-0.5, xmax=8591.5)
+
+    ## All muon
+    myGroup_track.defineHistogram('muPt_allMu;Pt_AllMuons',
+                            title='Pt of muons in all events;Pt[MeV];NMuon',
+                            type='TH1D',
+                            path='PlotCand',
+                            xbins=100,xmin=0,xmax=400e3)
+    myGroup_track.defineHistogram('muEta_allMu;Eta_AllMuons',
+                            title='#eta of muons in all events;#eta;NMuon',
+                            type='TH1D',
+                            path='PlotCand',
+                            xbins=42, xmin=-1.05,  xmax=1.05)
+    myGroup_track.defineHistogram('muPhi_allMu;Phi_AllMuons',
+                            title='#phi of muons in all events;#phi;NMuon',
+                            type='TH1D',
+                            path='PlotCand',
+                            ybins=32,ymin=-3.1415926,ymax=3.1415926)
+
+    myGroup_track.defineHistogram('muon_passExtrap_allMu,panelInd_hM_allMu;Panel_Efficiency_AllMuons', 
+                            title='Panels detection efficiency for all muons;Panel Index;Efficiency',
+                            type='TEfficiency',
+                            path=trackPath,
+                            xbins=8592, xmin=-0.5, xmax=8591.5)
+
+
+    sectors       = [str(k) for k in range(1, 16+1)]
+    array_sectors = helper.addArray([sectors], rpcTrackAnaAlg, 'RpcTrackAnaAlg', 'Muon/MuonRawDataMonitoring/RPC/')
+
+    array_sectors.defineHistogram('cs_sec;ClusterSize_Sector',
+                title='Cluster size on sector{0};Cluster size;NCluster',
+                type='TH1I',
+                path='TrackMatch/ClusterSize',
+                xbins=11, xmin=-0.5, xmax=10.5)
+
+    array_sectors.defineHistogram('hitTime_sec;PRDHitTime_MuonFromZ_Sector',
+                title='Hit time on sector{0};Hit time;NHits',
+                type='TH1I',
+                path='TrackMatch/PRDHitTime',
+                xbins=67, xmin=-104.6875, xmax=104.6875)
+
 
     ######################################################################################################
     ## Rpc lv1 Analysis
@@ -230,7 +258,7 @@ def RpcMonitoringConfig(inputFlags):
                             title='barrel and endcap muon Pt;Pt[MeV];NMuon',
                             type='TH1D',
                             path='PlotCand',
-                            xbins=200,xmin=0,xmax=1000e3)
+                            xbins=100,xmin=0,xmax=400e3)
 
     myGroup_lv1Trigger.defineHistogram('roiEta;roiEta',
                             title='roi eta;roi #eta;rois',
