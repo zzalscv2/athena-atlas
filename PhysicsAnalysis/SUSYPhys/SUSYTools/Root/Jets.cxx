@@ -61,6 +61,8 @@ namespace ST {
   const static SG::AuxElement::Decorator<char> dec_passDRcut("passDRcut");
   const static SG::AuxElement::ConstAccessor<char> acc_passDRcut("passDRcut");
 
+  const static SG::AuxElement::ConstAccessor<int> accTruthLabel("R10TruthLabel_R21Consolidated");
+
   const static SG::AuxElement::Decorator<int> dec_wtagged("wtagged");
   const static SG::AuxElement::Decorator<int> dec_ztagged("ztagged");
   const static SG::AuxElement::Decorator<int> dec_toptagged("toptagged");
@@ -227,8 +229,7 @@ namespace ST {
     // Update the jets
 
     for (const auto& jet : *copy) {
-      if (!isData()) m_jetTruthLabelingTool->modifyJet(*jet);
-
+      if (!isData() && !accTruthLabel.isAvailable(*jet)) ATH_CHECK(m_jetTruthLabelingTool->modifyJet(*jet));
       ATH_CHECK( this->FillTrackJet(*jet) );
     }
 
@@ -292,10 +293,9 @@ namespace ST {
       ATH_MSG_DEBUG("Not retrieving jet collection, using existing one provided by user");
       jets=copy;
     }
-
     for (const auto& jet : *copy) {
       // Truth Labeling (MC only)
-      if (!isData()) m_jetTruthLabelingTool->modifyJet(*jet);
+      if (!isData() && !accTruthLabel.isAvailable(*jet)) ATH_CHECK(m_jetTruthLabelingTool->modifyJet(*jet));
       //
       ATH_CHECK( this->FillJet(*jet, true, true, doLargeRdecorations) );
       //...
