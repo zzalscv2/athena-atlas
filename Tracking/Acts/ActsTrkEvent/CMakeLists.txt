@@ -15,7 +15,7 @@ atlas_add_library( ActsTrkEvent
                    LINK_LIBRARIES ${Boost_LIBRARIES} ${EIGEN_LIBRARIES} 
 		   AthenaBaseComps GaudiKernel AtlasDetDescr CxxUtils 
 		   xAODCore ActsCore ActsFatras ActsGeometryLib BeamSpotConditionsData
-		   MagFieldConditions MagFieldElements GeoPrimitives
+		   MagFieldConditions MagFieldElements GeoPrimitives xAODTracking
 		   )
 
 atlas_add_dictionary( ActsTrkEventDict
@@ -30,3 +30,8 @@ atlas_add_dictionary( ActsTrkEventDict
 		      ActsTrk::SeedContainer 
 		      ActsTrk::BoundTrackParametersContainer
 		      )
+
+atlas_add_test( MultiTrajectoryBasic_test 
+				SOURCES test/MultiTrajectoryBasic_test.cxx
+				LINK_LIBRARIES TestTools ActsTrkEvent xAODTracking ActsTrkEvent
+				POST_EXEC_SCRIPT nopost.sh)
