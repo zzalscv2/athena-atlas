@@ -209,3 +209,14 @@ def MonopoleCfg(flags):
         physicsOptions = [ result.popToolsAndMerge(MonopolePhysicsToolCfg(flags)) ]
         result.getService("PhysicsListSvc").PhysOption = physicsOptions + result.getService("PhysicsListSvc").PhysOption
     return result
+
+
+def Monopole_VerboseSelectorCfg(flags, name="G4UA::VerboseSelectorTool", **kwargs):
+    kwargs.setdefault('TargetEvent',1)
+    kwargs.setdefault('VerboseLevel',1)
+    kwargs.setdefault('TargetPdgIDs',
+                                    [
+                                        -4110000,4110000 #Monopoles
+                                    ])
+    from G4DebuggingTools.G4DebuggingToolsConfig import VerboseSelectorToolCfg
+    return VerboseSelectorToolCfg(flags, name, **kwargs)

@@ -175,3 +175,15 @@ def AMSB_Cfg(flags):
         result.getService("PhysicsListSvc").PhysOption += physicsOptions
 
     return result
+
+
+def AMSB_VerboseSelectorCfg(flags, name="G4UA::VerboseSelectorTool", **kwargs):
+    kwargs.setdefault('TargetEvent',1)
+    kwargs.setdefault('VerboseLevel',1)
+    kwargs.setdefault('TargetPdgIDs',
+                                    [
+                                        1000022, # ~chi(0,1)
+                                        -1000024,1000024 # ~chi(+,1)
+                                    ])
+    from G4DebuggingTools.G4DebuggingToolsConfig import VerboseSelectorToolCfg
+    return VerboseSelectorToolCfg(flags, name, **kwargs)
