@@ -2059,7 +2059,7 @@ BPHY8_seq += CfgMgr.DerivationFramework__DerivationKernel(
 #====================================================================
 from DerivationFrameworkCore.SlimmingHelper import SlimmingHelper
 BPHY8SlimmingHelper = SlimmingHelper("BPHY8SlimmingHelper")
-BPHY8_AllVariables     = []
+BPHY8_AllVariables     = ["EventInfo"]
 BPHY8_StaticContent    = []
 BPHY8_SmartCollections = []
 BPHY8_ExtraVariables   = []

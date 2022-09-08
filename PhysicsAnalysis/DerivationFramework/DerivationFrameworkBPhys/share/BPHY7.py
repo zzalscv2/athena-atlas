@@ -606,7 +606,7 @@ BPHY7SlimmingHelper = SlimmingHelper("BPHY7SlimmingHelper")
 SmartCollections = ["Electrons", "Photons", "TauJets", "AntiKt4EMPFlowJets", "AntiKt4EMPFlowJets_BTagging201810", "AntiKt4EMPFlowJets_BTagging201903", "AntiKt4EMTopoJets", "AntiKt4EMTopoJets_BTagging201810", "AntiKt4EMPFlowJets_BTagging201810", "AntiKt4EMPFlowJets_BTagging201903", "BTagging_AntiKt4EMTopo_201810", "PrimaryVertices", "Muons", "InDetTrackParticles", "MET_Reference_AntiKt4EMTopo"]
 
 
-AllVariables = ["METAssoc_AntiKt4EMTopo",
+AllVariables = ["EventInfo", "METAssoc_AntiKt4EMTopo",
                  "MET_Core_AntiKt4EMTopo",
                  "MET_Truth",
                  "MET_Track",

@@ -439,7 +439,7 @@ BPHY10Stream.AcceptAlgs(["BPHY10Kernel"])
 # Added by ASC
 from DerivationFrameworkCore.SlimmingHelper import SlimmingHelper
 BPHY10SlimmingHelper = SlimmingHelper("BPHY10SlimmingHelper")
-AllVariables  = []
+AllVariables  = ["EventInfo"]
 StaticContent = []
 
 # Needed for trigger objects
@@ -463,7 +463,7 @@ AllVariables += ["CombinedMuonTrackParticles"]
 AllVariables += ["ExtrapolatedMuonTrackParticles"]
 
 ## muon container
-AllVariables += ["Muons"] 
+AllVariables += ["Muons", "MuonsLRT"]
 
 
 ## Jpsi candidates 

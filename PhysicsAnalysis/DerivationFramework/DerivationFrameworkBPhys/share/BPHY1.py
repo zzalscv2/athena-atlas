@@ -239,7 +239,7 @@ DerivationFrameworkJob += CfgMgr.DerivationFramework__DerivationKernel(
 # Added by ASC
 from DerivationFrameworkCore.SlimmingHelper import SlimmingHelper
 BPHY1SlimmingHelper = SlimmingHelper("BPHY1SlimmingHelper")
-AllVariables = []
+AllVariables = ["EventInfo"]
 StaticContent = []
 
 # Needed for trigger objects
@@ -261,7 +261,7 @@ AllVariables += ["CombinedMuonTrackParticles"]
 AllVariables += ["ExtrapolatedMuonTrackParticles"]
 
 ## muon container
-AllVariables += ["Muons"]
+AllVariables += ["Muons", "MuonsLRT"]
 
 ## Jpsi candidates 
 StaticContent += ["xAOD::VertexContainer#%s"        % BPHY1_Reco_mumu.OutputVtxContainerName]

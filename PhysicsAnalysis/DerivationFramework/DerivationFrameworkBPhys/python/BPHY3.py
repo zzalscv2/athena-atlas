@@ -124,7 +124,8 @@ def BPHY3Cfg(ConfigFlags):
     from DerivationFrameworkCore.SlimmingHelper import SlimmingHelper
     from OutputStreamAthenaPool.OutputStreamConfig import OutputStreamCfg
     BPHY3SlimmingHelper = SlimmingHelper("BPHY3SlimmingHelper", NamesAndTypes = ConfigFlags.Input.TypedCollections)
-    AllVariables = []
+    from DerivationFrameworkBPhys.commonBPHYMethodsCfg import getDefaultAllVariables
+    AllVariables  = getDefaultAllVariables()
     StaticContent = []
     
     ## primary vertices

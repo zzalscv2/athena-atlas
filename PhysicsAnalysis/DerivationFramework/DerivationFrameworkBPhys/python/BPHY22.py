@@ -279,7 +279,8 @@ def BPHY22Cfg(ConfigFlags):
     # Needed for trigger objects
     BPHY22SlimmingHelper.IncludeMuonTriggerContent  = True
     BPHY22SlimmingHelper.IncludeBPhysTriggerContent = True
-    AllVariables  = []
+    from DerivationFrameworkBPhys.commonBPHYMethodsCfg import getDefaultAllVariables
+    AllVariables  = getDefaultAllVariables()
     StaticContent = []
     ## primary vertices
     AllVariables  += ["PrimaryVertices"]

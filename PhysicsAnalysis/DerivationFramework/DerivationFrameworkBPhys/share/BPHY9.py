@@ -315,7 +315,7 @@ from DerivationFrameworkCore.SlimmingHelper import SlimmingHelper
 BPHY9SlimmingHelper = SlimmingHelper('BPHY9SlimmingHelper')
 
 # Slimming for recontruction content
-BPHY9SlimmingHelper.AllVariables = []
+BPHY9SlimmingHelper.AllVariables = ["EventInfo"]
 
 BPHY9SlimmingHelper.SmartCollections = ['AntiKt4EMPFlowJets',
                                         'AntiKt4EMPFlowJets_BTagging201903',

@@ -289,7 +289,7 @@ DerivationFrameworkJob += CfgMgr.DerivationFramework__DerivationKernel(
 # Added by ASC
 from DerivationFrameworkCore.SlimmingHelper import SlimmingHelper
 BPHY6SlimmingHelper = SlimmingHelper("BPHY6SlimmingHelper")
-AllVariables = []
+AllVariables = ["EventInfo"]
 StaticContent = []
 
 # Needed for trigger objects

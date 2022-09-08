@@ -121,7 +121,8 @@ def BPHY1Cfg(ConfigFlags):
 
     from OutputStreamAthenaPool.OutputStreamConfig import OutputStreamCfg
     from DerivationFrameworkCore.SlimmingHelper import SlimmingHelper
-    AllVariables = []
+    from DerivationFrameworkBPhys.commonBPHYMethodsCfg import getDefaultAllVariables
+    AllVariables  = getDefaultAllVariables()
     StaticContent = []
     
 
@@ -140,7 +141,7 @@ def BPHY1Cfg(ConfigFlags):
     AllVariables += ["ExtrapolatedMuonTrackParticles"]
     
     ## muon container
-    AllVariables += ["Muons"]
+    AllVariables += ["Muons", "MuonsLRT"]
     
     ## Jpsi candidates 
     StaticContent += ["xAOD::VertexContainer#%s"        % BPHY1_Reco_mumu.OutputVtxContainerName]

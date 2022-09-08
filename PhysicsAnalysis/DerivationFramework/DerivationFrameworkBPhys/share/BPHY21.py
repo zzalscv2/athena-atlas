@@ -271,7 +271,7 @@ BPHY21_Stream.AcceptAlgs(["BPHY21_Kernel"])
 # Added by ASC
 from DerivationFrameworkCore.SlimmingHelper import SlimmingHelper
 BPHY21_SlimmingHelper = SlimmingHelper("BPHY21_SlimmingHelper")
-BPHY21_AllVariables  = []
+BPHY21_AllVariables  = ["EventInfo"]
 BPHY21_StaticContent = []
 
 # Needed for trigger objects

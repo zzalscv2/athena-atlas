@@ -71,7 +71,8 @@ def BPHY4Cfg(ConfigFlags):
     from DerivationFrameworkCore.SlimmingHelper import SlimmingHelper
     from OutputStreamAthenaPool.OutputStreamConfig import OutputStreamCfg
     BPHY4SlimmingHelper = SlimmingHelper("BPHY4SlimmingHelper", NamesAndTypes = ConfigFlags.Input.TypedCollections)
-    BPHY4AllVariables  = []
+    from DerivationFrameworkBPhys.commonBPHYMethodsCfg import getDefaultAllVariables
+    BPHY4AllVariables  = getDefaultAllVariables()
     BPHY4StaticContent = []
     BPHY4SmartVariables =[]
     from DerivationFrameworkCore.SlimmingHelper import SlimmingHelper
@@ -96,7 +97,6 @@ def BPHY4Cfg(ConfigFlags):
     BPHY4AllVariables += ["ExtrapolatedMuonTrackParticles"]
     
     ## muon container
-    BPHY4AllVariables += ["Muons"]
     BPHY4SmartVariables += ["Muons"]
     
     ## Electron container

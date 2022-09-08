@@ -240,7 +240,7 @@ BPHY16Stream.AcceptAlgs(["BPHY16Kernel"])
 
 from DerivationFrameworkCore.SlimmingHelper import SlimmingHelper
 BPHY16SlimmingHelper = SlimmingHelper("BPHY16SlimmingHelper")
-AllVariables = []
+AllVariables = ["EventInfo"]
 StaticContent = []
 
 # Needed for trigger objects
