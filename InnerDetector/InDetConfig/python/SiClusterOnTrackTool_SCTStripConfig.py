@@ -4,12 +4,13 @@ from AthenaConfiguration.ComponentAccumulator import ComponentAccumulator
 from AthenaConfiguration.ComponentFactory import CompFactory
 
 def InDetSCT_ClusterOnTrackToolCfg(flags, name='InDetSCT_ClusterOnTrackTool', **kwargs):
-    acc = ComponentAccumulator()
+    from TrkConfig.TrkRIO_OnTrackCreatorConfig import RIO_OnTrackErrorScalingCondAlgCfg
+    acc = RIO_OnTrackErrorScalingCondAlgCfg(flags) # To produce RIO_OnTrackErrorScaling
 
     if 'LorentzAngleTool' not in kwargs:
         from SiLorentzAngleTool.SCT_LorentzAngleConfig import SCT_LorentzAngleToolCfg
-        SCT_LorentzAngle = acc.popToolsAndMerge(SCT_LorentzAngleToolCfg(flags))
-        kwargs.setdefault("LorentzAngleTool", SCT_LorentzAngle )
+        kwargs.setdefault("LorentzAngleTool", acc.popToolsAndMerge(
+            SCT_LorentzAngleToolCfg(flags)))
         
     kwargs.setdefault("CorrectionStrategy", 0 ) # do correct position bias
     kwargs.setdefault("ErrorStrategy", 2 ) # do use phi dependent errors
@@ -26,8 +27,8 @@ def ITkStripClusterOnTrackToolCfg(flags, name='ITkStrip_ClusterOnTrackTool', **k
 
     if 'LorentzAngleTool' not in kwargs:
         from SiLorentzAngleTool.ITkStripLorentzAngleConfig import ITkStripLorentzAngleToolCfg
-        ITkStripLorentzAngleTool = acc.popToolsAndMerge( ITkStripLorentzAngleToolCfg(flags) )
-        kwargs.setdefault("LorentzAngleTool", ITkStripLorentzAngleTool )
+        kwargs.setdefault("LorentzAngleTool", acc.popToolsAndMerge(
+            ITkStripLorentzAngleToolCfg(flags)))
 
     kwargs.setdefault("CorrectionStrategy", 0 ) # do correct position bias
     kwargs.setdefault("ErrorStrategy", 0 ) # use width / sqrt(12)
