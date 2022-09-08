@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2017 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef ATHENADBTESTREC_DBCONNECTION_H
@@ -10,10 +10,11 @@
 
 #include <string>
 
+#include "CxxUtils/checker_macros.h"
 #include "CoolKernel/IDatabaseSvc.h"
 #include "CoraCool/CoraCoolDatabase.h"
 
-class DBConnection {
+class ATLAS_NOT_THREAD_SAFE DBConnection {
  public:
   DBConnection(const std::string tech, const std::string server,
 	       const std::string schema, const std::string dbname,
