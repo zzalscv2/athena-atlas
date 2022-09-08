@@ -19,7 +19,7 @@ Sim_tf.py \
     --inputEVNTFile="/cvmfs/atlas-nightlies.cern.ch/repo/data/data-art/ISF_Validation/mc21_13p6TeV.temp.DisplacedSmuonPairProduction.10events.pool.root" \
     --maxEvents="10" \
     --multithreaded="True" \
-    --preInclude "EVNTtoHITS:Campaigns.MC21SimulationMultiBeamSpot" \
+    --preInclude "EVNTtoHITS:Campaigns.MC21SimulationMultiBeamSpot,G4DebuggingTools.DebugSleptonsLLP" \
     --skipEvents="0" \
     --randomSeed="41" \
     --DBRelease="all:300.0.4" \
@@ -47,7 +47,7 @@ then
         --maxEvents="10" \
         --multithreaded="True" \
         --postInclude "default:PyJobTransforms/UseFrontier.py" \
-        --preInclude "EVNTtoHITS:Campaigns/MC21SimulationMultiBeamSpot.py,SimulationJobOptions/preInclude.ExtraParticles.py,SimulationJobOptions/preInclude.G4ExtraProcesses.py" \
+        --preInclude "EVNTtoHITS:Campaigns/MC21SimulationMultiBeamSpot.py,SimulationJobOptions/preInclude.ExtraParticles.py,SimulationJobOptions/preInclude.G4ExtraProcesses.py,SimulationJobOptions/preInclude.DebugSleptonsLLP.py" \
         --skipEvents="0" \
         --randomSeed="41" \
         --DBRelease="all:300.0.4" \
