@@ -212,32 +212,12 @@ VxTrackAtVertex::VxTrackAtVertex(Trk::ITrackLink* trackOrParticleLink)
 // destructor changed
 VxTrackAtVertex::~VxTrackAtVertex()
 {
-  if (m_perigeeAtVertex != nullptr) {
     delete m_perigeeAtVertex;
-    m_perigeeAtVertex = nullptr;
-  }
-  if (m_neutralPerigeeAtVertex != nullptr) {
     delete m_neutralPerigeeAtVertex;
-    m_neutralPerigeeAtVertex = nullptr;
-  }
-  if (m_linState != nullptr) {
     delete m_linState;
-    m_linState = nullptr;
-  }
-  //    if (m_initialPerigee !=0)  { delete m_initialPerigee;
-  //    m_initialPerigee=0; }
-  if (m_ImpactPoint3dAtaPlane != nullptr) {
     delete m_ImpactPoint3dAtaPlane;
-    m_ImpactPoint3dAtaPlane = nullptr;
-  }
-  if (m_ImpactPoint3dNeutralAtaPlane != nullptr) {
     delete m_ImpactPoint3dNeutralAtaPlane;
-    m_ImpactPoint3dNeutralAtaPlane = nullptr;
-  }
-  if (m_trackOrParticleLink != nullptr) {
     delete m_trackOrParticleLink;
-    m_trackOrParticleLink = nullptr;
-  }
 #ifndef NDEBUG
   s_numberOfInstantiations.fetch_sub(1, std::memory_order_relaxed);
 #endif
