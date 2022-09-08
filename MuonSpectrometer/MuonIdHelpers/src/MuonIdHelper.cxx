@@ -8,8 +8,8 @@
 
 const std::string MuonIdHelper::BAD_NAME = "UNKNOWN";
 
-MuonIdHelper::MuonIdHelper(const std::string& logName) : AtlasDetectorID(), AthMessaging(logName.empty() ? "MuonIdHelper" : logName) {
-    m_msgSvc = Athena::getMessageSvc();
+MuonIdHelper::MuonIdHelper(const std::string& logName) :
+    AtlasDetectorID(logName.empty() ? "MuonIdHelper" : logName) {
 }
 
 int MuonIdHelper::initialize_from_dictionary(const IdDictMgr& dict_mgr) {

@@ -2,7 +2,6 @@
   Copyright (C) 2002-2019 CERN for the benefit of the ATLAS collaboration
 */
 
-// $Id: xAODTauJetAuxContainerCnv_v1.cxx 751655 2016-06-02 03:55:32Z griffith $
 
 // System include(s):
 #include <stdexcept>
@@ -17,16 +16,6 @@
 // Local include(s):
 #include "xAODTauJetAuxContainerCnv_v1.h"
 
-/// Convenience macro for setting the level of output messages
-#define MSGLVL MSG::DEBUG
-
-/// Another convenience macro for printing messages in the converter
-#define ATH_MSG( MSG )                          \
-   do {                                         \
-      if( log.level() <= MSGLVL ) {             \
-         log << MSGLVL << MSG << endmsg;        \
-      }                                         \
-   } while( 0 )
 
 xAODTauJetAuxContainerCnv_v1::xAODTauJetAuxContainerCnv_v1()
 {
@@ -35,10 +24,7 @@ xAODTauJetAuxContainerCnv_v1::xAODTauJetAuxContainerCnv_v1()
 void xAODTauJetAuxContainerCnv_v1::
 persToTrans( const xAOD::TauJetAuxContainer_v1* oldObj,
              xAOD::TauJetAuxContainer* newObj,
-             MsgStream& log ) const {
-
-   // Greet the user:
-   ATH_MSG( "Converting xAOD::TauJetAuxContainer_v1 to current version..." );
+             MsgStream& /*log*/ ) const {
 
    // Clear the transient object:
    newObj->resize( 0 );
@@ -278,10 +264,6 @@ persToTrans( const xAOD::TauJetAuxContainer_v1* oldObj,
 
    }
 
-   // Print what happened:
-   ATH_MSG( "Converting xAOD::TauJetAuxContainer_v1 to current version "
-	    "[OK]" );
-   
    return;
 }
 

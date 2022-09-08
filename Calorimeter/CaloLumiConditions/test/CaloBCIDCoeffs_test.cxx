@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2020 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
 */
 /**
  * @file CaloLumiConditions/CaloBCIDCoeffs_test.cxx
@@ -9,6 +9,7 @@
  */
 
 #undef NDEBUG
+#include "AthenaKernel/getMessageSvc.h"
 #include "CaloLumiConditions/CaloBCIDCoeffs.h"
 #include "LArElecCalib/ILArOFC.h"
 #include "LArElecCalib/ILArShape.h"
@@ -359,6 +360,7 @@ void test_perf (const int n, const LArOnlineID& online_id)
 int main (int argc, char** argv)
 {
   std::cout << "CaloLumiConditions/CaloBCIDCoeffs_test\n";
+  Athena::getMessageSvcQuiet = true;
   LArOnlineIDTest larhelpers;
   test1 (5, larhelpers.onlineID());
   test1 (4, larhelpers.onlineID());

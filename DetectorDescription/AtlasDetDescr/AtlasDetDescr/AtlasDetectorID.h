@@ -28,6 +28,7 @@
 #include "IdDict/IdDictFieldImplementation.h"
 #include "AtlasDetTechnology.h"
 #include "AthenaKernel/CLASS_DEF.h"
+#include "AthenaBaseComps/AthMessaging.h"
 
 #include <string>
 #include <vector>
@@ -52,7 +53,7 @@ class AtlasDetectorIDHelper;
  *   id dictionaries used by the helper.
  **/
 
-class AtlasDetectorID : public IdHelper
+class AtlasDetectorID : public IdHelper, public AthMessaging
 {
 public:
     ///enum class for eventual final derived types of this class
@@ -84,7 +85,7 @@ public:
 
     /// @name strutors
     //@{
-    AtlasDetectorID();
+    AtlasDetectorID(const std::string& name = "AtlasDetectorID");
     virtual ~AtlasDetectorID();
     AtlasDetectorID(const AtlasDetectorID& other) = delete;
     AtlasDetectorID& operator= (const AtlasDetectorID& other) = delete;

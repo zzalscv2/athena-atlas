@@ -1,8 +1,7 @@
 /*
-  Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
 */
-// $Id$
-       
+
 // System include(s):
 #include <stdexcept>
        
@@ -17,17 +16,7 @@
 #include "xAODPFlow/TrackCaloClusterContainer.h"
 #include "xAODPFlow/versions/TrackCaloClusterContainer_v1.h"
        
-/// Convenience macro for setting the level of output messages
-#define MSGLVL MSG::DEBUG
-       
-/// Another convenience macro for printing messages in the converter
-#define ATH_MSG( MSG )                       \
-do {                                         \
-  if( log.level() <= MSGLVL ) {              \
-    log << MSGLVL << MSG << endmsg;          \
-  }                                          \
-} while( 0 )
-       
+
 xAODTrackCaloClusterAuxContainerCnv_v1::xAODTrackCaloClusterAuxContainerCnv_v1()
 {
 }
@@ -35,10 +24,7 @@ xAODTrackCaloClusterAuxContainerCnv_v1::xAODTrackCaloClusterAuxContainerCnv_v1()
 void xAODTrackCaloClusterAuxContainerCnv_v1::
 persToTrans(  const xAOD::TrackCaloClusterAuxContainer_v1* oldObj,
               xAOD::TrackCaloClusterAuxContainer* newObj,
-              MsgStream& log ) const {
-       
-  // Greet the user:
-  ATH_MSG( "Converting xAOD::TrackCaloClusterAuxContainer_v1 to current version..." );
+              MsgStream& /*log*/ ) const {
        
   // Clear the transient object:
   newObj->resize( 0 );
@@ -61,11 +47,7 @@ persToTrans(  const xAOD::TrackCaloClusterAuxContainer_v1* oldObj,
     newInt.push_back( new xAOD::TrackCaloCluster() );
   }
   newInt.setStore( newObj );
-    
-         
-  // Print what happened:
-  ATH_MSG( "Converting xAOD::TrackCaloClusterAuxContainer_v1 to current version [OK]" );
-       
+
   return;
 }
        

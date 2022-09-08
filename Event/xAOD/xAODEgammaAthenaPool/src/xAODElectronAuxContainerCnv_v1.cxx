@@ -1,8 +1,7 @@
 /*
-  Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
 */
 
-// $Id: xAODElectronAuxContainerCnv_v1.cxx 621103 2014-10-10 12:30:01Z christos $
 
 // System include(s):
 #include <stdexcept>
@@ -18,16 +17,6 @@
 #include "xAODEgamma/ElectronContainer.h"
 #include "xAODEgamma/versions/ElectronContainer_v1.h"
 
-/// Convenience macro for setting the level of output messages
-#define MSGLVL MSG::DEBUG
-
-/// Another convenience macro for printing messages in the converter
-#define ATH_MSG( MSG )                          \
-   do {                                         \
-      if( log.level() <= MSGLVL ) {             \
-         log << MSGLVL << MSG << endmsg;        \
-      }                                         \
-   } while( 0 )
 
 xAODElectronAuxContainerCnv_v1::xAODElectronAuxContainerCnv_v1()
 {
@@ -36,10 +25,7 @@ xAODElectronAuxContainerCnv_v1::xAODElectronAuxContainerCnv_v1()
 void xAODElectronAuxContainerCnv_v1::
 persToTrans( const xAOD::ElectronAuxContainer_v1* oldObj,
              xAOD::ElectronAuxContainer* newObj,
-             MsgStream& log ) const {
-
-   // Greet the user:
-   ATH_MSG( "Converting xAOD::ElectronAuxContainer_v1 to current version..." );
+             MsgStream& /*log*/ ) const {
 
    // Clear the transient object:
    newObj->resize( 0 );
@@ -102,10 +88,6 @@ persToTrans( const xAOD::ElectronAuxContainer_v1* oldObj,
        newInt[ i ]->setShowerShapeValue(Rhad1, xAOD::EgammaParameters::Rhad1); 
      }
    }
-
-   // Print what happened:
-   ATH_MSG( "Converting xAOD::ElectronAuxContainer_v1 to current version "
-            "[OK]" );
 
    return;
 }
