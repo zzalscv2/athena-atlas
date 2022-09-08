@@ -135,7 +135,6 @@ def make_hit_rate(inputs):
   draw_occu.doNEvtScale(h_NEvt_LB)
 
   h_name   = "NPRDHit_Panels_All"
-  timeTag   = "All"
 
   # -----------------------------------------------------------------------
   dic_hists             = {}
@@ -145,33 +144,33 @@ def make_hit_rate(inputs):
   for i_var in ["p0", "p1", "chi2", "predRate", "meanRate"]:
     ###
     ### Muon/MuonRawDataMonitoring/RPC/RpcOccupancy/HitRate_vs_InstLumi
-    ### "(p0|p1|chi2|predRate|meanRate)_All_per_sectors_per_layers_etaAndPhiPanels",
-    list_hist1D_secLayer = draw_occu.GetHist1D_ySectorsAndLayers([h_name, i_var, timeTag])
+    ### "(p0|p1|chi2|predRate|meanRate)_per_sectors_per_layers_etaAndPhiPanels",
+    list_hist1D_secLayer = draw_occu.GetHist1D_ySectorsAndLayers([h_name, i_var])
     
     ###
-    ### "(p0|p1|chi2|predRate|meanRate)_All_per_panel_(etaAndPhi｜eta|phi)View",
+    ### "(p0|p1|chi2|predRate|meanRate)_per_panel_(etaAndPhi｜eta|phi)View",
     ###
-    list_hist1D_panels   = draw_occu.GetHist1D_yPanels([h_name, i_var, timeTag])
+    list_hist1D_panels   = draw_occu.GetHist1D_yPanels([h_name, i_var])
     
     list_hist_all += list_hist1D_secLayer+list_hist1D_panels
   
     ###
     ### Muon/MuonRawDataMonitoring/RPC/RpcOccupancy/HitRate_vs_InstLumi/Layers
-    ### "Summary_layer[1-8]_(p0|p1|chi2|predRate|meanRate)_All", 
-    list_summary_allSectorsAndLayers  = draw_occu.GetSummary_allSectorsAndLayers([h_name, i_var, timeTag])
+    ### "Summary_layer[1-8]_(p0|p1|chi2|predRate|meanRate)", 
+    list_summary_allSectorsAndLayers  = draw_occu.GetSummary_allSectorsAndLayers([h_name, i_var])
 
     ###
-    ### "(p0|p1|chi2|predRate|meanRate)_All_layer[1-6]_measPhi[01]",
+    ### "(p0|p1|chi2|predRate|meanRate)_layer[1-6]_measPhi[01]",
     ###
-    list_hist2d_EtaPhi_allLayer       = draw_occu.GetHist2D_EtaPhi_allLayer([h_name, i_var, timeTag])
+    list_hist2d_EtaPhi_allLayer       = draw_occu.GetHist2D_EtaPhi_allLayer([h_name, i_var])
 
     list_hist_layer += list_summary_allSectorsAndLayers+list_hist2d_EtaPhi_allLayer
 
     ###
     ### Muon/MuonRawDataMonitoring/RPC/RpcOccupancy/HitRate_vs_InstLumi/SubDetector
-    ### "Summary_Sector[-16...-1, 1...16]_Layer[1...8]_dbPhi[1,2]_measPhi[0,1]_(p0|p1|chi2|predRate|meanRate)_All",
+    ### "Summary_Sector[-16...-1, 1...16]_Layer[1...8]_dbPhi[1,2]_measPhi[0,1]_(p0|p1|chi2|predRate|meanRate)",
     if i_var in ["p0", "chi2", "predRate"]:
-      list_summary_eachSectorsAndLayers = draw_occu.GetSummary_eachSectorsAndLayers([h_name, i_var, timeTag])
+      list_summary_eachSectorsAndLayers = draw_occu.GetSummary_eachSectorsAndLayers([h_name, i_var])
 
       list_hist_subDetector += list_summary_eachSectorsAndLayers
 
@@ -180,6 +179,31 @@ def make_hit_rate(inputs):
   getHistNames(list_hist_subDetector, "Muon/MuonRawDataMonitoring/RPC/RpcOccupancy/HitRate_vs_InstLumi/SubDetector", dic_hists)
 
   return dic_hists
+
+#############################################################################
+def make_2dhits(inputs):
+  hist_2dhits = inputs[0][1][0].Clone() #"NPRDHit_Panels_All"
+  hist_projY  = hist_2dhits.ProjectionY("NPRDHit_Panels_All_py")
+  DicPanels   = readElementFromXML()
+
+  draw_hits = CoreClass.Draw_2DCount(hist_projY)
+  draw_hits.SetPanelDic(DicPanels)
+  
+  h_name  = "NPRDHit_Panels_All_py"
+
+  # -----------------------------------------------------------------------
+  variable   = "prdhits"
+  config     = [h_name, variable]
+  dic_histos = {}
+
+  ###
+  ### "prdhits_layer[1-6]_measPhi[01]",
+  ###
+  list_hist2d_EtaPhi_allLayer      = draw_hits.GetHist2D_EtaPhi_allLayer(config, doSetZRange = False)
+  getHistNames(list_hist2d_EtaPhi_allLayer, "Muon/MuonRawDataMonitoring/RPC/RpcOccupancy/Hits", dic_histos)
+
+  return dic_histos
+
 
 #############################################################################
 def make_hitMulti(inputs):
@@ -234,7 +258,7 @@ def make_detection_eff(inputs):
   draw_eff = CoreClass.Draw_DetectEfficiency(hist)
   draw_eff.SetPanelDic(DicPanels)
   
-  h_name  = "Panel_Efficiency"
+  h_name  = "Panel_Efficiency_MuonFromZ"
 
   # -----------------------------------------------------------------------
   variable   = "detEff"
@@ -270,6 +294,86 @@ def make_detection_eff(inputs):
   ###
   list_hist1D_panels               = draw_eff.GetHist1D_yPanels(config)
   getHistNames(list_hist1D_panels, "Muon/MuonRawDataMonitoring/RPC/TrackMatch/MuonDetectionEff", dic_histos)
+
+  return dic_histos
+
+#############################################################################
+def make_2d_nmuons_Z(inputs):
+  hist_eff = inputs[0][1][0].Clone() #"Panel_Efficiency_MuonFromZ"
+  DicPanels   = readElementFromXML()
+
+  dic_histos = {}
+  #############
+  ### numerator
+  ##############
+  hist_num = hist_eff.GetPassedHistogram()
+  draw_hits = CoreClass.Draw_2DCount(hist_num)
+  draw_hits.SetPanelDic(DicPanels)
+  
+  # -----------------------------------------------------------------------
+  h_name     = "Muon_Z_ex2RpcPanelWithHit"
+  variable   = "muon_Z_num"
+  config     = [h_name, variable]
+
+  # "muon_Z_num_layer[1-6]_measPhi[01]",
+  list_hist2d_EtaPhi_allLayer      = draw_hits.GetHist2D_EtaPhi_allLayer(config, doSetZRange = False)
+  getHistNames(list_hist2d_EtaPhi_allLayer, "Muon/MuonRawDataMonitoring/RPC/TrackMatch/NMuon", dic_histos)
+
+  #############
+  ### denominator
+  ##############
+  hist_num = hist_eff.GetTotalHistogram()
+  draw_hits = CoreClass.Draw_2DCount(hist_num)
+  draw_hits.SetPanelDic(DicPanels)
+  
+  # -----------------------------------------------------------------------
+  h_name     = "Muon_Z_ex2RpcPanel"
+  variable   = "muon_Z_den"
+  config     = [h_name, variable]
+
+  # "muon_Z_den_layer[1-6]_measPhi[01]",
+  list_hist2d_EtaPhi_allLayer      = draw_hits.GetHist2D_EtaPhi_allLayer(config, doSetZRange = False)
+  getHistNames(list_hist2d_EtaPhi_allLayer, "Muon/MuonRawDataMonitoring/RPC/TrackMatch/NMuon", dic_histos)
+
+  return dic_histos
+
+#############################################################################
+def make_2d_nmuons_all(inputs):
+  hist_eff = inputs[0][1][0].Clone() #"Panel_Efficiency_AllMuons"
+  DicPanels   = readElementFromXML()
+
+  dic_histos = {}
+  #############
+  ### numerator
+  ##############
+  hist_num = hist_eff.GetPassedHistogram()
+  draw_hits = CoreClass.Draw_2DCount(hist_num)
+  draw_hits.SetPanelDic(DicPanels)
+  
+  # -----------------------------------------------------------------------
+  h_name     = "Muon_all_ex2RpcPanelWithHit"
+  variable   = "muon_all_num"
+  config     = [h_name, variable]
+
+  # "muon_all_num_layer[1-6]_measPhi[01]",
+  list_hist2d_EtaPhi_allLayer      = draw_hits.GetHist2D_EtaPhi_allLayer(config, doSetZRange = False)
+  getHistNames(list_hist2d_EtaPhi_allLayer, "Muon/MuonRawDataMonitoring/RPC/TrackMatch/NMuon", dic_histos)
+
+  #############
+  ### denominator
+  ##############
+  hist_num = hist_eff.GetTotalHistogram()
+  draw_hits = CoreClass.Draw_2DCount(hist_num)
+  draw_hits.SetPanelDic(DicPanels)
+  
+  # -----------------------------------------------------------------------
+  h_name     = "Muon_all_ex2RpcPanel"
+  variable   = "muon_all_den"
+  config     = [h_name, variable]
+
+  # "muon_all_den_layer[1-6]_measPhi[01]",
+  list_hist2d_EtaPhi_allLayer      = draw_hits.GetHist2D_EtaPhi_allLayer(config, doSetZRange = False)
+  getHistNames(list_hist2d_EtaPhi_allLayer, "Muon/MuonRawDataMonitoring/RPC/TrackMatch/NMuon", dic_histos)
 
   return dic_histos
 
@@ -328,6 +432,7 @@ def getHistNames(hist_list, prefix, dic_hist):
     for i_hist in hist_list:
         i_name = "%s/%s" %(prefix, i_hist.GetName())
         dic_hist[i_name] = i_hist
+
 
 #############################################################################
 if __name__ ==  '__main__':

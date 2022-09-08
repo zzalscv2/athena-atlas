@@ -53,6 +53,7 @@ class RpcTrackAnaAlg : public AthMonitorAlgorithm
 
   private:
     enum BarrelDL { BI = 1, BM1, BM2, BO1, BO2, OUT}; // Barrel doublet: BM_dbR
+    enum MuonSource { AllMuon = 0, ZCand};
 
     StatusCode readElIndexFromXML();
     StatusCode initRpcPanel();
@@ -73,8 +74,8 @@ class RpcTrackAnaAlg : public AthMonitorAlgorithm
     Trk::TrackParameters* computeTrackIntersectionWithGasGap(ExResult &result, const Trk::TrackParameters * trackParam, const std::shared_ptr<GasGapData> &gap) const;
     
     
-    StatusCode readHitsPerGasgap(const EventContext& ctx, std::vector<GasGapResult>& results) const;
-    StatusCode fillClusterSize(std::vector<const Muon::RpcPrepData*> &view_hits, const int panel_index, int isPhi) const;
+    StatusCode readHitsPerGasgap(const EventContext& ctx, std::vector<GasGapResult>& results, MuonSource muon_source) const;
+    StatusCode fillClusterSize(std::vector<const Muon::RpcPrepData*> &view_hits, const int panel_index, int LB, int phiSector, int isPhi) const;
     bool       IsNearbyHit(const std::vector<const Muon::RpcPrepData*> &cluster_hits, const Muon::RpcPrepData* hit) const;
 
   private:
@@ -131,6 +132,8 @@ class RpcTrackAnaAlg : public AthMonitorAlgorithm
     // 2=BML,3=BMS,4=BOL,5=BOS,8=BMF,9=BOF,10=BOG,53=BME
     std::map<BarrelDL, std::vector<int>>          m_StationNames;
     std::map<std::string, int>                    m_elementIndex;
+
+    std::map<std::string,int>                     m_SectorGroup;
 };
 
 #endif
