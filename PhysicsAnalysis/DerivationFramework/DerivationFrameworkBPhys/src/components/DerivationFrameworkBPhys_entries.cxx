@@ -16,6 +16,7 @@
 #include "DerivationFrameworkBPhys/Bmumu_reco_mumu.h"
 #include "DerivationFrameworkBPhys/Reco_mumu.h"
 #include "DerivationFrameworkBPhys/FourMuonTool.h"
+#include "DerivationFrameworkBPhys/AnyVertexSkimmingTool.h"
 //#include "DerivationFrameworkBPhys/BPhysAddMuonBasedInvMass.h"
 //#include "DerivationFrameworkBPhys/BPhysVertexTrackBase.h"
 //#include "DerivationFrameworkBPhys/BVertexTrackIsoTool.h"
@@ -56,6 +57,7 @@ DECLARE_COMPONENT( Bmumu_metadata )
 DECLARE_COMPONENT( BdKstarMuMu_metadata )
 DECLARE_COMPONENT( MuPlusDpstCascade )
 DECLARE_COMPONENT( MuPlusDsCascade )
+DECLARE_COMPONENT( AnyVertexSkimmingTool )
 //DECLARE_COMPONENT( CfAthAlgTool )
 //DECLARE_COMPONENT( Bmumu_reco_mumu )
 DECLARE_COMPONENT( FourMuonTool )

@@ -348,12 +348,15 @@ CascadeCollections += BPHY10JpsiLambdabar.CascadeVertexCollections
 
 if not isSimulation: #Only Skim Data
    from DerivationFrameworkTools.DerivationFrameworkToolsConf import DerivationFramework__xAODStringSkimmingTool
+   from DerivationFrameworkBPhys.DerivationFrameworkBPhysConf import DerivationFramework__AnyVertexSkimmingTool
    BPHY10_SelectBdJpsiKstEvent = DerivationFramework__xAODStringSkimmingTool(
      name = "BPHY10_SelectBdJpsiKstEvent",
      #expression = "(count(BPHY10BdJpsiKstCandidates.passed_Bd > 0) + count(BPHY10BdJpsiKstCandidates.passed_BdBar > 0) + count(BPHY10RecoV0Candidates) + count(RecoKshortContainerName) + count(RecoLambdaContainerName) + count(RecoLambdabarContainerName) ) > 0")
-     expression = "(count(BPHY10BdJpsiKstCandidates.passed_Bd > 0) + count(BPHY10BdJpsiKstCandidates.passed_Bdbar > 0) + count(BPHY10JpsiKshortCascadeSV1.x > -999) + count(BPHY10JpsiLambdaCascadeSV1.x > -999) + count(BPHY10JpsiLambdabarCascadeSV1.x > -999) ) > 0")
-   
+     expression = "(count(BPHY10BdJpsiKstCandidates.passed_Bd > 0) + count(BPHY10BdJpsiKstCandidates.passed_Bdbar > 0)) > 0")
+   BPHY10_cascadeCheck = DerivationFramework__AnyVertexSkimmingTool("BPHY10_AnyVertexSkimmingTool", UseHandles = True,
+                                                                        VertexContainerNames =CascadeCollections )
    ToolSvc += BPHY10_SelectBdJpsiKstEvent
+   ToolSvc += BPHY10_cascadeCheck
    print(BPHY10_SelectBdJpsiKstEvent)
 
 
@@ -365,7 +368,7 @@ if not isSimulation: #Only Skim Data
    from DerivationFrameworkTools.DerivationFrameworkToolsConf import DerivationFramework__FilterCombinationOR
    BPHY10SkimmingOR = CfgMgr.DerivationFramework__FilterCombinationOR(
        "BPHY10SkimmingOR",
-       FilterList = [BPHY10_SelectBdJpsiKstEvent],)
+       FilterList = [BPHY10_cascadeCheck, BPHY10_SelectBdJpsiKstEvent],)
    ToolSvc += BPHY10SkimmingOR
    print(BPHY10SkimmingOR)
 

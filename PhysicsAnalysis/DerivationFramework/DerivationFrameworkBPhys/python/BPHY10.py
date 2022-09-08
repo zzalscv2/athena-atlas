@@ -226,10 +226,15 @@ def BPHY10Cfg(ConfigFlags):
     if not isSimulation: #Only Skim Data
        BPHY10_SelectBdJpsiKstEvent = CompFactory.DerivationFramework.xAODStringSkimmingTool(
                     name = "BPHY10_SelectBdJpsiKstEvent",
-                    expression = "(count(BPHY10BdJpsiKstCandidates.passed_Bd > 0) + count(BPHY10BdJpsiKstCandidates.passed_Bdbar > 0) + count(BPHY10JpsiKshortCascadeSV1.x > -999) + count(BPHY10JpsiLambdaCascadeSV1.x > -999) + count(BPHY10JpsiLambdabarCascadeSV1.x > -999) ) > 0")
+                    expression = "(count(BPHY10BdJpsiKstCandidates.passed_Bd > 0) + count(BPHY10BdJpsiKstCandidates.passed_Bdbar > 0)) >0")
+
+       BPHY10_cascadeCheck = CompFactory.DerivationFramework.AnyVertexSkimmingTool("BPHY10_AnyVertexSkimmingTool",
+                                                                        VertexContainerNames =CascadeCollections,
+                                                                        UseHandles = True )
        BPHY10SkimmingOR = CompFactory.DerivationFramework.FilterCombinationOR(
                                 "BPHY10SkimmingOR",
-                                FilterList = [BPHY10_SelectBdJpsiKstEvent])
+                                FilterList = [BPHY10_cascadeCheck, BPHY10_SelectBdJpsiKstEvent])
+       acc.addPublicTool(BPHY10_cascadeCheck)
        acc.addPublicTool(BPHY10_SelectBdJpsiKstEvent)
        acc.addPublicTool(BPHY10SkimmingOR)
 
