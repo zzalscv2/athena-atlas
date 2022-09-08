@@ -326,13 +326,6 @@ bool PixelConditionsSummaryTool::isGood(const Identifier& elementId, const InDet
 }
 
 namespace {
-   inline void setStatus(const std::unordered_map<int, int> &status_map, unsigned int status_mask, std::vector<bool> &module_status) {
-      for (const std::pair<const int, int> &elm : status_map ) {
-         // set modules good if the module status passes the mask.
-         module_status.at(elm.first)  = module_status.at(elm.first) || (status_mask & (1<<elm.second));
-      }
-   }
-
    inline void andStatus(const std::unordered_map<int, int> &status_map, unsigned int status_mask, std::vector<bool> &module_status) {
       for (const std::pair<const int, int> &elm : status_map ) {
          // set modules good if the module status passes the mask.
