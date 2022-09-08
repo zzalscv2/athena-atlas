@@ -29,7 +29,7 @@ Sim_tf.py \
 
 rc=$?
 mv PDGTABLE.MeV PDGTABLE.MeV.CA
-mv log.EVNTtoHITS logEVNTtoHITS.CA
+mv log.EVNTtoHITS log.EVNTtoHITS.CA
 echo  "art-result: $rc simCA"
 status=$rc
 
@@ -61,7 +61,7 @@ Sim_tf.py \
 rc2=$?
 status=$rc2
 mv PDGTABLE.MeV PDGTABLE.MeV.CG
-mv log.EVNTtoHITS logEVNTtoHITS.CG
+mv log.EVNTtoHITS log.EVNTtoHITS.CG
 echo  "art-result: $rc2 simOLD"
 
 rc3=-9999

@@ -21,11 +21,6 @@ markers= [20, 24, 21, 25, 22, 26, 23, 32, 33, 27]
 
 layerNames = {1:"BM-Confirm-Gasgap1", 2:"BM-Confirm-Gasgap2", 3:"BM-Pivot-Gasgap1", 4:"BM-Pivot-Gasgap2", 5:"BO-Confirm-Gasgap1", 6:"BO-Confirm-Gasgap2", 7:"BOF_BOG-dR2-Gasgap1", 8:"BOF_BOG-dR2-Gasgap2"}
 isMeasPhiNames = ["#eta view", "#phi view"]
-timeTagName = { "All" : "Whole readout window(200ns)",
-                "B3"  : "3 BC before BC0(-100 ~ -25ns)",
-                "C1"  : "BC0(-25ns ~ 25ns)",
-                "A3"  : "3 BC after BC0(25ns ~ 100 ns)"
-              }
 
 Bin_EtaDbZ = {
   # (etaStation, dbZ): bin
@@ -47,7 +42,6 @@ Bin_EtaDbZ = {
   ( 7,  1): 35,   ( 7,  2): 36,
   ( 8,  1): 37,   ( 8,  2): 38,
 }
-
 
 #############################################################################
 class Draw_Base(object):
@@ -104,6 +98,11 @@ class Draw_Base(object):
     "p0"                  : 'Hz',
     "p1"                  : 'Hz/(10^{34} cm^{-2}s^{-1})',
     "chi2"                : '',
+    "prdhits"             : '',
+    "muon_Z_num"          : '',
+    "muon_Z_den"          : '',
+    "muon_all_num"        : '',
+    "muon_all_den"        : '',
     "predRate"            : 'Hz',
     "meanRate"            : 'Hz',
     "extrapMuons"         : '',
@@ -136,6 +135,11 @@ class Draw_Base(object):
     "p0"                  : "p0"       ,
     "p1"                  : "p1"       ,
     "chi2"                : "Chi2/ndf"     ,
+    "prdhits"             : "PRD hits"     ,
+    "muon_Z_num"          : "Muons(Z) extrapolated to individual RPC panels with hits",
+    "muon_Z_den"          : "Muons(Z) extrapolated to individual RPC panels",
+    "muon_all_num"        : "Muons(All) extrapolated to individual RPC panels with hits",
+    "muon_all_den"        : "Muons(All) extrapolated to individual RPC panels",
     "predRate"            : "Predicted hit rate" ,
     "meanRate"            : "Mean actual hit rate" ,
     "extrapMuons"         : "Extrapolated muons",
@@ -269,10 +273,6 @@ class Draw_Base(object):
 
     out_hname  = self._variable
     out_htitle = self._out_htitle
-    if len(config) == 3:
-      self._timeTag = config[2]
-      out_hname     = self._variable+'_'+self._timeTag
-      out_htitle    = self._out_htitle+'('+self._timeTag+')'
 
     if not self.doneParserSectorAndLayer == self._in_hname:
       self.parseHisto_allSectorAndLayers()
@@ -307,10 +307,6 @@ class Draw_Base(object):
 
     out_hname  = self._variable
     out_htitle = self._out_htitle
-    if len(config) == 3:
-      self._timeTag  = config[2]
-      out_hname  = self._variable+'_'+self._timeTag
-      out_htitle = self._out_htitle+'('+self._timeTag+')'
 
     if not self.doneParserPanel == self._in_hname:
       self.parseHisto_allPanels()
@@ -371,13 +367,8 @@ class Draw_Base(object):
     self._variable    = config[1]
     self._out_htitle  = self._var_title[self._variable]
 
-    if len(config) == 3:
-      self._timeTag  = config[2]
-      out_hname  = self._variable+'_'+self._timeTag
-      out_htitle = self._out_htitle+'('+self._timeTag+')'
-    else:
-      out_hname  = self._variable
-      out_htitle = self._out_htitle
+    out_hname  = self._variable
+    out_htitle = self._out_htitle
 
     if not self.doneParserSectorAndLayer == self._in_hname:
       self.parseHisto_allSectorAndLayers()
@@ -410,10 +401,6 @@ class Draw_Base(object):
 
     out_hname  = self._variable
     out_htitle = self._out_htitle
-    if len(config) == 3:
-      self._timeTag  = config[2]
-      out_hname  = self._variable+'_'+self._timeTag
-      out_htitle = self._out_htitle+'('+self._timeTag+')'
 
     if not self.doneParserPanel == self._in_hname:
       self.parseHisto_allPanels()
@@ -462,13 +449,8 @@ class Draw_Base(object):
     self._variable    = config[1]
     self._out_htitle  = self._var_title[self._variable]
 
-    if len(config) == 3:
-      self._timeTag  = config[2]
-      out_hname  = self._variable+'_'+self._timeTag
-      out_htitle = self._out_htitle+'('+self._timeTag+')'
-    else:
-      out_hname  = self._variable
-      out_htitle = self._out_htitle
+    out_hname  = self._variable
+    out_htitle = self._out_htitle
 
     if not self.doneParserPanel == self._in_hname:
       self.parseHisto_allPanels()
@@ -642,8 +624,6 @@ class Draw_Base(object):
   def setHistnameVariable(self, config):
     self._in_hname    = config[0]
     self._variable    = config[1]
-    if len(config) == 3:
-      self._timeTag  = config[2]
 
   # --- parseHisto_allPanels ----------------------------------------------
   def getObject_1panel(self, config):
@@ -690,15 +670,7 @@ class Draw_Occupancy(Draw_Base):
 
   # -----------------------------------------------------------------------
   def __getTimeScale(self):
-    if  self._timeTag.find("All") > -1:
-      timeScale = 200e-9
-    elif  (self._timeTag.find("A3") > -1) or (self._timeTag.find("B3") > -1):
-      timeScale = 75e-9
-    elif  self._timeTag.find("C1") > -1:
-      timeScale = 25e-9
-    else:
-      timeScale = 1
-
+    timeScale = 200e-9
     return timeScale
 
   # -----------------------------------------------------------------------
@@ -833,7 +805,7 @@ class Draw_Occupancy(Draw_Base):
   # -----------------------------------------------------------------------
   def getObject_1SectorLayer(self, config, sec_layer, temp_dic):
     name_pre = self._in_hname.split("_")[0]
-    titles = [name_pre+"_"+self._timeTag+"_LB", name_pre+"("+self._timeTag+") vs LB", "LB", "N_{hits}"]
+    titles = [name_pre+"_LB", name_pre+" vs LB", "LB", "N_{hits}"]
     self.getHist_1SectorLayer(config, sec_layer, temp_dic, titles)
 
   # -----------------------------------------------------------------------
@@ -962,13 +934,8 @@ class Draw_HitMultiplicity(Draw_Base):
     self._variable    = config[1]
     self._out_htitle  = self._var_title[self._variable]
 
-    if len(config) == 3:
-      self._timeTag  = config[2]
-      out_hname  = self._variable+'_'+self._timeTag
-      out_htitle = self._out_htitle+'('+self._timeTag+')'
-    else:
-      out_hname  = self._variable
-      out_htitle = self._out_htitle
+    out_hname  = self._variable
+    out_htitle = self._out_htitle
 
     if not self.doneParserSectorAndLayer == self._in_hname:
       self.parseHisto_allSectorAndLayers()
@@ -1176,6 +1143,25 @@ class Draw_HitOuttimeFraction(Draw_Base):
       error   = singleObj[1]
 
     return (content, error)
+
+#############################################################################
+class Draw_2DCount(Draw_Base):
+
+  # -----------------------------------------------------------------------
+  def __init__(self, inHisto):
+    super(Draw_2DCount, self).__init__(inHisto)
+
+  # -----------------------------------------------------------------------
+  def getObject_1panel(self, config):
+    panelInd  = config[0]
+    cont_err  = (self._in_histo.GetBinContent(panelInd+1), self._in_histo.GetBinError(panelInd+1))
+    
+    return  cont_err
+
+  # -----------------------------------------------------------------------
+  def getContent(self, singleObj):
+    return singleObj
+
 
 #############################################################################
 if __name__ ==  '__main__':

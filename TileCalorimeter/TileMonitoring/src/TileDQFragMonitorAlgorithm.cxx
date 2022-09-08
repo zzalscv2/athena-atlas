@@ -434,6 +434,9 @@ StatusCode TileDQFragMonitorAlgorithm::fillHistograms( const EventContext& ctx )
         fractionOfBadDMUs = nBadNotMaskedDMUs / MAX_DMU;
       }
 
+      // Keep the number of processed events in underflow
+      // in histograms with DMU header errors
+      setDigiError(dmus, errors, -1, OK);
       fill(m_tools[m_errorsGroups[ros - 1][drawer]], drawerDMUs, errorsInDMUs);
       fill(m_tools[m_errorsVsLBGroups[ros - 1][drawer]], lumiBlock, fractionOfBadDMUs);
 

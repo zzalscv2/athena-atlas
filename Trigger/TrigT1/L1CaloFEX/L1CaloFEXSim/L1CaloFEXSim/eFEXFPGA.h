@@ -55,18 +55,17 @@ namespace LVL1 {
     virtual void SetTowersAndCells_SG( int [][6] ) override ;
     virtual void SetIsoWP(std::vector<unsigned int> &, std::vector<unsigned int> &, unsigned int &, unsigned int &) override ;
 
-    virtual std::vector <eFEXegTOB> getEmTOBs() override ;
-    virtual std::vector <eFEXtauTOB> getTauTOBs() override ;
+    virtual std::vector <std::unique_ptr<eFEXegTOB>> getEmTOBs() override ;
+    virtual std::vector <std::unique_ptr<eFEXtauTOB>> getTauTOBs() override ;
 
     /** Internal data */
   private:
     const unsigned int m_eFexStep = 25;
 
-    template <class TOBObjectClass> static bool TOBetSort(const TOBObjectClass& i, const TOBObjectClass& j ) {return (((i.getTobword() >> 0 ) & 0xfff)>((j.getTobword() >> 0 ) & 0xfff)); }
     int m_id;
     int m_efexid;
-    std::vector< eFEXegTOB > m_emTobObjects;
-    std::vector< eFEXtauTOB > m_tauTobObjects;
+    std::vector< std::unique_ptr<eFEXegTOB> > m_emTobObjects;
+    std::vector< std::unique_ptr<eFEXtauTOB> > m_tauTobObjects;
     int m_eTowersIDs [10][6];
 
     SG::ReadHandleKey<TrigConf::L1Menu> m_l1MenuKey{
