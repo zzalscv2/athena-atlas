@@ -350,8 +350,10 @@ class ThresholdDef:
         ## BMA
         # Phase-II lumi demonstrator system
         # DO NOT USE FOR CTP OUTPUTS
-        NimThreshold('BMA0',    'NIM') #LUCID?
-        NimThreshold('BMA1',    'NIM') #LUCID?
+        NimThreshold('BMA0',    'NIM')
+        NimThreshold('BMA1',    'NIM')
+        NimThreshold('BMA2',    'NIM')
+        NimThreshold('BMA3',    'NIM')
 
         ## LUCID
 

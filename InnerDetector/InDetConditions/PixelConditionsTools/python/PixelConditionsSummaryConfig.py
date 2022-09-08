@@ -23,7 +23,10 @@ def PixelConditionsSummaryCfg(flags, name="PixelConditionsSummary", **kwargs):
     kwargs.setdefault("UseByteStreamFEI3", not flags.Input.isMC and not flags.Overlay.DataOverlay and flags.Input.Format is Format.BS)
 
     if flags.InDet.usePixelDCS:
-        kwargs.setdefault("IsActiveStates", [ 'READY', 'ON', 'UNKNOWN', 'TRANSITION', 'UNDEFINED' ])
+        pixel_states_active =  [ 'READY', 'ON', 'UNKNOWN', 'TRANSITION', 'UNDEFINED' ]
+        pixel_states_active += [ 'DISABLED', 'LOCKED_OUT' , 'OFF' ] # to be compatible with run2 reprocessing in 22.0-mc20
+
+        kwargs.setdefault("IsActiveStates", pixel_states_active)
         kwargs.setdefault("IsActiveStatus", [ 'OK', 'WARNING', 'ERROR', 'FATAL' ])
 
     from PixelConditionsAlgorithms.PixelConditionsConfig import PixelDetectorElementCondAlgCfg

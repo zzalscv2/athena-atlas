@@ -1,6 +1,6 @@
 # Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
 
-from ..Config.MenuComponents import MenuSequence, RecoFragmentsPool
+from ..Config.MenuComponents import MenuSequence, RecoFragmentsPool, algorithmCAToGlobalWrapper
 from AthenaConfiguration.AllConfigFlags import ConfigFlags
 from AthenaCommon.CFElements import seqAND
 from TrigEDMConfig.TriggerEDMRun3 import recordable
@@ -38,10 +38,7 @@ def bmumuxAlgSequence(ConfigFlags):
     viewMaker.ViewNodeName = recoSequence.name()
 
     from TrigGenericAlgs.TrigGenericAlgsConfig import ROBPrefetchingAlgCfg_Si
-    robPrefetchAlg = RecoFragmentsPool.retrieve(ROBPrefetchingAlgCfg_Si,
-                                                ConfigFlags,
-                                                nameSuffix=viewMaker.name(),
-                                                inputMaker=viewMaker)
+    robPrefetchAlg = algorithmCAToGlobalWrapper(ROBPrefetchingAlgCfg_Si, ConfigFlags, nameSuffix=viewMaker.name())[0]
 
     sequence = seqAND('bmumuxSequence', [viewMaker, robPrefetchAlg, recoSequence])
 

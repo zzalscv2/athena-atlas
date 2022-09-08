@@ -29,9 +29,14 @@ atlas_install_joboptions( share/*.py )
 
 # Tests in the package:
 function (athenapooltest_run_test testName jo pattern)
-  cmake_parse_arguments( ARG "" "" "DEPENDS" ${ARGN} )
+  cmake_parse_arguments( ARG "PRIVATE_WORKING_DIRECTORY" "" "DEPENDS" ${ARGN} )
+  set(_extraArgs)
+  if( ARG_PRIVATE_WORKING_DIRECTORY )
+     set(_extraArgs "PRIVATE_WORKING_DIRECTORY")
+  endif()
   atlas_add_test( ${testName}
                   SCRIPT athena.py AthenaPoolTest/${jo}.py
+                  ${_extraArgs}
                   LOG_SELECT_PATTERN ${pattern}
                   LOG_IGNORE_PATTERN "0x[0-9a-f]{4,}|DEBUG Try item:|AthenaAttribute.*DB=|AtlasRelease|Release version"
                   PROPERTIES TIMEOUT 900
@@ -88,13 +93,15 @@ athenapooltest_run_test( ReadCombinedRDO ReadCombinedRDO
 
 # Test basic overlay algorithms with DoubleEventSelector
 athenapooltest_run_test( DoubleEventSelectorOverlayTest DoubleEventSelectorOverlayTest
-                         "^DoubleEvent|^SecondaryEvent|^AthenaPoolAddr|^Stream1|Found HelperTools" )
+                         "^DoubleEvent|^SecondaryEvent|^AthenaPoolAddr|^Stream1|Found HelperTools"
+                         PRIVATE_WORKING_DIRECTORY )
 
 # AthenaMT test for DoubleEventSelector
 atlas_add_test( DoubleEventSelectorOverlayTestMT
                 SCRIPT athena.py --threads=4 -c \"outputFile=\'OverlayRDOMT.root\'\" AthenaPoolTest/DoubleEventSelectorOverlayTest.py
+                PRIVATE_WORKING_DIRECTORY
                 LOG_SELECT_PATTERN "^DoubleEvent.*WARNING|ERROR|Terminated successfully"
-                PROPERTIES TIMEOUT 900 )
+                PROPERTIES TIMEOUT 900 PROCESSORS 4)
 
 # Check for adding DetDescr tags to event info object:
 athenapooltest_run_test( EventInfoWrite EventInfoWrite

@@ -253,7 +253,7 @@ class L1Menu(object):
                 thrset = 'legacyCalo'
             elif thrName[:2]=='MU':
                 thrset = 'muon'
-            elif thrName[:3] in ['ALF', 'MBT','AFP','BCM','CAL','NIM','ZDC','BPT','LUC']:
+            elif thrName[:3] in ['ALF', 'MBT','AFP','BCM','CAL','NIM','ZDC','BPT','LUC','BMA']:
                 thrset = 'detector'
             elif thrName[:6]=='R2TOPO':
                 thrset = 'legacyTopo'
@@ -322,8 +322,11 @@ class L1Menu(object):
         log.debug("Number of un-used inputs bits: %i" , totalUnusedInputs )
 
         # Fail menu generation for menus going to P1:
-        if ( totalInputs > Limits.MaxTrigItems or len(ctpOutputs) > Limits.MaxTrigItems ):
-            raise RuntimeError("Both the numbers of inputs and outputs need to be not greater than %i in a physics menu!" % Limits.MaxTrigItems)
+        if ( totalInputs > Limits.MaxTrigItems or len(ctpOutputs) > Limits.MaxTrigItems):
+            if 'AllCTPIn' in self.menuName:
+                log.warning(f"Input or output bits limit of {Limits.MaxTrigItems} exceeded in the dummy CTP menu -- OK")
+            else:
+                raise RuntimeError("Both the numbers of inputs and outputs need to be not greater than %i in a physics menu!" % Limits.MaxTrigItems)
 
     # Avoid that L1 item is defined only for BGRP0 as this include also the CALREQ BGRP2 (ATR-24781)
     def checkBGRP(self):
