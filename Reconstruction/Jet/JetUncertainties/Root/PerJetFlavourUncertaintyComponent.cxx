@@ -18,6 +18,9 @@ PerJetFlavourUncertaintyComponent::PerJetFlavourUncertaintyComponent(const std::
     : UncertaintyComponent(ComponentHelper(name),0)
     , m_absEta(false)
     , m_labels()
+    , m_flavourType(FlavourComp::UNKNOWN)
+    , m_constrainZresponse(false)
+    , m_constrainZresponseFunc("Zjet_qFrac_AntiKt4EMPFlow")
 {
     JESUNC_NO_DEFAULT_CONSTRUCTOR;
 }
@@ -26,6 +29,9 @@ PerJetFlavourUncertaintyComponent::PerJetFlavourUncertaintyComponent(const Compo
     : UncertaintyComponent(component,1)
     , m_absEta(CompParametrization::isAbsEta(component.parametrization))
     , m_labels(component.truthLabels)
+    , m_flavourType(component.flavourType)
+    , m_constrainZresponse(component.constrainZresponse)
+    , m_constrainZresponseFunc(component.constrainZresponseFunc)
 {
     ATH_MSG_DEBUG("Created PerJetFlavourUncertaintyComponent named " << m_uncHistName.Data());
 }
@@ -34,6 +40,9 @@ PerJetFlavourUncertaintyComponent::PerJetFlavourUncertaintyComponent(const PerJe
     : UncertaintyComponent(toCopy)
     , m_absEta(toCopy.m_absEta)
     , m_labels(toCopy.m_labels)
+    , m_flavourType(toCopy.m_flavourType)
+    , m_constrainZresponse(toCopy.m_constrainZresponse)
+    , m_constrainZresponseFunc(toCopy.m_constrainZresponseFunc)
 {
     ATH_MSG_DEBUG("Creating copy of PerJetFlavourUncertaintyComponent named " << m_uncHistName.Data());
 }
@@ -60,6 +69,25 @@ StatusCode PerJetFlavourUncertaintyComponent::initialize(TFile* histFile)
         if (!isSupportedLabel(aLabel))
         {
             ATH_MSG_ERROR("Unsupported label ID of " << aLabel << " in " << getName().Data());
+            return StatusCode::FAILURE;
+        }
+    }
+
+    // Load TF1 for Z-jet gluon fraction
+    if (m_constrainZresponse)
+    {
+        // Find the histogram by name
+        TObject* tmp_tf1 = histFile->Get(m_constrainZresponseFunc);
+        if (!tmp_tf1)
+        {
+            ATH_MSG_ERROR(Form("Histogram file does not contain a histogram named %s",m_constrainZresponseFunc.Data()));
+            return StatusCode::FAILURE;
+        }
+        // Ensure the object is a TF1
+        m_ZjetQuarkFrac = dynamic_cast<const TF1*>(tmp_tf1);
+        if (!m_ZjetQuarkFrac)
+        {
+            ATH_MSG_ERROR(Form("Histogram file contains the expected key, but it's not a TF1* (%s)",m_constrainZresponseFunc.Data()));
             return StatusCode::FAILURE;
         }
     }
@@ -102,8 +130,24 @@ double PerJetFlavourUncertaintyComponent::getFlavourResponseUncertainty(const xA
     const double pT  = jet.pt()*m_energyScale;
     const double eta = m_absEta ? fabs(jet.eta()) : jet.eta();
 
-    // Return the uncertainty
-    return m_uncHist->getValue(pT,eta);
+    FlavourComp::TypeEnum ThisJetFlavourType = FlavourComp::UNKNOWN;
+    if(m_labels.at(0)==21 || m_labels.at(0)==0)   ThisJetFlavourType = FlavourComp::PerJetResponse_Gluon;
+    else if(m_labels.at(0)==1 || m_labels.at(0)==2 || m_labels.at(0)==3) ThisJetFlavourType = FlavourComp::PerJetResponse_LQ;
+    else if(m_labels.at(0)==5)  ThisJetFlavourType = FlavourComp::PerJetResponse_B;
+    else if(m_labels.at(0)==4 )  ThisJetFlavourType = FlavourComp::PerJetResponse_C;
+    
+    // bool DoesItPass = false;
+    if(m_flavourType == ThisJetFlavourType){
+        double unc = m_uncHist->getValue(pT,eta);
+        if (m_constrainZresponse){
+          if (m_flavourType==FlavourComp::PerJetResponse_Gluon) unc *= m_ZjetQuarkFrac->Eval(pT);
+          if (m_flavourType==FlavourComp::PerJetResponse_LQ) unc *= (m_ZjetQuarkFrac->Eval(pT)-1.0);
+        }
+        // Return the uncertainty
+        return unc;
+
+    }else{ return 0;}
+
 }
 
 
@@ -118,6 +162,7 @@ bool PerJetFlavourUncertaintyComponent::isSupportedLabel(const int label) const
         case 4:  // parton-label, charm
         case 5:  // parton-label, bottom
         case 21: // parton-label, gluon
+        case 0: // parton-label, PileUp/non-identified
             return true;
         default:
             return false;

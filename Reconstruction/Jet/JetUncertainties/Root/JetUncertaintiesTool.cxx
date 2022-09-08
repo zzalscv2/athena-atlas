@@ -982,10 +982,16 @@ UncertaintyComponent* JetUncertaintiesTool::buildUncertaintyComponent(const Comp
             }
             else if (component.parametrization == CompParametrization::PtEta || component.parametrization == CompParametrization::PtAbsEta)
             {
-                if (component.flavourType == FlavourComp::PerJetResponse)
-                    return new PerJetFlavourUncertaintyComponent(component);
-                else
-                    return new FlavourUncertaintyComponent(component,m_jetDef,m_analysisFile.c_str(),m_defAnaFile.c_str(),m_path.c_str(),m_calibArea.c_str(),m_analysisHistPattern.c_str());
+
+                if (component.flavourType == FlavourComp::PerJetResponse || 
+                    component.flavourType == FlavourComp::PerJetResponse_Gluon ||
+                    component.flavourType == FlavourComp::PerJetResponse_LQ ||
+                    component.flavourType == FlavourComp::PerJetResponse_B ||
+                    component.flavourType == FlavourComp::PerJetResponse_C){
+                        return new PerJetFlavourUncertaintyComponent(component);
+                    }else
+                        return new FlavourUncertaintyComponent(component,m_jetDef,m_analysisFile.c_str(),m_defAnaFile.c_str(),m_path.c_str(),m_calibArea.c_str(),m_analysisHistPattern.c_str());
+                                    
             }
             else
             {
