@@ -1,6 +1,6 @@
 // Dear emacs, this is -*- c++ -*-
 //
-// Copyright (C) 2002-2020 CERN for the benefit of the ATLAS collaboration
+// Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
 //
 
 // Local include(s).
@@ -12,9 +12,9 @@
 
 namespace AthCUDA {
 
-   Info& Info::instance() {
+   const Info& Info::instance() {
 
-      static Info info;
+      static const Info info;
       return info;
    }
 

@@ -1,6 +1,6 @@
 // Dear emacs, this is -*- c++ -*-
 //
-// Copyright (C) 2002-2020 CERN for the benefit of the ATLAS collaboration
+// Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
 //
 #ifndef ATHCUDACORE_INFO_H
 #define ATHCUDACORE_INFO_H
@@ -25,7 +25,7 @@ namespace AthCUDA {
 
    public:
       /// Singleton accessor function
-      static Info& instance();
+      static const Info& instance();
 
       /// Get the number of available devices
       int nDevices() const;
