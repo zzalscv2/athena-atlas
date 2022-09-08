@@ -10,6 +10,9 @@
 
 #undef NDEBUG
 
+#include "CxxUtils/checker_macros.h"
+ATLAS_NO_CHECK_FILE_THREAD_SAFETY;
+
 // Tested AthAlgorithm
 #include "../src/SimKernelMT.h"
 
