@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "sTgcRdoToPrepDataToolCore.h"
@@ -11,6 +11,9 @@ using namespace MuonGM;
 using namespace Trk;
 using namespace Muon;
 
+namespace {
+    std::atomic<bool> hitNegativeCharge{false};
+}
 //============================================================================
 Muon::sTgcRdoToPrepDataToolCore::sTgcRdoToPrepDataToolCore(const std::string& t, const std::string& n, const IInterface* p) 
 : base_class(t,n,p){}
@@ -35,6 +38,7 @@ StatusCode Muon::sTgcRdoToPrepDataToolCore::initialize()
 StatusCode Muon::sTgcRdoToPrepDataToolCore::processCollection(Muon::sTgcPrepDataContainer* stgcPrepDataContainer, const STGC_RawDataCollection *rdoColl, std::vector<IdentifierHash>& idWithDataVect) const
 {
     const EventContext& ctx = Gaudi::Hive::currentContext();
+    const sTgcIdHelper& id_helper = m_idHelperSvc->stgcIdHelper();
     const IdentifierHash hash = rdoColl->identifyHash();
 
     ATH_MSG_DEBUG(" ***************** Start of process STGC Collection with hash Id: " << hash);
@@ -60,9 +64,9 @@ StatusCode Muon::sTgcRdoToPrepDataToolCore::processCollection(Muon::sTgcPrepData
     idWithDataVect.push_back(hash);
 
     // set the offline identifier of the collection Id
-    IdContext  context = m_idHelperSvc->stgcIdHelper().module_context();
+    IdContext  context = id_helper.module_context();
     Identifier moduleId;
-    int getId = m_idHelperSvc->stgcIdHelper().get_id(hash, moduleId, &context);
+    int getId = id_helper.get_id(hash, moduleId, &context);
     if ( getId != 0 ) {
       ATH_MSG_ERROR("Could not convert the hash Id: " << hash << " to identifier");
     } else {
@@ -78,7 +82,7 @@ StatusCode Muon::sTgcRdoToPrepDataToolCore::processCollection(Muon::sTgcPrepData
     sTgcWirePrds.reserve(rdoColl->size());
     
     // Count hits with negative charge, which indicates bad calibration
-    int nHitNegativeCharge{0};
+    
   
     // MuonDetectorManager from the conditions store
     SG::ReadCondHandle<MuonGM::MuonDetectorManager> detMgrHandle{m_muDetMgrKey,ctx};
@@ -95,7 +99,7 @@ StatusCode Muon::sTgcRdoToPrepDataToolCore::processCollection(Muon::sTgcPrepData
         const Identifier  rdoId = rdo->identify();
 
         if (!m_idHelperSvc->issTgc(rdoId)) {
-            ATH_MSG_WARNING("The given Identifier "<<rdoId.get_compact()<<" ("<<m_idHelperSvc->stgcIdHelper().print_to_string(rdoId)<<") is no sTGC Identifier, continuing");
+            ATH_MSG_WARNING("The given Identifier "<<rdoId.get_compact()<<" ("<<m_idHelperSvc->toString(rdoId)<<") is no sTGC Identifier, continuing");
             continue;
         }
 
@@ -106,7 +110,7 @@ StatusCode Muon::sTgcRdoToPrepDataToolCore::processCollection(Muon::sTgcPrepData
         const MuonGM::sTgcReadoutElement* detEl = muonDetMgr->getsTgcReadoutElement(rdoId);
         Amg::Vector2D localPos;
 
-        int channelType = m_idHelperSvc->stgcIdHelper().channelType(rdoId);
+        int channelType = id_helper.channelType(rdoId);
         if (channelType < 0 || channelType > 2) {
             ATH_MSG_ERROR("Unknown sTGC channel type");
             return StatusCode::FAILURE;
@@ -120,17 +124,18 @@ StatusCode Muon::sTgcRdoToPrepDataToolCore::processCollection(Muon::sTgcPrepData
 
         // get the resolution from strip width
         // to be fixed: for now do not set the resolution, it will be added in the next update    
-        const int     gasGap = m_idHelperSvc->stgcIdHelper().gasGap(rdoId);
-        const int    channel = m_idHelperSvc->stgcIdHelper().channel(rdoId);
+        const int     gasGap = id_helper.gasGap(rdoId);
+        const int    channel = id_helper.channel(rdoId);
         const uint16_t bcTag = rdo->bcTag();
 
         NSWCalib::CalibratedStrip calibStrip;
         ATH_CHECK (m_calibTool->calibrateStrip(ctx, rdo, calibStrip));
         int calibratedCharge = static_cast<int>(calibStrip.charge);
         if (calibratedCharge < 0) {
-            if (nHitNegativeCharge < 1)
-              ATH_MSG_WARNING("One sTGC RDO or more, such as one with pdo = "<<rdo->charge() << " counts, corresponds to a negative charge (" << calibratedCharge << "). Skipping these RDOs");
-            ++nHitNegativeCharge;
+            if (!hitNegativeCharge) {
+                ATH_MSG_WARNING("One sTGC RDO or more, such as one with pdo = "<<rdo->charge() << " counts, corresponds to a negative charge (" << calibratedCharge << "). Skipping these RDOs");
+                hitNegativeCharge = true; 
+            }
             continue;
         }
         
@@ -197,11 +202,6 @@ StatusCode Muon::sTgcRdoToPrepDataToolCore::processCollection(Muon::sTgcPrepData
     // now add the collection to the container
     ATH_CHECK( lock.addOrDelete(std::move( prdColl ) ) );
     ATH_MSG_DEBUG("PRD hash " << hash << " has been moved to container");
-
-    // clear vector and delete elements
-    sTgcStripPrds.clear();
-    sTgcWirePrds.clear();
-    sTgcPadPrds.clear();
 
     return StatusCode::SUCCESS;
 }
