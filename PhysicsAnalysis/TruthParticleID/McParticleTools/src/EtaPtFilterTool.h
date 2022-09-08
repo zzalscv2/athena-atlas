@@ -1,7 +1,7 @@
 ///////////////////////// -*- C++ -*- /////////////////////////////
 
 /*
-  Copyright (C) 2002-2017 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
 */
 
 // EtaPtFilterTool.h 
@@ -75,7 +75,11 @@ class EtaPtFilterTool : public TruthParticleFilterBaseTool
   /////////////////////////////////////////////////////////////////// 
   // Protected methods: 
   /////////////////////////////////////////////////////////////////// 
- protected: 
+ protected:
+  using ParticleMap_t = std::unordered_map<const HepMC::GenParticle*,
+                                           HepMC::GenParticlePtr>;
+  using VertexMap_t = std::unordered_map<const HepMC::GenVertex*,
+                                         HepMC::GenVertexPtr>;
 
   /** Default constructor: 
    */
@@ -106,7 +110,9 @@ class EtaPtFilterTool : public TruthParticleFilterBaseTool
 
   /** Helper method to copy a given vertex and add it to a GenEvent
    */
-  StatusCode addVertex( HepMC::ConstGenVertexPtr srcVtx, HepMC::GenEvent* evt, 
+  StatusCode addVertex( HepMC::ConstGenVertexPtr srcVtx, HepMC::GenEvent* evt,
+                        VertexMap_t& vmap,
+                        ParticleMap_t& pmap,
 			bool isSignalVertex = false ) const;
 
   /** @brief Helper method to check if this @c HepMC::GenVertex looks
