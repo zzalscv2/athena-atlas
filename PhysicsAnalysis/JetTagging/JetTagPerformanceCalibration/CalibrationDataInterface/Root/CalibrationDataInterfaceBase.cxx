@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2020 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
 */
 
 
@@ -50,8 +50,13 @@ const std::string& Analysis::CalibrationDataInterfaceBase::EffCalibrationName(co
   // Return the MC efficiency name for the given flavour.
   // Note that no check is performed on the validity of the flavour.
   
-  // future: use map<>::find
-  return m_calibrationEffNames[flavour][mapIndex];
+  try {
+    return m_calibrationEffNames.at(flavour)[mapIndex];
+  }
+  catch (const std::out_of_range& e) {
+    std::cerr << "EffCalibrationName: flavour '" << flavour << "' is not known." << std::endl;
+    throw e;
+  }
 }
 
 //________________________________________________________________________________
@@ -68,9 +73,14 @@ const std::string& Analysis::CalibrationDataInterfaceBase::SFCalibrationName(con
 {
   // Return the efficiency scale factor calibration name for the given flavour.
   // Note that no check is performed on the validity of the flavour.
-  
-  // future: use map<>::find
-  return m_calibrationSFNames[flavour];
+
+  try {
+    return m_calibrationSFNames.at(flavour);
+  }
+  catch (const std::out_of_range& e) {
+    std::cerr << "SFCalibrationName: flavour '" << flavour << "' is not known." << std::endl;
+    throw e;
+  }
 }
 
 //________________________________________________________________________________
@@ -112,12 +122,13 @@ Analysis::CalibrationDataInterfaceBase::getContainername (const std::string& fla
   // of tagging operating point, jet flavour, and a possible extra extension. The calibration
   // container name (stored internally) is also attached.
 
-  if (!SF && mapIndex >= m_calibrationEffNames[flavour].size()) {
+  const std::vector<std::string>& effNames = m_calibrationEffNames.at(flavour);
+  if (!SF && mapIndex >= effNames.size()) {
     std::cerr << "getContainername: given mapIndex=" << mapIndex << " incompatible with array size "
-	      << m_calibrationEffNames[flavour].size() << "; resetting to 0" << std::endl;
+	      << effNames.size() << "; resetting to 0" << std::endl;
     mapIndex = 0;
   }
-  std::string name = SF ? m_calibrationSFNames[flavour] : m_calibrationEffNames[flavour][mapIndex];
+  std::string name = SF ? m_calibrationSFNames.at(flavour) : effNames[mapIndex];
   name += SF ? "_SF" : "_Eff";
 
   return name;

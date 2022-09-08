@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2020 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
 */
 
 ///////////////////////////////////////////////////////////////////
@@ -207,11 +207,11 @@ namespace Analysis {
     /** @brief decode the 'uncertainty' objects' names to determine the relevant variable types */
     virtual void computeVariableTypes() const = 0;
 
-    mutable std::vector<double> m_lowerBounds;   // lower validity bounds
-    mutable std::vector<double> m_upperBounds;   // upper validity bounds
+    std::vector<double> m_lowerBounds;   // lower validity bounds
+    std::vector<double> m_upperBounds;   // upper validity bounds
     // persistency not needed for the following (relevant for histogram uncertainties only and computed automatically)
-    mutable std::vector<double> m_lowerBoundsExtrapolated;   //! (possibly looser) lower validity bounds for extrapolation
-    mutable std::vector<double> m_upperBoundsExtrapolated;   //! (possibly looser) upper validity bounds for extrapolation
+    std::vector<double> m_lowerBoundsExtrapolated;   //! (possibly looser) lower validity bounds for extrapolation
+    std::vector<double> m_upperBoundsExtrapolated;   //! (possibly looser) upper validity bounds for extrapolation
 
     /** cached variables for code speed-up */
     mutable TObject* m_objResult;                //! don't persistify

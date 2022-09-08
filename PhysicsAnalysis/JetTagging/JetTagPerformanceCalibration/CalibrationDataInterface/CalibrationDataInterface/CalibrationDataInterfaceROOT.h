@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2020 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
 */
 
 ///////////////////////////////////////////////////////////////////
@@ -414,7 +414,7 @@ namespace Analysis
       // Eigenvector variations functionality
 
       /** store the eigenvector class and associate to its CalibrationDataContainer **/
-      mutable std::map<const CalibrationDataContainer*,const CalibrationDataEigenVariations*> m_eigenVariationsMap;
+      std::map<const CalibrationDataContainer*,const CalibrationDataEigenVariations*> m_eigenVariationsMap;
 
       /** decide whether to run the eigenvector method or not **/
       bool m_runEigenVectorMethod;
@@ -444,9 +444,9 @@ namespace Analysis
 
       /** the following maps (one for each directory) specify the name of the container
 	  serving as the 'hadronisation' reference for each object */
-      mutable std::map<std::string, HadronisationReferenceHelper*> m_refMap;
+      std::map<std::string, HadronisationReferenceHelper*> m_refMap;
       /** store the 'hadronisation' reference for each object (-1 means no reference found) */
-      mutable std::vector<int>                                     m_hadronisationReference;
+      std::vector<int>                                     m_hadronisationReference;
 
       // ------------------------------------------------------------------------------------------
 
