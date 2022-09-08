@@ -81,6 +81,7 @@ class BPHYV0FinderTools:
                                                                               significanceD0_Si   = 1.,
                                                                               significanceD0_Trt  = 1.,
                                                                               significanceZ0_Trt  = 3.,
+                                                                              UseEventInfoBS       = True,
                                                                               minPt               = 400.0,
                                                                               IsConversion        = False)
         ToolSvc += self.InDetV0VxTrackSelector
