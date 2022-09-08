@@ -27,12 +27,12 @@ def TIDAMonitoring( flags=None, name=None, monlevel=None, mcTruth=False ) :
 
         if monlevel is not None:
                 log.info( "TIDA monitoring not None: monlevel: " + monlevel )        
-                if "shifter" in monlevel:
-                        key     = "Shifter"
-                        toolkey = "Shifter"
                 if "t0" in monlevel:
                         key     = "Expert"
                         toolkey = "Expert"
+                elif "shifter" in monlevel:
+                        key     = "Shifter"
+                        toolkey = "Shifter"
 
 
 
@@ -77,6 +77,7 @@ def TIDAMonitoring( flags=None, name=None, monlevel=None, mcTruth=False ) :
                 tidaegammalrt.SliceTag       = "HLT/TRIDT/EgammaLRT/"+key
                                   
         tidaegammalrt.AnalysisConfig = "Tier0"
+        tidaegammalrt.mind0CutOffline = 2.
 
         chains = getchains( [ "HLT_e.*idperf_loose_lrtloose.*:key=HLT_IDTrack_ElecLRT_FTF:roi=HLT_Roi_FastElectron_LRT",
                               "HLT_e.*idperf_loose_lrtloose.*:key=HLT_IDTrack_ElecLRT_IDTrig:roi=HLT_Roi_FastElectron_LRT",
@@ -140,6 +141,8 @@ def TIDAMonitoring( flags=None, name=None, monlevel=None, mcTruth=False ) :
                 tidamuonlrt.SliceTag = "HLT/TRIDT/MuonLRT/"+key
 
         tidamuonlrt.AnalysisConfig = "Tier0"
+        tidamuonlrt.mind0CutOffline = 2.
+
 
         chains = getchains( [ "HLT_mu.*_LRT_idperf.*:key=HLT_IDTrack_MuonLRT_FTF:roi=HLT_Roi_L2SAMuon_LRT",
                               "HLT_mu.*_LRT_idperf.*:key=HLT_IDTrack_MuonLRT_IDTrig:roi=HLT_Roi_L2SAMuon_LRT"], monlevel )
@@ -191,6 +194,7 @@ def TIDAMonitoring( flags=None, name=None, monlevel=None, mcTruth=False ) :
                 tidataulrt.SliceTag = "HLT/TRIDT/TauLRT/"+key
 
         tidataulrt.AnalysisConfig = "Tier0"
+        tidataulrt.mind0CutOffline = 2.
 
         chains = getchains( [ "HLT_tau.*_idperf.*_trackLRT.*:key=HLT_IDTrack_TauLRT_FTF:roi=HLT_Roi_LRT",
                               "HLT_tau.*_idperf.*_trackLRT.*:key=HLT_IDTrack_TauLRT_IDTrig:roi=HLT_Roi_TauLRT"], monlevel )
@@ -346,8 +350,8 @@ def TIDAMonitoringCA( flags, monlevels=None ):
         from AthenaMonitoring import AthMonitorCfgHelper
         monConfig = AthMonitorCfgHelper(flags, "TrigIDMon")
 
-        algs = TIDAMonitoring(flags, "All" )
-        algs += TIDAMonitoring(flags, "Tier0", monlevel="idMon:t0" )
+##        algs = TIDAMonitoring(flags, "All" )
+        algs = TIDAMonitoring(flags, "Tier0", monlevel="idMon:t0:shifter" )
         algs += TIDAMonitoring(flags, "Shifter", monlevel="idMon:shifter", mcTruth=False ) 
       
         if flags.Input.isMC:    
