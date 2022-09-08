@@ -6,7 +6,7 @@ EgEfficiencyCorr_testE...INFO    ===> Model : SIMPLIFIED| electron : Pt = 41212.
 EgEfficiencyCorr_testEgEfficiencyCorrWithoutFile  -t FullSim -r 425504 -c FULL -e -0.94 -p 41212.10 -d Medium | grep SF  2>&1
 EgEfficiencyCorr_testE...INFO    ===> Model : FULL| electron : Pt = 41212.1 : eta = -0.94 : Bin index = 124 : SF = 0.994283 + 0.00814953 - 0.00814953 <===
 EgEfficiencyCorr_testEgEfficiencyCorrWithoutFile  -t FullSim -r 425504 -c TOTAL -e -0.94 -p 41212.10 -d Medium -l 0 | grep map  2>&1
-ElEffCorrectionTool.MapFilePath = 'ElectronEfficiencyCorrection/2015_2025/rel22.2/2022_Summer_Prerecom_v1/map0.txt'
+ElEffCorrectionTool.MapFilePath = 'ElectronEfficiencyCorrection/2015_2025/rel22.2/2022_Summer_Prerecom_v1/map1.txt'
  ==== CHECK II:  DEFAULT MAP ==== 
     ---> map looks good! 
  ==== CHECK III:  ID LVL ==== 
@@ -33,7 +33,7 @@ EgEfficiencyCorr_testE...INFO    ===> Model : TOTAL| electron : Pt = 1.21285e+07
 EgEfficiencyCorr_testEgEfficiencyCorrWithoutFile  -t FullSim -r 425504 -c TOTAL -e -0.94 -p 41212.10 -d Reconstruction | grep SF  2>&1
 EgEfficiencyCorr_testE...INFO    ===> Model : TOTAL| electron : Pt = 41212.1 : eta = -0.94 : Bin index = -999 : SF = 1 + 0.000721882 - 0.000721882 <===
 EgEfficiencyCorr_testEgEfficiencyCorrWithoutFile  -t FullSim -r 425504 -c TOTAL -e -0.94 -p 41212.10 -d Medium -i Tight_VarRad| grep SF  2>&1
-EgEfficiencyCorr_testE...INFO    ===> Model : TOTAL| electron : Pt = 41212.1 : eta = -0.94 : Bin index = -999 : SF = 1 + 1.0083 - 1.0083 <===
+EgEfficiencyCorr_testE...INFO    ===> Model : TOTAL| electron : Pt = 41212.1 : eta = -0.94 : Bin index = -999 : SF = 1 + 0.00826873 - 0.00826873 <===
 EgEfficiencyCorr_testEgEfficiencyCorrWithoutFile  -t FullSim -r 425504 -c TOTAL -e -0.94 -p 41212.10 -d Medium -i Tight_VarRad -g SINGLE_E_2015_e24_lhmedium_L1EM20VH_OR_e60_lhmedium_OR_e120_lhloose_2016_2017_e26_lhtight_nod0_ivarloose_OR_e60_lhmedium_nod0_OR_e140_lhloose_nod0| grep SF  2>&1
 
  ==== DONE ==== 
