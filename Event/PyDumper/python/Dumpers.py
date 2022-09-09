@@ -39,6 +39,9 @@ def cmp(x, y):
 etcone10 = 0
 nucone10 = 8
 
+# Suppress warnings we get from the gcc12 headers.
+ROOT.gROOT.ProcessLine ('#pragma clang diagnostic ignored "-Wdeprecated-declarations"')
+
 # Without these, cling gets confused by forward declarations.
 getattr (ROOT.xAOD, 'TrackParticleContainer_v1', None)
 getattr (ROOT.xAOD, 'Jet_v1', None)
