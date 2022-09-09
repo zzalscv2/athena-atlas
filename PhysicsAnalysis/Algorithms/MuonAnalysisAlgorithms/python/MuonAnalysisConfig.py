@@ -70,12 +70,13 @@ class MuonWorkingPointConfig (ConfigBlock) :
 
     This may at some point be split into multiple blocks (10 Mar 22)."""
 
-    def __init__ (self, containerName, postfix, quality, isolation) :
+    def __init__ (self, containerName, postfix, quality, isolation, isRun3Geo) :
         super (MuonWorkingPointConfig, self).__init__ ()
         self.containerName = containerName
         self.selectionName = postfix
         self.postfix = postfix
         self.quality = quality
+        self.isRun3Geo = isRun3Geo
         self.isolation = isolation
         self.qualitySelectionOutput = False
 
@@ -111,6 +112,7 @@ class MuonWorkingPointConfig (ConfigBlock) :
                                'MuonSelectionAlg' + postfix )
         config.addPrivateTool( 'selectionTool', 'CP::MuonSelectionTool' )
         alg.selectionTool.MuQuality = quality
+        alg.selectionTool.IsRun3Geo = self.isRun3Geo
         alg.selectionDecoration = 'good_muon' + postfix + ',as_bits'
         alg.badMuonVetoDecoration = 'is_bad' + postfix + ',as_char'
         alg.muons = config.readName (self.containerName)
@@ -180,7 +182,8 @@ def makeMuonCalibrationConfig( seq, containerName,
 
 
 def makeMuonWorkingPointConfig( seq, containerName, workingPoint, postfix,
-                                qualitySelectionOutput = True):
+                                qualitySelectionOutput = True,
+                                isRun3Geo = False):
     """Create muon analysis algorithms for a single working point
 
     Keyword arguments:
@@ -191,12 +194,13 @@ def makeMuonWorkingPointConfig( seq, containerName, workingPoint, postfix,
                  names are unique.
       qualitySelectionOutput -- Whether or not to apply muon quality selection
                                 when creating output containers.
+      isRun3Geo -- switches the muon selection tool to run 3 geometry
     """
 
     splitWP = workingPoint.split ('.')
     if len (splitWP) != 2 :
         raise ValueError ('working point should be of format "quality.isolation", not ' + workingPoint)
 
-    config = MuonWorkingPointConfig (containerName, postfix, splitWP[0], splitWP[1])
+    config = MuonWorkingPointConfig (containerName, postfix, splitWP[0], splitWP[1], isRun3Geo)
     config.qualitySelectionOutput = qualitySelectionOutput
     seq.append (config)

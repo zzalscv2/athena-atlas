@@ -16,114 +16,121 @@ def PHYSLITEKernelCfg(ConfigFlags, name='PHYSLITEKernel', **kwargs):
     """Configure the derivation framework driving algorithm (kernel) for PHYSLITE"""
     acc = ComponentAccumulator()
 
-    # Common augmentations
-    from DerivationFrameworkPhys.PhysCommonConfig import PhysCommonAugmentationsCfg
-    acc.merge(PhysCommonAugmentationsCfg(ConfigFlags, TriggerListsHelper = kwargs['TriggerListsHelper']))
+    # This block does the common physics augmentation and thinning, which isn't needed (or possible) for PHYS->PHYSLITE
+    # Ensure block only runs for AOD input
+    thinningTools = []
+    if 'StreamAOD' in ConfigFlags.Input.ProcessingTags:
 
-    # Thinning tools...
-    from DerivationFrameworkInDet.InDetToolsConfig import TrackParticleThinningCfg, MuonTrackParticleThinningCfg, TauTrackParticleThinningCfg, DiTauTrackParticleThinningCfg, TauJetLepRMParticleThinningCfg
-    from DerivationFrameworkTools.DerivationFrameworkToolsConfig import GenericObjectThinningCfg
-    from DerivationFrameworkCalo.DerivationFrameworkCaloConfig import CaloClusterThinningCfg
+        # Common augmentations
+        from DerivationFrameworkPhys.PhysCommonConfig import PhysCommonAugmentationsCfg
+        acc.merge(PhysCommonAugmentationsCfg(ConfigFlags, TriggerListsHelper = kwargs['TriggerListsHelper']))
 
-    # Inner detector group recommendations for indet tracks in analysis
-    # https://twiki.cern.ch/twiki/bin/viewauth/AtlasProtected/DaodRecommendations
-    PHYSLITE_thinning_expression = "InDetTrackParticles.DFCommonTightPrimary && abs(DFCommonInDetTrackZ0AtPV)*sin(InDetTrackParticles.theta) < 3.0*mm && InDetTrackParticles.pt > 10*GeV"
-    PHYSLITETrackParticleThinningTool = acc.getPrimaryAndMerge(TrackParticleThinningCfg(
-        ConfigFlags,
-        name                    = "PHYSLITETrackParticleThinningTool",
-        StreamName              = kwargs['StreamName'], 
-        SelectionString         = PHYSLITE_thinning_expression,
-        InDetTrackParticlesKey  = "InDetTrackParticles"))
-    
-    # Include inner detector tracks associated with muons
-    PHYSLITEMuonTPThinningTool = acc.getPrimaryAndMerge(MuonTrackParticleThinningCfg(
-        ConfigFlags,
-        name                    = "PHYSLITEMuonTPThinningTool",
-        StreamName              = kwargs['StreamName'],
-        MuonKey                 = "Muons",
-        InDetTrackParticlesKey  = "InDetTrackParticles"))
-    
-    # disable tau thinning for now
-    tau_thinning_expression = "(TauJets.ptFinalCalib >= 0)"
-    PHYSLITETauJetsThinningTool = acc.getPrimaryAndMerge(GenericObjectThinningCfg(ConfigFlags,
-        name            = "PHYSLITETauJetThinningTool",
-        StreamName      = kwargs['StreamName'],
-        ContainerName   = "TauJets",
-        SelectionString = tau_thinning_expression))
-    
-    # Only keep tau tracks (and associated ID tracks) classified as charged tracks
-    PHYSLITETauTPThinningTool = acc.getPrimaryAndMerge(TauTrackParticleThinningCfg(
-        ConfigFlags,
-        name                   = "PHYSLITETauTPThinningTool",
-        StreamName             = kwargs['StreamName'],
-        TauKey                 = "TauJets",
-        InDetTrackParticlesKey = "InDetTrackParticles",
-        DoTauTracksThinning    = True,
-        TauTracksKey           = "TauTracks"))
-    
-    tau_murm_thinning_expression = tau_thinning_expression.replace('TauJets', 'TauJets_MuonRM')
-    PHYSLITETauJetMuonRMParticleThinningTool = acc.getPrimaryAndMerge(TauJetLepRMParticleThinningCfg(
-        ConfigFlags,
-        name                   = "PHYSLITETauJets_MuonRMThinningTool",
-        StreamName             = kwargs['StreamName'],
-        originalTauKey         = "TauJets",
-        LepRMTauKey            = "TauJets_MuonRM",
-        InDetTrackParticlesKey = "InDetTrackParticles",
-        TauTracksKey           = "TauTracks_MuonRM",
-        SelectionString        = tau_murm_thinning_expression))
+        # Thinning tools...
+        from DerivationFrameworkInDet.InDetToolsConfig import TrackParticleThinningCfg, MuonTrackParticleThinningCfg, TauTrackParticleThinningCfg, DiTauTrackParticleThinningCfg, TauJetLepRMParticleThinningCfg
+        from DerivationFrameworkTools.DerivationFrameworkToolsConfig import GenericObjectThinningCfg
+        from DerivationFrameworkCalo.DerivationFrameworkCaloConfig import CaloClusterThinningCfg
 
-    # ID tracks associated with high-pt di-tau
-    PHYSLITEDiTauTPThinningTool = acc.getPrimaryAndMerge(DiTauTrackParticleThinningCfg(
-        ConfigFlags,
-        name                    = "PHYSLITEDiTauTPThinningTool",
-        StreamName              = kwargs['StreamName'],
-        DiTauKey                = "DiTauJets",
-        InDetTrackParticlesKey  = "InDetTrackParticles"))
+        # Inner detector group recommendations for indet tracks in analysis
+        # https://twiki.cern.ch/twiki/bin/viewauth/AtlasProtected/DaodRecommendations
+        PHYSLITE_thinning_expression = "InDetTrackParticles.DFCommonTightPrimary && abs(DFCommonInDetTrackZ0AtPV)*sin(InDetTrackParticles.theta) < 3.0*mm && InDetTrackParticles.pt > 10*GeV"
+        PHYSLITETrackParticleThinningTool = acc.getPrimaryAndMerge(TrackParticleThinningCfg(
+            ConfigFlags,
+            name                    = "PHYSLITETrackParticleThinningTool",
+            StreamName              = kwargs['StreamName'], 
+            SelectionString         = PHYSLITE_thinning_expression,
+            InDetTrackParticlesKey  = "InDetTrackParticles"))
+        
+        # Include inner detector tracks associated with muons
+        PHYSLITEMuonTPThinningTool = acc.getPrimaryAndMerge(MuonTrackParticleThinningCfg(
+            ConfigFlags,
+            name                    = "PHYSLITEMuonTPThinningTool",
+            StreamName              = kwargs['StreamName'],
+            MuonKey                 = "Muons",
+            InDetTrackParticlesKey  = "InDetTrackParticles"))
+        
+        # disable tau thinning for now
+        tau_thinning_expression = "(TauJets.ptFinalCalib >= 0)"
+        PHYSLITETauJetsThinningTool = acc.getPrimaryAndMerge(GenericObjectThinningCfg(ConfigFlags,
+            name            = "PHYSLITETauJetThinningTool",
+            StreamName      = kwargs['StreamName'],
+            ContainerName   = "TauJets",
+            SelectionString = tau_thinning_expression))
+        
+        # Only keep tau tracks (and associated ID tracks) classified as charged tracks
+        PHYSLITETauTPThinningTool = acc.getPrimaryAndMerge(TauTrackParticleThinningCfg(
+            ConfigFlags,
+            name                   = "PHYSLITETauTPThinningTool",
+            StreamName             = kwargs['StreamName'],
+            TauKey                 = "TauJets",
+            InDetTrackParticlesKey = "InDetTrackParticles",
+            DoTauTracksThinning    = True,
+            TauTracksKey           = "TauTracks"))
+        
+        tau_murm_thinning_expression = tau_thinning_expression.replace('TauJets', 'TauJets_MuonRM')
+        PHYSLITETauJetMuonRMParticleThinningTool = acc.getPrimaryAndMerge(TauJetLepRMParticleThinningCfg(
+            ConfigFlags,
+            name                   = "PHYSLITETauJets_MuonRMThinningTool",
+            StreamName             = kwargs['StreamName'],
+            originalTauKey         = "TauJets",
+            LepRMTauKey            = "TauJets_MuonRM",
+            InDetTrackParticlesKey = "InDetTrackParticles",
+            TauTracksKey           = "TauTracks_MuonRM",
+            SelectionString        = tau_murm_thinning_expression))
 
-    ## Low-pt di-tau thinning
-    PHYSLITEDiTauLowPtThinningTool = acc.getPrimaryAndMerge(GenericObjectThinningCfg(ConfigFlags,
-                                                                                 name            = "PHYSLITEDiTauLowPtThinningTool",
-                                                                                 StreamName      = kwargs['StreamName'],
-                                                                                 ContainerName   = "DiTauJetsLowPt",
-                                                                                 SelectionString = "DiTauJetsLowPt.nSubjets > 1"))
-    
-    # ID tracks associated with low-pt ditau
-    PHYSLITEDiTauLowPtTPThinningTool = acc.getPrimaryAndMerge(DiTauTrackParticleThinningCfg(ConfigFlags,
-                                                                                        name                    = "PHYSLITEDiTauLowPtTPThinningTool",
-                                                                                        StreamName              = kwargs['StreamName'],
-                                                                                        DiTauKey                = "DiTauJetsLowPt",
-                                                                                        InDetTrackParticlesKey  = "InDetTrackParticles",
-                                                                                        SelectionString         = "DiTauJetsLowPt.nSubjets > 1"))
+        # ID tracks associated with high-pt di-tau
+        PHYSLITEDiTauTPThinningTool = acc.getPrimaryAndMerge(DiTauTrackParticleThinningCfg(
+            ConfigFlags,
+            name                    = "PHYSLITEDiTauTPThinningTool",
+            StreamName              = kwargs['StreamName'],
+            DiTauKey                = "DiTauJets",
+            InDetTrackParticlesKey  = "InDetTrackParticles"))
 
-    # keep calo clusters around electrons
-    PHYSLITEElectronCaloClusterThinningTool = acc.getPrimaryAndMerge(CaloClusterThinningCfg(
-        ConfigFlags,
-        name="PHYSLITEElectronCaloClusterThinningTool",
-        StreamName=kwargs['StreamName'],
-        SGKey="AnalysisElectrons",
-        CaloClCollectionSGKey="egammaClusters",
-        ConeSize=-1.0))
+        ## Low-pt di-tau thinning
+        PHYSLITEDiTauLowPtThinningTool = acc.getPrimaryAndMerge(GenericObjectThinningCfg(ConfigFlags,
+                                                                                     name            = "PHYSLITEDiTauLowPtThinningTool",
+                                                                                     StreamName      = kwargs['StreamName'],
+                                                                                     ContainerName   = "DiTauJetsLowPt",
+                                                                                     SelectionString = "DiTauJetsLowPt.nSubjets > 1"))
+        
+        # ID tracks associated with low-pt ditau
+        PHYSLITEDiTauLowPtTPThinningTool = acc.getPrimaryAndMerge(DiTauTrackParticleThinningCfg(ConfigFlags,
+                                                                                            name                    = "PHYSLITEDiTauLowPtTPThinningTool",
+                                                                                            StreamName              = kwargs['StreamName'],
+                                                                                            DiTauKey                = "DiTauJetsLowPt",
+                                                                                            InDetTrackParticlesKey  = "InDetTrackParticles",
+                                                                                            SelectionString         = "DiTauJetsLowPt.nSubjets > 1"))
 
-    # keep calo clusters around photons
-    PHYSLITEPhotonCaloClusterThinningTool = acc.getPrimaryAndMerge(CaloClusterThinningCfg(
-        ConfigFlags,
-        name="PHYSLITEPhotonCaloClusterThinningTool",
-        StreamName=kwargs['StreamName'],
-        SGKey="AnalysisPhotons",
-        CaloClCollectionSGKey="egammaClusters",
-        ConeSize=-1.0))
+        # keep calo clusters around electrons
+        PHYSLITEElectronCaloClusterThinningTool = acc.getPrimaryAndMerge(CaloClusterThinningCfg(
+            ConfigFlags,
+            name="PHYSLITEElectronCaloClusterThinningTool",
+            StreamName=kwargs['StreamName'],
+            SGKey="AnalysisElectrons",
+            CaloClCollectionSGKey="egammaClusters",
+            ConeSize=-1.0))
 
-    # Collect the thinning tools
-    thinningTools = [PHYSLITETrackParticleThinningTool,
-                     PHYSLITEMuonTPThinningTool,
-                     PHYSLITETauJetsThinningTool,
-                     PHYSLITETauTPThinningTool,
-                     PHYSLITETauJetMuonRMParticleThinningTool,
-                     PHYSLITEDiTauTPThinningTool,
-                     PHYSLITEDiTauLowPtThinningTool,
-                     PHYSLITEDiTauLowPtTPThinningTool,
-                     PHYSLITEElectronCaloClusterThinningTool,
-                     PHYSLITEPhotonCaloClusterThinningTool ]
+        # keep calo clusters around photons
+        PHYSLITEPhotonCaloClusterThinningTool = acc.getPrimaryAndMerge(CaloClusterThinningCfg(
+            ConfigFlags,
+            name="PHYSLITEPhotonCaloClusterThinningTool",
+            StreamName=kwargs['StreamName'],
+            SGKey="AnalysisPhotons",
+            CaloClCollectionSGKey="egammaClusters",
+            ConeSize=-1.0))
+
+        # Collect the thinning tools
+        thinningTools = [PHYSLITETrackParticleThinningTool,
+                         PHYSLITEMuonTPThinningTool,
+                         PHYSLITETauJetsThinningTool,
+                         PHYSLITETauTPThinningTool,
+                         PHYSLITETauJetMuonRMParticleThinningTool,
+                         PHYSLITEDiTauTPThinningTool,
+                         PHYSLITEDiTauLowPtThinningTool,
+                         PHYSLITEDiTauLowPtTPThinningTool,
+                         PHYSLITEElectronCaloClusterThinningTool,
+                         PHYSLITEPhotonCaloClusterThinningTool ]
+
+    # End of block that should only be executed for AOD input
 
     #==============================================================================
     # Analysis-level variables 
@@ -136,6 +143,12 @@ def PHYSLITEKernelCfg(ConfigFlags, name='PHYSLITEKernel', **kwargs):
 
     dataType = "data"
     if ConfigFlags.Input.isMC: dataType = "mc"
+
+    # Needed in principle to support MET association when running PHYS->PHYSLITE, 
+    # but since this doesn't work for PHYS->PHYSLITE anyway, commenting for now
+    #if 'StreamDAOD_PHYS' in ConfigFlags.Input.ProcessingTags
+    #    from AtlasGeoModel.GeoModelConfig import GeoModelCfg
+    #    acc.merge(GeoModelCfg(ConfigFlags))    
 
     # Create a pile-up analysis sequence
     from AsgAnalysisAlgorithms.PileupAnalysisSequence import makePileupAnalysisSequence
@@ -162,7 +175,10 @@ def PHYSLITEKernelCfg(ConfigFlags, name='PHYSLITEKernel', **kwargs):
 
     # Include, and then set up the muon analysis algorithm sequence:
     from MuonAnalysisAlgorithms.MuonAnalysisSequence import makeMuonAnalysisSequence
-    muonSequence = makeMuonAnalysisSequence( dataType, shallowViewOutput = False, deepCopyOutput = True, workingPoint = 'Loose.NonIso' )
+    isRun3Geo = False
+    from AthenaConfiguration.Enums import LHCPeriod
+    if ConfigFlags.GeoModel.Run >= LHCPeriod.Run3: isRun3Geo = True 
+    muonSequence = makeMuonAnalysisSequence( dataType, shallowViewOutput = False, deepCopyOutput = True, workingPoint = 'Loose.NonIso', isRun3Geo = isRun3Geo)
     muonSequence.configure( inputName = 'Muons',
                             outputName = 'AnalysisMuons' )
     for element in muonSequence.getGaudiConfig2Components():
@@ -193,21 +209,23 @@ def PHYSLITEKernelCfg(ConfigFlags, name='PHYSLITEKernel', **kwargs):
         acc.addEventAlgo(element)
     
     # Build MET from our analysis objects
-    from METReconstruction.METAssocCfg import AssocConfig, METAssocConfig
-    from METReconstruction.METAssociatorCfg import getAssocCA
-    associators = [AssocConfig('PFlowJet', 'AnalysisJets'),
-                   AssocConfig('Muon', 'AnalysisMuons'),
-                   AssocConfig('Ele', 'AnalysisElectrons'),
-                   AssocConfig('Gamma', 'AnalysisPhotons'),
-                   #AssocConfig('Tau', 'AnalysisTauJets'),
-                   AssocConfig('Soft', '')]
-    PHYSLITE_cfg = METAssocConfig('AnalysisMET',
-                                  ConfigFlags,
-                                  associators,
-                                  doPFlow=True,
-                                  usePFOLinks=True)
-    components_PHYSLITE_cfg = getAssocCA(PHYSLITE_cfg,METName='AnalysisMET')
-    acc.merge(components_PHYSLITE_cfg)
+    # Currently only works for the AOD->PHYSLITE workflow
+    if 'StreamAOD' in ConfigFlags.Input.ProcessingTags:
+        from METReconstruction.METAssocCfg import AssocConfig, METAssocConfig
+        from METReconstruction.METAssociatorCfg import getAssocCA
+        associators = [AssocConfig('PFlowJet', 'AnalysisJets'),
+                       AssocConfig('Muon', 'AnalysisMuons'),
+                       AssocConfig('Ele', 'AnalysisElectrons'),
+                       AssocConfig('Gamma', 'AnalysisPhotons'),
+                       #AssocConfig('Tau', 'AnalysisTauJets'),
+                       AssocConfig('Soft', '')]
+        PHYSLITE_cfg = METAssocConfig('AnalysisMET',
+                                      ConfigFlags,
+                                      associators,
+                                      doPFlow=True,
+                                      usePFOLinks=True)
+        components_PHYSLITE_cfg = getAssocCA(PHYSLITE_cfg,METName='AnalysisMET')
+        acc.merge(components_PHYSLITE_cfg)
 
     # The derivation kernel itself
     DerivationKernel = CompFactory.DerivationFramework.DerivationKernel
@@ -340,7 +358,8 @@ def PHYSLITECfg(ConfigFlags):
 
     # Output stream    
     PHYSLITEItemList = PHYSLITESlimmingHelper.GetItemList()
-    acc.merge(OutputStreamCfg(ConfigFlags, "DAOD_PHYSLITE", ItemList=PHYSLITEItemList, AcceptAlgs=["PHYSLITEKernel"]))
-
+    formatString = 'D2AOD_PHYSLITE' if 'StreamDAOD_PHYS' in ConfigFlags.Input.ProcessingTags else 'DAOD_PHYSLITE'
+    acc.merge(OutputStreamCfg(ConfigFlags, formatString, ItemList=PHYSLITEItemList, AcceptAlgs=["PHYSLITEKernel"]))
+    
     return acc
 
