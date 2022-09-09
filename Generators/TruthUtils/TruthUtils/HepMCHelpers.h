@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
 */
 #ifndef TRUTHUTILS_HEPMCHELPERS_H
 #define TRUTHUTILS_HEPMCHELPERS_H
@@ -143,7 +143,10 @@ namespace MC {
   /// G4 are not set to have status = 2 in ATLAS, but simply have more status = 1 children,
   /// with barcodes > 200k.
   inline bool isGenStable(HepMC::ConstGenParticlePtr p) {
-    return isGenStable(p->status(), HepMC::barcode(p));
+    // Retrieving the barcode is relatively expensive with HepMC3,
+    // so test status first.
+    if (p->status() != 1) return false;
+    return HepMC::barcode(p) < SIM_BARCODE_THRESHOLD;
   }
 
 
