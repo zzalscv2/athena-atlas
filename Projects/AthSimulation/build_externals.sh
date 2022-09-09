@@ -12,7 +12,8 @@ ATLAS_BUILDTYPE="RelWithDebInfo"
 ATLAS_EXTRA_CMAKE_ARGS=(-DLCG_VERSION_NUMBER=101
                         -DLCG_VERSION_POSTFIX="_ATLAS_20"
                         -DATLAS_GAUDI_TAG="v36r5.002"
-                        -DATLAS_GEOMODEL_TAG="4.2.8") 
+                        -DATLAS_GEOMODEL_TAG="4.2.8"
+                        -DATLAS_CLHEP_TAG="CLHEP_2_4_1_3_atl04")
 ATLAS_EXTRA_MAKE_ARGS=()
 
 # Let "the common script" do all the heavy lifting.
