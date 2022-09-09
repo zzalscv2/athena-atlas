@@ -13,7 +13,8 @@ def makeMuonAnalysisSequence( dataType, workingPoint,
                               ptSelectionOutput = False,
                               qualitySelectionOutput = True,
                               enableCutflow = False,
-                              enableKinematicHistograms = False ):
+                              enableKinematicHistograms = False,
+                              isRun3Geo = False ):
     """Create a muon analysis algorithm sequence
 
     Keyword arguments:
@@ -52,7 +53,7 @@ def makeMuonAnalysisSequence( dataType, workingPoint,
     makeMuonCalibrationSequence (seq, dataType, postfix=postfix,
                                  ptSelectionOutput = ptSelectionOutput)
     makeMuonWorkingPointSequence (seq, dataType, workingPoint, postfix=postfix,
-                                  qualitySelectionOutput = qualitySelectionOutput)
+                                  qualitySelectionOutput = qualitySelectionOutput, isRun3Geo = isRun3Geo)
     makeSharedObjectSequence (seq, deepCopyOutput = deepCopyOutput,
                               shallowViewOutput = shallowViewOutput,
                               postfix = '_Muon' + postfix,
@@ -147,7 +148,7 @@ def makeMuonCalibrationSequence( seq, dataType,
 
 
 def makeMuonWorkingPointSequence( seq, dataType, workingPoint, postfix = '',
-                                  qualitySelectionOutput = True):
+                                  qualitySelectionOutput = True, isRun3Geo = False):
     """Create muon analysis algorithms for a single working point
 
     Keyword arguments:
@@ -159,6 +160,7 @@ def makeMuonWorkingPointSequence( seq, dataType, workingPoint, postfix = '',
                  names are unique.
       qualitySelectionOutput -- Whether or not to apply muon quality selection
                                 when creating output containers.
+      isRun3Geo -- switches the muon selection tool to run 3 geometry
     """
 
     if dataType not in ["data", "mc", "afii"] :
@@ -201,6 +203,7 @@ def makeMuonWorkingPointSequence( seq, dataType, workingPoint, postfix = '',
                            'MuonSelectionAlg' + postfix )
     addPrivateTool( alg, 'selectionTool', 'CP::MuonSelectionTool' )
     alg.selectionTool.MuQuality = quality
+    alg.selectionTool.IsRun3Geo = isRun3Geo 
     alg.selectionDecoration = 'good_muon' + postfix + ',as_bits'
     alg.badMuonVetoDecoration = 'is_bad' + postfix + ',as_char'
     seq.append( alg, inputPropName = 'muons',
