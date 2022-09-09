@@ -610,7 +610,7 @@ void egammaLayerRecalibTool::add_scale(const std::string& tuneIn)
 	      new GetAmountHisto1DErrorDown(*histo));
   }
  else if("layer2_alt_el_mu_comb_r21_v0"==tune) {
-    const std::string file = PathResolverFindCalibFile("egammaLayerRecalibTool/v7/egammaLayerRecalibTunes.root");
+    const std::string file = PathResolverFindCalibFile("egammaLayerRecalibTool/v8/egammaLayerRecalibTunes.root");
     TFile f(file.c_str());
     TH1D* histo = static_cast<TH1D*>(f.Get("hE1E2_emu_run2_rel21_v0"));
     assert(histo);
@@ -786,7 +786,7 @@ void egammaLayerRecalibTool::add_scale(const std::string& tuneIn)
               new GetAmountHisto1D(*histo_ps_tot_error));
   }
   else if ("ps_mu_r21_v0" == tune) {
-    const std::string file = PathResolverFindCalibFile("egammaLayerRecalibTool/v7/egammaLayerRecalibTunes.root");
+    const std::string file = PathResolverFindCalibFile("egammaLayerRecalibTool/v8/egammaLayerRecalibTunes.root");
     TFile f(file.c_str());
     TH1F* histo_ps_tot_error = static_cast<TH1F*>(f.Get("hPS_MuonLowMu_rel21"));
     assert(histo_ps_tot_error);
