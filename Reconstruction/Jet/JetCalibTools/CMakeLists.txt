@@ -5,14 +5,15 @@ atlas_subdir( JetCalibTools )
 
 # External dependencies:
 find_package( Boost )
-find_package( ROOT COMPONENTS Core Tree MathCore Hist RIO Graf Gpad lwtnn )
+find_package( ROOT COMPONENTS Core Tree MathCore Hist RIO Graf Gpad )
+find_package( lwtnn )
 
 # Libraries in the package:
 atlas_add_library( JetCalibToolsLib
    JetCalibTools/*.h Root/*.cxx
    PUBLIC_HEADERS JetCalibTools
-   INCLUDE_DIRS ${Boost_INCLUDE_DIRS} ${ROOT_INCLUDE_DIRS}
-   LINK_LIBRARIES ${Boost_LIBRARIES} ${ROOT_LIBRARIES} AsgTools xAODEventInfo xAODEventShape
+   INCLUDE_DIRS ${Boost_INCLUDE_DIRS} ${ROOT_INCLUDE_DIRS} ${LWTNN_INCLUDE_DIRS}
+   LINK_LIBRARIES ${Boost_LIBRARIES} ${ROOT_LIBRARIES} ${LWTNN_LIBRARIES} AsgTools xAODEventInfo xAODEventShape
    xAODJet xAODTracking PATInterfaces JetInterface AsgDataHandlesLib
    PRIVATE_LINK_LIBRARIES xAODMuon PathResolver )
 
