@@ -26,6 +26,8 @@
 #include "PixelConditionsData/PixelOfflineCalibData.h"
 #include "PixelReadoutGeometry/IPixelReadoutManager.h"
 #include "StoreGate/ReadCondHandleKey.h"
+#include "xAODInDetMeasurement/PixelCluster.h"
+#include "xAODInDetMeasurement/PixelClusterContainer.h"
 
 #include "GaudiKernel/ToolHandle.h"
 
@@ -105,20 +107,34 @@ public:
                              double splitProb2 = 0.) const;
 
   PixelCluster* pixelCluster(const Identifier& clusterID,
-                             const Amg::Vector2D& localPos,
-                             const std::vector<Identifier>& rdoList,
-                             const int lvl1a,
-                             const std::vector<int>& totList,
-                             const SiWidth& width,
-                             const InDetDD::SiDetectorElement* element, 
-                             bool ganged,
-                             int errorStrategy,
-                             const PixelID& pixelID,
-                             bool split = false,
-                             double splitProb1 = 0.,
-                             double splitProb2 = 0.) const;
+			     const Amg::Vector2D& localPos,
+			     const std::vector<Identifier>& rdoList,
+			     const int lvl1a,
+			     const std::vector<int>& totList,
+			     const SiWidth& width,
+			     const InDetDD::SiDetectorElement* element, 
+			     bool ganged,
+			     int errorStrategy,
+			     const PixelID& pixelID,
+			     bool split = false,
+			     double splitProb1 = 0.,
+			     double splitProb2 = 0.) const;
 
+  xAOD::PixelCluster* xAODpixelCluster(xAOD::PixelClusterContainer& container,
+				       const Amg::Vector2D& localPos,
+				       const std::vector<Identifier>& rdoList,
+				       const int lvl1a,
+				       const std::vector<int>& totList,
+				       const SiWidth& width,
+				       const InDetDD::SiDetectorElement* element, 
+				       bool ganged,
+				       int errorStrategy,
+				       const PixelID& pixelID,
+				       bool split = false,
+				       double splitProb1 = 0.,
+				       double splitProb2 = 0.) const;
 
+ 
 
   // Computes global position and errors for SCT cluster.
   // Called by SCT Clustering tools
@@ -141,6 +157,22 @@ public:
                          int errorStrategy) const;
  
 private:
+
+  template <typename ClusterType, typename CreatorType>
+  ClusterType makePixelCluster(const Identifier& clusterID,
+			       const Amg::Vector2D& localPos,
+			       const std::vector<Identifier>& rdoList,
+			       const int lvl1a,
+			       const std::vector<int>& totList,
+			       const SiWidth& width,
+			       const InDetDD::SiDetectorElement* element, 
+			       bool ganged,
+			       int errorStrategy,
+			       const PixelID& pixelID,
+			       bool split,
+			       double splitProb1,
+			       double splitProb2,
+			       CreatorType clusterCreator) const;
 
   ServiceHandle<InDetDD::IPixelReadoutManager> m_pixelReadout
   {this, "PixelReadoutManager", "PixelReadoutManager", "Pixel readout manager" };

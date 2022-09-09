@@ -18,7 +18,7 @@ atlas_add_library( SiClusterizationToolLib
    INCLUDE_DIRS ${ROOT_INCLUDE_DIRS} ${LWTNN_INCLUDE_DIRS} ${EIGEN_INCLUDE_DIRS}
    PRIVATE_INCLUDE_DIRS ${CLHEP_INCLUDE_DIRS} ${COOL_INCLUDE_DIRS}
    PRIVATE_DEFINITIONS ${CLHEP_DEFINITIONS}
-   LINK_LIBRARIES ${CLHEP_LIBRARIES} ${LWTNN_LIBRARIES} ${EIGEN_LIBRARIES} ${ROOT_LIBRARIES} AthenaBaseComps AthenaKernel BeamSpotConditionsData EventPrimitives GaudiKernel GeoPrimitives Identifier InDetCondTools InDetConditionsSummaryService InDetIdentifier InDetPrepRawData InDetRawData ReadoutGeometryBase InDetReadoutGeometry SCT_ReadoutGeometry InDetRecToolInterfaces InDetSimData PixelConditionsData PixelGeoModelLib PixelReadoutGeometryLib PoolSvcLib StoreGateLib TrkNeuralNetworkUtilsLib TrkParameters TrkSurfaces LwtnnUtils
+   LINK_LIBRARIES ${CLHEP_LIBRARIES} ${LWTNN_LIBRARIES} ${EIGEN_LIBRARIES} ${ROOT_LIBRARIES} AthenaBaseComps AthenaKernel BeamSpotConditionsData EventPrimitives GaudiKernel GeoPrimitives Identifier InDetCondTools InDetConditionsSummaryService InDetIdentifier InDetPrepRawData InDetRawData ReadoutGeometryBase InDetReadoutGeometry SCT_ReadoutGeometry InDetRecToolInterfaces InDetSimData PixelConditionsData PixelGeoModelLib PixelReadoutGeometryLib PoolSvcLib StoreGateLib TrkNeuralNetworkUtilsLib TrkParameters TrkSurfaces LwtnnUtils xAODInDetMeasurement
    PRIVATE_LINK_LIBRARIES ${Boost_LIBRARIES} ${COOL_LIBRARIES} AthenaPoolUtilities AtlasDetDescr AtlasHepMCLib DetDescrCondToolsLib FileCatalog TrkEventPrimitives VxVertex CxxUtils  )
 
 atlas_add_component( SiClusterizationTool

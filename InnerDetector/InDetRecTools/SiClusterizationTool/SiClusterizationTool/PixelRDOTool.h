@@ -42,6 +42,7 @@ class UnpackedPixelRDO {
     Identifier ID ;
 };
 
+
 class PixelRDOTool : public AthAlgTool 
 {
 
