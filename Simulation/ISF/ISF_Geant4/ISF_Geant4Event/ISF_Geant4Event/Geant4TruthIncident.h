@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2017 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef ISF_GEANT4TOOLS_Geant4TruthIncident_H
@@ -109,21 +109,20 @@ namespace iGeant4 {
     private:
       Geant4TruthIncident();
       /** prepare the child particles */
-      inline void prepareChildren() const;
+      inline void prepareChildren();
 
       /** check if the given G4Track represents a particle that is alive in ISF or ISF-G4 */
       inline bool particleAlive(const G4Track *track) const;
 
       HepMC::GenParticlePtr convert(const G4Track *particle, const int barcode, const bool secondary) const; //*AS* might be put static
 
-      mutable bool                  m_positionSet;
-      mutable HepMC::FourVector     m_position;
+      bool                          m_positionSet;
+      HepMC::FourVector             m_position;
       const G4Step*                 m_step{};
       const ISF::ISFParticle&       m_baseISP;
 
-      AtlasG4EventUserInfo*             m_atlasG4EvtUserInfo{};
-      mutable bool                  m_childrenPrepared;
-      mutable std::vector<const G4Track*> m_children;
+      AtlasG4EventUserInfo*         m_atlasG4EvtUserInfo{};
+      std::vector<const G4Track*>   m_children;
 
       HepMC::GenParticlePtr         m_parentParticleAfterIncident{};
    };

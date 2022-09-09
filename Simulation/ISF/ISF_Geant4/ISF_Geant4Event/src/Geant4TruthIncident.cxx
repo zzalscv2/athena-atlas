@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2017 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
 */
 
 // class header
@@ -68,23 +68,19 @@ iGeant4::Geant4TruthIncident::Geant4TruthIncident( const G4Step *step,
   m_position(),
   m_step(step),
   m_baseISP(baseISP),
-  m_atlasG4EvtUserInfo(atlasG4EvtUserInfo),
-  m_childrenPrepared(false),
-  m_children(),
-  m_parentParticleAfterIncident(nullptr)
+  m_atlasG4EvtUserInfo(atlasG4EvtUserInfo)
 {
+  // prepare children:
+  prepareChildren();
+
+  // calculate position:
+  const G4StepPoint *postStepPoint = m_step->GetPostStepPoint();
+  const G4ThreeVector         &pos = postStepPoint->GetPosition();
+  const G4double              time = postStepPoint->GetGlobalTime()*Gaudi::Units::c_light;
+  m_position.set( pos.x(), pos.y(), pos.z(), time );
 }
 
 const HepMC::FourVector& iGeant4::Geant4TruthIncident::position() const {
-  if (!m_positionSet) {
-    // post step processes:
-    const G4StepPoint *postStepPoint = m_step->GetPostStepPoint();
-    const G4ThreeVector         &pos = postStepPoint->GetPosition();
-    const G4double              time = postStepPoint->GetGlobalTime()*Gaudi::Units::c_light;
-    m_position.set( pos.x(), pos.y(), pos.z(), time );
-    m_positionSet = true;
-  }
-
   return m_position;
 }
 
@@ -125,7 +121,7 @@ Barcode::ParticleBarcode iGeant4::Geant4TruthIncident::parentBarcode() const {
 }
 
 HepMC::GenParticlePtr iGeant4::Geant4TruthIncident::parentParticle() const {
-  HepMC::GenParticlePtr hepParticle = m_atlasG4EvtUserInfo->GetCurrentlyTraced();
+  HepMC::GenParticlePtr hepParticle = std::as_const(m_atlasG4EvtUserInfo)->GetCurrentlyTraced();
 
   return hepParticle;
 }
@@ -186,30 +182,25 @@ HepMC::GenParticlePtr iGeant4::Geant4TruthIncident::parentParticleAfterIncident(
 }
 
 double iGeant4::Geant4TruthIncident::childP2(unsigned short i) const {
-  prepareChildren();
   const G4ThreeVector & mom= m_children[i]->GetMomentum();
   return mom.mag2();
 }
 
 const G4ThreeVector iGeant4::Geant4TruthIncident::childP(unsigned short i) const {
-  prepareChildren();
   const G4ThreeVector & mom= m_children[i]->GetMomentum();
   return mom;
 }
 
 double iGeant4::Geant4TruthIncident::childPt2(unsigned short i) const {
-  prepareChildren();
   const G4ThreeVector & mom= m_children[i]->GetMomentum();
   return mom.perp2();
 }
 
 double iGeant4::Geant4TruthIncident::childEkin(unsigned short i) const {
-  prepareChildren();
   return (m_children[i]->GetKineticEnergy()/CLHEP::MeV);
 }
 
 int iGeant4::Geant4TruthIncident::childPdgCode(unsigned short i) const {
-  prepareChildren();
   return m_children[i]->GetDefinition()->GetPDGEncoding();
 }
 
@@ -221,8 +212,6 @@ void iGeant4::Geant4TruthIncident::setAllChildrenBarcodes(Barcode::ParticleBarco
 
 HepMC::GenParticlePtr iGeant4::Geant4TruthIncident::childParticle(unsigned short i,
                                                                   Barcode::ParticleBarcode newBarcode) const {
-  prepareChildren();
-
   // the G4Track instance for the current child particle
   const G4Track* thisChildTrack = m_children[i];
 
@@ -251,8 +240,6 @@ HepMC::GenParticlePtr iGeant4::Geant4TruthIncident::childParticle(unsigned short
 
 HepMC::GenParticlePtr iGeant4::Geant4TruthIncident::updateChildParticle(unsigned short index,
                                                                         HepMC::GenParticlePtr existingChild) const {
-  prepareChildren();
-
   // the G4Track instance for the current child particle
   const G4Track* thisChildTrack = m_children[index];
 
@@ -339,17 +326,13 @@ HepMC::GenParticlePtr iGeant4::Geant4TruthIncident::convert(const G4Track *track
 }
 
 
-void iGeant4::Geant4TruthIncident::prepareChildren() const {
+void iGeant4::Geant4TruthIncident::prepareChildren() {
 
-  if (!m_childrenPrepared) {
-    unsigned short numChildren = numberOfChildren();
-    const auto &tracks = m_step->GetSecondaryInCurrentStep();
-    const int iSize=tracks->size();
-    const int iLast=iSize-numChildren-1; //NB can be -1.
-    for(int i=iSize-1;i>iLast;i--) {
-      m_children.push_back((*tracks)[i]);
-    }
-    m_childrenPrepared  = true;
+  const std::vector<const G4Track*>* tracks = m_step->GetSecondaryInCurrentStep();
+  const int iSize = tracks->size();
+  const int iLast = iSize - numberOfChildren() - 1; //NB can be -1.
+  for(int i=iSize-1;i>iLast;i--) {
+    m_children.push_back((*tracks)[i]);
   }
 }
 
