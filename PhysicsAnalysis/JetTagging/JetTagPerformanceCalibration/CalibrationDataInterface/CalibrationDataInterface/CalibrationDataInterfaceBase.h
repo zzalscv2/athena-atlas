@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2020 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
 */
 
 ///////////////////////////////////////////////////////////////////
@@ -68,10 +68,9 @@ namespace Analysis
 
     private:
 
-      /** @brief this simply collects the per-flavour properties.
-	  NB there ought to be no need for the 'mutable' qualifier here... */
-      mutable std::map<std::string, std::vector<std::string> > m_calibrationEffNames;
-      mutable std::map<std::string, std::string> m_calibrationSFNames;
+      /** @brief this simply collects the per-flavour properties. */
+      std::map<std::string, std::vector<std::string> > m_calibrationEffNames;
+      std::map<std::string, std::string> m_calibrationSFNames;
       
     protected:
 
