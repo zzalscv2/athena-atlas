@@ -112,10 +112,15 @@ public:
   }
 
 
-#ifndef XAOD_ANALYSIS /*This can not run in Analysis Base*/
+#ifndef XAOD_ANALYSIS /*These can not run in Analysis Base*/
+  virtual std::pair<MCTruthPartClassifier::ParticleType, MCTruthPartClassifier::ParticleOrigin> particleTruthClassifier(
+                                                                                    const HepMcParticleLink& theLink,
+    Info* info = nullptr) const override;
+
   virtual std::pair<MCTruthPartClassifier::ParticleType, MCTruthPartClassifier::ParticleOrigin> particleTruthClassifier(
     HepMC::ConstGenParticlePtr,
     Info* info = nullptr) const override;
+
   bool compareTruthParticles(HepMC::ConstGenParticlePtr genPart, const xAOD::TruthParticle* truthPart) const;
 #endif
 
