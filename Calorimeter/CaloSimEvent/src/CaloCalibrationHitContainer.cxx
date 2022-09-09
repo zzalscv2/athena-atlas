@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2020 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
 */
 
 // 09-Feb-2004 WGS: The following code was duplicated from
@@ -34,14 +34,9 @@ CaloCalibrationHitContainer::operator std::string () const
  ss <<   ": content " ;
  ss << newline ;
  
- CaloCalibrationHitContainer::const_iterator it ;
  int counter = 0 ;
- CaloCalibrationHit * hit ;    
- 
-     for(it = this->begin() ; it != this->end() ; ++it ){ // Loop over Hits
-     
-       hit = *it ;
-             
+
+     for (const CaloCalibrationHit* hit : *this) { // Loop over Hits
        ss << "CaloCalibrationHit[" ;
        ss << counter;
        ss << "] " ;
