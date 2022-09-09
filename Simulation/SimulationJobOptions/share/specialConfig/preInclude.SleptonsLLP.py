@@ -39,23 +39,29 @@ def get_and_fix_PDGTABLE(replace):
         sys.stdout.flush()
 
 def load_files_for_sleptonLLP_scenario(simdict):
-
+    pdgcodes = []
     if "GMSBSlepton" in simdict:
         get_and_fix_PDGTABLE([
                 (2000011, eval(simdict.get("GMSBSlepton",'0')), '~e(R)', '-'),
-                (2000013, eval(simdict.get("GMSBSlepton",'0')), '~mu(R)', '-'),            
+                (2000013, eval(simdict.get("GMSBSlepton",'0')), '~mu(R)', '-'),
                 (1000011, eval(simdict.get("GMSBSlepton",'0')), '~e(L)', '-'),
                 (1000013, eval(simdict.get("GMSBSlepton",'0')), '~mu(L)', '-'),
                 ])
+        pdgcodes += [-2000011,2000011,-2000013,2000013,-1000011,1000011,-1000013,1000013]
     if "GMSBStau" in simdict:
         get_and_fix_PDGTABLE([
                 (2000015, eval(simdict.get("GMSBStau",'0')), '~tau(R)', '-'),
                 (1000015, eval(simdict.get("GMSBStau",'0')), '~tau(L)', '-'),
                 ])
+        pdgcodes += [-2000015,2000015,-1000015,1000015]
     if "GMSBGravitino" in simdict:
         get_and_fix_PDGTABLE([
                 (1000039, eval(simdict.get("GMSBGravitino",'0')), '~G', '0'),
                 ])
+        pdgcodes += [1000039]
+
+    from ExtraParticles.PDGHelpers import updateExtraParticleWhiteList
+    updateExtraParticleWhiteList('G4particle_whitelist_ExtraParticles.txt', pdgcodes)
 
 doG4SimConfig = True
 from AthenaCommon.AthenaCommonFlags import athenaCommonFlags

@@ -7,40 +7,6 @@ from AthenaConfiguration.ComponentFactory import CompFactory
 from AthenaConfiguration.Enums import Format
 from InDetRecExample.InDetKeys import InDetKeys
 
-def SiTrackMaker_xkCfg(flags, name="SiTrackMaker_xk"):
-  """
-  based on: InnerDetector/InDetExample/InDetTrigRecExample/python/InDetTrigConfigRecNewTracking.py , should be moved elsewhere
-  """
-  acc = ComponentAccumulator()
-
-  from InDetConfig.SiDetElementsRoadToolConfig import SiDetElementsRoadMaker_xkCfg
-  roadTool = acc.popToolsAndMerge( SiDetElementsRoadMaker_xkCfg( flags, name="InDetTrigSiDetElementsRoadMaker" ) )
-  from InDetConfig.SiCombinatorialTrackFinderToolConfig import SiCombinatorialTrackFinder_xk_Trig_Cfg
-  combTrackFinderTool = acc.popToolsAndMerge( SiCombinatorialTrackFinder_xk_Trig_Cfg( flags ) )
-
-  from TrkConfig.TrkRIO_OnTrackCreatorConfig import RIO_OnTrackErrorScalingCondAlgCfg
-  acc.merge(RIO_OnTrackErrorScalingCondAlgCfg(flags))
-
-  tool = CompFactory.InDet.SiTrackMaker_xk( name,
-                                            RoadTool                 = roadTool,
-                                            CombinatorialTrackFinder = combTrackFinderTool,
-                                            pTmin                    = flags.InDet.Tracking.ActivePass.minPT,
-                                            nClustersMin             = flags.InDet.Tracking.ActivePass.minClusters,
-                                            nHolesMax                = flags.InDet.Tracking.ActivePass.nHolesMax,
-                                            nHolesGapMax             = flags.InDet.Tracking.ActivePass.nHolesGapMax,
-                                            SeedsFilterLevel         = flags.InDet.Tracking.ActivePass.seedFilterLevel,
-                                            Xi2max                   = flags.InDet.Tracking.ActivePass.Xi2max,
-                                            Xi2maxNoAdd              = flags.InDet.Tracking.ActivePass.Xi2maxNoAdd,
-                                            nWeightedClustersMin     = flags.InDet.Tracking.ActivePass.nWeightedClustersMin,
-                                            Xi2maxMultiTracks        = flags.InDet.Tracking.ActivePass.Xi2max,
-                                            UseAssociationTool       = False )
-  acc.addPublicTool( tool, primary=True )
-  return acc
-
-def ExtrapolatorCfg(flags):
-  from TrkConfig.AtlasExtrapolatorConfig import InDetExtrapolatorCfg
-  return InDetExtrapolatorCfg(flags, name="InDetTrigExtrapolator")
-
 class InDetCacheNames(object):
   Pixel_ClusterKey   = "PixelTrigClustersCache"
   SCT_ClusterKey     = "SCT_ClustersCache"
@@ -220,7 +186,9 @@ def ftfCfg(flags, roisKey, signature, signatureName):
   TrackSummaryTool = acc.popToolsAndMerge( InDetTrigTrackSummaryToolCfg(flags, name="InDetTrigFastTrackSummaryTool") )
   acc.addPublicTool(TrackSummaryTool)
 
-  acc.merge( SiTrackMaker_xkCfg( flags, name = "InDetTrigSiTrackMaker_FTF"+signature ) )
+  from InDetConfig.SiTrackMakerConfig import TrigSiTrackMaker_xkCfg
+  initialTrackMaker = acc.popToolsAndMerge( TrigSiTrackMaker_xkCfg(flags, name = "InDetTrigSiTrackMaker_FTF"+signature) )
+  acc.addPublicTool(initialTrackMaker)
 
   acc.addPublicTool( CompFactory.TrigInDetTrackFitter( "TrigInDetTrackFitter" ) )
   from RegionSelector.RegSelToolConfig import (regSelTool_SCT_Cfg, regSelTool_Pixel_Cfg)
@@ -251,8 +219,7 @@ def ftfCfg(flags, roisKey, signature, signatureName):
                                          LayerNumberTool          = acc.getPublicTool( "TrigL2LayerNumberTool_FTF" ),
                                          SpacePointProviderTool   = acc.getPublicTool( "TrigSpacePointConversionTool" + signature ),
                                          TrackSummaryTool         = TrackSummaryTool,
-#                                         TrigL2ResidualCalculator = acc.getPublicTool( "TrigL2ResidualCalculator" ),
-                                         initialTrackMaker        = acc.getPublicTool( "InDetTrigSiTrackMaker_FTF" + signature ),
+                                         initialTrackMaker        = initialTrackMaker,
                                          trigInDetTrackFitter     = acc.getPublicTool( "TrigInDetTrackFitter" ),
                                          RoIs                     = roisKey,
                                          trigZFinder              = CompFactory.TrigZFinder(),
