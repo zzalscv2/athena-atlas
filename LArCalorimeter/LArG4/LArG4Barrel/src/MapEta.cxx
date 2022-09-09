@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2020 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "MapEta.h"
@@ -10,8 +10,6 @@
 #endif
 
 #include <iostream>
-#include <iomanip>
-#include <sstream>
 #include <fstream>
 
 MapEta::MapEta(int isampling)
@@ -45,12 +43,10 @@ void MapEta::Initialize(int isampling)
 {
   if (m_init==1) return;
   if (isampling < 1 || isampling >3) return;
-  std::ostringstream fn;
-  if (isampling==1) fn<<"deta_strip.map";
-  if (isampling==2) fn<<"deta_middle.map";
-  if (isampling==3) fn<<"eta_trans.map";
-  std::string filename = fn.str();
-  filename=filename.substr(0,15);
+  std::string filename{};
+  if (isampling==1) filename = "deta_strip.map";
+  if (isampling==2) filename = "deta_middle.map";
+  if (isampling==3) filename = "eta_trans.map";
   std::string fileLocation;
 #ifdef LARG4_STAND_ALONE
   // The stand-alone program expects to find the file via AFS.
@@ -65,7 +61,7 @@ void MapEta::Initialize(int isampling)
   std::cout << "fileLocation " << fileLocation << std::endl;
 #endif
 
-  std::ifstream in(fileLocation.c_str());
+  std::ifstream in(fileLocation);
   if (in)
     {
       in>>m_nx>>m_xmin>>m_xmax>>m_ny>>m_ymin>>m_ymax;

@@ -85,15 +85,19 @@ void LArStraightElectrodes::initHalfLength(const PhysicalVolumeAccessor& theElec
   double l = 0.;
   const int id=cellid+stackid*10000;
   const G4VPhysicalVolume *pv=theElectrodes.GetPhysicalVolume(id);
-  if (!pv) l = 0.;
-  const G4LogicalVolume* lv = pv->GetLogicalVolume();
-  const G4Trap* trap = (G4Trap*) lv->GetSolid();
-  const G4VPhysicalVolume *pv2=theElectrodes.GetPhysicalVolume(1000000+id);
-  if (!pv2) l = trap->GetYHalfLength1();
-  else {
-    const G4LogicalVolume* lv2 = pv2->GetLogicalVolume();
-    const G4Trap* trap2 = (G4Trap*) lv2->GetSolid();
-    l = trap->GetYHalfLength1()+trap2->GetYHalfLength1();
+  if (!pv){
+    l = 0.;
+  } else {
+    const G4LogicalVolume* lv = pv->GetLogicalVolume();
+    const G4Trap* trap = (G4Trap*) lv->GetSolid();
+    const G4VPhysicalVolume *pv2=theElectrodes.GetPhysicalVolume(1000000+id);
+    if (!pv2){ 
+      l = trap->GetYHalfLength1();
+    } else {
+      const G4LogicalVolume* lv2 = pv2->GetLogicalVolume();
+      const G4Trap* trap2 = (G4Trap*) lv2->GetSolid();
+      l = trap->GetYHalfLength1()+trap2->GetYHalfLength1();
+    }
   }
   m_halflength[cellid][stackid] = l;
 }
