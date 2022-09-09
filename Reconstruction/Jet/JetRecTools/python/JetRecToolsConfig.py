@@ -13,7 +13,7 @@ from AthenaCommon import Logging
 jrtlog = Logging.logging.getLogger('JetRecToolsConfig')
 
 from AthenaConfiguration.ComponentFactory import CompFactory
-from JetRecConfig.JetRecConfig import isAthenaRelease
+from JetRecConfig.JetRecConfig import isAnalysisRelease
 
 
 
@@ -79,7 +79,7 @@ def getJetTrackVtxAlg( trkOpt,   algname="jetTVA", **ttva_overide):
 
     ttva_options = dict(
         returnCompFactory = True,
-        addDecoAlg= isAthenaRelease(), # ?? it seems mandatory ??
+        addDecoAlg = not isAnalysisRelease(), # ?? it seems mandatory ??
         TrackContName = trkProperties["Tracks"],
         VertexContName = trkProperties["Vertices"],
     )
