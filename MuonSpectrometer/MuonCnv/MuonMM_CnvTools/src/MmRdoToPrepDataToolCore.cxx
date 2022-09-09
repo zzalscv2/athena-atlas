@@ -18,6 +18,10 @@ using namespace MuonGM;
 using namespace Trk;
 using namespace Muon;
 
+namespace {
+  // Count hits with negative charge, which indicates bad calibration
+  std::atomic<bool> hitNegativeCharge{false};
+}
 class NswCalibDbTimeChargeData;
 
 Muon::MmRdoToPrepDataToolCore::MmRdoToPrepDataToolCore(const std::string& t,
@@ -46,6 +50,7 @@ StatusCode Muon::MmRdoToPrepDataToolCore::processCollection(Muon::MMPrepDataCont
 							std::vector<IdentifierHash>& idWithDataVect) const
 {
   ATH_MSG_DEBUG(" ***************** Start of process MM Collection");
+  const MmIdHelper& id_helper = m_idHelperSvc->mmIdHelper();
   const EventContext& ctx = Gaudi::Hive::currentContext();
   bool merge = m_merge;
 // protect for large splashes 
@@ -79,9 +84,9 @@ StatusCode Muon::MmRdoToPrepDataToolCore::processCollection(Muon::MMPrepDataCont
   idWithDataVect.push_back(hash);
     
   // set the offline identifier of the collection Id
-  IdContext context = m_idHelperSvc->mmIdHelper().module_context();
+  IdContext context = id_helper.module_context();
   Identifier moduleId;
-  int getId = m_idHelperSvc->mmIdHelper().get_id(hash,moduleId,&context);
+  int getId = id_helper.get_id(hash,moduleId,&context);
   if ( getId != 0 ) {
     ATH_MSG_ERROR("Could not convert the hash Id: " << hash << " to identifier");
   } 
@@ -98,9 +103,6 @@ StatusCode Muon::MmRdoToPrepDataToolCore::processCollection(Muon::MMPrepDataCont
     return StatusCode::FAILURE;
   }
  
-  // Count hits with negative charge, which indicates bad calibration
-  int nHitNegativeCharge{0};
-
   std::vector<MMPrepData> MMprds;
   // convert the RDO collection to a PRD collection
   for (const MM_RawData* rdo : *rdoColl ) {
@@ -108,22 +110,22 @@ StatusCode Muon::MmRdoToPrepDataToolCore::processCollection(Muon::MMPrepDataCont
 
     const Identifier rdoId = rdo->identify();
     if (!m_idHelperSvc->isMM(rdoId)) {
-      ATH_MSG_WARNING("given Identifier "<<rdoId.get_compact()<<" ("<<m_idHelperSvc->mmIdHelper().print_to_string(rdoId)<<") is no MicroMega Identifier, continuing");
+      ATH_MSG_WARNING("given Identifier "<<rdoId.get_compact()<<" ("<<id_helper.print_to_string(rdoId)<<") is no MicroMega Identifier, continuing");
       continue;
     }
     ATH_MSG_DEBUG(" dump rdo " << m_idHelperSvc->toString(rdoId ));
     
     int channel = rdo->channel();
     std::vector<Identifier> rdoList;
-    Identifier parentID = m_idHelperSvc->mmIdHelper().parentID(rdoId);
-    Identifier layid = m_idHelperSvc->mmIdHelper().channelID(parentID, m_idHelperSvc->mmIdHelper().multilayer(rdoId), m_idHelperSvc->mmIdHelper().gasGap(rdoId),1);
-    Identifier prdId = m_idHelperSvc->mmIdHelper().channelID(parentID, m_idHelperSvc->mmIdHelper().multilayer(rdoId), m_idHelperSvc->mmIdHelper().gasGap(rdoId),channel);
-    ATH_MSG_DEBUG(" channel RDO " << channel << " channel from rdoID " << m_idHelperSvc->mmIdHelper().channel(rdoId));
+    Identifier parentID = id_helper.parentID(rdoId);
+    Identifier layid = id_helper.channelID(parentID, id_helper.multilayer(rdoId), id_helper.gasGap(rdoId),1);
+    Identifier prdId = id_helper.channelID(parentID, id_helper.multilayer(rdoId), id_helper.gasGap(rdoId),channel);
+    ATH_MSG_DEBUG(" channel RDO " << channel << " channel from rdoID " << id_helper.channel(rdoId));
     rdoList.push_back(prdId);
  
     // get the local and global positions
     const MuonGM::MMReadoutElement* detEl = MuonDetMgr->getMMReadoutElement(layid);
-    Amg::Vector2D localPos;
+    Amg::Vector2D localPos{0.,0.};
 
     bool getLocalPos = detEl->stripPosition(prdId,localPos);
     if ( !getLocalPos ) {
@@ -131,7 +133,7 @@ StatusCode Muon::MmRdoToPrepDataToolCore::processCollection(Muon::MMPrepDataCont
       continue;
     }
 
-    Amg::Vector3D globalPos;
+    Amg::Vector3D globalPos{0.,0.,0.};
     bool getGlobalPos = detEl->stripGlobalPosition(prdId,globalPos);
     if ( !getGlobalPos ) {
       ATH_MSG_WARNING("Could not get the global strip position for MM");
@@ -140,39 +142,25 @@ StatusCode Muon::MmRdoToPrepDataToolCore::processCollection(Muon::MMPrepDataCont
     NSWCalib::CalibratedStrip calibStrip;
     ATH_CHECK (m_calibTool->calibrateStrip(ctx, rdo, calibStrip));
     if (calibStrip.charge < 0) {
-        if (nHitNegativeCharge < 1)
+        if (!hitNegativeCharge){
           ATH_MSG_WARNING("One MM RDO or more, such as one with pdo = "<<rdo->charge() << " counts, corresponds to a negative charge (" << calibStrip.charge << "). Skipping these RDOs");
-        ++nHitNegativeCharge;
+          hitNegativeCharge = true;
+        }
         continue;
     }
 
-    const Amg::Vector3D globalDir(globalPos.x(), globalPos.y(), globalPos.z());
+    const Amg::Vector3D globalDir = globalPos;
     Trk::LocalDirection localDir;
     const Trk::PlaneSurface& psurf = detEl->surface(layid);
     Amg::Vector2D lpos;
     psurf.globalToLocal(globalPos,globalPos,lpos);
     psurf.globalToLocalDirection(globalDir, localDir);
-    float inAngle_XZ = std::abs( localDir.angleXZ() / CLHEP::degree);
-   
+       
     ATH_MSG_DEBUG(" Surface centre x " << psurf.center().x() << " y " << psurf.center().y() << " z " << psurf.center().z() );
     ATH_MSG_DEBUG(" localPos x " << localPos.x() << " localPos y " << localPos.y() << " lpos recalculated 0 " << lpos[0] << " lpos y " << lpos[1]);
 
     Amg::Vector3D  gdir = psurf.transform().linear()*Amg::Vector3D(0.,1.,0.);
     ATH_MSG_DEBUG(" MM detector surface direction phi " << gdir.phi() << " global radius hit " << globalPos.perp() << " phi pos " << globalPos.phi() << " global z " << globalPos.z());      
-
-    // get for now a temporary error matrix -> to be fixed
-    double resolution = 0.07;
-    if (std::abs(inAngle_XZ)>3) resolution = ( -.001/3.*std::abs(inAngle_XZ) ) + .28/3.;
-    double errX = 0;
-    const MuonGM::MuonChannelDesign* design = detEl->getDesign(layid);
-    if( !design ){
-      ATH_MSG_WARNING("Failed to get design for " << m_idHelperSvc->toString(layid) );
-    }else{
-      errX = std::abs(design->inputPitch)/std::sqrt(12);
-      ATH_MSG_DEBUG(" strips inputPitch " << design->inputPitch << " error " << errX);
-    }
-// add strip width to error
-    resolution = std::sqrt(resolution*resolution+errX*errX);
 
     auto cov = Amg::MatrixX(2,2);
     cov.setIdentity();
@@ -210,7 +198,7 @@ StatusCode Muon::MmRdoToPrepDataToolCore::processCollection(Muon::MMPrepDataCont
       // in case it gets used in SimpleMMClusterBuilderTool::getClusters
       mpd.setHashAndIndex(hash, 0);
       mpd.setAuthor(Muon::MMPrepData::Author::RDOTOPRDConverter);
-      MMprds.push_back(mpd);
+      MMprds.push_back(std::move(mpd));
     } 
   }
 
@@ -220,8 +208,7 @@ StatusCode Muon::MmRdoToPrepDataToolCore::processCollection(Muon::MMPrepDataCont
     /// reconstruct the clusters
     ATH_CHECK(m_clusterBuilderTool->getClusters(MMprds,clusters));
 
-    for (unsigned int i = 0 ; i<clusters.size() ; ++i ) {
-      std::unique_ptr<Muon::MMPrepData> prdN = std::move(clusters.at(i));
+    for (std::unique_ptr<Muon::MMPrepData>& prdN : clusters ) {
       prdN->setHashAndIndex(prdColl->identifyHash(), prdColl->size());
       prdColl->push_back(std::move(prdN));
     } 
