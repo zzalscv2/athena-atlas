@@ -55,9 +55,8 @@ TRTUncompressedHitCollection* TRTUncompressedHitCollectionCnv::createTransient()
       size_t size = oldColl->size();
       trans_cont=new TRTUncompressedHitCollection("DefaultCollectionName",size);
       //do the copy
-      AthenaHitsVector<TRTUncompressedHit>::const_iterator it = oldColl->begin(), itEnd=oldColl->end();
-      for (;it!=itEnd;++it)  {
-	trans_cont->push_back(**it);
+      for (TRTUncompressedHit* hit : *oldColl) {
+	trans_cont->push_back(*hit);
       }
       delete oldColl;
     }  else {
