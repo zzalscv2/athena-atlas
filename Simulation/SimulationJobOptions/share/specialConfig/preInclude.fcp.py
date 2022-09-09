@@ -62,6 +62,10 @@ assert "CHARGE" in simdict
 assert "X" in simdict
 assert "Y" in simdict
 load_files_for_fcp_scenario(simdict["MASS"], simdict["CHARGE"], simdict["X"], simdict["Y"])
+pdgcodes = eval(simdict['InteractingPDGCodes']) if 'InteractingPDGCodes' in simdict else []
+from ExtraParticles.PDGHelpers import updateExtraParticleWhiteList
+updateExtraParticleWhiteList('G4particle_whitelist_ExtraParticles.txt', pdgcodes)
+
 
 if doG4SimConfig:
     from G4AtlasApps import AtlasG4Eng
