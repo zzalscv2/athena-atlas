@@ -109,12 +109,28 @@ def ITkRecPreProcessingSiliconCfg(flags, **kwargs):
         from InDetConfig.InDetPrepRawDataFormationConfig import ITkStripClusterizationCfg
         acc.merge(ITkStripClusterizationCfg(flags))
 
+
+    if flags.ITk.Tracking.convertInDetClusters and flags.ITk.Tracking.EnableNativexAODclusters:
+        raise RuntimeError(
+            "Competing flags ITk.Tracking.convertInDetClusters and ITk.Tracking.EnableNativexAODclusters both True!"
+        )
+
     if flags.ITk.Tracking.convertInDetClusters and flags.Detector.EnableITkPixel and flags.Detector.EnableITkStrip:
         #
         # --- Conversion algorithm for InDet clusters to xAOD clusters
         #
         from InDetConfig.InDetPrepRawDataFormationConfig import ITkInDetToXAODClusterConversionCfg
         acc.merge(ITkInDetToXAODClusterConversionCfg(flags))
+
+    if flags.ITk.Tracking.EnableNativexAODclusters and flags.Detector.EnableITkPixel:
+        if flags.Detector.EnableITkStrip:
+            raise NotImplementedError("Native xAOD strip clusterization not yet implemented!")
+
+        from ActsTrkClusterization.ActsTrkClusterizationConfig import ActsTrkITkPixelClusterizationAlgCfg
+        acc.merge(ActsTrkITkPixelClusterizationAlgCfg(flags))
+
+        
+        
 
     #
     # ----------- form SpacePoints from clusters in SCT and Pixels

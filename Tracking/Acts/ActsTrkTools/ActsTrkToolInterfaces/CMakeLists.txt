@@ -19,5 +19,6 @@ atlas_add_library( ActsTrkToolInterfacesLib
                    ActsTrkEvent
                    SiSpacePointFormationLib
                    InDetReadoutGeometry
+		   InDetIdentifier
                    xAODInDetMeasurement
                    )

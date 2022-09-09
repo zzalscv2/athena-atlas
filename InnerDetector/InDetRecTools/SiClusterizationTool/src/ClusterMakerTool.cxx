@@ -30,10 +30,100 @@
 using CLHEP::micrometer;
 
 namespace {
-	inline double square(const double x){
-		return x*x;
-	}
-	constexpr double ONE_TWELFTH = 1./12.;
+
+inline double square(const double x){
+    return x*x;
+}
+constexpr double ONE_TWELFTH = 1./12.;
+
+// Some methods below can be parameterized on the pixel cluster type,
+// The following functions allow using a function parameter for common
+// operations.
+InDet::PixelCluster* newInDetpixelCluster(const Identifier& RDOId,
+					  const Amg::Vector2D& locpos,
+					  const Amg::Vector3D& globpos,
+					  const std::vector<Identifier>& rdoList,
+					  const int lvl1a,
+					  const std::vector<int>& totList,
+					  const std::vector<float>& chargeList,
+					  const InDet::SiWidth& width,
+					  const InDetDD::SiDetectorElement* detEl,
+					  const Amg::MatrixX& locErrMat,
+					  const float omegax,
+					  const float omegay,
+					  bool split,
+					  float splitProb1,
+					  float splitProb2)
+{
+    return new InDet::PixelCluster(RDOId,
+				   locpos,
+				   globpos,
+				   rdoList,
+				   lvl1a,
+				   totList,
+				   chargeList,
+				   width,
+				   detEl,
+				   locErrMat,
+				   omegax,
+				   omegay,
+				   split,
+				   splitProb1,
+				   splitProb2);
+}
+
+// Function-like class to add an xAOD::PixelCluster to an
+// xAOD::PixelClusterContainer. This is needed because the
+// PixelCluster object needs an aux store for the setMeasurement call
+// to not crash
+class AddNewxAODpixelCluster {
+public:
+    AddNewxAODpixelCluster(xAOD::PixelClusterContainer& container)
+	: m_container(container) {}
+
+    xAOD::PixelCluster* operator()(const Identifier& /*RDOId*/,
+				   const Amg::Vector2D& locpos,
+				   const Amg::Vector3D& globpos,
+				   const std::vector<Identifier>& rdoList,
+				   const int lvl1a,
+				   const std::vector<int>& totList,
+				   const std::vector<float>& chargeList,
+				   const InDet::SiWidth& width,
+				   const InDetDD::SiDetectorElement* detEl,
+				   const Amg::MatrixX& locErrMat,
+				   const float omegax,
+				   const float omegay,
+				   bool split,
+				   float splitProb1,
+				   float splitProb2) {
+	xAOD::PixelCluster * pixelCl = new xAOD::PixelCluster();
+	m_container.push_back(pixelCl);
+	IdentifierHash idHash = detEl->identifyHash();
+
+	Eigen::Matrix<float,2,1> localPosition(locpos.x(), locpos.y());
+	Eigen::Matrix<float,2,2> localCovariance = Eigen::Matrix<float,2,2>::Zero();
+	localCovariance(0, 0) = locErrMat(0, 0);
+	localCovariance(1, 1) = locErrMat(1, 1);
+
+	pixelCl->setMeasurement<2>(idHash, localPosition, localCovariance);
+	pixelCl->setRDOlist(rdoList);
+	pixelCl->globalPosition() = globpos.cast<float>();
+	pixelCl->setToTlist(totList);
+	pixelCl->setChargelist(chargeList);
+	pixelCl->setLVL1A(lvl1a);
+	pixelCl->setChannelsInPhiEta(width.colRow()[0], width.colRow()[1]);
+	pixelCl->setOmegas(omegax, omegay);
+	pixelCl->setIsSplit(split);
+	pixelCl->setSplitProbabilities(splitProb1, splitProb2);
+
+	return pixelCl;
+    }
+
+private:
+    xAOD::PixelClusterContainer& m_container;
+};
+
+
 }
 
 
@@ -257,8 +347,9 @@ PixelCluster* ClusterMakerTool::pixelCluster(
   //       (default)
   //   10: CTB parametrization (as a function of module and cluster size)
   //       no magnetic field
-  // - const reference to a PixelID helper class  
-PixelCluster* ClusterMakerTool::pixelCluster(
+  // - const reference to a PixelID helper class
+template <typename ClusterType, typename CreatorType>
+ClusterType ClusterMakerTool::makePixelCluster(
                          const Identifier& clusterID,
                          const Amg::Vector2D& localPos,
                          const std::vector<Identifier>& rdoList,
@@ -269,9 +360,10 @@ PixelCluster* ClusterMakerTool::pixelCluster(
                          bool  ganged,
                          int errorStrategy,
                          const PixelID& pixelID,
-			 									 bool split,
+			 bool split,
                          double splitProb1,
-                         double splitProb2) const{
+                         double splitProb2,
+			 CreatorType clusterCreator) const{
 	
  
   ATH_MSG_VERBOSE("ClusterMakerTool called, number ");
@@ -438,25 +530,87 @@ PixelCluster* ClusterMakerTool::pixelCluster(
     errorMatrix.fillSymmetric(1,1,square(width.z()/colRow.y())*ONE_TWELFTH);
     break;
   }
- PixelCluster* newCluster = 
-   new PixelCluster(newClusterID, 
-                    locpos,
-                    globalPos,
-                    rdoList,
-                    lvl1a,
-                    totList,
-                    chargeList,
-                    width,
-                    element,
-                    errorMatrix,
-                    omegax,
-                    omegay,
-                    split,
-                    splitProb1,
-                    splitProb2);
 
- return newCluster;
+  return clusterCreator(newClusterID, 
+			locpos,
+			globalPos,
+			rdoList,
+			lvl1a,
+			totList,
+			chargeList,
+			width,
+			element,
+			errorMatrix,
+			omegax,
+			omegay,
+			split,
+			splitProb1,
+			splitProb2);
+}
 
+PixelCluster* ClusterMakerTool::pixelCluster(
+    const Identifier& clusterID,
+    const Amg::Vector2D& localPos,
+    const std::vector<Identifier>& rdoList,
+    const int lvl1a,
+    const std::vector<int>& totList,
+    const SiWidth& width,
+    const InDetDD::SiDetectorElement* element, 
+    bool ganged,
+    int errorStrategy,
+    const PixelID& pixelID,
+    bool split,
+    double splitProb1,
+    double splitProb2) const
+{
+    return makePixelCluster<PixelCluster*>(
+	clusterID,
+	localPos,
+	rdoList,
+	lvl1a,
+	totList,
+	width,
+	element, 
+	ganged,
+	errorStrategy,
+	pixelID,
+	split,
+	splitProb1,
+	splitProb2,
+	newInDetpixelCluster);
+}
+
+
+xAOD::PixelCluster* ClusterMakerTool::xAODpixelCluster(
+    xAOD::PixelClusterContainer& container,
+    const Amg::Vector2D& localPos,
+    const std::vector<Identifier>& rdoList,
+    const int lvl1a,
+    const std::vector<int>& totList,
+    const SiWidth& width,
+    const InDetDD::SiDetectorElement* element, 
+    bool ganged,
+    int errorStrategy,
+    const PixelID& pixelID,
+    bool split,
+    double splitProb1,
+    double splitProb2) const
+{
+    return makePixelCluster<xAOD::PixelCluster*>(
+	Identifier(),
+	localPos,
+	rdoList,
+	lvl1a,
+	totList,
+	width,
+	element, 
+	ganged,
+	errorStrategy,
+	pixelID,
+	split,
+	splitProb1,
+	splitProb2,
+	AddNewxAODpixelCluster(container));
 }
 
 
