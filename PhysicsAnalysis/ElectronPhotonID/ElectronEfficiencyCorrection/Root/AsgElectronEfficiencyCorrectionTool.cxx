@@ -78,7 +78,7 @@ AsgElectronEfficiencyCorrectionTool::AsgElectronEfficiencyCorrectionTool(
     "List of file names that store the correction factors for simulation.");
   declareProperty("MapFilePath",
                   m_mapFile = "ElectronEfficiencyCorrection/2015_2025/rel22.2/"
-                              "2022_Summer_Prerecom_v1/map0.txt",
+                              "2022_Summer_Prerecom_v1/map1.txt",
                   "Full path to the map file");
   declareProperty(
     "RecoKey", m_recoKey = "", "Key associated with reconstruction");
