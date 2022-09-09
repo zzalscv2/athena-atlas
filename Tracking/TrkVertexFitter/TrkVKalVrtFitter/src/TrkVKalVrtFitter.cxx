@@ -125,7 +125,7 @@ TrkVKalVrtFitter::makeState(const EventContext& ctx) const
 
 StatusCode TrkVKalVrtFitter::finalize()
 {
-    if(msgLvl(MSG::INFO))msg(MSG::INFO)<<"TrkVKalVrtFitter finalize() successful" << endmsg;
+    if(msgLvl(MSG::DEBUG))msg(MSG::DEBUG) <<"TrkVKalVrtFitter finalize() successful" << endmsg;
     return StatusCode::SUCCESS;
 }
 
@@ -174,7 +174,7 @@ StatusCode TrkVKalVrtFitter::initialize()
 //
 //
 //
-    if(msgLvl(MSG::INFO))msg(MSG::INFO)<< "TrkVKalVrtFitter initialize() successful" << endmsg;
+    if(msgLvl(MSG::DEBUG))msg(MSG::DEBUG)<< "TrkVKalVrtFitter initialize() successful" << endmsg;
     if(msgLvl(MSG::DEBUG)){
        msg(MSG::DEBUG)<< "TrkVKalVrtFitter configuration:" << endmsg;
        msg(MSG::DEBUG)<< "   A priori vertex constraint:           "<< m_useAprioriVertex <<endmsg;

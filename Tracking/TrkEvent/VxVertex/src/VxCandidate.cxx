@@ -70,7 +70,6 @@ std::atomic<unsigned int> VxCandidate::s_numberOfInstantiations=0;
       for (auto & i : m_vxTrackAtVertex)
       {
           delete i;
-          i = 0;
       }
       // and clear the vector
       m_vxTrackAtVertex.clear();
@@ -98,10 +97,7 @@ std::atomic<unsigned int> VxCandidate::s_numberOfInstantiations=0;
   VxCandidate::~VxCandidate() {
     for (auto & i : m_vxTrackAtVertex) {
       delete i;
-      i = 0;
     }
-    // and clear the vector
-    m_vxTrackAtVertex.clear();
 #ifndef NDEBUG
     s_numberOfInstantiations--;
 #endif
