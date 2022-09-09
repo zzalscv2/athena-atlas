@@ -38,16 +38,17 @@ def get_and_fix_PDGTABLE(replace):
         print('modfied PDGTABLE\n%s\n' % ''.join(lines))
         sys.stdout.flush()
 
+
 def load_files_for_GMSB_scenario(simdict):
 
     GMSBIndex = int(simdict["GMSBIndex"])
-
+    pdgcodes = []
     if GMSBIndex == 1:
         get_and_fix_PDGTABLE([
                               (1000022, eval(simdict["GMSBNeutralino"]), '~chi(0,1)', '0'),
                               (1000039, eval(simdict.get("GMSBGravitino",'0')), '~G', '0')
                             ])
-
+        pdgcodes += [1000022,1000039]
     elif GMSBIndex == 2:
         m_stau    = eval(simdict["GMSBStau"])
         m_slepton = eval(simdict["GMSBSlepton"])
@@ -56,7 +57,7 @@ def load_files_for_GMSB_scenario(simdict):
                               (2000011, m_slepton, '~e(R)', '-'),
                               (2000013, m_slepton, '~mu(R)', '-')
                             ])
-
+        pdgcodes += [-1000015,1000015,-2000011,2000011,-2000013,2000013]
     elif GMSBIndex == 3:
         m_stau = eval(simdict["GMSBStau"])
         m_slepton = eval(simdict["GMSBSlepton"])
@@ -84,15 +85,31 @@ def load_files_for_GMSB_scenario(simdict):
                               (1000035, 1.00E+04, '~chi(0,4)', '0'),
                               (1000037, 1.00E+04, '~chi(+,2)', '+')
                             ])
+        pdgcodes += [
+            -1000001,1000001,-2000001,2000001,
+            -1000002,1000002,-2000002,2000002,
+            -1000003,1000003,-2000003,2000003,
+            -1000004,1000004,-2000004,2000004,
+            -1000005,1000005,-2000005,2000005,
+            -1000006,1000006,-2000006,2000006,
+            -1000011,1000011,-2000011,2000011,
+            -1000013,1000013,-2000013,2000013,
+            -1000015,1000015,-2000015,2000015,
+             1000012,1000014,1000016,1000021,1000022,1000023,
+            -1000024,1000024,1000025,1000035,-1000037,1000037]
 
     elif GMSBIndex == 4:
         get_and_fix_PDGTABLE([
                               (1000015, m_stau, '~tau(L)', '-')
                             ])
+        pdgcodes += [-1000015,1000015]
 
     else:
         print ('GMSBIndex %i not supported' % GMSBIndex)
         raise
+    from ExtraParticles.PDGHelpers import updateExtraParticleWhiteList
+    updateExtraParticleWhiteList('G4particle_whitelist_ExtraParticles.txt', pdgcodes)
+
 
 doG4SimConfig = True
 from AthenaCommon.AthenaCommonFlags import athenaCommonFlags

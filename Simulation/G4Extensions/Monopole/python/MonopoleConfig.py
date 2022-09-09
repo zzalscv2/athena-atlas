@@ -135,6 +135,9 @@ def fcpCfg(flags):
 
     simdict = flags.Input.SpecialConfiguration
     load_files_for_fcp_scenario(simdict["MASS"], simdict["CHARGE"], simdict["X"], simdict["Y"])
+    pdgcodes = eval(simdict['InteractingPDGCodes']) if 'InteractingPDGCodes' in simdict else []
+    from ExtraParticles.PDGHelpers import updateExtraParticleWhiteList
+    updateExtraParticleWhiteList('G4particle_whitelist_ExtraParticles.txt', pdgcodes)
 
     if flags.Common.ProductionStep == ProductionStep.Simulation:
         physicsOptions = [ result.popToolsAndMerge(MonopolePhysicsToolCfg(flags)) ]
@@ -173,6 +176,9 @@ def QballCfg(flags):
     assert "MASS" in simdict
     assert "CHARGE" in simdict
     load_files_for_qball_scenario(simdict["MASS"], simdict["CHARGE"])
+    pdgcodes = eval(simdict['InteractingPDGCodes']) if 'InteractingPDGCodes' in simdict else []
+    from ExtraParticles.PDGHelpers import updateExtraParticleWhiteList
+    updateExtraParticleWhiteList('G4particle_whitelist_ExtraParticles.txt', pdgcodes)
 
     if flags.Common.ProductionStep == ProductionStep.Simulation:
         physicsOptions = [ result.popToolsAndMerge(MonopolePhysicsToolCfg(flags)) ]
@@ -204,6 +210,9 @@ def MonopoleCfg(flags):
     assert "MASS" in simdict
     assert "GCHARGE" in simdict
     load_files_for_monopole_scenario(simdict["MASS"], simdict["GCHARGE"])
+    pdgcodes = eval(simdict['InteractingPDGCodes']) if 'InteractingPDGCodes' in simdict else []
+    from ExtraParticles.PDGHelpers import updateExtraParticleWhiteList
+    updateExtraParticleWhiteList('G4particle_whitelist_ExtraParticles.txt', pdgcodes)
 
     if flags.Common.ProductionStep == ProductionStep.Simulation:
         physicsOptions = [ result.popToolsAndMerge(MonopolePhysicsToolCfg(flags)) ]

@@ -43,6 +43,27 @@ def getPDGTABLE(table):
     return True
 
 
+@lru_cache
+def getExtraParticleWhiteList(whitelist):
+    # Delete a local file if present
+    if os.path.isfile(whitelist):
+        os.remove(whitelist)
+    #create blank file
+    blank = open('G4particle_whitelist_ExtraParticles.txt', 'x')
+    blank.close()
+    return True
+
+
+def updateExtraParticleWhiteList(listName='G4particle_whitelist_ExtraParticles.txt', pdgcodes=[]):
+    if getExtraParticleWhiteList(listName):
+        import shutil
+        shutil.copy(listName, listName+'.org')
+    # update the whitelist for GenParticleSimWhiteList
+    with open(listName, 'a') as writer:
+        for pdg in pdgcodes:
+            writer.write('%s\n' % pdg)
+
+
 class ExtraParticle(object):
     name = ""
     mass = -1
@@ -195,11 +216,8 @@ class PDGParser(object):
             raise ValueError('Unexpected charge %s' % charge)
 
     def createList(self):
-
-        # make a new whitelist for GenParticleSimWhiteList
-        with open('G4particle_whitelist_ExtraParticles.txt', 'w') as writer:
-            for name in self.extraParticles:
-                writer.write('%s\n' % self.extraParticles[name].pdg)
+        pdgcodes = [ self.extraParticles[name].pdg for name in self.extraParticles ]
+        updateExtraParticleWhiteList('G4particle_whitelist_ExtraParticles.txt', pdgcodes)
 
         # generate output in correct format
         outDict = dict()
