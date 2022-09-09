@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2020 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "LArSimEventTPCnv/LArHitFloatContainerCnv_p1.h"
@@ -50,10 +50,7 @@ LArHitFloatContainer* LArHitFloatContainerCnv::copyLArHitToFloat(const LArHitCon
   float_cont->clear();
   float_cont->reserve(double_cont->size());
 
-  LArHitContainer::const_iterator it1 = double_cont->begin();
-  LArHitContainer::const_iterator it2 = double_cont->end();
-  for (;it1 != it2; it1++) {
-     LArHit* double_hit = (*it1);
+  for (const LArHit* double_hit : *double_cont) {
      float energy = (float)(double_hit->energy());
      float time   = (float)(double_hit->time());
      LArHitFloat float_hit(double_hit->cellID(),energy,time);
