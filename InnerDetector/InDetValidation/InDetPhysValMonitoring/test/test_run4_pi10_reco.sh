@@ -21,6 +21,9 @@ run () {
     echo "Running ${name}..."
     time ${cmd}
     rc=$?
+    # Only report hard failures for 21.9 vs master tests since both
+    # branches are unlikely to ever match perfectly
+    [ "${name}" = "dcube-21p9" ] && [ $rc -ne 255 ] && rc=0
     echo "art-result: $rc ${name}"
     return $rc
 }
