@@ -173,7 +173,7 @@ StatusCode ISF::FastCaloSimV2Tool::simulate(const ISF::ISFParticle& isfp, ISFPar
     Barcode::PhysicsProcessCode process = 201;
     // call punch-through simulation
     const ISF::ISFParticleVector *someSecondaries = m_punchThroughTool->computePunchThroughParticles(isfp, *rngWrapper);
-    if (someSecondaries) {
+    if (someSecondaries && !someSecondaries->empty()) {
       //Record truth incident for created punch through particles
       ISF::ISFTruthIncident truth( const_cast<ISF::ISFParticle&>(isfp),
                                    *someSecondaries,

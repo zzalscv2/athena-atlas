@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2018 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef ISF_GEANT4TOOLS_TRACKPROCESSORUSERACTIONBASE_H
@@ -64,7 +64,7 @@ private:
 
   /// Set the following information as the currently traced particle
   void setCurrentParticle(ISF::ISFParticle* baseISFParticle,
-                          HepMC::GenParticlePtr truthPrimary,
+                          HepMC::ConstGenParticlePtr truthPrimary,
                           HepMC::GenParticlePtr truthCurrentlyTraced);
 
   /// Classify the particle represented by the given set of truth links
