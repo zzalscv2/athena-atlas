@@ -288,7 +288,7 @@ BPHY2Seq += CfgMgr.DerivationFramework__DerivationKernel("BPHY2Kernel",
 # Added by ASC
 from DerivationFrameworkCore.SlimmingHelper import SlimmingHelper
 BPHY2SlimmingHelper = SlimmingHelper("BPHY2SlimmingHelper")
-AllVariables  = []
+AllVariables  = ["EventInfo"]
 StaticContent = []
 
 # Needed for trigger objects

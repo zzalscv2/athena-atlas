@@ -310,7 +310,8 @@ def BPHY5Cfg(ConfigFlags):
    from DerivationFrameworkCore.SlimmingHelper import SlimmingHelper
    from OutputStreamAthenaPool.OutputStreamConfig import OutputStreamCfg
    BPHY5SlimmingHelper = SlimmingHelper("BPHY5SlimmingHelper", NamesAndTypes = ConfigFlags.Input.TypedCollections)
-   AllVariables  = []
+   from DerivationFrameworkBPhys.commonBPHYMethodsCfg import getDefaultAllVariables
+   AllVariables  = getDefaultAllVariables()
    StaticContent = []
     
    # Needed for trigger objects
@@ -338,7 +339,7 @@ def BPHY5Cfg(ConfigFlags):
    AllVariables += ["ExtrapolatedMuonTrackParticles"]
    
    ## muon container
-   AllVariables += ["Muons"] 
+   AllVariables += ["Muons", "MuonsLRT"] 
     
     
    ## Jpsi candidates 
@@ -359,11 +360,11 @@ def BPHY5Cfg(ConfigFlags):
    StaticContent += ["xAOD::VertexAuxContainer#%sAux.-vxTrackAtVertex" % BPHY5BdKstSelectAndWrite.OutputVtxContainerName]
    
    # Tagging information (in addition to that already requested by usual algorithms)
-   AllVariables += ["GSFTrackParticles", "Electrons" , "Photons", "MuonSpectrometerTrackParticles" ]
+   AllVariables += ["GSFTrackParticles",  "MuonSpectrometerTrackParticles" ]
    tagJetCollections = ['AntiKt4LCTopoJets', 'AntiKt4EMTopoJets', 'AntiKt4PV0TrackJets']
    
    AllVariables += [ "Kt4LCTopoOriginEventShape", "Kt4EMTopoOriginEventShape" ]
-   SmartVar = ["Photons" ] #[ tagJetCollections ]
+   SmartVar = ["Photons", "Electrons", "LRTElectrons"] #[ tagJetCollections ]
    
    for jet_collection in tagJetCollections:
        AllVariables   += [jet_collection]

@@ -68,3 +68,5 @@ def BPHY_InDetDetailedTrackSelectorToolCfg(flags,BPHYDerivationName, **kwargs):
     acc.setPrivateTools(InDetTrackSelectorTool)
     return acc
 
+def getDefaultAllVariables():
+    return ["EventInfo"]

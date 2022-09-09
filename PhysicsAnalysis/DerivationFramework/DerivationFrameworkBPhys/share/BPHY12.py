@@ -600,7 +600,7 @@ BPHY12Stream.AcceptAlgs( [ "BPHY12Kernel" ] )
 from DerivationFrameworkCore.SlimmingHelper import SlimmingHelper
 BPHY12SlimmingHelper = SlimmingHelper( "BPHY12SlimmingHelper" )
 
-AllVariables   = []
+AllVariables   = ["EventInfo"]
 StaticContent  = []
 ExtraVariables = []
 

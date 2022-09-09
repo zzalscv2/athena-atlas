@@ -571,7 +571,7 @@ DerivationFrameworkJob += BPHY20_Sequence
 
 from DerivationFrameworkCore.SlimmingHelper import SlimmingHelper
 BPHY20SlimmingHelper = SlimmingHelper("BPHY20SlimmingHelper")
-AllVariables  = []
+AllVariables  = ["EventInfo"]
 StaticContent = []
 
 

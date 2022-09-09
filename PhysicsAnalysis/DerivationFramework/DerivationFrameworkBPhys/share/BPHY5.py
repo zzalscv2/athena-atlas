@@ -464,7 +464,7 @@ BPHY5Stream.AcceptAlgs(["BPHY5Kernel"])
 # Added by ASC
 from DerivationFrameworkCore.SlimmingHelper import SlimmingHelper
 BPHY5SlimmingHelper = SlimmingHelper("BPHY5SlimmingHelper")
-AllVariables  = []
+AllVariables  = ["EventInfo"]
 StaticContent = []
 
 # Needed for trigger objects
@@ -492,7 +492,7 @@ AllVariables += ["CombinedMuonTrackParticles"]
 AllVariables += ["ExtrapolatedMuonTrackParticles"]
 
 ## muon container
-AllVariables += ["Muons"] 
+AllVariables += ["Muons","MuonsLRT"] 
 
 
 ## Jpsi candidates 
@@ -513,11 +513,11 @@ StaticContent += ["xAOD::VertexContainer#%s"        %                 BPHY5BdKst
 StaticContent += ["xAOD::VertexAuxContainer#%sAux.-vxTrackAtVertex" % BPHY5BdKstSelectAndWrite.OutputVtxContainerName]
 
 # Tagging information (in addition to that already requested by usual algorithms)
-AllVariables += ["GSFTrackParticles", "Electrons" , "Photons", "MuonSpectrometerTrackParticles" ]
+AllVariables += ["GSFTrackParticles", "MuonSpectrometerTrackParticles" ]
 tagJetCollections = ['AntiKt4LCTopoJets', 'AntiKt4EMTopoJets', 'AntiKt4PV0TrackJets']
 
 AllVariables += [ "Kt4LCTopoOriginEventShape", "Kt4EMTopoOriginEventShape" ]
-SmartVar = ["Photons" ] #[ tagJetCollections ]
+SmartVar = ["Photons", "Electrons", "LRTElectrons" ] #[ tagJetCollections ]
 
 
 

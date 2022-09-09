@@ -166,7 +166,8 @@ def BPHY6Cfg(ConfigFlags):
     # Needed for trigger objects
     BPHY6SlimmingHelper.IncludeMuonTriggerContent = True
     BPHY6SlimmingHelper.IncludeBPhysTriggerContent = True
-    AllVariables  = []
+    from DerivationFrameworkBPhys.commonBPHYMethodsCfg import getDefaultAllVariables
+    AllVariables  = getDefaultAllVariables()
     StaticContent = []
     AllVariables += ["LVL1MuonRoIs"]
     

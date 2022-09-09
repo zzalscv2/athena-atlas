@@ -496,7 +496,8 @@ def BPHY15Cfg(ConfigFlags):
    from DerivationFrameworkCore.SlimmingHelper import SlimmingHelper
    from OutputStreamAthenaPool.OutputStreamConfig import OutputStreamCfg
    BPHY15SlimmingHelper = SlimmingHelper("BPHY15SlimmingHelper", NamesAndTypes = ConfigFlags.Input.TypedCollections)
-   AllVariables  = []
+   from DerivationFrameworkBPhys.commonBPHYMethodsCfg import getDefaultAllVariables
+   AllVariables  = getDefaultAllVariables()
    StaticContent = []
 
    # Needed for trigger objects

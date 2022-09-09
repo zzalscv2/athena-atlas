@@ -262,7 +262,7 @@ BPHY14Stream.AcceptAlgs(["BPHY14Kernel"])
 # Added by ASC
 from DerivationFrameworkCore.SlimmingHelper import SlimmingHelper
 BPHY14SlimmingHelper = SlimmingHelper("BPHY14SlimmingHelper")
-BPHY14_AllVariables     = []
+BPHY14_AllVariables     = ["EventInfo"]
 BPHY14_StaticContent    = []
 BPHY14_SmartCollections = []
 BPHY14_ExtraVariables   = []

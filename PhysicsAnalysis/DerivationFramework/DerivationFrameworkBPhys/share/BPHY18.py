@@ -457,7 +457,7 @@ BPHY18Stream.AcceptAlgs(["BPHY18Kernel"])
 # Added by ASC
 from DerivationFrameworkCore.SlimmingHelper import SlimmingHelper
 BPHY18SlimmingHelper = SlimmingHelper("BPHY18SlimmingHelper")
-AllVariables   = []
+AllVariables   = ["EventInfo"]
 StaticContent  = []
 ExtraVariables = []
 BPHY18SlimmingHelper.SmartCollections = ["Electrons", "Muons", "InDetTrackParticles" ] 

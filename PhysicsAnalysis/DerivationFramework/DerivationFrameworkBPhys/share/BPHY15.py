@@ -800,7 +800,7 @@ BPHY15Stream.AcceptAlgs(["BPHY15Kernel"])
 # Added by ASC
 from DerivationFrameworkCore.SlimmingHelper import SlimmingHelper
 BPHY15SlimmingHelper = SlimmingHelper("BPHY15SlimmingHelper")
-AllVariables  = []
+AllVariables  = ["EventInfo"]
 StaticContent = []
 
 # Needed for trigger objects
