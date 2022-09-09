@@ -344,27 +344,11 @@ namespace top {
 
     // Moriond2018 - AF2 JES
     // Summer2019 - JES/JER update
+    // Spring2021 - JMS update
+    // Summer2022 - JES precision flavour unc. update
 
     std::string conference = "Summer2019";
 
-    if (m_config->useJESPrecisionFlavourUncertainties()) {
-      // JES precision flavour uncertainties are stored in Summer2022 directory
-      // These don't invalidate the recommendations stored in the Summer2019 directory
-      // additionally the MC-to-MC corrections also have to be applied when the JES precision flavour uncertaitnies are used
-      // see https://twiki.cern.ch/twiki/bin/viewauth/AtlasProtected/JetUncertaintiesRel21Summer2018SmallR
-      if (m_config->jetMCtoMCCalibration() == "None" && m_config->isMC()) {
-	ATH_MSG_ERROR("useJESPrecisionFlavourUncertainties option provided but jetMCtoMCCalibration option is None! You have to provide a valid jetMCtoMCCalibration option.");
-        return StatusCode::FAILURE;
-      }
-      ATH_MSG_INFO("useJESPrecisionFlavourUncertainties option provided. JES precision flavour uncertainties are used.");
-      conference = "Summer2022";
-    }
-    // By setting calib_area to "None" we pick up the default from the JES group
-    std::string calib_area = "None";
-
-    // JER string option configuration
-    const bool JERisPseudoData = (m_config->jetJERSmearingModel() == "Full_PseudoData") || (m_config->jetJERSmearingModel() == "All_PseudoData");
-    std::string JERSmearModel = m_config->jetJERSmearingModel();
     std::string JMSOption = m_config->jetJMSOption();
     if (JMSOption != "None") {
       conference = "Spring2021"; // Updated files using the JMS option are in Spring2021
@@ -376,6 +360,28 @@ namespace top {
       }
     }
     else JMSOption = ""; // Default JMSOption
+
+    if (m_config->useJESPrecisionFlavourUncertainties()) {
+      // JES precision flavour uncertainties are stored in Summer2022 directory
+      // These don't invalidate the recommendations stored in the Summer2019 directory
+      // additionally the MC-to-MC corrections also have to be applied when the JES precision flavour uncertaitnies are used
+      // see https://twiki.cern.ch/twiki/bin/viewauth/AtlasProtected/JetUncertaintiesRel21Summer2018SmallR
+      if (m_config->jetMCtoMCCalibration() == "None" && m_config->isMC()) {
+	ATH_MSG_ERROR("useJESPrecisionFlavourUncertainties option provided but jetMCtoMCCalibration option is None! You have to provide a valid jetMCtoMCCalibration option.");
+        return StatusCode::FAILURE;
+      }
+      ATH_MSG_INFO("useJESPrecisionFlavourUncertainties option provided. JES precision flavour uncertainties are used.");
+      conference = "Summer2022"; // case where we want JES precision flavour uncertainties
+      if (JMSOption != "None") {
+	conference = "Summer2022_JMS"; // case where we want JMS AND JES precision flavour uncertainties
+      }
+    }
+    // By setting calib_area to "None" we pick up the default from the JES group
+    std::string calib_area = "None";
+
+    // JER string option configuration
+    const bool JERisPseudoData = (m_config->jetJERSmearingModel() == "Full_PseudoData") || (m_config->jetJERSmearingModel() == "All_PseudoData");
+    std::string JERSmearModel = m_config->jetJERSmearingModel();
     // Any PseudoData Option (Smear MC as data)
     if (JERSmearModel == "Full_PseudoData") {
       JERSmearModel = "Full";
