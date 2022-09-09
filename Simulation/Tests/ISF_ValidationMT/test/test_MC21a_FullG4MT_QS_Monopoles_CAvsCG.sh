@@ -19,7 +19,7 @@ Sim_tf.py \
     --inputEVNTFile="/cvmfs/atlas-nightlies.cern.ch/repo/data/data-art/ISF_Validation/mc21_13p6TeV.950542.MGPy8EG_DYSpinHalfMonopoles_1gD_1500GeV_valid.merge.EVNT.e8467_e8455.29631249._000005.pool.root.1" \
     --maxEvents="100" \
     --multithreaded="True" \
-    --preInclude "EVNTtoHITS:Campaigns.MC21SimulationMultiBeamSpot" \
+    --preInclude "EVNTtoHITS:Campaigns.MC21SimulationMultiBeamSpotG4DebuggingTools.DebugMonopole" \
     --skipEvents="0" \
     --randomSeed="41" \
     --DBRelease="all:300.0.4" \
@@ -47,7 +47,7 @@ then
         --maxEvents="100" \
         --multithreaded="True" \
         --postInclude "default:PyJobTransforms/UseFrontier.py" \
-        --preInclude "EVNTtoHITS:Campaigns/MC21SimulationMultiBeamSpot.py,SimulationJobOptions/preInclude.ExtraParticles.py,SimulationJobOptions/preInclude.G4ExtraProcesses.py" \
+        --preInclude "EVNTtoHITS:Campaigns/MC21SimulationMultiBeamSpot.py,SimulationJobOptions/preInclude.ExtraParticles.py,SimulationJobOptions/preInclude.G4ExtraProcesses.py,SimulationJobOptions/preInclude.DebugMonopoles.py" \
         --skipEvents="0" \
         --randomSeed="41" \
         --DBRelease="all:300.0.4" \

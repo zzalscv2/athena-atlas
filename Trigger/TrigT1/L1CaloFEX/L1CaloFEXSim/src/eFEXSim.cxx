@@ -150,52 +150,61 @@ StatusCode eFEXSim::NewExecute(int tmp_eTowersIDs_subset[10][18], eFEXOutputColl
 }
 
 
-std::vector<eFEXegTOB> eFEXSim::getEmTOBs()
+std::vector<std::unique_ptr<eFEXegTOB>> eFEXSim::getEmTOBs()
 {
 
-  std::vector<eFEXegTOB> tobsSort;
+  std::vector<std::unique_ptr<eFEXegTOB>> tobsSort;
   tobsSort.clear();
-  bool first = true;
+  //bool first = true;
 
   // concatonate tobs from the fpgas
+  // As we're using unique_ptrs here we have to move rather than copy
   for(auto &j : m_emTobObjects){
-    if (first) tobsSort = j;
-    else tobsSort.insert(tobsSort.end(),j.begin(),j.end());
-    first = false;
+    for (auto &k : j) {
+       tobsSort.push_back(std::move(k));
+    }
   }
 
   ATH_MSG_DEBUG("number of tobs: " <<tobsSort.size() << " in eFEX: " << m_id);
 
+  // Moving all TOB sorting to eFEXSysSim to allow xTOB generation
+  // Keep this just in case a more subtle need is discovered
+  /*
   // sort the tobs from the fpgas by their et (last 12 bits of 32 bit word)
   std::sort (tobsSort.begin(), tobsSort.end(), TOBetSort<eFEXegTOB>);
 
   // return the 6 highest ET TOBs from the efex
   if (tobsSort.size() > 6) tobsSort.resize(6);
+  */
   return tobsSort;
 }
 
 
-std::vector<eFEXtauTOB> eFEXSim::getTauTOBs()
+std::vector<std::unique_ptr<eFEXtauTOB>> eFEXSim::getTauTOBs()
 {
 
-  std::vector<eFEXtauTOB> tobsSort;
+  std::vector<std::unique_ptr<eFEXtauTOB>> tobsSort;
   tobsSort.clear();
-  bool first = true;
 
   // concatenate tobs from the fpgas
+  // As we're using unique_ptrs here we have to move rather than copy
   for( auto &j : m_tauTobObjects ){
-    if (first) tobsSort = j;
-    else tobsSort.insert(tobsSort.end(), j.begin(), j.end());
-    first = false;
+    for (auto &k : j) {
+       tobsSort.push_back(std::move(k));
+    }
   }
 
   ATH_MSG_DEBUG("number of tau tobs: " << tobsSort.size() << " in eFEX: " << m_id);
 
+  // Moving all TOB sorting to eFEXSysSim to allow xTOB generation
+  // Keep this just in case a more subtle need is discovered
+  /*
   // sort the tobs from the fpgas by their et (last 12 bits of 32 bit word)
   std::sort( tobsSort.begin(), tobsSort.end(), TOBetSort<eFEXtauTOB>);
 
   // return the tob 6 highest ET TOBs from the efex
   if (tobsSort.size() > 6) tobsSort.resize(6);
+  */
   return tobsSort;
 }
 

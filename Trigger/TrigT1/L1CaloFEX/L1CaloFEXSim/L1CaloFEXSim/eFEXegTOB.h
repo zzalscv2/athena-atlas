@@ -34,6 +34,8 @@ namespace LVL1 {
     bool m_seed_UnD;
     unsigned int m_seed;
     uint32_t m_tobword;
+    uint32_t m_xtobword0;
+    uint32_t m_xtobword1;
     
   public:
     eFEXegTOB();
@@ -55,21 +57,25 @@ namespace LVL1 {
     inline unsigned  int getWstotNum() const {return m_Wstot_Num;}
     inline unsigned  int getWstotDen() const {return m_Wstot_Den;}
     inline uint32_t getTobword() const {return m_tobword;}
+    inline uint32_t getxTobword0() const {return m_xtobword0;}
+    inline uint32_t getxTobword1() const {return m_xtobword1;}
     
-    unsigned int setEta(unsigned int);
-    unsigned int setPhi(unsigned int);
-    unsigned int setET(unsigned int);
-    unsigned int setFPGAID(unsigned int);
-    unsigned int seteFEXID(unsigned int);
-    bool setSeedUnD(bool);
-    unsigned int setSeed(unsigned int);
-    unsigned int setRetaCore(unsigned int);
-    unsigned int setRetaEnv(unsigned int);
-    unsigned int setRhadEM(unsigned int);
-    unsigned int setRhadHad(unsigned int);
-    unsigned int setWstotNum(unsigned int);
-    unsigned int setWstotDen(unsigned int);
-    uint32_t setTobword(uint32_t);
+    void setEta(unsigned int);
+    void setPhi(unsigned int);
+    void setET(unsigned int);
+    void setFPGAID(unsigned int);
+    void seteFEXID(unsigned int);
+    void setSeedUnD(bool);
+    void setSeed(unsigned int);
+    void setRetaCore(unsigned int);
+    void setRetaEnv(unsigned int);
+    void setRhadEM(unsigned int);
+    void setRhadHad(unsigned int);
+    void setWstotNum(unsigned int);
+    void setWstotDen(unsigned int);
+    void setTobword(uint32_t);
+    void setxTobword0(uint32_t);
+    void setxTobword1(uint32_t);
   };
   
 } // end of namespace

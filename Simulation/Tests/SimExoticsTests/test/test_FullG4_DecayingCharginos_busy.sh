@@ -19,7 +19,7 @@ Sim_tf.py \
 --truthStrategy 'MC15aPlusLLP' \
 --simulator 'FullG4MT' \
 --postInclude 'PyJobTransforms.UseFrontier' \
---preInclude 'Campaigns.MC16Simulation' \
+--preInclude 'Campaigns.MC16Simulation,G4DebuggingTools.DebugAMSB' \
 --geometryVersion 'default:ATLAS-R2-2016-01-00-01' \
 --inputEVNTFile "/cvmfs/atlas-nightlies.cern.ch/repo/data/data-art/SimCoreTests/mc15_13TeV.448300.MGPy8EG_A14N23LO_GG_mixedC1LLP_0p2_1400_1200.evgen.EVNT.e7183.EVNT.16706750._000001.pool.root.1" \
 --outputHITSFile "CA.HITS.pool.root" \
@@ -29,7 +29,7 @@ Sim_tf.py \
 
 rc=$?
 mv PDGTABLE.MeV PDGTABLE.MeV.CA
-mv log.EVNTtoHITS logEVNTtoHITS.CA
+mv log.EVNTtoHITS log.EVNTtoHITS.CA
 echo  "art-result: $rc simCA"
 status=$rc
 
@@ -38,7 +38,7 @@ Sim_tf.py \
     --truthStrategy 'MC15aPlusLLP' \
     --simulator 'FullG4MT' \
     --postInclude 'default:PyJobTransforms/UseFrontier.py' \
-    --preInclude 'EVNTtoHITS:Campaigns/MC16Simulation.py' \
+    --preInclude 'EVNTtoHITS:Campaigns/MC16Simulation.py,SimulationJobOptions.DebugAMSB.py' \
     --geometryVersion 'default:ATLAS-R2-2016-01-00-01' \
     --inputEVNTFile "/cvmfs/atlas-nightlies.cern.ch/repo/data/data-art/SimCoreTests/mc15_13TeV.448300.MGPy8EG_A14N23LO_GG_mixedC1LLP_0p2_1400_1200.evgen.EVNT.e7183.EVNT.16706750._000001.pool.root.1" \
     --outputHITSFile "CA.HITS.pool.root" \
@@ -52,7 +52,7 @@ Sim_tf.py \
     --truthStrategy 'MC15aPlusLLP' \
     --simulator 'FullG4MT' \
     --postInclude 'default:PyJobTransforms/UseFrontier.py' \
-    --preInclude 'EVNTtoHITS:Campaigns/MC16Simulation.py' \
+    --preInclude 'EVNTtoHITS:Campaigns/MC16Simulation.py,SimulationJobOptions.DebugAMSB.py' \
     --geometryVersion 'default:ATLAS-R2-2016-01-00-01' \
     --inputEVNTFile "/cvmfs/atlas-nightlies.cern.ch/repo/data/data-art/SimCoreTests/mc15_13TeV.448300.MGPy8EG_A14N23LO_GG_mixedC1LLP_0p2_1400_1200.evgen.EVNT.e7183.EVNT.16706750._000001.pool.root.1" \
     --outputHITSFile "CG.HITS.pool.root" \
@@ -62,7 +62,7 @@ Sim_tf.py \
 rc2=$?
 status=$rc2
 mv PDGTABLE.MeV PDGTABLE.MeV.CG
-mv log.EVNTtoHITS logEVNTtoHITS.CG
+mv log.EVNTtoHITS log.EVNTtoHITS.CG
 echo  "art-result: $rc2 simOLD"
 
 rc3=-9999

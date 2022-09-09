@@ -25,77 +25,73 @@ LVL1::eFEXegTOB::eFEXegTOB():
   m_Wstot_Den{99999},
   m_FPGA_ID{99999},
   m_eFEX_ID{99999},
-  m_seed_UnD{1},
+  m_seed_UnD{true},
   m_seed{99999},
-  m_tobword{0}
+  m_tobword{0},
+  m_xtobword0{0},
+  m_xtobword1{0}
 {}
 
-unsigned int LVL1::eFEXegTOB::setEta(unsigned int eta) {
+void LVL1::eFEXegTOB::setEta(unsigned int eta) {
   m_eta = eta;
-  return m_eta;
 }
 
-unsigned int LVL1::eFEXegTOB::setPhi(unsigned int phi) {
+void LVL1::eFEXegTOB::setPhi(unsigned int phi) {
   m_phi = phi;
-  return m_phi;
 }
 
-unsigned int LVL1::eFEXegTOB::setET(unsigned int et) {
+void LVL1::eFEXegTOB::setET(unsigned int et) {
   m_ET = et;
-  return m_ET;
 }
 
-unsigned int LVL1::eFEXegTOB::setFPGAID(unsigned int fpgaid) {
+void LVL1::eFEXegTOB::setFPGAID(unsigned int fpgaid) {
   m_FPGA_ID = fpgaid;
-  return m_FPGA_ID; 
 }
 
-unsigned int LVL1::eFEXegTOB::seteFEXID(unsigned int efexid) {
+void LVL1::eFEXegTOB::seteFEXID(unsigned int efexid) {
   m_eFEX_ID = efexid;
-  return m_eFEX_ID; 
 }
 
-bool LVL1::eFEXegTOB::setSeedUnD(bool seedund) {
+void LVL1::eFEXegTOB::setSeedUnD(bool seedund) {
   m_seed_UnD = seedund;
-  return m_seed_UnD;
 }
 
-unsigned int LVL1::eFEXegTOB::setSeed(unsigned int seed) {
+void LVL1::eFEXegTOB::setSeed(unsigned int seed) {
   m_seed = seed;
-  return m_seed;
 }
 
-unsigned int LVL1::eFEXegTOB::setRetaCore(unsigned int retaCore) {
+void LVL1::eFEXegTOB::setRetaCore(unsigned int retaCore) {
   m_Reta_Core = retaCore;
-  return m_Reta_Core;
 }
 
-unsigned int LVL1::eFEXegTOB::setRetaEnv(unsigned int retaEnv) {
+void LVL1::eFEXegTOB::setRetaEnv(unsigned int retaEnv) {
   m_Reta_Env = retaEnv;
-  return m_Reta_Env;
 }
 
-unsigned int LVL1::eFEXegTOB::setRhadEM(unsigned int rhadEM) {
+void LVL1::eFEXegTOB::setRhadEM(unsigned int rhadEM) {
   m_Rhad_EM = rhadEM;
-  return m_Rhad_EM;
 }
 
-unsigned int LVL1::eFEXegTOB::setRhadHad(unsigned int rhadHad) {
+void LVL1::eFEXegTOB::setRhadHad(unsigned int rhadHad) {
   m_Rhad_Had = rhadHad;
-  return m_Rhad_Had;
 }
 
-unsigned int LVL1::eFEXegTOB::setWstotNum(unsigned int wstot_Num) {
+void LVL1::eFEXegTOB::setWstotNum(unsigned int wstot_Num) {
   m_Wstot_Num = wstot_Num;
-  return m_Wstot_Num;
 }
 
-unsigned int LVL1::eFEXegTOB::setWstotDen(unsigned int wstot_Den) {
+void LVL1::eFEXegTOB::setWstotDen(unsigned int wstot_Den) {
   m_Wstot_Den = wstot_Den;
-  return m_Wstot_Den;
 }
 
-uint32_t LVL1::eFEXegTOB::setTobword(uint32_t tobword) {
+void LVL1::eFEXegTOB::setTobword(uint32_t tobword) {
   m_tobword = tobword;
-  return m_tobword;
+}
+
+void LVL1::eFEXegTOB::setxTobword0(uint32_t tobword) {
+  m_xtobword0 = tobword;
+}
+
+void LVL1::eFEXegTOB::setxTobword1(uint32_t tobword) {
+  m_xtobword1 = tobword;
 }

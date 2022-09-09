@@ -67,6 +67,7 @@ TrigR3Mon::TrigR3Mon( const std::string & name, ISvcLocator* pSvcLocator)
   declareProperty( "pTCutOffline",      m_pTCutOffline      = 2000 );
   declareProperty( "etaCutOffline",     m_etaCutOffline     = 2.5 );
   declareProperty( "d0CutOffline",      m_d0CutOffline      = 1000 );
+  declareProperty( "mind0CutOffline",   m_mind0CutOffline   = 0 );
   declareProperty( "z0CutOffline",      m_z0CutOffline      = 2000 );
   declareProperty( "pixHitsOffline",    m_pixHitsOffline    =  2 ); // 1 <- old value ( 2 degrees of freedom = 1 cluster ) 
   declareProperty( "sctHitsOffline",    m_sctHitsOffline    =  6 ); // 6 <- old value ( 6 clusters = 3 spacepoints )
@@ -224,7 +225,7 @@ StatusCode TrigR3Mon::bookHistograms() {
 
     // track filters
     // reference tracks (offline or truth) ...
-    TrackFilter* filterRef = new Filter_Track( m_etaCutOffline,    m_d0CutOffline,   0, m_z0CutOffline,  m_pTCutOffline,
+    TrackFilter* filterRef = new Filter_Track( m_etaCutOffline,    m_d0CutOffline,   m_mind0CutOffline, m_z0CutOffline,  m_pTCutOffline,
 					       m_pixHitsOffline,   m_sctHitsOffline, m_siHitsOffline, m_blayerHitsOffline,  
 					       m_strawHitsOffline, m_trtHitsOffline, 0, 
 					       m_pixHolesOffline, m_sctHolesOffline, m_siHolesOffline );

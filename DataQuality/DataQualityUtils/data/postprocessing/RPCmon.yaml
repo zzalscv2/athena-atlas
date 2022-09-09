@@ -42,7 +42,7 @@ Description: RPC outtime-time (on-track hits) fration
 
 ---
 # detection efficiency
-Input : ['Muon/MuonRawDataMonitoring/RPC/TrackMatch/Panel_Efficiency']
+Input : ['Muon/MuonRawDataMonitoring/RPC/TrackMatch/Panel_Efficiency_MuonFromZ']
 VariableOutput : True
 OutputDOF : [
   ]
@@ -59,3 +59,30 @@ OutputDOF : [
 ]
 Function: RpcRawDataMonitoring.RPCPostProcessing.make_hit_rate
 Description: RPC HitRate
+
+---
+# 2D Hit
+Input : ['Muon/MuonRawDataMonitoring/RPC/RpcOccupancy/NPRDHit_Panels_All']
+VariableOutput : True
+OutputDOF : [
+]
+Function: RpcRawDataMonitoring.RPCPostProcessing.make_2dhits
+Description: RPC 1DMuonHit
+
+---
+# 2D Nmuons decayed from Z
+Input : ['Muon/MuonRawDataMonitoring/RPC/TrackMatch/Panel_Efficiency_MuonFromZ']
+VariableOutput : True
+OutputDOF : [
+]
+Function: RpcRawDataMonitoring.RPCPostProcessing.make_2d_nmuons_Z
+Description: RPC Nmuons for muons from Z
+
+---
+# 2D Nmuons in all events
+Input : ['Muon/MuonRawDataMonitoring/RPC/TrackMatch/Panel_Efficiency_AllMuons']
+VariableOutput : True
+OutputDOF : [
+]
+Function: RpcRawDataMonitoring.RPCPostProcessing.make_2d_nmuons_all
+Description: RPC Nmuons for muons in all events

@@ -34,6 +34,8 @@ namespace LVL1 {
     bool m_seed_und;
     unsigned int m_seed;
     uint32_t m_tobword;
+    uint32_t m_xtobword0;
+    uint32_t m_xtobword1;
     
   public:
     eFEXtauTOB();
@@ -45,7 +47,7 @@ namespace LVL1 {
     inline unsigned int getBitwiseEt() const {return m_bitwise_et;}
     inline float getIso() const {return m_iso;}
     inline unsigned int getFPGAID() const {return m_fpga_id;}
-    inline unsigned int getEFEXID() const {return m_efex_id;}
+    inline unsigned int geteFEXID() const {return m_efex_id;}
     // if seed is above (higher phi) central supercell of the seed
     inline bool getSeedUnD() const {return m_seed_und;}
     // seed index in eta
@@ -55,21 +57,25 @@ namespace LVL1 {
     inline unsigned int getRhadCore() const {return m_rhad_core;}
     inline unsigned int getRhadEnv() const {return m_rhad_env;}
     inline uint32_t getTobword() const {return m_tobword;}
+    inline uint32_t getxTobword0() const {return m_xtobword0;}
+    inline uint32_t getxTobword1() const {return m_xtobword1;}
     
-    unsigned int setEta(unsigned int);
-    unsigned int setPhi(unsigned int);
-    unsigned int setEt(unsigned int);
-    unsigned int setBitwiseEt(unsigned int);
-    float setIso(unsigned int);
-    unsigned int setFPGAID(unsigned int);
-    unsigned int seteFEXID(unsigned int);
-    bool setSeedUnD(bool);
-    unsigned int setSeed(unsigned int);
-    unsigned int setRcoreCore(unsigned int);
-    unsigned int setRcoreEnv(unsigned int);
-    unsigned int setRhadCore(unsigned int);
-    unsigned int setRhadEnv(unsigned int);
-    uint32_t setTobword(uint32_t);
+    void setEta(unsigned int);
+    void setPhi(unsigned int);
+    void setEt(unsigned int);
+    void setBitwiseEt(unsigned int);
+    void setIso(unsigned int);
+    void setFPGAID(unsigned int);
+    void seteFEXID(unsigned int);
+    void setSeedUnD(bool);
+    void setSeed(unsigned int);
+    void setRcoreCore(unsigned int);
+    void setRcoreEnv(unsigned int);
+    void setRhadCore(unsigned int);
+    void setRhadEnv(unsigned int);
+    void setTobword(uint32_t);
+    void setxTobword0(uint32_t);
+    void setxTobword1(uint32_t);
   };
   
 } // end of namespace

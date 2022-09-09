@@ -53,6 +53,9 @@ StatusCode RpcTrackAnaAlg::initialize ()
   
   ATH_CHECK( initTrigTag() );
 
+  std::vector<std::string> sectorStr = {"1", "2", "3", "4", "5", "6", "7", "8", "9", "10", "11", "12", "13", "14", "15", "16"};
+  m_SectorGroup = Monitored::buildToolMap<int>(m_tools, "RpcTrackAnaAlg", sectorStr);
+
   ATH_MSG_INFO(" initialize extrapolator ");
   ATH_CHECK(m_extrapolator.retrieve());
 
@@ -333,10 +336,16 @@ StatusCode RpcTrackAnaAlg::fillMuonExtrapolateEff(const EventContext& ctx) const
     mymuons.push_back( mymuon );
   }
 
+  auto i_pt_allMu  = Scalar<double>("muPt_allMu",      0.);
+  auto i_eta_allMu = Scalar<double>("muEta_allMu",     0.);
+  auto i_phi_allMu = Scalar<double>("muPhi_allMu",     0.);
+  auto i_pt_zMu    = Scalar<double>("muPt_MuonFromZ",    0.);
+  auto i_eta_zMu   = Scalar<double>("muEta_MuonFromZ",   0.);
+  auto i_phi_zMu   = Scalar<double>("muPhi_MuonFromZ",   0.);
+
   std::vector<GasGapResult> results;
   std::vector<MyMuon>::iterator mu1_it = mymuons.begin();
   std::vector<MyMuon>::iterator mu1_end = mymuons.end();
-
   for(; mu1_it!=mu1_end; ++mu1_it){
     std::vector<MyMuon>::iterator mu2_it = mu1_it;
     std::vector<MyMuon>::iterator mu2_end = mu1_end;
@@ -361,13 +370,26 @@ StatusCode RpcTrackAnaAlg::fillMuonExtrapolateEff(const EventContext& ctx) const
       }
     }
 
-    if ( mu1_it->isolated && mu1_it->isZmumu ) {
-      const xAOD::TrackParticle* track = mu1_it->muon->trackParticle(xAOD::Muon::MuonSpectrometerTrackParticle);
-      if(!track) continue;
+    const xAOD::TrackParticle* track = mu1_it->muon->trackParticle(xAOD::Muon::MuonSpectrometerTrackParticle);
+    if(!track) continue;
 
-      results.clear();
-      ATH_CHECK(extrapolate2RPC(track,   Trk::anyDirection, results, BI));
-      ATH_CHECK(readHitsPerGasgap(ctx, results) );
+    results.clear();
+
+    ATH_CHECK(extrapolate2RPC(track,   Trk::anyDirection, results, BI));
+    ATH_CHECK(readHitsPerGasgap(ctx, results, AllMuon) );
+
+    i_pt_allMu  = mu1_it->muon->pt();
+    i_eta_allMu = mu1_it->muon->eta();
+    i_phi_allMu = mu1_it->muon->phi();
+    fill(tool, i_pt_allMu, i_eta_allMu, i_phi_allMu);
+
+    if ( mu1_it->isolated && mu1_it->isZmumu ) {
+      ATH_CHECK(readHitsPerGasgap(ctx, results, ZCand) );
+
+      i_pt_zMu  = mu1_it->muon->pt();
+      i_eta_zMu = mu1_it->muon->eta();
+      i_phi_zMu = mu1_it->muon->phi();
+      fill(tool, i_pt_zMu, i_eta_zMu, i_phi_zMu);
     }
   }
 
@@ -805,10 +827,13 @@ Trk::TrackParameters*  RpcTrackAnaAlg::computeTrackIntersectionWithGasGap(ExResu
 }
 
 //========================================================================================================
-StatusCode RpcTrackAnaAlg::readHitsPerGasgap(const EventContext& ctx, std::vector<GasGapResult>& results) const
+StatusCode RpcTrackAnaAlg::readHitsPerGasgap(const EventContext& ctx, std::vector<GasGapResult>& results, MuonSource muon_source) const
 {
   using namespace Monitored;
   auto tool = getGroup(m_packageName);
+
+  SG::ReadHandle<xAOD::EventInfo>         eventInfo(m_eventInfo, ctx);
+  int lumiBlock                            = eventInfo->lumiBlock();
 
   SG::ReadHandle<Muon::RpcPrepDataContainer> rpcContainer(m_rpcPrdKey, ctx);
   const RpcIdHelper& rpcIdHelper = m_idHelperSvc->rpcIdHelper();
@@ -817,8 +842,13 @@ StatusCode RpcTrackAnaAlg::readHitsPerGasgap(const EventContext& ctx, std::vecto
   ATH_MSG_DEBUG(" results size = "<< results.size());
   
   std::vector<std::pair<GasGapResult, const Muon::RpcPrepData*>>  v_PRDHit_TrackMatched;
+
+  auto i_hitTime_sec  = Scalar<int>("hitTime_sec",     0);
+
   for(GasGapResult &exr: results) {
     const std::shared_ptr<GasGapData> gap = exr.second;
+
+    int sector = (gap->RpcPanel_eta_phi.first->getSectorLayer()).first;
 
     int NHit_perEvt_eta = 0;
     int NHit_perEvt_phi = 0;
@@ -867,38 +897,71 @@ StatusCode RpcTrackAnaAlg::readHitsPerGasgap(const EventContext& ctx, std::vecto
           }
 
           v_PRDHit_TrackMatched.push_back(std::make_pair(exr, rpcData));
+
+          i_hitTime_sec = rpcData->time();
+          fill(m_tools[m_SectorGroup.at(std::to_string(std::abs(sector)))], i_hitTime_sec);
         }
       }
     }
 
+    int etaPanel_ind = -1;
+    int phiPanel_ind = -1;
+
+    etaPanel_ind = gap->RpcPanel_eta_phi.first->panel_index;
+    phiPanel_ind = gap->RpcPanel_eta_phi.second->panel_index;
+
     //Declare the quantities which should be monitored
-    auto hitMulti_eta  = Scalar<int>("hitMultiplicity_eta", NHit_perEvt_eta);
-    auto hitMulti_phi  = Scalar<int>("hitMultiplicity_phi", NHit_perEvt_phi);
-    auto hitMulti      = Scalar<int>("hitMultiplicity",     0);
-    auto i_panelIndex  = Scalar<int>("panelInd_hM",         0);
-    auto i_passExtrap  = Scalar<bool>("muon_passExtrap",   false);
+    if (muon_source == ZCand){
+      auto hitMulti_eta  = Scalar<int>("hitMulti_eta",       NHit_perEvt_eta);
+      auto hitMulti_phi  = Scalar<int>("hitMulti_phi",       NHit_perEvt_phi);
+      auto hitMulti      = Scalar<int>("hitMulti",           0);
+      auto i_panelIndex  = Scalar<int>("panelInd_hM",        0);
+      auto i_passExtrap  = Scalar<bool>("muon_passExtrap",   false);
+      auto i_LB          = Scalar<int>("LB_detEff",          lumiBlock);
+      
+      fill(tool, hitMulti_eta, hitMulti_phi);
 
-    fill(tool, hitMulti_eta, hitMulti_phi);
-    
-    int panel_ind = -1;
+      //
+      // Eta panel
+      hitMulti     = NHit_perEvt_eta;
+      i_panelIndex = etaPanel_ind;
+      if(NHit_perEvt_eta>0) i_passExtrap = true;
 
-    panel_ind = gap->RpcPanel_eta_phi.first->panel_index;
-    hitMulti = NHit_perEvt_eta;
-    if(hitMulti>0) i_passExtrap = true;
-    i_panelIndex = panel_ind;
-    fill(tool, hitMulti, i_panelIndex, i_passExtrap);
+      fill(tool, hitMulti, i_panelIndex, i_passExtrap, i_LB);
+      ATH_CHECK(fillClusterSize(view_hits_eta, etaPanel_ind, lumiBlock, sector, 0)); // isPhi = 0
+      
+      //
+      // Phi panel
+      hitMulti     = NHit_perEvt_phi;
+      i_panelIndex = phiPanel_ind;
+      if(NHit_perEvt_phi>0) i_passExtrap = true;
 
-    ATH_CHECK(fillClusterSize(view_hits_eta, panel_ind, 0)); // isPhi = 0
+      fill(tool, hitMulti, i_panelIndex, i_passExtrap, i_LB);
+      ATH_CHECK(fillClusterSize(view_hits_phi, phiPanel_ind, lumiBlock, sector, 1)); // isPhi = 1
+    }
+    else {
+      auto i_panelIndex  = Scalar<int>("panelInd_hM_allMu",       0);
+      auto i_passExtrap  = Scalar<bool>("muon_passExtrap_allMu",  false);
 
+      //
+      // Eta panel
+      i_panelIndex = etaPanel_ind;
+      if(NHit_perEvt_eta>0) i_passExtrap = true;
+      fill(tool, i_panelIndex, i_passExtrap);
 
-    panel_ind = gap->RpcPanel_eta_phi.second->panel_index;
-    hitMulti = NHit_perEvt_phi;
-    if(hitMulti>0) i_passExtrap = true;
-    i_panelIndex = panel_ind;
-    fill(tool, hitMulti, i_panelIndex, i_passExtrap);
-
-    ATH_CHECK(fillClusterSize(view_hits_phi, panel_ind, 1)); // isPhi = 1
+      //
+      // Phi panel
+      i_panelIndex = phiPanel_ind;
+      if(NHit_perEvt_phi>0) i_passExtrap = true;
+      
+      fill(tool, i_panelIndex, i_passExtrap);
+    }
   }
+
+  if (muon_source == AllMuon){
+    return StatusCode::SUCCESS;
+  }
+
 
   bool isOutTime = false;
   for(const std::pair<GasGapResult, const Muon::RpcPrepData*> &i_hit: v_PRDHit_TrackMatched) {    
@@ -947,11 +1010,12 @@ StatusCode RpcTrackAnaAlg::readHitsPerGasgap(const EventContext& ctx, std::vecto
 }
 
 //==================================================================================
-StatusCode RpcTrackAnaAlg::fillClusterSize(std::vector<const Muon::RpcPrepData*> &view_hits, const int panel_index, int isPhi) const
+StatusCode RpcTrackAnaAlg::fillClusterSize(std::vector<const Muon::RpcPrepData*> &view_hits, const int panel_index, int LB, int phiSector, int isPhi) const
 {
   using namespace Monitored;
 
   auto tool = getGroup(m_packageName);
+  auto i_LB = Scalar<int>("LB_nrpchit",  LB);
   
   // Make clusters from hits that are close together in space and time
   std::vector<const Muon::RpcPrepData*> cluster_hits;
@@ -983,17 +1047,24 @@ StatusCode RpcTrackAnaAlg::fillClusterSize(std::vector<const Muon::RpcPrepData*>
     }
 
     int cluster_size = cluster_hits.size();
+    for (int i_hit=0;i_hit < cluster_size; i_hit++ ){
+      auto i_phiSector = Scalar<int>("PhiSector",  phiSector);
+      fill(tool, i_LB, i_phiSector);
+    }
 
     auto i_panelIndex  = Scalar<int>("panelInd_clust",     panel_index);
-    auto i_clusterSize = Scalar<int>("clustMultiplicity",  cluster_size);
+    auto i_clusterSize = Scalar<int>("clusterSize",  cluster_size);
     fill(tool, i_panelIndex, i_clusterSize);
 
+    auto i_cs_sec  = Scalar<int>("cs_sec",     cluster_size);
+    fill(m_tools[m_SectorGroup.at(std::to_string(std::abs(phiSector)))], i_cs_sec);
+
     if (isPhi == 1) {
-      auto i_clusterSize_view = Scalar<int>("clustMultiplicity_phi",  cluster_size);
+      auto i_clusterSize_view = Scalar<int>("clusterSize_phi",  cluster_size);
       fill(tool, i_clusterSize_view);
     }
     else {
-      auto i_clusterSize_view = Scalar<int>("clustMultiplicity_eta",  cluster_size);
+      auto i_clusterSize_view = Scalar<int>("clusterSize_eta",  cluster_size);
       fill(tool, i_clusterSize_view);
     }
   }

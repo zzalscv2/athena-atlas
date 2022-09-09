@@ -74,6 +74,7 @@ protected:
   double  m_pTCutOffline;
   double  m_etaCutOffline;
   double  m_d0CutOffline;
+  double  m_mind0CutOffline;
   double  m_z0CutOffline;
 
   int m_siHitsOffline; // total number of si hits

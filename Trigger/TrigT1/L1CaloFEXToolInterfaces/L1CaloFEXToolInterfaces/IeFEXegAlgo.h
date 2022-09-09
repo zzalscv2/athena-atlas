@@ -41,6 +41,7 @@ Interface definition for eFEXegAlgo
     virtual void getWindowET(int layer, int jPhi, int SCID, unsigned int &) = 0;
     virtual bool hasSeed() = 0;
     virtual unsigned int getSeed() = 0;
+    virtual unsigned int getUnD() = 0;
     virtual void getCoreEMTowerET(unsigned int & et) = 0;
     virtual void getCoreHADTowerET(unsigned int & et) = 0;
 

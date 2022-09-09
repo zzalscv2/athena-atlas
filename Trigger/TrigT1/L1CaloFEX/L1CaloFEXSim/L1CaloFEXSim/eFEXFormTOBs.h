@@ -33,13 +33,28 @@ namespace LVL1 {
     virtual ~eFEXFormTOBs();
 
     virtual uint32_t formTauTOBWord(int &, int &, int &, unsigned int &, unsigned int &, unsigned int &, unsigned int &, unsigned int &, unsigned int &) override;
+    virtual std::vector<uint32_t> formTauxTOBWords(int &, int &, int &, int &, unsigned int &, unsigned int &, unsigned int &, unsigned int &, unsigned int &, unsigned int &) override;
 
-    virtual uint32_t formEmTOBWord(int &, int &, int &, unsigned int &, unsigned int &, unsigned int &, unsigned int &, unsigned int &, unsigned int &) override;
+    virtual uint32_t formEmTOBWord(int &, int &, int &, unsigned int &, unsigned int &, unsigned int &, unsigned int &, unsigned int &, unsigned int &, unsigned int &) override;
+    virtual std::vector<uint32_t> formEmxTOBWords(int &, int &, int &, int &, unsigned int &, unsigned int &, unsigned int &, unsigned int &, unsigned int &, unsigned int &, unsigned int &) override;
 
     /** Internal data */
   private:
-    const unsigned int m_eFexStep = 25;
-    const unsigned int m_eFexTobStep = 100;
+    const unsigned int m_tobETshift = 2;
+    const unsigned int m_fpgaShift = 30;
+    const unsigned int m_etaShift = 27;
+    const unsigned int m_phiShift = 24;
+    const unsigned int m_rhadShift = 22;
+    const unsigned int m_wstotShift = 20;
+    const unsigned int m_retaShift = 18;
+    const unsigned int m_seedShift = 16;
+    const unsigned int m_undShift = 15;
+    const unsigned int m_maxShift = 14;
+    const unsigned int m_shelfShift = 24;
+    const unsigned int m_efexShift = 20;
+    const unsigned int m_taurhadShift = 20;
+    const unsigned int m_taurcoreShift = 18;
+
   };
 
 } // end of namespace
