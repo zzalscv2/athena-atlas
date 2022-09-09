@@ -336,9 +336,10 @@ namespace CP
         parsID[4] = std::abs(parsID[4]);
         parsMS[4] = std::abs(parsMS[4]);
 
+
         Eigen::FullPivLU<AmgSymMatrix(5)> matID(covID);
         if (!matID.isInvertible()) {
-            ATH_MSG_WARNING(" ID weight matrix computation failed     ");
+            ATH_MSG_DEBUG(" ID weight matrix computation failed     ");
             return CorrectionCode::Error;
         }
         const AmgSymMatrix(5) weightID = matID.inverse();
@@ -346,7 +347,7 @@ namespace CP
 
         Eigen::FullPivLU<AmgSymMatrix(5)> matMS(covMS);
         if (!matMS.isInvertible()) {
-            ATH_MSG_WARNING(" MS weight matrix computation failed     ");
+            ATH_MSG_DEBUG(" MS weight matrix computation failed     ");
             return CorrectionCode::Error;
         }
         const AmgSymMatrix(5) weightMS = matMS.inverse();
@@ -354,7 +355,7 @@ namespace CP
 
         Eigen::FullPivLU<AmgSymMatrix(5)> matCB(weightID + weightMS);
         if (!matCB.isInvertible()) {
-            ATH_MSG_WARNING(" Inversion of weightCB failed ");
+            ATH_MSG_DEBUG(" Inversion of weightCB failed ");
             return CorrectionCode::Error;
         }
         covCB = matCB.inverse();
@@ -362,7 +363,7 @@ namespace CP
 
         Eigen::FullPivLU<AmgSymMatrix(5)> matSum(covID + covMS);
         if (!matSum.isInvertible()) {
-            ATH_MSG_WARNING(" Inversion of weightCB failed ");
+            ATH_MSG_DEBUG(" Inversion of weightCB failed ");
             return CorrectionCode::Error;
         }
         AmgSymMatrix(5) invCovSum = matSum.inverse();
