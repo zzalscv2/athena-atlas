@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2020 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "DBM_Telescope.h"
@@ -23,6 +23,13 @@
 #include "InDetGeoModelUtils/InDetMaterialManager.h"
 
 GeoVPhysVol* DBM_Telescope::Build() {
+
+  DBM_ModuleCage moduleCage(m_DDmgr, m_gmt_mgr, m_sqliteReader);
+
+  if(m_sqliteReader) {
+    moduleCage.Build();
+    return nullptr;
+  }
 
   double safety = 0.005*Gaudi::Units::mm;
 
@@ -86,7 +93,6 @@ GeoVPhysVol* DBM_Telescope::Build() {
 
   GeoTrf::RotateX3D rmX10(-10.*Gaudi::Units::deg);
 
-  DBM_ModuleCage moduleCage (m_DDmgr, m_gmt_mgr, m_sqliteReader);
   GeoVPhysVol* moduleCagePhys = moduleCage.Build();
 
   // parameters for rotating the 3-layer unit

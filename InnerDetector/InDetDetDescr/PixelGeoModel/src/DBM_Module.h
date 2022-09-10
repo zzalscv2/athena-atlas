@@ -1,9 +1,14 @@
 /*
-  Copyright (C) 2002-2020 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
 */
 
-#ifndef DBMModule_H
-#define DBMModule_H
+#ifndef PIXELGEOMODEL_DBMMODULE_H
+#define PIXELGEOMODEL_DBMMODULE_H
+
+/**
+ * @class DBM_Module
+ * Build the DBM Module consisting of diamond sensor, FEI4 and ceramic substrate
+ **/
 
 #include "GeoVPixelFactory.h"
 #include "GeoModelKernel/GeoIdentifierTag.h"
@@ -13,19 +18,13 @@
 
 #include <memory>
 
-/* @class DBM_Module
- *
- * Build the DBM Module consisting of diamond sensor, FEI4 and ceramic substrate
- *
- */
-
 namespace InDetDD {
   class SiDetectorDesign;
   class PixelDiodeMatrix;
 }
 
 class DBM_Module : public GeoVPixelFactory {
-  public:
+ public:
 
   DBM_Module(InDetDD::PixelDetectorManager* ddmgr,
              PixelGeometryManager* mgr,
