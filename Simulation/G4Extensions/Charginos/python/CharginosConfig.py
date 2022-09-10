@@ -157,6 +157,8 @@ def AMSB_Cfg(flags):
     N1Mass = eval(flags.Input.SpecialConfiguration["AMSBN1Mass"])
     # patching PDGTABLE
     get_and_fix_PDGTABLE_AMSB([(1000022, N1Mass, '~chi(0,1)', '0'), (1000024, C1Mass, '~chi(+,1)', '+')])
+    from ExtraParticles.PDGHelpers import updateExtraParticleWhiteList
+    updateExtraParticleWhiteList('G4particle_whitelist_ExtraParticles.txt', [1000022,-1000024,1000024])
     if flags.Common.ProductionStep == ProductionStep.Simulation:
         physicsOptions = [ result.popToolsAndMerge(CharginosPhysicsToolCfg(flags)) ]
         # Add Chargino decays if necessary

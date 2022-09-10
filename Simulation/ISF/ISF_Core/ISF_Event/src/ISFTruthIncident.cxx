@@ -31,11 +31,10 @@ ISF::ISFTruthIncident::ISFTruthIncident( ISF::ISFParticle &parent,
   m_position(position)
 {
   if ( !m_position) {
-    // no position was given, compute it
-    //  (1.) try retrieve the position from the first child particle
-    //  (2.) if no child particles given -> get position from parent particle
-    const ISF::ISFParticle *particle = m_children.front();
-    if ( !particle) particle = &m_parent;
+    // No position was given, so compute it.
+    // Default to the parent particle position in the case that there are no child particles.
+    const ISF::ISFParticle *particle = (m_children.empty()) ? &m_parent : m_children.front();
+    if ( !particle) particle = &m_parent; // protection against nullptrs in m_children ISFParticleVector - this would indicate a bug upstream, better to throw an exception here?
     const Amg::Vector3D &pos = particle->position();
 
     double time = 0.;  //<! TODO: FIXME

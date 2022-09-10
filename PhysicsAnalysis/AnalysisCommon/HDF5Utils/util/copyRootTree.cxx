@@ -192,6 +192,8 @@ namespace H5Utils {
         buffers.emplace_back(new Buffer<bool>(vars, tt, branchName));
       } else if (leaf_type == "Long64_t") {
         buffers.emplace_back(new Buffer<long long>(vars, tt, branchName));
+      } else if (leaf_type == "ULong64_t") {
+        buffers.emplace_back(new Buffer<unsigned long long>(vars, tt, branchName));
       } else if (leaf_type == "UInt_t") {
         buffers.emplace_back(new Buffer<unsigned int>(vars, tt, branchName));
       } else if (leaf_type == "UChar_t") {

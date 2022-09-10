@@ -18,7 +18,7 @@ AtlasG4_tf.py \
 --conditionsTag 'OFLCOND-RUN12-SDR-19' \
 --physicsList 'FTFP_BERT' \
 --DataRunNumber '222525' \
---firstEvent '0' \
+--firstEvent '1' \
 --beamType 'cosmics' \
 --postInclude 'PyJobTransforms.TransformUtils.UseFrontier' \
 --postExec 'with open("ConfigSimCA.pkl", "wb") as f: cfg.store(f)' \
@@ -38,7 +38,7 @@ AtlasG4_tf.py \
 --conditionsTag 'OFLCOND-RUN12-SDR-19' \
 --physicsList 'FTFP_BERT' \
 --DataRunNumber '222525' \
---firstEvent '0' \
+--firstEvent '1' \
 --beamType 'cosmics' \
 --postInclude 'PyJobTransforms/UseFrontier.py' \
 --truthStrategy 'MC15aPlus' \
@@ -54,7 +54,7 @@ AtlasG4_tf.py \
 --conditionsTag 'OFLCOND-RUN12-SDR-19' \
 --physicsList 'FTFP_BERT' \
 --DataRunNumber '222525' \
---firstEvent '0' \
+--firstEvent '1' \
 --beamType 'cosmics' \
 --postInclude 'PyJobTransforms/UseFrontier.py' \
 --truthStrategy 'MC15aPlus' \
