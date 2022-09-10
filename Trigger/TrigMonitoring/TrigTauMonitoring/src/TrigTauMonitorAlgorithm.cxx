@@ -1056,8 +1056,8 @@ void TrigTauMonitorAlgorithm::fillRNNCluster(const std::string& trigger, const s
     n_cluster = clusters.size();
 
     auto cluster_et_log = Monitored::Collection("cluster_et_log",clusters, [](const xAOD::CaloCluster *cluster){return std::log10( cluster->et()); });
-    auto cluster_eta =  Monitored::Collection("cluster_eta", clusters, [&tau](const xAOD::CaloCluster *cluster){return cluster->eta();});
-    auto cluster_phi =  Monitored::Collection("cluster_phi", clusters, [&tau](const xAOD::CaloCluster *cluster){return cluster->phi();});
+    auto cluster_eta =  Monitored::Collection("cluster_eta", clusters, [](const xAOD::CaloCluster *cluster){return cluster->eta();});
+    auto cluster_phi =  Monitored::Collection("cluster_phi", clusters, [](const xAOD::CaloCluster *cluster){return cluster->phi();});
     auto cluster_dEta = Monitored::Collection("cluster_dEta", clusters, [&tau](const xAOD::CaloCluster *cluster){auto ddeta=cluster->eta()- tau->eta();return ddeta; });
     auto cluster_dPhi = Monitored::Collection("cluster_dPhi", clusters, [&tau](const xAOD::CaloCluster *cluster){return cluster->p4().DeltaPhi(tau->p4()); }); 
     auto cluster_SECOND_R_log10 = Monitored::Collection("cluster_SECOND_R_log10", clusters, [](const xAOD::CaloCluster *cluster){
