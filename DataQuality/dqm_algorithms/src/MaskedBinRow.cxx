@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2017 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
 */
 
 /*! \file MaskedBinRow.cxx
@@ -60,6 +60,7 @@ dqm_algorithms::MaskedBinRow::execute(	const std::string & name,
   int checkstrip = dqm_algorithms::tools::GetFirstFromMap( "CheckStrip", config.getParameters(), 0);
   int useReference = dqm_algorithms::tools::GetFirstFromMap( "UseReference", config.getParameters(), 0);
   int useTotalEntries = dqm_algorithms::tools::GetFirstFromMap( "UseTotalEntries", config.getParameters(), 0);
+  int entriesBin = dqm_algorithms::tools::GetFirstFromMap( "EntriesBin", config.getParameters(), -1);
 
   TH2* refhist=0;
   if (useReference) {
@@ -112,6 +113,11 @@ dqm_algorithms::MaskedBinRow::execute(	const std::string & name,
       useTotalEntries = 0;
       dorate = 0;
     }
+  }
+
+  if (entriesBin > -1) {
+    totalEntries = histogram->GetBinContent(entriesBin);
+    useTotalEntries = (totalEntries == 0) ? 0 : 1;
   }
 
   dqm_core::Result* result = new dqm_core::Result();
@@ -231,5 +237,5 @@ dqm_algorithms::MaskedBinRow::printDescription(std::ostream& out)
   out<<"Optional Parameter: CheckStrip : To be used with DoRate.  Rather than check individual bins, it checks that the fraction of events outside the ok bin is below the threshold."<<std::endl;
   out<<"Optional Parameter: UseReference : Reference histogram with entries in the 'ok' bins will be used to indicate that these bins should be ignored  when parameter is set to 1.    default = 0 "<<std::endl;
   out<<"Optional Parameter: UseTotalEntries : The rate of digital errors will be checked against total number of entries in histogram  : default = 0 "<<std::endl;
+  out<<"Optional Parameter: EntriesBin : The rate of digital errors will be checked against content of global bin, if it is not negative : default = -1 "<<std::endl;
 }
-
