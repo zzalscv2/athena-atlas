@@ -193,7 +193,7 @@ int MissingMassTool::mmcType(const xAOD::IParticle* part) const
     if (aTauJet==0)
     {
       ATH_MSG_WARNING("MissingMassTool::mmcType() dynamic_cast of TauJet failed");
-      aType=-2;
+      return -2;
     }
     if (aTauJet->nTracks() <= 1) {
       aType=10;
