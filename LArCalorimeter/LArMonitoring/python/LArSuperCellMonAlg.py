@@ -39,8 +39,10 @@ def LArSuperCellMonConfigOld(inputFlags):
 
     return helper.result()
 
-def LArSuperCellMonConfig(inputFlags):
+def LArSuperCellMonConfig(inputFlags, **kwargs):
     from AthenaCommon.Logging import logging
+    from ByteStreamCnvSvc.ByteStreamConfig import ByteStreamReadCfg
+    from AthenaConfiguration.ComponentFactory import CompFactory
     mlog = logging.getLogger( 'LArSuperCellMonConfig' )
 
     from AthenaMonitoring.AthMonitorCfgHelper import AthMonitorCfgHelper
@@ -68,11 +70,19 @@ def LArSuperCellMonConfig(inputFlags):
     cfg.merge(CaloNoiseCondAlgCfg(inputFlags))
     cfg.merge(CaloNoiseCondAlgCfg(inputFlags,noisetype="electronicNoise"))
 
-    from LArROD.LArSCSimpleMakerConfig import LArSCSimpleMakerCfg, LArSuperCellBCIDEmAlgCfg
-    cfg.merge(LArSCSimpleMakerCfg(inputFlags))
-    cfg.merge(LArSuperCellBCIDEmAlgCfg(inputFlags))
+    cfg.merge(ByteStreamReadCfg(inputFlags))
+    from LArByteStream.LArRawSCDataReadingConfig import LArRawSCDataReadingCfg
+    cfg.merge(LArRawSCDataReadingCfg(inputFlags))
 
-    from AthenaConfiguration.ComponentFactory import CompFactory
+    from TrigT1CaloFexPerf.EmulationConfig import emulateSC_Cfg
+    sCellType = "EmulatedSCell"
+    cfg.merge(emulateSC_Cfg(inputFlags,SCOut=sCellType))
+
+    from LArCabling.LArCablingConfig import LArOnOffIdMappingSCCfg
+    cfg.merge(LArOnOffIdMappingSCCfg(inputFlags))
+    cfg.addEventAlgo(CompFactory.LArRAWtoSuperCell(SCellContainerIn="SC_ET",**kwargs))
+
+    #return cfg
     lArCellMonAlg=CompFactory.LArSuperCellMonAlg
 
 
@@ -112,6 +122,8 @@ def LArSuperCellMonConfigCore(helper, algclass, inputFlags, isCosmics=False, isM
     LArSuperCellMonAlg.MonGroupName = GroupName
 
     LArSuperCellMonAlg.EnableLumi = True
+    LArSuperCellMonAlg.CaloCellContainer = "SCell_ET"
+    LArSuperCellMonAlg.CaloCellContainerRef = "EmulatedSCell"
     
 
     do2DOcc = True #TMP
@@ -314,6 +326,7 @@ if __name__=='__main__':
     # Setup logs
     from AthenaCommon.Constants import DEBUG
     from AthenaCommon.Constants import WARNING
+    from AthenaConfiguration.Enums import LHCPeriod
     from AthenaCommon.Logging import log
     log.setLevel(DEBUG)
 
@@ -321,27 +334,23 @@ if __name__=='__main__':
     from AthenaConfiguration.AllConfigFlags import ConfigFlags
     #from AthenaConfiguration.TestDefaults import defaultTestFiles
     #ConfigFlags.Input.Files = defaultTestFiles.ESD
-    #ConfigFlags.Input.Files = ['/afs/cern.ch/work/l/lily/LAr/Rel22Dataset/valid1.345058.PowhegPythia8EvtGen_NNPDF3_AZNLO_ggZH125_vvbb.recon.ESD.e6004_e5984_s3126_d1623_r12488/ESD.24607649._000024.pool.root.1']
-    ConfigFlags.Input.Files = ['/home/pavol/valid1/ESD.24607649._000024.pool.root.1']
-    ConfigFlags.Input.Files = ['/tmp/damazio/SCMon/ESD.24607649._000024.pool.root.1']
-    #ConfigFlags.Input.Files = ['/eos/atlas/user/b/bcarlson/Run3Tmp/data18_13TeV.00360026.physics_EnhancedBias.recon.ESD.r10978_r11179_r11185/ESD.16781883._001043.pool.root.1']
     # to test tier0 workflow:
     #ConfigFlags.Input.Files = ['/cvmfs/atlas-nightlies.cern.ch/repo/data/data-art/OverlayTests/data15_13TeV.00278748.physics_ZeroBias.merge.RAW._lb0384._SFO-ALL._0001.1']
+    #ConfigFlags.Input.Files = ['../data22_13p6TeV/data22_13p6TeV.00432180.physics_Main.daq.RAW._lb0335._SFO-16._0001.data']
+    ConfigFlags.Input.Files = ['/eos/atlas/atlastier0/daq/data22_13p6TeV/express_express/00432180/data22_13p6TeV.00432180.express_express.daq.RAW/data22_13p6TeV.00432180.express_express.daq.RAW._lb0374._SFO-12._0001.data']
 
     #ConfigFlags.Calo.Cell.doPileupOffsetBCIDCorr=True
     ConfigFlags.Output.HISTFileName = 'LArSuperCellMonOutput.root'
     ConfigFlags.DQ.enableLumiAccess = True
     ConfigFlags.DQ.useTrigger = False
     ConfigFlags.DQ.Environment = 'tier0'
+    ConfigFlags.GeoModel.Run=LHCPeriod.Run3
     ConfigFlags.lock()
 
 
     # Initialize configuration object, add accumulator, merge, and run.
     from AthenaConfiguration.MainServicesConfig import MainServicesCfg 
     cfg = MainServicesCfg(ConfigFlags)
-    print(cfg)
-    print(dir(cfg))
-    print(cfg.getServices())
     storeGateSvc = cfg.getService("StoreGateSvc")
     storeGateSvc.Dump=True
     print(storeGateSvc)
@@ -350,8 +359,8 @@ if __name__=='__main__':
     #from CaloRec.CaloRecoConfig import CaloRecoCfg
     #cfg.merge(CaloRecoCfg(ConfigFlags))
 
-    from AthenaPoolCnvSvc.PoolReadConfig import PoolReadCfg
-    cfg.merge(PoolReadCfg(ConfigFlags))
+    #from AthenaPoolCnvSvc.PoolReadConfig import PoolReadCfg
+    #cfg.merge(PoolReadCfg(ConfigFlags))
 
     from LumiBlockComps.BunchCrossingCondAlgConfig import BunchCrossingCondAlgCfg
     cfg.merge(BunchCrossingCondAlgCfg(ConfigFlags))
@@ -362,4 +371,4 @@ if __name__=='__main__':
     cfg.store(f)
     f.close()
 
-    cfg.run(200,OutputLevel=WARNING) #use cfg.run() to run on all events
+    cfg.run(OutputLevel=WARNING) #use cfg.run() to run on all events
