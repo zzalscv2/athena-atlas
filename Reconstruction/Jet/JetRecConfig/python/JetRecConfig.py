@@ -10,8 +10,6 @@ Author: TJ Khoo, P-A Delsart
 """
 
 ########################################################################
-import os
-
 from AthenaCommon import Logging
 jetlog = Logging.logging.getLogger('JetRecConfig')
 
@@ -752,15 +750,11 @@ def isComponentPassingConditions(component, configflags, prereqDic):
 
     ok, reason = component.filterfn(configflags)
     return ok, reason
-    
-    
 
-
-def isAthenaRelease():
-    return 'Ath' in os.environ.get("AtlasProject", "")
 
 def isAnalysisRelease():
-    return 'Analysis' in os.environ.get("AtlasProject", "")
+    from AthenaConfiguration.Enums import Project
+    return Project.determine() is Project.AnalysisBase
 
 
 def reOrderAlgs(algs):
