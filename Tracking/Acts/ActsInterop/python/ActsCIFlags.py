@@ -14,7 +14,8 @@ def actsWorkflowFlags(flags):
     flags.Reco.EnableHGTDExtension = False
     flags.DQ.useTrigger = False
     flags.ITk.Tracking.doTruth = True
-    flags.ITk.Tracking.convertInDetClusters = True
+    flags.Detector.EnableITkStrip = False
+    flags.ITk.Tracking.EnableNativexAODclusters = True
     flags.ITk.Tracking.produceNewSpacePointContainer = True
     flags.Output.HISTFileName = "ActsMonitoringOutput.root"
 
