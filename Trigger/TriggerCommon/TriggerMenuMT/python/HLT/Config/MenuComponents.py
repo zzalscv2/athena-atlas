@@ -398,7 +398,7 @@ class MenuSequence(object):
                 if isinstance(probeIM,CompFactory.EventViewCreatorAlgorithm):
                     for child in baseSeq.getChildren()[1:]:
                         probeChild = child.clone(child.name()+"_probe")
-                        if hasProp(child,'ROBPrefetchingInputDecisions') and ConfigFlags.Trigger.enableROBPrefetching and child.ROBPrefetchingInputDecisions:
+                        if hasProp(child,'ROBPrefetchingInputDecisions') and ConfigFlags.Trigger.enableROBPrefetching:
                             # child is a ROB prefetching alg, map the probe IM decisions
                             probeChild.ROBPrefetchingInputDecisions = [str(probeIM.InputMakerOutputDecisions)]
                         elif probeIM.ViewNodeName == child.name():
