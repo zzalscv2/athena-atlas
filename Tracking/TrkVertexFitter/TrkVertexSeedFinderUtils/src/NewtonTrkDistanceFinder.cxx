@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2019 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
 */
 
 /*********************************************************************
@@ -53,7 +53,7 @@ namespace Trk
     return StatusCode::SUCCESS;
   }
 
-TwoPoints
+std::variant<TwoPoints, std::string>
 NewtonTrkDistanceFinder::GetClosestPoints (const PointOnTrack & firsttrack,
                                            const PointOnTrack & secondtrack) const
 {
@@ -241,11 +241,11 @@ NewtonTrkDistanceFinder::GetClosestPoints (const PointOnTrack & firsttrack,
     //(you are in a maximum or in a saddle point)
     if (det<0) {
       ATH_MSG_DEBUG( "Hessian is negative: saddle point" );
-      throw Error::NewtonProblem("Hessian is negative");
+      return "Hessian is negative";
     }
     if (det>0&&d2da_phi2<0) {
       ATH_MSG_DEBUG( "Hessian indicates a maximum: derivative will be zero but result incorrect" );
-      throw Error::NewtonProblem("Maximum point found");
+      return "Maximum point found";
     }
 
     //Now apply the Newton formula in more than one dimension
@@ -272,7 +272,9 @@ NewtonTrkDistanceFinder::GetClosestPoints (const PointOnTrack & firsttrack,
     
   }
 	
-  if (loopsnumber>m_maxloopnumber) throw Error::NewtonProblem("Could not find minimum distance: max loops number reached"); //now return error, see how to do it...
+  if (loopsnumber>m_maxloopnumber) {
+    return "Could not find minimum distance: max loops number reached"; //now return error, see how to do it...
+  }
   
 
   return TwoPoints(Amg::Vector3D(a_x0+a_Rt*(a_cosphi-a_cosphi0),

@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2019 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef TRKVERTEXSEEDFINDERUTILS_NEWTONTRKDISTANCEFINDER_H
@@ -9,6 +9,7 @@
 #include "TrkVertexSeedFinderUtils/SeedFinderParamDefs.h"
 #include "AthenaBaseComps/AthAlgTool.h"
 #include "MagFieldConditions/AtlasFieldCacheCondObj.h"
+#include <variant>
 
 namespace Trk
 {
@@ -46,23 +47,30 @@ namespace Trk
 
     virtual StatusCode initialize() override;
     virtual StatusCode finalize() override;
+
+    // GetClosestPoints returns either the resulting TwoPoints,
+    // or an error string on failure.
     
-    const TwoPoints GetClosestPoints(const Perigee & a, const Perigee & b) const {
-    //with the constractur of PointOnTrackPar a track is constructed with, as seed, 
+    std::variant<TwoPoints, std::string>
+    GetClosestPoints(const Perigee & a, const Perigee & b) const {
+      //with the constractur of PointOnTrackPar a track is constructed with, as seed, 
     //directly the point of closest approach (see for info PointOnTrack.h)
-    return GetClosestPoints(PointOnTrack(a),PointOnTrack(b));
-  }
+      return GetClosestPoints(PointOnTrack(a),PointOnTrack(b));
+    }
   
-  TwoPoints GetClosestPoints(const PointOnTrack &, const PointOnTrack &) const;
+    std::variant<TwoPoints, std::string>
+    GetClosestPoints(const PointOnTrack &, const PointOnTrack &) const;
 
-  const TwoPoints GetClosestPoints(const TwoTracks & twotracks) const {
-    return GetClosestPoints(twotracks.getFirstPerigee(),twotracks.getSecondPerigee());
-  }
+    std::variant<TwoPoints, std::string>
+    GetClosestPoints(const TwoTracks & twotracks) const {
+      return GetClosestPoints(twotracks.getFirstPerigee(),twotracks.getSecondPerigee());
+    }
   
-  const TwoPoints GetClosestPoints(const TwoPointOnTrack & twopointontrack) const {
-    return GetClosestPoints(twopointontrack.first,twopointontrack.second);
-  }
-
+    std::variant<TwoPoints, std::string>
+    GetClosestPoints(const TwoPointOnTrack & twopointontrack) const {
+      return GetClosestPoints(twopointontrack.first,twopointontrack.second);
+    }
+    
   private:
   //parameters for precision
   double m_precision;//as job option
@@ -73,13 +81,6 @@ namespace Trk
         {this, "AtlasFieldCacheCondObj", "fieldCondObj", "Name of the Magnetic Field conditions object key"};
 
   };
-
-  namespace Error {
-    struct NewtonProblem {
-      const char* p;
-      NewtonProblem(const char* q) {p=q; }
-    };	
-  }
 
 }
 

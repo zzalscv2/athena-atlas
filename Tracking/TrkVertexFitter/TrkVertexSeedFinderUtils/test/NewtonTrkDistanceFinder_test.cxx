@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2002-2020 CERN for the benefit of the ATLAS collaboration.
+ * Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration.
  */
 /**
  * @file TrkVertexSeedFinderUtils/test/NewtonTrkDistanceFinder_test.cxx
@@ -59,7 +59,7 @@ void test1 (Trk::NewtonTrkDistanceFinder& tool)
   Trk::Perigee p1a (pos1a, mom1a,  1, pos1a);
   Trk::Perigee p1b (pos1b, mom1b, -1, pos1b);
 
-  Trk::TwoPoints pp = tool.GetClosestPoints (p1a, p1b);
+  Trk::TwoPoints pp = std::get<Trk::TwoPoints> (tool.GetClosestPoints (p1a, p1b));
 
   assertVec3D (pp.first,  { -2.6655,  1.99717, 0.3325  } );
   assertVec3D (pp.second, { -1.99717, 2.6655, -0.3325  } );
@@ -72,7 +72,7 @@ void test1 (Trk::NewtonTrkDistanceFinder& tool)
   Trk::Perigee p2a (pos2a, mom2a, -1, pos2a);
   Trk::Perigee p2b (pos2b, mom2b,  1, pos2b);
 
-  EXPECT_EXCEPTION( Trk::Error::NewtonProblem, tool.GetClosestPoints (p2a, p2b));
+  assert (std::holds_alternative<std::string> (tool.GetClosestPoints (p2a, p2b)));
 
   Amg::Vector3D pos3a { 10, 2, 2 };
   Amg::Vector3D mom3a { 10000, 30000, 50000 };
@@ -81,7 +81,7 @@ void test1 (Trk::NewtonTrkDistanceFinder& tool)
 
   Trk::Perigee p3a (pos3a, mom3a,  1, pos3a);
   Trk::Perigee p3b (pos3b, mom3b, -1, pos3b);
-  pp = tool.GetClosestPoints (p3a, p3b);
+  pp = std::get<Trk::TwoPoints> (tool.GetClosestPoints (p3a, p3b));
   assertVec3D (pp.first,  { -9.47935, 0.437956, -0.603394 });
   assertVec3D (pp.second, { -4.46622, 4.67974,  -2.14596  });
 }

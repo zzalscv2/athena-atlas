@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2019 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
 */
 
 /*********************************************************************
@@ -67,22 +67,19 @@ namespace Trk
     std::pair<PointOnTrack,PointOnTrack> minpoints;
    
     //try first to get the minimum directly with the Newton method
-    try {
-      return m_distancefinder->GetClosestPoints(a,b);
+    auto ret = m_distancefinder->GetClosestPoints(a,b);
+    if (std::holds_alternative<TwoPoints>(ret)) {
+      return std::get<TwoPoints>(ret);
     }
-    catch (Error::NewtonProblem e) {
-      if(msgLvl(MSG::DEBUG)) msg(MSG::DEBUG) << "Problem with Newton finder: " << e.p << endmsg;
-      try {
-        minpoints=m_2ddistanceseeder->GetSeed(TwoTracks(a,b));
-        return m_distancefinder->GetClosestPoints(minpoints);
-      }
-      catch (Error::NewtonProblem e) {
-	ATH_MSG_DEBUG( "Problem with Newton finder, even after 2d seeder: no minimum between tracks found" << e.p);
-        m_numberOfMinimizationFailures+=1;
-      } catch (...) {
-        m_numberOfMinimizationFailures+=1;
-      }
+    ATH_MSG_DEBUG( "Problem with Newton finder: " <<
+                   std::get<std::string>(ret) );
+    minpoints = m_2ddistanceseeder->GetSeed(TwoTracks(a,b));
+    ret = m_distancefinder->GetClosestPoints(minpoints);
+    if (std::holds_alternative<TwoPoints>(ret)) {
+      return std::get<TwoPoints>(ret);
     }
+    ATH_MSG_DEBUG( "Problem with Newton finder, even after 2d seeder: no minimum between tracks found" << std::get<std::string>(ret));
+    m_numberOfMinimizationFailures+=1;
 
     return std::nullopt;
   }
