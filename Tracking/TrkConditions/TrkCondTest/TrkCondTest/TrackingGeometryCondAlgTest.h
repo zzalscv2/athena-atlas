@@ -22,16 +22,17 @@
 #include "TrkDetDescrInterfaces/ITrackingGeometrySvc.h"
 
 
+#include "CxxUtils/checker_macros.h"
 namespace Trk{
 
-class TrackingGeometryCondAlgTest : public AthReentrantAlgorithm
+class ATLAS_NOT_THREAD_SAFE TrackingGeometryCondAlgTest : public AthReentrantAlgorithm // execute not thread-safe
 {
 public:
     TrackingGeometryCondAlgTest(const std::string& name, ISvcLocator* pSvcLocator);
     virtual ~TrackingGeometryCondAlgTest() override = default;
 
     virtual StatusCode initialize() override;
-    virtual StatusCode execute(const EventContext& ctx) const override;
+    virtual StatusCode execute (const EventContext& ctx) const override;
     virtual bool isReEntrant() const override final { return false; }  // execute not thread-safe
     virtual StatusCode finalize() override {return StatusCode::SUCCESS;}
 

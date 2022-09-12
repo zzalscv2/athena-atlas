@@ -126,7 +126,7 @@ namespace InDet {
     
     */
     
-  class ATLAS_NOT_THREAD_SAFE StagedTrackingGeometryBuilder : //not safe  indexStaticLayers  and const_cast 
+  class ATLAS_NOT_THREAD_SAFE StagedTrackingGeometryBuilder : // const_cast 
     public AthAlgTool, 
     public Trk::TrackingVolumeManipulator,
     virtual public Trk::IGeometryBuilder {

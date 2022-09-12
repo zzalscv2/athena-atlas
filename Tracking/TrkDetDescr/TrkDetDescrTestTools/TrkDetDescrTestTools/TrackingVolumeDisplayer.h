@@ -15,7 +15,7 @@
 #include <string>
 #include <fstream>
 
-
+#include "CxxUtils/checker_macros.h" 
 namespace Trk {
 
     class TrackingVolume;
@@ -31,7 +31,8 @@ namespace Trk {
         @author Andreas.Salzburger@cern.ch   
      */
 
-    class TrackingVolumeDisplayer : virtual public RecursiveGeometryProcessor {
+    class ATLAS_NOT_THREAD_SAFE TrackingVolumeDisplayer : //mutable
+      virtual public RecursiveGeometryProcessor {
 
       public:
 

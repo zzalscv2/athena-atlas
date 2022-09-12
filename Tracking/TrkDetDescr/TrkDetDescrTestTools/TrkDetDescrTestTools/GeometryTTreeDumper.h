@@ -16,6 +16,7 @@
 #include <string>
 #include <fstream>
 
+#include "CxxUtils/checker_macros.h"
 class TTree;
 
 namespace Trk {
@@ -34,8 +35,10 @@ namespace Trk {
         @author Andreas.Salzburger@cern.ch   
      */
 
-    class GeometryTTreeDumper : virtual public RecursiveGeometryProcessor {
-      public:
+    class ATLAS_NOT_THREAD_SAFE GeometryTTreeDumper : //mutable
+      virtual public RecursiveGeometryProcessor {
+  
+    public:
         /** Constructor */
         GeometryTTreeDumper(const std::string&,const std::string&,const IInterface*);
 

@@ -36,7 +36,7 @@ namespace Trk {
       
       @author Andreas.Salzburger@cern.ch   
      */
-    class ATLAS_NOT_THREAD_SAFE GenericGeometryBuilder //Not safe indexStaticLayers  and const_cast
+    class ATLAS_NOT_THREAD_SAFE GenericGeometryBuilder //mutable
       : public AthAlgTool
       , virtual public IGeometryBuilder
     {

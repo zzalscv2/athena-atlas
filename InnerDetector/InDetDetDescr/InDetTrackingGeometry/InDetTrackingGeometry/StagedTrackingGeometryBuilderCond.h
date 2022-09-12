@@ -134,7 +134,7 @@ struct LayerSetupCond
     
     */
     
-  class ATLAS_NOT_THREAD_SAFE StagedTrackingGeometryBuilderCond : //not safe  indexStaticLayers  and const_cast
+  class ATLAS_NOT_THREAD_SAFE StagedTrackingGeometryBuilderCond : //const_cast
     public AthAlgTool, 
     public Trk::TrackingVolumeManipulator,
     virtual public Trk::IGeometryBuilderCond {

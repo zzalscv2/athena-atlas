@@ -19,6 +19,7 @@
 // ROOT
 #include "TTree.h"
 #include "TString.h"
+#include "CxxUtils/checker_macros.h"
 
 #define TRKDETDESCRTOOLS_MAXSTEPS 8000
 #define TRKDETDESCRTOOLS_MAXLAYERHITS 5000
@@ -199,7 +200,8 @@ namespace Trk {
 
      */
 
-    class MaterialMapper : public AthAlgTool, virtual public IMaterialMapper, virtual public IIncidentListener {
+    class ATLAS_NOT_THREAD_SAFE MaterialMapper : //mutable
+      public AthAlgTool, virtual public IMaterialMapper, virtual public IIncidentListener {
 
       public:
 

@@ -48,31 +48,26 @@ namespace Trk {
         virtual StatusCode initialize() override;
 
         /** Processor Action to work on TrackingGeometry& tgeo */
-        virtual StatusCode process
-        ATLAS_NOT_THREAD_SAFE(const TrackingGeometry& tgeo) const override;
+        virtual StatusCode process(TrackingGeometry& tgeo) const override;
 
         /** Processor Action to work on TrackingVolumes - the level is for the
          * hierachy tree*/
-        virtual StatusCode process
-        ATLAS_NOT_THREAD_SAFE(const TrackingVolume& tvol,
-                              size_t level = 0) const override;
+        virtual StatusCode process(TrackingVolume& tvol,
+                                   size_t level = 0) const override;
 
-        StatusCode process
-        ATLAS_NOT_THREAD_SAFE(const TrackingVolume& lay,
-                              const LayerMaterialMap& layerMaterialMap,
-                              size_t level) const;
+        StatusCode process(TrackingVolume& lay,
+                           const LayerMaterialMap& layerMaterialMap,
+                           size_t level) const;
 
         /** Processor Action to work on Layers */
-        virtual StatusCode process
-        ATLAS_NOT_THREAD_SAFE(const Layer& lay, size_t level = 0) const override;
+        virtual StatusCode process(Layer& lay, size_t level = 0) const override;
 
-        StatusCode process
-        ATLAS_NOT_THREAD_SAFE(const Layer& lay,
-                              const LayerMaterialMap& layerMaterialMap,
-                              size_t level) const;
+        StatusCode process(Layer& lay,
+                           const LayerMaterialMap& layerMaterialMap,
+                           size_t level) const;
 
         /** Processor Action to work on Surfaces */
-        virtual StatusCode process(const Surface& surf, size_t level = 0) const override;
+        virtual StatusCode process(Surface& surf, size_t level = 0) const override;
 
       private:
           

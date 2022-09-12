@@ -88,7 +88,8 @@ StatusCode Trk::TrackingGeometryTest::runTest()
         // push the geometry through the different processors
         for (ToolHandle<Trk::IGeometryProcessor> proc : m_trackingGeometryProcessors) {
             ATH_MSG_INFO("Parse geometry with processor " << proc->name() );
-            if ((proc->process(*m_trackingGeometry)).isFailure()){
+            //test so const_cast prb fine
+            if ((proc->process(const_cast<Trk::TrackingGeometry&>(*m_trackingGeometry))).isFailure()){
                 ATH_MSG_FATAL("Could not process the TrackingGeometry with '" << proc->name() <<"'. Aborting test.");
                 return StatusCode::FAILURE;
             }

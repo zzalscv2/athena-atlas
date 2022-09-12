@@ -44,7 +44,7 @@ namespace Trk {
       @author Andreas.Salzburger@cern.ch   
      */
 
-    class ATLAS_NOT_THREAD_SAFE GeometryBuilder :  // Not safe compactify and tools/sub builder are not all safe
+    class GeometryBuilder :
       public AthAlgTool,
       public TrackingVolumeManipulator,
       virtual public IGeometryBuilder {
@@ -69,8 +69,7 @@ namespace Trk {
       private:
 
         /** TrackingGeometry for ATLAS setup */
-        TrackingGeometry* atlasTrackingGeometry
-        ATLAS_NOT_THREAD_SAFE() const;
+        TrackingGeometry* atlasTrackingGeometry() const;
 
 #ifdef TRKDETDESCR_MEMUSAGE         
         MemoryLogger                        m_memoryLogger;                //!< in case the memory is logged

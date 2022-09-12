@@ -14,6 +14,8 @@
 // Gaudi & Athena
 #include "AthenaBaseComps/AthAlgTool.h"
 
+#include "CxxUtils/checker_macros.h"
+
 namespace Trk {
 
     class TrackingGeometry;
@@ -33,7 +35,8 @@ namespace Trk {
       @author Andreas.Salzburger@cern.ch   
      */
 
-    class RecursiveGeometryProcessor : public AthAlgTool, virtual public IGeometryProcessor {
+    class ATLAS_NOT_THREAD_SAFE RecursiveGeometryProcessor : //const_cast
+      public AthAlgTool, virtual public IGeometryProcessor {
 
       public:
         /** Constructor */
@@ -49,16 +52,16 @@ namespace Trk {
         StatusCode finalize();
        
         /** Processor Action to work on TrackingGeometry& tgeo */
-        virtual StatusCode process(const TrackingGeometry& tgeo) const;
+        virtual StatusCode process(TrackingGeometry& tgeo) const;
        
         /** Processor Action to work on TrackingVolumes - the level is for the hierachy tree*/
-        virtual StatusCode process(const TrackingVolume& tvol, size_t level = 0) const;
+        virtual StatusCode process(TrackingVolume& tvol, size_t level = 0) const;
        
         /** Processor Action to work on Layers */
-        virtual StatusCode process(const Layer& lay, size_t level = 0) const;
+        virtual StatusCode process(Layer& lay, size_t level = 0) const;
        
         /** Processor Action to work on Surfaces */
-        virtual StatusCode process(const Surface& surf, size_t level = 0) const;
+        virtual StatusCode process(Surface& surf, size_t level = 0) const;
      
       protected:
         /** Dedicated action for the different processors */

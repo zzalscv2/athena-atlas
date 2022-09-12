@@ -20,6 +20,8 @@
 #include "TTree.h"
 #include "TString.h"
 
+#include "CxxUtils/checker_macros.h"
+
 class TTree;
 
 namespace Trk {
@@ -36,7 +38,8 @@ namespace Trk {
       @author Andreas.Salzburger@cern.ch
      */
 
-    class VertexMapper : public AthAlgTool, virtual public IVertexMapper {
+    class ATLAS_NOT_THREAD_SAFE VertexMapper : //mutable
+      public AthAlgTool, virtual public IVertexMapper {
 
       public:
 

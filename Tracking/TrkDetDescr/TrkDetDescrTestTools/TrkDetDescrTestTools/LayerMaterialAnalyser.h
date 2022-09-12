@@ -14,6 +14,7 @@
 // Gaudi & Athena
 #include "AthenaBaseComps/AthAlgTool.h"
 #include "GaudiKernel/ToolHandle.h"
+#include "CxxUtils/checker_macros.h"
 
 #ifndef LAYERMAXBINS
 #define LAYERMAXBINS 50000
@@ -34,7 +35,8 @@ namespace Trk {
       @author Andreas.Salzburger@cern.ch
      */
 
-    class LayerMaterialAnalyser : public AthAlgTool, virtual public ILayerMaterialAnalyser {
+    class ATLAS_NOT_THREAD_SAFE LayerMaterialAnalyser : 
+      public AthAlgTool, virtual public ILayerMaterialAnalyser {
 
       public:
         /** Constructor */

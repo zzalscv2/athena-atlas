@@ -99,6 +99,8 @@ public:
 
   /** return the world */
   const TrackingVolume* highestTrackingVolume() const;
+  TrackingVolume* highestTrackingVolume();
+
 
   /** return the lowest tracking Volume */
   const TrackingVolume* lowestTrackingVolume(const Amg::Vector3D& gp) const;

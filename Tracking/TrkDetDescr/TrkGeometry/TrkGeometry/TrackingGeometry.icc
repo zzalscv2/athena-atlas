@@ -9,6 +9,12 @@ TrackingGeometry::highestTrackingVolume() const
   return (m_world);
 }
 
+inline TrackingVolume*
+TrackingGeometry::highestTrackingVolume()
+{
+  return (m_world);
+}
+
 inline NavigationLevel
 TrackingGeometry::navigationLevel() const
 {

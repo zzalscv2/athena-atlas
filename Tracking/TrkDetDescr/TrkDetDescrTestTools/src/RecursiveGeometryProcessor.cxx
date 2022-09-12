@@ -43,11 +43,11 @@ StatusCode Trk::RecursiveGeometryProcessor::finalize()
 }
 
 // Processor Action to work on TrackingGeometry 
-StatusCode Trk::RecursiveGeometryProcessor::process(const Trk::TrackingGeometry& tgeo) const {
+StatusCode Trk::RecursiveGeometryProcessor::process(Trk::TrackingGeometry& tgeo) const {
   
   ATH_MSG_VERBOSE("Start processing the TrackingGeometry recursively");
   // retrieve the highest tracking volume
-  const Trk::TrackingVolume* worldVolume = tgeo.highestTrackingVolume();  
+  Trk::TrackingVolume* worldVolume = tgeo.highestTrackingVolume();  
   if (worldVolume){
       ATH_MSG_VERBOSE("TrackingVolume '" << worldVolume->volumeName() << "' retrieved as highest level node.");
       return process(*worldVolume, 0);
@@ -58,7 +58,7 @@ StatusCode Trk::RecursiveGeometryProcessor::process(const Trk::TrackingGeometry&
 }
 
 // Processor Action to work on TrackingVolumes
-StatusCode Trk::RecursiveGeometryProcessor::process(const Trk::TrackingVolume& tvol, size_t level) const {
+StatusCode Trk::RecursiveGeometryProcessor::process(Trk::TrackingVolume& tvol, size_t level) const {
   
   std::stringstream displayBuffer;
   for (size_t il = 0; il < level; ++il) displayBuffer << " ";
@@ -72,12 +72,12 @@ StatusCode Trk::RecursiveGeometryProcessor::process(const Trk::TrackingVolume& t
   }
 
   // Process the contained layers if they exist
-  const Trk::LayerArray* layerArray = tvol.confinedLayers();
+  Trk::LayerArray* layerArray = tvol.confinedLayers();
   if (layerArray) {
       // display output
-      const auto & layers = layerArray->arrayObjects();
+      auto layers = layerArray->arrayObjects();
       ATH_MSG_VERBOSE(displayBuffer.str() << "--> has " << layers.size() << " confined layers." ); 
-      for (const auto & layIter : layers){
+      for (auto & layIter : layers){
           if (!layIter)
              ATH_MSG_WARNING("Zero-pointer found in LayerArray - indicates problem !");
           if ((layIter) && process(*layIter, level).isFailure()){
@@ -88,24 +88,28 @@ StatusCode Trk::RecursiveGeometryProcessor::process(const Trk::TrackingVolume& t
    } 
 
    // Process the boundary surface layers 
-   const auto & bSurfaces = tvol.boundarySurfaces();
+   auto bSurfaces = tvol.boundarySurfaces();
    for (size_t ib =0 ; ib < bSurfaces.size() ; ++ib){
        if (bSurfaces[ib]->surfaceRepresentation().associatedLayer()){
-           ATH_MSG_VERBOSE(displayBuffer.str() << "--> has a boundary layer." ); 
-           if ( process(*bSurfaces[ib]->surfaceRepresentation().associatedLayer(), level).isFailure() ){
-              ATH_MSG_FATAL("Failed to call process(const Layer&) on boundary layer. Aborting.");
-              return StatusCode::FAILURE;
+           ATH_MSG_VERBOSE(displayBuffer.str() << "--> has a boundary layer." );
+           if (process(
+                 const_cast<Trk::Layer&>(
+                   *bSurfaces[ib]->surfaceRepresentation().associatedLayer()),level)
+                 .isFailure()) {
+             ATH_MSG_FATAL("Failed to call process(const Layer&) on boundary "
+                           "layer. Aborting.");
+             return StatusCode::FAILURE;
            }
        }
    }
 
 
    // Process the contained TrackingVolumes (recursively) if they exist
-   const Trk::BinnedArray< Trk::TrackingVolume >* confinedVolumes = tvol.confinedVolumes();
+   Trk::BinnedArray< Trk::TrackingVolume >* confinedVolumes = tvol.confinedVolumes();
    // register the next round
    if (confinedVolumes) {
-       const auto & volumes = confinedVolumes->arrayObjects();
-       for (const auto & volumesIter : volumes){
+       auto volumes = confinedVolumes->arrayObjects();
+       for (auto & volumesIter : volumes){
            if (!volumesIter)
               ATH_MSG_WARNING("Zero-pointer found in VolumeArray - indicates problem !");
            if (volumesIter && process(*volumesIter, ++level).isFailure() ){
@@ -121,7 +125,7 @@ StatusCode Trk::RecursiveGeometryProcessor::process(const Trk::TrackingVolume& t
 }
 
 // Processor Action to work on Layers 
-StatusCode Trk::RecursiveGeometryProcessor::process(const Trk::Layer& lay, size_t level) const {
+StatusCode Trk::RecursiveGeometryProcessor::process(Trk::Layer& lay, size_t level) const {
 
     std::stringstream displayBuffer;
     for (size_t il = 0; il < level; ++il) displayBuffer << " ";
@@ -133,13 +137,13 @@ StatusCode Trk::RecursiveGeometryProcessor::process(const Trk::Layer& lay, size_
         return StatusCode::FAILURE;
     }
     // get the subsurface array
-    const Trk::SurfaceArray* surfArray = lay.surfaceArray();
+    Trk::SurfaceArray* surfArray = lay.surfaceArray();
     if (surfArray) {
-        Trk::BinnedArraySpan<Trk::Surface const * const > layerSurfaces = surfArray->arrayObjects();
+        Trk::BinnedArraySpan<Trk::Surface * const > layerSurfaces = surfArray->arrayObjects();
         ATH_MSG_VERBOSE(displayBuffer.str() << "   ---> has " << layerSurfaces.size() << " surfaces on the layer.");
         
-        Trk::BinnedArraySpan<Trk::Surface const * const >::const_iterator laySurfIter    = layerSurfaces.begin();
-        Trk::BinnedArraySpan<Trk::Surface const * const >::const_iterator laySurfIterEnd = layerSurfaces.end();
+        auto laySurfIter    = layerSurfaces.begin();
+        auto laySurfIterEnd = layerSurfaces.end();
         // loop over the surfaces and draw them
         for ( ; laySurfIter != laySurfIterEnd; ++laySurfIter) {
              if (!(*laySurfIter))
@@ -155,7 +159,7 @@ StatusCode Trk::RecursiveGeometryProcessor::process(const Trk::Layer& lay, size_
 }
 
 // Processor Action to work on Surfaces 
-StatusCode Trk::RecursiveGeometryProcessor::process(const Trk::Surface& surf, size_t level) const {
+StatusCode Trk::RecursiveGeometryProcessor::process(Trk::Surface& surf, size_t level) const {
     return processNode(surf, level);
 }
 
