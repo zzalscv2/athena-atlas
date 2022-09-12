@@ -19,7 +19,6 @@ ApplicationMgr Ready
 InDetVKalVxInJetTool/InDetTrkInJetType_test initGaudi 
 InDetVKalVxInJetTool/InDetTrkInJetType_test record 
 ClassIDSvc           INFO  getRegistryEntries: read 4092 CLIDRegistry entries for module ALL
-ToolSvc.InDet::...   INFO TrkVKalVrtFitter initialize() successful
 InDetVKalVxInJetTool/InDetTrkInJetType_test retrieve tool 
 test1
 test1 is OK
