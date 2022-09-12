@@ -45,21 +45,18 @@ namespace Trk {
         virtual StatusCode initialize();
 
         /** Processor Action to work on TrackingGeometry& tgeo */
-        virtual StatusCode process
-        ATLAS_NOT_THREAD_SAFE(const TrackingGeometry& tgeo) const;
+        virtual StatusCode process(TrackingGeometry& tgeo) const;
 
         /** Processor Action to work on TrackingVolumes - the level is for the
          * hierachy tree*/
-        virtual StatusCode process
-        ATLAS_NOT_THREAD_SAFE(const TrackingVolume& tvol,
-                              size_t level = 0) const;
+        virtual StatusCode process(TrackingVolume& tvol,
+                                   size_t level = 0) const;
 
         /** Processor Action to work on Layers */
-        virtual StatusCode process
-        ATLAS_NOT_THREAD_SAFE(const Layer& lay, size_t level = 0) const;
+        virtual StatusCode process(Layer& lay, size_t level = 0) const;
 
         /** Processor Action to work on Surfaces */
-        virtual StatusCode process(const Surface& surf, size_t level = 0) const;
+        virtual StatusCode process(Surface& surf, size_t level = 0) const;
 
       private:
          bool               m_constantMaterialToAllLayers;  //!< just assign a dummy material to all layers

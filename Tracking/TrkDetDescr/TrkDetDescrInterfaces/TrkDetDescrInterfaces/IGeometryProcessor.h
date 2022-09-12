@@ -28,8 +28,8 @@ namespace Trk {
   /** @class IGeometryProcessor
   
        Interface class IGeometryProcessors
-    
       @author Andreas.Salzburger@cern.ch
+      @author Christos Anastopoulos MT fixes
     */
   class IGeometryProcessor : virtual public IAlgTool {
     
@@ -41,16 +41,16 @@ namespace Trk {
       static const InterfaceID& interfaceID() { return IID_IGeometryProcessor; }
 
       /** Processor Action to work on TrackingGeometry& tgeo */
-      virtual StatusCode process ATLAS_NOT_THREAD_SAFE (const TrackingGeometry& tvol) const = 0;
+      virtual StatusCode process  (TrackingGeometry& tvol) const = 0;
 
       /** Processor Action to work on TrackingVolumes - the level is for the hierachy tree*/
-      virtual StatusCode process ATLAS_NOT_THREAD_SAFE (const TrackingVolume& tvol, size_t level=0) const = 0;
+      virtual StatusCode process  (TrackingVolume& tvol, size_t level=0) const = 0;
      
       /** Processor Action to work on Layers */
-      virtual StatusCode process ATLAS_NOT_THREAD_SAFE (const Layer& lay, size_t level=0) const = 0;
+      virtual StatusCode process  (Layer& lay, size_t level=0) const = 0;
 
       /** Processor Action to work on Surfaces */
-      virtual StatusCode process(const Surface& surf, size_t level=0) const = 0;
+      virtual StatusCode process(Surface& surf, size_t level=0) const = 0;
 
   };
 

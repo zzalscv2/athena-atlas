@@ -56,11 +56,11 @@ StatusCode Trk::InputLayerMaterialProvider::initialize() {
 }
 
 // Processor Action to work on TrackingGeometry 
-StatusCode Trk::InputLayerMaterialProvider::process(const Trk::TrackingGeometry& tgeo) const {
+StatusCode Trk::InputLayerMaterialProvider::process(Trk::TrackingGeometry& tgeo) const {
   
   ATH_MSG_VERBOSE("Start processing the TrackingGeometry recursively");
   // retrieve the highest tracking volume
-  const Trk::TrackingVolume* worldVolume = tgeo.highestTrackingVolume();  
+  Trk::TrackingVolume* worldVolume = tgeo.highestTrackingVolume();  
   if (worldVolume){
       ATH_MSG_VERBOSE("TrackingVolume '" << worldVolume->volumeName() << "' retrieved as highest level node.");
       return process(*worldVolume, 0);
@@ -71,7 +71,7 @@ StatusCode Trk::InputLayerMaterialProvider::process(const Trk::TrackingGeometry&
 }
 
 // Processor Action to work on TrackingVolumes
-StatusCode Trk::InputLayerMaterialProvider::process(const Trk::TrackingVolume& tvol, size_t level) const {
+StatusCode Trk::InputLayerMaterialProvider::process(Trk::TrackingVolume& tvol, size_t level) const {
   
   std::stringstream displayBuffer;
   for (size_t il = 0; il < level; ++il) displayBuffer << " ";
@@ -79,12 +79,12 @@ StatusCode Trk::InputLayerMaterialProvider::process(const Trk::TrackingVolume& t
   ATH_MSG_VERBOSE(displayBuffer.str() << "TrackingVolume '" << tvol.volumeName() << "'");
   
   // Process the contained layers if they exist
-  const Trk::LayerArray* layerArray = tvol.confinedLayers();
+  Trk::LayerArray* layerArray = tvol.confinedLayers();
   if (layerArray) {
       // display output
-      Trk::BinnedArraySpan<Trk::Layer const * const> layers = layerArray->arrayObjects();
-      Trk::BinnedArraySpan<Trk::Layer const * const>::const_iterator layIter  = layers.begin();
-      Trk::BinnedArraySpan<Trk::Layer const * const>::const_iterator layIterE = layers.end();    
+      Trk::BinnedArraySpan<Trk::Layer * const> layers = layerArray->arrayObjects();
+      auto layIter  = layers.begin();
+      auto layIterE = layers.end();    
       ATH_MSG_VERBOSE(displayBuffer.str() << "--> has " << layers.size() << " confined layers." ); 
       for ( ; layIter != layIterE; ++layIter){
           if (!(*layIter))
@@ -97,11 +97,11 @@ StatusCode Trk::InputLayerMaterialProvider::process(const Trk::TrackingVolume& t
    } 
 
    // Process the contained TrackingVolumes (recursively) if they exist
-   const Trk::BinnedArray< Trk::TrackingVolume >* confinedVolumes = tvol.confinedVolumes();
+   Trk::BinnedArray< Trk::TrackingVolume >* confinedVolumes = tvol.confinedVolumes();
    // register the next round
    if (confinedVolumes) {
-       Trk::BinnedArraySpan<Trk::TrackingVolume const * const> volumes = confinedVolumes->arrayObjects();
-       Trk::BinnedArraySpan<Trk::TrackingVolume const * const>::const_iterator volumesIter = volumes.begin();
+       Trk::BinnedArraySpan<Trk::TrackingVolume * const> volumes = confinedVolumes->arrayObjects();
+       auto volumesIter = volumes.begin();
        for (; volumesIter != volumes.end(); ++volumesIter){
            if (!(*volumesIter))
               ATH_MSG_WARNING("Zero-pointer found in VolumeArray - indicates problem !");
@@ -118,7 +118,7 @@ StatusCode Trk::InputLayerMaterialProvider::process(const Trk::TrackingVolume& t
 }
 
 // Processor Action to work on Layers 
-StatusCode Trk::InputLayerMaterialProvider::process(const Trk::Layer& lay, size_t level) const {
+StatusCode Trk::InputLayerMaterialProvider::process(Trk::Layer& lay, size_t level) const {
     
     // skip Layers w/o material
     if (!lay.layerMaterialProperties()) 
@@ -135,14 +135,13 @@ StatusCode Trk::InputLayerMaterialProvider::process(const Trk::Layer& lay, size_
     ATH_MSG_VERBOSE(displayBuffer.str() << "                 Layer memory adress is : " << &lay);
     
     Trk::HomogeneousLayerMaterial hLayerMaterial = Trk::HomogeneousLayerMaterial(m_constantMaterialProperties, 1.);
-    // assign it to the layer , const layer is passed so const cast ...
-    (const_cast<Trk::Layer&>(lay)).assignMaterialProperties(hLayerMaterial);
+    lay.assignMaterialProperties(hLayerMaterial);
     
     return StatusCode::SUCCESS;
 }
 
 // Processor Action to work on Surfaces 
-StatusCode Trk::InputLayerMaterialProvider::process(const Trk::Surface&, size_t) const {
+StatusCode Trk::InputLayerMaterialProvider::process(Trk::Surface&, size_t) const {
     return StatusCode::SUCCESS;
 }
 

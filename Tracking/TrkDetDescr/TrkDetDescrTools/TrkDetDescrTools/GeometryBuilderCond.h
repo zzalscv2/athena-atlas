@@ -24,7 +24,6 @@
 #include "TrkDetDescrUtils/MemoryLogger.h"
 #endif
 
-#include "CxxUtils/checker_macros.h"
 namespace Trk {
 
 class TrackingGeometry;
@@ -41,9 +40,10 @@ class ITrackingVolumeArrayCreator;
   to a single Trk::TrackingGeometry.
 
   @author Andreas.Salzburger@cern.ch
+  @author Christos Anastopoulos MT fixes
  */
 
-class ATLAS_NOT_THREAD_SAFE GeometryBuilderCond
+class GeometryBuilderCond
   : public AthAlgTool
   , public TrackingVolumeManipulator
   , virtual public IGeometryBuilderCond
@@ -74,7 +74,7 @@ public:
 private:
   /** TrackingGeometry for ATLAS setup */
   std::unique_ptr<Trk::TrackingGeometry> atlasTrackingGeometry
-  ATLAS_NOT_THREAD_SAFE(const EventContext& ctx, SG::WriteCondHandle<TrackingGeometry>& whandle) const;
+  (const EventContext& ctx, SG::WriteCondHandle<TrackingGeometry>& whandle) const;
 
 #ifdef TRKDETDESCR_MEMUSAGE
   MemoryLogger m_memoryLogger; //!< in case the memory is logged

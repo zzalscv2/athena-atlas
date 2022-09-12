@@ -5,7 +5,6 @@
 #include "GaudiKernel/ISvcLocator.h"
 
 #include "AthenaKernel/IOVSvcDefs.h"
-#include "CxxUtils/checker_macros.h"
 
 // Trk includes
 #include "TrkCondTest/TrackingGeometryCondAlgTest.h"
@@ -51,11 +50,10 @@ StatusCode Trk::TrackingGeometryCondAlgTest::execute(const EventContext& ctx) co
 
   for (const ToolHandle<Trk::IGeometryProcessor>& proc : m_trackingGeometryProcessors) {
     ATH_MSG_VERBOSE("PRINT SVC TG");
-    // process is not thread-safe but we made this algorithm non-reentrant
-    StatusCode sc1 ATLAS_THREAD_SAFE = proc->process(*trackingGeometry);
+    StatusCode sc1 = proc->process(const_cast<Trk::TrackingGeometry&>(*trackingGeometry));
     ATH_CHECK(sc1);
     ATH_MSG_VERBOSE("PRINT COND TG");
-    StatusCode sc2 ATLAS_THREAD_SAFE = proc->process(*trkGeom);
+    StatusCode sc2 = proc->process(const_cast<Trk::TrackingGeometry&>(*trkGeom));
     ATH_CHECK(sc2);
   }
   return StatusCode::SUCCESS;

@@ -13,6 +13,7 @@
 #include "TrkDetDescrTestTools/RecursiveGeometryProcessor.h"
 // Gaudi & Athena
 #include "AthenaBaseComps/AthAlgTool.h"
+#include "CxxUtils/checker_macros.h"
 
 class ITHistSvc;
 
@@ -31,7 +32,8 @@ namespace Trk {
 
      */
 
-    class LayerMaterialInspector :  virtual public RecursiveGeometryProcessor {
+    class ATLAS_NOT_THREAD_SAFE  LayerMaterialInspector :  
+      virtual public RecursiveGeometryProcessor {
      
       public:
         /** Constructor */
