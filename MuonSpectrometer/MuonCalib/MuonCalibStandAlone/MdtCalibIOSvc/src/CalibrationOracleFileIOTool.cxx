@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2017 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
 */
 
 // this
@@ -43,7 +43,7 @@ namespace MuonCalib {
         declareProperty("outputLocation", m_calib_dir);
     }
 
-    StatusCode CalibrationOracleFileIOTool::WriteT0(MdtTubeFitContainer *t0_output, const NtupleStationId &station_id, int iov_start,
+    StatusCode CalibrationOracleFileIOTool::WriteT0(const MdtTubeFitContainer *t0_output, const NtupleStationId &station_id, int iov_start,
                                                     int iov_end) {
         // create directory
         system(("mkdir -p " + m_calib_dir + "/t0s").c_str());

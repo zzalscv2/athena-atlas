@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2020 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef CalibrationTeeIOTool_H
@@ -22,7 +22,7 @@ namespace MuonCalib {
         /** initialize function */
         StatusCode initialize() override;
         /** interface functions */
-        StatusCode WriteT0(MdtTubeFitContainer *t0_output, const NtupleStationId &station_id, int iov_start, int iov_end) override;
+        StatusCode WriteT0(const MdtTubeFitContainer *t0_output, const NtupleStationId &station_id, int iov_start, int iov_end) override;
         StatusCode WriteRt(const RtCalibrationOutput *rt_relation, std::shared_ptr<const IRtResolution> resolution,
                            const NtupleStationId &station_id, int iov_start, int iov_end, bool real_rt, bool real_resolution) override;
         StatusCode LoadT0(std::map<NtupleStationId, MdtStationT0Container *> &t0s, int iov_id) override;

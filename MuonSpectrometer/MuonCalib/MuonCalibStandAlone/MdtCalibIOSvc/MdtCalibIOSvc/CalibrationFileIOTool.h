@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2020 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef CalibrationFileIOTool_H
@@ -19,7 +19,7 @@ namespace MuonCalib {
         /** constructor*/
         CalibrationFileIOTool(const std::string &t, const std::string &n, const IInterface *p);
         /** write out t0 */
-        StatusCode WriteT0(MdtTubeFitContainer *t0_output, const NtupleStationId &station_id, int /*iov_start*/, int /*iov_end*/) override;
+        StatusCode WriteT0(const MdtTubeFitContainer *t0_output, const NtupleStationId &station_id, int /*iov_start*/, int /*iov_end*/) override;
         /** write rt*/
         StatusCode WriteRt(const RtCalibrationOutput *rt_relation, std::shared_ptr<const IRtResolution> resolution,
                            const NtupleStationId &station_id, int /*iov_start*/, int /*iov_end*/, bool /*real_rt*/,

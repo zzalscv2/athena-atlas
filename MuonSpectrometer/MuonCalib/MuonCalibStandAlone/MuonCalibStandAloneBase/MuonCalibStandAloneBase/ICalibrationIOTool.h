@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef _CalibrationIOTool_H
@@ -42,7 +42,7 @@ namespace MuonCalib {
             @param iov_start start of the interval of validity
             @param iov_end end of the interval of validity
         */
-        virtual StatusCode WriteT0(MdtTubeFitContainer *t0_output, const NtupleStationId &station_id, int iov_start, int iov_end) = 0;
+        virtual StatusCode WriteT0(const MdtTubeFitContainer *t0_output, const NtupleStationId &station_id, int iov_start, int iov_end) = 0;
         /** write out rt relation
             @param rt_relation the rt relation
             @param resolution the rt_resolution

@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2020 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef MUONCALIB_TUBEDATAFROMFILE_H
@@ -23,7 +23,7 @@ namespace MuonCalib {
 
     class TubeDataFromFile {
     public:
-        typedef std::vector<MdtTubeFitContainer*> TubeData;
+        typedef std::vector<const MdtTubeFitContainer*> TubeData;
 
     public:
         TubeDataFromFile() : m_regions(0) {}
@@ -33,7 +33,7 @@ namespace MuonCalib {
         unsigned int nRegions() const { return m_regions; }
 
         /** retrieve MdtTubeFitContainer for a give regionId */
-        MdtTubeFitContainer* getTubes(unsigned int regionId) const {
+        const MdtTubeFitContainer* getTubes(unsigned int regionId) const {
             if (regionId >= (unsigned int)m_regions) {
                 MsgStream log(Athena::getMessageSvc(), "MdtTubeFitContainer");
                 log << MSG::WARNING << "TubeDataFromFile::getTubes: <regionId out of range> " << regionId << " size " << m_regions
@@ -50,7 +50,7 @@ namespace MuonCalib {
         }
 
         /** TubeDataFromFile takes ownership of the MdtTubeFitContainer */
-        bool addTubes(int regionId, MdtTubeFitContainer* tubes) {
+        bool addTubes(int regionId, const MdtTubeFitContainer* tubes) {
             if (regionId < 0 || regionId >= (int)m_regions) {
                 MsgStream log(Athena::getMessageSvc(), "MdtTubeFitContainer");
                 log << MSG::WARNING << "TubeDataFromFile::addTubes: <regionId out of range> " << regionId << " size " << m_regions

@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2020 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef MdtCalibOutputDbScvH
@@ -127,7 +127,7 @@ private:
     ///< database; method returns true in case of success, false otherwise
 
     // postprocess t0
-    MuonCalib::MdtTubeFitContainer *postprocess_t0s(MuonCalib::MdtTubeFitContainer *new_t0, const MuonCalib::NtupleStationId &id);
+    const MuonCalib::MdtTubeFitContainer *postprocess_t0s(const MuonCalib::MdtTubeFitContainer *new_t0, const MuonCalib::NtupleStationId &id);
     void create_default_resolution(const std::shared_ptr<const MuonCalib::IRtRelation>& rt);
 };
 #endif
