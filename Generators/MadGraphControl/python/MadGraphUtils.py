@@ -42,7 +42,7 @@ def setup_path_protection():
     # Addition for models directory
     global MADGRAPH_COMMAND_STACK
     if 'PYTHONPATH' in os.environ:
-        if 'Generators/madgraph/models' not in os.environ['PYTHONPATH']:
+        if not any( [('Generators/madgraph/models' in x and 'shutil_patch' not in x) for x in os.environ['PYTHONPATH'].split(':') ]):
             os.environ['PYTHONPATH'] += ':/cvmfs/atlas.cern.ch/repo/sw/Generators/madgraph/models/latest'
             MADGRAPH_COMMAND_STACK += ['export PYTHONPATH=${PYTHONPATH}:/cvmfs/atlas.cern.ch/repo/sw/Generators/madgraph/models/latest']
     # Make sure that gfortran doesn't write to somewhere it shouldn't
