@@ -54,6 +54,7 @@ def createSimConfigFlags():
     scf.addFlag("Sim.DoFullChain", False)
 
     def _check_G4_version(prevFlags):
+        from AthenaConfiguration.AthConfigFlags import isGaudiEnv
         version = ""
         if prevFlags.Input.Files:
             from AthenaConfiguration.AutoConfigFlags import GetFileMD
@@ -61,7 +62,7 @@ def createSimConfigFlags():
         if not version:
             from os import environ
             version = str(environ.get("G4VERS", ""))
-        if not version:
+        if isGaudiEnv() and not version:
             raise ValueError("Unknown G4 version")
         return version
 
