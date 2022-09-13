@@ -111,6 +111,7 @@
 + Reconstruction/tauRecTools
 + Reconstruction/PanTau/PanTauAlgs
 + Reconstruction/LwtnnUtils
++ Simulation/SimulationConfig
 + Tools/ART
 + Tools/DirectIOART
 + Tools/PathResolver
