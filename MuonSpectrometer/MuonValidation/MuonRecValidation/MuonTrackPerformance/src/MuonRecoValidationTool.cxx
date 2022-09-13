@@ -4,6 +4,7 @@
 
 #include "MuonRecoValidationTool.h"
 
+#include "GaudiKernel/ConcurrencyFlags.h"
 #include "GaudiKernel/IIncidentSvc.h"
 #include "GaudiKernel/ITHistSvc.h"
 #include "MuonClusterization/TgcHitClustering.h"
@@ -51,6 +52,12 @@ namespace Muon {
     }
 
     StatusCode MuonRecoValidationTool::initialize() {
+
+        if (Gaudi::Concurrency::ConcurrencyFlags::numThreads() > 1) {
+            ATH_MSG_ERROR("This tool cannot be used in multi-threaded mode");
+            return StatusCode::FAILURE;
+        }
+
         ATH_CHECK(m_idHelperSvc.retrieve());
         ATH_CHECK(m_edmHelperSvc.retrieve());
         ATH_CHECK(m_segmentHitSummaryTool.retrieve());

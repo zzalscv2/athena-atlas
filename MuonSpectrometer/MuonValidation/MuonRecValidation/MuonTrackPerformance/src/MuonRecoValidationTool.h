@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2020 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef MUON_MuonRecoValidationTool_H
@@ -9,6 +9,7 @@
 #include <vector>
 
 #include "AthenaBaseComps/AthAlgTool.h"
+#include "CxxUtils/checker_macros.h"
 #include "EventPrimitives/EventPrimitivesHelpers.h"
 #include "GaudiKernel/IIncidentListener.h"
 #include "GaudiKernel/ServiceHandle.h"
@@ -42,7 +43,7 @@ namespace Muon {
 
     struct MuonCandidate;
 
-    class MuonRecoValidationTool : public IMuonRecoValidationTool, virtual public IIncidentListener, public AthAlgTool {
+    class ATLAS_NOT_THREAD_SAFE MuonRecoValidationTool : public IMuonRecoValidationTool, virtual public IIncidentListener, public AthAlgTool {
     public:
         /** @brief default AlgTool constructor */
         MuonRecoValidationTool(const std::string&, const std::string&, const IInterface*);
