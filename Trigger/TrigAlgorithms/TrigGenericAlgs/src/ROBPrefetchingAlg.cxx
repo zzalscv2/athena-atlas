@@ -42,6 +42,12 @@ StatusCode ROBPrefetchingAlg::initialize() {
       ATH_MSG_DEBUG("- " << decisionContKey.key());
     }
   }
+  // Convert ChainFilter vector to set
+  m_chainFilter.insert(m_chainFilterVec.value().begin(), m_chainFilterVec.value().end());
+  if (not m_chainFilter.empty()) {
+    ATH_MSG_DEBUG("Will consider only RoIs from " << m_chainFilter.size()
+                  << " chains (or chain legs) in " << m_chainFilterVec.name());
+  }
   return StatusCode::SUCCESS;
 }
 
@@ -57,9 +63,24 @@ StatusCode ROBPrefetchingAlg::execute(const EventContext& eventContext) const {
     ATH_MSG_DEBUG("Processing " << decisionCont->size() << " decisions in " << decisionContKey.key());
     for (const Decision* decision : *decisionCont) {
 
-      ElementLink<TrigRoiDescriptorCollection> roiEL = findLink<TrigRoiDescriptorCollection>(decision, roiString()).link;
+      if (not m_chainFilter.empty()) {
+        bool skipPrefetching{true};
+        // Loop over active chains for this Decision to see if at least one matches the ChainFilter
+        for (const DecisionID chainLegID : decisionIDs(decision)) {
+          if (m_chainFilter.find(chainLegID)!=m_chainFilter.cend()) {
+            skipPrefetching = false;
+            break;
+          }
+        }
+        if (skipPrefetching) {
+          ATH_MSG_DEBUG("Skipping decision " << decision->name() << " because no active chain matches the " << m_chainFilterVec.name());
+          continue;
+        }
+      }
+
+      ElementLink<TrigRoiDescriptorCollection> roiEL = findLink<TrigRoiDescriptorCollection>(decision, m_roiLinkName.value()).link;
       if (!roiEL.isValid()) {
-        ATH_MSG_WARNING("No " << roiString() << " link in " << decisionContKey.key() << " decision " << *decision);
+        ATH_MSG_WARNING("No " << m_roiLinkName.value() << " link in " << decisionContKey.key() << " decision " << *decision);
         continue;
       }
 
