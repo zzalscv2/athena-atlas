@@ -1,7 +1,7 @@
 ///////////////////////// -*- C++ -*- /////////////////////////////
 
 /*
-  Copyright (C) 2002-2018 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
 */
 
 // xAODBranchAddress.cxx 
@@ -13,12 +13,10 @@
 #include "xAODBranchAddress.h"
 #include "xAODTEvent.h"
 
-// STL includes
-
 // fwk includes
 #include "GaudiKernel/System.h"
-//#include "GaudiKernel/ClassID.h"
 #include "AthenaKernel/CLIDRegistry.h"
+#include "CxxUtils/checker_macros.h"
 
 // ROOT includes
 #include "TBranch.h"
@@ -117,8 +115,8 @@ xAODBranchAddress::setTEventAddress()
   case 0: 
     {//reading event level info
       tevent->setActive(); //ensure we are active tevent
-      const void* addr = tevent->getInputObject(br_name, *ti);
-      m_ptr = (void*)addr; 
+      void* addr ATLAS_THREAD_SAFE = const_cast<void*>(tevent->getInputObject(br_name, *ti));
+      m_ptr = addr;
     }
     break;
   case 1: 
@@ -126,8 +124,8 @@ xAODBranchAddress::setTEventAddress()
       //FIXME: NEEED TO ACCESS METADATA
       //std::cout << "xAODBranchAddress::setTEventAddress metadata " << br_name << std::endl;
       tevent->setActive(); //ensure we are active tevent
-      const void* addr = tevent->getInputObject(br_name, *ti, false, true);
-      m_ptr = (void*)addr; 
+      void* addr ATLAS_THREAD_SAFE = const_cast<void*>(tevent->getInputObject(br_name, *ti, false, true));
+      m_ptr = addr;
     }
     break;
   }

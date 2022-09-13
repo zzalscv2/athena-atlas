@@ -1,7 +1,7 @@
 ///////////////////////// -*- C++ -*- /////////////////////////////
 
 /*
-  Copyright (C) 2002-2017 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
 */
 
 // RootConnection.cxx
@@ -16,6 +16,7 @@
 // fwk includes
 #include "GaudiKernel/ServiceHandle.h"
 #include "AthenaKernel/errorcheck.h"
+#include "CxxUtils/checker_macros.h"
 #include "DataModelRoot/RootType.h"
 
 // ROOT includes
@@ -129,7 +130,7 @@ StatusCode RootConnection::read(void* const /*data*/, size_t /*len*/) {
 }
 
 StatusCode RootConnection::write(const void* data, unsigned long& len) {
-  void* address = (void*)data;
+  void* address ATLAS_THREAD_SAFE = const_cast<void*>(data);
   if (m_file == 0 || m_tree == 0 || m_branch == 0) {
     return StatusCode::FAILURE;
   }
@@ -176,7 +177,7 @@ StatusCode RootConnection::setContainer(const std::string& container, const std:
   if (!m_tree)
     return StatusCode::FAILURE;
   m_branch = m_tree->GetBranch(branchName.c_str());
-  RootType root_type = RootType::ByName(type);
+  RootType root_type = RootType::ByNameNoQuiet(type);
   m_branchTypeCode = ::typecode_from_typeid(root_type.TypeInfo());
   if (m_branch == 0 && m_file->IsWritable()) {
     int bufsize = 32000; //FIXME: Make configurable

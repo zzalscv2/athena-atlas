@@ -1,7 +1,7 @@
 ///////////////////////// -*- C++ -*- /////////////////////////////
 
 /*
-  Copyright (C) 2002-2018 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
 */
 
 // xAODEventSelector.h 
@@ -13,6 +13,7 @@
 
 // framework includes
 #include "AthenaBaseComps/AthService.h"
+#include "CxxUtils/checker_macros.h"
 #include "GaudiKernel/IEvtSelector.h"
 #include "GaudiKernel/IIoComponent.h"
 #include "GaudiKernel/IIncidentSvc.h"
@@ -43,7 +44,7 @@ namespace Athena {
 /** @brief Class implementing the GAUDI @c IEvtSelector interface using 
  *         ROOT @c TTree as a backend
  */
-class xAODEventSelector : 
+class ATLAS_NOT_THREAD_SAFE xAODEventSelector :
   virtual public IEvtSelector,
   virtual public IEvtSelectorSeek,
   virtual public IAddressProvider,

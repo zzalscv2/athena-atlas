@@ -1,7 +1,7 @@
 ///////////////////////// -*- C++ -*- /////////////////////////////
 
 /*
-  Copyright (C) 2002-2017 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
 */
 
 // RootNtupleEventSelector.h 
@@ -24,6 +24,7 @@
 #include "GaudiKernel/ServiceHandle.h"
 #include "AthenaKernel/IEvtSelectorSeek.h"
 #include "AthenaKernel/IAddressProvider.h"
+#include "CxxUtils/checker_macros.h"
 
 #include "TFile.h"
 #include "TObjString.h"
@@ -41,7 +42,7 @@ namespace Athena {
 /** @brief Class implementing the GAUDI @c IEvtSelector interface using 
  *         ROOT @c TTree as a backend
  */
-class RootNtupleEventSelector :
+class ATLAS_NOT_THREAD_SAFE RootNtupleEventSelector :
     public extends<AthService,
                    IEvtSelector, IEvtSelectorSeek,
                    IAddressProvider, IIoComponent, IIncidentListener>

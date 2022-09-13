@@ -1,7 +1,7 @@
 ///////////////////////// -*- C++ -*- /////////////////////////////
 
 /*
-  Copyright (C) 2002-2017 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
 */
 
 // RootGlobalsRestore.h 
@@ -14,8 +14,9 @@
 // STL includes
 #include <iosfwd>
 
-// Gaudi includes
- 
+// Framework includes
+#include "CxxUtils/checker_macros.h"
+
 // Forward declaration
 class TDirectory;
 class TFile;
@@ -25,7 +26,7 @@ namespace Athena {
 /** @class RootGlobalsRestore captures the state of a few global resources
  *  from ROOT and restores their initial value upon d-tor call.
  */
-class RootGlobalsRestore
+class ATLAS_NOT_THREAD_SAFE RootGlobalsRestore
 { 
 
   /////////////////////////////////////////////////////////////////// 

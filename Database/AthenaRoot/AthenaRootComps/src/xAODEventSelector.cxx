@@ -1,7 +1,7 @@
 ///////////////////////// -*- C++ -*- /////////////////////////////
 
 /*
-  Copyright (C) 2002-2020 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
 */
 
 // xAODEventSelector.cxx 
@@ -38,6 +38,7 @@
 #include "AthenaKernel/IDictLoaderSvc.h"
 #include "AthenaKernel/CLASS_DEF.h"
 #include "AthenaKernel/CLIDRegistry.h"
+#include "CxxUtils/checker_macros.h"
 
 // StoreGate includes
 
@@ -83,14 +84,18 @@ public:
   /// standard d-tor
   virtual ~xAODEventContext() {}
   /// identifier method required by IEvtSelector::Context
-  virtual void* identifier() const { return (void*)(m_evtsel); }
-
+  virtual void* identifier() const override {
+    void* id ATLAS_THREAD_SAFE = const_cast<xAODEventSelector*>(m_evtsel);
+    return id;
+  }
   /// access to the container of files
   const std::vector<std::string>& files() const { return m_evtsel->m_inputCollectionsName.value(); }
   /// access to the current file
-  TFile* file() const { return m_evtsel->m_tfile; }
+  const TFile* file() const { return m_evtsel->m_tfile; }
   /// call to setFile on evtSel
-  StatusCode setFile(const std::string& fname) { return const_cast<xAODEventSelector*>(m_evtsel)->setFile(fname); }
+  StatusCode setFile ATLAS_NOT_THREAD_SAFE (const std::string& fname) {
+    return const_cast<xAODEventSelector*>(m_evtsel)->setFile(fname);
+  }
   /// access to the file iterator
   std::size_t fileIndex() const { return m_evtsel->m_collIdx; }
   /// access to the current event entry number
@@ -396,7 +401,7 @@ xAODEventSelector::next( IEvtSelector::Context& ctx ) const
   }
   
 
-  TFile *file = rctx->file();
+  const TFile *file = rctx->file();
   if(file && m_nbrEvts==0) {
     //fire the BeginInputFile incident for the first file
     m_incsvc->fireIncident(FileIncident(name(), "BeginInputFile", file->GetName()));
