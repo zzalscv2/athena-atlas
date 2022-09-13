@@ -5,6 +5,7 @@
 #include "JetSubStructureUtils/KtDeltaR.h"
 #include "fastjet/ClusterSequence.hh"
 #include "fastjet/JetDefinition.hh"
+#include "FourMomUtils/xAODP4Helpers.h"
 #include <math.h>
 #include <cmath>
 using namespace std;
@@ -26,11 +27,6 @@ double KtDeltaR::result(const fastjet::PseudoJet &jet) const
     return 0.0;
   }
 
-  // TODO: Switch to JetUtils helpers for dR when package is migrated
-  constexpr double twopi = 2.0*M_PI;
-  double deta = outjets[1].eta() - outjets[0].eta();
-  double dphi = std::abs(outjets[1].phi() - outjets[0].phi());
-  if ( dphi > twopi ) dphi -= twopi;
-  double dr = sqrt(deta*deta + dphi*dphi);
-  return dr;
+  return xAOD::P4Helpers::deltaR(outjets[0].eta(), outjets[0].phi(),
+				 outjets[1].eta(), outjets[1].phi());
 }
