@@ -90,7 +90,6 @@ namespace {
 	};
 
 	struct MMEfficiencyHistogramStruct {
-		std::vector<int> den;
 		std::vector<int> num;
 		std::vector<int> nGaps;
 	};
@@ -624,7 +623,6 @@ void MMRawDataMonAlg::clusterFromTrack(const xAOD::TrackParticleContainer*  muon
 
 void MMRawDataMonAlg::MMEfficiency( const xAOD::TrackParticleContainer*  muonContainer) const
 {
-	int numOfGaps = 4;
 	MMEfficiencyHistogramStruct effPlots[2][2][16][2][4];
 	MMEfficiencyHistogramStruct Gaps[2][2][16][2];
 
@@ -662,10 +660,8 @@ void MMRawDataMonAlg::MMEfficiency( const xAOD::TrackParticleContainer*  muonCon
 			int pcb=get_PCB_from_channel(ch);
 			int abs_stEta= get_sectorEta_from_stationEta(stEta);
 			int iside = (stEta > 0) ? 1 : 0;
-			Gaps[iside][abs_stEta][phi-1][multi-1].nGaps.push_back(gap);
-			// denominator
-			for(int ga=0; ga<numOfGaps; ++ga)
-				if(effPlots[iside][abs_stEta][phi-1][multi-1][ga].den.size()==0) effPlots[iside][abs_stEta][phi-1][multi-1][ga].den.push_back(pcb-1);
+                        if( ! (std::find( Gaps[iside][abs_stEta][phi-1][multi-1].nGaps.begin(), Gaps[iside][abs_stEta][phi-1][multi-1].nGaps.end(), gap ) != Gaps[iside][abs_stEta][phi-1][multi-1].nGaps.end()) )
+                          Gaps[iside][abs_stEta][phi-1][multi-1].nGaps.push_back(gap);
 			//numerator
 			if(effPlots[iside][abs_stEta][phi-1][multi-1][gap-1].num.size()==0) effPlots[iside][abs_stEta][phi-1][multi-1][gap-1].num.push_back(pcb-1);
 		}
@@ -679,16 +675,34 @@ void MMRawDataMonAlg::MMEfficiency( const xAOD::TrackParticleContainer*  muonCon
 			for(int p=0; p<16; ++p) {
 				for(int m=0; m<2; ++m) {
 					if(Gaps[s][e][p][m].nGaps.size()<nGaptag) continue;
-					for(int ga=0; ga<4; ++ga){
-						for (unsigned int i=0; i<effPlots[s][e][p][m][ga].den.size(); ++i){
-							int den_pcb = effPlots[s][e][p][m][ga].den.at(i);
-							auto traversed_pcb = Monitored::Scalar<int>("pcb_eta"+std::to_string(e+1)+"_"+MM_Side[s]+"_phi"+std::to_string(p)+"_multiplet"+std::to_string(m+1)+"_gas_gap"+std::to_string(ga+1),den_pcb);
-							auto traversed_pcb_allphi = Monitored::Scalar<int>("pcb_eta"+std::to_string(e+1)+"_allphi_"+MM_Side[s]+"_multiplet"+std::to_string(m+1)+"_gas_gap"+std::to_string(ga+1),den_pcb);
-							auto isHit = effPlots[s][e][p][m][ga].num.size() > 0;
-							auto hitcut = Monitored::Scalar<int>("hitcut", (int)isHit);
-							fill(MM_sideGroup, traversed_pcb, traversed_pcb_allphi, hitcut);
-						}
+                                        if(Gaps[s][e][p][m].nGaps.size()>4) continue;
+                                        //find the missing gap                                                                                                                                                                         
+                                        int gapsum=0;
+					for (unsigned int g=0; g<Gaps[s][e][p][m].nGaps.size(); ++g)
+					  gapsum+= Gaps[s][e][p][m].nGaps.at(g);
+					int missing_gap=10-gapsum-1;
+					//if missing gap = -1 --> nGaps=4 --> all efficient                                                                                                                                           
+					if(Gaps[s][e][p][m].nGaps.size()==4){
+					  for (unsigned int ga=0; ga<Gaps[s][e][p][m].nGaps.size(); ++ga){
+					    for (unsigned int i=0; i<effPlots[s][e][p][m][ga].num.size(); ++i){
+					      int pcb = effPlots[s][e][p][m][ga].num.at(i);
+					      auto traversed_pcb = Monitored::Scalar<int>("pcb_eta"+std::to_string(e+1)+"_"+MM_Side[s]+"_phi"+std::to_string(p)+"_multiplet"+std::to_string(m+1)+"_gas_gap"+std::to_string(ga+1),pcb);
+					      auto isHit = 1;
+					      auto hitcut = Monitored::Scalar<int>("hitcut", (int)isHit);
+					      fill(MM_sideGroup, traversed_pcb, hitcut);
+					    }
+					  }
+					} else {// 3 gaps, the fourth is inefficient                                                                                                                                                  
+					  int ref_gap = missing_gap+1;
+					  if(missing_gap==3) ref_gap=0;
+					  int ref_pcb=effPlots[s][e][p][m][ref_gap].num.at(0);
+					  auto traversed_pcb = Monitored::Scalar<int>("pcb_eta"+std::to_string(e+1)+"_"+MM_Side[s]+"_phi"+std::to_string(p)+"_multiplet"+std::to_string(m+1)+"_gas_gap"+std::to_string(missing_gap+1), ref_pcb);
+					  auto isHit = 0;
+					  auto hitcut = Monitored::Scalar<int>("hitcut", (int)isHit);
+					  fill(MM_sideGroup, traversed_pcb, hitcut);
 					}
+
+
 				}
 			}
 		}
