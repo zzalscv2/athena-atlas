@@ -3,6 +3,8 @@
 from AthenaConfiguration.ComponentAccumulator import ComponentAccumulator
 from AthenaConfiguration.ComponentFactory import CompFactory
 from TrigPartialEventBuilding.TrigPartialEventBuildingConfig import getRegSelTools
+from AthenaCommon.Logging import logging
+_log = logging.getLogger( __name__ )
 
 # The hack below works only for old configurables, because Conf2 uses __slots__ and cannot be extended
 from TrigGenericAlgs.TrigGenericAlgsConf import TimeBurner
@@ -61,3 +63,68 @@ def ROBPrefetchingAlgCfg_Calo(flags, nameSuffix, **kwargs):
 
 def ROBPrefetchingAlgCfg_Muon(flags, nameSuffix, **kwargs):
     return ROBPrefetchingAlgCfg(flags, 'ROBPrefetchingAlg_Muon_'+nameSuffix, ['MDT', 'RPC', 'TGC', 'CSC', 'MM', 'sTGC'], **kwargs)
+
+def configurePrefetchingInitialRoI(flags, chains):
+    from AthenaCommon.AlgSequence import AthSequencer, AlgSequence
+    from AthenaCommon.CFElements import findSubSequence, findAlgorithm
+    from AthenaCommon.Configurable import Configurable
+    from TrigConfHLTUtils.HLTUtils import string2hash
+    from collections import defaultdict
+
+    def sequenceAlgs(seq):
+        algs = []
+        for alg in seq.getChildren():
+            conf = Configurable.allConfigurables[alg] if type(alg)==str else alg
+            if type(conf)==AthSequencer:
+                algs.extend(sequenceAlgs(conf))
+            elif conf.getName().startswith('IMEmpty'):
+                # skip empty probe step in tag&probe chains
+                continue
+            else:
+                algs.append(conf.getName())
+        return algs
+
+    def firstNonEmptyStepAlgs(chainConfig):
+        algsMap = defaultdict(list) # {chainLegName, algsInFirstNonEmptyStep}
+        for step in chainConfig.steps:
+            for legName,menuSeq in zip(step.getChainLegs(), step.sequences):
+                algsMap[legName] = sequenceAlgs(menuSeq.sequence.Alg)
+                if algsMap[legName]:
+                    # only consider the first non-empty sequence across all legs - once found, break the loop
+                    return algsMap
+        return algsMap
+
+    detGroupIdentifierAlgs = {
+        'Si' : ['PixelRawDataProvider','SCTRawDataProvider'],
+        'Calo' : ['HLTCaloCellMaker','FastCaloL2EgammaAlg'],
+        'Muon' : ['RpcRawDataProvider','TgcRawDataProvider','MdtRawDataProvider','sTgcRawDataProvider','MMRawDataProvider']
+    }
+
+    def algsToDetGroup(algs):
+        groups = []
+        for group,idAlgs in detGroupIdentifierAlgs.items():
+            if any([ida in algName for algName in algs for ida in idAlgs]):
+                groups.append(group)
+        if len(groups)>1:
+            raise RuntimeError(f'Multiple detector groups: {groups:s} matched to the list of algs: {algs:s}')
+        return groups[0] if groups else None
+
+    chainFilterMap = { # {DetGroup, list of chain leg hashes}
+        'Si': [],
+        'Calo': [],
+        'Muon': []
+    }
+
+    for chain in chains:
+        algsMap = firstNonEmptyStepAlgs(chain)
+        for legName,algs in algsMap.items():
+            det = algsToDetGroup(algs)
+            if not det:
+                continue
+            _log.debug("%s initialRoI will prefetch %s", legName, det)
+            chainFilterMap[det].append(string2hash(legName))
+
+    hltBeginSeq = findSubSequence(AlgSequence(), 'HLTBeginSeq')
+    for det,chainFilter in chainFilterMap.items():
+        prefetchAlg = findAlgorithm(hltBeginSeq, f'ROBPrefetchingAlg_{det}_initialRoI')
+        prefetchAlg.ChainFilter = chainFilter

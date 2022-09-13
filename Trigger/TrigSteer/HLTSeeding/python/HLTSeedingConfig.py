@@ -394,6 +394,20 @@ def HLTSeedingCfg(flags, seqName = None):
     acc.merge( TrigConfigSvcCfg( flags ) )
     acc.merge( HLTPrescaleCondAlgCfg( flags ) )
 
+    # Configure ROB prefetching from initial RoIs
+    from TriggerJobOpts.TriggerConfigFlags import ROBPrefetching
+    if ROBPrefetching.InitialRoI in flags.Trigger.ROBPrefetchingOptions:
+        allDecisionsSet = set()
+        for roiUnpacker in decoderAlg.RoIBRoIUnpackers + decoderAlg.xAODRoIUnpackers:
+            dec = str(roiUnpacker.Decisions)
+            if dec:
+                allDecisionsSet.add(dec)
+        allDecisions = sorted(list(allDecisionsSet))
+        from TrigGenericAlgs.TrigGenericAlgsConfig import ROBPrefetchingAlgCfg_Si, ROBPrefetchingAlgCfg_Calo, ROBPrefetchingAlgCfg_Muon
+        acc.merge(ROBPrefetchingAlgCfg_Si(flags, "initialRoI", RoILinkName="initialRoI", ROBPrefetchingInputDecisions=allDecisions), sequenceName=seqName)
+        acc.merge(ROBPrefetchingAlgCfg_Calo(flags,"initialRoI", RoILinkName="initialRoI", ROBPrefetchingInputDecisions=allDecisions), sequenceName=seqName)
+        acc.merge(ROBPrefetchingAlgCfg_Muon(flags,"initialRoI", RoILinkName="initialRoI", ROBPrefetchingInputDecisions=allDecisions), sequenceName=seqName)
+
     return acc
 
 if __name__ == "__main__":
