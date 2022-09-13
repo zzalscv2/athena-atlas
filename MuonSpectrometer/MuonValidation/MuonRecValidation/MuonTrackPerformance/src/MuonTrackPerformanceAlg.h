@@ -287,9 +287,6 @@ private:
                                                           "Handle to the service providing the IMuonEDMHelperSvc interface"};
     ToolHandle<Muon::IMuonTrackTruthTool> m_truthTool;
     ToolHandle<Trk::ITrackSummaryHelperTool> m_summaryHelperTool;
-    MsgStream* m_log{};
-    bool m_debug{};
-    bool m_verbose{};
     int m_doEventListMissed{};
     int m_doEventListIncomplete{};
     int m_doEventListFake{};

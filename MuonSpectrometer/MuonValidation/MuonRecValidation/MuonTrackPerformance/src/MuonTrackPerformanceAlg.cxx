@@ -21,9 +21,6 @@ MuonTrackPerformanceAlg::MuonTrackPerformanceAlg(const std::string& name, ISvcLo
     m_printer("Muon::MuonEDMPrinterTool/MuonEDMPrinterTool"),
     m_truthTool("Muon::MuonTrackTruthTool/MuonTrackTruthTool"),
     m_summaryHelperTool("Muon::MuonTrackSummaryHelperTool/MuonTrackSummaryHelperTool"),
-    m_log(nullptr),
-    m_debug(false),
-    m_verbose(false),
     m_nevents(0),
     m_ntracks(0),
     m_nmatchedTracks(0),
@@ -81,9 +78,6 @@ MuonTrackPerformanceAlg::MuonTrackPerformanceAlg(const std::string& name, ISvcLo
 MuonTrackPerformanceAlg::~MuonTrackPerformanceAlg() {}
 
 StatusCode MuonTrackPerformanceAlg::initialize() {
-    m_log = new MsgStream(msgSvc(), name());
-    m_debug = m_log->level() <= MSG::DEBUG;
-    m_verbose = m_log->level() <= MSG::VERBOSE;
 
     ATH_CHECK(m_idHelperSvc.retrieve());
     ATH_CHECK(m_printer.retrieve());
@@ -123,7 +117,6 @@ StatusCode MuonTrackPerformanceAlg::initialize() {
 }
 
 StatusCode MuonTrackPerformanceAlg::execute() {
-    if (m_verbose) *m_log << MSG::VERBOSE << " Executing " << endmsg;
 
     SG::ReadHandle<xAOD::EventInfo> evInfo(m_eventInfoKey);
     if (!evInfo.isValid()) {
@@ -157,7 +150,7 @@ bool MuonTrackPerformanceAlg::handleSegmentCombi(const Muon::MuonSegmentCombinat
             const Muon::MuonSegment* seg = dynamic_cast<const Muon::MuonSegment*>((*ipsg).get());
 
             if (!seg) {
-                *m_log << MSG::WARNING << " MuonSegmentCombination contains a segment that is not a MuonSegment!! " << endmsg;
+                ATH_MSG_WARNING("MuonSegmentCombination contains a segment that is not a MuonSegment!!");
                 return false;
             }
         }
@@ -180,7 +173,7 @@ bool MuonTrackPerformanceAlg::handleTracks() {
 
         if (m_doTruth) { handleTrackTruth(*trackCol); }
 
-        if ((m_debug || m_doSummary >= 2) && !m_doTruth) { doSummary(*trackCol); }
+        if ((msgLvl(MSG::DEBUG) || m_doSummary >= 2) && !m_doTruth) { doSummary(*trackCol); }
     } else {
         SG::ReadHandle<xAOD::MuonContainer> muons(m_muons);
         if (!muons.isValid()) {
@@ -240,7 +233,7 @@ bool MuonTrackPerformanceAlg::handleTracks() {
 
         if (m_doTruth) { handleTrackTruth(*allTracks.get()); }
 
-        if ((m_debug || m_doSummary >= 2) && !m_doTruth) { doSummary(*allTracks.get()); }
+        if ((msgLvl(MSG::DEBUG) || m_doSummary >= 2) && !m_doTruth) { doSummary(*allTracks.get()); }
     }
 
     return true;
@@ -336,7 +329,7 @@ bool MuonTrackPerformanceAlg::handleTrackTruth(const TrackCollection& trackColle
         std::map<const TrackRecord*, Muon::IMuonTrackTruthTool::TruthTreeEntry>::iterator pos =
             truthTrackEntryMap.find(trackTruth.truthTrack);
         if (pos == truthTrackEntryMap.end()) {
-            *m_log << MSG::WARNING << " Truth track not found in map, this should not happen!! " << endmsg;
+            ATH_MSG_WARNING("Truth track not found in map, this should not happen!!");
             continue;
         }
 
@@ -373,8 +366,8 @@ bool MuonTrackPerformanceAlg::handleTrackTruth(const TrackCollection& trackColle
     eventData.eventNumber = eventNumber();
     eventData.eventPosition = m_nevents;
 
-    if (m_doTrackDebug >= 5 || m_debug) {
-        *m_log << MSG::INFO << " Event " << eventData.eventNumber << " truth tracks " << ntruthTracks << std::endl;
+    if (m_doTrackDebug >= 5 || msgLvl(MSG::DEBUG)) {
+        ATH_MSG_INFO("Event " << eventData.eventNumber << " truth tracks " << ntruthTracks);
     }
 
     // first loop over truth tracks that were found by reco
@@ -385,7 +378,7 @@ bool MuonTrackPerformanceAlg::handleTrackTruth(const TrackCollection& trackColle
         std::map<const TrackRecord*, Muon::IMuonTrackTruthTool::TruthTreeEntry>::iterator pos =
             truthTrackEntryMap.find(truthTrack.truthTrack);
         if (pos == truthTrackEntryMap.end()) {
-            *m_log << MSG::WARNING << " Truth track not found in map, this should not happen!! " << endmsg;
+            ATH_MSG_WARNING("Truth track not found in map, this should not happen!!");
             continue;
         }
 
@@ -411,8 +404,8 @@ bool MuonTrackPerformanceAlg::handleTrackTruth(const TrackCollection& trackColle
         }
         // check whether track is all ok
         if (trackData->allOk()) {
-            if (m_doTrackDebug >= 5 || m_debug) {
-                *m_log << MSG::INFO << print(*trackData) << std::endl;
+            if (m_doTrackDebug >= 5 || msgLvl(MSG::DEBUG)) {
+                ATH_MSG_INFO(print(*trackData));
                 didOutput = true;
             }
             delete trackData;
@@ -446,14 +439,14 @@ bool MuonTrackPerformanceAlg::handleTrackTruth(const TrackCollection& trackColle
                 eventData.wrongStation.push_back(trackData);
             }
         } else {
-            *m_log << MSG::WARNING << " Unknown problem with matched track " << std::endl << print(*trackData) << endmsg;
+            ATH_MSG_WARNING("Unknown problem with matched track " << std::endl << print(*trackData));
             delete trackData;
             continue;
         }
 
-        if (m_debug || m_doTrackDebug >= 4) {
-            *m_log << MSG::INFO << " Incomplete track in event " << eventInfo() << " nevents " << m_nevents << std::endl
-                   << print(*trackData) << std::endl;
+        if (msgLvl(MSG::DEBUG) || m_doTrackDebug >= 4) {
+            ATH_MSG_INFO("Incomplete track in event " << eventInfo() << " nevents " << m_nevents << std::endl
+                         << print(*trackData));
             didOutput = true;
         }
     }
@@ -471,7 +464,7 @@ bool MuonTrackPerformanceAlg::handleTrackTruth(const TrackCollection& trackColle
 
         TrackData* trackData = createTrackData(tit->second);
         if (!trackData) {
-            *m_log << MSG::WARNING << "Failed to create TrackData for truth track " << endmsg;
+            ATH_MSG_WARNING("Failed to create TrackData for truth track");
             continue;
         }
         trackData->truthTrack = new TrackRecord(*tit->second.truthTrack);
@@ -490,8 +483,8 @@ bool MuonTrackPerformanceAlg::handleTrackTruth(const TrackCollection& trackColle
                     new Amg::Vector3D(original->momentum().x(), original->momentum().y(), original->momentum().z());
             }
         }
-        if (m_doTrackDebug >= 3 || m_debug) {
-            *m_log << MSG::INFO << "Truth track not found: " << std::endl << print(*trackData) << std::endl;
+        if (m_doTrackDebug >= 3 || msgLvl(MSG::DEBUG)) {
+            ATH_MSG_INFO("Truth track not found: " << std::endl << print(*trackData));
             didOutput = true;
         }
         bool isSec = isSecondary(tit->second);
@@ -514,12 +507,10 @@ bool MuonTrackPerformanceAlg::handleTrackTruth(const TrackCollection& trackColle
 
     // sanity check
     if (ntruthTracks < nmatched)
-        *m_log << MSG::WARNING << " found more matched tracks than truth tracks: truth  " << ntruthTracks << "  matched " << nmatched
-               << endmsg;
+        ATH_MSG_WARNING("found more matched tracks than truth tracks: truth  " << ntruthTracks << "  matched " << nmatched);
 
     if (nmissed != ntruthTracks - nmatched)
-        *m_log << MSG::WARNING << " inconsisted number of missed tracks: truth  " << ntruthTracks << "  matched " << nmatched << " missed "
-               << nmissed << endmsg;
+        ATH_MSG_WARNING("inconsisted number of missed tracks: truth  " << ntruthTracks << "  matched " << nmatched << " missed " << nmissed);
 
     // finally print fake tracks
     TrackCollection::const_iterator trit = trackCollection.begin();
@@ -563,13 +554,13 @@ bool MuonTrackPerformanceAlg::handleTrackTruth(const TrackCollection& trackColle
             eventData.fakeTracksLowPt.push_back(trackData);
         }
 
-        if (m_doTrackDebug >= 3 || m_debug) {
-            *m_log << MSG::INFO << " Fake track " << fakeType << ": " << std::endl
-                   << summary.trackPars << "  " << summary.chambers << std::endl;
+        if (m_doTrackDebug >= 3 || msgLvl(MSG::DEBUG)) {
+            msg() << MSG::INFO << "Fake track " << fakeType << ": " << std::endl
+                  << summary.trackPars << "  " << summary.chambers << std::endl;
             didOutput = true;
         }
     }
-    if (didOutput) { *m_log << MSG::INFO << endmsg; }
+    if (didOutput) { msg() << MSG::INFO << endmsg; }
 
     if (!eventData.goodEvent()) m_badEvents.push_back(eventData);
 
@@ -577,7 +568,7 @@ bool MuonTrackPerformanceAlg::handleTrackTruth(const TrackCollection& trackColle
 }
 
 StatusCode MuonTrackPerformanceAlg::finalize() {
-    *m_log << MSG::INFO << std::endl << MuonTrackPerformanceAlg::printTrackCounters() << endmsg;
+    ATH_MSG_INFO(std::endl << MuonTrackPerformanceAlg::printTrackCounters());
 
     // write to file
     if (m_writeToFile) {
@@ -601,7 +592,6 @@ StatusCode MuonTrackPerformanceAlg::finalize() {
     std::vector<EventData>::iterator eit_end = m_badEvents.end();
     for (; eit != eit_end; ++eit) { clearEvent(*eit); }
 
-    delete m_log;
     return StatusCode::SUCCESS;
 }
 
@@ -613,45 +603,45 @@ int MuonTrackPerformanceAlg::eventNumber() const {
 std::string MuonTrackPerformanceAlg::eventInfo() const { return std::to_string(eventNumber()); }
 
 void MuonTrackPerformanceAlg::doSummary(const TrackCollection& trackCollection) const {
-    *m_log << m_log->level() << " Summarizing tracks in event " << eventInfo() << " nevents " << m_nevents;
+    msg() << " Summarizing tracks in event " << eventInfo() << " nevents " << m_nevents;
     if (trackCollection.empty())
-        *m_log << " : no tracks found" << endmsg;
+        msg() << " : no tracks found" << endmsg;
     else {
-        *m_log << " : " << trackCollection.size() << " tracks found " << std::endl;
+        msg() << " : " << trackCollection.size() << " tracks found " << std::endl;
         TrackCollection::const_iterator tit = trackCollection.begin();
         TrackCollection::const_iterator tit_end = trackCollection.end();
         for (; tit != tit_end; ++tit) {
             if (m_doHitResiduals > 0) {
-                *m_log << m_printer->print(**tit) << "  " << m_printer->printStations(**tit) << std::endl;
-                *m_log << m_printer->printMeasurements(**tit);
+                msg() << m_printer->print(**tit) << "  " << m_printer->printStations(**tit) << std::endl;
+                msg() << m_printer->printMeasurements(**tit);
             } else {
-                *m_log << m_printer->print(**tit) << "  " << m_printer->printStations(**tit);
+                msg() << m_printer->print(**tit) << "  " << m_printer->printStations(**tit);
             }
             // should finish with an 'endmsg' else the buffer does not get flushed.
             if (tit == tit_end - 1)
-                *m_log << endmsg;
+                msg() << endmsg;
             else
-                *m_log << std::endl;
+                msg() << std::endl;
         }
     }
 }
 
 void MuonTrackPerformanceAlg::doSummary(const Muon::IMuonTrackTruthTool::TruthTree& truthTracks) const {
-    *m_log << m_log->level() << " Summarizing tracks in event " << eventInfo() << " nevents " << m_nevents;
+    msg() << " Summarizing tracks in event " << eventInfo() << " nevents " << m_nevents;
     if (truthTracks.empty())
-        *m_log << " : no truth tracks" << endmsg;
+        msg() << " : no truth tracks" << endmsg;
     else {
-        *m_log << " : " << truthTracks.size() << " truth tracks found " << std::endl;
+        msg() << " : " << truthTracks.size() << " truth tracks found " << std::endl;
         Muon::IMuonTrackTruthTool::TruthTree::const_iterator tit = truthTracks.begin();
         Muon::IMuonTrackTruthTool::TruthTree::const_iterator tit_end = truthTracks.end();
         for (; tit != tit_end; ++tit) {
-            *m_log << print(tit->second);
+            msg() << print(tit->second);
             // should finish with an 'endmsg' else the buffer does not get flushed.
             Muon::IMuonTrackTruthTool::TruthTree::const_iterator tit_temp = tit;
             if (++tit_temp == tit_end)
-                *m_log << endmsg;
+                msg() << endmsg;
             else
-                *m_log << std::endl;
+                msg() << std::endl;
         }
     }
 }
@@ -798,76 +788,76 @@ void MuonTrackPerformanceAlg::printMissingChambers() const {
         outputFile.open(filename.c_str(), std::ios_base::out | std::ios_base::trunc);
     }
 
-    *m_log << MSG::INFO << "Summarizing events with endcap track without EI layer resulting in momentum loss, total "
+    msg() << MSG::INFO << "Summarizing events with endcap track without EI layer resulting in momentum loss, total "
            << m_nmissingStationMomLoss << std::endl;
     std::vector<EventData>::const_iterator eit = m_badEvents.begin();
     std::vector<EventData>::const_iterator eit_end = m_badEvents.end();
     for (; eit != eit_end; ++eit) {
         if (eit->missingStationMomLoss.empty()) continue;
-        *m_log << print(*eit, eit->missingStationMomLoss, "  tracks without inner layer in endcap") << std::endl;
+        msg() << print(*eit, eit->missingStationMomLoss, "  tracks without inner layer in endcap") << std::endl;
         if (m_doEventListIncomplete > 0) outputFile << eit->eventNumber << std::endl;
     }
-    *m_log << endmsg;
+    msg() << endmsg;
 
-    *m_log << MSG::INFO << "Summarizing events with track with missing layer, total " << m_nmissingStationLayer << std::endl;
+    msg() << MSG::INFO << "Summarizing events with track with missing layer, total " << m_nmissingStationLayer << std::endl;
     eit = m_badEvents.begin();
     eit_end = m_badEvents.end();
     for (; eit != eit_end; ++eit) {
         if (eit->missingStationLayer.empty()) continue;
-        *m_log << print(*eit, eit->missingStationLayer, "  tracks with a missing layer") << std::endl;
+        msg() << print(*eit, eit->missingStationLayer, "  tracks with a missing layer") << std::endl;
         if (m_doEventListIncomplete > 0) outputFile << eit->eventNumber << std::endl;
     }
-    *m_log << endmsg;
+    msg() << endmsg;
 
-    *m_log << MSG::INFO << "Summarizing events with track with missing chamber, total " << m_nmissingStation << std::endl;
+    msg() << MSG::INFO << "Summarizing events with track with missing chamber, total " << m_nmissingStation << std::endl;
     eit = m_badEvents.begin();
     eit_end = m_badEvents.end();
     for (; eit != eit_end; ++eit) {
         if (eit->missingStation.empty()) continue;
-        *m_log << print(*eit, eit->missingStation, "  tracks with a missing chamber") << std::endl;
+        msg() << print(*eit, eit->missingStation, "  tracks with a missing chamber") << std::endl;
         if (m_doEventListIncomplete > 1) outputFile << eit->eventNumber << std::endl;
     }
-    *m_log << endmsg;
+    msg() << endmsg;
 
-    *m_log << MSG::INFO << "Summarizing events with track with wrong layer, total " << m_nwrongStationLayer << std::endl;
+    msg() << MSG::INFO << "Summarizing events with track with wrong layer, total " << m_nwrongStationLayer << std::endl;
     eit = m_badEvents.begin();
     eit_end = m_badEvents.end();
     for (; eit != eit_end; ++eit) {
         if (eit->wrongStation.empty()) continue;
-        *m_log << print(*eit, eit->wrongStation, "  tracks with a wrong layer") << std::endl;
+        msg() << print(*eit, eit->wrongStation, "  tracks with a wrong layer") << std::endl;
         if (m_doEventListIncomplete > 0) outputFile << eit->eventNumber << std::endl;
     }
-    *m_log << endmsg;
+    msg() << endmsg;
 
-    *m_log << MSG::INFO << "Summarizing events with track with wrong chamber, total " << m_nwrongStation << std::endl;
+    msg() << MSG::INFO << "Summarizing events with track with wrong chamber, total " << m_nwrongStation << std::endl;
     eit = m_badEvents.begin();
     eit_end = m_badEvents.end();
     for (; eit != eit_end; ++eit) {
         if (eit->wrongStation.empty()) continue;
-        *m_log << print(*eit, eit->wrongStation, "  tracks with a wrong chamber") << std::endl;
+        msg() << print(*eit, eit->wrongStation, "  tracks with a wrong chamber") << std::endl;
         if (m_doEventListIncomplete > 0) outputFile << eit->eventNumber << std::endl;
     }
-    *m_log << endmsg;
+    msg() << endmsg;
 
-    *m_log << MSG::INFO << "Summarizing events with track with missing trigger layer, total " << m_nmissingStationLayerTrigger << std::endl;
+    msg() << MSG::INFO << "Summarizing events with track with missing trigger layer, total " << m_nmissingStationLayerTrigger << std::endl;
     eit = m_badEvents.begin();
     eit_end = m_badEvents.end();
     for (; eit != eit_end; ++eit) {
         if (eit->missingStationLayerTrigger.empty()) continue;
-        *m_log << print(*eit, eit->missingStationLayerTrigger, "  tracks with a missing trigger layer") << std::endl;
+        msg() << print(*eit, eit->missingStationLayerTrigger, "  tracks with a missing trigger layer") << std::endl;
         if (m_doEventListIncomplete > 0) outputFile << eit->eventNumber << std::endl;
     }
-    *m_log << endmsg;
+    msg() << endmsg;
 
-    *m_log << MSG::INFO << "Summarizing events with track with wrong trigger layer, total " << m_nwrongStationLayerTrigger << std::endl;
+    msg() << MSG::INFO << "Summarizing events with track with wrong trigger layer, total " << m_nwrongStationLayerTrigger << std::endl;
     eit = m_badEvents.begin();
     eit_end = m_badEvents.end();
     for (; eit != eit_end; ++eit) {
         if (eit->wrongStationLayerTrigger.empty()) continue;
-        *m_log << print(*eit, eit->wrongStationLayerTrigger, "  tracks with a wrong trigger layer") << std::endl;
+        msg() << print(*eit, eit->wrongStationLayerTrigger, "  tracks with a wrong trigger layer") << std::endl;
         if (m_doEventListIncomplete > 0) outputFile << eit->eventNumber << std::endl;
     }
-    *m_log << endmsg;
+    msg() << endmsg;
 }
 
 void MuonTrackPerformanceAlg::printMissingTracks() const {
@@ -878,25 +868,25 @@ void MuonTrackPerformanceAlg::printMissingTracks() const {
         outputFile.open(filename.c_str(), std::ios_base::out | std::ios_base::trunc);
     }
 
-    *m_log << MSG::INFO << "Summarizing events with missing track, total " << m_nmissedTracks << std::endl;
+    msg() << MSG::INFO << "Summarizing events with missing track, total " << m_nmissedTracks << std::endl;
     std::vector<EventData>::const_iterator eit = m_badEvents.begin();
     std::vector<EventData>::const_iterator eit_end = m_badEvents.end();
     for (; eit != eit_end; ++eit) {
         if (eit->missingTruthTracks.empty()) continue;
-        *m_log << print(*eit, eit->missingTruthTracks, "  missing tracks") << std::endl;
+        msg() << print(*eit, eit->missingTruthTracks, "  missing tracks") << std::endl;
         if (m_doEventListMissed > 0) outputFile << eit->eventNumber << std::endl;
     }
-    *m_log << endmsg;
+    msg() << endmsg;
 
-    *m_log << MSG::INFO << "Summarizing events with missing single station track, total " << m_nmissedTracksOneStation << std::endl;
+    msg() << MSG::INFO << "Summarizing events with missing single station track, total " << m_nmissedTracksOneStation << std::endl;
     eit = m_badEvents.begin();
     eit_end = m_badEvents.end();
     for (; eit != eit_end; ++eit) {
         if (eit->missingTruthTracksOneStation.empty()) continue;
-        *m_log << print(*eit, eit->missingTruthTracksOneStation, "  missing single station tracks") << std::endl;
+        msg() << print(*eit, eit->missingTruthTracksOneStation, "  missing single station tracks") << std::endl;
         if (m_doEventListMissed > 1) outputFile << eit->eventNumber << std::endl;
     }
-    *m_log << endmsg;
+    msg() << endmsg;
 }
 
 void MuonTrackPerformanceAlg::printFakeTracks() const {
@@ -907,35 +897,35 @@ void MuonTrackPerformanceAlg::printFakeTracks() const {
         outputFile.open(filename.c_str(), std::ios_base::out | std::ios_base::trunc);
     }
 
-    *m_log << MSG::INFO << "Summarizing events with fake tracks, high pt, total " << m_nfakeTracksHighPt << std::endl;
+    msg() << MSG::INFO << "Summarizing events with fake tracks, high pt, total " << m_nfakeTracksHighPt << std::endl;
     std::vector<EventData>::const_iterator eit = m_badEvents.begin();
     std::vector<EventData>::const_iterator eit_end = m_badEvents.end();
     for (; eit != eit_end; ++eit) {
         if (eit->fakeTracks.empty()) continue;
-        *m_log << print(*eit, eit->fakeTracks, "  high pt fake tracks") << std::endl;
+        msg() << print(*eit, eit->fakeTracks, "  high pt fake tracks") << std::endl;
         if (m_doEventListFake > 0) outputFile << eit->eventNumber << std::endl;
     }
-    *m_log << endmsg;
+    msg() << endmsg;
 
-    *m_log << MSG::INFO << "Summarizing events with fake tracks, low pt, total " << m_nfakeTracksLowPt << std::endl;
+    msg() << MSG::INFO << "Summarizing events with fake tracks, low pt, total " << m_nfakeTracksLowPt << std::endl;
     eit = m_badEvents.begin();
     eit_end = m_badEvents.end();
     for (; eit != eit_end; ++eit) {
         if (eit->fakeTracksLowPt.empty()) continue;
-        *m_log << print(*eit, eit->fakeTracksLowPt, "  low pt fake tracks") << std::endl;
+        msg() << print(*eit, eit->fakeTracksLowPt, "  low pt fake tracks") << std::endl;
         if (m_doEventListFake > 1) outputFile << eit->eventNumber << std::endl;
     }
-    *m_log << endmsg;
+    msg() << endmsg;
 
-    *m_log << MSG::INFO << "Summarizing events with fake tracks, SL, total " << m_nfakeTracksSL << std::endl;
+    msg() << MSG::INFO << "Summarizing events with fake tracks, SL, total " << m_nfakeTracksSL << std::endl;
     eit = m_badEvents.begin();
     eit_end = m_badEvents.end();
     for (; eit != eit_end; ++eit) {
         if (eit->fakeTracksSL.empty()) continue;
-        *m_log << print(*eit, eit->fakeTracksSL, "  SL fake tracks") << std::endl;
+        msg() << print(*eit, eit->fakeTracksSL, "  SL fake tracks") << std::endl;
         if (m_doEventListFake > 2) outputFile << eit->eventNumber << std::endl;
     }
-    *m_log << endmsg;
+    msg() << endmsg;
 }
 
 std::string MuonTrackPerformanceAlg::printTrackCounters(bool doSecondaries) const {
@@ -1353,7 +1343,7 @@ MuonTrackPerformanceAlg::TrackData* MuonTrackPerformanceAlg::createTrackData(
             minEtaHits = m_minCscEtaHits;
             minPhiHits = m_minCscPhiHits;
         } else {
-            *m_log << MSG::WARNING << "unexpected identifier " << endmsg;
+            ATH_MSG_WARNING("unexpected identifier");
             continue;
         }
         if (insertChamber(chIt->first, chIt->second, minEtaHits, minPhiHits, chamberData)) {
