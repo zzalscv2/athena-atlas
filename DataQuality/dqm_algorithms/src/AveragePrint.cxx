@@ -72,7 +72,7 @@ namespace dqm_algorithms {
 		if (!data.IsA()->InheritsFrom("TH1")) {
 			throw dqm_core::BadConfig(ERS_HERE, name, "does not inherit from TH1");
 		}
-		TH1* h = (TH1*)&data; // h cannot be null
+		const TH1* h = static_cast<const TH1*>(&data); // h cannot be null
 		if (h->GetDimension() > 2) { 
 			throw dqm_core::BadConfig(ERS_HERE, name, "dimension > 2 ");
 		}
@@ -81,7 +81,7 @@ namespace dqm_algorithms {
 		// Profile case
 		//**********
 		if ( data.IsA()->InheritsFrom("TProfile") ) {
-			TProfile* hp = (TProfile*)&data;
+			const TProfile* hp = static_cast<const TProfile*>(&data);
 			//ASSUME: dimension = 1
 			double Average_value = 0.;
 			double Total_entries = 0;

@@ -57,11 +57,11 @@ MDTTubeCheckError::clone()
 dqm_core::Result*
 MDTTubeCheckError::execute( const std::string& name, const TObject& object, const dqm_core::AlgorithmConfig& config)
 {
-  TH1* histogram;
-  TH1* refhist=0;
+  const TH1* histogram;
+  const TH1* refhist=0;
   
   if( object.IsA()->InheritsFrom( "TH1" ) ) {
-    histogram = (TH1*)&object;
+    histogram = static_cast<const TH1*>(&object);
     if (histogram->GetDimension() >= 2 ){
       throw dqm_core::BadConfig( ERS_HERE, name, "dimension >= 2 " );
     }
@@ -95,7 +95,7 @@ MDTTubeCheckError::execute( const std::string& name, const TObject& object, cons
   //Get Reference Histo
   if (refcheck>0) {
     try {
-      refhist = static_cast<TH1 *>( config.getReference() );
+      refhist = static_cast<const TH1*>( config.getReference() );
     }
     catch ( dqm_core::Exception & ex ) {
       throw dqm_core::BadRefHist(ERS_HERE,name," Could not retreive reference");

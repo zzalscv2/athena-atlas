@@ -35,9 +35,9 @@ dqm_core::Result* dqm_algorithms::KillBinsByStrip::execute(const std::string& na
 {
   // Runs KillBinsByStrip algorithm on the 2D-histogram provided in 'object'.
 
-  TH2* histogram = NULL;
+  const TH2* histogram = NULL;
   if( object.IsA()->InheritsFrom("TH2") ){
-    histogram = (TH2*)&object;
+    histogram = static_cast<const TH2*>(&object);
     if(histogram->GetDimension() != 2 ){ throw dqm_core::BadConfig( ERS_HERE, name, "Not a 2D-histogram" ); }
   } else { throw dqm_core::BadConfig( ERS_HERE, name, "does not inherit from TH1/TH2" ); }
  

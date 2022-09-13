@@ -1,10 +1,6 @@
 /*
-  Copyright (C) 2002-2017 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
 */
-
-// **********************************************************************
-// $Id: BinPrint.cxx,v 1.3 2009-01-22 13:53:56 ponyisi Exp $
-// **********************************************************************
 
 #include "dqm_algorithms/BinPrint.h"
 
@@ -142,7 +138,7 @@ namespace dqm_algorithms {
 		if (!data.IsA()->InheritsFrom("TH1")) {
 			throw dqm_core::BadConfig(ERS_HERE, name, "does not inherit from TH1");
 		}
-		TH1* h = (TH1*)&data; // h cannot be null
+		const TH1* h = static_cast<const TH1*>(&data); // h cannot be null
 		if (h->GetDimension() > 2) {
 			throw dqm_core::BadConfig(ERS_HERE, name, "dimension > 2 ");
 		}

@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2017 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
 */
 
 /*! \file SideBand.h file implements the dqm_algorithms::SideBand base class.
@@ -35,7 +35,7 @@ dqm_core::Result* dqm_algorithms::SideBand::execute(const std::string & name ,
 						    const TObject & obj, 
 						    const dqm_core::AlgorithmConfig & config )
 {
-  TH1* histo;
+  const TH1* histo;
   if ( obj.IsA()->InheritsFrom("TH2") || obj.IsA()->InheritsFrom("TH3") )
     {
       throw dqm_core::BadConfig( ERS_HERE , name , " dimension > 1 ");
@@ -43,7 +43,7 @@ dqm_core::Result* dqm_algorithms::SideBand::execute(const std::string & name ,
   if ( obj.IsA()->InheritsFrom("TH1") )
     {
       ERS_DEBUG(2,"Got TH1 called: "<<obj.GetName()<<" of type:"<<obj.IsA()->GetName());
-      histo=(TH1*)&obj;
+      histo=static_cast<const TH1*>(&obj);
     }
   else
     {

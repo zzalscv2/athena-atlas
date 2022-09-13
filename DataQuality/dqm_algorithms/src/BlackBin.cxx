@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2017 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
 */
 
 /*! \file BlackBin.cxx checks an individual bin of a 2D histogram wrt to a threshold value and returns dqm_core::Result
@@ -39,10 +39,10 @@ dqm_algorithms::BlackBin::execute(const std::string & name,
 					const TObject & object, 
 					const dqm_core::AlgorithmConfig & config)
 {  
-  TH2 * histogram;
+  const TH2 * histogram;
   
   if( object.IsA()->InheritsFrom( "TH2" ) ) {
-    histogram = (TH2*)&object;
+    histogram = static_cast<const TH2*>(&object);
     if (histogram->GetDimension() > 3 ){ 
       throw dqm_core::BadConfig( ERS_HERE, name, "dimension > 3 " );
     }

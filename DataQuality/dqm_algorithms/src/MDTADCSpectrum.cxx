@@ -56,11 +56,11 @@ MDTADCSpectrum::clone()
 dqm_core::Result*
 MDTADCSpectrum::execute( const std::string& name, const TObject& object, const dqm_core::AlgorithmConfig& config)
 {
-  TH1 * hist;
-  TH1 * ref;
+  const TH1 * hist;
+  const TH1 * ref;
   
   if( object.IsA()->InheritsFrom( "TH1" ) ) {
-    hist = (TH1*)&object;
+    hist = static_cast<const TH1*>(&object);
     if (hist->GetDimension() >= 2 ){
       throw dqm_core::BadConfig( ERS_HERE, name, "dimension >= 2 " );
     }
@@ -86,7 +86,7 @@ MDTADCSpectrum::execute( const std::string& name, const TObject& object, const d
   //Get Reference Histo
  
   try {
-    ref = static_cast<TH1 *>( config.getReference() );
+    ref = static_cast<const TH1*>( config.getReference() );
   }
   catch ( dqm_core::Exception & ex ) {
     throw dqm_core::BadRefHist(ERS_HERE,name," Could not retreive reference");

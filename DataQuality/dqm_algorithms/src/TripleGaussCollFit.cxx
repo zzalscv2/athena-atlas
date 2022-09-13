@@ -81,9 +81,9 @@ Double_t getStartValue(TH1* thehist, Double_t minx, Double_t maxx) {
 }
 
 
-const char* fmt = "%0*d";
+const char* const fmt = "%0*d";
 
-void multLB_writeTags(std::vector<int>* goodLB, dqm_core::Result* result, TH1* thehist) {
+void multLB_writeTags(std::vector<int>* goodLB, dqm_core::Result* result, const TH1* thehist) {
 
   /* This method assumes that the entries in goodLB are in ascending order!! */
 
@@ -219,13 +219,13 @@ namespace dqm_algorithms {
 
   dqm_core::Result* TripleGaussCollFit::execute (const std::string& /* s */, const TObject& object, const dqm_core::AlgorithmConfig& cfg) {
   
-    TH1* histogram;
+    const TH1* histogram;
     if(object.IsA()->InheritsFrom("TH1")) //or this can be done via dynamic casting
       { 
-	histogram = (TH1*) &(object); //c-style cast to avoid const propagation problem later
-	if (histogram->GetDimension() > 2 ){
-	  throw dqm_core::BadConfig( ERS_HERE, m_name, "called with histogram of dimension > 2"  );
-	}
+        histogram = static_cast<const TH1*>(&object);
+        if (histogram->GetDimension() > 2 ){
+          throw dqm_core::BadConfig( ERS_HERE, m_name, "called with histogram of dimension > 2"  );
+        }
       }
     else 
       throw dqm_core::BadConfig( ERS_HERE, m_name, "called with object that does not inherit from TH1" );
@@ -240,7 +240,7 @@ namespace dqm_algorithms {
       }
 
     else {   //running in 2D mode {
-      TH1* proj =  (static_cast<TH2*>(histogram) )->ProjectionY("", 0, 0);
+      const TH1* proj =  static_cast<const TH2*>(histogram)->ProjectionY("", 0, 0);
       if (proj->GetNbinsX() >= 1) {
 	binwidth = proj ->GetBinWidth(1);
       } else {
@@ -297,8 +297,7 @@ namespace dqm_algorithms {
     dqm_core::Result* result = new dqm_core::Result(); 
     
     if (histogram->GetDimension() == 1) {
-      
-      fitSingle(histogram);
+      fitSingle(const_cast<TH1*>(histogram));
 
       try {
 	

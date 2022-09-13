@@ -67,9 +67,9 @@ namespace dqm_algorithms {
 		dqm_core::Result* result = new dqm_core::Result();
 		result->status_ = dqm_core::Result::Undefined;
 		
-		TH1* h;
+		const TH1* h;
 		if(data.IsA()->InheritsFrom( "TH1" )) {
-			h = (TH1*)&data;
+            h = static_cast<const TH1*>(&data);
 			if (h->GetDimension() > 1 ) { 
 				throw dqm_core::BadConfig( ERS_HERE, name, "Not SCT Time Bins: Hist. Dimension > 1 " );
 			}

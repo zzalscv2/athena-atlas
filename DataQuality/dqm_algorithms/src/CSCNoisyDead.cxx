@@ -39,10 +39,10 @@ dqm_algorithms::CSCNoisyDead::execute(	const std::string & name,
 					const TObject & object, 
 					const dqm_core::AlgorithmConfig & config )
 {
-  TH2 * histogram;
+  const TH2 * histogram;
 
   if(object.IsA()->InheritsFrom( "TH2" )) {
-    histogram = (TH2*)&object;
+    histogram = static_cast<const TH2*>(&object);
     if (histogram->GetDimension() != 2 ){ 
       throw dqm_core::BadConfig( ERS_HERE, name, "dimension != 2 " );
     }
