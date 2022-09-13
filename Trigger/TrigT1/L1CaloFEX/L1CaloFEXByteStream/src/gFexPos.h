@@ -10,8 +10,8 @@
 
 namespace LVL1::gFEXPos {
 //The following definitions reflect the position of the 32-bits words in the gFEX bytestream
-        constexpr std::array<unsigned int, 3> START_JET_TOB           = {  1, 16, 31 };//position of word in bytestream of the start of the Jet TOB dataframe
-        constexpr std::array<unsigned int, 3> START_GLOBAL_TOB        = { 46, 61, 76 };//position of word in bytestream of the start of the MET TOB dataframe
+        constexpr std::array<unsigned int, 3> START_JET_TOB           = {  0, 15, 30 };//position of word in bytestream of the start of the Jet TOB dataframe
+        constexpr std::array<unsigned int, 3> START_GLOBAL_TOB        = { 45, 60, 75 };//position of word in bytestream of the start of the MET TOB dataframe
 
         constexpr std::array<unsigned int, 2> TRAILER_POSITION        = { 7, 14 };//position of trailer in Jet/Global TOB dataframe, relative to start of TOB 
         constexpr std::array<unsigned int, 5> JET_UNUSED_POSITION     = { 1, 5, 6, 12, 13 };//position of unused word in Jet TOB dataframe, relative to start of TOB 
