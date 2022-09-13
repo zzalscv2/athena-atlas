@@ -29,7 +29,7 @@ def main():
             log.error("AF3 not supported yet")
     elif options.overlay:
         if not options.workflow or options.workflow is WorkflowType.MCOverlay:
-            tests_to_run.append(OverlayTest("d1759", run, WorkflowType.MCOverlay, ["Overlay"], setup, options.extra_args))
+            tests_to_run.append(OverlayTest("d1759", run, WorkflowType.MCOverlay, ["Overlay"], setup, options.extra_args + " --runNumber 601229"))
     elif options.pileup:
         if setup.parallel_execution:
             log.error("Parallel execution not supported for pile-up workflow")
