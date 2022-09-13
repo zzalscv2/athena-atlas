@@ -1,8 +1,6 @@
 /*
-  Copyright (C) 2002-2017 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
 */
-
-// $Id: TEventFormatRegistry.cxx 595278 2014-05-03 09:31:05Z krasznaa $
 
 // ROOT include(s):
 #include <TFile.h>
@@ -12,16 +10,10 @@
 
 namespace xAOD {
 
-   /// Initialise the static variable(s)
-   TEventFormatRegistry* TEventFormatRegistry::s_instance = 0;
-
    TEventFormatRegistry& TEventFormatRegistry::instance() {
 
-      if( ! s_instance ) {
-         s_instance = new TEventFormatRegistry();
-      }
-
-      return *s_instance;
+      static TEventFormatRegistry instance;
+      return instance;
    }
 
    EventFormat& TEventFormatRegistry::getEventFormat( const TFile* file ) {

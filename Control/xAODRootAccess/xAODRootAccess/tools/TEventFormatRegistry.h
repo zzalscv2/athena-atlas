@@ -1,10 +1,9 @@
 // Dear emacs, this is -*- c++ -*-
 
 /*
-  Copyright (C) 2002-2017 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
 */
 
-// $Id: TEventFormatRegistry.h 595278 2014-05-03 09:31:05Z krasznaa $
 #ifndef XAODROOTACCESS_TOOLS_TEVENTFORMATREGISTRY_H
 #define XAODROOTACCESS_TOOLS_TEVENTFORMATREGISTRY_H
 
@@ -24,9 +23,6 @@ namespace xAOD {
    ///
    /// @author Attila Krasznahorkay <Attila.Krasznahorkay@cern.ch>
    ///
-   /// $Revision: 595278 $
-   /// $Date: 2014-05-03 11:31:05 +0200 (Sat, 03 May 2014) $
-   ///
    class TEventFormatRegistry {
 
    public:
@@ -45,10 +41,6 @@ namespace xAOD {
 
       /// The process-wide event format object
       std::map< const TFile*, EventFormat > m_eventFormats;
-
-   private:
-      /// Pointer to the only object in memory
-      static TEventFormatRegistry* s_instance;
 
    }; // class TEventFormatRegistry
 

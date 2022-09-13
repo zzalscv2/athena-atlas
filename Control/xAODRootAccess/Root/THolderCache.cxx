@@ -1,8 +1,10 @@
-// Copyright (C) 2002-2020 CERN for the benefit of the ATLAS collaboration
+// Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
 
 // Local include(s):
 #include "THolderCache.h"
 #include <mutex>
+
+#include "CxxUtils/checker_macros.h"
 
 namespace xAOD {
 
@@ -25,8 +27,7 @@ namespace xAOD {
       typedef std::unique_lock< std::shared_timed_mutex > unique_lock_t;
 
       THolderCache& THolderCache::instance() {
-
-         static THolderCache cache;
+         static THolderCache cache ATLAS_THREAD_SAFE;  // this class is thread-safe
          return cache;
       }
 

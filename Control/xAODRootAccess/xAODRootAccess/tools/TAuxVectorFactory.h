@@ -1,6 +1,6 @@
 // Dear emacs, this is -*- c++ -*-
 //
-// Copyright (C) 2002-2020 CERN for the benefit of the ATLAS collaboration
+// Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
 //
 #ifndef XAODROOTACCESS_TOOLS_TAUXVECTORFACTORY_H
 #define XAODROOTACCESS_TOOLS_TAUXVECTORFACTORY_H
@@ -86,7 +86,7 @@ namespace xAOD {
       /// Assignment operator
       mutable ::TMethodCall* m_assign = nullptr;
       /// Pointer to a default element object in memory
-      mutable void* m_defElt;
+      void* m_defElt;
 
    }; // class TAuxVectorFactory
 

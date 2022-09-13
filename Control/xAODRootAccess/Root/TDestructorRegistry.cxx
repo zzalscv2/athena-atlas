@@ -1,10 +1,11 @@
-// Copyright (C) 2002-2020 CERN for the benefit of the ATLAS collaboration
+// Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
 
 // ROOT include(s):
 #include <TError.h>
 
-// EDM include(s):
+// Framework include(s):
 #include "AthContainers/normalizedTypeinfoName.h"
+#include "CxxUtils/checker_macros.h"
 
 // Local include(s):
 #include "xAODRootAccess/tools/TDestructorRegistry.h"
@@ -14,7 +15,7 @@ namespace xAOD {
 
    TDestructorRegistry& TDestructorRegistry::instance() {
 
-      static TDestructorRegistry obj;
+      static TDestructorRegistry obj ATLAS_THREAD_SAFE;  // this class is thread-safe
       return obj;
    }
 

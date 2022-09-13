@@ -1,8 +1,7 @@
 /*
-  Copyright (C) 2002-2017 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
 */
 
-// $Id: Utils.cxx 613032 2014-08-22 10:50:40Z krasznaa $
 
 // STL include(s):
 #include <functional>
@@ -128,7 +127,7 @@ namespace xAOD {
          static constexpr SG::sgkey_t MASK = (~static_cast<SG::sgkey_t>(0)) >> 2;
 
          // The helper object:
-         static std::hash< std::string > helper;
+         static const std::hash< std::string > helper;
          // Let the helper do the work:
          return ( static_cast< SG::sgkey_t >( helper( name ) ) & MASK );
       }

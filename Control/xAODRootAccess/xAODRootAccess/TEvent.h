@@ -485,7 +485,7 @@ namespace xAOD {
       getEventFormatElement( SG::sgkey_t sgkey ) const;
 
       /// Get the object describing one object/branch
-      BranchInfo* getBranchInfo( SG::sgkey_t sgkey ) const;
+      const BranchInfo* getBranchInfo( SG::sgkey_t sgkey ) const;
 
       /// @}
 
