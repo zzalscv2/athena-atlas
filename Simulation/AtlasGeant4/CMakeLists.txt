@@ -1,7 +1,4 @@
-
-################################################################################
-# Package: AtlasGeant4
-################################################################################
+# Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
 
 # Declare the package name:
 atlas_subdir( AtlasGeant4 )
@@ -16,18 +13,18 @@ set( AtlasGeant4_TARGET_OBJECTS
     G4AtlasToolsLib
     MCTruth
     # Generation 2
-    CaloG4SimLib 
+    CaloG4SimLib
     ISF_Geant4Event
-    # Generation 3 
+    # Generation 3
     LArG4Code
     MCTruthBaseLib
     # Generation 4
-    LArG4ShowerLib 
+    LArG4ShowerLib
     G4AtlasAlgLib
     TileG4InterfacesLib
     # Generation 5
     TRT_G4Utilities
-    LArG4ShowerLibSvcLib 
+    LArG4ShowerLibSvcLib
     G4PhysicsLists
     GeoMaterial2G4
     TrackWriteFastSimLib
@@ -62,7 +59,7 @@ set( AtlasGeant4Component_TARGET_OBJECTS
     TrackWriteFastSim
     ISF_Geant4Tools
     TileGeoG4SD
-    # Generation 6 
+    # Generation 6
     HGTD_G4_SD
     BCM_G4_SD
     BLM_G4_SD
@@ -115,8 +112,9 @@ if( NOT SIMULATIONBASE )
         ALFA_G4_SDLib
         LUCID_G4_SDLib
         ZDC_SDLib
-        LArG4GenShowerLibLib )
-    
+        LArG4GenShowerLibLib
+        ISF_FastCaloSimParametrizationLib )
+
     list( APPEND AtlasGeant4Component_TARGET_OBJECTS
         # Generation 2
         ActsGeantFollowing
@@ -133,12 +131,13 @@ if( NOT SIMULATIONBASE )
 	LArG4FastSimSvc
 	LArG4GenShowerLib
 	LArG4H6SD
-	LArG4H8SD 
+	LArG4H8SD
 	G4AtlasTests
 	G4HitFilter
 	RHadrons
 	ISF_FastCaloSimParametrization
 	ISF_FastCaloSimSD
+	ISF_FastCaloSimServices
 	ISF_FatrasToolsG4
 	TBDetDescrCnv
 	CombinedScintillator
@@ -146,7 +145,7 @@ if( NOT SIMULATIONBASE )
 	MuonWall
 	PhantomCalorimeter
 	TrkG4UserActions )
-endif() 
+endif()
 
 # Need to disable as-needed, as libraries are not necessarily
 # ordered correctly with respect to objects.
@@ -164,4 +163,3 @@ atlas_add_library( AtlasGeant4Lib
 atlas_add_component( AtlasGeant4
                      dummy.cc
                      LINK_LIBRARIES "-Wl,--exclude-libs,ALL" ${AtlasGeant4Component_TARGET_OBJECTS} ${AtlasGeant4_TARGET_OBJECTS} )
-
