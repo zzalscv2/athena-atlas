@@ -792,6 +792,19 @@ class WriteDAOD_HDBS4Stream(JobProperty):
 jobproperties.DerivationFrameworkProdFlags.add_JobProperty(WriteDAOD_HDBS4Stream)
 listAODtoDPD.append(WriteDAOD_HDBS4Stream.StreamName)
 
+class WriteDAOD_HDBS5Stream(JobProperty):
+    """HDBS5 derivation: H->aa->2y+2tau"""
+    statusOn = True
+    allowedTypes = ['bool']
+    StoredValue = False
+    StreamName = 'StreamDAOD_HDBS5'
+    FileName = ''
+    isVirtual = False
+    DPDMakerScript = "DerivationFrameworkHDBS/HDBS5.py"
+    pass
+jobproperties.DerivationFrameworkProdFlags.add_JobProperty(WriteDAOD_HDBS5Stream)
+listAODtoDPD.append(WriteDAOD_HDBS5Stream.StreamName)
+
 #################################
 # Defined by the STDM group
 #################################
