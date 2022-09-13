@@ -51,7 +51,7 @@ def _TrigEff(flags, triggerAndRef, algname='HLTMinBiasEffMonitoringAlg'):
                                                  title=chain+';Offline Good nTrk (low pt);Efficiency', xbins=30, xmin=-0.5, xmax=30-0.5)
             effGroup.defineHistogram(f'EffPassed,leadingTrackPt;{chain}_ref_{refchain}_pt', type='TEfficiency',
                                                   title=chain+';Leading track pt;Efficiency', xbins=50, xmin=0.0, xmax=10)
-            # these chains have such form: HLT_mb_excl_1trk5_pt4_L1RD0_FILLED                                  
+            # these chains have such form: HLT_mb_excl_1trk5_pt4_L1RD0_FILLED
             whichcounter += '_'+chain.split('_')[4]
 
         if '_pusup' in chain or '_hmt_' in chain:
@@ -81,20 +81,38 @@ def TrigMinBiasEff(flags):
     if len(mbChains) == 0:
         return _TrigEff(flags, [])
 
-
     # here we generate config with detailed settings
     def _c(chain, refchain, **kwargs):
-        conf = {"chain":chain, "refchain": refchain, "xmin":0, "xmax":20 }
+        conf = {"chain": chain, "refchain": refchain, "xmin": 0, "xmax": 20}
         conf.update(kwargs)
         return conf
 
+    def _isMBSPTRK(chain):
+        return "HLT_mb_sptrk_" in chain or "HLT_mb_sp_" in chain or "HLT_mb_mbts_" in chain
+
+    def _isFilled(chain):
+        return "_EMPTY" not in chain and "_UNPAIRED_ISO" not in chain
+
+    mbsptrkChains = [chain for chain in mbChains if _isMBSPTRK(chain)]
+
+    filledChains = [chain for chain in mbsptrkChains if _isFilled(chain)]
+    emptyChains = [chain for chain in mbsptrkChains if "_EMPTY" in chain]
+    unpairedChains = [chain for chain in mbsptrkChains if "_UNPAIRED_ISO" in chain]
+
+    triggerAndRef = []
+
     # check all mb_sptrk chains w.r.t. random noalg
-    triggerAndRef = [ _c(chain, "HLT_noalg_L1RD0_FILLED")  for chain in mbChains
-                    if ("HLT_mb_sptrk_" in chain or "HLT_mb_sp_" in chain or "HLT_mb_mbts_" in chain)]
+    triggerAndRef += [_c(chain, "HLT_noalg_L1RD0_FILLED") for chain in filledChains]
+    triggerAndRef += [_c(chain, "HLT_noalg_L1RD0_EMPTY") for chain in emptyChains]
+    triggerAndRef += [_c(chain, "HLT_noalg_L1RD0_UNPAIRED_ISO") for chain in unpairedChains]
+
     # for monitoring in MB stream
-    triggerAndRef += [ _c(chain, "HLT_noalg_mb_L1RD0_FILLED")  for chain in mbChains
-                    if ("HLT_mb_sptrk_" in chain or "HLT_mb_sp_" in chain or "HLT_mb_mbts_" in chain)]
-    triggerAndRef += [ _c("HLT_mb_sptrk_L1RD0_FILLED", "HLT_mb_sp_L1RD0_FILLED") ]
+    triggerAndRef += [_c(chain, "HLT_noalg_mb_L1RD0_FILLED") for chain in filledChains]
+    triggerAndRef += [_c(chain, "HLT_noalg_mb_L1RD0_EMPTY") for chain in emptyChains]
+    triggerAndRef += [_c(chain, "HLT_noalg_mb_L1RD0_UNPAIRED_ISO") for chain in unpairedChains]
+
+    # sptrk vs sp
+    triggerAndRef += [_c("HLT_mb_sptrk_L1RD0_FILLED", "HLT_mb_sp_L1RD0_FILLED")]
 
     hmt = [c for c in mbChains if ('_hmt_' in c and '_pusup' not in c)]
     if len(hmt) != 0:
@@ -107,33 +125,36 @@ def TrigMinBiasEff(flags):
             raise RuntimeError(f"Chain {chain} is not the hmt chain")
 
         hmt.sort(key=lambda c: int(_trk(c)))
-        # monitor first hmt w.r.t sptrk
-        triggerAndRef += [ _c(hmt[0], "HLT_mb_sptrk_L1RD0_FILLED", xmax=_trk(hmt[0])+30)]
 
-        # group set the ref for each trigger to be one of lower threshold : ordering of chains needs to be reviewed  
+        # monitor first hmt w.r.t sptrk
+        triggerAndRef += [_c(hmt[0], "HLT_mb_sptrk_L1RD0_FILLED", xmax=_trk(hmt[0])+30)]
+
+        # group set the ref for each trigger to be one of lower threshold : ordering of chains needs to be reviewed
         # triggerAndRef += [  _c(chain, ref, xmin=_trk(chain)-20, xmax=_trk(chain)+50) for chain,ref in zip(hmt[1:], hmt) ]
-        triggerAndRef += [  _c(chain, "HLT_mb_sptrk_L1RD0_FILLED", xmin=_trk(chain)-20, xmax=_trk(chain)+50) for chain in hmt[1:] ]
+        triggerAndRef += [_c(chain, "HLT_mb_sptrk_L1RD0_FILLED", xmin=_trk(chain)-20, xmax=_trk(chain)+50) for chain in hmt[1:]]
 
         # pu suppressing trigger should be monitored using trigger of the same threshold w/o pu suppression
         pusup = [c for c in mbChains if '_hmt_' in c and '_pusup' in c]
+
         def _dropsup(chain):
             s = chain.split("_")
             return "_".join(s[:3]+s[4:])
-        triggerAndRef += [  _c(chain, _dropsup(chain),  xmin=_trk(chain)-20, xmax=_trk(chain)+50) for chain in pusup ]
+        triggerAndRef += [_c(chain, _dropsup(chain),  xmin=_trk(chain)-20, xmax=_trk(chain)+50) for chain in pusup]
 
-    excl = [c for c in mbChains if ('_excl_' in c)]
     # monitor exclusivity cut
-    triggerAndRef += [  _c(chain, 'HLT_mb_sptrk_L1RD0_FILLED') for chain in excl ]
+    excl = [c for c in mbChains if ('_excl_' in c)]
+    triggerAndRef += [_c(chain, 'HLT_mb_sptrk_L1RD0_FILLED') for chain in excl]
 
-    mbtsNoAlg = [c for c in mbChains if 'noalg' in c and 'L1MBTS' in c]
     # monitor noalg MBTS chains
-    triggerAndRef += [  _c(chain, 'HLT_mb_sptrk_L1RD0_FILLED') for chain in mbtsNoAlg ]
+    mbtsNoAlg = [c for c in mbChains if 'noalg' in c and 'L1MBTS' in c]
+    triggerAndRef += [_c(chain, 'HLT_mb_sptrk_L1RD0_FILLED') for chain in mbtsNoAlg]
+
     # L1 MBTS
-    mbts = ["L1_MBTS_A","L1_MBTS_C","L1_MBTS_1", "L1_MBTS_2","L1_MBTS_1_1"]
-    triggerAndRef += [  _c(chain, 'HLT_mb_sptrk_L1RD0_FILLED') for chain in mbts ]
+    mbts = ["L1_MBTS_A", "L1_MBTS_C", "L1_MBTS_1", "L1_MBTS_2", "L1_MBTS_1_1"]
+    triggerAndRef += [_c(chain, 'HLT_mb_sptrk_L1RD0_FILLED') for chain in mbts]
 
-
-    triggerAndRef += [ _c("L1_TE{}".format(i), 'HLT_mb_sptrk_L1RD0_FILLED', xmin=0, xmax=100) for i in [3,5,10,40]]
+    # L1 transverse energy
+    triggerAndRef += [_c("L1_TE{}".format(i), 'HLT_mb_sptrk_L1RD0_FILLED', xmin=0, xmax=100) for i in [3, 5, 10, 40]]
 
     # add here all the special cases
     return _TrigEff(flags, triggerAndRef)
