@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
 */
 
 // this
@@ -92,7 +92,7 @@ namespace MuonCalib {
         return StatusCode::SUCCESS;
     }
 
-    StatusCode CalibrationDbIOTool::WriteT0(MdtTubeFitContainer *t0, const NtupleStationId &it, int /*iov_start*/, int /*iov_end*/) {
+    StatusCode CalibrationDbIOTool::WriteT0(const MdtTubeFitContainer *t0, const NtupleStationId &it, int /*iov_start*/, int /*iov_end*/) {
         ATH_MSG_INFO("Writing to database");
         if (!m_connection->OpenConnection()) {
             ATH_MSG_FATAL("Open Connection failed!");

@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2017 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef T0CALIBRATIONOUTPUT_H
@@ -24,7 +24,7 @@ namespace MuonCalib {
             IMdtCalibrationOutput("T0CalibrationOutput"), m_tubeConstants(NULL), m_tubeConstants_map(t0Map) {}
 
         /** @return the pointer to the MdtTubeFitContainer with the fit results */
-        MdtTubeFitContainer* t0s() const { return m_tubeConstants; }
+        const MdtTubeFitContainer* t0s() const { return m_tubeConstants; }
         std::map<NtupleStationId, MdtTubeFitContainer*>& GetMap() { return m_tubeConstants_map; }
         const std::map<NtupleStationId, MdtTubeFitContainer*>& GetMap() const { return m_tubeConstants_map; }
 

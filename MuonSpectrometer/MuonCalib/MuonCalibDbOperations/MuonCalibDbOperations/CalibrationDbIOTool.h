@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef CalibrationDbIOTool_H
@@ -35,7 +35,7 @@ namespace MuonCalib {
         /** initialisation */
         StatusCode initialize() override;
         /** write out t0 */
-        StatusCode WriteT0(MdtTubeFitContainer *t0_output, const NtupleStationId &station_id, int iov_start, int iov_end) override;
+        StatusCode WriteT0(const MdtTubeFitContainer *t0_output, const NtupleStationId &station_id, int iov_start, int iov_end) override;
         /** load t0s*/
         StatusCode LoadT0(std::map<NtupleStationId, MdtStationT0Container *> &t0s, int /*iov_id*/) override;
         /** write rt*/
