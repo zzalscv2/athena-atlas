@@ -29,7 +29,7 @@ def MMMonitoringConfig(inputFlags):
     mmMonAlg = helper.addAlgorithm(CompFactory.MMRawDataMonAlg,'MMMonAlg')
     mmMonAlg.DoMMESD = True    
     mmMonAlg.do_stereoCorrection=False
-    mmMonAlg.cut_pt = 20000
+    mmMonAlg.cut_pt = 0
 
     mmGroup = helper.addGroup(mmMonAlg,'mmMonitor','Muon/MuonRawDataMonitoring/MM/')
     
@@ -88,16 +88,7 @@ def MMMonitoringConfig(inputFlags):
         phimax=16
         multipletmin=1
         multipletmax=2
-        for eta in etasector:
-            maxpcb=5
-            if(eta == "2"):
-                maxpcb=3
-            for multi in range(multipletmin, multipletmax+1):
-                for gas_gap in range(1,5):
-                    #efficiency per pcb
-                    title_allphi_eff=f'Efficiency_per_PCB_Eta{eta}_{iside}_allphi_multiplet{multi}_gas_gap{gas_gap}; pcb; Efficiency Eta{eta}'
-                    var_pcb_allphi=f'hitcut,pcb_eta{eta}_allphi_{iside}_multiplet{multi}_gas_gap{gas_gap}'
-                    mmSideGroup.defineHistogram(var_pcb_allphi, type='TEfficiency', title=title_allphi_eff, path='Efficiency', xbins=maxpcb, xmin=0, xmax=maxpcb, opt='kAlwaysCreate') 
+
         for phi in range(1, phimax+1):
             title_MMSummary=f'Number of strips per cluster E{iside} stPhi {phi}; ; Strip Number'
             var=f'sector_strip_{iside}_phi{phi},strip_number_{iside}_phi{phi};Strip_number_pergap_{iside}_stPhi{phi}'
