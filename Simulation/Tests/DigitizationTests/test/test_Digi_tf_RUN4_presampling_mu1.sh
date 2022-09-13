@@ -4,7 +4,7 @@
 # art-type: grid
 # art-architecture:  '#x86_64-intel'
 # art-include: master/Athena
-# art-output: RUN4_presampling.mu200.RDO.pool.root
+# art-output: RUN4_presampling.mu1.RDO.pool.root
 
 if [ -z ${ATLAS_REFERENCE_DATA+x} ]; then
   ATLAS_REFERENCE_DATA="/cvmfs/atlas-nightlies.cern.ch/repo/data/data-art"
