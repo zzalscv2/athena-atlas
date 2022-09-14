@@ -31,6 +31,7 @@ def InDetGlobalMonitoringRun3TestConfig(flags):
         inDetGlobalTrackMonAlg = helper.addAlgorithm(CompFactory.InDetGlobalTrackMonAlg, 'InDetGlobalTrackMonAlg',addFilterTools = [FilledBunchFilterToolCfg(flags)])
 
         from InDetConfig.InDetTrackSelectionToolConfig import InDetTrackSelectionTool_TightPrimary_TrackTools_Cfg
+        from InDetConfig.InDetTrackSelectionToolConfig import InDetTrackSelectionTool_Loose_Cfg
         TrackSelectionTool = acc.popToolsAndMerge(
             InDetTrackSelectionTool_TightPrimary_TrackTools_Cfg(flags, name='TrackSelectionTool',
                                                                 maxNPixelHoles = 1, # Default for TightPrimary is 0
@@ -40,7 +41,7 @@ def InDetGlobalMonitoringRun3TestConfig(flags):
                                                                 minPt = 5000))
 
         Loose_TrackSelectionTool = acc.popToolsAndMerge(
-            InDetTrackSelectionTool_TightPrimary_TrackTools_Cfg(flags, name='LooseTrackSelectionTool',
+            InDetTrackSelectionTool_Loose_Cfg(flags, name='LooseTrackSelectionTool',
                                                                 minPt = 1000))
 
         from TrkConfig.TrkVertexFitterUtilsConfig import TrackToVertexIPEstimatorCfg
