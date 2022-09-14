@@ -2,6 +2,7 @@
   Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
 */
 
+#include "CxxUtils/checker_macros.h"
 #include "GeoMaterial2G4/Geo2G4MaterialFactory.h"
 #include "Geo2G4ElementFactory.h"
 #include "GeoMaterial2G4/Geo2G4MatPropTableFactory.h"
@@ -12,9 +13,12 @@
 
 #include "G4Material.hh"
 
+#include <mutex>
+#include <unordered_map>
+
 namespace {
-  typedef std::map<const GeoMaterial* , G4Material*, std::less<const GeoMaterial*> > matList;
-  typedef std::map<std::string, const GeoMaterial*, std::less<std::string> > matNames;
+  typedef std::unordered_map<const GeoMaterial* , G4Material*> matList;
+  typedef std::unordered_map<std::string, const GeoMaterial*> matNames;
 }
 
 Geo2G4MaterialFactory::Geo2G4MaterialFactory() :
@@ -24,9 +28,14 @@ Geo2G4MaterialFactory::Geo2G4MaterialFactory() :
 
 G4Material* Geo2G4MaterialFactory::Build(const GeoMaterial* geoMaterial)
 {
-  // Material caches
-  static matList geoMaterialToG4Material;
-  static matNames geoMaterialNameToObject;
+  // Material caches and mutex
+  static matList geoMaterialToG4Material ATLAS_THREAD_SAFE;
+  static matNames geoMaterialNameToObject ATLAS_THREAD_SAFE;
+
+  // For now just use a global lock. If this turns out to be a bottleneck
+  // switch to a concurrent map or similar.
+  static std::mutex matLock;
+  std::scoped_lock lock(matLock);
 
   //
   // Check if this material has already been defined.
@@ -80,8 +89,8 @@ G4Material* Geo2G4MaterialFactory::Build(const GeoMaterial* geoMaterial)
     const GeoMaterialPropertiesTable* geoPropTable = extMat->GetMaterialPropertiesTable();
 
     if(geoPropTable) {
-      Geo2G4MatPropTableFactory* tFactory = Geo2G4MatPropTableFactory::instance();
-      G4MaterialPropertiesTable* g4PropTable = tFactory->Build(geoPropTable);
+      Geo2G4MatPropTableFactory tFactory;
+      G4MaterialPropertiesTable* g4PropTable = tFactory.Build(geoPropTable);
       if(g4PropTable) {
         g4Material->SetMaterialPropertiesTable(g4PropTable);
       }
@@ -93,7 +102,7 @@ G4Material* Geo2G4MaterialFactory::Build(const GeoMaterial* geoMaterial)
                                nelements);
   }
 
-  static Geo2G4ElementFactory eFactory;
+  static Geo2G4ElementFactory eFactory ATLAS_THREAD_SAFE;  // locked above
   for (int ii = 0; ii< nelements; ii++)  {
     G4Element* g4Element = eFactory.Build(geoMaterial->getElement(ii));
     g4Material->AddElement(g4Element, geoMaterial->getFraction(ii));

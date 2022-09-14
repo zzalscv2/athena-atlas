@@ -14,4 +14,4 @@ atlas_add_library( GeoMaterial2G4
                    PUBLIC_HEADERS GeoMaterial2G4
                    INCLUDE_DIRS ${GEANT4_INCLUDE_DIRS} ${GEOMODEL_INCLUDE_DIRS}
                    LINK_LIBRARIES ${GEANT4_LIBRARIES} ${GEOMODEL_LIBRARIES} AthenaBaseComps
-                   PRIVATE_LINK_LIBRARIES GeoModelUtilities )
+                   PRIVATE_LINK_LIBRARIES CxxUtils GeoModelUtilities )
