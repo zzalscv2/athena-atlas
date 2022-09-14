@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
 */
 
 #include <utility>
@@ -14,6 +14,7 @@
 #include "xAODEgamma/Photon.h"
 #include "xAODRootAccess/tools/ReturnCheck.h"
 #include "AsgTools/AsgToolConfig.h"
+#include "AthContainers/ConstDataVector.h"
 
 
 namespace FSR {
@@ -199,8 +200,8 @@ namespace FSR {
                                                                      const xAOD::PhotonContainer* photons_cont) {
 
 
-        static const SG::AuxElement::Accessor<char>  DFCommonPhotonsIsEMTight ("DFCommonPhotonsIsEMTight");
-        static const SG::AuxElement::Accessor<float> topoetcone20             ("topoetcone20");
+    static const SG::AuxElement::Accessor<char>  DFCommonPhotonsIsEMTight ("DFCommonPhotonsIsEMTight");
+    static const SG::AuxElement::Accessor<float> topoetcone20             ("topoetcone20");
 
    	/// Set FSR type to far
    	m_fsr_type = FsrCandidate::FsrType::FsrFar;
@@ -208,9 +209,9 @@ namespace FSR {
    	farFsrCandList.clear();
    	farFsrCandList.reserve(photons_cont->size());
 
-        // Save muon or electron of overlap removal for isolation
-        xAOD::IParticleContainer parts(SG::VIEW_ELEMENTS);
-        parts.push_back(const_cast<xAOD::IParticle*>(part));
+    // Save muon or electron of overlap removal for isolation
+    ConstDataVector<xAOD::IParticleContainer> parts(SG::VIEW_ELEMENTS);
+    parts.push_back(part);
    
    	ATH_MSG_DEBUG( "In getFarFsrCandidateList function : photon size = " << photons_cont->size());
    
@@ -231,7 +232,7 @@ namespace FSR {
 
                 ATH_MSG_VERBOSE( "Far Fsr ph aft : pt   " << ph->pt() << " topoetcone20 = " << topoetcone20(*ph));
 
-                bool farPhIsoOK         = (bool)m_isoCloseByCorrTool->acceptCorrected(*ph, parts);
+                bool farPhIsoOK         = (bool)m_isoCloseByCorrTool->acceptCorrected(*ph, *parts.asDataVector());
 
                 ATH_MSG_VERBOSE( "Far Fsr ph aft1: pt   " << ph->pt() << " topoetcone20 = " << topoetcone20(*ph));
 
@@ -244,7 +245,7 @@ namespace FSR {
                         ATH_MSG_VERBOSE( "Far Fsr candidate kinematics : author  " << ph->author()
                                        << " Et = " << ph->p4().Et()
                                        << " dr = " << dr
-                                       << " isoIsOK = " << (bool)m_isoCloseByCorrTool->acceptCorrected(*ph, parts));
+                                       << " isoIsOK = " << farPhIsoOK );
                     }
 
                     if(far_fsr_drcut_isOK) farFsrCandList.push_back(std::make_pair(ph, dr));
