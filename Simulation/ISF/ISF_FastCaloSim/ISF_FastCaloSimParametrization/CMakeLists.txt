@@ -27,6 +27,7 @@ atlas_add_library( ISF_FastCaloSimParametrizationLib
                    Root/*.cxx src/lib/CaloGeometryFromCaloDDM.cxx src/lib/CaloGeometryLookup.cxx src/lib/CaloGeometry.cxx
                    src/lib/CaloCellContainerSD.cxx
                    ${ISF_FastCaloSimParametrizationLibDictSource}
+                   OBJECT
                    PUBLIC_HEADERS ISF_FastCaloSimParametrization
                    INCLUDE_DIRS ${CLHEP_INCLUDE_DIRS} ${HEPPDT_INCLUDE_DIRS} ${ROOT_INCLUDE_DIRS}
                    PRIVATE_DEFINITIONS ${CLHEP_DEFINITIONS}
