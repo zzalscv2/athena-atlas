@@ -6,20 +6,20 @@
 #define PARTICLEJETGHOSTLABELTOOL_H
 
 #include "AsgTools/AsgTool.h"
-#include "JetInterface/IJetModifier.h"
+#include "JetInterface/IJetDecorator.h"
 #include "xAODTruth/TruthParticle.h"
 #include "xAODTruth/TruthParticleContainer.h"
 
 #include "ParticleJetTools/ParticleJetLabelCommon.h"
 
-class ParticleJetGhostLabelTool : public asg::AsgTool, public IJetModifier {
-ASG_TOOL_CLASS(ParticleJetGhostLabelTool, IJetModifier)
+class ParticleJetGhostLabelTool : public asg::AsgTool, public IJetDecorator {
+ASG_TOOL_CLASS(ParticleJetGhostLabelTool, IJetDecorator)
 public:
 
   /// Constructor
   ParticleJetGhostLabelTool(const std::string& name);
 
-  StatusCode modify(xAOD::JetContainer& jets) const;
+  StatusCode decorate(const xAOD::JetContainer& jets) const override;
 
 protected:
 
