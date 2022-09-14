@@ -14,7 +14,6 @@
 #include "TrkVolumes/Volume.h"
 #include "TrkVolumes/VolumeBounds.h"
 // Eigen
-#include "CxxUtils/checker_macros.h"
 #include "GeoPrimitives/GeoPrimitives.h"
 
 class MsgStream;
@@ -99,7 +98,7 @@ class SubtractedVolumeBounds final: public VolumeBounds {
      has to be implemented if Subtracteds are used more widely */
   EightObjectsAccessor m_objectAccessor;
 
-  mutable std::vector<bool> m_boundsOrientation ATLAS_THREAD_SAFE;
+  std::vector<bool> m_boundsOrientation;
 };
 
 inline SubtractedVolumeBounds* SubtractedVolumeBounds::clone() const {

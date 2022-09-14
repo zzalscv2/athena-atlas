@@ -98,7 +98,7 @@ class CombinedVolumeBounds final : public VolumeBounds {
   Volume* m_second;
   bool m_intersection;
   EightObjectsAccessor m_objectAccessor;
-  mutable std::vector<bool> m_boundsOrientation ATLAS_THREAD_SAFE;
+  std::vector<bool> m_boundsOrientation;
 };
 
 inline CombinedVolumeBounds* CombinedVolumeBounds::clone() const {
