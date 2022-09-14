@@ -11,7 +11,7 @@ formatList = ["PHYSVAL","PHYS","PHYSLITE",
               "IDTR2",
               "EGAM1", "EGAM2", "EGAM3", "EGAM4", "EGAM5", "EGAM7", "EGAM8", "EGAM9", "EGAM10",
               "FTAG1", "FTAG2",
-              "BPHY1", "BPHY2", "BPHY3", "BPHY4", "BPHY10", "BPHY12", "BPHY13", "BPHY15", "BPHY16", "BPHY21", "BPHY22"
+              "BPHY1", "BPHY2", "BPHY4", "BPHY10", "BPHY12", "BPHY13", "BPHY15", "BPHY16", "BPHY21", "BPHY22"
 ]
 
 truthFormatList = ["TRUTH0", "TRUTH1", "TRUTH3"]
