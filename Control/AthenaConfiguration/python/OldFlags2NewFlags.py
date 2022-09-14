@@ -43,6 +43,7 @@ def getNewConfigFlags():
     # Concurrency
     ConfigFlags.Concurrency.NumProcs = jobproperties.ConcurrencyFlags.NumProcs()
     ConfigFlags.Concurrency.NumThreads = jobproperties.ConcurrencyFlags.NumThreads()
+    ConfigFlags.Concurrency.NumConcurrentEvents = jobproperties.ConcurrencyFlags.NumConcurrentEvents()
 
     # Let's build a map whose key is new flagname, and whose value is old flagname.
     geom_flag_map = {}
