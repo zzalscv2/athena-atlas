@@ -41,7 +41,6 @@ tzrecoPreExec = ' '.join([
   "from AthenaConfiguration.AllConfigFlags import ConfigFlags;",
   "ConfigFlags.Trigger.triggerMenuSetup=\'Cosmic_run3_v1\';",
   "ConfigFlags.Trigger.AODEDMSet=\'AODFULL\';",
-  "ConfigFlags.Trigger.enableL1CaloPhase1=True;",
 ])
 
 tzreco = ExecStep.ExecStep('Tier0Reco')
