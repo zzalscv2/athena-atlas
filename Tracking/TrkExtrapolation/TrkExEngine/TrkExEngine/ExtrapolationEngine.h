@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
 */
 
 ///////////////////////////////////////////////////////////////////
@@ -49,7 +49,7 @@ namespace Trk {
   
       @author Andreas.Salzburger -at- cern.ch 
   */
-  class ATLAS_NOT_THREAD_SAFE ExtrapolationEngine : public AthCheckedComponent<AthAlgTool>, virtual public IExtrapolationEngine {
+  class ExtrapolationEngine : public AthCheckedComponent<AthAlgTool>, virtual public IExtrapolationEngine {
       
       friend class NavigationInitTest;
       

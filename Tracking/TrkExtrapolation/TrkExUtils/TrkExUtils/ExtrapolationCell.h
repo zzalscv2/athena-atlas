@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
 */
 
 ///////////////////////////////////////////////////////////////////
@@ -232,13 +232,12 @@ template<class T>
 class ExtrapolationCell
 {
 public:
-  const T* startParameters; //!< by reference - need to be defined
+  T* startParameters; //!< by reference - need to be defined
   const TrackingVolume*
     startVolume; //!< the start volume - needed for the volumeToVolume loop
   const Layer* startLayer; //!< the start layer  - needed for layerToLayer loop
 
-  const T*
-    endParameters; //!< by pointer - are newly created and can be optionally 0
+  T* endParameters; //!< by pointer - are newly created and can be optionally 0
   const TrackingVolume* endVolume; //!< the end Volume - can be optionally 0
                                    //!< (needs other trigger to stop)
   const Layer* endLayer; //!< the end Layer  - can be optionally 0 (needs other
@@ -246,20 +245,19 @@ public:
   const Surface*
     endSurface; //!< keep track of the destination surface - can be optionally 0
 
-  const T*
-    leadParameters; //!< the one last truely valid parameter in the stream
+  T* leadParameters; //!< the one last truely valid parameter in the stream
   const TrackingVolume*
     leadVolume;           //!< the lead Volume - carrying the navigation stream
   const Layer* leadLayer; //!< the lead Layer  - carrying the navigation stream
   const Surface* leadLayerSurface; //!< if the lead layer has sub structure that
                                    //!< is the first one to start with
 
-  const T* lastBoundaryParameters; //!< this is the last boundary surface to
-                                   //!< prevent loops
+  T* lastBoundaryParameters; //!< this is the last boundary surface to
+                             //!< prevent loops
   const Surface*
     lastBoundarySurface; //!< this is the last boundary surface to prevent loops
 
-  const T* lastLeadParameters; //!< this is for caching the last valid
+  T* lastLeadParameters; //!< this is for caching the last valid
                                //!< parameters before the lead parameters
   PropDirection propDirection; //!< this is the propagation direction
   int radialDirection; //!< for checking if navigation is radially towards the
@@ -304,7 +302,7 @@ public:
   float zX;          //!< z*dInX0 (for average calculations)
 
   /** start parameters are compulsory  */
-  ExtrapolationCell(const T& sParameters,
+  ExtrapolationCell(T& sParameters,
                     PropDirection pDir = alongMomentum,
                     unsigned int econfig = 1)
     : startParameters(&sParameters)

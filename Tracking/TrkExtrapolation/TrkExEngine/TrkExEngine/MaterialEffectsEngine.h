@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2017 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
 */
 
 ///////////////////////////////////////////////////////////////////
@@ -35,7 +35,7 @@ namespace Trk {
   
       @author Andreas Salzburger -at - cern.ch 
   */
-  class ATLAS_NOT_THREAD_SAFE MaterialEffectsEngine : public AthAlgTool, virtual public IMaterialEffectsEngine {
+  class MaterialEffectsEngine : public AthAlgTool, virtual public IMaterialEffectsEngine {
     public:
 
       /** Constructor */
@@ -62,10 +62,10 @@ namespace Trk {
       
     protected:
       /** charged extrapolation */
-      const TrackParameters* updateTrackParameters(const Trk::TrackParameters& parameters,
-                                                   Trk::ExCellCharged& eCell,
-                                                   Trk::PropDirection dir,
-                                                   Trk::MaterialUpdateStage matupstage) const; 
+      TrackParameters* updateTrackParameters(Trk::TrackParameters& parameters,
+                                             Trk::ExCellCharged& eCell,
+                                             Trk::PropDirection dir,
+                                             Trk::MaterialUpdateStage matupstage) const;
         
       MaterialInteraction                          m_interactionFormulae;     //!< the formulas concentrated
       bool                                         m_eLossCorrection;         //!< apply the energy loss correction

@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
 */
 
 ///////////////////////////////////////////////////////////////////
@@ -43,7 +43,7 @@ namespace Trk {
     
       @author Andreas.Salzburger -at- cern.ch
     */    
-  class ATLAS_NOT_THREAD_SAFE StaticNavigationEngine : public AthAlgTool, virtual public INavigationEngine {
+  class StaticNavigationEngine : public AthAlgTool, virtual public INavigationEngine {
 
       public:
         /** Constructor */

@@ -246,7 +246,7 @@ void ActsGeantFollowerHelper::trackParticle(const G4ThreeVector& pos,
   ecc.addConfigurationMode(Trk::ExtrapolationMode::CollectMaterial);
   // call the extrapolation engine
   auto eCodeSteps = m_extrapolationEngine->extrapolate(ecc, &destinationSurface);
-  const Trk::TrackParameters *trkParameters = ecc.endParameters;
+  Trk::TrackParameters *trkParameters = ecc.endParameters;
   float X0ATLAS = ecc.materialX0;
 
   if(eCodeSteps.code != 2 ){

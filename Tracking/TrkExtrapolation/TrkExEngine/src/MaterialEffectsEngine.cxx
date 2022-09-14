@@ -111,10 +111,10 @@ Trk::ExtrapolationCode Trk::MaterialEffectsEngine::handleMaterial(Trk::ExCellCha
 }
 
 /** charged extrapolation */
-const Trk::TrackParameters* Trk::MaterialEffectsEngine::updateTrackParameters(const Trk::TrackParameters& parameters,
-                                                                              Trk::ExCellCharged& eCell,
-                                                                              Trk::PropDirection dir,
-                                                                              Trk::MaterialUpdateStage matupstage) const
+Trk::TrackParameters* Trk::MaterialEffectsEngine::updateTrackParameters(Trk::TrackParameters& parameters,
+                                                                        Trk::ExCellCharged& eCell,
+                                                                        Trk::PropDirection dir,
+                                                                        Trk::MaterialUpdateStage matupstage) const
 {
     // now calculate the pathCorrection from the layer surface - it is signed, gives you the relative direction to the layer
     const Trk::Layer* layer = eCell.leadLayer;
@@ -194,23 +194,23 @@ const Trk::TrackParameters* Trk::MaterialEffectsEngine::updateTrackParameters(co
         if (eCell.leadParameters != eCell.startParameters ){
             EX_MSG_VERBOSE(eCell.navigationStep, "layer",  layer->layerIndex().value(), "material update on non-initial parameters.");
             if (uCovariance)
-              const_cast<Trk::TrackParameters*>(&parameters)->updateParameters(uParameters,*uCovariance);
+              parameters.updateParameters(uParameters,*uCovariance);
             else 
-              const_cast<Trk::TrackParameters*>(&parameters)->updateParameters(uParameters);
+              parameters.updateParameters(uParameters);
         } else {
             EX_MSG_VERBOSE(eCell.navigationStep, "layer",  layer->layerIndex().value(), "material update on initial parameters, creating new ones.");
             // create new parameters
             const Trk::Surface& tSurface = parameters.associatedSurface();
-            const Trk::TrackParameters* tParameters = tSurface.createUniqueTrackParameters(uParameters[Trk::loc1],
-                                                                                           uParameters[Trk::loc2],
-                                                                                           uParameters[Trk::phi],
-                                                                                           uParameters[Trk::theta],
-                                                                                           uParameters[Trk::qOverP],
-                                                                                           *uCovariance).release();
+            Trk::TrackParameters* tParameters = tSurface.createUniqueTrackParameters(uParameters[Trk::loc1],
+                                                                                     uParameters[Trk::loc2],
+                                                                                     uParameters[Trk::phi],
+                                                                                     uParameters[Trk::theta],
+                                                                                     uParameters[Trk::qOverP],
+                                                                                     *uCovariance).release();
             // these are newly created
             return tParameters;
         }
     }
-    //note aliaing input ...
+    //note aliasing input ...
     return (&parameters);
 }
