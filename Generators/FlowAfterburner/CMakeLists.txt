@@ -1,4 +1,4 @@
-# Copyright (C) 2002-2020 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
 
 # Declare the package name:
 atlas_subdir( FlowAfterburner )
@@ -16,7 +16,7 @@ atlas_add_library( FlowAfterburnerLib
                    PRIVATE_INCLUDE_DIRS 
                    DEFINITIONS ${CLHEP_DEFINITIONS}
                    LINK_LIBRARIES ${GSL_LIBRARIES} ${ROOT_LIBRARIES} ${CLHEP_LIBRARIES} AthenaBaseComps AthenaKernel AtlasHepMCLib AtlasHepMCsearchLib GaudiKernel TruthHelper GeneratorObjects
-                   PRIVATE_LINK_LIBRARIES StoreGateLib TruthUtils )
+                   PRIVATE_LINK_LIBRARIES CxxUtils StoreGateLib TruthUtils )
 
 atlas_add_component( FlowAfterburner
                      src/components/*.cxx

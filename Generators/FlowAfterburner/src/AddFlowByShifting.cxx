@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2020 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
 */
 
 // File:  Generators/FlowAfterburnber/AddFlowByShifting.cxx
@@ -28,6 +28,7 @@
 
 #include "StoreGate/StoreGateSvc.h"
 #include "GeneratorObjects/HijingEventParams.h"
+#include "CxxUtils/checker_macros.h"
 
 #include "TGraph.h"
 
@@ -470,7 +471,8 @@ double AddFlowByShifting::AddFlowToParent (HepMC::GenParticlePtr parent, const H
 
   // New fashioned rotation(exact)
   else if (m_flow_implementation_type==1){
-    const gsl_root_fsolver_type *T = gsl_root_fsolver_brent;
+    // Thread-safe according to https://www.gnu.org/software/gsl/doc/html/roots.html
+    const gsl_root_fsolver_type *T ATLAS_THREAD_SAFE = gsl_root_fsolver_brent;
     gsl_root_fsolver *s = gsl_root_fsolver_alloc (T);
     double x_lo=-2*M_PI,x_hi=2*M_PI;
     float params[13];
