@@ -324,6 +324,8 @@ namespace top {
                  "Failed to set doExtraSmearing for " + name + " tool");
       top::check(asg::setProperty(tool, "do2StationsHighPt", do2StationsHighPt),
                  "Failed to set do2StationsHighPt for " + name + " tool");
+      top::check(asg::setProperty(tool, "IsRun3Geo", m_config->isRun3()),
+                 "Failed to set IsRun3Geo for " + name + " tool");
       if (m_config->isMC() && m_config->forceRandomRunNumber() > 0) {
         top::check(asg::setProperty(tool, "useRandomRunNumber", false),
                    "Failed to set useRandomRunNumber for " + name + " tool");
