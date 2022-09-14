@@ -82,7 +82,7 @@ namespace CP{
         m_overlapRemovalTool->checkOverlap(*promptCol, *lrtCol, writePromptMuon, writeLRTMuon);
 
         // Decorate the muons with their locations.
-        static SG::AuxElement::Decorator<char> isLRT("isLRT"); //0 if prompt, 1 if LRT        
+        static const SG::AuxElement::Decorator<char> isLRT("isLRT"); //0 if prompt, 1 if LRT
         for (const xAOD::Muon* mu : *promptCol) isLRT(*mu) = 0;
         for (const xAOD::Muon* mu : *lrtCol) isLRT(*mu) = 1;
 
@@ -110,7 +110,7 @@ namespace CP{
                                 xAOD::MuonContainer* outputCol) const{
         // loop over muons, accept them and add them into association tool
         if(muonCol.empty()) {return StatusCode::SUCCESS;}
-        static SG::AuxElement::Decorator<ElementLink<xAOD::MuonContainer>> originalMuonLink("originalMuonLink");
+        static const SG::AuxElement::Decorator<ElementLink<xAOD::MuonContainer>> originalMuonLink("originalMuonLink");
         for(const xAOD::Muon* muon : muonCol){
             // add muon into output
             if (writeMuon.at(muon->index())){
