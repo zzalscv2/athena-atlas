@@ -10,28 +10,28 @@ def TileTMDBMonitoringConfig(flags, **kwargs):
     ''' Function to configure TileTMDBMonitorAlgorithm algorithm in the monitoring system.'''
     histogram_limits = {
         "PHY": {
-            "Energy": [-1010, 1010],
+            "Energy": [-100, 10000],
             "Error": [-1010, 1010]
         },
         "LAS": {
-            "Energy": [-1010, 15010],
-            "Error": [-15010, 15010]
+            "Energy": [-5, 30],
+            "Error": [-10, 10]
         },
         "BILAS": {
-            "Energy": [-1010, 15010],
-            "Error": [-15010, 15010]
+            "Energy": [-1010, 1010],
+            "Error": [-1010, 1010]
         },
         "CIS": {
-            "Energy": [-1010, 15000],
-            "Error": [-15010, 15000]
+            "Energy": [-1, 10],
+            "Error": [-10, 10]
         },
         "MONOCIS": {
-            "Energy": [-1010, 15000],
-            "Error": [-15010, 15000]
+            "Energy": [-1, 10],
+            "Error": [-10, 10]
         },
         "PED": {
-            "Energy": [-1010, 10000],
-            "Error": [-15010, 10000]
+            "Energy": [-700, 700],
+            "Error": [-500, 500]
         }
     }
 
