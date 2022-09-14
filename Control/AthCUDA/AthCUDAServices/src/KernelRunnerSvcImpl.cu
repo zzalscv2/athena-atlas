@@ -1,6 +1,6 @@
 // Dear emacs, this is -*- c++ -*-
 //
-// Copyright (C) 2002-2020 CERN for the benefit of the ATLAS collaboration
+// Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
 //
 
 // Local include(s).
@@ -10,6 +10,8 @@
 #include "AthCUDACore/Macros.cuh"
 #include "AthCUDACore/StreamHolderHelpers.cuh"
 #include "AthCUDACore/TaskArena.h"
+
+#include "CxxUtils/checker_macros.h"
 
 // System include(s).
 #include <cassert>
@@ -61,6 +63,8 @@ namespace {
 #endif // __CUDACC__
 
    /// Functor scheduling an @c AthCUDA::IKernelTask for execution
+   // Thread-safety qualifiers are ok here, since this should be run
+   // by only one thread at a time.
    class KernelSchedulerTask {
 
    public:
@@ -75,7 +79,8 @@ namespace {
       void operator()() const {
 
          // Get a stream for the job.
-         auto stream = m_svcImpl->getAvailableStream();
+         AthCUDA::KernelRunnerSvcImpl* svcImpl ATLAS_THREAD_SAFE = m_svcImpl;
+         auto stream = svcImpl->getAvailableStream();
          assert( stream );
 
          // First off, let the task schedule all of its own operations.
@@ -98,7 +103,7 @@ namespace {
       /// Callback to the kernel runner service
       AthCUDA::KernelRunnerSvcImplCallback m_callback;
       /// The task that's being executed
-      mutable std::unique_ptr< AthCUDA::IKernelTask > m_task;
+      mutable std::unique_ptr< AthCUDA::IKernelTask > m_task ATLAS_THREAD_SAFE;
       /// Pointer to the service implementation object
       AthCUDA::KernelRunnerSvcImpl* m_svcImpl;
 
