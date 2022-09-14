@@ -46,8 +46,7 @@ StatusCode MuonRegSelCondAlg::initialize()
 
 
 
-StatusCode MuonRegSelCondAlg::execute(const EventContext& ctx )  const
-{
+StatusCode MuonRegSelCondAlg::execute(const EventContext& ctx ) const {  
   ATH_MSG_DEBUG("MuonRegSelCondAlg::execute() -- enter -- ");
   
   /// do stuff here ...  
