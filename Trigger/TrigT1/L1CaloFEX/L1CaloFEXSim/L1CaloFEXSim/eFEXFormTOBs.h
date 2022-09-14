@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
 */
 
 //***********************************************************************
@@ -49,7 +49,6 @@ namespace LVL1 {
     const unsigned int m_retaShift = 18;
     const unsigned int m_seedShift = 16;
     const unsigned int m_undShift = 15;
-    const unsigned int m_maxShift = 14;
     const unsigned int m_shelfShift = 24;
     const unsigned int m_efexShift = 20;
     const unsigned int m_taurhadShift = 20;
