@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2017 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef ANALYSISTOOLS_AANTEVENTSELECTOR_H
@@ -17,6 +17,7 @@
 #include "Python.h"
 
 #include "AthenaBaseComps/AthService.h"
+#include "CxxUtils/checker_macros.h"
 #include "GaudiKernel/IEvtSelector.h"
 #include "GaudiKernel/IProperty.h"
 #include "GaudiKernel/MsgStream.h"
@@ -30,9 +31,9 @@ class StoreGateSvc;
 class TChain;
 
 // Class AANTEventSelector.
-class AANTEventSelector : virtual public AthService, 
-			  virtual public IEvtSelector, 
-			  virtual public IProperty 
+class ATLAS_NOT_THREAD_SAFE AANTEventSelector : virtual public AthService,
+                                                virtual public IEvtSelector,
+                                                virtual public IProperty
 {
 public:
 
@@ -96,7 +97,7 @@ private:
 };
 
 
-struct AANTTreeGate
+struct ATLAS_NOT_THREAD_SAFE AANTTreeGate
 {
 public:
   static void setTree (TChain *chain) { m_tree = chain;}

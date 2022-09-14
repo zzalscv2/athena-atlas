@@ -1,8 +1,9 @@
 /*
-  Copyright (C) 2002-2017 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "AnalysisTools/AANTEventContext.h"
+#include "CxxUtils/checker_macros.h"
 
 //________________________________________________________________________________
 AANTEventContext::AANTEventContext(const IEvtSelector* selector)
@@ -32,5 +33,6 @@ AANTEventContext::~AANTEventContext()
 //________________________________________________________________________________
 void* AANTEventContext::identifier() const
 {
-  return ((void*)(m_evtSelector));
+  IEvtSelector* id ATLAS_THREAD_SAFE = const_cast<IEvtSelector*>(m_evtSelector);
+  return id;
 }
