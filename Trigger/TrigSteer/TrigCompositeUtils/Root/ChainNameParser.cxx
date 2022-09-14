@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
 */
 
 #include <string>
@@ -83,12 +83,12 @@ namespace ChainNameParser {
         this->operator++();
     }
 
-    bool LegInfoIterator::operator==(const LegInfoIterator &other)
+    bool LegInfoIterator::operator==(const LegInfoIterator &other) const
     {
         return m_itr == other.m_itr && m_end == other.m_end && m_peekSignature == other.m_peekSignature;
     }
 
-    bool LegInfoIterator::operator!=(const LegInfoIterator &other)
+    bool LegInfoIterator::operator!=(const LegInfoIterator &other) const
     {
         return !(*this == other);
     }

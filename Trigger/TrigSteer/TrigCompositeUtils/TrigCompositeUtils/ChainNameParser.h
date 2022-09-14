@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef TrigCompositeUtils_ChainNameParser_h
@@ -50,8 +50,8 @@ namespace ChainNameParser {
         LegInfoIterator(const std::string &chain);
 
         /// Check (in)equality against another iterator
-        bool operator==(const LegInfoIterator &other);
-        bool operator!=(const LegInfoIterator &other);
+        bool operator==(const LegInfoIterator &other) const;
+        bool operator!=(const LegInfoIterator &other) const;
 
         /**
          * @brief Dereference the iterator
