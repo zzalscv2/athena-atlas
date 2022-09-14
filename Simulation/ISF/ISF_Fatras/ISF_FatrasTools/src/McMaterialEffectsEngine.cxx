@@ -608,7 +608,7 @@ Trk::ExtrapolationCode iFatras::McMaterialEffectsEngine::processMaterialOnLayer(
     }
 
     // use the manipulator to update the track parameters -------> get rid of 0!
-    const Trk::TrackParameters* upd =
+    Trk::TrackParameters* upd =
       eCell.leadParameters->associatedSurface()
         .createUniqueTrackParameters(uParameters[0],
                                      uParameters[1],
