@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "GeoPixelEndCap.h"
@@ -23,27 +23,35 @@
 
 #include "InDetGeoModelUtils/VolumeBuilder.h"
 
-GeoPixelEndCap::GeoPixelEndCap(InDetDD::PixelDetectorManager* ddmgr,
-                               PixelGeometryManager* mgr,
-			       GeoModelIO::ReadGeoModel* sqliteReader,
-                               GeoPixelServices * pixServices)
+GeoPixelEndCap::GeoPixelEndCap(InDetDD::PixelDetectorManager* ddmgr
+                               , PixelGeometryManager* mgr
+			       , GeoModelIO::ReadGeoModel* sqliteReader
+                               , GeoPixelServices * pixServices)
   : GeoVPixelFactory(ddmgr, mgr, sqliteReader),
     m_pixServices(pixServices)
 {}
 
 GeoVPhysVol* GeoPixelEndCap::Build( ) {
-  
 
-  //
-  // create the Barrel Mother volume
-  // 
-  double rmin = m_gmt_mgr->PixelEndcapRMin();
-  double rmax = m_gmt_mgr->PixelEndcapRMax();
-  double halflength = (m_gmt_mgr->PixelEndcapZMax()-m_gmt_mgr->PixelEndcapZMin())/2.;
-  const GeoMaterial* air = m_mat_mgr->getMaterial("std::Air");
-  const GeoTube* ecTube = new GeoTube(rmin,rmax,halflength);
-  const GeoLogVol* ecLog = new GeoLogVol("EndCap",ecTube,air);
-  GeoFullPhysVol* ecPhys = new GeoFullPhysVol(ecLog);
+  GeoFullPhysVol* ecPhys{nullptr};
+  std::map<std::string, GeoFullPhysVol*> mapFPV;
+  std::map<std::string, GeoAlignableTransform*> mapAX;
+  if(m_sqliteReader) {
+    mapFPV = m_sqliteReader->getPublishedNodes<std::string, GeoFullPhysVol*>("Pixel");
+    mapAX  = m_sqliteReader->getPublishedNodes<std::string, GeoAlignableTransform*>("Pixel");
+  }
+  else {
+    //
+    // create the Barrel Mother volume
+    // 
+    double rmin = m_gmt_mgr->PixelEndcapRMin();
+    double rmax = m_gmt_mgr->PixelEndcapRMax();
+    double halflength = (m_gmt_mgr->PixelEndcapZMax()-m_gmt_mgr->PixelEndcapZMin())/2.;
+    const GeoMaterial* air = m_mat_mgr->getMaterial("std::Air");
+    const GeoTube* ecTube = new GeoTube(rmin,rmax,halflength);
+    const GeoLogVol* ecLog = new GeoLogVol("EndCap",ecTube,air);
+    ecPhys = new GeoFullPhysVol(ecLog);
+  }
 
   int ndisks = m_gmt_mgr->PixelEndcapNDisk();
   m_gmt_mgr->msg(MSG::DEBUG) << "Number of disks is " << ndisks << endmsg;
@@ -65,38 +73,48 @@ GeoVPhysVol* GeoPixelEndCap::Build( ) {
     // to a valid value.
     m_gmt_mgr->SetEta(0);
     if(m_gmt_mgr->isLDPresent()) {
-      //
-      // The position is given w.r.t to the center of the detector!
-      //
-      //position of the disk
-      double zdisk = m_gmt_mgr->PixelDiskZPosition()-endcapZOffset;
-      // place the disk
-      std::ostringstream nameTag; 
-      nameTag << "Disk" << idisk;
-      GeoNameTag * tag = new GeoNameTag(nameTag.str());
-      GeoAlignableTransform* xform = new GeoAlignableTransform(GeoTrf::TranslateZ3D(zdisk));
-
-      GeoVPhysVol * diskPhys = pd->Build();
-      ecPhys->add(tag);
-      ecPhys->add(new GeoIdentifierTag(idisk));
-      ecPhys->add(xform);
-      ecPhys->add(diskPhys);
-
-      // Store the alignable transform
-      int brl_ec = 2*m_gmt_mgr->GetSide();
-      Identifier id = m_gmt_mgr->getIdHelper()->wafer_id(brl_ec,idisk,0,0);
-      m_DDmgr->addAlignableTransform(1, id, xform, diskPhys);
-
-      //
-      // place the cables twice for the two active parts
-      //
-      double dz = pd->Thickness()/2. + m_gmt_mgr->PixelECCablesDistance() ;
-      GeoTransform * xformCablesPlus = new GeoTransform(GeoTrf::TranslateZ3D(zdisk+dz));
-      ecPhys->add(xformCablesPlus);
-      ecPhys->add(pecc->Build() );
-      GeoTransform * xformCablesMinus = new GeoTransform(GeoTrf::TranslateZ3D(zdisk-dz));
-      ecPhys->add(xformCablesMinus);
-      ecPhys->add(pecc->Build() );
+      if(m_sqliteReader) {
+	pd->Build();
+	int brl_ec = 2*m_gmt_mgr->GetSide();
+	Identifier id = m_gmt_mgr->getIdHelper()->wafer_id(brl_ec,idisk,0,0);
+	std::string key="Disk_"+std::to_string(brl_ec)+"_"+std::to_string(idisk)+"_"+std::to_string(m_gmt_mgr->GetLD())+"_"+std::to_string(m_gmt_mgr->Phi())+"_"+std::to_string(m_gmt_mgr->Eta());
+	m_DDmgr->addAlignableTransform(1, id, mapAX[key], mapFPV[key]);
+      }
+      else {
+      
+	//
+	// The position is given w.r.t to the center of the detector!
+	//
+	//position of the disk
+	double zdisk = m_gmt_mgr->PixelDiskZPosition()-endcapZOffset;
+	// place the disk
+	std::ostringstream nameTag; 
+	nameTag << "Disk" << idisk;
+	GeoNameTag * tag = new GeoNameTag(nameTag.str());
+	GeoAlignableTransform* xform = new GeoAlignableTransform(GeoTrf::TranslateZ3D(zdisk));
+	
+	GeoVPhysVol * diskPhys = pd->Build();
+	ecPhys->add(tag);
+	ecPhys->add(new GeoIdentifierTag(idisk));
+	ecPhys->add(xform);
+	ecPhys->add(diskPhys);
+	
+	// Store the alignable transform
+	int brl_ec = 2*m_gmt_mgr->GetSide();
+	Identifier id = m_gmt_mgr->getIdHelper()->wafer_id(brl_ec,idisk,0,0);
+	m_DDmgr->addAlignableTransform(1, id, xform, diskPhys);
+	
+	//
+	// place the cables twice for the two active parts
+	//
+	double dz = pd->Thickness()/2. + m_gmt_mgr->PixelECCablesDistance() ;
+	GeoTransform * xformCablesPlus = new GeoTransform(GeoTrf::TranslateZ3D(zdisk+dz));
+	ecPhys->add(xformCablesPlus);
+	ecPhys->add(pecc->Build() );
+	GeoTransform * xformCablesMinus = new GeoTransform(GeoTrf::TranslateZ3D(zdisk-dz));
+	ecPhys->add(xformCablesMinus);
+	ecPhys->add(pecc->Build() );
+      }
     } else {
       if(m_gmt_mgr->msgLvl(MSG::DEBUG))	m_gmt_mgr->msg(MSG::DEBUG) << "Disk " << idisk << " not built" << endmsg;
     }
@@ -104,19 +122,17 @@ GeoVPhysVol* GeoPixelEndCap::Build( ) {
   delete pd;
   delete pecc;
 
-  if(m_pixServices) {
+  std::string region = m_gmt_mgr->GetSide()>0 ? "A" : "C";
+
+  if(m_sqliteReader) {
+    std::ostringstream ename;
+    ename << "EndCap" << region;
+    ecPhys = mapFPV[ename.str()];
+  }
+  else if(m_pixServices) {
     //
     // Add the Endcap services inide the EC volume
-    //
-    std::string region;
-    if (m_gmt_mgr->GetSide()>0) { 
-      // EndcapA
-      region = "A";
-    } else {
-      // EndcapC
-      region = "C";
-    }     
-  
+    //  
     m_pixServices->getBuilder()->buildAndPlace(region, ecPhys, endcapZOffset);
     if (m_pixServices->getServMatBuilder()) {
       m_pixServices->getServMatBuilder()->buildAndPlace(region, ecPhys, endcapZOffset);

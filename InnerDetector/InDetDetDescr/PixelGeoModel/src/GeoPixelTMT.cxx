@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
 */
 
 // Build The TMT.
@@ -28,15 +28,19 @@ GeoPixelTMT::GeoPixelTMT(InDetDD::PixelDetectorManager* ddmgr,
   GeoPixelStaveSupport(ddmgr, mgr, sqliteReader),
   m_transform(GeoTrf::Transform3D::Identity())
 {
-  m_physVol = GeoPixelTMT::Build();
-  m_physVol->ref();
+  if(!m_sqliteReader) {
+    m_physVol = GeoPixelTMT::Build();
+    m_physVol->ref();
+  }
 }
 
 GeoPixelTMT::~GeoPixelTMT(){
-  m_physVol->unref();
+  if(m_physVol) m_physVol->unref();
 }
 
 GeoVPhysVol* GeoPixelTMT::Build() {
+
+  if(m_sqliteReader) return nullptr;
 
   // we want to use an assembly; therefore, we need a dummy volume to trigger the mechanism
   const GeoMaterial* ether = m_mat_mgr->getMaterial("special::Ether");

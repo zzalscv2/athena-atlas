@@ -1,9 +1,9 @@
 /*
-  Copyright (C) 2002-2020 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
 */
 
-#ifndef GEOPIXELDISK_H
-#define GEOPIXELDISK_H
+#ifndef PIXELGEOMODEL_GEOPIXELDISK_H
+#define PIXELGEOMODEL_GEOPIXELDISK_H
 
 #include "GeoVPixelFactory.h"
 class GeoLogVol;
