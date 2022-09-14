@@ -360,13 +360,8 @@ TrackParticleCnvAlg::convert(
             // if configured also get truth classification
             if (result->second.particleLink().cptr() &&
                 !m_truthClassifier.empty()) {
-#ifdef HEPMC3
               auto truthClass = m_truthClassifier->particleTruthClassifier(
-                result->second.particleLink().scptr());
-#else
-              auto truthClass = m_truthClassifier->particleTruthClassifier(
-                result->second.particleLink().cptr());
-#endif
+                result->second.particleLink());
               type = truthClass.first;
               origin = truthClass.second;
               ATH_MSG_VERBOSE("Got truth type  " << static_cast<int>(type)
