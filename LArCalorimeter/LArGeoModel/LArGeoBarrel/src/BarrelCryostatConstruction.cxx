@@ -27,6 +27,7 @@
 #include "GeoModelKernel/GeoNameTag.h"
 #include "GeoModelKernel/GeoAlignableTransform.h"
 #include "GeoModelKernel/GeoIdentifierTag.h"
+#include "GeoModelKernel/GeoVolumeTagCatalog.h"
 #include "GeoModelKernel/GeoShapeIntersection.h"
 #include "GeoModelKernel/GeoShapeSubtraction.h"
 #include "GeoModelKernel/GeoShapeShift.h"
@@ -288,7 +289,11 @@ GeoFullPhysVol* LArGeo::BarrelCryostatConstruction::GetEnvelope(const VDetectorP
   const GeoLogVol* cryoMotherLogical =
     new GeoLogVol(cryoMotherName, cryoMotherShape, Air);
 
-  m_cryoMotherPhysical = new GeoFullPhysVol(cryoMotherLogical);                         //
+  m_cryoMotherPhysical = new GeoFullPhysVol(cryoMotherLogical);
+  //tag this volume as one that can be used as an envelope volume to add other volumes inside later 
+  //(e.g. ITk and HGTD services built by other tools)
+  GeoVolumeTagCatalog::VolumeTagCatalog()->addTaggedVolume("Envelope","LArBarrel",m_cryoMotherPhysical);
+
   //                                                                                                  //
   //--------------------------------------------------------------------------------------------------//
 
@@ -1007,53 +1012,55 @@ GeoFullPhysVol* LArGeo::BarrelCryostatConstruction::GetEnvelope(const VDetectorP
 
   // SCT-EC Cooling
   IRDBRecordset_ptr cryoPconPhiSect = rdbAccess->getRecordsetPtr("CryoPconPhiSect", larVersionKey.tag(),larVersionKey.node());
-  for(unsigned i=0; i<cryoPconPhiSect->size(); ++i) {
-    double startPhi = (*cryoPconPhiSect)[i]->getDouble("STARTPHI");
-    double dPhi     = (*cryoPconPhiSect)[i]->getDouble("DPHI");
-    double centerPhi = startPhi + 0.5*dPhi;
+  if ((*cryoPconPhiSect).size()!=0){
+      for(unsigned i=0; i<cryoPconPhiSect->size(); ++i) {
+        double startPhi = (*cryoPconPhiSect)[i]->getDouble("STARTPHI");
+        double dPhi     = (*cryoPconPhiSect)[i]->getDouble("DPHI");
+        double centerPhi = startPhi + 0.5*dPhi;
 
-    const GeoMaterial* material  = materialManager->getMaterial((*cryoPconPhiSect)[i]->getString("MATERIAL"));
-    if (!material) {
-      std::string message = std::string("Error in BarrelCryostatConstruction! ") + (*cryoPconPhiSect)[i]->getString("MATERIAL") + std::string(" is not found.");
-      throw std::runtime_error(message.c_str());
-    }
+        const GeoMaterial* material  = materialManager->getMaterial((*cryoPconPhiSect)[i]->getString("MATERIAL"));
+        if (!material) {
+          std::string message = std::string("Error in BarrelCryostatConstruction! ") + (*cryoPconPhiSect)[i]->getString("MATERIAL") + std::string(" is not found.");
+          throw std::runtime_error(message.c_str());
+        }
 
-    GeoPcon* pcon = new GeoPcon(startPhi*Gaudi::Units::deg,dPhi*Gaudi::Units::deg);
+        GeoPcon* pcon = new GeoPcon(startPhi*Gaudi::Units::deg,dPhi*Gaudi::Units::deg);
 
-    for(unsigned int ii=0; ii<sctEcCoolingPlanes.size(); ii++) {
-      iter = sctEcCoolingPlanes.find(ii);
+        for(unsigned int ii=0; ii<sctEcCoolingPlanes.size(); ii++) {
+          iter = sctEcCoolingPlanes.find(ii);
 
-      if(iter==sctEcCoolingPlanes.end()) {
-	std::ostringstream stream;
-	stream << "Error in BarrelCryostatConstruction, missing plane " << ii <<" in SCT-EC cooling";
-	throw std::runtime_error(stream.str().c_str());
-      }
-      else {
-	currentRecord = (*cryoPcons)[(*iter).second];
-	pcon->addPlane(currentRecord->getDouble("ZPLANE"),
-		       currentRecord->getDouble("RMIN"),
-		       currentRecord->getDouble("RMAX"));
-      }
-    } // iterate over planes
+          if(iter==sctEcCoolingPlanes.end()) {
+	    std::ostringstream stream;
+	    stream << "Error in BarrelCryostatConstruction, missing plane " << ii <<" in SCT-EC cooling";
+	    throw std::runtime_error(stream.str().c_str());
+          }
+          else {
+	    currentRecord = (*cryoPcons)[(*iter).second];
+	    pcon->addPlane(currentRecord->getDouble("ZPLANE"),
+		           currentRecord->getDouble("RMIN"),
+		           currentRecord->getDouble("RMAX"));
+          }
+        } // iterate over planes
 
-    const GeoLogVol* sctCiCoolingLog = new GeoLogVol("LAr::Barrel::Cryostat::SctCiCooling",pcon,material);
-    GeoPhysVol* sctCiCoolingPhys = new GeoPhysVol(sctCiCoolingLog);
+        const GeoLogVol* sctCiCoolingLog = new GeoLogVol("LAr::Barrel::Cryostat::SctCiCooling",pcon,material);
+        GeoPhysVol* sctCiCoolingPhys = new GeoPhysVol(sctCiCoolingLog);
 
-    GeoTransform* xfPos1 = new GeoTransform(GeoTrf::Transform3D::Identity());
-    GeoTransform* xfPos2 = new GeoTransform(GeoTrf::RotateZ3D(180*Gaudi::Units::deg));
-    GeoTransform* xfNeg1 = new GeoTransform(GeoTrf::RotateZ3D((180+2*centerPhi)*Gaudi::Units::deg)*GeoTrf::RotateY3D(180*Gaudi::Units::deg));
-    GeoTransform* xfNeg2 = new GeoTransform(GeoTrf::RotateZ3D(2*centerPhi*Gaudi::Units::deg)*GeoTrf::RotateY3D(180*Gaudi::Units::deg));
+        GeoTransform* xfPos1 = new GeoTransform(GeoTrf::Transform3D::Identity());
+        GeoTransform* xfPos2 = new GeoTransform(GeoTrf::RotateZ3D(180*Gaudi::Units::deg));
+        GeoTransform* xfNeg1 = new GeoTransform(GeoTrf::RotateZ3D((180+2*centerPhi)*Gaudi::Units::deg)*GeoTrf::RotateY3D(180*Gaudi::Units::deg));
+        GeoTransform* xfNeg2 = new GeoTransform(GeoTrf::RotateZ3D(2*centerPhi*Gaudi::Units::deg)*GeoTrf::RotateY3D(180*Gaudi::Units::deg));
 
-    m_cryoMotherPhysical->add(xfPos1);
-    m_cryoMotherPhysical->add(sctCiCoolingPhys);
-    m_cryoMotherPhysical->add(xfPos2);
-    m_cryoMotherPhysical->add(sctCiCoolingPhys);
-    m_cryoMotherPhysical->add(xfNeg1);
-    m_cryoMotherPhysical->add(sctCiCoolingPhys);
-    m_cryoMotherPhysical->add(xfNeg2);
-    m_cryoMotherPhysical->add(sctCiCoolingPhys);
-  } // iterate over Phi Sections
-
+        m_cryoMotherPhysical->add(xfPos1);
+        m_cryoMotherPhysical->add(sctCiCoolingPhys);
+        m_cryoMotherPhysical->add(xfPos2);
+        m_cryoMotherPhysical->add(sctCiCoolingPhys);
+        m_cryoMotherPhysical->add(xfNeg1);
+        m_cryoMotherPhysical->add(sctCiCoolingPhys);
+        m_cryoMotherPhysical->add(xfNeg2);
+        m_cryoMotherPhysical->add(sctCiCoolingPhys);
+      } // iterate over Phi Sections
+  }
+  else log << MSG::DEBUG << "CryoPconPhiSect table not found - not building SCT cooling " << endmsg;
 
 
   if(rdbAccess->getChildTag("LArBarrelDM",larVersionKey.tag(),larVersionKey.node())!="" && m_fullGeo) {
