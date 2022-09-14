@@ -3,7 +3,6 @@
 #include "TrkDetDescrTools/CompoundLayerMaterialCreator.h"
 #include "TrkDetDescrTools/CompressedLayerMaterialCreator.h"
 #include "TrkDetDescrTools/GeometryBuilder.h"
-#include "TrkDetDescrTools/GenericGeometryBuilder.h"
 #include "TrkDetDescrTools/LayerArrayCreator.h"
 #include "TrkDetDescrTools/LayerProvider.h"
 #include "TrkDetDescrTools/LayerMaterialProvider.h"
@@ -13,7 +12,6 @@
 #include "TrkDetDescrTools/TrackingVolumeHelper.h"
 
 #include "TrkDetDescrTools/GeometryBuilderCond.h"
-#include "TrkDetDescrTools/GenericGeometryBuilderCond.h"
 #include "TrkDetDescrTools/LayerProviderCond.h"
 
 using namespace Trk;
@@ -23,7 +21,6 @@ DECLARE_COMPONENT( BinnedLayerMaterialCreator )
 DECLARE_COMPONENT( CompoundLayerMaterialCreator )
 DECLARE_COMPONENT( CompressedLayerMaterialCreator )
 DECLARE_COMPONENT( GeometryBuilder )
-DECLARE_COMPONENT( GenericGeometryBuilder )
 DECLARE_COMPONENT( LayerArrayCreator )
 DECLARE_COMPONENT( LayerProvider )
 DECLARE_COMPONENT( LayerMaterialProvider )
@@ -33,5 +30,4 @@ DECLARE_COMPONENT( TrackingVolumeArrayCreator )
 DECLARE_COMPONENT( TrackingVolumeHelper )
 
 DECLARE_COMPONENT( GeometryBuilderCond )
-DECLARE_COMPONENT( GenericGeometryBuilderCond )
 DECLARE_COMPONENT( LayerProviderCond )
