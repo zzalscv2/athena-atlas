@@ -243,9 +243,9 @@ def BPHY22Cfg(ConfigFlags):
     CascadeCollections += BPHY22MuLambdaC.CascadeVertexCollections
 
     if not isSimulation: #Only Skim Data
-        BPHY22_SelectBMuDxEvent = CompFactory.DerivationFramework.xAODStringSkimmingTool(
-          name = "BPHY22_SelectBMuDxEvent",
-          expression = "(count(BMuDpstCascadeSV1.x > -999) + count(BMuDsCascadeSV1.x > -999) + count(BMuDpCascadeSV1.x > -999) + count(BMuLambdaCCascadeSV1.x > -999) ) > 0")
+        BPHY22_SelectBMuDxEvent = CompFactory.DerivationFramework.AnyVertexSkimmingTool("BPHY22_AnyVertexSkimmingTool",
+                                                                        VertexContainerNames =CascadeCollections,
+                                                                        UseHandles = True )
         acc.addPublicTool(BPHY22_SelectBMuDxEvent)
 
         #====================================================================

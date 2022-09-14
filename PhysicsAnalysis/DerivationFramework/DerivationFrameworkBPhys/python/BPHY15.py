@@ -464,15 +464,18 @@ def BPHY15Cfg(ConfigFlags):
    if not isSimulation: #Only Skim Data
       BPHY15_SelectBcJpsipiEvent = CompFactory.DerivationFramework.xAODStringSkimmingTool(
                            name = "BPHY15_SelectBcJpsipiEvent",
-                           expression = "( count(BPHY15BcJpsipiCandidates.passed_Bc > 0) + count(BcJpsiDsCascadeSV1.x > -999) + count(BcJpsiDpCascadeSV1.x > -999) + count(BcJpsiDpstCascadeSV1.x > -999) + count(BcJpsiDps1CascadeSV1.x > -999) ) > 0")
+                           expression = "( count(BPHY15BcJpsipiCandidates.passed_Bc) > 0)")
       acc.addPublicTool(BPHY15_SelectBcJpsipiEvent)
+      BPHY15_AnyVertexSkimmingTool = CompFactory.DerivationFramework.AnyVertexSkimmingTool("BPHY15_AnyVertexSkimmingTool", UseHandles = True,
+                                                                        VertexContainerNames =CascadeCollections )
+      acc.addPublicTool(BPHY15_AnyVertexSkimmingTool)
       #====================================================================
       # Make event selection based on an OR of the input skimming tools
       #====================================================================
          
       BPHY15SkimmingOR = CompFactory.DerivationFramework.FilterCombinationOR(
                            "BPHY15SkimmingOR",
-                           FilterList = [BPHY15_SelectBcJpsipiEvent] )
+                           FilterList = [BPHY15_SelectBcJpsipiEvent, BPHY15_AnyVertexSkimmingTool] )
       acc.addPublicTool(BPHY15SkimmingOR)
 
    augTools = [BPHY15JpsiSelectAndWrite, BPHY15_Select_Jpsi2mumu,

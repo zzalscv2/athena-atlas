@@ -696,11 +696,14 @@ CascadeCollections += BPHY15JpsiDps1.CascadeVertexCollections
 
 if not isSimulation: #Only Skim Data
    from DerivationFrameworkTools.DerivationFrameworkToolsConf import DerivationFramework__xAODStringSkimmingTool
+   from DerivationFrameworkBPhys.DerivationFrameworkBPhysConf import DerivationFramework__AnyVertexSkimmingTool
    BPHY15_SelectBcJpsipiEvent = DerivationFramework__xAODStringSkimmingTool(
      name = "BPHY15_SelectBcJpsipiEvent",
-     expression = "( count(BPHY15BcJpsipiCandidates.passed_Bc > 0) + count(BcJpsiDsCascadeSV1.x > -999) + count(BcJpsiDpCascadeSV1.x > -999) + count(BcJpsiDpstCascadeSV1.x > -999) + count(BcJpsiDps1CascadeSV1.x > -999) ) > 0")
-   
+     expression = "( count(BPHY15BcJpsipiCandidates.passed_Bc) > 0)")
+   BPHY15_AnyVertexSkimmingTool = DerivationFramework__AnyVertexSkimmingTool("BPHY15_AnyVertexSkimmingTool", UseHandles = True,
+                                                                        VertexContainerNames =CascadeCollections )
    ToolSvc += BPHY15_SelectBcJpsipiEvent
+   ToolSvc += BPHY15_AnyVertexSkimmingTool
    print(BPHY15_SelectBcJpsipiEvent)
 
    #====================================================================
@@ -710,7 +713,7 @@ if not isSimulation: #Only Skim Data
    from DerivationFrameworkTools.DerivationFrameworkToolsConf import DerivationFramework__FilterCombinationOR
    BPHY15SkimmingOR = CfgMgr.DerivationFramework__FilterCombinationOR(
        "BPHY15SkimmingOR",
-       FilterList = [BPHY15_SelectBcJpsipiEvent] )
+       FilterList = [BPHY15_SelectBcJpsipiEvent, BPHY15_AnyVertexSkimmingTool] )
    ToolSvc += BPHY15SkimmingOR
    print(BPHY15SkimmingOR)
 
