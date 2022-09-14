@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2017 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
 */
 
 /////////////////////////////////////////////////////////////////////////////
@@ -45,8 +45,8 @@ public:
   unsigned int NBins() const;                                                    /*!< Get amount of bins. */
   unsigned int GetBin(double value) const;                                       /*!< Get bin number that corresponds to a given value. */
   
-  TH1D* GetDenominatorHist() const;                                              /*!< Get original denominator histogram. */
-  TH1D* GetNumeratorHist() const;                                                /*!< Get original numerator histogram. */
+  const TH1D* GetDenominatorHist() const;                                              /*!< Get original denominator histogram. */
+  const TH1D* GetNumeratorHist() const;                                                /*!< Get original numerator histogram. */
   
   void SetSystUncert(double rel_uncert);                                         /*!< Set the global relative (!) systematic uncertainty of all efficiencies/weights. */
   void SetQuietMode(bool isQuiet = true);                                        /*!< Sets the flag to turn off messages. */

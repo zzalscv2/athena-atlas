@@ -1,7 +1,7 @@
 ///////////////////////// -*- C++ -*- /////////////////////////////
 
 /*
-  Copyright (C) 2002-2017 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
 */
 
 // Computes the product (multiplication) of the weights provided by
@@ -47,7 +47,7 @@ class WeightsAgregator : public WeightToolBase
     std::string m_eventInfoName;
 
     /// Array of ingredient weight tools
-    mutable ToolHandleArray< IWeightTool > m_toolArray;
+    ToolHandleArray< IWeightTool > m_toolArray;
 
   };
 
