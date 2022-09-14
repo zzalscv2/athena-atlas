@@ -27,7 +27,7 @@ Package.SUSYToolsTester  INFO    xsec DB initialized
 Package.SUSYToolsTester  INFO     ABOUT TO INITIALIZE SUSYTOOLS 
 SUSYObjDef_xAOD          INFO    Initialising... 
 SUSYObjDef_xAOD          INFO    *****     *****     *****     *****
-SUSYObjDef_xAOD          INFO    Configuring from file /nfs/dust/atlas/user/mrimoldi/software/DevelopST_R22/TEST/build/x86_64-centos7-gcc11-opt/data/SUSYTools/SUSYTools_Default.conf
+SUSYObjDef_xAOD          INFO    Configuring from file /home/merlassino/SUSYTools_fixRef_R22/build/x86_64-centos7-gcc11-opt/data/SUSYTools/SUSYTools_Default.conf
 SUSYObjDef_xAOD          INFO    Config file opened
 SUSYObjDef_xAOD          INFO    readConfig(): Loaded property Jet.InputType with value 9
 SUSYObjDef_xAOD          INFO    readConfig(): Loaded property Muon.Id with value 1
@@ -265,7 +265,7 @@ PathResolver             WARNING Locating dev file dev/PileupReweighting/share/D
 Info in <CP::TPileupReweighting::AddLumiCalcFile>: Adding LumiMetaData (scale factor=0.970874)...
 Info in <CP::TPileupReweighting::AddLumiCalcFile>: Adding LumiMetaData (scale factor=1.010100)...
 Info in <CP::TPileupReweighting::AddLumiCalcFile>: Adding LumiMetaData (scale factor=0.934579)...
-DefaultWeightTool        INFO    AsgTool DefaultWeightTool @ 0xee19470
+DefaultWeightTool        INFO    AsgTool DefaultWeightTool @ 0x11332710
 ToolSvc.JetCalibTool_A...INFO    Initializing ToolSvc.JetCalibTool_AntiKt4EMPFlow to calibrate AntiKt4EMPFlowjets
 ToolSvc.JetCalibTool_A...INFO    Reading global JES settings from: JES_MC16Recommendation_Consolidated_PFlow_Apr2019_Rel21.config
 ToolSvc.JetCalibTool_A...INFO    resolved in: /cvmfs/atlas.cern.ch/repo/sw/database/GroupData/JetCalibTools/CalibArea-00-04-82/CalibrationConfigs/JES_MC16Recommendation_Consolidated_PFlow_Apr2019_Rel21.config
@@ -681,7 +681,7 @@ ToolSvc.JetVertexTagge...INFO      Reading JVT file from:
     JetMomentTools/JVTlikelihood_20140805.root
 
 ToolSvc.JetVertexTagge...INFO                         resolved in  :
-    /cvmfs/atlas-nightlies.cern.ch/repo/sw/master_AnalysisBase_x86_64-centos7-gcc11-opt/2022-09-08T0220/AnalysisBase/22.2.89/InstallArea/x86_64-centos7-gcc11-opt/data/JetMomentTools/JVTlikelihood_20140805.root
+    /cvmfs/atlas-nightlies.cern.ch/repo/sw/master_AnalysisBase_x86_64-centos7-gcc11-opt/2022-09-11T0220/AnalysisBase/22.2.89/InstallArea/x86_64-centos7-gcc11-opt/data/JetMomentTools/JVTlikelihood_20140805.root
 
 
 ToolSvc.JVTEfficiencyToolINFO     Path found = /cvmfs/atlas.cern.ch/repo/sw/database/GroupData/JetJvtEfficiency/Moriond2018/JvtSFFile_EMPFlowJets.root
@@ -1706,7 +1706,6 @@ Package.SUSYToolsTester  INFO        kfactor (high order) 1.13976
 Package.SUSYToolsTester  INFO        filter efficiency    0.5438
 ToolSvc.TrigDecisionTool INFO    decision not set on first (?) assert. deciding how to unpack
 ToolSvc.TrigDecisionTool INFO    SG contains xAOD decision, use DecisionUnpackerStandalone
-ToolSvc.MCaST_Sagitta    WARNING  MS weight matrix computation failed     
 Info in <SUSYToolsTester>: ===>>>  done processing event #204039981, run #310000 1 events processed so far  <<<===
 SUSYObjDef_xAOD          WARNING TruthBSM is empty. Skipping FindSusyHP.
 Package.SUSYToolsTester  INFO        Xsec (high order)    452.311
@@ -1724,72 +1723,14 @@ SUSYObjDef_xAOD          WARNING TruthBSM is empty. Skipping FindSusyHP.
 Package.SUSYToolsTester  INFO        Xsec (high order)    452.311
 Package.SUSYToolsTester  INFO        kfactor (high order) 1.13976
 Package.SUSYToolsTester  INFO        filter efficiency    0.5438
-ToolSvc.MCaST_Sagitta    WARNING  Inversion of weightCB failed 
-ToolSvc.MCaST_Sagitta    WARNING  Inversion of weightCB failed 
-ToolSvc.MCaST_Sagitta    WARNING  MS weight matrix computation failed     
-ToolSvc.MCaST_Sagitta    WARNING  MS weight matrix computation failed     
-ToolSvc.MCaST_Sagitta    WARNING  MS weight matrix computation failed     
-ToolSvc.MCaST_Sagitta    WARNING  MS weight matrix computation failed     
-ToolSvc.MCaST_Sagitta    WARNING  MS weight matrix computation failed     
-ToolSvc.MCaST_Sagitta    WARNING  MS weight matrix computation failed     
-ToolSvc.MCaST_Sagitta    WARNING  MS weight matrix computation failed     
-ToolSvc.MCaST_Sagitta    WARNING  MS weight matrix computation failed     
-ToolSvc.MCaST_Sagitta    WARNING  MS weight matrix computation failed     
-ToolSvc.MCaST_Sagitta    WARNING  MS weight matrix computation failed     
-ToolSvc.MCaST_Sagitta    WARNING  MS weight matrix computation failed     
-ToolSvc.MCaST_Sagitta    WARNING  MS weight matrix computation failed     
-ToolSvc.MCaST_Sagitta    WARNING  MS weight matrix computation failed     
-ToolSvc.MCaST_Sagitta    WARNING  MS weight matrix computation failed     
-ToolSvc.MCaST_Sagitta    WARNING  MS weight matrix computation failed     
-ToolSvc.MCaST_Sagitta    WARNING  MS weight matrix computation failed     
-ToolSvc.MCaST_Sagitta    WARNING  MS weight matrix computation failed     
-ToolSvc.MCaST_Sagitta    WARNING  MS weight matrix computation failed     
-ToolSvc.MCaST_Sagitta    WARNING  MS weight matrix computation failed     
-ToolSvc.MCaST_Sagitta    WARNING  MS weight matrix computation failed     
-ToolSvc.MCaST_Sagitta    WARNING  MS weight matrix computation failed     
-ToolSvc.MCaST_Sagitta    WARNING  MS weight matrix computation failed     
-ToolSvc.MCaST_Sagitta    WARNING  Inversion of weightCB failed 
-ToolSvc.MCaST_Sagitta    WARNING  MS weight matrix computation failed     
-ToolSvc.MCaST_Sagitta    WARNING  Inversion of weightCB failed 
-ToolSvc.MCaST_Sagitta    WARNING  Inversion of weightCB failed 
-ToolSvc.MCaST_Sagitta    WARNING  MS weight matrix computation failed     
 ToolSvc.TopTagger        WARNING One (or more) tagger input variable has an out-of-range value, setting score to -666
-ToolSvc.MCaST_Sagitta    WARNING  MS weight matrix computation failed     
-ToolSvc.MCaST_Sagitta    WARNING  MS weight matrix computation failed     
-ToolSvc.MCaST_Sagitta    WARNING  MS weight matrix computation failed     
-ToolSvc.MCaST_Sagitta    WARNING  MS weight matrix computation failed     
-ToolSvc.MCaST_Sagitta    WARNING  MS weight matrix computation failed     
-ToolSvc.MCaST_Sagitta    WARNING  MS weight matrix computation failed     
-ToolSvc.MCaST_Sagitta    WARNING  MS weight matrix computation failed     
-ToolSvc.MCaST_Sagitta    WARNING  MS weight matrix computation failed     
-ToolSvc.MCaST_Sagitta    WARNING  MS weight matrix computation failed     
-ToolSvc.MCaST_Sagitta    WARNING  MS weight matrix computation failed     
-ToolSvc.MCaST_Sagitta    WARNING  MS weight matrix computation failed     
-ToolSvc.MCaST_Sagitta    WARNING  Inversion of weightCB failed 
-ToolSvc.MCaST_Sagitta    WARNING  Inversion of weightCB failed 
-ToolSvc.MCaST_Sagitta    WARNING  MS weight matrix computation failed     
 ToolSvc.TopTagger        WARNING One (or more) tagger input variable has an out-of-range value, setting score to -666
-ToolSvc.MCaST_Sagitta    WARNING  MS weight matrix computation failed     
-ToolSvc.MCaST_Sagitta    WARNING  Inversion of weightCB failed 
-ToolSvc.MCaST_Sagitta    WARNING  Inversion of weightCB failed 
-ToolSvc.MCaST_Sagitta    WARNING  Inversion of weightCB failed 
-ToolSvc.MCaST_Sagitta    WARNING  Inversion of weightCB failed 
-ToolSvc.MCaST_Sagitta    WARNING  Inversion of weightCB failed 
-ToolSvc.MCaST_Sagitta    WARNING  Inversion of weightCB failed 
-ToolSvc.MCaST_Sagitta    WARNING  Inversion of weightCB failed 
-ToolSvc.MCaST_Sagitta    WARNING  MS weight matrix computation failed     
-ToolSvc.MCaST_Sagitta    WARNING  MS weight matrix computation failed     
-ToolSvc.MCaST_Sagitta    WARNING  Inversion of weightCB failed 
-ToolSvc.MCaST_Sagitta    WARNING  MS weight matrix computation failed     
-ToolSvc.MCaST_Sagitta    WARNING  MS weight matrix computation failed     
-ToolSvc.MCaST_Sagitta    WARNING  MS weight matrix computation failed     
 Package.SUSYToolsTester  INFO    ===>>>  start processing event #, 204040979run #310000 99 events processed so far  <<<===
-ToolSvc.MCaST_Sagitta    WARNING  MS weight matrix computation failed     
 Info in <SUSYToolsTester>: ===>>>  done processing event #204040979, run #310000 100 events processed so far  <<<===
 Info in <SUSYToolsTester>: Time per event:          (CPU / WALL)
-  Entire loop           - 222.800000 / 676.609502 ms
-  First event           - 750.000000 / 46141.572952 ms
-  Excluding first event - 217.474747 / 217.367432 ms
+  Entire loop           - 182.200000 / 584.061952 ms
+  First event           - 680.000000 / 40826.062918 ms
+  Excluding first event - 177.171717 / 177.577062 ms
 Package.SUSYToolsTester  INFO    -- Dummy Cutflow -- >>>> Variation  <<<<
 Package.SUSYToolsTester  INFO    Cut 0(All)-> el: 100, mu: 100
 Package.SUSYToolsTester  INFO    Cut 1(GRL+Cleaning)-> el: 100, mu: 100
