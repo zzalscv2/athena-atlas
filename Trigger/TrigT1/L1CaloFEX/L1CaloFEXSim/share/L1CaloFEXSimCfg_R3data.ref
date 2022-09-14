@@ -11,6 +11,7 @@ ApplicationMgr                                               0 SUCCESS          
 ApplicationMgr                                               0 SUCCESS                     SGInputLoader/SGInputLoader
 ApplicationMgr                                               0 SUCCESS                     LArRawSCDataReadingAlg/LArRawSCDataReadingAlg
 ApplicationMgr                                               0 SUCCESS                     LArRAWtoSuperCell/LArRAWtoSuperCell
+ApplicationMgr                                               0 SUCCESS                     LVL1::eTowerMakerFromSuperCells/eTowerMakerFromSuperCells
 ApplicationMgr                                               0 SUCCESS                     LVL1::eFEXDriver/eFEXDriver
 ApplicationMgr                                               0 SUCCESS                     LVL1::jFEXDriver/jFEXDriver
 ApplicationMgr                                               0 SUCCESS                     LVL1::gFEXDriver/gFEXDriver

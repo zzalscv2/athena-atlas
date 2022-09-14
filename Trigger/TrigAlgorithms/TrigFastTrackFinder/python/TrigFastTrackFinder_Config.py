@@ -227,6 +227,9 @@ class TrigFastTrackFinderBase(TrigFastTrackFinder):
         config = getInDetTrigConfig( slice_name )
 
         remapped_type = config.name
+        isCosmicConfig = False
+        if remapped_type=="cosmics":
+            isCosmicConfig = True
 
         #Global keys/names for collections
         from TrigInDetConfig.InDetTrigCollectionKeys import TrigPixelKeys, TrigSCTKeys
@@ -282,7 +285,7 @@ class TrigFastTrackFinderBase(TrigFastTrackFinder):
 
         self.Triplet_MinPtFrac = 1
         self.Triplet_nMaxPhiSlice = 53
-        if remapped_type=="cosmics":
+        if isCosmicConfig :
           self.Triplet_nMaxPhiSlice = 2 #Divide detector in 2 halves for cosmics
 
         self.LRT_Mode = config.isLRT
@@ -309,7 +312,7 @@ class TrigFastTrackFinderBase(TrigFastTrackFinder):
         if config.UseTrigSeedML is not None:
             self.UseTrigSeedML = config.UseTrigSeedML
 
-        if remapped_type=="cosmics":
+        if isCosmicConfig:
           self.Doublet_FilterRZ = False
 
         from TrigEDMConfig.TriggerEDMRun3 import recordable
@@ -340,7 +343,7 @@ class TrigFastTrackFinderBase(TrigFastTrackFinder):
 
         InDetTrigSiDetElementsRoadMaker_FTF.RoadWidth = config.RoadWidth
 
-        if remapped_type=="cosmics":
+        if isCosmicConfig:
           from InDetTrigRecExample.InDetTrigConfigRecLoadToolsCosmics import InDetTrigSiDetElementsRoadMakerCosmics
           InDetTrigSiDetElementsRoadMaker_FTF = InDetTrigSiDetElementsRoadMakerCosmics.clone('InDetTrigSiDetElementsRoadMaker_FTF')
 
@@ -404,8 +407,8 @@ class TrigFastTrackFinderBase(TrigFastTrackFinder):
 
         from TrigInDetTrackFitter.TrigInDetTrackFitterConf import TrigInDetTrackFitter
         theTrigInDetTrackFitter = TrigInDetTrackFitter()
-        #theTrigInDetTrackFitter.correctClusterPos = False #Flag to control whether to correct cluster position
-        theTrigInDetTrackFitter.correctClusterPos = True  #temporarily to true to improve err(z0) estimates
+        #Flag to control whether to correct cluster position - temporarily to true to improve err(z0) estimates
+        theTrigInDetTrackFitter.correctClusterPos = True
 
         from InDetTrigRecExample.InDetTrigConfigRecLoadTools import InDetTrigRotCreator
         theTrigInDetTrackFitter.ROTcreator = InDetTrigRotCreator

@@ -32,6 +32,7 @@ def TrigMETMonConfig(inputFlags):
     # You can actually make multiple instances of the same algorithm and give
     # them different configurations
     TrigMETMonChain1Alg = helper.addAlgorithm(CompFactory.TrigMETMonitorAlgorithm,'TrigMETMonChain1Alg')
+    TrigMETMonChain2Alg = helper.addAlgorithm(CompFactory.TrigMETMonitorAlgorithm,'TrigMETMonChain2Alg')
 
     # # If for some really obscure reason you need to instantiate an algorithm
     # # yourself, the AddAlgorithm method will still configure the base
@@ -52,10 +53,14 @@ def TrigMETMonConfig(inputFlags):
     # to enable a trigger filter, for example:
     # TrigMETMonAlg.TriggerChain = 'HLT_xe30_cell_L1XE10'
     # without filters, all events are processed.
+    TrigMETMonChain1 = 'HLT_xe80_cell_xe115_tcpufit_L1XE50'
+    TrigMETMonChain2 = 'HLT_xe65_cell_xe90_pfopufit_L1XE50'
     if mt_chains:
-      TrigMETMonChain1Alg.TriggerChain = 'HLT_xe80_cell_xe115_tcpufit_L1XE50'
+      TrigMETMonChain1Alg.TriggerChain = TrigMETMonChain1
+      TrigMETMonChain2Alg.TriggerChain = TrigMETMonChain2
     else:
       TrigMETMonChain1Alg.TriggerChain = 'HLT_xe110_pufit_xe65_L1XE50'
+      TrigMETMonChain2Alg.TriggerChain = 'HLT_xe110_pufit_xe65_L1XE50'
 
 
     ### monitorig group
@@ -165,6 +170,10 @@ def TrigMETMonConfig(inputFlags):
                "tcpufit", 
                "pfopufit", 
                "met_nn"]
+    algsHLTChain1 = ["cell",
+                     "tcpufit"]
+    algsHLTChain2 = ["cell",
+                     "pfopufit"]
     algsHLTPreSel = ["cell", 
                "tcpufit", 
                "tcpufit_sig30", 
@@ -201,6 +210,8 @@ def TrigMETMonConfig(inputFlags):
     TrigMETMonAlg.algsHLT2d = algsHLT2d
     TrigMETMonAlg.algsHLTExpert = algsHLTExpert
     TrigMETMonAlg.algsMET2d_tcpufit = algsMET2d_tcpufit
+    TrigMETMonChain1Alg.algsHLT = algsHLTChain1
+    TrigMETMonChain2Alg.algsHLT = algsHLTChain2
 
     ### cell component and status bit
     comp_names = ["PreSamplB", "EMB1", "EMB2", "EMB3", # LAr barrel
@@ -277,7 +288,8 @@ def TrigMETMonConfig(inputFlags):
     metGroup = helper.addGroup(TrigMETMonAlg,'TrigMETMonitor','HLT/METMon/')
 
     # Add a GMT for the other example monitor algorithm
-    metChain1Group = helper.addGroup(TrigMETMonChain1Alg,'TrigMETMonitor','HLT/METMon/HLT_xe80_cell_xe115_tcpufit_L1XE50/')
+    metChain1Group = helper.addGroup(TrigMETMonChain1Alg,'TrigMETMonitor','HLT/METMon/{}'.format(TrigMETMonChain1))
+    metChain2Group = helper.addGroup(TrigMETMonChain2Alg,'TrigMETMonitor','HLT/METMon/{}'.format(TrigMETMonChain2))
 
     ### STEP 5 ###
     # Configure histograms
@@ -743,48 +755,93 @@ def TrigMETMonConfig(inputFlags):
                                title='HLT tcpufit Missing E_{{T}} vs. HLT {} Missing Et;{} E_{{T}} [GeV];tcpufit E_{{T}} [GeV]'.format(alg, alg),
                                path='Expert/HLT_MET2D',
                                xbins=40,xmin=et_min,xmax=et_max,ybins=40,ymin=et_min,ymax=et_max) 
-    ## Chain specific
-    metChain1Group.defineHistogram('cell_Ex',
-                                  title='cell Missing E_{x};E_{x} [GeV];Events',
-                                  path='cell',
-                                  xbins=ec_bins,xmin=ec_min,xmax=ec_max)
-    metChain1Group.defineHistogram('cell_Ex_log',
-                                  title='cell Missing E_{x} log;sgn(E_{x}) log_{10}(E_{x}/GeV);Events',
-                                  path='cell',
-                                  xbins=ec_bins_log,xmin=ec_min_log,xmax=ec_max_log)
-    metChain1Group.defineHistogram('cell_Ey',
-                                  title='cell Missing E_{y};E_{y} [GeV];Events',
-                                  path='cell',
-                                  xbins=ec_bins,xmin=ec_min,xmax=ec_max)
-    metChain1Group.defineHistogram('cell_Ey_log',
-                                  title='cell Missing E_{y} log;sgn(E_{y}) log_{10}(E_{y}/GeV);Events',
-                                  path='cell',
-                                  xbins=ec_bins_log,xmin=ec_min_log,xmax=ec_max_log)
-    metChain1Group.defineHistogram('cell_Et',
-                                  title='cell Missing E_{T};E_{T} [GeV];Events',
-                                  path='cell',
-                                  xbins=et_bins,xmin=et_min,xmax=et_max)
-    metChain1Group.defineHistogram('cell_Et_log',
-                                  title='cell Missing E_{T} log;log_{10}(E_{T}/GeV);Events',
-                                  path='cell',
-                                  xbins=et_bins_log,xmin=et_min_log,xmax=et_max_log)
-    metChain1Group.defineHistogram('cell_sumEt',
-                                  title='cell sumEt;sumE_{T} [GeV];Events',
-                                  path='cell',
-                                  xbins=sumet_bins,xmin=sumet_min,xmax=sumet_max)
-    metChain1Group.defineHistogram('cell_sumEt_log',
-                                  title='cell sumE_{T} log;log_{10}(sumE_{T}/GeV);Events',
-                                  path='cell',
-                                  xbins=sumet_bins_log,xmin=sumet_min_log,xmax=sumet_max_log)
-    metChain1Group.defineHistogram('cell_phi',
-                                  title='cell #phi;#phi;Events',
-                                  path='cell',
-                                  xbins=phi_bins,xmin=phi_min,xmax=phi_max)
-    metChain1Group.defineHistogram('cell_phi;cell_phi_etweight', 
-                                  title='cell #phi (etweighted);#phi;E_{T} weighted events',
-                                  weight='cell_Et',
-                                  path='cell',
-                                  xbins=phi_bins,xmin=phi_min,xmax=phi_max)
+    ## Chain1 specific
+    for alg in algsHLTChain1:
+      metChain1Group.defineHistogram('{}_Ex'.format(alg),
+                             title='{} Missing E_{{x}};E_{{x}} [GeV];Events'.format(alg),
+                             path='HLT_{}'.format(alg),
+                             xbins=ec_bins,xmin=ec_min,xmax=ec_max)
+      metChain1Group.defineHistogram('{}_Ex_log'.format(alg),
+                             title='{} Missing E_{{x}} log;sgn(E_{{x}}) log(E_{{x}}/GeV);Events'.format(alg),
+                             path='HLT_{}'.format(alg),
+                             xbins=ec_bins_log,xmin=ec_min_log,xmax=ec_max_log)
+      metChain1Group.defineHistogram('{}_Ey'.format(alg),
+                             title='{} Missing E_{{y}};E_{{y}} [GeV];Events'.format(alg),
+                             path='HLT_{}'.format(alg),
+                             xbins=ec_bins,xmin=ec_min,xmax=ec_max)
+      metChain1Group.defineHistogram('{}_Ey_log'.format(alg),
+                             title='{} Missing E_{{y}} log;sgn(E_{{y}}) log(E_{{y}}/GeV);Events'.format(alg),
+                             path='HLT_{}'.format(alg),
+                             xbins=ec_bins_log,xmin=ec_min_log,xmax=ec_max_log)
+      metChain1Group.defineHistogram('{}_Et'.format(alg),
+                             title='{} Missing E_{{T}};E_{{T}} [GeV];Events'.format(alg),
+                             path='HLT_{}'.format(alg),
+                             xbins=et_bins,xmin=et_min,xmax=et_max)
+      metChain1Group.defineHistogram('{}_Et_log'.format(alg),
+                             title='{} Missing E_{{T}} log;log(E_{{T}}/GeV);Events'.format(alg),
+                             path='HLT_{}'.format(alg),
+                             xbins=et_bins_log,xmin=et_min_log,xmax=et_max_log)
+      metChain1Group.defineHistogram('{}_sumEt'.format(alg),
+                             title='{} sumE_{{T}};sumE_{{T}} [GeV];Events'.format(alg),
+                             path='HLT_{}'.format(alg),
+                             xbins=sumet_bins,xmin=sumet_min,xmax=sumet_max)
+      metChain1Group.defineHistogram('{}_sumEt_log'.format(alg),
+                             title='{} sumE_{{T}} log;log(sumE_{{T}}/GeV);Events'.format(alg),
+                             path='HLT_{}'.format(alg),
+                             xbins=sumet_bins_log,xmin=sumet_min_log,xmax=sumet_max_log)
+      metChain1Group.defineHistogram('{}_phi'.format(alg),
+                             title='{} #phi;#phi;Events'.format(alg),
+                             path='HLT_{}'.format(alg),
+                             xbins=phi_bins,xmin=phi_min,xmax=phi_max)
+      metChain1Group.defineHistogram('{0}_phi;{0}_phi_etweight'.format(alg), 
+                             title='{} #phi (etweighted);#phi;Et weighted events'.format(alg),
+                             weight='{}_Et'.format(alg),
+                             path='HLT_{}'.format(alg),
+                             xbins=phi_bins,xmin=phi_min,xmax=phi_max)
+    ## Chain2 specific
+    for alg in algsHLTChain2:
+      metChain2Group.defineHistogram('{}_Ex'.format(alg),
+                             title='{} Missing E_{{x}};E_{{x}} [GeV];Events'.format(alg),
+                             path='HLT_{}'.format(alg),
+                             xbins=ec_bins,xmin=ec_min,xmax=ec_max)
+      metChain2Group.defineHistogram('{}_Ex_log'.format(alg),
+                             title='{} Missing E_{{x}} log;sgn(E_{{x}}) log(E_{{x}}/GeV);Events'.format(alg),
+                             path='HLT_{}'.format(alg),
+                             xbins=ec_bins_log,xmin=ec_min_log,xmax=ec_max_log)
+      metChain2Group.defineHistogram('{}_Ey'.format(alg),
+                             title='{} Missing E_{{y}};E_{{y}} [GeV];Events'.format(alg),
+                             path='HLT_{}'.format(alg),
+                             xbins=ec_bins,xmin=ec_min,xmax=ec_max)
+      metChain2Group.defineHistogram('{}_Ey_log'.format(alg),
+                             title='{} Missing E_{{y}} log;sgn(E_{{y}}) log(E_{{y}}/GeV);Events'.format(alg),
+                             path='HLT_{}'.format(alg),
+                             xbins=ec_bins_log,xmin=ec_min_log,xmax=ec_max_log)
+      metChain2Group.defineHistogram('{}_Et'.format(alg),
+                             title='{} Missing E_{{T}};E_{{T}} [GeV];Events'.format(alg),
+                             path='HLT_{}'.format(alg),
+                             xbins=et_bins,xmin=et_min,xmax=et_max)
+      metChain2Group.defineHistogram('{}_Et_log'.format(alg),
+                             title='{} Missing E_{{T}} log;log(E_{{T}}/GeV);Events'.format(alg),
+                             path='HLT_{}'.format(alg),
+                             xbins=et_bins_log,xmin=et_min_log,xmax=et_max_log)
+      metChain2Group.defineHistogram('{}_sumEt'.format(alg),
+                             title='{} sumE_{{T}};sumE_{{T}} [GeV];Events'.format(alg),
+                             path='HLT_{}'.format(alg),
+                             xbins=sumet_bins,xmin=sumet_min,xmax=sumet_max)
+      metChain2Group.defineHistogram('{}_sumEt_log'.format(alg),
+                             title='{} sumE_{{T}} log;log(sumE_{{T}}/GeV);Events'.format(alg),
+                             path='HLT_{}'.format(alg),
+                             xbins=sumet_bins_log,xmin=sumet_min_log,xmax=sumet_max_log)
+      metChain2Group.defineHistogram('{}_phi'.format(alg),
+                             title='{} #phi;#phi;Events'.format(alg),
+                             path='HLT_{}'.format(alg),
+                             xbins=phi_bins,xmin=phi_min,xmax=phi_max)
+      metChain2Group.defineHistogram('{0}_phi;{0}_phi_etweight'.format(alg),
+                             title='{} #phi (etweighted);#phi;Et weighted events'.format(alg),
+                             weight='{}_Et'.format(alg),
+                             path='HLT_{}'.format(alg),
+                             xbins=phi_bins,xmin=phi_min,xmax=phi_max)
+
 
     ### STEP 6 ###
     # Finalize. The return value should be a tuple of the ComponentAccumulator

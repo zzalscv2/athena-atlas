@@ -1,8 +1,8 @@
 #!/bin/sh
 
-# art-description: Run FastChain with Simulation (ATLFASTII) and MC+MC Overlay in one job without reco for MC21a (RUN3), ttbar
+# art-description: Run FastChain with Simulation (ATLFAST3F_G4MS) and MC+MC Overlay in one job without reco for MC21a (RUN3), ttbar
 # art-type: grid
-# art-include: master/Athena
+# art-include: 22.0/Athena
 # art-output: *.root
 # art-output: config.txt
 # art-output: RAWtoESD_config.txt

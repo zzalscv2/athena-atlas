@@ -115,20 +115,7 @@ def _createCfgFlags():
                                                         prevFlags.Overlay.FastChain)))  # Enable Overlay
     acf.addFlag('Common.doExpressProcessing', False)
     acf.addFlag('Common.ProductionStep', ProductionStep.Default, enum=ProductionStep)
-
-    def _checkProject():
-        import os
-        if "AthSimulation_DIR" in os.environ:
-            return Project.AthSimulation
-        if "AthGeneration_DIR" in os.environ:
-            return Project.AthGeneration
-        if "AthAnalysis_DIR" in os.environ:
-            return Project.AthAnalysis
-        if "AthDerivation_DIR" in os.environ:
-            return Project.AthDerivation
-        #TODO expand this method.
-        return Project.Athena
-    acf.addFlag('Common.Project', _checkProject(), enum=Project)
+    acf.addFlag('Common.Project', Project.determine(), enum=Project)
 
     # replace global.Beam*
     acf.addFlag('Beam.BunchSpacing', 25) # former global.BunchSpacing

@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "MuonCalibStandAloneBase/CalibrationTeeIOTool.h"
@@ -16,7 +16,7 @@ namespace MuonCalib {
         return StatusCode::SUCCESS;
     }
 
-    StatusCode CalibrationTeeIOTool::WriteT0(MdtTubeFitContainer *t0_output, const NtupleStationId &station_id, int iov_start,
+    StatusCode CalibrationTeeIOTool::WriteT0(const MdtTubeFitContainer *t0_output, const NtupleStationId &station_id, int iov_start,
                                              int iov_end) {
         ATH_MSG_INFO("Writing to tool 1");
         ATH_CHECK(m_tool1->WriteT0(t0_output, station_id, iov_start, iov_end));

@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2019 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef MUONTRACKSTATISTICSTOOL_MUONTRACKSTATISTICSTOOL_H
@@ -93,13 +93,13 @@ public:
     // function to access tracks and update counters
     // First function is an interface to MuonTrackStatisticsAlg, which passes in the retrieved collection from SG and the name, which it
     // uses to find the appropriate counter The counter and collection are then passed to the 2nd function, which does the updating
-    StatusCode updateTrackCounters(const std::string& name, const TrackCollection* tracks) const;
-    StatusCode updateTrackCounters(TrackCounters& counters, const TrackCollection& tracks) const;
+    StatusCode updateTrackCounters(const std::string& name, const TrackCollection* tracks);
+    StatusCode updateTrackCounters(TrackCounters& counters, const TrackCollection& tracks);
 
-    StatusCode updateTruthTrackCounters(const std::string& name, const DetailedTrackTruthCollection* truthMap) const;
-    StatusCode updateTruthTrackCounters(TruthTrackCounters& counters, const DetailedTrackTruthCollection& TruthMap) const;
+    StatusCode updateTruthTrackCounters(const std::string& name, const DetailedTrackTruthCollection* truthMap);
+    StatusCode updateTruthTrackCounters(TruthTrackCounters& counters, const DetailedTrackTruthCollection& TruthMap);
 
-    void addTrackCounters(const std::string& trkLoc) const;
+    void addTrackCounters(const std::string& trkLoc);
     //  void addTruthTrackCounters( std::string trkLoc ) const;
     std::string printTrackCounters() const;
 
@@ -111,8 +111,8 @@ private:
 
     bool m_doTruth;
 
-    mutable std::vector<MuonTrackStatisticsTool::TrackCounters*> m_allCounters;
-    mutable std::vector<MuonTrackStatisticsTool::TruthTrackCounters*> m_allTruthCounters;
+    std::vector<MuonTrackStatisticsTool::TrackCounters*> m_allCounters;
+    std::vector<MuonTrackStatisticsTool::TruthTrackCounters*> m_allTruthCounters;
 
     void storeTruthTracks(void);
 };

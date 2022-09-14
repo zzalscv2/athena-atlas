@@ -76,7 +76,7 @@ vartree', path=path, treedef='pixmvamontool_lb/i:status_vec/vector<float>\
             hname_idx = int( postfix.split('_').pop() )
             hname = hnames[hname_idx]
             tool.defineHistogram(fullvarstring + ';' + hname, type='TProfile', path=layer, 
-                                        title='BDT score for last 100LB ' + hname + ';lumi block;<BDT score>',
+                                        title='BDT score per LB ' + hname + ';lumi block;<BDT score>',
                                         xbins=xbins, xmin=-0.5, xmax=-0.5+xbins)
 '''
 This function configures 1D (Profile) vs lumi histograms for Pixel(IBL) modules(FEs).
