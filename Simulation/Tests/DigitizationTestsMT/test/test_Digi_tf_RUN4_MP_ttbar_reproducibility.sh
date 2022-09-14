@@ -9,7 +9,7 @@
 # art-output: RUN4_ttbar_MP_fork_evt0.RDO.pool.root
 # art-output: RUN4_ttbar_MP_fork_evt1.RDO.pool.root
 
-export ATHENA_CORE_NUMBER=8
+export ATHENA_CORE_NUMBER=4
 
 DigiOutFileNameSP="RUN4_ttbar_SP.RDO.pool.root"
 DigiOutFileNameMP0="RUN4_ttbar_MP_fork_evt0.RDO.pool.root"
