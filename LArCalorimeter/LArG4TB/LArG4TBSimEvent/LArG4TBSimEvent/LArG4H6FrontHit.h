@@ -39,31 +39,31 @@ class LArG4H6FrontHit
 // Set- Get- methods
  // energy deposit
      inline void SetEdep(double ed) { m_edep = ed; }
-     inline double GetEdep() { return m_edep; }
+     inline double GetEdep() const { return m_edep; }
 
  // position
      inline void SetPos(const CLHEP::Hep3Vector& p) { m_pos = p; }
-     inline CLHEP::Hep3Vector GetPos() { return m_pos; }
+     inline CLHEP::Hep3Vector GetPos() const { return m_pos; }
 
  // scnum
      inline void SetSC(int sc) { m_scnum = sc; }
-     inline int GetSC() { return m_scnum; }
+     inline int GetSC() const { return m_scnum; }
 
  // mwpcnum , x, y
      inline void SetMWPC(int mw) { m_mwpcnum = mw; }
-     inline int GetMWPC()  { return m_mwpcnum; }
+     inline int GetMWPC() const  { return m_mwpcnum; }
      inline void SetX(int x1) { m_x = x1; }
-     inline int GetX() { return m_x; }
+     inline int GetX() const { return m_x; }
      inline void SetY(int y1) { m_y = y1; }
-     inline int GetY() { return m_y; }
+     inline int GetY() const { return m_y; }
 
  // trackID
      inline void SetTrackID(int id)  { m_track_id = id; }
-     inline int GetTrackID()  { return m_track_id; }
+     inline int GetTrackID() const  { return m_track_id; }
 
  // particle code
      inline void SetPcode(int code) { m_pcode = code; }
-     inline int GetPcode() { return m_pcode; }     
+     inline int GetPcode() const { return m_pcode; }     
 
  private:
      double m_edep;                // deposited energy in G4 internal units
