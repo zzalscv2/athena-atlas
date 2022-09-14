@@ -23,16 +23,17 @@ ParticleJetGhostLabelTool::ParticleJetGhostLabelTool(const std::string& name)
 }
 
 
-StatusCode ParticleJetGhostLabelTool::modify(JetContainer& jets) const {
+StatusCode ParticleJetGhostLabelTool::decorate(const JetContainer& jets) const
+{
 
   using namespace std;
   using namespace xAOD;
 
   ATH_MSG_VERBOSE("In " << name() << "::modify()");
 
-  for (xAOD::Jet* jetptr: jets) {
+  for (const xAOD::Jet* jetptr: jets) {
 
-    Jet& jet = *jetptr;
+    const Jet& jet = *jetptr;
     vector<const TruthParticle*> jetlabelpartsb = match(jet, m_ghostbname);
     vector<const TruthParticle*> jetlabelpartsc = match(jet, m_ghostcname);
     vector<const TruthParticle*> jetlabelpartstau = match(jet, m_ghosttauname);
