@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2020 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "TileSimEventTPCnv/TileHitVectorCnv_p1.h"
@@ -39,9 +39,8 @@ TileHitVector* TileHitVectorCnv::createTransient() {
         trans_cont->reserve(size);
         // copy all hits to new vector
 
-        TileOldHitVector::const_iterator it = oldVec->begin(), itEnd = oldVec->end();
-        for (;it != itEnd; ++it)  {
-          trans_cont->push_back(**it);
+        for (TileHit* hit : *oldVec) {
+          trans_cont->push_back(*hit);
         }
 
         delete oldVec;
