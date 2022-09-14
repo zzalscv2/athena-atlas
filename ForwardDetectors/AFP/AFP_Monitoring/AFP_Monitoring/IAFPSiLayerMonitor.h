@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2018 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef AFP_MONITORING_IAFPSILAYERMONITOR_H
@@ -57,10 +57,10 @@ public:
   virtual int layerID () const = 0;
 
   /// @brief Returns a name suffixed with station and layer numbers.
-  virtual std::string makeHistName (const std::string name) const = 0;
+  virtual std::string makeHistName (const std::string& name) const = 0;
 
   /// @brief Returns a title suffixed with station and layer numbers.
-  virtual std::string makeHistTitle (const std::string title) const = 0;
+  virtual std::string makeHistTitle (const std::string& title) const = 0;
 
   /// @brief Returns name of the ROOT file directory where histograms are stored
   virtual const std::string& histsDirName () const = 0;

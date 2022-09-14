@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2018 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef AFP_MONITORING_IAFPSISTATIONMONITOR_H
@@ -60,10 +60,10 @@ public:
   virtual const ToolHandleArray<IAFPSiLayerMonitor>& layersMonitors () const = 0;
 
   /// @brief Return a string useful for creating a name of the distribution.
-  virtual std::string makeName (const std::string name) const = 0;
+  virtual std::string makeName (const std::string& name) const = 0;
 
   /// @brief Return a string useful for creating a name of the distribution.
-  virtual std::string makeTitle (const std::string title) const = 0;
+  virtual std::string makeTitle (const std::string& title) const = 0;
 
   /// @brief Sets main monitor tool as a parent in all layers tools.
   virtual void setAllLayersParent (AFPHitsMonitorTool* parent) = 0;
