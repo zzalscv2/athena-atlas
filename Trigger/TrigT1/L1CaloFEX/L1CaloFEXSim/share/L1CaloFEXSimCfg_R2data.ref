@@ -13,6 +13,7 @@ ApplicationMgr                                               0 SUCCESS          
 ApplicationMgr                                               0 SUCCESS                     HLTCaloCellMaker/CaloCellSeedLessFS
 ApplicationMgr                                               0 SUCCESS                     LVL1::SCEmulation/LVL1::SCEmulation
 ApplicationMgr                                               0 SUCCESS                     LArSuperCellBCIDEmAlg/LArSuperCellBCIDEmAlg
+ApplicationMgr                                               0 SUCCESS                     LVL1::eTowerMakerFromSuperCells/eTowerMakerFromSuperCells
 ApplicationMgr                                               0 SUCCESS                     LVL1::eFEXDriver/eFEXDriver
 ApplicationMgr                                               0 SUCCESS                     LVL1::jFEXDriver/jFEXDriver
 ApplicationMgr                                               0 SUCCESS                     LVL1::gFEXDriver/gFEXDriver

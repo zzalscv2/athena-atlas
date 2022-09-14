@@ -66,6 +66,7 @@ svcMgr.THistSvc.Output += ["ANALYSIS DATAFILE='myfile.root' OPT='RECREATE'"]
 #######################################################
 log.info("==========================================================")
 log.info("Scheduling eFEXDriver")
+athAlgSeq += CfgMgr.LVL1__eTowerMakerFromSuperCells('MyeTowerMaker')
 athAlgSeq += CfgMgr.LVL1__eFEXDriver('MyeFEXDriver')
 athAlgSeq += CfgMgr.LVL1__eFEXNtupleWriter('MyeFEXNtupleWriter')
 log.info("==========================================================")
