@@ -64,13 +64,13 @@ namespace Muon
 
       ServiceHandle<Muon::IMuonIdHelperSvc> m_idHelperSvc {this, "MuonIdHelperSvc", "Muon::MuonIdHelperSvc/MuonIdHelperSvc"};
  
-      mutable std::vector<int>* m_mdtSectorIx;  //!< sector number 1-16, odd=large, even=small
-      mutable std::vector<int>* m_mdtStationIx;  //!< describe 
-      mutable std::vector<int>* m_rpcSectorIx;  //!< sector number 1-16, odd=large, even=small
-      mutable std::vector<int>* m_rpcStationIx;  //!< describe 
-      mutable std::vector<int>* m_rpcMeasuresPhi; //!< describe
-      mutable std::vector<int>* m_tgcStationIx;  //!< describe 
-      mutable std::vector<int>* m_tgcMeasuresPhi; //!< describe
+      std::vector<int>* m_mdtSectorIx;  //!< sector number 1-16, odd=large, even=small
+      std::vector<int>* m_mdtStationIx;  //!< describe
+      std::vector<int>* m_rpcSectorIx;  //!< sector number 1-16, odd=large, even=small
+      std::vector<int>* m_rpcStationIx;  //!< describe
+      std::vector<int>* m_rpcMeasuresPhi; //!< describe
+      std::vector<int>* m_tgcStationIx;  //!< describe
+      std::vector<int>* m_tgcMeasuresPhi; //!< describe
     }; 
 } // end of namespace
 
