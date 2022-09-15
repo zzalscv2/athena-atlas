@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
 */
 
 // System include(s):
@@ -11,6 +11,7 @@
 #include <TError.h>
 
 #include "AsgMessaging/MessageCheck.h"
+#include "CxxUtils/checker_macros.h"
 
 // Local include(s):
 #include "xAODRootAccess/Init.h"
@@ -18,7 +19,7 @@
 #include "xAODRootAccess/tools/TFileChecker.h"
 #include "xAODRootAccess/tools/ReturnCheck.h"
 
-int main( int argc, char* argv[] ) {
+int main ATLAS_NOT_THREAD_SAFE ( int argc, char* argv[] ) {
 
    ANA_CHECK_SET_TYPE (int);
    using namespace asg::msgUserCode;

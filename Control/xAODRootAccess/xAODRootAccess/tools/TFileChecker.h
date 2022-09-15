@@ -1,10 +1,9 @@
 // Dear emacs, this is -*- c++ -*-
 
 /*
-  Copyright (C) 2002-2017 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
 */
 
-// $Id: TFileChecker.h 673572 2015-06-09 08:40:47Z krasznaa $
 #ifndef XAODROOTACCESS_TOOLS_TFILECHECKER_H
 #define XAODROOTACCESS_TOOLS_TFILECHECKER_H
 
@@ -17,6 +16,7 @@
 
 // Local include(s):
 #include "AsgMessaging/StatusCode.h"
+#include "CxxUtils/checker_macros.h"
 
 // Forward declaration(s):
 namespace SG {
@@ -36,10 +36,7 @@ namespace xAOD {
    ///
    /// @author Attila Krasznahorkay <Attila.Krasznahorkay@cern.ch>
    ///
-   /// $Revision: 673572 $
-   /// $Date: 2015-06-09 10:40:47 +0200 (Tue, 09 Jun 2015) $
-   ///
-   class TFileChecker : public ::TObject {
+   class ATLAS_NOT_THREAD_SAFE TFileChecker : public ::TObject {
 
    public:
       /// Default constructor

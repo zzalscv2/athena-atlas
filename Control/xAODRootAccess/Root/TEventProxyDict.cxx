@@ -215,7 +215,7 @@ namespace xAOD {
       }
 
       // Return the proxy:
-      BranchInfo* bi = getBranchInfo( efe->hash() );
+      const BranchInfo* bi = getBranchInfo( efe->hash() );
       return bi->m_proxy.get();
    }
 
@@ -232,7 +232,7 @@ namespace xAOD {
    SG::DataProxy* TEvent::proxy_exact( SG::sgkey_t sgkey ) const {
 
       // Get the object describing this branch/object:
-      BranchInfo* bi = getBranchInfo( sgkey );
+      const BranchInfo* bi = getBranchInfo( sgkey );
       if( ! bi ) {
          static SG::SGKeyMap< int > missingSGKeys;
          if( missingSGKeys.emplace( sgkey, 0 ).second ) {
@@ -250,7 +250,7 @@ namespace xAOD {
       return proxy;
    }
 
-   TEvent::BranchInfo* TEvent::getBranchInfo( SG::sgkey_t sgkey ) const {
+   const TEvent::BranchInfo* TEvent::getBranchInfo( SG::sgkey_t sgkey ) const {
 
       // If the object already exists, return it:
       auto it = m_branches.find( sgkey );

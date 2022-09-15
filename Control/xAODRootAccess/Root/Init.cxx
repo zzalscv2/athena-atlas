@@ -1,6 +1,7 @@
 // Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
 
 // System include(s):
+#include <atomic>
 #include <iostream>
 #include <iomanip>
 #include <cstring>
@@ -15,21 +16,17 @@
 #include <TSystem.h>
 
 // Local include(s):
+#include "CxxUtils/checker_macros.h"
 #include "xAODRootAccess/Init.h"
 
 namespace xAOD {
 
-   /// Pointer to the original error handler function if there was one
-   static ErrorHandlerFunc_t sErrorHandler = 0;
    /// Function filtering the warnings coming from ROOT
-   void ErrorHandler( Int_t level, Bool_t abort, const char* location,
-                      const char* message );
-
-   /// Internal status flag
-   static bool sInitialised = false;
+   void ErrorHandler ATLAS_NOT_THREAD_SAFE ( Int_t level, Bool_t abort, const char* location,
+                                             const char* message );
 
    /// Width of the message source strings
-   static size_t sMessageSourceWidth = 25;
+   static std::atomic<size_t> sMessageSourceWidth = 25;
 
    StatusCode Init( const char* appname ) {
 
@@ -38,56 +35,54 @@ namespace xAOD {
 
    StatusCode Init( const char* appname, int* argc, char** argv ) {
 
+      static std::atomic_flag sInitialised ATLAS_THREAD_SAFE = ATOMIC_FLAG_INIT;
+
       // Check if we need to do anything:
-      if( sInitialised ) return StatusCode::SUCCESS;
+      if( ! sInitialised.test_and_set() ) {
 
-      // Set up our own error handler function:
-      sErrorHandler = ::SetErrorHandler( ErrorHandler );
-      if( ! sErrorHandler ) {
-         std::cerr << "<xAOD::Init> ERROR Couldn't set up ROOT message "
-                   << "filtering" << std::endl;
-         return StatusCode::FAILURE;
-      }
+         // Set up our own error handler function:
+         ::SetErrorHandler( ErrorHandler );
 
-      // Create an application. This is needed to ensure the auto-loading
-      // of the xAOD dictionaries.
-      if( ! gApplication ) {
-         if( argc && argv ) {
-            [[maybe_unused]]
-            static ::TApplication sApplication( appname, argc, argv );
-         } else {
-            ::TApplication::CreateApplication();
+         // Create an application. This is needed to ensure the auto-loading
+         // of the xAOD dictionaries.
+         TApplication* app ATLAS_THREAD_SAFE = gApplication;  // suppress checker warning (protected above)
+         if( ! app ) {
+            if( argc && argv ) {
+               [[maybe_unused]]
+               static ::TApplication sApplication( appname, argc, argv );
+            } else {
+               ::TApplication::CreateApplication();
+            }
          }
-      }
 
-      // Load the libraries in a carefully selected order.
-      // This is a temporary work-around (26 Oct 20) until the current
-      // xAOD dictionary issues are worked out.
-      for (const char *name : {
-            "xAOD::TruthParticle_v1",
-            "xAOD::MuonRoI_v1",
-            "xAOD::CaloCluster_v1",
-            "xAOD::TrackParticle_v1",
-            "xAOD::Electron_v1",
-            "xAOD::Muon_v1",
-            "xAOD::Jet_v1",
-            "xAOD::TauJet_v1",
-            "xAOD::PFO_v1",
-            "xAOD::TrigElectron_v1",
-            "xAOD::L2CombinedMuon_v1",
-            "xAOD::Particle_v1"}) {
-        // silently ignore missing classes, because this gets used in
-        // all projects, and not all projects contain all xAOD classes
-        static constexpr Bool_t LOAD = kTRUE;
-        static constexpr Bool_t SILENT = kTRUE;
-        TClass::GetClass( name, LOAD, SILENT );
-      }
+         // Load the libraries in a carefully selected order.
+         // This is a temporary work-around (26 Oct 20) until the current
+         // xAOD dictionary issues are worked out.
+         for (const char *name : {
+               "xAOD::TruthParticle_v1",
+               "xAOD::MuonRoI_v1",
+               "xAOD::CaloCluster_v1",
+               "xAOD::TrackParticle_v1",
+               "xAOD::Electron_v1",
+               "xAOD::Muon_v1",
+               "xAOD::Jet_v1",
+               "xAOD::TauJet_v1",
+               "xAOD::PFO_v1",
+               "xAOD::TrigElectron_v1",
+               "xAOD::L2CombinedMuon_v1",
+               "xAOD::Particle_v1"}) {
+            // silently ignore missing classes, because this gets used in
+            // all projects, and not all projects contain all xAOD classes
+            static constexpr Bool_t LOAD = kTRUE;
+            static constexpr Bool_t SILENT = kTRUE;
+            TClass::GetClass( name, LOAD, SILENT );
+         }
 
-      // Let the user know what happened:
-      ::Info( appname, "Environment initialised for data access" );
+         // Let the user know what happened:
+         ::Info( appname, "Environment initialised for data access" );
+      }
 
       // Return gracefully:
-      sInitialised = true;
       return StatusCode::SUCCESS;
    }
 
@@ -107,8 +102,8 @@ namespace xAOD {
    /// @param location The source of the message
    /// @param message The message that needs to be printed
    ///
-   void ErrorHandler( Int_t level, Bool_t abort, const char* location,
-                      const char* message ) {
+   void ErrorHandler ATLAS_NOT_THREAD_SAFE ( Int_t level, Bool_t abort, const char* location,
+                                             const char* message ) {
 
       // Check if we need to print anything for this level:
       if( level < gErrorIgnoreLevel ) {
