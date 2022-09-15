@@ -15,7 +15,7 @@ def defaultOverlayFlags(configFlags):
     configFlags.GeoModel.Align.Dynamic = False
     configFlags.Digitization.DoCaloNoise = False
     configFlags.Digitization.DoInnerDetectorNoise = False
-    configFlags.Digitization.DoHardScatterTruth = False
+    configFlags.Digitization.EnableCaloHSTruthRecoInputs = False
     configFlags.LAr.OFCShapeFolder = "4samples1phase"
     configFlags.LAr.ROD.DoOFCPileupOptimization = True
     configFlags.LAr.ROD.nSamples = 4

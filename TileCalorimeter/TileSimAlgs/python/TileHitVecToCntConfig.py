@@ -65,7 +65,7 @@ def TileHitVecToCntToolCfg(flags, **kwargs):
         from SGComps.SGInputLoaderConfig import SGInputLoaderCfg
         acc.merge(SGInputLoaderCfg(flags, [f'TileHitVector#{vec}' for vec in kwargs['TileHitVectors']]))
 
-    kwargs.setdefault('DoHSTruthReconstruction', flags.Digitization.DoHardScatterTruth)
+    kwargs.setdefault('DoHSTruthReconstruction', flags.Digitization.EnableCaloHSTruthRecoInputs)
     if kwargs['DoHSTruthReconstruction']:
         kwargs.setdefault('TileHitContainer_DigiHSTruth', 'TileHitCnt_DigiHSTruth')
     else:
