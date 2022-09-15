@@ -658,8 +658,10 @@ IAsgElectronEfficiencyCorrectionTool*
       tool = asg::ToolStore::get<IAsgElectronEfficiencyCorrectionTool>(name);
     } else {
       tool = new AsgElectronEfficiencyCorrectionTool(name);
-      // Give the full map path
-      top::check(asg::setProperty(tool, "MapFilePath", map_path), "Failed to set MapFilePath to " + name);
+      if (map_path != "UseEgammaRecommended") {
+	// Give the full map path if not using the default one
+	top::check(asg::setProperty(tool, "MapFilePath", map_path), "Failed to set MapFilePath to " + name);
+      }
       // Set the data type for all tools
       top::check(asg::setProperty(tool, "ForceDataType", data_type), "Failed to set ForceDataType to " + name);
       // Set the correlation model for all tools
@@ -736,8 +738,10 @@ IAsgElectronEfficiencyCorrectionTool*
       tool = asg::ToolStore::get<IAsgElectronEfficiencyCorrectionTool>(name);
     } else {
       tool = new AsgElectronEfficiencyCorrectionTool(name);
-      // Give the full map path
-      top::check(asg::setProperty(tool, "MapFilePath", map_path), "Failed to set MapFilePath to " + name);
+      if (map_path != "UseEgammaRecommended") {
+	// Give the full map path if not using the default one
+	top::check(asg::setProperty(tool, "MapFilePath", map_path), "Failed to set MapFilePath to " + name);
+      }
       // Set the data type for all tools
       top::check(asg::setProperty(tool, "ForceDataType", data_type), "Failed to set ForceDataType to " + name);
       // Set the correlation model for all tools
@@ -851,13 +855,13 @@ IAsgElectronEfficiencyCorrectionTool*
   std::string EgammaCPTools::electronSFMapFilePath(const std::string& type) {
     // Store here the paths to maps which may be updated with new recommendations
     // Currently can use maps for reco, id, iso, trigger but not ChargeID
-    const std::string el_calib_path = "ElectronEfficiencyCorrection/2015_2025/rel22.2/2022_Summer_Prerecom_v1/map0.txt";
+    const std::string el_calib_path = "UseEgammaRecommended";
 
     if (type == "FWDID") {
       return PathResolverFindCalibFile("ElectronEfficiencyCorrection/2015_2017/rel21.2/Consolidation_September2018_v1/map3.txt");
     }
 
-    return PathResolverFindCalibFile(el_calib_path);
+    return el_calib_path;
   }
 
   std::string EgammaCPTools::mapWorkingPoints(const std::string& type) {
