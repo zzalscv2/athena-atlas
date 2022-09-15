@@ -6,23 +6,41 @@
 
 
 namespace xAOD {
-    AUXSTORE_OBJECT_SETTER_AND_GETTER(TrackParameters_v1, std::vector<double>, parameters, setParameters)
 
-    std::vector<double>& TrackParameters_v1::parameters() {
+    TrackParameters_v1::VectorMap TrackParameters_v1::parameters() {
         static const SG::AuxElement::Accessor<std::vector<double>> acc("parameters");
         if (!acc.isAvailable(*this)) throw std::runtime_error("Missing 'parameters' in TrackParameters_v1");
-        return acc(*this);
+        return VectorMap{acc(*this).data()};
     }
 
-    AUXSTORE_OBJECT_SETTER_AND_GETTER(TrackParameters_v1, std::vector<double>, covariance, setCovariance)
+    TrackParameters_v1::ConstVectorMap TrackParameters_v1::parameters() const {
+        static const SG::AuxElement::ConstAccessor<std::vector<double>> acc("parameters");
+        if (!acc.isAvailable(*this)) throw std::runtime_error("Missing 'parameters' in TrackParameters_v1");
+        return ConstVectorMap{acc(*this).data()};
+    }
 
-    std::vector<double>& TrackParameters_v1::covariance() {
+
+    TrackParameters_v1::MatrixMap TrackParameters_v1::covariance() {
         static const SG::AuxElement::Accessor<std::vector<double>> acc("covariance");
         if (!acc.isAvailable(*this)) throw std::runtime_error("Missing 'covariance' in TrackParameters_v1");;
-        return acc(*this);
+        return MatrixMap{acc(*this).data()};
     }
+    TrackParameters_v1::ConstMatrixMap TrackParameters_v1::covariance() const {
+        static const SG::AuxElement::ConstAccessor<std::vector<double>> acc("covariance");
+        if (!acc.isAvailable(*this)) throw std::runtime_error("Missing 'covariance' in TrackParameters_v1");;
+        return ConstMatrixMap{acc(*this).data()};
+    }
+
     void TrackParameters_v1::resize(size_t sz) {
-        parameters().resize(sz); // 1D vector storage
-        covariance().resize(sz * sz); // 2D Matrix storage
+        {
+            static const SG::AuxElement::Accessor<std::vector<double>> acc("parameters");
+            if (!acc.isAvailable(*this)) throw std::runtime_error("Missing 'parameters' in TrackParameters_v1");
+            acc(*this).resize(sz);
+        }
+        {
+            static const SG::AuxElement::Accessor<std::vector<double>> acc("covariance");
+            if (!acc.isAvailable(*this)) throw std::runtime_error("Missing 'covariance' in TrackParameters_v1");;
+            acc(*this).resize(sz * sz);
+        }
     }
 }
