@@ -70,34 +70,30 @@ namespace {
   std::string
   root_typename(const std::string& root_type_name)
   {
-    static std::unordered_map<std::string,std::string> s;
-    static bool first = true;
-    if (first) {
-      first = false;
+    static const std::unordered_map<std::string,std::string> s = {
+      {"Int_t", System::typeinfoName(typeid(Int_t))},
+      {"UInt_t", System::typeinfoName(typeid(UInt_t))},
 
-      s["Int_t"] = System::typeinfoName(typeid(Int_t));
-      s["UInt_t"] = System::typeinfoName(typeid(UInt_t));
+      {"Long_t", System::typeinfoName(typeid(Long_t))},
+      {"ULong_t", System::typeinfoName(typeid(ULong_t))},
 
-      s["Long_t"] = System::typeinfoName(typeid(Long_t));
-      s["ULong_t"] = System::typeinfoName(typeid(ULong_t));
+      {"Long64_t", System::typeinfoName(typeid(Long64_t))},
+      {"ULong64_t", System::typeinfoName(typeid(ULong64_t))},
 
-      s["Long64_t"] = System::typeinfoName(typeid(Long64_t));
-      s["ULong64_t"] = System::typeinfoName(typeid(ULong64_t));
-
-      s["Float_t"] = System::typeinfoName(typeid(Float_t));
-      s["Float16_t"] = System::typeinfoName(typeid(Float16_t));
-      s["Double_t"] = System::typeinfoName(typeid(Double_t));
-      s["Double32_t"] = System::typeinfoName(typeid(Double32_t));
+      {"Float_t", System::typeinfoName(typeid(Float_t))},
+      {"Float16_t", System::typeinfoName(typeid(Float16_t))},
+      {"Double_t", System::typeinfoName(typeid(Double_t))},
+      {"Double32_t", System::typeinfoName(typeid(Double32_t))},
       
-      s["Bool_t"] = System::typeinfoName(typeid(Bool_t));
-      s["Char_t"] = System::typeinfoName(typeid(Char_t));
-      s["UChar_t"] = System::typeinfoName(typeid(UChar_t));
+      {"Bool_t", System::typeinfoName(typeid(Bool_t))},
+      {"Char_t", System::typeinfoName(typeid(Char_t))},
+      {"UChar_t", System::typeinfoName(typeid(UChar_t))},
       
-      s["Short_t"] = System::typeinfoName(typeid(Short_t));
-      s["UShort_t"] = System::typeinfoName(typeid(UShort_t));
+      {"Short_t", System::typeinfoName(typeid(Short_t))},
+      {"UShort_t", System::typeinfoName(typeid(UShort_t))}
+    };
 
-    }
-    return s[root_type_name];
+    return s.at(root_type_name);
   }
 
 #if 0
@@ -130,7 +126,7 @@ namespace Athena {
 /** @class RootNtupleEventContext 
  *  ROOT specific event selector context
  */
-class RootNtupleEventContext : 
+class ATLAS_NOT_THREAD_SAFE RootNtupleEventContext :
     public ::IEvtSelector::Context
 {
 public:
@@ -141,20 +137,11 @@ private:
   /// reference to the hosting event selector instance
   const RootNtupleEventSelector* m_evtsel;
 
-  /// the file container managed by this context
-  //FileNames_t m_files;
-
   /// current collection index (into `m_inputCollectionsName`)
   long m_collIdx;
 
   /// current tuple index (into `m_tupleNames')
   long m_tupleIdx;
-
-  /// current entry of current file
-  //int64_t m_entry;
-
-  /// reference to top-level tree
-  //TTree* m_tree;
 
   /// connection FID
   std::string m_fid;
@@ -164,11 +151,8 @@ public:
   /// standard c-tor with initialization
   RootNtupleEventContext(const RootNtupleEventSelector* sel) :
     m_evtsel(sel),
-    //m_files(),
     m_collIdx(0),
     m_tupleIdx(0),
-    //m_entry(-1),
-    //m_tree(NULL),
     m_fid("")
   {}
 
@@ -179,15 +163,8 @@ public:
   const FileNames_t& files() const 
   { return m_evtsel->m_inputCollectionsName.value(); }
 
-  // /// set the container of files
-  // void setFiles(const FileNames_t& fnames) 
-  // {
-  //   //m_files = fnames;
-  //   //m_fidx = 0;
-  // }
-
   /// context identifier
-  virtual void* identifier() const 
+  virtual void* identifier() const
   { return (void*)(m_evtsel); }
 
   /// access to the file iterator
@@ -206,9 +183,6 @@ public:
 
   /// access to the current event entry number
   int64_t entry() const { return m_evtsel->m_curEvt; }
-
-  // /// set the current event entry number
-  // void setEntry(int64_t entry) { m_entry = entry; }
 
   /// set connection FID
   void setFID(const std::string& fid) { m_fid = fid; }
