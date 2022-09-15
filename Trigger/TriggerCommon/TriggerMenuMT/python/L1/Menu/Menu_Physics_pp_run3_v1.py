@@ -212,8 +212,8 @@ def defineMenu():
     
         # RNDM
         'L1_RD0_FILLED', 'L1_RD0_UNPAIRED_ISO',  'L1_RD0_EMPTY',
-        'L1_RD0_FIRSTEMPTY', 'L1_RD0_BGRP11',
-        'L1_RD0_BGRP7',
+        'L1_RD0_FIRSTEMPTY', 'L1_RD0_BGRP10', 'L1_RD0_BGRP11',
+        'L1_RD0_BGRP7', 'L1_RD0_BGRP15',
         'L1_RD0_FIRSTINTRAIN',
         'L1_RD1_EMPTY',
         'L1_RD1_FILLED',
@@ -224,6 +224,7 @@ def defineMenu():
 
         #LUCID
         'L1_LUCID_A', 'L1_LUCID_C',
+        'L1_LUCID_A_BGRP11', 'L1_LUCID_C_BGRP11',
 
         # VDM
 
@@ -291,6 +292,8 @@ def defineMenu():
         'L1_MBTS_4_A', 'L1_MBTS_4_C',
         'L1_MBTS_1_A', 'L1_MBTS_1_C',
         'L1_MBTS_1_A_EMPTY', 'L1_MBTS_1_C_EMPTY',
+        # For VdM
+        'L1_MBTS_2_BGRP11', 'L1_MBTS_1_1_BGRP11', 
 
         # extra MBTS 
         # TODO: to be removed for high-mu pp        

@@ -1309,6 +1309,9 @@ class ItemDef:
         MenuItem('L1_LUCID_BGRP9').setLogic( (d.LUCID_A | d.LUCID_C) & bgrp9cond)
         MenuItem('L1_LUCID_BGRP11').setLogic( (d.LUCID_A | d.LUCID_C) & bgrp11cond)
 
+        MenuItem('L1_LUCID_A_BGRP11').setLogic( d.LUCID_A & bgrp11cond)
+        MenuItem('L1_LUCID_C_BGRP11').setLogic( d.LUCID_C & bgrp11cond)
+
         # BCM
         MenuItem('L1_BCM_Wide'                   ).setLogic( d.BCM_Wide & physcond )
         MenuItem('L1_BCM_Wide_BGRP12'            ).setLogic( d.BCM_Wide & bgrp12cond )
@@ -1363,6 +1366,7 @@ class ItemDef:
         MenuItem('L1_RD0_BGRP9'          ).setLogic( d.RNDM0 & bgrp9cond          ).setTriggerType(TT.rand)
         MenuItem('L1_RD0_BGRP10'         ).setLogic( d.RNDM0 & alfacalib          ).setTriggerType(TT.rand)
         MenuItem('L1_RD0_BGRP11'         ).setLogic( d.RNDM0 & bgrp11cond         ).setTriggerType(TT.rand)
+        MenuItem('L1_RD0_BGRP15'         ).setLogic( d.RNDM0 & alfacalib          ).setTriggerType(TT.rand)
         MenuItem('L1_RD0_FIRSTINTRAIN'   ).setLogic( d.RNDM0 & firstintrain       ).setTriggerType(TT.rand)
 
         MenuItem('L1_RD1_FILLED'         ).setLogic( d.RNDM1 & physcond           ).setTriggerType(TT.zerobs) # used to be TT.rand
