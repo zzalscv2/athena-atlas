@@ -1,7 +1,8 @@
 /*
-  Copyright (C) 2002-2017 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
 */
 
+#include "CxxUtils/checker_macros.h"
 #include "GeoMaterial2G4/Geo2G4MatPropTableFactory.h"
 #include "G4MaterialPropertiesTable.hh"
 #include "G4MaterialPropertyVector.hh"
@@ -9,26 +10,29 @@
 #include "GeoModelUtilities/GeoMaterialPropertiesTable.h"
 #include "GeoModelUtilities/GeoMaterialPropertyVector.h"
 
-Geo2G4MatPropTableFactory* Geo2G4MatPropTableFactory::m_instance = 0;
+#include <mutex>
+#include <unordered_map>
 
-Geo2G4MatPropTableFactory* Geo2G4MatPropTableFactory::instance()
-{
-  if(!m_instance)
-    m_instance = new Geo2G4MatPropTableFactory();
-  return m_instance;
+namespace {
+  typedef std::unordered_map<const GeoMaterialPropertiesTable*, G4MaterialPropertiesTable*> TableMap;
 }
 
-Geo2G4MatPropTableFactory::Geo2G4MatPropTableFactory()
-{
-}
 
 G4MaterialPropertiesTable* Geo2G4MatPropTableFactory::Build(const GeoMaterialPropertiesTable* thePropTable)
 {
+  static TableMap definedTables ATLAS_THREAD_SAFE;
+
+  // For now just use a global lock. If this turns out to be a bottleneck
+  // switch to a concurrent map or similar.
+  static std::mutex tableMutex;
+  std::scoped_lock lock(tableMutex);
+
   //
   // Check if this material has already been defined.
   //
-  if(m_definedTables.find(thePropTable) != m_definedTables.end())
-    return m_definedTables[thePropTable];
+  const auto itr = definedTables.find(thePropTable);
+  if(itr != definedTables.end())
+    return itr->second;
 
   G4MaterialPropertiesTable* newTable = new G4MaterialPropertiesTable();
 
@@ -64,7 +68,7 @@ G4MaterialPropertiesTable* Geo2G4MatPropTableFactory::Build(const GeoMaterialPro
     }
 
   // Save new table to the map
-  m_definedTables[thePropTable]=newTable;
+  definedTables[thePropTable]=newTable;
 
   return newTable;
 }

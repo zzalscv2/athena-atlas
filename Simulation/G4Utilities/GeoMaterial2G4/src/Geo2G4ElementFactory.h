@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2017 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef GEOMATERIAL2G4_ElementFactory_H
@@ -8,9 +8,9 @@
 class G4Element;
 class GeoElement;
 
-#include <map>
+#include <unordered_map>
 #include <string>
-typedef std::map<std::string, G4Element*, std::less<std::string> > elList;
+typedef std::unordered_map<std::string, G4Element*> elList;
 
 class Geo2G4ElementFactory {
 public:
