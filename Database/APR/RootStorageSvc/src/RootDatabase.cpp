@@ -286,8 +286,9 @@ static void printErrno(DbPrint& log, const char* nam, int err) {
     case ENOSPC: /// not enough space left on the device for the operation.
     default:
       {
+        char errbuf[256];
         log << DbPrintLvl::Error << "Failed to modify file: " << nam
-          << " Errno=" << err << " " << strerror(err) << DbPrint::endmsg;
+            << " Errno=" << err << " " << strerror_r(err, errbuf, sizeof(errbuf)) << DbPrint::endmsg;
         break;
       }
   }

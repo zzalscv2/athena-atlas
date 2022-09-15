@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
 */
 
 //====================================================================
@@ -16,6 +16,7 @@
 #include "TBufferFile.h"
 #define G__DICTIONARY
 #include "RtypesImp.h"
+#include "CxxUtils/checker_macros.h"
 #include "CxxUtils/no_sanitize_undefined.h"
 
 #include <iostream>
@@ -49,7 +50,7 @@ namespace pool {
 
       Streamer(*fBufferRef);         //write key itself
       fKeylen    = fBufferRef->Length();
-      auto ptr = const_cast<void*>(obj);
+      void* ptr ATLAS_THREAD_SAFE = const_cast<void*>(obj);
       fBufferRef->MapObject(ptr, cl);    //register obj in map in case of self reference
       cl->WriteBuffer(*fBufferRef, ptr); //write object
       lbuf       = fBufferRef->Length();
@@ -256,7 +257,8 @@ int pool::RootKeyIOHandler::write(TClass* cl,
         if ( key->GetSeekKey() ) {
           nbytes = key->WriteFile(0);
           gFile->SumBuffer(nbytes);
-          if ( gDebug > 1 ) {
+          const bool debug ATLAS_THREAD_SAFE = (gDebug > 1);  // use of global, but just for debugging
+          if ( debug ) {
             std::cout << "::writeObject> File " << gFile->GetName() 
                       << " object " << knam << " with length:" << nbytes << " read." << std::endl;
           }
@@ -304,7 +306,8 @@ int pool::RootKeyIOHandler::read NO_SANITIZE_UNDEFINED (TKey* key, void** obj) c
     // But we then need to disable ubsan for this function.
     int nbytes = mkey->readObject(obj);
     const char* knam = key->GetName();
-    if ( gDebug > 1 ) {
+    const bool debug ATLAS_THREAD_SAFE = (gDebug > 1);  // use of global, but just for debugging
+    if ( debug ) {
       std::cout << "::readObject> File " << gFile->GetName() 
         << " object " << knam << " with length:" << nbytes << " read." << std::endl;
     }

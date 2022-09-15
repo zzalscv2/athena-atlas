@@ -61,13 +61,13 @@ pool::DbString       myStringC1("This is my string C1");
 pool::DbString       myStringC2("This is my string C2");
 pool::DbString       myStringC3("This is my string C3");
 
-// string tokens to written objects, for use when reading back
-string refA1, refA2, refA3, refA4, refA5, refA6, refA7;
-string refB1, refB2, refB3, refC1, refC2, refC3;
-
 
 int main() {
    cout << "Starting branchContIdx_test" << endl;
+
+   // string tokens to written objects, for use when reading back
+   string refA1, refA2, refA3, refA4, refA5, refA6, refA7;
+   string refB1, refB2, refB3, refC1, refC2, refC3;
 
    pool::IStorageSvc* storSvc = pool::createStorageSvc("StorageSvc");
    if ( ! storSvc ) {

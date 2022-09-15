@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
 */
 
 //====================================================================
@@ -42,6 +42,7 @@
 #include "AthContainersInterfaces/IAuxStoreHolder.h"
 #include "AthContainers/AuxTypeRegistry.h"
 #include "AthContainers/normalizedTypeinfoName.h"
+#include "CxxUtils/checker_macros.h"
 #include "RootAuxDynIO/RootAuxDynIO.h"
 
 using namespace pool;
@@ -120,8 +121,9 @@ void fixupPackedConversion (TBranch* br)
 
 } // anonymous namespace
 
-static UCharDbArrayAthena  s_char_Blob;
-static IntDbArray   s_int_Blob;
+// I/O buffers (protected by mutex where used)
+static UCharDbArrayAthena  s_char_Blob ATLAS_THREAD_SAFE;
+static IntDbArray   s_int_Blob ATLAS_THREAD_SAFE;
 
 
 RootTreeContainer::RootTreeContainer()
@@ -177,7 +179,8 @@ DbStatus RootTreeContainer::writeObject( ActionList::value_type& action )
    for(k=m_branches.begin(), icol=0; k !=m_branches.end(); ++k, ++icol) {
       BranchDesc& dsc = (*k);
       RootDataPtr p( nullptr );
-      p.ptr = const_cast<void*>( action.dataAtOffset( dsc.column->offset() ) );
+      void* ptr ATLAS_THREAD_SAFE = const_cast<void*>( action.dataAtOffset( dsc.column->offset() ) );
+      p.ptr = ptr;
       switch( dsc.column->typeID() ) {
        case DbColumn::ANY:
        case DbColumn::POINTER:
@@ -216,7 +219,8 @@ DbStatus RootTreeContainer::writeObject( ActionList::value_type& action )
                       }
                    }
                 }
-                newBrDsc.object = (void*)store->getIOData(id);
+                void* ptr ATLAS_THREAD_SAFE = const_cast<void*>(store->getIOData(id));
+                newBrDsc.object = ptr;
                 newBrDsc.branch->SetAddress( newBrDsc.objectAddr() );
                 newBrDsc.written = true;  // marking that branch address was set, even if Fill is delayed
                 if( isBranchContainer() && !m_treeFillMode ) {
@@ -1054,24 +1058,27 @@ DbStatus RootTreeContainer::getOption(DbOption& opt)  const  {
         if ( !strcasecmp(n+5,"BRANCH_IDX") )  {
           int idx = 0;
           opt._getValue(idx);
-          TObjArray* arr = m_tree->GetListOfBranches();
+          TTree* tree ATLAS_THREAD_SAFE = m_tree;  // GetListOfBranches should be const
+          const TObjArray* arr = tree->GetListOfBranches();
           return opt._setValue((void*)arr->At(idx));
         }
         if ( !strcasecmp(n+5,"BRANCH_NAME") )  {
           const char* br_nam = nullptr;
           opt._getValue(br_nam);
           if ( br_nam )  {
-            return opt._setValue((void*)m_tree->GetBranch(br_nam));
+            TTree* tree ATLAS_THREAD_SAFE = m_tree;  // GetBranch should be const
+            return opt._setValue((void*)tree->GetBranch(br_nam));
           }
           opt._setValue((void*)nullptr);
         }
         if ( !strcasecmp(n+5,"BRANCH_IDX_NAME") )  {
           int idx = 0;
           opt._getValue(idx);
-          TObjArray* arr = m_tree->GetListOfBranches();
+          TTree* tree ATLAS_THREAD_SAFE = m_tree;  // GetListOfBranches should be const
+          const TObjArray* arr = tree->GetListOfBranches();
           TBranch* br = (TBranch*)arr->At(idx);
           if ( br )  {
-            return opt._setValue((char*)br->GetName());
+            return opt._setValue(br->GetName());
           }
           opt._setValue((char*)nullptr);
         }
@@ -1091,8 +1098,11 @@ DbStatus RootTreeContainer::getOption(DbOption& opt)  const  {
           return opt._setValue(int(m_tree->GetMaxVirtualSize()));
         break;
       case 'N':
-        if ( !strcasecmp(n+5,"NBRANCHES") )
-          return opt._setValue(int(m_tree->GetNbranches()));
+        if ( !strcasecmp(n+5,"NBRANCHES") ) {
+          TTree* tree ATLAS_THREAD_SAFE = m_tree;  // GetNBranches should be const
+          const int nBranches = tree->GetNbranches();
+          return opt._setValue(nBranches);
+        }
         break;
       case 'T':
         if ( !strcasecmp(n+5,"TOTAL_BYTES") )
