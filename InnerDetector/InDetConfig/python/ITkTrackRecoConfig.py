@@ -45,7 +45,7 @@ def ITkTrackRecoCfg(flags):
 
     if flags.Input.Format is Format.BS:
         # TODO: ITk BS providers
-        raise RuntimeError("BS imputs not supported")
+        raise RuntimeError("ByteStream inputs not supported")
 
     from InDetConfig.SiliconPreProcessing import ITkRecPreProcessingSiliconCfg
     result.merge(ITkRecPreProcessingSiliconCfg(flags))
@@ -91,7 +91,7 @@ def ITkTrackRecoCfg(flags):
     from TrkConfig.TrkTrackCollectionMergerConfig import ITkTrackCollectionMergerAlgCfg
     result.merge(ITkTrackCollectionMergerAlgCfg(flags,
                                                 InputCombinedTracks = InputCombinedITkTracks,
-                                                CombinedITkClusterSplitProbContainer = ITkClusterSplitProbabilityContainerName(flags)))
+                                                CombinedITkClusterSplitProbContainer = ITkClusterSplitProbabilityContainerName(flags) if not flags.ITk.Tracking.doFastTracking else ""))
 
     if flags.ITk.Tracking.doTruth:
         result.merge(ITkTrackTruthCfg(flags))
