@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2020 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "LArSimEvent/LArHitContainer.h"
@@ -33,14 +33,9 @@ LArHitContainer::operator std::string () const {
              hitContainerString +=   ": content " ;
              hitContainerString +=  newline ;
  
- LArHitContainer::const_iterator it ;
  int counter = 0 ;
- LArHit * hit ;    
- 
-     for(it = this->begin() ; it != this->end() ; ++it ){ // Loop over Hits
-     
-       hit = *it ;
-             
+
+     for (const LArHit* hit : *this) { // Loop over Hits
        sprintf( stCounter , "%d" , counter ) ;     
         
        hitContainerString += "LArHit[" ;
