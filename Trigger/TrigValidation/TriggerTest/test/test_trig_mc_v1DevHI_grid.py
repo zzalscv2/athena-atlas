@@ -29,7 +29,7 @@ ex.input = 'pbpb'
 ex.threads = 4
 ex.concurrent_events = 4
 ex.max_events = 500
-ex.args = '-c "setMenu=\'Dev_HI_run3_v1\';doWriteBS=False;doWriteRDOTrigger=True;"'
+ex.args = '-c "setMenu=\'Dev_HI_run3_v1_TriggerValidation_prescale\';doWriteBS=False;doWriteRDOTrigger=True;"'
 
 test = Test.Test()
 test.art_type = 'grid'
