@@ -1,14 +1,22 @@
 #!/bin/env python
 
 # Copyright (C) 2002-2019 CERN for the benefit of the ATLAS collaboration
-import sys,time
+import os,sys,time
 from PyCool import cool, coral
+
+if os.path.exists("/afs/cern.ch/work/s/sctcalib/CondReadPwd") :
+    pwdinfo = open( '/afs/cern.ch/work/s/sctcalib/CondReadPwd', 'r' ).read()
+    pwdinfolist = pwdinfo.split( ' ' )
+    pwd = pwdinfolist[0]
+else :
+    print('ERROR : unable to open pwd file')
+    sys.exit(-1)
 
 runNum = int(sys.argv[1])
 since = (runNum << 32)
 until = ((runNum+1) << 32)-1
 dbSvc = cool.DatabaseSvcFactory.databaseService()
-RunCtrlDB = 'oracle://ATLAS_COOLPROD;schema=ATLAS_COOLONL_TDAQ;dbname=COMP200;user=ATLAS_COOL_READER;password=COOLRED4PRO'
+RunCtrlDB = 'oracle://ATLAS_COOLPROD;schema=ATLAS_COOLONL_TDAQ;dbname=COMP200;user=ATLAS_COOL_READER;password='+pwd
 RunCtrlDb = dbSvc.openDatabase( RunCtrlDB )
 try: RunCtrlDb = dbSvc.openDatabase( RunCtrlDB )
 except Exception,e:

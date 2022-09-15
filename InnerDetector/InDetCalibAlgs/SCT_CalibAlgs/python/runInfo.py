@@ -2,7 +2,7 @@
 
 # Copyright (C) 2002-2020 CERN for the benefit of the ATLAS collaboration
 
-import sys
+import os,sys
 from PyCool import cool
 
 from CoolRunQuery.utils.AtlRunQueryLookup import InitDetectorMaskDecoder
@@ -24,14 +24,19 @@ def main( runNum=None, projectName='' ):
     dbSvc = cool.DatabaseSvcFactory.databaseService()
     #load COMP200 or CONDBR2 depending on date A.Gascon 2014-12-08
 
+    if os.path.exists("/afs/cern.ch/work/s/sctcalib/CondReadPwd") :
+        pwdinfo = open( '/afs/cern.ch/work/s/sctcalib/CondReadPwd', 'r' ).read()
+        pwdinfolist = pwdinfo.split( ' ' )
+        pwd = pwdinfolist[0]
+    else :
+        print('ERROR : unable to open pwd file')
+        sys.exit(-1)
+
     if (year > 13):
-        RunCtrlDB = 'oracle://ATLAS_COOLPROD;schema=ATLAS_COOLONL_TDAQ;dbname=CONDBR2;user=ATLAS_COOL_READER;password=COOLRED4PRO'
+        RunCtrlDB = 'oracle://ATLAS_COOLPROD;schema=ATLAS_COOLONL_TDAQ;dbname=CONDBR2;user=ATLAS_COOL_READER;password='+pwd
     else:
-        RunCtrlDB = 'oracle://ATLAS_COOLPROD;schema=ATLAS_COOLONL_TDAQ;dbname=COMP200;user=ATLAS_COOL_READER;password=COOLRED4PRO'
+        RunCtrlDB = 'oracle://ATLAS_COOLPROD;schema=ATLAS_COOLONL_TDAQ;dbname=COMP200;user=ATLAS_COOL_READER;password='+pwd
     
-    # use new CONDBR2, A.N., 2014-11-28
-    # RunCtrlDB = 'oracle://ATLAS_COOLPROD;schema=ATLAS_COOLONL_TDAQ;dbname=CONDBR2;user=ATLAS_COOL_READER;password=COOLRED4PRO'
-    #    RunCtrlDb = dbSvc.openDatabase( RunCtrlDB )
     try:
         RunCtrlDb = dbSvc.openDatabase( RunCtrlDB )
     except Exception as e:
