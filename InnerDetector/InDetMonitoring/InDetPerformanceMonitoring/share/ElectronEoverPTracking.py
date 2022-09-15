@@ -64,9 +64,19 @@ import MagFieldServices.SetupField
 # set up geometry
 #
 
-#include('TrkDetDescrSvc/AtlasTrackingGeometrySvc.py')
-#include('/afs/cern.ch/user/s/sthenkel/work/ProjectArea/Tracking/TrkDetDescr/TrkDetDescrSvc/python/AtlasTrackingGeometrySvc.py')
-#from __main__ import AtlasTrackingGeometrySvc
+#
+print (' == ElectronEoverPTracking.py == setting up geometry (new cond alg, rel22)')  
+from InDetRecExample.TrackingCommon import use_tracking_geometry_cond_alg
+geom_svc=None
+geom_cond_key=''
+if not use_tracking_geometry_cond_alg :
+    from TrkConfig.AtlasTrackingGeometrySvcConfig import TrackingGeometrySvcCfg
+    acc = TrackingGeometrySvcCfg(flags)
+    geom_svc = acc.getPrimary()
+else :
+   cond_alg = TrackingCommon.createAndAddCondAlg(TrackingCommon.getTrackingGeometryCondAlg, "AtlasTrackingGeometryCondAlg", name="AtlasTrackingGeometryCondAlg")
+   geom_cond_key = cond_alg.TrackingGeometryWriteKey
+
 #
 # get propagator
 #
@@ -84,8 +94,10 @@ ToolSvc += ElectronTrkStepPropagator
 #
 from TrkExTools.TrkExToolsConf import Trk__Navigator
 ElectronTrkNavigator = Trk__Navigator(name = 'ElectronTrkNavigator',
-                                #TrackingGeometrySvc = AtlasTrackingGeometrySvc
-                                )
+                                      TrackingGeometrySvc = geom_svc,
+                                      TrackingGeometryKey = geom_cond_key
+                                      #TrackingGeometrySvc = AtlasTrackingGeometrySvc
+                                  )
 ToolSvc += ElectronTrkNavigator
 #
 # Setup the MaterialEffectsUpdator
@@ -141,13 +153,13 @@ ToolSvc += GSFTrackFitter
 from InDetRecExample import TrackingCommon as TrackingCommon
 from TrkGlobalChi2Fitter.TrkGlobalChi2FitterConf import Trk__GlobalChi2Fitter
 GX2TrackFitter = Trk__GlobalChi2Fitter(name                  = 'GX2TrackFitter',
-                                       OutputLevel = 4,
+                                       OutputLevel = INFO,
                                        ExtrapolationTool     = ElectronTrkExtrapolator,
                                        NavigatorTool         = ElectronTrkNavigator,
                                        PropagatorTool        = ElectronTrkPropagator,
                                        RotCreatorTool        = ElectronRotCreator,
                                        BroadRotCreatorTool   = None,
-                                       MeasurementUpdateTool = ElectronUpdator,
+                                       MeasurementUpdateTool = InDetUpdator,
                                        MaterialUpdateTool    = TrackingCommon.getInDetMaterialEffectsUpdator(), # R22 SALVA
                                        StraightLine          = not InDetFlags.solenoidOn(),
                                        OutlierCut            = 4,
@@ -160,7 +172,8 @@ GX2TrackFitter = Trk__GlobalChi2Fitter(name                  = 'GX2TrackFitter',
                                        Acceleration          = True,
                                        RecalculateDerivatives= InDetFlags.doCosmics() or InDetFlags.doBeamHalo(),
                                        TRTExtensionCuts      = True,
-                                       TrackChi2PerNDFCut    = 10)
+                                       TrackChi2PerNDFCut    = 10,
+                                       TrackingGeometryReadKey=geom_cond_key)
 
 print (' == ElectronEoverPTracking.py == printing GX2TrackFitter configuration')
 print (GX2TrackFitter)

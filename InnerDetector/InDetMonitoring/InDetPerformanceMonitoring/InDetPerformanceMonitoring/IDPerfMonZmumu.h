@@ -2,8 +2,8 @@
   Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
 */
 
-#ifndef INDETPERFORMANCEMONITORING_IDPERFMONZMUMU_H
-#define INDETPERFORMANCEMONITORING_IDPERFMONZMUMU_H
+#ifndef IDPERFMON_ZMUMU_H
+#define IDPERFMON_ZMUMU_H
 
 //==============================================================================
 // Include files...
@@ -26,6 +26,7 @@
 #include "xAODEgamma/EgammaTruthxAODHelpers.h"
 
 #include "TrackVertexAssociationTool/TrackVertexAssociationTool.h"
+#include "xAODEventInfo/EventInfo.h"
 
 #include <map>
 #include <string>
@@ -37,14 +38,24 @@
 #include "GaudiKernel/ToolHandle.h"
 #include "GaudiKernel/ServiceHandle.h"
 #include "TrkExInterfaces/IExtrapolator.h"
+#include "StoreGate/ReadCondHandleKey.h"
 #include "BeamSpotConditionsData/BeamSpotData.h"
 
-#include "xAODEventInfo/EventInfo.h"
+#include "TrigDecisionTool/TrigDecisionTool.h"
+#include "TriggerMatchingTool/IMatchingTool.h" 
+
+
+
 
 class IegammaTrkRefitterTool;
 
 namespace Trig{
   class TrigDecisionTool;
+  class MatchingTool;
+}
+
+namespace TrigConf {
+  class xAODConfigTool;
 }
 
 namespace Trk{
@@ -110,8 +121,8 @@ class IDPerfMonZmumu : public AthAlgorithm
   bool m_doIP;
   bool m_doFourMuAnalysis;
   bool m_storeZmumuNtuple;
-  std::vector<std::string> m_regions;
-
+  bool m_skipMS;
+  bool m_useCustomMuonSelector;
 
   /** @brief The track refitter */
   ToolHandle<IegammaTrkRefitterTool>  m_TrackRefitter1;
@@ -122,11 +133,16 @@ class IDPerfMonZmumu : public AthAlgorithm
   /** @brief tool to extrapolate tracks to BL*/
   ToolHandle<Reco::ITrackToVertex> m_trackToVertexTool;
 
-  /** @brief The trigger decision tool */
-  ToolHandle<Trig::TrigDecisionTool> m_triggerDecision;
+  /* /\** @brief The trigger decision tool *\/ */
+  ToolHandle<Trig::TrigDecisionTool> m_triggerDecision; 
+
+
+  /* /\** @brief The trigger decision tool *\/ */
+  ToolHandle<Trig::IMatchingTool> m_triggerMatching; 
 
   /** @brief The track selection Tool */
   ToolHandle< InDet::IInDetTrackSelectionTool > m_selTool;
+
 
   /** Needed for IP resolution studies **/
   ToolHandle< Trk::ITrackToVertexIPEstimator > m_trackToVertexIPEstimator;
@@ -135,11 +151,8 @@ class IDPerfMonZmumu : public AthAlgorithm
   SG::ReadCondHandleKey<InDet::BeamSpotData> m_beamSpotKey { this, "BeamSpotKey", "BeamSpotData", "SG key for beam spot" };
   ToolHandle<Trk::IExtrapolator> m_extrapolator;
 
-  /* vertex */
-  SG::ReadHandleKey<xAOD::VertexContainer> m_vertexKey { this, "VertexContainer", "PrimaryVertices", "primary vertex container" };
-
-  /* event info */
-  SG::ReadHandleKey<xAOD::EventInfo> m_eventInfoKey{this, "EventInfo", "EventInfo", "EventInfo name"};
+  /** used to pass a custom muon selector **/
+  ToolHandle<CP::IMuonSelectionTool> m_muonSelector; 
 
   //Validation Ntuple variables
   //!< boolean to switch to validation mode
@@ -156,8 +169,11 @@ class IDPerfMonZmumu : public AthAlgorithm
   std::string                     m_MSTreeName;            //MS tracks
   std::string                     m_FourMuTreeName;        //Four lepton tree
 
+
+
   //!< validation tree description - second argument in TTree
   std::string                     m_ValidationTreeDescription;
+
   //!< stream/folder to for the TTree to be written out
   std::string                     m_commonTreeFolder;
   std::string                     m_defaultTreeFolder;
@@ -169,12 +185,6 @@ class IDPerfMonZmumu : public AthAlgorithm
   std::string                     m_MSTreeFolder;
   std::string                     m_FourMuTreeFolder;
 
-  std::string m_truthName;          /// Track(Particle)TruthCollection input name
-  std::string m_trackParticleName;  /// TrackParticle input name
-  std::string m_truthLinkVecName;   /// link vector to map HepMC onto xAOD truth
-
-  // cut flow histogram
-  TH1F*                           m_h_cutflow = nullptr;
   //!< Root Validation Tree
   TTree*                          m_commonTree;
   TTree*                          m_defaultTree;
@@ -186,11 +196,34 @@ class IDPerfMonZmumu : public AthAlgorithm
   TTree*                          m_MSTree;
   TTree*                          m_FourMuTree;
 
+
+
+
+  bool m_doRemoval{};
+  bool m_doDebug{};
+
+  ToolHandle< CP::ITrackVertexAssociationTool > m_Trk2VtxAssociationTool;
+
+  /* vertex */
+  SG::ReadHandleKey<xAOD::VertexContainer> m_vertexKey { this, "VertexContainer", "PrimaryVertices", "primary vertex container" };
+  
+  /** IDTtacks **/
+  SG::ReadHandleKey<xAOD::TrackParticleContainer> m_trackContainerName{this, "trackContainerName", "InDetTrackParticles"};
+
+
+  std::string m_truthName;          /// Track(Particle)TruthCollection input name
+  std::string m_trackParticleName;  /// TrackParticle input name
+  std::string m_truthLinkVecName;   /// link vector to map HepMC onto xAOD truth
+
+  // cut flow histogram
+  TH1F*                           m_h_cutflow;
+
   unsigned int  m_runNumber{};
   unsigned int  m_evtNumber{};
   unsigned int  m_lumi_block{};
   unsigned int  m_event_mu{};
-  int           m_triggerPrescale = 0;
+  int           m_triggerPrescale;
+  std::string m_triggerName;
   unsigned int  m_nVertex{};
 
   double m_positive_px{};
@@ -201,6 +234,8 @@ class IDPerfMonZmumu : public AthAlgorithm
   double m_positive_eta{};
   double m_positive_z0{};
   double m_positive_d0{};
+  double m_positive_z0_manualBS{};
+  double m_positive_d0_manualBS{};
   double m_positive_z0_err{};
   double m_positive_d0_err{};
   double m_positive_sigma_pt{};
@@ -233,7 +268,9 @@ class IDPerfMonZmumu : public AthAlgorithm
   double m_negative_phi{};
   double m_negative_eta{};
   double m_negative_z0{};
-  double m_negative_d0{};
+  double m_negative_d0{};  
+  double m_negative_z0_manualBS{};
+  double m_negative_d0_manualBS{};
   double m_negative_z0_err{};
   double m_negative_d0_err{};
   double m_negative_sigma_pt{};
@@ -390,12 +427,10 @@ class IDPerfMonZmumu : public AthAlgorithm
   //
   std::string m_sTriggerChainName;
   std::string m_outputTracksName;
-  bool m_doRemoval{};
-  bool m_doDebug{};
   std::string m_MuonQualityName;
 
-  //std::unique_ptr<CP::TrackVertexAssociationTool> m_Trk2VtxAssociationTool;
-  ToolHandle< CP::ITrackVertexAssociationTool > m_Trk2VtxAssociationTool;
+  // needed to handle EventInfo now.. 2/8/21 (prob. rel.22)
+  SG::ReadHandleKey<xAOD::EventInfo> m_EventInfoKey{this, "EventInfoKey", "EventInfo"};
 };
 //==============================================================================
 
