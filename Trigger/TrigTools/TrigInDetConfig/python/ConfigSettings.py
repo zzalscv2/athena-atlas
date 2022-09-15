@@ -13,8 +13,8 @@ from AthenaCommon.SystemOfUnits import GeV
 # Function that returns specific signature setting/configuration
 # Rename to InDetTrigSignatureConfig ?
 def getInDetTrigConfig( name ):
-   if name in _ConfigSettings :
-      config = _ConfigSettings[name]
+   if name in ConfigSettingsInstances:
+      config = ConfigSettingsInstances[name]
       # keep a record of the configuration that is input
       # will use this to uniquely identify the algorithms
       config._input_name = name
@@ -27,7 +27,7 @@ def getInDetTrigConfig( name ):
       return None
 
 
-class _ConfigSettings_electron( _ConfigSettingsBase ):
+class ConfigSettings_electron( _ConfigSettingsBase ):
    def __init__( self ):
       _ConfigSettingsBase.__init__(self)
       self._name      = "electron"
@@ -43,7 +43,7 @@ class _ConfigSettings_electron( _ConfigSettingsBase ):
       self._electronPID         = True
 
 
-class _ConfigSettings_muon( _ConfigSettingsBase ):
+class ConfigSettings_muon( _ConfigSettingsBase ):
    def __init__( self ):
       _ConfigSettingsBase.__init__(self)
       self._name      = "muon"
@@ -56,7 +56,7 @@ class _ConfigSettings_muon( _ConfigSettingsBase ):
       self._monPtMin            = 12*GeV
 
 
-class _ConfigSettings_muonIso( _ConfigSettingsBase ):
+class ConfigSettings_muonIso( _ConfigSettingsBase ):
    def __init__( self ):
       _ConfigSettingsBase.__init__(self)
       self._name      = "muonIso"
@@ -67,7 +67,7 @@ class _ConfigSettings_muonIso( _ConfigSettingsBase ):
       self._zedHalfWidth        = 10.0
 
 
-class _ConfigSettings_tau( _ConfigSettingsBase ):
+class ConfigSettings_tau( _ConfigSettingsBase ):
    def __init__( self ):
       _ConfigSettingsBase.__init__(self)
       self._name     = "tau"
@@ -84,7 +84,7 @@ class _ConfigSettings_tau( _ConfigSettingsBase ):
       # self._minNSiHits_vtx = 6
 
 
-class _ConfigSettings_tauCore( _ConfigSettingsBase ):
+class ConfigSettings_tauCore( _ConfigSettingsBase ):
     def __init__( self ):
        _ConfigSettingsBase.__init__(self)
        self._name     = "tauCore"
@@ -92,7 +92,7 @@ class _ConfigSettings_tauCore( _ConfigSettingsBase ):
        self._roi      = "HLT_Roi_TauCore"
        self._holeSearch_FTF = True
 
-class _ConfigSettings_tauIso( _ConfigSettingsBase ):
+class ConfigSettings_tauIso( _ConfigSettingsBase ):
    def __init__( self ):
       _ConfigSettingsBase.__init__(self)
       self._name     = "tauIso"
@@ -118,13 +118,13 @@ class _ConfigSettings_tauIso( _ConfigSettingsBase ):
 
 # inherit everythiong from the tauIso instance - only
 # the Roi name is changed to protect the innocent
-class _ConfigSettings_tauIsoBDT( _ConfigSettings_tauIso ):
+class ConfigSettings_tauIsoBDT( ConfigSettings_tauIso ):
    def __init__( self ):
-      _ConfigSettings_tauIso.__init__(self)
+      ConfigSettings_tauIso.__init__(self)
       self._roi      = "HLT_Roi_TauIsoBDT"
 
 
-class _ConfigSettings_bjet( _ConfigSettingsBase ):
+class ConfigSettings_bjet( _ConfigSettingsBase ):
    def __init__( self ):
       _ConfigSettingsBase.__init__(self)
       self._name     = "bjet"
@@ -135,7 +135,7 @@ class _ConfigSettings_bjet( _ConfigSettingsBase ):
       self._phiHalfWidth    = 0.4
 
 
-class _ConfigSettings_jetSuper( _ConfigSettingsBase ):
+class ConfigSettings_jetSuper( _ConfigSettingsBase ):
    def __init__( self ):
       _ConfigSettingsBase.__init__(self)
       self._name     = "jetSuper"
@@ -160,7 +160,7 @@ class _ConfigSettings_jetSuper( _ConfigSettingsBase ):
       self._UseTrigSeedML   = 4
 
 
-class _ConfigSettings_minBias( _ConfigSettingsBase ):
+class ConfigSettings_minBias( _ConfigSettingsBase ):
    def __init__( self ):
       _ConfigSettingsBase.__init__(self)
       self._name     = "minBias"
@@ -175,7 +175,7 @@ class _ConfigSettings_minBias( _ConfigSettingsBase ):
 
 
 
-class _ConfigSettings_beamSpot( _ConfigSettingsBase ):
+class ConfigSettings_beamSpot( _ConfigSettingsBase ):
    def __init__( self ):
       _ConfigSettingsBase.__init__(self)
       self._name     = "beamSpot"
@@ -192,7 +192,7 @@ class _ConfigSettings_beamSpot( _ConfigSettingsBase ):
       self._doRecord        = False
 
 
-class _ConfigSettings_fullScan( _ConfigSettingsBase ):
+class ConfigSettings_fullScan( _ConfigSettingsBase ):
    def __init__( self ):
       _ConfigSettingsBase.__init__(self)
       self._name     = "fullScan"
@@ -221,7 +221,7 @@ class _ConfigSettings_fullScan( _ConfigSettingsBase ):
       self._doDisappearingTrk = True
 
 
-class _ConfigSettings_beamSpotFS( _ConfigSettingsBase ):
+class ConfigSettings_beamSpotFS( _ConfigSettingsBase ):
    def __init__( self ):
       _ConfigSettingsBase.__init__(self)
       self._name     = "fullScan"
@@ -240,7 +240,7 @@ class _ConfigSettings_beamSpotFS( _ConfigSettingsBase ):
       self._doRecord        = False
 
 
-class _ConfigSettings_fullScanUTT( _ConfigSettingsBase ):
+class ConfigSettings_fullScanUTT( _ConfigSettingsBase ):
    def __init__( self ):
       _ConfigSettingsBase.__init__(self)
       self._name     = "fullScanUTT"
@@ -260,7 +260,7 @@ class _ConfigSettings_fullScanUTT( _ConfigSettingsBase ):
       self._actsVertex      = True
 
 
-class _ConfigSettings_cosmics( _ConfigSettingsBase ):
+class ConfigSettings_cosmics( _ConfigSettingsBase ):
    def __init__( self ):
       _ConfigSettingsBase.__init__(self)
       self._name        = "cosmics"
@@ -275,7 +275,7 @@ class _ConfigSettings_cosmics( _ConfigSettingsBase ):
       self._phiHalfWidth    = math.pi
 
 
-class _ConfigSettings_bmumux( _ConfigSettingsBase ):
+class ConfigSettings_bmumux( _ConfigSettingsBase ):
    def __init__( self ):
       _ConfigSettingsBase.__init__(self)
       self._name      = "bphysics"
@@ -289,7 +289,7 @@ class _ConfigSettings_bmumux( _ConfigSettingsBase ):
       self._doSeedRedundancyCheck = True
 
 
-class _ConfigSettings_electronLRT( _ConfigSettingsBase ):
+class ConfigSettings_electronLRT( _ConfigSettingsBase ):
    def __init__( self ):
       _ConfigSettingsBase.__init__(self)
       self._name       = "electronLRT"
@@ -307,19 +307,19 @@ class _ConfigSettings_electronLRT( _ConfigSettingsBase ):
       self._isLRT               = True
       #pt config
       self._newConfig           = True
-      self._maxZImpactPT        = 500.
-      self._maxRPhiImpactPT     = 300.
-      self._maxEtaPT            = 2.7
-      self._maxDoubleHolesPT    = 0
-      self._maxSiHolesPT        = 2
-      self._maxPixelHolesPT     = 1
-      self._maxSCTHolesPT       = 1
-      self._minSiClustersPT     = 8
-      self._doEmCaloSeedPT      = False
-      self._minTRTonTrkPT       = 0
+      self._maxZImpact        = 500.
+      self._maxRPhiImpact     = 300.
+      self._maxEta            = 2.7
+      self._maxDoubleHoles    = 0
+      self._maxSiHoles        = 2
+      self._maxPixelHoles     = 1
+      self._maxSCTHoles       = 1
+      self._minSiClusters     = 8
+      self._doEmCaloSeed      = False
+      self._minTRTonTrk       = 0
 
 
-class _ConfigSettings_muonLRT( _ConfigSettingsBase ):
+class ConfigSettings_muonLRT( _ConfigSettingsBase ):
    def __init__( self ):
       _ConfigSettingsBase.__init__(self)
       self._name       = "muonLRT"
@@ -338,19 +338,19 @@ class _ConfigSettings_muonLRT( _ConfigSettingsBase ):
       self._DoPhiFiltering      = False
       #pt config
       self._newConfig           = True
-      self._maxZImpactPT        = 500.
-      self._maxRPhiImpactPT     = 300.
-      self._maxEtaPT            = 2.7
-      self._maxDoubleHolesPT    = 0
-      self._maxSiHolesPT        = 2
-      self._maxPixelHolesPT     = 1
-      self._maxSCTHolesPT       = 1
-      self._minSiClustersPT     = 8
-      self._doEmCaloSeedPT      = False
-      self._minTRTonTrkPT       = 0
+      self._maxZImpact        = 500.
+      self._maxRPhiImpact     = 300.
+      self._maxEta            = 2.7
+      self._maxDoubleHoles    = 0
+      self._maxSiHoles        = 2
+      self._maxPixelHoles     = 1
+      self._maxSCTHoles       = 1
+      self._minSiClusters     = 8
+      self._doEmCaloSeed      = False
+      self._minTRTonTrk       = 0
 
 
-class _ConfigSettings_tauLRT( _ConfigSettingsBase ):
+class ConfigSettings_tauLRT( _ConfigSettingsBase ):
    def __init__( self ):
       _ConfigSettingsBase.__init__(self)
       self._name     = "tauLRT"
@@ -370,19 +370,19 @@ class _ConfigSettings_tauLRT( _ConfigSettingsBase ):
       self._isLRT               = True
       #pt config
       self._newConfig           = True
-      self._maxZImpactPT        = 500.
-      self._maxRPhiImpactPT     = 300.
-      self._maxEtaPT            = 2.7
-      self._maxDoubleHolesPT    = 0
-      self._maxSiHolesPT        = 2
-      self._maxPixelHolesPT     = 1
-      self._maxSCTHolesPT       = 1
-      self._minSiClustersPT     = 8
-      self._doEmCaloSeedPT      = False
-      self._minTRTonTrkPT       = 0
+      self._maxZImpact        = 500.
+      self._maxRPhiImpact     = 300.
+      self._maxEta            = 2.7
+      self._maxDoubleHoles    = 0
+      self._maxSiHoles        = 2
+      self._maxPixelHoles     = 1
+      self._maxSCTHoles       = 1
+      self._minSiClusters     = 8
+      self._doEmCaloSeed      = False
+      self._minTRTonTrk       = 0
 
 
-class _ConfigSettings_bjetLRT( _ConfigSettingsBase ):
+class ConfigSettings_bjetLRT( _ConfigSettingsBase ):
    def __init__( self ):
       _ConfigSettingsBase.__init__(self)
       self._name     = "bjetLRT"
@@ -398,19 +398,19 @@ class _ConfigSettings_bjetLRT( _ConfigSettingsBase ):
       self._isLRT               = True
       #pt config
       self._newConfig           = True
-      self._maxZImpactPT        = 500.
-      self._maxRPhiImpactPT     = 300.
-      self._maxEtaPT            = 2.7
-      self._maxDoubleHolesPT    = 0
-      self._maxSiHolesPT        = 2
-      self._maxPixelHolesPT     = 1
-      self._maxSCTHolesPT       = 1
-      self._minSiClustersPT     = 8
-      self._doEmCaloSeedPT      = False
-      self._minTRTonTrkPT       = 0
+      self._maxZImpact        = 500.
+      self._maxRPhiImpact     = 300.
+      self._maxEta            = 2.7
+      self._maxDoubleHoles    = 0
+      self._maxSiHoles        = 2
+      self._maxPixelHoles     = 1
+      self._maxSCTHoles       = 1
+      self._minSiClusters     = 8
+      self._doEmCaloSeed      = False
+      self._minTRTonTrk       = 0
 
 
-class _ConfigSettings_fullScanLRT( _ConfigSettingsBase ):
+class ConfigSettings_fullScanLRT( _ConfigSettingsBase ):
    def __init__( self ):
       _ConfigSettingsBase.__init__(self)
       self._name     = "fullScanLRT"
@@ -433,19 +433,19 @@ class _ConfigSettings_fullScanLRT( _ConfigSettingsBase ):
       self._LRTHardPtMin          = 1.0*GeV
       #pt config
       self._newConfig           = True
-      self._maxZImpactPT        = 500.
-      self._maxRPhiImpactPT     = 300.
-      self._maxEtaPT            = 2.7
-      self._maxDoubleHolesPT    = 0
-      self._maxSiHolesPT        = 2
-      self._maxPixelHolesPT     = 1
-      self._maxSCTHolesPT       = 1
-      self._minSiClustersPT     = 8
-      self._doEmCaloSeedPT      = False
-      self._minTRTonTrkPT       = 0
+      self._maxZImpact        = 500.
+      self._maxRPhiImpact     = 300.
+      self._maxEta            = 2.7
+      self._maxDoubleHoles    = 0
+      self._maxSiHoles        = 2
+      self._maxPixelHoles     = 1
+      self._maxSCTHoles       = 1
+      self._minSiClusters     = 8
+      self._doEmCaloSeed      = False
+      self._minTRTonTrk       = 0
 
 
-class _ConfigSettings_DJetLRT( _ConfigSettingsBase ):
+class ConfigSettings_DJetLRT( _ConfigSettingsBase ):
    def __init__( self ):
       _ConfigSettingsBase.__init__(self)
       self._name     = "displacedJetLRT"
@@ -468,20 +468,20 @@ class _ConfigSettings_DJetLRT( _ConfigSettingsBase ):
       self._LRTHardPtMin          = 1.0*GeV
       #pt config
       self._newConfig           = True
-      self._maxZImpactPT        = 500.
-      self._maxRPhiImpactPT     = 300.
-      self._maxEtaPT            = 2.7
-      self._maxDoubleHolesPT    = 0
-      self._maxSiHolesPT        = 2
-      self._maxPixelHolesPT     = 1
-      self._maxSCTHolesPT       = 1
-      self._minSiClustersPT     = 8
-      self._doEmCaloSeedPT      = False
-      self._minTRTonTrkPT       = 0
+      self._maxZImpact        = 500.
+      self._maxRPhiImpact     = 300.
+      self._maxEta            = 2.7
+      self._maxDoubleHoles    = 0
+      self._maxSiHoles        = 2
+      self._maxPixelHoles     = 1
+      self._maxSCTHoles       = 1
+      self._minSiClusters     = 8
+      self._doEmCaloSeed      = False
+      self._minTRTonTrk       = 0
 
 
 
-class _ConfigSettings_DVtxLRT( _ConfigSettingsBase ):
+class ConfigSettings_DVtxLRT( _ConfigSettingsBase ):
    def __init__( self ):
       _ConfigSettingsBase.__init__(self)
       self._name     = "displacedVertexLRT"
@@ -504,65 +504,65 @@ class _ConfigSettings_DVtxLRT( _ConfigSettingsBase ):
       self._LRTHardPtMin          = 1.0*GeV
       #pt config
       self._newConfig           = True
-      self._maxZImpactPT        = 500.
-      self._maxRPhiImpactPT     = 300.
-      self._maxEtaPT            = 2.7
-      self._maxDoubleHolesPT    = 0
-      self._maxSiHolesPT        = 2
-      self._maxPixelHolesPT     = 1
-      self._maxSCTHolesPT       = 1
-      self._minSiClustersPT     = 8
-      self._doEmCaloSeedPT      = False
-      self._minTRTonTrkPT       = 0
+      self._maxZImpact        = 500.
+      self._maxRPhiImpact     = 300.
+      self._maxEta            = 2.7
+      self._maxDoubleHoles    = 0
+      self._maxSiHoles        = 2
+      self._maxPixelHoles     = 1
+      self._maxSCTHoles       = 1
+      self._minSiClusters     = 8
+      self._doEmCaloSeed      = False
+      self._minTRTonTrk       = 0
 
 
 
-_ConfigSettings = {
-   "electron"     : _ConfigSettings_electron(),
-   "Electron"     : _ConfigSettings_electron(),
+ConfigSettingsInstances = {
+   "electron"     : ConfigSettings_electron(),
+   "Electron"     : ConfigSettings_electron(),
 
-    "muon"        : _ConfigSettings_muon(),
-    "muonIso"     : _ConfigSettings_muonIso(),
-    "muonIsoMS"   : _ConfigSettings_muonIso(),
-    "muonCore"    : _ConfigSettings_muon(),
-    "muonFS"      : _ConfigSettings_muon(),
-    "muonLate"    : _ConfigSettings_muon(),
+    "muon"        : ConfigSettings_muon(),
+    "muonIso"     : ConfigSettings_muonIso(),
+    "muonIsoMS"   : ConfigSettings_muonIso(),
+    "muonCore"    : ConfigSettings_muon(),
+    "muonFS"      : ConfigSettings_muon(),
+    "muonLate"    : ConfigSettings_muon(),
 
-    "Muon"        : _ConfigSettings_muon(),
-    "MuonIso"     : _ConfigSettings_muonIso(),
-    "MuonCore"    : _ConfigSettings_muon(),
-    "MuonFS"      : _ConfigSettings_muon(),
-    "MuonLate"    : _ConfigSettings_muon(),
+    "Muon"        : ConfigSettings_muon(),
+    "MuonIso"     : ConfigSettings_muonIso(),
+    "MuonCore"    : ConfigSettings_muon(),
+    "MuonFS"      : ConfigSettings_muon(),
+    "MuonLate"    : ConfigSettings_muon(),
 
-    "tau"         : _ConfigSettings_tau(),
-    "tauTau"      : _ConfigSettings_tau(),
-    "tauCore"     : _ConfigSettings_tauCore(),
-    "tauIso"      : _ConfigSettings_tauIso(),
-    "tauIsoBDT"   : _ConfigSettings_tauIsoBDT(),
+    "tau"         : ConfigSettings_tau(),
+    "tauTau"      : ConfigSettings_tau(),
+    "tauCore"     : ConfigSettings_tauCore(),
+    "tauIso"      : ConfigSettings_tauIso(),
+    "tauIsoBDT"   : ConfigSettings_tauIsoBDT(),
 
-    "bjet"        : _ConfigSettings_bjet(),
-    "Bjet"        : _ConfigSettings_bjet(),
+    "bjet"        : ConfigSettings_bjet(),
+    "Bjet"        : ConfigSettings_bjet(),
 
-    "jet"         : _ConfigSettings_fullScan(),
-    #    "jet"         : _ConfigSettings_bjet(),
-    "fullScan"    : _ConfigSettings_fullScan(),
-    "FS"          : _ConfigSettings_fullScan(),
+    "jet"         : ConfigSettings_fullScan(),
+    #    "jet"         : ConfigSettings_bjet(),
+    "fullScan"    : ConfigSettings_fullScan(),
+    "FS"          : ConfigSettings_fullScan(),
 
-    "jetSuper"    : _ConfigSettings_jetSuper(),
+    "jetSuper"    : ConfigSettings_jetSuper(),
 
-    "beamSpot"    : _ConfigSettings_beamSpot(),
-    "BeamSpot"    : _ConfigSettings_beamSpot(),
-    "beamSpotFS"  : _ConfigSettings_beamSpotFS(),
+    "beamSpot"    : ConfigSettings_beamSpot(),
+    "BeamSpot"    : ConfigSettings_beamSpot(),
+    "beamSpotFS"  : ConfigSettings_beamSpotFS(),
 
-    "cosmics"     : _ConfigSettings_cosmics(),
-    "bmumux"      : _ConfigSettings_bmumux(),
-    "bphysics"    : _ConfigSettings_bmumux(),
-    "minBias"     : _ConfigSettings_minBias(),
+    "cosmics"     : ConfigSettings_cosmics(),
+    "bmumux"      : ConfigSettings_bmumux(),
+    "bphysics"    : ConfigSettings_bmumux(),
+    "minBias"     : ConfigSettings_minBias(),
 
-    "electronLRT"    : _ConfigSettings_electronLRT(),
-    "muonLRT"        : _ConfigSettings_muonLRT(),
-    "tauLRT"         : _ConfigSettings_tauLRT(),
-    "bjetLRT"        : _ConfigSettings_bjetLRT(),
-    "fullScanLRT"    : _ConfigSettings_fullScanLRT(),
-    "DJetLRT"        : _ConfigSettings_DJetLRT(),
-    "DVtxLRT"        : _ConfigSettings_DVtxLRT() }
+    "electronLRT"    : ConfigSettings_electronLRT(),
+    "muonLRT"        : ConfigSettings_muonLRT(),
+    "tauLRT"         : ConfigSettings_tauLRT(),
+    "bjetLRT"        : ConfigSettings_bjetLRT(),
+    "fullScanLRT"    : ConfigSettings_fullScanLRT(),
+    "DJetLRT"        : ConfigSettings_DJetLRT(),
+    "DVtxLRT"        : ConfigSettings_DVtxLRT() }

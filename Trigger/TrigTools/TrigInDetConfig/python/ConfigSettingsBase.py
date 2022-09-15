@@ -68,18 +68,22 @@ class _ConfigSettingsBase() :
 
 
       #precision tracking configuration values
-      self._maxRPhiImpactPT   = None
-      self._maxZImpactPT      = None
-      self._maxEtaPT          = None
-      self._minSiClustersPT   = None
-      self._maxSiHolesPT      = None
-      self._maxPixelHolesPT   = None
-      self._maxSCTHolesPT    = None
-      self._maxDoubleHolesPT  = None
-      self._usePixelPT        = None
-      self._useSCTPT          = None
-      self._doEmCaloSeedPT    = None
-      self._minTRTonTrkPT     = None
+      #__provisional change__:
+      #the following settings are incorrect but this is what is being used in the production running
+      #at the moment. Setting them explicitely here will prevent trigger count differences in
+      #https://gitlab.cern.ch/atlas/athena/-/merge_requests/56607
+      self._maxRPhiImpact   = 10.
+      self._maxZImpact      = 250.
+      self._maxEta          = 2.7
+      self._minSiClusters   = 7
+      self._maxSiHoles      = 5
+      self._maxPixelHoles   = 5
+      self._maxSCTHoles    = 5
+      self._maxDoubleHoles  = 2
+      self._usePixel        = None
+      self._useSCT          = None
+      self._doEmCaloSeed    = None
+      self._minTRTonTrk     = None
       self._useSiSPSeededTrackFinder = False
 
       if hasattr(self.__class__, 'override') and callable(getattr(self.__class__, 'override')) :
@@ -342,51 +346,51 @@ class _ConfigSettingsBase() :
 
    @property
    def maxRPhiImpact(self):
-      return self._maxRPhiImpactPT
+      return self._maxRPhiImpact
 
    @property
    def maxZImpact(self):
-      return self._maxZImpactPT
+      return self._maxZImpact
 
    @property
    def maxEta(self):
-      return self._maxEtaPT
+      return self._maxEta
 
    @property
    def minSiClusters(self):
-      return self._minSiClustersPT
+      return self._minSiClusters
 
    @property
    def maxSiHoles(self):
-      return self._maxSiHolesPT
+      return self._maxSiHoles
 
    @property
    def maxPixelHoles(self):
-      return self._maxPixelHolesPT
+      return self._maxPixelHoles
 
    @property
    def maxSCTHoles(self):
-      return self._maxSCTHolesPT
+      return self._maxSCTHoles
 
    @property
    def maxDoubleHoles(self):
-      return self._maxDoubleHolesPT
+      return self._maxDoubleHoles
 
    @property
    def usePixel(self):
-      return self._usePixelPT
+      return self._usePixel
    
    @property
    def useSCT(self):
-      return self._useSCTPT
+      return self._useSCT
    
    @property
    def doEmCaloSeed(self):
-      return self._doEmCaloSeedPT
+      return self._doEmCaloSeed
 
    @property
    def minTRTonTrk(self):
-      return self._minTRTonTrkPT
+      return self._minTRTonTrk
 
    @property
    def useDynamicRoiZWidth(self):
@@ -433,17 +437,17 @@ class _ConfigSettingsBase() :
       log.info( "   suffix                : %s", self._suffix )
       log.info( "   roi                   : %s", self._roi )
       log.info( "   addSingleTrackVertices: %s", self._addSingleTrackVertices )
-      log.info( "   maxRPhiImpact         : %s", self._maxRPhiImpactPT )
-      log.info( "   maxZImpact            : %s", self._maxZImpactPT )
-      log.info( "   maxEta                : %s", self._maxEtaPT )
-      log.info( "   maxSiHoles            : %s", self._maxSiHolesPT )
-      log.info( "   maxPixelHoles         : %s", self._maxPixelHolesPT )
-      log.info( "   maxSCTHoles           : %s", self._maxSCTHolesPT )
-      log.info( "   maxDoubleHoles        : %s", self._maxDoubleHolesPT )
-      log.info( "   usePixel              : %s", self._usePixelPT )
-      log.info( "   useSCT                : %s", self._useSCTPT )
-      log.info( "   doEmCaloSeed          : %s", self._doEmCaloSeedPT )
-      log.info( "   minTRTonTrk           : %s", self._minTRTonTrkPT )
+      log.info( "   maxRPhiImpact         : %s", self._maxRPhiImpact )
+      log.info( "   maxZImpact            : %s", self._maxZImpact )
+      log.info( "   maxEta                : %s", self._maxEta )
+      log.info( "   maxSiHoles            : %s", self._maxSiHoles )
+      log.info( "   maxPixelHoles         : %s", self._maxPixelHoles )
+      log.info( "   maxSCTHoles           : %s", self._maxSCTHoles )
+      log.info( "   maxDoubleHoles        : %s", self._maxDoubleHoles )
+      log.info( "   usePixel              : %s", self._usePixel )
+      log.info( "   useSCT                : %s", self._useSCT )
+      log.info( "   doEmCaloSeed          : %s", self._doEmCaloSeed )
+      log.info( "   minTRTonTrk           : %s", self._minTRTonTrk )
       log.info( "   useDynamicRoiZWidth   : %s", self._useDynamicRoiZWidth )
       log.info( "   useSiSPSeededTrackFinder : %s", self._useSiSPSeededTrackFinder )
 
