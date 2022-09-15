@@ -275,7 +275,8 @@ if __name__ == '__main__':
   parser = argparse.ArgumentParser(prog='python -m TrigT1ResultByteStream.TrigT1ResultByteStreamConfig',
                                    description="""Bytestream decoder athena script.\n\n
                                    Example: python -m TrigT1ResultByteStream.TrigT1ResultByteStreamConfig --filesInput "data22*" --evtMax 10 --outputs eTOBs exTOBs """)
-  parser.add_argument('--evtMax',type=int,default=-1,help="number of events")
+  parser.add_argument('--evtMax',type=int,default=-1,help="number of events to process (-1 = til end of files)")
+  parser.add_argument('--skipEvents',type=int,default=0,help="number of events to skip")
   parser.add_argument('--filesInput',nargs='+',help="input files",required=True)
   parser.add_argument('--outputLevel',default="WARNING",choices={ 'INFO','WARNING','DEBUG','VERBOSE'})
   parser.add_argument('--outputs',nargs='+',choices={"eTOBs","exTOBs","eTowers","jTOBs","jTowers","gTOBs","gCaloTowers","Topo","legacy"},required=True,
@@ -289,26 +290,29 @@ if __name__ == '__main__':
 
   if any(["data22" in f for f in args.filesInput]):
     flags.Trigger.triggerConfig='DB'
+    from AthenaConfiguration.Enums import LHCPeriod
+    flags.GeoModel.Run = LHCPeriod.Run3 # needed for LArGMConfig
 
   flags.Exec.OutputLevel = algLogLevel
   flags.Exec.MaxEvents = args.evtMax
+  flags.Exec.SkipEvents = args.skipEvents
   flags.Input.Files = [file for x in args.filesInput for file in glob.glob(x)]
   flags.Concurrency.NumThreads = 1
   flags.Concurrency.NumConcurrentEvents = 1
-  
+
   if any(["data22" in f for f in args.filesInput]):
     flags.Output.AODFileName = "AOD."+(args.filesInput[0].split("/")[-1]).split('_SFO')[0]+"pool.root"
   else:
-    flags.Output.AODFileName = 'AOD.pool.root'  
+    flags.Output.AODFileName = 'AOD.pool.root'
 
   flags.Trigger.enableL1CaloLegacy = 'legacy' in args.outputs
   flags.lock()
 
   from AthenaConfiguration.MainServicesConfig import MainServicesCfg
+  from ByteStreamCnvSvc.ByteStreamConfig import ByteStreamReadCfg
   acc = MainServicesCfg(flags)
+  acc.merge(ByteStreamReadCfg(flags)) # configure reading bytestream
 
-  from TriggerJobOpts.TriggerByteStreamConfig import ByteStreamReadCfg
-  acc.merge(ByteStreamReadCfg(flags))
 
   # Generate run3 L1 menu
   from TrigConfigSvc.TrigConfigSvcCfg import L1ConfigSvcCfg,generateL1Menu
@@ -321,6 +325,7 @@ if __name__ == '__main__':
   decoderTools = []
   outputEDM = []
   maybeMissingRobs = []
+
 
   def addEDM(edmType, edmName):
     auxType = edmType.replace('Container','AuxContainer')
@@ -377,7 +382,7 @@ if __name__ == '__main__':
         maybeMissingRobs.append(module_id)
 
     decoderTools += [jFexTool]
-    
+
   ########################################
   # jFEX input Data
   ########################################
@@ -387,7 +392,7 @@ if __name__ == '__main__':
         maybeMissingRobs.append(module_id)
 
     decoderTools += [inputjFexTool]
-    
+
   ########################################
   # eFEX ROIs and Input data
   ########################################
@@ -435,6 +440,7 @@ if __name__ == '__main__':
   # get rid of warning about propagating input attribute list ... since there is none
   # note it's odd that the AthenaCommon.globalflags input format property doesn't get updated appropriately by flags??
   acc.getEventAlgo("EventInfoTagBuilder").PropagateInput = (flags.Input.Format != Format.BS)
+
 
 
   if acc.run().isFailure():
