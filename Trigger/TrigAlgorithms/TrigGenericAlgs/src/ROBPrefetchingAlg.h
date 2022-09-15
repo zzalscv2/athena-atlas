@@ -14,6 +14,11 @@
 #include "IRegionSelector/IRegSelTool.h"
 #include "StoreGate/ReadHandleKeyArray.h"
 
+// System includes
+#include <string>
+#include <vector>
+#include <unordered_set>
+
 /**
  *  @class ROBPrefetchingAlg
  *  @brief Algorithm taking a list of decision objects, extracting RoI from each and prefetching ROBs
@@ -35,9 +40,20 @@ private:
   ToolHandleArray<IRegSelTool> m_regionSelectorTools {
     this, "RegionSelectorTools", {}, "Region Selector tools"};
 
-  // The ROB data provider service used to prefetch the ROBs
-  ServiceHandle<IROBDataProviderSvc> m_robDataProviderSvc{
+  /// The ROB data provider service used to prefetch the ROBs
+  ServiceHandle<IROBDataProviderSvc> m_robDataProviderSvc {
     this, "ROBDataProviderSvc", "ROBDataProviderSvc", "Name of the ROB data provider"};
+
+  /// Choose the name of the RoI link to follow
+  Gaudi::Property<std::string> m_roiLinkName {
+    this, "RoILinkName", TrigCompositeUtils::roiString(), "The string identifying links from Decisions to RoIs"};
+
+  /// ChainFilter to select decisions for specific active chains
+  Gaudi::Property<std::vector<TrigCompositeUtils::DecisionID>> m_chainFilterVec {
+    this, "ChainFilter", {}, "Apply prefetching only to RoIs from Decisions where chains from this list are active. Empty list means no filtering."};
+
+  /// ChainFilter as unordered_set for faster lookup
+  std::unordered_set<TrigCompositeUtils::DecisionID> m_chainFilter;
 };
 
 #endif // TRIGGENERICALGS_ROBPrefetchingAlg_h

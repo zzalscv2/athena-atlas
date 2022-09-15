@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2020 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "MdtCalibIOSvc/MdtCalibOutputDbSvc.h"
@@ -175,7 +175,7 @@ StatusCode MdtCalibOutputDbSvc::saveCalibrationResults(void) {
         std::shared_ptr<const T0CalibrationOutput> t0_output = std::dynamic_pointer_cast<const T0CalibrationOutput>(m_results);
         if (t0_output != nullptr) {
             ATH_MSG_INFO("Writing out t0s.");
-            MdtTubeFitContainer *new_t0s = t0_output->t0s();
+            const MdtTubeFitContainer *new_t0s = t0_output->t0s();
             if (t0_output->GetMap().size()) {
                 std::map<NtupleStationId, MdtTubeFitContainer *>::const_iterator mit(t0_output->GetMap().find(*it));
                 if (mit != t0_output->GetMap().end()) { new_t0s = mit->second; }
@@ -228,8 +228,8 @@ void MdtCalibOutputDbSvc::reset() {
     return;
 }
 
-MuonCalib::MdtTubeFitContainer *MdtCalibOutputDbSvc::postprocess_t0s(MuonCalib::MdtTubeFitContainer *t0,
-                                                                     const MuonCalib::NtupleStationId &id) {
+const MuonCalib::MdtTubeFitContainer *MdtCalibOutputDbSvc::postprocess_t0s(const MuonCalib::MdtTubeFitContainer *t0,
+                                                                           const MuonCalib::NtupleStationId &id) {
     int n_layers(-1), n_tubes(-1);
     if (id.NMultilayers() < 0) return t0;
     // get the maximum number of layers and tubes per layer for this station

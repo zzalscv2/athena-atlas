@@ -48,7 +48,6 @@ tzrecoPreExec = ' '.join([
   "from AthenaConfiguration.AllConfigFlags import ConfigFlags;",
   f"ConfigFlags.Trigger.triggerMenuSetup=\'{triggermenu}\';",
   "ConfigFlags.Trigger.AODEDMSet=\'AODFULL\';",
-  "ConfigFlags.Trigger.enableL1CaloPhase1=True;",
   "from AthenaMonitoring.DQMonFlags import DQMonFlags;",
   "DQMonFlags.set_All_Off();",
   "DQMonFlags.doDataFlowMon=True;",

@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2020 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
 */
 
 /***************************************************************************
@@ -47,7 +47,7 @@ StatusCode MuonTrackStatisticsTool::finalize() {
     return StatusCode::SUCCESS;
 }
 
-StatusCode MuonTrackStatisticsTool::updateTruthTrackCounters(const std::string& name, const DetailedTrackTruthCollection* truthMap) const {
+StatusCode MuonTrackStatisticsTool::updateTruthTrackCounters(const std::string& name, const DetailedTrackTruthCollection* truthMap) {
     std::vector<MuonTrackStatisticsTool::TruthTrackCounters*>::iterator counterTruth_it = m_allTruthCounters.begin();
     std::vector<MuonTrackStatisticsTool::TruthTrackCounters*>::iterator counterTruth_itEnd = m_allTruthCounters.end();
     for (; counterTruth_it != counterTruth_itEnd; ++counterTruth_it) {
@@ -58,7 +58,7 @@ StatusCode MuonTrackStatisticsTool::updateTruthTrackCounters(const std::string& 
 }
 
 StatusCode MuonTrackStatisticsTool::updateTruthTrackCounters(TruthTrackCounters& counters,
-                                                             const DetailedTrackTruthCollection& TruthMap) const {
+                                                             const DetailedTrackTruthCollection& TruthMap) {
     ATH_MSG_DEBUG("MuonTrackStatisticsTool calling updateTruthTrackCounters: " << counters.trackLocation);
     ++counters.nEvents;
     if (TruthMap.empty()) return StatusCode::SUCCESS;
@@ -114,7 +114,7 @@ StatusCode MuonTrackStatisticsTool::updateTruthTrackCounters(TruthTrackCounters&
     ;
 }
 
-StatusCode MuonTrackStatisticsTool::updateTrackCounters(const std::string& name, const TrackCollection* tracks) const {
+StatusCode MuonTrackStatisticsTool::updateTrackCounters(const std::string& name, const TrackCollection* tracks) {
     std::vector<MuonTrackStatisticsTool::TrackCounters*>::iterator counter_it = m_allCounters.begin();
     std::vector<MuonTrackStatisticsTool::TrackCounters*>::iterator counter_itEnd = m_allCounters.end();
     for (; counter_it != counter_itEnd; ++counter_it) {
@@ -124,7 +124,7 @@ StatusCode MuonTrackStatisticsTool::updateTrackCounters(const std::string& name,
     return StatusCode::SUCCESS;
 }
 
-StatusCode MuonTrackStatisticsTool::updateTrackCounters(TrackCounters& counters, const TrackCollection& tracks) const {
+StatusCode MuonTrackStatisticsTool::updateTrackCounters(TrackCounters& counters, const TrackCollection& tracks) {
     ATH_MSG_DEBUG("MuonTrackStatisticsTool calling updateTrackCounters: " << counters.trackLocation);
     ++counters.nEvents;
 
@@ -152,7 +152,7 @@ StatusCode MuonTrackStatisticsTool::updateTrackCounters(TrackCounters& counters,
     return StatusCode::SUCCESS;
 }
 
-void MuonTrackStatisticsTool::addTrackCounters(const std::string& trkLoc) const {
+void MuonTrackStatisticsTool::addTrackCounters(const std::string& trkLoc) {
     TString temp_string(trkLoc);
 
     if (temp_string.Contains("Truth") && m_doTruth) {
@@ -172,11 +172,11 @@ void MuonTrackStatisticsTool::addTrackCounters(const std::string& trkLoc) const 
 std::string MuonTrackStatisticsTool::printTrackCounters() const {
     std::ostringstream sout;
 
-    std::vector<MuonTrackStatisticsTool::TrackCounters*>::iterator counter_it = m_allCounters.begin();
-    std::vector<MuonTrackStatisticsTool::TrackCounters*>::iterator counter_itEnd = m_allCounters.end();
-    std::vector<MuonTrackStatisticsTool::TruthTrackCounters*>::iterator truthcounter_it_start = m_allTruthCounters.begin();
-    std::vector<MuonTrackStatisticsTool::TruthTrackCounters*>::iterator truthcounter_itEnd = m_allTruthCounters.end();
-    std::vector<MuonTrackStatisticsTool::TruthTrackCounters*>::iterator truthcounter_it = m_allTruthCounters.begin();
+    std::vector<MuonTrackStatisticsTool::TrackCounters*>::const_iterator counter_it = m_allCounters.begin();
+    std::vector<MuonTrackStatisticsTool::TrackCounters*>::const_iterator counter_itEnd = m_allCounters.end();
+    std::vector<MuonTrackStatisticsTool::TruthTrackCounters*>::const_iterator truthcounter_it_start = m_allTruthCounters.begin();
+    std::vector<MuonTrackStatisticsTool::TruthTrackCounters*>::const_iterator truthcounter_itEnd = m_allTruthCounters.end();
+    std::vector<MuonTrackStatisticsTool::TruthTrackCounters*>::const_iterator truthcounter_it = m_allTruthCounters.begin();
 
     double trksPerEvent;
     double hitsPerTrk;

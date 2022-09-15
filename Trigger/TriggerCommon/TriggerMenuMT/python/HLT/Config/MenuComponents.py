@@ -21,6 +21,7 @@ from HLTSeeding.HLTSeedingConfig import mapThresholdToL1DecisionCollection
 from TrigCompositeUtils.TrigCompositeUtils import legName
 from AthenaCommon.Configurable import ConfigurableRun3Behavior
 from AthenaConfiguration.ComponentAccumulator import appendCAtoAthena, conf2toConfigurable
+from TriggerJobOpts.TriggerConfigFlags import ROBPrefetching
 
 from collections.abc import MutableSequence
 import collections.abc
@@ -371,7 +372,7 @@ class MenuSequence(object):
         input_maker_output= self.maker.readOutputList()[0] # only one since it's merged
 
         # Connect InputMaker output to ROBPrefetchingAlg(s) if there are any (except for probe seq which is handled later)
-        if ConfigFlags.Trigger.enableROBPrefetching:
+        if ROBPrefetching.StepRoI in ConfigFlags.Trigger.ROBPrefetchingOptions:
             seqChildren = Sequence.getChildren() if hasattr(Sequence,'getChildren') else Sequence.Members
             for child in seqChildren:
                 if hasProp(child,'ROBPrefetchingInputDecisions') and input_maker_output not in child.ROBPrefetchingInputDecisions and not input_maker_output.endswith('_probe'):
@@ -398,7 +399,7 @@ class MenuSequence(object):
                 if isinstance(probeIM,CompFactory.EventViewCreatorAlgorithm):
                     for child in baseSeq.getChildren()[1:]:
                         probeChild = child.clone(child.name()+"_probe")
-                        if hasProp(child,'ROBPrefetchingInputDecisions') and ConfigFlags.Trigger.enableROBPrefetching and child.ROBPrefetchingInputDecisions:
+                        if hasProp(child,'ROBPrefetchingInputDecisions') and (ROBPrefetching.StepRoI in ConfigFlags.Trigger.ROBPrefetchingOptions):
                             # child is a ROB prefetching alg, map the probe IM decisions
                             probeChild.ROBPrefetchingInputDecisions = [str(probeIM.InputMakerOutputDecisions)]
                         elif probeIM.ViewNodeName == child.name():

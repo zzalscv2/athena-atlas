@@ -48,7 +48,7 @@ namespace MuonCalib {
         declareProperty("RtRelationLookup", m_rt_lookup);
     }
 
-    StatusCode CalibrationFileIOTool::WriteT0(MdtTubeFitContainer *t0_output, const NtupleStationId &station_id, int /*iov_start*/,
+    StatusCode CalibrationFileIOTool::WriteT0(const MdtTubeFitContainer *t0_output, const NtupleStationId &station_id, int /*iov_start*/,
                                               int /*iov_end*/) {
         // create directory
         system(("mkdir -p " + m_calib_dir + "/t0s").c_str());

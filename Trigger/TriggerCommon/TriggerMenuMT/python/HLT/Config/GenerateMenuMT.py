@@ -526,9 +526,13 @@ class GenerateMenuMT(object, metaclass=Singleton):
         makeHLTTree(flags, newJO=False, hltMenuConfig = HLTMenuConfig)
         # the return values used for debugging, might be removed later
 
-        log.info("Applying HLT prescales")
+        from TriggerJobOpts.TriggerConfigFlags import ROBPrefetching
+        if ROBPrefetching.InitialRoI in flags.Trigger.ROBPrefetchingOptions:
+            from TrigGenericAlgs.TrigGenericAlgsConfig import configurePrefetchingInitialRoI
+            configurePrefetchingInitialRoI(flags, HLTMenuConfig.configsList())
 
         # Having built the Menu add prescales for disabling items (e.g. MC production)
+        log.info("Applying HLT prescales")
         applyHLTPrescale(HLTMenuConfig, self.HLTPrescales, self.signaturesOverwritten)
 
         log.info("Checking the L1HLTConsistency...")

@@ -18,6 +18,22 @@ class Project(FlagEnum):
     AthDerivation = 'AthDerivation'
     AthGeneration = 'AthGeneration'
     AthSimulation = 'AthSimulation'
+    AnalysisBase = 'AnalysisBase'
+
+    @classmethod
+    def determine(cls):
+        import os
+        if "AthSimulation_DIR" in os.environ:
+            return cls.AthSimulation
+        if "AthGeneration_DIR" in os.environ:
+            return cls.AthGeneration
+        if "AthAnalysis_DIR" in os.environ:
+            return cls.AthAnalysis
+        if "AthDerivation_DIR" in os.environ:
+            return cls.AthDerivation
+        if "AnalysisBase_DIR" in os.environ:
+            return cls.AnalysisBase
+        return cls.Athena
 
 
 class Format(FlagEnum):

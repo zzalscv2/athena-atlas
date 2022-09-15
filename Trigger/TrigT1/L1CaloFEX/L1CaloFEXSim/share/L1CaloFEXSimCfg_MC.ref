@@ -10,6 +10,7 @@ ApplicationMgr                                               0 SUCCESS          
 ApplicationMgr                                               0 SUCCESS                AthSequencer/AthAlgSeq
 ApplicationMgr                                               0 SUCCESS                     SGInputLoader/SGInputLoader
 ApplicationMgr                                               0 SUCCESS                     LVL1::Run2TriggerTowerMaker/Run2TriggerTowerMaker25ns
+ApplicationMgr                                               0 SUCCESS                     LVL1::eTowerMakerFromSuperCells/eTowerMakerFromSuperCells
 ApplicationMgr                                               0 SUCCESS                     LVL1::eFEXDriver/eFEXDriver
 ApplicationMgr                                               0 SUCCESS                     LVL1::jFEXDriver/jFEXDriver
 ApplicationMgr                                               0 SUCCESS                     LVL1::gFEXDriver/gFEXDriver

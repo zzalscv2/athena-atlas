@@ -3,11 +3,17 @@
 import os
 
 from AthenaConfiguration.AthConfigFlags import AthConfigFlags
-from AthenaConfiguration.Enums import Format
+from AthenaConfiguration.Enums import FlagEnum, Format
 from AthenaCommon.SystemOfUnits import GeV
 from AthenaCommon.Logging import logging
 
 log=logging.getLogger('TriggerConfigFlags')
+
+class ROBPrefetching(FlagEnum):
+    # Enable mapping step InputMaker outputs as ROBPrefetchingAlg inputs
+    StepRoI = 'StepRoI'
+    # Enable mapping chains' first step to pre-HLT prefetching rules based on initial RoIs
+    InitialRoI = 'InitialRoI'
 
 def createTriggerFlags(doTriggerRecoFlags):
     flags = AthConfigFlags()
@@ -84,8 +90,8 @@ def createTriggerFlags(doTriggerRecoFlags):
     # also enables per step decison printouts
     flags.addFlag('Trigger.doRuntimeNaviVal', False)
 
-    # Enable the ROBPrefetchingAlg functionality in menu sequences
-    flags.addFlag('Trigger.enableROBPrefetching', True)
+    # Select ROBPrefetching options, out of ROBPrefetching enum, empty list means no prefetching
+    flags.addFlag('Trigger.ROBPrefetchingOptions', [ROBPrefetching.InitialRoI, ROBPrefetching.StepRoI])
 
     # if 1, Run1 decoding version is set; if 2, Run2; if 3, Run 3
     def EDMVersion(flags):

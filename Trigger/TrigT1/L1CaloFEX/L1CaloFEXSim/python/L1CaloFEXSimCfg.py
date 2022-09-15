@@ -76,9 +76,11 @@ def L1CaloFEXSimCfg(flags):
     # Need also TriggerTowers as input
     acc.merge(TriggerTowersInputCfg(flags))
 
+    eFEXInputs = CompFactory.LVL1.eTowerMakerFromSuperCells('eTowerMakerFromSuperCells')
     eFEX = CompFactory.LVL1.eFEXDriver('eFEXDriver')
-    eFEX.eSuperCellTowerMapperTool = CompFactory.LVL1.eSuperCellTowerMapper('eSuperCellTowerMapper', SCell=sCellType)
+    eFEXInputs.eSuperCellTowerMapperTool = CompFactory.LVL1.eSuperCellTowerMapper('eSuperCellTowerMapper', SCell=sCellType)
     eFEX.eFEXSysSimTool = CompFactory.LVL1.eFEXSysSim('eFEXSysSimTool')
+    acc.addEventAlgo(eFEXInputs)
     acc.addEventAlgo(eFEX)
 
     # jFEX part

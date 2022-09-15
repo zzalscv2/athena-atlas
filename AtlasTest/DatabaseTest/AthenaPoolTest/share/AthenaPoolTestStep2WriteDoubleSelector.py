@@ -89,9 +89,10 @@ Stream3.ItemList   += ["AthenaPoolTestMatrix#*"]
 
 print(Stream3.ItemList)
 
-# Change output file catalog to avoid collisions.
+# Set file catalogs to avoid collisions.
 from PoolSvc import PoolSvcConf
 PoolSvc = PoolSvcConf.PoolSvc()
+PoolSvc.ReadCatalog = ['file:AthenaPoolTestWriteDoubleSelector_catalog.xml']
 PoolSvc.WriteCatalog = 'file:AthenaPoolTestStep2WriteDoubleSelector_catalog.xml'
 
 
