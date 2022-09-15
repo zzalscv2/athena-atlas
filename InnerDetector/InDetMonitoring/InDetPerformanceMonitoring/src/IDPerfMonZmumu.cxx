@@ -6,7 +6,7 @@
 // Include files...
 //==================================================================================
 // This files header
-#include "IDPerfMonZmumu.h"
+#include "InDetPerformanceMonitoring/IDPerfMonZmumu.h"
 // Standard headers
 #include "TTree.h"
 #include "TLorentzVector.h"
@@ -28,10 +28,13 @@
 /** needed for IP resolution studies **/
 #include "TrkVertexFitterInterfaces/ITrackToVertexIPEstimator.h"
 
+#include "TrigConfxAOD/xAODConfigTool.h"
 #include "TrigDecisionTool/TrigDecisionTool.h"
+#include "TriggerMatchingTool/MatchingTool.h"
 #include "TrigDecisionTool/ChainGroup.h"
 
 #include "InDetTrackSelectionTool/IInDetTrackSelectionTool.h"
+#include "MuonAnalysisInterfaces/IMuonSelectionTool.h"
 
 /** missing ET */
 #include "xAODMissingET/MissingET.h"
@@ -49,9 +52,11 @@ IDPerfMonZmumu::IDPerfMonZmumu(const std::string& name,
   m_TrackRefitter2(""),
   m_trackToVertexTool("Reco::TrackToVertex"),
   m_triggerDecision("Trig::TrigDecisionTool/TrigDecisionTool"),
+  m_triggerMatching("Trig::MatchingTool/MatchingTool"),
   m_selTool( "InDet::InDetTrackSelectionTool/TrackSelectionTool"),
   m_trackToVertexIPEstimator("Trk::TrackToVertexIPEstimator"),
   m_extrapolator("Trk::Extrapolator/AtlasExtrapolator"),
+  m_muonSelector("CP::MuonSelectionTool/MuonSelectionTool"),
   m_validationMode(true),
 
   m_commonTreeName ("commonTree"),
@@ -88,11 +93,10 @@ IDPerfMonZmumu::IDPerfMonZmumu(const std::string& name,
   m_doRemoval(true),
   m_doDebug(false),
   m_Trk2VtxAssociationTool("CP::TrackVertexAssociationTool", this)
-
 {
   // Properties that are set from the python scripts.
 
-  declareProperty("UseTrigger"    ,    m_UseTrigger     = false);
+  declareProperty("UseTrigger"    ,    m_UseTrigger     = true);
   declareProperty("doIsoSelection",    m_doIsoSelection = true );
   declareProperty("doIPSelection",     m_doIPSelection = true );
   declareProperty("doMCPSelection",    m_doMCPSelection = true );
@@ -145,8 +149,15 @@ IDPerfMonZmumu::IDPerfMonZmumu(const std::string& name,
   declareProperty("StoreZmumuNtuple", m_storeZmumuNtuple = true);
   declareProperty("doZmumuEventDebug",m_doDebug);
   declareProperty("MuonQuality", m_MuonQualityName = "Medium");
+  declareProperty("skipMS", m_skipMS = false);
+  declareProperty("useCustomMuonSelector", m_useCustomMuonSelector = false );
+  declareProperty("MuonSelector", m_muonSelector );
 
+
+  // initializing the eventInfo "accessor"
+  StatusCode test =  m_EventInfoKey.initialize() ;
   return;
+
 }
 
 
@@ -206,7 +217,7 @@ StatusCode IDPerfMonZmumu::initialize()
       ATH_MSG_INFO("Retrieved tool (track selection tool) m_selTool " << m_selTool << " SUCCESS ");
     }
     else {
-      ATH_MSG_FATAL("Unable to retrieve (track selection tool) m_selTool " << m_trackToVertexTool << " FAILURE ");
+      ATH_MSG_FATAL("Unable to retrieve (track selection tool) m_selTool " << m_selTool << " FAILURE ");
       return StatusCode::FAILURE;
     }
   }
@@ -216,13 +227,16 @@ StatusCode IDPerfMonZmumu::initialize()
     ATH_CHECK (m_trackToVertexIPEstimator.retrieve());
   }
 
-  ATH_CHECK(m_beamSpotKey.initialize());
   ATH_CHECK( m_extrapolator.retrieve());
   
   ATH_CHECK (m_vertexKey.initialize());
-  ATH_CHECK (m_eventInfoKey.initialize());
+  
+  ATH_CHECK (m_trackContainerName.initialize());
 
   ATH_MSG_INFO(" -- IDPerfMonZmumu::initialize() -- m_vertexKey: " << m_vertexKey);
+
+  ATH_MSG_INFO(" -- IDPerfMonZmumu::initialize() -- init m_beamSpotKey ");
+  ATH_CHECK(m_beamSpotKey.initialize());
 
   m_xZmm.setDebugMode(false);
   // START new place for initilization of params
@@ -238,6 +252,12 @@ StatusCode IDPerfMonZmumu::initialize()
   m_xZmm.SetZ0GapCut        (m_Z0GapCut);
   m_xZmm.setDebugMode       (m_doDebug);
   m_xZmm.SetMuonQuality     (m_MuonQualityName);
+  m_xZmm.SetSkipMSCheck     (m_skipMS);
+
+  if (m_useCustomMuonSelector) {
+    m_xZmm.SetMuonSelectionTool (m_muonSelector);
+    
+  }
   // END new place for initialization of params
 
   if (m_doFourMuAnalysis) {
@@ -257,6 +277,22 @@ StatusCode IDPerfMonZmumu::initialize()
 
   ATH_CHECK( this->bookTrees() );
   
+  if(m_triggerDecision.retrieve().isFailure()) {                                                                                                                                   
+    ATH_MSG_FATAL("Unable to retrieve " << m_triggerDecision << " turn it off");                                                                                             
+    return StatusCode::FAILURE;                                                                                                                                               
+  }                                                                                                                                                                           
+  else {                                                                                                                                                                        
+    ATH_MSG_DEBUG("retrieved tool: " << m_triggerDecision );                                                                                                                  
+  }  
+
+  if(m_triggerMatching.retrieve().isFailure()) {       
+    ATH_MSG_FATAL("Unable to retrieve " << m_triggerMatching << " turn it off");                                                                                                
+    return StatusCode::FAILURE;                                                                                                                                                 
+  }                                                                                                                                                                             
+  else {                                                                                                                                                                         
+    ATH_MSG_INFO("retrieved tool: " << m_triggerDecision );                                                                                                                    
+  }  
+
   ATH_MSG_DEBUG("** IDPerfMonZmumu::Initialize ** Completed **");
   return StatusCode::SUCCESS;
 }
@@ -272,7 +308,7 @@ StatusCode IDPerfMonZmumu::bookTrees()
   ATH_MSG_DEBUG("                              m_defaultTree name: " << m_defaultTreeName.c_str());    
   ATH_MSG_DEBUG("                                   m_IDTree name: " << m_IDTreeName.c_str());    
 
-  if (m_commonTree == nullptr) {
+  if (!m_commonTree) {
     ATH_MSG_INFO("initialize() ** defining m_commonTree with name: " << m_commonTreeName.c_str());    
     m_commonTree = new TTree((m_commonTreeName).c_str(), m_ValidationTreeDescription.c_str());
 
@@ -333,7 +369,7 @@ StatusCode IDPerfMonZmumu::bookTrees()
     m_commonTree->Branch("numberOfTRTHits"     , &m_nTRThits);
   }
 
-  if ( m_defaultTree == nullptr){
+  if ( !m_defaultTree){
     ATH_MSG_INFO("initialize() ** defining m_defaultTree with name: " << m_defaultTreeName.c_str());    
     m_defaultTree = new TTree((m_defaultTreeName).c_str(), m_ValidationTreeDescription.c_str());
 
@@ -385,7 +421,7 @@ StatusCode IDPerfMonZmumu::bookTrees()
   }
   
   
-  if ( m_IDTree == nullptr ){
+  if ( !m_IDTree ){
     ATH_MSG_INFO("initialize() ** defining m_IDTree with name: " << m_IDTreeName.c_str());    
     m_IDTree = new TTree((m_IDTreeName).c_str(), m_ValidationTreeDescription.c_str());
     
@@ -436,7 +472,7 @@ StatusCode IDPerfMonZmumu::bookTrees()
     }
   }
   
-  if( m_doRefit && m_refit1Tree == nullptr){
+  if( m_doRefit && !m_refit1Tree){
     ATH_MSG_INFO("initialize() ** defining m_refit1Tree with name: " << m_refit1TreeName.c_str());    
     m_refit1Tree = new TTree((m_refit1TreeName).c_str(), m_ValidationTreeDescription.c_str()); 
     
@@ -454,6 +490,8 @@ StatusCode IDPerfMonZmumu::bookTrees()
     m_refit1Tree->Branch("Negative_Eta", &m_negative_eta, "Negative_Eta/D");
     m_refit1Tree->Branch("Negative_z0",  &m_negative_z0,  "Negative_z0/D");
     m_refit1Tree->Branch("Negative_d0",  &m_negative_d0,  "Negative_d0/D");
+    m_refit1Tree->Branch("Negative_z0_manualBS",  &m_positive_z0_manualBS,  "Negative_z0_manualBS/D");
+    m_refit1Tree->Branch("Negative_d0_manualBS",  &m_positive_d0_manualBS,  "Negative_d0_manualBS/D");
     m_refit1Tree->Branch("Negative_z0_err",  &m_negative_z0_err,  "Negative_z0_err/D");
     m_refit1Tree->Branch("Negative_d0_err",  &m_negative_d0_err,  "Negative_d0_err/D");
     m_refit1Tree->Branch("Negative_sigma_pt",  &m_negative_sigma_pt,  "Negative_sigma_pt/D");
@@ -466,6 +504,8 @@ StatusCode IDPerfMonZmumu::bookTrees()
     m_refit1Tree->Branch("Positive_eta", &m_positive_eta, "Positive_Eta/D");
     m_refit1Tree->Branch("Positive_z0",  &m_positive_z0,  "Positive_z0/D");
     m_refit1Tree->Branch("Positive_d0",  &m_positive_d0,  "Positive_d0/D");
+    m_refit1Tree->Branch("Positive_z0_manualBS",  &m_positive_z0_manualBS,  "Positive_z0_manualBS/D");
+    m_refit1Tree->Branch("Positive_d0_manualBS",  &m_positive_d0_manualBS,  "Positive_d0_manualBS/D");
     m_refit1Tree->Branch("Positive_z0_err",  &m_positive_z0_err,  "Positive_z0_err/D");
     m_refit1Tree->Branch("Positive_d0_err",  &m_positive_d0_err,  "Positive_d0_err/D");
     m_refit1Tree->Branch("Positive_sigma_pt",  &m_positive_sigma_pt,  "Positive_sigma_pt/D");
@@ -488,7 +528,7 @@ StatusCode IDPerfMonZmumu::bookTrees()
     }    
   }
 
-  if( m_doRefit && m_refit2Tree == nullptr){
+  if( m_doRefit && !m_refit2Tree){
     ATH_MSG_INFO("initialize() ** defining m_refit2Tree with name: " << m_refit2TreeName.c_str());
     m_refit2Tree = new TTree((m_refit2TreeName).c_str(), m_ValidationTreeDescription.c_str());
 
@@ -506,6 +546,8 @@ StatusCode IDPerfMonZmumu::bookTrees()
     m_refit2Tree->Branch("Negative_Eta", &m_negative_eta, "Negative_Eta/D");
     m_refit2Tree->Branch("Negative_z0",  &m_negative_z0,  "Negative_z0/D");
     m_refit2Tree->Branch("Negative_d0",  &m_negative_d0,  "Negative_d0/D");
+    m_refit2Tree->Branch("Negative_z0_manualBS",  &m_positive_z0_manualBS,  "Negative_z0_manualBS/D");
+    m_refit2Tree->Branch("Negative_d0_manualBS",  &m_positive_d0_manualBS,  "Negative_d0_manualBS/D");
     m_refit2Tree->Branch("Negative_z0_err",  &m_negative_z0_err,  "Negative_z0_err/D");
     m_refit2Tree->Branch("Negative_d0_err",  &m_negative_d0_err,  "Negative_d0_err/D");
     m_refit2Tree->Branch("Negative_sigma_pt",  &m_negative_sigma_pt,  "Negative_sigma_pt/D");
@@ -518,6 +560,8 @@ StatusCode IDPerfMonZmumu::bookTrees()
     m_refit2Tree->Branch("Positive_Eta", &m_positive_eta, "Positive_Eta/D");
     m_refit2Tree->Branch("Positive_z0",  &m_positive_z0,  "Positive_z0/D");
     m_refit2Tree->Branch("Positive_d0",  &m_positive_d0,  "Positive_d0/D");
+    m_refit2Tree->Branch("Positive_z0_manualBS",  &m_positive_z0_manualBS,  "Positive_z0_manualBS/D");
+    m_refit2Tree->Branch("Positive_d0_manualBS",  &m_positive_d0_manualBS,  "Positive_d0_manualBS/D");
     m_refit2Tree->Branch("Positive_z0_err",  &m_positive_z0_err,  "Positive_z0_err/D");
     m_refit2Tree->Branch("Positive_d0_err",  &m_positive_d0_err,  "Positive_d0_err/D");
     m_refit2Tree->Branch("Positive_sigma_pt",  &m_positive_sigma_pt,  "Positive_sigma_pt/D");
@@ -543,7 +587,7 @@ StatusCode IDPerfMonZmumu::bookTrees()
     }    
   }
   
-  if( m_combTree == nullptr){
+  if( !m_combTree && !m_skipMS){
     ATH_MSG_INFO("initialize() ** defining m_combTree with name: " << m_combTreeName.c_str());
     m_combTree = new TTree((m_combTreeName).c_str(), m_ValidationTreeDescription.c_str());
 
@@ -597,7 +641,7 @@ StatusCode IDPerfMonZmumu::bookTrees()
   }
 
   
-  if( m_MSTree == nullptr){
+  if( !m_MSTree && !m_skipMS ){
     ATH_MSG_INFO("initialize() ** defining MSTree ");
 
     m_MSTree = new TTree(m_MSTreeName.c_str(), m_ValidationTreeDescription.c_str());
@@ -632,7 +676,7 @@ StatusCode IDPerfMonZmumu::bookTrees()
     m_MSTree->Branch("Positive_sigma_pt",  &m_positive_sigma_pt,  "Positive_sigma_pt/D");
   }
 
-  if( m_isMC && m_truthTree == nullptr){
+  if( m_isMC && !m_truthTree ){
     m_truthTree = new TTree(m_truthTreeName.c_str(), m_ValidationTreeDescription.c_str());
 
     m_truthTree->Branch("runNumber"      ,  &m_runNumber,  "runNumber/I");
@@ -665,7 +709,7 @@ StatusCode IDPerfMonZmumu::bookTrees()
     m_truthTree->Branch("Positive_parent",  &m_positive_parent,  "Positive_parent/I");
   }
 
-  if (m_doFourMuAnalysis && m_FourMuTree == nullptr) {
+  if (m_doFourMuAnalysis && !m_FourMuTree) {
     ATH_MSG_INFO("initialize() ** defining m_FourMuTree ");
     m_FourMuTree = new TTree((m_FourMuTreeName).c_str(), "Four Muon monitoring");
 
@@ -786,22 +830,34 @@ StatusCode IDPerfMonZmumu::bookTrees()
     m_validationMode = false;
   }
   
-  if ((tHistSvc->regTree(m_combTreeFolder, m_combTree)).isSuccess() ) {
-    ATH_MSG_INFO("initialize() CBTree succesfully registered!");
+  if ( m_skipMS ) {
+    ATH_MSG_INFO("CBtree has to be skipped: flag ON");
+    delete m_MSTree; m_MSTree = nullptr;
   }
   else {
-    ATH_MSG_ERROR("initialize() Could not register the validation combTree -> Switching ValidationMode Off !");
-    delete m_combTree; m_combTree = nullptr;
-    m_validationMode = false;
+    if ((tHistSvc->regTree(m_combTreeFolder, m_combTree)).isSuccess() ) {
+      ATH_MSG_INFO("initialize() MSTree succesfully registered!");
+    }
+    else {
+      ATH_MSG_ERROR("initialize() Could not register the validation combTree -> Switching ValidationMode Off !");
+      delete m_combTree; m_combTree = nullptr;
+      m_validationMode = false;
+    }
   }
   
-  if ((tHistSvc->regTree(m_MSTreeFolder, m_MSTree)).isSuccess() ) {
-    ATH_MSG_INFO("initialize() MSTree succesfully registered!");
+  if ( m_skipMS ) {
+    ATH_MSG_INFO("MStree has to be skipped: flag ON");
+    delete m_MSTree; m_MSTree = nullptr;
   }
   else {
-    ATH_MSG_ERROR("initialize() Could not register the validation MSTree -> Switching ValidationMode Off !");
-    delete m_MSTree; m_MSTree = nullptr;
-    m_validationMode = false;
+    if ( (tHistSvc->regTree(m_MSTreeFolder, m_MSTree)).isSuccess()  ){
+      ATH_MSG_INFO("initialize() MSTree succesfully registered!");
+    }
+    else {
+      ATH_MSG_ERROR("initialize() Could not register the validation MSTree -> Switching ValidationMode Off !");
+      delete m_MSTree; m_MSTree = nullptr;
+      m_validationMode = false;
+    }
   }
 
   if( m_doRefit ){
@@ -862,7 +918,7 @@ StatusCode IDPerfMonZmumu::execute()
 {
   ATH_MSG_DEBUG("** IDPerfMonZmumu::execute ** START **");
   
-  SG::ReadHandle<xAOD::EventInfo> eventInfo (m_eventInfoKey, getContext());
+  SG::ReadHandle<xAOD::EventInfo> eventInfo (m_EventInfoKey, getContext());
   if(eventInfo.isValid()) {
     m_runNumber = eventInfo->runNumber();
     m_evtNumber = eventInfo->eventNumber();
@@ -871,8 +927,19 @@ StatusCode IDPerfMonZmumu::execute()
     ATH_MSG_DEBUG(" Execute() starting on --> Run: " << m_runNumber << "  event: " << m_evtNumber << "   Lumiblock: " << m_lumi_block);
   }
   else {
-    ATH_MSG_ERROR("** IDPerfMonZmumu::execute ** Could not retrieve event info.");
-    return StatusCode::FAILURE;
+    ATH_MSG_DEBUG(" IDPerfMonZmumu::execute evtStore->retrieve (eventInfo) failed ..  trying another strategy.. ");
+    SG::ReadHandle<xAOD::EventInfo> eventInfo2(m_EventInfoKey);
+    if (eventInfo2.isValid()) {
+      m_runNumber = eventInfo2->runNumber();
+      m_evtNumber = eventInfo2->eventNumber();
+      m_lumi_block = eventInfo2->lumiBlock();
+      m_event_mu = eventInfo2->actualInteractionsPerCrossing();
+      ATH_MSG_DEBUG(" Execute() starting on --> Run: " << m_runNumber << "  event: " << m_evtNumber << "   Lumiblock: " << m_lumi_block);
+    }
+      
+    else{
+      ATH_MSG_ERROR("** IDPerfMonZmumu::execute ** Could not retrieve event info.");
+    }
   }
 
   /// --  START 4 lepton analysis
@@ -905,17 +972,14 @@ StatusCode IDPerfMonZmumu::execute()
   // If this point is reached -> there is a good mu+mu- pair that stisfies all selection cuts
   //
 
-  if (m_UseTrigger) {
-    StatusCode isTriggerPassed = CheckTriggerStatusAndPrescale ();
-    if (isTriggerPassed == StatusCode::SUCCESS) {
-      ATH_MSG_INFO("Trigger passed -> accept event");
-    }
-    else{
-      ATH_MSG_INFO("Trigger Failed -> reject event --> leave event");
-      return StatusCode::SUCCESS;
-    }
+  StatusCode isTriggerPassed = CheckTriggerStatusAndPrescale ();
+  if (isTriggerPassed == StatusCode::SUCCESS) {
+    ATH_MSG_INFO("Trigger passed -> accept event");
   }
-
+  else{
+    ATH_MSG_INFO("Trigger Failed -> reject event --> leave event");
+    return StatusCode::SUCCESS;
+  }
 
   // std::cout << " ** IDPerfMonZmumu ** extracting muon_pos and muon_neg... " << std::endl;
   const xAOD::Muon* muon_pos = m_xZmm.getCombMuon(m_xZmm.getPosMuon(ZmumuEvent::CB));
@@ -1086,109 +1150,104 @@ StatusCode IDPerfMonZmumu::execute()
       
       //
       // combined muons ntuple
-      ATH_MSG_DEBUG("-- >> going to fill CB muons params << --");
-      success_pos = FillRecParametersTP(muon_pos->trackParticle(xAOD::Muon::CombinedTrackParticle), 
+      if (!m_skipMS) { // if skipMS -> no combined muons
+	ATH_MSG_INFO("** IDPerfMonZmumu::execute ** success_pos");
+	success_pos = FillRecParameters(muon_pos->trackParticle(xAOD::Muon::CombinedTrackParticle)->track(),
 					muon_pos->trackParticle(xAOD::Muon::InnerDetectorTrackParticle), 
 					p1_comb->charge(), 
 					p1_comb_v);
-      success_neg = FillRecParametersTP(muon_neg->trackParticle(xAOD::Muon::CombinedTrackParticle), 
+	ATH_MSG_INFO("** IDPerfMonZmumu::execute ** success_neg");
+	success_neg = FillRecParameters(muon_neg->trackParticle(xAOD::Muon::CombinedTrackParticle)->track(),
 					muon_neg->trackParticle(xAOD::Muon::InnerDetectorTrackParticle), 
 					p2_comb->charge(), 
 					p2_comb_v);    
-      if (success_pos && success_neg) {
-	ATH_MSG_DEBUG("-- Filling m_combTree ntuple " << m_combTree->GetName() << " entry " << m_combTree->GetEntries() 
-		      << "  run: " << m_runNumber 
-		      << "  event: " << m_evtNumber 
-		      << "  Lumiblock: " << m_lumi_block 
-		      << "  Invariant mass = " << m_xZmm.GetInvMass() << " GeV ");
-	ATH_MSG_DEBUG("mu+ --> pxyz " << m_positive_px 
-		      << ", " << m_positive_py
-		      << ", " << m_positive_pz
-		      << "  pt: " << muon_pos->trackParticle(xAOD::Muon::CombinedTrackParticle)->pt()
-		      << "  d0: " << m_positive_d0 
-		      << "  z0: " << m_positive_z0
-		      << "  d0unc: " << m_positive_d0_err
-		      << "  sigma_pt: " << m_positive_sigma_pt);
-	ATH_MSG_DEBUG("mu- --> pxyz: " << m_negative_px
-		      << ", " << m_negative_py
-		      << ", " << m_negative_pz 
-		      << "  pt: " << muon_neg->trackParticle(xAOD::Muon::CombinedTrackParticle)->pt()
-		      << "  d0: " << m_negative_d0
-		      << "  z0: " << m_negative_z0
-		      << "  d0unc: " << m_negative_d0_err
-		      << "  sigma_pt: " << m_negative_sigma_pt);
-	// ntuple variables have been filled in FillRecParameters
-	m_combTree->Fill();
-	// Fill vectors for common ntuple
-	m_CBTrack_pt.push_back(m_positive_pt);
-	m_CBTrack_pt.push_back(m_negative_pt);
-	m_CBTrack_eta.push_back(m_positive_eta);
-	m_CBTrack_eta.push_back(m_negative_eta);
-	m_CBTrack_phi.push_back(m_positive_phi);
-	m_CBTrack_phi.push_back(m_negative_phi);
-	m_CBTrack_d0.push_back(m_positive_d0);
-	m_CBTrack_d0.push_back(m_negative_d0);
-	m_CBTrack_z0.push_back(m_positive_z0);
-	m_CBTrack_z0.push_back(m_negative_z0);
-	
-	m_CBTrack_sigma_pt.push_back(m_positive_sigma_pt);
-	m_CBTrack_sigma_pt.push_back(m_negative_sigma_pt);
-	m_CBTrack_sigma_d0.push_back(m_positive_d0_err);
-	m_CBTrack_sigma_d0.push_back(m_negative_d0_err);
-	m_CBTrack_sigma_z0.push_back(m_positive_z0_err);
-	m_CBTrack_sigma_z0.push_back(m_negative_z0_err);
-      }
-      else {
-	ATH_MSG_INFO("** IDPerfMonZmumu::execute ** FAILED filling " << m_combTree->GetName() 
-		     << "  for run: " << m_runNumber 
-		     << "  event: " << m_evtNumber 
-		     << "  Lumiblock: " << m_lumi_block);
-      } // End of fill combine muons Tree 
+      
+	ATH_MSG_INFO("** IDPerfMonZmumu::execute ** success_pos TP");
+	success_pos = FillRecParametersTP(muon_pos->trackParticle(xAOD::Muon::CombinedTrackParticle), 
+					  muon_pos->trackParticle(xAOD::Muon::InnerDetectorTrackParticle), 
+					  p1_comb->charge(), 
+					  p1_comb_v);
+	ATH_MSG_INFO("** IDPerfMonZmumu::excute ** success_neg TP");
+	success_neg = FillRecParametersTP(muon_neg->trackParticle(xAOD::Muon::CombinedTrackParticle), 
+					  muon_neg->trackParticle(xAOD::Muon::InnerDetectorTrackParticle), 
+					  p2_comb->charge(), 
+					  p2_comb_v);    
+	if (success_pos && success_neg) {
+	  ATH_MSG_DEBUG("-- Filling m_combTree ntuple " << m_combTree->GetName() << " entry " << m_combTree->GetEntries() 
+			<< "  run: " << m_runNumber 
+			<< "  event: " << m_evtNumber 
+			<< "  Lumiblock: " << m_lumi_block 
+			<< "  Invariant mass = " << m_xZmm.GetInvMass() << " GeV ");
+	  ATH_MSG_DEBUG("mu+ --> pxyz " << m_positive_px 
+			<< ", " << m_positive_py
+			<< ", " << m_positive_pz
+			<< "  pt: " << muon_pos->trackParticle(xAOD::Muon::CombinedTrackParticle)->pt()
+			<< "  d0: " << m_positive_d0 
+			<< "  z0: " << m_positive_z0
+			<< "  d0unc: " << m_positive_d0_err);
+	  ATH_MSG_DEBUG("mu- --> pxyz: " << m_negative_px
+			<< ", " << m_negative_py
+			<< ", " << m_negative_pz 
+			<< "  pt: " << muon_neg->trackParticle(xAOD::Muon::CombinedTrackParticle)->pt()
+			<< "  d0: " << m_negative_d0
+			<< "  z0: " << m_negative_z0
+			<< "  d0unc: " << m_negative_d0_err);
+	  // ntuple variables have been filled in FillRecParameters
+	  m_combTree->Fill();
+	}
+	else {
+	  ATH_MSG_INFO("** IDPerfMonZmumu::execute ** FAILED filling " << m_combTree->GetName() 
+		       << "  for run: " << m_runNumber 
+		       << "  event: " << m_evtNumber 
+		       << "  Lumiblock: " << m_lumi_block);
+	}
+      } // if skipMS -> no combined muons
+
       
       
       // MS ntuple
-      ATH_MSG_DEBUG("-- >> going to fill MS muons params << --");
-      success_pos = FillRecParametersTP(m_xZmm.getMSTrack(m_xZmm.getPosMuon(ZmumuEvent::CB)),
-					muon_pos->trackParticle(xAOD::Muon::InnerDetectorTrackParticle), 
-					p1_comb->charge(), 
-					p1_comb_v);
-      success_neg = FillRecParametersTP(m_xZmm.getMSTrack(m_xZmm.getNegMuon(ZmumuEvent::CB)),
-					muon_neg->trackParticle(xAOD::Muon::InnerDetectorTrackParticle), 
-					p2_comb->charge(), 
-					p2_comb_v);    
-      if (success_pos && success_neg) { 
-	ATH_MSG_DEBUG("-- Filling m_MSTree " << m_MSTree->GetName() << " entry " << m_MSTree->GetEntries() 
-		      << "  run: " << m_runNumber 
-		      << "  event: " << m_evtNumber 
-		      << "  Lumiblock: " << m_lumi_block 
-		      << "  Invariant mass = " << m_xZmm.GetInvMass() << " GeV ");
-	ATH_MSG_DEBUG("mu+ --> pxyz " << m_positive_px 
-		      << ", " << m_positive_py
-		      << ", " << m_positive_pz
-		      << "  pt: " << m_xZmm.getMSTrack(m_xZmm.getPosMuon(ZmumuEvent::CB))->pt()
-		      << "  d0: " << m_positive_d0 
-		      << "  z0: " << m_positive_z0
-		      << "  d0unc: " << m_positive_d0_err
-		      << "  sigma_pt: " << m_positive_sigma_pt);
-	ATH_MSG_DEBUG("mu- --> pxyz: " << m_negative_px
-		      << ", " << m_negative_py
-		      << ", " << m_negative_pz 
-		      << "  pt: " << m_xZmm.getMSTrack(m_xZmm.getNegMuon(ZmumuEvent::CB))->pt()
-		      << "  d0: " << m_negative_d0
-		      << "  z0: " << m_negative_z0
-		      << "  d0unc: " << m_negative_d0_err
-		      << "  sigma_pt: " << m_negative_sigma_pt);
-	// ntuple variables have been filled in FillRecParametersTP
-	m_MSTree->Fill();
+      if (!m_skipMS) { // if skipMS -> no MS tracks
+	ATH_MSG_DEBUG("-- >> going to fill MS muons params << --");
+	success_pos = FillRecParametersTP(m_xZmm.getMSTrack(m_xZmm.getPosMuon(ZmumuEvent::CB)),
+					  muon_pos->trackParticle(xAOD::Muon::InnerDetectorTrackParticle),
+					  p1_comb->charge(), 
+					  p1_comb_v);
+
+	success_neg = FillRecParametersTP(m_xZmm.getMSTrack(m_xZmm.getNegMuon(ZmumuEvent::CB)),
+					  muon_neg->trackParticle(xAOD::Muon::InnerDetectorTrackParticle),
+					  p2_comb->charge(),
+					  p2_comb_v);
+	if (success_pos && success_neg) { 
+	  ATH_MSG_DEBUG("-- Filling m_MSTree " << m_MSTree->GetName() << " entry " << m_MSTree->GetEntries() 
+			<< "  run: " << m_runNumber 
+			<< "  event: " << m_evtNumber 
+			<< "  Lumiblock: " << m_lumi_block 
+			<< "  Invariant mass = " << m_xZmm.GetInvMass() << " GeV ");
+	  ATH_MSG_DEBUG("mu+ --> pxyz " << m_positive_px 
+			<< ", " << m_positive_py
+			<< "  pt: " << m_xZmm.getMSTrack(m_xZmm.getPosMuon(ZmumuEvent::CB))->pt()
+			<< "  d0: " << m_positive_d0 
+			<< "  z0: " << m_positive_z0
+			<< "  d0unc: " << m_positive_d0_err);
+	  ATH_MSG_DEBUG("mu- --> pxyz: " << m_negative_px
+			<< ", " << m_negative_py
+
+
+			<< "  pt: " << m_xZmm.getMSTrack(m_xZmm.getNegMuon(ZmumuEvent::CB))->pt()
+			<< "  d0: " << m_negative_d0
+			<< "  z0: " << m_negative_z0
+			<< "  d0unc: " << m_negative_d0_err);
+	  // ntuple variables have been filled in FillRecParametersTP
+	  m_MSTree->Fill();
+	}
+	else {
+	  ATH_MSG_INFO("FAILED filling " << m_MSTree->GetName() 
+		       << "  for run: " << m_runNumber 
+		       << "  event: " << m_evtNumber 
+		       << "  Lumiblock: " << m_lumi_block);
+	}
+	// MS ntuple
       }
-      else {
-	ATH_MSG_INFO("FAILED filling " << m_MSTree->GetName() 
-		     << "  for run: " << m_runNumber 
-		     << "  event: " << m_evtNumber 
-		     << "  Lumiblock: " << m_lumi_block);
-      }
-      // MS ntuple
-      
     } // if store Zmumu ntuple
     
     // changed refitting to combinedparticles since run II DESDM_ZMUMU did not store InDetTrackParticles
@@ -1509,6 +1568,55 @@ StatusCode IDPerfMonZmumu::execute()
 
 
   ATH_MSG_DEBUG(" --IDPerfMonZmumu::execute--  event completed -- Run: " << m_runNumber << "  event: " << m_evtNumber);
+
+  /* *********************************************************
+   * after all, let's make the collection for ALL MUON ID Tracks
+   * *********************************************************/
+ 
+  ATH_MSG_DEBUG("IDTracks monitoring..");
+  int nTracks = 0;
+  TrackCollection* IDTracks = new TrackCollection(SG::OWN_ELEMENTS);
+
+  // DIFFERENT RETRIEVAL
+  const xAOD::MuonContainer* muons = PerfMonServices::getContainer<xAOD::MuonContainer>( PerfMonServices::MUON_COLLECTION );
+  if(muons){   
+    for (auto muon : *muons) {
+      ATH_MSG_DEBUG(" - track index = "<< nTracks); 
+      const xAOD::TrackParticle* tp = muon->trackParticle(xAOD::Muon::InnerDetectorTrackParticle);   
+      if(!tp) {
+	ATH_MSG_DEBUG(" - tpb = "<< tp << " -> is null? " << (!tp));
+	continue;
+      }
+      const Trk::Track* t = tp->track();
+      if ( !t ) {
+	ATH_MSG_DEBUG(" - tpb does not have track ");
+	continue;
+      }
+      const Trk::Perigee* tPerigee = t->perigeeParameters() ;
+      if ( !tPerigee ) {
+	ATH_MSG_DEBUG(" - t does not have perigree ");
+	continue;    
+      }
+      IDTracks->push_back ( new Trk::Track (*t));
+      nTracks++; 
+    }
+  }
+  else  ATH_MSG_WARNING ("Could not retrieve Muon container");
+
+  ATH_MSG_DEBUG(" --> nTracks = " << nTracks);
+
+  StatusCode scid = evtStore()->record(IDTracks, "IDTracks");
+  if (scid.isSuccess()) {
+    ATH_MSG_DEBUG ("Stored "<< IDTracks->size() << " IDTracks into StoreGate");
+  }
+  else{
+    ATH_MSG_WARNING ("Failed storing IDTracks");
+  }
+  
+  /*********************************************************
+   * ..finish
+   ********************************************************/
+
   return StatusCode::SUCCESS;
 }
 
@@ -1523,7 +1631,7 @@ StatusCode IDPerfMonZmumu::FillRecParametersTP(const xAOD::TrackParticle* trackp
     return StatusCode::FAILURE;
   }
 
-  if (m_doRemoval && !trackp_for_unbias){
+  if (m_doRemoval && !trackp_for_unbias && !m_skipMS){
     return StatusCode::FAILURE;
   }
     
@@ -1566,26 +1674,29 @@ StatusCode IDPerfMonZmumu::FillRecParametersTP(const xAOD::TrackParticle* trackp
   sigma_pt = sqrt( pow(sigma_pt_term1,2) + pow(sigma_pt_term2,2) + 2 * sigma_pt_term3 * trackp->definingParametersCovMatrix()(Trk::qOverP,Trk::theta));
   qoverp = thePerigee->parameters()[Trk::qOverP];
 
+  d0res = std::sqrt(trackp->definingParametersCovMatrix()(0,0));
+  z0res = std::sqrt(trackp->definingParametersCovMatrix()(1,1));
 
-  if (vertex == nullptr) {
+  if (vertex) {
     ATH_MSG_WARNING("in FillRecParametersTP. WARNING: Vertex is NULL");
     return StatusCode::FAILURE;
   }
-  if (m_trackToVertexIPEstimator == 0) {
+  if (!m_trackToVertexIPEstimator) {
     ATH_MSG_WARNING("in FillRecParametersTP. WARNING: m_trackToVertexIPEstimator is NULL");
     return StatusCode::FAILURE;
   }
 
-  if (m_doIP && vertex != nullptr && m_trackToVertexIPEstimator != 0){
+  if (m_doIP && vertex != nullptr && m_trackToVertexIPEstimator){
     const Trk::ImpactParametersAndSigma* iPandSigma(nullptr);
     ATH_MSG_DEBUG("-- using the trackToVertexIPEstimator --");
     
     //Calling the estimate(trackp,newtrackp,vertex,doRemoval)
     //The first track is used to unbias the vertex, the second to get the extrapolation
-    iPandSigma = m_trackToVertexIPEstimator->estimate(trackp_for_unbias, trackp, vertex, m_doRemoval);
+    if (!m_skipMS) iPandSigma = m_trackToVertexIPEstimator->estimate(trackp_for_unbias, trackp, vertex, m_doRemoval);
+    else iPandSigma = m_trackToVertexIPEstimator->estimate(trackp, vertex);
     ATH_MSG_DEBUG("return from the trackToVertexIPEstimator->estimate()");
     
-    if( iPandSigma == nullptr ){
+    if( iPandSigma ){
       ATH_MSG_WARNING ("FillRecParametersTP::trackToVertexIPEstimator failed !");
       return StatusCode::FAILURE;
     }
@@ -1659,12 +1770,15 @@ StatusCode IDPerfMonZmumu::FillRecParameters(const Trk::Track* track, const xAOD
     return StatusCode::FAILURE;
   }
 
-  if (m_doRemoval && !trackp_for_unbias) {
+  if (m_doRemoval && !trackp_for_unbias && !m_skipMS) {
     ATH_MSG_DEBUG("* FillRecParameters * Empty Track: trackp_for_unbias. Skipping.");
     return StatusCode::FAILURE;
   }
+
+  ATH_MSG_DEBUG("** FillRecParameters **  PAOLO: stai skippandoMS? " << m_skipMS);
   const Trk::Perigee* trkPerigee = track->perigeeParameters();
-  const Trk::Perigee* trk_for_unbiasPerigee = &(trackp_for_unbias->perigeeParameters());
+  const Trk::Perigee* trk_for_unbiasPerigee = nullptr;
+  if (!m_skipMS)  trk_for_unbiasPerigee = &(trackp_for_unbias->perigeeParameters());
 
   double px = 0;
   double py = 0;
@@ -1728,11 +1842,32 @@ StatusCode IDPerfMonZmumu::FillRecParameters(const Trk::Track* track, const xAOD
   else {
     ATH_MSG_WARNING("FillRecParameters::Failed extrapolation to the BeamLine");
   }
+
+  SG::ReadCondHandle<InDet::BeamSpotData> beamSpotHandleRec { m_beamSpotKey };
+  Amg::Vector3D position = beamSpotHandleRec->beamPos();
+  TLorentzVector vtrack = TLorentzVector (trkPerigee->momentum().x(),
+					  trkPerigee->momentum().y(),
+					  trkPerigee->momentum().z(),
+					  trkPerigee->momentum().mag());
+  float trkd0 = trkPerigee->parameters()[Trk::d0];
+  float trkz0 = trkPerigee->parameters()[Trk::z0];
+  float bsX = position.x();
+  float bsY = position.y();
+  float bsZ = position.z();
+  float btiltX = beamSpotHandleRec->beamTilt(0);
+  float btiltY = beamSpotHandleRec->beamTilt(1);
+  // correct the track parameters for the beamspot position
+  float beamX = bsX + std::tan(btiltX) * (trkz0-bsZ);
+  float beamY = bsY + std::tan(btiltY) * (trkz0-bsZ);
+  float beamD0 = ( -std::sin(vtrack.Phi())*beamX + std::cos(vtrack.Phi())*beamY );
+  float d0bscorr = trkd0 - beamD0;
+  float z0bscorr = trkz0 - bsZ;
   
   if(m_doIP && vertex && track->perigeeParameters()){ //I assume that the vertex is the same of the original track
     const Trk::ImpactParametersAndSigma* iPandSigma(nullptr);
-    iPandSigma = m_trackToVertexIPEstimator->estimate(trk_for_unbiasPerigee,trkPerigee,vertex,m_doRemoval);
-    if( iPandSigma==nullptr ){
+    if (!m_skipMS) iPandSigma = m_trackToVertexIPEstimator->estimate(trk_for_unbiasPerigee,trkPerigee,vertex,m_doRemoval);
+    else iPandSigma = m_trackToVertexIPEstimator->estimate(trkPerigee,vertex);
+    if( iPandSigma==0 ){
       ATH_MSG_WARNING ("FillRecParameters::trackToVertexIPEstimator failed !");
       return StatusCode::FAILURE;
     }
@@ -1765,6 +1900,8 @@ StatusCode IDPerfMonZmumu::FillRecParameters(const Trk::Track* track, const xAOD
     m_positive_eta= eta;
     m_positive_z0 = z0;
     m_positive_d0 = d0;
+    m_positive_z0_manualBS = z0bscorr;
+    m_positive_d0_manualBS = d0bscorr;
     m_positive_d0_err = d0_err;
     m_positive_z0_err = z0_err;
     if(m_doIP){
@@ -1784,6 +1921,8 @@ StatusCode IDPerfMonZmumu::FillRecParameters(const Trk::Track* track, const xAOD
     m_negative_eta= eta;
     m_negative_z0 = z0;
     m_negative_d0 = d0;
+    m_negative_z0_manualBS = z0bscorr;
+    m_negative_d0_manualBS = d0bscorr;
     m_negative_d0_err = d0_err;
     m_negative_z0_err = z0_err;
     if(m_doIP){
@@ -1802,8 +1941,6 @@ StatusCode IDPerfMonZmumu::FillRecParameters(const Trk::Track* track, const xAOD
 StatusCode IDPerfMonZmumu::FillTruthParameters(const xAOD::TrackParticle* trackParticle)
 {
 
-
-  const EventContext& ctx = Gaudi::Hive::currentContext();
   if (!trackParticle ){//|| !trackParticle->vertex()){
     ATH_MSG_WARNING("-- FillTruthParameters -- Empty Trackparticle. Skipping.");
     return StatusCode::FAILURE;
@@ -1835,7 +1972,7 @@ StatusCode IDPerfMonZmumu::FillTruthParameters(const xAOD::TrackParticle* trackP
   } 
 
   const Amg::Vector3D momentum(particle->px(), particle->py(), particle->pz());  
-  const xAOD::TruthVertex * ptruthVertex(nullptr);
+  const xAOD::TruthVertex * ptruthVertex(0);
   ptruthVertex=particle->prodVtx();
   if (!ptruthVertex){
     ATH_MSG_DEBUG("A production vertex pointer was retrieved, but it is NULL");
@@ -1871,12 +2008,11 @@ StatusCode IDPerfMonZmumu::FillTruthParameters(const xAOD::TrackParticle* trackP
   const Amg::Vector3D position(xPos, yPos, z_truth);
   const Trk::CurvilinearParameters cParameters(position, momentum, charge);
 
-  SG::ReadCondHandle<InDet::BeamSpotData> beamSpotHandle { m_beamSpotKey };
-  Trk::PerigeeSurface persf( beamSpotHandle->beamPos() );
+  SG::ReadCondHandle<InDet::BeamSpotData> beamSpotHandleTruth { m_beamSpotKey };
+  Trk::PerigeeSurface persf( beamSpotHandleTruth->beamPos() );
 
-  const Trk::TrackParameters* tP = m_extrapolator->extrapolate(ctx,
-                                                               cParameters,persf, Trk::anyDirection, false).release();
-
+  const EventContext& ctx = Gaudi::Hive::currentContext();
+  std::unique_ptr<const Trk::TrackParameters> tP = m_extrapolator->extrapolate(ctx, cParameters,persf, Trk::anyDirection, false);
 
   double px = 0;
   double py = 0;
@@ -1918,7 +2054,7 @@ StatusCode IDPerfMonZmumu::FillTruthParameters(const xAOD::TrackParticle* trackP
       ATH_MSG_DEBUG("cand perig HEP particle (truth) pz : "<< tP->momentum().z());
       ATH_MSG_DEBUG("cand perig HEP particle (truth) d0 : "<< tP->parameters()[Trk::d0]);
       ATH_MSG_DEBUG("cand perig HEP particle (truth) z0 : "<< tP->parameters()[Trk::z0]);
-      delete tP;tP=nullptr;
+      
     }
   }
 
@@ -1994,7 +2130,7 @@ StatusCode IDPerfMonZmumu::FillTruthParameters(const xAOD::TrackParticle* trackP
 //==================================================================================
 const xAOD::TruthParticle* IDPerfMonZmumu::getTruthParticle( const xAOD::IParticle& p ) {
   /// A convenience type declaration
-  using Link_t = ElementLink<xAOD::TruthParticleContainer>;
+  typedef ElementLink< xAOD::TruthParticleContainer > Link_t;
   /// A static accessor for the information
   static const SG::AuxElement::ConstAccessor< Link_t > acc( "truthParticleLink" );
   // Check if such a link exists on the object:
@@ -2029,13 +2165,15 @@ StatusCode IDPerfMonZmumu::CheckTriggerStatusAndPrescale ()
     return StatusCode::FAILURE;
   }
   else {
-    ATH_MSG_DEBUG("retrieved tool: " << m_triggerDecision );
+    ATH_MSG_INFO("retrieved tool: " << m_triggerDecision );
   }
 
   float thisEventTriggerPrescale = 999999.9;
   float thisHLTTriggerPrescale = 999999.9;
   bool thisHLTIsPassed = false;
-
+  std::string thisHLTTriggerName;
+  std::string thisEventTriggerName;
+  
   // HLT triggers
   const std::vector<std::string> myHLTtriglist = m_triggerDecision->getChainGroup("HLT_mu.*, HLT_2mu.*")->getListOfTriggers();
   for (int i=0; i < (int) myHLTtriglist.size(); i++) {
@@ -2047,6 +2185,7 @@ StatusCode IDPerfMonZmumu::CheckTriggerStatusAndPrescale ()
       float thisprescale = m_triggerDecision->getChainGroup(myHLTtriglist.at(i))->getPrescale();
       if (thisprescale < thisHLTTriggerPrescale) {
 	thisHLTTriggerPrescale = thisprescale;
+	thisHLTTriggerName = myHLTtriglist.at(i);
       }
     }
   }
@@ -2064,9 +2203,12 @@ StatusCode IDPerfMonZmumu::CheckTriggerStatusAndPrescale ()
 
   // event prescale
   thisEventTriggerPrescale = thisHLTTriggerPrescale;
-  ATH_MSG_INFO("Event trigger prescale = " << thisEventTriggerPrescale);
-
+  thisEventTriggerName = thisHLTTriggerName;
+  ATH_MSG_DEBUG("Event trigger prescale = " << thisEventTriggerPrescale);
+  ATH_MSG_DEBUG("Event trigger name = " << thisEventTriggerName);
+  
   m_triggerPrescale = thisEventTriggerPrescale;
+  m_triggerName = thisEventTriggerName;
 
   return StatusCode::SUCCESS;
 }
@@ -2075,8 +2217,8 @@ StatusCode IDPerfMonZmumu::CheckTriggerStatusAndPrescale ()
 //==================================================================================
 const xAOD::Vertex* IDPerfMonZmumu::GetDiMuonVertex(const xAOD::TrackParticle* muon1, const xAOD::TrackParticle* muon2) {
   
-  const xAOD::VertexContainer* vxContainer(nullptr);
-  const xAOD::Vertex* myVtx(nullptr);
+  const xAOD::VertexContainer* vxContainer(0);
+  const xAOD::Vertex* myVtx(0);
   vxContainer = PerfMonServices::getContainer<xAOD::VertexContainer> (PerfMonServices::VTX_COLLECTION);
   if (!vxContainer) { 
     return myVtx;
@@ -2169,6 +2311,8 @@ void IDPerfMonZmumu::Clear4MuNtupleVariables()
   m_positive_pz = 0.;
   m_positive_d0 = 0.;
   m_positive_z0 = 0.;
+  m_positive_d0_manualBS = 0.;
+  m_positive_z0_manualBS = 0.;
   m_positive_d0_err = 0.;
   m_positive_z0_err = 0.;
   m_positive_sigma_pt = 0.;
@@ -2180,6 +2324,8 @@ void IDPerfMonZmumu::Clear4MuNtupleVariables()
   m_negative_pz = 0.;
   m_negative_d0 = 0.;
   m_negative_z0 = 0.;
+  m_negative_d0_manualBS = 0.;
+  m_negative_z0_manualBS = 0.;
   m_negative_d0_err = 0.;
   m_negative_z0_err = 0.;
   m_negative_sigma_pt = 0.;

@@ -70,6 +70,8 @@ IDAlignMonGenericTracks::IDAlignMonGenericTracks(const std::string& type, const 
   m_hWeightInFile(nullptr),
   m_etapTWeight(nullptr) { // cppcheck-suppress useInitializationList
   m_trackSelection = ToolHandle< InDetAlignMon::TrackSelectionTool >("InDetAlignMon::TrackSelectionTool");
+  m_extrapolator = ToolHandle<Trk::IExtrapolator> ( "Trk::Extrapolator/AtlasExtrapolator" );
+  m_trackToVertexIPEstimatorTool = ToolHandle<Trk::ITrackToVertexIPEstimator> ( "Trk::TrackToVertexIPEstimator/TrackToVertexIPEstimator" );
   // cppcheck-suppress useInitializationList
   m_hitQualityTool = ToolHandle<IInDetAlignHitQualSelTool>("");
 
@@ -99,6 +101,8 @@ IDAlignMonGenericTracks::IDAlignMonGenericTracks(const std::string& type, const 
   declareProperty("RangePixHits", m_rangePixHits);
   declareProperty("RangeSCTHits", m_rangeSCTHits);
   declareProperty("RangeTRTHits", m_rangeTRTHits);
+  declareProperty("Extrapolator", m_extrapolator);
+  declareProperty("TrackToVertexIPEstimatorTool", m_trackToVertexIPEstimatorTool);
 }
 
 IDAlignMonGenericTracks::~IDAlignMonGenericTracks() { }
@@ -473,16 +477,17 @@ StatusCode IDAlignMonGenericTracks::initialize() {
     m_doHitQuality = true;
   }
 
-  // retrieving trackToVertexIPEstimator
-  //if ( m_trackToVertexIPEstimator.retrieve().isFailure() ) {
-  //  ATH_MSG_DEBUG( "Failed to retrieve tool " << m_trackToVertexIPEstimator);
-  //m_trackToVertexIPEstimator = 0;
-  //} else {
-  //ATH_MSG_DEBUG( "Retrieved tool " << m_trackToVertexIPEstimator);
-  //}
+  ATH_CHECK( m_extrapolator.retrieve() );
 
   if (m_doIP) {
-    ATH_CHECK(m_trackToVertexIPEstimator.retrieve());
+    // extract TrackToVertexIPEstimator extrapolator tool
+    if ( m_trackToVertexIPEstimatorTool.retrieve().isFailure() ) {
+      ATH_MSG_ERROR("initialize: failed to retrieve trackToVertexIPEstimator tool ");
+      return StatusCode::SUCCESS;
+    }
+    else {
+      ATH_MSG_INFO("initialize: Retrieved Trk::TrackToVertexIPEstimator Tool" << m_trackToVertexIPEstimatorTool);
+    }
   }
 
   if (m_beamSpotKey.initialize().isFailure()) {
@@ -1986,7 +1991,7 @@ StatusCode IDAlignMonGenericTracks::fillHistograms() {
     if (m_doIP) {
       //Get unbiased impact parameter
 
-      if (m_pvtx) myIPandSigma = m_trackToVertexIPEstimator->estimate((*trksItr)->perigeeParameters(), m_pvtx, true);
+      if (m_pvtx) myIPandSigma = m_trackToVertexIPEstimatorTool->estimate((*trksItr)->perigeeParameters(), m_pvtx, true);
     }
 
     if (covariance == nullptr) {

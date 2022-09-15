@@ -11,6 +11,7 @@
 // **********************************************************************
 
 #include "TrkVertexFitterInterfaces/ITrackToVertexIPEstimator.h"
+#include "TrkExInterfaces/IExtrapolator.h"
 #include "GaudiKernel/StatusCode.h"
 #include "AthenaMonitoring/AthenaMonManager.h"
 #include "AthenaMonitoring/ManagedMonitorToolBase.h"
@@ -433,10 +434,8 @@ private:
     this, "BeamSpotKey", "BeamSpotData", "SG key for beam spot"
   };
 
-  PublicToolHandle< Trk::ITrackToVertexIPEstimator >  m_trackToVertexIPEstimator
-  {
-    this, "TrackToVertexIPEstimator", "Trk::TrackToVertexIPEstimator", ""
-  };
+  ToolHandle<Trk::ITrackToVertexIPEstimator>  m_trackToVertexIPEstimatorTool;
+  ToolHandle<Trk::IExtrapolator>         m_extrapolator;    //!< track extrapolator
 
   std::string m_Pixel_Manager;
   std::string m_SCT_Manager;

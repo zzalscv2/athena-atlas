@@ -19,6 +19,7 @@
 #include <atomic>
 #include "GaudiKernel/ServiceHandle.h"
 #include "AsgTools/ToolHandle.h" 
+#include "AsgTools/AnaToolHandle.h"
 #include "MuonAnalysisInterfaces/IMuonSelectionTool.h"
 
 
@@ -40,7 +41,8 @@ class MuonSelector : public EventAnalysis
   bool passSelection ( const xAOD::Muon* pxMuon );
   void setDebug(bool debug){m_doDebug = debug;}
   ToolHandle<CP::IMuonSelectionTool> m_muonSelectionTool;
- 
+  
+  
   // Override functions from EventAnalysis
   virtual void  Init();
   inline void   doIsoSelection (bool doIso) {m_doIsoSelection = doIso;}
@@ -51,6 +53,7 @@ class MuonSelector : public EventAnalysis
   inline double GetPtCut ()                         {return m_combPtCut;}
   virtual bool  Reco();
   void          SetMuonQualityRequirement (std::string newname);
+  void          SetCustomMuonSelectionTool (ToolHandle<CP::IMuonSelectionTool> mst) { m_muonSelectionTool = mst; };
 
  protected:
   virtual void BookHistograms();

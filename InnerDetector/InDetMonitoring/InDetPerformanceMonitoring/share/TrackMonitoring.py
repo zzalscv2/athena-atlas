@@ -152,6 +152,8 @@ for trackCollection in trackCollections:
                                                              applyHistWeight = useWeightInMonitoring,
                                                              hWeightHistName = "h_eventMuVsTrkEta",
                                                              hWeightInFileName = fileWithWeights,
+                                                             Extrapolator     = InDetExtrapolator,
+                                                             TrackToVertexIPEstimatorTool = TrackingCommon.getTrackToVertexIPEstimator(),
                                                              OutputLevel = INFO
                                                          )
         print (InDetAlignMonGenericTracks)
@@ -174,7 +176,7 @@ for trackCollection in trackCollections:
 
 from InDetAlignmentMonitoring.InDetAlignmentMonitoringConf import InDetAlignMonBeamSpot
 InDetAlignMonBeamSpot_noTrig = InDetAlignMonBeamSpot (name  = "InDetAlignMonBeamSpot_noTrig",
-                                                      extrapolator                   = ElectronTrkExtrapolator,
+                                                      # extrapolator                   = ElectronTrkExtrapolator,
                                                       # vxContainerName                = InDetKeys.PrimaryVertices(),
                                                       vxContainerName                = "PrimaryVertices",
                                                       trackContainerName  = "InDetTrackParticles",
@@ -187,10 +189,10 @@ if not hasattr(ServiceMgr, 'THistSvc'):
     from GaudiSvc.GaudiSvcConf import THistSvc
     ServiceMgr += THistSvc()
 
-THistSvc         = Service( "THistSvc" )
+# THistSvc         = Service( "THistSvc" )
 
 histOutput       = DQMonFlags.monManFileKey()+" DATAFILE='monitoring.root' OPT='RECREATE'"
-THistSvc.Output += [histOutput]
+ServiceMgr.THistSvc.Output += [histOutput]
 #InDetAlignMonManager.FileKey = "IDAlignMon"
 topSequence += InDetAlignMonManager
 print (InDetAlignMonManager)
