@@ -35,19 +35,20 @@ dqm_core::Result* dqm_algorithms::GraphTest::execute(const std::string & name,
 						     const TObject & obj, 
 						     const dqm_core::AlgorithmConfig & config )
 {
-  TGraph* graph;
-  TGraph* refhist = 0;
+  const TGraph* graph;
+  const TGraph* refhist = 0;
   bool ownObject=false;
   if ( obj.IsA()->InheritsFrom("TGraph") )
     {
       ERS_DEBUG(2,"Got TGraph called: "<<obj.GetName()<<" of type:"<<obj.IsA()->GetName());
-      graph = (TGraph*)&obj;
+      graph = static_cast<const TGraph*>(&obj);
     } 
   else if ( obj.IsA()->InheritsFrom("TH1") )
     {
       ERS_DEBUG(2,"Got TH1: converting to TGraphErrors");
-      graph = new TGraphErrors((TH1*)&obj);
-      graph->SetNameTitle("TempG","TempG");
+      TGraph* newgraph = new TGraphErrors((TH1*)&obj);
+      newgraph->SetNameTitle("TempG","TempG");
+      graph = const_cast<const TGraph*>(newgraph);
       ownObject = true; // In case we are here we have to delete the graph 
     }
   else
@@ -58,7 +59,7 @@ dqm_core::Result* dqm_algorithms::GraphTest::execute(const std::string & name,
   ERS_DEBUG(2,"Retreiving reference graph");
 
   try {
-    refhist = static_cast<TGraph *>( config.getReference() );
+    refhist = static_cast<const TGraph*>( config.getReference() );
   }
   catch ( dqm_core::Exception & ex ) {
     ERS_DEBUG(2,"No reference specified, will skip point-by-point comparison");

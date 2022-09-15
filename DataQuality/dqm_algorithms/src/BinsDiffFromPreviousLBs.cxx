@@ -69,10 +69,10 @@ dqm_algorithms::BinsDiffFromPreviousLBs::execute(const std::string &  name,
 					   const TObject& object, 
 					   const dqm_core::AlgorithmConfig& config )
 { 
-  TH1* histogram = NULL;
+  const TH1* histogram = nullptr;
 
   if( object.IsA()->InheritsFrom( "TH1" ) ) {
-    histogram = (TH1*)&object;
+    histogram = static_cast<const TH1*>(&object);
     if (histogram->GetDimension() > 2 ){ 
       throw dqm_core::BadConfig( ERS_HERE, name, "dimension > 2 " );
     }
@@ -115,7 +115,7 @@ dqm_algorithms::BinsDiffFromPreviousLBs::execute(const std::string &  name,
     throw dqm_core::BadConfig( ERS_HERE, name, ex.what(), ex );
   }
   
-  TH1* resulthisto = NULL;
+  TH1* resulthisto = nullptr;
   if (histogram->InheritsFrom("TH2")) {
 	resulthisto=(TH1*)(histogram->Clone());
   } else if (histogram->InheritsFrom("TH1")) {

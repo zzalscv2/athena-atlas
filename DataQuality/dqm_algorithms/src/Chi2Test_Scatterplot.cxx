@@ -43,19 +43,14 @@ dqm_algorithms::Chi2Test_Scatterplot::execute(	const std::string & name ,
 					const TObject & object, 
 					const dqm_core::AlgorithmConfig & config )
 {
-  const TH1 * inputgraph2;
+  const TH1 * inputgraph;
   
   if(object.IsA()->InheritsFrom( "TH1" )) {
-    inputgraph2 = static_cast<const TH1*>( &object );
+    inputgraph = static_cast<const TH1*>( &object );
     
   } else {
     throw dqm_core::BadConfig( ERS_HERE, name, "does not inherit from TH1" );
   }
-  
-  //now, cast inputgraph2 to input graph and remove its constness
-  TH1* inputgraph=const_cast<TH1*>(inputgraph2);
-  
-  
   
   double minstat = dqm_algorithms::tools::GetFirstFromMap( "MinStat", config.getParameters(), 1 );
   

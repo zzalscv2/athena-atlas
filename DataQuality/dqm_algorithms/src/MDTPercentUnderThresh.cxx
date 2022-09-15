@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2017 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
 */
 
 // **********************************************************************
@@ -56,10 +56,10 @@ MDTPercentUnderThresh::clone()
 dqm_core::Result*
 MDTPercentUnderThresh::execute( const std::string& name, const TObject& object, const dqm_core::AlgorithmConfig& config)
 {
-  TH1 * hist;
+  const TH1 * hist;
   
   if( object.IsA()->InheritsFrom( "TH1" ) ) {
-    hist = (TH1*)&object;
+    hist = static_cast<const TH1*>(&object);
     if (hist->GetDimension() >= 2 ){
       throw dqm_core::BadConfig( ERS_HERE, name, "dimension >= 2 " );
     }

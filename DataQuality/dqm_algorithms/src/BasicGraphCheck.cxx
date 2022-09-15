@@ -42,10 +42,10 @@ dqm_algorithms::BasicGraphCheck::execute(	const std::string & name ,
 						const TObject & object, 
                                                 const dqm_core::AlgorithmConfig & config)
 {  
-  TGraph * graph;
+  const TGraph * graph;
   
   if( object.IsA()->InheritsFrom( "TGraph" ) ) {
-    graph = (TGraph*)&object;
+    graph = static_cast<const TGraph*>(&object);
   } else {
     throw dqm_core::BadConfig( ERS_HERE, name, "does not inherit from TGraph" );
   }

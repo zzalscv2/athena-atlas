@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2017 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "dqm_algorithms/MaximumBin.h"
@@ -28,10 +28,10 @@ dqm_algorithms::MaximumBin::execute(const std::string & name,
 					const dqm_core::AlgorithmConfig & config)
 { 
   // get the histogram 
-  TH1 * histogram;
+  const TH1 * histogram;
   
   if( object.IsA()->InheritsFrom( "TH1" ) ) {
-    histogram = (TH1*)&object;
+    histogram = static_cast<const TH1*>(&object);
   } else {
     throw dqm_core::BadConfig( ERS_HERE, name, "does not inherit from TH1" );
   }

@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2017 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "dqm_algorithms/MDTOverview.h"
@@ -55,11 +55,11 @@ MDTOverview::clone()
 dqm_core::Result*
 MDTOverview::execute( const std::string& name, const TObject& object, const dqm_core::AlgorithmConfig& config)
 {
-  TH2 * hist;
-  TH2 * ref;
+  const TH2 * hist;
+  const TH2 * ref;
   
   if( object.IsA()->InheritsFrom( "TH2" ) ) {
-    hist = (TH2*)&object;
+    hist = static_cast<const TH2*>(&object);
     if (hist->GetDimension() != 2 ){
       throw dqm_core::BadConfig( ERS_HERE, name, "dimension != 2 " );
     }
@@ -96,7 +96,7 @@ MDTOverview::execute( const std::string& name, const TObject& object, const dqm_
 
   //Get Reference Histo
   try {
-    ref = static_cast<TH2 *>( config.getReference() );
+    ref = static_cast<const TH2 *>( config.getReference() );
   }
   catch ( dqm_core::Exception & ex ) {
     throw dqm_core::BadRefHist(ERS_HERE,name," Could not retreive reference");

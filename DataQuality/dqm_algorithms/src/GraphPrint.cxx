@@ -32,11 +32,11 @@ dqm_core::Result* dqm_algorithms::GraphPrint::execute(const std::string & name,
 						     const TObject & obj, 
 						      const dqm_core::AlgorithmConfig & /* config */ )
 {
-  TGraph* graph;
+  const TGraph* graph;
   if ( obj.IsA()->InheritsFrom("TGraph") )
     {
       ERS_DEBUG(2,"Got TGraph called: "<<obj.GetName()<<" of type:"<<obj.IsA()->GetName());
-      graph = (TGraph*)&obj;
+      graph = static_cast<const TGraph*>(&obj);
     } 
   else
     {

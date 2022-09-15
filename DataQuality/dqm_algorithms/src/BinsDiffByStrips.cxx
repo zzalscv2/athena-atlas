@@ -57,10 +57,10 @@ dqm_algorithms::BinsDiffByStrips::execute(const std::string &  name,
   //==========================================================================
   // Retrieve input object, test if it is a valid 2D histogram:
   
-  TH1* histogram;
+  const TH1* histogram;
   
   if( object.IsA()->InheritsFrom( "TH1" ) ) {
-    histogram = (TH1*)&object;
+    histogram = static_cast<const TH1*>(&object);
     if (histogram->GetDimension() != 2 ){ 
       throw dqm_core::BadConfig( ERS_HERE, name, "dimension != 2 " );
     }

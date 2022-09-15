@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2017 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
 */
 
 // **********************************************************************
@@ -60,10 +60,10 @@ dqm_core::Result*
 BinDump::
 execute( const std::string& name, const TObject& object, const dqm_core::AlgorithmConfig& config)
 {
-  TH1 * histogram;
+  const TH1 * histogram;
 
   if( object.IsA()->InheritsFrom( "TH1" ) ) {
-    histogram = (TH1*)&object;
+    histogram = static_cast<const TH1*>(&object);
     if (histogram->GetDimension() > 2 ){
       throw dqm_core::BadConfig( ERS_HERE, name, "dimension > 2 " );
     }
@@ -116,7 +116,7 @@ execute( const std::string& name, const TObject& object, const dqm_core::Algorit
   ERS_DEBUG(1,"Green: "<< gmin << " entries;   Red: " << rmin << " entries ");
 
 
-  TAxis *axis = histogram->GetXaxis();
+  const TAxis *axis = histogram->GetXaxis();
   dqm_core::Result* result = new dqm_core::Result();
   if(axis) {
     for(int i=0;i<binSize;i++) {
