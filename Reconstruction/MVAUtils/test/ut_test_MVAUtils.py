@@ -1,5 +1,5 @@
 #!/usr/bin/env python
-# Copyright (C) 2002-2020 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
 
 __doc__ = "Test for MVAUtils, check simple hardcoded cases"
 __author__ = "Ruggero Turra"
@@ -12,6 +12,10 @@ from math import exp
 
 
 ROOT.PyConfig.IgnoreCommandLineOptions = True
+
+# libHist needs to be loaded before MVAUtils gets loaded; otherwise, we can
+# run into dictionary problems with std::vector.
+ROOT.TH1
 
 
 def create_tree(variables, values, offset, default_lefts=None, tree_title='tree'):
