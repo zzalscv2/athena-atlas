@@ -128,7 +128,7 @@ namespace Muon {
         ATH_MSG_DEBUG("after hit cleaning, track is " << m_printer->print(*hitTrack));
 
         // keep this clone in case outlier recovery fails but the rest of the cleaning was succesful.
-        std::unique_ptr<Trk::Track> hitTrackClone(new Trk::Track(*(hitTrack.get())));
+        std::unique_ptr<Trk::Track> hitTrackClone = std::make_unique<Trk::Track>(*hitTrack);
 
         // fail if only one station remains
         unsigned int nstationsHitCleaning = state.stations.size();
@@ -186,7 +186,7 @@ namespace Muon {
 
         ATH_MSG_DEBUG(" Clean comp rots " << state.numberOfCleanedCompROTs);
 
-        auto tsos = DataVector<const Trk::TrackStateOnSurface>();
+        Trk::TrackStates tsos{};;
         tsos.reserve(state.measInfo.size());
 
         unsigned int nmeas = 0;
@@ -247,7 +247,7 @@ namespace Muon {
 
         ATH_MSG_DEBUG(" Trying to flip MDT signs: total number of hits with wrong sign " << state.numberOfFlippedMdts);
 
-        auto tsos = DataVector<const Trk::TrackStateOnSurface>();
+        Trk::TrackStates tsos{};;
         tsos.reserve(state.measInfo.size());
 
         unsigned int nmeas = 0;
@@ -318,7 +318,7 @@ namespace Muon {
 
             ATH_MSG_VERBOSE(" outlier removal cycle " << n);
 
-            auto tsos = DataVector<const Trk::TrackStateOnSurface>();
+            Trk::TrackStates tsos{};;
             tsos.reserve(state.measInfo.size());
             ATH_MSG_VERBOSE("cleaning track with " << state.measInfo.size() << " hits");
 
@@ -593,37 +593,46 @@ namespace Muon {
             return result;
         }
 
-        auto tsos = DataVector<const Trk::TrackStateOnSurface>();
+        Trk::TrackStates tsos{};
         tsos.reserve(state.measInfo.size());
 
         unsigned int nmeas = 0;
         // loop over hits
-        InfoIt hit = state.measInfo.begin();
-        InfoIt hit_end = state.measInfo.end();
-        for (; hit != hit_end; ++hit) {
-            if (hit->id.is_valid()) {
-                bool measuresPhi = m_idHelperSvc->measuresPhi(hit->id);
-                bool remove = hit->chId == chId && ((removePhi && measuresPhi) || (removeEta && !measuresPhi));
+        std::set<Identifier> stations{};
+        for (MCTBCleaningInfo& hit : state.measInfo) {
+            if (hit.id.is_valid()) {
+                bool measuresPhi = m_idHelperSvc->measuresPhi(hit.id);
+                bool remove = hit.chId == chId && ((removePhi && measuresPhi) || (removeEta && !measuresPhi));
                 // hits that are flagged as outlier or hits in the chamber to be removed are added as Outlier
-                if (!hit->useInFit || remove) {
-                    ATH_MSG_DEBUG("   removing hit " << m_idHelperSvc->toString(hit->id) << " pull " << hit->resPull->pull().front());
+                if (!hit.useInFit || remove) {
+                    ATH_MSG_DEBUG("   removing hit " << m_idHelperSvc->toString(hit.id) << " pull " << hit.resPull->pull().front());
                     // add as outlier
-                    if (hit->inBounds)
-                        tsos.push_back(MuonTSOSHelper::cloneTSOSWithUpdate(*hit->originalState, *hit->meas, *hit->pars,
+                    if (hit.inBounds)
+                        tsos.push_back(MuonTSOSHelper::cloneTSOSWithUpdate(*hit.originalState, *hit.meas, *hit.pars,
                                                                            Trk::TrackStateOnSurface::Outlier));
 
                     // if removed, add hit to vector of hits
                     // but only if the hit was not already an outlier to be skipped!
-                    if (remove && hit->useInFit) result.removedHits.push_back(&*hit);
-                    hit->useInFit = 0;
+                    if (remove && hit.useInFit) result.removedHits.push_back(&hit);
+                    hit.useInFit = 0;
                     continue;
                 }
             }
-            if (hit->meas) ++nmeas;
-            tsos.push_back(hit->originalState->clone());
+            if (hit.meas) {
+                ++nmeas;
+                // Through how many detector layers went actually the track ?
+                if (m_idHelperSvc->isMdt(hit.id)) stations.insert(m_idHelperSvc->mdtIdHelper().multilayerID(hit.id));
+                // Keep it for the run 2 legacy
+                else if (m_idHelperSvc->isCsc(hit.id)) stations.insert(m_idHelperSvc->cscIdHelper().elementID(hit.id));
+                // Multilayer defines here whether the track went through the IP or HO wedge
+                else if (m_idHelperSvc->isMM(hit.id)) stations.insert(m_idHelperSvc->mmIdHelper().multilayerID(hit.id));
+                // Hits on track in the site before or after the Micromega wedges... yeah micromega sandwich
+                else if (m_idHelperSvc->issTgc(hit.id)) stations.insert(m_idHelperSvc->stgcIdHelper().multilayerID(hit.id));
+            }
+            tsos.push_back(hit.originalState->clone());
         }
 
-        if (nmeas < 6) {
+        if (nmeas < 6 || stations.size() < 2) {
             ATH_MSG_DEBUG(" too few hits, cannot perform chamberCleaning ");
             return result;
         }
@@ -636,7 +645,7 @@ namespace Muon {
         printStates(cleanedTrack.get());
 
         if (!cleanedTrack->perigeeParameters()) { ATH_MSG_DEBUG("   track without perigee "); }
-
+        
         std::unique_ptr<Trk::Track> newTrack = fitTrack(ctx, *cleanedTrack, track->info().particleHypothesis(), state.slFit);
 
         if (newTrack && !newTrack->perigeeParameters()) {
@@ -693,7 +702,7 @@ namespace Muon {
         bool addedHits = false;
         unsigned int removedOutOfBoundsHits(0);
 
-        auto tsos = DataVector<const Trk::TrackStateOnSurface>();
+        Trk::TrackStates tsos{};;
         tsos.reserve(state.measInfo.size());
 
         // loop over hits
@@ -704,16 +713,15 @@ namespace Muon {
                         // check whether we can savely add hits in this chamber to the track
                         bool recover = !isOutsideOnTrackCut(hit.id, hit.residual, hit.pull, m_associationScaleFactor);
                         if (recover && m_onlyUseHitErrorInRecovery && hit.pars) {
-                            const Trk::ResidualPull* resPull =
-                                m_pullCalculator->residualPull(hit.meas, hit.pars, Trk::ResidualPull::HitOnly);
+                            std::unique_ptr<const Trk::ResidualPull> resPull{
+                                m_pullCalculator->residualPull(hit.meas, hit.pars, Trk::ResidualPull::HitOnly)};
                             if (!resPull) {
                                 ATH_MSG_DEBUG(" calculation of residual/pull failed !!!!! ");
                                 recover = false;
                             } else {
                                 recover = !isOutsideOnTrackCut(hit.id, resPull->residual().front(), std::abs(resPull->pull().front()),
 
-                                                               m_associationScaleFactor);
-                                delete resPull;
+                                                               m_associationScaleFactor);                               
                             }
                         }
                         if (recover) {
@@ -785,8 +793,6 @@ namespace Muon {
     }
 
     void MuonTrackCleaner::init(const EventContext& ctx, const Trk::Track& track, CleaningState& state) const {
-        // for_each( state.parsToBeDeleted.begin(), state.parsToBeDeleted.end(), MuonDeleteObject<const Trk::TrackParameters>() );
-        // state.parsToBeDeleted.clear();
         state.nscatterers = 0;
         state.numberOfFlippedMdts = 0;
         state.numberOfCleanedCompROTs = 0;
@@ -828,7 +834,7 @@ namespace Muon {
         if (m_use_slFit) state.slFit = true;
 
         // loop over track and calculate residuals
-        const DataVector<const Trk::TrackStateOnSurface>* states = track.trackStateOnSurfaces();
+        const Trk::TrackStates* states = track.trackStateOnSurfaces();
         if (!states) {
             ATH_MSG_WARNING(" track without states, cannot perform cleaning ");
             return;
@@ -844,19 +850,17 @@ namespace Muon {
         double largestmdtpull = -999;
 
         // loop over TSOSs
-        DataVector<const Trk::TrackStateOnSurface>::const_iterator tsit = states->begin();
-        DataVector<const Trk::TrackStateOnSurface>::const_iterator tsit_end = states->end();
-        for (; tsit != tsit_end; ++tsit) {
-            if ((*tsit)->type(Trk::TrackStateOnSurface::Perigee))
-                ATH_MSG_DEBUG((*tsit)->dumpType() << ", parameters " << *(*tsit)->trackParameters());
-            const Trk::TrackParameters* pars = (*tsit)->trackParameters();
+        for (const Trk::TrackStateOnSurface* tsit : *states) {
+            if (tsit->type(Trk::TrackStateOnSurface::Perigee))
+                ATH_MSG_DEBUG(tsit->dumpType() << ", parameters " << *tsit->trackParameters());
+            const Trk::TrackParameters* pars = tsit->trackParameters();
             if (!pars) {
-                state.measInfo.push_back(MCTBCleaningInfo(*tsit));
+                state.measInfo.emplace_back(tsit);
                 continue;
             }
 
-            if ((*tsit)->type(Trk::TrackStateOnSurface::Scatterer)) {
-                const Trk::MaterialEffectsBase* matEff = (*tsit)->materialEffectsOnTrack();
+            if (tsit->type(Trk::TrackStateOnSurface::Scatterer)) {
+                const Trk::MaterialEffectsBase* matEff = tsit->materialEffectsOnTrack();
                 const Trk::MaterialEffectsOnTrack* matTrk = dynamic_cast<const Trk::MaterialEffectsOnTrack*>(matEff);
                 ATH_MSG_VERBOSE(" Scatterer: r  " << pars->position().perp() << " z " << pars->position().z());
                 if (matEff) ATH_MSG_VERBOSE(" X0 " << matEff->thicknessInX0());
@@ -870,14 +874,14 @@ namespace Muon {
                     ATH_MSG_DEBUG(" eloss " << eloss->deltaE());
                 }
                 ++state.nscatterers;
-                state.measInfo.push_back(MCTBCleaningInfo(*tsit));
+                state.measInfo.emplace_back(tsit);
                 continue;
             }
 
             // check whether state is a measurement
-            const Trk::MeasurementBase* meas = (*tsit)->measurementOnTrack();
+            const Trk::MeasurementBase* meas = tsit->measurementOnTrack();
             if (!meas) {
-                state.measInfo.push_back(MCTBCleaningInfo(*tsit));
+                state.measInfo.emplace_back(tsit);
                 continue;
             }
 
@@ -889,8 +893,8 @@ namespace Muon {
                 ATH_MSG_VERBOSE("      TSOS is not a muon hit, position: r  " << pars->position().perp() << " z " << pars->position().z());
 
                 // count ID hits on track
-                if ((*tsit)->type(Trk::TrackStateOnSurface::Measurement) && m_idHelperSvc->mdtIdHelper().is_indet(id)) { ++state.nIdHits; }
-                state.measInfo.push_back(MCTBCleaningInfo(*tsit));
+                if (tsit->type(Trk::TrackStateOnSurface::Measurement) && m_idHelperSvc->mdtIdHelper().is_indet(id)) { ++state.nIdHits; }
+                state.measInfo.emplace_back(tsit);
                 continue;
             }
 
@@ -931,10 +935,8 @@ namespace Muon {
             MuonStationIndex::ChIndex chIndex = !pseudo ? m_idHelperSvc->chamberIndex(id) : MuonStationIndex::ChUnknown;
 
             // pointer to resPull: workaround because a const pointer is returned
-            const Trk::ResidualPull* tempPull = m_pullCalculator->residualPull(
-                meas, pars, (*tsit)->type(Trk::TrackStateOnSurface::Outlier) ? Trk::ResidualPull::Unbiased : Trk::ResidualPull::Biased);
-            std::unique_ptr<Trk::ResidualPull> resPull = std::make_unique<Trk::ResidualPull>(*tempPull);
-            delete tempPull;
+            std::unique_ptr<const Trk::ResidualPull> resPull{m_pullCalculator->residualPull(
+                meas, pars, tsit->type(Trk::TrackStateOnSurface::Outlier) ? Trk::ResidualPull::Unbiased : Trk::ResidualPull::Biased)};
             if (!resPull) {
                 ATH_MSG_DEBUG(" calculation of residual/pull failed !!!!! ");
                 continue;
@@ -1012,7 +1014,7 @@ namespace Muon {
                     }
                 } else {
                     // if the outlier MDT is not recoverable by flipping the sign, add it as the worst outlier
-                    if (isOutlier && isMDT && pull > largestmdtpull && !(*tsit)->type(Trk::TrackStateOnSurface::Outlier)) {
+                    if (isOutlier && isMDT && pull > largestmdtpull && !tsit->type(Trk::TrackStateOnSurface::Outlier)) {
                         largestmdtpull = pull;
                         mdtmeas = meas;
                     }
@@ -1123,7 +1125,7 @@ namespace Muon {
                 }
             }
 
-            state.measInfo.push_back(MCTBCleaningInfo(id, chId, chIndex, inBounds, residual, pull, *tsit, meas, pars, resPull, nullptr));
+            state.measInfo.emplace_back(id, chId, chIndex, inBounds, residual, pull, tsit, meas, pars, std::move(resPull), nullptr);
             MCTBCleaningInfo& info = state.measInfo.back();
             if (flipSign) { info.flippedMdt = std::move(mdtRotFlipped); }
             info.isNoise = isNoise;
@@ -1131,16 +1133,15 @@ namespace Muon {
                 ATH_MSG_DEBUG("updated competing ROT");
                 info.cleanedCompROT = std::move(updatedCompRot);
                 if (info.cleanedCompROT->associatedSurface() != meas->associatedSurface()) {
-                    const Trk::TrackParameters* exPars =
-                        m_extrapolator
-                            ->extrapolate(ctx, *pars, info.cleanedCompROT->associatedSurface(), Trk::anyDirection, false, Trk::muon)
-                            .release();
+                     std::unique_ptr<Trk::TrackParameters> exPars = m_extrapolator->extrapolate(ctx, 
+                                                                        *pars, info.cleanedCompROT->associatedSurface(), 
+                                                                        Trk::anyDirection, false, Trk::muon);
                     if (!exPars) {
                         ATH_MSG_WARNING("Update of comp rot parameters failed, keeping old ones");
                         info.cleanedCompROT.reset();
                     } else {
-                        info.pars = exPars;
-                        state.parsToBeDeleted.emplace_back(exPars);
+                        info.pars = exPars.get();
+                        state.parsToBeDeleted.emplace_back(std::move(exPars));
                     }
                 }
             }
@@ -1148,7 +1149,7 @@ namespace Muon {
             ChamberLayerStatistics& chamberStatistics = state.chamberLayerStatistics[chIndex];
             chamberStatistics.chIndex = chIndex;
 
-            if ((*tsit)->type(Trk::TrackStateOnSurface::Outlier)) {
+            if (tsit->type(Trk::TrackStateOnSurface::Outlier)) {
                 ATH_MSG_DEBUG("  Outlier " << m_idHelperSvc->toString(id) << m_printer->print(*(info.resPull)));
                 if (isMDT)
                     ATH_MSG_DEBUG(" r_drift " << rDrift << "  r_trk " << rTrack << " dr " << std::setw(7)
@@ -1233,7 +1234,7 @@ namespace Muon {
                 }
 
                 // measurements with large pull
-                if (!(*tsit)->type(Trk::TrackStateOnSurface::Outlier) && isOutlier && !isMDT) { state.largePullMeasurements.insert(meas); }
+                if (!tsit->type(Trk::TrackStateOnSurface::Outlier) && isOutlier && !isMDT) { state.largePullMeasurements.insert(meas); }
 
                 // pulls per chamber
                 if (!m_idHelperSvc->isTrigger(info.chId)) {
@@ -1361,8 +1362,8 @@ namespace Muon {
                     PullChIt pIt = state.chambersToBeRemovedPhi.begin();
                     PullChIt pIt_end = state.chambersToBeRemovedPhi.end();
                     for (; pIt != pIt_end; ++pIt) {
-                        if (pIt->second == chit->first && pIt->first < fakePull) {
-                            pIt->first = fakePull;
+                        if (pIt->second == chit->first) {
+                            pIt->first = std::max(pIt->first, fakePull);
                             break;
                         }
                     }
@@ -1542,11 +1543,10 @@ namespace Muon {
     }
 
     void MuonTrackCleaner::printStates(Trk::Track* track) const {
-        const DataVector<const Trk::TrackStateOnSurface>* states = track->trackStateOnSurfaces();
+        const Trk::TrackStates* states = track->trackStateOnSurfaces();
         int nStates = 0;
         if (states) nStates = states->size();
-        ATH_MSG_DEBUG("Calling fit with hits: " << nStates);
-        ATH_MSG_VERBOSE(m_printer->printMeasurements(*track));
+        ATH_MSG_DEBUG("Calling fit with hits: " << nStates<<std::endl<<m_printer->printMeasurements(*track));       
     }
 
     std::unique_ptr<Trk::Track> MuonTrackCleaner::fitTrack(const EventContext& ctx, Trk::Track& track, Trk::ParticleHypothesis pHyp,
