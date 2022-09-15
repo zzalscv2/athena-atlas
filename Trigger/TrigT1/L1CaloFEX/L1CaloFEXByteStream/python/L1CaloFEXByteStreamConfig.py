@@ -5,12 +5,12 @@ from AthenaConfiguration.ComponentFactory import CompFactory
 from libpyeformat_helper import SourceIdentifier, SubDetector
 
 
-def eFexByteStreamToolCfg(name, flags, writeBS=False, TOBs=True, xTOBs=False, multiSlice=False, decodeInputs=False):
+def eFexByteStreamToolCfg(name, flags, *, writeBS=False, TOBs=True, xTOBs=False, multiSlice=False, decodeInputs=False):
   tool = CompFactory.eFexByteStreamTool(name)
-  efex_roi_moduleids = [0x1000,0x1100]
-  tool.ROBIDs = [int(SourceIdentifier(SubDetector.TDAQ_CALO_FEAT_EXTRACT_ROI, moduleid)) for moduleid in efex_roi_moduleids]
+
   if writeBS:
     # write BS == read xAOD
+    # Note: this is currently unsupported!!!
     tool.eEMContainerReadKey   = "L1_eEMxRoI"  if xTOBs else "L1_eEMRoI"
     tool.eTAUContainerReadKey  = "L1_eTauxRoI" if xTOBs else "L1_eTauRoI"
     tool.eEMContainerWriteKey  = ""
@@ -19,6 +19,9 @@ def eFexByteStreamToolCfg(name, flags, writeBS=False, TOBs=True, xTOBs=False, mu
     # read BS == write xAOD
     tool.eEMContainerReadKey   = ""
     tool.eTAUContainerReadKey  = ""
+    if TOBs or xTOBs or multiSlice:
+      efex_roi_moduleids = [0x1000,0x1100]
+      tool.ROBIDs = [int(SourceIdentifier(SubDetector.TDAQ_CALO_FEAT_EXTRACT_ROI, moduleid)) for moduleid in efex_roi_moduleids]
     if TOBs:
       tool.eEMContainerWriteKey  = "L1_eEMRoI"
       tool.eTAUContainerWriteKey = "L1_eTauRoI"
@@ -28,20 +31,19 @@ def eFexByteStreamToolCfg(name, flags, writeBS=False, TOBs=True, xTOBs=False, mu
     if multiSlice:
       tool.eEMSliceContainerWriteKey = "L1_eEMxRoIOutOfTime"
       tool.eTAUSliceContainerWriteKey = "L1_eTauxRoIOutOfTime"
-
-  if decodeInputs:
-    efex_raw_ids = []
-    inputId = int(SourceIdentifier(SubDetector.TDAQ_CALO_FEAT_EXTRACT_DAQ, 0x1000))
-    for shelf in range(0,2):
-      for module in range(0,12):
-        efex_raw_ids += [inputId + shelf*0x100 + module*0x010 ]
-    tool.ROBIDs += efex_raw_ids
-    tool.eTowerContainerWriteKey   = "L1_eTowers"
+    if decodeInputs:
+      efex_raw_ids = []
+      inputId = int(SourceIdentifier(SubDetector.TDAQ_CALO_FEAT_EXTRACT_DAQ, 0x1000))
+      for shelf in range(0,2):
+        for module in range(0,12):
+          efex_raw_ids += [inputId + shelf*0x100 + module*0x010 ]
+      tool.ROBIDs += efex_raw_ids
+      tool.eTowerContainerWriteKey   = "L1_eTowers"
 
   return tool
 
 
-def jFexRoiByteStreamToolCfg(name, flags, writeBS=False, xTOBs=False):
+def jFexRoiByteStreamToolCfg(name, flags, *, writeBS=False, xTOBs=False):
   tool = CompFactory.jFexRoiByteStreamTool(name)
   tool.ConvertExtendedTOBs = xTOBs
   jfex_roi_moduleids = [0x2000]
@@ -80,7 +82,7 @@ def jFexRoiByteStreamToolCfg(name, flags, writeBS=False, xTOBs=False):
   return tool
 
  
-def gFexByteStreamToolCfg(name, flags, writeBS=False):
+def gFexByteStreamToolCfg(name, flags, *, writeBS=False):
   tool = CompFactory.gFexByteStreamTool(name)
   gfex_roi_moduleids = [0x3000]
   tool.ROBIDs = [int(SourceIdentifier(SubDetector.TDAQ_CALO_FEAT_EXTRACT_ROI, moduleid)) for moduleid in gfex_roi_moduleids]
@@ -140,7 +142,7 @@ def gFexByteStreamToolCfg(name, flags, writeBS=False):
   return tool
 
 
-def jFexInputByteStreamToolCfg(name, flags, writeBS=False):
+def jFexInputByteStreamToolCfg(name, flags, *, writeBS=False):
   tool = CompFactory.jFexInputByteStreamTool(name)
   jfex_roi_moduleids = [0x2000,0x2010,0x2020,0x2030,0x2040,0x2050]
   tool.ROBIDs = [int(SourceIdentifier(SubDetector.TDAQ_CALO_FEAT_EXTRACT_DAQ, moduleid)) for moduleid in jfex_roi_moduleids]  
@@ -160,7 +162,7 @@ def jFexInputByteStreamToolCfg(name, flags, writeBS=False):
   return tool
 
 
-def gFexInputByteStreamToolCfg(name, flags, writeBS=False):
+def gFexInputByteStreamToolCfg(name, flags, *, writeBS=False):
   tool = CompFactory.gFexInputByteStreamTool(name)
   gfex_roi_moduleids = [0x3000]
   tool.ROBIDs = [int(SourceIdentifier(SubDetector.TDAQ_CALO_FEAT_EXTRACT_DAQ, moduleid)) for moduleid in gfex_roi_moduleids]  

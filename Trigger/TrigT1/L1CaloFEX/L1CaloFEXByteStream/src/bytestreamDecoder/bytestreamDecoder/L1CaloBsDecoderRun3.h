@@ -16,6 +16,7 @@ class L1CaloRdoGfexTower;
 class L1CaloRdoJfexTob;
 class L1CaloRdoJfexTower;
 class L1CaloRdoMuonTob;     // **FIXME** Different class for run 3?
+class L1CaloRdoPh1TopoHit;
 class L1CaloRdoRodInfo;
 
 class L1CaloBsDecoderRun3
@@ -54,9 +55,9 @@ public:
                            std::list<L1CaloRdoMuonTob>& mtob,
                            std::list<L1CaloRdoRodInfo>::const_iterator rodInfo );
 
-   //>>void decodePh1TopoHits( const uint32_t* beg, const uint32_t* end,
-   //>>                     std::list<L1CaloRdoPh1TopoHit>& dat,
-   //>>                     std::list<L1CaloRdoRodInfo>::const_iterator rodInfo );
+   void decodePh1TopoHits( const uint32_t* beg, const uint32_t* end,
+                           std::list<L1CaloRdoPh1TopoHit>& hit,
+                           std::list<L1CaloRdoRodInfo>::const_iterator rodInfo );
 #endif
    void setVerbosity( bool verbosity );
 
