@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2017 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
 */
 
 // ReweightUtils includes
@@ -24,7 +24,8 @@ SumOfWeightsAlg::~SumOfWeightsAlg() { }
 
 //**********************************************************************
 
-StatusCode SumOfWeightsAlg::initialize() {
+StatusCode SumOfWeightsAlg::initialize ATLAS_NOT_THREAD_SAFE () {
+  //                                   ^ due to registerTopFilter
   StatusCode sc;
   ATH_MSG_DEBUG("Initializing " << name() << "...");
   ATH_MSG_DEBUG("Retrieving tools...");

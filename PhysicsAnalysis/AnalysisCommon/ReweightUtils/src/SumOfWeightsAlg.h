@@ -1,7 +1,7 @@
 ///////////////////////// -*- C++ -*- /////////////////////////////
 
 /*
-  Copyright (C) 2002-2017 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
 */
 
 // Calls IWeightTool objects for each event and stores SumOfWeights
@@ -15,6 +15,7 @@
 
 // Include the base class
 #include "AthenaBaseComps/AthFilterAlgorithm.h"
+#include "CxxUtils/checker_macros.h"
 #include "GaudiKernel/ToolHandle.h"
 
 #include <vector>
@@ -37,7 +38,7 @@ class SumOfWeightsAlg : public ::AthFilterAlgorithm {
      ~SumOfWeightsAlg(); 
    
      /// Athena algorithm's Hooks
-     StatusCode  initialize();
+     StatusCode  initialize ATLAS_NOT_THREAD_SAFE ();
      StatusCode  execute();
      StatusCode  finalize();
    

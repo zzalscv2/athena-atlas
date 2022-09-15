@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2017 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
 */
 
 #define APReweight3D_cxx
@@ -134,11 +134,11 @@ APWeightEntry* APReweight3D::GetWeight(double value_x, double value_y, double va
   return GetBinWeight(GetBinX(value_x), GetBinY(value_y), GetBinZ(value_z));
 }
 
-TH3D* APReweight3D::GetDenominatorHist() const {
+const TH3D* APReweight3D::GetDenominatorHist() const {
   return m_denominator_hist;
 }
 
-TH3D* APReweight3D::GetNumeratorHist() const {
+const TH3D* APReweight3D::GetNumeratorHist() const {
   return m_numerator_hist;
 }
 

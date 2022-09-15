@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2017 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
 */
 
 #define APReweight_cxx
@@ -155,11 +155,11 @@ APWeightEntry* APReweight::GetWeight(double value) const {
   return GetBinWeight(GetBin(value));
 }
 
-TH1D* APReweight::GetDenominatorHist() const {
+const TH1D* APReweight::GetDenominatorHist() const {
   return m_denominator_hist;
 }
 
-TH1D* APReweight::GetNumeratorHist() const {
+const TH1D* APReweight::GetNumeratorHist() const {
   return m_numerator_hist;
 }
 
