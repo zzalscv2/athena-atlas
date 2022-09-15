@@ -9,7 +9,6 @@
 #include "MuonRDO/CscRawDataContainer.h"
 #include "CscCalibTools/ICscCalibTool.h"
 #include "GaudiKernel/Chrono.h"
-#include "MuonCondInterface/CscICoolStrSvc.h"
 #include "MuonCSC_CnvTools/ICSC_RDO_Decoder.h"
 #include "CscCalibData/CscCalibResultContainer.h"
 #include "CscCalibData/CscCalibReportContainer.h"

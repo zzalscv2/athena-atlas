@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2020 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "CscCalibMonToolPed.h"
@@ -11,7 +11,7 @@
 
 #include "CscCalibData/CscCalibReportContainer.h"
 #include "CscCalibData/CscCalibReportPed.h"
-#include "MuonCondInterface/CscICoolStrSvc.h"
+
 
 CscCalibMonToolPed::CscCalibMonToolPed(const std::string & type, const std::string & name, 
     const IInterface* parent) : 
