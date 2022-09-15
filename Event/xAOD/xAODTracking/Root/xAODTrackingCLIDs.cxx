@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2017 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2012 CERN for the benefit of the ATLAS collaboration
 */
 
 
@@ -19,4 +19,6 @@
 #include "xAODTracking/TrackStateAuxContainer.h"
 #include "xAODTracking/TrackParametersContainer.h"
 #include "xAODTracking/TrackParametersAuxContainer.h"
+#include "xAODTracking/TrackJacobianContainer.h"
+#include "xAODTracking/TrackJacobianAuxContainer.h"
 

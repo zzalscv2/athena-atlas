@@ -8,6 +8,8 @@
 #include "ActsTrkEvent/MultiTrajectory.h"
 #include "xAODTracking/TrackStateAuxContainer.h"
 #include "xAODTracking/TrackParametersAuxContainer.h"
+#include "xAODTracking/TrackJacobianAuxContainer.h"
+#include "xAODTracking/TrackMeasurementsAuxContainer.h"
 
 
 namespace {
@@ -23,14 +25,27 @@ struct EmptyMTJ { // setup empty MTJ
     parametersBackendAux = std::make_unique<xAOD::TrackParametersAuxContainer>();
     parametersBackend->setStore(parametersBackendAux.get());
 
-    // TODO other backends
+    jacobianBackend = std::make_unique<xAOD::TrackJacobianContainer>();
+    jacobianBackendAux = std::make_unique<xAOD::TrackJacobianAuxContainer>();
+    jacobianBackend->setStore(jacobianBackendAux.get());
 
-    t = std::make_unique<ActsTrk::MultiTrajectory<ActsTrk::IsReadWrite>>(trackStateBackend.get(), parametersBackend.get());
+    measurementsBackend = std::make_unique<xAOD::TrackMeasurementsContainer>();
+    measurementsBackendAux = std::make_unique<xAOD::TrackMeasurementsAuxContainer>();
+    measurementsBackend->setStore(measurementsBackendAux.get());
+
+    t = std::make_unique<ActsTrk::MultiTrajectory<ActsTrk::IsReadWrite>>(trackStateBackend.get(), parametersBackend.get(), 
+                                                                          jacobianBackend.get(), measurementsBackend.get());
   }
   std::unique_ptr<xAOD::TrackStateContainer> trackStateBackend;
   std::unique_ptr<xAOD::TrackStateAuxContainer> trackStateBackendAux;
   std::unique_ptr<xAOD::TrackParametersContainer> parametersBackend;
   std::unique_ptr<xAOD::TrackParametersAuxContainer> parametersBackendAux;
+  std::unique_ptr<xAOD::TrackJacobianContainer> jacobianBackend;
+  std::unique_ptr<xAOD::TrackJacobianAuxContainer> jacobianBackendAux;
+  std::unique_ptr<xAOD::TrackMeasurementsContainer> measurementsBackend;
+  std::unique_ptr<xAOD::TrackMeasurementsAuxContainer> measurementsBackendAux;
+
+
   std::unique_ptr<ActsTrk::MultiTrajectory<ActsTrk::IsReadWrite>> t;
 };
 

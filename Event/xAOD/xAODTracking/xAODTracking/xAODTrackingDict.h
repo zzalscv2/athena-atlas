@@ -70,6 +70,21 @@
 #include "xAODTracking/versions/TrackParametersAuxContainer_v1.h"
 
 
+#include "xAODTracking/TrackJacobian.h"
+#include "xAODTracking/TrackJacobianContainer.h"
+#include "xAODTracking/TrackJacobianAuxContainer.h"
+#include "xAODTracking/versions/TrackJacobian_v1.h"
+#include "xAODTracking/versions/TrackJacobianContainer_v1.h"
+#include "xAODTracking/versions/TrackJacobianAuxContainer_v1.h"
+
+#include "xAODTracking/TrackMeasurements.h"
+#include "xAODTracking/TrackMeasurementsContainer.h"
+#include "xAODTracking/TrackMeasurementsAuxContainer.h"
+#include "xAODTracking/versions/TrackMeasurements_v1.h"
+#include "xAODTracking/versions/TrackMeasurementsContainer_v1.h"
+#include "xAODTracking/versions/TrackMeasurementsAuxContainer_v1.h"
+
+
 // EDM include(s).
 #include "xAODCore/tools/DictHelpers.h"
 

@@ -10,5 +10,3 @@ namespace xAOD {
     AUX_VARIABLE(covariance);
   }
 }
-
-

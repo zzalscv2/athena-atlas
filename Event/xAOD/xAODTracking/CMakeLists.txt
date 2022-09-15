@@ -48,3 +48,8 @@ atlas_add_test( xAODTracking_TrackParticlexAODHelpers_test
 atlas_add_test( ut_xaodtracking_vertex
    SOURCES test/ut_xaodtracking_vertex.cxx
    LINK_LIBRARIES xAODTracking )
+
+atlas_add_test(xAODTracking_MultiTrajectoryBackends_test
+   SOURCES test/xAODTracking_MultiTrajectoryBackends_test.cxx
+   LINK_LIBRARIES xAODTracking
+   POST_EXEC_SCRIPT nopost.sh)

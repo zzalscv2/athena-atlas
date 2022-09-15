@@ -119,6 +119,31 @@
    <typedef name="xAOD::TrackParametersAuxContainer" />
 
 
+   <!-- xAOD::TrackJacobian interface type(s). -->
+   <class name="xAOD::TrackJacobian_v1" />
+   <class name="xAOD::TrackJacobianContainer_v1"
+          id="206B43CF-A06C-450A-AB1D-BA368118F3C9" />
+   <typedef name="xAOD::TrackJacobian" />
+   <typedef name="xAOD::TrackJacobianContainer" />
+
+   <!-- xAOD::TrackJacobian auxiliary type(s). -->
+   <class name="xAOD::TrackJacobianAuxContainer_v1"
+          id="F532D40F-5AAC-4192-B7BA-A1A4CE15A1E5" />
+   <typedef name="xAOD::TrackJacobianAuxContainer" />
+
+   <!-- xAOD::TrackMeasurements interface type(s). -->
+   <class name="xAOD::TrackMeasurements_v1" />
+   <class name="xAOD::TrackMeasurementsContainer_v1"
+          id="E59EFB44-E922-4531-9E70-2AE02A08DE9E" />
+   <typedef name="xAOD::TrackMeasurements" />
+   <typedef name="xAOD::TrackMeasurementsContainer" />
+
+   <!-- xAOD::TrackMeasurements auxiliary type(s). -->
+   <class name="xAOD::TrackMeasurementsAuxContainer_v1"
+          id="DDCD13AD-AB54-4D53-9D3F-6726AFF12CC7" />
+   <typedef name="xAOD::TrackMeasurementsAuxContainer" />
+
+
    <!-- xAOD::TrackMeasurementValidation interface type(s). -->
    <class name="xAOD::TrackMeasurementValidation_v1" />
    <class name="xAOD::TrackMeasurementValidationContainer_v1"
