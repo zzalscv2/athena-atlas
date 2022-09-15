@@ -112,10 +112,11 @@ SUSYObjDef_xAOD::SUSYObjDef_xAOD( const std::string& name )
     m_ZtagConfig(""),
     m_WZTaggerCalibArea(""),
     m_ToptagConfig(""),
-    m_TopTaggerCalibArea(""),
     m_WTagUncConfig(""),
     m_ZTagUncConfig(""),
     m_TopTagUncConfig(""),
+    m_JetTruthLabelName(""),
+    m_TopTaggerCalibArea(""),
     m_tool_init(false),
     m_subtool_init(false),
     // set dummies for configuration
@@ -602,6 +603,7 @@ SUSYObjDef_xAOD::SUSYObjDef_xAOD( const std::string& name )
   declareProperty( "JetZtaggerConfig",  m_ZtagConfig );
   declareProperty( "JetWZTaggerCalibArea",  m_WZTaggerCalibArea );
   declareProperty( "JetToptaggerConfig",  m_ToptagConfig );
+  declareProperty( "JetTruthLabelName",  m_JetTruthLabelName );
   declareProperty( "JetTopTaggerCalibArea",  m_TopTaggerCalibArea );
   declareProperty( "JetWTaguncConfig",  m_WTagUncConfig );
   declareProperty( "JetZTaguncConfig",  m_ZTagUncConfig );
@@ -1414,6 +1416,7 @@ StatusCode SUSYObjDef_xAOD::readConfig()
   configFromFile(m_ZtagConfig, "Jet.ZtaggerConfig", rEnv, "SmoothedInclZTagger_AntiKt10LCTopoTrimmed_FixedSignalEfficiency50_SUSYOpt_MC16_20210129.dat");
   configFromFile(m_WZTaggerCalibArea, "Jet.WZTaggerCalibArea", rEnv, "SmoothedWZTaggers/Rel21/");
   configFromFile(m_ToptagConfig, "Jet.ToptaggerConfig", rEnv, "JSSDNNTagger_AntiKt10LCTopoTrimmed_TopQuarkInclusive_MC16d_20190405_80Eff.dat");
+  configFromFile(m_JetTruthLabelName, "Jet.JetTruthLabelName", rEnv, "R10TruthLabel_R21Consolidated");
   configFromFile(m_TopTaggerCalibArea, "Jet.TopTaggerCalibArea", rEnv, "JSSWTopTaggerDNN/Rel21/");
   configFromFile(m_jesConfig, "Jet.JESConfig", rEnv, "JES_MC16Recommendation_Consolidated_EMTopo_Apr2019_Rel21.config");
   configFromFile(m_jesConfigAFII, "Jet.JESConfigAFII", rEnv, "JES_MC16Recommendation_AFII_EMTopo_Apr2019_Rel21.config");

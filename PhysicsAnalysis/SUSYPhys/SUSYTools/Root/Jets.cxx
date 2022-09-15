@@ -263,8 +263,15 @@ namespace ST {
     // Calibrate the jets - only insitu for data for now
     if (isData()) ATH_CHECK(m_jetFatCalibTool->applyCalibration(*copy));
 
-    // Truth Labeling (MC only)
-    if (!isData()) ATH_CHECK(m_jetTruthLabelingTool->decorate(*copy));
+    if (!isData() && !m_JetTruthLabelName.empty()){ 
+      ATH_MSG_DEBUG("Checking if decorator for JetTruthLabelingTool is available:");
+      std::string fatjetcoll = m_fatJets;
+      m_label_truthKey = fatjetcoll+"."+m_JetTruthLabelName;
+      SG::ReadDecorHandle<xAOD::JetContainer, int> labelHandle_truthKey(m_label_truthKey);
+      ATH_MSG_DEBUG("Reading JetTruthLabelingTool truthKey:" << m_label_truthKey << " isAvailable " << labelHandle_truthKey.isAvailable());
+      // Truth Labeling (MC only)
+      if (!labelHandle_truthKey.isAvailable()) ATH_CHECK(m_jetTruthLabelingTool->decorate(*copy));
+    }
 
     for (const auto& jet : *copy) {
 

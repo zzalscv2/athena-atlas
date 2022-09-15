@@ -28,7 +28,7 @@ Package.SUSYToolsTester  INFO    GRL tool retrieve & initialized...
 Package.SUSYToolsTester  INFO     ABOUT TO INITIALIZE SUSYTOOLS 
 SUSYObjDef_xAOD          INFO    Initialising... 
 SUSYObjDef_xAOD          INFO    *****     *****     *****     *****
-SUSYObjDef_xAOD          INFO    Configuring from file /home/merlassino/SUSYTools_fixRef_R22/build/x86_64-centos7-gcc11-opt/data/SUSYTools/SUSYTools_Default.conf
+SUSYObjDef_xAOD          INFO    Configuring from file /nfs/dust/atlas/user/mrimoldi/software/DevelopST_R22/truthJET/build/x86_64-centos7-gcc11-opt/data/SUSYTools/SUSYTools_Default.conf
 SUSYObjDef_xAOD          INFO    Config file opened
 SUSYObjDef_xAOD          INFO    readConfig(): Loaded property Jet.InputType with value 9
 SUSYObjDef_xAOD          INFO    readConfig(): Loaded property Muon.Id with value 1
@@ -144,6 +144,7 @@ SUSYObjDef_xAOD          INFO    configFromFile(): Loaded property "Jet.WtaggerC
 SUSYObjDef_xAOD          INFO    configFromFile(): Loaded property "Jet.ZtaggerConfig" with value SmoothedInclZTagger_AntiKt10LCTopoTrimmed_FixedSignalEfficiency50_SUSYOpt_MC16_20210129.dat
 SUSYObjDef_xAOD          INFO    configFromFile(): Loaded property "Jet.WZTaggerCalibArea" with value SmoothedWZTaggers/Rel21/
 SUSYObjDef_xAOD          INFO    configFromFile(): Loaded property "Jet.ToptaggerConfig" with value JSSDNNTagger_AntiKt10LCTopoTrimmed_TopQuarkInclusive_MC16d_20190405_80Eff.dat
+SUSYObjDef_xAOD          INFO    configFromFile(): Loaded property "Jet.JetTruthLabelName" with value R10TruthLabel_R21Consolidated
 SUSYObjDef_xAOD          INFO    configFromFile(): Loaded property "Jet.TopTaggerCalibArea" with value JSSWTopTaggerDNN/Rel21/
 SUSYObjDef_xAOD          INFO    configFromFile(): Loaded property "Jet.JESConfig" with value JES_MC16Recommendation_Consolidated_EMTopo_Apr2019_Rel21.config
 SUSYObjDef_xAOD          INFO    configFromFile(): Loaded property "Jet.JESConfigAFII" with value JES_MC16Recommendation_AFII_EMTopo_Apr2019_Rel21.config
@@ -263,7 +264,7 @@ Info in <CP::TPileupReweighting::UsePeriodConfig>: Using MC16 Period configurati
 Info in <CP::TPileupReweighting::AddLumiCalcFile>: Adding LumiMetaData (scale factor=0.970874)...
 Info in <CP::TPileupReweighting::AddLumiCalcFile>: Adding LumiMetaData (scale factor=1.010100)...
 Info in <CP::TPileupReweighting::AddLumiCalcFile>: Adding LumiMetaData (scale factor=0.934579)...
-DefaultWeightTool        INFO    AsgTool DefaultWeightTool @ 0xd2b4df0
+DefaultWeightTool        INFO    AsgTool DefaultWeightTool @ 0xd805f40
 ToolSvc.JetCalibTool_A...INFO    Initializing ToolSvc.JetCalibTool_AntiKt4EMPFlow to calibrate AntiKt4EMPFlowjets
 ToolSvc.JetCalibTool_A...INFO    Reading global JES settings from: JES_MC16Recommendation_Consolidated_PFlow_Apr2019_Rel21.config
 ToolSvc.JetCalibTool_A...INFO    resolved in: /cvmfs/atlas.cern.ch/repo/sw/database/GroupData/JetCalibTools/CalibArea-00-04-82/CalibrationConfigs/JES_MC16Recommendation_Consolidated_PFlow_Apr2019_Rel21.config
@@ -709,7 +710,7 @@ ToolSvc.JetVertexTagge...INFO      Reading JVT file from:
     JetMomentTools/JVTlikelihood_20140805.root
 
 ToolSvc.JetVertexTagge...INFO                         resolved in  :
-    /cvmfs/atlas-nightlies.cern.ch/repo/sw/master_AnalysisBase_x86_64-centos7-gcc11-opt/2022-09-11T0220/AnalysisBase/22.2.89/InstallArea/x86_64-centos7-gcc11-opt/data/JetMomentTools/JVTlikelihood_20140805.root
+    /cvmfs/atlas-nightlies.cern.ch/repo/sw/master_AnalysisBase_x86_64-centos7-gcc11-opt/2022-09-14T0220/AnalysisBase/22.2.89/InstallArea/x86_64-centos7-gcc11-opt/data/JetMomentTools/JVTlikelihood_20140805.root
 
 
 ToolSvc.JVTEfficiencyToolINFO     Path found = /cvmfs/atlas.cern.ch/repo/sw/database/GroupData/JetJvtEfficiency/Moriond2018/JvtSFFile_EMPFlowJets.root
@@ -1021,9 +1022,9 @@ ToolSvc.TopTagger        WARNING One (or more) tagger input variable has an out-
 Package.SUSYToolsTester  INFO    ===>>>  start processing event #, 370301029run #356250 499 events processed so far  <<<===
 Info in <SUSYToolsTester>: ===>>>  done processing event #370301029, run #356250 500 events processed so far  <<<===
 Info in <SUSYToolsTester>: Time per event:          (CPU / WALL)
-  Entire loop           - 20.780000 / 113.415704 ms
-  First event           - 800.000000 / 39891.884089 ms
-  Excluding first event - 19.218437 / 33.699327 ms
+  Entire loop           - 25.200000 / 25.307442 ms
+  First event           - 750.000000 / 760.177135 ms
+  Excluding first event - 23.747495 / 23.834754 ms
 Package.SUSYToolsTester  INFO    -- Dummy Cutflow -- >>>> Variation  <<<<
 Package.SUSYToolsTester  INFO    Cut 0(All)-> el: 497, mu: 497
 Package.SUSYToolsTester  INFO    Cut 1(GRL+Cleaning)-> el: 497, mu: 497
