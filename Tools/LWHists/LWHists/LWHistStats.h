@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2017 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
 */
 
 
@@ -17,6 +17,8 @@
 #ifndef LWHISTSTATS_H
 #define LWHISTSTATS_H
 
+#include <atomic>
+
 class LWHistStats {
 public:
   static long nActiveLWHists() { return s_nActiveHists; }
@@ -31,7 +33,7 @@ public:
 private:
   LWHistStats(){}
   ~LWHistStats(){}
-  static long s_nActiveHists;
+  static std::atomic<long> s_nActiveHists;
   friend class LWHist;
 };
 

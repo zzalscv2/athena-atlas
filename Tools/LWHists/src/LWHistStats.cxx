@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2017 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
 */
 
 
@@ -15,7 +15,7 @@
 #include "LWHists/LWHistStats.h"
 #include "LWPools.h"
 
-long LWHistStats::s_nActiveHists = 0;
+std::atomic<long> LWHistStats::s_nActiveHists = 0;
 
 //____________________________________________________________________
 long long LWHistStats::getTotalPoolMemAllocated()
