@@ -26,7 +26,8 @@ StatusCode CscCondDbAlg::initialize() {
                         << "as keys and different values of the pslopes for the different CSC channels as values, otherwise please run "
                         << "with the ReadPSlopeFromDatabase property set to false");
     } else {
-        if (!(m_pslope > 0 && m_pslope < 1)) {
+        float pslope = m_pslope; // Work around cppcheck false positive
+        if (!(pslope > 0 && pslope < 1)) {
             ATH_MSG_FATAL("The Pslope cannot be set to a value <=0 or >=1");
             return StatusCode::FAILURE;
         } else if (m_pslope != m_DEFAULT_PSLOPE) {
@@ -163,9 +164,9 @@ StatusCode CscCondDbAlg::loadDataHv(writeHandle_t& writeHandle, CscCondDbData* w
                 WireLayerstring += layer;
 
                 writeCdo->setDeadLayer(WireLayerstring, WireLayerId);
-                if (layerMap.count(ChamberId) == 0) layerMap[ChamberId] = 0;
-                ++layerMap[ChamberId];
-                if (layerMap[ChamberId] == 3) writeCdo->setDeadStation(chamber_name, ChamberId);
+                int& mapval = layerMap[ChamberId];
+                ++mapval;
+                if (mapval == 3) writeCdo->setDeadStation(chamber_name, ChamberId);
             }
         }
         chan_index++;
