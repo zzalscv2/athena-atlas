@@ -44,78 +44,50 @@ namespace Muon {
     class MuonTrackCleaner : virtual public IMuonTrackCleaner, public AthAlgTool {
     public:
         struct MCTBCleaningInfo {
-            Identifier id;
-            Identifier chId;
-            MuonStationIndex::ChIndex chIndex;
-            int useInFit;
-            bool inBounds;
-            bool isNoise;
-            bool copyState;  // if true the state will be copied instead of evaluated for outliers
-            double residual;
-            double pull;
-            const Trk::TrackStateOnSurface* originalState;
-            const Trk::MeasurementBase* meas;
-            const Trk::TrackParameters* pars;
-            std::unique_ptr<Trk::ResidualPull> resPull;
-            std::unique_ptr<MdtDriftCircleOnTrack> flippedMdt;
-            std::unique_ptr<const CompetingMuonClustersOnTrack> cleanedCompROT;
-            const Trk::FitQuality* fitQ;
+            Identifier id{};
+            Identifier chId{};
+            MuonStationIndex::ChIndex chIndex{MuonStationIndex::ChUnknown};
+            int useInFit{1};
+            bool inBounds{true};
+            bool isNoise{false};
+            bool copyState{true};  // if true the state will be copied instead of evaluated for outliers
+            double residual{DBL_MAX};
+            double pull{DBL_MAX};
+            const Trk::TrackStateOnSurface* originalState{nullptr};
+            const Trk::MeasurementBase* meas{nullptr};
+            const Trk::TrackParameters* pars{nullptr};
+            std::unique_ptr<const Trk::ResidualPull> resPull{nullptr};
+            std::unique_ptr<MdtDriftCircleOnTrack> flippedMdt{nullptr};
+            std::unique_ptr<const CompetingMuonClustersOnTrack> cleanedCompROT{nullptr};
+            const Trk::FitQuality* fitQ{nullptr};
 
             MCTBCleaningInfo(const Trk::TrackStateOnSurface* orState) :
-                id(),
-                chId(),
-                chIndex(MuonStationIndex::ChUnknown),
-                useInFit(1),
-                inBounds(true),
-                isNoise(false),
-                copyState(true),
-                residual(1e10),
-                pull(1e10),
-                originalState(orState),
-                meas(0),
-                pars(0),
-                resPull(),
-                flippedMdt(),
-                cleanedCompROT(),
-                fitQ(0) {}
+                originalState(orState){}
 
             MCTBCleaningInfo(const Identifier& i, const Identifier& chi, MuonStationIndex::ChIndex chIn, bool inB, double r, double p,
                              const Trk::TrackStateOnSurface* orState) :
                 id(i),
                 chId(chi),
                 chIndex(chIn),
-                useInFit(1),
                 inBounds(inB),
-                isNoise(false),
-                copyState(true),
                 residual(r),
                 pull(p),
-                originalState(orState),
-                meas(0),
-                pars(0),
-                resPull(),
-                flippedMdt(),
-                cleanedCompROT(),
-                fitQ(0) {}
+                originalState(orState){}
 
             MCTBCleaningInfo(const Identifier& i, const Identifier& chi, MuonStationIndex::ChIndex chIn, bool inB, double r, double p,
                              const Trk::TrackStateOnSurface* orState, const Trk::MeasurementBase* me, const Trk::TrackParameters* par,
-                             std::unique_ptr<Trk::ResidualPull>& resP, const Trk::FitQuality* fq) :
+                             std::unique_ptr<const Trk::ResidualPull> resP, const Trk::FitQuality* fq) :
                 id(i),
                 chId(chi),
                 chIndex(chIn),
-                useInFit(1),
-                inBounds(inB),
-                isNoise(false),
-                copyState(false),
+                inBounds(inB),              
+                copyState{false},
                 residual(r),
                 pull(p),
                 originalState(orState),
                 meas(me),
                 pars(par),
-                resPull(std::move(resP)),
-                flippedMdt(),
-                cleanedCompROT(),
+                resPull(std::move(resP)),               
                 fitQ(fq) {}
         };
         typedef std::vector<MCTBCleaningInfo> InfoVec;
@@ -126,7 +98,7 @@ namespace Muon {
 
         /** struct to store return values of chamber removal, contains the new track plus a list the removed hits */
         struct ChamberRemovalOutput {
-            ChamberRemovalOutput() : track() {}
+            ChamberRemovalOutput() = default;
             std::unique_ptr<Trk::Track> track;
             Identifier chId;
             std::vector<MCTBCleaningInfo*> removedHits;
@@ -139,10 +111,10 @@ namespace Muon {
         };
 
         struct ChamberPullInfo {
-            ChamberPullInfo() : pullSum(0.), maxPull(0.), nhits(0) {}
-            double pullSum;
-            double maxPull;
-            int nhits;
+            ChamberPullInfo() = default;
+            double pullSum{0.};
+            double maxPull{0.};
+            int nhits{0};
         };
         typedef std::map<Identifier, ChamberPullInfo> PullChamberMap;
         typedef PullChamberMap::iterator PullChamberIt;
@@ -177,14 +149,14 @@ namespace Muon {
 
         // struct to hold the internal state information, i.e. the various track properties relevant for the cleaner
         struct CleaningState {
-            InfoVec measInfo;
-            MeasSet largePullMeasurements;
-            MeasSet flippedMdts;
-            MeasSet largePullPseudoMeasurements;
+            InfoVec measInfo{};
+            MeasSet largePullMeasurements{};
+            MeasSet flippedMdts{};
+            MeasSet largePullPseudoMeasurements{};
 
             // need to keep these somewhere while they're being used: couldn't figure out how to make unique_ptr work with
             // Trk::TrackParameter given the inheritance issues
-            std::vector<std::unique_ptr<const Trk::TrackParameters>> parsToBeDeleted;
+            std::vector<std::unique_ptr<Trk::TrackParameters>> parsToBeDeleted{};
 
             unsigned int nscatterers{0};
             unsigned int nhits{0};
@@ -206,22 +178,22 @@ namespace Muon {
             ChamberPullInfo pullSumPhi{};
             ChamberPullInfo pullSumTrigEta{};
 
-            EtaPhiPerChamberMap hitsPerChamber;
-            EtaPhiPerChamberMap outBoundsPerChamber;
+            EtaPhiPerChamberMap hitsPerChamber{};
+            EtaPhiPerChamberMap outBoundsPerChamber{};
 
-            PullChamberMap pullSumPerChamber;
-            PullChamberMap pullSumPerChamberPhi;
-            PullChamberMap pullSumPerChamberEta;
+            PullChamberMap pullSumPerChamber{};
+            PullChamberMap pullSumPerChamberPhi{};
+            PullChamberMap pullSumPerChamberEta{};
 
-            PullChVec chambersToBeRemoved;
-            PullChVec chambersToBeRemovedPhi;
+            PullChVec chambersToBeRemoved{};
+            PullChVec chambersToBeRemovedPhi{};
 
-            std::set<MuonStationIndex::StIndex> stations;
-            std::set<MuonStationIndex::PhiIndex> phiLayers;
+            std::set<MuonStationIndex::StIndex> stations{};
+            std::set<MuonStationIndex::PhiIndex> phiLayers{};
 
-            std::map<MuonStationIndex::ChIndex, ChamberLayerStatistics> chamberLayerStatistics;
+            std::map<MuonStationIndex::ChIndex, ChamberLayerStatistics> chamberLayerStatistics{};
 
-            std::set<Identifier> chamberRemovalExclusionList;
+            std::set<Identifier> chamberRemovalExclusionList{};
             CleaningState() = default;
         };
 
