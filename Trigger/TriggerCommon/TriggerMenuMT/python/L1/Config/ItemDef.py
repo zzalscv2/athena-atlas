@@ -98,7 +98,6 @@ class ItemDef:
         # old Run-3 configurations 
         #ZDC_A_C = d.ZDC_A & d.ZDC_C
         #VZDC_A_C = Not(d.ZDC_A) & Not(d.ZDC_C)
-        #VZDC_AORC = Not(d.ZDC_A) | Not(d.ZDC_C)
 
         # new ZDC configuration for Run-3 (ATR-24734)
         ZDC_comb0 = Not(d.ZDC_2) & Not(d.ZDC_1) & Not(d.ZDC_0) # this means no signal! to be used ONLY in add with other inputs
@@ -111,17 +110,21 @@ class ItemDef:
         ZDC_comb7 = d.ZDC_2      & d.ZDC_1      & d.ZDC_0
 
         # combined signals for heavy ion runs
-        ZDC_yy    = ZDC_comb0 | ZDC_comb1 | ZDC_comb2 | ZDC_comb3
-        ZDC_had   = ZDC_comb7
-        ZDC_Ay    = ZDC_comb1 | ZDC_comb3 | ZDC_comb4 | ZDC_comb5
-        ZDC_yA    = ZDC_comb2 | ZDC_comb3 | ZDC_comb4 | ZDC_comb6
-        ZDC_yAAy  = ZDC_comb1 | ZDC_comb2 | ZDC_comb3 | ZDC_comb4 | ZDC_comb5 | ZDC_comb6
-        ZDC_A     = ZDC_comb1 | ZDC_comb3 | ZDC_comb4 | ZDC_comb5 | ZDC_comb7
-        ZDC_C     = ZDC_comb2 | ZDC_comb3 | ZDC_comb4 | ZDC_comb6 | ZDC_comb7
-        ZDC_A_C   = ZDC_comb3 | ZDC_comb4 | ZDC_comb7
-        VZDC_A_C  = ZDC_comb0
-        VZDC_AORC = ZDC_comb0 | ZDC_comb1 | ZDC_comb2 | ZDC_comb5 | ZDC_comb6
+        PHYS_VZDC_A_VZDC_C         = ZDC_comb0
+        PHYS_1TO4ZDC_A_VZDC_C      = ZDC_comb1
+        PHYS_VZDC_A_1TO4ZDC_C      = ZDC_comb2
+        PHYS_1TO4ZDC_A_1TO4ZDC_C   = ZDC_comb3
+        PHYS_5ZDC_A_VZDC_C         = ZDC_comb4
+        PHYS_VZDC_A_5ZDC_C         = ZDC_comb5
+        PHYS_ZDC_1TO4XOR5          = ZDC_comb6
+        PHYS_5ZDC_A_5ZDC_C         = ZDC_comb7
+        ZDC_A     = ZDC_comb1 | ZDC_comb3 | ZDC_comb4 | ZDC_comb6 | ZDC_comb7
+        ZDC_C     = ZDC_comb2 | ZDC_comb3 | ZDC_comb5 | ZDC_comb6 | ZDC_comb7
+        ZDC_A_C   = ZDC_A & ZDC_C
         ZDC_AND   = ZDC_A_C
+        VZDC_A_C  = ZDC_comb0
+        ZDC_XOR   = (ZDC_A & Not(ZDC_C)) | (ZDC_C & Not(ZDC_A))
+        VZDC_AORC = Not(ZDC_A) | Not(ZDC_C)
 
         # ZDC configuration for LHCf+ZDC special run in Sep. 2022
         # rename existing ZDC configuration to match request in ATR-26051
@@ -1168,7 +1171,6 @@ class ItemDef:
         MenuItem('L1_ZDC_A_C_BGRP11'     ).setLogic( ZDC_A_C & bgrp11cond & physcond)
 
 # ATR-12470
-        ZDC_XOR = (ZDC_A & Not(ZDC_C)) | (ZDC_C & Not(ZDC_A))
         MenuItem('L1_ZDC_A_VZDC_C'                  ).setLogic(ZDC_A & Not(ZDC_C) & physcond)
         MenuItem('L1_ZDC_C_VZDC_A'                  ).setLogic(ZDC_C & Not(ZDC_A) & physcond)
         MenuItem('L1_ZDC_A_VZDC_C_VTE200'           ).setLogic(ZDC_A & Not(ZDC_C) & Not(d.TE200) & physcond)
@@ -1223,7 +1225,18 @@ class ItemDef:
         MenuItem('L1_ZDC_COMB5').setLogic( ZDC_comb5 & physcond)
         MenuItem('L1_ZDC_COMB6').setLogic( ZDC_comb6 & physcond)
         MenuItem('L1_ZDC_COMB7').setLogic( ZDC_comb7 & physcond)
+        # ZDC calibration for LHCf+ZDC runs
+        MenuItem('L1_ZDC_OR_LHCF').setLogic( (Not(ZDC_comb0) | d.NIMLHCF) & physcond)
 
+        # ZDC for 2022 heavy ion runs
+        MenuItem('L1_VZDC_A_VZDC_C'      ).setLogic( PHYS_VZDC_A_VZDC_C       & physcond)
+        MenuItem('L1_1TO4ZDC_A_VZDC_C'   ).setLogic( PHYS_1TO4ZDC_A_VZDC_C    & physcond)
+        MenuItem('L1_VZDC_A_1TO4ZDC_C'   ).setLogic( PHYS_VZDC_A_1TO4ZDC_C    & physcond)
+        MenuItem('L1_1TO4ZDC_A_1TO4ZDC_C').setLogic( PHYS_1TO4ZDC_A_1TO4ZDC_C & physcond)
+        MenuItem('L1_5ZDC_A_VZDC_C'      ).setLogic( PHYS_5ZDC_A_VZDC_C       & physcond)
+        MenuItem('L1_VZDC_A_5ZDC_C'      ).setLogic( PHYS_VZDC_A_5ZDC_C       & physcond)
+        MenuItem('L1_ZDC_1TO4XOR5'       ).setLogic( PHYS_ZDC_1TO4XOR5        & physcond)
+        MenuItem('L1_5ZDC_A_5ZDC_C'      ).setLogic( PHYS_5ZDC_A_5ZDC_C       & physcond)
 
         # ATR-14967
         MenuItem('L1_EM3_VZDC_A'           ).setLogic( d.EM3 & Not(ZDC_A) & physcond)

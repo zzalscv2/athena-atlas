@@ -11,10 +11,9 @@
 from TrigValTools.TrigValSteering import Test, ExecStep, CheckSteps
 
 preExec = ';'.join([
-  'setMenu=\'Dev_HI_run3_v1\'',
+  'setMenu=\'Dev_HI_run3_v1_TriggerValidation_prescale\'',
   'doWriteBS=False',
   'doWriteRDOTrigger=True',
-  'forceEnableAllChains=True',
   'from AthenaConfiguration.AllConfigFlags import ConfigFlags',
   'ConfigFlags.Trigger.AODEDMSet=\'AODFULL\'',
 ])
