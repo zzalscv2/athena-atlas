@@ -15,39 +15,43 @@
 #include "TrkCaloCluster_OnTrack/CaloCluster_OnTrack.h"
 
 #include "StoreGate/ReadHandle.h"
+#include "GaudiKernel/SystemOfUnits.h"
 
 namespace {
 
-// cluster Et and absEta returns
-// quick phi resolution paramtrization
+// cluster Et in MeV and absEta returns
+// quick phi resolution parametrization
+// in rad 
 double
 phiResol(double clusterEt, double absEta)
 {
+  // convert from MeV to GeV 
+  double EtinGeV = clusterEt * 1e-3;
   if (absEta < 0.6) {
-    return 0.065 / std::sqrt(clusterEt) - 0.007;
+    return 0.065 / std::sqrt(EtinGeV) - 0.007;
   }
   if (absEta < 0.8) {
-    return 0.074 / std::sqrt(clusterEt) - 0.008;
+    return 0.074 / std::sqrt(EtinGeV) - 0.008;
   }
   if (absEta < 1.15) {
-    return 0.085 / std::sqrt(clusterEt) - 0.010;
+    return 0.085 / std::sqrt(EtinGeV) - 0.010;
   }
   if (absEta < 1.37) {
-    return 0.091 / std::sqrt(clusterEt) - 0.010;
+    return 0.091 / std::sqrt(EtinGeV) - 0.010;
   }
   if (absEta < 1.52) {
-    return 0.082 / std::sqrt(clusterEt) - 0.006;
+    return 0.082 / std::sqrt(EtinGeV) - 0.006;
   }
   if (absEta < 1.81) {
-    return 0.084 / std::sqrt(clusterEt) - 0.008;
+    return 0.084 / std::sqrt(EtinGeV) - 0.008;
   }
   if (absEta < 2.01) {
-    return 0.046 / std::sqrt(clusterEt) - 0.001;
+    return 0.046 / std::sqrt(EtinGeV) - 0.001;
   }
   if (absEta < 2.37) {
-    return 0.032 / std::sqrt(clusterEt) + 0.001;
+    return 0.032 / std::sqrt(EtinGeV) + 0.001;
   }
-  return 0.030 / std::sqrt(clusterEt) + 0.003;
+  return 0.030 / std::sqrt(EtinGeV) + 0.003;
 }
 }
 
@@ -215,9 +219,11 @@ CaloCluster_OnTrackBuilder::getClusterErrorMatrix(
 
   //variance in phi from calorimeter phi resolution 
   double phiresol = phiResol(clusterEt, std::abs(clusterEta));
-  if (phiresol < 2e-3) {
+  if (phiresol < 4e-3) {
     //Avoid going too small for  very high pt
-    phiresol = 2e-3;
+    //as the quick one did not have such data
+    //so here 4 mrad is the smaller 
+    phiresol = 4e-3;
   }
   const double phivariance = phiresol * phiresol;
 
