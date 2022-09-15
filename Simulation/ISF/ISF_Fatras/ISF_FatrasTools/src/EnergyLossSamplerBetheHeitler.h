@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2019 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
 */
 
 ///////////////////////////////////////////////////////////////////
@@ -75,8 +75,6 @@ namespace iFatras{
   CLHEP::HepRandomEngine*              m_randomEngine;
   /** Name of the random number stream */
   std::string                          m_randomEngineName; 
-
-  mutable std::vector<double>          m_pdf;
 
   /** the one free parameter to scale */
   double                               m_scaleFactor;   

@@ -272,10 +272,10 @@ private:
   std::string m_randomEngineName; //!< Name of the random number stream
 
   /** for statistics output */
-  mutable int m_recordedBremPhotons;
+  mutable std::atomic<unsigned int> m_recordedBremPhotons;
 
   /** for the calo energy recording */
-  mutable int m_currentSample;               //!< the currentSample
+  int m_currentSample;                       //!< the currentSample
   bool m_recordEnergyDeposition;             //!< for deposition methods
   std::string m_layerIndexCaloSampleMapName; //!< name to record it
   mutable const Trk::LayerIndexSampleMap*

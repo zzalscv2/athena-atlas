@@ -51,10 +51,13 @@
 #include "TrkEventPrimitives/ParticleHypothesis.h"
 
 
-// statics doubles 
-double  iFatras::PhotonConversionTool::s_alpha         = 1./137.;
-double  iFatras::PhotonConversionTool::s_oneOverThree  = 1./3.;
-Trk::PdgToParticleHypothesis  iFatras::PhotonConversionTool::s_pdgToHypo;
+/** Inverse fine structure constant */
+namespace {
+  constexpr double s_alpha         = 1./137.;
+  constexpr double s_oneOverThree  = 1./3.;
+}
+
+const Trk::PdgToParticleHypothesis  iFatras::PhotonConversionTool::s_pdgToHypo;
 
 // constructor
 iFatras::PhotonConversionTool::PhotonConversionTool(const std::string& t, const std::string& n, const IInterface* p) :
@@ -314,8 +317,6 @@ ISF::ISFParticleVector iFatras::PhotonConversionTool::getChilds(const ISF::ISFPa
 								       const Amg::Vector3D& childDirection,
 								       Trk::ParticleHypothesis childType) const
 {
-    static ISF::ISFParticleVector children(2);
- 
     // calculate the child momentum
     double p1 = sqrt(childEnergy*childEnergy-Trk::ParticleMasses::mass[childType]*Trk::ParticleMasses::mass[childType]);    
 
@@ -363,8 +364,8 @@ ISF::ISFParticleVector iFatras::PhotonConversionTool::getChilds(const ISF::ISFPa
                                                                time,
                                                                *parent));
 
-    children[0] = ch1.release();
-    children[1] = ch2.release();
+    ISF::ISFParticleVector children{ch1.release(),
+                                    ch2.release()};
 
     // register TruthIncident
     ISF::ISFTruthIncident truth( const_cast<ISF::ISFParticle&>(*parent),

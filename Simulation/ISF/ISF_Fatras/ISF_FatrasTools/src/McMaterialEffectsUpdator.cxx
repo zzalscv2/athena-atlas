@@ -1575,7 +1575,7 @@ iFatras::McMaterialEffectsUpdator::interact(double time,
 
   if ( process == 5 ) {     // positron annihilation
 
-    static ISF::ISFParticleVector children(2);
+    ISF::ISFParticleVector children(2);
 
     double fmin = mass/p;
 
@@ -1688,7 +1688,7 @@ ISF::ISFParticleVector  iFatras::McMaterialEffectsUpdator::interactLay(const ISF
 
   if ( process == 5 ) {     // positron annihilation
 
-    static ISF::ISFParticleVector children(2);
+    ISF::ISFParticleVector children(2);
 
     double fmin = mass/p;
 
