@@ -7,6 +7,7 @@
 
 // STL includes
 #include <string>
+#include <type_traits>
 
 // base class header
 #include "AthenaBaseComps/AthReentrantAlgorithm.h"
@@ -179,7 +180,7 @@ inline void ISF::CollectionMerger::insertCopy(const HitType_t& hit,
 template <typename HitType_t, typename OutputType_t>
 inline void ISF::CollectionMerger::insertCopy(HitType_t * const hit,
                                            OutputType_t& outputHandle) const {
-  auto&& hitCopy = std::make_unique<HitType_t>(*hit);
+  auto&& hitCopy = std::make_unique<std::remove_const_t<HitType_t> >(*hit);
   outputHandle->push_back( hitCopy.release() );
 }
 

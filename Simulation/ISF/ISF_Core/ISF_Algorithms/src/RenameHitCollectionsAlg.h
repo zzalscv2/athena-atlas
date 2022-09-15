@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef ISF_ALGORITHMS_RENAMEHITCOLLECTIONSALG_H
@@ -8,6 +8,7 @@
 // STL includes
 #include <string>
 #include <memory>
+#include <type_traits>
 
 // Framework includes
 #include <AthenaBaseComps/AthReentrantAlgorithm.h>
@@ -200,7 +201,7 @@ namespace ISF {
     ATH_CHECK( outputHandle.record(std::make_unique<LArHitContainer>()) );
 
     SG::ReadHandle<LArHitContainer> inputHandle{inputReadHandleKey, ctx};
-    for ( const auto& hit: *inputHandle ) {
+    for ( const LArHit* hit: *inputHandle ) {
       this->insertCopy(hit, outputHandle);
     }
     outputHandle->setName(inputHandle->Name());
@@ -267,7 +268,7 @@ namespace ISF {
   template <typename HitType_t, typename OutputType_t>
   inline void ISF::RenameHitCollectionsAlg::insertCopy(HitType_t * const hit,
                                                        OutputType_t& outputHandle) const {
-    auto&& hitCopy = std::make_unique<HitType_t>(*hit);
+    auto&& hitCopy = std::make_unique<std::remove_const_t<HitType_t> >(*hit);
     outputHandle->push_back( hitCopy.release() );
   }
 
