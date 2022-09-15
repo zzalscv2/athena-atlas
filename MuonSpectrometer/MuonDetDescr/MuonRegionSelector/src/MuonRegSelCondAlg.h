@@ -39,7 +39,8 @@ public:
   MuonRegSelCondAlg( const std::string& name, ISvcLocator* pSvcLocator );
 
   virtual StatusCode  initialize() override;
-  virtual StatusCode  execute(const EventContext& ctx) const override;
+  virtual StatusCode execute(const EventContext& ctx) const override;
+  virtual bool isReEntrant() const override final { return false; }
 
   virtual std::unique_ptr<RegSelSiLUT> createTable( const EventContext& ctx, EventIDRange& id_range ) const = 0;   
 
