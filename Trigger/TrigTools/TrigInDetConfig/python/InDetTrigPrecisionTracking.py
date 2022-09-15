@@ -7,19 +7,17 @@ from __future__ import print_function
 from AthenaCommon.Logging import logging 
 log = logging.getLogger("InDetTrigPrecisionTracking")
 
-
-
-
 def makeInDetTrigPrecisionTracking( config=None, verifier=False, rois='EMViewRoIs', prefix="InDetTrigMT" ) :      
     
     log.info( "makeInDetTrigPrecisionTracking:: {} {} doTRT: {} ".format(  config.input_name, config.name, config.doTRT ) )
-    
+
     ptAlgs = [] # List containing all the precision tracking algorithms hence every new added alg has to be appended to the list
     
     # Expects configuration  
     if config is None:
         raise ValueError('PrecisionTracking No configuration provided!')
-        
+
+
     doTRT = config.doTRT
 
     # Add suffix to the algorithms
@@ -46,6 +44,7 @@ def makeInDetTrigPrecisionTracking( config=None, verifier=False, rois='EMViewRoI
     if config.newConfig:
         log.info( "ID Trigger: NEW precision tracking configuration {} {}".format(config.input_name, signature) )
         ambiSolvingAlgs = ambiguitySolver_builder( signature, config, summaryTool, outputTrackName=ambiTrackCollection, prefix=prefix+"Trk" )
+        log.info(ambiSolvingAlgs)
     else:
         log.info( "ID Trigger: OLD precision tracking configuration {} {}".format(config.input_name, signature) )
         ambiSolvingAlgs = ambiguitySolverOld_builder( signature, config, summaryTool, outputTrackName=ambiTrackCollection, prefix=prefix )
@@ -238,30 +237,27 @@ def ambiguityProcessorToolNN_builder( signature, config, summaryTool ,prefix=Non
 
 
 
-def scoringTool_builder( signature, config, summaryTool, prefix=None ):
+def scoringTool_builder( signature, config, summaryTool, prefix=None, SiOnly=True ):
 
-  from InDetTrigRecExample.InDetTrigConfigRecLoadTools import InDetTrigExtrapolator
-  
-  from InDetTrigRecExample.InDetTrigConfigRecLoadTools import InDetTrigTRTDriftCircleCut
-
-  # NB: This DriftCircleCutTool should not be used here, we want to use the AmbiScoringTool 
-  #     without using the DriftCircleCutTool at all, but unfortunatly, the AmbiScoringTool
-  #     needs a DriftCircleCut tool - either the one we pass in, or the default offline 
-  #     tool. 
-  #     In both of these cases, using the tool might be problematic, so we hope to 
-  #     be able to disable it in the tool completely at some point in the near future 
-  from InDetTrackScoringTools.InDetTrackScoringToolsConf import InDet__InDetAmbiScoringTool
   from InDetRecExample.TrackingCommon import setDefaults
+
   kwargs = {}
 
-  kwargs = setDefaults(kwargs, name = '%sScoringTool_%s'%( prefix, config.input_name),
-                                              Extrapolator = InDetTrigExtrapolator,
-                                              minPt        = config.pTmin, 
-                                              doEmCaloSeed = False,
-                                              SummaryTool  = summaryTool,
-                                              minTRTonTrk        = 0,
-                                              DriftCircleCutTool = InDetTrigTRTDriftCircleCut)
+  if SiOnly:
+      scoringToolName = '%sScoringTool_%s'%( prefix, config.input_name)
+      InDetTrigTRTDriftCircleCut = None
+  else:
+      scoringToolName = '%sExtScoringTool_%s'%( prefix, config.input_name)
+      from InDetTrigRecExample.InDetTrigConfigRecLoadTools import InDetTrigTRTDriftCircleCut
 
+  kwargs = setDefaults(kwargs, 
+                       name = scoringToolName,
+                       minPt        = config.pTmin, 
+                       doEmCaloSeed = False,
+                       SummaryTool  = summaryTool,
+                       minTRTonTrk        = 0,
+                       DriftCircleCutTool = InDetTrigTRTDriftCircleCut)
+  
   if(config.maxRPhiImpact is not None):
     kwargs = setDefaults(kwargs, maxRPhiImp = config.maxRPhiImpact)
 
@@ -298,11 +294,22 @@ def scoringTool_builder( signature, config, summaryTool, prefix=None ):
   if(config.minTRTonTrk is not None):
     kwargs = setDefaults(kwargs, minTRTonTrk = config.minTRTonTrk)
 
-  scoringTool =  InDet__InDetAmbiScoringTool(**kwargs)
-                                                                                          
-  log.info( scoringTool )
+  from InDetConfig.InDetTrackScoringToolsConfig import InDetAmbiScoringToolCfg
+  from AthenaConfiguration.ComponentAccumulator import CAtoGlobalWrapper
+  from AthenaConfiguration.ComponentAccumulator import conf2toConfigurable
+  from AthenaConfiguration.AllConfigFlags import ConfigFlags
 
+  flags = ConfigFlags.cloneAndReplace("InDet.Tracking.ActivePass", "Trigger.InDetTracking."+config.name)
+
+  from AthenaCommon.Configurable import ConfigurableRun3Behavior
+
+  with ConfigurableRun3Behavior():
+    ca = CAtoGlobalWrapper(InDetAmbiScoringToolCfg, flags, **kwargs)
+    sct = ca.popPrivateTools()
+
+  scoringTool = conf2toConfigurable(sct)
   from AthenaCommon.AppMgr import ToolSvc
+  log.info(scoringTool)
   ToolSvc += scoringTool
 
   return scoringTool
@@ -530,37 +537,8 @@ def trtExtensionProcessor_builder( signature, config, summaryTool, inputTracks, 
     # TODO: do I need a new fitter for this? Or can I use the same one?
     # TODO In Run2 option for cosmic
     # InDetTrigExtensionFitter = InDetTrigTrackFitter
-    from InDetTrigRecExample.ConfiguredNewTrackingTrigCuts import EFIDTrackingCuts
 
-    cutValues = EFIDTrackingCuts
-
-    if(config.isLRT):
-        from InDetTrigRecExample.ConfiguredNewTrackingTrigCuts import EFIDTrackingCutLRT
-        cutValues = EFIDTrackingCutLRT
-    
-    from InDetTrigRecExample.InDetTrigConfigRecLoadTools import  InDetTrigExtrapolator
-    
-    from InDetTrackScoringTools.InDetTrackScoringToolsConf import InDet__InDetAmbiScoringTool
-    from InDetTrigRecExample.InDetTrigConfigRecLoadTools import InDetTrigTRTDriftCircleCut
-
-    scoringTool = InDet__InDetAmbiScoringTool(name               = '%sExtScoringTool%s'%(prefix, signature),
-                                              Extrapolator       = InDetTrigExtrapolator,
-                                              SummaryTool        = summaryTool,
-                                              useAmbigFcn        = True,     # this is NewTracking  
-                                              maxRPhiImp         = cutValues.maxPrimaryImpact(),
-                                              maxZImp            = cutValues.maxZImpact(),
-                                              maxEta             = cutValues.maxEta(),
-                                              minSiClusters      = cutValues.minClusters(),
-                                              maxSiHoles         = cutValues.maxHoles(),
-                                              maxDoubleHoles     = cutValues.maxDoubleHoles(),
-                                              usePixel           = cutValues.usePixel(),
-                                              useSCT             = cutValues.useSCT(),
-                                              doEmCaloSeed       = False,
-                                              minTRTonTrk        = cutValues.minTRTonTrk(),
-                                              minTRTPrecisionFraction = cutValues.minTRTPrecFrac(),
-                                              #useSigmaChi2   = False # tuning from Thijs
-                                              DriftCircleCutTool = InDetTrigTRTDriftCircleCut,
-                                              minPt              = config.pTmin )
+    scoringTool = scoringTool_builder( signature, config, summaryTool=ToolSvc.InDetTrigTrackSummaryTool, prefix=prefix, SiOnly=False )
     ToolSvc += scoringTool
 
 

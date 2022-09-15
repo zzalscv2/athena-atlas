@@ -25,19 +25,23 @@ def InDetAmbiScoringToolBaseCfg(flags, name='InDetAmbiScoringTool', **kwargs) :
         from InDetConfig.InDetTrackSelectorToolConfig import InDetTRTDriftCircleCutToolCfg
         kwargs.setdefault("DriftCircleCutTool", acc.popToolsAndMerge(InDetTRTDriftCircleCutToolCfg(flags)))
 
-    have_calo_rois = flags.InDet.Tracking.doBremRecovery and flags.InDet.Tracking.doCaloSeededBrem and flags.Detector.EnableCalo
+    have_calo_rois = flags.InDet.Tracking.doBremRecovery and flags.InDet.Tracking.doCaloSeededBrem \
+        and flags.Detector.EnableCalo and kwargs.get("doEmCaloSeed",True)
+    
     if have_calo_rois:
         from InDetConfig.InDetCaloClusterROISelectorConfig import CaloClusterROIPhiRZContainerMakerCfg
         acc.merge(CaloClusterROIPhiRZContainerMakerCfg(flags))
         kwargs.setdefault("EMROIPhiRZContainer", "InDetCaloClusterROIPhiRZ5GeV")
 
+    if 'doEmCaloSeed' not in kwargs:
+        kwargs.setdefault("doEmCaloSeed", have_calo_rois )
+        
     kwargs.setdefault("useAmbigFcn", True )
     kwargs.setdefault("useTRT_AmbigFcn", False )
     kwargs.setdefault("maxZImp", flags.InDet.Tracking.ActivePass.maxZImpact )
     kwargs.setdefault("maxEta", flags.InDet.Tracking.ActivePass.maxEta )
     kwargs.setdefault("usePixel", flags.InDet.Tracking.ActivePass.usePixel )
     kwargs.setdefault("useSCT", flags.InDet.Tracking.ActivePass.useSCT )
-    kwargs.setdefault("doEmCaloSeed", have_calo_rois )
 
     acc.setPrivateTools(CompFactory.InDet.InDetAmbiScoringTool(name, **kwargs))
     return acc

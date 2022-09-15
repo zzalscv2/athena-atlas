@@ -1,12 +1,6 @@
 # Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
 import AthenaCommon.SystemOfUnits as Units
-from AthenaConfiguration.AthConfigFlags import AthConfigFlags
 from InDetConfig.TrackingPassFlags import createTrackingPassFlags
-
-# for the time when the two config systems coexist we reuse -flags 
-from TrigInDetConfig.ConfigSettings import (
-    _ConfigSettings_electron, _ConfigSettings_muon, _ConfigSettings_muonLRT, _ConfigSettings_fullScan, _ConfigSettings_muonIso, _ConfigSettings_tau, _ConfigSettings_tauCore, _ConfigSettings_tauIso
-)
 
 
 def __flagsFromConfigSettings(settings):
@@ -15,7 +9,8 @@ def __flagsFromConfigSettings(settings):
         setting = setting.lstrip("_")
         if setting in flags._flagdict:
             if value is not None: 
-                flags._flagdict[setting] = value
+                #flags._flagdict[setting] = value
+                flags._flagdict[setting].set(value)
         else:
             if value is None: 
                 flags.addFlag(setting, lambda pf: None)
@@ -32,45 +27,24 @@ def __flagsFromConfigSettings(settings):
     flags.minPT = flags.pTmin # hack to sync pT threshold used in offline and trigger
     return flags
 
-def __electronFlags():
-    return __flagsFromConfigSettings(_ConfigSettings_electron())
-
-def __muonFlags():
-    return __flagsFromConfigSettings(_ConfigSettings_muon())
-
-def __muonIsoFlags():
-    return __flagsFromConfigSettings(_ConfigSettings_muonIso())
-
-def _muonLRTFlags():
-    return __flagsFromConfigSettings(_ConfigSettings_muonLRT())
-
-def __tauFlags():
-    return __flagsFromConfigSettings(_ConfigSettings_tau())
-
-def __tauCoreFlags():
-    return __flagsFromConfigSettings(_ConfigSettings_tauCore())
-
-def __tauIsoFlags():
-    return __flagsFromConfigSettings(_ConfigSettings_tauIso())
-
-def __tauIsoBDTFlags():
-    return __flagsFromConfigSettings(_ConfigSettings_tauIso())
-
-def __jetFlags():
-    return __flagsFromConfigSettings(_ConfigSettings_fullScan())
 
 def createTrigTrackingPassFlags():
+    
+    #hide instantiation of flags in a function that can be consumed by addFlagsCategory
+    def flagsFactory(settings):
+        def hidearg():
+            return __flagsFromConfigSettings(settings)
+        return hidearg
+
+    from AthenaConfiguration.AthConfigFlags import AthConfigFlags
     flags = AthConfigFlags()
-    flags.addFlagsCategory('Trigger.InDetTracking.Electron', __electronFlags, prefix=True)
-    flags.addFlagsCategory('Trigger.InDetTracking.Muon', __muonFlags, prefix=True)
-    flags.addFlagsCategory('Trigger.InDetTracking.MuonIso', __muonIsoFlags, prefix=True)
-    flags.addFlagsCategory('Trigger.InDetTracking.MuonFS', __muonFlags, prefix=True)
-    flags.addFlagsCategory('Trigger.InDetTracking.MuonLRT', _muonLRTFlags, prefix=True)
-    flags.addFlagsCategory('Trigger.InDetTracking.Tau', __tauFlags, prefix=True)
-    flags.addFlagsCategory('Trigger.InDetTracking.TauCore', __tauCoreFlags, prefix=True)
-    flags.addFlagsCategory('Trigger.InDetTracking.TauIso', __tauIsoFlags, prefix=True)
-    flags.addFlagsCategory('Trigger.InDetTracking.TauIsoBDT', __tauIsoBDTFlags, prefix=True)
-    flags.addFlagsCategory('Trigger.InDetTracking.jet', __jetFlags, prefix=True)
+    from TrigInDetConfig.ConfigSettings import ConfigSettingsInstances,getInDetTrigConfig
+
+    for i in ConfigSettingsInstances.keys():
+      category = f'Trigger.InDetTracking.{i}'
+      factory = flagsFactory(getInDetTrigConfig(i))     
+      flags.addFlagsCategory(category,factory,prefix=True)
+
     return flags
 
 
