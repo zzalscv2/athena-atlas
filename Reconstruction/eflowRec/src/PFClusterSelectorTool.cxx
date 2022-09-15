@@ -56,26 +56,11 @@ PFClusterSelectorTool::execute(
       std::map<IdentifierHash,double> cellsWeightMap;
       retrieveLCCalCellWeight(caloClustersReadHandle->at(iCluster)->e(), iCluster, cellsWeightMap, *calclusters,**caloMgrHandle);
 
-      if (msgLvl(MSG::DEBUG)) {
-        //zhangr
-        std::map<IdentifierHash, double>::iterator it = cellsWeightMap.begin();
-        for (; it != cellsWeightMap.end(); ++it) {
-	  ATH_MSG_DEBUG("zhangrui eflowPreparation " << iCluster << "/" << nClusters << ": e="
-                    << caloClustersReadHandle->at(iCluster)->e() << " (" << it->first << "  "
-			<< it->second << ")");
-        }
-      }
-
       thisEFRecCluster->setCellsWeight(cellsWeightMap);
     }
 
     thisEFRecCluster->setClusterId(iCluster);
     theEFlowRecClusterContainer.push_back(std::move(thisEFRecCluster));
-    
-    if (msgLvl(MSG::DEBUG)) {
-      const xAOD::CaloCluster* thisCluster = caloClustersReadHandle->at(iCluster);
-      ATH_MSG_DEBUG("eflowPreparation clus = " << thisCluster->eta() << " " << thisCluster->phi() << " " << thisCluster->e()/cosh(thisCluster->eta()));
-    }
   }
   
   return StatusCode::SUCCESS;
