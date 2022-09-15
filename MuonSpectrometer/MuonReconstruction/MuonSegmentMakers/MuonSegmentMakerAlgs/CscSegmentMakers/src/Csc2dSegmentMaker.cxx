@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2020 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "Csc2dSegmentMaker.h"
@@ -7,7 +7,6 @@
 #include <cmath>
 #include <sstream>
 
-#include "MuonCondInterface/ICSCConditionsSvc.h"
 #include "MuonPrepRawData/CscPrepDataContainer.h"
 #include "MuonPrepRawData/CscStripPrepDataContainer.h"
 #include "MuonRIO_OnTrack/CscClusterOnTrack.h"
