@@ -2484,6 +2484,14 @@ def setupMenu():
         ChainProp(name='HLT_idcalib_trk9_IDCalibPEB_L14jJ40',  stream=['IDCalib'], groups=SupportPhIGroup+['PS:Online','RATE:Calibration','BW:Detector'],  l1SeedThresholds=['FSNOSEED']),
 
         ChainProp(name='HLT_noalg_L1NSW_MONITOR', l1SeedThresholds=['FSNOSEED'], stream=['NSWTriggerMonitor'], groups=['PS:Online']+SupportGroup),
+
+        # Lumi items for vdM programme
+        ChainProp(name='HLT_noalg_LumiPEB_L1RD0_BGRP15', l1SeedThresholds=['FSNOSEED'], stream=['PixelBeam'], groups=['PS:Online']+SupportGroup),
+        ChainProp(name='HLT_noalg_vdm_LumiPEB_L1RD0_BGRP10', l1SeedThresholds=['FSNOSEED'], stream=['VdM'], groups=['PS:Online']+SupportGroup),
+        ChainProp(name='HLT_noalg_vdm_LumiPEB_L1MBTS_2_BGRP11', l1SeedThresholds=['FSNOSEED'], stream=['VdM'], groups=['PS:Online']+SupportGroup),
+        ChainProp(name='HLT_noalg_vdm_LumiPEB_L1MBTS_1_1_BGRP11', l1SeedThresholds=['FSNOSEED'], stream=['VdM'], groups=['PS:Online']+SupportGroup),
+        ChainProp(name='HLT_noalg_vdm_LumiPEB_L1LUCID_A_BGRP11', l1SeedThresholds=['FSNOSEED'], stream=['VdM'], groups=['PS:Online']+SupportGroup),
+        ChainProp(name='HLT_noalg_vdm_LumiPEB_L1LUCID_C_BGRP11', l1SeedThresholds=['FSNOSEED'], stream=['VdM'], groups=['PS:Online']+SupportGroup),
     ]
 
     chains['UnconventionalTracking'] += [
