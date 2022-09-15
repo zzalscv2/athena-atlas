@@ -167,9 +167,8 @@ basic_copycmd="cp -f -L -R"
 basic_linkcmd="ln -s -f -n"
 copycmd=${basic_copycmd}
 
-# Add 'exit' here to make script interruptable; do not trap signal 0.
-if [ -z "$TMPDIR" ]; then tempfile="/tmp/getfile_$$"
-else tempfile="$TMPDIR/getfile_$$"; fi
+# Add 'exit' here to make script clean up on interrupt; do not trap signal 0.
+tempfile=$(mktemp -u)
 
 trap '/bin/rm -f ${tempfile}; exit 1' 1 2 15
 /bin/rm -f ${tempfile}
