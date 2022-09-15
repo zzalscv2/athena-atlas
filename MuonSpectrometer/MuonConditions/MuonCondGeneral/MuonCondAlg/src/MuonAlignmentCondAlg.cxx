@@ -18,6 +18,7 @@
 #include "MuonReadoutGeometry/MuonDetectorManager.h"
 #include "PathResolver/PathResolver.h"
 #include "SGTools/TransientAddress.h"
+#include "boost/algorithm/string/predicate.hpp"
 
 MuonAlignmentCondAlg::MuonAlignmentCondAlg(const std::string& name, ISvcLocator* pSvcLocator) :
     AthAlgorithm(name, pSvcLocator) {
@@ -1149,7 +1150,7 @@ void MuonAlignmentCondAlg::setAsBuiltFromAscii(MdtAsBuiltMapContainer* writeCdo)
     xPar.isNew(true);
     int count = 0;
     while (getline(fin, line)) {
-        if (line.find("Corr:") == 0) {
+        if (boost::starts_with (line, "Corr:")) {
             if (!xPar.setFromAscii(line)) {
                 ATH_MSG_ERROR("Unable to parse AsBuilt params from Ascii line: " << line);
             } else {
