@@ -494,10 +494,11 @@ namespace ST {
     std::string m_ZtagConfig;
     std::string m_WZTaggerCalibArea;
     std::string m_ToptagConfig;
-    std::string m_TopTaggerCalibArea;
     std::string m_WTagUncConfig;
     std::string m_ZTagUncConfig;
     std::string m_TopTagUncConfig;
+    std::string m_JetTruthLabelName;
+    std::string m_TopTaggerCalibArea;
 
 
     bool m_tool_init;
@@ -755,6 +756,8 @@ namespace ST {
     asg::AnaToolHandle<ICPJetUncertaintiesTool> m_WTagjetUncertaintiesTool;
     asg::AnaToolHandle<ICPJetUncertaintiesTool> m_ZTagjetUncertaintiesTool;
     asg::AnaToolHandle<ICPJetUncertaintiesTool> m_TopTagjetUncertaintiesTool;
+
+    SG::ReadDecorHandleKey<xAOD::JetContainer> m_label_truthKey;
 
     //
     std::string m_jesConfig;
