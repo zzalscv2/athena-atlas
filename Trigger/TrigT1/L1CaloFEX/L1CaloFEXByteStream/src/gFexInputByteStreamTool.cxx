@@ -809,7 +809,7 @@ int gFexInputByteStreamTool::crc9d32(std::array<int, 6> inWords,int numWords,int
     crc_r.fill(1);
 
     int crc_word = 0x000; 
-    int mask = 0x00000001;
+    unsigned int mask = 0x00000001;
     
     for(int k =0; k < numWords; k++) {
         if( reverse == 1 ) {
