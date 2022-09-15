@@ -180,7 +180,7 @@ def addValgrindArguments(parser):
         metavar = 'OPT1,OPT2,OPT3', 
         help = 'Extra options passed to Valgrind when running Athena. ' +
         'Options starting with "-" must be given as ' +
-        '--valgrindopts=\'--opt1=foo,--opt2=bar,...\''
+        '--valgrindExtraOpts=\'--opt1=foo,--opt2=bar,...\''
     )
 
 ## @brief Options related to the setup of the ATLAS detector (used in simulation and digitisation
