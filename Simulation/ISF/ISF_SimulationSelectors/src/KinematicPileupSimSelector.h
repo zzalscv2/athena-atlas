@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2017 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
 */
 ///////////////////////////////////////////////////////////////////
 // KinematicPileupSimSelector.h, (c) ATLAS Detector software
@@ -35,14 +35,13 @@ namespace ISF {
 
 
     // Athena algtool's Hooks
-    StatusCode  initialize() override;
-    StatusCode  finalize() override;
+    virtual StatusCode  initialize() override;
+    virtual StatusCode  finalize() override;
 
     /** check whether given particle passes all cuts -> will be used for routing decision*/
     inline virtual bool passSelectorCuts(const ISFParticle& particle) const override final;
 
   private:
-    mutable Barcode::BitCalculator m_bitcalculator;
 
     std::vector<int> m_pileupbcid; // vector of BCIDs to select
 
