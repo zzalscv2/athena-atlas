@@ -497,10 +497,9 @@ CascadeCollections += BPHY22MuLambdaC.CascadeVertexCollections
 ## 6/ select the event. We only want to keep events that
 ##    contain certain vertices which passed certain selection.
 if not isSimulation: #Only Skim Data
-   from DerivationFrameworkTools.DerivationFrameworkToolsConf import DerivationFramework__xAODStringSkimmingTool
-   BPHY22_SelectBMuDxEvent = DerivationFramework__xAODStringSkimmingTool(
-     name = "BPHY22_SelectBMuDxEvent",
-     expression = "(count(BMuDpstCascadeSV1.x > -999) + count(BMuDsCascadeSV1.x > -999) + count(BMuDpCascadeSV1.x > -999) + count(BMuLambdaCCascadeSV1.x > -999) ) > 0")
+   from DerivationFrameworkBPhys.DerivationFrameworkBPhysConf import DerivationFramework__AnyVertexSkimmingTool
+   BPHY22_SelectBMuDxEvent = DerivationFramework__AnyVertexSkimmingTool("BPHY22_AnyVertexSkimmingTool", UseHandles = True,
+                                                                        VertexContainerNames =CascadeCollections )
    
    ToolSvc += BPHY22_SelectBMuDxEvent
    print      (BPHY22_SelectBMuDxEvent)
