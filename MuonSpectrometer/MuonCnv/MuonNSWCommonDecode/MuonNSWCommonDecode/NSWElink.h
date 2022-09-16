@@ -6,7 +6,6 @@
 
 #include <stdint.h>
 #include <vector>
-#include <exception>
 
 #include "MuonNSWCommonDecode/NSWDecodeBitmaps.h"
 #include "MuonNSWCommonDecode/NSWDecodeHelper.h"
@@ -17,32 +16,6 @@ namespace Muon
   {
     class VMMChannel;
     class NSWResourceId;
-
-    class NSWElinkException: public std::exception
-    {
-     public:
-      explicit NSWElinkException (const char *s)
-	: m_description (s) {};
-
-      virtual const char *what () const throw () {return m_description.c_str ();};
-
-     private:
-      std::string m_description;
-    };
-
-    class NSWElinkROCHeaderException: public NSWElinkException
-    {
-     public:
-      explicit NSWElinkROCHeaderException (const char *s)
-	: NSWElinkException (s) {};
-    };
-
-    class NSWElinkFelixHeaderException: public NSWElinkException
-    {
-     public:
-      explicit NSWElinkFelixHeaderException (const char *s)
-	: NSWElinkException (s) {};
-    };
 
     class NSWElink
     {
