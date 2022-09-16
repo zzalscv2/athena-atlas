@@ -48,9 +48,8 @@ SiHitCollection* SiHitCollectionCnv::createTransient() {
       size_t size = oldColl->size();
       trans_cont=new SiHitCollection("DefaultCollectionName",size);
       //do the copy
-      AthenaHitsVector<SiHit>::const_iterator it = oldColl->begin(), itEnd=oldColl->end();
-      for (;it!=itEnd;++it)  {
-        trans_cont->push_back(**it);
+      for (SiHit* hit : *oldColl) {
+        trans_cont->push_back(*hit);
       }
       delete oldColl;
     }  else {
