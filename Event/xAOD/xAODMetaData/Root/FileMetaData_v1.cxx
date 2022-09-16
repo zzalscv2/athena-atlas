@@ -21,7 +21,7 @@ namespace xAOD {
    { }
 
 
-   bool FileMetaData_v1::compareWith( const FileMetaData_v1& rhs, const std::set<std::string> ignore ) const
+   bool FileMetaData_v1::compareWith( const FileMetaData_v1& rhs, const std::set<std::string>& ignore ) const
    {
       // Get the variable types from both objects:
       SG::auxid_set_t auxids1 = this->getAuxIDs();

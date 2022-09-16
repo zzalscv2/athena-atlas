@@ -45,7 +45,7 @@ namespace xAOD {
       bool operator!=( const FileMetaData_v1& rhs ) const;
 
       /// Compare this FMD object with another, optionally ignoring some attributes
-      bool compareWith(const FileMetaData_v1& rhs, const std::set<std::string> ignore ) const;
+      bool compareWith(const FileMetaData_v1& rhs, const std::set<std::string>& ignore ) const;
 
       /// @}
 
