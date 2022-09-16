@@ -142,17 +142,27 @@ bool ISF::GenParticleSimWhiteList::pass(HepMC::ConstGenParticlePtr particle , st
   passFilter = passFilter && particle->status()<3;
   // Test all daughter particles
   if (particle->end_vertex() && m_qs && passFilter){
-    // Break loops
-    if ( std::find( used_vertices.begin() , used_vertices.end() , HepMC::barcode(particle->end_vertex()) )==used_vertices.end() ){
-      used_vertices.push_back( HepMC::barcode(particle->end_vertex()) );
-      for (auto pit: particle->end_vertex()->particles_out()){
-        passFilter = passFilter && pass( pit , used_vertices );
-        if (!passFilter) {
-          ATH_MSG_VERBOSE( "Daughter particle " << pit << " does not pass." );
-          break;
-        }
-      } // Loop over daughters
-    } // Break loops
+    // Primarily interested in passing particles decaying outside
+    // m_minDecayRadiusQS (nomimally the inner radius of the
+    // beampipe). However, it is also interesting to pass particles
+    // which start outside m_minDecayRadiusQS, but decay inside it.
+    passFilter = passFilter && ( (m_minDecayRadiusQS < particle->end_vertex()->position().perp()) || (m_minDecayRadiusQS < particle->production_vertex()->position().perp()) );
+    if (passFilter) {
+      // Break loops
+      if ( std::find( used_vertices.begin() , used_vertices.end() , HepMC::barcode(particle->end_vertex()) )==used_vertices.end() ){
+        used_vertices.push_back( HepMC::barcode(particle->end_vertex()) );
+        for (auto pit: particle->end_vertex()->particles_out()){
+          passFilter = passFilter && pass( pit , used_vertices );
+          if (!passFilter) {
+            ATH_MSG_VERBOSE( "Daughter particle " << pit << " does not pass." );
+            break;
+          }
+        } // Loop over daughters
+      } // Break loops
+    } // particle decayed before the min radius to be considered for simulation
+    else {
+      ATH_MSG_VERBOSE( "Particle " << particle << " was produced and decayed within a radius of " << m_minDecayRadiusQS << " mm.");
+    }
   } // particle had daughters
   else if (!particle->end_vertex() && !passFilter && particle->status()<3) { // no daughters... No end vertex... Check if this isn't trouble
     ATH_MSG_ERROR( "Found a particle with no end vertex that does not appear in the white list." );
