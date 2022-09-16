@@ -42,16 +42,20 @@ struct Params
   bool printout {false};
   bool tree_view {true};
   bool flat_view {true};
+  bool print_raw {false};
   unsigned int printout_level {0};
+  unsigned int max_events {0};
   std::vector <std::string> file_names;
 };
 
 void test_nsw_common_decoder_help (char *progname)
 {
   std::cout << "Usage: " << progname << " [-v] [-t] [-f] [-h] file1, file2, ..." << std::endl;
-  std::cout << "\t\tMultiple [-v] options increase printout detail level" << std::endl;
+  std::cout << "\t\t[-n events] maximum number of events to read (default = all)" << std::endl;
+  std::cout << "\t\t[-r] print raw fragments" << std::endl;
   std::cout << "\t\t[-t] only shows hits taken from tree view of decoded data" << std::endl;
   std::cout << "\t\t[-f] only shows hits taken from flat view of decoded data" << std::endl;
+  std::cout << "\t\tMultiple [-v] options increase printout detail level" << std::endl;
 }
 
 int test_nsw_common_decoder_opt (int argc, char **argv, Params& params)
@@ -68,11 +72,17 @@ int test_nsw_common_decoder_opt (int argc, char **argv, Params& params)
 	  params.printout = true;
           ++params.printout_level;
 	  break;
+        case 'r':
+	  params.print_raw = true;
+	  break;
         case 't':
           params.flat_view = false;
           break;
         case 'f':
           params.tree_view = false;
+          break;
+        case 'n':
+          params.max_events = static_cast <unsigned int> (atoi (argv[++i]));
           break;
         case 'h':
 	  test_nsw_common_decoder_help (argv[0]);
@@ -152,6 +162,29 @@ int test_nsw_common_decoder_event (eformat::read::FullEventFragment &f, const Pa
     {
       if (params.printout_level > 2)
         std::cout << "NSW fragment found: detector ID = 0x" << std::hex << s << std::dec << " length " << r->rod_ndata () << std::endl;
+
+      // Print out raw fragment
+
+      if (params.print_raw)
+      {
+	std::cout << "ROD fragment size in words: Total: " << r->rod_fragment_size_word ()
+                  << " Header: " << r->rod_header_size_word () << " Trailer: " << r->rod_trailer_size_word () << std::endl;
+	std::cout << "ROD source ID: 0x" << std::hex << r->rod_source_id ()
+		  << " ROD L1 ID: " << r->rod_lvl1_id () << std::dec << std::endl;
+	std::cout << "Data words: " << r->rod_ndata () << std::endl;
+	std::cout << std::hex;
+
+	const uint32_t *bs = r->rod_data ();
+
+	for (unsigned int i = 0; i < r->rod_ndata (); ++i)
+	{
+	  std::cout << "\t" << bs[i];
+	  if (i % 4 == 3)
+	    std::cout << std::endl;
+	}
+
+	std::cout << std::dec;
+      }
 
       // Decode the ROB fragment (including sanity check)
 
@@ -358,7 +391,7 @@ int test_nsw_common_decoder_loop (const Params& params)
       return ERR_GENERIC;
     }
 
-    while (!reader->endOfFile ())
+    while (!reader->endOfFile () && (params.max_events == 0 || tot_nev < params.max_events))
     {
       try
       {
@@ -384,6 +417,7 @@ int test_nsw_common_decoder_loop (const Params& params)
 
         ++tot_nev;
       }
+
       catch (ers::Issue &ex)
       {
         ers::error (ers::File (ERS_HERE, data_file_name.c_str (), ex));

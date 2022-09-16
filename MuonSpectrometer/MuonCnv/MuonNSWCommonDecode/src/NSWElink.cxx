@@ -14,10 +14,12 @@
 #include "MuonNSWCommonDecode/VMMChannel.h"
 #include "MuonNSWCommonDecode/NSWResourceId.h"
 
+#include "MuonNSWCommonDecode/NSWDecodeExceptions.h"
+
 Muon::nsw::NSWElink::NSWElink (const uint32_t *bs, const uint32_t remaining)
   : m_wordCount (0)
 {
-  m_rocId=0; // Fix coverity warning
+  m_rocId = 0; // Fix coverity warning
 
   // Felix header (2 words)
   // Packet length includes Felix header
@@ -30,7 +32,7 @@ Muon::nsw::NSWElink::NSWElink (const uint32_t *bs, const uint32_t remaining)
   {
     std::ostringstream s;
     s << "Packet status in FELIX header 0x" << std::hex << m_packet_status << std::dec;
-    Muon::nsw::NSWElinkFelixHeaderException e (s.str ().c_str ());
+    Muon::nsw::MuonNSWCommonDecoder::NSWElinkFelixHeaderException e (ERS_HERE, s.str ());
     throw e;
   }
 
@@ -38,7 +40,7 @@ Muon::nsw::NSWElink::NSWElink (const uint32_t *bs, const uint32_t remaining)
   {
     std::ostringstream s;
     s << "Packet length in FELIX header " << packet_nbytes << " is larger than available data";
-    Muon::nsw::NSWElinkFelixHeaderException e (s.str ().c_str ());
+    Muon::nsw::MuonNSWCommonDecoder::NSWElinkFelixHeaderException e (ERS_HERE, s.str ());
     throw e;
   }
 
@@ -51,7 +53,7 @@ Muon::nsw::NSWElink::NSWElink (const uint32_t *bs, const uint32_t remaining)
 
   ERS_DEBUG (2, "==============================================================");
   ERS_DEBUG (2, "FELIX HEADER: LENGTH (BYTES) = " << packet_nbytes <<
-	     " | STATUS = " << m_packet_status << " | ELINK ID = 0x" << std::hex << m_elinkId << std::dec);
+	     " | STATUS = " << m_packet_status << " | RESOURCE ID = 0x" << std::hex << m_elinkWord << std::dec);
 
   if ((m_isNull = Muon::nsw::helper::get_bits (word, Muon::nsw::bitMaskSRocNULL, Muon::nsw::bitPosSRocNULL)) == true)
   {
@@ -65,6 +67,10 @@ Muon::nsw::NSWElink::NSWElink (const uint32_t *bs, const uint32_t remaining)
 
     if (packet_nbytes != s_null_packet_length)
     {
+      std::ostringstream s;
+      s << "Additional data detected in packet flagged as null " << packet_nbytes;
+      Muon::nsw::MuonNSWCommonDecoder::NSWElinkROCHeaderException e (ERS_HERE, s.str ());
+
       // Additional words are ignored
 
       m_wordCount = packet_nbytes / sizeof (uint32_t);
@@ -79,7 +85,7 @@ Muon::nsw::NSWElink::NSWElink (const uint32_t *bs, const uint32_t remaining)
     {
       std::ostringstream s;
       s << "Packet length in FELIX header " << packet_nbytes << " and null event flag in packet are inconsistent";
-      Muon::nsw::NSWElinkROCHeaderException e (s.str ().c_str ());
+      Muon::nsw::MuonNSWCommonDecoder::NSWElinkROCHeaderException e (ERS_HERE, s.str ());
       throw e;
     }
 
@@ -98,7 +104,22 @@ Muon::nsw::NSWElink::NSWElink (const uint32_t *bs, const uint32_t remaining)
     // Set hit bytes to correspond to the length in Flx header
     // Everything should be re-aligned in the swROD, though
 
-    unsigned int hit_size  = m_noTdc ? 3 : 4; // set hit bytes to correspond to the length in Flx header
+    // const unsigned int hit_size  = m_noTdc ? 3 : 4; // set hit bytes to correspond to the length in Flx header
+
+    // Hit size should always be 4, since (at least for run 3) the detector is always configured to get the TDC info
+    // Please keep the previous commented out line. Having noTdc = true is a legal condition, in principle,
+    // but given the actual configuration of the detector, that should never happen and a crash is provoked when it does if
+    // it is taken into account. I (EP) added a warning exception to report that condition.
+
+    static const unsigned int hit_size = 4;
+
+    if (m_noTdc)
+    {
+      std::ostringstream s;
+      s << "Hit size is not compatible with flags in ROC header, elink ID = " << m_elinkWord << " L1 ID = " << m_l1Id;
+      Muon::nsw::MuonNSWCommonDecoder::NSWElinkROCHeaderException e (ERS_HERE, s.str ());
+      ers::warning (e);
+    }
 
     // Two 32-bits words for Felix header, 1 word for ROC header, 1 word for the ROC trailer
 
@@ -127,8 +148,8 @@ Muon::nsw::NSWElink::NSWElink (const uint32_t *bs, const uint32_t remaining)
     m_tout       = Muon::nsw::helper::get_bits (word, Muon::nsw::bitMaskTrailTO, Muon::nsw::bitPosTrailTO);
     m_extended   = Muon::nsw::helper::get_bits (word, Muon::nsw::bitMaskTrailEXTENDED, Muon::nsw::bitPosTrailEXTENDED);
 
-    ERS_DEBUG (2, "ROC TRAILER: EXTENDED = " << m_extended << " | TIMEOUT = " << m_tout <<
-	       " | FLAGMISS = " << m_flagMiss << " | L0ID = " << m_l0Id << " | NHITS = " << m_nhits <<
+    ERS_DEBUG (2, "ROC TRAILER: EXTENDED = " << m_extended << " | TIMEOUT = " << m_tout << std::hex <<
+	       " | FLAGMISS = 0x" << m_flagMiss << std::dec << " | L0ID = " << m_l0Id << " | NHITS = " << m_nhits <<
 	       " | CHECKSUM = 0x" << std::hex << static_cast <unsigned int> (m_checksum) << std::dec);             
     ERS_DEBUG (2, "PACKET CHECKSUM = " << m_running_checksum);
   }
