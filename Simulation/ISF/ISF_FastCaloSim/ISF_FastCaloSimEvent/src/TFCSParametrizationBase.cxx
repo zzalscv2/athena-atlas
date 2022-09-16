@@ -96,11 +96,18 @@ void TFCSParametrizationBase::Print(Option_t *option) const
 
 void TFCSParametrizationBase::DoCleanup()
 {
+  std::scoped_lock lock(s_cleanup_mutex);
   //Do cleanup only at the end of read/write operations
   for(auto ptr:s_cleanup_list) if(ptr) {
     delete ptr;
   }  
   s_cleanup_list.resize(0);
+}
+
+void TFCSParametrizationBase::AddToCleanup(const std::vector<TFCSParametrizationBase*>& garbage)
+{
+  std::scoped_lock lock(s_cleanup_mutex);
+  s_cleanup_list.insert(s_cleanup_list.end(), garbage.begin(), garbage.end());
 }
 
 void TFCSParametrizationBase::FindDuplicates(FindDuplicateClasses_t& dupclasses)

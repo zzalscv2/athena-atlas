@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2020 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "ISF_FastCaloSimEvent/TFCSParametrizationChain.h"
@@ -250,6 +250,7 @@ void TFCSParametrizationChain::Streamer(TBuffer &R__b)
       if(R__n) {
         TFCSParametrizationChain::Chain_t::iterator R__k;
         int R__i=0;
+        std::vector<TFCSParametrizationBase*> cleanup_list;
         for (R__k = R__stl.begin(); R__k != R__stl.end(); ++R__k) {
           TFCSParametrizationBase* R__t = *R__k;
           TFCSParametrizationBase* new_R__t=nullptr;
@@ -261,10 +262,12 @@ void TFCSParametrizationChain::Streamer(TBuffer &R__b)
           R__b << R__t;
 
           //delete new_R__t only after the end of read/write operations by calling TFCSParametrizationBase::DoCleanup();
-          if(new_R__t) s_cleanup_list.push_back(new_R__t);
+          if(new_R__t) cleanup_list.push_back(new_R__t);
 
           ++R__i;
         }
+        //transfer to global (locked) garbage collector
+        AddToCleanup(cleanup_list);
       }
       R__b.SetByteCount(R__c, kTRUE);
    }
