@@ -82,6 +82,7 @@ namespace InDet {
         Amg::MatrixX   cov(3,3);
         cov<<B0[0]*Ax[0]+B0[1]*Ax[1], C01                    , C02                    ,
              C01                    , B1[0]*Ay[0]+B1[1]*Ay[1], C12                    ,
+        // cppcheck-suppress constStatement
              C02                    , C12                    , B2[0]*Az[0]+B2[1]*Az[1];
              
         spacepointCollection->push_back( new InDet::PixelSpacePoint(idHash,c,pos,cov) );
