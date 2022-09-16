@@ -13,9 +13,6 @@
 #include "TString.h"
 #endif
 
-#ifndef __FastCaloSimStandAlone__
-#include "AthenaKernel/getMessageSvc.h"
-#endif
 
 //=============================================
 //======= TFCSParametrizationBase =========
@@ -35,8 +32,6 @@ TFCSParametrizationBase::TFCSParametrizationBase(const char* name, const char* t
 TFCSParametrizationBase::TFCSParametrizationBase(const char* name, const char* title)
   : TNamed(name,title)
 {
-  // Initialize only in constructor to make sure the needed services are ready
-  if (!s_msg) s_msg = std::make_unique<MsgStream>(Athena::getMessageSvc(), "FastCaloSimParametrization");
 }
 #endif
 

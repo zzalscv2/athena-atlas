@@ -61,6 +61,9 @@ class TFCSExtrapolationState;
 #else
   #include "GaudiKernel/MsgStream.h"
   #include "AthenaBaseComps/AthMsgStreamMacros.h"
+  #include "AthenaKernel/getMessageSvc.h"
+  #include "CxxUtils/checker_macros.h"
+  #include <boost/thread/tss.hpp>
 #endif
 
 /** Base class for all FastCaloSim parametrizations
@@ -205,19 +208,26 @@ private:
 #else
 public:
   /// Update outputlevel
-  void setLevel(int level) {s_msg->setLevel(level);}
+  void setLevel(int level) {msg().setLevel(level);}
 
   /// Retrieve output level
-  MSG::Level level() const {return s_msg->level();}
+  MSG::Level level() const {return msg().level();}
 
   /// Log a message using the Athena controlled logging system
-  MsgStream& msg() const { return *s_msg; }
+  MsgStream& msg() const {
+    MsgStream* ms = s_msg_tls.get();
+    if (!ms) {
+      ms = new MsgStream(Athena::getMessageSvc(), "FastCaloSimParametrization");
+      s_msg_tls.reset(ms);
+    }
+    return *ms;
+  }
 
   /// Log a message using the Athena controlled logging system
-  MsgStream& msg( MSG::Level lvl ) const { return *s_msg << lvl; }
+  MsgStream& msg( MSG::Level lvl ) const { return msg() << lvl; }
 
   /// Check whether the logging system is active at the provided verbosity level
-  bool msgLvl( MSG::Level lvl ) const { return s_msg->level() <= lvl; }
+  bool msgLvl( MSG::Level lvl ) const { return msg().level() <= lvl; }
   
 private:
   /** Static private message stream member.
@@ -225,7 +235,7 @@ private:
       Note that we also cannot use AthMessaging as a base class as this creates problems
       when storing these objects in ROOT files (ATLASSIM-5854).
   */
-  inline static std::unique_ptr<MsgStream> s_msg;//! Do not persistify!
+  inline static boost::thread_specific_ptr<MsgStream> s_msg_tls ATLAS_THREAD_SAFE;//! Do not persistify!
 #endif  
   
 private:
