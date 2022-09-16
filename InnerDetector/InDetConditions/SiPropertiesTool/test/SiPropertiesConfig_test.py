@@ -7,17 +7,17 @@ from AthenaConfiguration.AllConfigFlags import ConfigFlags
 from AthenaConfiguration.TestDefaults import defaultTestFiles
 from AthenaCommon.Logging import log
 from AthenaCommon.Constants import DEBUG
-from SiPropertiesTool.SCT_SiPropertiesConfig import SCT_SiPropertiesCfg
-from SiPropertiesTool.PixelSiPropertiesConfig import PixelSiPropertiesCfg
+from SiPropertiesTool.SCT_SiPropertiesConfig import SCT_SiPropertiesToolCfg
+from SiPropertiesTool.PixelSiPropertiesConfig import PixelSiPropertiesToolCfg
 
 # test setup
 log.setLevel(DEBUG)
 ConfigFlags.Input.Files = defaultTestFiles.HITS_RUN2
 ConfigFlags.lock()
 # test
-sct_acc = SCT_SiPropertiesCfg(ConfigFlags, name="SCT_SiPropertiesConfigTest")
+sct_acc = SCT_SiPropertiesToolCfg(ConfigFlags, name="SCT_SiPropertiesConfigTest")
 sct_acc.popPrivateTools()
-pix_acc = PixelSiPropertiesCfg(ConfigFlags, name="PixelSiPropertiesConfigTest")
+pix_acc = PixelSiPropertiesToolCfg(ConfigFlags, name="PixelSiPropertiesConfigTest")
 pix_acc.popPrivateTools()
 
 sct_acc.wasMerged()

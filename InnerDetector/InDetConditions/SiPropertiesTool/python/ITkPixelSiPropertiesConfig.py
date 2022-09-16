@@ -9,14 +9,7 @@ from PixelConditionsAlgorithms.ITkPixelConditionsConfig import (
     ITkPixelDCSCondHVAlgCfg, ITkPixelDCSCondTempAlgCfg
 )
 
-def ITkPixelSiPropertiesToolCfg(flags, name="ITkPixelSiPropertiesTool", **kwargs):
-    """Return a SiPropertiesTool configured for ITk Pixel"""
-    kwargs.setdefault("DetectorName", "Pixel")
-    kwargs.setdefault("ReadKey", "ITkPixelSiliconPropertiesVector")
-    SiPropertiesTool=CompFactory.SiPropertiesTool
-    return SiPropertiesTool(name=name, **kwargs)
-
-def ITkPixelSiPropertiesCfg(flags, name="ITkPixelSiPropertiesCondAlg", **kwargs):
+def ITkPixelSiPropertiesCondAlgCfg(flags, name="ITkPixelSiPropertiesCondAlg", **kwargs):
     """Return configured ComponentAccumulator and tool for ITkPixelSiPropertiesCondAlg
 
     SiPropertiesTool may be provided in kwargs
@@ -24,12 +17,18 @@ def ITkPixelSiPropertiesCfg(flags, name="ITkPixelSiPropertiesCondAlg", **kwargs)
     acc = ComponentAccumulator()
     acc.merge(ITkPixelDCSCondHVAlgCfg(flags))
     acc.merge(ITkPixelDCSCondTempAlgCfg(flags))
-    tool = kwargs.get("SiPropertiesTool", ITkPixelSiPropertiesToolCfg(flags))
     kwargs.setdefault("PixelDetEleCollKey", "ITkPixelDetectorElementCollection")
     kwargs.setdefault("ReadKeyeTemp", "ITkPixelDCSTempCondData")
     kwargs.setdefault("ReadKeyHV", "ITkPixelDCSHVCondData")
     kwargs.setdefault("WriteKey", "ITkPixelSiliconPropertiesVector")
-    PixelSiPropertiesCondAlg=CompFactory.PixelSiPropertiesCondAlg
-    acc.addCondAlgo(PixelSiPropertiesCondAlg(name, **kwargs))
-    acc.setPrivateTools(tool)
+    acc.addCondAlgo(CompFactory.PixelSiPropertiesCondAlg(name, **kwargs))
+    return acc
+
+
+def ITkPixelSiPropertiesToolCfg(flags, name="ITkPixelSiPropertiesTool", **kwargs):
+    """Return a SiPropertiesTool configured for ITk Pixel"""
+    acc = ITkPixelSiPropertiesCondAlgCfg(flags)
+    kwargs.setdefault("DetectorName", "Pixel")
+    kwargs.setdefault("ReadKey", "ITkPixelSiliconPropertiesVector")
+    acc.setPrivateTools(CompFactory.SiPropertiesTool(name, **kwargs))
     return acc
