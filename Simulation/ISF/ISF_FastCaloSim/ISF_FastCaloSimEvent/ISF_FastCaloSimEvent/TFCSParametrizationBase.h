@@ -8,6 +8,7 @@
 #include <TNamed.h>
 #include <set>
 #include <map>
+#include <mutex>
 
 class ICaloGeometry;
 class TFCSSimulationState;
@@ -155,7 +156,7 @@ public:
   ///Deletes all objects from the s_cleanup_list. 
   ///This list can get filled during streaming operations, where an immediate delete is not possible
   static void DoCleanup();
-  
+
   struct Duplicate_t {
     TFCSParametrizationBase* replace=nullptr;
     std::vector< TFCSParametrizationBase* > mother;
@@ -180,8 +181,9 @@ protected:
   static constexpr double init_eta_min=-100;//! Do not persistify!
   static constexpr double init_eta_max=100;//! Do not persistify!
 
-  static std::vector< TFCSParametrizationBase* > s_cleanup_list;
-  
+  /// Add the vector of garbage to the list of objects to delete by DoCleanup
+  static void AddToCleanup(const std::vector<TFCSParametrizationBase*>& garbage);
+
   bool compare(const TFCSParametrizationBase& ref) const;
 
 #if defined(__FastCaloSimStandAlone__)
@@ -239,6 +241,8 @@ private:
 #endif  
   
 private:
+  static inline std::mutex s_cleanup_mutex;
+  static std::vector< TFCSParametrizationBase* > s_cleanup_list ATLAS_THREAD_SAFE;
 
   ClassDef(TFCSParametrizationBase,2)  //TFCSParametrizationBase
 };
