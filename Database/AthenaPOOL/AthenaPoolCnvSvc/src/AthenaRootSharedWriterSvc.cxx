@@ -7,6 +7,7 @@
  *  @author Peter van Gemmeren <gemmeren@anl.gov>
  **/
 
+#include "GaudiKernel/IAlgManager.h"
 #include "AthenaRootSharedWriterSvc.h"
 
 #include "TBranch.h"
@@ -149,7 +150,7 @@ struct ParallelFileMerger : public TObject
 //___________________________________________________________________________
 AthenaRootSharedWriterSvc::AthenaRootSharedWriterSvc(const std::string& name, ISvcLocator* pSvcLocator)
   : AthService(name, pSvcLocator)
-  , m_rootServerSocket(nullptr), m_rootMonitor(nullptr), m_rootMergers(), m_rootClientIndex(0), m_rootClientCount(0) {
+  , m_rootServerSocket(nullptr), m_rootMonitor(nullptr), m_rootMergers(), m_rootClientIndex(0), m_rootClientCount(0), m_numberOfStreams(0) {
 }
 //___________________________________________________________________________
 StatusCode AthenaRootSharedWriterSvc::initialize() {
@@ -193,10 +194,25 @@ StatusCode AthenaRootSharedWriterSvc::initialize() {
          ATH_MSG_DEBUG("Successfully created ROOT TServerSocket and added it to TMonitor: ready to accept connections, " << streamPort);
       }
    }
+   // Count the number of output streams
+   const IAlgManager* algMgr = Gaudi::svcLocator()->as<IAlgManager>();
+   for(const auto& alg : algMgr->getAlgorithms()) {
+      if(alg->type() == "AthenaOutputStream") {
+         ATH_MSG_DEBUG("Counting " << alg->name() << " as an output stream algorithm");
+         m_numberOfStreams++;
+      }
+   }
+   if(m_numberOfStreams == 0) {
+      ATH_MSG_WARNING("No output stream algorithm found, setting the number of streams to 1");
+      m_numberOfStreams = 1;
+   } else {
+      ATH_MSG_INFO("Found a total of " << m_numberOfStreams << " output streams");
+   }
+
    return StatusCode::SUCCESS;
 }
 //___________________________________________________________________________
-StatusCode AthenaRootSharedWriterSvc::share(int/* numClients*/, bool motherClient) {
+StatusCode AthenaRootSharedWriterSvc::share(int numClients, bool motherClient) {
    ATH_MSG_DEBUG("Start commitOutput loop");
    StatusCode sc = m_cnvSvc->commitOutput("", false);
 
@@ -216,8 +232,14 @@ StatusCode AthenaRootSharedWriterSvc::share(int/* numClients*/, bool motherClien
                client->Send(1, 1);
                ++m_rootClientIndex;
                ++m_rootClientCount;
-               m_rootMonitor->Add(client);
-               ATH_MSG_INFO("ROOT Monitor add client: " << m_rootClientIndex << ", " << client);
+               if (m_rootClientCount < (numClients-1)*m_numberOfStreams + 1) {
+                  m_rootMonitor->Add(client);
+                  ATH_MSG_INFO("ROOT Monitor add client: " << m_rootClientIndex << ", " << client);
+               } else {
+                  ATH_MSG_WARNING("ROOT Monitor do NOT add client: " << m_rootClientIndex << ", " << client);
+                  client->Close("force");
+                  --m_rootClientCount;
+               }
             } else {
                TMessage* message = nullptr;
                Int_t result = socket->Recv(message);

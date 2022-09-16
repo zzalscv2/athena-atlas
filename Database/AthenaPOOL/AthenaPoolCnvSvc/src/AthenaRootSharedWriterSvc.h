@@ -49,6 +49,7 @@ private:
    THashTable m_rootMergers;
    int m_rootClientIndex;
    int m_rootClientCount;
+   int m_numberOfStreams;
 };
 
 #endif
