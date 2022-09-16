@@ -1,7 +1,7 @@
 // dear emacs, this is -*- C++ -*-
 
 /*
-  Copyright (C) 2002-2017 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef ANALYSISTOOLS_AANTUPLESTREAM_H
@@ -11,6 +11,7 @@
 #include "GaudiKernel/ServiceHandle.h"
 #include "GaudiKernel/IIoComponent.h"
 #include "AthenaBaseComps/AthLegacySequence.h"
+#include "CxxUtils/checker_macros.h"
 
 #include <map>
 #include <vector>
@@ -29,8 +30,8 @@ class TFile;
 class TTree;
 class TBranch;
 
-class AANTupleStream : virtual public IIoComponent,
-                               public AthLegacySequence
+class ATLAS_NOT_THREAD_SAFE AANTupleStream : virtual public IIoComponent,
+                                             public AthLegacySequence
 {
 public:
     
