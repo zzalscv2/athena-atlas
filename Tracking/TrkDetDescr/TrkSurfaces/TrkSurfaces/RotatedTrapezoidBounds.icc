@@ -48,15 +48,16 @@ RotatedTrapezoidBounds::r() const
 }
 
 inline bool
-RotatedTrapezoidBounds::inside(const Amg::Vector2D& locpo,
+RotatedTrapezoidBounds::inside(const Amg::Vector2D& pos,
                                const BoundaryCheck& bchk) const
 {
+  const Amg::Vector2D locpo = m_rotMat * pos;
   if (bchk.bcType == 0)
     return RotatedTrapezoidBounds::inside(
       locpo, bchk.toleranceLoc1, bchk.toleranceLoc2);
 
   // a fast FALSE
-  double fabsX = fabs(locpo[Trk::locX]);
+  const double fabsX = std::abs(locpo[Trk::locX]);
   double max_ell = bchk.lCovariance(0, 0) > bchk.lCovariance(1, 1)
                      ? bchk.lCovariance(0, 0)
                      : bchk.lCovariance(1, 1);
@@ -64,7 +65,7 @@ RotatedTrapezoidBounds::inside(const Amg::Vector2D& locpo,
   if (fabsX > (m_boundValues[RotatedTrapezoidBounds::bv_halfX] + limit))
     return false;
   // a fast FALSE
-  double fabsY = fabs(locpo[Trk::locY]);
+  const double fabsY = std::abs(locpo[Trk::locY]);
   if (fabsY > (m_boundValues[RotatedTrapezoidBounds::bv_maxHalfY] + limit))
     return false;
   // a fast TRUE
@@ -118,18 +119,20 @@ RotatedTrapezoidBounds::inside(const Amg::Vector2D& locpo,
 }
 
 inline bool
-RotatedTrapezoidBounds::insideLoc1(const Amg::Vector2D& locpo,
+RotatedTrapezoidBounds::insideLoc1(const Amg::Vector2D& pos,
                                    double tol1) const
 {
-  return (fabs(locpo[locX]) <
+  const Amg::Vector2D locpo = m_rotMat * pos;
+  return (std::abs(locpo[locX]) <
           m_boundValues[RotatedTrapezoidBounds::bv_halfX] + tol1);
 }
 
 inline bool
-RotatedTrapezoidBounds::insideLoc2(const Amg::Vector2D& locpo,
+RotatedTrapezoidBounds::insideLoc2(const Amg::Vector2D& pos,
                                    double tol2) const
 {
-  return (fabs(locpo[locY]) <
+  const Amg::Vector2D locpo = m_rotMat * pos;  
+  return (std::abs(locpo[locY]) <
           m_boundValues[RotatedTrapezoidBounds::bv_maxHalfY] + tol2);
 }
 } // end of namespace

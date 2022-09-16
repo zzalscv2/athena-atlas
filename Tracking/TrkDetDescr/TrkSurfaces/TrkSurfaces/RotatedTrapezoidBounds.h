@@ -74,6 +74,9 @@ public:
 
   /**Constructor for symmetric Trapezoid*/
   RotatedTrapezoidBounds(double halex, double minhalex, double maxhalex);
+  /** Constructor for symmetric Trapezoid rotated around the X axis by alpha */
+  RotatedTrapezoidBounds(double halex, double minhalex, double maxhalex, double alpha);
+  
 
  /**Virtual constructor*/
   virtual RotatedTrapezoidBounds* clone() const override;
@@ -156,8 +159,11 @@ private:
 
   /** The internal storage of the bounds can be float/double*/
   std::vector<TDD_real_t> m_boundValues;
-  TDD_real_t m_kappa;
-  TDD_real_t m_delta;
+  TDD_real_t m_kappa{0};
+  TDD_real_t m_delta{0};
+  /// Transformation matrix to define surface bounds which are tilted 
+  /// w.r.t. the surfaces (e.g. Micromega stereo layers)
+  AmgSymMatrix(2) m_rotMat{AmgSymMatrix(2)::Identity()};
 };
 } // end of namespace
 
