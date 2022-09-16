@@ -120,12 +120,11 @@ namespace MuonPRDTest {
                 // compute hit position within the detector element/surfaces
                 const Trk::PlaneSurface& surf = detEl->surface(newId);
                 Amg::Transform3D     gToL = detEl->absTransform().inverse();
-                Amg::Vector3D hpos(hit.globalPosition().x(),hit.globalPosition().y(),hit.globalPosition().z());
-                Amg::Vector3D dSurface_pos = gToL*hpos;
+                Amg::Vector3D dSurface_pos = gToL*globalPosition;
 
                 // compute the hit position on the readout plane (same as in MuonFastDigitization)
-                Amg::Vector3D rSurface_pos = surf.transform().inverse()*hpos;
-                Amg::Vector3D ldir = surf.transform().inverse().linear()*Amg::Vector3D(hit.globalDirection().x(),hit.globalDirection().y(),hit.globalDirection().z());
+                Amg::Vector3D rSurface_pos = surf.transform().inverse()*globalPosition;
+                Amg::Vector3D ldir = surf.transform().inverse().linear()*globalDirection;
 
                 ATH_MSG_DEBUG("sTGC channel type:" << type);
 
