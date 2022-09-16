@@ -40,12 +40,9 @@ namespace MuonPRDTest {
                 Amg::Vector3D gpos{0., 0., 0.};
                 Amg::Vector2D lpos(0., 0.);
 
-                const bool stripPosition = rdoEl->stripPosition(Id, lpos);
-                int stripNumber = rdoEl->stripNumber(lpos, Id);
+                const bool stripPosition = rdoEl->stripPosition(Id, lpos);              
 
-                if (!stripPosition) {
-                    ATH_MSG_WARNING("TGCDigitVariables: failed to associate a valid local position for strip n. "
-                                    << stripNumber << "; associated positions will be set to 0.0.");
+                if (!stripPosition) {                   
                     continue;
                 }
 
@@ -54,8 +51,6 @@ namespace MuonPRDTest {
                 m_TGC_dig_localPosX.push_back(lpos.x());
                 m_TGC_dig_localPosY.push_back(lpos.y());
                 m_TGC_dig_id.push_back(Id);
-                m_TGC_dig_stripNumber.push_back(stripNumber);
-
                 ++n_digits;
             }
         }
