@@ -61,7 +61,6 @@ CaloCluster_OnTrackBuilder::CaloCluster_OnTrackBuilder(const std::string& t,
   : AthAlgTool(t, n, p)
 {
   declareInterface<ICaloCluster_OnTrackBuilder>(this);
-  m_eg_resol = std::make_unique<eg_resolution>("run2_R21_v1");
 }
 
 CaloCluster_OnTrackBuilder::~CaloCluster_OnTrackBuilder() = default;
@@ -69,6 +68,7 @@ CaloCluster_OnTrackBuilder::~CaloCluster_OnTrackBuilder() = default;
 StatusCode
 CaloCluster_OnTrackBuilder::initialize()
 {
+  m_eg_resol = std::make_unique<eg_resolution>("run2_R21_v1");
   ATH_CHECK(m_calosurf.retrieve());
   ATH_CHECK(m_caloMgrKey.initialize());
   return StatusCode::SUCCESS;
