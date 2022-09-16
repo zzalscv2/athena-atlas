@@ -1,7 +1,4 @@
-# Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
-################################################################################
-# Package: FsrUtils
-################################################################################
+# Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
 
 # Declare the package name:
 atlas_subdir( FsrUtils )
@@ -13,8 +10,9 @@ find_package( ROOT COMPONENTS Core Physics RIO )
 atlas_add_library( FsrUtilsLib
    FsrUtils/*.h Root/*.cxx
    PUBLIC_HEADERS FsrUtils
-   LINK_LIBRARIES AsgTools xAODMuon xAODEgamma PATInterfaces
-   IsolationSelectionLib IsolationCorrectionsLib ElectronPhotonFourMomentumCorrectionLib)
+   LINK_LIBRARIES AsgTools PATInterfaces xAODEgamma xAODMuon
+   PRIVATE_LINK_LIBRARIES AthContainers EgammaAnalysisInterfacesLib IsolationCorrectionsLib
+   IsolationSelectionLib xAODRootAccess )
 
 if( NOT XAOD_STANDALONE )
    atlas_add_component( FsrUtils
@@ -29,8 +27,8 @@ if( XAOD_STANDALONE )
    atlas_add_executable( FsrPhotonToolTester
       util/FsrPhotonToolTester.cxx
       INCLUDE_DIRS ${ROOT_INCLUDE_DIRS}
-      LINK_LIBRARIES ${ROOT_LIBRARIES} xAODRootAccess xAODMuon xAODCore 
-      FsrUtilsLib )
+      LINK_LIBRARIES ${ROOT_LIBRARIES} ElectronPhotonFourMomentumCorrectionLib xAODBase
+      xAODBase xAODCore xAODEgamma xAODMuon xAODRootAccess FsrUtilsLib )
 endif()
 
 # Install files from the package:
