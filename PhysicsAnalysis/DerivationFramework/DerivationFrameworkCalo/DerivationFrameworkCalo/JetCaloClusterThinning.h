@@ -50,19 +50,15 @@ private:
   SG::ReadHandleKey<xAOD::JetContainer>
     m_sgKey{ this, "SGKey", "", "SG key of jet container to thin" };
 
-  std::string m_selectionString;
-  float m_coneSize;
+  Gaudi::Property<std::vector<std::string>> m_addClusterSGKey{ this, "AdditionalClustersKey", {}, ""};
+  SG::ThinningHandleKey<xAOD::CaloClusterContainer> m_tmpAddClusterKey{ this, "TmpAddClustersKey","LCOriginTopoClusters",""};
+  std::vector<SG::ThinningHandleKey<xAOD::CaloClusterContainer>> m_addClusterKeys;
 
-  void setJetClustersMask(std::vector<bool>&,
-                          const xAOD::JetContainer*,
-                          const xAOD::CaloClusterContainer*) const;
-  void setJetClustersMask(std::vector<bool>&,
-                          std::vector<const xAOD::Jet*>&,
-                          const xAOD::CaloClusterContainer*) const;
-  static void select(const xAOD::Jet* particle,
-                     float coneSize,
-                     const xAOD::CaloClusterContainer* clusters,
-                     std::vector<bool>& mask);
+  std::string m_selectionString;
+
+  void setJetClustersMask(std::vector<bool>&, const xAOD::JetContainer*&) const;
+  void setJetClustersMask(std::vector<bool>&, std::vector<const xAOD::Jet*>&) const;
+
 };
 
 }

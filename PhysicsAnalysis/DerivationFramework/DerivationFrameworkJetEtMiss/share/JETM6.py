@@ -6,6 +6,7 @@
 from DerivationFrameworkCore.DerivationFrameworkMaster import DerivationFrameworkIsMonteCarlo, DerivationFrameworkJob, buildFileName
 from DerivationFrameworkJetEtMiss.JetCommon import addJetOutputs, OutputJets, addOriginCorrectedClusters
 from DerivationFrameworkPhys import PhysCommon
+from DerivationFrameworkTrigger.TriggerMatchingHelper import TriggerMatchingHelper
 
 #====================================================================
 # SET UP STREAM   
@@ -13,7 +14,7 @@ from DerivationFrameworkPhys import PhysCommon
 streamName = derivationFlags.WriteDAOD_JETM6Stream.StreamName
 fileName   = buildFileName( derivationFlags.WriteDAOD_JETM6Stream )
 JETM6Stream = MSMgr.NewPoolRootStream( streamName, fileName )
-JETM6Stream.AcceptAlgs(["JETM6MainKernel"])
+JETM6Stream.AcceptAlgs(["JETM6Kernel"])
 augStream = MSMgr.GetStream( streamName )
 evtStream = augStream.GetEventStream()
 
@@ -27,71 +28,79 @@ muonTriggers = TriggerLists.single_mu_Trig()
 photonTriggers = TriggerLists.single_photon_Trig()
 jetTriggers = TriggerLists.jetTrig()
 
-jetSelection = '(count( AntiKt10LCTopoJets.pt > 400.*GeV && abs(AntiKt10LCTopoJets.eta) < 2.5 ) >=1 || count( AntiKt10UFOCSSKJets.pt > 400.*GeV && abs(AntiKt10UFOCSSKJets.eta) < 2.5 ) >= 1)'
-jetSelection_lep = '(count( AntiKt10LCTopoJets.pt > 150.*GeV && abs(AntiKt10LCTopoJets.eta) < 2.5 ) >=1 || count( AntiKt10UFOCSSKJets.pt > 150.*GeV && abs(AntiKt10UFOCSSKJets.eta) < 2.5 ) >= 1)'
+# One electron or muon or high-pT photon + large-R jet or just a high-pT large-R jet
 
+jetsofflinesel = '(count( AntiKt10LCTopoJets.pt > 400.*GeV && abs(AntiKt10LCTopoJets.eta) < 2.5 ) >=1 || count( AntiKt10UFOCSSKJets.pt > 400.*GeV && abs(AntiKt10UFOCSSKJets.eta) < 2.5 ) >= 1)'
 if DerivationFrameworkIsMonteCarlo:
-  jetSelection = '(count( AntiKt10LCTopoJets.pt > 180.*GeV && abs(AntiKt10LCTopoJets.eta) < 2.5 ) >=1 || count( AntiKt10UFOCSSKJets.pt > 180.*GeV && abs(AntiKt10UFOCSSKJets.eta) < 2.5 ) >= 1)'
+  jetsofflinesel = '(count( AntiKt10LCTopoJets.pt > 180.*GeV && abs(AntiKt10LCTopoJets.eta) < 2.5 ) >=1 || count( AntiKt10UFOCSSKJets.pt > 180.*GeV && abs(AntiKt10UFOCSSKJets.eta) < 2.5 ) >= 1)'
 
-orstr  = ' || '
 andstr = ' && '
-eltrigsel = '(EventInfo.eventTypeBitmask==1) || '+orstr.join(electronTriggers)
-elofflinesel = andstr.join(['count((Electrons.pt > 20*GeV) && (Electrons.DFCommonElectronsLHLoose)) >= 1',jetSelection_lep])
-electronSelection = '( (' + eltrigsel + ') && (' + elofflinesel + ') )'
-
-mutrigsel = '(EventInfo.eventTypeBitmask==1) || '+orstr.join(muonTriggers)
-muofflinesel = andstr.join(['count((Muons.pt > 20*GeV) && (Muons.DFCommonMuonPassPreselection)) >= 1',jetSelection_lep])
-muonSelection = ' ( (' + mutrigsel + ') && (' + muofflinesel + ') ) '
-
-gammatrigsel = '(EventInfo.eventTypeBitmask==1) || '+orstr.join(photonTriggers)
-gammaofflinesel = andstr.join(['count(Photons.pt > 150*GeV) >= 1',jetSelection_lep])
-photonSelection = ' ( (' + gammatrigsel + ') && (' + gammaofflinesel + ') ) '
-
-lepSelection = '( ' + electronSelection + ' || ' + muonSelection + ' || ' + photonSelection + ' )'
-expression = jetSelection + ' || '+ lepSelection
-
-from DerivationFrameworkTools.DerivationFrameworkToolsConf import DerivationFramework__TriggerSkimmingTool
-JETM6TrigSkimmingTool = DerivationFramework__TriggerSkimmingTool(   name           = "JETM6TrigSkimmingTool",
-                                                                    TriggerListOR  = jetTriggers+electronTriggers+muonTriggers+photonTriggers)
-
-ToolSvc += JETM6TrigSkimmingTool
+jetsel_lep = '(count( AntiKt10LCTopoJets.pt > 150.*GeV && abs(AntiKt10LCTopoJets.eta) < 2.5 ) >=1 || count( AntiKt10UFOCSSKJets.pt > 150.*GeV && abs(AntiKt10UFOCSSKJets.eta) < 2.5 ) >= 1)'
+elofflinesel = andstr.join(['count((Electrons.pt > 20*GeV) && (Electrons.DFCommonElectronsLHLoose)) >= 1',jetsel_lep])
+muofflinesel = andstr.join(['count((Muons.pt > 20*GeV) && (Muons.DFCommonMuonPassPreselection)) >= 1',jetsel_lep])
+gammaofflinesel = andstr.join(['count(Photons.pt > 150*GeV) >= 1',jetsel_lep])
 
 from DerivationFrameworkTools.DerivationFrameworkToolsConf import DerivationFramework__xAODStringSkimmingTool
-JETM6OfflineSkimmingTool = DerivationFramework__xAODStringSkimmingTool( name = "JETM6OfflineSkimmingTool",
-                                                                        expression = expression)
-ToolSvc += JETM6OfflineSkimmingTool
+JETM6OfflineSkimmingTool_ele   = DerivationFramework__xAODStringSkimmingTool( name = "JETM6OfflineSkimmingTool_ele",
+                                                                              expression = elofflinesel)
+JETM6OfflineSkimmingTool_mu    = DerivationFramework__xAODStringSkimmingTool( name = "JETM6OfflineSkimmingTool_mu",
+                                                                              expression = muofflinesel)
+JETM6OfflineSkimmingTool_gamma = DerivationFramework__xAODStringSkimmingTool( name = "JETM6OfflineSkimmingTool_gamma",
+                                                                              expression = gammaofflinesel)
+JETM6OfflineSkimmingTool_jets  = DerivationFramework__xAODStringSkimmingTool( name = "JETM6OfflineSkimmingTool_jets",
+                                                                              expression = jetsofflinesel)
+
+ToolSvc += JETM6OfflineSkimmingTool_ele
+ToolSvc += JETM6OfflineSkimmingTool_mu
+ToolSvc += JETM6OfflineSkimmingTool_gamma
+ToolSvc += JETM6OfflineSkimmingTool_jets
+
+JETM6SkimmingTools = []
+
+from DerivationFrameworkTools.DerivationFrameworkToolsConf import DerivationFramework__FilterCombinationAND
+from DerivationFrameworkTools.DerivationFrameworkToolsConf import DerivationFramework__FilterCombinationOR
+
+if not DerivationFrameworkIsMonteCarlo:
+  from DerivationFrameworkTools.DerivationFrameworkToolsConf import DerivationFramework__TriggerSkimmingTool
+  JETM6TriggerSkimmingTool_ele   = DerivationFramework__TriggerSkimmingTool(name = "JETM6TriggerSkimmingTool_ele",   TriggerListOR = electronTriggers)
+  ToolSvc += JETM6TriggerSkimmingTool_ele
+  JETM6TriggerSkimmingTool_mu    = DerivationFramework__TriggerSkimmingTool(name = "JETM6TriggerSkimmingTool_mu",    TriggerListOR = muonTriggers)
+  ToolSvc += JETM6TriggerSkimmingTool_mu
+  JETM6TriggerSkimmingTool_gamma = DerivationFramework__TriggerSkimmingTool(name = "JETM6TriggerSkimmingTool_gamma", TriggerListOR = photonTriggers)
+  ToolSvc += JETM6TriggerSkimmingTool_gamma
+  JETM6TriggerSkimmingTool_jets  = DerivationFramework__TriggerSkimmingTool(name = "JETM6TriggerSkimmingTool_jets",  TriggerListOR = jetTriggers)
+  ToolSvc += JETM6TriggerSkimmingTool_jets
+
+  # Combine trigger and offline selection
+  JETM6SkimmingTool_ele   = DerivationFramework__FilterCombinationAND(name="JETM6SkimmingTool_ele",   FilterList=[JETM6OfflineSkimmingTool_ele,   JETM6TriggerSkimmingTool_ele] )
+  JETM6SkimmingTool_mu    = DerivationFramework__FilterCombinationAND(name="JETM6SkimmingTool_mu",    FilterList=[JETM6OfflineSkimmingTool_mu,    JETM6TriggerSkimmingTool_mu] )
+  JETM6SkimmingTool_gamma = DerivationFramework__FilterCombinationAND(name="JETM6SkimmingTool_gamma", FilterList=[JETM6OfflineSkimmingTool_gamma, JETM6TriggerSkimmingTool_gamma] )
+  JETM6SkimmingTool_jets  = DerivationFramework__FilterCombinationAND(name="JETM6SkimmingTool_jets",  FilterList=[JETM6OfflineSkimmingTool_jets,  JETM6TriggerSkimmingTool_jets] )
+
+  ToolSvc += JETM6SkimmingTool_ele
+  ToolSvc += JETM6SkimmingTool_mu
+  ToolSvc += JETM6SkimmingTool_gamma
+  ToolSvc += JETM6SkimmingTool_jets
+
+  # Combine electron and muon channel
+  JETM6SkimmingTool = DerivationFramework__FilterCombinationOR(name="JETM6SkimmingTool", 
+                                                               FilterList=[JETM6SkimmingTool_ele, JETM6SkimmingTool_mu, JETM6SkimmingTool_gamma, JETM6SkimmingTool_jets])
+  ToolSvc += JETM6SkimmingTool
+
+  JETM6SkimmingTools += [JETM6SkimmingTool]
+
+else:
+  JETM6SkimmingTool = DerivationFramework__FilterCombinationOR(name="JETM6SkimmingTool",
+                                                               FilterList=[JETM6OfflineSkimmingTool_ele,JETM6OfflineSkimmingTool_mu,JETM6OfflineSkimmingTool_gamma,JETM6OfflineSkimmingTool_jets])
+  ToolSvc += JETM6SkimmingTool
+
+  JETM6SkimmingTools += [JETM6SkimmingTool]
 
 #====================================================================
 # CREATE PRIVATE SEQUENCE
 #====================================================================
 jetm6Seq = CfgMgr.AthSequencer("JETM6Sequence")
 DerivationFrameworkJob += jetm6Seq
-
-#====================================================================
-# Trigger matching decorations
-#====================================================================
-photonTriggers_matching = ['HLT_g60_loose', 'HLT_g140_loose', 'HLT_g160_loose']
-
-from DerivationFrameworkCore.TriggerMatchingAugmentation import applyTriggerMatching
-TrigMatchAug, NewTrigVars = applyTriggerMatching(ToolNamePrefix="JETM6",
-                                                 ElectronTriggers=electronTriggers,
-                                                 MuonTriggers=muonTriggers,
-                                                 PhotonTriggers=photonTriggers_matching)
-
-#====================================================================
-# TRIGGER THINNING TOOL
-#====================================================================
-
-from DerivationFrameworkCore.ThinningHelper import ThinningHelper
-JETM6ThinningHelper = ThinningHelper( "JETM6ThinningHelper" )
-JETM6ThinningHelper.TriggerChains = ''
-
-JETM6ThinningHelper.TriggerChains += "|".join(electronTriggers)
-JETM6ThinningHelper.TriggerChains += "|".join(muonTriggers)
-JETM6ThinningHelper.TriggerChains += "|".join(photonTriggers)
-JETM6ThinningHelper.TriggerChains += "|".join(jetTriggers)
-
-JETM6ThinningHelper.AppendToStream( JETM6Stream )
 
 #====================================================================
 # THINNING TOOLS
@@ -165,18 +174,25 @@ thinningTools.append(JETM6PhotonTPThinningTool)
 
 # TrackParticles associated with taus
 from DerivationFrameworkInDet.DerivationFrameworkInDetConf import DerivationFramework__TauTrackParticleThinning
-JETM6TauTPThinningTool = DerivationFramework__TauTrackParticleThinning( name            = "JETM6TauTPThinningTool",
-                                                                        StreamName      = streamName,
-                                                                        TauKey          = "TauJets",
-                                                                        InDetTrackParticlesKey  = "InDetTrackParticles")
+JETM6TauTPThinningTool = DerivationFramework__TauTrackParticleThinning( name                   = "JETM6TauTPThinningTool",
+                                                                        StreamName             = streamName,
+                                                                        TauKey                 = "TauJets",
+                                                                        InDetTrackParticlesKey = "InDetTrackParticles",
+                                                                        DoTauTracksThinning    = True,
+                                                                        TauTracksKey           = "TauTracks")
+
 ToolSvc += JETM6TauTPThinningTool
 thinningTools.append(JETM6TauTPThinningTool)
 
 #====================================================================
 # AUGMENTATION TOOLS
 #====================================================================
+
 augmentationTools = []
-augmentationTools.append(TrigMatchAug)
+
+#====================================================================
+# Tracking quality criteria decoration
+#====================================================================
 
 from DerivationFrameworkInDet.DerivationFrameworkInDetConf import DerivationFramework__InDetTrackSelectionToolWrapper
 JETM6TrackSelectionTool = DerivationFramework__InDetTrackSelectionToolWrapper(name = "JETM6TrackSelectionTool",
@@ -187,21 +203,14 @@ JETM6TrackSelectionTool.TrackSelectionTool.CutLevel = "Loose"
 ToolSvc += JETM6TrackSelectionTool
 augmentationTools.append(JETM6TrackSelectionTool)
 
-
 #=======================================
 # CREATE THE DERIVATION KERNEL ALGORITHM
 #=======================================
 
 from DerivationFrameworkCore.DerivationFrameworkCoreConf import DerivationFramework__DerivationKernel
-jetm6Seq += CfgMgr.DerivationFramework__DerivationKernel(name = "JETM6TrigSkimKernel",
-                                                         AugmentationTools = [] ,
-                                                         SkimmingTools = [JETM6TrigSkimmingTool],
-                                                         ThinningTools = [])
-
-from DerivationFrameworkCore.DerivationFrameworkCoreConf import DerivationFramework__DerivationKernel
-jetm6Seq += CfgMgr.DerivationFramework__DerivationKernel( name = "JETM6MainKernel",
+jetm6Seq += CfgMgr.DerivationFramework__DerivationKernel( name = "JETM6Kernel",
                                                           AugmentationTools = augmentationTools,
-                                                          SkimmingTools = [JETM6OfflineSkimmingTool],
+                                                          SkimmingTools = JETM6SkimmingTools,
                                                           ThinningTools = thinningTools)
 
 #====================================================================
@@ -240,8 +249,7 @@ JETM6SlimmingHelper.SmartCollections = ["EventInfo","InDetTrackParticles","Prima
 
 JETM6SlimmingHelper.AllVariables = ["TruthEvents"]
 
-JETM6SlimmingHelper.ExtraVariables  = ['CaloCalTopoClusters.calE.calEta.calM.calPhi.CENTER_MAG',
-                                       'Electrons.'+NewTrigVars["Electrons"],'Muons.'+NewTrigVars["Muons"],'Photons.'+NewTrigVars["Photons"]]
+JETM6SlimmingHelper.ExtraVariables  = ['CaloCalTopoClusters.calE.calEta.calM.calPhi.CENTER_MAG']
 
 if DerivationFrameworkIsMonteCarlo:
     JETM6SlimmingHelper.AllVariables += ["TruthMuons", "TruthElectrons", "TruthPhotons", "TruthBottom", "TruthTopQuarkWithDecayParticles", "TruthBosonsWithDecayParticles", "TruthHFWithDecayParticles"]
@@ -259,5 +267,21 @@ addOriginCorrectedClusters(JETM6SlimmingHelper,writeLC=True,writeEM=True)
 JETM6SlimmingHelper.IncludeJetTriggerContent = True
 JETM6SlimmingHelper.IncludeMuonTriggerContent = True
 JETM6SlimmingHelper.IncludeEGammaTriggerContent = True
+
+#==================================================================== 
+# Add trigger matching
+#==================================================================== 
+
+photonTriggers_matching = ['HLT_g60_loose', 'HLT_g140_loose', 'HLT_g160_loose']
+
+from AthenaConfiguration.AllConfigFlags import ConfigFlags
+if ConfigFlags.Trigger.EDMVersion == 3:
+  from TrigNavSlimmingMT.TrigNavSlimmingMTConfig import TrigNavSlimmingMTDerivationCfg
+  from AthenaConfiguration.ComponentAccumulator import CAtoGlobalWrapper
+  CAtoGlobalWrapper(TrigNavSlimmingMTDerivationCfg, ConfigFlags, chainsFilter=electronTriggers+muonTriggers+photonTriggers_matching+jetTriggers)
+else:
+  trigmatching_helper = TriggerMatchingHelper(name='JETM6TriggerMatchingTool',
+                                              trigger_list = electronTriggers+muonTriggers+photonTriggers_matching+jetTriggers, add_to_df_job=True)
+  trigmatching_helper.add_to_slimming(JETM6SlimmingHelper)
 
 JETM6SlimmingHelper.AppendContentToStream(JETM6Stream)
