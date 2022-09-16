@@ -59,24 +59,13 @@ namespace iFatras {
       
   private:
       bool                  m_log_include;           //!< boolean switch to include log term  
-      static double 	    s_projectionFactor;	     //!< projection factor to scale the projected angle out of the plane
-      
-      //========== used for General mixture model =================================================
-      
+
       /** Random Generator service  */
       ServiceHandle<IAtRndmGenSvc>                 m_rndGenSvc;
       /** Random engine  */
       CLHEP::HepRandomEngine*                      m_randomEngine;
       std::string                                  m_randomEngineName;                   //!< Name of the random number stream
-       
-       
-      static double         s_main_RossiGreisen;     //!< main factor for Rossi-Greisen formula
-      static double         s_log_RossiGreisen;      //!< main factor for Rossi-Greisen formula
-      
-      
-      // ========= General mixture model R.Frühwirth, M. Liendl. Comp. Phys. Comm. 141 (2001) 230–246 =========
-      static double	    s_genMixScale;	    //!< General mixture model: Scaling factor
-      
+
       //!< General mixture model: get parameters for single gaussian simulation
       static std::vector<double> getGaussian(double beta, double p,double dOverX0, double scale) ;
       //!< General mixture model: get parameters for gaussian mixture

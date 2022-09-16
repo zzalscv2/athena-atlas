@@ -14,16 +14,16 @@
 #include "TrkEventPrimitives/ParticleHypothesis.h"
 
 
-// static particle masses
-//  doubles
+namespace {
+  constexpr double s_main_RossiGreisen = 17.5*Gaudi::Units::MeV;  //!< main factor for Rossi-Greisen formula
+  constexpr double s_log_RossiGreisen  =  0.125;  //!< main factor for Rossi-Greisen formula
 
-double iFatras::MultipleScatteringSamplerGeneralMixture::s_main_RossiGreisen = 17.5*Gaudi::Units::MeV;
-double iFatras::MultipleScatteringSamplerGeneralMixture::s_log_RossiGreisen  =  0.125;
+  const double s_projectionFactor  =  sqrt(2.);  //!< projection factor to scale the projected angle out of the plane
 
-double iFatras::MultipleScatteringSamplerGeneralMixture::s_projectionFactor  =  sqrt(2.);
+  // ========= General mixture model R.Frühwirth, M. Liendl. Comp. Phys. Comm. 141 (2001) 230–246 =========
+  constexpr double s_genMixScale = 0.608236;  //!< numerically derived scaling factor
+}
 
-// ============================= General mixture model =============
-double iFatras::MultipleScatteringSamplerGeneralMixture::s_genMixScale = 0.608236; //numerically derived scaling factor
 
 // constructor
 iFatras::MultipleScatteringSamplerGeneralMixture::MultipleScatteringSamplerGeneralMixture(const std::string& t, const std::string& n, const IInterface* p) :

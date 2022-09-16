@@ -15,27 +15,29 @@
 #include "TrkEventPrimitives/ParticleHypothesis.h"
 
 
-// static doubles
-double iFatras::MultipleScatteringSamplerGaussianMixture::s_main_RutherfordScott = 13.6*Gaudi::Units::MeV;
-double iFatras::MultipleScatteringSamplerGaussianMixture::s_log_RutherfordScott  =  0.038;
+namespace {
+  constexpr double s_main_RutherfordScott = 13.6*Gaudi::Units::MeV;  //!< main factor of Rutherford-Scott formula
+  constexpr double s_log_RutherfordScott  =  0.038;                  //!< log factor of Rutherford-Scott formula
 
-double iFatras::MultipleScatteringSamplerGaussianMixture::s_main_RossiGreisen = 17.5*Gaudi::Units::MeV;
-double iFatras::MultipleScatteringSamplerGaussianMixture::s_log_RossiGreisen  =  0.125;
+  constexpr double s_main_RossiGreisen = 17.5*Gaudi::Units::MeV;     //!< main factor for Rossi-Greisen formula
+  constexpr double s_log_RossiGreisen  =  0.125;                     //!< log factor for Rossi-Greisen formula
 
-// ============================= Gaussian mixture model =============
-double iFatras::MultipleScatteringSamplerGaussianMixture::s_gausMixSigma1_a0  =  8.471e-1;
-double iFatras::MultipleScatteringSamplerGaussianMixture::s_gausMixSigma1_a1  =  3.347e-2;
-double iFatras::MultipleScatteringSamplerGaussianMixture::s_gausMixSigma1_a2  = -1.843e-3;
+  // ========= Gaussian mixture model Fruehwirth, Regler Nucl. Inst. Methods A 456(2001) =========
+  constexpr double s_gausMixSigma1_a0  =  8.471e-1;  //!< Gaussian mixture model: Sigma parameter a0
+  constexpr double s_gausMixSigma1_a1  =  3.347e-2;  //!< Gaussian mixture model: Sigma parameter a1
+  constexpr double s_gausMixSigma1_a2  = -1.843e-3;  //!< Gaussian mixture model: Sigma parameter a2
 
-double iFatras::MultipleScatteringSamplerGaussianMixture::s_gausMixEpsilon_a0 =  4.841e-2;
-double iFatras::MultipleScatteringSamplerGaussianMixture::s_gausMixEpsilon_a1 =  6.348e-3;
-double iFatras::MultipleScatteringSamplerGaussianMixture::s_gausMixEpsilon_a2 =  6.096e-4;
+  constexpr double s_gausMixEpsilon_a0 =  4.841e-2;  //!< Gaussian mixture model: Epsilon parameter a0
+  constexpr double s_gausMixEpsilon_a1 =  6.348e-3;  //!< Gaussian mixture model: Epsilon parameter a1
+  constexpr double s_gausMixEpsilon_a2 =  6.096e-4;  //!< Gaussian mixture model: Epsilon parameter a2
 
-double iFatras::MultipleScatteringSamplerGaussianMixture::s_gausMixEpsilon_b0 = -1.908e-2;
-double iFatras::MultipleScatteringSamplerGaussianMixture::s_gausMixEpsilon_b1 =  1.106e-1;
-double iFatras::MultipleScatteringSamplerGaussianMixture::s_gausMixEpsilon_b2 = -5.729e-3;
+  constexpr double s_gausMixEpsilon_b0 = -1.908e-2;  //!< Gaussian mixture model: Epsilon parameter b0
+  constexpr double s_gausMixEpsilon_b1 =  1.106e-1;  //!< Gaussian mixture model: Epsilon parameter b1
+  constexpr double s_gausMixEpsilon_b2 = -5.729e-3;  //!< Gaussian mixture model: Epsilon parameter b2
 
-double iFatras::MultipleScatteringSamplerGaussianMixture::s_projectionFactor  =  sqrt(2.);
+  const double s_projectionFactor  =  sqrt(2.);  //!< projection factor to scale the projected angle out of the plane
+}
+
 
 // constructor
 iFatras::MultipleScatteringSamplerGaussianMixture::MultipleScatteringSamplerGaussianMixture(const std::string& t, const std::string& n, const IInterface* p) :

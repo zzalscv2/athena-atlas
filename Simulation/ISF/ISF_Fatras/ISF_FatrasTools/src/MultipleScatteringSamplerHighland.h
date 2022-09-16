@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2017 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
 */
 
 ///////////////////////////////////////////////////////////////////
@@ -73,16 +73,6 @@ namespace iFatras {
       CLHEP::HepRandomEngine*                      m_randomEngine;
       std::string                                  m_randomEngineName;                   //!< Name of the random number stream
 
-      
-      static double         s_main_RutherfordScott;  //!< main factor of Rutherford-Scott formula
-      static double         s_log_RutherfordScott;   //!< log factor of Rutherford-Scott formula
-       
-      static double         s_main_RossiGreisen;     //!< main factor for Rossi-Greisen formula
-      static double         s_log_RossiGreisen;      //!< main factor for Rossi-Greisen formula
-      
-      static double 	    s_projectionFactor;	     //!< projection factor to scale the projected angle out of the plane
-
-      
     };
   
   

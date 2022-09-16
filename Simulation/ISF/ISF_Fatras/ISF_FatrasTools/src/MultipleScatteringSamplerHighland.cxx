@@ -16,14 +16,15 @@
 #include "TrkEventPrimitives/ParticleHypothesis.h"
 
 
-// static doubles
-double iFatras::MultipleScatteringSamplerHighland::s_main_RutherfordScott = 13.6*Gaudi::Units::MeV;
-double iFatras::MultipleScatteringSamplerHighland::s_log_RutherfordScott  =  0.038;
+namespace {
+  constexpr double s_main_RutherfordScott = 13.6*Gaudi::Units::MeV;  //!< main factor of Rutherford-Scott formula
+  constexpr double s_log_RutherfordScott  =  0.038;   //!< log factor of Rutherford-Scott formula
 
-double iFatras::MultipleScatteringSamplerHighland::s_main_RossiGreisen = 17.5*Gaudi::Units::MeV;
-double iFatras::MultipleScatteringSamplerHighland::s_log_RossiGreisen  =  0.125;
+  constexpr double s_main_RossiGreisen = 17.5*Gaudi::Units::MeV;  //!< main factor for Rossi-Greisen formula
+  constexpr double s_log_RossiGreisen  =  0.125;  //!< main factor for Rossi-Greisen formula
 
-double iFatras::MultipleScatteringSamplerHighland::s_projectionFactor  =  sqrt(2.);
+  const double s_projectionFactor  =  sqrt(2.);  //!< projection factor to scale the projected angle out of the plane
+}
 
 Trk::MaterialInteraction       matInt;
 
