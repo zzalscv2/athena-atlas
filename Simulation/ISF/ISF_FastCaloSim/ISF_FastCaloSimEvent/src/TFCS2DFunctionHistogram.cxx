@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2017 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "ISF_FastCaloSimEvent/TFCS2DFunctionHistogram.h"
@@ -85,7 +85,7 @@ void TFCS2DFunctionHistogram::rnd_to_fct(float& valuex,float& valuey,float rnd0,
   valuey = m_HistoBordersy[biny] + (m_HistoBordersy[biny+1]-m_HistoBordersy[biny]) * rnd1;
 }
 
-void TFCS2DFunctionHistogram::unit_test(TH2* hist)
+void TFCS2DFunctionHistogram::unit_test ATLAS_NOT_THREAD_SAFE (TH2* hist)
 {
   int nbinsx;
   int nbinsy;

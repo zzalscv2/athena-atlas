@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2020 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "ISF_FastCaloSimEvent/TFCS1DFunctionInt32Histogram.h"
@@ -89,7 +89,7 @@ bool TFCS1DFunctionInt32Histogram::operator==(const TFCS1DFunction& ref) const
   return true;
 }
 
-void TFCS1DFunctionInt32Histogram::unit_test(TH1* hist)
+void TFCS1DFunctionInt32Histogram::unit_test ATLAS_NOT_THREAD_SAFE (TH1* hist)
 {
   int nbinsx;
   if(hist==nullptr) {

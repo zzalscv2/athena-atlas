@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2017 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "ISF_FastCaloSimEvent/TFCS1DFunction.h"
@@ -76,7 +76,7 @@ double TFCS1DFunction::CheckAndIntegrate1DHistogram(const TH1* hist, std::vector
   return integral;
 }
 
-TH1* TFCS1DFunction::generate_histogram_random_slope(int nbinsx,double xmin,double xmax,double zerothreshold)
+TH1* TFCS1DFunction::generate_histogram_random_slope ATLAS_NOT_THREAD_SAFE (int nbinsx,double xmin,double xmax,double zerothreshold)
 {
   TH1* hist=new TH1D("test_slope1D","test_slope1D",nbinsx,xmin,xmax);
   hist->Sumw2();
@@ -89,7 +89,7 @@ TH1* TFCS1DFunction::generate_histogram_random_slope(int nbinsx,double xmin,doub
   return hist;
 }
 
-TH1* TFCS1DFunction::generate_histogram_random_gauss(int nbinsx,int ntoy,double xmin,double xmax,double xpeak,double sigma)
+TH1* TFCS1DFunction::generate_histogram_random_gauss ATLAS_NOT_THREAD_SAFE (int nbinsx,int ntoy,double xmin,double xmax,double xpeak,double sigma)
 {
   TH1* hist=new TH1D("test_gauss1D","test_gauss1D",nbinsx,xmin,xmax);
   hist->Sumw2();
@@ -100,7 +100,7 @@ TH1* TFCS1DFunction::generate_histogram_random_gauss(int nbinsx,int ntoy,double 
   return hist;
 }  
 
-void TFCS1DFunction::unit_test(TH1* hist,TFCS1DFunction* rtof,int nrnd,TH1* histfine)
+void TFCS1DFunction::unit_test ATLAS_NOT_THREAD_SAFE (TH1* hist,TFCS1DFunction* rtof,int nrnd,TH1* histfine)
 {
   std::cout<<"========= "<<hist->GetName()<<" funcsize="<<rtof->MemorySize()<<" ========"<<std::endl;
   int nbinsx=hist->GetNbinsX();

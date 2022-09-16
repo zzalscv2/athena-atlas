@@ -1,10 +1,11 @@
 /*
-  Copyright (C) 2002-2020 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef TFCSHitCellMappingWiggle_h
 #define TFCSHitCellMappingWiggle_h
 
+#include "CxxUtils/checker_macros.h"
 #include "ISF_FastCaloSimEvent/TFCSHitCellMapping.h"
 
 #ifdef USE_GPU
@@ -44,7 +45,7 @@ public:
 
   void Print(Option_t *option="") const override;
 
-  static void unit_test(TFCSSimulationState* simulstate=nullptr,TFCSTruthState* truth=nullptr, TFCSExtrapolationState* extrapol=nullptr);
+  static void unit_test ATLAS_NOT_THREAD_SAFE (TFCSSimulationState* simulstate=nullptr,TFCSTruthState* truth=nullptr, TFCSExtrapolationState* extrapol=nullptr);
 
 #ifdef USE_GPU
   //construct the hist function and copy to GPU

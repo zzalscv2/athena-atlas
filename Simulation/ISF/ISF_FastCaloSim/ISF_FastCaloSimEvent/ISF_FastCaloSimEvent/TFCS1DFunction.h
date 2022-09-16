@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2020 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef ISF_FASTCALOSIMEVENT_TFCS1DFunction_h
@@ -8,6 +8,7 @@
 // STL includes
 #include <vector>
 
+#include "CxxUtils/checker_macros.h"
 #include "ISF_FastCaloSimEvent/TFCSFunction.h"
 
 class TH1;
@@ -36,9 +37,9 @@ class TFCS1DFunction:public TFCSFunction
 
     static double CheckAndIntegrate1DHistogram(const TH1* hist, std::vector<double>& integral_vec,int& first,int& last);
 
-    static TH1* generate_histogram_random_slope(int nbinsx=50,double xmin=0,double xmax=1,double zerothreshold=0.1);
-    static TH1* generate_histogram_random_gauss(int nbinsx=50,int ntoy=100000,double xmin=1,double xmax=5,double xpeak=1.5,double sigma=0.6);
-    static void unit_test(TH1* hist,TFCS1DFunction* rtof,int nrnd=1000000,TH1* histfine=nullptr);
+    static TH1* generate_histogram_random_slope ATLAS_NOT_THREAD_SAFE (int nbinsx=50,double xmin=0,double xmax=1,double zerothreshold=0.1);
+    static TH1* generate_histogram_random_gauss ATLAS_NOT_THREAD_SAFE (int nbinsx=50,int ntoy=100000,double xmin=1,double xmax=5,double xpeak=1.5,double sigma=0.6);
+    static void unit_test ATLAS_NOT_THREAD_SAFE (TH1* hist,TFCS1DFunction* rtof,int nrnd=1000000,TH1* histfine=nullptr);
 
   private:
 
