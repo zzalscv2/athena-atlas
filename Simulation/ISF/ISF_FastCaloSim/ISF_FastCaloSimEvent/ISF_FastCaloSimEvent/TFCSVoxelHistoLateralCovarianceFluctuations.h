@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2019 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef TFCSVoxelHistoLateralCovarianceFluctuations_h
@@ -34,8 +34,8 @@ public:
 protected:
   ICaloGeometry* m_geo; //! do not persistify
   
-  static std::uint32_t s_layer_hash[CaloCell_ID_FCS::MaxSample]; //! do not persistify
-  static std::uint32_t s_layer_hash_geo[CaloCell_ID_FCS::MaxSample]; //! do not persistify
+  static const std::uint32_t s_layer_hash[CaloCell_ID_FCS::MaxSample]; //! do not persistify
+  static const std::uint32_t s_layer_hash_geo[CaloCell_ID_FCS::MaxSample]; //! do not persistify
 
   typedef std::vector< std::vector< float > > weight_t;
 

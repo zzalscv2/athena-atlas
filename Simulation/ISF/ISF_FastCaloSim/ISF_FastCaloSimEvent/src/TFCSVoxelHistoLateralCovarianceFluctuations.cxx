@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2019 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
 */
 
 #include <string>
@@ -25,7 +25,7 @@
 //======= TFCSVoxelHistoLateralCovarianceFluctuations =========
 //=============================================
 
-std::uint32_t TFCSVoxelHistoLateralCovarianceFluctuations::s_layer_hash[CaloCell_ID_FCS::MaxSample]={
+const std::uint32_t TFCSVoxelHistoLateralCovarianceFluctuations::s_layer_hash[CaloCell_ID_FCS::MaxSample]={
 "PreSamplerB"_FCShash,"EMB1"_FCShash,"EMB2"_FCShash,"EMB3"_FCShash,
 "PreSamplerE"_FCShash,"EME1"_FCShash,"EME2"_FCShash,"EME3"_FCShash,
 "HEC0"_FCShash,"HEC1"_FCShash,"HEC2"_FCShash,"HEC3"_FCShash,
@@ -35,7 +35,7 @@ std::uint32_t TFCSVoxelHistoLateralCovarianceFluctuations::s_layer_hash[CaloCell
 "FCAL0"_FCShash,"FCAL1"_FCShash,"FCAL2"_FCShash};
 
 
-std::uint32_t TFCSVoxelHistoLateralCovarianceFluctuations::s_layer_hash_geo[CaloCell_ID_FCS::MaxSample]={
+const std::uint32_t TFCSVoxelHistoLateralCovarianceFluctuations::s_layer_hash_geo[CaloCell_ID_FCS::MaxSample]={
 "PreSamplerB_geo"_FCShash,"EMB1_geo"_FCShash,"EMB2_geo"_FCShash,"EMB3_geo"_FCShash,
 "PreSamplerE_geo"_FCShash,"EME1_geo"_FCShash,"EME2_geo"_FCShash,"EME3_geo"_FCShash,
 "HEC0_geo"_FCShash,"HEC1_geo"_FCShash,"HEC2_geo"_FCShash,"HEC3_geo"_FCShash,

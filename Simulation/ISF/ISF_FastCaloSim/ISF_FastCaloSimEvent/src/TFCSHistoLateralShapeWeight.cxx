@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2019 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "CLHEP/Random/RandFlat.h"
@@ -91,7 +91,7 @@ void TFCSHistoLateralShapeWeight::Print(Option_t *option) const
   TFCSLateralShapeParametrizationHitBase::Print(option);
 
   if(longprint) {
-    if(m_hist) ATH_MSG_INFO(optprint <<"  Histogram: "<<m_hist->GetNbinsX()<<" bins ["<<m_hist->GetXaxis()->GetXmin()<<","<<m_hist->GetXaxis()->GetXmax()<<"]" << " min weight: " << m_minWeight << " max weight: " << m_maxWeight);
+    if(m_hist) ATH_MSG_INFO(optprint <<"  Histogram: "<<m_hist->GetNbinsX()<<" bins ["<<std::as_const(m_hist)->GetXaxis()->GetXmin()<<","<<std::as_const(m_hist)->GetXaxis()->GetXmax()<<"]" << " min weight: " << m_minWeight << " max weight: " << m_maxWeight);
      else ATH_MSG_INFO(optprint <<"  no Histogram");
   }  
 }

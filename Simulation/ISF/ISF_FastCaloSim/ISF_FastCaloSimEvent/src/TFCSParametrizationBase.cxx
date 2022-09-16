@@ -21,7 +21,6 @@
 //======= TFCSParametrizationBase =========
 //=============================================
 
-std::set< int > TFCSParametrizationBase::s_no_pdgid;
 std::vector< TFCSParametrizationBase* > TFCSParametrizationBase::s_cleanup_list;
 
 #if defined(__FastCaloSimStandAlone__)
