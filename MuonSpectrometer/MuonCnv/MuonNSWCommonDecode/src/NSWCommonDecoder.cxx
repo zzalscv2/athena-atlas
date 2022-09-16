@@ -7,6 +7,7 @@
 #include "MuonNSWCommonDecode/NSWElink.h"
 #include "MuonNSWCommonDecode/VMMChannel.h"
 #include "MuonNSWCommonDecode/NSWCommonDecoder.h"
+#include "MuonNSWCommonDecode/NSWDecodeExceptions.h"
 
 Muon::nsw::NSWCommonDecoder::NSWCommonDecoder (const eformat::read::ROBFragment &robFrag)
   : m_has_error (false)
@@ -47,17 +48,17 @@ Muon::nsw::NSWCommonDecoder::NSWCommonDecoder (const eformat::read::ROBFragment 
       remaining = nw - wcount;
     }
 
-    catch (Muon::nsw::NSWElinkFelixHeaderException &e)
+    catch (Muon::nsw::MuonNSWCommonDecoder::NSWElinkFelixHeaderException &e)
     {
       m_has_error = true;
-      //ers_error (e);
+      ers::warning (e);
       break;
     }
 
-    catch (Muon::nsw::NSWElinkROCHeaderException &e)
+    catch (Muon::nsw::MuonNSWCommonDecoder::NSWElinkROCHeaderException &e)
     {
       m_has_error = true;
-      //ers_error (e);
+      ers::warning (e);
 
       // Try to move to next link
 
