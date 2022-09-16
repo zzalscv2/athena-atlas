@@ -11,6 +11,10 @@
 namespace HepMC3 {
 inline std::vector<HepMC3::ConstGenParticlePtr>::const_iterator  begin(const HepMC3::GenVertex& v) { return v.particles_out().begin(); }
 inline std::vector<HepMC3::ConstGenParticlePtr>::const_iterator  end(const HepMC3::GenVertex& v) { return v.particles_out().end(); }
+
+/// @brief Print one-line info with idiomatic C++ printing
+/// @note More generic printing methods from HepMC3::Print should be preffered - move to PrintStreams.h?
+inline std::ostream& operator<<(std::ostream& os,  GenVertexPtr v) { ConstGenVertexPtr cv = v; Print::line(os,cv); return os; }
 }
 namespace HepMC {
 typedef HepMC3::GenVertexPtr GenVertexPtr;
