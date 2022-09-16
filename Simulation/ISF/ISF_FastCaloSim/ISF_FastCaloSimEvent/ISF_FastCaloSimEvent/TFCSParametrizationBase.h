@@ -105,7 +105,7 @@ public:
   virtual bool is_match_all_Ekin_bin() const {return false;};
   virtual bool is_match_all_calosample() const {return false;};
 
-  virtual const std::set< int > &pdgid() const {return s_no_pdgid;};
+  virtual const std::set< int > &pdgid() const {static const std::set<int> empty; return empty;};
   virtual double Ekin_nominal() const {return init_Ekin_nominal;};
   virtual double Ekin_min() const {return init_Ekin_min;};
   virtual double Ekin_max() const {return init_Ekin_max;};
@@ -229,7 +229,6 @@ private:
 #endif  
   
 private:
-  static std::set< int > s_no_pdgid;
 
   ClassDef(TFCSParametrizationBase,2)  //TFCSParametrizationBase
 };
