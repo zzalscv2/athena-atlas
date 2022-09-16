@@ -98,7 +98,9 @@ RpcPad* RpcByteStreamDecoder::decodePad(PADreadout& pad) {
     PadReadOutStructure pad_header = readout->getHeader();
     PadReadOutStructure pad_footer = readout->getFooter();
     // Check the data format
+    // cppcheck-suppress assertWithSideEffect
     assert(pad_header.isHeader());
+    // cppcheck-suppress assertWithSideEffect
     assert(pad_footer.isFooter());
 
     unsigned int hashId = index.hash();
