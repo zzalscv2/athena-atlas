@@ -17,20 +17,21 @@
 
 // default constructor
 Trk::RotatedTrapezoidBounds::RotatedTrapezoidBounds()
-  : m_boundValues(RotatedTrapezoidBounds::bv_length, 0.)
-  , m_kappa(0.)
-  , m_delta(0.)
+  : m_boundValues(RotatedTrapezoidBounds::bv_length, 0.)  
 {}
 
 // constructor from arguments I
+Trk::RotatedTrapezoidBounds::RotatedTrapezoidBounds(double halex, double minhalex, double maxhalex, double alpha):
+    RotatedTrapezoidBounds(halex, minhalex, maxhalex){
+    m_rotMat = Eigen::Rotation2D{alpha};
+}
 Trk::RotatedTrapezoidBounds::RotatedTrapezoidBounds(double halex, double minhalex, double maxhalex)
   : m_boundValues(RotatedTrapezoidBounds::bv_length, 0.)
-  , m_kappa(0.)
-  , m_delta(0.)
+  
 {
-  m_boundValues[RotatedTrapezoidBounds::bv_halfX] = fabs(halex);
-  m_boundValues[RotatedTrapezoidBounds::bv_minHalfY] = fabs(minhalex);
-  m_boundValues[RotatedTrapezoidBounds::bv_maxHalfY] = fabs(maxhalex);
+  m_boundValues[RotatedTrapezoidBounds::bv_halfX] = std::abs(halex);
+  m_boundValues[RotatedTrapezoidBounds::bv_minHalfY] = std::abs(minhalex);
+  m_boundValues[RotatedTrapezoidBounds::bv_maxHalfY] = std::abs(maxhalex);
   // swap if needed
   if (m_boundValues[RotatedTrapezoidBounds::bv_minHalfY] > m_boundValues[RotatedTrapezoidBounds::bv_maxHalfY])
     swap(m_boundValues[RotatedTrapezoidBounds::bv_minHalfY], m_boundValues[RotatedTrapezoidBounds::bv_maxHalfY]);
@@ -51,12 +52,13 @@ Trk::RotatedTrapezoidBounds::operator==(const Trk::SurfaceBounds& sbo) const
 
 // checking if inside bounds
 bool
-Trk::RotatedTrapezoidBounds::inside(const Amg::Vector2D& locpo, double tol1, double tol2) const
+Trk::RotatedTrapezoidBounds::inside(const Amg::Vector2D& pos, double tol1, double tol2) const
 {
 
   // the cases:
-  double fabsX = fabs(locpo[Trk::locX]);
-  double fabsY = fabs(locpo[Trk::locY]);
+  const Amg::Vector2D locpo = m_rotMat * pos;
+  double fabsX = std::abs(locpo[Trk::locX]);
+  double fabsY = std::abs(locpo[Trk::locY]);
   // (1) a fast FALSE
   if (fabsX > (m_boundValues[RotatedTrapezoidBounds::bv_halfX] + tol1))
     return false;
@@ -79,15 +81,16 @@ Trk::RotatedTrapezoidBounds::isBelow(double locX, double fabsLocY, double tol1, 
 }
 
 double
-Trk::RotatedTrapezoidBounds::minDistance(const Amg::Vector2D& pos) const
+Trk::RotatedTrapezoidBounds::minDistance(const Amg::Vector2D& locpo) const
 {
-  const int Np = 4;
+  const Amg::Vector2D pos = m_rotMat * locpo;
+  constexpr int Np = 4;
 
-  double X[4] = { -m_boundValues[RotatedTrapezoidBounds::bv_halfX],
+  const std::array<double,4> X{ -m_boundValues[RotatedTrapezoidBounds::bv_halfX],
                   -m_boundValues[RotatedTrapezoidBounds::bv_halfX],
                   m_boundValues[RotatedTrapezoidBounds::bv_halfX],
                   m_boundValues[RotatedTrapezoidBounds::bv_halfX] };
-  double Y[4] = { -m_boundValues[RotatedTrapezoidBounds::bv_minHalfY],
+  const std::array<double,4> Y{ -m_boundValues[RotatedTrapezoidBounds::bv_minHalfY],
                   m_boundValues[RotatedTrapezoidBounds::bv_minHalfY],
                   m_boundValues[RotatedTrapezoidBounds::bv_maxHalfY],
                   -m_boundValues[RotatedTrapezoidBounds::bv_maxHalfY] };
@@ -124,9 +127,9 @@ Trk::RotatedTrapezoidBounds::minDistance(const Amg::Vector2D& pos) const
     Ao = A;
   }
   if (in){
-    return -sqrt(dm);
+    return -std::sqrt(dm);
   }
-  return sqrt(dm);
+  return std::sqrt(dm);
 }
 
 // ostream operator overload
