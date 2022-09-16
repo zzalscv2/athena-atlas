@@ -28,11 +28,9 @@ DerivationFramework::JetCaloClusterThinning::JetCaloClusterThinning(
   , m_ntotTopo(0)
   , m_npassTopo(0)
   , m_selectionString("")
-  , m_coneSize(-1.0)
 {
   declareInterface<DerivationFramework::IThinningTool>(this);
   declareProperty("SelectionString", m_selectionString);
-  declareProperty("ConeSize", m_coneSize);
 }
 
 // Destructor
@@ -56,6 +54,12 @@ DerivationFramework::JetCaloClusterThinning::initialize()
       << m_sgKey.key()
       << " will be retained in this format with the rest being thinned away");
     ATH_CHECK(m_sgKey.initialize());
+  }
+
+  for(unsigned int i=0; i < m_addClusterSGKey.size(); i++){
+    m_tmpAddClusterKey = m_addClusterSGKey[i];
+    ATH_CHECK(m_tmpAddClusterKey.initialize(m_streamName));
+    m_addClusterKeys.push_back(m_tmpAddClusterKey);
   }
 
   // Set up the text-parsing machinery for selectiong the photon directly
@@ -92,7 +96,7 @@ DerivationFramework::JetCaloClusterThinning::doThinning() const
   if (nTopoClusters == 0)
     return StatusCode::SUCCESS;
 
-  // Set up a mask with the same entries as the full TrackParticle collection(s)
+  // Set up a mask with the same entries as the full CaloCalTopoClusters collection(s)
   std::vector<bool> topomask;
   topomask.assign(nTopoClusters, false);
   m_ntotTopo += nTopoClusters;
@@ -127,15 +131,32 @@ DerivationFramework::JetCaloClusterThinning::doThinning() const
         if (entries[i] == 1)
           jetToCheck.push_back((*importedJets)[i]);
     }
-  }
 
-  // Set elements in the mask to true if there is a corresponding ElementLink
-  // from a reconstructed object
-  if (m_selectionString.empty()) { // check all objects as user didn't provide a
-                                   // selection string
-    setJetClustersMask(topomask, importedJets, importedTopoCaloCluster.cptr());
-  } else {
-    setJetClustersMask(topomask, jetToCheck, importedTopoCaloCluster.cptr());
+    if(jetToCheck.size() == 0)
+      return StatusCode::SUCCESS;
+    
+    for( const xAOD::Jet* jet : jetToCheck){
+      const auto& links = jet->constituentLinks();
+      for( const auto& link : links ) {
+        // Check that the link is valid:                                                                                                                                                                    
+        if( ! link.isValid() ) {
+          continue;
+        }
+        topomask.at( link.index() ) = true;
+      }
+    }
+  }
+  else{
+    for( const xAOD::Jet* jet : *importedJets){
+      const auto& links = jet->constituentLinks();
+      for( const auto& link : links ) {
+	// Check that the link is valid:
+	if( ! link.isValid() ) {
+	  continue;
+	}
+	topomask.at( link.index() ) = true;
+      }
+    }
   }
 
   // Count up the mask contents
@@ -147,79 +168,10 @@ DerivationFramework::JetCaloClusterThinning::doThinning() const
   // Execute the thinning service based on the mask. Finish.
   importedTopoCaloCluster.keep(topomask);
 
+  for(unsigned int i = 0; i < m_addClusterKeys.size(); i++){
+    SG::ThinningHandle<xAOD::CaloClusterContainer>  tempClusters(m_addClusterKeys[i]);
+    tempClusters.keep(topomask);
+  }
+
   return StatusCode::SUCCESS;
 }
-
-void
-DerivationFramework::JetCaloClusterThinning::setJetClustersMask(
-  std::vector<bool>& mask,
-  const xAOD::JetContainer* jets,
-  const xAOD::CaloClusterContainer* cps) const
-{
-  for (xAOD::JetContainer::const_iterator jetIt = jets->begin();
-       jetIt != jets->end();
-       ++jetIt) {
-    const xAOD::Jet* jet = dynamic_cast<const xAOD::Jet*>(*jetIt);
-    if (jet)
-      select(jet, m_coneSize, cps, mask); // check clusters amongst constituents
-  }
-
-  }
-
-void
-DerivationFramework::JetCaloClusterThinning::setJetClustersMask(
-  std::vector<bool>& mask,
-  std::vector<const xAOD::Jet*>& jets,
-  const xAOD::CaloClusterContainer* cps) const
-{
-  for (std::vector<const xAOD::Jet*>::iterator jetIt = jets.begin();
-       jetIt != jets.end();
-       ++jetIt) {
-    const xAOD::Jet* jet = dynamic_cast<const xAOD::Jet*>(*jetIt);
-    if (jet)
-      select(jet, m_coneSize, cps, mask); // check clusters amongst constituents
-  }
-  }
-
-void
-DerivationFramework::JetCaloClusterThinning::select(
-  const xAOD::Jet* particle,
-  float coneSize,
-  const xAOD::CaloClusterContainer* clusters,
-  std::vector<bool>& mask)
-{
-  xAOD::JetConstituentVector vec = particle->getConstituents();
-  xAOD::JetConstituentVector::iterator it = vec.begin();
-  xAOD::JetConstituentVector::iterator itE = vec.end();
-  for (; it != itE; ++it) {
-    unsigned int i(0);
-    for (xAOD::CaloClusterContainer::const_iterator clIt = clusters->begin();
-         clIt != clusters->end();
-         ++clIt, ++i) {
-      float deltaEta = (*clIt)->eta() - (*it)->eta();
-      float deltaPhi = fabs((*clIt)->phi() - (*it)->phi());
-      if (deltaPhi > TMath::Pi())
-        deltaPhi = 2.0 * TMath::Pi() - deltaPhi;
-      float deltaR = sqrt(deltaEta * deltaEta + deltaPhi * deltaPhi);
-      if (deltaR < 0.05)
-        mask[i] = true;
-    }
-  }
-  if (coneSize > 0) {
-    unsigned int i(0);
-    float particleEta = particle->eta();
-    float particlePhi = particle->phi();
-    for (xAOD::CaloClusterContainer::const_iterator clIt = clusters->begin();
-         clIt != clusters->end();
-         ++clIt, ++i) {
-      float deltaEta = (*clIt)->eta() - particleEta;
-      float deltaPhi = fabs((*clIt)->phi() - particlePhi);
-      if (deltaPhi > TMath::Pi())
-        deltaPhi = 2.0 * TMath::Pi() - deltaPhi;
-      float deltaR = sqrt(deltaEta * deltaEta + deltaPhi * deltaPhi);
-      if (deltaR < coneSize)
-        mask[i] = true;
-    }
-  }
-  }
-

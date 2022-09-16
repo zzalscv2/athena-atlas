@@ -69,7 +69,7 @@ JETM8AKt10CCThinningTool = DerivationFramework__JetCaloClusterThinning(name     
                                                                        SGKey                 = "AntiKt10LCTopoJets",
                                                                        SelectionString       = "(AntiKt10LCTopoJets.pt > 150*GeV && abs(AntiKt10LCTopoJets.eta) < 2.8)",
                                                                        TopoClCollectionSGKey = "CaloCalTopoClusters",
-#                                                                       AdditionalClustersKey = ["LCOriginTopoClusters"], #features needs to be migrated to r22
+                                                                       AdditionalClustersKey = ["LCOriginTopoClusters"],
                                                                      )
 ToolSvc += JETM8AKt10CCThinningTool
 thinningTools.append(JETM8AKt10CCThinningTool)
