@@ -1,10 +1,11 @@
 /*
-  Copyright (C) 2002-2018 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef ISF_FASTCALOSIMEVENT_TFCS1DFunctionSpline_h
 #define ISF_FASTCALOSIMEVENT_TFCS1DFunctionSpline_h
 
+#include "CxxUtils/checker_macros.h"
 #include "ISF_FastCaloSimEvent/TFCS1DFunction.h"
 #include <TSpline.h>
 #include <vector>
@@ -12,7 +13,8 @@
 class TH1;
 class TFCS1DFunctionInt32Histogram;
 
-class TFCS1DFunctionSpline:public TFCS1DFunction
+class ATLAS_NOT_THREAD_SAFE TFCS1DFunctionSpline:public TFCS1DFunction
+//    ^ heavy use of gRandom, but class is not used anywhere
 {
   public:
     TFCS1DFunctionSpline(TH1* hist=nullptr,double maxdevgoal=0.01,double maxeffsiggoal=3,int maxnp=20) {if(hist) Initialize(hist,maxdevgoal,maxeffsiggoal,maxnp);};
@@ -35,7 +37,7 @@ class TFCS1DFunctionSpline:public TFCS1DFunction
     const TSpline3& spline() const {return m_spline;};
     TSpline3& spline() {return m_spline;};
 
-    static void unit_test(TH1* hist=nullptr);
+    static void unit_test ATLAS_NOT_THREAD_SAFE (TH1* hist=nullptr);
   protected:
     double optimize(TSpline3& sp_best,std::vector<double>& nprop,const TH1* hist,TFCS1DFunctionInt32Histogram& hist_fct,double maxdevgoal=0.01,double maxeffsiggoal=3);
 

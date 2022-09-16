@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2017 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "ISF_FastCaloSimEvent/TFCS2DFunction.h"
@@ -63,7 +63,7 @@ double TFCS2DFunction::CheckAndIntegrate2DHistogram(const TH2* hist, std::vector
   return integral;
 }
 
-TH2* create_random_TH2(int nbinsx=64,int nbinsy=64)
+TH2* create_random_TH2 ATLAS_NOT_THREAD_SAFE (int nbinsx=64,int nbinsy=64)
 {
   TH2* hist=new TH2F("test2D","test2D",nbinsx,0,1,nbinsy,0,1);
   hist->Sumw2();
@@ -77,7 +77,7 @@ TH2* create_random_TH2(int nbinsx=64,int nbinsy=64)
   return hist;
 }
 
-void TFCS2DFunction::unit_test(TH2* hist,TFCS2DFunction* rtof,const char* outfilename,int nrnd)
+void TFCS2DFunction::unit_test ATLAS_NOT_THREAD_SAFE (TH2* hist,TFCS2DFunction* rtof,const char* outfilename,int nrnd)
 {
   if(hist==nullptr) hist=create_random_TH2();
   if(rtof==nullptr) rtof=new TFCS2DFunctionHistogram(hist);
@@ -140,7 +140,7 @@ void TFCS2DFunction::unit_test(TH2* hist,TFCS2DFunction* rtof,const char* outfil
 #endif
 }
 
-void TFCS2DFunction::unit_tests(TH2* hist,const char* outfilename,int nrnd)
+void TFCS2DFunction::unit_tests ATLAS_NOT_THREAD_SAFE (TH2* hist,const char* outfilename,int nrnd)
 {
   if(hist==nullptr) hist=create_random_TH2(16,16);
   
