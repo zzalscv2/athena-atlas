@@ -87,6 +87,11 @@ def TrigBjetMonConfig(inputFlags):
         log.info (" ==> BeamType is not collision: %s", inputFlags.Beam.Type)
     trigBjetMonAlg.CollisionRun = CollisionRun
 
+
+    # Set Express Stream Flag
+    ExpressStreamFlag = inputFlags.Common.doExpressProcessing
+    trigBjetMonAlg.ExpressStreamFlag = ExpressStreamFlag
+
     # Add some tools. N.B. Do not use your own trigger decion tool. Use the
     # standard one that is included with AthMonitorAlgorithm.
 
@@ -696,7 +701,7 @@ if __name__=='__main__':
     #ConfigFlags.Input.isMC = False
 
     # AOD file to be run w/ MT access and Mon Groups implemented
-    file = '/afs/cern.ch/work/e/enagy/public/ARTfiles/MCBugtest270622.AOD.pool.root'
+    file = '/afs/cern.ch/work/e/enagy/public/ARTfiles/MCtest090922.AOD.pool.root'
 
     ConfigFlags.Input.Files = [file]
     ConfigFlags.Input.isMC = True
