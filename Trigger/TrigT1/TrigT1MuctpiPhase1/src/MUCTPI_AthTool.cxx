@@ -44,10 +44,10 @@ namespace LVL1MUCTPIPHASE1 {
   const std::string MUCTPI_AthTool::m_DEFAULT_L1MuctpiStoreLocationTGC = "/Event/L1MuctpiStoreTGC";
   const std::string MUCTPI_AthTool::m_DEFAULT_AODLocID                 = "LVL1_ROI";
   const std::string MUCTPI_AthTool::m_DEFAULT_RDOLocID                 = "MUCTPI_RDO";
-  const std::string MUCTPI_AthTool::m_DEFAULT_barrelRoIFile            = "TrigConfMuctpi/Data_ROI_Mapping_Barrel_20201214.txt";
-  const std::string MUCTPI_AthTool::m_DEFAULT_ecfRoIFile               = "TrigConfMuctpi/Data_RoI_Mapping_EF_20201214.txt";
-  const std::string MUCTPI_AthTool::m_DEFAULT_side0LUTFile             = "TrigConfMuctpi/lookup_0_20201214.json";
-  const std::string MUCTPI_AthTool::m_DEFAULT_side1LUTFile             = "TrigConfMuctpi/lookup_1_20201214.json";
+  const std::string MUCTPI_AthTool::m_DEFAULT_barrelRoIFile            = "TrigConfMuctpi/Data_ROI_Mapping_Barrel_040422.txt";
+  const std::string MUCTPI_AthTool::m_DEFAULT_ecfRoIFile               = "TrigConfMuctpi/Data_RoI_Mapping_EF_040422.txt";
+  const std::string MUCTPI_AthTool::m_DEFAULT_side0LUTFile             = "TrigConfMuctpi/lookup_0_040422.json";
+  const std::string MUCTPI_AthTool::m_DEFAULT_side1LUTFile             = "TrigConfMuctpi/lookup_1_040422.json";
 
   MUCTPI_AthTool::MUCTPI_AthTool(const std::string& type, const std::string& name, const IInterface* parent)
   : AthAlgTool(type, name, parent)

@@ -11,7 +11,7 @@
 #include <string>
 
 #include "Configuration.h"
-#include "L1TopoLUT.h"
+#include "TrigT1MuctpiPhase1/L1TopoLUT.h"
 #include "MuonSectorProcessor.h"
 #include "TriggerProcessor.h"
 #include "MUCTPIResults.h"
