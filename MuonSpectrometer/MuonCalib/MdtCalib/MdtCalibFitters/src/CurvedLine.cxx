@@ -60,7 +60,7 @@ CurvedLine::CurvedLine(std::vector<Amg::Vector3D>& points) {
     // FILL VARIABLES //
     ////////////////////
 
-    for (unsigned int k = 0; k < errors.size(); k++) { errors[k] = Amg::Vector3D(1.0, 1.0, 0.0); }
+    for (auto & error : errors) { error = Amg::Vector3D(1.0, 1.0, 0.0); }
 
     ////////////////////
     // INITIALIZATION //

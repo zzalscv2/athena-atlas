@@ -106,14 +106,14 @@ namespace MuonCalib {
             for (unsigned int i = 0; i < m_sort_by.size(); i++) { analyse_tdc(i, full, st, fit_by); }
         for (unsigned int i = 0; i < m_adc_sort_by.size(); i++) { analyse_adc(i, full, st); }
 
-        for (std::map<int, MdtTubeFitContainer::SingleTubeFit>::iterator it = full.begin(); it != full.end(); it++) {
-            if (it->first == 0) continue;
-            MuonFixedId fId(it->first);
+        for (auto & it : full) {
+            if (it.first == 0) continue;
+            MuonFixedId fId(it.first);
             NtupleStationId sid(fId);
             sid.SetMultilayer(0);
-            MdtTubeFitContainer::SingleTubeFit &fi(it->second);
-            MdtTubeFitContainer::SingleTubeCalib &stc(st[it->first]);
-            fi.group_by = fit_by[it->first];
+            MdtTubeFitContainer::SingleTubeFit &fi(it.second);
+            MdtTubeFitContainer::SingleTubeCalib &stc(st[it.first]);
+            fi.group_by = fit_by[it.first];
             int nML = fId.mdtMultilayer();
             int nL = fId.mdtTubeLayer();
             int nT = fId.mdtTube();
@@ -168,7 +168,7 @@ namespace MuonCalib {
     }
 
     IMdtCalibration::MdtCalibOutputPtr T0CalibrationMT::analyseSegments(const MuonSegVec &segs) {
-        for (unsigned int i = 0; i < segs.size(); i++) handleSegment(*segs[i]);
+        for (const auto & seg : segs) handleSegment(*seg);
         analyse();
         return getResults();
     }
@@ -191,14 +191,14 @@ namespace MuonCalib {
             theGroup = MdtRelativeTubeT0::MEZZ_CARD;
         if (T0h->FitT0() && m_settings->MinEntriesTime() <= T0h->GetTSpec()->GetEntries()) {
             const TF1 *fun(T0h->GetT0Function());
-            for (std::set<MuonFixedId>::const_iterator it = tube_ids.begin(); it != tube_ids.end(); it++) {
-                if (it->getIdInt() == 0) continue;
-                NtupleStationId stId(*it);
+            for (auto tube_id : tube_ids) {
+                if (tube_id.getIdInt() == 0) continue;
+                NtupleStationId stId(tube_id);
                 stId.SetMultilayer(0);
                 double rel_t0(0.0);
-                if (m_settings->T0Settings()->CorrectRelT0s()) rel_t0 = m_rel_tube_t0s[stId].GetRelativeOffset(*it, theGroup);
-                MdtTubeFitContainer::SingleTubeFit &fi(fim[it->getIdInt()]);
-                MdtTubeFitContainer::SingleTubeCalib &stc(stcm[it->getIdInt()]);
+                if (m_settings->T0Settings()->CorrectRelT0s()) rel_t0 = m_rel_tube_t0s[stId].GetRelativeOffset(tube_id, theGroup);
+                MdtTubeFitContainer::SingleTubeFit &fi(fim[tube_id.getIdInt()]);
+                MdtTubeFitContainer::SingleTubeCalib &stc(stcm[tube_id.getIdInt()]);
                 // store parameters
                 fi.statistics = static_cast<int>(T0h->GetTSpec()->GetEntries());
                 fi.chi2Tdc = T0h->T0Chi2();
@@ -211,15 +211,15 @@ namespace MuonCalib {
                 stc.t0 = fun->GetParameter(T0MTHistos ::T0_PAR_NR_T0) + rel_t0;
                 stc.statusCode = T0h->StatusCode();
                 m_converged = true;
-                fit_by_map[it->getIdInt()] = fit_by;
+                fit_by_map[tube_id.getIdInt()] = fit_by;
             }
         }
         if (T0h->FitTmax() && m_settings->MinEntriesTime() <= T0h->GetTSpec()->GetEntries()) {
             const TF1 *fun(T0h->GetTMaxFunction());
             // store parameters
-            for (std::set<MuonFixedId>::const_iterator it = tube_ids.begin(); it != tube_ids.end(); it++) {
-                if (it->getIdInt() == 0) continue;
-                MdtTubeFitContainer::SingleTubeFit &fi(fim[it->getIdInt()]);
+            for (auto tube_id : tube_ids) {
+                if (tube_id.getIdInt() == 0) continue;
+                MdtTubeFitContainer::SingleTubeFit &fi(fim[tube_id.getIdInt()]);
                 //			MdtTubeFitContainer::SingleTubeCalib &stc(stcm[*it]);
                 fi.par[5] = fun->GetParameter(T0MTHistos ::TMAX_PAR_NR_TMAX);
                 fi.cov[5] = fun->GetParError(T0MTHistos ::TMAX_PAR_NR_TMAX);
@@ -235,10 +235,10 @@ namespace MuonCalib {
         if (T0h->FitAdc() && m_settings->MinEntriesADC() <= T0h->GetADCSpec()->GetEntries()) {
             const TF1 *fun(T0h->GetAdcFunction());
             if (fun == nullptr) return;
-            for (std::set<MuonFixedId>::const_iterator it = tube_ids.begin(); it != tube_ids.end(); it++) {
-                if (it->getIdInt() == 0) continue;
-                MdtTubeFitContainer::SingleTubeFit &fi(fim[it->getIdInt()]);
-                MdtTubeFitContainer::SingleTubeCalib &stc(stcm[it->getIdInt()]);
+            for (auto tube_id : tube_ids) {
+                if (tube_id.getIdInt() == 0) continue;
+                MdtTubeFitContainer::SingleTubeFit &fi(fim[tube_id.getIdInt()]);
+                MdtTubeFitContainer::SingleTubeCalib &stc(stcm[tube_id.getIdInt()]);
 
                 stc.adcCal = fun->GetParameter(1);
                 for (int i = 0; (i < fun->GetNpar() && i < 4); i++) {
@@ -288,8 +288,8 @@ namespace MuonCalib {
         const T0CalibrationOutput *t0Input = dynamic_cast<const T0CalibrationOutput *>(calib_in);
         if (!calib_in || !t0Input) return;
         m_result = t0Input->GetMap();
-        for (std::map<NtupleStationId, MdtTubeFitContainer *>::iterator it = m_result.begin(); it != m_result.end(); it++)
-            it->second->setImplementation("T0CalibrationMT");
+        for (auto & it : m_result)
+            it.second->setImplementation("T0CalibrationMT");
     }
 
     bool T0CalibrationMT::converged() const { return m_converged; }

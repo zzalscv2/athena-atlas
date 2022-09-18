@@ -54,7 +54,7 @@ void RtCalibrationIntegration::init(bool close_hits, double r_max, double lower_
 unsigned int RtCalibrationIntegration::number_of_hits_used() const { return m_nb_hits_used; }
 
 RtCalibrationIntegration::MdtCalibOutputPtr RtCalibrationIntegration::analyseSegments(const MuonSegVec &seg) {
-    for (unsigned int k = 0; k < seg.size(); k++) { handleSegment(*seg[k]); }
+    for (const auto & k : seg) { handleSegment(*k); }
     m_nb_segments_used = seg.size();
     analyse();
 
@@ -134,9 +134,9 @@ bool RtCalibrationIntegration::analyse() {
     tspec_ml[0] = std::make_unique<TH1F>("tspec_ml0", "DRIFT-TIME SPECTRUM ML 0", n_bins, min_t, max_t);
     tspec_ml[1] = std::make_unique<TH1F>("tspec_ml1", "DRIFT-TIME SPECTRUM ML 1", n_bins, min_t, max_t);
 
-    for (unsigned int k = 0; k < m_t_drift.size(); k++) {
-        tspec->Fill(m_t_drift[k].first, 1.0);
-        tspec_ml[static_cast<unsigned int>(m_t_drift[k].second)]->Fill(m_t_drift[k].first, 1.0);
+    for (auto & k : m_t_drift) {
+        tspec->Fill(k.first, 1.0);
+        tspec_ml[static_cast<unsigned int>(k.second)]->Fill(k.first, 1.0);
     }
     drift_time_spec.SetTSpec(1, tspec.get(), &t0_setting, false);
     drift_time_spec_ml[0].SetTSpec(2, tspec_ml[0].get(), &t0_setting, false);

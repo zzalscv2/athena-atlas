@@ -104,10 +104,10 @@ RtCalibrationCurved::MdtCalibOutputPtr RtCalibrationCurved::analyseSegments(cons
     /////////////////////
     // Initial RESIDUALS //
     /////////////////////
-    for (unsigned int k = 0; k < seg.size(); k++) {
-        for (unsigned int l = 0; l < seg[k]->hitsOnTrack(); l++) {
-            double rr = (seg[k]->mdtHOT())[l]->driftRadius();
-            double dd = (seg[k]->mdtHOT())[l]->signedDistanceToTrack();
+    for (const auto & k : seg) {
+        for (unsigned int l = 0; l < k->hitsOnTrack(); l++) {
+            double rr = (k->mdtHOT())[l]->driftRadius();
+            double dd = (k->mdtHOT())[l]->signedDistanceToTrack();
             if (m_residuals_final) m_residuals_initial_all->Fill(std::abs(dd), std::abs(rr) - std::abs(dd));
             m_driftTime_initial->Fill(rr, dd);
         }
@@ -117,7 +117,7 @@ RtCalibrationCurved::MdtCalibOutputPtr RtCalibrationCurved::analyseSegments(cons
     // AUTOCALIBRATION LOOP //
     //////////////////////////
     while (!converged()) {
-        for (unsigned int k = 0; k < seg.size(); k++) { handleSegment(*seg[k]); }
+        for (const auto & k : seg) { handleSegment(*k); }
         if (!analyse(seg)) {
             MsgStream log(Athena::getMessageSvc(), "RtCalibrationCurved");
             log << MSG::WARNING << "analyseSegments() - analyse failed, segments:" << endmsg;
@@ -148,11 +148,11 @@ RtCalibrationCurved::MdtCalibOutputPtr RtCalibrationCurved::analyseSegments(cons
     if (!m_do_smoothing) {
         // final residuals //
         double r{0}, d{0}, adc{0};
-        for (unsigned int k = 0; k < seg.size(); k++) {
-            for (unsigned int l = 0; l < seg[k]->hitsOnTrack(); l++) {
-                adc = (seg[k]->mdtHOT())[l]->adcCount();
-                r = (seg[k]->mdtHOT())[l]->driftRadius();
-                d = (seg[k]->mdtHOT())[l]->signedDistanceToTrack();
+        for (const auto & k : seg) {
+            for (unsigned int l = 0; l < k->hitsOnTrack(); l++) {
+                adc = (k->mdtHOT())[l]->adcCount();
+                r = (k->mdtHOT())[l]->driftRadius();
+                d = (k->mdtHOT())[l]->signedDistanceToTrack();
                 if (m_residuals_final) m_residuals_final->Fill(std::abs(d), std::abs(r) - std::abs(d));
                 m_driftTime_final->Fill(r, d);
                 m_adc_vs_residual_final->Fill(adc, std::abs(r) - std::abs(d));
@@ -182,22 +182,22 @@ RtCalibrationCurved::MdtCalibOutputPtr RtCalibrationCurved::analyseSegments(cons
         // counter //
         unsigned int counter{0}, counter2{0};
         // overwrite drift radii and calculate the average resolution //
-        for (unsigned int k = 0; k < seg.size(); k++) {
-            if (seg[k]->mdtHitsOnTrack() < 4) { continue; }
+        for (const auto & k : seg) {
+            if (k->mdtHitsOnTrack() < 4) { continue; }
             counter2++;
             double avres(0.0);
-            for (unsigned int h = 0; h < seg[k]->mdtHitsOnTrack(); h++) {
-                seg[k]->mdtHOT()[h]->setDriftRadius(tmp_rt->radius(seg[k]->mdtHOT()[h]->driftTime()),
-                                                    seg[k]->mdtHOT()[h]->sigmaDriftRadius());
-                if (seg[k]->mdtHOT()[h]->sigmaDriftRadius() < 0.5 * m_r_max) {
-                    avres = avres + seg[k]->mdtHOT()[h]->sigma2DriftRadius();
+            for (unsigned int h = 0; h < k->mdtHitsOnTrack(); h++) {
+                k->mdtHOT()[h]->setDriftRadius(tmp_rt->radius(k->mdtHOT()[h]->driftTime()),
+                                                    k->mdtHOT()[h]->sigmaDriftRadius());
+                if (k->mdtHOT()[h]->sigmaDriftRadius() < 0.5 * m_r_max) {
+                    avres = avres + k->mdtHOT()[h]->sigma2DriftRadius();
                 } else {
                     avres = avres + 0.01;
                 }
             }
-            avres = avres / static_cast<double>(seg[k]->mdtHitsOnTrack());
+            avres = avres / static_cast<double>(k->mdtHitsOnTrack());
             avres = std::sqrt(avres);
-            if (smoothing.addResidualsFromSegment(*seg[k], true, 5.0 * avres)) { counter++; }
+            if (smoothing.addResidualsFromSegment(*k, true, 5.0 * avres)) { counter++; }
         }
 
         // break, do no smoothing if there are not enough segments //
@@ -205,10 +205,10 @@ RtCalibrationCurved::MdtCalibOutputPtr RtCalibrationCurved::analyseSegments(cons
             MsgStream log(Athena::getMessageSvc(), "RtCalibrationCurved");
             log << MSG::WARNING << "analyseSegments() - too small number of reconstructed segments!" << endmsg;
             // final residuals //
-            for (unsigned int k = 0; k < seg.size(); k++) {
-                for (unsigned int l = 0; l < seg[k]->hitsOnTrack(); l++) {
-                    double r = (seg[k]->mdtHOT())[l]->driftRadius();
-                    double d = (seg[k]->mdtHOT())[l]->signedDistanceToTrack();
+            for (const auto & k : seg) {
+                for (unsigned int l = 0; l < k->hitsOnTrack(); l++) {
+                    double r = (k->mdtHOT())[l]->driftRadius();
+                    double d = (k->mdtHOT())[l]->signedDistanceToTrack();
                     if (m_residuals_final) m_residuals_final->Fill(d, std::abs(r) - std::abs(d), 1.0);
                 }
             }
@@ -242,11 +242,11 @@ RtCalibrationCurved::MdtCalibOutputPtr RtCalibrationCurved::analyseSegments(cons
     /////////////////////
     // FINAL RESIDUALS //
     /////////////////////
-    for (unsigned int k = 0; k < seg.size(); k++) {
-        for (unsigned int l = 0; l < seg[k]->hitsOnTrack(); l++) {
-            double adc = (seg[k]->mdtHOT())[l]->adcCount();
-            double r = (seg[k]->mdtHOT())[l]->driftRadius();
-            double d = (seg[k]->mdtHOT())[l]->signedDistanceToTrack();
+    for (const auto & k : seg) {
+        for (unsigned int l = 0; l < k->hitsOnTrack(); l++) {
+            double adc = (k->mdtHOT())[l]->adcCount();
+            double r = (k->mdtHOT())[l]->driftRadius();
+            double d = (k->mdtHOT())[l]->signedDistanceToTrack();
             if (m_residuals_final) m_residuals_final->Fill(d, std::abs(r) - std::abs(d));
             m_driftTime_final->Fill(r, d);
             m_adc_vs_residual_final->Fill(adc, std::abs(r) - std::abs(d));

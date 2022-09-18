@@ -105,18 +105,18 @@ namespace MuonCalib {
         double t0, adcm, chi2tdc, t0err, tmax, tmaxerr, noise, noiseerr, slope, sloperr;
         int tube_id, runflag = 0, validflag = 0;
 
-        for (unsigned int i = 0; i < m_tubeData.size(); ++i) {
+        for (const auto *i : m_tubeData) {
             int eta = 0;
             int phi = 0;
             int technology = 0;
-            if (m_tubeData[i]) {
-                unsigned int nml = m_tubeData[i]->numMultilayers();
-                unsigned int nl = m_tubeData[i]->numLayers();
-                unsigned int nt = m_tubeData[i]->numTubes();
-                std::string datatype = m_tubeData[i]->name();
-                std::string implementation = m_tubeData[i]->implementation();
+            if (i) {
+                unsigned int nml = i->numMultilayers();
+                unsigned int nl = i->numLayers();
+                unsigned int nt = i->numTubes();
+                std::string datatype = i->name();
+                std::string implementation = i->implementation();
                 // unpack regionKey
-                std::string chamberName = m_tubeData[i]->regionKey();
+                std::string chamberName = i->regionKey();
                 std::string stnName(chamberName, 0, 3);
                 int separator1 = chamberName.find_first_of('_');
                 int separator2 = chamberName.find_last_of('_');
@@ -136,8 +136,8 @@ namespace MuonCalib {
                 for (unsigned int km = 0; km < nml; ++km) {
                     for (unsigned int kl = 0; kl < nl; ++kl) {
                         for (unsigned int kt = 0; kt < nt; ++kt) {
-                            const MdtTubeFitContainer::SingleTubeCalib* stc = m_tubeData[i]->getCalib(km, kl, kt);
-                            const MdtTubeFitContainer::SingleTubeFit* stf = m_tubeData[i]->getFit(km, kl, kt);
+                            const MdtTubeFitContainer::SingleTubeCalib* stc = i->getCalib(km, kl, kt);
+                            const MdtTubeFitContainer::SingleTubeFit* stf = i->getFit(km, kl, kt);
                             tech = technology;
                             ml = km + 1;
                             l = kl + 1;
