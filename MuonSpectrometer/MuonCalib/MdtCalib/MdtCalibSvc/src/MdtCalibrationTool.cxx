@@ -646,7 +646,7 @@ double MdtCalibrationTool::Imp::applyCorrections(MagField::AtlasFieldCache& fiel
 			  (*inputData.pointOfClosestApproach)(2) };
         fieldCache.getField(xyz, BGXYZ);
         
-	for (int i=0; i<3; i++) BGXYZ[i] *= 1000.; // convert kT to Tesla
+	for (double & i : BGXYZ) i *= 1000.; // convert kT to Tesla
         Amg::Vector3D B_global(BGXYZ[0], BGXYZ[1], BGXYZ[2]);
         Amg::Vector3D B_loc(gToStation.linear()*B_global);
         double Bpar = B_loc.x();
