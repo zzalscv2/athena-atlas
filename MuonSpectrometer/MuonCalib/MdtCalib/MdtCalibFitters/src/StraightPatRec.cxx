@@ -160,8 +160,8 @@ MTStraightLine StraightPatRec::fitCandidate(MuonCalibSegment &r_segment, const s
     Amg::Vector3D xhat(1.0, 0.0, 0.0);
 
     unsigned int num_selected_hits(0);
-    for (unsigned int k = 0; k < r_selection.size(); k++) {
-        if (!r_selection[k]) { num_selected_hits++; }
+    for (unsigned int k : r_selection) {
+        if (!k) { num_selected_hits++; }
     }
     if (num_selected_hits < 3) return cand_line;
 

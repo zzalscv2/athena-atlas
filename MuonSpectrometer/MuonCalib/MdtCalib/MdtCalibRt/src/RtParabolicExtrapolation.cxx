@@ -99,7 +99,7 @@ RtRelationLookUp RtParabolicExtrapolation::getRtWithParabolicExtrapolation(const
     }
 
     // addtional points for the fit
-    for (unsigned int k = 0; k < add_fit_points.size(); k++) { t_r.push_back(add_fit_points[k]); }
+    for (const auto & add_fit_point : add_fit_points) { t_r.push_back(add_fit_point); }
 
     // perform fit //
     fitter.fit_parameters(t_r, 1, t_r.size(), &pol);

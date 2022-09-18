@@ -131,8 +131,8 @@ namespace MuonCalib {
     StatusCode CoolInserter::finalize() {
         ATH_MSG_INFO("finalizing ");
         try {
-            for (unsigned int i = 0; i < m_mdtt0_fld.size(); i++) m_mdtt0_fld[i]->flushStorageBuffer();
-            for (unsigned int i = 0; i < m_mdtrt_fld.size(); i++) m_mdtrt_fld[i]->flushStorageBuffer();
+            for (auto & i : m_mdtt0_fld) i->flushStorageBuffer();
+            for (auto & i : m_mdtrt_fld) i->flushStorageBuffer();
         } catch (std::exception &e) {
             ATH_MSG_FATAL("Exception in finalize: " << e.what());
             return StatusCode::FAILURE;
@@ -224,19 +224,19 @@ namespace MuonCalib {
             m_t0_created = true;
         }
         if (m_t0_created) {
-            for (std::map<bool, coral::AttributeList>::iterator it = m_mdtt0_cool_row.begin(); it != m_mdtt0_cool_row.end(); it++) {
-                it->second["file"].data<cool::String4k>() = file;
-                it->second["tech"].data<int>() = creation_flags;
-                if (it->first) {
+            for (auto & it : m_mdtt0_cool_row) {
+                it.second["file"].data<cool::String4k>() = file;
+                it.second["tech"].data<int>() = creation_flags;
+                if (it.first) {
                     uLongf dest_len = compressBound(m_data_string.str().size());
-                    coral::Blob &blob(it->second["data"].data<coral::Blob>());
+                    coral::Blob &blob(it.second["data"].data<coral::Blob>());
                     blob.resize(dest_len);
                     Bytef *p = static_cast<Bytef *>(blob.startingAddress());
 
                     compress(p, &dest_len, reinterpret_cast<const Bytef *>(m_data_string.str().c_str()), m_data_string.str().size());
                     blob.resize(dest_len);
                 } else {
-                    it->second["data"].data<cool::String16M>() = m_data_string.str();
+                    it.second["data"].data<cool::String16M>() = m_data_string.str();
                 }
                 for (unsigned int i = 0; i < m_mdtt0_fld.size(); i++) {
                     cool::ConstRecordAdapter record(m_mdtt0_fld[i]->payloadSpecification(), m_mdtt0_cool_row[m_compressed_t0[i]]);
@@ -289,23 +289,23 @@ namespace MuonCalib {
         }
         std::ostringstream data_column;
         data_column << id_cp.FixedId() << "," << points.size() << std::endl;
-        for (std::map<int, SamplePoint>::const_iterator it = points.begin(); it != points.end(); it++) {
-            data_column << it->second.x2() << "," << it->second.x1() << "," << it->second.error() << ",";
+        for (const auto & point : points) {
+            data_column << point.second.x2() << "," << point.second.x1() << "," << point.second.error() << ",";
         }
         if (m_rt_created) {
-            for (std::map<bool, coral::AttributeList>::iterator it = m_mdtrt_cool_row.begin(); it != m_mdtrt_cool_row.end(); it++) {
-                it->second["tech"].data<int>() = creation_flags;
-                it->second["file"].data<cool::String4k>() = file;
-                if (it->first) {
+            for (auto & it : m_mdtrt_cool_row) {
+                it.second["tech"].data<int>() = creation_flags;
+                it.second["file"].data<cool::String4k>() = file;
+                if (it.first) {
                     uLongf dest_len = compressBound(data_column.str().size());
-                    coral::Blob &blob(it->second["data"].data<coral::Blob>());
+                    coral::Blob &blob(it.second["data"].data<coral::Blob>());
                     blob.resize(dest_len);
                     Bytef *p = static_cast<Bytef *>(blob.startingAddress());
 
                     compress(p, &dest_len, reinterpret_cast<const Bytef *>(data_column.str().c_str()), data_column.str().size());
                     blob.resize(dest_len);
                 } else {
-                    it->second["data"].data<cool::String16M>() = data_column.str();
+                    it.second["data"].data<cool::String16M>() = data_column.str();
                 }
             }  // for(std::map<bool, coral::AttributeList> ...
             for (unsigned int i = 0; i < m_mdtrt_fld.size(); i++) {

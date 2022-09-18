@@ -124,7 +124,7 @@ bool CurvedPatRec::fit(MuonCalibSegment &r_segment, HitSelection r_selection, Cu
 
             segment_found = true;
 
-            for (unsigned int cand = 0; cand < candidates.size(); cand++) {
+            for (const auto & candidate : candidates) {
                 std::vector<Amg::Vector3D> errors(track_hits.size());
                 for (unsigned int k = 0; k < errors.size(); k++) {
                     if (track_hits[k]->sigmaDriftRadius() > 0.0) {
@@ -135,22 +135,22 @@ bool CurvedPatRec::fit(MuonCalibSegment &r_segment, HitSelection r_selection, Cu
                 }
 
                 // get hit points //
-                points = getHitPoints(track_hits, candidates[cand]);
+                points = getHitPoints(track_hits, candidate);
 
                 // fit a curved line through the points //
                 aux_line = CurvedLine(points, errors);
 
                 // calculate chi^2 //
                 double tmp_chi2(0.0);
-                for (unsigned int k = 0; k < track_hits.size(); k++) {
-                    MTStraightLine tang(curved_track.getTangent((track_hits[k]->localPosition()).z()));
-                    MTStraightLine wire(Amg::Vector3D(0.0, track_hits[k]->localPosition().y(), track_hits[k]->localPosition().z()), xhat,
+                for (auto & track_hit : track_hits) {
+                    MTStraightLine tang(curved_track.getTangent((track_hit->localPosition()).z()));
+                    MTStraightLine wire(Amg::Vector3D(0.0, track_hit->localPosition().y(), track_hit->localPosition().z()), xhat,
                                         null, null);
                     double d(std::abs(tang.signDistFrom(wire)));
-                    if (track_hits[k]->sigma2DriftRadius() != 0) {
-                        tmp_chi2 = tmp_chi2 + std::pow(d - track_hits[k]->driftRadius(), 2) / track_hits[k]->sigma2DriftRadius();
+                    if (track_hit->sigma2DriftRadius() != 0) {
+                        tmp_chi2 = tmp_chi2 + std::pow(d - track_hit->driftRadius(), 2) / track_hit->sigma2DriftRadius();
                     } else {
-                        tmp_chi2 = tmp_chi2 + std::pow(d - track_hits[k]->driftRadius(), 2) / 0.01;
+                        tmp_chi2 = tmp_chi2 + std::pow(d - track_hit->driftRadius(), 2) / 0.01;
                     }
                 }
 
@@ -192,15 +192,15 @@ bool CurvedPatRec::fit(MuonCalibSegment &r_segment, HitSelection r_selection, Cu
     /////////////////////
 
     chi2 = 0.0;
-    for (unsigned int k = 0; k < stored_track_hits.size(); k++) {
-        MTStraightLine tang(curved_track.getTangent((stored_track_hits[k]->localPosition()).z()));
-        MTStraightLine wire(Amg::Vector3D(0.0, stored_track_hits[k]->localPosition().y(), stored_track_hits[k]->localPosition().z()), xhat,
+    for (auto & stored_track_hit : stored_track_hits) {
+        MTStraightLine tang(curved_track.getTangent((stored_track_hit->localPosition()).z()));
+        MTStraightLine wire(Amg::Vector3D(0.0, stored_track_hit->localPosition().y(), stored_track_hit->localPosition().z()), xhat,
                             null, null);
         double d(std::abs(tang.signDistFrom(wire)));
-        if (stored_track_hits[k]->sigma2DriftRadius() != 0) {
-            chi2 += std::pow(d - stored_track_hits[k]->driftRadius(), 2) / stored_track_hits[k]->sigma2DriftRadius();
+        if (stored_track_hit->sigma2DriftRadius() != 0) {
+            chi2 += std::pow(d - stored_track_hit->driftRadius(), 2) / stored_track_hit->sigma2DriftRadius();
         } else {
-            chi2 += std::pow(d - stored_track_hits[k]->driftRadius(), 2) / 0.01;
+            chi2 += std::pow(d - stored_track_hit->driftRadius(), 2) / 0.01;
         }
     }
 
@@ -257,7 +257,7 @@ std::vector<Amg::Vector3D> CurvedPatRec::getHitPoints(const MdtHitVec &track_hit
     // FILL HIT VECTOR //
     /////////////////////
 
-    for (unsigned int k = 0; k < track_hits.size(); k++) { hit_vec.emplace_back(getHitPoint(track_hits[k], straight_track)); }
+    for (const auto & track_hit : track_hits) { hit_vec.emplace_back(getHitPoint(track_hit, straight_track)); }
 
     ///////////////////////////
     // RETURN THE HIT VECTOR //
@@ -277,8 +277,8 @@ std::vector<Amg::Vector3D> CurvedPatRec::getHitPoints(const MdtHitVec &track_hit
     // FILL HIT VECTOR //
     /////////////////////
 
-    for (unsigned int k = 0; k < track_hits.size(); k++) {
-        hit_vec.emplace_back(getHitPoint(track_hits[k], curved_track.getTangent((track_hits[k]->localPosition()).z())));
+    for (const auto & track_hit : track_hits) {
+        hit_vec.emplace_back(getHitPoint(track_hit, curved_track.getTangent((track_hit->localPosition()).z())));
     }
 
     ///////////////////////////

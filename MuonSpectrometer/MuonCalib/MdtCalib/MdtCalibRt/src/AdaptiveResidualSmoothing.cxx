@@ -83,9 +83,9 @@ bool AdaptiveResidualSmoothing::addResidualsFromSegment(MuonCalibSegment &seg, b
 
     // store the residuals //
     const MuonCalibSegment::MdtHitVec &trackHits = curved ? curved_track.trackHits() : straight_track.trackHits();
-    for (unsigned int k = 0; k < trackHits.size(); k++) {
-        point[0] = trackHits[k]->driftRadius();
-        point[1] = trackHits[k]->driftRadius() - std::abs(trackHits[k]->signedDistanceToTrack());
+    for (const auto & trackHit : trackHits) {
+        point[0] = trackHit->driftRadius();
+        point[1] = trackHit->driftRadius() - std::abs(trackHit->signedDistanceToTrack());
         m_residual_point.emplace_back(point, 0);
     }
 
@@ -226,17 +226,17 @@ RtRelationLookUp AdaptiveResidualSmoothing::performSmoothing(const IRtRelation &
 
     // sort the residuals point in the residual value for a simple outlyer //
     // rejection performed later                                           //
-    for (unsigned int k = 0; k < m_residual_point.size(); k++) { m_residual_point[k].setReferenceComponent(1); }
+    for (auto & k : m_residual_point) { k.setReferenceComponent(1); }
     sort(m_residual_point.begin(), m_residual_point.end());
 
     // auxiliary data point arrays //
     std::vector<std::vector<const DataPoint *> > sample_points_per_r_bin(nb_bins);
 
     // group data points in r bins //
-    for (unsigned int k = 0; k < m_residual_point.size(); k++) {
-        if (std::abs(m_residual_point[k].dataVector()[0]) >= r_max) { continue; }
-        bin_index = static_cast<unsigned int>(std::abs(m_residual_point[k].dataVector()[0]) / step_size);
-        sample_points_per_r_bin[bin_index].push_back(&(m_residual_point[k]));
+    for (auto & k : m_residual_point) {
+        if (std::abs(k.dataVector()[0]) >= r_max) { continue; }
+        bin_index = static_cast<unsigned int>(std::abs(k.dataVector()[0]) / step_size);
+        sample_points_per_r_bin[bin_index].push_back(&k);
     }
 
     // loop over the r bins and determine the r-t corrections //

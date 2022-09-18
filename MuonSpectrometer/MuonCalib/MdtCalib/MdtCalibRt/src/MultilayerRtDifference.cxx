@@ -53,17 +53,17 @@ namespace MuonCalib {
 
     inline MultilayerRtDifference_Histograms::MultilayerRtDifference_Histograms(TDirectory *control_histogram_dir) :
         m_control_histogram_dir(control_histogram_dir) {
-        for (int i = 0; i < 2; i++) { m_current_residuals[i] = nullptr; }
+        for (auto & m_current_residual : m_current_residuals) { m_current_residual = nullptr; }
     }
 
     // copy constructor to keep Coverity happy
     MultilayerRtDifference_Histograms::MultilayerRtDifference_Histograms(const MultilayerRtDifference_Histograms &MLRTDH) {
         for (int i = 0; i < 2; i++) {
-            for (auto res : MLRTDH.m_residuals[i]) { m_residuals[i].push_back(new TH2F(*res)); }
+            for (auto *res : MLRTDH.m_residuals[i]) { m_residuals[i].push_back(new TH2F(*res)); }
             m_current_residuals[i] = new TH2F(*(MLRTDH.m_current_residuals[i]));
-            for (auto res : MLRTDH.m_res_prov[i]) { m_res_prov[i].push_back(new TProfile(*res)); }
+            for (auto *res : MLRTDH.m_res_prov[i]) { m_res_prov[i].push_back(new TProfile(*res)); }
         }
-        for (auto res : MLRTDH.m_res_prov_diff) { m_res_prov_diff.push_back(new TProfile(*res)); }
+        for (auto *res : MLRTDH.m_res_prov_diff) { m_res_prov_diff.push_back(new TProfile(*res)); }
         m_control_histogram_dir = MLRTDH.m_control_histogram_dir;  // not a deep copy, hope it is ok
     }
 

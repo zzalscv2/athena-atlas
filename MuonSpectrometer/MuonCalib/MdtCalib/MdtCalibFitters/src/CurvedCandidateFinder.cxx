@@ -68,18 +68,18 @@ const std::vector<CurvedLine> &CurvedCandidateFinder::getCandidates(const double
     }
 
     // find a third hit with large separation from these two points //
-    for (unsigned int k = 0; k < m_hits.size(); k++) {
-        if (m_hits[k] != hit[0] && m_hits[k] != hit[2]) {
+    for (auto & ihit : m_hits) {
+        if (ihit != hit[0] && ihit != hit[2]) {
             if (!hit[1]) {
-                hit[1] = m_hits[k];
+                hit[1] = ihit;
                 dist = (hit[2]->localPosition().z() - hit[1]->localPosition().z()) -
                        (hit[1]->localPosition().z() - hit[0]->localPosition().z());
             } else {
-                if (dist < (hit[2]->localPosition().z() - m_hits[k]->localPosition().z()) -
-                               (m_hits[k]->localPosition().z() - hit[0]->localPosition().z())) {
-                    dist = (hit[2]->localPosition().z() - m_hits[k]->localPosition().z()) -
-                           (m_hits[k]->localPosition().z() - hit[0]->localPosition().z());
-                    hit[1] = m_hits[k];
+                if (dist < (hit[2]->localPosition().z() - ihit->localPosition().z()) -
+                               (ihit->localPosition().z() - hit[0]->localPosition().z())) {
+                    dist = (hit[2]->localPosition().z() - ihit->localPosition().z()) -
+                           (ihit->localPosition().z() - hit[0]->localPosition().z());
+                    hit[1] = ihit;
                 }
             }
         }
@@ -113,10 +113,10 @@ const std::vector<CurvedLine> &CurvedCandidateFinder::getCandidates(const double
                 }
 
                 // count the number of hits on the line within the given road width //
-                for (unsigned int k = 0; k < m_hits.size(); k++) {
-                    MTStraightLine w(Amg::Vector3D(0.0, m_hits[k]->localPosition().y(), m_hits[k]->localPosition().z()), xhat, null, null);
-                    double d(std::abs((cand_line.getTangent(m_hits[k]->localPosition().z())).signDistFrom(w)));
-                    if (std::abs(m_hits[k]->driftRadius() - d) < road_width) { nb_hits++; }
+                for (auto & ihit : m_hits) {
+                    MTStraightLine w(Amg::Vector3D(0.0, ihit->localPosition().y(), ihit->localPosition().z()), xhat, null, null);
+                    double d(std::abs((cand_line.getTangent(ihit->localPosition().z())).signDistFrom(w)));
+                    if (std::abs(ihit->driftRadius() - d) < road_width) { nb_hits++; }
                 }
 
                 // add the candidate line to list of candidates if there are enough hits //

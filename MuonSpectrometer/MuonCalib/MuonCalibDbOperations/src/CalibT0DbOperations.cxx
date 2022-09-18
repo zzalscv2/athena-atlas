@@ -209,9 +209,9 @@ namespace MuonCalib {
             }
             // check if all tubes ar enew or if all tubes a validated good
             bool all_new(true), all_good(true);
-            for (std::vector<int>::const_iterator it = validation_flag.begin(); it != validation_flag.end(); it++) {
-                if ((*it) != 0) all_new = false;
-                if ((*it) != 3) all_good = false;
+            for (int it : validation_flag) {
+                if (it != 0) all_new = false;
+                if (it != 3) all_good = false;
                 if (!all_new && !all_good) break;
             }
             // insert new tubes
@@ -309,22 +309,22 @@ namespace MuonCalib {
             m_query->addToOutputList("MDT_TUBE.TUBE_ID", "TUBE_ID");
             m_query->setRowCacheSize(10000);
             const std::vector<std::string> &rows_tube_table(storage.RowsFromMdtTubeTable());
-            for (std::vector<std::string>::const_iterator it = rows_tube_table.begin(); it != rows_tube_table.end(); it++) {
-                if (*it == "CHAMBER" || *it == "TUBE_ID") continue;
-                m_query->addToOutputList(std::string("MDT_TUBE.") + *it, *it);
+            for (const auto & it : rows_tube_table) {
+                if (it == "CHAMBER" || it == "TUBE_ID") continue;
+                m_query->addToOutputList(std::string("MDT_TUBE.") + it, it);
             }
             const std::vector<std::string> &rows_tube_v_table(storage.RowsFromMdtTubeVTable());
             if (rows_tube_v_table.size() != 0) {
                 m_query->addToTableList("MDT_TUBE_V");
-                for (std::vector<std::string>::const_iterator it = rows_tube_v_table.begin(); it != rows_tube_v_table.end(); it++) {
-                    m_query->addToOutputList(std::string("MDT_TUBE_V.") + *it, *it);
+                for (const auto & it : rows_tube_v_table) {
+                    m_query->addToOutputList(std::string("MDT_TUBE_V.") + it, it);
                 }
             }
             const std::vector<std::string> &rows_tube_c_table(storage.RowsFromMdtTubeCTable());
             if (rows_tube_c_table.size() != 0) {
                 m_query->addToTableList("MDT_TUBE_C");
-                for (std::vector<std::string>::const_iterator it = rows_tube_c_table.begin(); it != rows_tube_c_table.end(); it++) {
-                    m_query->addToOutputList(std::string("MDT_TUBE_C.") + *it, *it);
+                for (const auto & it : rows_tube_c_table) {
+                    m_query->addToOutputList(std::string("MDT_TUBE_C.") + it, it);
                 }
             }
             coral::AttributeList conditionData;
@@ -582,9 +582,9 @@ namespace MuonCalib {
         }
         // check what has to be done
         if (validflag.size() == 0) return !has_unvalidated;
-        for (std::vector<int>::const_iterator it = validflag.begin(); it != validflag.end(); it++) {
-            if ((*it) > 0 && has_validated) return false;
-            if ((*it) == 0 && has_unvalidated) return false;
+        for (int it : validflag) {
+            if (it > 0 && has_validated) return false;
+            if (it == 0 && has_unvalidated) return false;
         }
         return true;
     }

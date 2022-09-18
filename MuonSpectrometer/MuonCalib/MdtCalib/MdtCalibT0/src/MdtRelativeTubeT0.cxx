@@ -47,8 +47,8 @@ namespace MuonCalib {
                 it2->second.second++;
             }
         }
-        for (std::map<unsigned int, std::pair<double, int> >::iterator it = mean_t0.begin(); it != mean_t0.end(); it++) {
-            it->second.first /= it->second.second;
+        for (auto & it : mean_t0) {
+            it.second.first /= it.second.second;
         }
 
         // calculate tube offsets

@@ -88,8 +88,7 @@ namespace MuonCalib {
     }
 
     inline StatusCode MuonCalibDefaultCalibrationSource::load_rt_files() {
-        for (std::vector<std::string>::const_iterator it = m_rt_files.begin(); it != m_rt_files.end(); it++) {
-            const std::string &fname(*it);
+        for (const auto & fname : m_rt_files) {
             std::string line;
             std::ifstream rtf(fname.c_str());
             if (!rtf.good()) {
@@ -119,13 +118,13 @@ namespace MuonCalib {
 
     inline bool MuonCalibDefaultCalibrationSource::store_t0_fun() {
         const std::vector<NtupleStationId> &regions(m_reg_sel_svc->GetStationsInRegions());
-        for (std::vector<NtupleStationId>::const_iterator it = regions.begin(); it != regions.end(); it++) {
-            MuonFixedId fid(it->FixedId());
+        for (const auto & region : regions) {
+            MuonFixedId fid(region.FixedId());
             for (unsigned int i = 0; i < m_t0_regions.size(); i++) {
                 if (m_t0_regions[i]->Result(fid)) {
-                    m_inserter->StartT0Chamber(*it);
+                    m_inserter->StartT0Chamber(region);
                     while (m_inserter->AppendT0(m_t0[i], 5, 0.0)) {}
-                    m_inserter->StoreT0Chamber(*it, std::string("default"), m_creation_flags_t0[i]);
+                    m_inserter->StoreT0Chamber(region, std::string("default"), m_creation_flags_t0[i]);
                     //				break;
                 }
             }
@@ -135,11 +134,11 @@ namespace MuonCalib {
 
     inline bool MuonCalibDefaultCalibrationSource::store_rt_fun() {
         const std::vector<NtupleStationId> &regions(m_reg_sel_svc->GetStationsInRegions());
-        for (std::vector<NtupleStationId>::const_iterator it = regions.begin(); it != regions.end(); it++) {
-            MuonFixedId fid(it->FixedId());
+        for (const auto & region : regions) {
+            MuonFixedId fid(region.FixedId());
             for (unsigned int i = 0; i < m_rt_regions.size(); i++) {
                 if (m_rt_regions[i]->Result(fid)) {
-                    m_inserter->StoreRtChamber(*it, m_rt_points[i], std::string("default"), m_creation_flags_rt[i]);
+                    m_inserter->StoreRtChamber(region, m_rt_points[i], std::string("default"), m_creation_flags_rt[i]);
                     break;
                 }
             }

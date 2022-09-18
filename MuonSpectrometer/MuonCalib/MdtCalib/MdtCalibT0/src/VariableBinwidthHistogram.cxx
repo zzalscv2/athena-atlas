@@ -74,7 +74,7 @@ namespace MuonCalib {
             (*current_bin) += static_cast<unsigned int>(hist->GetBinContent(i));
         }
         // sort bins by content
-        for (unsigned int i = 0; i < m_bins.size(); i++) { m_sort_bins.push_back(VBHBinPtrSrt(m_bins[i])); }
+        for (auto & bin : m_bins) { m_sort_bins.push_back(VBHBinPtrSrt(bin)); }
         m_sorted = false;
         m_error = false;
         return true;

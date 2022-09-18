@@ -390,8 +390,8 @@ bool QuasianalyticLineReconstruction::fit(MuonCalibSegment& r_segment, HitSelect
         r_selection.clear();
         r_selection.assign(r_segment.hitsOnTrack(), 0);
     } else {
-        for (unsigned int k = 0; k < r_selection.size(); k++) {
-            if (r_selection[k] == 0) { nb_selected_hits = nb_selected_hits + 1; }
+        for (unsigned int k : r_selection) {
+            if (k == 0) { nb_selected_hits = nb_selected_hits + 1; }
         }
     }
 

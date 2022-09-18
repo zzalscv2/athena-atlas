@@ -111,9 +111,9 @@ namespace MuonCalib {
             ATH_MSG_WARNING("Cannot insert chamber " << chamber);
             return true;
         }
-        for (std::map<TubeId, coral::AttributeList>::const_iterator it = rows.begin(); it != rows.end(); it++) {
-            if (!m_inserter->AppendT0(it->second["P4"].data<float>() + m_t0_offset, it->second["VALIDFLAG"].data<short>(),
-                                      it->second["ADC_1"].data<float>())) {
+        for (const auto & row : rows) {
+            if (!m_inserter->AppendT0(row.second["P4"].data<float>() + m_t0_offset, row.second["VALIDFLAG"].data<short>(),
+                                      row.second["ADC_1"].data<float>())) {
                 ATH_MSG_WARNING("Wrong number of tubes in database for " << sid.regionId() << "!");
                 break;
             }
@@ -132,12 +132,12 @@ namespace MuonCalib {
         if (m_drift_time_offsets.size()) {
             float slice_width = 14.6 / static_cast<float>(m_drift_time_offsets.size());
             std::map<int, SamplePoint> points_cp(points);
-            for (std::map<int, SamplePoint>::iterator it = points_cp.begin(); it != points_cp.end(); it++) {
-                int slice_number = static_cast<int>(std::floor(it->second.x2() / slice_width));
+            for (auto & it : points_cp) {
+                int slice_number = static_cast<int>(std::floor(it.second.x2() / slice_width));
                 if (slice_number < 0) slice_number = 0;
                 if (slice_number >= static_cast<int>(m_drift_time_offsets.size()))
                     slice_number = static_cast<int>(m_drift_time_offsets.size()) - 1;
-                it->second.set_x1(it->second.x1() + m_drift_time_offsets[slice_number]);
+                it.second.set_x1(it.second.x1() + m_drift_time_offsets[slice_number]);
             }
             m_inserter->StoreRtChamber(sid, points_cp, f.str(), m_creation_flags);
         } else {

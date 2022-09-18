@@ -178,20 +178,20 @@ namespace MuonCalib {
                 ATH_MSG_INFO("Reading rts for region " << it->regionId());
                 std::vector<SamplePoint> outpoints;
                 float tmax_diff(-9e9);
-                for (unsigned int k = 0; k < in_points.size(); k++) {
-                    if (in_points[k].x2() < -99) {
-                        tmax_diff = in_points[k].x1();
+                for (auto & in_point : in_points) {
+                    if (in_point.x2() < -99) {
+                        tmax_diff = in_point.x1();
                         continue;
                     }
-                    SamplePoint outpoint(in_points[k].x1(), in_points[k].x2(), 1.0);
+                    SamplePoint outpoint(in_point.x1(), in_point.x2(), 1.0);
                     outpoints.push_back(outpoint);
                 }
                 rts[*it] = new RtRelationLookUp(rt_from_points.getRtRelationLookUp(outpoints));
                 if (tmax_diff > -8e8) { rts[*it]->SetTmaxDiff(tmax_diff); }
                 outpoints.clear();
-                for (unsigned int k = 0; k < in_points.size(); k++) {
-                    if (in_points[k].x2() < -99) { continue; }
-                    SamplePoint outpoint(in_points[k].x1(), in_points[k].error(), 1.0);
+                for (auto & in_point : in_points) {
+                    if (in_point.x2() < -99) { continue; }
+                    SamplePoint outpoint(in_point.x1(), in_point.error(), 1.0);
                     outpoints.push_back(outpoint);
                 }
                 res[*it] = new RtResolutionLookUp(res_from_points.getRtResolutionLookUp(outpoints));
@@ -236,7 +236,7 @@ namespace MuonCalib {
     }
 
     void CalibrationDbIOTool::fillResPoints(const std::shared_ptr<const IRtResolution>& rt_resolution, std::vector<SamplePoint> &points) {
-        for (unsigned int i = 0; i < points.size(); i++) { points[i].set_error(rt_resolution->resolution(points[i].x1())); }
+        for (auto & point : points) { point.set_error(rt_resolution->resolution(point.x1())); }
     }
 
     CalibDbConnection *CalibrationDbIOTool::get_connection(int write) {
