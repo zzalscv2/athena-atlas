@@ -1,4 +1,4 @@
-#include "L1TopoLUT.h"
+#include "TrigT1MuctpiPhase1/L1TopoLUT.h"
 
 #define BOOST_BIND_GLOBAL_PLACEHOLDERS // silence Boost pragma message (fixed in Boost 1.76)
 #include <boost/property_tree/json_parser.hpp>
@@ -9,11 +9,79 @@
 
 namespace LVL1MUCTPIPHASE1
 {
+
+  StatusCode L1TopoLUT::initializePtEncoding()
+  {
+    const TrigConf::L1Menu * l1menu = nullptr;
+    ISvcLocator* svcLoc = Gaudi::svcLocator();
+    StatusCode sc = StatusCode::SUCCESS;
+    sc = svcLoc->service("DetectorStore", m_detStore);
+    sc = m_detStore->retrieve(l1menu);
+    m_ptEncoding.clear();
+
+    //build the map between index and pt threshold.
+    //the index is the 3- or 4-bit pt word, and has a different
+    //pt threshold meaning depending on the subsystem.
+    //the value part of the map is the pt value for the 3 subsystems,
+    //and the key is the index for an arbitrary subsystem.
+    //not all indices will be covered by all subsystems since
+    //barrel only has 3 bits, so initialize the value tuple with -1
+    const auto & exMU = &l1menu->thrExtraInfo().MU();
+    auto rpcPtValues = exMU->knownRpcPtValues();
+    auto tgcPtValues = exMU->knownTgcPtValues();
+    std::vector<int> tmp_thresholds;
+    for ( unsigned i=0; i<rpcPtValues.size(); i++){
+      tmp_thresholds.push_back(exMU->ptForRpcIdx(i));
+    }
+    m_ptEncoding.push_back(tmp_thresholds);
+    tmp_thresholds.clear();
+    for ( unsigned i=0; i<tgcPtValues.size(); i++){
+      tmp_thresholds.push_back(exMU->ptForTgcIdx(i));
+    }
+    m_ptEncoding.push_back(tmp_thresholds);
+    m_ptEncoding.push_back(tmp_thresholds);
+    tmp_thresholds.clear();
+    return sc;
+  }
+
+  bool L1TopoLUT::initializeBarrelLUT(const std::string& side0LUTFileName,
+				      const std::string& side1LUTFileName)
+  {    
+    bool success = true;
+    boost::property_tree::ptree root0;
+    boost::property_tree::read_json(side0LUTFileName.c_str(), root0);
+    boost::property_tree::ptree root1;
+    boost::property_tree::read_json(side1LUTFileName.c_str(), root1);
+    std::vector<float> etas_or_phis;
+    
+    for (boost::property_tree::ptree::value_type& sectorID_elem : root0.get_child("lookup_barrel_eta")){
+      for (boost::property_tree::ptree::value_type& code_elem : sectorID_elem.second) etas_or_phis.push_back(code_elem.second.get_value<float>());
+      m_barrel_eta_lookup0.push_back(etas_or_phis);
+      etas_or_phis.clear();
+    }
+    for (boost::property_tree::ptree::value_type& sectorID_elem : root0.get_child("lookup_barrel_phi")){
+      for (boost::property_tree::ptree::value_type& code_elem : sectorID_elem.second) etas_or_phis.push_back(code_elem.second.get_value<float>());
+      m_barrel_phi_lookup0.push_back(etas_or_phis);
+      etas_or_phis.clear();
+    }
+    for (boost::property_tree::ptree::value_type& sectorID_elem : root1.get_child("lookup_barrel_eta")){
+      for (boost::property_tree::ptree::value_type& code_elem : sectorID_elem.second) etas_or_phis.push_back(code_elem.second.get_value<float>());
+      m_barrel_eta_lookup1.push_back(etas_or_phis);
+      etas_or_phis.clear();
+    }
+    for (boost::property_tree::ptree::value_type& sectorID_elem : root1.get_child("lookup_barrel_phi")){
+      for (boost::property_tree::ptree::value_type& code_elem : sectorID_elem.second) etas_or_phis.push_back(code_elem.second.get_value<float>());
+      m_barrel_phi_lookup1.push_back(etas_or_phis);
+      etas_or_phis.clear();
+    }
+    if (m_barrel_phi_lookup1.size() &&  m_barrel_phi_lookup0.size()) return success;
+    else return false;
+  }
+
   bool L1TopoLUT::initializeLUT(const std::string& barrelFileName,
 				const std::string& ecfFileName,
 				const std::string& side0LUTFileName,
 				const std::string& side1LUTFileName)
-
   {
     m_encoding.clear();
     m_errors.clear();
@@ -54,8 +122,7 @@ namespace LVL1MUCTPIPHASE1
 
       if (!isBarrel) 
       {
-	inFile >> subsystem;
-      
+	inFile >> subsystem;      
 	//in the EC+FW file, EC=0 and FW=1, so increment to distinguish from barrel
 	subsystem++;
       }
@@ -92,14 +159,13 @@ namespace LVL1MUCTPIPHASE1
 	phi_index = phi_indices->size();
 	(*phi_indices)[float(phi)] = phi_index;
       }
-      
+     
       L1TopoLUTKey key = {side, subsystem, sectorID, roi};
       L1TopoCoordinates value = {eta, phi, eta_min, eta_max, phi_min, phi_max, eta_index, phi_index};
-      //crude crude patch by Patrick Czodrowski for the inverse eta coordinates https://its.cern.ch/jira/browse/ATR-24376                                                                                                                                                                                    
+      //crude crude patch by Patrick Czodrowski for the inverse eta coordinates https://its.cern.ch/jira/browse/ATR-24376
       if ( (side == 0 && eta > 0) || (side == 1 && eta < 0) ) {
 	value = {-eta, phi, -eta_min, -eta_max, phi_min, phi_max, eta_index, phi_index};
       }
-
       if (m_encoding.find(key) != m_encoding.end())
       {
 	m_errors.push_back("Duplicate key found in L1TopoLUT: "+key.info());
@@ -107,7 +173,6 @@ namespace LVL1MUCTPIPHASE1
       }
       m_encoding[key] = value;
     }
-
     return true;
   }
 
@@ -115,16 +180,12 @@ namespace LVL1MUCTPIPHASE1
   {
     // Create a root
     pt::ptree root;
-
     // Load the json file in this ptree
     pt::read_json(inFileName.c_str(), root);
-
-
     // Supplement the L1TopoCoordinates with the eta/phi indices for the barrel.
     // These are calculated on-the-fly for the endcap/forward.
     bool success = true;
     success = success && initializeJSONForSubsystem(root, "encode_lookup_barrel", side, 0);
-
     return success;
   }
 
@@ -175,7 +236,20 @@ namespace LVL1MUCTPIPHASE1
       L1TopoCoordinates null;
       return null;
     }
-
     return itr->second;
+  }
+
+  int L1TopoLUT::getPtValue(const int isys, const int ptwordvalue) const {
+    return m_ptEncoding[isys][ptwordvalue];
+  }
+
+  float L1TopoLUT::getBarrelEta(const int hemi, const int sec, const int barrel_eta_lookup) const{
+    if (hemi) return m_barrel_eta_lookup0[sec][barrel_eta_lookup];
+    else return m_barrel_eta_lookup1[sec][barrel_eta_lookup];
+  }
+
+  float L1TopoLUT::getBarrelPhi(const int hemi, const int sec, const int barrel_phi_lookup) const{
+    if (hemi) return m_barrel_phi_lookup0[sec][barrel_phi_lookup];
+    else return m_barrel_phi_lookup1[sec][barrel_phi_lookup];
   }
 }

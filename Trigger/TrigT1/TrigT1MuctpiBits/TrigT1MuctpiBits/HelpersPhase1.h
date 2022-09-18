@@ -15,9 +15,49 @@ namespace LVL1::MuCTPIBits {
   enum class WordType : uint8_t {Undefined=0, Timeslice, Multiplicity, Candidate, Topo, Status, MAX};
   enum class SubsysID : uint8_t {Undefined=0, Barrel, Forward, Endcap, MAX};
   struct TimesliceHeader {
-      uint16_t bcid{0};
-      uint16_t tobCount{0};
-      uint16_t candCount{0};
+    uint16_t bcid{0};
+    uint16_t tobCount{0};
+    uint16_t candCount{0};
+  };
+
+  struct Multiplicity {
+    bool nswMon               = false;
+    bool candOverflow         = false;
+    std::vector<uint32_t> cnt = {};
+  };
+  struct Candidate {
+    bool     side = false;//C=0 A=1
+    SubsysID type = SubsysID::Undefined;
+    uint32_t num{0};
+    uint32_t pt{0};//1-15
+    uint32_t roi{0};
+    bool errorFlag           = false;
+    bool vetoFlag            = false;
+    bool sectorFlag_gtN      = false;//BA: gt2, EC/FW: gt4
+    bool sectorFlag_nswMon   = false;//EC/FW only
+    bool candFlag_phiOverlap = false;//BA only
+    bool candFlag_gt1CandRoi = false;//BA only
+    bool candFlag_GoodMF     = false;//EC/FW only
+    bool candFlag_InnerCoin  = false;//EC/FW only
+    bool candFlag_BW23       = false;//EC/FW only
+    bool candFlag_Charge     = false;//EC/FW only
+  };
+  struct TopoTOB {
+    bool     side = false;//C=0 A=1
+    uint32_t pt{0};//1-15
+    uint32_t etaRaw{0};
+    uint32_t phiRaw{0};
+    bool candFlag_GoodMF     = false;//EC/FW only
+    bool candFlag_InnerCoin  = false;//EC/FW only
+    bool candFlag_BW23       = false;//EC/FW only
+    bool candFlag_Charge     = false;//EC/FW only
+  };
+
+  struct Slice {
+    uint32_t bcid{0},nTOB{0},nCand{0};
+    Multiplicity           mlt;
+    std::vector<Candidate> cand       = {};
+    std::vector<TopoTOB>       tob        = {};
   };
 
   // Status data word error definitions
@@ -65,7 +105,7 @@ namespace LVL1::MuCTPIBits {
   inline constexpr WordType getWordType(uint32_t word) {
     if (wordEquals(word, RUN3_TIMESLICE_MULT_WORD_ID_SHIFT, RUN3_TIMESLICE_MULT_WORD_ID_MASK, RUN3_TIMESLICE_MULT_WORD_ID_VAL)) {
       if (wordEquals(word, RUN3_TIMESLICE_MULT_WORD_NUM_SHIFT, RUN3_TIMESLICE_MULT_WORD_NUM_MASK, RUN3_TIMESLICE_WORD_NUM_VAL)) {
-        return WordType::Timeslice;
+	return WordType::Timeslice;
       }
       return WordType::Multiplicity;
     } else if (wordEquals(word, RUN3_CAND_WORD_ID_SHIFT, RUN3_CAND_WORD_ID_MASK, RUN3_CAND_WORD_ID_VAL)) {
@@ -100,6 +140,55 @@ namespace LVL1::MuCTPIBits {
     word |= buildWord(tobCount, RUN3_TIMESLICE_NTOB_SHIFT, RUN3_TIMESLICE_NTOB_MASK);
     word |= buildWord(candCount, RUN3_TIMESLICE_NCAND_SHIFT, RUN3_TIMESLICE_NCAND_MASK);
     return word;
+  }
+
+  /// Decode topo word :
+  inline constexpr auto topoHeader(uint32_t word) {
+    struct {
+      bool     flag0{0};
+      bool     flag1{0};
+      bool     flag2{0};
+      bool     flag3{0};
+      uint32_t ptID{0};
+      uint32_t etacode{0};
+      uint32_t phicode{0};
+      uint32_t barrel_eta_lookup{0};
+      uint32_t barrel_phi_lookup{0};
+      uint32_t hemi{0};
+      uint32_t det{0};
+      uint32_t sec{0};
+      uint32_t roi{0};
+    } header;
+    header.flag0   = maskedWord(word, RUN3_TOPO_WORD_FLAGS_SHIFT,   0x1); //20
+    header.flag1   = maskedWord(word, RUN3_TOPO_WORD_FLAGS_SHIFT+1, 0x1); //21
+    header.flag2   = maskedWord(word, RUN3_TOPO_WORD_FLAGS_SHIFT+2, 0x1); //22
+    header.flag3   = maskedWord(word, RUN3_TOPO_WORD_FLAGS_SHIFT+3, 0x1); //23
+    header.ptID    = maskedWord(word, RUN3_TOPO_WORD_PT_SHIFT,      RUN3_TOPO_WORD_PT_MASK);
+    header.etacode = maskedWord(word, RUN3_TOPO_WORD_ETA_SHIFT,     RUN3_TOPO_WORD_ETA_MASK);
+    header.phicode = maskedWord(word, RUN3_TOPO_WORD_PHI_SHIFT,     RUN3_TOPO_WORD_PHI_MASK);
+    // HEMISPHERE 0: C-side (-) / 1: A-side (-)
+    header.hemi    = maskedWord(word, RUN3_TOPO_WORD_HEMI_SHIFT,    RUN3_TOPO_WORD_HEMI_MASK);
+    // Barrel: 00 - EC: 1X - FW: 01 - see: https://indico.cern.ch/event/864390/contributions/3642129/attachments/1945776/3234220/ctp_topo_encoding.pdf
+    header.det     = maskedWord(word, RUN3_TOPO_WORD_DET_SHIFT,     RUN3_TOPO_WORD_DET_MASK);
+    // set EC to 2 instead of sometimes 3 - see above why
+    if (header.det > 2) header.det = 2;
+    // Decode Barrel:
+    if (header.det == 0){
+      header.sec = header.phicode >> 3;
+      header.barrel_eta_lookup = (header.etacode >> 1) & 0xf;
+      header.barrel_phi_lookup = header.phicode & 0x7;
+    }
+    // FWD
+    else if (header.det == 1){
+      header.sec = header.phicode >> 3 ;
+      header.roi = ((header.etacode & 0x1f) << 2) | ((header.phicode >> 1) & 0x3) ;
+    }
+    // EC
+    else if (header.det == 2){
+      header.sec = header.phicode >> 2 ;
+      header.roi = ((header.etacode & 0x3f) << 2) | (header.phicode & 0x3) ;
+    }
+    return header;
   }
 
   /// Decode the index of the multitpicity word, which is 1, 2, or 3
@@ -141,7 +230,7 @@ namespace LVL1::MuCTPIBits {
     std::vector<size_t> errors;
     for (size_t bit=0; bit<DataStatusWordErrors.size(); ++bit) {
       if (wordEquals(status, bit, 1u, 1u)) {
-        errors.push_back(bit);
+	errors.push_back(bit);
       }
     }
     return errors;

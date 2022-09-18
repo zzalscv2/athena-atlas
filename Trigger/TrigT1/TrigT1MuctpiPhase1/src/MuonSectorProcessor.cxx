@@ -4,7 +4,7 @@
 
 // First the corresponding header.
 #include "MuonSectorProcessor.h"
-#include "L1TopoLUT.h"
+#include "TrigT1MuctpiPhase1/L1TopoLUT.h"
 
 // The headers from other ATLAS packages,
 // from most to least dependent.
@@ -406,17 +406,17 @@ namespace LVL1MUCTPIPHASE1 {
 				  roiID,
 				  bcid,
 				  (unsigned int)ptword,
-				  ptCode,
+				  ptCode, //removed Run3
 				  (unsigned int)ptValue,
 				  coord.eta,
 				  coord.phi,
-				  etacode,
-				  phicode,
+				  etacode, //removed Run3
+				  phicode, //removed Run3
 				  coord.eta_min,
 				  coord.eta_max,
 				  coord.phi_min,
 				  coord.phi_max,
-				  mioctID,
+				  mioctID, //removed Run3
 				  coord.ieta,
 				  coord.iphi);
 
