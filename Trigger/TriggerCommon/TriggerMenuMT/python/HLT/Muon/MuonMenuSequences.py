@@ -1,5 +1,5 @@
 #
-#  Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
 #
 
 from ..Config.MenuComponents import MenuSequence, RecoFragmentsPool, algorithmCAToGlobalWrapper
@@ -566,6 +566,20 @@ def muEFCBIDperfSequence(ConfigFlags, is_probe_leg=False):
                          HypoToolGen = TrigMuonEFCombinerHypoToolFromDict,
                          IsProbe     = is_probe_leg )
 
+def muEFIDtpSequence(ConfigFlags, is_probe_leg=False):
+
+    (muonEFCBSequence, efcbViewsMaker, sequenceOut) = RecoFragmentsPool.retrieve(muEFCBAlgSequence, ConfigFlags)
+
+    from TrigMuonHypo.TrigMuonHypoConfig import TrigMuonEFIdtpHypoAlg
+    trigMuonEFIdtpHypo = TrigMuonEFIdtpHypoAlg( "TrigMuonEFIdtpHypoAlg" )
+
+    from TrigMuonHypo.TrigMuonHypoConfig import TrigMuonEFIdtpHypoToolFromDict
+
+    return MenuSequence( Sequence    = muonEFCBSequence,
+                         Maker       = efcbViewsMaker,
+                         Hypo        = trigMuonEFIdtpHypo,
+                         HypoToolGen = TrigMuonEFIdtpHypoToolFromDict,
+                         IsProbe     = is_probe_leg )
 
 
 def muEFCBLRTAlgSequence(ConfigFlags):

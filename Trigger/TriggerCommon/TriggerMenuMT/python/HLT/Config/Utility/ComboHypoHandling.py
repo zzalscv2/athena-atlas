@@ -1,4 +1,4 @@
-# Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
 
 ############################################################
 # Functionality to add generic topo hypos to combined chains
@@ -50,6 +50,7 @@ allowed_obs = {
 }
 
 from TriggerMenuMT.HLT.MinBias.MinBiasChainConfiguration import TrigAFPDijetComboHypoToolCfg
+from TriggerMenuMT.HLT.Muon.MuonChainConfiguration import TrigMuonEFIdtpInvMassHypoToolCfg
 
 def TrigComboHypoToolFromDict(chainDict):
     from TrigHypoCommonTools.TrigHypoCommonToolsConf import TrigComboHypoTool
@@ -205,6 +206,7 @@ comboConfigurator = {
     'invm':TrigComboHypoToolFromDict,
     'mT':TrigComboHypoToolFromDict,
     'afpdijet':TrigAFPDijetComboHypoToolCfg,
+    'idZmumu':TrigMuonEFIdtpInvMassHypoToolCfg,
 }
 
 def addTopoInfo(theChainConfig, mainChainDict, listOfChainDefs, lengthOfChainConfigs):
