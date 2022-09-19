@@ -122,8 +122,13 @@ def PoolReadCfg(flags):
         #Schedule a (potential) AODFix ...
         processingTags=flags.Input.ProcessingTags
         if "StreamAOD" in processingTags:
-            from RecJobTransforms.AODFixConfig import AODFixCfg
-            result.merge(AODFixCfg(flags))
+            try:
+                from RecJobTransforms.AODFixConfig import AODFixCfg
+                result.merge(AODFixCfg(flags))
+            except ImportError:
+                #Looks like running on AthSimulation or AthAnalysis ... ignore AODFix
+                pass
+                
 
 
     result.setAppProperty("EvtSel", evSel.getFullJobOptName())
