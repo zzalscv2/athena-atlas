@@ -36,7 +36,7 @@ class TileGeoSectionBuilder
 {
  public:
   /** Constructor */
-  TileGeoSectionBuilder(const StoredMaterialManager* matManager,
+  TileGeoSectionBuilder(StoredMaterialManager* matManager,
                         TileDddbManager* pDbManager,
                         const TileSwitches & switches,
                         MsgStream * log);
@@ -195,7 +195,7 @@ class TileGeoSectionBuilder
 
  private:
 
-  const StoredMaterialManager*          m_theMaterialManager;
+  StoredMaterialManager*                m_theMaterialManager;
   TileDddbManager *                     m_dbManager;
   MsgStream *                           m_log;
 
