@@ -209,7 +209,7 @@ def GetFieldFromInputFile():
                 logAutoConfiguration.warning("Field is configured due to GEO version")
                 solenoidCurrent,toroidCurrent= GetApproximateFieldFromGeo()
     else:
-        logAutoConfiguration.warning("Input file metadata don't have necessary info to get field conditions. It's probably too old.")
+        logAutoConfiguration.info("Input data file metadata doesn't have necessary info to get field conditions. This is normal in MC15+ and for new data")
     return solenoidCurrent,toroidCurrent
 
 def GetApproximateFieldFromGeo():
@@ -261,7 +261,7 @@ def GetApproximateFieldFromConditions():
         solenoidCurrent=0.0
         toroidCurrent=0.0
     else:
-        logAutoConfiguration.warning("Don't know how to interpret magnetic field status from conditionsTag '%s'.",cond)
+        logAutoConfiguration.info(f"Don't know how to get magnetic field status from conditions tag '{cond}' - this is normal in many situations")
     return solenoidCurrent,toroidCurrent
 
 
@@ -490,7 +490,7 @@ def ConfigureNumberOfCollisions():
         try:
             jobproperties.Beam.numberOfCollisions.set_Value_and_Lock(metadata['numberOfCollisions'])
         except Exception:
-            logAutoConfiguration.warning("numberOfCollisions could not be auto configured, no info available using default value: %s "
+            logAutoConfiguration.info("numberOfCollisions could not be auto configured, no info available using default value: %s "
                                          ,jobproperties.Beam.numberOfCollisions() )
             return
                 
