@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2019 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
 */
 
 /////////////////////////////////////////////////////////////////// 
@@ -24,7 +24,6 @@
 #include <math.h>
 
 class StoreGateSvc;
-class G4RunManager;
 
 namespace ISF {
     class ISFParticle;
@@ -101,24 +100,11 @@ namespace iFatras {
       ToolHandle<ISF::IG4RunManagerHelper> m_g4RunManagerHelper;   //!< G4RunManager needs to be initialized before G4 tables are accessed
       ToolHandle<PDGToG4Particle>         m_pdgToG4Conv;           //!< Handle for the  PDGToG4Particle converter tool
 
-      mutable G4RunManager*                m_g4runManager;         //!< for dummy G4 initialization 
-
       /** Validation output with histogram service */
       bool                                                         m_validationMode; //!< turn validation mode on/off
       ToolHandle<IPhysicsValidationTool>                           m_validationTool;   //!< the ntuple
       
-      /*------------------------------------------------------------
-       *  Statistics counter
-       *------------------------------------------------------------*/          
-      mutable size_t                       m_nDecayedParticles;
-                    
-      /*---------------------------------------------------------------------
-       *  Private static members
-       *---------------------------------------------------------------------*/
-      /** the speed of light in SI units */
-      static double s_speedOfLightSI;      
-                    
-   };               
+   };
                     
 }                   
 

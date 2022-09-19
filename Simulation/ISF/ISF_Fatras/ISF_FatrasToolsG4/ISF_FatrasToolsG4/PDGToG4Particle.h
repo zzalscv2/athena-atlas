@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2017 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
 */
 
 ///////////////////////////////////////////////////////////////////
@@ -9,7 +9,7 @@
 #ifndef FATRASG4TOOLS_PDGTOG4PARTICLE_H
 #define FATRASG4TOOLS_PDGTOG4PARTICLE_H
 
-// Gaudi
+// Gaudi/Athena
 #include "AthenaBaseComps/AthAlgTool.h"
 #include "GaudiKernel/MsgStream.h"
 
@@ -69,21 +69,11 @@ namespace iFatras
 
   private:
     /*---------------------------------------------------------------------
-     *  Static private members
-     *---------------------------------------------------------------------*/
-    /** fills default particles in map of predefined particles */
-    static void fillPredefinedParticles();
-    
-    /** add a G4 particle to the map of predefined particles */
-    static void addParticle( G4ParticleDefinition* pDef);
-    
-    /** static map of predefined particles */
-    static std::map<int,G4ParticleDefinition*> s_predefinedParticles;
-    
-    /*---------------------------------------------------------------------
      *  Private members
      *---------------------------------------------------------------------*/
-     
+    /** fills default particles in map */
+    std::map<int,G4ParticleDefinition*> predefinedParticles();
+
     /** map from pdg codes to defined Geant4 particles */
     PDGG4ParticleMap m_pdgG4ParticleMap;
 
