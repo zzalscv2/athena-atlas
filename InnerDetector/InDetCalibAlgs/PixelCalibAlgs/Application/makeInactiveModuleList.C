@@ -218,6 +218,8 @@ namespace{
       std::string lbdepPath =  prefix + d;
       for(int phi = 0; phi < 48; phi++){
         const std::string & name = getHistoName(hitMapFile,lbdepPath, phi);
+        char invalidCharacter = getHistoName(hitMapFile, lbdepPath, phi)[0]; //has to be L or D to be a proper module ID
+        if(invalidCharacter=='O'){continue;} //Sometimes the function grabs the directory name, propagating this needs to be avoided
         lbdep[name] = getHistoPtr(hitMapFile,lbdepPath, phi);
         lbdep[name]->SetName(name.c_str());
       }
@@ -242,6 +244,8 @@ namespace{
       const int nModulesTotal = staves[layer] * nModulesPerStave;
       for(int module = 0; module < nModulesTotal; module++){ // loop on modules
         const std::string & name =  getHistoName(hitMapFile,lbdepPath, module);
+        char invalidCharacter = getHistoName(hitMapFile, lbdepPath, module)[0]; //has to be L or D to be a proper module ID
+        if(invalidCharacter=='O'){continue;} //Sometimes the function grabs the directory name, propagating this needs to be avoided
         lbdep[name] = getHistoPtr(hitMapFile,lbdepPath, module);
         lbdep[name]->SetName(name.c_str());
       }
@@ -453,6 +457,8 @@ namespace{
     for(const auto & component: globalDiskNames){
       const std::string hitMapsPath = hitMapsDirName + component;
       for(int phi = 0; phi < 48; phi++){
+        char invalidCharacter = getHistoName(hitMapFile, hitMapsPath, phi)[0]; //has to be L or D to be a proper module ID
+        if(invalidCharacter=='O'){continue;} //Sometimes the function grabs the directory name, propagating this needs to be avoided
         const std::string & name = getHistoName(hitMapFile, hitMapsPath, phi);
         hitMaps[name] = getHistoPtr(hitMapFile, hitMapsPath, phi);
       }
@@ -479,6 +485,8 @@ namespace{
       if (isIBL && layer == 0) nModulesPerStave = 32; // --- IBL --- //
       if (layer !=0){						//IBL ignored,because treated in function for LB information
         for(int module = 0; module < staves[layer] * nModulesPerStave; module++){ // loop on modules
+          char invalidCharacter = getHistoName(hitMapFile, hitMapsPath, module)[0]; //has to be L or D to be a proper module ID
+          if(invalidCharacter=='O'){continue;} //Sometimes the function grabs the directory name, propagating this needs to be avoided
           const std::string & name = getHistoName(hitMapFile, hitMapsPath, module);
           hitMaps[name] = getHistoPtr(hitMapFile, hitMapsPath, module);
           hitMaps[name]->SetName(name.c_str());
