@@ -5,11 +5,17 @@
 #ifndef TRIGT1RESULTBYTESTREAM_MUONROIBYTESTREAMTOOL_H
 #define TRIGT1RESULTBYTESTREAM_MUONROIBYTESTREAMTOOL_H
 
+#include <boost/property_tree/ptree.hpp>
+#include <boost/property_tree/json_parser.hpp>
+
 // Trigger includes
 #include "TrigT1ResultByteStream/IL1TriggerByteStreamTool.h"
 #include "TrigT1Interfaces/ITrigT1MuonRecRoiTool.h"
 #include "TrigT1Interfaces/ITrigThresholdDecisionTool.h"
 #include "xAODTrigger/MuonRoIContainer.h"
+#include "TrigT1Interfaces/MuCTPIL1Topo.h"
+#include "TrigT1Interfaces/TrigT1StoreGateKeys.h"
+#include "TrigT1MuctpiPhase1/L1TopoLUT.h"
 
 // Athena includes
 #include "AthenaBaseComps/AthAlgTool.h"
@@ -60,14 +66,22 @@ private:
   SG::ReadHandleKeyArray<xAOD::MuonRoIContainer> m_roiReadKeys {
     this, "MuonRoIContainerReadKeys", {},
     "Read handle keys to MuonRoIContainer for conversion to ByteStream (one key per BC in the readout window)"};
-
+  SG::WriteHandleKeyArray<LVL1::MuCTPIL1Topo> m_MuCTPIL1TopoKeys {
+    this, "L1TopoOutputLocID", {},
+    "Output keys for MuCTPItoL1Topo, one per time slice"};
   // ------------------------- Other properties --------------------------------
   Gaudi::Property<std::vector<uint32_t>> m_robIds {
     this, "ROBIDs", {}, "List of ROB IDs required for conversion to/from xAOD RoI"};
+  const std::string m_barrelRoIFile            = "TrigConfMuctpi/Data_ROI_Mapping_Barrel_040422.txt";
+  const std::string m_ecfRoIFile               = "TrigConfMuctpi/Data_RoI_Mapping_EF_040422.txt";
+  const std::string m_side0LUTFile             = "TrigConfMuctpi/lookup_0_040422.json";
+  const std::string m_side1LUTFile             = "TrigConfMuctpi/lookup_1_040422.json";
 
   // ------------------------- Helper members ----------------------------------
   /// Expected readout window size calculated from the size of data handle key arrays, should be 1, 3 or 5
   short int m_readoutWindow{-1};
+  /// Muctpi Topo TOB word lookup table interface: hemi, detector, sector, roi(EC&FWD)/lut-numbers(Barrel) -> eta & phi coordinates - also L1Muon pT-Threshold mapping 
+  LVL1MUCTPIPHASE1::L1TopoLUT m_l1topoLUT ;
 };
 
 #endif // TRIGT1RESULTBYTESTREAM_MUONROIBYTESTREAMTOOL_H

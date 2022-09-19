@@ -400,7 +400,7 @@ MuonChainParts = {
     'lrtInfo'        : ['d0loose','d0medium','d0tight'],
     'invMassInfo'    : ['invmJPsiOS','invmDimu'],
     'msonlyInfo'     : ['msonly'],
-    'addInfo'        : ['idperf','LRT','3layersEC','cosmic',"muonqual","nscan"],
+    'addInfo'        : ['idperf','LRT','3layersEC','cosmic',"muonqual","nscan",'idtp'],
     'topo'           : AllowedTopos_mu,
     'flavour'        : [],
     'sigFolder'     : ['Muon'],
@@ -1145,6 +1145,7 @@ UnconventionalTrackingChainParts_Default = {
 # Combined Chains
 #==========================================================
 AllowedTopos_comb = [
+    'idZmumu',
     'dRAA12', 'dRAB15', '03dRAB','03dRAB30','dRAB03','dRAB04','02dRAB','02dRAC','02dRBC','50invmAB','60invmAB','afpdijet','18dphiAB','18dphiAC','80mTAC','80mTAD',
     '90invmAB',# TEST
     '1invmAB5','50invmAB130', # Jpsiee, Zee/Zeg

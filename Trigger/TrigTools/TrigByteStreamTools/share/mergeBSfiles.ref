@@ -61,7 +61,7 @@ Py:MetaReader        INFO Current filenames: ['mergedBS._0001.data', 'mergedBS._
 |   |-- file_comp_level   : 1
 |   |-- file_size         : 10494356
 |   |-- file_type         : BS
-|   |-- lumiBlockNumbers  : [0]
+|   |-- lumiBlockNumbers  : [151]
 |   |-- nentries          : 10
 |   |-- processingTags    : ['EnhancedBias']
 |   |-- project_name      : 
@@ -80,7 +80,7 @@ Py:MetaReader        INFO Current filenames: ['mergedBS._0001.data', 'mergedBS._
     |-- file_comp_level   : 1
     |-- file_size         : 10494376
     |-- file_type         : BS
-    |-- lumiBlockNumbers  : [0]
+    |-- lumiBlockNumbers  : [151]
     |-- nentries          : 10
     |-- processingTags    : ['EnhancedBias']
     |-- project_name      : 
