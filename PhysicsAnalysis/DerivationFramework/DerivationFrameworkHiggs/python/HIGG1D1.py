@@ -28,9 +28,13 @@ def HIGG1D1KernelCfg(ConfigFlags, name='HIGG1D1Kernel', **kwargs):
     
     #CustomJetsConfig
     acc.merge(HIGG1D1CustomJetsCfg(ConfigFlags))
+    
+    from DerivationFrameworkFlavourTag.FtagRun3DerivationConfig import FtagJetCollectionsCfg
+    acc.merge(FtagJetCollectionsCfg(ConfigFlags,['AntiKt4EMPFlowCustomVtxJets'],['HggPrimaryVertices']))
 
-    # MET and Btagging
-    #TODO
+    #Custom MET
+    from DerivationFrameworkJetEtMiss.METCommonConfig import METCustomVtxCfg
+    acc.merge(METCustomVtxCfg(ConfigFlags, 'HggPrimaryVertices', 'AntiKt4EMPFlowCustomVtx', 'CHSGCustomVtxParticleFlowObjects'))
 
     # Thinning tools...
     from DerivationFrameworkInDet.InDetToolsConfig import TrackParticleThinningCfg, MuonTrackParticleThinningCfg, TauTrackParticleThinningCfg, DiTauTrackParticleThinningCfg 
@@ -191,17 +195,30 @@ def HIGG1D1Cfg(ConfigFlags):
                                               "TauJets.dRmax.etOverPtLeadTrk",
                                               "HLT_xAOD__TrigMissingETContainer_TrigEFMissingET.ex.ey",
                                               "HLT_xAOD__TrigMissingETContainer_TrigEFMissingET_mht.ex.ey"]
-       
-        HIGG1D1SlimmingHelper.AppendToDictionary.update({  "AntiKt4EMPFlowJetsCustomVtx": "xAOD::JetContainer", "AntiKt4EMPFlowCustomVtxJetsAux":"xAOD::JetAuxContainer",
+
+        #  Additional content for HIGG1D1   
+        HIGG1D1SlimmingHelper.AppendToDictionary.update({  "AntiKt4EMPFlowCustomVtxJets": "xAOD::JetContainer", "AntiKt4EMPFlowCustomVtxJetsAux":"xAOD::JetAuxContainer",
+          "METAssoc_AntiKt4EMPFlowCustomVtx": "xAOD::MissingETAssociationMap", "METAssoc_AntiKt4EMPFlowCustomVtxAux":"xAOD::MissingETAuxAssociationMap",
+          "MET_Core_AntiKt4EMPFlowCustomVtx": "xAOD::MissingETContainer", "MET_Core_AntiKt4EMPFlowCustomVtxAux":"xAOD::MissingETAuxContainer",
           "HggPrimaryVertices":"xAOD::VertexContainer", "HggPrimaryVerticesAux":"xAOD::ShallowAuxContainer",
           "Kt4EMPFlowCustomVtxEventShape":"xAOD::EventShape", "Kt4EMPFlowCustomVtxEventShapeAux":"xAOD::EventShapeAuxInfo",
           "Kt4EMPFlowEventShape":"xAOD::EventShape", "Kt4EMPFlowEventShapeAux":"xAOD::EventShapeAuxInfo",
           "ZeeRefittedPrimaryVertices":"xAOD::VertexContainer","ZeeRefittedPrimaryVerticesAux":"xAOD:VertexAuxContainer"
         })
 
-        HIGG1D1SlimmingHelper.AllVariables += ["HggPrimaryVertices","ZeeRefittedPrimaryVertices","AntiKt4EMPFlowCustomVtxJets","Kt4PFlowCustomVtxEventShape","Kt4EMPFlowEventShape"]
-
+        HIGG1D1SlimmingHelper.AllVariables += ["HggPrimaryVertices","ZeeRefittedPrimaryVertices","AntiKt4EMPFlowCustomVtxJets","Kt4EMPFlowCustomVtxEventShape","Kt4EMPFlowEventShape","METAssoc_AntiKt4EMPFlowCustomVtx","MET_Core_AntiKt4EMPFlowCustomVtx"]
     
+        # Add AFP information
+        HIGG1D1SlimmingHelper.AllVariables += ["AFPSiHitContainer","AFPToFHitContainer"]
+
+        # Add Btagging information
+        from DerivationFrameworkFlavourTag.BTaggingContent import BTaggingStandardContent,BTaggingXbbContent
+        HIGG1D1SlimmingHelper.ExtraVariables += BTaggingStandardContent("AntiKt4EMPFlowCustomVtxJets")
+        HIGG1D1SlimmingHelper.ExtraVariables += BTaggingStandardContent("AntiKt4EMPFlowJets")
+        HIGG1D1SlimmingHelper.ExtraVariables += BTaggingXbbContent("AntiKt4EMPFlowCustomVtxJets")
+        HIGG1D1SlimmingHelper.ExtraVariables += BTaggingXbbContent("AntiKt4EMPFlowJets")
+
+
     # Output stream    
     HIGG1D1ItemList = HIGG1D1SlimmingHelper.GetItemList()
     acc.merge(OutputStreamCfg(ConfigFlags, "DAOD_HIGG1D1", ItemList=HIGG1D1ItemList, AcceptAlgs=["HIGG1D1Kernel"]))

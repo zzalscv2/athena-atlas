@@ -47,7 +47,7 @@ def METCfg(inputFlags):
         outputList.append('xAOD::MissingETContainer#MET_Core_'+metDef)
         outputList.append('xAOD::MissingETAuxContainer#MET_Core_'+metDef+'Aux.')
         # Build reference MET
-        result.addEventAlgo(getMETMakerAlg(metDef), sequenceName='METAssoc_'+metDef)
+        result.addEventAlgo(getMETMakerAlg(metDef))
         outputList.append('xAOD::MissingETContainer#MET_Reference_'+metDef)
         outputList.append('xAOD::MissingETAuxContainer#MET_Reference_'+metDef+'Aux.-ConstitObjectLinks.-ConstitObjectWeights')
 
