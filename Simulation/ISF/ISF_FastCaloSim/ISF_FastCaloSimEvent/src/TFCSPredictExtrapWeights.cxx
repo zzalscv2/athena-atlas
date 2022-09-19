@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2020 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "ISF_FastCaloSimEvent/TFCSPredictExtrapWeights.h"
@@ -148,22 +148,22 @@ std::map<std::string,double> TFCSPredictExtrapWeights::prepareInputs(TFCSSimulat
 {
   std::map<std::string, double> inputVariables;
   for(int ilayer=0;ilayer<CaloCell_ID_FCS::MaxSample;++ilayer) {
-    if(std::find(m_relevantLayers->begin(), m_relevantLayers->end(), ilayer) != m_relevantLayers->end()){
-      std::string layer = std::to_string(ilayer);
+    if(std::find(m_relevantLayers->cbegin(), m_relevantLayers->cend(), ilayer) != m_relevantLayers->cend()){
+      const std::string layer = std::to_string(ilayer);
       // Find index
-      auto itr = std::find(m_normLayers->begin(), m_normLayers->end(), ilayer);
-      if(itr != m_normLayers->end()){
-        int index = std::distance((*m_normLayers).begin(),itr);
-        inputVariables["ef_"+layer] = (simulstate.Efrac(ilayer) - (*m_normMeans).at(index)) / (*m_normStdDevs).at(index);
+      auto itr = std::find(m_normLayers->cbegin(), m_normLayers->cend(), ilayer);
+      if(itr != m_normLayers->cend()){
+        const int index = std::distance(m_normLayers->cbegin(),itr);
+        inputVariables["ef_"+layer] = (simulstate.Efrac(ilayer) - std::as_const(m_normMeans)->at(index)) / std::as_const(m_normStdDevs)->at(index);
       } else {
         ATH_MSG_ERROR("Normalization information not found for layer " << ilayer);
       }
     }
   }
   // Find index for truth energy
-  auto itr  = std::find(m_normLayers->begin(), m_normLayers->end(), -1);
-  int index = std::distance(m_normLayers->begin(), itr);
-  inputVariables["etrue"] = ( truthE - (*m_normMeans).at(index) ) / (*m_normStdDevs).at(index);
+  auto itr  = std::find(m_normLayers->cbegin(), m_normLayers->cend(), -1);
+  int index = std::distance(m_normLayers->cbegin(), itr);
+  inputVariables["etrue"] = ( truthE - std::as_const(m_normMeans)->at(index) ) / std::as_const(m_normStdDevs)->at(index);
   if(is_match_pdgid(22)){
     inputVariables["pdgId"] = 1; // one hot enconding
   } else if(is_match_pdgid(11) || is_match_pdgid(-11)){
@@ -175,9 +175,8 @@ std::map<std::string,double> TFCSPredictExtrapWeights::prepareInputs(TFCSSimulat
 
 // simulate()
 // get predicted extrapolation weights and save them as AuxInfo in simulstate
-FCSReturnCode TFCSPredictExtrapWeights::simulate(TFCSSimulationState& simulstate, const TFCSTruthState* truth, const TFCSExtrapolationState* extrapol) const
+FCSReturnCode TFCSPredictExtrapWeights::simulate(TFCSSimulationState& simulstate, const TFCSTruthState* truth, const TFCSExtrapolationState* /*extrapol*/) const
 {
-  (void)extrapol; // avoid unused variable warning
 
   // Get inputs to Neural Network
   std::map<std::string,double> inputVariables = prepareInputs(simulstate, truth->E()*0.001);
@@ -185,7 +184,7 @@ FCSReturnCode TFCSPredictExtrapWeights::simulate(TFCSSimulationState& simulstate
   // Get predicted extrapolation weights
   auto outputs            = m_nn->compute(inputVariables);
   for (unsigned int i = 0; i < m_relevantLayers->size(); i++) {
-    int ilayer = m_relevantLayers->at(i);
+    const int ilayer = std::as_const(m_relevantLayers)->at(i);
     ATH_MSG_DEBUG("TFCSPredictExtrapWeights::simulate: layer: " << ilayer << " weight: " << outputs["extrapWeight_"+std::to_string(ilayer)]);
     simulstate.setAuxInfo<float>(ilayer,outputs["extrapWeight_"+std::to_string(ilayer)]);
   }
@@ -193,9 +192,8 @@ FCSReturnCode TFCSPredictExtrapWeights::simulate(TFCSSimulationState& simulstate
 }
 
 // simulate_hit()
-FCSReturnCode TFCSPredictExtrapWeights::simulate_hit(Hit& hit, TFCSSimulationState& simulstate, const TFCSTruthState* truth, const TFCSExtrapolationState* extrapol)
+FCSReturnCode TFCSPredictExtrapWeights::simulate_hit(Hit& hit, TFCSSimulationState& simulstate, const TFCSTruthState* /*truth*/, const TFCSExtrapolationState* extrapol)
 {
-   (void)truth; // avoid unused variable warning
 
    const int cs=calosample();
 

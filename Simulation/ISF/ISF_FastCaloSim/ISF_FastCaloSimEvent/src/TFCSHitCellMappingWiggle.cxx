@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2020 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "CLHEP/Random/RandFlat.h"
@@ -175,7 +175,7 @@ bool TFCSHitCellMappingWiggle::compare(const TFCSParametrizationBase& ref) const
   return true;
 }
 
-void TFCSHitCellMappingWiggle::unit_test(TFCSSimulationState* simulstate,TFCSTruthState* truth, TFCSExtrapolationState* extrapol)
+void TFCSHitCellMappingWiggle::unit_test ATLAS_NOT_THREAD_SAFE (TFCSSimulationState* simulstate,TFCSTruthState* truth, TFCSExtrapolationState* extrapol)
 {
   if(!simulstate) simulstate=new TFCSSimulationState();
   if(!truth) truth=new TFCSTruthState();

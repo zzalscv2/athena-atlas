@@ -4,6 +4,7 @@
 atlas_subdir( ISF_FastCaloSimEvent )
 
 # External dependencies:
+find_package( Boost )
 find_package( CLHEP )
 find_package( HepPDT )
 find_package( ROOT COMPONENTS Core Tree MathCore MathMore Hist RIO Matrix Physics )
@@ -102,9 +103,9 @@ else()
   atlas_add_library( ISF_FastCaloSimEvent
     ISF_FastCaloSimEvent/*.h ${_dictSource} src/*.cxx
     PUBLIC_HEADERS ISF_FastCaloSimEvent
-    INCLUDE_DIRS ${CLHEP_INCLUDE_DIRS} ${HEPPDT_INCLUDE_DIRS} ${ROOT_INCLUDE_DIRS} ${LIBXML2_INCLUDE_DIRS} ${LWTNN_INCLUDE_DIRS}
+    INCLUDE_DIRS ${Boost_INCLUDE_DIRS} ${CLHEP_INCLUDE_DIRS} ${HEPPDT_INCLUDE_DIRS} ${ROOT_INCLUDE_DIRS} ${LIBXML2_INCLUDE_DIRS} ${LWTNN_INCLUDE_DIRS}
     DEFINITIONS ${CLHEP_DEFINITIONS}
-    LINK_LIBRARIES ${CLHEP_LIBRARIES} ${HEPPDT_LIBRARIES} ${ROOT_LIBRARIES} AthContainers AthenaKernel AthenaBaseComps CaloDetDescrLib ${LWTNN_LIBRARIES} ${LIBXML2_LIBRARIES}
+    LINK_LIBRARIES ${Boost_LIBRARIES} ${CLHEP_LIBRARIES} ${HEPPDT_LIBRARIES} ${ROOT_LIBRARIES} AthContainers AthenaKernel AthenaBaseComps CaloDetDescrLib ${LWTNN_LIBRARIES} ${LIBXML2_LIBRARIES}
     CaloGeoHelpers CxxUtils TileSimEvent
     PRIVATE_LINK_LIBRARIES GaudiKernel )
 endif()
