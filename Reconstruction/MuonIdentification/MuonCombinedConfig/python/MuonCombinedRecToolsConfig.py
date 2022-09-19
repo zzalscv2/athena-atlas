@@ -999,7 +999,7 @@ def MuonLayerAmbiguitySolverToolCfg(flags, name="MuonLayerAmbiguitySolverTool", 
         MuonSegmentMatchingToolCfg(flags, name='MuonSegmentMatchingToolTight', TightSegmentMatching=True)))
 
     kwargs.setdefault("MuonSegmentTrackBuilder",
-                      result.popToolsAndMerge(MooTrackBuilderCfg(flags)))
+                      result.popToolsAndMerge(MooTrackBuilderCfg(flags, name='MooMuonTrackBuilder', prefix='MuSt_')))
     kwargs.setdefault("MuonEDMPrinterTool", result.getPrimaryAndMerge(
         MuonEDMPrinterToolCfg(flags)))
 
