@@ -76,10 +76,9 @@ def firstSimCreatedBarcode():
         mlog.info('Generator job: leaving SimBarcodeOffset at 200k')
 
     else:
-        from RecExConfig.InputFilePeeker import inputFileSummary
+        from PyUtils.MetaReaderPeeker import metadata
         try:
-            offset = int(
-                inputFileSummary['metadata']['/Simulation/Parameters']['SimBarcodeOffset'])
+            offset = int(metadata['SimBarcodeOffset'])
         except Exception:
             mlog.info(
                 'Could not retrieve SimBarcodeOffset from /Simulation/Parameters, leaving at 200k')
