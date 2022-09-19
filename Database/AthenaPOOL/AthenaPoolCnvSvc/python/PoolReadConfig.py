@@ -119,6 +119,13 @@ def PoolReadCfg(flags):
         result.merge(EventSelectorAthenaPoolCfg(flags))
         evSel = result.getService("EventSelector")
 
+        #Schedule a (potential) AODFix ...
+        processingTags=flags.Input.ProcessingTags
+        if "StreamAOD" in processingTags:
+            from RecJobTransforms.AODFixConfig import AODFixCfg
+            result.merge(AODFixCfg(flags))
+
+
     result.setAppProperty("EvtSel", evSel.getFullJobOptName())
 
     return result
