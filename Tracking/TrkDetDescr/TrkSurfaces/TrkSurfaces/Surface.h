@@ -86,28 +86,31 @@ public:
   struct Transforms
   {
     // constructor with just a Amg::Transform3D input
-    inline Transforms(const Amg::Transform3D& _transform)
-      : transform(_transform)
+    inline Transforms(const Amg::Transform3D& atransform)
+      : transform(atransform)
       , center(transform.translation())
       , normal(transform.rotation().col(2))
-    {}
+    {
+    }
 
     // constructor with  Amg::Transform3D and center input
-    inline Transforms(const Amg::Transform3D& _transform,
-                      const Amg::Vector3D& _center)
-      : transform(_transform)
-      , center(_center)
+    inline Transforms(const Amg::Transform3D& atransform,
+                      const Amg::Vector3D& acenter)
+      : transform(atransform)
+      , center(acenter)
       , normal(transform.rotation().col(2))
-    {}
+    {
+    }
 
     // constructor with  Amg::Transform3D , center and normal input
-    inline Transforms(const Amg::Transform3D& _transform,
-                      const Amg::Vector3D& _center,
-                      const Amg::Vector3D& _normal)
-      : transform(_transform)
-      , center(_center)
-      , normal(_normal)
-    {}
+    inline Transforms(const Amg::Transform3D& atransform,
+                      const Amg::Vector3D& acenter,
+                      const Amg::Vector3D& anormal)
+      : transform(atransform)
+      , center(acenter)
+      , normal(anormal)
+    {
+    }
     Transforms(const Transforms&) = default;
     Transforms(Transforms&&) = default;
     Transforms& operator=(const Transforms&) = default;
@@ -167,7 +170,7 @@ public:
 
   /**Implicit constructor - uses the copy constructor */
   virtual Surface* clone() const = 0;
-  
+
   /** NVI method returning unique_ptr clone */
   std::unique_ptr<Surface> uniqueClone() const;
 
@@ -210,7 +213,6 @@ public:
   /** return the material Layer */
   const Trk::Layer* materialLayer() const;
   Trk::Layer* materialLayer();
-
 
   /** return the base surface (simplified for persistification) */
   virtual const Trk::Surface* baseSurface() const;
@@ -363,9 +365,10 @@ public:
   /** fst straight line intersection schema - templated for charged and neutral
    * parameters */
   template<class T>
-  Intersection straightLineIntersection(const T& pars,
-                                        bool forceDir = false,
-                                        const Trk::BoundaryCheck& bchk = false) const
+  Intersection straightLineIntersection(
+    const T& pars,
+    bool forceDir = false,
+    const Trk::BoundaryCheck& bchk = false) const
   {
     return straightLineIntersection(
       pars.position(), pars.momentum().unit(), forceDir, bchk);
@@ -450,7 +453,7 @@ protected:
   /** Not owning Pointer to the TrkDetElementBase*/
   const TrkDetElementBase* m_associatedDetElement = nullptr;
 
-  /** Identifier for the TrkDetElementBase*/ 
+  /** Identifier for the TrkDetElementBase*/
   Identifier m_associatedDetElementId;
 
   /**The associated layer Trk::Layer
