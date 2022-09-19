@@ -8,7 +8,7 @@ SiPropertiesTool::SiPropertiesTool(const std::string& type, const std::string& n
   base_class(type, name, parent),
   m_propertiesVector{"SCTSiliconPropertiesVector"}
 {
-  declareProperty("DetectorName", m_detectorName="SCT", "Dectector name: Pixel or SCT");
+  declareProperty("DetectorName", m_detectorName="SCT", "Dectector name: Pixel, SCT or PLR");
   declareProperty("ReadKey", m_propertiesVector, "Key of SiliconPropertiesVector");
 }
 
@@ -17,8 +17,8 @@ SiPropertiesTool::initialize()
 { 
   ATH_MSG_INFO("SiPropertiesTool Initialized");
   
-  if ((m_detectorName != "Pixel") and (m_detectorName != "SCT")) {
-    ATH_MSG_FATAL("Invalid detector name: " << m_detectorName << ". Must be Pixel or SCT.");
+  if ((m_detectorName != "Pixel") and (m_detectorName != "SCT") and (m_detectorName != "PLR")) {
+    ATH_MSG_FATAL("Invalid detector name: " << m_detectorName << ". Must be Pixel, SCT or PLR.");
     return StatusCode::FAILURE;
   }
   ATH_CHECK(m_propertiesVector.initialize());

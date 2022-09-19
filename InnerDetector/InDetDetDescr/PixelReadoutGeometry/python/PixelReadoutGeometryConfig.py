@@ -15,3 +15,11 @@ def ITkPixelReadoutManagerCfg(flags, name="ITkPixelReadoutManager", **kwargs):
     acc = ComponentAccumulator()
     acc.addService(CompFactory.InDetDD.ITk.PixelReadoutManager(name, **kwargs), primary=True)
     return acc
+
+def PLR_ReadoutManagerCfg(flags, name="PLR_ReadoutManager", **kwargs):
+    """Return a ComponentAccumulator with a PLR configured ITkPixelReadoutManager"""
+    acc = ComponentAccumulator()
+    kwargs.setdefault("DetectorName", "PLR")
+    kwargs.setdefault("PixelIDName", "PLR_ID")
+    acc.addService(CompFactory.InDetDD.ITk.PixelReadoutManager(name, **kwargs), primary=True)
+    return acc

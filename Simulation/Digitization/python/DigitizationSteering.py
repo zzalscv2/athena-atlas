@@ -20,6 +20,7 @@ from MuonConfig.MM_DigitizationConfig import MM_DigitizationDigitToRDOCfg
 from MuonConfig.RPC_DigitizationConfig import RPC_DigitizationDigitToRDOCfg
 from MuonConfig.TGC_DigitizationConfig import TGC_DigitizationDigitToRDOCfg
 from MuonConfig.sTGC_DigitizationConfig import sTGC_DigitizationDigitToRDOCfg
+from PixelDigitization.PLR_DigitizationConfig import PLR_DigitizationCfg
 from PixelDigitization.ITkPixelDigitizationConfig import ITkPixelDigitizationCfg
 from PixelDigitization.PixelDigitizationConfig import PixelDigitizationCfg
 from SCT_Digitization.SCT_DigitizationConfig import SCT_DigitizationCfg
@@ -134,6 +135,8 @@ def DigitizationMainContentCfg(flags):
         acc.merge(ITkPixelDigitizationCfg(flags))
     if flags.Detector.EnableITkStrip:
         acc.merge(ITkStripDigitizationCfg(flags))
+    if flags.Detector.EnablePLR:
+        acc.merge(PLR_DigitizationCfg(flags))
 
     # HGTD
     if flags.Detector.EnableHGTD:

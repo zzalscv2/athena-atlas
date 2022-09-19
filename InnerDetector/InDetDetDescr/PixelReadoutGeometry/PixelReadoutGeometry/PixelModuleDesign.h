@@ -368,7 +368,8 @@ namespace InDetDD {
     inline PixelReadoutTechnology PixelModuleDesign::getReadoutTechnology() const {
       if (m_detectorType == InDetDD::DetectorType::PixelBarrel
           || m_detectorType == InDetDD::DetectorType::PixelEndcap
-          || m_detectorType == InDetDD::DetectorType::PixelInclined)
+          || m_detectorType == InDetDD::DetectorType::PixelInclined
+          || m_detectorType == InDetDD::DetectorType::PLR)
       {
         return PixelReadoutTechnology::RD53;
       }

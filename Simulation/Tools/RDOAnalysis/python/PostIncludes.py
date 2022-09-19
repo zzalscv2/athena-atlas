@@ -15,5 +15,8 @@ def ITkRDOAnalysis(configFlags):
         from RDOAnalysis.RDOAnalysisConfig import ITkPixelRDOAnalysisCfg
         result.merge(ITkPixelRDOAnalysisCfg(configFlags))
 
+    if configFlags.Detector.EnablePLR:
+        from RDOAnalysis.RDOAnalysisConfig import PLR_RDOAnalysisCfg
+        result.merge(PLR_RDOAnalysisCfg(configFlags))
 
     return result

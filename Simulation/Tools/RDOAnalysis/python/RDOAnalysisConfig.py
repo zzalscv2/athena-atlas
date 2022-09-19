@@ -60,6 +60,26 @@ def ITkStripRDOAnalysisCfg(flags, name="ITkStripRDOAnalysis", **kwargs):
     return result
 
 
+def PLR_RDOAnalysisCfg(flags, name="PLR_RDOAnalysis", **kwargs):
+    from PLRGeoModelXml.PLR_GeoModelConfig import PLR_ReadoutGeometryCfg
+    result = PLR_ReadoutGeometryCfg(flags)
+
+    kwargs.setdefault("CollectionName", "PLR_RDOs")
+    kwargs.setdefault("SDOCollectionName", "PLR_SDO_Map")
+    kwargs.setdefault("HistPath", "/RDOAnalysis/PLR/")
+    kwargs.setdefault("SharedHistPath", "/RDOAnalysis/histos/")
+    kwargs.setdefault("NtuplePath", "/RDOAnalysis/ntuples/")
+    kwargs.setdefault("NtupleName", "PLR")
+    kwargs.setdefault("DetectorName", "PLR")
+    kwargs.setdefault("PixelIDName", "PLR_ID")
+
+    result.addEventAlgo(CompFactory.ITk.PixelRDOAnalysis(name, **kwargs))
+
+    result.merge(RDOAnalysisOutputCfg(flags))
+
+    return result
+
+
 def RDOAnalysisCfg(flags):
     acc = ComponentAccumulator()
 
@@ -70,5 +90,8 @@ def RDOAnalysisCfg(flags):
     
     if flags.Detector.EnableITkStrip:
         acc.merge(ITkStripRDOAnalysisCfg(flags))
+
+    if flags.Detector.EnablePLR:
+        acc.merge(PLR_RDOAnalysisCfg(flags))
 
     return acc

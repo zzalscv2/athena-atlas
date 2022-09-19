@@ -4,6 +4,7 @@
 
 #include "PLRGmxInterface.h"
 
+#include <InDetIdentifier/PLR_ID.h>
 #include <InDetReadoutGeometry/SiDetectorDesign.h>
 #include <InDetReadoutGeometry/SiDetectorElement.h>
 #include <InDetSimEvent/SiHitIdHelper.h>

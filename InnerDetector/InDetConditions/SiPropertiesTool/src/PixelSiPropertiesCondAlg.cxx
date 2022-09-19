@@ -19,7 +19,7 @@ PixelSiPropertiesCondAlg::PixelSiPropertiesCondAlg(const std::string& name, ISvc
 StatusCode PixelSiPropertiesCondAlg::initialize() {
   ATH_MSG_DEBUG("PixelSiPropertiesCondAlg::initialize()");
 
-  ATH_CHECK(detStore()->retrieve(m_pixid,"PixelID"));
+  ATH_CHECK(detStore()->retrieve(m_pixid, m_pixelIDName.value()));
 
   ATH_CHECK(m_readKeyTemp.initialize());
   ATH_CHECK(m_readKeyHV.initialize());

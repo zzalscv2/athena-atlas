@@ -30,7 +30,7 @@ PixelChargeLUTCalibCondAlg::PixelChargeLUTCalibCondAlg(const std::string& name, 
 StatusCode PixelChargeLUTCalibCondAlg::initialize() {
   ATH_MSG_DEBUG("PixelChargeLUTCalibCondAlg::initialize()");
 
-  ATH_CHECK(detStore()->retrieve(m_pixelID,"PixelID"));
+  ATH_CHECK(detStore()->retrieve(m_pixelID, m_pixelIDName.value()));
   ATH_CHECK(m_pixelDetEleCollKey.initialize());
   ATH_CHECK(m_configKey.initialize());
   ATH_CHECK(m_readKey.initialize(SG::AllowEmpty));

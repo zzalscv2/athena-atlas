@@ -19,7 +19,6 @@
 #include "ReadoutGeometryBase/InDetDD_Defs.h"
 
 #include "InDetIdentifier/PixelID.h"
-#include "InDetIdentifier/PLR_ID.h"
 
 #include <map>
 
@@ -54,7 +53,7 @@ namespace InDetDD {
       /** Constructor */
       PixelDetectorManager(StoreGateSvc* detStore);
       /** Constructor with name */
-      PixelDetectorManager(StoreGateSvc* detStore, const std::string& name);
+      PixelDetectorManager(StoreGateSvc* detStore, const std::string& name, const std::string& pixelIDName);
 
       /** Destructor */
       ~PixelDetectorManager();

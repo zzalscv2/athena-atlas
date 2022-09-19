@@ -49,6 +49,10 @@ private:
   SG::ReadHandleKey<InDetSimDataCollection> m_inputTruthKey {this, "SDOCollectionName", "ITkPixelSDO_Map", "Input ITk Pixel SDO collection name"};
   const PixelID *m_pixelID{};
   const InDetDD::PixelDetectorManager *m_pixelManager{};
+  Gaudi::Property<std::string> m_detectorName
+  {this, "DetectorName", "ITkPixel", "Pixel detector name"};
+  Gaudi::Property<std::string> m_pixelIDName
+  {this, "PixelIDName", "PixelID", "Pixel ID name"};
 
   Gaudi::Property<std::string> m_histPath {this, "HistPath", "/RDOAnalysis/ITkPixel/", ""};
   Gaudi::Property<std::string> m_sharedHistPath {this, "SharedHistPath", "/RDOAnalysis/histos/", ""};

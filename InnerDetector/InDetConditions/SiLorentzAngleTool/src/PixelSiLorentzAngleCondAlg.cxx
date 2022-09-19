@@ -19,7 +19,8 @@ StatusCode PixelSiLorentzAngleCondAlg::initialize() {
   ATH_MSG_DEBUG("PixelSiLorentzAngleCondAlg::initialize()");
 
   const PixelID* idHelper{nullptr};
-  ATH_CHECK(detStore()->retrieve(idHelper,"PixelID"));
+  ATH_CHECK(detStore()->retrieve(idHelper, m_pixelIDName.value()));
+
   m_maxHash = idHelper->wafer_hash_max();
 
   ATH_CHECK(m_moduleDataKey.initialize());

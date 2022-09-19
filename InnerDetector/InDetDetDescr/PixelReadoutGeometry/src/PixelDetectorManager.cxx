@@ -28,8 +28,9 @@ namespace InDetDD {
 
 
   PixelDetectorManager::PixelDetectorManager(StoreGateSvc* detStore,
-                                             const std::string& name)
-    : SiDetectorManager(detStore,name),
+                                             const std::string& name,
+                                             const std::string& pixelIDName)
+    : SiDetectorManager(detStore, name),
       m_idHelper(nullptr),
       m_isLogical(false) // Change to true to change the definition of local module corrections
   {
@@ -38,19 +39,23 @@ namespace InDetDD {
     //
 
 
-    if(name!="PLR"){
-      StatusCode sc = detStore->retrieve(m_idHelper,"PixelID");
-      if (sc.isFailure()) {
-        ATH_MSG_ERROR("Could not retrieve PixelID helper");
-      }
-    }
-    else {
+    if (pixelIDName == "PLR_ID") {
       const PLR_ID* plr_idHelper;
-      StatusCode sc = detStore->retrieve(plr_idHelper,"PLR_ID");
+      StatusCode sc = detStore->retrieve(plr_idHelper, pixelIDName);
       if (sc.isFailure()) {
         ATH_MSG_ERROR("Could not retrieve PLR_ID helper");
       }
       m_idHelper = plr_idHelper;
+      // make the symlink
+      sc = detStore->symLink(plr_idHelper, m_idHelper);
+      if (sc.isFailure()) {
+        ATH_MSG_ERROR("Could not make PLR_ID symlink");
+      }
+    } else {
+      StatusCode sc = detStore->retrieve(m_idHelper, pixelIDName);
+      if (sc.isFailure()) {
+        ATH_MSG_ERROR("Could not retrieve PixelID helper");
+      }
     }
 
     // Initialize the collections.
@@ -61,7 +66,7 @@ namespace InDetDD {
   }
 
   PixelDetectorManager::PixelDetectorManager(StoreGateSvc* detStore)
-     : PixelDetectorManager(detStore, "Pixel"){ }
+     : PixelDetectorManager(detStore, "Pixel", "PixelID"){ }
 
 
   PixelDetectorManager::~PixelDetectorManager()

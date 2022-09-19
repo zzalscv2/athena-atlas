@@ -17,6 +17,7 @@ from InDetOverlay.ITkStripOverlayConfig import ITkStripOverlayCfg
 from InDetOverlay.PixelOverlayConfig import PixelOverlayCfg
 from InDetOverlay.SCTOverlayConfig import SCTOverlayCfg
 from InDetOverlay.TRTOverlayConfig import TRTOverlayCfg
+from InDetOverlay.PLR_OverlayConfig import PLR_OverlayCfg
 from HGTD_Overlay.HGTD_OverlayConfig import HGTD_OverlayCfg
 from LArDigitization.LArDigitizationConfig import LArOverlayCfg, LArSuperCellOverlayCfg
 from MuonConfig.CSC_OverlayConfig import CSC_OverlayCfg
@@ -87,6 +88,8 @@ def OverlayMainContentCfg(configFlags):
         acc.merge(ITkPixelOverlayCfg(configFlags))
     if configFlags.Detector.EnableITkStrip:
         acc.merge(ITkStripOverlayCfg(configFlags))
+    if configFlags.Detector.EnablePLR:
+        acc.merge(PLR_OverlayCfg(configFlags))
 
     # HGTD
     if configFlags.Detector.EnableHGTD:
