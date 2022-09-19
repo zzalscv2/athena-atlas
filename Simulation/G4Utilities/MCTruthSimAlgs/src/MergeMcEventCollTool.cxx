@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "MergeMcEventCollTool.h"
@@ -294,12 +294,11 @@ StatusCode MergeMcEventCollTool::mergeEvent(const EventContext& /*ctx*/) {
 }
 void MergeMcEventCollTool::printDetailsOfMergedMcEventCollection() const {
   if (! m_pOvrlMcEvColl->empty()) {
-    DataVector<HepMC::GenEvent>::const_iterator outputEventItr(m_pOvrlMcEvColl->begin());
-    const DataVector<HepMC::GenEvent>::const_iterator endOfEvents(m_pOvrlMcEvColl->end());
     ATH_MSG_INFO ( "$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$" );
     ATH_MSG_INFO ( "INTIME("<<int(INTIME)<<"), OUTOFTIME("<<int(OUTOFTIME)<<"), RESTOFMB("<<int(RESTOFMB)<<"), CAVERN("<<int(CAVERN)<<"), NOPUTYPE("<<int(NOPUTYPE)<<")" );
     ATH_MSG_INFO ( "Current OUTPUT GenEvent: " );
-    while(outputEventItr!=endOfEvents) {
+    auto outputEventItr = m_pOvrlMcEvColl->cbegin();
+    while(outputEventItr!=m_pOvrlMcEvColl->cend()) {
       const int signal_process_id(HepMC::signal_process_id((*outputEventItr))), event_number((*outputEventItr)->event_number()), separator_hack(HepMC::mpi((*outputEventItr)));
       const IndexKey key(makekey(signal_process_id,event_number,separator_hack));
       const PileUpBackgroundMap::const_iterator event(m_backgroundClassificationMap.find(key));
