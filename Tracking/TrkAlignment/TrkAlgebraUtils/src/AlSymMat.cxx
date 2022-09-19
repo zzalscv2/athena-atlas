@@ -43,21 +43,17 @@ AlSymMat::AlSymMat()
   , m_pathtxt("./")
 {
   m_matrix_type = 1;
-  m_size = 0;
-  m_nele = 0;
-  // set pointer to null
 }
 
 
 //______________________________________________________________________________
 AlSymMat::AlSymMat(long int N)
-  : m_ptr_data(new double[m_nele])
+  : AlSymMatBase(N)
+  , m_ptr_data(new double[m_nele])
   , m_pathbin("./")
   , m_pathtxt("./")
 {
   m_matrix_type = 1;
-  m_size = N;
-  m_nele = N*(N+1)/2;
 
   double*  p = m_ptr_data + m_nele;
   while (p > m_ptr_data) *(--p) = 0.;
@@ -88,7 +84,7 @@ AlSymMat::AlSymMat(const AlSpaMat& m)
   m_pathbin = m.pathBin();
   m_pathtxt = m.pathTxt();
 
-  copy(m);
+  AlSymMat::copy(m);
 }
 
 //______________________________________________________________________________
@@ -139,7 +135,7 @@ void AlSymMat::copy(const AlSpaMat& m)
   const_mapiterator pos;
   for (pos = m.ptrMap()->begin(); pos!=m.ptrMap()->end(); pos++) {
     m.elem(pos->first, i, j);
-    elemr(i,j) = pos->second;
+    AlSymMat::elemr(i,j) = pos->second;
   }
 
   }
@@ -653,7 +649,7 @@ StatusCode AlSymMat::Write(const std::string &filename, bool binary,
 }
 
 //______________________________________________________________________________
-StatusCode AlSymMat::CheckMatVersion(const std::string filename, bool &StdUnits)
+StatusCode AlSymMat::CheckMatVersion(const std::string& filename, bool &StdUnits)
 {
   std::ifstream inmat((filename).c_str(), std::ios::binary);
   if(inmat.fail())

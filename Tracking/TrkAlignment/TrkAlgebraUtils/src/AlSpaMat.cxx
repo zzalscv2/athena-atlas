@@ -713,7 +713,7 @@ StatusCode AlSpaMat::Write(const std::string &filename, bool binary,
 }
 
 //______________________________________________________________________________
-StatusCode AlSpaMat::CheckMatVersion(const std::string filename, bool &StdUnits)
+StatusCode AlSpaMat::CheckMatVersion(const std::string& filename, bool &StdUnits)
 {
   std::ifstream inmat((filename).c_str(), std::ios::binary);
   if(inmat.fail())

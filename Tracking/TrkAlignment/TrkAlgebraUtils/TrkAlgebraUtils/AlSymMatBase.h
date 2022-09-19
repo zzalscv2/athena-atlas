@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2017 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef TRKALGS_ALSYMMATBASE_H
@@ -80,7 +80,7 @@ class AlSymMatBase  {
   virtual  void       SetPathBin(const std::string&) = 0;
   virtual  void       SetPathTxt(const std::string&) = 0;
   virtual  StatusCode Write(const std::string&, bool, bool, double, float) = 0;
-  virtual  StatusCode CheckMatVersion(const std::string, bool&) = 0;
+  virtual  StatusCode CheckMatVersion(const std::string&, bool&) = 0;
   virtual  StatusCode Read(const std::string&, int&, bool&, float&) = 0;
   virtual  StatusCode ReadProjected(const std::string&, int&, bool&, float&) = 0;
   virtual  int diagonalize(char jobz, AlVec& w, AlMat& z) = 0;

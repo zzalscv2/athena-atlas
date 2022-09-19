@@ -84,6 +84,8 @@ AlVec& AlVec::operator=(const AlVec& v) {
     throw std::range_error( "AlVec Assignment: size does not match!" );
   }
 
+  m_size = v.m_size; // Avoid cppcheck warning
+
   if ( m_ptr_data != v.m_ptr_data )  copy(v);
 
   return *this;
