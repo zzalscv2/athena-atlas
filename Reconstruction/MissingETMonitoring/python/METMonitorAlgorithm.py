@@ -1,4 +1,4 @@
-# Copyright (C) 2002-2019 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
 import math
 def defineHistograms(monAlg, group,helper,histoNameSuffix=""):
 #    name = histoNameSuffix + 'x'
@@ -62,11 +62,13 @@ def METMonitoringConfig(inputFlags):
 # Import filter tools as helpers
     from AthenaMonitoring.AtlasReadyFilterConfig import AtlasReadyFilterCfg
     from AthenaMonitoring.BadLBFilterToolConfig import LArBadLBFilterToolCfg
+    from AthenaMonitoring.FilledBunchFilterToolConfig import FilledBunchFilterToolCfg
 
     from AthenaConfiguration.ComponentFactory import CompFactory  
     METRefFinal_MonAlg = helper.addAlgorithm(CompFactory.METMonitoringAlg,'METRefFinal_MonAlg',
                                             addFilterTools = [AtlasReadyFilterCfg(inputFlags),
-                                                              LArBadLBFilterToolCfg(inputFlags)
+                                                              LArBadLBFilterToolCfg(inputFlags),
+                                                              FilledBunchFilterToolCfg(inputFlags)
                                                               ])
     met_types = ["MET_RefFinal","MET_RefJet","MET_Muon","MET_RefEle","MET_RefGamma","MET_RefTau","MET_PVSoftTrk"]
 
@@ -83,7 +85,8 @@ def METMonitoringConfig(inputFlags):
     if inputFlags.DQ.DataType != 'cosmics':
         METPflow_MonAlg = helper.addAlgorithm(CompFactory.METMonitoringAlg,'METPflow_MonAlg',
                                             addFilterTools = [AtlasReadyFilterCfg(inputFlags),
-                                                              LArBadLBFilterToolCfg(inputFlags)
+                                                              LArBadLBFilterToolCfg(inputFlags),
+                                                              FilledBunchFilterToolCfg(inputFlags)
                                                               ])
         pfmet_types = ["MET_PFlow","MET_PFlow_RefJet","MET_PFlow_Muon","MET_PFlow_RefEle","MET_PFlow_RefGamma","MET_PFlow_RefTau","MET_PFlow_PVSoftTrk"]
         METPflow_MonAlg.METContainer="MET_Reference_AntiKt4EMPFlow"
@@ -97,7 +100,8 @@ def METMonitoringConfig(inputFlags):
         
     METEMTopo_MonAlg = helper.addAlgorithm(CompFactory.METMonitoringAlg,'METEMTopo_MonAlg',
                                             addFilterTools = [AtlasReadyFilterCfg(inputFlags),
-                                                              LArBadLBFilterToolCfg(inputFlags)
+                                                              LArBadLBFilterToolCfg(inputFlags),
+                                                              FilledBunchFilterToolCfg(inputFlags)
                                                               ])
     emtopomet_types = ["MET_Topo"]
     METEMTopo_MonAlg.METContainer="MET_EMTopo"
@@ -109,7 +113,11 @@ def METMonitoringConfig(inputFlags):
         defineHistograms(METEMTopo_MonAlg, group,helper,mets)
 
 
-    METCalo_MonAlg = helper.addAlgorithm(CompFactory.METMonitoringAlg,'METCalo_MonAlg')   
+    METCalo_MonAlg = helper.addAlgorithm(CompFactory.METMonitoringAlg,'METCalo_MonAlg',
+                                         addFilterTools = [AtlasReadyFilterCfg(inputFlags),
+                                                           LArBadLBFilterToolCfg(inputFlags),
+                                                           FilledBunchFilterToolCfg(inputFlags)]
+                                         )
     metcalo_types = [ "PEMB", "EMB", "PEME", "EME", "TILE", "HEC", "FCAL" ]
     METCalo_MonAlg.METContainer="MET_Calo"
     METCalo_MonAlg.METCaloKeys = metcalo_types
@@ -119,7 +127,11 @@ def METMonitoringConfig(inputFlags):
     for mets in metcalo_types:
         defineHistogramsCalo(METCalo_MonAlg, group,helper,mets)
 #trigger
-    METRefFinal_XE50_MonAlg = helper.addAlgorithm(CompFactory.METMonitoringAlg,'METRefFinal_XE50_MonAlg')
+    METRefFinal_XE50_MonAlg = helper.addAlgorithm(CompFactory.METMonitoringAlg,'METRefFinal_XE50_MonAlg',
+                                                  addFilterTools = [AtlasReadyFilterCfg(inputFlags),
+                                                                    LArBadLBFilterToolCfg(inputFlags),
+                                                                    FilledBunchFilterToolCfg(inputFlags)]
+                                                  )
     METRefFinal_XE50_MonAlg.METContainer="MET_Reference_AntiKt4EMTopo"
     METRefFinal_XE50_MonAlg.metTotalKey="FinalTrk"
     METRefFinal_XE50_MonAlg.metKeys = met_types
@@ -129,7 +141,11 @@ def METMonitoringConfig(inputFlags):
         defineHistograms(METRefFinal_XE50_MonAlg, group,helper,mets)
 
     if inputFlags.DQ.DataType != 'cosmics':
-        METPflow_XE50_MonAlg = helper.addAlgorithm(CompFactory.METMonitoringAlg,'METPflow_XE50_MonAlg')
+        METPflow_XE50_MonAlg = helper.addAlgorithm(CompFactory.METMonitoringAlg,'METPflow_XE50_MonAlg',
+                                                   addFilterTools = [AtlasReadyFilterCfg(inputFlags),
+                                                                     LArBadLBFilterToolCfg(inputFlags),
+                                                                     FilledBunchFilterToolCfg(inputFlags)]
+                                                   )
         METPflow_XE50_MonAlg.METContainer="MET_Reference_AntiKt4EMPFlow"
         METPflow_XE50_MonAlg.metTotalKey="FinalTrk"
         METPflow_XE50_MonAlg.metKeys = pfmet_types
@@ -138,7 +154,11 @@ def METMonitoringConfig(inputFlags):
         for mets in pfmet_types:
             defineHistograms(METPflow_XE50_MonAlg, group,helper,mets)
 
-    METCalo_XE50_MonAlg = helper.addAlgorithm(CompFactory.METMonitoringAlg,'METCalo_XE50_MonAlg')
+    METCalo_XE50_MonAlg = helper.addAlgorithm(CompFactory.METMonitoringAlg,'METCalo_XE50_MonAlg',
+                                              addFilterTools = [AtlasReadyFilterCfg(inputFlags),
+                                                                LArBadLBFilterToolCfg(inputFlags),
+                                                                FilledBunchFilterToolCfg(inputFlags)]
+                                              )
     METCalo_XE50_MonAlg.METCaloContainer="MET_Calo"
     METCalo_XE50_MonAlg.METCaloKeys = metcalo_types
     METCalo_XE50_MonAlg.dotrigger = True
@@ -146,7 +166,11 @@ def METMonitoringConfig(inputFlags):
     for mets in metcalo_types:
         defineHistogramsCalo(METCalo_XE50_MonAlg, group,helper,mets)
 
-    METEMTopo_XE50_MonAlg = helper.addAlgorithm(CompFactory.METMonitoringAlg,'METEMTopo_XE50_MonAlg')
+    METEMTopo_XE50_MonAlg = helper.addAlgorithm(CompFactory.METMonitoringAlg,'METEMTopo_XE50_MonAlg',
+                                                addFilterTools = [AtlasReadyFilterCfg(inputFlags),
+                                                                  LArBadLBFilterToolCfg(inputFlags),
+                                                                  FilledBunchFilterToolCfg(inputFlags)]
+                                               )
     METEMTopo_XE50_MonAlg.METContainer="MET_EMTopo"
     METEMTopo_XE50_MonAlg.METAntiKt4EMTopoContainer="MET_Reference_AntiKt4EMTopo"
     emtopomet_types= ["MET_Topo"]
@@ -157,7 +181,11 @@ def METMonitoringConfig(inputFlags):
         defineHistograms(METEMTopo_XE50_MonAlg, METEMTopo_XE50_group,helper,mets) 
 
 # metcut
-    METRefFinal_METCut_MonAlg = helper.addAlgorithm(CompFactory.METMonitoringAlg,'METRefFinal_METCut_MonAlg')
+    METRefFinal_METCut_MonAlg = helper.addAlgorithm(CompFactory.METMonitoringAlg,'METRefFinal_METCut_MonAlg',
+                                                    addFilterTools = [AtlasReadyFilterCfg(inputFlags),
+                                                                      LArBadLBFilterToolCfg(inputFlags),
+                                                                      FilledBunchFilterToolCfg(inputFlags)]
+                                                   )
     METRefFinal_METCut_MonAlg.METContainer="MET_Reference_AntiKt4EMTopo"
     METRefFinal_METCut_MonAlg.metTotalKey="FinalTrk"
     METRefFinal_METCut_MonAlg.metKeys = met_types
@@ -168,7 +196,11 @@ def METMonitoringConfig(inputFlags):
         defineHistograms(METRefFinal_METCut_MonAlg, group,helper,mets) 
    
     if inputFlags.DQ.DataType != 'cosmics':
-        METPflow_METCut_MonAlg = helper.addAlgorithm(CompFactory.METMonitoringAlg,'METPflow_METCut_MonAlg')
+        METPflow_METCut_MonAlg = helper.addAlgorithm(CompFactory.METMonitoringAlg,'METPflow_METCut_MonAlg',
+                                                     addFilterTools = [AtlasReadyFilterCfg(inputFlags),
+                                                                       LArBadLBFilterToolCfg(inputFlags),
+                                                                       FilledBunchFilterToolCfg(inputFlags)]
+                                                     )
         METPflow_METCut_MonAlg.METContainer="MET_Reference_AntiKt4EMPFlow"
         METPflow_METCut_MonAlg.metKeys = pfmet_types
         METPflow_METCut_MonAlg.dometcut = True
@@ -177,7 +209,11 @@ def METMonitoringConfig(inputFlags):
         for mets in pfmet_types:
             defineHistograms(METPflow_METCut_MonAlg, group,helper,mets)
         
-    METCalo_METCut_MonAlg = helper.addAlgorithm(CompFactory.METMonitoringAlg,'METCalo_METCut_MonAlg')
+    METCalo_METCut_MonAlg = helper.addAlgorithm(CompFactory.METMonitoringAlg,'METCalo_METCut_MonAlg',
+                                                addFilterTools = [AtlasReadyFilterCfg(inputFlags),
+                                                                  LArBadLBFilterToolCfg(inputFlags),
+                                                                  FilledBunchFilterToolCfg(inputFlags)]
+                                               )
     metcalo_types = [ "PEMB", "EMB", "PEME", "EME", "TILE", "HEC", "FCAL" ]
     METCalo_METCut_MonAlg.METCaloContainer="MET_Calo"
     METCalo_METCut_MonAlg.METCaloKeys = metcalo_types
@@ -187,7 +223,11 @@ def METMonitoringConfig(inputFlags):
     for mets in metcalo_types:
         defineHistogramsCalo(METCalo_METCut_MonAlg, METCalo_METCut_group,helper,mets) 
    
-    METEMTopo_METCut_MonAlg = helper.addAlgorithm(CompFactory.METMonitoringAlg,'METEMTopo_METCut_MonAlg')
+    METEMTopo_METCut_MonAlg = helper.addAlgorithm(CompFactory.METMonitoringAlg,'METEMTopo_METCut_MonAlg',
+                                                  addFilterTools = [AtlasReadyFilterCfg(inputFlags),
+                                                                    LArBadLBFilterToolCfg(inputFlags),
+                                                                    FilledBunchFilterToolCfg(inputFlags)]
+                                                 )
     METEMTopo_METCut_MonAlg.METContainer="MET_EMTopo"
     METEMTopo_METCut_MonAlg.METAntiKt4EMTopoContainer="MET_Reference_AntiKt4EMTopo"
     emtopomet_types = ["MET_Topo"]
@@ -201,10 +241,19 @@ def METMonitoringConfig(inputFlags):
 
     jetCleaningTool = CompFactory.JetCleaningTool()
     jetCleaningTool.CutLevel = "LooseBad"       
-#    jetCleaningTool.CutLevel = "TightBad"       
     jetCleaningTool.DoUgly = False
+    jetCleaningTool.JetContainer = "AntiKt4EMTopoJets"
+
+    jetCleaningToolPFlow = CompFactory.JetCleaningTool("JetCleaningTool_PFlow")
+    jetCleaningToolPFlow.CutLevel = "LooseBad"
+    jetCleaningToolPFlow.DoUgly = False
+    jetCleaningToolPFlow.JetContainer = "AntiKt4EMPFlowJets"
     
-    JetCleaning_METMonAlg = helper.addAlgorithm(CompFactory.METMonitoringAlg,'JetCleaning_METMonAlg')    
+    JetCleaning_METMonAlg = helper.addAlgorithm(CompFactory.METMonitoringAlg,'JetCleaning_METMonAlg',
+                                                addFilterTools = [AtlasReadyFilterCfg(inputFlags),
+                                                                  LArBadLBFilterToolCfg(inputFlags),
+                                                                  FilledBunchFilterToolCfg(inputFlags)]
+                                                )
     JetCleaning_METMonAlg.metKeys = met_types
     JetCleaning_METMonAlg.DoJetCleaning = True
     JetCleaning_METMonAlg.JetCleaningTool = jetCleaningTool
@@ -217,17 +266,25 @@ def METMonitoringConfig(inputFlags):
         
 
     if inputFlags.DQ.DataType != 'cosmics':
-        PflowJetCleaning_METMonAlg = helper.addAlgorithm(CompFactory.METMonitoringAlg,'PflowJetCleaning_METMonAlg') 
+        PflowJetCleaning_METMonAlg = helper.addAlgorithm(CompFactory.METMonitoringAlg,'PflowJetCleaning_METMonAlg',
+                                                         addFilterTools = [AtlasReadyFilterCfg(inputFlags),
+                                                                           LArBadLBFilterToolCfg(inputFlags),
+                                                                           FilledBunchFilterToolCfg(inputFlags)]
+                                                        )
         PflowJetCleaning_METMonAlg.METContainer="MET_Reference_AntiKt4EMPFlow"
         PflowJetCleaning_METMonAlg.metKeys = pfmet_types
         PflowJetCleaning_METMonAlg.DoJetCleaning = True
-        PflowJetCleaning_METMonAlg.JetCleaningTool = jetCleaningTool
+        PflowJetCleaning_METMonAlg.JetCleaningTool = jetCleaningToolPFlow
         PflowJetCleaningGroup = helper.addGroup(PflowJetCleaning_METMonAlg,"METMonitor","MissingEt/Jetcleaning/MET_AntiKt4EMPflow/")    
         PflowJetCleaning_METMonAlg.JetContainerName = "AntiKt4EMPFlowJets"
         for mets in pfmet_types:
             defineHistograms(PflowJetCleaning_METMonAlg, PflowJetCleaningGroup,helper,mets)
          
-    METCaloJetCleaning_MonAlg = helper.addAlgorithm(CompFactory.METMonitoringAlg,'METCaloJetCleaning_MonAlg')   
+    METCaloJetCleaning_MonAlg = helper.addAlgorithm(CompFactory.METMonitoringAlg,'METCaloJetCleaning_MonAlg',
+                                                    addFilterTools = [AtlasReadyFilterCfg(inputFlags),
+                                                                      LArBadLBFilterToolCfg(inputFlags),
+                                                                      FilledBunchFilterToolCfg(inputFlags)]
+                                                   )
     metcalo_types = [ "PEMB", "EMB", "PEME", "EME", "TILE", "HEC", "FCAL" ]
     METCaloJetCleaning_MonAlg.METCaloContainer="MET_Calo"
     METCaloJetCleaning_MonAlg.METCaloKeys = metcalo_types
@@ -237,7 +294,11 @@ def METMonitoringConfig(inputFlags):
     for mets in metcalo_types:
         defineHistogramsCalo(METCaloJetCleaning_MonAlg, group,helper,mets) 
    
-    METEMTopoJetCleaning_MonAlg = helper.addAlgorithm(CompFactory.METMonitoringAlg,'METEMTopoJetCleaning_MonAlg')   
+    METEMTopoJetCleaning_MonAlg = helper.addAlgorithm(CompFactory.METMonitoringAlg,'METEMTopoJetCleaning_MonAlg',
+                                                      addFilterTools = [AtlasReadyFilterCfg(inputFlags),
+                                                                        LArBadLBFilterToolCfg(inputFlags),
+                                                                        FilledBunchFilterToolCfg(inputFlags)]
+                                                     )
     emtopomet_types = ["MET_Topo"]
     METEMTopoJetCleaning_MonAlg.METContainer="MET_EMTopo"
     METEMTopoJetCleaning_MonAlg.metKeys = emtopomet_types
@@ -254,7 +315,11 @@ def METMonitoringConfig(inputFlags):
     #    jetCleaningTool.CutLevel = "TightBad"       
     jetCleaningTool.DoUgly = False
     
-    BadJets_METMonAlg = helper.addAlgorithm(CompFactory.METMonitoringAlg,'BadJets_METMonAlg')    
+    BadJets_METMonAlg = helper.addAlgorithm(CompFactory.METMonitoringAlg,'BadJets_METMonAlg',
+                                            addFilterTools = [AtlasReadyFilterCfg(inputFlags),
+                                                              LArBadLBFilterToolCfg(inputFlags),
+                                                              FilledBunchFilterToolCfg(inputFlags)]
+                                            )
     BadJets_METMonAlg.metKeys = met_types
     BadJets_METMonAlg.DoJetCleaning = True
     BadJets_METMonAlg.alltrigger = True
@@ -266,20 +331,28 @@ def METMonitoringConfig(inputFlags):
         defineHistograms(BadJets_METMonAlg, BadJetsGroup,helper,mets)
 
     if inputFlags.DQ.DataType != 'cosmics':
-        BadPFJets_METMonAlg = helper.addAlgorithm(CompFactory.METMonitoringAlg,'BadPFJets_METMonAlg')    
+        BadPFJets_METMonAlg = helper.addAlgorithm(CompFactory.METMonitoringAlg,'BadPFJets_METMonAlg',
+                                                  addFilterTools = [AtlasReadyFilterCfg(inputFlags),
+                                                                    LArBadLBFilterToolCfg(inputFlags),
+                                                                    FilledBunchFilterToolCfg(inputFlags)]
+                                                 )
         BadPFJets_METMonAlg.METContainer="MET_Reference_AntiKt4EMPFlow"
         BadPFJets_METMonAlg.metKeys = pfmet_types
         BadPFJets_METMonAlg.DoJetCleaning = True
         BadPFJets_METMonAlg.alltrigger = True
         BadPFJets_METMonAlg.DoBadJets = True
-        BadPFJets_METMonAlg.JetCleaningTool = jetCleaningTool
+        BadPFJets_METMonAlg.JetCleaningTool = jetCleaningToolPFlow
         BadPFJets_METMonAlg.JetContainerName = "AntiKt4EMPFlowJets"
         BadPFJetsGroup = helper.addGroup(BadPFJets_METMonAlg,"METMonitor","MissingEt/AllTriggers/BadJets/MET_AntiKt4EMPflow/")
         for mets in pfmet_types:
             defineHistograms(BadPFJets_METMonAlg, BadPFJetsGroup,helper,mets)
 
 
-    BadJets_CaloMETMonAlg = helper.addAlgorithm(CompFactory.METMonitoringAlg,'BadJets_CaloMETMonAlg')    
+    BadJets_CaloMETMonAlg = helper.addAlgorithm(CompFactory.METMonitoringAlg,'BadJets_CaloMETMonAlg',
+                                                addFilterTools = [AtlasReadyFilterCfg(inputFlags),
+                                                                  LArBadLBFilterToolCfg(inputFlags),
+                                                                  FilledBunchFilterToolCfg(inputFlags)]
+                                                )
     metcalo_types = [ "PEMB", "EMB", "PEME", "EME", "TILE", "HEC", "FCAL" ]
     BadJets_CaloMETMonAlg.METCaloContainer="MET_Calo"
     BadJets_CaloMETMonAlg.METCaloKeys = metcalo_types
@@ -293,7 +366,11 @@ def METMonitoringConfig(inputFlags):
         defineHistogramsCalo(BadJets_CaloMETMonAlg, BadJetsGroup_CaloMETMonAlg,helper,mets)
 
 
-    BadJets_EMTopoMETMonAlg = helper.addAlgorithm(CompFactory.METMonitoringAlg,'BadJets_EMTopoMETMonAlg')    
+    BadJets_EMTopoMETMonAlg = helper.addAlgorithm(CompFactory.METMonitoringAlg,'BadJets_EMTopoMETMonAlg',
+                                                  addFilterTools = [AtlasReadyFilterCfg(inputFlags),
+                                                                    LArBadLBFilterToolCfg(inputFlags),
+                                                                    FilledBunchFilterToolCfg(inputFlags)]
+                                                  )
     BadJets_EMTopoMETMonAlg.metKeys = emtopomet_types
     BadJets_EMTopoMETMonAlg.METContainer="MET_EMTopo"
     BadJets_EMTopoMETMonAlg.DoJetCleaning = True
