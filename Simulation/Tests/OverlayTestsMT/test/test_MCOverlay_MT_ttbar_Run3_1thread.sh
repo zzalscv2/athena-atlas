@@ -15,19 +15,20 @@
 
 export ATHENA_CORE_NUMBER=1
 
-HITS_File="/cvmfs/atlas-nightlies.cern.ch/repo/data/data-art/Tier0ChainTests/mc16_13TeV.410470.PhPy8EG_A14_ttbar_hdamp258p75_nonallhad.simul.HITS.e6337_s3681/HITS.25836812._004813.pool.root.1"
-RDO_BKG_File="/cvmfs/atlas-nightlies.cern.ch/repo/data/data-art/OverlayTests/PresampledPileUp/22.0/Run2/large/mc20_13TeV.900149.PG_single_nu_Pt50.digit.RDO.e8307_s3482_s3136_d1715/RDO.26811908._031801.pool.root.1"
+HITS_File="/cvmfs/atlas-nightlies.cern.ch/repo/data/data-art/CampaignInputs/mc21/HITS/mc21_13p6TeV.601229.PhPy8EG_A14_ttbar_hdamp258p75_SingleLep.simul.HITS.e8453_s3873/50events.HITS.pool.root"
+RDO_BKG_File="/cvmfs/atlas-nightlies.cern.ch/repo/data/data-art/CampaignInputs/mc21/RDO_BKG/mc21_13p6TeV.900149.PG_single_nu_Pt50.digit.RDO.e8453_e8455_s3864_d1761/50events.RDO.pool.root"
 
 
 Overlay_tf.py \
 --multithreaded \
+--runNumber 601229 \
 --inputHITSFile ${HITS_File} \
 --inputRDO_BKGFile ${RDO_BKG_File} \
 --outputRDOFile MC_plus_MC.RDO.pool.root \
 --maxEvents 50 --skipEvents 10 --digiSeedOffset1 511 --digiSeedOffset2 727 \
---conditionsTag OFLCOND-MC16-SDR-RUN2-09 \
---geometryVersion ATLAS-R2-2016-01-00-01 \
---preInclude 'all:Campaigns/MC20e.py' \
+--conditionsTag OFLCOND-MC21-SDR-RUN3-07  \
+--geometryVersion ATLAS-R3S-2021-03-00-00 \
+--preInclude 'all:Campaigns/MC21a.py' \
 --imf False
 
 rc=$?
