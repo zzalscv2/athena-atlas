@@ -344,7 +344,7 @@ RtCalibrationAnalytic::MdtCalibOutputPtr RtCalibrationAnalytic::analyseSegments(
     // AUTOCALIBRATION LOOP //
     //////////////////////////
     while (!converged()) {
-        for (unsigned int k = 0; k < seg.size(); k++) { handleSegment(*seg[k]); }
+        for (const auto & k : seg) { handleSegment(*k); }
         if (!analyse()) {
             MsgStream log(Athena::getMessageSvc(), "RtCalibrationAnalytic");
             log << MSG::WARNING << "analyseSegments() - analyse failed, segments:" << endmsg;
@@ -402,25 +402,25 @@ RtCalibrationAnalytic::MdtCalibOutputPtr RtCalibrationAnalytic::analyseSegments(
         unsigned int counter2(0);
 
         // overwrite drift radii and calculate the average resolution //
-        for (unsigned int k = 0; k < seg.size(); k++) {
-            if (seg[k]->mdtHitsOnTrack() < 3) { continue; }
+        for (const auto & k : seg) {
+            if (k->mdtHitsOnTrack() < 3) { continue; }
             counter2++;
             double avres(0.0);
-            for (unsigned int h = 0; h < seg[k]->mdtHitsOnTrack(); h++) {
-                seg[k]->mdtHOT()[h]->setDriftRadius(tmp_rt->radius(seg[k]->mdtHOT()[h]->driftTime()),
-                                                    seg[k]->mdtHOT()[h]->sigmaDriftRadius());
-                if (seg[k]->mdtHOT()[h]->sigmaDriftRadius() < 0.5 * m_r_max) {
-                    avres = avres + seg[k]->mdtHOT()[h]->sigma2DriftRadius();
+            for (unsigned int h = 0; h < k->mdtHitsOnTrack(); h++) {
+                k->mdtHOT()[h]->setDriftRadius(tmp_rt->radius(k->mdtHOT()[h]->driftTime()),
+                                                    k->mdtHOT()[h]->sigmaDriftRadius());
+                if (k->mdtHOT()[h]->sigmaDriftRadius() < 0.5 * m_r_max) {
+                    avres = avres + k->mdtHOT()[h]->sigma2DriftRadius();
                 } else {
                     avres = avres + 0.1;
                 }
             }
-            avres = avres / static_cast<double>(seg[k]->mdtHitsOnTrack());
+            avres = avres / static_cast<double>(k->mdtHitsOnTrack());
             avres = std::sqrt(avres);
-            if (seg[k]->mdtHitsOnTrack() > 3) {
-                if (smoothing.addResidualsFromSegment(*seg[k], true, 7.0 * avres)) { counter++; }
+            if (k->mdtHitsOnTrack() > 3) {
+                if (smoothing.addResidualsFromSegment(*k, true, 7.0 * avres)) { counter++; }
             } else {
-                if (smoothing.addResidualsFromSegment(*seg[k], false, 7.0 * avres)) { counter++; }
+                if (smoothing.addResidualsFromSegment(*k, false, 7.0 * avres)) { counter++; }
             }
         }
 
