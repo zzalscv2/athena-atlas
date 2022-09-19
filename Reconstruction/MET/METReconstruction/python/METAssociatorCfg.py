@@ -40,7 +40,7 @@ def METAssociatorCfg(configFlags, jetType):
                                     modConstKey=modConstKey,
                                     modClusColls=modClusColls
                                     )
-        components_akt4lc= getAssocCA(cfg_akt4lc,sequencename='METAssoc_AntiKt4LCTopo',METName='AntiKt4LCTopo')
+        components_akt4lc= getAssocCA(cfg_akt4lc,METName='AntiKt4LCTopo')
         components.merge(components_akt4lc)
 
     elif jetType == "AntiKt4EMTopo":
@@ -57,7 +57,7 @@ def METAssociatorCfg(configFlags, jetType):
                                     modConstKey=modConstKey,
                                     modClusColls=modClusColls
                                     )
-        components_akt4em= getAssocCA(cfg_akt4em,sequencename='METAssoc_AntiKt4EMTopo',METName='AntiKt4EMTopo')
+        components_akt4em= getAssocCA(cfg_akt4em,METName='AntiKt4EMTopo')
         components.merge(components_akt4em)
 
     elif jetType == "AntiKt4EMPFlow":
@@ -73,18 +73,15 @@ def METAssociatorCfg(configFlags, jetType):
                                     doPFlow=True,
                                     usePFOLinks=configFlags.MET.UseFELinks
                                     )
-        components_akt4pf= getAssocCA(cfg_akt4pf,sequencename='METAssoc_AntiKt4EMPFlow',METName='AntiKt4EMPFlow')
+        components_akt4pf= getAssocCA(cfg_akt4pf,METName='AntiKt4EMPFlow')
         components.merge(components_akt4pf)
     else:
         raise RuntimeError("Jet type not recognized by METAssociatorCfg: {}".format(jetType) )
     return components
     
     
-def getAssocCA(config,sequencename='METAssociation',METName=''):
+def getAssocCA(config,METName=''):
     components = ComponentAccumulator()
-    from AthenaConfiguration.ComponentFactory import CompFactory
-    AthSequencer=CompFactory.AthSequencer
-    components.addSequence( AthSequencer(sequencename) )
     assocAlg = getMETAssocAlg(algName='METAssociation_'+METName,configs={config.suffix:config})
-    components.addEventAlgo(assocAlg,sequencename)
+    components.addEventAlgo(assocAlg)
     return components
