@@ -356,6 +356,7 @@ public:
     double m_tolerance{1e-05};
     double m_momentumCutOff{50.};
     double m_scatteringScale{1.};
+    double m_maxPath{100000.};
     double m_maxSteps {10000};
     double m_layXmax{1.};
     // secondary interactions
@@ -406,24 +407,10 @@ private:
     cache.m_tolerance = m_tolerance;
     cache.m_momentumCutOff = m_momentumCutOff;
     cache.m_scatteringScale = m_scatteringScale;
+    cache.m_maxPath = m_maxPath;
     cache.m_maxSteps = m_maxSteps;
     cache.m_layXmax = m_layXmax;
   }
-
-  /////////////////////////////////////////////////////////////////////////////////
-  // Main functions for propagation
-  /////////////////////////////////////////////////////////////////////////////////
-  std::unique_ptr<Trk::TrackParameters> propagateRungeKutta(
-    Cache& cache,
-    bool errorPropagation,
-    const Trk::TrackParameters& trackParameters,
-    const Trk::Surface& targetSurface,
-    Trk::PropDirection propagationDirection,
-    const MagneticFieldProperties& magneticFieldProperties,
-    ParticleHypothesis particle,
-    const Trk::BoundaryCheck& boundaryCheck,
-    double* Jacobian,
-    bool returnCurv = false) const;
 
   /////////////////////////////////////////////////////////////////////////////////
   // Main function for propagation
@@ -441,16 +428,6 @@ private:
     double& path,
     bool returnCurv = false) const;
 
-  /////////////////////////////////////////////////////////////////////////////////
-  // Method of the propagation
-  /////////////////////////////////////////////////////////////////////////////////
-  bool propagateWithJacobian(Cache& cache,
-                             bool errorPropagation,
-                             Trk::SurfaceType surfaceType,
-                             double* targetSurface,
-                             double* P,
-                             double& path) const;
-
   ////////////////////////////////////////////////////////////////////////////////
   // Method for propagation with search of closest surface (ST)
   ////////////////////////////////////////////////////////////////////////////////
@@ -463,25 +440,24 @@ private:
                              double& path,
                              double sumPath) const;
 
-  ////////////////////////////////////////////////////////////////////////////////////////////////////////
+  //////////////////////////////////////////////////////////////////////////////
   // dump material effects
-  ////////////////////////////////////////////////////////////////////////////////////////////////////////
-
+  /////////////////////////////////////////////////////////////////////////////
   void dumpMaterialEffects(Cache& cache,
                            const Trk::CurvilinearParameters* trackParameters,
                            double path) const;
 
-  /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+  ////////////////////////////////////////////////////////////////////////////
   // Momentum smearing (simulation mode)
-  /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+  ////////////////////////////////////////////////////////////////////////////
   void smear(Cache& cache,
              double& phi,
              double& theta,
              const Trk::TrackParameters* parms,
              double radDist) const;
-  /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+  //////////////////////////////////////////////////////////////////////////
   // Bremstrahlung (simulation mode)
-  /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+  //////////////////////////////////////////////////////////////////////////
   void sampleBrem(Cache& cache, double mom) const;
 
   double m_tolerance; //!< Error tolerance. Low tolerance gives high accuracy
@@ -500,10 +476,11 @@ private:
   double m_maxSteps;
   double m_layXmax;
 
-  // simulation mode
+  // The following are needed for simulation
+  // enable simulation mode
   bool m_simulation;
-  ToolHandle<ITimedMatEffUpdator>
-    m_simMatUpdator; //!< secondary interactions (brem photon emission)
+  /** secondary interactions (brem photon emission)*/
+  ToolHandle<ITimedMatEffUpdator> m_simMatUpdator;
   /** Random Generator service */
   ServiceHandle<IAtRndmGenSvc> m_rndGenSvc;
   /** Random engine */
