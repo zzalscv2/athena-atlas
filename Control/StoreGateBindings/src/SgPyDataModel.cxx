@@ -5,7 +5,6 @@
 
 #include "SgPyDataModel.h"
 #include "GaudiKernel/ServiceHandle.h"
-#include "RootUtils/PyAthenaGILStateEnsure.h"
 
 CLID PyCLID = 72785480;
 
