@@ -152,12 +152,6 @@ IDPerfMonZmumu::IDPerfMonZmumu(const std::string& name,
   declareProperty("skipMS", m_skipMS = false);
   declareProperty("useCustomMuonSelector", m_useCustomMuonSelector = false );
   declareProperty("MuonSelector", m_muonSelector );
-
-
-  // initializing the eventInfo "accessor"
-  StatusCode test =  m_EventInfoKey.initialize() ;
-  return;
-
 }
 
 
@@ -221,6 +215,9 @@ StatusCode IDPerfMonZmumu::initialize()
       return StatusCode::FAILURE;
     }
   }
+
+  // initializing the eventInfo "accessor"
+  ATH_CHECK(  m_EventInfoKey.initialize() );
 
   if (m_doIP) {
     ATH_MSG_DEBUG("Retrieving tool (trackToVertexIPEstimator)");
