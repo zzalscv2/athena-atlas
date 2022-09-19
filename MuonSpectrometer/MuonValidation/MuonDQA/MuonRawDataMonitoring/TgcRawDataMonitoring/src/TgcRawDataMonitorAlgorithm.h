@@ -33,7 +33,7 @@ class TgcRawDataMonitorAlgorithm : public AthMonitorAlgorithm {
   virtual StatusCode fillHistograms( const EventContext& ctx ) const override;
 
   enum TgcCoinPtBitShifts{
-    CoinFlagQ=4,CoinFlagF,CoinFlagC,CoinFlagH,CoinFlagEI,CoinFlagTile,CoinFlagRPC,CoinFlagNSW,
+    CoinFlagF=4,CoinFlagC,CoinFlagH,CoinFlagEI,CoinFlagTile,CoinFlagRPC,CoinFlagNSW,
     CoinFlags = CoinFlagF, InnerCoinFlags = CoinFlagEI
   };
   struct MyMuonRoI{
@@ -164,6 +164,7 @@ class TgcRawDataMonitorAlgorithm : public AthMonitorAlgorithm {
   SG::ReadHandleKey<Muon::TgcCoinDataContainer> m_TgcCoinDataContainerNextBCKey{this,"TgcCoinDataContainerNextBCName","TrigT1CoinDataCollectionNextBC","TGC Coin Data Container NextBC"};
   SG::ReadHandleKey<Muon::TgcCoinDataContainer> m_TgcCoinDataContainerPrevBCKey{this,"TgcCoinDataContainerPrevBCName","TrigT1CoinDataCollectionPriorBC","TGC Coin Data Container PrevBC"};
   
+  BooleanProperty m_doExpressProcessing{this,"doExpressProcessing",false,"Processing express_express data"};
   StringProperty m_packageName{this,"PackageName","TgcRawDataMonitor","group name for histograming"};
   StringProperty m_ctpDecMonList{this,"CtpDecisionMoniorList","Tit:L1_2MU4,Mul:2,HLT:HLT_2mu4,RPC:1,TGC:1;","list of L1MU items to be monitored for before/after CTP decision"};
   BooleanProperty m_monitorTriggerMultiplicity{this,"MonitorTriggerMultiplicity",false,"start monitoring tirgger multiplicity performance"};

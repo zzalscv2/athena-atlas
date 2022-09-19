@@ -798,6 +798,11 @@ StatusCode TgcRawDataMonitorAlgorithm::fillHistograms(const EventContext &ctx) c
 
 	// loop over the single muon triggers if at least one of them matches this second muon
 	for (const auto &trigName : list_of_single_muon_triggers) {
+	  if(m_doExpressProcessing){ // check the express_express bit
+	    const unsigned int passBits = getTrigDecisionTool()->isPassedBits(trigName.data());
+	    const bool expressPass = passBits & TrigDefs::Express_passed;
+	    if(!expressPass)continue;
+	  }
 	  // check if this particular tirgger has fired in this event
 	  if (!getTrigDecisionTool()->isPassed(trigName.data(),TrigDefs::Physics)) continue;
 	  ATH_MSG_DEBUG("This muon trigger, " << trigName << ", is fired in this event!!");
@@ -1905,11 +1910,11 @@ void TgcRawDataMonitorAlgorithm::fillTgcCoin(const std::string & type,
   variables.push_back(varowner.back());
   varowner.push_back(Monitored::Collection(type+"_coin_pt",tgcTrigs,[](const TgcTrig&m){return m.pt & 0xF;}));
   variables.push_back(varowner.back());
-  varowner.push_back(Monitored::Collection(type+"_coin_CoinFlagQ",tgcTrigs,[](const TgcTrig&m){return (m.pt>>CoinFlagQ)&0x1;}));
+  varowner.push_back(Monitored::Collection(type+"_coin_CoinFlagQ",tgcTrigs,[](const TgcTrig&m){return m.isPositiveDeltaR;}));
   variables.push_back(varowner.back());
-  varowner.push_back(Monitored::Collection(type+"_coin_CoinFlagQpos",tgcTrigs,[](const TgcTrig&m){return ((m.pt>>CoinFlagQ)&0x1)==1;}));
+  varowner.push_back(Monitored::Collection(type+"_coin_CoinFlagQpos",tgcTrigs,[](const TgcTrig&m){return m.isPositiveDeltaR==0;}));
   variables.push_back(varowner.back());
-  varowner.push_back(Monitored::Collection(type+"_coin_CoinFlagQneg",tgcTrigs,[](const TgcTrig&m){return ((m.pt>>CoinFlagQ)&0x1)==0;}));
+  varowner.push_back(Monitored::Collection(type+"_coin_CoinFlagQneg",tgcTrigs,[](const TgcTrig&m){return m.isPositiveDeltaR==1;}));
   variables.push_back(varowner.back());
   varowner.push_back(Monitored::Collection(type+"_coin_CoinFlags",tgcTrigs,[](const TgcTrig&m){return (m.pt>>CoinFlags)&0x7;}));
   variables.push_back(varowner.back());
@@ -1994,7 +1999,7 @@ void TgcRawDataMonitorAlgorithm::fillTgcCoinEff(const std::string & type,
       double deltaR = vec.Mod() - TVector2(ext.extPos.x(), ext.extPos.y()).Mod();
       if( std::abs(deltaPhi) > m_dPhiCutOnM3 || std::abs(deltaR) > m_dRCutOnM3 )continue;
       matched |= 1;
-      int charge = ((tgcTrig.pt>>CoinFlagQ)&0x1) ? (+1) : (-1);
+      int charge = (tgcTrig.isPositiveDeltaR==0) ? (+1) : (-1);
       matchedQ |= (ext.muon->charge()*charge>0);
       matchedF |= (tgcTrig.pt>>CoinFlagF) & 0x1;
       matchedC |= (tgcTrig.pt>>CoinFlagC) & 0x1;
