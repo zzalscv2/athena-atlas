@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
 */
 
 ///////////////////////////////////////////////////////////////////
@@ -63,18 +63,16 @@
 #include "CLHEP/Random/RandExponential.h"
 #include "CLHEP/Random/RandFlat.h"
 
-
-// using namespace std;
-
 // STD
 #include <math.h>
 
 // ROOT
 #include "TTree.h"
 
-// statics doubles
-// sqrt(2)
-double iFatras::G4HadIntProcessor::s_projectionFactor = sqrt(2.);
+namespace {
+  /** projection factor for the non-parametric scattering */
+  const double s_projectionFactor = sqrt(2.);
+}
 
 // constructor
 iFatras::G4HadIntProcessor::G4HadIntProcessor(const std::string& t, const std::string& n, const IInterface* p) :
@@ -84,11 +82,6 @@ iFatras::G4HadIntProcessor::G4HadIntProcessor(const std::string& t, const std::s
   m_doElastic(false),
   m_hadIntProbScale(1.0),
   m_minMomentum(50.0),
-  m_g4runManager(0),
-  m_g4dynPar(0),
-  m_g4zeroPos(0),
-  m_g4step(0),
-  m_g4stepPoint(0),
   m_particleBroker("ISF_ParticleBrokerSvc", n),
   m_truthRecordSvc("ISF_ValidationTruthService", n),
   m_randomEngine(0),
@@ -173,13 +166,6 @@ StatusCode iFatras::G4HadIntProcessor::initialize()
 // finalize
 StatusCode iFatras::G4HadIntProcessor::finalize()
 {
-
-  // clean up locally stored Geant4 instances
-  delete m_g4dynPar;
-  delete m_g4zeroPos;
-  //delete m_g4step; will be deleted via m_g4stepPoint
-  delete m_g4stepPoint;
-
   ATH_MSG_INFO( " ---------- Statistics output -------------------------- " );
   //ATH_MSG_INFO( "                     Minimum energy cut for brem photons : " <<   m_minimumBremPhotonMomentum  );
   //ATH_MSG_INFO( "                     Brem photons (above cut, recorded)  : " <<   m_recordedBremPhotons        );
@@ -189,12 +175,12 @@ StatusCode iFatras::G4HadIntProcessor::finalize()
 }
 
 
-std::map<int,G4VProcess*>::iterator iFatras::G4HadIntProcessor::initProcessPDG(int pdg) const
+std::map<int,G4VProcess*>::const_iterator iFatras::G4HadIntProcessor::initProcessPDG(int pdg)
 {
   ATH_MSG_VERBOSE( "  [ g4sim ] Registering Geant4 processes for particles with pdg code " << pdg );
 
-  // std::map::insert return value
-  std::pair< std::map<int,G4VProcess*>::iterator,bool > ret;
+  // return value
+  std::map<int,G4VProcess*>::const_iterator ret;
 
 
   G4ParticleDefinition *parDef = G4ParticleTable::GetParticleTable()->FindParticle( pdg);
@@ -239,11 +225,11 @@ std::map<int,G4VProcess*>::iterator iFatras::G4HadIntProcessor::initProcessPDG(i
     }
 
     if(hadInelastic){
-      ret = m_g4HadrInelasticProcesses.insert( std::pair<int,G4VProcess*>( pdg, hadInelastic) );
+      ret = m_g4HadrInelasticProcesses.insert( std::pair<int,G4VProcess*>( pdg, hadInelastic) ).first;
       ATH_MSG_DEBUG( "  [ g4sim ] Registered Geant4 hadronic interaction processes for particles with pdg code " << pdg );
     }
     if(m_doElastic && hadElastic ){
-      ret = m_g4HadrElasticProcesses.insert( std::pair<int,G4VProcess*>( pdg, hadElastic) );
+      ret = m_g4HadrElasticProcesses.insert( std::pair<int,G4VProcess*>( pdg, hadElastic) ).first;
       G4ProcessType pType = curProc->GetProcessType();
       ATH_MSG_DEBUG( "  [ g4sim ] Registered Geant4 ELASTIC hadronic interaction processes for particles with pdg code "
 		     << pdg << "and process " <<  pType);
@@ -253,7 +239,7 @@ std::map<int,G4VProcess*>::iterator iFatras::G4HadIntProcessor::initProcessPDG(i
   } // process loop
 
   // return iterator to insterted G4VProcess
-  return ret.first;
+  return ret;
 }
 
 bool iFatras::G4HadIntProcessor::hadronicInteraction(const Amg::Vector3D& position, const Amg::Vector3D& momentum,
@@ -291,16 +277,15 @@ bool iFatras::G4HadIntProcessor::hadronicInteraction(const Amg::Vector3D& positi
 }
 
 
-bool iFatras::G4HadIntProcessor::initG4RunManager() const {
+StatusCode iFatras::G4HadIntProcessor::initG4RunManager() {
+
+  ATH_MSG_DEBUG("[ g4sim ] Initializing G4RunManager");
 
   // Get the G4RunManagerHelper ( no initialization of G4RunManager done )
-  if (m_g4RunManagerHelper.retrieve().isFailure()) {
-    ATH_MSG_FATAL( "Could not retrieve " << m_g4RunManagerHelper );
-    return false;
-  }
+  ATH_CHECK( m_g4RunManagerHelper.retrieve() );
 
-  m_g4runManager = m_g4RunManagerHelper->fastG4RunManager();
-  m_g4runManager->SetVerboseLevel(10);
+  G4RunManager* g4runManager = m_g4RunManagerHelper->fastG4RunManager();
+  g4runManager->SetVerboseLevel(10);
 
   initProcessPDG( 211);
   initProcessPDG(-211);
@@ -311,13 +296,6 @@ bool iFatras::G4HadIntProcessor::initG4RunManager() const {
   initProcessPDG( 321);
   initProcessPDG( 111);
   initProcessPDG(-321);
-
-  // set up locally stored Geant4 instances
-  m_g4dynPar          = new G4DynamicParticle();
-  m_g4zeroPos         = new G4ThreeVector(0, 0, 0);
-  m_g4step            = new G4Step();
-  m_g4stepPoint       = new G4StepPoint();
-  m_g4step->SetPreStepPoint( m_g4stepPoint);
 
   // define the available G4Material
   m_g4Material.clear();
@@ -375,7 +353,7 @@ bool iFatras::G4HadIntProcessor::initG4RunManager() const {
   G4cout << std::flush;
   G4cerr << std::flush;
 
-  return true;
+  return StatusCode::SUCCESS;
 }
 
 ISF::ISFParticleVector iFatras::G4HadIntProcessor::getHadState(const ISF::ISFParticle* parent,
@@ -384,26 +362,36 @@ ISF::ISFParticleVector iFatras::G4HadIntProcessor::getHadState(const ISF::ISFPar
 {
   ISF::ISFParticleVector chDef(0);
 
-  int pdg = parent->pdgCode();
+  const int pdg = parent->pdgCode();
 
   // ions not handled at the moment
   if ( pdg>10000 ) return chDef;
 
+  /*
+   * This mutex needs to be locked when calling methods that may modify the process map
+   * (e.g. initProcessPDG). We rely on the fact that std::map iterators remain valid even
+   * when new elements are added. So we only lock on write-access.
+   */
+  static std::mutex processMapMutex;
+
   // initialize G4RunManager if not done already
-  if (!m_g4runManager) {
-    ATH_MSG_DEBUG("[ g4sim ] Initializing G4RunManager");
-    bool g4mgr = initG4RunManager();
-    if (!g4mgr) return chDef;
-  }
+  static const StatusCode g4RunManagerInit = [&]() {
+    std::scoped_lock lock(processMapMutex);
+    auto this_nc ATLAS_THREAD_SAFE = const_cast<iFatras::G4HadIntProcessor*>(this);
+    return this_nc->initG4RunManager();
+  }();
+  if (g4RunManagerInit.isFailure()) return chDef;
 
   // find corresponding hadronic interaction process ----------------------------------------------
   //
-  std::map<int, G4VProcess*>::iterator processIter_inelast = m_g4HadrInelasticProcesses.find(pdg);
-  std::map<int, G4VProcess*>::iterator processIter_elast   = m_g4HadrElasticProcesses.find(pdg);
+  std::map<int, G4VProcess*>::const_iterator processIter_inelast = m_g4HadrInelasticProcesses.find(pdg);
+  std::map<int, G4VProcess*>::const_iterator processIter_elast   = m_g4HadrElasticProcesses.find(pdg);
 
   if ( (processIter_inelast==m_g4HadrInelasticProcesses.end()) && (processIter_elast==m_g4HadrElasticProcesses.end()) ) {
     ATH_MSG_DEBUG ( " [ g4sim ] No hadronic interactions registered for current particle type (pdg=" << pdg << ")" );
-    initProcessPDG(pdg);
+    std::scoped_lock lock(processMapMutex);
+    auto this_nc ATLAS_THREAD_SAFE = const_cast<iFatras::G4HadIntProcessor*>(this);
+    this_nc->initProcessPDG(pdg);
     return chDef;       // this interaction aborted but next may go through
   }
   //if ( processIter_inelast==m_g4HadrInelasticProcesses.end()) return chDef;
@@ -427,7 +415,7 @@ ISF::ISFParticleVector iFatras::G4HadIntProcessor::getHadState(const ISF::ISFPar
   const G4ThreeVector mom( momentum.x(), momentum.y(), momentum.z() );
   inputPar->SetMomentum( mom);
   // position and timing dummy
-  G4Track* g4track=new G4Track( inputPar, 0 /* time */, *m_g4zeroPos);
+  G4Track g4track( inputPar, 0 /* time */, {0, 0, 0} /* position */);
   //G4TouchableHandle g4touchable(new G4TouchableHistory());     // TODO check memory handling here
   //g4track->SetTouchableHandle( g4touchable);
 
@@ -439,12 +427,15 @@ ISF::ISFParticleVector iFatras::G4HadIntProcessor::getHadState(const ISF::ISFPar
   }
 
   // further G4 initializations (G4Step, G4MaterialCutsCouple, ...)
-  m_g4stepPoint->SetMaterial(m_g4Material[g4matInd].second.first);
-  m_g4stepPoint->SetMaterialCutsCouple(&(m_g4Material[g4matInd].second.second));
+  G4Step g4step;
+  G4StepPoint* g4stepPoint = new G4StepPoint();
+  g4step.SetPreStepPoint( g4stepPoint);  // now owned by g4step
+
+  g4stepPoint->SetMaterial(m_g4Material[g4matInd].second.first);
+  g4stepPoint->SetMaterialCutsCouple(&(m_g4Material[g4matInd].second.second));
 
   // preparing G4Step and G4Track
-  m_g4step->DeleteSecondaryVector();
-  g4track->SetStep( m_g4step);
+  g4track.SetStep( &g4step);
 
   // by default, the current process is the inelastic hadr. interaction
   G4VProcess *process = processIter_inelast!=m_g4HadrInelasticProcesses.end() ? processIter_inelast->second : 0;
@@ -464,10 +455,9 @@ ISF::ISFParticleVector iFatras::G4HadIntProcessor::getHadState(const ISF::ISFPar
   //process->SetVerboseLevel(10);
   //ATH_MSG_VERBOSE ( "Verbose Level is " << process->GetVerboseLevel() );
 
-  G4VParticleChange* g4change = process->PostStepDoIt(*g4track, *m_g4step);
+  G4VParticleChange* g4change = process->PostStepDoIt(g4track, g4step);
   if (!g4change) {
     ATH_MSG_WARNING( " [ ---- ] Geant4 did not return any hadronic interaction information of particle with pdg=" << pdg );
-    delete g4track;
     return chDef;
   }
 
@@ -538,14 +528,12 @@ ISF::ISFParticleVector iFatras::G4HadIntProcessor::getHadState(const ISF::ISFPar
 
     // free up memory
     g4change->Clear();
-    delete g4track;
     return children;
 
   }
 
   // free up memory
   g4change->Clear();
-  delete g4track;
   return chDef;
 }
 

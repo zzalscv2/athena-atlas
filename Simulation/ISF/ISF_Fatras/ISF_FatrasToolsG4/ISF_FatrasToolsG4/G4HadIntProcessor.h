@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2019 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
 */
 
 /////////////////////////////////////////////////////////////////
@@ -99,7 +99,7 @@ namespace iFatras {
 
     private:
       /** initialize G4RunManager on first call if not done by then */
-      bool initG4RunManager() const;
+      StatusCode initG4RunManager();
 
       /** collect secondaries for layer material update */                           
       ISF::ISFParticleVector getHadState(const ISF::ISFParticle* parent,
@@ -107,7 +107,7 @@ namespace iFatras {
 					 const Trk::Material *ematprop) const;
 
       //!< Initialize inleastic hadronic Geant4 processes 
-      std::map<int,G4VProcess*>::iterator  initProcessPDG(int pdg) const;
+      std::map<int,G4VProcess*>::const_iterator  initProcessPDG(int pdg);
 
       //!< choose for list of predefined (pure) materials
       unsigned int retrieveG4MaterialIndex(const Trk::Material* ematprop) const;
@@ -126,19 +126,11 @@ namespace iFatras {
       // internal steering : clone type
       double                               m_minMomentum;
 
-      //!< Geant4 engine
-      mutable G4RunManager*                m_g4runManager;
-
       //!< Geant4 processes <PDGcode, process>  TODO : fission, capture
-      mutable std::map<int, G4VProcess*>   m_g4HadrInelasticProcesses;
-      mutable std::map<int, G4VProcess*>   m_g4HadrElasticProcesses;
+      std::map<int, G4VProcess*>   m_g4HadrInelasticProcesses;
+      std::map<int, G4VProcess*>   m_g4HadrElasticProcesses;
 
-      //!< locally stored Geant4 instances (speeds up processing)
-      mutable G4DynamicParticle*           m_g4dynPar;
-      mutable const G4ThreeVector*         m_g4zeroPos;
-      mutable G4Step*                      m_g4step;
-      mutable G4StepPoint*                 m_g4stepPoint;
-      mutable std::vector<std::pair<float,std::pair< G4Material*, G4MaterialCutsCouple> > > m_g4Material;
+      std::vector<std::pair<float,std::pair< G4Material*, G4MaterialCutsCouple> > > m_g4Material;
 
       /** ISF services & Tools */
       ServiceHandle<ISF::IParticleBroker>  m_particleBroker;
@@ -147,9 +139,6 @@ namespace iFatras {
       /** Random engine  */
       CLHEP::HepRandomEngine*              m_randomEngine;
       std::string                          m_randomEngineName;       //!< Name of the random number stream
-
-      /** projection factor for the non-parametric scattering */
-      static double                        s_projectionFactor;
 
       // ------------------------ Validation section ------------------------------------
       bool                          m_validationMode;

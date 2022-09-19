@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2017 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
 */
 
 ///////////////////////////////////////////////////////////////////
@@ -30,9 +30,6 @@
 
 #endif
 
-std::map<int,G4ParticleDefinition*>
-iFatras::PDGToG4Particle::s_predefinedParticles;
-
 /*=========================================================================
  *  DESCRIPTION OF FUNCTION:
  *  ==> see headerfile
@@ -48,8 +45,6 @@ iFatras::PDGToG4Particle::PDGToG4Particle(const std::string& t,
   declareProperty("UseParticles", m_useParticles);
   declareProperty("PrintList",    m_printList=false);
 
-  if( !s_predefinedParticles.size())
-      fillPredefinedParticles();
 }
 
 /*=========================================================================
@@ -72,6 +67,8 @@ iFatras::PDGToG4Particle::initialize()
   /*-----------------------------------------------------------------------
    *  Fill map of particles
    *-----------------------------------------------------------------------*/
+  static const auto s_predefinedParticles = predefinedParticles();
+
   if( m_useParticles.size() == 0)
   {
     ATH_MSG_INFO( "using all predefined particles" );
@@ -231,9 +228,17 @@ iFatras::PDGToG4Particle::printListOfParticles( bool withDecayTableOnly) const
  *  DESCRIPTION OF FUNCTION:
  *  ==> see headerfile
  *=======================================================================*/
-void
-iFatras::PDGToG4Particle::fillPredefinedParticles()
+std::map<int,G4ParticleDefinition*>
+iFatras::PDGToG4Particle::predefinedParticles()
 {
+  /** map of predefined particles */
+  std::map<int,G4ParticleDefinition*> predefinedParticles;
+
+  /** Helper to fill map */
+  auto addParticle = [&](G4ParticleDefinition* pDef) {
+    if (pDef) predefinedParticles[pDef->GetPDGEncoding()] = pDef;
+  };
+
   // Gauge and Higgs Bosons
   addParticle( G4Gamma::GammaDefinition());
 
@@ -334,17 +339,7 @@ iFatras::PDGToG4Particle::fillPredefinedParticles()
   addParticle( G4STauMinus::STauMinusDefinition());
   addParticle( G4STauPlus::STauPlusDefinition());
 #endif
+
+  return predefinedParticles;
 }
 
-/*=========================================================================
- *  DESCRIPTION OF FUNCTION:
- *  ==> see headerfile
- *=======================================================================*/
-void
-iFatras::PDGToG4Particle::addParticle( G4ParticleDefinition* pDef)
-{
-  if( !pDef)
-      return;
-  
-  s_predefinedParticles[pDef->GetPDGEncoding()] = pDef;
-}

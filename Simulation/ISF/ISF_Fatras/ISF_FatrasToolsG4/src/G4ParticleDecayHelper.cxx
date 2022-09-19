@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2019 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
 */
 
 ///////////////////////////////////////////////////////////////////
@@ -34,7 +34,10 @@
 #include "G4DecayProducts.hh"
 #include <cmath>
 
-double iFatras::G4ParticleDecayHelper::s_speedOfLightSI =  CLHEP::c_light*CLHEP::s/CLHEP::mm;
+namespace {
+  /** the speed of light in SI units */
+  constexpr double s_speedOfLightSI =  CLHEP::c_light*CLHEP::s/CLHEP::mm;
+}
 
 /*=========================================================================
  *  DESCRIPTION OF FUNCTION:
@@ -50,10 +53,8 @@ iFatras::G4ParticleDecayHelper::G4ParticleDecayHelper(const std::string& t, cons
    m_G4RandomEngineName("FatrasG4"),
    m_g4RunManagerHelper("iGeant4::G4RunManagerHelper/G4RunManagerHelper"),
    m_pdgToG4Conv("iFatras::PDGToG4Particle/PDGToG4ParticleConverter"),
-   m_g4runManager(0),
    m_validationMode(false),
-   m_validationTool(""),
-   m_nDecayedParticles(0)
+   m_validationTool("")
 {
   // ISF: truth and broker service
   declareProperty("ParticleBroker",           m_particleBroker,       "ISF Particle Broker Svc");
@@ -153,10 +154,8 @@ double iFatras::G4ParticleDecayHelper::freePath(const ISF::ISFParticle& isp) con
   int pdgCode =  isp.pdgCode();
 
   // initialize G4RunManager if not done already
-  if (!m_g4runManager) {
-    bool g4mgr = initG4RunManager();
-    if (!g4mgr) ATH_MSG_WARNING(  "initialization of G4RunManager failed in G4ParticleDecayHelper" );
-  }
+  bool g4mgr = initG4RunManager();
+  if (!g4mgr) ATH_MSG_WARNING(  "initialization of G4RunManager failed in G4ParticleDecayHelper" );
 
   if (!m_pdgToG4Conv && m_pdgToG4Conv.retrieve().isFailure()) return -1.;
 
@@ -202,7 +201,6 @@ void iFatras::G4ParticleDecayHelper::decay(const ISF::ISFParticle& particleToDec
   /*-------------------------------------------------------------------
    *  The actual decay
    *-------------------------------------------------------------------*/
-  ++m_nDecayedParticles;
   ATH_MSG_DEBUG( "[ decay ] calling G4ParticleDecayCreator with " << particleToDecay );
 
   // perform the decay 
@@ -277,10 +275,8 @@ iFatras::G4ParticleDecayHelper::decayParticle(const ISF::ISFParticle& parent,
   std::vector<ISF::ISFParticle*> children;
 
   // initialize G4RunManager if not done already
-  if (!m_g4runManager) {
-    bool g4mgr = initG4RunManager();
-    if (!g4mgr) ATH_MSG_WARNING(  "initialization of G4RunManager failed in G4ParticleDecayHelper" );
-  }
+  bool g4mgr = initG4RunManager();
+  if (!g4mgr) ATH_MSG_WARNING(  "initialization of G4RunManager failed in G4ParticleDecayHelper" );
 
   if (!m_pdgToG4Conv) {
 
@@ -396,7 +392,7 @@ iFatras::G4ParticleDecayHelper::decayParticle(const ISF::ISFParticle& parent,
 
 bool iFatras::G4ParticleDecayHelper::initG4RunManager() const {
 
-  m_g4runManager = m_g4RunManagerHelper->fastG4RunManager();
+  static const G4RunManager* const g4runManager = m_g4RunManagerHelper->fastG4RunManager();
 
-  return true;
+  return g4runManager ? true : false;
 }
