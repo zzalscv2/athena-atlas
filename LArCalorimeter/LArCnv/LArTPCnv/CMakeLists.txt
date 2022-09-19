@@ -1,4 +1,4 @@
-# Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
 
 # Declare the package name:
 atlas_subdir( LArTPCnv )
@@ -24,6 +24,17 @@ atlas_add_test( LArDigitContainerCnv_p1_test
                 SOURCES
                 test/LArDigitContainerCnv_p1_test.cxx
                 LINK_LIBRARIES GaudiKernel LArTPCnv TestTools )
+
+atlas_add_test( LArDigitContainerCnv_p2_test
+		SOURCES
+		test/LArDigitContainerCnv_p2_test.cxx
+		LINK_LIBRARIES GaudiKernel LArTPCnv TestTools IdDictParser )
+
+atlas_add_test( LArDigitContainerCnv_p3_test
+		SOURCES
+		test/LArDigitContainerCnv_p3_test.cxx
+		LINK_LIBRARIES GaudiKernel LArTPCnv TestTools IdDictParser
+		LOG_IGNORE_PATTERN "Welcome to ApplicationMgr|running on|getRegistryEntries|DEBUG Recorded object|in DataObject" )
 
 atlas_add_test( LArFebErrorSummaryCnv_p1_test
                 SOURCES
