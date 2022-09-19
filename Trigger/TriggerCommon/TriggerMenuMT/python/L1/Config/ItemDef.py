@@ -98,7 +98,6 @@ class ItemDef:
         # old Run-3 configurations 
         #ZDC_A_C = d.ZDC_A & d.ZDC_C
         #VZDC_A_C = Not(d.ZDC_A) & Not(d.ZDC_C)
-        #VZDC_AORC = Not(d.ZDC_A) | Not(d.ZDC_C)
 
         # new ZDC configuration for Run-3 (ATR-24734)
         ZDC_comb0 = Not(d.ZDC_2) & Not(d.ZDC_1) & Not(d.ZDC_0) # this means no signal! to be used ONLY in add with other inputs
@@ -111,17 +110,21 @@ class ItemDef:
         ZDC_comb7 = d.ZDC_2      & d.ZDC_1      & d.ZDC_0
 
         # combined signals for heavy ion runs
-        ZDC_yy    = ZDC_comb0 | ZDC_comb1 | ZDC_comb2 | ZDC_comb3
-        ZDC_had   = ZDC_comb7
-        ZDC_Ay    = ZDC_comb1 | ZDC_comb3 | ZDC_comb4 | ZDC_comb5
-        ZDC_yA    = ZDC_comb2 | ZDC_comb3 | ZDC_comb4 | ZDC_comb6
-        ZDC_yAAy  = ZDC_comb1 | ZDC_comb2 | ZDC_comb3 | ZDC_comb4 | ZDC_comb5 | ZDC_comb6
-        ZDC_A     = ZDC_comb1 | ZDC_comb3 | ZDC_comb4 | ZDC_comb5 | ZDC_comb7
-        ZDC_C     = ZDC_comb2 | ZDC_comb3 | ZDC_comb4 | ZDC_comb6 | ZDC_comb7
-        ZDC_A_C   = ZDC_comb3 | ZDC_comb4 | ZDC_comb7
-        VZDC_A_C  = ZDC_comb0
-        VZDC_AORC = ZDC_comb0 | ZDC_comb1 | ZDC_comb2 | ZDC_comb5 | ZDC_comb6
+        PHYS_VZDC_A_VZDC_C         = ZDC_comb0
+        PHYS_1TO4ZDC_A_VZDC_C      = ZDC_comb1
+        PHYS_VZDC_A_1TO4ZDC_C      = ZDC_comb2
+        PHYS_1TO4ZDC_A_1TO4ZDC_C   = ZDC_comb3
+        PHYS_5ZDC_A_VZDC_C         = ZDC_comb4
+        PHYS_VZDC_A_5ZDC_C         = ZDC_comb5
+        PHYS_ZDC_1TO4XOR5          = ZDC_comb6
+        PHYS_5ZDC_A_5ZDC_C         = ZDC_comb7
+        ZDC_A     = ZDC_comb1 | ZDC_comb3 | ZDC_comb4 | ZDC_comb6 | ZDC_comb7
+        ZDC_C     = ZDC_comb2 | ZDC_comb3 | ZDC_comb5 | ZDC_comb6 | ZDC_comb7
+        ZDC_A_C   = ZDC_A & ZDC_C
         ZDC_AND   = ZDC_A_C
+        VZDC_A_C  = ZDC_comb0
+        ZDC_XOR   = (ZDC_A & Not(ZDC_C)) | (ZDC_C & Not(ZDC_A))
+        VZDC_AORC = Not(ZDC_A) | Not(ZDC_C)
 
         # ZDC configuration for LHCf+ZDC special run in Sep. 2022
         # rename existing ZDC configuration to match request in ATR-26051
@@ -661,7 +664,7 @@ class ItemDef:
 
         MenuItem('L1_MU3V_jJ30'      ).setLogic( d.MU3V & d.jJ30    & physcond).setTriggerType(TT.calo) # added temporarily 
         MenuItem('L1_MU3V_jJ40'      ).setLogic( d.MU3V & d.jJ40    & physcond).setTriggerType(TT.calo)
-        MenuItem('L1_MU5VF_jJ90'      ).setLogic( d.MU3V & d.jJ90    & physcond).setTriggerType(TT.calo)
+        MenuItem('L1_MU5VF_jJ90'      ).setLogic( d.MU5VF & d.jJ90  & physcond).setTriggerType(TT.calo)
 
         MenuItem('L1_jLJ60'         ).setLogic( d.jLJ60        & physcond).setTriggerType(TT.calo) # Not in commissioning
         MenuItem('L1_jLJ80'         ).setLogic( d.jLJ80        & physcond).setTriggerType(TT.calo)
@@ -778,7 +781,7 @@ class ItemDef:
         MenuItem('L1_J75_XE50' ).setLogic( d.J75 & d.XE50 & physcond).setTriggerType(TT.calo)
         MenuItem('L1_2J15_XE55').setLogic( d.J15.x(2) & d.XE55 & physcond).setTriggerType(TT.calo)
         MenuItem('L1_2J40_XE45').setLogic( d.J40.x(2) & d.XE45 & physcond).setTriggerType(TT.calo)
-        MenuItem('L1_2J50_XE40').setLogic( d.J50.x(2) & d.XE50 & physcond).setTriggerType(TT.calo)
+        MenuItem('L1_2J50_XE40').setLogic( d.J50.x(2) & d.XE40 & physcond).setTriggerType(TT.calo)
         MenuItem('L1_J40_XE60' ).setLogic( d.J40 & d.XE60 & physcond).setTriggerType(TT.calo)
         MenuItem('L1_J30p0ETA49_XE50').setLogic( d.J300ETA49 & d.XE50 & physcond).setTriggerType(TT.calo)
         MenuItem('L1_3J15p0ETA25_XE40').setLogic( d.J150ETA25.x(3) & d.XE40 & physcond).setTriggerType(TT.calo)
@@ -1168,7 +1171,6 @@ class ItemDef:
         MenuItem('L1_ZDC_A_C_BGRP11'     ).setLogic( ZDC_A_C & bgrp11cond & physcond)
 
 # ATR-12470
-        ZDC_XOR = (ZDC_A & Not(ZDC_C)) | (ZDC_C & Not(ZDC_A))
         MenuItem('L1_ZDC_A_VZDC_C'                  ).setLogic(ZDC_A & Not(ZDC_C) & physcond)
         MenuItem('L1_ZDC_C_VZDC_A'                  ).setLogic(ZDC_C & Not(ZDC_A) & physcond)
         MenuItem('L1_ZDC_A_VZDC_C_VTE200'           ).setLogic(ZDC_A & Not(ZDC_C) & Not(d.TE200) & physcond)
@@ -1223,7 +1225,18 @@ class ItemDef:
         MenuItem('L1_ZDC_COMB5').setLogic( ZDC_comb5 & physcond)
         MenuItem('L1_ZDC_COMB6').setLogic( ZDC_comb6 & physcond)
         MenuItem('L1_ZDC_COMB7').setLogic( ZDC_comb7 & physcond)
+        # ZDC calibration for LHCf+ZDC runs
+        MenuItem('L1_ZDC_OR_LHCF').setLogic( (Not(ZDC_comb0) | d.NIMLHCF) & physcond)
 
+        # ZDC for 2022 heavy ion runs
+        MenuItem('L1_VZDC_A_VZDC_C'      ).setLogic( PHYS_VZDC_A_VZDC_C       & physcond)
+        MenuItem('L1_1TO4ZDC_A_VZDC_C'   ).setLogic( PHYS_1TO4ZDC_A_VZDC_C    & physcond)
+        MenuItem('L1_VZDC_A_1TO4ZDC_C'   ).setLogic( PHYS_VZDC_A_1TO4ZDC_C    & physcond)
+        MenuItem('L1_1TO4ZDC_A_1TO4ZDC_C').setLogic( PHYS_1TO4ZDC_A_1TO4ZDC_C & physcond)
+        MenuItem('L1_5ZDC_A_VZDC_C'      ).setLogic( PHYS_5ZDC_A_VZDC_C       & physcond)
+        MenuItem('L1_VZDC_A_5ZDC_C'      ).setLogic( PHYS_VZDC_A_5ZDC_C       & physcond)
+        MenuItem('L1_ZDC_1TO4XOR5'       ).setLogic( PHYS_ZDC_1TO4XOR5        & physcond)
+        MenuItem('L1_5ZDC_A_5ZDC_C'      ).setLogic( PHYS_5ZDC_A_5ZDC_C       & physcond)
 
         # ATR-14967
         MenuItem('L1_EM3_VZDC_A'           ).setLogic( d.EM3 & Not(ZDC_A) & physcond)
@@ -1296,6 +1309,9 @@ class ItemDef:
         MenuItem('L1_LUCID_BGRP9').setLogic( (d.LUCID_A | d.LUCID_C) & bgrp9cond)
         MenuItem('L1_LUCID_BGRP11').setLogic( (d.LUCID_A | d.LUCID_C) & bgrp11cond)
 
+        MenuItem('L1_LUCID_A_BGRP11').setLogic( d.LUCID_A & bgrp11cond)
+        MenuItem('L1_LUCID_C_BGRP11').setLogic( d.LUCID_C & bgrp11cond)
+
         # BCM
         MenuItem('L1_BCM_Wide'                   ).setLogic( d.BCM_Wide & physcond )
         MenuItem('L1_BCM_Wide_BGRP12'            ).setLogic( d.BCM_Wide & bgrp12cond )
@@ -1350,6 +1366,7 @@ class ItemDef:
         MenuItem('L1_RD0_BGRP9'          ).setLogic( d.RNDM0 & bgrp9cond          ).setTriggerType(TT.rand)
         MenuItem('L1_RD0_BGRP10'         ).setLogic( d.RNDM0 & alfacalib          ).setTriggerType(TT.rand)
         MenuItem('L1_RD0_BGRP11'         ).setLogic( d.RNDM0 & bgrp11cond         ).setTriggerType(TT.rand)
+        MenuItem('L1_RD0_BGRP15'         ).setLogic( d.RNDM0 & alfacalib          ).setTriggerType(TT.rand)
         MenuItem('L1_RD0_FIRSTINTRAIN'   ).setLogic( d.RNDM0 & firstintrain       ).setTriggerType(TT.rand)
 
         MenuItem('L1_RD1_FILLED'         ).setLogic( d.RNDM1 & physcond           ).setTriggerType(TT.zerobs) # used to be TT.rand

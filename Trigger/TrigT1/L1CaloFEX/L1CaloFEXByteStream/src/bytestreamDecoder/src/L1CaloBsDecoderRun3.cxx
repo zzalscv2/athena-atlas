@@ -26,6 +26,7 @@
 #include "bytestreamDecoder/L1CaloRdoJfexTob.h"
 #include "bytestreamDecoder/L1CaloRdoJfexTower.h"
 #include "bytestreamDecoder/L1CaloRdoMuonTob.h"     // **FIXME** Different class for run 3?
+#include "bytestreamDecoder/L1CaloRdoPh1TopoHit.h"
 #include "channelMappings/GfexCellMapping.h"
 #include "channelMappings/JfexCellMapping.h"
 #include "defsL1Calo/FexDefs.h"
@@ -485,6 +486,13 @@ L1CaloBsDecoderRun3::decodeEfexTobSlice( const uint32_t payload[], size_t& index
        // and also doesn't include padding word (which occurs if the blockSize is even
        // because the corrective trailer adds one more word and then a padding word is needed
       corrBlockSize += ((corrBlockSize % 2) == 1) ? 1 : 2;
+
+      if (corrBlockSize > index) {
+          ERS_ERROR("L1CaloBsDecoderRun3::decodeEfexTobs: corrective blocksize " << corrBlockSize <<
+          " > remaining blocksize " << index);
+          return false;
+      }
+
       index -= corrBlockSize;   // Ought to be 2
    }
    else {
@@ -508,13 +516,18 @@ L1CaloBsDecoderRun3::decodeEfexTobSlice( const uint32_t payload[], size_t& index
       tobSize += (tobSize % 2);
 
       // Move index to start of this block.
+       if (tobSize > index) {
+           ERS_ERROR( "L1CaloBsDecoderRun3::decodeEfexTobs: TOB blocksize " << tobSize <<
+                     " > remaining blocksize " << index);
+           return false;
+       }
       index -= tobSize;
 
       if ( safeMode ) {
-         std::cerr << "L1CaloBsDecoderRun3::decodeEfexTobs: safe mode from FPGA "
+         ERS_ERROR( "L1CaloBsDecoderRun3::decodeEfexTobs: safe mode from FPGA "
                    << fpgaNumber << " eFEX " << efexNumber << " shelf " << shelfNumber
                    << ", missed " << numTobs << " TOBs, " << numEmXtobs << " EM XTOBs, "
-                   << numTauXtobs << " Tau XTOBs" << std::endl;
+                   << numTauXtobs << " Tau XTOBs" );
       }
       else {
          // Luxury, we can now work forwards inside the slice block!
@@ -1516,6 +1529,122 @@ L1CaloBsDecoderRun3::decodePh1TopoData( const uint32_t* beg, const uint32_t* end
    //??   std::cout << "L1CaloBsDecoderRun3::decodeJfexData: n.towers added="
    //??             << tower.size() - numTowers << std::endl;
    //??}
+}
+
+/*!
+ * Decode Ph1Topo hit results.
+ * The format is common to jFEX TOBs (and much like eFEX TOBs).
+ * So there could be better code reuse than this cut & paste job.
+ * \param beg pointer to start of rod data payload
+ * \param end pointer to end of rod data payload
+ * \param tob list of RDO to be filled
+ * \param rodInfo iterator to ROD information for this block
+ */
+void
+L1CaloBsDecoderRun3::decodePh1TopoHits( const uint32_t* beg, const uint32_t* end,
+                                        std::list<L1CaloRdoPh1TopoHit>& hit,
+                                        std::list<L1CaloRdoRodInfo>::const_iterator rodInfo )
+{
+   const uint32_t* payload( beg );
+   const size_t fragmentSize = end - beg;
+
+   // The data block is optimised for production by firmware as a set
+   // of nested blocks with the lengths at the end. So we need to find
+   // the end and work backwards.
+
+   if ( fragmentSize < 2 ) {
+      std::cerr << "L1CaloBsDecoderRun3::decodePh1TopoHits: fragment size " << fragmentSize
+                << " is too small for the ROD trailer" << std::endl;
+      return;
+   }
+
+   size_t index = fragmentSize;
+   const uint32_t rodTrailer2 = payload[--index];
+   const uint32_t rodTrailer1 = payload[--index];
+
+   const uint32_t rodErrors = rodTrailer2 & 0x7f;
+   const size_t payloadSize = rodTrailer1 & 0xffff;
+   if ( (payloadSize + 2) != fragmentSize ) {
+      // Actual ROD fragment payload size does not match that claimed in the trailer.
+      std::cerr << "L1CaloBsDecoderRun3::decodePh1TopoHits: payload size " << payloadSize
+                << " inconsistent with ROD fragment size " << fragmentSize << std::endl;
+      return;
+   }
+
+   // Loop looking backwards for Ph1Topo FPGA blocks.
+   while ( index > 0 ) {
+      if ( index < 2 ) {
+         std::cerr << "L1CaloBsDecoderRun3::decodePh1TopoHits: remaining block size " << index
+                   << " is too small for the Ph1Topo trailer" << std::endl;
+         return;
+      }
+      size_t fpgaIndex = index;
+      const uint32_t fpgaTrailer2 = payload[--fpgaIndex];
+      const uint32_t fpgaTrailer1 = payload[--fpgaIndex];
+      const size_t fpgaBlockSize  = fpgaTrailer1 & 0xffff;
+      const uint32_t topoNumber   = (fpgaTrailer1 >> 20) & 0x7;
+      const uint32_t fpgaNumber   = (fpgaTrailer1 >> 18) & 0x3;
+      const uint32_t numSlices    = (fpgaTrailer1 >> 24) & 0xf;
+      const uint32_t sliceNumber  = (fpgaTrailer1 >> 28) & 0xf;
+      const uint32_t fpgaErrors   = fpgaTrailer2 & 0x3f;
+      if ( fpgaBlockSize > index ) {
+         std::cerr << "L1CaloBsDecoderRun3::decodePh1TopoHits: Ph1Topo FPGA block size "
+                   << fpgaBlockSize << " exceeds remaining data size " << index
+                   << " (Ph1Topo " << topoNumber << " FPGA " << fpgaNumber << ")" << std::endl;
+         return;
+      }
+      // Update index to previous Ph1Topo FPGA block (if any).
+      index = fpgaIndex - fpgaBlockSize;
+
+      // Combine rod and topo error fields.
+      const uint32_t errorMask = fpgaErrors | (rodErrors << 6);
+
+      // There should always be six words.
+      // All six are only used by Topo1 and they are all CTP hits.
+      // Topo2 and Topo3 modules just use two words of the block,
+      // one for the hits sent to CTP and one for the overflow flags.
+      const size_t expectedBlockSize = 6;
+      if ( fpgaBlockSize != expectedBlockSize ) {
+         std::cerr << "L1CaloBsDecoderRun3::decodePh1TopoHits: Ph1Topo FPGA block size "
+                   << fpgaBlockSize << " is not the expected " << expectedBlockSize << std::endl;
+         return;
+      }
+      const uint32_t shelfNumber = 0x24;   // Hard code to P1 value (36)
+      const int idFlag = 0;  // Not used for Ph1Topo
+      L1CaloRdoHit::HitSource hitSource( L1CaloRdoHit::Result );
+      size_t numWordsUsedPerFPGA = (topoNumber == 1) ? 6 : 2;
+      size_t numHitWordsPerFPGA  = (topoNumber == 1) ? 6 : 1;
+      size_t numHitWordsPerModule = numHitWordsPerFPGA * 2;
+
+      L1CaloRdoPh1TopoHit newOne( shelfNumber, topoNumber, idFlag, hitSource, numHitWordsPerModule, numSlices );
+      newOne.setRodInfo( rodInfo );
+      L1CaloRdoPh1TopoHit& rdo = L1CaloBsDecoderUtil::findRdo( newOne, hit );
+      rdo.setFlag( errorMask, sliceNumber );
+
+      size_t sliceIndex = index;
+      for ( size_t k = 0; k < numWordsUsedPerFPGA; k++ ) {
+         const uint32_t resultWord = payload[sliceIndex++];
+         size_t wordNum = ( topoNumber == 1 ) ? k : 0;
+         wordNum += fpgaNumber * numHitWordsPerFPGA;
+         // Interpret this as hit or overflow?
+         bool isOverflow = ( topoNumber != 1 ) && ( k != 0 );
+         if ( isOverflow ) {
+            rdo.setOverflows( resultWord, wordNum, sliceNumber );
+         }
+         else {
+            rdo.setHits( resultWord, wordNum, sliceNumber );
+         }
+
+         if ( m_verbosity > 0 )
+         {
+            std::cout << "L1CaloBsDecoderRun3::decodePh1TopoHits: slice=" << sliceNumber
+                      << ", module=" << topoNumber << ", fpga=" << fpgaNumber
+                      << std::hex << ", result=0x" << resultWord << ", errors=0x" << errorMask
+                      << std::dec << ", numSlices=" << numSlices << ", numWords=" << numHitWordsPerModule
+                      << ", isOverflow=" << isOverflow << std::endl;
+         }
+      }
+   }
 }
 #endif // OFFLINE
 /*!

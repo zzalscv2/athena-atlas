@@ -294,7 +294,7 @@ if InDetTrigFlags.loadExtrapolator():
   InDetTrigSubUpdators    += [ InDetTrigMaterialUpdator.name() ]
 
   from TrkExTools.TrkExToolsConf import Trk__Extrapolator
-  InDetTrigExtrapolator = Trk__Extrapolator(name        = 'InDetTrigExtrapolator',
+  InDetTrigExtrapolator = Trk__Extrapolator(name        = 'InDetTrigLegacyExtrapolator',
                                             Propagators             = [ InDetTrigRKPropagator, InDetTrigStepPropagator],
                                             MaterialEffectsUpdators = [ InDetTrigMaterialUpdator ],
                                             Navigator               = InDetTrigNavigator,
@@ -304,8 +304,7 @@ if InDetTrigFlags.loadExtrapolator():
                                             )
 
   ToolSvc += InDetTrigExtrapolator
-  if (InDetTrigFlags.doPrintConfigurables()):
-    print (     InDetTrigExtrapolator                                          )
+
 
 #
 # ----------- control loading of fitters

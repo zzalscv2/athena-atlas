@@ -98,8 +98,6 @@ StatusCode InDetGlobalTrackMonAlg::fillHistograms( const EventContext& ctx ) con
 	continue;
       }
     
-    nBase++;
-    
     // =================================== //
     // Fill hits BEGINS
     
@@ -120,6 +118,8 @@ StatusCode InDetGlobalTrackMonAlg::fillHistograms( const EventContext& ctx ) con
     // Base tracks
     if ( !m_trackSelTool->accept(*track) )
       continue;
+
+    nBase++;
 
     fill(trackGroup, eta_perigee_m, phi_perigee_m); // Trk_Base_eta_phi
     

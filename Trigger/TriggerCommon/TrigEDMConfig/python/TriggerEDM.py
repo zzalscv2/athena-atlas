@@ -32,7 +32,7 @@ def getTriggerEDMList(key, runVersion):
     List (Literally Python dict) of trigger objects to be placed with flags:
     key can be" 'ESD', 'AODSLIM', 'AODFULL', 'DS'
     additionally for Run 3 the key can be 'AODSMALL' and 'AODLARGE'
-    run can be: '1 (Run1)', '2 (Run2)', '3' (Run 3)
+    run can be: '1 (Run1)', '2 (Run2)', '3' (Run 3), '4' (Run 4)
     """
     if runVersion == 1:
         return getTriggerObjList(key,[TriggerL2List,TriggerEFList, TriggerResultsRun1List])
@@ -43,7 +43,7 @@ def getTriggerEDMList(key, runVersion):
         else:
             return getTriggerObjList(key,[TriggerHLTList, TriggerResultsList])
 
-    elif runVersion ==3:
+    elif runVersion == 3 or runVersion == 4: 
         if key in AllowedOutputFormats: # AllowedOutputFormats is the entire list of output formats including ESD
             #if 'SLIM' in key or 'SMALL' in key or 'LARGE' in key : #keeping for refernece/potential revert
             # this keeps only the dynamic variables that have been specificied in TriggerEDMRun3

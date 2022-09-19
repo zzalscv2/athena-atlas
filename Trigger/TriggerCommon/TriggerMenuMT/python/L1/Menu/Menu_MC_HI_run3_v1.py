@@ -163,7 +163,17 @@ def defineMenu():
 
         # ZDC
         'L1_ZDC_A','L1_ZDC_C','L1_ZDC_A_C',
-        'L1_ZDC_AND',
+        'L1_ZDC_AND', 'L1_ZDC_XOR',
+        'L1_ZDC_C_VZDC_A', 'L1_ZDC_A_VZDC_C',
+        # Run3 ZDC items for heavy ion runs 
+        'L1_VZDC_A_VZDC_C',
+        'L1_1TO4ZDC_A_VZDC_C',
+        'L1_VZDC_A_1TO4ZDC_C',
+        'L1_1TO4ZDC_A_1TO4ZDC_C',
+        'L1_5ZDC_A_VZDC_C',
+        'L1_VZDC_A_5ZDC_C',
+        'L1_ZDC_1TO4XOR5',
+        'L1_5ZDC_A_5ZDC_C',
         
         # ZDC and calo
         'L1_ZDC_A_C_VTE50',
@@ -200,6 +210,7 @@ def defineMenu():
         'L1_ZDC_E3_AND_E3'    ,
         'L1_ZDC_A_AND_C'      ,
         'L1_ZDC_OR_EMPTY', 'L1_ZDC_OR_UNPAIRED_ISO', 'L1_ZDC_OR_UNPAIRED_NONISO',
+        'L1_ZDC_OR_LHCF',
         # LHCF
         'L1_LHCF', 'L1_LHCF_UNPAIRED_ISO', 'L1_LHCF_EMPTY',
     

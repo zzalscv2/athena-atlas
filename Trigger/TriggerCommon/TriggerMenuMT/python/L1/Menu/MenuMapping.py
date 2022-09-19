@@ -1,4 +1,4 @@
-# Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
 
 """
 This map specifies with menu to load from TriggerMenuMT/python/L1/Menu
@@ -15,6 +15,12 @@ menuMap = {
     "PhysicsP1_pp_run3_v1"                      : ["Physics_pp_run3_v1","Physics_pp_run3_v1_inputs","MC_pp_run3_v1_inputs_legacy"],
     "MC_pp_run3_v1"                             : ["MC_pp_run3_v1",     "MC_pp_run3_v1_inputs",     "MC_pp_run3_v1_inputs_legacy"],
     "Dev_pp_run3_v1"                            : ["MC_pp_run3_v1",     "MC_pp_run3_v1_inputs",     "MC_pp_run3_v1_inputs_legacy"],
+
+    # pp for run 4
+    "Physics_pp_run4_v1"                        : ["Physics_pp_run3_v1","Physics_pp_run3_v1_inputs","MC_pp_run3_v1_inputs_legacy"],
+    #"PhysicsP1_pp_run4_v1"                      : ["Physics_pp_run3_v1","Physics_pp_run3_v1_inputs","MC_pp_run3_v1_inputs_legacy"],
+    "MC_pp_run4_v1"                             : ["MC_pp_run3_v1",     "MC_pp_run3_v1_inputs",     "MC_pp_run3_v1_inputs_legacy"],
+    "Dev_pp_run4_v1"                            : ["MC_pp_run3_v1",     "MC_pp_run3_v1_inputs",     "MC_pp_run3_v1_inputs_legacy"],
 
     # low mu
     "PhysicsP1_pp_lowMu_run3_v1"                : ["MC_HI_run3_v1",     "Physics_pp_run3_v1_inputs","MC_HI_run3_v1_inputs_legacy"],

@@ -70,7 +70,7 @@ class InDetGlobalTrackMonAlg : public AthMonitorAlgorithm {
   ServiceHandle<IBLParameterSvc> m_IBLParameterSvc{this, "IBLParameterSvc", "IBLParameterSvc"};
 
   BooleanProperty m_doIBL{this, "DoIBL", true, "IBL present?"};
-  BooleanProperty m_doTide{this, "DoTide", false, "Make TIDE plots?"};
+  BooleanProperty m_doTide{this, "DoTide", true, "Make TIDE plots?"};
   
 };
 #endif

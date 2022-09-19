@@ -12209,7 +12209,7 @@ HLT_j80_0eta290_020jvt_bdl1d60_pf_ftf_xe60_cell_L12J50_XE40:
     1: 4
     2: 3
   stepFeatures:
-    0: 8
+    0: 9
     1: 13
     2: 4
 HLT_j80_0eta290_020jvt_bdl1d70_j60_0eta290_020jvt_bdl1d85_j45f_pf_ftf_preselj60XXj45XXf40_L1J40p0ETA25_2J25_J20p31ETA49:
@@ -12239,7 +12239,7 @@ HLT_j80_0eta290_020jvt_bdl1r60_pf_ftf_xe60_cell_L12J50_XE40:
     1: 4
     2: 3
   stepFeatures:
-    0: 8
+    0: 9
     1: 13
     2: 4
 HLT_j80_0eta290_020jvt_bdl1r70_j60_0eta290_020jvt_bdl1r85_j45f_pf_ftf_preselj60XXj45XXf40_L1J40p0ETA25_2J25_J20p31ETA49:

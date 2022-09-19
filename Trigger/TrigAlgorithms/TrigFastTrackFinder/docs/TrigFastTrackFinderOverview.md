@@ -37,8 +37,8 @@ Configuration-dependant inputs:
 * DataVector< LVL1::RecJetRoI > RecJetRoI: Jet RoI information used when doHitDV_Seeding=True
 
 Configuration-dependant outputs:
-* xAOD::TrigCompositeContainer> HitDVTrk and xAOD::TrigCompositeContainer> HitDVSP filled when doHitDV=True
-* xAOD::TrigCompositeContainer> EdxTrk and xAOD::TrigCompositeContainer> dEdxHit filled when dodEdxTrk=True
+* xAOD::TrigCompositeContainer> HitDVSeed, xAOD::TrigCompositeContainer> HitDVTrk and xAOD::TrigCompositeContainer> HitDVSP filled when doHitDV=True
+* xAOD::TrigCompositeContainer> dEdxTrk and xAOD::TrigCompositeContainer> dEdxHit filled when dodEdxTrk=True
 * xAOD::TrigCompositeContainer> DisTrkCand filled when doDisappearingTrk=True
 
 # Algorithm Methods
