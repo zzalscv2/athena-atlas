@@ -252,6 +252,8 @@ def createTrackingFlags():
                     500*Units.mm if pcf.InDet.doRobustReco else
                     maxZImpact_ranges( pcf ) )
 
+    icf.addFlag("maxEMImpact", 50.0 * Units.mm)
+
     # --- this is for the TRT-extension
     icf.addFlag("minTRTonTrk", 9)
     icf.addFlag("minTRTPrecFrac", 0.4) #old: 0.3
@@ -574,7 +576,8 @@ def createR3LargeD0TrackingFlags():
     icf.minPT              = 1.0 * Units.GeV                                                                                    
     icf.maxEta             = 3                                                                                                        
     icf.maxPrimaryImpact   = 300.0 * Units.mm
-    icf.maxZImpact         = 750 * Units.mm    
+    icf.maxEMImpact        = 300 * Units.mm
+    icf.maxZImpact         = 750 * Units.mm
     icf.maxSecondaryImpact = 300.0 * Units.mm  
     icf.minSecondaryPt     = 1000.0 * Units.MeV 
     icf.minClusters        = 8                  
