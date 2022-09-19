@@ -352,7 +352,8 @@ class AODDigestCheck(WorkflowCheck):
             else:
                 self.logger.error(f"The output '{validation_output}' (>) differs from the reference '{reference_output}' (<):")
             if diff_output:
-                self.logger.print("")
+                with reference_output.open() as file:
+                    self.logger.print(file.readline())
                 self.logger.print(diff_output)
             if diff_error:
                 self.logger.print(diff_error)
