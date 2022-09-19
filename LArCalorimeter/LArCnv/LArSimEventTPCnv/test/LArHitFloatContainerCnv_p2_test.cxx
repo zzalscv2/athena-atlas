@@ -1,8 +1,6 @@
 /*
-  Copyright (C) 2002-2019 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
 */
-
-// $Id$
 /**
  * @file LArSimEventTPCnv/test/LArHitFloatContainerCnv_p2_test.cxx
  * @author scott snyder <snyder@bnl.gov>
@@ -16,6 +14,7 @@
 #include "StoreGate/StoreGateSvc.h"
 #include "CaloIdentifier/CaloCell_ID.h"
 #include "IdDictParser/IdDictParser.h"
+#include "CxxUtils/checker_macros.h"
 #include "TestTools/initGaudi.h"
 #include "TestTools/FLOATassert.h"
 #include "TestTools/leakcheck.h"
@@ -54,7 +53,7 @@ void testit (const LArHitFloatContainer& trans1)
 }
 
 
-void test1 (const CaloCell_ID& idhelper)
+void test1 ATLAS_NOT_THREAD_SAFE (const CaloCell_ID& idhelper)
 {
   std::cout << "test1\n";
   Athena_test::Leakcheck check;
@@ -112,7 +111,7 @@ const CaloCell_ID& make_dd (ISvcLocator* svcLoc)
 }
 
 
-int main()
+int main ATLAS_NOT_THREAD_SAFE ()
 {
   ISvcLocator* svcLoc = nullptr;
   (void)Athena_test::initGaudi ("DetStoreTest_jobOptions.txt", svcLoc);
