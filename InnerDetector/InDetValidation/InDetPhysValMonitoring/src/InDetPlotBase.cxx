@@ -136,14 +136,16 @@ InDetPlotBase::fillHisto(TH3* pTh3, const float xval, const float yval, const fl
 void
 InDetPlotBase::fillHisto(TEfficiency* pTeff,  const float value, const bool accepted, float weight) {
   if (pTeff and validArguments(value)) {
-    pTeff->FillWeighted(accepted, weight, value);
+    if(weight==1.) pTeff->Fill(accepted, value); // To get proper error estimate when possible
+    else pTeff->FillWeighted(accepted, weight, value);
   }
 }
 
 void
 InDetPlotBase::fillHisto(TEfficiency* eff2d, const float xvalue, const float yvalue, const bool accepted, const float weight) {
   if (eff2d and validArguments(xvalue, yvalue)) {
-    eff2d->FillWeighted(accepted, weight, xvalue, yvalue);
+    if(weight==1.) eff2d->Fill(accepted, weight, xvalue, yvalue);
+    else eff2d->FillWeighted(accepted, weight, xvalue, yvalue);
   }
 }
 
