@@ -234,7 +234,8 @@ public:
 
   /** Extrapolation method collecting intersections with subdetector
    * boundaries and active volumes/layers. Destination
-   * (subdetector boundary) : geoID (+ entry, -exit) ( default MS exit )
+   * (subdetector boundary) : geoID (+ entry, -exit) 
+   * ( default Calo = 3 exit see GeometrySignature.h)
    * Employs the STEP_propagator, used to create ParticleCaloExtensions
    * mainly for muons and Particle Flow.
    */
@@ -705,11 +706,10 @@ private:
   //------------Reference surface --------------
   Surface* m_referenceSurface;
   //-------------------------- SCREEN output steering -------------------------------------------//
-  bool m_printHelpOutputAtInitialize;
   bool m_printRzOutput;
   //------------------------- VALIDATION  SECTION ------------------------------------------//
   // flags
-  bool m_navigationStatistics;             //!< steer the output for the navigaiton statistics
+  bool m_navigationStatistics;             //!< steer the output for the navigation statistics
   bool m_navigationBreakDetails;           //!< steer the output for the navigation break details
   bool m_materialEffectsOnTrackValidation; //!< mat effects on track validation
 

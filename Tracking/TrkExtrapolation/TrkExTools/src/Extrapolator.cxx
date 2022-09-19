@@ -154,7 +154,6 @@ Trk::Extrapolator::Extrapolator(const std::string& t, const std::string& n, cons
   , m_dumpCache(false)
   , m_fastField(false)
   , m_referenceSurface{ nullptr }
-  , m_printHelpOutputAtInitialize(false)
   , m_printRzOutput(true)
   , m_navigationStatistics(false)
   , m_navigationBreakDetails(false)
@@ -213,7 +212,6 @@ Trk::Extrapolator::Extrapolator(const std::string& t, const std::string& n, cons
   declareProperty("InitialLayerAttempts", m_initialLayerAttempts);
   declareProperty("SuccessiveLayerAttempts", m_successiveLayerAttempts);
   // debug and validation
-  declareProperty("HelpOutput", m_printHelpOutputAtInitialize);
   declareProperty("positionOutput", m_printRzOutput);
   declareProperty("NavigationStatisticsOutput", m_navigationStatistics);
   declareProperty("DetailedNavigationOutput", m_navigationBreakDetails);
@@ -737,8 +735,8 @@ Trk::Extrapolator::extrapolateToNextMaterialLayer(const EventContext& ctx,
               
             } else {
               const auto& multi = (*iTer)->multilayerRepresentation();
-              for (unsigned int i = 0; i < multi.size(); i++) {
-                cache.addOneNavigationLayer((*iTer)->trackingVolume(), (multi)[i]);
+              for (const auto *i : multi) {
+                cache.addOneNavigationLayer((*iTer)->trackingVolume(), i);
               }
             }
           }
@@ -820,13 +818,13 @@ Trk::Extrapolator::extrapolateToNextMaterialLayer(const EventContext& ctx,
           if (m_dumpCache) {
             ATH_MSG_DEBUG(cache.to_string(" extrapolateToNextMaterialLayer"));
           }
-          double dInX0 = fabs(path) / propagVol->x0();
+          double dInX0 = std::abs(path) / propagVol->x0();
           ATH_MSG_DEBUG(" add x0 " << dInX0);
           cache.m_extrapolationCache->updateX0(dInX0);
-          Trk::MaterialProperties materialProperties(*propagVol, fabs(path));
+          Trk::MaterialProperties materialProperties(*propagVol, std::abs(path));
           double currentqoverp = nextPar->parameters()[Trk::qOverP];
           std::unique_ptr<EnergyLoss> eloss = m_elossupdater->energyLoss(
-            materialProperties, fabs(1. / currentqoverp), 1., dir, particle);
+            materialProperties, std::abs(1. / currentqoverp), 1., dir, particle);
           ATH_MSG_DEBUG("  [M] Energy loss: STEP,EnergyLossUpdator:"
                         << nextPar->momentum().mag() - currPar->momentum().mag() << ","
                         << eloss->deltaE());
@@ -981,17 +979,17 @@ Trk::Extrapolator::extrapolateToNextMaterialLayer(const EventContext& ctx,
       }
       // collect unordered layers
       if (!confinedLays.empty()) {
-        for (unsigned int il = 0; il < confinedLays.size(); il++) {
-          cache.addOneNavigationLayer(dVol, confinedLays[il]);
+        for (const auto *confinedLay : confinedLays) {
+          cache.addOneNavigationLayer(dVol, confinedLay);
         }
       }
     } else { // active material
       const Trk::TrackingVolume* detVol = dVol->associatedSubVolume(gp);
       if (!detVol && dVol->confinedVolumes()) {
         Trk::BinnedArraySpan<Trk::TrackingVolume const * const> subvols = dVol->confinedVolumes()->arrayObjects();
-        for (unsigned int iv = 0; iv < subvols.size(); iv++) {
-          if (subvols[iv]->inside(gp, m_tolerance)) {
-            detVol = subvols[iv];
+        for (const auto *subvol : subvols) {
+          if (subvol->inside(gp, m_tolerance)) {
+            detVol = subvol;
             break;
           }
         }
@@ -1036,8 +1034,8 @@ Trk::Extrapolator::extrapolateToNextMaterialLayer(const EventContext& ctx,
           }
         } else if (!detVol->confinedArbitraryLayers().empty()) {
           Trk::ArraySpan<const Trk::Layer* const> layers = detVol->confinedArbitraryLayers();
-          for (unsigned int il = 0; il < layers.size(); il++) {
-            cache.addOneNavigationLayer(detVol, layers[il]);
+          for (const auto *layer : layers) {
+            cache.addOneNavigationLayer(detVol, layer);
           }
         }
       }
@@ -1130,12 +1128,12 @@ Trk::Extrapolator::extrapolateToNextMaterialLayer(const EventContext& ctx,
           if (m_dumpCache) {
             ATH_MSG_DEBUG(cache.to_string( " extrapolateToNextMaterialLayer dense "));
           }
-          double dInX0 = fabs(path) / cache.m_currentDense->x0();
+          double dInX0 = std::abs(path) / cache.m_currentDense->x0();
           cache.m_extrapolationCache->updateX0(dInX0);
-          Trk::MaterialProperties materialProperties(*cache.m_currentDense, fabs(path));
+          Trk::MaterialProperties materialProperties(*cache.m_currentDense, std::abs(path));
           double currentqoverp = nextPar->parameters()[Trk::qOverP];
           std::unique_ptr<Trk::EnergyLoss> eloss = m_elossupdater->energyLoss(
-            materialProperties, fabs(1. / currentqoverp), 1., dir, particle);
+            materialProperties, std::abs(1. / currentqoverp), 1., dir, particle);
           cache.m_extrapolationCache->updateEloss(
             eloss->meanIoni(), eloss->sigmaIoni(), eloss->meanRad(), eloss->sigmaRad());
           if (m_dumpCache) {
@@ -1151,7 +1149,7 @@ Trk::Extrapolator::extrapolateToNextMaterialLayer(const EventContext& ctx,
         if (path * dir < 0.) {
           ATH_MSG_WARNING(" got negative path!! " << path);
         }
-        Trk::MaterialProperties materialProperties(*cache.m_currentDense, fabs(path));
+        Trk::MaterialProperties materialProperties(*cache.m_currentDense, std::abs(path));
         double scatsigma = std::sqrt(m_msupdater->sigmaSquare(
           materialProperties, 1. / std::abs(nextPar->parameters()[qOverP]), 1., particle));
         auto newsa = Trk::ScatteringAngles(
@@ -1205,7 +1203,7 @@ Trk::Extrapolator::extrapolateToNextMaterialLayer(const EventContext& ctx,
           nextPar->position(), nextPar->momentum().normalized());
         if (distSol.numberOfSolutions() > 0) {
           dist = distSol.first();
-          if (distSol.numberOfSolutions() > 1 && fabs(dist) < m_tolerance) {
+          if (distSol.numberOfSolutions() > 1 && std::abs(dist) < m_tolerance) {
             dist = distSol.second();
           }
           if (distSol.numberOfSolutions() > 1 && dist * dir < 0. && distSol.second() * dir > 0.) {
@@ -1258,12 +1256,12 @@ Trk::Extrapolator::extrapolateToNextMaterialLayer(const EventContext& ctx,
 
               double thick = 0.;
               double costr =
-                fabs(nextPar->momentum().normalized().dot(mb->surfaceRepresentation().normal()));
+                std::abs(nextPar->momentum().normalized().dot(mb->surfaceRepresentation().normal()));
 
               if (mb->surfaceRepresentation().isOnSurface(
                     mb->surfaceRepresentation().center(), false, 0., 0.)) {
                 thick = fmin(mb->surfaceRepresentation().bounds().r(),
-                             layThick / fabs(nextPar->momentum().normalized().dot(
+                             layThick / std::abs(nextPar->momentum().normalized().dot(
                                           mb->surfaceRepresentation().normal())));
               } else {
                 thick = fmin(2 * mb->thickness(), layThick / (1 - costr));
@@ -1278,7 +1276,7 @@ Trk::Extrapolator::extrapolateToNextMaterialLayer(const EventContext& ctx,
                   cache.m_extrapolationCache->updateX0(dInX0);
                   double currentqoverp = nextPar->parameters()[Trk::qOverP];
                   std::unique_ptr<EnergyLoss> eloss = m_elossupdater->energyLoss(
-                    *lmat, fabs(1. / currentqoverp), 1. / costr, dir, particle);
+                    *lmat, std::abs(1. / currentqoverp), 1. / costr, dir, particle);
                   cache.m_extrapolationCache->updateEloss(
                     eloss->meanIoni(), eloss->sigmaIoni(), eloss->meanRad(), eloss->sigmaRad());
                   if (m_dumpCache) {
@@ -1412,13 +1410,13 @@ Trk::Extrapolator::extrapolateToNextMaterialLayer(const EventContext& ctx,
             double lx0 = nextLayer->fullUpdateMaterialProperties(*nextPar)->x0();
 
             double thick = 0.;
-            double costr = fabs(
+            double costr = std::abs(
               nextPar->momentum().normalized().dot(nextLayer->surfaceRepresentation().normal()));
 
             if (nextLayer->surfaceRepresentation().isOnSurface(
                   nextLayer->surfaceRepresentation().center(), false, 0., 0.)) {
               thick = fmin(nextLayer->surfaceRepresentation().bounds().r(),
-                           layThick / fabs(nextPar->momentum().normalized().dot(
+                           layThick / std::abs(nextPar->momentum().normalized().dot(
                                         nextLayer->surfaceRepresentation().normal())));
             } else {
               thick = fmin(2 * nextLayer->thickness(), layThick / (1 - costr));
@@ -1435,7 +1433,7 @@ Trk::Extrapolator::extrapolateToNextMaterialLayer(const EventContext& ctx,
                   *nextLayer->fullUpdateMaterialProperties(*nextPar)); // !<@TODO check
                 double currentqoverp = nextPar->parameters()[Trk::qOverP];
                 std::unique_ptr<EnergyLoss> eloss = m_elossupdater->energyLoss(
-                  materialProperties, fabs(1. / currentqoverp), 1. / costr, dir, particle);
+                  materialProperties, std::abs(1. / currentqoverp), 1. / costr, dir, particle);
                 cache.m_extrapolationCache->updateEloss(
                   eloss->meanIoni(), eloss->sigmaIoni(), eloss->meanRad(), eloss->sigmaRad());
                 if (m_dumpCache) {
@@ -1452,18 +1450,19 @@ Trk::Extrapolator::extrapolateToNextMaterialLayer(const EventContext& ctx,
                 *nextLayer->fullUpdateMaterialProperties(*nextPar)); // !<@TODOcheck
               double scatsigma = std::sqrt(m_msupdater->sigmaSquare(
                 materialProperties, 1. / std::abs(nextPar->parameters()[qOverP]), 1., particle));
-              const double par_theta = std::abs(nextPar->parameters()[Trk::theta]) > FLT_EPSILON ? nextPar->parameters()[Trk::theta] : FLT_EPSILON;
-              Trk::ScatteringAngles newsa(
-                0, 0, scatsigma / std::sin(par_theta), scatsigma);
+              const double par_theta = std::abs(nextPar->parameters()[Trk::theta]) > FLT_EPSILON
+                                         ? nextPar->parameters()[Trk::theta]
+                                         : FLT_EPSILON;
+              Trk::ScatteringAngles newsa(0, 0, scatsigma / std::sin(par_theta), scatsigma);
               // energy loss
               double currentqoverp = nextPar->parameters()[Trk::qOverP];
               std::unique_ptr<EnergyLoss> eloss = (m_elossupdater->energyLoss(
                 materialProperties, std::abs(1. / currentqoverp), 1. / costr, dir, particle));
 
               // use curvilinear TPs to simplify retrieval by fitters
-              std::unique_ptr<const Trk::TrackParameters> cvlTP(new Trk::CurvilinearParameters(
-                nextPar->position(), nextPar->momentum(), nextPar->charge()));
-             if (cache.m_extrapolationCache) {
+              auto cvlTP = std::make_unique<const Trk::CurvilinearParameters>(
+                nextPar->position(), nextPar->momentum(), nextPar->charge());
+              if (cache.m_extrapolationCache) {
                 if (not cache.elossPointerOverwritten()) {
                   if (m_dumpCache) {
                     ATH_MSG_DEBUG(cache.to_string(" extrapolateToNextMaterialLayer thin "));
@@ -1813,7 +1812,7 @@ Trk::Extrapolator::extrapolateInAlignableTV(const EventContext& ctx,
           nextPar->position(), nextPar->momentum().normalized());
         if (distSol.numberOfSolutions() > 0) {
           dist = distSol.first();
-          if (distSol.numberOfSolutions() > 1 && fabs(dist) < m_tolerance) {
+          if (distSol.numberOfSolutions() > 1 && std::abs(dist) < m_tolerance) {
             dist = distSol.second();
           }
           if (distSol.numberOfSolutions() > 1 && dist * dir < 0. && distSol.second() * dir > 0.) {
@@ -2290,8 +2289,8 @@ void
 Trk::Extrapolator::validationAction() const
 {
   // record the updator validation information
-  for (unsigned int imueot = 0; imueot < m_subupdaters.size(); ++imueot) {
-    m_subupdaters[imueot]->validationAction();
+  for (const auto *subupdater : m_subupdaters) {
+    subupdater->validationAction();
   }
   // record the navigator validation information
 }
@@ -2400,7 +2399,7 @@ Trk::Extrapolator::extrapolateImpl(const EventContext& ctx,
     if (distSol.numberOfSolutions() > 0) {
       currentDistance = distSol.absClosest();
     } else {
-      currentDistance = fabs(distSol.toPointOfClosestApproach());
+      currentDistance = std::abs(distSol.toPointOfClosestApproach());
     }
     // VERBOSE output
   }
@@ -2586,7 +2585,7 @@ Trk::Extrapolator::extrapolateImpl(const EventContext& ctx,
             distParameters->position(), dir * distParameters->momentum().normalized());
           currentDistance = newDistSol.numberOfSolutions() > 0
                               ? newDistSol.absClosest()
-                              : fabs(newDistSol.toPointOfClosestApproach());
+                              : std::abs(newDistSol.toPointOfClosestApproach());
         }
       }
     }
@@ -3036,7 +3035,7 @@ Trk::Extrapolator::extrapolateWithinDetachedVolumes(const EventContext& ctx,
                                          currVol));
   }
 
-  if (fabs(dist) < m_tolerance) {
+  if (std::abs(dist) < m_tolerance) {
     ATH_MSG_DEBUG("  [-] Already at the destination surface.");
 
     if (dist >= 0.) {
@@ -3090,7 +3089,7 @@ Trk::Extrapolator::extrapolateWithinDetachedVolumes(const EventContext& ctx,
         onNextLayer->position(), dir * onNextLayer->momentum().normalized());
       double currentDistance = (distSol.numberOfSolutions() > 0)
                                  ? distSol.absClosest()
-                                 : fabs(distSol.toPointOfClosestApproach());
+                                 : std::abs(distSol.toPointOfClosestApproach());
       if (currentDistance <= m_tolerance &&
           sf.isOnSurface(onNextLayer->position(), bchk, m_tolerance, m_tolerance)) {
         cache.m_parametersAtBoundary.resetBoundaryInformation();
@@ -3907,9 +3906,9 @@ Trk::Extrapolator::extrapolateToIntermediateLayer(const EventContext& ctx,
     if (cl) {
       // try each surface in turn
       const std::vector<const Surface*> cs = cl->constituentSurfaces();
-      for (unsigned int i = 0; i < cs.size(); ++i) {
+      for (const auto *c : cs) {
         parsOnLayer = cache.manage(prop.propagate(
-          ctx, *parm, *(cs[i]), dir, true, m_fieldProperties, particle));
+          ctx, *parm, *c, dir, true, m_fieldProperties, particle));
         if (parsOnLayer) {
           break;
         }
@@ -4456,10 +4455,10 @@ Trk::Extrapolator::addMaterialEffectsOnTrack(const EventContext& ctx,
       if (cl) {
         // try each surface in turn
         const std::vector<const Surface*> cs = cl->constituentSurfaces();
-        for (unsigned int i = 0; i < cs.size(); ++i) {
+        for (const auto *c : cs) {
           parsOnLayer = cache.manage(
             prop.propagateParameters(
-              ctx, *parms, *(cs[i]), Trk::anyDirection, false, m_fieldProperties));
+              ctx, *parms, *c, Trk::anyDirection, false, m_fieldProperties));
           if (parsOnLayer) {
             break;
           }
@@ -4888,17 +4887,17 @@ Trk::Extrapolator::extrapolateToVolumeWithPathLimit(const EventContext& ctx,
       }
       // collect unordered layers
       if (!confinedLays.empty()) {
-        for (unsigned int il = 0; il < confinedLays.size(); il++) {
-          cache.addOneNavigationLayer(dVol, confinedLays[il]);
+        for (const auto *confinedLay : confinedLays) {
+          cache.addOneNavigationLayer(dVol, confinedLay);
         }
       }
     } else { // active material
       const Trk::TrackingVolume* detVol = dVol->associatedSubVolume(gp);
       if (!detVol && dVol->confinedVolumes()) {
         Trk::BinnedArraySpan<Trk::TrackingVolume const * const> subvols = dVol->confinedVolumes()->arrayObjects();
-        for (unsigned int iv = 0; iv < subvols.size(); iv++) {
-          if (subvols[iv]->inside(gp, m_tolerance)) {
-            detVol = subvols[iv];
+        for (const auto *subvol : subvols) {
+          if (subvol->inside(gp, m_tolerance)) {
+            detVol = subvol;
             break;
           }
         }
@@ -4932,9 +4931,9 @@ Trk::Extrapolator::extrapolateToVolumeWithPathLimit(const EventContext& ctx,
         if (detVol->confinedLayers()) {
           if (cache.m_robustSampling) {
             Trk::BinnedArraySpan<Trk::Layer const * const> cLays = detVol->confinedLayers()->arrayObjects();
-            for (unsigned int i = 0; i < cLays.size(); i++) {
-              if (cLays[i]->layerType() > 0 || cLays[i]->layerMaterialProperties()) {
-                cache.addOneNavigationLayer(cLays[i]);
+            for (const auto *cLay : cLays) {
+              if (cLay->layerType() > 0 || cLay->layerMaterialProperties()) {
+                cache.addOneNavigationLayer(cLay);
               }
             }
           } else {
@@ -4964,9 +4963,9 @@ Trk::Extrapolator::extrapolateToVolumeWithPathLimit(const EventContext& ctx,
     if (cache.m_robustSampling) {
       Trk::BinnedArraySpan<Trk::Layer const * const> cLays =
         cache.m_currentStatic->confinedLayers()->arrayObjects();
-      for (unsigned int i = 0; i < cLays.size(); i++) {
-        if (cLays[i]->layerType() > 0 || cLays[i]->layerMaterialProperties()) {
-          cache.addOneNavigationLayer(cLays[i]);
+      for (const auto *cLay : cLays) {
+        if (cLay->layerType() > 0 || cLay->layerMaterialProperties()) {
+          cache.addOneNavigationLayer(cLay);
         }
       }
     } else {
@@ -5083,11 +5082,11 @@ Trk::Extrapolator::extrapolateToVolumeWithPathLimit(const EventContext& ctx,
     // collect material
     if (cache.m_currentDense->zOverAtimesRho() != 0. && !cache.m_matstates &&
         cache.m_extrapolationCache) {
-      double dInX0 = fabs(path) / cache.m_currentDense->x0();
+      double dInX0 = std::abs(path) / cache.m_currentDense->x0();
       double currentqoverp = nextPar->parameters()[Trk::qOverP];
-      MaterialProperties materialProperties(*cache.m_currentDense, fabs(path));
+      MaterialProperties materialProperties(*cache.m_currentDense, std::abs(path));
       std::unique_ptr<EnergyLoss> eloss = (m_elossupdater->energyLoss(
-        materialProperties, fabs(1. / currentqoverp), 1., dir, particle));
+        materialProperties, std::abs(1. / currentqoverp), 1., dir, particle));
       if (m_dumpCache) {
         ATH_MSG_DEBUG(cache.to_string( " extrapolateToVolumeWithPathLimit"));
       }
