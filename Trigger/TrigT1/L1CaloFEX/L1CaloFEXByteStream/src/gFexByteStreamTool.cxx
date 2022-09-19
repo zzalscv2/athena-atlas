@@ -219,6 +219,7 @@ StatusCode gFexByteStreamTool::convertFromBS(const std::vector<const ROBF*>& vro
 
         //saving Jet TOBs into the EDM container
         for(unsigned int iWord=0; iWord<n_words/2; iWord++) {
+	    if ((dataArray[iWord])==0) continue;
             ATH_MSG_DEBUG("Raw word  0x" << std::hex << dataArray[iWord]  << "    " << std::bitset<32> (dataArray[iWord]));
             //Skipping the start 
             for (unsigned int iStartJetTob=0; iStartJetTob< gPos::START_JET_TOB.size(); iStartJetTob++){
@@ -272,6 +273,7 @@ StatusCode gFexByteStreamTool::convertFromBS(const std::vector<const ROBF*>& vro
 
         //saving Global TOBs into the EDM container
         for(unsigned int iWord=n_words/2; iWord<n_words; iWord++) {
+	    if ((dataArray[iWord])==0) continue;
             ATH_MSG_DEBUG("Raw word  0x" << std::hex << dataArray[iWord]  << "    " << std::bitset<32> (dataArray[iWord]));
             //Skipping the start 
             for (unsigned int iStartGlobalTob=0; iStartGlobalTob< gPos::START_GLOBAL_TOB.size(); iStartGlobalTob++){
