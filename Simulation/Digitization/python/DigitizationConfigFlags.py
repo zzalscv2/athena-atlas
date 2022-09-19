@@ -47,8 +47,8 @@ def createDigitizationCfgFlags():
     flags.addFlag("Digitization.DoXingByXingPileUp", False)
     # Run Calorimeter noise simulation
     flags.addFlag("Digitization.DoCaloNoise", True)
-    # Compute and store hard scatter truth information
-    flags.addFlag("Digitization.DoHardScatterTruth", False)
+    # Produce inputs for Calorimeter hard scatter truth reconstruction
+    flags.addFlag("Digitization.EnableCaloHSTruthRecoInputs", False)
     # Use high-gain Forward Calorimeters
     flags.addFlag("Digitization.HighGainFCal", False)
     # Use high-gain ElectroMagnetic EndCap Inner Wheel

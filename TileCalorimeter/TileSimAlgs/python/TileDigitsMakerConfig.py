@@ -97,7 +97,7 @@ def TileDigitsMakerCfg(flags, **kwargs):
         kwargs.setdefault('TileDigitsContainer', 'TileDigitsCnt')
 
 
-    kwargs.setdefault('DoHSTruthReconstruction', flags.Digitization.DoHardScatterTruth)
+    kwargs.setdefault('DoHSTruthReconstruction', flags.Digitization.EnableCaloHSTruthRecoInputs)
     if kwargs['DoHSTruthReconstruction']:
         kwargs.setdefault('TileHitContainer_DigiHSTruth', 'TileHitCnt_DigiHSTruth')
         kwargs.setdefault('TileDigitsContainer_DigiHSTruth', 'TileDigitsCnt_DigiHSTruth')
