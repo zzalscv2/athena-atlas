@@ -2,7 +2,7 @@
 
 """Define methods to configure SCTLorentzAngleTool
 """
-from SiPropertiesTool.PixelSiPropertiesConfig import PixelSiPropertiesCfg
+from SiPropertiesTool.PixelSiPropertiesConfig import PixelSiPropertiesToolCfg
 from AthenaConfiguration.ComponentFactory import CompFactory
 from MagFieldServices.MagFieldServicesConfig import AtlasFieldCacheCondAlgCfg
 from PixelConditionsAlgorithms.PixelConditionsConfig import (
@@ -25,7 +25,7 @@ def PixelLorentzAngleCondAlgCfg(flags, name="PixelSiLorentzAngleCondAlg", **kwar
     acc.merge(PixelReadoutGeometryCfg(flags)) # To produce PixelDetectorElementCollection
     acc.merge(PixelDCSCondHVAlgCfg(flags))
     acc.merge(PixelDCSCondTempAlgCfg(flags))
-    kwargs.setdefault("SiPropertiesTool", acc.popToolsAndMerge(PixelSiPropertiesCfg(flags)))
+    kwargs.setdefault("SiPropertiesTool", acc.popToolsAndMerge(PixelSiPropertiesToolCfg(flags)))
     kwargs.setdefault("UseMagFieldCache", True)
     kwargs.setdefault("UseMagFieldDcs", not flags.Common.isOnline)
     acc.addCondAlgo(CompFactory.PixelSiLorentzAngleCondAlg(name, **kwargs))

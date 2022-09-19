@@ -96,31 +96,11 @@ def ITkPixelChargeCalibCondAlgCfg(flags, name="ITkPixelChargeCalibCondAlg", **kw
     acc.addCondAlgo(CompFactory.PixelChargeLUTCalibCondAlg(name, **kwargs))
     return acc
 
-def ITkPixelChargeLUTCalibCondAlgCfg(flags, name="ITkPixelChargeLUTCalibCondAlg", **kwargs):
-    """Return a ComponentAccumulator with configured PixelChargeLUTCalibCondAlg for ITk"""
-    acc = ComponentAccumulator()
-    acc.merge(ITkPixelModuleConfigCondAlgCfg(flags))
-    acc.merge(addFoldersSplitOnline(flags, "PIXEL", "/PIXEL/Onl/PixCalib", "/PIXEL/PixCalib", className="CondAttrListCollection"))
-    from PixelGeoModelXml.ITkPixelGeoModelConfig import ITkPixelReadoutGeometryCfg
-    acc.merge(ITkPixelReadoutGeometryCfg(flags))
-    kwargs.setdefault("PixelDetEleCollKey", "ITkPixelDetectorElementCollection")
-    kwargs.setdefault("PixelModuleData", "ITkPixelModuleData")
-    kwargs.setdefault("ReadKey", "/PIXEL/ChargeCalibration")
-    kwargs.setdefault("WriteKey", "ITkPixelChargeCalibCondData")
-    acc.addCondAlgo(CompFactory.PixelChargeLUTCalibCondAlg(name, **kwargs))
-    return acc
-
 def ITkPixelDCSCondHVAlgCfg(flags, name="ITkPixelDCSCondHVAlg", **kwargs):
     """Return a ComponentAccumulator with configured PixelDCSCondHVAlg for ITk"""
     acc = ComponentAccumulator()
     acc.merge(ITkPixelModuleConfigCondAlgCfg(flags))
-    if flags.Common.isOnline:
-        kwargs.update( ReadKey="/PIXEL/HLT/DCS/HV")
-        acc.merge(addFolders(flags, kwargs["ReadKey"], "PIXEL_ONL", className="CondAttrListCollection"))
-    else:
-        # kwargs.update( ReadKey="/PIXEL/DCS/HV")
-        # acc.merge(addFolders(flags, kwargs["ReadKey"], "DCS_OFL", className="CondAttrListCollection"))
-        kwargs.update(ReadKey="")  # disable for ITk for now
+    kwargs.setdefault("ReadKey", "")  # disable for ITk for now
     kwargs.setdefault("PixelModuleData", "ITkPixelModuleData")
     kwargs.setdefault("WriteKey", "ITkPixelDCSHVCondData")
     acc.addCondAlgo(CompFactory.PixelDCSCondHVAlg(name, **kwargs))
@@ -146,12 +126,7 @@ def ITkPixelDCSCondTempAlgCfg(flags, name="ITkPixelDCSCondTempAlg", **kwargs):
     """Return a ComponentAccumulator with configured PixelDCSCondTempAlg for ITk"""
     acc = ComponentAccumulator()
     acc.merge(ITkPixelModuleConfigCondAlgCfg(flags))
-    if flags.Common.isOnline:
-        kwargs.setdefault("ReadKey", "/PIXEL/HLT/DCS/TEMPERATURE")
-        acc.merge(addFolders(flags, kwargs["ReadKey"], "PIXEL_ONL", className="CondAttrListCollection"))
-    else:
-        kwargs.setdefault("ReadKey", "/PIXEL/DCS/TEMPERATURE")
-        acc.merge(addFolders(flags, kwargs["ReadKey"], "DCS_OFL", className="CondAttrListCollection"))
+    kwargs.setdefault("ReadKey", "")  # disable for ITk for now
     kwargs.setdefault("PixelModuleData", "ITkPixelModuleData")
     kwargs.setdefault("WriteKey", "ITkPixelDCSTempCondData")
     acc.addCondAlgo(CompFactory.PixelDCSCondTempAlg(name, **kwargs))
