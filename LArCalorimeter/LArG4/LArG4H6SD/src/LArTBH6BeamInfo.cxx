@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2019 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "LArTBH6BeamInfo.h"
@@ -77,7 +77,7 @@ StatusCode LArTBH6BeamInfo::execute()
 
       ATH_MSG_INFO (" hit container: "<< it->Name() <<" size: "<<it->size() );
 
-      for (const auto &hit : *it){
+      for (const LArG4H6FrontHit* hit : *it){
           // loop over hits, find track==0 and make a fit, store a TBTrack to StoreGate
           if(hit->GetSC() > 0) continue; // scintilator hit
           if(m_Primary) {

@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2017 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "LArTBH6TriggerTimeTool.h"
@@ -71,7 +71,7 @@ double LArTBH6TriggerTimeTool::larTime(){
 
   for(auto &it : m_hitcoll){
 
-    for(const auto &hit : *it){
+    for(const LArHit* hit : *it){
       e += hit->energy();
       te += hit->energy() * hit->time() ;
       ++n;
