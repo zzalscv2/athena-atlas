@@ -2,11 +2,11 @@
   Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
 */
 
-/* 
- * Updates: 
- * - 2022 Jan, Riccardo Maria BIANCHI <riccardo.maria.bianchi@cern.ch>  
- *   Added support to input data from SQLite, for the DetectorFactoryLite for Run4 
- */  
+/*
+ * Updates:
+ * - 2022 Jan, Riccardo Maria BIANCHI <riccardo.maria.bianchi@cern.ch>
+ *   Added support to input data from SQLite, for the DetectorFactoryLite for Run4
+ */
 
 #ifndef TileDddbManager_H
 #define TileDddbManager_H
@@ -20,23 +20,23 @@ class IRDBRecord;
 class MsgStream;
 
 /**
-  This class provides access to constants in the Geometry DB.
-  We have following tables:
-  @see TILE     
-  @see GLOBALS  
-  @see MODULES  Modules
-  @see TILB     Modules     
-  @see SCNT     Scintillator
-  @see TIGR     Girder     
-  @see TIFG     Finger
-  @see CUTS     Extended Barrel cutouts
-  @see TICG     
+   This class provides access to constants in the Geometry DB.
+   We have following tables:
+   @see TILE
+   @see GLOBALS
+   @see MODULES  Modules
+   @see TILB     Modules
+   @see SCNT     Scintillator
+   @see TIGR     Girder
+   @see TIFG     Finger
+   @see CUTS     Extended Barrel cutouts
+   @see TICG
 */
 
 class TileDddbManager
-  : public AthMessaging
+    : public AthMessaging
 {
- public:
+public:
   enum TileSections
   {
     TILE_BARREL=1,
@@ -48,15 +48,15 @@ class TileDddbManager
   };
 
   TileDddbManager(IRDBAccessSvc* access,
-          const std::string&    version_tag,
-          const std::string&    version_node,
-          bool sqliteInput = false);
+                  const std::string&    version_tag,
+                  const std::string&    version_node,
+                  bool sqliteInput = false);
 
   TileDddbManager (const TileDddbManager&) = delete;
   TileDddbManager& operator= (const TileDddbManager&) = delete;
 
   virtual ~TileDddbManager() {}
-    
+
   // ---------------- T I L E ---------------
   //fields of TILE structure
   int TILEnmodul() const;
@@ -111,9 +111,9 @@ class TileDddbManager
   int SetCurrentSection(unsigned int section, bool print=true);
 
   //fields of TILB structure
-  int TILBsection() const;
-  int TILBnperiod() const;
-  int TILBnmodul() const;
+  int    TILBsection() const;
+  int    TILBnperiod() const;
+  int    TILBnmodul() const;
   double TILBrmin() const;
   double TILBrmax() const;
   double TILBrminimal() const;
@@ -131,12 +131,12 @@ class TileDddbManager
   double TILBdzspac() const;
   double TILBdzend1() const;
   double TILBdzend2() const;
-  int TILBngirder() const;
-  int TILBnscin() const;
-  int TILBfingpattern() const;
-  int TILBnpercutpos() const;
-  int TILBnpercutneg() const;
-  int TILBcurscint() const;
+  int    TILBngirder() const;
+  int    TILBnscin() const;
+  int    TILBfingpattern() const;
+  int    TILBnpercutpos() const;
+  int    TILBnpercutneg() const;
+  int    TILBcurscint() const;
   double TILBdzgir() const;
 
 
@@ -145,11 +145,11 @@ class TileDddbManager
 
   /** Fields of SCNT structure (see also Oracle comments):
       @param SCNTitem  Scintillator number:1-bar,2-ext,3-ITC1(7,8 special ITC),4-ITC2,5-Gap,6-Crack
-      @param SCNTdr    Dimension along R  
+      @param SCNTdr    Dimension along R
       @param SCNTrc    R position with respect to the lower edge of module
       @param SCNTzp    Z position
       @param SCNTdrw   Radial space for wrapping
-      @param SCNTdt    Scintillator thickness in Z 
+      @param SCNTdt    Scintillator thickness in Z
       @param SCNTdtw   Wrapping thickness in Z
       @param SCNTdphi  Distance between scintillator and absorber edge in Phi
   */
@@ -165,7 +165,7 @@ class TileDddbManager
   // -------- Extended Barrel Cuts ----------
   /** Fields of CUTS structure (see also Oracle comments):
       @param CUTSName  Cuts volume name
-      @param CutsDX1   TRD shape, dX1/2  
+      @param CutsDX1   TRD shape, dX1/2
       @param CutsDX2   TRD shape, dX2/2
       @param CutsDY1   TRD shape, dY1/2
       @param CutsDY2   TRD shape, dY2/2
@@ -187,7 +187,7 @@ class TileDddbManager
 
   // ------------- S a d d l e  -----------------
   /** Fields of SADDLE structure (see also Oracle comments):
-      @param DzSaddleSupport  Width of Saddle Support [cm]  
+      @param DzSaddleSupport  Width of Saddle Support [cm]
       @param RadiusSaddle     Radius of Saddle Support [cm]
   */
 
@@ -231,14 +231,14 @@ class TileDddbManager
   double TICGzc() const;
 
   // -------------- T I C L --------------------
-  unsigned int GetNumTicl() const; 
+  unsigned int GetNumTicl() const;
 
   int SetCurrentTicl(int detector, double sample, double tower);
   int SetCurrentTicl(unsigned int index);
 
   // Find first TICL for given detector
   // 1 - success; 0 - doesn't exist any TICL for given detector
-  int SetFirstTiclInDet(int detector);   
+  int SetFirstTiclInDet(int detector);
 
   // Find first TICL for given detector and sample
   // 1 - success; 0 - doesn't exist any such TICL
@@ -274,7 +274,7 @@ class TileDddbManager
   int steel()           const { return getSwitch("STEEL",0); }
   int csTube()          const { return getSwitch("CSTUBE",0); }
 
- private:
+private:
 
   IRDBRecordset_ptr m_tiglob;
   IRDBRecordset_ptr m_timod;
@@ -287,8 +287,8 @@ class TileDddbManager
   IRDBRecordset_ptr m_ticl;
   IRDBRecordset_ptr m_cuts;
   IRDBRecordset_ptr m_saddle;
-  IRDBRecordset_ptr m_tileSwitches; 
- 
+  IRDBRecordset_ptr m_tileSwitches;
+
 
   unsigned int m_n_tiglob;
   unsigned int m_n_timod;
@@ -304,7 +304,7 @@ class TileDddbManager
   unsigned int m_n_cuts;
   unsigned int m_n_saddle;
   unsigned int m_n_tileSwitches;
- 
+
   const IRDBRecord* m_currentTileGlob;
   const IRDBRecord* m_currentTileMod;
   const IRDBRecord* m_currentSection;
