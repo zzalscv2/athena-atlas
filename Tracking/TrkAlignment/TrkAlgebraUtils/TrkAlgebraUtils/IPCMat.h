@@ -41,6 +41,9 @@ class IPCMat {
   IPCMat(IMessageSvc *msgSvc);
   ~IPCMat(){}
 
+  IPCMat(const IPCMat&) = delete;
+  IPCMat& operator= (const IPCMat&) = delete;
+
   StatusCode init(void);
   StatusCode allocate(int);
   StatusCode write(const std::string&,bool);

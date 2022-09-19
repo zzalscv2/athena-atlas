@@ -59,7 +59,7 @@ class AlSpaMat : public AlSymMatBase {
     virtual  void SetPathBin(const std::string&) override final;
     virtual  void SetPathTxt(const std::string&) override final;
     virtual  StatusCode Write(const std::string&, bool, bool, double, float) override final;
-    virtual  StatusCode CheckMatVersion(const std::string, bool&) override final;
+    virtual  StatusCode CheckMatVersion(const std::string&, bool&) override final;
     virtual  StatusCode Read(const std::string&, int&, bool&, float&) override final;
     virtual  StatusCode ReadProjected(const std::string&, int&, bool&, float&) override final;
     virtual  int invert() override final;
