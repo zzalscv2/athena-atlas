@@ -1,9 +1,9 @@
 /*
-  Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
 */
 
-#ifndef GEOPIXELSTAVERINGSERVICES_H
-#define GEOPIXELSTAVERINGSERVICES_H
+#ifndef PIXELGEOMODEL_GEOPIXELSTAVERINGSERVICES_H
+#define PIXELGEOMODEL_GEOPIXELSTAVERINGSERVICES_H
 
 #include "GeoVPixelFactory.h"
 
@@ -19,9 +19,11 @@ class GeoPixelStaveRingServices :  public GeoVPixelFactory {
 
 public:  
 
-  GeoPixelStaveRingServices(InDetDD::PixelDetectorManager* ddmgr,
-                            PixelGeometryManager* mgr, GeoModelIO::ReadGeoModel* sqliteReader,
-                            GeoPixelLadder& ladder, GeoPixelStaveSupport& staveSupport);
+  GeoPixelStaveRingServices(InDetDD::PixelDetectorManager* ddmgr
+			    , PixelGeometryManager* mgr
+			    , GeoModelIO::ReadGeoModel* sqliteReader
+			    , GeoPixelLadder& ladder
+			    , GeoPixelStaveSupport& staveSupport);
   virtual GeoVPhysVol* Build() override;
 
   GeoPhysVol* getSupportA(){ return m_supportPhysA; }

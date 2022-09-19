@@ -112,6 +112,20 @@ GeoVPhysVol* GeoPixelLayer::Build() {
   m_DDmgr->numerology().setNumPhiModulesForLayer(m_gmt_mgr->GetLD(),nSectors);
   m_DDmgr->numerology().setNumEtaModulesForLayer(m_gmt_mgr->GetLD(),m_gmt_mgr->PixelNModule());
 
+  if(m_sqliteReader) {
+    bool bAddIBLStaveRings=(m_gmt_mgr->GetLD()==0&&m_gmt_mgr->ibl()&&m_gmt_mgr->PixelStaveLayout()>3&&m_gmt_mgr->PixelStaveLayout()<8);
+    for(int ii = 0; ii < nSectors; ii++) {
+      m_gmt_mgr->SetPhi(ii);
+      pixelLadder.Build();
+    }
+    if(bAddIBLStaveRings) {
+      m_gmt_mgr->msg(MSG::INFO) << "IBL stave ring support"<< endmsg;
+      GeoPixelStaveRingServices staveRingService(m_DDmgr, m_gmt_mgr, m_sqliteReader, pixelLadder, *staveSupport);
+      staveRingService.Build();
+    }
+    return nullptr;
+  }
+
   //
   // Calculate layerThicknessN: Thickness from layer radius to min radius of envelope
   // Calculate layerThicknessP: Thickness from layer radius to max radius of envelope

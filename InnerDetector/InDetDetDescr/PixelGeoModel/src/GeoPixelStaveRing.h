@@ -1,9 +1,9 @@
 /*
-  Copyright (C) 2002-2020 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
 */
 
-#ifndef GEOPIXELSTAVERING_H
-#define GEOPIXELSTAVERING_H
+#ifndef PIXELGEOMODEL_GEOPIXELSTAVERING_H
+#define PIXELGEOMODEL_GEOPIXELSTAVERING_H
 
 #include "GeoVPixelFactory.h"
 

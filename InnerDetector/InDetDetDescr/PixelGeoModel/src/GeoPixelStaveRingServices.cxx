@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
 */
 
 
@@ -24,15 +24,21 @@
 #include <algorithm>
 using std::max;
 
-GeoPixelStaveRingServices::GeoPixelStaveRingServices(InDetDD::PixelDetectorManager* ddmgr,
-                                                     PixelGeometryManager* mgr, GeoModelIO::ReadGeoModel* sqliteReader,
-                                                     GeoPixelLadder& ladder, GeoPixelStaveSupport& staveSupport):
-  GeoVPixelFactory (ddmgr, mgr, sqliteReader),
-  m_ladder(ladder),m_staveSupport(staveSupport),
-  m_supportPhysA(nullptr),m_supportPhysC(nullptr),m_supportMidRing(nullptr),
-  m_xformSupportA(nullptr), m_xformSupportC(nullptr), m_xformSupportMidRing(nullptr)
+GeoPixelStaveRingServices::GeoPixelStaveRingServices(InDetDD::PixelDetectorManager* ddmgr
+						     , PixelGeometryManager* mgr
+						     , GeoModelIO::ReadGeoModel* sqliteReader
+						     , GeoPixelLadder& ladder
+						     , GeoPixelStaveSupport& staveSupport)
+  : GeoVPixelFactory (ddmgr, mgr, sqliteReader)
+  , m_ladder(ladder)
+  , m_staveSupport(staveSupport)
+  , m_supportPhysA(nullptr)
+  , m_supportPhysC(nullptr)
+  , m_supportMidRing(nullptr)
+  , m_xformSupportA(nullptr)
+  , m_xformSupportC(nullptr)
+  , m_xformSupportMidRing(nullptr)
 {
-
 }
 
 GeoVPhysVol* GeoPixelStaveRingServices::Build()
@@ -40,6 +46,12 @@ GeoVPhysVol* GeoPixelStaveRingServices::Build()
 
   m_gmt_mgr->msg(MSG::INFO) <<"Build IBL stave ring services"<<endmsg;
 
+  if(m_sqliteReader) {
+    GeoPixelStaveRing staveRing (m_DDmgr, m_gmt_mgr, m_sqliteReader);
+    staveRing.SetParametersAndBuild("Brl0A_StaveRing","AC");
+    staveRing.SetParametersAndBuild("Brl0C_StaveRing","AC");
+    return nullptr;
+  }
 
   double layerRadius = m_gmt_mgr->PixelLayerRadius();
   double ladderTilt   = m_gmt_mgr->PixelLadderTilt();

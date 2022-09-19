@@ -1,9 +1,9 @@
 /*
-  Copyright (C) 2002-2020 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
 */
 
-#ifndef GEOPIXELENVELOPE_H
-#define GEOPIXELENVELOPE_H
+#ifndef PIXELGEOMODEL_GEOPIXELENVELOPE_H
+#define PIXELGEOMODEL_GEOPIXELENVELOPE_H
 
 #include "GeoVPixelFactory.h"
 

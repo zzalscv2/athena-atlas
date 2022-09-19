@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
 */
 
 // Build detailed stave support : face plate + carbon foam + cable flex + cooling pipe + end blocks
@@ -55,6 +55,7 @@ GeoVPhysVol* GeoPixelStaveRing::Build(){
   if(m_gmt_mgr->GetLD() == 0) isBLayer = true;
   GeoPixelSiCrystal theSensor(m_DDmgr, m_gmt_mgr, m_sqliteReader, isBLayer);
   GeoPixelModule pm(m_DDmgr, m_gmt_mgr, m_sqliteReader, theSensor);
+  if(m_sqliteReader) return nullptr;
   // Ladder geometry
 
   double endBlockFixingPoint= m_gmt_mgr->IBLStaveMechanicalStaveEndBlockFixPoint();

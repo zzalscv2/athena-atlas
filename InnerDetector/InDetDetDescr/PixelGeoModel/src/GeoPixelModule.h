@@ -1,9 +1,9 @@
 /*
-  Copyright (C) 2002-2020 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
 */
 
-#ifndef GEOPIXELMODULE_H
-#define GEOPIXELMODULE_H
+#ifndef PIXELGEOMODEL_GEOPIXELMODULE_H
+#define PIXELGEOMODEL_GEOPIXELMODULE_H
 #include "Identifier/Identifier.h"
 #include "GeoVPixelFactory.h"
 class GeoLogVol;
@@ -34,14 +34,14 @@ class GeoPixelModule : public GeoVPixelFactory {
 
   const GeoShape*  addShape(const GeoShape * lastShape, const GeoShape * nextShape, const GeoTrf::Transform3D & trans);
 
-  const GeoLogVol* m_theModule;
+  const GeoLogVol* m_theModule{nullptr};
   Identifier m_id;
   GeoPixelSiCrystal& m_theSensor;
-  bool m_isModule3D;
+  bool m_isModule3D{false};
 
-  double m_moduleSvcThickness;
-  double m_moduleSvcWidth;
-  int m_nbModuleSvc;
+  double m_moduleSvcThickness{0.};
+  double m_moduleSvcWidth{0.};
+  int m_nbModuleSvc{0};
 
 };
 

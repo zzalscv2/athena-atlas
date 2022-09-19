@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "GeoPixelLadder.h"
@@ -25,15 +25,15 @@
 
 using std::max;
 
-GeoPixelLadder::GeoPixelLadder(InDetDD::PixelDetectorManager* m_DDmgr,
-                               PixelGeometryManager* mgr,
-			       GeoModelIO::ReadGeoModel* sqliteReader,
-                               GeoPixelSiCrystal& theSensor,
-			       GeoPixelStaveSupport* staveSupport) :
-  GeoVPixelFactory (m_DDmgr, mgr, sqliteReader),
-  m_theLadder(nullptr),
-  m_theSensor(theSensor),
-  m_staveSupport(staveSupport)
+GeoPixelLadder::GeoPixelLadder(InDetDD::PixelDetectorManager* m_DDmgr
+                               , PixelGeometryManager* mgr
+			       , GeoModelIO::ReadGeoModel* sqliteReader
+                               , GeoPixelSiCrystal& theSensor
+			       , GeoPixelStaveSupport* staveSupport)
+  : GeoVPixelFactory (m_DDmgr, mgr, sqliteReader)
+  , m_theLadder(nullptr)
+  , m_theSensor(theSensor)
+  , m_staveSupport(staveSupport)
 {
   //
   // Define the log volume in the constructor, so I do it only once.
@@ -68,64 +68,66 @@ GeoPixelLadder::GeoPixelLadder(InDetDD::PixelDetectorManager* m_DDmgr,
     m_thicknessP = std::max(m_thicknessP,m_thicknessN); 
     m_thicknessN = m_thicknessP;
     double halfThickness = m_thicknessP;
-    ladderShape = new GeoBox(halfThickness, m_width/2., length/2.);
+    if(!m_sqliteReader) {
+      ladderShape = new GeoBox(halfThickness, m_width/2., length/2.);
+    }
   } 
-  else if (m_gmt_mgr->PixelBentStaveNModule() != 0)
-    {
-      // Calculate thickness from bent stave part
-      double angle              = m_gmt_mgr->PixelLadderBentStaveAngle() * Gaudi::Units::pi / 180.0;
-      double BentStaveThickness = double(m_gmt_mgr->PixelBentStaveNModule()) * m_gmt_mgr->PixelLadderModuleDeltaZ() * sin(angle);
+  else if (m_gmt_mgr->PixelBentStaveNModule() != 0) {
+    // Calculate thickness from bent stave part
+    double angle              = m_gmt_mgr->PixelLadderBentStaveAngle() * Gaudi::Units::pi / 180.0;
+    double BentStaveThickness = double(m_gmt_mgr->PixelBentStaveNModule()) * m_gmt_mgr->PixelLadderModuleDeltaZ() * sin(angle);
       
-      // Extend +ve or -ve ladder thickness according to stave angle
-      if (angle < 0) m_thicknessP += BentStaveThickness;
-      if (angle > 0) m_thicknessN += BentStaveThickness;
+    // Extend +ve or -ve ladder thickness according to stave angle
+    if (angle < 0) m_thicknessP += BentStaveThickness;
+    if (angle > 0) m_thicknessN += BentStaveThickness;
       
-      //    std::cout << "NPR:: m_thicknessP = " << m_thicknessP << std::endl;
-      //    std::cout << "NPR:: m_thicknessN = " << m_thicknessN << std::endl;
-      //    std::cout << "NPR:: shift        = " << -0.5*BentStaveThickness << std::endl;
-      //    std::cout << "NPR:: an gle       = " << angle << std::endl;
-      
+    if(!m_sqliteReader) {
       // Create stave and apply shift to the ladder.
       GeoBox * box = new GeoBox((m_thicknessP+m_thicknessN)/2., m_width/2., length/2.);
-      
+	
       // Shift ladder outwards if stave bends away from beam pipe
       double shift = 0.5*BentStaveThickness;
       if (angle > 0) shift *= -1.0;
       const GeoShape & shiftedBox = (*box) << GeoTrf::TranslateX3D(shift);
-      ladderShape = &shiftedBox; 
+      ladderShape = &shiftedBox;
     }
-  else if (!(m_gmt_mgr->PixelStaveLayout()>3&& m_gmt_mgr->PixelStaveLayout()<7)){
+  }
+  else if (!(m_gmt_mgr->PixelStaveLayout()>3&& m_gmt_mgr->PixelStaveLayout()<7)) {
     double halfThickness = 0.5*(m_thicknessP+m_thicknessN);
     double shift = 0.5*(m_thicknessP-m_thicknessN);
-    GeoBox * box = new GeoBox(halfThickness, m_width/2., length/2.);
-    const GeoShape & shiftedBox = (*box) << GeoTrf::TranslateX3D(shift);
-    ladderShape = &shiftedBox;  
+    if(!m_sqliteReader) {
+      GeoBox * box = new GeoBox(halfThickness, m_width/2., length/2.);
+      const GeoShape & shiftedBox = (*box) << GeoTrf::TranslateX3D(shift);
+      ladderShape = &shiftedBox;
+    }  
   }
-  else if(m_staveSupport) 
-    {
+  else if(m_staveSupport) {
+    if(!m_sqliteReader) {
       GeoSimplePolygonBrep* staveSupportShape=m_staveSupport->computeStaveEnvelopShape(safety);
       const GeoShape & staveShape = (*staveSupportShape);
-      ladderShape = &staveShape;  
-    }
-  else
-    {
-      m_gmt_mgr->msg(MSG::ERROR)<<"No ladder shape could be defined "<<endmsg;      
-    }
+      ladderShape = &staveShape;
+    }  
+  }
+  else {
+    m_gmt_mgr->msg(MSG::ERROR)<<"No ladder shape could be defined "<<endmsg;      
+  }
 
-  if(not ladderShape)
-  { 
-     m_gmt_mgr->msg(MSG::ERROR)<<"No ladder shape could be defined in "<<__FILE__<<endmsg;
-     std::abort();
-  } else {
-    const GeoMaterial* air = m_mat_mgr->getMaterial("std::Air");
-    m_theLadder = new GeoLogVol("Ladder",ladderShape,air);
-    m_theLadder->ref();
+  if(!m_sqliteReader) {
+    if(not ladderShape) {
+      m_gmt_mgr->msg(MSG::ERROR)<<"No ladder shape could be defined in "<<__FILE__<<endmsg;
+      std::abort();
+    } 
+    else {
+      const GeoMaterial* air = m_mat_mgr->getMaterial("std::Air");
+      m_theLadder = new GeoLogVol("Ladder",ladderShape,air);
+      m_theLadder->ref();
+    }
   }
   m_thickness = 2*std::max(m_thicknessN,m_thicknessP);
 }
 
-GeoPixelLadder::~GeoPixelLadder(){
-  m_theLadder->unref();
+GeoPixelLadder::~GeoPixelLadder() {
+  if(m_theLadder) m_theLadder->unref();
 }
 
 
@@ -159,11 +161,15 @@ GeoPixelLadder::~GeoPixelLadder(){
 
 GeoVPhysVol* GeoPixelLadder::Build( ) {
 
-  // Something went wrong while building the ladder logical volume 
-  if(!m_theLadder) return nullptr;
+  std::map<std::string, GeoFullPhysVol*>        mapFPV;
+  std::map<std::string, GeoAlignableTransform*> mapAX;
+  if(m_sqliteReader) {
+    mapFPV = m_sqliteReader->getPublishedNodes<std::string, GeoFullPhysVol*>("Pixel");
+    mapAX  = m_sqliteReader->getPublishedNodes<std::string, GeoAlignableTransform*>("Pixel");
+  }
 
-  // Create the ladder physVolume
-  GeoPhysVol* ladderPhys = new GeoPhysVol(m_theLadder);
+ // Create the ladder physVolume
+  GeoPhysVol* ladderPhys = m_sqliteReader==nullptr ? new GeoPhysVol(m_theLadder) : nullptr;
   //
   // Place the Modules
   //
@@ -324,7 +330,7 @@ GeoVPhysVol* GeoPixelLadder::Build( ) {
 	  }
       }
 
-    
+  
     GeoTrf::Translation3D modulepos(xpos+xposShift,yposShift,zpos);
 //
 //  Rotate if module is inclined.
@@ -333,41 +339,48 @@ GeoVPhysVol* GeoPixelLadder::Build( ) {
 //
 // Place the Module
 //
-    GeoVPhysVol* modulephys; // = pm.Build() ;
+    GeoVPhysVol* modulephys{nullptr}; // = pm.Build() ;
 
     if(!b3DModule)
       modulephys = pm.Build();
     else
       modulephys = pm3D.Build();
 
-    std::ostringstream nameTag; 
-    nameTag << "ModuleBrl" << m_gmt_mgr->Eta();
-    GeoNameTag * tag = new GeoNameTag(nameTag.str());
-    GeoAlignableTransform* xform;
-
-    xform = new GeoAlignableTransform(GeoTrf::Transform3D(modulepos*rm));
-    ladderPhys->add(tag);
-    ladderPhys->add(new GeoIdentifierTag(m_gmt_mgr->Eta() ) );
-    ladderPhys->add(xform);
-    ladderPhys->add(modulephys );
-
-    // Now store the xform by identifier:
-    Identifier id;
-    if(!b3DModule)  id = m_theSensor.getID();
-    else id = theSensor3D.getID();
-    m_DDmgr->addAlignableTransform(0,id,xform,modulephys);
-    
+    if(m_sqliteReader) {
+      std::string key="ModuleBrl_"+std::to_string(m_gmt_mgr->GetLD())+"_"+std::to_string(m_gmt_mgr->Phi())+"_"+std::to_string(m_gmt_mgr->Eta());
+      Identifier id;
+      if(!b3DModule)  id = m_theSensor.getID();
+      else id = theSensor3D.getID();
+      m_DDmgr->addAlignableTransform(0,id,mapAX[key],mapFPV[key]);
+    }
+    else {
+      std::ostringstream nameTag; 
+      nameTag << "ModuleBrl" << m_gmt_mgr->Eta();
+      GeoNameTag * tag = new GeoNameTag(nameTag.str());
+      GeoAlignableTransform* xform;
+      
+      xform = new GeoAlignableTransform(GeoTrf::Transform3D(modulepos*rm));
+      ladderPhys->add(tag);
+      ladderPhys->add(new GeoIdentifierTag(m_gmt_mgr->Eta() ) );
+      ladderPhys->add(xform);
+      ladderPhys->add(modulephys );
+      
+      // Now store the xform by identifier:
+      Identifier id;
+      if(!b3DModule)  id = m_theSensor.getID();
+      else id = theSensor3D.getID();
+      m_DDmgr->addAlignableTransform(0,id,xform,modulephys);
+    }
   }
   //Add the TMT or other stave support
-  if (m_staveSupport) {
+  if (!m_sqliteReader && m_staveSupport) {
     ladderPhys->add(new GeoTransform(m_staveSupport->transform()));
     ladderPhys->add(m_staveSupport->getPhysVol()); 
   }
 
   
-  if (m_gmt_mgr->PixelBentStaveNModule() != 0)
+  if (!m_sqliteReader && m_gmt_mgr->PixelBentStaveNModule() != 0)
     {
-      std::cout << "SB: Adding bent stave support" << std::endl;
       double thickness = m_gmt_mgr->PixelLadderSupportThickness();
       double width     = m_gmt_mgr->PixelLadderSupportWidth();
       double length    = m_gmt_mgr->PixelLadderSupportLength();
