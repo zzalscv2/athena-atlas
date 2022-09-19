@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2017 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
 */
 
 /**
@@ -9,12 +9,12 @@
  *
  * @author Gia Khoriauli <Gia.Khoriauli@cern.ch>
  *
- * $Id: TileTBFactory.h,v 1.6 2007-11-05 15:45:18 baranov Exp $
  */
 
 #ifndef TileTBFactory_h
 #define TileTBFactory_h 1
 
+#include "CxxUtils/checker_macros.h"
 #include "GeoModelKernel/GeoVDetectorFactory.h"
 #include "TileDetDescr/TileDetDescrManager.h"
 #include "TileGeoModel/TileSwitches.h"
@@ -23,7 +23,8 @@ class MsgStream;
 class StoreGateSvc;
 
 
-class TileTBFactory : public GeoVDetectorFactory
+class ATLAS_NOT_THREAD_SAFE TileTBFactory : public GeoVDetectorFactory
+//    ^ modifies cabling during create
 {
 public:
   
@@ -35,10 +36,10 @@ public:
   ~TileTBFactory();
   
   /** Creation of Test Beam Tile geometry */
-  virtual void create(GeoPhysVol *world);
+  virtual void create(GeoPhysVol *world) override;
   
   /** Access function to TileDetDescr geometry data */
-  virtual const TileDetDescrManager * getDetectorManager() const { return m_detectorManager; }
+  virtual const TileDetDescrManager * getDetectorManager() const override { return m_detectorManager; }
 
 private:  
   
