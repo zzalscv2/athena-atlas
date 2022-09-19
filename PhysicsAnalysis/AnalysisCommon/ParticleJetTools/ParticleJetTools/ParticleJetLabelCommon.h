@@ -38,7 +38,6 @@ namespace ParticleJetTools {
                   const std::vector<const xAOD::TruthParticle*>&);
   private:
     using IPLV = std::vector<ElementLink<xAOD::IParticleContainer>>;
-    SG::sgkey_t m_key;
     SG::AuxElement::Decorator<IPLV> m_dec;
   };
 

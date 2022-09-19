@@ -102,10 +102,11 @@ namespace ParticleJetTools {
   }
 
 
+  // key might be added back if we figure out how to get the store
+  // gate key from a read handle in analysis base
   IParticleLinker::IParticleLinker(
-    const SG::ReadHandleKey<xAOD::TruthParticleContainer>& key,
+    const SG::ReadHandleKey<xAOD::TruthParticleContainer>& /* key */,
     const std::string& linkname):
-    m_key(key.hashedKey()),
     m_dec(linkname)
   {
   }
@@ -115,7 +116,15 @@ namespace ParticleJetTools {
   {
     IPLV links;
     for (const xAOD::TruthParticle* ip: ipv) {
-      links.emplace_back(m_key, ip->index());
+      // I copied this whole song and dance from setAssociatedObjects
+      // in the jet edm. It would be much easier if we could store the
+      // container hash in this object and use ElementLink(sgkey,
+      // index) but that seems to break in AnalysisBase
+      IPLV::value_type link;
+      const auto* ipc = dynamic_cast<const xAOD::IParticleContainer*>(
+        ip->container());
+      link.toIndexedElement(*ipc, ip->index());
+      links.push_back(link);
     }
     m_dec(jet) = links;
   }
