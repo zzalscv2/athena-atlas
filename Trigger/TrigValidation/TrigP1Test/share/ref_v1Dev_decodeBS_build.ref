@@ -210,9 +210,13 @@ HLT_2j120_mb_afprec_afpdijet_L1AFP_A_AND_C_TOF_J50:
   eventCount: 0
 HLT_2j120_mb_afprec_afpdijet_L1AFP_A_AND_C_TOF_jJ90:
   eventCount: 0
+HLT_2j120_mb_afprec_afpdijet_L1J100:
+  eventCount: 0
 HLT_2j175_mb_afprec_afpdijet_L1AFP_A_AND_C_TOF_J75:
   eventCount: 0
 HLT_2j175_mb_afprec_afpdijet_L1AFP_A_AND_C_TOF_jJ125:
+  eventCount: 0
+HLT_2j175_mb_afprec_afpdijet_L1J100:
   eventCount: 0
 HLT_2j20_2j20_0eta290_boffperf_pf_ftf_presel2c20XX2c20b85_PhysicsTLA_L1J45p0ETA21_3J15p0ETA25:
   eventCount: 0
