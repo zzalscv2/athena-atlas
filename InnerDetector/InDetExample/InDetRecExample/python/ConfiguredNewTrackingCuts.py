@@ -51,6 +51,7 @@ class ConfiguredNewTrackingCuts :
     self.__maxSctHoles             = 2                # was 5
     self.__maxDoubleHoles          = 1                # was 2
     self.__maxPrimaryImpact        = 10.0 * Units.mm  # low lumi
+    self.__maxEMImpact             = 50.0 * Units.mm  # Ambiguity solver default
     self.__maxZImpact              = 320. * Units.mm  # Was 250 mm
 
     # --- this is for the TRT-extension
@@ -310,6 +311,7 @@ class ConfiguredNewTrackingCuts :
       self.__minPT              = 900 * Units.MeV
       self.__maxEta             = 5
       self.__maxPrimaryImpact   = 300.0 * Units.mm
+      self.__maxEMImpact        = 300.0 * Units.mm  # Ambiguity solver
       self.__maxZImpact         = 1500.0 * Units.mm
       self.__maxSecondaryImpact = 300.0 * Units.mm
       self.__minSecondaryPt     = 500.0 * Units.MeV
@@ -334,6 +336,7 @@ class ConfiguredNewTrackingCuts :
       self.__minPT              = 1.0 * Units.GeV                                                                                    
       self.__maxEta             = 3                                                                                                        
       self.__maxPrimaryImpact   = 300.0 * Units.mm
+      self.__maxEMImpact        = 300.0 * Units.mm  # Ambiguity solver
       self.__maxZImpact         = 500 * Units.mm    
       self.__maxSecondaryImpact = 300.0 * Units.mm  
       self.__minSecondaryPt     = 1000.0 * Units.MeV 
@@ -367,6 +370,7 @@ class ConfiguredNewTrackingCuts :
       self.__minPT              = 100 * Units.MeV
       self.__maxEta             = 5
       self.__maxPrimaryImpact   = 300.0 * Units.mm
+      self.__maxEMImpact        = 300.0 * Units.mm  # Ambiguity solver
       self.__maxZImpact         = 1500.0 * Units.mm
       self.__maxSecondaryImpact = 300.0 * Units.mm
       self.__minSecondaryPt     = 400.0 * Units.MeV
@@ -817,6 +821,9 @@ class ConfiguredNewTrackingCuts :
   def maxPrimaryImpact( self ) :
     return self.__maxPrimaryImpact
 
+  def maxEMImpact ( self ):
+    return self.__maxEMImpact
+
   def maxSecondaryImpact( self ) :
     return self.__maxSecondaryImpact
 
@@ -1031,6 +1038,7 @@ class ConfiguredNewTrackingCuts :
     print('* NewTracking cuts:')
     print('* -----------------')
     print('* max Rphi IP (primaries)     :  ', self.__maxPrimaryImpact, ' mm')
+    print('* max Rphi IP (EM)            :  ', self.__maxEMImpact, ' mm')
     print('* min number of clusters      :  ', self.__minClusters)
     print('* min number of pixel hits    :  ', self.__minPixel)
     print('* min number of NOT shared    :  ', self.__minSiNotShared)
