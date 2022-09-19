@@ -315,6 +315,7 @@ namespace Trk {
           bool m_solenoid = true;
           bool m_needgradient = false;
           bool m_newfield = true;
+          bool m_usegradient = false;
         };
 
       private:
@@ -322,38 +323,12 @@ namespace Trk {
         /////////////////////////////////////////////////////////////////////////////////
         // Private methods:
         /////////////////////////////////////////////////////////////////////////////////
-        /** Test quality Jacobian calculation */
-        void JacobianTest(const TrackParameters&,
-                          const Surface&,
-                          const MagneticFieldProperties&) const;
-
-        /** Internal RungeKutta propagation method for charge track parameters*/
-
-        std::unique_ptr<TrackParameters> propagateRungeKutta(
-          Cache& cache,
-          bool,
-          const TrackParameters&,
-          const Surface&,
-          const PropDirection,
-          const BoundaryCheck&,
-          const MagneticFieldProperties&,
-          double*,
-          bool returnCurv) const;
-
-        /** Internal RungeKutta propagation method */
-
-        bool propagateRungeKutta(Cache& cache,
-                                 bool,
-                                 PatternTrackParameters&,
-                                 const Surface&,
-                                 PatternTrackParameters&,
-                                 PropDirection,
-                                 const MagneticFieldProperties&,
-                                 double&) const;
-
         void getFieldCacheObject(Cache& cache, const EventContext& ctx) const;
 
+        /////////////////////////////////////////////////////////////////////////////////
         // Private data members:
+        /////////////////////////////////////////////////////////////////////////////////
+
         // Read handle for conditions object to get the field cache
         SG::ReadCondHandleKey<AtlasFieldCacheCondObj> m_fieldCondObjInputKey{
           this,
@@ -365,7 +340,7 @@ namespace Trk {
         double m_dlt;          // accuracy parameter
         double m_helixStep;    // max step whith helix model
         double m_straightStep; // max step whith srtaight line model
-        bool m_usegradient;    // use magnetif field gradient into the error
+        bool m_usegradient;    // use magnetig field gradient into the error
                                // propagation
     };
 
