@@ -30,10 +30,10 @@ ALFA_MDMultiple::ALFA_MDMultiple() :
 	m_iNU      = new std::vector<Int_t>();
 	m_iNV      = new std::vector<Int_t>();
 
-	for (int iLayer=0; iLayer<ALFALAYERSCNT*ALFAPLATESCNT; iLayer++)
+	for (auto & iLayer : m_iFibSel)
 	{
-		m_iFibSel[iLayer] = nullptr;
-		m_iFibSel[iLayer] = new std::vector<Int_t>();
+		iLayer = nullptr;
+		iLayer = new std::vector<Int_t>();
 	}
 
 	m_iTrackMatch[0] = nullptr;
@@ -146,9 +146,9 @@ ALFA_MDMultiple::~ALFA_MDMultiple()
 	if (m_iNU!=nullptr) {delete m_iNU; m_iNU=nullptr;}
 	if (m_iNV!=nullptr) {delete m_iNV; m_iNV=nullptr;}
 
-	for (int iLayer=0; iLayer<ALFALAYERSCNT*ALFAPLATESCNT; iLayer++)
+	for (auto & iLayer : m_iFibSel)
 	{
-		if (m_iFibSel[iLayer]!=nullptr) {delete m_iFibSel[iLayer]; m_iFibSel[iLayer]=nullptr;}
+		if (iLayer!=nullptr) {delete iLayer; iLayer=nullptr;}
 	}
 	if (m_iTrackMatch[0]!=nullptr) {delete m_iTrackMatch[0]; m_iTrackMatch[0]=nullptr;}
 	if (m_iTrackMatch[1]!=nullptr) {delete m_iTrackMatch[1]; m_iTrackMatch[1]=nullptr;}
@@ -246,9 +246,9 @@ StatusCode ALFA_MDMultiple::Execute(const std::list<MDHIT> &ListMDHits)
 				//Checking that the maximum was not already used
 				Bool_t MaxUsed=false;
 
-				for (UInt_t j=0; j<MaxTrackID.size(); j++)
+				for (int j : MaxTrackID)
 				{
-					if (i==MaxTrackID[j]) {MaxUsed = true; break;}
+					if (i==j) {MaxUsed = true; break;}
 				}
 
 				if (((Num_p[i]+Num_n[i])>iMaxSum) && (!MaxUsed))
@@ -264,18 +264,18 @@ StatusCode ALFA_MDMultiple::Execute(const std::list<MDHIT> &ListMDHits)
 //		std::cout << "MaxTrackID size = " << MaxTrackID.size() << std::endl;
 
 //		for (Int_t i=0; i<(Int_t)b_p.size();i++)
-		for (Int_t i=0; i<(Int_t)MaxTrackID.size();i++)
+		for (int i : MaxTrackID)
 		{
 //			std::cout << "   [" << i << "] = " << MaxTrackID[i] << std::endl;
 //			if (fabs((b_p[i]+b_n[i])/2.0) < 135.5)
 			{
-				m_fRecXPos->push_back((b_p[MaxTrackID[i]]-b_n[MaxTrackID[i]])/2.0);
-				m_fRecYPos->push_back((b_p[MaxTrackID[i]]+b_n[MaxTrackID[i]])/2.0);
+				m_fRecXPos->push_back((b_p[i]-b_n[i])/2.0);
+				m_fRecYPos->push_back((b_p[i]+b_n[i])/2.0);
 
-				m_fOvU->push_back(Ov_p[MaxTrackID[i]]);
-				m_fOvV->push_back(Ov_n[MaxTrackID[i]]);
-				m_iNU->push_back(Num_p[MaxTrackID[i]]);
-				m_iNV->push_back(Num_n[MaxTrackID[i]]);
+				m_fOvU->push_back(Ov_p[i]);
+				m_fOvV->push_back(Ov_n[i]);
+				m_iNU->push_back(Num_p[i]);
+				m_iNV->push_back(Num_n[i]);
 
 				//the U and V are somehow interchanged, therefore they are here interchanged back.
 //				m_fOvU->push_back(Ov_n[MaxTrackID[i]]);   //just for test
@@ -283,8 +283,8 @@ StatusCode ALFA_MDMultiple::Execute(const std::list<MDHIT> &ListMDHits)
 //				m_iNU->push_back(Num_n[MaxTrackID[i]]);   //just for test
 //				m_iNV->push_back(Num_p[MaxTrackID[i]]);   //just for test
 
-				m_iTrackMatch[0]->push_back(iTrackMatch[0][MaxTrackID[i]]);
-				m_iTrackMatch[1]->push_back(iTrackMatch[1][MaxTrackID[i]]);
+				m_iTrackMatch[0]->push_back(iTrackMatch[0][i]);
+				m_iTrackMatch[1]->push_back(iTrackMatch[1][i]);
 
 //				std::cout << "iTrackMatch[0][" << MaxTrackID[i] << "] = " << iTrackMatch[0][MaxTrackID[i]] << std::endl;
 //				std::cout << "iTrackMatch[1][" << MaxTrackID[i] << "] = " << iTrackMatch[1][MaxTrackID[i]] << std::endl;
@@ -292,8 +292,8 @@ StatusCode ALFA_MDMultiple::Execute(const std::list<MDHIT> &ListMDHits)
 
 				for (Int_t iPlate=0; iPlate<ALFAPLATESCNT; iPlate++)
 				{
-					m_iFibSel[2*iPlate]->push_back(FSel_p[iPlate][MaxTrackID[i]]);
-					m_iFibSel[2*iPlate+1]->push_back(FSel_n[iPlate][MaxTrackID[i]]);
+					m_iFibSel[2*iPlate]->push_back(FSel_p[iPlate][i]);
+					m_iFibSel[2*iPlate+1]->push_back(FSel_n[iPlate][i]);
 //					m_iFibSel[2*iPlate+1]->push_back(FSel_p[iPlate][MaxTrackID[i]]);   //just for test
 //					m_iFibSel[2*iPlate]->push_back(FSel_n[iPlate][MaxTrackID[i]]);     //just for test
 				}
@@ -375,9 +375,9 @@ void ALFA_MDMultiple::Proj_Store(Int_t iFiberSide, Int_t (&iOver)[72000], Float_
 	if (m_faMD[m_iRPot][iSideFlag][0]>0) fSign=1.0;
 	else fSign=-1.0;
 
-	for (Int_t iBin=0; iBin<72000; iBin++)
+	for (int & iBin : iOver)
 	{
-		iOver[iBin]=0;
+		iBin=0;
 	}
 
 	// coverity bug 13955 fixed bellow
@@ -440,9 +440,9 @@ void ALFA_MDMultiple::Proj_Store(std::vector<Int_t> FiberHit[ALFAPLATESCNT], Int
 	if (m_faMD[m_iRPot][iSideFlag][0]>0) fSign=1.0;
 	else fSign=-1.0;
 
-	for (Int_t iBin=0; iBin<72000; iBin++)
+	for (int & iBin : iOver)
 	{
-		iOver[iBin]=0;
+		iBin=0;
 	}
 
 	int iHit = 9999;
@@ -563,7 +563,7 @@ void ALFA_MDMultiple::Finding_Fib(Int_t iFiberSide, Float_t fbRef, Float_t fbRec
 	x= (b_pos-b_neg)/2.0;
 	y= (b_neg+b_pos)/2.0;
 
-	for (Int_t iLayer=0; iLayer<ALFAPLATESCNT; iLayer++) iFSel[iLayer] = 9999;
+	for (int & iLayer : iFSel) iLayer = 9999;
 
 	//For each layer, we determine the hit fiber which is closest to the track
 	std::list<int>::iterator intIter;
@@ -1020,9 +1020,9 @@ void ALFA_MDMultiple::GetData(Int_t (&iNumU)[MAXTRACKNUM], Int_t (&iNumV)[MAXTRA
 
 	iTrackNum=0;
 	iSize=0;
-	for (Int_t iLayer=0; iLayer<ALFALAYERSCNT*ALFAPLATESCNT; iLayer++)
+	for (auto & iLayer : m_iFibSel)
 	{
-		iSize = ((Int_t)m_iFibSel[iLayer]->size() > iSize)? m_iFibSel[iLayer]->size() : iSize;
+		iSize = ((Int_t)iLayer->size() > iSize)? iLayer->size() : iSize;
 	}
 	iTrackNum = (iSize < MAXTRACKNUM)? iSize : MAXTRACKNUM;
 	for (Int_t iTrack=0; iTrack<iTrackNum; iTrack++)

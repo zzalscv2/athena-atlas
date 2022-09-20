@@ -164,9 +164,9 @@ void ALFA_MDGap::Proj_Store(Int_t iFiberSide, Int_t (&iOver)[72000], Float_t fbR
 	if (m_faMD[m_iRPot][iSideFlag][0]>0) fSign=1.0;
 	else fSign=-1.0;
 
-	for (Int_t iBin=0; iBin<72000; iBin++)
+	for (int & iBin : iOver)
 	{
-		iOver[iBin]=0;
+		iBin=0;
 	}
 
 	std::list<int>::iterator intIter;
@@ -284,7 +284,7 @@ void ALFA_MDGap::Finding_Fib(Int_t iFiberSide, Float_t fbRef, Float_t fbRec, Int
 	x= (b_pos-b_neg)/2.0;
 	y= (b_neg+b_pos)/2.0;
 
-	for (Int_t iLayer=0; iLayer<ALFAPLATESCNT; iLayer++) iFSel[iLayer] = 9999;
+	for (int & iLayer : iFSel) iLayer = 9999;
 
 	//For each layer, we determine the hit fiber which is closest to the track
 	std::list<int>::iterator intIter;
