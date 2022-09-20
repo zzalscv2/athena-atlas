@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2017 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
 */
 
 ///////////////////////////////////////////////////////////////////
@@ -49,14 +49,14 @@ namespace Trk {
        PRD_TruthTrajectoryBuilder( const std::string& t, const std::string& n, const IInterface* p );
  
        // Athena algtool's Hooks
-       StatusCode  initialize();
-       StatusCode  finalize();
+       virtual StatusCode  initialize() override;
+       virtual StatusCode  finalize() override;
 
        /** return a vector of PrepRawData trajectories - uses internal cache**/
-       const std::map< HepMC::ConstGenParticlePtr, PRD_TruthTrajectory >& truthTrajectories() const;
+       virtual std::map< HepMC::ConstGenParticlePtr, PRD_TruthTrajectory > truthTrajectories() const override;
 
        /** Event refresh - can't be an IIncident, because it has to run after PRD creation and PRD truth creation */
-       StatusCode refreshEvent();
+       virtual StatusCode refreshEvent() override;
 
      private:
        const AtlasDetectorID*                               m_idHelper;                         //! Helper to detect type of sub-detector from PRD->identify().
@@ -71,7 +71,6 @@ namespace Trk {
         
       	Gaudi::Property<double>                             m_minPt{this,"MinimumPt",400.,"minimum pT to be even considered"};
       	Gaudi::Property<bool>                               m_geantinos{this,"Geantinos",false,"Track geantinos or not"};
-        mutable std::map< HepMC::ConstGenParticlePtr, PRD_TruthTrajectory > m_gpPrdTruthTrajectories; //!< the cache for the return (cleared by Incident)
         
   };
 
