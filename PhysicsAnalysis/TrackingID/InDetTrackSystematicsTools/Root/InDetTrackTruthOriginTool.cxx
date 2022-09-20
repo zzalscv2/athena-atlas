@@ -6,6 +6,7 @@
 #include "InDetTrackSystematicsTools/InDetTrackTruthOriginDefs.h"
 
 #include "xAODTruth/TruthParticleContainer.h"
+#include "xAODTruth/TruthEventContainer.h"
 
 #include <math.h>
 
@@ -24,11 +25,14 @@ namespace InDet {
 
     declareProperty("truthParticleLinkName", m_truthParticleLinkName = "truthParticleLink");
     declareProperty("truthMatchProbabilityAuxName", m_truthMatchProbabilityAuxName = "truthMatchProbability");
+    declareProperty("isFullPileUpTruth", m_isFullPileupTruth = false);
+
   }
 
   InDetTrackTruthOriginTool::~InDetTrackTruthOriginTool() = default;
 
   StatusCode InDetTrackTruthOriginTool::initialize() {
+    if(m_isFullPileupTruth) ATH_MSG_INFO("InDetTrackTruthOriginTool configured for full pile-up truth sample");
     return StatusCode::SUCCESS;
   }
 
@@ -150,6 +154,29 @@ namespace InDet {
     // truth link is broken: call it from pileup (not true for < 100 MeV and some specialised samples!)
     if (!truth){
       origin = origin | (0x1 << InDet::TrkOrigin::Pileup);
+    }
+    
+    // For full pile-up truth samples, check explicitly if truth record is present among hard-scatter collection to assign Pileup origin
+    else if(m_isFullPileupTruth){
+      const xAOD::TruthEventContainer* truthEventContainer(nullptr);
+      if(evtStore()->retrieve(truthEventContainer, "TruthEvents").isFailure()){
+	ATH_MSG_ERROR("InDetTrackTruthOriginTool configured for full pile-up truth but could not retrieve TruthEvents container");
+      }
+      const xAOD::TruthEvent* event = truthEventContainer ? truthEventContainer->at(0) : nullptr;
+
+      if(event){
+	const auto& links = event->truthParticleLinks();
+
+	bool isFromHSProdVtx = false;
+	for (const auto& link : links){
+	  if(truth == *link){
+	    isFromHSProdVtx = true;
+	    break;
+	  }
+	}
+
+	if(!isFromHSProdVtx) origin = origin | (0x1 << InDet::TrkOrigin::Pileup);
+      }
     }
 
     // low TruthMatchProbability: call it fake (also includes poorly reconstructed tracks)

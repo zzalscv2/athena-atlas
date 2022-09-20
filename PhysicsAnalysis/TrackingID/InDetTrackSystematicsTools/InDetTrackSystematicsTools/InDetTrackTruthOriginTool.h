@@ -56,6 +56,8 @@ namespace InDet {
     std::string m_truthParticleLinkName;
     std::string m_truthMatchProbabilityAuxName;
 
+    bool m_isFullPileupTruth;
+
 }; // class InDetTrackTruthOriginTool
 
 } // namespace InDet
