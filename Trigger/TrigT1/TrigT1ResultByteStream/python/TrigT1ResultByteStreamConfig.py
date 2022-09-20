@@ -56,10 +56,12 @@ def ExampleL1TriggerByteStreamToolCfg(name, writeBS=False):
     # write BS == read xAOD
     tool.MuonRoIContainerReadKey="LVL1MuonRoIs"
     tool.MuonRoIContainerWriteKey=""
+    tool.L1TopoOutputLocID=""
   else:
     # read BS == write xAOD
     tool.MuonRoIContainerReadKey=""
     tool.MuonRoIContainerWriteKey=recordable("LVL1MuonRoIs")
+    tool.L1TopoOutputLocID="LVL1MUCTPI::DEFAULT_MuonL1TopoLocation"
   return tool
 
 def MuonRoIByteStreamToolCfg(name, flags, writeBS=False):
@@ -80,13 +82,21 @@ def MuonRoIByteStreamToolCfg(name, flags, writeBS=False):
     containerBaseName + "BCp1",
     containerBaseName + "BCp2",
   ]
-
+  topocontainerBaseName = "LVL1MUCTPI::DEFAULT_MuonL1TopoLocation"
+  topocontainerNames = [
+    topocontainerBaseName + "-2",
+    topocontainerBaseName + "-1",
+    topocontainerBaseName,
+    topocontainerBaseName + "1",
+    topocontainerBaseName + "2",
+  ]
   if writeBS:
     # write BS == read xAOD
     tool.MuonRoIContainerReadKeys += containerNames
   else:
     # read BS == write xAOD
     tool.MuonRoIContainerWriteKeys += [recordable(c) for c in containerNames]
+    tool.L1TopoOutputLocID += topocontainerNames
 
   tool.RPCRecRoiTool = getRun3RPCRecRoiTool(name="RPCRecRoiTool",useRun3Config=flags.Trigger.enableL1MuonPhase1)
   tool.TGCRecRoiTool = getRun3TGCRecRoiTool(name="TGCRecRoiTool",useRun3Config=flags.Trigger.enableL1MuonPhase1)

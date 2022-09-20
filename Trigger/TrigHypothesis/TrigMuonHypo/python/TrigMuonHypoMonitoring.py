@@ -1,4 +1,4 @@
-# Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
 
 from AthenaMonitoringKernel.GenericMonitoringTool import GenericMonitoringTool
 
@@ -121,6 +121,71 @@ def TrigMuonEFInvMassHypoMonitoring(histPath):
                             xbins=200, xmin=0, xmax=200)
     montool.defineHistogram('Mass_sel', type='TH1F', path='EXPERT', title="Dimuon mass for selected events from #TrigMuonEFInvMHypo; Mass (GeV)",
                             xbins=200, xmin=0, xmax=200)
+    return montool
+
+
+def TrigMuonEFIdtpHypoMonitoring(histPath):
+    montool = GenericMonitoringTool(HistPath = histPath)
+    montool.defineHistogram('SA_pt', type='TH1F', path='EXPERT', title="SA p_{T} at EFIdperfHypo; SA p_{T} (GeV); N entries",
+                            xbins=50, xmin=0, xmax=100)
+    montool.defineHistogram('SA_eta', type='TH1F', path='EXPERT', title="SA #eta at EFIdperfHypo; SA #eta; N entries",
+                            xbins=50, xmin=-3.2, xmax=3.2)
+    montool.defineHistogram('SA_phi', type='TH1F', path='EXPERT', title="SA #phi at EFIdperfHypo; SA #phi; N entries",
+                            xbins=50, xmin=-3.15, xmax=3.15)
+    montool.defineHistogram('SA_pt_sel', type='TH1F', path='EXPERT', title="Selected SA p_{T} at EFIdperfHypo; p_{T} (GeV); N entries",
+                            xbins=50, xmin=0, xmax=100)
+    montool.defineHistogram('SA_eta_sel', type='TH1F', path='EXPERT', title="Selected SA #eta at EFIdperfHypo; #eta; N entries",
+                            xbins=50, xmin=-3.2, xmax=3.2)
+    montool.defineHistogram('SA_phi_sel', type='TH1F', path='EXPERT', title="Selected SA #phi at EFIdperfHypo; #phi; N entries",
+                            xbins=50, xmin=-3.15, xmax=3.15)
+    return montool
+
+
+def TrigMuonEFIdtpInvMassHypoMonitoring(histPath):
+    montool = GenericMonitoringTool(HistPath = histPath)
+    montool.defineHistogram('Mass', type='TH1F', path='EXPERT', title="Dimuon mass from IdperfInvMassHypo; Mass (GeV); N entries",
+                            xbins=198, xmin=2, xmax=200)
+
+    montool.defineHistogram('probe_pt',  type='TH1F',path='EXPERT',title="Probe p_{T}; Probe p_{T} (GeV); N entries",  
+                            xbins=25, xmin=0, xmax=100)
+    montool.defineHistogram('probe_eta', type='TH1F',path='EXPERT',title="Probe #eta; Probe #eta; N entries",  
+                            xbins=30, xmin=-3.0, xmax=3.0)
+
+    montool.defineHistogram('PT_dr',   type='TH1F',path='EXPERT',title="#Delta R (PT track and ME track); #Delta R; N entries",  
+                            xbins=25, xmin=0, xmax=0.5)
+    montool.defineHistogram('PT_qovp', type='TH1F',path='EXPERT',title="Q/R difference significance (PT track and ME track); Q/R diff sig; N entries",
+                            xbins=25, xmin=0, xmax=5.0)
+    montool.defineHistogram('FTF_dr',  type='TH1F',path='EXPERT',title="#Delta R (FTF track and ME track); #Delta R; N entries",
+                            xbins=25, xmin=0, xmax=0.5)
+    montool.defineHistogram('FTF_qovp',type='TH1F',path='EXPERT',title="Q/R difference significance (FTF track and ME track); Q/R diff sig; N entries",
+                            xbins=25, xmin=0, xmax=5.0)
+
+    montool.defineHistogram('PT_effi_pt0_eta0', type='TH1F', path='EXPERT', title="PT track efficiency for p_{T} < 20 GeV, |#eta|<1; PT found wrt MStrack; N entries", 
+                            xbins=2, xmin=0, xmax=2)
+    montool.defineHistogram('PT_effi_pt0_eta1', type='TH1F', path='EXPERT', title="PT track efficiency for p_{T} < 20 GeV, 1<|#eta|<2; PT found wrt MStrack; N entries",
+                            xbins=2, xmin=0, xmax=2)
+    montool.defineHistogram('PT_effi_pt0_eta2', type='TH1F', path='EXPERT', title="PT track efficiency for p_{T} < 20 GeV, |#eta|>2; PT found wrt MStrack; N entries", 
+                            xbins=2, xmin=0, xmax=2)
+    montool.defineHistogram('PT_effi_pt1_eta0', type='TH1F', path='EXPERT', title="PT track efficiency for p_{T} > 20 GeV, |#eta|<1; PT found wrt MStrack; N entries", 
+                            xbins=2, xmin=0, xmax=2)
+    montool.defineHistogram('PT_effi_pt1_eta1', type='TH1F', path='EXPERT', title="PT track efficiency for p_{T} > 20 GeV, 1<|#eta|<2; PT found wrt MStrack; N entries", 
+                            xbins=2, xmin=0, xmax=2)
+    montool.defineHistogram('PT_effi_pt1_eta2', type='TH1F', path='EXPERT', title="PT track efficiency for p_{T} > 20 GeV, |#eta|>2; PT found wrt MStrack; N entries", 
+                            xbins=2, xmin=0, xmax=2)
+    
+    montool.defineHistogram('FTF_effi_pt0_eta0', type='TH1F', path='EXPERT', title="FTF track efficiency for p_{T} < 20 GeV, |#eta|<1; PT found wrt MStrack; N entries",
+                            xbins=2, xmin=0, xmax=2)
+    montool.defineHistogram('FTF_effi_pt0_eta1', type='TH1F', path='EXPERT', title="FTF track efficiency for p_{T} < 20 GeV, 1<|#eta|<2; PT found wrt MStrack; N entries", 
+                            xbins=2, xmin=0, xmax=2)
+    montool.defineHistogram('FTF_effi_pt0_eta2', type='TH1F', path='EXPERT', title="FTF track efficiency for p_{T} < 20 GeV, |#eta|>2; PT found wrt MStrack; N entries", 
+                            xbins=2, xmin=0, xmax=2)
+    montool.defineHistogram('FTF_effi_pt1_eta0', type='TH1F', path='EXPERT', title="FTF track efficiency for p_{T} > 20 GeV, |#eta|<1; PT found wrt MStrack; N entries",
+                            xbins=2, xmin=0, xmax=2)
+    montool.defineHistogram('FTF_effi_pt1_eta1', type='TH1F', path='EXPERT', title="FTF track efficiency for p_{T} > 20 GeV, 1<|#eta|<2; PT found wrt MStrack; N entries",
+                            xbins=2, xmin=0, xmax=2)
+    montool.defineHistogram('FTF_effi_pt1_eta2', type='TH1F', path='EXPERT', title="FTF track efficiency for p_{T} > 20 GeV, |#eta|>2; PT found wrt MStrack; N entries",
+                            xbins=2, xmin=0, xmax=2)
+
     return montool
 
 

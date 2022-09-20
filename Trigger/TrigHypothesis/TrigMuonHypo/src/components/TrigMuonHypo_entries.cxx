@@ -10,11 +10,13 @@
 #include "src/TrigMuonEFTrackIsolationHypoTool.h"
 #include "src/TrigMuonEFHypoAlg.h"
 #include "src/TrigMuonEFHypoTool.h"
+#include "src/TrigMuonEFIdtpHypoTool.h"
+#include "src/TrigMuonEFIdtpHypoAlg.h"
 #include "src/TrigMuonEFInvMassHypoTool.h"
+#include "src/TrigMuonEFIdtpInvMassHypoTool.h"
 #include "src/TrigMuonLateMuRoIHypoAlg.h"
 #include "src/TrigMuonLateMuRoIHypoTool.h"
 #include "src/TrigMuonTLAHypoAlg.h"
-
 
 DECLARE_COMPONENT( TrigMufastHypoAlg )
 DECLARE_COMPONENT( TrigMufastHypoTool )
@@ -24,7 +26,10 @@ DECLARE_COMPONENT( TrigMuonEFTrackIsolationHypoAlg )
 DECLARE_COMPONENT( TrigMuonEFTrackIsolationHypoTool )
 DECLARE_COMPONENT( TrigMuonEFHypoAlg )
 DECLARE_COMPONENT( TrigMuonEFHypoTool )
+DECLARE_COMPONENT( TrigMuonEFIdtpHypoAlg )
+DECLARE_COMPONENT( TrigMuonEFIdtpHypoTool )
 DECLARE_COMPONENT( TrigMuonEFInvMassHypoTool )
+DECLARE_COMPONENT( TrigMuonEFIdtpInvMassHypoTool )
 DECLARE_COMPONENT( TrigMuonLateMuRoIHypoAlg )
 DECLARE_COMPONENT( TrigMuonLateMuRoIHypoTool )
 DECLARE_COMPONENT( TrigMuonTLAHypoAlg )

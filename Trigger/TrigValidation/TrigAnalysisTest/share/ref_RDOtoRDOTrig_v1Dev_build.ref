@@ -13331,6 +13331,18 @@ HLT_mu14_L1MU8VFC:
     1: 7
     2: 7
     3: 7
+HLT_mu14_idtp_L1MU8F:
+  eventCount: 7
+  stepCounts:
+    0: 7
+    1: 7
+    2: 7
+    3: 7
+  stepFeatures:
+    0: 8
+    1: 8
+    2: 8
+    3: 8
 HLT_mu14_ivarloose_tau25_mediumRNN_tracktwoMVA_03dRAB_L1MU8F_TAU12IM_3J12:
   eventCount: 1
   stepCounts:
@@ -13380,6 +13392,18 @@ HLT_mu14_ivarloose_tau35_mediumRNN_tracktwoMVA_03dRAB_L1MU8F_TAU20IM:
     8: 8
     9: 1
 HLT_mu14_mu14_idperf_50invmAB130_L12MU8F:
+  eventCount: 1
+  stepCounts:
+    0: 1
+    1: 1
+    2: 1
+    3: 1
+  stepFeatures:
+    0: 4
+    1: 4
+    2: 4
+    3: 4
+HLT_mu14_mu14_idtp_idZmumu_L12MU8F:
   eventCount: 1
   stepCounts:
     0: 1
