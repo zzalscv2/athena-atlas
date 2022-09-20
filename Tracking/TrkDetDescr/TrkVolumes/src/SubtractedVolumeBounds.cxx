@@ -289,10 +289,10 @@ const std::vector<const Trk::Surface*>*
     }
   }
 
-  for (size_t i = 0; i < outerSurfaces->size(); i++)
-    delete (*outerSurfaces)[i];
-  for (size_t i = 0; i < innerSurfaces->size(); i++)
-    delete (*innerSurfaces)[i];
+  for (const auto *outerSurface : *outerSurfaces)
+    delete outerSurface;
+  for (const auto *innerSurface : *innerSurfaces)
+    delete innerSurface;
   delete outerSurfaces;
   delete innerSurfaces;
 

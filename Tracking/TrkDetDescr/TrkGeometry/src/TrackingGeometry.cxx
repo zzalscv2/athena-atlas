@@ -116,9 +116,9 @@ Trk::TrackingGeometry::registerTrackingVolumes(Trk::TrackingVolume& tvol,
   /** register the boundary layers */
   // boundary layers
   const auto& bounds = tvol.boundarySurfaces();
-  for (size_t ib = 0; ib < bounds.size(); ++ib) {
+  for (const auto & bound : bounds) {
     Trk::Layer* bLayer =
-      bounds[ib]->surfaceRepresentation().materialLayer();
+      bound->surfaceRepresentation().materialLayer();
     if (bLayer) {
       auto bfIter = m_boundaryLayers.find(bLayer);
       if (bfIter != m_boundaryLayers.end())

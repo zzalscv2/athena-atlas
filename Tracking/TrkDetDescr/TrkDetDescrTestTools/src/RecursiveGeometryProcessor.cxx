@@ -77,7 +77,7 @@ StatusCode Trk::RecursiveGeometryProcessor::process(Trk::TrackingVolume& tvol, s
       // display output
       auto layers = layerArray->arrayObjects();
       ATH_MSG_VERBOSE(displayBuffer.str() << "--> has " << layers.size() << " confined layers." ); 
-      for (auto & layIter : layers){
+      for (const auto & layIter : layers){
           if (!layIter)
              ATH_MSG_WARNING("Zero-pointer found in LayerArray - indicates problem !");
           if ((layIter) && process(*layIter, level).isFailure()){
@@ -89,12 +89,12 @@ StatusCode Trk::RecursiveGeometryProcessor::process(Trk::TrackingVolume& tvol, s
 
    // Process the boundary surface layers 
    auto bSurfaces = tvol.boundarySurfaces();
-   for (size_t ib =0 ; ib < bSurfaces.size() ; ++ib){
-       if (bSurfaces[ib]->surfaceRepresentation().associatedLayer()){
+   for (auto & bSurface : bSurfaces){
+       if (bSurface->surfaceRepresentation().associatedLayer()){
            ATH_MSG_VERBOSE(displayBuffer.str() << "--> has a boundary layer." );
            if (process(
                  const_cast<Trk::Layer&>(
-                   *bSurfaces[ib]->surfaceRepresentation().associatedLayer()),level)
+                   *bSurface->surfaceRepresentation().associatedLayer()),level)
                  .isFailure()) {
              ATH_MSG_FATAL("Failed to call process(const Layer&) on boundary "
                            "layer. Aborting.");
@@ -109,7 +109,7 @@ StatusCode Trk::RecursiveGeometryProcessor::process(Trk::TrackingVolume& tvol, s
    // register the next round
    if (confinedVolumes) {
        auto volumes = confinedVolumes->arrayObjects();
-       for (auto & volumesIter : volumes){
+       for (const auto & volumesIter : volumes){
            if (!volumesIter)
               ATH_MSG_WARNING("Zero-pointer found in VolumeArray - indicates problem !");
            if (volumesIter && process(*volumesIter, ++level).isFailure() ){
@@ -142,8 +142,8 @@ StatusCode Trk::RecursiveGeometryProcessor::process(Trk::Layer& lay, size_t leve
         Trk::BinnedArraySpan<Trk::Surface * const > layerSurfaces = surfArray->arrayObjects();
         ATH_MSG_VERBOSE(displayBuffer.str() << "   ---> has " << layerSurfaces.size() << " surfaces on the layer.");
         
-        auto laySurfIter    = layerSurfaces.begin();
-        auto laySurfIterEnd = layerSurfaces.end();
+        const auto *laySurfIter    = layerSurfaces.begin();
+        const auto *laySurfIterEnd = layerSurfaces.end();
         // loop over the surfaces and draw them
         for ( ; laySurfIter != laySurfIterEnd; ++laySurfIter) {
              if (!(*laySurfIter))

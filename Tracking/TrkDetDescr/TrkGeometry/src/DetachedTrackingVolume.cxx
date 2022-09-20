@@ -50,8 +50,8 @@ Trk::DetachedTrackingVolume::~DetachedTrackingVolume() {
   delete m_trkVolume;
   if (m_layerRepresentation) delete m_layerRepresentation;
   if (m_multilayerRepresentation) {
-    for (unsigned int i = 0; i < m_multilayerRepresentation->size(); i++)
-      delete (*m_multilayerRepresentation)[i];
+    for (auto *layer : *m_multilayerRepresentation)
+      delete layer;
     delete m_multilayerRepresentation;
   }
   delete m_baseTransform;
@@ -65,8 +65,8 @@ Trk::DetachedTrackingVolume::move(Amg::Transform3D& shift)
     m_layerRepresentation->moveLayer(shift);
   }
   if (m_multilayerRepresentation) {
-    for (unsigned int i = 0; i < m_multilayerRepresentation->size(); i++) {
-      (*m_multilayerRepresentation)[i]->moveLayer(shift);
+    for (auto *layer : *m_multilayerRepresentation) {
+      layer->moveLayer(shift);
     }
   }
 }
@@ -118,19 +118,19 @@ Trk::DetachedTrackingVolume::clone(const std::string& name,
   if (newTV->confinedVolumes()) {
     BinnedArraySpan<Trk::TrackingVolume * const> vols =
         newTV->confinedVolumes()->arrayObjects();
-    for (unsigned int ivol = 0; ivol < vols.size(); ivol++) {
-      Trk::LayerArray* layAr = vols[ivol]->confinedLayers();
+    for (auto *vol : vols) {
+      Trk::LayerArray* layAr = vol->confinedLayers();
       Trk::ArraySpan<Trk::Layer* const> alays =
-          vols[ivol]->confinedArbitraryLayers();
+          vol->confinedArbitraryLayers();
       if (layAr) {
         Trk::BinnedArraySpan<Trk::Layer* const> lays = layAr->arrayObjects();
-        for (unsigned int il = 0; il < lays.size(); il++) {
-          (lays[il])->encloseDetachedTrackingVolume(*newStat);
+        for (auto *lay : lays) {
+          lay->encloseDetachedTrackingVolume(*newStat);
         }
       }
       if (!alays.empty()) {
-        for (unsigned int il = 0; il < alays.size(); il++) {
-          (alays[il])->encloseDetachedTrackingVolume(*newStat);
+        for (auto *alay : alays) {
+          alay->encloseDetachedTrackingVolume(*newStat);
         }
       }
     }
@@ -138,15 +138,15 @@ Trk::DetachedTrackingVolume::clone(const std::string& name,
   if (newTV->confinedLayers()) {
     BinnedArraySpan<Trk::Layer* const> lays =
         newTV->confinedLayers()->arrayObjects();
-    for (unsigned int il = 0; il < lays.size(); il++){
-      (lays[il])->encloseDetachedTrackingVolume(*newStat);
+    for (auto *lay : lays){
+      lay->encloseDetachedTrackingVolume(*newStat);
     }
   }
   if (!newTV->confinedArbitraryLayers().empty()) {
     Trk::ArraySpan<Trk::Layer* const> alays =
         newTV->confinedArbitraryLayers();
-    for (unsigned int il = 0; il < alays.size(); il++) {
-      (alays[il])->encloseDetachedTrackingVolume(*newStat);
+    for (auto *alay : alays) {
+      alay->encloseDetachedTrackingVolume(*newStat);
     }
   }
   //

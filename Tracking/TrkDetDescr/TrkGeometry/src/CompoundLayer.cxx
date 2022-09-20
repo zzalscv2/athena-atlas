@@ -20,7 +20,7 @@ bool Trk::CompoundLayer::isOnCompoundLayer(const Amg::Vector3D &gp,
 }
 
 Trk::CompoundLayer::~CompoundLayer() {
-  for (unsigned int i = 0; i < m_surfaces.size(); ++i) {
-    delete m_surfaces[i];
+  for (auto & surface : m_surfaces) {
+    delete surface;
   }
 }

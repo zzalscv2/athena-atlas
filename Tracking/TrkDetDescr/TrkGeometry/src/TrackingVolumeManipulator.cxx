@@ -114,12 +114,12 @@ Trk::TrackingVolumeManipulator::confineVolume(TrackingVolume& tvol,
 {
 
   const auto& bounds = tvol.boundarySurfaces();
-  for (unsigned int ib = 0; ib < bounds.size(); ib++) {
-    if (bounds[ib]->outsideVolume() == nullptr) {
-      bounds[ib]->setOutsideVolume(outsideVol);
+  for (const auto & bound : bounds) {
+    if (bound->outsideVolume() == nullptr) {
+      bound->setOutsideVolume(outsideVol);
     }
-    if (bounds[ib].get()->insideVolume() == nullptr) {
-      bounds[ib]->setInsideVolume(outsideVol);
+    if (bound.get()->insideVolume() == nullptr) {
+      bound->setInsideVolume(outsideVol);
     }
   }
 }

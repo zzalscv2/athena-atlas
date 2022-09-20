@@ -129,7 +129,7 @@ Trk::LayerMaterialProvider::process(Trk::TrackingVolume& tvol,
       // display output
       Trk::BinnedArraySpan<Trk::Layer * const> layers = layerArray->arrayObjects(); 
       ATH_MSG_VERBOSE(displayBuffer.str() << "--> has " << layers.size() << " confined layers." ); 
-      for ( auto & layIter : layers ){
+      for ( const auto & layIter : layers ){
           if (!layIter)
               ATH_MSG_WARNING("Zero-pointer found in LayerArray - indicates problem !");
           else {
