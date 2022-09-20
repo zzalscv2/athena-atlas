@@ -63,6 +63,8 @@ def getFlavourTagging( inputJets, inputVertex, inputTracks, BTagName,
         'BTagging/20211216trig/dips/AntiKt4EMPFlow/network.json',
         # R22 retraining with the above DIPS, provides DL1d20211216
         'BTagging/20211216trig/dl1d/AntiKt4EMPFlow/network.json',
+        # Trigger GN1 training
+        'BTagging/20220813trig/gn1/antikt4empflow/network.onnx',
         #
         # anti-bb tagger, see ATLINFR-4511
         # this is required by the above tagger, but isn't a trigger

@@ -36,7 +36,9 @@ bool BJetThreeValueCheck::passThreshold(const SG::AuxElement& btag) const
   float c = m_acc->c(btag);
   float u = m_acc->u(btag);
   float f = m_cFraction;
-  float llr = std::log( b / (f*c + (1-f)*u));
+  float denom = f*c + (1-f)*u;
+  float ratio = (denom == 0 ? INFINITY : b / denom);
+  float llr = (ratio == 0 ? -INFINITY : std::log( ratio ));
   Monitored::Group(m_monTool, Monitored::Scalar(m_llrName, llr));
   return llr > m_threshold;
 }
