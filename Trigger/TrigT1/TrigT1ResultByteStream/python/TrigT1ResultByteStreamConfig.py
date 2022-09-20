@@ -311,7 +311,8 @@ if __name__ == '__main__':
   flags.Concurrency.NumConcurrentEvents = 1
 
   if any(["data22" in f for f in args.filesInput]):
-    flags.Output.AODFileName = "AOD."+(args.filesInput[0].split("/")[-1]).split('_SFO')[0]+"pool.root"
+    s=args.filesInput[0].replace('*','').replace('.data','')
+    flags.Output.AODFileName = "AOD."+(s.split("/")[-1]).split('_SFO')[0]+"pool.root"
   else:
     flags.Output.AODFileName = 'AOD.pool.root'
 

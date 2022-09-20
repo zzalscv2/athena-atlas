@@ -18,23 +18,25 @@ namespace xAOD{
 
   /// AuxContainer for jFexTower_v1
 
-  class jFexTowerAuxContainer_v1 : public AuxContainerBase {
-  public:
-    // Default constructor
-    jFexTowerAuxContainer_v1();
-    
-  private:   
-    
-    std::vector<float> eta;           
-    std::vector<float> phi; 
-    std::vector<uint8_t> module;
-    std::vector<uint8_t> fpga;
-    std::vector<uint8_t> channel;
-    std::vector<uint16_t> towerEt;
-    std::vector<uint8_t> jFEXdataID;
-    std::vector<char> isSaturated;
-    
-  }; // class jFexTowerAuxContainer_v1 
+class jFexTowerAuxContainer_v1 : public AuxContainerBase {
+    public:
+        // Default constructor
+        jFexTowerAuxContainer_v1();
+
+    private:
+
+        std::vector<float>    eta;
+        std::vector<float>    phi;
+        std::vector<uint8_t>  module;
+        std::vector<uint8_t>  fpga;
+        std::vector<uint8_t>  channel;
+        std::vector<uint16_t> towerEt;
+        std::vector<uint8_t>  jFEXdataID;
+        std::vector<char>     isSaturated;
+        std::vector<uint32_t> jFEXtowerID;
+        std::vector<uint8_t>  Calosource;
+
+}; // class jFexTowerAuxContainer_v1
 } // namespace xAOD
 
 #include "xAODCore/BaseInfo.h"
