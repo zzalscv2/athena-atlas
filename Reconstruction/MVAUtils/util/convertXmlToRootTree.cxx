@@ -151,21 +151,20 @@ int main  ATLAS_NOT_THREAD_SAFE (int argc, char** argv){
 
   cout << "Boosted Decision Tree for " << AnalysisType << endl;
 
-  for (std::vector<XmlVariableInfo>::const_iterator itvar = variable_infos.begin();
-       itvar != variable_infos.end(); ++itvar){
+  for (const auto & variable_info : variable_infos){
 
-    TString infoType  = (TString(itvar->nodeName).Contains("Variable") ?
+    TString infoType  = (TString(variable_info.nodeName).Contains("Variable") ?
                          "variable" : "spectator");
-    TString expression = itvar->expression;
-    TString varName    = itvar->label;
-    TString type       = itvar->varType;
+    TString expression = variable_info.expression;
+    TString varName    = variable_info.label;
+    TString type       = variable_info.varType;
 
     TString varDefinition(varName);
     if (varName != expression){
       varDefinition += " := " + expression;
     }
 
-    float average_value = (itvar->min+itvar->max)/2 ;
+    float average_value = (variable_info.min+variable_info.max)/2 ;
     var_avgerage.push_back(average_value);
     vars.push_back(new float(average_value));
     if (infoType == "variable"){
@@ -208,7 +207,7 @@ int main  ATLAS_NOT_THREAD_SAFE (int argc, char** argv){
        << (isRegression ? reader->EvaluateRegression(0, "BDTG") : isMulti ? reader->EvaluateMulticlass("BDTG")[NClass-1] : reader->EvaluateMVA("BDTG"))
        << endl;
 
-  for(uint i = 0; i != vars.size(); ++i) *vars[i] = 0;
+  for(auto & var : vars) *var = 0;
   cout << "MVAUtils::BDT : "
        << (isRegression ? bdt->GetResponse() : isMulti ? bdt->GetMultiResponse(vars,NClass)[NClass-1] : isGrad ? bdt->GetGradBoostMVA(vars) : bdt->GetClassification())
        << " , TMVA::Reader : "

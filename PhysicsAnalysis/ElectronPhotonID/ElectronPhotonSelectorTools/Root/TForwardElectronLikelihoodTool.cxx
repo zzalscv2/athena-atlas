@@ -30,11 +30,11 @@ Root::TForwardElectronLikelihoodTool::TForwardElectronLikelihoodTool(
   , m_cutPosition_LH(-9)
 {
   for (unsigned int varIndex = 0; varIndex < s_fnVariables; varIndex++) {
-    for (unsigned int s_or_b = 0; s_or_b < 2; s_or_b++) {
-      for (unsigned int ip = 0; ip < IP_FBINS; ip++) {
+    for (auto & fPDFbin : fPDFbins) {
+      for (auto & ip : fPDFbin) {
         for (unsigned int et = 0; et < s_fnEtBinsHist; et++) {
           for (unsigned int eta = 0; eta < s_fnEtaBins; eta++) {
-            fPDFbins[s_or_b][ip][et][eta][varIndex] = nullptr;
+            ip[et][eta][varIndex] = nullptr;
           }
         }
       }
@@ -48,12 +48,12 @@ Root::TForwardElectronLikelihoodTool::TForwardElectronLikelihoodTool(
 Root::TForwardElectronLikelihoodTool::~TForwardElectronLikelihoodTool()
 {
   for (unsigned int varIndex = 0; varIndex < s_fnVariables; varIndex++) {
-    for (unsigned int s_or_b = 0; s_or_b < 2; s_or_b++) {
-      for (unsigned int ip = 0; ip < IP_FBINS; ip++) {
+    for (auto & fPDFbin : fPDFbins) {
+      for (auto & ip : fPDFbin) {
         for (unsigned int et = 0; et < s_fnEtBinsHist; et++) {
           for (unsigned int eta = 0; eta < s_fnEtaBins; eta++) {
-            delete fPDFbins[s_or_b][ip][et][eta][varIndex];
-            fPDFbins[s_or_b][ip][et][eta][varIndex] = nullptr;
+            delete ip[et][eta][varIndex];
+            ip[et][eta][varIndex] = nullptr;
           }
         }
       }
