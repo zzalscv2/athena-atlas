@@ -9,7 +9,7 @@
 #include "xAODTruth/TruthParticle.h"
 #include "xAODJet/Jet.h"
 #include "xAODTruth/TruthVertex.h"
-#include "StoreGate/ReadHandleKey.h"
+#include "AsgDataHandles/ReadHandleKey.h"
 
 #include <vector>
 
@@ -35,7 +35,7 @@ namespace ParticleJetTools {
     IParticleLinker(const SG::ReadHandleKey<xAOD::TruthParticleContainer>&,
                     const std::string& linkName);
     void decorate(const xAOD::Jet&,
-                  const std::vector<const xAOD::TruthParticle*>&);
+                  const std::vector<const xAOD::TruthParticle*>&) const;
   private:
     using IPLV = std::vector<ElementLink<xAOD::IParticleContainer>>;
     SG::AuxElement::Decorator<IPLV> m_dec;

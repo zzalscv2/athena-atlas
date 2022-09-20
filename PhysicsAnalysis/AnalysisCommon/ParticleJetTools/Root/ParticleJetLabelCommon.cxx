@@ -112,7 +112,7 @@ namespace ParticleJetTools {
   }
   void IParticleLinker::decorate(
     const xAOD::Jet& jet,
-    const std::vector<const xAOD::TruthParticle*>& ipv)
+    const std::vector<const xAOD::TruthParticle*>& ipv) const
   {
     IPLV links;
     for (const xAOD::TruthParticle* ip: ipv) {
