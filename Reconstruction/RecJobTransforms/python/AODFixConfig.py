@@ -4,6 +4,7 @@ from AthenaConfiguration.ComponentAccumulator import ComponentAccumulator
 from EventInfoMgt.TagInfoMgrConfig import TagInfoMgrCfg
 from AthenaCommon.Logging import logging
 
+
 _doneAODFixes=set()
 
 
@@ -11,8 +12,12 @@ def AODFixCfg(flags):
 
     nAODFixes=0
     msg=logging.getLogger("AODFixCfg")
-    aodFixesDoneStr=flags.Input.AODFixesDone
-    for doneFix in aodFixesDoneStr.split():
+    aodFixesDone=flags.Input.AODFixesDone
+
+    if isinstance(aodFixesDone,str):
+        aodFixesDone=aodFixesDone.split()
+
+    for doneFix in aodFixesDone:
         _doneAODFixes.add(doneFix)
 
     result=ComponentAccumulator()
