@@ -89,13 +89,6 @@ namespace RungeKuttaUtils {
 /////////////////////////////////////////////////////////////////////////////////
 // Step estimators to surface
 /////////////////////////////////////////////////////////////////////////////////
-
-double
-stepEstimator(int,
-              double* ATH_RESTRICT,
-              const double* ATH_RESTRICT,
-              bool&);
-
 double
 stepEstimatorToCone(double* ATH_RESTRICT,
                     const double* ATH_RESTRICT,

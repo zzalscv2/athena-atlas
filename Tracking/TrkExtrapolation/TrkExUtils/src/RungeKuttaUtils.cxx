@@ -999,39 +999,6 @@ Trk::RungeKuttaUtils::transformGlobalToLocal(const Trk::Surface* su,
 }
 
 /////////////////////////////////////////////////////////////////////////////////
-// Global position transformation to local Plane system coordinate
-/////////////////////////////////////////////////////////////////////////////////
-
-/////////////////////////////////////////////////////////////////////////////////
-// Main program for step estimation to surfaces
-/////////////////////////////////////////////////////////////////////////////////
-
-double
-Trk::RungeKuttaUtils::stepEstimator(int kind,
-                                    double* Su,
-                                    const double* P,
-                                    bool& Q)
-{
-  switch (kind) {
-    case 0: {
-      return stepEstimatorToStraightLine(Su, P, Q);
-    }
-    case 1: {
-      return stepEstimatorToPlane(Su, P, Q);
-    }
-    case 2: {
-      return stepEstimatorToCylinder(Su, P, Q);
-    }
-    case 3: {
-      return stepEstimatorToCone(Su, P, Q);
-    }
-    default: {
-      return 1000000.;
-    }
-  }
-}
-
-/////////////////////////////////////////////////////////////////////////////////
 // Step estimation to Plane
 /////////////////////////////////////////////////////////////////////////////////
 
@@ -1450,8 +1417,7 @@ AmgSymMatrix(5) Trk::RungeKuttaUtils::newCovarianceMatrix(
 bool
 Trk::RungeKuttaUtils::transformLocalToGlobal(bool useJac,
                                              const Trk::Surface* Su,
-                                             const AmgVector(5) &
-                                               ATH_RESTRICT p,
+                                             const AmgVector(5) & ATH_RESTRICT p,
                                              double* ATH_RESTRICT P)
 {
   if (!Su)
