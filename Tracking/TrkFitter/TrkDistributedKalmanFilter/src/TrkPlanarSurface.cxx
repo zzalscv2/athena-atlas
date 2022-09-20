@@ -150,8 +150,8 @@ namespace Trk
     printf("SURFACE: CENTER x=%f y=%f z=%f R=%f\n", m_Center[0], m_Center[1], m_Center[2], m_Rc);
     printf("         NORMAL nx=%f ny=%f nz=%f\n", m_Normal[0], m_Normal[1], m_Normal[2]);
     printf("EQUATION: (%f)x+(%f)y+(%f)z+(%f)=0\n", m_Params[0], m_Params[1], m_Params[2], m_Params[3]);
-    for (int i = 0; i < 3; i++) {
-      for (int j = 0; j < 3; j++) printf("%f ", m_M[i][j]);
+    for (auto & i : m_M) {
+      for (double j : i) printf("%f ", j);
       printf("\n");
     }
   }

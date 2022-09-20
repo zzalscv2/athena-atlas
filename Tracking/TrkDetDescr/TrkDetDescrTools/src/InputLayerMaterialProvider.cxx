@@ -83,8 +83,8 @@ StatusCode Trk::InputLayerMaterialProvider::process(Trk::TrackingVolume& tvol, s
   if (layerArray) {
       // display output
       Trk::BinnedArraySpan<Trk::Layer * const> layers = layerArray->arrayObjects();
-      auto layIter  = layers.begin();
-      auto layIterE = layers.end();    
+      const auto *layIter  = layers.begin();
+      const auto *layIterE = layers.end();    
       ATH_MSG_VERBOSE(displayBuffer.str() << "--> has " << layers.size() << " confined layers." ); 
       for ( ; layIter != layIterE; ++layIter){
           if (!(*layIter))
@@ -101,7 +101,7 @@ StatusCode Trk::InputLayerMaterialProvider::process(Trk::TrackingVolume& tvol, s
    // register the next round
    if (confinedVolumes) {
        Trk::BinnedArraySpan<Trk::TrackingVolume * const> volumes = confinedVolumes->arrayObjects();
-       auto volumesIter = volumes.begin();
+       const auto *volumesIter = volumes.begin();
        for (; volumesIter != volumes.end(); ++volumesIter){
            if (!(*volumesIter))
               ATH_MSG_WARNING("Zero-pointer found in VolumeArray - indicates problem !");

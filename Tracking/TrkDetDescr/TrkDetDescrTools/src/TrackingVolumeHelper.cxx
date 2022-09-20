@@ -589,9 +589,9 @@ void Trk::TrackingVolumeHelper::fillGlueVolumes(const std::vector<TrackingVolume
     auto refVolIter = topLevelVolumes.begin();
     for ( ; refVolIter != topLevelVolumes.end(); ++refVolIter ) {
         // loop over the faceVolumes
-        for (unsigned int ienvFace=0; ienvFace< envelopeFaceVolumes.size(); ++ienvFace){
+        for (auto *envelopeFaceVolume : envelopeFaceVolumes){
             // check whether this volume was assigned to on this face
-            if (envelopeFaceVolumes[ienvFace]==(*refVolIter)) {
+            if (envelopeFaceVolume==(*refVolIter)) {
                 // get the GlueVolumesDescriptor
                 Trk::GlueVolumesDescriptor& glueVolDescriptor = (*refVolIter)->glueVolumesDescriptor();
                 // if the size of glue volumes is 0 -> the referenceVolume is at navigation level
@@ -599,8 +599,8 @@ void Trk::TrackingVolumeHelper::fillGlueVolumes(const std::vector<TrackingVolume
                     glueVols.push_back(*refVolIter);
                 } else {
                     // fill all the sub-volumes described by the glueVolumeDescriptor
-                    for (unsigned int isubNavVol=0; isubNavVol<(glueVolDescriptor.glueVolumes(glueFace)).size(); ++isubNavVol)
-                        glueVols.push_back( (glueVolDescriptor.glueVolumes(glueFace))[isubNavVol]  );
+                    for (auto *isubNavVol : glueVolDescriptor.glueVolumes(glueFace))
+                        glueVols.push_back( isubNavVol  );
                 }
             }
         }// loop over envelopeFaceVolumes
@@ -665,14 +665,14 @@ void Trk::TrackingVolumeHelper::glueTrackingVolumes(const std::vector<Trk::Track
 
             // array vs. array in Z
             if (glueVols2.size()>1)
-                for (unsigned int i=0; i<glueVols1.size(); i++) setOutsideTrackingVolumeArray( *(glueVols1[i]), firstFace, sgv2 );
+                for (auto & vol : glueVols1) setOutsideTrackingVolumeArray( *vol, firstFace, sgv2 );
             else
-                for (unsigned int i=0; i<glueVols1.size(); i++) setOutsideTrackingVolume( *(glueVols1[i]), firstFace, glueVols2[0] );
+                for (auto & vol : glueVols1) setOutsideTrackingVolume( *vol, firstFace, glueVols2[0] );
 
             if (glueVols1.size()>1)
-                for (unsigned int i=0; i<glueVols2.size(); i++) setOutsideTrackingVolumeArray( *(glueVols2[i]), secondFace, sgv1 );
+                for (auto & vol : glueVols2) setOutsideTrackingVolumeArray( *vol, secondFace, sgv1 );
             else
-                for (unsigned int i=0; i<glueVols2.size(); i++) setOutsideTrackingVolume( *(glueVols2[i]), secondFace, glueVols1[0] );
+                for (auto & vol : glueVols2) setOutsideTrackingVolume( *vol, secondFace, glueVols1[0] );
 
 
         } else {
@@ -685,31 +685,31 @@ void Trk::TrackingVolumeHelper::glueTrackingVolumes(const std::vector<Trk::Track
             // the glue cases -----------------------------------------------------------------------------------
             // handle the tube with care !
             // first vol
-            for (unsigned int i=0; i<glueVols1.size(); i++) {
+            for (auto & vol : glueVols1) {
                 // set the array as the outside array of the firstVol
                 if (firstFace != Trk::tubeInnerCover) {
                     if (glueVols2.size()>1)
-                        setOutsideTrackingVolumeArray( *(glueVols1[i]), firstFace, sgv2 );
+                        setOutsideTrackingVolumeArray( *vol, firstFace, sgv2 );
                     else
-                        setOutsideTrackingVolume( *(glueVols1[i]), firstFace, glueVols2[0] );
+                        setOutsideTrackingVolume( *vol, firstFace, glueVols2[0] );
                 } else {
                     if (glueVols2.size()>1){
-                        setInsideTrackingVolumeArray( *(glueVols1[i]), firstFace, sgv2 );
-                        setOutsideTrackingVolume( *(glueVols1[i]), firstFace, glueVols1[i] );
+                        setInsideTrackingVolumeArray( *vol, firstFace, sgv2 );
+                        setOutsideTrackingVolume( *vol, firstFace, vol );
                     } else {
-                        setInsideTrackingVolume( *(glueVols1[i]), firstFace, glueVols2[0] );
-                        setOutsideTrackingVolume( *(glueVols1[i]), firstFace, glueVols1[i] );
+                        setInsideTrackingVolume( *vol, firstFace, glueVols2[0] );
+                        setOutsideTrackingVolume( *vol, firstFace, vol );
                     }
                 }
             }
             // second
-            for (unsigned int i=0; i<glueVols2.size(); i++) {
+            for (auto & vol : glueVols2) {
                 // set the array as the outside array of the secondVol
                 if (secondFace != Trk::tubeInnerCover)
-                    setOutsideTrackingVolumeArray( *(glueVols2[i]), secondFace, sgv1 );
+                    setOutsideTrackingVolumeArray( *vol, secondFace, sgv1 );
                 else {
-                    setInsideTrackingVolumeArray( *(glueVols2[i]), secondFace, sgv1 );
-                    setOutsideTrackingVolume( *(glueVols2[i]), secondFace, glueVols2[i] );
+                    setInsideTrackingVolumeArray( *vol, secondFace, sgv1 );
+                    setOutsideTrackingVolume( *vol, secondFace, vol );
                 }
             }
         }

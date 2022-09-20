@@ -90,9 +90,9 @@ namespace Trk
     printf("STATE x0=%f y0=%f phi=%f theta=%f qOverP=%f pT=%f\n",
            m_Rk[0], m_Rk[1], m_Rk[2], m_Rk[3], m_Rk[4], sin(m_Rk[3]) / m_Rk[4]);
     printf("COVARIANCE \n");
-    for (int i = 0; i < 5; i++) {
-      for (int j = 0; j < 5; j++) {
-        printf("%E ", m_Gk[i][j]);
+    for (auto & i : m_Gk) {
+      for (double j : i) {
+        printf("%E ", j);
       }
       printf("\n");
     }

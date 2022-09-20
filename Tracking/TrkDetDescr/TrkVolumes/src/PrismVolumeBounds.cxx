@@ -264,8 +264,8 @@ Trk::PrismVolumeBounds::dump(MsgStream& sl) const
   temp_sl << std::setprecision(7);
   temp_sl << "Trk::PrismVolumeBounds: (halfZ, generating vtx) = ";
   temp_sl << "( " << m_halfZ << ")";
-  for (unsigned int i = 0; i < m_xyVtx.size(); i++)
-    temp_sl << "(" << m_xyVtx[i].first << "," << m_xyVtx[i].second << ")";
+  for (const auto & myVtx : m_xyVtx)
+    temp_sl << "(" << myVtx.first << "," << myVtx.second << ")";
   sl << temp_sl.str();
 
   return sl;
@@ -279,8 +279,8 @@ Trk::PrismVolumeBounds::dump(std::ostream& sl) const
   temp_sl << std::setprecision(7);
   temp_sl << "Trk::PrismVolumeBounds:  (halfZ, generating vtx) = ";
   temp_sl << "( " << m_halfZ << ")";
-  for (unsigned int i = 0; i < m_xyVtx.size(); i++)
-    temp_sl << "(" << m_xyVtx[i].first << "," << m_xyVtx[i].second << ")";
+  for (const auto & myVtx : m_xyVtx)
+    temp_sl << "(" << myVtx.first << "," << myVtx.second << ")";
   sl << temp_sl.str();
 
   return sl;

@@ -288,10 +288,10 @@ Trk::TrackingVolumeArrayCreator::cylinderVolumesArrayInPhiR(
     return nullptr;
 
   bool bevelled = false;
-  for (unsigned int i = 0; i < vols.size(); ++i) {
+  for (auto *vol : vols) {
     const Trk::BevelledCylinderVolumeBounds* bcyl =
       dynamic_cast<const Trk::BevelledCylinderVolumeBounds*>(
-        &(vols[i]->volumeBounds()));
+        &(vol->volumeBounds()));
     if (bcyl) {
       bevelled = true;
       break;
@@ -313,13 +313,13 @@ Trk::TrackingVolumeArrayCreator::cylinderVolumesArrayInPhiR(
       volPos;
     std::vector<Trk::TrackingVolume*> fullPhiVols;
 
-    for (unsigned int i = 0; i < vols.size(); ++i) {
+    for (auto *vol : vols) {
       const Trk::CylinderVolumeBounds* cyl =
         dynamic_cast<const Trk::CylinderVolumeBounds*>(
-          &(vols[i]->volumeBounds()));
+          &(vol->volumeBounds()));
       const Trk::BevelledCylinderVolumeBounds* bcyl =
         dynamic_cast<const Trk::BevelledCylinderVolumeBounds*>(
-          &(vols[i]->volumeBounds()));
+          &(vol->volumeBounds()));
       double rmin = 0.;
       double rmax = 0.;
       double dphi = 0.;
@@ -345,13 +345,13 @@ Trk::TrackingVolumeArrayCreator::cylinderVolumesArrayInPhiR(
       if (dphi < M_PI) {
         // push back the volume order position
         Amg::Vector3D gp(mRad, 0., 0.);
-        Amg::Vector3D ngp((vols[i]->transform()) * gp);
+        Amg::Vector3D ngp((vol->transform()) * gp);
         if (!navtype) {
           volOrder.emplace_back(
-            Trk::SharedObject<TrackingVolume>(vols[i]), ngp);
+            Trk::SharedObject<TrackingVolume>(vol), ngp);
         } else {
           volOrder.emplace_back(Trk::SharedObject<TrackingVolume>(
-                                  vols[i], do_not_delete<TrackingVolume>),
+                                  vol, do_not_delete<TrackingVolume>),
                                 ngp);
         }
         // push back volume position to avoid another loop
@@ -407,7 +407,7 @@ Trk::TrackingVolumeArrayCreator::cylinderVolumesArrayInPhiR(
           phiSteps.push_back(fmax(phi1, phi2));
         }
       } else {
-        fullPhiVols.push_back(vols[i]);
+        fullPhiVols.push_back(vol);
       }
     } // end of first loop over volumes
     // collect volumes with full phi range
@@ -415,10 +415,10 @@ Trk::TrackingVolumeArrayCreator::cylinderVolumesArrayInPhiR(
       phiSteps.push_back(-M_PI);
       phiSteps.push_back(+M_PI);
     }
-    for (unsigned int iv = 0; iv < fullPhiVols.size(); ++iv) {
+    for (auto & fullPhiVol : fullPhiVols) {
       const Trk::CylinderVolumeBounds* cyl =
         dynamic_cast<const Trk::CylinderVolumeBounds*>(
-          &(fullPhiVols[iv]->volumeBounds()));
+          &(fullPhiVol->volumeBounds()));
       if (!cyl) {
         ATH_MSG_WARNING("dynamic_cast<const Trk::CylinderVolumeBounds*>   "
                         "failed ... trying to continue loop");
@@ -441,11 +441,11 @@ Trk::TrackingVolumeArrayCreator::cylinderVolumesArrayInPhiR(
 
         if (!navtype) {
           volOrder.emplace_back(
-            Trk::SharedObject<TrackingVolume>(fullPhiVols[iv]), ngp);
+            Trk::SharedObject<TrackingVolume>(fullPhiVol), ngp);
         } else {
           volOrder.emplace_back(
             Trk::SharedObject<TrackingVolume>(
-              fullPhiVols[iv], do_not_delete<TrackingVolume>),
+              fullPhiVol, do_not_delete<TrackingVolume>),
             ngp);
         }
         // push back volume position to avoid another loop
@@ -549,10 +549,10 @@ Trk::TrackingVolumeArrayCreator::cylinderVolumesArrayInPhiR(
   double phiSector = M_PI;
   std::vector<std::pair<double, std::pair<double, double>>> volPos;
 
-  for (unsigned int i = 0; i < vols.size(); ++i) {
+  for (auto *vol : vols) {
     const Trk::CylinderVolumeBounds* cyl =
       dynamic_cast<const Trk::CylinderVolumeBounds*>(
-        &(vols[i]->volumeBounds()));
+        &(vol->volumeBounds()));
     if (!cyl) {
       ATH_MSG_WARNING("dynamic_cast<const Trk::CylinderVolumeBounds*>   "
                       "failed ... trying to continue loop");
@@ -566,13 +566,13 @@ Trk::TrackingVolumeArrayCreator::cylinderVolumesArrayInPhiR(
 
     // push back the volume order position
     Amg::Vector3D gp(cyl->mediumRadius(), 0., 0.);
-    Amg::Vector3D ngp((vols[i]->transform()) * gp);
+    Amg::Vector3D ngp((vol->transform()) * gp);
     if (!navtype) {
-      volOrder.emplace_back(Trk::SharedObject<TrackingVolume>(vols[i]),
+      volOrder.emplace_back(Trk::SharedObject<TrackingVolume>(vol),
                             ngp);
     } else {
       volOrder.emplace_back(Trk::SharedObject<TrackingVolume>(
-                              vols[i], do_not_delete<TrackingVolume>),
+                              vol, do_not_delete<TrackingVolume>),
                             ngp);
     }
     // push back volume position to avoid another loop
@@ -738,25 +738,25 @@ Trk::TrackingVolumeArrayCreator::cylinderVolumesArrayInPhiZ(
   double phiSector = M_PI;
   std::vector<std::pair<float, std::pair<float, float>>> volPos;
 
-  for (unsigned int i = 0; i < vols.size(); ++i) {
+  for (auto *vol : vols) {
     const Trk::CylinderVolumeBounds* cyl =
       dynamic_cast<const Trk::CylinderVolumeBounds*>(
-        &(vols[i]->volumeBounds()));
+        &(vol->volumeBounds()));
     const Trk::BevelledCylinderVolumeBounds* bcyl =
       dynamic_cast<const Trk::BevelledCylinderVolumeBounds*>(
-        &(vols[i]->volumeBounds()));
+        &(vol->volumeBounds()));
     double zmin = 0.;
     double zmax = 0.;
     double dphi = 0.;
     double mRad = 0.;
     if (cyl) {
-      zmin = vols[i]->center()[2] - cyl->halflengthZ();
-      zmax = vols[i]->center()[2] + cyl->halflengthZ();
+      zmin = vol->center()[2] - cyl->halflengthZ();
+      zmax = vol->center()[2] + cyl->halflengthZ();
       dphi = cyl->halfPhiSector();
       mRad = cyl->mediumRadius();
     } else if (bcyl) {
-      zmin = vols[i]->center()[2] - bcyl->halflengthZ();
-      zmax = vols[i]->center()[2] + bcyl->halflengthZ();
+      zmin = vol->center()[2] - bcyl->halflengthZ();
+      zmax = vol->center()[2] + bcyl->halflengthZ();
       dphi = bcyl->halfPhiSector();
       mRad = bcyl->mediumRadius();
     } else {
@@ -769,17 +769,17 @@ Trk::TrackingVolumeArrayCreator::cylinderVolumesArrayInPhiZ(
 
     // push back the volume order position
     Amg::Vector3D gp(mRad, 0., 0.);
-    Amg::Vector3D ngp((vols[i]->transform()) * gp);
+    Amg::Vector3D ngp((vol->transform()) * gp);
     if (!navtype) {
-      volOrder.emplace_back(Trk::SharedObject<TrackingVolume>(vols[i]),
+      volOrder.emplace_back(Trk::SharedObject<TrackingVolume>(vol),
                             ngp);
     } else {
       volOrder.emplace_back(Trk::SharedObject<TrackingVolume>(
-                              vols[i], do_not_delete<TrackingVolume>),
+                              vol, do_not_delete<TrackingVolume>),
                             ngp);
     }
     // push back volume position to avoid another loop
-    volPos.emplace_back(vols[i]->center()[2],
+    volPos.emplace_back(vol->center()[2],
                         std::pair<float, float>(ngp.phi(), dphi));
     // z binning
     if (!zSteps.empty()) {

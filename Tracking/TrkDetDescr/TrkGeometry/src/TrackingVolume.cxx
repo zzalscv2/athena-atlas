@@ -424,9 +424,9 @@ Trk::TrackingVolume::TrackingVolume(const Trk::TrackingVolume& trVol,
     Trk::BinnedArraySpan<Trk::Layer const* const> layers = confinedLayers->arrayObjects();
     std::vector<Trk::SharedObject<Trk::Layer>> layerOrder;
     layerOrder.reserve(layers.size());
-    for (unsigned int i = 0; i < layers.size(); i++) {
+    for (const auto *layer : layers) {
       const Trk::PlaneLayer* lay =
-        dynamic_cast<const Trk::PlaneLayer*>(layers[i]);
+        dynamic_cast<const Trk::PlaneLayer*>(layer);
       if (lay) {
         Trk::PlaneLayer* newlay = new Trk::PlaneLayer(*lay, transform);
         layerOrder.push_back(Trk::SharedObject<Trk::Layer>(newlay));
@@ -448,17 +448,17 @@ Trk::TrackingVolume::TrackingVolume(const Trk::TrackingVolume& trVol,
     // clone & apply the transform
     std::vector<Trk::Layer*> uLayers;
     uLayers.reserve(confinedArbitraryLayers.size());
-    for (unsigned int i = 0; i < confinedArbitraryLayers.size(); i++) {
+    for (const auto *confinedArbitraryLayer : confinedArbitraryLayers) {
       const Trk::SubtractedPlaneLayer* slayer =
         dynamic_cast<const Trk::SubtractedPlaneLayer*>(
-          confinedArbitraryLayers[i]);
+          confinedArbitraryLayer);
       const Trk::SubtractedCylinderLayer* sclayer =
         dynamic_cast<const Trk::SubtractedCylinderLayer*>(
-          confinedArbitraryLayers[i]);
+          confinedArbitraryLayer);
       const Trk::PlaneLayer* layer =
-        dynamic_cast<const Trk::PlaneLayer*>(confinedArbitraryLayers[i]);
+        dynamic_cast<const Trk::PlaneLayer*>(confinedArbitraryLayer);
       const Trk::CylinderLayer* clayer =
-        dynamic_cast<const Trk::CylinderLayer*>(confinedArbitraryLayers[i]);
+        dynamic_cast<const Trk::CylinderLayer*>(confinedArbitraryLayer);
 
       if (slayer) {
         Trk::SubtractedPlaneLayer* lay =
@@ -488,8 +488,8 @@ Trk::TrackingVolume::TrackingVolume(const Trk::TrackingVolume& trVol,
       confinedVolumes->arrayObjects();
     std::vector<Trk::SharedObject<Trk::TrackingVolume>> volOrder;
     volOrder.reserve(volumes.size());
-    for (unsigned int i = 0; i < volumes.size(); i++) {
-      Trk::TrackingVolume* vol = new Trk::TrackingVolume(*(volumes[i]), transform);
+    for (const auto *volume : volumes) {
+      Trk::TrackingVolume* vol = new Trk::TrackingVolume(*volume, transform);
       volOrder.push_back(Trk::SharedObject<TrackingVolume>(vol));
     }
     const Trk::NavBinnedArray1D<Trk::TrackingVolume>* confVols =
@@ -508,9 +508,9 @@ Trk::TrackingVolume::TrackingVolume(const Trk::TrackingVolume& trVol,
     std::vector<Trk::TrackingVolume*> newVol;
     newVol.reserve(confinedDenseVolumes.size());
     // retrieve array objects and apply the transform
-    for (unsigned int i = 0; i < confinedDenseVolumes.size(); ++i) {
+    for (const auto *confinedDenseVolume : confinedDenseVolumes) {
       Trk::TrackingVolume* vol =
-        new Trk::TrackingVolume(*((confinedDenseVolumes)[i]), transform);
+        new Trk::TrackingVolume(*confinedDenseVolume, transform);
       newVol.push_back(vol);
     }
     m_confinedDenseVolumes =
@@ -524,13 +524,15 @@ Trk::TrackingVolume::~TrackingVolume()
   delete m_confinedVolumes;
   delete m_confinedDetachedVolumes;
   if (m_confinedDenseVolumes) {
-    for (size_t i = 0; i < m_confinedDenseVolumes->size(); i++)
-      delete (*m_confinedDenseVolumes)[i];
+    for (auto * confinedDenseVolume : *m_confinedDenseVolumes){
+      delete confinedDenseVolume;
+    }
     delete m_confinedDenseVolumes;
   }
   if (m_confinedArbitraryLayers) {
-    for (size_t i = 0; i < m_confinedArbitraryLayers->size(); i++)
-      delete (*m_confinedArbitraryLayers)[i];
+    for (auto * confinedArbitraryLayer : *m_confinedArbitraryLayers){
+      delete confinedArbitraryLayer;
+    }
     delete m_confinedArbitraryLayers;
   }
   delete m_layerAttemptsCalculator;
@@ -548,14 +550,16 @@ Trk::TrackingVolume::clear()
     m_confinedLayers = nullptr;
   }
   if (m_confinedDenseVolumes) {
-    for (size_t i = 0; i < m_confinedDenseVolumes->size(); i++)
-      delete (*m_confinedDenseVolumes)[i];
+    for (auto * confinedDenseVolume : *m_confinedDenseVolumes){
+      delete confinedDenseVolume;
+    }
     delete m_confinedDenseVolumes;
     m_confinedDenseVolumes = nullptr;
   }
   if (m_confinedArbitraryLayers) {
-    for (size_t i = 0; i < m_confinedArbitraryLayers->size(); i++)
-      delete (*m_confinedArbitraryLayers)[i];
+    for (auto *confinedArbitraryLayer : *m_confinedArbitraryLayers){
+      delete confinedArbitraryLayer;
+    }
     delete m_confinedArbitraryLayers;
     m_confinedArbitraryLayers = nullptr;
   }
@@ -569,9 +573,11 @@ Trk::TrackingVolume::associatedLayer(const Amg::Vector3D& gp) const
     return (confinedLayers()->object(gp));
   // confined arbitrary
   if (m_confinedArbitraryLayers) {
-    for (unsigned int i = 0; i < m_confinedArbitraryLayers->size(); i++)
-      if ((*m_confinedArbitraryLayers)[i]->isOnLayer(gp))
-        return (*m_confinedArbitraryLayers)[i];
+    for (auto * confinedArbitraryLayer : *m_confinedArbitraryLayers){
+      if (confinedArbitraryLayer->isOnLayer(gp)){
+        return confinedArbitraryLayer;
+      }
+    }
   }
   return nullptr;
 }
@@ -584,9 +590,11 @@ Trk::TrackingVolume::associatedLayer(const Amg::Vector3D& gp)
     return (confinedLayers()->object(gp));
   // confined arbitrary
   if (m_confinedArbitraryLayers) {
-    for (unsigned int i = 0; i < m_confinedArbitraryLayers->size(); i++)
-      if ((*m_confinedArbitraryLayers)[i]->isOnLayer(gp))
-        return (*m_confinedArbitraryLayers)[i];
+    for (auto * confinedArbitraryLayer : *m_confinedArbitraryLayers){
+      if (confinedArbitraryLayer->isOnLayer(gp)){
+        return confinedArbitraryLayer;
+      }
+    }
   }
   return nullptr;
 }
@@ -705,16 +713,18 @@ Trk::TrackingVolume::associatedSubVolume(const Amg::Vector3D& gp) const
     return (m_confinedVolumes->object(gp));
 
   if (m_confinedDetachedVolumes) {
-    for (size_t i = 0; i < m_confinedDetachedVolumes->size(); i++) {
-      if ((*m_confinedDetachedVolumes)[i]->trackingVolume()->inside(gp, 0.001))
-        return ((*m_confinedDetachedVolumes)[i])->trackingVolume();
+    for (auto *confinedDetachedVolume : *m_confinedDetachedVolumes) {
+      if (confinedDetachedVolume->trackingVolume()->inside(gp, 0.001)){
+        return confinedDetachedVolume->trackingVolume();
+      }
     }
   }
 
   if (m_confinedDenseVolumes) {
-    for (size_t i = 0; i < m_confinedDenseVolumes->size(); i++)
-      if ((*m_confinedDenseVolumes)[i]->inside(gp, 0.001))
-        return (*m_confinedDenseVolumes)[i];
+    for (auto *confinedDenseVolume : *m_confinedDenseVolumes)
+      if (confinedDenseVolume->inside(gp, 0.001)){
+        return confinedDenseVolume;
+      }
   }
 
   return this;
@@ -727,16 +737,19 @@ Trk::TrackingVolume::associatedSubVolume(const Amg::Vector3D& gp)
     return (m_confinedVolumes->object(gp));
 
   if (m_confinedDetachedVolumes) {
-    for (size_t i = 0; i < m_confinedDetachedVolumes->size(); i++) {
-      if ((*m_confinedDetachedVolumes)[i]->trackingVolume()->inside(gp, 0.001))
-        return ((*m_confinedDetachedVolumes)[i])->trackingVolume();
+    for (auto *confinedDetachedVolume : *m_confinedDetachedVolumes) {
+      if (confinedDetachedVolume->trackingVolume()->inside(gp, 0.001)){
+        return confinedDetachedVolume->trackingVolume();
+      }
     }
   }
 
   if (m_confinedDenseVolumes) {
-    for (size_t i = 0; i < m_confinedDenseVolumes->size(); i++)
-      if ((*m_confinedDenseVolumes)[i]->inside(gp, 0.001))
-        return (*m_confinedDenseVolumes)[i];
+    for (auto * confinedDenseVolume : *m_confinedDenseVolumes){
+      if (confinedDenseVolume->inside(gp, 0.001)){
+        return confinedDenseVolume;
+      }
+    }
   }
 
   return this;
@@ -793,9 +806,9 @@ Trk::TrackingVolume::assocDetachedSubVolumes(const Amg::Vector3D& gp,
   Trk::ArraySpan<const Trk::DetachedTrackingVolume* const> detVols =
     confinedDetachedVolumes();
   if (!detVols.empty()) {
-    for (unsigned int i = 0; i < detVols.size(); i++) {
-      if (detVols[i]->trackingVolume()->inside(gp, tol))
-        currVols->push_back(detVols[i]);
+    for (const auto *detVol : detVols) {
+      if (detVol->trackingVolume()->inside(gp, tol))
+        currVols->push_back(detVol);
     }
   }
   return currVols;
@@ -1233,9 +1246,9 @@ Trk::TrackingVolume* Trk::TrackingVolume::cloneTV (Amg::Transform3D& transform) 
     // retrieve array objects and apply the transform
     Trk::BinnedArraySpan<Trk::Layer const * const> layers = confLayers->arrayObjects();
     std::vector<Trk::SharedObject<Trk::Layer>> layerOrder;
-    for (unsigned int i = 0; i < layers.size(); i++) {
+    for (const auto *layer : layers) {
       const Trk::PlaneLayer* lay =
-        dynamic_cast<const Trk::PlaneLayer*>(layers[i]);
+        dynamic_cast<const Trk::PlaneLayer*>(layer);
       if (lay) {
         Trk::PlaneLayer* newlay = new Trk::PlaneLayer(*lay, transform);
         layerOrder.push_back(Trk::SharedObject<Trk::Layer>(newlay));
@@ -1258,15 +1271,15 @@ Trk::TrackingVolume* Trk::TrackingVolume::cloneTV (Amg::Transform3D& transform) 
   if (!confArbLayers.empty()) {
     // clone & apply the transform
     std::vector<Trk::Layer*> uLayers;
-    for (unsigned int i = 0; i < confArbLayers.size(); i++) {
+    for (const auto *confArbLayer : confArbLayers) {
       const Trk::SubtractedPlaneLayer* slayer =
-        dynamic_cast<const Trk::SubtractedPlaneLayer*>(confArbLayers[i]);
+        dynamic_cast<const Trk::SubtractedPlaneLayer*>(confArbLayer);
       const Trk::SubtractedCylinderLayer* sclayer =
-        dynamic_cast<const Trk::SubtractedCylinderLayer*>(confArbLayers[i]);
+        dynamic_cast<const Trk::SubtractedCylinderLayer*>(confArbLayer);
       const Trk::PlaneLayer* layer =
-        dynamic_cast<const Trk::PlaneLayer*>(confArbLayers[i]);
+        dynamic_cast<const Trk::PlaneLayer*>(confArbLayer);
       const Trk::CylinderLayer* clayer =
-        dynamic_cast<const Trk::CylinderLayer*>(confArbLayers[i]);
+        dynamic_cast<const Trk::CylinderLayer*>(confArbLayer);
 
       if (slayer) {
         Trk::SubtractedPlaneLayer* lay = new Trk::SubtractedPlaneLayer(*slayer);
@@ -1297,8 +1310,8 @@ Trk::TrackingVolume* Trk::TrackingVolume::cloneTV (Amg::Transform3D& transform) 
     // retrieve array objects and apply the transform
     Trk::BinnedArraySpan<Trk::TrackingVolume const* const> volumes = confVolumes->arrayObjects();
     std::vector<Trk::SharedObject<TrackingVolume>> volOrder;
-    for (unsigned int i = 0; i < volumes.size(); i++) {
-      Trk::TrackingVolume* vol = volumes[i]->cloneTV(transform);
+    for (const auto *volume : volumes) {
+      Trk::TrackingVolume* vol = volume->cloneTV(transform);
       volOrder.push_back(Trk::SharedObject<TrackingVolume>(vol));
     }
     // recreate TrackingVolumeArray
@@ -1317,9 +1330,9 @@ Trk::TrackingVolume* Trk::TrackingVolume::cloneTV (Amg::Transform3D& transform) 
   if (!confDenseVolumes.empty()) {
     std::vector<Trk::TrackingVolume*> newVol;
     // retrieve array objects and apply the transform
-    for (unsigned int i = 0; i < confDenseVolumes.size(); i++) {
+    for (const auto *confDenseVolume : confDenseVolumes) {
       Trk::TrackingVolume* vol =
-        (confDenseVolumes)[i]->cloneTV(transform);
+        confDenseVolume->cloneTV(transform);
       newVol.push_back(vol);
     }
     newDenseVol = new std::vector<Trk::TrackingVolume*>(newVol);

@@ -329,11 +329,11 @@ const std::vector<const Trk::Surface*>*
     }
   }
 
-  for (size_t i = 0; i < firstSurfaces->size(); i++) {
-    delete (*firstSurfaces)[i];
+  for (const auto *firstSurface : *firstSurfaces) {
+    delete firstSurface;
   }
-  for (size_t i = 0; i < secondSurfaces->size(); i++) {
-    delete (*secondSurfaces)[i];
+  for (const auto *secondSurface : *secondSurfaces) {
+    delete secondSurface;
   }
   delete firstSurfaces;
   delete secondSurfaces;

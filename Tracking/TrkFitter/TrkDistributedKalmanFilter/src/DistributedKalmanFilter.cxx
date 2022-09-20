@@ -881,13 +881,13 @@ Trk::DistributedKalmanFilter::fit(
       inputPRDColl.begin(), inputPRDColl.end(), *compareHits);
   delete compareHits;
   ATH_MSG_VERBOSE(" List of sorted PRDs: ");
-  for (PrepRawDataSet::const_iterator prdIt = inputPRDColl.begin(); prdIt != inputPRDColl.end(); prdIt++) {
-    if (!(*prdIt)->detectorElement()) continue;
-    ATH_MSG_VERBOSE(m_idHelper->print_to_string((*prdIt)->identify())
+  for (const auto *prdIt : inputPRDColl) {
+    if (!prdIt->detectorElement()) continue;
+    ATH_MSG_VERBOSE(m_idHelper->print_to_string(prdIt->identify())
                     << " radius= "
-                    << (*prdIt)
+                    << prdIt
                      ->detectorElement()
-                     ->surface((*prdIt)->identify())
+                     ->surface(prdIt->identify())
                      .center()
                      .mag());
   }
@@ -942,18 +942,16 @@ Trk::DistributedKalmanFilter::fit(
   PVPSurfaces pvpSurfaces;
   PVPTrackStates pvpTrackStates;
 
-  for (PrepRawDataSet::const_iterator prdIt = inputPRDColl.begin();
-       prdIt != inputPRDColl.end();
-       prdIt++) {
-    if ((*prdIt)->detectorElement() == nullptr) {
+  for (const auto *prdIt : inputPRDColl) {
+    if (prdIt->detectorElement() == nullptr) {
       ATH_MSG_WARNING(" PrepRawData has no detector element - drop it");
       continue;
     }
-    Identifier ID = (*prdIt)->identify();
+    Identifier ID = prdIt->identify();
     if (m_idHelper->is_indet(ID) || m_idHelper->is_sct(ID) ||
         m_idHelper->is_pixel(ID) || m_idHelper->is_trt(ID)) {
       if (m_idHelper->is_pixel(ID) || m_idHelper->is_sct(ID)) {
-        const Trk::Surface& rSurf = (*prdIt)->detectorElement()->surface();
+        const Trk::Surface& rSurf = prdIt->detectorElement()->surface();
         N[0] = rSurf.normal().x();
         N[1] = rSurf.normal().y();
         N[2] = rSurf.normal().z();
@@ -971,12 +969,12 @@ Trk::DistributedKalmanFilter::fit(
         pvpSurfaces.push_back(std::make_unique<TrkPlanarSurface>(C, N, M, rlSili));
         pS = pvpSurfaces.back().get();
         if (m_idHelper->is_pixel(ID)) {
-          pvpNodes.push_back(std::make_unique<TrkPixelNode>(pS, 200.0, (*prdIt)));
+          pvpNodes.push_back(std::make_unique<TrkPixelNode>(pS, 200.0, prdIt));
         } else {
           if (fabs(N[2]) < 0.1) {
-            pvpNodes.push_back(std::make_unique<TrkClusterNode>(pS, 200.0, (*prdIt)));
+            pvpNodes.push_back(std::make_unique<TrkClusterNode>(pS, 200.0, prdIt));
           } else {
-            pvpNodes.push_back(std::make_unique<TrkEndCapClusterNode>(pS, 200.0, (*prdIt)));
+            pvpNodes.push_back(std::make_unique<TrkEndCapClusterNode>(pS, 200.0, prdIt));
           }
         }
         continue;
@@ -984,10 +982,10 @@ Trk::DistributedKalmanFilter::fit(
       if (m_idHelper->is_trt(ID)) {
         nAmbHits++;
 
-        const Trk::Surface& rSurf = (*prdIt)->detectorElement()->surface(ID);
+        const Trk::Surface& rSurf = prdIt->detectorElement()->surface(ID);
         double len = 500.0;
         const Trk::SurfaceBounds& rBounds =
-          (*prdIt)->detectorElement()->surface().bounds();
+          prdIt->detectorElement()->surface().bounds();
 
         C[0] = rSurf.center().x();
         C[1] = rSurf.center().y();
@@ -996,7 +994,7 @@ Trk::DistributedKalmanFilter::fit(
         double sinFs = C[1] / sqrt(C[0] * C[0] + C[1] * C[1]);
 
         const Amg::Vector3D& rNorm =
-          (*prdIt)->detectorElement()->surface().normal();
+          prdIt->detectorElement()->surface().normal();
         bool isBarrel = true;
         if (fabs(rNorm.z()) > 0.2) isBarrel = false;
 
@@ -1048,7 +1046,7 @@ Trk::DistributedKalmanFilter::fit(
         }
         pvpSurfaces.push_back(std::make_unique<TrkPlanarSurface>(C, N, M, rlTrt));
         pS = pvpSurfaces.back().get();
-        pvpNodes.push_back(std::make_unique<TrkTrtNode>(pS, 200.0, -len, len, (*prdIt)));
+        pvpNodes.push_back(std::make_unique<TrkTrtNode>(pS, 200.0, -len, len, prdIt));
 
         continue;
       }

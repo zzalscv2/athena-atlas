@@ -2271,8 +2271,8 @@ namespace Trk {
     std::unique_ptr<Track> track =
       fit(ctx, rots, param, runOutlier, matEffects);
 
-    for (MeasurementSet::const_iterator it = rots.begin(); it != rots.end(); ++it) {
-      delete *it;
+    for (const auto *rot : rots) {
+      delete rot;
     }
     
     return track;
@@ -2419,8 +2419,8 @@ namespace Trk {
     
     std::unique_ptr<Track> track = fit(ctx,intrk, rots, runOutlier, matEffects);
     
-    for (MeasurementSet::const_iterator it = rots.begin(); it != rots.end(); ++it) {
-      delete *it;
+    for (const auto *rot : rots) {
+      delete rot;
     }
     
     return track;
@@ -3470,51 +3470,43 @@ namespace Trk {
     /*
      * Now, we add the barrel cylinder layers.
      */
-    for (
-      std::vector<const Layer *>::const_iterator it = cache.m_barrelcylinders.begin(); 
-      it != cache.m_barrelcylinders.end();
-      ++it
-    ) {
+    for (const auto *barrelcylinder : cache.m_barrelcylinders) {
       /*
        * Check for overshoots and reject them.
        */
-      if ((*it)->surfaceRepresentation().bounds().r() > lastr) {
+      if (barrelcylinder->surfaceRepresentation().bounds().r() > lastr) {
         break;
       }
       
       /*
        * Confirm intersection with the layer.
        */
-      double zintersect = firstz + ((*it)->surfaceRepresentation().bounds().r() - firstr) * slope;
+      double zintersect = firstz + (barrelcylinder->surfaceRepresentation().bounds().r() - firstr) * slope;
 
-      if (std::abs(zintersect - (*it)->surfaceRepresentation().center().z()) >
-          ((const CylinderSurface*)(&(*it)->surfaceRepresentation()))->bounds().halflengthZ() + 50) {
+      if (std::abs(zintersect - barrelcylinder->surfaceRepresentation().center().z()) >
+          ((const CylinderSurface*)(&barrelcylinder->surfaceRepresentation()))->bounds().halflengthZ() + 50) {
         continue;
       }
 
-      if ((*it) == endlayer) {
+      if (barrelcylinder == endlayer) {
         continue;
       }
       
       /*
        * Same as with the discs, add the layers to the output vectors.
        */
-      if (
-        (*it)->surfaceRepresentation().bounds().r() < firstr || 
-        (*it) == startlayer
-      ) {
-        upstreamlayers.emplace_back((*it), (Layer *) nullptr);
+      if (barrelcylinder->surfaceRepresentation().bounds().r() < firstr ||
+          barrelcylinder == startlayer) {
+        upstreamlayers.emplace_back(barrelcylinder, (Layer*)nullptr);
       }
-      
-      if (
-        (*it) != startlayer && 
-        ((*it)->surfaceRepresentation().bounds().r() > firstr2 || 
-        (*it) == startlayer2)
-      ) {
-        layers.emplace_back((*it), (Layer *) nullptr);
+
+      if (barrelcylinder != startlayer &&
+          (barrelcylinder->surfaceRepresentation().bounds().r() > firstr2 ||
+           barrelcylinder == startlayer2)) {
+        layers.emplace_back(barrelcylinder, (Layer*)nullptr);
       }
     }
-    
+
     /*
      * Sort the layers such that they are in the right order, from close to far
      * in respect to the experiment center.
@@ -4800,9 +4792,9 @@ namespace Trk {
         nearestpar = uclone(&param);
       }
 
-      for (int i = 0; i < (int) mymatvec.size(); i++) {
+      for (auto & state : mymatvec) {
         Trk::PropDirection propdir = Trk::alongMomentum;
-        const Surface *matsurf = mymatvec[i]->surface();
+        const Surface *matsurf = state->surface();
         DistanceSolution distsol = matsurf->straightLineDistanceEstimate(
           nearestpar->position(), nearestpar->momentum().unit());
 
@@ -4846,11 +4838,11 @@ namespace Trk {
 
         AmgVector(5) newpars = tmppar->parameters();
         
-        if (mymatvec[i]->materialEffects()->sigmaDeltaE() > 0) {
-          newpars[Trk::qOverP] += .001 * mymatvec[i]->materialEffects()->delta_p();
+        if (state->materialEffects()->sigmaDeltaE() > 0) {
+          newpars[Trk::qOverP] += .001 * state->materialEffects()->delta_p();
         } else if (newpars[Trk::qOverP] != 0) {
           double sign = (newpars[Trk::qOverP] > 0) ? 1 : -1;
-          double de = std::abs(mymatvec[i]->materialEffects()->deltaE());
+          double de = std::abs(state->materialEffects()->deltaE());
           double oldp = std::abs(1 / newpars[Trk::qOverP]);
           double newp2 = oldp * oldp - 2 * de * std::sqrt(mass * mass + oldp * oldp) + de * de;
           if (newp2 > 0) {
