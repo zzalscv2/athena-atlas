@@ -169,6 +169,9 @@ def createTriggerFlags(doTriggerRecoFlags):
     # enable L1Muon ByteStream conversion / simulation
     flags.addFlag('Trigger.L1.doMuon', True)
 
+    # enable ByteStream conversion / simulation of MUCTPI Topo TOBs
+    flags.addFlag('Trigger.L1.doMuonTopoInputs', lambda prevFlags: prevFlags.Trigger.doLVL1)
+
     # enable L1Calo ByteStream conversion / simulation
     flags.addFlag('Trigger.L1.doCalo', True)
 

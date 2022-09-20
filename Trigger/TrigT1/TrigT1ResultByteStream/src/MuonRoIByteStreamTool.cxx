@@ -20,6 +20,9 @@
 using ROBF = OFFLINE_FRAGMENTS_NAMESPACE::ROBFragment;
 using WROBF = OFFLINE_FRAGMENTS_NAMESPACE_WRITE::ROBFragment;
 
+// -----------------------------------------------------------------------------
+// Helpers
+// -----------------------------------------------------------------------------
 namespace {
   /// x-axis values for word type count histogram
   constexpr static std::array<size_t,static_cast<size_t>(LVL1::MuCTPIBits::WordType::MAX)> s_wordTypes = {0,1,2,3,4,5};
@@ -52,20 +55,32 @@ namespace {
   }
 }
 
+// -----------------------------------------------------------------------------
+// Constructor
+// -----------------------------------------------------------------------------
 MuonRoIByteStreamTool::MuonRoIByteStreamTool(const std::string& type,
                                              const std::string& name,
                                              const IInterface* parent)
 : base_class(type, name, parent) {}
 
+// -----------------------------------------------------------------------------
+// Initialisation
+// -----------------------------------------------------------------------------
 StatusCode MuonRoIByteStreamTool::initialize() {
   ConversionMode mode = getConversionMode(m_roiReadKeys, m_roiWriteKeys, msg());
   ATH_CHECK(mode!=ConversionMode::Undefined);
   ATH_CHECK(m_roiWriteKeys.initialize(mode==ConversionMode::Decoding));
   ATH_CHECK(m_roiReadKeys.initialize(mode==ConversionMode::Encoding));
-  ATH_CHECK(m_MuCTPIL1TopoKeys.initialize(mode==ConversionMode::Decoding));
+  ATH_CHECK(m_MuCTPIL1TopoKeys.initialize(m_doTopo.value() && mode==ConversionMode::Decoding));
 
   ATH_MSG_DEBUG((mode==ConversionMode::Encoding ? "Encoding" : "Decoding") << " ROB IDs: "
                 << MSG::hex << m_robIds.value() << MSG::dec);
+
+  if (m_doTopo.value() && mode==ConversionMode::Decoding && m_MuCTPIL1TopoKeys.size() != m_roiWriteKeys.size()) {
+    ATH_MSG_ERROR("Number of Topo TOB output containers (" << m_MuCTPIL1TopoKeys.size() << ") "
+                  << "does not match the number of RoI output containers (" << m_roiWriteKeys.size() << ")");
+    return StatusCode::FAILURE;
+  }
 
   m_readoutWindow = mode==ConversionMode::Decoding ? m_roiWriteKeys.size() : m_roiReadKeys.size();
   if (m_readoutWindow!=1 && m_readoutWindow!=3 && m_readoutWindow!=5) {
@@ -76,7 +91,7 @@ StatusCode MuonRoIByteStreamTool::initialize() {
   if (m_robIds.value().size() != 1) {
     ATH_MSG_ERROR("This tool implementation assumes there is exactly one MUCTPI ROB, but "
                   << m_robIds.size() << " were configured");
-    return StatusCode::SUCCESS;  
+    return StatusCode::SUCCESS;
   }
 
   CHECK( m_rpcTool.retrieve() );
@@ -90,32 +105,37 @@ StatusCode MuonRoIByteStreamTool::initialize() {
   const std::string side1LUTFileName = PathResolverFindCalibFile( m_side1LUTFile );
 
   CHECK( m_l1topoLUT.initializeBarrelLUT(side0LUTFileName,
-					 side1LUTFileName) );
+                                         side1LUTFileName) );
   CHECK( m_l1topoLUT.initializeLUT(barrelFileName,
-				   ecfFileName,
-				   side0LUTFileName,
-				   side1LUTFileName) );
+                                   ecfFileName,
+                                   side0LUTFileName,
+                                   side1LUTFileName) );
   ATH_CHECK(m_l1topoLUT.initializePtEncoding());
 
   return StatusCode::SUCCESS;
 }
 
+// -----------------------------------------------------------------------------
 // BS->xAOD conversion
+// -----------------------------------------------------------------------------
 StatusCode MuonRoIByteStreamTool::convertFromBS(const std::vector<const ROBF*>& vrobf,
                                                 const EventContext& eventContext) const {
   // Create and record the RoI containers
   std::vector<SG::WriteHandle<xAOD::MuonRoIContainer>> roiHandles = m_roiWriteKeys.makeHandles(eventContext);
   for (auto& roiHandle : roiHandles) {
     ATH_CHECK(roiHandle.record(std::make_unique<xAOD::MuonRoIContainer>(),
-			       std::make_unique<xAOD::MuonRoIAuxContainer>()));
+                               std::make_unique<xAOD::MuonRoIAuxContainer>()));
     ATH_MSG_DEBUG("Recorded MuonRoIContainer with key " << roiHandle.key());
   }
 
   // Create a WriteHandle for L1Topo output
-  std::vector<SG::WriteHandle<LVL1::MuCTPIL1Topo>> topoHandles = m_MuCTPIL1TopoKeys.makeHandles(eventContext);
-  for (auto& topoHandle : topoHandles) {
-    ATH_CHECK(topoHandle.record(std::make_unique<LVL1::MuCTPIL1Topo>()));
-    ATH_MSG_DEBUG("Recorded MuCTPIL1Topo with key " << topoHandle.key());
+  std::vector<SG::WriteHandle<LVL1::MuCTPIL1Topo>> topoHandles;
+  if (m_doTopo.value()) {
+    topoHandles = m_MuCTPIL1TopoKeys.makeHandles(eventContext);
+    for (auto& topoHandle : topoHandles) {
+      ATH_CHECK(topoHandle.record(std::make_unique<LVL1::MuCTPIL1Topo>()));
+      ATH_MSG_DEBUG("Recorded MuCTPIL1Topo with key " << topoHandle.key());
+    }
   }
 
   // Find the ROB fragment to decode
@@ -168,8 +188,8 @@ StatusCode MuonRoIByteStreamTool::convertFromBS(const std::vector<const ROBF*>& 
                       << ", NTOB=" << header.tobCount << ", NCAND=" << header.candCount);
         // create new RoI words slice
         roiSlices.emplace_back(0,0);
-	// create new Topo words slice
-	topoSlices.emplace_back(0,0);
+        // create new Topo words slice
+        topoSlices.emplace_back(0,0);
         // monitor BCID offset
         bcidOffsetsWrtROB.push_back(bcidDiff(header.bcid, rob->rod_bc_id()));
         break;
@@ -194,12 +214,13 @@ StatusCode MuonRoIByteStreamTool::convertFromBS(const std::vector<const ROBF*>& 
       }
       case LVL1::MuCTPIBits::WordType::Topo: {
         ATH_MSG_DEBUG("This is a Topo TOB word");
+        if (not m_doTopo.value()) {break;}
         if (topoSlices.empty()) {
           ATH_MSG_ERROR("Unexpected data format - found Topo TOB word before any timeslice header");
           return StatusCode::FAILURE;
         }
         // advance slice edges
-	std::pair<size_t,size_t>& slice = topoSlices.back();
+        std::pair<size_t,size_t>& slice = topoSlices.back();
         if (slice.first==0) slice.first = iWord;
         slice.second = iWord - slice.first + 1;
         break;
@@ -245,248 +266,54 @@ StatusCode MuonRoIByteStreamTool::convertFromBS(const std::vector<const ROBF*>& 
     return StatusCode::FAILURE;
   }
   const size_t outputOffset = nOutputSlices/2 - nSlices/2;
-  auto outputIt = roiHandles.begin();
-  std::advance(outputIt, outputOffset);
-  for (const auto& [sliceStart,sliceSize] : roiSlices) {
-    for (const uint32_t word : CxxUtils::span{data+sliceStart, sliceSize}) {
-      ATH_MSG_DEBUG("Decoding RoI word 0x" << std::hex << word << std::dec << " into the " << outputIt->key() << " container");
-
-      // Create a new xAOD::MuonRoI object for this candidate in the output container
-      (*outputIt)->push_back(std::make_unique<xAOD::MuonRoI>());
-
-      // Decode eta/phi information using the right tool for the subsystem
-      LVL1::TrigT1MuonRecRoiData roiData;
-      const LVL1::MuCTPIBits::SubsysID subsysID = LVL1::MuCTPIBits::getSubsysID(word);
-      switch (subsysID) {
-        case LVL1::MuCTPIBits::SubsysID::Endcap: // same for Endcap and Forward
-        case LVL1::MuCTPIBits::SubsysID::Forward: {
-          ATH_MSG_DEBUG("This is an Endcap/Forward candidate, calling the " << m_tgcTool.typeAndName());
-          roiData = m_tgcTool->roiData(word);
-          break;
-        }
-        case LVL1::MuCTPIBits::SubsysID::Barrel: {
-          ATH_MSG_DEBUG("This is a Barrel candidate, calling the " << m_rpcTool.typeAndName());
-          roiData = m_rpcTool->roiData(word);
-          break;
-        }
-        default: {
-          ATH_MSG_ERROR("Failed to determine Sector ID from RoI word 0x" << std::hex << word << std::dec);
-          return StatusCode::FAILURE;
-        }
-      }
-
-      // Get the threshold decisions to find the lowest pt threshold passed
-      // This is required by xAOD::MuonRoI::initialize() but not used for HLT seeding (a threshold pattern bit mask is used instead)
-      const std::pair<std::string, double> minThrInfo = m_thresholdTool->getMinThresholdNameAndValue(
-        m_thresholdTool->getThresholdDecisions(word, eventContext),
-        roiData.eta());
-
-      // Fill the xAOD::MuonRoI object
-      (*outputIt)->back()->initialize(roiWordAddOfflineRun3Flag(word),
-                                      roiData.eta(),
-                                      roiData.phi(),
-                                      minThrInfo.first,
-                                      minThrInfo.second);
-
-      // Fill per-candidate monitoring histograms
-      using SubsysID_ut = std::underlying_type_t<LVL1::MuCTPIBits::SubsysID>;
-      Monitored::Scalar<SubsysID_ut> monSubsysID{"SubsysID", static_cast<SubsysID_ut>(subsysID)};
-      std::string sectorName{s_sectorNames[static_cast<size_t>(subsysID)]};
-      Monitored::Scalar<double> monEta{"roiEta_"+sectorName, roiData.eta()};
-      Monitored::Scalar<double> monPhi{"roiPhi_"+sectorName, roiData.phi()};
-      Monitored::Group(m_monTool, monSubsysID, monEta, monPhi);
-    }
-    ++outputIt;
-  } // Loop over RoI candidate time slices
+  ATH_CHECK(decodeRoiSlices(data, roiSlices, roiHandles, outputOffset, eventContext));
 
   // Validate the number of slices and decode the Topo TOB words in each time slice
-  const size_t nTopoSlices{topoSlices.size()};
-  const size_t nTopoOutputSlices{static_cast<size_t>(m_readoutWindow)};
-  if (nTopoSlices > nTopoOutputSlices) {
-    ATH_MSG_ERROR("Found " << nTopoSlices << " time slices, but only " << m_readoutWindow << " outputs are configured");
-    return StatusCode::FAILURE;
-  } else if (nTopoSlices != static_cast<size_t>(rob->rod_detev_type())) {
-    ATH_MSG_ERROR("Found " << nTopoSlices << " time slices, but Detector Event Type word indicates there should be "
-                  << rob->rod_detev_type());
-    return StatusCode::FAILURE;
-  } else if (nTopoSlices!=1 && nTopoSlices!=3 && nTopoSlices!=5) {
-    ATH_MSG_ERROR("Expected 1, 3 or 5 time slices but found " << nTopoSlices);
-    return StatusCode::FAILURE;
-  }
-
-  int toposliceiterator = -1;
-  int nomBCID_slice = nTopoSlices / 2 ;
-  int topobcidOffset = 0;
-  unsigned short subsystem = 0;
-  unsigned int ptValue = 0;
-  float eta_barrel = 0.;
-  float phi_barrel = 0.;
-  //in case something is found to not be correcly decoded by the L1Topo group - can clean this extra-debug printouts later if wished
-  bool local_topo_debug = 0;
-
-  //the cand usage should be optimised!
-  LVL1::MuCTPIL1TopoCandidate cand;
-
-  const size_t topoOutputOffset = nTopoOutputSlices/2 - nTopoSlices/2;
-  auto topoOutputIt = topoHandles.begin();
-  std::advance(topoOutputIt, topoOutputOffset);
-  // Loop over Topo candidate time slices 
-  for (const auto& [sliceStart,sliceSize] : topoSlices) {
-    toposliceiterator++;
-    for (const uint32_t word : CxxUtils::span{data+sliceStart, sliceSize}) {
-      //the cand usage should be optimised!
-      cand = LVL1::MuCTPIL1TopoCandidate{};
-      std::stringstream sectorName;
-      subsystem = 0;
-      ptValue = 0;
-      eta_barrel = 0.;
-      phi_barrel = 0.;
-
-      topobcidOffset = toposliceiterator - nomBCID_slice;
-      ATH_MSG_DEBUG("MuCTPIL1Topo: Decoding Topo word 0x" << std::hex << word << std::dec << " into the " << topoOutputIt->key() << " container");
-      
-      // NOTE the convention: 
-      // HEMISPHERE 0: C-side (-) / 1: A-side (+)
-      // Det (bits): Barrel: 00 - EC: 1X - FW: 01
-      const auto topoheader = LVL1::MuCTPIBits::topoHeader(word);
-      if (local_topo_debug) {
-	ATH_MSG_DEBUG("MuCTPIL1Topo: TOPOSLICE data: " <<data << " sliceStart: "<<sliceStart<< " sliceSize: " <<sliceSize );
-	ATH_MSG_DEBUG("MuCTPIL1Topo word: 0x"     << std::hex << word << std::dec  );
-	ATH_MSG_DEBUG("MuCTPIL1Topo word: 0b"     << std::bitset<32>(word) );
-      }
-      // Build the sector name
-      // topoheader.det is the direct WORD content, but here later in m_l1topoLUT.getCoordinates the definition is differnt ... see the subsystem settings below
-      if (topoheader.det == 0) {
-	sectorName<<"B";
-	subsystem = 0;
-      }
-      else if (topoheader.det == 1) {
-	sectorName<<"F";
-	subsystem = 2;
-      }
-      else if (topoheader.det == 2) {
-	sectorName<<"E";
-	subsystem = 1;
-      }
-      if (topoheader.hemi) sectorName << "A";
-      else sectorName<< "C";
-
-      sectorName << topoheader.sec;
-      // End of: Build the sector name
-
-      ptValue = m_l1topoLUT.getPtValue(subsystem, topoheader.ptID);
-
-      if (local_topo_debug) {
-	ATH_MSG_DEBUG("MuCTPIL1Topo det:     " << topoheader.det);
-	ATH_MSG_DEBUG("MuCTPIL1Topo hemi:    " << topoheader.hemi );
-	ATH_MSG_DEBUG("MuCTPIL1Topo sector:  " << sectorName.str() );
-	ATH_MSG_DEBUG("MuCTPIL1Topo etacode: " << topoheader.etacode );
-	ATH_MSG_DEBUG("MuCTPIL1Topo phicode: " << topoheader.phicode );
-	ATH_MSG_DEBUG("MuCTPIL1Topo sec:     " << topoheader.sec );
-	ATH_MSG_DEBUG("MuCTPIL1Topo roi:     " << topoheader.roi );
-	ATH_MSG_DEBUG("MuCTPIL1Topo ptThrID: " << topoheader.ptID );
-	ATH_MSG_DEBUG("MuCTPIL1Topo ptvalue: " << ptValue);      
-      }
-
-      if (subsystem == 0) // Barrel
-	{
-          eta_barrel = m_l1topoLUT.getBarrelEta(topoheader.hemi, topoheader.sec, topoheader.barrel_eta_lookup);
-          phi_barrel = m_l1topoLUT.getBarrelPhi(topoheader.hemi, topoheader.sec, topoheader.barrel_phi_lookup);
-	  if (local_topo_debug) {
-	    ATH_MSG_DEBUG("MuCTPIL1Topo: Barrel decoding");
-	    ATH_MSG_DEBUG("MuCTPIL1Topo barrel_eta_lookup:     " << topoheader.barrel_eta_lookup );
-	    ATH_MSG_DEBUG("MuCTPIL1Topo barrel_phi_lookup:     " << topoheader.barrel_phi_lookup );
-	    ATH_MSG_DEBUG("MuCTPIL1Topo eta value: " <<  eta_barrel);
-	    ATH_MSG_DEBUG("MuCTPIL1Topo phi value: " <<  phi_barrel);
-	  }
-	  // See: TrigT1Interfaces/MuCTPIL1TopoCandidate.h
-	  cand.setCandidateData(sectorName.str(),
-				0,//roiID,      -- always ZERO for Barrel as it is not contained in the word
-				topobcidOffset,
-				topoheader.ptID,//ptThresholdID
-				0,//ptCode,       removed Run3
-				ptValue,
-				eta_barrel,
-				phi_barrel,
-				0,//etacode,      removed Run3
-				0,//phicode,      removed Run3
-				0,//coord.eta_min, -- could be added for barrel but would need more code 
-				0,//coord.eta_max,
-				0,//coord.phi_min,
-				0,//coord.phi_max,
-				0,//mioctID,      removed Run3
-				0,//coord.ieta,
-				0);//coord.iphi
-	  // Documentation / translation for the flag setting below 
-	  if (local_topo_debug) {
-	    ATH_MSG_DEBUG("MuCTPIL1Topo phiOvl(0): " << topoheader.flag0);
-	    ATH_MSG_DEBUG("MuCTPIL1Topo is2cand(1):" << topoheader.flag1);
-          }
-	  // bool phiOvl  = topoheader.flag0;
-	  // bool is2cand = topoheader.flag1;    
-	  cand.setRPCFlags(topoheader.flag1, topoheader.flag0);
-	} // Barrel
-      else { // EC and FWD
-	LVL1MUCTPIPHASE1::L1TopoCoordinates coord = m_l1topoLUT.getCoordinates(topoheader.hemi ,subsystem ,topoheader.sec ,topoheader.roi);
-	if (local_topo_debug) {
-	  ATH_MSG_DEBUG("MuCTPIL1Topo: EC / FWD decoding");
-	  ATH_MSG_DEBUG("MuCTPIL1Topo coord.eta     " <<  coord.eta);
-	  ATH_MSG_DEBUG("MuCTPIL1Topo coord.phi     " <<  coord.phi);
-	  ATH_MSG_DEBUG("MuCTPIL1Topo coord.eta_min " <<  coord.eta_min);
-	  ATH_MSG_DEBUG("MuCTPIL1Topo coord.eta_max " <<  coord.eta_max);
-	  ATH_MSG_DEBUG("MuCTPIL1Topo coord.phi_min " <<  coord.phi_min);
-	  ATH_MSG_DEBUG("MuCTPIL1Topo coord.phi_max " <<  coord.phi_max);
-          ATH_MSG_DEBUG("MuCTPIL1Topo coord.ieta    " <<  coord.ieta);
-          ATH_MSG_DEBUG("MuCTPIL1Topo coord.iphi    " <<  coord.iphi);
-	  }
-	cand.setCandidateData(sectorName.str(),
-			      topoheader.roi,
-			      topobcidOffset,
-			      topoheader.ptID,//ptThresholdID,
-			      0,//ptCode,       removed Run3
-			      ptValue,
-			      coord.eta,
-			      coord.phi,
-			      0,//etacode,      removed Run3
-			      0,//phicode,      removed Run3
-			      coord.eta_min,
-			      coord.eta_max,
-			      coord.phi_min,
-			      coord.phi_max,
-			      0,//mioctID,      removed Run3
-			      coord.ieta,                                
-			      coord.iphi);
-	// Documentation / translation for the flag setting below
-        if (local_topo_debug) {
-        ATH_MSG_DEBUG("MuCTPIL1Topo charge    (0):" << topoheader.flag0);
-        ATH_MSG_DEBUG("MuCTPIL1Topo bw2or3    (1):" << topoheader.flag1);
-        ATH_MSG_DEBUG("MuCTPIL1Topo innerCoin (2):" << topoheader.flag2);
-        ATH_MSG_DEBUG("MuCTPIL1Topo goodMF    (3):" << topoheader.flag3);
-	}
-	cand.setTGCFlags(topoheader.flag1, topoheader.flag2, topoheader.flag3, topoheader.flag0);
-      }// EC and FWD
-      // Push the candidate into SG
-      (*topoOutputIt)->addCandidate(cand);
-      ATH_MSG_DEBUG("MuCTPIL1Topo: L1Topo output recorded to StoreGate with key " << topoOutputIt->key() << " and bcidOffset: " << topobcidOffset);
+  if (m_doTopo.value()) {
+    const size_t nTopoSlices{topoSlices.size()};
+    const size_t nTopoOutputSlices{static_cast<size_t>(m_readoutWindow)};
+    if (nTopoSlices > nTopoOutputSlices) {
+      ATH_MSG_ERROR("Found " << nTopoSlices << " time slices, but only " << m_readoutWindow << " outputs are configured");
+      return StatusCode::FAILURE;
+    } else if (nTopoSlices != static_cast<size_t>(rob->rod_detev_type())) {
+      ATH_MSG_ERROR("Found " << nTopoSlices << " time slices, but Detector Event Type word indicates there should be "
+                    << rob->rod_detev_type());
+      return StatusCode::FAILURE;
+    } else if (nTopoSlices!=1 && nTopoSlices!=3 && nTopoSlices!=5) {
+      ATH_MSG_ERROR("Expected 1, 3 or 5 time slices but found " << nTopoSlices);
+      return StatusCode::FAILURE;
     }
-    ++topoOutputIt;
-  }  // Loop over Topo candidate time slices
-
+    const size_t topoOutputOffset = nTopoOutputSlices/2 - nTopoSlices/2;
+    ATH_CHECK(decodeTopoSlices(data, topoSlices, topoHandles, topoOutputOffset, eventContext));
+  }
 
   // Output monitoring
   short bcOffset{static_cast<short>(5/2 - m_readoutWindow/2 - 2)};
+  auto topoHandleIt = topoHandles.begin();
   for (auto& roiHandle : roiHandles) {
-    ATH_MSG_DEBUG("Decoded " << roiHandle->size() << " Muon RoIs into the " << roiHandle.key() << " container");
+    auto& topoHandle = *topoHandleIt;
     Monitored::Scalar<short> monBCOffset{"BCOffset", bcOffset};
     Monitored::Scalar<size_t> monNumRoIs{"NumOutputRoIs", roiHandle->size()};
-    Monitored::Group(m_monTool, monBCOffset, monNumRoIs);
+    if (m_doTopo.value()) {
+      Monitored::Scalar<size_t> monNumTopo{"NumOutputTopoTOBs", topoHandle->getCandidates().size()};
+      Monitored::Scalar<int> monNumDiff{"NumOutputDiffRoITopo", static_cast<int>(monNumRoIs)-static_cast<int>(monNumTopo)};
+      ATH_MSG_DEBUG("Decoded " << monNumRoIs << " RoIs into the " << roiHandle.key() << " container "
+                    "and " << monNumTopo << " Topo TOBs into the " << topoHandle.key() << " container");
+      Monitored::Group(m_monTool, monBCOffset, monNumRoIs, monNumTopo, monNumDiff);
+      ++topoHandleIt;
+    } else {
+      ATH_MSG_DEBUG("Decoded " << monNumRoIs << " RoIs into the " << roiHandle.key() << " container");
+      Monitored::Group(m_monTool, monBCOffset, monNumRoIs);
+    }
     ++bcOffset;
   }
 
   return StatusCode::SUCCESS;
 }
 
-/// xAOD->BS conversion
+// -----------------------------------------------------------------------------
+// xAOD->BS conversion
+// -----------------------------------------------------------------------------
 StatusCode MuonRoIByteStreamTool::convertToBS(std::vector<WROBF*>& vrobf,
                                               const EventContext& eventContext) {
   // Retrieve the RoI containers and determine how many time slices will be encoded
@@ -584,6 +411,256 @@ StatusCode MuonRoIByteStreamTool::convertToBS(std::vector<WROBF*>& vrobf,
   // Create a ROBFragment containing the ROD words
   const eformat::helper::SourceIdentifier sid(m_robIds.value().at(0));
   vrobf.push_back(newRobFragment(eventContext, sid.code(), rodSize, data, nSlices));
+
+  return StatusCode::SUCCESS;
+}
+
+// -----------------------------------------------------------------------------
+// Helper for BS->xAOD conversion of RoI candidate words
+// -----------------------------------------------------------------------------
+StatusCode MuonRoIByteStreamTool::decodeRoiSlices(const uint32_t* data,
+                                                  const std::vector<std::pair<size_t,size_t>>& slices,
+                                                  std::vector<SG::WriteHandle<xAOD::MuonRoIContainer>>& handles,
+                                                  size_t outputOffset,
+                                                  const EventContext& eventContext) const {
+  auto outputIt = handles.begin();
+  std::advance(outputIt, outputOffset);
+  for (const auto& [sliceStart,sliceSize] : slices) {
+    for (const uint32_t word : CxxUtils::span{data+sliceStart, sliceSize}) {
+      ATH_MSG_DEBUG("Decoding RoI word 0x" << std::hex << word << std::dec << " into the " << outputIt->key() << " container");
+
+      // Create a new xAOD::MuonRoI object for this candidate in the output container
+      (*outputIt)->push_back(std::make_unique<xAOD::MuonRoI>());
+
+      // Decode eta/phi information using the right tool for the subsystem
+      LVL1::TrigT1MuonRecRoiData roiData;
+      const LVL1::MuCTPIBits::SubsysID subsysID = LVL1::MuCTPIBits::getSubsysID(word);
+      switch (subsysID) {
+        case LVL1::MuCTPIBits::SubsysID::Endcap: // same for Endcap and Forward
+        case LVL1::MuCTPIBits::SubsysID::Forward: {
+          ATH_MSG_DEBUG("This is an Endcap/Forward candidate, calling the " << m_tgcTool.typeAndName());
+          roiData = m_tgcTool->roiData(word);
+          break;
+        }
+        case LVL1::MuCTPIBits::SubsysID::Barrel: {
+          ATH_MSG_DEBUG("This is a Barrel candidate, calling the " << m_rpcTool.typeAndName());
+          roiData = m_rpcTool->roiData(word);
+          break;
+        }
+        default: {
+          ATH_MSG_ERROR("Failed to determine Sector ID from RoI word 0x" << std::hex << word << std::dec);
+          return StatusCode::FAILURE;
+        }
+      }
+
+      // Get the threshold decisions to find the lowest pt threshold passed
+      // This is required by xAOD::MuonRoI::initialize() but not used for HLT seeding (a threshold pattern bit mask is used instead)
+      const std::pair<std::string, double> minThrInfo = m_thresholdTool->getMinThresholdNameAndValue(
+        m_thresholdTool->getThresholdDecisions(word, eventContext),
+        roiData.eta());
+
+      // Fill the xAOD::MuonRoI object
+      (*outputIt)->back()->initialize(roiWordAddOfflineRun3Flag(word),
+                                      roiData.eta(),
+                                      roiData.phi(),
+                                      minThrInfo.first,
+                                      minThrInfo.second);
+
+      // Fill per-candidate monitoring histograms
+      using SubsysID_ut = std::underlying_type_t<LVL1::MuCTPIBits::SubsysID>;
+      Monitored::Scalar<SubsysID_ut> monSubsysID{"SubsysID", static_cast<SubsysID_ut>(subsysID)};
+      std::string sectorName{s_sectorNames[static_cast<size_t>(subsysID)]};
+      Monitored::Scalar<double> monEta{"roiEta_"+sectorName, roiData.eta()};
+      Monitored::Scalar<double> monPhi{"roiPhi_"+sectorName, roiData.phi()};
+      Monitored::Group(m_monTool, monSubsysID, monEta, monPhi);
+    }
+    ++outputIt;
+  } // Loop over RoI candidate time slices
+
+  return StatusCode::SUCCESS;
+}
+
+// -----------------------------------------------------------------------------
+// Helper for BS->transient conversion of Topo TOB words
+// -----------------------------------------------------------------------------
+StatusCode MuonRoIByteStreamTool::decodeTopoSlices(const uint32_t* data,
+                                                   const std::vector<std::pair<size_t,size_t>>& slices,
+                                                   std::vector<SG::WriteHandle<LVL1::MuCTPIL1Topo>>& handles,
+                                                   size_t outputOffset,
+                                                   const EventContext& /*eventContext*/) const {
+  int toposliceiterator = -1;
+  int nomBCID_slice = slices.size() / 2 ;
+  int topobcidOffset = 0;
+  unsigned short subsystem = 0;
+  unsigned int ptValue = 0;
+  float eta_barrel = 0.;
+  float phi_barrel = 0.;
+  //in case something is found to not be correctly decoded by the L1Topo group - can clean this extra-debug printouts later if wished
+  constexpr static bool local_topo_debug{false};
+
+  //the cand usage should be optimised!
+  LVL1::MuCTPIL1TopoCandidate cand;
+
+  auto outputIt = handles.begin();
+  std::advance(outputIt, outputOffset);
+  // Loop over Topo candidate time slices
+  for (const auto& [sliceStart,sliceSize] : slices) {
+    toposliceiterator++;
+    for (const uint32_t word : CxxUtils::span{data+sliceStart, sliceSize}) {
+      //the cand usage should be optimised!
+      cand = LVL1::MuCTPIL1TopoCandidate{};
+      std::stringstream sectorName;
+      subsystem = 0;
+      ptValue = 0;
+      eta_barrel = 0.;
+      phi_barrel = 0.;
+
+      topobcidOffset = toposliceiterator - nomBCID_slice;
+      ATH_MSG_DEBUG("MuCTPIL1Topo: Decoding Topo word 0x" << std::hex << word << std::dec << " into the " << outputIt->key() << " container");
+
+      // NOTE the convention:
+      // HEMISPHERE 0: C-side (-) / 1: A-side (+)
+      // Det (bits): Barrel: 00 - EC: 1X - FW: 01
+      const auto topoheader = LVL1::MuCTPIBits::topoHeader(word);
+      if (local_topo_debug) {
+        ATH_MSG_DEBUG("MuCTPIL1Topo: TOPOSLICE data: " <<data << " sliceStart: "<<sliceStart<< " sliceSize: " <<sliceSize );
+        ATH_MSG_DEBUG("MuCTPIL1Topo word: 0x"     << std::hex << word << std::dec  );
+        ATH_MSG_DEBUG("MuCTPIL1Topo word: 0b"     << std::bitset<32>(word) );
+      }
+      // Build the sector name
+      // topoheader.det is the direct WORD content, but here later in m_l1topoLUT.getCoordinates the definition is different ... see the subsystem settings below
+      if (topoheader.det == 0) {
+        sectorName<<"B";
+        subsystem = 0;
+      }
+      else if (topoheader.det == 1) {
+        sectorName<<"F";
+        subsystem = 2;
+      }
+      else if (topoheader.det == 2) {
+        sectorName<<"E";
+        subsystem = 1;
+      }
+      if (topoheader.hemi) sectorName << "A";
+      else sectorName<< "C";
+
+      sectorName << topoheader.sec;
+      // End of: Build the sector name
+
+      ptValue = m_l1topoLUT.getPtValue(subsystem, topoheader.ptID);
+
+      if (local_topo_debug) {
+        ATH_MSG_DEBUG("MuCTPIL1Topo det:     " << topoheader.det);
+        ATH_MSG_DEBUG("MuCTPIL1Topo hemi:    " << topoheader.hemi );
+        ATH_MSG_DEBUG("MuCTPIL1Topo sector:  " << sectorName.str() );
+        ATH_MSG_DEBUG("MuCTPIL1Topo etacode: " << topoheader.etacode );
+        ATH_MSG_DEBUG("MuCTPIL1Topo phicode: " << topoheader.phicode );
+        ATH_MSG_DEBUG("MuCTPIL1Topo sec:     " << topoheader.sec );
+        ATH_MSG_DEBUG("MuCTPIL1Topo roi:     " << topoheader.roi );
+        ATH_MSG_DEBUG("MuCTPIL1Topo ptThrID: " << topoheader.ptID );
+        ATH_MSG_DEBUG("MuCTPIL1Topo ptvalue: " << ptValue);
+      }
+
+      if (subsystem == 0) // Barrel
+        {
+          eta_barrel = m_l1topoLUT.getBarrelEta(topoheader.hemi, topoheader.sec, topoheader.barrel_eta_lookup);
+          phi_barrel = m_l1topoLUT.getBarrelPhi(topoheader.hemi, topoheader.sec, topoheader.barrel_phi_lookup);
+          if (local_topo_debug) {
+            ATH_MSG_DEBUG("MuCTPIL1Topo: Barrel decoding");
+            ATH_MSG_DEBUG("MuCTPIL1Topo barrel_eta_lookup:     " << topoheader.barrel_eta_lookup );
+            ATH_MSG_DEBUG("MuCTPIL1Topo barrel_phi_lookup:     " << topoheader.barrel_phi_lookup );
+            ATH_MSG_DEBUG("MuCTPIL1Topo eta value: " <<  eta_barrel);
+            ATH_MSG_DEBUG("MuCTPIL1Topo phi value: " <<  phi_barrel);
+          }
+          // See: TrigT1Interfaces/MuCTPIL1TopoCandidate.h
+          cand.setCandidateData(sectorName.str(),
+                                0,//roiID,      -- always ZERO for Barrel as it is not contained in the word
+                                topobcidOffset,
+                                topoheader.ptID,//ptThresholdID
+                                0,//ptCode,       removed Run3
+                                ptValue,
+                                eta_barrel,
+                                phi_barrel,
+                                0,//etacode,      removed Run3
+                                0,//phicode,      removed Run3
+                                0,//coord.eta_min, -- could be added for barrel but would need more code
+                                0,//coord.eta_max,
+                                0,//coord.phi_min,
+                                0,//coord.phi_max,
+                                0,//mioctID,      removed Run3
+                                0,//coord.ieta,
+                                0);//coord.iphi
+          // Documentation / translation for the flag setting below
+          if (local_topo_debug) {
+            ATH_MSG_DEBUG("MuCTPIL1Topo phiOvl(0): " << topoheader.flag0);
+            ATH_MSG_DEBUG("MuCTPIL1Topo is2cand(1):" << topoheader.flag1);
+          }
+          // bool phiOvl  = topoheader.flag0;
+          // bool is2cand = topoheader.flag1;
+          cand.setRPCFlags(topoheader.flag1, topoheader.flag0);
+        } // Barrel
+      else { // EC and FWD
+        LVL1MUCTPIPHASE1::L1TopoCoordinates coord = m_l1topoLUT.getCoordinates(topoheader.hemi ,subsystem ,topoheader.sec ,topoheader.roi);
+        if (local_topo_debug) {
+          ATH_MSG_DEBUG("MuCTPIL1Topo: EC / FWD decoding");
+          ATH_MSG_DEBUG("MuCTPIL1Topo coord.eta     " <<  coord.eta);
+          ATH_MSG_DEBUG("MuCTPIL1Topo coord.phi     " <<  coord.phi);
+          ATH_MSG_DEBUG("MuCTPIL1Topo coord.eta_min " <<  coord.eta_min);
+          ATH_MSG_DEBUG("MuCTPIL1Topo coord.eta_max " <<  coord.eta_max);
+          ATH_MSG_DEBUG("MuCTPIL1Topo coord.phi_min " <<  coord.phi_min);
+          ATH_MSG_DEBUG("MuCTPIL1Topo coord.phi_max " <<  coord.phi_max);
+          ATH_MSG_DEBUG("MuCTPIL1Topo coord.ieta    " <<  coord.ieta);
+          ATH_MSG_DEBUG("MuCTPIL1Topo coord.iphi    " <<  coord.iphi);
+          }
+        cand.setCandidateData(sectorName.str(),
+                              topoheader.roi,
+                              topobcidOffset,
+                              topoheader.ptID,//ptThresholdID,
+                              0,//ptCode,       removed Run3
+                              ptValue,
+                              coord.eta,
+                              coord.phi,
+                              0,//etacode,      removed Run3
+                              0,//phicode,      removed Run3
+                              coord.eta_min,
+                              coord.eta_max,
+                              coord.phi_min,
+                              coord.phi_max,
+                              0,//mioctID,      removed Run3
+                              coord.ieta,
+                              coord.iphi);
+        // Documentation / translation for the flag setting below
+        if (local_topo_debug) {
+        ATH_MSG_DEBUG("MuCTPIL1Topo charge    (0):" << topoheader.flag0);
+        ATH_MSG_DEBUG("MuCTPIL1Topo bw2or3    (1):" << topoheader.flag1);
+        ATH_MSG_DEBUG("MuCTPIL1Topo innerCoin (2):" << topoheader.flag2);
+        ATH_MSG_DEBUG("MuCTPIL1Topo goodMF    (3):" << topoheader.flag3);
+        }
+        cand.setTGCFlags(topoheader.flag1, topoheader.flag2, topoheader.flag3, topoheader.flag0);
+      }// EC and FWD
+      // Push the candidate into SG
+      (*outputIt)->addCandidate(cand);
+      ATH_MSG_DEBUG("MuCTPIL1Topo: L1Topo output recorded to StoreGate with key " << outputIt->key() << " and bcidOffset: " << topobcidOffset);
+
+      // Fill per-candidate monitoring histograms
+      using SubsysID_t = LVL1::MuCTPIBits::SubsysID;
+      using SubsysID_ut = std::underlying_type_t<SubsysID_t>;
+      SubsysID_t subsysID{SubsysID_t::Undefined};
+      switch (subsystem) {
+        case 0: {subsysID=SubsysID_t::Barrel; break;}
+        case 1: {subsysID=SubsysID_t::Endcap; break;} // Mind the swap in numbering E<->F, see comments above
+        case 2: {subsysID=SubsysID_t::Forward; break;}
+        default: {break;}
+      }
+      Monitored::Scalar<SubsysID_ut> monSubsysID{"topoSubsysID", static_cast<SubsysID_ut>(subsysID)};
+      std::string subsysName{s_sectorNames[static_cast<size_t>(subsysID)]};
+      Monitored::Scalar<float> monEta{"topoEta_"+subsysName, (*outputIt)->getCandidates().back().geteta()};
+      Monitored::Scalar<float> monPhi{"topoPhi_"+subsysName, (*outputIt)->getCandidates().back().getphi()};
+      Monitored::Scalar<unsigned int> monPtThr{"topoPtThresholdID_"+subsysName, (*outputIt)->getCandidates().back().getptThresholdID()};
+      Monitored::Group(m_monTool, monSubsysID, monEta, monPhi, monPtThr);
+    }
+    ++outputIt;
+  }  // Loop over Topo candidate time slices
 
   return StatusCode::SUCCESS;
 }
