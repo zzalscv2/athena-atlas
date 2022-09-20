@@ -85,18 +85,18 @@ namespace ISF {
      *  particles with the right distributions (energy, theta, phi).
      *  if a second argument is given, create exactly this number of particles
      *  (also with the right energy,theta,phi distributions */
-    int getAllParticles(CLHEP::HepRandomEngine* rndmEngine, int pdg, int numParticles = -1) const;
+    int getAllParticles(const ISF::ISFParticle &isfp, ISFParticleVector& isfpCont, CLHEP::HepRandomEngine* rndmEngine, int pdg, int numParticles = -1) const;
 
     /** get the right number of particles for the given pdg while considering
      *  the correlation to an other particle type, which has already created
      *  'corrParticles' number of particles */
-    int getCorrelatedParticles(int doPdg, int corrParticles, CLHEP::HepRandomEngine* rndmEngine) const;
+    int getCorrelatedParticles(const ISF::ISFParticle &isfp, ISFParticleVector& isfpCont, int doPdg, int corrParticles, CLHEP::HepRandomEngine* rndmEngine) const;
 
     /** create exactly one punch-through particle with the given pdg and the given max energy */
-    ISF::ISFParticle *getOneParticle(int pdg, double maxEnergy, CLHEP::HepRandomEngine* rndmEngine) const;
+    ISF::ISFParticle *getOneParticle(const ISF::ISFParticle &isfp, int pdg, double maxEnergy, CLHEP::HepRandomEngine* rndmEngine) const;
 
     /** create a ISF Particle state at the MS entrace containing a particle with the given properties */
-    ISF::ISFParticle *createExitPs(int PDGcode, double energy, double theta, double phi, double momTheta, double momPhi) const;
+    ISF::ISFParticle *createExitPs(const ISF::ISFParticle &isfp, int PDGcode, double energy, double theta, double phi, double momTheta, double momPhi) const;
 
     /** get the floating point number in a string, after the given pattern */
     double getFloatAfterPatternInStr(const char *str, const char *pattern);
@@ -107,24 +107,11 @@ namespace ISF {
      *  Private members
      *---------------------------------------------------------------------*/
 
-    /** initial particle properties */  //FIXME These should not be a member variables.
-    mutable const ISF::ISFParticle*      m_initPs{nullptr}; //!< the incoming particle
-    mutable double                       m_initEnergy{0.};  //!< the incoming particle's energy
-    mutable double                       m_initEta{0.};     //!< the incoming particle's eta
-    mutable double                       m_initTheta{0.};   //!< the incoming particle's theta
-    mutable double                       m_initPhi{0.};     //!< the incoming particle's phi
-
     /** calo-MS borders */
     double                               m_R1{0.};
     double                               m_R2{0.};
     double                               m_z1{0.};
     double                               m_z2{0.};
-
-    /** the returned vector of ISFParticles */
-    mutable ISF::ISFParticleVector  *m_isfpCont{nullptr}; //FIXME This should not be a member variable.
-
-    /** parent event */
-    mutable HepMC::GenEvent*            m_parentGenEvt{nullptr};    //!< all newly created particles/vertices will have this common parent //FIXME This should not be a member variable.
 
     /** ParticleDataTable needed to get connection pdg_code <-> charge */
     const HepPDT::ParticleDataTable*    m_particleDataTable{nullptr};
@@ -132,17 +119,8 @@ namespace ISF {
     /** ROOT objects */
     TFile*                              m_fileLookupTable{nullptr};   //!< the punch-through lookup table file
 
-    /** general information of the punch-through particles which will be created */
-    mutable std::map<int, bool>         m_doAntiParticleMap;        /*!< stores information, if anti-particles are
-                                                                      created for any given PDG id */
     /** needed to create punch-through particles with the right distributions */
-    mutable std::map<int, PunchThroughParticle*> m_particles;       //!< store all punch-through information for each particle id
-
-    /** barcode steering */
-
-    mutable Barcode::PhysicsProcessCode m_processCode{0};
-    mutable Barcode::ParticleBarcode    m_primBC{0};
-    mutable Barcode::ParticleBarcode    m_secBC{0};
+    std::map<int, PunchThroughParticle*> m_particles;       //!< store all punch-through information for each particle id
 
     /*---------------------------------------------------------------------
      *  Properties
