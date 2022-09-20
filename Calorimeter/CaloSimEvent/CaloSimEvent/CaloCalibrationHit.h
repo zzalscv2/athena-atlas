@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2020 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
 */
 
 // CaloCalibrationHit
@@ -145,7 +145,7 @@ class CaloCalibrationHit
   double operator() (unsigned int i) const { return energy(i); }
 
   /** Calibration hits are ordered by values of their identifiers */
-  bool Less(CaloCalibrationHit* const& h) const 
+  bool Less(const CaloCalibrationHit* h) const 
   {
     if(m_ID != h->m_ID){
       return m_ID < h->m_ID; 
