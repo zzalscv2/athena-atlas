@@ -213,7 +213,8 @@ FitParameters::d0(void) const
 inline double
 FitParameters::difference(int param) const
 {
-  // if (! m_differences)  return 0.;   // surely unnecessary?
+   if (! m_differences)  return 0.;
+   /// Use as_const to avoid compiler warning
   return std::as_const(*m_differences)(param);
 }
 
