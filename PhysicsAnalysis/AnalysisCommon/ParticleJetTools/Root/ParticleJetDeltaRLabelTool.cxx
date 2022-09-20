@@ -32,15 +32,29 @@ namespace {
 
 }
 
+
 StatusCode ParticleJetDeltaRLabelTool::initialize(){
+
+  // initialize keys
   ATH_CHECK(m_tauPartCollectionKey.initialize());
   ATH_CHECK(m_bottomPartCollectionKey.initialize());
   ATH_CHECK(m_charmPartCollectionKey.initialize());
+
+  // get the keys to the containers we just read, to build element
+  // links later
+  using Linker = ParticleJetTools::IParticleLinker;
+  m_blinker.reset(new Linker(m_bottomPartCollectionKey, m_bottomlabelname));
+  m_clinker.reset(new Linker(m_charmPartCollectionKey, m_charmlabelname));
+  m_taulinker.reset(new Linker(m_tauPartCollectionKey, m_taulabelname));
+
+  // build label decorators
+  m_labeldecs.reset(new ParticleJetTools::LabelDecorators(m_labelnames));
+
   return StatusCode::SUCCESS;
 }
 
 
-StatusCode ParticleJetDeltaRLabelTool::modify(JetContainer& jets) const {
+StatusCode ParticleJetDeltaRLabelTool::decorate(const JetContainer& jets) const {
 
   ATH_MSG_VERBOSE("In " << name() << "::modify()");
 
@@ -68,6 +82,7 @@ StatusCode ParticleJetDeltaRLabelTool::modify(JetContainer& jets) const {
     vector<vector<const TruthParticle*> > jetlabelpartsc = match(*truthcsReadHandle, jets);
     vector<vector<const TruthParticle*> > jetlabelpartstau = match(*truthtausReadHandle, jets);
 
+
     for (unsigned int iJet = 0; iJet < jets.size(); iJet++) {
         // remove children whose parent hadrons are also in the jet.
         // don't care about double tau jets
@@ -79,15 +94,16 @@ StatusCode ParticleJetDeltaRLabelTool::modify(JetContainer& jets) const {
         childrenRemoved(jetlabelpartsc[iJet], jetlabelpartsc[iJet]);
 
 
-        Jet& jet = *jets.at(iJet);
-        jet.setAssociatedObjects(m_bottomlabelname, jetlabelpartsb.at(iJet));
-        jet.setAssociatedObjects(m_charmlabelname, jetlabelpartsc.at(iJet));
-        jet.setAssociatedObjects(m_taulabelname, jetlabelpartstau.at(iJet));
+        const Jet& jet = *jets.at(iJet);
+
+        m_blinker->decorate(jet, jetlabelpartsb.at(iJet));
+        m_clinker->decorate(jet, jetlabelpartsc.at(iJet));
+        m_taulinker->decorate(jet, jetlabelpartstau.at(iJet));
 
         // set truth label to -99 for jets below pt threshold
         if (jet.pt() < m_jetptmin) {
-            jet.setAttribute<int>(m_labelnames.singleint, -99);
-            jet.setAttribute<int>(m_labelnames.doubleint, -99);
+            m_labeldecs->singleint(jet) = -99;
+            m_labeldecs->doubleint(jet) = -99;
             continue;
         }
 
@@ -97,7 +113,7 @@ StatusCode ParticleJetDeltaRLabelTool::modify(JetContainer& jets) const {
         particles.b = jetlabelpartsb.at(iJet);
         particles.c = jetlabelpartsc.at(iJet);
         particles.tau = jetlabelpartstau.at(iJet);
-        ParticleJetTools::setJetLabels(jet, particles, m_labelnames);
+        ParticleJetTools::setJetLabels(jet, particles, *m_labeldecs);
     }
 
     return StatusCode::SUCCESS;

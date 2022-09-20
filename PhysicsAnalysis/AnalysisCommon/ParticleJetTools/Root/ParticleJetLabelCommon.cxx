@@ -92,9 +92,46 @@ namespace ParticleJetTools {
   // ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
   // End of code copied from ParticleJetDeltaRLabelTool
 
-  void setJetLabels(xAOD::Jet& jet,
+
+  LabelDecorators::LabelDecorators(const LabelNames& n):
+    singleint(n.singleint),
+    doubleint(n.doubleint),
+    pt(n.pt),
+    Lxy(n.Lxy)
+  {
+  }
+
+
+  // key might be added back if we figure out how to get the store
+  // gate key from a read handle in analysis base
+  IParticleLinker::IParticleLinker(
+    const SG::ReadHandleKey<xAOD::TruthParticleContainer>& /* key */,
+    const std::string& linkname):
+    m_dec(linkname)
+  {
+  }
+  void IParticleLinker::decorate(
+    const xAOD::Jet& jet,
+    const std::vector<const xAOD::TruthParticle*>& ipv) const
+  {
+    IPLV links;
+    for (const xAOD::TruthParticle* ip: ipv) {
+      // I copied this whole song and dance from setAssociatedObjects
+      // in the jet edm. It would be much easier if we could store the
+      // container hash in this object and use ElementLink(sgkey,
+      // index) but that seems to break in AnalysisBase
+      IPLV::value_type link;
+      const auto* ipc = dynamic_cast<const xAOD::IParticleContainer*>(
+        ip->container());
+      link.toIndexedElement(*ipc, ip->index());
+      links.push_back(link);
+    }
+    m_dec(jet) = links;
+  }
+
+  void setJetLabels(const xAOD::Jet& jet,
                     const Particles& particles,
-                    const LabelNames& names) {
+                    const LabelDecorators& decs) {
 
     // we also want to save information about the maximum pt particle of the labeling partons
     auto getMaxPtPart = [](const auto& container) -> const xAOD::TruthParticle* {
@@ -118,49 +155,55 @@ namespace ParticleJetTools {
     // set truth label for jets above pt threshold
     // hierarchy: b > c > tau > light
     if (particles.b.size()) {
-      jet.setAttribute<int>(names.singleint, 5);
+      decs.singleint(jet) = 5;
       const auto maxPtPart = getMaxPtPart(particles.b);
-      jet.setAttribute<float>(names.pt, partPt(maxPtPart));
-      jet.setAttribute<float>(names.Lxy, partLxy(maxPtPart));
+      decs.pt(jet) = partPt(maxPtPart);
+      decs.Lxy(jet) = partLxy(maxPtPart);
     } else if (particles.c.size()) {
-      jet.setAttribute<int>(names.singleint, 4);
+      decs.singleint(jet) = 4;
       const auto maxPtPart = getMaxPtPart(particles.c);
-      jet.setAttribute<float>(names.pt, partPt(maxPtPart));
-      jet.setAttribute<float>(names.Lxy, partLxy(maxPtPart));
+      decs.pt(jet) = partPt(maxPtPart);
+      decs.Lxy(jet) = partLxy(maxPtPart);
     } else if (particles.tau.size()) {
-      jet.setAttribute<int>(names.singleint, 15);
+      decs.singleint(jet) = 15;
       const auto maxPtPart = getMaxPtPart(particles.tau);
-      jet.setAttribute<float>(names.pt, partPt(maxPtPart));
-      jet.setAttribute<float>(names.Lxy, partLxy(maxPtPart));
+      decs.pt(jet) = partPt(maxPtPart);
+      decs.Lxy(jet) = partLxy(maxPtPart);
     } else {
-      jet.setAttribute<int>(names.singleint, 0);
-      jet.setAttribute<float>(names.pt, NAN);
-      jet.setAttribute<float>(names.Lxy, NAN);
+      decs.singleint(jet) = 0;
+      decs.pt(jet) = NAN;
+      decs.Lxy(jet) = NAN;
     }
 
     if (particles.b.size()) {
       if (particles.b.size() >= 2)
-        jet.setAttribute<int>(names.doubleint, 55);
+        decs.doubleint(jet) = 55;
 
       else if (particles.c.size())
-        jet.setAttribute<int>(names.doubleint, 54);
+        decs.doubleint(jet) = 54;
 
       else
-        jet.setAttribute<int>(names.doubleint, 5);
+        decs.doubleint(jet) = 5;
 
     } else if (particles.c.size()) {
       if (particles.c.size() >= 2)
-        jet.setAttribute<int>(names.doubleint, 44);
+        decs.doubleint(jet) = 44;
 
       else
-        jet.setAttribute<int>(names.doubleint, 4);
+        decs.doubleint(jet) = 4;
 
     } else if (particles.tau.size())
-      jet.setAttribute<int>(names.doubleint, 15);
+      decs.doubleint(jet) = 15;
 
     else
-      jet.setAttribute<int>(names.doubleint, 0);
+      decs.doubleint(jet) = 0;
 
+  }
+
+  void setJetLabels(const xAOD::Jet& jet,
+                    const Particles& particles,
+                    const LabelNames& names) {
+    setJetLabels(jet, particles, LabelDecorators(names));
   }
 
 }
