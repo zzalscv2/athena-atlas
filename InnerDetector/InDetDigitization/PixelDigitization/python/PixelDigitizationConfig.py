@@ -18,7 +18,7 @@ from PixelConditionsTools.PixelConditionsSummaryConfig import PixelConditionsSum
 from PixelGeoModel.PixelGeoModelConfig import PixelReadoutGeometryCfg
 from PixelReadoutGeometry.PixelReadoutGeometryConfig import PixelReadoutManagerCfg
 from SiLorentzAngleTool.PixelLorentzAngleConfig import PixelLorentzAngleToolCfg
-from SiPropertiesTool.PixelSiPropertiesConfig import PixelSiPropertiesCfg
+from SiPropertiesTool.PixelSiPropertiesConfig import PixelSiPropertiesToolCfg
 
 
 # The earliest and last bunch crossing times for which interactions will be sent
@@ -77,10 +77,8 @@ def EnergyDepositionToolCfg(flags, name="EnergyDepositionTool", **kwargs):
 def SensorSimPlanarToolCfg(flags, name="SensorSimPlanarTool", **kwargs):
     """Return ComponentAccumulator with configured SensorSimPlanarTool"""
     acc = PixelConfigCondAlgCfg(flags)
-    SiTool = acc.popToolsAndMerge(PixelSiPropertiesCfg(flags))
-    LorentzTool = acc.popToolsAndMerge(PixelLorentzAngleToolCfg(flags))
-    kwargs.setdefault("SiPropertiesTool", SiTool)
-    kwargs.setdefault("LorentzAngleTool", LorentzTool)
+    kwargs.setdefault("SiPropertiesTool", acc.popToolsAndMerge(PixelSiPropertiesToolCfg(flags)))
+    kwargs.setdefault("LorentzAngleTool", acc.popToolsAndMerge(PixelLorentzAngleToolCfg(flags)))
     SensorSimPlanarTool = CompFactory.SensorSimPlanarTool
     kwargs.setdefault("doRadDamage", flags.Digitization.DoPixelPlanarRadiationDamage)
     kwargs.setdefault("doRadDamageTemplate", flags.Digitization.DoPixelPlanarRadiationDamageTemplate)
@@ -93,8 +91,7 @@ def SensorSimPlanarToolCfg(flags, name="SensorSimPlanarTool", **kwargs):
 def SensorSim3DToolCfg(flags, name="SensorSim3DTool", **kwargs):
     """Return ComponentAccumulator with configured SensorSim3DTool"""
     acc = PixelConfigCondAlgCfg(flags)
-    SiTool = acc.popToolsAndMerge(PixelSiPropertiesCfg(flags))
-    kwargs.setdefault("SiPropertiesTool", SiTool)
+    kwargs.setdefault("SiPropertiesTool", acc.popToolsAndMerge(PixelSiPropertiesToolCfg(flags)))
     SensorSim3DTool = CompFactory.SensorSim3DTool
     kwargs.setdefault("doRadDamage", flags.Digitization.DoPixel3DRadiationDamage)
     kwargs.setdefault("doRadDamageTemplate", flags.Digitization.DoPixel3DRadiationDamageTemplate)

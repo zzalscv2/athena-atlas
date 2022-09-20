@@ -8,8 +8,8 @@ from AthenaConfiguration.ComponentFactory import CompFactory
 def SCTSiPropertiesTestAlgCfg(flags, name="SCTSiPropertiesTestAlg", **kwargs):
     """Return a configured SCTSiPropertiesTestAlg"""
     acc = ComponentAccumulator()
-    from SiPropertiesTool.SCT_SiPropertiesConfig import SCT_SiPropertiesCfg
-    kwargs.setdefault("SCTPropertiesTool", acc.popToolsAndMerge(SCT_SiPropertiesCfg(flags)))
+    from SiPropertiesTool.SCT_SiPropertiesConfig import SCT_SiPropertiesToolCfg
+    kwargs.setdefault("SCTPropertiesTool", acc.popToolsAndMerge(SCT_SiPropertiesToolCfg(flags)))
     acc.addEventAlgo(CompFactory.SCTSiPropertiesTestAlg(**kwargs))
     return acc
 

@@ -164,7 +164,12 @@ monitoring_topo = [
 # Chains inside the ​Physics_pp_run3_v1.py menu:
 ######  
 
-primary_single_ele = monitoringTP_electron 
+primary_single_ele = ['HLT_e26_lhtight_ivarloose_L1EM22VHI',
+                'HLT_e26_lhtight_ivarmedium_L1EM22VHI',
+                'HLT_e28_lhtight_ivarloose_L1EM22VHI',
+                'HLT_e60_lhmedium_L1EM22VHI',
+                'HLT_e140_lhloose_L1EM22VHI',                            
+        ] 
 
 primary_double_pho = [
         'HLT_2g20_tight_icaloloose_L12EM15VHI',
@@ -172,6 +177,12 @@ primary_double_pho = [
         'HLT_g35_medium_g25_medium_L12EM20VH',
         'HLT_2g50_loose_L12EM20VH',
         ]       
+        
+monitoring_Zee = ['HLT_e26_lhtight_e14_etcut_probe_50invmAB130_L1EM22VHI',
+                'HLT_e26_lhtight_e14_etcut_L1EM22VHI',
+                'HLT_e26_lhtight_e14_etcut_probe_50invmAB130_L1eEM26M',
+                'HLT_e26_lhtight_e14_etcut_L1eEM26M'
+                ] + primary_single_ele
 
 monitoring_Jpsiee = [
         'HLT_e10_lhvloose_L1EM7',

@@ -241,6 +241,7 @@ def createTrackingPassFlags():
 
     icf.addFlag("maxPrimaryImpact", lambda pcf: 10.0 * Units.mm if pcf.InDet.Tracking.doBLS
                 else maxPrimaryImpact_ranges(pcf) )
+    icf.addFlag("maxEMImpact", 50.0 * Units.mm)
     icf.addFlag("maxZImpact", maxZImpact_ranges )
 
     # --- this is for the TRT-extension
@@ -583,6 +584,7 @@ def createR3LargeD0TrackingPassFlags():
     icf.minPT              = 1.0 * Units.GeV                                                                                    
     icf.maxEta             = 3                                                                                                        
     icf.maxPrimaryImpact   = 300.0 * Units.mm
+    icf.maxEMImpact        = 300 * Units.mm
     icf.maxZImpact         = 500 * Units.mm    
     icf.maxSecondaryImpact = 300.0 * Units.mm  
     icf.minSecondaryPt     = 1000.0 * Units.MeV 

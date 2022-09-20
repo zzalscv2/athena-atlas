@@ -93,9 +93,9 @@ StatusCode TrigCostSvc::startEvent(const EventContext& context, const bool enabl
     m_eventMonitored[ context.slot() ] = monitoredEvent;
   }
 
-  // As we missed the AuditType::Before of the HLTSeeding (which is calling this TrigCostSvc::startEvent), let's add it now.
+  // As we missed the AuditType::Before of the TrigCostSupervisorAlg (which is calling this TrigCostSvc::startEvent), let's add it now.
   // This will be our canonical initial timestamps for measuring this event. Similar will be done for DecisionSummaryMakerAlg at the end
-  ATH_CHECK(processAlg(context, m_hltSeedingName, AuditType::Before));
+  ATH_CHECK(processAlg(context, m_costSupervisorAlgName, AuditType::Before));
 
   return StatusCode::SUCCESS;
 }
@@ -243,7 +243,7 @@ StatusCode TrigCostSvc::endEvent(const EventContext& context, SG::WriteHandle<xA
   // And the global START time for the event
   uint64_t eventStartTime = 0;
   {
-    const AlgorithmIdentifier hltSeedingAi = AlgorithmIdentifierMaker::make(context, m_hltSeedingName, msg());
+    const AlgorithmIdentifier hltSeedingAi = AlgorithmIdentifierMaker::make(context, m_costSupervisorAlgName, msg());
     ATH_CHECK( hltSeedingAi.isValid() );
     tbb::concurrent_hash_map<AlgorithmIdentifier, AlgorithmPayload, AlgorithmIdentifierHashCompare>::const_accessor startAcessor;
     if (m_algStartInfo.retrieve(hltSeedingAi, startAcessor, msg()).isFailure()) {
