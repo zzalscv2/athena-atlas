@@ -54,7 +54,7 @@ namespace Trk {
        bool                                         m_executed;                   //!< Make sure it only runs once 
                                                     
        ServiceHandle<Trk::ITrackingGeometrySvc>     m_trackingGeometrySvc;        //!< Service handle for retrieving the TrackingGeometry
-       mutable const TrackingGeometry*              m_trackingGeometry;           //!< The TrackingGeometry to be retrieved
+       const TrackingGeometry*                      m_trackingGeometry;           //!< The TrackingGeometry to be retrieved
        std::string                                  m_trackingGeometryName;       //!< The Name of the TrackingGeometry
        ToolHandleArray<Trk::IGeometryProcessor>     m_trackingGeometryProcessors; //!< Tool to write out a Display format for external viewers
                                     
