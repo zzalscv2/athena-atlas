@@ -4,11 +4,11 @@
 #include <iostream>
 #include "TH1D.h"
 #include "TCanvas.h"
-#include "TRandom.h"
+#include "TRandom3.h"
 
 void RunDigiToy(int nRDO=1000000, int nRDOperFile=1000, int nHighPtMB=100000, int nHighPtMBperjob=4000, bool rndHighPtMBinfileOffset=true, bool veto_intime_reuse=false)
 {
-  gRandom->SetSeed(4321);
+  TRandom3 rndGen(4321);
   
   int njobs=nRDO/nRDOperFile;
   int nHighPtMBfiles=nHighPtMB/nHighPtMBperjob;
@@ -30,23 +30,23 @@ void RunDigiToy(int nRDO=1000000, int nRDOperFile=1000, int nHighPtMB=100000, in
 
   for(int ijob=0;ijob<njobs;++ijob) {  
     //randomly pick one high pT minbias event
-    int iMBfile=gRandom->Uniform(0,nHighPtMBfiles);
+    int iMBfile=rndGen.Uniform(0,nHighPtMBfiles);
     if(iMBfile>=nHighPtMBfiles) iMBfile-=nHighPtMBfiles;
     int iMBbeg=iMBfile * nHighPtMBperjob;
     int iMBend=iMBbeg + nHighPtMBperjob;
     int iMB=iMBbeg;
     if(rndHighPtMBinfileOffset) {
-      iMB=gRandom->Uniform(iMBbeg,iMBend);
+      iMB=rndGen.Uniform(iMBbeg,iMBend);
       if(iMB>=iMBend) iMB=iMBbeg;
     }
     for(int iRDO=0;iRDO<nRDOperFile;++iRDO) 
     {
       std::vector< int > veto(nHighPtMBperjob,0);
       for(int itime=0;itime<ntime;++itime) {
-        int nmu=gRandom->Poisson(mu);
+        int nmu=rndGen.Poisson(mu);
         if(ijob%nprint==0 && iRDO<2 && itime<2) std::cout<<"job="<<ijob<<" event="<<iRDO<<", itime="<<itime<<": nmu="<<nmu<<" iMB="<<iMB<<" nuse[iMB]="<<nuse[iMB]<<" nuse_outoftime[iMB]="<<nuse_outoftime[iMB]<<std::endl;
         for(int imu=0;imu<nmu;++imu) {
-          double rnd=gRandom->Rndm();
+          double rnd=rndGen.Rndm();
           if(rnd<highpTfrac) {
             //std::cout<<"event="<<iRDO<<": high pT event, rnd="<<rnd<<std::endl;
             if(itime==0) {
@@ -73,7 +73,7 @@ void RunDigiToy(int nRDO=1000000, int nRDOperFile=1000, int nHighPtMB=100000, in
 
   for(int iMB=0;iMB<nHighPtMB;++iMB) {
     hist_poisson->Fill(nuse[iMB]);
-    hist_poisson_ideal->Fill(gRandom->Poisson(prob));
+    hist_poisson_ideal->Fill(rndGen.Poisson(prob));
     hist_poisson_outoftime->Fill(nuse_outoftime[iMB]);
   }
 
@@ -92,7 +92,7 @@ void RunDigiToy(int nRDO=1000000, int nRDOperFile=1000, int nHighPtMB=100000, in
 
 void RunRDOToy(int nRDO=1000000, int nRDOperFile=1000, int nMCperSample=10000, int nMCsamples=100, bool rndRDO=true)
 {
-  gRandom->SetSeed(4321);
+  TRandom3 rndGen(4321);
   
   int nRDOfiles=nRDO/nRDOperFile;
   int nRDOfilesperMCSample=nMCperSample/nRDOperFile;
@@ -110,7 +110,7 @@ void RunRDOToy(int nRDO=1000000, int nRDOperFile=1000, int nMCperSample=10000, i
       int indexRDO;
       if(rndRDO || iRDO==0) {
         do {
-          indexRDO=gRandom->Uniform(0,nRDOfiles);
+          indexRDO=rndGen.Uniform(0,nRDOfiles);
           if(indexRDO>=nRDOfiles) indexRDO=0;
         } while (usedRDO[iMC].count(indexRDO)>0);
         firstRDO=indexRDO;
