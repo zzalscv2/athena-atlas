@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
 */
 
 /***************************************************************************
@@ -36,7 +36,7 @@ public:
 			  const ToolHandle<IIntersector>&	intersector,
 			  std::vector<FitMeasurement*>&		measurements,
 			  FitParameters*			parameters,
-			  ToolHandle<IIntersector>&    		rungeKuttaIntersector,
+			  const ToolHandle<IIntersector>&	rungeKuttaIntersector,
 			  const ToolHandle<IPropagator>&    	stepPropagator,
 			  int 					useStepPropagator);    
     ~MeasurementProcessor (void);
@@ -52,8 +52,8 @@ public:
     void	propagationDerivatives(void);
     
 private:
-    void		clusterDerivatives(int derivativeFlag, const FitMeasurement& measurement);
-    void		driftDerivatives(int derivativeFlag, const FitMeasurement& measurement);
+    void		clusterDerivatives(int derivativeFlag, FitMeasurement& measurement);
+    void		driftDerivatives(int derivativeFlag, FitMeasurement& measurement);
     bool		extrapolateToMeasurements(ExtrapolationType type);
 
     std::vector<FitMeasurement*>	m_alignments;
@@ -79,7 +79,7 @@ private:
     double				m_qOverP[ExtrapolationTypes]{};
     double				m_qOverPbeforeCalo;
     double				m_qOverPafterCalo;
-    ToolHandle<IIntersector>&		m_rungeKuttaIntersector;
+    const ToolHandle<IIntersector>&	m_rungeKuttaIntersector;
     const ToolHandle<IPropagator>&	m_stepPropagator;
     int 				m_useStepPropagator;
     std::vector<FitMeasurement*>	m_scatterers;

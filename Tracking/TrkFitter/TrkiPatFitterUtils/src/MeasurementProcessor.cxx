@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
 */
 
 /***************************************************************************
@@ -30,7 +30,7 @@ MeasurementProcessor::MeasurementProcessor (bool				asymmetricCaloEnergy,
 					    const ToolHandle<IIntersector>&		intersector,
 					    std::vector<FitMeasurement*>&		measurements,
 					    FitParameters*			parameters,
-					    ToolHandle<IIntersector>&		rungeKuttaIntersector,
+					    const ToolHandle<IIntersector>&	rungeKuttaIntersector,
 					    const ToolHandle<IPropagator>&	stepPropagator,
                                             int useStepPropagator)
     :	m_asymmetricCaloEnergy		(asymmetricCaloEnergy),
@@ -587,7 +587,7 @@ MeasurementProcessor::propagationDerivatives(void)
 }
 
 void
-MeasurementProcessor::clusterDerivatives(int derivativeFlag, const FitMeasurement& measurement)
+MeasurementProcessor::clusterDerivatives(int derivativeFlag, FitMeasurement& measurement)
 {
     // derivativeFlag definition: 0 take wrt Z0, 1 take wrt D0, 2 take wrt D0 and Z0
     double weight				= measurement.weight();
@@ -756,7 +756,7 @@ MeasurementProcessor::clusterDerivatives(int derivativeFlag, const FitMeasuremen
 }
 
 void
-MeasurementProcessor::driftDerivatives(int derivativeFlag, const FitMeasurement& measurement)
+MeasurementProcessor::driftDerivatives(int derivativeFlag, FitMeasurement& measurement)
 {
     // transverse distance to measurement
     const TrackSurfaceIntersection& intersection= measurement.intersection(FittedTrajectory);
