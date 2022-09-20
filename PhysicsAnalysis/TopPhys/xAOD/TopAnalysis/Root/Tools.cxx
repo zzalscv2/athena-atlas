@@ -367,7 +367,7 @@ namespace top {
       auto cursor = dataType.find("_"); // split DAOD_BLALBA
       std::string stream = dataType.substr(cursor + 1);
       config->setDerivationStream(stream);
-      config->setIsTruthDxAOD((stream == "TRUTH"));
+      config->setIsTruthDxAOD((stream.find("TRUTH") != std::string::npos));
     } else {
       ATH_MSG_WARNING("DataType: " << dataType
           << " does not appear to be a StreamDAOD_*, so we cannot determine derivation type.");
@@ -395,6 +395,8 @@ namespace top {
         config->setIsAFII(true);
       } else if (simFlavour == "ATLFAST3_QS") {
         config->setIsAFII(false);
+      } else if (config->isTruthDxAOD()) {
+	config->setIsAFII(false);
       } else {
         ATH_MSG_ERROR("Unsupported simFlavour detected in xAOD::FileMetaData: " << simFlavour);
         throw std::runtime_error("Unsupported simFlavour detected, exiting");

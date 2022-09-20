@@ -43,7 +43,7 @@ namespace top {
 
     top::check(m_met_maker.retrieve(), "Failed to retrieve met maker tool");
     top::check(m_met_systematics.retrieve(), "Failed to retrieve met systematic tool");
-    top::check(m_metSignif.retrieve(),       "Failed to retrieve metSignificance!");
+    if (m_config->METSignificance()) top::check(m_metSignif.retrieve(), "Failed to retrieve metSignificance!");
 
     std::string jet_collection = m_config->sgKeyJets();
     jet_collection.erase(jet_collection.length() - 4); //erase "Jets" from jet collection name
