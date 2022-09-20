@@ -6,7 +6,8 @@ Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
 
 from argparse import ArgumentParser
 from AthenaCommon.Debugging import DbgStage
-
+from AthenaConfiguration.AutoConfigFlags import GetFileMD
+from AthenaConfiguration.Enums import LHCPeriod
 from AthenaConfiguration.JobOptsDumper import JobOptsDumperCfg
 
 
@@ -34,6 +35,10 @@ def CommonTestArgumentParser(prog):
                         help="Output RDO file")
     parser.add_argument("-s", "--outputSig", default='', type=str,
                         help="Output RDO_SGNL file")
+    parser.add_argument("-r", "--run", default=LHCPeriod.Run2,
+                        type=LHCPeriod, choices=list(LHCPeriod))
+    parser.add_argument("--disableTruth", default=False, action="store_true",
+                        help="Disable truth overlay")
     parser.add_argument("--debug", default='', type=str,
                         choices=DbgStage.allowed_values,
                         help="Debugging flag: " + ','.join (DbgStage.allowed_values))
@@ -46,6 +51,8 @@ def defaultTestFlags(configFlags, args):
     configFlags.Digitization.DoCaloNoise = False
     configFlags.Digitization.DoInnerDetectorNoise = False
     configFlags.Digitization.EnableCaloHSTruthRecoInputs = False
+    if args.disableTruth:
+        configFlags.Digitization.EnableTruth = False
     configFlags.LAr.OFCShapeFolder = "4samples1phase"
     configFlags.LAr.ROD.DoOFCPileupOptimization = True
     configFlags.LAr.ROD.nSamples = 4
@@ -67,10 +74,22 @@ def defaultTestFlags(configFlags, args):
         configFlags.IOVDb.DatabaseInstance = "CONDBR2"
         configFlags.Overlay.DataOverlay = True
     else:
-        configFlags.Input.Files = defaultTestFiles.RDO_BKG_RUN2
-        configFlags.Input.SecondaryFiles = defaultTestFiles.HITS_RUN2
+        configFlags.Input.MCChannelNumber = GetFileMD(configFlags.Input.SecondaryFiles).get("mc_channel_number", 0)
+        if args.run is LHCPeriod.Run2:
+            configFlags.Input.Files = defaultTestFiles.RDO_BKG_RUN2
+            configFlags.Input.SecondaryFiles = defaultTestFiles.HITS_RUN2
+            configFlags.IOVDb.GlobalTag = "OFLCOND-MC16-SDR-RUN2-09"
+        elif args.run is LHCPeriod.Run3:
+            configFlags.Input.Files = defaultTestFiles.RDO_BKG_RUN3
+            configFlags.Input.SecondaryFiles = defaultTestFiles.HITS_RUN3
+            configFlags.IOVDb.GlobalTag = "OFLCOND-MC21-SDR-RUN3-05"
+        elif args.run is LHCPeriod.Run4:
+            configFlags.Input.Files = defaultTestFiles.RDO_BKG_RUN4
+            configFlags.Input.SecondaryFiles = defaultTestFiles.HITS_RUN4
+            configFlags.IOVDb.GlobalTag = "OFLCOND-MC15c-SDR-14-05"
+        else:
+            raise ValueError("Run not supported")
         configFlags.Output.RDOFileName = "mcOverlayRDO.pool.root"
-        configFlags.IOVDb.GlobalTag = "OFLCOND-MC16-SDR-20-01"
         configFlags.Overlay.DataOverlay = False
 
     if args.output:
@@ -108,8 +127,7 @@ def postprocessAndLockFlags(configFlags, args):
 def printAndRun(accessor, configFlags, args):
     """Common debugging and execution for overlay tests"""
     # Dump config
-    if args.verboseAccumulators:
-        accessor.printConfig(withDetails=True)
+    accessor.printConfig(withDetails=args.verboseAccumulators)
     if args.verboseStoreGate:
         accessor.getService("StoreGateSvc").Dump = True
     configFlags.dump()
@@ -119,9 +137,6 @@ def printAndRun(accessor, configFlags, args):
 
     # Execute and finish
     sc = accessor.run(maxEvents=args.maxEvents)
-
-    # Dump config summary
-    accessor.printConfig(withDetails=False)
 
     # Success should be 0
     return not sc.isSuccess()
