@@ -393,10 +393,19 @@ if not dsid.isdigit():
 svcMgr.EventSelector.RunNumber = int(dsid)
 
 ## Include information about generators in metadata
+gennamesvers=[]
+for item in gennames:
+       genera = item.upper()
+       generat = genera+"VER"
+       if (generat in os.environ):
+           gennamesvers.append(item+"(v."+os.environ[generat]+")")
+       else:
+           gennamesvers.append(item)
+
 import EventInfoMgt.EventInfoMgtInit
 svcMgr.TagInfoMgr.ExtraTagValuePairs.update({"mc_channel_number":str(dsid)})
 svcMgr.TagInfoMgr.ExtraTagValuePairs.update({"lhefGenerator": '+'.join( filter( gens_lhef, gennames ) ) })
-svcMgr.TagInfoMgr.ExtraTagValuePairs.update({"generators": '+'.join(gennames)})
+svcMgr.TagInfoMgr.ExtraTagValuePairs.update({"generators": '+'.join(gennamesvers)})
 svcMgr.TagInfoMgr.ExtraTagValuePairs.update({"evgenProcess": evgenConfig.process})
 svcMgr.TagInfoMgr.ExtraTagValuePairs.update({"evgenTune": evgenConfig.tune})
 if hasattr( evgenConfig, "hardPDF" ) : svcMgr.TagInfoMgr.ExtraTagValuePairs.update({"hardPDF": evgenConfig.hardPDF})
@@ -713,14 +722,6 @@ if _checkattr("description", required=True):
         msg += " " + evgenConfig.notes
     printfunc("MetaData: %s = %s" % ("physicsComment", msg))
 if _checkattr("generators", required=True):
-    gennamesvers=[]
-    for item in gennames:
-       genera = item.upper()
-       generat = genera+"VER"
-       if (generat in os.environ):
-           gennamesvers.append(item+"(v."+os.environ[generat]+")")
-       else:
-           gennamesvers.append(item)
     printfunc ("MetaData: %s = %s" % ("generatorName", "+".join(gennamesvers)))    
 if _checkattr("process"):
     printfunc ("MetaData: %s = %s" % ("physicsProcess", evgenConfig.process))
