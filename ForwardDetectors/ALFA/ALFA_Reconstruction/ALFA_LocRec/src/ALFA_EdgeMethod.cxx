@@ -215,10 +215,10 @@ Bool_t ALFA_EdgeMethod::iterationOne(UInt_t no_Detector, std::vector<Track> &tra
 	std::vector< Corridor > corr_V;
 	if( !iterOne(no_Detector, 0, corr_U) || !iterOne(no_Detector, 1, corr_V) ) return kFALSE;
 
-	for(UInt_t i = 0; i < corr_U.size(); i++){
-		for(UInt_t j = 0; j < corr_V.size(); j++){
+	for(auto & i : corr_U){
+		for(auto & j : corr_V){
 			if( testTrack( /*corr_U.at(i), corr_V.at(j)*/ ) ){
-				tracks.emplace_back( corr_U.at(i), corr_V.at(j) );
+				tracks.emplace_back( i, j );
 			}
 		}
 	}

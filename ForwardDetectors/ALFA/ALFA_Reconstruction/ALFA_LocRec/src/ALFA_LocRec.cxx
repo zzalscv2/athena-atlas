@@ -247,9 +247,9 @@ StatusCode ALFA_LocRec::execute()
 	else
 	{
 		std::string strAlgoMD;
-		for(unsigned int i=0; i<m_vecListAlgoMD.size(); i++)
+		for(auto & i : m_vecListAlgoMD)
 		{
-			strAlgoMD = m_vecListAlgoMD[i];
+			strAlgoMD = i;
 			for(iterRPName=m_ListExistingRPots.begin();iterRPName!=m_ListExistingRPots.end();++iterRPName)
 			{
 				eRPName = *iterRPName;
@@ -266,9 +266,9 @@ StatusCode ALFA_LocRec::execute()
 		}
 
 		std::string strAlgoOD;
-		for(unsigned int i=0; i<m_vecListAlgoOD.size(); i++)
+		for(auto & i : m_vecListAlgoOD)
 		{
-			strAlgoOD = m_vecListAlgoOD[i];
+			strAlgoOD = i;
 			for(iterRPName=m_ListExistingRPots.begin();iterRPName!=m_ListExistingRPots.end();++iterRPName)
 			{
 				eRPName = *iterRPName;
@@ -739,9 +739,9 @@ StatusCode ALFA_LocRec::ExecuteRecoMethod(const std::string& strAlgo, const eRPo
 
 				pMDTracking->GetData(iNumU, iNumV, fOverlapU, fOverlapV, iFibSel);
 				vecFibSel.clear();
-				for (Int_t iLayer=0; iLayer<ALFALAYERSCNT*ALFAPLATESCNT; iLayer++)
+				for (int & iLayer : iFibSel)
 				{
-					vecFibSel.push_back(iFibSel[iLayer]);
+					vecFibSel.push_back(iLayer);
 				}
 
 				m_pLocRecEvCollection->push_back(new ALFA_LocRecEvent(2, eRPName-1, fRecPosX, fRecPosY, fOverlapU, fOverlapV, iNumU, iNumV, vecFibSel));
@@ -767,9 +767,9 @@ StatusCode ALFA_LocRec::ExecuteRecoMethod(const std::string& strAlgo, const eRPo
 			if (fRecPosX!=-9999 && fRecPosY!=-9999)
 			{
 				vecFibSel.clear();
-				for (Int_t iLayer=0; iLayer<ALFALAYERSCNT*ALFAPLATESCNT; iLayer++)
+				for (int & iLayer : iFibSel)
 				{
-					vecFibSel.push_back(iFibSel[iLayer]);
+					vecFibSel.push_back(iLayer);
 				}
 
 				m_pLocRecEvCollection->push_back(new ALFA_LocRecEvent(3, eRPName-1, fRecPosX, fRecPosY, fOverlapU, fOverlapV, iNumU, iNumV, vecFibSel));
@@ -795,9 +795,9 @@ StatusCode ALFA_LocRec::ExecuteRecoMethod(const std::string& strAlgo, const eRPo
 			if (fRecPosX!=-9999 && fRecPosY!=-9999)
 			{
 				vecFibSel.clear();
-				for (Int_t iLayer=0; iLayer<ALFALAYERSCNT*ALFAPLATESCNT; iLayer++)
+				for (int & iLayer : iFibSel)
 				{
-					vecFibSel.push_back(iFibSel[iLayer]);
+					vecFibSel.push_back(iLayer);
 				}
 
 				m_pLocRecEvCollection->push_back(new ALFA_LocRecEvent(4, eRPName-1, fRecPosX, fRecPosY, fOverlapU, fOverlapV, iNumU, iNumV, vecFibSel));
@@ -882,9 +882,9 @@ StatusCode ALFA_LocRec::ExecuteRecoMethod(const std::string& strAlgo, const eRPo
 
 			pHalfReco->GetData(iNumU[0], iNumV[0], fOverlapU[0], fOverlapV[0], iFibSel);
 			vecFibSel0.clear();
-			for (Int_t iLayer=0; iLayer<ALFALAYERSCNT*ALFAPLATESCNT; iLayer++)
+			for (int & iLayer : iFibSel)
 			{
-				vecFibSel0.push_back(iFibSel[iLayer]);
+				vecFibSel0.push_back(iLayer);
 			}
 
 			sc = pHalfReco->Initialize(m_faMD, m_fbMD, iHalfSecond, m_iMultiplicityCutMD, m_iUVCutMDHalfReco, m_fOverlapCutMD);
@@ -893,9 +893,9 @@ StatusCode ALFA_LocRec::ExecuteRecoMethod(const std::string& strAlgo, const eRPo
 
 			pHalfReco->GetData(iNumU[1], iNumV[1], fOverlapU[1], fOverlapV[1], iFibSel);
 			vecFibSel1.clear();
-			for (Int_t iLayer=0; iLayer<ALFALAYERSCNT*ALFAPLATESCNT; iLayer++)
+			for (int & iLayer : iFibSel)
 			{
-				vecFibSel1.push_back(iFibSel[iLayer]);
+				vecFibSel1.push_back(iLayer);
 			}
 
 			if (fRecPosX[0]!=-9999.0 && fRecPosY[0]!=-9999.0 && fRecPosX[1]!=-9999.0 && fRecPosY[1]!=-9999.0)
@@ -931,9 +931,9 @@ StatusCode ALFA_LocRec::ExecuteRecoMethod(const std::string& strAlgo, const eRPo
 				if (fRecPosX[iTrack] != -9999.0 && fRecPosY[iTrack] != -9999.0)
 				{
 					vecFibSel.clear();
-					for (Int_t iLayer=0; iLayer<ALFALAYERSCNT*ALFAPLATESCNT; iLayer++)
+					for (int & iLayer : iFibSel)
 					{
-						vecFibSel.push_back(iFibSel[iLayer]);
+						vecFibSel.push_back(iLayer);
 					}
 
 					m_pLocRecEvCollection->push_back(new ALFA_LocRecEvent(7, eRPName-1, fRecPosX[iTrack], fRecPosY[iTrack], fOverU[iTrack], fOverV[iTrack], iNumU[iTrack], iNumV[iTrack], vecFibSel));
@@ -976,9 +976,9 @@ StatusCode ALFA_LocRec::ExecuteRecoMethod(const std::string& strAlgo, const eRPo
 				if (fRecPosX[iTrack] != -9999.0 && fRecPosY[iTrack] != -9999.0)
 				{
 					vecFibSel.clear();
-					for (Int_t iLayer=0; iLayer<ALFALAYERSCNT*ALFAPLATESCNT; iLayer++)
+					for (int & iLayer : iFibSel)
 					{
-						vecFibSel.push_back(iFibSel[iLayer]);
+						vecFibSel.push_back(iLayer);
 					}
 
 					m_pLocRecEvCollection->push_back(new ALFA_LocRecEvent(8, eRPName-1, fRecPosX[iTrack], fRecPosY[iTrack], fOverU[iTrack], fOverV[iTrack], iNumU[iTrack], iNumV[iTrack], vecFibSel));
