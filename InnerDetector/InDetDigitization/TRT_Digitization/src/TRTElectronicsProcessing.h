@@ -112,7 +112,7 @@ private:
    * @param highthreshold: high threshold discriminator setting
    */
   void DiscriminatorResponse(const double& lowthreshold,
-                             const double& highthreshold) const;
+                             const double& highthreshold);
 
   /**
    * Encode 27 bit digit from discriminator response
