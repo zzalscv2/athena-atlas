@@ -61,11 +61,13 @@ void test1 ATLAS_NOT_THREAD_SAFE ()
   parser.register_external_entity ("LArCalorimeter", "IdDictParser/IdDictLArCalorimeter_DC3-05-Comm-01.xml");
   IdDictMgr& idd = parser.parse ("IdDictParser/ATLAS_IDS.xml");
 
-  Athena_test::Leakcheck check;
+
 
   // create LArOnlineID helper to be passed to converter
   std::unique_ptr<LArOnlineID> idHelper = std::make_unique<LArOnlineID>();
   assert (idHelper->initialize_from_dictionary (idd) == 0);
+
+  Athena_test::Leakcheck check;
 
   CaloGain::CaloGain gains[CaloGain::LARNGAIN] =
     {CaloGain::LARHIGHGAIN, CaloGain::LARMEDIUMGAIN, CaloGain::LARLOWGAIN};
@@ -81,6 +83,7 @@ void test1 ATLAS_NOT_THREAD_SAFE ()
   }
 
   testit (trans, idHelper.get());
+
 }
 
 
