@@ -20,7 +20,6 @@
 #include <vector>
 #include <string>
 #include <array>
-#include <unordered_map>
 #include <map>
 //Root fwd declares
 class TKey;
@@ -102,7 +101,7 @@ private:
   int setupHistogramsInFolder( const TObjArray& dirNameArray, 
                                int lastIdx );
 
-  bool setupUncorrToySyst(std::unordered_map<int, TObjArray>& objs,
+  bool setupUncorrToySyst(std::vector<TObjArray>& objs,
                           std::vector<TObjArray>& sysObjs,
                           std::vector< std::vector<TObjArray>>& uncorrToyMCSyst);
 
@@ -126,7 +125,7 @@ private:
                             int& randomCounter);
 
   void setupTempMapsHelper(TObject* obj,
-                           std::unordered_map<int, TObjArray>& objs,
+                           std::vector<TObjArray>& objs,
                            std::vector<TObjArray >& sysObjs,int& seenSystematics) ;
 
   /// Fill and interpret the setup, depending on which histograms are found in the input file(s)
@@ -161,10 +160,10 @@ private :
   /// List of run numbers where histograms stop being valid for fast simulation
   std::vector< unsigned int > m_endRunNumberListFastSim;    
  /// List of histograms for full Geant4 simulation
-  std::unordered_map<int, std::vector< TObjArray > > m_histList;
+  std::vector<std::vector< TObjArray > > m_histList;
   std::vector< std::vector< TObjArray > > m_sysList;
   /// List of histograms for fast simulation
-  std::unordered_map<int, std::vector< TObjArray > > m_fastHistList;
+  std::vector< std::vector< TObjArray > > m_fastHistList;
   std::vector< std::vector< TObjArray > > m_fastSysList;
   //The Random generator class   
   TRandom3 m_Rndm;

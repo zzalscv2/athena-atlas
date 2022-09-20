@@ -1,5 +1,5 @@
 /*
-   Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+   Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
  */
 
 /**
@@ -189,11 +189,11 @@ AsgElectronEfficiencyCorrectionTool::initialize()
   }
   // Resolve the paths to the input files for the full Geant4 simualtion
   // corrections
-  for (size_t i = 0; i < m_corrFileNameList.size(); ++i) {
+  for (auto & ifile : m_corrFileNameList) {
 
-    std::string filename = PathResolverFindCalibFile(m_corrFileNameList.at(i));
+    std::string filename = PathResolverFindCalibFile(ifile);
     if (filename.empty()) {
-      ATH_MSG_ERROR("Could NOT resolve file name " << m_corrFileNameList.at(i));
+      ATH_MSG_ERROR("Could NOT resolve file name " << ifile);
       return StatusCode::FAILURE;
     } else {
       ATH_MSG_DEBUG(" Path found = " << filename);
@@ -201,29 +201,29 @@ AsgElectronEfficiencyCorrectionTool::initialize()
     m_rootTool->addFileName(filename);
     // Determine the systematics substring according to the name of the input
     // file
-    if (m_corrFileNameList.at(i).find("efficiencySF.") != std::string::npos) {
+    if (ifile.find("efficiencySF.") != std::string::npos) {
       m_sysSubstring = "Trigger_";
     }
-    if (m_corrFileNameList.at(i).find("efficiencySF.offline") !=
+    if (ifile.find("efficiencySF.offline") !=
         std::string::npos) {
       m_sysSubstring = "ID_";
     }
-    if (m_corrFileNameList.at(i).find("efficiencySF.offline.RecoTrk") !=
+    if (ifile.find("efficiencySF.offline.RecoTrk") !=
         std::string::npos) {
       m_sysSubstring = "Reco_";
     }
-    if (m_corrFileNameList.at(i).find("efficiencySF.offline.Fwd") !=
+    if (ifile.find("efficiencySF.offline.Fwd") !=
         std::string::npos) {
       m_sysSubstring = "FwdID_";
     }
-    if (m_corrFileNameList.at(i).find("efficiencySF.Isolation") !=
+    if (ifile.find("efficiencySF.Isolation") !=
         std::string::npos) {
       m_sysSubstring = "Iso_";
     }
-    if (m_corrFileNameList.at(i).find("efficiency.") != std::string::npos) {
+    if (ifile.find("efficiency.") != std::string::npos) {
       m_sysSubstring = "TriggerEff_";
     }
-    if (m_corrFileNameList.at(i).find("efficiencySF.ChargeID") !=
+    if (ifile.find("efficiencySF.ChargeID") !=
         std::string::npos) {
       m_sysSubstring = "ChargeIDSel_";
     }
@@ -298,7 +298,12 @@ AsgElectronEfficiencyCorrectionTool::initialize()
 
   // get Nsyst
   m_nCorrSyst = m_rootTool->getNSyst();
-  m_nUncorrSyst = m_rootTool->getNbins(m_pteta_bins);
+  std::map<float, std::vector<float>> tmp;
+  m_nUncorrSyst = m_rootTool->getNbins(tmp);
+  // copy over to vector for better access
+  for (const auto& i : tmp) {
+    m_pteta_bins.emplace_back(i.first, i.second);
+  }
 
   // Initialize the systematics
   if (InitSystematics() != StatusCode::SUCCESS) {
@@ -378,7 +383,7 @@ AsgElectronEfficiencyCorrectionTool::getEfficiencyScaleFactor(
   // allow for a 5% margin at the lowest pT bin boundary (i.e. increase et by 5% 
   // for sub-threshold electrons). This assures that electrons that pass the 
   // threshold only under syst variations of energy get a scale factor assigned.
-  std::map<float, std::vector<float>>::const_iterator itr_pt = m_pteta_bins.begin();
+  auto itr_pt = m_pteta_bins.begin();
   if (itr_pt!=m_pteta_bins.end() && et<itr_pt->first) {
     et=et*1.05;
   }
@@ -864,10 +869,10 @@ AsgElectronEfficiencyCorrectionTool::currentSimplifiedUncorrSystRegion(
                     << "] for the SIMPLIFIED correlation model ");
     return -1;
   }
-  int etabin = std::as_const(*m_UncorrRegions).GetYaxis()->FindBin(fabs(cluster_eta)) - 1;
+  int etabin = std::as_const(*m_UncorrRegions).GetYaxis()->FindBin(std::abs(cluster_eta)) - 1;
   if (etabin < 0 || etabin >= std::as_const(*m_UncorrRegions).GetYaxis()->GetNbins()) {
     ATH_MSG_WARNING(" Found electron with |eta| = "
-                    << fabs(cluster_eta)
+                    << std::abs(cluster_eta)
                     << ", where you specified boundaries of ["
                     << std::as_const(*m_UncorrRegions).GetYaxis()->GetBinLowEdge(1) << ","
                     << std::as_const(*m_UncorrRegions).GetYaxis()->GetBinUpEdge(
@@ -891,30 +896,25 @@ AsgElectronEfficiencyCorrectionTool::currentUncorrSystRegion(
   int reg = 0;
   bool found = false;
   float cluster_eta_electron = 0;
-  std::map<float, std::vector<float>>::const_iterator itr_ptBEGIN =
-    m_pteta_bins.begin();
-  std::map<float, std::vector<float>>::const_iterator itr_ptEND =
-    m_pteta_bins.end();
-  // Consider using std::map::lower_bound, returns the iterator to the first
-  // element that is greater-or-equal to a pt
+  auto itr_ptBEGIN = m_pteta_bins.begin();
+  auto itr_ptEND = m_pteta_bins.end();
   for (; itr_ptBEGIN != itr_ptEND; ++itr_ptBEGIN) {
-    std::map<float, std::vector<float>>::const_iterator itr_ptBEGINplusOne =
-      itr_ptBEGIN;
+    auto itr_ptBEGINplusOne = itr_ptBEGIN;
     ++itr_ptBEGINplusOne;
-    // Find the pt bin : Larger or equal from the current and (the next one is
-    // the last or the next one is larger).
+    // Find the pt bin : Larger or equal from the current and the next one is
+    // the last or the next one is larger.
     if (et >= itr_ptBEGIN->first &&
         (itr_ptBEGINplusOne == itr_ptEND || et < itr_ptBEGINplusOne->first)) {
       if ((itr_ptBEGIN->second).at(0) >= 0) {
-        cluster_eta_electron = fabs(cluster_eta);
+        cluster_eta_electron = std::abs(cluster_eta);
       } else {
         cluster_eta_electron = (cluster_eta);
       };
       for (unsigned int etab = 0; etab < ((itr_ptBEGIN->second).size());
            ++etab) {
         unsigned int etabnext = etab + 1;
-        // Find the eta bin : Larger or equal from the current and (the next one
-        // is the last or the next one is larger).
+        // Find the eta bin : Larger or equal from the current and the next one
+        // is the last or the next one is larger:.
         if ((cluster_eta_electron) >= (itr_ptBEGIN->second).at(etab) &&
             (etabnext == itr_ptBEGIN->second.size() ||
              cluster_eta_electron < itr_ptBEGIN->second.at(etabnext))) {

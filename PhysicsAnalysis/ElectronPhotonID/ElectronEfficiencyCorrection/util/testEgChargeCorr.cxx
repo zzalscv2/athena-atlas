@@ -1,5 +1,5 @@
 /*
-   Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+   Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
  */
 
 // System include(s):
@@ -135,10 +135,10 @@ main(int argc, char* argv[])
                 << std::endl;
     Info(APP_NAME, "Electron");
 
-    const xAOD::EventInfo* event_info = 0;
+    const xAOD::EventInfo* event_info = nullptr;
     CHECK(event.retrieve(event_info, "EventInfo"));
 
-    const xAOD::ElectronContainer* electrons = 0;
+    const xAOD::ElectronContainer* electrons = nullptr;
     CHECK(event.retrieve(electrons, "Electrons"));
 
     // Create shallow copy for this systematic
