@@ -92,37 +92,9 @@ namespace ParticleJetTools {
   // ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
   // End of code copied from ParticleJetDeltaRLabelTool
 
-
-  LabelDecorators::LabelDecorators(const LabelNames& n):
-    singleint(n.singleint),
-    doubleint(n.doubleint),
-    pt(n.pt),
-    Lxy(n.Lxy)
-  {
-  }
-
-
-  IParticleLinker::IParticleLinker(
-    const SG::ReadHandleKey<xAOD::TruthParticleContainer>& key,
-    const std::string& linkname):
-    m_key(key.hashedKey()),
-    m_dec(linkname)
-  {
-  }
-  void IParticleLinker::decorate(
-    const xAOD::Jet& jet,
-    const std::vector<const xAOD::TruthParticle*>& ipv)
-  {
-    IPLV links;
-    for (const xAOD::TruthParticle* ip: ipv) {
-      links.emplace_back(m_key, ip->index());
-    }
-    m_dec(jet) = links;
-  }
-
-  void setJetLabels(const xAOD::Jet& jet,
+  void setJetLabels(xAOD::Jet& jet,
                     const Particles& particles,
-                    const LabelDecorators& decs) {
+                    const LabelNames& names) {
 
     // we also want to save information about the maximum pt particle of the labeling partons
     auto getMaxPtPart = [](const auto& container) -> const xAOD::TruthParticle* {
@@ -146,55 +118,49 @@ namespace ParticleJetTools {
     // set truth label for jets above pt threshold
     // hierarchy: b > c > tau > light
     if (particles.b.size()) {
-      decs.singleint(jet) = 5;
+      jet.setAttribute<int>(names.singleint, 5);
       const auto maxPtPart = getMaxPtPart(particles.b);
-      decs.pt(jet) = partPt(maxPtPart);
-      decs.Lxy(jet) = partLxy(maxPtPart);
+      jet.setAttribute<float>(names.pt, partPt(maxPtPart));
+      jet.setAttribute<float>(names.Lxy, partLxy(maxPtPart));
     } else if (particles.c.size()) {
-      decs.singleint(jet) = 4;
+      jet.setAttribute<int>(names.singleint, 4);
       const auto maxPtPart = getMaxPtPart(particles.c);
-      decs.pt(jet) = partPt(maxPtPart);
-      decs.Lxy(jet) = partLxy(maxPtPart);
+      jet.setAttribute<float>(names.pt, partPt(maxPtPart));
+      jet.setAttribute<float>(names.Lxy, partLxy(maxPtPart));
     } else if (particles.tau.size()) {
-      decs.singleint(jet) = 15;
+      jet.setAttribute<int>(names.singleint, 15);
       const auto maxPtPart = getMaxPtPart(particles.tau);
-      decs.pt(jet) = partPt(maxPtPart);
-      decs.Lxy(jet) = partLxy(maxPtPart);
+      jet.setAttribute<float>(names.pt, partPt(maxPtPart));
+      jet.setAttribute<float>(names.Lxy, partLxy(maxPtPart));
     } else {
-      decs.singleint(jet) = 0;
-      decs.pt(jet) = NAN;
-      decs.Lxy(jet) = NAN;
+      jet.setAttribute<int>(names.singleint, 0);
+      jet.setAttribute<float>(names.pt, NAN);
+      jet.setAttribute<float>(names.Lxy, NAN);
     }
 
     if (particles.b.size()) {
       if (particles.b.size() >= 2)
-        decs.doubleint(jet) = 55;
+        jet.setAttribute<int>(names.doubleint, 55);
 
       else if (particles.c.size())
-        decs.doubleint(jet) = 54;
+        jet.setAttribute<int>(names.doubleint, 54);
 
       else
-        decs.doubleint(jet) = 5;
+        jet.setAttribute<int>(names.doubleint, 5);
 
     } else if (particles.c.size()) {
       if (particles.c.size() >= 2)
-        decs.doubleint(jet) = 44;
+        jet.setAttribute<int>(names.doubleint, 44);
 
       else
-        decs.doubleint(jet) = 4;
+        jet.setAttribute<int>(names.doubleint, 4);
 
     } else if (particles.tau.size())
-      decs.doubleint(jet) = 15;
+      jet.setAttribute<int>(names.doubleint, 15);
 
     else
-      decs.doubleint(jet) = 0;
+      jet.setAttribute<int>(names.doubleint, 0);
 
-  }
-
-  void setJetLabels(const xAOD::Jet& jet,
-                    const Particles& particles,
-                    const LabelNames& names) {
-    setJetLabels(jet, particles, LabelDecorators(names));
   }
 
 }
