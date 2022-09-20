@@ -1,5 +1,5 @@
 /*
-   Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+   Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
  */
 
 #ifndef __ASGELECTRONEFFICIENCYCORRECTIONTOOL__
@@ -213,7 +213,7 @@ private:
   // number if systematics uncertainty
   int m_nCorrSyst;
   int m_nUncorrSyst;
-  std::map<float, std::vector<float>> m_pteta_bins;
+  std::vector<std::pair<float, std::vector<float>>> m_pteta_bins;
 
   // custom binning for SIMPLIFIED model
   std::vector<float> m_uncorrSimplfEtaBinsUser;

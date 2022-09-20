@@ -1,5 +1,5 @@
 /*
-   Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+   Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
  */
 
 // System include(s):
@@ -119,24 +119,24 @@ main(int argc, char* argv[])
   // Configure the tool based on the inputs
   AsgElectronEfficiencyCorrectionTool ElEffCorrectionTool(
     "ElEffCorrectionTool");
-  if (fileName != "") {
+  if (!fileName.empty()) {
     std::vector<std::string> inputFiles{ fileName };
     CHECK(
       ElEffCorrectionTool.setProperty("CorrectionFileNameList", inputFiles));
   }
-  if (mapfileName != "") {
+  if (!mapfileName.empty()) {
     CHECK(ElEffCorrectionTool.setProperty("MapFilePath", mapfileName));
   }
-  if (recokey != "") {
+  if (!recokey.empty()) {
     CHECK(ElEffCorrectionTool.setProperty("RecoKey", recokey));
   }
-  if (idkey != "") {
+  if (!idkey.empty()) {
     CHECK(ElEffCorrectionTool.setProperty("IdKey", idkey));
   }
-  if (isokey != "") {
+  if (!isokey.empty()) {
     CHECK(ElEffCorrectionTool.setProperty("IsoKey", isokey));
   }
-  if (triggerkey != "") {
+  if (!triggerkey.empty()) {
     CHECK(ElEffCorrectionTool.setProperty("TriggerKey", triggerkey));
   }
   CHECK(ElEffCorrectionTool.setProperty("ForceDataType", (int)SimType));
@@ -166,7 +166,7 @@ main(int argc, char* argv[])
    * Set up the systematic variations
    * 2 cases one for "continuous" one for "toys"
    */
-  bool isToys = model.find("TOY") != std::string::npos ? true : false;
+  bool isToys = model.find("TOY") != std::string::npos;
   double nominalSF{};
   double totalNeg{};
   double totalPos{};

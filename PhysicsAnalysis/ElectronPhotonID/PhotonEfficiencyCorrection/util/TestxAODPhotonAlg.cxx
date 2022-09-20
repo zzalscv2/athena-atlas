@@ -139,29 +139,29 @@ int main( int argc, char* argv[] ) {
 
    std::cout << "restructure all recommended systematic variations for the SF tool"<<std::endl;
    std::vector<CP::SystematicSet> syst_PhotonID, syst_PhotonIso, syst_PhotonTrig;
-   for (auto SystematicsVariation : CP::make_systematics_vector(photonSF_ID.recommendedSystematics()))
+   for (const auto& SystematicsVariation : CP::make_systematics_vector(photonSF_ID.recommendedSystematics()))
    {
-     syst_PhotonID.push_back(CP::SystematicSet());
+     syst_PhotonID.emplace_back();
    	 syst_PhotonID.back().insert(SystematicsVariation);
    }
-   for (auto SystematicsVariation : CP::make_systematics_vector(photonSF_Iso.recommendedSystematics()))
+   for (const auto& SystematicsVariation : CP::make_systematics_vector(photonSF_Iso.recommendedSystematics()))
    {
-     syst_PhotonIso.push_back(CP::SystematicSet());
+     syst_PhotonIso.emplace_back();
    	 syst_PhotonIso.back().insert(SystematicsVariation);
    }
-   for (auto SystematicsVariation : CP::make_systematics_vector(photonSF_Trig.recommendedSystematics()))
+   for (const auto& SystematicsVariation : CP::make_systematics_vector(photonSF_Trig.recommendedSystematics()))
    {
-     syst_PhotonTrig.push_back(CP::SystematicSet());
+     syst_PhotonTrig.emplace_back();
          syst_PhotonTrig.back().insert(SystematicsVariation);
    }
    //Print all recomended systemtaics
-   for (auto sSystematicSet: syst_PhotonID){
+   for (const auto& sSystematicSet: syst_PhotonID){
 	  Info(APP_NAME,"PhotonEfficiencyCorrectionTool ID instance has next systematic variation  %s ",sSystematicSet.name().c_str());
    }
-   for (auto sSystematicSet: syst_PhotonIso){
+   for (const auto& sSystematicSet: syst_PhotonIso){
 	  Info(APP_NAME,"PhotonEfficiencyCorrectionTool Iso instance has next systematic variation  %s ",sSystematicSet.name().c_str());
    }   
-   for (auto sSystematicSet: syst_PhotonTrig){
+   for (const auto& sSystematicSet: syst_PhotonTrig){
           Info(APP_NAME,"PhotonEfficiencyCorrectionTool Iso instance has next systematic variation  %s ",sSystematicSet.name().c_str());
    }
    
@@ -174,12 +174,12 @@ int main( int argc, char* argv[] ) {
      event.getEntry( entry );   
 	
 	// Get the EventInfo (run number...):
-	const xAOD::EventInfo* ei = 0;
+	const xAOD::EventInfo* ei = nullptr;
 	CHECK( event.retrieve( ei, "EventInfo" ) );
 	//std::cout << "Event number = " << ei->eventNumber() << std::endl;
 	
 	// Get the Photon container from the event:
-    const xAOD::PhotonContainer *photons = 0;
+    const xAOD::PhotonContainer *photons = nullptr;
 	CHECK( event.retrieve( photons, "Photons" ) );
 	
 	//Clone 

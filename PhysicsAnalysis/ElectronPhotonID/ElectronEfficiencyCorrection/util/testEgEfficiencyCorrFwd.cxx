@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2020 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
 */
 
 // System include(s):
@@ -91,7 +91,7 @@ main(int argc, char* argv[])
     event.getEntry(entry);
     MSG_INFO(" \n ==> Event " << entry);
 
-    const xAOD::ElectronContainer* electrons = 0;
+    const xAOD::ElectronContainer* electrons = nullptr;
     CHECK(event.retrieve(electrons, "ForwardElectrons"));
 
     for (const xAOD::Electron* el : *electrons) {

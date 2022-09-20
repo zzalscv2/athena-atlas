@@ -1,5 +1,5 @@
 /*
-   Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+   Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
  */
 
 #include "CreateDummyEl.h"
@@ -118,8 +118,7 @@ getElectrons(const std::vector<std::pair<double, double>>& pt_eta,
     xAOD::Electron* el = new xAOD::Electron;
     electrons->push_back(el);
     links.clear();
-    links.push_back(
-      ElementLink<xAOD::CaloClusterContainer>("MyClusters", el->index()));
+    links.emplace_back("MyClusters", el->index());
     el->setCaloClusterLinks(links);
     el->setEta(eta);
     el->setPhi(0.0);

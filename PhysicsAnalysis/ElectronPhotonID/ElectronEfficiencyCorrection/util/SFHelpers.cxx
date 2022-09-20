@@ -1,5 +1,5 @@
 /*
-   Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+   Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
  */
 
 #include "SFHelpers.h"
@@ -40,7 +40,7 @@ SFHelpers::result(AsgElectronEfficiencyCorrectionTool& tool,
     }
     // Helper function as a lamda
     auto totalSyst =
-      [&tool](xAOD::Electron el,
+      [&tool](const xAOD::Electron& el,
               const std::vector<CP::SystematicVariation>& variations,
               const double nominal,
               double& result) {

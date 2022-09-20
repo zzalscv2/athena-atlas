@@ -289,7 +289,7 @@ bool scanPhaseSpace(Config& cfg, map_t& affected_bins)
   xAOD::TStore store;
 
   using RealTool = const AsgElectronEfficiencyCorrectionTool;
-  auto asgtool = dynamic_cast<RealTool*>(&*cfg.tool);
+  const auto *asgtool = dynamic_cast<RealTool*>(&*cfg.tool);
   const std::size_t jmax{subdiv_eta + 1}, kmax{subdiv_pt + 1};
   const std::size_t dmax{cfg.domains.size()};
   for (std::size_t d{0}; d<dmax; ++d) {
@@ -410,11 +410,11 @@ bool displayFindings_analysis(const Config& cfg, const map_t& affected_bins)
   NP prev{-888, false};
   for (const auto& kv : affected_bins) {
     const auto& bins{kv.second};
-    if (!bins.size()) continue;
+    if (bins.empty()) continue;
     const NP np{kv.first};
     const bool next{prev.uncorr==np.uncorr && np.index==prev.index+1};
     prev = np;
-    if (summary.size() && next) {
+    if (!summary.empty() && next) {
       std::get<int>(summary.back()) = np.index;
       continue;
     }
@@ -439,7 +439,7 @@ bool find_boundaries(const Config& cfg,
                      const map_t::mapped_type& affected_bins,
                      Domain& bounds, bool& abs_eta, bool& holes)
 {
-  if (!affected_bins.size()) return false;
+  if (affected_bins.empty()) return false;
   constexpr float inf{std::numeric_limits<float>::max()};
   constexpr float inf_{std::numeric_limits<float>::lowest()};
   Domain bAC[2] = {{inf, inf_, inf, inf_}, {inf, inf_, inf, inf_}};
@@ -482,7 +482,7 @@ bool find_boundaries(const Config& cfg,
     auto f = [=](const float x) { return abs_eta? std::fabs(x) : x; };
     for (std::size_t i{0}; i<imax && !holes; ++i) {
       if (std::count(affected_bins.cbegin(), affected_bins.cend(), i)) continue;
-      auto& dom{cfg.domains[i]};
+      const auto& dom{cfg.domains[i]};
       holes = (dom.ptmax > bounds.ptmin) && 
         (dom.ptmin < bounds.ptmax) && 
         (f(dom.etamax) > bounds.etamin) &&
