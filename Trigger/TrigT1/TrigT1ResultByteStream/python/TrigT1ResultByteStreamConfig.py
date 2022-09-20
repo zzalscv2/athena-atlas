@@ -61,7 +61,6 @@ def ExampleL1TriggerByteStreamToolCfg(name, writeBS=False):
     # read BS == write xAOD
     tool.MuonRoIContainerReadKey=""
     tool.MuonRoIContainerWriteKey=recordable("LVL1MuonRoIs")
-    tool.L1TopoOutputLocID="LVL1MUCTPI::DEFAULT_MuonL1TopoLocation"
   return tool
 
 def MuonRoIByteStreamToolCfg(name, flags, writeBS=False):
@@ -69,9 +68,10 @@ def MuonRoIByteStreamToolCfg(name, flags, writeBS=False):
   muctpi_moduleid = 0  # No RoIB in Run 3, we always read the DAQ ROB
   muctpi_robid = int(SourceIdentifier(SubDetector.TDAQ_MUON_CTP_INTERFACE, muctpi_moduleid)) # 0x760000
   tool.ROBIDs = [muctpi_robid]
+  tool.DoTopo = flags.Trigger.L1.doMuonTopoInputs
 
   from TrigT1ResultByteStream.TrigT1ResultByteStreamMonitoring import L1MuonBSConverterMonitoring
-  tool.MonTool = L1MuonBSConverterMonitoring(name, writeBS)
+  tool.MonTool = L1MuonBSConverterMonitoring(name, flags, writeBS)
 
   # Build container names for each bunch crossing in the maximum readout window (size 5)
   containerBaseName = "LVL1MuonRoIs"
@@ -82,7 +82,7 @@ def MuonRoIByteStreamToolCfg(name, flags, writeBS=False):
     containerBaseName + "BCp1",
     containerBaseName + "BCp2",
   ]
-  topocontainerBaseName = "LVL1MUCTPI::DEFAULT_MuonL1TopoLocation"
+  topocontainerBaseName = "L1MuCTPItoL1TopoLocation"
   topocontainerNames = [
     topocontainerBaseName + "-2",
     topocontainerBaseName + "-1",
