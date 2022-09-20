@@ -25,6 +25,11 @@ def PhysValBTagCfg(flags, **kwargs):
     kwargs.setdefault("JetEtaCut", 2.5 if flags.GeoModel.Run <= LHCPeriod.Run3 else 4.0)
     kwargs.setdefault("hasJetFitterNN", flags.BTagging.RunJetFitterNN)
 
+    if "trackTruthOriginTool" not in kwargs:
+        from InDetTrackSystematicsTools.InDetTrackSystematicsToolsConfig import InDetTrackTruthOriginToolCfg
+        kwargs.setdefault("trackTruthOriginTool", acc.popToolsAndMerge(
+            InDetTrackTruthOriginToolCfg(flags)))
+
     tool = CompFactory.JetTagDQA.PhysValBTag(**kwargs)
     acc.setPrivateTools(tool)
     return acc

@@ -133,9 +133,13 @@ def getFtagComponent(cfgFlags, jetcol, pvCol):
     ))
 
     if cfgFlags.Input.isMC:
+        from InDetTrackSystematicsTools.InDetTrackSystematicsToolsConfig import InDetTrackTruthOriginToolCfg
+        trackTruthOriginTool = acc.popToolsAndMerge(InDetTrackTruthOriginToolCfg(cfgFlags))
+
         acc.addEventAlgo(CompFactory.FlavorTagDiscriminants.TrackTruthDecoratorAlg(
             'TrackTruthDecoratorAlg',
             trackContainer=track_collection,
+            trackTruthOriginTool=trackTruthOriginTool
         ))
 
     acc.merge(BTagAlgsCfg(

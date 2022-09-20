@@ -25,8 +25,7 @@ namespace DerivationFramework {
 
   PseudoTrackSelector::PseudoTrackSelector(const std::string& t,
                                            const std::string& n,
-                                           const IInterface* p) : AthAlgTool(t,n,p),
-                                           m_trackOriginTool("InDet::InDetTrackTruthOriginTool")
+                                           const IInterface* p) : AthAlgTool(t,n,p)
   {
     declareInterface<DerivationFramework::IAugmentationTool>(this);
     // The default goal of this selector is to create a track collection from a subset of pseudo tracks

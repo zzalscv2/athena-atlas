@@ -153,6 +153,11 @@ def InDetPhysValMonitoringToolCfg(flags, **kwargs):
         kwargs.setdefault("useVertexTruthMatchTool", True)
         kwargs.setdefault("VertexTruthMatchTool", VertexTruthMatchTool)
 
+        if "trackTruthOriginTool" not in kwargs:
+            from InDetTrackSystematicsTools.InDetTrackSystematicsToolsConfig import InDetTrackTruthOriginToolCfg
+            kwargs.setdefault("trackTruthOriginTool", acc.popToolsAndMerge(
+                InDetTrackTruthOriginToolCfg(flags)))
+
         # Options for Truth Strategy : Requires full pile-up truth containers for some
         if flags.PhysVal.IDPVM.setTruthStrategy == 'All' or flags.PhysVal.IDPVM.setTruthStrategy == 'PileUp':
             if "xAOD::TruthPileupEventContainer#TruthPileupEvents" in flags.Input.TypedCollections:

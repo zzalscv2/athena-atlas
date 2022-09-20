@@ -26,7 +26,7 @@ namespace InDet {
 
   JetTrackFilterTool::JetTrackFilterTool(const std::string& name) :
     InDetTrackSystematicsTool(name),
-    m_trackOriginTool("InDet::InDetTrackTruthOriginTool")
+    m_trackOriginTool("InDet::InDetTrackTruthOriginTool", this)
   {
 
 #ifndef XAOD_STANDALONE

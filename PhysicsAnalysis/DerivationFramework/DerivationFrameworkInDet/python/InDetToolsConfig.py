@@ -102,8 +102,13 @@ def TrackParametersAtPVCfg(ConfigFlags, name, **kwargs):
 def PseudoTrackSelectorCfg(ConfigFlags, name, **kwargs):
     """Configure the pseudotrack selector"""
     acc = ComponentAccumulator()
-    PseudoTrackSelector = CompFactory.DerivationFramework.PseudoTrackSelector
-    acc.addPublicTool(PseudoTrackSelector(name, **kwargs),
+
+    if "trackTruthOriginTool" not in kwargs:
+        from InDetTrackSystematicsTools.InDetTrackSystematicsToolsConfig import InDetTrackTruthOriginToolCfg
+        kwargs.setdefault("trackTruthOriginTool", acc.popToolsAndMerge(
+            InDetTrackTruthOriginToolCfg(ConfigFlags)))
+
+    acc.addPublicTool(CompFactory.DerivationFramework.PseudoTrackSelector(name, **kwargs),
                       primary = True)
     return acc
 

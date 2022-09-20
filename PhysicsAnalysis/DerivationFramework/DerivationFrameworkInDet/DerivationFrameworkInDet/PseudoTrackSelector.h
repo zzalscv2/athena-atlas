@@ -84,7 +84,7 @@ namespace DerivationFramework {
         // convience types
         typedef ElementLink<xAOD::TruthParticleContainer> TruthLink;
         // Track origin tool
-        ToolHandle< InDet::IInDetTrackTruthOriginTool > m_trackOriginTool;
+        ToolHandle< InDet::IInDetTrackTruthOriginTool > m_trackOriginTool{this, "trackTruthOriginTool", "InDet::InDetTrackTruthOriginTool", "truth track origin tool"};
     };
 }
 #endif // DERIVATIONFRAMEWORK_PseudoTrackSelector_H
