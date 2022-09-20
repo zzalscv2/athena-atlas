@@ -185,13 +185,7 @@ int main(int argc, char** argv) {
       return 1;
     }
 
-    // determine derivation stream
-    // TODO: can we find a nicer way instead of looping over MetaData TTree branches ?
-    const std::string derivationStream = top::getDerivationStream(testFile.get());
-    ATH_MSG_INFO("Derivation stream is -> " << derivationStream);
-    topConfig->setDerivationStream(derivationStream);
-    // TODO: unclear if DAOD_TRUTH derivations exist in R22, and if they are reprocessed ?
-    topConfig->setIsTruthDxAOD((derivationStream == "TRUTH"));
+    ATH_MSG_INFO("Derivation stream is -> " << topConfig->getDerivationStream());
 
     // Pass the settings file to the TopConfig
     topConfig->setConfigSettings(settings);
@@ -276,13 +270,14 @@ int main(int argc, char** argv) {
 
 
   // Systematic object collection making
+  std::unique_ptr<top::TopObjectSelection> objectSelection;
   std::unique_ptr<top::ObjectCollectionMaker> systObjMaker(new top::ObjectCollectionMaker("top::ObjectCollectionMaker"));
   top::check(systObjMaker->setProperty("config", topConfig), "Failed to setProperty of systObjMaker");
-  if (!topConfig->isTruthDxAOD()) top::check(systObjMaker->initialize(), "Failed to initialize systObjMaker");
-
-  std::unique_ptr<top::TopObjectSelection> objectSelection;
-  objectSelection.reset(top::loadObjectSelection(topConfig));
-  objectSelection->print(msg(MSG::Level::INFO)); // forward to msg stream using INFO level
+  if (!topConfig->isTruthDxAOD()) {
+    top::check(systObjMaker->initialize(), "Failed to initialize systObjMaker");
+    objectSelection.reset(top::loadObjectSelection(topConfig));
+    objectSelection->print(msg(MSG::Level::INFO)); // forward to msg stream using INFO level
+  }
 
   //setup event-level cuts
   top::EventSelectionManager eventSelectionManager(settings->selections(), outputFile.get(), libraryNames, topConfig);
