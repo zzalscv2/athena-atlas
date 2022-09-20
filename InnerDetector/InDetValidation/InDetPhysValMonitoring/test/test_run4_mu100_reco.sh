@@ -4,9 +4,10 @@
 # art-input-nfiles: 1
 # art-type: grid
 # art-include: master/Athena
-# art-output: idpvm.root
+# art-output: *.root
 # art-output: *.xml
 # art-output: dcube*
+# art-html: dcube_last
 
 lastref_dir=last_results
 dcubeXml="/cvmfs/atlas-nightlies.cern.ch/repo/data/data-art/InDetPhysValMonitoring/dcube/config/IDPVMPlots_R22.xml"
