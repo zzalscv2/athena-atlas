@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2017 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "CBNTAA_TBScint.h"
@@ -33,14 +33,11 @@ StatusCode CBNTAA_TBScint::CBNT_execute() {
   unsigned i;
   
   // Get scint. hits
-  LArG4H6FrontHitCollection *frontcoll;
-  LArG4H6FrontHitCollection *movecoll;
+  const LArG4H6FrontHitCollection *frontcoll;
+  const LArG4H6FrontHitCollection *movecoll;
   StatusCode sc = evtStore()->retrieve(frontcoll,"Front::Hits");
   if (sc.isSuccess()){
-     LArG4H6FrontHitConstIterator f_it = frontcoll->begin();
-     LArG4H6FrontHitConstIterator f_end = frontcoll->end();
-     for ( ; f_it!=f_end; ++f_it) {
-       LArG4H6FrontHit* hit = (*f_it);
+     for (const LArG4H6FrontHit* hit : *frontcoll) {
        scnum = hit->GetSC();
        if(scnum  <= 0) continue; // not a scintilator hit
        edep = hit->GetEdep();
@@ -69,10 +66,7 @@ StatusCode CBNTAA_TBScint::CBNT_execute() {
 
   sc = evtStore()->retrieve(movecoll,"Movable::Hits");
   if (sc.isSuccess()){
-     LArG4H6FrontHitConstIterator it = movecoll->begin();
-     LArG4H6FrontHitConstIterator end = movecoll->end();
-     for ( ; it!=end; ++it) {
-       LArG4H6FrontHit* hit = (*it);
+     for (const LArG4H6FrontHit* hit : *movecoll) {
        scnum = hit->GetSC();
        if(scnum  <= 0) continue; // not a scintilator hit
        edep = hit->GetEdep();
