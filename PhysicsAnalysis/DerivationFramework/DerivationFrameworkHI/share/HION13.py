@@ -401,6 +401,7 @@ HION13SlimmingHelper.AllVariables += [ "PrimaryVertices",
                                        "ExtrapolatedMuonTrackParticles",
                                        "HIEventShape",
                                        "ZdcSums" ]
+HION13SlimmingHelper.AllVariables += ["MuonSegments"]
 
 # HIGlobalVars = ['CaloSums', 'ZdcModules', 'ZdcTriggerTowers',
 #                 'MBTSForwardEventInfo', 'MBTSModules']
