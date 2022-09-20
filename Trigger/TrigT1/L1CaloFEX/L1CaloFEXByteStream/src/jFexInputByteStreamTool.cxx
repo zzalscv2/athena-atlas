@@ -15,6 +15,8 @@
 #include "eformat/SourceIdentifier.h"
 #include "eformat/Status.h"
 
+#include <fstream>
+
 using ROBF = OFFLINE_FRAGMENTS_NAMESPACE::ROBFragment;
 using WROBF = OFFLINE_FRAGMENTS_NAMESPACE_WRITE::ROBFragment;
 
@@ -48,6 +50,12 @@ StatusCode jFexInputByteStreamTool::initialize() {
     ATH_CHECK(m_jTowersWriteKey.initialize(jTowersmode==ConversionMode::Decoding));
     ATH_CHECK(m_jTowersReadKey.initialize(jTowersmode==ConversionMode::Encoding));
     ATH_MSG_DEBUG((jTowersmode==ConversionMode::Encoding ? "Encoding" : "Decoding") << " jTowers ROB IDs: " << MSG::hex << m_robIds.value() << MSG::dec);
+    
+    
+    
+    //Since the mapping is constant in everyentry, better to be read in the initialize function
+    //Reading from CVMFS Trigger Tower and their corresponding SCell ID
+    ATH_CHECK(ReadfromFile(m_FiberMapping));
 
     return StatusCode::SUCCESS;
 }
@@ -78,17 +86,7 @@ StatusCode jFexInputByteStreamTool::convertFromBS(const std::vector<const ROBF*>
         
         const auto dataArray = CxxUtils::span{rob->rod_data(), rob->rod_ndata()};
         std::vector<uint32_t> vec_words(dataArray.begin(),dataArray.end());
-
-/* do not remove, checks will be needed when P1 data available
-        int aux = 1; //delete, for debug
-        for (const uint32_t word : vec_words) {
-
-            printf("\t %3d  raw word: 0x%08x \t bits: %32s\n",aux,word, (std::bitset<32>(word).to_string()).c_str() );
-            aux++; //delete, for debug
-
-        }
-*/
-
+        
         // jFEX to ROD trailer position
         unsigned int trailers_pos = rob->rod_ndata();
         
@@ -98,8 +96,7 @@ StatusCode jFexInputByteStreamTool::convertFromBS(const std::vector<const ROBF*>
             
             //if(m_verbose) printf("----------------------------------------------------------------------------------------------------------------------\n");
             
-            
-            const auto [payload, fpga, jfex]                      = jFEXtoRODTrailer  ( vec_words.at(trailers_pos-2), vec_words.at(trailers_pos-1) );
+            const auto [payload, jfex, fpga]                      = jFEXtoRODTrailer  ( vec_words.at(trailers_pos-2), vec_words.at(trailers_pos-1) );
             
             if(payload % jBits::DATA_BLOCKS != 0){
                 ATH_MSG_DEBUG("  Not full readout activated (" << payload << "). Data blocks/channels expected (" << jBits::DATA_BLOCKS <<")"<<C.END);
@@ -137,11 +134,30 @@ StatusCode jFexInputByteStreamTool::convertFromBS(const std::vector<const ROBF*>
                 //std::array<uint16_t,16> allsat  = {0};
                 
                 for(uint idata = 0; idata < allDATA.size(); idata++){
-                    jTowersContainer->push_back( std::make_unique<xAOD::jFexTower>() );
+                    
                     char et_saturation = ((saturation >> idata) & jBits::BS_TRAILER_1b);
                     //allsat[idata] = et_saturation;
-                    // eta and phi are place holders for now, need to change in the future!
-                    jTowersContainer->back()->initialize(-99, -99, allDATA[idata], jfex, fpga, channel, idata, et_saturation );                    
+                    
+                    // read ID, eta and phi from map
+                    unsigned int intID = mapIndex(jfex, fpga, channel, idata);
+                    //commented to avoid noise, needed to debug with adding the decorator, will be removed
+                    //ATH_MSG_DEBUG( "jFEX: "<< jfex<< " FPGA: "<< fpga<< " channel: "<< channel<< " dataID: "<< idata << " IDmap: "<< intID<< " Et: "<< allDATA[idata] );
+                    if(m_Firm2Tower_map.find(intID) == m_Firm2Tower_map.end()){
+                        
+                        // under investigation, now it skips the jTower... needs to be discussed
+                        //ATH_MSG_ERROR("ID: "<<intID<< " not found on map m_Firm2Tower_map");
+                        //return StatusCode::FAILURE;
+                        
+                        //makes for now a lot of noise.. good so i can remember this annoying thing until it is discussed
+                        ATH_MSG_WARNING("ID: "<<intID<< " not found on map m_Firm2Tower_map, jTower skipped with Et:" << allDATA[idata]);
+                        continue;
+                    }
+                    
+                    const auto [IDsim, eta, phi, source] = m_Firm2Tower_map.at(intID);
+                    
+                    //initilize the jTower EDM
+                    jTowersContainer->push_back( std::make_unique<xAOD::jFexTower>() );
+                    jTowersContainer->back()->initialize(eta, phi, IDsim, source, allDATA[idata], jfex, fpga, channel, idata, et_saturation );                    
                 }
                 
                 //if(m_verbose ){
@@ -182,8 +198,8 @@ StatusCode jFexInputByteStreamTool::convertFromBS(const std::vector<const ROBF*>
 std::array<uint32_t,3> jFexInputByteStreamTool::jFEXtoRODTrailer (uint32_t word0, uint32_t /*word1*/) const {
     
     uint32_t payload    = ((word0 >> jBits::PAYLOAD_ROD_TRAILER ) & jBits::ROD_TRAILER_16b);
-    uint32_t fpga       = ((word0 >> jBits::FPGA_ROD_TRAILER    ) & jBits::ROD_TRAILER_2b );
     uint32_t jfex       = ((word0 >> jBits::jFEX_ROD_TRAILER    ) & jBits::ROD_TRAILER_4b );
+    uint32_t fpga       = ((word0 >> jBits::FPGA_ROD_TRAILER    ) & jBits::ROD_TRAILER_2b );
     
     //DO NOT REMOVE, may be necessary in the future
     //if(m_verbose){
@@ -198,7 +214,7 @@ std::array<uint32_t,3> jFexInputByteStreamTool::jFEXtoRODTrailer (uint32_t word0
     //}
 
     
-    return {payload,fpga,jfex};
+    return {payload,jfex,fpga};
    
 }
 
@@ -304,5 +320,58 @@ StatusCode jFexInputByteStreamTool::convertToBS(std::vector<WROBF*>& /*vrobf*/, 
                     ));
 */
     return StatusCode::SUCCESS;
+}
+
+StatusCode jFexInputByteStreamTool::ReadfromFile(const std::string & fileName){
+    
+    std::string myline;
+    
+    //openning file with ifstream
+    std::ifstream myfile(fileName);
+    
+    if ( !myfile.is_open() ){
+        ATH_MSG_FATAL("Could not open file:" << fileName);
+        return StatusCode::FAILURE;
+    }
+    
+    //loading the mapping information
+    while ( std::getline (myfile, myline) ) {
+
+        //removing the header of the file (it is just information!)
+        if(myline[0] == '#') continue;
+        
+        //Splitting myline in different substrings
+        std::stringstream oneLine(myline);
+        
+        //reading elements
+        std::vector<float> elements;
+        std::string element;
+        while(std::getline(oneLine, element, ' '))
+        {
+            elements.push_back(std::stof(element));
+        }
+        
+        // It should have 10 elements
+        // ordered as:  jfex fpga channel towerNr source globalEtaIndex globalPhiIndex IDSimulation eta phi
+        if(elements.size() != 10){
+            ATH_MSG_ERROR("Unexpected number of elemennts (10 expected) in file: "<< fileName);
+            return StatusCode::FAILURE;
+        }
+        // building array of  <IDSimulation, eta, phi, source>
+        std::array<float,4> aux_arr{ {elements.at(7),elements.at(8),elements.at(9),elements.at(4)} };
+        
+        //filling the map with the hash given by mapIndex()
+        m_Firm2Tower_map[ mapIndex(elements.at(0),elements.at(1),elements.at(2),elements.at(3)) ] = aux_arr;
+        
+    }
+    myfile.close();
+
+    return StatusCode::SUCCESS;
+}
+
+
+constexpr unsigned int jFexInputByteStreamTool::mapIndex(unsigned int jfex, unsigned int fpga, unsigned int channel, unsigned int tower) const{
+  // values from hardware: jfex=[0,5] 4 bits, fpga=[0,3] 4 bits, channel=[0,59] 8 bits, tower=[0,15] 4 bits
+  return (jfex << 16) | (fpga << 12) | (channel << 4) | tower;
 }
 

@@ -63,14 +63,27 @@ namespace xAOD {
       /// set saturation flag of jTower
       void setIsSaturated(char); ///setter for the above
 
-      void initialize(const float Eta,const float Phi);
-      void initialize(const float Eta,const float Phi,
-                                   const uint16_t TowerEt,
-                                   const uint8_t Module,
-                                   const uint8_t Fpga,
-				   const uint8_t Channel,
-				   const uint8_t JFEXdataID,
-				   const char IsSaturated);
+      /// get the Simulation ID
+      uint32_t jFEXtowerID() const; /// getter for the jtower simulation ID
+      /// set the simulation ID
+      void setjFEXtowerID(uint32_t); ///setter for the above
+
+      /// Information about the calorimeter source
+      /// Calosource values:  0: barrel, 1: tile, 2: emec, 3: hec, 4: fcal1, 5: fcal2, 6: fcal3, 7: Combination of EM and HAD layer (a real jTower)
+      uint8_t Calosource() const; /// getter for the calorimeter source
+      /// set calorimeter source
+      void setCalosource(uint8_t); ///setter for the above
+
+      void initialize(  const float Eta,const float Phi);
+      void initialize(  const float Eta,const float Phi,
+                        const uint32_t IDsim,
+                        const uint8_t source,
+                        const uint16_t TowerEt,
+                        const uint8_t Module,
+                        const uint8_t Fpga,
+                        const uint8_t Channel,
+                        const uint8_t JFEXdataID,
+                        const char IsSaturated);
 
     
     private:
