@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "TBBeamQualityMC.h"
@@ -95,16 +95,12 @@ StatusCode TBBeamQualityMC::execute() {
      std::vector<bool> has_energy (m_scint_prim.size());
      for(int ll=0; ll<(int)m_scint_prim.size(); ++ll) has_energy[ll]=false;
 
-     //LArG4H6FrontHitCollection *frontcoll;
-     const DataHandle<LArG4H6FrontHitCollection> frontcoll;
+     const LArG4H6FrontHitCollection *frontcoll;
      ATH_CHECK( evtStore()->retrieve(frontcoll,"Front::Hits") );
 
      int scnum;
      unsigned i;
-     LArG4H6FrontHitConstIterator f_it = frontcoll->begin();
-     LArG4H6FrontHitConstIterator f_end = frontcoll->end();
-     for ( ; f_it!=f_end; ++f_it) {
-         LArG4H6FrontHit* hit = (*f_it);
+     for (const LArG4H6FrontHit* hit : *frontcoll) {
          scnum = hit->GetSC();
          if(scnum  <= 0) continue; // not a scintilator hit
          for(i=0; i<m_scint_prim.size(); ++i) {
@@ -115,13 +111,9 @@ StatusCode TBBeamQualityMC::execute() {
          }
      }
 
-     //LArG4H6FrontHitCollection *movecoll;
-     const DataHandle<LArG4H6FrontHitCollection> movecoll;
+     const LArG4H6FrontHitCollection *movecoll;
      ATH_CHECK( evtStore()->retrieve(movecoll,"Movable::Hits") );
-     LArG4H6FrontHitConstIterator m_it = movecoll->begin();
-     LArG4H6FrontHitConstIterator m_end = movecoll->end();
-     for ( ; m_it!=m_end; ++m_it) {
-         LArG4H6FrontHit* hit = (*m_it);
+     for (const LArG4H6FrontHit* hit : *movecoll) {
          scnum = hit->GetSC();
          if(scnum  <= 0) continue; // not a scintilator hit
          for(i=0; i<m_scint_prim.size(); ++i) {
@@ -143,13 +135,9 @@ StatusCode TBBeamQualityMC::execute() {
 
   if(m_check_veto) { // check if there is a hit in veto scint.
      int scnum;
-     // LArG4H6FrontHitCollection *movecoll;
-     const DataHandle<LArG4H6FrontHitCollection> movecoll;
+     const LArG4H6FrontHitCollection *movecoll;
      ATH_CHECK( evtStore()->retrieve(movecoll,"Movable::Hits") );
-     LArG4H6FrontHitConstIterator m_it = movecoll->begin();
-     LArG4H6FrontHitConstIterator m_end = movecoll->end();
-     for ( ; m_it!=m_end; ++m_it) {
-         LArG4H6FrontHit* hit = (*m_it);
+     for (const LArG4H6FrontHit* hit : *movecoll) {
          scnum = hit->GetSC();
          if(scnum  <= 0) continue; 
          if(hit->GetSC() == 5 &&  (hit->GetTrackID() == 1)) {
@@ -163,7 +151,7 @@ StatusCode TBBeamQualityMC::execute() {
   }
 
   if(m_check_clus) { // Rejected if no good cluster
-     const DataHandle<CaloClusterContainer> cc ;
+     const CaloClusterContainer* cc = nullptr;
      ATH_CHECK( evtStore()->retrieve(cc,m_clusterCollName) );
      bool haveit=false;
      for (const CaloCluster * theCluster : *cc) {
@@ -184,8 +172,8 @@ StatusCode TBBeamQualityMC::execute() {
 
 
   if(m_check_trackreco) { // Rejected if bad track reco
-      const DataHandle< TBTrack > mytrack;
-      const DataHandle< TBEventInfo > mytbeinfo;
+      const TBTrack* mytrack = nullptr;
+      const TBEventInfo* mytbeinfo = nullptr;
       ATH_CHECK( evtStore()->retrieve(mytrack,"Track" ) );
       ATH_CHECK( evtStore()->retrieve(mytbeinfo,"TBEventInfo" ) );
       double chi2 = mytrack->getChi2_u();
