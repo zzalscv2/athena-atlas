@@ -62,11 +62,10 @@ StatusCode testAthenaEgammaCalibTool::execute()
 
   ATH_MSG_INFO("SIZE of the systematics set:" << recommendedSystematics.size()); 
    
-  for(CP::SystematicSet::const_iterator sysItr = recommendedSystematics.begin();
-      sysItr != recommendedSystematics.end(); ++sysItr)
+  for(const auto & recommendedSystematic : recommendedSystematics)
     {
       sysList.emplace_back();
-      sysList.back().insert(*sysItr);
+      sysList.back().insert(recommendedSystematic);
     }
    
   std::vector<CP::SystematicSet>::const_iterator sysListItr;

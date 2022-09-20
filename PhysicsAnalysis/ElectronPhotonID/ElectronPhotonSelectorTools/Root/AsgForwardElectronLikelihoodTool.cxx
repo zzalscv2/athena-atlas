@@ -492,8 +492,7 @@ AsgForwardElectronLikelihoodTool::getNPrimVertices(
 		    << " container, returning default nVtx");
     return m_nPVdefault;
   }
-  for (unsigned int i = 0; i < vtxCont->size(); i++) {
-    const xAOD::Vertex* vxcand = vtxCont->at(i);
+  for (const auto *vxcand : *vtxCont) {
     if (vxcand->nTrackParticles() >= 2)
       nVtx++;
   }

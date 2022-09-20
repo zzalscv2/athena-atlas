@@ -27,8 +27,8 @@ namespace egGain {
 	delete m_funcG[j][i];
 	delete m_conv_funcG[j][i];
       }
-      for (int j=0;j< m_NUM_UNCONV_ENERGY_BINS;++j){
-	delete  m_unconv_funcG[j][i];
+      for (auto & j : m_unconv_funcG){
+	delete  j[i];
       }
     }
 

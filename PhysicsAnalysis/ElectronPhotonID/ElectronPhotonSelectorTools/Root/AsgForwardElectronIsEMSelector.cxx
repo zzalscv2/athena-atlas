@@ -380,8 +380,7 @@ AsgForwardElectronIsEMSelector::getNPrimVertices(const EventContext& ctx) const
   if (!vtxCont.isValid()) {
     return nVtx;
   }
-  for (unsigned int i = 0; i < vtxCont->size(); i++) {
-    const xAOD::Vertex* vtxcand = vtxCont->at(i);
+  for (const auto *vtxcand : *vtxCont) {
     if (vtxcand->nTrackParticles() >= 3)
       nVtx++;
   }

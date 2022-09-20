@@ -114,19 +114,19 @@ StatusCode AsgPhotonEfficiencyCorrectionTool::initialize()
   }
 
   // once the input files are retrieved, update the path using PathResolver or TOOL/data folder
-  for ( unsigned int i=0; i<corrFileNameList.size(); ++i ){
+  for (auto & i : corrFileNameList){
 
     //Using the PathResolver to locate the file
-    std::string filename = PathResolverFindCalibFile( corrFileNameList.at(i) );
+    std::string filename = PathResolverFindCalibFile( i );
 
     if (filename.empty()){
-      ATH_MSG_ERROR ( "Could NOT resolve file name " << corrFileNameList.at(i) );
+      ATH_MSG_ERROR ( "Could NOT resolve file name " << i );
       return StatusCode::FAILURE ;
     } else{
       ATH_MSG_INFO(" Using path = "<<filename);
     }
 
-    corrFileNameList.at(i) = filename;
+    i = filename;
 
   }
    
