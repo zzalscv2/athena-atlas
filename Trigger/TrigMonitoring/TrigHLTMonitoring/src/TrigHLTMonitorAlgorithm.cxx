@@ -30,7 +30,6 @@ StatusCode TrigHLTMonitorAlgorithm::initialize() {
 
 StatusCode TrigHLTMonitorAlgorithm::fillHistograms( const EventContext& ctx ) const {
   using namespace Monitored;
-  StatusCode sc = StatusCode::FAILURE;
 
   //Fetch the general tool
   auto tool = getGroup("TrigHLTMonitor");
@@ -46,24 +45,22 @@ StatusCode TrigHLTMonitorAlgorithm::fillHistograms( const EventContext& ctx ) co
   ////////////////////////////////////
   // L1 items monitoring
 
-  std::vector<std::string> L1items = m_trigDecTool->getChainGroup("L1_.*")->getListOfTriggers();
-  unsigned int nL1Items = L1items.size();
+  const std::vector<std::string> L1items = m_trigDecTool->getChainGroup("L1_.*")->getListOfTriggers();
 
   // Fill. First argument is the tool (GMT) name as defined in the py file, 
   // all others are the variables to be saved.
   // Alternative fill method. Get the group yourself, and pass it to the fill function.
 
   ATH_MSG_DEBUG("Filling L1Events histogram");
-  for(unsigned int it=0; it<nL1Items; ++it) {
-    if( L1items[it] != "" ) {
-      ATH_MSG_DEBUG("L1Item " << it << " " << L1items[it] );
-      if(m_trigDecTool->isPassed(L1items[it])) {
-	
-	/// Fill L1 histogram
-	L1Events = L1items[it];
-	ATH_MSG_DEBUG("L1Chain " << it << L1items[it]  << " is passed");
-	fill(tool,L1Events);
-      }
+  for(const std::string& l1name : L1items) {
+
+    // Manually create single-trigger group to avoid regex parsing (ATR-23427)
+    const Trig::ChainGroup* trig = m_trigDecTool->getChainGroup(l1name, TrigDefs::Group::NoRegex);
+    if(m_trigDecTool->isPassed(trig)) {
+      /// Fill L1 histogram
+      L1Events = l1name;
+      ATH_MSG_DEBUG("L1Chain " << l1name << " is passed");
+      fill(tool,L1Events);
     }
   }
 
@@ -122,76 +119,74 @@ StatusCode TrigHLTMonitorAlgorithm::fillHistograms( const EventContext& ctx ) co
     //Loop over HLT chains
     ATH_MSG_DEBUG( "Filling HLT" << signaturename << " and RoI information for " << thisregex );
 
-    std::vector< std::string > chainNames = m_trigDecTool->getChainGroup(thisregex)->getListOfTriggers();
-    unsigned int nHLTChains = chainNames.size();
+    const std::vector<std::string> chainNames = m_trigDecTool->getChainGroup(thisregex)->getListOfTriggers();
 
-    for(unsigned int ith=0; ith<nHLTChains; ++ith) {
-      if( chainNames[ith] != "" ) {
+    for(const std::string& chain : chainNames) {
 
-	ATH_MSG_DEBUG("HLTChain " << ith << " " << chainNames[ith] );  
-	if(m_trigDecTool->isPassed(chainNames[ith], TrigDefs::requireDecision)) {
-	  ATH_MSG_DEBUG( "    Chain " << chainNames[ith] << " IS passed");  
+      // Manually create single-trigger group to avoid regex parsing (ATR-23427)
+      const Trig::ChainGroup* trig = m_trigDecTool->getChainGroup(chain, TrigDefs::Group::NoRegex);
+      if(m_trigDecTool->isPassed(trig, TrigDefs::requireDecision)) {
+        ATH_MSG_DEBUG( "    Chain " << chain << " IS passed");
 
-	  /// Fill plain chains histogram
-	  HLT_RAW = chainNames[ith];
-	  fill(tool,HLT_RAW);
-	
-	  //If the chain is prescaled
-	  const TrigConf::HLTChain* c = m_trigDecTool->ExperimentalAndExpertMethods().getChainConfigurationDetails(chainNames[ith]);
-	  float prescale = 0;
-	  if (c) {
-	    prescale = c->prescale();
-	  }
-	  else {
-	    ATH_MSG_WARNING("No chain found in m_trigDecTool->ExperimentalAndExpertMethods().getChainConfigurationDetails(" <<  chainNames[ith] << "). Using prescale 0");
-	  }
-	  if(prescale>1. || prescale<1.) {
-	    //NB! Right now very few chains are prescaled, so this histogram is seldom filled
-	    HLT_PS = chainNames[ith];
-	    ATH_MSG_DEBUG( "HLT_PS: " << chainNames[ith] << " has PS = " << prescale); 
-	    fill(tool,HLT_PS);
-	  }
+        /// Fill plain chains histogram
+        HLT_RAW = chain;
+        fill(tool,HLT_RAW);
 
-	  /// Fill RoIs histogram and 1D histos for eta, phi, RoI count
-	  std::vector<LinkInfo<TrigRoiDescriptorCollection>> fvec = m_trigDecTool->features<TrigRoiDescriptorCollection>(chainNames[ith], TrigDefs::Physics, "", TrigDefs::lastFeatureOfType, initialRoIString()); 
+        //If the chain is prescaled
+        const TrigConf::HLTChain* c = m_trigDecTool->ExperimentalAndExpertMethods().getChainConfigurationDetails(chain);
+        float prescale = 0;
+        if (c) {
+          prescale = c->prescale();
+        }
+        else {
+          ATH_MSG_WARNING("No chain found in m_trigDecTool->ExperimentalAndExpertMethods().getChainConfigurationDetails(" <<  chain << "). Using prescale 0");
+        }
+        if(prescale>1. || prescale<1.) {
+          //NB! Right now very few chains are prescaled, so this histogram is seldom filled
+          HLT_PS = chain;
+          ATH_MSG_DEBUG( "HLT_PS: " << chain << " has PS = " << prescale);
+          fill(tool,HLT_PS);
+        }
 
-	  //Loop over RoIs
-	  for (const LinkInfo<TrigRoiDescriptorCollection>& li : fvec) {
-	    if( li.isValid() ) {
+        /// Fill RoIs histogram and 1D histos for eta, phi, RoI count
+        std::vector<LinkInfo<TrigRoiDescriptorCollection>> fvec = m_trigDecTool->features<TrigRoiDescriptorCollection>(chain, TrigDefs::Physics, "", TrigDefs::lastFeatureOfType, initialRoIString());
 
-	      //Fill 1D histos of roi_N, eta, phi
-	      const TrigRoiDescriptor* roi = *(li.link).cptr();
-	      if(!roi->isFullscan()) {
-		RoI_eta = roi->eta();
-		RoI_phi = roi->phi();
-		fill(tool,RoI_eta);
-		fill(tool,RoI_phi);
-		roiN[N_sig]++;
-	      }
-	      else {
-		ATH_MSG_DEBUG( "RoI is FULLSCAN, chain " << chainNames[ith]); 
-	      }
+        //Loop over RoIs
+        for (const LinkInfo<TrigRoiDescriptorCollection>& li : fvec) {
+          if( li.isValid() ) {
 
-	      //Fill 2D RoI maps
-	      auto phi = Monitored::Scalar("phi",0.0);
-	      auto eta = Monitored::Scalar("eta",0.0);
-	      
-	      if(!roi->isFullscan()) {
-		auto HLT_RoIs = Monitored::Group(thisTool, eta, phi);
-		const TrigRoiDescriptor* roi = *(li.link).cptr();
-		eta = roi->eta();
-		phi = roi->phi();
-	      }
-	    }//end if(li.isValid())
+            //Fill 1D histos of roi_N, eta, phi
+            const TrigRoiDescriptor* roi = *(li.link).cptr();
+            if(!roi->isFullscan()) {
+              RoI_eta = roi->eta();
+              RoI_phi = roi->phi();
+              fill(tool,RoI_eta);
+              fill(tool,RoI_phi);
+              roiN[N_sig]++;
+            }
+            else {
+              ATH_MSG_DEBUG( "RoI is FULLSCAN, chain " << chain);
+            }
 
-	    else {
-	      ATH_MSG_WARNING( "TrigRoiDescriptorCollection for chain " << chainNames[ith] << " is not valid");
-	    }
+            //Fill 2D RoI maps
+            auto phi = Monitored::Scalar("phi",0.0);
+            auto eta = Monitored::Scalar("eta",0.0);
 
-	  }//end for (const LinkInfo<TrigRoiDescriptorCollection>& li : fvec)
-	}// end if(m_trigDecTool->isPassed(chainNames[ith]))
-      }// end if( chainNames[ith] != "" )
-    }//end for(unsigned int ith=0; ith<nHLTChains; ++ith)
+            if(!roi->isFullscan()) {
+              auto HLT_RoIs = Monitored::Group(thisTool, eta, phi);
+              const TrigRoiDescriptor* roi = *(li.link).cptr();
+              eta = roi->eta();
+              phi = roi->phi();
+            }
+          }//end if(li.isValid())
+
+          else {
+            ATH_MSG_WARNING( "TrigRoiDescriptorCollection for chain " << chain << " is not valid");
+          }
+
+        }
+      }
+    }
 
     //Fill RoI count per stream
     RoI_N = roiN[N_sig];
@@ -206,7 +201,7 @@ StatusCode TrigHLTMonitorAlgorithm::fillHistograms( const EventContext& ctx ) co
   //////////////////////////////////////
   // HLTResult and ConfigConsistency
   
-  sc = fillResultAndConsistencyHistograms(ctx);
+  ATH_CHECK(fillResultAndConsistencyHistograms(ctx));
   
   
   //////////////////////////////////////
