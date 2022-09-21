@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
 */
 #include "MuonCalibStandAloneBase/T0Refinement.h"
 
@@ -13,16 +13,17 @@
 
 using namespace MuonCalib;
 
-T0Refinement::T0Refinement() {
-    m_time_out = 2.0;
-    m_qfitter = std::make_unique<StraightPatRec>();
+T0Refinement::T0Refinement()
+  : m_qfitter (std::make_unique<StraightPatRec>()),
+    m_cfitter (std::make_unique<CurvedPatRec>()),
+    m_delta_t0 (30.0),
+    m_time_out (2.0)
+{
     m_qfitter->setRoadWidth(1.0);  // 1.0 mm road width
     m_qfitter->switchOnRefit();
     m_qfitter->setTimeOut(m_time_out);
-    m_cfitter = std::make_unique<CurvedPatRec>();
     m_cfitter->setRoadWidth(1.0);  // 1.0 mm road width
     m_cfitter->setTimeOut(m_time_out);
-    m_delta_t0 = 30.0;
 }
 
 double T0Refinement::getDeltaT0(MuonCalibSegment* segment, const IRtRelation* rt, bool overwrite, double& error, bool& failed,
