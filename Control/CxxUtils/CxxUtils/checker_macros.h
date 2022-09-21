@@ -1,7 +1,7 @@
 // This file's extension implies that it's C, but it's really -*- C++ -*-.
 
 /*
-  Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
 */
 
 /**
@@ -120,6 +120,9 @@
  * Add to a function to suppress warnings about uses of static variables,
  * mutable variables, or discarding const.
  *
+ * For a constructor or destructor, this should be given _after_ the
+ * argument list, not before.
+ *
  * Add to a class to so mark all functions in the class.
  *
  * A function calling an ATLAS_NOT_THREAD_SAFE function must also be marked
@@ -140,10 +143,7 @@
  * A function calling a function marked as not thread-safe must also be marked
  * as not thread-safe.
  */
-// This should in principle be the same as ATLAS_NOT_THREAD_SAFE;
-// however, in gcc versions prior to 10, we can't use a c++11-style attribute
-// with a constructor or destructor.  So we work around in this way.
-#define ATLAS_CTORDTOR_NOT_THREAD_SAFE __attribute__ ((ATLAS_not_thread_safe))
+#define ATLAS_CTORDTOR_NOT_THREAD_SAFE ATLAS_NOT_THREAD_SAFE
 
 
 /**
