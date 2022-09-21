@@ -119,7 +119,7 @@ evgenLog.debug("****************** CONFIGURING EVENT GENERATION ****************
 ## Functions for operating on generator names
 ## NOTE: evgenConfig, topSeq, svcMgr, theApp, etc. should NOT be explicitly re-imported in JOs
 from EvgenJobTransforms.EvgenConfig import evgenConfig
-from EvgenJobTransforms.EvgenConfig import gens_known, gens_lhef, gen_sortkey, gens_testhepmc, gens_notune, gen_require_steering
+from EvgenJobTransforms.EvgenConfig import gens_known, gen_lhef, gens_lhef, gen_sortkey, gens_testhepmc, gens_notune, gen_require_steering
 
 ## Fix non-standard event features
 from EvgenProdTools.EvgenProdToolsConf import FixHepMC
@@ -502,11 +502,20 @@ svcMgr.EventSelector.RunNumber = int(dsid)
 # TODO: set EventType::mc_channel_number = runArgs.runNumber
 
 ## Include information about generators in metadata
+gennamesvers=[]
+for item in gennames:
+    genera = item.upper()
+    generat = genera+"VER"
+    if (generat in os.environ):
+       gennamesvers.append(item+"(v."+os.environ[generat]+")")
+    else:
+       gennamesvers.append(item)
+
 import EventInfoMgt.EventInfoMgtInit
 svcMgr.TagInfoMgr.ExtraTagValuePairs += ["mc_channel_number",str(dsid)]
 #                                         str(runArgs.runNumber) ]
-svcMgr.TagInfoMgr.ExtraTagValuePairs += ["lhefGenerator", '+'.join( filter( gens_lhef, gennames ) ) ]
-svcMgr.TagInfoMgr.ExtraTagValuePairs += ["generators", '+'.join(gennames)]
+svcMgr.TagInfoMgr.ExtraTagValuePairs += ["lhefGenerator", '+'.join( filter( gen_lhef, gennames ) ) ]
+svcMgr.TagInfoMgr.ExtraTagValuePairs += ["generators", '+'.join(gennamesvers)]
 svcMgr.TagInfoMgr.ExtraTagValuePairs += ["evgenProcess", evgenConfig.process]
 svcMgr.TagInfoMgr.ExtraTagValuePairs += ["evgenTune", evgenConfig.tune]
 if hasattr( evgenConfig, "hardPDF" ) : svcMgr.TagInfoMgr.ExtraTagValuePairs += ["hardPDF", evgenConfig.hardPDF]
@@ -852,16 +861,6 @@ if _checkattr("description", required=True):
         msg += " " + evgenConfig.notes
     print "MetaData: %s = %s" % ("physicsComment", msg)
 if _checkattr("generators", required=True):
-#    print "MetaData: %s = %s" % ("generatorName", "+".join(gennames))
-    gennamesvers=[]
-    for item in gennames:
-       genera = item.upper()
-       generat = genera+"VER"
-       if (generat in os.environ):
-           gennamesvers.append(item+"(v."+os.environ[generat]+")")
-#           gennamesvers.append(item+"."+os.environ[generat])
-       else:
-           gennamesvers.append(item)
     print "MetaData: %s = %s" % ("generatorName", "+".join(gennamesvers))    
 if _checkattr("process"):
     print "MetaData: %s = %s" % ("physicsProcess", evgenConfig.process)
