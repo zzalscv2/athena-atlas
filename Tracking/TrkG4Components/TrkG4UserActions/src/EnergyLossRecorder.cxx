@@ -62,10 +62,10 @@ namespace G4UA
     // we require a minimum amount of material for recording the step
 
     // the material information
-    G4TouchableHistory* touchHist = (G4TouchableHistory*)aStep->GetPreStepPoint()->GetTouchable();
+    const G4TouchableHistory* touchHist = static_cast<const G4TouchableHistory*>(aStep->GetPreStepPoint()->GetTouchable());
     // G4LogicalVolume
-    G4LogicalVolume *lv= touchHist ? touchHist->GetVolume()->GetLogicalVolume() : nullptr;
-    G4Material *mat    = lv ? lv->GetMaterial() : nullptr;
+    const G4LogicalVolume *lv= touchHist ? touchHist->GetVolume()->GetLogicalVolume() : nullptr;
+    const G4Material *mat    = lv ? lv->GetMaterial() : nullptr;
 
     // log the information // cut off air
     if (mat && mat->GetRadlen() < 200000.) {

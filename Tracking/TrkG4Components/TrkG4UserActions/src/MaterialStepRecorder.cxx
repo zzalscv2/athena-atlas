@@ -33,7 +33,6 @@ namespace G4UA
   MaterialStepRecorder::MaterialStepRecorder():
     AthMessaging(Gaudi::svcLocator()->service< IMessageSvc >( "MessageSvc" ),"MaterialStepRecorder"),
     m_evtStore("StoreGateSvc/StoreGateSvc","MaterialStepRecorder"), //FIXME name should be passed in via a Config struct rather than hardcoded.
-    m_detStore("StoreGateSvc/DetectorStore","MaterialStepRecorder"), //FIXME name should be passed in via a Config struct rather than hardcoded.
     m_matStepCollection(nullptr),
     m_matStepCollectionName("MaterialStepRecords"), //FIXME should be passed in via a Config struct rather than hardcoded.
     m_recordComposition(true), //FIXME should be passed in via a Config struct rather than hardcoded.
@@ -97,10 +96,10 @@ namespace G4UA
     }
 
     // the material information
-    G4TouchableHistory* touchHist = (G4TouchableHistory*)aStep->GetPreStepPoint()->GetTouchable();
+    const G4TouchableHistory* touchHist = static_cast<const G4TouchableHistory*>(aStep->GetPreStepPoint()->GetTouchable());
     // G4LogicalVolume
-    G4LogicalVolume *lv= touchHist ? touchHist->GetVolume()->GetLogicalVolume() : nullptr;
-    G4Material *mat    = lv ? lv->GetMaterial() : nullptr;
+    const G4LogicalVolume *lv= touchHist ? touchHist->GetVolume()->GetLogicalVolume() : nullptr;
+    const G4Material *mat    = lv ? lv->GetMaterial() : nullptr;
     
     std::vector<unsigned char> elements;
     std::vector<unsigned char> fractions;

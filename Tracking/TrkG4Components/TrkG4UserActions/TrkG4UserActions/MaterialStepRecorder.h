@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2019 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
 */
 
 ///////////////////////////////////////////////////////////////////
@@ -47,11 +47,8 @@ namespace G4UA
     virtual void UserSteppingAction(const G4Step*) override;
   private:
 
-    typedef ServiceHandle<StoreGateSvc> StoreGateSvc_t;
     /// Pointer to StoreGate (event store by default)
-    mutable StoreGateSvc_t m_evtStore;
-    /// Pointer to StoreGate (detector store by default)
-    mutable StoreGateSvc_t m_detStore;
+    ServiceHandle<StoreGateSvc> m_evtStore;
 
     Trk::MaterialStepCollection*    m_matStepCollection; //FIXME convert to a WriteHandle
     std::string                     m_matStepCollectionName; //FIXME should be passed in via a Config struct rather than hardcoded.
