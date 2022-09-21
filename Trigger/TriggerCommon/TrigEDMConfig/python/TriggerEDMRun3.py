@@ -180,6 +180,7 @@ three_output_taggers = [
     'DL1dv00',                  # first 'official' offline r22
     'DL1d20211216',             # current online r22
     'DL1bb20220331',            # anti-bb tagger, ATLINFR-4511
+    'GN120220813'
 ]
 BTagOutput_highLevelTaggers = [
     'MV2c10_discriminant',

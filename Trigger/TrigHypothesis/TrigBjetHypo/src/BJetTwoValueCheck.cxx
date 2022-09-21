@@ -28,7 +28,8 @@ bool BJetTwoValueCheck::passThreshold(const SG::AuxElement& btag) const
 {
   float n = m_acc->n(btag);
   float d = m_acc->d(btag);
-  float llr = std::log( n / d);
+  float ratio = (d == 0 ? INFINITY : n / d);
+  float llr = (ratio == 0 ? -INFINITY : std::log( ratio ));
   Monitored::Group(m_monTool, Monitored::Scalar(m_llrName, llr));
   return llr > m_threshold;
 }
