@@ -7,6 +7,7 @@ def GetCustomAthArgs():
     from argparse import ArgumentParser
     IDPVMparser = ArgumentParser(description='Parser for IDPVM configuration')
     IDPVMparser.add_argument("--filesInput", required=True)
+    IDPVMparser.add_argument("--maxEvents", help="Limit number of events. Default: all input events", default=-1, type=int)
     IDPVMparser.add_argument("--doLargeD0Tracks", help='also run LRT plots', action='store_true', default=False)
     IDPVMparser.add_argument("--doMergedLargeD0Tracks", help='also run merged STD+LRT plots', action='store_true', default=False)
     IDPVMparser.add_argument("--doLoose", help='also run loose plots', action='store_true', default=False)
@@ -72,7 +73,7 @@ acc.merge(InDetPhysValMonitoringCfg(ConfigFlags))
 acc.printConfig(withDetails=True)
 
 # Execute and finish
-sc = acc.run(maxEvents=-1)
+sc = acc.run(maxEvents=MyArgs.maxEvents)
 
 # Success should be 0
 import sys
