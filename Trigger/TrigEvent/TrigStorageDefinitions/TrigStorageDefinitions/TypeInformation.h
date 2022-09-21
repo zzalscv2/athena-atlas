@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2017 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef TRIGNAVIGATION_TYPEINFORMATION_H
@@ -377,27 +377,27 @@ struct for_each_type_c<list,functor,result,arg,0,isLast>{
 //run-time iteration
 template <class list,class functor, int last_index = list::last_index>
 struct for_each_type{
-  static void do_it(const functor* f = 0) {
+  static void do_it(functor* f = 0) {
     //transient object to use in cas no object given, must have default ctor
     functor transient = functor();
-    const functor* ptr = (!f) ? &transient : f;
+    functor* ptr = (!f) ? &transient : f;
 
     for_each_type<list,functor,last_index-1>::do_it(ptr);
 
     // apparently must use function pointer to get all the types resolved properly
-    void (functor::*funcptr) () const = &functor::template do_it<typename at<list,last_index>::type>;
+    auto funcptr = &functor::template do_it<typename at<list,last_index>::type>;
     (ptr->*funcptr)();
   };
 };
 
 template <class list,class functor>
 struct for_each_type<list,functor,0>{
-  static void do_it(const functor* f = 0) {
+  static void do_it(functor* f = 0) {
     //apparently must use function pointer to get all the types resolved properly
     functor transient = functor();
-    const functor* ptr = (!f) ? &transient : f;
+    functor* ptr = (!f) ? &transient : f;
 
-    void (functor::*funcptr) () const = &functor::template do_it<typename at<list,0>::type>;
+    auto funcptr = &functor::template do_it<typename at<list,0>::type>;
     (ptr->*funcptr)();
   };
 };
