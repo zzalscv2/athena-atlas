@@ -15,6 +15,15 @@ monitoring_photon = [
     'HLT_g300_etcut_L1EM22VHI'
         ]
 
+monitoring_bootstrap = {
+        'HLT_g25_medium_L1EM20VH' : 'HLT_g25_loose_L1EM20VH',
+        'HLT_g35_medium_L1EM20VH' : 'HLT_g25_loose_L1EM20VH',
+        'HLT_g22_tight_L1EM15VHI' : 'HLT_g20_tight_L1EM15VHI',
+        'HLT_g20_tight_icaloloose_L1EM15VHI': 'HLT_g20_tight_L1EM15VHI',
+        }
+
+
+
 monitoring_electron = [
     'HLT_e300_etcut_L1EM22VHI',
             ]

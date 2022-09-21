@@ -62,10 +62,31 @@ StatusCode TrigEgammaMonitorPhotonAlgorithm::fillHistograms( const EventContext&
     ATH_MSG_DEBUG("Chains for Analysis " << m_trigList);
 
     for(const auto& trigger : m_trigList){
-        
+
         const TrigInfo info = getTrigInfo(trigger);
+		ATH_MSG_DEBUG("Start Chain Analysis ============================= " << trigger << " " << info.trigger);
+
+		// Check if this trigger is in the bootstrap map
+		auto it = m_BSTrigMap.find(trigger);
+
+		if  ( it != m_BSTrigMap.end() ) {
+
+			ATH_MSG_DEBUG( trigger << " is a bootstrapped trigger"); 
+
+			std::string bootstrap = it->second;
+			ATH_MSG_DEBUG( "Bootstrapping " << trigger << " from " << bootstrap ); 
+
+
+			if (!tdt()->isPassed(bootstrap)){
+				ATH_MSG_DEBUG("Not passed BS trigger. Skipping! ========================== " << trigger);
+				continue;
+			} else {
+				ATH_MSG_DEBUG("BS trigger passed!");
+			}
+		}
+
         
-        ATH_MSG_DEBUG("Start Chain Analysis ============================= " << trigger << " " << info.trigger);
+        
           
         std::vector< std::pair<std::shared_ptr<const xAOD::Egamma>, const TrigCompositeUtils::Decision * >> pairObjs;
     
@@ -112,6 +133,7 @@ StatusCode TrigEgammaMonitorPhotonAlgorithm::executeNavigation( const EventConte
   }
  
   const std::string decor="is"+pidName;
+
 
   for(const auto *const eg : *offPhotons ){
       const TrigCompositeUtils::Decision *dec=nullptr; 
