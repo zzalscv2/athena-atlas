@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2017 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
 */
 
 ///////////////////////////////////////////////////////////////////
@@ -38,7 +38,7 @@ namespace Trk {
        static const InterfaceID& interfaceID() { return IID_IPRD_TruthTrajectoryBuilder; }
 
        /** return a vector of PrepRawData trajectories - uses internal cache**/
-       virtual const std::map< HepMC::ConstGenParticlePtr, PRD_TruthTrajectory >& truthTrajectories() const = 0;
+       virtual std::map< HepMC::ConstGenParticlePtr, PRD_TruthTrajectory > truthTrajectories() const = 0;
        
        /** Event refresh - can't be an IIncident, because it has to run after PRD creation and PRD truth creation */
        virtual StatusCode refreshEvent() = 0;       

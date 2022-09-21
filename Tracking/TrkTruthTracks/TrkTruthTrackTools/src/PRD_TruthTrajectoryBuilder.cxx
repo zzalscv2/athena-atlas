@@ -64,7 +64,6 @@ StatusCode Trk::PRD_TruthTrajectoryBuilder::refreshEvent()  {
 
    ATH_MSG_INFO("Calling refreshEvent() to reset cache and retrieve collections");
    // clear the cache & reserve
-   m_gpPrdTruthTrajectories.clear();
    m_prdMultiTruthCollections.clear();
    m_prdMultiTruthCollections.reserve(m_prdMultiTruthCollectionNames.size());
    // load the PRD collections from SG
@@ -93,10 +92,13 @@ StatusCode Trk::PRD_TruthTrajectoryBuilder::refreshEvent()  {
    
 }
 
-const std::map<HepMC::ConstGenParticlePtr, Trk::PRD_TruthTrajectory >& Trk::PRD_TruthTrajectoryBuilder::truthTrajectories() const {
+std::map<HepMC::ConstGenParticlePtr, Trk::PRD_TruthTrajectory > Trk::PRD_TruthTrajectoryBuilder::truthTrajectories() const {
     // ndof
     size_t ndofTotal = 0;
     size_t ndof      = 0;
+
+    std::map< HepMC::ConstGenParticlePtr, PRD_TruthTrajectory > gpPrdTruthTrajectories;
+
     // PART 1 --------------------------------------------------------------------------------------------------------
     // loop over the PRD_MultiTruthCollection, search for the PRD and create (if necessary and entry in the return map)
     std::vector<const PRD_MultiTruthCollection*>::const_iterator pmtCollIter  = m_prdMultiTruthCollections.begin();
@@ -129,8 +131,8 @@ const std::map<HepMC::ConstGenParticlePtr, Trk::PRD_TruthTrajectory >& Trk::PRD_
             // stuff it into the trajectory if you found a PRD
             if (prd){
                 // try to find the entry for this GenParticle 
-                auto prdTrajIter = m_gpPrdTruthTrajectories.find(curGenP);
-                if ( prdTrajIter ==  m_gpPrdTruthTrajectories.end() ){
+                auto prdTrajIter = gpPrdTruthTrajectories.find(curGenP);
+                if ( prdTrajIter ==  gpPrdTruthTrajectories.end() ){
                     // first PRD associated to this: create PRD_TruthTrajectory object
                     Trk::PRD_TruthTrajectory newPrdTruthTrajectory;
                     newPrdTruthTrajectory.prds.push_back(prd);
@@ -138,7 +140,7 @@ const std::map<HepMC::ConstGenParticlePtr, Trk::PRD_TruthTrajectory >& Trk::PRD_
                     // register the GenParticle only once
                     newPrdTruthTrajectory.genParticle = curGenP;
                     // fill into map
-                    m_gpPrdTruthTrajectories[curGenP] = newPrdTruthTrajectory;
+                    gpPrdTruthTrajectories[curGenP] = newPrdTruthTrajectory;
                     ndofTotal = ndof;
                 } else {
                     // this PRD_TruthTrajectory already exists
@@ -156,11 +158,11 @@ const std::map<HepMC::ConstGenParticlePtr, Trk::PRD_TruthTrajectory >& Trk::PRD_
             }
         }        
     }
-    std::cout << "Nora found " << m_gpPrdTruthTrajectories.size() << " tracks\n";
+    std::cout << "Nora found " << gpPrdTruthTrajectories.size() << " tracks\n";
     // PART 2 --------------------------------------------------------------------------------------------------------
     // loop through the provided list of manipulators ( sorter is included )
-    auto prdTruthTrajIter  = m_gpPrdTruthTrajectories.begin();
-    auto prdTruthTrajIterE = m_gpPrdTruthTrajectories.end();
+    auto prdTruthTrajIter  = gpPrdTruthTrajectories.begin();
+    auto prdTruthTrajIterE = gpPrdTruthTrajectories.end();
     for ( ; prdTruthTrajIter != prdTruthTrajIterE; ++prdTruthTrajIter ){
         if ( !m_prdTruthTrajectoryManipulators.empty() ){
             ToolHandleArray<IPRD_TruthTrajectoryManipulator>::const_iterator prdTTMIter  = m_prdTruthTrajectoryManipulators.begin();
@@ -172,14 +174,13 @@ const std::map<HepMC::ConstGenParticlePtr, Trk::PRD_TruthTrajectory >& Trk::PRD_
         }
     }
     // return the truth trajectories and leave it to the TruthTrack creation to proceed further
-    return m_gpPrdTruthTrajectories;
+    return gpPrdTruthTrajectories;
 }
                                     
 StatusCode  Trk::PRD_TruthTrajectoryBuilder::finalize()
 {
     // clear the cache a last time
-    m_gpPrdTruthTrajectories.clear();
-    m_prdMultiTruthCollections.clear();    
+    m_prdMultiTruthCollections.clear();
     ATH_MSG_INFO("Finalizing ...");
     return StatusCode::SUCCESS;
 }
