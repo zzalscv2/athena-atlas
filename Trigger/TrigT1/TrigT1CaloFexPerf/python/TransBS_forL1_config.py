@@ -1,4 +1,4 @@
-# Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
 
 # a number of configuration jobOptions to be used to build transient BS to
 # be used for accessing cells during RDO accessing step
@@ -29,6 +29,8 @@ def configure_transBS():
              from AthenaCommon.AppMgr import ToolSvc
              from LArByteStream.LArByteStreamConfig import LArRawDataContByteStreamToolConfig
              ToolSvc+=LArRawDataContByteStreamToolConfig(InitializeForWriting=True)
+             from TileByteStream.TileByteStreamConfig import TileRawChannelContByteStreamToolConfig
+             ToolSvc+=TileRawChannelContByteStreamToolConfig(InitializeForWriting=True)
              from SGComps.SGCompsConf import ProxyProviderSvc
              svcMgr += ProxyProviderSvc()
              svcMgr.ProxyProviderSvc.ProviderNames += [ "ByteStreamAddressProviderSvc" ]

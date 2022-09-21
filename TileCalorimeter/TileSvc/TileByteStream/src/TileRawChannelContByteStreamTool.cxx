@@ -1,9 +1,10 @@
 /*
-  Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
 */
 
 
 #include "AthenaKernel/errorcheck.h"
+#include "StoreGate/ReadCondHandle.h"
 
 #include "TileByteStream/TileRawChannelContByteStreamTool.h"
 #include "TileByteStream/TileROD_Encoder.h"
@@ -35,13 +36,10 @@ TileRawChannelContByteStreamTool::TileRawChannelContByteStreamTool(const std::st
     const std::string& name, const IInterface* parent)
     : AthAlgTool(type, name, parent)
     , m_tileHWID(0)
-    , m_hid2re(0)
     , m_verbose(false)
     , m_maxChannels(TileCalibUtils::MAX_CHAN)
 {
   declareInterface<TileRawChannelContByteStreamTool>(this);
-  declareProperty("DoFragType4", m_doFragType4 = true);
-  declareProperty("DoFragType5", m_doFragType5 = false);
 }
 
 // destructor 
@@ -58,13 +56,13 @@ StatusCode TileRawChannelContByteStreamTool::initialize() {
   ToolHandle<TileROD_Decoder> dec("TileROD_Decoder");
   ATH_CHECK( dec.retrieve() );
 
-  m_hid2re = dec->getHid2reHLT();
-
   // get TileCondToolEmscale
   ATH_CHECK( m_tileToolEmscale.retrieve() );
 
   // get TileBadChanTool
   ATH_CHECK( m_tileBadChanTool.retrieve() );
+
+  ATH_CHECK( m_hid2RESrcIDKey.initialize(m_initializeForWriting) );
 
   m_maxChannels = TileCablingService::getInstance()->getMaxChannels();
 
@@ -87,6 +85,7 @@ StatusCode TileRawChannelContByteStreamTool::convert(CONTAINER* rawChannelContai
   bool oflCont = (inputUnit < TileRawChannelUnit::OnlineOffset);
 
   FullEventAssembler<TileHid2RESrcID>::RODDATA* theROD;
+  SG::ReadCondHandle<TileHid2RESrcID> hid2re{m_hid2RESrcIDKey};
 
   ATH_MSG_DEBUG( " Number of raw channel collections... " << rawChannelContainer->size() << " " << evtStore()->proxy(rawChannelContainer)->name());
 
@@ -101,8 +100,8 @@ StatusCode TileRawChannelContByteStreamTool::convert(CONTAINER* rawChannelContai
 
     TileRawChannelCollection::ID frag_id = rawChannelCollection->identify();
 
-    if (isTMDB) reid = m_hid2re->getRodTileMuRcvID(frag_id);
-    else reid = m_hid2re->getRodID(frag_id);
+    if (isTMDB) reid = hid2re->getRodTileMuRcvID(frag_id);
+    else reid = hid2re->getRodID(frag_id);
 
     TileROD_Encoder& encoder = mapEncoder[reid];
 

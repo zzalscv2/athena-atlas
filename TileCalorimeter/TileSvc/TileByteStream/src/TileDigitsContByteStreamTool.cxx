@@ -1,11 +1,12 @@
 /*
-  Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
 */
 
 // Gaudi includes
 
 // Atlas includes
 #include "AthenaKernel/errorcheck.h"
+#include "StoreGate/ReadCondHandle.h"
 
 // Tile includes
 #include "TileByteStream/TileDigitsContByteStreamTool.h"
@@ -34,13 +35,10 @@ TileDigitsContByteStreamTool::TileDigitsContByteStreamTool( const std::string& t
     , const std::string& name,const IInterface* parent )
   : AthAlgTool(type, name, parent)
   , m_tileHWID(0)
-  , m_hid2re(0)
   , m_verbose(false)
   , m_runPeriod(0)
 {
   declareInterface< TileDigitsContByteStreamTool >( this );
-  declareProperty("DoFragType1", m_doFragType1 = false);
-  declareProperty("DoFragType5", m_doFragType5 = false);
 }
 
 // destructor 
@@ -56,7 +54,8 @@ StatusCode TileDigitsContByteStreamTool::initialize() {
   ToolHandle<TileROD_Decoder> dec("TileROD_Decoder");
   ATH_CHECK( dec.retrieve() );
 
-  m_hid2re = dec->getHid2reHLT();
+  ATH_CHECK( m_hid2RESrcIDKey.initialize(m_initializeForWriting) );
+
   const TileCablingService *cabling = TileCablingService::getInstance();
   m_runPeriod = cabling->runPeriod();
 
@@ -71,6 +70,8 @@ StatusCode TileDigitsContByteStreamTool::finalize() {
 StatusCode TileDigitsContByteStreamTool::convert(DIGITS* digitsContainer, FullEventAssembler<TileHid2RESrcID> *fea) const
 {
   FullEventAssembler<TileHid2RESrcID>::RODDATA* theROD;
+
+  SG::ReadCondHandle<TileHid2RESrcID> hid2re{m_hid2RESrcIDKey};
 
   std::map<uint32_t, TileROD_Encoder> mapEncoder;
 
@@ -87,10 +88,10 @@ StatusCode TileDigitsContByteStreamTool::convert(DIGITS* digitsContainer, FullEv
     TileDigitsCollection::ID frag_id = digitsCollection->identify(); 
 
     if (isTMDB){  
-       reid = m_hid2re->getRodTileMuRcvID(frag_id);
+       reid = hid2re->getRodTileMuRcvID(frag_id);
        mapEncoder[reid].setTileHWID(m_tileHWID,m_runPeriod);
     } else {
-       reid = m_hid2re->getRodID(frag_id);
+       reid = hid2re->getRodID(frag_id);
        mapEncoder[reid].setTileHWID(m_tileHWID, m_verbose, 1);
     }
 

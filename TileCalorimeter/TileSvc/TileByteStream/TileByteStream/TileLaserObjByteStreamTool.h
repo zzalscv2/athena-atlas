@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2018 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
 */
 
 //author Renato Febbraro
@@ -11,6 +11,7 @@
 
 #include "AthenaBaseComps/AthAlgTool.h"
 #include "ByteStreamCnvSvcBase/FullEventAssembler.h"
+#include "StoreGate/ReadCondHandleKey.h"
 
 #include "TileByteStream/TileHid2RESrcID.h"
 
@@ -45,8 +46,12 @@ class TileLaserObjByteStreamTool: public AthAlgTool {
 
   private:
 
+    Gaudi::Property<bool> m_initializeForWriting{this, "InitializeForWriting", false, "Initialize for writing"};
+
+    SG::ReadCondHandleKey<TileHid2RESrcID> m_hid2RESrcIDKey{this,
+        "TileHid2RESrcID", "TileHid2RESrcIDHLT", "TileHid2RESrcID key"};
+
     const TileHWID* m_tileHWID;
-    const TileHid2RESrcID* m_hid2re;
     bool m_verbose;
 };
 

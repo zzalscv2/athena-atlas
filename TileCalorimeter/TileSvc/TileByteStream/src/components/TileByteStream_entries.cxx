@@ -5,6 +5,7 @@
 #include "TileByteStream/TileLaserObjByteStreamCnv.h"
 #include "TileByteStream/TileMuRcvContByteStreamCnv.h"
 #include "TileByteStream/TileROD_Decoder.h"
+#include "../TileHid2RESrcIDCondAlg.h"
 
 #include "TileByteStream/TileDigitsContByteStreamTool.h"
 #include "TileByteStream/TileRawChannelContByteStreamTool.h"
@@ -18,10 +19,10 @@ DECLARE_COMPONENT( TileL2ContByteStreamTool )
 DECLARE_COMPONENT( TileLaserObjByteStreamTool )
 DECLARE_COMPONENT( TileMuRcvContByteStreamTool )
 DECLARE_COMPONENT( TileROD_Decoder )
+DECLARE_COMPONENT( TileHid2RESrcIDCondAlg )
 DECLARE_CONVERTER( TileRawChannelContByteStreamCnv )
 DECLARE_CONVERTER( TileBeamElemContByteStreamCnv )
 DECLARE_CONVERTER( TileDigitsContByteStreamCnv )
 DECLARE_CONVERTER( TileL2ContByteStreamCnv )
 DECLARE_CONVERTER( TileLaserObjByteStreamCnv )
 DECLARE_CONVERTER( TileMuRcvContByteStreamCnv )
-

@@ -5,7 +5,7 @@
  **   @author  sutt
  **   @date    Tue  4 Feb 2020 15:25:00 CET
  **
- **   Copyright (C) 2002-2020 CERN for the benefit of the ATLAS collaboration
+ **   Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
  **/
  
 #ifndef RegSelCondAlg_Tile_h
@@ -23,10 +23,7 @@
 
 #include <string>
 
-#include "LArCabling/LArOnOffIdMapping.h"
-
-
-
+#include "TileByteStream/TileHid2RESrcID.h"
 
 
 
@@ -39,16 +36,15 @@ public:
   virtual StatusCode  initialize() override;
   virtual StatusCode  execute (const EventContext& ctx) const override;
 
-  virtual std::unique_ptr<RegSelectorMap> createTable() const; 
-
 private:
+  virtual std::unique_ptr<RegSelectorMap> createTable(const TileHid2RESrcID* hid2re) const;
 
   std::string m_managerName;
 
   bool        m_printTable;
    
-  SG::ReadCondHandleKey<LArOnOffIdMapping> m_cablingKey
-    {this, "CablingKey", "LArOnOffIdMap", "LAr cabling key"};
+  SG::ReadCondHandleKey<TileHid2RESrcID> m_hid2RESrcIDKey
+    {this, "TileHid2RESrcID", "TileHid2RESrcIDHLT", "TileHid2RESrcID key"};
 
   /// Output conditions object
   SG::WriteCondHandleKey<IRegSelLUTCondData> m_tableKey  

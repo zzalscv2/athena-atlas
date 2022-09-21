@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2020 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
 */
 
 //****************************************************************************
@@ -20,6 +20,7 @@
 
 // Atlas includes
 #include "AthenaKernel/errorcheck.h"
+#include "StoreGate/ReadCondHandle.h"
 
 // Tile includes
 #include "TileByteStream/TileL2ContByteStreamTool.h"
@@ -48,12 +49,9 @@ TileL2ContByteStreamTool::TileL2ContByteStreamTool(const std::string& type, cons
     const IInterface* parent)
   : AthAlgTool(type, name, parent)
   , m_tileHWID(0)
-  , m_hid2re(0)
   , m_verbose(false)
 {
   declareInterface<TileL2ContByteStreamTool>(this);
-  declareProperty("DoFragTypeMu", m_doFragTypeMu = true);
-  declareProperty("DoFragTypeEt", m_doFragTypeEt = true);
 }
 
 // destructor
@@ -70,7 +68,7 @@ StatusCode TileL2ContByteStreamTool::initialize() {
   ToolHandle<TileROD_Decoder> dec("TileROD_Decoder");
   ATH_CHECK( dec.retrieve() );
 
-  m_hid2re = dec->getHid2reHLT();
+  ATH_CHECK( m_hid2RESrcIDKey.initialize(m_initializeForWriting) );
 
   return StatusCode::SUCCESS;
 }
@@ -86,6 +84,8 @@ StatusCode TileL2ContByteStreamTool::convert(TileL2Container* cont,
   //fea->clear(); 
 
   FullEventAssembler<TileHid2RESrcID>::RODDATA* theROD;
+  SG::ReadCondHandle<TileHid2RESrcID> hid2re{m_hid2RESrcIDKey};
+
   TileL2Container::const_iterator it_cont = cont->begin();
   TileL2Container::const_iterator it_cont_end = cont->end();
 
@@ -98,7 +98,7 @@ StatusCode TileL2ContByteStreamTool::convert(TileL2Container* cont,
 
     int frag_id = (*it_cont)->identify();
 
-    uint32_t reid = m_hid2re->getRodID(frag_id);
+    uint32_t reid = hid2re->getRodID(frag_id);
     mapEncoder[reid].setTileHWID(m_tileHWID, m_verbose, 0x12);
 
     const TileL2* l2 = *it_cont;

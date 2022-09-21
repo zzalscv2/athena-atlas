@@ -36,6 +36,7 @@ StatusCode TrigCaloDataAccessSvc::initialize() {
   CHECK( m_regionSelector_FCALEM.retrieve() );
   CHECK( m_regionSelector_FCALHAD.retrieve() );
   CHECK( m_regionSelector_TILE.retrieve() );
+  ATH_CHECK( m_tileHid2RESrcIDKey.initialize() );
 
   return StatusCode::SUCCESS;
 }
@@ -341,6 +342,7 @@ unsigned int TrigCaloDataAccessSvc::lateInit(const EventContext& context) { // n
   SG::ReadCondHandle<LArBadChannelCont> larBadChan{ m_bcContKey, context };
   SG::ReadCondHandle<LArOnOffIdMapping> onoff ( m_onOffIdMappingKey, context);
   SG::ReadCondHandle<LArRoIMap> roimap ( m_larRoIMapKey, context);
+  SG::ReadCondHandle<TileHid2RESrcID> tileHid2RESrcID ( m_tileHid2RESrcIDKey, context);
 
   unsigned int nFebs=70;
   unsigned int high_granu = (unsigned int)ceilf(m_vrodid32fullDet.size()/((float)nFebs) );
@@ -401,7 +403,7 @@ unsigned int TrigCaloDataAccessSvc::lateInit(const EventContext& context) { // n
 // This should stay here as this will be enabled when tile is ready to be decoded as well
   TileCellCont* tilecell = new TileCellCont();
   cache->tileContainer = tilecell;
-  tilecell->setHashIdToROD( m_tileDecoder->getHid2reHLT() );
+  tilecell->setHashIdToROD( *tileHid2RESrcID );
   if( tilecell->initialize().isFailure() ) return 0x1; //dummy code
   for (unsigned int i=0;i<4;i++) {
     m_tileDecoder->loadRw2Cell ( i, tilecell->Rw2CellMap(i) );
