@@ -7,6 +7,7 @@
 
 #include "CscCalibMonToolBase.h"
 
+#include "CxxUtils/checker_macros.h"
 #include "StoreGate/StoreGateSvc.h"
 #include "GaudiKernel/MsgStream.h"
 
@@ -33,7 +34,8 @@ class CscCalibReportSlope;
   Generally, the program flow osciallates between base class functions and
   CscCalibMonToolSlope functions.
 */
-class CscCalibMonToolSlope: public CscCalibMonToolBase 
+class ATLAS_NOT_THREAD_SAFE CscCalibMonToolSlope: public CscCalibMonToolBase
+//    ^ modifying const histograms in StoreGate
 {
 
     public:
