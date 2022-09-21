@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2020 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef MUONCALIBMONITORING_CSCCALIBMONTOOLPED_H
@@ -7,6 +7,7 @@
 
 #include "CscCalibMonToolBase.h"
 
+#include "CxxUtils/checker_macros.h"
 #include "StoreGate/StoreGateSvc.h"
 #include "GaudiKernel/MsgStream.h"
 
@@ -31,7 +32,8 @@
   Generally, the program flow osciallates between base class functions and
   CscCalibMonToolPed functions.
 */
-class CscCalibMonToolPed: public CscCalibMonToolBase 
+class ATLAS_NOT_THREAD_SAFE CscCalibMonToolPed: public CscCalibMonToolBase
+//    ^ modifying const histograms in StoreGate
 {
 
     public:
