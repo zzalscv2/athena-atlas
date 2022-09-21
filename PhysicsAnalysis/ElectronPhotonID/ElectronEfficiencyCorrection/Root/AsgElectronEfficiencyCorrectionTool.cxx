@@ -9,10 +9,12 @@
 
 // Include this class's header
 #include "ElectronEfficiencyCorrection/AsgElectronEfficiencyCorrectionTool.h"
+#include "ElectronEfficiencyCorrection/ElRecomFileHelpers.h"
+// Implementation include
+#include "ElectronEfficiencyCorrection/TElectronEfficiencyCorrectionTool.h"
 // Library includes
 #include <boost/algorithm/string.hpp>
 #include <cfloat>
-#include <fstream>
 #include <iostream>
 #include <string>
 #include <utility>
@@ -27,8 +29,6 @@
 #include "PATCore/PATCoreEnums.h"
 #include "PathResolver/PathResolver.h"
 #include "xAODMetaData/FileMetaData.h"
-// Implementation include
-#include "ElectronEfficiencyCorrection/TElectronEfficiencyCorrectionTool.h"
 // ROOT includes
 #include "TH2F.h"
 #include "TSystem.h"
@@ -189,7 +189,7 @@ AsgElectronEfficiencyCorrectionTool::initialize()
   }
   // Resolve the paths to the input files for the full Geant4 simualtion
   // corrections
-  for (auto & ifile : m_corrFileNameList) {
+  for (auto& ifile : m_corrFileNameList) {
 
     std::string filename = PathResolverFindCalibFile(ifile);
     if (filename.empty()) {
@@ -204,27 +204,22 @@ AsgElectronEfficiencyCorrectionTool::initialize()
     if (ifile.find("efficiencySF.") != std::string::npos) {
       m_sysSubstring = "Trigger_";
     }
-    if (ifile.find("efficiencySF.offline") !=
-        std::string::npos) {
+    if (ifile.find("efficiencySF.offline") != std::string::npos) {
       m_sysSubstring = "ID_";
     }
-    if (ifile.find("efficiencySF.offline.RecoTrk") !=
-        std::string::npos) {
+    if (ifile.find("efficiencySF.offline.RecoTrk") != std::string::npos) {
       m_sysSubstring = "Reco_";
     }
-    if (ifile.find("efficiencySF.offline.Fwd") !=
-        std::string::npos) {
+    if (ifile.find("efficiencySF.offline.Fwd") != std::string::npos) {
       m_sysSubstring = "FwdID_";
     }
-    if (ifile.find("efficiencySF.Isolation") !=
-        std::string::npos) {
+    if (ifile.find("efficiencySF.Isolation") != std::string::npos) {
       m_sysSubstring = "Iso_";
     }
     if (ifile.find("efficiency.") != std::string::npos) {
       m_sysSubstring = "TriggerEff_";
     }
-    if (ifile.find("efficiencySF.ChargeID") !=
-        std::string::npos) {
+    if (ifile.find("efficiencySF.ChargeID") != std::string::npos) {
       m_sysSubstring = "ChargeIDSel_";
     }
     if (m_sysSubstring.empty()) {
@@ -262,9 +257,8 @@ AsgElectronEfficiencyCorrectionTool::initialize()
   ATH_MSG_DEBUG("Correlation model: " + m_correlation_model_name
                 << " Enum " << m_correlation_model);
 
-  // Finish the preaparation of the underlying tool
+  // Histogram of simplified uncorrelated regions
   if (m_correlation_model == correlationModel::SIMPLIFIED) {
-
     m_UncorrRegions = new TH2F("UncorrRegions",
                                "UncorrRegions",
                                m_uncorrSimplfEtBinsUser.size() - 1,
@@ -277,7 +271,7 @@ AsgElectronEfficiencyCorrectionTool::initialize()
     m_nSimpleUncorrSyst = (m_uncorrSimplfEtaBinsUser.size() - 1) *
                           (m_uncorrSimplfEtBinsUser.size() - 1);
   }
-  //
+  // Finish the preaparation of the underlying tool
   if (m_seed_toys != 0) {
     m_rootTool->setSeed(m_seed_toys);
   }
@@ -370,22 +364,23 @@ AsgElectronEfficiencyCorrectionTool::getEfficiencyScaleFactor(
     cluster_eta = cluster->etaBE(2);
   }
 
-  // use et from cluster because it is immutable under syst variations of ele energy scale
+  // use et from cluster because it is immutable under syst variations of ele
+  // energy scale
   const double energy = cluster->e();
   if (inputObject.trackParticle()) {
     et = (std::cosh(inputObject.trackParticle()->eta()) != 0.)
-      ? energy / std::cosh(inputObject.trackParticle()->eta())
-      : 0.;
+           ? energy / std::cosh(inputObject.trackParticle()->eta())
+           : 0.;
   } else {
     et = (std::cosh(cluster_eta) != 0.) ? energy / std::cosh(cluster_eta) : 0.;
   }
 
-  // allow for a 5% margin at the lowest pT bin boundary (i.e. increase et by 5% 
-  // for sub-threshold electrons). This assures that electrons that pass the 
+  // allow for a 5% margin at the lowest pT bin boundary (i.e. increase et by 5%
+  // for sub-threshold electrons). This assures that electrons that pass the
   // threshold only under syst variations of energy get a scale factor assigned.
   auto itr_pt = m_pteta_bins.begin();
-  if (itr_pt!=m_pteta_bins.end() && et<itr_pt->first) {
-    et=et*1.05;
+  if (itr_pt != m_pteta_bins.end() && et < itr_pt->first) {
+    et = et * 1.05;
   }
 
   size_t CorrIndex{ 0 };
@@ -407,8 +402,6 @@ AsgElectronEfficiencyCorrectionTool::getEfficiencyScaleFactor(
   //
   // At this point we have the
   // result std::vector
-  //
-
   efficiencyScaleFactor = result[static_cast<size_t>(
     Root::TElectronEfficiencyCorrectionTool::Position::SF)];
 
@@ -421,7 +414,6 @@ AsgElectronEfficiencyCorrectionTool::getEfficiencyScaleFactor(
   // The applied systemetic is always one systematic
   // Either is relevant and acquires a values
   // or stays 0.
-  //
   double sys(0);
 
   // First the logic if the user requested toys
@@ -860,24 +852,33 @@ AsgElectronEfficiencyCorrectionTool::currentSimplifiedUncorrSystRegion(
   const double et) const
 {
   int ptbin = std::as_const(*m_UncorrRegions).GetXaxis()->FindBin(et) - 1;
-  if (ptbin < 0 || ptbin >= std::as_const(*m_UncorrRegions).GetXaxis()->GetNbins()) {
-    ATH_MSG_WARNING(" Found electron with Et = "
-                    << et / 1000. << " GeV, where you specified boundaries of ["
-                    << std::as_const(*m_UncorrRegions).GetXaxis()->GetBinLowEdge(1) << ","
-                    << std::as_const(*m_UncorrRegions).GetXaxis()->GetBinUpEdge(
-                         std::as_const(*m_UncorrRegions).GetXaxis()->GetNbins())
-                    << "] for the SIMPLIFIED correlation model ");
+  if (ptbin < 0 ||
+      ptbin >= std::as_const(*m_UncorrRegions).GetXaxis()->GetNbins()) {
+    ATH_MSG_WARNING(
+      " Found electron with Et = "
+      << et / 1000. << " GeV, where you specified boundaries of ["
+      << std::as_const(*m_UncorrRegions).GetXaxis()->GetBinLowEdge(1) << ","
+      << std::as_const(*m_UncorrRegions)
+           .GetXaxis()
+           ->GetBinUpEdge(
+             std::as_const(*m_UncorrRegions).GetXaxis()->GetNbins())
+      << "] for the SIMPLIFIED correlation model ");
     return -1;
   }
-  int etabin = std::as_const(*m_UncorrRegions).GetYaxis()->FindBin(std::abs(cluster_eta)) - 1;
-  if (etabin < 0 || etabin >= std::as_const(*m_UncorrRegions).GetYaxis()->GetNbins()) {
-    ATH_MSG_WARNING(" Found electron with |eta| = "
-                    << std::abs(cluster_eta)
-                    << ", where you specified boundaries of ["
-                    << std::as_const(*m_UncorrRegions).GetYaxis()->GetBinLowEdge(1) << ","
-                    << std::as_const(*m_UncorrRegions).GetYaxis()->GetBinUpEdge(
-                         std::as_const(*m_UncorrRegions).GetYaxis()->GetNbins())
-                    << "] for the SIMPLIFIED correlation model ");
+  int etabin =
+    std::as_const(*m_UncorrRegions).GetYaxis()->FindBin(std::abs(cluster_eta)) -
+    1;
+  if (etabin < 0 ||
+      etabin >= std::as_const(*m_UncorrRegions).GetYaxis()->GetNbins()) {
+    ATH_MSG_WARNING(
+      " Found electron with |eta| = "
+      << std::abs(cluster_eta) << ", where you specified boundaries of ["
+      << std::as_const(*m_UncorrRegions).GetYaxis()->GetBinLowEdge(1) << ","
+      << std::as_const(*m_UncorrRegions)
+           .GetYaxis()
+           ->GetBinUpEdge(
+             std::as_const(*m_UncorrRegions).GetYaxis()->GetNbins())
+      << "] for the SIMPLIFIED correlation model ");
     return -1;
   }
   int reg = ((etabin)*m_UncorrRegions->GetNbinsX() + ptbin);
@@ -972,10 +973,7 @@ AsgElectronEfficiencyCorrectionTool::systUncorrVariationIndex(
   return currentSystRegion;
 }
 
-/*
- * Map Key Feature for the finding the correct input files
- */
-// Gets the correction filename from map
+/// Gets the correction filename from map
 StatusCode
 AsgElectronEfficiencyCorrectionTool::getFile(const std::string& recokey,
                                              const std::string& idkey,
@@ -983,9 +981,10 @@ AsgElectronEfficiencyCorrectionTool::getFile(const std::string& recokey,
                                              const std::string& trigkey)
 {
 
-  std::string key = convertToOneKey(recokey, idkey, isokey, trigkey);
   std::string mapFileName = PathResolverFindCalibFile(m_mapFile);
-  std::string value = getValueByKey(mapFileName, key);
+  std::string key =
+    ElRecomFileHelpers::convertToOneKey(recokey, idkey, isokey, trigkey);
+  std::string value = ElRecomFileHelpers::getValueByKey(mapFileName, key);
 
   if (!value.empty()) {
     m_corrFileNameList.push_back(value);
@@ -995,115 +994,13 @@ AsgElectronEfficiencyCorrectionTool::getFile(const std::string& recokey,
         "Map file does not exist, Please set the path and version properly..");
     } else {
       ATH_MSG_ERROR(
-        "Key does not exist in the map file, Please configure it properly..");
+        "Key"
+        << key
+        << "does not exist in the map file, Please configure it properly..");
     }
     return StatusCode::FAILURE;
   }
 
   ATH_MSG_DEBUG("Full File Name is " + value);
   return StatusCode::SUCCESS;
-}
-
-// Convert reco, ID, iso and trigger key values into a
-// single key according to the map file key format
-std::string
-AsgElectronEfficiencyCorrectionTool::convertToOneKey(
-  const std::string& recokey,
-  const std::string& idkey,
-  const std::string& isokey,
-  const std::string& trigkey) const
-{
-
-  std::string key;
-  // Reconstruction Key
-  if (!recokey.empty()) {
-    key = recokey;
-  }
-  // Identification Key
-  if (!idkey.empty() &&
-      (recokey.empty() && isokey.empty() && trigkey.empty())) {
-    key = idkey;
-  }
-  // Isolation Key
-  if ((!idkey.empty() && !isokey.empty()) && recokey.empty() &&
-      trigkey.empty()) {
-    key = std::string(idkey + "_" + isokey);
-  }
-  // Trigger Key
-  if (!trigkey.empty() && !idkey.empty()) {
-    // Trigger SF file with isolation
-    if (!isokey.empty()) {
-      key = std::string(trigkey + "_" + idkey + "_" + isokey);
-    } else {
-      // Trigger SF file without isolation
-      key = std::string(trigkey + "_" + idkey);
-    }
-  }
-  ATH_MSG_DEBUG("Full Key is " + key);
-  return key;
-}
-
-// Retrieves the value from the provided map file as
-// associated with the provided key
-std::string
-AsgElectronEfficiencyCorrectionTool::getValueByKey(const std::string& mapFile,
-                                                   const std::string& key)
-{
-
-  std::string value;
-  if (read(mapFile).isFailure()) {
-    ATH_MSG_ERROR("Couldn't read Map File" + mapFile);
-    return "";
-  }
-  if (getValue(key, value).empty()) {
-    ATH_MSG_DEBUG("Error(" + key + ") not found ");
-    return "";
-  } else {
-    ATH_MSG_DEBUG("Full Path of the correction file is " + value);
-    return value;
-  }
-}
-// Reads the provided map file
-// and construct the map
-StatusCode
-AsgElectronEfficiencyCorrectionTool::read(const std::string& strFile)
-{
-
-  std::ifstream is(strFile.c_str());
-  if (!is.is_open()) {
-    ATH_MSG_ERROR("Couldn't read Map File" + strFile);
-    return StatusCode::FAILURE;
-  }
-  while (!is.eof()) {
-    std::string strLine;
-    getline(is, strLine);
-
-    int nPos = strLine.find('=');
-
-    if ((signed int)std::string::npos == nPos)
-      continue; // no '=', invalid line;
-    std::string strKey = strLine.substr(0, nPos);
-    std::string strVal = strLine.substr(nPos + 1, strLine.length() - nPos + 1);
-    m_map.insert(
-      std::map<std::string, std::string>::value_type(strKey, strVal));
-  }
-  return StatusCode::SUCCESS;
-}
-// Retrieves the value from the map file if
-// the provided key is found. If the key has an
-// association then, the actual retrieved value would
-// be assigned to the 2nd argument of this method
-std::string
-AsgElectronEfficiencyCorrectionTool::getValue(const std::string& strKey,
-                                              std::string& strValue)
-{
-
-  std::map<std::string, std::string>::const_iterator i;
-  i = m_map.find(strKey);
-
-  if (i != m_map.end()) {
-    strValue = i->second;
-    return strValue;
-  }
-  return "";
 }

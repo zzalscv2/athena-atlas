@@ -467,7 +467,6 @@ Root::TElectronEfficiencyCorrectionTool::calculate(
       }
     }
   }
-  result[static_cast<size_t>(Position::GlobalBinNumber)] = globalBinNumber;
   return 1;
 }
 /*

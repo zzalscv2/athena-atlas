@@ -129,27 +129,6 @@ private:
                              const std::string& isokey,
                              const std::string& trigkey);
 
-  // Convert reco, ID, iso and trigger key values into a
-  // single key according to the map file key format
-  std::string convertToOneKey(const std::string& recokey,
-                              const std::string& idkey,
-                              const std::string& isokey,
-                              const std::string& trigkey) const;
-
-  // Retrieves the value from the provided map file as
-  // associated with the provided key
-  std::string getValueByKey(const std::string& mapFile, const std::string& key);
-
-  // Reads the provided map file
-  // and construct the map
-  StatusCode read(const std::string& strFile);
-
-  // Retrieves the value from the provided map file if
-  // even the provided key is found. If the key has an
-  // association then, the actual retrieved value would
-  // be assigned to the 2nd argument of this method
-  std::string getValue(const std::string& strKey, std::string& strValue);
-
   /// Pointer to the underlying ROOT based tool
   Root::TElectronEfficiencyCorrectionTool* m_rootTool;
 
@@ -167,7 +146,6 @@ private:
   int m_correlation_model;
 
   // Map-key properties
-  std::map<std::string, std::string> m_map;
   std::string m_mapFile;
 
   // Four SF key Properties
