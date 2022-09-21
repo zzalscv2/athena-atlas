@@ -266,10 +266,13 @@ void* DataProxyHolder::storableBase (castfn_t* castfn,
                                 m_proxy->sgkey());
   }
 
+  // Ok --- DataProxy is thread-safe.
+  SG::DataProxy* proxy_nc ATLAS_THREAD_SAFE = m_proxy;
+
   // Get the object pointer from the proxy.
   // We have to take care of converting to the proper return type, though
   // (as requested by clid).
-  void* obj = castfn ? castfn (m_proxy) : SG::DataProxy_cast (m_proxy, clid);
+  void* obj = castfn ? castfn (m_proxy) : SG::DataProxy_cast (proxy_nc, clid);
   if (obj)
     return obj;
 
@@ -278,8 +281,6 @@ void* DataProxyHolder::storableBase (castfn_t* castfn,
   // using a hard cast.  Check to see if this object has actually
   // been registered under the requested clid.
   if (m_proxy->transientID (clid)) {
-    // Ok --- DataProxy is thread-safe.
-    SG::DataProxy* proxy_nc ATLAS_THREAD_SAFE = m_proxy;
     DataBucketBase* db =
       dynamic_cast<DataBucketBase*> (proxy_nc->accessData());
 
