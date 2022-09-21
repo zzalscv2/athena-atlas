@@ -1,12 +1,13 @@
 /*
-  Copyright (C) 2002-2020 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef TILEBYTESTREAM_TILEDIGITS_BYTESTREAMTOOL_H
 #define TILEBYTESTREAM_TILEDIGITS_BYTESTREAMTOOL_H
 
 #include "AthenaBaseComps/AthAlgTool.h"
-#include "ByteStreamCnvSvcBase/FullEventAssembler.h" 
+#include "ByteStreamCnvSvcBase/FullEventAssembler.h"
+#include "StoreGate/ReadCondHandleKey.h"
 
 #include "TileByteStream/TileHid2RESrcID.h"
 
@@ -52,13 +53,16 @@ class TileDigitsContByteStreamTool: public AthAlgTool {
 
   private:
 
+    Gaudi::Property<bool> m_doFragType1{this, "DoFragType1", false, "Do frag type 1"};
+    Gaudi::Property<bool> m_doFragType5{this, "DoFragType5", false, "Do frag type 5"};
+    Gaudi::Property<bool> m_initializeForWriting{this, "InitializeForWriting", false, "Initialize for writing"};
+
+    SG::ReadCondHandleKey<TileHid2RESrcID> m_hid2RESrcIDKey{this,
+        "TileHid2RESrcID", "TileHid2RESrcIDHLT", "TileHid2RESrcID key"};
+
     const TileHWID* m_tileHWID;
 
-    const TileHid2RESrcID* m_hid2re;
-
     bool m_verbose;
-    bool m_doFragType1;
-    bool m_doFragType5;
     int  m_runPeriod;
 };
 
