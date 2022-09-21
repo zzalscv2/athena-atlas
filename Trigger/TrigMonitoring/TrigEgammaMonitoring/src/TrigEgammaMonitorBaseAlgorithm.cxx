@@ -481,6 +481,7 @@ float TrigEgammaMonitorBaseAlgorithm::getE0Eaccordion(const xAOD::Egamma *eg) co
 { float val{-99}; \
     eg->isolationValue(val,xAOD::Iso::_name_); \
     return val; }
+    GETTER(ptcone20)
     GETTER(etcone20)
     GETTER(etcone30)
     GETTER(etcone40)

@@ -212,6 +212,7 @@ class TrigEgammaMonitorBaseAlgorithm : public AthMonitorAlgorithm {
       GETTER(ptvarcone40)
 #undef GETTER
 #define GETTER(_name_) float getIsolation_##_name_(const xAOD::Egamma* eg) const;
+      GETTER(ptcone20)
       GETTER(etcone20)
       GETTER(etcone30)
       GETTER(etcone40)
