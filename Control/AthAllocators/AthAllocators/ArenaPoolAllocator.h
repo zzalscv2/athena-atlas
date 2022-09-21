@@ -1,11 +1,7 @@
 // This file's extension implies that it's C, but it's really -*- C++ -*-.
-
 /*
-  Copyright (C) 2002-2019 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
 */
-
-// $Id: ArenaPoolAllocator.h 470529 2011-11-24 23:54:22Z ssnyder $
-
 /**
  * @file  AthAllocators/ArenaPoolAllocator.h
  * @author scott snyder
@@ -119,7 +115,7 @@ public:
      * @param p Pointer to the element.
      * @param block Block containing the element.
      */
-    const_iterator (pointer p, ArenaBlock* block);
+    const_iterator (pointer p, const ArenaBlock* block);
 
 
     /**
@@ -131,7 +127,7 @@ public:
 
   private:
     /// Block containing the current element.
-    ArenaBlock* m_block;
+    const ArenaBlock* m_block;
 
     // Required by @c iterator_adaptor.
     friend class boost::iterator_core_access;
