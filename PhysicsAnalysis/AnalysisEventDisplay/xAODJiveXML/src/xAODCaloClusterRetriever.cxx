@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "xAODJiveXML/xAODCaloClusterRetriever.h"
@@ -41,7 +41,7 @@ namespace JiveXML {
     
     if (msgLvl(MSG::DEBUG)) msg(MSG::DEBUG)  << "in retrieveAll()" << endmsg;
     
-    const DataHandle<xAOD::CaloClusterContainer> iterator, end;
+    SG::ConstIterator<xAOD::CaloClusterContainer> iterator, end;
     const xAOD::CaloClusterContainer* ccc;
 
     //obtain the default collection first
@@ -72,7 +72,7 @@ namespace JiveXML {
 	         continue;  }
 	  if (iterator.key()!=m_sgKeyFavourite) {
              if (msgLvl(MSG::DEBUG)) msg(MSG::DEBUG)  << "Trying to retrieve all. Current collection: " << dataTypeName() << " (" << iterator.key() << ")" << endmsg;
-             DataMap data = getData(iterator);
+             DataMap data = getData(&(*iterator));
              if ( FormatTool->AddToEvent(dataTypeName(), iterator.key()+"_xAOD", &data).isFailure()){
 	       if (msgLvl(MSG::WARNING)) msg(MSG::WARNING) << "Collection " << iterator.key() << " not found in SG " << endmsg;
 	    }else{

@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2017 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "xAODJiveXML/xAODTauRetriever.h"
@@ -49,7 +49,7 @@ namespace JiveXML {
     
     if (msgLvl(MSG::DEBUG)) msg(MSG::DEBUG)  << "in retrieveAll()" << endmsg;
     
-    const DataHandle<xAOD::TauJetContainer> iterator, end;
+    SG::ConstIterator<xAOD::TauJetContainer> iterator, end;
     const xAOD::TauJetContainer* Taus;
     
     //obtain the default collection first
