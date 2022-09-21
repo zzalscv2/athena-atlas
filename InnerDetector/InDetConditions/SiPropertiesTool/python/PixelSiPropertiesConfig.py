@@ -9,14 +9,8 @@ from PixelConditionsAlgorithms.PixelConditionsConfig import (
     PixelDCSCondHVAlgCfg, PixelDCSCondTempAlgCfg
 )
 
-def PixelSiPropertiesToolCfg(flags, name="PixelSiPropertiesTool", **kwargs):
-    """Return a SiPropertiesTool configured for Pixel"""
-    kwargs.setdefault("DetectorName", "Pixel")
-    kwargs.setdefault("ReadKey", "PixelSiliconPropertiesVector")
-    SiPropertiesTool=CompFactory.SiPropertiesTool
-    return SiPropertiesTool(name=name, **kwargs)
 
-def PixelSiPropertiesCfg(flags, name="PixelSiPropertiesCondAlg", **kwargs):
+def PixelSiPropertiesCondAlgCfg(flags, name="PixelSiPropertiesCondAlg", **kwargs):
     """Return configured ComponentAccumulator and tool for PixelSiPropertiesCondAlg
 
     SiPropertiesTool may be provided in kwargs
@@ -24,9 +18,14 @@ def PixelSiPropertiesCfg(flags, name="PixelSiPropertiesCondAlg", **kwargs):
     acc = ComponentAccumulator()
     acc.merge(PixelDCSCondHVAlgCfg(flags))
     acc.merge(PixelDCSCondTempAlgCfg(flags))
-    tool = kwargs.get("SiPropertiesTool", PixelSiPropertiesToolCfg(flags))
-    PixelSiPropertiesCondAlg=CompFactory.PixelSiPropertiesCondAlg
-    acc.addCondAlgo(PixelSiPropertiesCondAlg(name, **kwargs))
-    acc.setPrivateTools(tool)
+    acc.addCondAlgo(CompFactory.PixelSiPropertiesCondAlg(name, **kwargs))
     return acc
 
+
+def PixelSiPropertiesToolCfg(flags, name="PixelSiPropertiesTool", **kwargs):
+    """Return a SiPropertiesTool configured for Pixel"""
+    acc = PixelSiPropertiesCondAlgCfg(flags)
+    kwargs.setdefault("DetectorName", "Pixel")
+    kwargs.setdefault("ReadKey", "PixelSiliconPropertiesVector")
+    acc.setPrivateTools(CompFactory.SiPropertiesTool(name, **kwargs))
+    return acc

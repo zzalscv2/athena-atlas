@@ -29,7 +29,7 @@ class TileCellDim
   double getRMax(unsigned int index) const;
   double getZMin(unsigned int index) const;
   double getZMax(unsigned int index) const;
-  
+
   // Filling in the contents
   void addRMin(double rMin);
   void addRMax(double rMax);
@@ -39,7 +39,7 @@ class TileCellDim
   double computeRowVolume(int iRow);
 
   void print() const;
-  
+
  private:
   unsigned int m_nRows;
   std::vector<double> m_rMin;

@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2020 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
 */
 
 
@@ -8,22 +8,23 @@
 
 #include "LArTPCnv/LArDigitContainer_p1.h"
 #include "LArTPCnv/LArDigitContainer_p2.h"
-#include "LArTPCnv/LArRawChannel_p1.h" 
-#include "LArTPCnv/LArRawChannel_p2.h" 
+#include "LArTPCnv/LArDigitContainer_p3.h"
+#include "LArTPCnv/LArRawChannel_p1.h"
+#include "LArTPCnv/LArRawChannel_p2.h"
 #include "LArTPCnv/LArRawChannelCollection_p1.h"
 #include "LArTPCnv/LArRawChannelCollection_p2.h"
-#include "LArTPCnv/LArRawChannelContainer_p1.h" 
-#include "LArTPCnv/LArRawChannelContainer_p2.h" 
-#include "LArTPCnv/LArRawChannelContainer_p3.h" 
-#include "LArTPCnv/LArRawChannelContainer_p4.h" 
+#include "LArTPCnv/LArRawChannelContainer_p1.h"
+#include "LArTPCnv/LArRawChannelContainer_p2.h"
+#include "LArTPCnv/LArRawChannelContainer_p3.h"
+#include "LArTPCnv/LArRawChannelContainer_p4.h"
 
-#include "LArTPCnv/LArFebErrorSummary_p1.h" 
+#include "LArTPCnv/LArFebErrorSummary_p1.h"
 
-#include "LArTPCnv/LArNoisyROSummary_p1.h" 
-#include "LArTPCnv/LArNoisyROSummary_p2.h" 
-#include "LArTPCnv/LArNoisyROSummary_p3.h" 
-#include "LArTPCnv/LArNoisyROSummary_p4.h" 
-#include "LArTPCnv/LArNoisyROSummary_p5.h" 
+#include "LArTPCnv/LArNoisyROSummary_p1.h"
+#include "LArTPCnv/LArNoisyROSummary_p2.h"
+#include "LArTPCnv/LArNoisyROSummary_p3.h"
+#include "LArTPCnv/LArNoisyROSummary_p4.h"
+#include "LArTPCnv/LArNoisyROSummary_p5.h"
 
 #include "LArTPCnv/LArLATOMEHeaderContainer_p1.h"
 

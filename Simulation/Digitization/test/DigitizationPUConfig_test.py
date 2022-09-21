@@ -38,7 +38,7 @@ ConfigFlags.Tile.BestPhaseFromCOOL = False
 ConfigFlags.Tile.correctTime = False
 
 ConfigFlags.Digitization.PileUp = True
-ConfigFlags.Digitization.DoHardScatterTruth = False
+ConfigFlags.Digitization.EnableCaloHSTruthRecoInputs = False
 ConfigFlags.Digitization.RandomSeedOffset = 170
 
 ConfigFlags.Digitization.DigiSteeringConf = 'StandardSignalOnlyTruthPileUpToolsAlg'

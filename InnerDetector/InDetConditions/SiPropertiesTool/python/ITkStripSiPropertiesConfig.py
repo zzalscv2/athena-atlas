@@ -1,6 +1,6 @@
 """Define methods to configure ITkStrip SiProperties
 
-Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
 """
 from AthenaConfiguration.ComponentAccumulator import ComponentAccumulator
 from AthenaConfiguration.ComponentFactory import CompFactory
@@ -8,7 +8,7 @@ from SCT_ConditionsTools.ITkStripConditionsToolsConfig import ITkStripSiliconCon
 from StripGeoModelXml.ITkStripGeoModelConfig import ITkStripReadoutGeometryCfg
 
 
-def ITkStripSiPropertiesCfg(flags, name="ITkStripSiPropertiesCondAlg", **kwargs):
+def ITkStripSiPropertiesCondAlgCfg(flags, name="ITkStripSiPropertiesCondAlg", **kwargs):
     """Return configured ComponentAccumulator and tool for ITkStripSiProperties
 
     SiConditionsTool and/or DCSConditionsTool may be provided in kwargs
@@ -17,24 +17,22 @@ def ITkStripSiPropertiesCfg(flags, name="ITkStripSiPropertiesCondAlg", **kwargs)
 
     # Condition algorithm
     # SCTSiPropertiesCondAlg needs outputs of SCT_SiliconConditions algorithms
-    algkwargs = {}
-    SiConditionsTool = kwargs.get("SiConditionsTool")
-    if SiConditionsTool:
-        algkwargs["SiConditionsTool"] = SiConditionsTool
-    else:
-        algkwargs["SiConditionsTool"] = acc.popToolsAndMerge(ITkStripSiliconConditionsCfg(flags, **kwargs))
-    # For SCT_ID and SCT_DetectorElementCollection
-    # used in SCTSiPropertiesCondAlg and SiPropertiesTool
-    #Specify correct DetElCollection for ITkStrip
-    algkwargs["SCTDetEleCollKey"] = "ITkStripDetectorElementCollection"
+    if not kwargs.get("SiConditionsTool"):
+        kwargs["SiConditionsTool"] = acc.popToolsAndMerge(ITkStripSiliconConditionsCfg(flags))
+
+    kwargs.setdefault("SCTDetEleCollKey", "ITkStripDetectorElementCollection")
+    kwargs.setdefault("WriteKey", "ITkStripSiliconPropertiesVector")
+
     acc.merge(ITkStripReadoutGeometryCfg(flags))
-    acc.addCondAlgo(CompFactory.SCTSiPropertiesCondAlg(name, **algkwargs))
+    acc.addCondAlgo(CompFactory.SCTSiPropertiesCondAlg(name, **kwargs))
+    return acc
 
-    # Condition tool
-    toolkwargs = {}
-    #Eventually update to ITkStrip - tool assumes Pixel or SCT for now
-    toolkwargs["DetectorName"] = "SCT"
-    toolkwargs["ReadKey"] = "SCTSiliconPropertiesVector"
-    acc.setPrivateTools(CompFactory.SiPropertiesTool(name="ITkStripSiPropertiesTool", **toolkwargs))
 
+def ITkStripSiPropertiesToolCfg(flags, name="ITkStripSiPropertiesTool", **kwargs):
+    """Return a SiPropertiesTool configured for ITk Strip"""
+    SiConditionsTool = kwargs.pop("SiConditionsTool", None)
+    acc = ITkStripSiPropertiesCondAlgCfg(flags, SiConditionsTool=SiConditionsTool)
+    kwargs.setdefault("DetectorName", "SCT")
+    kwargs.setdefault("ReadKey", "ITkStripSiliconPropertiesVector")
+    acc.setPrivateTools(CompFactory.SiPropertiesTool(name, **kwargs))
     return acc

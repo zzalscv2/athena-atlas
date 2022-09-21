@@ -67,7 +67,7 @@ def MooTrackFitterCfg(flags, name = 'MooTrackFitter', prefix='', **kwargs):
     result.setPrivateTools(fitter)
     return result
 
-def MooTrackBuilderCfg(flags, name="MooTrackBuilderTemplate", prefix="", **kwargs):
+def MooTrackBuilderCfg(flags, name="MooTrackBuilderTemplate", prefix="", doSegmentPhiMatching=True, **kwargs):
     Muon__MooTrackBuilder=CompFactory.Muon.MooTrackBuilder
     from MuonConfig.MuonRIO_OnTrackCreatorToolConfig import MdtDriftCircleOnTrackCreatorCfg, TriggerChamberClusterOnTrackCreatorCfg
     from MuonConfig.MuonRecToolsConfig import MuonTrackToSegmentToolCfg, MuonTrackExtrapolationToolCfg
@@ -118,7 +118,8 @@ def MooTrackBuilderCfg(flags, name="MooTrackBuilderTemplate", prefix="", **kwarg
     kwargs.setdefault("CandidateTool",       result.popToolsAndMerge(MuPatCandidateToolCfg(flags)))
 
     kwargs.setdefault("CandidateMatchingTool", 
-                      result.popToolsAndMerge(MooCandidateMatchingToolCfg(flags, name = 'MooCandidateMatchingTool', prefix=prefix)))
+                      result.popToolsAndMerge(MooCandidateMatchingToolCfg(flags, name = 'MooCandidateMatchingTool', 
+                      doSegmentPhiMatching=doSegmentPhiMatching, prefix=prefix)))
 
     from TrkConfig.TrkTrackSummaryToolConfig import MuonTrackSummaryToolCfg
     kwargs.setdefault("TrackSummaryTool", result.popToolsAndMerge(MuonTrackSummaryToolCfg(flags)))
@@ -324,8 +325,6 @@ def MuonChamberHoleRecoveryToolCfg(flags, name="MuonChamberHoleRecoveryTool", **
     kwargs.setdefault("AddMeasurements",  not flags.Muon.doSegmentT0Fit )
     if flags.Detector.GeometryCSC:
         extrakwargs={}
-        if flags.Muon.enableErrorTuning or not flags.Input.isMC:
-            extrakwargs["ErrorScalerBeta"] = 0.200
         from MuonConfig.MuonRIO_OnTrackCreatorToolConfig import CscClusterOnTrackCreatorCfg
         kwargs.setdefault("CscRotCreator", result.popToolsAndMerge(CscClusterOnTrackCreatorCfg(flags, **extrakwargs)))
     else:
@@ -397,7 +396,7 @@ def MuonTrackSteeringCfg(flags, name="MuonTrackSteering", **kwargs):
         kwargs["TrackBuilderTool"] = result.popToolsAndMerge( MooTrackBuilderCfg(flags, name='MooMuonTrackBuilder', prefix="MuSt_"))
         
     if "TrackRefinementTool" not in kwargs:
-        kwargs["TrackRefinementTool"] = result.popToolsAndMerge( MooTrackBuilderCfg(flags, name='MooTrackBuilderTemplate'))
+        kwargs["TrackRefinementTool"] = result.popToolsAndMerge( MooTrackBuilderCfg(flags, name='MooTrackBuilderTemplate', doSegmentPhiMatching=False))
     
     acc=MuPatCandidateToolCfg(flags)
     cand_tool = acc.getPrimary()

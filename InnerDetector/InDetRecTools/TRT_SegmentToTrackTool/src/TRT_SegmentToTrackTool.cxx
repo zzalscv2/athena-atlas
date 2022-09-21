@@ -18,6 +18,12 @@
 using Amg::Vector3D;
 using CLHEP::mm;
 
+namespace {
+   Amg::Vector2D project2D(const Amg::Vector3D &vec) {
+      Amg::Vector2D tmp{vec[0],vec[1] };
+      return tmp;
+   }
+}
 namespace InDet {
 
   // Constructor with parameters:
@@ -230,6 +236,11 @@ namespace InDet {
     points.reserve(40);
     double oldphi = 0;
 
+    const Trk::Surface *surf_zmin=nullptr;
+    const Trk::Surface *surf_zmax=nullptr;
+    int  meas_zmin_i=int(tS.numberOfMeasurementBases());
+    int  meas_zmax_i=int(tS.numberOfMeasurementBases());
+
     // loop over the measurements in track segment (tS)
     for (int it = 0; it < int(tS.numberOfMeasurementBases()); it++) {
 
@@ -264,7 +275,6 @@ namespace InDet {
         // copy measurement
         seg_tsos =
           new Trk::TrackStateOnSurface(tS.measurement(it)->uniqueClone(), nullptr);
-
         //
         // --- following is for the hack below
         //
@@ -277,13 +287,8 @@ namespace InDet {
         // it is always the last one
         lastsurf = &tS.measurement(it)->associatedSurface();
 
-        // this is a rubbish way to find out it is endcap
-        if (std::abs(tS.measurement(it)
-                   ->associatedSurface()
-                   .transform()
-                   .rotation()
-                   .col(2)
-                   .z()) < .5) {
+        // detect endcap elemeents
+        if (!m_trtId->is_barrel(tS.measurement(it)->associatedSurface().associatedDetectorElementIdentifier())) {
           // increase counter and keep some information
           nendcap++;
           if (!firstecsurf)
@@ -301,6 +306,14 @@ namespace InDet {
           // remember oldphi
           oldphi = tmpphi;
 
+          if (!surf_zmax || std::abs(tS.measurement(it)->associatedSurface().center().z())>std::abs(surf_zmax->center().z())) {
+             surf_zmax = &tS.measurement(it)->associatedSurface();
+             meas_zmax_i = it;
+          }
+          if (!surf_zmin || std::abs(tS.measurement(it)->associatedSurface().center().z())<std::abs(surf_zmin->center().z())) {
+             surf_zmin = &tS.measurement(it)->associatedSurface();
+             meas_zmin_i = it;
+          }
           // copy the points
           points.emplace_back(
             tS.measurement(it)->associatedSurface().center().z(), tmpphi);
@@ -374,8 +387,9 @@ namespace InDet {
 
         // get estimate of parameters
         double sx = 0, sy = 0, sxx = 0, sxy = 0, d = 0;
-        float zmin = 0, zmax = 0;
+        float zmin = points.empty() ? 0 : points.begin()->first, zmax = 0;
         // loop over all points
+
         for (unsigned int i = 0; i < points.size(); i++) {
           sx += points[i].first;
           sy += points[i].second;
@@ -391,17 +405,63 @@ namespace InDet {
 
         if (std::abs(pseudotheta) < 1.e-6) {
           ATH_MSG_DEBUG("pseudomeasurements missing on the segment?");
-          const float Rinn = 644., Rout = 1004.;
-          if (zmax * zmin > 0.) {
-            pseudotheta = std::atan2(Rout - Rinn, zmax - zmin);
-          } else if (std::abs(zmax * zmin) < 1.e-6) {
-            if (std::abs(zmax) > 1.e-6) {
-              pseudotheta = std::atan2(Rout, zmax);
-            } else {
-              ATH_MSG_DEBUG("no points in endcap?");
-            }
-          } else {
-            pseudotheta = std::atan2(2. * Rout, zmax - zmin);
+
+          if (   meas_zmin_i < int(tS.numberOfMeasurementBases())
+              && meas_zmax_i < int(tS.numberOfMeasurementBases())) {
+             Amg::Vector3D meas_zmin = tS.measurement(meas_zmin_i)->globalPosition();
+             Amg::Vector3D meas_zmax = tS.measurement(meas_zmax_i)->globalPosition();
+             double diff_z (meas_zmax.z() - meas_zmin.z());
+             if (std::abs(diff_z)>1e-6) {
+                double diff_r( meas_zmax.perp() - meas_zmin.perp());
+                pseudotheta = std::atan2(diff_r, diff_z);
+                ATH_MSG_INFO("Initial pseudo theta is zero. Compute pseudo from inner- and outermost endcap measurements. delta R: " <<
+                             meas_zmax.perp() << " - " << meas_zmin.perp()  << " = " << diff_r
+                             << " , diff Z: " << meas_zmax.z() << " - " << meas_zmin.z()
+                             << " = " << diff_z
+                             << " " << pseudotheta);
+             }
+          }
+
+          if (std::abs(pseudotheta) < 1.e-6) {
+             constexpr std::array<float,2> boundary_r {644., 1004.};
+             // true if track extends from endcap A to endcap C:
+             bool is_across_sides=std::signbit(zmin)!=std::signbit(zmax);
+             double r_path=is_across_sides ? 2 * boundary_r[1] :  boundary_r[1]-boundary_r[0];
+             double r1 =0.;
+             double r2 =0.;
+             if (surf_zmin && surf_zmax) {
+                bool is_reverse=std::abs(surf_zmin->center().z())>std::abs(surf_zmax->center().z());
+                // use the innermost and outermost surfaces (defined by z-coordinate) to compute the
+                // travel distance in R-direction assume that the outermost surface is always crossed
+                // at the outermost radial position assume more over that the the innermost surface
+                // is either crossed at the innermost or outermost position what ever leads to the
+                // largest travel distance in r.
+
+                std::array<const Trk::Surface *,2> boundary_surface{
+                   is_reverse ? surf_zmax  : surf_zmin,
+                   is_reverse ? surf_zmin : surf_zmax};
+                // true if track goes from the outside to the insde :
+                std::array<Amg::Vector2D,2> translation;
+                std::array<Amg::Vector2D,2> height;
+                for (unsigned int boundary_i=boundary_surface.size(); boundary_i-->0;) {
+                   if (   boundary_surface[boundary_i]->type()          == Trk::SurfaceType::Line
+                          && boundary_surface[boundary_i]->bounds().type() == Trk::SurfaceBounds::Cylinder) {
+                      const Trk::CylinderBounds &
+                         cylinder_bounds = dynamic_cast<const Trk::CylinderBounds &>(boundary_surface[boundary_i]->bounds());
+                      height[boundary_i]= project2D( boundary_surface[boundary_i]->transform().rotation()
+                                                     *  Amg::Vector3D(0,0, cylinder_bounds.halflengthZ()) );
+                      translation[boundary_i]=project2D( boundary_surface[boundary_i]->transform().translation() );
+                   }
+                }
+                r1 = (translation[1] + height[1]  - ( translation[0] + height[0])).perp();
+                r2 = (translation[1] + height[1]  - ( translation[0] - height[0])).perp();
+                r_path=std::max(r1,r2);
+
+             }
+             pseudotheta = std::atan2(r_path, zmax - zmin);
+             ATH_MSG_INFO("Initial pseudo theta is zero. Pseudo theta from inner- and outermost surfaces. Deleta r " << r2 << " - " << r1 << " -> " << r_path
+                          << " , delta Z " << zmax << " - " << zmin << " -> " << (zmax-zmin)
+                          << " " << pseudotheta);
           }
         }
 

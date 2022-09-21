@@ -182,6 +182,12 @@ def setupMenu():
         ChainProp(name='HLT_mb_sp100_trk30_hmt_L1ZDC_E3_AND_E3',     l1SeedThresholds=['FSNOSEED'], stream=[MinBiasStream], groups=MinBiasGroup+['PS:Online', 'PS:NoHLTReprocessing']),
         ChainProp(name='HLT_mb_sp100_trk30_hmt_L1ZDC_A_AND_C',       l1SeedThresholds=['FSNOSEED'], stream=[MinBiasStream], groups=MinBiasGroup+['PS:Online', 'PS:NoHLTReprocessing']),
 
+
+#TRT seeded Minbias chains for testing in LHCf runs
+        ChainProp(name='HLT_mb_excl_1trk2_pt1_L1TRT_FILLED', l1SeedThresholds=['FSNOSEED'], stream=[MinBiasStream], groups=MinBiasGroup+LowMuGroup+['PS:Online', 'PS:NoHLTReprocessing']),
+        ChainProp(name='HLT_mb_excl_1trk2_pt1_L1TRT_VTE50',  l1SeedThresholds=['FSNOSEED'], stream=[MinBiasStream], groups=MinBiasGroup+LowMuGroup+['PS:Online', 'PS:NoHLTReprocessing']),
+
+
     ]
 
 

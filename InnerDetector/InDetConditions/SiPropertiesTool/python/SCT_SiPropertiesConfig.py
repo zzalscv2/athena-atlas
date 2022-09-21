@@ -1,6 +1,6 @@
 """Define methods to configure SCT SiProperties
 
-Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
 """
 from AthenaConfiguration.ComponentAccumulator import ComponentAccumulator
 from AthenaConfiguration.ComponentFactory import CompFactory
@@ -8,7 +8,7 @@ from SCT_ConditionsTools.SCT_ConditionsToolsConfig import SCT_SiliconConditionsC
 from SCT_GeoModel.SCT_GeoModelConfig import SCT_ReadoutGeometryCfg
 
 
-def SCT_SiPropertiesCfg(flags, name="SCTSiPropertiesCondAlg", **kwargs):
+def SCT_SiPropertiesCondAlgCfg(flags, name="SCTSiPropertiesCondAlg", **kwargs):
     """Return configured ComponentAccumulator and tool for SCT_SiProperties
 
     SiConditionsTool and/or DCSConditionsTool may be provided in kwargs
@@ -17,21 +17,23 @@ def SCT_SiPropertiesCfg(flags, name="SCTSiPropertiesCondAlg", **kwargs):
 
     # Condition algorithm
     # SCTSiPropertiesCondAlg needs outputs of SCT_SiliconConditions algorithms
-    algkwargs = {}
-    SiConditionsTool = kwargs.get("SiConditionsTool")
-    if SiConditionsTool:
-        algkwargs["SiConditionsTool"] = SiConditionsTool
-    else:
-        algkwargs["SiConditionsTool"] = acc.popToolsAndMerge(SCT_SiliconConditionsCfg(flags, **kwargs))
+    if not kwargs.get("SiConditionsTool"):
+        kwargs["SiConditionsTool"] = acc.popToolsAndMerge(SCT_SiliconConditionsCfg(flags))
     # For SCT_ID and SCT_DetectorElementCollection
     # used in SCTSiPropertiesCondAlg and SiPropertiesTool
     acc.merge(SCT_ReadoutGeometryCfg(flags))
-    acc.addCondAlgo(CompFactory.SCTSiPropertiesCondAlg(name, **algkwargs))
+    acc.addCondAlgo(CompFactory.SCTSiPropertiesCondAlg(name, **kwargs))
+    return acc
 
-    # Condition tool
-    toolkwargs = {}
-    toolkwargs["DetectorName"] = "SCT"
-    toolkwargs["ReadKey"] = "SCTSiliconPropertiesVector"
-    acc.setPrivateTools(CompFactory.SiPropertiesTool(name="SCT_SiPropertiesTool", **toolkwargs))
 
+def SCT_SiPropertiesToolCfg(flags, name="SCTSiPropertiesTool", **kwargs):
+    """Return configured ComponentAccumulator and tool for SCT_SiProperties
+
+    SiConditionsTool and/or DCSConditionsTool may be provided in kwargs
+    """
+    SiConditionsTool = kwargs.pop("SiConditionsTool", None)
+    acc = SCT_SiPropertiesCondAlgCfg(flags, SiConditionsTool=SiConditionsTool)
+    kwargs.setdefault("DetectorName", "SCT")
+    kwargs.setdefault("ReadKey", "SCTSiliconPropertiesVector")
+    acc.setPrivateTools(CompFactory.SiPropertiesTool(name, **kwargs))
     return acc

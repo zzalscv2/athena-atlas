@@ -13,7 +13,7 @@ from OutputStreamAthenaPool.OutputStreamConfig import OutputStreamCfg
 from SCT_ConditionsTools.ITkStripConditionsToolsConfig import ITkStripSiliconConditionsCfg
 #from SCT_ConditionsTools.ITkStripConditionsToolsConfig import ItkStripReadCalibChipDataCfg
 from SiLorentzAngleTool.ITkStripLorentzAngleConfig import ITkStripLorentzAngleToolCfg
-from SiPropertiesTool.ITkStripSiPropertiesConfig import ITkStripSiPropertiesCfg
+from SiPropertiesTool.ITkStripSiPropertiesConfig import ITkStripSiPropertiesToolCfg
 from StripGeoModelXml.ITkStripGeoModelConfig import ITkStripReadoutGeometryCfg
 
 import AthenaCommon.SystemOfUnits as Units
@@ -173,7 +173,7 @@ def ITkStripSurfaceChargesGeneratorCfg(flags, name="ITkStripSurfaceChargesGenera
     tool = CompFactory.ITk.StripSurfaceChargesGenerator(name, **kwargs)
     tool.RadDamageSummaryTool = CompFactory.SCT_RadDamageSummaryTool(name="ITkStripRadDamageSummaryTool")
     tool.SiConditionsTool = acc.popToolsAndMerge(ITkStripSiliconConditionsCfg(flags))
-    tool.SiPropertiesTool = acc.popToolsAndMerge(ITkStripSiPropertiesCfg(flags, SiConditionsTool=tool.SiConditionsTool))
+    tool.SiPropertiesTool = acc.popToolsAndMerge(ITkStripSiPropertiesToolCfg(flags, SiConditionsTool=tool.SiConditionsTool))
     tool.LorentzAngleTool = acc.popToolsAndMerge(ITkStripLorentzAngleToolCfg(flags))
     acc.setPrivateTools(tool)
     return acc

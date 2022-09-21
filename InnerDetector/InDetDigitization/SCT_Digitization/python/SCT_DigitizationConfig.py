@@ -13,7 +13,7 @@ from OutputStreamAthenaPool.OutputStreamConfig import OutputStreamCfg
 from SCT_ConditionsTools.SCT_ConditionsToolsConfig import SCT_ReadCalibChipDataCfg, SCT_SiliconConditionsCfg
 from SCT_GeoModel.SCT_GeoModelConfig import SCT_ReadoutGeometryCfg
 from SiLorentzAngleTool.SCT_LorentzAngleConfig import SCT_LorentzAngleToolCfg
-from SiPropertiesTool.SCT_SiPropertiesConfig import SCT_SiPropertiesCfg
+from SiPropertiesTool.SCT_SiPropertiesConfig import SCT_SiPropertiesToolCfg
 
 import AthenaCommon.SystemOfUnits as Units
 
@@ -182,7 +182,7 @@ def SCT_SurfaceChargesGeneratorCfg(flags, name="SCT_SurfaceChargesGenerator", **
     tool = SCT_SurfaceChargesGenerator(name, **kwargs)
     tool.RadDamageSummaryTool = SCT_RadDamageSummaryTool()
     tool.SiConditionsTool = acc.popToolsAndMerge(SCT_SiliconConditionsCfg(flags))
-    tool.SiPropertiesTool = acc.popToolsAndMerge(SCT_SiPropertiesCfg(flags, SiConditionsTool=tool.SiConditionsTool))
+    tool.SiPropertiesTool = acc.popToolsAndMerge(SCT_SiPropertiesToolCfg(flags, SiConditionsTool=tool.SiConditionsTool))
     tool.LorentzAngleTool = acc.popToolsAndMerge(SCT_LorentzAngleToolCfg(flags))
     acc.setPrivateTools(tool)
     return acc

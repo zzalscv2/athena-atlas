@@ -8,7 +8,8 @@ from PixelConditionsAlgorithms.ITkPixelConditionsConfig import (
     ITkPixelDCSCondHVAlgCfg, ITkPixelDCSCondTempAlgCfg
 )
 from PixelGeoModelXml.ITkPixelGeoModelConfig import ITkPixelReadoutGeometryCfg
-from SiPropertiesTool.ITkPixelSiPropertiesConfig import ITkPixelSiPropertiesCfg
+from SiPropertiesTool.ITkPixelSiPropertiesConfig import ITkPixelSiPropertiesToolCfg
+
 
 def ITkPixelLorentzAngleToolCfg(flags, name="ITkPixelLorentzAngleTool", **kwargs):
     """Return a SiLorentzAngleTool configured for ITk Pixel"""
@@ -20,12 +21,13 @@ def ITkPixelLorentzAngleToolCfg(flags, name="ITkPixelLorentzAngleTool", **kwargs
     acc.setPrivateTools(CompFactory.SiLorentzAngleTool(name, **kwargs))
     return acc
 
+
 def ITkPixelLorentzAngleCondAlgCfg(flags, name="ITkPixelSiLorentzAngleCondAlg", **kwargs):
     acc  = AtlasFieldCacheCondAlgCfg(flags)
     acc.merge(ITkPixelReadoutGeometryCfg(flags)) # To produce ITkPixelDetectorElementCollection
     acc.merge(ITkPixelDCSCondHVAlgCfg(flags))
     acc.merge(ITkPixelDCSCondTempAlgCfg(flags))
-    kwargs.setdefault("SiPropertiesTool", acc.popToolsAndMerge(ITkPixelSiPropertiesCfg(flags)))
+    kwargs.setdefault("SiPropertiesTool", acc.popToolsAndMerge(ITkPixelSiPropertiesToolCfg(flags)))
     kwargs.setdefault("UseMagFieldCache", True)
     kwargs.setdefault("UseMagFieldDcs", not flags.Common.isOnline)
     kwargs.setdefault("Disable3DCorrection", True) # ITk-specific
@@ -36,4 +38,3 @@ def ITkPixelLorentzAngleCondAlgCfg(flags, name="ITkPixelSiLorentzAngleCondAlg", 
     kwargs.setdefault("WriteKey", "ITkPixelSiLorentzAngleCondData")
     acc.addCondAlgo(CompFactory.PixelSiLorentzAngleCondAlg(name, **kwargs))
     return acc
-

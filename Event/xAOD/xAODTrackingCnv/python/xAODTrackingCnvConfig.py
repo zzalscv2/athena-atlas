@@ -134,7 +134,7 @@ def TrackParticleCnvAlgNoPIDCfg(flags, name, **kwargs):
     result.merge(TrackParticleCnvAlgCfg(flags, name, **kwargs))
     return result
 
-def ITkTrackParticleCnvAlgCfg(flags, name="ITkTrackParticleCnvAlg", TrackContainerName="CombinedITkTracks", OutputTrackParticleContainer="InDetTrackParticles", **kwargs):
+def ITkTrackParticleCnvAlgCfg(flags, name="ITkTrackParticleCnvAlg", **kwargs):
     result = ComponentAccumulator()
 
     kwargs.setdefault("ConvertTracks", True)

@@ -34,7 +34,8 @@ def TgcRawDataMonitoringConfig(inputFlags):
                                            TgcRawDataMonitorTool = tgcRawDataMonitorTool,
                                            MuonSelectionTool = result.popToolsAndMerge(MuonSelectionToolCfg(inputFlags, 
                                                                                                             MuQuality=1,
-                                                                                                            MaxEta=2.7)) )
+                                                                                                            MaxEta=2.7)),
+                                           doExpressProcessing = inputFlags.Common.doExpressProcessing )
 
     from TrackingGeometryCondAlg.AtlasTrackingGeometryCondAlgConfig import TrackingGeometryCondAlgCfg
     result.merge( TrackingGeometryCondAlgCfg(inputFlags ) )
@@ -1139,7 +1140,7 @@ if __name__=='__main__':
 
     from AthenaConfiguration.AllConfigFlags import ConfigFlags
 
-    ConfigFlags.Input.isMC = True
+    ConfigFlags.Input.isMC = False
 
     import glob
     import sys
@@ -1156,7 +1157,7 @@ if __name__=='__main__':
     ConfigFlags.Trigger.triggerMenuSetup = "Dev_pp_run3_v1"
 
     if not ConfigFlags.Input.isMC:
-        ConfigFlags.IOVDb.GlobalTag = "CONDBR2-BLKPA-2022-04"
+        ConfigFlags.IOVDb.GlobalTag = "CONDBR2-BLKPA-2022-07"
 
     ConfigFlags.lock()
     ConfigFlags.dump()

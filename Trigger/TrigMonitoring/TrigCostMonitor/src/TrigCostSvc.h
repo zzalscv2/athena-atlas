@@ -162,9 +162,8 @@ class TrigCostSvc : public extends <AthService, ITrigCostSvc> {
   Gaudi::Property<bool>        m_enableMultiSlot{this, "EnableMultiSlot", false, "Monitored events in the MasterSlot collect data from events running in other slots."};
   Gaudi::Property<bool>        m_saveHashes{this, "SaveHashes", false, "Store a copy of the hash dictionary for easier debugging"};
   Gaudi::Property<size_t>      m_masterSlot{this, "MasterSlot", 0, "The slot responsible for saving MultiSlot data"};
-  Gaudi::Property<std::string> m_hltSeedingName{this, "HLTSeedingName", "HLTSeeding", "The name of the Gaudi Configurable of type HLTSeeding"};
+  Gaudi::Property<std::string> m_costSupervisorAlgName{this, "CostSupervisorAlgName", "TrigCostSupervisorAlg", "The name of cost monitoring supervising algorithm, starting at the begining of the event"};
   Gaudi::Property<std::string> m_decisionSummaryMakerAlgName{this, "DecisionSummaryMakerAlgName", "DecisionSummaryMakerAlg", "The name of the Gaudi Configurable of type DecisionSummaryMakerAlg"};
-
 
 
 };
