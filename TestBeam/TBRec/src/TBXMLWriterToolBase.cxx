@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2017 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
 */
 
 
@@ -13,7 +13,7 @@
 // XML writer implementation //
 ///////////////////////////////
 
-std::string TBXMLWriterToolBase::m_doubleQuote = "\042"; 
+const std::string TBXMLWriterToolBase::m_doubleQuote = "\042";
 
 // dictionary
 void

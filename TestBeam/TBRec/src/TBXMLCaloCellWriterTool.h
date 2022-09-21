@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef TBREC_TBXMLCALOCELLWRITERTOOL_H
@@ -55,7 +55,7 @@ class TBXMLCaloCellWriterTool : public TBXMLWriterToolBase
 
  private:
 
-  static unsigned int m_nCols;
+  static const unsigned int m_nCols;
 
   std::vector<std::string>              m_includedCalos;
   std::vector<std::string>              m_includedSamplings;

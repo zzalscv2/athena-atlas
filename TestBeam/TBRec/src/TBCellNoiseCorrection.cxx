@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "TBCellNoiseCorrection.h"
@@ -152,8 +152,8 @@ void TBCellNoiseCorrection::MakeCorrection (CaloCell* theCell,
     // removing this, should use the BadChannel now
     // if(cid == 810049536)  e = 0.; // Not working cell in data
     for(i = 0; i < size; ++i) {
-       if((*m_cell_id)[i] == cid) {
-          e += (*m_cell_energy)[i];
+       if(std::as_const(m_cell_id)->at(i) == cid) {
+          e += std::as_const(m_cell_energy)->at(i);
           break;
        }
     }
