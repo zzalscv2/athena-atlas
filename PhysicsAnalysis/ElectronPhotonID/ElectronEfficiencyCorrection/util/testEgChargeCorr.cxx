@@ -32,15 +32,27 @@
 #include "PATCore/AcceptData.h"
 #include "PATInterfaces/SystematicsUtil.h"
 
-#include "Messaging.h"
 #include <ElectronPhotonSelectorTools/AsgElectronLikelihoodTool.h>
+
+#include "AsgMessaging/MessageCheck.h"
+#include "AsgMessaging/MsgStream.h"
+
+
+namespace asg{
+  ANA_MSG_HEADER (testEgChargeCorr)
+  ANA_MSG_SOURCE (testEgChargeCorr, "") 
+}
+
 
 int
 main(int argc, char* argv[])
 {
-
-  // The application's name:
   const char* APP_NAME = argv[0];
+  using namespace asg::testEgChargeCorr;
+  ANA_CHECK_SET_TYPE (int);
+  MSG::Level mylevel=MSG::INFO;
+  setMsgLevel(mylevel);
+  msg().setName(APP_NAME);
 
   // Check if we received a file name:
   if (argc < 3) {
@@ -58,7 +70,7 @@ main(int argc, char* argv[])
   double n_chargeMisID = 0;
 
   // Initialise the application:
-  CHECK(xAOD::Init(APP_NAME));
+  ANA_CHECK(xAOD::Init(APP_NAME));
 
   // Open the input file:
   const TString fileName = argv[1];
@@ -66,12 +78,12 @@ main(int argc, char* argv[])
 
   Info(APP_NAME, "Opening file: %s", fileName.Data());
   std::unique_ptr<TFile> ifile(TFile::Open(fileName, "READ"));
-  CHECK(ifile.get());
+  ANA_CHECK(ifile.get());
 
   // Create a TEvent object:
   // xAOD::TEvent event( xAOD::TEvent::kBranchAccess );
   xAOD::TEvent event(xAOD::TEvent::kClassAccess);
-  CHECK(event.readFrom(ifile.get()));
+  ANA_CHECK(event.readFrom(ifile.get()));
   Info(APP_NAME,
        "Number of events in the file: %i",
        static_cast<int>(event.getEntries()));
@@ -88,30 +100,29 @@ main(int argc, char* argv[])
   }
 
   // Likelihood
-  MSG::Level mylevel = MSG::INFO;
   CP::ElectronChargeEfficiencyCorrectionTool myEgCorrections("myEgCorrections");
-  CHECK(myEgCorrections.setProperty("OutputLevel", mylevel));
+  ANA_CHECK(myEgCorrections.setProperty("OutputLevel", mylevel));
 
   std::string inputFile =
     corrFileName.Data(); //"data/ChMisIDSF_TightLL_FixedCutTight.root" ;
-  CHECK(myEgCorrections.setProperty("CorrectionFileName", inputFile));
-  CHECK(myEgCorrections.setProperty("ForceDataType", 1));
+  ANA_CHECK(myEgCorrections.setProperty("CorrectionFileName", inputFile));
+  ANA_CHECK(myEgCorrections.setProperty("ForceDataType", 1));
 
-  CHECK(myEgCorrections.setProperty("DefaultRandomRunNumber",
+  ANA_CHECK(myEgCorrections.setProperty("DefaultRandomRunNumber",
                                     (unsigned int)311481));
-  CHECK(myEgCorrections.setProperty("UseRandomRunNumber", false));
-  CHECK(myEgCorrections.initialize());
+  ANA_CHECK(myEgCorrections.setProperty("UseRandomRunNumber", false));
+  ANA_CHECK(myEgCorrections.initialize());
 
   AsgElectronLikelihoodTool* m_LHToolTight =
     new AsgElectronLikelihoodTool("m_LHToolTight");
-  CHECK(
+  ANA_CHECK(
     m_LHToolTight->setProperty("primaryVertexContainer", "PrimaryVertices"));
   m_LHToolTight
     ->setProperty("ConfigFile",
                   "ElectronPhotonSelectorTools/offline/mc15_20160512/"
                   "ElectronLikelihoodLooseOfflineConfig2016_CutBL_Smooth.conf")
     .ignore();
-  CHECK(m_LHToolTight->initialize());
+  ANA_CHECK(m_LHToolTight->initialize());
 
   // Get a list of systematics
   CP::SystematicSet recSysts = myEgCorrections.recommendedSystematics();
@@ -136,10 +147,10 @@ main(int argc, char* argv[])
     Info(APP_NAME, "Electron");
 
     const xAOD::EventInfo* event_info = nullptr;
-    CHECK(event.retrieve(event_info, "EventInfo"));
+    ANA_CHECK(event.retrieve(event_info, "EventInfo"));
 
     const xAOD::ElectronContainer* electrons = nullptr;
-    CHECK(event.retrieve(electrons, "Electrons"));
+    ANA_CHECK(event.retrieve(electrons, "Electrons"));
 
     // Create shallow copy for this systematic
     std::pair<xAOD::ElectronContainer*, xAOD::ShallowAuxContainer*>
@@ -191,7 +202,7 @@ main(int argc, char* argv[])
         double systematic = 0;
 
         // Configure the tool for this systematic
-        CHECK(myEgCorrections.applySystematicVariation({ sys }));
+        ANA_CHECK(myEgCorrections.applySystematicVariation({ sys }));
         //
         if (myEgCorrections.getEfficiencyScaleFactor(*el, systematic) ==
             CP::CorrectionCode::Ok) {
@@ -202,11 +213,11 @@ main(int argc, char* argv[])
                systematic - SF);
         }
       }
-      CHECK(myEgCorrections.applySystematicVariation({})); // Empty variation is the nominal
+      ANA_CHECK(myEgCorrections.applySystematicVariation({})); // Empty variation is the nominal
 
 
       int truthcharge = false;
-      CHECK(ElectronEfficiencyHelpers::getEleTruthCharge(*el,truthcharge));
+      ANA_CHECK(ElectronEfficiencyHelpers::getEleTruthCharge(*el,truthcharge));
       if (el->charge() * truthcharge < 0) {
         n_chargeMisID+=SF;
       } else
@@ -220,7 +231,7 @@ main(int argc, char* argv[])
   Info(APP_NAME, "===>>>  compared to #%f (from Charge MisId SF)", SF_chargeID);
   Info(APP_NAME, "===>>>  compared to #%f and #%f ", n_chargeID, n_chargeMisID);
 
-  CHECK(myEgCorrections.finalize());
+  ANA_CHECK(myEgCorrections.finalize());
 
   // Return gracefully:
   return 0;
