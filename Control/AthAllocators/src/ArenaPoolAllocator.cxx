@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2020 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
 */
 /**
  * @file  AthAllocators/src/ArenaPoolAllocator.cxx
@@ -50,7 +50,7 @@ ArenaPoolAllocator_iterator_increment (ArenaPoolAllocator::pointer base,
 inline
 ArenaPoolAllocator::const_pointer
 ArenaPoolAllocator_iterator_increment (ArenaPoolAllocator::const_pointer base,
-                                       ArenaBlock* & block)
+                                       const ArenaBlock* & block)
 {
   // If we haven't yet reached the start of this block, move the iterator
   // back one.

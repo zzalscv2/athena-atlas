@@ -1,6 +1,6 @@
 // This file's extension implies that it's C, but it's really -*- C++ -*-.
 /*
-  Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
 */
 /**
  * @file  AthAllocators/ArenaBlock.h
@@ -44,6 +44,7 @@ class ArenaBlock
 public:
   /// Type for a pointer to an element.
   typedef char* pointer;
+  typedef const char* const_pointer;
 
   /// Function that operates on an element.
   typedef void func_t (pointer);
@@ -127,10 +128,23 @@ public:
 
 
   /**
+   * @brief Return the link pointer of the block.
+   */
+  const ArenaBlock* link() const;
+
+
+  /**
    * @brief Return a pointer to element @c i in the block.
    * @param i The index of the desired element.
    */
   pointer index (size_t i);
+
+
+  /**
+   * @brief Return a pointer to element @c i in the block.
+   * @param i The index of the desired element.
+   */
+  const_pointer index (size_t i) const;
 
 
   /**
@@ -143,6 +157,18 @@ public:
    * is saved in a local.
    */
   pointer index (size_t i, size_t elt_size);
+
+
+  /**
+   * @brief Return a pointer to element @c i in the block.
+   * @param i The index of the desired element.
+   * @param elt_size The block's element size.
+   *
+   * This is provided in addition to the previous function as it may
+   * allow for better inlined code in when used in a loop, if @c elt_size
+   * is saved in a local.
+   */
+  const_pointer index (size_t i, size_t elt_size) const;
 
 
   /**
