@@ -3,7 +3,6 @@
  */
 
 #include "CreateDummyEl.h"
-#include "Messaging.h"
 // EDM include(s):
 #include "xAODEgamma/Egamma.h"
 #include "xAODEgamma/ElectronContainer.h"
@@ -14,18 +13,25 @@
 #include <xAODEgamma/ElectronAuxContainer.h>
 #include <xAODEgamma/ElectronContainer.h>
 
+#include "AsgMessaging/MessageCheck.h"
+#include "AsgMessaging/MsgStream.h"
+
+namespace asg {
+ANA_MSG_HEADER(CreateDummyEl)
+ANA_MSG_SOURCE(CreateDummyEl, "")
+}
+
 namespace {
 
 const std::set<CaloSampling::CaloSample> samplings{
-    CaloSampling::PreSamplerB, CaloSampling::EMB1,        CaloSampling::EMB2,
-    CaloSampling::EMB3,        CaloSampling::PreSamplerE, CaloSampling::EME1,
-    CaloSampling::EME2,        CaloSampling::EME3
+  CaloSampling::PreSamplerB, CaloSampling::EMB1,        CaloSampling::EMB2,
+  CaloSampling::EMB3,        CaloSampling::PreSamplerE, CaloSampling::EME1,
+  CaloSampling::EME2,        CaloSampling::EME3
 };
 
 void
 fill_cluster(xAOD::CaloCluster* cluster, float eta, float phi, float e)
 {
-
   unsigned sampling_pattern = 0;
   for (auto sample : samplings) {
     sampling_pattern |= 0x1U << sample;
@@ -66,6 +72,9 @@ getElectrons(const std::vector<std::pair<double, double>>& pt_eta,
              int runNumber,
              xAOD::TStore& store)
 {
+  using namespace asg::CreateDummyEl;
+  ANA_CHECK_SET_TYPE(int);
+  setMsgLevel(MSG::INFO);
   // This is what we will return back
 
   // create the EventInfo
@@ -78,7 +87,7 @@ getElectrons(const std::vector<std::pair<double, double>>& pt_eta,
     "RandomRunNumber");
   randomrunnumber(*eventInfo) = runNumber;
   if (!store.record(std::move(eventInfo), "EventInfo").isSuccess()) {
-    MSG_ERROR("Could not record EventInfo");
+    ANA_MSG_ERROR("Could not record EventInfo");
     return StatusCode::FAILURE;
   }
 
@@ -101,7 +110,7 @@ getElectrons(const std::vector<std::pair<double, double>>& pt_eta,
 
   if (!store.record(std::move(clusters), "MyClusters").isSuccess() ||
       !store.record(std::move(clAux), "MyClustersAux.").isSuccess()) {
-    MSG_ERROR("Could not record clusters");
+    ANA_MSG_ERROR("Could not record clusters");
     return StatusCode::FAILURE;
   }
   // Create all electrons  one per cluster
@@ -127,7 +136,7 @@ getElectrons(const std::vector<std::pair<double, double>>& pt_eta,
   }
   if (!store.record(std::move(electrons), "MyElectrons").isSuccess() ||
       !store.record(std::move(electronsAux), "MyElectronAux.").isSuccess()) {
-    MSG_ERROR("Could not record Electrons");
+    ANA_MSG_ERROR("Could not record Electrons");
     return StatusCode::FAILURE;
   }
 

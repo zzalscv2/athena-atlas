@@ -19,8 +19,8 @@ http://valgrind.org/docs/manual/faq.html#faq.deflost
 #include "AsgMessaging/AsgMessaging.h"
 #include "AsgTools/StandaloneToolHandle.h"
 #include "EgammaAnalysisInterfaces/IAsgElectronEfficiencyCorrectionTool.h"
-#include <string>
 #include <iostream>
+#include <string>
 #include <vector>
 #ifdef XAOD_STANDALONE
 // xAOD include(s):

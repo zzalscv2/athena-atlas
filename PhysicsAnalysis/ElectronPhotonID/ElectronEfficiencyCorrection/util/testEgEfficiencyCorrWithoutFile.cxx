@@ -18,16 +18,25 @@
 #include "ElectronEfficiencyCorrection/AsgElectronEfficiencyCorrectionTool.h"
 // Local includes
 #include "CreateDummyEl.h"
-#include "Messaging.h"
 #include "SFHelpers.h"
 //
 #include <boost/program_options.hpp>
+
+#include "AsgMessaging/MessageCheck.h"
+#include "AsgMessaging/MsgStream.h"
+
+namespace asg {
+ANA_MSG_HEADER(msgSelectorCheck)
+ANA_MSG_SOURCE(msgSelectorCheck, "")
+}
 
 int
 main(int argc, char* argv[])
 {
   StatusCode::enableFailure();
-  MSGHELPERS::getMsgStream().msg().setLevel(MSG::INFO);
+  using namespace asg::msgSelectorCheck;
+  ANA_CHECK_SET_TYPE(int);
+  setMsgLevel(MSG::INFO);
   /*
    * Parse the input from the command line
    */
@@ -66,10 +75,9 @@ main(int argc, char* argv[])
     "Reco working point Key")(
     "mapfile,m",
     value<std::string>(&mapfileName)->default_value(""),
-    "Map file name")(
-    "keyid,d",
-    value<std::string>(&idkey)->default_value(""),
-    "Identification working point Key")(
+    "Map file name")("keyid,d",
+                     value<std::string>(&idkey)->default_value(""),
+                     "Identification working point Key")(
     "keyiso,i",
     value<std::string>(&isokey)->default_value(""),
     "Isolation working point Key")(
@@ -80,19 +88,19 @@ main(int argc, char* argv[])
   try {
     store(parse_command_line(argc, argv, desc), vm);
     if (vm.count("help")) {
-      MSG_INFO(desc << '\n');
+      ANA_MSG_INFO(desc << '\n');
       return 0;
     }
     notify(vm);
   } catch (const boost::program_options::error& ex) {
-    MSG_ERROR(ex.what() << '\n');
-    MSG_ERROR(desc << '\n');
+    ANA_MSG_ERROR(ex.what() << '\n');
+    ANA_MSG_ERROR(desc << '\n');
     return 0;
   }
 
   if (!(type == "FullSim" || type == "AtlFast2")) {
-    MSG_ERROR("No valid type given (FullSim or AtlFast2)");
-    MSG_ERROR(desc << '\n');
+    ANA_MSG_ERROR("No valid type given (FullSim or AtlFast2)");
+    ANA_MSG_ERROR(desc << '\n');
     return 0;
   }
   PATCore::ParticleDataType::DataType SimType =
@@ -100,17 +108,18 @@ main(int argc, char* argv[])
                        : PATCore::ParticleDataType::Fast);
   if (!(model == "COMBMCTOYS" || model == "FULL" || model == "SIMPLIFIED" ||
         model == "TOTAL")) {
-    MSG_ERROR("No valid correlation model");
-    MSG_ERROR(desc << '\n');
+    ANA_MSG_ERROR("No valid correlation model");
+    ANA_MSG_ERROR(desc << '\n');
     return 0;
   }
 
   // Initialize the xAOD application
   const char* APP_NAME = argv[0];
+  msg().setName(APP_NAME);
   MSG::Level mylevel = static_cast<MSG::Level>(inputlevel);
-  MSGHELPERS::getMsgStream().msg().setName(APP_NAME);
-  MSGHELPERS::getMsgStream().msg().setLevel(mylevel);
-  CHECK(xAOD::Init(APP_NAME));
+  setMsgLevel(mylevel);
+  msg().setName(APP_NAME);
+  ANA_CHECK(xAOD::Init(APP_NAME));
 
   // Initialize the store
   xAOD::TEvent event(xAOD::TEvent::kClassAccess);
@@ -121,28 +130,28 @@ main(int argc, char* argv[])
     "ElEffCorrectionTool");
   if (!fileName.empty()) {
     std::vector<std::string> inputFiles{ fileName };
-    CHECK(
+    ANA_CHECK(
       ElEffCorrectionTool.setProperty("CorrectionFileNameList", inputFiles));
   }
   if (!mapfileName.empty()) {
-    CHECK(ElEffCorrectionTool.setProperty("MapFilePath", mapfileName));
+    ANA_CHECK(ElEffCorrectionTool.setProperty("MapFilePath", mapfileName));
   }
   if (!recokey.empty()) {
-    CHECK(ElEffCorrectionTool.setProperty("RecoKey", recokey));
+    ANA_CHECK(ElEffCorrectionTool.setProperty("RecoKey", recokey));
   }
   if (!idkey.empty()) {
-    CHECK(ElEffCorrectionTool.setProperty("IdKey", idkey));
+    ANA_CHECK(ElEffCorrectionTool.setProperty("IdKey", idkey));
   }
   if (!isokey.empty()) {
-    CHECK(ElEffCorrectionTool.setProperty("IsoKey", isokey));
+    ANA_CHECK(ElEffCorrectionTool.setProperty("IsoKey", isokey));
   }
   if (!triggerkey.empty()) {
-    CHECK(ElEffCorrectionTool.setProperty("TriggerKey", triggerkey));
+    ANA_CHECK(ElEffCorrectionTool.setProperty("TriggerKey", triggerkey));
   }
-  CHECK(ElEffCorrectionTool.setProperty("ForceDataType", (int)SimType));
-  CHECK(ElEffCorrectionTool.setProperty("OutputLevel", mylevel));
-  CHECK(ElEffCorrectionTool.setProperty("CorrelationModel", model));
-  CHECK(ElEffCorrectionTool.initialize());
+  ANA_CHECK(ElEffCorrectionTool.setProperty("ForceDataType", (int)SimType));
+  ANA_CHECK(ElEffCorrectionTool.setProperty("OutputLevel", mylevel));
+  ANA_CHECK(ElEffCorrectionTool.setProperty("CorrelationModel", model));
+  ANA_CHECK(ElEffCorrectionTool.initialize());
   if (mylevel < MSG::INFO) {
     asg::ToolStore::dumpToolConfig();
   }
@@ -152,9 +161,9 @@ main(int argc, char* argv[])
    * it really is a pseudo "reconstruction"
    */
   std::vector<std::pair<double, double>> pt_eta{ { pt, eta } };
-  CHECK(getElectrons(pt_eta, runno, store).isSuccess());
+  ANA_CHECK(getElectrons(pt_eta, runno, store).isSuccess());
   const xAOD::ElectronContainer* electrons(nullptr);
-  CHECK(store.retrieve(electrons, "MyElectrons").isSuccess());
+  ANA_CHECK(store.retrieve(electrons, "MyElectrons").isSuccess());
   // Loop over electrons , here it is one
   xAOD::Electron el = *(electrons->at(0));
   /*
@@ -170,13 +179,14 @@ main(int argc, char* argv[])
   double nominalSF{};
   double totalNeg{};
   double totalPos{};
-  CHECK(SFHelpers::result(
-          ElEffCorrectionTool, el, nominalSF, totalPos, totalNeg, isToys) == 0);
+  ANA_CHECK(SFHelpers::result(
+              ElEffCorrectionTool, el, nominalSF, totalPos, totalNeg, isToys) ==
+            0);
 
-  MSG_INFO("===> Model : " << model << "| electron : Pt = " << el.pt()
-                           << " : eta = " << el.eta() << " : Bin index = "
-                           << index << " : SF = " << nominalSF << " + "
-                           << totalPos << " - " << totalNeg << " <===");
-  
+  ANA_MSG_INFO("===> Model : " << model << "| electron : Pt = " << el.pt()
+                               << " : eta = " << el.eta() << " : Bin index = "
+                               << index << " : SF = " << nominalSF << " + "
+                               << totalPos << " - " << totalNeg << " <===");
+
   return 0;
 }

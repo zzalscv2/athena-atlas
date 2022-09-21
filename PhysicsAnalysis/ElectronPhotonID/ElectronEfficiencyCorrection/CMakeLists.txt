@@ -52,25 +52,26 @@ if( XAOD_STANDALONE )
       util/testEgEfficiencyCorr.cxx util/SFHelpers.cxx
       INCLUDE_DIRS ${ROOT_INCLUDE_DIRS}
       LINK_LIBRARIES ${ROOT_LIBRARIES} xAODRootAccess xAODEgamma PATInterfaces
-      ElectronEfficiencyCorrectionLib )
+      ElectronEfficiencyCorrectionLib AsgMessagingLib)
 
    atlas_add_executable( EgEfficiencyCorr_testEgEfficiencyCorrFwd
       util/testEgEfficiencyCorrFwd.cxx util/SFHelpers.cxx
       INCLUDE_DIRS ${ROOT_INCLUDE_DIRS}
       LINK_LIBRARIES ${ROOT_LIBRARIES} xAODRootAccess xAODEgamma PATInterfaces
-      ElectronEfficiencyCorrectionLib )
+      ElectronEfficiencyCorrectionLib AsgMessagingLib)
     
    atlas_add_executable( EgEfficiencyCorr_testEgEfficiencyCorrWithoutFile
       util/testEgEfficiencyCorrWithoutFile.cxx 
       util/CreateDummyEl.cxx util/SFHelpers.cxx
       INCLUDE_DIRS ${Boost_INCLUDE_DIRS} ${ROOT_INCLUDE_DIRS}
       LINK_LIBRARIES ${Boost_LIBRARIES} ${ROOT_LIBRARIES} ElectronEfficiencyCorrectionLib
-      PATInterfaces xAODCaloEvent xAODEgamma xAODEventInfo xAODRootAccess )
+      PATInterfaces xAODCaloEvent xAODEgamma xAODEventInfo xAODRootAccess AsgMessagingLib)
 
    atlas_add_executable( EgEfficiencyCorr_testEgChargeCorr
       util/testEgChargeCorr.cxx
       INCLUDE_DIRS ${ROOT_INCLUDE_DIRS}
-      LINK_LIBRARIES ${ROOT_LIBRARIES} AsgMessagingLib ElectronEfficiencyCorrectionLib ElectronPhotonSelectorToolsLib PATCoreAcceptLib PATInterfaces xAODCore xAODEgamma xAODEventInfo )
+      LINK_LIBRARIES ${ROOT_LIBRARIES} AsgMessagingLib ElectronEfficiencyCorrectionLib ElectronPhotonSelectorToolsLib 
+      PATCoreAcceptLib PATInterfaces xAODCore xAODEgamma xAODEventInfo )
 
    atlas_add_executable( EgEfficiencyCorr_dumpNPs
       util/dumpNPs.cxx util/CreateDummyEl.cxx
