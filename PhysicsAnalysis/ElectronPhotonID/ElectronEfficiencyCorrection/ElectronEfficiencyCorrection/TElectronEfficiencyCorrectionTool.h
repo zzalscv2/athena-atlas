@@ -43,10 +43,8 @@ public:
     SF=0,
     Total=1,
     Stat=2,
-    NSys=3,
-    UnCorr=4,
-    GlobalBinNumber=5,
-    End=6
+    UnCorr=3,
+    End=4
   };
 
   /** Standard constructor */
@@ -59,7 +57,18 @@ public:
   /** Initialize this class */
   int initialize();
 
-  /** The main calculate method: the actual cuts are applied here */
+  /** The main calculate method: the actual cuts are applied here 
+   *  @c dataType PATCore::ParticleDataType::DataType (e.g DATA,FULL etc)
+   *  @ runnumber the run number 1st dimension of the stored measurements
+   *  @ cluster_eta the cluster eta 2nd dimension of the stored measurements
+   *  @ et third dimension of the stored measurments
+   *  @ result the vector with the results. The first
+   *  @ Position::End entries are filled with the 
+   *  SF, Total uncertainty, Stat uncertainty, Uncorr uncertainty
+   *  @ index_of_corr this is where the correlated syst start
+   *  @ index_of_toys this is where the potential toys start
+   *  returns 0 in failure 
+   */
   int calculate( const PATCore::ParticleDataType::DataType dataType,
                  const unsigned int runnumber,
                  const double cluster_eta,
@@ -68,22 +77,26 @@ public:
                  size_t& index_of_corr,
                  size_t& index_of_toys) const;
 
-  /// Add an input file
+  /// Add an input file with the auxiliary measurement
   inline void addFileName ( const std::string& val ) { 
     m_corrFileNameList.push_back(val); 
   }
-  ///MC Toys Helper functions
+  ///Running these book toys 
   inline void bookToyMCScaleFactors(const int nToyMC) {
     m_doToyMC = true;
     m_nToyMC = nToyMC;
   }
+
   inline void bookCombToyMCScaleFactors(const int nToyMC) {
     m_doCombToyMC = true;
     m_nToyMC = nToyMC;
   }
 
   ///Helpers to get the binning of the uncertainties
-  int getNbins(std::map<float, std::vector<float> >&) const; 
+  //in a std::map (pt, eta) 
+  int getNbins(std::map<float, std::vector<float> >& ptEta) const; 
+
+  /// get number of systematics
   inline int getNSyst() const {
     return m_nSysMax;
   }
