@@ -133,7 +133,7 @@ def L1TopoSimulationOldStyleCfg(flags, isLegacy):
 
     return topoSimSeq
 
-def L1TopoSimulationStandaloneCfg(flags, outputEDM=[]):
+def L1TopoSimulationStandaloneCfg(flags, outputEDM=[], doMuons = False):
 
     acc = ComponentAccumulator()
 
@@ -142,15 +142,17 @@ def L1TopoSimulationStandaloneCfg(flags, outputEDM=[]):
     gfex_provider_attr = ['gFexSRJetRoI','gFexLRJetRoI','gFexXEJWOJRoI','gFexXENCRoI','gFexXERHORoI','gFexMHTRoI','gFexTERoI']
    
     #Configure the MuonInputProvider
-    muProvider = CompFactory.LVL1.MuonInputProvider("MuonInputProvider",
-                                                    ROIBResultLocation = "", #disable input from RoIBResult
-                                                    MuonROILocation = "",
-                                                    MuonEncoding = 1)
+    muProvider=""
+    if doMuons:
+        muProvider = CompFactory.LVL1.MuonInputProvider("MuonInputProvider",
+                                                        ROIBResultLocation = "", #disable input from RoIBResult
+                                                        MuonROILocation = "",
+                                                        MuonEncoding = 1)
 
-    #Configure the MuonRoiTools for the MIP
-    from TrigT1MuonRecRoiTool.TrigT1MuonRecRoiToolConfig import getRun3RPCRecRoiTool, getRun3TGCRecRoiTool
-    muProvider.RecRpcRoiTool = getRun3RPCRecRoiTool("RPCRecRoiTool", useRun3Config = True)
-    muProvider.RecTgcRoiTool = getRun3TGCRecRoiTool("TGCRecRoiTool", useRun3Config = True)
+        #Configure the MuonRoiTools for the MIP
+        from TrigT1MuonRecRoiTool.TrigT1MuonRecRoiToolConfig import getRun3RPCRecRoiTool, getRun3TGCRecRoiTool
+        muProvider.RecRpcRoiTool = getRun3RPCRecRoiTool("RPCRecRoiTool", useRun3Config = True)
+        muProvider.RecTgcRoiTool = getRun3TGCRecRoiTool("TGCRecRoiTool", useRun3Config = True)
 
 
     efexProvider = CompFactory.LVL1.eFexInputProvider("eFexInputProvider")
@@ -185,7 +187,7 @@ def L1TopoSimulationStandaloneCfg(flags, outputEDM=[]):
             setattr(gfexProvider,attr+'Key','')
 
     topoSimAlg = CompFactory.LVL1.L1TopoSimulation("L1TopoSimulation",
-                                                    MuonInputProvider = "",
+                                                    MuonInputProvider = muProvider,
                                                     EMTAUInputProvider = efexProvider,
                                                     JetInputProvider = jfexProvider,
                                                     EnergyInputProvider = gfexProvider,
@@ -229,8 +231,6 @@ if __name__ == '__main__':
 
   if len(subsystem)==0:
       log.warning(f'subsystem not given or the given subsystem not supported with one of the: {supportedSubsystems}')
-
-
   
   if args.log == 'warning': algLogLevel = WARNING
   if args.log == 'debug': algLogLevel = DEBUG
@@ -247,9 +247,9 @@ if __name__ == '__main__':
   flags.Concurrency.NumConcurrentEvents = 1
   flags.Exec.SkipEvents = args.skipEvents
   flags.Output.AODFileName = 'AOD.pool.root'
-  flags.GeoModel.AtlasVersion = 'ATLAS-R3S-2021-01-00-02'
-  flags.IOVDb.GlobalTag = 'CONDBR2-BLKPA-2018-13'
-  flags.Muon.enableAlignment = True
+  flags.Trigger.L1.doMuon = True
+  flags.Trigger.enableL1MuonPhase1 = True
+  flags.Trigger.L1.doMuonTopoInputs = True
   flags.lock()
 
   from AthenaConfiguration.MainServicesConfig import MainServicesCfg
@@ -289,20 +289,15 @@ if __name__ == '__main__':
   loadFromSG = [('xAOD::EventInfo', 'StoreGateSvc+EventInfo')]
  
   if 'Muons' in subsystem:
-      loadFromSG += [( 'RpcPadContainer' , 'StoreGateSvc+RPCPAD_L1' ),
-                     ( 'TgcRdoContainer' , 'StoreGateSvc+TGCRDO_L1' )]
-      from MuonConfig.MuonCablingConfig import MuonCablingConfigCfg
-      acc.merge(MuonCablingConfigCfg(flags))
+      from MuonConfig.MuonBytestreamDecodeConfig import RpcBytestreamDecodeCfg,TgcBytestreamDecodeCfg
+      rpcdecodingAcc = RpcBytestreamDecodeCfg(flags)
+      acc.merge(rpcdecodingAcc)
+      tgcdecodingAcc = TgcBytestreamDecodeCfg(flags) 
+      acc.merge(tgcdecodingAcc)
       
-      from MuonConfig.MuonGeometryConfig import MuonGeoModelCfg
-      acc.merge(MuonGeoModelCfg(flags))
-
       from TrigT1ResultByteStream.TrigT1ResultByteStreamConfig import MuonRoIByteStreamToolCfg
       muonRoiTool = MuonRoIByteStreamToolCfg(name="L1MuonBSDecoderTool",flags=flags,writeBS=False)
       decoderTools += [muonRoiTool]
-
-      from TriggerJobOpts.Lvl1MuonSimulationConfig import MuonBytestream2RdoConfig
-      acc.merge(MuonBytestream2RdoConfig(flags))
 
   if 'jFex' in subsystem:
       from L1CaloFEXByteStream.L1CaloFEXByteStreamConfig import jFexRoiByteStreamToolCfg
@@ -348,7 +343,7 @@ if __name__ == '__main__':
       acc.getEventAlgo('L1LegacyTopoSimulation').FillHistoBasedOnHardware = True
       acc.getEventAlgo('L1LegacyTopoSimulation').PrescaleDAQROBAccess = 1
 
-  acc.merge(L1TopoSimulationStandaloneCfg(flags,outputEDM), sequenceName='AthAlgSeq')
+  acc.merge(L1TopoSimulationStandaloneCfg(flags,outputEDM,doMuons=True), sequenceName='AthAlgSeq')
   if args.algoHdwMon:
       acc.getEventAlgo('L1TopoSimulation').FillHistoBasedOnHardware = True
       acc.getEventAlgo('L1TopoSimulation').PrescaleDAQROBAccess = 1
