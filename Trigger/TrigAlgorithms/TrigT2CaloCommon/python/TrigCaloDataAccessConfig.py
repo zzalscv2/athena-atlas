@@ -4,6 +4,7 @@ from AthenaConfiguration.ComponentFactory import CompFactory
 from AthenaConfiguration.AccumulatorCache import AccumulatorCache
 
 CaloDataAccessSvcDependencies = [('TileEMScale'        , 'ConditionStore+TileEMScale'),
+                                 ('TileHid2RESrcID'    , 'ConditionStore+TileHid2RESrcIDHLT'),
                                  ('TileBadChannels'    , 'ConditionStore+TileBadChannels'),
                                  ('IRegSelLUTCondData' , 'ConditionStore+RegSelLUTCondData_TTEM'),
                                  ('IRegSelLUTCondData' , 'ConditionStore+RegSelLUTCondData_TTHEC'),
@@ -60,6 +61,9 @@ def trigCaloDataAccessSvcCfg( flags ):
     from LArCabling.LArCablingConfig import LArOnOffIdMappingCfg, LArFebRodMappingCfg
     acc.merge( LArOnOffIdMappingCfg( flags ))
     acc.merge( LArFebRodMappingCfg( flags ))
+
+    from TileByteStream.TileHid2RESrcIDConfig import TileHid2RESrcIDCondAlgCfg
+    acc.merge( TileHid2RESrcIDCondAlgCfg(flags, ForHLT=True) )
 
     #setup region selector
     from RegionSelector.RegSelToolConfig import (regSelTool_TTEM_Cfg,regSelTool_TTHEC_Cfg,

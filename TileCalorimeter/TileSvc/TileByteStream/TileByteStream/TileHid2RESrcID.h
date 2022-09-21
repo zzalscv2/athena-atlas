@@ -82,4 +82,11 @@ private:
   uint32_t m_runnum, m_TileMuRcvRunnum = 0U;
 };
 
+
+#include "AthenaKernel/CLASS_DEF.h"
+#include "AthenaKernel/CondCont.h"
+
+CLASS_DEF(TileHid2RESrcID, 22911658, 0)
+CONDCONT_DEF(TileHid2RESrcID, 23187372);
+
 #endif 

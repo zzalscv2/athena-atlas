@@ -66,6 +66,13 @@ atlas_add_test( TileROD_Decoder_test
                 LINK_LIBRARIES TileByteStreamLib IdDictParser PathResolver TestTools
                 ENVIRONMENT "JOBOPTSEARCHPATH=${CMAKE_CURRENT_SOURCE_DIR}/share" )
 
+
+atlas_add_test( TileHid2RESrcIDConfig_test
+                SCRIPT python -m TileByteStream.TileHid2RESrcIDConfig
+                PROPERTIES TIMEOUT 300
+                POST_EXEC_SCRIPT nopost.sh)
+
 # Install files from the package:
 atlas_install_joboptions( share/*.py )
 atlas_install_data( share/*.dump )
+atlas_install_python_modules( python/*.py POST_BUILD_CMD ${ATLAS_FLAKE8} )

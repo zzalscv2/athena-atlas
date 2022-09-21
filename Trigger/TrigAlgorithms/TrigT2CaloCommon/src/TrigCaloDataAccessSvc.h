@@ -10,6 +10,7 @@
 #include "AthenaKernel/SlotSpecificObj.h"
 #include "LArByteStream/LArRodDecoder.h"
 #include "TileByteStream/TileROD_Decoder.h"
+#include "TileByteStream/TileHid2RESrcID.h"
 #include "LArRawUtils/LArTT_Selector.h"
 #include "TileByteStream/TileCellCont.h"
 #include "TrigT2CaloCommon/LArCellCont.h"
@@ -87,6 +88,8 @@ class TrigCaloDataAccessSvc : public extends<AthService, ITrigCaloDataAccessSvc>
    {this, "LArRoIMapKey", "LArRoIMap", "Key of the LArRoIMap CDO" };
   SG::ReadCondHandleKey<CaloDetDescrManager> m_caloMgrKey
    {this, "CaloDetDescrManager", "CaloDetDescrManager", "SG Key for CaloDetDescrManager in the Condition Store" };
+  SG::ReadCondHandleKey<TileHid2RESrcID> m_tileHid2RESrcIDKey
+   {this, "TileHid2RESrcID", "TileHid2RESrcIDHLT", "SG Key of TileHid2RESrcID object"} ;
 
   void reset_LArCol ( LArCellCollection* coll ){
     for(LArCellCollection::iterator ii=coll->begin();ii!=coll->end();++ii)

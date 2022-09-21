@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
 */
 
 //****************************************************************************
@@ -20,6 +20,7 @@
 
 // Atlas includes
 #include "AthenaKernel/errorcheck.h"
+#include "StoreGate/ReadCondHandle.h"
 
 // Tile includes
 #include "TileByteStream/TileMuRcvContByteStreamTool.h"
@@ -46,7 +47,6 @@ TileMuRcvContByteStreamTool::TileMuRcvContByteStreamTool(const std::string& type
     const IInterface* parent)
   : AthAlgTool(type, name, parent)
   , m_tileHWID(0)
-  , m_hid2re(0)
   , m_runPeriod(0)
 {
   declareInterface<TileMuRcvContByteStreamTool>(this);
@@ -66,7 +66,8 @@ StatusCode TileMuRcvContByteStreamTool::initialize() {
   ToolHandle<TileROD_Decoder> dec("TileROD_Decoder");
   ATH_CHECK( dec.retrieve() );
 
-  m_hid2re = dec->getHid2reHLT();
+  ATH_CHECK( m_hid2RESrcIDKey.initialize(m_initializeForWriting) );
+
   const TileCablingService *cabling = TileCablingService::getInstance();
   m_runPeriod = cabling->runPeriod();
 
@@ -81,6 +82,8 @@ StatusCode TileMuRcvContByteStreamTool::finalize() {
 StatusCode TileMuRcvContByteStreamTool::convert(TileMuonReceiverContainer* cont, FullEventAssembler<TileHid2RESrcID> *fea) const
 {
   ATH_MSG_INFO ("Executing TileMuRcvContByteStreamTool::convert method");
+
+  SG::ReadCondHandle<TileHid2RESrcID> hid2re{m_hid2RESrcIDKey};
 
   int  n           = 0;
   uint32_t frag_id = 0x0;
@@ -99,7 +102,7 @@ StatusCode TileMuRcvContByteStreamTool::convert(TileMuonReceiverContainer* cont,
     {
       n++;
       frag_id = (*it_cont)->identify();
-      reid = m_hid2re->getRodTileMuRcvID(frag_id);
+      reid = hid2re->getRodTileMuRcvID(frag_id);
       mapEncoder[reid].setTileHWID(m_tileHWID,m_runPeriod);
       const TileMuonReceiverObj* tileMuRcv = *it_cont;	
       mapEncoder[reid].addTileMuRcvObj(tileMuRcv);
