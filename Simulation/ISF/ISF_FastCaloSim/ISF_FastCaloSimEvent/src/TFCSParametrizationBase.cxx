@@ -13,15 +13,11 @@
 #include "TString.h"
 #endif
 
-#ifndef __FastCaloSimStandAlone__
-#include "AthenaKernel/getMessageSvc.h"
-#endif
 
 //=============================================
 //======= TFCSParametrizationBase =========
 //=============================================
 
-std::set< int > TFCSParametrizationBase::s_no_pdgid;
 std::vector< TFCSParametrizationBase* > TFCSParametrizationBase::s_cleanup_list;
 
 #if defined(__FastCaloSimStandAlone__)
@@ -36,8 +32,6 @@ TFCSParametrizationBase::TFCSParametrizationBase(const char* name, const char* t
 TFCSParametrizationBase::TFCSParametrizationBase(const char* name, const char* title)
   : TNamed(name,title)
 {
-  // Initialize only in constructor to make sure the needed services are ready
-  if (!s_msg) s_msg = std::make_unique<MsgStream>(Athena::getMessageSvc(), "FastCaloSimParametrization");
 }
 #endif
 
@@ -102,11 +96,18 @@ void TFCSParametrizationBase::Print(Option_t *option) const
 
 void TFCSParametrizationBase::DoCleanup()
 {
+  std::scoped_lock lock(s_cleanup_mutex);
   //Do cleanup only at the end of read/write operations
   for(auto ptr:s_cleanup_list) if(ptr) {
     delete ptr;
   }  
   s_cleanup_list.resize(0);
+}
+
+void TFCSParametrizationBase::AddToCleanup(const std::vector<TFCSParametrizationBase*>& garbage)
+{
+  std::scoped_lock lock(s_cleanup_mutex);
+  s_cleanup_list.insert(s_cleanup_list.end(), garbage.begin(), garbage.end());
 }
 
 void TFCSParametrizationBase::FindDuplicates(FindDuplicateClasses_t& dupclasses)

@@ -8,6 +8,7 @@
 #include <TNamed.h>
 #include <set>
 #include <map>
+#include <mutex>
 
 class ICaloGeometry;
 class TFCSSimulationState;
@@ -61,6 +62,9 @@ class TFCSExtrapolationState;
 #else
   #include "GaudiKernel/MsgStream.h"
   #include "AthenaBaseComps/AthMsgStreamMacros.h"
+  #include "AthenaKernel/getMessageSvc.h"
+  #include "CxxUtils/checker_macros.h"
+  #include <boost/thread/tss.hpp>
 #endif
 
 /** Base class for all FastCaloSim parametrizations
@@ -105,7 +109,7 @@ public:
   virtual bool is_match_all_Ekin_bin() const {return false;};
   virtual bool is_match_all_calosample() const {return false;};
 
-  virtual const std::set< int > &pdgid() const {return s_no_pdgid;};
+  virtual const std::set< int > &pdgid() const {static const std::set<int> empty; return empty;};
   virtual double Ekin_nominal() const {return init_Ekin_nominal;};
   virtual double Ekin_min() const {return init_Ekin_min;};
   virtual double Ekin_max() const {return init_Ekin_max;};
@@ -152,7 +156,7 @@ public:
   ///Deletes all objects from the s_cleanup_list. 
   ///This list can get filled during streaming operations, where an immediate delete is not possible
   static void DoCleanup();
-  
+
   struct Duplicate_t {
     TFCSParametrizationBase* replace=nullptr;
     std::vector< TFCSParametrizationBase* > mother;
@@ -177,8 +181,9 @@ protected:
   static constexpr double init_eta_min=-100;//! Do not persistify!
   static constexpr double init_eta_max=100;//! Do not persistify!
 
-  static std::vector< TFCSParametrizationBase* > s_cleanup_list;
-  
+  /// Add the vector of garbage to the list of objects to delete by DoCleanup
+  static void AddToCleanup(const std::vector<TFCSParametrizationBase*>& garbage);
+
   bool compare(const TFCSParametrizationBase& ref) const;
 
 #if defined(__FastCaloSimStandAlone__)
@@ -205,19 +210,26 @@ private:
 #else
 public:
   /// Update outputlevel
-  void setLevel(int level) {s_msg->setLevel(level);}
+  void setLevel(int level) {msg().setLevel(level);}
 
   /// Retrieve output level
-  MSG::Level level() const {return s_msg->level();}
+  MSG::Level level() const {return msg().level();}
 
   /// Log a message using the Athena controlled logging system
-  MsgStream& msg() const { return *s_msg; }
+  MsgStream& msg() const {
+    MsgStream* ms = s_msg_tls.get();
+    if (!ms) {
+      ms = new MsgStream(Athena::getMessageSvc(), "FastCaloSimParametrization");
+      s_msg_tls.reset(ms);
+    }
+    return *ms;
+  }
 
   /// Log a message using the Athena controlled logging system
-  MsgStream& msg( MSG::Level lvl ) const { return *s_msg << lvl; }
+  MsgStream& msg( MSG::Level lvl ) const { return msg() << lvl; }
 
   /// Check whether the logging system is active at the provided verbosity level
-  bool msgLvl( MSG::Level lvl ) const { return s_msg->level() <= lvl; }
+  bool msgLvl( MSG::Level lvl ) const { return msg().level() <= lvl; }
   
 private:
   /** Static private message stream member.
@@ -225,11 +237,12 @@ private:
       Note that we also cannot use AthMessaging as a base class as this creates problems
       when storing these objects in ROOT files (ATLASSIM-5854).
   */
-  inline static std::unique_ptr<MsgStream> s_msg;//! Do not persistify!
+  inline static boost::thread_specific_ptr<MsgStream> s_msg_tls ATLAS_THREAD_SAFE;//! Do not persistify!
 #endif  
   
 private:
-  static std::set< int > s_no_pdgid;
+  static inline std::mutex s_cleanup_mutex;
+  static std::vector< TFCSParametrizationBase* > s_cleanup_list ATLAS_THREAD_SAFE;
 
   ClassDef(TFCSParametrizationBase,2)  //TFCSParametrizationBase
 };

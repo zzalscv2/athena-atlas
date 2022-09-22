@@ -1,10 +1,11 @@
 /*
-  Copyright (C) 2002-2018 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef ISF_FASTCALOSIMEVENT_TFCS2DFunction_h
 #define ISF_FASTCALOSIMEVENT_TFCS2DFunction_h
 
+#include "CxxUtils/checker_macros.h"
 #include "ISF_FastCaloSimEvent/TFCSFunction.h"
 #include <vector>
 
@@ -23,8 +24,8 @@ class TFCS2DFunction:public TFCSFunction
 
   	static double CheckAndIntegrate2DHistogram(const TH2* hist, std::vector<double>& integral_vec,int& first,int& last);
 
-    static void unit_test(TH2* hist=nullptr,TFCS2DFunction* rtof=nullptr,const char* outfilename="TFCS2DFunction_unit_test.root",int nrnd=10000000);
-    static void unit_tests(TH2* hist=nullptr,const char* outfilename="TFCS2DFunction_unit_test.root",int nrnd=10000000);
+    static void unit_test ATLAS_NOT_THREAD_SAFE (TH2* hist=nullptr,TFCS2DFunction* rtof=nullptr,const char* outfilename="TFCS2DFunction_unit_test.root",int nrnd=10000000);
+    static void unit_tests ATLAS_NOT_THREAD_SAFE (TH2* hist=nullptr,const char* outfilename="TFCS2DFunction_unit_test.root",int nrnd=10000000);
   private:
 
   ClassDef(TFCS2DFunction,1)  //TFCS2DFunction

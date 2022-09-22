@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2018 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "ISF_FastCaloSimEvent/TFCS1DFunctionSpline.h"
@@ -326,7 +326,7 @@ double TFCS1DFunctionSpline::rnd_to_fct(double rnd) const
   return m_spline.Eval(rnd);
 }
 
-void TFCS1DFunctionSpline::unit_test(TH1* hist)
+void TFCS1DFunctionSpline::unit_test ATLAS_NOT_THREAD_SAFE (TH1* hist)
 {
   int nbinsx;
   TH1* histfine=0;

@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2017 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "ISF_FastCaloSimEvent/TFCS1DFunctionRegression.h"
@@ -111,7 +111,7 @@ void TFCS1DFunctionRegression::set_weights(vector<vector<double> > fWeightMatrix
 
 double TFCS1DFunctionRegression::sigmoid(double x) const
 {
-   static Double_t sigval[7000] = {
+   static const Double_t sigval[7000] = {
    -3.500000e+01, 6.30511676014698530e-16, 6.30511676014698130e-16, 3.15255838007348670e-16, 1.05085279335782620e-16, 2.62713198339455210e-17, 5.25426396678905190e-18, 8.75710661131491060e-19, 1.25101523018779380e-19, 1.56376903773461590e-20,
    -3.490000e+01, 6.96823167838580650e-16, 6.96823167838580160e-16, 3.48411583919289640e-16, 1.16137194639762880e-16, 2.90342986599405540e-17, 5.80685973198804710e-18, 9.67809955331319670e-19, 1.38258565047325200e-19, 1.72823206309141090e-20,
    -3.480000e+01, 7.70108700136546340e-16, 7.70108700136545750e-16, 3.85054350068272280e-16, 1.28351450022757030e-16, 3.20878625056890590e-17, 6.41757250113773230e-18, 1.06959541685626250e-18, 1.52799345265172810e-19, 1.90999181581447200e-20,
@@ -816,7 +816,7 @@ double TFCS1DFunctionRegression::sigmoid(double x) const
    Int_t i = (Int_t)(10*x+350.5);
    if(i<0)   return TMath::Exp(x);
    if(i>699) return 1;
-   Double_t* basePoint = sigval+(10*i);
+   const Double_t* basePoint = sigval+(10*i);
    Double_t res =  x - basePoint[0];
    res =        basePoint[1] + res * ( basePoint[2] + res * ( basePoint[3]
       + res * ( basePoint[4] + res * ( basePoint[5] + res * ( basePoint[6]

@@ -1,10 +1,11 @@
 /*
-  Copyright (C) 2002-2018 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef ISF_FASTCALOSIMEVENT_TFCS1DFunctionInt16Histogram_h
 #define ISF_FASTCALOSIMEVENT_TFCS1DFunctionInt16Histogram_h
 
+#include "CxxUtils/checker_macros.h"
 #include "ISF_FastCaloSimEvent/TFCS1DFunction.h"
 #include <vector>
 
@@ -32,7 +33,7 @@ class TFCS1DFunctionInt16Histogram:public TFCS1DFunction
     const std::vector<HistoContent_t>& get_HistoContents() const {return m_HistoContents;};
     std::vector<HistoContent_t>& get_HistoContents() {return m_HistoContents;};
     
-    static void unit_test(TH1* hist=nullptr);
+    static void unit_test ATLAS_NOT_THREAD_SAFE (TH1* hist=nullptr);
   protected:
     
     std::vector<float> m_HistoBorders;
