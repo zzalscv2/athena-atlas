@@ -5,7 +5,7 @@
 
 from DerivationFrameworkCore.DerivationFrameworkMaster import DerivationFrameworkIsMonteCarlo, DerivationFrameworkJob, buildFileName
 from DerivationFrameworkJetEtMiss.JetCommon import addDAODJets,OutputJets, addJetOutputs
-from JetRecConfig.StandardSmallRJets import AntiKt4UFOCSSK
+from JetRecConfig.StandardSmallRJets import AntiKt4UFOCSSKNoPtCut
 from DerivationFrameworkPhys import PhysCommon
 
 if DerivationFrameworkIsMonteCarlo:
@@ -65,7 +65,7 @@ jetm13Seq += CfgMgr.DerivationFramework__DerivationKernel( name = "JETM13MainKer
 #=======================================
 # UFO with CHS and small-R UFO jets
 #=======================================
-from JetRecConfig.JetRecConfig import getInputAlgs,reOrderAlgs
+from JetRecConfig.JetRecConfig import getInputAlgs,getConstitPJGAlg, reOrderAlgs
 from JetRecConfig.StandardJetConstits import stdConstitDic as cst
 from JetRecConfig.JetInputConfig import buildEventShapeAlg
 from AthenaConfiguration.ComponentAccumulator import conf2toConfigurable
@@ -79,7 +79,7 @@ for a in constit_algs:
     DerivationFrameworkJob += conf2toConfigurable(a)
 
 # R = 0.4 UFO CSSK jets
-jetList = [AntiKt4UFOCSSK]
+jetList = [AntiKt4UFOCSSKNoPtCut]
 addDAODJets(jetList,DerivationFrameworkJob)
 
 # Eventshape for UFO CSSK jets
@@ -87,7 +87,15 @@ eventshapealg = buildEventShapeAlg(cst.UFOCSSK,'')
 if not hasattr(DerivationFrameworkJob, eventshapealg.getName()):
   DerivationFrameworkJob += conf2toConfigurable(eventshapealg)
 
-OutputJets["JETM13"] = ["AntiKt4UFOCSSKJets"]
+pjgufoccskneut = getConstitPJGAlg(cst.UFOCSSK, suffix='Neut')
+if not hasattr(DerivationFrameworkJob, pjgufoccskneut.getName()):
+  DerivationFrameworkJob += conf2toConfigurable(pjgufoccskneut)
+
+eventshapeneutalg = buildEventShapeAlg(cst.UFOCSSK, '', suffix = 'Neut')
+if not hasattr(DerivationFrameworkJob, eventshapeneutalg.getName()):
+  DerivationFrameworkJob += conf2toConfigurable(eventshapeneutalg)
+
+OutputJets["JETM13"] = ["AntiKt4UFOCSSKNoPtCutJets"]
 
 #====================================================================
 # Add the containers to the output stream - slimming done here
@@ -109,6 +117,8 @@ JETM13SlimmingHelper.AppendToDictionary['UFO'] = 'xAOD::FlowElementContainer'
 JETM13SlimmingHelper.AppendToDictionary['UFOAux'] = 'xAOD::FlowElementAuxContainer'
 JETM13SlimmingHelper.AppendToDictionary['Kt4UFOCSSKEventShape'] = 'xAOD::EventShape'
 JETM13SlimmingHelper.AppendToDictionary['Kt4UFOCSSKEventShapeAux'] = 'xAOD::EventShapeAuxInfo'
+JETM13SlimmingHelper.AppendToDictionary['Kt4UFOCSSKNeutEventShape'] = 'xAOD::EventShape'
+JETM13SlimmingHelper.AppendToDictionary['Kt4UFOCSSKNeutEventShapeAux'] = 'xAOD::EventShapeAuxInfo'
 if DerivationFrameworkIsMonteCarlo:
   JETM13SlimmingHelper.AppendToDictionary['TruthTopQuarkWithDecayParticles'] = 'xAOD::TruthParticleContainer'
   JETM13SlimmingHelper.AppendToDictionary['TruthTopQuarkWithDecayParticlesAux'] = 'xAOD::TruthParticleAuxContainer'
@@ -129,7 +139,7 @@ JETM13SlimmingHelper.SmartCollections = ["EventInfo",
 JETM13SlimmingHelper.AllVariables = ["CaloCalTopoClusters", "CaloCalFwdTopoTowers",
                                      "GlobalChargedParticleFlowObjects", "GlobalNeutralParticleFlowObjects",
                                      "CHSGChargedParticleFlowObjects","CHSGNeutralParticleFlowObjects",
-                                     "Kt4EMTopoOriginEventShape","Kt4EMPFlowEventShape","Kt4EMPFlowPUSBEventShape","Kt4EMPFlowNeutEventShape","Kt4UFOCSSKEventShape",
+                                     "Kt4EMTopoOriginEventShape","Kt4EMPFlowEventShape","Kt4EMPFlowPUSBEventShape","Kt4EMPFlowNeutEventShape","Kt4UFOCSSKEventShape","Kt4UFOCSSKNeutEventShape",
                                      "TruthParticles",
                                      "TruthVertices",
                                      "TruthEvents",

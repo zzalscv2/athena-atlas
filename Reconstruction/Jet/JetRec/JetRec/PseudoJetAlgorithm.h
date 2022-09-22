@@ -89,7 +89,7 @@ private:
   bool m_isGhost{false}; /// Determines whether the PJs should be made ghosts
   bool m_emtopo{false};  /// True if inputs are EM-scale topo clusters.
   bool m_pflow{false};   /// True if inputs are PFlow
-
+  bool m_ufo{false};     /// True if inputs are UFOs
 }; 
 
 #endif

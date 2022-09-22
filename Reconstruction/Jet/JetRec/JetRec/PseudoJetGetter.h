@@ -116,13 +116,15 @@ namespace PseudoJetGetter {
     bool useNeutralPFOs{true};
     bool useChargedPV{true};
     bool useChargedPUsideband{false};
+    bool inputIsUFO{false};
 
-    PFlowRejecter(bool skip, bool useCharged, bool useNeutral, bool chargedPV, bool chargedPUsideband): 
+    PFlowRejecter(bool skip, bool useCharged, bool useNeutral, bool chargedPV, bool chargedPUsideband, bool isUFO):
       skipNegativeEnergy(skip),
       useChargedPFOs(useCharged),
       useNeutralPFOs(useNeutral),
       useChargedPV(chargedPV),
-      useChargedPUsideband(chargedPUsideband){
+      useChargedPUsideband(chargedPUsideband),
+      inputIsUFO(isUFO){
     }
 
     bool operator()(const xAOD::IParticle* ip){
@@ -139,16 +141,22 @@ namespace PseudoJetGetter {
 
 	reject = (skipNegativeEnergy && e<FLT_MIN);
 
-        if( pfo->isCharged() ){
-	  if(!useChargedPFOs) reject = true;
-          const static SG::AuxElement::ConstAccessor<char> PVMatchedAcc("matchedToPV");
-	  if(useChargedPV && !PVMatchedAcc(*pfo)) reject = true;
-          const static SG::AuxElement::ConstAccessor<char> PUsidebandMatchedAcc("matchedToPUsideband");
-          if (useChargedPUsideband && !PUsidebandMatchedAcc(*pfo)) reject = true;
-        }
+	if(!inputIsUFO){
+	  if( pfo->isCharged() ){
+	    if(!useChargedPFOs) reject = true;
+	    const static SG::AuxElement::ConstAccessor<char> PVMatchedAcc("matchedToPV");
+	    if(useChargedPV && !PVMatchedAcc(*pfo)) reject = true;
+	    const static SG::AuxElement::ConstAccessor<char> PUsidebandMatchedAcc("matchedToPUsideband");
+	    if (useChargedPUsideband && !PUsidebandMatchedAcc(*pfo)) reject = true;
+	  }
+	  else{
+	    if(!useNeutralPFOs) reject = true;
+	  }
+	}
 	else{
-          if(!useNeutralPFOs) reject = true;
-        }
+	  if(pfo->signalType() == xAOD::FlowElement::SignalType::Charged && !useChargedPFOs) reject = true;
+	  if(pfo->signalType() == xAOD::FlowElement::SignalType::Neutral && !useNeutralPFOs) reject = true;
+	}
         return reject;
       }
     
@@ -178,9 +186,9 @@ namespace PseudoJetGetter {
 
 
   std::vector<fastjet::PseudoJet> 
-  PFlowsToPJs(const xAOD::IParticleContainer& ips, bool skipNegativeEnergy, bool useChargedPFOs, bool useNeutralPFOs, bool useChargedPV, bool useChargedPUsideband) {
+  PFlowsToPJs(const xAOD::IParticleContainer& ips, bool skipNegativeEnergy, bool useChargedPFOs, bool useNeutralPFOs, bool useChargedPV, bool useChargedPUsideband, bool isUFO) {
 
-    PFlowRejecter rejecter(skipNegativeEnergy, useChargedPFOs, useNeutralPFOs, useChargedPV, useChargedPUsideband);
+    PFlowRejecter rejecter(skipNegativeEnergy, useChargedPFOs, useNeutralPFOs, useChargedPV, useChargedPUsideband, isUFO);
     std::vector<fastjet::PseudoJet> vpj;
     int index = -1;
 
