@@ -1,10 +1,6 @@
 /*
-  Copyright (C) 2002-2017 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
 */
-
-// **********************************************************************
-// $Id: MonitoringFile.cxx 756119 2016-06-19 06:44:00Z ponyisi $
-// **********************************************************************
 
 #include "DataQualityUtils/MonitoringFile.h"
 #include "DataQualityInterfaces/HanApp.h"
@@ -416,7 +412,7 @@ void MonitoringFile::mergeObjsMultiCycles(const std::string& keyname,
      std::cerr << "WARNING: CHANGE OF CLASS TYPES FOR " << h->GetName() << ", NOT MERGING" << std::endl;
      continue;
    }
-   MonitoringFile::mergeObjs(obj.get(), nextObj.get(), mergeType,m_debugLevel>VERBOSE?VERBOSE: (dqutils::MonitoringFile::debugLevel_t)m_debugLevel);
+   MonitoringFile::mergeObjs(obj.get(), nextObj.get(), mergeType,m_debugLevel>VERBOSE?VERBOSE: (dqutils::MonitoringFile::debugLevel_t)m_debugLevel.load());
       } else {
    std::cerr << "MonitoringFile::mergeObjsMultiCycles(): NULL KEY; corrupt file?" << std::endl;
       }
@@ -2250,7 +2246,7 @@ int MonitoringFile::mergeLBintervals(std::string inFilename, std::string inDebug
 
    debugLevel_t debugLevel = none;
    if(inDebugLevel.empty()){
-     debugLevel=m_debugLevel>(int)VERBOSE?VERBOSE:(debugLevel_t)m_debugLevel;
+     debugLevel=m_debugLevel>(int)VERBOSE?VERBOSE:(debugLevel_t)m_debugLevel.load();
    }else{
      if( inDebugLevel == "DEBUG" ) debugLevel = DEBUG;
      else if( inDebugLevel == "VERBOSE" ) debugLevel = VERBOSE;
@@ -2298,8 +2294,8 @@ CheckHistogram(TFile* f,const char* HistoName)
 
 int MonitoringFile::getDebugLevel(){return m_debugLevel;}
 void MonitoringFile::setDebugLevel(int level){m_debugLevel=level;}
-int MonitoringFile::m_fileCompressionLevel=1;
-int MonitoringFile::m_debugLevel=0;
+std::atomic<int> MonitoringFile::m_fileCompressionLevel=1;
+std::atomic<int> MonitoringFile::m_debugLevel=0;
 
 std::string MonitoringFile::getPath(TDirectory *dir){
   

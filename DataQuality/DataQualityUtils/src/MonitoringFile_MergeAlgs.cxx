@@ -1,10 +1,6 @@
 /*
-  Copyright (C) 2002-2017 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
 */
-
-// **********************************************************************
-// $Id: MonitoringFile_MergeAlgs.cxx,v 1.4 2009-04-06 13:08:13 ponyisi Exp $
-// **********************************************************************
 
 #include "DataQualityUtils/MonitoringFile.h"
 
@@ -148,7 +144,7 @@ void MonitoringFile::merge_perBinEffPerCent(TH1& a, const TH1& b)
   // dEff = 0 means no entries, the bin is ignored
   //
 
-  static double OneSigOneSided = 0.159; // 0.5*(1-0.681) where 0.681 means 68%CL
+  constexpr double OneSigOneSided = 0.159; // 0.5*(1-0.681) where 0.681 means 68%CL
   // Verify histogram compatibility
   if (a.GetDimension() != b.GetDimension()) {
     std::cerr<<"merge_perBinEffPerCent \""<< a.GetName() <<"\": attempt to merge histograms of different dimensionality" << std::endl;

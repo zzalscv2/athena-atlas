@@ -13,6 +13,8 @@
 #include <TObjString.h>
 #include <nlohmann/json.hpp>
 
+#include "CxxUtils/checker_macros.h"
+
 class TCanvas;
 class TDirectory;
 class TFile;
@@ -26,7 +28,7 @@ class TEfficiency;
 namespace dqutils
 {
 
-  class HanOutputFile : public TObject
+  class ATLAS_NOT_THREAD_SAFE HanOutputFile : public TObject
   {
   public:
     HanOutputFile();

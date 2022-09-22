@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2017 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
 */
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -40,10 +40,10 @@ namespace dqutils {
 
   //   static const bool fdbg = false;
   static const bool fdbg = true;
-  bool HI_pp_key=false;//true::HI false::pp
 
   void MonitoringFile::HLTMuonHistogramDivision(const std::string & inFilename, TString& run_dir)
   {
+    bool HI_pp_key=false;//true::HI false::pp
 
     if (fdbg) std::cout << "  Start to Divide HLTMuon Histograms for Efficiency and Rate Ratio" << std::endl;
     PostProcessorFileWrapper mf( inFilename , "HLT Histogram Division");
