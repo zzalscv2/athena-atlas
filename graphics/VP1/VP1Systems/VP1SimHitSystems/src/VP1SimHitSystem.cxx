@@ -266,7 +266,7 @@ void VP1SimHitSystem::buildHitTree(const QString& detector)
     //
     // Pixel:
     //
-    const DataHandle<SiHitCollection> p_collection;
+    const SiHitCollection* p_collection;
     if(sg->retrieve(p_collection,"PixelHits")==StatusCode::SUCCESS)
     {
       for(SiHitConstIterator i_hit=p_collection->begin(); i_hit!=p_collection->end(); ++i_hit)
@@ -285,7 +285,7 @@ void VP1SimHitSystem::buildHitTree(const QString& detector)
     //
     // SCT:
     //
-    const DataHandle<SiHitCollection> s_collection;
+    const SiHitCollection* s_collection;
     if(sg->retrieve(s_collection,"SCT_Hits")==StatusCode::SUCCESS)
     {
       for(SiHitConstIterator i_hit=s_collection->begin();i_hit!=s_collection->end();++i_hit)
@@ -304,7 +304,7 @@ void VP1SimHitSystem::buildHitTree(const QString& detector)
     //
     // TRT:
     //
-    const DataHandle<TRTUncompressedHitCollection> t_collection;
+    const TRTUncompressedHitCollection* t_collection;
     if(sg->retrieve(t_collection,"TRTUncompressedHits")==StatusCode::SUCCESS)
     {
       for(TRTUncompressedHitConstIter i_hit=t_collection->begin();i_hit!=t_collection->end();++i_hit)
@@ -326,7 +326,7 @@ void VP1SimHitSystem::buildHitTree(const QString& detector)
     // NOTE: to access additional LAr simHit data, see: 
     // Simulation/Tools/HitAnalysis/src/CaloHitAnalysis.cxx
     //
-    const DataHandle<LArHitContainer> lar_collection;
+    const LArHitContainer* lar_collection;
 
     std::string collName{"LArHit"};
     std::string suff{""};
@@ -364,7 +364,7 @@ void VP1SimHitSystem::buildHitTree(const QString& detector)
       // For more Tile simHits data, see:
       // Simulation/Tools/HitAnalysis/src/CaloHitAnalysis.cxx
       //
-      const DataHandle<TileHitVector> t_collection;
+      const TileHitVector* t_collection;
 
       if(sg->retrieve(t_collection,"TileHitVec")==StatusCode::SUCCESS)
       {
@@ -386,7 +386,7 @@ void VP1SimHitSystem::buildHitTree(const QString& detector)
     //
     // MDT:
     //
-    const DataHandle<MDTSimHitCollection> mdt_collection;
+    const MDTSimHitCollection* mdt_collection;
     if(sg->retrieve(mdt_collection)==StatusCode::SUCCESS)
     {
       for(MDTSimHitConstIterator i_hit=mdt_collection->begin();i_hit!=mdt_collection->end();++i_hit)
@@ -405,7 +405,7 @@ void VP1SimHitSystem::buildHitTree(const QString& detector)
     //
     // RPC:
     //
-    const DataHandle<RPCSimHitCollection> rpc_collection;
+    const RPCSimHitCollection* rpc_collection;
     if(sg->retrieve(rpc_collection)==StatusCode::SUCCESS) {
       for(RPCSimHitConstIterator i_hit=rpc_collection->begin();i_hit!=rpc_collection->end();++i_hit)
       {
@@ -423,7 +423,7 @@ void VP1SimHitSystem::buildHitTree(const QString& detector)
     //
     // TGC:
     //
-    const DataHandle<TGCSimHitCollection> tgc_collection;
+    const TGCSimHitCollection* tgc_collection;
     if (sg->retrieve(tgc_collection)==StatusCode::SUCCESS)
     {
       for(TGCSimHitConstIterator i_hit=tgc_collection->begin();i_hit!=tgc_collection->end();++i_hit)
@@ -442,7 +442,7 @@ void VP1SimHitSystem::buildHitTree(const QString& detector)
     //
     // CSC:
     //
-    const DataHandle<CSCSimHitCollection> csc_collection;
+    const CSCSimHitCollection* csc_collection;
     if(sg->retrieve(csc_collection)==StatusCode::SUCCESS)
     {
       for(CSCSimHitConstIterator i_hit=csc_collection->begin();i_hit!=csc_collection->end();++i_hit)
@@ -462,7 +462,7 @@ void VP1SimHitSystem::buildHitTree(const QString& detector)
       //
       message("Trying for Generic Muon (as many collections as can be found)");
       foreach(QString key,VP1SGContentsHelper(this).getKeys<GenericMuonSimHitCollection>()) {
-        const DataHandle<GenericMuonSimHitCollection> generic_collection;
+        const GenericMuonSimHitCollection* generic_collection;
         if(sg->retrieve( generic_collection,key.toStdString().c_str() )==StatusCode::SUCCESS)
         {
           messageVerbose("Retrieved"+key+"with size: "+str(generic_collection->size()));
@@ -487,7 +487,7 @@ void VP1SimHitSystem::buildHitTree(const QString& detector)
       //
       message("Trying for ForwardRegion (as many collections as can be found)");
       foreach(QString key,VP1SGContentsHelper(this).getKeys<SimulationHitCollection>()) {
-        const DataHandle<SimulationHitCollection> generic_collection;
+        const SimulationHitCollection* generic_collection;
         if(sg->retrieve( generic_collection,key.toStdString().c_str() )==StatusCode::SUCCESS)
         {
           messageVerbose("Retrieved"+key+"with size: "+str(generic_collection->size()));
