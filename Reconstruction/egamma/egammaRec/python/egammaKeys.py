@@ -18,8 +18,11 @@ class egammaKeysDict:
     ShowerShapesSuppress = '.-e033.-e011.-e333.-e335.-e337.-e377'
     PhotonisemSuppress = '.-isEMLoose.-isEMTight'
     ElectronisemSupress = '.-isEMLHLoose.-isEMLHTight.-isEMLHMedium.-isEMLoose.-isEMMultiLepton.-isEMMedium.-isEMTight'
-    ElectronSuppress = ShowerShapesSuppress + ElectronisemSupress + '.-EgammaCovarianceMatrix'
-    PhotonSuppress = ShowerShapesSuppress + PhotonisemSuppress
+    #When we run jet finding we create links between global FE and electrons/photons
+    #Global FE do not go into the ESD/AOD, so we suppress the links to them here
+    GlobalPFlowSuppress = '.-chargedGlobalFELinks.-neutralGlobalFELinks'
+    ElectronSuppress = ShowerShapesSuppress + ElectronisemSupress + '.-EgammaCovarianceMatrix' + GlobalPFlowSuppress
+    PhotonSuppress = ShowerShapesSuppress + PhotonisemSuppress + GlobalPFlowSuppress
     FwdElectronisemSupress = '.-isEMTight.-isEMMedium.-isEMLoose'
     isovar_suppress = "-" + ".-".join(iso_vars())
     egisovar_suppress = isovar_suppress + '.-ptconeCorrBitset.-ptconecoreTrackPtrCorrection.-topoetconeCorrBitset'
@@ -47,7 +50,7 @@ class egammaKeysDict:
         Electron=[
             'xAOD::ElectronContainer',
             'Electrons',
-            egisovar_suppress,
+            egisovar_suppress + GlobalPFlowSuppress,
             ElectronSuppress],
         EgammaRec=['egammaRecContainer',
                    'egammaRecCollection',
@@ -68,7 +71,7 @@ class egammaKeysDict:
                     '-SisterCluster', ''],
         Photon=['xAOD::PhotonContainer',
                 'Photons',
-                phisovar_suppress,
+                phisovar_suppress + GlobalPFlowSuppress,
                 PhotonSuppress],
         TrackParticle=[
             'xAOD::TrackParticleContainer',

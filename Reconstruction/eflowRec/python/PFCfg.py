@@ -196,10 +196,12 @@ def getLCNeutralFlowElementCreatorAlgorithm(inputFlags,neutralFlowElementOutputN
     
     return LCFlowElementNeutralCreatorAlgorithm 
 
-def getEGamFlowElementAssocAlgorithm(inputFlags,neutral_FE_cont_name="",charged_FE_cont_name="",AODTest=False,doTCC=False):
+def getEGamFlowElementAssocAlgorithm(inputFlags,neutral_FE_cont_name="",charged_FE_cont_name="",AODTest=False,doTCC=False,useGlobal=False,algName=""):
 
     PFEGamFlowElementLinkerAlgorithmFactory=CompFactory.PFEGamFlowElementAssoc
-    PFEGamFlowElementLinkerAlgorithm=PFEGamFlowElementLinkerAlgorithmFactory("PFEGamFlowElementAssoc")
+    if (algName == ""):
+        algName = "PFEGamFlowElementAssoc"
+    PFEGamFlowElementLinkerAlgorithm=PFEGamFlowElementLinkerAlgorithmFactory(algName)
 
     #set an an alternate name if needed
     #this uses some gaudi core magic, namely that you can change the name of the handle as it is a callable attribute, despite the attribute not being explicitly listed in the header
@@ -268,17 +270,44 @@ def getEGamFlowElementAssocAlgorithm(inputFlags,neutral_FE_cont_name="",charged_
         PFEGamFlowElementLinkerAlgorithm.ChargedFEPhotonDecorKey="TrackCaloClustersCharged.TCC_PhotonLinks"
         PFEGamFlowElementLinkerAlgorithm.NeutralFEPhotonDecorKey="TrackCaloClustersNeutral.TCC_PhotonLinks"
         
+    if(useGlobal):
+        # ReadHandles to change
+        PFEGamFlowElementLinkerAlgorithm.JetEtMissNeutralFlowElementContainer="GlobalNeutralParticleFlowObjects"
+        PFEGamFlowElementLinkerAlgorithm.JetEtMissChargedFlowElementContainer="GlobalChargedParticleFlowObjects"
         
+        #Now to change the writeHandles
+        # first the Electron -> FE links
+        EL_NFE_Link=str(PFEGamFlowElementLinkerAlgorithm.ElectronNeutralFEDecorKey)
+        PFEGamFlowElementLinkerAlgorithm.ElectronNeutralFEDecorKey=EL_NFE_Link.replace("FELinks","GlobalFELinks")
+        EL_CFE_Link=str(PFEGamFlowElementLinkerAlgorithm.ElectronChargedFEDecorKey)
+        PFEGamFlowElementLinkerAlgorithm.ElectronChargedFEDecorKey=EL_CFE_Link.replace("FELinks","GlobalFELinks")
+        #then the converse case (FE -> Electron)
+        
+        PFEGamFlowElementLinkerAlgorithm.ChargedFEElectronDecorKey="GlobalChargedParticleFlowObjects.GlobalFE_ElectronLinks"
+        PFEGamFlowElementLinkerAlgorithm.NeutralFEElectronDecorKey="GlobalNeutralParticleFlowObjects.GLobalFE_ElectronLinks"
+        
+
+        # first the Photon -> FE links
+        PH_NFE_Link=str(PFEGamFlowElementLinkerAlgorithm.PhotonNeutralFEDecorKey)
+        PFEGamFlowElementLinkerAlgorithm.PhotonNeutralFEDecorKey=PH_NFE_Link.replace("FELinks","GlobalFELinks")
+        PH_CFE_Link=str(PFEGamFlowElementLinkerAlgorithm.PhotonChargedFEDecorKey)
+        PFEGamFlowElementLinkerAlgorithm.PhotonChargedFEDecorKey=PH_CFE_Link.replace("FELinks","GlobalFELinks")
+        #then the converse case (FE -> Photons)
+        
+        PFEGamFlowElementLinkerAlgorithm.ChargedFEPhotonDecorKey="GlobalChargedParticleFlowObjects.TCC_PhotonLinks"
+        PFEGamFlowElementLinkerAlgorithm.NeutralFEPhotonDecorKey="GlobalNeutralParticleFlowObjects.TCC_PhotonLinks"
         
         
         
     return PFEGamFlowElementLinkerAlgorithm
 
-def getMuonFlowElementAssocAlgorithm(inputFlags,neutral_FE_cont_name="",charged_FE_cont_name="",LinkNeutralFEClusters=True,useMuonTopoClusters=False,AODTest=False,doTCC=False):
+def getMuonFlowElementAssocAlgorithm(inputFlags,neutral_FE_cont_name="",charged_FE_cont_name="",LinkNeutralFEClusters=True,useMuonTopoClusters=False,AODTest=False,doTCC=False,useGlobal=False,algName=""):
     
 
     PFMuonFlowElementLinkerAlgorithmFactory=CompFactory.PFMuonFlowElementAssoc
-    PFMuonFlowElementLinkerAlgorithm=PFMuonFlowElementLinkerAlgorithmFactory("PFMuonFlowElementAssoc")
+    if (algName == ""):
+        algName="PFMuonFlowElementAssoc"
+    PFMuonFlowElementLinkerAlgorithm=PFMuonFlowElementLinkerAlgorithmFactory(algName)
 
     #set an an alternate name if needed
     #this uses some gaudi core magic, namely that you can change the name of the handle as it is a callable attribute, despite the attribute not being explicitly listed in the header as such
@@ -336,6 +365,24 @@ def getMuonFlowElementAssocAlgorithm(inputFlags,neutral_FE_cont_name="",charged_
         PFMuonFlowElementLinkerAlgorithm.MuonContainer_muon_efrac_matched_FE="Muons.muon_efrac_matched_TCC"
         # this is because the algorithm adds this debug container which we don't need 
         PFMuonFlowElementLinkerAlgorithm.MuonContainer_ClusterInfo_deltaR="Muons.deltaR_muon_clus_TCCalg"
+
+    if(useGlobal):
+        PFMuonFlowElementLinkerAlgorithm.JetEtMissChargedFlowElementContainer="GlobalChargedParticleFlowObjects"
+        PFMuonFlowElementLinkerAlgorithm.JetEtMissNeutralFlowElementContainer="GlobalNeutralParticleFlowObjects"
+
+        PFMuonFlowElementLinkerAlgorithm.MuonContainer_chargedFELinks="Muons.chargedGlobalFELinks"
+        PFMuonFlowElementLinkerAlgorithm.MuonContainer_neutralFELinks="Muons.neutralGlobalFELinks"
+
+        PFMuonFlowElementLinkerAlgorithm.JetETMissNeutralFlowElementContainer_FE_MuonLinks="GlobalNeutralParticleFlowObjects.GlobalFE_MuonLinks"
+        PFMuonFlowElementLinkerAlgorithm.JetETMissChargedFlowElements_FE_MuonLinks="GlobalChargedParticleFlowObjects.GlobalFE_MuonLinks"
+
+        PFMuonFlowElementLinkerAlgorithm.FlowElementContainer_nMatchedMuons="GlobalNeutralParticleFlowObjects.GlobalFE_nMatchedMuons"
+        PFMuonFlowElementLinkerAlgorithm.FlowElementContainer_FE_efrac_matched_muon="GlobalNeutralParticleFlowObjects.GlobalFE_efrac_matched_muon"
+
+        PFMuonFlowElementLinkerAlgorithm.MuonContainer_muon_efrac_matched_FE="Muons.muon_efrac_matched_GlobalFE"
+        # this is because the algorithm adds this debug container which we don't need 
+        PFMuonFlowElementLinkerAlgorithm.MuonContainer_ClusterInfo_deltaR="Muons.deltaR_muon_clus_GlobalFEalg"
+
     if(LinkNeutralFEClusters):
         if (doTCC or AODTest):
             # since the cells are deleted on AOD, if you try to run the link between NFE and Muon on AOD, it will crash. Terminate to catch this.
@@ -352,10 +399,13 @@ def getMuonFlowElementAssocAlgorithm(inputFlags,neutral_FE_cont_name="",charged_
 
 
 
-def getTauFlowElementAssocAlgorithm(inputFlags,neutral_FE_cont_name="",charged_FE_cont_name="",AODTest=False,doTCC=False) :
+def getTauFlowElementAssocAlgorithm(inputFlags,neutral_FE_cont_name="",charged_FE_cont_name="",AODTest=False,doTCC=False,useGlobal=False,algName=""):
 
     PFTauFlowElementLinkerAlgorithmFactory=CompFactory.PFTauFlowElementAssoc
-    PFTauFlowElementLinkerAlgorithm=PFTauFlowElementLinkerAlgorithmFactory("PFTauFlowElementAssoc")
+    if(algName == ""):
+        algName = "PFTauFlowElementAssoc"
+
+    PFTauFlowElementLinkerAlgorithm=PFTauFlowElementLinkerAlgorithmFactory(algName)
 
     #set an an alternate name if needed
     #this uses some gaudi core magic, namely that you can change the name of the handle as it is a callable attribute, despite the attribute not being explicitly listed in the header
@@ -390,6 +440,16 @@ def getTauFlowElementAssocAlgorithm(inputFlags,neutral_FE_cont_name="",charged_F
          
          PFTauFlowElementLinkerAlgorithm.NeutralFETauDecorKey="TrackCaloClustersNeutral.TCC_TauLinks"
          PFTauFlowElementLinkerAlgorithm.ChargedFETauDecorKey="TrackCaloClustersCharged.TCC_TauLinks"
+    #This allows to set the links on the global particle flow containers created by JetPFlowSelectionAlg in JetRecTools
+    if(useGlobal):
+        PFTauFlowElementLinkerAlgorithm.JetETMissNeutralFlowElementContainer="GlobalNeutralParticleFlowObjects"
+        PFTauFlowElementLinkerAlgorithm.JetETMissChargedFlowElementContainer="GlobalChargedParticleFlowObjects"
+
+        PFTauFlowElementLinkerAlgorithm.TauNeutralFEDecorKey="TauJets.neutralGlobalFELinks"
+        PFTauFlowElementLinkerAlgorithm.TauChargedFEDecorKey="TauJets.chargedGlobalFELinks"
+
+        PFTauFlowElementLinkerAlgorithm.NeutralFETauDecorKey="GlobalNeutralParticleFlowObjects.GlobalFE_TauLinks"
+        PFTauFlowElementLinkerAlgorithm.ChargedFETauDecorKey="GlobalChargedParticleFlowObjects.GlobalFE_TauLinks"
 
     return PFTauFlowElementLinkerAlgorithm
 
@@ -414,12 +474,18 @@ def getOfflinePFAlgorithm(inputFlags):
     result.addEventAlgo(PFAlgorithm)
     return result
 
-def PFTauFlowElementLinkingCfg(inputFlags,neutral_FE_cont_name="",charged_FE_cont_name="",AODTest=False):
+def PFTauFlowElementLinkingCfg(inputFlags,neutral_FE_cont_name="",charged_FE_cont_name="",AODTest=False,doTCC=False,useGlobal=False,algName=""):
     result=ComponentAccumulator()
     
-    result.addEventAlgo(getTauFlowElementAssocAlgorithm(inputFlags,neutral_FE_cont_name,charged_FE_cont_name,AODTest))
+    result.addEventAlgo(getTauFlowElementAssocAlgorithm(inputFlags,neutral_FE_cont_name,charged_FE_cont_name,AODTest,doTCC,useGlobal,algName))
 
     return result
 
+def PFGlobalFlowElementLinkingCfg(inputFlags):
+    result=ComponentAccumulator()
+    result.addEventAlgo(getTauFlowElementAssocAlgorithm(inputFlags,useGlobal=True,algName="PFTauGlobalFlowElementAssoc"))
+    result.addEventAlgo(getMuonFlowElementAssocAlgorithm(inputFlags,useGlobal=True,algName="PFMuonGlobalFlowElementAssoc"))  
+    result.addEventAlgo(getEGamFlowElementAssocAlgorithm(inputFlags,useGlobal=True,algName="PFEGamGlobalFlowElementAssoc"))
+    return result
 
 

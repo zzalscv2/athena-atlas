@@ -71,8 +71,8 @@ namespace met {
     declareProperty( "UseFELinks",         m_useFELinks = false                  ); 
     declareProperty( "NeutralPFOLinksKey", m_neutralPFOLinksKey = "neutralpfoLinks"); 
     declareProperty( "ChargedPFOLinksKey", m_chargedPFOLinksKey = "chargedpfoLinks"); 
-    declareProperty( "NeutralFELinksKey",  m_neutralFELinksKey  = "neutralFELinks"); 
-    declareProperty( "ChargedFELinksKey",  m_chargedFELinksKey  = "chargedFELinks"); 
+    declareProperty( "NeutralFELinksKey",  m_neutralFELinksKey  = "neutralGlobalFELinks"); 
+    declareProperty( "ChargedFELinksKey",  m_chargedFELinksKey  = "chargedGlobalFELinks"); 
   }
 
   // Destructor
