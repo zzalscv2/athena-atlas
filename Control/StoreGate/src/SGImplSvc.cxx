@@ -40,6 +40,7 @@
 #include "PersistentDataModel/DataHeader.h"
 #include "StoreGate/StoreClearedIncident.h"
 #include "AthAllocators/ArenaHeader.h"
+#include "CxxUtils/checker_macros.h"
 
 // StoreGateSvc. must come before SGImplSvc.h
 #include "StoreGate/StoreGateSvc.h"
@@ -784,7 +785,8 @@ SGImplSvc::proxy(const CLID& id, bool checkValid) const
     lock_t lock (m_mutex);
     dp = m_pStore->proxy(id);
     if (0 == dp && 0 != m_pPPS) {
-      dp = m_pPPS->retrieveProxy(id, string("DEFAULT"), *m_pStore);
+      SG::DataStore* pStore ATLAS_THREAD_SAFE = m_pStore;
+      dp = m_pPPS->retrieveProxy(id, string("DEFAULT"), *pStore);
     }
   }
   /// Check if it is valid
@@ -813,7 +815,8 @@ SGImplSvc::proxy(const CLID& id, const string& key, bool checkValid) const
     lock_t lock (m_mutex);
     dp = m_pStore->proxy(id, key);
     if (0 == dp && 0 != m_pPPS) {
-      dp = m_pPPS->retrieveProxy(id, key, *m_pStore);
+      SG::DataStore* pStore ATLAS_THREAD_SAFE = m_pStore;
+      dp = m_pPPS->retrieveProxy(id, key, *pStore);
     }
   }
   // Be sure to release the lock before this.
