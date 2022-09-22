@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2017 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
 */
 
 /**
@@ -23,28 +23,28 @@ class StoreGateSvc;
 
 class TileDetectorFactory : public GeoVDetectorFactory
 {
-public:
-  
+ public:
+
   /** Constructor */
-  TileDetectorFactory(StoreGateSvc *pDetStore, TileDetDescrManager * manager, 
+  TileDetectorFactory(StoreGateSvc *pDetStore, TileDetDescrManager * manager,
                       const TileSwitches & switches, MsgStream *log);
-  
+
   /** Destructor */
   ~TileDetectorFactory();
-  
+
   /** Creation of Tile geometry */
   virtual void create(GeoPhysVol *world);
 
   /** Access function to TileDetDescr geometry data */
   virtual const TileDetDescrManager * getDetectorManager() const { return m_detectorManager; }
 
-private:  
-  
+ private:
+
   /** Detector pointer to Store Gate service */
   StoreGateSvc              *m_detectorStore;
 
-  /** Detector pointer to TileDetDescrManager */  
-  TileDetDescrManager       *m_detectorManager;  
+  /** Detector pointer to TileDetDescrManager */
+  TileDetDescrManager       *m_detectorManager;
 
   /** Get message SVC */
   MsgStream                 *m_log;
@@ -57,4 +57,3 @@ private:
 };
 
 #endif
-

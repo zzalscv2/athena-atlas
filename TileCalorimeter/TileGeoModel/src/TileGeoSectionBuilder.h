@@ -32,9 +32,11 @@ class GeoMaterial;
 class GeoTrd;
 class GeoShape;
 
-class TileGeoSectionBuilder   
+
+class TileGeoSectionBuilder
 {
  public:
+
   /** Constructor */
   TileGeoSectionBuilder(StoredMaterialManager* matManager,
                         TileDddbManager* pDbManager,
@@ -46,7 +48,7 @@ class TileGeoSectionBuilder
 
   /** Section parameters are the following:
       @param sec_number Number of sector
-      @param tile_rmax  Maximal radius 
+      @param tile_rmax  Maximal radius
       @param rminb      Minimal radius
       @param dzglue     Glue gap along dZ
       @param delta_phi  Delta Phi
@@ -67,9 +69,9 @@ class TileGeoSectionBuilder
   /** Girder parameters are the following:
       @param mother     Pointer to mother volume
       @param tile_rmax  Radius from TILE
-      @param tilb_rmax  Radius from TILB 
-      @param delta_ph   Delta phi      
-      @param thickness  Thickness of Girder 
+      @param tilb_rmax  Radius from TILB
+      @param delta_ph   Delta phi
+      @param thickness  Thickness of Girder
   */
   void fillGirder(GeoPhysVol*&             mother,
                   double                   tile_rmax,
@@ -80,8 +82,8 @@ class TileGeoSectionBuilder
   /** Finger parameters are the following:
       @param mother     Pointer to mother volume
       @param tile_rmax  Radius from TILE
-      @param tilb_rmax  Radius from TILB 
-      @param delta_ph   Delta phi      
+      @param tilb_rmax  Radius from TILB
+      @param delta_ph   Delta phi
       @param ModuleNcp  Module index
       @param corrected_dz  dZ correction
   */
@@ -91,14 +93,14 @@ class TileGeoSectionBuilder
                   double                   tilb_rmax,
                   double                   delta_phi_not_used,
                   bool                     testbeam,
-                  int                      ModuleNcp = 0,                  
+                  int                      ModuleNcp = 0,
                   double                   corrected_dz = 0.);
 
   /** Period parameters are the following:
       @param mother      Pointer to mother volume
       @param thickness   Thickness of period
       @param dzglue      Glue thickness in z direction
-      @param delta_ph    Delta phi      
+      @param delta_ph    Delta phi
       @param period_type Type of period
 
   */
@@ -130,7 +132,7 @@ class TileGeoSectionBuilder
       @param manager    Pointer to TileDetDescrManager
       @param detector   Detector index
       @param addPlates  1 for adding plate
-      @param zShiftPos  Positiv shift in Z direction [mm] 
+      @param zShiftPos  Positiv shift in Z direction [mm]
       @param zShiftNeg  Negative shift in Z direction [mm]
   */
   void computeCellDim(TileDetDescrManager*& manager,
@@ -177,7 +179,7 @@ class TileGeoSectionBuilder
             float& etamax,
             float& deta,
             unsigned int& neta);
- 
+
   /** Function for checking empty volumes:
       @param VolumeName  The volume name
       @param print       printig ON/OFF
@@ -185,7 +187,7 @@ class TileGeoSectionBuilder
       @param XYZ         checking variables
   */
   void checking(const std::string& VolumeName, bool print, int level,
-                double X1, double X2, double Y1, double Y2, double Z); 
+                double X1, double X2, double Y1, double Y2, double Z);
 
   // These methods should be used when section contents are not built
   // They initialize private data members used for computing cell dimensions
