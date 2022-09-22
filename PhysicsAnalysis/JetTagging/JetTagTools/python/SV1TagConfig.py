@@ -27,19 +27,25 @@ def SV1TagCfg( flags, name = 'SV1Tag', scheme = '', useBTagFlagsDefaults = True,
         options['xAODBaseName'] = 'SV1Flip'
     else:
         options['xAODBaseName'] = 'SV1'
-    if useBTagFlagsDefaults:
+
+    if flags.BTagging.SaveSV1Probabilities:
         likelihood = acc.popToolsAndMerge(NewLikelihoodToolCfg(flags, 'SV1NewLikelihoodTool', 'SV1', scheme))
-        defaults = { 'Runmodus'                         : flags.BTagging.RunModus,
-                     'referenceType'                    : flags.BTagging.ReferenceType,
-                     'jetPtMinRef'                      : flags.BTagging.JetPtMinRef,
-                     'SaveProbabilities'                : flags.BTagging.SaveSV1Probabilities,
-                     'SVAlgType'                        : 'SV1',
-                     'jetCollectionList'                : [], #used only in reference mode
-                     'SecVxFinderName'                  : 'SV1',
-                     'UseCHypo'                         : True,
-                     'LikelihoodTool'                   : likelihood }
-        for option in defaults:
-            options.setdefault(option, defaults[option])
+    else:
+        likelihood = None
+
+    defaults = {
+        'Runmodus'           : flags.BTagging.RunModus,
+        'referenceType'      : flags.BTagging.ReferenceType,
+        'jetPtMinRef'        : flags.BTagging.JetPtMinRef,
+        'SaveProbabilities'  : flags.BTagging.SaveSV1Probabilities,
+        'SVAlgType'          : 'SV1',
+        'jetCollectionList'  : [], #used only in reference mode
+        'SecVxFinderName'    : 'SV1',
+        'UseCHypo'           : True,
+        'LikelihoodTool'     : likelihood
+    }
+    for option in defaults:
+        options.setdefault(option, defaults[option])
     acc.setPrivateTools(CompFactory.Analysis.SVTag(**options))
 
     return acc
