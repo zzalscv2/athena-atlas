@@ -169,7 +169,7 @@ namespace InDet {
 
 	bool isFromHSProdVtx = false;
 	for (const auto& link : links){
-	  if(truth == *link){
+	  if(link.isValid() && truth == *link){
 	    isFromHSProdVtx = true;
 	    break;
 	  }
