@@ -329,7 +329,7 @@ void TRTElectronicsProcessing::SignalShaping(int strawGasType) {
 }
 
 //___________________________________________________________________________
-void TRTElectronicsProcessing::DiscriminatorResponse(const double& lowthreshold, const double& highthreshold) const {
+void TRTElectronicsProcessing::DiscriminatorResponse(const double& lowthreshold, const double& highthreshold) {
   //Input: m_lowThresholdSignal[],m_highThresholdSignal[]
   //
   //Output: m_lowThresholdDiscriminator[], m_highThresholdDiscriminator[]
