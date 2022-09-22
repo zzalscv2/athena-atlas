@@ -1693,7 +1693,7 @@ StatusCode IDPerfMonZmumu::FillRecParametersTP(const xAOD::TrackParticle* trackp
     else iPandSigma = m_trackToVertexIPEstimator->estimate(trackp, vertex);
     ATH_MSG_DEBUG("return from the trackToVertexIPEstimator->estimate()");
     
-    if( iPandSigma ){
+    if( !iPandSigma ){
       ATH_MSG_WARNING ("FillRecParametersTP::trackToVertexIPEstimator failed !");
       return StatusCode::FAILURE;
     }
