@@ -452,10 +452,10 @@ TriggerHLTListRun3 = [
     ('xAOD::TrigElectronContainer#HLT_FastElectrons_LRT',                 'BS ESD AODCOMM', 'Egamma', 'inViews:EMElectronViews_LRT'),
     ('xAOD::TrigElectronAuxContainer#HLT_FastElectrons_LRTAux.',          'BS ESD AODCOMM', 'Egamma'),
 
-    ('xAOD::TrackParticleContainer#HLT_IDTrack_Electron_FTF',        'BS ESD AODCOMM', 'Egamma', 'inViews:EMElectronViews'),
+    ('xAOD::TrackParticleContainer#HLT_IDTrack_Electron_FTF',        'BS ESD AODCOMM', 'Egamma', 'inViews:EMFastTrackingViews'),
     ('xAOD::TrackParticleAuxContainer#HLT_IDTrack_Electron_FTFAux.', 'BS ESD AODCOMM', 'Egamma'),
 
-    ('xAOD::TrackParticleContainer#HLT_IDTrack_ElecLRT_FTF',        'BS ESD AODCOMM', 'Egamma', 'inViews:EMElectronViews_LRT'),
+    ('xAOD::TrackParticleContainer#HLT_IDTrack_ElecLRT_FTF',        'BS ESD AODCOMM', 'Egamma', 'inViews:EMFastTrackingViews_LRT'),
     ('xAOD::TrackParticleAuxContainer#HLT_IDTrack_ElecLRT_FTFAux.', 'BS ESD AODCOMM', 'Egamma'),
 
     ('xAOD::TrackParticleContainer#HLT_IDTrack_Electron_IDTrig',        'BS ESD AODFULL', 'Egamma', 'inViews:precisionTrackingViews'),
@@ -1247,3 +1247,4 @@ def addExtraCollectionsToEDMList(edmList, extraList):
             else:
                 # asking to add some collection which is already in the list - do nothing
                 pass
+
