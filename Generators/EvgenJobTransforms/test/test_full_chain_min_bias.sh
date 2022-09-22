@@ -25,10 +25,11 @@ echo "art-results: $? HITSMerge_tf"
 
 
 
-Reco_tf.py --AMIConfig=r13829 --inputHITSFile=HITS_Mrg_421113_13p6.pool.root --maxEvents=100 --jobNumber=113 --outputAODFile=AOD_421111_13p6.pool.root --inputRDO_BKGFile=/cvmfs/atlas-nightlies.cern.ch/repo/data/data-art/mc21_13p6TeV/RDO.29616548._005230.pool.root.1
+Reco_tf.py --AMIConfig=r13829 --inputHITSFile=HITS_Mrg_421113_13p6.pool.root --maxEvents=100 --jobNumber=113 --outputAODFile=AOD_421111_13p6.pool.root --inputRDO_BKGFile=/cvmfs/atlas-nightlies.cern.ch/repo/data/data-art/CampaignInputs/mc21/RDO_BKG/mc21_13p6TeV.900149.PG_single_nu_Pt50.digit.RDO.e8453_e8455_s3864_d1761/100events.RDO.pool.root
 
 echo "art-result: $? Reco_tf"
 
 AODMerge_tf.py  --AMIConfig=r13831 --inputAODFile=AOD_421113.pool.root --outputAOD_MRGFile=AOD_merge_421113.pool.root --skipEvents=0
 
 echo "art-result: $? AODMerge_tf"
+~                                   
