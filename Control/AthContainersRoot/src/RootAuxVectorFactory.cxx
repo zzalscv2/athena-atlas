@@ -1,8 +1,6 @@
 /*
-  Copyright (C) 2002-2017 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
 */
-
-// $Id$
 /**
  * @file AthContainersRoot/src/RootAuxVectorFactory.cxx
  * @author scott snyder <snyder@bnl.gov>
@@ -174,7 +172,9 @@ void* RootAuxVector::toVector ()
  */
 size_t RootAuxVector::size() const
 {
-  TVirtualCollectionProxy::TPushPop bind (m_proxy, m_vec);
+  TVirtualCollectionProxy* proxy ATLAS_THREAD_SAFE = m_proxy;
+  void* vec ATLAS_THREAD_SAFE = m_vec;
+  TVirtualCollectionProxy::TPushPop bind (proxy, vec);
   return m_proxy->Size();
 }
 
