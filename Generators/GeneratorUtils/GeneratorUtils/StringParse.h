@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2017 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef GENERATORUTILS_STRINGPARSE_H
@@ -30,8 +30,9 @@ class StringParse {
 public:
 
   /// Constructor, taking a string of whitespace-separated tokens
-  StringParse(const std::string& input) {
-    m_lstring = input;
+  StringParse(const std::string& input)
+    : m_lstring (input)
+  {
     std::istringstream instring(input);
     std::string token;
     while (instring >> token) {
