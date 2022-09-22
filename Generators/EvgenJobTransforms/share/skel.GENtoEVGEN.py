@@ -122,7 +122,7 @@ evgenLog.debug("****************** CONFIGURING EVENT GENERATION ****************
 ## Functions for operating on generator names
 ## NOTE: evgenConfig, topSeq, svcMgr, theApp, etc. should NOT be explicitly re-imported in JOs
 from EvgenJobTransforms.EvgenConfig import evgenConfig
-from EvgenJobTransforms.EvgenConfig import gens_known, gens_lhef, gen_sortkey, gens_testhepmc, gens_notune, gen_require_steering
+from EvgenJobTransforms.EvgenConfig import gens_known, gen_lhef, gens_lhef, gen_sortkey, gens_testhepmc, gens_notune, gen_require_steering
 
 ## Fix non-standard event features
 from EvgenProdTools.EvgenProdToolsConf import FixHepMC
@@ -490,7 +490,7 @@ for item in gennames:
 
 import EventInfoMgt.EventInfoMgtInit
 svcMgr.TagInfoMgr.ExtraTagValuePairs.update({"mc_channel_number":str(dsid)})
-svcMgr.TagInfoMgr.ExtraTagValuePairs.update({"lhefGenerator": '+'.join( filter( gens_lhef, gennames ) ) })
+svcMgr.TagInfoMgr.ExtraTagValuePairs.update({"lhefGenerator": '+'.join( filter( gen_lhef, gennames ) ) })
 svcMgr.TagInfoMgr.ExtraTagValuePairs.update({"generators": '+'.join(gennamesvers)})
 svcMgr.TagInfoMgr.ExtraTagValuePairs.update({"evgenProcess": evgenConfig.process})
 svcMgr.TagInfoMgr.ExtraTagValuePairs.update({"evgenTune": evgenConfig.tune})
