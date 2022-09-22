@@ -25,7 +25,13 @@ StatusCode ISF::ActsFatrasSimTool::initialize() {
   if (!m_particleFilter.empty()) ATH_CHECK(m_particleFilter.retrieve());
 
   // setup logger
-  m_logger = makeActsAthenaLogger(this->msgSvc().get(), "ActsFatrasSimTool", this->msgSvc().get()->outputLevel(), boost::optional<std::string>("ActsFatrasSimTool"));
+  int athena_msg_outputlevel = this->msgSvc().get()->outputLevel();
+  if (athena_msg_outputlevel <= MSG::Level::DEBUG){
+    m_logger = makeActsAthenaLogger(this->msgSvc().get(), "ActsFatrasSimTool", athena_msg_outputlevel, boost::optional<std::string>("ActsFatrasSimTool"));
+  }
+  else{
+    m_logger = makeActsAthenaLogger(this->msgSvc().get(), "ActsFatrasSimTool", MSG::Level::FATAL, boost::optional<std::string>("ActsFatrasSimTool")); // disable the Error msg from propagator. No need to report Error for particle that fail to be simulated
+  }
 
   // retrive tracking geo tool
   ATH_CHECK(m_trackingGeometryTool.retrieve());
@@ -50,8 +56,9 @@ StatusCode ISF::ActsFatrasSimTool::initialize() {
   return StatusCode::SUCCESS;
 }
 
-StatusCode ISF::ActsFatrasSimTool::simulate(const ISFParticle& isp, ISFParticleContainer& secondaries,
-                                            McEventCollection* mcEventCollection) const {
+StatusCode ISF::ActsFatrasSimTool::simulate(
+  const ISFParticle& isp, ISFParticleContainer& secondaries,
+  McEventCollection* mcEventCollection) const {
   ATH_MSG_VERBOSE("Particle " << isp << " received for simulation.");
   // Check if particle passes filter, if there is one
   if (!m_particleFilter.empty() && !m_particleFilter->passFilter(isp)) {
@@ -90,6 +97,10 @@ StatusCode ISF::ActsFatrasSimTool::simulateVector(
   NeutralSimulation simulatorNeutral(std::move(neutralPropagator), m_logger);
   Simulation simulator=Simulation(std::move(simulatorCharged),std::move(simulatorNeutral));
   ATH_MSG_VERBOSE(name() << " Min pT for interaction " << m_interact_minPt * Acts::UnitConstants::MeV << " GeV");
+  simulator.charged.maxStepSize=m_maxStepSize;
+  simulator.charged.maxStep=m_maxStep;
+  simulator.charged.pathLimit=m_pathLimit;
+  simulator.charged.ptLoopers=m_ptLoopers;
   simulator.charged.interactions = ActsFatras::makeStandardChargedElectroMagneticInteractions(m_interact_minPt * Acts::UnitConstants::MeV);
   // get Geo and Mag map
   ATH_MSG_VERBOSE(name() << " Getting per event Geo and Mag map");
@@ -119,7 +130,13 @@ StatusCode ISF::ActsFatrasSimTool::simulateVector(
     std::vector<ActsFatras::Hit> hits;
     ATH_MSG_DEBUG(name() << " Propagating ActsFatras::Particle  vertex|particle|generation|subparticle, " << input[0]);
     // simulate
-    simulator.simulate(anygctx, mctx, generator, input, simulatedInitial, simulatedFinal, hits);
+    auto result=simulator.simulate(anygctx, mctx, generator, input, simulatedInitial, simulatedFinal, hits);
+    auto simulatedFailure=result.value();
+    if (simulatedFailure.size()>0){
+      ATH_MSG_WARNING(name() << "Particle " << input[0] << "fail to be simulated during Propagation");
+      continue;
+    }
+
     ATH_MSG_DEBUG(name() << " initial particle " << simulatedInitial[0]);
     ATH_MSG_DEBUG(name() << " No. of particles after ActsFatras simulator: " << simulatedFinal.size());
     // convert final particles to ISF::particle

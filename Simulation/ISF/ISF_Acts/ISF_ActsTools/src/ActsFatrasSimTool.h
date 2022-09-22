@@ -251,8 +251,16 @@ class ActsFatrasSimTool : public BaseSimulatorTool {
       this, "ParticleFilter", "", "Particle filter kinematic cuts, etc."};
 
   Gaudi::Property<double> m_interact_minPt{this, "Interact_MinPt", 50.0,
-    "Min pT of the interactions (MeV)"};
-
+      "Min pT of the interactions (MeV)"};
+  Gaudi::Property<double> m_maxStepSize{this, "MaxStepSize", 3.0,
+      "Max step size (converted to Acts::UnitConstants::m)"};
+  Gaudi::Property<double> m_maxStep{this, "MaxSteps", 1000,
+       "Max number of steps"};
+  Gaudi::Property<double> m_pathLimit{this, "PathLimit", 100.0,
+      "Track path limit (converted to Acts::UnitConstants::cm)"};
+  Gaudi::Property<double> m_ptLoopers{this, "PtLoopers", 300.0,
+      "pT loop protection threshold; adapts to pathLimit (converted to "
+      "Acts::UnitConstants::MeV)"};
 };
 
 }  // namespace ISF
