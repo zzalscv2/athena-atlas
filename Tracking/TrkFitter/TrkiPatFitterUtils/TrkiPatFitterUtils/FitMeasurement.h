@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
 */
 
 /***************************************************************************
@@ -104,10 +104,10 @@ public:
   unsigned alignmentParameter2(void) const;
   void alignmentParameter2(unsigned value);
   double derivative(int param) const;
-  void derivative(int param, double value) const;
+  void derivative(int param, double value);
   void derivative(double* pointer);
   double derivative2(int param) const;
-  void derivative2(int param, double value) const;
+  void derivative2(int param, double value);
   void derivative2(double* pointer);
   int derivativeRow(void) const;
   void derivativeRow(int row);
@@ -322,7 +322,7 @@ FitMeasurement::derivative(int param) const
 }
 
 inline void
-FitMeasurement::derivative(int param, double value) const
+FitMeasurement::derivative(int param, double value)
 {
   *(m_derivative + param) = value;
 }
@@ -340,7 +340,7 @@ FitMeasurement::derivative2(int param) const
 }
 
 inline void
-FitMeasurement::derivative2(int param, double value) const
+FitMeasurement::derivative2(int param, double value)
 {
   *(m_derivative2 + param) = value;
 }
