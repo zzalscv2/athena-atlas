@@ -19,7 +19,7 @@ class TrigEgammaKeysBase(object):
 
 
         """Static class to collect all string manipulation in fast electron sequences """
-        self.fastElectronRoIContainer                   = recordable("HLT_Roi_FastElectron")
+        self.fastTrackingRoIContainer                   = recordable("HLT_Roi_FastElectron")
         self.fastElectronContainer                      = recordable("HLT_FastElectrons")
 
         """Static class to collect all string manipulation in fast photon sequences """
@@ -67,6 +67,9 @@ class TrigEgammaKeysBase(object):
       def IDTrigConfig(self):
           return self._IDTrigConfig
 
+      @property
+      def fastTrackParticleContainer(self):
+          return self._IDTrigConfig.tracks_FTF()
 
 
 
@@ -75,7 +78,7 @@ class TrigEgammaKeys_LRT(TrigEgammaKeysBase):
     def __init__(self,ion):
         TrigEgammaKeysBase.__init__(self,ion)
         
-        self.fastElectronRoIContainer               = recordable("HLT_Roi_FastElectron_LRT")
+        self.fastTrackingRoIContainer               = recordable("HLT_Roi_FastElectron_LRT")
         self.fastElectronContainer                  = recordable('HLT_FastElectrons_LRT')
         self.precisionElectronEMClusterContainer    = recordable('HLT_TrigEMClusters_Electrons_LRT')
         self.precisionElectronCaloClusterContainer  = recordable("HLT_CaloEMClusters_LRT")
