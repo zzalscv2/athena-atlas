@@ -26,28 +26,28 @@ class StoreGateSvc;
 class ATLAS_NOT_THREAD_SAFE TileTBFactory : public GeoVDetectorFactory
 //    ^ modifies cabling during create
 {
-public:
-  
+ public:
+
   /** Constructor */
   TileTBFactory(StoreGateSvc *pDetStore, TileDetDescrManager *manager,
                 const TileSwitches & switches, MsgStream *log);
-  
+
   /** Destructor */
   ~TileTBFactory();
-  
+
   /** Creation of Test Beam Tile geometry */
   virtual void create(GeoPhysVol *world) override;
-  
+
   /** Access function to TileDetDescr geometry data */
   virtual const TileDetDescrManager * getDetectorManager() const override { return m_detectorManager; }
 
-private:  
-  
+ private:
+
   /** Detector pointer to Store Gate service */
   StoreGateSvc              *m_detectorStore;
 
-  /** Detector pointer to TileDetDescrManager */  
-  TileDetDescrManager       *m_detectorManager;  
+  /** Detector pointer to TileDetDescrManager */
+  TileDetDescrManager       *m_detectorManager;
 
   /** Get message SVC */
   MsgStream                 *m_log;
@@ -60,4 +60,3 @@ private:
 };
 
 #endif
-

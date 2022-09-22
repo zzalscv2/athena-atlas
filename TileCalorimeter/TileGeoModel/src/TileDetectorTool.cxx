@@ -14,14 +14,13 @@
 #include "TileTBFactory.h"
 #include "TileDetectorFactoryLite.h"
 
-#include "TileDetDescr/TileDetDescrManager.h" 
+#include "TileDetDescr/TileDetDescrManager.h"
 #include "TileDetDescr/TileDddbManager.h"
 #include "TileConditions/TileCablingService.h"
 
 #include "CaloIdentifier/TileID.h"
 #include "TileIdentifier/TileHWID.h"
 #include "CaloIdentifier/CaloCell_ID.h"
-#include "CaloDetDescr/CaloDetDescrElement.h"
 
 #include "GeoModelInterfaces/IGeoModelSvc.h"
 #include "GeoModelUtilities/GeoModelExperiment.h"
@@ -29,8 +28,6 @@
 #include "GaudiKernel/MsgStream.h"
 #include "StoreGate/StoreGateSvc.h"
 #include "RDBAccessSvc/IRDBAccessSvc.h"
-#include "RDBAccessSvc/IRDBRecordset.h"
-#include "RDBAccessSvc/IRDBRecord.h"
 
 #include "GeoModelRead/ReadGeoModel.h"
 
@@ -39,16 +36,15 @@
 #include "SGTools/DataProxy.h"
 
 
-
-TileDetectorTool::TileDetectorTool(const std::string& type, 
-                   const std::string& name, 
-                   const IInterface* parent):
-  GeoModelTool(type, name, parent),
-  m_switches(false,true),
-  m_not_locked(true),
-  m_useNewFactory(true),
-  m_geometryConfig("FULL"),
-  m_manager(0)
+TileDetectorTool::TileDetectorTool(const std::string& type,
+                                   const std::string& name,
+                                   const IInterface* parent)
+        : GeoModelTool(type, name, parent)
+        , m_switches(false,true)
+        , m_not_locked(true)
+        , m_useNewFactory(true)
+        , m_geometryConfig("FULL")
+        , m_manager(0)
 {
   declareProperty("UseNewFactory", m_useNewFactory);
   declareProperty("GeometryConfig",m_geometryConfig);
@@ -61,28 +57,30 @@ TileDetectorTool::TileDetectorTool(const std::string& type,
   declareProperty("CsTube",m_switches.csTube);
 }
 
+
 TileDetectorTool::~TileDetectorTool()
 {
 }
 
+
 void TileDetectorTool::setSwitch(int & param, int value, const char * name)
 {
-    if (param < 0) {
-      param = value;
-      ATH_MSG_INFO(name << " parameter from database is: " << param);
+  if (param < 0) {
+    param = value;
+    ATH_MSG_INFO(name << " parameter from database is: " << param);
+  } else {
+    if (param != value) {
+      ATH_MSG_WARNING("Overriding " << name << " value from DB by value from jobOptions, using "
+                      << param << " instead of " << value);
     } else {
-      if (param != value) {
-        ATH_MSG_WARNING("Overriding " << name << " value from DB by value from jobOptions, using "
-                        << param << " instead of " << value);
-      } else {
-        ATH_MSG_INFO(name << " parameter from jobOptions is: " << param);
-      }
+      ATH_MSG_INFO(name << " parameter from jobOptions is: " << param);
     }
+  }
 }
 
 
 StatusCode TileDetectorTool::create()
-{ 
+{
   MsgStream log(msgSvc(), name());
   ATH_MSG_INFO(" Entering TileDetectorTool::create()");
 
@@ -92,26 +90,24 @@ StatusCode TileDetectorTool::create()
 
   std::string atlasVersion = geoModel->atlasVersion();
   std::string tileVersion = geoModel->tileVersionOverride();
- 
+
   std::string versionTag = tileVersion.empty()? atlasVersion : tileVersion;
   std::string versionNode = tileVersion.empty()? "ATLAS" : "TileCal";
- 
-  if(versionTag == "AUTO")
-  {
+
+  if (versionTag == "AUTO") {
     versionTag = "TileCal-00";
-    versionNode = "TileCal";    
+    versionNode = "TileCal";
   }
   if (atlasVersion.compare(0,9,"ATLAS-CTB") == 0 || tileVersion.compare(0,6,"TileTB") == 0) {
     ATH_MSG_INFO("CTB geometry detected: " << atlasVersion  << " " << tileVersion);
     m_switches.testBeam = true;
   }
-  
+
   //Locate the top level experiment node
   GeoModelExperiment* theExpt = nullptr;
   CHECK( detStore()->retrieve(theExpt, "ATLAS") );
 
-  if ( 0 == m_detector )
-  {
+  if ( 0 == m_detector ) {
     // Get the detector configuration.
     ServiceHandle<IGeoDbTagSvc> geoDbTag("GeoDbTagSvc",name());
     ATH_CHECK(geoDbTag.retrieve());
@@ -119,7 +115,7 @@ StatusCode TileDetectorTool::create()
     // Get the 'new' accessSvc to get parameters / DB data from the DD SQLite input file.
     ServiceHandle<IRDBAccessSvc> accessSvc(geoDbTag->getParamSvcName(),name());
     ATH_CHECK(accessSvc.retrieve());
-    
+
     // Get the SQLite reader, if specified in the jobOption
     GeoModelIO::ReadGeoModel* sqliteReader = geoDbTag->getSqliteReader();
 
@@ -147,46 +143,42 @@ StatusCode TileDetectorTool::create()
     setSwitch(m_switches.csTube, dbManager->csTube(), "CsTube");
 
     m_not_locked = false;
-    
+
     GeoPhysVol *world=&*theExpt->getPhysVol();
-    
+
     // build the geometry from the standalone SQLite file
     if (sqliteReader) {
-        TileDetectorFactoryLite theTileFactoryLite(detStore().operator->(), 
-                m_manager, 
-                sqliteReader,
-                accessSvc.operator->(),
-                m_switches,
-                &log,
-                true);
-        theTileFactoryLite.create(world);
-    } 
-    // build the geometry from the Oracle-based GeometryDB
-    else {
-        if(m_switches.testBeam)
-        {
-          // TileTBFactory is not thread-safe. But since this code should only be
-          // ever called once (and this is "only" for test beam geometry), we use
-          // this rather ugly hack to silence the thread-checker warnings:
-          [[maybe_unused]] static const bool do_once ATLAS_THREAD_SAFE = [&]() ATLAS_NOT_THREAD_SAFE {
-            TileCablingService::getInstance_nc()->setTestBeam(true);
-            TileTBFactory theTileTBFactory = TileTBFactory(detStore().operator->(),m_manager,m_switches,&log);
-            theTileTBFactory.create(world);
-            return true;
-          }();
-        }
-        else if (m_useNewFactory)
-        {
-            TileAtlasFactory theTileFactory(detStore().operator->(),m_manager,m_switches,&log,m_geometryConfig=="FULL");
-            theTileFactory.create(world);
-        }
-        else
-        {
-            TileDetectorFactory theTileFactory(detStore().operator->(),m_manager,m_switches,&log);
-            theTileFactory.create(world);
-        }
+      TileDetectorFactoryLite theTileFactoryLite(detStore().operator->(),
+                                                 m_manager,
+                                                 sqliteReader,
+                                                 accessSvc.operator->(),
+                                                 m_switches,
+                                                 &log,
+                                                 true);
+      theTileFactoryLite.create(world);
+    } else {
+      // build the geometry from the Oracle-based GeometryDB
+      if (m_switches.testBeam) {
+        // TileTBFactory is not thread-safe. But since this code should only be
+        // ever called once (and this is "only" for test beam geometry), we use
+        // this rather ugly hack to silence the thread-checker warnings:
+        [[maybe_unused]] static const bool do_once ATLAS_THREAD_SAFE = [&]() ATLAS_NOT_THREAD_SAFE {
+          TileCablingService::getInstance_nc()->setTestBeam(true);
+          TileTBFactory theTileTBFactory = TileTBFactory(detStore().operator->(),m_manager,m_switches,&log);
+          theTileTBFactory.create(world);
+          return true;
+        }();
+
+      } else if (m_useNewFactory) {
+        TileAtlasFactory theTileFactory(detStore().operator->(),m_manager,m_switches,&log,m_geometryConfig=="FULL");
+        theTileFactory.create(world);
+
+      } else {
+        TileDetectorFactory theTileFactory(detStore().operator->(),m_manager,m_switches,&log);
+        theTileFactory.create(world);
+      }
     } // end of building the geometry from the GeometryDB
-   ATH_MSG_DEBUG( "The Tile raw geometry has been built.");
+    ATH_MSG_DEBUG( "The Tile raw geometry has been built.");
 
     CHECK( createElements() );
 
@@ -196,25 +188,27 @@ StatusCode TileDetectorTool::create()
 
     // For reco jobs: release DB manager. Cannot do it here for simulation jobs, they
     // release DB manager as part of global GeoModel release
-    if(m_geometryConfig=="RECO")
+    if (m_geometryConfig=="RECO")
       m_manager->releaseDbManager();
 
     return StatusCode::SUCCESS;
-  
+
   }
 
   return StatusCode::FAILURE;
 }
 
+
 StatusCode TileDetectorTool::clear()
 {
   SG::DataProxy* proxy = detStore()->proxy(ClassID_traits<TileDetDescrManager>::ID(),m_manager->getName());
-  if(proxy) {
+  if (proxy) {
     proxy->reset();
     m_manager = 0;
   }
   return StatusCode::SUCCESS;
 }
+
 
 StatusCode TileDetectorTool::initIds()
 {
@@ -233,12 +227,11 @@ StatusCode TileDetectorTool::initIds()
 
   // instantiate Cabling Svc to initialize pointers to helpers there
   const TileCablingService * cabling = TileCablingService::getInstance();
-  if(cabling==0)
-  {
+  if (cabling==0) {
     ATH_MSG_ERROR("Could not get instance of TileCablingService");
     return StatusCode::FAILURE;
   }
-  
+
   return StatusCode::SUCCESS;
 }
 

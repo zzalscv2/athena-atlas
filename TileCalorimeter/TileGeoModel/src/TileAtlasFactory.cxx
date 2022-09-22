@@ -29,7 +29,7 @@
 
 #include "GeoGenericFunctions/AbsFunction.h"
 #include "GeoGenericFunctions/Variable.h"
-#include "GeoModelKernel/GeoXF.h" 
+#include "GeoModelKernel/GeoXF.h"
 #include "GeoModelKernel/GeoSerialTransformer.h"
 
 #include "GeoModelInterfaces/StoredMaterialManager.h"
@@ -41,7 +41,7 @@
 #include <stdexcept>
 #include <iostream>
 #include <iomanip>
-#include <algorithm> 
+#include <algorithm>
 #include <cmath>
 #include <string>
 
@@ -50,36 +50,39 @@
 using namespace GeoGenfun;
 using namespace GeoXF;
 
+
 // Constructor:
 TileAtlasFactory::TileAtlasFactory(StoreGateSvc *pDetStore,
                                    TileDetDescrManager *manager,
                                    const TileSwitches & switches,
                                    MsgStream *log,
-				                   bool fullGeo)
-  : m_detectorStore(pDetStore)
-  , m_detectorManager(manager)
-  , m_log(log) 
-  , m_switches(switches)
-  , m_verbose(log->level()<=MSG::VERBOSE) 
-  , m_fullGeo(fullGeo)
+                                   bool fullGeo)
+        : m_detectorStore(pDetStore)
+        , m_detectorManager(manager)
+        , m_log(log)
+        , m_switches(switches)
+        , m_verbose(log->level()<=MSG::VERBOSE)
+        , m_fullGeo(fullGeo)
 {
   m_switches.testBeam = false;
 }
-  
-// Destructor: 
-TileAtlasFactory::~TileAtlasFactory(){}
-  
+
+
+// Destructor:
+TileAtlasFactory::~TileAtlasFactory() {}
+
+
 // Creation of geometry:
-void TileAtlasFactory::create(GeoPhysVol *world)  
-{ 
+void TileAtlasFactory::create(GeoPhysVol *world)
+{
   // Global geometri definition for debugging
   bool  Filling = true;
   bool  EBC = true /* Negative */, BAR = true /* Barrel */, EBA = true /* Positive */;
   int   NcpFrom = 1, NcpPlus = 63; // Default is all [1-63]
- 
+
   //int   NcpFrom = 34, NcpPlus = 29; // ext.barrel, special
 
-  double deltaPhi = 360./64; // we know apriory that 64 modules makes full cylinder 
+  double deltaPhi = 360./64; // we know apriory that 64 modules makes full cylinder
   double AnglMin = (NcpFrom-1)*deltaPhi*Gaudi::Units::deg, AnglMax = (NcpPlus+1)*deltaPhi*Gaudi::Units::deg;
 
   // phi range of modules with special C10
@@ -92,10 +95,9 @@ void TileAtlasFactory::create(GeoPhysVol *world)
 
   // -------- -------- MATERIAL MANAGER -------- ----------
   StoredMaterialManager* theMaterialManager = nullptr;
-  if (StatusCode::SUCCESS != m_detectorStore->retrieve(theMaterialManager, "MATERIALS")) 
-  {  
-    (*m_log) << MSG::ERROR << "Could not find Material Manager MATERIALS" << endmsg; 
-    return; 
+  if (StatusCode::SUCCESS != m_detectorStore->retrieve(theMaterialManager, "MATERIALS")) {
+    (*m_log) << MSG::ERROR << "Could not find Material Manager MATERIALS" << endmsg;
+    return;
   }
   const GeoMaterial* matAir = theMaterialManager->getMaterial("std::Air");
   const GeoMaterial* matIron = theMaterialManager->getMaterial("std::Iron");
@@ -106,19 +108,19 @@ void TileAtlasFactory::create(GeoPhysVol *world)
   TileGeoSectionBuilder* sectionBuilder = new TileGeoSectionBuilder(theMaterialManager,dbManager,m_switches,m_log);
 
   double DzSaddleSupport = 0, RadiusSaddle = 0;
-  if (dbManager->BoolSaddle())
-    {(*m_log) << MSG::INFO << " Tile Geometry with Saddle supports, starting from TileCal-CSC-02 xxx"<< endmsg;
+  if (dbManager->BoolSaddle()) {
+    (*m_log) << MSG::INFO << " Tile Geometry with Saddle supports, starting from TileCal-CSC-02 xxx"<< endmsg;
 
-     dbManager->SetCurrentSaddle(0);
+    dbManager->SetCurrentSaddle(0);
 
-     DzSaddleSupport = dbManager->DzSaddleSupport()*Gaudi::Units::cm;
-     RadiusSaddle = dbManager->RadiusSaddle()*Gaudi::Units::cm;
-     if(m_log->level()<=MSG::DEBUG)
-       (*m_log) << MSG::DEBUG << " DzSaddleSupport()= "<<DzSaddleSupport<<" RadiusSaddle= "<<RadiusSaddle
-		<< endmsg;
-    }
+    DzSaddleSupport = dbManager->DzSaddleSupport()*Gaudi::Units::cm;
+    RadiusSaddle = dbManager->RadiusSaddle()*Gaudi::Units::cm;
+    if (m_log->level()<=MSG::DEBUG)
+      (*m_log) << MSG::DEBUG << " DzSaddleSupport()= "<<DzSaddleSupport<<" RadiusSaddle= "<<RadiusSaddle
+               << endmsg;
+  }
 
-  if(m_log->level()<=MSG::DEBUG)
+  if (m_log->level()<=MSG::DEBUG)
     (*m_log) <<MSG::DEBUG << "TileAtlasFactory. addPlates = " <<m_switches.addPlatesToCell<<endmsg;
   // -------- -------- CUT BUILDER  -------- ----------
   //TileGeoCutBuilder* CutBuilder = new TileGeoCutBuilder(theMaterialManager,dbManager,m_log);
@@ -129,7 +131,7 @@ void TileAtlasFactory::create(GeoPhysVol *world)
   GeoPhysVol *pvTileEnvelopeBarrel =0, *pvTileEnvelopePosEndcap =0, *pvTileEnvelopeNegEndcap =0;
 
   // radius for minimization overlap volumes
-  double rless   =0.15; // 150 [mkm] 
+  double rless   =0.15; // 150 [mkm]
 
   double dzITC1 =0, rMinITC1 =0, rMaxITC1 =0;
   double dzITC2 =0, rMinITC2 =0, rMaxITC2 =0;
@@ -149,7 +151,7 @@ void TileAtlasFactory::create(GeoPhysVol *world)
   double PhiMin[]   = {+360.0,+360.0,+360.0,+360.0,+360.0,+360.0};
   double RInMin[]   = {99999.9,99999.9,99999.9,99999.9,99999.9,99999.9};
   double ROutMax[]  = {0.0,0.0,0.0,0.0,0.0,0.0};
-  double FingerRmax  =0;
+  double FingerRmax = 0;
   //unsigned int ienv_size = 6;
 
   // set default finger length
@@ -157,7 +159,7 @@ void TileAtlasFactory::create(GeoPhysVol *world)
   double BFingerLengthNeg =0;
   double BFingerLengthPos =0;
 
-  // Barrel finger 
+  // Barrel finger
   dbManager->SetCurrentTifg(1);
   BFingerLength  = BFingerLengthNeg  = BFingerLengthPos  = dbManager->TIFGdz()*Gaudi::Units::cm;
 
@@ -165,26 +167,25 @@ void TileAtlasFactory::create(GeoPhysVol *world)
   double EBFingerLengthNeg =0;
   double EBFingerLengthPos =0;
 
-  // EBarrel finger 
+  // EBarrel finger
   dbManager->SetCurrentTifg(2);
   EBFingerLength = EBFingerLengthNeg = EBFingerLengthPos = dbManager->TIFGdz()*Gaudi::Units::cm;
 
   int n_env = dbManager->GetNumberOfEnv();
-  
+
   //std::cerr <<std::cout.setf(std::ios::right)<<std::setiosflags(std::ios::fixed)<<std::setw(9)<<std::setprecision(2);
 
-  if(m_log->level()<=MSG::DEBUG)
+  if (m_log->level()<=MSG::DEBUG)
     (*m_log) << MSG::DEBUG << "n_env " << n_env << endmsg;
 
-  for(int i = 0; i < n_env ; ++i)
-  {
+  for (int i = 0; i < n_env ; ++i) {
     dbManager->SetCurrentEnvByIndex(i);
     int Type = dbManager->GetEnvType();
 
     /*
-    if (Type == 1) BAR = true;
-    if (Type == 2) EBC = true; 
-    if (Type == 3) EBA = true;
+      if (Type == 1) BAR = true;
+      if (Type == 2) EBC = true;
+      if (Type == 3) EBA = true;
     */
 
     ZLength  [Type] = dbManager->GetEnvZLength()*Gaudi::Units::cm;
@@ -195,16 +196,16 @@ void TileAtlasFactory::create(GeoPhysVol *world)
     ROutMax  [Type] = std::max(ROutMax[Type],dbManager->GetEnvRout()*Gaudi::Units::cm);
     FingerRmax         = std::max(FingerRmax,dbManager->GetEnvRout()*Gaudi::Units::cm);
 
-    //std::cout << "# Type " <<Type<< " ZLength " <<ZLength [Type]<< " EnvDZPos "<<EnvDZPos [Type]<< "\n"; 
+    //std::cout << "# Type " <<Type<< " ZLength " <<ZLength [Type]<< " EnvDZPos "<<EnvDZPos [Type]<< "\n";
   }
 
   //
-  // recalculate length of positive barrel finger length if Ext.Barrel is present 
+  // recalculate length of positive barrel finger length if Ext.Barrel is present
   //
 
   double PosDelta =0;
   PosDelta = EnvDZPos[3] - EnvDZPos[1];
-  if(m_log->level()<=MSG::DEBUG)
+  if (m_log->level()<=MSG::DEBUG)
     (*m_log) << MSG::DEBUG <<" BFingerLengthPos "<<BFingerLengthPos<<" PosDelta "<<PosDelta;
   if (fabs(PosDelta) < fabs(EBFingerLength - BFingerLength) ) {
     BFingerLengthPos += PosDelta;
@@ -217,12 +218,12 @@ void TileAtlasFactory::create(GeoPhysVol *world)
   }
 
   //
-  // recalculate length of negative barrel finger length if Ext.Barrel is present 
+  // recalculate length of negative barrel finger length if Ext.Barrel is present
   //
 
   double NegDelta =0;
   NegDelta = (-EnvDZPos[2] + EnvDZPos[1]); // negative shift - bigger finger
-  if(m_log->level()<=MSG::DEBUG)
+  if (m_log->level()<=MSG::DEBUG)
     (*m_log) << MSG::DEBUG <<" BFingerLengthNeg "<<BFingerLengthNeg<<" NegDelta "<<NegDelta;
   if (fabs(NegDelta) < fabs(EBFingerLength - BFingerLength) ) {
     BFingerLengthNeg += NegDelta;
@@ -260,7 +261,7 @@ void TileAtlasFactory::create(GeoPhysVol *world)
       rMinE4neg = rMinE4sp;
     }
   }
-  
+
   /** setfinger length */
   double BFingerRmin=0, EFingerRmin=0;
   dbManager->SetCurrentSection(TileDddbManager::TILE_BARREL);
@@ -273,70 +274,70 @@ void TileAtlasFactory::create(GeoPhysVol *world)
 
 
   //
-  // Central Barrel 
+  // Central Barrel
   //
 
-  // Z planes 
+  // Z planes
   double endCentralBarrel = ZLength[1]/2 - BFingerLength; // nominal position of end plate
   double endEnvelopeNeg = endCentralBarrel + BFingerLengthNeg;
   double endEnvelopePos = endCentralBarrel + BFingerLengthPos;
 
-  // R minimal 
+  // R minimal
   double rminBarrel = RInMin[1];
-    
+
   // R maximal
   double rmaxTotal = ROutMax[1];
-    
+
   GeoPcon* tileEnvPconeBarrel = new GeoPcon(PhiMin[1]*Gaudi::Units::deg, PhiMax[1]*Gaudi::Units::deg);
 
-   tileEnvPconeBarrel->addPlane(-endEnvelopeNeg,                   BFingerRmin,             rmaxTotal);
-   tileEnvPconeBarrel->addPlane(-endCentralBarrel-DzSaddleSupport, BFingerRmin,             rmaxTotal);
-  if (dbManager->BoolSaddle())
-  {tileEnvPconeBarrel->addPlane(-endCentralBarrel-DzSaddleSupport, BFingerRmin-RadiusSaddle,rmaxTotal);
-   tileEnvPconeBarrel->addPlane(-endCentralBarrel,                 BFingerRmin-RadiusSaddle,rmaxTotal);
+  tileEnvPconeBarrel->addPlane(-endEnvelopeNeg,                   BFingerRmin,             rmaxTotal);
+  tileEnvPconeBarrel->addPlane(-endCentralBarrel-DzSaddleSupport, BFingerRmin,             rmaxTotal);
+  if (dbManager->BoolSaddle()) {
+    tileEnvPconeBarrel->addPlane(-endCentralBarrel-DzSaddleSupport, BFingerRmin-RadiusSaddle,rmaxTotal);
+    tileEnvPconeBarrel->addPlane(-endCentralBarrel,                 BFingerRmin-RadiusSaddle,rmaxTotal);
   }
-   tileEnvPconeBarrel->addPlane(-endCentralBarrel,                 rminBarrel,              rmaxTotal);
-   tileEnvPconeBarrel->addPlane( endCentralBarrel,                 rminBarrel,              rmaxTotal);
-  if (dbManager->BoolSaddle())
-  {tileEnvPconeBarrel->addPlane( endCentralBarrel,                 BFingerRmin-RadiusSaddle,rmaxTotal);
-   tileEnvPconeBarrel->addPlane( endCentralBarrel+DzSaddleSupport, BFingerRmin-RadiusSaddle,rmaxTotal);
+  tileEnvPconeBarrel->addPlane(-endCentralBarrel,                 rminBarrel,              rmaxTotal);
+  tileEnvPconeBarrel->addPlane( endCentralBarrel,                 rminBarrel,              rmaxTotal);
+  if (dbManager->BoolSaddle()) {
+    tileEnvPconeBarrel->addPlane( endCentralBarrel,                 BFingerRmin-RadiusSaddle,rmaxTotal);
+    tileEnvPconeBarrel->addPlane( endCentralBarrel+DzSaddleSupport, BFingerRmin-RadiusSaddle,rmaxTotal);
   }tileEnvPconeBarrel->addPlane( endCentralBarrel+DzSaddleSupport, BFingerRmin,             rmaxTotal);
-   tileEnvPconeBarrel->addPlane( endEnvelopePos,                   BFingerRmin,             rmaxTotal);
+  tileEnvPconeBarrel->addPlane( endEnvelopePos,                   BFingerRmin,             rmaxTotal);
 
   lvTileEnvelopeBarrel = new GeoLogVol("TileCentralBarrel",tileEnvPconeBarrel,matAir);
   pvTileEnvelopeBarrel = new GeoPhysVol(lvTileEnvelopeBarrel);
 
   //
-  // Pos Ext. Barrel 
-  // 
+  // Pos Ext. Barrel
+  //
 
-  // Z planes 
+  // Z planes
   double PosEndBarrelFinger = ZLength[1]/2; // nominal end of barrel finger
   double PosEndITC = PosEndBarrelFinger + ZLength[5];
   double PosEndExBarrelFinger = PosEndITC + ZLength[3];
   double PosEndExBarrel = PosEndExBarrelFinger - EBFingerLengthPos;
 
-  if(m_log->level()<=MSG::DEBUG) {
-    (*m_log) << MSG::DEBUG 
-	     << " EBPos EnvDZPos[3] " << EnvDZPos[3] << " ZLength[5] " <<ZLength[5]<<"+"<<ZLength[3]
-	     << " = " << ZLength[3]+ZLength[5] << " EBFingerLengthPos = " <<EBFingerLengthPos
-	     <<endmsg;
-    
+  if (m_log->level()<=MSG::DEBUG) {
+    (*m_log) << MSG::DEBUG
+             << " EBPos EnvDZPos[3] " << EnvDZPos[3] << " ZLength[5] " <<ZLength[5]<<"+"<<ZLength[3]
+             << " = " << ZLength[3]+ZLength[5] << " EBFingerLengthPos = " <<EBFingerLengthPos
+             <<endmsg;
+
     (*m_log) << MSG::DEBUG << " PosEndBarrelFinger = " << PosEndBarrelFinger
-	     << " PosEndITC = " << PosEndITC
-	     << " PosEndExBarrel = " << PosEndExBarrel
-	     << " PosEndExtBarrelFinger = " << PosEndExBarrelFinger
-	     << endmsg;
+             << " PosEndITC = " << PosEndITC
+             << " PosEndExBarrel = " << PosEndExBarrel
+             << " PosEndExtBarrelFinger = " << PosEndExBarrelFinger
+             << endmsg;
   }
 
   dbManager->SetCurrentSection(TileDddbManager::TILE_PLUG1);
   double PosEndITC1 = (dbManager->TILBzoffset() + dbManager->TILEzshift() + dbManager->TILBdzmodul()/2)*Gaudi::Units::cm;
   double corr = PosEndITC - PosEndITC1;
   if (fabs(corr)>0.01) {
-     (*m_log) << MSG::WARNING
-              << "Discrepancy between TileGlobals and TILB tables in GeoModel DB "
-              << PosEndITC << " != " << PosEndITC1 << "; take this into account" 
-              <<endmsg;
+    (*m_log) << MSG::WARNING
+             << "Discrepancy between TileGlobals and TILB tables in GeoModel DB "
+             << PosEndITC << " != " << PosEndITC1 << "; take this into account"
+             <<endmsg;
   }
 
   //double beginITC1   = corr + (dbManager->TILBzoffset() + dbManager->TILEzshift()-dbManager->TILBdzmodul()/2)*Gaudi::Units::cm;
@@ -354,16 +355,16 @@ void TileAtlasFactory::create(GeoPhysVol *world)
     PosBeginGap = PosBeginCrack + 0.9 * Gaudi::Units::cm;
     PosEndGap   = PosBeginGap + GapWidth;
   }
-  
-  if(m_log->level()<=MSG::DEBUG)
+
+  if (m_log->level()<=MSG::DEBUG)
     (*m_log) << MSG::DEBUG << " PosBeginITC2  = " << PosBeginITC2
-	     << " PosBeginGap  = " << PosBeginGap
-	     << " PosEndGap  = " << PosEndGap
-	     << " PosBeginCrack  = " << PosBeginCrack
-	     << " PosEndCrack  = " << PosEndCrack
-	     << endmsg;
-  
-  // R minimals 
+             << " PosBeginGap  = " << PosBeginGap
+             << " PosEndGap  = " << PosEndGap
+             << " PosBeginCrack  = " << PosBeginCrack
+             << " PosEndCrack  = " << PosEndCrack
+             << endmsg;
+
+  // R minimals
   dbManager->SetCurrentSection(TileDddbManager::TILE_PLUG1);
   double PosRminITC1  = dbManager->TILBrminimal()*Gaudi::Units::cm;
   dbManager->SetCurrentSection(TileDddbManager::TILE_PLUG2);
@@ -372,22 +373,22 @@ void TileAtlasFactory::create(GeoPhysVol *world)
   double PosRminCrack = rMinE4pos*Gaudi::Units::cm;
 
   double PosRminExt = RInMin[3];
-    
+
   // R maximal
   double PosRmaxTotal = ROutMax[3];
 
-  if(m_log->level()<=MSG::DEBUG)
+  if (m_log->level()<=MSG::DEBUG)
     (*m_log) << MSG::DEBUG
              << " PosRminITC1 = "  << PosRminITC1
              << " PosRminITC2 = "  << PosRminITC
              << " PosRminCrack = " << PosRminCrack
              << " PosRminExt = "   << PosRminExt
              << " PosRmaxTotal = " << PosRmaxTotal
-	     << endmsg;
+             << endmsg;
 
   GeoPcon* tileEnvPconePosEndcap = new GeoPcon(PhiMin[3]*Gaudi::Units::deg, PhiMax[3]*Gaudi::Units::deg);
 
-  // Positive Endcap 
+  // Positive Endcap
   tileEnvPconePosEndcap->addPlane(PosEndBarrelFinger,             PosRminITC1,              PosRmaxTotal);
   tileEnvPconePosEndcap->addPlane(PosBeginITC2,                   PosRminITC1,              PosRmaxTotal);
   tileEnvPconePosEndcap->addPlane(PosBeginITC2,                   PosRminITC,               PosRmaxTotal);
@@ -396,8 +397,8 @@ void TileAtlasFactory::create(GeoPhysVol *world)
   tileEnvPconePosEndcap->addPlane(PosEndCrack,                    PosRminCrack,             PosRmaxTotal);
   tileEnvPconePosEndcap->addPlane(PosEndCrack,                    PosRminExt,               PosRmaxTotal);
   tileEnvPconePosEndcap->addPlane(PosEndExBarrel,                 PosRminExt,               PosRmaxTotal);
-  if (dbManager->BoolSaddle())
-  { tileEnvPconePosEndcap->addPlane(PosEndExBarrel,                 EFingerRmin-RadiusSaddle, PosRmaxTotal);
+  if (dbManager->BoolSaddle()) {
+    tileEnvPconePosEndcap->addPlane(PosEndExBarrel,                 EFingerRmin-RadiusSaddle, PosRmaxTotal);
     tileEnvPconePosEndcap->addPlane(PosEndExBarrel+DzSaddleSupport, EFingerRmin-RadiusSaddle, PosRmaxTotal);
   }
   tileEnvPconePosEndcap->addPlane(PosEndExBarrel+DzSaddleSupport, EFingerRmin,              PosRmaxTotal);
@@ -408,7 +409,7 @@ void TileAtlasFactory::create(GeoPhysVol *world)
 
   //
   // Neg Ex Barrel
-  // 
+  //
 
   // Z planes
   double NegEndBarrelFinger = ZLength[1]/2; // nominal end of barrel finger
@@ -416,17 +417,17 @@ void TileAtlasFactory::create(GeoPhysVol *world)
   double NegEndExtBarrelFinger = NegEndITC + ZLength[2];
   double NegEndExBarrel = NegEndExtBarrelFinger - EBFingerLengthNeg;
 
-  if(m_log->level()<=MSG::DEBUG) {
-    (*m_log) << MSG::DEBUG 
-	     << " EBNeg EnvDZPos[2] " << EnvDZPos[2] << " ZLength[4] " <<ZLength[4]<<"+"<<ZLength[2]
-	     << " = " << ZLength[2]+ZLength[4] << " EBFingerLengthNeg = " <<EBFingerLengthNeg
-	     <<endmsg;
-    
+  if (m_log->level()<=MSG::DEBUG) {
+    (*m_log) << MSG::DEBUG
+             << " EBNeg EnvDZPos[2] " << EnvDZPos[2] << " ZLength[4] " <<ZLength[4]<<"+"<<ZLength[2]
+             << " = " << ZLength[2]+ZLength[4] << " EBFingerLengthNeg = " <<EBFingerLengthNeg
+             <<endmsg;
+
     (*m_log) << MSG::DEBUG << " NegEndBarrelFinger = " << NegEndBarrelFinger
-	     << " NegEndITC = " << NegEndITC
-	     << " NegEndExBarrel = " << NegEndExBarrel
-	     << " NegEndExtBarrelFinger = " << NegEndExtBarrelFinger
-	     << endmsg;
+             << " NegEndITC = " << NegEndITC
+             << " NegEndExBarrel = " << NegEndExBarrel
+             << " NegEndExtBarrelFinger = " << NegEndExtBarrelFinger
+             << endmsg;
   }
 
   dbManager->SetCurrentSection(TileDddbManager::TILE_PLUG1);
@@ -435,9 +436,9 @@ void TileAtlasFactory::create(GeoPhysVol *world)
 
   if (fabs(corr)>0.01) { (*m_log) << MSG::WARNING
                                   << "Discrepancy between TileGlobals and TILB tables in GeoModel DB "
-                                  << NegEndITC << " != " << NegEndITC1 << "; take this into account" 
+                                  << NegEndITC << " != " << NegEndITC1 << "; take this into account"
                                   << endmsg;
-    }
+  }
   //double NegBeginITC1 = corr + (dbManager->TILBzoffset() + dbManager->TILEzshift()-dbManager->TILBdzmodul()/2)*Gaudi::Units::cm;
   dbManager->SetCurrentSection(TileDddbManager::TILE_PLUG2);
   double NegBeginITC2   = corr + (dbManager->TILBzoffset() + dbManager->TILEzshift()-dbManager->TILBdzmodul()/2)*Gaudi::Units::cm;
@@ -453,16 +454,16 @@ void TileAtlasFactory::create(GeoPhysVol *world)
     NegBeginGap = NegBeginCrack + 0.9 * Gaudi::Units::cm;
     NegEndGap = NegBeginGap + GapWidth;
   }
-  
-  if(m_log->level()<=MSG::DEBUG)
-    (*m_log) << MSG::DEBUG << " NegBeginITC2  = " << NegBeginITC2
-	     << " NegBeginGap  = " << NegBeginGap
-	     << " NegEndGap  = " << NegEndGap
-	     << " NegBeginCrack  = " << NegBeginCrack
-	     << " NegEndCrack  = " << NegEndCrack
-	     << endmsg;
 
-  // R minimals 
+  if (m_log->level()<=MSG::DEBUG)
+    (*m_log) << MSG::DEBUG << " NegBeginITC2  = " << NegBeginITC2
+             << " NegBeginGap  = " << NegBeginGap
+             << " NegEndGap  = " << NegEndGap
+             << " NegBeginCrack  = " << NegBeginCrack
+             << " NegEndCrack  = " << NegEndCrack
+             << endmsg;
+
+  // R minimals
   dbManager->SetCurrentSection(TileDddbManager::TILE_PLUG1);
   double NegRminITC1 = dbManager->TILBrminimal()*Gaudi::Units::cm;
   dbManager->SetCurrentSection(TileDddbManager::TILE_PLUG2);
@@ -472,26 +473,26 @@ void TileAtlasFactory::create(GeoPhysVol *world)
   dbManager->SetCurrentSection(TileDddbManager::TILE_EBARREL);
 
   double NegRminExt = RInMin[2];
-    
-  // R maximal 
+
+  // R maximal
   double NegRmaxTotal = ROutMax[2];
 
-  if(m_log->level()<=MSG::DEBUG)
+  if (m_log->level()<=MSG::DEBUG)
     (*m_log) << MSG::DEBUG
              << " NegRminITC1 = "  << NegRminITC1
              << " NegRminITC2 = "  << NegRminITC
              << " NegRminCrack = " << NegRminCrack
              << " NegRminExt = "   << NegRminExt
              << " NegRmaxTotal = " << NegRmaxTotal
-	     << endmsg;
+             << endmsg;
 
   GeoPcon* tileEnvPconeNegEndcap = new GeoPcon(PhiMin[2]*Gaudi::Units::deg, PhiMax[2]*Gaudi::Units::deg);
 
-  // Negative Endcap 
+  // Negative Endcap
   tileEnvPconeNegEndcap->addPlane(-NegEndExtBarrelFinger,          EFingerRmin,              NegRmaxTotal);
   tileEnvPconeNegEndcap->addPlane(-NegEndExBarrel-DzSaddleSupport, EFingerRmin,              NegRmaxTotal);
-  if (dbManager->BoolSaddle())
-  { tileEnvPconeNegEndcap->addPlane(-NegEndExBarrel-DzSaddleSupport, EFingerRmin-RadiusSaddle, NegRmaxTotal);
+  if (dbManager->BoolSaddle()) {
+    tileEnvPconeNegEndcap->addPlane(-NegEndExBarrel-DzSaddleSupport, EFingerRmin-RadiusSaddle, NegRmaxTotal);
     tileEnvPconeNegEndcap->addPlane(-NegEndExBarrel,                 EFingerRmin-RadiusSaddle, NegRmaxTotal);
   }
   tileEnvPconeNegEndcap->addPlane(-NegEndExBarrel,                 NegRminExt,               NegRmaxTotal);
@@ -507,13 +508,13 @@ void TileAtlasFactory::create(GeoPhysVol *world)
   pvTileEnvelopeNegEndcap = new GeoPhysVol(lvTileEnvelopeNegEndcap);
 
   // --------------- Configure Section Builder for the Reco geometry --------------------
-  if(!m_fullGeo) {
+  if (!m_fullGeo) {
     // Central barrel part
     dbManager->SetCurrentSectionByNumber(1);
-    
-    dzGlue = (dbManager->TILBdzmodul() - dbManager->TILBdzend1() - dbManager->TILBdzend2() 
-	      - (dbManager->TILBnperiod()*2.*(dbManager->TILBdzmast() + dbManager->TILBdzspac()) 
-		 -  dbManager->TILBdzmast()))/(2.*(2.*dbManager->TILBnperiod() - 1));
+
+    dzGlue = (dbManager->TILBdzmodul() - dbManager->TILBdzend1() - dbManager->TILBdzend2()
+              - (dbManager->TILBnperiod()*2.*(dbManager->TILBdzmast() + dbManager->TILBdzspac())
+                 -  dbManager->TILBdzmast()))/(2.*(2.*dbManager->TILBnperiod() - 1));
 
     // TODO: apparently, the value set with the call below is not used: it seems m_barrelPeriodThickness is recomputed inside the GeoSectionBuilder's code; so, the call below is probably useless...
     sectionBuilder->setBarrelPeriodThickness(2.*(dbManager->TILBdzmast() + dbManager->TILBdzspac() + 2.*dzGlue)*Gaudi::Units::cm);
@@ -522,18 +523,16 @@ void TileAtlasFactory::create(GeoPhysVol *world)
     // Ext barrel part
     dbManager->SetCurrentSectionByNumber(2);
 
-    dzGlue = (dbManager->TILBdzmodul() - dbManager->TILBdzend1() - dbManager->TILBdzend2() 
-	      - dbManager->TILBnperiod()*2.*(dbManager->TILBdzmast() + dbManager->TILBdzspac()))/(4.*dbManager->TILBnperiod());
+    dzGlue = (dbManager->TILBdzmodul() - dbManager->TILBdzend1() - dbManager->TILBdzend2()
+              - dbManager->TILBnperiod()*2.*(dbManager->TILBdzmast() + dbManager->TILBdzspac()))/(4.*dbManager->TILBnperiod());
 
     // TODO: apparently, the value set with the call below is not used: it seems m_extendedPeriodThickness is recomputed inside the GeoSectionBuilder's code; so, the call below is probably useless...
     sectionBuilder->setExtendedPeriodThickness(2.*(dbManager->TILBdzmast() + dbManager->TILBdzspac() + 2.*dzGlue)*Gaudi::Units::cm);
   }
 
-  GeoPhysVol *pvBarrelMother{nullptr},     *pvFingerMotherNeg{nullptr}, *pvFingerMotherPos{nullptr}, 
-             *pvSaddleMotherNeg{nullptr},  *pvSaddleMotherPos{nullptr};
+  GeoPhysVol *pvBarrelMother{nullptr},     *pvFingerMotherNeg{nullptr}, *pvFingerMotherPos{nullptr}, *pvSaddleMotherNeg{nullptr},  *pvSaddleMotherPos{nullptr};
   GeoPhysVol *pvEBarrelMotherNeg{nullptr}, *pvEBarrelMotherPos{nullptr};
-  GeoPhysVol *pvEFingerMotherNeg{nullptr}, *pvEFingerMotherPos{nullptr},
-             *pvESaddleMotherNeg{nullptr}, *pvESaddleMotherPos{nullptr};
+  GeoPhysVol *pvEFingerMotherNeg{nullptr}, *pvEFingerMotherPos{nullptr}, *pvESaddleMotherNeg{nullptr}, *pvESaddleMotherPos{nullptr};
   GeoPhysVol *pvITCMotherNeg{nullptr},     *pvITCMotherPos{nullptr};
   GeoPhysVol *pvGapMotherNeg{nullptr},     *pvGapMotherPos{nullptr};
   GeoPhysVol *pvCrackMotherNeg{nullptr},   *pvCrackMotherPos{nullptr};
@@ -542,8 +541,8 @@ void TileAtlasFactory::create(GeoPhysVol *world)
   GeoPhysVol *pvEBarrelModuleMotherPos{nullptr}, *pvEBarrelModuleMotherNeg{nullptr};
 
   /*
-  GeoPhysVol *pvTmp_EBarrelModuleMotherPos =0,*pvTmL_EBarrelModuleMotherPos =0,*pvTmR_EBarrelModuleMotherPos =0;
-  GeoPhysVol *pvTmp_EBarrelModuleMotherNeg =0,*pvTmL_EBarrelModuleMotherNeg =0,*pvTmR_EBarrelModuleMotherNeg =0;
+    GeoPhysVol *pvTmp_EBarrelModuleMotherPos =0,*pvTmL_EBarrelModuleMotherPos =0,*pvTmR_EBarrelModuleMotherPos =0;
+    GeoPhysVol *pvTmp_EBarrelModuleMotherNeg =0,*pvTmL_EBarrelModuleMotherNeg =0,*pvTmR_EBarrelModuleMotherNeg =0;
   */
 
   //GeoCutVolAction *action1 =0, *action2 =0, *action3 =0;
@@ -566,185 +565,186 @@ void TileAtlasFactory::create(GeoPhysVol *world)
   GeoLogVol  *lvIrUp =0, *lvIrDw =0, *lvIron3 =0, *lvIron2 =0, *lvIron1 =0, *lvIrBox =0;
   GeoPhysVol *pvIrUp =0, *pvIrDw =0, *pvIron3 =0, *pvIron2 =0, *pvIron1 =0, *pvIrBox =0;
 
-  if(m_fullGeo) {
+  if (m_fullGeo) {
 
     // ext. barrel Cuts description
     if (dbManager->BoolCuts()) {
-      if(m_log->level()<=MSG::DEBUG)
-	(*m_log) << MSG::DEBUG << " Tile Geometry with Ext.Barrel CutOuts and Iron plates, starting form TileCal-CSC-01"
-		 << endmsg;
+      if (m_log->level()<=MSG::DEBUG)
+        (*m_log) << MSG::DEBUG << " Tile Geometry with Ext.Barrel CutOuts and Iron plates, starting form TileCal-CSC-01"
+                 << endmsg;
 
-      volname = "CutB"; dbManager->SetCurrentCuts(volname); 
-      PosXcut = dbManager->CutsXpos(); 
-      PosYcut = dbManager->CutsYpos(); 
+      volname = "CutB"; dbManager->SetCurrentCuts(volname);
+      PosXcut = dbManager->CutsXpos();
+      PosYcut = dbManager->CutsYpos();
       modl_length = 4*dbManager->CutsDX1();
 
       // Inert materials, CutB1
-      dX1 = dbManager->CutsDX1(); 
-      dX2 = dbManager->CutsDX2(); 
-      dY1 = dbManager->CutsDY1(); 
-      dY2 = dbManager->CutsDY2(); 
-      dZ1 = dbManager->CutsDZ1(); 
+      dX1 = dbManager->CutsDX1();
+      dX2 = dbManager->CutsDX2();
+      dY1 = dbManager->CutsDY1();
+      dY2 = dbManager->CutsDY2();
+      dZ1 = dbManager->CutsDZ1();
 
       checking("CutB1", false, 1, dX1,dX2,dY1,dY2,dZ1);
       GeoTrd* CutB1 = new GeoTrd(dX1,dX2,dY1,dY2,dZ1);
       //const GeoShape& CutB = *CutB1;
       CutB = CutB1;
 
-      // Inert materials which are in cuts, special modules 
-      // Materials are in cuting region, up Iron plate 
-      volname = "IrUp"; dbManager->SetCurrentCuts(volname); 
-      dX1 = dbManager->CutsDX1(); 
-      dX2 = dbManager->CutsDX2(); 
-      dY1 = dbManager->CutsDY1(); 
-      dY2 = dbManager->CutsDY2(); 
-      dZ1 = dbManager->CutsDZ1(); 
+      // Inert materials which are in cuts, special modules
+      // Materials are in cuting region, up Iron plate
+      volname = "IrUp"; dbManager->SetCurrentCuts(volname);
+      dX1 = dbManager->CutsDX1();
+      dX2 = dbManager->CutsDX2();
+      dY1 = dbManager->CutsDY1();
+      dY2 = dbManager->CutsDY2();
+      dZ1 = dbManager->CutsDZ1();
 
       checking("IrUp", false, 1,dX1,dX2,dY1,dY2,dZ1);
       GeoTrd* IrUp = new GeoTrd(dX1,dX2,dY1,dY2,dZ1);
       lvIrUp = new GeoLogVol("IrUp",IrUp,matIron);
-      pvIrUp = new GeoPhysVol(lvIrUp); 
-      
-      // Materials are in cuting region, down Iron plate 
-      volname = "IrDw"; dbManager->SetCurrentCuts(volname); 
-      dX1 = dbManager->CutsDX1(); 
-      dX2 = dbManager->CutsDX2(); 
-      dY1 = dbManager->CutsDY1(); 
-      dY2 = dbManager->CutsDY2(); 
-      dZ1 = dbManager->CutsDZ1(); 
+      pvIrUp = new GeoPhysVol(lvIrUp);
+
+      // Materials are in cuting region, down Iron plate
+      volname = "IrDw"; dbManager->SetCurrentCuts(volname);
+      dX1 = dbManager->CutsDX1();
+      dX2 = dbManager->CutsDX2();
+      dY1 = dbManager->CutsDY1();
+      dY2 = dbManager->CutsDY2();
+      dZ1 = dbManager->CutsDZ1();
 
       checking("IrDw", false, 1, dX1,dX2,dY1,dY2,dZ1);
       GeoTrd* IrDw = new GeoTrd(dX1,dX2,dY1,dY2,dZ1);
       lvIrDw = new GeoLogVol("IrDw",IrDw,matIron);
-      pvIrDw = new GeoPhysVol(lvIrDw); 
+      pvIrDw = new GeoPhysVol(lvIrDw);
 
       // Materials are in cuting region, 1up Iron plate
       volname = "Cut1up"; dbManager->SetCurrentCuts(volname); //>>
       PosY =  dbManager->CutsYpos();
 
-      dX1 = dbManager->CutsDX1(); 
-      dX2 = dbManager->CutsDX2(); 
-      dY1 = dbManager->CutsDY1(); 
-      dY2 = dbManager->CutsDY2(); 
-      dZ1 = dbManager->CutsDZ1(); 
+      dX1 = dbManager->CutsDX1();
+      dX2 = dbManager->CutsDX2();
+      dY1 = dbManager->CutsDY1();
+      dY2 = dbManager->CutsDY2();
+      dZ1 = dbManager->CutsDZ1();
 
       checking("Cut1up", false, 1, dX1,dX2,dY1,dY2,dZ1);
-      GeoTrd* Cut1up = new GeoTrd(dX1,dX2,dY1,dY2,dZ1);     
+      GeoTrd* Cut1up = new GeoTrd(dX1,dX2,dY1,dY2,dZ1);
 
       volname = "Cut2down"; dbManager->SetCurrentCuts(volname); //>>
-      dX1 = dbManager->CutsDX1(); 
-      dX2 = dbManager->CutsDX2(); 
-      dY1 = dbManager->CutsDY1(); 
-      dY2 = dbManager->CutsDY2(); 
-      dZ2 = dbManager->CutsDZ1(); 
+      dX1 = dbManager->CutsDX1();
+      dX2 = dbManager->CutsDX2();
+      dY1 = dbManager->CutsDY1();
+      dY2 = dbManager->CutsDY2();
+      dZ2 = dbManager->CutsDZ1();
 
       checking("Cut2down", false, 1, dX1,dX2,dY1,dY2,dZ2);
       GeoTrd* Cut1down = new GeoTrd(dX1,dX2,dY1,dY2,dZ2);
- 
+
       GeoTrf::Translate3D yPosA(0.,0.,-dZ1-dZ2);
-      
+
       const GeoShapeUnion& CutA1 = Cut1up->add(*Cut1down<<yPosA);
       CutA = &CutA1;
 
-    /*                               |----------> X
-                  |---------------------------------------|     (Xdown, -Ydown)
-                  |                                   (3) |
-                  |---------------------------------------| (2) (Xdown, -Ymiddle) 
-                 /                 CutA                    \
-                |-------------------------------------------| (1) (Xup,   -Yup)
-                                                            
-      GeoSimplePolygonBrep *BREP = new GeoSimplePolygonBrep(length/2);
-      BREP->addVertex( Xup,   -Yup    );  
-      BREP->addVertex( Xdown, -Ymiddle);  
-      BREP->addVertex( Xdown, -Ydown  );  
-      BREP->addVertex(-Xdown, -Ydown  );  
-      BREP->addVertex(-Xdown, -Ymiddle);  
-      BREP->addVertex(-Xup,   -Yup    );  
-      const GeoShape& ShapeCut2 = *BREP;
-     */
-      
-      // Inert materials which are in cuts, special modules 
+      /*
+          |----------> X
+          |---------------------------------------|     (Xdown, -Ydown)
+          |                                   (3) |
+          |---------------------------------------| (2) (Xdown, -Ymiddle)
+          /                 CutA                    \
+          |-------------------------------------------| (1) (Xup,   -Yup)
+
+          GeoSimplePolygonBrep *BREP = new GeoSimplePolygonBrep(length/2);
+          BREP->addVertex( Xup,   -Yup    );
+          BREP->addVertex( Xdown, -Ymiddle);
+          BREP->addVertex( Xdown, -Ydown  );
+          BREP->addVertex(-Xdown, -Ydown  );
+          BREP->addVertex(-Xdown, -Ymiddle);
+          BREP->addVertex(-Xup,   -Yup    );
+          const GeoShape& ShapeCut2 = *BREP;
+      */
+
+      // Inert materials which are in cuts, special modules
       // Materials are in cuting region, down Iron plate (3)
       volname = "Iron3"; dbManager->SetCurrentCuts(volname); //>>
-      dX1 = dbManager->CutsDX1(); 
-      dX2 = dbManager->CutsDX2(); 
-      dY1 = dbManager->CutsDY1(); 
-      dY2 = dbManager->CutsDY2(); 
-      dZ1 = dbManager->CutsDZ1(); 
+      dX1 = dbManager->CutsDX1();
+      dX2 = dbManager->CutsDX2();
+      dY1 = dbManager->CutsDY1();
+      dY2 = dbManager->CutsDY2();
+      dZ1 = dbManager->CutsDZ1();
 
       checking("Iron3", false, 1, dX1,dX2,dY1,dY2,dZ1);
       GeoTrd* Iron3 = new GeoTrd(dX1,dX2,dY1,dY2,dZ1);
       lvIron3 = new GeoLogVol("Iron3",Iron3,matIron);
-      pvIron3 = new GeoPhysVol(lvIron3); 
-      
+      pvIron3 = new GeoPhysVol(lvIron3);
+
       // Materials are in cuting region, down Iron plate (2)
       volname = "Iron2"; dbManager->SetCurrentCuts(volname); //>>
-      dX1 = dbManager->CutsDX1(); 
-      dX2 = dbManager->CutsDX2(); 
-      dY1 = dbManager->CutsDY1(); 
-      dY2 = dbManager->CutsDY2(); 
-      dZ1 = dbManager->CutsDZ1(); 
+      dX1 = dbManager->CutsDX1();
+      dX2 = dbManager->CutsDX2();
+      dY1 = dbManager->CutsDY1();
+      dY2 = dbManager->CutsDY2();
+      dZ1 = dbManager->CutsDZ1();
 
       checking("Iron2", false, 1, dX1,dX2,dY1,dY2,dZ1);
       GeoTrd* Iron2 = new GeoTrd(dX1,dX2,dY1,dY2,dZ1);
       lvIron2 = new GeoLogVol("Iron2",Iron2,matIron);
-      pvIron2 = new GeoPhysVol(lvIron2); 
-      
+      pvIron2 = new GeoPhysVol(lvIron2);
+
       // Materials are in cuting region, down Iron plate (1)
       volname = "Iron1"; dbManager->SetCurrentCuts(volname); //>>
-      dX1 = dbManager->CutsDX1(); 
-      dX2 = dbManager->CutsDX2(); 
-      dY1 = dbManager->CutsDY1(); 
-      dY2 = dbManager->CutsDY2(); 
-      dZ1 = dbManager->CutsDZ1(); 
+      dX1 = dbManager->CutsDX1();
+      dX2 = dbManager->CutsDX2();
+      dY1 = dbManager->CutsDY1();
+      dY2 = dbManager->CutsDY2();
+      dZ1 = dbManager->CutsDZ1();
 
       checking("Iron1", false, 1, dX1,dX2,dY1,dY2,dZ1);
       GeoTrd* Iron1 = new GeoTrd(dX1,dX2,dY1,dY2,dZ1);
       lvIron1 = new GeoLogVol("Iron1",Iron1,matIron);
-      pvIron1 = new GeoPhysVol(lvIron1); 
+      pvIron1 = new GeoPhysVol(lvIron1);
 
       // Materials are in cuting region, Heavy Iron Box
       volname = "IrBox"; dbManager->SetCurrentCuts(volname); //>>
-      dX1 = dbManager->CutsDX1(); 
-      dX2 = dbManager->CutsDX2(); 
-      dY1 = dbManager->CutsDY1(); 
-      dY2 = dbManager->CutsDY2(); 
-      dZ1 = dbManager->CutsDZ1(); 
+      dX1 = dbManager->CutsDX1();
+      dX2 = dbManager->CutsDX2();
+      dY1 = dbManager->CutsDY1();
+      dY2 = dbManager->CutsDY2();
+      dZ1 = dbManager->CutsDZ1();
 
       checking("IrBox", false, 1, dX1,dX2,dY1,dY2,dZ1);
       GeoTrd* IrBox = new GeoTrd(dX1,dX2,dY1,dY2,dZ1);
       lvIrBox = new GeoLogVol("IrBox",IrBox,matIron);
-      pvIrBox = new GeoPhysVol(lvIrBox); 
+      pvIrBox = new GeoPhysVol(lvIrBox);
 
-    /*                                           |<-->|----- |Xdown - Xup|
-                                 (Xdown,-Ymiddle)    /|   ^ 
-                                                    / |   |
-                                 (Xup,             /  |   |   CutB
-                  |----------> X                  |   |   |
-                                 (Xup,-Yup)       |   |   |
-                                                   \  |   |
-                                                    \ |   |- |Ydown - Ymiddle|
-                                 (Xdown,-Ydown)      \|  ---
-      (Ydown+|Ydown-Ymiddle|/2)-Yup 
-      Y position = Ydown+|Ydown-Ymiddle|/2
+      /*
+          |<-->|----- |Xdown - Xup|
+          (Xdown,-Ymiddle)    /|   ^
+          / |   |
+          (Xup,             /  |   |   CutB
+          |----------> X                  |   |   |
+          (Xup,-Yup)       |   |   |
+          \  |   |
+          \ |   |- |Ydown - Ymiddle|
+          (Xdown,-Ydown)      \|  ---
+          (Ydown+|Ydown-Ymiddle|/2)-Yup
+          Y position = Ydown+|Ydown-Ymiddle|/2
 
-      GeoSimplePolygonBrep *BREP = new GeoSimplePolygonBrep(length/4);
-      BREP->addVertex( Xup,   -Yup    );
-      BREP->addVertex( Xdown, -Ydown  );
-      BREP->addVertex( Xdown, -Ymiddle);
-      BREP->addVertex(-Xdown, -Ymiddle);    
-      BREP->addVertex(-Xdown, -Ydown  );   
-      BREP->addVertex(-Xup,   -Yup    );   
-      const GeoShape& ShapeCut1 = *BREP;
-    */
+          GeoSimplePolygonBrep *BREP = new GeoSimplePolygonBrep(length/4);
+          BREP->addVertex( Xup,   -Yup    );
+          BREP->addVertex( Xdown, -Ydown  );
+          BREP->addVertex( Xdown, -Ymiddle);
+          BREP->addVertex(-Xdown, -Ymiddle);
+          BREP->addVertex(-Xdown, -Ydown  );
+          BREP->addVertex(-Xup,   -Yup    );
+          const GeoShape& ShapeCut1 = *BREP;
+      */
     } // end if,  BoolCuts
   }
 
   int NumberOfEnv = dbManager->GetNumberOfEnv();
   MLOG(DEBUG) << "NumberOfEnv: " << NumberOfEnv << endmsg;
 
-  for(int EnvCounter = 0; EnvCounter < NumberOfEnv ; ++EnvCounter)
-  { // Loop over Envelopes
+  for (int EnvCounter = 0; EnvCounter < NumberOfEnv ; ++EnvCounter) { // Loop over Envelopes
 
     dbManager->SetCurrentEnvByIndex(EnvCounter);
     int EnvType = dbManager->GetEnvType();
@@ -752,34 +752,33 @@ void TileAtlasFactory::create(GeoPhysVol *world)
     int NumberOfMod = dbManager->GetEnvNModules();
 
     // Break for debugging
-    //if(EnvType != 3) continue;
+    //if (EnvType != 3) continue;
 
-    if(m_log->level()<=MSG::DEBUG)
-      (*m_log) << MSG::DEBUG << " EnvCounter " << EnvCounter << " EnvType " << EnvType 
-	       << " EnvNModules " << NumberOfMod << endmsg;
+    if (m_log->level()<=MSG::DEBUG)
+      (*m_log) << MSG::DEBUG << " EnvCounter " << EnvCounter << " EnvType " << EnvType
+               << " EnvNModules " << NumberOfMod << endmsg;
 
-    if(EnvType == 1) 
-     {
+    if (EnvType == 1) {
       // nominal position of end plate
       zEndSection = ZLength[1]/2 - BFingerLength;
 
       GeoTubs* GeneralMother = new GeoTubs(dbManager->GetEnvRin()*Gaudi::Units::cm,
-					   dbManager->GetEnvRout()*Gaudi::Units::cm,
-					   zEndSection,
-					   AnglMin, AnglMax);
+                                           dbManager->GetEnvRout()*Gaudi::Units::cm,
+                                           zEndSection,
+                                           AnglMin, AnglMax);
 
-      GeoTubs* barrelMother = GeneralMother;      
+      GeoTubs* barrelMother = GeneralMother;
       GeoLogVol* lvBarrelMother = new GeoLogVol("Barrel",barrelMother,matAir);
       pvBarrelMother = new GeoPhysVol(lvBarrelMother);
 
-      if(m_log->level()<=MSG::DEBUG)
-	(*m_log) << MSG::DEBUG << "Barrel envelope parameters: " 
-		 << " Length=" << zEndSection
-		 << " Rmin=" << dbManager->GetEnvRin()*Gaudi::Units::cm
-		 << " Rmax=" << dbManager->GetEnvRout()*Gaudi::Units::cm
-		 << endmsg;
-      
-      // Envelopes for two barrel fingers, positive finger 
+      if (m_log->level()<=MSG::DEBUG)
+        (*m_log) << MSG::DEBUG << "Barrel envelope parameters: "
+                 << " Length=" << zEndSection
+                 << " Rmin=" << dbManager->GetEnvRin()*Gaudi::Units::cm
+                 << " Rmax=" << dbManager->GetEnvRout()*Gaudi::Units::cm
+                 << endmsg;
+
+      // Envelopes for two barrel fingers, positive finger
       GeoTubs* fingerMotherPos = new GeoTubs(BFingerRmin,
                                              dbManager->GetEnvRout()*Gaudi::Units::cm,
                                              BFingerLengthPos/2,
@@ -788,98 +787,96 @@ void TileAtlasFactory::create(GeoPhysVol *world)
       GeoLogVol* lvFingerMotherPos = new GeoLogVol("FingerPos",fingerMotherPos,matAir);
       pvFingerMotherPos = new GeoPhysVol(lvFingerMotherPos);
 
-      if (dbManager->BoolSaddle())
-       { // Envelopes for barrel saddle supports, positive
-         GeoTubs* SaddleMotherPos = new GeoTubs(BFingerRmin-RadiusSaddle,
-                                                BFingerRmin,
-                                                DzSaddleSupport/2,
-                                                AnglMin, AnglMax);
+      if (dbManager->BoolSaddle()) { // Envelopes for barrel saddle supports, positive
+        GeoTubs* SaddleMotherPos = new GeoTubs(BFingerRmin-RadiusSaddle,
+                                               BFingerRmin,
+                                               DzSaddleSupport/2,
+                                               AnglMin, AnglMax);
 
-         GeoLogVol* lvSaddleMotherPos = new GeoLogVol("SaddlePos",SaddleMotherPos,matAir);
-         pvSaddleMotherPos = new GeoPhysVol(lvSaddleMotherPos);
-       }
+        GeoLogVol* lvSaddleMotherPos = new GeoLogVol("SaddlePos",SaddleMotherPos,matAir);
+        pvSaddleMotherPos = new GeoPhysVol(lvSaddleMotherPos);
+      }
 
-       // Negative finger
-       GeoTubs* fingerMotherNeg = new GeoTubs(BFingerRmin,
-                                              dbManager->GetEnvRout()*Gaudi::Units::cm,
-                                              BFingerLengthNeg/2,
-                                              AnglMin, AnglMax);
+      // Negative finger
+      GeoTubs* fingerMotherNeg = new GeoTubs(BFingerRmin,
+                                             dbManager->GetEnvRout()*Gaudi::Units::cm,
+                                             BFingerLengthNeg/2,
+                                             AnglMin, AnglMax);
 
-       GeoLogVol* lvFingerMotherNeg = new GeoLogVol("FingerNeg",fingerMotherNeg,matAir);
-       pvFingerMotherNeg = new GeoPhysVol(lvFingerMotherNeg);
+      GeoLogVol* lvFingerMotherNeg = new GeoLogVol("FingerNeg",fingerMotherNeg,matAir);
+      pvFingerMotherNeg = new GeoPhysVol(lvFingerMotherNeg);
 
-       if(m_log->level()<=MSG::DEBUG)
-	 (*m_log) << MSG::DEBUG << "Barrel finger envelope parameters: " 
-		  << " length Pos/Neg=" << BFingerLengthPos << "/" << BFingerLengthNeg
-		  << " Rmin=" << BFingerRmin << " Rmax=" << dbManager->GetEnvRout()*Gaudi::Units::cm
-		  << endmsg;
+      if (m_log->level()<=MSG::DEBUG)
+        (*m_log) << MSG::DEBUG << "Barrel finger envelope parameters: "
+                 << " length Pos/Neg=" << BFingerLengthPos << "/" << BFingerLengthNeg
+                 << " Rmin=" << BFingerRmin << " Rmax=" << dbManager->GetEnvRout()*Gaudi::Units::cm
+                 << endmsg;
 
-       // Envelopes for two barrel saddle supports, positive
-       if (dbManager->BoolSaddle())
-        {          GeoTubs* SaddleMotherNeg = new GeoTubs(BFingerRmin-RadiusSaddle,
-                                                          BFingerRmin,
-                                                          DzSaddleSupport/2,
-                                                          AnglMin, AnglMax);
+      // Envelopes for two barrel saddle supports, positive
+      if (dbManager->BoolSaddle()) {
+        GeoTubs* SaddleMotherNeg = new GeoTubs(BFingerRmin-RadiusSaddle,
+                                               BFingerRmin,
+                                               DzSaddleSupport/2,
+                                               AnglMin, AnglMax);
 
-         GeoLogVol* lvSaddleMotherNeg = new GeoLogVol("SaddleNeg",SaddleMotherNeg,matAir);
-         pvSaddleMotherNeg = new GeoPhysVol(lvSaddleMotherNeg);
-        }
-     }
-    
-    if(EnvType == 3) {   
+        GeoLogVol* lvSaddleMotherNeg = new GeoLogVol("SaddleNeg",SaddleMotherNeg,matAir);
+        pvSaddleMotherNeg = new GeoPhysVol(lvSaddleMotherNeg);
+      }
+    }
 
-      if(m_log->level()<=MSG::DEBUG)
-	(*m_log) << MSG::DEBUG <<" EBarrelPos DZ "<<(dbManager->GetEnvZLength()*Gaudi::Units::cm- EBFingerLengthPos)/2<< endmsg;
+    if (EnvType == 3) {
 
-      checking("EBarrel (+)", false, 0, 
+      if (m_log->level()<=MSG::DEBUG)
+        (*m_log) << MSG::DEBUG <<" EBarrelPos DZ "<<(dbManager->GetEnvZLength()*Gaudi::Units::cm- EBFingerLengthPos)/2<< endmsg;
+
+      checking("EBarrel (+)", false, 0,
                dbManager->GetEnvRin()*Gaudi::Units::cm,dbManager->GetEnvRout()*Gaudi::Units::cm,
                AnglMin,AnglMax,(dbManager->GetEnvZLength()*Gaudi::Units::cm- EBFingerLengthPos)/2);
 
       GeoTubs* GeneralMother = new GeoTubs(dbManager->GetEnvRin()*Gaudi::Units::cm,
-					   dbManager->GetEnvRout()*Gaudi::Units::cm,
-					   (dbManager->GetEnvZLength()*Gaudi::Units::cm- EBFingerLengthPos)/2,
-					   AnglMin, AnglMax);
+                                           dbManager->GetEnvRout()*Gaudi::Units::cm,
+                                           (dbManager->GetEnvZLength()*Gaudi::Units::cm- EBFingerLengthPos)/2,
+                                           AnglMin, AnglMax);
 
       GeoTubs* ebarrelMotherPos = GeneralMother;
       GeoLogVol* lvEBarrelMotherPos = new GeoLogVol("EBarrel",ebarrelMotherPos,matAir);
       pvEBarrelMotherPos = new GeoPhysVol(lvEBarrelMotherPos);
 
-      if(m_log->level()<=MSG::DEBUG)
-	(*m_log) << MSG::DEBUG << "Positive ext.barrel envelope parameters: " 
-		 << " length=" << (dbManager->GetEnvZLength()*Gaudi::Units::cm- EBFingerLength)
-		 << " Rmin=" << dbManager->GetEnvRin()*Gaudi::Units::cm
-		 << " Rmax=" << dbManager->GetEnvRout()*Gaudi::Units::cm
-		 << endmsg;
+      if (m_log->level()<=MSG::DEBUG)
+        (*m_log) << MSG::DEBUG << "Positive ext.barrel envelope parameters: "
+                 << " length=" << (dbManager->GetEnvZLength()*Gaudi::Units::cm- EBFingerLength)
+                 << " Rmin=" << dbManager->GetEnvRin()*Gaudi::Units::cm
+                 << " Rmax=" << dbManager->GetEnvRout()*Gaudi::Units::cm
+                 << endmsg;
 
       // Envelope for finger separately
-      checking("EBarrel (+)", false, 0, 
+      checking("EBarrel (+)", false, 0,
                EFingerRmin,dbManager->GetEnvRout()*Gaudi::Units::cm,
                AnglMin,AnglMax, EBFingerLength/2);
 
       GeoTubs* fingerMother = new GeoTubs(EFingerRmin,
-					  dbManager->GetEnvRout()*Gaudi::Units::cm,
-					  EBFingerLength/2,
-					  AnglMin, AnglMax);
+                                          dbManager->GetEnvRout()*Gaudi::Units::cm,
+                                          EBFingerLength/2,
+                                          AnglMin, AnglMax);
 
       GeoLogVol* lvEFingerMother = new GeoLogVol("EFinger",fingerMother,matAir);
       pvEFingerMotherPos = new GeoPhysVol(lvEFingerMother);
 
-      if(m_log->level()<=MSG::DEBUG)
-	(*m_log) << MSG::DEBUG << "Positive ext.barrel finger envelope parameters: " 
-		 << " length=" << EBFingerLength
-		 << " Rmin=" << EFingerRmin
-		 << " Rmax=" << (dbManager->GetEnvRout())*Gaudi::Units::cm
-		 << endmsg;
+      if (m_log->level()<=MSG::DEBUG)
+        (*m_log) << MSG::DEBUG << "Positive ext.barrel finger envelope parameters: "
+                 << " length=" << EBFingerLength
+                 << " Rmin=" << EFingerRmin
+                 << " Rmax=" << (dbManager->GetEnvRout())*Gaudi::Units::cm
+                 << endmsg;
 
-      if (dbManager->BoolSaddle())
-      { //Envelopes for two barrel saddle supports, positive
-        checking("ESaddle (+)", false, 0, 
-	         EFingerRmin-RadiusSaddle,EFingerRmin,AnglMin,AnglMax, DzSaddleSupport/2);
+      if (dbManager->BoolSaddle()) { //Envelopes for two barrel saddle supports, positive
+        checking("ESaddle (+)", false, 0,
+                 EFingerRmin-RadiusSaddle,EFingerRmin,AnglMin,AnglMax, DzSaddleSupport/2);
 
         GeoTubs* ESaddleMother = new GeoTubs(EFingerRmin-RadiusSaddle,
-	                                     EFingerRmin,
-					     DzSaddleSupport/2,
-					     AnglMin, AnglMax);
+                                             EFingerRmin,
+                                             DzSaddleSupport/2,
+                                             AnglMin, AnglMax);
 
         GeoLogVol* lvESaddleMother = new GeoLogVol("ESaddlePos",ESaddleMother,matAir);
         pvESaddleMotherPos = new GeoPhysVol(lvESaddleMother);
@@ -887,59 +884,58 @@ void TileAtlasFactory::create(GeoPhysVol *world)
     }
 
     // Negative Ext.Barrel
-    if(EnvType == 2) { 
-      if(m_log->level()<=MSG::DEBUG)
-	(*m_log) << MSG::DEBUG <<" EBarrelNeg DZ "<<(dbManager->GetEnvZLength()*Gaudi::Units::cm- EBFingerLengthNeg)/2<< endmsg;
+    if (EnvType == 2) {
+      if (m_log->level()<=MSG::DEBUG)
+        (*m_log) << MSG::DEBUG <<" EBarrelNeg DZ "<<(dbManager->GetEnvZLength()*Gaudi::Units::cm- EBFingerLengthNeg)/2<< endmsg;
 
       GeoTubs* GeneralMother = new GeoTubs(dbManager->GetEnvRin()*Gaudi::Units::cm,
-					   dbManager->GetEnvRout()*Gaudi::Units::cm,
-					   (dbManager->GetEnvZLength()*Gaudi::Units::cm- EBFingerLengthNeg)/2,
-					   AnglMin, AnglMax);
+                                           dbManager->GetEnvRout()*Gaudi::Units::cm,
+                                           (dbManager->GetEnvZLength()*Gaudi::Units::cm- EBFingerLengthNeg)/2,
+                                           AnglMin, AnglMax);
 
       GeoTubs* ebarrelMotherNeg = GeneralMother;
-      GeoLogVol* lvEBarrelMotherNeg = new GeoLogVol("EBarrel",ebarrelMotherNeg,matAir);  
+      GeoLogVol* lvEBarrelMotherNeg = new GeoLogVol("EBarrel",ebarrelMotherNeg,matAir);
       pvEBarrelMotherNeg = new GeoPhysVol(lvEBarrelMotherNeg);
-      
-      if(m_log->level()<=MSG::DEBUG)
-	(*m_log) << MSG::DEBUG << "Nevative ext.barrel envelope parameters: " 
-		 << " length=" << (dbManager->GetEnvZLength()*Gaudi::Units::cm- EBFingerLength)
-		 << " Rmin=" << dbManager->GetEnvRin()*Gaudi::Units::cm
-		 << " Rmax=" << dbManager->GetEnvRout()*Gaudi::Units::cm
-		 << endmsg;
+
+      if (m_log->level()<=MSG::DEBUG)
+        (*m_log) << MSG::DEBUG << "Nevative ext.barrel envelope parameters: "
+                 << " length=" << (dbManager->GetEnvZLength()*Gaudi::Units::cm- EBFingerLength)
+                 << " Rmin=" << dbManager->GetEnvRin()*Gaudi::Units::cm
+                 << " Rmax=" << dbManager->GetEnvRout()*Gaudi::Units::cm
+                 << endmsg;
 
       // Envelope for finger separately
       GeoTubs* fingerMother = new GeoTubs(EFingerRmin,
-					  dbManager->GetEnvRout()*Gaudi::Units::cm,
-					  EBFingerLengthNeg/2,
-					  AnglMin, AnglMax);
-      
+                                          dbManager->GetEnvRout()*Gaudi::Units::cm,
+                                          EBFingerLengthNeg/2,
+                                          AnglMin, AnglMax);
+
       GeoLogVol* lvEFingerMother = new GeoLogVol("EFinger",fingerMother,matAir);
       pvEFingerMotherNeg = new GeoPhysVol(lvEFingerMother);
 
-      if(m_log->level()<=MSG::DEBUG)
-	(*m_log) << MSG::DEBUG <<"Negative ext.barrel finger envelope parameters: " 
-		 << " length=" << EBFingerLengthNeg
-		 << " Rmin=" << EFingerRmin
-		 << " Rmax=" << dbManager->GetEnvRout()*Gaudi::Units::cm
-		 << endmsg;
+      if (m_log->level()<=MSG::DEBUG)
+        (*m_log) << MSG::DEBUG <<"Negative ext.barrel finger envelope parameters: "
+                 << " length=" << EBFingerLengthNeg
+                 << " Rmin=" << EFingerRmin
+                 << " Rmax=" << dbManager->GetEnvRout()*Gaudi::Units::cm
+                 << endmsg;
 
-      if (dbManager->BoolSaddle())
-      { //Envelopes for Ext. barrel saddle supports, positive 
-        checking("ESaddle (-)", false, 0, 
-	       EFingerRmin-RadiusSaddle,EFingerRmin,AnglMin,AnglMax, DzSaddleSupport/2);
+      if (dbManager->BoolSaddle()) { //Envelopes for Ext. barrel saddle supports, positive
+        checking("ESaddle (-)", false, 0,
+                 EFingerRmin-RadiusSaddle,EFingerRmin,AnglMin,AnglMax, DzSaddleSupport/2);
 
         GeoTubs* ESaddleMother = new GeoTubs(EFingerRmin-RadiusSaddle,
-	                                     EFingerRmin,
-					     DzSaddleSupport/2,
-					     AnglMin, AnglMax);
+                                             EFingerRmin,
+                                             DzSaddleSupport/2,
+                                             AnglMin, AnglMax);
 
         GeoLogVol* lvESaddleMother = new GeoLogVol("ESaddlePos",ESaddleMother,matAir);
         pvESaddleMotherNeg = new GeoPhysVol(lvESaddleMother);
       }
     }
-    
+
     // ITC Positive
-    if(EnvType == 5) {
+    if (EnvType == 5) {
 
       dbManager->SetCurrentSection(TileDddbManager::TILE_PLUG2);
 
@@ -950,15 +946,15 @@ void TileAtlasFactory::create(GeoPhysVol *world)
       dbManager->SetCurrentSection(TileDddbManager::TILE_PLUG1);
 
       rMinITC1 = dbManager->TILBrminimal();
-      rMaxITC1 = dbManager->TILErmam(); 
+      rMaxITC1 = dbManager->TILErmam();
       dzITC1   = dbManager->TILBdzmodul();
-      
-      (*m_log) << MSG::INFO << " Positive ITC envelope parameters: PLUG1 " 
+
+      (*m_log) << MSG::INFO << " Positive ITC envelope parameters: PLUG1 "
                <<" Rmin= "<<rMinITC1*Gaudi::Units::cm<<" Rmax= "<<rMaxITC1*Gaudi::Units::cm<<" dzITC1= "<<dzITC1/2*Gaudi::Units::cm<< endmsg;
       (*m_log) << MSG::INFO << "                                   PLUG2 "
                <<" Rmin= "<<rMinITC2*Gaudi::Units::cm<<" Rmax= "<<rMaxITC2*Gaudi::Units::cm<<" dzITC2= "<<dzITC2/2*Gaudi::Units::cm<< endmsg;
 
-      checking("ITC itcWheel1 (+)", false, 0, 
+      checking("ITC itcWheel1 (+)", false, 0,
                rMinITC1*Gaudi::Units::cm,rMaxITC1*Gaudi::Units::cm, AnglMin,AnglMax, dzITC1/2*Gaudi::Units::cm);
 
       GeoTubs* itcWheel1 = new GeoTubs(rMinITC1*Gaudi::Units::cm,
@@ -973,7 +969,7 @@ void TileAtlasFactory::create(GeoPhysVol *world)
                                        rMaxITC2*Gaudi::Units::cm,
                                        dzITC2/2*Gaudi::Units::cm,
                                        AnglMin, AnglMax);
-      
+
       Z = ( dzITC1 - dzITC2)/2*Gaudi::Units::cm;
       GeoTrf::Translate3D itcWheel2OffsetPos(0.,0., Z);
 
@@ -987,13 +983,13 @@ void TileAtlasFactory::create(GeoPhysVol *world)
       // Gap Positive
       dbManager->SetCurrentSection(TileDddbManager::TILE_PLUG3);
 
-      checking("Gap (+)", false, 0, 
-              dbManager->TILBrminimal()*Gaudi::Units::cm,
-              dbManager->TILBrmaximal()*Gaudi::Units::cm/cos(deltaPhi/2*Gaudi::Units::deg),
-              AnglMin,AnglMax, dbManager->TILBdzmodul()/2*Gaudi::Units::cm);
+      checking("Gap (+)", false, 0,
+               dbManager->TILBrminimal()*Gaudi::Units::cm,
+               dbManager->TILBrmaximal()*Gaudi::Units::cm/cos(deltaPhi/2*Gaudi::Units::deg),
+               AnglMin,AnglMax, dbManager->TILBdzmodul()/2*Gaudi::Units::cm);
 
       GeoTubs* GapMotherPos = new GeoTubs(dbManager->TILBrminimal()*Gaudi::Units::cm,
-	                                  dbManager->TILBrmaximal()*Gaudi::Units::cm/cos(deltaPhi/2*Gaudi::Units::deg),
+                                          dbManager->TILBrmaximal()*Gaudi::Units::cm/cos(deltaPhi/2*Gaudi::Units::deg),
                                           dbManager->TILBdzmodul()/2*Gaudi::Units::cm,
                                           AnglMin, AnglMax);
 
@@ -1003,22 +999,22 @@ void TileAtlasFactory::create(GeoPhysVol *world)
       // Crack Positive
       dbManager->SetCurrentSection(TileDddbManager::TILE_PLUG4);
 
-      checking("Crack (+)", spE4, 0, 
-              rMinE4pos*Gaudi::Units::cm,
-              dbManager->TILBrmaximal()*Gaudi::Units::cm/cos(deltaPhi/2*Gaudi::Units::deg),
-              AnglMin,AnglMax, dbManager->TILBdzmodul()/2*Gaudi::Units::cm);
+      checking("Crack (+)", spE4, 0,
+               rMinE4pos*Gaudi::Units::cm,
+               dbManager->TILBrmaximal()*Gaudi::Units::cm/cos(deltaPhi/2*Gaudi::Units::deg),
+               AnglMin,AnglMax, dbManager->TILBdzmodul()/2*Gaudi::Units::cm);
 
       GeoTubs* crackMotherPos = new GeoTubs(rMinE4pos*Gaudi::Units::cm,
-				            dbManager->TILBrmaximal()*Gaudi::Units::cm/cos(deltaPhi/2*Gaudi::Units::deg),
-				            dbManager->TILBdzmodul()/2*Gaudi::Units::cm,
+                                            dbManager->TILBrmaximal()*Gaudi::Units::cm/cos(deltaPhi/2*Gaudi::Units::deg),
+                                            dbManager->TILBdzmodul()/2*Gaudi::Units::cm,
                                             AnglMin, AnglMax);
-    
+
       GeoLogVol* lvCrackMotherPos = new GeoLogVol("Crack",crackMotherPos,matAir);
       pvCrackMotherPos = new GeoPhysVol(lvCrackMotherPos);
 
-    } 
+    }
     // ITC Negative
-    if(EnvType == 4) { 
+    if (EnvType == 4) {
 
       dbManager->SetCurrentSection(TileDddbManager::TILE_PLUG2);
 
@@ -1031,13 +1027,13 @@ void TileAtlasFactory::create(GeoPhysVol *world)
       rMinITC1 = dbManager->TILBrminimal();
       rMaxITC1 = dbManager->TILErmam();
       dzITC1   = dbManager->TILBdzmodul();
-      
-      (*m_log) << MSG::INFO << " Negative ITC envelope parameters: PLUG1 " 
+
+      (*m_log) << MSG::INFO << " Negative ITC envelope parameters: PLUG1 "
                <<" Rmin= "<<rMinITC1*Gaudi::Units::cm<<" Rmax= "<<rMaxITC1*Gaudi::Units::cm<<" dzITC1= "<<dzITC1/2*Gaudi::Units::cm<<endmsg;
       (*m_log) << MSG::INFO << "                                   PLUG2 "
                <<" Rmin= "<<rMinITC2*Gaudi::Units::cm<<" Rmax= "<<rMaxITC2*Gaudi::Units::cm<<" dzITC2= "<<dzITC2/2*Gaudi::Units::cm<<endmsg;
 
-      checking("ITC itcWheel1 (-)", false, 0, 
+      checking("ITC itcWheel1 (-)", false, 0,
                rMinITC1*Gaudi::Units::cm,rMaxITC1*Gaudi::Units::cm, AnglMin,AnglMax, dzITC1/2*Gaudi::Units::cm);
 
       GeoTubs* itcWheel1 = new GeoTubs(rMinITC1*Gaudi::Units::cm,
@@ -1066,13 +1062,13 @@ void TileAtlasFactory::create(GeoPhysVol *world)
       // Gap Negative
       dbManager->SetCurrentSection(TileDddbManager::TILE_PLUG3);
 
-      checking("Gap (-)", false, 1, 
-              dbManager->TILBrminimal()*Gaudi::Units::cm,
-              dbManager->TILBrmaximal()*Gaudi::Units::cm/cos(deltaPhi/2*Gaudi::Units::deg),
-              AnglMin,AnglMax, dbManager->TILBdzmodul()/2*Gaudi::Units::cm);
+      checking("Gap (-)", false, 1,
+               dbManager->TILBrminimal()*Gaudi::Units::cm,
+               dbManager->TILBrmaximal()*Gaudi::Units::cm/cos(deltaPhi/2*Gaudi::Units::deg),
+               AnglMin,AnglMax, dbManager->TILBdzmodul()/2*Gaudi::Units::cm);
 
       GeoTubs* GapMotherNeg = new GeoTubs(dbManager->TILBrminimal()*Gaudi::Units::cm,
-	                                  dbManager->TILBrmaximal()*Gaudi::Units::cm/cos(deltaPhi/2*Gaudi::Units::deg),
+                                          dbManager->TILBrmaximal()*Gaudi::Units::cm/cos(deltaPhi/2*Gaudi::Units::deg),
                                           dbManager->TILBdzmodul()/2*Gaudi::Units::cm,
                                           AnglMin, AnglMax);
 
@@ -1081,1349 +1077,1343 @@ void TileAtlasFactory::create(GeoPhysVol *world)
 
       // Crack Negative
       dbManager->SetCurrentSection(TileDddbManager::TILE_PLUG4);
-  
-      checking("Crack (-)", spE4, 0, 
-              rMinE4neg*Gaudi::Units::cm,
-              dbManager->TILBrmaximal()*Gaudi::Units::cm/cos(deltaPhi/2*Gaudi::Units::deg),
-              AnglMin,AnglMax, dbManager->TILBdzmodul()/2*Gaudi::Units::cm);
+
+      checking("Crack (-)", spE4, 0,
+               rMinE4neg*Gaudi::Units::cm,
+               dbManager->TILBrmaximal()*Gaudi::Units::cm/cos(deltaPhi/2*Gaudi::Units::deg),
+               AnglMin,AnglMax, dbManager->TILBdzmodul()/2*Gaudi::Units::cm);
 
       GeoTubs* crackMotherNeg = new GeoTubs(rMinE4neg*Gaudi::Units::cm,
-				            dbManager->TILBrmaximal()*Gaudi::Units::cm/cos(deltaPhi/2*Gaudi::Units::deg),
-				            dbManager->TILBdzmodul()/2*Gaudi::Units::cm,
+                                            dbManager->TILBrmaximal()*Gaudi::Units::cm/cos(deltaPhi/2*Gaudi::Units::deg),
+                                            dbManager->TILBdzmodul()/2*Gaudi::Units::cm,
                                             AnglMin, AnglMax);
-    
+
       GeoLogVol* lvCrackMotherNeg = new GeoLogVol("Crack",crackMotherNeg,matAir);
       pvCrackMotherNeg = new GeoPhysVol(lvCrackMotherNeg);
 
     }
-    
-    if(m_fullGeo) {   
 
-    // ModuleNumber[NumberOfMod] array for independent of positrion numeration
-    int ModuleIndex[64];
-    for(int i=0; i < NumberOfMod; i++){
-      ModuleIndex[i] = i+1;
-    }
+    if (m_fullGeo) {
 
-    // the main loop around all phi modules position
-    int ModuleNcp =0;
-
-    GeoTransform* yrotMod = new GeoTransform(GeoTrf::RotateY3D(90*Gaudi::Units::deg));
-    yrotMod->ref();
-    GeoTransform* XYrtMod = new GeoTransform(GeoTrf::RotateX3D(180*Gaudi::Units::deg) * GeoTrf::RotateY3D(90*Gaudi::Units::deg));
-    XYrtMod->ref();
-
-    for(int ModCounter = 0; ModCounter < NumberOfMod; ModCounter++){
-
-      ModuleNcp = ModuleIndex[ModCounter];
-
-      // General rotation and transformations
-      double phi = (double(ModuleNcp-1) + 0.5)*deltaPhi;
-      double ph1 = (double(ModuleNcp-1))*deltaPhi;
-
-      GeoTransform* zrotMod = new GeoTransform(GeoTrf::RotateZ3D(phi*Gaudi::Units::deg));
-      zrotMod->ref();
-      GeoTransform* zrotSaddle =  new GeoTransform(GeoTrf::RotateZ3D(ph1*Gaudi::Units::deg));
-      zrotSaddle->ref();
-
-      dbManager->SetCurrentModuleByIndex(ModuleNcp-1);
-      int ModType = dbManager->GetModType();
-      int ModFingpattern = dbManager->TILBfingpattern(); 
-
-      // Debuging code for cuted modules
-      if(!(ModuleNcp>=NcpFrom && ModuleNcp<=NcpFrom+NcpPlus)) continue;
-
-      // special Modules with Cuts
-      //if(ModuleNcp<35 || ModuleNcp>62) continue; if(ModuleNcp>37 && ModuleNcp<60) continue;
-
-      // Saddle Supports
-      //if(ModuleNcp<39 || ModuleNcp>58) continue; if(ModuleNcp>42 && ModuleNcp<55) continue;
-      
-      if(m_log->level()<=MSG::DEBUG)
-	(*m_log) << MSG::DEBUG <<" ModuleNcp= "<< ModuleNcp <<" ModType "<< ModType <<" Phi "<< phi << endmsg;
-
-      //
-      // ------------------- BARREL BLOCKS ------------------------ 
-      //    
- 
-      if( EnvType == 1 ) { // normal barrel module or module zero 
-
-	dbManager->SetCurrentSectionByNumber(ModType);
-
-        thicknessWedgeMother = dbManager->TILBdzmodul() * Gaudi::Units::cm; 
-        heightWedgeMother = (dbManager->TILBrmaximal() - dbManager->TILBrminimal()) * Gaudi::Units::cm;
-        dy1WedgeMother = dbManager->TILBrminimal() * tan(deltaPhi/2*Gaudi::Units::deg) * Gaudi::Units::cm;
-        dy2WedgeMother = dbManager->TILBrmaximal() * tan(deltaPhi/2*Gaudi::Units::deg) * Gaudi::Units::cm;
-       
-        dzGlue = (dbManager->TILBdzmodul() - dbManager->TILBdzend1() - dbManager->TILBdzend2() 
-               - (dbManager->TILBnperiod()*2.*(dbManager->TILBdzmast() + dbManager->TILBdzspac()) 
-               -  dbManager->TILBdzmast()))/(2.*(2.*dbManager->TILBnperiod() - 1));
-        
-        GeoTrd* barrelModuleMother = new GeoTrd(thicknessWedgeMother/2,
-                                                thicknessWedgeMother/2,
-                                                dy1WedgeMother,
-                                                dy2WedgeMother,
-                                                heightWedgeMother/2);
-       
-        GeoLogVol* lvBarrelModuleMother = new GeoLogVol("BarrelModule",barrelModuleMother,matAir);
-        GeoPhysVol* pvBarrelModuleMother = new GeoPhysVol(lvBarrelModuleMother);
-       
-        // Fill the section
-	if(Filling){ 
-	  sectionBuilder->fillSection(pvBarrelModuleMother, 1,
-				      dbManager->TILBrmaximal(),
-				      dbManager->TILBrminimal(),
-				      dzGlue,
-				      deltaPhi); 
-	}
-       
-        GeoTransform* xtraMod = new GeoTransform(GeoTrf::TranslateX3D(
-                                    (dbManager->TILBrmaximal() + dbManager->TILBrminimal())/2 * Gaudi::Units::cm));
-
-        pvBarrelMother->add(zrotMod);
-        pvBarrelMother->add(xtraMod);
-        pvBarrelMother->add(XYrtMod);
-
-        pvBarrelMother->add(new GeoIdentifierTag(ModuleNcp));
-        pvBarrelMother->add(pvBarrelModuleMother);
-       
-        // --------------------------BARREL FINGERS MAKING---------------------------- 
-       
-	dbManager->SetCurrentTifg(1);  // Barrel finger 
-        zEndSection = dbManager->TILBzoffset() + dbManager->TILBdzmodul()/2;
-
-        heightWedgeMother = (dbManager->TILErmax() - dbManager->TILBrmax())*Gaudi::Units::cm;
-        dy1WedgeMother = dbManager->TILBrmax() * tan(deltaPhi/2*Gaudi::Units::deg)*Gaudi::Units::cm;
-        dy2WedgeMother = dbManager->TILErmax() * tan(deltaPhi/2*Gaudi::Units::deg)*Gaudi::Units::cm;
-
-	// Finger Positive, positioning (only Left ModFingpattern == 10) 
-	if ( ModFingpattern != 10 ) {
-	  GeoTrd* fingerModuleMotherPos = new GeoTrd(BFingerLengthPos/2,
-						     BFingerLengthPos/2,
-						     dy1WedgeMother,
-						     dy2WedgeMother,
-						     heightWedgeMother/2);
-	  
-	  GeoLogVol* lvFingerModuleMotherPos = new GeoLogVol("FingerModule",fingerModuleMotherPos,matAir);
-	  GeoPhysVol* pvFingerModuleMotherPos = new GeoPhysVol(lvFingerModuleMotherPos);
-
-	  if(Filling)
-	    sectionBuilder->fillFinger(pvFingerModuleMotherPos, 1,
-				       dbManager->TILErmax(),
-				       dbManager->TILBrmax(),
-				       deltaPhi,
-				       m_switches.testBeam,
-				       ModuleNcp,
-				       BFingerLengthPos*(1./Gaudi::Units::cm)); 
-
-	  GeoTransform* xtraModFingerPos  = new GeoTransform(GeoTrf::TranslateX3D((dbManager->TILErmax() + dbManager->TILBrmax())/2*Gaudi::Units::cm));
-
-          //(*m_log) << MSG::DEBUG << "R  Index " << ModuleNcp << " Fingpattern "<< ModFingpattern << endmsg;
- 
-          pvFingerMotherPos->add(zrotMod);
-          pvFingerMotherPos->add(xtraModFingerPos);
-          pvFingerMotherPos->add(XYrtMod);
-
-          pvFingerMotherPos->add(new GeoIdentifierTag(ModuleNcp));
-          pvFingerMotherPos->add(pvFingerModuleMotherPos);
-	} 
-       
-        // Finger Negative, positioning (only Left ModFingpattern == 01) 
-        if ( ModFingpattern != 1 ) {
-
-	  GeoTrd* fingerModuleMotherNeg = new GeoTrd(BFingerLengthNeg/2,
-						     BFingerLengthNeg/2,
-						     dy1WedgeMother,
-						     dy2WedgeMother,
-						     heightWedgeMother/2);
-	  
-	  GeoLogVol* lvFingerModuleMotherNeg = new GeoLogVol("FingerModule",fingerModuleMotherNeg,matAir);
-	  GeoPhysVol* pvFingerModuleMotherNeg = new GeoPhysVol(lvFingerModuleMotherNeg);
-
-	  if(Filling)
-	    sectionBuilder->fillFinger(pvFingerModuleMotherNeg, 1,
-				       dbManager->TILErmax(),
-				       dbManager->TILBrmax(),
-				       deltaPhi,
-				       m_switches.testBeam,
-				       ModuleNcp*100,
-				       BFingerLengthNeg*(1./Gaudi::Units::cm));
-
-	  GeoTransform* xtraModFingerNeg  = new GeoTransform(GeoTrf::TranslateX3D((dbManager->TILErmax() + dbManager->TILBrmax())/2*Gaudi::Units::cm));
-
-          // (*m_log) << MSG::DEBUG << "L  Index " << ModuleNcp << " Fingpattern "<< ModFingpattern << endmsg;
-
-          pvFingerMotherNeg->add(zrotMod);
-          pvFingerMotherNeg->add(xtraModFingerNeg);
-          pvFingerMotherNeg->add(yrotMod);
-
-          pvFingerMotherNeg->add(new GeoIdentifierTag(ModuleNcp));
-          pvFingerMotherNeg->add(pvFingerModuleMotherNeg);
-        }
-       
-        // --------------------------BARREL SADDLE MAKING----------------------------
-        if (dbManager->BoolSaddle())
-        { if ( (ModuleNcp >=40 && ModuleNcp <=41) || (ModuleNcp >=56 && ModuleNcp <=57) )
-	  { 
-            GeoTubs* SaddleModule = new GeoTubs(BFingerRmin-RadiusSaddle,
-                                                BFingerRmin,
-                                                DzSaddleSupport/2,
-                                                0.,deltaPhi*Gaudi::Units::deg);
-     
-            GeoLogVol* lvSaddleModule = new GeoLogVol("SaddleModule",SaddleModule,matIron);
-            GeoPhysVol* pvSaddleModule = new GeoPhysVol(lvSaddleModule);
-       
-            pvSaddleMotherPos->add(zrotSaddle);
-            pvSaddleMotherPos->add(new GeoIdentifierTag(ModuleNcp));
-            pvSaddleMotherPos->add(pvSaddleModule); 
-
-            pvSaddleMotherNeg->add(zrotSaddle);
-            pvSaddleMotherNeg->add(new GeoIdentifierTag(ModuleNcp));
-            pvSaddleMotherNeg->add(pvSaddleModule); 
-          }
-         }
+      // ModuleNumber[NumberOfMod] array for independent of positrion numeration
+      int ModuleIndex[64];
+      for (int i=0; i < NumberOfMod; i++) {
+        ModuleIndex[i] = i+1;
       }
 
-      //------------------- Extended Barrel Module Positive ----------------------------------------------------------
-
-      if (EnvType == 3) {
-
-	dbManager->SetCurrentSectionByNumber(ModType);
-
-        // Mother module 
-        thicknessWedgeMother = dbManager->TILBdzmodul() * Gaudi::Units::cm;
-        heightWedgeMother = (dbManager->TILBrmaximal() - dbManager->TILBrminimal()) * Gaudi::Units::cm;
-        dy1WedgeMother = dbManager->TILBrminimal() * tan(deltaPhi/2*Gaudi::Units::deg) * Gaudi::Units::cm;
-        dy2WedgeMother = dbManager->TILBrmaximal() * tan(deltaPhi/2*Gaudi::Units::deg) * Gaudi::Units::cm;
-        
-        dzGlue = (dbManager->TILBdzmodul() - dbManager->TILBdzend1() - dbManager->TILBdzend2() 
-                - dbManager->TILBnperiod()*2.*(dbManager->TILBdzmast() + dbManager->TILBdzspac()))/(4.*
-                  dbManager->TILBnperiod());
-        
-        double Radius = (dbManager->TILBrmaximal() + dbManager->TILBrminimal())/2 * Gaudi::Units::cm;
-
-        checking("EBarrelModule (+)", false, 1, 
-                 thicknessWedgeMother/2,thicknessWedgeMother/2,dy1WedgeMother,dy2WedgeMother,heightWedgeMother/2);
-
-        GeoTrd* ebarrelModuleMotherPos = new GeoTrd(thicknessWedgeMother/2,
-                                                    thicknessWedgeMother/2,
-                                                    dy1WedgeMother,
-                                                    dy2WedgeMother,
-                                                    heightWedgeMother/2);
-
-        if (!dbManager->BoolCuts())
-	 { 
-	   if(m_log->level()<=MSG::DEBUG)
-	     (*m_log) << MSG::DEBUG << " BoolCuts NO "<< dbManager->BoolCuts() << endmsg;
-
-           lvEBarrelModuleMotherPos = new GeoLogVol("EBarrelModule",ebarrelModuleMotherPos,matAir);
-           pvEBarrelModuleMotherPos = new GeoPhysVol(lvEBarrelModuleMotherPos);
-
-         } else {
-
-           //gdb
-	  if(m_log->level()<=MSG::DEBUG)
-	    (*m_log) << MSG::DEBUG << " BoolCuts YES "<< dbManager->BoolCuts() << endmsg;
- 
-           double PoZ2 =0, PoZ1 =0, thicknessEndPlate =dbManager->TILBdzend1()*Gaudi::Units::cm;
-
-           PoZ1 = thicknessEndPlate + modl_length/4 - (dbManager->GetEnvZLength()*Gaudi::Units::cm- EBFingerLengthPos)/2;
-           PoZ2 = PoZ1 + modl_length/4;
-
-           if ((ModuleNcp>=35 && ModuleNcp<=37) || (ModuleNcp>=60 && ModuleNcp<=62))
-	    { GeoTrf::Transform3D  TransCut2 = GeoTrf::TranslateZ3D(-Radius) * GeoTrf::RotateX3D((90-phi)*Gaudi::Units::deg) * GeoTrf::RotateY3D(180*Gaudi::Units::deg)
-                                        * GeoTrf::Translate3D(-PoZ2,0.,-PosY);
- 
-              if (ModuleNcp>=60 && ModuleNcp<=62)
-	       { GeoTrf::Transform3D TransCutL = GeoTrf::TranslateZ3D(-Radius)
-                                          * GeoTrf::RotateY3D(180*Gaudi::Units::deg) * GeoTrf::RotateX3D(phi*Gaudi::Units::deg)
-                                          * GeoTrf::Translate3D(PoZ1,PosYcut,-PosXcut);
-
-                 // Cuting of module (Left)
-                 const GeoShape& TmL_EBarrelModuleMotherPos = ebarrelModuleMotherPos->subtract((*CutA)<<TransCut2).
-                                                                                      subtract((*CutB)<<TransCutL);
-
-                 lvEBarrelModuleMotherPos = new GeoLogVol("EBarrelModule",&TmL_EBarrelModuleMotherPos,matAir);
-
-               } else if (ModuleNcp>=35 && ModuleNcp<=37) 
-	       { GeoTrf::Transform3D TransCutR = GeoTrf::TranslateZ3D(-Radius)
-                                          * GeoTrf::RotateY3D(180*Gaudi::Units::deg) * GeoTrf::RotateX3D(phi*Gaudi::Units::deg)
-                                          * GeoTrf::Translate3D(PoZ1,PosYcut,PosXcut) * GeoTrf::RotateY3D(180*Gaudi::Units::deg);
-
-                 // Cuting of module (Right)
-                 const GeoShape& TmR_EBarrelModuleMotherPos = ebarrelModuleMotherPos->subtract((*CutA)<<TransCut2).
-                                                                                      subtract((*CutB)<<TransCutR);
-
-                 lvEBarrelModuleMotherPos = new GeoLogVol("EBarrelModule",&TmR_EBarrelModuleMotherPos,matAir);
-	       }
-
-              pvEBarrelModuleMotherPos = new GeoPhysVol(lvEBarrelModuleMotherPos);
-
-	    } else {
-              lvEBarrelModuleMotherPos = new GeoLogVol("EBarrelModule",ebarrelModuleMotherPos,matAir);
-              pvEBarrelModuleMotherPos = new GeoPhysVol(lvEBarrelModuleMotherPos);
-            } // end special modules
-	 } // end if, BoolCuts()
-
-        // Fill the section
-        if(Filling){
-	  sectionBuilder->fillSection(pvEBarrelModuleMotherPos, 2,
-                                      dbManager->TILBrmaximal(),
-                                      dbManager->TILBrminimal(),
-                                      dzGlue,
-                                      deltaPhi,
-                                      ModuleNcp);
-	}
-
-        GeoTransform* xtraModPos = new GeoTransform(GeoTrf::TranslateX3D(Radius));
-
-        pvEBarrelMotherPos->add(zrotMod);
-        pvEBarrelMotherPos->add(xtraModPos);
-        pvEBarrelMotherPos->add(XYrtMod);
-
-        pvEBarrelMotherPos->add(new GeoIdentifierTag(ModuleNcp));
-        pvEBarrelMotherPos->add(pvEBarrelModuleMotherPos);
-
-        /*
-        if (!dbManager->BoolCuts())
-	 { pvEBarrelMotherPos->add(pvEBarrelModuleMotherPos);
-           (*m_log) << MSG::DEBUG << " BoolCuts NO "<< dbManager->BoolCuts() << endmsg;
-
-         } else {
-
-           (*m_log) << MSG::DEBUG << " BoolCuts YES "<< dbManager->BoolCuts() << endmsg;
- 
-           double PoZ2 =0, PoZ1 =0;
-           double thicknessEndPlate = dbManager->TILBdzend1()*Gaudi::Units::cm;
-
-           PoZ1 = thicknessEndPlate + modl_length/4 - (dbManager->GetEnvZLength()*Gaudi::Units::cm- EBFingerLengthPos)/2;
-           PoZ2 = modl_length/4 + PoZ1;
-
-           if ((ModuleNcp>=35 && ModuleNcp<=37) || (ModuleNcp>=60 && ModuleNcp<=62))
-	    { GeoTrf::Transform3D  TransCut2 = GeoTrf::TranslateZ3D(-Radius) * GeoTrf::RotateX3D((90-phi)*Gaudi::Units::deg) * GeoTrf::RotateY3D(180*Gaudi::Units::deg)
-                                        * GeoTrf::Translate3D(-PoZ2,0.,-PosY);
- 
-              // Cuting of pvEBarrelModuleMotherPos (-)
-              GeoCutVolAction action1(*CutA, TransCut2);
-              pvEBarrelModuleMotherPos->apply(&action1);
-              pvTmp_EBarrelModuleMotherPos = action1.getPV();
-              pvEBarrelModuleMotherPos->unref(); // Cleaning useless volume
-
-              if (ModuleNcp>=60 && ModuleNcp<=62)
-	       { GeoTrf::Transform3D TransCutL = GeoTrf::TranslateZ3D(-Radius)
-                                          * GeoTrf::RotateY3D(180*Gaudi::Units::deg) * GeoTrf::RotateX3D(phi*Gaudi::Units::deg)
-                                          * GeoTrf::Translate3D(PoZ1,PosYcut,-PosXcut);
-
-                 // Cuting of pvEBarrelModuleMotherPos (Left)
-                 GeoCutVolAction action2(*CutB, TransCutL);
-                 pvTmp_EBarrelModuleMotherPos->apply(&action2);
-                 pvTmL_EBarrelModuleMotherPos = action2.getPV();
-                 pvTmp_EBarrelModuleMotherPos->unref();// Cleaning useless volume
-
-                 pvEBarrelMotherPos->add(pvTmL_EBarrelModuleMotherPos);
-
-               } else if (ModuleNcp>=35 && ModuleNcp<=37) 
-	       { GeoTrf::Transform3D TransCutR = GeoTrf::TranslateZ3D(-Radius)
-                                          * GeoTrf::RotateY3D(180*Gaudi::Units::deg) * GeoTrf::RotateX3D(phi*Gaudi::Units::deg)
-                                          * GeoTrf::Translate3D(PoZ1,PosYcut,PosXcut) * GeoTrf::RotateY3D(180*Gaudi::Units::deg);
-
-                 // Cuting of pvEBarrelModuleMotherPos (Right)
-                 GeoCutVolAction action3(*CutB, TransCutR);
-                 pvTmp_EBarrelModuleMotherPos->apply(&action3);
-                 pvTmR_EBarrelModuleMotherPos = action3.getPV();
-                 pvTmp_EBarrelModuleMotherPos->unref();// Cleaning useless volume
- 
-                 pvEBarrelMotherPos->add(pvTmR_EBarrelModuleMotherPos);
-	       }
-	    } 	
-            else  
-            { pvEBarrelMotherPos->add(pvEBarrelModuleMotherPos);
-            } // end special modules
-              pvEBarrelMotherPos->add(pvEBarrelModuleMotherPos);
-         } // end if, BoolCuts()
-	*/  
-
-        //--------------------------EBARREL FINGERS MAKING------------------------------
-  
-        dbManager->SetCurrentTifg(2);  //barrel efinger (small)
-        
-        // Trd - one finger mother
-        thicknessWedgeMother = dbManager->TIFGdz() * Gaudi::Units::cm;
-        heightWedgeMother = (dbManager->TILErmax() - dbManager->TILBrmax()) * Gaudi::Units::cm;
-        dy1WedgeMother = dbManager->TILBrmax() * tan(deltaPhi/2*Gaudi::Units::deg) * Gaudi::Units::cm;
-        dy2WedgeMother = dbManager->TILErmax() * tan(deltaPhi/2*Gaudi::Units::deg) * Gaudi::Units::cm;
-        
-        checking("EFingerModule (+)", false,  1, 
-                 thicknessWedgeMother/2,thicknessWedgeMother/2,dy1WedgeMother,dy2WedgeMother,heightWedgeMother/2);
-
-        GeoTrd* efingerModuleMother = new GeoTrd(thicknessWedgeMother/2,
-                                                 thicknessWedgeMother/2,
-                                                 dy1WedgeMother,
-                                                 dy2WedgeMother,
-                                                 heightWedgeMother/2);
-        
-        GeoLogVol* lvEFingerModuleMother = new GeoLogVol("EFingerModule",efingerModuleMother,matAir);
-        GeoPhysVol* pvEFingerModuleMother = new GeoPhysVol(lvEFingerModuleMother);
-        
-        // Fill the section
-        if (Filling)
-         { sectionBuilder->fillFinger(pvEFingerModuleMother, 2,
-                                      dbManager->TILErmax(),
-                                      dbManager->TILBrmax(),
-                                      deltaPhi,
-                                      m_switches.testBeam,
-                                      ModuleNcp);
-	 }
-        GeoTransform* xtraModFingerPos  = new GeoTransform(GeoTrf::TranslateX3D(
-                                              (dbManager->TILErmax() + dbManager->TILBrmax())/2*Gaudi::Units::cm));
-        pvEFingerMotherPos->add(zrotMod);
-        pvEFingerMotherPos->add(xtraModFingerPos);
-        pvEFingerMotherPos->add(XYrtMod);
-
-        pvEFingerMotherPos->add(new GeoIdentifierTag(ModuleNcp));
-        pvEFingerMotherPos->add(pvEFingerModuleMother);
-
-        // --------------------------BARREL SADDLE MAKING----------------------------
-        if (dbManager->BoolSaddle())
-        { if ( (ModuleNcp >=39 && ModuleNcp <=42) || (ModuleNcp >=55 && ModuleNcp <=58) )
-	  { 
-            GeoTubs* SaddleModule = new GeoTubs(BFingerRmin-RadiusSaddle,
-                                                BFingerRmin,
-                                                DzSaddleSupport/2,
-                                                0.,deltaPhi*Gaudi::Units::deg);
-     
-            GeoLogVol* lvSaddleModule = new GeoLogVol("SaddleModule",SaddleModule,matIron);
-            GeoPhysVol* pvSaddleModule = new GeoPhysVol(lvSaddleModule);
-
-            pvESaddleMotherPos->add(zrotSaddle);
-            pvESaddleMotherPos->add(new GeoIdentifierTag(ModuleNcp));
-            pvESaddleMotherPos->add(pvSaddleModule); 
-          }
-         }
-
-      } // end if (EnvType == 3)
-      
-      //------------------- Extended Barrel Module Negative ----------------------------------------------------------
- 
-      if (EnvType == 2) {
-
-	dbManager->SetCurrentSectionByNumber(ModType);
-
-        // Mother module
-        thicknessWedgeMother = dbManager->TILBdzmodul() * Gaudi::Units::cm;
-        heightWedgeMother = (dbManager->TILBrmaximal() - dbManager->TILBrminimal()) * Gaudi::Units::cm;
-        dy1WedgeMother = dbManager->TILBrminimal() * tan(deltaPhi/2*Gaudi::Units::deg) * Gaudi::Units::cm;
-        dy2WedgeMother = dbManager->TILBrmaximal() * tan(deltaPhi/2*Gaudi::Units::deg) * Gaudi::Units::cm;
-        
-        dzGlue = (dbManager->TILBdzmodul() - dbManager->TILBdzend1() - dbManager->TILBdzend2() 
-                - dbManager->TILBnperiod()*2.*(dbManager->TILBdzmast() 
-                + dbManager->TILBdzspac()))/(4.*dbManager->TILBnperiod());
-  
-        double Radius = (dbManager->TILBrmaximal() + dbManager->TILBrminimal())/2 * Gaudi::Units::cm;
-
-        checking("EBarrelModule (-)", false, 1, 
-                 thicknessWedgeMother/2,thicknessWedgeMother/2,dy1WedgeMother,dy2WedgeMother,heightWedgeMother/2);
-
-        GeoTrd* ebarrelModuleMotherNeg = new GeoTrd(thicknessWedgeMother/2,
-                                                    thicknessWedgeMother/2,
-                                                    dy1WedgeMother,
-                                                    dy2WedgeMother,
-                                                    heightWedgeMother/2);
-        
-         if (!dbManager->BoolCuts())
-	 { 
-	   if(m_log->level()<=MSG::DEBUG)
-	     (*m_log) << MSG::DEBUG << " BoolCuts NO "<< dbManager->BoolCuts() << endmsg;
-
-           lvEBarrelModuleMotherNeg = new GeoLogVol("EBarrelModule",ebarrelModuleMotherNeg,matAir);
-           pvEBarrelModuleMotherNeg = new GeoPhysVol(lvEBarrelModuleMotherNeg);
-
-         } else {
-
-           //gdb
-	   if(m_log->level()<=MSG::DEBUG)
-	     (*m_log) << MSG::DEBUG << " BoolCuts YES "<< dbManager->BoolCuts() << endmsg;
- 
-           double PoZ2 =0, PoZ1 =0, thicknessEndPlate = dbManager->TILBdzend1()*Gaudi::Units::cm;
-
-           PoZ1 = thicknessEndPlate + modl_length/4 - (dbManager->GetEnvZLength()*Gaudi::Units::cm- EBFingerLengthNeg)/2;
-           PoZ2 = PoZ1 + modl_length/4;
-
-           if ((ModuleNcp>=35 && ModuleNcp<=37) || (ModuleNcp>=60 && ModuleNcp<=62))
-	    { GeoTrf::Transform3D  TransCut2 = GeoTrf::TranslateZ3D(-Radius) 
-                                        * GeoTrf::RotateX3D((phi-90)*Gaudi::Units::deg) * GeoTrf::RotateY3D(180*Gaudi::Units::deg)
-                                        * GeoTrf::Translate3D(-PoZ2,0,-PosY);
- 
-              if (ModuleNcp>=60 && ModuleNcp<=62)
-	       { GeoTrf::Transform3D TransCutL = GeoTrf::TranslateZ3D(-Radius)
-                                          * GeoTrf::RotateY3D(180*Gaudi::Units::deg) * GeoTrf::RotateX3D(-phi*Gaudi::Units::deg)
-                                          * GeoTrf::Translate3D(PoZ1,-PosYcut,-PosXcut);
-
-                 // Cuting of module (Left)
-                 const GeoShape& TmL_EBarrelModuleMotherNeg = ebarrelModuleMotherNeg->subtract((*CutA)<<TransCut2).
-                                                                                      subtract((*CutB)<<TransCutL);
-
-                 lvEBarrelModuleMotherNeg = new GeoLogVol("EBarrelModule",&TmL_EBarrelModuleMotherNeg,matAir);
-
-               } else if (ModuleNcp>=35 && ModuleNcp<=37)
-	       { GeoTrf::Transform3D TransCutR = GeoTrf::TranslateZ3D(-Radius)
-                                          * GeoTrf::RotateY3D(180*Gaudi::Units::deg) * GeoTrf::RotateX3D(-phi*Gaudi::Units::deg)
-                                          * GeoTrf::Translate3D(PoZ1,-PosYcut,PosXcut) * GeoTrf::RotateY3D(180*Gaudi::Units::deg);
-
-                 // Cuting of module (Right)
-                 const GeoShape& TmR_EBarrelModuleMotherNeg = ebarrelModuleMotherNeg->subtract((*CutA)<<TransCut2).
-                                                                                      subtract((*CutB)<<TransCutR);
-
-                 lvEBarrelModuleMotherNeg = new GeoLogVol("EBarrelModule",&TmR_EBarrelModuleMotherNeg,matAir);
-	       }
-
-              pvEBarrelModuleMotherNeg = new GeoPhysVol(lvEBarrelModuleMotherNeg);
-
-	    } else {
-              lvEBarrelModuleMotherNeg = new GeoLogVol("EBarrelModule",ebarrelModuleMotherNeg,matAir);
-              pvEBarrelModuleMotherNeg = new GeoPhysVol(lvEBarrelModuleMotherNeg);
-            } // end special modules
-	 } // end if, BoolCuts()
-
-        // Fill the section
-        if (Filling)
-         {sectionBuilder->fillSection(pvEBarrelModuleMotherNeg, 2,
-                                      dbManager->TILBrmaximal(),
-                                      dbManager->TILBrminimal(),
-                                      dzGlue,
-                                      deltaPhi,
-                                      ModuleNcp,
-				      0.,true);
-         }
-
-        GeoTransform* xtraModNeg = new GeoTransform(GeoTrf::TranslateX3D(Radius));
-
-        pvEBarrelMotherNeg->add(zrotMod);
-        pvEBarrelMotherNeg->add(xtraModNeg);
-        pvEBarrelMotherNeg->add(yrotMod);
-
-        pvEBarrelMotherNeg->add(new GeoIdentifierTag(ModuleNcp));
-        pvEBarrelMotherNeg->add(pvEBarrelModuleMotherNeg);
-
-        /*
-        if (!dbManager->BoolCuts()) 
-         { pvEBarrelMotherNeg->add(pvEBarrelModuleMotherNeg);
-           (*m_log) << MSG::DEBUG << " BoolCuts NO "<< dbManager->BoolCuts() << endmsg;
-
-         } else {
-           (*m_log) << MSG::DEBUG << " BoolCuts YES "<< dbManager->BoolCuts() << endmsg;
-
-           double PoZ2 =0, PoZ1 =0;
-           double thicknessEndPlate = dbManager->TILBdzend1()*Gaudi::Units::cm;
-
-           PoZ1 = thicknessEndPlate + modl_length/4 - (dbManager->GetEnvZLength()*Gaudi::Units::cm- EBFingerLengthPos)/2;
-           PoZ2 = modl_length/4 + PoZ1;
-
-          if ((ModuleNcp>=35 && ModuleNcp<=37) || (ModuleNcp>=60 && ModuleNcp<=62))
-	   { GeoTrf::Transform3D  TransCut2 = GeoTrf::TranslateZ3D(-Radius) 
-                                       * GeoTrf::RotateX3D((phi-90)*Gaudi::Units::deg) * GeoTrf::RotateY3D(180*Gaudi::Units::deg)   
-                                       * GeoTrf::Translate3D(-PoZ2,0.,-PosY);
-
-             // Cuting of pvEBarrelModuleMotherNeg (-)
-             GeoCutVolAction action1(*CutA, TransCut2);
-             pvEBarrelModuleMotherNeg->apply(&action1);
-             pvTmp_EBarrelModuleMotherNeg = action1.getPV();
-             pvEBarrelModuleMotherNeg->unref(); // Cleaning useless volume
-
-             if (ModuleNcp>=60 && ModuleNcp<=62)
-	      { GeoTrf::Transform3D TransCutL = GeoTrf::TranslateZ3D(-Radius)
-                                         * GeoTrf::RotateY3D(180*Gaudi::Units::deg) * GeoTrf::RotateX3D(-phi*Gaudi::Units::deg)
-                                         * GeoTrf::Translate3D(PoZ1,-PosYcut,-PosXcut);
-
-                // Cuting of pvEBarrelModuleMotherNeg (Left)
-                GeoCutVolAction action2(*CutB, TransCutL);
-                pvTmp_EBarrelModuleMotherNeg->apply(&action2);
-                pvTmL_EBarrelModuleMotherNeg = action2.getPV();
-                pvTmp_EBarrelModuleMotherNeg->unref();// Cleaning useless volume
-
-                pvEBarrelMotherNeg->add(pvTmL_EBarrelModuleMotherNeg);
-
-              } else if (ModuleNcp>=35 && ModuleNcp<=37) 
-	      { GeoTrf::Transform3D TransCutR = GeoTrf::TranslateZ3D(-Radius)
-                                         * GeoTrf::RotateY3D(180*Gaudi::Units::deg) * GeoTrf::RotateX3D(-phi*Gaudi::Units::deg)
-                                         * GeoTrf::Translate3D(PoZ1,-PosYcut,PosXcut) * GeoTrf::RotateY3D(180*Gaudi::Units::deg);
-
-                // Cuting of pvEBarrelModuleMotherNeg (Right)
-                GeoCutVolAction action3(*CutB, TransCutR);
-                pvTmp_EBarrelModuleMotherNeg->apply(&action3);
-                pvTmR_EBarrelModuleMotherNeg = action3.getPV();
-                pvTmp_EBarrelModuleMotherNeg->unref();// Cleaning useless volume
-
-                pvEBarrelMotherNeg->add(pvTmR_EBarrelModuleMotherNeg);
-              }
-	   } else  
-           { pvEBarrelMotherNeg->add(pvEBarrelModuleMotherNeg);
-           } // end special modules
-             pvEBarrelMotherNeg->add(pvEBarrelModuleMotherNeg);
-	} // end if, BoolCuts()
-        */
-
-        //--------------------------EBARREL FINGERS MAKING------------------------------
-        
-        dbManager->SetCurrentTifg(2);  //barrel efinger (small)
-        
-        //zEndSection = extOffset + dbManager->TILBdzmodul()/2 + dbManager->TILEzshift();
-
-        // Trd - one finger mother
-        thicknessWedgeMother = dbManager->TIFGdz() * Gaudi::Units::cm;
-        heightWedgeMother = (dbManager->TILErmax() - dbManager->TILBrmax()) * Gaudi::Units::cm;
-        dy1WedgeMother = dbManager->TILBrmax() * tan(deltaPhi/2*Gaudi::Units::deg) * Gaudi::Units::cm;
-        dy2WedgeMother = dbManager->TILErmax() * tan(deltaPhi/2*Gaudi::Units::deg) * Gaudi::Units::cm;
-        
-        checking("EFingerModule (-)", false, 1, 
-                 thicknessWedgeMother/2,thicknessWedgeMother/2,dy1WedgeMother,dy2WedgeMother,heightWedgeMother/2);
-
-        GeoTrd* efingerModuleMother = new GeoTrd(thicknessWedgeMother/2,
-                                                 thicknessWedgeMother/2,
-                                                 dy1WedgeMother,
-                                                 dy2WedgeMother,
-                                                 heightWedgeMother/2);
-        
-        GeoLogVol* lvEFingerModuleMother = new GeoLogVol("EFingerModule",efingerModuleMother,matAir);
-        GeoPhysVol* pvEFingerModuleMother = new GeoPhysVol(lvEFingerModuleMother);
-        
-        // Fill the section
-        if (Filling)
-         { sectionBuilder->fillFinger(pvEFingerModuleMother, 2,
-                                      dbManager->TILErmax(),
-                                      dbManager->TILBrmax(),
-                                      deltaPhi,
-                                      m_switches.testBeam,
-                                      ModuleNcp*100);
-         }
-        GeoTransform* xtraModFingerNeg  = new GeoTransform(GeoTrf::TranslateX3D(
-                                              (dbManager->TILErmax() + dbManager->TILBrmax())/2*Gaudi::Units::cm));
-        pvEFingerMotherNeg->add(zrotMod);
-        pvEFingerMotherNeg->add(xtraModFingerNeg); 
-        pvEFingerMotherNeg->add(yrotMod);
-
-        pvEFingerMotherNeg->add(new GeoIdentifierTag(ModuleNcp));
-        pvEFingerMotherNeg->add(pvEFingerModuleMother);
-
-        // --------------------------BARREL SADDLE MAKING----------------------------
-        if (dbManager->BoolSaddle())
-        { if ( (ModuleNcp >=39 && ModuleNcp <=42) || (ModuleNcp >=55 && ModuleNcp <=58) )
-	  { 
-            GeoTubs* SaddleModule = new GeoTubs(BFingerRmin-RadiusSaddle,
-                                                BFingerRmin,
-                                                DzSaddleSupport/2,
-                                                0.,deltaPhi*Gaudi::Units::deg);
-     
-            GeoLogVol* lvSaddleModule = new GeoLogVol("SaddleModule",SaddleModule,matIron);
-            GeoPhysVol* pvSaddleModule = new GeoPhysVol(lvSaddleModule);
-
-            pvESaddleMotherNeg->add(zrotSaddle);
-            pvESaddleMotherNeg->add(new GeoIdentifierTag(ModuleNcp));
-            pvESaddleMotherNeg->add(pvSaddleModule); 
-          }
-         }
-
-      } // end if (EnvType == 2)
-
-      //------------------- D4/C10/Gap/Crack
-
-      if((EnvType == 4) || (EnvType == 5)){
-
-        int Id4 = ModType%100;
-        int Ic10 = (ModType/100)%100;
-        int Igap = (ModType/10000)%100;
-        int Icrack = (ModType/1000000)%100;
-
-        bool Ifd4    = ( Id4 != 0);
-        bool Ifc10   = ( Ic10 != 0);
-        bool Ifgap   = ( Igap != 0);
-        bool Ifcrack = ( Icrack != 0);
-
-	bool Ifspecialgirder = (Id4 == 7);
-
-	if(m_log->level()<=MSG::DEBUG)
-	  (*m_log) << MSG::DEBUG <<" ITC : EnvType "<<EnvType<<" Size = "<<dbManager->GetModTypeSize()
-		   <<" Ncp= "<<ModuleNcp<<"  D4 "<<Id4<<" specialflag = "<<Ifspecialgirder<<" C10 "<<Ic10<<" Gap "<<Igap<<" Crack "<<Icrack
-		   << endmsg;
-
-        if (Ifc10) 
-         { dbManager->SetCurrentSectionByNumber(Ic10); // TILE_PLUG2
-           rMinITC2 = dbManager->TILBrminimal();
-           rMaxITC2 = dbManager->TILBrmaximal();
-           dzITC2   = dbManager->TILBdzmodul();
-         } else { 
-	   if(m_log->level()<=MSG::DEBUG)
-	     (*m_log) << MSG::DEBUG <<" C10 unavailable "<<endmsg;
-         }
-
-        if (Ifd4) 
-         { dbManager->SetCurrentSectionByNumber(Id4); // TILE_PLUG1
-           rMinITC1 = dbManager->TILBrminimal();
-           rMaxITC1 = dbManager->TILBrmaximal();
-           dzITC1   = dbManager->TILBdzmodul();
-	   if (Ifspecialgirder) {
-             if(m_log->level()<=MSG::DEBUG)
-               (*m_log) << MSG::DEBUG <<" dzITC1 changed from "<<dzITC1<<" to "<<dbManager->TILBdzgir()<<endmsg;
-	     dzITC1 = dbManager->TILBdzgir();
-           }
-         } else
-         { (*m_log) << MSG::INFO <<" D4 unavailable "<<endmsg;
-	   dzITC1 = 9.485; //sb [Gaudi::Units::cm]
-         }
-
-        bool specialC10 = (Ifd4 && Ifc10 && rMaxITC2 < rMinITC1);
-        if (specialC10) {
-          rMaxITC2 = rMinITC1; // for special C10 make outer radius equal to inner radius of D4
-        }
-        
-        //------------------- ITC BLOCKS Negative --------------------------------    
-	if (EnvType == 4) {
-
-          // Common mother for ITC1/2 modules
-          if (Ifd4 || Ifc10) {
-
-            //  The first sub shape
-            thicknessWedgeMother = dzITC1 * Gaudi::Units::cm;
-            heightWedgeMother = (rMaxITC1 - rMinITC1) * Gaudi::Units::cm;
-            dy1WedgeMother = rMinITC1 * tan(deltaPhi/2*Gaudi::Units::deg) * Gaudi::Units::cm;
-            dy2WedgeMother = rMaxITC1 * tan(deltaPhi/2*Gaudi::Units::deg) * Gaudi::Units::cm;
-
-            checking("ITCModule tcModuleSub1Neg (-) ", false, 1, 
-                 thicknessWedgeMother/2,thicknessWedgeMother/2,dy1WedgeMother,dy2WedgeMother,heightWedgeMother/2);
-
-            GeoTrd* itcModuleSub1Neg = new GeoTrd(thicknessWedgeMother/2,
-  	                                          thicknessWedgeMother/2,
+      // the main loop around all phi modules position
+      int ModuleNcp =0;
+
+      GeoTransform* yrotMod = new GeoTransform(GeoTrf::RotateY3D(90*Gaudi::Units::deg));
+      yrotMod->ref();
+      GeoTransform* XYrtMod = new GeoTransform(GeoTrf::RotateX3D(180*Gaudi::Units::deg) * GeoTrf::RotateY3D(90*Gaudi::Units::deg));
+      XYrtMod->ref();
+
+      for (int ModCounter = 0; ModCounter < NumberOfMod; ModCounter++) {
+
+        ModuleNcp = ModuleIndex[ModCounter];
+
+        // General rotation and transformations
+        double phi = (double(ModuleNcp-1) + 0.5)*deltaPhi;
+        double ph1 = (double(ModuleNcp-1))*deltaPhi;
+
+        GeoTransform* zrotMod = new GeoTransform(GeoTrf::RotateZ3D(phi*Gaudi::Units::deg));
+        zrotMod->ref();
+        GeoTransform* zrotSaddle =  new GeoTransform(GeoTrf::RotateZ3D(ph1*Gaudi::Units::deg));
+        zrotSaddle->ref();
+
+        dbManager->SetCurrentModuleByIndex(ModuleNcp-1);
+        int ModType = dbManager->GetModType();
+        int ModFingpattern = dbManager->TILBfingpattern();
+
+        // Debuging code for cuted modules
+        if (!(ModuleNcp>=NcpFrom && ModuleNcp<=NcpFrom+NcpPlus)) continue;
+
+        // special Modules with Cuts
+        //if (ModuleNcp<35 || ModuleNcp>62) continue; if (ModuleNcp>37 && ModuleNcp<60) continue;
+
+        // Saddle Supports
+        //if (ModuleNcp<39 || ModuleNcp>58) continue; if (ModuleNcp>42 && ModuleNcp<55) continue;
+
+        if (m_log->level()<=MSG::DEBUG)
+          (*m_log) << MSG::DEBUG <<" ModuleNcp= "<< ModuleNcp <<" ModType "<< ModType <<" Phi "<< phi << endmsg;
+
+        //
+        // ------------------- BARREL BLOCKS ------------------------
+        //
+
+        if ( EnvType == 1 ) { // normal barrel module or module zero
+
+          dbManager->SetCurrentSectionByNumber(ModType);
+
+          thicknessWedgeMother = dbManager->TILBdzmodul() * Gaudi::Units::cm;
+          heightWedgeMother = (dbManager->TILBrmaximal() - dbManager->TILBrminimal()) * Gaudi::Units::cm;
+          dy1WedgeMother = dbManager->TILBrminimal() * tan(deltaPhi/2*Gaudi::Units::deg) * Gaudi::Units::cm;
+          dy2WedgeMother = dbManager->TILBrmaximal() * tan(deltaPhi/2*Gaudi::Units::deg) * Gaudi::Units::cm;
+
+          dzGlue = (dbManager->TILBdzmodul() - dbManager->TILBdzend1() - dbManager->TILBdzend2()
+                    - (dbManager->TILBnperiod()*2.*(dbManager->TILBdzmast() + dbManager->TILBdzspac())
+                       -  dbManager->TILBdzmast()))/(2.*(2.*dbManager->TILBnperiod() - 1));
+
+          GeoTrd* barrelModuleMother = new GeoTrd(thicknessWedgeMother/2,
+                                                  thicknessWedgeMother/2,
                                                   dy1WedgeMother,
                                                   dy2WedgeMother,
                                                   heightWedgeMother/2);
-            // The second sub shape
-            thicknessWedgeMother = dzITC2 * Gaudi::Units::cm;
-            heightWedgeMother    = (rMaxITC2 - rMinITC2) * Gaudi::Units::cm;
-            dy1WedgeMother = rMinITC2 * tan(deltaPhi/2*Gaudi::Units::deg) * Gaudi::Units::cm;
-            dy2WedgeMother = rMaxITC2 * tan(deltaPhi/2*Gaudi::Units::deg) * Gaudi::Units::cm;
 
-            checking("ITCModule itcModuleSub2Neg (-)", false, 1, 
-                 thicknessWedgeMother/2,thicknessWedgeMother/2,dy1WedgeMother,dy2WedgeMother,heightWedgeMother/2);
+          GeoLogVol* lvBarrelModuleMother = new GeoLogVol("BarrelModule",barrelModuleMother,matAir);
+          GeoPhysVol* pvBarrelModuleMother = new GeoPhysVol(lvBarrelModuleMother);
 
-            GeoTrd* itcModuleSub2Neg = new GeoTrd(thicknessWedgeMother/2,
-	                                          thicknessWedgeMother/2,
-                                                  dy1WedgeMother,
-                                                  dy2WedgeMother,
-                                                  heightWedgeMother/2 );
+          // Fill the section
+          if (Filling) {
+            sectionBuilder->fillSection(pvBarrelModuleMother, 1,
+                                        dbManager->TILBrmaximal(),
+                                        dbManager->TILBrminimal(),
+                                        dzGlue,
+                                        deltaPhi);
+          }
 
-            X = (dzITC1 - dzITC2)/2*Gaudi::Units::cm; 
-            Z = ((rMinITC2+rMaxITC2)-(rMaxITC1 + rMinITC1))/2*Gaudi::Units::cm;
-	    if(m_log->level()<=MSG::DEBUG)
-	      (*m_log) << MSG::DEBUG <<"  ITCModule Negative, position X= "<<X<<" Z= "<<Z<< endmsg;
+          GeoTransform* xtraMod = new GeoTransform(GeoTrf::TranslateX3D(
+                                                       (dbManager->TILBrmaximal() + dbManager->TILBrminimal())/2 * Gaudi::Units::cm));
 
-            GeoTrf::Translate3D itcModule_SubShiftNeg(X, 0., Z);
-            const GeoShapeUnion& itcModuleMotherNeg = itcModuleSub1Neg->add(*itcModuleSub2Neg<<itcModule_SubShiftNeg);
+          pvBarrelMother->add(zrotMod);
+          pvBarrelMother->add(xtraMod);
+          pvBarrelMother->add(XYrtMod);
 
-            GeoTrf::Translate3D itcModuleSubShiftNeg(X, 0., Z);
+          pvBarrelMother->add(new GeoIdentifierTag(ModuleNcp));
+          pvBarrelMother->add(pvBarrelModuleMother);
 
-            GeoLogVol* lvITCModuleMotherNeg = new GeoLogVol("ITCModule",&itcModuleMotherNeg,matAir);
-            GeoPhysVol* pvITCModuleMotherNeg = new GeoPhysVol(lvITCModuleMotherNeg);
+          // --------------------------BARREL FINGERS MAKING----------------------------
 
-            //Mother volume for ITC1
-            //In plug1 it's necessary to produce GeoShapeUnion for mother volume that is composed by two parts:
-            // 1. Mother for absorber and girder
-            // 2. Mother for frontplate (since it's short)
-          
-            // The D4, PLUG1
-            dbManager->SetCurrentSectionByNumber(Id4);
+          dbManager->SetCurrentTifg(1);  // Barrel finger
+          zEndSection = dbManager->TILBzoffset() + dbManager->TILBdzmodul()/2;
 
-            thicknessWedgeMother = dzITC1 * Gaudi::Units::cm;
-            heightWedgeMother = (rMaxITC1 - dbManager->TILBrmin()) * Gaudi::Units::cm;
-            dy1WedgeMother = dbManager->TILBrmin() * tan(deltaPhi/2*Gaudi::Units::deg) * Gaudi::Units::cm;
-            dy2WedgeMother = rMaxITC1 * tan(deltaPhi/2*Gaudi::Units::deg) * Gaudi::Units::cm;
-	    // ps changes dzITC1 -> dzmodul
-            Glue =  dbManager->TILBdzmodul() - dbManager->TILBdzend1() - dbManager->TILBdzend2();
-            NbPeriod = dbManager->TILBnperiod();
+          heightWedgeMother = (dbManager->TILErmax() - dbManager->TILBrmax())*Gaudi::Units::cm;
+          dy1WedgeMother = dbManager->TILBrmax() * tan(deltaPhi/2*Gaudi::Units::deg)*Gaudi::Units::cm;
+          dy2WedgeMother = dbManager->TILErmax() * tan(deltaPhi/2*Gaudi::Units::deg)*Gaudi::Units::cm;
 
-	    if(m_log->level()<=MSG::DEBUG)
-	      (*m_log) << MSG::DEBUG <<"  Plug1Module : Glue= "<<Glue<<" dzITC1= "<<dzITC1
-                     <<" TILBdzend1= "<<dbManager->TILBdzend1()
-	             <<" TILBdzend2= "<<dbManager->TILBdzend2()
-                     <<endmsg; 
+          // Finger Positive, positioning (only Left ModFingpattern == 10)
+          if ( ModFingpattern != 10 ) {
+            GeoTrd* fingerModuleMotherPos = new GeoTrd(BFingerLengthPos/2,
+                                                       BFingerLengthPos/2,
+                                                       dy1WedgeMother,
+                                                       dy2WedgeMother,
+                                                       heightWedgeMother/2);
 
-            if (NbPeriod > 6)
-             { dzGlue = (Glue - 2*NbPeriod * (dbManager->TILBdzmast() + dbManager->TILBdzspac())) / (4.*NbPeriod);
-             }  else {
-               dzGlue = (Glue - (2*(NbPeriod-1) * (dbManager->TILBdzmast() + dbManager->TILBdzspac()) + dbManager->TILBdzspac())) / (4.*(NbPeriod-1));
-             }
+            GeoLogVol* lvFingerModuleMotherPos = new GeoLogVol("FingerModule",fingerModuleMotherPos,matAir);
+            GeoPhysVol* pvFingerModuleMotherPos = new GeoPhysVol(lvFingerModuleMotherPos);
 
-	    if(m_log->level()<=MSG::DEBUG)
-	      (*m_log) << MSG::DEBUG <<"  Plug1Module : Glue= "<<Glue<<" dzGlue= "<<dzGlue<<" NbPeriod= "<<NbPeriod
-		       <<" TILBdzmast= "<<dbManager->TILBdzmast()<<" TILBdzspac= "<<dbManager->TILBdzspac()
-		       <<endmsg; 
+            if (Filling)
+              sectionBuilder->fillFinger(pvFingerModuleMotherPos, 1,
+                                         dbManager->TILErmax(),
+                                         dbManager->TILBrmax(),
+                                         deltaPhi,
+                                         m_switches.testBeam,
+                                         ModuleNcp,
+                                         BFingerLengthPos*(1./Gaudi::Units::cm));
 
-            if (dzGlue <= 0.)
-             { (*m_log) << MSG::WARNING <<"  Plug1Module warning: "<<" dzGlue= "<<dzGlue 
-	                <<endmsg;
-             }
+            GeoTransform* xtraModFingerPos  = new GeoTransform(GeoTrf::TranslateX3D((dbManager->TILErmax() + dbManager->TILBrmax())/2*Gaudi::Units::cm));
 
-            checking("Plug1Module plug1SubMotherNeg (-)", false, 2, 
-                 thicknessWedgeMother/2,thicknessWedgeMother/2,dy1WedgeMother,dy2WedgeMother,heightWedgeMother/2);
+            //(*m_log) << MSG::DEBUG << "R  Index " << ModuleNcp << " Fingpattern "<< ModFingpattern << endmsg;
 
-            GeoTrd* plug1SubMotherNeg = new GeoTrd(thicknessWedgeMother/2,
-                                                   thicknessWedgeMother/2,
-                                                   dy1WedgeMother,
-                                                   dy2WedgeMother,
-                                                   heightWedgeMother/2);
-            //Second submother for frontplate
-            double dzITC2Bis = (specialC10) ? 0.0 : dzITC2; // for special C10 D4 and C10 do not overlap
-            thicknessWedgeMother = (dbManager->TILBdzmodul() - dzITC2Bis) * Gaudi::Units::cm;
-	    if(m_log->level()<=MSG::DEBUG)
-              if (specialC10)
-                (*m_log) << MSG::DEBUG <<" Separate C10 and D4 in module " << ModuleNcp << endmsg;
-          
-            GeoLogVol *lvPlug1ModuleMotherNeg=0;
-            if (thicknessWedgeMother > rless)
-             { 
-               heightWedgeMother = (dbManager->TILBrmin() - dbManager->TILBrminimal()) * Gaudi::Units::cm;
-               dy1WedgeMother = dbManager->TILBrminimal() * tan(deltaPhi/2*Gaudi::Units::deg) * Gaudi::Units::cm;
-               dy2WedgeMother = dbManager->TILBrmin() * tan(deltaPhi/2*Gaudi::Units::deg) * Gaudi::Units::cm;
-    
-               checking("Plug1Module plug2SubMotherNeg (-)", false, 2, 
+            pvFingerMotherPos->add(zrotMod);
+            pvFingerMotherPos->add(xtraModFingerPos);
+            pvFingerMotherPos->add(XYrtMod);
+
+            pvFingerMotherPos->add(new GeoIdentifierTag(ModuleNcp));
+            pvFingerMotherPos->add(pvFingerModuleMotherPos);
+          }
+
+          // Finger Negative, positioning (only Left ModFingpattern == 01)
+          if ( ModFingpattern != 1 ) {
+
+            GeoTrd* fingerModuleMotherNeg = new GeoTrd(BFingerLengthNeg/2,
+                                                       BFingerLengthNeg/2,
+                                                       dy1WedgeMother,
+                                                       dy2WedgeMother,
+                                                       heightWedgeMother/2);
+
+            GeoLogVol* lvFingerModuleMotherNeg = new GeoLogVol("FingerModule",fingerModuleMotherNeg,matAir);
+            GeoPhysVol* pvFingerModuleMotherNeg = new GeoPhysVol(lvFingerModuleMotherNeg);
+
+            if (Filling)
+              sectionBuilder->fillFinger(pvFingerModuleMotherNeg, 1,
+                                         dbManager->TILErmax(),
+                                         dbManager->TILBrmax(),
+                                         deltaPhi,
+                                         m_switches.testBeam,
+                                         ModuleNcp*100,
+                                         BFingerLengthNeg*(1./Gaudi::Units::cm));
+
+            GeoTransform* xtraModFingerNeg  = new GeoTransform(GeoTrf::TranslateX3D((dbManager->TILErmax() + dbManager->TILBrmax())/2*Gaudi::Units::cm));
+
+            // (*m_log) << MSG::DEBUG << "L  Index " << ModuleNcp << " Fingpattern "<< ModFingpattern << endmsg;
+
+            pvFingerMotherNeg->add(zrotMod);
+            pvFingerMotherNeg->add(xtraModFingerNeg);
+            pvFingerMotherNeg->add(yrotMod);
+
+            pvFingerMotherNeg->add(new GeoIdentifierTag(ModuleNcp));
+            pvFingerMotherNeg->add(pvFingerModuleMotherNeg);
+          }
+
+          // --------------------------BARREL SADDLE MAKING----------------------------
+          if (dbManager->BoolSaddle()) {
+            if ( (ModuleNcp >=40 && ModuleNcp <=41) || (ModuleNcp >=56 && ModuleNcp <=57) ) {
+              GeoTubs* SaddleModule = new GeoTubs(BFingerRmin-RadiusSaddle,
+                                                  BFingerRmin,
+                                                  DzSaddleSupport/2,
+                                                  0.,deltaPhi*Gaudi::Units::deg);
+
+              GeoLogVol* lvSaddleModule = new GeoLogVol("SaddleModule",SaddleModule,matIron);
+              GeoPhysVol* pvSaddleModule = new GeoPhysVol(lvSaddleModule);
+
+              pvSaddleMotherPos->add(zrotSaddle);
+              pvSaddleMotherPos->add(new GeoIdentifierTag(ModuleNcp));
+              pvSaddleMotherPos->add(pvSaddleModule);
+
+              pvSaddleMotherNeg->add(zrotSaddle);
+              pvSaddleMotherNeg->add(new GeoIdentifierTag(ModuleNcp));
+              pvSaddleMotherNeg->add(pvSaddleModule);
+            }
+          }
+        }
+
+        //------------------- Extended Barrel Module Positive ----------------------------------------------------------
+
+        if (EnvType == 3) {
+
+          dbManager->SetCurrentSectionByNumber(ModType);
+
+          // Mother module
+          thicknessWedgeMother = dbManager->TILBdzmodul() * Gaudi::Units::cm;
+          heightWedgeMother = (dbManager->TILBrmaximal() - dbManager->TILBrminimal()) * Gaudi::Units::cm;
+          dy1WedgeMother = dbManager->TILBrminimal() * tan(deltaPhi/2*Gaudi::Units::deg) * Gaudi::Units::cm;
+          dy2WedgeMother = dbManager->TILBrmaximal() * tan(deltaPhi/2*Gaudi::Units::deg) * Gaudi::Units::cm;
+
+          dzGlue = (dbManager->TILBdzmodul() - dbManager->TILBdzend1() - dbManager->TILBdzend2()
+                    - dbManager->TILBnperiod()*2.*(dbManager->TILBdzmast() + dbManager->TILBdzspac()))
+              / (4.* dbManager->TILBnperiod());
+
+          double Radius = (dbManager->TILBrmaximal() + dbManager->TILBrminimal())/2 * Gaudi::Units::cm;
+
+          checking("EBarrelModule (+)", false, 1,
                    thicknessWedgeMother/2,thicknessWedgeMother/2,dy1WedgeMother,dy2WedgeMother,heightWedgeMother/2);
 
-               GeoTrd* plug2SubMotherNeg = new GeoTrd(thicknessWedgeMother/2,
+          GeoTrd* ebarrelModuleMotherPos = new GeoTrd(thicknessWedgeMother/2,
                                                       thicknessWedgeMother/2,
                                                       dy1WedgeMother,
                                                       dy2WedgeMother,
                                                       heightWedgeMother/2);
-    
-               GeoTrf::Translate3D plug1SubOffsetNeg(-dzITC2Bis*Gaudi::Units::cm/2, 0.,
-                                               (dbManager->TILBrminimal()-dbManager->TILBrmaximal())*Gaudi::Units::cm/2);
-    
-               const GeoShapeUnion& plug1ModuleMotherNeg = 
-                                    plug1SubMotherNeg->add(*plug2SubMotherNeg<<plug1SubOffsetNeg);
 
-               lvPlug1ModuleMotherNeg = new GeoLogVol("Plug1Module",&plug1ModuleMotherNeg,matAir);
-	     } else
-	     { lvPlug1ModuleMotherNeg = new GeoLogVol("Plug1Module",plug1SubMotherNeg,matAir);
-             }
+          if (!dbManager->BoolCuts()) {
+            if (m_log->level()<=MSG::DEBUG)
+              (*m_log) << MSG::DEBUG << " BoolCuts NO "<< dbManager->BoolCuts() << endmsg;
 
-            GeoPhysVol* pvPlug1ModuleMotherNeg = new GeoPhysVol(lvPlug1ModuleMotherNeg);
-        
-            // Fill the section
-            if (Filling)
-             { sectionBuilder->fillSection(pvPlug1ModuleMotherNeg, 3,
-                                           dbManager->TILBrmaximal(),
-                                           (thicknessWedgeMother > rless) ? dbManager->TILBrminimal() : dbManager->TILBrmin(),
-                                           dzGlue,
-                                           deltaPhi,
-                                           ModuleNcp,
-                                           dzITC2Bis); 
-             }
-        
-            Z = (dbManager->TILBrmin()-dbManager->TILBrminimal())*Gaudi::Units::cm/2;
-            GeoTransform* tfPlug1ModuleMotherNeg = new GeoTransform(GeoTrf::Translate3D(0.,0.,Z));
+            lvEBarrelModuleMotherPos = new GeoLogVol("EBarrelModule",ebarrelModuleMotherPos,matAir);
+            pvEBarrelModuleMotherPos = new GeoPhysVol(lvEBarrelModuleMotherPos);
 
-            pvITCModuleMotherNeg->add(tfPlug1ModuleMotherNeg);
-            pvITCModuleMotherNeg->add(pvPlug1ModuleMotherNeg);
-      
-            //Mother volume for ITC2
-            if (Ifc10) {  
+          } else {
 
-              // TILE_PLUG2
-              dbManager->SetCurrentSectionByNumber(Ic10);
+            //gdb
+            if (m_log->level()<=MSG::DEBUG)
+              (*m_log) << MSG::DEBUG << " BoolCuts YES "<< dbManager->BoolCuts() << endmsg;
 
+            double PoZ2 =0, PoZ1 =0, thicknessEndPlate =dbManager->TILBdzend1()*Gaudi::Units::cm;
+
+            PoZ1 = thicknessEndPlate + modl_length/4 - (dbManager->GetEnvZLength()*Gaudi::Units::cm- EBFingerLengthPos)/2;
+            PoZ2 = PoZ1 + modl_length/4;
+
+            if ((ModuleNcp>=35 && ModuleNcp<=37) || (ModuleNcp>=60 && ModuleNcp<=62)) {
+              GeoTrf::Transform3D  TransCut2 = GeoTrf::TranslateZ3D(-Radius) * GeoTrf::RotateX3D((90-phi)*Gaudi::Units::deg) * GeoTrf::RotateY3D(180*Gaudi::Units::deg)
+                  * GeoTrf::Translate3D(-PoZ2,0.,-PosY);
+
+              if (ModuleNcp>=60 && ModuleNcp<=62) {
+                GeoTrf::Transform3D TransCutL = GeoTrf::TranslateZ3D(-Radius)
+                    * GeoTrf::RotateY3D(180*Gaudi::Units::deg) * GeoTrf::RotateX3D(phi*Gaudi::Units::deg)
+                    * GeoTrf::Translate3D(PoZ1,PosYcut,-PosXcut);
+
+                // Cuting of module (Left)
+                const GeoShape& TmL_EBarrelModuleMotherPos = ebarrelModuleMotherPos->subtract((*CutA)<<TransCut2).
+                    subtract((*CutB)<<TransCutL);
+
+                lvEBarrelModuleMotherPos = new GeoLogVol("EBarrelModule",&TmL_EBarrelModuleMotherPos,matAir);
+
+              } else if (ModuleNcp>=35 && ModuleNcp<=37) {
+                GeoTrf::Transform3D TransCutR = GeoTrf::TranslateZ3D(-Radius)
+                    * GeoTrf::RotateY3D(180*Gaudi::Units::deg) * GeoTrf::RotateX3D(phi*Gaudi::Units::deg)
+                    * GeoTrf::Translate3D(PoZ1,PosYcut,PosXcut) * GeoTrf::RotateY3D(180*Gaudi::Units::deg);
+
+                // Cuting of module (Right)
+                const GeoShape& TmR_EBarrelModuleMotherPos = ebarrelModuleMotherPos->subtract((*CutA)<<TransCut2).
+                    subtract((*CutB)<<TransCutR);
+
+                lvEBarrelModuleMotherPos = new GeoLogVol("EBarrelModule",&TmR_EBarrelModuleMotherPos,matAir);
+              }
+
+              pvEBarrelModuleMotherPos = new GeoPhysVol(lvEBarrelModuleMotherPos);
+
+            } else {
+              lvEBarrelModuleMotherPos = new GeoLogVol("EBarrelModule",ebarrelModuleMotherPos,matAir);
+              pvEBarrelModuleMotherPos = new GeoPhysVol(lvEBarrelModuleMotherPos);
+            } // end special modules
+          } // end if, BoolCuts()
+
+          // Fill the section
+          if (Filling) {
+            sectionBuilder->fillSection(pvEBarrelModuleMotherPos, 2,
+                                        dbManager->TILBrmaximal(),
+                                        dbManager->TILBrminimal(),
+                                        dzGlue,
+                                        deltaPhi,
+                                        ModuleNcp);
+          }
+
+          GeoTransform* xtraModPos = new GeoTransform(GeoTrf::TranslateX3D(Radius));
+
+          pvEBarrelMotherPos->add(zrotMod);
+          pvEBarrelMotherPos->add(xtraModPos);
+          pvEBarrelMotherPos->add(XYrtMod);
+
+          pvEBarrelMotherPos->add(new GeoIdentifierTag(ModuleNcp));
+          pvEBarrelMotherPos->add(pvEBarrelModuleMotherPos);
+
+          /*
+            if (!dbManager->BoolCuts()) {
+              pvEBarrelMotherPos->add(pvEBarrelModuleMotherPos);
+              (*m_log) << MSG::DEBUG << " BoolCuts NO "<< dbManager->BoolCuts() << endmsg;
+
+            } else {
+
+              (*m_log) << MSG::DEBUG << " BoolCuts YES "<< dbManager->BoolCuts() << endmsg;
+
+              double PoZ2 =0, PoZ1 =0;
+              double thicknessEndPlate = dbManager->TILBdzend1()*Gaudi::Units::cm;
+
+              PoZ1 = thicknessEndPlate + modl_length/4 - (dbManager->GetEnvZLength()*Gaudi::Units::cm- EBFingerLengthPos)/2;
+              PoZ2 = modl_length/4 + PoZ1;
+
+              if ((ModuleNcp>=35 && ModuleNcp<=37) || (ModuleNcp>=60 && ModuleNcp<=62)) {
+                GeoTrf::Transform3D  TransCut2 = GeoTrf::TranslateZ3D(-Radius) * GeoTrf::RotateX3D((90-phi)*Gaudi::Units::deg) * GeoTrf::RotateY3D(180*Gaudi::Units::deg)
+                  * GeoTrf::Translate3D(-PoZ2,0.,-PosY);
+
+                // Cuting of pvEBarrelModuleMotherPos (-)
+                GeoCutVolAction action1(*CutA, TransCut2);
+                pvEBarrelModuleMotherPos->apply(&action1);
+                pvTmp_EBarrelModuleMotherPos = action1.getPV();
+                pvEBarrelModuleMotherPos->unref(); // Cleaning useless volume
+
+                if (ModuleNcp>=60 && ModuleNcp<=62) {
+                  GeoTrf::Transform3D TransCutL = GeoTrf::TranslateZ3D(-Radius)
+                    * GeoTrf::RotateY3D(180*Gaudi::Units::deg) * GeoTrf::RotateX3D(phi*Gaudi::Units::deg)
+                    * GeoTrf::Translate3D(PoZ1,PosYcut,-PosXcut);
+
+                  // Cuting of pvEBarrelModuleMotherPos (Left)
+                  GeoCutVolAction action2(*CutB, TransCutL);
+                  pvTmp_EBarrelModuleMotherPos->apply(&action2);
+                  pvTmL_EBarrelModuleMotherPos = action2.getPV();
+                  pvTmp_EBarrelModuleMotherPos->unref();// Cleaning useless volume
+
+                  pvEBarrelMotherPos->add(pvTmL_EBarrelModuleMotherPos);
+
+                } else if (ModuleNcp>=35 && ModuleNcp<=37) {
+                  GeoTrf::Transform3D TransCutR = GeoTrf::TranslateZ3D(-Radius)
+                    * GeoTrf::RotateY3D(180*Gaudi::Units::deg) * GeoTrf::RotateX3D(phi*Gaudi::Units::deg)
+                    * GeoTrf::Translate3D(PoZ1,PosYcut,PosXcut) * GeoTrf::RotateY3D(180*Gaudi::Units::deg);
+
+                  // Cuting of pvEBarrelModuleMotherPos (Right)
+                  GeoCutVolAction action3(*CutB, TransCutR);
+                  pvTmp_EBarrelModuleMotherPos->apply(&action3);
+                  pvTmR_EBarrelModuleMotherPos = action3.getPV();
+                  pvTmp_EBarrelModuleMotherPos->unref();// Cleaning useless volume
+
+                  pvEBarrelMotherPos->add(pvTmR_EBarrelModuleMotherPos);
+                }
+              } else {
+                pvEBarrelMotherPos->add(pvEBarrelModuleMotherPos);
+              } // end special modules
+              pvEBarrelMotherPos->add(pvEBarrelModuleMotherPos);
+            } // end if, BoolCuts()
+          */
+
+          //--------------------------EBARREL FINGERS MAKING------------------------------
+
+          dbManager->SetCurrentTifg(2);  //barrel efinger (small)
+
+          // Trd - one finger mother
+          thicknessWedgeMother = dbManager->TIFGdz() * Gaudi::Units::cm;
+          heightWedgeMother = (dbManager->TILErmax() - dbManager->TILBrmax()) * Gaudi::Units::cm;
+          dy1WedgeMother = dbManager->TILBrmax() * tan(deltaPhi/2*Gaudi::Units::deg) * Gaudi::Units::cm;
+          dy2WedgeMother = dbManager->TILErmax() * tan(deltaPhi/2*Gaudi::Units::deg) * Gaudi::Units::cm;
+
+          checking("EFingerModule (+)", false,  1,
+                   thicknessWedgeMother/2,thicknessWedgeMother/2,dy1WedgeMother,dy2WedgeMother,heightWedgeMother/2);
+
+          GeoTrd* efingerModuleMother = new GeoTrd(thicknessWedgeMother/2,
+                                                   thicknessWedgeMother/2,
+                                                   dy1WedgeMother,
+                                                   dy2WedgeMother,
+                                                   heightWedgeMother/2);
+
+          GeoLogVol* lvEFingerModuleMother = new GeoLogVol("EFingerModule",efingerModuleMother,matAir);
+          GeoPhysVol* pvEFingerModuleMother = new GeoPhysVol(lvEFingerModuleMother);
+
+          // Fill the section
+          if (Filling) {
+            sectionBuilder->fillFinger(pvEFingerModuleMother, 2,
+                                       dbManager->TILErmax(),
+                                       dbManager->TILBrmax(),
+                                       deltaPhi,
+                                       m_switches.testBeam,
+                                       ModuleNcp);
+          }
+          GeoTransform* xtraModFingerPos  = new GeoTransform(GeoTrf::TranslateX3D(
+                                                                 (dbManager->TILErmax() + dbManager->TILBrmax())/2*Gaudi::Units::cm));
+          pvEFingerMotherPos->add(zrotMod);
+          pvEFingerMotherPos->add(xtraModFingerPos);
+          pvEFingerMotherPos->add(XYrtMod);
+
+          pvEFingerMotherPos->add(new GeoIdentifierTag(ModuleNcp));
+          pvEFingerMotherPos->add(pvEFingerModuleMother);
+
+          // --------------------------BARREL SADDLE MAKING----------------------------
+          if (dbManager->BoolSaddle()) {
+            if ( (ModuleNcp >=39 && ModuleNcp <=42) || (ModuleNcp >=55 && ModuleNcp <=58) ) {
+              GeoTubs* SaddleModule = new GeoTubs(BFingerRmin-RadiusSaddle,
+                                                  BFingerRmin,
+                                                  DzSaddleSupport/2,
+                                                  0.,deltaPhi*Gaudi::Units::deg);
+
+              GeoLogVol* lvSaddleModule = new GeoLogVol("SaddleModule",SaddleModule,matIron);
+              GeoPhysVol* pvSaddleModule = new GeoPhysVol(lvSaddleModule);
+
+              pvESaddleMotherPos->add(zrotSaddle);
+              pvESaddleMotherPos->add(new GeoIdentifierTag(ModuleNcp));
+              pvESaddleMotherPos->add(pvSaddleModule);
+            }
+          }
+
+        } // end if (EnvType == 3)
+
+        //------------------- Extended Barrel Module Negative ----------------------------------------------------------
+
+        if (EnvType == 2) {
+
+          dbManager->SetCurrentSectionByNumber(ModType);
+
+          // Mother module
+          thicknessWedgeMother = dbManager->TILBdzmodul() * Gaudi::Units::cm;
+          heightWedgeMother = (dbManager->TILBrmaximal() - dbManager->TILBrminimal()) * Gaudi::Units::cm;
+          dy1WedgeMother = dbManager->TILBrminimal() * tan(deltaPhi/2*Gaudi::Units::deg) * Gaudi::Units::cm;
+          dy2WedgeMother = dbManager->TILBrmaximal() * tan(deltaPhi/2*Gaudi::Units::deg) * Gaudi::Units::cm;
+
+          dzGlue = (dbManager->TILBdzmodul() - dbManager->TILBdzend1() - dbManager->TILBdzend2()
+                    - dbManager->TILBnperiod()*2.*(dbManager->TILBdzmast()
+                                                   + dbManager->TILBdzspac()))/(4.*dbManager->TILBnperiod());
+
+          double Radius = (dbManager->TILBrmaximal() + dbManager->TILBrminimal())/2 * Gaudi::Units::cm;
+
+          checking("EBarrelModule (-)", false, 1,
+                   thicknessWedgeMother/2,thicknessWedgeMother/2,dy1WedgeMother,dy2WedgeMother,heightWedgeMother/2);
+
+          GeoTrd* ebarrelModuleMotherNeg = new GeoTrd(thicknessWedgeMother/2,
+                                                      thicknessWedgeMother/2,
+                                                      dy1WedgeMother,
+                                                      dy2WedgeMother,
+                                                      heightWedgeMother/2);
+
+          if (!dbManager->BoolCuts()) {
+            if (m_log->level()<=MSG::DEBUG)
+              (*m_log) << MSG::DEBUG << " BoolCuts NO "<< dbManager->BoolCuts() << endmsg;
+
+            lvEBarrelModuleMotherNeg = new GeoLogVol("EBarrelModule",ebarrelModuleMotherNeg,matAir);
+            pvEBarrelModuleMotherNeg = new GeoPhysVol(lvEBarrelModuleMotherNeg);
+
+          } else {
+
+            //gdb
+            if (m_log->level()<=MSG::DEBUG)
+              (*m_log) << MSG::DEBUG << " BoolCuts YES "<< dbManager->BoolCuts() << endmsg;
+
+            double PoZ2 =0, PoZ1 =0, thicknessEndPlate = dbManager->TILBdzend1()*Gaudi::Units::cm;
+
+            PoZ1 = thicknessEndPlate + modl_length/4 - (dbManager->GetEnvZLength()*Gaudi::Units::cm- EBFingerLengthNeg)/2;
+            PoZ2 = PoZ1 + modl_length/4;
+
+            if ((ModuleNcp>=35 && ModuleNcp<=37) || (ModuleNcp>=60 && ModuleNcp<=62)) {
+              GeoTrf::Transform3D  TransCut2 = GeoTrf::TranslateZ3D(-Radius)
+                  * GeoTrf::RotateX3D((phi-90)*Gaudi::Units::deg) * GeoTrf::RotateY3D(180*Gaudi::Units::deg)
+                  * GeoTrf::Translate3D(-PoZ2,0,-PosY);
+
+              if (ModuleNcp>=60 && ModuleNcp<=62) {
+                GeoTrf::Transform3D TransCutL = GeoTrf::TranslateZ3D(-Radius)
+                    * GeoTrf::RotateY3D(180*Gaudi::Units::deg) * GeoTrf::RotateX3D(-phi*Gaudi::Units::deg)
+                    * GeoTrf::Translate3D(PoZ1,-PosYcut,-PosXcut);
+
+                // Cuting of module (Left)
+                const GeoShape& TmL_EBarrelModuleMotherNeg = ebarrelModuleMotherNeg->subtract((*CutA)<<TransCut2).
+                    subtract((*CutB)<<TransCutL);
+
+                lvEBarrelModuleMotherNeg = new GeoLogVol("EBarrelModule",&TmL_EBarrelModuleMotherNeg,matAir);
+
+              } else if (ModuleNcp>=35 && ModuleNcp<=37) {
+                GeoTrf::Transform3D TransCutR = GeoTrf::TranslateZ3D(-Radius)
+                    * GeoTrf::RotateY3D(180*Gaudi::Units::deg) * GeoTrf::RotateX3D(-phi*Gaudi::Units::deg)
+                    * GeoTrf::Translate3D(PoZ1,-PosYcut,PosXcut) * GeoTrf::RotateY3D(180*Gaudi::Units::deg);
+
+                // Cuting of module (Right)
+                const GeoShape& TmR_EBarrelModuleMotherNeg = ebarrelModuleMotherNeg->subtract((*CutA)<<TransCut2).
+                    subtract((*CutB)<<TransCutR);
+
+                lvEBarrelModuleMotherNeg = new GeoLogVol("EBarrelModule",&TmR_EBarrelModuleMotherNeg,matAir);
+              }
+
+              pvEBarrelModuleMotherNeg = new GeoPhysVol(lvEBarrelModuleMotherNeg);
+
+            } else {
+              lvEBarrelModuleMotherNeg = new GeoLogVol("EBarrelModule",ebarrelModuleMotherNeg,matAir);
+              pvEBarrelModuleMotherNeg = new GeoPhysVol(lvEBarrelModuleMotherNeg);
+            } // end special modules
+          } // end if, BoolCuts()
+
+          // Fill the section
+          if (Filling) {
+            sectionBuilder->fillSection(pvEBarrelModuleMotherNeg, 2,
+                                        dbManager->TILBrmaximal(),
+                                        dbManager->TILBrminimal(),
+                                        dzGlue,
+                                        deltaPhi,
+                                        ModuleNcp,
+                                        0.,true);
+          }
+
+          GeoTransform* xtraModNeg = new GeoTransform(GeoTrf::TranslateX3D(Radius));
+
+          pvEBarrelMotherNeg->add(zrotMod);
+          pvEBarrelMotherNeg->add(xtraModNeg);
+          pvEBarrelMotherNeg->add(yrotMod);
+
+          pvEBarrelMotherNeg->add(new GeoIdentifierTag(ModuleNcp));
+          pvEBarrelMotherNeg->add(pvEBarrelModuleMotherNeg);
+
+          /*
+            if (!dbManager->BoolCuts()) {
+              pvEBarrelMotherNeg->add(pvEBarrelModuleMotherNeg);
+              (*m_log) << MSG::DEBUG << " BoolCuts NO "<< dbManager->BoolCuts() << endmsg;
+
+            } else {
+              (*m_log) << MSG::DEBUG << " BoolCuts YES "<< dbManager->BoolCuts() << endmsg;
+
+              double PoZ2 =0, PoZ1 =0;
+              double thicknessEndPlate = dbManager->TILBdzend1()*Gaudi::Units::cm;
+
+              PoZ1 = thicknessEndPlate + modl_length/4 - (dbManager->GetEnvZLength()*Gaudi::Units::cm- EBFingerLengthPos)/2;
+              PoZ2 = modl_length/4 + PoZ1;
+
+              if ((ModuleNcp>=35 && ModuleNcp<=37) || (ModuleNcp>=60 && ModuleNcp<=62)) {
+                GeoTrf::Transform3D  TransCut2 = GeoTrf::TranslateZ3D(-Radius)
+                  * GeoTrf::RotateX3D((phi-90)*Gaudi::Units::deg) * GeoTrf::RotateY3D(180*Gaudi::Units::deg)
+                  * GeoTrf::Translate3D(-PoZ2,0.,-PosY);
+
+                // Cuting of pvEBarrelModuleMotherNeg (-)
+                GeoCutVolAction action1(*CutA, TransCut2);
+                pvEBarrelModuleMotherNeg->apply(&action1);
+                pvTmp_EBarrelModuleMotherNeg = action1.getPV();
+                pvEBarrelModuleMotherNeg->unref(); // Cleaning useless volume
+
+                if (ModuleNcp>=60 && ModuleNcp<=62) {
+                  GeoTrf::Transform3D TransCutL = GeoTrf::TranslateZ3D(-Radius)
+                    * GeoTrf::RotateY3D(180*Gaudi::Units::deg) * GeoTrf::RotateX3D(-phi*Gaudi::Units::deg)
+                    * GeoTrf::Translate3D(PoZ1,-PosYcut,-PosXcut);
+
+                  // Cuting of pvEBarrelModuleMotherNeg (Left)
+                  GeoCutVolAction action2(*CutB, TransCutL);
+                  pvTmp_EBarrelModuleMotherNeg->apply(&action2);
+                  pvTmL_EBarrelModuleMotherNeg = action2.getPV();
+                  pvTmp_EBarrelModuleMotherNeg->unref();// Cleaning useless volume
+
+                  pvEBarrelMotherNeg->add(pvTmL_EBarrelModuleMotherNeg);
+
+                } else if (ModuleNcp>=35 && ModuleNcp<=37) {
+                  GeoTrf::Transform3D TransCutR = GeoTrf::TranslateZ3D(-Radius)
+                    * GeoTrf::RotateY3D(180*Gaudi::Units::deg) * GeoTrf::RotateX3D(-phi*Gaudi::Units::deg)
+                    * GeoTrf::Translate3D(PoZ1,-PosYcut,PosXcut) * GeoTrf::RotateY3D(180*Gaudi::Units::deg);
+
+                  // Cuting of pvEBarrelModuleMotherNeg (Right)
+                  GeoCutVolAction action3(*CutB, TransCutR);
+                  pvTmp_EBarrelModuleMotherNeg->apply(&action3);
+                  pvTmR_EBarrelModuleMotherNeg = action3.getPV();
+                  pvTmp_EBarrelModuleMotherNeg->unref();// Cleaning useless volume
+
+                  pvEBarrelMotherNeg->add(pvTmR_EBarrelModuleMotherNeg);
+                }
+              } else {
+                pvEBarrelMotherNeg->add(pvEBarrelModuleMotherNeg);
+              } // end special modules
+              pvEBarrelMotherNeg->add(pvEBarrelModuleMotherNeg);
+            } // end if, BoolCuts()
+          */
+
+          //--------------------------EBARREL FINGERS MAKING------------------------------
+
+          dbManager->SetCurrentTifg(2);  //barrel efinger (small)
+
+          //zEndSection = extOffset + dbManager->TILBdzmodul()/2 + dbManager->TILEzshift();
+
+          // Trd - one finger mother
+          thicknessWedgeMother = dbManager->TIFGdz() * Gaudi::Units::cm;
+          heightWedgeMother = (dbManager->TILErmax() - dbManager->TILBrmax()) * Gaudi::Units::cm;
+          dy1WedgeMother = dbManager->TILBrmax() * tan(deltaPhi/2*Gaudi::Units::deg) * Gaudi::Units::cm;
+          dy2WedgeMother = dbManager->TILErmax() * tan(deltaPhi/2*Gaudi::Units::deg) * Gaudi::Units::cm;
+
+          checking("EFingerModule (-)", false, 1,
+                   thicknessWedgeMother/2,thicknessWedgeMother/2,dy1WedgeMother,dy2WedgeMother,heightWedgeMother/2);
+
+          GeoTrd* efingerModuleMother = new GeoTrd(thicknessWedgeMother/2,
+                                                   thicknessWedgeMother/2,
+                                                   dy1WedgeMother,
+                                                   dy2WedgeMother,
+                                                   heightWedgeMother/2);
+
+          GeoLogVol* lvEFingerModuleMother = new GeoLogVol("EFingerModule",efingerModuleMother,matAir);
+          GeoPhysVol* pvEFingerModuleMother = new GeoPhysVol(lvEFingerModuleMother);
+
+          // Fill the section
+          if (Filling) {
+            sectionBuilder->fillFinger(pvEFingerModuleMother, 2,
+                                       dbManager->TILErmax(),
+                                       dbManager->TILBrmax(),
+                                       deltaPhi,
+                                       m_switches.testBeam,
+                                       ModuleNcp*100);
+          }
+          GeoTransform* xtraModFingerNeg  = new GeoTransform(GeoTrf::TranslateX3D(
+                                                                 (dbManager->TILErmax() + dbManager->TILBrmax())/2*Gaudi::Units::cm));
+          pvEFingerMotherNeg->add(zrotMod);
+          pvEFingerMotherNeg->add(xtraModFingerNeg);
+          pvEFingerMotherNeg->add(yrotMod);
+
+          pvEFingerMotherNeg->add(new GeoIdentifierTag(ModuleNcp));
+          pvEFingerMotherNeg->add(pvEFingerModuleMother);
+
+          // --------------------------BARREL SADDLE MAKING----------------------------
+          if (dbManager->BoolSaddle()) {
+            if ( (ModuleNcp >=39 && ModuleNcp <=42) || (ModuleNcp >=55 && ModuleNcp <=58) ) {
+              GeoTubs* SaddleModule = new GeoTubs(BFingerRmin-RadiusSaddle,
+                                                  BFingerRmin,
+                                                  DzSaddleSupport/2,
+                                                  0.,deltaPhi*Gaudi::Units::deg);
+
+              GeoLogVol* lvSaddleModule = new GeoLogVol("SaddleModule",SaddleModule,matIron);
+              GeoPhysVol* pvSaddleModule = new GeoPhysVol(lvSaddleModule);
+
+              pvESaddleMotherNeg->add(zrotSaddle);
+              pvESaddleMotherNeg->add(new GeoIdentifierTag(ModuleNcp));
+              pvESaddleMotherNeg->add(pvSaddleModule);
+            }
+          }
+
+        } // end if (EnvType == 2)
+
+        //------------------- D4/C10/Gap/Crack
+
+        if ((EnvType == 4) || (EnvType == 5)) {
+
+          int Id4 = ModType%100;
+          int Ic10 = (ModType/100)%100;
+          int Igap = (ModType/10000)%100;
+          int Icrack = (ModType/1000000)%100;
+
+          bool Ifd4    = ( Id4 != 0);
+          bool Ifc10   = ( Ic10 != 0);
+          bool Ifgap   = ( Igap != 0);
+          bool Ifcrack = ( Icrack != 0);
+
+          bool Ifspecialgirder = (Id4 == 7);
+
+          if (m_log->level()<=MSG::DEBUG)
+            (*m_log) << MSG::DEBUG <<" ITC : EnvType "<<EnvType<<" Size = "<<dbManager->GetModTypeSize()
+                     <<" Ncp= "<<ModuleNcp<<"  D4 "<<Id4<<" specialflag = "<<Ifspecialgirder<<" C10 "<<Ic10<<" Gap "<<Igap<<" Crack "<<Icrack
+                     << endmsg;
+
+          if (Ifc10) {
+            dbManager->SetCurrentSectionByNumber(Ic10); // TILE_PLUG2
+            rMinITC2 = dbManager->TILBrminimal();
+            rMaxITC2 = dbManager->TILBrmaximal();
+            dzITC2   = dbManager->TILBdzmodul();
+          } else {
+            if (m_log->level()<=MSG::DEBUG)
+              (*m_log) << MSG::DEBUG <<" C10 unavailable "<<endmsg;
+          }
+
+          if (Ifd4) {
+            dbManager->SetCurrentSectionByNumber(Id4); // TILE_PLUG1
+            rMinITC1 = dbManager->TILBrminimal();
+            rMaxITC1 = dbManager->TILBrmaximal();
+            dzITC1   = dbManager->TILBdzmodul();
+            if (Ifspecialgirder) {
+              if (m_log->level()<=MSG::DEBUG)
+                (*m_log) << MSG::DEBUG <<" dzITC1 changed from "<<dzITC1<<" to "<<dbManager->TILBdzgir()<<endmsg;
+              dzITC1 = dbManager->TILBdzgir();
+            }
+          } else {
+            (*m_log) << MSG::INFO <<" D4 unavailable "<<endmsg;
+            dzITC1 = 9.485; //sb [Gaudi::Units::cm]
+          }
+
+          bool specialC10 = (Ifd4 && Ifc10 && rMaxITC2 < rMinITC1);
+          if (specialC10) {
+            rMaxITC2 = rMinITC1; // for special C10 make outer radius equal to inner radius of D4
+          }
+
+          //------------------- ITC BLOCKS Negative --------------------------------
+          if (EnvType == 4) {
+
+            // Common mother for ITC1/2 modules
+            if (Ifd4 || Ifc10) {
+
+              //  The first sub shape
+              thicknessWedgeMother = dzITC1 * Gaudi::Units::cm;
+              heightWedgeMother = (rMaxITC1 - rMinITC1) * Gaudi::Units::cm;
+              dy1WedgeMother = rMinITC1 * tan(deltaPhi/2*Gaudi::Units::deg) * Gaudi::Units::cm;
+              dy2WedgeMother = rMaxITC1 * tan(deltaPhi/2*Gaudi::Units::deg) * Gaudi::Units::cm;
+
+              checking("ITCModule tcModuleSub1Neg (-) ", false, 1,
+                       thicknessWedgeMother/2,thicknessWedgeMother/2,dy1WedgeMother,dy2WedgeMother,heightWedgeMother/2);
+
+              GeoTrd* itcModuleSub1Neg = new GeoTrd(thicknessWedgeMother/2,
+                                                    thicknessWedgeMother/2,
+                                                    dy1WedgeMother,
+                                                    dy2WedgeMother,
+                                                    heightWedgeMother/2);
+              // The second sub shape
+              thicknessWedgeMother = dzITC2 * Gaudi::Units::cm;
+              heightWedgeMother    = (rMaxITC2 - rMinITC2) * Gaudi::Units::cm;
+              dy1WedgeMother = rMinITC2 * tan(deltaPhi/2*Gaudi::Units::deg) * Gaudi::Units::cm;
+              dy2WedgeMother = rMaxITC2 * tan(deltaPhi/2*Gaudi::Units::deg) * Gaudi::Units::cm;
+
+              checking("ITCModule itcModuleSub2Neg (-)", false, 1,
+                       thicknessWedgeMother/2,thicknessWedgeMother/2,dy1WedgeMother,dy2WedgeMother,heightWedgeMother/2);
+
+              GeoTrd* itcModuleSub2Neg = new GeoTrd(thicknessWedgeMother/2,
+                                                    thicknessWedgeMother/2,
+                                                    dy1WedgeMother,
+                                                    dy2WedgeMother,
+                                                    heightWedgeMother/2 );
+
+              X = (dzITC1 - dzITC2)/2*Gaudi::Units::cm;
+              Z = ((rMinITC2+rMaxITC2)-(rMaxITC1 + rMinITC1))/2*Gaudi::Units::cm;
+              if (m_log->level()<=MSG::DEBUG)
+                (*m_log) << MSG::DEBUG <<"  ITCModule Negative, position X= "<<X<<" Z= "<<Z<< endmsg;
+
+              GeoTrf::Translate3D itcModule_SubShiftNeg(X, 0., Z);
+              const GeoShapeUnion& itcModuleMotherNeg = itcModuleSub1Neg->add(*itcModuleSub2Neg<<itcModule_SubShiftNeg);
+
+              GeoTrf::Translate3D itcModuleSubShiftNeg(X, 0., Z);
+
+              GeoLogVol* lvITCModuleMotherNeg = new GeoLogVol("ITCModule",&itcModuleMotherNeg,matAir);
+              GeoPhysVol* pvITCModuleMotherNeg = new GeoPhysVol(lvITCModuleMotherNeg);
+
+              //Mother volume for ITC1
+              //In plug1 it's necessary to produce GeoShapeUnion for mother volume that is composed by two parts:
+              // 1. Mother for absorber and girder
+              // 2. Mother for frontplate (since it's short)
+
+              // The D4, PLUG1
+              dbManager->SetCurrentSectionByNumber(Id4);
+
+              thicknessWedgeMother = dzITC1 * Gaudi::Units::cm;
+              heightWedgeMother = (rMaxITC1 - dbManager->TILBrmin()) * Gaudi::Units::cm;
+              dy1WedgeMother = dbManager->TILBrmin() * tan(deltaPhi/2*Gaudi::Units::deg) * Gaudi::Units::cm;
+              dy2WedgeMother = rMaxITC1 * tan(deltaPhi/2*Gaudi::Units::deg) * Gaudi::Units::cm;
+              // ps changes dzITC1 -> dzmodul
+              Glue =  dbManager->TILBdzmodul() - dbManager->TILBdzend1() - dbManager->TILBdzend2();
+              NbPeriod = dbManager->TILBnperiod();
+
+              if (m_log->level()<=MSG::DEBUG)
+                (*m_log) << MSG::DEBUG <<"  Plug1Module : Glue= "<<Glue<<" dzITC1= "<<dzITC1
+                         <<" TILBdzend1= "<<dbManager->TILBdzend1()
+                         <<" TILBdzend2= "<<dbManager->TILBdzend2()
+                         <<endmsg;
+
+              if (NbPeriod > 6) {
+                dzGlue = (Glue - 2*NbPeriod * (dbManager->TILBdzmast() + dbManager->TILBdzspac())) / (4.*NbPeriod);
+              } else {
+                dzGlue = (Glue - (2*(NbPeriod-1) * (dbManager->TILBdzmast() + dbManager->TILBdzspac()) + dbManager->TILBdzspac())) / (4.*(NbPeriod-1));
+              }
+
+              if (m_log->level()<=MSG::DEBUG)
+                (*m_log) << MSG::DEBUG <<"  Plug1Module : Glue= "<<Glue<<" dzGlue= "<<dzGlue<<" NbPeriod= "<<NbPeriod
+                         <<" TILBdzmast= "<<dbManager->TILBdzmast()<<" TILBdzspac= "<<dbManager->TILBdzspac()
+                         <<endmsg;
+
+              if (dzGlue <= 0.) {
+                (*m_log) << MSG::WARNING <<"  Plug1Module warning: "<<" dzGlue= "<<dzGlue
+                         <<endmsg;
+              }
+
+              checking("Plug1Module plug1SubMotherNeg (-)", false, 2,
+                       thicknessWedgeMother/2,thicknessWedgeMother/2,dy1WedgeMother,dy2WedgeMother,heightWedgeMother/2);
+
+              GeoTrd* plug1SubMotherNeg = new GeoTrd(thicknessWedgeMother/2,
+                                                     thicknessWedgeMother/2,
+                                                     dy1WedgeMother,
+                                                     dy2WedgeMother,
+                                                     heightWedgeMother/2);
+              //Second submother for frontplate
+              double dzITC2Bis = (specialC10) ? 0.0 : dzITC2; // for special C10 D4 and C10 do not overlap
+              thicknessWedgeMother = (dbManager->TILBdzmodul() - dzITC2Bis) * Gaudi::Units::cm;
+              if (m_log->level()<=MSG::DEBUG)
+                if (specialC10)
+                  (*m_log) << MSG::DEBUG <<" Separate C10 and D4 in module " << ModuleNcp << endmsg;
+
+              GeoLogVol *lvPlug1ModuleMotherNeg=0;
+              if (thicknessWedgeMother > rless) {
+                heightWedgeMother = (dbManager->TILBrmin() - dbManager->TILBrminimal()) * Gaudi::Units::cm;
+                dy1WedgeMother = dbManager->TILBrminimal() * tan(deltaPhi/2*Gaudi::Units::deg) * Gaudi::Units::cm;
+                dy2WedgeMother = dbManager->TILBrmin() * tan(deltaPhi/2*Gaudi::Units::deg) * Gaudi::Units::cm;
+
+                checking("Plug1Module plug2SubMotherNeg (-)", false, 2,
+                         thicknessWedgeMother/2,thicknessWedgeMother/2,dy1WedgeMother,dy2WedgeMother,heightWedgeMother/2);
+
+                GeoTrd* plug2SubMotherNeg = new GeoTrd(thicknessWedgeMother/2,
+                                                       thicknessWedgeMother/2,
+                                                       dy1WedgeMother,
+                                                       dy2WedgeMother,
+                                                       heightWedgeMother/2);
+
+                GeoTrf::Translate3D plug1SubOffsetNeg(-dzITC2Bis*Gaudi::Units::cm/2, 0.,
+                                                      (dbManager->TILBrminimal()-dbManager->TILBrmaximal())*Gaudi::Units::cm/2);
+
+                const GeoShapeUnion& plug1ModuleMotherNeg =
+                    plug1SubMotherNeg->add(*plug2SubMotherNeg<<plug1SubOffsetNeg);
+
+                lvPlug1ModuleMotherNeg = new GeoLogVol("Plug1Module",&plug1ModuleMotherNeg,matAir);
+              } else {
+                lvPlug1ModuleMotherNeg = new GeoLogVol("Plug1Module",plug1SubMotherNeg,matAir);
+              }
+
+              GeoPhysVol* pvPlug1ModuleMotherNeg = new GeoPhysVol(lvPlug1ModuleMotherNeg);
+
+              // Fill the section
+              if (Filling) {
+                sectionBuilder->fillSection(pvPlug1ModuleMotherNeg, 3,
+                                            dbManager->TILBrmaximal(),
+                                            (thicknessWedgeMother > rless) ? dbManager->TILBrminimal() : dbManager->TILBrmin(),
+                                            dzGlue,
+                                            deltaPhi,
+                                            ModuleNcp,
+                                            dzITC2Bis);
+              }
+
+              Z = (dbManager->TILBrmin()-dbManager->TILBrminimal())*Gaudi::Units::cm/2;
+              GeoTransform* tfPlug1ModuleMotherNeg = new GeoTransform(GeoTrf::Translate3D(0.,0.,Z));
+
+              pvITCModuleMotherNeg->add(tfPlug1ModuleMotherNeg);
+              pvITCModuleMotherNeg->add(pvPlug1ModuleMotherNeg);
+
+              //Mother volume for ITC2
+              if (Ifc10) {
+
+                // TILE_PLUG2
+                dbManager->SetCurrentSectionByNumber(Ic10);
+
+                thicknessWedgeMother = dbManager->TILBdzmodul() * Gaudi::Units::cm;
+                heightWedgeMother = (dbManager->TILBrmaximal() - dbManager->TILBrminimal()) * Gaudi::Units::cm;
+                dy1WedgeMother = dbManager->TILBrminimal() * tan(deltaPhi/2*Gaudi::Units::deg) * Gaudi::Units::cm;
+                dy2WedgeMother = dbManager->TILBrmaximal() * tan(deltaPhi/2*Gaudi::Units::deg) * Gaudi::Units::cm;
+
+                if (dbManager->TILBnperiod() > 1) {
+                  dzGlue = (dbManager->TILBdzmodul() - dbManager->TILBdzend1() - dbManager->TILBdzend2()
+                            - ((dbManager->TILBnperiod()-1)*2*(dbManager->TILBdzmast() + dbManager->TILBdzspac())
+                               + dbManager->TILBdzspac()))/(4.*(dbManager->TILBnperiod() - 1));
+                } else {
+                  dzGlue = 0; // add for special missing C10 modules
+                }
+
+                checking("Plug2Module (-)", false, 2,
+                         thicknessWedgeMother/2,thicknessWedgeMother/2,dy1WedgeMother,dy2WedgeMother,heightWedgeMother/2);
+
+                GeoTrd* plug2ModuleMotherNeg = new GeoTrd(thicknessWedgeMother/2,
+                                                          thicknessWedgeMother/2,
+                                                          dy1WedgeMother,
+                                                          dy2WedgeMother,
+                                                          heightWedgeMother/2);
+
+                GeoLogVol* lvPlug2ModuleMotherNeg = new GeoLogVol("Plug2Module",plug2ModuleMotherNeg,matAir);
+                GeoPhysVol* pvPlug2ModuleMotherNeg = new GeoPhysVol(lvPlug2ModuleMotherNeg);
+
+                // Fill the section
+                if (Filling) {
+                  sectionBuilder->fillSection(pvPlug2ModuleMotherNeg, Ic10,
+                                              dbManager->TILBrmaximal(),
+                                              dbManager->TILBrminimal(),
+                                              dzGlue,
+                                              deltaPhi);
+                }
+
+                // TILE_PLUG1, D4
+                if (Ifd4) {
+                  dbManager->SetCurrentSectionByNumber(Id4);
+
+                  GeoTransform* tfPlug2ModuleMotherNeg = new GeoTransform(itcModuleSubShiftNeg);
+
+                  pvITCModuleMotherNeg->add(tfPlug2ModuleMotherNeg);
+                  pvITCModuleMotherNeg->add(pvPlug2ModuleMotherNeg);
+                }
+              }//if C10
+
+              double zShift = 0;
+              NbPeriod = dbManager->TILBnperiod();
+              //          Z = (dbManager->TILBdzmodul()-dzITC2)/2*Gaudi::Units::cm;
+              // ps Zshift calculated from length of volumes rather than modules (account for special modules)
+              //
+              Z = (dzITC1 - dzITC2)/2*Gaudi::Units::cm;
+
+              if (NbPeriod == 6 && !Ifspecialgirder && fabs(Z) < fabs(zITCStandard)) zShift = zITCStandard*(1./Gaudi::Units::cm);
+
+              if (m_log->level()<=MSG::DEBUG)
+                (*m_log) << MSG::DEBUG <<"  ITCModule Negative, position X= "<<X<<" Z= "<<Z
+                         <<" zStandard= "<<zITCStandard<< " zShift= " <<zShift
+                         <<endmsg;
+
+              GeoTransform* xtraITCNeg = new GeoTransform(GeoTrf::TranslateX3D(
+                                                              (dbManager->TILBrmaximal() + dbManager->TILBrminimal())/2*Gaudi::Units::cm));
+              GeoTransform* ztraITCNeg = new GeoTransform(GeoTrf::TranslateZ3D(zShift*Gaudi::Units::cm));
+
+              pvITCMotherNeg->add(zrotMod);
+              pvITCMotherNeg->add(xtraITCNeg);
+              pvITCMotherNeg->add(ztraITCNeg);
+              pvITCMotherNeg->add(yrotMod);
+
+              pvITCMotherNeg->add(new GeoIdentifierTag(ModuleNcp));
+              pvITCMotherNeg->add(pvITCModuleMotherNeg);
+
+            }//if (Ifd4 || Ifc10)
+
+            //-------------------------- G A P Negative ---------------------------------
+            if (Ifgap) {
+
+              // TILE_PLUG3
+              dbManager->SetCurrentSectionByNumber(Igap);
+
+              // Trd - module mother
               thicknessWedgeMother = dbManager->TILBdzmodul() * Gaudi::Units::cm;
               heightWedgeMother = (dbManager->TILBrmaximal() - dbManager->TILBrminimal()) * Gaudi::Units::cm;
               dy1WedgeMother = dbManager->TILBrminimal() * tan(deltaPhi/2*Gaudi::Units::deg) * Gaudi::Units::cm;
               dy2WedgeMother = dbManager->TILBrmaximal() * tan(deltaPhi/2*Gaudi::Units::deg) * Gaudi::Units::cm;
 
-              if (dbManager->TILBnperiod() > 1)
-               { dzGlue = (dbManager->TILBdzmodul() - dbManager->TILBdzend1() - dbManager->TILBdzend2() 
-                        - ((dbManager->TILBnperiod()-1)*2*(dbManager->TILBdzmast() + dbManager->TILBdzspac()) 
-                        + dbManager->TILBdzspac()))/(4.*(dbManager->TILBnperiod() - 1));
-               } else { dzGlue = 0; // add for special missing C10 modules
-               }
+              dzGlue = 0.;
 
-              checking("Plug2Module (-)", false, 2, 
-                   thicknessWedgeMother/2,thicknessWedgeMother/2,dy1WedgeMother,dy2WedgeMother,heightWedgeMother/2);
+              checking("GapModule (-)", false, 2,
+                       thicknessWedgeMother/2,thicknessWedgeMother/2,dy1WedgeMother,dy2WedgeMother,heightWedgeMother/2);
 
-              GeoTrd* plug2ModuleMotherNeg = new GeoTrd(thicknessWedgeMother/2,
-                                                        thicknessWedgeMother/2,
-                                                        dy1WedgeMother,
-                                                        dy2WedgeMother,
-                                                        heightWedgeMother/2);
-    
-              GeoLogVol* lvPlug2ModuleMotherNeg = new GeoLogVol("Plug2Module",plug2ModuleMotherNeg,matAir);
-              GeoPhysVol* pvPlug2ModuleMotherNeg = new GeoPhysVol(lvPlug2ModuleMotherNeg);
-    
-              // Fill the section
-              if (Filling)
-	       { sectionBuilder->fillSection(pvPlug2ModuleMotherNeg, Ic10,
-                                             dbManager->TILBrmaximal(),
-                                             dbManager->TILBrminimal(),
-                                             dzGlue,
-                                             deltaPhi);
-               }
-
-              // TILE_PLUG1, D4        
-              if (Ifd4) {
-                dbManager->SetCurrentSectionByNumber(Id4);
-
-                GeoTransform* tfPlug2ModuleMotherNeg = new GeoTransform(itcModuleSubShiftNeg);
-
-                pvITCModuleMotherNeg->add(tfPlug2ModuleMotherNeg);
-                pvITCModuleMotherNeg->add(pvPlug2ModuleMotherNeg); 
-              }
-            }//if C10
-
-          double zShift = 0;
-          NbPeriod = dbManager->TILBnperiod();
-	  //          Z = (dbManager->TILBdzmodul()-dzITC2)/2*Gaudi::Units::cm;
-	  // ps Zshift calculated from length of volumes rather than modules (account for special modules) 
-	  //
-          Z = (dzITC1 - dzITC2)/2*Gaudi::Units::cm;
-
-          if (NbPeriod == 6 && !Ifspecialgirder && fabs(Z) < fabs(zITCStandard)) zShift = zITCStandard*(1./Gaudi::Units::cm);
-
-	  if(m_log->level()<=MSG::DEBUG)
-	    (*m_log) << MSG::DEBUG <<"  ITCModule Negative, position X= "<<X<<" Z= "<<Z
-		     <<" zStandard= "<<zITCStandard<< " zShift= " <<zShift
-		     <<endmsg;
-
-          GeoTransform* xtraITCNeg = new GeoTransform(GeoTrf::TranslateX3D(
-                                         (dbManager->TILBrmaximal() + dbManager->TILBrminimal())/2*Gaudi::Units::cm));
-	  GeoTransform* ztraITCNeg = new GeoTransform(GeoTrf::TranslateZ3D(zShift*Gaudi::Units::cm));
-
-          pvITCMotherNeg->add(zrotMod);
-          pvITCMotherNeg->add(xtraITCNeg);
-          pvITCMotherNeg->add(ztraITCNeg);
-          pvITCMotherNeg->add(yrotMod);
-
-          pvITCMotherNeg->add(new GeoIdentifierTag(ModuleNcp));
-	  pvITCMotherNeg->add(pvITCModuleMotherNeg);
-
-	}//if(Ifd4 || Ifc10)
-
-        //-------------------------- G A P Negative ---------------------------------
-        if (Ifgap) {
-
-          // TILE_PLUG3
-          dbManager->SetCurrentSectionByNumber(Igap); 
-
-          // Trd - module mother
-          thicknessWedgeMother = dbManager->TILBdzmodul() * Gaudi::Units::cm;
-          heightWedgeMother = (dbManager->TILBrmaximal() - dbManager->TILBrminimal()) * Gaudi::Units::cm;
-          dy1WedgeMother = dbManager->TILBrminimal() * tan(deltaPhi/2*Gaudi::Units::deg) * Gaudi::Units::cm;
-          dy2WedgeMother = dbManager->TILBrmaximal() * tan(deltaPhi/2*Gaudi::Units::deg) * Gaudi::Units::cm;
-
-          dzGlue = 0.;
-
-          checking("GapModule (-)", false, 2, 
-               thicknessWedgeMother/2,thicknessWedgeMother/2,dy1WedgeMother,dy2WedgeMother,heightWedgeMother/2);
-
-          GeoTrd* gapModuleMotherNeg = new GeoTrd(thicknessWedgeMother/2,
-	                                          thicknessWedgeMother/2,
-                                                  dy1WedgeMother,
-					          dy2WedgeMother,
-					          heightWedgeMother/2);
-
-          GeoLogVol* lvGapModuleMotherNeg = new GeoLogVol("GapModule",gapModuleMotherNeg,matAir);
-          GeoPhysVol* pvGapModuleMotherNeg = new GeoPhysVol(lvGapModuleMotherNeg);
-
-          // Fill the section
-          if (Filling)
-            { sectionBuilder->fillSection(pvGapModuleMotherNeg, 5,  // probably better to have Igap instead of 5
-					 dbManager->TILBrmaximal(),
-					 dbManager->TILBrminimal(),
-					 dzGlue,
-					 deltaPhi);
-           }
-
-          // Module position inside mother
-          GeoTransform* xtraGapNeg = new GeoTransform(GeoTrf::TranslateX3D(
-                                         (dbManager->TILBrmaximal() + dbManager->TILBrminimal())/2*Gaudi::Units::cm));
-          pvGapMotherNeg->add(zrotMod);
-          pvGapMotherNeg->add(xtraGapNeg);
-          pvGapMotherNeg->add(yrotMod);
-
-          pvGapMotherNeg->add(new GeoIdentifierTag(ModuleNcp));
-	  pvGapMotherNeg->add(pvGapModuleMotherNeg); 
-       	}
-
-        //-------------------------- Crack Negative ---------------------------------
-        if (Ifcrack) {
-
-          // TILE_PLUG4
-          dbManager->SetCurrentSectionByNumber(Icrack);
-
-          // mother
-          thicknessWedgeMother = dbManager->TILBdzmodul() * Gaudi::Units::cm;
-          heightWedgeMother = (dbManager->TILBrmaximal() - dbManager->TILBrminimal()) * Gaudi::Units::cm;
-          dy1WedgeMother = dbManager->TILBrminimal() * tan(deltaPhi/2*Gaudi::Units::deg) * Gaudi::Units::cm;
-          dy2WedgeMother = dbManager->TILBrmaximal() * tan(deltaPhi/2*Gaudi::Units::deg) * Gaudi::Units::cm;
-    
-          dzGlue = 0.;
-
-          checking("CrackModule (-)", spE4, 2, 
-               thicknessWedgeMother/2,thicknessWedgeMother/2,dy1WedgeMother,dy2WedgeMother,heightWedgeMother/2);
-
-          GeoTrd* crackModuleMotherNeg = new GeoTrd(thicknessWedgeMother/2,
-					            thicknessWedgeMother/2,
-						    dy1WedgeMother,
-						    dy2WedgeMother,
-						    heightWedgeMother/2);
-    
-          GeoLogVol* lvCrackModuleMotherNeg = new GeoLogVol("CrackModule",crackModuleMotherNeg,matAir);
-          GeoPhysVol* pvCrackModuleMotherNeg = new GeoPhysVol(lvCrackModuleMotherNeg);
-    
-          // Fill the section
-          if (Filling)
-           { sectionBuilder->fillSection(pvCrackModuleMotherNeg, 6,
-					 dbManager->TILBrmaximal(),
-					 dbManager->TILBrminimal(),
-					 dzGlue,
-					 deltaPhi);
-           }
-          // Module position inside mother
-          GeoTransform* xtraCrackNeg = new GeoTransform(GeoTrf::TranslateX3D(
-                                           (dbManager->TILBrmaximal() + dbManager->TILBrminimal())/2*Gaudi::Units::cm));
-          pvCrackMotherNeg->add(zrotMod);
-          pvCrackMotherNeg->add(xtraCrackNeg);
-          pvCrackMotherNeg->add(yrotMod);
-
-          pvCrackMotherNeg->add(new GeoIdentifierTag(ModuleNcp));
-	  pvCrackMotherNeg->add(pvCrackModuleMotherNeg); 
-
-        }
-      }
-
-      //-------------------------------------- ITC BLOCKS Positive --------------------------------------    
-      if(EnvType == 5) {
-
-        // Common mother for ITC1/2 modules  
-        if(Ifd4 || Ifc10) {
-
-          // The first sub shape
-          thicknessWedgeMother = dzITC1 * Gaudi::Units::cm;
-          heightWedgeMother = (rMaxITC1 - rMinITC1) * Gaudi::Units::cm;
-          dy1WedgeMother = rMinITC1 * tan(deltaPhi/2*Gaudi::Units::deg) * Gaudi::Units::cm;
-          dy2WedgeMother = rMaxITC1 * tan(deltaPhi/2*Gaudi::Units::deg) * Gaudi::Units::cm;
-
-          checking("ITCModule itcModuleSub2Pos (+)", false, 1,
-	        thicknessWedgeMother/2,thicknessWedgeMother/2,dy1WedgeMother,dy2WedgeMother,heightWedgeMother/2);
-
-          GeoTrd* itcModuleSub1Pos = new GeoTrd(thicknessWedgeMother/2,
-	                                        thicknessWedgeMother/2,
-                                                dy1WedgeMother        ,
-                                                dy2WedgeMother        ,
-                                                heightWedgeMother/2  );
-          // The second sub shape
-          thicknessWedgeMother = dzITC2 * Gaudi::Units::cm;
-          heightWedgeMother    = (rMaxITC2 - rMinITC2) * Gaudi::Units::cm;
-          dy1WedgeMother = rMinITC2 * tan(deltaPhi/2*Gaudi::Units::deg) * Gaudi::Units::cm;
-          dy2WedgeMother = rMaxITC2 * tan(deltaPhi/2*Gaudi::Units::deg) * Gaudi::Units::cm;
-
-          checking("ITCModule itcModuleSub2Pos (+)", false, 1,
-	        thicknessWedgeMother/2,thicknessWedgeMother/2,dy1WedgeMother,dy2WedgeMother,heightWedgeMother/2);
-
-          GeoTrd* itcModuleSub2Pos = new GeoTrd(thicknessWedgeMother/2,
-	                                        thicknessWedgeMother/2,
-                                                dy1WedgeMother        ,
-                                                dy2WedgeMother        ,
-                                                heightWedgeMother/2  );
-
-          X = (dzITC1 - dzITC2)/2*Gaudi::Units::cm; 
-          Z = ((rMinITC2+rMaxITC2)-(rMaxITC1 + rMinITC1))/2*Gaudi::Units::cm;
-	  if(m_log->level()<=MSG::DEBUG)
-	    (*m_log) << MSG::DEBUG <<"  ITCModule Positive, position X= "<<X<<" Z= "<<Z<< endmsg;
-
-          GeoTrf::Translate3D itcModule_SubShiftPos(X, 0., Z);
-          const GeoShapeUnion& itcModuleMotherPos = itcModuleSub1Pos->add(*itcModuleSub2Pos<<itcModule_SubShiftPos);
-
-          GeoTrf::Translate3D itcModuleSubShiftPos(X, 0., Z);
-
-          GeoLogVol* lvITCModuleMotherPos = new GeoLogVol("ITCModule",&itcModuleMotherPos,matAir);
-          GeoPhysVol* pvITCModuleMotherPos = new GeoPhysVol(lvITCModuleMotherPos);
-
-          // Mother volume for ITC1 
-          // In plug1 it's necessary to produce GeoShapeUnion for mother volume that is composed by two parts:
-          // 1. Mother for absorber and girder 
-          // 2. Mother for frontplate (since it's short) 
-        
-          // The D4, PLUG1
-          dbManager->SetCurrentSectionByNumber(Id4);
-
-          thicknessWedgeMother = dzITC1 * Gaudi::Units::cm;
-          dy1WedgeMother = dbManager->TILBrmin() * tan(deltaPhi/2*Gaudi::Units::deg) * Gaudi::Units::cm;
-          dy2WedgeMother = rMaxITC1 * tan(deltaPhi/2*Gaudi::Units::deg) * Gaudi::Units::cm;
-          heightWedgeMother = (rMaxITC1 - dbManager->TILBrmin()) * Gaudi::Units::cm;
-
-	  // ps changes dzITC1 -> dzmodul
-	  Glue =  dbManager->TILBdzmodul() - dbManager->TILBdzend1() - dbManager->TILBdzend2();
-          NbPeriod = dbManager->TILBnperiod();
-
-	  if(m_log->level()<=MSG::DEBUG)
-	    (*m_log) << MSG::DEBUG <<"  Plug1Module : Glue= "<<Glue<<" dzITC1= "<<dzITC1
-		     <<" TILBdzend1= "<<dbManager->TILBdzend1()
-		     <<" TILBdzend2= "<<dbManager->TILBdzend2()
-		     <<endmsg; 
-
-          if (NbPeriod > 6)
-           { dzGlue = (Glue - 2*NbPeriod * (dbManager->TILBdzmast() + dbManager->TILBdzspac())) / (4.*NbPeriod);
-           } else {
-             dzGlue = (Glue - (2*(NbPeriod-1) * (dbManager->TILBdzmast() + dbManager->TILBdzspac()) 
-                      + dbManager->TILBdzspac())) / (4.*(NbPeriod-1));
-           }
-
-	  if(m_log->level()<=MSG::DEBUG)
-	    (*m_log) << MSG::DEBUG <<"  Plug1Module : Glue= "<<Glue<<" dzGlue= "<<dzGlue<<" NbPeriod= "<<NbPeriod
-		     <<" TILBdzmast= "<<dbManager->TILBdzmast()<<" TILBdzspac= "<<dbManager->TILBdzspac()
-		     <<endmsg; 
-
-          if (dzGlue <= 0.)
-             {(*m_log) << MSG::WARNING <<"  Plug1Module warning: "<<" dzGlue= "<<dzGlue 
-	               <<endmsg;
-             }
-
-          checking("Plug1Module plug1SubMotherPos (+)", false, 2, 
-              thicknessWedgeMother/2,thicknessWedgeMother/2,dy1WedgeMother,dy2WedgeMother,heightWedgeMother/2);
-        
-          GeoTrd* plug1SubMotherPos = new GeoTrd(thicknessWedgeMother/2,
-                                                 thicknessWedgeMother/2,
-                                                 dy1WedgeMother        ,
-                                                 dy2WedgeMother        , 
-                                                 heightWedgeMother/2   );
-
-          //Second submother C10, PLUG2
-          double dzITC2Bis = (specialC10) ? 0.0 : dzITC2; // for special C10 D4 and C10 do not overlap
-          thicknessWedgeMother = (dbManager->TILBdzmodul() - dzITC2Bis) * Gaudi::Units::cm;
-          if(m_log->level()<=MSG::DEBUG)
-            if (specialC10)
-              (*m_log) << MSG::DEBUG <<" Separate C10 and D4 in module " << ModuleNcp << endmsg;
-
-          GeoLogVol *lvPlug1ModuleMotherPos=0;
-          if (thicknessWedgeMother > rless)
-           { 
-             heightWedgeMother = (dbManager->TILBrmin() - dbManager->TILBrminimal()) * Gaudi::Units::cm;
-             dy1WedgeMother = dbManager->TILBrminimal() * tan(deltaPhi/2*Gaudi::Units::deg) * Gaudi::Units::cm;
-             dy2WedgeMother = dbManager->TILBrmin() * tan(deltaPhi/2*Gaudi::Units::deg) * Gaudi::Units::cm;
-
-             checking("Plug1Module plug2SubMotherPos (+)", false, 2, 
-                 thicknessWedgeMother/2,thicknessWedgeMother/2,dy1WedgeMother,dy2WedgeMother,heightWedgeMother/2);
-
-             GeoTrd* plug2SubMotherPos = new GeoTrd(thicknessWedgeMother/2,
-                                                    thicknessWedgeMother/2,
-                                                    dy1WedgeMother        ,
-                                                    dy2WedgeMother        ,
-                                                    heightWedgeMother/2   );
-
-             GeoTrf::Translate3D plug1SubOffsetPos(-dzITC2Bis/2*Gaudi::Units::cm, 0.,
-                                        (dbManager->TILBrminimal()-dbManager->TILBrmaximal())/2*Gaudi::Units::cm);
-        
-             const GeoShapeUnion& plug1ModuleMotherPos = plug1SubMotherPos->add(*plug2SubMotherPos<<plug1SubOffsetPos);
-
-             lvPlug1ModuleMotherPos = new GeoLogVol("Plug1Module",&plug1ModuleMotherPos,matAir);
-	   } else
-	   { lvPlug1ModuleMotherPos = new GeoLogVol("Plug1Module",plug1SubMotherPos,matAir);
-           }
-
-          GeoPhysVol* pvPlug1ModuleMotherPos = new GeoPhysVol(lvPlug1ModuleMotherPos);
-        
-          // Fill the section
-	  if (Filling)
-	    { sectionBuilder->fillSection(pvPlug1ModuleMotherPos, 3,
-                                         dbManager->TILBrmaximal(),
-                                         (thicknessWedgeMother > rless) ? dbManager->TILBrminimal() : dbManager->TILBrmin(),
-                                         dzGlue,
-                                         deltaPhi,
-					 ModuleNcp,
-                                         dzITC2Bis);
-           }
-        
-          Z = (dbManager->TILBrmin()-dbManager->TILBrminimal())*Gaudi::Units::cm/2;
-          GeoTransform* tfPlug1ModuleMotherPos = new GeoTransform(GeoTrf::Translate3D(0.,0.,Z));
-
-          pvITCModuleMotherPos->add(tfPlug1ModuleMotherPos);
-          pvITCModuleMotherPos->add(pvPlug1ModuleMotherPos);
-
-          //Mother volume for ITC2 Positive
-          if (Ifc10) { 
-
-            // TILE_PLUG2, C10
-            dbManager->SetCurrentSectionByNumber(Ic10); 
-
-            thicknessWedgeMother = dzITC2 * Gaudi::Units::cm;
-            heightWedgeMother    = (rMaxITC2 - rMinITC2) * Gaudi::Units::cm;
-            dy1WedgeMother = rMinITC2 * tan(deltaPhi/2*Gaudi::Units::deg) * Gaudi::Units::cm;
-            dy2WedgeMother = rMaxITC2 * tan(deltaPhi/2*Gaudi::Units::deg) * Gaudi::Units::cm;
-
-            if (dbManager->TILBnperiod() > 1)
-             { dzGlue = (dzITC2 - dbManager->TILBdzend1() - dbManager->TILBdzend2() 
-                      - ((dbManager->TILBnperiod()-1)*2*(dbManager->TILBdzmast() 
-                      + dbManager->TILBdzspac()) + dbManager->TILBdzspac()))/(4*(dbManager->TILBnperiod()-1));
-             } else {  dzGlue = 0; // add for special missing C10 modules
-             }
-
-            checking("Plug2Module (+)", false, 2,
-	        thicknessWedgeMother/2,thicknessWedgeMother/2,dy1WedgeMother,dy2WedgeMother,heightWedgeMother/2);
-
-            GeoTrd* plug2ModuleMotherPos = new GeoTrd(thicknessWedgeMother/2,
+              GeoTrd* gapModuleMotherNeg = new GeoTrd(thicknessWedgeMother/2,
                                                       thicknessWedgeMother/2,
                                                       dy1WedgeMother,
                                                       dy2WedgeMother,
                                                       heightWedgeMother/2);
-        
-            GeoLogVol* lvPlug2ModuleMotherPos = new GeoLogVol("Plug2Module",plug2ModuleMotherPos,matAir);
-            GeoPhysVol* pvPlug2ModuleMotherPos = new GeoPhysVol(lvPlug2ModuleMotherPos);
-        
-            // Fill the section
-            if (Filling)
-	     { sectionBuilder->fillSection(pvPlug2ModuleMotherPos, Ic10,
-                                           dbManager->TILBrmaximal(),
-                                           dbManager->TILBrminimal(),
-                                           dzGlue,
-                                           deltaPhi);
-             }
-         
-            // TILE_PLUG1, D4
-            if ((Ifd4)) {
+
+              GeoLogVol* lvGapModuleMotherNeg = new GeoLogVol("GapModule",gapModuleMotherNeg,matAir);
+              GeoPhysVol* pvGapModuleMotherNeg = new GeoPhysVol(lvGapModuleMotherNeg);
+
+              // Fill the section
+              if (Filling) {
+                sectionBuilder->fillSection(pvGapModuleMotherNeg, 5,  // probably better to have Igap instead of 5
+                                            dbManager->TILBrmaximal(),
+                                            dbManager->TILBrminimal(),
+                                            dzGlue,
+                                            deltaPhi);
+              }
+
+              // Module position inside mother
+              GeoTransform* xtraGapNeg = new GeoTransform(GeoTrf::TranslateX3D(
+                                                              (dbManager->TILBrmaximal() + dbManager->TILBrminimal())/2*Gaudi::Units::cm));
+              pvGapMotherNeg->add(zrotMod);
+              pvGapMotherNeg->add(xtraGapNeg);
+              pvGapMotherNeg->add(yrotMod);
+
+              pvGapMotherNeg->add(new GeoIdentifierTag(ModuleNcp));
+              pvGapMotherNeg->add(pvGapModuleMotherNeg);
+            }
+
+            //-------------------------- Crack Negative ---------------------------------
+            if (Ifcrack) {
+
+              // TILE_PLUG4
+              dbManager->SetCurrentSectionByNumber(Icrack);
+
+              // mother
+              thicknessWedgeMother = dbManager->TILBdzmodul() * Gaudi::Units::cm;
+              heightWedgeMother = (dbManager->TILBrmaximal() - dbManager->TILBrminimal()) * Gaudi::Units::cm;
+              dy1WedgeMother = dbManager->TILBrminimal() * tan(deltaPhi/2*Gaudi::Units::deg) * Gaudi::Units::cm;
+              dy2WedgeMother = dbManager->TILBrmaximal() * tan(deltaPhi/2*Gaudi::Units::deg) * Gaudi::Units::cm;
+
+              dzGlue = 0.;
+
+              checking("CrackModule (-)", spE4, 2,
+                       thicknessWedgeMother/2,thicknessWedgeMother/2,dy1WedgeMother,dy2WedgeMother,heightWedgeMother/2);
+
+              GeoTrd* crackModuleMotherNeg = new GeoTrd(thicknessWedgeMother/2,
+                                                        thicknessWedgeMother/2,
+                                                        dy1WedgeMother,
+                                                        dy2WedgeMother,
+                                                        heightWedgeMother/2);
+
+              GeoLogVol* lvCrackModuleMotherNeg = new GeoLogVol("CrackModule",crackModuleMotherNeg,matAir);
+              GeoPhysVol* pvCrackModuleMotherNeg = new GeoPhysVol(lvCrackModuleMotherNeg);
+
+              // Fill the section
+              if (Filling) {
+                sectionBuilder->fillSection(pvCrackModuleMotherNeg, 6,
+                                            dbManager->TILBrmaximal(),
+                                            dbManager->TILBrminimal(),
+                                            dzGlue,
+                                            deltaPhi);
+              }
+              // Module position inside mother
+              GeoTransform* xtraCrackNeg = new GeoTransform(GeoTrf::TranslateX3D(
+                                                                (dbManager->TILBrmaximal() + dbManager->TILBrminimal())/2*Gaudi::Units::cm));
+              pvCrackMotherNeg->add(zrotMod);
+              pvCrackMotherNeg->add(xtraCrackNeg);
+              pvCrackMotherNeg->add(yrotMod);
+
+              pvCrackMotherNeg->add(new GeoIdentifierTag(ModuleNcp));
+              pvCrackMotherNeg->add(pvCrackModuleMotherNeg);
+
+            }
+          }
+
+          //-------------------------------------- ITC BLOCKS Positive --------------------------------------
+          if (EnvType == 5) {
+
+            // Common mother for ITC1/2 modules
+            if (Ifd4 || Ifc10) {
+
+              // The first sub shape
+              thicknessWedgeMother = dzITC1 * Gaudi::Units::cm;
+              heightWedgeMother = (rMaxITC1 - rMinITC1) * Gaudi::Units::cm;
+              dy1WedgeMother = rMinITC1 * tan(deltaPhi/2*Gaudi::Units::deg) * Gaudi::Units::cm;
+              dy2WedgeMother = rMaxITC1 * tan(deltaPhi/2*Gaudi::Units::deg) * Gaudi::Units::cm;
+
+              checking("ITCModule itcModuleSub2Pos (+)", false, 1,
+                       thicknessWedgeMother/2,thicknessWedgeMother/2,dy1WedgeMother,dy2WedgeMother,heightWedgeMother/2);
+
+              GeoTrd* itcModuleSub1Pos = new GeoTrd(thicknessWedgeMother/2,
+                                                    thicknessWedgeMother/2,
+                                                    dy1WedgeMother        ,
+                                                    dy2WedgeMother        ,
+                                                    heightWedgeMother/2  );
+              // The second sub shape
+              thicknessWedgeMother = dzITC2 * Gaudi::Units::cm;
+              heightWedgeMother    = (rMaxITC2 - rMinITC2) * Gaudi::Units::cm;
+              dy1WedgeMother = rMinITC2 * tan(deltaPhi/2*Gaudi::Units::deg) * Gaudi::Units::cm;
+              dy2WedgeMother = rMaxITC2 * tan(deltaPhi/2*Gaudi::Units::deg) * Gaudi::Units::cm;
+
+              checking("ITCModule itcModuleSub2Pos (+)", false, 1,
+                       thicknessWedgeMother/2,thicknessWedgeMother/2,dy1WedgeMother,dy2WedgeMother,heightWedgeMother/2);
+
+              GeoTrd* itcModuleSub2Pos = new GeoTrd(thicknessWedgeMother/2,
+                                                    thicknessWedgeMother/2,
+                                                    dy1WedgeMother        ,
+                                                    dy2WedgeMother        ,
+                                                    heightWedgeMother/2  );
+
+              X = (dzITC1 - dzITC2)/2*Gaudi::Units::cm;
+              Z = ((rMinITC2+rMaxITC2)-(rMaxITC1 + rMinITC1))/2*Gaudi::Units::cm;
+              if (m_log->level()<=MSG::DEBUG)
+                (*m_log) << MSG::DEBUG <<"  ITCModule Positive, position X= "<<X<<" Z= "<<Z<< endmsg;
+
+              GeoTrf::Translate3D itcModule_SubShiftPos(X, 0., Z);
+              const GeoShapeUnion& itcModuleMotherPos = itcModuleSub1Pos->add(*itcModuleSub2Pos<<itcModule_SubShiftPos);
+
+              GeoTrf::Translate3D itcModuleSubShiftPos(X, 0., Z);
+
+              GeoLogVol* lvITCModuleMotherPos = new GeoLogVol("ITCModule",&itcModuleMotherPos,matAir);
+              GeoPhysVol* pvITCModuleMotherPos = new GeoPhysVol(lvITCModuleMotherPos);
+
+              // Mother volume for ITC1
+              // In plug1 it's necessary to produce GeoShapeUnion for mother volume that is composed by two parts:
+              // 1. Mother for absorber and girder
+              // 2. Mother for frontplate (since it's short)
+
+              // The D4, PLUG1
               dbManager->SetCurrentSectionByNumber(Id4);
 
-              GeoTransform* tfPlug2ModuleMotherPos = new GeoTransform(itcModuleSubShiftPos);
+              thicknessWedgeMother = dzITC1 * Gaudi::Units::cm;
+              dy1WedgeMother = dbManager->TILBrmin() * tan(deltaPhi/2*Gaudi::Units::deg) * Gaudi::Units::cm;
+              dy2WedgeMother = rMaxITC1 * tan(deltaPhi/2*Gaudi::Units::deg) * Gaudi::Units::cm;
+              heightWedgeMother = (rMaxITC1 - dbManager->TILBrmin()) * Gaudi::Units::cm;
 
-              pvITCModuleMotherPos->add(tfPlug2ModuleMotherPos);
-              pvITCModuleMotherPos->add(pvPlug2ModuleMotherPos);
-            } 
-          }//if C10
+              // ps changes dzITC1 -> dzmodul
+              Glue =  dbManager->TILBdzmodul() - dbManager->TILBdzend1() - dbManager->TILBdzend2();
+              NbPeriod = dbManager->TILBnperiod();
 
-          double zShift = 0;
-          NbPeriod = dbManager->TILBnperiod();
-	  //ps          Z = (dbManager->TILBdzmodul()-dzITC2)/2*Gaudi::Units::cm;
-          Z = (dzITC1 - dzITC2)/2*Gaudi::Units::cm;
+              if (m_log->level()<=MSG::DEBUG)
+                (*m_log) << MSG::DEBUG <<"  Plug1Module : Glue= "<<Glue<<" dzITC1= "<<dzITC1
+                         <<" TILBdzend1= "<<dbManager->TILBdzend1()
+                         <<" TILBdzend2= "<<dbManager->TILBdzend2()
+                         <<endmsg;
 
-          if (NbPeriod == 6 && !Ifspecialgirder && fabs(Z) < fabs(zITCStandard)) zShift = zITCStandard*(1./Gaudi::Units::cm);
+              if (NbPeriod > 6) {
+                dzGlue = (Glue - 2*NbPeriod * (dbManager->TILBdzmast() + dbManager->TILBdzspac())) / (4.*NbPeriod);
+              } else {
+                dzGlue = (Glue - (2*(NbPeriod-1) * (dbManager->TILBdzmast() + dbManager->TILBdzspac())
+                                  + dbManager->TILBdzspac())) / (4.*(NbPeriod-1));
+              }
 
-	  if(m_log->level()<=MSG::DEBUG)
-	    (*m_log) << MSG::DEBUG <<"  ITCModule Positive, position X= "<<X<<" Z= "<<Z
-		     <<" zStandard= "<<zITCStandard<< " zShift= " <<zShift
-		     <<endmsg;
+              if (m_log->level()<=MSG::DEBUG)
+                (*m_log) << MSG::DEBUG <<"  Plug1Module : Glue= "<<Glue<<" dzGlue= "<<dzGlue<<" NbPeriod= "<<NbPeriod
+                         <<" TILBdzmast= "<<dbManager->TILBdzmast()<<" TILBdzspac= "<<dbManager->TILBdzspac()
+                         <<endmsg;
 
-	  GeoTransform* xtraITCPos = new GeoTransform(GeoTrf::TranslateX3D(
-                                        (dbManager->TILBrmaximal() + dbManager->TILBrminimal())/2*Gaudi::Units::cm));
-	  GeoTransform* ztraITCPos = new GeoTransform(GeoTrf::TranslateZ3D(zShift*Gaudi::Units::cm));
+              if (dzGlue <= 0.) {
+                (*m_log) << MSG::WARNING <<"  Plug1Module warning: "<<" dzGlue= "<<dzGlue
+                         <<endmsg;
+              }
 
-          pvITCMotherPos->add(zrotMod);
-          pvITCMotherPos->add(xtraITCPos);
-          pvITCMotherPos->add(ztraITCPos);
-          pvITCMotherPos->add(XYrtMod);
+              checking("Plug1Module plug1SubMotherPos (+)", false, 2,
+                       thicknessWedgeMother/2,thicknessWedgeMother/2,dy1WedgeMother,dy2WedgeMother,heightWedgeMother/2);
 
-	  pvITCMotherPos->add(new GeoIdentifierTag(ModuleNcp));
-          pvITCMotherPos->add(pvITCModuleMotherPos);
+              GeoTrd* plug1SubMotherPos = new GeoTrd(thicknessWedgeMother/2,
+                                                     thicknessWedgeMother/2,
+                                                     dy1WedgeMother        ,
+                                                     dy2WedgeMother        ,
+                                                     heightWedgeMother/2   );
 
-        }//if(Ifd4 || Ifc10)
+              //Second submother C10, PLUG2
+              double dzITC2Bis = (specialC10) ? 0.0 : dzITC2; // for special C10 D4 and C10 do not overlap
+              thicknessWedgeMother = (dbManager->TILBdzmodul() - dzITC2Bis) * Gaudi::Units::cm;
+              if (m_log->level()<=MSG::DEBUG)
+                if (specialC10)
+                  (*m_log) << MSG::DEBUG <<" Separate C10 and D4 in module " << ModuleNcp << endmsg;
+
+              GeoLogVol *lvPlug1ModuleMotherPos=0;
+              if (thicknessWedgeMother > rless) {
+                heightWedgeMother = (dbManager->TILBrmin() - dbManager->TILBrminimal()) * Gaudi::Units::cm;
+                dy1WedgeMother = dbManager->TILBrminimal() * tan(deltaPhi/2*Gaudi::Units::deg) * Gaudi::Units::cm;
+                dy2WedgeMother = dbManager->TILBrmin() * tan(deltaPhi/2*Gaudi::Units::deg) * Gaudi::Units::cm;
+
+                checking("Plug1Module plug2SubMotherPos (+)", false, 2,
+                         thicknessWedgeMother/2,thicknessWedgeMother/2,dy1WedgeMother,dy2WedgeMother,heightWedgeMother/2);
+
+                GeoTrd* plug2SubMotherPos = new GeoTrd(thicknessWedgeMother/2,
+                                                       thicknessWedgeMother/2,
+                                                       dy1WedgeMother        ,
+                                                       dy2WedgeMother        ,
+                                                       heightWedgeMother/2   );
+
+                GeoTrf::Translate3D plug1SubOffsetPos(-dzITC2Bis/2*Gaudi::Units::cm, 0.,
+                                                      (dbManager->TILBrminimal()-dbManager->TILBrmaximal())/2*Gaudi::Units::cm);
+
+                const GeoShapeUnion& plug1ModuleMotherPos = plug1SubMotherPos->add(*plug2SubMotherPos<<plug1SubOffsetPos);
+
+                lvPlug1ModuleMotherPos = new GeoLogVol("Plug1Module",&plug1ModuleMotherPos,matAir);
+              } else {
+                lvPlug1ModuleMotherPos = new GeoLogVol("Plug1Module",plug1SubMotherPos,matAir);
+              }
+
+              GeoPhysVol* pvPlug1ModuleMotherPos = new GeoPhysVol(lvPlug1ModuleMotherPos);
+
+              // Fill the section
+              if (Filling) {
+                sectionBuilder->fillSection(pvPlug1ModuleMotherPos, 3,
+                                            dbManager->TILBrmaximal(),
+                                            (thicknessWedgeMother > rless) ? dbManager->TILBrminimal() : dbManager->TILBrmin(),
+                                            dzGlue,
+                                            deltaPhi,
+                                            ModuleNcp,
+                                            dzITC2Bis);
+              }
+
+              Z = (dbManager->TILBrmin()-dbManager->TILBrminimal())*Gaudi::Units::cm/2;
+              GeoTransform* tfPlug1ModuleMotherPos = new GeoTransform(GeoTrf::Translate3D(0.,0.,Z));
+
+              pvITCModuleMotherPos->add(tfPlug1ModuleMotherPos);
+              pvITCModuleMotherPos->add(pvPlug1ModuleMotherPos);
+
+              //Mother volume for ITC2 Positive
+              if (Ifc10) {
+
+                // TILE_PLUG2, C10
+                dbManager->SetCurrentSectionByNumber(Ic10);
+
+                thicknessWedgeMother = dzITC2 * Gaudi::Units::cm;
+                heightWedgeMother    = (rMaxITC2 - rMinITC2) * Gaudi::Units::cm;
+                dy1WedgeMother = rMinITC2 * tan(deltaPhi/2*Gaudi::Units::deg) * Gaudi::Units::cm;
+                dy2WedgeMother = rMaxITC2 * tan(deltaPhi/2*Gaudi::Units::deg) * Gaudi::Units::cm;
+
+                if (dbManager->TILBnperiod() > 1) {
+                  dzGlue = (dzITC2 - dbManager->TILBdzend1() - dbManager->TILBdzend2()
+                            - ((dbManager->TILBnperiod()-1)*2*(dbManager->TILBdzmast()
+                                                               + dbManager->TILBdzspac()) + dbManager->TILBdzspac()))/(4*(dbManager->TILBnperiod()-1));
+                } else {
+                  dzGlue = 0; // add for special missing C10 modules
+                }
+
+                checking("Plug2Module (+)", false, 2,
+                         thicknessWedgeMother/2,thicknessWedgeMother/2,dy1WedgeMother,dy2WedgeMother,heightWedgeMother/2);
+
+                GeoTrd* plug2ModuleMotherPos = new GeoTrd(thicknessWedgeMother/2,
+                                                          thicknessWedgeMother/2,
+                                                          dy1WedgeMother,
+                                                          dy2WedgeMother,
+                                                          heightWedgeMother/2);
+
+                GeoLogVol* lvPlug2ModuleMotherPos = new GeoLogVol("Plug2Module",plug2ModuleMotherPos,matAir);
+                GeoPhysVol* pvPlug2ModuleMotherPos = new GeoPhysVol(lvPlug2ModuleMotherPos);
+
+                // Fill the section
+                if (Filling) {
+                  sectionBuilder->fillSection(pvPlug2ModuleMotherPos, Ic10,
+                                              dbManager->TILBrmaximal(),
+                                              dbManager->TILBrminimal(),
+                                              dzGlue,
+                                              deltaPhi);
+                }
+
+                // TILE_PLUG1, D4
+                if ((Ifd4)) {
+                  dbManager->SetCurrentSectionByNumber(Id4);
+
+                  GeoTransform* tfPlug2ModuleMotherPos = new GeoTransform(itcModuleSubShiftPos);
+
+                  pvITCModuleMotherPos->add(tfPlug2ModuleMotherPos);
+                  pvITCModuleMotherPos->add(pvPlug2ModuleMotherPos);
+                }
+              }//if C10
+
+              double zShift = 0;
+              NbPeriod = dbManager->TILBnperiod();
+              //ps          Z = (dbManager->TILBdzmodul()-dzITC2)/2*Gaudi::Units::cm;
+              Z = (dzITC1 - dzITC2)/2*Gaudi::Units::cm;
+
+              if (NbPeriod == 6 && !Ifspecialgirder && fabs(Z) < fabs(zITCStandard)) zShift = zITCStandard*(1./Gaudi::Units::cm);
+
+              if (m_log->level()<=MSG::DEBUG)
+                (*m_log) << MSG::DEBUG <<"  ITCModule Positive, position X= "<<X<<" Z= "<<Z
+                         <<" zStandard= "<<zITCStandard<< " zShift= " <<zShift
+                         <<endmsg;
+
+              GeoTransform* xtraITCPos = new GeoTransform(GeoTrf::TranslateX3D(
+                                                              (dbManager->TILBrmaximal() + dbManager->TILBrminimal())/2*Gaudi::Units::cm));
+              GeoTransform* ztraITCPos = new GeoTransform(GeoTrf::TranslateZ3D(zShift*Gaudi::Units::cm));
+
+              pvITCMotherPos->add(zrotMod);
+              pvITCMotherPos->add(xtraITCPos);
+              pvITCMotherPos->add(ztraITCPos);
+              pvITCMotherPos->add(XYrtMod);
+
+              pvITCMotherPos->add(new GeoIdentifierTag(ModuleNcp));
+              pvITCMotherPos->add(pvITCModuleMotherPos);
+
+            }//if (Ifd4 || Ifc10)
 
 
-        //-------------------------- G A P Positive ---------------------------------
-        if (Ifgap) {
+            //-------------------------- G A P Positive ---------------------------------
+            if (Ifgap) {
 
-          // TILE_PLUG3
-          dbManager->SetCurrentSectionByNumber(Igap); 
+              // TILE_PLUG3
+              dbManager->SetCurrentSectionByNumber(Igap);
 
-          // Mother
-          thicknessWedgeMother = dbManager->TILBdzmodul() * Gaudi::Units::cm;
-          heightWedgeMother = (dbManager->TILBrmaximal() - dbManager->TILBrminimal()) * Gaudi::Units::cm;
-          dy1WedgeMother = dbManager->TILBrminimal() * tan(deltaPhi/2*Gaudi::Units::deg) * Gaudi::Units::cm;
-          dy2WedgeMother = dbManager->TILBrmaximal() * tan(deltaPhi/2*Gaudi::Units::deg) * Gaudi::Units::cm;
+              // Mother
+              thicknessWedgeMother = dbManager->TILBdzmodul() * Gaudi::Units::cm;
+              heightWedgeMother = (dbManager->TILBrmaximal() - dbManager->TILBrminimal()) * Gaudi::Units::cm;
+              dy1WedgeMother = dbManager->TILBrminimal() * tan(deltaPhi/2*Gaudi::Units::deg) * Gaudi::Units::cm;
+              dy2WedgeMother = dbManager->TILBrmaximal() * tan(deltaPhi/2*Gaudi::Units::deg) * Gaudi::Units::cm;
 
-          dzGlue = 0;
+              dzGlue = 0;
 
-          checking("Plug2Module (+)", false, 2,
-              thicknessWedgeMother/2,thicknessWedgeMother/2,dy1WedgeMother,dy2WedgeMother,heightWedgeMother/2);
+              checking("Plug2Module (+)", false, 2,
+                       thicknessWedgeMother/2,thicknessWedgeMother/2,dy1WedgeMother,dy2WedgeMother,heightWedgeMother/2);
 
-          GeoTrd* gapModuleMotherPos = new GeoTrd(thicknessWedgeMother/2,
-	                                          thicknessWedgeMother/2,
-                                                  dy1WedgeMother,
-					          dy2WedgeMother,
-					          heightWedgeMother/2);
+              GeoTrd* gapModuleMotherPos = new GeoTrd(thicknessWedgeMother/2,
+                                                      thicknessWedgeMother/2,
+                                                      dy1WedgeMother,
+                                                      dy2WedgeMother,
+                                                      heightWedgeMother/2);
 
-          GeoLogVol* lvGapModuleMotherPos = new GeoLogVol("GapModule",gapModuleMotherPos,matAir);
-          GeoPhysVol* pvGapModuleMotherPos = new GeoPhysVol(lvGapModuleMotherPos);
+              GeoLogVol* lvGapModuleMotherPos = new GeoLogVol("GapModule",gapModuleMotherPos,matAir);
+              GeoPhysVol* pvGapModuleMotherPos = new GeoPhysVol(lvGapModuleMotherPos);
 
-          // Fill the section
-          if (Filling)
-           { sectionBuilder->fillSection(pvGapModuleMotherPos, 5,
-                                         dbManager->TILBrmaximal(),
-                                         dbManager->TILBrminimal(),
-                                         dzGlue,
-                                         deltaPhi);
-           }
+              // Fill the section
+              if (Filling) {
+                sectionBuilder->fillSection(pvGapModuleMotherPos, 5,
+                                            dbManager->TILBrmaximal(),
+                                            dbManager->TILBrminimal(),
+                                            dzGlue,
+                                            deltaPhi);
+              }
 
-          // Module position inside mother
-          GeoTransform* xtraGapPos = new GeoTransform(GeoTrf::TranslateX3D(
-                                         (dbManager->TILBrmaximal() + dbManager->TILBrminimal())/2*Gaudi::Units::cm));
-          pvGapMotherPos->add(zrotMod);
-          pvGapMotherPos->add(xtraGapPos);
-          pvGapMotherPos->add(XYrtMod);
+              // Module position inside mother
+              GeoTransform* xtraGapPos = new GeoTransform(GeoTrf::TranslateX3D(
+                                                              (dbManager->TILBrmaximal() + dbManager->TILBrminimal())/2*Gaudi::Units::cm));
+              pvGapMotherPos->add(zrotMod);
+              pvGapMotherPos->add(xtraGapPos);
+              pvGapMotherPos->add(XYrtMod);
 
-          pvGapMotherPos->add(new GeoIdentifierTag(ModuleNcp));
-	  pvGapMotherPos->add(pvGapModuleMotherPos); 
-       	} 
+              pvGapMotherPos->add(new GeoIdentifierTag(ModuleNcp));
+              pvGapMotherPos->add(pvGapModuleMotherPos);
+            }
 
-        //-------------------------- Crack Positive ---------------------------------
-        if (Ifcrack) {
+            //-------------------------- Crack Positive ---------------------------------
+            if (Ifcrack) {
 
-          // TILE_PLUG4
-          dbManager->SetCurrentSectionByNumber(Icrack); 
+              // TILE_PLUG4
+              dbManager->SetCurrentSectionByNumber(Icrack);
 
-          // Trd - module mother
-          thicknessWedgeMother = dbManager->TILBdzmodul() * Gaudi::Units::cm;
-          heightWedgeMother = (dbManager->TILBrmaximal() - dbManager->TILBrminimal()) * Gaudi::Units::cm;
-          dy1WedgeMother = dbManager->TILBrminimal() * tan(deltaPhi/2*Gaudi::Units::deg) * Gaudi::Units::cm;
-          dy2WedgeMother = dbManager->TILBrmaximal() * tan(deltaPhi/2*Gaudi::Units::deg) * Gaudi::Units::cm;
-    
-          dzGlue = 0.;
-    
-          checking("CrackModule (+)", spE4, 2, 
-               thicknessWedgeMother/2,thicknessWedgeMother/2,dy1WedgeMother,dy2WedgeMother,heightWedgeMother/2);
+              // Trd - module mother
+              thicknessWedgeMother = dbManager->TILBdzmodul() * Gaudi::Units::cm;
+              heightWedgeMother = (dbManager->TILBrmaximal() - dbManager->TILBrminimal()) * Gaudi::Units::cm;
+              dy1WedgeMother = dbManager->TILBrminimal() * tan(deltaPhi/2*Gaudi::Units::deg) * Gaudi::Units::cm;
+              dy2WedgeMother = dbManager->TILBrmaximal() * tan(deltaPhi/2*Gaudi::Units::deg) * Gaudi::Units::cm;
 
-          GeoTrd* crackModuleMotherPos = new GeoTrd(thicknessWedgeMother/2,
-					            thicknessWedgeMother/2,
-						    dy1WedgeMother,
-						    dy2WedgeMother,
-						    heightWedgeMother/2);
-    
-          GeoLogVol* lvCrackModuleMotherPos = new GeoLogVol("CrackModule",crackModuleMotherPos,matAir);
-          GeoPhysVol* pvCrackModuleMotherPos = new GeoPhysVol(lvCrackModuleMotherPos);
-    
-          // Fill the section
-          if (Filling)
-           { sectionBuilder->fillSection(pvCrackModuleMotherPos, 6,
-                                         dbManager->TILBrmaximal(),
-                                         dbManager->TILBrminimal(),
-                                         dzGlue,
-                                         deltaPhi);
-           }
-    
-          // Module position inside mother
-          GeoTransform* xtraCrackPos = new GeoTransform(GeoTrf::TranslateX3D(
-                                          (dbManager->TILBrmaximal() + dbManager->TILBrminimal())/2*Gaudi::Units::cm));
-          pvCrackMotherPos->add(zrotMod);
-          pvCrackMotherPos->add(xtraCrackPos);
-          pvCrackMotherPos->add(XYrtMod);
+              dzGlue = 0.;
 
-          pvCrackMotherPos->add(new GeoIdentifierTag(ModuleNcp));
-	  pvCrackMotherPos->add(pvCrackModuleMotherPos); 
+              checking("CrackModule (+)", spE4, 2,
+                       thicknessWedgeMother/2,thicknessWedgeMother/2,dy1WedgeMother,dy2WedgeMother,heightWedgeMother/2);
 
-        }
-      } 
+              GeoTrd* crackModuleMotherPos = new GeoTrd(thicknessWedgeMother/2,
+                                                        thicknessWedgeMother/2,
+                                                        dy1WedgeMother,
+                                                        dy2WedgeMother,
+                                                        heightWedgeMother/2);
 
-      } // if(EnvType == 4 || EnvType == 5)
+              GeoLogVol* lvCrackModuleMotherPos = new GeoLogVol("CrackModule",crackModuleMotherPos,matAir);
+              GeoPhysVol* pvCrackModuleMotherPos = new GeoPhysVol(lvCrackModuleMotherPos);
 
-      zrotMod->unref();
-      zrotSaddle->unref();
-    }// ModCounter, end
-    
-    
+              // Fill the section
+              if (Filling) {
+                sectionBuilder->fillSection(pvCrackModuleMotherPos, 6,
+                                            dbManager->TILBrmaximal(),
+                                            dbManager->TILBrminimal(),
+                                            dzGlue,
+                                            deltaPhi);
+              }
 
-    yrotMod->unref();
-    XYrtMod->unref();
+              // Module position inside mother
+              GeoTransform* xtraCrackPos = new GeoTransform(GeoTrf::TranslateX3D(
+                                                                (dbManager->TILBrmaximal() + dbManager->TILBrminimal())/2*Gaudi::Units::cm));
+              pvCrackMotherPos->add(zrotMod);
+              pvCrackMotherPos->add(xtraCrackPos);
+              pvCrackMotherPos->add(XYrtMod);
+
+              pvCrackMotherPos->add(new GeoIdentifierTag(ModuleNcp));
+              pvCrackMotherPos->add(pvCrackModuleMotherPos);
+
+            }
+          }
+
+        } // if (EnvType == 4 || EnvType == 5)
+
+        zrotMod->unref();
+        zrotSaddle->unref();
+      }// ModCounter, end
+
+
+
+      yrotMod->unref();
+      XYrtMod->unref();
 
     }
 
@@ -2438,7 +2428,7 @@ void TileAtlasFactory::create(GeoPhysVol *world)
     double ztrans =0;
     dbManager->SetCurrentEnvByType(EnvType);
 
-    if(EnvType == 1) { 
+    if (EnvType == 1) {
 
       GeoTransform* tfBarrelMother;
 
@@ -2449,12 +2439,12 @@ void TileAtlasFactory::create(GeoPhysVol *world)
 
       (*m_log) << MSG::INFO <<" Positioning barrel with translation "<<ztrans*Gaudi::Units::cm<< endmsg;
 
-      GeoNameTag* ntBarrelModuleMother = new GeoNameTag("Barrel"); 
+      GeoNameTag* ntBarrelModuleMother = new GeoNameTag("Barrel");
 
       pvTileEnvelopeBarrel->add(tfBarrelMother);
       pvTileEnvelopeBarrel->add(ntBarrelModuleMother);
       pvTileEnvelopeBarrel->add(pvBarrelMother);
-      
+
       GeoTransform* tfFingerMotherPos;
 
       ztrans = (dbManager->GetEnvZLength()*Gaudi::Units::cm/2 - BFingerLengthPos/2 + PosDelta)*(1./Gaudi::Units::cm);
@@ -2469,8 +2459,8 @@ void TileAtlasFactory::create(GeoPhysVol *world)
       pvTileEnvelopeBarrel->add(ntFingerMotherPos);
       pvTileEnvelopeBarrel->add(pvFingerMotherPos);
 
-      if (dbManager->BoolSaddle())
-      { GeoTransform* tfSaddleMotherPos;
+      if (dbManager->BoolSaddle()) {
+        GeoTransform* tfSaddleMotherPos;
 
         ztrans = (dbManager->GetEnvZLength()*Gaudi::Units::cm/2 - BFingerLengthPos + DzSaddleSupport/2 + PosDelta)*(1./Gaudi::Units::cm);
 
@@ -2496,10 +2486,10 @@ void TileAtlasFactory::create(GeoPhysVol *world)
       GeoNameTag* ntFingerMotherNeg = new GeoNameTag("TileFingerNeg");
       pvTileEnvelopeBarrel->add(tfFingerMotherNeg);
       pvTileEnvelopeBarrel->add(ntFingerMotherNeg);
-      pvTileEnvelopeBarrel->add(pvFingerMotherNeg); 
+      pvTileEnvelopeBarrel->add(pvFingerMotherNeg);
 
-      if (dbManager->BoolSaddle())
-      { GeoTransform* tfSaddleMotherNeg;
+      if (dbManager->BoolSaddle()) {
+        GeoTransform* tfSaddleMotherNeg;
 
         ztrans = (-dbManager->GetEnvZLength()*Gaudi::Units::cm/2 + BFingerLengthNeg - DzSaddleSupport/2 - NegDelta)*(1./Gaudi::Units::cm);
 
@@ -2511,12 +2501,12 @@ void TileAtlasFactory::create(GeoPhysVol *world)
         pvTileEnvelopeBarrel->add(ntSaddleMotherNeg);
         pvTileEnvelopeBarrel->add(pvSaddleMotherNeg);
       }
-    } 
+    }
 
-    //  
+    //
     //----------------------------------------- EBarrel Positive -----------------------------------------------------
 
-    if(EnvType == 3) { // positive ext.barrel is always at positive boundary, after finger
+    if (EnvType == 3) { // positive ext.barrel is always at positive boundary, after finger
 
       dbManager->SetCurrentSection(TileDddbManager::TILE_EBARREL);
       double thicknessEndPlate = dbManager->TILBdzend1()*Gaudi::Units::cm;
@@ -2526,159 +2516,159 @@ void TileAtlasFactory::create(GeoPhysVol *world)
 
       //--------------------------------------------------------------------------------------------------------------
       // CutA in Tile (Positive) (close center)
-      if(m_fullGeo) {
-      if (dbManager->BoolCuts()){
+      if (m_fullGeo) {
+        if (dbManager->BoolCuts()) {
 
-        // Iron1, down
-        volname = "Iron1"; dbManager->SetCurrentCuts(volname); //>>
-        dxIron = dbManager->CutsXpos();
-	dyIron = dbManager->CutsYpos();
-	if(m_log->level()<=MSG::DEBUG)
-	  (*m_log) << MSG::DEBUG << " Iron1: " << dxIron << " " << dyIron << endmsg;
+          // Iron1, down
+          volname = "Iron1"; dbManager->SetCurrentCuts(volname); //>>
+          dxIron = dbManager->CutsXpos();
+          dyIron = dbManager->CutsYpos();
+          if (m_log->level()<=MSG::DEBUG)
+            (*m_log) << MSG::DEBUG << " Iron1: " << dxIron << " " << dyIron << endmsg;
 
-        GeoTransform* tfIron1 = new GeoTransform(GeoTrf::TranslateZ3D(ztrans*Gaudi::Units::cm) * GeoTrf::Translate3D(dxIron,PosY-dyIron,PoZ2) 
-	                                       * GeoTrf::RotateX3D(90.*Gaudi::Units::deg) * GeoTrf::RotateZ3D(90.*Gaudi::Units::deg)); // Left
-        pvEBarrelMotherPos->add(tfIron1);
-        pvEBarrelMotherPos->add(new GeoIdentifierTag(1));
-        pvEBarrelMotherPos->add(pvIron1);
+          GeoTransform* tfIron1 = new GeoTransform(GeoTrf::TranslateZ3D(ztrans*Gaudi::Units::cm) * GeoTrf::Translate3D(dxIron,PosY-dyIron,PoZ2)
+                                                   * GeoTrf::RotateX3D(90.*Gaudi::Units::deg) * GeoTrf::RotateZ3D(90.*Gaudi::Units::deg)); // Left
+          pvEBarrelMotherPos->add(tfIron1);
+          pvEBarrelMotherPos->add(new GeoIdentifierTag(1));
+          pvEBarrelMotherPos->add(pvIron1);
 
-                      tfIron1 = new GeoTransform(GeoTrf::TranslateZ3D(ztrans*Gaudi::Units::cm) * GeoTrf::Translate3D(-dxIron,PosY-dyIron,PoZ2) 
-					       * GeoTrf::RotateX3D(90.*Gaudi::Units::deg) * GeoTrf::RotateZ3D(90.*Gaudi::Units::deg)); // Right
-        pvEBarrelMotherPos->add(tfIron1);
-        pvEBarrelMotherPos->add(pvIron1);
+          tfIron1 = new GeoTransform(GeoTrf::TranslateZ3D(ztrans*Gaudi::Units::cm) * GeoTrf::Translate3D(-dxIron,PosY-dyIron,PoZ2)
+                                     * GeoTrf::RotateX3D(90.*Gaudi::Units::deg) * GeoTrf::RotateZ3D(90.*Gaudi::Units::deg)); // Right
+          pvEBarrelMotherPos->add(tfIron1);
+          pvEBarrelMotherPos->add(pvIron1);
 
-        // Iron2, middle
-        volname = "Iron2"; dbManager->SetCurrentCuts(volname); //>>
-        dxIron = dbManager->CutsXpos();
-	dyIron = dbManager->CutsYpos();
-	if(m_log->level()<=MSG::DEBUG)
-	  (*m_log) << MSG::DEBUG << " Iron2: " << dxIron << " " << dyIron << endmsg;
+          // Iron2, middle
+          volname = "Iron2"; dbManager->SetCurrentCuts(volname); //>>
+          dxIron = dbManager->CutsXpos();
+          dyIron = dbManager->CutsYpos();
+          if (m_log->level()<=MSG::DEBUG)
+            (*m_log) << MSG::DEBUG << " Iron2: " << dxIron << " " << dyIron << endmsg;
 
-        GeoTransform* tfIron2 = new GeoTransform(GeoTrf::TranslateZ3D(ztrans*Gaudi::Units::cm) * GeoTrf::Translate3D(dxIron,PosY+dyIron,PoZ2) 
-	                      * GeoTrf::RotateZ3D(-84.*Gaudi::Units::deg) * GeoTrf::RotateX3D(90.*Gaudi::Units::deg) * GeoTrf::RotateZ3D(90.*Gaudi::Units::deg)); // Left
-        pvEBarrelMotherPos->add(tfIron2);
-        pvEBarrelMotherPos->add(new GeoIdentifierTag(2));
-        pvEBarrelMotherPos->add(pvIron2);
+          GeoTransform* tfIron2 = new GeoTransform(GeoTrf::TranslateZ3D(ztrans*Gaudi::Units::cm) * GeoTrf::Translate3D(dxIron,PosY+dyIron,PoZ2)
+                                                   * GeoTrf::RotateZ3D(-84.*Gaudi::Units::deg) * GeoTrf::RotateX3D(90.*Gaudi::Units::deg) * GeoTrf::RotateZ3D(90.*Gaudi::Units::deg)); // Left
+          pvEBarrelMotherPos->add(tfIron2);
+          pvEBarrelMotherPos->add(new GeoIdentifierTag(2));
+          pvEBarrelMotherPos->add(pvIron2);
 
-                      tfIron2 = new GeoTransform(GeoTrf::TranslateZ3D(ztrans*Gaudi::Units::cm) * GeoTrf::Translate3D(-dxIron,PosY+dyIron,PoZ2) 
-	                      * GeoTrf::RotateZ3D(84.*Gaudi::Units::deg) * GeoTrf::RotateX3D(90.*Gaudi::Units::deg) * GeoTrf::RotateZ3D(90.*Gaudi::Units::deg)); // Left
-        pvEBarrelMotherPos->add(tfIron2);
-        pvEBarrelMotherPos->add(pvIron2);
+          tfIron2 = new GeoTransform(GeoTrf::TranslateZ3D(ztrans*Gaudi::Units::cm) * GeoTrf::Translate3D(-dxIron,PosY+dyIron,PoZ2)
+                                     * GeoTrf::RotateZ3D(84.*Gaudi::Units::deg) * GeoTrf::RotateX3D(90.*Gaudi::Units::deg) * GeoTrf::RotateZ3D(90.*Gaudi::Units::deg)); // Left
+          pvEBarrelMotherPos->add(tfIron2);
+          pvEBarrelMotherPos->add(pvIron2);
 
-        // Iron3, middle 
-        volname = "Iron3"; dbManager->SetCurrentCuts(volname); //>>
-        dxIron = dbManager->CutsXpos();
-	dyIron = dbManager->CutsYpos();
-	if(m_log->level()<=MSG::DEBUG)
-	  (*m_log) << MSG::DEBUG << " Iron3: " << dxIron << " " << dyIron << endmsg;
+          // Iron3, middle
+          volname = "Iron3"; dbManager->SetCurrentCuts(volname); //>>
+          dxIron = dbManager->CutsXpos();
+          dyIron = dbManager->CutsYpos();
+          if (m_log->level()<=MSG::DEBUG)
+            (*m_log) << MSG::DEBUG << " Iron3: " << dxIron << " " << dyIron << endmsg;
 
-        GeoTransform* tfIron3 = new GeoTransform(GeoTrf::TranslateZ3D(ztrans*Gaudi::Units::cm) * GeoTrf::Translate3D(dxIron,PosY+dyIron,PoZ2) 
-	                      * GeoTrf::RotateZ3D(90.*Gaudi::Units::deg) * GeoTrf::RotateX3D(90.*Gaudi::Units::deg) * GeoTrf::RotateZ3D(90.*Gaudi::Units::deg)); // Left
-        pvEBarrelMotherPos->add(tfIron3);
-        pvEBarrelMotherPos->add(new GeoIdentifierTag(3));
-        pvEBarrelMotherPos->add(pvIron3);
+          GeoTransform* tfIron3 = new GeoTransform(GeoTrf::TranslateZ3D(ztrans*Gaudi::Units::cm) * GeoTrf::Translate3D(dxIron,PosY+dyIron,PoZ2)
+                                                   * GeoTrf::RotateZ3D(90.*Gaudi::Units::deg) * GeoTrf::RotateX3D(90.*Gaudi::Units::deg) * GeoTrf::RotateZ3D(90.*Gaudi::Units::deg)); // Left
+          pvEBarrelMotherPos->add(tfIron3);
+          pvEBarrelMotherPos->add(new GeoIdentifierTag(3));
+          pvEBarrelMotherPos->add(pvIron3);
 
-                      tfIron3 = new GeoTransform(GeoTrf::TranslateZ3D(ztrans*Gaudi::Units::cm) * GeoTrf::Translate3D(-dxIron,PosY+dyIron,PoZ2) 
-	                      * GeoTrf::RotateZ3D(90.*Gaudi::Units::deg) * GeoTrf::RotateX3D(90.*Gaudi::Units::deg) * GeoTrf::RotateZ3D(90.*Gaudi::Units::deg)); // Right
-        pvEBarrelMotherPos->add(tfIron3);
-        pvEBarrelMotherPos->add(pvIron3);
+          tfIron3 = new GeoTransform(GeoTrf::TranslateZ3D(ztrans*Gaudi::Units::cm) * GeoTrf::Translate3D(-dxIron,PosY+dyIron,PoZ2)
+                                     * GeoTrf::RotateZ3D(90.*Gaudi::Units::deg) * GeoTrf::RotateX3D(90.*Gaudi::Units::deg) * GeoTrf::RotateZ3D(90.*Gaudi::Units::deg)); // Right
+          pvEBarrelMotherPos->add(tfIron3);
+          pvEBarrelMotherPos->add(pvIron3);
 
-        // Heavy Iron Box 
-        volname = "IrBox"; dbManager->SetCurrentCuts(volname); //>>
-        dxIron = dbManager->CutsXpos();
-	dyIron = dbManager->CutsYpos();
+          // Heavy Iron Box
+          volname = "IrBox"; dbManager->SetCurrentCuts(volname); //>>
+          dxIron = dbManager->CutsXpos();
+          dyIron = dbManager->CutsYpos();
 
-        GeoTransform* tfIrBoxL = new GeoTransform(GeoTrf::TranslateZ3D(ztrans*Gaudi::Units::cm) * GeoTrf::Translate3D(dxIron,PosY-dyIron,PoZ2) 
-					       * GeoTrf::RotateX3D(90.*Gaudi::Units::deg) * GeoTrf::RotateZ3D(90.*Gaudi::Units::deg)); // Left
-        pvEBarrelMotherPos->add(tfIrBoxL);
-        pvEBarrelMotherPos->add(new GeoIdentifierTag(4));
-        pvEBarrelMotherPos->add(pvIrBox);
+          GeoTransform* tfIrBoxL = new GeoTransform(GeoTrf::TranslateZ3D(ztrans*Gaudi::Units::cm) * GeoTrf::Translate3D(dxIron,PosY-dyIron,PoZ2)
+                                                    * GeoTrf::RotateX3D(90.*Gaudi::Units::deg) * GeoTrf::RotateZ3D(90.*Gaudi::Units::deg)); // Left
+          pvEBarrelMotherPos->add(tfIrBoxL);
+          pvEBarrelMotherPos->add(new GeoIdentifierTag(4));
+          pvEBarrelMotherPos->add(pvIrBox);
 
-        GeoTransform* tfIrBoxR = new GeoTransform(GeoTrf::TranslateZ3D(ztrans*Gaudi::Units::cm) * GeoTrf::Translate3D(-dxIron,PosY-dyIron,PoZ2)
-                                                * GeoTrf::RotateX3D(90.*Gaudi::Units::deg) * GeoTrf::RotateZ3D(90.*Gaudi::Units::deg)); // Right
-        pvEBarrelMotherPos->add(tfIrBoxR);
-        pvEBarrelMotherPos->add(pvIrBox);
+          GeoTransform* tfIrBoxR = new GeoTransform(GeoTrf::TranslateZ3D(ztrans*Gaudi::Units::cm) * GeoTrf::Translate3D(-dxIron,PosY-dyIron,PoZ2)
+                                                    * GeoTrf::RotateX3D(90.*Gaudi::Units::deg) * GeoTrf::RotateZ3D(90.*Gaudi::Units::deg)); // Right
+          pvEBarrelMotherPos->add(tfIrBoxR);
+          pvEBarrelMotherPos->add(pvIrBox);
 
-        // CutB in Tile (Positive) (outer center) 
-        volname = "IrUp"; dbManager->SetCurrentCuts(volname); //>>
-        dxIr = dbManager->CutsXpos();
-	dyIr = dbManager->CutsYpos();
-	if(m_log->level()<=MSG::DEBUG)
-	  (*m_log) << MSG::DEBUG << " IrUp: " <<dxIr<< " " <<dyIr<< endmsg;
+          // CutB in Tile (Positive) (outer center)
+          volname = "IrUp"; dbManager->SetCurrentCuts(volname); //>>
+          dxIr = dbManager->CutsXpos();
+          dyIr = dbManager->CutsYpos();
+          if (m_log->level()<=MSG::DEBUG)
+            (*m_log) << MSG::DEBUG << " IrUp: " <<dxIr<< " " <<dyIr<< endmsg;
 
-        GeoTransform* tfIrUp = new GeoTransform(GeoTrf::TranslateZ3D(ztrans*Gaudi::Units::cm) 
-                             * GeoTrf::Translate3D(PosXcut+dxIr,-PosYcut+dyIr,-PoZ1) 
-		             * GeoTrf::RotateZ3D(90.*Gaudi::Units::deg) * GeoTrf::RotateX3D(90.*Gaudi::Units::deg) * GeoTrf::RotateZ3D(90.*Gaudi::Units::deg)); // Left
-        pvEBarrelMotherPos->add(tfIrUp);
-        pvEBarrelMotherPos->add(new GeoIdentifierTag(5));
-        pvEBarrelMotherPos->add(pvIrUp);
+          GeoTransform* tfIrUp = new GeoTransform(GeoTrf::TranslateZ3D(ztrans*Gaudi::Units::cm)
+                                                  * GeoTrf::Translate3D(PosXcut+dxIr,-PosYcut+dyIr,-PoZ1)
+                                                  * GeoTrf::RotateZ3D(90.*Gaudi::Units::deg) * GeoTrf::RotateX3D(90.*Gaudi::Units::deg) * GeoTrf::RotateZ3D(90.*Gaudi::Units::deg)); // Left
+          pvEBarrelMotherPos->add(tfIrUp);
+          pvEBarrelMotherPos->add(new GeoIdentifierTag(5));
+          pvEBarrelMotherPos->add(pvIrUp);
 
-                      tfIrUp = new GeoTransform(GeoTrf::TranslateZ3D(ztrans*Gaudi::Units::cm) 
-                             * GeoTrf::Translate3D(-PosXcut-dxIr,-PosYcut+dyIr,-PoZ1) 
-		             * GeoTrf::RotateZ3D(90.*Gaudi::Units::deg) * GeoTrf::RotateX3D(90.*Gaudi::Units::deg) * GeoTrf::RotateZ3D(90.*Gaudi::Units::deg)); // Right
-        pvEBarrelMotherPos->add(tfIrUp);
-        pvEBarrelMotherPos->add(pvIrUp);
+          tfIrUp = new GeoTransform(GeoTrf::TranslateZ3D(ztrans*Gaudi::Units::cm)
+                                    * GeoTrf::Translate3D(-PosXcut-dxIr,-PosYcut+dyIr,-PoZ1)
+                                    * GeoTrf::RotateZ3D(90.*Gaudi::Units::deg) * GeoTrf::RotateX3D(90.*Gaudi::Units::deg) * GeoTrf::RotateZ3D(90.*Gaudi::Units::deg)); // Right
+          pvEBarrelMotherPos->add(tfIrUp);
+          pvEBarrelMotherPos->add(pvIrUp);
 
-        // CutB in Tile (Positive) (outer center) 
-        volname = "IrDw"; dbManager->SetCurrentCuts(volname); //>>
-        dxIr = dbManager->CutsXpos();
-	dyIr = dbManager->CutsYpos();
-	if(m_log->level()<=MSG::DEBUG)
-	  (*m_log) << MSG::DEBUG << " IrDw: " <<dxIr<< " " <<dyIr<< endmsg;
+          // CutB in Tile (Positive) (outer center)
+          volname = "IrDw"; dbManager->SetCurrentCuts(volname); //>>
+          dxIr = dbManager->CutsXpos();
+          dyIr = dbManager->CutsYpos();
+          if (m_log->level()<=MSG::DEBUG)
+            (*m_log) << MSG::DEBUG << " IrDw: " <<dxIr<< " " <<dyIr<< endmsg;
 
-        GeoTransform* tfIrDw = new GeoTransform(GeoTrf::TranslateZ3D(ztrans*Gaudi::Units::cm) 
-                             * GeoTrf::Translate3D(PosXcut+dxIr,-PosYcut+dyIr,-PoZ1) 
-		             * GeoTrf::RotateZ3D(70.*Gaudi::Units::deg) * GeoTrf::RotateX3D(90.*Gaudi::Units::deg) * GeoTrf::RotateZ3D(90.*Gaudi::Units::deg)); // Left
-        pvEBarrelMotherPos->add(tfIrDw);
-        pvEBarrelMotherPos->add(new GeoIdentifierTag(6));
-        pvEBarrelMotherPos->add(pvIrDw);
+          GeoTransform* tfIrDw = new GeoTransform(GeoTrf::TranslateZ3D(ztrans*Gaudi::Units::cm)
+                                                  * GeoTrf::Translate3D(PosXcut+dxIr,-PosYcut+dyIr,-PoZ1)
+                                                  * GeoTrf::RotateZ3D(70.*Gaudi::Units::deg) * GeoTrf::RotateX3D(90.*Gaudi::Units::deg) * GeoTrf::RotateZ3D(90.*Gaudi::Units::deg)); // Left
+          pvEBarrelMotherPos->add(tfIrDw);
+          pvEBarrelMotherPos->add(new GeoIdentifierTag(6));
+          pvEBarrelMotherPos->add(pvIrDw);
 
-                      tfIrDw = new GeoTransform(GeoTrf::TranslateZ3D(ztrans*Gaudi::Units::cm) 
-                             * GeoTrf::Translate3D(-PosXcut+dxIr,-PosYcut+dyIr,-PoZ1) 
-		             * GeoTrf::RotateZ3D(-70.*Gaudi::Units::deg) * GeoTrf::RotateX3D(90.*Gaudi::Units::deg) * GeoTrf::RotateZ3D(90.*Gaudi::Units::deg)); // Left
+          tfIrDw = new GeoTransform(GeoTrf::TranslateZ3D(ztrans*Gaudi::Units::cm)
+                                    * GeoTrf::Translate3D(-PosXcut+dxIr,-PosYcut+dyIr,-PoZ1)
+                                    * GeoTrf::RotateZ3D(-70.*Gaudi::Units::deg) * GeoTrf::RotateX3D(90.*Gaudi::Units::deg) * GeoTrf::RotateZ3D(90.*Gaudi::Units::deg)); // Left
 
-        pvEBarrelMotherPos->add(tfIrDw);
-        pvEBarrelMotherPos->add(pvIrDw);
-      } // end if BoolCuts
+          pvEBarrelMotherPos->add(tfIrDw);
+          pvEBarrelMotherPos->add(pvIrDw);
+        } // end if BoolCuts
       }
       //--------------------------------------------------------------------------------------------------------------
       // Ext.Barrel
-      ztrans = (PosEndCrack + (dbManager->GetEnvZLength()*Gaudi::Units::cm - EBFingerLengthPos)/2 + 19.5)*(1./Gaudi::Units::cm); 
+      ztrans = (PosEndCrack + (dbManager->GetEnvZLength()*Gaudi::Units::cm - EBFingerLengthPos)/2 + 19.5)*(1./Gaudi::Units::cm);
 
-      GeoTransform* tfEBarrelMotherPos = new GeoTransform(GeoTrf::TranslateZ3D(ztrans*Gaudi::Units::cm) * 
-                                             GeoTrf::RotateZ3D(dbManager->GetEnvDPhi()*Gaudi::Units::deg));
+      GeoTransform* tfEBarrelMotherPos = new GeoTransform(GeoTrf::TranslateZ3D(ztrans*Gaudi::Units::cm) *
+                                                          GeoTrf::RotateZ3D(dbManager->GetEnvDPhi()*Gaudi::Units::deg));
 
-      (*m_log) << MSG::INFO <<" Positioning positive ext.barrel with translation "<< ztrans*Gaudi::Units::cm << endmsg; 
+      (*m_log) << MSG::INFO <<" Positioning positive ext.barrel with translation "<< ztrans*Gaudi::Units::cm << endmsg;
 
       //
       GeoNameTag* ntEBarrelMotherPos = new GeoNameTag("EBarrelPos");
       pvTileEnvelopePosEndcap->add(tfEBarrelMotherPos);
-      pvTileEnvelopePosEndcap->add(ntEBarrelMotherPos); 
+      pvTileEnvelopePosEndcap->add(ntEBarrelMotherPos);
       pvTileEnvelopePosEndcap->add(new GeoIdentifierTag(3));
       pvTileEnvelopePosEndcap->add(pvEBarrelMotherPos);
       //
 
       //--------------------------------------------------------------------------------------------------------------
-      // Finger 
-      ztrans = (PosEndExBarrel + EBFingerLengthPos/2)*(1./Gaudi::Units::cm); 
+      // Finger
+      ztrans = (PosEndExBarrel + EBFingerLengthPos/2)*(1./Gaudi::Units::cm);
 
-      GeoTransform* tfEFingerMotherPos = new GeoTransform(GeoTrf::TranslateZ3D(ztrans*Gaudi::Units::cm) * 
+      GeoTransform* tfEFingerMotherPos = new GeoTransform(GeoTrf::TranslateZ3D(ztrans*Gaudi::Units::cm) *
                                                           GeoTrf::RotateZ3D(dbManager->GetEnvDPhi() * Gaudi::Units::deg));
 
       (*m_log) << MSG::INFO <<" Positioning positive ext.barrel finger with translation ztrans= "<<ztrans*Gaudi::Units::cm<<endmsg;
 
       GeoNameTag* ntEFingerMotherPos = new GeoNameTag("TileEFingerPos");
 
-      pvTileEnvelopePosEndcap->add(tfEFingerMotherPos); 
+      pvTileEnvelopePosEndcap->add(tfEFingerMotherPos);
       pvTileEnvelopePosEndcap->add(ntEFingerMotherPos);
-      pvTileEnvelopePosEndcap->add(pvEFingerMotherPos); 
+      pvTileEnvelopePosEndcap->add(pvEFingerMotherPos);
 
       //--------------------------------------------------------------------------------------------------------------
       // Ext. Saddle Support
-      if (dbManager->BoolSaddle())
-      { ztrans = (PosEndExBarrel + DzSaddleSupport/2)*(1./Gaudi::Units::cm); 
+      if (dbManager->BoolSaddle()) {
+        ztrans = (PosEndExBarrel + DzSaddleSupport/2)*(1./Gaudi::Units::cm);
 
-        GeoTransform* tfESaddleMotherPos = new GeoTransform(GeoTrf::TranslateZ3D(ztrans*Gaudi::Units::cm) * 
+        GeoTransform* tfESaddleMotherPos = new GeoTransform(GeoTrf::TranslateZ3D(ztrans*Gaudi::Units::cm) *
                                                             GeoTrf::RotateZ3D(dbManager->GetEnvDPhi() * Gaudi::Units::deg));
 
         (*m_log) << MSG::INFO <<" Positioning positive ext.barrel saddle with translation ztrans= "<<ztrans*Gaudi::Units::cm
@@ -2686,9 +2676,9 @@ void TileAtlasFactory::create(GeoPhysVol *world)
 
         GeoNameTag* ntESaddleMotherPos = new GeoNameTag("TileESaddlePos");
 
-        pvTileEnvelopePosEndcap->add(tfESaddleMotherPos); 
-        pvTileEnvelopePosEndcap->add(ntESaddleMotherPos); 
-        pvTileEnvelopePosEndcap->add(pvESaddleMotherPos); 
+        pvTileEnvelopePosEndcap->add(tfESaddleMotherPos);
+        pvTileEnvelopePosEndcap->add(ntESaddleMotherPos);
+        pvTileEnvelopePosEndcap->add(pvESaddleMotherPos);
       }
 
     }
@@ -2696,7 +2686,7 @@ void TileAtlasFactory::create(GeoPhysVol *world)
 
     //----------------------------------------- EBarrel Negative -----------------------------------------------------
     //
-    if(EnvType == 2) { // negative ext.barrel is always at negative boundary, after finger
+    if (EnvType == 2) { // negative ext.barrel is always at negative boundary, after finger
 
       dbManager->SetCurrentSection(TileDddbManager::TILE_EBARREL);
       double thicknessEndPlate = dbManager->TILBdzend1()*Gaudi::Units::cm;
@@ -2706,120 +2696,120 @@ void TileAtlasFactory::create(GeoPhysVol *world)
 
       //*>------------------------------------------------------------------------------------------------------
       // LArPart in Tile (Negative) (close center)
-      if(m_fullGeo) {
-      if (dbManager->BoolCuts()){
-        // Iron1, down
-        volname = "Iron1"; dbManager->SetCurrentCuts(volname); //>>
-        dxIron = dbManager->CutsXpos();
-	dyIron = dbManager->CutsYpos();
+      if (m_fullGeo) {
+        if (dbManager->BoolCuts()) {
+          // Iron1, down
+          volname = "Iron1"; dbManager->SetCurrentCuts(volname); //>>
+          dxIron = dbManager->CutsXpos();
+          dyIron = dbManager->CutsYpos();
 
-        GeoTransform* tfIron1 = new GeoTransform(GeoTrf::TranslateZ3D(ztrans*Gaudi::Units::cm) * GeoTrf::Translate3D(dxIron,PosY-dyIron,-PoZ2) 
-					       * GeoTrf::RotateX3D(90.*Gaudi::Units::deg) * GeoTrf::RotateZ3D(90.*Gaudi::Units::deg)); // Left
-        pvEBarrelMotherNeg->add(tfIron1);
-        pvEBarrelMotherNeg->add(new GeoIdentifierTag(1));
-        pvEBarrelMotherNeg->add(pvIron1);
+          GeoTransform* tfIron1 = new GeoTransform(GeoTrf::TranslateZ3D(ztrans*Gaudi::Units::cm) * GeoTrf::Translate3D(dxIron,PosY-dyIron,-PoZ2)
+                                                   * GeoTrf::RotateX3D(90.*Gaudi::Units::deg) * GeoTrf::RotateZ3D(90.*Gaudi::Units::deg)); // Left
+          pvEBarrelMotherNeg->add(tfIron1);
+          pvEBarrelMotherNeg->add(new GeoIdentifierTag(1));
+          pvEBarrelMotherNeg->add(pvIron1);
 
-                      tfIron1 = new GeoTransform(GeoTrf::TranslateZ3D(ztrans*Gaudi::Units::cm) * GeoTrf::Translate3D(-dxIron,PosY-dyIron,-PoZ2)
-					       * GeoTrf::RotateX3D(90.*Gaudi::Units::deg) * GeoTrf::RotateZ3D(90.*Gaudi::Units::deg)); // Right
-        pvEBarrelMotherNeg->add(tfIron1);
-        pvEBarrelMotherNeg->add(new GeoIdentifierTag(2));
-        pvEBarrelMotherNeg->add(pvIron1);
+          tfIron1 = new GeoTransform(GeoTrf::TranslateZ3D(ztrans*Gaudi::Units::cm) * GeoTrf::Translate3D(-dxIron,PosY-dyIron,-PoZ2)
+                                     * GeoTrf::RotateX3D(90.*Gaudi::Units::deg) * GeoTrf::RotateZ3D(90.*Gaudi::Units::deg)); // Right
+          pvEBarrelMotherNeg->add(tfIron1);
+          pvEBarrelMotherNeg->add(new GeoIdentifierTag(2));
+          pvEBarrelMotherNeg->add(pvIron1);
 
-        // Iron2, middle
-        volname = "Iron2"; dbManager->SetCurrentCuts(volname); //>>
-        dxIron = dbManager->CutsXpos();
-	dyIron = dbManager->CutsYpos();
+          // Iron2, middle
+          volname = "Iron2"; dbManager->SetCurrentCuts(volname); //>>
+          dxIron = dbManager->CutsXpos();
+          dyIron = dbManager->CutsYpos();
 
-        GeoTransform* tfIron2 = new GeoTransform(GeoTrf::TranslateZ3D(ztrans*Gaudi::Units::cm) * GeoTrf::Translate3D(dxIron,PosY+dyIron,-PoZ2) 
-	                      * GeoTrf::RotateZ3D(-84.*Gaudi::Units::deg) * GeoTrf::RotateX3D(90.*Gaudi::Units::deg) * GeoTrf::RotateZ3D(90.*Gaudi::Units::deg)); // Left
-        pvEBarrelMotherNeg->add(tfIron2);
-        pvEBarrelMotherNeg->add(new GeoIdentifierTag(2));
-        pvEBarrelMotherNeg->add(pvIron2);
+          GeoTransform* tfIron2 = new GeoTransform(GeoTrf::TranslateZ3D(ztrans*Gaudi::Units::cm) * GeoTrf::Translate3D(dxIron,PosY+dyIron,-PoZ2)
+                                                   * GeoTrf::RotateZ3D(-84.*Gaudi::Units::deg) * GeoTrf::RotateX3D(90.*Gaudi::Units::deg) * GeoTrf::RotateZ3D(90.*Gaudi::Units::deg)); // Left
+          pvEBarrelMotherNeg->add(tfIron2);
+          pvEBarrelMotherNeg->add(new GeoIdentifierTag(2));
+          pvEBarrelMotherNeg->add(pvIron2);
 
-                      tfIron2 = new GeoTransform(GeoTrf::TranslateZ3D(ztrans*Gaudi::Units::cm) * GeoTrf::Translate3D(-dxIron,PosY+dyIron,-PoZ2)
-                              * GeoTrf::RotateZ3D(84.*Gaudi::Units::deg) * GeoTrf::RotateX3D(90.*Gaudi::Units::deg) * GeoTrf::RotateZ3D(90.*Gaudi::Units::deg)); // Left
-        pvEBarrelMotherNeg->add(tfIron2);
-        pvEBarrelMotherNeg->add(pvIron2);
+          tfIron2 = new GeoTransform(GeoTrf::TranslateZ3D(ztrans*Gaudi::Units::cm) * GeoTrf::Translate3D(-dxIron,PosY+dyIron,-PoZ2)
+                                     * GeoTrf::RotateZ3D(84.*Gaudi::Units::deg) * GeoTrf::RotateX3D(90.*Gaudi::Units::deg) * GeoTrf::RotateZ3D(90.*Gaudi::Units::deg)); // Left
+          pvEBarrelMotherNeg->add(tfIron2);
+          pvEBarrelMotherNeg->add(pvIron2);
 
-        // Iron3, middle 
-        volname = "Iron3"; dbManager->SetCurrentCuts(volname); //>>
-        dxIron = dbManager->CutsXpos();
-	dyIron = dbManager->CutsYpos();
+          // Iron3, middle
+          volname = "Iron3"; dbManager->SetCurrentCuts(volname); //>>
+          dxIron = dbManager->CutsXpos();
+          dyIron = dbManager->CutsYpos();
 
-        GeoTransform* tfIron3 = new GeoTransform(GeoTrf::TranslateZ3D(ztrans*Gaudi::Units::cm) * GeoTrf::Translate3D(dxIron,PosY+dyIron,-PoZ2) 
-	                      * GeoTrf::RotateZ3D(90.*Gaudi::Units::deg) * GeoTrf::RotateX3D(90.*Gaudi::Units::deg) * GeoTrf::RotateZ3D(90.*Gaudi::Units::deg)); // Left
-        pvEBarrelMotherNeg->add(tfIron3);
-        pvEBarrelMotherNeg->add(new GeoIdentifierTag(3));
-        pvEBarrelMotherNeg->add(pvIron3); 
+          GeoTransform* tfIron3 = new GeoTransform(GeoTrf::TranslateZ3D(ztrans*Gaudi::Units::cm) * GeoTrf::Translate3D(dxIron,PosY+dyIron,-PoZ2)
+                                                   * GeoTrf::RotateZ3D(90.*Gaudi::Units::deg) * GeoTrf::RotateX3D(90.*Gaudi::Units::deg) * GeoTrf::RotateZ3D(90.*Gaudi::Units::deg)); // Left
+          pvEBarrelMotherNeg->add(tfIron3);
+          pvEBarrelMotherNeg->add(new GeoIdentifierTag(3));
+          pvEBarrelMotherNeg->add(pvIron3);
 
-                      tfIron3 = new GeoTransform(GeoTrf::TranslateZ3D(ztrans*Gaudi::Units::cm) * GeoTrf::Translate3D(-dxIron,PosY+dyIron,-PoZ2)
-                              * GeoTrf::RotateZ3D(90.*Gaudi::Units::deg) * GeoTrf::RotateX3D(90.*Gaudi::Units::deg) * GeoTrf::RotateZ3D(90.*Gaudi::Units::deg)); // Right
-        pvEBarrelMotherNeg->add(tfIron3);
-        pvEBarrelMotherNeg->add(pvIron3);
+          tfIron3 = new GeoTransform(GeoTrf::TranslateZ3D(ztrans*Gaudi::Units::cm) * GeoTrf::Translate3D(-dxIron,PosY+dyIron,-PoZ2)
+                                     * GeoTrf::RotateZ3D(90.*Gaudi::Units::deg) * GeoTrf::RotateX3D(90.*Gaudi::Units::deg) * GeoTrf::RotateZ3D(90.*Gaudi::Units::deg)); // Right
+          pvEBarrelMotherNeg->add(tfIron3);
+          pvEBarrelMotherNeg->add(pvIron3);
 
-        // Heavy Iron Box
-        volname = "IrBox"; dbManager->SetCurrentCuts(volname); //>>
-        dxIron = dbManager->CutsXpos();
-	dyIron = dbManager->CutsYpos();
-        GeoTransform* tfIrBoxL = new GeoTransform(GeoTrf::TranslateZ3D(ztrans*Gaudi::Units::cm) * GeoTrf::Translate3D(dxIron,PosY-dyIron,-PoZ2)
-                               * GeoTrf::RotateX3D(90.*Gaudi::Units::deg) * GeoTrf::RotateZ3D(90.*Gaudi::Units::deg)); // Left
-        pvEBarrelMotherNeg->add(tfIrBoxL); 
-        pvEBarrelMotherNeg->add(new GeoIdentifierTag(4));
-        pvEBarrelMotherNeg->add(pvIrBox); 
+          // Heavy Iron Box
+          volname = "IrBox"; dbManager->SetCurrentCuts(volname); //>>
+          dxIron = dbManager->CutsXpos();
+          dyIron = dbManager->CutsYpos();
+          GeoTransform* tfIrBoxL = new GeoTransform(GeoTrf::TranslateZ3D(ztrans*Gaudi::Units::cm) * GeoTrf::Translate3D(dxIron,PosY-dyIron,-PoZ2)
+                                                    * GeoTrf::RotateX3D(90.*Gaudi::Units::deg) * GeoTrf::RotateZ3D(90.*Gaudi::Units::deg)); // Left
+          pvEBarrelMotherNeg->add(tfIrBoxL);
+          pvEBarrelMotherNeg->add(new GeoIdentifierTag(4));
+          pvEBarrelMotherNeg->add(pvIrBox);
 
-        GeoTransform* tfIrBoxR = new GeoTransform(GeoTrf::TranslateZ3D(ztrans*Gaudi::Units::cm) *GeoTrf::Translate3D(-dxIron,PosY-dyIron,-PoZ2)
-		               * GeoTrf::RotateX3D(90.*Gaudi::Units::deg) * GeoTrf::RotateZ3D(90.*Gaudi::Units::deg)); // Right
-        pvEBarrelMotherNeg->add(tfIrBoxR);
-        pvEBarrelMotherNeg->add(pvIrBox);
+          GeoTransform* tfIrBoxR = new GeoTransform(GeoTrf::TranslateZ3D(ztrans*Gaudi::Units::cm) *GeoTrf::Translate3D(-dxIron,PosY-dyIron,-PoZ2)
+                                                    * GeoTrf::RotateX3D(90.*Gaudi::Units::deg) * GeoTrf::RotateZ3D(90.*Gaudi::Units::deg)); // Right
+          pvEBarrelMotherNeg->add(tfIrBoxR);
+          pvEBarrelMotherNeg->add(pvIrBox);
 
-        // LArPart in Tile (Positive) (outer center) 
-        volname = "IrUp"; dbManager->SetCurrentCuts(volname); //>>
-        dxIr = dbManager->CutsXpos();
-	dyIr = dbManager->CutsYpos();
+          // LArPart in Tile (Positive) (outer center)
+          volname = "IrUp"; dbManager->SetCurrentCuts(volname); //>>
+          dxIr = dbManager->CutsXpos();
+          dyIr = dbManager->CutsYpos();
 
-        GeoTransform* tfIrUp = new GeoTransform(GeoTrf::TranslateZ3D(ztrans*Gaudi::Units::cm) 
-                             * GeoTrf::Translate3D(PosXcut+dxIr,-PosYcut+dyIr,PoZ1) 
-		             * GeoTrf::RotateZ3D(90.*Gaudi::Units::deg) * GeoTrf::RotateX3D(90.*Gaudi::Units::deg) * GeoTrf::RotateZ3D(90.*Gaudi::Units::deg)); // Left
-        pvEBarrelMotherNeg->add(tfIrUp);
-        pvEBarrelMotherNeg->add(new GeoIdentifierTag(5));
-        pvEBarrelMotherNeg->add(pvIrUp);
+          GeoTransform* tfIrUp = new GeoTransform(GeoTrf::TranslateZ3D(ztrans*Gaudi::Units::cm)
+                                                  * GeoTrf::Translate3D(PosXcut+dxIr,-PosYcut+dyIr,PoZ1)
+                                                  * GeoTrf::RotateZ3D(90.*Gaudi::Units::deg) * GeoTrf::RotateX3D(90.*Gaudi::Units::deg) * GeoTrf::RotateZ3D(90.*Gaudi::Units::deg)); // Left
+          pvEBarrelMotherNeg->add(tfIrUp);
+          pvEBarrelMotherNeg->add(new GeoIdentifierTag(5));
+          pvEBarrelMotherNeg->add(pvIrUp);
 
-                      tfIrUp = new GeoTransform(GeoTrf::TranslateZ3D(ztrans*Gaudi::Units::cm) 
-                             * GeoTrf::Translate3D(-PosXcut-dxIr,-PosYcut+dyIr,PoZ1) 
-		             * GeoTrf::RotateZ3D(90.*Gaudi::Units::deg) * GeoTrf::RotateX3D(90.*Gaudi::Units::deg) * GeoTrf::RotateZ3D(90.*Gaudi::Units::deg)); // Right
-        pvEBarrelMotherNeg->add(tfIrUp);
-        pvEBarrelMotherNeg->add(pvIrUp);
+          tfIrUp = new GeoTransform(GeoTrf::TranslateZ3D(ztrans*Gaudi::Units::cm)
+                                    * GeoTrf::Translate3D(-PosXcut-dxIr,-PosYcut+dyIr,PoZ1)
+                                    * GeoTrf::RotateZ3D(90.*Gaudi::Units::deg) * GeoTrf::RotateX3D(90.*Gaudi::Units::deg) * GeoTrf::RotateZ3D(90.*Gaudi::Units::deg)); // Right
+          pvEBarrelMotherNeg->add(tfIrUp);
+          pvEBarrelMotherNeg->add(pvIrUp);
 
-        // CutB in Tile (Positive) (outer center) 
-        volname = "IrDw"; dbManager->SetCurrentCuts(volname); //>>
-        dxIr = dbManager->CutsXpos();
-	dyIr = dbManager->CutsYpos();
+          // CutB in Tile (Positive) (outer center)
+          volname = "IrDw"; dbManager->SetCurrentCuts(volname); //>>
+          dxIr = dbManager->CutsXpos();
+          dyIr = dbManager->CutsYpos();
 
-        GeoTransform* tfIrDw = new GeoTransform(GeoTrf::TranslateZ3D(ztrans*Gaudi::Units::cm) 
-                             * GeoTrf::Translate3D(PosXcut+dxIr,-PosYcut+dyIr,PoZ1) 
-		             * GeoTrf::RotateZ3D(70.*Gaudi::Units::deg) * GeoTrf::RotateX3D(90.*Gaudi::Units::deg) * GeoTrf::RotateZ3D(90.*Gaudi::Units::deg)); // Left
-        pvEBarrelMotherNeg->add(tfIrDw);
-        pvEBarrelMotherNeg->add(new GeoIdentifierTag(6));
-        pvEBarrelMotherNeg->add(pvIrDw);
+          GeoTransform* tfIrDw = new GeoTransform(GeoTrf::TranslateZ3D(ztrans*Gaudi::Units::cm)
+                                                  * GeoTrf::Translate3D(PosXcut+dxIr,-PosYcut+dyIr,PoZ1)
+                                                  * GeoTrf::RotateZ3D(70.*Gaudi::Units::deg) * GeoTrf::RotateX3D(90.*Gaudi::Units::deg) * GeoTrf::RotateZ3D(90.*Gaudi::Units::deg)); // Left
+          pvEBarrelMotherNeg->add(tfIrDw);
+          pvEBarrelMotherNeg->add(new GeoIdentifierTag(6));
+          pvEBarrelMotherNeg->add(pvIrDw);
 
-                      tfIrDw = new GeoTransform(GeoTrf::TranslateZ3D(ztrans*Gaudi::Units::cm) 
-                             * GeoTrf::Translate3D(-PosXcut+dxIr,-PosYcut+dyIr,PoZ1) 
-		             * GeoTrf::RotateZ3D(-70.*Gaudi::Units::deg) * GeoTrf::RotateX3D(90.*Gaudi::Units::deg) * GeoTrf::RotateZ3D(90.*Gaudi::Units::deg)); // Left
+          tfIrDw = new GeoTransform(GeoTrf::TranslateZ3D(ztrans*Gaudi::Units::cm)
+                                    * GeoTrf::Translate3D(-PosXcut+dxIr,-PosYcut+dyIr,PoZ1)
+                                    * GeoTrf::RotateZ3D(-70.*Gaudi::Units::deg) * GeoTrf::RotateX3D(90.*Gaudi::Units::deg) * GeoTrf::RotateZ3D(90.*Gaudi::Units::deg)); // Left
 
-        pvEBarrelMotherNeg->add(tfIrDw);
-        pvEBarrelMotherNeg->add(pvIrDw);
-      } // end if BoolCuts
+          pvEBarrelMotherNeg->add(tfIrDw);
+          pvEBarrelMotherNeg->add(pvIrDw);
+        } // end if BoolCuts
       }
       //
       //*>------------------------------------------------------------------------------------------------------
       // Ext.Barrel
       ztrans = (-NegEndCrack - (dbManager->GetEnvZLength()*Gaudi::Units::cm - EBFingerLengthNeg)/2 - 19.5)*(1./Gaudi::Units::cm);
 
-      GeoTransform* tfEBarrelMotherNeg = new GeoTransform(GeoTrf::TranslateZ3D(ztrans*Gaudi::Units::cm) * 
-                                             GeoTrf::RotateZ3D(dbManager->GetEnvDPhi()*Gaudi::Units::deg));
+      GeoTransform* tfEBarrelMotherNeg = new GeoTransform(GeoTrf::TranslateZ3D(ztrans*Gaudi::Units::cm) *
+                                                          GeoTrf::RotateZ3D(dbManager->GetEnvDPhi()*Gaudi::Units::deg));
 
       (*m_log) << MSG::INFO <<" Positioning negative ext.barrel with translation ztrans "<<ztrans*Gaudi::Units::cm<<endmsg;
-      
+
       GeoNameTag* ntEBarrelMotherNeg = new GeoNameTag("EBarrelNeg");
 
       pvTileEnvelopeNegEndcap->add(tfEBarrelMotherNeg);
@@ -2829,10 +2819,10 @@ void TileAtlasFactory::create(GeoPhysVol *world)
 
       //*>------------------------------------------------------------------------------------------------------
       // Finger
-      ztrans = (-NegEndExBarrel - EBFingerLengthPos/2)*(1./Gaudi::Units::cm); 
+      ztrans = (-NegEndExBarrel - EBFingerLengthPos/2)*(1./Gaudi::Units::cm);
 
-      GeoTransform* tfEFingerMotherNeg = new GeoTransform(GeoTrf::TranslateZ3D(ztrans*Gaudi::Units::cm) * 
-                                             GeoTrf::RotateZ3D(dbManager->GetEnvDPhi() * Gaudi::Units::deg));
+      GeoTransform* tfEFingerMotherNeg = new GeoTransform(GeoTrf::TranslateZ3D(ztrans*Gaudi::Units::cm) *
+                                                          GeoTrf::RotateZ3D(dbManager->GetEnvDPhi() * Gaudi::Units::deg));
 
       (*m_log) << MSG::INFO <<" Positioning negative ext.barrel finger with translation ztrans= "<<ztrans*Gaudi::Units::cm<< endmsg;
 
@@ -2844,18 +2834,18 @@ void TileAtlasFactory::create(GeoPhysVol *world)
 
       //*>------------------------------------------------------------------------------------------------------
       // Ext. Saddle Support
-      if (dbManager->BoolSaddle())
-      { ztrans = (-NegEndExBarrel - DzSaddleSupport/2)*(1./Gaudi::Units::cm); 
+      if (dbManager->BoolSaddle()) {
+        ztrans = (-NegEndExBarrel - DzSaddleSupport/2)*(1./Gaudi::Units::cm);
 
-        GeoTransform* tfESaddleMotherNeg = new GeoTransform(GeoTrf::TranslateZ3D(ztrans*Gaudi::Units::cm) * 
-                                               GeoTrf::RotateZ3D(dbManager->GetEnvDPhi() * Gaudi::Units::deg));
+        GeoTransform* tfESaddleMotherNeg = new GeoTransform(GeoTrf::TranslateZ3D(ztrans*Gaudi::Units::cm) *
+                                                            GeoTrf::RotateZ3D(dbManager->GetEnvDPhi() * Gaudi::Units::deg));
 
         (*m_log) << MSG::INFO <<" Positioning negative ext.barrel saddle with translation ztrans= "<<ztrans*Gaudi::Units::cm
                  << endmsg;
 
         GeoNameTag* ntESaddleMotherNeg = new GeoNameTag("TileESaddleNeg");
 
-        pvTileEnvelopeNegEndcap->add(tfESaddleMotherNeg); 
+        pvTileEnvelopeNegEndcap->add(tfESaddleMotherNeg);
         pvTileEnvelopeNegEndcap->add(ntESaddleMotherNeg);
         pvTileEnvelopeNegEndcap->add(pvESaddleMotherNeg);
       }
@@ -2865,7 +2855,7 @@ void TileAtlasFactory::create(GeoPhysVol *world)
     // ---------------------------------------- ITC Positive -----------------------------------------------------
     //
 
-    if(EnvType == 5) { // positive ITC attached to positive ext.barrel
+    if (EnvType == 5) { // positive ITC attached to positive ext.barrel
 
       dbManager->SetCurrentSection(TileDddbManager::TILE_PLUG1);
 
@@ -2873,11 +2863,11 @@ void TileAtlasFactory::create(GeoPhysVol *world)
 
       //std::cout <<" ztrans "<<ztrans<<" PosEndBarrelFinger/Gaudi::Units::cm "<<PosEndBarrelFinger/Gaudi::Units::cm
       //          <<" dbManager->TILBdzmodul()/2*Gaudi::Units::cm"<<dbManager->TILBdzmodul()/2<<"\n";
-      
+
       (*m_log) << MSG::INFO <<" Positioning positive ITC with translation "<<ztrans*Gaudi::Units::cm<< endmsg;
 
-      GeoTransform* tfITCMotherPos = new GeoTransform(GeoTrf::TranslateZ3D(ztrans*Gaudi::Units::cm) * 
-                                         GeoTrf::RotateZ3D(dbManager->GetEnvDPhi() * Gaudi::Units::deg));
+      GeoTransform* tfITCMotherPos = new GeoTransform(GeoTrf::TranslateZ3D(ztrans*Gaudi::Units::cm) *
+                                                      GeoTrf::RotateZ3D(dbManager->GetEnvDPhi() * Gaudi::Units::deg));
 
       GeoNameTag* ntITCMotherPos = new GeoNameTag("ITCPos");
 
@@ -2890,8 +2880,8 @@ void TileAtlasFactory::create(GeoPhysVol *world)
 
       (*m_log) << MSG::INFO <<" Positioning positive Gap with translation "<<ztrans*Gaudi::Units::cm<<endmsg;
 
-      GeoTransform* tfGapMotherPos = new GeoTransform(GeoTrf::TranslateZ3D(ztrans*Gaudi::Units::cm)* 
-                                         GeoTrf::RotateZ3D(dbManager->GetEnvDPhi()*Gaudi::Units::deg));
+      GeoTransform* tfGapMotherPos = new GeoTransform(GeoTrf::TranslateZ3D(ztrans*Gaudi::Units::cm)*
+                                                      GeoTrf::RotateZ3D(dbManager->GetEnvDPhi()*Gaudi::Units::deg));
 
       GeoNameTag* ntGapMotherPos = new GeoNameTag("GapPos");
 
@@ -2905,34 +2895,34 @@ void TileAtlasFactory::create(GeoPhysVol *world)
 
       (*m_log) << MSG::INFO <<" Positioning positive Crack with translation "<<ztrans*Gaudi::Units::cm<<endmsg;
 
-      GeoTransform* tfCrackMotherPos = new GeoTransform(GeoTrf::TranslateZ3D(ztrans*Gaudi::Units::cm)* 
-                                         GeoTrf::RotateZ3D(dbManager->GetEnvDPhi()*Gaudi::Units::deg));
- 
+      GeoTransform* tfCrackMotherPos = new GeoTransform(GeoTrf::TranslateZ3D(ztrans*Gaudi::Units::cm)*
+                                                        GeoTrf::RotateZ3D(dbManager->GetEnvDPhi()*Gaudi::Units::deg));
+
       GeoNameTag* ntCrackMotherPos = new GeoNameTag("CrackPos");
 
       pvTileEnvelopePosEndcap->add(tfCrackMotherPos);
       pvTileEnvelopePosEndcap->add(ntCrackMotherPos);
       pvTileEnvelopePosEndcap->add(pvCrackMotherPos);
-      }
-    
+    }
+
     //
     // ---------------------------------------- ITC Negative -----------------------------------------------------
     //
 
     // negative ITC attached to negative ext.barrel
-    if(EnvType == 4) { 
+    if (EnvType == 4) {
 
       dbManager->SetCurrentSection(TileDddbManager::TILE_PLUG1);
       ztrans = -NegEndBarrelFinger*(1./Gaudi::Units::cm) - dbManager->TILBdzmodul()/2;
 
       (*m_log) << MSG::INFO <<" Positioning negative ITC with translation "<<ztrans*Gaudi::Units::cm<<endmsg;
 
-      GeoTransform* tfITCMotherNeg = new GeoTransform(GeoTrf::TranslateZ3D(ztrans*Gaudi::Units::cm)* 
-                                         GeoTrf::RotateZ3D(dbManager->GetEnvDPhi()*Gaudi::Units::deg));
+      GeoTransform* tfITCMotherNeg = new GeoTransform(GeoTrf::TranslateZ3D(ztrans*Gaudi::Units::cm)*
+                                                      GeoTrf::RotateZ3D(dbManager->GetEnvDPhi()*Gaudi::Units::deg));
 
       GeoNameTag* ntITCMotherNeg = new GeoNameTag("ITCNeg");
 
-      pvTileEnvelopeNegEndcap->add(tfITCMotherNeg); 
+      pvTileEnvelopeNegEndcap->add(tfITCMotherNeg);
       pvTileEnvelopeNegEndcap->add(ntITCMotherNeg);
       pvTileEnvelopeNegEndcap->add(pvITCMotherNeg);
 
@@ -2941,14 +2931,14 @@ void TileAtlasFactory::create(GeoPhysVol *world)
 
       (*m_log) << MSG::INFO <<" Positioning negative Gap with translation "<<ztrans*Gaudi::Units::cm<<endmsg;
 
-      GeoTransform* tfGapMotherNeg = new GeoTransform(GeoTrf::TranslateZ3D(ztrans*Gaudi::Units::cm)* 
-                                         GeoTrf::RotateZ3D(dbManager->GetEnvDPhi()*Gaudi::Units::deg));
+      GeoTransform* tfGapMotherNeg = new GeoTransform(GeoTrf::TranslateZ3D(ztrans*Gaudi::Units::cm)*
+                                                      GeoTrf::RotateZ3D(dbManager->GetEnvDPhi()*Gaudi::Units::deg));
 
       GeoNameTag* ntGapMotherNeg = new GeoNameTag("GapNeg");
 
       pvTileEnvelopeNegEndcap->add(tfGapMotherNeg);
       pvTileEnvelopeNegEndcap->add(ntGapMotherNeg);
-      pvTileEnvelopeNegEndcap->add(pvGapMotherNeg); 
+      pvTileEnvelopeNegEndcap->add(pvGapMotherNeg);
 
       // Crack
       dbManager->SetCurrentSection(TileDddbManager::TILE_PLUG4);
@@ -2956,8 +2946,8 @@ void TileAtlasFactory::create(GeoPhysVol *world)
 
       (*m_log) << MSG::INFO <<" Positioning negative Crack with translation "<<ztrans*Gaudi::Units::cm<<endmsg;
 
-      GeoTransform* tfCrackMotherNeg = new GeoTransform(GeoTrf::TranslateZ3D(ztrans*Gaudi::Units::cm)* 
-                                           GeoTrf::RotateZ3D(dbManager->GetEnvDPhi()*Gaudi::Units::deg));
+      GeoTransform* tfCrackMotherNeg = new GeoTransform(GeoTrf::TranslateZ3D(ztrans*Gaudi::Units::cm)*
+                                                        GeoTrf::RotateZ3D(dbManager->GetEnvDPhi()*Gaudi::Units::deg));
 
       GeoNameTag* ntCrackMotherNeg = new GeoNameTag("CrackNeg");
 
@@ -2968,79 +2958,78 @@ void TileAtlasFactory::create(GeoPhysVol *world)
     }
   }  // EnvCounter, end
 
-     //
-     // creating Descriptiors and CaloDetDescrElements 
-     // 
-     (*m_log) << MSG::DEBUG << "Creating descriptors for " << dbManager->GetNumberOfEnv() << " envelopes..." << endmsg;
+  //
+  // creating Descriptiors and CaloDetDescrElements
+  //
+  (*m_log) << MSG::DEBUG << "Creating descriptors for " << dbManager->GetNumberOfEnv() << " envelopes..." << endmsg;
 
-     int nModulesInSection[6] = {0,0,0,0,0,0};
-     double zShiftInSection[6] = {0.0,0.0,0.0,0.0,0.0,0.0,};
+  int nModulesInSection[6] = {0,0,0,0,0,0};
+  double zShiftInSection[6] = {0.0,0.0,0.0,0.0,0.0,0.0,};
 
 
-     for(int EnvCounter = 0; EnvCounter < dbManager->GetNumberOfEnv(); ++EnvCounter){ //Loop over Envelopes
+  for (int EnvCounter = 0; EnvCounter < dbManager->GetNumberOfEnv(); ++EnvCounter) { //Loop over Envelopes
 
-       dbManager->SetCurrentEnvByIndex(EnvCounter);
-       int EnvType = dbManager->GetEnvType();
-       int NumberOfMod = dbManager->GetEnvNModules();
-       double Zshift = dbManager->GetEnvZShift()*Gaudi::Units::cm;
+    dbManager->SetCurrentEnvByIndex(EnvCounter);
+    int EnvType = dbManager->GetEnvType();
+    int NumberOfMod = dbManager->GetEnvNModules();
+    double Zshift = dbManager->GetEnvZShift()*Gaudi::Units::cm;
 
-       if(m_log->level()<=MSG::DEBUG)
-	 (*m_log) << MSG::DEBUG 
-		  << " EnvCounter is " << EnvCounter
-		  << " EnvType is " << EnvType
-		  << " Zshift is " << Zshift*(1./Gaudi::Units::cm) << " cm"
-		  << endmsg;
+    if (m_log->level()<=MSG::DEBUG)
+      (*m_log) << MSG::DEBUG
+               << " EnvCounter is " << EnvCounter
+               << " EnvType is " << EnvType
+               << " Zshift is " << Zshift*(1./Gaudi::Units::cm) << " cm"
+               << endmsg;
 
-       // Central barrel 
-       if(EnvType == 1 || EnvType == 0) { 
-         nModulesInSection[0] = nModulesInSection[1] = NumberOfMod;
-         zShiftInSection[0] = zShiftInSection[1] = Zshift;
-       } else if(EnvType < 6) {
-         nModulesInSection[EnvType] = NumberOfMod;
-         zShiftInSection[EnvType] = Zshift;
-       }
-     }
+    // Central barrel
+    if (EnvType == 1 || EnvType == 0) {
+      nModulesInSection[0] = nModulesInSection[1] = NumberOfMod;
+      zShiftInSection[0] = zShiftInSection[1] = Zshift;
+    } else if (EnvType < 6) {
+      nModulesInSection[EnvType] = NumberOfMod;
+      zShiftInSection[EnvType] = Zshift;
+    }
+  }
 
-   const TileID* tileID = m_detectorManager->get_id();
- 
-   unsigned int dete[6] = {TILE_REGION_CENTRAL,TILE_REGION_CENTRAL,TILE_REGION_EXTENDED,TILE_REGION_EXTENDED,
-                           TILE_REGION_GAP,TILE_REGION_GAP};
-   int side[6] = {0,1,0,1,0,1};
-  
+  const TileID* tileID = m_detectorManager->get_id();
 
-   (*m_log) << MSG::DEBUG << "Loop over Tile detector regions, and call computeCellDim() when needed..." << endmsg; 
-   for (int ii=0; ii<6; ++ii) {
-     
-     (*m_log) << MSG::DEBUG << "ii: " << ii << ", region: " << dete[ii] << endmsg; 
-     
-     if (ii%2 == 0) {
-        (*m_log) << MSG::DEBUG << "ii: " << ii << ", region: " << dete[ii] << " --> calling computeCellDim()..." << endmsg; 
-        sectionBuilder->computeCellDim(m_detectorManager, dete[ii],
-                                       m_switches.addPlatesToCell,
-                                       zShiftInSection[ii+1], // zShiftPos
-                                       zShiftInSection[ii]);  // zShiftNeg
-     }
-     
-     (*m_log) << MSG::DEBUG << "calling fillDescriptor()..." << endmsg; 
-     TileDetDescriptor* descriptor = new TileDetDescriptor();
-     sectionBuilder->fillDescriptor(descriptor, dete[ii], side[ii],
-                                    m_switches.testBeam,        // set to false - ATLAS geometry
-                                    m_switches.addPlatesToCell, // add front/end plates to cell volume
-                                    nModulesInSection[ii],   // 0-64 modules
-                                    zShiftInSection[ii]);    // Z-shift
-     
-     (*m_log) << MSG::DEBUG << "Get an Identifier for the region and add it to the detectorManager..." << endmsg; 
-     Identifier idRegion = tileID->region_id(ii);
-     descriptor->set(idRegion);
-     m_detectorManager->add(descriptor); 
-     m_detectorManager->add(new TileDetDescrRegion(idRegion, descriptor));
-   }
+  unsigned int dete[6] = {TILE_REGION_CENTRAL,TILE_REGION_CENTRAL,TILE_REGION_EXTENDED,TILE_REGION_EXTENDED,
+                          TILE_REGION_GAP,TILE_REGION_GAP};
+  int side[6] = {0,1,0,1,0,1};
 
-  // --------- ----------- --------- -------- ------ --------- ------- ---------- 
+
+  (*m_log) << MSG::DEBUG << "Loop over Tile detector regions, and call computeCellDim() when needed..." << endmsg;
+  for (int ii=0; ii<6; ++ii) {
+
+    (*m_log) << MSG::DEBUG << "ii: " << ii << ", region: " << dete[ii] << endmsg;
+
+    if (ii%2 == 0) {
+      (*m_log) << MSG::DEBUG << "ii: " << ii << ", region: " << dete[ii] << " --> calling computeCellDim()..." << endmsg;
+      sectionBuilder->computeCellDim(m_detectorManager, dete[ii],
+                                     m_switches.addPlatesToCell,
+                                     zShiftInSection[ii+1], // zShiftPos
+                                     zShiftInSection[ii]);  // zShiftNeg
+    }
+
+    (*m_log) << MSG::DEBUG << "calling fillDescriptor()..." << endmsg;
+    TileDetDescriptor* descriptor = new TileDetDescriptor();
+    sectionBuilder->fillDescriptor(descriptor, dete[ii], side[ii],
+                                   m_switches.testBeam,        // set to false - ATLAS geometry
+                                   m_switches.addPlatesToCell, // add front/end plates to cell volume
+                                   nModulesInSection[ii],   // 0-64 modules
+                                   zShiftInSection[ii]);    // Z-shift
+
+    (*m_log) << MSG::DEBUG << "Get an Identifier for the region and add it to the detectorManager..." << endmsg;
+    Identifier idRegion = tileID->region_id(ii);
+    descriptor->set(idRegion);
+    m_detectorManager->add(descriptor);
+    m_detectorManager->add(new TileDetDescrRegion(idRegion, descriptor));
+  }
+
+  // --------- ----------- --------- -------- ------ --------- ------- ----------
   GeoNameTag *nTag = new GeoNameTag("Tile");
 
-  if(BAR)
-  {
+  if (BAR) {
     world->add(nTag);
 
     // Top transform for the Central barrel
@@ -3060,11 +3049,10 @@ void TileAtlasFactory::create(GeoPhysVol *world)
     world->add(pvTileEnvelopeBarrel);
     m_detectorManager->addTreeTop(pvTileEnvelopeBarrel);
   }
- 
-  if(EBA)
-  {
+
+  if (EBA) {
     world->add(nTag);
- 
+
     // Top transform for the Positive endcap
     dbManager->SetCurrentEnvByType(3);
     GeoTrf::Transform3D mz = GeoTrf::RotateZ3D(dbManager->GetEnvDPhi());
@@ -3082,9 +3070,8 @@ void TileAtlasFactory::create(GeoPhysVol *world)
     world->add(pvTileEnvelopePosEndcap);
     m_detectorManager->addTreeTop(pvTileEnvelopePosEndcap);
   }
- 
-  if(EBC)
-  {
+
+  if (EBC) {
     world->add(nTag);
 
     // Top transform for the Negative endcap
@@ -3114,25 +3101,24 @@ void TileAtlasFactory::create(GeoPhysVol *world)
 // Checking geometry dimensions for all directions
 
 void TileAtlasFactory::checking(const std::string& Name, bool print, int level,
-                                double X1, double X2, double Y1, double Y2, double Z) 
+                                double X1, double X2, double Y1, double Y2, double Z)
 {
   double rless = .150; //150 [mkm]
   std::string Step[8] = {" ","  ","   ","    ","     ","      ","       ","        "};
 
-  if (print)
-   {
-     if(m_log->level()<=MSG::DEBUG)
-       (*m_log) << MSG::DEBUG <<Step[level]<<Name<<"-"<<level
-		<<" dX1,dX2= "<<X1<<","<<X2<<" dY1,dY2= "<<Y1<<","<<Y2<<",dZ= "<<Z
-		<<endmsg;
-   }
-  if (X1 < rless && X2 < rless)
-   { (*m_log) << MSG::WARNING <<" volume "<<Name<<" is empty, X1 or X2<0 "<<endmsg;
-   }
-  if (Y1 < rless && Y2 < rless)
-   { (*m_log) << MSG::WARNING <<" volume "<<Name<<" is empty, Y1 or Y2<0 "<<endmsg;
-   }
-  if (Z < rless)
-   { (*m_log) << MSG::WARNING <<" volume "<<Name<<" is empty, Z<0   "<<endmsg;
-   } 
-} 
+  if (print) {
+    if (m_log->level()<=MSG::DEBUG)
+      (*m_log) << MSG::DEBUG <<Step[level]<<Name<<"-"<<level
+               <<" dX1,dX2= "<<X1<<","<<X2<<" dY1,dY2= "<<Y1<<","<<Y2<<",dZ= "<<Z
+               <<endmsg;
+  }
+  if (X1 < rless && X2 < rless) {
+    (*m_log) << MSG::WARNING <<" volume "<<Name<<" is empty, X1 or X2<0 "<<endmsg;
+  }
+  if (Y1 < rless && Y2 < rless) {
+    (*m_log) << MSG::WARNING <<" volume "<<Name<<" is empty, Y1 or Y2<0 "<<endmsg;
+  }
+  if (Z < rless) {
+    (*m_log) << MSG::WARNING <<" volume "<<Name<<" is empty, Z<0   "<<endmsg;
+  }
+}
