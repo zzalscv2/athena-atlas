@@ -298,31 +298,23 @@ const ISF::ISFParticleVector* ISF::PunchThroughTool::computePunchThroughParticle
 {
   ATH_MSG_DEBUG( "[ punchthrough ] starting punch-through simulation");
 
-  // reset the output particle collection
-  m_isfpCont = new ISF::ISFParticleVector();
+  // create output particle collection
+  auto isfpCont = std::make_unique<ISF::ISFParticleVector>();
 
-  // reset the parent GenEvent
-  m_parentGenEvt = nullptr;
-
-  // store the initial particle state locally
-  m_initPs = &isfp;
-
-  ATH_MSG_VERBOSE("[ punchthrough ] position of the input particle: r"<<m_initPs->position().perp()<<" z= "<<m_initPs->position().z() );
+  ATH_MSG_VERBOSE("[ punchthrough ] position of the input particle: r"<<isfp.position().perp()<<" z= "<<isfp.position().z() );
   //if not on ID surface - don't simulate
 
-  if ( m_geoIDSvc->inside(m_initPs->position(),AtlasDetDescr::fAtlasID) != 1 || m_geoIDSvc->inside(m_initPs->position(),AtlasDetDescr::fAtlasCalo) != 1)
+  if ( m_geoIDSvc->inside(isfp.position(),AtlasDetDescr::fAtlasID) != 1 || m_geoIDSvc->inside(isfp.position(),AtlasDetDescr::fAtlasCalo) != 1)
     {
       ATH_MSG_DEBUG("[ GeoIDSvc ] input particle position is not on reference surface -> no punch-through simulation");
-      if (m_isfpCont) {delete m_isfpCont; m_isfpCont=nullptr;}
       return nullptr;
     }
 
   //check if it points to the calorimeter - if not, don't simulate
 
-  if ( m_geoIDSvc->identifyNextGeoID(*m_initPs) != AtlasDetDescr::fAtlasCalo)
+  if ( m_geoIDSvc->identifyNextGeoID(isfp) != AtlasDetDescr::fAtlasCalo)
     {
-      ATH_MSG_VERBOSE ("[ GeoIDSvc ] input particle doesn't point to calorimeter"<< "Next GeoID: "<<m_geoIDSvc->identifyNextGeoID(*m_initPs) );
-      if (m_isfpCont) {delete m_isfpCont; m_isfpCont=nullptr;}
+      ATH_MSG_VERBOSE ("[ GeoIDSvc ] input particle doesn't point to calorimeter"<< "Next GeoID: "<<m_geoIDSvc->identifyNextGeoID(isfp) );
       return nullptr;
     }
 
@@ -336,10 +328,9 @@ const ISF::ISFParticleVector* ISF::PunchThroughTool::computePunchThroughParticle
     // loop over all known punch-through initiators
     for ( ; pdgIt != pdgItEnd; ++pdgIt, ++minEnergyIt)
       {
-        if (std::abs(m_initPs->pdgCode()) == *pdgIt){
-          if(std::sqrt( m_initPs->momentum().mag2() + m_initPs->mass()*m_initPs->mass() ) < *minEnergyIt){
+        if (std::abs(isfp.pdgCode()) == *pdgIt){
+          if(std::sqrt( isfp.momentum().mag2() + isfp.mass()*isfp.mass() ) < *minEnergyIt){
             ATH_MSG_DEBUG("[ punchthrough ] particle does not meet initiator min energy requirement. Dropping it in the calo.");
-            if (m_isfpCont) {delete m_isfpCont; m_isfpCont=nullptr;}
             return nullptr;
           }
           break;
@@ -350,34 +341,16 @@ const ISF::ISFParticleVector* ISF::PunchThroughTool::computePunchThroughParticle
     if (pdgIt == pdgItEnd)
       {
         ATH_MSG_DEBUG("[ punchthrough ] particle is not registered as punch-through initiator. Dropping it in the calo.");
-        if (m_isfpCont) {delete m_isfpCont; m_isfpCont=nullptr;}
         return nullptr;
       }
   }
 
-  if(m_initPs->position().eta() < m_initiatorsEtaRange.at(0) || m_initPs->position().eta() > m_initiatorsEtaRange.at(1) ){
+  if(isfp.position().eta() < m_initiatorsEtaRange.at(0) || isfp.position().eta() > m_initiatorsEtaRange.at(1) ){
     ATH_MSG_DEBUG("[ punchthrough ] particle does not meet initiator eta range requirement. Dropping it in the calo.");
-    if (m_isfpCont) {delete m_isfpCont; m_isfpCont=nullptr;}
     return nullptr;
   }
 
   //if initial particle is on ID surface, points to the calorimeter, is a punch-through initiator, meets initiator min enery and eta range
-
-  // store initial particle mass
-  const double mass = m_initPs->mass();
-  //store its barcode
-  m_primBC = m_initPs->barcode();
-  // now store some parameters from the given particle locally
-  // in this class
-  //  -> the energy
-  m_initEnergy = std::sqrt( m_initPs->momentum().mag2() + mass*mass );
-  //  -> get geometrical properties
-  //  -> the pseudorapidity eta
-  m_initEta = m_initPs->position().eta();
-  //  -> the angle theta
-  m_initTheta = m_initPs->position().theta();
-  //  -> the azimutal angle phi
-  m_initPhi = m_initPs->position().phi();
 
   // this is the place where the magic is done:
   // test for each registered punch-through pdg if a punch-through
@@ -413,7 +386,7 @@ const ISF::ISFParticleVector* ISF::PunchThroughTool::computePunchThroughParticle
               if ( CLHEP::RandFlat::shoot(rndmEngine) > 0.5 ) doPdg = corrPdg;
               // now create the particles with the given pdg and note how many
               // particles of this pdg are created
-              corrPdgNumDone[doPdg] = getAllParticles(rndmEngine, doPdg);
+              corrPdgNumDone[doPdg] = getAllParticles(isfp, *isfpCont, rndmEngine, doPdg);
             }
 
           // one of the two correlated particle types was already simulated
@@ -428,7 +401,7 @@ const ISF::ISFParticleVector* ISF::PunchThroughTool::computePunchThroughParticle
               if (donePdg == doPdg) doPdg = corrPdg;
 
               // now create the correlated particles
-              getCorrelatedParticles(doPdg, doneNumPart, rndmEngine);
+              getCorrelatedParticles(isfp, *isfpCont, doPdg, doneNumPart, rndmEngine);
               // note: no need to take note, that this particle type is now simulated,
               // since this is the second of two correlated particles, which is
               // simulated and we do not have correlations of more than two particles.
@@ -437,13 +410,13 @@ const ISF::ISFParticleVector* ISF::PunchThroughTool::computePunchThroughParticle
           // if no correlation for this particle
           // -> directly create all particles with the current pdg
         }
-      else getAllParticles(rndmEngine, doPdg);
+      else getAllParticles(isfp, *isfpCont, rndmEngine, doPdg);
 
     } // for-loop over all particle pdgs
 
-  if (m_isfpCont->size() > 0)  ATH_MSG_DEBUG( "[ punchthrough ] returning ISFparticle vector , size: "<<m_isfpCont->size() );
+  if (isfpCont->size() > 0)  ATH_MSG_DEBUG( "[ punchthrough ] returning ISFparticle vector , size: "<<isfpCont->size() );
 
-  for (ISF::ISFParticle *particle : *m_isfpCont) {
+  for (ISF::ISFParticle *particle : *isfpCont) {
     ATH_MSG_DEBUG("codes of produced punch through particle: pdg = "<< particle->pdgCode());
     Amg::Vector3D position = particle->position();
     ATH_MSG_DEBUG("position of produced punch-through particle: x = "<< position.x() <<" y = "<< position.y() <<" z = "<< position.z());
@@ -451,20 +424,20 @@ const ISF::ISFParticleVector* ISF::PunchThroughTool::computePunchThroughParticle
     ATH_MSG_DEBUG("momentum of produced punch-through particle: px = "<< momentum.x() <<" py = "<< momentum.x() <<" pz = "<< momentum.x() <<" e = "<< particle->ekin() << " mass = " << particle->mass());
   }
 
-  return m_isfpCont;
+  return isfpCont.release();
 }
 
 /*=========================================================================
  *  DESCRIPTION OF FUNCTION:
  *  ==> see headerfile
  *=======================================================================*/
-int ISF::PunchThroughTool::getAllParticles(CLHEP::HepRandomEngine* rndmEngine, int pdg, int numParticles) const
+int ISF::PunchThroughTool::getAllParticles(const ISF::ISFParticle &isfp, ISFParticleVector& isfpCont, CLHEP::HepRandomEngine* rndmEngine, int pdg, int numParticles) const
 {
-  // first check if the ISF particle vector already exists
-  if (!m_isfpCont)    m_isfpCont = new ISFParticleVector();
+
+  const double initEnergy = std::sqrt( isfp.momentum().mag2() + isfp.mass()*isfp.mass() );
 
   // get the current particle
-  PunchThroughParticle *p = m_particles[pdg];
+  PunchThroughParticle *p = m_particles.at(pdg);
 
   // if no number of particles (=-1) was handed over as an argument
   //  -> get the number of particles from the pdf
@@ -472,8 +445,8 @@ int ISF::PunchThroughTool::getAllParticles(CLHEP::HepRandomEngine* rndmEngine, i
     {
       // prepare the function arguments for the PDFcreator class
       std::vector<double> parameters;
-      parameters.push_back( m_initEnergy );
-      parameters.push_back( std::fabs(m_initEta) );
+      parameters.push_back( initEnergy );
+      parameters.push_back( std::fabs(isfp.position().eta()) );
       // the maximum number of particles which should be produced
       // if no maximum number is given, this is -1
       int maxParticles = p->getMaxNumParticles();
@@ -493,14 +466,14 @@ int ISF::PunchThroughTool::getAllParticles(CLHEP::HepRandomEngine* rndmEngine, i
   ATH_MSG_VERBOSE("[ punchthrough ] adding " << numParticles << " punch-through particles with pdg " << pdg);
 
   // now create the exact number of particles which was just computed before
-  double energyRest = m_initEnergy;
+  double energyRest = initEnergy;
   double minEnergy = p->getMinEnergy();
   int numCreated = 0;
 
   for ( numCreated = 0; (numCreated < numParticles) && (energyRest > minEnergy); numCreated++ )
     {
       // create one particle which fullfills the right energy distribution
-      ISF::ISFParticle *par = getOneParticle(pdg, energyRest, rndmEngine);
+      ISF::ISFParticle *par = getOneParticle(isfp, pdg, energyRest, rndmEngine);
 
       // if something went wrong
       if (!par)
@@ -518,7 +491,7 @@ int ISF::PunchThroughTool::getAllParticles(CLHEP::HepRandomEngine* rndmEngine, i
       energyRest -= curEnergy;
 
       // add this ISFparticle to the vector
-      m_isfpCont->push_back( par );
+      isfpCont.push_back( par );
     }
 
   // the number of particles which was created is numCreated
@@ -530,19 +503,21 @@ int ISF::PunchThroughTool::getAllParticles(CLHEP::HepRandomEngine* rndmEngine, i
  *  ==> see headerfile
  *=======================================================================*/
 
-int ISF::PunchThroughTool::getCorrelatedParticles(int pdg, int corrParticles, CLHEP::HepRandomEngine* rndmEngine) const
+int ISF::PunchThroughTool::getCorrelatedParticles(const ISF::ISFParticle &isfp, ISFParticleVector& isfpCont, int pdg, int corrParticles, CLHEP::HepRandomEngine* rndmEngine) const
 {
   // get the PunchThroughParticle class
-  PunchThroughParticle *p = m_particles[pdg];
+  PunchThroughParticle *p = m_particles.at(pdg);
+
+  const double initEnergy = std::sqrt( isfp.momentum().mag2() + isfp.mass()*isfp.mass() );
 
   // (1.) decide if we do correlation or not
   double rand = CLHEP::RandFlat::shoot(rndmEngine)
     *(p->getFullCorrelationEnergy()-p->getMinCorrelationEnergy())
     + p->getMinCorrelationEnergy();
-  if ( m_initEnergy < rand )
+  if ( initEnergy < rand )
     {
       // here we do not do correlation
-      return getAllParticles(rndmEngine, pdg);
+      return getAllParticles(isfp, isfpCont, rndmEngine, pdg);
     }
 
   // (2.) if this point is reached, we do correlation
@@ -551,7 +526,7 @@ int ISF::PunchThroughTool::getCorrelatedParticles(int pdg, int corrParticles, CL
   TH2F *hist2d = 0;
   // compute the center values of the lowE and highE
   // correlation histogram domains
-  if ( m_initEnergy <  histDomains[1])
+  if ( initEnergy <  histDomains[1])
     {
       // initial energy lower than border between lowEnergy and highEnergy histogram domain
       //  --> choose lowEnergy correlation histogram
@@ -561,7 +536,7 @@ int ISF::PunchThroughTool::getCorrelatedParticles(int pdg, int corrParticles, CL
     {
       double rand = CLHEP::RandFlat::shoot(rndmEngine)*(histDomains[2]-histDomains[1])
         + histDomains[1];
-      hist2d = ( m_initEnergy < rand) ? p->getCorrelationLowEHist()
+      hist2d = ( initEnergy < rand) ? p->getCorrelationLowEHist()
         : p->getCorrelationHighEHist();
     }
 
@@ -594,7 +569,7 @@ int ISF::PunchThroughTool::getCorrelatedParticles(int pdg, int corrParticles, CL
   while ( (maxParticles >= 0.) && (numParticles > maxParticles) );
 
   // finally create this exact number of particles
-  return getAllParticles(rndmEngine, pdg, numParticles);
+  return getAllParticles(isfp, isfpCont, rndmEngine, pdg, numParticles);
 }
 
 /*=========================================================================
@@ -602,10 +577,10 @@ int ISF::PunchThroughTool::getCorrelatedParticles(int pdg, int corrParticles, CL
  *  ==> see headerfile
  *=======================================================================*/
 
-ISF::ISFParticle *ISF::PunchThroughTool::getOneParticle(int pdg, double maxEnergy, CLHEP::HepRandomEngine* rndmEngine) const
+ISF::ISFParticle *ISF::PunchThroughTool::getOneParticle(const ISF::ISFParticle &isfp, int pdg, double maxEnergy, CLHEP::HepRandomEngine* rndmEngine) const
 {
   // get a local copy of the needed punch-through particle class
-  PunchThroughParticle *p = m_particles[pdg];
+  PunchThroughParticle *p = m_particles.at(pdg);
 
   // (1.) decide if we create a particle or an anti-particle
   int anti = 1;
@@ -620,8 +595,8 @@ ISF::ISFParticle *ISF::PunchThroughTool::getOneParticle(int pdg, double maxEnerg
   // (2.) get the right punch-through distributions
   // prepare the function arguments for the PDFcreator class
   std::vector<double> parInitEnergyEta;
-  parInitEnergyEta.push_back( m_initEnergy );
-  parInitEnergyEta.push_back( std::fabs(m_initEta) );
+  parInitEnergyEta.push_back( std::sqrt( isfp.momentum().mag2() + isfp.mass()*isfp.mass() ) );
+  parInitEnergyEta.push_back( std::fabs(isfp.position().eta()) );
 
   // (2.1) get the energy
   double energy = p->getExitEnergyPDF()->getRand( rndmEngine,
@@ -640,7 +615,7 @@ ISF::ISFParticle *ISF::PunchThroughTool::getOneParticle(int pdg, double maxEnerg
       deltaTheta *=  ( CLHEP::RandFlat::shoot(rndmEngine) > 0.5 ) ? 1. : -1.;
       // calculate the exact theta value of the later created
       // punch-through particle
-      theta = m_initTheta + deltaTheta*p->getPosAngleFactor();
+      theta = isfp.position().theta() + deltaTheta*p->getPosAngleFactor();
 
     }
   while ( (theta > M_PI) || (theta < 0.) );
@@ -651,7 +626,7 @@ ISF::ISFParticle *ISF::PunchThroughTool::getOneParticle(int pdg, double maxEnerg
   deltaPhi *=  ( CLHEP::RandFlat::shoot(rndmEngine) > 0.5 ) ? 1. : -1.;
 
   // keep phi within range [-PI,PI]
-  double phi = m_initPhi + deltaPhi*p->getPosAngleFactor();
+  double phi = isfp.position().phi() + deltaPhi*p->getPosAngleFactor();
   while ( std::fabs(phi) > 2*M_PI) phi /= 2.;
   while (phi >  M_PI) phi -= 2*M_PI;
   while (phi < -M_PI) phi += 2*M_PI;
@@ -687,16 +662,12 @@ ISF::ISFParticle *ISF::PunchThroughTool::getOneParticle(int pdg, double maxEnerg
   while (momPhi >  M_PI) momPhi -= 2*M_PI;
   while (momPhi < -M_PI) momPhi += 2*M_PI;
 
-  //assign barcodes to the produced particles
-  m_processCode = 0;
-  m_secBC = m_barcodeSvc->newSecondary( m_primBC, m_processCode);
-
   // (**) finally create the punch-through particle as a ISFParticle
 
   ATH_MSG_DEBUG("createExitPs input parameters: doAnti? = "<< pdg*anti <<" energy = "<< energy <<" theta = "<< theta <<" phi = "<< phi <<" momTheta = "<< momTheta << " momPhi " << momPhi );
 
 
-  ISF::ISFParticle *par = createExitPs( pdg*anti, energy, theta, phi, momTheta, momPhi);
+  ISF::ISFParticle *par = createExitPs( isfp, pdg*anti, energy, theta, phi, momTheta, momPhi);
 
   return par;
 }
@@ -932,7 +903,7 @@ std::unique_ptr<ISF::PDFcreator> ISF::PunchThroughTool::readLookuptablePDF(int p
  *  ==> see headerfile
  *=========================================================================*/
 
-ISF::ISFParticle* ISF::PunchThroughTool::createExitPs( int pdg,
+ISF::ISFParticle* ISF::PunchThroughTool::createExitPs( const ISF::ISFParticle &isfp, int pdg,
                                                        double energy, double theta, double phi,double momTheta, double momPhi) const
 {
   // the intersection point with Calo-MS surface
@@ -957,7 +928,11 @@ ISF::ISFParticle* ISF::PunchThroughTool::createExitPs( int pdg,
 
   const double pTime = 0;  /** @TODO: fix */
 
-  ISF::ISFParticle* finalPar = new ISF::ISFParticle (pos, mom, mass, charge, pdg, pTime, *m_initPs, m_secBC);
+  //assign barcodes to the produced particles
+  Barcode::PhysicsProcessCode processCode{0};
+  const Barcode::ParticleBarcode secBC = m_barcodeSvc->newSecondary( isfp.barcode(), processCode);
+
+  ISF::ISFParticle* finalPar = new ISF::ISFParticle (pos, mom, mass, charge, pdg, pTime, isfp, secBC);
   finalPar->setNextGeoID( AtlasDetDescr::fAtlasMS);
 
   // return the punch-through particle
