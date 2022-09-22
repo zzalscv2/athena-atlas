@@ -1,10 +1,8 @@
 // This file's extension implies that it's C, but it's really -*- C++ -*-.
 
 /*
-  Copyright (C) 2002-2017 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
 */
-
-// $Id$
 /**
  * @file AthContainers/tests/DVLIterator.h
  * @author scott snyder <snyder@bnl.gov>
@@ -20,6 +18,7 @@
 #include "AthContainers/OwnershipPolicy.h"
 #include "AthContainers/tools/DVLCast.h"
 #include "AthContainers/tools/ElementProxy.h"
+#include "CxxUtils/checker_macros.h"
 #include <boost/iterator/iterator_adaptor.hpp>
 #include <boost/version.hpp>
 #include <iterator>
@@ -232,7 +231,8 @@ public:
    */
   ElementProxy operator[] (int n) const
   {
-    return ElementProxy (this->base()+n, m_container);
+    DVL* container ATLAS_THREAD_SAFE = m_container;
+    return ElementProxy (this->base()+n, container);
   }
 
 
@@ -312,7 +312,10 @@ public:
   operator- (const iterator& i) const
   { return this->base() - i.base(); }
   iterator operator- (typename iterator_adaptor_::difference_type i) const
-  { return iterator (this->base() - i, m_container); }
+  {
+    DVL* container ATLAS_THREAD_SAFE = m_container;
+    return iterator (this->base() - i, container);
+  }
   typename iterator_adaptor_::difference_type
   operator- (const const_iterator& i) const
   { return static_cast<const_iterator>(*this) - i; }
@@ -331,7 +334,8 @@ private:
    */
   ElementProxy dereference() const
   {
-    return ElementProxy (this->base(), m_container);
+    DVL* container ATLAS_THREAD_SAFE = m_container;
+    return ElementProxy (this->base(), container);
   }
 
 
