@@ -52,7 +52,7 @@ StatusCode MuonHitTestToolBase::executeCheckEventInfo()
   // *AS* Why this (double) loop, if only the last entry is preserved?
   //    changed it to take the gen particle
   DataVector<HepMC::GenEvent>::const_iterator e;
-  for (e=mcEvent->begin();e!=mcEvent->end(); e++) {
+  for (e=mcEvent->begin();e!=mcEvent->end(); ++e) {
     for (auto p: (**e)) {
       if ( HepMC::barcode(p)<200000) {
         Amg::Vector3D temp_momentum(p->momentum().px(),

@@ -13,15 +13,9 @@
 #include "G4AtlasTests/ISimTestTool.h"
 
 #include "SimTestHisto.h"
-#include "AthenaKernel/errorcheck.h"
-#include "GaudiKernel/ITHistSvc.h"
-
 
 #include "AtlasHepMC/GenParticle_fwd.h"
 
-class TProfile;
-class TH1;
-class TH2;
 
 class SimTestToolBase : public SimTestHisto, public extends<AthAlgTool, ISimTestTool> {
 public:
@@ -35,9 +29,6 @@ public:
 
  protected:
   HepMC::ConstGenParticlePtr   getPrimary();
-
-  // general prefix (e.g. "/truth/")
-  std::string m_path;
 
   /// The MC truth key
   std::string m_key;

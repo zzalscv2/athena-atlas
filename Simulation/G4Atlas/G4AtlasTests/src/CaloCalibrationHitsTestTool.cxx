@@ -75,7 +75,7 @@ StatusCode CaloCalibrationHitsTestTool::processEvent(){
 
   const CaloCalibrationHitContainer* iter;
   CHECK(evtStore()->retrieve(iter,m_hitcollkey));
-  for(hit=(*iter).begin(); hit != (*iter).end(); hit++){
+  for(hit=(*iter).begin(); hit != (*iter).end(); ++hit){
 
     GeoCaloCalibHit geoHit(**hit, m_hitcollkey, m_caloMgr);
     if (!geoHit) continue;

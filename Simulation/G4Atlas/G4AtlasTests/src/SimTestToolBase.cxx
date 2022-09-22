@@ -21,7 +21,7 @@ HepMC::ConstGenParticlePtr   SimTestToolBase::getPrimary()
   const McEventCollection* mcCollection;
   if (evtStore()->retrieve(mcCollection,m_key).isSuccess()) {
     DataVector<HepMC::GenEvent>::const_iterator e;
-    for (e=mcCollection->begin();e!=mcCollection->end(); e++) {
+    for (e=mcCollection->begin();e!=mcCollection->end(); ++e) {
       for (auto p : (**e)) {
 	if ( HepMC::barcode(p)<200000 ) {
 	  return p;

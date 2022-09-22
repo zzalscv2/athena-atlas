@@ -18,14 +18,6 @@
 #include "CaloSimEvent/CaloCalibrationHit.h"
 #include "CaloSimEvent/CaloCalibrationHitContainer.h"
 
-#include "CLHEP/Units/SystemOfUnits.h"
-
-#include <iterator>
-#include <sstream>
-#include <set>
-
-#include <math.h>
-
 
 //###############################################################################
 
@@ -76,7 +68,7 @@ StatusCode CalibHitValidate::execute()
   // calibration hit containers
   const CaloCalibrationHitContainer* cchc;
   std::vector<const CaloCalibrationHitContainer *> v_cchc;
-  for (containerNameIter=m_CalibrationHitContainerNames.begin();containerNameIter!=m_CalibrationHitContainerNames.end();containerNameIter++) {
+  for (containerNameIter=m_CalibrationHitContainerNames.begin();containerNameIter!=m_CalibrationHitContainerNames.end();++containerNameIter) {
 
 
     double totEnergy=0.;
@@ -92,7 +84,7 @@ StatusCode CalibHitValidate::execute()
       CaloCalibrationHitContainer::const_iterator chIter  = cchc->begin();
       CaloCalibrationHitContainer::const_iterator chIterE = cchc->end();
 
-      for(;chIter!=chIterE;chIter++)
+      for(;chIter!=chIterE;++chIter)
         totEnergy+=(*chIter)->energyTotal();
     }
 
@@ -108,7 +100,7 @@ StatusCode CalibHitValidate::execute()
   std::vector<double> hitEnergiesDM;
 
   std::vector<const CaloCalibrationHitContainer *> v_dmcchc;
-  for (containerNameIter=m_DMCalibrationHitContainerNames.begin();containerNameIter!=m_DMCalibrationHitContainerNames.end();containerNameIter++) {
+  for (containerNameIter=m_DMCalibrationHitContainerNames.begin();containerNameIter!=m_DMCalibrationHitContainerNames.end();++containerNameIter) {
 
 
     double totEnergy=0.;
@@ -123,7 +115,7 @@ StatusCode CalibHitValidate::execute()
       CaloCalibrationHitContainer::const_iterator chIter  = cchc->begin();
       CaloCalibrationHitContainer::const_iterator chIterE = cchc->end();
 
-      for(;chIter!=chIterE;chIter++)
+      for(;chIter!=chIterE;++chIter)
         totEnergy+=(*chIter)->energyTotal();
     }
 
