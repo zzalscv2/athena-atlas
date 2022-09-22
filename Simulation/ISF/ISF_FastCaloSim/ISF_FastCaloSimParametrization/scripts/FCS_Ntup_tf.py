@@ -42,6 +42,7 @@ def getTransform():
                                    inData = ['ESD'], outData = ['NTUP_FCS'],))
     trf = transform(executor = executorSet, description = 'FastCaloSim V2 Parametrization ntuple transform. Inputs must be ESD. Outputs must be ntuple files.')
     addAthenaArguments(trf.parser)
+    addDetectorArguments(trf.parser)
     addFCS_NtupArgs(trf.parser)
     return trf
 
