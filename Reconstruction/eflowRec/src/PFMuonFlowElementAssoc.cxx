@@ -159,22 +159,21 @@ StatusCode PFMuonFlowElementAssoc::execute(const EventContext& ctx) const {
         for (const xAOD::FlowElement* FE : *NeutralFEmuonWriteDecorHandle) {
             int nMatchedFE = 0;
             // get the index of the cluster corresponding to the Neutral FlowElements
-            size_t FEclusterindex = FE->otherObjects().at(0)->index();
+            ATH_MSG_DEBUG("P1");
+            const xAOD::IParticle* otherObject = FE->otherObjects().at(0);
+            //This is expected to happen for low energy FE - sometimes the linked cluster has E < 0 and 
+            //is thinned away in the AOD
+            if (!otherObject){
+                ATH_MSG_DEBUG("No linked cluster for Neutral FE with E, eta and phi" << FE->e() << ", " << FE->eta() << " and " << FE->phi());
+                continue;
+            }
+            size_t FEclusterindex = otherObject->index();
 
             // FE->otherObjects returns a vector of IParticles. We only want the first one
             const xAOD::IParticle* FE_Iparticle = FE->otherObjects().at(0);
-            // dynamic cast to CaloCluster
-            const xAOD::CaloCluster* FE_cluster = dynamic_cast<const xAOD::CaloCluster*>(FE_Iparticle);  // cast to CaloCluster
 
-            // retrieve the link to cells
-            const CaloClusterCellLink* CellLink = FE_cluster->getCellLinks();
-            // build the iterator(s) for the looping over the elements inside the CellLink
-            if (!CellLink && !m_UseMuonTopoClusters) {  // safety check if no celll link and we're doing the cell based matching only
-                ATH_MSG_WARNING("Flow Element cluster link is nullptr");
-                continue;
-            }
-            CaloClusterCellLink::const_iterator FE_FirstCell = CellLink->begin();
-            CaloClusterCellLink::const_iterator FE_LastCell = CellLink->end();
+            // dynamic cast to CaloCluster
+            const xAOD::CaloCluster* FE_cluster = dynamic_cast<const xAOD::CaloCluster*>(FE_Iparticle);  // cast to CaloCluster            
 
             // debug for Negative energy cluster
 
@@ -198,8 +197,10 @@ StatusCode PFMuonFlowElementAssoc::execute(const EventContext& ctx) const {
                     // get the linker to the topo clusters
                     const std::vector<ElementLink<xAOD::CaloClusterContainer>>& linksToTopoClusters = acc_constClusterLinks(*cluster);
                     for (const ElementLink<xAOD::CaloClusterContainer>& TopoClusterLink : linksToTopoClusters) {
+                         //This is expected to happen for low energy cluster - sometimes the linked cluster has E < 0 and 
+                        //is thinned away in the AOD
                         if (!TopoClusterLink.isValid()) {
-                            ATH_MSG_WARNING("Muon Calo cluster's TopoCluster link not found, skip");
+                            ATH_MSG_DEBUG("Muon Calo cluster's TopoCluster link not found, skip");
                             continue;
                         }
                         const xAOD::CaloCluster* MuonTopoCluster = *TopoClusterLink;  // de-ref the link to get the topo-cluster
@@ -209,7 +210,7 @@ StatusCode PFMuonFlowElementAssoc::execute(const EventContext& ctx) const {
                             // index() is the unique index of the muon in the muon container
                             FEMuonLinks.emplace_back(*muonReadHandle, muon->index());
                             // index() is the unique index of the cFlowElement in the cFlowElementcontaine
-                            muonNeutralFEVec.at(muon->index()).push_back(FlowElementLink_t(*NeutralFEReadHandle, FE->index()));
+                            muonNeutralFEVec.at(muon->index()).push_back(FlowElementLink_t(*NeutralFEReadHandle, FE->index()));            
                             ATH_MSG_VERBOSE("Got a match between NFE and Muon");
                             nMatchedFE++;  // count number of matches between FE and muons
                             if (neg_E_cluster) ATH_MSG_ERROR("Muon cluster matched to negative E topocluster from FE");
@@ -220,6 +221,17 @@ StatusCode PFMuonFlowElementAssoc::execute(const EventContext& ctx) const {
                     // if we don't match topoclusters, do something more complex:
                     // Retrieve cells in both the FE cluster and muon cluster
                     // Define the link as where at least one calo cell is shared between the FE cluster and the Muon Cluster
+
+                    // retrieve the link to cells
+                    const CaloClusterCellLink* CellLink = FE_cluster->getCellLinks();
+                    // build the iterator(s) for the looping over the elements inside the CellLink
+                    if (!CellLink && !m_UseMuonTopoClusters) {  // safety check if no celll link and we're doing the cell based matching only
+                       ATH_MSG_WARNING("Flow Element cluster link is nullptr");
+                        continue;
+                    }
+
+                    CaloClusterCellLink::const_iterator FE_FirstCell = CellLink->begin();
+                    CaloClusterCellLink::const_iterator FE_LastCell = CellLink->end();
 
                     // retrieve cells associated to Muon cluster
                     const CaloClusterCellLink* Muon_Clus_CellLink = cluster->getCellLinks();
@@ -283,7 +295,6 @@ StatusCode PFMuonFlowElementAssoc::execute(const EventContext& ctx) const {
                     }
 
                 }  // end of calocluster specific block
-
                 // loop over caloclusters
             }  // loop over muons
             NeutralFEmuon_nMatches_WriteDecorHandle(*FE) = nMatchedFE;

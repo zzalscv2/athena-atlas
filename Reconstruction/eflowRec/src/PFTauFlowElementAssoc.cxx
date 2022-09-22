@@ -77,8 +77,9 @@ StatusCode PFTauFlowElementAssoc::execute(const EventContext &ctx) const {
 
     // Loop over the taus
     for (const xAOD::TauJet* tau : *tauNeutralFEWriteDecorHandle) {
-      // Skip taus that won't be written to AOD
-      if(!acc_passThinning(*tau)) continue;
+      // Skip taus that won't be written to AOD - first check the variable exists
+      // because older ESD and any AOD used as input do not have this variable.
+      if(acc_passThinning.isAvailable(*tau) && !acc_passThinning(*tau)) continue;
       // Get tau vertex
       const xAOD::Vertex* tauVertex = tau->vertex();
       // Get the clusters associated to the tau
@@ -125,7 +126,9 @@ StatusCode PFTauFlowElementAssoc::execute(const EventContext &ctx) const {
 
     // Loop over the taus
     for (const xAOD::TauJet* tau : *tauChargedFEWriteDecorHandle) {
-      if(!acc_passThinning(*tau)) continue;
+      // Skip taus that won't be written to AOD - first check the variable exists                                                                                                                                                                                              
+      // because older ESD and any AOD used as input do not have this variable. 
+      if(acc_passThinning.isAvailable(*tau) && !acc_passThinning(*tau)) continue;
       // Get tau tracks associated to the tau
       std::vector<const xAOD::TauTrack*> tauTracks = tau->tracks();
       for (const auto *tauTrack : tauTracks) {
