@@ -32,6 +32,7 @@ namespace FlavorTagDiscriminants {
     std::string m_flipTagConfig;
     std::string m_trackAssociator;
     std::unique_ptr<BTagJetAugmenter> m_aug; //!
+    bool m_useIpxd;
   };
 
 }

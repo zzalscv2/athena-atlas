@@ -10,17 +10,20 @@ namespace FlavorTagDiscriminants {
   BTagAugmenterTool::BTagAugmenterTool(const std::string& name):
     asg::AsgTool(name),
     m_flipTagConfig("STANDARD"),
-    m_aug(nullptr)
+    m_aug(nullptr),
+    m_useIpxd(false)
   {
     declareProperty("flipTagConfig", m_flipTagConfig);
     declareProperty("trackAssociator", m_trackAssociator);
+    declareProperty("useIpxd", m_useIpxd);
   }
   BTagAugmenterTool::~BTagAugmenterTool() {}
 
   StatusCode BTagAugmenterTool::initialize() {
     m_aug.reset(
       new BTagJetAugmenter(m_trackAssociator,
-        flipTagConfigFromString(m_flipTagConfig)));
+                           flipTagConfigFromString(m_flipTagConfig),
+                           m_useIpxd));
     return StatusCode::SUCCESS;
   }
 

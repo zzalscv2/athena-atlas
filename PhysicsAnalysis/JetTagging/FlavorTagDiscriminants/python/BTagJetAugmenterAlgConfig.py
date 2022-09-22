@@ -9,10 +9,13 @@ def BTagJetAugmenterAlgCfg(ConfigFlags, BTagCollection, Associator,  TrackCollec
     flip_config = 'FLIP_SIGN' if doFlipTagger else 'STANDARD'
     name+=("_"+flip_config)
 
+    useIpxd = bool({'IP3D','IP2D'} & set(ConfigFlags.BTagging.taggerList))
+
     btagAug = CompFactory.FlavorTagDiscriminants.BTagAugmenterTool(
         name=name,
         flipTagConfig=flip_config,
         trackAssociator=Associator,
+        useIpxd=useIpxd,
     )
 
     decorAlg = CompFactory.FlavorTagDiscriminants.BTagDecoratorAlg(

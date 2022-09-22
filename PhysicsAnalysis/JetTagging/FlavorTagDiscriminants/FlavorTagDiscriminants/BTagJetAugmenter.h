@@ -17,7 +17,8 @@ class BTagJetAugmenter
 public:
   typedef FlavorTagDiscriminants::FlipTagConfig FlipTagConfig;
   BTagJetAugmenter(std::string associator = "BTagTrackToJetAssociator",
-                   FlipTagConfig flip = FlipTagConfig::STANDARD);
+                   FlipTagConfig flip = FlipTagConfig::STANDARD,
+                   bool useIpxd = false);
   ~BTagJetAugmenter();
   BTagJetAugmenter(BTagJetAugmenter&&);
   void augmentJfDr(const xAOD::BTagging &btag) const;
@@ -101,6 +102,7 @@ private:
   AE::Decorator<float> m_avg_trk_flightDirRelEta;
 
   FlipTagConfig m_flipConfig;
+  bool m_useIpxd;
 
 };
 
