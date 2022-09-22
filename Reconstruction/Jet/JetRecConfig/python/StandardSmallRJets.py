@@ -97,7 +97,8 @@ AntiKt4EMTopo = JetDefinition("AntiKt",0.4,cst.EMTopoOrigin,
 )
 
 # *********************************************************
-# EMPFlow CSSK jets
+# EMPFlow CSSK jets  (no jet calibration available yet,
+# thus applying only low pT filter)
 # *********************************************************
 AntiKt4EMPFlowCSSK = JetDefinition("AntiKt",0.4,cst.GPFlowCSSK,
                                    ghostdefs = standardghosts+flavourghosts,
@@ -107,7 +108,8 @@ AntiKt4EMPFlowCSSK = JetDefinition("AntiKt",0.4,cst.GPFlowCSSK,
 )
 
 # *********************************************************
-# UFO CSSK jets
+# UFO CSSK jets (no jet calibration available yet,
+# thus applying only low pT filter)
 # *********************************************************
 AntiKt4UFOCSSK = JetDefinition("AntiKt",0.4,cst.UFOCSSK,
                                ghostdefs = standardghosts+flavourghosts,
@@ -119,6 +121,22 @@ AntiKt4UFOCSSK = JetDefinition("AntiKt",0.4,cst.UFOCSSK,
 # *********************************************************
 # Low and no pT cut containers used in JETMX derivations
 # *********************************************************
+AntiKt4UFOCSSKNoPtCut = JetDefinition("AntiKt",0.4,cst.UFOCSSK,
+                                      infix = "NoPtCut",
+                                      ghostdefs = standardghosts+flavourghosts,
+                                      modifiers = ("ConstitFourMom","Sort","Filter:1","JetPtAssociation","Width","TrackMoments","TrackSumMoments","JVF","JVT","Charge",)+truthmods,
+                                      ptmin = 1,
+                                      lock = True
+)
+
+AntiKt4EMPFlowCSSKNoPtCut = JetDefinition("AntiKt",0.4,cst.GPFlowCSSK,
+                                          infix = "NoPtCut",
+                                          ghostdefs = standardghosts+flavourghosts,
+                                          modifiers = ("ConstitFourMom","CaloEnergies","Sort","Filter:1","JetPtAssociation")+truthmods+standardmods,
+                                          ptmin = 1,
+                                          lock = True
+)
+
 AntiKt4EMPFlowNoPtCut = JetDefinition("AntiKt",0.4,cst.GPFlow,
                                       infix = "NoPtCut",
                                       ghostdefs = standardghosts+flavourghosts,

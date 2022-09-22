@@ -8,7 +8,7 @@ from DerivationFrameworkCore.DerivationFrameworkMaster import DerivationFramewor
 
 from DerivationFrameworkPhys import PhysCommon
 
-from JetRecConfig.StandardSmallRJets import AntiKt4PV0Track, AntiKt4EMPFlow, AntiKt4EMPFlowNoPtCut, AntiKt4EMTopoLowPt, AntiKt4EMPFlowCSSK, AntiKt4UFOCSSK
+from JetRecConfig.StandardSmallRJets import AntiKt4PV0Track, AntiKt4EMPFlow, AntiKt4EMPFlowNoPtCut, AntiKt4EMTopoLowPt, AntiKt4EMPFlowCSSKNoPtCut, AntiKt4UFOCSSKNoPtCut
 
 from DerivationFrameworkJetEtMiss.JetCommon import addJetOutputs, addDAODJets, OutputJets
 
@@ -250,23 +250,32 @@ if DerivationFrameworkIsMonteCarlo:
 #=======================================
 # CSSK R = 0.4 EMPFlow and UFO jets
 #=======================================
-jetList += [AntiKt4EMPFlowCSSK, AntiKt4UFOCSSK]
+jetList += [AntiKt4EMPFlowCSSKNoPtCut, AntiKt4UFOCSSKNoPtCut]
 
 addDAODJets(jetList,DerivationFrameworkJob)
 
 #======================================= 
 # UFO CSSK event shape
 #======================================= 
+from JetRecConfig.JetRecConfig import getConstitPJGAlg
 from JetRecConfig.StandardJetConstits import stdConstitDic as cst
 from JetRecConfig.JetInputConfig import buildEventShapeAlg
 from AthenaConfiguration.ComponentAccumulator import conf2toConfigurable
 
 #Need to add non-standard jets explicitly
-OutputJets["JETM1"] = ["AntiKt4PV0TrackJets","AntiKt4EMPFlowCSSKJets","AntiKt4UFOCSSKJets","AntiKt4EMPFlowNoPtCutJets","AntiKt4EMTopoLowPtJets"]
+OutputJets["JETM1"] = ["AntiKt4PV0TrackJets","AntiKt4EMPFlowCSSKNoPtCutJets","AntiKt4UFOCSSKNoPtCutJets","AntiKt4EMPFlowNoPtCutJets","AntiKt4EMTopoLowPtJets"]
 
 eventshapealg = buildEventShapeAlg(cst.UFOCSSK,'')
 if not hasattr(DerivationFrameworkJob, eventshapealg.getName()):
   DerivationFrameworkJob += conf2toConfigurable(eventshapealg)
+
+pjgufoccskneut = getConstitPJGAlg(cst.UFOCSSK, suffix='Neut')
+if not hasattr(DerivationFrameworkJob, pjgufoccskneut.getName()):
+  DerivationFrameworkJob += conf2toConfigurable(pjgufoccskneut)
+
+eventshapeneutalg = buildEventShapeAlg(cst.UFOCSSK, '', suffix = 'Neut')
+if not hasattr(DerivationFrameworkJob, eventshapeneutalg.getName()):
+  DerivationFrameworkJob += conf2toConfigurable(eventshapeneutalg)
 
 #=======================================
 # More detailed truth information
@@ -302,12 +311,13 @@ JETM1SlimmingHelper.ExtraVariables  = ["AntiKt4EMTopoJets.DFCommonJets_QGTagger_
                                        "TruthVertices.barcode.z"]
 
 JETM1SlimmingHelper.AllVariables = [ "MuonSegments", "EventInfo",
-                                     "Kt4EMTopoOriginEventShape","Kt4EMPFlowEventShape","Kt4EMPFlowPUSBEventShape","Kt4EMPFlowNeutEventShape","Kt4UFOCSSKEventShape",
+                                     "Kt4EMTopoOriginEventShape","Kt4EMPFlowEventShape","Kt4EMPFlowPUSBEventShape","Kt4EMPFlowNeutEventShape","Kt4UFOCSSKEventShape","Kt4UFOCSSKNeutEventShape",
                                      "CaloCalFwdTopoTowers"]
-
 
 JETM1SlimmingHelper.AppendToDictionary['Kt4UFOCSSKEventShape'] = 'xAOD::EventShape'
 JETM1SlimmingHelper.AppendToDictionary['Kt4UFOCSSKEventShapeAux'] = 'xAOD::EventShapeAuxInfo'
+JETM1SlimmingHelper.AppendToDictionary['Kt4UFOCSSKNeutEventShape'] = 'xAOD::EventShape'
+JETM1SlimmingHelper.AppendToDictionary['Kt4UFOCSSKNeutEventShapeAux'] = 'xAOD::EventShapeAuxInfo'
 
 if DerivationFrameworkIsMonteCarlo:
     JETM1SlimmingHelper.AppendToDictionary['TruthTopQuarkWithDecayParticles'] = 'xAOD::TruthParticleContainer'

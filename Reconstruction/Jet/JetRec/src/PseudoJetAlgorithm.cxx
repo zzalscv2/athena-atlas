@@ -23,7 +23,8 @@ StatusCode PseudoJetAlgorithm::initialize() {
   // in order to change the cluster signal state.
   if ( m_label == "EMTopo") m_emtopo = true;
   // PFlow containers need to have PV matching applied
-  if ( std::string(m_label).find("PFlow") != std::string::npos ) m_pflow = true;
+  if ( std::string(m_label).find("PFlow") != std::string::npos) m_pflow = true;
+  if ( std::string(m_label).find("UFO") != std::string::npos) m_ufo = true;
 
   // "Ghost" in output collection name? If so is a ghost collection.
   m_isGhost = (m_outcoll.key()).find("Ghost") != std::string::npos;
@@ -93,7 +94,7 @@ std::unique_ptr<PseudoJetContainer> PseudoJetAlgorithm::createPJContainer(const 
 std::vector<fastjet::PseudoJet> 
 PseudoJetAlgorithm::createPseudoJets(const xAOD::IParticleContainer& ips) const{
 #ifndef GENERATIONBASE
-  if (m_pflow) {return PseudoJetGetter::PFlowsToPJs(ips,m_skipNegativeEnergy.value(),m_useCharged.value(),m_useNeutral.value(),m_useChargedPV.value(),m_useChargedPUsideband.value());}
+  if (m_pflow || m_ufo) {return PseudoJetGetter::PFlowsToPJs(ips,m_skipNegativeEnergy.value(),m_useCharged.value(),m_useNeutral.value(),m_useChargedPV.value(),m_useChargedPUsideband.value(),m_ufo);}
   if (m_emtopo) {return PseudoJetGetter::EMToposToPJs(ips,m_skipNegativeEnergy.value());}
 #endif
   return PseudoJetGetter::IParticlesToPJs(ips,m_skipNegativeEnergy.value());
@@ -112,6 +113,7 @@ void PseudoJetAlgorithm::print() const {
   ATH_MSG_INFO("   Skip negative E: " << sskip);
   ATH_MSG_INFO("         Is EMTopo: " << m_emtopo);
   ATH_MSG_INFO("          Is PFlow: " << m_pflow);
+  ATH_MSG_INFO("            Is UFO: " << m_ufo);
   ATH_MSG_INFO("          Is ghost: " << m_isGhost);
   ATH_MSG_INFO(" Treat negative E as ghost: " << m_negEnergyAsGhosts.value());
   if(m_pflow){
@@ -119,6 +121,10 @@ void PseudoJetAlgorithm::print() const {
     ATH_MSG_INFO("   Use neutral FEs: " << m_useNeutral.value());
     ATH_MSG_INFO("Use charged PV FEs: " << m_useChargedPV.value());
     ATH_MSG_INFO("   PU sideband def: " << m_useChargedPUsideband.value());
+  }
+  if(m_ufo){
+    ATH_MSG_INFO("   Use charged UFOs: " << m_useCharged.value());
+    ATH_MSG_INFO("   Use neutral UFOs: " << m_useNeutral.value());
   }
 }
 

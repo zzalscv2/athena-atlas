@@ -284,7 +284,7 @@ _stdSeqList = [
                        'JetETMissParticleFlowObjects', 'CSSKParticleFlowObjects', jetinputtype="EMPFlow"),
 
     JetInputConstitSeq("GPFlowCSSK", xAODType.FlowElement,["CorrectPFO",  "CS","SK", "CHS"] ,
-                       'GlobalParticleFlowObjects', 'CSSKGParticleFlowObjects', jetinputtype="EMPFlow"),
+                       'GlobalParticleFlowObjects', 'CSSKGParticleFlowObjects', jetinputtype="EMPFlow", label='EMPFlowCSSK'),
 
 
 
