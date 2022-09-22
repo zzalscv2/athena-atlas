@@ -24,6 +24,12 @@ namespace LVL1::jFEXBits {
     static constexpr uint32_t DATA_WORDS_PER_BLOCK = 8;
 
 
+/************     FPGA scheme     ************/
+    static constexpr uint32_t FPGA_U1 = 0;
+    static constexpr uint32_t FPGA_U2 = 1;
+    static constexpr uint32_t FPGA_U3 = 2;
+    static constexpr uint32_t FPGA_U4 = 3;
+
 /************     TOB,XTOB Counter Trailer     ************/
 
     ///Masking for TOB/xTOB Counter Trailer of jEM, jTau, jJ and jLJ

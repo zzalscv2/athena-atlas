@@ -19,6 +19,7 @@
 
 // Athena includes
 #include "AthenaBaseComps/AthAlgTool.h"
+#include "PathResolver/PathResolver.h"
 
 // Gaudi includes
 #include "Gaudi/Property.h"
@@ -51,6 +52,8 @@ class jFexInputByteStreamTool : public extends<AthAlgTool, IL1TriggerByteStreamT
         // ------------------------- Properties --------------------------------------
         // ROBIDs property required by the interface
         Gaudi::Property<std::vector<uint32_t>> m_robIds {this, "ROBIDs", {}, "List of ROB IDs required for conversion to/from xAOD RoI"};
+        // FiberMapping property required by the interface
+        Gaudi::Property<std::string> m_FiberMapping {this, "FiberMapping", PathResolver::find_calib_file("L1CaloFEXByteStream/2022-09-13/jFEX_fiber_mapping.txt").c_str(), "Text file to convert from hardware fiber to eta-phi location"};
 
          //Write handle keys for the L1Calo EDMs for BS->xAOD mode of operation
         SG::WriteHandleKey< xAOD::jFexTowerContainer> m_jTowersWriteKey   {this,"jTowersWriteKey"  ,"L1_jTowers","Write jFexEDM Trigger Tower container"};
@@ -63,6 +66,15 @@ class jFexInputByteStreamTool : public extends<AthAlgTool, IL1TriggerByteStreamT
         std::array<uint16_t,3> Dataformat1 (uint32_t ) const;
         std::array<uint16_t,4> Dataformat2 (uint32_t ) const;
         //bool m_verbose = 1;
+        
+        // Read Mapping file to link fibers to Simulation ID and Eta/Phi coordinates
+        StatusCode ReadfromFile(const std::string&);
+        
+        // hash the index into one integer in the format 0xJFCCT (hexadecimal)
+        constexpr unsigned int mapIndex(unsigned int jfex, unsigned int fpga, unsigned int channel, unsigned int tower) const;
+        std::unordered_map<unsigned int, std::array<float,4> > m_Firm2Tower_map; /// {map index, {IDsimulation,eta,phi}}
+        
+        
         
 };
 

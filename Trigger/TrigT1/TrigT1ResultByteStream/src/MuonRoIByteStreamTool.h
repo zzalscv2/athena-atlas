@@ -69,9 +69,13 @@ private:
   SG::WriteHandleKeyArray<LVL1::MuCTPIL1Topo> m_MuCTPIL1TopoKeys {
     this, "L1TopoOutputLocID", {},
     "Output keys for MuCTPItoL1Topo, one per time slice"};
+
   // ------------------------- Other properties --------------------------------
   Gaudi::Property<std::vector<uint32_t>> m_robIds {
     this, "ROBIDs", {}, "List of ROB IDs required for conversion to/from xAOD RoI"};
+  Gaudi::Property<bool> m_doTopo {
+    this, "DoTopo", false, "Enable decoding/encoding MUCTPI Topo TOBs"};
+
   const std::string m_barrelRoIFile            = "TrigConfMuctpi/Data_ROI_Mapping_Barrel_040422.txt";
   const std::string m_ecfRoIFile               = "TrigConfMuctpi/Data_RoI_Mapping_EF_040422.txt";
   const std::string m_side0LUTFile             = "TrigConfMuctpi/lookup_0_040422.json";
@@ -82,6 +86,18 @@ private:
   short int m_readoutWindow{-1};
   /// Muctpi Topo TOB word lookup table interface: hemi, detector, sector, roi(EC&FWD)/lut-numbers(Barrel) -> eta & phi coordinates - also L1Muon pT-Threshold mapping 
   LVL1MUCTPIPHASE1::L1TopoLUT m_l1topoLUT ;
+  /// Process raw RoI candidate words in all slices, convert and fill the output EDM
+  StatusCode decodeRoiSlices(const uint32_t* data,
+                             const std::vector<std::pair<size_t,size_t>>& slices,
+                             std::vector<SG::WriteHandle<xAOD::MuonRoIContainer>>& handles,
+                             size_t outputOffset,
+                             const EventContext& eventContext) const;
+  /// Process raw Topo TOB words in all slices, convert and fill the output EDM
+  StatusCode decodeTopoSlices(const uint32_t* data,
+                              const std::vector<std::pair<size_t,size_t>>& slices,
+                              std::vector<SG::WriteHandle<LVL1::MuCTPIL1Topo>>& handles,
+                              size_t outputOffset,
+                              const EventContext& eventContext) const;
 };
 
 #endif // TRIGT1RESULTBYTESTREAM_MUONROIBYTESTREAMTOOL_H

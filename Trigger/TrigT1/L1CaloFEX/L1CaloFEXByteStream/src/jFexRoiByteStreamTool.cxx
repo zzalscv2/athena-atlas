@@ -184,9 +184,19 @@ StatusCode jFexRoiByteStreamTool::convertFromBS(const std::vector<const ROBF*>& 
             //printf("----------> trailer_pos:%3d payload:%3d N.Words:%3d fpga:%3d  jfex:%3d\n",trailers_pos,payload,total_tobs+jBits::TOB_TRAILERS,fpga,jfex);
             //printf(" TOBs(0x%08x):   jJ:%3d   jLJ:%3d   jTau:%3d   jEM:%3d   jTE:%3d   jXE:%3d\n",vec_words.at(trailers_pos-4),n_jJ,n_jLJ,n_jTau,n_jEM,n_jTE,n_jXE);  
             //printf("xTOBs(0x%08x):  xjJ:%3d  xjLJ:%3d  xjTau:%3d  xjEM:%3d\n",vec_words.at(trailers_pos-3),n_xjJ,n_xjLJ,n_xjTau,n_xjEM);            
+
+            // First we need to check if there is a padding word.
+            //Padding wordis when there is an even number in the payload, but odd number of xTOB and TOB.. need to check and remove the extra word.
+            unsigned int paddingWord = 0;
+            if(total_tobs % 2){
+                //printf("Odd number of TOBs + xTOBs: %4d, there is a padding word! CAREFUL!\n",total_tobs);
+                ATH_MSG_WARNING("Odd number of TOBs + xTOBs:"<< total_tobs<<", there is a padding word!");
+                paddingWord = 1;
+            }
             
-            if(payload != (total_tobs + jBits::TOB_TRAILERS)){
+            if(payload != (total_tobs + jBits::TOB_TRAILERS + paddingWord)){
                 //printf("%s !! ERROR Payload=%-4d is different from TOBs+Trailers=%-4d -> SKIPPED %s\n",C.RED.c_str(),payload,(total_tobs + jBits::TOB_TRAILERS),C.END.c_str());
+                ATH_MSG_WARNING("Payload="<< payload<<" is different from TOBs+Trailers+padding words="<< total_tobs + jBits::TOB_TRAILERS + paddingWord <<". FPGA: "<< fpga << " in jFEX: "<< jfex <<" SKIPPED!");
                 trailers_pos -= (payload+2);
                 if(trailers_pos == 0) {
                     READ_TOBS = false;
@@ -196,22 +206,18 @@ StatusCode jFexRoiByteStreamTool::convertFromBS(const std::vector<const ROBF*>& 
             
             //The minimum number for the payload should be 2 (The TOB/xTOB counters). If lower send an error message
             if(payload < jBits::TOB_TRAILERS){
+                ATH_MSG_WARNING("Payload="<< payload<<" is lower than the expected size (at least" << jBits::TOB_TRAILERS << "trailers)");
                 //printf("ERROR Payload is lower than the TOB/xTOB trailers. (Payload = %3d < %3d = TOB Trailer) \n",payload,jBits::TOB_TRAILERS);
                 break;
             }
-            
-            
-            //There can be a padding word, even number in the payload, but odd number of xTOB and TOB.. need to check and remove the extra word.
-            unsigned int paddingWord = 0;
-            if(total_tobs % 2){
-                //printf("Odd number of TOBs + xTOBs: %4d, there is a padding word! CAREFUL!\n",total_tobs);
-                paddingWord = 1;
-            }
-            
+                        
             //removing jFEX to ROD, TOB and xTOB Trailers from trailers_pos (4 positions), possible padding word added on the data to get even number of 32bit words
             unsigned int tobIndex = trailers_pos - (jBits::jFEX2ROD_WORDS + jBits::TOB_TRAILERS + paddingWord);
-
-
+            
+            if(paddingWord == 1){
+                ATH_MSG_WARNING("Padding word: "<< std::hex << vec_words.at(tobIndex) <<std::dec);
+            }
+            
             if(m_convertExtendedTOBs) {
                 /************************************************** DECODING xTOBS **************************************************/
                 
@@ -258,17 +264,23 @@ StatusCode jFexRoiByteStreamTool::convertFromBS(const std::vector<const ROBF*>& 
                 tobIndex -= n_xtobs;
                 
                 //saving jXE into the EDM container
-                for(unsigned int i=tobIndex; i>tobIndex-n_jXE; i--) {
-                    jXEContainer->push_back( std::make_unique<xAOD::jFexMETRoI>() );
-                    jXEContainer->back()->initialize(jfex, fpga, vec_words.at(i-1), 200);
+                //Only FPGA U1 and U4 are sent to L1Topo, it cover the full phi
+                if(fpga == jBits::FPGA_U1 || fpga == jBits::FPGA_U4  ){
+                    for(unsigned int i=tobIndex; i>tobIndex-n_jXE; i--) {
+                        jXEContainer->push_back( std::make_unique<xAOD::jFexMETRoI>() );
+                        jXEContainer->back()->initialize(jfex, fpga, vec_words.at(i-1), 200);
+                    }                    
                 }
                 //removing jXE counter from TOBs
                 tobIndex -= n_jXE;
 
                 //saving jTE into the EDM container
-                for(unsigned int i=tobIndex; i>tobIndex-n_jTE; i--) {
-                    jTEContainer->push_back( std::make_unique<xAOD::jFexSumETRoI>() );
-                    jTEContainer->back()->initialize(jfex, fpga, vec_words.at(i-1), 200);
+                //Only FPGA U1 and U4 are sent to L1Topo, it cover the full phi
+                if(fpga == jBits::FPGA_U1 || fpga == jBits::FPGA_U4  ) {
+                    for(unsigned int i=tobIndex; i>tobIndex-n_jTE; i--) {
+                        jTEContainer->push_back( std::make_unique<xAOD::jFexSumETRoI>() );
+                        jTEContainer->back()->initialize(jfex, fpga, vec_words.at(i-1), 200);
+                    }
                 }
                 //removing jTE counter from TOBs
                 tobIndex -= n_jTE;
@@ -276,7 +288,7 @@ StatusCode jFexRoiByteStreamTool::convertFromBS(const std::vector<const ROBF*>& 
                 //saving jEM into the EDM container
                 for(unsigned int i=tobIndex; i>tobIndex-n_jEM; i--) {
                     jEMContainer->push_back( std::make_unique<xAOD::jFexFwdElRoI>() );
-                    jEMContainer->back()->initialize(jfex, fpga, vec_words.at(i-1),0, 200, -99, -99);
+                    jEMContainer->back()->initialize(jfex, fpga, vec_words.at(i-1),1, 200, -99, -99);
                 }
                 //removing jEM counter from TOBs
                 tobIndex -= n_jEM;

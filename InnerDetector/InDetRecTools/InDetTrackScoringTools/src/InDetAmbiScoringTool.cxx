@@ -348,7 +348,7 @@ Trk::TrackScore InDet::InDetAmbiScoringTool::simpleScore( const Trk::Track& trac
      }
   }
   if (std::abs(extrapolatedPerigee->parameters()[Trk::d0]) > maxD0) {
-    ATH_MSG_DEBUG ("Track Rphi impact > "<<m_maxRPhiImp<<", reject it");
+    ATH_MSG_DEBUG ("Track Rphi impact > "<<maxD0<<", reject it");
     return Trk::TrackScore(0);
   }
 
