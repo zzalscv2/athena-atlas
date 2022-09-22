@@ -279,20 +279,21 @@ void VP1BatchOnLatestEvent::overlayEventDetails()
 void VP1BatchOnLatestEvent::getHumanReadableTimestamp()
 {
 	time_t t_timestamp = m_timeStamp;
-	tm *ltm = localtime(&t_timestamp);
+	struct tm ltm;
+	localtime_r(&t_timestamp, &ltm);
 
 	// print various components of tm structure.
-	ATH_MSG_DEBUG( "Year: "<< 1900 + ltm->tm_year
-			<< " - " << "Month: "<< 1 + ltm->tm_mon<< " - "  // tm_mon is in the range [0, 11], so 1 must be added to get real months
-			<< "Day: "<<  ltm->tm_mday
-			<< " - " "Time: "<< ltm->tm_hour << ":" << ltm->tm_min << ":" << ltm->tm_sec); // << "CEST" FIXME: check if time zone is available on data file
+	ATH_MSG_DEBUG( "Year: "<< 1900 + ltm.tm_year
+			<< " - " << "Month: "<< 1 + ltm.tm_mon<< " - "  // tm_mon is in the range [0, 11], so 1 must be added to get real months
+			<< "Day: "<<  ltm.tm_mday
+			<< " - " "Time: "<< ltm.tm_hour << ":" << ltm.tm_min << ":" << ltm.tm_sec); // << "CEST" FIXME: check if time zone is available on data file
 
 
 	std::ostringstream ostri;
-	ostri  << 1900 + ltm->tm_year
-			<< "-" << 1 + ltm->tm_mon  // tm_mon is in the range [0, 11], so 1 must be added to get real months
-			<< "-" << ltm->tm_mday
-			<< "T" << ltm->tm_hour << "-" << ltm->tm_min << "-" << ltm->tm_sec; // << "CEST"; FIXME: check if time zone is available on data file
+	ostri  << 1900 + ltm.tm_year
+			<< "-" << 1 + ltm.tm_mon  // tm_mon is in the range [0, 11], so 1 must be added to get real months
+			<< "-" << ltm.tm_mday
+			<< "T" << ltm.tm_hour << "-" << ltm.tm_min << "-" << ltm.tm_sec; // << "CEST"; FIXME: check if time zone is available on data file
 
 	m_humanTimestamp = ostri.str();
 	ATH_MSG_DEBUG( "'human readable' timestamp: " << m_humanTimestamp );
