@@ -54,22 +54,24 @@ void TrigEgammaMonitorAnalysisAlgorithm::fillEfficiencies( const std::vector< st
   for( auto pairObj : pairObjs ){
 
 
-    if(pairObj.first->type()==xAOD::Type::Electron){
-      const xAOD::Electron* el = static_cast<const xAOD::Electron *> (pairObj.first);
-      float et = getEt(el)/Gaudi::Units::GeV;
-      if(et < info.etthr-5.0) continue; 
-     
-    }else if(pairObj.first->type()==xAOD::Type::Photon){
-      float et = getCluster_et(pairObj.first)/Gaudi::Units::GeV;
-      if(et < info.etthr-5.0) continue; 
-      
-       if(boost::contains(info.trigger,"icalovloose")) {
-          if (getIsolation_topoetcone20(pairObj.first)/getCluster_et(pairObj.first) >= 0.065) continue; // pass FixedCutLoose offline isolation
-      }
-      else {
-          if ((getIsolation_topoetcone40(pairObj.first)-2450.0)/getCluster_et(pairObj.first) >= 0.022) continue; // pass FixedCutTightCaloOnly offline isolation
-      }
-    } // Offline photon
+	  if(pairObj.first->type()==xAOD::Type::Electron){
+		  const xAOD::Electron* el = static_cast<const xAOD::Electron *> (pairObj.first);
+		  float et = getEt(el)/Gaudi::Units::GeV;
+		  if(et < info.etthr-5.0) continue; 
+
+	  }else if(pairObj.first->type()==xAOD::Type::Photon){
+		  float et = getCluster_et(pairObj.first)/Gaudi::Units::GeV;
+		  if(et < info.etthr-5.0) continue; 
+
+		  // Applying FixedCutLoose isolation on the offline photon as recommended  in the twiki:
+		  // https://twiki.cern.ch/twiki/bin/viewauth/AtlasProtected/IsolationSelectionTool#Photons
+		  bool pass_CaloIso = getIsolation_topoetcone20(pairObj.first)/getCluster_et(pairObj.first) < 0.065;
+		  bool pass_trkIso = getIsolation_ptcone20(pairObj.first)/getCluster_et(pairObj.first) < 0.05; 
+
+		  if (!pass_CaloIso || !pass_trkIso){
+			  continue; // pass FixedCutLoose offline isolation
+		  }
+	  } // Offline photon
   
 
     
@@ -408,7 +410,8 @@ void TrigEgammaMonitorAnalysisAlgorithm::fillDistributions( const std::vector< s
   }
 
   if ( info.signature == "Electron" ){
-      // Fast Electron
+      
+      // L2 Electron
       {
           std::string key = match()->key("FastElectrons");
           if(info.lrt) key = match()->key("FastElectrons_LRT");
@@ -444,20 +447,6 @@ void TrigEgammaMonitorAnalysisAlgorithm::fillDistributions( const std::vector< s
           fillTracking( trigger, el_vec, true );
       }
   }else if ( info.signature == "Photon"){
-    // Fast Photon
-      {
-          std::string key = match()->key("FastPhotons");         
-          std::vector<const xAOD::TrigPhoton*> ph_vec;
-          // Get only passed objects
-          auto vec =  tdt()->features<xAOD::TrigPhotonContainer>(trigger,condition,key );      
-          for( auto &featLinkInfo : vec ){
-              if(! featLinkInfo.isValid() ) continue;
-              const auto *feat = *(featLinkInfo.link);
-              if(!feat) continue;
-              ph_vec.push_back(feat);
-          }
-          fillL2Photon( trigger, ph_vec );
-      }
       // HLT Photon
       {
           std::vector<const xAOD::Egamma*> ph_vec;
@@ -587,31 +576,6 @@ void TrigEgammaMonitorAnalysisAlgorithm::fillL2Electron(const std::string &trigg
       highet_vec.push_back( el->pt()/Gaudi::Units::GeV );
       eta_vec.push_back( el->eta() );
       phi_vec.push_back( el->phi() );
-    }
-
-    fill( monGroup, et_col, eta_col, phi_col, highet_col );
-}
-
-
-void TrigEgammaMonitorAnalysisAlgorithm::fillL2Photon(const std::string &trigger, const std::vector< const xAOD::TrigPhoton* >& ph_vec) const
-{
- 
-    auto monGroup = getGroup(trigger+"_Distributions_L2Photon");
-    
-    std::vector<float> et_vec, eta_vec, phi_vec, highet_vec;
-    
-    auto et_col   = Monitored::Collection("et" , et_vec  ); 
-    auto highet_col   = Monitored::Collection("highet" , highet_vec  );    
-    auto eta_col  = Monitored::Collection("eta", eta_vec );    
-    auto phi_col  = Monitored::Collection("phi", phi_vec );    
-    
-    for ( const auto *ph : ph_vec )
-    {
-      if(!ph)  continue;
-      et_vec.push_back( ph->pt()/Gaudi::Units::GeV );
-      highet_vec.push_back( ph->pt()/Gaudi::Units::GeV );
-      eta_vec.push_back( ph->eta() );
-      phi_vec.push_back( ph->phi() );
     }
 
     fill( monGroup, et_col, eta_col, phi_col, highet_col );
