@@ -188,7 +188,7 @@ private:
   // scale for toy uncertainty:
   double m_scale_toys;
 
-  // number if systematics uncertainty
+  // number of systematic uncertainties
   int m_nCorrSyst;
   int m_nUncorrSyst;
   std::vector<std::pair<float, std::vector<float>>> m_pteta_bins;
@@ -200,6 +200,13 @@ private:
   // simplified uncorrelation regions
   TH2F* m_UncorrRegions;
   int m_nSimpleUncorrSyst;
+
+  //Caching of variations we know after initialize
+  std::string m_prefixUncorr;
+  std::string m_toysBasename;
+  std::vector<CP::SystematicVariation> m_corrVarUp;
+  std::vector<CP::SystematicVariation> m_corrVarDown;
+
 
 }; // End: class definition
 
