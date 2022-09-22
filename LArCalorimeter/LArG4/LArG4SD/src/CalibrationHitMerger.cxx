@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2017 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "CalibrationHitMerger.h"
@@ -46,12 +46,12 @@ StatusCode LArG4::CalibrationHitMerger::execute()
   //       and reserve the corresponding size in the outputHandle
   SG::WriteHandle<CaloCalibrationHitContainer> outputHandle{m_outputHits};
   ATH_CHECK( outputHandle.record(std::make_unique<CaloCalibrationHitContainer>()) );
-  m_calibrationHits_t calibrationHits;
+  calibrationHits_t calibrationHits;
   unsigned int nHitsMerged(0);
   for ( const auto& collKey: m_inputHits ) {
     SG::ReadHandle<CaloCalibrationHitContainer> inputHandle{collKey};
     ATH_MSG_DEBUG(inputHandle.name() << " has " << inputHandle->size() << " hits.");
-    for ( const auto& hit: *inputHandle ) {
+    for ( const CaloCalibrationHit* hit: *inputHandle ) {
       // If we haven't had a hit in this cell before, create one and add
       // it to the hit collection.
 
