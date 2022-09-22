@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2017 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef LARG4SD_CALIBRATIONHITMERGER_H
@@ -39,12 +39,14 @@ namespace LArG4 {
   private:
     class LessHit {
     public:
-      bool operator() ( CaloCalibrationHit* const& p, CaloCalibrationHit* const& q ) const
+      // Allow a lookup in a calibrationHits_t using a const pointer.
+      using is_transparent = std::true_type;
+      bool operator() ( const CaloCalibrationHit* p, const CaloCalibrationHit* q ) const
       {
         return p->Less(q);
       }
     };
-    typedef std::set< CaloCalibrationHit*, LessHit >  m_calibrationHits_t;
+    typedef std::set< CaloCalibrationHit*, LessHit >  calibrationHits_t;
 
     /** Initialize the given VarHandleKey */
     StatusCode initializeVarHandleKey( SG::VarHandleKey& varHandleKey ) const;
