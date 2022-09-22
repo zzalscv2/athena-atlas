@@ -33,6 +33,7 @@ TestHepMC::TestHepMC(const std::string& name, ISvcLocator* pSvcLocator)
   declareProperty("AccuracyMargin",   m_accur_margin=0.); //MeV
 
   declareProperty("G4ExtraWhiteFile", m_paramFile       = "g4_extrawhite.param" );
+  // a list of allowed pdgid which however might not follow the official rules
   declareProperty("UnknownPDGIDFile", m_unknownPDGIDFile = "pdgid_extras.txt" );
 
   declareProperty("NoDecayVertexStatuses", m_vertexStatuses );
@@ -386,11 +387,13 @@ StatusCode TestHepMC::execute() {
         for (auto part_it = vtx->particles_in_const_begin(); part_it != vtx->particles_in_const_end(); ++part_it) {
         auto part=(*part_it);
 #endif
-          ATH_MSG_WARNING("Outgoing particle : ");
-          if (m_dumpEvent) HepMC::Print::line(std::cout,part);
+          if (m_dumpEvent){
+            ATH_MSG_WARNING("Outgoing particle : ");
+            HepMC::Print::line(msg( MSG::WARNING ).stream(),part);
+          }
           ATH_MSG_WARNING("production vertex = " << part->production_vertex()->position().x() << ", " << part->production_vertex()->position().y() << ", " << part->production_vertex()->position().z());
           ATH_MSG_WARNING("end vertex        = " << part->end_vertex()->position().x() << ", " << part->end_vertex()->position().y() << ", " << part->end_vertex()->position().z());
-          ATH_MSG_WARNING("parents info: ");
+          if (m_dumpEvent) ATH_MSG_WARNING("parents info: ");
           if (part->production_vertex()) {
 #ifdef HEPMC3
             for(auto p_parents: part->production_vertex()->particles_in()) {
@@ -398,8 +401,10 @@ StatusCode TestHepMC::execute() {
             for(auto p_parents_it = part->production_vertex()->particles_in_const_begin(); p_parents_it != part->production_vertex()->particles_in_const_end(); ++p_parents_it) {
             auto p_parents=(*p_parents_it);
 #endif
-              if (m_dumpEvent) HepMC::Print::line(std::cout,p_parents);
-              ATH_MSG_WARNING("\t");
+              if (m_dumpEvent){
+                msg(MSG::WARNING) << "\t";
+                HepMC::Print::line( msg( MSG::WARNING ).stream() , p_parents );
+              }
             }
           } // Done with fancy print
 
@@ -464,7 +469,7 @@ StatusCode TestHepMC::execute() {
         if (m_momNaNTest) {
           filter_pass = false;
         }
-      } // End of check for NaNs and infiinities
+      } // End of check for NaNs and infinities
 
       // Check for undecayed pi0s
       if (pstatus == 1 || pstatus == 2) {
@@ -529,8 +534,9 @@ StatusCode TestHepMC::execute() {
 
       // Check for bad PDG IDs
       if (!MC::PID::isValid(ppdgid)){
-        ATH_MSG_WARNING("Invalid PDG ID found: " << ppdgid);
-        if (m_unknownPDGIDTest && std::find(m_uknownPDGID_tab.begin(),m_uknownPDGID_tab.end(),ppdgid)!=m_uknownPDGID_tab.end()){
+        ATH_MSG_DEBUG("Invalid PDG ID found: " << ppdgid);
+        if (m_unknownPDGIDTest && std::find(m_uknownPDGID_tab.begin(),m_uknownPDGID_tab.end(),ppdgid)==m_uknownPDGID_tab.end()){
+          ATH_MSG_WARNING("Invalid and unmasked PDG ID found: " << ppdgid);
           filter_pass = false;
         }
       } // End of check for invalid PDG IDs
