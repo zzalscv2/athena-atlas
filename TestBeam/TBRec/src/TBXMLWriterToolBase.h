@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef TBREC_TBXMLWRITERTOOLBASE_H
@@ -106,6 +106,6 @@ class TBXMLWriterToolBase : public AthAlgTool
   std::vector<std::string> m_elementList;
   std::string              m_dictionary;
 
-  static std::string       m_doubleQuote;
+  static const std::string       m_doubleQuote;
 };
 #endif

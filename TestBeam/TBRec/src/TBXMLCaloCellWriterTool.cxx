@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
 */
 
 
@@ -40,7 +40,7 @@
 using CLHEP::deg;
 
 
-unsigned int TBXMLCaloCellWriterTool::m_nCols = 2;
+const unsigned int TBXMLCaloCellWriterTool::m_nCols = 2;
 
 TBXMLCaloCellWriterTool::TBXMLCaloCellWriterTool(const std::string& type, 
 						 const std::string& name,
