@@ -575,8 +575,8 @@ def analyseChainName(chainName, L1thresholds, L1item):
 
         # ---- set the alignment group here, once we have fully worked out the properties ----
         # ---- this is for the benefit of the probe leg in T&P chains ----
-    
-        if 'larnoiseburst' in chainName or 'idcalib' in chainName:
+   
+        if any(x in chainName for x in ('larnoiseburst', 'idcalib', 'metcalo', 'mettrk')):
             chainProperties['alignmentGroup'] = 'JetMET'
         else:
             if 'tnpInfo' in chainProperties.keys() and chainProperties['tnpInfo'] != "":
