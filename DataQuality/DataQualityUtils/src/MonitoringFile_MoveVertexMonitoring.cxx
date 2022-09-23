@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2017 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "DataQualityUtils/MonitoringFile.h"
@@ -18,16 +18,14 @@
 
 namespace dqutils {
     
-TFile *source = 0;
-TFile *target = 0;
-int padding = 0;
+std::atomic<int> padding = 0;
     
 // define helper methods here rather then in this central MonitoringFile.h beast
 int updateHists(const std::string & inFileName, const std::string & inStem, const std::string & outFileName = "", const std::string & outStem = "");
 bool makeDirectories(const std::string & dirName);
 bool makeDir(const std::string & dirName);
-void Copy(const std::string & inDir, const std::string & outDir, const std::string & inHist = "", const std::string & outHist = "");
-void CopyHist(const std::string & inDir, const std::string & outDir, const std::string & inHist, const std::string & outHist);
+void Copy(TFile* source, TFile* target, const std::string & inDir, const std::string & outDir, const std::string & inHist = "", const std::string & outHist = "");
+void CopyHist(TFile* source, TFile* target, const std::string & inDir, const std::string & outDir, const std::string & inHist, const std::string & outHist);
 
 //main method here
 void MonitoringFile::VxMon_move( const std::string & inFilename, bool isIncremental)
@@ -151,7 +149,7 @@ void MonitoringFile::VxMon_move( const std::string & inFilename, bool isIncremen
         std::string outFileName = fileName;
         std::string outStem = stem;
         //open original file
-        source = TFile::Open(inFileName.c_str());
+        TFile* source = TFile::Open(inFileName.c_str());
         if (!source) {
             //std::cout << "Couldn't open input file, " << inFileName << std::endl;
             return 1;
@@ -187,7 +185,7 @@ void MonitoringFile::VxMon_move( const std::string & inFilename, bool isIncremen
             outFileName += "_trimmed.root";
         }
 
-        target = TFile::Open(outFileName.c_str(), "update");
+        TFile* target = TFile::Open(outFileName.c_str(), "update");
         if (!target) {
             //std::cout << "coundn't open output file " << outFileName << std::endl;
             return 1;
@@ -212,7 +210,7 @@ void MonitoringFile::VxMon_move( const std::string & inFilename, bool isIncremen
         }      
         //copy relevant objects
 	if(!target->IsWritable()) return 1;
-        Copy(path, targetPath, hist, targetHist);
+        Copy(source, target, path, targetPath, hist, targetHist);
  
         delete target;
         delete source;
@@ -255,12 +253,12 @@ void MonitoringFile::VxMon_move( const std::string & inFilename, bool isIncremen
         return gDirectory->cd(dirName.c_str());
     }
     
-    void Copy(const std::string & inDir, const std::string & outDir, const std::string & inHist, const std::string & outHist)
+    void Copy(TFile* source, TFile* target, const std::string & inDir, const std::string & outDir, const std::string & inHist, const std::string & outHist)
     {
         padding += 3;
         
         if (!inHist.empty()) {
-            CopyHist(inDir, outDir, inHist, outHist);
+            CopyHist(source, target, inDir, outDir, inHist, outHist);
             
         } else {
             TDirectory *sourceDir = source->GetDirectory(inDir.c_str());
@@ -293,10 +291,10 @@ void MonitoringFile::VxMon_move( const std::string & inFilename, bool isIncremen
                     std::cout << std::setw(padding) << " ";
                     std::cout << "moving to " << newInDir << ", a " << className << std::endl;
                     */
-                    Copy(newInDir, newOutDir);
+                    Copy(source, target, newInDir, newOutDir);
                     
                 } else {
-                    CopyHist(inDir, outDir, keyName, keyName);
+                    CopyHist(source, target, inDir, outDir, keyName, keyName);
                 }
             }
         }
@@ -304,7 +302,7 @@ void MonitoringFile::VxMon_move( const std::string & inFilename, bool isIncremen
         padding -= 3;
     }
     
-    void CopyHist(const std::string & inDir, const std::string & outDir, const std::string & inHist, const std::string & outHist)
+    void CopyHist(TFile* source, TFile* target, const std::string & inDir, const std::string & outDir, const std::string & inHist, const std::string & outHist)
     {
         TDirectory *sourceDir = source->GetDirectory(inDir.c_str());
         TDirectory *targetDir = target->GetDirectory(outDir.c_str());
