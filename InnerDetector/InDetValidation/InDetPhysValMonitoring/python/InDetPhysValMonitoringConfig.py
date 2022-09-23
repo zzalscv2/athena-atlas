@@ -62,7 +62,7 @@ def GoodRunsListSelectionToolCfg(flags, **kwargs):
         '2016': cvmfs + 'data16_13TeV/20180129/data16_13TeV.periodAllYear_DetStatus-v89-pro21-01_DQDefects-00-02-04_PHYS_StandardGRL_All_Good_25ns.xml',
         '2017': cvmfs + 'data17_13TeV/20180619/data17_13TeV.periodAllYear_DetStatus-v99-pro22-01_Unknown_PHYS_StandardGRL_All_Good_25ns_Triggerno17e33prim.xml',
         '2018': cvmfs + 'data18_13TeV/20190318/data18_13TeV.periodAllYear_DetStatus-v102-pro22-04_Unknown_PHYS_StandardGRL_All_Good_25ns_Triggerno17e33prim.xml',
-        '2022': cvmfs + 'data22_13p6TeV/20220902/data22_13p6TeV.periodF_DetStatus-v108-pro28_Unknown_PHYS_StandardGRL_All_Good_25ns.xml'
+        '2022': cvmfs + 'data22_13p6TeV/20220902/data22_13p6TeV.periodF_DetStatus-v108-pro28_MERGED_PHYS_StandardGRL_All_Good_25ns.xml'
     }
 
     tool = CompFactory.GoodRunsListSelectionTool(
