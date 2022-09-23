@@ -34,8 +34,8 @@ def fromRunArgs(runArgs):
     # Generate detector list and setup detector flags
     from SimuJobTransforms.SimulationHelpers import getDetectorsFromRunArgs
     detectors = getDetectorsFromRunArgs(ConfigFlags, runArgs)
-    from AthenaConfiguration.DetectorConfigFlags import setupDetectorsFromList
-    setupDetectorsFromList(ConfigFlags, detectors, toggle_geometry=True)
+    from AthenaConfiguration.DetectorConfigFlags import setupDetectorFlags
+    setupDetectorFlags(ConfigFlags, detectors, use_metadata=True, toggle_geometry=True)
 
     # Pre-include
     processPreInclude(runArgs, ConfigFlags)

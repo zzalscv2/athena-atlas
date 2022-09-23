@@ -11,7 +11,6 @@ if __name__ == '__main__':
   from AthenaCommon.Constants import DEBUG
   log.setLevel(DEBUG)
 
-
   #import config flags
   from AthenaConfiguration.AllConfigFlags import ConfigFlags
 
@@ -21,10 +20,10 @@ if __name__ == '__main__':
 
   ConfigFlags.Sim.WorldRRange = 15000
   ConfigFlags.Sim.WorldZRange = 27000 #change defaults?
-  detectors = ['Bpipe', 'BCM', 'Pixel', 'SCT', 'TRT', 'LAr', 'Tile', 'CSC', 'MDT', 'RPC', 'TGC']
+  detectors = ['Bpipe', 'BCM', 'Pixel', 'SCT', 'TRT', 'LAr', 'Tile', 'MBTS', 'CSC', 'MDT', 'RPC', 'TGC']
   # Setup detector flags
-  from AthenaConfiguration.DetectorConfigFlags import setupDetectorsFromList
-  setupDetectorsFromList(ConfigFlags, detectors, toggle_geometry=True)
+  from AthenaConfiguration.DetectorConfigFlags import setupDetectorFlags
+  setupDetectorFlags(ConfigFlags, detectors, toggle_geometry=True)
 
   # Finalize
   ConfigFlags.lock()
@@ -43,7 +42,6 @@ if __name__ == '__main__':
   # Dump config
   cfg.printConfig(withDetails=True, summariseProps = True)
   ConfigFlags.dump()
-
 
   f=open("test.pkl","wb")
   cfg.store(f)

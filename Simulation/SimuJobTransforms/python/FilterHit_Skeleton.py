@@ -80,13 +80,6 @@ def getStreamHITS_ItemList(ConfigFlags):
     return ItemList
 
 
-def defaultFilterHitFlags(ConfigFlags, detectors):
-    """Fill default flags for hit filtering"""
-    # Nothing special other than setup of detector flags
-    from AthenaConfiguration.DetectorConfigFlags import setupDetectorsFromList
-    setupDetectorsFromList(ConfigFlags, detectors, toggle_geometry=True)
-
-
 def fromRunArgs(runArgs):
     from AthenaCommon.Logging import logging
     log = logging.getLogger('FilterHit_tf')
@@ -107,8 +100,8 @@ def fromRunArgs(runArgs):
     # Generate detector list and setup detector flags
     from SimuJobTransforms.SimulationHelpers import getDetectorsFromRunArgs
     detectors = getDetectorsFromRunArgs(ConfigFlags, runArgs)
-    from AthenaConfiguration.DetectorConfigFlags import setupDetectorsFromList
-    setupDetectorsFromList(ConfigFlags, detectors, toggle_geometry=True)
+    from AthenaConfiguration.DetectorConfigFlags import setupDetectorFlags
+    setupDetectorFlags(ConfigFlags, detectors, use_metadata=True, toggle_geometry=True)
 
     ## from SimuJobTransforms.HitsFilePeeker import HitsFilePeeker
     ## HitsFilePeeker(runArgs, filterHitLog)

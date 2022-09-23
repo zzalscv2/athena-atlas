@@ -20,8 +20,8 @@ def defaultSimulationFlags(ConfigFlags, detectors):
     ConfigFlags.GeoModel.Align.Dynamic = False
 
     # Setup detector flags
-    from AthenaConfiguration.DetectorConfigFlags import setupDetectorsFromList
-    setupDetectorsFromList(ConfigFlags, detectors, toggle_geometry=True)
+    from AthenaConfiguration.DetectorConfigFlags import setupDetectorFlags
+    setupDetectorFlags(ConfigFlags, detectors, toggle_geometry=True)
 
 
 def fromRunArgs(runArgs):
@@ -42,12 +42,12 @@ def fromRunArgs(runArgs):
     from AthenaConfiguration.Enums import ProductionStep
     ConfigFlags.Common.ProductionStep = ProductionStep.Simulation
 
+    if hasattr(runArgs, 'simulator'):
+        ConfigFlags.Sim.ISF.Simulator = SimulationFlavour(runArgs.simulator)
+
     # Generate detector list
     from SimuJobTransforms.SimulationHelpers import getDetectorsFromRunArgs
     detectors = getDetectorsFromRunArgs(ConfigFlags, runArgs)
-
-    if hasattr(runArgs, 'simulator'):
-        ConfigFlags.Sim.ISF.Simulator = SimulationFlavour(runArgs.simulator)
 
     # Setup common simulation flags
     defaultSimulationFlags(ConfigFlags, detectors)
