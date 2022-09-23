@@ -91,7 +91,9 @@ def createEgammaConfigFlags():
                  '-topoetconeCorrBitset')
 
     egcf.addFlag("Egamma.Keys.Output.Electrons", 'Electrons')
-    egcf.addFlag("Egamma.Keys.Output.ElectronsSuppESD", '')
+    #Remove GlobalFELinks - these are links between FlowElement (FE) containers created in jet finding and electrons/photons. Since these transient FE containers are not in the ESD/AOD, we should not write out these links.
+    gpf_vars='-chargedGlobalFELinks.-neutralGlobalFELinks.'
+    egcf.addFlag("Egamma.Keys.Output.ElectronsSuppESD", gpf_vars)
     egcf.addFlag("Egamma.Keys.Output.ElectronsSuppAOD",
                  lambda prevFlags: (
                      prevFlags.Egamma.Keys.Output.ElectronsSuppESD +
@@ -116,7 +118,7 @@ def createEgammaConfigFlags():
                      prevFlags.Egamma.Keys.Output.ForwardClustersSuppESD))
 
     egcf.addFlag("Egamma.Keys.Output.Photons", 'Photons')
-    egcf.addFlag("Egamma.Keys.Output.PhotonsSuppESD", '')
+    egcf.addFlag("Egamma.Keys.Output.PhotonsSuppESD", gpf_vars)
     egcf.addFlag("Egamma.Keys.Output.PhotonsSuppAOD",
                  lambda prevFlags: (
                      prevFlags.Egamma.Keys.Output.PhotonsSuppESD +

@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef TILESWITCHES_h
@@ -13,7 +13,8 @@
 
 class TileSwitches
 {
-public:
+ public:
+
   /** Setup defaults */
   TileSwitches(bool tb=false, bool pl=true) :
           testBeam(tb),

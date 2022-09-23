@@ -21,17 +21,18 @@
 class MsgStream;
 class StoreGateSvc;
 
+
 class TileAtlasFactory : public GeoVDetectorFactory
 {
-public:
-  
+ public:
+
   /** Constructor */
   TileAtlasFactory(StoreGateSvc *pDetStore, TileDetDescrManager *manager,
                    const TileSwitches & switches, MsgStream *log, bool fullGeo);
-  
+
   /** Destructor */
   ~TileAtlasFactory();
-  
+
   /** Creation of Tile geometry */
   virtual void create(GeoPhysVol *world);
 
@@ -45,14 +46,14 @@ public:
       @param X1,X2,Y1,Y2,DZ - checking variables
   */
   void checking(const std::string& VolumeName, bool print, int level,
-                double X1, double X2, double Y1, double Y2, double Z); 
+                double X1, double X2, double Y1, double Y2, double Z);
 
-private:  
-  
+ private:
+
   /** Detector pointer to Store Gate service */
   StoreGateSvc              *m_detectorStore;
 
-  /** Detector pointer to TileDetDescrManager */  
+  /** Detector pointer to TileDetDescrManager */
   TileDetDescrManager       *m_detectorManager;
 
   /** Get message SVC */
@@ -69,4 +70,3 @@ private:
 };
 
 #endif
-

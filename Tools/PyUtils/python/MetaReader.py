@@ -512,6 +512,12 @@ def read_metadata(filenames, file_type = None, mode = 'lite', promote = None, me
                     msg.debug('Taking the luminosity block info from the first event (%i)', evt.lumi_block())
                     meta_dict[filename]['lumiBlockNumbers'] = [evt.lumi_block()]
                     pass
+                # ATLASRECTS-7126: If there is no valid run number information
+                # in the ByteStream header, get the info from the first event.
+                if meta_dict[filename]['runNumbers'] == [0]:
+                    msg.debug('Taking the run number info from the first event (%i)', evt.run_no())
+                    meta_dict[filename]['runNumbers'] = [evt.run_no()]
+                    pass
 
                 # fix for ATEAM-122
                 if len(bs_metadata.get('eventTypes', '')) == 0:  # see: ATMETADATA-6

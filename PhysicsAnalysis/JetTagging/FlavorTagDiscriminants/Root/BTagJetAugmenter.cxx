@@ -56,7 +56,10 @@ namespace {
 
 }
 
-BTagJetAugmenter::BTagJetAugmenter(const std::string& associator, FlavorTagDiscriminants::FlipTagConfig f):
+
+BTagJetAugmenter::BTagJetAugmenter(const std::string associator,
+                                   FlavorTagDiscriminants::FlipTagConfig f,
+                                   bool useIpxd):
   m_jetLink("jetLink"),
   m_pt_uncalib("pt_btagJes"),
   m_eta_uncalib("eta_btagJes"),
@@ -107,7 +110,8 @@ BTagJetAugmenter::BTagJetAugmenter(const std::string& associator, FlavorTagDiscr
   m_min_trk_flightDirRelEta(jfSvNew(f) + "_minimumAllJetTrackRelativeEta"),
   m_max_trk_flightDirRelEta(jfSvNew(f) + "_maximumAllJetTrackRelativeEta"),
   m_avg_trk_flightDirRelEta(jfSvNew(f) + "_averageAllJetTrackRelativeEta"),
-  m_flipConfig(f)
+  m_flipConfig(f),
+  m_useIpxd(useIpxd)
 {
 }
 
@@ -232,21 +236,23 @@ void BTagJetAugmenter::augmentBtagJes(const xAOD::BTagging &btag,
 
 void BTagJetAugmenter::augment(const xAOD::BTagging &btag) const {
 
-  if (m_ip2d_weightBOfTracks(btag).size() > 0) {
-    m_ip2d_isDefaults(btag) = 0;
-  } else {
-    m_ip2d_isDefaults(btag) = 1;
-  }
-  m_ip2d_nTrks(btag) = m_ip2d_weightBOfTracks(btag).size();
+  if (m_useIpxd) {
+    if (m_ip2d_weightBOfTracks(btag).size() > 0) {
+      m_ip2d_isDefaults(btag) = 0;
+    } else {
+      m_ip2d_isDefaults(btag) = 1;
+    }
+    m_ip2d_nTrks(btag) = m_ip2d_weightBOfTracks(btag).size();
 
-  if (m_ip3d_weightBOfTracks(btag).size() > 0) {
-    m_ip3d_isDefaults(btag) = 0;
-  } else {
-    m_ip3d_isDefaults(btag) = 1;
-  }
+    if (m_ip3d_weightBOfTracks(btag).size() > 0) {
+      m_ip3d_isDefaults(btag) = 0;
+    } else {
+      m_ip3d_isDefaults(btag) = 1;
+    }
 
-  m_ip3d_nTrks(btag) = m_ip3d_weightBOfTracks(btag).size();
-  augmentIpRatios(btag);
+    m_ip3d_nTrks(btag) = m_ip3d_weightBOfTracks(btag).size();
+    augmentIpRatios(btag);
+  }
 
   m_jf_isDefaults(btag) = jfIsDefaults(btag);
   augmentJfDr(btag);

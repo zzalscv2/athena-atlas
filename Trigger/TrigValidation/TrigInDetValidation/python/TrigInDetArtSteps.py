@@ -99,6 +99,10 @@ class TrigInDetReco(ExecStep):
                 chains += "'HLT_e30_idperf_loose_lrtloose_L1EM22VHI',"
                 chains += "'HLT_e26_lhtight_ivarloose_e5_lhvloose_nopix_lrtloose_idperf_probe_L1EM22VHI',"
                 chains += "'HLT_e5_lhvloose_nopix_lrtloose_idperf_probe_g25_medium_L1EM20VH',"
+
+                # new chains
+                chains += "'HLT_e26_lhtight_ivarloose_e5_idperf_loose_lrtloose_probe_L1EM22VHI',"
+                chains += "'HLT_e5_idperf_loose_lrtloose_probe_g25_medium_L1EM20VH',"
                 flags += 'doEgammaSlice=True;'
             if (i=='electron') :
                 # chains +=  "'HLT_e5_etcut_L1EM3',"  ## need an idperf chain once one is in the menu
@@ -110,6 +114,10 @@ class TrigInDetReco(ExecStep):
             if (i=='electron-tnp') :
                 chains += "'HLT_e26_lhtight_e14_etcut_idperf_probe_50invmAB130_L1EM22VHI',"
                 chains += "'HLT_e26_lhtight_e14_etcut_idperf_nogsf_probe_50invmAB130_L1EM22VHI',"
+                
+                # new chains
+                chains += "'HLT_e26_lhtight_e14_idperf_tight_probe_50invmAB130_L1EM22VHI',"
+                chains += "'HLT_e26_lhtight_e14_idperf_tight_nogsf_probe_50invmAB130_L1EM22VHI',"
                 flags += 'doEgammaSlice=True;'
             if (i=='tau') :
                 chains +=  "'HLT_tau25_idperf_tracktwoMVA_L1TAU12IM',"
@@ -407,4 +415,6 @@ class TrigInDetCpuCostStep(RefComparisonStep):
         else:
             self.args  = self.input_file + " " + self.reference + " -o " + self.output_dir + " " + self.extra
         Step.configure(self, test)
+
+
 

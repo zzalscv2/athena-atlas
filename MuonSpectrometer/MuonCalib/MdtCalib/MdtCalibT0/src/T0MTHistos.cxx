@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2020 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "MdtCalibT0/T0MTHistos.h"
@@ -7,15 +7,28 @@
 #include <cmath>
 
 #include "AthenaKernel/getMessageSvc.h"
+#include "CxxUtils/checker_macros.h"
 #include "GaudiKernel/MsgStream.h"
 #include "MdtCalibT0/MTT0PatternRecognition.h"
 #include "MdtCalibT0/MTTmaxPatternRecognition.h"
 #include "TDirectory.h"
 #include "TLine.h"
-#include "TRandom.h"
+#include "TRandom3.h"
 #include "list"
+#include "boost/thread/tss.hpp"
 
 namespace MuonCalib {
+
+    TRandom3* getTLSRandomGen()
+    {
+        static boost::thread_specific_ptr<TRandom3> rnd ATLAS_THREAD_SAFE;
+        TRandom3* random = rnd.get();
+        if (!random) {
+            random = new TRandom3();
+            rnd.reset(random);
+        }
+        return random;
+    }
 
     /** The fermi function to be fitted at the rising edge of the spectrum */
     inline Double_t mt_t0_fermi(Double_t *x, Double_t *par) {
@@ -293,8 +306,9 @@ namespace MuonCalib {
         snprintf(scramhistname, 100, "%s_scram", m_time->GetName());
         std::unique_ptr<TH1F> scramhist = std::make_unique<TH1F>(scramhistname, "scrambled histogram", m_time->GetSize() - 2,
                                                                  m_time->GetXaxis()->GetXmin(), m_time->GetXaxis()->GetXmax());
+
         for (int binnr = 0; binnr < m_time->GetSize(); binnr++) {
-            scramhist->SetBinContent(binnr, m_time->GetBinContent(binnr) + gRandom->Gaus(0, m_time->GetBinError(binnr)));
+            scramhist->SetBinContent(binnr, m_time->GetBinContent(binnr) + getTLSRandomGen()->Gaus(0, m_time->GetBinError(binnr)));
             scramhist->SetBinError(binnr, m_time->GetBinError(binnr) * 1.41421356);
             if (scramhist->GetBinContent(binnr) < 0) scramhist->SetBinContent(binnr, 0);
         }

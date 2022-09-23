@@ -13,16 +13,16 @@
 class StoreGateSvc;
 class TileDetDescrManager;
 
-class TileDetectorTool final : public GeoModelTool 
+class TileDetectorTool final : public GeoModelTool
 {
  public:
 
-  TileDetectorTool(const std::string& type, 
-           const std::string& name, 
-           const IInterface* parent);
+  TileDetectorTool(const std::string& type,
+                   const std::string& name,
+                   const IInterface* parent);
 
   virtual ~TileDetectorTool() override final;
-  
+
   virtual StatusCode create() override final;
   virtual StatusCode clear() override final;
 
@@ -44,4 +44,4 @@ class TileDetectorTool final : public GeoModelTool
   TileDetDescrManager* m_manager;
 };
 
-#endif 
+#endif

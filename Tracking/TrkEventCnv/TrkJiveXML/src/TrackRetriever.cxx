@@ -427,7 +427,7 @@ namespace JiveXML {
 			//If no collections had been requested explicitly, loop over all of them
 			if (m_OtherTrackCollections.empty()) {
 				//Get an iterator over all other track collections
-				const DataHandle<TrackCollection> trackCollIter, trackCollEnd;
+				SG::ConstIterator<TrackCollection> trackCollIter, trackCollEnd;
 				if ((evtStore()->retrieve(trackCollIter, trackCollEnd)).isFailure()){
 					ATH_MSG_ERROR( "Unable to retrieve track collection iterator" );
 					return StatusCode::RECOVERABLE;

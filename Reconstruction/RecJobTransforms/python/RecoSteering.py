@@ -136,6 +136,10 @@ def RecoSteering(flags):
     if flags.Reco.EnableJet:
         from JetRecConfig.JetRecoSteering import JetRecoSteeringCfg
         acc.merge(JetRecoSteeringCfg(flags))
+        #We also need to build links between the newly created jet constituents (GlobalFE)
+        #and electrons,photons,muons and taus
+        from eflowRec.PFCfg import PFGlobalFlowElementLinkingCfg
+        acc.merge(PFGlobalFlowElementLinkingCfg(flags))
         log.info("---------- Configured jets")
 
     # btagging

@@ -130,7 +130,7 @@ validationTP_jpsiee = ['HLT_e5_lhtight_L1EM3']
 
 validation_Zee = [
         'HLT_e26_lhtight_e15_etcut_Zee_L1EM22VHI', 
-        'HLT_e26_lhtight_e15_etcut_idperf_Zee_L1EM22VHI', 
+        'HLT_e26_lhtight_e15_idperf_tight_Zee_L1EM22VHI', 
         'HLT_e20_lhtight_ivarloose_L1ZAFB-25DPHI-eEM18I'
         ] # adding Zee/special chains later
 
