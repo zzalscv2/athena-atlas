@@ -24,6 +24,7 @@ ApplicationMgr                                               0 SUCCESS          
 ApplicationMgr                                               0 SUCCESS                     LArFebRodMappingAlg/LArFebRodMappingAlg
 ApplicationMgr                                               0 SUCCESS                     LArOnOffMappingAlg/LArOnOffMappingAlg
 ApplicationMgr                                               0 SUCCESS                     LArRoIMapCondAlg/LArRoIMapCondAlg
+ApplicationMgr                                               0 SUCCESS                     TileHid2RESrcIDCondAlg/TileHid2RESrcIDHLTCondAlg
 ApplicationMgr                                               0 SUCCESS                     RegSelCondAlg_LAr/RegSelCondAlg_TTEM
 ApplicationMgr                                               0 SUCCESS                     RegSelCondAlg_LAr/RegSelCondAlg_TTHEC
 ApplicationMgr                                               0 SUCCESS                     RegSelCondAlg_LAr/RegSelCondAlg_FCALEM
