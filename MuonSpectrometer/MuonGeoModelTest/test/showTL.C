@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2017 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
 */
 
 #include <TCanvas.h>
@@ -18,7 +18,7 @@
 #include "AtlasUtils.C"
 
 #define maxvsize 3000
-void showTL(std::string bLpar = "eg", std::string selection = "[7.4.1.3.0.1.", std::string cham = "BOLA") {
+void showTL(const std::string& bLpar = "eg", const std::string& selection = "[7.4.1.3.0.1.", const std::string& cham = "BOLA") {
     std::cout << "running command:" << std::endl;
     std::cout << ".x showTL.C(\"" << bLpar << "\",\"" << selection << "\");" << std::endl;
     std::string fileNmdtNoBLines;

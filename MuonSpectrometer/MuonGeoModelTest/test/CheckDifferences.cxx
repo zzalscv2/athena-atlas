@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2020 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
 */
 
 #include <fstream>
@@ -19,52 +19,54 @@ typedef enum iost { READ, WRITE } IOMaterialMap;
 
 class Record {
 public:
-    Record() {
-        _identifier = "[0]";
-        for (int i = 0; i < 10; i++) _value[i] = 0.;
-        _nvalues = 0;
-        _all = "**** nothing read yet ****";
+    Record()
+      : m_identifier ("[0]"),
+        m_nvalues (0),
+        m_all ("**** nothing read yet ****")
+    {
+        for (int i = 0; i < 10; i++) m_value[i] = 0.;
     }
-    Record(std::string s, int n, double* array) {
-        _identifier = "[0]";
-        for (int i = 0; i < 10; i++) _value[i] = array[i];
-        _nvalues = n;
-        _all = s;
+    Record(const std::string& s, int n, double* array)
+      : m_identifier ("[0]"),
+        m_nvalues (n),
+        m_all (s)
+    {
+        for (int i = 0; i < 10; i++) m_value[i] = array[i];
     }
-    void showAll() { std::cout << _all << std::endl; };
+    void showAll() { std::cout << m_all << std::endl; };
     void printValues() {
         std::cout << " Record values ";
-        for (int i = 0; i < _nvalues; i++) std::cout << _value[i] << " ";
+        for (int i = 0; i < m_nvalues; i++) std::cout << m_value[i] << " ";
         std::cout << std::endl;
     }
 
     void empty() {
-        _identifier = "[0]";
-        for (int i = 0; i < 10; i++) _value[i] = 0.;
-        _nvalues = 0;
-        _all = "**** nothing read yet ****";
+        m_identifier = "[0]";
+        for (int i = 0; i < 10; i++) m_value[i] = 0.;
+        m_nvalues = 0;
+        m_all = "**** nothing read yet ****";
     };
     double Value(int i) {
-        if (i < 0 || i > 10) return -9999999.;
-        return _value[i];
+        if (i < 0 || i >= 10) return -9999999.;
+        return m_value[i];
     }
-    int nValues() { return _nvalues; }
+    int nValues() { return m_nvalues; }
 
 private:
-    std::string _identifier;
-    double _value[10];
-    int _nvalues;
-    std::string _all;
+    std::string m_identifier;
+    double m_value[10];
+    int m_nvalues;
+    std::string m_all;
 };
 
 class MaterialMap {
 public:
-    MaterialMap(std::string fileName, IOMaterialMap io = READ);
+    MaterialMap(const std::string& fileName, IOMaterialMap io = READ);
     // static MaterialMap * getMaterialMap(std::string fileName, IOMaterialMap io=READ);
     ~MaterialMap();
     int readMapRecord();
     Record getRecord() { return myrecord; }
-    void setTech(std::string s) { tech = s; }
+    void setTech(const std::string& s) { tech = s; }
     std::string fileName() { return m_filename; }
 
 private:
@@ -75,8 +77,8 @@ private:
     static MaterialMap* myself;
     Record myrecord;
 
-    bool openFileWrite(std::string);
-    bool openFileRead(std::string);
+    bool openFileWrite(const std::string&);
+    bool openFileRead(const std::string&);
     bool closeFile();
     //
     static bool status_read;
@@ -170,7 +172,7 @@ int main(int argc, char* argv[]) {
 
 bool MaterialMap::status_read = true;
 MaterialMap* MaterialMap::myself = 0;
-MaterialMap::MaterialMap(std::string fileName, IOMaterialMap io) {
+MaterialMap::MaterialMap(const std::string& fileName, IOMaterialMap io) {
     ioFile = 0;
     if (io == READ) {
         m_nentries = 0;
@@ -201,7 +203,7 @@ MaterialMap::~MaterialMap() { closeFile(); };
 //     return myself;
 // };
 
-bool MaterialMap::openFileRead(std::string fileName) {
+bool MaterialMap::openFileRead(const std::string& fileName) {
     std::cout << " Open the Map file to read ";
     std::cout << fileName << std::endl;
 
@@ -220,7 +222,7 @@ bool MaterialMap::openFileRead(std::string fileName) {
     //
 };
 
-bool MaterialMap::openFileWrite(std::string fileName) {
+bool MaterialMap::openFileWrite(const std::string& fileName) {
     fileToWrite = fileName;
     status_read = false;
     return true;
