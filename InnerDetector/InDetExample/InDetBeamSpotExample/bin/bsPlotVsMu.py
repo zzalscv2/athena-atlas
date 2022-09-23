@@ -179,7 +179,7 @@ def main():
       iov1 = run << 32
       iov2 = (run + 1) << 32
   
-      itrLumi = folderLumi.browseObjects(iov1, iov2, cool.ChannelSelection.all(), options.tagLumi)
+      itrLumi = folderLumi.browseObjects(iov1, iov2, cool.ChannelSelection(0), options.tagLumi)
       print( "...finished getting Lumi data for run %i" % run )
       
       lblb.setIOVRangeFromRun(run)

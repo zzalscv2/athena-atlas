@@ -158,9 +158,9 @@ if __name__ == '__main__':
             help='beam spot SQLite file (default: none)')
 
     execopt = OptionGroup(parser, 'Execution Options')
-    execopt.add_option('', '--submit', dest='submit', default='lsf', metavar='TYPE',
-            choices=['grid', 'lsf', 'shell', 'bg', 'pdsf', 'simple'],
-            help='submission type (default: lsf, choices: grid,lsf,shell,bg,pdsf,simple)')
+    execopt.add_option('', '--submit', dest='submit', default='condor', metavar='TYPE',
+            choices=['grid', 'lsf', 'shell', 'bg', 'pdsf', 'simple', 'condor'],
+            help='submission type (default: condor, choices: grid,lsf,shell,bg,pdsf,simple,condor)')
     execopt.add_option('', '--grid-user', dest='grid_user', default=None, metavar='USER',
             help='grid username (default: $USER)')
     execopt.add_option('', '--grid-site', dest='gridsite', default='AUTO', metavar='SITE',
@@ -240,6 +240,7 @@ if __name__ == '__main__':
                 'bg': 'BackgroundJobRunner',
                 'pdsf': 'PDSFJobRunner',
                 'simple': 'JobRunner',
+                'condor': 'HTCondorJobRunner',
                 }[opts.submit]
         if grid_mode:
             if not opts.in_dsid:

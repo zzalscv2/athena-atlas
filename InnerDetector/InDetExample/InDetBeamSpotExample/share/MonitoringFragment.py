@@ -44,14 +44,16 @@ if not jobConfig['doMonitoringGlobal']:
                                                  minTracksPerVtx=jobConfig['MinTracksPerVtx'],
                                                  minTrackPt = jobConfig['MinTrackPt'],
                                                  useBeamspot = jobConfig['useBeamSpot'])
-    if jobConfig['UseFilledBCIDsOnly']:
-        printfunc ("This is AKMAKMAKM")
-        # Selection on non-empty BCIDs
-         # This tool is throwing tons of warnings for no good reason, make it quieter.
-        from AthenaMonitoring.AthenaMonitoringConf import DQFilledBunchFilterTool
-        monFilledBunchFilterTool = DQFilledBunchFilterTool()
-        InDetGlobalBeamSpotMonTool.FilterTools += [monFilledBunchFilterTool]
+    #if jobConfig['UseFilledBCIDsOnly']:
+    #    printfunc ("This is AKMAKMAKM")
+    #    # Selection on non-empty BCIDs
+    #     # This tool is throwing tons of warnings for no good reason, make it quieter.
+    #    from AthenaMonitoring.AthenaMonitoringConf import DQFilledBunchFilterTool
+    #    monFilledBunchFilterTool = DQFilledBunchFilterTool()
+    #    InDetGlobalBeamSpotMonTool.FilterTools += [monFilledBunchFilterTool]
 
+    from LumiBlockComps.BunchCrossingCondAlgDefault import BunchCrossingCondAlgDefault
+    BunchCrossingCondAlgDefault()
 
     printfunc (InDetGlobalBeamSpotMonTool)
     
@@ -74,6 +76,8 @@ if not jobConfig['doMonitoringGlobal']:
     #from GaudiSvc.GaudiSvcConf import THistSvc
     ServiceMgr += CfgMgr.THistSvc()
     ServiceMgr.THistSvc.Output += [ "BeamSpotMonitoring DATAFILE='%s' OPT='RECREATE'" % jobConfig['monfile'] ]
+
+    ServiceMgr.MessageSvc.defaultLimit = 50
 
     # Default postprocessing step(s)
     jobConfig['jobpostprocsteps'] += ' PlotBeamSpotMon'
