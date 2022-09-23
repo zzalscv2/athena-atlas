@@ -11,25 +11,25 @@
 
 #include "AsgMessaging/MessageCheck.h"
 #include "AsgMessaging/MsgStream.h"
-
 namespace asg {
 ANA_MSG_HEADER(SFHelper)
 ANA_MSG_SOURCE(SFHelper, "")
 }
 
 int
-SFHelpers::result(AsgElectronEfficiencyCorrectionTool& tool,
-                  const xAOD::Electron& el,
-                  double& nominalSF,
-                  double& totalPos,
-                  double& totalNeg,
-                  const bool isToys)
+SFHelpers::result(
+  asg::StandaloneToolHandle<IAsgElectronEfficiencyCorrectionTool>& tool,
+  const xAOD::Electron& el,
+  double& nominalSF,
+  double& totalPos,
+  double& totalNeg,
+  const bool isToys)
 {
   using namespace asg::SFHelper;
   ANA_CHECK_SET_TYPE(int);
   setMsgLevel(MSG::INFO);
 
-  CP::SystematicSet systs = tool.recommendedSystematics();
+  CP::SystematicSet systs = tool->recommendedSystematics();
   if (!isToys) {
     /*
      * Split the variation in up and down
@@ -56,28 +56,28 @@ SFHelpers::result(AsgElectronEfficiencyCorrectionTool& tool,
         double total2{};
         double systematic{};
         for (const auto& sys : variations) {
-          if (tool.applySystematicVariation({ sys }) != StatusCode::SUCCESS ||
-              tool.getEfficiencyScaleFactor(el, systematic) !=
+          if (tool->applySystematicVariation({ sys }) != StatusCode::SUCCESS ||
+              tool->getEfficiencyScaleFactor(el, systematic) !=
                 CP::CorrectionCode::Ok) {
             ANA_MSG_ERROR("Error in setting/getting " << sys.name());
             return -999.0;
           }
           total2 += (nominal - systematic) * (nominal - systematic);
         }
-        return  std::sqrt(total2);
+        return std::sqrt(total2);
       };
 
     // Do the work
     // Empty variation is the nominal
-    ANA_CHECK(tool.applySystematicVariation({}));
-    ANA_CHECK(tool.getEfficiencyScaleFactor(el, nominalSF) ==
+    ANA_CHECK(tool->applySystematicVariation({}));
+    ANA_CHECK(tool->getEfficiencyScaleFactor(el, nominalSF) ==
               CP::CorrectionCode::Ok);
     totalNeg = totalSyst(el, negativeVar, nominalSF);
     totalPos = totalSyst(el, positiveVar, nominalSF);
   } else {
     CP::MakeSystematicsVector sysVec;
     sysVec.addGroup("toys");
-    sysVec.setToys(tool.getNumberOfToys());
+    sysVec.setToys(tool->getNumberOfToys());
     sysVec.calc(systs);
     std::vector<CP::SystematicSet> toys = sysVec.result("toys");
     std::vector<double> toysVal{};
@@ -86,10 +86,10 @@ SFHelpers::result(AsgElectronEfficiencyCorrectionTool& tool,
     // Do the work
     for (const auto& sys : toys) {
       double systematic{};
-      ANA_CHECK(tool.applySystematicVariation(sys) == StatusCode::SUCCESS &&
-                tool.getEfficiencyScaleFactor(el, systematic) ==
+      ANA_CHECK(tool->applySystematicVariation(sys) == StatusCode::SUCCESS &&
+                tool->getEfficiencyScaleFactor(el, systematic) ==
                   CP::CorrectionCode::Ok);
-      ANA_MSG_DEBUG(tool.appliedSystematics().name()
+      ANA_MSG_DEBUG(tool->appliedSystematics().name()
                     << " toy Result : " << systematic);
       toysVal.push_back(systematic);
     }

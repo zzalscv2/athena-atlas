@@ -51,6 +51,9 @@ public:
 	virtual CP::SystematicSet recommendedSystematics() const override { return CP::SystematicSet(); }
 	virtual StatusCode applySystematicVariation(const CP::SystematicSet&) override { return StatusCode::SUCCESS; }
 	virtual int systUncorrVariationIndex( const xAOD::Electron &) const override { return 0; }
+  virtual int getNumberOfToys() const override {return 0;}
+  virtual const CP::SystematicSet& appliedSystematics() const { static const CP::SystematicSet dummy ; return dummy;};
+  virtual void printCorrelationModels() const {}
 };
 
 class SimplePhotonEfficiencyCorrectionTool : virtual public IAsgPhotonEfficiencyCorrectionTool, public asg::AsgTool

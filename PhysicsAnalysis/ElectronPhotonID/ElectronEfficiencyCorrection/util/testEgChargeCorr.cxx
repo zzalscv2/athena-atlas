@@ -231,8 +231,6 @@ main(int argc, char* argv[])
   Info(APP_NAME, "===>>>  compared to #%f (from Charge MisId SF)", SF_chargeID);
   Info(APP_NAME, "===>>>  compared to #%f and #%f ", n_chargeID, n_chargeMisID);
 
-  ANA_CHECK(myEgCorrections.finalize());
-
   // Return gracefully:
   return 0;
 }

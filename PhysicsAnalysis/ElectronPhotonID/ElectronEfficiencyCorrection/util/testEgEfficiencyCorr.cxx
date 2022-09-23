@@ -2,7 +2,7 @@
    Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
  */
 
-//Local includes
+// Local includes
 #include "ElectronEfficiencyCorrection/AsgElectronEfficiencyCorrectionTool.h"
 #include "SFHelpers.h"
 // System include(s):
@@ -18,18 +18,16 @@
 #include "xAODEgamma/Electron.h"
 #include "xAODEgamma/ElectronContainer.h"
 
+#include "AsgMessaging/MessageCheck.h"
+#include "AsgMessaging/MsgStream.h"
+#include "AsgTools/StandaloneToolHandle.h"
 // To disable sending data
 #include "xAODRootAccess/tools/TFileAccessTracer.h"
 
-#include "AsgMessaging/MessageCheck.h"
-#include "AsgMessaging/MsgStream.h"
-
-
-namespace asg{
-  ANA_MSG_HEADER (testEgEfficiencyCorr)
-  ANA_MSG_SOURCE (testEgEfficiencyCorr, "") 
+namespace asg {
+ANA_MSG_HEADER(testEgEfficiencyCorr)
+ANA_MSG_SOURCE(testEgEfficiencyCorr, "")
 }
-
 
 int
 main(int argc, char* argv[])
@@ -40,8 +38,8 @@ main(int argc, char* argv[])
   const char* APP_NAME = argv[0];
 
   using namespace asg::testEgEfficiencyCorr;
-  ANA_CHECK_SET_TYPE (int);
-  MSG::Level mylevel=MSG::INFO;
+  ANA_CHECK_SET_TYPE(int);
+  MSG::Level mylevel = MSG::INFO;
   setMsgLevel(mylevel);
   msg().setName(APP_NAME);
 
@@ -64,12 +62,12 @@ main(int argc, char* argv[])
   ANA_CHECK(ifile.get());
 
   // Create a TEvent object:
-  // xAOD::TEvent event( xAOD::TEvent::kBranchAccess );
   xAOD::TEvent event;
 
   // Then the tools
-  AsgElectronEfficiencyCorrectionTool ElEffCorrectionTool(
-    "ElEffCorrectionTool");
+  asg::StandaloneToolHandle<IAsgElectronEfficiencyCorrectionTool>
+    ElEffCorrectionTool(
+      "AsgElectronEfficiencyCorrectionTool/ElEffCorrectionTool");
   ANA_CHECK(ElEffCorrectionTool.setProperty("IdKey", "Medium"));
   ANA_CHECK(ElEffCorrectionTool.setProperty("ForceDataType", 1));
   ANA_CHECK(ElEffCorrectionTool.setProperty("OutputLevel", mylevel));
@@ -80,7 +78,7 @@ main(int argc, char* argv[])
   // Then open the file(s)
   ANA_CHECK(event.readFrom(ifile.get()));
   ANA_MSG_INFO("Number of available events to read in:  "
-           << static_cast<long long int>(event.getEntries()));
+               << static_cast<long long int>(event.getEntries()));
 
   // Decide how many events to run over:
   long long int entries = event.getEntries();
@@ -112,7 +110,7 @@ main(int argc, char* argv[])
         continue;
       }
 
-      int index = ElEffCorrectionTool.systUncorrVariationIndex(*el);
+      int index = ElEffCorrectionTool->systUncorrVariationIndex(*el);
       /*
        * Set up the systematic variations
        */
@@ -126,9 +124,9 @@ main(int argc, char* argv[])
         0);
 
       ANA_MSG_INFO("===> electron : Pt = "
-               << el->pt() << " : eta = " << el->eta()
-               << " : Bin index = " << index << " : SF = " << nominalSF << " + "
-               << totalPos << " - " << totalNeg << " <===");
+                   << el->pt() << " : eta = " << el->eta()
+                   << " : Bin index = " << index << " : SF = " << nominalSF
+                   << " + " << totalPos << " - " << totalNeg << " <===");
     }
   }
 

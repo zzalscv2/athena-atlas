@@ -331,14 +331,6 @@ CP::ElectronChargeEfficiencyCorrectionTool::initialize()
   return StatusCode::SUCCESS;
 }
 
-// =============================================================================
-// Athena finalize method
-// =============================================================================
-StatusCode
-CP::ElectronChargeEfficiencyCorrectionTool::finalize()
-{
-  return StatusCode::SUCCESS;
-}
 
 //---------------------------------------------------------------------------------------
 // Get the scale factor for the electron

@@ -23,7 +23,7 @@ class IParticle;
 
 namespace CP {
 
-class ElectronChargeEfficiencyCorrectionTool
+class ElectronChargeEfficiencyCorrectionTool final
   : virtual public IAsgElectronEfficiencyCorrectionTool
   , public asg::AsgTool
 {
@@ -39,41 +39,38 @@ public:
 
 public:
   /// Gaudi Service Interface method implementations
-  virtual StatusCode initialize();
+  virtual StatusCode initialize() override final;
 
-  /// Gaudi Service Interface method implementations
-  virtual StatusCode finalize();
 
   /// Retrieve the Scale factor
   virtual CP::CorrectionCode getEfficiencyScaleFactor(
     const xAOD::Electron& inputObject,
-    double& sf) const;
+    double& sf) const override final;
 
   /// Decorate the electron
   virtual CP::CorrectionCode applyEfficiencyScaleFactor(
-    const xAOD::Electron& inputObject) const;
+    const xAOD::Electron& inputObject) const override final;
 
   /// Returns whether this tool is affected by the given systematics
   virtual bool isAffectedBySystematic(
-    const SystematicVariation& systematic) const;
+    const SystematicVariation& systematic) const override final;
 
   /// Returns the list of all systematics this tool can be affected by
-  virtual SystematicSet affectingSystematics() const;
+  virtual SystematicSet affectingSystematics() const override final;
 
   /// Returns the list of all systematics this tool recommends to use
-  virtual CP::SystematicSet recommendedSystematics() const;
+  virtual CP::SystematicSet recommendedSystematics() const override final;
 
-  virtual StatusCode applySystematicVariation(const SystematicSet& systConfig);
+  virtual StatusCode applySystematicVariation(const SystematicSet& systConfig) override final;
 
-  StatusCode registerSystematics();
 
   /// returns: the currently applied systematics
-  const CP::SystematicSet& appliedSystematics() const
+  virtual const CP::SystematicSet& appliedSystematics() const override  final
   {
     return *m_appliedSystematics;
   }
 
-  int systUncorrVariationIndex(const xAOD::Electron&) const
+  virtual int systUncorrVariationIndex(const xAOD::Electron&) const override final
   {
     ATH_MSG_WARNING("systUncorrVariationIndex is not implemented in "
                     "ElectronChargeEfficiencyCorrectionTool");
@@ -81,8 +78,24 @@ public:
   }
 
   //
+  //
+  virtual int getNumberOfToys() const override final
+  {
+    ATH_MSG_WARNING("No toysimplemented in "
+                    "ElectronChargeEfficiencyCorrectionTool");
+ 
+    return -1;
+  };
+  /// print available/implemented correlation models
+  virtual void printCorrelationModels() const override final
+  {
+    ATH_MSG_INFO(
+      "ONLY A DEFAULT Correlation model available for now");
+  };
 
+ 
 private:
+  StatusCode registerSystematics();
   /// Get the charge flip rate rate given pt, eta, histogram
   float getChargeFlipRate(double eta,
                           double pt,

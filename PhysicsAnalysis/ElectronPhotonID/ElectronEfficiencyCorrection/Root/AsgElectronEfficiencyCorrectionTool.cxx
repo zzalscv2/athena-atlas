@@ -67,10 +67,11 @@ AsgElectronEfficiencyCorrectionTool::AsgElectronEfficiencyCorrectionTool(
   , m_nUncorrSyst(0)
   , m_UncorrRegions(nullptr)
   , m_nSimpleUncorrSyst(0)
-  , m_prefixUncorr{}
   , m_toysBasename{}
   , m_corrVarUp{}
   , m_corrVarDown{}
+  , m_uncorrVarUp{}
+  , m_uncorrVarDown{}
 {
   // Create an instance of the underlying ROOT tool
   m_rootTool =
@@ -369,13 +370,8 @@ AsgElectronEfficiencyCorrectionTool::getEfficiencyScaleFactor(
   // use et from cluster because it is immutable under syst variations of ele
   // energy scale
   const double energy = cluster->e();
-  if (inputObject.trackParticle()) {
-    et = (std::cosh(inputObject.trackParticle()->eta()) != 0.)
-           ? energy / std::cosh(inputObject.trackParticle()->eta())
-           : 0.;
-  } else {
-    et = (std::cosh(cluster_eta) != 0.) ? energy / std::cosh(cluster_eta) : 0.;
-  }
+  const double parEta = inputObject.eta();
+  et = (std::cosh(parEta) != 0.) ? energy / std::cosh(parEta) : 0.;
 
   // allow for a 5% margin at the lowest pT bin boundary (i.e. increase et by 5%
   // for sub-threshold electrons). This assures that electrons that pass the
@@ -421,15 +417,9 @@ AsgElectronEfficiencyCorrectionTool::getEfficiencyScaleFactor(
   // First the logic if the user requested toys
   if (m_correlation_model == correlationModel::MCTOYS ||
       m_correlation_model == correlationModel::COMBMCTOYS) {
-    if (m_correlation_model == correlationModel::MCTOYS) {
-      auto toy = appliedSystematics().getToyVariationByBaseName(m_toysBasename);
-      toy.second = m_scale_toys;
-      sys = result[MCToysIndex + toy.first - 1] * m_scale_toys;
-    } else if (m_correlation_model == correlationModel::COMBMCTOYS) {
-      auto toy = appliedSystematics().getToyVariationByBaseName(m_toysBasename);
-      toy.second = m_scale_toys;
-      sys = result[MCToysIndex + toy.first - 1] * m_scale_toys;
-    }
+    auto toy = appliedSystematics().getToyVariationByBaseName(m_toysBasename);
+    toy.second = m_scale_toys;
+    sys = result[MCToysIndex + toy.first - 1] * m_scale_toys;
     // return here for Toy variations
     efficiencyScaleFactor = sys;
     return CP::CorrectionCode::Ok;
@@ -438,26 +428,25 @@ AsgElectronEfficiencyCorrectionTool::getEfficiencyScaleFactor(
   else if (m_correlation_model == correlationModel::TOTAL) {
     sys = result[static_cast<size_t>(
       Root::TElectronEfficiencyCorrectionTool::Position::Total)];
-    if (appliedSystematics().matchSystematic(
-          CP::SystematicVariation(m_prefixUncorr + "1NPCOR_PLUS_UNCOR", 1))) {
+    if (appliedSystematics().matchSystematic(m_uncorrVarUp[0])) {
       return HelperFunc(efficiencyScaleFactor, sys);
     }
-    if (appliedSystematics().matchSystematic(
-          CP::SystematicVariation(m_prefixUncorr + "1NPCOR_PLUS_UNCOR", -1))) {
+    if (appliedSystematics().matchSystematic(m_uncorrVarDown[0])) {
       return HelperFunc(efficiencyScaleFactor, -1 * sys);
     }
   }
   // Then the uncorrelated part for the FULL model
   else if (m_correlation_model == correlationModel::FULL) {
     int currentReg = currentUncorrSystRegion(cluster_eta, et);
-    if (appliedSystematics().matchSystematic(CP::SystematicVariation(
-          m_prefixUncorr + Form("UncorrUncertaintyNP%d", currentReg), 1))) {
+    if (currentReg < 0) {
+      return CP::CorrectionCode::OutOfValidityRange;
+    }
+    if (appliedSystematics().matchSystematic(m_uncorrVarUp[currentReg])) {
       sys = result[static_cast<size_t>(
         Root::TElectronEfficiencyCorrectionTool::Position::UnCorr)];
       return HelperFunc(efficiencyScaleFactor, sys);
     }
-    if (appliedSystematics().matchSystematic(CP::SystematicVariation(
-          m_prefixUncorr + Form("UncorrUncertaintyNP%d", currentReg), -1))) {
+    if (appliedSystematics().matchSystematic(m_uncorrVarDown[currentReg])) {
       sys = -1 * result[static_cast<size_t>(
                    Root::TElectronEfficiencyCorrectionTool::Position::UnCorr)];
       return HelperFunc(efficiencyScaleFactor, sys);
@@ -469,15 +458,13 @@ AsgElectronEfficiencyCorrectionTool::getEfficiencyScaleFactor(
       return CP::CorrectionCode::OutOfValidityRange;
     }
 
-    if (appliedSystematics().matchSystematic(CP::SystematicVariation(
-          m_prefixUncorr + Form("UncorrUncertaintyNP%d", currentReg), 1))) {
+    if (appliedSystematics().matchSystematic(m_uncorrVarUp[currentReg])) {
       sys = result[static_cast<size_t>(
         Root::TElectronEfficiencyCorrectionTool::Position::UnCorr)];
       return HelperFunc(efficiencyScaleFactor, sys);
     }
 
-    if (appliedSystematics().matchSystematic(CP::SystematicVariation(
-          m_prefixUncorr + Form("UncorrUncertaintyNP%d", currentReg), -1))) {
+    if (appliedSystematics().matchSystematic(m_uncorrVarDown[currentReg])) {
       sys = -1 * result[static_cast<size_t>(
                    Root::TElectronEfficiencyCorrectionTool::Position::UnCorr)];
       return HelperFunc(efficiencyScaleFactor, sys);
@@ -496,7 +483,8 @@ AsgElectronEfficiencyCorrectionTool::getEfficiencyScaleFactor(
         result[static_cast<size_t>(
           Root::TElectronEfficiencyCorrectionTool::Position::UnCorr)] *
           result[static_cast<size_t>(Root::TElectronEfficiencyCorrectionTool::
-                                       Position::UnCorr)]); // total -stat
+                                       Position::UnCorr)]); // total
+                                                            // -stat
       return HelperFunc(efficiencyScaleFactor, sys);
     }
     if (appliedSystematics().matchSystematic(m_corrVarDown[0])) {
@@ -640,8 +628,8 @@ AsgElectronEfficiencyCorrectionTool::applySystematicVariation(
 StatusCode
 AsgElectronEfficiencyCorrectionTool::InitSystematics()
 {
-  std::string prefix = "EL_EFF_" + m_sysSubstring;
-  m_prefixUncorr = prefix + m_correlation_model_name + "_";
+  const std::string prefix = "EL_EFF_" + m_sysSubstring;
+  const std::string prefixUncorr = prefix + m_correlation_model_name + "_";
   // Toys
   if (m_correlation_model == correlationModel::COMBMCTOYS) {
     m_toysBasename = prefix + "COMBMCTOY";
@@ -664,8 +652,8 @@ AsgElectronEfficiencyCorrectionTool::InitSystematics()
       for (int i = 0; i < m_nCorrSyst; ++i) {
         auto varUp =
           CP::SystematicVariation(prefix + Form("CorrUncertaintyNP%d", i), 1);
-        auto varDown = CP::SystematicVariation(
-          prefix + Form("CorrUncertaintyNP%d", i), -1);
+        auto varDown =
+          CP::SystematicVariation(prefix + Form("CorrUncertaintyNP%d", i), -1);
         m_corrVarUp.push_back(varUp);
         m_corrVarDown.push_back(varDown);
         m_affectedSys.insert(varUp);
@@ -674,23 +662,34 @@ AsgElectronEfficiencyCorrectionTool::InitSystematics()
   }
   // Different tratement for the uncorrelated per model
   if (m_correlation_model == correlationModel::TOTAL) {
-    m_affectedSys.insert(
-      CP::SystematicVariation(m_prefixUncorr + "1NPCOR_PLUS_UNCOR", 1));
-    m_affectedSys.insert(
-      CP::SystematicVariation(m_prefixUncorr + "1NPCOR_PLUS_UNCOR", -1));
+    auto varUp = CP::SystematicVariation(prefixUncorr + "1NPCOR_PLUS_UNCOR", 1);
+    auto varDown =
+      CP::SystematicVariation(prefixUncorr + "1NPCOR_PLUS_UNCOR", -1);
+    m_uncorrVarUp.push_back(varUp);
+    m_uncorrVarDown.push_back(varDown);
+    m_affectedSys.insert(varUp);
+    m_affectedSys.insert(varDown);
   } else if (m_correlation_model == correlationModel::FULL) {
     for (int i = 0; i < m_nUncorrSyst; ++i) {
-      m_affectedSys.insert(CP::SystematicVariation(
-        m_prefixUncorr + Form("UncorrUncertaintyNP%d", i), 1));
-      m_affectedSys.insert(CP::SystematicVariation(
-        m_prefixUncorr + Form("UncorrUncertaintyNP%d", i), -1));
+      auto varUp = CP::SystematicVariation(
+        prefixUncorr + Form("UncorrUncertaintyNP%d", i), 1);
+      auto varDown = CP::SystematicVariation(
+        prefixUncorr + Form("UncorrUncertaintyNP%d", i), -1);
+      m_uncorrVarUp.push_back(varUp);
+      m_uncorrVarDown.push_back(varDown);
+      m_affectedSys.insert(varUp);
+      m_affectedSys.insert(varDown);
     }
   } else if (m_correlation_model == correlationModel::SIMPLIFIED) {
     for (int i = 0; i < m_nSimpleUncorrSyst; ++i) {
-      m_affectedSys.insert(CP::SystematicVariation(
-        m_prefixUncorr + Form("UncorrUncertaintyNP%d", i), 1));
-      m_affectedSys.insert(CP::SystematicVariation(
-        m_prefixUncorr + Form("UncorrUncertaintyNP%d", i), -1));
+      auto varUp = CP::SystematicVariation(
+        prefixUncorr + Form("UncorrUncertaintyNP%d", i), 1);
+      auto varDown = CP::SystematicVariation(
+        prefixUncorr + Form("UncorrUncertaintyNP%d", i), -1);
+      m_uncorrVarUp.push_back(varUp);
+      m_uncorrVarDown.push_back(varDown);
+      m_affectedSys.insert(varUp);
+      m_affectedSys.insert(varDown);
     }
   }
   return StatusCode::SUCCESS;
