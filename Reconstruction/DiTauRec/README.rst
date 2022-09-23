@@ -328,3 +328,12 @@ To see all variables available in the DiTau EDM consult `DiTauJet_v1.cxx <https:
 |
 |
 |
+
+MuHad Tau Reconstruction and Identification
+===========================================
+Lianyou SHAN,  Aug 14, 2022
+
+Please pardon a borrowing of a corner in this package to accommodate some codes ( MuHad*.cxx ), 
+by which one just expects to remove possible muons from tau (seed) then re-use conventional tau reco and RNN.
+This is expected to run only from AOD to dAOD by riding on the DerivationFramework, limited in R21.2.
+

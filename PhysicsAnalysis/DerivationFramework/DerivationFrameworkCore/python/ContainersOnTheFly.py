@@ -125,4 +125,6 @@ ContainersOnTheFly = [
                         ["BTagging_AntiKt4EMPFlow_201903Aux","xAOD::BTaggingAuxContainer"],
                         ["DiTauJetsLowPt","xAOD::DiTauJetContainer"],
                         ["DiTauJetsLowPtAux","xAOD::DiTauJetAuxContainer"],
+                        ["MuRmTauJets","xAOD::TauJetContainer"],
+                        ["MuRmTauJetsAux","xAOD::TauJetAuxContainer"]
 ]

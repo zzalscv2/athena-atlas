@@ -21,7 +21,7 @@ public:
  //-------------------------------------------------------------
  //! Destructor
  //-------------------------------------------------------------
- virtual ~VertexFinder();
+ virtual ~VertexFinder() ;
 
  virtual StatusCode initialize();
 

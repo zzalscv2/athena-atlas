@@ -8,6 +8,7 @@ FullListOfSmartContainers = [
    "TauMVATESJets",
    "DiTauJets",
    "DiTauJetsLowPt",
+   "MuRmTauJets",
    "MET_Reference_AntiKt4LCTopo",
    "MET_Reference_AntiKt4EMTopo",
    "MET_Reference_AntiKt4EMPFlow",

@@ -1061,6 +1061,19 @@ class WriteDAOD_TAUP5Stream(JobProperty):
 jobproperties.DerivationFrameworkProdFlags.add_JobProperty(WriteDAOD_TAUP5Stream)
 listAODtoDPD.append(WriteDAOD_TAUP5Stream.StreamName)
 
+class WriteDAOD_TAUP6Stream(JobProperty):
+    """TAUP6: tau Re-Identification with overlaped muons removed """
+    statusOn = True
+    allowedTypes = ['bool']
+    StoredValue = False
+    StreamName = 'StreamDAOD_TAUP6'
+    FileName = ''
+    isVirtual = False
+    DPDMakerScript = "DerivationFrameworkTau/TAUP6.py"
+    pass
+jobproperties.DerivationFrameworkProdFlags.add_JobProperty(WriteDAOD_TAUP6Stream)
+listAODtoDPD.append(WriteDAOD_TAUP6Stream.StreamName)
+
 #################################
 # Defined by the SUSY group
 #################################

@@ -54,7 +54,7 @@ StatusCode SeedJetBuilder::execute(DiTauCandidateData * data) {
 
 	xAOD::DiTauJet* pDiTau = data->xAODDiTau;
 
-	if (pDiTau == NULL) {
+	if (pDiTau == nullptr ) {
 		ATH_MSG_ERROR("no di-tau candidate given");
 		return StatusCode::FAILURE;
 	}

@@ -344,6 +344,9 @@ class SlimmingHelper:
                 elif collectionName=="DiTauJetsLowPt":
                         from DerivationFrameworkTau.DiTauJetsLowPtCPContent import DiTauJetsLowPtCPContent
                         items.extend(DiTauJetsLowPtCPContent)
+                elif collectionName=="MuRmTauJets" :
+                        from DerivationFrameworkTau.MuHadTauCPContent import MuHadTauCPContent
+                        items.extend( MuHadTauCPContent ) 
                 elif collectionName=="MET_Reference_AntiKt4LCTopo":
                         from DerivationFrameworkJetEtMiss.MET_Reference_AntiKt4LCTopoCPContent import MET_Reference_AntiKt4LCTopoCPContent
                         #from DerivationFrameworkCore.MET_Reference_AntiKt4LCTopoCPContent import MET_Reference_AntiKt4LCTopoCPContent

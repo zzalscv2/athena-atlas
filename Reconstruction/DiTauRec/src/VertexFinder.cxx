@@ -133,7 +133,7 @@ ElementLink<xAOD::VertexContainer> VertexFinder::getPV_TJVA(const xAOD::DiTauJet
     }
 
     // Get the TVA object
-    const jet::TrackVertexAssociation* tva = NULL;
+    const jet::TrackVertexAssociation* tva = nullptr ;
     if (evtStore()->retrieve(tva, m_trackVertexAssocName).isFailure()) {
         ATH_MSG_ERROR("Could not retrieve the TrackVertexAssociation from evtStore: " << m_trackVertexAssocName);
         return ElementLink<xAOD::VertexContainer>();
