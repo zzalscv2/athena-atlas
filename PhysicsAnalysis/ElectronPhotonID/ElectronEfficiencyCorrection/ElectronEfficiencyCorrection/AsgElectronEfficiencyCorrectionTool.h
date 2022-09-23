@@ -32,7 +32,7 @@ class TElectronEfficiencyCorrectionTool;
 #include "PATInterfaces/CorrectionCode.h"
 #include "PATInterfaces/SystematicRegistry.h"
 
-class AsgElectronEfficiencyCorrectionTool
+class AsgElectronEfficiencyCorrectionTool final
   : virtual public IAsgElectronEfficiencyCorrectionTool
   , public asg::AsgMetadataTool
 {
@@ -42,27 +42,47 @@ class AsgElectronEfficiencyCorrectionTool
 public:
   /// Standard constructor
   AsgElectronEfficiencyCorrectionTool(const std::string& myname);
-
   /// Standard destructor
-  virtual ~AsgElectronEfficiencyCorrectionTool();
-
+  virtual ~AsgElectronEfficiencyCorrectionTool() override final;
   /// Gaudi Service Interface method implementations
-  virtual StatusCode initialize();
+  virtual StatusCode initialize() override final;
 
-  /// Metadata methods
-  virtual StatusCode beginInputFile();
-  virtual StatusCode beginEvent();
+  /*
+   * Metadata tool methods
+   */
+  virtual StatusCode beginInputFile() override final;
+  virtual StatusCode beginEvent() override final;
 
-  int getNumberOfToys() { return m_number_of_toys; };
+  /*
+   * ISystematic tool methods
+   */
+  /// returns: the list of all systematics this tool can be affected by
+  virtual CP::SystematicSet affectingSystematics() const override final;
+  /// returns: the list of all systematics this tool recommends to use
+  virtual CP::SystematicSet recommendedSystematics() const override final;
+  /// returns: whether this tool is affected by the given systematis
+  virtual bool isAffectedBySystematic(
+    const CP::SystematicVariation& systematic) const override final;
+  /// Configure this tool for the given systematics
+  virtual StatusCode applySystematicVariation(
+    const CP::SystematicSet& systConfig) override final;
 
-  CP::CorrectionCode getEfficiencyScaleFactor(
+  /*
+   * IAsgElectronEfficiencyCorrectionTool methods
+   */
+  virtual CP::CorrectionCode getEfficiencyScaleFactor(
     const xAOD::Electron& inputObject,
-    double& efficiencyScaleFactor) const;
-  CP::CorrectionCode applyEfficiencyScaleFactor(
-    const xAOD::Electron& inputObject) const;
-
+    double& efficiencyScaleFactor) const override final;
+  //
+  virtual CP::CorrectionCode applyEfficiencyScaleFactor(
+    const xAOD::Electron& inputObject) const override final;
+  //
+  virtual int getNumberOfToys() const override final
+  {
+    return m_number_of_toys;
+  };
   /// print available/implemented correlation models
-  void printCorrelationModels()
+  virtual void printCorrelationModels() const override final
   {
     ATH_MSG_INFO(
       " Available Correlation Models for the ElectronEfficiencyCorrectionTool");
@@ -74,46 +94,33 @@ public:
     ATH_MSG_INFO("TOTAL");
   };
 
-  /// returns: whether this tool is affected by the given systematis
-  virtual bool isAffectedBySystematic(
-    const CP::SystematicVariation& systematic) const;
-
-  /// returns: the list of all systematics this tool can be affected by
-  virtual CP::SystematicSet affectingSystematics() const;
-
-  /// returns: the list of all systematics this tool recommends to use
-  virtual CP::SystematicSet recommendedSystematics() const;
-
   /// returns: the currently applied systematics
-  const CP::SystematicSet& appliedSystematics() const
+  virtual const CP::SystematicSet& appliedSystematics() const override final
   {
     return *m_appliedSystematics;
   }
 
-  /// Configure this tool for the given systematics
-  virtual StatusCode applySystematicVariation(
-    const CP::SystematicSet& systConfig);
+  virtual int systUncorrVariationIndex(
+    const xAOD::Electron& inputObject) const override final;
 
-  StatusCode registerSystematics();
-
-  int systUncorrVariationIndex(const xAOD::Electron& inputObject) const;
-
-  // Private member variables
 private:
-  // To check if the metadat can be retrieved
-  bool m_metadata_retrieved = false;
-
-  // Get the simulation type from metadata
-  StatusCode get_simType_from_metadata(
-    PATCore::ParticleDataType::DataType& result) const;
+  StatusCode registerSystematics();
 
   int currentSimplifiedUncorrSystRegion(const double cluster_eta,
                                         const double et) const;
   int currentUncorrSystRegion(const double cluster_eta, const double et) const;
 
-  /// The main calculate method: the actual correction factors are determined
-  /// here
+  /// initialize the systematics
   StatusCode InitSystematics();
+
+  // Gets the correction filename from map
+  virtual StatusCode getFile(const std::string& recokey,
+                             const std::string& idkey,
+                             const std::string& isokey,
+                             const std::string& trigkey);
+  // Get the simulation type from metadata
+  StatusCode get_simType_from_metadata(
+    PATCore::ParticleDataType::DataType& result) const;
 
   // struct for toys
   struct SystConf
@@ -123,11 +130,8 @@ private:
     float m_toy_scale;
   };
 
-  // Gets the correction filename from map
-  virtual StatusCode getFile(const std::string& recokey,
-                             const std::string& idkey,
-                             const std::string& isokey,
-                             const std::string& trigkey);
+  // To check if the metadat can be retrieved
+  bool m_metadata_retrieved = false;
 
   /// Pointer to the underlying ROOT based tool
   Root::TElectronEfficiencyCorrectionTool* m_rootTool;
@@ -201,12 +205,12 @@ private:
   TH2F* m_UncorrRegions;
   int m_nSimpleUncorrSyst;
 
-  //Caching of variations we know after initialize
-  std::string m_prefixUncorr;
+  // Caching of variations we know after initialize
   std::string m_toysBasename;
   std::vector<CP::SystematicVariation> m_corrVarUp;
   std::vector<CP::SystematicVariation> m_corrVarDown;
-
+  std::vector<CP::SystematicVariation> m_uncorrVarUp;
+  std::vector<CP::SystematicVariation> m_uncorrVarDown;
 
 }; // End: class definition
 

@@ -24,6 +24,7 @@
 
 #include "AsgMessaging/MessageCheck.h"
 #include "AsgMessaging/MsgStream.h"
+#include "AsgTools/StandaloneToolHandle.h"
 
 namespace asg {
 ANA_MSG_HEADER(msgSelectorCheck)
@@ -126,8 +127,9 @@ main(int argc, char* argv[])
   xAOD::TStore store;
 
   // Configure the tool based on the inputs
-  AsgElectronEfficiencyCorrectionTool ElEffCorrectionTool(
-    "ElEffCorrectionTool");
+  asg::StandaloneToolHandle<IAsgElectronEfficiencyCorrectionTool>
+    ElEffCorrectionTool(
+      "AsgElectronEfficiencyCorrectionTool/ElEffCorrectionTool");
   if (!fileName.empty()) {
     std::vector<std::string> inputFiles{ fileName };
     ANA_CHECK(
@@ -170,7 +172,7 @@ main(int argc, char* argv[])
    * Potentiallly we can make this part more clever, for now since it is an
    * util I did not try to optimise too much.
    */
-  int index = ElEffCorrectionTool.systUncorrVariationIndex(el);
+  int index = ElEffCorrectionTool->systUncorrVariationIndex(el);
   /*
    * Set up the systematic variations
    * 2 cases one for "continuous" one for "toys"
