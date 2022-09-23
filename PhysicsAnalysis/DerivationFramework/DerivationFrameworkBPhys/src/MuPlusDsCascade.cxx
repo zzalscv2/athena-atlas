@@ -86,6 +86,12 @@ namespace DerivationFramework {
             if(std::abs(m_Dx_pid) == 4122) m_vtx1Daug3MassHypo = BPhysPVCascadeTools::getParticleMass(pdt, PDG::p_plus); //Lambda_c+
             else m_vtx1Daug3MassHypo = BPhysPVCascadeTools::getParticleMass(pdt, PDG::pi_plus); //Ds+, D+
         }
+
+        //======================== inDetTrack selection tool ==================
+        m_trackSelectionTools = std::make_unique<InDet::InDetTrackSelectionTool>("TrackSelector");
+        ANA_CHECK(m_trackSelectionTools->setProperty("CutLevel", "LoosePrimary"));
+        ANA_CHECK(m_trackSelectionTools->initialize() );
+        //=====================================================================
         return StatusCode::SUCCESS;
     }
 
@@ -641,48 +647,41 @@ namespace DerivationFramework {
         //-------------------------------------------------------------------------------
         // Select the D_s+/D+/Lambda_c+ candidates before calling cascade fit
         std::vector<const xAOD::Vertex*> selectedDxCandidates;
-        
-        //======================== inDetTrack selection tool ==================
-        InDet::InDetTrackSelectionTool m_trackSelectionTools( "TrackSelection" );
-        ANA_CHECK(m_trackSelectionTools.setProperty("CutLevel", "LoosePrimary"));
-        ANA_CHECK(m_trackSelectionTools.initialize() );
-        //=====================================================================
-
+        SG::AuxElement::Accessor<Char_t> flagAccDP("passed_Dp");
+        SG::AuxElement::Accessor<Char_t> flagAccDM("passed_Dm");
+        SG::AuxElement::Accessor<Char_t> flagAccDS("passed_Ds");
         for(auto vxcItr : *dxContainer){
 
            // Check the passed flag first
            xAOD::Vertex* vtx = vxcItr;
            if(std::abs(m_Dx_pid)==431) { // D_s+/-
-               SG::AuxElement::Accessor<Char_t> flagAcc1("passed_Ds");
-               if(flagAcc1.isAvailable(*vtx)){
-                  if(!flagAcc1(*vtx)) continue;
+               if(flagAccDS.isAvailable(*vtx)){
+                  if(!flagAccDS(*vtx)) continue;
                }
            }
 
            if(std::abs(m_Dx_pid)==411) { // D+/-
-               SG::AuxElement::Accessor<Char_t> flagAcc1("passed_Dp");
-               SG::AuxElement::Accessor<Char_t> flagAcc2("passed_Dm");
                bool isDp(true);
                bool isDm(true);
-               if(flagAcc1.isAvailable(*vtx)){
-                  if(!flagAcc1(*vtx)) isDp = false;
+               if(flagAccDP.isAvailable(*vtx)){
+                  if(!flagAccDP(*vtx)) isDp = false;
                }
-               if(flagAcc2.isAvailable(*vtx)){
-                  if(!flagAcc2(*vtx)) isDm = false;
+               if(flagAccDM.isAvailable(*vtx)){
+                  if(!flagAccDM(*vtx)) isDm = false;
                }
                if(!(isDp||isDm)) continue;
            } 
 
            // Track selection - Loose
-           if ( !m_trackSelectionTools.accept(vxcItr->trackParticle(0)) ){
+           if ( !m_trackSelectionTools->accept(vxcItr->trackParticle(0)) ){
                 ATH_MSG_DEBUG(" Original Dx/Lambda_c candidate rejected by the track's cut level - loose ");
                 continue;
            }
-           if ( !m_trackSelectionTools.accept(vxcItr->trackParticle(1)) ){
+           if ( !m_trackSelectionTools->accept(vxcItr->trackParticle(1)) ){
                 ATH_MSG_DEBUG(" Original Dx/Lambda_c candidate rejected by the track's cut level - loose ");
                 continue;
            }
-           if ( !m_trackSelectionTools.accept(vxcItr->trackParticle(2)) ){
+           if ( !m_trackSelectionTools->accept(vxcItr->trackParticle(2)) ){
                 ATH_MSG_DEBUG(" Original Dx/Lambda_c candidate rejected by the track's cut level - loose ");
                 continue;
            }
