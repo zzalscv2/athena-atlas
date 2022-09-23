@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2017 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef MUONALIGNERRORBASE_ALIGNMENTDEVIATION_H
@@ -19,6 +19,10 @@ namespace Trk {
      */
     class AlignmentDeviation {
     public:
+        AlignmentDeviation (const std::vector<const Trk::RIO_OnTrack*>& hits,  // not owned
+                            std::size_t hitshash,
+                            bool hitshashdone);
+
         virtual ~AlignmentDeviation() {}
 
         /**
@@ -68,6 +72,16 @@ namespace Trk {
         std::size_t m_hitshash;
         bool m_hitshashdone;
     };
+
+    inline
+    AlignmentDeviation::AlignmentDeviation (const std::vector<const Trk::RIO_OnTrack*>& hits,  // not owned
+                                            std::size_t hitshash,
+                                            bool hitshashdone)
+      : m_hits (hits),
+        m_hitshash (hitshash),
+        m_hitshashdone (hitshashdone)
+    {
+    }
 
     inline void AlignmentDeviation::getListOfHits(std::vector<const Trk::RIO_OnTrack*>& hits) const { hits = m_hits; }
 

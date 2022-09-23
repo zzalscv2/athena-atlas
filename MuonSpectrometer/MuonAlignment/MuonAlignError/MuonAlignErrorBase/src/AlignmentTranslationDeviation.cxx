@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2020 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "MuonAlignErrorBase/AlignmentTranslationDeviation.h"
@@ -10,10 +10,9 @@ using namespace MuonAlign;
 
 AlignmentTranslationDeviation::AlignmentTranslationDeviation(const Amg::Vector3D& u, double sigma,
                                                              const std::vector<const Trk::RIO_OnTrack*>& hits) :
-    m_u(u.unit()), m_sigma(sigma) {
-    m_hits = hits;
-    m_hitshash = 0;
-    m_hitshashdone = false;
+    AlignmentDeviation (hits, 0, false),
+    m_u(u.unit()), m_sigma(sigma)
+{
 }
 
 int AlignmentTranslationDeviation::nPar() const { return 1; }
