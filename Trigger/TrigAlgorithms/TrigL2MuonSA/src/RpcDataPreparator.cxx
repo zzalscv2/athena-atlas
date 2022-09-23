@@ -205,12 +205,11 @@ StatusCode TrigL2MuonSA::RpcDataPreparator::prepareData(const TrigRoiDescriptor*
        //Determine deta, dphi threshold in case of dynamicDeltaRpcMode
        if( dynamicDeltaRpc ){
          ATH_MSG_DEBUG("Collected RPC hits by MultiMuonTriggerMode");
-         m_recRPCRoiTool->roiData( p_roids->roiWord() );
          double RoiPhiMin(0);
          double RoiPhiMax(0);
          double RoiEtaMin(0);
          double RoiEtaMax(0);
-         m_recRPCRoiTool->RoIsize(p_roids->roiWord(), RoiEtaMin, RoiEtaMax, RoiPhiMin, RoiPhiMax);
+         ATH_CHECK( m_recRPCRoiTool->RoIsize(p_roids->roiWord(), RoiEtaMin, RoiEtaMax, RoiPhiMin, RoiPhiMax) );
          ATH_MSG_DEBUG( "RoI Phi min = " << RoiPhiMin << " RoI Phi max = " << RoiPhiMax << " RoI Eta min = " << RoiEtaMin << " RoI Eta max = " << RoiEtaMax );
          deta_thr = std::abs( RoiEtaMax - RoiEtaMin )/2. + dynamic_add;
          dphi_thr = std::abs( std::acos( std::cos( RoiPhiMax - RoiPhiMin ) ) )/2. + dynamic_add;

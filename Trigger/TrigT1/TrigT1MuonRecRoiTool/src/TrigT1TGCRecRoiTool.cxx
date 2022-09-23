@@ -35,9 +35,8 @@ namespace LVL1 {
     return StatusCode::SUCCESS;
   }
  
-  TrigT1MuonRecRoiData TrigT1TGCRecRoiTool::roiData( const unsigned int & roiWord)const
+  StatusCode TrigT1TGCRecRoiTool::roiData( const unsigned int & roiWord, TrigT1MuonRecRoiData& data )const
   {
-    TrigT1MuonRecRoiData data;
     // get SLB parameters
     TGCIdBase tgcIdBase;
     unsigned int sectorID, roiNumber,r,phi;
@@ -47,12 +46,12 @@ namespace LVL1 {
       ATH_MSG_ERROR( "TGCRecRoiSvc::reconstruct  : BAD roiWord. " 
                      << "Can not get SLBparameters "
                      << " roi word = " << std::hex << roiWord  );
-      return data;
+      return StatusCode::FAILURE;
     }
     if (tgcIdBase.getSideType() == TGCIdBase::NoSideType) {
       ATH_MSG_ERROR( "TGCRecRoiSvc::reconstruct  : "
                      << "This roiWord is not of TGC" );
-      return data;
+      return StatusCode::FAILURE;
     } 
     
     
@@ -63,7 +62,7 @@ namespace LVL1 {
     if (w_asdout == nullptr) {
       ATH_MSG_WARNING( "TGCRecRoiSvc::reconstruct  : "
 		       << "Cannot get ASD out for Wire " );
-      return data;
+      return StatusCode::FAILURE;
     }
     
     std::unique_ptr<TGCIdBase> s_asdout =
@@ -71,7 +70,7 @@ namespace LVL1 {
     if (s_asdout == nullptr) {
       ATH_MSG_WARNING( "TGCRecRoiSvc::reconstruct  : "
 		       << "Cannot get ASD out for Strip " );
-      return data;
+      return StatusCode::FAILURE;
     }
     
     // wire(eta)
@@ -91,13 +90,13 @@ namespace LVL1 {
     data.set_phi(s_phi);
 
     double etaMin, etaMax, phiMin, phiMax;
-    RoIsize(roiWord,etaMin,etaMax,phiMin,phiMax);
+    if(RoIsize(roiWord,etaMin,etaMax,phiMin,phiMax)!=StatusCode::SUCCESS) return StatusCode::FAILURE;
     data.set_etaMin(etaMin);
     data.set_etaMax(etaMax);
     data.set_phiMin(phiMin);
     data.set_phiMax(phiMax);
 
-    return data;
+    return StatusCode::SUCCESS;
   }
   
   bool TrigT1TGCRecRoiTool::getSLBparameters(const unsigned int & roiWord,
@@ -372,9 +371,9 @@ namespace LVL1 {
 
 
 
-  void TrigT1TGCRecRoiTool::RoIsize(const unsigned int & roiWord,
-				    double & etaMin, double & etaMax, 
-				    double & phiMin, double & phiMax) const 
+  StatusCode TrigT1TGCRecRoiTool::RoIsize(const unsigned int & roiWord,
+					  double & etaMin, double & etaMax,
+					  double & phiMin, double & phiMax) const
   {
     // init
     etaMin=etaMax=phiMin=phiMax=0;
@@ -391,13 +390,13 @@ namespace LVL1 {
       if (! getSLBparameters(roiWord,tgcIdBase,sectorID,roiNumber,r,phi,wireSLBId,block)) {
 	ATH_MSG_ERROR( "TGCRecRoiSvc::RoIsize  : "
 		       << "BAD roiWord " );
-	return;
+	return StatusCode::FAILURE;
       }
       
       if (tgcIdBase.getSideType() == TGCIdBase::NoSideType) {
 	ATH_MSG_ERROR( "TGCRecRoiSvc::RoIsize  : "
 		       << "This roiWord is not of TGC" );
-	return;
+	return StatusCode::FAILURE;
       }
       
       int wireOffset = offset;
@@ -456,6 +455,9 @@ namespace LVL1 {
       // SWAP(phiMin, phiMax);
       double temp=phiMin; phiMin=phiMax; phiMax=temp;
     }
+
+    return StatusCode::SUCCESS;
+
   }
   
   bool TrigT1TGCRecRoiTool::dumpRoiMap(const std::string& filename) const
@@ -487,7 +489,8 @@ namespace LVL1 {
 	      sectorAddress |= 0x80;
 	      sectorAddress |= (side==0)?(0x1):(0x0);
 	      unsigned long int roiWord = (m_useRun3Config) ? (roi+(sectorAddress<<21)) : ((roi<<2)+(sectorAddress<<14));
-	      auto data = roiData(roiWord);
+	      TrigT1MuonRecRoiData data;
+	      if(!roiData(roiWord,data).isSuccess())continue;
 	      roi_map << std::setw(8)  << side     << " "
 		      << std::setw(8)  << sector   << " "
 		      << std::setw(8)  << roi      << " "
@@ -511,7 +514,8 @@ namespace LVL1 {
 	      sectorAddress |= 0x80;
 	      sectorAddress |= (side==0)?(0x1):(0x0);
 	      unsigned long int roiWord = (m_useRun3Config) ? (roi+(sectorAddress<<21)) : ((roi<<2)+(sectorAddress<<14));
-	      auto data = roiData(roiWord);
+	      TrigT1MuonRecRoiData data;
+	      if(!roiData(roiWord,data).isSuccess())continue;
 	      roi_map << std::setw(8)  << side     << " "
 		      << std::setw(8)  << sector   << " "
 		      << std::setw(8)  << roi      << " "
