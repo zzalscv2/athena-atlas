@@ -189,7 +189,7 @@ def jetHIRecoSequence(configFlags, clustersKey, towerKey, **jetRecoDict):
 
     # First iteration!
     iter0=HLTAddIteration(jetsFullName_seed0, eventShapeKey, clustersKey, map_tool=eventShapeMapTool, assoc_name=associationName, suffix="iter0") # subtract UE from jets
-    jetHIRecSeq += HLTRunTools([iter0], "jetToolRunner_iter0", "jetalgHI_iter0") 
+    jetHIRecSeq += HLTRunTools([iter0], "jetalgHI_iter0") 
     modulator0=iter0.Modulator
     subtractor0=iter0.Subtractor
 
@@ -197,7 +197,7 @@ def jetHIRecoSequence(configFlags, clustersKey, towerKey, **jetRecoDict):
 
     cluster_key_iter0_deep=clustersKey+"_iter0_temp"
     happy_iter0_Tool = ApplySubtractionToClustersHLT(EventShapeKey="HLTHIEventShapeWeighted_iter0", ClusterKey=clustersKey, OutClusterKey=cluster_key_iter0_deep, Modulator=modulator0, EventShapeMapTool=eventShapeMapTool, Subtractor=subtractor0, SetMoments=False, ApplyOriginCorrection=False)
-    jetHIRecSeq += HLTRunTools([happy_iter0_Tool], "jetToolRunner_clusterSub_iter0", "jetalgHI_clusterSub_iter0") 
+    jetHIRecSeq += HLTRunTools([happy_iter0_Tool], "jetalgHI_clusterSub_iter0") 
 
     GetConstituentsModifierToolHLT(name="HIJetConstituentModifierTool", ClusterKey=cluster_key_iter0_deep, ApplyOriginCorrection=False, label="HLTHIJetJetConstMod_iter0")
 
@@ -216,12 +216,12 @@ def jetHIRecoSequence(configFlags, clustersKey, towerKey, **jetRecoDict):
 
     HLTMakeSubtractionTool(iter1.OutputEventShapeKey, Modulator=modulator1, EventShapeMapTool=eventShapeMapTool, label="HLTHIJetConstSub_iter1")
 
-    jetHIRecSeq += HLTRunTools([iter1], "jetToolRunner_clusterSub_egamma", "jetalgHI_clusterSub_egamma") 
+    jetHIRecSeq += HLTRunTools([iter1], "jetalgHI_clusterSub_egamma") 
 
     # 
     cluster_key_final_deep=clustersKey+"_final"
     subToClusterTool = ApplySubtractionToClustersHLT(EventShapeKey="HLTHIEventShape_iter1", ClusterKey=clustersKey, OutClusterKey=cluster_key_final_deep, Modulator=modulator1, EventShapeMapTool=eventShapeMapTool, Subtractor=subtractor1, SetMoments=False, ApplyOriginCorrection=False)
-    jetHIRecSeq += HLTRunTools([subToClusterTool], "jetToolRunner_clusterSub", "jetalgHI_clusterSub") 
+    jetHIRecSeq += HLTRunTools([subToClusterTool], "jetalgHI_clusterSub") 
 
     GetConstituentsModifierToolHLT(name="HIJetConstituentModifierTool", ClusterKey=cluster_key_final_deep, ApplyOriginCorrection=False, label="HLTHIJetJetConstMod_iter1")
 
@@ -242,11 +242,10 @@ def jetHIRecoSequence(configFlags, clustersKey, towerKey, **jetRecoDict):
     jetsOut = jetsFinal
     return jetHIRecSeq, jetsOut, jetDef_final
 
-def HLTRunTools(toollist, toolName, algoName):
-    runner = CompFactory.JetToolRunner(toolName,
-                          Tools=toollist)
+def HLTRunTools(toollist, algoName):
+    
     theAlg = CompFactory.JetAlgorithm(algoName)
-    theAlg.Tools = [runner]
+    theAlg.Tools = toollist 
    
     return theAlg
 
