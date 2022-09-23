@@ -333,7 +333,7 @@ Trk::TrackingGeometry* Calo::CaloTrackingGeometryBuilder::trackingGeometry(Trk::
   // PART 1 : Liquid Argon Volumes ===========================================================================================
   // get the Tracking Volumes from the LAr Builder
   const CaloDetDescrManager* caloDDM = nullptr;
-  if (detStore()->retrieve(caloDDM).isFailure()) {
+  if (detStore()->retrieve(caloDDM,"CaloMgr").isFailure()) {
     ATH_MSG_WARNING("Failed to retrieve calo Det Descr manager");
     return nullptr;
   }
