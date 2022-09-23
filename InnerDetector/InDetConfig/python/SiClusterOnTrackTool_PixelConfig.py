@@ -11,8 +11,7 @@ from AthenaConfiguration.Enums import BeamType
 def InDetPixelClusterOnTrackToolBaseCfg(flags, name="PixelClusterOnTrackTool", **kwargs):
     from PixelConditionsAlgorithms.PixelConditionsConfig import PixelDistortionAlgCfg, PixelOfflineCalibCondAlgCfg
     acc = PixelOfflineCalibCondAlgCfg(flags)    # To produce PixelOfflineCalibData
-    if not flags.InDet.Tracking.doDBMstandalone:
-        acc.merge(PixelDistortionAlgCfg(flags)) # To produce PixelDistortionData
+    acc.merge(PixelDistortionAlgCfg(flags)) # To produce PixelDistortionData
 
     from TrkConfig.TrkRIO_OnTrackCreatorConfig import RIO_OnTrackErrorScalingCondAlgCfg
     acc.merge(RIO_OnTrackErrorScalingCondAlgCfg(flags)) # To produce RIO_OnTrackErrorScaling
@@ -22,11 +21,11 @@ def InDetPixelClusterOnTrackToolBaseCfg(flags, name="PixelClusterOnTrackTool", *
         kwargs.setdefault("LorentzAngleTool", acc.popToolsAndMerge(
             PixelLorentzAngleToolCfg(flags)))
 
-    if flags.Beam.Type is BeamType.Cosmics or flags.InDet.Tracking.doDBMstandalone:
+    if flags.Beam.Type is BeamType.Cosmics:
         kwargs.setdefault("ErrorStrategy", 0)
         kwargs.setdefault("PositionStrategy", 0)
 
-    kwargs.setdefault("DisableDistortions", flags.InDet.Tracking.doDBMstandalone)
+    kwargs.setdefault("DisableDistortions", False) ## Is this correct?
     kwargs.setdefault("applyNNcorrection", flags.InDet.Tracking.doPixelClusterSplitting and flags.InDet.Tracking.pixelClusterSplittingType == "NeuralNet")
     kwargs.setdefault("NNIBLcorrection", flags.InDet.Tracking.doPixelClusterSplitting and flags.InDet.Tracking.pixelClusterSplittingType == "NeuralNet")
     split_cluster_map_extension = flags.InDet.Tracking.ActivePass.extension if flags.InDet.Tracking.ActivePass.useTIDE_Ambi else ""
@@ -71,15 +70,6 @@ def InDetPixelClusterOnTrackToolCfg(flags, name="InDetPixelClusterOnTrackTool", 
 def InDetBroadPixelClusterOnTrackToolCfg(flags, name='InDetBroadPixelClusterOnTrackTool', **kwargs):
     kwargs.setdefault("ErrorStrategy", 0)
     return InDetPixelClusterOnTrackToolCfg(flags, name, **kwargs)
-
-def InDetPixelClusterOnTrackToolDBMCfg(flags, name='InDetPixelClusterOnTrackToolDBM', **kwargs):
-    kwargs.setdefault("DisableDistortions", True )
-    kwargs.setdefault("applyNNcorrection", False )
-    kwargs.setdefault("NNIBLcorrection", False )
-    kwargs.setdefault("RunningTIDE_Ambi", False )
-    kwargs.setdefault("ErrorStrategy", 0 )
-    kwargs.setdefault("PositionStrategy", 0 )
-    return InDetPixelClusterOnTrackToolBaseCfg(flags, name, **kwargs)
 
 #############################################
 ### InDet PixelClusterOnTrackTool trigger ###

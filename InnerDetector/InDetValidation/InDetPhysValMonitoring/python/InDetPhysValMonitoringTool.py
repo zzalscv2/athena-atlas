@@ -225,18 +225,6 @@ def getInDetPhysValMonitoringToolMuons(**kwargs):
     return getInDetPhysValMonitoringTool(**kwargs)
 
 
-def getInDetPhysValMonitoringToolDBM(**kwargs):
-    from InDetRecExample.InDetKeys import InDetKeys
-    kwargs = setDefaults(
-        kwargs,
-        name='InDetPhysValMonitoringToolDBM',
-        SubFolder='DBM/',
-        TrackParticleContainerName=InDetKeys.DBMTracks(),
-        useTrackSelection=True)
-
-    return getInDetPhysValMonitoringTool(**kwargs)
-
-
 def getInDetLargeD0PhysValMonitoringTool(**kwargs):
     from InDetRecExample.InDetJobProperties import InDetFlags
     from InDetRecExample.InDetKeys import InDetKeys

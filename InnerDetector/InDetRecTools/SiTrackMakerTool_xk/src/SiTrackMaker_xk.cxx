@@ -644,8 +644,6 @@ std::list<Trk::Track*> InDet::SiTrackMaker_xk::getTracks
   if (m_seedsfilter) isGoodSeed=newSeed(data, Sp);
   if (!isGoodSeed) return tracks;
 
-  data.dbm() = isDBMSeeds(*Sp.begin());
-
   // Get AtlasFieldCache
   MagField::AtlasFieldCache fieldCache;
 
@@ -660,12 +658,7 @@ std::list<Trk::Track*> InDet::SiTrackMaker_xk::getTracks
 
   /// Get initial parameters estimation from our seed
   std::unique_ptr<Trk::TrackParameters> Tp = nullptr;
-  if (data.dbm()) {
-    Tp = getAtaPlaneDBM(fieldCache, data, Sp);
-  }
-  else {
-    Tp = getAtaPlane(fieldCache, data, false, Sp, ctx);
-  }
+  Tp = getAtaPlane(fieldCache, data, false, Sp, ctx);
   /// if we failed to get the initial parameters, we bail out.
   /// Can happen in certain pathological cases (e.g. malformed strip hits),
   /// or if we would be running with calo-ROI strip seeds (we aren't)
@@ -685,7 +678,7 @@ std::list<Trk::Track*> InDet::SiTrackMaker_xk::getTracks
   else                m_roadmaker->detElementsRoad(ctx, fieldCache, *Tp,Trk::oppositeMomentum,DE, data.roadMakerData());
 
   /// if we don't use all of pix and SCT, filter our list, erasing any that don't fit our requirements
-  if (!data.pix() || !data.sct() || data.dbm()) detectorElementsSelection(data, DE);
+  if (!data.pix() || !data.sct()) detectorElementsSelection(data, DE);
 
   /// if we did not find sufficient detector elements to fulfill the minimum cluster requirement,
   /// bail out. We will not be able to build a track satisfying the cuts.
@@ -969,93 +962,6 @@ std::unique_ptr<Trk::TrackParameters> InDet::SiTrackMaker_xk::getAtaPlane
 }
 
 ///////////////////////////////////////////////////////////////////
-// Space point seed parameters extimation for DBM seed
-///////////////////////////////////////////////////////////////////
-
-std::unique_ptr<Trk::TrackParameters> InDet::SiTrackMaker_xk::getAtaPlaneDBM
-(MagField::AtlasFieldCache& fieldCache,
- SiTrackMakerEventData_xk& data,
- const std::vector<const Trk::SpacePoint*>& SP) const
-{
-  if (SP.size() < 3) return nullptr;
-
-  const Trk::PrepRawData* cl  = SP[0]->clusterList().first;
-  if (!cl) return nullptr;
-  const Trk::PlaneSurface* pla =
-    static_cast<const Trk::PlaneSurface*>(&cl->detectorElement()->surface());
-  if (!pla) return nullptr;
-
-  double p0[3],p1[3],p2[3];
-  if (!globalPositions(*(SP[0]),*(SP[1]),*(SP[2]),p0,p1,p2)) return nullptr;
-
-  double x0 = data.xybeam()[0]-p0[0];
-  double y0 = data.xybeam()[1]-p0[1];
-  double x2 = p2[0]      -p0[0];
-  double y2 = p2[1]      -p0[1];
-  double z2 = p2[2]      -p0[2];
-
-  double u1 = -1./sqrt(x0*x0+y0*y0);
-  double rn = x2*x2+y2*y2          ;
-  double r2 = 1./rn                ;
-  double a  =  x0*u1               ;
-  double b  =  y0*u1               ;
-  double u2 = (a*x2+b*y2)*r2       ;
-  double v2 = (a*y2-b*x2)*r2       ;
-  double A  = v2/(u2-u1)           ;
-  double B  = 2.*(v2-A*u2)         ;
-  double C  = B/sqrt(1.+A*A)       ;
-  double T  = z2*sqrt(r2)          ;
-
-  const Amg::Transform3D& Tp = pla->transform();
-
-  double Ax[3] = {Tp(0,0),Tp(1,0),Tp(2,0)};
-  double Ay[3] = {Tp(0,1),Tp(1,1),Tp(2,1)};
-  double D [3] = {Tp(0,3),Tp(1,3),Tp(2,3)};
-
-  double   d[3] = {p0[0]-D[0],p0[1]-D[1],p0[2]-D[2]};
-
-  data.par()[0] = d[0]*Ax[0]+d[1]*Ax[1]+d[2]*Ax[2];
-  data.par()[1] = d[0]*Ay[0]+d[1]*Ay[1]+d[2]*Ay[2];
-
-  Trk::MagneticFieldMode fieldModeEnum(m_fieldModeEnum);
-  if (!fieldCache.solenoidOn()) fieldModeEnum = Trk::NoField;
-  Trk::MagneticFieldProperties fieldprop(fieldModeEnum);
-  if (fieldprop.magneticFieldMode() > 0) {
-    double H[3],gP[3] ={p0[0],p0[1],p0[2]};
-
-    fieldCache.getFieldZR(gP, H);
-
-    if (fabs(H[2])>.0001) {
-      data.par()[2] = atan2(b+a*A,a-b*A);
-      data.par()[3] = atan2(1.,T)       ;
-      data.par()[5] = -C/(300.*H[2])    ;
-    } else {
-      T    =  z2*sqrt(r2)  ;
-      data.par()[2] = atan2(y2,x2);
-      data.par()[3] = atan2(1.,T) ;
-      data.par()[5] = 1./1000.    ;
-    }
-  } else {
-    T    = z2*sqrt(r2)   ;
-    data.par()[2] = atan2(y2,x2);
-    data.par()[3] = atan2(1.,T) ;
-    data.par()[5] = 1./1000     ;
-  }
-
-  if (fabs(data.par()[5])*20. > 1.1) return nullptr;
-  data.par()[4] = data.par()[5]/sqrt(1.+T*T);
-  data.par()[6] = p0[0]                           ;
-  data.par()[7] = p0[1]                           ;
-  data.par()[8] = p0[2]                           ;
-  return pla->createUniqueTrackParameters(data.par()[0],
-                                          data.par()[1],
-                                          data.par()[2],
-                                          data.par()[3],
-                                          data.par()[4],
-                                          std::nullopt);
-}
-
-///////////////////////////////////////////////////////////////////
 // Set track quality cuts
 ///////////////////////////////////////////////////////////////////
 
@@ -1098,35 +1004,19 @@ void InDet::SiTrackMaker_xk::detectorElementsSelection(SiTrackMakerEventData_xk&
                                                        std::list<const InDetDD::SiDetectorElement*>& DE) 
 {
   std::list<const InDetDD::SiDetectorElement*>::iterator d = DE.begin();
-  if (!data.dbm()) {
-    while (d!=DE.end()) {
-      if ((*d)->isPixel()) {
-        if (!data.pix()) {
-          d = DE.erase(d);
-          continue;
-        }
-      } else if (!data.sct()) {
+  while (d!=DE.end()) {
+    if ((*d)->isPixel()) {
+      if (!data.pix()) {
         d = DE.erase(d);
         continue;
       }
-      ++d;
+    } else if (!data.sct()) {
+      d = DE.erase(d);
+      continue;
     }
-  } else {
-    while (d!=DE.end()) {
-      if (!(*d)->isDBM() ) {
-        if ((*d)->isSCT() || (*d)->isEndcap()) {
-          d = DE.erase(d);
-          continue;
-        }
-        const Amg::Transform3D& T = (*d)->surface().transform();
-        if (T(0,3)*T(0,3)+T(1,3)*T(1,3) > (43.*43) ) {
-          d = DE.erase(d);
-          continue;
-        }
-      }
-      ++d;
-    }
+    ++d;
   }
+
 }
 
 ///////////////////////////////////////////////////////////////////
@@ -1446,17 +1336,6 @@ bool InDet::SiTrackMaker_xk::isHadCaloCompatible(SiTrackMakerEventData_xk& data)
   double Z = data.par()[8]                           ;
 
   return data.caloClusterROIHad()->hasMatchingROI(F, E,  R, Z, m_phiWidth, m_etaWidth);
-}
-
-///////////////////////////////////////////////////////////////////
-// Test is it DBM seed
-///////////////////////////////////////////////////////////////////
-
-bool InDet::SiTrackMaker_xk::isDBMSeeds(const Trk::SpacePoint* s) 
-{
-  const InDetDD::SiDetectorElement* de=
-    static_cast<const InDetDD::SiDetectorElement*>(s->clusterList().first->detectorElement());
-  return de && de->isDBM();
 }
 
 ///////////////////////////////////////////////////////////////////

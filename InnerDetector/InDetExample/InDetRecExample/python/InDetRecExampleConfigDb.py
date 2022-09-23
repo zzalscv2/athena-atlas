@@ -29,4 +29,3 @@ addTool('InDetRecExample.InDetRecExampleConfig.InDetTrackFitter','InDetTrackFitt
 addTool('InDetRecExample.InDetRecExampleConfig.InDetTrackFitterBT','InDetTrackFitterBT')
 addTool('InDetRecExample.InDetRecExampleConfig.InDetTrackFitterLowPt','InDetTrackFitterLowPt')
 addTool('InDetRecExample.InDetRecExampleConfig.InDetTrackFitterTRT','InDetTrackFitterTRT')
-addTool('InDetRecExample.InDetRecExampleConfig.InDetTrackFitterDBM','InDetTrackFitterDBM')

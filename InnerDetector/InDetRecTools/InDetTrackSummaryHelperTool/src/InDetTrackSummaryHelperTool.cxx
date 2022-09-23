@@ -119,46 +119,38 @@ InDet::InDetTrackSummaryHelperTool::analyse(
       }
     } else {
       bool hitIsSplit(false);
-      if (m_pixelId->is_dbm(id)) {
-        int offset =
-          static_cast<int>(Trk::DBM0); // get int value of first DBM layer
-        offset += m_pixelId->layer_disk(id);
-        hitPattern.set(offset);
-        information[Trk::numberOfDBMHits]++;
+      information[Trk::numberOfPixelHits]++;
+      if (m_pixelId->layer_disk(id) == 0 and m_pixelId->is_barrel(id))
+        information[Trk::numberOfInnermostPixelLayerHits]++;
+      if (m_pixelId->layer_disk(id) == 1 and m_pixelId->is_barrel(id))
+        information[Trk::numberOfNextToInnermostPixelLayerHits]++;
+      // check to see if there's an ambiguity with the ganged cluster.
+      const PixelClusterOnTrack* pix = nullptr;
+      if (rot->rioType(Trk::RIO_OnTrackType::PixelCluster)) {
+        pix = static_cast<const PixelClusterOnTrack*>(rot);
+      }
+      if (not pix) {
+        ATH_MSG_ERROR("Could not cast pixel RoT to PixelClusterOnTrack!");
       } else {
-        information[Trk::numberOfPixelHits]++;
-        if (m_pixelId->layer_disk(id) == 0 and m_pixelId->is_barrel(id))
-          information[Trk::numberOfInnermostPixelLayerHits]++;
-        if (m_pixelId->layer_disk(id) == 1 and m_pixelId->is_barrel(id))
-          information[Trk::numberOfNextToInnermostPixelLayerHits]++;
-        // check to see if there's an ambiguity with the ganged cluster.
-        const PixelClusterOnTrack* pix = nullptr;
-        if (rot->rioType(Trk::RIO_OnTrackType::PixelCluster)) {
-          pix = static_cast<const PixelClusterOnTrack*>(rot);
+        const InDet::PixelCluster* pixPrd = pix->prepRawData();
+        const Trk::ClusterSplitProbabilityContainer::ProbabilityInfo&
+          splitProb = getClusterSplittingProbability(ctx, pixPrd);
+        if (pixPrd and splitProb.isSplit()) {
+          information[Trk::numberOfPixelSplitHits]++;
+          hitIsSplit = true;
         }
-        if (not pix) {
-          ATH_MSG_ERROR("Could not cast pixel RoT to PixelClusterOnTrack!");
-        } else {
-          const InDet::PixelCluster* pixPrd = pix->prepRawData();
-          const Trk::ClusterSplitProbabilityContainer::ProbabilityInfo&
-            splitProb = getClusterSplittingProbability(ctx, pixPrd);
-          if (pixPrd and splitProb.isSplit()) {
-            information[Trk::numberOfPixelSplitHits]++;
-            hitIsSplit = true;
-          }
-          if (pixPrd and m_pixelId->is_barrel(id) and
-              m_pixelId->layer_disk(id) == 0 and splitProb.isSplit())
-            information[Trk::numberOfInnermostLayerSplitHits]++;
-          if (pixPrd and m_pixelId->is_barrel(id) and
-              m_pixelId->layer_disk(id) == 1 and splitProb.isSplit())
-            information[Trk::numberOfNextToInnermostLayerSplitHits]++;
-          if (pix->isBroadCluster())
-            information[Trk::numberOfPixelSpoiltHits]++;
-          if (pix->hasClusterAmbiguity()) {
-            information[Trk::numberOfGangedPixels]++;
-            if (pix->isFake())
-              information[Trk::numberOfGangedFlaggedFakes]++;
-          }
+        if (pixPrd and m_pixelId->is_barrel(id) and
+            m_pixelId->layer_disk(id) == 0 and splitProb.isSplit())
+          information[Trk::numberOfInnermostLayerSplitHits]++;
+        if (pixPrd and m_pixelId->is_barrel(id) and
+            m_pixelId->layer_disk(id) == 1 and splitProb.isSplit())
+          information[Trk::numberOfNextToInnermostLayerSplitHits]++;
+        if (pix->isBroadCluster())
+          information[Trk::numberOfPixelSpoiltHits]++;
+        if (pix->hasClusterAmbiguity()) {
+          information[Trk::numberOfGangedPixels]++;
+          if (pix->isFake())
+            information[Trk::numberOfGangedFlaggedFakes]++;
         }
 
         if ((m_pixelId->is_barrel(id))) {

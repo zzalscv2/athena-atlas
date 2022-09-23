@@ -174,7 +174,6 @@ namespace InDet {
     //@{
     BooleanProperty m_pixel{this, "usePixel", true};
     BooleanProperty m_sct{this, "useSCT", true};
-    BooleanProperty m_dbm{this, "useDBM", false};
     BooleanProperty m_useOverlap{this, "useOverlapSpCollection", true};
     IntegerProperty m_maxsize{this, "maxSize", 50000};
     IntegerProperty m_maxsizeSP{this, "maxSizeSP", 5000};

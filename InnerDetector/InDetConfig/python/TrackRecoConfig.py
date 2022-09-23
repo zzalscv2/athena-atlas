@@ -9,9 +9,7 @@ def CombinedTrackingPassFlagSets(flags):
     flags_set = []
 
     # Primary Pass
-    if flags.InDet.Tracking.doDBMstandalone:
-        flags = flags.cloneAndReplace("InDet.Tracking.ActivePass", "InDet.Tracking.DBMPass")
-    elif flags.InDet.Tracking.doVtxLumi:
+    if flags.InDet.Tracking.doVtxLumi:
         flags = flags.cloneAndReplace("InDet.Tracking.ActivePass", "InDet.Tracking.VtxLumiPass")
     elif flags.InDet.Tracking.doVtxBeamSpot:
         flags = flags.cloneAndReplace("InDet.Tracking.ActivePass", "InDet.Tracking.VtxBeamSpotPass")
@@ -399,11 +397,10 @@ def InDetTrackRecoOutputCfg(flags):
     ##### ESD #####
     # Save full and zero-suppressed BCM rdos
     # (the latter is needed to allow writting to AOD and the former will hopefully be removed in future):
-    if not flags.InDet.Tracking.doDBMstandalone:
-        toESD += [
-            "BCM_RDO_Container#BCM_RDOs",
-            "BCM_RDO_Container#BCM_CompactDOs",
-        ]
+    toESD += [
+        "BCM_RDO_Container#BCM_RDOs",
+        "BCM_RDO_Container#BCM_CompactDOs",
+    ]
 
     # In case of cosmics we save the RDOs as well
     if special:  # flags.InDet.writeRDOs:
@@ -458,12 +455,6 @@ def InDetTrackRecoOutputCfg(flags):
         if flags.InDet.doTruth:
             toESD += ["TrackTruthCollection#InDetPseudoTracksTruthCollection"]
             toESD += ["DetailedTrackTruthCollection#InDetPseudoTracksDetailedTruth"]
-
-    if flags.InDet.Tracking.doDBMstandalone:
-        toESD += ["TrackCollection#ResolvedDBMTracks"]
-        if flags.InDet.doTruth:
-            toESD += ["TrackTruthCollection#ResolvedDBMTracksTruthCollection"]
-            toESD += ["DetailedTrackTruthCollection#ResolvedDBMTracksDetailedTruth"]
 
     # add the forward tracks for combined muon reconstruction
     if flags.InDet.Tracking.doForwardTracks:
@@ -528,13 +519,6 @@ def InDetTrackRecoOutputCfg(flags):
     if flags.InDet.Tracking.doTrackSegmentsTRT:
         toAOD += ["xAOD::TrackParticleContainer#InDetTRTTrackParticles"]
         toAOD += [f"xAOD::TrackParticleAuxContainer#InDetTRTTrackParticlesAux.{excludedAuxData}"]
-    if flags.InDet.Tracking.doDBMstandalone: 
-        toAOD += ["xAOD::TrackParticleContainer#InDetDBMTrackParticles"] 
-        toAOD += [f"xAOD::TrackParticleAuxContainer#InDetDBMTrackParticlesAux.{excludedAuxData}"] 
-        toAOD += ["TrackCollection#ResolvedDBMTracks"] 
-        if flags.InDet.doTruth:
-            toAOD += ["TrackTruthCollection#ResolvedDBMTracksTruthCollection"] 
-            toAOD += ["DetailedTrackTruthCollection#ResolvedDBMTracksDetailedTruth"] 
     if flags.InDet.Tracking.doPseudoTracking:
         toAOD += ["xAOD::TrackParticleContainer#InDetPseudoTrackParticles"]
         toAOD += [f"xAOD::TrackParticleAuxContainer#InDetPseudoTrackParticlesAux.{excludedAuxData}"]

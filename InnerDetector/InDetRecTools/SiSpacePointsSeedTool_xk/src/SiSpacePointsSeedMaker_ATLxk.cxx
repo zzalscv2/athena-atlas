@@ -213,7 +213,6 @@ void InDet::SiSpacePointsSeedMaker_ATLxk::newEvent(const EventContext& ctx, Even
   /// the following will only happen in the first iteration 
 
   data.checketa = data.dzdrmin > 1.;
-  if (m_dbm) data.checketa = false;
 
   /// build the r-binning. 
   float oneOverBinSizeR = 1.f/m_binSizeR;
@@ -251,7 +250,7 @@ void InDet::SiSpacePointsSeedMaker_ATLxk::newEvent(const EventContext& ctx, Even
   data.r_first = 0;
 
   /// Get pixels space points containers from store gate 
-  if (!m_dbm && m_pixel) {
+  if (m_pixel) {
 
     SG::ReadHandle<SpacePointContainer> spacepointsPixel{m_spacepointsPixel, ctx};
     if (spacepointsPixel.isValid()) {
@@ -301,7 +300,7 @@ void InDet::SiSpacePointsSeedMaker_ATLxk::newEvent(const EventContext& ctx, Even
   } ///< end pixel case
   
   /// Get sct space points containers from store gate 
-  if (!m_dbm && m_sct) {
+  if (m_sct) {
 
     SG::ReadHandle<SpacePointContainer> spacepointsSCT{m_spacepointsSCT, ctx};
     if (spacepointsSCT.isValid()) {
@@ -362,38 +361,6 @@ void InDet::SiSpacePointsSeedMaker_ATLxk::newEvent(const EventContext& ctx, Even
     }
   }
   
-  /// Get pixels space points containers from store gate for DBM reconstruction
-  if (m_dbm) {
-
-    SG::ReadHandle<SpacePointContainer> spacepointsPixel{m_spacepointsPixel, ctx};
-    if (spacepointsPixel.isValid()) {
-
-      for (const SpacePointCollection* spc: *spacepointsPixel) {
-        for (const Trk::SpacePoint* sp: *spc) {
-
-          /// Keep only DBM space points
-          const InDetDD::SiDetectorElement* de= 
-            static_cast<const InDetDD::SiDetectorElement*>(sp->clusterList().first->detectorElement());
-          if (!de || !de->isDBM() || sp->r() > m_r_rmax) continue;
-
-          /// the following logic follows what is done above for the other species, 
-          /// please see there for detailed explanation 
-          InDet::SiSpacePointForSeed* sps = newSpacePoint(data, sp);
-          if (!sps) continue;
-
-
-          int radiusBin = static_cast<int>(sps->radius()*oneOverBinSizeR);
-          if (radiusBin>maxBinR) radiusBin = maxBinR;
-          data.r_Sorted[radiusBin].push_back(sps);
-          ++data.r_map[radiusBin];
-          if (data.r_map[radiusBin]==1) data.r_index[data.nr++] = radiusBin;
-          if (radiusBin > data.r_first) data.r_first = radiusBin;
-          ++data.ns;
-        }
-      }
-    }
-    ++data.r_first;
-  }
   /// negative iterations are not used in the current run-3 reco
   if (iteration < 0) data.r_first = 0;
 
@@ -965,14 +932,7 @@ void InDet::SiSpacePointsSeedMaker_ATLxk::buildFrameWork()
 {
   m_ptmin = std::abs(m_ptmin);
   
-  /// For DBM reconstruction we use new parameters
-  if (m_dbm) {
-    m_r_rmax  = 150.;
-    m_binSizeR = .5;
-    m_drmin = 2.;
-    m_ptmin = 10.;
-    m_maxdImpact = 150.;
-  } else if (m_ptmin < 100.) {
+  if (m_ptmin < 100.) {
     m_ptmin = 100.;
   }
   /// ensure consistency in the transverse IP cuts 
@@ -1049,7 +1009,7 @@ void InDet::SiSpacePointsSeedMaker_ATLxk::buildFrameWork()
     /// a trajectory with 400 MeV, from the origin, and Rmin = 0 / Rmax = 600mm   float ptm = 400.;
     float ptm = 400.; 
     /// if we cut below 400 MeV, adapt the ptm 
-    if (!m_dbm && m_ptmin < ptm) ptm = m_ptmin;
+    if (m_ptmin < ptm) ptm = m_ptmin;
     m_inverseBinSizePhi = ptm /60.f;
   }
 

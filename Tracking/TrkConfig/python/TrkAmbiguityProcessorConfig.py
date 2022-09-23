@@ -25,8 +25,7 @@ def SimpleAmbiguityProcessorToolCfg(flags,
     # --- set up different Scoring Tool for collisions and cosmics
     #
     if "ScoringTool" not in kwargs:
-        if (flags.Beam.Type is BeamType.Cosmics and
-            flags.InDet.Tracking.ActivePass.extension != "DBM"):
+        if (flags.Beam.Type is BeamType.Cosmics):
             from InDetConfig.InDetTrackScoringToolsConfig import InDetCosmicsScoringToolCfg
             InDetAmbiScoringTool = acc.popToolsAndMerge(
                 InDetCosmicsScoringToolCfg(flags))
@@ -88,8 +87,7 @@ def SimpleAmbiguityProcessorToolCfg(flags,
         if flags.InDet.Tracking.materialInteractions else 0)
 
     if flags.InDet.Tracking.ActivePass.extension == (
-        "Pixel" or
-            flags.InDet.Tracking.ActivePass.extension == "DBM"):
+        "Pixel"):
         kwargs.setdefault("SuppressHoleSearch", True)
 
     acc.setPrivateTools(CompFactory.Trk.SimpleAmbiguityProcessorTool(
@@ -232,8 +230,7 @@ def DenseEnvironmentsAmbiguityScoreProcessorToolCfg(
 
     # --- set up different Scoring Tool for collisions and cosmics
     if "ScoringTool" not in kwargs:
-        if (flags.Beam.Type is BeamType.Cosmics and
-            flags.InDet.Tracking.ActivePass.extension != "DBM"):
+        if (flags.Beam.Type is BeamType.Cosmics):
             from InDetConfig.InDetTrackScoringToolsConfig import InDetCosmicsScoringToolCfg
             InDetAmbiScoringTool = acc.popToolsAndMerge(
                 InDetCosmicsScoringToolCfg(flags))
@@ -356,8 +353,7 @@ def DenseEnvironmentsAmbiguityProcessorToolCfg(
 
     # --- set up different Scoring Tool for collisions and cosmics
     if "ScoringTool" not in kwargs:
-        if (flags.Beam.Type is BeamType.Cosmics and
-            flags.InDet.Tracking.ActivePass.extension != "DBM"):
+        if (flags.Beam.Type is BeamType.Cosmics):
             from InDetConfig.InDetTrackScoringToolsConfig import InDetCosmicsScoringToolCfg
             InDetAmbiScoringTool = acc.popToolsAndMerge(
                 InDetCosmicsScoringToolCfg(flags))

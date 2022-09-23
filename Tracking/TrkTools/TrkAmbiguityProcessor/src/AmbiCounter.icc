@@ -16,7 +16,7 @@ template<class EnumType>
 class AmbiCounter {
 public:
   using Categories = EnumType;
-  enum RegionIndex {iBarrel , iTransi , iEndcap , iDBM = 3, nRegions=4, iForwrd = 3};
+  enum RegionIndex {iBarrel , iTransi , iEndcap , iFWD = 3, nRegions=4, iForwrd = 3};
   enum GlobalCounterIndices {
     nEvents,
     nInvalidTracks,

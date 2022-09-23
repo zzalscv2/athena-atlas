@@ -212,14 +212,6 @@ def InDetPhysValMonitoringToolMuonsCfg(flags, **kwargs):
 
     return InDetPhysValMonitoringToolCfg(flags, name='InDetPhysValMonitoringToolMuons', **kwargs)
 
-def InDetPhysValMonitoringToolDBMCfg(flags, **kwargs):
-    
-    kwargs.setdefault("SubFolder", 'DBM/')
-    kwargs.setdefault("TrackParticleContainerName", 'ResolvedDBMTracks')
-    kwargs.setdefault("useTrackSelection", True)
-
-    return InDetPhysValMonitoringToolCfg(flags, name='InDetPhysValMonitoringToolDBM', **kwargs)
-
 def InDetLargeD0PhysValMonitoringToolCfg(flags, **kwargs):
     acc = ComponentAccumulator()
 
@@ -295,7 +287,6 @@ def InDetPhysValMonitoringCfg(flags):
              (flags.IDPVM.doValidateMergedLargeD0Tracks  ,  InDetMergedLargeD0PhysValMonitoringToolCfg),
              (flags.IDPVM.doValidateLooseTracks          ,  InDetPhysValMonitoringToolLooseCfg ),
              (flags.IDPVM.doValidateTightPrimaryTracks   ,  InDetPhysValMonitoringToolTightPrimaryCfg ),
-             (flags.IDPVM.doValidateDBMTracks            ,  InDetPhysValMonitoringToolDBMCfg ),
              (flags.IDPVM.doValidateGSFTracks            ,  InDetPhysValMonitoringToolGSFCfg )
     ]
 

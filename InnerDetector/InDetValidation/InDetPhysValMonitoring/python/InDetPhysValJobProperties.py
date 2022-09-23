@@ -56,12 +56,6 @@ class doValidateMergedLargeD0Tracks(InDetPhysValFlagsJobProperty):
     allowedTypes = ['bool']
     StoredValue = False
 
-class doValidateDBMTracks(InDetPhysValFlagsJobProperty):
-    statusOn = True
-    allowedTypes = ['bool']
-    StoredValue = False
-
-
 class doValidateGSFTracks(InDetPhysValFlagsJobProperty):
     statusOn = True
     allowedTypes = ['bool']
@@ -206,10 +200,6 @@ class InDetPhysValJobProperties(JobPropertyContainer):
         # THIS METHOD MUST BE THE FIRST TO BE CALLED. DO NOT MOVE IT OR ADD THINGS IN FRONT
         self.setupDefaults()
 
-        # for backward compatibility check whether DBM has been added already
-        from InDetRecExample.InDetJobProperties import InDetFlags
-        if hasattr(InDetFlags, 'doDBM') and not InDetFlags.doDBM():
-            self.checkThenSet(self.doValidateDBMTracks,  False)
         print(self)
 
     def printInfo(self):
@@ -223,7 +213,6 @@ jobproperties.add_Container(InDetPhysValJobProperties)
 # adding ID flags to the InDetJobProperties container
 _list_InDetPhysValJobProperties = [
     Enabled,
-    doValidateDBMTracks,
     doValidateGSFTracks,
     doValidateLooseTracks,
     doValidateTightPrimaryTracks,

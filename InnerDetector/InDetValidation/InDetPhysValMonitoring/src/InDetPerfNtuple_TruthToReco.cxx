@@ -58,7 +58,6 @@ InDetPerfNtuple_TruthToReco::InDetPerfNtuple_TruthToReco(InDetPlotBase* pParent,
     m_numberOfNextToInnermostPixelLayerOutliers("numberOfNextToInnermostPixelLayerOutliers",m_undefinedValue,*this),
     m_numberOfNextToInnermostPixelLayerSharedHits("numberOfNextToInnermostPixelLayerSharedHits",m_undefinedValue,*this),
     m_numberOfNextToInnermostPixelLayerSplitHits("numberOfNextToInnermostPixelLayerSplitHits",m_undefinedValue,*this),
-    m_numberOfDBMHits("numberOfDBMHits",m_undefinedValue,*this),
     m_numberOfPixelHits("numberOfPixelHits",m_undefinedValue,*this),
     m_numberOfPixelOutliers("numberOfPixelOutliers",m_undefinedValue,*this),
     m_numberOfPixelHoles("numberOfPixelHoles",m_undefinedValue,*this),
@@ -223,9 +222,6 @@ void InDetPerfNtuple_TruthToReco::fillTrackSummaryInfo(const xAOD::TrackParticle
     }
     if (track.summaryValue(value, xAOD::numberOfNextToInnermostPixelLayerSplitHits)) {
         m_numberOfNextToInnermostPixelLayerSplitHits = value;
-    }
-    if (track.summaryValue(value, xAOD::numberOfDBMHits)) {
-        m_numberOfDBMHits = value;
     }
     if (track.summaryValue(value, xAOD::numberOfPixelHits)) {
         m_numberOfPixelHits = value;

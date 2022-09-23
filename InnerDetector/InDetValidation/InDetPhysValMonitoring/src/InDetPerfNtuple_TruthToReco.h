@@ -88,7 +88,6 @@ private:
     InDetPerfNtupleBranch<int> m_numberOfNextToInnermostPixelLayerOutliers;
     InDetPerfNtupleBranch<int> m_numberOfNextToInnermostPixelLayerSharedHits;
     InDetPerfNtupleBranch<int> m_numberOfNextToInnermostPixelLayerSplitHits;
-    InDetPerfNtupleBranch<int> m_numberOfDBMHits;
     InDetPerfNtupleBranch<int> m_numberOfPixelHits;
     InDetPerfNtupleBranch<int> m_numberOfPixelOutliers;
     InDetPerfNtupleBranch<int> m_numberOfPixelHoles;

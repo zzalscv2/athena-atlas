@@ -197,10 +197,7 @@ if doPixel:
             else:
                 # Planar IBL
                 if (geoFlags.IBLLayout() == "planar"):
-                    if (geoFlags.isDBM() == True):
-                        IdMappingDat="PixelCabling/Pixels_Atlas_IdMapping_inclIBL_DBM.dat"
-                    else:
-                        IdMappingDat="PixelCabling/Pixels_Atlas_IdMapping_inclIBL.dat"
+                    IdMappingDat="PixelCabling/Pixels_Atlas_IdMapping_inclIBL.dat"
                 # Hybrid IBL plus DBM
                 elif (geoFlags.IBLLayout() == "3D"):
                     IdMappingDat="PixelCabling/Pixels_Atlas_IdMapping_Run2.dat"
@@ -632,7 +629,7 @@ if doPixel:
     from SiClusterOnTrackTool.SiClusterOnTrackToolConf import InDet__PixelClusterOnTrackTool
     PixelClusterOnTrackTool = InDet__PixelClusterOnTrackTool("InDetPixelClusterOnTrackTool",
                                                              LorentzAngleTool   = ToolSvc.PixelLorentzAngleTool,
-                                                             DisableDistortions = (InDetFlags.doFatras() or InDetFlags.doDBMstandalone()),
+                                                             DisableDistortions = (InDetFlags.doFatras()),
                                                              applyNNcorrection = ( InDetFlags.doPixelClusterSplitting() and
                                                                                    InDetFlags.pixelClusterSplittingType() == "NeuralNet"),
                                                              NNIBLcorrection = ( InDetFlags.doPixelClusterSplitting() and
@@ -722,12 +719,12 @@ InDetSiSPSeededTrackFinder = InDet__SiSPSeededTrackFinder(name           = "InDe
                                                           TrackTool      = InDetSiTrackMaker,
                                                           TracksLocation = TracksLocation,
                                                           SeedsTool      = InDetSiSpacePointsSeedMaker,
-                                                          useZvertexTool = InDetFlags.useZvertexTool() and NewTrackingCuts.mode() != "DBM",
+                                                          useZvertexTool = InDetFlags.useZvertexTool(),
                                                           ZvertexTool    = InDetZvertexMaker,
                                                           TrackSummaryTool = TrackingCommon.getInDetTrackSummaryToolNoHoleSearch(), 
-                                                          useNewStrategy = InDetFlags.useNewSiSPSeededTF() and NewTrackingCuts.mode() != "DBM",
+                                                          useNewStrategy = InDetFlags.useNewSiSPSeededTF(),
                                                           useMBTSTimeDiff = InDetFlags.useMBTSTimeDiff(),
-                                                          useZBoundFinding = NewTrackingCuts.doZBoundary() and NewTrackingCuts.mode() != "DBM")
+                                                          useZBoundFinding = NewTrackingCuts.doZBoundary())
 if not doBeamSpot:
     InDetSiSPSeededTrackFinder.BeamSpotKey = ""
 if not doPixel:

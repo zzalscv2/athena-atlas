@@ -523,7 +523,7 @@ def siTrackMakerTool_builder( name, config, siDetElementsRoadMakerTool, trackFin
    else:
       trackPatternRecoInfo = 'SiSPSeededFinder'
 
-   useBremMode = trackingCuts.mode() == "Offline" or trackingCuts.mode() == "SLHC" or trackingCuts.mode() == "DBM"
+   useBremMode = trackingCuts.mode() == "Offline" or trackingCuts.mode() == "SLHC"
 
    kwargs = {}
 
@@ -601,7 +601,7 @@ def siSPSeededTrackFinder_builder( name, config, outputTracks, trackingCuts, use
    # --- Z-coordinates primary vertices finder (only for collisions)
    zVertexMakerTool = None
    #FIXME:Switch to trig flags? ATR-22756
-   if InDetFlags.useZvertexTool() and trackingCuts.mode() != "DBM":
+   if InDetFlags.useZvertexTool():
       zVertexMakerTool =  zVertexMakerTool_builder(name, trackingCuts, siSpacePointsSeedMakerTool )
 
    # --- SCT and Pixel detector elements road builder
@@ -635,10 +635,10 @@ def siSPSeededTrackFinder_builder( name, config, outputTracks, trackingCuts, use
                          TracksLocation      = outputTracks, 
                          SeedsTool           = siSpacePointsSeedMakerTool,
                          ZvertexTool         = zVertexMakerTool,
-                         useZvertexTool      = InDetFlags.useZvertexTool() and trackingCuts.mode() != "DBM",         #FIXME: revisit  ATR-22756
-                         useNewStrategy      = InDetFlags.useNewSiSPSeededTF() and trackingCuts.mode() != "DBM",     #FIXME: revisit  ATR-22756
+                         useZvertexTool      = InDetFlags.useZvertexTool(),         #FIXME: revisit  ATR-22756
+                         useNewStrategy      = InDetFlags.useNewSiSPSeededTF(),     #FIXME: revisit  ATR-22756
                          useMBTSTimeDiff     = InDetFlags.useMBTSTimeDiff(),                                         #FIXME: revisit  ATR-22756
-                         useZBoundFinding    = trackingCuts.doZBoundary() and trackingCuts.mode() != "DBM" )         
+                         useZBoundFinding    = trackingCuts.doZBoundary())         
       
    # FIXME: revisit HI option ATR-22756
    #     if InDetFlags.doHeavyIon():

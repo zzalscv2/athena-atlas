@@ -35,8 +35,8 @@ def InDetAmbiTrackSelectionToolCfg(flags, name = "InDetAmbiTrackSelectionTool", 
     kwargs.setdefault("maxShared"       , flags.InDet.Tracking.ActivePass.maxShared)
     kwargs.setdefault("minTRTHits"      , 0) # used for Si only tracking !!!
     kwargs.setdefault("UseParameterization" , False)
-    kwargs.setdefault("Cosmics"             , flags.Beam.Type is BeamType.Cosmics and flags.InDet.Tracking.ActivePass.extension != "DBM")
-    kwargs.setdefault("doPixelSplitting"    , flags.InDet.Tracking.doPixelClusterSplitting and flags.InDet.Tracking.ActivePass.extension != "DBM")
+    kwargs.setdefault("Cosmics"             , flags.Beam.Type is BeamType.Cosmics)
+    kwargs.setdefault("doPixelSplitting"    , flags.InDet.Tracking.doPixelClusterSplitting)
 
     if flags.InDet.Tracking.ActivePass.useTIDE_Ambi:
         kwargs.setdefault("sharedProbCut"             , flags.InDet.Tracking.pixelClusterSplitProb1)
@@ -65,14 +65,6 @@ def InDetAmbiTrackSelectionToolCfg(flags, name = "InDetAmbiTrackSelectionTool", 
         kwargs.setdefault("phiWidthEM"                , 0.05)     #Split cluster ROI size
         kwargs.setdefault("etaWidthEM"                , 0.05)     #Split cluster ROI size
 
-    elif flags.InDet.Tracking.ActivePass.extension == "DBM":
-        kwargs.setdefault("maxShared"             , 1000)
-        kwargs.setdefault("maxTracksPerSharedPRD" , 2)
-        kwargs.setdefault("minHits"               , 0)
-        kwargs.setdefault("minNotShared"          , 0)
-        kwargs.setdefault("minScoreShareTracks"   , 0.0)
-        kwargs.setdefault("minTRTHits"            , 0)
-        kwargs.setdefault("sharedProbCut"         , 0.1)
     else:
         kwargs.setdefault("sharedProbCut", 0.10)
 

@@ -61,10 +61,6 @@ namespace InDet {
     return m_sct;
   }
 
-  bool& SiTrackMakerEventData_xk::dbm() {
-    return m_dbm;
-  }
-
   std::array<double, 2>& SiTrackMakerEventData_xk::xybeam() {
     return m_xybeam;
   }
