@@ -23,11 +23,11 @@ namespace LVL1 {
       virtual ~TrigT1RPCRecRoiTool()=default;
       virtual StatusCode initialize() override;
 
-      virtual TrigT1MuonRecRoiData roiData (const unsigned int& roiWord) const override;
+      virtual StatusCode roiData (const unsigned int& roiWord, TrigT1MuonRecRoiData& data) const override;
       
-      virtual void RoIsize(const unsigned int& roiWord,
-			   double& etaMin, double& etaMax, 
-			   double& phiMin, double& phiMax) const override;
+      virtual StatusCode RoIsize(const unsigned int& roiWord,
+				 double& etaMin, double& etaMax,
+				 double& phiMin, double& phiMax) const override;
       
       virtual bool dumpRoiMap(const std::string& filename) const override;
       

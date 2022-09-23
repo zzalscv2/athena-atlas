@@ -168,7 +168,8 @@ namespace LVL1TGCTrigger {
       if(sldata.pt(icand)<0)continue;
       int roi = sldata.roi(icand);
       unsigned long int roiWord = (roi<<2)+(sectorAddress<<14);
-      auto roiData = m_recTGCRoiTool->roiData(roiWord);
+      LVL1::TrigT1MuonRecRoiData roiData;
+      if( !m_recTGCRoiTool->roiData(roiWord,roiData).isSuccess() )continue;
       TVector3 roiPos;
       roiPos.SetPtEtaPhi(10,roiData.eta(),roiData.phi());
       if( std::abs(roiPos.Eta()) < 1.3 ) continue; // only NSW region

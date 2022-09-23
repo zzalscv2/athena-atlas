@@ -190,7 +190,12 @@ StatusCode TrigL2MuonSA::MuFastDataPreparator::prepareData(const LVL1::RecMuonRo
     ATH_MSG_DEBUG("Skip RpcDataPreparator");
   }
 
-  auto data = m_recRPCRoiTool->roiData(p_roi->roiWord());
+  LVL1::TrigT1MuonRecRoiData data;
+  sc = m_recRPCRoiTool->roiData(p_roi->roiWord(),data);
+  if (!sc.isSuccess()){
+    ATH_MSG_WARNING("Error in roiWord decode");
+    return sc;
+  }
   double roiEtaMinLow = 0.;
   double roiEtaMaxLow = 0.;
   double roiEtaMinHigh = 0.;
@@ -278,7 +283,12 @@ StatusCode TrigL2MuonSA::MuFastDataPreparator::prepareData(const xAOD::MuonRoI* 
     ATH_MSG_DEBUG("Skip RpcDataPreparator");
   }
 
-  auto data = m_recRPCRoiTool->roiData(p_roi->roiWord());
+  LVL1::TrigT1MuonRecRoiData data;
+  sc = m_recRPCRoiTool->roiData(p_roi->roiWord(),data);
+  if (!sc.isSuccess()){
+    ATH_MSG_WARNING("Error in roiWord decode");
+    return sc;
+  }
   double roiEtaMinLow = 0.;
   double roiEtaMaxLow = 0.;
   double roiEtaMinHigh = 0.;
@@ -368,7 +378,12 @@ StatusCode TrigL2MuonSA::MuFastDataPreparator::prepareData(const LVL1::RecMuonRo
     }
   }
 
-  auto data = m_recRPCRoiTool->roiData(p_roi->roiWord());
+  LVL1::TrigT1MuonRecRoiData data;
+  sc = m_recRPCRoiTool->roiData(p_roi->roiWord(),data);
+  if (!sc.isSuccess()){
+    ATH_MSG_WARNING("Error in roiWord decode");
+    return sc;
+  }
   double roiEtaMinLow = 0.;
   double roiEtaMaxLow = 0.;
   double roiEtaMinHigh = 0.;
@@ -491,7 +506,12 @@ StatusCode TrigL2MuonSA::MuFastDataPreparator::prepareData(const xAOD::MuonRoI* 
     }
   }
 
-  auto data = m_recRPCRoiTool->roiData(p_roi->roiWord());
+  LVL1::TrigT1MuonRecRoiData data;
+  sc = m_recRPCRoiTool->roiData(p_roi->roiWord(),data);
+  if (!sc.isSuccess()){
+    ATH_MSG_WARNING("Error in roiWord decode");
+    return sc;
+  }
   double roiEtaMinLow = 0.;
   double roiEtaMaxLow = 0.;
   double roiEtaMinHigh = 0.;

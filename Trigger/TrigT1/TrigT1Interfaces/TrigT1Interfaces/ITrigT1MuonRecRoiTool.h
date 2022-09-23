@@ -20,12 +20,12 @@ namespace LVL1 {
     DeclareInterfaceID( ITrigT1MuonRecRoiTool, 1, 0);
 
     /// pure virtual function to return eta and phi coord of RoI
-    virtual TrigT1MuonRecRoiData roiData(const unsigned int& roiWord ) const = 0;
+    virtual StatusCode roiData(const unsigned int& roiWord, TrigT1MuonRecRoiData& data) const = 0;
 
     /// pure virtual function returns roi size
-    virtual void RoIsize(const unsigned int& roiWord,
-			 double& etaMin, double& etaMax, 
-			 double& phiMin, double& phiMax) const = 0;
+    virtual StatusCode RoIsize(const unsigned int& roiWord,
+			       double& etaMin, double& etaMax,
+			       double& phiMin, double& phiMax) const = 0;
 
     /// pure virtual function for dumping roi mapping
     virtual bool dumpRoiMap(const std::string& filename) const = 0;
