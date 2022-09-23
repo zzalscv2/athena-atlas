@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2017 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef GENERATORMODULES_GENBASE_H
@@ -11,6 +11,7 @@
 #include "GaudiKernel/IIncidentSvc.h"
 #include "AthenaKernel/IAtRndmGenSvc.h"
 #include "AthenaKernel/errorcheck.h"
+#include "CxxUtils/checker_macros.h"
 #include "StoreGate/ReadHandleKey.h"
 #include "GeneratorObjects/McEventCollection.h"
 
@@ -60,9 +61,8 @@ public:
 
   /// @name Event loop algorithm methods
   //@{
-  virtual StatusCode initialize();
-  virtual StatusCode execute() { return StatusCode::SUCCESS; }
-  virtual StatusCode finalize() { return StatusCode::SUCCESS; }
+  virtual StatusCode initialize() override;
+  virtual StatusCode execute() override { return StatusCode::SUCCESS; }
   //@}
 
 
@@ -73,7 +73,7 @@ public:
   ///
   /// @note This function will make a new McEventCollection
   /// if there is not already a valid one _and_ MakeMcEvent=True.
-  HepMC::GenEvent* event() {
+  HepMC::GenEvent* event ATLAS_NOT_CONST_THREAD_SAFE () {
     if (events()->empty())
       ATH_MSG_ERROR("McEventCollection is empty during first event access");
     return *(events()->begin());
@@ -90,7 +90,7 @@ public:
   ///
   /// @note This function will make a new McEventCollection
   /// if there is not already a valid one _and_ MakeMcEvent=True.
-  McEventCollection* events();
+  McEventCollection* events ATLAS_NOT_CONST_THREAD_SAFE ();
 
   /// Access the current event's McEventCollection (const)
   const McEventCollection* events_const() const {

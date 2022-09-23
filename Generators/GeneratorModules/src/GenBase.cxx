@@ -31,7 +31,7 @@ StatusCode GenBase::initialize() {
 
 
 /// Access the current event's McEventCollection
-McEventCollection* GenBase::events() {
+McEventCollection* GenBase::events ATLAS_NOT_CONST_THREAD_SAFE () {
   // Make a new MC event collection if necessary
   McEventCollection* mcevents = nullptr;
   if (!evtStore()->contains<McEventCollection>(m_mcEventKey) && m_mkMcEvent) {
