@@ -72,7 +72,6 @@ class TileL2ContByteStreamTool: public AthAlgTool {
      "TileHid2RESrcID", "TileHid2RESrcIDHLT", "TileHid2RESrcID key"};
 
   const TileHWID* m_tileHWID;
-  const TileHid2RESrcID* m_hid2re;
   bool m_verbose;
 };
 
