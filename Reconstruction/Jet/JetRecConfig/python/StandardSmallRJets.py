@@ -113,7 +113,7 @@ AntiKt4EMPFlowCSSK = JetDefinition("AntiKt",0.4,cst.GPFlowCSSK,
 # *********************************************************
 AntiKt4UFOCSSK = JetDefinition("AntiKt",0.4,cst.UFOCSSK,
                                ghostdefs = standardghosts+flavourghosts,
-                               modifiers = ("ConstitFourMom","Sort","Filter:1","JetPtAssociation","Width","TrackMoments","TrackSumMoments","JVF","JVT","Charge",)+truthmods,
+                               modifiers = ("ConstitFourMom","Sort","Filter:1","EMScaleMom","JetPtAssociation","Width","TrackMoments","TrackSumMoments","JVF","JVT","Charge","CaloEnergies",)+truthmods,
                                ptmin = 2000,
                                lock = True
 )
@@ -124,7 +124,7 @@ AntiKt4UFOCSSK = JetDefinition("AntiKt",0.4,cst.UFOCSSK,
 AntiKt4UFOCSSKNoPtCut = JetDefinition("AntiKt",0.4,cst.UFOCSSK,
                                       infix = "NoPtCut",
                                       ghostdefs = standardghosts+flavourghosts,
-                                      modifiers = ("ConstitFourMom","Sort","Filter:1","JetPtAssociation","Width","TrackMoments","TrackSumMoments","JVF","JVT","Charge",)+truthmods,
+                                      modifiers = ("ConstitFourMom","Sort","Filter:1","EMScaleMom","JetPtAssociation","Width","TrackMoments","TrackSumMoments","JVF","JVT","Charge","CaloEnergies",)+truthmods,
                                       ptmin = 1,
                                       lock = True
 )
