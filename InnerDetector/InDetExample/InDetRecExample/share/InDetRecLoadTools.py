@@ -7,9 +7,9 @@
 from InDetRecExample.TrackingCommon import createAndAddCondAlg
 from InDetRecExample.TrackingCommon import getRIO_OnTrackErrorScalingCondAlg
 
-use_broad_cluster_any = InDetFlags.useBroadClusterErrors() and (not InDetFlags.doDBMstandalone())
-use_broad_cluster_pix = InDetFlags.useBroadPixClusterErrors() and (not InDetFlags.doDBMstandalone())
-use_broad_cluster_sct = InDetFlags.useBroadSCTClusterErrors() and (not InDetFlags.doDBMstandalone())
+use_broad_cluster_any = InDetFlags.useBroadClusterErrors()
+use_broad_cluster_pix = InDetFlags.useBroadPixClusterErrors()
+use_broad_cluster_sct = InDetFlags.useBroadSCTClusterErrors()
 if use_broad_cluster_pix is None :
     use_broad_cluster_pix = use_broad_cluster_any
 if use_broad_cluster_sct is None :
@@ -124,8 +124,6 @@ if InDetFlags.loadRotCreator():
         # load Pixel ROT creator, we overwrite the defaults for the
         # tool to always make conservative pixel cluster errors
         # SiLorentzAngleTool
-        if InDetFlags.doDBM():
-            PixelClusterOnTrackToolDBM = TrackingCommon.getInDetPixelClusterOnTrackToolDBM()
         PixelClusterOnTrackTool        = TrackingCommon.getInDetPixelClusterOnTrackTool()
         PixelClusterOnTrackToolPattern = TrackingCommon.getInDetPixelClusterOnTrackToolPattern()
 
@@ -150,9 +148,6 @@ if InDetFlags.loadRotCreator():
     InDetRotCreator = TrackingCommon.getInDetRotCreator()
     InDetRotCreatorPattern = TrackingCommon.getInDetRotCreatorPattern()
 
-    if InDetFlags.doDBM():
-        InDetRotCreatorDBM=TrackingCommon.getInDetRotCreatorDBM()
-
     if PixelClusterOnTrackToolDigital is not None :
         InDetRotCreatorDigital = TrackingCommon.getInDetRotCreatorDigital()
     else:
@@ -164,10 +159,7 @@ if InDetFlags.loadRotCreator():
     if DetFlags.haveRIO.pixel_on():
         #
         # tool to always make conservative pixel cluster errors
-        if not InDetFlags.doDBMstandalone():
-            BroadPixelClusterOnTrackTool = TrackingCommon.getInDetBroadPixelClusterOnTrackTool()
-        else:
-            BroadPixelClusterOnTrackTool = None
+        BroadPixelClusterOnTrackTool = TrackingCommon.getInDetBroadPixelClusterOnTrackTool()
     else:
         BroadPixelClusterOnTrackTool = None
 
@@ -253,18 +245,6 @@ if InDetFlags.loadFitter():
         InDetTrackFitterLowPt = CfgGetter.getPublicTool('InDetTrackFitterLowPt')
     if DetFlags.TRT_on():
         InDetTrackFitterTRT =   CfgGetter.getPublicTool('InDetTrackFitterTRT')
-    if InDetFlags.doDBM():
-        InDetTrackFitterDBM =   CfgGetter.getPublicTool('InDetTrackFitterDBM')
-
-        # @TODO should aldready be in ToolSvc
-        # if not InDetFlags.doDBMstandalone():
-            # ToolSvc += InDetTrackFitterTRT
-            # if (InDetFlags.doPrintConfigurables()):
-            #     printfunc (InDetTrackFitterTRT)
-        # if InDetFlags.doLowPt() or (InDetFlags.doTrackSegmentsPixel() and InDetFlags.doMinBias()):
-            # ToolSvc+=InDetTrackFitterLowPt
-            # if (InDetFlags.doPrintConfigurables()):
-            #    printfunc (InDetTrackFitterLowPt)
 
 #
 # ----------- load association tool from Inner Detector to handle pixel ganged ambiguities
@@ -346,13 +326,12 @@ if InDetFlags.doPattern():
     #
     # TRT detector elements road builder
     #
-    if not InDetFlags.doDBMstandalone():
-        InDetTRTDetElementsRoadMaker =  TrackingCommon.getInDetTRT_RoadMaker()
-        from InDetRecExample.TrackingCommon import getTRT_DetElementsRoadCondAlg
-        createAndAddCondAlg(getTRT_DetElementsRoadCondAlg,'TRT_DetElementsRoadCondAlg_xk')
+    InDetTRTDetElementsRoadMaker =  TrackingCommon.getInDetTRT_RoadMaker()
+    from InDetRecExample.TrackingCommon import getTRT_DetElementsRoadCondAlg
+    createAndAddCondAlg(getTRT_DetElementsRoadCondAlg,'TRT_DetElementsRoadCondAlg_xk')
 
-        if (InDetFlags.doPrintConfigurables()):
-            printfunc (     InDetTRTDetElementsRoadMaker)
+    if (InDetFlags.doPrintConfigurables()):
+        printfunc (     InDetTRTDetElementsRoadMaker)
 
     #
     # Local combinatorial track finding using space point seed and detector element road
@@ -385,27 +364,6 @@ if InDetFlags.doPattern():
             condSeq += InDet__SiDetElementBoundaryLinksCondAlg_xk(name = "InDetSiDetElementBoundaryLinksSCTCondAlg",
                                                                   ReadKey = "SCT_DetectorElementCollection",
                                                                   WriteKey = "SCT_DetElementBoundaryLinks_xk")
-
-    #if InDetFlags.doDBM():
-    #    InDetSiComTrackFinderDBM = InDet__SiCombinatorialTrackFinder_xk(name                  = 'InDetSiComTrackFinderDBM',
-    #                                                                    PropagatorTool        = InDetPatternPropagator,
-    #                                                                    UpdatorTool           = InDetPatternUpdator,
-    #                                                                    RIOonTrackTool        = InDetRotCreatorDBM,
-    #                                                                    AssosiationTool       = InDetPrdAssociationTool,
-    #                                                                    usePixel              = True,
-    #                                                                    useSCT                = False,
-    #                                                                    PixelClusterContainer = InDetKeys.PixelClusters(),
-    #                                                                    SCT_ClusterContainer  = InDetKeys.SCT_Clusters(),
-    #                                                                    MagneticFieldMode     = "NoField",
-    #                                                                    TrackQualityCut       = 9.3
-    #                                                                    )
-    #if InDetFlags.doDBMstandalone():
-    #    InDetSiComTrackFinder.MagneticFieldMode     =  "NoField"
-
-    # if (DetFlags.haveRIO.SCT_on()):
-    #   InDetSiComTrackFinder.SctSummaryTool = InDetSCT_ConditionsSummaryTool
-    # else:
-    #  InDetSiComTrackFinder.SctSummaryTool = None
 
     if (InDetFlags.doPrintConfigurables()):
       printfunc (InDetSiComTrackFinder)

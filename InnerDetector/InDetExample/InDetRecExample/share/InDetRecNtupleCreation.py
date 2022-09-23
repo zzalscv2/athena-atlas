@@ -300,35 +300,17 @@ if InDetFlags.doPhysValMon():
     print( InDetPhysValMonManager )
 
   from InDetPhysValMonitoring.InDetPhysValMonitoringConf import InDetPhysValMonitoringTool
-  if InDetFlags.doDBMstandalone():
-    InDetPhysValMonTool = InDetPhysValMonitoringTool (useTrackSelection   = False,
-                                                      TrackParticleContainerName = "InDetDBMTrackParticles", 
-                                                      TrackSelectionTool = None, 
-                                                      TruthSelectionTool = None, 
-                                                      jetContainerName = "")
-  else:
-    InDetPhysValMonTool = InDetPhysValMonitoringTool (useTrackSelection   = True,
-                                                      TrackSelectionTool   = InDetTrackSelectorTool)
+  InDetPhysValMonTool = InDetPhysValMonitoringTool (useTrackSelection   = True,
+                                                    TrackSelectionTool   = InDetTrackSelectorTool)
 #                                                      TrackParticleContainerName      = InDetKeys.Tracks())
 #      InputTrackCollectionTruth = InDetKeys.TracksTruth()
-#  if InDetFlags.doDBM():
-#    InDetPhysValMonToolDBM = InDetPhysValMonitoringTool (useTrackSelection   = False,
-#                                                         TrackParticleContainerName   = "InDetDBMTrackParticles",
-#                                                         TruthParticleContainerName = "DBMTracksTruth",
-#                                                         TrackSelectionTool = None,
-#                                                         TruthSelectionTool = None,
-#                                                         jetContainerName = "")
-
-#    ToolSvc += InDetPhysValMonToolDBM
-#    InDetPhysValMonManager.AthenaMonTools += [InDetPhysValMonToolDBM]
 
   #ToolSvc += InDetPhysValMonTool
   InDetPhysValMonManager.AthenaMonTools += [InDetPhysValMonTool]
   if (InDetFlags.doPrintConfigurables()):
     print( InDetPhysValMonTool )
-#    if InDetFlags.doDBM():
-#      print( InDetPhysValMonToolDBM )
-#monitoring pile-up particles separately if splitReco is used (fast chain)
+
+  #monitoring pile-up particles separately if splitReco is used (fast chain)
   if InDetFlags.doSplitReco():
     InDetPhysValMonToolPU = InDetPhysValMonitoringTool (useTrackSelection   = True,
                                                         TrackSelectionTool   = InDetTrackSelectorTool,

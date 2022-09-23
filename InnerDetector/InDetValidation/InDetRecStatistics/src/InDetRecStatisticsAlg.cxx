@@ -86,7 +86,7 @@ InDet::InDetRecStatisticsAlg::InDetRecStatisticsAlg(const std::string& name, ISv
   m_UseTrackSummary            (true),
   m_printSecondary             (false),
   m_minPt                      (1000),
-  m_maxEta                     (2.7),
+  m_maxEta                     (4.2),
   m_maxEtaBarrel               (0.8),
   m_maxEtaTransition           (1.6),
   m_maxEtaEndcap               (2.5),
@@ -104,8 +104,8 @@ InDet::InDetRecStatisticsAlg::InDetRecStatisticsAlg(const std::string& name, ISv
   m_minZEndSecondary           (3200.0*CLHEP::mm),
   m_useTrackSelection          (false),
   m_doTruth                    (true),
-  m_minEtaDBM                  (2.5),
-  m_maxEtaDBM                  (10.0),
+  m_minEtaFORWARD              (2.5),
+  m_maxEtaFORWARD              (4.2),
   m_isUnbiased                 (0),
   m_events_processed           (0)
 {
@@ -133,8 +133,8 @@ InDet::InDetRecStatisticsAlg::InDetRecStatisticsAlg(const std::string& name, ISv
   declareProperty("maxEtaBarrel",               m_maxEtaBarrel  );
   declareProperty("maxEtaTransition",           m_maxEtaTransition);
   declareProperty("maxEtaEndcap",               m_maxEtaEndcap);
-  declareProperty("maxEtaDBM", m_maxEtaDBM);
-  declareProperty("minEtaDBM", m_minEtaDBM);
+  declareProperty("maxEtaFORWARD", m_maxEtaFORWARD);
+  declareProperty("minEtaFORWARD", m_minEtaFORWARD);
   declareProperty("fakeTrackCut",               m_fakeTrackCut);
   declareProperty("fakeTrackCut2",              m_fakeTrackCut2);
   declareProperty("matchTrackCut",              m_matchTrackCut);
@@ -235,8 +235,8 @@ StatusCode InDet::InDetRecStatisticsAlg::initialize(){
   ct.minZEndPrimary	 = m_minZEndPrimary;
   ct.minZEndSecondary  	 = m_minZEndSecondary;
   ct.minPt               = m_minPt;
-  ct.minEtaDBM = m_minEtaDBM;
-  ct.maxEtaDBM = m_maxEtaDBM;
+  ct.minEtaFORWARD = m_minEtaFORWARD;
+  ct.maxEtaFORWARD = m_maxEtaFORWARD;
 
   unsigned int nCollections = 0;
   for (SG::ReadHandleKeyArray<TrackCollection>::const_iterator
@@ -721,7 +721,7 @@ void InDet :: InDetRecStatisticsAlg :: printStatistics() {
 	  << " R > "    << m_minREndSecondary   << "mm or"
 	  << " |z| > "  << m_minREndSecondary   << "mm" << "\n"
           << "\t" << "Forward                \t"
-          << "|eta| > " << m_minEtaDBM     << "\n"
+          << "|eta| > " << m_minEtaFORWARD     << "\n"
 	  << "\t" << "Low prob tracks #1    \t" << "< "
 	  << m_fakeTrackCut  << " of hits from single Truth Track "
 	  << "\n"
@@ -776,7 +776,7 @@ void InDet :: InDetRecStatisticsAlg :: printStatistics() {
         << "----------------------------------------------------------------------------------------------------------------------------------------------------" << "\n"
         << "  in FORWARD region        tracks/event  " << track_stummary_type_header << "\n"
         << "----------------------------------------------------------------------------------------------------------------------------------------------------" << "\n";
-    printTrackSummary (out, ETA_DBM);
+    printTrackSummary (out, ETA_FORWARD);
   }
 
   if(m_printSecondary){

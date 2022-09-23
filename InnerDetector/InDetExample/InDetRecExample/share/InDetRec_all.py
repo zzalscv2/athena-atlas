@@ -92,10 +92,6 @@ if doEdmMonitor:
   topSequence += InDetEdmMonitor
   if (InDetFlags.doPrintConfigurables()):
     print          (InDetEdmMonitor)
-## DBM TruthLinks
-if (InDetFlags.doDBMstandalone() or InDetFlags.doDBM()) and InDetFlags.doTruth():
-  from AthenaCommon.Resilience import protectedInclude
-  protectedInclude( "McParticleAlgs/TruthParticleBuilder_jobOptions_DBM.py" )
 
 #--------------------------------------------------------------
 # Load Inner Detector reconstruction
@@ -230,8 +226,6 @@ if doWriteESD or doWriteAOD or ('doCopyRDO' in dir() and doCopyRDO):
     StreamESD.ItemList += [ "TrigDec::TrigDecision#TrigDecision" ]
     StreamESD.ItemList += [ "HLT::HLTResult#HLTResult_L2" ]
     StreamESD.ItemList += [ "HLT::HLTResult#HLTResult_EF" ]
-    if InDetFlags.doDBMstandalone(): 
-      StreamESD.ItemList+=["TrackCollection#SiSPSeededTracks"]
 
   if doWriteAOD:
     from OutputStreamAthenaPool.MultipleStreamManager import MSMgr
@@ -251,8 +245,6 @@ if doWriteESD or doWriteAOD or ('doCopyRDO' in dir() and doCopyRDO):
     StreamAOD.ItemList += [ "TrigDec::TrigDecision#TrigDecision" ]
     StreamAOD.ItemList += [ "HLT::HLTResult#HLTResult_L2" ]
     StreamAOD.ItemList += [ "HLT::HLTResult#HLTResult_EF" ]
-    if InDetFlags.doDBMstandalone():
-      StreamESD.ItemList+=["TrackCollection#SiSPSeededTracks"]
   
   if 'doCopyRDO' in dir() and doCopyRDO:
     # --- create stream

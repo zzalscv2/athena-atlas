@@ -58,18 +58,7 @@ def SiTrackMaker_xkCfg(flags, name="InDetSiTrackMaker", **kwargs):
     kwargs.setdefault("HadROIPhiRZContainer", "InDetHadCaloClusterROIPhiRZ")
     kwargs.setdefault("UseAssociationTool", flags.InDet.Tracking.ActivePass.usePrdAssociationTool)
 
-    if flags.InDet.Tracking.ActivePass.extension == "DBM":
-        kwargs.setdefault("MagneticFieldMode", "NoField")
-        kwargs.setdefault("useBremModel", False)
-        kwargs.setdefault("doMultiTracksProd", False)
-        kwargs.setdefault("TrackPatternRecoInfo", 'SiSPSeededFinder')
-        kwargs.setdefault("pTminSSS", -1)
-        kwargs.setdefault("CosmicTrack", False)
-        kwargs.setdefault("useSSSseedsFilter", False)
-        kwargs.setdefault("doCaloSeededBrem", False)
-        kwargs.setdefault("doHadCaloSeedSSS", False)
-
-    elif flags.Beam.Type is BeamType.Cosmics:
+    if flags.Beam.Type is BeamType.Cosmics:
         kwargs.setdefault("TrackPatternRecoInfo", 'SiSpacePointsSeedMaker_Cosmic')
 
     elif flags.Reco.EnableHI:

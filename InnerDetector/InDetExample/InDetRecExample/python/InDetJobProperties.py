@@ -99,17 +99,6 @@ class doBLS(InDetFlagsJobProperty):
     allowedTypes = ['bool']
     StoredValue  = False
 
-
-class doDBMstandalone(InDetFlagsJobProperty):
-    statusOn     = True
-    allowedTypes = ['bool']
-    StoredValue  = False
-
-class doDBM(InDetFlagsJobProperty):
-    statusOn     = True
-    allowedTypes = ['bool']
-    StoredValue  = False
-
 class doPrintConfigurables(InDetFlagsJobProperty):
     """if this is on the all the print(InDetXYZ lines are activated"""
     statusOn     = True
@@ -2111,14 +2100,6 @@ class InDetJobProperties(JobPropertyContainer):
        print('*')
        print('* --------------------> Special reconstruction for BLS physics !')
        print('*')
-    if self.doDBM() :
-       print('*')
-       print('* --------------------> Special reconstruction for DBM !')
-       print('*')
-    if self.doDBMstandalone() :
-       print('*')
-       print('* --------------------> Standalone reconstruction for DBM !')
-       print('*')
     if self.doHighPileup() :
        print('*')
        print('* --------------------> Special reconstruction for high pile-up !')
@@ -2728,9 +2709,7 @@ _list_InDetJobProperties = [Enabled,
                             useNNTTrainedNetworks,
                             keepAdditionalHitsOnTrackParticle,
                             doSCTModuleVeto,
-                            doDBMstandalone,
                             doBLS,
-                            doDBM,
                             doParticleConversion,
                             doStoreTrackSeeds,
                             doHIP300,

@@ -1028,45 +1028,6 @@ def createTRTStandaloneTrackingPassFlags():
 
     return icf
 
-########## DBM mode ################################
-def createDBMTrackingPassFlags():
-    icf = createTrackingPassFlags()
-    icf.extension               = "DBM"
-    icf.useTIDE_Ambi            = False
-    icf.minEta                  = 3.05
-    icf.maxEta                  = 3.45
-    icf.Xi2maxNoAdd             = 10000
-    icf.Xi2max                  = 10000
-    icf.nWeightedClustersMin    = 0
-    icf.seedFilterLevel         = 1
-    icf.maxdImpactPPSSeeds      = 100000.0 * Units.mm
-    icf.maxdImpactSSSSeeds      = 100000.0 * Units.mm
-    icf.maxPrimaryImpact        = 100000.0 * Units.mm  # low lumi
-    icf.maxZImpact              = 320000.0 * Units.mm  # Was 250 mm
-    icf.maxPT            = 100000.0 * Units.GeV # some overlap
-    icf.minPT            = 0.0 * Units.GeV
-    icf.minClusters      = 0
-    icf.minSiNotShared   = 0
-    icf.maxShared        = 1000   # cut is now on number of shared modules
-    icf.minPixel         = 0
-    maxHolesDefault     = 0
-    icf.maxHoles         = maxHolesDefault
-    icf.maxPixelHoles    = 0
-    icf.maxSctHoles      = 0
-    icf.maxDoubleHoles   = 0
-    icf.radMax           = 600000. * Units.mm
-    icf.nHolesMax        = maxHolesDefault
-    icf.nHolesGapMax     = maxHolesDefault
-    icf.useTRT           = False
-    icf.useSCT           = False
-    icf.usePixel         = True
-
-    icf.RunPixelPID      = False
-    icf.RunTRTPID        = False
-
-    return icf
-
-
 #####################################################################
 #####################################################################
 #####################################################################

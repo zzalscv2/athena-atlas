@@ -66,19 +66,8 @@ class  ConfiguredInDetValidation:
                                                          minREndSecondary         = 1000.0, # ME: leaves in R
                                                          minZEndPrimary           = 2300.0, # ME: 2 disks in the forward
                                                          minZEndSecondary         = 2700.0) # ME: or leaves in z 
-      if InDetFlags.doDBMstandalone() or nameExt=="DBM" or nameExt=="PUDBM":
-        InDetRecStatistics.minPt              = .0*GeV
-        InDetRecStatistics.maxEta             = 9999.
-        InDetRecStatistics.maxRStartPrimary   = 9999999.
-        InDetRecStatistics.maxRStartSecondary = 9999999.
-        InDetRecStatistics.maxZStartPrimary   = 9999999.
-        InDetRecStatistics.maxZStartSecondary = 9999999.
-        InDetRecStatistics.minREndPrimary     = 0.
-        InDetRecStatistics.minREndSecondary   = 0.
-        InDetRecStatistics.minZEndPrimary     = 0.
-        InDetRecStatistics.minZEndSecondary   = 0.
 
-      elif (InDetFlags.doCosmics() or InDetFlags.doBeamHalo()):
+      if (InDetFlags.doCosmics() or InDetFlags.doBeamHalo()):
         # change cuts for cosmics
         InDetRecStatistics.minPt              = .0*GeV
         InDetRecStatistics.maxEta             = 9999.
@@ -117,16 +106,8 @@ class  ConfiguredInDetValidation:
                                                                         usePixel               = DetFlags.haveRIO.pixel_on()     ,
                                                                         useSCT                 = DetFlags.haveRIO.SCT_on()       ,
                                                                         useTRT                 = DetFlags.haveRIO.TRT_on()       )
-
-      if InDetFlags.doDBMstandalone() or  nameExt=="DBM" or nameExt=="PUDBM":
-        InDetTrackClusterAssValidation.MomentumCut            = 0
-        InDetTrackClusterAssValidation.RadiusMax              = 9999999.0
-#        InDetTrackClusterAssValidation.RapidityCut            = 9999.9
-        InDetTrackClusterAssValidation.MinNumberClustersTRT   = 0
-        InDetTrackClusterAssValidation.MinNumberClusters      = 0
-        InDetTrackClusterAssValidation.MinNumberSpacePoints   = 0
       
-      elif InDetFlags.doCosmics() or InDetFlags.doBeamHalo():
+      if InDetFlags.doCosmics() or InDetFlags.doBeamHalo():
         InDetTrackClusterAssValidation.MomentumCut            = NewTrackingCuts.minPT()
         InDetTrackClusterAssValidation.RadiusMax              = 9999999.0
         InDetTrackClusterAssValidation.RapidityCut            = 9999.9

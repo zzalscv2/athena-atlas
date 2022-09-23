@@ -96,18 +96,10 @@ def InDetGlobalChi2Fitter(name='InDetGlobalChi2Fitter', **kwargs) :
                            RotCreatorTool        = TrackingCommon.getInDetRotCreator(**pix_cluster_on_track_args))
 
     from InDetRecExample.InDetJobProperties import InDetFlags
-    use_broad_cluster_any = InDetFlags.useBroadClusterErrors() and (not InDetFlags.doDBMstandalone())
+    use_broad_cluster_any = InDetFlags.useBroadClusterErrors()
     if 'BroadRotCreatorTool' not in kwargs and  not InDetFlags.doRefit():
         kwargs=setDefaults(kwargs,
                            BroadRotCreatorTool   = TrackingCommon.getInDetBroadRotCreator(**pix_cluster_on_track_args))
-
-    if InDetFlags.doDBMstandalone():
-        kwargs=setDefaults(kwargs,
-                           StraightLine        = True,
-                           OutlierCut          = 5,
-                           RecalibrateTRT      = False,
-                           TRTExtensionCuts    = False,
-                           TrackChi2PerNDFCut  = 20)
 
     if InDetFlags.doRefit() or use_broad_cluster_any is True:
         kwargs=setDefaults(kwargs,
@@ -196,23 +188,6 @@ def InDetGlobalChi2FitterTRT(name='InDetGlobalChi2FitterTRT', **kwargs) :
         ReintegrateOutliers    = False             if InDetFlags.doRefit()                                              else  False  # default
        ))
 
-def InDetGlobalChi2FitterDBM(name='InDetGlobalChi2FitterDBM', **kwargs) :
-    pix_cluster_on_track_args = stripArgs(kwargs,['SplitClusterMapExtension','ClusterSplitProbabilityName','nameSuffix'])
-    if 'RotCreatorTool' not in kwargs :
-        from InDetRecExample import TrackingCommon as TrackingCommon
-        kwargs=setDefaults(kwargs, RotCreatorTool = TrackingCommon.getInDetRotCreatorDBM(**pix_cluster_on_track_args))
-
-    return  InDetGlobalChi2FitterBase(name, **setDefaults(kwargs,
-                                                          BroadRotCreatorTool   = None,
-                                                          StraightLine          = True,
-                                                          OutlierCut            = 5,
-                                                          RecalibrateTRT        = False,
-                                                          RecalculateDerivatives= False,
-                                                          TRTExtensionCuts      = False,
-                                                          TrackChi2PerNDFCut    = 20,
-                                                          Momentum              = 1000.*Units.MeV))
-
-
 def GaussianSumFitter(name='GaussianSumFitter', **kwargs):
     import egammaRec.EMCommonRefitter
     kwargs.setdefault("RefitOnMeasurementBase", True)
@@ -246,6 +221,3 @@ def InDetTrackFitterTRT(name='InDetTrackFitterTRT', **kwargs) :
         return InDetTrackFitter(name,**kwargs)
     else :
         return InDetGlobalChi2FitterTRT(name,**kwargs)
-
-def InDetTrackFitterDBM(name='InDetTrackFitterDBM', **kwargs) :
-    return InDetGlobalChi2FitterDBM(name,**kwargs)
