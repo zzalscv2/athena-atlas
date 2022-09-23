@@ -151,8 +151,8 @@ StatusCode DiTauBuilder::execute() {
         ATH_MSG_DEBUG("Seed pt: "<< seed->pt() << "  eta: "<< seed->eta());
 
         // seed cuts
-        if (fabs(seed->pt()) < m_minPt) continue;
-        if (fabs(seed->eta()) > m_maxEta) continue;
+        if ( seed->pt() < m_minPt) continue;
+        if (std::abs(seed->eta()) > m_maxEta) continue;
 
         // cuts passed
         rDiTauData.seed = seed;

@@ -87,7 +87,7 @@ StatusCode DiTauTrackFinder::execute(DiTauCandidateData * data) {
 
     xAOD::DiTauJet *pDiTau = data->xAODDiTau;
 
-    if (pDiTau == NULL) {
+    if (pDiTau == nullptr ) {
         ATH_MSG_ERROR("no di-tau candidate given");
         return StatusCode::FAILURE;
     }
@@ -113,7 +113,7 @@ StatusCode DiTauTrackFinder::execute(DiTauCandidateData * data) {
     }
     else {
         ATH_MSG_WARNING("could not retieve VertexLink in ditau candidate");
-        pVertex = NULL;
+        pVertex = nullptr ;
     }
 
     // get tracks

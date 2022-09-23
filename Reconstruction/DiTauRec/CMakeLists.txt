@@ -18,9 +18,15 @@ if( NOT XAOD_ANALYSIS )
     Reconstruction/Jet/JetEDM
     Tracking/TrkTools/TrkToolInterfaces
     PRIVATE
+    Tools/PathResolver
     Calorimeter/CaloEvent
+    Event/xAOD/xAODCaloEvent
     Event/xAOD/xAODTracking
+    Event/FourMomUtils
+    Reconstruction/tauRec
     Reconstruction/RecoTools/RecoToolInterfaces
+    PhysicsAnalysis/MuonID/MuonIDAnalysis/MuonMomentumCorrections
+    Tracking/TrkVertexFitter/TrkVertexFitterInterfaces
     Reconstruction/tauRecTools
     Tracking/TrkEvent/TrkParametersIdentificationHelpers )
   
@@ -37,10 +43,19 @@ atlas_depends_on_subdirs( PUBLIC
                           Reconstruction/Jet/JetEDM
                           Tracking/TrkTools/TrkToolInterfaces
                           PRIVATE
+                          Tools/PathResolver
                           Calorimeter/CaloEvent
                           Event/xAOD/xAODTracking
+                          Event/xAOD/xAODCaloEvent
+                          Event/FourMomUtils
+                          Reconstruction/tauRec
                           Reconstruction/RecoTools/RecoToolInterfaces
+                          Reconstruction/RecoTools/ITrackToVertex
+                          Tracking/TrkVertexFitter/TrkVertexFitterInterfaces
+                          Tracking/TrkVertexFitter/TrkVertexFitters
+                          InnerDetector/InDetRecTools/InDetTrackSelectionTool
                           Reconstruction/tauRecTools
+                          Reconstruction/MVAUtils
                           Tracking/TrkEvent/TrkParametersIdentificationHelpers )
 endif()
 
@@ -65,7 +80,7 @@ if( NOT XAOD_ANALYSIS )
     src/*.cxx
     src/components/*.cxx
     INCLUDE_DIRS ${FASTJET_INCLUDE_DIRS}
-    LINK_LIBRARIES ${FASTJET_LIBRARIES} AthenaBaseComps xAODEgamma xAODJet xAODMuon xAODTau GaudiKernel MuonSelectorToolsLib JetEDM TrkToolInterfaces CaloEvent xAODTracking RecoToolInterfaces tauRecToolsLib TrkParametersIdentificationHelpers )
+    LINK_LIBRARIES ${FASTJET_LIBRARIES} AthenaBaseComps xAODEgamma xAODJet xAODMuon xAODTau GaudiKernel MuonSelectorToolsLib JetEDM TrkToolInterfaces CaloEvent xAODCaloEvent xAODTracking RecoToolInterfaces tauRec tauRecToolsLib MuonMomentumCorrectionsLib TrkParametersIdentificationHelpers TrkVertexFitterInterfaces TrkVertexFittersLib ITrackToVertex InDetTrackSelectionToolLib FourMomUtils MVAUtils PathResolver )
 else()
 
 atlas_add_library( DiTauRecLib

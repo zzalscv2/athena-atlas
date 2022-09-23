@@ -85,7 +85,7 @@ StatusCode ElMuFinder::execute(DiTauCandidateData * data) {
 
     xAOD::DiTauJet *pDiTau = data->xAODDiTau;
 
-    if (pDiTau == NULL) {
+    if (pDiTau == nullptr ) {
         ATH_MSG_ERROR("no di-tau candidate given");
         return StatusCode::FAILURE;
     }
@@ -119,7 +119,7 @@ StatusCode ElMuFinder::execute(DiTauCandidateData * data) {
             continue;    
         ATH_MSG_DEBUG("Electron passes author selection.");
 
-        if (el->pt() < m_elMinPt || fabs(el->eta() > m_elMaxEta))
+        if (el->pt() < m_elMinPt || std::abs(el->eta() > m_elMaxEta))
             continue;
         ATH_MSG_DEBUG("Electron passes basic kinematic selection");
 
