@@ -90,6 +90,7 @@ class gFexByteStreamTool : public extends<AthAlgTool, IL1TriggerByteStreamTool> 
         //Read handle key for the L1Menu
         SG::ReadHandleKey<TrigConf::L1Menu> m_l1MenuKey   {this, "L1TriggerMenu", "DetectorStore+L1TriggerMenu","Name of the L1Menu object to read configuration from"}; 
 
+        void decodeGfexTobSlice( const uint32_t dataArray[], uint32_t blockType) const;
         
 };
 
