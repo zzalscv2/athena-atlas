@@ -61,15 +61,9 @@ StatusCode LArDigitContainerCnv::initialize() {
 
 LArDigitContainerPERS* LArDigitContainerCnv::createPersistent(LArDigitContainer* trans) {
     MsgStream log(msgSvc(), "LArDigitContainerCnv");
-    log << MSG::DEBUG << "Writing LArDigitContainer_p2" << endmsg;
-    LArDigitContainerPERS* pers=new LArDigitContainerPERS();
-    LArDigitContainerCnv_p2 converter(m_idHelper);
-    // to be replaced in a follow-up MR
-    /*
     log << MSG::DEBUG << "Writing LArDigitContainer_p3" << endmsg;
     LArDigitContainerPERS* pers=new LArDigitContainerPERS();
     LArDigitContainerCnv_p3 converter(m_idHelper, m_idSCHelper, m_storeGateSvc);
-    */
     converter.transToPers(trans,pers,log);
     return pers;
 }
