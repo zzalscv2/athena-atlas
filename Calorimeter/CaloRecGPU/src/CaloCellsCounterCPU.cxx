@@ -6,7 +6,6 @@
 #include "CaloRecGPU/Helpers.h"
 #include "CaloRecGPU/CUDAFriendlyClasses.h"
 #include "CaloRecGPU/StandaloneDataIO.h"
-#include "CaloDetDescr/CaloDetDescrManager.h"
 #include "StoreGate/DataHandle.h"
 #include "CaloRec/CaloBadCellHelper.h"
 
@@ -25,6 +24,7 @@ StatusCode CaloCellsCounterCPU::initialize()
 {
   ATH_CHECK( m_noiseCDOKey.initialize() );
   ATH_CHECK( m_cellsKey.value().initialize() );
+  ATH_CHECK( detStore()->retrieve(m_calo_id, "CaloCell_ID") );
   return StatusCode::SUCCESS;
 }
 
@@ -78,9 +78,6 @@ StatusCode CaloCellsCounterCPU::execute (const EventContext & ctx, xAOD::CaloClu
   SG::ReadCondHandle<CaloNoise> noise_handle(m_noiseCDOKey, ctx);
   const CaloNoise * noise_tool = *noise_handle;
 
-  const CaloDetDescrManager * calo_dd_man = CaloDetDescrManager::instance();
-  const CaloCell_ID * calo_id = calo_dd_man->getCaloCell_ID();
-
   unsigned int gain_counts[GainConversion::num_gain_values()] = {0};
 
   size_struct global_counts, global_cluster_counts;
@@ -91,7 +88,7 @@ StatusCode CaloCellsCounterCPU::execute (const EventContext & ctx, xAOD::CaloClu
 
       const float energy = cell->energy();
 
-      const float SNR = std::abs( energy / noise_tool->getNoise(calo_id->calo_cell_hash(cell->ID()), cell->gain()) );
+      const float SNR = std::abs( energy / noise_tool->getNoise(m_calo_id->calo_cell_hash(cell->ID()), cell->gain()) );
 
       int gain = static_cast<int>(GainConversion::from_standard_gain(cell->gain()));
 
@@ -181,12 +178,12 @@ StatusCode CaloCellsCounterCPU::execute (const EventContext & ctx, xAOD::CaloClu
             }
 
 
-          const float this_snr = std::abs(cell->energy()) / noise_tool->getNoise(calo_id->calo_cell_hash(cell->ID()), cell->gain());
+          const float this_snr = std::abs(cell->energy()) / noise_tool->getNoise(m_calo_id->calo_cell_hash(cell->ID()), cell->gain());
 
           if (this_snr > max_snr)
             {
               max_snr = this_snr;
-              max_snr_hash = calo_id->calo_cell_hash(cell->ID());
+              max_snr_hash = m_calo_id->calo_cell_hash(cell->ID());
             }
 
           int gain = static_cast<int>(GainConversion::from_standard_gain(cell->gain()));

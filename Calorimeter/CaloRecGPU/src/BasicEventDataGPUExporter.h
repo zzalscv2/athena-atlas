@@ -17,6 +17,8 @@
 #include "CaloRecGPU/CaloGPUTimed.h"
 #include "CaloConditions/CaloNoise.h"
 
+class CaloCell_ID;
+
 /**
  * @class BasicEventDataGPUExporter
  * @author Nuno Fernandes <nuno.dos.santos.fernandes@cern.ch>
@@ -110,6 +112,10 @@ class BasicEventDataGPUExporter :
    */
   Gaudi::Property<float> m_seedThreshold {this, "SeedThresholdOnEorAbsEinSigma", 4., "Seed threshold (in units of noise Sigma)"};
 
+  /**
+   * @brief Pointer to Calo ID Helper
+   */
+  const CaloCell_ID* m_calo_id{nullptr};
 };
 
 #endif //CALORECGPU_BASICEVENTDATAGPUEXPORTER_H

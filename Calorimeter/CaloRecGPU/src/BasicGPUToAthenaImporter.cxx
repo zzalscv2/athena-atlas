@@ -33,6 +33,7 @@ BasicGPUToAthenaImporter::BasicGPUToAthenaImporter(const std::string & type, con
 StatusCode BasicGPUToAthenaImporter::initialize()
 {
   ATH_CHECK( m_cellsKey.value().initialize() );
+  ATH_CHECK( detStore()->retrieve(m_calo_id, "CaloCell_ID") );
 
   auto get_option_from_string = [](const std::string & str, bool & failed)
   {
@@ -133,15 +134,13 @@ StatusCode BasicGPUToAthenaImporter::convert (const EventContext & ctx,
 
   const auto after_creation = clock_type::now();
 
-  const CaloDetDescrManager * calo_dd_man = CaloDetDescrManager::instance();
-  const CaloCell_ID * calo_id = calo_dd_man->getCaloCell_ID();
   CaloCellContainer::const_iterator iCells = cell_collection->begin();
 
   for (int cell_count = 0; iCells != cell_collection->end(); ++iCells, ++cell_count)
     {
       const CaloCell * cell = (*iCells);
 
-      const int index = calo_id->calo_cell_hash(cell->ID());
+      const int index = m_calo_id->calo_cell_hash(cell->ID());
 
       const tag_type this_tag = ed.m_cell_state->clusterTag[index];
 

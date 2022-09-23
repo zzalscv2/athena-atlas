@@ -12,7 +12,6 @@
 #include "CaloIdentifier/CaloCell_ID.h"
 #include "StoreGate/DataHandle.h"
 #include "CaloConditions/CaloNoise.h"
-#include "CaloDetDescr/CaloDetDescrManager.h"
 
 #include "boost/chrono/chrono.hpp"
 #include "boost/chrono/thread_clock.hpp"
@@ -38,7 +37,7 @@ StatusCode BasicConstantGPUDataExporter::initialize()
     }
 
   ATH_CHECK(m_noiseCDOKey.initialize());
-
+  ATH_CHECK(m_caloMgrKey.initialize());
   auto get_option_from_string = [](const std::string & str, bool & failed)
   {
     failed = false;
@@ -109,7 +108,8 @@ StatusCode BasicConstantGPUDataExporter::convert(const EventContext & ctx, Const
 
   auto start = clock_type::now();
 
-  const CaloDetDescrManager * calo_dd_man = CaloDetDescrManager::instance();
+  SG::ReadCondHandle<CaloDetDescrManager> caloMgrHandle{m_caloMgrKey,ctx};
+  const CaloDetDescrManager * calo_dd_man = *caloMgrHandle;
 
   cd.m_geometry.allocate();
 

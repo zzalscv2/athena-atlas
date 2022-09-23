@@ -30,7 +30,7 @@ StatusCode BasicEventDataGPUExporter::initialize()
 
   ATH_CHECK( m_noiseCDOKey.initialize() );
   ATH_CHECK( m_cellsKey.value().initialize() );
-
+  ATH_CHECK( detStore()->retrieve(m_calo_id, "CaloCell_ID") );
   return StatusCode::SUCCESS;
 }
 
@@ -92,15 +92,11 @@ StatusCode BasicEventDataGPUExporter::convert(const EventContext & ctx,
   SG::ReadCondHandle<CaloNoise> noise_handle(m_noiseCDOKey, ctx);
   const CaloNoise * noise_tool = *noise_handle;
 
-
-  const CaloDetDescrManager * calo_dd_man = CaloDetDescrManager::instance();
-  const CaloCell_ID * calo_id = calo_dd_man->getCaloCell_ID();
-
   for (CaloCellContainer::const_iterator iCells = cell_collection->begin(); iCells != cell_collection->end(); ++iCells)
     {
       const CaloCell * cell = (*iCells);
 
-      const int index = calo_id->calo_cell_hash(cell->ID());
+      const int index = m_calo_id->calo_cell_hash(cell->ID());
 
       const float energy = cell->energy();
 
@@ -178,7 +174,7 @@ StatusCode BasicEventDataGPUExporter::convert(const EventContext & ctx,
           ed.m_clusters->clusterEta[cluster_number] = cluster->eta();
           ed.m_clusters->clusterPhi[cluster_number] = cluster->phi();
 
-          const int seed_cell_index = calo_id->calo_cell_hash(cluster->cell_begin()->ID());
+          const int seed_cell_index = m_calo_id->calo_cell_hash(cluster->cell_begin()->ID());
 
           ed.m_clusters->seedCellID[cluster_number] = seed_cell_index;
 
@@ -187,7 +183,7 @@ StatusCode BasicEventDataGPUExporter::convert(const EventContext & ctx,
 
           for (const CaloCell * cell : (*cell_links))
             {
-              IdentifierHash tmpHashid = calo_id->calo_cell_hash(cell->ID());
+              IdentifierHash tmpHashid = m_calo_id->calo_cell_hash(cell->ID());
               const int cell_ID = tmpHashid;
               ed.m_cell_state->clusterTag[cell_ID] = tag;
             }

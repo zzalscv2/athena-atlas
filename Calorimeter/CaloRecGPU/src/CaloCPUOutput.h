@@ -17,6 +17,7 @@
 
 #include "CLHEP/Units/SystemOfUnits.h"
 
+class CaloCell_ID;
 
 /**
  * @class CaloCPUOutput
@@ -114,6 +115,10 @@ class CaloCPUOutput :
    */
   Gaudi::Property<float> m_seedThreshold {this, "SeedThresholdOnEorAbsEinSigma", 4., "Seed threshold (in units of noise Sigma)"};
 
+  /**
+   * @brief Pointer to Calo ID Helper
+   */
+  const CaloCell_ID* m_calo_id{nullptr};
 };
 
 #endif //CALORECGPU_CALOCPUOUTPUT_H
