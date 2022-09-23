@@ -42,7 +42,7 @@ afterburnerGenerators = ["Photos", "Photospp", "Tauola", "TauolaPP", "Tauolapp",
 knownGenerators = inputGenerators + mainGenerators + afterburnerGenerators
 
 ## Note which generators should NOT be sanity tested by the TestHepMC alg
-notesthepmcGenerators = ["Superchic","ParticleDecayer", "ParticleGun", "CosmicGenerator", "BeamHaloGenerator", "FPMC",
+notesthepmcGenerators = ["ParticleDecayer", "ParticleGun", "CosmicGenerator", "BeamHaloGenerator", "FPMC",
                          "Hijing", "Hydjet", "Starlight", "PythiaRhad"]
 
 ## Generators with no flexibility/concept of a tune or PDF choice
