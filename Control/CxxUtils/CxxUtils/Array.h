@@ -46,9 +46,11 @@
 namespace CxxUtils {
 
 
-// Forward declaration.
+// Forward declarations.
 template <unsigned int N>
 class ArrayIterator;
+template <unsigned int N>
+class WritableArray;
 
 
 //**********************************************************************
@@ -245,6 +247,7 @@ protected:
 
   // These classes need to call the above protected constructor.
   friend class Array<N+1>;
+  friend WritableArray<N+1>;
   friend class ArrayIterator<N+1>;
 
   /// Pointer to the representation.
@@ -358,6 +361,7 @@ protected:
 
   // This class needs to call the above protected constructor.
   friend class Array<1>;
+  friend class WritableArray<1>;
 
   /// Pointer to this array's single element.
   /// Null if this instance was created using the default constructor.
@@ -663,7 +667,17 @@ public:
    *
    * Note that this operation is not available if @c N is 0.
    */
-  WritableArray<N-1> operator[] (unsigned int i) const;
+  WritableArray<N-1> operator[] (unsigned int i);
+
+  /**
+   * @brief Array indexing.
+   * @param i The desired index.  Must be less than the array size
+   *          along this dimension.
+   * @return The @a i'th @c N-1 dimensional subarray in the array.
+   *
+   * Note that this operation is not available if @c N is 0.
+   */
+  Array<N-1> operator[] (unsigned int i) const;
 
   /**
    * @brief Return a direct pointer to array elements.
