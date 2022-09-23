@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
 */
 /**
  * @file  AthAllocators/ArenaBlock.icc
@@ -44,6 +44,16 @@ ArenaBlock*& ArenaBlock::link()
 
 
 /**
+ * @brief Return the link pointer of the block.
+ */
+inline
+const ArenaBlock* ArenaBlock::link() const
+{
+  return m_link;
+}
+
+
+/**
  * @brief Return a pointer to element @c i in the block.
  * @param i The index of the desired element.
  */
@@ -51,6 +61,18 @@ inline
 ArenaBlock::pointer ArenaBlock::index (size_t i)
 {
   return reinterpret_cast<char*>(this) +
+    ArenaBlockBodyOffset + i*eltSize();
+}
+
+
+/**
+ * @brief Return a pointer to element @c i in the block.
+ * @param i The index of the desired element.
+ */
+inline
+ArenaBlock::const_pointer ArenaBlock::index (size_t i) const
+{
+  return reinterpret_cast<const char*>(this) +
     ArenaBlockBodyOffset + i*eltSize();
 }
 
@@ -68,6 +90,22 @@ inline
 ArenaBlock::pointer ArenaBlock::index (size_t i, size_t elt_size)
 {
   return reinterpret_cast<char*>(this) + ArenaBlockBodyOffset + i*elt_size;
+}
+
+
+/**
+ * @brief Return a pointer to element @c i in the block.
+ * @param i The index of the desired element.
+ * @param elt_size The block's element size.
+ *
+ * This is provided in addition to the previous function as it may
+ * allow for better inlined code in when used in a loop, if @c elt_size
+ * is saved in a local.
+ */
+inline
+ArenaBlock::const_pointer ArenaBlock::index (size_t i, size_t elt_size) const
+{
+  return reinterpret_cast<const char*>(this) + ArenaBlockBodyOffset + i*elt_size;
 }
 
 
