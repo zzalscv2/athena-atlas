@@ -9,16 +9,12 @@
 #include "AthenaPoolCnvSvc/T_AthenaPoolCustomCnv.h"
 #include "LArRawEvent/LArDigitContainer.h"
 
-#include "LArTPCnv/LArDigitContainer_p2.h"
-// to be replaced in follow-up MR
-//#include "LArTPCnv/LArDigitContainer_p3.h"
+#include "LArTPCnv/LArDigitContainer_p3.h"
 
 class LArOnlineID_Base;
 class StoreGateSvc;
 
-typedef LArDigitContainer_p2 LArDigitContainerPERS;
-// to be replaced in follow-up MR
-//typedef LArDigitContainer_p3 LArDigitContainerPERS;
+typedef LArDigitContainer_p3 LArDigitContainerPERS;
 
 typedef T_AthenaPoolCustomCnv<LArDigitContainer,LArDigitContainerPERS> LArDigitContainerCnvBase;
 
