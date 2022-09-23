@@ -21,7 +21,7 @@ namespace JiveXML {
    * Simple result checking routine, that will output an errorMsg throught the
    * ServerSvc if there was an error. Returns false on error;
    */
-  bool checkResult( const int RetVal, const std::string Module, IMessage* const ServerSvc){
+  bool checkResult( const int RetVal, const std::string& Module, IMessage* const ServerSvc){
 
     //Immediately return on no error
     if (RetVal == 0) return true ;
@@ -137,7 +137,7 @@ namespace JiveXML {
     event.isCompressed = false ;
     event.EventNumber = currEvtStreamID.EventNumber();
     event.RunNumber = currEvtStreamID.RunNumber();
-    event.StreamName = currEvtStreamID.StreamName().c_str();
+    event.StreamName = currEvtStreamID.StreamNameCStr();
     event.NBytes = 0; event.EventData = NULL ;
 
     //Check if such a stream was currently found

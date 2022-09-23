@@ -37,7 +37,7 @@ namespace JiveXML{
   //Maximum allowed number of streams
   const unsigned int NSTREAMMAX = 1024 ;
   //Maximum allowd number of bytes in one event (2^31 for 4-byte ints)
-  const unsigned int NBYTESMAX = 0x1 << (sizeof( unsigned int )*8 - 1) ; //2147483648 ; 
+  const unsigned int NBYTESMAX = 0x1u << (sizeof( unsigned int )*8 - 1) ; //2147483648 ; 
 
   /**
    * Data structures for GetStreams functions

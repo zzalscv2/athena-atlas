@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2017 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "JiveXML/XMLFormatTool.h"
@@ -57,8 +57,11 @@ namespace JiveXML {
    * @param RunNumber the run number
    * @param dataTime a date and time string
    */
-  StatusCode XMLFormatTool::StartEvent(  const unsigned long EventNumber, const unsigned int RunNumber, std::string dateTime, 
-					 const unsigned int lumiBlock, std::string eventProperty, std::string geometryVersion ){
+  StatusCode XMLFormatTool::StartEvent(  const unsigned long EventNumber, const unsigned int RunNumber,
+                                         const std::string& dateTime, 
+					 const unsigned int lumiBlock,
+                                         const std::string& eventProperty,
+                                         const std::string& geometryVersion ){
 
     
     //Recreate the event buffer if it does not exists
@@ -106,7 +109,9 @@ namespace JiveXML {
    * @param key the name of the data field we write
    * @param aMap the data that shall be written
    */
-  StatusCode XMLFormatTool::AddToEvent(std::string component, std::string key, const DataMap * aMap) {
+  StatusCode XMLFormatTool::AddToEvent(const std::string& component,
+                                       const std::string& key,
+                                       const DataMap * aMap) {
     
     DataMap::const_iterator itr;
 

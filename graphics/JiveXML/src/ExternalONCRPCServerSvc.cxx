@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2017 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "JiveXML/ExternalONCRPCServerSvc.h"
@@ -150,7 +150,7 @@ namespace JiveXML {
    * Implementation of IServerSvc method. Get one event and put it as the new
    * event for the this stream, which is identified by EventStreamID
    */
-  StatusCode ExternalONCRPCServerSvc::UpdateEventForStream( const EventStreamID evtStreamID, const std::string & eventStr) {
+  StatusCode ExternalONCRPCServerSvc::UpdateEventForStream( const EventStreamID& evtStreamID, const std::string & eventStr) {
  
     ATH_MSG_VERBOSE( "UpdateEventForStream()"  );
 

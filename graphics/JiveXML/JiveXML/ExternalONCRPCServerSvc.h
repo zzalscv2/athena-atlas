@@ -30,13 +30,13 @@ namespace JiveXML {
     virtual ~ExternalONCRPCServerSvc();
 
     /** Gaudi default methods */
-    StatusCode initialize();
-    StatusCode finalize();
+    virtual StatusCode initialize() override;
+    virtual StatusCode finalize() override;
 
     /** @name Server methods */
     //@{
     /** Put this event as new current event for stream given by name */
-    virtual StatusCode UpdateEventForStream( const EventStreamID evtStreamID, const std::string & event);
+    virtual StatusCode UpdateEventForStream( const EventStreamID& evtStreamID, const std::string & event) override;
     //@}
      
   private:

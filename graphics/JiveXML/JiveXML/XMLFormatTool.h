@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2017 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef JIVEXML__XMLFORMATTOOL_H
@@ -26,27 +26,31 @@ namespace JiveXML{
       XMLFormatTool( const std::string&, const std::string&, const IInterface*);
 
       /// Initialize
-      virtual StatusCode initialize();
+      virtual StatusCode initialize() override;
       
       /// Finalize
-      virtual StatusCode finalize();
+      virtual StatusCode finalize() override;
 
       /** Set additional tags */
-      virtual StatusCode SetTag ( const TagType tag );
+      virtual StatusCode SetTag ( const TagType tag ) override;
 
       /** Start a new event */
       virtual StatusCode StartEvent( const unsigned long EventNumber, const unsigned int RunNumber, 
-                                     std::string DateTime,
-                                     const unsigned int lumiBlock, std::string eventProperty, std::string geometryVersion );      
+                                     const std::string& DateTime,
+                                     const unsigned int lumiBlock,
+                                     const std::string& eventProperty,
+                                     const std::string& geometryVersion ) override;
 
       /** Finialize this event */
-      virtual StatusCode EndEvent();
+      virtual StatusCode EndEvent() override;
 
       /** Append a formatted version of one event component */
-      virtual StatusCode AddToEvent( std::string component, std::string key, const DataMap* aMap);
+      virtual StatusCode AddToEvent( const std::string& component,
+                                     const std::string& key,
+                                     const DataMap* aMap) override;
 
       /** Return the formated stringstream */
-      virtual const std::ostringstream* getFormattedEvent() const ;
+      virtual const std::ostringstream* getFormattedEvent() const override;
 
 
    private:

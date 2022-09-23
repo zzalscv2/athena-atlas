@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2017 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef JIVEXML_IMESSAGE_H
@@ -22,7 +22,7 @@ namespace JiveXML {
 
       /** @name Messaging services */
       //@{
-      virtual void Message( const MSG::Level level, const std::string msg ) const = 0;
+      virtual void Message( const MSG::Level level, const std::string& msg ) const = 0;
       /** Get the logging level **/
       virtual MSG::Level LogLevel() const = 0;
       //@}

@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2017 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef JIVEXML_EVENTSTREAM_H
@@ -21,7 +21,7 @@ namespace JiveXML {
     public:
 
       //Constructor with all parameters
-      EventStreamID( unsigned long EventNumber, unsigned int RunNumber, std::string StreamName ) :
+      EventStreamID( unsigned long EventNumber, unsigned int RunNumber, const std::string& StreamName ) :
         m_event(EventNumber), m_run(RunNumber), m_stream(StreamName){
       };
 
@@ -33,7 +33,7 @@ namespace JiveXML {
       };
 
       //Constructor with just a stream name - usefull for searching in the map
-      EventStreamID( std::string StreamName ) :
+      EventStreamID( const std::string& StreamName ) :
         m_event(0), m_run(0), m_stream(StreamName){
       };
 
@@ -41,6 +41,7 @@ namespace JiveXML {
       unsigned long EventNumber() const { return m_event; };
       unsigned int RunNumber() const { return m_run; };
       std::string StreamName() const { return m_stream; };
+      const char* StreamNameCStr() const { return m_stream.c_str(); };
 
       //Check wether two EventStreamIDs are refering to the same event
       bool isSameEvent ( const EventStreamID& id ) const {
