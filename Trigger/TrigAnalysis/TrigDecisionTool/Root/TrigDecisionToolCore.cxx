@@ -38,7 +38,8 @@ const Trig::CacheGlobalMemory* Trig::TrigDecisionToolCore::cgm() const {
   const Trig::CacheGlobalMemory* ptr = m_cacheGlobalMemory.get();
   // A consequence of placing the cache in a slot-specific wrapper
   Trig::CacheGlobalMemory* p ATLAS_THREAD_SAFE = const_cast<Trig::CacheGlobalMemory*>(ptr);
-  p->navigation (m_navigation);
+  HLT::TrigNavStructure* navigation ATLAS_THREAD_SAFE = m_navigation;
+  p->navigation (navigation);
   return ptr;
 }
 
