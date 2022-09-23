@@ -218,7 +218,7 @@ namespace Trig {
     
     
       template<class FEATURE>
-      void do_it() const {
+      void do_it() {
 	//std::cout << "TrigDecisionTool::Feature::get_links: getting links from navi for element in feature list: " << ClassID_traits<FEATURE>::typeName() << std::endl;
 	//std::cout << "TrigDecisionTool::Feature::get_links:                      type originally  requested is: " << ClassID_traits<REQUESTED>::typeName() << std::endl;
 
@@ -233,10 +233,10 @@ namespace Trig {
       }
 
       template<class FEATURE,bool do_flatten>
-      void _do_it(false_type dummy = false_type()) const {(void)dummy;/* do nothing */;}
+      void _do_it(false_type dummy = false_type()) {(void)dummy;/* do nothing */;}
     
       template<class FEATURE,bool do_flatten>
-      void _do_it(true_type /*dummy*/ = true_type()) const {
+      void _do_it(true_type /*dummy*/ = true_type()) {
 
 	//const HLT::TriggerElement* sourceTE(0);
 	std::string sourceLabel;
