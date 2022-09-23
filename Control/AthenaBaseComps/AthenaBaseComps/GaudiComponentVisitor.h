@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
 */
 
 /* Dear emacs, this is -*-c++-*- */
@@ -61,7 +61,7 @@ namespace xGaudi {
                                   const std::regex& reject_filter = ComponentVisitorBase::s_noFilter,
                                   T_TestVisited &&ignore = T_TestVisited()) {
          class Visitor final : public IVisitor {
-            Callable* m_func;
+            const Callable* m_func;
 
          public:
             Visitor( Callable* f ) : m_func{f} {}
