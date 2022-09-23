@@ -1,7 +1,7 @@
 // This file's extension implies that it's C, but it's really -*- C++ -*-.
 
 /*
-  Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
 */
 
 /**
@@ -709,11 +709,29 @@ WritableArray<N>::WritableArray (Arrayrep& rep)
  */
 template <unsigned int N>
 inline
-WritableArray<N-1> WritableArray<N>::operator[] (unsigned int i) const
+WritableArray<N-1> WritableArray<N>::operator[] (unsigned int i)
 {
   assert (i < this->m_rep_nc->m_shape[this->m_rep_nc->m_shape.size() - N]);
   return WritableArray<N-1> (*this->m_rep_nc,
                              this->m_offs + i * this->m_rep_nc->m_sizes[N-1]);
+}
+
+
+/**
+ * @brief Array indexing.
+ * @param i The desired index.  Must be less than the array size
+ *          along this dimension.
+ * @return The @a i'th @c N-1 dimensional subarray in the array.
+ *
+ * Note that this operation is not available if @c N is 0.
+ */
+template <unsigned int N>
+inline
+Array<N-1> WritableArray<N>::operator[] (unsigned int i) const
+{
+  assert (i < this->m_rep_nc->m_shape[this->m_rep_nc->m_shape.size() - N]);
+  return Array<N-1> (*this->m_rep_nc,
+                     this->m_offs + i * this->m_rep_nc->m_sizes[N-1]);
 }
 
 
