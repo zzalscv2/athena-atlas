@@ -198,33 +198,58 @@ void JetCaloEnergies::fillEperSamplingFE(const xAOD::Jet& jet, std::vector<float
   float psTot = 0.;
   float eTot = 0.;
   size_t numConstit = jet.numConstituents();    
+  std::unique_ptr<std::vector<const xAOD::CaloCluster*> > constitV_tot = std::unique_ptr<std::vector<const xAOD::CaloCluster*>>(new std::vector<const xAOD::CaloCluster*>);
+
   for ( size_t i=0; i<numConstit; i++ ) {
     if(jet.rawConstituent(i)->type()!=xAOD::Type::FlowElement) {
       ATH_MSG_WARNING("Tried to call fillEperSamplingFE with a jet constituent that is not a FlowElement!");
       continue;
     }
     const xAOD::FlowElement* constit = static_cast<const xAOD::FlowElement*>(jet.rawConstituent(i));
-    if(constit->isCharged()){
-      eTot += constit->chargedObject(0)->e();
-    }
-    else{
-      eTot += constit->e();
-      std::vector<float> constitEPerSampling = FEHelpers::getEnergiesPerSampling(*constit);
-      for ( size_t s = CaloSampling::PreSamplerB; s < CaloSampling::Unknown; s++ ) {
-        ePerSampling[s] += constitEPerSampling[s];
+
+    for (size_t n = 0; n < constit->otherObjects().size(); ++n) {
+      if(! constit->otherObject(n)) continue;
+     int index_pfo = constit->otherObject(n)->index();
+  	  if(index_pfo<0) continue;
+
+      const auto* fe = (constit->otherObject(n));
+      const xAOD::CaloCluster* cluster = nullptr;
+
+      //If we have a cluster, we can directly access the calorimeter information
+      if(fe->type() == xAOD::Type::CaloCluster){
+        cluster = dynamic_cast<const xAOD::CaloCluster*> (fe);
       }
-      emTot += (constitEPerSampling[CaloSampling::PreSamplerB] + constitEPerSampling[CaloSampling::EMB1]
-              + constitEPerSampling[CaloSampling::EMB2]        + constitEPerSampling[CaloSampling::EMB3]
-              + constitEPerSampling[CaloSampling::PreSamplerE] + constitEPerSampling[CaloSampling::EME1]
-              + constitEPerSampling[CaloSampling::EME2]        + constitEPerSampling[CaloSampling::EME3]
-              + constitEPerSampling[CaloSampling::FCAL0]);
+      //If we have a PFO, we should still get the associated cluster first
+      else {
+        const xAOD::FlowElement* pfo = dynamic_cast<const xAOD::FlowElement*>(fe);
+        if(pfo->otherObjects().size() > 0 && pfo->otherObject(0)->type() == xAOD::Type::CaloCluster){
+          cluster = dynamic_cast<const xAOD::CaloCluster*> (pfo->otherObject(0));
+        }
+      }
+      if(!cluster) continue;
 
-      hecTot += (constitEPerSampling[CaloSampling::HEC0] + constitEPerSampling[CaloSampling::HEC1]
-               + constitEPerSampling[CaloSampling::HEC2] + constitEPerSampling[CaloSampling::HEC3]);
+      if(std::find(constitV_tot->begin(), constitV_tot->end(), cluster) == constitV_tot->end()){
+        for ( size_t s= CaloSampling::PreSamplerB; s< CaloSampling::Unknown; s++ ) {
+          ePerSampling[s] += cluster->eSample( (xAOD::CaloCluster::CaloSample) s );
+        }
+        eTot += cluster->rawE();
 
-      psTot += (constitEPerSampling[CaloSampling::PreSamplerB] + constitEPerSampling[CaloSampling::PreSamplerE]);
+        emTot += (cluster->eSample( CaloSampling::PreSamplerB) + cluster->eSample( CaloSampling::EMB1)
+                + cluster->eSample( CaloSampling::EMB2)        + cluster->eSample( CaloSampling::EMB3)
+                + cluster->eSample( CaloSampling::PreSamplerE) + cluster->eSample( CaloSampling::EME1)
+                + cluster->eSample( CaloSampling::EME2)        + cluster->eSample( CaloSampling::EME3)
+                + cluster->eSample( CaloSampling::FCAL0));
+
+        hecTot += (cluster->eSample( CaloSampling::HEC0) + cluster->eSample( CaloSampling::HEC1)
+                 + cluster->eSample( CaloSampling::HEC2) + cluster->eSample( CaloSampling::HEC3));
+  
+        psTot += (cluster->eSample( CaloSampling::PreSamplerB) + cluster->eSample( CaloSampling::PreSamplerE));
+         
+        constitV_tot->push_back(cluster);
+      }
     }
   }
+
   SG::WriteDecorHandle<xAOD::JetContainer, float> emFracHandle(m_emFracKey);
   SG::WriteDecorHandle<xAOD::JetContainer, float> hecFracHandle(m_hecFracKey);
   SG::WriteDecorHandle<xAOD::JetContainer, float> psFracHandle(m_psFracKey);
