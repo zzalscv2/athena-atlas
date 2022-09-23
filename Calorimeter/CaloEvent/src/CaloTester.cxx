@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2020 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
 */
 /**
  * @file CaloEvent/src/CaloTester.cxx
@@ -36,9 +36,7 @@ CaloTester::CaloTester()
 
 
 /**
- * @brief Record the CaloDetDescrManager in the detector store
-          and the ConditionStore.
- *        This may create the detector store as a side effect.
+ * @brief Record the CaloDetDescrManager in the ConditionStore
  */
 StatusCode CaloTester::record_mgr()
 {
@@ -50,11 +48,6 @@ StatusCode CaloTester::record_mgr()
   CHECK_WITH_CONTEXT(mgr_cc->insert(IOVInfiniteRange::infiniteTime(),std::move(m_mgr_up)),"CaloTester");
   CHECK_WITH_CONTEXT(condStore->record(std::move(mgr_cc),"CaloDetDescrManager"),"CaloTester");
 
-  //Record the CaloDetDescrManager also to ConditionStore. Double-delete?  
-  ServiceHandle<StoreGateSvc> detStore ("DetectorStore", "test");
-  CHECK_WITH_CONTEXT( detStore.retrieve(), "CaloTester" );
-  CHECK_WITH_CONTEXT( detStore->record (m_mgr, "CaloMgr"), "CaloTester" );
-  
   return StatusCode::SUCCESS;
 }
 
