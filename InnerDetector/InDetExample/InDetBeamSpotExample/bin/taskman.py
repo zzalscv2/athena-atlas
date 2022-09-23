@@ -574,7 +574,7 @@ if cmd=='deleteTask' and len(args)==3:
         else:
             print ('No task files found (no directory %s)' % dir)
         if not options.batch:
-            a = raw_input('\nDeleteing task entry and all files - ARE YOU SURE [n] ? ')
+            a = input('\nDeleteing task entry and all files - ARE YOU SURE [n] ? ')
             if a!='y':
                 print ("ERROR: Deletion aborted by user.")
                 sys.exit(1)
@@ -582,6 +582,42 @@ if cmd=='deleteTask' and len(args)==3:
     print ('\n%i task entry deleted.' % (n))
     print ('Deleting ',dir,' ...')
     os.system('rm -rf %s' % dir)
+    sys.exit(0)
+
+if cmd=='deleteTask' and len(args)==2:
+    dsname = args[1]
+    taskname = ''
+    with getTaskManager() as taskman:
+        try:
+            taskList = getFullTaskNames(taskman,dsname,taskname,addWildCards=not options.nowildcards)
+        except TaskManagerCheckError as e:
+            print (e)
+            sys.exit(1)
+        print()
+        # print ("    %-50s  %s" % ('DATASET NAME','TASK NAME'))
+        # print ("    %s" % (75*'-'))
+        # for t in taskList:
+        #     print ("    %-50s  %s" % (t[0],t[1])  )
+        print ('\n%i task(s) found\n' % len(taskList))
+        n = 0
+        for t in taskList:
+            taskname = t[1]
+            print ("    %-50s  %s" % (dsname,taskname)  )
+            dir = '/'.join([proddir,dsname,taskname])
+            print()
+            if os.path.exists(dir):
+                os.system('du -hs %s' % dir)
+            else:
+                print ('No task files found (no directory %s)' % dir)
+            if not options.batch:
+                a = input('\nDeleteing task entry and all files - ARE YOU SURE [n] ? ')
+                if a!='y':
+                    print ("ERROR: Deletion aborted by user.")
+                    sys.exit(1)
+            n += taskman.deleteTask(dsname,taskname)
+            print ('Deleting ',dir,' ...')
+            os.system('rm -rf %s' % dir)
+        print ('\n%i tasks deleted.' % (n))
     sys.exit(0)
 
 if cmd=='notifyFailed' and len(args)<3:

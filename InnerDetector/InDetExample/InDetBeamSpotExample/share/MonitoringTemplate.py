@@ -14,6 +14,14 @@ if not 'jobConfig' in dir():                         jobConfig = {}
 if not 'outputlevel' in jobConfig:                   jobConfig['outputlevel'] = WARNING
 if not 'jobpostprocsteps' in jobConfig:              jobConfig['jobpostprocsteps'] = ''
 if not 'doVertexSplitting' in jobConfig:             jobConfig['doVertexSplitting'] = False
+if not 'doExpressProcessing' in jobConfig:           jobConfig['doExpressProcessing'] = False
+
+#set Global tag
+if not 'GlobalTag' in jobConfig:
+    from InDetBeamSpotExample import COOLUtils
+    tag = COOLUtils.resolveCurrentAlias()
+    print('Current COOL BLK tag: ',tag)
+    jobConfig['GlobalTag'] = tag
 
 # General job setup
 include("InDetBeamSpotExample/AutoConfFragment.py")

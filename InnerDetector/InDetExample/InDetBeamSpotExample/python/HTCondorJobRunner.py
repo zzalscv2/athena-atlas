@@ -5,7 +5,7 @@
 from __future__ import print_function
 
 """
-LSFJobRunner is a JobRunner for running jobs with the HTCondor batch system.
+HTCondorJobRunner is a JobRunner for running jobs with the HTCondor batch system.
 
 Written by Anthony Morley in 2019.
 """

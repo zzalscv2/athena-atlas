@@ -13,7 +13,7 @@ __author__  = 'Juerg Beringer'
 __version__ = '$Id: LSFJobRunner.py 216126 2009-09-29 16:12:59Z atlidbs $'
 
 
-from JobRunner import JobRunner
+from InDetBeamSpotExample import JobRunner
 import os
 
 
