@@ -9,6 +9,8 @@ index_ref
 (.*)_RoIBResult(.*)
 (.*)_TrigConfKeys(.*)
 (.*)_xTrigDecisionAux(.*)
+# see ATR-26322:
+TrigRoiDescriptorCollection_p3_MuonCandidates_FS_ROIs(.*)
 
 # temporarily excluded
 (.*)MuonSegmentAuxContainer_v1_MuonSegmentsAux(.*)

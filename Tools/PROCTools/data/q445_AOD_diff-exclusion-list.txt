@@ -11,3 +11,7 @@ xTrigDecisionAux(.*)
 
 # temporarily excluded
 MuonSegmentsAux(.*)
+
+# see ATR-26322:
+MuonCandidates_FS_ROIs(.*)
+
