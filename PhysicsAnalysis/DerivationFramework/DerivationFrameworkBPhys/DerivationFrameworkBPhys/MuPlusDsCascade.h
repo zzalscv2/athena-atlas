@@ -15,6 +15,7 @@
 #include "JpsiUpsilonTools/PrimaryVertexRefitter.h"
 #include <vector>
 #include "xAODMuon/MuonContainer.h"
+#include "InDetTrackSelectionTool/InDetTrackSelectionTool.h"
 
 
 namespace Trk {
@@ -78,6 +79,7 @@ namespace DerivationFramework {
         ToolHandle < Analysis::PrimaryVertexRefitter >   m_pvRefitter;
         ToolHandle < Trk::V0Tools >                      m_V0Tools;
         ToolHandle < DerivationFramework::CascadeTools > m_CascadeTools;
+        std::unique_ptr<InDet::InDetTrackSelectionTool>  m_trackSelectionTools;
 
         bool        m_refitPV;
         std::string m_refPVContainerName;

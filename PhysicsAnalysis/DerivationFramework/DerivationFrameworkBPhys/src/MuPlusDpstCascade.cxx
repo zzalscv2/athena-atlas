@@ -53,6 +53,12 @@ namespace DerivationFramework {
         if(m_vtx1Daug1MassHypo < 0.) m_vtx1Daug1MassHypo = BPhysPVCascadeTools::getParticleMass(pdt, PDG::pi_plus);
         if(m_vtx1Daug2MassHypo < 0.) m_vtx1Daug2MassHypo = BPhysPVCascadeTools::getParticleMass(pdt, PDG::K_plus);
 
+        //======================== inDetTrack selection tool ==================
+        m_trackSelectionTools = std::make_unique<InDet::InDetTrackSelectionTool>("TrackSelector");
+        ANA_CHECK(m_trackSelectionTools->setProperty("CutLevel", "LoosePrimary"));
+        ANA_CHECK(m_trackSelectionTools->initialize() );
+        //=====================================================================
+
         return StatusCode::SUCCESS;
     }
 
@@ -515,12 +521,6 @@ namespace DerivationFramework {
         Masses.push_back(m_vtx0Daug2MassHypo); //pi
         Masses.push_back(m_vtx1MassHypo); //D0
         
-        //======================== inDetTrack selection tool ==================
-        InDet::InDetTrackSelectionTool m_trackSelectionTools( "TrackSelection" );
-        ANA_CHECK(m_trackSelectionTools.setProperty("CutLevel", "LoosePrimary"));
-        ANA_CHECK(m_trackSelectionTools.initialize() );
-        //=====================================================================
-
 
         // Select mu+pi_soft candidates before calling cascade fit
         std::vector<const xAOD::Vertex*> selectedMuPiCandidates;
@@ -543,7 +543,7 @@ namespace DerivationFramework {
 
             // Track selection - Loose
             // for soft pion wich is (2nd) in MuPi vertex
-            if ( !m_trackSelectionTools.accept(vxcItr->trackParticle(1)) ){
+            if ( !m_trackSelectionTools->accept(vxcItr->trackParticle(1)) ){
                 ATH_MSG_DEBUG(" Original mu & pi_soft candidate rejected by the track's cut level - loose");
                 continue;
             }
@@ -551,14 +551,13 @@ namespace DerivationFramework {
             selectedMuPiCandidates.push_back(vxcItr);
         } //for(auto vxcItr : *MuPiContainer)
         if(selectedMuPiCandidates.size()<1) return StatusCode::SUCCESS;
-
+        SG::AuxElement::Accessor<Char_t> flagAcc1("passed_D0");
+        SG::AuxElement::Accessor<Char_t> flagAcc2("passed_D0b");
         // Select the D0/D0b candidates before calling cascade fit
         std::vector<const xAOD::Vertex*> selectedD0Candidates;
         for(auto vxcItr : *d0Container){
            // Check the passed flag first
            xAOD::Vertex* vtx = vxcItr;
-           SG::AuxElement::Accessor<Char_t> flagAcc1("passed_D0");
-           SG::AuxElement::Accessor<Char_t> flagAcc2("passed_D0b");
            bool isD0(true);
            bool isD0b(true);
            if(flagAcc1.isAvailable(*vtx)){
@@ -570,11 +569,11 @@ namespace DerivationFramework {
            if(!(isD0||isD0b)) continue;
 
            // Track selection - Loose
-           if ( !m_trackSelectionTools.accept(vxcItr->trackParticle(0)) ){
+           if ( !m_trackSelectionTools->accept(vxcItr->trackParticle(0)) ){
                ATH_MSG_DEBUG(" Original D0/D0-bar candidate rejected by the track's cut level - loose ");
                continue;
            }
-           if ( !m_trackSelectionTools.accept(vxcItr->trackParticle(1)) ){
+           if ( !m_trackSelectionTools->accept(vxcItr->trackParticle(1)) ){
                ATH_MSG_DEBUG(" Original D0/D0-bar candidate rejected by the track's cut level - loose ");
                continue;
            }
