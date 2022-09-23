@@ -124,7 +124,8 @@ MB_triggers += ['HLT_mb_sptrk_ion_L1ZDC_A_C_VTE50'] # 2015 MB trigger with full 
 # Need to apply a ZDC veto in order to assess actual efficiencies for comparison.
 
 MB_triggers += ['HLT_mb_sp_L1VTE50']  # Min-bias stream for dijet photoproduction up to 50 GeV. No minimum cut so high pre-scale.
-MB_triggers += ['HLT_noalg_pc_L1TE50_VTE600.0ETA490']  # Part of the main heavy ion min-bias stream from 50 to 600 GeV. In the PC stream so requires special attention.
+MB_triggers += ['HLT_noalg_pc_L1TE50_VTE600.0ETA49']  # Part of the main heavy ion min-bias stream from 50 to 600 GeV. In the PC stream so requires special attention.
+MB_triggers += ['HLT_mb_sptrk_L1ZDC_A_C_VTE50']  # Part of the main heavy ion min-bias stream from 0 to 50 GeV. In the PC stream so requires special attention.
 
 expression = '( (' + ' || '.join(triggers+MB_triggers) + ') && '+objectSelection+ ' && ' + '(' + ' || '.join(nJetCuts) + ')' + ')'
 # if HIDerivationFlags.doMinBiasSelection() : expression = FCal_Cut
