@@ -11,7 +11,7 @@
 // **********************************************************************
 
 #include "TrkVertexFitterInterfaces/ITrackToVertexIPEstimator.h"
-
+#include "TrkExInterfaces/IExtrapolator.h"
 
 #include "GaudiKernel/StatusCode.h"
 #include "AthenaMonitoring/AthenaMonManager.h"
@@ -142,11 +142,8 @@ private:
   std::string m_tracksName;
   std::string m_triggerChainName;
   std::string m_VxPrimContainerName;
-  PublicToolHandle< Trk::ITrackToVertexIPEstimator >  m_trackToVertexIPEstimator
-  {
-    this, "TrackToVertexIPEstimator", "Trk::TrackToVertexIPEstimator", ""
-  };
-
+  ToolHandle<Trk::ITrackToVertexIPEstimator>  m_trackToVertexIPEstimatorTool;
+  ToolHandle<Trk::IExtrapolator>         m_extrapolator;    //!< track extrapolator
 
   unsigned int m_runNumber {};
   unsigned int m_evtNumber {};

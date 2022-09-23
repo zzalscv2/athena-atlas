@@ -1,5 +1,5 @@
 /*
-   Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+   Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
  */
 
 // **********************************************************************
@@ -49,10 +49,9 @@ IDAlignMonPVBiases::IDAlignMonPVBiases(const std::string& type, const std::strin
   m_histosBooked(0),
   m_tracksName("ExtendedTracks"),
   m_triggerChainName("NoTriggerSelection") {
-  //m_TreeFolder("/PVbiases/PVbiases"),
-  //m_Tree(0),
-  //m_TreeName("PVbiases")
   m_trackSelection = ToolHandle< InDetAlignMon::TrackSelectionTool >("InDetAlignMon::TrackSelectionTool");
+  m_extrapolator = ToolHandle<Trk::IExtrapolator> ( "Trk::Extrapolator/AtlasExtrapolator" );
+  m_trackToVertexIPEstimatorTool = ToolHandle<Trk::ITrackToVertexIPEstimator> ( "Trk::TrackToVertexIPEstimator/TrackToVertexIPEstimator" );
 
   InitializeHistograms();
 
@@ -61,6 +60,9 @@ IDAlignMonPVBiases::IDAlignMonPVBiases(const std::string& type, const std::strin
   declareProperty("triggerChainName", m_triggerChainName);
   declareProperty("trackSelection", m_trackSelection);
   declareProperty("VxPrimContainerName", m_VxPrimContainerName);
+  declareProperty("Extrapolator", m_extrapolator);
+  declareProperty("TrackToVertexIPEstimatorTool", m_trackToVertexIPEstimatorTool);
+
 }
 
 IDAlignMonPVBiases::~IDAlignMonPVBiases() { }
@@ -158,42 +160,17 @@ StatusCode IDAlignMonPVBiases::initialize() {
   ATH_CHECK(m_eventInfoKey.initialize());
   ATH_CHECK(m_trackParticleKey.initialize());
   ATH_CHECK(m_vertexKey.initialize());
-/*
-   //create tree and branches
-   if(m_Tree == 0) {
 
-    m_Tree = new TTree(m_TreeName.c_str(), "Tree");
-
-    m_Tree->Branch("run_number"      ,  &m_runNumber,  "runNumber/I");
-    m_Tree->Branch("event_number"    ,  &m_evtNumber,  "eventNumber/I");
-    m_Tree->Branch("lumi_block"     ,  &m_lumi_block,  "lumi_block/I");
-
-    m_Tree->Branch("charge",  &m_charge,  "Charge/D");
-    m_Tree->Branch("pt",  &m_pt,  "pt/D");
-    m_Tree->Branch("eta", &m_eta, "eta/D");
-    m_Tree->Branch("phi", &m_phi, "phi/D");
-    m_Tree->Branch("z0",  &m_z0,  "z0/D");
-    m_Tree->Branch("d0",  &m_d0,  "d0/D");
-    m_Tree->Branch("z0_err",  &m_z0_err,  "z0_err/D");
-    m_Tree->Branch("d0_err",  &m_d0_err,  "d0_err/D");
-    m_Tree->Branch("vertex_x",  &m_vertex_x,  "vertex_x/D");
-    m_Tree->Branch("vertex_y",  &m_vertex_y,  "vertex_y/D");
-    m_Tree->Branch("vertex_z",  &m_vertex_z,  "vertex_z/D");
-   }
-
-   //register the tree
-   ITHistSvc* tHistSvc = 0;
-   if (service("THistSvc",tHistSvc).isFailure()){
-    ATH_MSG_ERROR("initialize() Could not find Hist Service -> Switching ValidationMode Off !");
-    //m_validationMode = false;
-   }
-
-   if ((tHistSvc->regTree(m_TreeFolder, m_Tree)).isFailure() ) {
-    ATH_MSG_ERROR("initialize() Could not register the validation Tree -> Switching ValidationMode Off !");
-    delete m_Tree; m_Tree = 0;
-    //m_validationMode = false;
-   }
- */
+  ATH_CHECK( m_extrapolator.retrieve() );
+  
+  // extract TrackToVertexIPEstimator extrapolator tool
+  if ( m_trackToVertexIPEstimatorTool.retrieve().isFailure() ) {
+    ATH_MSG_ERROR("initialize: failed to retrieve trackToVertexIPEstimator tool ");
+    return StatusCode::SUCCESS;
+  }
+  else {
+    ATH_MSG_INFO("initialize: Retrieved Trk::TrackToVertexIPEstimator Tool" << m_trackToVertexIPEstimatorTool);
+  }
 
   return StatusCode::SUCCESS;
 }
@@ -613,7 +590,7 @@ StatusCode IDAlignMonPVBiases::fillHistograms() {
     if (foundVertex->nTrackParticles() < 10) continue;
 
     const Trk::ImpactParametersAndSigma* myIPandSigma(nullptr);
-    myIPandSigma = m_trackToVertexIPEstimator->estimate(*track_itr, foundVertex, true);
+    myIPandSigma = m_trackToVertexIPEstimatorTool->estimate(*track_itr, foundVertex, true);
 
     // require d0_pv to be smaller than 4
     if (myIPandSigma->IPd0 > 4.0) continue;
