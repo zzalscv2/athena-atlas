@@ -15,6 +15,8 @@
 #include "StoreGate/ReadHandleKey.h"
 #include "CaloRecGPU/CaloGPUTimed.h"
 
+class CaloCell_ID;
+
 /**
  * @class BasicGPUToAthenaImporter
  * @author Nuno Fernandes <nuno.dos.santos.fernandes@cern.ch>
@@ -79,6 +81,10 @@ class BasicGPUToAthenaImporter :
 
   xAOD::CaloCluster::ClusterSize m_clusterSize;
 
+  /**
+   * @brief Pointer to Calo ID Helper
+   */
+  const CaloCell_ID* m_calo_id{nullptr};
 };
 
 #endif //CALORECGPU_BASICGPUTOATHENAIMPORTER_H

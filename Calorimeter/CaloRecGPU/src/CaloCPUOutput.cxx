@@ -6,7 +6,6 @@
 #include "CaloRecGPU/Helpers.h"
 #include "CaloRecGPU/CUDAFriendlyClasses.h"
 #include "CaloRecGPU/StandaloneDataIO.h"
-#include "CaloDetDescr/CaloDetDescrManager.h"
 #include "StoreGate/DataHandle.h"
 #include "CaloRec/CaloBadCellHelper.h"
 
@@ -23,6 +22,7 @@ StatusCode CaloCPUOutput::initialize()
 {
   ATH_CHECK( m_noiseCDOKey.initialize() );
   ATH_CHECK( m_cellsKey.value().initialize() );
+  ATH_CHECK( detStore()->retrieve(m_calo_id, "CaloCell_ID") );
   return StatusCode::SUCCESS;
 }
 
@@ -81,14 +81,11 @@ StatusCode CaloCPUOutput::execute (const EventContext & ctx, xAOD::CaloClusterCo
   SG::ReadCondHandle<CaloNoise> noise_handle(m_noiseCDOKey, ctx);
   const CaloNoise * noise_tool = *noise_handle;
 
-  const CaloDetDescrManager * calo_dd_man = CaloDetDescrManager::instance();
-  const CaloCell_ID * calo_id = calo_dd_man->getCaloCell_ID();
-
   for (CaloCellContainer::const_iterator iCells = cell_collection->begin(); iCells != cell_collection->end(); ++iCells)
     {
       const CaloCell * cell = (*iCells);
 
-      const int index = calo_id->calo_cell_hash(cell->ID());
+      const int index = m_calo_id->calo_cell_hash(cell->ID());
 
       const float energy = cell->energy();
 
@@ -156,7 +153,7 @@ StatusCode CaloCPUOutput::execute (const EventContext & ctx, xAOD::CaloClusterCo
       ret_clusts->clusterEta[cluster_number] = cluster->eta();
       ret_clusts->clusterPhi[cluster_number] = cluster->phi();
 
-      const int seed_cell_index = calo_id->calo_cell_hash(cluster->cell_begin()->ID());
+      const int seed_cell_index = m_calo_id->calo_cell_hash(cluster->cell_begin()->ID());
 
       ret_clusts->seedCellID[cluster_number] = seed_cell_index;
 
@@ -169,7 +166,7 @@ StatusCode CaloCPUOutput::execute (const EventContext & ctx, xAOD::CaloClusterCo
             {
               continue;
             }
-          IdentifierHash tmpHashid = calo_id->calo_cell_hash(cell->ID());
+          IdentifierHash tmpHashid = m_calo_id->calo_cell_hash(cell->ID());
           const int cell_ID = tmpHashid;
           ret_state->clusterTag[cell_ID] = tag;
         }

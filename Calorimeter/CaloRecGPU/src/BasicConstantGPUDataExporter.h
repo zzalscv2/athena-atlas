@@ -12,6 +12,7 @@
 #include "StoreGate/ReadCondHandleKey.h"
 #include "CaloRecGPU/CaloGPUTimed.h"
 #include "CaloConditions/CaloNoise.h"
+#include "CaloDetDescr/CaloDetDescrManager.h"
 
 /**
  * @class BasicConstantGPUDataExporter
@@ -61,6 +62,13 @@ class BasicConstantGPUDataExporter :
 
   SG::ReadCondHandleKey<CaloNoise> m_noiseCDOKey{this, "CaloNoiseKey", "totalNoise", "SG Key of CaloNoise data object"};
 
+  /**
+   * @brief Key for the CaloDetDescrManager in the Condition Store
+   */
+  SG::ReadCondHandleKey<CaloDetDescrManager> m_caloMgrKey { this
+      , "CaloDetDescrManager"
+      , "CaloDetDescrManager"
+      , "SG Key for CaloDetDescrManager in the Condition Store" };
 
   /**
    * @brief type of neighbor relations to use.

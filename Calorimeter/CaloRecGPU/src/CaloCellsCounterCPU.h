@@ -17,6 +17,8 @@
 
 #include "CLHEP/Units/SystemOfUnits.h"
 
+class CaloCell_ID;
+
 /**
  * @class CaloCellsCounterCPU
  * @author Nuno Fernandes <nuno.dos.santos.fernandes@cern.ch>
@@ -119,6 +121,10 @@ class CaloCellsCounterCPU :
    */
   Gaudi::Property<float> m_cellThreshold {this, "CellThresholdOnEorAbsEinSigma", 0., "Cell (terminal) threshold (in units of noise Sigma)"};
   
+  /**
+   * @brief Pointer to Calo ID Helper
+   */
+  const CaloCell_ID* m_calo_id{nullptr};
 
   //TO DO: Consider non-absolute SNR...
 
