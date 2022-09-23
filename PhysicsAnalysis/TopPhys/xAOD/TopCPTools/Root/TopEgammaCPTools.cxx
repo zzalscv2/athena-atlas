@@ -551,7 +551,9 @@ namespace top {
 	&& electronIsolation != "PLVTight" && electronIsolation != "PLVLoose"
 	&& electronIsolationLoose != "PLVTight" && electronIsolationLoose != "PLVLoose"
 	&& electronIsolation != "PLImprovedTight" && electronIsolation != "PLImprovedVeryTight"
-	&& electronIsolationLoose != "PLImprovedTight" && electronIsolationLoose != "PLImprovedVeryTight") { // We need to update the implementation according to new recommendations
+	&& electronIsolationLoose != "PLImprovedTight" && electronIsolationLoose != "PLImprovedVeryTight"
+	&& electronIsolation != "TightTrackOnly_VarRad" && electronIsolationLoose != "TightTrackOnly_VarRad"
+	&& electronIsolation != "TightTrackOnly_FixedRad" && electronIsolationLoose != "TightTrackOnly_FixedRad") { // We need to update the implementation according to new recommendations
 
       ATH_MSG_INFO("Setting up Electrons ChargeID SF tool");
       // Charge ID file (no maps)
@@ -571,14 +573,16 @@ namespace top {
       m_electronEffSFChargeIDLoose = setupElectronSFTool(elSFPrefix + "ChargeIDLoose", inChargeIDLoose, dataType);
     }
     if(electronIsolation != "PLVTight" && electronIsolation != "PLVLoose" &&
-       electronIsolation != "PLImprovedTight" && electronIsolation != "PLImprovedVeryTight"){
+       electronIsolation != "PLImprovedTight" && electronIsolation != "PLImprovedVeryTight" &&
+       electronIsolation != "TightTrackOnly_VarRad" && electronIsolation != "TightTrackOnly_FixedRad"){
       CP::ElectronChargeEfficiencyCorrectionTool* ChargeMisIDCorrections = new CP::ElectronChargeEfficiencyCorrectionTool("ElectronChargeEfficiencyCorrection");
       m_electronEffSFChargeMisIDFile = electronSFFilePath("ChargeMisID", electronID, electronIsolation);
       top::check(ChargeMisIDCorrections->setProperty("CorrectionFileName", m_electronEffSFChargeMisIDFile), "Failed to setProperty");
       top::check(ChargeMisIDCorrections->initialize(), "Failed to setProperty");
     }
     if(electronIsolationLoose != "PLVTight" && electronIsolationLoose != "PLVLoose" &&
-       electronIsolationLoose != "PLImprovedTight" && electronIsolationLoose != "PLImprovedVeryTight"){
+       electronIsolationLoose != "PLImprovedTight" && electronIsolationLoose != "PLImprovedVeryTight" &&
+       electronIsolationLoose != "TightTrackOnly_VarRad" && electronIsolationLoose != "TightTrackOnly_FixedRad"){
       CP::ElectronChargeEfficiencyCorrectionTool* ChargeMisIDCorrectionsLoose = new CP::ElectronChargeEfficiencyCorrectionTool("ElectronChargeEfficiencyCorrectionLoose");
       m_electronEffSFChargeMisIDLooseFile = electronSFFilePath("ChargeMisID", electronIDLoose, electronIsolationLoose);
       top::check(ChargeMisIDCorrectionsLoose->setProperty("CorrectionFileName", m_electronEffSFChargeMisIDLooseFile), "Failed to setProperty");
@@ -913,18 +917,11 @@ IAsgElectronEfficiencyCorrectionTool*
       if (type == "PflowLoose") working_point = "FCLoose";
       if (type == "PflowTight") working_point = "FCTight";
     }
+    if (type == "TightTrackOnly") working_point = "TightTrackOnly_VarRad";
     if (type == "Tight") working_point = "FCTight";
     if (type == "Loose") working_point = "FCLoose";
     if (type == "HighPtCaloOnly") working_point = "FCHighPtCaloOnly";
-    if (type == "TightTrackOnly") {
-      ATH_MSG_WARNING("You selected the TightTrackOnly isolation WP for at least one of your electron collections - BE WARNED THAT THESE ARE NOT YET READY TO BE RELEASED FOR USE IN PHYSICS ANALYSES AND OF COURSE DON'T HAVE ASSOCIATED SCALE FACTORS YET!!! Setting to \"Gradient\" SFs to allow the code to run");
-      working_point = "Gradient";
-    }
-    if (type == "TightTrackOnly_FixedRad") {
-      ATH_MSG_WARNING("You selected the TightTrackOnly_FixedRad isolation WP for at least one of your electron collections - BE WARNED THAT THESE ARE NOT YET READY TO BE RELEASED FOR USE IN PHYSICS ANALYSES AND OF COURSE DON'T HAVE ASSOCIATED SCALE FACTORS YET!!! Setting to \"Gradient\" SFs to allow the code to run");
-      working_point = "Gradient";
-    }
-    if (type == "FCTight" || type == "FCLoose" || type == "FCHighPtCaloOnly" || type == "Gradient" || type == "PLVTight" || type == "PLVLoose" || type == "PLImprovedTight" || type == "PLImprovedVeryTight") working_point = type;
+    if (type == "FCTight" || type == "FCLoose" || type == "FCHighPtCaloOnly" || type == "Gradient" || type == "PLVTight" || type == "PLVLoose" || type == "PLImprovedTight" || type == "PLImprovedVeryTight" || type == "TightTrackOnly_FixedRad") working_point = type;
 
     return working_point;
   }
