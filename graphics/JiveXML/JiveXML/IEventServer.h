@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2017 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef JIVEXML_IEVENTSERVER_H
@@ -29,9 +29,9 @@ namespace JiveXML {
       /** get the names of all the streams */
       virtual std::vector<std::string> GetStreamNames() const = 0;
       /** get the current EventStreamID for a particular stream */
-      virtual const EventStreamID GetEventStreamID(std::string streamName) const = 0;
+      virtual const EventStreamID GetEventStreamID(const std::string& streamName) const = 0;
       /** get the current event for a particular stream */
-      virtual const std::string GetEvent( const EventStreamID evtStreamID ) const = 0;
+      virtual const std::string GetEvent( const EventStreamID& evtStreamID ) const = 0;
       /** get the Status of the application */
       virtual int GetState() const = 0;
       /** The server thread will stop once this flag is set to false */

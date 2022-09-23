@@ -49,41 +49,43 @@ namespace JiveXML {
     virtual ~ONCRPCServerSvc();
 
     /** Gaudi default methods */
-    StatusCode initialize();
-    StatusCode finalize();
+    virtual StatusCode initialize() override;
+    virtual StatusCode finalize() override;
 
 
     /** @name Server methods */
     //@{
     /** get the Status of the application */
-    int GetState() const ;
+    virtual int GetState() const override;
     /** get the names of all the streams */
-    std::vector<std::string> GetStreamNames() const ;
+    virtual std::vector<std::string> GetStreamNames() const override;
     /** get the current EventStreamID for a particular stream */
-    const EventStreamID GetEventStreamID(std::string streamName) const ;
+    virtual const EventStreamID GetEventStreamID(const std::string& streamName) const override;
     /** get the current event for a particular stream */
-    const std::string GetEvent( const EventStreamID evtStreamID ) const ;
+    virtual
+    const std::string GetEvent( const EventStreamID& evtStreamID ) const override;
     /** Put this event as new current event for stream given by name */
-    virtual StatusCode UpdateEventForStream( const EventStreamID evtStreamID, const std::string & event);
+    virtual StatusCode UpdateEventForStream( const EventStreamID& evtStreamID, const std::string & event) override;
     //@}
     
     /**
      * This function is exposed to allow using athena messaging service from
      * other threads
      */
-    void Message( const MSG::Level level, const std::string mesg ) const ;
+    virtual
+    void Message( const MSG::Level level, const std::string& mesg ) const override;
     /** Get the logging level **/
-    MSG::Level LogLevel() const ;
+    virtual MSG::Level LogLevel() const override;
 
 
     /** The server thread will stop once this flag is set to false */
-    bool GetRunServerFlag () const { return m_runServerThread; };
+    virtual bool GetRunServerFlag () const override { return m_runServerThread; };
     /** Start the server thread */
     StatusCode StartServer();
     /** Stop the server thread */
     StatusCode StopServer();
     /** Callback when server thread terminates */
-    void ServerThreadStopped();
+    virtual void ServerThreadStopped() override;
  
   private:
 

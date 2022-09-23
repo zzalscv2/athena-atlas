@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2017 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef JIVEXML__IFORMATTOOL_H
@@ -35,14 +35,18 @@ namespace JiveXML {
 
       /** Start a new event */
       virtual StatusCode StartEvent( const unsigned long EventNumber, const unsigned int RunNumber, 
-                                const std::string DateTime,
-   			        const unsigned int lumiBlock, std::string eventProperty, std::string geometryVersion ) = 0 ;
+                                const std::string& DateTime,
+   			        const unsigned int lumiBlock,
+                                const std::string& eventProperty,
+                                const std::string& geometryVersion ) = 0 ;
 
       /** Finialize this event */
       virtual StatusCode EndEvent() = 0 ;
 
       /** Append a formatted version of one event component */
-      virtual StatusCode AddToEvent( const std::string component, const std::string key, const DataMap* aMap) = 0 ;
+      virtual StatusCode AddToEvent( const std::string& component,
+                                     const std::string& key,
+                                     const DataMap* aMap) = 0 ;
 
       /** Return the formated string */
       virtual const std::ostringstream* getFormattedEvent() const = 0;

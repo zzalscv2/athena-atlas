@@ -142,7 +142,7 @@ namespace JiveXML {
    * Deliver a message - possibly from another thread - to the athena msgSvc;
    */
   void ONCRPCServerSvc::Message( const MSG::Level level,
-                                 const std::string mesg) const
+                                 const std::string& mesg) const
   {
     //Deliver message
     msg() << level << mesg << endmsg;
@@ -211,7 +211,7 @@ namespace JiveXML {
   /**
    * Return the EventStreamID for the last event of a given stream
    */
-  const EventStreamID ONCRPCServerSvc::GetEventStreamID( const std::string StreamName) const {
+  const EventStreamID ONCRPCServerSvc::GetEventStreamID( const std::string& StreamName) const {
     
     //Obtain an exclusive access lock
     int retVal = pthread_mutex_lock(&m_accessLock);
@@ -238,7 +238,7 @@ namespace JiveXML {
   /**
    * Return the event for a given stream
    */
-  const std::string ONCRPCServerSvc::GetEvent( const EventStreamID evtStreamID ) const {
+  const std::string ONCRPCServerSvc::GetEvent( const EventStreamID& evtStreamID ) const {
     
     //Obtain an exclusive access lock
     int retVal = pthread_mutex_lock(&m_accessLock);
@@ -323,7 +323,7 @@ namespace JiveXML {
    * Implementation of IServerSvc method. Get one event and put it as the new
    * event for the this stream, which is identified by EventStreamID
    */
-  StatusCode ONCRPCServerSvc::UpdateEventForStream( const EventStreamID evtStreamID, const std::string & event) {
+  StatusCode ONCRPCServerSvc::UpdateEventForStream( const EventStreamID& evtStreamID, const std::string & event) {
  
     ATH_MSG_VERBOSE( "UpdateEventForStream()"  );
 

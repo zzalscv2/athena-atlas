@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2017 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef JIVEXML__IEVENTRECEIVER_H
@@ -29,7 +29,7 @@ namespace JiveXML {
       /** @name Event receiving methods */
       //@{
       /** Put this event as new current event for stream given by name */
-      virtual StatusCode UpdateEventForStream( const EventStreamID, const std::string& ) = 0;
+      virtual StatusCode UpdateEventForStream( const EventStreamID&, const std::string& ) = 0;
       //@}
       
   };

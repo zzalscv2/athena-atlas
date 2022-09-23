@@ -198,7 +198,7 @@ namespace JiveXML {
    * Get one event and put it as the new event for the this stream, which is
    * identified by EventStreamID
    */
-  StatusCode JiveXMLServer::UpdateEventForStream( const EventStreamID evtStreamID, const std::string & event) {
+  StatusCode JiveXMLServer::UpdateEventForStream( const EventStreamID& evtStreamID, const std::string & event) {
  
     ERS_DEBUG(MSG::VERBOSE,"UpdateEventForStream");
 
@@ -322,7 +322,7 @@ namespace JiveXML {
   /**
    * Return the EventStreamID for the last event of a given stream
    */
-  const EventStreamID JiveXMLServer::GetEventStreamID( const std::string StreamName) const {
+  const EventStreamID JiveXMLServer::GetEventStreamID( const std::string& StreamName) const {
     
     //Obtain an exclusive access lock
     int retVal = pthread_mutex_lock(&m_accessLock);
@@ -354,7 +354,7 @@ namespace JiveXML {
   /**
    * Return the event for a given stream
    */
-  const std::string JiveXMLServer::GetEvent( const EventStreamID evtStreamID ) const {
+  const std::string JiveXMLServer::GetEvent( const EventStreamID& evtStreamID ) const {
     
     //Obtain an exclusive access lock
     int retVal = pthread_mutex_lock(&m_accessLock);
@@ -386,7 +386,7 @@ namespace JiveXML {
   /** 
    * Deliver a message - possibly from another thread - to ERS;
    */
-  void JiveXMLServer::Message( const MSG::Level level, const std::string msg) const {
+  void JiveXMLServer::Message( const MSG::Level level, const std::string& msg) const {
     //Deliver message to the proper stream
     if (level <= MSG::DEBUG) ERS_REPORT_IMPL( ers::debug, ers::Message, msg, level);
     if (level == MSG::INFO) ERS_REPORT_IMPL( ers::info, ers::Message, msg, );

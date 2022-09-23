@@ -27,7 +27,7 @@ namespace JiveXML{
    * Simple result checking routine, that will output an errorMsg throught the
    * ServerSvc if there was an error. Returns false on error;
    */
-  bool checkResult( const int RetVal, const std::string Module, IMessage* const ServerSvc);
+  bool checkResult( const int RetVal, const std::string& Module, IMessage* const ServerSvc);
 
   /**
    * Implementation of NULLPROC 
