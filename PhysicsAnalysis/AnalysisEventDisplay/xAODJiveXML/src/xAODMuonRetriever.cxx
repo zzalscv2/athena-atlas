@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2017 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "xAODJiveXML/xAODMuonRetriever.h"
@@ -49,7 +49,7 @@ namespace JiveXML {
     
     if (msgLvl(MSG::DEBUG)) msg(MSG::DEBUG)  << "in retrieveAll()" << endmsg;
     
-    const DataHandle<xAOD::MuonContainer> iterator, end;
+    SG::ConstIterator<xAOD::MuonContainer> iterator, end;
     const xAOD::MuonContainer* muons;
     
     //obtain the default collection first
@@ -78,7 +78,7 @@ namespace JiveXML {
       for (; iterator!=end; iterator++) {
 	  if (iterator.key()!=m_sgKey) {
              if (msgLvl(MSG::DEBUG)) msg(MSG::DEBUG)  << "Trying to retrieve all. Current collection: " << dataTypeName() << " (" << iterator.key() << ")" << endmsg;
-             DataMap data = getData(iterator);
+             DataMap data = getData(&(*iterator));
              if ( FormatTool->AddToEvent(dataTypeName(), iterator.key()+"_xAOD", &data).isFailure()){
 	       if (msgLvl(MSG::WARNING)) msg(MSG::WARNING) << "Collection " << iterator.key() << " not found in SG " << endmsg;
 	    }else{
