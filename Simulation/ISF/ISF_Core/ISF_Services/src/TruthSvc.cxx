@@ -267,7 +267,11 @@ void ISF::TruthSvc::recordIncidentToMCTruth( ISF::ITruthIncident& ti, bool passW
       // 2) A new GenVertex for the intermediate interaction should be
       // added.
 #ifdef HEPMC3
-      auto newVtx = HepMC::newGenVertexPtr( vtx->position(), vtx->status());
+      // NB Doing this check to explicitly avoid the fallback mechanism in
+      // HepMC3::GenVertex::position() to return the position of
+      // another GenVertex in the event if the position isn't set (or is set to zero)!
+      const HepMC::FourVector &posVec = (vtx->has_set_position()) ? vtx->position() : HepMC::FourVector::ZERO_VECTOR();
+      auto newVtx = HepMC::newGenVertexPtr( posVec, vtx->status());
       HepMC::GenEvent *mcEvent = parentBeforeIncident->parent_event();
       auto tmpVtx = newVtx;
       mcEvent->add_vertex( newVtx);
@@ -448,7 +452,14 @@ HepMC::GenVertexPtr  ISF::TruthSvc::createGenVertexFromTruthIncident( ISF::ITrut
       this->deleteChildVertex(oldVertex);
     }
     else {
+#ifdef HEPMC3
+      // NB Doing this check to explicitly avoid the fallback mechanism in
+      // HepMC3::GenVertex::position() to return the position of
+      // another GenVertex in the event if the position isn't set (or is set to zero)!
+      const HepMC::FourVector &old_pos = (oldVertex->has_set_position()) ? oldVertex->position() : HepMC::FourVector::ZERO_VECTOR();
+#else
       const auto& old_pos=oldVertex->position();
+#endif
       const auto& new_pos=ti.position();
       double diffr=std::sqrt(std::pow(new_pos.x()-old_pos.x(),2)+std::pow(new_pos.y()-old_pos.y(),2)+std::pow(new_pos.z()-old_pos.z(),2));
       //AV The comparison below is not portable.

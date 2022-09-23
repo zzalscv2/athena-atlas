@@ -81,7 +81,10 @@ StatusCode Simulation::ZeroLifetimePositioner::manipulate(HepMC::GenEvent& ge, b
     if (ATH_UNLIKELY(this->msgLvl (MSG::VERBOSE))) {
       HepMC::Print::line(nextVtx);
     }
-    const HepMC::FourVector &nextVec = nextVtx->position();
+    // NB Doing this check to explicitly avoid the fallback mechanism in
+    // HepMC3::GenVertex::position() to return the position of
+    // another GenVertex in the event if the position isn't set (or is set to zero)!
+    const HepMC::FourVector &nextVec = (nextVtx->has_set_position()) ? nextVtx->position() : HepMC::FourVector::ZERO_VECTOR();
     const CLHEP::HepLorentzVector nextPos( nextVec.x(), nextVec.y(), nextVec.z(), nextVec.t() );
     ATH_MSG_VERBOSE("Current Vertex:");
     if (ATH_UNLIKELY(this->msgLvl (MSG::VERBOSE))) {
@@ -93,7 +96,10 @@ StatusCode Simulation::ZeroLifetimePositioner::manipulate(HepMC::GenEvent& ge, b
       if (ATH_UNLIKELY(this->msgLvl (MSG::VERBOSE))) {
         HepMC::Print::line(prevVtx);
       }
-      const HepMC::FourVector &prevVec = prevVtx->position();
+      // NB Doing this check to explicitly avoid the fallback mechanism in
+      // HepMC3::GenVertex::position() to return the position of
+      // another GenVertex in the event if the position isn't set (or is set to zero)!
+      const HepMC::FourVector &prevVec = (prevVtx->has_set_position()) ? prevVtx->position() : HepMC::FourVector::ZERO_VECTOR();
       const CLHEP::HepLorentzVector prevPos( prevVec.x(), prevVec.y(), prevVec.z(), prevVec.t() );
       CLHEP::HepLorentzVector newPos = 0.5*(prevPos+nextPos);
       curVtx->set_position(HepMC::FourVector(newPos.x(),newPos.y(),newPos.z(),newPos.t()));
