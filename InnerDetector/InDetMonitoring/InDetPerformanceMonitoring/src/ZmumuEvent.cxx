@@ -67,7 +67,7 @@ ZmumuEvent::ZmumuEvent()
   m_eventselectioncount_masswindow = 0;
   m_eventselectioncount_openingangle = 0;
   m_eventselectioncount_dimuoncharge = 0;
-
+  m_skipMScheck = false;
 }
 
 //==================================================================================
@@ -78,6 +78,8 @@ ZmumuEvent::~ZmumuEvent()
 //==================================================================================
 void ZmumuEvent::Init()
 {
+  
+
   m_xMuonID.Init();
   
   PARENT::Init();

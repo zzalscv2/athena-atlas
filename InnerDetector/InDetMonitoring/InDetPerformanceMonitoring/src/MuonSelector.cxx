@@ -112,6 +112,7 @@ MuonSelector::~MuonSelector()
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////
 void MuonSelector::Init()
 {
+  
   ISvcLocator* serviceLocator = Gaudi::svcLocator();
   IToolSvc* toolSvc;
   StatusCode sc = serviceLocator->service("ToolSvc", toolSvc, true);
@@ -121,7 +122,7 @@ void MuonSelector::Init()
     return;
   }
 
-  // check muon selection tool is available 
+  // check muon selection tool is available
   if (m_muonSelectionTool.retrieve().isSuccess()) {
     ( *m_msgStream) << MSG::INFO << "  * MuonSelector::Init * m_muonSelectionTool.initialize() success :)" << endmsg;
     if(m_doDebug){ std::cout << "  * MuonSelector::Init * m_muonSelectionTool.initialize() success :)" << std::endl;}

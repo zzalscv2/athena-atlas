@@ -14,6 +14,8 @@
 #include "InDetPerformanceMonitoring/EventAnalysis.h"
 #include "InDetPerformanceMonitoring/PerfMonServices.h"
 
+#include "AsgTools/ToolHandle.h"
+#include "MuonAnalysisInterfaces/IMuonSelectionTool.h"
 //==============================================================================
 // Forward class declarations...
 //==============================================================================
@@ -92,9 +94,11 @@ class ZmumuEvent : public EventAnalysis
   void SetSecondMuonPtCut (double newvalue); 
   inline void SetOpeningAngleCut (double newvalue) {m_OpeningAngleCut = newvalue;}
   inline void SetZ0GapCut (double newvalue) {m_Z0GapCut = newvalue;}
+  inline void SetSkipMSCheck (bool value) {m_skipMScheck = value;}
 
   void setContainer( PerfMonServices::CONTAINERS container) { m_container = container; };
   inline double GetInvMass() {return m_DiMuonPairInvMass;}
+  inline void SetMuonSelectionTool ( ToolHandle<CP::IMuonSelectionTool> mst ) { m_muonSelectionTool = mst;  m_xMuonID.SetCustomMuonSelectionTool (mst); };
 
  protected:
   virtual void BookHistograms();
@@ -111,6 +115,7 @@ class ZmumuEvent : public EventAnalysis
   // Active mu-cuts for the analysis
   MuonSelector            m_xMuonID;
   PerfMonServices::CONTAINERS m_container;
+  ToolHandle<CP::IMuonSelectionTool> m_muonSelectionTool;
 
   // Tag Setup variables
   unsigned int m_uMuonTags;
@@ -125,7 +130,8 @@ class ZmumuEvent : public EventAnalysis
   double m_MassWindowHigh;
   double m_OpeningAngleCut;
   double m_Z0GapCut;
-
+  bool m_skipMScheck;
+ 
   bool m_doDebug;
   // Member variables : Mostly to store relevant muon data for quick access.
   unsigned int     m_numberOfFullPassMuons{};
