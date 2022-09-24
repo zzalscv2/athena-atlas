@@ -1,24 +1,22 @@
-################################################################################
-# Package: MdtCalibT0
-################################################################################
+# Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
 
 # Declare the package name:
 atlas_subdir( MdtCalibT0 )
 
 # External dependencies:
-find_package( ROOT COMPONENTS Graf Minuit Core Tree MathCore Hist RIO pthread MathMore Minuit2 Matrix Physics HistPainter Rint RooFitCore RooFit Graf3d Gpad Html Postscript Gui GX11TTF GX11 )
+find_package( Boost )
+find_package( ROOT COMPONENTS Core Graf Hist MathCore MathMore Minuit RIO Tree )
 
 # Component(s) in the package:
 atlas_add_library( MdtCalibT0
                    src/*.cxx
                    PUBLIC_HEADERS MdtCalibT0
                    INCLUDE_DIRS ${ROOT_INCLUDE_DIRS}
-                   LINK_LIBRARIES ${ROOT_LIBRARIES} MdtCalibData MuonCalibStandAloneBaseLib
-                   PRIVATE_LINK_LIBRARIES MuonCalibEventBase MuonCalibIdentifier )
+                   PRIVATE_INCLUDE_DIRS ${Boost_INCLUDE_DIRS}
+                   LINK_LIBRARIES ${ROOT_LIBRARIES} AthenaKernel GaudiKernel MdtCalibData MdtCalibInterfacesLib MuonCalibStandAloneBaseLib
+                   PRIVATE_LINK_LIBRARIES ${Boost_LIBRARIES} CxxUtils MuonCalibEventBase MuonCalibIdentifier MuonCalibStl )
 
 atlas_add_dictionary( MdtCalibT0Dict
                       MdtCalibT0/ReflexHeaders.h
                       MdtCalibT0/selection.xml
-                      INCLUDE_DIRS ${ROOT_INCLUDE_DIRS}
-                      LINK_LIBRARIES ${ROOT_LIBRARIES} MdtCalibData MuonCalibStandAloneBaseLib MuonCalibEventBase MuonCalibIdentifier MdtCalibT0 )
-
+                      LINK_LIBRARIES MdtCalibT0 )

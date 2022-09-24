@@ -24,7 +24,6 @@
 #include "TrkParticleBase/LinkToTrackParticleBase.h"
 #include "TrkParameters/TrackParameters.h"
 
-#include "StoreGate/DataHandle.h"
 
 namespace JiveXML {
 
@@ -150,7 +149,7 @@ namespace JiveXML {
 
     //Get an iterator over all vertex collections,
     //return if there are none
-    const DataHandle<VxContainer> vtxCollectionItr, vtxCollectionsEnd;
+    SG::ConstIterator<VxContainer> vtxCollectionItr, vtxCollectionsEnd;
     if (evtStore()->retrieve(vtxCollectionItr,vtxCollectionsEnd).isFailure()) {
       if (msgLvl(MSG::DEBUG )) msg(MSG::DEBUG ) << "No VxContainer containers found in this event" << endmsg;
       return StatusCode::SUCCESS;
@@ -261,10 +260,10 @@ namespace JiveXML {
 	if (msgLvl(MSG::DEBUG)){ msg(MSG::DEBUG) << " collection " << vtxCollectionItr.key() << ": VertexType: " << vtx_type << endmsg; }
 
         //Store primary vertex candidate flag
-        if ( vtxCollectionItr == primaryVtxCollection ){
+    if ( &(*vtxCollectionItr) == primaryVtxCollection ){
 	  if ( Trk::PriVtx == vtx_type ){ primVxCand.push_back(DataType( 1 )); // type 1 'real' primary vertex
           }else{ primVxCand.push_back(DataType( 0 )); } // hack ! 'type 3 pileup' Should properly use 'vertexType'
-	}else if ( vtxCollectionItr == secondaryVtxCollection ){ 
+	}else if ( &(*vtxCollectionItr) == secondaryVtxCollection ){
 	   primVxCand.push_back(DataType( 2 )); // normally those are 'type 9 Kshort'
         }else{
            primVxCand.push_back(DataType( 0 ));

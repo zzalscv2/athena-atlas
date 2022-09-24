@@ -23,9 +23,10 @@ class TileDetDescriptor;
 class TileDetDescrManager;
 
 
-class TileGeoCutBuilder   
+class TileGeoCutBuilder
 {
  public:
+
   /** Constructor */
   TileGeoCutBuilder(StoredMaterialManager* matManager,
                     TileDddbManager* pDbManager,
@@ -36,8 +37,8 @@ class TileGeoCutBuilder
 
   /** Section parameters are the following:
       @param sec_number Number of sector
-      @param tile_rmax  Maximal radius 
-      @param rminb      Minimal radius 
+      @param tile_rmax  Maximal radius
+      @param rminb      Minimal radius
       @param dzglue     Glue gap along dZ
       @param delta_phi  Delta Phi
       @param zlen_itc2  Length for ITC2 only
@@ -46,11 +47,11 @@ class TileGeoCutBuilder
                int                      number);
 
   void checking(const std::string& VolumeName, bool print, int level,
-                double X1, double X2, double Y1, double Y2, double Z); 
+                double X1, double X2, double Y1, double Y2, double Z);
 
  private:
+
   MsgStream *                           m_log;
 };
 
 #endif // not TILEGEOMODEL_TILEGEOCUTBUILDER_H
-

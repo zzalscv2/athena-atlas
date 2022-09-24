@@ -7,17 +7,17 @@
  *
  * @class TileDetectorFactoryLite
  *
- * @brief Definition of the TileDetectorFactoryLite class. 
- * The TileDetectorFactoryLite is invoked by the TileDetectorTool when the GeoModel 
+ * @brief Definition of the TileDetectorFactoryLite class.
+ * The TileDetectorFactoryLite is invoked by the TileDetectorTool when the GeoModel
  * description of Tile calorimeter is built from the SQLite database
  * It also builds readout geometry (coming soon).
  *
  * @author Riccardo Maria BIANCHI <riccardo.maria.bianchi@cern.ch> , Aug 2021
  *
- * Updates: 
+ * Updates:
  * - Riccardo Maria BIANCHI <riccardo.maria.bianchi@cern.ch>, Oct 2021
  * - Riccardo Maria BIANCHI <riccardo.maria.bianchi@cern.ch>, Dec 2021
- *   Moved code to use Switches, for instance for 'addPlatesToCell' or 'testBeam' 
+ *   Moved code to use Switches, for instance for 'addPlatesToCell' or 'testBeam'
  * - Riccardo Maria BIANCHI <riccardo.maria.bianchi@cern.ch>, Jan 2022
  *   Added the build of the Readout geometry
  */
@@ -40,30 +40,29 @@ namespace GeoModelIO {
 
 class TileDetectorFactoryLite : public GeoVDetectorFactory
 {
-public:
-  
+ public:
+
   /** Constructor */
-  TileDetectorFactoryLite(StoreGateSvc *pDetStore, 
-                          TileDetDescrManager *manager, 
+  TileDetectorFactoryLite(StoreGateSvc *pDetStore,
+                          TileDetDescrManager *manager,
                           GeoModelIO::ReadGeoModel* sqliteReader,
                           IRDBAccessSvc* rdbaccess,
                           const TileSwitches & switches,
-                          MsgStream *log, 
+                          MsgStream *log,
                           bool fullGeo);
-  
+
   /** Destructor */
   ~TileDetectorFactoryLite();
-  
+
   /** Creation of Tile geometry */
   virtual void create(GeoPhysVol *world);
 
   /** Access function to TileDetDescr geometry data */
   virtual const TileDetDescrManager * getDetectorManager() const { return m_detectorManager; }
 
+ private:
 
-private:  
-  
-  /** Detector pointer to TileDetDescrManager */  
+  /** Detector pointer to TileDetDescrManager */
   TileDetDescrManager       *m_detectorManager;
 
   /** Pointer to an instance of the RDBAccessSvc to get parameters from the SQLite file */
@@ -71,7 +70,7 @@ private:
 
   /** all switches */
   TileSwitches m_switches;
-  
+
   /** Get message SVC */
   MsgStream                 *m_log;
 
@@ -80,4 +79,3 @@ private:
 };
 
 #endif
-

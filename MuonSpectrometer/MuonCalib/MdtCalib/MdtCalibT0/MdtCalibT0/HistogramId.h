@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2017 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef HistogramId_H
@@ -46,13 +46,13 @@ namespace MuonCalib {
         /** get numberic id */
         inline int getIdInt() const { return m_id.second; }
         /** get ascii histogram name */
-        inline const std::string &HistogramName() const { return s_histogram_names[m_id]; }
+        inline const std::string &HistogramName() const { return m_histogram_name; }
 
     private:
         //! integer identity - value depends on the sort_by argument of the Initialize-Function
         std::pair<int, int> m_id;
-        //! ascii histogram names
-        static std::map<std::pair<int, int>, std::string> s_histogram_names;
+        //! ascii histogram name
+        std::string m_histogram_name;
     };
 
 }  // namespace MuonCalib

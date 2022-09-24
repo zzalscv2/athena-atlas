@@ -177,8 +177,15 @@ if recAlgs.doEFlow() and jobproperties.eflowRecFlags.usePFFlowElementAssoc:
         from eflowRec.PFCfg import PFTauFlowElementLinkingCfg
         CAtoGlobalWrapper(PFTauFlowElementLinkingCfg,ConfigFlags)        
     except Exception:
-        treatException("Could not set up tau-FE links")
+        treatException("Could not set up tau-FE links")    
 
+#Links to/from global FE containers created during jet finding
+if(jetOK):
+    try:
+        from eflowRec.PFCfg import PFGlobalFlowElementLinkingCfg
+        CAtoGlobalWrapper(PFGlobalFlowElementLinkingCfg,ConfigFlags)
+    except Exception:
+        treatException("Could not setup PFGlobalFlowElementAssoc Algorithms")
 #
 # functionality : Missing Et
 #

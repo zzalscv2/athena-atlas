@@ -14,7 +14,8 @@ TauESDList = []
 # Taus
 #------------------------------------------------------------------------------
 TauESDList += [ "xAOD::TauJetContainer#TauJets" ]
-TauESDList += [ "xAOD::TauJetAuxContainer#TauJetsAux.-VertexedClusters" ]
+#Also remove GlobalFELinks - these are links between FlowElement (FE) containers created in jet finding and taus. Since these transient FE containers are not in the AOD, we should not write out these links.
+TauESDList += [ "xAOD::TauJetAuxContainer#TauJetsAux.-VertexedClusters.-chargedGlobalFELinks.-neutralGlobalFELinks" ]
 
 #------------------------------------------------------------------------------
 # Tau tracks

@@ -70,6 +70,13 @@ def PhysCommonAugmentationsCfg(ConfigFlags,**kwargs):
     from DerivationFrameworkTau.TauCommonConfig import (AddDiTauLowPtCfg, AddTauWPDecorationCfg, AddMuonRemovalTauAODReRecoAlgCfg)
     from DerivationFrameworkJetEtMiss.METCommonConfig import METCommonCfg 
     acc.merge(JetCommonCfg(ConfigFlags))
+    #We also need to build links between the newly created jet constituents (GlobalFE)
+    #and electrons,photons,muons and taus
+    from eflowRec.PFCfg import PFGlobalFlowElementLinkingCfg
+    acc.merge(PFGlobalFlowElementLinkingCfg(ConfigFlags))
+    #AOD do not have calorimeter cells for CaloCalTopoCluster, so we have to use 
+    #this special setting for the muon-FE links.
+    acc.getEventAlgo("PFMuonGlobalFlowElementAssoc").m_UseMuonTopoClusters=True
     acc.merge(AddDiTauLowPtCfg(ConfigFlags, prefix = 'PhysCommon'))
     acc.merge(AddMuonRemovalTauAODReRecoAlgCfg(ConfigFlags, prefix = 'PhysCommon'))
     acc.merge(AddTauWPDecorationCfg(ConfigFlags, prefix = 'PhysCommon', evetoFixTag="v1"))

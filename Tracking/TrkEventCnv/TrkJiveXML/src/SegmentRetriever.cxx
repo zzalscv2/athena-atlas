@@ -1,9 +1,8 @@
 /*
-  Copyright (C) 2002-2017 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "TrkJiveXML/SegmentRetriever.h"
-#include "StoreGate/DataHandle.h"
 
 #include "TrkSegment/Segment.h"
 #include "TrkSegment/TrackSegment.h"
@@ -41,7 +40,7 @@ namespace JiveXML {
     if (msgLvl(MSG::DEBUG)) msg(MSG::DEBUG) << "Retrieving " << dataTypeName() <<endmsg; 
 
     //Get an iterator over all segement collections
-    const DataHandle<Trk::SegmentCollection> CollectionItr, CollectionsEnd;
+    SG::ConstIterator<Trk::SegmentCollection> CollectionItr, CollectionsEnd;
     if ((evtStore()->retrieve(CollectionItr, CollectionsEnd)).isFailure()){
       if (msgLvl(MSG::ERROR)) msg(MSG::ERROR) << "Unable to retrieve iterator for Segment collection" << endmsg;
       return StatusCode::RECOVERABLE;

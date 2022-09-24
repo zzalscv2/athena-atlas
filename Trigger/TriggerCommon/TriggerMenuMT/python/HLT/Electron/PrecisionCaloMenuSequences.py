@@ -30,7 +30,7 @@ def precisionCaloSequence(flags, ion=False, variant=''):
     # Note: This step processes Decision Objects which have followed either Electron reco, Photon reco, or both.
     # For Decision Object which have followed both, there is an ambiguity about which ROI should be used in this
     # merged step. In such cases we break the ambiguity by specifying that the Electron ROI is to be used.
-    roiTool.RoISGKey = TrigEgammaKeys.fastElectronRoIContainer
+    roiTool.RoISGKey = TrigEgammaKeys.fastTrackingRoIContainer
     precisionCaloViewsMaker.RoITool = roiTool
     precisionCaloViewsMaker.InViewRoIs = InViewRoIs
     precisionCaloViewsMaker.Views = tag(ion) + 'Views' + variant

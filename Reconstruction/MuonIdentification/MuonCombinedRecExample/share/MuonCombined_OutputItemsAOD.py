@@ -30,7 +30,10 @@ if DetFlags.detdescr.Calo_on(): # FIXME - check if the objects below still make 
 if DetFlags.detdescr.Muon_on():
    excludedAuxData = '-clusterAssociation'
    common_flags = [ "DFCommonMuonsTight", "DFCommonGoodMuon","DFCommonMuonsMedium", "DFCommonMuonsLoose", "InnerDetectorPt", "MuonSpectrometerPt" ]
-   excludedMuonAuxData = ".-"+".-".join(iso_vars() + common_flags)
+   #Also remove GlobalFELinks and associated variables - these are links between FlowElement (FE) containers created in jet finding and muons. Since these transient FE containers are not in the AOD, 
+   # we should not write out these links or variables
+   gpf_vars = ["chargedGlobalFELinks","neutralGlobalFELinks","deltaR_muon_clus_GlobalFEalg","muon_efrac_matched_GlobalFE"]
+   excludedMuonAuxData = ".-"+".-".join(iso_vars() + common_flags + gpf_vars)
    # Adding the xAOD content by default
    track_particles = GetCombinedTrackParticles()[0]
    for trk_cont in track_particles:
