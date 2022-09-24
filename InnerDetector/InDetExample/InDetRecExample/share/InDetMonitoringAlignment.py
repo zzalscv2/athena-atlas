@@ -238,7 +238,7 @@ from InDetRecExample import TrackingCommon
 from InDetAlignmentMonitoring.InDetAlignmentMonitoringConf import IDAlignMonGenericTracks
 InDetAlignMonGenericTracks_noTrig = IDAlignMonGenericTracks (name                = "InDetAlignMonGenericTracks_noTrig",
                                                              trackSelection      = m_alignMonTrackSelectionTool[1],
-                                                             TrackToVertexIPEstimator = TrackingCommon.getTrackToVertexIPEstimator(),
+                                                             TrackToVertexIPEstimatorTool = TrackingCommon.getTrackToVertexIPEstimator(),
                                                              VxPrimContainerName = InDetKeys.xAODVertexContainer())
 
 if jobproperties.Beam.beamType()=='cosmics' or jobproperties.Beam.beamType()=='singlebeam':
