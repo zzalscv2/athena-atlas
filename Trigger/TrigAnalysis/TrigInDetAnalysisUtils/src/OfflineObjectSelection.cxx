@@ -86,10 +86,20 @@ bool TIDA::isGoodOffline(const xAOD::TauJet& tau, const unsigned int selection, 
   // Could this selection just be replaced by a string that is passed in? Or an enumerate if the function is needed to be called when incrementing an int for the selection?
   bool good_tau = false;
 
+#if 0
+  /// run 2 selection
   if      ( selection == 1 ) good_tau = tau.isTau(xAOD::TauJetParameters::JetBDTSigTight);
   else if ( selection == 2 ) good_tau = tau.isTau(xAOD::TauJetParameters::JetBDTSigMedium);
   else if ( selection == 3 ) good_tau = tau.isTau(xAOD::TauJetParameters::JetBDTSigLoose);
   else                       good_tau = true;
+#else
+  /// run 3 selection
+  if      ( selection == 1 ) good_tau = tau.isTau(xAOD::TauJetParameters::JetRNNSigTight);
+  else if ( selection == 2 ) good_tau = tau.isTau(xAOD::TauJetParameters::JetRNNSigMedium);
+  else if ( selection == 3 ) good_tau = tau.isTau(xAOD::TauJetParameters::JetRNNSigLoose);
+  else                       good_tau = true;
+#endif
+
 
   /// instead of a bool to decide on whether 1 or 3 tracks are required, 
   /// why not just specify the number of tracks ?
