@@ -55,16 +55,6 @@ DataHeader
 DataHeaderForm
 DiTauJets
 DiTauJetsAux.
-EMEO_CombinedMuonTrackParticles
-EMEO_CombinedMuonTrackParticlesAux.
-EMEO_ExtrapolatedMuonTrackParticles
-EMEO_ExtrapolatedMuonTrackParticlesAux.
-EMEO_MSOnlyExtrapolatedMuonTrackParticles
-EMEO_MSOnlyExtrapolatedMuonTrackParticlesAux.
-EMEO_MuonSpectrometerTrackParticles
-EMEO_MuonSpectrometerTrackParticlesAux.
-EMEO_Muons
-EMEO_MuonsAux.
 ElectronCaloRings
 ElectronCaloRingsAux.
 ElectronRingSets
