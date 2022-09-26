@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2020 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
 */
 
 /*****************************************************************************
@@ -180,7 +180,7 @@ void CBTree::connectNode(const std::string& name, CBNode* parent) {
 
 /* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-CBNode* CBTree::findNode(const SG::DataProxy* proxy) const {
+CBNode* CBTree::findNode(const SG::DataProxy* proxy) {
 
   return findNode(proxy, m_root);
 
@@ -188,7 +188,7 @@ CBNode* CBTree::findNode(const SG::DataProxy* proxy) const {
 
 /* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-CBNode* CBTree::findNode(const SG::DataProxy* proxy, CBNode* start) const {
+CBNode* CBTree::findNode(const SG::DataProxy* proxy, CBNode* start) {
 
   if ( start->proxy() == proxy ) {
     return start;
@@ -208,13 +208,13 @@ CBNode* CBTree::findNode(const SG::DataProxy* proxy, CBNode* start) const {
 
 /* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-CBNode* CBTree::findNode(BFCN* fcn) const {
+CBNode* CBTree::findNode(BFCN* fcn) {
   return findNode(fcn, m_root);
 }
 
 /* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-CBNode* CBTree::findNode(BFCN* fcn, CBNode* start) const {
+CBNode* CBTree::findNode(BFCN* fcn, CBNode* start) {
 
   if (start->fcn() == fcn) {
     return start;
@@ -235,13 +235,13 @@ CBNode* CBTree::findNode(BFCN* fcn, CBNode* start) const {
 
 /* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-CBNode* CBTree::findNode(const std::string& name) const {
+CBNode* CBTree::findNode(const std::string& name) {
   return findNode(name, m_root);
 }
 
 /* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-CBNode* CBTree::findNode(const std::string& name, CBNode* start) const {
+CBNode* CBTree::findNode(const std::string& name, CBNode* start) {
 
   if (start->name() == name) {
     return start;
@@ -270,7 +270,7 @@ void CBTree::printTree() const {
 
 /* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-void CBTree::printTree( CBNode* start ) const {
+void CBTree::printTree( const CBNode* start ) const {
 
   for (int i=0; i<start->level(); ++i) {
     cout << "  ";
@@ -285,14 +285,13 @@ void CBTree::printTree( CBNode* start ) const {
   }
   cout << endl;
 
-  std::set<CBNode*>::const_iterator citr;
-  for (citr=start->children().begin(); citr!=start->children().end(); ++citr) {
-    printTree( *citr );
+  for (const CBNode* child : start->children()) {
+    printTree( child );
   }
 
 }
 
-void CBTree::_printTree( CBNode* current, CBNode* parent ) {
+void CBTree::_printTree( const CBNode* current, const CBNode* parent ) {
   std::string np;
   int lp;
   if (parent == 0) {
@@ -372,7 +371,7 @@ void CBTree::listNodes(const int& level,
 
 /* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-void CBTree::cascadeTrigger(const bool b, CBNode* start) const {
+void CBTree::cascadeTrigger(const bool b, CBNode* start) {
   if (start == 0) {
     start = m_root;
   }
@@ -387,7 +386,7 @@ void CBTree::cascadeTrigger(const bool b, CBNode* start) const {
   
 /* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-void CBTree::cascadeTrigger(const bool b, BFCN* fcn) const {
+void CBTree::cascadeTrigger(const bool b, BFCN* fcn) {
 
   CBNode* start = findNode(fcn);
   if (start == 0) {
@@ -401,7 +400,7 @@ void CBTree::cascadeTrigger(const bool b, BFCN* fcn) const {
   
 /* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-void CBTree::cascadeTrigger(const bool b, const SG::DataProxy* proxy) const {
+void CBTree::cascadeTrigger(const bool b, const SG::DataProxy* proxy) {
 
   CBNode* start = findNode(proxy);
   if (start == 0) {
@@ -433,9 +432,8 @@ void CBTree::cascadeFlag(const bool b, CBNode* start) const {
 
   start->setFlag(b);
 
-  std::set<CBNode*>::iterator citr = start->children().begin();
-  for (;citr!=start->children().end(); ++citr) {
-    cascadeFlag(b, *citr);
+  for (CBNode* child : start->children()) {
+    cascadeFlag(b, child);
   }
 }
 
@@ -468,37 +466,35 @@ void CBTree::adjustLevels(CBNode* start) {
 
 // Traverse full tree, applying function   void fnc(current)   to each node
 
-void CBTree::traverse(void(*pf) (CBNode*)) const {
+void CBTree::traverse(void(*pf) (const CBNode*)) const {
   
-  CBNode* current = m_root;
+  const CBNode* current = m_root;
 
   traverse(current, pf);
 
 }
 
-void CBTree::traverse(CBNode* current, void(*pf) (CBNode*)) const {
+void CBTree::traverse(const CBNode* current, void(*pf) (const CBNode*)) const {
 
   if (current == 0) { return; }
   
   (*pf)(current);
-  
-  std::set<CBNode*>::const_iterator citr = current->children().begin();
-  for (; citr != current->children().end(); ++citr) {
-    traverse( *citr, pf);
+
+  for (const CBNode* child : current->children()) {
+    traverse( child, pf);
   }
 
 }
 
-void CBTree::traverseR(CBNode* current, void(*pf) (CBNode*)) const {
+void CBTree::traverseR(const CBNode* current, void(*pf) (const CBNode*)) const {
   // traverse tree in reverse
 
   if (current == 0) { return; }
   
   (*pf)(current);
-  
-  std::set<CBNode*>::const_iterator citr = current->parents().begin();
-  for (; citr != current->parents().end(); ++citr) {
-    traverseR( *citr, pf);
+
+  for (const CBNode* parent : current->parents()) {
+    traverseR( parent, pf);
   }
 
 }
@@ -508,38 +504,36 @@ void CBTree::traverseR(CBNode* current, void(*pf) (CBNode*)) const {
 
 // Traverse tree, applying function  void fnc(current, parent)  to each node.
 
-void CBTree::traverse(void(*pf) (CBNode*,CBNode*)) const {
+void CBTree::traverse(void(*pf) (const CBNode*,const CBNode*)) const {
   
-  CBNode* current = m_root;
+  const CBNode* current = m_root;
 
   traverse(current,0, pf);
 
 }
 
-void CBTree::traverse(CBNode* current, CBNode* parent, 
-                      void(*pf) (CBNode*, CBNode*)) const {
+void CBTree::traverse(const CBNode* current, const CBNode* parent, 
+                      void(*pf) (const CBNode*, const CBNode*)) const {
 
   if (current == 0) { return; }
   
   (*pf)(current,parent);
-  
-  std::set<CBNode*>::const_iterator citr = current->children().begin();
-  for (; citr != current->children().end(); ++citr) {
-    traverse( *citr, current, pf);
+
+  for (const CBNode* child : current->children()) {
+    traverse( child, current, pf);
   }
 
 }
 
-void CBTree::traverseR(CBNode* current, CBNode* child, 
-                       void(*pf) (CBNode*, CBNode*)) const {
+void CBTree::traverseR(const CBNode* current, const CBNode* child, 
+                       void(*pf) (const CBNode*, const CBNode*)) const {
 
   if (current == 0) { return; }
   
   (*pf)(current,child);
   
-  std::set<CBNode*>::const_iterator citr = current->parents().begin();
-  for (; citr != current->parents().end(); ++citr) {
-    traverseR( *citr, current, pf);
+  for (const CBNode* parent : current->parents()) {
+    traverseR( parent, current, pf);
   }
 
 }
@@ -549,24 +543,22 @@ void CBTree::traverseR(CBNode* current, CBNode* child,
 // Traverse tree, stopping when function  CBNode* fnc( current )  returns
 // a non-null. Good for searches.
 
-CBNode* CBTree::traverse(CBNode* (*pf) (CBNode*)) const {
+const CBNode* CBTree::traverse(const CBNode* (*pf) (const CBNode*)) const {
 
   return traverse(m_root, pf);
 
 }
 
-CBNode* CBTree::traverse(CBNode* current, CBNode* (*pf) (CBNode*)) const {
+const CBNode* CBTree::traverse(const CBNode* current, const CBNode* (*pf) (const CBNode*)) const {
 
-  CBNode *n = (*pf)(current);
+  const CBNode *n = (*pf)(current);
 
   if ( n != 0 ) {
     return n;
   } else {
 
-    CBNode *c;
-    std::set<CBNode*>::const_iterator citr = current->children().begin();
-    for (; citr != current->children().end(); ++citr) {
-      c = traverse(*citr, pf );
+    for (const CBNode* child : current->children()) {
+      const CBNode* c = traverse(child, pf );
       if (c != 0) {
         return c;
       }
@@ -577,18 +569,16 @@ CBNode* CBTree::traverse(CBNode* current, CBNode* (*pf) (CBNode*)) const {
     
 }
 
-CBNode* CBTree::traverseR(CBNode* current, CBNode* (*pf) (CBNode*)) const {
+const CBNode* CBTree::traverseR(const CBNode* current, const CBNode* (*pf) (const CBNode*)) const {
 
-  CBNode *n = (*pf)(current);
+  const CBNode *n = (*pf)(current);
 
   if ( n != 0 ) {
     return n;
   } else {
 
-    CBNode *c;
-    std::set<CBNode*>::const_iterator citr = current->parents().begin();
-    for (; citr != current->parents().end(); ++citr) {
-      c = traverseR(*citr, pf );
+    for (const CBNode* parent : current->parents()) {
+      const CBNode* c = traverseR(parent, pf );
       if (c != 0) {
         return c;
       }
