@@ -1,7 +1,7 @@
 ///////////////////////// -*- C++ -*- /////////////////////////////
 
 /*
-  Copyright (C) 2002-2017 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
 */
 
 // Py::Store.h 
@@ -61,7 +61,7 @@ class Store
   std::size_t bufferSize() const { return m_bufSize; }
 
   /// python representation
-  std::string repr() const;
+  std::string repr();
 
   /////////////////////////////////////////////////////////////////// 
   // Non-const methods: 
