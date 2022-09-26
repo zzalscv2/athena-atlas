@@ -71,7 +71,7 @@ class jFexInputByteStreamTool : public extends<AthAlgTool, IL1TriggerByteStreamT
         StatusCode ReadfromFile(const std::string&);
         
         // hash the index into one integer in the format 0xJFCCT (hexadecimal)
-        constexpr unsigned int mapIndex(unsigned int jfex, unsigned int fpga, unsigned int channel, unsigned int tower) const;
+        constexpr static unsigned int mapIndex(unsigned int jfex, unsigned int fpga, unsigned int channel, unsigned int tower);
         std::unordered_map<unsigned int, std::array<float,4> > m_Firm2Tower_map; /// {map index, {IDsimulation,eta,phi}}
         
         

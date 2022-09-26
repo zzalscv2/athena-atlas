@@ -370,7 +370,7 @@ StatusCode jFexInputByteStreamTool::ReadfromFile(const std::string & fileName){
 }
 
 
-constexpr unsigned int jFexInputByteStreamTool::mapIndex(unsigned int jfex, unsigned int fpga, unsigned int channel, unsigned int tower) const{
+constexpr unsigned int jFexInputByteStreamTool::mapIndex(unsigned int jfex, unsigned int fpga, unsigned int channel, unsigned int tower) {
   // values from hardware: jfex=[0,5] 4 bits, fpga=[0,3] 4 bits, channel=[0,59] 8 bits, tower=[0,15] 4 bits
   return (jfex << 16) | (fpga << 12) | (channel << 4) | tower;
 }
