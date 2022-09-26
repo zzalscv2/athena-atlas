@@ -3,6 +3,7 @@
 # AnaAlgorithm import(s):
 from AnaAlgorithm.AnaAlgSequence import AnaAlgSequence
 from AnaAlgorithm.DualUseConfig import createAlgorithm, addPrivateTool
+from Campaigns.Utils import Campaign
 
 try:
     from AthenaCommon.Logging import logging
@@ -27,10 +28,10 @@ def makePileupAnalysisSequence( dataType, campaign=None, files=None, useDefaultC
 
     toolConfigFiles = []
     toolLumicalcFiles = []
-    if files is not None and (campaign is None or userPileupConfigs is None):
-        if campaign is None:
+    if files is not None and (campaign is None or campaign is Campaign.Unknown or userPileupConfigs is None):
+        if campaign is None or campaign is Campaign.Unknown:
             from Campaigns.Utils import getMCCampaign
-            campaign = getMCCampaign(files=files)
+            campaign = getMCCampaign(files)
             if campaign:
                 log.info(f'Autoconfiguring PRW with campaign: {campaign}')
             else:

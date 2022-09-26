@@ -1,6 +1,4 @@
 # Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
-from SimulationConfig.SimEnums import TruthStrategy
-
 
 def PhaseIIPileUpBase(flags, collisions=200):
     """Phase-II Upgrade / Run 4 flags for MC with pile-up"""
@@ -131,6 +129,7 @@ def PhaseIINoPileUp(flags):
 
 def PhaseIISimulation(flags):
     """Phase-II Upgrade / Run 4 flags for simulation"""
+    from SimulationConfig.SimEnums import TruthStrategy
     flags.Sim.PhysicsList = 'FTFP_BERT_ATL'
     flags.Sim.TruthStrategy = TruthStrategy.MC15aPlus
 

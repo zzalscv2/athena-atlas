@@ -1,24 +1,27 @@
 # Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
 from AthenaConfiguration.ComponentAccumulator import ComponentAccumulator, ConfigurationError
 from AthenaConfiguration.ComponentFactory import CompFactory
-import os
 
 
-def TagInfoMgrCfg(configFlags,tagValuePairs={}):
-
-    #Sanity check:
-    if not isinstance(tagValuePairs,dict):
+def TagInfoMgrCfg(flags, tagValuePairs={}):
+    # Sanity check:
+    if not isinstance(tagValuePairs, dict):
         raise ConfigurationError("Parameter extraTagValuePairs is supposed to be a dictionary")
 
-    #Build project-version string for the TagInfoMgr
-    project = os.getenv('AtlasProject',"Unknown")
-    version = os.getenv('AtlasVersion',"Unknown")
+    # Build project-version string for the TagInfoMgr
+    from os import getenv
+    project = getenv("AtlasProject", "Unknown")
+    version = getenv("AtlasVersion", "Unknown")
     atlasRelease=project+"-"+version
 
     tagValuePairs.update({"AtlasRelease" : atlasRelease})
 
-    result=ComponentAccumulator()
-    result.addService(CompFactory.TagInfoMgr(ExtraTagValuePairs = tagValuePairs), primary=True)
+    from Campaigns.Utils import Campaign
+    if flags.Input.isMC and flags.Input.MCCampaign is not Campaign.Unknown:
+        tagValuePairs.update({"mc_campaign" : flags.Input.MCCampaign.value})
+
+    result = ComponentAccumulator()
+    result.addService(CompFactory.TagInfoMgr(ExtraTagValuePairs=tagValuePairs), primary=True)
     return result
 
 
@@ -30,7 +33,7 @@ if __name__ == "__main__":
     ConfigFlags.lock()
 
     acc = TagInfoMgrCfg( ConfigFlags, {"SomeKey": "SomeValue"} )
-    acc2 =  TagInfoMgrCfg( ConfigFlags, {"OtherKey":"OtherValue", "SomeKey": "SomeValue"} )
+    acc2 = TagInfoMgrCfg( ConfigFlags, {"OtherKey": "OtherValue", "SomeKey": "SomeValue"} )
     acc.merge(acc2)
 
     assert "SomeKey" in acc.getService("TagInfoMgr").ExtraTagValuePairs

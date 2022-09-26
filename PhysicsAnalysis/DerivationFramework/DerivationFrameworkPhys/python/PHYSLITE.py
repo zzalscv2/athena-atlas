@@ -151,11 +151,12 @@ def PHYSLITEKernelCfg(ConfigFlags, name='PHYSLITEKernel', **kwargs):
     #    acc.merge(GeoModelCfg(ConfigFlags))    
 
     # Create a pile-up analysis sequence
-    from AsgAnalysisAlgorithms.PileupAnalysisSequence import makePileupAnalysisSequence
-    pileupSequence = makePileupAnalysisSequence( dataType, files=ConfigFlags.Input.Files, useDefaultConfig=True )
-    pileupSequence.configure( inputName = {}, outputName = {} )
-    for element in pileupSequence.getGaudiConfig2Components():
-        acc.addEventAlgo(element)
+    if ConfigFlags.Input.isMC:
+        from AsgAnalysisAlgorithms.PileupAnalysisSequence import makePileupAnalysisSequence
+        pileupSequence = makePileupAnalysisSequence( dataType, campaign=ConfigFlags.Input.MCCampaign, files=ConfigFlags.Input.Files, useDefaultConfig=True )
+        pileupSequence.configure( inputName = {}, outputName = {} )
+        for element in pileupSequence.getGaudiConfig2Components():
+            acc.addEventAlgo(element)
 
     # Include, and then set up the electron analysis sequence:
     from EgammaAnalysisAlgorithms.ElectronAnalysisSequence import  makeElectronAnalysisSequence

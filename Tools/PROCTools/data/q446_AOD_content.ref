@@ -246,6 +246,7 @@ FileMetaDataAuxDyn.beamType
 FileMetaDataAuxDyn.conditionsTag
 FileMetaDataAuxDyn.geometryVersion
 FileMetaDataAuxDyn.isDataOverlay
+FileMetaDataAuxDyn.mcCampaign
 FileMetaDataAuxDyn.mcProcID
 FileMetaDataAuxDyn.simFlavour
 ForwardElectronClusters
