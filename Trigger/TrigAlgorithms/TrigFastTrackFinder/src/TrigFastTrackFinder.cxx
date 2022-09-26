@@ -869,6 +869,8 @@ StatusCode TrigFastTrackFinder::findTracks(InDet::SiTrackMakerEventData_xk &trac
   }
   mnt_roi_lastStageExecuted = 6;
 
+  mnt_roi_nTracks = outputTracks.size();
+
   // z-vertex for UTT
   std::vector<double> disTrk_v_xVtx;
   std::vector<double> disTrk_v_yVtx;
@@ -1052,8 +1054,7 @@ void TrigFastTrackFinder::fillMon(const TrackCollection& tracks, const TrigVerte
   auto mnt_roi_phiWidth = Monitored::Scalar<float>("roi_phiWidth", 0.0);
   auto mnt_roi_z        = Monitored::Scalar<float>("roi_z",        0.0);
   auto mnt_roi_zWidth   = Monitored::Scalar<float>("roi_zWidth",  0.0);
-  auto mnt_roi_nTracks  = Monitored::Scalar<int>("roi_nTracks", 0);
-  auto monRoI           = Monitored::Group(m_monTool, mnt_roi_eta, mnt_roi_phi, mnt_roi_etaWidth, mnt_roi_phiWidth, mnt_roi_z, mnt_roi_zWidth, mnt_roi_nTracks);
+  auto monRoI           = Monitored::Group(m_monTool, mnt_roi_eta, mnt_roi_phi, mnt_roi_etaWidth, mnt_roi_phiWidth, mnt_roi_z, mnt_roi_zWidth);
 
   if (roi.composite()){
     for(unsigned int i=0; i<roi.size(); i++) {
@@ -1116,8 +1117,6 @@ void TrigFastTrackFinder::fillMon(const TrackCollection& tracks, const TrigVerte
   for (const auto vertex : vertices) {
     mnt_roi_zVertices.push_back(vertex->z());
   }
-  mnt_roi_nTracks = tracks.size();
-
 
   for (auto track : tracks) {
     const Trk::TrackParameters* trackPars = track->perigeeParameters();
