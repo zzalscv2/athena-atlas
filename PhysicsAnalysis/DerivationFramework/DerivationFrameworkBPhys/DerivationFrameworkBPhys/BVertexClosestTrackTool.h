@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
 */
 
 //============================================================================
@@ -72,30 +72,30 @@ namespace DerivationFramework {
 	virtual void        resetVals();
 	virtual void        copyVals(const BaseItem& item);
 	virtual void        copyVals(const CtItem& item);
-	virtual std::string dcaName();
-	virtual std::string dcaErrName();
-	virtual std::string zcaName();
-	virtual std::string zcaErrName();
-	virtual std::string vtxNDErr2Name();
-	virtual std::string trkNDErr2Name();
-	virtual std::string phi0UsedName();
-	virtual std::string nTrksChi2Name();
-	virtual std::string closeTrackName();
+	virtual std::string dcaName() const;
+	virtual std::string dcaErrName() const;
+	virtual std::string zcaName() const;
+	virtual std::string zcaErrName() const;
+	virtual std::string vtxNDErr2Name() const;
+	virtual std::string trkNDErr2Name() const;
+	virtual std::string phi0UsedName() const;
+	virtual std::string nTrksChi2Name() const;
+	virtual std::string closeTrackName() const;
   virtual std::string toString() const;
 
   public:
-	mutable double             dca;
-	mutable double             dcaErr;
-	mutable double             zca;
-	mutable double             zcaErr;
-  mutable double             vtxNDErr2;
-  mutable double             trkNDErr2;
-  mutable double             phi0Used;
-	mutable int                nTrksChi2;
+	double             dca;
+	double             dcaErr;
+	double             zca;
+	double             zcaErr;
+	double             vtxNDErr2;
+	double             trkNDErr2;
+	double             phi0Used;
+	int                nTrksChi2;
 	const xAOD::TrackParticle* closeTrack;
-  mutable TrackBag                          tracks;
-  mutable std::vector<std::vector<double> > vtap;
-  mutable std::vector<unsigned short>       selpat;
+	TrackBag                          tracks;
+	std::vector<std::vector<double> > vtap;
+	std::vector<unsigned short>       selpat;
 
   }; // CtItem
       

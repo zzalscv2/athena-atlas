@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2017 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
 */
 
 //============================================================================
@@ -90,17 +90,11 @@ namespace DerivationFramework {
     ATH_MSG_DEBUG("Calling destructor");
   }
   //--------------------------------------------------------------------------
-  // return a handle to an ICutFlowSvc instance
-  ServiceHandle<ICutFlowSvc>& CfAthAlgTool::cutFlowSvc() const {
-
-    return m_cutFlowSvc;
-  }
-  //--------------------------------------------------------------------------
   // Initialization method invoked by the framework.
   StatusCode CfAthAlgTool::sysInitialize() {
 
     // retrieve CutFlowSvc instance
-    CHECK( cutFlowSvc().retrieve() );
+    CHECK( m_cutFlowSvc.retrieve() );
     
     // re-direct to base class...
     return AthAlgTool::sysInitialize();
@@ -111,7 +105,7 @@ namespace DerivationFramework {
 
     CutIdentifier id = getCounter(name);
     if ( id > 0 ) {
-      cutFlowSvc()->addEvent(id, weight);
+      m_cutFlowSvc->addEvent(id, weight);
     }
     return (id > 0);
   }
@@ -124,7 +118,7 @@ namespace DerivationFramework {
     CutIdentifier id = getCounter(name);
     if ( id > 0 ) {
       for (uint64_t i=0; i<counts; ++i) {
-	cutFlowSvc()->addEvent(id, weight);
+        m_cutFlowSvc->addEvent(id, weight);
       }
     }
     return (id > 0);

@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
 */
 
 //============================================================================
@@ -89,11 +89,11 @@ namespace DerivationFramework {
     nTracks  = item.nTracks;
   }
   
-  std::string BVertexTrackIsoTool::IsoItem::isoName() {
+  std::string BVertexTrackIsoTool::IsoItem::isoName() const {
     return buildName();
   }
 
-  std::string BVertexTrackIsoTool::IsoItem::nTracksName() {
+  std::string BVertexTrackIsoTool::IsoItem::nTracksName() const {
     return buildName("Ntracks");
   }
 
@@ -323,7 +323,7 @@ namespace DerivationFramework {
   // Calculate track isolation variables -- slower method
   //--------------------------------------------------------------------------
   StatusCode BVertexTrackIsoTool::
-  calcIsolation(const IsoItem& iso,
+  calcIsolation(IsoItem& iso,
                 const xAOD::Vertex* vtx,
                 const double coneSize,
                 const double logChi2Max,

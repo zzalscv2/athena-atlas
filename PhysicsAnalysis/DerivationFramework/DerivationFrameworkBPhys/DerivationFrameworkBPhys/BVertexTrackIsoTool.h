@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
 */
 
 //============================================================================
@@ -56,12 +56,12 @@ namespace DerivationFramework {
     virtual void resetVals();
     virtual void copyVals(const BaseItem& item);
     virtual void copyVals(const IsoItem& item);
-    virtual std::string isoName();
-    virtual std::string nTracksName();
+    virtual std::string isoName() const;
+    virtual std::string nTracksName() const;
     
   public:
-    mutable double  isoValue;
-    mutable int     nTracks;
+    double  isoValue;
+    int     nTracks;
   }; // IsoItem
 
   public: 
@@ -87,7 +87,7 @@ namespace DerivationFramework {
   private:
       virtual StatusCode  saveIsolation(const xAOD::Vertex* vtx) const;
       virtual StatusCode  calculateIsolation(const xAOD::Vertex* vtx) const;
-      virtual StatusCode  calcIsolation(const IsoItem& iso,
+      virtual StatusCode  calcIsolation(IsoItem& iso,
                                         const xAOD::Vertex* vtx,
                                         const double coneSize,
                                         const double logChi2Max,

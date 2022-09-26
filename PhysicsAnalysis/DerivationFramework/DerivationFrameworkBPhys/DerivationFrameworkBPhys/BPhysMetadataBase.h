@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2019 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
 */
 
 //============================================================================
@@ -76,7 +76,7 @@ namespace DerivationFramework {
       
   private:
       /// Object accessing the output metadata store
-      mutable ServiceHandle< StoreGateSvc > m_outputMetaStore;
+      ServiceHandle< StoreGateSvc > m_outputMetaStore;
       
       // job options
       std::string m_derivationName;

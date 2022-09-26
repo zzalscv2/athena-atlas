@@ -44,9 +44,9 @@ bool MuonExtrapolationTool::extrapolateAndDecorateTrackParticle(const xAOD::Trac
 {
 
   // decorators used to access or store the information 
-  static SG::AuxElement::Decorator< char > Decorated ("DecoratedPivotEtaPhi");
-  static SG::AuxElement::Decorator< float > Eta ("EtaTriggerPivot");
-  static SG::AuxElement::Decorator< float > Phi ("PhiTriggerPivot");
+  static const SG::AuxElement::Decorator< char > Decorated ("DecoratedPivotEtaPhi");
+  static const SG::AuxElement::Decorator< float > Eta ("EtaTriggerPivot");
+  static const SG::AuxElement::Decorator< float > Phi ("PhiTriggerPivot");
 
   if (! Decorated.isAvailable(*particle) || !Decorated(*particle)){
     // in the athena release, we can run the extrapolation if needed

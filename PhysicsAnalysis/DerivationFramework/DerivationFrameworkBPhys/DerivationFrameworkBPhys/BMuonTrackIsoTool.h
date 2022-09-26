@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
 */
 
 //============================================================================
@@ -51,14 +51,14 @@ namespace DerivationFramework {
     virtual void        copyVals(const MuIsoItem& item);
     virtual void        fill(double isoValue=-2., int nTracks=-1,
 			     const xAOD::Muon* muon=NULL);
-    virtual std::string muIsoName();
-    virtual std::string nTracksName();
-    virtual std::string muLinkName();
+    virtual std::string muIsoName() const;
+    virtual std::string nTracksName() const;
+    virtual std::string muLinkName() const;
     
   public:
-    mutable std::vector<float>  vIsoValues;
-    mutable std::vector<int>    vNTracks;
-    mutable MuonBag             vMuons;
+    std::vector<float>  vIsoValues;
+    std::vector<int>    vNTracks;
+    MuonBag             vMuons;
   }; // MuIsoItem
     
   public: 
