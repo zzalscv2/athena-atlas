@@ -676,9 +676,12 @@ Identifier MmIdHelper::channelID(int stationName, int stationEta, int stationPhi
 }
 Identifier MmIdHelper::channelID(int stationName, int stationEta, int stationPhi, int multilayer, int gasGap, int channel,
                                  bool& isValid) const {
-    const Identifier result = channelID(stationName, stationEta, stationPhi, multilayer, gasGap, channel);
-    isValid = validChannel(result, stationName, stationEta, stationPhi, multilayer, gasGap, channel);
-    return result;
+    try{
+        const Identifier result = channelID(stationName, stationEta, stationPhi, multilayer, gasGap, channel);
+        isValid = validChannel(result, stationName, stationEta, stationPhi, multilayer, gasGap, channel);
+        return result;
+    } catch (const std::out_of_range&) { isValid = false; }
+    return Identifier{0};
 }
 /*******************************************************************************/
 Identifier MmIdHelper::channelID(const std::string& stationNameStr, int stationEta, int stationPhi, int multilayer, int gasGap, int channel,

@@ -693,9 +693,12 @@ Identifier MdtIdHelper::channelID(int stationName, int stationEta, int stationPh
 }
 Identifier MdtIdHelper::channelID(int stationName, int stationEta, int stationPhi, int multilayer, int tubeLayer, int tube,
                                   bool& isValid) const {
-    const Identifier result = channelID(stationName, stationEta, stationPhi, multilayer, tubeLayer, tube);
-    isValid = stationName >= 0 && validChannel(result, stationName, stationEta, stationPhi, multilayer, tubeLayer, tube);
-    return result;
+    try{
+        const Identifier result = channelID(stationName, stationEta, stationPhi, multilayer, tubeLayer, tube);
+        isValid = stationName >= 0 && validChannel(result, stationName, stationEta, stationPhi, multilayer, tubeLayer, tube);
+        return result;
+    } catch (const std::out_of_range&) { isValid = false; }
+    return Identifier{0};
 }
 
 Identifier MdtIdHelper::channelID(const std::string& stationNameStr, int stationEta, int stationPhi, int multilayer, int tubeLayer,
