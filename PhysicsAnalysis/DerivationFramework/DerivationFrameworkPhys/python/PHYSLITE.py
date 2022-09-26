@@ -186,11 +186,11 @@ def PHYSLITEKernelCfg(ConfigFlags, name='PHYSLITEKernel', **kwargs):
 
     # Include, and then set up the tau analysis algorithm sequence:                                                    
     # Commented for now due to use of public tools
-    #from TauAnalysisAlgorithms.TauAnalysisSequence import makeTauAnalysisSequence
-    #tauSequence = makeTauAnalysisSequence( dataType, 'Baseline', shallowViewOutput = False, deepCopyOutput = True )
-    #tauSequence.configure( inputName = 'TauJets', outputName = 'AnalysisTauJets' )
-    #for element in tauSequence.getGaudiConfig2Components():
-    #    acc.addEventAlgo(element,sequenceName=tauSequence.name())
+    from TauAnalysisAlgorithms.TauAnalysisSequence import makeTauAnalysisSequence
+    tauSequence = makeTauAnalysisSequence( dataType, 'Baseline', shallowViewOutput = False, deepCopyOutput = True )
+    tauSequence.configure( inputName = 'TauJets', outputName = 'AnalysisTauJets' )
+    for element in tauSequence.getGaudiConfig2Components():
+        acc.addEventAlgo(element)
 
     # Include, and then set up the jet analysis algorithm sequence:
     jetContainer = 'AntiKt4EMPFlowJets'
