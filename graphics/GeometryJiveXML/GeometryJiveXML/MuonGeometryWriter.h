@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2017 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef JIVEXML_MUONGEOMETRYWRITER
@@ -69,7 +69,14 @@ namespace JiveXML
      * Writes a trapezoid station in XML to a stream.
      * \param out stream where the XML fragment is written to
     */
-    void writeATrd(std::ofstream &out, std::string stationTech, std::string stationName, double zi, double zo, double ri, double ro, double wi, double wo, int eta, std::string phiString, double dphi, double shift, double alpha) const ;
+    void writeATrd(std::ofstream &out,
+                   const std::string& stationTech,
+                   const std::string& stationName,
+                   double zi, double zo,
+                   double ri, double ro,
+                   double wi, double wo, int eta,
+                   const std::string& phiString,
+                   double dphi, double shift, double alpha) const ;
 
 
     /**
