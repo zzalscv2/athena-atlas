@@ -33,7 +33,7 @@ inputfile = {"data": 'ASG_TEST_FILE_DATA',
              "mc":   'ASG_TEST_FILE_MC',
              "afii": 'ASG_TEST_FILE_MC_AFII'}
 
-jetContainer = "AntiKt4EMTopoJets"
+jetContainer = "AntiKt4EMPFlowJets"
 
 if dataType not in ["data", "mc", "afii"] :
     raise ValueError ("invalid data type: " + dataType)

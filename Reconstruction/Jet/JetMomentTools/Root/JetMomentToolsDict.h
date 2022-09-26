@@ -20,6 +20,7 @@
 #include "JetMomentTools/JetTrackSumMomentsTool.h"
 #include "JetMomentTools/JetVertexFractionTool.h"
 #include "JetMomentTools/JetVertexTaggerTool.h"
+#include "JetMomentTools/JetVertexNNTagger.h"
 #include "JetMomentTools/JetWidthTool.h"
 #include "JetMomentTools/JetQGTaggerVariableTool.h"
 #include "JetMomentTools/JetEMScaleMomTool.h"

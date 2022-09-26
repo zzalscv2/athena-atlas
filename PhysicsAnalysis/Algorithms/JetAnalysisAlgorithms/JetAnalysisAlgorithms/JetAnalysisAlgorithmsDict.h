@@ -15,5 +15,6 @@
 #include <JetAnalysisAlgorithms/JetUncertaintiesAlg.h>
 #include <JetAnalysisAlgorithms/JvtEfficiencyAlg.h>
 #include <JetAnalysisAlgorithms/JvtUpdateAlg.h>
+#include <JetAnalysisAlgorithms/JetDecoratorAlg.h>
 
 #endif

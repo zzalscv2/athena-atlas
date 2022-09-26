@@ -144,7 +144,7 @@ def makeJetAnalysisSequence( dataType, jetCollection, postfix = '',
 
 def makeSmallRJetAnalysisSequence( seq, dataType, jetCollection,
                                    jetInput, postfix = '', 
-                                   runJvtUpdate = False, runFJvtUpdate = False,
+                                   runJvtUpdate = False, runNNJvtUpdate = False, runFJvtUpdate = False,
                                    runJvtSelection = True, runFJvtSelection = False,
                                    runJvtEfficiency = True, runFJvtEfficiency = False,
                                    reduction = "Global", JEROption = "Simple"):
@@ -157,6 +157,7 @@ def makeSmallRJetAnalysisSequence( seq, dataType, jetCollection,
         jetInput -- The type of input used, read from the collection name.
         postfix -- String to be added to the end of all public names.
         runJvtUpdate -- Determines whether or not to update JVT on the jets
+        runNNJvtUpdate -- Determines whether or not to update NN JVT on the jets
         runFJvtUpdate -- Determines whether or not to update forward JVT on the jets
         runJvtSelection -- Determines whether or not to run JVT selection on the jets
         runFJvtSelection -- Determines whether or not to run forward JVT selection on the jets
@@ -175,6 +176,9 @@ def makeSmallRJetAnalysisSequence( seq, dataType, jetCollection,
     if jetInput not in ["EMTopo", "EMPFlow"]:
         raise ValueError(
             "Unsupported input type '{0}' for R=0.4 jets!".format(jetInput) )
+
+    if runNNJvtUpdate:
+        assert jetInput=="EMPFlow", "NN JVT only defined for PFlow jets"
 
     # Prepare the jet calibration algorithm
     alg = createAlgorithm( 'CP::JetCalibrationAlg', 'JetCalibrationAlg'+postfix )
@@ -229,7 +233,20 @@ def makeSmallRJetAnalysisSequence( seq, dataType, jetCollection,
         alg = createAlgorithm( 'CP::JvtUpdateAlg', 'JvtUpdateAlg'+postfix )
         addPrivateTool( alg, 'jvtTool', 'JetVertexTaggerTool' )
         alg.jvtTool.JetContainer = jetCollection
+        alg.jvtTool.SuppressInputDependence=True
+
         seq.append( alg, inputPropName = 'jets', outputPropName = 'jetsOut', stageName = 'selection' )
+
+    if runNNJvtUpdate :
+        alg = createAlgorithm( 'CP::JetDecoratorAlg', 'NNJvtUpdateAlg'+postfix )
+        addPrivateTool( alg, 'decorator', 'JetPileupTag::JetVertexNNTagger' )
+        # Set this actually to the *output* collection
+        alg.decorator.JetContainer = jetCollection
+        alg.decorator.SuppressInputDependence=True
+        alg.decorator.SuppressOutputDependence=True
+
+        seq.append(alg, inputPropName = 'jets', outputPropName = 'jetsOut', stageName = 'selection')
+        seq.addDecorAwareTool(tool=alg.decorator,parent=alg,outputPropName='JetContainer')
 
     if runFJvtUpdate :
         alg = createAlgorithm( 'CP::JetModifierAlg', 'JetModifierAlg'+postfix )
@@ -240,6 +257,7 @@ def makeSmallRJetAnalysisSequence( seq, dataType, jetCollection,
         alg.modifierTool.UseTightOP = 1 # 1 = Tight, 0 = Loose
         alg.modifierTool.EtaThresh = 2.5 # Eta dividing central from forward jets
         alg.modifierTool.ForwardMaxPt = 120.0e3 #Max Pt to define fwdJets for JVT
+        alg.modifierTool.JetContainer = jetCollection
         seq.append( alg, inputPropName = 'jets', outputPropName = 'jetsOut', stageName = 'selection' )
         pass
 

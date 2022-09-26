@@ -15,6 +15,7 @@
 <class name="JetTrackSumMomentsTool"/>
 <class name="JetVertexFractionTool"/>
 <class name="JetVertexTaggerTool"/>
+<class name="JetPileupTag::JetVertexNNTagger"/>
 <class name="JetWidthTool"/>
 <class name="JetQGTaggerVariableTool"/>
 <class name="JetEMScaleMomTool"/>

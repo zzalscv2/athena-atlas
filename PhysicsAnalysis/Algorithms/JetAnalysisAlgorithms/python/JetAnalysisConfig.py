@@ -61,6 +61,7 @@ class SmallRJetAnalysisConfig (ConfigBlock) :
         if self.postfix != '' and self.postfix[0] != '_' :
             self.postfix = '_' + self.postfix
         self.runJvtUpdate = False
+        self.runNNJvtUpdate = False
         self.runFJvtUpdate = False
         self.runJvtSelection = True
         self.runFJvtSelection = False
@@ -140,6 +141,17 @@ class SmallRJetAnalysisConfig (ConfigBlock) :
             alg.jets = config.readName (self.containerName)
             alg.jetsOut = config.copyName (self.containerName)
             alg.preselection = config.getPreselection (self.containerName, '')
+
+        if self.runNNJvtUpdate:
+            assert self.jetInput=="EMPFlow", "NN JVT only defined for PFlow jets"
+            alg = config.createAlgorithm( 'CP::JetDecoratorAlg', 'NNJvtUpdateAlg'+self.postfix )
+            config.addPrivateTool( 'decorator', 'JetPileupTag::JetVertexNNTagger' )
+            # Set this actually to the *output* collection
+            alg.jets = config.readName (self.containerName)
+            alg.jetsOut = config.copyName (self.containerName)
+            alg.decorator.JetContainer = alg.jetsOut
+            alg.decorator.SuppressInputDependence=True
+            alg.decorator.SuppressOutputDependence=True
 
         if self.runFJvtUpdate :
             alg = config.createAlgorithm( 'CP::JetModifierAlg', 'JetModifierAlg'+self.postfix )
@@ -422,7 +434,7 @@ def makeJetAnalysisConfig( seq, containerName, jetCollection, postfix = '',
 
 def makeSmallRJetAnalysisConfig( seq, containerName, jetCollection,
                                    jetInput, postfix = '',
-                                   runJvtUpdate = False, runFJvtUpdate = False,
+                                   runJvtUpdate = False, runNNJvtUpdate = False, runFJvtUpdate = False,
                                    runJvtSelection = True, runFJvtSelection = False,
                                    runJvtEfficiency = True, runFJvtEfficiency = False,
                                    reduction = "Global", JEROption = "Simple"):
@@ -434,6 +446,7 @@ def makeSmallRJetAnalysisConfig( seq, containerName, jetCollection,
         jetInput -- The type of input used, read from the collection name.
         postfix -- String to be added to the end of all public names.
         runJvtUpdate -- Determines whether or not to update JVT on the jets
+        runNNJvtUpdate -- Determines whether or not to update NN JVT on the jets
         runFJvtUpdate -- Determines whether or not to update forward JVT on the jets
         runJvtSelection -- Determines whether or not to run JVT selection on the jets
         runFJvtSelection -- Determines whether or not to run forward JVT selection on the jets
@@ -450,6 +463,7 @@ def makeSmallRJetAnalysisConfig( seq, containerName, jetCollection,
 
     config = SmallRJetAnalysisConfig (containerName, jetCollection, jetInput, postfix)
     config.runJvtUpdate = runJvtUpdate
+    config.runNNJvtUpdate = runNNJvtUpdate
     config.runFJvtUpdate = runFJvtUpdate
     config.runJvtSelection = runJvtSelection
     config.runFJvtSelection = runFJvtSelection

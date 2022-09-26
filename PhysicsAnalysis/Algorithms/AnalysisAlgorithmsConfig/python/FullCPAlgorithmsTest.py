@@ -74,7 +74,9 @@ def makeSequenceOld (dataType, algSeq, vars, forCompare) :
     # Include, and then set up the jet analysis algorithm sequence:
     from JetAnalysisAlgorithms.JetAnalysisSequence import makeJetAnalysisSequence
     jetContainer = 'AntiKt4EMPFlowJets'
-    jetSequence = makeJetAnalysisSequence( dataType, jetContainer, enableCutflow=True, enableKinematicHistograms=True, shallowViewOutput = False )
+    jetSequence = makeJetAnalysisSequence( dataType, jetContainer,
+                                           runJvtUpdate = True, runNNJvtUpdate = True,
+                                           enableCutflow=True, enableKinematicHistograms=True, shallowViewOutput = False )
 
     from FTagAnalysisAlgorithms.FTagAnalysisSequence import makeFTagAnalysisSequence
     makeFTagAnalysisSequence( jetSequence, dataType, jetContainer, noEfficiency = True, legacyRecommendations = True,
@@ -493,7 +495,7 @@ def makeSequenceBlocks (dataType, algSeq, vars, forCompare) :
     # Include, and then set up the jet analysis algorithm sequence:
     from JetAnalysisAlgorithms.JetAnalysisConfig import makeJetAnalysisConfig
     jetContainer = 'AntiKt4EMPFlowJets'
-    makeJetAnalysisConfig( configSeq, 'AnaJets', jetContainer )
+    makeJetAnalysisConfig( configSeq, 'AnaJets', jetContainer, runJvtUpdate = True, runNNJvtUpdate = True )
     vars += ['OutJets_%SYS%.pt  -> jet_pt_%SYS%',
              'OutJets_NOSYS.phi -> jet_phi',
              'OutJets_NOSYS.eta -> jet_eta', ]

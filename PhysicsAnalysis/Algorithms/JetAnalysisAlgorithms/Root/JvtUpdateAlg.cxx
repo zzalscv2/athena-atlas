@@ -58,6 +58,8 @@ namespace CP
       ANA_CHECK (m_jetHandle.getCopy (jets, sys));
       for (xAOD::Jet *jet : *jets)
       {
+        // Set default value for jets that fail preselection
+        (*m_decorationAccessor) (*jet) = -1.;
         if (m_preselection.getBool (*jet, sys))
         {
           // manually update jvt decoration using the tool

@@ -15,6 +15,7 @@
 #include "JetMomentTools/JetTrackSumMomentsTool.h"
 #include "JetMomentTools/JetVertexFractionTool.h"
 #include "JetMomentTools/JetVertexTaggerTool.h"
+#include "JetMomentTools/JetVertexNNTagger.h"
 #include "JetMomentTools/JetWidthTool.h"
 #include "JetMomentTools/JetCaloEnergies.h"
 #include "JetMomentTools/JetQGTaggerVariableTool.h"
@@ -38,6 +39,7 @@
 #pragma link C++ class JetTrackSumMomentsTool+;
 #pragma link C++ class JetVertexFractionTool+;
 #pragma link C++ class JetVertexTaggerTool+;
+#pragma link C++ class JetPileupTag::JetVertexNNTagger+;
 #pragma link C++ class JetWidthTool+;
 #pragma link C++ class JetCaloEnergies+;
 #pragma link C++ class JetQGTaggerVariableTool+;
