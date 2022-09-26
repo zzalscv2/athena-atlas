@@ -181,7 +181,7 @@ int main ATLAS_NOT_THREAD_SAFE (int argc, char *argv[])
 	if (checkevents) fe.check_tree();
 	totalSize+=fe.readable_payload_size_word()*4;
 	
-	const uint32_t eventNo=fe.global_id();
+	const uint64_t eventNo=fe.global_id();
 	const uint32_t runNo=fe.run_no();
 	const time_t sec=fe.bc_time_seconds();
 	if (listevents) {
