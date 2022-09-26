@@ -226,6 +226,9 @@ def L1TriggerByteStreamDecoderCfg(flags, returnEDM=False):
                                                          DecoderTools=decoderTools,
                                                          MaybeMissingROBs=maybeMissingRobs)
 
+  from TrigT1ResultByteStream.TrigT1ResultByteStreamMonitoring import L1TriggerByteStreamDecoderMonitoring
+  decoderAlg.MonTool = L1TriggerByteStreamDecoderMonitoring(decoderAlg.getName(), flags, decoderTools)
+
   acc = ComponentAccumulator()
   acc.addEventAlgo(decoderAlg, primary=True)
 
