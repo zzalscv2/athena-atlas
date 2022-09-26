@@ -902,7 +902,8 @@ MuonEDMPrinterTool::printData(const Trk::MeasurementBase& measurement) const
     double h_phi   = measurement.globalPosition().phi();
     double h_theta = measurement.globalPosition().theta();
     double error = std::sqrt(measurement.localCovariance()(0, 0));
-    double local_pos = measurement.localParameters()[Trk::locX];
+    const Trk::LocalParameters& lpars = measurement.localParameters();
+    double local_pos =  lpars.contains(Trk::locX) ? lpars[Trk::locX] : (lpars.contains(Trk::locY) ? lpars[Trk::locY] : 0.);
     sout << "r " << std::fixed << std::setprecision(0) << std::setw(5) << h_r << " z " << std::fixed
          << std::setprecision(0) << std::setw(5) << h_z << " phi " << std::fixed << std::setprecision(3) << std::setw(4)
          << h_phi << " theta " << std::fixed << std::setprecision(3) << std::setw(4) << h_theta
