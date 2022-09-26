@@ -2,6 +2,7 @@
 # Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
 #
 from AthenaMonitoringKernel.GenericMonitoringTool import GenericMonitoringTool
+from libpyeformat_helper import SourceIdentifier, SubDetector
 
 def L1MuonBSConverterMonitoring(name, flags, encoder=False):
     tool = GenericMonitoringTool('MonTool')
@@ -67,3 +68,65 @@ def L1MuonBSConverterMonitoring(name, flags, encoder=False):
                                 xbins=50, xmin=0, xmax=50)
 
     return tool
+
+def L1TriggerByteStreamDecoderMonitoring(name, flags, decoderTools):
+    monTool = GenericMonitoringTool('MonTool')
+    monTool.HistPath = f'HLTFramework/L1BSConverters/{name}'
+
+    monTool.defineHistogram('TIME_execute', path='EXPERT', type='TH1F',
+                            title='Time of the alg execute() method;Time [ms];N events',
+                            xbins=100, xmin=0, xmax=100)
+
+    # In hindsight, it would be better for RoIBResult decoder to have the same property interface as the other tools
+    def getRobIds(decoder):
+        if 'RoIBResult' not in decoder.getName():
+            return decoder.ROBIDs
+        robIds = []
+        robIds += [int(SourceIdentifier(SubDetector.TDAQ_CTP, decoder.CTPModuleId))] if decoder.CTPModuleId!=0xff else []
+        robIds += [int(SourceIdentifier(SubDetector.TDAQ_MUON_CTP_INTERFACE, decoder.MUCTPIModuleId))] if decoder.MUCTPIModuleId!=0xff else []
+        robIds += [int(SourceIdentifier(SubDetector.TDAQ_CALO_CLUSTER_PROC_ROI, modId)) for modId in decoder.EMModuleIds]
+        robIds += [int(SourceIdentifier(SubDetector.TDAQ_CALO_JET_PROC_ROI, modId)) for modId in decoder.JetModuleIds]
+        robIds += [int(SourceIdentifier(SubDetector.TDAQ_CALO_TOPO_PROC, modId)) for modId in decoder.L1TopoModuleIds]
+        return robIds
+
+    allRobIds = []
+    for decoder in decoderTools:
+        decoderName = decoder.getName()
+        allRobIds += getRobIds(decoder)
+        monTool.defineHistogram(f'TIME_prepareROBs_{decoderName}', path='EXPERT', type='TH1F',
+                                title=f'Time of preparing ROB inputs for {decoderName};Time [ms];N events',
+                                xbins=100, xmin=0, xmax=100)
+        monTool.defineHistogram(f'TIME_convert_{decoderName}', path='EXPERT', type='TH1F',
+                                title=f'Time of the convertFromBS() method of {decoderName};Time [ms];N events',
+                                xbins=100, xmin=0, xmax=100)
+        monTool.defineHistogram(f'LumiBlock,MissingROBFraction_{decoderName};MissingROBFraction_{decoderName}', path='EXPERT', type='TProfile',
+                                title=f'Fraction of missing ROBs requested by {decoderName} vs LBN;LumiBlock;N missing ROBs / N requested ROBs',
+                                xbins=100, xmin=0, xmax=100, opt='kCanRebin')
+        monTool.defineHistogram(f'LumiBlock,CorruptedROBFraction_{decoderName};CorruptedROBFraction_{decoderName}', path='EXPERT', type='TProfile',
+                                title=f'Fraction of corrupted ROBs requested by {decoderName} vs LBN;LumiBlock;N corrupted ROBs / N retrieved ROBs',
+                                xbins=100, xmin=0, xmax=100, opt='kCanRebin')
+        monTool.defineHistogram(f'LumiBlock,ErroneousROBFraction_{decoderName};ErroneousROBFraction_{decoderName}', path='EXPERT', type='TProfile',
+                                title=f'Fraction of erroneous ROBs requested by {decoderName} vs LBN;LumiBlock;N erroneous ROBs / N retrieved ROBs',
+                                xbins=100, xmin=0, xmax=100, opt='kCanRebin')
+
+    robIdLabels = [hex(id) for id in sorted(list(set(allRobIds)))]
+    monTool.defineHistogram('MissingROB', path='EXPERT', type='TH1F',
+                            title='Count of missing obligatory ROBs;ROB ID;N events with ROB missing',
+                            xbins=len(robIdLabels), xmin=0, xmax=len(robIdLabels), xlabels=robIdLabels)
+    monTool.defineHistogram('MissingROBAllowed', path='EXPERT', type='TH1F',
+                            title='Count of missing optional ROBs;ROB ID;N events with ROB missing',
+                            xbins=len(robIdLabels), xmin=0, xmax=len(robIdLabels), xlabels=robIdLabels)
+    monTool.defineHistogram('CorruptedROB', path='EXPERT', type='TH1F',
+                            title='Count of corrupted obligatory ROBs;ROB ID;N events with ROB errors',
+                            xbins=len(robIdLabels), xmin=0, xmax=len(robIdLabels), xlabels=robIdLabels)
+    monTool.defineHistogram('CorruptedROBAllowed', path='EXPERT', type='TH1F',
+                            title='Count of corrupted optional ROBs;ROB ID;N events with ROB errors',
+                            xbins=len(robIdLabels), xmin=0, xmax=len(robIdLabels), xlabels=robIdLabels)
+    monTool.defineHistogram('ErroneousROB', path='EXPERT', type='TH1F',
+                            title='Count of erroneous obligatory ROBs;ROB ID;N events with ROB errors',
+                            xbins=len(robIdLabels), xmin=0, xmax=len(robIdLabels), xlabels=robIdLabels)
+    monTool.defineHistogram('ErroneousROBAllowed', path='EXPERT', type='TH1F',
+                            title='Count of erroneous optional ROBs;ROB ID;N events with ROB errors',
+                            xbins=len(robIdLabels), xmin=0, xmax=len(robIdLabels), xlabels=robIdLabels)
+
+    return monTool
