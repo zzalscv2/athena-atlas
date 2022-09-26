@@ -96,7 +96,7 @@ bool TrigMuonEFHypoTool::decideOnSingleObject(TrigMuonEFHypoTool::MuonEFInfo& in
       //Apply hypo cuts
       float absEta = std::abs(tr->eta());
       float threshold = 0;
-      for (std::vector<float>::size_type k=0; k<m_bins[0]; ++k) {
+      for (std::vector<float>::size_type k=0; k<m_bins[cutIndex]; ++k) {
         if (absEta > m_ptBins[cutIndex][k] && absEta <= m_ptBins[cutIndex][k+1]) threshold = m_ptThresholds[cutIndex][k];
       }
       if (std::abs(tr->pt())/Gaudi::Units::GeV > (threshold/Gaudi::Units::GeV)){

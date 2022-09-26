@@ -3,6 +3,22 @@ from AthenaConfiguration.AthConfigFlags import AthConfigFlags
 from AthenaConfiguration.Enums import Format, LHCPeriod
 
 
+_all_domains = [
+    "Calo", "Tracking",
+    "HGTDExtension",
+    "CaloExtension",
+    "Muon", "CombinedMuon",
+    "Egamma",
+    "TrackCellAssociation",
+    "PFlow", "Jet", "BTagging",
+    "Tau",
+    "Met",
+    "CaloRinger",
+    "HI",
+    "PostProcessing",
+]
+
+
 def createRecoConfigFlags():
     """Return an AthConfigFlags object with required flags"""
     flags = AthConfigFlags()
@@ -74,6 +90,49 @@ def createRecoConfigFlags():
                   prevFlags.Reco.EnableTracking and
                   prevFlags.Reco.EnableCombinedMuon)
     return flags
+
+
+def printRecoFlags(flags):
+    # setup logging
+    from AthenaCommon.Logging import logging
+    log = logging.getLogger('RecoSteering')
+
+    # load flags
+    flags._loadDynaFlags('Detector')
+    flags._loadDynaFlags('Reco')
+
+    # generate common formatting string
+    item_len = 7
+    format_common = f'%-{item_len}s'
+
+    domain_len = 7
+    for d in _all_domains:
+        domain_len = max(domain_len, len(d) + 2)
+
+    enabled = []
+    for d in _all_domains:
+        if flags.hasFlag(f'Detector.Enable{d}'):
+            name = f'Detector.Enable{d}'
+        elif flags.hasFlag(f'Reco.Enable{d}'):
+            name = f'Reco.Enable{d}'
+        else:
+            raise RuntimeError(f'Unknown reconstruction domain {d}')
+
+        if flags(name) is not False:
+            enabled.append('ON')
+        else:
+            enabled.append('--')
+
+    format_header = f'%{domain_len}s   ' + format_common
+    format = f'%{domain_len}s : ' + format_common
+    data = [_all_domains, enabled]
+    data = list(map(list, zip(*data)))
+
+    # print header rows
+    log.info(format_header, *(['', 'Enbl.']))
+    # print data
+    for row in data:
+        log.info(format, *row)
 
 
 def recoRunArgsToFlags(runArgs, flags):

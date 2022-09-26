@@ -239,7 +239,6 @@ namespace ITk
 
     /// @name Properties, which are not used in this implementation of ITk::SiSpacePointsSeedMaker class
     //@{
-    BooleanProperty m_dbm{this, "useDBM", false};
     UnsignedIntegerProperty m_maxNumberVertices{this, "maxNumberVertices", 99};
     FloatProperty m_r1min{this, "minRadius1", 0.};
     FloatProperty m_r1max{this, "maxRadius1", 600.};

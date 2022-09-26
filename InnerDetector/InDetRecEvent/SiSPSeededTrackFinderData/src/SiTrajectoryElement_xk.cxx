@@ -140,13 +140,6 @@ bool InDet::SiTrajectoryElement_xk::firstTrajectorElement
     cv[9] = cv[5];
   }
 
-  /// update starting cov for DBM case
-  if(m_detelement->isDBM()) {
-
-    double tn = tan(startingPatternPars.parameters()[3]);
-    cv[ 5]    = .0001           ;
-    cv[14]    = (tn*tn*1.e-6)   ;
-  } 
   /// write our covariance into the parameters
   m_parametersPredForward.setCovariance(cv);
   /// and initiate our state. parametersUF will be constrained 

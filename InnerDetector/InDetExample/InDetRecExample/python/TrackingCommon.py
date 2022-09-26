@@ -131,8 +131,6 @@ def getInDetNewTrackingCuts() :
     from InDetRecExample.InDetJobProperties import InDetFlags
     if InDetFlags.doBLS():
         InDetNewTrackingCuts      = ConfiguredNewTrackingCuts("BLS")
-    elif InDetFlags.doDBMstandalone():
-        InDetNewTrackingCuts      = ConfiguredNewTrackingCuts("DBM")
     elif InDetFlags.doVtxLumi():
         InDetNewTrackingCuts      = ConfiguredNewTrackingCuts("VtxLumi")
     elif InDetFlags.doVtxBeamSpot():
@@ -361,14 +359,14 @@ def getInDetPixelClusterOnTrackToolBase(name, **kwargs) :
     from InDetRecExample.InDetJobProperties import InDetFlags
     from SiClusterOnTrackTool.SiClusterOnTrackToolConf import InDet__PixelClusterOnTrackTool
 
-    if InDetFlags.doCosmics() or InDetFlags.doDBMstandalone():
+    if InDetFlags.doCosmics():
         kwargs = setDefaults(kwargs,
                              ErrorStrategy    = 0,
                              PositionStrategy = 0)
 
     from InDetRecExample.InDetKeys import InDetKeys
     kwargs = setDefaults(kwargs,
-                         DisableDistortions       = (InDetFlags.doFatras() or InDetFlags.doDBMstandalone()),
+                         DisableDistortions       = (InDetFlags.doFatras()),
                          applyNNcorrection        = ( InDetFlags.doPixelClusterSplitting() and
                                                       InDetFlags.pixelClusterSplittingType() == 'NeuralNet'),
                          NNIBLcorrection          = ( InDetFlags.doPixelClusterSplitting() and
@@ -415,15 +413,6 @@ def getInDetPixelClusterOnTrackToolDigital(name='InDetPixelClusterOnTrackToolDig
                              SplitClusterAmbiguityMap = "")
 
     return getInDetPixelClusterOnTrackToolBase(name=name, **kwargs)
-
-def getInDetPixelClusterOnTrackToolDBM(name='InDetPixelClusterOnTrackToolDBM', **kwargs) :
-    return getInDetPixelClusterOnTrackToolBase(name=name, **setDefaults(kwargs,
-                                                                        DisableDistortions = True,
-                                                                        applyNNcorrection  = False,
-                                                                        NNIBLcorrection    = False,
-                                                                        RunningTIDE_Ambi   = False,
-                                                                        ErrorStrategy      = 0,
-                                                                        PositionStrategy   = 0))
 
 def getInDetBroadPixelClusterOnTrackTool(name='InDetBroadPixelClusterOnTrackTool', **kwargs) :
     return getInDetPixelClusterOnTrackTool(name=name, **setDefaults(kwargs, ErrorStrategy  = 0))
@@ -509,8 +498,8 @@ def getInDetRotCreator(name='InDetRotCreator', **kwargs) :
     for an_arg in  strip_args:
         kwargs.pop(an_arg,None)
     from InDetRecExample.InDetJobProperties import InDetFlags
-    use_broad_cluster_pix = InDetFlags.useBroadPixClusterErrors() and (not InDetFlags.doDBMstandalone())
-    use_broad_cluster_sct = InDetFlags.useBroadSCTClusterErrors() and (not InDetFlags.doDBMstandalone())
+    use_broad_cluster_pix = InDetFlags.useBroadPixClusterErrors()
+    use_broad_cluster_sct = InDetFlags.useBroadSCTClusterErrors()
 
     if 'ToolPixelCluster' not in kwargs :
         if use_broad_cluster_pix :
@@ -540,20 +529,6 @@ def getInDetRotCreatorPattern(name='InDetRotCreatorPattern', **kwargs) :
         pix_cluster_on_track_args = copyArgs(kwargs,['SplitClusterMapExtension','ClusterSplitProbabilityName','nameSuffix'])
         kwargs = setDefaults(kwargs,
                              ToolPixelCluster = getInDetPixelClusterOnTrackToolPattern(**pix_cluster_on_track_args))
-    return getInDetRotCreator(name=name, **kwargs)
-
-
-def getInDetRotCreatorDBM(name='InDetRotCreatorDBM', **kwargs) :
-    if 'ToolPixelCluster' not in kwargs :
-        pix_cluster_on_track_args = copyArgs(kwargs,['SplitClusterMapExtension','ClusterSplitProbabilityName','nameSuffix'])
-        from InDetRecExample.InDetJobProperties import InDetFlags
-        from AthenaCommon.DetFlags              import DetFlags
-        if InDetFlags.loadRotCreator() and DetFlags.haveRIO.pixel_on():
-            kwargs = setDefaults(kwargs,
-                                 ToolPixelCluster = getInDetPixelClusterOnTrackToolDBM(**pix_cluster_on_track_args))
-        else :
-            kwargs = setDefaults(kwargs,
-                                 ToolPixelCluster = getInDetPixelClusterOnTrackTool(**pix_cluster_on_track_args))
     return getInDetRotCreator(name=name, **kwargs)
 
 def getInDetRotCreatorDigital(name='InDetRotCreatorDigital', **kwargs) :
@@ -1697,8 +1672,6 @@ def combinedClusterSplitProbName() :
     if ('InDetNewTrackingCuts' not in dir()):
       if InDetFlags.doBLS():
         InDetNewTrackingCuts      = ConfiguredNewTrackingCuts("BLS")
-      elif InDetFlags.doDBMstandalone():
-        InDetNewTrackingCuts      = ConfiguredNewTrackingCuts("DBM")
       elif InDetFlags.doVtxLumi():
         InDetNewTrackingCuts      = ConfiguredNewTrackingCuts("VtxLumi")
       elif InDetFlags.doVtxBeamSpot():
@@ -1772,8 +1745,6 @@ def combinedClusterSplitProbName() :
     if InDetFlags.doNewTrackingPattern() or InDetFlags.doBeamHalo():
       if InDetFlags.useExistingTracksAsInput():
           pass # CombinedInDetClusterSplitProbContainer = ClusterSplitProbContainer # @TODO handle cluster splitting probability ?
-      if InDetFlags.doDBMstandalone():
-          CombinedInDetClusterSplitProbContainer=''
 
   return CombinedInDetClusterSplitProbContainer if hasSplitProb(CombinedInDetClusterSplitProbContainer) else ''
 

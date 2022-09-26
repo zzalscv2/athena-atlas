@@ -106,6 +106,7 @@ def L1CaloFEXSimCfg(flags):
         check(jFEX.jFEXSysSimTool.Key_jFexTauOutputContainer)
         check(jFEX.jFEXSysSimTool.Key_jFexSumETOutputContainer)
         check(jFEX.jFEXSysSimTool.Key_jFexMETOutputContainer)
+        check(jFEX.jFEXSysSimTool.Key_jFexFwdElOutputContainer)
         check(gFEX.gFEXSysSimTool.Key_gFexSRJetOutputContainer)
         check(gFEX.gFEXSysSimTool.Key_gFexLRJetOutputContainer)
         check(gFEX.gFEXSysSimTool.Key_gFexRhoOutputContainer)
@@ -113,6 +114,47 @@ def L1CaloFEXSimCfg(flags):
         check(gFEX.gFEXSysSimTool.Key_gMETComponentsJwojOutputContainer)
         check(gFEX.gFEXSysSimTool.Key_gMHTComponentsJwojOutputContainer)
         check(gFEX.gFEXSysSimTool.Key_gMSTComponentsJwojOutputContainer)
+        check(gFEX.gFEXSysSimTool.Key_gMETComponentsNoiseCutOutputContainer)
+        check(gFEX.gFEXSysSimTool.Key_gMETComponentsRmsOutputContainer)
+        check(gFEX.gFEXSysSimTool.Key_gScalarENoiseCutOutputContainer)
+        check(gFEX.gFEXSysSimTool.Key_gScalarERmsOutputContainer)
+    else:
+        # Rename outputs for monitoring resimulation to avoid clash with standard SG keys
+        def getSimHandle(key):
+            """
+            Add 'Sim' to the standard handle path
+            """
+            keyPath = key.path()
+            keyPath += "Sim"
+            key.Path = keyPath
+            return key
+
+        eFEX.eFEXSysSimTool.Key_eFexEMOutputContainer=getSimHandle(eFEX.eFEXSysSimTool.Key_eFexEMOutputContainer)
+        eFEX.eFEXSysSimTool.Key_eFexTauOutputContainer=getSimHandle(eFEX.eFEXSysSimTool.Key_eFexTauOutputContainer)
+        eFEX.eFEXSysSimTool.Key_eFexEMxTOBOutputContainer=getSimHandle(eFEX.eFEXSysSimTool.Key_eFexEMxTOBOutputContainer)
+        eFEX.eFEXSysSimTool.Key_eFexTauxTOBOutputContainer=getSimHandle(eFEX.eFEXSysSimTool.Key_eFexTauxTOBOutputContainer)
+        jFEX.jFEXSysSimTool.Key_jFexSRJetOutputContainer=getSimHandle(jFEX.jFEXSysSimTool.Key_jFexSRJetOutputContainer)
+        jFEX.jFEXSysSimTool.Key_jFexLRJetOutputContainer=getSimHandle(jFEX.jFEXSysSimTool.Key_jFexLRJetOutputContainer)
+        jFEX.jFEXSysSimTool.Key_jFexTauOutputContainer=getSimHandle(jFEX.jFEXSysSimTool.Key_jFexTauOutputContainer)
+        jFEX.jFEXSysSimTool.Key_jFexSumETOutputContainer=getSimHandle(jFEX.jFEXSysSimTool.Key_jFexSumETOutputContainer)
+        jFEX.jFEXSysSimTool.Key_jFexMETOutputContainer=getSimHandle(jFEX.jFEXSysSimTool.Key_jFexMETOutputContainer)
+        jFEX.jFEXSysSimTool.Key_jFexFwdElOutputContainer=getSimHandle(jFEX.jFEXSysSimTool.Key_jFexFwdElOutputContainer)
+        gFEX.gFEXSysSimTool.Key_gFexSRJetOutputContainer=getSimHandle(gFEX.gFEXSysSimTool.Key_gFexSRJetOutputContainer)
+        gFEX.gFEXSysSimTool.Key_gFexLRJetOutputContainer=getSimHandle(gFEX.gFEXSysSimTool.Key_gFexLRJetOutputContainer)
+        gFEX.gFEXSysSimTool.Key_gFexRhoOutputContainer=getSimHandle(gFEX.gFEXSysSimTool.Key_gFexRhoOutputContainer)
+        gFEX.gFEXSysSimTool.Key_gScalarEJwojOutputContainer=getSimHandle(gFEX.gFEXSysSimTool.Key_gScalarEJwojOutputContainer)
+        gFEX.gFEXSysSimTool.Key_gMETComponentsJwojOutputContainer=getSimHandle(gFEX.gFEXSysSimTool.Key_gMETComponentsJwojOutputContainer)
+        gFEX.gFEXSysSimTool.Key_gMHTComponentsJwojOutputContainer=getSimHandle(gFEX.gFEXSysSimTool.Key_gMHTComponentsJwojOutputContainer)
+        gFEX.gFEXSysSimTool.Key_gMSTComponentsJwojOutputContainer=getSimHandle(gFEX.gFEXSysSimTool.Key_gMSTComponentsJwojOutputContainer)
+        gFEX.gFEXSysSimTool.Key_gMETComponentsNoiseCutOutputContainer=getSimHandle(gFEX.gFEXSysSimTool.Key_gMETComponentsNoiseCutOutputContainer)
+        gFEX.gFEXSysSimTool.Key_gMETComponentsRmsOutputContainer=getSimHandle(gFEX.gFEXSysSimTool.Key_gMETComponentsRmsOutputContainer)
+        gFEX.gFEXSysSimTool.Key_gScalarENoiseCutOutputContainer=getSimHandle(gFEX.gFEXSysSimTool.Key_gScalarENoiseCutOutputContainer)
+        gFEX.gFEXSysSimTool.Key_gScalarERmsOutputContainer=getSimHandle(gFEX.gFEXSysSimTool.Key_gScalarERmsOutputContainer)
+        # set jFEX input containers
+        jFEX.myEDMSR=jFEX.jFEXSysSimTool.Key_jFexSRJetOutputContainer
+        jFEX.myEDMLR=jFEX.jFEXSysSimTool.Key_jFexLRJetOutputContainer
+        jFEX.myEDMTau=jFEX.jFEXSysSimTool.Key_jFexTauOutputContainer
+        jFEX.myEDMFwdEl=jFEX.jFEXSysSimTool.Key_jFexFwdElOutputContainer
 
     return acc
 
@@ -163,8 +205,8 @@ if __name__ == '__main__':
         flags.GeoModel.AtlasVersion = 'ATLAS-R3S-2021-02-00-00'
 
     # Enable only calo for this test
-    from AthenaConfiguration.DetectorConfigFlags import setupDetectorsFromList
-    setupDetectorsFromList(flags,['LAr','Tile','MBTS'],True)
+    from AthenaConfiguration.DetectorConfigFlags import setupDetectorFlags
+    setupDetectorFlags(flags, ['LAr','Tile','MBTS'], toggle_geometry=True)
 
     flags.lock()
 

@@ -32,9 +32,6 @@ def SiSPSeededTrackFinderCfg(flags, name="InDetSiSpTrackFinder", **kwargs) :
     if flags.InDet.Tracking.ActivePass.extension == "Forward":
         kwargs.setdefault("useZvertexTool", flags.Reco.EnableHI) # For heavy-ion
         kwargs.setdefault("useZBoundFinding", False)
-    elif flags.InDet.Tracking.ActivePass.extension == "DBM":
-        kwargs.setdefault("useZvertexTool", False)
-        kwargs.setdefault("useZBoundFinding", False)
     else:
         kwargs.setdefault("useZvertexTool", flags.Reco.EnableHI) # For heavy-ion
         kwargs.setdefault("useZBoundFinding", flags.InDet.Tracking.ActivePass.doZBoundary)

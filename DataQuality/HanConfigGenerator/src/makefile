@@ -5,6 +5,8 @@ ROOTLIBS   = $(shell root-config --libs)
 
 SOURCES = hcg.cxx addnode.cxx
 
+INSTALLDIR=$(WorkDir_DIR)/bin
+
 # install : hcg
 # 	cp hcg $(HOME)/bin 
 
@@ -17,3 +19,5 @@ archive :  $(SOURCES) node.h addnode.h simpletimer.h spacer.h makefile README
 install : hcg
 	cp hcg $(HOME)/bin
 
+ginstall : install
+	cp hcg $(INSTALLDIR)

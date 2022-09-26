@@ -7,7 +7,6 @@ import json
 import os
 
 from .ConfigHelpers import AlgConfig
-from .HLTInputConfig import HLTInputConfigRegistry
 from ..Menu.SignatureDicts import METChainParts
 import GaudiKernel.SystemOfUnits as Units
 import TrigEFMissingET.PUClassification as PUClassification
@@ -259,6 +258,10 @@ class NNHLTConfig(AlgConfig):
                 met = dct2["name"].removeprefix("HLT_MET_").partition(".")[0]
                 if met not in self.inputs:
                     self.inputs.append(met)
+
+        
+        from .HLTInputConfig import HLTInputConfigRegistry
+        
         super().__init__(inputs=self.inputs, inputRegistry=HLTInputConfigRegistry(), **recoDict)
 
     def make_fex_accumulator(self, flags, name, inputs):

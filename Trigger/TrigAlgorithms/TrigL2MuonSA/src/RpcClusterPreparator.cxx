@@ -71,12 +71,13 @@ int TrigL2MuonSA::RpcClusterPreparator::buildPatterns(const bool doMultiMuon,
   float dynamic_add = 0.02;
   if(doMultiMuon){
     ATH_MSG_DEBUG("# dynamic search window of RPC");
-    m_recRPCRoiTool->roiData( p_roids->roiWord() );
     double RoiPhiMin(0);
     double RoiPhiMax(0);
     double RoiEtaMin(0);
     double RoiEtaMax(0);
-    m_recRPCRoiTool->RoIsize(p_roids->roiWord(), RoiEtaMin, RoiEtaMax, RoiPhiMin, RoiPhiMax);
+    if( !m_recRPCRoiTool->RoIsize(p_roids->roiWord(), RoiEtaMin, RoiEtaMax, RoiPhiMin, RoiPhiMax).isSuccess() ){
+      ATH_MSG_WARNING( "Problem in roiWord decording" );
+    }
     ATH_MSG_DEBUG( "  ... RoI Phi min = " << RoiPhiMin << " RoI Phi max = " << RoiPhiMax << " RoI Eta min = " << RoiEtaMin << " RoI Eta max = " << RoiEtaMax );
     deta_thr = std::abs( RoiEtaMax - RoiEtaMin )/2. + dynamic_add;
     dphi_thr = std::abs( std::acos( std::cos( RoiPhiMax - RoiPhiMin ) ) )/2. + dynamic_add;

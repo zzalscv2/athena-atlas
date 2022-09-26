@@ -12,7 +12,6 @@ mons=[ (True                                             , InDetPhysValMonitorin
        (InDetPhysValFlags.doValidateLargeD0Tracks()      , InDetPhysValMonitoringTool.getInDetLargeD0PhysValMonitoringTool),
        (InDetPhysValFlags.doValidateLooseTracks()        , InDetPhysValMonitoringTool.getInDetPhysValMonitoringToolLoose),
        (InDetPhysValFlags.doValidateTightPrimaryTracks() , InDetPhysValMonitoringTool.getInDetPhysValMonitoringToolTightPrimary),
-       (InDetPhysValFlags.doValidateDBMTracks()          , InDetPhysValMonitoringTool.getInDetPhysValMonitoringToolDBM),
        (InDetPhysValFlags.doValidateGSFTracks()          , InDetPhysValMonitoringTool.getInDetPhysValMonitoringToolGSF)
      ]
 

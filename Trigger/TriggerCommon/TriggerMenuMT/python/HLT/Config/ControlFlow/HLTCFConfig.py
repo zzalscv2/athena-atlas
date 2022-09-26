@@ -1,4 +1,3 @@
-
 # Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
 
 """
@@ -206,9 +205,10 @@ def makeHLTTree(flags, newJO=False, hltMenuConfig = None):
             endOfEventFilterAlg = EndOfEventFilterAlgCfg('EndOfEventFilterAlg'+seqLabel, chainName=prescaleChain)
             acceptedEventSeq += conf2toConfigurable(endOfEventFilterAlg)
             # Now add chain-specific end-of-event sequences executed conditionally on the prescale
+            purposes = acceptedEventChainDict['chainParts'][0]['purpose']
 
             # The LAr Noise Burst end-of-event sequence
-            if 'larnoiseburst' in acceptedEventChainDict['chainParts'][0]['purpose']:
+            if 'larnoiseburst' in purposes:
                 # Add stream filter to EndOfEventFilterAlg
                 # Only accept events going to streams that already do full calo reco
                 # CosmicCalo explicitly requested [ATR-26096]
@@ -217,6 +217,12 @@ def makeHLTTree(flags, newJO=False, hltMenuConfig = None):
                 from TriggerMenuMT.HLT.CalibCosmicMon.CalibChainConfiguration import getLArNoiseBurstRecoSequence
                 recoSeq = getLArNoiseBurstRecoSequence()
                 acceptedEventSeq += conf2toConfigurable(recoSeq)
+            elif any(purpose.startswith("met") for purpose in purposes):
+                from TriggerMenuMT.HLT.MET.EndOfEvent import getMETRecoSequences
+                algorithms, rois, streams = getMETRecoSequences(purposes)
+                endOfEventFilterAlg.StreamFilter = streams
+                endOfEventRoIMaker.RoIs = [x for x in rois if x not in endOfEventRoIMaker.RoIs]
+                acceptedEventSeq += algorithms
             # elif ... add other end of event sequences (with the corresponding chain) here if needed
 
             acceptedEventTopSeq += conf2toConfigurable(acceptedEventSeq)

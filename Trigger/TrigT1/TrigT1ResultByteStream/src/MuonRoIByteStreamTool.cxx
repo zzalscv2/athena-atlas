@@ -439,12 +439,12 @@ StatusCode MuonRoIByteStreamTool::decodeRoiSlices(const uint32_t* data,
         case LVL1::MuCTPIBits::SubsysID::Endcap: // same for Endcap and Forward
         case LVL1::MuCTPIBits::SubsysID::Forward: {
           ATH_MSG_DEBUG("This is an Endcap/Forward candidate, calling the " << m_tgcTool.typeAndName());
-          roiData = m_tgcTool->roiData(word);
+          ATH_CHECK( m_tgcTool->roiData(word,roiData) );
           break;
         }
         case LVL1::MuCTPIBits::SubsysID::Barrel: {
           ATH_MSG_DEBUG("This is a Barrel candidate, calling the " << m_rpcTool.typeAndName());
-          roiData = m_rpcTool->roiData(word);
+	  ATH_CHECK( m_rpcTool->roiData(word,roiData) );
           break;
         }
         default: {

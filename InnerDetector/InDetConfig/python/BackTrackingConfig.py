@@ -60,9 +60,8 @@ if __name__ == "__main__":
 
     ########################## TRTPreProcessing Configuration ################################
 
-    if not flags.InDet.Tracking.doDBMstandalone:
-        from InDetConfig.TRTPreProcessing import TRTPreProcessingCfg
-        top_acc.merge(TRTPreProcessingCfg(flags))
+    from InDetConfig.TRTPreProcessing import TRTPreProcessingCfg
+    top_acc.merge(TRTPreProcessingCfg(flags))
 
     ######################################## TRTSegmentFinding Configuration ###########################################
     InputCollections = []

@@ -46,7 +46,7 @@ namespace JiveXML {
     
     if (msgLvl(MSG::DEBUG)) msg(MSG::DEBUG) << "in retrieveAll()" << endmsg;
     
-    const DataHandle<Analysis::TauJetContainer> iterator, end;
+    SG::ConstIterator<Analysis::TauJetContainer> iterator, end;
     const Analysis::TauJetContainer* tauCont;
     
     //obtain the default collection first
@@ -85,7 +85,7 @@ namespace JiveXML {
        if ( position != 0 ){  // SG key doesn't contain HLTAutoKey         
          if ( iterator.key()!=m_sgKey) {
           if (msgLvl(MSG::DEBUG)) msg(MSG::DEBUG)  << "Trying to retrieve all " << dataTypeName() << " (" << iterator.key() << ")" << endmsg;
-            DataMap data = getData(iterator);
+            DataMap data = getData(&(*iterator));
             if ( FormatTool->AddToEvent(dataTypeName(), iterator.key(), &data).isFailure()){
 	       if (msgLvl(MSG::WARNING)) msg(MSG::WARNING) << "Collection " << iterator.key() << " not found in SG " << endmsg;
 	    }else{

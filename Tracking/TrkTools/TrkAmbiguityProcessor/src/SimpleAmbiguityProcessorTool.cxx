@@ -75,7 +75,7 @@ StatusCode Trk::SimpleAmbiguityProcessorTool::initialize(){
   // statistics
   if (m_etaBounds.size() != Counter::nRegions) {
      ATH_MSG_ERROR( "There must be exactly " << Counter::nRegions
-                    << " etaBounds: barrel end, transition region end, end-cap end, DBM start, DBM end." );
+                    << " etaBounds: barrel end, transition region end, end-cap end, forward, and the-restaurant-at-the-end-of-the-world." );
      return StatusCode::FAILURE;
   }
   if (initializeClusterSplitProbContainer().isFailure()) {
@@ -335,7 +335,7 @@ Trk::SimpleAmbiguityProcessorTool::dumpStat(MsgStream &out) const {
   out << "\n";
   out <<             "---------------------------------------------------------------------------------" << "\n";
   out <<             "  Number of events processed      :   "<< m_stat.numberOfEvents() << "\n";
-  out <<             "  statistics by eta range          ------All---Barrel---Trans.--- Endcap---DBM---" << "\n";
+  out <<             "  statistics by eta range          ------All---Barrel---Trans.--- Endcap---Fwd---" << "\n";
   out <<             "---------------------------------------------------------------------------------" << "\n";
   out << m_stat.dumpRegions(   "  Number of candidates at input   :", CounterIndex::kNcandidates);
   out << m_stat.dumpRegions(   "  - candidates rejected score 0   :", CounterIndex::kNcandScoreZero);
@@ -369,7 +369,7 @@ Trk::SimpleAmbiguityProcessorTool::dumpStat(MsgStream &out) const {
   out <<             "---------------------------------------------------------------------------------" << "\n";
   out << std::setiosflags(std::ios::fixed | std::ios::showpoint) << std::setprecision(2)
       <<             "    definition: ( 0.0 < Barrel < " << m_etaBounds[Counter::iBarrel] << " < Transition < " << m_etaBounds[Counter::iTransi]
-      <<             " < Endcap < " << m_etaBounds[Counter::iEndcap] << " DBM )" << "\n";
+      <<             " < Endcap < " << m_etaBounds[Counter::iEndcap] << " FWD )" << "\n";
   out <<             "-------------------------------------------------------------------------------" << "\n";
   out.precision (ss);
 }

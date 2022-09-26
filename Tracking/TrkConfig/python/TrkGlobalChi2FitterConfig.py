@@ -101,16 +101,8 @@ def InDetGlobalChi2FitterCfg(flags,
     kwargs.setdefault(
         'MinPHFCut', flags.InDet.Tracking.ActivePass.minTRTPrecFrac)
 
-    if flags.InDet.Tracking.doDBMstandalone:
-        kwargs.setdefault('StraightLine', True)
-        kwargs.setdefault('OutlierCut', 5)
-        kwargs.setdefault('RecalibrateTRT', False)
-        kwargs.setdefault('TRTExtensionCuts', False)
-        kwargs.setdefault('TrackChi2PerNDFCut', 20)
-
     if ((flags.InDet.Tracking.useBroadPixClusterErrors or
-        flags.InDet.Tracking.useBroadSCTClusterErrors) and not
-            flags.InDet.Tracking.doDBMstandalone):
+        flags.InDet.Tracking.useBroadSCTClusterErrors)):
         kwargs.setdefault('RecalibrateSilicon', False)
 
     if flags.InDet.Tracking.doRobustReco:

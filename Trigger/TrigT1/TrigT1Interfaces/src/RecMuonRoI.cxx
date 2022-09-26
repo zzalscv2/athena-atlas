@@ -201,16 +201,20 @@ LVL1::RecMuonRoI::construct( unsigned int roIWord,
    if( m_sysID == 0 ) {   // RPC
       if( theRecRPCRoiTool ) {
          // set eta and phi values
-         LVL1::TrigT1MuonRecRoiData roiData = theRecRPCRoiTool->roiData( roIWord );
-         m_eta = roiData.eta();
-         m_phi = roiData.phi();
+	LVL1::TrigT1MuonRecRoiData roiData;
+	if( theRecRPCRoiTool->roiData( roIWord, roiData ).isSuccess() ){
+	  m_eta = roiData.eta();
+	  m_phi = roiData.phi();
+	}
       }
    } else {               // TGC
       if( theRecTGCRoiTool ) {
          // set eta and phi values
-         LVL1::TrigT1MuonRecRoiData roiData = theRecTGCRoiTool->roiData( roIWord );
-         m_eta = roiData.eta();
-         m_phi = roiData.phi();
+	LVL1::TrigT1MuonRecRoiData roiData;
+	if( theRecTGCRoiTool->roiData( roIWord, roiData ).isSuccess() ){
+	  m_eta = roiData.eta();
+	  m_phi = roiData.phi();
+	}
       }
    }
 
@@ -290,9 +294,11 @@ LVL1::RecMuonRoI::construct( unsigned int roIWord,
    const ITrigT1MuonRecRoiTool* theRecRoiTool = (m_sysID == 0) ? theRecRPCRoiTool : theRecTGCRoiTool;
    if( theRecRoiTool ) {
       // set eta and phi values
-      LVL1::TrigT1MuonRecRoiData roiData = theRecRoiTool->roiData( roIWord );
-      m_eta = roiData.eta();
-      m_phi = roiData.phi();
+     LVL1::TrigT1MuonRecRoiData roiData;
+     if( theRecRoiTool->roiData( roIWord, roiData ).isSuccess() ){
+       m_eta = roiData.eta();
+       m_phi = roiData.phi();
+     }
    }
 
    // Get the threshold value

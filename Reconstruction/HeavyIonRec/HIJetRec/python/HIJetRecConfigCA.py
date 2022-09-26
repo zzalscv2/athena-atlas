@@ -70,7 +70,7 @@ def HIJetRecCfg(flags):
     acc.merge(JetCopyAlgCfg(flags,jetname2, jetDef_seed0)) 
  
     iter0 = acc.popToolsAndMerge(AddIterationCfg(flags,jetname_seed0, eventshapeKey, clustersKey, map_tool=theMapTool, assoc_name=associationName, suffix="iter0"))
-    acc.merge(RunToolsCfg(flags,[iter0], "jetToolRunner_iter0", "jetalgHI_iter0")) #this run iter0 and produce the new shape
+    acc.merge(RunToolsCfg(flags,[iter0], "jetalgHI_iter0")) #this run iter0 and produce the new shape
 
     modulator0=iter0.Modulator #get modulator from iter0
     subtractor0=iter0.Subtractor #get subtractor from iter0
@@ -88,7 +88,7 @@ def HIJetRecCfg(flags):
             suffix="iter0")
     )
 
-    acc.merge(RunToolsCfg(flags,[iter0_egamma], "jetToolRunner_iter0_egamma", "jetalgHI_iter0_egamma")) #this run iter0_egamma and produce the new shape
+    acc.merge(RunToolsCfg(flags,[iter0_egamma], "jetalgHI_iter0_egamma")) #this run iter0_egamma and produce the new shape
 
     cluster_key_eGamma_deep=clustersKey+"_eGamma_deep"
 
@@ -105,7 +105,7 @@ def HIJetRecCfg(flags):
         useClusters=False, 
         apply_origin_correction=False)
     )
-    acc.merge(RunToolsCfg(flags,[subtocelltool], "jetToolRunner_subtocelltool", "jetalgHI_subtocelltool")) #this run iter0 and produce the new shape
+    acc.merge(RunToolsCfg(flags,[subtocelltool], "jetalgHI_subtocelltool")) #this run iter0 and produce the new shape
 
     #Seeting subtraction 0
     stdJetModifiers.update(
@@ -176,7 +176,7 @@ def HIJetRecCfg(flags):
             suffix="iter1")
         )
 
-    acc.merge(RunToolsCfg(flags,[iter1], "jetToolRunner_iter1", "jetalgHI_iter1")) #this run iter1 and produce the new shape
+    acc.merge(RunToolsCfg(flags,[iter1], "jetalgHI_iter1")) #this run iter1 and produce the new shape
 
     modulator1=iter1.Modulator
     subtractor1=iter1.Subtractor
@@ -210,7 +210,7 @@ def HIJetRecCfg(flags):
         apply_origin_correction=False)
         )
 
-    acc.merge(RunToolsCfg(flags,[subtoclustertool], "jetToolRunner_subtoclustertool", "jetalgHI_subtoclustertool"))    
+    acc.merge(RunToolsCfg(flags,[subtoclustertool], "jetalgHI_subtoclustertool"))    
 
     stdJetModifiers.update(
     consmod = JetModifier(
@@ -520,13 +520,13 @@ def GetNullModulator() :
     for n in [2,3,4] : setattr(mod,'DoV%d' % n,False)
     return mod
 
-def RunToolsCfg(flags,toollist, toolName, algoName):
+def RunToolsCfg(flags,toollist, algoName):
     acc = ComponentAccumulator()
 
-    runner = CompFactory.JetToolRunner(toolName,
-                          Tools=toollist)
+    #runner = CompFactory.JetToolRunner(toolName,
+    #                      Tools=toollist)
     theAlg = CompFactory.JetAlgorithm(algoName)
-    theAlg.Tools = [runner]
+    theAlg.Tools = toollist #[runner]
    
     acc.addEventAlgo(theAlg)
 

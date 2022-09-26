@@ -218,9 +218,8 @@ if __name__ == "__main__":
     # NewTracking collection keys
     InputCombinedInDetTracks = []
 
-    if not flags.InDet.Tracking.doDBMstandalone:
-        from InDetConfig.TRTPreProcessing import TRTPreProcessingCfg
-        top_acc.merge(TRTPreProcessingCfg(flags))
+    from InDetConfig.TRTPreProcessing import TRTPreProcessingCfg
+    top_acc.merge(TRTPreProcessingCfg(flags))
 
     top_acc.merge(TRTSegmentFindingCfg( flags,
                                         extension = "",

@@ -233,11 +233,6 @@ namespace InDet{
         bool sss,
         const std::vector<const Trk::SpacePoint*>& SP,
         const EventContext& ctx) const;
-      std::unique_ptr<Trk::TrackParameters> getAtaPlaneDBM(
-        MagField::AtlasFieldCache& fieldCache,
-        SiTrackMakerEventData_xk& data,
-        const std::vector<const Trk::SpacePoint*>& SP) const;
-
       bool globalPositions(const Trk::SpacePoint& s0,
                            const Trk::SpacePoint& s1,
                            const Trk::SpacePoint& s2,
@@ -255,7 +250,6 @@ namespace InDet{
       static bool isNewTrack(SiTrackMakerEventData_xk& data, Trk::Track* Tr) ;
       bool isCaloCompatible(SiTrackMakerEventData_xk& data) const;
       bool isHadCaloCompatible(SiTrackMakerEventData_xk& data) const;
-      static bool isDBMSeeds(const Trk::SpacePoint* s) ;
       static void clusterTrackMap(SiTrackMakerEventData_xk& data, Trk::Track* Tr) ;
       double pTmin(double eta) const;
 

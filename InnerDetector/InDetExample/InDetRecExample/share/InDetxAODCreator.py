@@ -135,31 +135,23 @@ if (doCreation or doConversion):# or InDetFlags.useExistingTracksAsInput()) : <-
     #           if finally there is no need of the special "MergedTrack" name
     if 'InputTrackCollectionTruth' not in dir():
         InputTrackCollectionTruth = InDetKeys.TracksTruth()
-    if not InDetFlags.doDBMstandalone():
-        if doCreation :
-            createTrackParticles(InputTrackCollection, InputTrackCollectionTruth, InDetKeys.xAODTrackParticleContainer(),topSequence,
-                                 trt_pid_tool=True, pixel_dedx=True)
-            from  InDetPhysValMonitoring.InDetPhysValJobProperties import InDetPhysValFlags
-            from  InDetPhysValMonitoring.ConfigUtils import extractCollectionPrefix
-            for col in InDetPhysValFlags.validateExtraTrackCollections() :
-                prefix=extractCollectionPrefix(col)
-                createTrackParticles(col,"", prefix+"TrackParticles", topSequence,
-                                     trt_pid_tool=False, pixel_dedx=False)
-        if doConversion :
-            convertTrackParticles(getRecTrackParticleNameIfInFile(InDetKeys.TrackParticles()),
-                                  InDetKeys.TrackParticlesTruth() ,
-                                  InDetKeys.xAODTrackParticleContainer(),
-                                  topSequence)
-
-
-    if (InDetFlags.doDBMstandalone() or InDetFlags.doDBM() ) and doCreation :
-        # or instead of InDetKeys.DBMTracksTruth()  rather InDetKeys.DBMDetailedTracksTruth() ?
-        createTrackParticles( InDetKeys.xAODDBMTrackParticleContainer(), InDetKeys.DBMTracksTruth(), InDetKeys.xAODDBMTrackParticleContainer(),topSequence,
-                              trt_pid_tool=False, pixel_dedx=False)
+    if doCreation :
+        createTrackParticles(InputTrackCollection, InputTrackCollectionTruth, InDetKeys.xAODTrackParticleContainer(),topSequence,
+                            trt_pid_tool=True, pixel_dedx=True)
+        from  InDetPhysValMonitoring.InDetPhysValJobProperties import InDetPhysValFlags
+        from  InDetPhysValMonitoring.ConfigUtils import extractCollectionPrefix
+        for col in InDetPhysValFlags.validateExtraTrackCollections() :
+            prefix=extractCollectionPrefix(col)
+            createTrackParticles(col,"", prefix+"TrackParticles", topSequence,
+                                trt_pid_tool=False, pixel_dedx=False)
+    if doConversion :
+        convertTrackParticles(getRecTrackParticleNameIfInFile(InDetKeys.TrackParticles()),
+                            InDetKeys.TrackParticlesTruth() ,
+                            InDetKeys.xAODTrackParticleContainer(),
+                            topSequence)
 
 if not InDetFlags.doVertexFinding():
-    if (not InDetFlags.doDBMstandalone() and
-        not IsInInputFile ('xAOD::VertexContainer', InDetKeys.xAODVertexContainer()) and
+    if (not IsInInputFile ('xAOD::VertexContainer', InDetKeys.xAODVertexContainer()) and
         IsInInputFile ('VxContainer', InDetKeys.PrimaryVertices())) :
         if len(getRecVertexNameIfInFile(InDetKeys.PrimaryVertices()))>0 :
             from xAODTrackingCnv.xAODTrackingCnvConf import xAODMaker__VertexCnvAlg
@@ -168,15 +160,6 @@ if not InDetFlags.doVertexFinding():
             xAODVertexCnvAlg.AODContainerName = InDetKeys.PrimaryVertices()
             xAODVertexCnvAlg.TPContainerName = InDetKeys.xAODTrackParticleContainer()
             topSequence += xAODVertexCnvAlg
-
-    if InDetFlags.doDBMstandalone() or InDetFlags.doDBM():
-        if (IsInInputFile ('VxContainer', InDetKeys.PrimaryVertices())) :
-            from xAODTrackingCnv.xAODTrackingCnvConf import xAODMaker__VertexCnvAlg
-            xAODVertexCnvAlgDBM = xAODMaker__VertexCnvAlg("VertexCnvAlgDBM")
-            xAODVertexCnvAlgDBM.xAODContainerName = InDetKeys.xAODVertexContainer()
-            xAODVertexCnvAlgDBM.AODContainerName = InDetKeys.PrimaryVertices()
-            xAODVertexCnvAlgDBM.TPContainerName = InDetKeys.xAODDBMTrackParticleContainer()
-            topSequence += xAODVertexCnvAlgDBM
 
 #For forward tracks, no separate collection for ITK, since they are already merged
 if (InDetFlags.doForwardTracks() and InDetFlags.doParticleCreation()) or doConversion:

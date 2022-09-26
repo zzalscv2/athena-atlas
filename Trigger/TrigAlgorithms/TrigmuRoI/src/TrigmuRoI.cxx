@@ -117,13 +117,13 @@ StatusCode TrigmuRoI::execute(const EventContext& ctx) const
     LVL1::TrigT1MuonRecRoiData roiData;
     //std::string region = "";
     if( sysID == 0 ) {
-      roiData = m_recRPCRoiTool->roiData(((it).first).roIWord());
+      ATH_CHECK( m_recRPCRoiTool->roiData(((it).first).roIWord(),roiData) );
       //region = "Barrel region";
     } else if ( sysID == 1 ){
-      roiData = m_recTGCRoiTool->roiData(((it).first).roIWord());
+      ATH_CHECK( m_recTGCRoiTool->roiData(((it).first).roIWord(),roiData) );
       //region = "Endcap region";
     } else {
-      roiData = m_recTGCRoiTool->roiData(((it).first).roIWord());
+      ATH_CHECK( m_recTGCRoiTool->roiData(((it).first).roIWord(),roiData) );
       //region = "Forward region";
     }
 	   

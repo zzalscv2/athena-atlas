@@ -58,10 +58,6 @@ def InDetSiTrackerSpacePointFinderCfg(flags, name = "InDetSiTrackerSpacePointFin
     kwargs.setdefault("ProcessSCTs", flags.Detector.EnableSCT)
     kwargs.setdefault("ProcessOverlaps", flags.Detector.EnableSCT)
 
-    if flags.InDet.Tracking.doDBMstandalone:
-        kwargs.setdefault("OverlapLimitEtaMax", 5.0)
-        kwargs.setdefault("OverlapLimitEtaMin", 0)
-
     if flags.Beam.Type is BeamType.Cosmics:
         kwargs.setdefault("ProcessOverlaps", False)
         kwargs.setdefault("OverrideBeamSpot", True)

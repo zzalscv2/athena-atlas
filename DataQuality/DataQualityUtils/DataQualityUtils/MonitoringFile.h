@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef dqutilsMonitoringFile_h
@@ -421,8 +421,8 @@ namespace dqutils {
     std::string m_mergeMatchHistoREString;
     std::string m_mergeMatchDirREString;
     bool m_useRE;
-    static int m_debugLevel;
-    static int m_fileCompressionLevel;
+    static std::atomic<int> m_debugLevel;
+    static std::atomic<int> m_fileCompressionLevel;
   public:
     static int mergeLBintervals(std::string, std::string debugLevel = "none");
     static int getDebugLevel();

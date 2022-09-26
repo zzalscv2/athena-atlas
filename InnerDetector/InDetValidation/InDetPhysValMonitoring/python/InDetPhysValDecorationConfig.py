@@ -190,10 +190,6 @@ def TrackDecoratorsCfg(flags, **kwargs):
 
     return acc
 
-def DBMTrackDecoratorsCfg(flags, **kwargs):
-    kwargs.setdefault("TrackParticleContainerName","ResolvedDBMTracks")
-    return TrackDecoratorsCfg(flags,**kwargs)
-
 def GSFTrackDecoratorsCfg(flags, **kwargs):
     kwargs.setdefault("TrackParticleContainerName","GSFTrackParticles")
     return TrackDecoratorsCfg(flags,**kwargs)
@@ -217,9 +213,6 @@ def AddDecoratorCfg(flags,**kwargs):
 
     if flags.PhysVal.IDPVM.doValidateGSFTracks:
         acc.merge(AddGSFTrackDecoratorAlgCfg(flags))
-
-    if flags.PhysVal.IDPVM.doValidateDBMTracks and ("DBMTrackParticles" in flags.Input.Collections):
-        acc.merge(DBMTrackDecoratorsCfg(flags))
 
     return acc
 

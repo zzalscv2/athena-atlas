@@ -134,6 +134,7 @@ parser.add_option('', '--pLbFile', dest='pseudoLbFile', default=None, help='File
 parser.add_option('', '--prefix', dest='prefix', default='', help='Prefix for reading files from mass storage (Default: determine from filename (`\'\') ')
 parser.add_option('', '--rl', dest='runMin', type='int', default=None, help='Minimum run number for mctag (inclusive)')
 parser.add_option('', '--ru', dest='runMax', type='int', default=None, help='Maximum run number for mctag (inclusive)')
+parser.add_option('', '--useRun', dest='useRun', type='int', default=None, help='Run monitoring job for a given run only')
 parser.add_option('', '--noCheckAcqFlag', dest='noCheckAcqFlag', action='store_true', default=False, help='Don\'t check acqFlag when submitting VdM jobs')
 parser.add_option('', '--resubAll', dest='resubAll', action='store_true', default=False, help='Resubmit all jobs irrespective of status')
 parser.add_option('', '--resubRunning', dest='resubRunning', action='store_true', default=False, help='Resubmit all "running" jobs')
@@ -336,16 +337,19 @@ if cmd=='runMon' and len(args)==3:
                 '--directory', dataset,
                 '--queue', '"tomorrow"')
     else:
+        queue = options.batch_queue or '"longlunch"'
+        print('Queue: ', queue )
         run_jobs(options.monjoboptions, dsname, '{}.{}'.format(options.montaskname, tag),
                 {
                     'cmdjobpreprocessing' : 'export STAGE_SVCCLASS=atlcal; export ATLAS_LOCAL_ROOT_BASE=/cvmfs/atlas.cern.ch/repo/ATLASLocalRootBase',
                     'useBeamSpot' : True,
                     'beamspottag' : options.beamspottag,
                     },
-                '--lbperjob', 10,
+                '--lbperjob', 20,
                 '--match', options.filter,
                 '--exclude', r'.*\.TMP\.log.*',
-                '--directory', dataset)
+                '--directory', dataset,
+                '--queue', queue)
 
     sys.exit(0)
 
@@ -383,7 +387,7 @@ if cmd=='backup' and len(args)==2:
         print ('WARNING: ARCHIVING - DIRECTORIES WILL BE DELETED AFTER BACKUP!!!')
         print ('****************************************************************')
     if not options.batch:
-        a = raw_input('\nARE YOU SURE [n] ? ')
+        a = input('\nARE YOU SURE [n] ? ')
         if a!='y':
             sys.exit('ERROR: Aborted by user')
     for d in dirlist:
@@ -745,7 +749,7 @@ if cmd=='runCmd' and len(args)==4:
 
     print ('\n%i datasets / tasks selected.\n' % len(taskList))
     if not options.batch:
-        a = raw_input('\nARE YOU SURE [n] ? ')
+        a = input('\nARE YOU SURE [n] ? ')
         if a!='y':
             sys.exit('ERROR: Running of monitoring tasks aborted by user')
         print()
@@ -787,21 +791,27 @@ if cmd=='runMonJobs' and len(args)<3:
             taskName = t['TASKNAME']
             datatag = taskName.split('.')[-1].split('_')[0]
             monTaskName = 'MON.%s.%s' % (taskName,datatag)
+            useRun = True
+            if options.useRun is not None:
+                useRun = False
+                if runnr == options.useRun:
+                    useRun = True 
 
-            try:
-                m = taskman.taskIterDict('*',['where RUNNR =',DbParam(runnr),'and DSNAME =',DbParam(dsname),'and TASKNAME =',DbParam(monTaskName),'order by UPDATED desc']).next()
-                print ('       %-10s  %s'% (runnr,monTaskName))
-            except:
-                print ('    *  %-10s  %s'% (runnr,'--- no monitoring task found ---'))
-                taskList.append(t)
-                pass
+            if useRun:
+                try:
+                    m = taskman.taskIterDict('*',['where RUNNR =',DbParam(runnr),'and DSNAME =',DbParam(dsname),'and TASKNAME =',DbParam(monTaskName),'order by UPDATED desc']).next()
+                    print ('       %-10s  %s'% (runnr,monTaskName))
+                except:
+                    print ('    *  %-10s  %s'% (runnr,'--- no monitoring task found ---'))
+                    taskList.append(t)
+                    pass
 
     if not taskList:
         print ('\nNo jobs need to be run.\n')
         sys.exit(0)
 
     if not options.batch:
-        a = raw_input('\nARE YOU SURE [n] ? ')
+        a = input('\nARE YOU SURE [n] ? ')
         if a!='y':
             sys.exit('ERROR: Running of monitoring tasks aborted by user')
         print()
@@ -869,7 +879,8 @@ if cmd=='runMonJobs' and len(args)<3:
             if int(runnr)<240000:
                 print ('   ',r)
             print ('... Submitting monitoring task')
-            cmd = 'beamspotman --eospath=%s -p %s -s %s -f \'.*\\.%s\\..*\' -t %s --montaskname %s runMon %i %s' % (eospath,ptag,stream,filter,bstag,monTaskName,int(runnr),datatag)
+            queue = options.batch_queue or '\'\"longlunch\"\''
+            cmd = 'beamspotman --eospath=%s -p %s -s %s -f \'.*\\.%s\\..*\' -t %s --queue %s --montaskname %s runMon %i %s' % (eospath,ptag,stream,filter,bstag,queue,monTaskName,int(runnr),datatag)
             print (cmd)
             sys.stdout.flush()
             status = os.system(cmd) >> 8   # Convert to standard Unix exit code
@@ -1511,7 +1522,7 @@ if cmd=='runBCIDJobs' and len(args)<3:
         sys.exit(0)
 
     if not options.batch:
-        a = raw_input('\nARE YOU SURE [n] ? ')
+        a = input('\nARE YOU SURE [n] ? ')
         if a!='y':
             sys.exit('ERROR: Running of BCID tasks aborted by user')
         print()
@@ -1594,6 +1605,45 @@ if cmd=='mctag' and len(args)<12:
     print ('* To upload to oracle use:')
     print ('  - beamspotman.py --srctag %s -t %s --srcdbname OFLP200 --destdbname OFLP200 upload %s' %(options.beamspottag, options.beamspottag, dbfile))
     print ('  - /afs/cern.ch/user/a/atlcond/utils22/AtlCoolMerge.py --nomail %s OFLP200 ATLAS_COOLWRITE ATLAS_COOLOFL_INDET_W <passwd>' %(dbfile))
+    sys.exit(0)
+
+#
+#  Create an sqlite file containing a Data (CONDBR2) tag a la beamSpot_set.py
+#  Need -- before positional agruments to deal with -ve values
+#  beamspotman.py -t IndetBeampos-7TeV-PeriodD-SmallWidth-001 maketag -- 0 0.1 1.1 -5 0.045 0.048 63 0.00043 -4e-05 9e-05
+#
+if cmd=='maketag' and len(args)<12:
+
+    from InDetBeamSpotExample.COOLUtils import *
+
+    if not options.beamspottag:
+        sys.exit('ERROR: No beam spot tag specified')
+
+    dbfile=options.beamspottag + '.db'
+    dbName=options.destdbname
+    folderHandle = openBeamSpotDbFile(dbfile, dbName = options.destdbname, forceNew = True)
+
+    runMin = options.runMin if options.runMin is not None else 0
+    runMax = options.runMax if options.runMax is not None else (1 << 31)-1
+
+    writeBeamSpotEntry(folderHandle, tag=options.beamspottag,
+                       runMin=runMin, runMax=runMax,
+                       status=int(args[1]),
+                       posX=float(args[2]), posY=float(args[3]), posZ=float(args[4]),
+                       sigmaX=float(args[5]), sigmaY=float(args[6]), sigmaZ=float(args[7]),
+                       tiltX=float(args[8]) if len(args)>8 else 0.,
+                       tiltY=float(args[9]) if len(args)>9 else 0.,
+                       sigmaXY=float(args[10]) if len(args)>10 else 0.,
+                       posXErr=0., posYErr=0., posZErr=0.,
+                       sigmaXErr=0., sigmaYErr=0., sigmaZErr=0.,
+                       tiltXErr=0., tiltYErr=0.,
+                       sigmaXYErr=0.)
+
+    print ('* Beamspot tag written to db=%s, tag=%s in %s ' %(dbName,options.beamspottag, dbfile))
+    print ('  - AtlCoolConsole.py "sqlite://;schema=' + dbfile + ';dbname=%s"' %(dbName))
+    print ('* To upload to oracle use:')
+    print ('  - beamspotman.py --srctag %s -t %s --srcdbname %s --destdbname %s upload %s' %(options.beamspottag, options.beamspottag, dbName, dbName, dbfile))
+    print ('  - /afs/cern.ch/user/a/atlcond/utils22/AtlCoolMerge.py --nomail %s %s ATLAS_COOLWRITE ATLAS_COOLOFL_INDET_W <passwd>' %(dbfile, dbName))
     sys.exit(0)
 
 

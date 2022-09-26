@@ -62,7 +62,7 @@ atlas_add_library( DataQualityUtils
                    ${DataQualityUtilsDictSource}
                    PUBLIC_HEADERS DataQualityUtils
                    INCLUDE_DIRS ${Boost_INCLUDE_DIRS} ${COOL_INCLUDE_DIRS} ${ROOT_INCLUDE_DIRS} ${CORAL_INCLUDE_DIRS}
-                   LINK_LIBRARIES ${Boost_LIBRARIES} ${COOL_LIBRARIES} ${ROOT_LIBRARIES} ${CORAL_LIBRARIES} nlohmann_json::nlohmann_json
+                   LINK_LIBRARIES ${Boost_LIBRARIES} ${COOL_LIBRARIES} ${ROOT_LIBRARIES} ${CORAL_LIBRARIES} CxxUtils nlohmann_json::nlohmann_json
                    PRIVATE_LINK_LIBRARIES DataQualityInterfaces )
 
 # With gcc8, need to link with -lstdc++fs in order to use std::filesystem.

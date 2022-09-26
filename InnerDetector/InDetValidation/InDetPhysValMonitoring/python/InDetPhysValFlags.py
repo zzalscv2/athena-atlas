@@ -6,7 +6,6 @@ def createIDPVMConfigFlags():
     from AthenaConfiguration.AthConfigFlags import AthConfigFlags
     icf = AthConfigFlags()
 
-    icf.addFlag("doValidateDBMTracks", False )
     icf.addFlag("doValidateGSFTracks", False )
     icf.addFlag("doValidateLooseTracks", False )
     icf.addFlag("doValidateTightPrimaryTracks", False )

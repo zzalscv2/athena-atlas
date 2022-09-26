@@ -210,9 +210,8 @@ if __name__ == "__main__":
     top_acc.merge(SCT_ReadoutGeometryCfg(ConfigFlags))
 
     ############################# TRTPreProcessing configuration ############################
-    if not ConfigFlags.InDet.Tracking.doDBMstandalone:
-        from InDetConfig.TRTPreProcessing import TRTPreProcessingCfg
-        top_acc.merge(TRTPreProcessingCfg(ConfigFlags))
+    from InDetConfig.TRTPreProcessing import TRTPreProcessingCfg
+    top_acc.merge(TRTPreProcessingCfg(ConfigFlags))
     ########################### TRTSegmentFindingCfg configuration ##########################
     # NewTracking collection keys
     InputCombinedInDetTracks = []

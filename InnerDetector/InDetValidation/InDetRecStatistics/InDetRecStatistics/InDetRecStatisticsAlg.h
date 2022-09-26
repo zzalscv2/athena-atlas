@@ -138,8 +138,8 @@ namespace InDet {
       float         m_minZEndSecondary;//!< If track has end vertex, this is min Z of end vertex to be considered secondary.
       bool          m_useTrackSelection; //!< Use track selector tool
       bool          m_doTruth;  //!< Use truth information
-      float m_minEtaDBM;
-      float m_maxEtaDBM;
+      float m_minEtaFORWARD;
+      float m_maxEtaFORWARD;
       SG::ReadHandleKeyArray<TrackCollection>        m_RecTrackCollection_keys;
       SG::ReadHandleKeyArray<TrackTruthCollection>   m_TrackTruthCollection_keys;
 

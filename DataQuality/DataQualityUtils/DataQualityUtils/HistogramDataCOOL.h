@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2017 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef dqutilsHistogramDataCOOL_h
@@ -36,6 +36,8 @@
 #include "CoolKernel/RecordSpecification.h"
 #include "CoolKernel/ChannelSelection.h"
 
+#include "CxxUtils/checker_macros.h"
+
 #include <sstream>
 #include <fstream>
 #include <TCanvas.h>
@@ -67,7 +69,7 @@ namespace cool {
 
 namespace dqutils {
 
-class HistogramDataCOOL : public cool::Application, public TObject {
+class ATLAS_NOT_THREAD_SAFE HistogramDataCOOL : public cool::Application, public TObject {
 private:
 
 // Protect CINT from some system definitions that cause problems

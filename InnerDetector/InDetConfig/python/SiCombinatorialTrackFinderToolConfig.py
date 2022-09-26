@@ -63,16 +63,9 @@ def SiCombinatorialTrackFinder_xkCfg(flags, name="InDetSiComTrackFinder", **kwar
     #
     # --- Local track finding using sdCaloSeededSSSpace point seed
     #
-    if flags.InDet.Tracking.doDBMstandalone:
-        from TrkConfig.TrkRIO_OnTrackCreatorConfig import InDetRotCreatorDBMCfg
-        RotCreator = acc.popToolsAndMerge(InDetRotCreatorDBMCfg(flags))
-        kwargs.setdefault("useSCT", False)
-        kwargs.setdefault("MagneticFieldMode", "NoField")
-        kwargs.setdefault("TrackQualityCut", 9.3)
-    else:
-        from TrkConfig.TrkRIO_OnTrackCreatorConfig import InDetRotCreatorDigitalCfg
-        RotCreator = acc.popToolsAndMerge(InDetRotCreatorDigitalCfg(flags))
-        kwargs.setdefault("useSCT", flags.Detector.EnableSCT)
+    from TrkConfig.TrkRIO_OnTrackCreatorConfig import InDetRotCreatorDigitalCfg
+    RotCreator = acc.popToolsAndMerge(InDetRotCreatorDigitalCfg(flags))
+    kwargs.setdefault("useSCT", flags.Detector.EnableSCT)
 
     acc.addPublicTool(RotCreator)
     kwargs.setdefault("RIOonTrackTool", RotCreator)

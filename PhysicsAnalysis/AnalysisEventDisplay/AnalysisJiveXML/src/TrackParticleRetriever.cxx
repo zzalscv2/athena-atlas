@@ -143,7 +143,7 @@ namespace JiveXML {
     if (m_OtherTrackCollections.empty()) {
       
       //Get an iterator over all other track collections
-      const DataHandle<Rec::TrackParticleContainer> trackCollIter, trackCollEnd;
+      SG::ConstIterator<Rec::TrackParticleContainer> trackCollIter, trackCollEnd;
       if ((evtStore()->retrieve(trackCollIter, trackCollEnd)).isFailure()){
         if (msgLvl(MSG::WARNING)) msg(MSG::WARNING) << "Unable to retrieve track collection iterator" << endmsg;
         return StatusCode::SUCCESS; 

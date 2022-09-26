@@ -70,10 +70,15 @@ class JobPostProcessing(PostProcessingStep):
     def run(self):
         ## JobPostProcessing runs only on completed tasks in status POSTPROCESSING
         #if self.oldStatus==TaskManager.StatusCodes['POSTPROCESSING']:
+        print('Jobname: ',self.jobName)
         try:
             postProcSteps = self.getJobConfig(self.jobName)['jobpostprocsteps'].split()
         except Exception:
-            raise PostProcessingError('ERROR: No config file or jobpostprocsteps parameter found for %s/%s' % (self.dsName,self.taskName),self.executedSteps)
+            self.log('Warning: No config file or jobpostprocsteps parameter found for %s/%s' % (self.dsName,self.taskName))
+            self.log('Continue anyway with the steps: PlotBeamSpotMon LinkResults')
+            steps = 'PlotBeamSpotMon LinkResults'
+            postProcSteps = steps.split()
+            #raise PostProcessingError('ERROR: No config file or jobpostprocsteps parameter found for %s/%s' % (self.dsName,self.taskName),self.executedSteps)
         for step in postProcSteps:
             self.log('Running postprocessing step:  %s' % step)
             self.executedSteps  = runPostProcStep(self.taskman,self.taskDict,self.oldStatus,self.executedSteps,step,self.postprocLib,self.jobName)
@@ -454,14 +459,13 @@ class BeamSpotGlobalNt(PostProcessingStep):
         
         ntFileName = self.getFileName('-nt.root','MergeNt')
         globalNtDir = '/afs/cern.ch/user/a/atlidbs/nt/t0'
-        beamspottag = 'IndetBeampos-RUN2-ES1-UPD2-13' # Always update to one global ntuple so don't resolve current
+        beamspottag = cooltags.split()[len(cooltags.split())-1]
         globalNtFileName = '%s/beamspotnt-%s.root' % (globalNtDir,beamspottag)
-        globalNtFileName2 = '%s/beamspotnt-%s.root' % (globalNtDir,'IndetBeampos-ES1-UPD2')
         if not os.path.exists(globalNtDir):
             raise PostProcessingError('ERROR: Cannot access directory with global beam spot ntuple: %s' % globalNtDir, self.executedSteps)
         if os.path.exists('/'.join([self.taskDir,ntFileName])):
             self.logExec("cd %s; beamspotnt.py -f %s --status '' --fillCOOL --useAve merge %s" % (self.taskDir,globalNtFileName,ntFileName))
-            self.logExec("cd %s; beamspotnt.py -f %s --status '' --fillCOOL --useAve merge %s" % (self.taskDir,globalNtFileName2,ntFileName))
+            # self.logExec("cd %s; beamspotnt.py -f %s --status '' --fillCOOL --useAve merge %s" % (self.taskDir,globalNtFileName2,ntFileName))
         else:
             raise PostProcessingError('ERROR: No merged ntuple file %s - did MergeNt step run?\n' % ntFileName, self.executedSteps)
 

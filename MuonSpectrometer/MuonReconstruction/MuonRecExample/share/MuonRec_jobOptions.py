@@ -26,7 +26,7 @@ from RecExConfig.RecFlags import rec
 from RecExConfig.RecAlgsFlags import recAlgs
 from MuonRecExample.MuonAlignFlags import muonAlignFlags
 from AthenaCommon.AppMgr import ToolSvc
-
+from AthenaCommon.BeamFlags import beamFlags
 from AtlasGeoModel.MuonGMJobProperties import MuonGeometryFlags
 
 muonRecFlags.setDefaults()
@@ -44,7 +44,7 @@ if muonRecFlags.doCSCs() and not MuonGeometryFlags.hasCSC(): muonRecFlags.doCSCs
 if muonRecFlags.dosTGCs() and not MuonGeometryFlags.hasSTGC(): muonRecFlags.dosTGCs = False
 if muonRecFlags.doMMs() and not MuonGeometryFlags.hasMM(): muonRecFlags.doMMs = False
 
-muonRecFlags.runCommissioningChain = muonRecFlags.doMMs() or muonRecFlags.dosTGCs() and beamFlags.beamType() != 'cosmics'
+muonRecFlags.runCommissioningChain = (muonRecFlags.doMMs() or muonRecFlags.dosTGCs()) and beamFlags.beamType() != 'cosmics'
 if muonRecFlags.doDigitization():
     include("MuonRecExample/MuonDigitization_jobOptions.py")
 

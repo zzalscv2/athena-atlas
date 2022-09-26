@@ -254,7 +254,7 @@ StatusCode InDet::TrackClusterAssValidation::finalize() {
   out<<"|                    take into account outliers      "<<yesNo(m_useOutliers)<<"                            |\n";
   out<<topNtail(spaceSeparator)<<"\n";
   if(!m_usePIX && !m_useSCT) return StatusCode::SUCCESS;
-  enum Regions{Barrel, Transition, Endcap, DBM, NRegions};//'DBM' = very forward
+  enum Regions{Barrel, Transition, Endcap, Forward, NRegions};
   auto incrementArray=[](auto & array, const int idx){for (int j{};j!=NRegions;++j) array[idx][j] += array[idx+1][j];};
   for(int i=48; i>=0; --i) {
     m_eventStat.m_particleClusters      [i]   +=m_eventStat.m_particleClusters      [i+1];
@@ -296,12 +296,12 @@ StatusCode InDet::TrackClusterAssValidation::finalize() {
   for (auto & thisClusterE: pcEndcap2ff){
     thisClusterE = double(m_eventStat.m_particleClustersBTE[ clusterEndcapIdx++ ][Endcap])/ pa;
   }
-  //dbm
+  //fwd
   pa           = coerceToOne(m_eventStat.m_particleClustersBTE[0][3]); 
-  std::array<double, 10> pcDbm2ff{};
-  size_t clusterDbmIdx = 2;
-  for (auto & thisClusterD: pcDbm2ff){
-    thisClusterD = double(m_eventStat.m_particleClustersBTE[ clusterDbmIdx++ ][DBM])/ pa;
+  std::array<double, 10> pcFwd2ff{};
+  size_t clusterFwdIdx = 2;
+  for (auto & thisClusterD: pcFwd2ff){
+    thisClusterD = double(m_eventStat.m_particleClustersBTE[ clusterFwdIdx++ ][Forward])/ pa;
   }
   //
   //*** SPACE POINTS ***
@@ -334,17 +334,17 @@ StatusCode InDet::TrackClusterAssValidation::finalize() {
   for (auto & thisSpacepoint: spEndcap2ff){
     thisSpacepoint = double(m_eventStat.m_particleSpacePointsBTE[ spacepointEndcapIdx++ ][Endcap])/ pa;
   }
-  //dbm
-  pa           = coerceToOne(m_eventStat.m_particleSpacePointsBTE[0][DBM]); 
-  std::array<double, 10> spDbm2ff{};
-  size_t spacepointDbmIdx = 2;
-  for (auto & thisSpacepoint: spDbm2ff){
-    thisSpacepoint = double(m_eventStat.m_particleSpacePointsBTE[ spacepointDbmIdx++ ][DBM])/ pa;
+  //Fwd
+  pa           = coerceToOne(m_eventStat.m_particleSpacePointsBTE[0][Forward]); 
+  std::array<double, 10> spFwd2ff{};
+  size_t spacepointFwdIdx = 2;
+  for (auto & thisSpacepoint: spFwd2ff){
+    thisSpacepoint = double(m_eventStat.m_particleSpacePointsBTE[ spacepointFwdIdx++ ][Forward])/ pa;
   }
   auto w8=std::setw(8);
   out<<"|         Probability for such charge particles to have some number silicon                          |\n";
-  out<<"|                     clusters                     |             space points                        |\n";
-  out<<"|           Total   Barrel  Transi  Endcap   DBM   |  Total   Barrel  Transi  Endcap   DBM           |\n";
+  out<<"|                     clusters                         |             space points                        |\n";
+  out<<"|           Total   Barrel  Transi  Endcap   Forward   |  Total   Barrel  Transi  Endcap   Forward       |\n";
 
    for (size_t idx{0};idx != 10;++idx){
      out<<"|  >= "<<idx+2<< std::string((idx<8)?"  ":" ")
@@ -352,13 +352,13 @@ StatusCode InDet::TrackClusterAssValidation::finalize() {
        <<w8<<p5<<pcBarrel2ff[idx]
        <<w8<<p5<<pcTransition2ff[idx]
        <<w8<<p5<<pcEndcap2ff[idx]
-       <<w8<<p5<<pcDbm2ff[idx]<<"  |  "
+       <<w8<<p5<<pcFwd2ff[idx]<<"  |  "
 
        <<w8<<p5<<sp2ff[idx]
        <<w8<<p5<<spBarrel2ff[idx]
        <<w8<<p5<<spTransition2ff[idx]
        <<w8<<p5<<spEndcap2ff[idx]
-       <<w8<<p5<<spDbm2ff[idx]
+       <<w8<<p5<<spFwd2ff[idx]
        <<"       |\n";
    }
 
@@ -376,8 +376,8 @@ StatusCode InDet::TrackClusterAssValidation::finalize() {
   out<<"|                                        For transition region "<<w8<<p5<<double(m_eventStat.m_eventsBTE[Transition])/pa<<"             |\n";
   pa  = coerceToOne(m_eventStat.m_particleClustersBTE[0][Endcap]); 
   out<<"|                                        For endcap     region "<<w8<<p5<<double(m_eventStat.m_eventsBTE[Endcap])/pa<<"             |\n";
-  pa  = coerceToOne(m_eventStat.m_particleClustersBTE[0][DBM]); 
-  out<<"|                                        For DBM        region "<<w8<<p5<<double(m_eventStat.m_eventsBTE[DBM])/pa<<"             |\n";
+  pa  = coerceToOne(m_eventStat.m_particleClustersBTE[0][Forward]); 
+  out<<"|                                        For forward    region "<<w8<<p5<<double(m_eventStat.m_eventsBTE[Forward])/pa<<"             |\n";
   out<<"|                                                                                   |\n";
   pa            = coerceToOne(m_eventStat.m_nclustersNegBP); 
   double ratio  = double(m_eventStat.m_nclustersPosBP)/pa;
@@ -387,13 +387,6 @@ StatusCode InDet::TrackClusterAssValidation::finalize() {
   ratio         = double(m_eventStat.m_nclustersPosEP)/pa;
   eratio        = std::sqrt(ratio*(1.+ratio)/pa);
   out<<"|      Ratio endcap pixels clusters for +/- particles ="<<w8<<p5<<ratio<<" +-"<<w8<<p5<<eratio<<"          |\n";
-  pa            = coerceToOne(m_eventStat.m_nclustersNegDBM);
-  ratio         = double(m_eventStat.m_nclustersPosDBM)/pa;
-  eratio        = std::sqrt(ratio*(1.+ratio)/pa);
-  out<<"|      Ratio  DBM  pixels clusters for +/- particles = "
-           <<std::setw(8)<<std::setprecision(5)<<ratio<<" +-"
-           <<std::setw(8)<<std::setprecision(5)<<eratio
-           <<"          |\n";
   pa            = coerceToOne(m_eventStat.m_nclustersNegBS);
   ratio         = double(m_eventStat.m_nclustersPosBS)/pa;
   eratio        = std::sqrt(ratio*(1.+ratio)/pa);
@@ -474,12 +467,12 @@ StatusCode InDet::TrackClusterAssValidation::finalize() {
     const EffArray_t efE3 = makeEffArray(efficiencyArrayInput,3,Endcap,neBTE);
     const EffArray_t efE4 = makeEffArray(efficiencyArrayInput,4,Endcap,neBTE);
     //
-    neBTE = coerceToOne(m_eventStat.m_eventsBTE[DBM]);
-    const EffArray_t efD0 = makeEffArray(efficiencyArrayInput,0,DBM,neBTE);
-    const EffArray_t efD1 = makeEffArray(efficiencyArrayInput,1,DBM,neBTE);
-    const EffArray_t efD2 = makeEffArray(efficiencyArrayInput,2,DBM,neBTE);
-    const EffArray_t efD3 = makeEffArray(efficiencyArrayInput,3,DBM,neBTE);
-    const EffArray_t efD4 = makeEffArray(efficiencyArrayInput,4,DBM,neBTE);
+    neBTE = coerceToOne(m_eventStat.m_eventsBTE[Forward]);
+    const EffArray_t efD0 = makeEffArray(efficiencyArrayInput,0,Forward,neBTE);
+    const EffArray_t efD1 = makeEffArray(efficiencyArrayInput,1,Forward,neBTE);
+    const EffArray_t efD2 = makeEffArray(efficiencyArrayInput,2,Forward,neBTE);
+    const EffArray_t efD3 = makeEffArray(efficiencyArrayInput,3,Forward,neBTE);
+    const EffArray_t efD4 = makeEffArray(efficiencyArrayInput,4,Forward,neBTE);
 
 
     double efrec  = ef0[0]+ef0[1]+ef0[2]+ef1[0]+ef1[1]+ef2[0];
@@ -547,7 +540,7 @@ StatusCode InDet::TrackClusterAssValidation::finalize() {
     out<<"| >=4 wrong clusters  ";
 	  formattedOutput(efE4);
     out<<"|-----------------------------------------------------------------------------------|\n";
-    out<<"| DBM region                                                                        |\n";
+    out<<"| Forward region                                                                    |\n";
     out<<"|   0 wrong clusters  ";
     formattedOutput(efD0);
     out<<"|   1 wrong clusters  ";
@@ -588,11 +581,11 @@ StatusCode InDet::TrackClusterAssValidation::finalize() {
 	    <<std::setw(9)<<std::setprecision(5)<<efrecE*double(m_eventStat.m_eventsBTE[Endcap])/pa
 	    <<" ) "
 	    <<"       |\n";
-   pa  = coerceToOne(m_eventStat.m_particleClustersBTE[0][DBM]); 
-   out<<"|                             For DBM        region = "
+   pa  = coerceToOne(m_eventStat.m_particleClustersBTE[0][Forward]); 
+   out<<"|                             For forward    region = "
             <<std::setw(9)<<std::setprecision(5)<<efrecD
             <<" ("
-            <<std::setw(9)<<std::setprecision(5)<<efrecD*double(m_eventStat.m_eventsBTE[DBM])/pa
+            <<std::setw(9)<<std::setprecision(5)<<efrecD*double(m_eventStat.m_eventsBTE[Forward])/pa
             <<" ) "
             <<"       |\n";
 
@@ -618,13 +611,13 @@ StatusCode InDet::TrackClusterAssValidation::finalize() {
 	     <<std::setw(11)<<m_trackCollectionStat[nc].m_ntracksNEGE
 	     <<std::setw(11)<<std::setprecision(5)<<ratio
 	     <<std::setw(11)<<std::setprecision(5)<<eratio<<"                  |\n";
-    pa     = coerceToOne(m_trackCollectionStat[nc].m_ntracksNEGDBM); 
-    ratio  = double(m_trackCollectionStat[nc].m_ntracksPOSDBM)/pa;
+    pa     = coerceToOne(m_trackCollectionStat[nc].m_ntracksNEGFWD); 
+    ratio  = double(m_trackCollectionStat[nc].m_ntracksPOSFWD)/pa;
     eratio = std::sqrt(ratio*(1.+ratio)/pa);
 
-    out<<"| DBM                  "
-             <<std::setw(10)<<m_trackCollectionStat[nc].m_ntracksPOSDBM
-             <<std::setw(11)<<m_trackCollectionStat[nc].m_ntracksNEGDBM
+    out<<"| Forward              "
+             <<std::setw(10)<<m_trackCollectionStat[nc].m_ntracksPOSFWD
+             <<std::setw(11)<<m_trackCollectionStat[nc].m_ntracksNEGFWD
              <<std::setw(11)<<std::setprecision(5)<<ratio
              <<std::setw(11)<<std::setprecision(5)<<eratio<<"                  |\n";
 
@@ -1054,24 +1047,20 @@ int InDet::TrackClusterAssValidation::qualityTracksSelection(InDet::TrackCluster
     int q  = charge(event_data,*c,rp);
 
     if     (q<0) {
-      if (de->isDBM())
-	++event_data.m_eventStat.m_nclustersNegDBM;
-      else if(de->isBarrel()) {
-	de->isPixel() ? ++event_data.m_eventStat.m_nclustersNegBP : ++event_data.m_eventStat.m_nclustersNegBS;
+      if(de->isBarrel()) {
+	      de->isPixel() ? ++event_data.m_eventStat.m_nclustersNegBP : ++event_data.m_eventStat.m_nclustersNegBS;
       }
       else                                     {
-	de->isPixel() ? ++event_data.m_eventStat.m_nclustersNegEP : ++event_data.m_eventStat.m_nclustersNegES;
+	      de->isPixel() ? ++event_data.m_eventStat.m_nclustersNegEP : ++event_data.m_eventStat.m_nclustersNegES;
       }
 
     }
     else if(q>0) {
-      if (de->isDBM())
-	++event_data.m_eventStat.m_nclustersPosDBM;
-      else if(de->isBarrel()) {
-	de->isPixel() ? ++event_data.m_eventStat.m_nclustersPosBP : ++event_data.m_eventStat.m_nclustersPosBS;
+      if(de->isBarrel()) {
+      	de->isPixel() ? ++event_data.m_eventStat.m_nclustersPosBP : ++event_data.m_eventStat.m_nclustersPosBS;
       }
       else                                     {
-	de->isPixel() ? ++event_data.m_eventStat.m_nclustersPosEP : ++event_data.m_eventStat.m_nclustersPosES;
+      	de->isPixel() ? ++event_data.m_eventStat.m_nclustersPosEP : ++event_data.m_eventStat.m_nclustersPosES;
       }
     }
   }
@@ -1141,12 +1130,12 @@ void InDet::TrackClusterAssValidation::tracksComparison(const EventContext& ctx,
 	    if     (pT >  m_ptcut && pT <  m_ptcutmax) {
 	      if     (rap <      1. ) ++event_data.m_trackCollectionStat[nc].m_ntracksPOSB;
 	      else if(rap < 3.0) ++event_data.m_trackCollectionStat[nc].m_ntracksPOSE;
-	      else if(rap < m_rapcut) ++event_data.m_trackCollectionStat[nc].m_ntracksPOSDBM;
+	      else if(rap < m_rapcut) ++event_data.m_trackCollectionStat[nc].m_ntracksPOSFWD;
 	    }
 	    else if(pT < -m_ptcut && pT > -m_ptcutmax) {
 	      if     (rap <      1. ) ++event_data.m_trackCollectionStat[nc].m_ntracksNEGB;
               else if(rap < 3.0) ++event_data.m_trackCollectionStat[nc].m_ntracksNEGE;
-	      else if(rap < m_rapcut) ++event_data.m_trackCollectionStat[nc].m_ntracksNEGDBM;
+	      else if(rap < m_rapcut) ++event_data.m_trackCollectionStat[nc].m_ntracksNEGFWD;
 	    }
 	  }
 	}
@@ -1546,7 +1535,7 @@ int InDet::TrackClusterAssValidation::charge(const InDet::TrackClusterAssValidat
       double pt = std::sqrt(px*px+py*py)   ;
       double t  = std::atan2(pt,pz)        ;
       double ra = std::abs(std::log(std::tan(.5*t)));
-      // DBM
+      // Forward
       if (ra > 3.0)
 	rap = 3;
       else

@@ -62,11 +62,20 @@ def RpcRDODecodeCfg(flags, name="RpcRdoToRpcPrepData", **kwargs):
         from MuonConfig.MuonCondAlgConfig import RpcCondDbAlgCfg
         acc.merge(RpcCondDbAlgCfg(flags))
 
+    tool_kwargs={}
+    if not flags.Input.isMC:
+        tool_kwargs["reduceCablingOverlap"] = True
+        tool_kwargs["produceRpcCoinDatafromTriggerWords"] = True
+        tool_kwargs["overlap_timeTolerance"] = 1000
+        tool_kwargs["solvePhiAmbiguities"] = True
+        tool_kwargs["etaphi_coincidenceTime"] = 1000
+
     # Get the RDO -> PRD tool
     kwargs.setdefault("DecodingTool", CompFactory.Muon.RpcRdoToPrepDataToolMT(name="RpcPrepDataProviderTool",
                                                                               ReadKey="RpcCondDbData" if not flags.Common.isOnline else "",
                                                                               RpcPrdContainerCacheKey=MuonPrdCacheNames.RpcCache if flags.Muon.MuonTrigger else "",
-                                                                              RpcCoinDataContainerCacheKey=MuonPrdCacheNames.RpcCoinCache if flags.Muon.MuonTrigger else ""))
+                                                                              RpcCoinDataContainerCacheKey=MuonPrdCacheNames.RpcCoinCache if flags.Muon.MuonTrigger else "",
+                                                                              **tool_kwargs))
 
     # add RegSelTool
     from RegionSelector.RegSelToolConfig import regSelTool_RPC_Cfg

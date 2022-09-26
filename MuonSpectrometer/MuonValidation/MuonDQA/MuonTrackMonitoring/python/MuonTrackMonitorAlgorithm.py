@@ -221,11 +221,11 @@ def MuonTrackConfig(inputFlags, isOld=False, **kwargs):
             title='Muons_AllCBMuons_z0;z0;Entries', 
             type='TH1F', path='Muons/AllCBMuons', 
             xbins=100, xmin=-200, xmax=200, opt='kAlwaysCreate')
-    myGroup.defineHistogram('AllCBMuonIDChi2NDF;Muons_AllCBMuons_IDtndof', 
+    myGroup.defineHistogram('AllCBMuonIDchi2ndof;Muons_AllCBMuons_IDtndof', 
             title='Muons_AllCBMuons_IDtndof;TotalNumberDOF;Entries', 
             type='TH1F', path='Muons/AllCBMuons', 
             xbins=100, xmin=0, xmax=100, opt='kAlwaysCreate')
-    myGroup.defineHistogram('AllCBMuonMEChi2NDF;Muons_AllCBMuons_MEtndof', 
+    myGroup.defineHistogram('AllCBMuonMEchi2ndof;Muons_AllCBMuons_MEtndof', 
             title='Muons_AllCBMuons_MEtndof;TotalNumberDOF;Entries', 
             type='TH1F', path='Muons/AllCBMuons', 
             xbins=100, xmin=0, xmax=5, opt='kAlwaysCreate')
@@ -325,11 +325,11 @@ def MuonTrackConfig(inputFlags, isOld=False, **kwargs):
             title='Muons_CBMuons_z0;z0;Entries', 
             type='TH1F', path='Muons/CBMuons', 
             xbins=100, xmin=-200, xmax=200, opt='kAlwaysCreate')
-    myGroup.defineHistogram('CBMuonIDChi2NDF;Muons_CBMuons_IDtndof', 
+    myGroup.defineHistogram('CBMuonIDchi2ndof;Muons_CBMuons_IDtndof', 
             title='Muons_CBMuons_IDtndof;TotalNumberDOF;Entries', 
             type='TH1F', path='Muons/CBMuons', 
             xbins=100, xmin=0, xmax=100, opt='kAlwaysCreate')
-    myGroup.defineHistogram('CBMuonMEChi2NDF;Muons_CBMuons_MEtndof', 
+    myGroup.defineHistogram('CBMuonMEchi2ndof;Muons_CBMuons_MEtndof', 
             title='Muons_CBMuons_MEtndof;TotalNumberDOF;Entries', 
             type='TH1F', path='Muons/CBMuons', 
             xbins=100, xmin=0, xmax=5, opt='kAlwaysCreate')
@@ -421,11 +421,11 @@ def MuonTrackConfig(inputFlags, isOld=False, **kwargs):
             title='Muons_AllNonCBMuons_z0;z0;Entries', 
             type='TH1F', path='Muons/AllNonCBMuons', 
             xbins=100, xmin=-200, xmax=200, opt='kAlwaysCreate')
-    myGroup.defineHistogram('AllNonCBMuonIDChi2NDF;Muons_AllNonCBMuons_IDtndof', 
+    myGroup.defineHistogram('AllNonCBMuonIDchi2ndof;Muons_AllNonCBMuons_IDtndof', 
             title='Muons_AllNonCBMuons_IDtndof;TotalNumberDOF;Entries', 
             type='TH1F', path='Muons/AllNonCBMuons', 
             xbins=100, xmin=0, xmax=100, opt='kAlwaysCreate')
-    myGroup.defineHistogram('AllNonCBMuonMEChi2NDF;Muons_AllNonCBMuons_MEtndof', 
+    myGroup.defineHistogram('AllNonCBMuonMEchi2ndof;Muons_AllNonCBMuons_MEtndof', 
             title='Muons_AllNonCBMuons_MEtndof;TotalNumberDOF;Entries', 
             type='TH1F', path='Muons/AllNonCBMuons', 
             xbins=100, xmin=0, xmax=5, opt='kAlwaysCreate')
@@ -517,11 +517,11 @@ def MuonTrackConfig(inputFlags, isOld=False, **kwargs):
             title='Muons_NonCBMuons_z0;z0;Entries', 
             type='TH1F', path='Muons/NonCBMuons', 
             xbins=100, xmin=-200, xmax=200, opt='kAlwaysCreate')
-    myGroup.defineHistogram('NonCBMuonIDChi2NDF;Muons_NonCBMuons_IDtndof', 
+    myGroup.defineHistogram('NonCBMuonIDchi2ndof;Muons_NonCBMuons_IDtndof', 
             title='Muons_NonCBMuons_IDtndof;TotalNumberDOF;Entries', 
             type='TH1F', path='Muons/NoTrigCBMuons', 
             xbins=100, xmin=0, xmax=100, opt='kAlwaysCreate')
-    myGroup.defineHistogram('NonCBMuonMEChi2NDF;Muons_NonCBMuons_MEtndof', 
+    myGroup.defineHistogram('NonCBMuonMEchi2ndof;Muons_NonCBMuons_MEtndof', 
             title='Muons_NonCBMuons_MEtndof;TotalNumberDOF;Entries', 
             type='TH1F', path='Muons/NoTrigCBMuons', 
             xbins=100, xmin=0, xmax=5, opt='kAlwaysCreate')
@@ -597,7 +597,7 @@ def MuonTrackConfig(inputFlags, isOld=False, **kwargs):
             title='Muons_NoTrigCBMuons_type;Type;Entries', 
             type='TH1F', path='Muons/NoTrigCBMuons', 
             xbins=20, xmin=0, xmax=20, opt='kAlwaysCreate')
-    myGroup.defineHistogram('NoTrigCBMuonIDChi2NDF;Muons_NoTrigCBMuons_chi2ndof', 
+    myGroup.defineHistogram('NoTrigCBMuonIDchi2ndof;Muons_NoTrigCBMuons_chi2ndof', 
             title='Muons_NoTrigCBMuons_chi2ndof;TrackFitChi2/ndof', 
             type='TH1F', path='Muons/NoTrigCBMuons', 
             xbins=220, xmin=0, xmax=5, opt='kAlwaysCreate')
@@ -637,12 +637,12 @@ def MuonTrackConfig(inputFlags, isOld=False, **kwargs):
             title='Muons_NoTrigCBMuons_pt_broad;p_{T};Entries', 
             type='TH1F', path='Muons/NoTrigCBMuons', 
             xbins=100, xmin=0, xmax=1000, opt='kAlwaysCreate')
-    myGroup.defineHistogram('NoTrigCBMuonIDChi2NDF;Muons_NoTrigCBMuons_IDtndof', 
-            title='Muons_NoTrigCBMuons_IDtndof;TrackFitChi2NDF;Entries', 
+    myGroup.defineHistogram('NoTrigCBMuonIDchi2ndof;Muons_NoTrigCBMuons_IDtndof', 
+            title='Muons_NoTrigCBMuons_IDtndof;TrackFitchi2ndof;Entries', 
             type='TH1F', path='Muons/NoTrigCBMuons', 
             xbins=100, xmin=0, xmax=100, opt='kAlwaysCreate')
-    myGroup.defineHistogram('NoTrigCBMuonMEChi2NDF;Muons_NoTrigCBMuons_MEtndof', 
-            title='Muons_NoTrigCBMuons_MEtndof;TrackFitChi2NDF;Entries', 
+    myGroup.defineHistogram('NoTrigCBMuonMEchi2ndof;Muons_NoTrigCBMuons_MEtndof', 
+            title='Muons_NoTrigCBMuons_MEtndof;TrackFitchi2ndof;Entries', 
             type='TH1F', path='Muons/NoTrigCBMuons', 
             xbins=100, xmin=0, xmax=5, opt='kAlwaysCreate')
     myGroup.defineHistogram('NoTrigCBMuonZ0;Muons_NoTrigCBMuons_z0', 
@@ -705,7 +705,7 @@ def MuonTrackConfig(inputFlags, isOld=False, **kwargs):
             title='Muons_NoTrigNonCBMuons_type;Type;Entries', 
             type='TH1F', path='Muons/NoTrigNonCBMuons', 
             xbins=20, xmin=0, xmax=20, opt='kAlwaysCreate')
-    myGroup.defineHistogram('NoTrigNonCBMuonIDChi2NDF;Muons_NoTrigNonCBMuons_chi2ndof', 
+    myGroup.defineHistogram('NoTrigNonCBMuonIDchi2ndof;Muons_NoTrigNonCBMuons_chi2ndof', 
             title='Muons_NoTrigNonCBMuons_chi2ndof;TrackFitChi2/ndof', 
             type='TH1F', path='Muons/NoTrigNonCBMuons', 
             xbins=220, xmin=0, xmax=5, opt='kAlwaysCreate')
@@ -745,12 +745,12 @@ def MuonTrackConfig(inputFlags, isOld=False, **kwargs):
             title='Muons_NoTrigNonCBMuons_pt_broad;p_{T};Entries', 
             type='TH1F', path='Muons/NoTrigNonCBMuons', 
             xbins=100, xmin=0, xmax=1000, opt='kAlwaysCreate')
-    myGroup.defineHistogram('NoTrigNonCBMuonIDChi2NDF;Muons_NoTrigNonCBMuons_IDtndof', 
-            title='Muons_NoTrigNonCBMuons_IDtndof;TrackFitChi2NDF;Entries', 
+    myGroup.defineHistogram('NoTrigNonCBMuonIDchi2ndof;Muons_NoTrigNonCBMuons_IDtndof', 
+            title='Muons_NoTrigNonCBMuons_IDtndof;TrackFitchi2ndof;Entries', 
             type='TH1F', path='Muons/NoTrigNonCBMuons', 
             xbins=100, xmin=0, xmax=100, opt='kAlwaysCreate')
-    myGroup.defineHistogram('NoTrigNonCBMuonMEChi2NDF;Muons_NoTrigNonCBMuons_MEtndof', 
-            title='Muons_NoTrigNonCBMuons_MEtndof;TrackFitChi2NDF;Entries', 
+    myGroup.defineHistogram('NoTrigNonCBMuonMEchi2ndof;Muons_NoTrigNonCBMuons_MEtndof', 
+            title='Muons_NoTrigNonCBMuons_MEtndof;TrackFitchi2ndof;Entries', 
             type='TH1F', path='Muons/NoTrigNonCBMuons', 
             xbins=100, xmin=0, xmax=5, opt='kAlwaysCreate')
     myGroup.defineHistogram('NoTrigNonCBMuonZ0;Muons_NoTrigNonCBMuons_z0', 
@@ -905,8 +905,8 @@ def MuonTrackConfig(inputFlags, isOld=False, **kwargs):
             title='TracksID_Jpsi_HitContent_NTRTHits;NumberOfTRTHits;Entries', 
             type='TH1F', path='TracksID/Jpsi', 
             xbins=50, xmin=-0.5, xmax=49.5, opt='kAlwaysCreate')
-    myGroup.defineHistogram('JpsiMuonIDChi2NDF;TracksID_Jpsi_chi2ndof', 
-            title='TracksID_Jpsi_chi2ndof;TrackFitChi2NDF;Entries', 
+    myGroup.defineHistogram('JpsiMuonIDchi2ndof;TracksID_Jpsi_chi2ndof', 
+            title='TracksID_Jpsi_chi2ndof;TrackFitchi2ndof;Entries', 
             type='TH1F', path='TracksID/Jpsi', 
             xbins=100, xmin=0, xmax=5, opt='kAlwaysCreate')
     myGroup.defineHistogram('JpsiMuonIDPt;TracksID_Jpsi_pt', 
@@ -955,8 +955,8 @@ def MuonTrackConfig(inputFlags, isOld=False, **kwargs):
             title='TracksID_Z_HitContent_NTRTHits;NumberOfTRTHits;Entries', 
             type='TH1F', path='TracksID/Z', 
             xbins=50, xmin=-0.5, xmax=49.5, opt='kAlwaysCreate')
-    myGroup.defineHistogram('ZMuonIDChi2NDF;TracksID_Z_chi2ndof', 
-            title='TracksID_Z_chi2ndof;TrackFitChi2NDF;Entries', 
+    myGroup.defineHistogram('ZMuonIDchi2ndof;TracksID_Z_chi2ndof', 
+            title='TracksID_Z_chi2ndof;TrackFitchi2ndof;Entries', 
             type='TH1F', path='TracksID/Z', 
             xbins=100, xmin=0, xmax=5, opt='kAlwaysCreate')
     myGroup.defineHistogram('ZMuonIDPt;TracksID_Z_pt', 
@@ -1005,8 +1005,8 @@ def MuonTrackConfig(inputFlags, isOld=False, **kwargs):
             title='TracksID_CBMuons_HitContent_NTRTHits;NumberOfTRTHits;Entries', 
             type='TH1F', path='TracksID/CBMuons', 
             xbins=50, xmin=-0.5, xmax=49.5, opt='kAlwaysCreate')
-    myGroup.defineHistogram('CBMuonIDChi2NDF;TracksID_CBMuons_chi2ndof', 
-            title='TracksID_CBMuons_chi2ndof;TrackFitChi2NDF;Entries', 
+    myGroup.defineHistogram('CBMuonIDchi2ndof;TracksID_CBMuons_chi2ndof', 
+            title='TracksID_CBMuons_chi2ndof;TrackFitchi2ndof;Entries', 
             type='TH1F', path='TracksID/CBMuons', 
             xbins=100, xmin=0, xmax=5, opt='kAlwaysCreate')
     myGroup.defineHistogram('CBMuonMuonIDPt;TracksID_CBMuons_pt', 
@@ -1055,8 +1055,8 @@ def MuonTrackConfig(inputFlags, isOld=False, **kwargs):
             title='TracksID_NonCBMuons_HitContent_NTRTHits;NumberOfTRTHits;Entries', 
             type='TH1F', path='TracksID/NonCBMuons', 
             xbins=50, xmin=-0.5, xmax=49.5, opt='kAlwaysCreate')
-    myGroup.defineHistogram('NonCBMuonIDChi2NDF;TracksID_NonCBMuons_chi2ndof', 
-            title='TracksID_NonCBMuons_chi2ndof;TrackFitChi2NDF;Entries', 
+    myGroup.defineHistogram('NonCBMuonIDchi2ndof;TracksID_NonCBMuons_chi2ndof', 
+            title='TracksID_NonCBMuons_chi2ndof;TrackFitchi2ndof;Entries', 
             type='TH1F', path='TracksID/NonCBMuons', 
             xbins=100, xmin=0, xmax=5, opt='kAlwaysCreate')
     myGroup.defineHistogram('NonCBMuonMuonIDPt;TracksID_NonCBMuons_pt', 
@@ -1105,8 +1105,8 @@ def MuonTrackConfig(inputFlags, isOld=False, **kwargs):
             title='NoTrig_TracksID_CBMuons_HitContent_NTRTHits;NumberOfTRTHits;Entries', 
             type='TH1F', path='TracksID/NoTrigCBMuons', 
             xbins=50, xmin=-0.5, xmax=49.5, opt='kAlwaysCreate')
-    myGroup.defineHistogram('NoTrigCBMuonIDChi2NDF;NoTrig_TracksID_CBMuons_chi2ndof', 
-            title='NoTrig_TracksID_CBMuons_chi2ndof;TrackFitChi2NDF;Entries', 
+    myGroup.defineHistogram('NoTrigCBMuonIDchi2ndof;NoTrig_TracksID_CBMuons_chi2ndof', 
+            title='NoTrig_TracksID_CBMuons_chi2ndof;TrackFitchi2ndof;Entries', 
             type='TH1F', path='TracksID/NoTrigCBMuons', 
             xbins=100, xmin=0, xmax=5, opt='kAlwaysCreate')
 
@@ -1127,8 +1127,8 @@ def MuonTrackConfig(inputFlags, isOld=False, **kwargs):
             title='NoTrig_TracksID_NonCBMuons_HitContent_NTRTHits;NumberOfTRTHits;Entries', 
             type='TH1F', path='TracksID/NoTrigNonCBMuons', 
             xbins=50, xmin=-0.5, xmax=49.5, opt='kAlwaysCreate')
-    myGroup.defineHistogram('NoTrigNonCBMuonIDChi2NDF;NoTrig_TracksID_NonCBMuons_chi2ndof', 
-            title='NoTrig_TracksID_NonCBMuons_chi2ndof;TrackFitChi2NDF;Entries', 
+    myGroup.defineHistogram('NoTrigNonCBMuonIDchi2ndof;NoTrig_TracksID_NonCBMuons_chi2ndof', 
+            title='NoTrig_TracksID_NonCBMuons_chi2ndof;TrackFitchi2ndof;Entries', 
             type='TH1F', path='TracksID/NoTrigNonCBMuons', 
             xbins=100, xmin=0, xmax=5, opt='kAlwaysCreate')
 
@@ -1138,8 +1138,8 @@ def MuonTrackConfig(inputFlags, isOld=False, **kwargs):
 ###########################################################
 
     # TracksME/Jpsi
-    myGroup.defineHistogram('JpsiMEChi2NDF;TracksME_Jpsi_chi2ndof', 
-            title='TracksME_Jpsi_chi2ndof;TrackFitChi2NDF;Entries', 
+    myGroup.defineHistogram('JpsiMEchi2ndof;TracksME_Jpsi_chi2ndof', 
+            title='TracksME_Jpsi_chi2ndof;TrackFitchi2ndof;Entries', 
             type='TH1F', path='TracksME/Jpsi', 
             xbins=100, xmin=0, xmax=5, opt='kAlwaysCreate')
     myGroup.defineHistogram('JpsiMEPt;TracksME_Jpsi_pt', 
@@ -1180,8 +1180,8 @@ def MuonTrackConfig(inputFlags, isOld=False, **kwargs):
             xbins=27, xmin=-2.7, xmax=2.7, ybins=31, ymin=0, ymax=3.15, opt='kAlwaysCreate')
 
     # TracksME/Z
-    myGroup.defineHistogram('ZMEChi2NDF;TracksME_Z_chi2ndof', 
-            title='TracksME_Z_chi2ndof;TrackFitChi2NDF;Entries', 
+    myGroup.defineHistogram('ZMEchi2ndof;TracksME_Z_chi2ndof', 
+            title='TracksME_Z_chi2ndof;TrackFitchi2ndof;Entries', 
             type='TH1F', path='TracksME/Z', 
             xbins=100, xmin=0, xmax=5, opt='kAlwaysCreate')
     myGroup.defineHistogram('ZMEPt;TracksME_Z_pt', 
@@ -1222,8 +1222,8 @@ def MuonTrackConfig(inputFlags, isOld=False, **kwargs):
             xbins=27, xmin=-2.7, xmax=2.7, ybins=31, ymin=0, ymax=3.15, opt='kAlwaysCreate')
 
     # TracksME/CBMuons
-    myGroup.defineHistogram('CBMEChi2NDF;TracksME_CBMuons_chi2ndof', 
-            title='TracksME_CBMuons_chi2ndof;TrackFitChi2NDF;Entries', 
+    myGroup.defineHistogram('CBMEchi2ndof;TracksME_CBMuons_chi2ndof', 
+            title='TracksME_CBMuons_chi2ndof;TrackFitchi2ndof;Entries', 
             type='TH1F', path='TracksME/CBMuons', 
             xbins=100, xmin=0, xmax=5, opt='kAlwaysCreate')
     myGroup.defineHistogram('CBMEPt;TracksME_CBMuons_pt', 
@@ -1264,8 +1264,8 @@ def MuonTrackConfig(inputFlags, isOld=False, **kwargs):
             xbins=27, xmin=-2.7, xmax=2.7, ybins=31, ymin=0, ymax=3.15, opt='kAlwaysCreate')
 
     # TracksME/NoTrigCBMuons
-    myGroup.defineHistogram('NoTrigCBMEChi2NDF;TracksME_NoTrigCBMuons_chi2ndof', 
-            title='TracksME_NoTrigCBMuons_chi2ndof;TrackFitChi2NDF;Entries', 
+    myGroup.defineHistogram('NoTrigCBMEchi2ndof;TracksME_NoTrigCBMuons_chi2ndof', 
+            title='TracksME_NoTrigCBMuons_chi2ndof;TrackFitchi2ndof;Entries', 
             type='TH1F', path='TracksME/NoTrigCBMuons', 
             xbins=100, xmin=0, xmax=5, opt='kAlwaysCreate')
     myGroup.defineHistogram('NoTrigCBMEPt;TracksME_NoTrigCBMuons_pt', 
@@ -1306,8 +1306,8 @@ def MuonTrackConfig(inputFlags, isOld=False, **kwargs):
             xbins=27, xmin=-2.7, xmax=2.7, ybins=31, ymin=0, ymax=3.15, opt='kAlwaysCreate')
 
     # TracksME/CBMuons
-    myGroup.defineHistogram('NonCBMEChi2NDF;TracksME_NonCBMuons_chi2ndof', 
-            title='TracksME_NonCBMuons_chi2ndof;TrackFitChi2NDF;Entries', 
+    myGroup.defineHistogram('NonCBMEchi2ndof;TracksME_NonCBMuons_chi2ndof', 
+            title='TracksME_NonCBMuons_chi2ndof;TrackFitchi2ndof;Entries', 
             type='TH1F', path='TracksME/NonCBMuons', 
             xbins=100, xmin=0, xmax=5, opt='kAlwaysCreate')
     myGroup.defineHistogram('NonCBMEPt;TracksME_NonCBMuons_pt', 
@@ -1348,8 +1348,8 @@ def MuonTrackConfig(inputFlags, isOld=False, **kwargs):
             xbins=27, xmin=-2.7, xmax=2.7, ybins=31, ymin=0, ymax=3.15, opt='kAlwaysCreate')
 
     # TracksME/NoTrigNonCBMuonsNoTrig
-    myGroup.defineHistogram('NoTrigNonCBMEChi2NDF;TracksME_NoTrigNonCBMuons_chi2ndof', 
-            title='TracksME_NoTrigNonCBMuons_chi2ndof;TrackFitChi2NDF;Entries', 
+    myGroup.defineHistogram('NoTrigNonCBMEchi2ndof;TracksME_NoTrigNonCBMuons_chi2ndof', 
+            title='TracksME_NoTrigNonCBMuons_chi2ndof;TrackFitchi2ndof;Entries', 
             type='TH1F', path='TracksME/NoTrigNonCBMuons', 
             xbins=100, xmin=0, xmax=5, opt='kAlwaysCreate')
     myGroup.defineHistogram('NoTrigNonCBMEPt;TracksME_NoTrigNonCBMuons_pt', 
@@ -1601,7 +1601,7 @@ def MuonTrackConfig(inputFlags, isOld=False, **kwargs):
             title='Segments_AllCBMuons_rzpos_sectorSmall;zPos[mm];r[mm]', 
             type='TH2F', path='Segments/CBMuons', 
             xbins=220, xmin=-22000, xmax=22000, ybins=100, ymin=0, ymax=15000, opt='kAlwaysCreate')
-    myGroup.defineHistogram('AllCBSegmentFitChi2NDF;Segments_AllCBMuons_segmentfitChi2oNdof', 
+    myGroup.defineHistogram('AllCBSegmentFitchi2ndof;Segments_AllCBMuons_segmentfitChi2oNdof', 
             title='Segments_AllCBMuons_segmentfitChi2oNdof;SegmentFit#Chi^{2}/N_{dof};Entries', 
             type='TH1F', path='Segments/CBMuons', 
             xbins=120, xmin=0, xmax=12, opt='kAlwaysCreate')
@@ -1639,7 +1639,7 @@ def MuonTrackConfig(inputFlags, isOld=False, **kwargs):
             title='Segments_AllNonCBMuons_rzpos_sectorSmall;zPos[mm];r[mm]', 
             type='TH2F', path='Segments/NonCBMuons', 
             xbins=220, xmin=-22000, xmax=22000, ybins=100, ymin=0, ymax=15000, opt='kAlwaysCreate')
-    myGroup.defineHistogram('AllNonCBSegmentFitChi2NDF;Segments_AllNonCBMuons_segmentfitChi2oNdof', 
+    myGroup.defineHistogram('AllNonCBSegmentFitchi2ndof;Segments_AllNonCBMuons_segmentfitChi2oNdof', 
             title='Segments_AllNonCBMuons_segmentfitChi2oNdof;SegmentFit#Chi^{2}/N_{dof};Entries', 
             type='TH1F', path='Segments/NonCBMuons', 
             xbins=120, xmin=0, xmax=12, opt='kAlwaysCreate')
@@ -1677,7 +1677,7 @@ def MuonTrackConfig(inputFlags, isOld=False, **kwargs):
             title='Segments_CBMuons_rzpos_sectorSmall;zPos[mm];r[mm]', 
             type='TH2F', path='Segments/CBMuons', 
             xbins=220, xmin=-22000, xmax=22000, ybins=100, ymin=0, ymax=15000, opt='kAlwaysCreate')
-    myGroup.defineHistogram('CBSegmentFitChi2NDF;Segments_CBMuons_segmentfitChi2oNdof', 
+    myGroup.defineHistogram('CBSegmentFitchi2ndof;Segments_CBMuons_segmentfitChi2oNdof', 
             title='Segments_CBMuons_segmentfitChi2oNdof;SegmentFit#Chi^{2}/N_{dof};Entries', 
             type='TH1F', path='Segments/CBMuons', 
             xbins=120, xmin=0, xmax=12, opt='kAlwaysCreate')
@@ -1715,7 +1715,7 @@ def MuonTrackConfig(inputFlags, isOld=False, **kwargs):
             title='Segments_NonCBMuons_rzpos_sectorSmall;zPos[mm];r[mm]', 
             type='TH2F', path='Segments/NonCBMuons', 
             xbins=220, xmin=-22000, xmax=22000, ybins=100, ymin=0, ymax=15000, opt='kAlwaysCreate')
-    myGroup.defineHistogram('NonCBSegmentFitChi2NDF;Segments_NonCBMuons_segmentfitChi2oNdof', 
+    myGroup.defineHistogram('NonCBSegmentFitchi2ndof;Segments_NonCBMuons_segmentfitChi2oNdof', 
             title='Segments_NonCBMuons_segmentfitChi2oNdof;SegmentFit#Chi^{2}/N_{dof};Entries', 
             type='TH1F', path='Segments/NonCBMuons', 
             xbins=120, xmin=0, xmax=12, opt='kAlwaysCreate')
@@ -1753,7 +1753,7 @@ def MuonTrackConfig(inputFlags, isOld=False, **kwargs):
             title='Segments_NoTrig_CBMuons_rzpos_sectorSmall;zPos[mm];r[mm]', 
             type='TH2F', path='Segments/NoTrigCBMuons', 
             xbins=220, xmin=-22000, xmax=22000, ybins=100, ymin=0, ymax=15000, opt='kAlwaysCreate')
-    myGroup.defineHistogram('NoTrigCBSegmentFitChi2NDF;Segments_NoTrig_CBMuons_segmentfitChi2oNdof', 
+    myGroup.defineHistogram('NoTrigCBSegmentFitchi2ndof;Segments_NoTrig_CBMuons_segmentfitChi2oNdof', 
             title='Segments_NoTrig_CBMuons_segmentfitChi2oNdof;SegmentFit#Chi^{2}/N_{dof};Entries', 
             type='TH1F', path='Segments/NoTrigCBMuons', 
             xbins=120, xmin=0, xmax=12, opt='kAlwaysCreate')
@@ -1791,7 +1791,7 @@ def MuonTrackConfig(inputFlags, isOld=False, **kwargs):
             title='Segments_NoTrig_NonCBMuons_rzpos_sectorSmall;zPos[mm];r[mm]', 
             type='TH2F', path='Segments/NoTrigNonCBMuons', 
             xbins=220, xmin=-22000, xmax=22000, ybins=100, ymin=0, ymax=15000, opt='kAlwaysCreate')
-    myGroup.defineHistogram('NoTrigNonCBSegmentFitChi2NDF;Segments_NoTrig_NonCBMuons_segmentfitChi2oNdof', 
+    myGroup.defineHistogram('NoTrigNonCBSegmentFitchi2ndof;Segments_NoTrig_NonCBMuons_segmentfitChi2oNdof', 
             title='Segments_NoTrig_NonCBMuons_segmentfitChi2oNdof;SegmentFit#Chi^{2}/N_{dof};Entries', 
             type='TH1F', path='Segments/NoTrigNonCBMuons', 
             xbins=120, xmin=0, xmax=12, opt='kAlwaysCreate')

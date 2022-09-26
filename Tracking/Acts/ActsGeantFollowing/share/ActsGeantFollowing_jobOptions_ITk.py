@@ -33,9 +33,8 @@ def defaultTestFlags(configFlags, args):
       "Bpipe"
     ]
  
-    from AthenaConfiguration.DetectorConfigFlags import setupDetectorsFromList
-    setupDetectorsFromList(ConfigFlags, detectors, toggle_geometry=True)
-
+    from AthenaConfiguration.DetectorConfigFlags import setupDetectorFlags
+    setupDetectorFlags(ConfigFlags, detectors, toggle_geometry=True)
 
     ConfigFlags.GeoModel.AtlasVersion = "ATLAS-P2-RUN4-01-00-00"
     ConfigFlags.IOVDb.GlobalTag = "OFLCOND-SIM-00-00-00"
