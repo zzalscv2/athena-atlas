@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
 */
 
 ///////////////////////////////////////////////////////////////////
@@ -8,7 +8,9 @@
 
 #ifndef DERIVATIONFRAMEWORK_SKIMMINGTOOLHSG1_H
 #define DERIVATIONFRAMEWORK_SKIMMINGTOOLHSG1_H
- 
+
+#include <array>
+#include <optional>
 #include <string>
 #include <vector>
 #include <algorithm>
@@ -53,11 +55,11 @@ namespace DerivationFramework {
       ~SkimmingToolHIGG1();
 
       // Athena algtool's Hooks
-      StatusCode  initialize();
-      StatusCode  finalize();
+      virtual StatusCode  initialize() override;
+      virtual StatusCode  finalize() override;
 
       /** Check that the current event passes this filter */
-      virtual bool eventPassesFilter() const;
+      virtual bool eventPassesFilter() const override;
 
     private:
 
@@ -96,8 +98,6 @@ namespace DerivationFramework {
       std::vector<std::string> m_triggers;
       std::vector<std::string> m_mergedtriggers;
 
-      mutable bool m_isMC;
-
       double m_minPhotonPt;
       bool   m_removeCrack;
       double m_maxEta;
@@ -121,29 +121,31 @@ namespace DerivationFramework {
       // Cuts
       bool   SubcutOneMergedElectron() const;
       bool   SubcutGoodRunList() const;
-      bool   SubcutLArError() const;
+      bool   SubcutLArError(const xAOD::EventInfo& eventInfo) const;
       bool   SubcutTrigger() const;
-      bool   SubcutPreselect() const;
+      /// Leading and sub-leading photon (in that order)
+      using LeadingPhotons_t = std::array<const xAOD::Photon*, 2>;
+      std::optional<LeadingPhotons_t> SubcutPreselect() const;
       bool   SubcutOnePhotonOneElectron() const;
       bool   SubcutTwoElectrons() const;
       bool   SubcutOnePhotonOneMuon() const;
       bool   SubcutOnePhotonTwoElectrons() const;
       bool   SubcutOnePhotonTwoMuons() const;
-      bool   SubcutOnePhotonMergedElectrons() const;
+      bool   SubcutOnePhotonMergedElectrons(const xAOD::EventInfo& eventInfo) const;
       bool   SubcutHighPtOnePhotonOneElectron() const;
 
-      bool   SubcutKinematic() const;
-      bool   SubcutQuality() const;
+      bool   SubcutKinematic(const LeadingPhotons_t& leadingPhotons, double invariantMass) const;
+      bool   SubcutQuality(const LeadingPhotons_t& leadingPhotons) const;
       bool   SubcutIsolation() const;
-      bool   SubcutInvariantMass() const;
+      bool   SubcutInvariantMass(double invariantMass) const;
 
       // Calculators
       bool   PhotonPreselect(const xAOD::Photon *ph) const;
       bool   ElectronPreselect(const xAOD::Electron *el) const;
       bool   MergedElectronPreselect(const xAOD::Electron *el) const;
       bool   MuonPreselect(const xAOD::Muon *mu) const;
-      void   CalculateInvariantMass() const;
-      void   GetDiphotonVertex() const;
+      double CalculateInvariantMass(const LeadingPhotons_t& leadingPhotons) const;
+      double GetDiphotonVertex() const;
       static double CorrectedEnergy(const xAOD::Photon *ph) ;
       double CorrectedEta(const xAOD::Photon *ph) const;
       static double ReturnRZ_1stSampling_cscopt2(double eta1) ;
@@ -152,52 +154,25 @@ namespace DerivationFramework {
       ///////////////
       ///// COUNTERS
 
-      mutable unsigned int m_n_tot;
-      mutable unsigned int m_n_passGRL;
-      mutable unsigned int m_n_passLArError;
-      mutable unsigned int m_n_passTrigger;
-      mutable unsigned int m_n_passPreselect;
-      mutable unsigned int m_n_passSingleElectronPreselect;
-      mutable unsigned int m_n_passDoubleElectronPreselect;
-      mutable unsigned int m_n_passSingleMuonPreselect;
-      mutable unsigned int m_n_passSinglePhotonDoubleMuonPreselect;
-      mutable unsigned int m_n_passSinglePhotonDoubleElectronPreselect;
-      mutable unsigned int m_n_passSinglePhotonMergedElectronPreselect;
-      mutable unsigned int m_n_passHighPtPhotonMergedElectronPreselect;
-      mutable unsigned int m_n_passSingleMergedElectronPreselect;
-      mutable unsigned int m_n_passKinematic;
-      mutable unsigned int m_n_passQuality;
-      mutable unsigned int m_n_passIsolation;
-      mutable unsigned int m_n_passInvariantMass;
-      mutable unsigned int m_n_pass;
+      mutable std::atomic<unsigned int> m_n_tot{0};
+      mutable std::atomic<unsigned int> m_n_passGRL{0};
+      mutable std::atomic<unsigned int> m_n_passLArError{0};
+      mutable std::atomic<unsigned int> m_n_passTrigger{0};
+      mutable std::atomic<unsigned int> m_n_passPreselect{0};
+      mutable std::atomic<unsigned int> m_n_passSingleElectronPreselect{0};
+      mutable std::atomic<unsigned int> m_n_passDoubleElectronPreselect{0};
+      mutable std::atomic<unsigned int> m_n_passSingleMuonPreselect{0};
+      mutable std::atomic<unsigned int> m_n_passSinglePhotonDoubleMuonPreselect{0};
+      mutable std::atomic<unsigned int> m_n_passSinglePhotonDoubleElectronPreselect{0};
+      mutable std::atomic<unsigned int> m_n_passSinglePhotonMergedElectronPreselect{0};
+      mutable std::atomic<unsigned int> m_n_passHighPtPhotonMergedElectronPreselect{0};
+      mutable std::atomic<unsigned int> m_n_passSingleMergedElectronPreselect{0};
+      mutable std::atomic<unsigned int> m_n_passKinematic{0};
+      mutable std::atomic<unsigned int> m_n_passQuality{0};
+      mutable std::atomic<unsigned int> m_n_passIsolation{0};
+      mutable std::atomic<unsigned int> m_n_passInvariantMass{0};
+      mutable std::atomic<unsigned int> m_n_pass{0};
 
-
-      /////////////////////////////
-      ///// EVENT LEVEL QUANTITIES
-
-      mutable std::vector<const xAOD::Photon*> m_e_leadingPhotons;
-
-
-      mutable bool m_e_passGRL;
-      mutable bool m_e_passLArError;
-      mutable bool m_e_passTrigger;
-      mutable bool m_e_passPreselect;
-      mutable bool m_e_passSingleElectronPreselect;
-      mutable bool m_e_passDoubleElectronPreselect;
-      mutable bool m_e_passSingleMuonPreselect;
-      mutable bool m_e_passKinematic;
-      mutable bool m_e_passQuality;
-      mutable bool m_e_passIsolation;
-      mutable bool m_e_passInvariantMass;
-
-      mutable int    m_ph_pos_lead, m_ph_pos_subl;
-      mutable double m_ph_pt_lead, m_ph_eta_lead, m_ph_phi_lead, m_ph_e_lead;
-      mutable double m_ph_pt_subl, m_ph_eta_subl, m_ph_phi_subl, m_ph_e_subl;
-
-      mutable int    m_ph_tight_lead, m_ph_tight_subl;
-
-      mutable double m_e_invariantMass;
-      mutable double m_e_diphotonZ;
 
       /////////////////////////////
       ///// FUNCTIONS

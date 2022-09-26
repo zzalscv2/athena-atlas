@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
 */
 
 
@@ -279,7 +279,7 @@ namespace DerivationFramework {
     std::vector<float> subCluster_dEta;
     std::vector<float> subCluster_dPhi;
 
-    static SG::AuxElement::Accessor<std::vector<ElementLink<xAOD::CaloClusterContainer> > > clusterLinksAcc("constituentClusterLinks");
+    static const SG::AuxElement::Accessor<std::vector<ElementLink<xAOD::CaloClusterContainer> > > clusterLinksAcc("constituentClusterLinks");
     if(caloCluster && clusterLinksAcc.isAvailable(*caloCluster) ){
       std::vector<ElementLink<xAOD::CaloClusterContainer> >  clusterLinks = clusterLinksAcc(*caloCluster);
       for( const auto& link : clusterLinks){

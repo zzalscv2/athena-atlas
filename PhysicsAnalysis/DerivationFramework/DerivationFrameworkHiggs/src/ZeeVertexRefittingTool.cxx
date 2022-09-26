@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
 */
 
 ///////////////////////////////////////////////////////////////////
@@ -23,7 +23,7 @@
 namespace DerivationFramework {
 
   static const SG::AuxElement::Decorator<float> sumPt2("sumPt2");  
-  static SG::AuxElement::Decorator<std::vector<ElementLink<xAOD::TrackParticleContainer> > > electronTrackLinksDecor("ElectronTrackLinks"); 
+  static const SG::AuxElement::Decorator<std::vector<ElementLink<xAOD::TrackParticleContainer> > > electronTrackLinksDecor("ElectronTrackLinks");
 
   ZeeVertexRefittingTool::ZeeVertexRefittingTool(const std::string& t,
 					   const std::string& n,
@@ -126,10 +126,10 @@ namespace DerivationFramework {
         xAOD::EgammaHelpers::getOriginalTrackParticle( electrons->at(pair[1]) )
       };
       ATH_MSG_DEBUG("Refitting PV for e tracks: " << tps[0] << " " << tps[1]);      
-      const xAOD::Vertex* pv_ref = m_pvrefitter->refitVertex(pv,tps);
+      xAOD::Vertex* pv_ref = m_pvrefitter->refitVertex(pv,tps);
       if (pv_ref) {                
-      	refittedPVContainer->push_back(const_cast<xAOD::Vertex*>(pv_ref)); //must remove const-ness: since PrimaryVertexRefitter is given the parameter returnCopy=true, it will return a newly allocated xAOD::Vertex object via const pointer, requiring the const to be cast away to add it to the container.
-            
+      	refittedPVContainer->push_back(pv_ref);
+
         ATH_MSG_DEBUG("refitted PV nTP: " << pv_ref->nTrackParticles() << " -- " << pv->nTrackParticles());
         ATH_MSG_DEBUG("refitted PV z: " << pv_ref->z() << " -- " << pv->z());
 
