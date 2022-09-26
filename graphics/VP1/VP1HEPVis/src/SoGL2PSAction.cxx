@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2017 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
 */
 
 // this :
@@ -21,18 +21,17 @@
 
 SO_ACTION_SOURCE(SoGL2PSAction)
 //////////////////////////////////////////////////////////////////////////////
-bool SoGL2PSAction::s_didInit = false;
 void SoGL2PSAction::initClass(
 )
 //////////////////////////////////////////////////////////////////////////////
 //!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!//
 {
-  if ( !s_didInit ) {
-    s_didInit = true;
+  [[maybe_unused]] static const bool didInit = [&]() {
     SO_ACTION_INIT_CLASS(SoGL2PSAction,SoGLRenderAction);
     SO_ACTION_ADD_METHOD(SoSeparator,separatorAction);
     SO_ACTION_ADD_METHOD(SoDrawStyle,drawStyleAction);
-  }
+    return true;
+  }();
 }
 //////////////////////////////////////////////////////////////////////////////
 SoGL2PSAction::SoGL2PSAction(

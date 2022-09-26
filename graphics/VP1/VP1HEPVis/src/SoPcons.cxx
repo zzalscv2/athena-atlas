@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2017 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
 */
 
 /*-----------------------------Hepvis---------------------------------------*/
@@ -69,13 +69,12 @@ SoPcons::~SoPcons() {
 
 
 //____________________________________________________________________
-bool SoPcons::s_didInit = false;
 void SoPcons::initClass()
 {
-  if ( !s_didInit ) {
+  [[maybe_unused]] static const bool didInit = [&]() {
     SO_NODE_INIT_CLASS(SoPcons,SoShape,"Shape");
-    s_didInit = true;
-  }
+    return true;
+  }();
 }
 
 // generatePrimitives

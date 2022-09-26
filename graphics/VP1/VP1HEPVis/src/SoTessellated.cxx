@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2017 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "VP1HEPVis/nodes/SoTessellated.h"
@@ -16,13 +16,12 @@
 SO_NODE_SOURCE(SoTessellated)
 
 //____________________________________________________________________
-bool SoTessellated::s_didInit = false;
 void SoTessellated::initClass()
 {
-  if(!s_didInit){
+  [[maybe_unused]] static const bool didInit = [&]() {
     SO_NODE_INIT_CLASS(SoTessellated, SoShape, "Shape");
-    s_didInit = true;
-  }
+    return true;
+  }();
 }
 
 //____________________________________________________________________

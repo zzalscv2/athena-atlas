@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2017 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
 */
 
 
@@ -59,13 +59,12 @@ static int sogenericbox_vindices_foraltreplines[20] =
 };
 
 //____________________________________________________________________
-bool SoGenericBox::s_didInit = false;
 void SoGenericBox::initClass()
 {
-  if ( !s_didInit ) {
+  [[maybe_unused]] static const bool didInit = [&]() {
     SO_NODE_INIT_CLASS(SoGenericBox, SoShape, "Shape");
-    s_didInit = true;
-  }
+    return true;
+  }();
 }
 
 //____________________________________________________________________

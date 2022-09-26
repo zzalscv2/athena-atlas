@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2017 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
 */
 
 
@@ -21,20 +21,17 @@
 #include <Inventor/actions/SoGLRenderAction.h>
 #include <Inventor/bundles/SoMaterialBundle.h>
 #include <Inventor/elements/SoTransparencyElement.h>
-#include <algorithm>//for min/max
-
-bool SoTransparency::s_didInit = false;
+#include <algorithm> //for min/max
 
 SO_NODE_SOURCE(SoTransparency)
 // Initializes the SoTransparency class.
 void
 SoTransparency::initClass()
 {
-  if ( !s_didInit )
-  {
+  [[maybe_unused]] static const bool didInit = [&]() {
     SO_NODE_INIT_CLASS(SoTransparency, SoNode, "Node");
-    s_didInit = true;
-  }
+    return true;
+  }();
 }
 
 // Constructor
