@@ -9,6 +9,7 @@ def makeJetJvtAnalysisSequence( dataType, jetCollection,
                                 enableFJvt = False,
                                 globalSF = True,
                                 runSelection = True,
+                                runNNJvt = False,
                                 shallowViewOutput = True,
                                 enableCutflow = False ):
     """Create a jet JVT analysis algorithm sequence
@@ -27,6 +28,9 @@ def makeJetJvtAnalysisSequence( dataType, jetCollection,
 
     if runSelection and not globalSF :
         raise ValueError ("per-event scale factors needs to be computed when doing a JVT selection")
+
+    if runNNJvt:
+        assert (not globalSF), "SFs not yet available for NN JVT"
 
     # Create the analysis algorithm sequence object:
     seq = AnaAlgSequence( "JetJVTAnalysisSequence" )
@@ -56,7 +60,8 @@ def makeJetJvtAnalysisSequence( dataType, jetCollection,
                         inputPropName = { 'jets' : 'particles' } )
 
     if runSelection:
-        seq.addMetaConfigDefault ("selectionDecorNames", ['jvt_selection', 'fjvt_selection'] if enableFJvt else ['jvt_selection'])
+        jvt_name = 'NNJvtPass' if runNNJvt else 'jvt_selection'
+        seq.addMetaConfigDefault ("selectionDecorNames", [ jvt_name, 'fjvt_selection'] if enableFJvt else ['jvt_selection'])
         seq.addMetaConfigDefault ("selectionDecorCount", [1, 1] if enableFJvt else [1])
 
         # Set up an algorithm used to create jet JVT selection cutflow:

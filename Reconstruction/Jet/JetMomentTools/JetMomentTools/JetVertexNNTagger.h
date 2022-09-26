@@ -20,6 +20,8 @@
 #include <vector>
 #include <utility>
 #include <memory>
+#include <functional>
+#include <optional>
 
 #include "AsgTools/PropertyWrapper.h"
 #include "AsgTools/AsgTool.h"
@@ -58,7 +60,7 @@ namespace JetPileupTag {
       // Determine pt, eta bin of jet
       std::pair<size_t,size_t> get_kinematic_bin(const xAOD::Jet& jet) const;
       // Retrieve hard scatter vertex for its index
-      const xAOD::Vertex* findHSVertex() const;
+      std::optional<std::reference_wrapper<const xAOD::Vertex> > findHSVertex(const xAOD::VertexContainer& vertices) const;
 
       // Evaluate JVT from Rpt and JVFcorr
       float evaluateJvt(float rpt, float jvfcorr, size_t ptbin, size_t etabin) const;
@@ -77,6 +79,7 @@ namespace JetPileupTag {
       // Generically needed for moment tools
       Gaudi::Property<std::string> m_jetContainerName{this,"JetContainer", "", "SG key for the input jet container"};
       Gaudi::Property<bool> m_suppressInputDeps{this, "SuppressInputDependence", false, "Will JVFCorr and SumPtTrk be created in the same algorithm that uses this tool?"};
+      Gaudi::Property<bool> m_suppressOutputDeps{this, "SuppressOutputDependence", false, "Ignore creating the output decoration dependency for data flow; for analysis"};
 
       // NN configuration
       Gaudi::Property<std::string> m_NNConfigDir{this,"NNConfigDir", "JetPileupTag/NNJvt/2022-03-22", "PathResolver-accessible directory holding config files"};

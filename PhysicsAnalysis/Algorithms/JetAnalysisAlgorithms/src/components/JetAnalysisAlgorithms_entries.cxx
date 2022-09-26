@@ -7,6 +7,7 @@
 #include <JetAnalysisAlgorithms/JetUncertaintiesAlg.h>
 #include <JetAnalysisAlgorithms/JvtEfficiencyAlg.h>
 #include <JetAnalysisAlgorithms/JvtUpdateAlg.h>
+#include <JetAnalysisAlgorithms/JetDecoratorAlg.h>
 
 DECLARE_COMPONENT (CP::JetCalibrationAlg)
 DECLARE_COMPONENT (CP::JetGhostMuonAssociationAlg)
@@ -15,3 +16,4 @@ DECLARE_COMPONENT (CP::JetSelectionAlg)
 DECLARE_COMPONENT (CP::JetUncertaintiesAlg)
 DECLARE_COMPONENT (CP::JvtEfficiencyAlg)
 DECLARE_COMPONENT (CP::JvtUpdateAlg)
+DECLARE_COMPONENT (CP::JetDecoratorAlg)

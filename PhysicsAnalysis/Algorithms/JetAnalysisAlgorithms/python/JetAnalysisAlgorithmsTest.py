@@ -30,9 +30,25 @@ def makeSequence (dataType, jetContainer="AntiKt4EMPFlowJets") :
     pileupSequence.configure( inputName = {}, outputName = {} )
     print( pileupSequence ) # For debugging
 
+    from AsgAnalysisAlgorithms.EventSelectionAnalysisSequence import \
+        makeEventSelectionAnalysisSequence
+    
+    evtselSequence = makeEventSelectionAnalysisSequence(dataType)
+    evtselSequence.configure( inputName = {}, outputName = {} )
+    print( evtselSequence )
+
     # Include, and then set up the jet analysis algorithm sequence:
     from JetAnalysisAlgorithms.JetAnalysisSequence import makeJetAnalysisSequence
-    jetSequence = makeJetAnalysisSequence( dataType, jetContainer, enableCutflow=True, enableKinematicHistograms=True )
+    jvtopts = dict(runJvtUpdate=True, runFJvtUpdate=True)
+    if jetContainer=="AntiKt4EMPFlowJets":
+       jvtopts.update(dict(runNNJvtUpdate=True))
+    
+    jetSequence = makeJetAnalysisSequence(
+        dataType, jetContainer,
+        enableCutflow=True, enableKinematicHistograms=True,
+        **jvtopts
+    )
+        
     jetSequence.configure( inputName = jetContainer, outputName = 'AnalysisJetsBase_%SYS%' )
     print( jetSequence ) # For debugging
 
@@ -45,6 +61,7 @@ def makeSequence (dataType, jetContainer="AntiKt4EMPFlowJets") :
 
     # Add the sequences to the job:
     algSeq += pileupSequence
+    algSeq += evtselSequence
     algSeq += jetSequence
     algSeq += jvtSequence
 

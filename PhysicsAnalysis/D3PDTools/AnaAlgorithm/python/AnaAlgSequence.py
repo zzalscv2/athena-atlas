@@ -9,6 +9,9 @@ from AnaAlgorithm.AlgSequence import AlgSequence
 from AnaAlgorithm.AnaAlgorithmMeta import AnaAlgorithmMeta
 from AnaAlgorithm.DualUseConfig import createAlgorithm
 
+def getFullName(comp):
+    return f"{comp.getType()}/{comp.getName()}"
+
 class AnaAlgSequence( AlgSequence ):
     """Analysis algorithm sequence
 
@@ -39,6 +42,9 @@ class AnaAlgSequence( AlgSequence ):
         # Special members for GaudiConfig2 types
         self._isGaudiConfig2 = False
         self._gaudiConfig2List = []
+        # For tools that need to be aware of their parent's
+        # input/output properties (for DecorHandle management)
+        self._algToDecorToolMap = {}
 
         return
 
@@ -50,6 +56,14 @@ class AnaAlgSequence( AlgSequence ):
     # Access Gaudi2 components
     def getGaudiConfig2Components(self):
         return self._gaudiConfig2List
+
+    # Some tools (e.g. IJetDecorator instances) hold a container name to handle
+    # Read/WriteDecorHandles correctly
+    # These need to receive the corresponding input/output properties that
+    # their parents do, so add in a map from parent to child and propagate
+    def addDecorAwareTool(self, tool, parent, inputPropName=None, outputPropName=None):
+        assert inputPropName or outputPropName, "Either input or output name should be provided for decor-aware tools"
+        self._algToDecorToolMap[getFullName(parent)] = (tool, inputPropName, outputPropName)
 
     def configure( self, inputName, outputName,
                    hiddenLayerPrefix = "" ):
@@ -144,6 +158,11 @@ class AnaAlgSequence( AlgSequence ):
                 if inputLabel not in currentInputs:
                     continue
                 setattr( alg, inputPropName, currentInputs[ inputLabel ] )
+
+                if getFullName(alg) in self._algToDecorToolMap:
+                    tool, inputPropName, outputPropName = self._algToDecorToolMap[getFullName(alg)]
+                    if inputPropName:
+                        setattr( tool, inputPropName, currentInputs[ inputLabel ] )
                 pass
 
             # Set up the output name(s):
@@ -167,6 +186,11 @@ class AnaAlgSequence( AlgSequence ):
                     tmpIndex[ outputLabel ] += 1
                     setattr( alg, outputPropName, currentInputs[ outputLabel ] )
 
+                    if getFullName(alg) in self._algToDecorToolMap:
+                        tool, inputPropName, outputPropName = self._algToDecorToolMap[getFullName(alg)]
+                        if outputPropName:
+                            setattr( tool, outputPropName, currentInputs[ outputLabel ] )
+
                     pass
                 pass
 
@@ -187,6 +211,12 @@ class AnaAlgSequence( AlgSequence ):
                 for outputLabel, outputKey in meta.outputPropName.items():
                     if outputLabel in currentOutputs:
                         setattr( alg, outputKey, currentOutputs[ outputLabel ] )
+
+                        if getFullName(alg) in self._algToDecorToolMap:
+                            tool, inputPropName, outputPropName = self._algToDecorToolMap[getFullName(alg)]
+                            if outputPropName:
+                                setattr( tool, outputPropName, currentInputs[ outputLabel ] )
+
                         del currentOutputs[ outputLabel ]
                         pass
                     pass
@@ -198,6 +228,11 @@ class AnaAlgSequence( AlgSequence ):
                 for inputLabel, inputKey in meta.inputPropName.items():
                     if inputLabel in currentOutputs:
                         setattr( alg, inputKey, currentOutputs[ inputLabel ] )
+
+                        if getFullName(alg) in self._algToDecorToolMap:
+                            tool, inputPropName, outputPropName = self._algToDecorToolMap[getFullName(alg)]
+                            if inputPropName:
+                                setattr( tool, inputPropName, currentInputs[ inputLabel ] )
 
             pass
 

@@ -1,6 +1,6 @@
-# Copyright (C) 2002-2019 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
 #
-# @author Nils Krumnack
+# @author Nils Krumnack, Teng Jian Khoo
 
 # User options, which can be set from command line after a "-" character
 # athena EgammaAlgorithmsTest_jobOptions.py - --myOption ...
@@ -21,7 +21,7 @@ inputfile = {"data": 'ASG_TEST_FILE_DATA',
              "mc":   'ASG_TEST_FILE_MC',
              "afii": 'ASG_TEST_FILE_MC_AFII'}
 
-jetContainer = "AntiKt4EMTopoJets"
+jetContainer = "AntiKt4EMPFlowJets"
 
 # Set up the reading of the input file:
 import AthenaPoolCnvSvc.ReadAthenaPool
@@ -41,6 +41,17 @@ ServiceMgr += CfgMgr.THistSvc()
 ServiceMgr.THistSvc.Output += [
     "ANALYSIS DATAFILE='JetAnalysisAlgorithmsTestPFlow." + dataType + ".hist.root' OPT='RECREATE'"
     ]
+
+# Workaround for running the event selection algs on MC with multiple event weights
+from AthenaCommon.Configurable import ConfigurableRun3Behavior
+from AthenaConfiguration.AllConfigFlags import ConfigFlags
+from EventBookkeeperTools.EventBookkeeperToolsConfig import CutFlowSvcCfg
+
+with ConfigurableRun3Behavior():
+    cfg = CutFlowSvcCfg(ConfigFlags)
+
+from AthenaConfiguration.LegacySupport import conf2toConfigurable, appendCAtoAthena
+appendCAtoAthena(cfg)
 
 # Reduce the printout from Athena:
 include( "AthAnalysisBaseComps/SuppressLogging.py" )

@@ -46,7 +46,7 @@ namespace CP
     /// \brief the jet collection we run on
   private:
     SysCopyHandle<xAOD::JetContainer> m_jetHandle {
-      this, "jets", "AntiKt4EMTopoJets", "the jet collection to run on"};
+      this, "jets", "", "the jet collection to run on"};
 
     /// \brief the preselection we apply to our input
   private:
