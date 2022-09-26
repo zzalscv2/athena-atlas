@@ -77,7 +77,6 @@ TRTFastDigitizationTool::TRTFastDigitizationTool( const std::string &type,
     m_HardScatterSplittingSkipper( false ),
     m_vetoThisBarcode( crazyParticleBarcode ),
     m_useEventInfo( false ),
-    m_EventInfoKey( "McEventInfo" ),
     m_NCollPerEvent( 30 ),
     m_trtHighProbabilityBoostBkg(1.), 
     m_trtHighProbabilityBoostEle(1.)
@@ -94,7 +93,6 @@ TRTFastDigitizationTool::TRTFastDigitizationTool( const std::string &type,
   declareProperty( "HardScatterSplittingMode",    m_HardScatterSplittingMode, "Control pileup & signal splitting" );
   declareProperty( "ParticleBarcodeVeto",         m_vetoThisBarcode, "Barcode of particle to ignore");
   declareProperty( "useEventInfo",                m_useEventInfo);
-  declareProperty( "EventInfoKey",                m_EventInfoKey);
   declareProperty( "NCollPerEvent",               m_NCollPerEvent);
 }
 
@@ -136,7 +134,9 @@ StatusCode TRTFastDigitizationTool::initialize()
 
   if ( m_useTrtElectronPidTool ) {
     CHECK( m_trtElectronPidTool.retrieve() );
-  } 
+  }
+
+  ATH_CHECK( m_EventInfoKey.initialize (m_useEventInfo) );
 
   StatusCode sc = initializeNumericalConstants();
 
@@ -295,7 +295,7 @@ StatusCode TRTFastDigitizationTool::produceDriftCircles(const EventContext& ctx)
   
   if(m_useEventInfo){
 
-     SG::ReadHandle<EventInfo> eventInfoContainer(m_EventInfoKey, ctx);
+     SG::ReadHandle<xAOD::EventInfo> eventInfoContainer(m_EventInfoKey, ctx);
      if(eventInfoContainer.isValid()){
        m_NCollPerEvent = (float) eventInfoContainer->averageInteractionsPerCrossing();
      }
