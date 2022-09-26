@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2020 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef FASTTRT_DIGITIZATION_FASTTRT_DIGITIZATIONTOOL_H
@@ -10,7 +10,6 @@
  * @author Paolo Calafiura - ATLAS Collaboration
  */
 
-#include "EventInfo/PileUpEventInfo.h"
 #include "PileUpTools/PileUpToolBase.h"
 
 #include "GaudiKernel/ServiceHandle.h"
@@ -34,11 +33,11 @@
 #include "TrkTruthData/PRD_MultiTruthCollection.h"
 
 #include "xAODEventInfo/EventInfo.h"
-#include "xAODEventInfo/EventAuxInfo.h"
 
 #include "HitManagement/TimedHitCollection.h"
 #include "InDetSimEvent/TRTUncompressedHitCollection.h"
 #include "StoreGate/WriteHandle.h"
+#include "StoreGate/ReadHandleKey.h"
 #include "PileUpTools/PileUpMergeSvc.h"
 
 #include <utility>
@@ -144,8 +143,9 @@ private:
   bool m_HardScatterSplittingSkipper;
   IntegerProperty m_vetoThisBarcode;
 
-  bool m_useEventInfo;  // get mu from EventInfo ? 
-  std::string m_EventInfoKey;
+  bool m_useEventInfo;  // get mu from EventInfo ?
+  SG::ReadHandleKey<xAOD::EventInfo> m_EventInfoKey
+    { this, "EventInfoKey", "EventInfo", "SG key for EventInfo" };
   float m_NCollPerEvent;
 
   // numerical constants. Might wish to move these to a DB in the future
