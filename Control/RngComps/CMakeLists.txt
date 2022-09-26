@@ -50,7 +50,7 @@ atlas_add_test( TestSeedRunEvent
 atlas_add_test( RNGWrapper_test
    SOURCES test/RNGWrapper_test.cxx
    INCLUDE_DIRS ${CLHEP_INCLUDE_DIRS}
-   LINK_LIBRARIES ${CLHEP_LIBRARIES} ${TBB_LIBRARIES} AthenaKernel AtlasCLHEP_RandomGenerators TestTools )
+   LINK_LIBRARIES ${CLHEP_LIBRARIES} ${TBB_LIBRARIES} AthenaKernel AtlasCLHEP_RandomGenerators TestTools CxxUtils )
 
 # This test takes way too long to run in the dbg build.
 if ( NOT "${CMAKE_BUILD_TYPE}" STREQUAL "Debug" )
