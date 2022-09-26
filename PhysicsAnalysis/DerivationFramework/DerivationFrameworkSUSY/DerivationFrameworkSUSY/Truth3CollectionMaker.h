@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
 */
 
 ///////////////////////////////////////////////////////////////////
@@ -24,12 +24,12 @@ namespace DerivationFramework {
     public: 
       Truth3CollectionMaker(const std::string& t, const std::string& n, const IInterface* p);
       ~Truth3CollectionMaker();
-      StatusCode initialize();
-      StatusCode finalize();
-      virtual StatusCode addBranches() const;
+      virtual StatusCode initialize() override;
+      virtual StatusCode finalize() override;
+      virtual StatusCode addBranches() const override;
 
     private:
-      mutable unsigned int m_ntotpart, m_npasspart;
+      mutable std::atomic<unsigned int> m_ntotpart, m_npasspart;
       std::string m_particlesKey;
       //std::string m_verticesKey;
       std::string m_collectionName; 
