@@ -68,6 +68,9 @@ namespace pool {
       int m_index_multi;
       /// Index (64 bit)
       long long int* m_index;
+
+      /// first object retrieval attempt flag (to rebuild index)
+      bool          m_firstRead = true;
    };
 }
 #endif //POOL_ROOTTREEINDEXCONTAINER_H

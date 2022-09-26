@@ -14,6 +14,7 @@
 #include "TTree.h"
 #include "TMemFile.h"
 #include "TBranch.h"
+#include "TTreeIndex.h"
 
 using namespace pool;
 using namespace std;
@@ -83,10 +84,23 @@ DbStatus RootTreeIndexContainer::transAct(Transaction::Action action) {
    return status;
 }
 
-DbStatus RootTreeIndexContainer::loadObject(void** ptr, ShapeH shape, Token::OID_t& oid) {
-   if ((oid.second >> 32) > 0) {
+
+DbStatus RootTreeIndexContainer::loadObject(void** ptr, ShapeH shape, Token::OID_t& oid)
+{
+   if( (oid.second >> 32) > 0 ) {
+      if( m_firstRead ) {
+         // on the first read check if the index can and should be rebuilt
+         if( m_tree->GetEntries()>0 and m_tree->GetBranch("index_ref")
+             and !m_rootDb->wasIndexRebuilt(m_tree->GetName()) ) {
+            delete m_tree->GetTreeIndex();
+            m_tree->BuildIndex("index_ref");
+            m_rootDb->markIndexRebuilt(m_tree->GetName());
+         }
+         m_firstRead = false;
+      }
       long long int evt_id = m_tree->GetEntryNumberWithIndex(oid.second);
       if (evt_id == -1) {
+         delete m_tree->GetTreeIndex();
          m_tree->BuildIndex("index_ref");
          evt_id = m_tree->GetEntryNumberWithIndex(oid.second);
       }
