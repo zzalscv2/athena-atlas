@@ -827,9 +827,12 @@ Identifier sTgcIdHelper::channelID(int stationName, int stationEta, int stationP
 }
 Identifier sTgcIdHelper::channelID(int stationName, int stationEta, int stationPhi, int multilayer, int gasGap, int channelType,
                                    int channel, bool& isValid) const {
-    const Identifier result = channelID(stationName, stationEta, stationPhi, multilayer, gasGap, channelType, channel);
-    isValid = validChannel(result, stationName, stationEta, stationPhi, multilayer, gasGap, channelType, channel);
-    return result;
+    try {
+        const Identifier result = channelID(stationName, stationEta, stationPhi, multilayer, gasGap, channelType, channel);
+        isValid = validChannel(result, stationName, stationEta, stationPhi, multilayer, gasGap, channelType, channel);
+        return result;
+    } catch (const std::out_of_range&) { isValid = false; }    
+    return Identifier{0};
 }
 /*******************************************************************************/
 Identifier sTgcIdHelper::channelID(const std::string& stationNameStr, int stationEta, int stationPhi, int multilayer, int gasGap,
@@ -851,9 +854,12 @@ Identifier sTgcIdHelper::channelID(const Identifier& id, int multilayer, int gas
     return result;
 }
 Identifier sTgcIdHelper::channelID(const Identifier& id, int multilayer, int gasGap, int channelType, int channel, bool& isValid) const {
-    const Identifier result = channelID(id, multilayer, gasGap, channelType, channel);
-    isValid = valid(result);
-    return result;
+    try{
+        const Identifier result = channelID(id, multilayer, gasGap, channelType, channel);
+        isValid = valid(result);
+        return result;
+    } catch (const std::out_of_range&) { isValid = false; }
+    return Identifier{0};
 }
 /*******************************************************************************/
 Identifier sTgcIdHelper::padID(int stationName, int stationEta, int stationPhi, int multilayer, int gasGap, int channelType, int padEta,
