@@ -13450,6 +13450,78 @@ HLT_mu10_ivarmedium_mu10_10invmAB70_L12MU8F:
     2: 4
     3: 4
     4: 1
+HLT_mu10_j225_0eta290_020jvt_boffperf_pf_ftf_preselj180_dRAB04_L1J100:
+  eventCount: 0
+  stepCounts:
+    0: 2
+    1: 2
+    2: 2
+    3: 2
+  stepFeatures:
+    0: 3
+    1: 2
+    2: 2
+    3: 2
+HLT_mu10_j225_0eta290_020jvt_boffperf_pf_ftf_preselj180_dRAB04_L1jJ160:
+  eventCount: 0
+  stepCounts:
+    0: 2
+    1: 2
+    2: 2
+    3: 2
+  stepFeatures:
+    0: 3
+    1: 2
+    2: 2
+    3: 2
+HLT_mu10_j300_0eta290_020jvt_boffperf_pf_ftf_preselj225_dRAB04_L1J100:
+  eventCount: 0
+  stepCounts:
+    0: 2
+    1: 2
+    2: 2
+    3: 2
+  stepFeatures:
+    0: 3
+    1: 2
+    2: 2
+    3: 2
+HLT_mu10_j300_0eta290_020jvt_boffperf_pf_ftf_preselj225_dRAB04_L1jJ160:
+  eventCount: 0
+  stepCounts:
+    0: 2
+    1: 2
+    2: 2
+    3: 2
+  stepFeatures:
+    0: 3
+    1: 2
+    2: 2
+    3: 2
+HLT_mu10_j360_0eta290_020jvt_boffperf_pf_ftf_preselj225_dRAB04_L1J100:
+  eventCount: 0
+  stepCounts:
+    0: 2
+    1: 2
+    2: 2
+    3: 2
+  stepFeatures:
+    0: 3
+    1: 2
+    2: 2
+    3: 2
+HLT_mu10_j360_0eta290_020jvt_boffperf_pf_ftf_preselj225_dRAB04_L1jJ160:
+  eventCount: 0
+  stepCounts:
+    0: 2
+    1: 2
+    2: 2
+    3: 2
+  stepFeatures:
+    0: 3
+    1: 2
+    2: 2
+    3: 2
 HLT_mu10_l2mt_L1MU10BO:
   eventCount: 7
   stepCounts:
