@@ -149,7 +149,7 @@ namespace LVL1::MuCTPIBits {
       bool     flag1{0};
       bool     flag2{0};
       bool     flag3{0};
-      uint32_t ptID{0};
+      uint32_t pt{0};
       uint32_t etacode{0};
       uint32_t phicode{0};
       uint32_t barrel_eta_lookup{0};
@@ -163,7 +163,7 @@ namespace LVL1::MuCTPIBits {
     header.flag1   = maskedWord(word, RUN3_TOPO_WORD_FLAGS_SHIFT+1, 0x1); //21
     header.flag2   = maskedWord(word, RUN3_TOPO_WORD_FLAGS_SHIFT+2, 0x1); //22
     header.flag3   = maskedWord(word, RUN3_TOPO_WORD_FLAGS_SHIFT+3, 0x1); //23
-    header.ptID    = maskedWord(word, RUN3_TOPO_WORD_PT_SHIFT,      RUN3_TOPO_WORD_PT_MASK);
+    header.pt      = maskedWord(word, RUN3_TOPO_WORD_PT_SHIFT,      RUN3_TOPO_WORD_PT_MASK);
     header.etacode = maskedWord(word, RUN3_TOPO_WORD_ETA_SHIFT,     RUN3_TOPO_WORD_ETA_MASK);
     header.phicode = maskedWord(word, RUN3_TOPO_WORD_PHI_SHIFT,     RUN3_TOPO_WORD_PHI_MASK);
     // HEMISPHERE 0: C-side (-) / 1: A-side (-)

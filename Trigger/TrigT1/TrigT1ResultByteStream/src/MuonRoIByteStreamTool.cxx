@@ -99,19 +99,19 @@ StatusCode MuonRoIByteStreamTool::initialize() {
   CHECK( m_thresholdTool.retrieve() );
   if (!m_monTool.empty()) ATH_CHECK(m_monTool.retrieve());
 
-  const std::string barrelFileName   = PathResolverFindCalibFile( m_barrelRoIFile );
-  const std::string ecfFileName      = PathResolverFindCalibFile( m_ecfRoIFile );
-  const std::string side0LUTFileName = PathResolverFindCalibFile( m_side0LUTFile );
-  const std::string side1LUTFileName = PathResolverFindCalibFile( m_side1LUTFile );
-
-  CHECK( m_l1topoLUT.initializeBarrelLUT(side0LUTFileName,
-                                         side1LUTFileName) );
-  CHECK( m_l1topoLUT.initializeLUT(barrelFileName,
-                                   ecfFileName,
-                                   side0LUTFileName,
-                                   side1LUTFileName) );
-  ATH_CHECK(m_l1topoLUT.initializePtEncoding());
-
+  if (m_doTopo.value()) {
+    const std::string barrelFileName   = PathResolverFindCalibFile( m_barrelRoIFile );
+    const std::string ecfFileName      = PathResolverFindCalibFile( m_ecfRoIFile );
+    const std::string side0LUTFileName = PathResolverFindCalibFile( m_side0LUTFile );
+    const std::string side1LUTFileName = PathResolverFindCalibFile( m_side1LUTFile );
+    
+    CHECK( m_l1topoLUT.initializeBarrelLUT(side0LUTFileName,
+					   side1LUTFileName) );
+    CHECK( m_l1topoLUT.initializeLUT(barrelFileName,
+				     ecfFileName,
+				     side0LUTFileName,
+				     side1LUTFileName) );
+  }
   return StatusCode::SUCCESS;
 }
 
@@ -273,7 +273,7 @@ StatusCode MuonRoIByteStreamTool::convertFromBS(const std::vector<const ROBF*>& 
     const size_t nTopoSlices{topoSlices.size()};
     const size_t nTopoOutputSlices{static_cast<size_t>(m_readoutWindow)};
     if (nTopoSlices > nTopoOutputSlices) {
-      ATH_MSG_ERROR("Found " << nTopoSlices << " time slices, but only " << m_readoutWindow << " outputs are configured");
+      ATH_MSG_ERROR("Found " << nTopoSlices << " TOPO TOB time slices, but only " << m_readoutWindow << " outputs are configured");
       return StatusCode::FAILURE;
     } else if (nTopoSlices != static_cast<size_t>(rob->rod_detev_type())) {
       ATH_MSG_ERROR("Found " << nTopoSlices << " time slices, but Detector Event Type word indicates there should be "
@@ -492,7 +492,6 @@ StatusCode MuonRoIByteStreamTool::decodeTopoSlices(const uint32_t* data,
   int nomBCID_slice = slices.size() / 2 ;
   int topobcidOffset = 0;
   unsigned short subsystem = 0;
-  unsigned int ptValue = 0;
   float eta_barrel = 0.;
   float phi_barrel = 0.;
   //in case something is found to not be correctly decoded by the L1Topo group - can clean this extra-debug printouts later if wished
@@ -511,7 +510,6 @@ StatusCode MuonRoIByteStreamTool::decodeTopoSlices(const uint32_t* data,
       cand = LVL1::MuCTPIL1TopoCandidate{};
       std::stringstream sectorName;
       subsystem = 0;
-      ptValue = 0;
       eta_barrel = 0.;
       phi_barrel = 0.;
 
@@ -543,11 +541,8 @@ StatusCode MuonRoIByteStreamTool::decodeTopoSlices(const uint32_t* data,
       }
       if (topoheader.hemi) sectorName << "A";
       else sectorName<< "C";
-
       sectorName << topoheader.sec;
       // End of: Build the sector name
-
-      ptValue = m_l1topoLUT.getPtValue(subsystem, topoheader.ptID);
 
       if (local_topo_debug) {
         ATH_MSG_DEBUG("MuCTPIL1Topo det:     " << topoheader.det);
@@ -557,8 +552,7 @@ StatusCode MuonRoIByteStreamTool::decodeTopoSlices(const uint32_t* data,
         ATH_MSG_DEBUG("MuCTPIL1Topo phicode: " << topoheader.phicode );
         ATH_MSG_DEBUG("MuCTPIL1Topo sec:     " << topoheader.sec );
         ATH_MSG_DEBUG("MuCTPIL1Topo roi:     " << topoheader.roi );
-        ATH_MSG_DEBUG("MuCTPIL1Topo ptThrID: " << topoheader.ptID );
-        ATH_MSG_DEBUG("MuCTPIL1Topo ptvalue: " << ptValue);
+        ATH_MSG_DEBUG("MuCTPIL1Topo pt:      " << topoheader.pt );
       }
 
       if (subsystem == 0) // Barrel
@@ -576,9 +570,9 @@ StatusCode MuonRoIByteStreamTool::decodeTopoSlices(const uint32_t* data,
           cand.setCandidateData(sectorName.str(),
                                 0,//roiID,      -- always ZERO for Barrel as it is not contained in the word
                                 topobcidOffset,
-                                topoheader.ptID,//ptThresholdID
+                                0,//ptThresholdID
                                 0,//ptCode,       removed Run3
-                                ptValue,
+                                topoheader.pt,
                                 eta_barrel,
                                 phi_barrel,
                                 0,//etacode,      removed Run3
@@ -615,9 +609,9 @@ StatusCode MuonRoIByteStreamTool::decodeTopoSlices(const uint32_t* data,
         cand.setCandidateData(sectorName.str(),
                               topoheader.roi,
                               topobcidOffset,
-                              topoheader.ptID,//ptThresholdID,
+                              0,//ptThresholdID,
                               0,//ptCode,       removed Run3
-                              ptValue,
+                              topoheader.pt,
                               coord.eta,
                               coord.phi,
                               0,//etacode,      removed Run3
@@ -656,7 +650,7 @@ StatusCode MuonRoIByteStreamTool::decodeTopoSlices(const uint32_t* data,
       std::string subsysName{s_sectorNames[static_cast<size_t>(subsysID)]};
       Monitored::Scalar<float> monEta{"topoEta_"+subsysName, (*outputIt)->getCandidates().back().geteta()};
       Monitored::Scalar<float> monPhi{"topoPhi_"+subsysName, (*outputIt)->getCandidates().back().getphi()};
-      Monitored::Scalar<unsigned int> monPtThr{"topoPtThresholdID_"+subsysName, (*outputIt)->getCandidates().back().getptThresholdID()};
+      Monitored::Scalar<unsigned int> monPtThr{"topoPtThreshold_"+subsysName, (*outputIt)->getCandidates().back().getptValue()};
       Monitored::Group(m_monTool, monSubsysID, monEta, monPhi, monPtThr);
     }
     ++outputIt;

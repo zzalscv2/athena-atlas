@@ -62,8 +62,8 @@ def L1MuonBSConverterMonitoring(name, flags, encoder=False):
             tool.defineHistogram(f'topoPhi_{subsysName}', path='EXPERT', type='TH1F',
                                 title=f'Phi of output Topo TOBs in the {subsysName} subsystem;phi;N TOBs',
                                 xbins=64, xmin=-3.2, xmax=3.2)
-            tool.defineHistogram(f'topoPtThresholdID_{subsysName}', path='EXPERT', type='TH1F',
-                                title=f'pT threshold ID of output Topo TOBs in the {subsysName} subsystem;pT threshold ID;N TOBs',
+            tool.defineHistogram(f'topoPtThreshold_{subsysName}', path='EXPERT', type='TH1F',
+                                 title=f'pT threshold [GeV] of output Topo TOBs in the {subsysName} subsystem;pT threshold [GeV];N TOBs',
                                 xbins=50, xmin=0, xmax=50)
 
     return tool

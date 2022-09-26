@@ -14,11 +14,6 @@
 #include <utility>
 #include <sstream>
 
-#include "StoreGate/StoreGateSvc.h" 
-#include "TrigConfData/L1Menu.h"
-#include "TrigConfData/L1Threshold.h"
-#include "TrigT1Interfaces/TrigT1StoreGateKeys.h"
-
 namespace LVL1MUCTPIPHASE1
 {
   namespace pt = boost::property_tree;
@@ -44,7 +39,6 @@ namespace LVL1MUCTPIPHASE1
   class L1TopoLUT //: public extends<AthService IL1TopoLUT>
   {
   public:
-    StatusCode initializePtEncoding();
     bool initializeLUT(const std::string& barrelFileName, 
 		       const std::string& ecfFileName,
 		       const std::string& side0LUTFileName,
@@ -56,15 +50,12 @@ namespace LVL1MUCTPIPHASE1
 				     const unsigned short& sectorID,
 				     const unsigned short& roi) const;
     
-
-    int getPtValue(const int isys, const int ptword) const;
     float getBarrelEta(const int hemi, const int sec, const int barrel_eta_lookup) const;
     float getBarrelPhi(const int hemi, const int sec, const int barrel_phi_lookup) const;
 
     std::vector<std::string> getErrors() const {return m_errors;}
 
   protected:
-    StoreGateSvc* m_detStore = nullptr;
     bool initializeLUT(const std::string& inFileName, const bool& isBarrel);
     bool initializeJSON(const std::string& inFileName, bool side);
     bool initializeJSONForSubsystem(pt::ptree& root,
@@ -104,7 +95,6 @@ namespace LVL1MUCTPIPHASE1
 	return key.side | (key.subsystem << 8) | (key.sectorID << 16) | (key.roi << 24);
       }
     };
-    std::vector<std::vector<int>>  m_ptEncoding;
     std::vector<std::vector<float>> m_barrel_eta_lookup0;
     std::vector<std::vector<float>> m_barrel_eta_lookup1;
     std::vector<std::vector<float>> m_barrel_phi_lookup0;
