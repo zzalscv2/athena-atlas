@@ -43,7 +43,7 @@ namespace JiveXML {
     
     ATH_MSG_DEBUG( "in retrieveAll()" );
     
-    const DataHandle<xAOD::MissingETContainer> iterator, end;
+    SG::ConstIterator<xAOD::MissingETContainer> iterator, end;
     const xAOD::MissingETContainer* MissingETs;
 
     //obtain the default collection first
@@ -70,7 +70,7 @@ namespace JiveXML {
       for (; iterator!=end; iterator++) {
 	  if (iterator.key()!=m_sgKeyFavourite) {
              ATH_MSG_DEBUG( "Trying to retrieve all " << dataTypeName() << " (" << iterator.key() << ")" );
-             DataMap data = getData(iterator);
+             DataMap data = getData(&(*iterator));
              if ( FormatTool->AddToEvent(dataTypeName(), iterator.key()+"_xAOD", &data).isFailure()){
 	       ATH_MSG_WARNING( "Collection " << iterator.key() << " not found in SG " );
 	    }else{

@@ -742,45 +742,6 @@ class ConfiguredNewTrackingCuts :
           self.__minSiNotShared   = 4
           self.__rejectShortExtensions     = False
 
-    if mode == "DBM":
-      self.__extension               = "DBM"
-      self.__minEta                  = 3.05
-      self.__maxEta                  = 3.45
-      self.__Xi2maxNoAdd             = 10000
-      self.__Xi2max                  = 10000
-      self.__nWeightedClustersMin    = 0
-      self.__seedFilterLevel         = 1
-      self.__maxdImpactPPSSeeds      = 100000.0 * Units.mm
-      self.__maxdImpactSSSSeeds      = 100000.0 * Units.mm
-      self.__maxPrimaryImpact        = 100000.0 * Units.mm  # low lumi
-      self.__maxZImpact              = 320000.0 * Units.mm  # Was 250 mm
-      self.__maxPT            = 100000.0 * Units.GeV # some overlap
-      self.__minPT            = 0.0 * Units.GeV
-      self.__minClusters      = 0
-      self.__minSiNotShared   = 0
-      self.__maxShared        = 1000   # cut is now on number of shared modules
-      self.__minPixel         = 0
-      self.__maxHoles         = 0
-      self.__maxPixelHoles    = 0
-      self.__maxSctHoles      = 0
-      self.__maxDoubleHoles   = 0
-      self.__radMax           = 600000. * Units.mm
-      self.__nHolesMax        = self.__maxHoles
-      self.__nHolesGapMax     = self.__maxHoles # not as tight as 2*maxDoubleHoles
-      self.__useTRT           = False
-      self.__useSCT           = False
-      self.__usePixel         = True
-
-
-#        elif rec.Commissioning():
-#        self.__minClusters             = 7               # Igor 6, was 7
-#        self.__maxHoles                = 5               # was 5
-#        self.__maxSctHoles             = 5               # was 5
-#        self.__maxDoubleHoles          = 4               # was 2
-#        self.__maxPrimaryImpact        = 50.0 * Units.mm # low lumi
-#        self.__maxZImpact              = 500.0 * Units.mm
-
-
     # using d0<10mm instead of d0<5mm. This is desired for B-physics
     if mode == "BLS":
       self.__maxPrimaryImpact   = 10.0 * Units.mm 

@@ -203,11 +203,6 @@ def getTrackDecorators(**kwargs):
                 getParameterErrDecoratorAlg(**kwargs)]
 
 
-def getDBMTrackDecorators(**kwargs):
-    from InDetRecExample.InDetKeys import InDetKeys
-    return getTrackDecorators(TrackParticleContainerName=InDetKeys.DBMTrackParticles())
-
-
 def getTruthDecorators(**kwargs):
     '''
     Get truth particle decorators needed for the InDetPhysValMonitoring tool.
@@ -389,13 +384,6 @@ def addDecorator():
         from RecExConfig.RecFlags import rec
         rec.UserExecs += ['from InDetPhysValMonitoring.InDetPhysValDecoration import addGSFTrackDecoratorAlg;addGSFTrackDecoratorAlg();']
 
-    # from  InDetRecExample.InDetJobProperties import InDetFlags
-    from InDetRecExample.InDetKeys import InDetKeys
-    # for backward compatibility check whether DBM has been added already
-    if InDetPhysValFlags.doValidateDBMTracks() and hasattr(InDetKeys, 'DBMTrackParticles'):
-        # and InDetFlags.doDBM()
-        decorators += getDBMTrackDecorators()
-
     _addDecorators(decorators)
 
 
@@ -446,7 +434,7 @@ def addDecoratorIfNeeded():
 
     addDecorator()
 
-    # if DBM or GSF tracks need to be monitored schedule addExtraMonitoring as user algorithm, so that
+    # if GSF tracks need to be monitored schedule addExtraMonitoring as user algorithm, so that
     # the monitoring manager exists already.
     from InDetPhysValMonitoring.InDetPhysValJobProperties import InDetPhysValFlags
     InDetPhysValFlags.init()

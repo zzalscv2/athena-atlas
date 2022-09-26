@@ -107,10 +107,10 @@ namespace InDet {
         int                                m_efficiencyNEG[6]={}  ;
         int                                m_ntracksPOSB{}       ;
         int                                m_ntracksPOSE{}       ;
-        int                                m_ntracksPOSDBM{};
+        int                                m_ntracksPOSFWD{};
         int                                m_ntracksNEGB{}       ;
         int                                m_ntracksNEGE{}       ;
-        int                                m_ntracksNEGDBM{};
+        int                                m_ntracksNEGFWD{};
         int                                m_total        [50]={} ;
         int                                m_fake         [50]={} ;
         int                                m_events{}                 ;
@@ -127,10 +127,10 @@ namespace InDet {
             for (int i=0; i<6; ++i) { m_efficiencyNEG[i]+=a_stat.m_efficiencyNEG[i];}
             m_ntracksPOSB+=a_stat.m_ntracksPOSB       ;
             m_ntracksPOSE+=a_stat.m_ntracksPOSE       ;
-            m_ntracksPOSDBM+=a_stat.m_ntracksPOSDBM;
+            m_ntracksPOSFWD+=a_stat.m_ntracksPOSFWD;
             m_ntracksNEGB+=a_stat.m_ntracksNEGB       ;
             m_ntracksNEGE+=a_stat.m_ntracksNEGE       ;
-            m_ntracksNEGDBM+=a_stat.m_ntracksNEGDBM;
+            m_ntracksNEGFWD+=a_stat.m_ntracksNEGFWD;
             for (int i=0; i<50; ++i) { m_total[i]+=a_stat.m_total[i];}
             for (int i=0; i<50; ++i) { m_fake[i]+=a_stat.m_fake[i];}
 
@@ -155,12 +155,10 @@ namespace InDet {
         int                                m_nclustersPosBS{}         ;
         int                                m_nclustersPosEP{}         ;
         int                                m_nclustersPosES{}         ;
-        int                                m_nclustersPosDBM{};
         int                                m_nclustersNegBP{}         ;
         int                                m_nclustersNegBS{}         ;
         int                                m_nclustersNegEP{}         ;
         int                                m_nclustersNegES{}         ;
-        int                                m_nclustersNegDBM{};
         //
         int                                m_nclustersPTOT{}          ;
         int                                m_nclustersPTOTt{}         ;
@@ -181,12 +179,10 @@ namespace InDet {
           m_nclustersPosBS  += m_nclustersPosBS;
           m_nclustersPosEP  += m_nclustersPosEP;
           m_nclustersPosES  += m_nclustersPosES;
-          m_nclustersPosDBM += m_nclustersPosDBM;
           m_nclustersNegBP  += m_nclustersNegBP;
           m_nclustersNegBS  += m_nclustersNegBS;
           m_nclustersNegEP  += m_nclustersNegEP;
           m_nclustersNegES  += m_nclustersNegES;
-          m_nclustersNegDBM += m_nclustersNegDBM;
           m_nclustersPTOT   +=a_stat.m_nclustersPTOT;
 	        m_nclustersPTOTt  +=a_stat.m_nclustersPTOTt;
 	        m_nclustersSTOT   +=a_stat.m_nclustersSTOT;

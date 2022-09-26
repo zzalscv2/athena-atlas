@@ -18,7 +18,6 @@ which one is aliased to Tracks."""
 
     for a in ['CombinedInDetTracks',
               'MergedTracks',
-              'DBMTracksDetailedTruth',
               'InDetPseudoTracks',
               'ConvertedIPatTracks',
               'ConvertedXKalmanTracks',

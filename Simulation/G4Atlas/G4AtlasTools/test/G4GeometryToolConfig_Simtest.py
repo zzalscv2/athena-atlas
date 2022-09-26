@@ -22,13 +22,13 @@ if __name__ == '__main__':
   ConfigFlags.Input.Files = defaultTestFiles.EVNT
 
   if ConfigFlags.Common.Project is Project.AthSimulation:
-    detectors =['Bpipe', 'BCM', 'Pixel', 'SCT', 'TRT', 'LAr', 'Tile', 'CSC', 'MDT', 'RPC', 'TGC'] # FwdRegion geometry not currently included in AthSimulation
+    detectors =['Bpipe', 'BCM', 'Pixel', 'SCT', 'TRT', 'LAr', 'Tile', 'MBTS', 'CSC', 'MDT', 'RPC', 'TGC'] # FwdRegion geometry not currently included in AthSimulation
   else:
-    detectors =['Bpipe', 'BCM', 'Pixel', 'SCT', 'TRT', 'LAr', 'Tile', 'CSC', 'MDT', 'RPC', 'TGC', 'FwdRegion']
+    detectors =['Bpipe', 'BCM', 'Pixel', 'SCT', 'TRT', 'LAr', 'Tile', 'MBTS', 'CSC', 'MDT', 'RPC', 'TGC', 'FwdRegion']
 
   # Setup detector flags
-  from AthenaConfiguration.DetectorConfigFlags import setupDetectorsFromList
-  setupDetectorsFromList(ConfigFlags, detectors, toggle_geometry=True)
+  from AthenaConfiguration.DetectorConfigFlags import setupDetectorFlags
+  setupDetectorFlags(ConfigFlags, detectors, toggle_geometry=True)
 
   #turn the forward region off
   ConfigFlags.Sim.WorldRRange = 15000

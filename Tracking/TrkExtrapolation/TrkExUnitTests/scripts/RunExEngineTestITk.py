@@ -15,8 +15,8 @@ if ConfigFlags.ITk.Geometry.AllLocal:
     "ITkStrip",
     "Bpipe"
   ]
-  from AthenaConfiguration.DetectorConfigFlags import setupDetectorsFromList
-  setupDetectorsFromList(ConfigFlags, detectors, toggle_geometry=True)
+  from AthenaConfiguration.DetectorConfigFlags import setupDetectorFlags
+  setupDetectorFlags(ConfigFlags, detectors, toggle_geometry=True)
   ConfigFlags.TrackingGeometry.MaterialSource = "Input"
 
 

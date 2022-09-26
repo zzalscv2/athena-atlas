@@ -65,7 +65,7 @@ namespace JiveXML {
 
     ATH_MSG_DEBUG( "in retrieveAll()" );
 
-    const DataHandle<xAOD::JetContainer> iterator, end;
+    SG::ConstIterator<xAOD::JetContainer> iterator, end;
     const xAOD::JetContainer* Jets;
 
     //obtain the default collection first
@@ -96,7 +96,7 @@ namespace JiveXML {
         if ( position != 0 ){  // SG key doesn't contain HLTAutoKey
           if (iterator.key()!=m_sgKeyFavourite) {
             ATH_MSG_DEBUG( "Trying to retrieve all " << dataTypeName() << " (" << iterator.key() << ")" );
-            DataMap data = getData(iterator);
+            DataMap data = getData(&(*iterator));
             if ( FormatTool->AddToEvent(dataTypeName(), iterator.key()+"_xAOD", &data).isFailure()){
               ATH_MSG_WARNING( "Collection " << iterator.key() << " not found in SG " );
             }else{

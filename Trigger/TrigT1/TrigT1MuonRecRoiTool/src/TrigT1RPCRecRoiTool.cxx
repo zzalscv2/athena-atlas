@@ -22,9 +22,8 @@ namespace LVL1 {
     return StatusCode::SUCCESS;
   }
  
-  TrigT1MuonRecRoiData TrigT1RPCRecRoiTool::roiData( const unsigned int & roiWord )const
+  StatusCode TrigT1RPCRecRoiTool::roiData( const unsigned int & roiWord, TrigT1MuonRecRoiData& data )const
   {
-    TrigT1MuonRecRoiData data;
 
     // subsystem ID and  sector ID
     data.set_side( getBitMaskValue(&roiWord,SubSysIDMask()) );
@@ -47,7 +46,7 @@ namespace LVL1 {
     const RpcCablingCondData* rpcCab{*rpcReadHandle};
     if (rpcCab==nullptr){
       ATH_MSG_ERROR("Null pointer to the read RpcCablingCondData conditions object.");
-      return data;
+      return StatusCode::FAILURE;
     }
     
     if(rpcCab->give_RoI_borders_id(data.side(), data.sector(), data.roi(),
@@ -59,7 +58,7 @@ namespace LVL1 {
 	const MuonGM::MuonDetectorManager* muonMgr = DetectorManagerHandle.cptr(); 
 	if(muonMgr==nullptr){
 	  ATH_MSG_ERROR("Null pointer to the read MuonDetectorManager conditions object.");
-	  return data;
+	  return StatusCode::FAILURE;
 	}
 	
   
@@ -90,18 +89,19 @@ namespace LVL1 {
 	data.update(); 
 	
       }
-    return data;
+    return StatusCode::SUCCESS;
   }
-  void TrigT1RPCRecRoiTool::RoIsize(const unsigned int & roiWord,
-				    double & etaMin_LowHigh, double & etaMax_LowHigh,
-				    double & phiMin_LowHigh, double & phiMax_LowHigh) const
+  StatusCode TrigT1RPCRecRoiTool::RoIsize(const unsigned int & roiWord,
+					  double & etaMin_LowHigh, double & etaMax_LowHigh,
+					  double & phiMin_LowHigh, double & phiMax_LowHigh) const
   {
     double etaMin_Low=0;
     double etaMin_High=0;
     double etaMax_Low=0;
     double etaMax_High=0;
     
-    auto data = roiData(roiWord);
+    TrigT1MuonRecRoiData data;
+    ATH_CHECK( roiData(roiWord,data) );
     phiMin_LowHigh=data.phiMin();
     phiMax_LowHigh=data.phiMax();
     
@@ -121,7 +121,7 @@ namespace LVL1 {
       etaMin_LowHigh = data.etaMin();
       etaMax_LowHigh = data.etaMax();
     }
-    return;
+    return StatusCode::SUCCESS;
   }
 
   bool TrigT1RPCRecRoiTool::dumpRoiMap(const std::string& filename) const
@@ -141,7 +141,8 @@ namespace LVL1 {
 	for(unsigned int sector=0;sector < maxLogicSector; sector++){
 	  for (unsigned int roi=0; roi<maxRoI; roi++){
 	    unsigned long int roIWord = (m_useRun3Config) ? (roi+(side<<21)+(sector<<22)) : ((roi<<2)+(side<<14)+(sector<<15));
-	    auto data = roiData(roIWord);
+	    TrigT1MuonRecRoiData data;
+	    if(!roiData(roIWord,data).isSuccess())continue;
 	    double etaMinLow(0),etaMaxLow(0),etaMinHigh(0),etaMaxHigh(0);
 	    etaDimLow (data,etaMinLow, etaMaxLow);
 	    etaDimHigh(data,etaMinHigh,etaMaxHigh);

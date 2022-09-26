@@ -134,8 +134,6 @@ dumpTrackSummary(T_out& out, const TrackSummary& trackSum)
       << trackSum.get(numberOfGangedFlaggedFakes) << "\n";
   out << " * Number of dead pixel sensors  : "
       << trackSum.get(numberOfPixelDeadSensors) << "\n";
-  out << " * Number of DBM hits            : " << trackSum.get(numberOfDBMHits)
-      << "\n";
   out << " * Number of SCT hits            : " << trackSum.get(numberOfSCTHits)
       << "\n";
   out << " * Number of SCT outliers        : "

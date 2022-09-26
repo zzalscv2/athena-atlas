@@ -72,10 +72,10 @@ def defaultTestFlags(configFlags, args):
     configFlags.GeoModel.Align.Dynamic = False
     configFlags.GeoModel.AtlasVersion = 'ATLAS-R2-2016-01-00-01'
 
-    detectors =['Bpipe', 'BCM', 'DBM',  'Pixel', 'SCT', 'TRT', 'LAr', 'Tile', 'CSC', 'MDT', 'RPC', 'TGC']
+    detectors = ['Bpipe', 'BCM', 'Pixel', 'SCT', 'TRT', 'LAr', 'Tile', 'MBTS', 'CSC', 'MDT', 'RPC', 'TGC']
     # Setup detector flags
-    from AthenaConfiguration.DetectorConfigFlags import setupDetectorsFromList
-    setupDetectorsFromList(configFlags, detectors, toggle_geometry=True)
+    from AthenaConfiguration.DetectorConfigFlags import setupDetectorFlags
+    setupDetectorFlags(configFlags, detectors, toggle_geometry=True)
 
     # Frozen showers OFF = 0
     configFlags.Sim.LArParameterization = LArParameterization.NoFrozenShowers

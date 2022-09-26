@@ -173,8 +173,8 @@ if __name__=='__main__':
    from AthenaConfiguration.AutoConfigOnlineRecoFlags import setDefaultOnlineRecoFlags
    setDefaultOnlineRecoFlags(ConfigFlags)
 
-   from AthenaConfiguration.DetectorConfigFlags import setupDetectorsFromList
-   setupDetectorsFromList(ConfigFlags, ['LAr'], toggle_geometry=True)
+   from AthenaConfiguration.DetectorConfigFlags import setupDetectorFlags
+   setupDetectorFlags(ConfigFlags, ['LAr'], toggle_geometry=True)
 
    ConfigFlags.Trigger.doID=False
    ConfigFlags.Trigger.doMuon=False

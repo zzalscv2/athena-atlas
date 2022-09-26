@@ -43,13 +43,11 @@ ConfigFlags.Input.isMC = True
 ConfigFlags.IOVDb.GlobalTag = "OFLCOND-MC15c-SDR-14-05"
 ConfigFlags.Input.Files = []
 
-
-
 if args.localgeo:
     ConfigFlags.ITk.Geometry.AllLocal = True
-if args.detectors:
-    from AthenaConfiguration.DetectorConfigFlags import setupDetectorsFromList
-    setupDetectorsFromList(ConfigFlags, args.detectors, toggle_geometry=True)
+
+from AthenaConfiguration.DetectorConfigFlags import setupDetectorFlags
+setupDetectorFlags(ConfigFlags, args.detectors, toggle_geometry=True)
 
 ConfigFlags.lock()
 

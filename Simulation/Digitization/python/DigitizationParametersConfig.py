@@ -65,20 +65,8 @@ def writeDigitizationMetadata(ConfigFlags):
     logDigitizationWriteMetadata.info('DigitizationMetaData: setting "%s" to be %s', testKey, testValue)
 
     ## Digitized detector flags: add each enabled detector to the DigitizedDetectors list - might be better to determine this from the OutputStream or CA-itself? Possibly redundant info though?
-    ConfigFlags._loadDynaFlags("Detector") # Ensure that Detector flags have been loaded
-    from AthenaConfiguration.DetectorConfigFlags import allDetectors
-    digiDets = []
-    for det in allDetectors:
-        if det in ['Bpipe', 'Cavern']: # skip regions without sensitive detectors
-            continue
-        attrname = f'Detector.Enable{det}'
-        if ConfigFlags.hasFlag(attrname):
-            testValue = ConfigFlags(attrname)
-            if testValue:
-                digiDets.append(det)
-        else:
-            logDigitizationWriteMetadata.info("No flag called '%s' found in ConfigFlags", attrname)
-    digiDets.append('Truth') # FIXME Currently there is no way to switch off processing Truth containers (see Digitization.DigitizationSteering.DigitizationMainContentCfg)
+    from AthenaConfiguration.DetectorConfigFlags import getEnabledDetectors
+    digiDets = getEnabledDetectors(ConfigFlags)
     logDigitizationWriteMetadata.info("Setting 'DigitizedDetectors' = %s" , repr(digiDets))
     dbFiller.addDigitParam('DigitizedDetectors', repr(digiDets))
 

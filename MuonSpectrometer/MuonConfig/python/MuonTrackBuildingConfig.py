@@ -46,7 +46,7 @@ def MooTrackFitterCfg(flags, name = 'MooTrackFitter', prefix='', **kwargs):
     track_to_segment_tool =  result.popToolsAndMerge(MuonTrackToSegmentToolCfg(flags))
     kwargs.setdefault("TrackToSegmentTool", track_to_segment_tool)    
     
-    mdt_dcot_creator = result.popToolsAndMerge(MdtDriftCircleOnTrackCreatorCfg(flags))
+    mdt_dcot_creator = result.popToolsAndMerge(MdtDriftCircleOnTrackCreatorCfg(flags, name="MdtTubeHitOnTrackCreator", CreateTubeHit=True ))
     kwargs.setdefault("MdtRotCreator", mdt_dcot_creator)
     
     kwargs.setdefault("PhiHitSelector",  result.popToolsAndMerge(MuonPhiHitSelectorCfg(flags)))
@@ -85,9 +85,9 @@ def MooTrackBuilderCfg(flags, name="MooTrackBuilderTemplate", prefix="", doSegme
     
     # Just take the default configuration, as per https://gitlab.cern.ch/atlas/athena/blob/release/22.0.3/MuonSpectrometer/MuonReconstruction/MuonRecExample/python/MuonRecExampleConfigDb.py#L56
     from TrkConfig.TrkExSTEP_PropagatorConfig import AtlasSTEP_PropagatorCfg
-    prop = result.popToolsAndMerge(AtlasSTEP_PropagatorCfg(flags))
-    
-    moo_sl_track_fitter = result.popToolsAndMerge(MooTrackFitterCfg( flags, name="MooSLTrackFitter", prefix=prefix, Fitter = mctbslfitter, Propagator=prop, ReducedChi2Cut=10.0,  SLFit=True))
+    muon_prop = result.popToolsAndMerge(AtlasSTEP_PropagatorCfg(flags, name = 'MuonStraightLinePropagator'))
+
+    moo_sl_track_fitter = result.popToolsAndMerge(MooTrackFitterCfg( flags, name="MooSLTrackFitter", prefix=prefix, Fitter = mctbslfitter, Propagator=muon_prop, ReducedChi2Cut=10.0,  SLFit=True))
     
     kwargs.setdefault("SLFitter", moo_sl_track_fitter)
     kwargs.setdefault("RecalibrateMDTHitsOnTrack", ( (not flags.Muon.doSegmentT0Fit) and flags.Beam.Type is BeamType.Collisions) )
@@ -101,8 +101,6 @@ def MooTrackBuilderCfg(flags, name="MooTrackBuilderTemplate", prefix="", doSegme
     muon_comp_cluster_creator =  result.popToolsAndMerge(TriggerChamberClusterOnTrackCreatorCfg(flags))
     kwargs.setdefault("CompetingClustersCreator", muon_comp_cluster_creator)    
     
-    from TrkConfig.TrkExSTEP_PropagatorConfig import AtlasSTEP_PropagatorCfg
-    muon_prop = result.popToolsAndMerge(AtlasSTEP_PropagatorCfg(flags, name = 'MuonStraightLinePropagator'))
     kwargs.setdefault("Propagator", muon_prop) 
     kwargs.setdefault("ChamberHoleRecoveryTool",  
                      result.popToolsAndMerge(MuonChamberHoleRecoveryToolCfg(flags))) 
@@ -143,7 +141,7 @@ def MuonSegmentInOverlapResolvingToolCfg(flags, name="MuonSegmentInOverlapResolv
 # Not bothering with MuonSegmentMatchingToolTight - just pass in TightSegmentMatching=True
 def MuonSegmentMatchingToolCfg(flags, name="MuonSegmentMatchingTool", **kwargs):
     Muon__MuonSegmentMatchingTool=CompFactory.Muon.MuonSegmentMatchingTool
-    
+
     kwargs.setdefault( "doThetaMatching", flags.Muon.useSegmentMatching)
     kwargs.setdefault( "doPhiMatching", False )
     if flags.Beam.Type is BeamType.Cosmics:

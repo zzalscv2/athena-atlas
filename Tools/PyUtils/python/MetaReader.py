@@ -1020,6 +1020,7 @@ def make_peeker(meta_dict):
                 'SimulationFlavour',
                 'Simulator',
                 'PhysicsList',
+                'SimulatedDetectors',
             ]
             for item in list(meta_dict[filename]['/Simulation/Parameters']):
                 if item not in keys_to_keep:
@@ -1033,6 +1034,7 @@ def make_peeker(meta_dict):
                 'physicsList',
                 'digiSteeringConf',
                 'pileUp',
+                'DigitizedDetectors',
             ]
             for item in list(meta_dict[filename]['/Digitization/Parameters']):
                 if item not in keys_to_keep:

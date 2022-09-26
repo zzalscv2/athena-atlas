@@ -18,10 +18,8 @@ def InDetRotCreatorCfg(flags, name='InDetRotCreator', **kwargs):
 
     acc = ComponentAccumulator()
 
-    use_broad_cluster_pix = (flags.InDet.Tracking.useBroadPixClusterErrors and
-                             not flags.InDet.Tracking.doDBMstandalone)
-    use_broad_cluster_sct = (flags.InDet.Tracking.useBroadSCTClusterErrors and
-                             not flags.InDet.Tracking.doDBMstandalone)
+    use_broad_cluster_pix = flags.InDet.Tracking.useBroadPixClusterErrors
+    use_broad_cluster_sct = flags.InDet.Tracking.useBroadSCTClusterErrors
 
     if 'ToolPixelCluster' not in kwargs:
         if use_broad_cluster_pix:
@@ -110,20 +108,6 @@ def InDetRotCreatorDigitalCfg(flags, name='InDetRotCreatorDigital', **kwargs):
             InDetPixelClusterOnTrackToolDigitalCfg)
         kwargs.setdefault('ToolPixelCluster', acc.popToolsAndMerge(
             InDetPixelClusterOnTrackToolDigitalCfg(flags)))
-
-    acc.setPrivateTools(acc.popToolsAndMerge(
-        InDetRotCreatorCfg(flags, name, **kwargs)))
-    return acc
-
-
-def InDetRotCreatorDBMCfg(flags, name='InDetRotCreatorDBM', **kwargs):
-    acc = ComponentAccumulator()
-
-    if 'ToolPixelCluster' not in kwargs:
-        from InDetConfig.SiClusterOnTrackTool_PixelConfig import (
-            InDetPixelClusterOnTrackToolDBMCfg)
-        kwargs.setdefault('ToolPixelCluster', acc.popToolsAndMerge(
-            InDetPixelClusterOnTrackToolDBMCfg(flags)))
 
     acc.setPrivateTools(acc.popToolsAndMerge(
         InDetRotCreatorCfg(flags, name, **kwargs)))

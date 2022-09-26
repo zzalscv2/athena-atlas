@@ -218,149 +218,159 @@ StatusCode gFexByteStreamTool::convertFromBS(const std::vector<const ROBF*>& vro
         unsigned int n_words = rob->rod_ndata();
 
         //saving Jet TOBs into the EDM container
-        for(unsigned int iWord=0; iWord<n_words/2; iWord++) {
-	    if ((dataArray[iWord])==0) continue;
+        for(unsigned int iWord=0; iWord<n_words; iWord++) {
             ATH_MSG_DEBUG("Raw word  0x" << std::hex << dataArray[iWord]  << "    " << std::bitset<32> (dataArray[iWord]));
-            //Skipping the start 
-            for (unsigned int iStartJetTob=0; iStartJetTob< gPos::START_JET_TOB.size(); iStartJetTob++){
-
-                if(iWord == gPos::START_JET_TOB.at(iStartJetTob)){
-                    continue;
-                }
-           
-                //Skipping the unused words
-                for (unsigned int iJetUnusedPos=0; iJetUnusedPos< gPos::JET_UNUSED_POSITION.size(); iJetUnusedPos++){
-                    if (iWord == gPos::START_JET_TOB.at(iStartJetTob) + gPos::JET_UNUSED_POSITION.at(iJetUnusedPos) ){
-                        continue;
-                    }
-                }  
-
-                //Skipping the trailer words
-                for (unsigned int itrailerPos=0; itrailerPos< gPos::TRAILER_POSITION.size(); itrailerPos++){
-                    if (iWord == gPos::START_JET_TOB.at(iStartJetTob) + gPos::TRAILER_POSITION.at(itrailerPos) ){
-                        continue;
-                    }
-                }  
-
-                //saving gRho TOBs into the EDM container
-                if (iWord == gPos::START_JET_TOB.at(iStartJetTob) + gPos::GRHO_POSITION){
-                    std::unique_ptr<xAOD::gFexJetRoI> myEDM (new xAOD::gFexJetRoI());
-                    gRhoContainer->push_back(std::move(myEDM));
-                    gRhoContainer->back()->initialize(dataArray[iWord], gJ_scale);
-                }  
-
-                //saving gBlock TOBs into the EDM container
-                for (unsigned int iGblockPos=0; iGblockPos< gPos::GBLOCK_POSITION.size(); iGblockPos++){
-                    if (iWord == gPos::START_JET_TOB.at(iStartJetTob) + gPos::GBLOCK_POSITION.at(iGblockPos) ){
-                        std::unique_ptr<xAOD::gFexJetRoI> myEDM (new xAOD::gFexJetRoI());
-                        gSJContainer->push_back(std::move(myEDM));
-                        gSJContainer->back()->initialize(dataArray[iWord], gJ_scale);
-                    }
-                }  
-
-                //saving gJet TOBs into the EDM container
-                for (unsigned int iGjetPos=0; iGjetPos< gPos::GJET_POSITION.size(); iGjetPos++){
-                    if (iWord == gPos::START_JET_TOB.at(iStartJetTob) + gPos::GJET_POSITION.at(iGjetPos) ){
-                        std::unique_ptr<xAOD::gFexJetRoI> myEDM (new xAOD::gFexJetRoI());
-                        gLJContainer->push_back(std::move(myEDM));
-                        gLJContainer->back()->initialize(dataArray[iWord], gLJ_scale);
-                    }
-                }  
-            
-            }
-
         }
-
-        //saving Global TOBs into the EDM container
-        for(unsigned int iWord=n_words/2; iWord<n_words; iWord++) {
-	    if ((dataArray[iWord])==0) continue;
-            ATH_MSG_DEBUG("Raw word  0x" << std::hex << dataArray[iWord]  << "    " << std::bitset<32> (dataArray[iWord]));
-            //Skipping the start 
-            for (unsigned int iStartGlobalTob=0; iStartGlobalTob< gPos::START_GLOBAL_TOB.size(); iStartGlobalTob++){
-
-                if(iWord == gPos::START_GLOBAL_TOB.at(iStartGlobalTob)){
-
-                    continue;
-                }
-           
-                //Skipping the unused words
-                for (unsigned int iGlobalUnusedPos=0; iGlobalUnusedPos< gPos::GLOBAL_UNUSED_POSITION.size(); iGlobalUnusedPos++){
-                    if (iWord == gPos::START_GLOBAL_TOB.at(iStartGlobalTob) + gPos::GLOBAL_UNUSED_POSITION.at(iGlobalUnusedPos) ){
-                        continue;
-                    }
-                }  
-
-                //Skipping the trailer words
-                for (unsigned int itrailerPos=0; itrailerPos< gPos::TRAILER_POSITION.size(); itrailerPos++){
-                    if (iWord == gPos::START_GLOBAL_TOB.at(iStartGlobalTob) + gPos::TRAILER_POSITION.at(itrailerPos) ){
-                        continue;
-                    }
-                }  
-
-                //saving jwoj MHT TOBs into the EDM container
-                
-                if (iWord == gPos::START_GLOBAL_TOB.at(iStartGlobalTob) + gPos::JWOJ_MHT_POSITION) {
-                    std::unique_ptr<xAOD::gFexGlobalRoI> myEDM (new xAOD::gFexGlobalRoI());
-                    gMHTComponentsJwojContainer->push_back(std::move(myEDM));
-                    gMHTComponentsJwojContainer->back()->initialize(dataArray[iWord], gXE_scale, gTE_scale);
-                }
-                  
-
-                //saving jwoj MST TOBs into the EDM container
-                if (iWord == gPos::START_GLOBAL_TOB.at(iStartGlobalTob) + gPos::JWOJ_MST_POSITION){
-                    std::unique_ptr<xAOD::gFexGlobalRoI> myEDM (new xAOD::gFexGlobalRoI());
-                    gMSTComponentsJwojContainer->push_back(std::move(myEDM));
-                    gMSTComponentsJwojContainer->back()->initialize(dataArray[iWord], gXE_scale, gTE_scale);
-                }
-                  
-
-                //saving jwoj MET TOBs into the EDM container
-                if (iWord == gPos::START_GLOBAL_TOB.at(iStartGlobalTob) + gPos::JWOJ_MET_POSITION){
-                    std::unique_ptr<xAOD::gFexGlobalRoI> myEDM (new xAOD::gFexGlobalRoI());
-                    gMETComponentsJwojContainer->push_back(std::move(myEDM));
-                    gMETComponentsJwojContainer->back()->initialize(dataArray[iWord], gXE_scale, gTE_scale);
-                }
-            
-                //saving jwoj Scalar TOBs into the EDM container
-                if (iWord == gPos::START_GLOBAL_TOB.at(iStartGlobalTob) + gPos::JWOJ_SCALAR_POSITION){
-                    std::unique_ptr<xAOD::gFexGlobalRoI> myEDM (new xAOD::gFexGlobalRoI());
-                    gScalarEJwojContainer->push_back(std::move(myEDM));
-                    gScalarEJwojContainer->back()->initialize(dataArray[iWord], gXE_scale, gTE_scale);
-                }                   
-
-                //saving Noise Cut MET TOBs into the EDM container
-                if (iWord == gPos::START_GLOBAL_TOB.at(iStartGlobalTob) + gPos::NC_MET_POSITION){
-                    std::unique_ptr<xAOD::gFexGlobalRoI> myEDM (new xAOD::gFexGlobalRoI());
-                    gMETComponentsNoiseCutContainer->push_back(std::move(myEDM));
-                    gMETComponentsNoiseCutContainer->back()->initialize(dataArray[iWord], gXE_scale, gTE_scale);
-                } 
-
-                //saving Noise Cut Scalar TOBs into the EDM container
-                if (iWord == gPos::START_GLOBAL_TOB.at(iStartGlobalTob) + gPos::NC_SCALAR_POSITION){
-                    std::unique_ptr<xAOD::gFexGlobalRoI> myEDM (new xAOD::gFexGlobalRoI());
-                    gScalarENoiseCutContainer->push_back(std::move(myEDM));
-                    gScalarENoiseCutContainer->back()->initialize(dataArray[iWord], gXE_scale, gTE_scale);
-                }  
-
-                //saving Rho+RMS MET TOBs into the EDM container
-                if (iWord == gPos::START_GLOBAL_TOB.at(iStartGlobalTob) + gPos::RMS_MET_POSITION){
-                    std::unique_ptr<xAOD::gFexGlobalRoI> myEDM (new xAOD::gFexGlobalRoI());
-                    gMETComponentsRmsContainer->push_back(std::move(myEDM));
-                    gMETComponentsRmsContainer->back()->initialize(dataArray[iWord], gXE_scale, gTE_scale);
-                } 
-
-                //saving Rho+RMS Scalar TOBs into the EDM container
-                if (iWord == gPos::START_GLOBAL_TOB.at(iStartGlobalTob) + gPos::RMS_SCALAR_POSITION){
-                    std::unique_ptr<xAOD::gFexGlobalRoI> myEDM (new xAOD::gFexGlobalRoI());
-                    gScalarERmsContainer->push_back(std::move(myEDM));
-                    gScalarERmsContainer->back()->initialize(dataArray[iWord], gXE_scale, gTE_scale);
-                }  
-            }
-
-        }
-
-    }
         
+
+
+        size_t index = 0;
+        while ( index < n_words ) {
+            const uint32_t headerWord = dataArray[index];//Identify the header words. The first is a header word.
+            const uint32_t blockType  = (headerWord >> gPos::BLOCK_TYPE_BIT)  &    gPos::BLOCK_TYPE_MASK;
+            const uint32_t headerSize = (headerWord >> gPos::HEADER_SIZE_BIT) &    gPos::HEADER_SIZE_MASK;
+            const uint32_t errorFlags = (headerWord >> gPos::ERROR_FLAG_BIT)  &    gPos::ERROR_FLAG_MASK;
+            const uint32_t dataSize   =  headerWord        &  gPos::DATA_SIZE_MASK;
+      
+            ATH_MSG_DEBUG( "index        "<< index );
+            ATH_MSG_DEBUG( "word         "<< std::bitset<32> (dataArray[index]) );
+            ATH_MSG_DEBUG( "headerWord   "<< std::bitset<32> (headerWord) );
+            ATH_MSG_DEBUG( "blockType    "<< std::bitset<4> (blockType) );
+            ATH_MSG_DEBUG( "headerSize   "<< std::bitset<2> (headerSize) );
+            ATH_MSG_DEBUG( "errorFlags   "<< std::bitset<1> (errorFlags) );
+            ATH_MSG_DEBUG( "dataSize     "<< std::bitset<12> (dataSize) );
+
+            
+            const uint32_t blockSize  = headerSize + dataSize;
+            if ( (index + blockSize) > n_words ) {
+                ATH_MSG_DEBUG( "Remaining block size "
+                << (n_words - index)
+                << " is too small for subblock of type " << blockType
+                << " with headerSize " << headerSize
+                << " and dataSize " << dataSize );
+            }
+
+            index += headerSize;
+      
+            const uint32_t numSlices = dataSize / gPos::WORDS_PER_SLICE;
+            ATH_MSG_DEBUG( "numSlices   "  <<  numSlices );
+
+            if ( numSlices * gPos::WORDS_PER_SLICE != dataSize ) {
+                ATH_MSG_DEBUG( "L1CaloBsDecoderRun3::decodeGfexTobs: subblock type " << blockType
+                   << " with dataSize " << dataSize
+                   << " is not a multiple of " << gPos::WORDS_PER_SLICE << " words" );
+            }
+
+            // The subblock type is 0xA,B,C for jet TOBs from FPGA A,B,C
+            // and 0x1,2,3 for global (MET) TOBs.
+            bool isMet = (blockType >= 0x1 && blockType <= 0x3);
+            bool isJet = (blockType >= 0xA && blockType <= 0xC);
+            
+            for (uint32_t sliceNumber = 0; sliceNumber < numSlices; sliceNumber++) {
+                if (sliceNumber == 0){
+                    if ( !isJet && !isMet ) {
+                        ATH_MSG_DEBUG( "gFexByteStreamTool::decodeGfexTobSlice: invalid block type " << blockType );
+                    }
+
+                    for(unsigned int iWord=0; iWord<gPos::WORDS_PER_SLICE; iWord++) {
+
+                        if (isJet) {
+                            //Skipping the unused words
+                            if (std::find(gPos::JET_UNUSED_POSITION.begin(),gPos::JET_UNUSED_POSITION.end(),iWord)!=gPos::JET_UNUSED_POSITION.end()){
+                                continue;
+                            }
+                            //Skipping the trailer words
+                            if (std::find(gPos::TRAILER_POSITION.begin(),gPos::TRAILER_POSITION.end(),iWord)!=gPos::TRAILER_POSITION.end()){
+                                continue;
+                            }
+                            //Saving gRho TOBs into the EDM container
+                            if (iWord == gPos::GRHO_POSITION){
+                                std::unique_ptr<xAOD::gFexJetRoI> myEDM (new xAOD::gFexJetRoI());
+                                gRhoContainer->push_back(std::move(myEDM));
+                                gRhoContainer->back()->initialize(dataArray[index+iWord], gJ_scale);
+                            }
+                            //Saving gBlock TOBs into the EDM container
+                            if (std::find(gPos::GBLOCK_POSITION.begin(),gPos::GBLOCK_POSITION.end(),iWord)!=gPos::GBLOCK_POSITION.end()){
+                                std::unique_ptr<xAOD::gFexJetRoI> myEDM (new xAOD::gFexJetRoI());
+                                gSJContainer->push_back(std::move(myEDM));
+                                gSJContainer->back()->initialize(dataArray[index+iWord], gJ_scale);
+                            }
+                            //Saving gJet TOBs into the EDM container
+                            if (std::find(gPos::GJET_POSITION.begin(),gPos::GJET_POSITION.end(),iWord)!=gPos::GJET_POSITION.end()){
+                                std::unique_ptr<xAOD::gFexJetRoI> myEDM (new xAOD::gFexJetRoI());
+                                gLJContainer->push_back(std::move(myEDM));
+                                gLJContainer->back()->initialize(dataArray[index+iWord], gLJ_scale);
+                            }
+
+                        }
+
+                        if (isMet){
+                            //Skipping the unused words
+                            if (std::find(gPos::GLOBAL_UNUSED_POSITION.begin(),gPos::GLOBAL_UNUSED_POSITION.end(),iWord)!=gPos::GLOBAL_UNUSED_POSITION.end()){
+                                continue;
+                            }
+                            //Skipping the trailer words
+                            if (std::find(gPos::TRAILER_POSITION.begin(),gPos::TRAILER_POSITION.end(),iWord)!=gPos::TRAILER_POSITION.end()){
+                                continue;
+                            }
+                            //Saving jwoj MHT TOBs into the EDM container
+                            if (iWord == gPos::JWOJ_MHT_POSITION){
+                                std::unique_ptr<xAOD::gFexGlobalRoI> myEDM (new xAOD::gFexGlobalRoI());
+                                gMHTComponentsJwojContainer->push_back(std::move(myEDM));
+                                gMHTComponentsJwojContainer->back()->initialize(dataArray[index+iWord], gXE_scale, gTE_scale);
+                            }
+                            //Saving jwoj MST TOBs into the EDM container
+                            if (iWord == gPos::JWOJ_MST_POSITION){
+                                std::unique_ptr<xAOD::gFexGlobalRoI> myEDM (new xAOD::gFexGlobalRoI());
+                                gMSTComponentsJwojContainer->push_back(std::move(myEDM));
+                                gMSTComponentsJwojContainer->back()->initialize(dataArray[index+iWord], gXE_scale, gTE_scale);
+                            }
+                            //Saving jwoj MET TOBs into the EDM container
+                            if (iWord == gPos::JWOJ_MET_POSITION){
+                                std::unique_ptr<xAOD::gFexGlobalRoI> myEDM (new xAOD::gFexGlobalRoI());
+                                gMETComponentsJwojContainer->push_back(std::move(myEDM));
+                                gMETComponentsJwojContainer->back()->initialize(dataArray[index+iWord], gXE_scale, gTE_scale);
+                            }
+                            //Saving jwoj Scalar TOBs into the EDM container
+                            if (iWord == gPos::JWOJ_SCALAR_POSITION){
+                                std::unique_ptr<xAOD::gFexGlobalRoI> myEDM (new xAOD::gFexGlobalRoI());
+                                gScalarEJwojContainer->push_back(std::move(myEDM));
+                                gScalarEJwojContainer->back()->initialize(dataArray[index+iWord], gXE_scale, gTE_scale);
+                            }
+                            //Saving Noise Cut MET TOBs into the EDM container
+                            if (iWord == gPos::NC_MET_POSITION){
+                                std::unique_ptr<xAOD::gFexGlobalRoI> myEDM (new xAOD::gFexGlobalRoI());
+                                gMETComponentsNoiseCutContainer->push_back(std::move(myEDM));
+                                gMETComponentsNoiseCutContainer->back()->initialize(dataArray[index+iWord], gXE_scale, gTE_scale);
+                            }
+                            //Saving Noise Cut Scalar TOBs into the EDM container
+                            if (iWord == gPos::NC_SCALAR_POSITION){
+                                std::unique_ptr<xAOD::gFexGlobalRoI> myEDM (new xAOD::gFexGlobalRoI());
+                                gScalarENoiseCutContainer->push_back(std::move(myEDM));
+                                gScalarENoiseCutContainer->back()->initialize(dataArray[index+iWord], gXE_scale, gTE_scale);
+                            }
+                            //Saving Rho+RMS MET TOBs into the EDM container
+                            if (iWord == gPos::RMS_MET_POSITION){
+                                std::unique_ptr<xAOD::gFexGlobalRoI> myEDM (new xAOD::gFexGlobalRoI());
+                                gMETComponentsRmsContainer->push_back(std::move(myEDM));
+                                gMETComponentsRmsContainer->back()->initialize(dataArray[index+iWord], gXE_scale, gTE_scale);
+                            }
+                            //Saving Rho+RMS Scalar TOBs into the EDM container
+                            if (iWord == gPos::RMS_SCALAR_POSITION){
+                                std::unique_ptr<xAOD::gFexGlobalRoI> myEDM (new xAOD::gFexGlobalRoI());
+                                gScalarERmsContainer->push_back(std::move(myEDM));
+                                gScalarERmsContainer->back()->initialize(dataArray[index+iWord], gXE_scale, gTE_scale);
+                            }
+
+                        }
+
+                    }
+
+                }
+                index += gPos::WORDS_PER_SLICE;
+            }
+        }
+    }
     return StatusCode::SUCCESS;
 }
 

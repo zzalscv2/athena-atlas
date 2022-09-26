@@ -12,15 +12,15 @@ method.
 from collections import defaultdict
 from AthenaCommon.Logging import logging
 from AthenaConfiguration.ComponentAccumulator import ComponentAccumulator
-from .ConfigHelpers import AlgConfig, stringToMETRecoDict
 
 log = logging.getLogger(__name__)
 
 class HLTInputConfigRegistry:
     """Configure HLT outputs as inputs"""
 
-    def build_steps(self, requested, RoIs, recoDict, return_ca=False, flags = None):
+    def build_steps(self, requested, RoIs=None, recoDict=None, return_ca=False, flags = None):
         """Build the necessary input sequence, separated by steps"""
+        from .ConfigHelpers import AlgConfig, stringToMETRecoDict
 
         if return_ca and flags is None:
             raise ValueError(

@@ -53,7 +53,6 @@ namespace InDet {
     std::array<double, 9>& par();
     bool& pix();
     bool& sct();
-    bool& dbm();
     const ROIPhiRZContainer *caloClusterROIEM()  const        { return m_caloClusterROIEM; }
     const ROIPhiRZContainer *caloClusterROIHad() const        { return m_caloClusterROIHad; }
     void setCaloClusterROIEM(const ROIPhiRZContainer &rois)   { m_caloClusterROIEM  = &rois; }
@@ -92,11 +91,6 @@ namespace InDet {
     //@{
     bool m_pix{false};
     bool m_sct{false};
-    //@}
-
-    /// @name Data members updated only by getTracks
-    //@{
-    bool m_dbm{false};
     //@}
 
     /// Counters

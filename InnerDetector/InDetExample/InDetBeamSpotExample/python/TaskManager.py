@@ -107,7 +107,7 @@ def getJobConfig(jobDir,dsName,taskName,jobName='*'):
     if not configFile:
         configFile = glob.glob('%s/%s/%s/%s/%s' % (jobDir,dsName,taskName,jobName,'*.config.py'))
     if configFile:
-        exec(open(configFile[0],'r'),config)    # Eval config file and put defs into config dict
+        exec(open(configFile[0]).read(),config)    # Eval config file and put defs into config dict
     return config['jobConfig']
 
 

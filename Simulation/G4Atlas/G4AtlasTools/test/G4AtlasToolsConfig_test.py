@@ -12,7 +12,6 @@ if __name__ == '__main__':
   from AthenaCommon.Constants import DEBUG
   log.setLevel(DEBUG)
 
-
   #import config flags
   from AthenaConfiguration.AllConfigFlags import ConfigFlags
   from AthenaConfiguration.Enums import ProductionStep
@@ -24,24 +23,19 @@ if __name__ == '__main__':
   inputDir = defaultTestFiles.d
   ConfigFlags.Input.Files = defaultTestFiles.EVNT
 
-  from AthenaConfiguration.Enums import LHCPeriod
-  ConfigFlags.GeoModel.Run = LHCPeriod.Run2
-
-  detectors =['BCM', 'Pixel', 'SCT', 'TRT', 'LAr']
-  # Setup detector flags
-  from AthenaConfiguration.DetectorConfigFlags import setupDetectorsFromList
-  setupDetectorsFromList(ConfigFlags, detectors, toggle_geometry=True)
-
   #ConfigFlags.GeoModel.AtlasVersion = "tb_Tile2000_2003"
   #ConfigFlags.GeoModel.AtlasVersion = "ctbh8"
   ConfigFlags.GeoModel.AtlasVersion = 'ATLAS-R2-2015-03-01-00'
+
+  # Setup detector flags
+  from AthenaConfiguration.DetectorConfigFlags import setupDetectorFlags
+  setupDetectorFlags(ConfigFlags, ['BCM', 'Pixel', 'SCT', 'TRT', 'LAr', 'MBTS'], toggle_geometry=True)
+
   # Finalize
   ConfigFlags.lock()
 
-
   ## Initialize a new component accumulator
   cfg = MainServicesCfg(ConfigFlags)
-
 
   from G4AtlasTools.G4AtlasToolsConfig import SensitiveDetectorMasterToolCfg
   acc  = SensitiveDetectorMasterToolCfg(ConfigFlags)
@@ -51,11 +45,9 @@ if __name__ == '__main__':
   cfg.printConfig(withDetails=True, summariseProps = True)
   ConfigFlags.dump()
 
-
   #cfg not being used so complains ...fine now!
   f=open("test.pkl","wb")
   cfg.store(f) #sets wasmerged = true
   f.close()
-
 
   print ("-----------------finished----------------------")

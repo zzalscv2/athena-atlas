@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2017 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
 */
 
 
@@ -36,7 +36,7 @@
 #include "TProfile.h"
 #include "TMinuit.h"
 
-const char *SegStationName[17] = {"BIS", "BIL", "BMS", "BML", "BOS", "BOL", "BEE", 
+const char * const SegStationName[17] = {"BIS", "BIL", "BMS", "BML", "BOS", "BOL", "BEE",
                               "EIS", "EIL", "EMS", "EML", "EOS", "EOL", "EES", 
                               "EEL", "CSS", "CSL"};//For filling in monitoring plots
 

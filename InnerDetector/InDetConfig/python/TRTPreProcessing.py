@@ -197,8 +197,7 @@ if __name__ == "__main__":
     top_acc.merge( PixelReadoutGeometryCfg(ConfigFlags) )
     top_acc.merge( SCT_ReadoutGeometryCfg(ConfigFlags) )
 
-    if not ConfigFlags.InDet.Tracking.doDBMstandalone:
-        top_acc.merge(TRTPreProcessingCfg(ConfigFlags))
+    top_acc.merge(TRTPreProcessingCfg(ConfigFlags))
 
     iovsvc = top_acc.getService('IOVDbSvc')
     iovsvc.OutputLevel=5

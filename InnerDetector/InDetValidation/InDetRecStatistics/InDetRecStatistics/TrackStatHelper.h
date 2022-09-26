@@ -69,10 +69,6 @@ namespace InDet {
 		    HIT_SCT4,  
 		    HIT_SCT5TO9, 
 		    HIT_TRT_ALL,
-		    HIT_DBM_ALL,
-		    HIT_DBM1,
-		    HIT_DBM2,
-		    HIT_DBM3,
 		    HIT_UNKNOWN, 
 		    N_HITTYPES};//!< hit type, all, subsystem, subsystem layer
 
@@ -81,7 +77,7 @@ namespace InDet {
 		    ETA_TRANSITION, 
 		    ETA_ENDCAP, 
 		    ETA_OUTSIDE,
-		    ETA_DBM,
+		    ETA_FORWARD,
 		    ETA_UNKNOWN,
 		    N_ETAREGIONS}; //!< eta region
 
@@ -89,8 +85,8 @@ namespace InDet {
     float maxEtaBarrel;
     float maxEtaTransition;//!< Maxiumu eta for transition region
     float maxEtaEndcap;//!< Maximum eta for endcap
-    float minEtaDBM;
-    float maxEtaDBM;
+    float minEtaFORWARD;
+    float maxEtaFORWARD;
     float fakeTrackCut;//!< fraction of hits per track that come from single matched truth track.  tracks with less than this fraction are considered fakes or low probability
     float fakeTrackCut2;//!< 2nd value for fraction of hits per track that come from single matched truth track.  tracks with less than this fraction are considered fakes or low probability
     float matchTrackCut;//!< Truth  probability has to be greater than this for track to be considered matched    
@@ -107,8 +103,8 @@ namespace InDet {
       maxEtaBarrel    =0;
       maxEtaTransition=0;
       maxEtaEndcap    =0;
-      minEtaDBM = 3.1;
-      maxEtaDBM=3.5;
+      minEtaFORWARD = 2.5;
+      maxEtaFORWARD=4.2;
       fakeTrackCut=0;
       fakeTrackCut2     =0;
       matchTrackCut     =0;
@@ -294,7 +290,6 @@ namespace InDet {
         kNumberOfTRTHighThresholdHits,
         kNumberOfTRTHighThresholdOutliers,
         kNumberOfOutliersOnTrack,
-        kNumberOfDBMHits,
         kNSummaryTypes
     };
     static const Trk::SummaryType       s_summaryTypes                      [kNSummaryTypes]; //!< summary types for which statistics

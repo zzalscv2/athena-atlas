@@ -84,10 +84,6 @@ def SiSpacePointsSeedMakerCfg(flags, name="InDetSpSeedsMaker", **kwargs) :
         kwargs.setdefault("checkEta", True)
         kwargs.setdefault("etaMin", flags.InDet.Tracking.ActivePass.minEta)
         kwargs.setdefault("etaMax", flags.InDet.Tracking.ActivePass.maxEta)
-    elif flags.InDet.Tracking.ActivePass.extension == "DBM":
-        kwargs.setdefault("etaMin", flags.InDet.Tracking.ActivePass.minEta)
-        kwargs.setdefault("etaMax", flags.InDet.Tracking.ActivePass.maxEta)
-        kwargs.setdefault("useDBM", True)
 
     InDetSiSpacePointsSeedMaker = SiSpacePointsSeedMaker (name = name+flags.InDet.Tracking.ActivePass.extension, **kwargs)
     acc.setPrivateTools(InDetSiSpacePointsSeedMaker)

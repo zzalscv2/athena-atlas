@@ -440,11 +440,11 @@ namespace LVL1MUCTPIPHASE1 {
       switch (LVL1::MuCTPIBits::getSubsysID(data.dataWord)) {
         case LVL1::MuCTPIBits::SubsysID::Endcap: // same for Endcap and Forward
         case LVL1::MuCTPIBits::SubsysID::Forward: {
-          roiData = m_tgcTool->roiData(data.dataWord);
+          ATH_CHECK( m_tgcTool->roiData(data.dataWord, roiData) );
           break;
         }
         case LVL1::MuCTPIBits::SubsysID::Barrel: {
-          roiData = m_rpcTool->roiData(data.dataWord);
+          ATH_CHECK( m_rpcTool->roiData(data.dataWord, roiData) );
           break;
         }
         default: {

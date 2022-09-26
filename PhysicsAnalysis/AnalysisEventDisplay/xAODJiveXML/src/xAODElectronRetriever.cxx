@@ -46,7 +46,7 @@ namespace JiveXML {
     
     if (msgLvl(MSG::DEBUG)) msg(MSG::DEBUG)  << "in retrieveAll()" << endmsg;
     
-    const DataHandle<xAOD::ElectronContainer> iterator, end;
+    SG::ConstIterator<xAOD::ElectronContainer> iterator, end;
     const xAOD::ElectronContainer* electrons;
     
     //obtain the default collection first
@@ -74,7 +74,7 @@ namespace JiveXML {
       for (; iterator!=end; iterator++) {
 	  if (iterator.key()!=m_sgKey) {
              if (msgLvl(MSG::DEBUG)) msg(MSG::DEBUG)  << "Trying to retrieve all. Current collection: " << dataTypeName() << " (" << iterator.key() << ")" << endmsg;
-             DataMap data = getData(iterator);
+             DataMap data = getData(&(*iterator));
              if ( FormatTool->AddToEvent(dataTypeName(), iterator.key()+"_xAOD", &data).isFailure()){
 	       if (msgLvl(MSG::WARNING)) msg(MSG::WARNING) << "Collection " << iterator.key() << " not found in SG " << endmsg;
 	    }else{

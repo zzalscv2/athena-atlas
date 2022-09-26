@@ -116,7 +116,6 @@ def createInDetConfigFlags():
     icf.addFlag("InDet.Tracking.doTrackSegmentsTRT",
                 lambda prevFlags: (prevFlags.InDet.Tracking.doLowMu or
                                    prevFlags.InDet.Tracking.doInnerDetectorCommissioning))
-    icf.addFlag("InDet.Tracking.doDBMstandalone", False)
     # Turn running of high pile-up reconstruction on and off
     icf.addFlag("InDet.Tracking.doHighPileup", False)
     # turn on / off TRT extensions
@@ -202,7 +201,7 @@ def createInDetConfigFlags():
         createVtxLumiTrackingPassFlags, createVtxBeamSpotTrackingPassFlags, createCosmicsTrackingPassFlags,
         createHeavyIonTrackingPassFlags, createPixelTrackingPassFlags, createDisappearingTrackingPassFlags,
         createSCTTrackingPassFlags, createTRTTrackingPassFlags, createTRTStandaloneTrackingPassFlags,
-        createDBMTrackingPassFlags, createRobustRecoTrackingPassFlags)
+        createRobustRecoTrackingPassFlags)
 
     # Set up for first tracking pass, updated for second passes
     icf.addFlagsCategory("InDet.Tracking.MainPass",
@@ -243,8 +242,6 @@ def createInDetConfigFlags():
                          createTRTTrackingPassFlags, prefix=True)
     icf.addFlagsCategory("InDet.Tracking.TRTStandalonePass",
                          createTRTStandaloneTrackingPassFlags, prefix=True)
-    icf.addFlagsCategory("InDet.Tracking.DBMPass",
-                         createDBMTrackingPassFlags, prefix=True)
     icf.addFlagsCategory("InDet.Tracking.RobustRecoPass",
                          createRobustRecoTrackingPassFlags, prefix=True)
 

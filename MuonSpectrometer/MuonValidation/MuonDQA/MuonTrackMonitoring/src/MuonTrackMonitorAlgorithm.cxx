@@ -115,8 +115,8 @@ StatusCode MuonTrackMonitorAlgorithm::FillMuonInformation(const std::string& sId
     auto    MuonsNPixHitsAvg = Monitored::Scalar<float>((sIdentifier+"MuonNPixHitsAvg").c_str(), 0);    
     auto    MuonsNSCTHitsAvg = Monitored::Scalar<float>((sIdentifier+"MuonNSCTHitsAvg").c_str(), 0);    
     auto    MuonsNTRTHitsAvg = Monitored::Scalar<float>((sIdentifier+"MuonNTRTHitsAvg").c_str(), 0);    
-    auto    MuonsIDChi2NDF = Monitored::Scalar<float>((sIdentifier+"MuonIDChi2NDF").c_str(), 0);    
-    auto    MuonsMEChi2NDF = Monitored::Scalar<float>((sIdentifier+"MuonMEChi2NDF").c_str(), 0);    
+    auto    MuonsIDchi2ndof = Monitored::Scalar<float>((sIdentifier+"MuonIDchi2ndof").c_str(), 0);    
+    auto    MuonsMEchi2ndof = Monitored::Scalar<float>((sIdentifier+"MuonMEchi2ndof").c_str(), 0);    
     auto    MuonsEtaHitsLayer1 = Monitored::Scalar<float>((sIdentifier+"MuonsEtaHitsLayer1").c_str(), 0);   
     auto    MuonsEtaHitsLayer2 = Monitored::Scalar<float>((sIdentifier+"MuonsEtaHitsLayer2").c_str(), 0);   
     auto    MuonsEtaHitsLayer3 = Monitored::Scalar<float>((sIdentifier+"MuonsEtaHitsLayer3").c_str(), 0);   
@@ -209,9 +209,9 @@ StatusCode MuonTrackMonitorAlgorithm::FillMuonInformation(const std::string& sId
                     MuonDPTIDME     = (idtp->pt() - metp->pt()) / idtp->pt();
                     MuonDPTCBME     = (cbtp->pt() - metp->pt()) / cbtp->pt();
                     MuonDPTIDMECB   = (idtp->pt() - metp->pt()) / cbtp->pt();
-                    MuonsIDChi2NDF  = idtp->chiSquared()/std::max(1.f,idtp->numberDoF());
-                    MuonsMEChi2NDF  = metp->chiSquared()/std::max(1.f,metp->numberDoF());   
-                    fill(tool, MuonDPTIDME, MuonsIDChi2NDF, MuonsMEChi2NDF);
+                    MuonsIDchi2ndof  = idtp->chiSquared()/std::max(1.f,idtp->numberDoF());
+                    MuonsMEchi2ndof  = metp->chiSquared()/std::max(1.f,metp->numberDoF());   
+                    fill(tool, MuonDPTIDME, MuonsIDchi2ndof, MuonsMEchi2ndof);
                 }
 
             }
@@ -239,9 +239,9 @@ StatusCode MuonTrackMonitorAlgorithm::FillMuonInformation(const std::string& sId
                 /// Momentum Resolution and chi2 studies of MS and ID only tracks
                 if (idtp && metp) {
                     MuonDPTIDME     = (idtp->pt() - metp->pt()) / idtp->pt();
-                    MuonsIDChi2NDF  = idtp->chiSquared()/idtp->numberDoF();
-                    MuonsMEChi2NDF  = metp->chiSquared()/metp->numberDoF(); 
-                    fill(tool, MuonDPTIDME, MuonsIDChi2NDF, MuonsMEChi2NDF);
+                    MuonsIDchi2ndof  = idtp->chiSquared()/idtp->numberDoF();
+                    MuonsMEchi2ndof  = metp->chiSquared()/metp->numberDoF(); 
+                    fill(tool, MuonDPTIDME, MuonsIDchi2ndof, MuonsMEchi2ndof);
                 }
             }
         }

@@ -7,17 +7,18 @@
 #include <cstdlib>
 #include <filesystem>
 
+#include "CxxUtils/checker_macros.h"
 #include "DataQualityUtils/HanOutputFile.h"
 
 namespace
 {
 
-  void usage(const std::string& command_name, int exit_code);
+  int usage(const std::string& command_name, int exit_code);
 
   class CmdLineArgs
   {
   public:
-    CmdLineArgs(int argc, char* argv[]);
+    int parse(int argc, char* argv[]);
 
     std::string command;
     std::string hresults;
@@ -25,9 +26,11 @@ namespace
 
 } // unnamed namespace
 
-int main(int argc, char* argv[])
+int main ATLAS_NOT_THREAD_SAFE (int argc, char* argv[])
 {
-  CmdLineArgs arg(argc, argv);
+  CmdLineArgs arg;
+  int rc = arg.parse(argc, argv);
+  if (rc!=0) return rc;
 
   std::string resultsName(arg.hresults);
 
@@ -49,7 +52,7 @@ int main(int argc, char* argv[])
 namespace
 {
 
-  void usage(const std::string& command_name, int exit_code)
+  int usage(const std::string& command_name, int exit_code)
   {
     std::string message;
     message += "\n";
@@ -63,19 +66,20 @@ namespace
     std::cout << "\n";
     std::cout << "Usage: " << short_name << " <results_file>\n";
     std::cout << message << "\n";
-    exit(exit_code);
+    return exit_code;
   }
 
-  CmdLineArgs::
-    CmdLineArgs(int argc, char* argv[])
+  int CmdLineArgs::
+    parse(int argc, char* argv[])
   {
     command = argv[0];
     if (argc > 2)
-      usage(command, 1);
+      return usage(command, 1);
     if (argc < 2)
-      usage(command, 0);
+      return usage(command, 0);
 
     hresults = argv[1];
+    return 0;
   }
 
 } // unnamed namespace

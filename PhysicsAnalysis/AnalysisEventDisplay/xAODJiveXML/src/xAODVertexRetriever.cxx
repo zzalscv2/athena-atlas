@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2017 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "xAODJiveXML/xAODVertexRetriever.h"
@@ -47,7 +47,7 @@ namespace JiveXML {
 
     //Get an iterator over all vertex collections,
     //return if there are none
-    const DataHandle<xAOD::VertexContainer> vtxCollectionItr, vtxCollectionsEnd;
+    SG::ConstIterator<xAOD::VertexContainer> vtxCollectionItr, vtxCollectionsEnd;
     if (evtStore()->retrieve(vtxCollectionItr,vtxCollectionsEnd).isFailure()) {
       if (msgLvl(MSG::DEBUG )) msg(MSG::DEBUG ) << "No xAODVertexContainer containers found in this event" << endmsg;
       return StatusCode::SUCCESS;

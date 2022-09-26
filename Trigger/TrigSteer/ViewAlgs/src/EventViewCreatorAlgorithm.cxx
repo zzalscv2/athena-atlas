@@ -179,7 +179,7 @@ bool EventViewCreatorAlgorithm::checkCache(const DecisionContainer* cachedViews,
     return false; // No cached input configured, which is fine.
   }
 
-  bool usedROIMatchingFlag; // Sanity check
+  bool usedROIMatchingFlag{false}; // Sanity check
   const bool result = matchInCollection(cachedViews, outputDecision, cachedIndex, usedROIMatchingFlag, matchingCache, context);
   if (usedROIMatchingFlag and m_mergeUsingFeature) {
     ATH_MSG_ERROR("Called matchInCollection in an EVCA configured with mergeUsingFeature=True, however ROI matching was used instead?! Should not be possible.");

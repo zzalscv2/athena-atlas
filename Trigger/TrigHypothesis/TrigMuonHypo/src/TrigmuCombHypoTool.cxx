@@ -525,9 +525,9 @@ bool TrigmuCombHypoTool::isOverlap(const xAOD::L2CombinedMuon *combMf1,
   for(unsigned int i=0; i<(m_etaBins.size()-1); i++) {
     if ( m_etaBins[i] <= absEta && absEta < m_etaBins[i+1] ) iThres = i;
   }
-  double dRThres     = m_dRThres[iThres];
-  double dRbyMFThres = m_mufastDRThres[iThres];
-  double massThres   = m_massThres[iThres];
+  double dRThres     = m_requireDR ? m_dRThres[iThres] : 0.;
+  double dRbyMFThres = m_requireMufastDR ? m_mufastDRThres[iThres] : 0.;
+  double massThres   = m_requireMass ? m_massThres[iThres] : 0.;
   ATH_MSG_DEBUG( "   ...iThres=" << iThres );
   if(m_requireDR)        ATH_MSG_DEBUG( "   ...dR       threshold=" << dRThres     );
   if(m_requireMufastDR)  ATH_MSG_DEBUG( "   ...dR(byMF) threshold=" << dRbyMFThres );

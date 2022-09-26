@@ -287,7 +287,7 @@ class BeamSpotValue:
 
         # Parameters as stored in COOL
         
-        self.fitID=0
+        #self.fitID=0
         self.status = 0
         self.posX = 0.
         self.posY = 0.
@@ -376,11 +376,11 @@ class BeamSpotValue:
         self.defectWord = 0
 
         # Pileup
-        self.pileup = 0
+        #self.pileup = 0
 
         # Scan info
         self.separation = 0.
-        self.acquisitionFlag = 0.
+        #self.acquisitionFlag = 0.
 
     @property
     def sigmaXY(self):
@@ -454,7 +454,7 @@ class BeamSpotValue:
         self.timeStart = self.pseudoLbDict[self.lbStart][0]
         self.timeEnd = self.pseudoLbDict[self.lbStart][1]
         self.separation = self.pseudoLbDict[self.lbStart][2]
-        self.acquisitionFlag = self.pseudoLbDict[self.lbStart][3]
+        #self.acquisitionFlag = self.pseudoLbDict[self.lbStart][3]
 
         #print (self.lbStart, self.timeStart, self.timeEnd, time.strftime('%a %b %d %X %Z %Y',time.localtime(self.timeStart)))
 
@@ -793,7 +793,7 @@ class BeamSpotContainer:
             if b.timeStart<self.timeMin: continue
             if b.timeEnd>self.timeMax: continue
             if self.statusList and b.status not in self.statusList: continue            
-            if self.acqFlag is not None and b.acquisitionFlag != self.acqFlag: continue
+            #if self.acqFlag is not None and b.acquisitionFlag != self.acqFlag: continue
             
             if self.grl:
                 # Check if in GRL
@@ -878,6 +878,7 @@ class BeamSpotContainer:
 
 ROOT.gROOT.ProcessLine(BeamSpotValue(fullCorrelations=True).getROOTStruct())
 from ROOT import BeamSpotNtBuf
+from cppyy.ll import cast
 
 class BeamSpotNt(BeamSpotContainer):
     """BeamSpotContainer for master beam spot ntuple."""
@@ -901,7 +902,7 @@ class BeamSpotNt(BeamSpotContainer):
                     self.nt.Branch(v,ROOT.addressof( self.ntbuf,v), v+varType)
             else:
                 for v in bs.varList():
-                    self.nt.SetBranchAddress(v,ROOT.addressof(self.ntbuf,v))
+                    self.nt.SetBranchAddress(v,cast['void*'](ROOT.addressof(self.ntbuf,v)))
         else:
             self.rootFile = ROOT.TFile(fileName)
             self.nt = self.rootFile.Get(self.treeName)
@@ -980,11 +981,11 @@ class BeamSpotFinderNt(BeamSpotContainer):
         for j in range(self.nt.GetEntries()):
             self.nt.GetEntry(j)
             bs = BeamSpotValue(self.fullCorrelations)
-            try:
-                bs.status = BeamSpotFinderNt.fitIdToStatusMap[self.nt.fitID]+BeamSpotFinderNt.fitResultToStatusMap[self.nt.fitStatus]
-            except Exception:
-                bs.status = 0
-                print ("ERROR: can't translate (fitID,fitStatus) = (%i,%i) into status word" % (self.nt.fitID,self.nt.fitStatus))
+            #try:
+            #    bs.status = BeamSpotFinderNt.fitIdToStatusMap[self.nt.fitID]+BeamSpotFinderNt.fitResultToStatusMap[self.nt.fitStatus]
+            #except Exception:
+            #    bs.status = 0
+            #    print ("ERROR: can't translate (fitID,fitStatus) = (%i,%i) into status word" % (self.nt.fitID,self.nt.fitStatus))
             bs.run = self.nt.run
             try:
                 bs.bcid = self.nt.bcid
