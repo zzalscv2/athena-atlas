@@ -84,7 +84,8 @@ int fitVertexCascadeScale( VKVertex * vk, double & distToVertex )
    if (IERR) return -13;                        /* NONINVERTIBLE COV.MATRIX */
    cfdcopy(    dptot, vk->fitMom, 3);          //save Momentum
    cfdcopy(VrtMomCov, vk->fitCovXYZMom, 21);   //save XYZMom covariance
-   vk->FVC.Charge=getVertexCharge(vk);     
+   vk->FVC.Charge=getVertexCharge(vk);
+   if(vk->FVC.Charge!=0)vk->FVC.Charge=std::copysign(1,vk->FVC.Charge);
 //
    if(vk->nextCascadeVrt){
       FullMTXfill(vk, vk->ader);
@@ -92,6 +93,7 @@ int fitVertexCascadeScale( VKVertex * vk, double & distToVertex )
       if( target_trk == nullptr ) return -12;
 
       long int Charge=getVertexCharge(vk);
+      if(Charge!=0)Charge=std::copysign(1,Charge);
       target_trk->Charge=Charge;
 
       double parV0[5],covParV0[15],tmpCov[15],fittedVrt[3];      
