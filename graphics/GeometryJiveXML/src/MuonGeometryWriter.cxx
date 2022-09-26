@@ -199,7 +199,7 @@ namespace JiveXML {
 	  // Now loop over the other stations and see if any of them have the same parameters. Do 
 	  // this in reverse order to allow the current station to be erased from the vector.
 	  std::vector<const MuonGM::MuonStation *>::iterator it;
-	  for (it=stations->end()-1; it>=stations->begin(); it--) {
+	  for (it=stations->end()-1; it>=stations->begin(); --it) {
 	    HepGeom::Point3D<double> pos2 = getPosition(*it, maxPhi);
 	    int phi2 = (*it)->getPhiIndex();
 	    double dphi2 = getDeltaPhi(pos2, maxPhi);
@@ -359,9 +359,9 @@ namespace JiveXML {
   }
 
   void MuonGeometryWriter::writeATrd(std::ofstream &out,
-        std::string stationTech, std::string stationName,
+        const std::string& stationTech, const std::string& stationName,
         double zi, double zo, double ri, double ro, double wi, double wo,
-        int eta, std::string phiString,
+        int eta, const std::string& phiString,
         double dphi, double shift, double alpha) const {
 
      out << "<ATrd n=\"" << stationTech << "_" << stationName << std::abs(eta) << "\""
