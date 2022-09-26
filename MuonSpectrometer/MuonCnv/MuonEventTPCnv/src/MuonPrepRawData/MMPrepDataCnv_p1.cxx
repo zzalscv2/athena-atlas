@@ -62,7 +62,7 @@ persToTrans( const Muon::MMPrepData_p1 *persObj, Muon::MMPrepData *transObj,MsgS
 }
 
 void MMPrepDataCnv_p1::
-transToPers( const Muon::MMPrepData *transObj, Muon::MMPrepData_p1 *persObj, MsgStream & log )
+transToPers( const Muon::MMPrepData *transObj, Muon::MMPrepData_p1 *persObj, MsgStream &)
 {
     persObj->m_locX     = transObj->localPosition()[Trk::locX];
     persObj->m_errorMat = (transObj->localCovariance())(0,0);
@@ -93,7 +93,6 @@ transToPers( const Muon::MMPrepData *transObj, Muon::MMPrepData_p1 *persObj, Msg
       // (this only works if the absolute value of the difference is smaller than 128)
       Identifier32::value_type rdoIdCompact = rdo_id.get_identifier32().get_compact(); // unsigned int
       int diff = (int)(rdoIdCompact-clusIdCompact);
-      if (abs(diff)>SCHAR_MAX) log << MSG::WARNING << "Difference between cluster and rdo Identifier (" << diff << ") larger than what can be stored (" << SCHAR_MAX << ")" << endmsg;
       rdoListPers.push_back((signed char)diff);
     } 
    
