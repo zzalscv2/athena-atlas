@@ -209,7 +209,7 @@ void JetCaloEnergies::fillEperSamplingFE(const xAOD::Jet& jet, std::vector<float
 
     for (size_t n = 0; n < constit->otherObjects().size(); ++n) {
       if(! constit->otherObject(n)) continue;
-     int index_pfo = constit->otherObject(n)->index();
+      int index_pfo = constit->otherObject(n)->index();
   	  if(index_pfo<0) continue;
 
       const auto* fe = (constit->otherObject(n));
@@ -222,7 +222,7 @@ void JetCaloEnergies::fillEperSamplingFE(const xAOD::Jet& jet, std::vector<float
       //If we have a PFO, we should still get the associated cluster first
       else {
         const xAOD::FlowElement* pfo = dynamic_cast<const xAOD::FlowElement*>(fe);
-        if(pfo->otherObjects().size() > 0 && pfo->otherObject(0)->type() == xAOD::Type::CaloCluster){
+        if(pfo->otherObjects().size() > 0 && pfo->otherObject(0) && pfo->otherObject(0)->type() == xAOD::Type::CaloCluster){
           cluster = dynamic_cast<const xAOD::CaloCluster*> (pfo->otherObject(0));
         }
       }
