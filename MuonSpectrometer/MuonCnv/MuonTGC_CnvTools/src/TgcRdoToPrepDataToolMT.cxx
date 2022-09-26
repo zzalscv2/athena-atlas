@@ -1620,10 +1620,8 @@ StatusCode Muon::TgcRdoToPrepDataToolMT::decodeHiPt(State& state,
     }
   }
   
-  const Amg::Vector2D* hitPos_o = new Amg::Vector2D(tmp_hitPos_o);
-  if(!hitPos_o) ATH_MSG_WARNING("Muon::TgcRdoToPrepDataToolMT::decodeHiPt Amg::Vector2D* hitPos_o is null");
-  const Amg::Vector2D* hitPos_i = new Amg::Vector2D(tmp_hitPos_i);
-  if(!hitPos_i) ATH_MSG_WARNING("Muon::TgcRdoToPrepDataToolMT::decodeHiPt Amg::Vector2D* hitPos_i is null");
+  auto hitPos_o = std::make_unique< Amg::Vector2D >(tmp_hitPos_o);
+  auto hitPos_i = std::make_unique< Amg::Vector2D >(tmp_hitPos_i);
  
   TgcCoinData* newCoinData = new TgcCoinData(channelIdIn_tmp,
 					     channelIdOut_tmp,
@@ -1637,8 +1635,8 @@ StatusCode Muon::TgcRdoToPrepDataToolMT::decodeHiPt(State& state,
 					     static_cast<bool>(rd.isForward()), // isForward
 					     static_cast<bool>(rd.isStrip()), // isStrip
 					     trackletId, // trackletId
-					     hitPos_i, 
-					     hitPos_o,
+					     hitPos_i.release(),
+					     hitPos_o.release(),
 					     width_i,
 					     width_o,
 					     delta, // delta
@@ -1906,8 +1904,8 @@ StatusCode Muon::TgcRdoToPrepDataToolMT::decodeHiPt_NSL(State& state,
     }
   }
   
-  const Amg::Vector2D* hitPos_o = new Amg::Vector2D(tmp_hitPos_o);  
-  const Amg::Vector2D* hitPos_i = new Amg::Vector2D(tmp_hitPos_i);  
+  auto hitPos_o = std::make_unique< Amg::Vector2D >(tmp_hitPos_o);
+  auto hitPos_i = std::make_unique< Amg::Vector2D >(tmp_hitPos_i);
  
   TgcCoinData* newCoinData = new TgcCoinData(channelIdIn_tmp,
 					     channelIdOut_tmp,
@@ -1921,8 +1919,8 @@ StatusCode Muon::TgcRdoToPrepDataToolMT::decodeHiPt_NSL(State& state,
 					     static_cast<bool>(rd.isForward()), // isForward
 					     static_cast<bool>(rd.isStrip()), // isStrip
 					     trackletId, // trackletId
-					     hitPos_i, 
-					     hitPos_o,
+					     hitPos_i.release(),
+					     hitPos_o.release(),
 					     width_i,
 					     width_o,
 					     delta, // delta
@@ -1977,8 +1975,8 @@ StatusCode Muon::TgcRdoToPrepDataToolMT::decodeInner(State& state,
   int locId = (rd.bcTag()==TgcDigit::BC_CURRENT || rd.bcTag()==TgcDigit::BC_UNDEFINED) 
     ? 1 : rd.bcTag()-1;
   
-  const Amg::Vector2D* hitPos_o = new Amg::Vector2D(0,0);
-  const Amg::Vector2D* hitPos_i = new Amg::Vector2D(0,0);
+  auto hitPos_o = std::make_unique< Amg::Vector2D >(0,0);
+  auto hitPos_i = std::make_unique< Amg::Vector2D >(0,0);
   
 
   const MuonGM::TgcReadoutElement* descriptor_ii = nullptr;
@@ -2019,8 +2017,8 @@ StatusCode Muon::TgcRdoToPrepDataToolMT::decodeInner(State& state,
 					     0, // isForward
 					     static_cast<bool>(rd.isStrip()), // isStrip, Inner or Tile
 					     0, // trackletId
-					     hitPos_i, 
-					     hitPos_o,
+					     hitPos_i.release(),
+					     hitPos_o.release(),
 					     0., // width_i,
 					     0., // width_o,
 					     0, // delta,
@@ -2076,10 +2074,6 @@ StatusCode Muon::TgcRdoToPrepDataToolMT::decodeInner_NSL(State& state,
   int locId = (rd.bcTag()==TgcDigit::BC_CURRENT || rd.bcTag()==TgcDigit::BC_UNDEFINED) 
     ? 1 : rd.bcTag()-1;
   
-  Amg::Vector2D tmp_hitPos_i(0., 0.);
-  Amg::Vector2D tmp_hitPos_o(0., 0.);
-  const Amg::Vector2D* hitPos_o = new Amg::Vector2D(tmp_hitPos_o);
-  const Amg::Vector2D* hitPos_i = new Amg::Vector2D(tmp_hitPos_i);
   
   const MuonGM::TgcReadoutElement* descriptor_ii = nullptr;
   const MuonGM::TgcReadoutElement* descriptor_oo = nullptr;
@@ -2145,7 +2139,8 @@ StatusCode Muon::TgcRdoToPrepDataToolMT::decodeInner_NSL(State& state,
     ATH_MSG_WARNING("Invalid ROD ID : " << rd.rodId() );
     return StatusCode::FAILURE;    
   }
-
+  auto hitPos_o = std::make_unique<Amg::Vector2D>(0., 0.);
+  auto hitPos_i = std::make_unique<Amg::Vector2D>(0., 0.);
   TgcCoinData* newCoinData = new TgcCoinData(channelIdIn,  // empty
                                              channelIdOut, // empty
                                              tgcHashId, // determined from channelIdOut[1]
@@ -2158,8 +2153,8 @@ StatusCode Muon::TgcRdoToPrepDataToolMT::decodeInner_NSL(State& state,
                                              0, // isForward
                                              static_cast<bool>(isStrip), // Selection for NSW/BIS/EIFI/TMDB
                                              0, // trackletId
-                                             hitPos_i, 
-                                             hitPos_o,
+                                             hitPos_i.release(),
+                                             hitPos_o.release(),
                                              0., // width_i,
                                              0., // width_o,
                                              0, // delta,
@@ -2321,9 +2316,6 @@ StatusCode Muon::TgcRdoToPrepDataToolMT::decodeSL(State& state,
     // Obtain the local position in a different way. 
   const Amg::Vector2D* hitPos = !onSurface ? new Amg::Vector2D(tmp_hitPos) : getSLLocalPosition(descriptor_w2, channelId_wire[2], tmp_eta, tmp_phi);
 
-//  if(!hitPos) {  //No need to check should not be possible to fail
-//    ATH_MSG_WARNING("Muon::TgcRdoToPrepDataToolMT::decodeSL Amg::Vector2D* hitPos is null.");  
-//  } 
 
   Amg::MatrixX mat(2,2);
   mat.setIdentity();
