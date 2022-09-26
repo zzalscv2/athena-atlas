@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2017 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
 */
 
 ///////////////////////////////////////////////////////////////////
@@ -125,10 +125,6 @@ bool DerivationFramework::SkimmingToolEXOT14::eventPassesFilter() const
 
   bool writeEvent(false);
 
-  const xAOD::EventInfo *eventInfo(0);
-  ATH_CHECK(evtStore()->retrieve(eventInfo), false);
-  m_isMC = eventInfo->eventType(xAOD::EventInfo::IS_SIMULATION);   
-
   // int *leading    = new int(0);
   // if (!evtStore()->contains<int>("leading"))    CHECK(evtStore()->record(leading,    "leading"));
 
@@ -136,18 +132,18 @@ bool DerivationFramework::SkimmingToolEXOT14::eventPassesFilter() const
   if (!SubcutLArError()    && m_reqLArError ) return false;
   if (!SubcutTrigger()     && m_reqTrigger  ) return false;
 
-  SubcutPreselect();
+  const auto jets = SubcutPreselect();
   if (!m_reqPreselection) writeEvent = true;	    
 
   // There *must* be two jets for the remaining 
   // pieces, but you can still save the event...
-  if (m_e_passPreselect) {
+  if (jets) {
 
     bool passDiJets(true);     
-    if (!SubcutJetPts()        && m_reqJetPts   ) passDiJets = false;
-    if (!SubcutJetDEta()       && m_reqJetsDEta ) passDiJets = false;
-    if (!SubcutDijetMass()     && m_reqDiJetMass) passDiJets = false;
-    if (!SubcutJetDPhi()       && m_reqJetsDPhi ) passDiJets = false;
+    if (!SubcutJetPts(jets.value())        && m_reqJetPts   ) passDiJets = false;
+    if (!SubcutJetDEta(jets.value())       && m_reqJetsDEta ) passDiJets = false;
+    if (!SubcutDijetMass(jets.value())     && m_reqDiJetMass) passDiJets = false;
+    if (!SubcutJetDPhi(jets.value())       && m_reqJetsDPhi ) passDiJets = false;
     if (passDiJets) writeEvent = true; 
   }
 
@@ -161,11 +157,8 @@ bool DerivationFramework::SkimmingToolEXOT14::eventPassesFilter() const
 bool DerivationFramework::SkimmingToolEXOT14::SubcutGoodRunList() const {
 
   // Placeholder
-
-  m_e_passGRL = true;
-  
-  if (m_e_passGRL) m_n_passGRL++;
-  return m_e_passGRL;
+  m_n_passGRL++;
+  return true;
 
 }
   
@@ -176,10 +169,10 @@ bool DerivationFramework::SkimmingToolEXOT14::SubcutLArError() const {
   const xAOD::EventInfo *eventInfo(0);
   ATH_CHECK(evtStore()->retrieve(eventInfo), false);
 
-  m_e_passLArError = !(eventInfo->errorState(xAOD::EventInfo::LAr) == xAOD::EventInfo::Error);
+  const bool passLArError = !(eventInfo->errorState(xAOD::EventInfo::LAr) == xAOD::EventInfo::Error);
   
-  if (m_e_passLArError) m_n_passLArError++;
-  return m_e_passLArError;
+  if (passLArError) m_n_passLArError++;
+  return passLArError;
 
 }
 
@@ -189,37 +182,36 @@ bool DerivationFramework::SkimmingToolEXOT14::SubcutTrigger() const {
   const xAOD::EventInfo *eventInfo(0);
   ATH_CHECK(evtStore()->retrieve(eventInfo), false);
 
-  m_e_passTrigger = false;
+  bool passTrigger = false;
 
   for (unsigned int i = 0; i < m_triggers.size(); i++) {
     bool thisTrig = m_trigDecisionTool->isPassed(m_triggers.at(i));
     eventInfo->auxdecor< bool >(TriggerVarName(m_triggers.at(i))) = thisTrig;
     // ATH_MSG_INFO("TRIGGER = " << m_triggers.at(i) <<  " -->> " << thisTrig);
-    m_e_passTrigger |= thisTrig;
+    passTrigger |= thisTrig;
   }
   
   //  temporary pass-through of trigger cut for MC
-  if (m_isMC) m_e_passTrigger = true;
+  if (eventInfo->eventType(xAOD::EventInfo::IS_SIMULATION)) passTrigger = true;
 
-  if (m_e_passTrigger) m_n_passTrigger++;
-  return m_e_passTrigger;
+  if (passTrigger) m_n_passTrigger++;
+  return passTrigger;
 
 }
 
-
-bool DerivationFramework::SkimmingToolEXOT14::SubcutPreselect() const {
+std::optional<DerivationFramework::SkimmingToolEXOT14::LeadingJets_t>
+DerivationFramework::SkimmingToolEXOT14::SubcutPreselect() const {
 
   // xAOD::TStore store;
   const xAOD::JetContainer *jets(0); 
-  ATH_CHECK(evtStore()->retrieve(jets, m_jetSGKey), false);
+  ATH_CHECK(evtStore()->retrieve(jets, m_jetSGKey), {});
   xAOD::JetContainer::const_iterator jet_itr(jets->begin());
   xAOD::JetContainer::const_iterator jet_end(jets->end());
 
   xAOD::JetContainer calibJets;
   calibJets.setStore(new xAOD::JetAuxContainer());
-  
-  m_j1TLV.SetPtEtaPhiE(0, 0, 0, 0);
-  m_j2TLV.SetPtEtaPhiE(0, 0, 0, 0);
+
+  TLorentzVector j1TLV, j2TLV;
 
   // Copy jets into the container to be calibrated
   while(jet_itr != jet_end) {
@@ -239,80 +231,68 @@ bool DerivationFramework::SkimmingToolEXOT14::SubcutPreselect() const {
 
     if (abs((*jet_itr)->eta()) > m_maxEta) continue;
 
-    if ((*jet_itr)->pt() > m_j1TLV.Pt()) {
+    if ((*jet_itr)->pt() > j1TLV.Pt()) {
 
-      m_j2TLV = m_j1TLV;
-      m_j1TLV.SetPtEtaPhiE((*jet_itr)->pt(), (*jet_itr)->eta(), (*jet_itr)->phi(), (*jet_itr)->e());
+      j2TLV = j1TLV;
+      j1TLV.SetPtEtaPhiE((*jet_itr)->pt(), (*jet_itr)->eta(), (*jet_itr)->phi(), (*jet_itr)->e());
 
-    } else if ((*jet_itr)->pt() > m_j2TLV.Pt()) {
+    } else if ((*jet_itr)->pt() > j2TLV.Pt()) {
 
-      m_j2TLV.SetPtEtaPhiE((*jet_itr)->pt(), (*jet_itr)->eta(), (*jet_itr)->phi(), (*jet_itr)->e());
+      j2TLV.SetPtEtaPhiE((*jet_itr)->pt(), (*jet_itr)->eta(), (*jet_itr)->phi(), (*jet_itr)->e());
     }
     
     ++jet_itr;
   }
 
   // save this for this code.
-  if (m_j2TLV.Pt() > m_minJetPt) {
-    m_e_passPreselect = true;
+  if (j2TLV.Pt() > m_minJetPt) {
     m_n_passPreselect++;
-    return true;
+    return LeadingJets_t{j1TLV, j2TLV};
   }
 
-  m_e_passPreselect = false;
-  return false;
+  return {};
 
 }
 
 
-bool DerivationFramework::SkimmingToolEXOT14::SubcutJetPts() const {
+bool DerivationFramework::SkimmingToolEXOT14::SubcutJetPts(const LeadingJets_t& jets) const {
 
+  bool passJetPts =  (!m_leadingJetPt    || jets[0].Pt() > m_leadingJetPt);
+  passJetPts &= (!m_subleadingJetPt || jets[1].Pt() > m_subleadingJetPt);
 
-  // ATH_MSG_INFO("j1_pt=" << m_j1TLV.Pt() << "  min=" << m_leadingJetPt);
-  // ATH_MSG_INFO("j2_pt=" << m_j2TLV.Pt() << "  min=" << m_subleadingJetPt);
-
-  m_e_passJetPts =  (!m_leadingJetPt    || m_j1TLV.Pt() > m_leadingJetPt);
-  m_e_passJetPts &= (!m_subleadingJetPt || m_j2TLV.Pt() > m_subleadingJetPt);
-
-  if (m_e_passJetPts) m_n_passJetPts++;
-  return m_e_passJetPts;
+  if (passJetPts) m_n_passJetPts++;
+  return passJetPts;
 
 }
 
-bool DerivationFramework::SkimmingToolEXOT14::SubcutJetDEta() const {
+bool DerivationFramework::SkimmingToolEXOT14::SubcutJetDEta(const LeadingJets_t& jets) const {
 
-  m_e_JetsDEta = fabs(m_j1TLV.Eta() - m_j2TLV.Eta());
-  //ATH_MSG_INFO("deta=" << m_e_JetsDEta << "  min=" << m_etaSeparation);
+  const double JetsDEta = fabs(jets[0].Eta() - jets[1].Eta());
+  const bool passJetsDEta = JetsDEta > m_etaSeparation;
 
-  m_e_passJetsDEta = m_e_JetsDEta > m_etaSeparation;
-
-  if (m_e_passJetsDEta) m_n_passJetsDEta++;
-  return m_e_passJetsDEta;
+  if (passJetsDEta) m_n_passJetsDEta++;
+  return passJetsDEta;
 
 }
 
 
-bool DerivationFramework::SkimmingToolEXOT14::SubcutDijetMass() const {
+bool DerivationFramework::SkimmingToolEXOT14::SubcutDijetMass(const LeadingJets_t& jets) const {
 
-  m_e_DiJetMass = (m_j1TLV + m_j2TLV).M();
-  // ATH_MSG_INFO("mass=" << m_e_DiJetMass << "  min=" << m_dijetMass);
+  const double DiJetMass = (jets[0] + jets[1]).M();
+  const bool passDiJetMass = DiJetMass > m_dijetMass;
 
-  m_e_passDiJetMass = m_e_DiJetMass > m_dijetMass;
-
-  if (m_e_passDiJetMass) m_n_passDiJetMass++;
-  return m_e_passDiJetMass;
+  if (passDiJetMass) m_n_passDiJetMass++;
+  return passDiJetMass;
 
 }
 
-bool DerivationFramework::SkimmingToolEXOT14::SubcutJetDPhi() const {
+bool DerivationFramework::SkimmingToolEXOT14::SubcutJetDPhi(const LeadingJets_t& jets) const {
 
-  m_e_JetsDPhi = fabs(m_j1TLV.DeltaPhi(m_j2TLV));
-  // ATH_MSG_INFO("dphi=" << m_e_JetsDPhi << "  max=" << m_jetDPhi);
+  const double JetsDPhi = fabs(jets[0].DeltaPhi(jets[1]));
+  const bool passJetsDPhi = JetsDPhi < m_jetDPhi;
 
-  m_e_passJetsDPhi = m_e_JetsDPhi < m_jetDPhi;
-
-  if (m_e_passJetsDPhi) m_n_passJetsDPhi++;
-  return m_e_passJetsDPhi;
+  if (passJetsDPhi) m_n_passJetsDPhi++;
+  return passJetsDPhi;
 
 }
 

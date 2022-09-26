@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2017 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
 */
 
 ///////////////////////////////////////////////////////////////////
@@ -8,7 +8,9 @@
 
 #ifndef DERIVATIONFRAMEWORK_SKIMMINGTOOLEXOT14_H
 #define DERIVATIONFRAMEWORK_SKIMMINGTOOLEXOT14_H 1
- 
+
+#include <array>
+#include <optional>
 #include <string>
 #include <vector>
 #include <algorithm>
@@ -50,11 +52,11 @@ namespace DerivationFramework {
       ~SkimmingToolEXOT14();
 
       // Athena algtool's Hooks
-      StatusCode  initialize();
-      StatusCode  finalize();
+      virtual StatusCode  initialize() override;
+      virtual StatusCode  finalize() override;
 
       /** Check that the current event passes this filter */
-      virtual bool eventPassesFilter() const;
+      virtual bool eventPassesFilter() const override;
 
     private:
 
@@ -81,8 +83,6 @@ namespace DerivationFramework {
 
       // CUT VALUES/SETTINGS
 
-      mutable bool m_isMC;
-
       std::string m_goodRunList;
 
       std::string m_defaultTrigger;
@@ -100,18 +100,15 @@ namespace DerivationFramework {
       ///// FUNCTIONS
 
       // Cuts
+      using LeadingJets_t = std::array<TLorentzVector, 2>;
+      std::optional<LeadingJets_t> SubcutPreselect() const;
       bool   SubcutGoodRunList() const;
       bool   SubcutLArError() const;
       bool   SubcutTrigger() const;
-      bool   SubcutPreselect() const;
-      bool   SubcutJetPts() const;
-      bool   SubcutJetDEta() const;
-      bool   SubcutDijetMass() const;
-      bool   SubcutJetDPhi() const;
-
-
-      // Calculators
-      void   JetPreselect(const xAOD::Jet *jet);
+      bool   SubcutJetPts(const LeadingJets_t& jets) const;
+      bool   SubcutJetDEta(const LeadingJets_t& jets) const;
+      bool   SubcutDijetMass(const LeadingJets_t& jets) const;
+      bool   SubcutJetDPhi(const LeadingJets_t& jets) const;
 
       // Helpers
       std::string TriggerVarName(std::string s) const;
@@ -119,38 +116,16 @@ namespace DerivationFramework {
 
       ///////////////
       ///// COUNTERS
-      mutable unsigned int m_n_tot;
-      mutable unsigned int m_n_passGRL;
-      mutable unsigned int m_n_passLArError;
-      mutable unsigned int m_n_passTrigger;
-      mutable unsigned int m_n_passPreselect;
-      mutable unsigned int m_n_passJetPts;
-      mutable unsigned int m_n_passJetsDEta;
-      mutable unsigned int m_n_passDiJetMass;
-      mutable unsigned int m_n_passJetsDPhi;
-      mutable unsigned int m_n_pass;
-
-
-      /////////////////////////////
-      ///// EVENT LEVEL QUANTITIES
-
-      mutable TLorentzVector m_j1TLV, m_j2TLV;
-
-      mutable bool m_e_passGRL;
-      mutable bool m_e_passLArError;
-      mutable bool m_e_passTrigger;
-      mutable bool m_e_passPreselect;
-      mutable bool m_e_passJetPts;
-      mutable bool m_e_passJetsDEta;
-      mutable bool m_e_passDiJetMass;
-      mutable bool m_e_passJetsDPhi;
-
-      mutable double m_e_JetsDEta;
-      mutable double m_e_DiJetMass;
-      mutable double m_e_JetsDPhi;
-
-      /////////////////////////////
-      ///// FUNCTIONS
+      mutable std::atomic<unsigned int> m_n_tot;
+      mutable std::atomic<unsigned int> m_n_passGRL;
+      mutable std::atomic<unsigned int> m_n_passLArError;
+      mutable std::atomic<unsigned int> m_n_passTrigger;
+      mutable std::atomic<unsigned int> m_n_passPreselect;
+      mutable std::atomic<unsigned int> m_n_passJetPts;
+      mutable std::atomic<unsigned int> m_n_passJetsDEta;
+      mutable std::atomic<unsigned int> m_n_passDiJetMass;
+      mutable std::atomic<unsigned int> m_n_passJetsDPhi;
+      mutable std::atomic<unsigned int> m_n_pass;
 
       static const double s_MZ;
 
