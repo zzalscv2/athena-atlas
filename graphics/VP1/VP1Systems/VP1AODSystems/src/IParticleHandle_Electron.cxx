@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2017 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
 */
 
 
@@ -166,7 +166,7 @@ void IParticleHandle_Electron::addParameterShapes(){
   } else {
     parameterPoints->numPoints=i;
     parameterPoints->vertexProperty = vertices2;
-    m_d->sep->addChild(static_cast<IParticleCollHandle_Electron*>(collHandle())->collSettingsButton().defaultParameterMaterial());
+    m_d->sep->addChild(static_cast<const IParticleCollHandle_Electron*>(collHandle())->collSettingsButton().defaultParameterMaterial());
     m_d->sep->addChild(parameterPoints);
   }
 }
@@ -313,7 +313,7 @@ void IParticleHandle_Electron::addLine_Extrapolated(){
     ecc.addConfigurationMode(Trk::ExtrapolationMode::StopAtBoundary);
 
   // call the extrapolation engine
-  Trk::IExtrapolationEngine * engine = collHandle()->common()->extrapolator();
+  const Trk::IExtrapolationEngine * engine = collHandle()->common()->extrapolator();
   if (!engine) {
      VP1Msg::messageVerbose("No extrapolator engine available. Aborting.");
      return;

@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2017 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
 */
 
 
@@ -75,7 +75,7 @@ public:
 //  double transverseEnergy() const;
 //  double energyForCuts() const;
 //=======
-	SoGenericBox * genericBox() const;
+	SoGenericBox * genericBox();
 	virtual double charge() const ;//!< Returns unknown() in case of trouble.
 	double phi() const;
 	double eta() const;

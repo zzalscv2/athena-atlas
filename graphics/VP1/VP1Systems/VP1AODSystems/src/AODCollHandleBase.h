@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
 */
 
 
@@ -73,10 +73,10 @@ public:
    //Called just after creation. Should set current cut values and
   //connections with controller to monitor future changes. Reimplement
   //the ..Specific method to setup subsystem specific settings.
-  void setupSettingsFromController(AODSystemController*);
+  void setupSettingsFromController(const AODSystemController*);
 protected:
 	/// For extensions specific to this collection 
-  virtual void setupSettingsFromControllerSpecific(AODSystemController*) {};
+  virtual void setupSettingsFromControllerSpecific(const AODSystemController*) {};
 public:
 
   ///////////////////////////////////////////////////////////
@@ -85,8 +85,10 @@ public:
 
   //For use by the handles:
   QString name() const;
-  AODSysCommonData * common() const { return m_commonData; }
-  VP1ExtraSepLayerHelper * sepHelper() const { return m_sephelper; }//For attaching/detaching. 
+  const AODSysCommonData * common() const { return m_commonData; }
+  AODSysCommonData * common() { return m_commonData; }
+  const VP1ExtraSepLayerHelper * sepHelper() const { return m_sephelper; }//For attaching/detaching.
+  VP1ExtraSepLayerHelper * sepHelper() { return m_sephelper; }//For attaching/detaching.
   void setSepHelper(VP1ExtraSepLayerHelper * sh) { m_sephelper=sh; }//For attaching/detaching. 
   
   virtual QByteArray persistifiableState() const;//!<Provide specific implementation 

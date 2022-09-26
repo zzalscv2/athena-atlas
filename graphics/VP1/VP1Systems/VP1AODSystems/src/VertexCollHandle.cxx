@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2017 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
 */
 
 
@@ -158,7 +158,7 @@ void VertexCollHandle::init(VP1MaterialButtonBase*)
   collSwitch()->addChild(m_d->collSettingsButton->vertexDrawStyle());
 }
 
-void VertexCollHandle::setupSettingsFromControllerSpecific(AODSystemController*) {
+void VertexCollHandle::setupSettingsFromControllerSpecific(const AODSystemController*) {
   //cuts
   // R
   connect(m_d->collSettingsButton,SIGNAL(cutAllowedRChanged(const VP1Interval&)),this,SLOT(setCutAllowedR(const VP1Interval&)));

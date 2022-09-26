@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
 */
 
 
@@ -229,7 +229,7 @@ void IParticleCollHandle_Jet::init(VP1MaterialButtonBase*)
 
 
 //____________________________________________________________________
-void IParticleCollHandle_Jet::setupSettingsFromControllerSpecific(AODSystemController*)
+void IParticleCollHandle_Jet::setupSettingsFromControllerSpecific(const AODSystemController*)
 {
 	messageDebug("IParticleCollHandle_Jet::setupSettingsFromControllerSpecific()");
 
