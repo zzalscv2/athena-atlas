@@ -64,8 +64,8 @@ class TileL2ContByteStreamTool: public AthAlgTool {
 
  private:
 
-  Gaudi::Property<bool> m_doFragTypeMu{this, "DoFragTypeMu", false, "Do frag type Mu"};
-  Gaudi::Property<bool> m_doFragTypeEt{this, "DoFragTypeEt", false, "Do frag type Et"};
+  Gaudi::Property<bool> m_doFragTypeMu{this, "DoFragTypeMu", true, "Do frag type Mu"};
+  Gaudi::Property<bool> m_doFragTypeEt{this, "DoFragTypeEt", true, "Do frag type Et"};
   Gaudi::Property<bool> m_initializeForWriting{this, "InitializeForWriting", false, "Initialize for writing"};
 
   SG::ReadCondHandleKey<TileHid2RESrcID> m_hid2RESrcIDKey{this,
