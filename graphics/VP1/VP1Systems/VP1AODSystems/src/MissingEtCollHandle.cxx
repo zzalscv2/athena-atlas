@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2017 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
 */
 
 
@@ -207,7 +207,7 @@ QList<AODHandleBase*> MissingEtCollHandle::getHandlesList() const
 
 
 
-void MissingEtCollHandle::setupSettingsFromControllerSpecific(AODSystemController*) {
+void MissingEtCollHandle::setupSettingsFromControllerSpecific(const AODSystemController*) {
 
   //cuts  
   //	connect(m_d->collSettingsButton,SIGNAL(cutAllowedPtChanged(const VP1Interval&)),this,SLOT(setCutAllowedPt(const VP1Interval&)));

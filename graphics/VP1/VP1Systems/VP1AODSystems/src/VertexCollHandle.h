@@ -58,7 +58,7 @@ public:
 
 protected:
 	/// For extensions specific to this collection 
-  virtual void setupSettingsFromControllerSpecific(AODSystemController*);
+  virtual void setupSettingsFromControllerSpecific(const AODSystemController*);
   
   
 public:

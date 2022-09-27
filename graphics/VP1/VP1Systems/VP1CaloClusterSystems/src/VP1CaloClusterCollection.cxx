@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2017 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
 */
 
 
@@ -63,9 +63,9 @@ public:
     return std::max(1*CLHEP::mm, scale.second*(scale.first?log(1+fabs(energy)):energy));
   }
 
-  static double calo_start_r;
-  static double calo_start_z;
-  static double calo_crack_eta;
+  static const double calo_start_r;
+  static const double calo_start_z;
+  static const double calo_crack_eta;
 
   class ClusterHandle {
   public:
@@ -108,7 +108,7 @@ public:
       }
     }
 
-    SoGenericBox * genericBox() const { return m_genericBox; }
+    SoGenericBox * genericBox() { return m_genericBox; }
     double phi() const { return m_cluster->phi(); }
     double eta() const { return m_cluster->eta(); }
     double transverseEnergy() const { return m_transverseEnergy; }
@@ -150,9 +150,9 @@ public:
 };
 
 //Fixme: Just some approximate values for now:
-double VP1CaloClusterCollection::Imp::calo_start_r = 1.1*CLHEP::m + 0.05*CLHEP::m;
-double VP1CaloClusterCollection::Imp::calo_start_z = 3.671*CLHEP::m + 0.05*CLHEP::m;
-double VP1CaloClusterCollection::Imp::calo_crack_eta = fabs(log(tan(0.5*atan(calo_start_r/calo_start_z))));
+const double VP1CaloClusterCollection::Imp::calo_start_r = 1.1*CLHEP::m + 0.05*CLHEP::m;
+const double VP1CaloClusterCollection::Imp::calo_start_z = 3.671*CLHEP::m + 0.05*CLHEP::m;
+const double VP1CaloClusterCollection::Imp::calo_crack_eta = fabs(log(tan(0.5*atan(calo_start_r/calo_start_z))));
 
 //____________________________________________________________________
 double VP1CaloClusterCollection::crackEta()

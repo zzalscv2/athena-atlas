@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2017 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
 */
 
 
@@ -45,12 +45,14 @@ public:
   AODSysCommonData(VP1AODSystem * sys,AODSystemController *);
   virtual ~AODSysCommonData();
 
-  VP1AODSystem * system() const;
-  AODSystemController * controller() const;
+  const VP1AODSystem * system() const { return m_3dsystem; }
+  VP1AODSystem * system() { return m_3dsystem; }
+  const AODSystemController * controller() const { return m_controller; }
+  AODSystemController * controller() { return m_controller; }
 
-  SoPointSet * singlePoint() const;//A single point at (0,0,0)
+  const SoPointSet * singlePoint() const { return m_singlePoint; }
 
-  Trk::IExtrapolationEngine * extrapolator() const { return m_extrapolator; }
+  const Trk::IExtrapolationEngine * extrapolator() const { return m_extrapolator; }
   void setExtrapolator(Trk::IExtrapolationEngine * e) { m_extrapolator=e; }
   
   // AODHandleSelectionManager* selectionManager() const { return m_selManager; }
@@ -72,14 +74,9 @@ private:
 
   VP1AODSystem * m_3dsystem;
   AODSystemController * m_controller;
-  SoPointSet * m_singlePoint;
+  SoPointSet * m_singlePoint;  //A single point at (0,0,0)
   Trk::IExtrapolationEngine* m_extrapolator;
   // AODHandleSelectionManager* m_selManager;
 };
 
-inline VP1AODSystem* AODSysCommonData::system() const { return m_3dsystem; }
-inline AODSystemController * AODSysCommonData::controller() const { return m_controller; }
-inline SoPointSet * AODSysCommonData::singlePoint() const { return m_singlePoint; }
-
 #endif
-

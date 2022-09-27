@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2017 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
 */
 
 
@@ -49,7 +49,7 @@ class VertexHandle::Imp {
 public:
   static double dist(const SbVec3f& p1,const SbVec3f& p2);
 
-  static int nvtxhandles;
+  static std::atomic<int> nvtxhandles;
 
   Imp(VertexHandle*tc, const xAOD::Vertex* vtx) : theclass(tc), vertex(vtx), collHandle(nullptr),sep(nullptr), sphere(nullptr){}
   ~Imp() { }
@@ -63,7 +63,7 @@ public:
 
 
 //____________________________________________________________________
-int VertexHandle::Imp::nvtxhandles = 0;
+std::atomic<int> VertexHandle::Imp::nvtxhandles = 0;
 
 //____________________________________________________________________
 VertexHandle::VertexHandle(VertexCollHandle*ch, const xAOD::Vertex *vertex)

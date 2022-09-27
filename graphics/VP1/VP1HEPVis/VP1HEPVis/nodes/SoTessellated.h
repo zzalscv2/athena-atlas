@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2017 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef SOTESSELLATED_H
@@ -72,8 +72,7 @@ class SoTessellated : public SoShape
   std::vector<float> m_points;
   std::vector<float> m_normals;
   SbBox3f m_bbox; 
-  SbVec3f m_center; 
-  static bool s_didInit;
+  SbVec3f m_center;
 };
 
 #endif

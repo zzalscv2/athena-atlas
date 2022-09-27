@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2017 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
 */
 
 ////////////////////////////////////////////////////////////////
@@ -38,7 +38,7 @@ public:
   virtual ~IParticleCollHandle_Electron();
 
   virtual void init(VP1MaterialButtonBase* matBut=0);//reimplementations must start with a call to this.
-  virtual void setupSettingsFromControllerSpecific(AODSystemController*);
+  virtual void setupSettingsFromControllerSpecific(const AODSystemController*);
   virtual void dumpToJSON( std::ofstream& ) const ;
 
   const ElectronCollectionSettingsButton& collSettingsButton() const;

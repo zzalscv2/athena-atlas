@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
 */
 
 // Class: SoCooperativeSelection.
@@ -22,15 +22,13 @@ void SoCooperativeSelection::initClass()
   SO_NODE_INIT_CLASS(SoCooperativeSelection,SoSelection,"CooperativeSelection");
 }
 
-bool SoCooperativeSelection::s_needsinit = true;
-
 //____________________________________________________________________
 void SoCooperativeSelection::ensureInitClass()
 {
-  if (SoCooperativeSelection::s_needsinit) {
-    SoCooperativeSelection::s_needsinit = false;
+  [[maybe_unused]] static const bool needsinit = [&]() {
     initClass();
-  }
+    return false;
+  }();
 }
 
 //____________________________________________________________________

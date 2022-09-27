@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
 */
 
 
@@ -53,7 +53,7 @@ class AODHandleBase::Imp {
 public:
   static double dist(const SbVec3f& p1,const SbVec3f& p2);
 
-  static int nobjhandles;
+  static std::atomic<int> nobjhandles;
 
   Imp(AODHandleBase*tc) : theclass(tc),
   m_objBrowseTree(0){}
@@ -67,7 +67,7 @@ public:
 
 
 //____________________________________________________________________
-int AODHandleBase::Imp::nobjhandles = 0;
+std::atomic<int> AODHandleBase::Imp::nobjhandles = 0;
 
 //____________________________________________________________________
 AODHandleBase::AODHandleBase(AODCollHandleBase*ch)
@@ -90,9 +90,9 @@ int AODHandleBase::numberOfInstances()
 }
 
 //____________________________________________________________________
-AODSysCommonData * AODHandleBase::common() const
+const AODSysCommonData * AODHandleBase::common() const
 {
-  return m_collhandle->common();
+  return std::as_const(m_collhandle)->common();
 }
 
 //____________________________________________________________________
@@ -166,7 +166,7 @@ void AODHandleBase::attach3DObjects()
   if (has3DObjects() && m_collhandle->sepHelper()) {
     VP1Msg::messageVerbose("Adding nodes to sep helper...");
   
-    collHandle()->common()->registerHandle(this); 
+    m_collhandle->common()->registerHandle(this);
 
     // debug
     // std::cout<<"m_collhandle->sepHelper() = " << m_collhandle->sepHelper()<<std::endl;
@@ -198,7 +198,7 @@ void AODHandleBase::detach3DObjects()
     m_collhandle->sepHelper()->removeNodeUnderMaterial(nodes(),m_currentmaterial);
   }
   
-  collHandle()->common()->deregisterHandle(this);
+  m_collhandle->common()->deregisterHandle(this);
   
   // if (label_sep && theclass->common()->textSep()) 
   //   theclass->common()->textSep()->removeChild(label_sep);

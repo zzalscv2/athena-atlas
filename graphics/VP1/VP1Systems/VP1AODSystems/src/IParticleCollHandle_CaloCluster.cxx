@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2019 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
 */
 
 
@@ -112,9 +112,9 @@ public:
  * DEFINITIONS
  */
 //Fixme: Just some approximate values for now:
-double IParticleCollHandle_CaloCluster::calo_start_r = 1.1*SYSTEM_OF_UNITS::m + 0.05*SYSTEM_OF_UNITS::m;
-double IParticleCollHandle_CaloCluster::calo_start_z = 3.671*SYSTEM_OF_UNITS::m + 0.05*SYSTEM_OF_UNITS::m;
-double IParticleCollHandle_CaloCluster::calo_crack_eta = fabs(log(tan(0.5*atan(calo_start_r/calo_start_z))));
+const double IParticleCollHandle_CaloCluster::calo_start_r = 1.1*SYSTEM_OF_UNITS::m + 0.05*SYSTEM_OF_UNITS::m;
+const double IParticleCollHandle_CaloCluster::calo_start_z = 3.671*SYSTEM_OF_UNITS::m + 0.05*SYSTEM_OF_UNITS::m;
+const double IParticleCollHandle_CaloCluster::calo_crack_eta = fabs(log(tan(0.5*atan(calo_start_r/calo_start_z))));
 
 
 
@@ -314,7 +314,7 @@ QPair<bool,double> IParticleCollHandle_CaloCluster::scale() const
 
 
 //____________________________________________________________________
-void IParticleCollHandle_CaloCluster::setupSettingsFromControllerSpecific(AODSystemController*) {
+void IParticleCollHandle_CaloCluster::setupSettingsFromControllerSpecific(const AODSystemController*) {
 
 	VP1Msg::messageDebug("IParticleCollHandle_CaloCluster::setupSettingsFromControllerSpecific()");
 

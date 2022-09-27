@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2017 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
 */
 
 
@@ -48,11 +48,11 @@ public:
   AODHandleBase(AODCollHandleBase*);
   virtual ~AODHandleBase();
   
-  AODSysCommonData * common() const;
+  const AODSysCommonData * common() const;
 
   void setVisible(bool);//!< use by the collection handle.
   bool visible() const { return m_visible; }
-  AODCollHandleBase * collHandle() const { return m_collhandle; }
+  const AODCollHandleBase * collHandle() const { return m_collhandle; }
 	/// Returns true if the 3D objects have been created
 	virtual bool has3DObjects() {return false;}
 	/// Called after some configuration changes, or when the object is first created. Must be overloaded by children.

@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
 */
 
 
@@ -109,7 +109,7 @@ AODCollHandleBase::~AODCollHandleBase()
 }
 
 //____________________________________________________________________
-void AODCollHandleBase::setupSettingsFromController(AODSystemController* controller)
+void AODCollHandleBase::setupSettingsFromController(const AODSystemController* controller)
 {
   messageVerbose("setupSettingsFromController start");
   if (!controller) {

@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2017 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef HEPVis_SoGL2PSAction_h
@@ -57,7 +57,6 @@ private:
   SbString m_fileName;
   FILE* m_file;
   int m_pageOptions;
-  static bool s_didInit;
 };
 
 #endif

@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2017 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
 */
 
 
@@ -61,7 +61,7 @@ public:
 
 	// Getters
 	const xAOD::CaloCluster* cluster() const { return m_cluster; }
-	SoGenericBox * genericBox() const { return m_genericBox; }
+	SoGenericBox * genericBox() { return m_genericBox; }
 	double phi() const { /*VP1Msg::messageVerbose("phi: " + QString::number(m_cluster->phi()) );*/ return m_cluster->phi(); }
 	double eta() const { /*VP1Msg::messageVerbose("eta: " + QString::number(m_cluster->eta()) );*/ return m_cluster->eta(); }
 	double et() const { VP1Msg::messageDebug("et()");return m_cluster->et(); }
@@ -107,7 +107,7 @@ IParticleHandle_CaloCluster::~IParticleHandle_CaloCluster()
 
 
 //____________________________________________________________________
-SoGenericBox* IParticleHandle_CaloCluster::genericBox() const
+SoGenericBox* IParticleHandle_CaloCluster::genericBox()
 {
 	return m_d->genericBox();
 }
