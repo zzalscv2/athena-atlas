@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
 */
 
 //============================================================================
@@ -199,7 +199,7 @@ namespace DerivationFramework {
   }
 
   std::string BPhysVertexTrackBase::BaseItem::buildName(const std::string& qualifier,
-							const std::string& suffix) {
+							const std::string& suffix) const {
     boost::format f("%s%s%s%s%s");
     f % (prefix.length() > 0 ? prefix+"_" : "")
       % (bname.length() > 0 ? bname+"_" : "")

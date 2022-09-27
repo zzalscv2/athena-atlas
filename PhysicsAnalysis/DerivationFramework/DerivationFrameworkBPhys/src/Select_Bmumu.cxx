@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
 */
 
 //============================================================================
@@ -337,7 +337,7 @@ namespace DerivationFramework {
       bool blindedMuCalcMass(true);
       if ( m_useMuCalcMass ) {
         std::string bname = m_hypoName+"_MUCALC_mass";
-        static SG::AuxElement::Accessor<float> mucalcAcc(bname);
+        static const SG::AuxElement::Accessor<float> mucalcAcc(bname);
         if ( mucalcAcc.isAvailable(**bcandItr) ) {
           passedMuCalcMassCut = massCuts(mucalcAcc(**bcandItr));
           blindedMuCalcMass = massInBlindedRegion(mucalcAcc(**bcandItr));

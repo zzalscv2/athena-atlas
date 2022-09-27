@@ -120,8 +120,8 @@ StatusCode BPhysBGammaFinder::addBranches() const {
     CHECK( evtStore()->retrieve(BVtxContainer, *itr));
     ATH_MSG_DEBUG( "Vertex Container (" << *itr << ") contains " << BVtxContainer->size() << " vertices" );
 
-    static SG::AuxElement::Decorator< std::vector< VertexLink > > BGammaLinks( "BGammaLinks" );
-    static std::vector< VertexLink > vertexLinks;
+    static const SG::AuxElement::Decorator< std::vector< VertexLink > > BGammaLinks( "BGammaLinks" );
+    static const std::vector< VertexLink > vertexLinks;
 
     for (const xAOD::Vertex* vertex : *BVtxContainer) {
       BGammaLinks(*vertex) = vertexLinks;

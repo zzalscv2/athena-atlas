@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2017 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
 */
 
 //============================================================================
@@ -39,9 +39,6 @@ namespace DerivationFramework {
     // destructor
     virtual ~CfAthAlgTool();
     
-    // return a handle to an ICutFlowSvc instance
-    ServiceHandle<ICutFlowSvc>& cutFlowSvc() const;
-    
     // Initialization method invoked by the framework.
     virtual StatusCode sysInitialize() override;
 
@@ -64,10 +61,8 @@ namespace DerivationFramework {
     virtual CutIdentifier getCounterIdByName(const std::string &name) const;
     
   private:
-    // typedef for ServiceHandle<ICutFlowSvc>
-    typedef ServiceHandle<ICutFlowSvc> ICutFlowSvc_t;
     // handle to the service holding tables of cut-flows for filtering algs.
-    mutable ICutFlowSvc_t m_cutFlowSvc;
+    ServiceHandle<ICutFlowSvc> m_cutFlowSvc;
 
     // base name for counters
     std::string m_ctbasename;

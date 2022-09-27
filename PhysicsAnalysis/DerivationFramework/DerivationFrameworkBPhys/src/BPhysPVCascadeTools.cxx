@@ -235,7 +235,7 @@ StatusCode DerivationFramework::BPhysPVCascadeTools::FillCandwithRefittedVertice
                                                                            Trk::VxCascadeInfo* casc, int index,
                                                                            double mass, xAOD::BPhysHypoHelper &vtx)
 {
-    static const Trk::V0Tools* dummy = nullptr;
+    static const Trk::V0Tools* const dummy = nullptr;
     static const DerivationFramework::BPhysPVTools pvtool(dummy);
 
     const std::vector<TLorentzVector> &mom = casc->getParticleMoms()[index];

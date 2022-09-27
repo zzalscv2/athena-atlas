@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
 */
 
 //============================================================================
@@ -80,15 +80,15 @@ namespace DerivationFramework {
     vMuons.push_back(muon);
   }
   
-  std::string BMuonTrackIsoTool::MuIsoItem::muIsoName() {
+  std::string BMuonTrackIsoTool::MuIsoItem::muIsoName() const {
     return buildName();
   }
 
-  std::string BMuonTrackIsoTool::MuIsoItem::nTracksName() {
+  std::string BMuonTrackIsoTool::MuIsoItem::nTracksName() const {
     return buildName("Ntracks");
   }
 
-  std::string BMuonTrackIsoTool::MuIsoItem::muLinkName() {
+  std::string BMuonTrackIsoTool::MuIsoItem::muLinkName() const {
     return buildName("", "_muLink");
   }
 

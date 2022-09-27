@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
 */
 
 //============================================================================
@@ -70,7 +70,7 @@ namespace DerivationFramework {
       virtual void        resetVals();
       virtual void        copyVals(const BaseItem& item) = 0;
       virtual std::string buildName(const std::string& qualifier="",
-                                    const std::string& suffix="");
+                                    const std::string& suffix="") const;
       virtual std::string toString() const;
       
     public:

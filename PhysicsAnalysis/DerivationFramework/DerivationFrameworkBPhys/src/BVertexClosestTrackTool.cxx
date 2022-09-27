@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
 */
 
 //============================================================================
@@ -156,39 +156,39 @@ namespace DerivationFramework {
     selpat     = item.selpat;
   }
   
-  std::string BVertexClosestTrackTool::CtItem::dcaName() {
+  std::string BVertexClosestTrackTool::CtItem::dcaName() const {
     return buildName("DCA");
   }
   
-  std::string BVertexClosestTrackTool::CtItem::dcaErrName() {
+  std::string BVertexClosestTrackTool::CtItem::dcaErrName() const {
     return buildName("DCAError");
   }
   
-  std::string BVertexClosestTrackTool::CtItem::zcaName() {
+  std::string BVertexClosestTrackTool::CtItem::zcaName() const {
     return buildName("ZCA");
   }
   
-  std::string BVertexClosestTrackTool::CtItem::zcaErrName() {
+  std::string BVertexClosestTrackTool::CtItem::zcaErrName() const {
     return buildName("ZCAError");
   }
   
-  std::string BVertexClosestTrackTool::CtItem::vtxNDErr2Name() {
+  std::string BVertexClosestTrackTool::CtItem::vtxNDErr2Name() const {
     return buildName("VtxNDError2");
   }
 
-  std::string BVertexClosestTrackTool::CtItem::trkNDErr2Name() {
+  std::string BVertexClosestTrackTool::CtItem::trkNDErr2Name() const {
     return buildName("TrkNDError2");
   }
 
-  std::string BVertexClosestTrackTool::CtItem::phi0UsedName() {
+  std::string BVertexClosestTrackTool::CtItem::phi0UsedName() const {
     return buildName("Phi0Used");
   }
 
-  std::string BVertexClosestTrackTool::CtItem::nTrksChi2Name() {
+  std::string BVertexClosestTrackTool::CtItem::nTrksChi2Name() const {
     return buildName("NTracksChi2");
   }
 
-  std::string BVertexClosestTrackTool::CtItem::closeTrackName() {
+  std::string BVertexClosestTrackTool::CtItem::closeTrackName() const {
     return buildName("CloseTrack", "_Link");
   }
   
