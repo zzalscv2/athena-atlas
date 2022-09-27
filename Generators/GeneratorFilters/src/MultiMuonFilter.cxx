@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2017 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "GeneratorFilters/MultiMuonFilter.h"
@@ -26,7 +26,7 @@ StatusCode MultiMuonFilter::filterEvent() {
     }
   }
 
-  ATH_MSG_INFO("Found " << numMuons << "Muons");
+  ATH_MSG_DEBUG("Found " << numMuons << " Muons");
   setFilterPassed(numMuons >= m_NMuons);
   return StatusCode::SUCCESS;
 }
