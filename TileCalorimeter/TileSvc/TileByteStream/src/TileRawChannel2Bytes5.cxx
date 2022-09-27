@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2020 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "TileByteStream/TileRawChannel2Bytes5.h" 
@@ -400,6 +400,7 @@ void calc_amp(const UINT32* ofw, int unit, int chan, int gain, int ene, int time
     s7 = q7 + d7 + s1;
   }
   s4 = get_s4(ofw, unit, chan, gain, ene, s1, s2, s3, s5, s6, s7);
+  //cppcheck-suppress ctuArrayIndex
   fill_samp(s1, s2, s3, s4, s5, s6, s7, s);
 }
 
@@ -407,6 +408,7 @@ void calc_raw(const UINT32* ofw, int unit, int chan, int gain, int ene,
   int s1, int s2, int s3, int s5, int s6, int s7, int s[])
 {
   int s4 = get_s4(ofw, unit, chan, gain, ene, s1, s2, s3, s5, s6, s7);
+  //cppcheck-suppress ctuArrayIndex
   fill_samp(s1, s2, s3, s4, s5, s6, s7, s);
 }
 
@@ -506,6 +508,7 @@ int unpack_amp(const UINT32* ofw, int unit, int chan,
     size = 64;
   }
   unpack_diff(diff, nbits, d2, d3, d5, d6, d7);
+  //cppcheck-suppress ctuArrayIndex
   calc_amp(ofw, unit, chan, *gain, *ene, *time, s1, d2, d3, d5, d6, d7, s);
   return size;
 }
@@ -549,7 +552,7 @@ int unpack_raw(const UINT32* ofw, int unit, int chan,
     s7 = mvbits_ex(diff2, 10, 0, 6);
     size = 80;
   }
-
+  //cppcheck-suppress ctuArrayIndex
   calc_raw(ofw, unit, chan, *gain, *ene, s1, s2, s3, s5, s6, s7, s);
   return size;
 }
