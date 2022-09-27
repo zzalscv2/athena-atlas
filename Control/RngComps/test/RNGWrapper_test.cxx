@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2020 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
 */
 
 #include <cmath>
@@ -13,6 +13,7 @@
 #include "TestTools/expect.h"
 #include "TestTools/ParallelCallTest.h"
 #include "AtlasCLHEP_RandomGenerators/dSFMTEngine.h"
+#include "CxxUtils/checker_macros.h"
 #include "CLHEP/Random/Ranlux64Engine.h"
 #include "CLHEP/Random/RanecuEngine.h"
 #include "tbb/global_control.h"
@@ -79,9 +80,10 @@ public:
     size_t currentSlot = m_slot++ % nSlots;
 
     VALUE( currentSlot < 20 ) EXPECTED( true );
-    reseed( m_wrapper, currentSlot );
+    RNGWrapper* wrapper ATLAS_THREAD_SAFE = m_wrapper;
+    reseed( wrapper, currentSlot );
     std::vector<double>  seq;
-    pullN( m_wrapper, 10000, seq, currentSlot );
+    pullN( wrapper, 10000, seq, currentSlot );
     double sum = std::accumulate( seq.begin(), seq.end(), 0.0);
 
     VALUE( sum ) EXPECTED ( m_slot0SumRef );
