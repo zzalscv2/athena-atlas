@@ -22,7 +22,6 @@
 #include "AthenaKernel/IIOVDbSvc.h"
 #include "AthenaKernel/IAthenaOutputStreamTool.h"
 #include "AthenaPoolUtilities/CondAttrListCollection.h"
-#include "EventInfo/EventInfo.h"
 #include "Identifier/Identifier.h"
 #include "InDetConditionsSummaryService/InDetHierarchy.h"
 #include "StoreGate/ReadHandleKey.h"
@@ -155,8 +154,6 @@ class SCTCalibWriteTool : public AthAlgTool {
       StatusCode wrapUpLorentzAngle();
 
    private:
-      SG::ReadHandleKey<EventInfo> m_eventInfoKey{this, "EventInfo", "ByteStreamEventInfo"};
-
       int stringToInt(const std::string& s) const;
 
       StatusCode streamOutCondObjects(const std::string& foldername);

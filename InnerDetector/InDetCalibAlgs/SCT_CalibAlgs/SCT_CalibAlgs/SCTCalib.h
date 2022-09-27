@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
 */
 
 /**
@@ -30,7 +30,6 @@
 #include "Identifier/Identifier.h"
 #include "StoreGate/ReadCondHandleKey.h"
 #include "StoreGate/ReadHandleKey.h"
-#include "xAODEventInfo/EventInfo.h"
 
 //InnerDetector
 #include "InDetIdentifier/SCT_ID.h"
@@ -95,7 +94,6 @@ class SCTCalib : public AthAlgorithm {
 
       const SCT_ID*                                               m_pSCTHelper{nullptr};
       SG::ReadCondHandleKey<InDetDD::SiDetectorElementCollection> m_SCTDetEleCollKey{this, "SCTDetEleCollKey", "SCT_DetectorElementCollection", "Key of SiDetectorElementCollection for SCT"};
-      SG::ReadHandleKey<xAOD::EventInfo>                          m_eventInfoKey{this, "EventInfoKey", "EventInfo", ""};
 
       ToolHandle<SCTCalibWriteTool>                   m_pCalibWriteTool{this, "SCTCalibWriteTool", "SCTCalibWriteTool", "Tool to write out data from calibration loop"};
       ToolHandle<ISCT_ConfigurationConditionsTool>    m_ConfigurationConditionsTool{this, "SCT_ConfigurationConditionsTool", "SCT_ConfigurationConditionsTool/InDetSCT_ConfigurationConditionsTool", "Tool to retrieve SCT Configuration"};
