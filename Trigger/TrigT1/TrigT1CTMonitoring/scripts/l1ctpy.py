@@ -19,8 +19,26 @@ ORBIT_FREQUENCY = 40.0790e6 / 3564.
 #+================================================================
 
 _COOLDBOWNER='' 
-
-_COOLDB="oracle://ATLAS_COOLPROD;schema=ATLAS_COOLONL_TRIGGER;dbname=DBNAME;user=ATLAS_COOL_READER;password=COOLRED4PRO"
+# Get user and passwd from coral auth file - see: https://its.cern.ch/jira/browse/ATR-25572
+# see this package in case the following doesn't work for you: Database/ConnectionManagement/AtlasAuthentication/data/dblookup.xml
+connName="oracle://ATLAS_COOLPROD/ATLAS_COOLONL_TRIGGER" # aka. schema
+dbauthPath=os.environ.get('CORAL_AUTH_PATH')
+dbpw = None
+dbuser = None
+# Get username and password by parsing authentication XML file
+authenticationXmlDoc = minidom.parse(dbauthPath + "authentication.xml")
+authenticationList = authenticationXmlDoc.getElementsByTagName("connection")
+for entry in authenticationList:
+    if entry.attributes["name"].value == connName:
+        parameters = entry.getElementsByTagName("parameter")
+        # Set username and password from authentication parameters
+        for parameter in parameters:
+            if parameter.attributes["name"].value == "user":
+                dbuser = parameter.attributes["value"].value
+            elif parameter.attributes["name"].value == "password":
+                dbpw = parameter.attributes["value"].value
+dbstring="oracle://ATLAS_COOLPROD;schema=ATLAS_COOLONL_TRIGGER;dbname=DBNAME;user="+dbuser+";password="+dbpw
+#old_COOLDB="oracle://ATLAS_COOLPROD;schema=ATLAS_COOLONL_TRIGGER;dbname=DBNAME;user=ATLAS_COOL_READER;password=PAssWDusedTObeHEREinPLAINtext"
 
 def get_dbid_MONP(owner=False):
    if owner:
@@ -38,7 +56,26 @@ def get_dbid_COMP(owner=False):
    
 
 def get_dbid_TDAQ_COMP(owner=False):
-   _COOLDB="oracle://ATLAS_COOLPROD;schema=ATLAS_COOLONL_TDAQ;dbname=DBNAME;user=ATLAS_COOL_READER;password=COOLRED4PRO"
+   # Get user and passwd from coral auth file - see: https://its.cern.ch/jira/browse/ATR-25572
+   # see this package in case the following doesn't work for you: Database/ConnectionManagement/AtlasAuthentication/data/dblookup.xml
+   connName="oracle://ATLAS_COOLPROD/ATLAS_COOLONL_TRIGGER" # aka. schema
+   dbauthPath=os.environ.get('CORAL_AUTH_PATH')
+   dbpw = None
+   dbuser = None
+   # Get username and password by parsing authentication XML file
+   authenticationXmlDoc = minidom.parse(dbauthPath + "authentication.xml")
+   authenticationList = authenticationXmlDoc.getElementsByTagName("connection")
+   for entry in authenticationList:
+      if entry.attributes["name"].value == connName:
+         parameters = entry.getElementsByTagName("parameter")
+         # Set username and password from authentication parameters
+         for parameter in parameters:
+            if parameter.attributes["name"].value == "user":
+               dbuser = parameter.attributes["value"].value
+            elif parameter.attributes["name"].value == "password":
+               dbpw = parameter.attributes["value"].value
+   _COOLDB="oracle://ATLAS_COOLPROD;schema=ATLAS_COOLONL_TRIGGER;dbname=DBNAME;user="+dbuser+";password="+dbpw
+   #old_COOLDB="oracle://ATLAS_COOLPROD;schema=ATLAS_COOLONL_TDAQ;dbname=DBNAME;user=ATLAS_COOL_READER;password=PAssWDusedTObeHEREinPLAINtext"
    if owner:
        print "NO OWNER ACCOUNT IMPLEMENTED"
        return _COOLDBOWNER.replace("DBNAME","COMP200")
