@@ -154,9 +154,7 @@ StatusCode EventDensityTool::fillEventShape(xAOD::EventShape *eventShape) const 
       return StatusCode::FAILURE;
     }
     if ( h_in->size() == 0 ) {
-      // !!! FIXME !!! Downgraded ERROR to WARNING and no FAILURE
-      ATH_MSG_WARNING( "Input PseudoJetContainer size()=0 for pseudojets from "<< m_inPJKey.key() );
-      //return StatusCode::FAILURE;
+      ATH_MSG_DEBUG( "Input PseudoJetContainer size()=0 for pseudojets from "<< m_inPJKey.key() );
     } else {
       ATH_MSG_DEBUG("Retrieved input pseudojets " << m_inPJKey.key() << " , count: " <<  h_in->size());
     }
