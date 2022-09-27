@@ -8,7 +8,7 @@ def getDetectorsFromRunArgs(ConfigFlags, runArgs):
         detectors = runArgs.detectors
     else:
         from AthenaConfiguration.AutoConfigFlags import getDefaultDetectors
-        detectors = getDefaultDetectors(ConfigFlags.GeoModel.AtlasVersion)
+        detectors = getDefaultDetectors(ConfigFlags.GeoModel.AtlasVersion, includeForward=False)
 
     # Support switching on Forward Detectors
     if hasattr(runArgs, 'LucidOn'):
@@ -24,6 +24,14 @@ def getDetectorsFromRunArgs(ConfigFlags, runArgs):
     # TODO here support switching on Cavern geometry
     # if hasattr(runArgs, 'CavernOn'):
     #     detectors = detectors+['Cavern']
+
+    # Fatras does not support simulating the BCM, so have to switch that off
+    from SimulationConfig.SimEnums import SimulationFlavour
+    if ConfigFlags.Sim.ISF.Simulator in [SimulationFlavour.ATLFASTIIFMT, SimulationFlavour.ATLFASTIIF_G4MS, SimulationFlavour.ATLFAST3F_G4MS]:
+        try:
+            detectors.remove('BCM')
+        except ValueError:
+            pass
 
     return detectors
 

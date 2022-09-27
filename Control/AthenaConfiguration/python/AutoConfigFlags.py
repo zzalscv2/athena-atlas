@@ -100,7 +100,7 @@ def DetDescrInfo(geoTag):
 
 
 @lru_cache(maxsize=4)  # maxsize=1 should be enough for most jobs
-def getDefaultDetectors(geoTag):
+def getDefaultDetectors(geoTag, includeForward=False):
     """Query geometry DB for detector description.
     Returns a set of detectors used in a geometry tag.
 
@@ -142,6 +142,14 @@ def getDefaultDetectors(geoTag):
         detectors.add('sTGC')
     if DetDescrInfo(geoTag)['Muon']['HasMM']:
         detectors.add('MM')
+
+    if includeForward:
+        detectors.add('Lucid')
+        if DetDescrInfo(geoTag)['Common']['Run'] not in ['RUN1']:
+            detectors.add('AFP')
+        detectors.add('ZDC')
+        detectors.add('ALFA')
+        detectors.add('FwdRegion')
 
     return detectors
 
