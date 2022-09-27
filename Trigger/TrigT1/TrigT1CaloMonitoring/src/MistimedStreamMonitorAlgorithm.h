@@ -47,7 +47,6 @@ public: MistimedStreamMonitorAlgorithm( const std::string& name, ISvcLocator* pS
     const xAOD::JetElement* element;
     std::vector<double>  phiScaled;
     std::vector<double> etaScaled;
-    //std::vector<double>  etaScaled; /// phi for 2d maps with integer bins (taking into account granularity in eta)
     double phi1d;     /// phi for 1d phi distributions (taking into account granularity in eta) 
   };
 

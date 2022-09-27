@@ -100,7 +100,7 @@ StatusCode MistimedStreamMonitorAlgorithm::fillHistograms( const EventContext& c
   unsigned int currentEventNo =  ctx.eventID().event_number();
 
 
-
+  
   ATH_MSG_DEBUG("Lumi Block :: " << lumiNo);
   ATH_MSG_DEBUG("Run Number :: " << currentRunNo);
   ATH_MSG_DEBUG("Event Number :: " << currentEventNo);
@@ -193,7 +193,6 @@ StatusCode MistimedStreamMonitorAlgorithm::fillHistograms( const EventContext& c
   for (const xAOD::TriggerTower* tt : *triggerTowerTES) {
   
     float ttPulseCategory = 0;
-    //std::vector<uint16_t> ttADC =  (tt)->adc();
     const std::vector<uint16_t>& ttADC =  (tt)->adc();
     std::vector<uint16_t> readoutCorrectedADC; //this is the standard readout ADC vector: 5 40MHz samples with l1A in the middle
     if(!readout80ModePpm){//40 MHz
@@ -305,22 +304,20 @@ StatusCode MistimedStreamMonitorAlgorithm::fillHistograms( const EventContext& c
   cutFlowX=  TTEMLayer;
   fill(m_packageName,cutFlowX);
   
-  
-  
-  
-  
+    
   
   // scope for mutable error event per lumi block tt counter
   // it allows only one event per lumiblock
   std::lock_guard<std::mutex> lock(m_mutex);	
   m_event_counter[lumiNo]+=1;
   const int eventCounter = m_eventCounter++;
-
+ 
   
-  if( m_event_counter[lumiNo] <=1){ 
-    ATH_MSG_DEBUG( "EventID :: " <<  m_event_counter[lumiNo]);
-    if (eventCounter < m_maxEvents) { // save less than MaxEvents
 
+
+
+  if( (m_event_counter[lumiNo] <=1) && (eventCounter < m_maxEvents) ){ 
+    ATH_MSG_DEBUG( "EventID :: " <<  m_event_counter[lumiNo]);
     
       // Saving the lumiblock and event number of the events with mistimed 
       auto  eventMonitor= Monitored::Scalar<std::string>("eventMonitor", "Event"+std::to_string(eventCounter)+"="+std::to_string(currentEventNo));
@@ -373,7 +370,6 @@ StatusCode MistimedStreamMonitorAlgorithm::fillHistograms( const EventContext& c
       //Loop over CPM tower container
       //Create the CPM objects and calculate scaled phi
       std::vector<MonitorCPM> vecMonCPM;     // All towers
-      //Create the CPM objects and calculate scaled phi
       for (const xAOD::CPMTower* cpm : *cpmTowerTES) {
 	ATH_CHECK( makeTowerCPM(cpm, vecMonCPM) );     
 	
@@ -483,7 +479,12 @@ StatusCode MistimedStreamMonitorAlgorithm::fillHistograms( const EventContext& c
 	    if(jepHADenergy.at(2) > 0)  fill(groupName+"lut_HAD2",etalut,philut, hadLUT2);
 	  }}
 	}}}
-    }
+  }
+
+  else if ( eventCounter >= m_maxEvents ) { 
+    auto  eventMonitor_all= Monitored::Scalar<std::string>("eventMonitor_all", std::to_string(currentEventNo));
+    auto  lbMonitor_all= Monitored::Scalar<std::string>("lbMonitor_all", std::to_string(lumiNo));
+    fill("Event_all_", eventMonitor_all, lbMonitor_all );
   }
   
 
