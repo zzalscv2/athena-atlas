@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2018 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
 */
 /*
  */
@@ -25,10 +25,7 @@ void test1 (CaloTester& tester)
   std::cout << "test1\n";
   ServiceHandle<StoreGateSvc> detStore ("DetectorStore", "test");
   assert( detStore.retrieve().isSuccess() );
-  const CaloDetDescrManager* mgr = nullptr;
-  assert( detStore->retrieve (mgr, "CaloMgr").isSuccess() );
-  assert (mgr != nullptr);
-  assert (&tester.mgr() == mgr);
+  const CaloDetDescrManager* mgr = &tester.mgr();
 
   Identifier cell_id = tester.caloID().cell_id (CaloCell_ID::LAREM,
                                                 1, // + barrel

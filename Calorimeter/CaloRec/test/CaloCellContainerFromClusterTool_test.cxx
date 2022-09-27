@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2020 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
 */
 /*
  */
@@ -42,7 +42,8 @@
 #include <cassert>
 
 
-void create_cluster (xAOD::CaloClusterContainer& clusts,
+void create_cluster (CaloTester& calotest,
+		     xAOD::CaloClusterContainer& clusts,
                      const CaloCellContainer& cells,
                      float eta,
                      float phi,
@@ -55,13 +56,14 @@ void create_cluster (xAOD::CaloClusterContainer& clusts,
   cl.setEta (eta);
   cl.setPhi (phi);
 
+  const CaloDetDescrManager* caloDDMgr = &calotest.mgr();
   auto celllinks = std::make_unique<CaloClusterCellLink> (&cells);
 
-  auto addCells = [cells, eta, phi] (CaloClusterCellLink* celllinks,
+  auto addCells = [caloDDMgr, cells, eta, phi] (CaloClusterCellLink* celllinks,
                                      std::set<IdentifierHash>& hashes,
                                      CaloSampling::CaloSample sam)
                   {
-                    CaloCellList cell_list (CaloDetDescrManager::instance(), 
+                    CaloCellList cell_list (caloDDMgr,
 					    &cells);
                     cell_list.select (eta, phi, 5*0.025, 5*0.025, sam);
                     for (const CaloCell* cell : cell_list) {
@@ -128,7 +130,8 @@ void create_cluster (xAOD::CaloClusterContainer& clusts,
 }
 
 
-void make_cluster_lists (StoreGateSvc& sg,
+void make_cluster_lists (CaloTester& calotest, 
+			 StoreGateSvc& sg,
                          const CaloCellContainer& cells,
                          std::set<IdentifierHash>& usedCells1,
                          std::set<IdentifierHash>& usedCells,
@@ -137,9 +140,9 @@ void make_cluster_lists (StoreGateSvc& sg,
   auto cl1 = std::make_unique<xAOD::CaloClusterContainer>();
   auto cl1aux = std::make_unique<xAOD::CaloClusterAuxContainer>();
   cl1->setStore (cl1aux.get());
-  create_cluster (*cl1, cells,  0.3,  0.1,  usedCells1, otherCells);
-  create_cluster (*cl1, cells,  0.32, 0.12, usedCells1, otherCells);
-  create_cluster (*cl1, cells, -0.5,  1.4,  usedCells1, otherCells);
+  create_cluster (calotest, *cl1, cells,  0.3,  0.1,  usedCells1, otherCells);
+  create_cluster (calotest, *cl1, cells,  0.32, 0.12, usedCells1, otherCells);
+  create_cluster (calotest, *cl1, cells, -0.5,  1.4,  usedCells1, otherCells);
 
   usedCells = usedCells1;
 
@@ -149,9 +152,9 @@ void make_cluster_lists (StoreGateSvc& sg,
   auto cl2 = std::make_unique<xAOD::CaloClusterContainer>();
   auto cl2aux = std::make_unique<xAOD::CaloClusterAuxContainer>();
   cl2->setStore (cl2aux.get());
-  create_cluster (*cl2, cells,  1.8,  0.3,  usedCells, otherCells);
-  create_cluster (*cl2, cells,  1.82, 0.32, usedCells, otherCells);
-  create_cluster (*cl2, cells, -2.0,  1.4,  usedCells, otherCells);
+  create_cluster (calotest, *cl2, cells,  1.8,  0.3,  usedCells, otherCells);
+  create_cluster (calotest, *cl2, cells,  1.82, 0.32, usedCells, otherCells);
+  create_cluster (calotest, *cl2, cells, -2.0,  1.4,  usedCells, otherCells);
 
   assert( sg.record (std::move (cl2), "Clusts2") );
   assert( sg.record (std::move (cl2aux), "Clusts2Aux.") );
@@ -167,7 +170,7 @@ void test1 (CaloTester& calotest, StoreGateSvc& sg, const EventContext& ctx)
   std::set<IdentifierHash> usedCells;
   std::set<IdentifierHash> otherCells;
 
-  make_cluster_lists (sg, *cells, usedCells1, usedCells, otherCells);
+  make_cluster_lists (calotest, sg, *cells, usedCells1, usedCells, otherCells);
 
   assert( sg.record (std::move (cells), "AllCalo") );
 
