@@ -5,7 +5,10 @@
 #ifndef ISF_FASTCALOSIMEVENT_TFCS1DFunctionSpline_h
 #define ISF_FASTCALOSIMEVENT_TFCS1DFunctionSpline_h
 
-#include "CxxUtils/checker_macros.h"
+#ifndef __FastCaloSimStandAlone__ 
+  #include "CxxUtils/checker_macros.h"  
+#endif
+
 #include "ISF_FastCaloSimEvent/TFCS1DFunction.h"
 #include <TSpline.h>
 #include <vector>

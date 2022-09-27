@@ -5,7 +5,10 @@
 #ifndef ISF_FASTCALOSIMEVENT_TFCS2DFunction_h
 #define ISF_FASTCALOSIMEVENT_TFCS2DFunction_h
 
-#include "CxxUtils/checker_macros.h"
+#ifndef __FastCaloSimStandAlone__ 
+  #include "CxxUtils/checker_macros.h"  
+#endif
+
 #include "ISF_FastCaloSimEvent/TFCSFunction.h"
 #include <vector>
 
