@@ -57,7 +57,7 @@ class TileRawChannelContByteStreamTool: public AthAlgTool {
 
   private:
 
-    Gaudi::Property<bool> m_doFragType4{this, "DoFragType4", false, "Do frag type 4"};
+    Gaudi::Property<bool> m_doFragType4{this, "DoFragType4", true, "Do frag type 4"};
     Gaudi::Property<bool> m_doFragType5{this, "DoFragType5", false, "Do frag type 5"};
     Gaudi::Property<bool> m_initializeForWriting{this, "InitializeForWriting", false, "Initialize for writing"};
 
