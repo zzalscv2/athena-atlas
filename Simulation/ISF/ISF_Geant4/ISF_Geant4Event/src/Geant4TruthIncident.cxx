@@ -204,6 +204,23 @@ int iGeant4::Geant4TruthIncident::childPdgCode(unsigned short i) const {
   return m_children[i]->GetDefinition()->GetPDGEncoding();
 }
 
+Barcode::ParticleBarcode  iGeant4::Geant4TruthIncident::childBarcode(unsigned short index) const {
+  // the G4Track instance for the current child particle
+  const G4Track* track = m_children[index];
+  // This should be a *secondary* track.  If it has a primary, it was a decay and
+  //  we are running with quasi-stable particle simulation.  Note that if the primary
+  //  track is passed in as a secondary that survived the interaction, then this was
+  //  *not* a decay and we should not treat it in this way
+  if (track->GetDynamicParticle() &&
+      track->GetDynamicParticle()->GetPrimaryParticle() &&
+      track->GetDynamicParticle()->GetPrimaryParticle()->GetUserInformation()){
+    // Then the new particle should use the same barcode as the old one!!
+    PrimaryParticleInformation* ppi = dynamic_cast<PrimaryParticleInformation*>( track->GetDynamicParticle()->GetPrimaryParticle()->GetUserInformation() );
+    return ppi->GetParticleBarcode();
+  }
+  return 0;
+}
+
 void iGeant4::Geant4TruthIncident::setAllChildrenBarcodes(Barcode::ParticleBarcode) {
   G4ExceptionDescription description;
   description << G4String("setAllChildrenBarcodes: ") + "Shared child particle barcodes are not implemented in ISF_Geant4 at this point.";
@@ -219,17 +236,16 @@ HepMC::GenParticlePtr iGeant4::Geant4TruthIncident::childParticle(unsigned short
   //     secondary could decay right away and create further particles which pass the
   //     truth strategies.
 
-  HepMC::GenParticlePtr hepParticle = convert( thisChildTrack , newBarcode , true );
-
+  HepMC::GenParticlePtr hepParticle = convert( thisChildTrack, newBarcode, true );
   TrackHelper tHelper(thisChildTrack);
   TrackInformation *trackInfo = tHelper.GetTrackInformation();
 
   // needed to make AtlasG4 work with ISF TruthService
-  if(trackInfo==nullptr) {
-    trackInfo = new TrackInformation( hepParticle );    
-    thisChildTrack->SetUserInformation( trackInfo );    
-  } 
-    
+  if (trackInfo==nullptr) {
+    trackInfo = new TrackInformation( hepParticle );
+    thisChildTrack->SetUserInformation( trackInfo );
+  }
+
   trackInfo->SetParticle(hepParticle);
   trackInfo->SetClassification(RegisteredSecondary);
   trackInfo->SetRegenerationNr(0);
@@ -296,8 +312,11 @@ bool iGeant4::Geant4TruthIncident::particleAlive(const G4Track *track) const {
   return true;
 }
 
-
+#ifdef HEPMC3
+HepMC::GenParticlePtr iGeant4::Geant4TruthIncident::convert(const G4Track *track, const int, const bool) const {
+#else
 HepMC::GenParticlePtr iGeant4::Geant4TruthIncident::convert(const G4Track *track, const int barcode, const bool secondary) const {
+#endif
 
   const G4ThreeVector & mom =  track->GetMomentum();
   const double energy =  track->GetTotalEnergy();
@@ -307,7 +326,8 @@ HepMC::GenParticlePtr iGeant4::Geant4TruthIncident::convert(const G4Track *track
   const int status = 1; // stable particle not decayed by EventGenerator
   HepMC::GenParticlePtr newParticle = HepMC::newGenParticlePtr(fourMomentum, pdgCode, status);
 
-  // This should be a *secondary* track.  If it has a primary, it was a decay and 
+#ifndef HEPMC3
+  // This should be a *secondary* track.  If it has a primary, it was a decay and
   //  we are running with quasi-stable particle simulation.  Note that if the primary
   //  track is passed in as a secondary that survived the interaction, then this was
   //  *not* a decay and we should not treat it in this way
@@ -321,6 +341,7 @@ HepMC::GenParticlePtr iGeant4::Geant4TruthIncident::convert(const G4Track *track
   } else {
     HepMC::suggest_barcode( newParticle, barcode );
   }
+#endif
 
   return newParticle;
 }

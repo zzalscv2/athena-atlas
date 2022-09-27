@@ -95,6 +95,8 @@ namespace ISF {
     virtual double                    childEkin(unsigned short index) const = 0;
     /** Return the PDG Code of the i-th child particle */
     virtual int                       childPdgCode(unsigned short index) const = 0;
+    /** Return the barcode of the i-th child particle (if defined as part of the TruthIncident) otherwise return 0 */
+    virtual Barcode::ParticleBarcode  childBarcode(unsigned short index) const = 0;
     /** Return true if at least one child particle passes the given p^2 cut
         (= at least one child with p^2 >= pt2cut) */
     inline bool                       childrenP2Pass(double p2cut);
