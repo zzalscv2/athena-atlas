@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
 */
 
 /*
@@ -40,8 +40,7 @@ namespace DerivationFramework{
     HadronOriginClassifier(const std::string& t, const std::string& n, const IInterface* p);
     virtual ~HadronOriginClassifier();
     
-    virtual StatusCode initialize();
-    virtual StatusCode finalize();
+    virtual StatusCode initialize() override;
 
     static const InterfaceID& interfaceID() { return IID_HadronOriginClassifier; }
 
@@ -55,19 +54,14 @@ namespace DerivationFramework{
     
     typedef enum { Pythia6=0, Pythia8=1, HerwigPP=2, Sherpa=3 } GEN_id;
         
-    std::map<const xAOD::TruthParticle*, HF_id> GetOriginMap();
+    std::map<const xAOD::TruthParticle*, HF_id> GetOriginMap() const;
     
   private:
 
+    void fillHadronMap(std::map<const xAOD::TruthParticle*,int>& mainHadronMap, const xAOD::TruthParticle* mainhad, const xAOD::TruthParticle* ihad, bool decayed=false) const;
 
-    void initMaps();
- 
-    void fillHadronMap(const xAOD::TruthParticle* mainhad, const xAOD::TruthParticle* ihad, bool decayed=false);
-
-    void findPartonsToRemove(bool isNotDecayed);
-
-    void buildPartonsHadronsMaps();
-
+    void buildPartonsHadronsMaps(std::map<const xAOD::TruthParticle*,int>& mainHadronMap,
+                                 std::map<const xAOD::TruthParticle*,HF_id>& partonsOrigin) const;
 
     static int hadronType(int pdgid) ;
     static bool isBHadron(const xAOD::TruthParticle* part) ;
@@ -110,22 +104,11 @@ namespace DerivationFramework{
     static bool isDirectlyMPISherpa(const xAOD::TruthParticle* part) ;
 
      
-    inline bool IsHerwigPP(){return m_GenUsed==HerwigPP;};
-    inline bool IsPythia8(){return m_GenUsed==Pythia8;};
-    inline bool IsPythia6(){return m_GenUsed==Pythia6;};
-    inline bool IsSherpa(){return m_GenUsed==Sherpa;};
-    inline bool IsTtBb(){return m_ttbb;}
-
-    const xAOD::TruthParticle*  partonToHadron(const xAOD::TruthParticle* parton);
-
-    
-    std::set<const xAOD::TruthParticle*> m_usedHadron;
-    std::map<const xAOD::TruthParticle*,int> m_mainHadronMap; //maps main hadrons with flavor
-    
-    
-    std::map<const xAOD::TruthParticle*, HF_id> m_partonsOrigin; //parton, category
-    std::map<const xAOD::TruthParticle*, const xAOD::TruthParticle*> m_hadronsPartons; //hadron, category
-    std::map<const xAOD::TruthParticle*, HF_id> m_hadronsOrigin; //hadron, category
+    inline bool IsHerwigPP() const {return m_GenUsed==HerwigPP;};
+    inline bool IsPythia8() const {return m_GenUsed==Pythia8;};
+    inline bool IsPythia6() const {return m_GenUsed==Pythia6;};
+    inline bool IsSherpa() const {return m_GenUsed==Sherpa;};
+    inline bool IsTtBb() const {return m_ttbb;}
 
     std::string m_mcName;
     double m_HadronPtMinCut;

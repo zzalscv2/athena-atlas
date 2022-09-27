@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
 */
 #include "DerivationFrameworkMCTruth/HadronOriginClassifier.h"
 
@@ -117,26 +117,26 @@ namespace DerivationFramework{
   }
 
   //---------------------------------------------------------------------------
-  StatusCode HadronOriginClassifier::finalize() {
-    return StatusCode::SUCCESS;
-  }
+  std::map<const xAOD::TruthParticle*, DerivationFramework::HadronOriginClassifier::HF_id>
+  HadronOriginClassifier::GetOriginMap() const {
 
-  //---------------------------------------------------------------------------
-  std::map<const xAOD::TruthParticle*, DerivationFramework::HadronOriginClassifier::HF_id> HadronOriginClassifier::GetOriginMap(){
-    initMaps();
+    //--- init maps
+    std::map<const xAOD::TruthParticle*, int> mainHadronMap; //maps main hadrons with flavor
+    std::map<const xAOD::TruthParticle*, HF_id> partonsOrigin; //parton, category
+    std::map<const xAOD::TruthParticle*, const xAOD::TruthParticle*> hadronsPartons; //hadron, category
+    std::map<const xAOD::TruthParticle*, HF_id> hadronsOrigin; //hadron, category
+
+    buildPartonsHadronsMaps(mainHadronMap, partonsOrigin);
 
     //--- map partons to hadrons
     std::vector<const xAOD::TruthParticle*> matched_partons;
     std::vector<const xAOD::TruthParticle*> matched_hadrons;
 
-    matched_partons.clear();
-    matched_hadrons.clear();
-
-    while (matched_partons.size()<m_partonsOrigin.size() && matched_hadrons.size()<m_mainHadronMap.size()){
+    while (matched_partons.size()<partonsOrigin.size() && matched_hadrons.size()<mainHadronMap.size()){
       float dR=999.;
       const xAOD::TruthParticle* hadron=nullptr;
       const xAOD::TruthParticle* parton=nullptr;
-      for(std::map<const xAOD::TruthParticle*, HF_id>::iterator itr = m_partonsOrigin.begin(); itr!=m_partonsOrigin.end(); ++itr){
+      for(std::map<const xAOD::TruthParticle*, HF_id>::iterator itr = partonsOrigin.begin(); itr!=partonsOrigin.end(); ++itr){
 
         if(std::find(matched_partons.begin(), matched_partons.end(), (*itr).first) != matched_partons.end()) continue;
 
@@ -146,7 +146,7 @@ namespace DerivationFramework{
         else // Protection against FPE from eta and phi calculation
           v.SetXYZ(0.,0.,(*itr).first->pz());
 
-        for(std::map<const xAOD::TruthParticle*, int>::iterator it = m_mainHadronMap.begin(); it!=m_mainHadronMap.end(); ++it){
+        for(std::map<const xAOD::TruthParticle*, int>::iterator it = mainHadronMap.begin(); it!=mainHadronMap.end(); ++it){
 
           if(std::find(matched_hadrons.begin(), matched_hadrons.end(), (*it).first) != matched_hadrons.end()) continue;
 
@@ -166,42 +166,32 @@ namespace DerivationFramework{
       matched_partons.push_back(parton);
       matched_hadrons.push_back(hadron);
 
-      m_hadronsPartons[ hadron ] = parton;
+      hadronsPartons[ hadron ] = parton;
     }
 
-    for(std::map<const xAOD::TruthParticle*, int>::iterator it = m_mainHadronMap.begin(); it!=m_mainHadronMap.end(); ++it){
+    for(std::map<const xAOD::TruthParticle*, int>::iterator it = mainHadronMap.begin(); it!=mainHadronMap.end(); ++it){
       const xAOD::TruthParticle* hadron = (*it).first;
-      if(m_hadronsPartons.find(hadron)!=m_hadronsPartons.end()){
-        m_hadronsOrigin[hadron] = m_partonsOrigin[ m_hadronsPartons[hadron] ];
+      if(hadronsPartons.find(hadron)!=hadronsPartons.end()){
+        hadronsOrigin[hadron] = partonsOrigin[ hadronsPartons[hadron] ];
       } else{
-        m_hadronsOrigin[hadron] = extrajet;
+        hadronsOrigin[hadron] = extrajet;
       }
     }
 
-    return m_hadronsOrigin;
-  }
-
-  //---------------------------------------------------------------------------
-  void HadronOriginClassifier::initMaps(){
-    m_partonsOrigin.clear();
-    m_hadronsOrigin.clear();
-
-    m_usedHadron.clear();
-    m_mainHadronMap.clear();
-
-    m_hadronsPartons.clear();
-
-    buildPartonsHadronsMaps();
+    return hadronsOrigin;
   }
 
 
   //---------------------------------------------------------------------------
-  void HadronOriginClassifier::buildPartonsHadronsMaps(){
+  void HadronOriginClassifier::buildPartonsHadronsMaps(std::map<const xAOD::TruthParticle*,int>& mainHadronMap,
+                                                       std::map<const xAOD::TruthParticle*,HF_id>& partonsOrigin) const {
 
     const xAOD::TruthEventContainer* xTruthEventContainer = nullptr;
     if (evtStore()->retrieve(xTruthEventContainer,m_mcName).isFailure()) {
       ATH_MSG_WARNING("could not retrieve TruthEventContainer " <<m_mcName);
     }
+
+    std::set<const xAOD::TruthParticle*> usedHadron;
 
     for ( const auto* truthevent : *xTruthEventContainer ) {
 
@@ -235,28 +225,28 @@ namespace DerivationFramework{
         if(isbquark){
           bool islooping = isLooping(part);
           if(isDirectlyFromWTop(part, islooping)){
-            m_partonsOrigin[ part ] = b_from_W;
+            partonsOrigin[ part ] = b_from_W;
           }
           else if(isDirectlyFromTop(part, islooping)){
-            m_partonsOrigin[ part ] = b_from_top;
+            partonsOrigin[ part ] = b_from_top;
           }
           else if(!IsTtBb()&&(IsHerwigPP()||IsSherpa())&&isDirectlyFSR(part,islooping)){
-            m_partonsOrigin[ part ] = b_FSR;
+            partonsOrigin[ part ] = b_FSR;
           }
           else if(!IsTtBb()&&IsPythia8()&&isDirectlyFSRPythia8(part,islooping)){
-            m_partonsOrigin[ part ] = b_FSR;
+            partonsOrigin[ part ] = b_FSR;
           }
           else if(!IsTtBb()&&IsPythia6()&&isDirectlyFSRPythia6(part,islooping)){
-            m_partonsOrigin[ part ] = b_FSR;
+            partonsOrigin[ part ] = b_FSR;
           }
           else if(!IsTtBb()&&IsPythia6()&&isDirectlyMPIPythia6(part, islooping)){
-            m_partonsOrigin[ part ] = b_MPI;
+            partonsOrigin[ part ] = b_MPI;
           }
           else if(!IsTtBb()&&IsPythia8()&&isDirectlyMPIPythia8(part, islooping)){
-            m_partonsOrigin[ part ] = b_MPI;
+            partonsOrigin[ part ] = b_MPI;
           }
           else if(!IsTtBb()&&IsSherpa()&&isDirectlyMPISherpa(part)){
-            m_partonsOrigin[ part ] = b_MPI;
+            partonsOrigin[ part ] = b_MPI;
           }
 
 
@@ -267,48 +257,37 @@ namespace DerivationFramework{
           bool islooping = isLooping(part);
 
           if(isDirectlyFromWTop(part, islooping)){
-            m_partonsOrigin[ part ] = c_from_W;
+            partonsOrigin[ part ] = c_from_W;
           }
           else if(isDirectlyFromTop(part, islooping)){
-            m_partonsOrigin[ part ] = c_from_top;
+            partonsOrigin[ part ] = c_from_top;
           }
           else if(!IsTtBb()&&(IsHerwigPP()&&IsSherpa())&&isDirectlyFSR(part,islooping)){
-            m_partonsOrigin[ part ] = c_FSR;
+            partonsOrigin[ part ] = c_FSR;
           }
           else if(!IsTtBb()&&IsPythia8()&&isDirectlyFSRPythia8(part,islooping)){
-            m_partonsOrigin[ part ] = c_FSR;
+            partonsOrigin[ part ] = c_FSR;
           }
           else if(!IsTtBb()&&IsPythia6()&&isDirectlyFSRPythia6(part,islooping)){
-            m_partonsOrigin[ part ] = c_FSR;
+            partonsOrigin[ part ] = c_FSR;
           }
 
           else if(!IsTtBb()&&IsPythia6()&&isDirectlyMPIPythia6(part, islooping)){
-            m_partonsOrigin[ part ] = c_MPI;
+            partonsOrigin[ part ] = c_MPI;
           }
           else if(!IsTtBb()&&IsPythia8()&&isDirectlyMPIPythia8(part, islooping)){
-            m_partonsOrigin[ part ] = c_MPI;
+            partonsOrigin[ part ] = c_MPI;
           }
           else if(!IsTtBb()&&IsSherpa()&&isDirectlyMPISherpa(part)){
-            m_partonsOrigin[ part ] = c_MPI;
-          }
-
-
-
-        }
-
-
-
-
-        if(isHFhadron){
-          if(!isCHadronFromB(part)){
-            if(m_usedHadron.count(part)) continue;
-
-            fillHadronMap(part,part);
+            partonsOrigin[ part ] = c_MPI;
           }
         }
 
-
-
+        if(isHFhadron && !isCHadronFromB(part)){
+          if(usedHadron.insert(part).second) {  // true if new hadron
+            fillHadronMap(mainHadronMap,part,part);
+          }
+        }
 
       }//loop on particles
     }//loop on truthevent container
@@ -388,10 +367,9 @@ namespace DerivationFramework{
 
 
 
-  void HadronOriginClassifier::fillHadronMap(const xAOD::TruthParticle* mainhad, const xAOD::TruthParticle* ihad, bool decayed){
+  void HadronOriginClassifier::fillHadronMap(std::map<const xAOD::TruthParticle*,int>& mainHadronMap, const xAOD::TruthParticle* mainhad, const xAOD::TruthParticle* ihad, bool decayed) const {
     if (!ihad) return;
 
-    m_usedHadron.insert(ihad);
     int parent_flav,child_flav;
     bool isFinal = true;
 
@@ -401,7 +379,7 @@ namespace DerivationFramework{
       const xAOD::TruthParticle* child = ihad->child(j);
 
       if(decayed){
-        fillHadronMap(mainhad,child,true);
+        fillHadronMap(mainHadronMap,mainhad,child,true);
         isFinal=false;
       }
       else{
@@ -409,7 +387,7 @@ namespace DerivationFramework{
         if(child_flav!=4 && child_flav!=5) continue;
         parent_flav = hadronType(mainhad->pdgId());
         if(child_flav!=parent_flav) continue;
-        fillHadronMap(mainhad,child);
+        fillHadronMap(mainHadronMap,mainhad,child);
         isFinal=false;
       }
 
@@ -417,11 +395,11 @@ namespace DerivationFramework{
 
     if(isFinal && !decayed){
 
-      m_mainHadronMap[mainhad]=hadronType(mainhad->pdgId());
+      mainHadronMap[mainhad]=hadronType(mainhad->pdgId());
 
       for(unsigned int j=0; j<ihad->nChildren(); ++j){
         const xAOD::TruthParticle* child = ihad->child(j);
-        fillHadronMap(mainhad,child,true);
+        fillHadronMap(mainHadronMap,mainhad,child,true);
       }
     }
 
@@ -710,33 +688,6 @@ namespace DerivationFramework{
     }
 
     return part;
-  }
-
-
-  //--------------------------------------------------------------------------
-  const xAOD::TruthParticle* HadronOriginClassifier::partonToHadron(const xAOD::TruthParticle* parton){
-
-    const xAOD::TruthParticle* hadron(nullptr);
-
-    TVector3 v, vtmp;
-    v.SetPtEtaPhi(parton->pt(),parton->eta(),parton->phi());
-    float dR=999.;
-
-    for(std::map<const xAOD::TruthParticle*,int>::iterator it = m_mainHadronMap.begin(); it != m_mainHadronMap.end(); ++it){
-
-      //      const xAOD::TruthParticle* fhadron=(*it).first;
-
-      if((*it).second != abs(parton->pdgId()) ) continue; // || ((fhadron->pt()/parton->pt())>1)
-      vtmp.SetPtEtaPhi((*it).first->pt(),(*it).first->eta(),(*it).first->phi());
-
-      if(vtmp.DeltaR(v) < dR){
-        dR = vtmp.DeltaR(v);
-        hadron = (*it).first;
-      }
-
-    }
-
-    return hadron;
   }
 
 }//namespace
