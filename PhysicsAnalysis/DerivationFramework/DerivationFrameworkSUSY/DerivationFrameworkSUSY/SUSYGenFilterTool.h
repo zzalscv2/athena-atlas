@@ -1,7 +1,7 @@
 /** -*- C++ -*- */
 
 /*
-  Copyright (C) 2002-2017 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
 */
 
 /*
@@ -32,9 +32,8 @@ namespace DerivationFramework {
   public:
     SUSYGenFilterTool(const std::string& t, const std::string& n, const IInterface* p);
     ~SUSYGenFilterTool();
-    StatusCode initialize();
-    StatusCode finalize();
-    virtual StatusCode addBranches() const;
+    virtual StatusCode initialize() override;
+    virtual StatusCode addBranches() const override;
 
     StatusCode getGenFiltVars(const xAOD::TruthParticleContainer* tpc, float& genFiltHT, float& genFiltMET) const;
 
@@ -53,7 +52,6 @@ namespace DerivationFramework {
     float m_MaxLepEta; //!< Max eta for the truth leptons
     int m_SimBarcodeOffset; //!< G4 particle barcode offset value (Particles having a barcode greater than this value are defined to be G4 particles)
 
-    mutable std::map<const xAOD::TruthParticle*,MCTruthPartClassifier::ParticleOrigin> m_originMap;
     ToolHandle<IMCTruthClassifier> m_classif;
 
 

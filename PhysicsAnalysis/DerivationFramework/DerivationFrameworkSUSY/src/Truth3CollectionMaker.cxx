@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
 */
 
 /////////////////////////////////////////////////////////////////
@@ -106,21 +106,20 @@ StatusCode DerivationFramework::Truth3CollectionMaker::addBranches() const
     m_ntotpart += nParticles;
     
     // Set up decorators
-    SG::AuxElement::Decorator< ElementLink<xAOD::TruthParticleContainer> > linkDecorator("originalTruthParticle");
-    SG::AuxElement::Decorator< int > originDecorator("particleMotherPdgId");
-    SG::AuxElement::Decorator< int > typeDecorator("particleOriginBarcode");
-    SG::AuxElement::Decorator< float > typeDecoratorMass("particleOriginMass");
-    SG::AuxElement::Decorator< int > tauprongDecorator("nprong");
-    SG::AuxElement::Decorator< int > tautypeDecorator("islep");
+    static const SG::AuxElement::Decorator< ElementLink<xAOD::TruthParticleContainer> > linkDecorator("originalTruthParticle");
+    static const SG::AuxElement::Decorator< int > originDecorator("particleMotherPdgId");
+    static const SG::AuxElement::Decorator< int > typeDecorator("particleOriginBarcode");
+    static const SG::AuxElement::Decorator< float > typeDecoratorMass("particleOriginMass");
+    static const SG::AuxElement::Decorator< int > tauprongDecorator("nprong");
+    static const SG::AuxElement::Decorator< int > tautypeDecorator("islep");
 
     std::vector<int> entries;
 
     // Execute the text parsers and update the mask
     if (!m_partString.empty()) {
-    	entries =  m_parser->evaluateAsVector();
-    	unsigned int nEntries = entries.size();
+    	entries = m_parser->evaluateAsVector();
     	// check the sizes are compatible
-    	if (nParticles != nEntries ) {
+    	if (nParticles != entries.size() ) {
     	    ATH_MSG_ERROR("Sizes incompatible! Are you sure your selection string used TruthParticles?");
             return StatusCode::FAILURE;
     	} else {
@@ -129,7 +128,7 @@ StatusCode DerivationFramework::Truth3CollectionMaker::addBranches() const
 	    ElementLink<xAOD::TruthParticleContainer> eltp(*importedTruthParticles,i); 
 	    if (entries[i]==1) {
 	      
-	      xAOD::TruthParticle* theParticle = const_cast<xAOD::TruthParticle*>( (*importedTruthParticles)[i] );
+	      const xAOD::TruthParticle* theParticle = (*importedTruthParticles)[i];
 	      
 	      //SUSYTRUTH definitions are based on Appendix A in http://arxiv.org/pdf/1403.4853v1.pdf.
 
