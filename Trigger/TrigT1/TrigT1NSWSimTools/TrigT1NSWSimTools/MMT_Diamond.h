@@ -64,7 +64,6 @@ class MMT_Diamond : public AthMessaging {
     std::vector<slope_t> getSlopeVector(const unsigned int iterator) const { return m_diamonds.at(iterator).slopes; }
     unsigned int getDiamondSize() const { return m_diamonds.size(); }
     int getUVfactor() const { return m_uvfactor; }
-    void printHits(const unsigned int iterator);
     void resetSlopes();
     void setTrapezoidalShape(bool flag) { m_trapflag = flag; }
     void setUVfactor(int factor) { m_uvfactor = factor; }
