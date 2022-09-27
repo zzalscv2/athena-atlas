@@ -126,10 +126,6 @@ private:
     const ParticleHypothesis particleHypothesis = nonInteracting,
     const CaloCluster_OnTrack* ccot = nullptr) const;
 
-  /** Method for combining the forwards fitted state and the smoothed state */
-  MultiComponentState combine(const MultiComponentState&,
-                              const MultiComponentState&) const;
-
   /** Methof to add the CaloCluster onto the track */
   MultiComponentState addCCOT(
     const EventContext& ctx,
