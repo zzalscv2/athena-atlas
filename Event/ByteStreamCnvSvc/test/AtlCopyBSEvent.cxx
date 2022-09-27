@@ -41,7 +41,7 @@
 
 #include "CxxUtils/checker_macros.h"
 
-void eventLoop(DataReader*, EventStorage::DataWriter*, unsigned&, const std::vector<uint32_t>*, uint32_t, bool, bool, bool, const std::vector<long long int>* = 0);
+void eventLoop(DataReader*, EventStorage::DataWriter*, unsigned&, const std::vector<uint64_t>*, uint32_t, bool, bool, bool, const std::vector<long long int>* = 0);
 
 int main ATLAS_NOT_THREAD_SAFE (int argc, char *argv[]) {
   using namespace eformat;
@@ -63,7 +63,7 @@ int main ATLAS_NOT_THREAD_SAFE (int argc, char *argv[]) {
   std::vector<std::string> collNames, collTypes;
   std::string collConnect;
   std::string collQuery;
-  std::vector<uint32_t> searchEvents;
+  std::vector<uint64_t> searchEvents;
   std::vector<std::string> searchTokens;
   uint32_t searchRun=0; 
   bool searchEventSet=false;
@@ -83,7 +83,7 @@ int main ATLAS_NOT_THREAD_SAFE (int argc, char *argv[]) {
       if (arg2.size()>0 && isdigit(arg2[0])) {
 	size_t p=0;
 	while (p!=std::string::npos) {
-	  searchEvents.push_back(atol(arg2.c_str()+p));
+	  searchEvents.push_back(atoll(arg2.c_str()+p));
 	  p=arg2.find(',',p);
 	  if (p!=std::string::npos) p++;
 	}
@@ -176,7 +176,7 @@ int main ATLAS_NOT_THREAD_SAFE (int argc, char *argv[]) {
   }// End loop over arguments
 
   std::map<Guid, std::string> guidPfn;
-  std::map<std::string, std::vector<uint32_t> > searchEventByPFN;
+  std::map<std::string, std::vector<uint64_t> > searchEventByPFN;
   std::map<std::string, std::vector<long long int> > offsetEventByPFN;
   // If no event search set, then we need a POOL collections as input
   if (!searchEventSet && !collNames.empty()) {
@@ -233,12 +233,12 @@ int main ATLAS_NOT_THREAD_SAFE (int argc, char *argv[]) {
               guidPfn.insert(std::pair<Guid, std::string>(guid, pfn));
               // add pfn to list
               fileNames.push_back(pfn);
-              std::vector<uint32_t> evts;
+              std::vector<uint64_t> evts;
               std::vector<long long int> offs;
               evts.push_back(*evNum);
               offs.push_back(pos);
               // fill map of pfn to event number list
-              searchEventByPFN.insert(std::pair<std::string, std::vector<uint32_t> >(pfn, evts));
+              searchEventByPFN.insert(std::pair<std::string, std::vector<uint64_t> >(pfn, evts));
               // fill map of pfn to offset list
               offsetEventByPFN.insert(std::pair<std::string, std::vector<long long int> >(pfn, offs));
             } else {   // guid already in map guid to pfn map
@@ -269,7 +269,7 @@ int main ATLAS_NOT_THREAD_SAFE (int argc, char *argv[]) {
 
   std::sort(searchEvents.begin(),searchEvents.end());
   std::cout << "Events to copy: ";
-  for (std::vector<uint32_t>::const_iterator itEvt1=searchEvents.begin(), itEvt2=searchEvents.end(); itEvt1!=itEvt2; ++itEvt1) {
+  for (std::vector<uint64_t>::const_iterator itEvt1=searchEvents.begin(), itEvt2=searchEvents.end(); itEvt1!=itEvt2; ++itEvt1) {
     std::cout << *itEvt1 << " ";
   }
   std::cout << std::endl;
@@ -364,7 +364,7 @@ int main ATLAS_NOT_THREAD_SAFE (int argc, char *argv[]) {
   return 0;
 }
 
-void eventLoop(DataReader* pDR, EventStorage::DataWriter* pDW, unsigned& nFound, const std::vector<uint32_t>* pSearchEvents, uint32_t searchRun, bool searchRunSet, bool listEvents, bool checkEvents, const std::vector<long long int>* pOffsetEvents) {
+void eventLoop(DataReader* pDR, EventStorage::DataWriter* pDW, unsigned& nFound, const std::vector<uint64_t>* pSearchEvents, uint32_t searchRun, bool searchRunSet, bool listEvents, bool checkEvents, const std::vector<long long int>* pOffsetEvents) {
   using namespace eformat;
   // the event loop
   uint32_t eventCounter=0;
@@ -414,7 +414,7 @@ void eventLoop(DataReader* pDR, EventStorage::DataWriter* pDW, unsigned& nFound,
       FullEventFragment<const uint32_t*> fe(fragment);
       if (checkEvents) fe.check_tree();
       
-      uint32_t eventNo=fe.global_id();
+      uint64_t eventNo=fe.global_id();
       uint32_t runNo=fe.run_no();
       if (listEvents)
         std::cout << "Index=" << eventCounter <<" Run=" << runNo << " Event=" << eventNo 

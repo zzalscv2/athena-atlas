@@ -53,7 +53,7 @@ int main ATLAS_NOT_THREAD_SAFE (int argc, char *argv[])
   }
 
   std::vector<std::string> fileNames;
-  uint32_t searchEvent=std::numeric_limits<uint32_t>::max();
+  uint64_t searchEvent=std::numeric_limits<uint64_t>::max();
   uint32_t searchRun=std::numeric_limits<uint32_t>::max(); 
   uint32_t eventCounter=0;
   bool listevents=false;
@@ -67,7 +67,7 @@ int main ATLAS_NOT_THREAD_SAFE (int argc, char *argv[])
     if (arg1=="-e" || arg1=="--event") {
       //try read event number
       if (arg2.size() && isdigit(arg2[0])) 
-	searchEvent=atoi(arg2.c_str());
+	searchEvent=atoll(arg2.c_str());
       else {
 	std::cout << "ERROR: no numerical argument found after '" << arg1 << "'" << std::endl;
 	return -1;
@@ -99,7 +99,7 @@ int main ATLAS_NOT_THREAD_SAFE (int argc, char *argv[])
     return -1;
   }
 
-  if (searchEvent==std::numeric_limits<uint32_t>::max()) 
+  if (searchEvent==std::numeric_limits<uint64_t>::max()) 
     listevents=true;
 
 
@@ -182,7 +182,7 @@ int main ATLAS_NOT_THREAD_SAFE (int argc, char *argv[])
       
 	if (checkevents) fe.check_tree();
 	
-	const uint32_t eventNo=fe.global_id();
+	const uint64_t eventNo=fe.global_id();
 	const uint32_t runNo=fe.run_no();
 	const time_t sec=fe.bc_time_seconds();
 	if (listevents) {
@@ -229,7 +229,7 @@ int main ATLAS_NOT_THREAD_SAFE (int argc, char *argv[])
   if (!found) {
     if (searchRun!=std::numeric_limits<uint32_t>::max()) 
       std::cout << "Run " << searchRun << " ";
-    if (searchEvent!=std::numeric_limits<uint32_t>::max()) 
+    if (searchEvent!=std::numeric_limits<uint64_t>::max()) 
       std::cout << "Event " << searchEvent << " not found in given files" 
 		<< std::endl;
     return -1;
