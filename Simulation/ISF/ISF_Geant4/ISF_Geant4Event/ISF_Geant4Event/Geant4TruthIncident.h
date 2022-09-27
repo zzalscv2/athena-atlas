@@ -80,6 +80,8 @@ namespace iGeant4 {
       double                    childEkin(unsigned short index) const override final;
       /** Return the PDG Code of the i-th child particle */
       int                       childPdgCode(unsigned short index) const override final;
+      /** Return the barcode of the i-th child particle (if defined as part of the TruthIncident) otherwise return 0 */
+      Barcode::ParticleBarcode  childBarcode(unsigned short index) const override final;
       /** Set the the barcode of all child particles to the given bc */
       void                      setAllChildrenBarcodes(Barcode::ParticleBarcode bc) override final;
 
@@ -114,7 +116,7 @@ namespace iGeant4 {
       /** check if the given G4Track represents a particle that is alive in ISF or ISF-G4 */
       inline bool particleAlive(const G4Track *track) const;
 
-      HepMC::GenParticlePtr convert(const G4Track *particle, const int barcode, const bool secondary) const; //*AS* might be put static
+      HepMC::GenParticlePtr convert(const G4Track *particle, const int barcode, const bool secondary) const;
 
       bool                          m_positionSet;
       HepMC::FourVector             m_position;
