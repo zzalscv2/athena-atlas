@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
 */
 
 ///////////////////////////////////////////////////////////////////////
@@ -73,7 +73,6 @@ bool DerivationFramework::SkimmingToolEXOT5::eventPassesFilter() const
 
   const xAOD::EventInfo* eventInfo = nullptr;
   ATH_CHECK(evtStore()->retrieve(eventInfo), false);
-  m_isMC = eventInfo->eventType(xAOD::EventInfo::IS_SIMULATION);
 
   const xAOD::JetContainer* jets = nullptr;
   ATH_CHECK(evtStore()->retrieve(jets, m_jetSGKey), false);
@@ -112,7 +111,7 @@ bool DerivationFramework::SkimmingToolEXOT5::eventPassesFilter() const
   }
   if ((recoJets->size() > 0 && recoJets->at(0)->pt() > m_monoJetPt) || (recoJets->size() > 1 && recoJets->at(0)->pt() > m_leadingJetPt && recoJets->at(1)->pt() > m_subleadingJetPt && mjj > m_Mjj)) passRecoJetCuts = true;
 
-  if (m_isMC) {
+  if (eventInfo->eventType(xAOD::EventInfo::IS_SIMULATION)) {
     const xAOD::JetContainer* truthJetContainer = nullptr;
     ATH_CHECK(evtStore()->retrieve(truthJetContainer, "AntiKt4TruthJets"), false);
 

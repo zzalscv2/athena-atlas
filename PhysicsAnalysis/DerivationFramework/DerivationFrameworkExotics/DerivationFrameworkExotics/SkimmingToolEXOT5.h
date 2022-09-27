@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2017 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
 */
 
 ///////////////////////////////////////////////////////////////////
@@ -26,10 +26,10 @@ namespace DerivationFramework {
 
       ~SkimmingToolEXOT5();
 
-      StatusCode  initialize();
-      StatusCode  finalize();
+      virtual StatusCode  initialize() override;
+      virtual StatusCode  finalize() override;
 
-      virtual bool eventPassesFilter() const;
+      virtual bool eventPassesFilter() const override;
 
     private:
 
@@ -42,9 +42,8 @@ namespace DerivationFramework {
       double m_subleadingJetPt;
       double m_Mjj;
 
-      mutable bool m_isMC;
-      mutable unsigned int m_ntot;
-      mutable unsigned int m_npass;
+      mutable std::atomic<unsigned int> m_ntot;
+      mutable std::atomic<unsigned int> m_npass;
 
   }; 
 
