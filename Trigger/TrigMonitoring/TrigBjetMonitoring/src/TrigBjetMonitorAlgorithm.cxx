@@ -475,35 +475,6 @@ StatusCode TrigBjetMonitorAlgorithm::fillHistograms( const EventContext& ctx ) c
 	    ATH_CHECK( btaggingLinkInfo.isValid() ) ;
 	    const xAOD::BTagging* btag = *(btaggingLinkInfo.link);
 	    
-	    // IP3D variables
-	    NameH = "IP3D_pu_tr_"+trigName;
-	    ATH_MSG_DEBUG( " NameH: " << NameH  );
-	    auto IP3D_pu = Monitored::Scalar<float>(NameH,0.0);
-	    IP3D_pu = btag->IP3D_pu();
-	    ATH_MSG_DEBUG("        IP3D_pu: " << IP3D_pu);
-	    fill("TrigBjetMonitor",IP3D_pu);
-	    
-	    NameH = "IP3D_pb_tr_"+trigName;
-	    ATH_MSG_DEBUG( " NameH: " << NameH  );
-	    auto IP3D_pb = Monitored::Scalar<float>(NameH,0.0);
-	    IP3D_pb = btag->IP3D_pb();
-	    ATH_MSG_DEBUG("        IP3D_pb: " << IP3D_pb);
-	    fill("TrigBjetMonitor",IP3D_pb);
-	    
-	    NameH = "IP3D_pc_tr_"+trigName;
-	    ATH_MSG_DEBUG( " NameH: " << NameH  );
-	    auto IP3D_pc = Monitored::Scalar<float>(NameH,0.0);
-	    IP3D_pc = btag->IP3D_pc();
-	    ATH_MSG_DEBUG("        IP3D_pc: " << IP3D_pc);
-	    fill("TrigBjetMonitor",IP3D_pc);
-	    
-	    // LogLH variables
-	    NameH = "wIP3D_Rbu_tr_"+trigName;
-	    ATH_MSG_DEBUG( " NameH: " << NameH  );
-	    auto wIP3D = Monitored::Scalar<double>(NameH,0.0);
-	    btag->loglikelihoodratio("IP3D", wIP3D);
-	    ATH_MSG_DEBUG("        wIP3D: " << wIP3D);
-	    fill("TrigBjetMonitor",wIP3D);
 	    
 	    // SV1 variables (credit LZ)
 	    NameH = "xNVtx_tr_"+trigName;
@@ -560,28 +531,6 @@ StatusCode TrigBjetMonitorAlgorithm::fillHistograms( const EventContext& ctx ) c
 	    ATH_MSG_DEBUG("        jf_efrc: " << jf_efrc);
 	    fill("TrigBjetMonitor",jf_efrc);
 	    
-	    // Run-3 discriminators
-	    
-	    NameH = "RNNIP_pu_tr_"+trigName;
-	    ATH_MSG_DEBUG( " NameH: " << NameH  );
-	    auto RNNIP_pu = Monitored::Scalar<double>(NameH,0.0);
-	    btag->pu("rnnip",RNNIP_pu);
-	    ATH_MSG_DEBUG("        RNNIP_pu: " << RNNIP_pu);
-	    fill("TrigBjetMonitor",RNNIP_pu);
-	    
-	    NameH = "RNNIP_pc_tr_"+trigName;
-	    ATH_MSG_DEBUG( " NameH: " << NameH  );
-	    auto RNNIP_pc = Monitored::Scalar<double>(NameH,0.0);
-	    btag->pc("rnnip",RNNIP_pc);
-	    ATH_MSG_DEBUG("        RNNIP_pc: " << RNNIP_pc);
-	    fill("TrigBjetMonitor",RNNIP_pc);
-	    
-	    NameH = "RNNIP_pb_tr_"+trigName;
-	    ATH_MSG_DEBUG( " NameH: " << NameH  );
-	    auto RNNIP_pb = Monitored::Scalar<double>(NameH,0.0);
-	    btag->pb("rnnip",RNNIP_pb);
-	    ATH_MSG_DEBUG("        RNNIP_pb: " << RNNIP_pb);
-	    fill("TrigBjetMonitor",RNNIP_pb);
 	    
 	    
 	    NameH = "DL1d_pu_tr_"+trigName;
@@ -612,34 +561,6 @@ StatusCode TrigBjetMonitorAlgorithm::fillHistograms( const EventContext& ctx ) c
 	    if ( theLLR ) fill("TrigBjetMonitor",DL1d_mv);
 	    ATH_MSG_DEBUG("        DL1d_mv: " << DL1d_mv << " LLR: " << theLLR); 
 	    
-	    
-	    NameH = "DL1r_pu_tr_"+trigName;
-	    ATH_MSG_DEBUG( " NameH: " << NameH  );
-	    auto DL1r_pu = Monitored::Scalar<double>(NameH,0.0);
-	    btag->pu("DL1r",DL1r_pu);
-	    ATH_MSG_DEBUG("        DL1r_pu: " << DL1r_pu);
-	    fill("TrigBjetMonitor",DL1r_pu);
-	    
-	    NameH = "DL1r_pc_tr_"+trigName;
-	    ATH_MSG_DEBUG( " NameH: " << NameH  );
-	    auto DL1r_pc = Monitored::Scalar<double>(NameH,0.0);
-	    btag->pc("DL1r",DL1r_pc);
-	    ATH_MSG_DEBUG("        DL1r_pc: " << DL1r_pc);
-	    fill("TrigBjetMonitor",DL1r_pc);
-	    
-	    NameH = "DL1r_pb_tr_"+trigName;
-	    ATH_MSG_DEBUG( " NameH: " << NameH  );
-	    auto DL1r_pb = Monitored::Scalar<double>(NameH,0.0);
-	    btag->pb("DL1r",DL1r_pb);
-	    ATH_MSG_DEBUG("        DL1r_pb: " << DL1r_pb);
-	    fill("TrigBjetMonitor",DL1r_pb);
-	    
-	    NameH = "DL1r_mv_tr_"+trigName;
-	    ATH_MSG_DEBUG( " NameH: " << NameH  );
-	    auto DL1r_mv = Monitored::Scalar<double>(NameH,0.0);
-	    theLLR = LLR (DL1r_pu, DL1r_pc, DL1r_pb, DL1r_mv);
-	    if ( theLLR ) fill("TrigBjetMonitor",DL1r_mv);
-	    ATH_MSG_DEBUG("        DL1r_mv: " << DL1r_mv << " LLR: " << theLLR); 
 	    
 	    
 	    NameH = "DIPSL_pu_tr_"+trigName;
