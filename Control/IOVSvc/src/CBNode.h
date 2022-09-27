@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef IOVSVC_CBNODE_H
@@ -52,6 +52,7 @@ public:
   };
 
   typedef std::set<CBNode*, CBNode::nodeOrder> nodeSet;
+  typedef std::vector<const CBNode*> constNodeVec;
 
   CBNode() = delete;
   CBNode(const std::string& name, CBNode* parent);
@@ -65,8 +66,10 @@ public:
   bool delParent(CBNode* parent);
   bool delChild(CBNode* child);
 
-  const nodeSet& children() const { return m_children; }
-  const nodeSet& parents() const { return m_parents; }
+  const nodeSet& children() { return m_children; }
+  const nodeSet& parents() { return m_parents; }
+  constNodeVec children() const { return constNodeVec (m_children.begin(), m_children.end()); }
+  constNodeVec parents() const { return constNodeVec (m_parents.begin(), m_parents.end()); }
 
   std::string name() const { return m_name; }
   int level() const { return m_level; }
