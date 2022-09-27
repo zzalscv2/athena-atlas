@@ -56,12 +56,6 @@ StatusCode DerivationFramework::TruthMetaDataWriter::initialize()
     return StatusCode::SUCCESS;
 }
 
-StatusCode DerivationFramework::TruthMetaDataWriter::finalize()
-{
-    ATH_MSG_VERBOSE("finalize() ...");
-    return StatusCode::SUCCESS;
-}
-
 // Selection and collection creation
 StatusCode DerivationFramework::TruthMetaDataWriter::addBranches() const
 {

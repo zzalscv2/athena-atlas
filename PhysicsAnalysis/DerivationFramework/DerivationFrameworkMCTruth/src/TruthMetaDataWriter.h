@@ -1,12 +1,12 @@
 /*
-  Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef DERIVATIONFRAMEWORK_TRUTHMETADATAWRITER_H
 #define DERIVATIONFRAMEWORK_TRUTHMETADATAWRITER_H
 
-// Base classes
 #include "AthenaBaseComps/AthAlgTool.h"
+#include "CxxUtils/checker_macros.h"
 #include "DerivationFrameworkInterfaces/IAugmentationTool.h"
 
 // Handles to services
@@ -24,13 +24,13 @@ class IHepMCWeightSvc;
 
 namespace DerivationFramework {
 
-  class TruthMetaDataWriter : public AthAlgTool, public IAugmentationTool {
+  class ATLAS_NOT_THREAD_SAFE TruthMetaDataWriter : public AthAlgTool, public IAugmentationTool {
+    //  ^ meta-data handling in addBranches
     public: 
       TruthMetaDataWriter(const std::string& t, const std::string& n, const IInterface* p);
       ~TruthMetaDataWriter();
-      StatusCode initialize();
-      StatusCode finalize();
-      virtual StatusCode addBranches() const;
+      virtual StatusCode initialize() override;
+      virtual StatusCode addBranches() const override;
 
     private:
       /// Connection to the metadata store
