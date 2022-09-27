@@ -10,11 +10,9 @@ def _createTileContByteStreamToolsConfig (name, TileContByteStreamTool, Initiali
     tool = TileContByteStreamTool(**kwargs)
 
     if InitializeForWriting:
-        from AthenaCommon.AlgSequence import AthSequencer
-        condSequence = AthSequencer("AthCondSeq")
-        if not hasattr(condSequence, "TileHid2RESrcIDHLTCondAlg"):
-            from TileByteStream.TileByteStreamConf import TileHid2RESrcIDCondAlg
-            condSequence += TileHid2RESrcIDCondAlg(ForHLT=True)
+        from TileByteStream.TileHid2RESrcIDConfig import TileHid2RESrcIDCondAlg
+        TileHid2RESrcIDCondAlg(ForHLT=True)
+
         if stream:
             stream.ExtraInputs += [('TileHid2RESrcID', 'ConditionStore+TileHid2RESrcIDHLT')]
 

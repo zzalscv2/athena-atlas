@@ -5,6 +5,21 @@
 from AthenaConfiguration.ComponentAccumulator import ComponentAccumulator
 from AthenaConfiguration.ComponentFactory import CompFactory
 
+def TileHid2RESrcIDCondAlg(ForHLT=False):
+    """Configure TileHid2ReSrcIDCondAlg conditions algorithm"""
+
+    hid2RESrcID = 'TileHid2RESrcIDHLT' if ForHLT else 'TileHid2RESrcID'
+    hid2RESrcIDCondAlg = f'{hid2RESrcID}CondAlg'
+    from AthenaCommon.AlgSequence import AthSequencer
+    condSequence = AthSequencer("AthCondSeq")
+    if hasattr(condSequence, hid2RESrcIDCondAlg):
+        return #Already there....
+
+    from TileByteStream.TileByteStreamConf import TileHid2RESrcIDCondAlg
+    condSequence += TileHid2RESrcIDCondAlg(name=hid2RESrcIDCondAlg, ForHLT=ForHLT, TileHid2RESrcID=hid2RESrcID)
+    return
+
+
 def TileHid2RESrcIDCondAlgCfg(flags, **kwargs):
     """Return component accumulator with configured TileHid2ReSrcIDCondAlg conditions algorithm"""
 
