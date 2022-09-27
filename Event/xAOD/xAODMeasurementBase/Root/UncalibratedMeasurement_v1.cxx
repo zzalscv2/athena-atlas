@@ -1,5 +1,5 @@
 /*
-   Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+   Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
 */
 
 // EDM include(s):
@@ -7,14 +7,13 @@
 // Local include(s):
 #include "xAODMeasurementBase/versions/UncalibratedMeasurement_v1.h"
 
-static const SG::AuxElement::Accessor< IdentifierHash::value_type > identifierHashAcc( "identifierHash" );
+static const SG::AuxElement::Accessor< xAOD::DetectorIDHashType > identifierHashAcc( "identifierHash" );
 
-void xAOD::UncalibratedMeasurement_v1::setIdentifierHash(IdentifierHash& id) {
-    identifierHashAcc(*this) = id.value();
+void xAOD::UncalibratedMeasurement_v1::setIdentifierHash(const xAOD::DetectorIDHashType id) {
+    identifierHashAcc(*this) = id;
 }
 
-const IdentifierHash xAOD::UncalibratedMeasurement_v1::identifierHash() const {
-    IdentifierHash::value_type id = identifierHashAcc(*this);
-    return IdentifierHash(id);
+xAOD::DetectorIDHashType xAOD::UncalibratedMeasurement_v1::identifierHash() const {
+    return identifierHashAcc(*this);
 }
 
