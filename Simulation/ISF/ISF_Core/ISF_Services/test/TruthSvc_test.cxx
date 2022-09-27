@@ -109,6 +109,8 @@ namespace ISFTesting {
     virtual double                    childEkin(unsigned short) const {return 1.0;};
     /** Return the PDG Code of the i-th child particle */
     virtual int                       childPdgCode(unsigned short) const {return 1;};
+    /** Return the barcode of the i-th child particle (if defined as part of the TruthIncident) otherwise return 0 */
+    Barcode::ParticleBarcode  childBarcode(unsigned short) const override final {return 0;};
     /** Return the i-th child as a HepMC particle type and assign the given
         Barcode to the simulator particle (only called for particles that will
         enter the HepMC truth event) */
