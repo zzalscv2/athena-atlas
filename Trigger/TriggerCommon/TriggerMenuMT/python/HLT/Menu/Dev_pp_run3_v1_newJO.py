@@ -67,7 +67,6 @@ def setupMenu():
     ]
 
     chains["bjet"] = [
-#        ChainProp(name='HLT_j275_subjesgscIS_ftf_bdl1r60_split_L1J100', groups=SingleBjetGroup),
     ]
 
     chains["tau"] = [
