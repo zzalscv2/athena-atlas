@@ -188,7 +188,6 @@ namespace NSWL1 {
               if (hitDatas[ihds].BC_time < 0.) continue;
               else if (hitDatas[ihds].BC_time < smallest_bc) smallest_bc = hitDatas[ihds].BC_time;
 
-              // The PrintHits function below gives identical results to the following one: hitDatas[ihds].print();
               if (m_doNtuple) {
                 m_trigger_VMM->push_back(hitDatas[ihds].VMM_chip);
                 m_trigger_plane->push_back(hitDatas[ihds].plane);
@@ -196,7 +195,6 @@ namespace NSWL1 {
                 m_trigger_strip->push_back(hitDatas[ihds].strip);
               }
             }
-            diamond->printHits(i-nskip);
             std::vector<double> slopes = diamond->getHitSlopes();
             for (const auto &s : slopes) if (m_doNtuple) m_trigger_RZslopes->push_back(s);
             diamond->resetSlopes();
