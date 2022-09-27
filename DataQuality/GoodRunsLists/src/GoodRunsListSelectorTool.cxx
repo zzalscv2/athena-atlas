@@ -166,10 +166,10 @@ GoodRunsListSelectorTool::passEvent(const EventIDBase& pEvent)
 {
   ATH_MSG_DEBUG ("passEvent() ");
 
-  int eventNumber = pEvent.event_number();
+  auto eventNumber = pEvent.event_number();
   int runNumber   = pEvent.run_number();
   int lumiBlockNr = pEvent.lumi_block();
-  int timeStamp   = pEvent.time_stamp();
+  auto timeStamp   = pEvent.time_stamp();
 
   ATH_MSG_DEBUG ("passEvent() :: run number = " << runNumber <<
                  " ; event number = " << eventNumber <<
