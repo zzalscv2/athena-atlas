@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2017 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "GeneratorFilters/MultiElectronFilter.h"
@@ -27,7 +27,7 @@ StatusCode MultiElectronFilter::filterEvent() {
 	  }
 	}
   }
-  ATH_MSG_INFO("Found " << numElectrons << "Electrons");
+  ATH_MSG_DEBUG("Found " << numElectrons << " Electrons");
   setFilterPassed(numElectrons >= m_NElectrons);
   return StatusCode::SUCCESS;
 }
