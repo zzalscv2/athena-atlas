@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
 */
 
 /**
@@ -12,8 +12,6 @@
 #include "SCT_CalibUtilities.h"
 
 //gaudi
-#include "EventInfo/EventInfo.h"
-#include "EventInfo/EventID.h"
 #include "InDetIdentifier/SCT_ID.h"
 #include "Identifier/Identifier.h"
 #include <algorithm> //std::unique
@@ -33,19 +31,6 @@ namespace SCT_CalibAlgs {
   return s.substr(first,last);
 }
 
-
-std::string
-eventInfoAsString(const EventInfo* theEvent) {
-   using std::string;
-   const EventID* e{theEvent->event_ID()};
-   string result{string("[ Run, Event, Time, Lumi, Bunch ] = [ " )+
-                 std::to_string(e->run_number()) + ", " +
-                 std::to_string(e->event_number()) + ", "+
-                 std::to_string(e->time_stamp()) + ", "+
-                 std::to_string(e->lumi_block()) + ", "+
-                 std::to_string(e->lumi_block()) + " ] "};
-   return result;
-}//function end
 
 std::string
 formatPosition(const Identifier& waferId, const SCT_ID* helper, const std::string& delimiter, const bool includeSide) {

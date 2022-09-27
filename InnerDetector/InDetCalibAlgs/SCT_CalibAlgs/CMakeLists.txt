@@ -1,4 +1,4 @@
-# Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
 
 # Declare the package name:
 atlas_subdir( SCT_CalibAlgs )
@@ -13,12 +13,12 @@ atlas_add_component( SCT_CalibAlgs
                      src/*.cxx
                      src/components/*.cxx
                      INCLUDE_DIRS ${ROOT_INCLUDE_DIRS} ${CORAL_INCLUDE_DIRS}
-                     LINK_LIBRARIES ${ROOT_LIBRARIES} ${CORAL_LIBRARIES} AthenaBaseComps AthenaKernel StoreGateLib AthenaPoolUtilities Identifier EventInfo GaudiKernel InDetIdentifier SCT_CablingLib InDetRawData InDetReadoutGeometry SCT_ReadoutGeometry PathResolver InDetConditionsSummaryService SCT_ConditionsToolsLib RegistrationServicesLib )
+                     LINK_LIBRARIES ${ROOT_LIBRARIES} ${CORAL_LIBRARIES} AthenaBaseComps AthenaKernel StoreGateLib AthenaPoolUtilities Identifier GaudiKernel InDetIdentifier SCT_CablingLib InDetRawData InDetReadoutGeometry SCT_ReadoutGeometry PathResolver InDetConditionsSummaryService SCT_ConditionsToolsLib RegistrationServicesLib )
 
 atlas_add_test( SCT_CalibUtilities_test
    SOURCES test/SCT_CalibUtilities_test.cxx src/SCT_CalibUtilities.cxx
    INCLUDE_DIRS ${Boost_INCLUDE_DIRS}
-   LINK_LIBRARIES ${Boost_LIBRARIES} EventInfo InDetIdentifier
+   LINK_LIBRARIES ${Boost_LIBRARIES} InDetIdentifier
    POST_EXEC_SCRIPT "nopost.sh"
 )
 

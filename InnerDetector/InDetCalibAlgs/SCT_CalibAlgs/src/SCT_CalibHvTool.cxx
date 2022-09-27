@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
 */
 
 /**
@@ -11,9 +11,6 @@
 #include "SCT_CalibHvTool.h"
 #include "SCT_CalibUtilities.h"
 #include "SCT_CalibNumbers.h"
-
-#include "EventInfo/EventInfo.h"
-#include "EventInfo/EventID.h"
 
 using namespace SCT_CalibAlgs;
 
@@ -66,13 +63,15 @@ SCT_CalibHvTool::book() {
 
 bool
 SCT_CalibHvTool::fill(const bool fromData) {
+   const EventContext& ctx = Gaudi::Hive::currentContext();
+
    if (fromData) {
       return fillFromData();
    }
    bool result{true};
    int lumi_block{0}; //fix me!
    const int wafersize{static_cast<int>(m_sct_waferHash->size())};
-   int time_stamp{static_cast<int>(m_evt->event_ID()->time_stamp())};
+   int time_stamp{static_cast<int>(ctx.eventID().time_stamp())};
    int curr_time{time_stamp};
    int dtime{curr_time - m_phvtripPrevTime};
    int totalHits{0};

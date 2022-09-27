@@ -21,10 +21,6 @@
 #include "Identifier/IdentifierHash.h"
 #include "InDetIdentifier/SCT_ID.h"
 
-// Event Info
-#include "EventInfo/EventID.h"
-#include "EventInfo/EventType.h"
-
 //path resolver to find the file
 #include "PathResolver/PathResolver.h"
 
@@ -91,9 +87,6 @@ SCTCalibWriteTool::initialize()
       ATH_MSG_ERROR("SCT mgr failed to retrieve");
       return StatusCode::FAILURE;
    }
-
-   ATH_CHECK(m_eventInfoKey.initialize());
-   ATH_MSG_DEBUG("in SCTCalibWriteTool::initialize after m_eventInfoKey initialized");
 
    // ------------------------------------------------------------
    // The following is required for writing out something to COOL
@@ -641,12 +634,8 @@ SCTCalibWriteTool::registerCondObjects(const std::string& foldername,const std::
          unsigned int endRun;
          if (!m_manualiov) {
 
-            SG::ReadHandle<EventInfo> evt{m_eventInfoKey};
-            if (not evt.isValid()) {
-               return StatusCode::FAILURE;
-            }
-
-            beginRun = evt->event_ID()->run_number();
+            const EventContext& ctx = Gaudi::Hive::currentContext();
+            beginRun = ctx.eventID().run_number();
             endRun = beginRun;
 
          } else {

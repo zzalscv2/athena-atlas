@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
 */
 
 /**
@@ -10,9 +10,6 @@
 
 #include "SCT_CalibEventInfo.h"
 #include "SCT_CalibUtilities.h"
-
-#include "EventInfo/EventInfo.h"
-#include "EventInfo/EventID.h"
 
 #include "CoralBase/TimeStamp.h"
 

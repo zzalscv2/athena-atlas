@@ -31,10 +31,6 @@
 //InnerDetector
 #include "InDetReadoutGeometry/SiDetectorElement.h"
 
-//infrastructure
-#include "EventInfo/EventInfo.h"
-#include "EventInfo/EventID.h"
-
 //Gaudi
 #include "GaudiKernel/IEventProcessor.h"
 
@@ -195,8 +191,6 @@ StatusCode SCTCalib::initialize() {
    if (m_readBS) {
       ATH_MSG_INFO("------------> Reading from ByteStream <-------------");
       m_calibEvtInfoTool->setSource("BS");
-      ATH_CHECK(m_eventInfoKey.initialize());
-      ATH_MSG_INFO("m_eventInfoKey.initialize() was successful");
    }
 
    //--- Open HIST
@@ -245,7 +239,6 @@ StatusCode SCTCalib::initialize() {
       m_calibEvtInfoTool->setTimeStamp(m_runStartTime, m_runEndTime);
       m_calibEvtInfoTool->setRunNumber(m_runNumber);
       m_calibEvtInfoTool->setEventNumber(m_eventNumber);
-      ATH_CHECK(m_eventInfoKey.initialize());
    }
 
    //--- Booking histograms for hitmaps
@@ -262,8 +255,6 @@ StatusCode SCTCalib::initialize() {
       m_calibEvtInfoTool->setTimeStamp(m_runStartTime, m_runEndTime);
       m_calibEvtInfoTool->setRunNumber(m_runNumber);
       m_calibEvtInfoTool->setEventNumber(m_eventNumber);
-      ATH_CHECK(m_eventInfoKey.initialize());
-      ATH_MSG_DEBUG("m_eventInfoKey.initialize() was successful");
       if (m_doNoisyStrip) {
          m_calibLbTool->read("./SCTLB.root");
       }
@@ -310,15 +301,10 @@ StatusCode SCTCalib::execute() {
 
    const bool majorityIsGoodOrUnused{(m_useMajority and m_MajorityConditionsTool->isGood()) or !m_useMajority};
    if (m_readBS) {
-      ATH_MSG_DEBUG("in execute(): m_eventInfoKey = " << m_eventInfoKey);
-      SG::ReadHandle<xAOD::EventInfo> evt(m_eventInfoKey);
-      if (not evt.isValid()) {
-         ATH_MSG_FATAL("Unable to get the EventInfo");
-         return StatusCode::FAILURE;
-      }
       //--- TimeStamp/LB range analyzed
-      const int timeStamp{static_cast<int>(evt->timeStamp())};
-      const int lumiBlock{static_cast<int>(evt->lumiBlock())};
+      const EventContext& ctx = Gaudi::Hive::currentContext();
+      const int timeStamp{static_cast<int>(ctx.eventID().time_stamp())};
+      const int lumiBlock{static_cast<int>(ctx.eventID().lumi_block())};
       int timeStampBeginOld;
       int timeStampEndOld;
       m_calibEvtInfoTool->getTimeStamps(timeStampBeginOld, timeStampEndOld);
@@ -330,7 +316,7 @@ StatusCode SCTCalib::execute() {
       m_calibEvtInfoTool->setLumiBlock(lumiBlock);
       m_calibEvtInfoTool->setTimeStamp(timeStamp);
       if (m_doHitMapsLB and majorityIsGoodOrUnused) {
-         m_calibLbTool->setLb(evt->lumiBlock());
+         m_calibLbTool->setLb(ctx.eventID().lumi_block());
       }
    }
 

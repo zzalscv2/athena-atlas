@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
 */
 
 /**
@@ -34,7 +34,6 @@
 class StatusCode;
 class ISvcLocator;
 class IdentifierHash;
-class EventInfo;
 
 class SCT_CalibHvTool : public extends<AthAlgTool, ISCT_CalibHistoTool>
 {
@@ -88,7 +87,6 @@ class SCT_CalibHvTool : public extends<AthAlgTool, ISCT_CalibHistoTool>
 
       std::vector<std::vector<std::pair<int, int>>> m_summarytrips;
       std::vector<std::vector<std::pair<int, int>>> m_summarytripslb;
-      const EventInfo* m_evt{nullptr};
       bool m_outputLowHits{false};
       int m_lowHitCut{100};
       ///retrieve a tool and report if it failed

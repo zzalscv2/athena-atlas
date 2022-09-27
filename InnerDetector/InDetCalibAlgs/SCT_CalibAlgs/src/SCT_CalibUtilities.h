@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
 */
 
 /**
@@ -17,11 +17,9 @@
 
 class Identifier;
 class SCT_ID;
-class EventInfo;
 
 namespace SCT_CalibAlgs {
 
-std::string eventInfoAsString(const EventInfo* theEvent);
 std::string formatPosition(const Identifier& waferId, const SCT_ID* helper, const std::string& delimiter="_", const bool includeSide=true);
 std::string chipList2LinkList(const std::string& chipList);
 unsigned int bec2Index(const int bec);
