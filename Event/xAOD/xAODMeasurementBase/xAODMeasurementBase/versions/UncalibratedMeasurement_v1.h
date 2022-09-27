@@ -1,5 +1,5 @@
 /*
-   Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+   Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef XAODMEASUREMENTBASE_VERSION_UNCALIBRATEDMEASUREMENT_V1_H
@@ -8,7 +8,6 @@
 // EDM include(s):
 #include "AthContainers/AuxElement.h"
 
-#include "Identifier/IdentifierHash.h"
 #include "EventPrimitives/EventPrimitives.h"
 
 namespace xAOD {
@@ -20,7 +19,8 @@ namespace xAOD {
         PixelClusterType = 1,
         StripClusterType = 2
     };
-
+    /// @ detector ID element hash
+    using DetectorIDHashType = unsigned int;
     /// @class UncalibratedMeasurement_v1
     /// Class describing uncalibrated measurements
     class UncalibratedMeasurement_v1 : public SG::AuxElement {
@@ -43,7 +43,7 @@ namespace xAOD {
         /// @{
 
         /// Returns the IdentifierHash of the measurement (corresponds to the detector element IdentifierHash)
-        const IdentifierHash identifierHash() const;
+        DetectorIDHashType identifierHash() const;
 
         using PosAccessor = const SG::AuxElement::Accessor< std::array< float, 3 > >;
         using CovAccessor = const SG::AuxElement::Accessor< std::array< float, 9 > >;
@@ -106,7 +106,7 @@ namespace xAOD {
         /// @{
 
         /// Sets the IdentifierHash of the measurement (corresponds to the detector element IdentifierHash)
-        void setIdentifierHash(IdentifierHash& idHash);
+        void setIdentifierHash(const DetectorIDHashType idHash);
 
 
         /// @}
@@ -116,7 +116,7 @@ namespace xAOD {
 
         /// Sets IdentifierHash, local position and local covariance of the measurement
         template < int N >
-        void setMeasurement(IdentifierHash& idHash,
+        void setMeasurement(DetectorIDHashType idHash,
                             Eigen::Matrix<float,N,1>& locPos,
                             Eigen::Matrix<float,N,N>& locCov) {
             setIdentifierHash(idHash);
@@ -129,8 +129,5 @@ namespace xAOD {
 
 }
 
-// Finish declaration of SG::AuxElement as a base class of UncalibratedMeasurement_v1:
-#include "AthContainers/DataVector.h"
-DATAVECTOR_BASE( xAOD::UncalibratedMeasurement_v1, SG::AuxElement );
 
 #endif // XAODMEASUREMENTBASE_VERSION_UNCALIBRATEDMEASUREMENT_V1_H
