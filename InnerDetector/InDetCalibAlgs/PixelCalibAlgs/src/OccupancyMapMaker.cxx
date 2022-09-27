@@ -11,8 +11,6 @@
 
 // EDM
 #include "InDetRawData/PixelRDO_Container.h"
-#include "EventInfo/EventInfo.h"
-#include "EventInfo/EventID.h"
 
 // geometry
 #include "InDetIdentifier/PixelID.h"
@@ -301,25 +299,19 @@ StatusCode OccupancyMapMaker::registerHistograms(){
 StatusCode OccupancyMapMaker::execute(){
   ATH_MSG_DEBUG( "Executing OccupancyMapMaker" );
 
-  // retrieve EventInfo
-  const EventInfo* eventInfo;
-  StatusCode sc = evtStore()->retrieve(eventInfo);
-  if( !sc.isSuccess() ){
-    ATH_MSG_FATAL("Unable to retrieve event info");
-    return StatusCode::FAILURE;
-  } ATH_MSG_DEBUG("Event info retrieved");
+  const EventContext& ctx = Gaudi::Hive::currentContext();
 
   // check LB is in allowed range
-  unsigned int LB =  eventInfo->event_ID()->lumi_block();
+  unsigned int LB =  ctx.eventID().lumi_block();
   if( (LB < m_evt_lbMin) || (m_evt_lbMax >= m_evt_lbMin && LB > m_evt_lbMax) ){
-    ATH_MSG_VERBOSE("Event in lumiblock " << eventInfo->event_ID()->lumi_block() <<
+    ATH_MSG_VERBOSE("Event in lumiblock " << LB <<
 		    " not in selected range [" << m_evt_lbMin << "," << m_evt_lbMax << "] => skipped");    
     return StatusCode::SUCCESS;
   }
 
   // retrieve PixelRDO container
   const PixelRDO_Container* pixelRDOs = nullptr;
-  sc = evtStore()->retrieve(pixelRDOs, m_pixelRDOKey);
+  StatusCode sc = evtStore()->retrieve(pixelRDOs, m_pixelRDOKey);
   if( !sc.isSuccess() ){
     ATH_MSG_FATAL( "Unable to retrieve pixel RDO container at " << m_pixelRDOKey );
     return StatusCode::FAILURE;

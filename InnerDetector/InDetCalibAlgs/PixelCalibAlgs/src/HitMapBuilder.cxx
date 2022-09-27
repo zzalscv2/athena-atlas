@@ -18,9 +18,6 @@
 #include "InDetReadoutGeometry/SiDetectorElement.h"
 #include "InDetReadoutGeometry/SiDetectorElementCollection.h"
 
-#include "EventInfo/EventInfo.h"
-#include "EventInfo/EventID.h"
-
 // geometry
 #include "InDetIdentifier/PixelID.h"
 
@@ -366,14 +363,12 @@ StatusCode HitMapBuilder::registerHistograms() {
 StatusCode HitMapBuilder::execute() {
   ATH_MSG_DEBUG( "Executing HitMapBuilder" );
 
-  // retrieve EventInfo
-  const EventInfo* eventInfo;
-  ATH_CHECK( evtStore()->retrieve(eventInfo) );
+  const EventContext& ctx = Gaudi::Hive::currentContext();
 
   // check LB is in allowed range
-  int LB =  static_cast<int>(eventInfo->event_ID()->lumi_block());
+  int LB =  static_cast<int>(ctx.eventID().lumi_block());
   if ((LB < m_evt_lbMin) || (m_evt_lbMax >= m_evt_lbMin && LB > m_evt_lbMax)) {
-    ATH_MSG_VERBOSE("Event in lumiblock " << eventInfo->event_ID()->lumi_block() << " not in selected range [" << m_evt_lbMin << "," << m_evt_lbMax << "] => skipped");
+    ATH_MSG_VERBOSE("Event in lumiblock " << LB << " not in selected range [" << m_evt_lbMin << "," << m_evt_lbMax << "] => skipped");
     return StatusCode::SUCCESS;
   }
 
