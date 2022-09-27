@@ -80,7 +80,7 @@ Store::~Store()
 // const methods: 
 /////////////////////////////////////////////////////////////////// 
 
-std::string Store::repr() const
+std::string Store::repr()
 {
   return Py::repr( m_store );
 }
