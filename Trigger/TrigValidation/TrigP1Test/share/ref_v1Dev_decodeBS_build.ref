@@ -5311,6 +5311,18 @@ HLT_mu10_ivarmedium_j70_j50a_j0_DJMASS900j50_L1jMJJ-500-NFF:
   eventCount: 0
 HLT_mu10_ivarmedium_mu10_10invmAB70_L12MU8F:
   eventCount: 0
+HLT_mu10_j225_0eta290_020jvt_boffperf_pf_ftf_preselj180_dRAB04_L1J100:
+  eventCount: 0
+HLT_mu10_j225_0eta290_020jvt_boffperf_pf_ftf_preselj180_dRAB04_L1jJ160:
+  eventCount: 0
+HLT_mu10_j300_0eta290_020jvt_boffperf_pf_ftf_preselj225_dRAB04_L1J100:
+  eventCount: 0
+HLT_mu10_j300_0eta290_020jvt_boffperf_pf_ftf_preselj225_dRAB04_L1jJ160:
+  eventCount: 0
+HLT_mu10_j360_0eta290_020jvt_boffperf_pf_ftf_preselj225_dRAB04_L1J100:
+  eventCount: 0
+HLT_mu10_j360_0eta290_020jvt_boffperf_pf_ftf_preselj225_dRAB04_L1jJ160:
+  eventCount: 0
 HLT_mu10_l2mt_L1MU10BO:
   eventCount: 0
 HLT_mu10_l2mt_L1MU10BOM:

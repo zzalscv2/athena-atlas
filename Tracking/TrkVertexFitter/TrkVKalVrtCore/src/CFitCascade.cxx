@@ -166,6 +166,7 @@ int fitVertexCascade( VKVertex * vk, int Pointing)
       if( target_trk == nullptr ) return -12;
 
       long int Charge=getVertexCharge(vk);
+      if(Charge!=0) Charge=std::copysign(1,Charge);
       target_trk->Charge=Charge;
 
       double dptot[4],VrtMomCov[21];      
@@ -228,6 +229,7 @@ int fitVertexCascade( VKVertex * vk, int Pointing)
         target_trk->iniP[1]=target_trk->cnstP[1]=(target_trk->fitP[1]+target_trk->Perig[3])/2.;
         target_trk->iniP[2]=target_trk->cnstP[2]=(target_trk->fitP[2]+target_trk->Perig[4])/2.;
       }
+      if(tmpCov[0]>1.e4 || tmpCov[2]>1.e4) return -18; //Something is wrong in combined track creation
       if(Pointing){tmpCov[0] += target_trk->Perig[0]*target_trk->Perig[0]; tmpCov[2] += target_trk->Perig[1]*target_trk->Perig[1];}
       tmpCov[0] += 0.0001*0.0001; tmpCov[2] += 0.0002*0.0002;  //numerical accuracy protection
 
@@ -288,10 +290,11 @@ int processCascade(CascadeEvent & cascadeEvent_ )
 //Results are saved in ForVRTClose structure
        if(cascadeEvent_.nearPrmVertex && iv==(cascadeEvent_.cascadeNV-1)){   //only last vertex in cascade may have it
           double dparst[6]={vk->refIterV[0]+vk->iniV[0], vk->refIterV[1]+vk->iniV[1], vk->refIterV[2]+vk->iniV[2],
-	                    vk->fitMom[0], vk->fitMom[1], vk->fitMom[2] };
-          vk->FVC.Charge=getVertexCharge(vk);     
-	  vpderiv(true, vk->FVC.Charge, dparst, vk->fitCovXYZMom, vk->FVC.vrt, vk->FVC.covvrt, 
-	                      vk->FVC.cvder, vk->FVC.ywgt, vk->FVC.rv0, (vk->vk_fitterControl).get());
+                            vk->fitMom[0], vk->fitMom[1], vk->fitMom[2] };
+          vk->FVC.Charge=getVertexCharge(vk);
+          if(vk->FVC.Charge!=0)vk->FVC.Charge=std::copysign(1,vk->FVC.Charge);
+          vpderiv(true, vk->FVC.Charge, dparst, vk->fitCovXYZMom, vk->FVC.vrt, vk->FVC.covvrt, 
+                              vk->FVC.cvder, vk->FVC.ywgt, vk->FVC.rv0, (vk->vk_fitterControl).get());
        }
        IERR = fitVertexCascade( vk, 0);     if(IERR)return IERR;   //fit 
        IERR = setVTrackMass(vk);            if(IERR)return IERR;   //mass of combined particle
@@ -357,10 +360,11 @@ int processCascade(CascadeEvent & cascadeEvent_ )
 //Results are saved in ForVRTClose structure
        if(cascadeEvent_.nearPrmVertex && iv==(cascadeEvent_.cascadeNV-1)){   //only last vertex in cascade may have it
           double dparst[6]={vk->refIterV[0]+vk->iniV[0], vk->refIterV[1]+vk->iniV[1], vk->refIterV[2]+vk->iniV[2],
-	                    vk->fitMom[0], vk->fitMom[1], vk->fitMom[2] };
+                            vk->fitMom[0], vk->fitMom[1], vk->fitMom[2] };
           vk->FVC.Charge=getVertexCharge(vk);
-	  vpderiv(vk->passWithTrkCov, vk->FVC.Charge, dparst, vk->fitCovXYZMom, 
-	     vk->FVC.vrt, vk->FVC.covvrt, vk->FVC.cvder, vk->FVC.ywgt, vk->FVC.rv0, (vk->vk_fitterControl).get());
+          if(vk->FVC.Charge!=0)vk->FVC.Charge=std::copysign(1,vk->FVC.Charge);
+          vpderiv(vk->passWithTrkCov, vk->FVC.Charge, dparst, vk->fitCovXYZMom, 
+             vk->FVC.vrt, vk->FVC.covvrt, vk->FVC.cvder, vk->FVC.ywgt, vk->FVC.rv0, (vk->vk_fitterControl).get());
        }
        if (vk->vk_fitterControl->vk_forcft.irob != 0) {robtest(vk, 0);}  // ROBUSTIFICATION new data structure
        if (vk->vk_fitterControl->vk_forcft.irob != 0) {robtest(vk, 1);}  // ROBUSTIFICATION new data structure
@@ -482,7 +486,9 @@ int processCascade(CascadeEvent & cascadeEvent_ )
      }
 //
 
-     if(fullSTOP) break;  
+     if(fullSTOP) break;
+     if(cnstRemnants>1.e4&&Iter>10)     //no way to fulfil constraints
+       { delete[] fullMatrix; delete[] fullLSide; delete[] tmpLSide; delete[] iniCovMatrix; return -2;}
 //     
      if( Iter<NFitIterationMax && Iter>2){
        if(fabs(Chi2Diff)<0.001 && cnstRemnants/minCnstRemnants<10.){   //stable cascade position before end of cycling

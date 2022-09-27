@@ -21,6 +21,7 @@
  ***********************************************************************************/
 #include <string>
 #include <sstream>
+#include <vector>
 #include <boost/algorithm/string/predicate.hpp>
 
 #include "TrigNavStructure/TriggerElement.h"
@@ -60,18 +61,35 @@ namespace Trig {
      * @brief true if given group of chains passed
      * @see Trig::ChainGroup
      * @see TrigDefs::Conditions
-     **/ 
-    bool isPassed(const Trig::ChainGroup* chaingroup, 
+     **/
+    bool isPassed(const Trig::ChainGroup* chaingroup,
                   unsigned int condition = TrigDefs::Physics) const;
     /**
      * @brief true if given chain passed
      * @see Trig::ChainGroup
      * @see TrigDefs::Conditions
      **/ 
-    bool isPassed(const std::string& chain, 
+    bool isPassed(const std::string& chain,
                   unsigned int condition) const;
 
     bool isPassed(const std::string& chain) const;
+
+    /**
+     * @brief return decision for each chain in group
+     * @see Trig::ChainGroup
+     * @see TrigDefs::Conditions
+     **/
+    std::vector<bool> isPassedForEach(const Trig::ChainGroup* chainGroup,
+                                      unsigned int condition = TrigDefs::Physics) const;
+
+    /**
+     * @brief return decision for each chain defined by given pattern
+     * @see Trig::ChainGroup
+     * @see TrigDefs::Conditions
+     **/
+    std::vector<bool> isPassedForEach(const std::string& chain,
+                                      unsigned int condition = TrigDefs::Physics) const;
+
     /**
      * Return expert-level information about the various trigger flags as a
      * bit mask. Note: this does not accept a conditions flag -- the

@@ -10,40 +10,6 @@
 namespace LVL1MUCTPIPHASE1
 {
 
-  StatusCode L1TopoLUT::initializePtEncoding()
-  {
-    const TrigConf::L1Menu * l1menu = nullptr;
-    ISvcLocator* svcLoc = Gaudi::svcLocator();
-    StatusCode sc = StatusCode::SUCCESS;
-    sc = svcLoc->service("DetectorStore", m_detStore);
-    sc = m_detStore->retrieve(l1menu);
-    m_ptEncoding.clear();
-
-    //build the map between index and pt threshold.
-    //the index is the 3- or 4-bit pt word, and has a different
-    //pt threshold meaning depending on the subsystem.
-    //the value part of the map is the pt value for the 3 subsystems,
-    //and the key is the index for an arbitrary subsystem.
-    //not all indices will be covered by all subsystems since
-    //barrel only has 3 bits, so initialize the value tuple with -1
-    const auto & exMU = &l1menu->thrExtraInfo().MU();
-    auto rpcPtValues = exMU->knownRpcPtValues();
-    auto tgcPtValues = exMU->knownTgcPtValues();
-    std::vector<int> tmp_thresholds;
-    for ( unsigned i=0; i<rpcPtValues.size(); i++){
-      tmp_thresholds.push_back(exMU->ptForRpcIdx(i));
-    }
-    m_ptEncoding.push_back(tmp_thresholds);
-    tmp_thresholds.clear();
-    for ( unsigned i=0; i<tgcPtValues.size(); i++){
-      tmp_thresholds.push_back(exMU->ptForTgcIdx(i));
-    }
-    m_ptEncoding.push_back(tmp_thresholds);
-    m_ptEncoding.push_back(tmp_thresholds);
-    tmp_thresholds.clear();
-    return sc;
-  }
-
   bool L1TopoLUT::initializeBarrelLUT(const std::string& side0LUTFileName,
 				      const std::string& side1LUTFileName)
   {    
@@ -237,10 +203,6 @@ namespace LVL1MUCTPIPHASE1
       return null;
     }
     return itr->second;
-  }
-
-  int L1TopoLUT::getPtValue(const int isys, const int ptwordvalue) const {
-    return m_ptEncoding[isys][ptwordvalue];
   }
 
   float L1TopoLUT::getBarrelEta(const int hemi, const int sec, const int barrel_eta_lookup) const{
