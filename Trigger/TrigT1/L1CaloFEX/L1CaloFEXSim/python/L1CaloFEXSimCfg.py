@@ -18,7 +18,7 @@ def ReadSCellFromPoolFileCfg(flags, key='SCell'):
     return acc
 
 
-def ReadSCellFromByteStreamCfg(flags, key='SCell'):
+def ReadSCellFromByteStreamCfg(flags, key='SCell', keyIn='SC_ET'):
     acc=ComponentAccumulator()
 
     # Geometry, conditions and cabling setup
@@ -36,7 +36,7 @@ def ReadSCellFromByteStreamCfg(flags, key='SCell'):
     decoderAlg = CompFactory.LArRawSCDataReadingAlg('LArRawSCDataReadingAlg', LATOMEDecoder=decoderTool)
     acc.addEventAlgo(decoderAlg)
 
-    scellAlg = CompFactory.LArRAWtoSuperCell('LArRAWtoSuperCell', SCellContainerOut=key)
+    scellAlg = CompFactory.LArRAWtoSuperCell('LArRAWtoSuperCell', SCellContainerIn=keyIn, SCellContainerOut=key)
     acc.addEventAlgo(scellAlg)
 
     return acc

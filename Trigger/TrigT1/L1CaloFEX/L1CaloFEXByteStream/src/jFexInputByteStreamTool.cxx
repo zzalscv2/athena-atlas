@@ -117,18 +117,18 @@ StatusCode jFexInputByteStreamTool::convertFromBS(const std::vector<const ROBF*>
             for (uint iblock = 0; iblock < Max_iter; iblock++){
                 const auto [channel, saturation] = BulkStreamTrailer(vec_words.at(wordIndex-1),vec_words.at(wordIndex-2));
                 
-                const auto [DATA15_low          , DATA14, DATA13] = Dataformat1(vec_words.at(wordIndex-3));
-                const auto [DATA15_up,DATA12_up , DATA11, DATA10] = Dataformat2(vec_words.at(wordIndex-4));
-                const auto [DATA12_low          , DATA9 , DATA8 ] = Dataformat1(vec_words.at(wordIndex-5));
-                const auto [DATA7_low           , DATA6 , DATA5 ] = Dataformat1(vec_words.at(wordIndex-6));
-                const auto [DATA7_up ,DATA4_up  , DATA3 , DATA2 ] = Dataformat2(vec_words.at(wordIndex-7));
-                const auto [DATA4_low           , DATA1 , DATA0 ] = Dataformat1(vec_words.at(wordIndex-8));
+                const auto [DATA13_low          , DATA15, DATA14] = Dataformat1(vec_words.at(wordIndex-3));
+                const auto [DATA13_up,DATA10_up , DATA12, DATA11] = Dataformat2(vec_words.at(wordIndex-4));
+                const auto [DATA10_low          , DATA9 , DATA8 ] = Dataformat1(vec_words.at(wordIndex-5));
+                const auto [DATA5_low           , DATA7 , DATA6 ] = Dataformat1(vec_words.at(wordIndex-6));
+                const auto [DATA5_up ,DATA2_up  , DATA4 , DATA3 ] = Dataformat2(vec_words.at(wordIndex-7));
+                const auto [DATA2_low           , DATA1 , DATA0 ] = Dataformat1(vec_words.at(wordIndex-8));
                 
                 //uncomment for mergeing splitted Et
-                uint16_t DATA4  = ( DATA4_up  << jBits::BS_MERGE_DATA ) + DATA4_low;
-                uint16_t DATA7  = ( DATA7_up  << jBits::BS_MERGE_DATA ) + DATA7_low;
-                uint16_t DATA12 = ( DATA12_up << jBits::BS_MERGE_DATA ) + DATA12_low;
-                uint16_t DATA15 = ( DATA15_up << jBits::BS_MERGE_DATA ) + DATA15_low;
+                uint16_t DATA2  = ( DATA2_up  << jBits::BS_MERGE_DATA ) + DATA2_low;
+                uint16_t DATA5  = ( DATA5_up  << jBits::BS_MERGE_DATA ) + DATA5_low;
+                uint16_t DATA10 = ( DATA10_up << jBits::BS_MERGE_DATA ) + DATA10_low;
+                uint16_t DATA13 = ( DATA13_up << jBits::BS_MERGE_DATA ) + DATA13_low;
                 
                 std::array<uint16_t,16> allDATA = {DATA0, DATA1, DATA2, DATA3, DATA4, DATA5, DATA6, DATA7, DATA8, DATA9, DATA10, DATA11, DATA12, DATA13, DATA14, DATA15 };
                 //std::array<uint16_t,16> allsat  = {0};
@@ -140,16 +140,11 @@ StatusCode jFexInputByteStreamTool::convertFromBS(const std::vector<const ROBF*>
                     
                     // read ID, eta and phi from map
                     unsigned int intID = mapIndex(jfex, fpga, channel, idata);
-                    //commented to avoid noise, needed to debug with adding the decorator, will be removed
-                    //ATH_MSG_DEBUG( "jFEX: "<< jfex<< " FPGA: "<< fpga<< " channel: "<< channel<< " dataID: "<< idata << " IDmap: "<< intID<< " Et: "<< allDATA[idata] );
+
+                    // Exists the jTower in the mapping?
                     if(m_Firm2Tower_map.find(intID) == m_Firm2Tower_map.end()){
-                        
-                        // under investigation, now it skips the jTower... needs to be discussed
-                        //ATH_MSG_ERROR("ID: "<<intID<< " not found on map m_Firm2Tower_map");
-                        //return StatusCode::FAILURE;
-                        
-                        //makes for now a lot of noise.. good so i can remember this annoying thing until it is discussed
-                        ATH_MSG_WARNING("ID: "<<intID<< " not found on map m_Firm2Tower_map, jTower skipped with Et:" << allDATA[idata]);
+                        // jTower not found in the mapping.. skipping. 
+                        // If we are here means that the jTower is not actually used in the firmware
                         continue;
                     }
                     
@@ -160,11 +155,16 @@ StatusCode jFexInputByteStreamTool::convertFromBS(const std::vector<const ROBF*>
                     jTowersContainer->back()->initialize(eta, phi, IDsim, source, allDATA[idata], jfex, fpga, channel, idata, et_saturation );                    
                 }
                 
+                // keeping this for future x-checks
                 //if(m_verbose ){
-                    //printf("DATA0 :%5d   DATA1 :%5d   DATA2 :%5d   DATA3 :%5d\n",DATA0  ,DATA1  ,DATA2  ,DATA3  );
-                    //printf("DATA4 :%5d   DATA5 :%5d   DATA6 :%5d   DATA7 :%5d\n",DATA4  ,DATA5  ,DATA6  ,DATA7  );
-                    //printf("DATA8 :%5d   DATA8 :%5d   DATA10:%5d   DATA11:%5d\n",DATA8  ,DATA9  ,DATA10 ,DATA11 );
-                    //printf("DATA12:%5d   DATA13:%5d   DATA14:%5d   DATA15:%5d\n\n",DATA12 ,DATA13 ,DATA14 ,DATA15 );
+                    
+                    //printf("DATA00 :%5x   DATA01 :%5x   DATA02_lo :%5x\n"                  , DATA0  ,DATA1  ,DATA2_low);
+                    //printf("DATA03 :%5x   DATA04 :%5x   DATA02_up :%5x   DATA05_up :%5x\n" , DATA3  ,DATA4  ,DATA2_up  ,DATA5_up);
+                    //printf("DATA06 :%5x   DATA07 :%5x   DATA05_lo :%5x\n"                  , DATA6  ,DATA7  ,DATA5_low);
+                    //printf("DATA08 :%5x   DATA09 :%5x   DATA10_lo :%5x\n"                  , DATA8  ,DATA9  ,DATA10_low);
+                    //printf("DATA11 :%5x   DATA12 :%5x   DATA10_up :%5x   DATA13_up :%5x\n" , DATA11 ,DATA12 ,DATA10_up  ,DATA13_up  );
+                    //printf("DATA14 :%5x   DATA15 :%5x   DATA13_lo :%5x\n"                  , DATA14 ,DATA15 ,DATA13_low);
+                    //printf("*merged* DATA02 :%5x   DATA05 :%5x   DATA10 :%5x   DATA13 :%5x\n" , DATA2 ,DATA5 ,DATA10  ,DATA13  );
                     
                     //printf("DATA0 :%5d   DATA1 :%5d   DATA2 :%5d   DATA3 :%5d\n",allsat[0]  ,allsat[1]  ,allsat[2]  ,allsat[3]  );
                     //printf("DATA4 :%5d   DATA5 :%5d   DATA6 :%5d   DATA7 :%5d\n",allsat[4]  ,allsat[5]  ,allsat[6]  ,allsat[7]  );
@@ -176,18 +176,13 @@ StatusCode jFexInputByteStreamTool::convertFromBS(const std::vector<const ROBF*>
                 wordIndex -= jBits::DATA_WORDS_PER_BLOCK;
             }
             
-
             //moving trailer position index to the next jFEX data block
             trailers_pos -= (payload + jBits::jFEX2ROD_WORDS);
             
             if(trailers_pos == 0){
                 READ_TOBS = false;
             }
-
-
-            
         }
-        
     }
         
     return StatusCode::SUCCESS;
@@ -200,19 +195,6 @@ std::array<uint32_t,3> jFexInputByteStreamTool::jFEXtoRODTrailer (uint32_t word0
     uint32_t payload    = ((word0 >> jBits::PAYLOAD_ROD_TRAILER ) & jBits::ROD_TRAILER_16b);
     uint32_t jfex       = ((word0 >> jBits::jFEX_ROD_TRAILER    ) & jBits::ROD_TRAILER_4b );
     uint32_t fpga       = ((word0 >> jBits::FPGA_ROD_TRAILER    ) & jBits::ROD_TRAILER_2b );
-    
-    //DO NOT REMOVE, may be necessary in the future
-    //if(m_verbose){
-        //printf("%sWord0  PAYLOAD: %-7d\n", C.ORANGE.c_str(), ((word0 >> jBits::PAYLOAD_ROD_TRAILER ) & jBits::ROD_TRAILER_16b) );
-        //printf("Word0     FPGA: %-7d\n",                     ((word0 >> jBits::FPGA_ROD_TRAILER    ) & jBits::ROD_TRAILER_2b ) );
-        //printf("Word0     jFEX: %-7d\n",                     ((word0 >> jBits::jFEX_ROD_TRAILER    ) & jBits::ROD_TRAILER_4b ) );
-        //printf("Word0 RO SLICE: %-7d\n",                     ((word0 >> jBits::RO_ROD_TRAILER      ) & jBits::ROD_TRAILER_4b ) );
-        //printf("Word0      TSN: %-7d\n",                     ((word0 >> jBits::TSN_ROD_TRAILER     ) & jBits::ROD_TRAILER_4b ) );
-    
-        //printf("Word1    ERROR: %-7d\n",                     ((word1 >> jBits::ERROR_ROD_TRAILER   ) & jBits::ROD_TRAILER_6b ) );
-        //printf("Word1      CRC: %-7d%s\n\n",                 ((word1 >> jBits::CRC_ROD_TRAILER     ) & jBits::ROD_TRAILER_20b) , C.END.c_str() );
-    //}
-
     
     return {payload,jfex,fpga};
    
@@ -232,19 +214,6 @@ std::array<uint16_t,2> jFexInputByteStreamTool::BulkStreamTrailer (uint32_t word
         Satur = 0;
     }
     
-    
-    //DO NOT REMOVE, may be necessary in the future
-    //if(m_verbose){
-        //printf("%sBulkStreamTrailer: word0 0x%08x , word1 0x%08x\n", C.BLUE.c_str(),word0, word1 );
-        //printf("Word1 KSATUR [15:8]: %3x\n" , ((word1 >> jBits::BS_SATUR_0_TRAILER ) & jBits::BS_TRAILER_8b ) );
-        //printf("Word1  SATUR [ 7:0]: %3x\n" , ((word1 >> jBits::BS_SATUR_1_TRAILER ) & jBits::BS_TRAILER_8b ) );
-        //printf("Word1   BCID [ 6:0]: %3x\n" , ((word1 >> jBits::BS_BCID_TRAILER    ) & jBits::BS_TRAILER_7b ) );
-        //printf("Word1           CRC: %3x\n" , ((word1 >> jBits::BS_CRC_TRAILER     ) & jBits::BS_TRAILER_9b ) );
-        //printf("SATUR %16s\n",(std::bitset<16>(Satur).to_string()).c_str());
-        //printf("Word0       CHANNEL: %-7d\n" ,((word0 >> jBits::BS_CHANNEL_TRAILER ) & jBits::BS_TRAILER_8b ));
-        //printf("Word0          BCID: %3x%s\n",((word0 >> 8 ) & 0xfff ),C.END.c_str() );
-    //}
-    
     return {Channel, Satur};
    
 }
@@ -257,14 +226,6 @@ std::array<uint16_t,3>  jFexInputByteStreamTool::Dataformat1 (uint32_t word0) co
     uint16_t data_mid  = ((word0 >> jBits::BS_ET_DATA_1 ) & jBits::BS_TRAILER_12b );
     uint16_t data_up   = ((word0 >> jBits::BS_ET_DATA_4 ) & jBits::BS_TRAILER_8b );
     
-    //DO NOT REMOVE, may be necessary in the future
-    //if(m_verbose){
-        //printf("Dataformat 1: word0 0x%08x   -->  ",word0 );
-        //printf("DATA LOW  : %3x,  ", data_low );
-        //printf("DATA MID  : %3x,  ", data_mid );
-        //printf("DATA UP   : %3x\n", data_up  );
-    //}
-    
     return {data_up,data_mid,data_low};
 }
 
@@ -276,16 +237,7 @@ std::array<uint16_t,4>  jFexInputByteStreamTool::Dataformat2 (uint32_t word0) co
     uint16_t data_mid  = ((word0 >> jBits::BS_ET_DATA_1 ) & jBits::BS_TRAILER_12b );
     uint16_t data_up_1 = ((word0 >> jBits::BS_ET_DATA_4 ) & jBits::BS_TRAILER_4b );
     uint16_t data_up_2 = ((word0 >> jBits::BS_ET_DATA_7 ) & jBits::BS_TRAILER_4b );
-    
-    //DO NOT REMOVE, may be necessary in the future
-    //if(m_verbose){
-        //printf("Dataformat 2: word0 0x%08x   -->  ",word0 );
-        //printf("DATA LOW  : %3x,  ", data_low  );
-        //printf("DATA MID  : %3x,  ", data_mid  );
-        //printf("DATA UP 1 : %3x,  ", data_up_1 );
-        //printf("DATA UP 2 : %3x\n", data_up_2 );
-    //}
-    
+
     return {data_up_2,data_up_1,data_mid,data_low};
 }
 
