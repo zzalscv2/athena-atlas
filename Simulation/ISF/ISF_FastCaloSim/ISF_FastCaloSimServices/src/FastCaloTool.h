@@ -1,7 +1,7 @@
 // -*- c++ -*-
 
 /*
-  Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef ISF_FASTCALOTOOL_h
@@ -17,6 +17,7 @@
 //Athena
 #include "AthenaBaseComps/AthAlgTool.h"
 #include "AthenaKernel/SlotSpecificObj.h"
+#include "CxxUtils/checker_macros.h"
 
 // DetectorDescription
 #include "AtlasDetDescr/AtlasRegion.h"
@@ -107,7 +108,7 @@ private:
 
   // Would be better to pass this explicitly through setupEvent / simulate,
   // but the interfaces would need to be reworked to do that.
-  mutable SG::SlotSpecificObj<TRandom3> m_rndm;
+  mutable SG::SlotSpecificObj<TRandom3> m_rndm ATLAS_THREAD_SAFE;
 
   ServiceHandle<ISF::ITruthSvc> m_truthRecordSvc{this,"ParticleTruthSvc", "ISF_TruthRecordSvc", "ISF Particle Truth Svc"};
 };
