@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2017 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
 */
 
 // Helper for MultiParticleGunPileup
@@ -41,7 +41,6 @@ class MomSampler {
   ~MomSampler(){};
   virtual TLorentzVector shoot() {return m_val;};
   TLorentzVector m_val;
-  static TRandom m_random;
   ConstSampler * m_mass;
 };
 
