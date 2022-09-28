@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
 */
 
 /////////////////////////////////////////////////////////////////
@@ -101,26 +101,26 @@ bool DerivationFramework::SkimmingToolHIGG5VBF::eventPassesFilter() const
   }
   
   // (1) Count Jet Multiplicity
-  m_goodAllJets.clear();
-  m_goodCentralJets.clear();
-  
+  std::vector<TLorentzVector> goodAllJets;
+  std::vector<TLorentzVector> goodCentralJets;
+
   const xAOD::JetContainer *jets(nullptr); 
   ATH_CHECK(evtStore()->retrieve(jets, m_jetSGKey), false);
   xAOD::JetContainer::const_iterator jet_itr(jets->begin());
   xAOD::JetContainer::const_iterator jet_end(jets->end());
   for(; jet_itr != jet_end; ++jet_itr) {
     TLorentzVector jetP4 = getCalibedJets( (*jet_itr) );
-    if(this->checkAllJetQuality(jetP4)) { m_goodAllJets.push_back(jetP4); }
-    if(this->checkCentralJetQuality(jetP4)) { m_goodCentralJets.push_back(jetP4); }
+    if(this->checkAllJetQuality(jetP4)) { goodAllJets.push_back(jetP4); }
+    if(this->checkCentralJetQuality(jetP4)) { goodCentralJets.push_back(jetP4); }
   }
   
   // (2) evaluate maximum Mjj in the event
   double maxM = 0.;
-  for(unsigned int jet_i = 0; jet_i<m_goodAllJets.size(); jet_i++) {  
-    const TLorentzVector& iP4 = m_goodAllJets.at(jet_i);
+  for(unsigned int jet_i = 0; jet_i<goodAllJets.size(); jet_i++) {
+    const TLorentzVector& iP4 = goodAllJets.at(jet_i);
     
-    for(unsigned int jet_k=jet_i+1; jet_k<m_goodAllJets.size(); jet_k++) {
-      const TLorentzVector& kP4 = m_goodAllJets.at(jet_k);
+    for(unsigned int jet_k=jet_i+1; jet_k<goodAllJets.size(); jet_k++) {
+      const TLorentzVector& kP4 = goodAllJets.at(jet_k);
       
       const TLorentzVector jjP4 = iP4 + kP4;
       const double jjM = jjP4.M();
@@ -142,8 +142,8 @@ bool DerivationFramework::SkimmingToolHIGG5VBF::eventPassesFilter() const
   
 
 
-  const bool passNAllJet     = (m_goodAllJets.size()>=m_nAllJets);
-  const bool passNCentralJet = (m_goodCentralJets.size()>=m_nCentralJets);
+  const bool passNAllJet     = (goodAllJets.size()>=m_nAllJets);
+  const bool passNCentralJet = (goodCentralJets.size()>=m_nCentralJets);
   const bool passMjjCut      = (maxM>m_vbfMjjCut);
   const bool passPhPtCut     = (maxPhPt>m_phPtCut);
 
@@ -163,8 +163,8 @@ bool DerivationFramework::SkimmingToolHIGG5VBF::eventPassesFilter() const
 	   "(NJets=%2d [%6s], NCentralJets=%2d [%6s] Mjj=%10.1f [%6s], Trigger [%6s]) \n", 
 	   __LINE__, 
 	   acceptEvent? "Y" : "N",
-	   (int)m_goodAllJets.size(),  passNAllJet ? "PASSED" : "FAILED",
-	   (int)m_goodCentralJets.size(),  passNCentralJet ? "PASSED" : "FAILED",
+	   (int)goodAllJets.size(),  passNAllJet ? "PASSED" : "FAILED",
+	   (int)goodCentralJets.size(),  passNCentralJet ? "PASSED" : "FAILED",
 	   maxM, passMjjCut ? "PASSED" : "FAILED",
 	   isTriggerFired ? "PASSED" : "FAILED"
 	   );

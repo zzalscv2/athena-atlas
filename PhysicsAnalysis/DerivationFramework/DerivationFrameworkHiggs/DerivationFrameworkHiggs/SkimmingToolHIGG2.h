@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
 */
 
 ///////////////////////////////////////////////////////////////////
@@ -42,11 +42,11 @@ namespace DerivationFramework {
     ~SkimmingToolHIGG2();
     
     // Athena algtool's Hooks
-    StatusCode  initialize();
-    StatusCode  finalize();
+    virtual StatusCode  initialize() override;
+    virtual StatusCode  finalize() override;
     
     /** Check that the current event passes this filter */
-    virtual bool eventPassesFilter() const;
+    virtual bool eventPassesFilter() const override;
     
   private:
     enum {
@@ -55,17 +55,19 @@ namespace DerivationFramework {
 
     ToolHandle<Trig::TrigDecisionTool> m_trigDecisionTool;
 
-    mutable unsigned int m_ntot;
-    mutable unsigned int m_npass;
+    mutable std::atomic<unsigned int> m_ntot;
+    mutable std::atomic<unsigned int> m_npass;
 
     bool m_skipTriggerRequirement;
 
-    mutable std::vector<const xAOD::Electron*> m_goodElectrons;
-    mutable std::vector<const xAOD::Muon*> m_goodMuons;
-    mutable std::vector<const xAOD::Jet*> m_goodJets;
-    mutable std::vector<const xAOD::Jet*> m_goodMergedJets[NUMBER_OF_MERGED_JET_TYPES];
-    mutable std::vector<const xAOD::Photon*> m_goodPhotons;
-    mutable std::vector<const xAOD::TrackParticle*> m_goodTracks;
+    struct Candidates {
+      std::vector<const xAOD::Electron*> goodElectrons;
+      std::vector<const xAOD::Muon*> goodMuons;
+      std::vector<const xAOD::Jet*> goodJets;
+      std::vector<const xAOD::Jet*> goodMergedJets[NUMBER_OF_MERGED_JET_TYPES];
+      std::vector<const xAOD::Photon*> goodPhotons;
+      std::vector<const xAOD::TrackParticle*> goodTracks;
+    };
 
     std::string m_filterType;
 
@@ -149,12 +151,12 @@ namespace DerivationFramework {
     bool checkPhotonQuality(const xAOD::Photon *ph) const;
     bool checkTrackQuality(const xAOD::TrackParticle *trk) const;
 
-    bool check2L() const;
-    bool check4L() const;
-    bool checkTP() const;
-    bool check2L2Q() const;
-    bool checkJPSI() const;
-    bool checkPHI() const;
+    bool check2L(const Candidates& evt) const;
+    bool check4L(const Candidates& evt) const;
+    bool checkTP(const Candidates& evt) const;
+    bool check2L2Q(const Candidates& evt) const;
+    bool checkJPSI(const Candidates& evt) const;
+    bool checkPHI(const Candidates& evt) const;
 
     TLorentzVector electronFourMomentum(const xAOD::Electron *el) const;
     static TLorentzVector muonFourMomentum(const xAOD::Muon *mu) ;

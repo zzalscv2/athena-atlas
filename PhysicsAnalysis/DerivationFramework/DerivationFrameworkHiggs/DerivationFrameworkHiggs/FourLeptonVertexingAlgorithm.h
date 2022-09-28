@@ -6,6 +6,7 @@
 
 // Gaudi & Athena basics
 #include "AthenaBaseComps/AthReentrantAlgorithm.h"
+#include "CxxUtils/checker_macros.h"
 #include "EgammaAnalysisInterfaces/IAsgElectronLikelihoodTool.h"
 #include "MuonAnalysisInterfaces/IMuonSelectionTool.h"
 #include "StoreGate/ReadHandleKey.h"
@@ -87,9 +88,9 @@ namespace DerivationFramework {
         Gaudi::Property<bool> m_pruneWeight{this, "PruneTrackWeights", true, "Clears the track weight vector"};
         
         /// Simple counter to evaluate the number of leptons per event
-        mutable std::array<std::atomic<unsigned int>, 8>  m_num_lep{};        
-        mutable std::array<std::atomic<unsigned int>, 8>  m_num_ele{};        
-        mutable std::array<std::atomic<unsigned int>, 8>  m_num_muo{};        
+        mutable std::array<std::atomic<unsigned int>, 8>  m_num_lep ATLAS_THREAD_SAFE {};
+        mutable std::array<std::atomic<unsigned int>, 8>  m_num_ele ATLAS_THREAD_SAFE {};
+        mutable std::array<std::atomic<unsigned int>, 8>  m_num_muo ATLAS_THREAD_SAFE {};
      
         /// How many vertex fits were attempted
         mutable std::atomic<unsigned int>  m_tried_fits{0};
