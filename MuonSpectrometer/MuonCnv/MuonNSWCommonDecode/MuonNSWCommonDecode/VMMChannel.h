@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
 */
 #ifndef _MUON_VMM_CHANNEL_H_
 #define _MUON_VMM_CHANNEL_H_
@@ -17,7 +17,7 @@ namespace Muon
      private:
       uint32_t m_vmm_word;
 
-      uint16_t m_roc_vmm;      // captured vmm number
+      uint16_t m_roc_vmm;      // vmm capture on the ROC
       uint16_t m_chan;         // vmm channel
       uint16_t m_pdo;          // adc amplitude
       uint16_t m_tdo;          // peaking time 
@@ -110,7 +110,13 @@ inline Muon::nsw::VMMChannel::VMMChannel (uint32_t vmm_word, Muon::nsw::NSWElink
   m_neighbor = Muon::nsw::helper::get_bits (vmm_word, Muon::nsw::bitMaskVmmHitN, Muon::nsw::bitPosVmmHitN);
   m_parity   = Muon::nsw::helper::get_bits (vmm_word, Muon::nsw::bitMaskVmmHitP, Muon::nsw::bitPosVmmHitP);
 
-  m_offlineHelper = std::make_unique <Muon::nsw::helper::NSWOfflineHelper> (elink->elinkId (), m_roc_vmm, m_chan);
+  // For sTGCs: convert the vmm capture on the ROC (vmm in the fragment) to the nominal vmm number on the FEB
+  uint16_t vmm{m_roc_vmm};
+  constexpr uint16_t vmmRemap[8] = { 2, 3, 0, 1, 5, 4, 6, 7 };  
+  if (elink->elinkId()->detId() == eformat::MUON_STGC_ENDCAP_A_SIDE || elink->elinkId()->detId() == eformat::MUON_STGC_ENDCAP_C_SIDE)
+    vmm = vmmRemap [m_roc_vmm];
+
+  m_offlineHelper = std::make_unique <Muon::nsw::helper::NSWOfflineHelper> (elink->elinkId (), vmm, m_chan);
 }
 
 #endif // _MUON_VMM_CHANNEL_H_
