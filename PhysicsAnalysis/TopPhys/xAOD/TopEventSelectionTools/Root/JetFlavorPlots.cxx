@@ -158,7 +158,7 @@ namespace top {
 
   bool JetFlavorPlots::apply(const top::Event& event) const {
     //only MC
-    if (!top::isSimulation(event)) return true;
+    if (!m_config->isMC()) return true;
 
     // only nominal
     if (event.m_hashValue != m_nominalHashValue) return true;
