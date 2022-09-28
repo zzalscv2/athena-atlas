@@ -286,8 +286,6 @@ if __name__ == '__main__':
   outputEDM += addEDM('xAOD::EmTauRoIContainer', 'LVL1EmTauRoIs')
   outputEDM += addEDM('xAOD::EnergySumRoI'     , 'LVL1EnergySumRoI')
 
-  loadFromSG = [('xAOD::EventInfo', 'StoreGateSvc+EventInfo')]
- 
   if 'Muons' in subsystem:
       from MuonConfig.MuonBytestreamDecodeConfig import RpcBytestreamDecodeCfg,TgcBytestreamDecodeCfg
       rpcdecodingAcc = RpcBytestreamDecodeCfg(flags)
@@ -298,6 +296,7 @@ if __name__ == '__main__':
       from TrigT1ResultByteStream.TrigT1ResultByteStreamConfig import MuonRoIByteStreamToolCfg
       muonRoiTool = MuonRoIByteStreamToolCfg(name="L1MuonBSDecoderTool",flags=flags,writeBS=False)
       decoderTools += [muonRoiTool]
+      outputEDM += addEDM('xAOD::MuonRoIContainer'     , '*')
 
   if 'jFex' in subsystem:
       from L1CaloFEXByteStream.L1CaloFEXByteStreamConfig import jFexRoiByteStreamToolCfg
@@ -326,12 +325,9 @@ if __name__ == '__main__':
   
   decoderAlg = CompFactory.L1TriggerByteStreamDecoderAlg(name="L1TriggerByteStreamDecoder",
                                                          DecoderTools=decoderTools, OutputLevel=algLogLevel)
-
   
   acc.addEventAlgo(decoderAlg, sequenceName='AthAlgSeq')
   
-  acc.addEventAlgo(CompFactory.SGInputLoader(Load=loadFromSG), sequenceName="AthAlgSeq")
-
   roib2topo = CompFactory.LVL1.RoiB2TopoInputDataCnv(name='RoiB2TopoInputDataCnv')
   roib2topo.OutputLevel = algLogLevel
   acc.addEventAlgo(roib2topo, sequenceName="AthAlgSeq")
