@@ -9,6 +9,7 @@
 
 #include "SCT_GeoModel/SCT_BarrelModuleParameters.h"
 
+#include "GeoModelRead/ReadGeoModel.h"
 #include "GeoModelKernel/GeoBox.h"
 #include "GeoModelKernel/GeoLogVol.h"
 #include "GeoModelKernel/GeoFullPhysVol.h"
@@ -27,8 +28,9 @@ using namespace InDetDD;
 SCT_Sensor::SCT_Sensor(const std::string & name,
                        InDetDD::SCT_DetectorManager* detectorManager,
                        SCT_GeometryManager* geometryManager,
-                       SCT_MaterialManager* materials)
-  : SCT_UniqueComponentFactory(name, detectorManager, geometryManager, materials),
+                       SCT_MaterialManager* materials,
+                       GeoModelIO::ReadGeoModel* sqliteReader)
+  : SCT_UniqueComponentFactory(name, detectorManager, geometryManager, materials, sqliteReader),
     m_noElementWarning{true}
 {
   getParameters();
@@ -41,7 +43,7 @@ SCT_Sensor::getParameters()
 {
   
   const SCT_BarrelModuleParameters * parameters = m_geometryManager->barrelModuleParameters();
-  m_material  = m_materials->getMaterial(parameters->sensorMaterial());
+  if(!m_sqliteReader) m_material  = m_materials->getMaterial(parameters->sensorMaterial());
   m_thickness = parameters->sensorThickness();
   m_length    = 0;
   if (parameters->sensorNumWafers() == 2) {
@@ -57,12 +59,15 @@ const GeoLogVol *
 SCT_Sensor::preBuild()
 {
 
+  // Make the moduleside design for this sensor
+  makeDesign();
+  if(m_sqliteReader) return nullptr;
+    
   // Build the sensor. Just a simple box.
   const GeoBox * sensorShape = new GeoBox(0.5*m_thickness, 0.5*m_width, 0.5*m_length);
   GeoLogVol * sensorLog = new GeoLogVol(getName(), sensorShape, m_material);
 
-  // Make the moduleside design for this sensor
-  makeDesign();
+  
 
   return sensorLog;
 }
@@ -74,7 +79,6 @@ SCT_Sensor::makeDesign()
   //SiDetectorDesign::Axis etaAxis   = SiDetectorDesign::zAxis;
   //SiDetectorDesign::Axis phiAxis   = SiDetectorDesign::yAxis;
   //SiDetectorDesign::Axis depthAxis = SiDetectorDesign::xAxis;
-
   const SCT_BarrelModuleParameters * parameters = m_geometryManager->barrelModuleParameters();
   
   double stripPitch      = parameters->sensorStripPitch();
@@ -116,6 +120,7 @@ SCT_Sensor::makeDesign()
                                             xPhiStripPatternCenter,
                                             totalDeadLength,
                                             readoutSide);
+
   m_design = m_detectorManager->addDesign(std::move(design));
 
   //
@@ -136,7 +141,17 @@ SCT_Sensor::makeDesign()
 GeoVPhysVol * 
 SCT_Sensor::build(SCT_Identifier id)
 {
-  GeoFullPhysVol * sensor = new GeoFullPhysVol(m_logVolume); 
+    GeoFullPhysVol * sensor;
+    if(m_sqliteReader){
+        
+        std::map<std::string, GeoFullPhysVol*>        mapFPV = m_sqliteReader->getPublishedNodes<std::string, GeoFullPhysVol*>("SCT");
+        
+        std::string key="Sensor_Side#"+std::to_string(id.getSide())+"_"+std::to_string(id.getBarrelEC())+"_"+std::to_string(id.getLayerDisk())+"_"+std::to_string(id.getEtaModule())+"_"+std::to_string(id.getPhiModule());
+        
+        sensor=mapFPV[key];
+        
+    }
+    else sensor= new GeoFullPhysVol(m_logVolume);
   
   // Make detector element and add to collection
   // Only do so if we have a valid id helper.

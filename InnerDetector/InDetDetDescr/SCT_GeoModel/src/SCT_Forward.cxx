@@ -23,6 +23,7 @@
 
 #include "InDetGeoModelUtils/ExtraMaterial.h"
 
+#include "GeoModelRead/ReadGeoModel.h"
 #include "GeoModelKernel/GeoTube.h"
 #include "GeoModelKernel/GeoLogVol.h"
 #include "GeoModelKernel/GeoFullPhysVol.h"
@@ -39,8 +40,9 @@
 SCT_Forward::SCT_Forward(const std::string & name, int ec,
                          InDetDD::SCT_DetectorManager* detectorManager,
                          SCT_GeometryManager* geometryManager,
-                         SCT_MaterialManager* materials)
-  : SCT_UniqueComponentFactory(name, detectorManager, geometryManager, materials),
+                         SCT_MaterialManager* materials,
+                         GeoModelIO::ReadGeoModel* sqliteReader)
+  : SCT_UniqueComponentFactory(name, detectorManager, geometryManager, materials, sqliteReader),
     m_endcap(ec)
 {
   getParameters();
@@ -54,7 +56,6 @@ SCT_Forward::~SCT_Forward()
 void 
 SCT_Forward::getParameters()
 {
-
   const SCT_ForwardParameters * parameters = m_geometryManager->forwardParameters();
   const SCT_ForwardModuleParameters * moduleParameters = m_geometryManager->forwardModuleParameters();
     
@@ -95,12 +96,12 @@ const GeoLogVol *
 SCT_Forward::preBuild()
 {
   // Create the elements we need for the forward
-
   // We make all the module types here. There is a outer, middle, truncated middle and inner type module.
   std::vector<SCT_FwdModule*> modules;
   for (int iModuleType = 0; iModuleType < m_numModuleTypes; iModuleType++){
+    
     std::unique_ptr<SCT_FwdModule> module = std::make_unique<SCT_FwdModule>("FwdModule"+intToString(iModuleType), iModuleType,
-                                                                            m_detectorManager, m_geometryManager, m_materials);
+                                                                            m_detectorManager, m_geometryManager, m_materials, m_sqliteReader);
     modules.push_back(module.get());
     m_modules.push_back(std::move(module));
   }
@@ -109,10 +110,11 @@ SCT_Forward::preBuild()
     // Build Wheels
     std::ostringstream name; name << "Wheel" << iWheel << ((m_endcap > 0) ? "A" : "C");
     m_wheels.push_back(std::make_unique<SCT_FwdWheel>(name.str(), iWheel, modules, m_endcap,
-                                                      m_detectorManager, m_geometryManager, m_materials));
+                                                      m_detectorManager, m_geometryManager, m_materials, m_sqliteReader));
   }
 
-
+  if(m_sqliteReader) return nullptr;
+    
   // Make one end of the Forward tracker
   //  Tube envelope containing the forward
   const GeoTube * forwardEnvelopeShape = new GeoTube(m_innerRadius, m_outerRadius, 0.5 * m_length);
@@ -125,147 +127,174 @@ SCT_Forward::preBuild()
 GeoVPhysVol * 
 SCT_Forward::build(SCT_Identifier id)
 {
-  GeoFullPhysVol * forward = new GeoFullPhysVol(m_logVolume);
-
-  for (int iWheel = 0; iWheel < m_numWheels; iWheel++){
-
-    SCT_FwdWheel * wheel = m_wheels[iWheel].get();
-    std::ostringstream wheelName; wheelName << "Wheel#" << iWheel;
-    double zpos = wheel->zPosition() - zCenter();
-    forward->add(new GeoNameTag(wheelName.str()));
-    forward->add(new GeoIdentifierTag(iWheel));
-    GeoAlignableTransform * transform = new GeoAlignableTransform(GeoTrf::TranslateZ3D(zpos));
-    forward->add(transform);
-    id.setLayerDisk(iWheel);
-    GeoVPhysVol * wheelPV = wheel->build(id);
-    forward->add(wheelPV);
-
-    // Store the alignable transform
-    m_detectorManager->addAlignableTransform(2, id.getWaferId(), transform, wheelPV);
-  }
-
-  //
-  // Place SupportFrame
-  //
-  SCT_FwdSupportFrame supportFrame("SupportFrame", m_detectorManager, m_geometryManager, m_materials);
-  double supportFrameZPos = supportFrame.zPosition() - zCenter();
-  forward->add(new GeoTransform(GeoTrf::TranslateZ3D(supportFrameZPos)));
-  forward->add(supportFrame.getVolume());
-
-  // Make and Place Cylinder Services
-
-  if(m_cylinderServicesPresent) {
-
-    // New phi-dependent services
-    SCT_FwdCylinderServices cylinderServices("CylinderServices",
-                                             supportFrame.outerRadius(),
-                                             m_outerRadiusCylinderServices,
-                                             supportFrame.length(),
-                                             m_detectorManager, m_geometryManager, m_materials);
-    forward->add(new GeoTransform(GeoTrf::TranslateZ3D(supportFrameZPos)));
-    forward->add(cylinderServices.getVolume());
-
-  } else {
-
-    // Old cylindrical services
-    //
-    // Make cooling pipes. These extend from the wheel to the TRT Gap.
-    //
+    GeoFullPhysVol * forward=nullptr;
+    if(!m_sqliteReader)
     {
-      // End position of the pipes.
-      double endPos = m_trtGapPos;
-
-      // Calculate radius to start placing cooling pipes. This is equal to the
-      // outer radius of the support frame + the pipe radius (The pipe radius is to just 
-      // give a small gap - it is not really necessary)
-      double innerRadiusCooling = supportFrame.outerRadius() + m_coolingPipeRadius; 
-
-      // Inner radius of cylinder representing pipes. Gets incremented for each wheel.
-      double rStart = innerRadiusCooling;
-
-      for (int iWheel = 0; iWheel < m_numWheels; iWheel++){
-        // Start position of the pipes.
-        double startPos = m_wheels[iWheel]->zPosition();
-       
-        // Assume one cooling circuit per quadrant of each ring. ie 8 pipes per ring.
-        int numPipes = 8 * m_wheels[iWheel]->numRings();
-    
-        // Label Cooling pipe with W# at end of string  
-        SCT_FwdCoolingPipe coolingPipe("OffDiskCoolingPipeW"+intToString(iWheel),
-                                       numPipes, rStart, startPos, endPos,
-                                       m_detectorManager, m_geometryManager, m_materials);
-      
-        // Place the cooling pipes
-        double coolingPipeZPos = coolingPipe.zPosition() - zCenter();
-        forward->add(new GeoTransform(GeoTrf::TranslateZ3D(coolingPipeZPos)));
-        forward->add(coolingPipe.getVolume());
-
-        // Set rStart for next cooling pipe equal to outer radius of this cooling pipe.
-        rStart = coolingPipe.outerRadius();
-      
-      }
-    }
-
-    //
-    // Make Power Tapes. These extend from the wheel to the TRT Gap.
-    //
-    {
-      
-      // End position of the power tapes.
-      double endPos = m_trtGapPos;
-    
-      // Calculate radius to start placing power tapes. This is half way bewteen outer radius
-      // of support fram and outer radius of forward envelope.
-      // The -1 mm is to avoid a clash with the thermal shield.
-      double innerRadiusPowerTapes = 0.5*(supportFrame.outerRadius() + m_outerRadius) - 1*Gaudi::Units::mm;
-
-      // Inner radius of cylinder representing power tapes. Gets incremented for each wheel.
-      double rStart = innerRadiusPowerTapes;
-    
-      for (int iWheel = 0; iWheel < m_numWheels; iWheel++){
-      
-        // Start position of the power tapes.
-        double startPos = m_wheels[iWheel]->zPosition();
-      
-        // Get total number of modules in wheel
-        int numModules = m_wheels[iWheel]->totalModules();
-
-        // Label power tape with W# at end of string  
-        SCT_FwdPowerTape powerTape("OffDiskPowerTapeW"+intToString(iWheel),
-                                   numModules, rStart, startPos, endPos,
-                                   m_detectorManager, m_geometryManager, m_materials);
-
-        // Place Power Tapes
-        double powerTapeZPos = powerTape.zPosition() - zCenter();
-        forward->add(new GeoTransform(GeoTrf::TranslateZ3D(powerTapeZPos)));
-        forward->add(powerTape.getVolume());
+        forward = new GeoFullPhysVol(m_logVolume);
+        
+        for (int iWheel = 0; iWheel < m_numWheels; iWheel++){
             
-        // Set rStart for next power tape equal to outer radius of this power tape.
-        rStart = powerTape.outerRadius();
-      } // end loop over wheels
+            SCT_FwdWheel * wheel = m_wheels[iWheel].get();
+            std::ostringstream wheelName; wheelName << "Wheel#" << iWheel;
+            double zpos = wheel->zPosition() - zCenter();
+            forward->add(new GeoNameTag(wheelName.str()));
+            forward->add(new GeoIdentifierTag(iWheel));
+            GeoAlignableTransform * transform = new GeoAlignableTransform(GeoTrf::TranslateZ3D(zpos));
+            forward->add(transform);
+            id.setLayerDisk(iWheel);
+            GeoVPhysVol * wheelPV = wheel->build(id);
+            forward->add(wheelPV);
+            
+            // Store the alignable transform
+            m_detectorManager->addAlignableTransform(2, id.getWaferId(), transform, wheelPV);
+        }
+        
+        //
+        // Place SupportFrame
+        //
+        SCT_FwdSupportFrame supportFrame("SupportFrame", m_detectorManager, m_geometryManager, m_materials);
+        double supportFrameZPos = supportFrame.zPosition() - zCenter();
+        forward->add(new GeoTransform(GeoTrf::TranslateZ3D(supportFrameZPos)));
+        forward->add(supportFrame.getVolume());
+        
+        // Make and Place Cylinder Services
+        
+        if(m_cylinderServicesPresent) {
+            
+            // New phi-dependent services
+            SCT_FwdCylinderServices cylinderServices("CylinderServices",
+                                                     supportFrame.outerRadius(),
+                                                     m_outerRadiusCylinderServices,
+                                                     supportFrame.length(),
+                                                     m_detectorManager, m_geometryManager, m_materials);
+            forward->add(new GeoTransform(GeoTrf::TranslateZ3D(supportFrameZPos)));
+            forward->add(cylinderServices.getVolume());
+            
+        } else {
+            
+            // Old cylindrical services
+            //
+            // Make cooling pipes. These extend from the wheel to the TRT Gap.
+            //
+            {
+                // End position of the pipes.
+                double endPos = m_trtGapPos;
+                
+                // Calculate radius to start placing cooling pipes. This is equal to the
+                // outer radius of the support frame + the pipe radius (The pipe radius is to just
+                // give a small gap - it is not really necessary)
+                double innerRadiusCooling = supportFrame.outerRadius() + m_coolingPipeRadius;
+                
+                // Inner radius of cylinder representing pipes. Gets incremented for each wheel.
+                double rStart = innerRadiusCooling;
+                
+                for (int iWheel = 0; iWheel < m_numWheels; iWheel++){
+                    // Start position of the pipes.
+                    double startPos = m_wheels[iWheel]->zPosition();
+                    
+                    // Assume one cooling circuit per quadrant of each ring. ie 8 pipes per ring.
+                    int numPipes = 8 * m_wheels[iWheel]->numRings();
+                    
+                    // Label Cooling pipe with W# at end of string
+                    SCT_FwdCoolingPipe coolingPipe("OffDiskCoolingPipeW"+intToString(iWheel),
+                                                   numPipes, rStart, startPos, endPos,
+                                                   m_detectorManager, m_geometryManager, m_materials);
+                    
+                    // Place the cooling pipes
+                    double coolingPipeZPos = coolingPipe.zPosition() - zCenter();
+                    forward->add(new GeoTransform(GeoTrf::TranslateZ3D(coolingPipeZPos)));
+                    forward->add(coolingPipe.getVolume());
+                    
+                    // Set rStart for next cooling pipe equal to outer radius of this cooling pipe.
+                    rStart = coolingPipe.outerRadius();
+                    
+                }
+            }
+            
+            //
+            // Make Power Tapes. These extend from the wheel to the TRT Gap.
+            //
+            {
+                
+                // End position of the power tapes.
+                double endPos = m_trtGapPos;
+                
+                // Calculate radius to start placing power tapes. This is half way bewteen outer radius
+                // of support fram and outer radius of forward envelope.
+                // The -1 mm is to avoid a clash with the thermal shield.
+                double innerRadiusPowerTapes = 0.5*(supportFrame.outerRadius() + m_outerRadius) - 1*Gaudi::Units::mm;
+                
+                // Inner radius of cylinder representing power tapes. Gets incremented for each wheel.
+                double rStart = innerRadiusPowerTapes;
+                
+                for (int iWheel = 0; iWheel < m_numWheels; iWheel++){
+                    
+                    // Start position of the power tapes.
+                    double startPos = m_wheels[iWheel]->zPosition();
+                    
+                    // Get total number of modules in wheel
+                    int numModules = m_wheels[iWheel]->totalModules();
+                    
+                    // Label power tape with W# at end of string
+                    SCT_FwdPowerTape powerTape("OffDiskPowerTapeW"+intToString(iWheel),
+                                               numModules, rStart, startPos, endPos,
+                                               m_detectorManager, m_geometryManager, m_materials);
+                    
+                    // Place Power Tapes
+                    double powerTapeZPos = powerTape.zPosition() - zCenter();
+                    forward->add(new GeoTransform(GeoTrf::TranslateZ3D(powerTapeZPos)));
+                    forward->add(powerTape.getVolume());
+                    
+                    // Set rStart for next power tape equal to outer radius of this power tape.
+                    rStart = powerTape.outerRadius();
+                } // end loop over wheels
+            }
+        }
+        
+        //
+        // Place Thermal Shield Elements
+        //
+        for (int iElement = 0; iElement < m_numThermalShieldElements; iElement++){
+            SCT_FwdThermalShieldElement thermalShieldElement("FwdThermalShieldElement"+intToString(iElement),
+                                                             iElement, m_detectorManager, m_geometryManager, m_materials);
+            double elementZPos = thermalShieldElement.zPosition() - zCenter();
+            forward->add(new GeoTransform(GeoTrf::TranslateZ3D(elementZPos)));
+            forward->add(thermalShieldElement.getVolume());
+        }
+        
+        // Extra Material
+        InDetDD::ExtraMaterial xMat(m_geometryManager->distortedMatManager());
+        xMat.add(forward, "SCTEndcap", zCenter());
+        if (m_endcap > 0) {
+            xMat.add(forward, "SCTEndcapA", zCenter());
+        } else {
+            xMat.add(forward, "SCTEndcapC", zCenter());
+        }
+
+    }else
+    {
+        std::map<std::string, GeoFullPhysVol*>        mapFPV = m_sqliteReader->getPublishedNodes<std::string, GeoFullPhysVol*>("SCT");
+        
+        std::map<std::string, GeoAlignableTransform*> mapAX  = m_sqliteReader->getPublishedNodes<std::string, GeoAlignableTransform*>("SCT");
+        
+        for (int iWheel = 0; iWheel < m_numWheels; iWheel++){
+            
+            SCT_FwdWheel * wheel = m_wheels[iWheel].get();
+            std::ostringstream wheelName; wheelName << "Wheel#" << iWheel;
+            id.setLayerDisk(iWheel);
+            wheel->build(id);
+            
+            std::string key=wheelName.str()+"_"+std::to_string(id.getBarrelEC());
+            
+            // Store the alignable transform
+            m_detectorManager->addAlignableTransform(2, id.getWaferId(), mapAX[key], mapFPV[key]);
+        }
+        if (m_endcap > 0) {
+            forward= mapFPV["SCTEndcapA"];
+        } else {
+            forward= mapFPV["SCTEndcapC"];
+        }
+    
     }
-  }
-
-  //
-  // Place Thermal Shield Elements
-  //
-  for (int iElement = 0; iElement < m_numThermalShieldElements; iElement++){
-    SCT_FwdThermalShieldElement thermalShieldElement("FwdThermalShieldElement"+intToString(iElement),
-                                                     iElement, m_detectorManager, m_geometryManager, m_materials);
-    double elementZPos = thermalShieldElement.zPosition() - zCenter();
-    forward->add(new GeoTransform(GeoTrf::TranslateZ3D(elementZPos)));
-    forward->add(thermalShieldElement.getVolume());
-  }
-
-  // Extra Material
-  InDetDD::ExtraMaterial xMat(m_geometryManager->distortedMatManager());
-  xMat.add(forward, "SCTEndcap", zCenter());
-  if (m_endcap > 0) {
-    xMat.add(forward, "SCTEndcapA", zCenter());
-  } else {
-    xMat.add(forward, "SCTEndcapC", zCenter());
-  }
-
-
-  return forward;
+    return forward;
 }

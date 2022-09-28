@@ -11,6 +11,7 @@
 
 #include "SCT_GeoModel/SCT_Identifier.h"
 
+#include "GeoModelRead/ReadGeoModel.h"
 #include "GeoModelKernel/GeoTrd.h"
 #include "GeoModelKernel/GeoShape.h"
 #include "GeoModelKernel/GeoLogVol.h"
@@ -41,8 +42,9 @@ SCT_FwdSensor::SCT_FwdSensor(const std::string & name,
                              int ringType,
                              InDetDD::SCT_DetectorManager* detectorManager,
                              SCT_GeometryManager* geometryManager,
-                             SCT_MaterialManager* materials)
-  : SCT_UniqueComponentFactory(name, detectorManager, geometryManager, materials),
+                             SCT_MaterialManager* materials,
+                             GeoModelIO::ReadGeoModel* sqliteReader)
+  : SCT_UniqueComponentFactory(name, detectorManager, geometryManager, materials, sqliteReader),
     m_ringType{ringType},
     m_noElementWarning{true}
 {
@@ -57,113 +59,113 @@ SCT_FwdSensor::~SCT_FwdSensor() {
 void
 SCT_FwdSensor::getParameters()
 {
-
-  const SCT_ForwardModuleParameters * parameters = m_geometryManager->forwardModuleParameters();
-
-  m_materialSensor  = m_materials->getMaterial(parameters->fwdSensorMaterialFar(m_ringType));
-  
- 
-  m_materialGlass  = nullptr;
-  if (m_ringType == 2) { // Only need to define glass if its a Truncated middle module.
-    m_materialGlass =  m_materials->getMaterial(parameters->fwdSensorMaterialNear(m_ringType));
-  }
-                  
-  m_thicknessN = m_thicknessF = parameters->fwdSensorThickness(m_ringType);
-
-
-  m_innerWidthF = parameters->fwdSensorInnerWidthFar(m_ringType);
-  m_outerWidthF = parameters->fwdSensorOuterWidthFar(m_ringType);
-  m_lengthF     = parameters->fwdSensorLengthFar(m_ringType);
-  m_radiusF     = parameters->fwdSensorRadiusFar(m_ringType);
-
-  m_innerWidthN = parameters->fwdSensorInnerWidthNear(m_ringType);
-  m_outerWidthN = parameters->fwdSensorOuterWidthNear(m_ringType);
-  m_lengthN     = parameters->fwdSensorLengthNear(m_ringType);
-  m_radiusN     = parameters->fwdSensorRadiusNear(m_ringType);
-
-  if (m_ringType == 3) {
-    // For Inner Module only use number for far sensor.
-    m_innerRadius = m_radiusF - 0.5 * m_lengthF;
-    m_innerWidth = m_innerWidthF;
-  } else {
-    m_innerRadius = m_radiusN - 0.5 * m_lengthN;
-    m_innerWidth = m_innerWidthN;
-  }
-  m_outerWidth = m_outerWidthF;
-  m_outerRadius = m_radiusF + 0.5 * m_lengthF;
-
-  m_activeHalfLengthFar  = parameters->fwdSensorActiveHalfLengthFar(m_ringType);
-  m_activeHalfLengthNear = parameters->fwdSensorActiveHalfLengthNear(m_ringType);
-
-  if (m_ringType == 3) { // Inner 
-    m_sensorRadius = m_radiusF;
-  } else {
-    m_sensorRadius = 0.5 * (m_radiusF + m_activeHalfLengthFar  
-                            + m_radiusN - m_activeHalfLengthNear);
-  }
-
-  // For truncated middle the sensor is offset from what it would be if it was a full middle.
-  m_sensorOffset = 0;
-  if (m_ringType == 2) { // truncated middle
-    m_sensorOffset = m_radiusF - m_sensorRadius;
-  }
-  
-  // The thickness of the two are the same, but to be pedantic.
-  m_thickness = std::max(m_thicknessF, m_thicknessN);
+    const SCT_ForwardModuleParameters * parameters = m_geometryManager->forwardModuleParameters();
+    
+    if(!m_sqliteReader){
+        m_materialSensor  = m_materials->getMaterial(parameters->fwdSensorMaterialFar(m_ringType));
+    
+        m_materialGlass  = nullptr;
+        if (m_ringType == 2) { // Only need to define glass if its a Truncated middle module.
+            m_materialGlass =  m_materials->getMaterial(parameters->fwdSensorMaterialNear(m_ringType));
+        }
+    }
+    
+    m_thicknessN = m_thicknessF = parameters->fwdSensorThickness(m_ringType);
+    
+    m_innerWidthF = parameters->fwdSensorInnerWidthFar(m_ringType);
+    m_outerWidthF = parameters->fwdSensorOuterWidthFar(m_ringType);
+    m_lengthF     = parameters->fwdSensorLengthFar(m_ringType);
+    m_radiusF     = parameters->fwdSensorRadiusFar(m_ringType);
+    
+    m_innerWidthN = parameters->fwdSensorInnerWidthNear(m_ringType);
+    m_outerWidthN = parameters->fwdSensorOuterWidthNear(m_ringType);
+    m_lengthN     = parameters->fwdSensorLengthNear(m_ringType);
+    m_radiusN     = parameters->fwdSensorRadiusNear(m_ringType);
+    
+    if (m_ringType == 3) {
+        // For Inner Module only use number for far sensor.
+        m_innerRadius = m_radiusF - 0.5 * m_lengthF;
+        m_innerWidth = m_innerWidthF;
+    } else {
+        m_innerRadius = m_radiusN - 0.5 * m_lengthN;
+        m_innerWidth = m_innerWidthN;
+    }
+    m_outerWidth = m_outerWidthF;
+    m_outerRadius = m_radiusF + 0.5 * m_lengthF;
+    
+    m_activeHalfLengthFar  = parameters->fwdSensorActiveHalfLengthFar(m_ringType);
+    m_activeHalfLengthNear = parameters->fwdSensorActiveHalfLengthNear(m_ringType);
+    
+    if (m_ringType == 3) { // Inner
+        m_sensorRadius = m_radiusF;
+    } else {
+        m_sensorRadius = 0.5 * (m_radiusF + m_activeHalfLengthFar
+                                + m_radiusN - m_activeHalfLengthNear);
+    }
+    
+    // For truncated middle the sensor is offset from what it would be if it was a full middle.
+    m_sensorOffset = 0;
+    if (m_ringType == 2) { // truncated middle
+        m_sensorOffset = m_radiusF - m_sensorRadius;
+    }
+    
+    // The thickness of the two are the same, but to be pedantic.
+    m_thickness = std::max(m_thicknessF, m_thicknessN);
 }
 
 const GeoLogVol * SCT_FwdSensor::preBuild()
 {
-
-  const GeoTrd * sensorShapeF = new GeoTrd(0.5 * m_thicknessF, 0.5 * m_thicknessF,
-                                           0.5 * m_innerWidthF, 0.5 * m_outerWidthF,
-                                           0.5 * m_lengthF);
-  
-  
-  const GeoTrd * sensorShapeN= nullptr;
-  if (m_ringType != 3) {
-    sensorShapeN= new GeoTrd(0.5 * m_thicknessN, 0.5 * m_thicknessN,
-                             0.5 * m_innerWidthN, 0.5 * m_outerWidthN,
-                             0.5 * m_lengthN);
-  }
-
-
-  const GeoShape * sensorShape = nullptr;
-  if ((m_ringType == 2) || (m_ringType == 3)) {
-    // For truncated middle and inner there is only one wafer.
-    sensorShape = sensorShapeF;
-  } else {
-    // For outer and middle there are two wafers. We 
-    // define the sensor as a boolean volume of the two wafers.
-    // relative position of near sensor 
-    double positionNearZ = m_radiusN - m_sensorRadius;
-    const GeoShape & sensorPosN = (*sensorShapeN<< GeoTrf::TranslateZ3D(positionNearZ)) ;
-    // relative position of near sensor 
-    double positionFarZ = m_radiusF - m_sensorRadius; 
-    const GeoShape & sensorPosF = (*sensorShapeF<< GeoTrf::TranslateZ3D(positionFarZ) );
-    sensorShape = &(sensorPosF.add(sensorPosN));
-  }
-
-  const GeoLogVol * sensorLog;
-  sensorLog = new GeoLogVol(getName(), sensorShape, m_materialSensor);
-  
-
-
-  if (m_ringType == 2) {
-    // Make inactive glass sensor. 
-    double positionZ = m_radiusN - m_sensorRadius;
-    const GeoShape & sensorPosN = (*sensorShapeN<< GeoTrf::TranslateZ3D(positionZ) );
-    GeoLogVol * inactiveLog = new GeoLogVol(getName()+"Glass", &sensorPosN, m_materialGlass);
-    m_inactive = new GeoPhysVol(inactiveLog);
-    m_inactive->ref();
-  } else {
-    m_inactive = nullptr;
-  }
-
-  // Make the moduleside design for this sensor
-  makeDesign();
-
-  return sensorLog;
+    const GeoLogVol * sensorLog=nullptr;
+    if(!m_sqliteReader){
+        
+        const GeoTrd * sensorShapeF = new GeoTrd(0.5 * m_thicknessF, 0.5 * m_thicknessF,
+                                                 0.5 * m_innerWidthF, 0.5 * m_outerWidthF,
+                                                 0.5 * m_lengthF);
+        
+        
+        const GeoTrd * sensorShapeN= nullptr;
+        if (m_ringType != 3) {
+            sensorShapeN= new GeoTrd(0.5 * m_thicknessN, 0.5 * m_thicknessN,
+                                     0.5 * m_innerWidthN, 0.5 * m_outerWidthN,
+                                     0.5 * m_lengthN);
+        }
+        
+        
+        const GeoShape * sensorShape = nullptr;
+        if ((m_ringType == 2) || (m_ringType == 3)) {
+            // For truncated middle and inner there is only one wafer.
+            sensorShape = sensorShapeF;
+        } else {
+            // For outer and middle there are two wafers. We
+            // define the sensor as a boolean volume of the two wafers.
+            // relative position of near sensor
+            double positionNearZ = m_radiusN - m_sensorRadius;
+            const GeoShape & sensorPosN = (*sensorShapeN<< GeoTrf::TranslateZ3D(positionNearZ)) ;
+            // relative position of near sensor
+            double positionFarZ = m_radiusF - m_sensorRadius;
+            const GeoShape & sensorPosF = (*sensorShapeF<< GeoTrf::TranslateZ3D(positionFarZ) );
+            sensorShape = &(sensorPosF.add(sensorPosN));
+        }
+        
+        sensorLog = new GeoLogVol(getName(), sensorShape, m_materialSensor);
+    
+        
+        if (m_ringType == 2) {
+            // Make inactive glass sensor.
+            double positionZ = m_radiusN - m_sensorRadius;
+            const GeoShape & sensorPosN = (*sensorShapeN<< GeoTrf::TranslateZ3D(positionZ) );
+            GeoLogVol * inactiveLog = new GeoLogVol(getName()+"Glass", &sensorPosN, m_materialGlass);
+            m_inactive = new GeoPhysVol(inactiveLog);
+            m_inactive->ref();
+        } else {
+            m_inactive = nullptr;
+        }
+    }
+    
+    // Make the moduleside design for this sensor
+    makeDesign();
+    
+    return sensorLog;
 }
 
 void SCT_FwdSensor::makeDesign()
@@ -299,39 +301,46 @@ void SCT_FwdSensor::makeDesign()
 
 }
 
-
-
 GeoVPhysVol *SCT_FwdSensor::build(SCT_Identifier id)
 {
     
-  GeoFullPhysVol * sensor = new GeoFullPhysVol(m_logVolume);
-  
-  // Make detector element and add to collection
-  // Only do so if we have a valid id helper.
-  //id.print(); // for debugging only
-
-  const SiCommonItems* commonItems =  m_geometryManager->commonItems();
-
-  if (commonItems->getIdHelper()) {
-
-    // detElement will be owned by SCT_DetectorManager
-    // and will be deleted in destructor of SiDetectorElementCollection in SCT_DetectorManager
-    SiDetectorElement * detElement = new SiDetectorElement(id.getWaferId(),
-                                                           m_design,
-                                                           sensor,
-                                                           commonItems);
-
-    // Add the detector element.
-    m_detectorManager->addDetectorElement(detElement);
-
-  } else {
-    if (m_noElementWarning) {
-      std::cout << "WARNING!!!!: No SCT id helper and so no elements being produced." << std::endl;
-      m_noElementWarning = false;
-    }
-  }
+    GeoFullPhysVol * sensor=nullptr;
+    if (m_sqliteReader)
+    {
+        std::map<std::string, GeoFullPhysVol*> mapFPV = m_sqliteReader->getPublishedNodes<std::string, GeoFullPhysVol*>("SCT");
+        
+        std::string key="FwdSensor_Side#"+std::to_string(id.getSide())+"_"+std::to_string(id.getBarrelEC())+"_"+std::to_string(id.getLayerDisk())+"_"+std::to_string(id.getEtaModule())+"_"+std::to_string(id.getPhiModule());
+        
+        sensor = mapFPV[key];
+    } else
+        sensor= new GeoFullPhysVol(m_logVolume);
     
-  return sensor;
+    // Make detector element and add to collection
+    // Only do so if we have a valid id helper.
+    //id.print(); // for debugging only
+    
+    const SiCommonItems* commonItems =  m_geometryManager->commonItems();
+    
+    if (commonItems->getIdHelper()) {
+        
+        // detElement will be owned by SCT_DetectorManager
+        // and will be deleted in destructor of SiDetectorElementCollection in SCT_DetectorManager
+        SiDetectorElement * detElement = new SiDetectorElement(id.getWaferId(),
+                                                               m_design,
+                                                               sensor,
+                                                               commonItems);
+        
+        // Add the detector element.
+        m_detectorManager->addDetectorElement(detElement);
+        
+    } else {
+        if (m_noElementWarning) {
+            std::cout << "WARNING!!!!: No SCT id helper and so no elements being produced." << std::endl;
+            m_noElementWarning = false;
+        }
+    }
+    
+    return sensor;
 }
 
 

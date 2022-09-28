@@ -1,13 +1,13 @@
 /*
-  Copyright (C) 2002-2020 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
 */
 
 //
-// SCT_DetectorFactory: This is the top level node 
+// SCT_DetectorFactoryLite: This is the top level node
 //
 
 
-#include "SCT_GeoModel/SCT_DetectorFactory.h"
+#include "SCT_GeoModel/SCT_DetectorFactoryLite.h"
 
 #include "AthenaPoolUtilities/CondAttrListCollection.h"
 
@@ -18,6 +18,10 @@
 //
 #include "GeoModelInterfaces/IGeoDbTagSvc.h"
 #include "GeoModelInterfaces/StoredMaterialManager.h"
+
+#include "GeoModelRead/ReadGeoModel.h"
+#include "GeoModelKernel/GeoPVLink.h"
+#include "GeoModelKernel/GeoVolumeCursor.h"
 #include "GeoModelKernel/GeoAlignableTransform.h"
 #include "GeoModelKernel/GeoDefinitions.h"
 #include "GeoModelKernel/GeoIdentifierTag.h"
@@ -31,7 +35,11 @@
 #include "GeoModelKernel/GeoTransform.h"
 #include "GeoModelKernel/GeoTube.h"
 #include "GeoModelKernel/GeoVPhysVol.h"
+
+#include "GeoModelUtilities/StoredAlignX.h"
+#include "GeoModelUtilities/StoredPhysVol.h"
 #include "GeoModelUtilities/DecodeVersionKey.h"
+
 
 #include "ReadoutGeometryBase/InDetDD_Defs.h"
 #include "ReadoutGeometryBase/SiCommonItems.h"
@@ -64,20 +72,21 @@
 using InDetDD::SCT_DetectorManager; 
 using InDetDD::SiCommonItems; 
 
-SCT_DetectorFactory::SCT_DetectorFactory(SCT_GeoModelAthenaComps * athenaComps,
+SCT_DetectorFactoryLite::SCT_DetectorFactoryLite(GeoModelIO::ReadGeoModel *sqliteReader,
+     SCT_GeoModelAthenaComps * athenaComps,
 					 const SCT_Options & options)
   : InDetDD::DetectorFactoryBase(athenaComps),
+    m_sqliteReader (sqliteReader),
     m_useDynamicAlignFolders(false)
 { 
   
   // Create the detector manager
   m_detectorManager = new SCT_DetectorManager(detStore());
-
   // Create the database
   m_db = std::make_unique<SCT_DataBase>(athenaComps);
-
+  
   // Create the material manager
-  m_materials = std::make_unique<SCT_MaterialManager>(m_db.get());
+  m_materials=nullptr;
 
   // Create the Si common items
   std::unique_ptr<InDetDD::SiCommonItems> commonItems{std::make_unique<InDetDD::SiCommonItems>(athenaComps->getIdHelper())};
@@ -91,7 +100,6 @@ SCT_DetectorFactory::SCT_DetectorFactory(SCT_GeoModelAthenaComps * athenaComps,
   m_detectorManager->setCommonItems(std::move(commonItems));
 
   m_useDynamicAlignFolders = options.dynamicAlignFolders();
- 
   // Set Version information
   // Get the geometry tag
   DecodeVersionKey versionKey(geoDbTagSvc(),"SCT");
@@ -107,7 +115,6 @@ SCT_DetectorFactory::SCT_DetectorFactory(SCT_GeoModelAthenaComps * athenaComps,
   if (!switches->isFieldNull("DESCRIPTION")) {
     description = switches->getString("DESCRIPTION");
   }
-
   std::string versionTag = rdbAccessSvc()->getChildTag("SCT", versionKey.tag(), versionKey.node());
   std::string versionName = switches->getString("VERSIONNAME");
   int versionMajorNumber = 3;
@@ -125,13 +132,13 @@ SCT_DetectorFactory::SCT_DetectorFactory(SCT_GeoModelAthenaComps * athenaComps,
 } 
  
  
-SCT_DetectorFactory::~SCT_DetectorFactory() 
+SCT_DetectorFactoryLite::~SCT_DetectorFactoryLite()
 { 
   // NB the detector manager (m_detectorManager)is stored in the detector store by the
   // Tool and so we don't delete it.
 } 
 
-void SCT_DetectorFactory::create(GeoPhysVol *world) 
+void SCT_DetectorFactoryLite::create(GeoPhysVol*)
 { 
 
   msg(MSG::INFO) << "Building SCT Detector." << endmsg;
@@ -140,12 +147,8 @@ void SCT_DetectorFactory::create(GeoPhysVol *world)
   // Change precision.
   int oldPrecision = std::cout.precision(6);
 
-  // The tree tops get added to world. We name it "indet" though.
-  GeoPhysVol *indet = world;
-
+  // The tree tops get added to world.
   const SCT_GeneralParameters * sctGeneral = m_geometryManager->generalParameters();
-
-  GeoTrf::Transform3D sctTransform = sctGeneral->partTransform("SCT");
 
   std::string barrelLabel = "Barrel";
   std::string forwardPlusLabel = "EndcapA";
@@ -155,7 +158,9 @@ void SCT_DetectorFactory::create(GeoPhysVol *world)
   bool forwardPlusPresent  = sctGeneral->partPresent(forwardPlusLabel);
   bool forwardMinusPresent = sctGeneral->partPresent(forwardMinusLabel);
 
-
+  std::map<std::string, GeoFullPhysVol*>        mapFPV = m_sqliteReader->getPublishedNodes<std::string, GeoFullPhysVol*>("SCT");
+    
+  std::map<std::string, GeoAlignableTransform*> mapAX  = m_sqliteReader->getPublishedNodes<std::string, GeoAlignableTransform*>("SCT");
 
   //
   // The Barrel
@@ -167,20 +172,14 @@ void SCT_DetectorFactory::create(GeoPhysVol *world)
     m_detectorManager->numerology().addBarrel(0);
 
     // Create the SCT Barrel
-      SCT_Barrel sctBarrel("SCT_Barrel", m_detectorManager, m_geometryManager.get(), m_materials.get(), nullptr);
-  
+    SCT_Barrel sctBarrel("SCT_Barrel", m_detectorManager, m_geometryManager.get(), nullptr, m_sqliteReader);
+      
     SCT_Identifier id{m_geometryManager->athenaComps()->getIdHelper()};
     id.setBarrelEC(0);
-    GeoVPhysVol * barrelPV = sctBarrel.build(id);
-    GeoAlignableTransform * barrelTransform = new GeoAlignableTransform(sctTransform * sctGeneral->partTransform(barrelLabel));
-
-    //indet->add(new GeoNameTag("SCT_Barrel"));
-    // The name tag here is what is used by the GeoModel viewer.
-    GeoNameTag *topLevelNameTag = new GeoNameTag("SCT");
-    indet->add(topLevelNameTag);
-    indet->add(new GeoIdentifierTag(0));
-    indet->add(barrelTransform);
-    indet->add(barrelPV);
+    //GeoVPhysVol * barrelPV =
+    sctBarrel.build(id);
+    GeoFullPhysVol *barrelPV = mapFPV["SCT_Barrel"];
+    GeoAlignableTransform * barrelTransform = mapAX["SCT_Barrel"];
     m_detectorManager->addTreeTop(barrelPV);
 
     // Store alignable transform
@@ -198,23 +197,15 @@ void SCT_DetectorFactory::create(GeoPhysVol *world)
     m_detectorManager->numerology().addEndcap(2);
 
     // Create the Forward
-    SCT_Forward sctForwardPlus("SCT_ForwardA", +2, m_detectorManager, m_geometryManager.get(), m_materials.get(), nullptr);
-    
+    SCT_Forward sctForwardPlus("SCT_ForwardA", +2, m_detectorManager, m_geometryManager.get(), nullptr, m_sqliteReader);
     SCT_Identifier idFwdPlus{m_geometryManager->athenaComps()->getIdHelper()};
     idFwdPlus.setBarrelEC(2);
-    GeoVPhysVol * forwardPlusPV = sctForwardPlus.build(idFwdPlus);
-    GeoTrf::Transform3D fwdTransformPlus(sctTransform 
-                                          * sctGeneral->partTransform(forwardPlusLabel) 
-                                          * GeoTrf::TranslateZ3D(sctForwardPlus.zCenter()));
-    GeoAlignableTransform * fwdGeoTransformPlus = new GeoAlignableTransform(fwdTransformPlus);
+    //GeoVPhysVol * forwardPlusPV =
+    sctForwardPlus.build(idFwdPlus);
     
-    //indet->add(new GeoNameTag("SCT_ForwardPlus"));
-    // The name tag here is what is used by the GeoModel viewer.
-    GeoNameTag *topLevelNameTag = new GeoNameTag("SCT");
-    indet->add(topLevelNameTag);
-    indet->add(new GeoIdentifierTag(2));
-    indet->add(fwdGeoTransformPlus);
-    indet->add(forwardPlusPV);
+    GeoFullPhysVol *forwardPlusPV = mapFPV["SCT_ForwardPlus"];
+    GeoAlignableTransform * fwdGeoTransformPlus = mapAX["SCT_ForwardPlus"];
+    
     m_detectorManager->addTreeTop(forwardPlusPV);
 
     // Store alignable transform
@@ -231,28 +222,15 @@ void SCT_DetectorFactory::create(GeoPhysVol *world)
 
     m_detectorManager->numerology().addEndcap(-2);
     
-    SCT_Forward sctForwardMinus("SCT_ForwardC", -2, m_detectorManager, m_geometryManager.get(), m_materials.get(), nullptr);
+    SCT_Forward sctForwardMinus("SCT_ForwardC", -2, m_detectorManager, m_geometryManager.get(), nullptr, m_sqliteReader);
 
     SCT_Identifier idFwdMinus{m_geometryManager->athenaComps()->getIdHelper()};
     idFwdMinus.setBarrelEC(-2);
-    GeoVPhysVol * forwardMinusPV = sctForwardMinus.build(idFwdMinus);
-
-    GeoTrf::Transform3D rot;
-    rot = GeoTrf::RotateY3D(180 * Gaudi::Units::degree);
-  
-    GeoTrf::Transform3D fwdTransformMinus(sctTransform  
-                                           * sctGeneral->partTransform(forwardMinusLabel)  
-                                           * rot  
-                                           * GeoTrf::TranslateZ3D(sctForwardMinus.zCenter()));
-    GeoAlignableTransform * fwdGeoTransformMinus = new GeoAlignableTransform(fwdTransformMinus);
-
-    //indet->add(new GeoNameTag("SCT_ForwardMinus"));
-    // The name tag here is what is used by the GeoModel viewer.
-    GeoNameTag *topLevelNameTag = new GeoNameTag("SCT");
-    indet->add(topLevelNameTag);
-    indet->add(new GeoIdentifierTag(-2));
-    indet->add(fwdGeoTransformMinus);
-    indet->add(forwardMinusPV);
+    //GeoVPhysVol * forwardMinusPV =
+    sctForwardMinus.build(idFwdMinus);
+      
+    GeoFullPhysVol *forwardMinusPV = mapFPV["SCT_ForwardMinus"];
+    GeoAlignableTransform * fwdGeoTransformMinus = mapAX["SCT_ForwardMinus"];
     m_detectorManager->addTreeTop(forwardMinusPV);
 
 
@@ -354,7 +332,7 @@ void SCT_DetectorFactory::create(GeoPhysVol *world)
 } 
  
 
-const SCT_DetectorManager * SCT_DetectorFactory::getDetectorManager() const
+const SCT_DetectorManager * SCT_DetectorFactoryLite::getDetectorManager() const
 {
   return m_detectorManager;
 }

@@ -20,6 +20,7 @@
 
 #include "SCT_ReadoutGeometry/SCT_DetectorManager.h"
 
+#include "GeoModelRead/ReadGeoModel.h"
 #include "GeoModelKernel/GeoShape.h"
 #include "GeoModelKernel/GeoShapeShift.h"
 #include "GeoModelKernel/GeoShapeUnion.h"
@@ -41,8 +42,9 @@
 SCT_Module::SCT_Module(const std::string & name,
                        InDetDD::SCT_DetectorManager* detectorManager,
                        SCT_GeometryManager* geometryManager,
-                       SCT_MaterialManager* materials)
-: SCT_UniqueComponentFactory(name, detectorManager, geometryManager, materials)
+                       SCT_MaterialManager* materials,
+                       GeoModelIO::ReadGeoModel* sqliteReader)
+: SCT_UniqueComponentFactory(name, detectorManager, geometryManager, materials, sqliteReader)
 {
   getParameters();
   m_logVolume = SCT_Module::preBuild();
@@ -59,7 +61,6 @@ SCT_Module::getParameters()
 {
   const SCT_BarrelModuleParameters       * parameters = m_geometryManager->barrelModuleParameters();
   const SCT_GeneralParameters     * generalParameters = m_geometryManager->generalParameters();
-
   m_safety       = generalParameters->safety();
 
   m_sensorGap    = parameters->moduleSensorToSensorGap();
@@ -79,10 +80,12 @@ const GeoLogVol *
 SCT_Module::preBuild()
 {
   // Create child components
-  m_outerSide = std::make_unique<SCT_OuterSide>("OuterSide", m_detectorManager, m_geometryManager, m_materials);
-  m_baseBoard = std::make_unique<SCT_BaseBoard>("BaseBoard", m_detectorManager, m_geometryManager, m_materials);
-  m_innerSide = std::make_unique<SCT_InnerSide>("InnerSide", m_detectorManager, m_geometryManager, m_materials);
+  m_outerSide = std::make_unique<SCT_OuterSide>("OuterSide", m_detectorManager, m_geometryManager, m_materials, m_sqliteReader);
+  m_innerSide = std::make_unique<SCT_InnerSide>("InnerSide", m_detectorManager, m_geometryManager, m_materials, m_sqliteReader);
 
+  if(m_sqliteReader) return nullptr;
+    
+  m_baseBoard = std::make_unique<SCT_BaseBoard>("BaseBoard", m_detectorManager, m_geometryManager, m_materials);
   //
   // We have 2 envelopes.
   // 1. It contains two sensors and baseBoard.
@@ -303,7 +306,6 @@ SCT_Module::preBuild()
   const double baseBoardPosZ = m_baseBoardOffsetZ;
   m_baseBoardPos = std::make_unique<GeoTrf::Translate3D>(0.0, baseBoardPosY, baseBoardPosZ);
 
-
   return moduleLog;
 }
 
@@ -311,45 +313,79 @@ SCT_Module::preBuild()
 GeoVPhysVol * 
 SCT_Module::build(SCT_Identifier id)
 {
-  GeoFullPhysVol * module = new GeoFullPhysVol(m_logVolume); 
-
-  // We make these fullPhysVols for the alignment code.
-  // We probably should make the transform for the sensor 
-  // alignable rather than the "side" to save making an extra full phys volume.
-
-  //
-  // Build the module
-  //
-  // Add Baseboard
-  GeoTransform * baseBoardTransform = new GeoTransform(*m_baseBoardPos);
-  module->add(baseBoardTransform);
-  module->add(m_baseBoard->getVolume());
-
-  // Add innerside
-  GeoAlignableTransform * innerTransform = new GeoAlignableTransform(*m_innerSidePos);
-  module->add(innerTransform);
-  int innerSideNumber = (m_upperSide) ? 0 : 1;
-  module->add(new GeoNameTag("Side#"+intToString(innerSideNumber))); // Identifier side=0
-  module->add(new GeoIdentifierTag(innerSideNumber));
-  id.setSide(innerSideNumber);
-  Identifier innerId = id.getWaferId();
-  GeoVPhysVol * innerSide = m_innerSide->build(id);
-  module->add(innerSide);  
-  // Store alignable transform
-  m_detectorManager->addAlignableTransform(0, innerId, innerTransform, innerSide);
-     
-  // Add outerside
-  GeoAlignableTransform * outerTransform = new GeoAlignableTransform(*m_outerSidePos);
-  module->add(outerTransform);
-  int outerSideNumber = m_upperSide;
-  module->add(new GeoNameTag("Side#"+intToString(outerSideNumber))); // Identifier side=1
-  module->add(new GeoIdentifierTag(outerSideNumber));
-  id.setSide(outerSideNumber);
-  Identifier outerId = id.getWaferId();
-  GeoVPhysVol * outerSide = m_outerSide->build(id);
-  module->add(outerSide);
-  // Store alignable transform
-  m_detectorManager->addAlignableTransform(0, outerId, outerTransform, outerSide);
-  
-  return module;
+    GeoFullPhysVol * module=nullptr;
+    
+    if(!m_sqliteReader){
+        
+        module=new GeoFullPhysVol(m_logVolume);
+        
+        
+        // We make these fullPhysVols for the alignment code.
+        // We probably should make the transform for the sensor
+        // alignable rather than the "side" to save making an extra full phys volume.
+        
+        //
+        // Build the module
+        //
+        // Add Baseboard
+        GeoTransform * baseBoardTransform = new GeoTransform(*m_baseBoardPos);
+        module->add(baseBoardTransform);
+        module->add(m_baseBoard->getVolume());
+        
+        // Add innerside
+        GeoAlignableTransform * innerTransform = new GeoAlignableTransform(*m_innerSidePos);
+        module->add(innerTransform);
+        int innerSideNumber = (m_upperSide) ? 0 : 1;
+        module->add(new GeoNameTag("Side#"+intToString(innerSideNumber))); // Identifier side=0
+        module->add(new GeoIdentifierTag(innerSideNumber));
+        id.setSide(innerSideNumber);
+        Identifier innerId = id.getWaferId();
+        GeoVPhysVol * innerSide = m_innerSide->build(id);
+        module->add(innerSide);
+        // Store alignable transform
+        m_detectorManager->addAlignableTransform(0, innerId, innerTransform, innerSide);
+        
+        // Add outerside
+        GeoAlignableTransform * outerTransform = new GeoAlignableTransform(*m_outerSidePos);
+        module->add(outerTransform);
+        int outerSideNumber = m_upperSide;
+        module->add(new GeoNameTag("Side#"+intToString(outerSideNumber))); // Identifier side=1
+        module->add(new GeoIdentifierTag(outerSideNumber));
+        id.setSide(outerSideNumber);
+        Identifier outerId = id.getWaferId();
+        GeoVPhysVol * outerSide = m_outerSide->build(id);
+        module->add(outerSide);
+        // Store alignable transform
+        m_detectorManager->addAlignableTransform(0, outerId, outerTransform, outerSide);
+    } else
+    {
+        
+        std::map<std::string, GeoFullPhysVol*>        mapFPV = m_sqliteReader->getPublishedNodes<std::string, GeoFullPhysVol*>("SCT");
+        
+        std::map<std::string, GeoAlignableTransform*> mapAX  = m_sqliteReader->getPublishedNodes<std::string, GeoAlignableTransform*>("SCT");
+        
+        
+        // Add innerside
+        int innerSideNumber = (m_upperSide) ? 0 : 1;
+        id.setSide(innerSideNumber);
+        // Store alignable transform
+        Identifier innerId = id.getWaferId();
+        m_innerSide->build(id);
+        
+        std::string key="Side#"+intToString(innerSideNumber)+"_"+std::to_string(id.getBarrelEC())+"_"+std::to_string(id.getLayerDisk())+"_"+std::to_string(id.getEtaModule())+"_"+std::to_string(id.getPhiModule());
+        m_detectorManager->addAlignableTransform(0, innerId, mapAX[key], mapFPV[key]);
+       
+        
+        // Add outerside
+        int outerSideNumber = m_upperSide;
+        id.setSide(outerSideNumber);
+        // Store alignable transform
+        Identifier outerId = id.getWaferId();
+        m_outerSide->build(id);
+        
+        key="Side#"+intToString(outerSideNumber)+"_"+std::to_string(id.getBarrelEC())+"_"+std::to_string(id.getLayerDisk())+"_"+std::to_string(id.getEtaModule())+"_"+std::to_string(id.getPhiModule());
+        m_detectorManager->addAlignableTransform(0, outerId, mapAX[key], mapFPV[key]);
+        
+    }
+    return module;
 }

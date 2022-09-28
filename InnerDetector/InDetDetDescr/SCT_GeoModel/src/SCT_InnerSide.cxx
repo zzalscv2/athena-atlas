@@ -22,6 +22,7 @@
 
 #include "SCT_ReadoutGeometry/SCT_DetectorManager.h"
 
+#include "GeoModelRead/ReadGeoModel.h"
 #include "GeoModelKernel/GeoBox.h"
 #include "GeoModelKernel/GeoLogVol.h"
 #include "GeoModelKernel/GeoPhysVol.h"
@@ -40,8 +41,9 @@
 SCT_InnerSide::SCT_InnerSide(const std::string & name,
                              InDetDD::SCT_DetectorManager* detectorManager,
                              SCT_GeometryManager* geometryManager,
-                             SCT_MaterialManager* materials)
-  : SCT_UniqueComponentFactory(name, detectorManager, geometryManager, materials)
+                             SCT_MaterialManager* materials,
+                             GeoModelIO::ReadGeoModel* sqliteReader)
+  : SCT_UniqueComponentFactory(name, detectorManager, geometryManager, materials, sqliteReader)
 {
   getParameters();
   m_logVolume = SCT_InnerSide::preBuild();
@@ -71,7 +73,10 @@ const GeoLogVol *
 SCT_InnerSide::preBuild()
 {
   // Create child components
-  m_sensor = std::make_unique<SCT_Sensor>("BRLSensor", m_detectorManager, m_geometryManager, m_materials);
+  m_sensor = std::make_unique<SCT_Sensor>("BRLSensor", m_detectorManager, m_geometryManager, m_materials, m_sqliteReader);
+
+  if(m_sqliteReader) return nullptr;
+    
   m_hybrid = std::make_unique<SCT_Hybrid>("Hybrid", m_detectorManager, m_geometryManager, m_materials);
 
   //
@@ -163,6 +168,13 @@ SCT_InnerSide::preBuild()
 GeoVPhysVol * 
 SCT_InnerSide::build(SCT_Identifier id)
 {
+    
+  if(m_sqliteReader){
+      
+      m_sensor->build(id);
+      return nullptr;
+        
+  }
   GeoFullPhysVol * innerSide = new GeoFullPhysVol(m_logVolume);
 
   //

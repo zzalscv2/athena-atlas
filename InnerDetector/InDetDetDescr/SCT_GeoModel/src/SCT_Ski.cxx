@@ -16,6 +16,7 @@
 
 #include "SCT_ReadoutGeometry/SCT_DetectorManager.h"
 
+#include "GeoModelRead/ReadGeoModel.h"
 #include "GeoModelKernel/GeoBox.h"
 #include "GeoModelKernel/GeoTube.h"
 #include "GeoModelKernel/GeoLogVol.h"
@@ -41,15 +42,17 @@ SCT_Ski::SCT_Ski(const std::string & name,
                  double length,
                  InDetDD::SCT_DetectorManager* detectorManager,
                  SCT_GeometryManager* geometryManager,
-                 SCT_MaterialManager* materials)
-  : SCT_UniqueComponentFactory(name, detectorManager, geometryManager, materials),
+                 SCT_MaterialManager* materials,
+                 GeoModelIO::ReadGeoModel* sqliteReader)
+  : SCT_UniqueComponentFactory(name, detectorManager, geometryManager, materials, sqliteReader),
     m_stereoSign(stereoSign),
     m_tilt(tilt), 
     m_length(length), 
     m_module(module)
 {
   getParameters();
-  m_logVolume = SCT_Ski::preBuild();
+  if(!m_sqliteReader)
+      m_logVolume = SCT_Ski::preBuild();
 }
 
 
@@ -340,39 +343,61 @@ SCT_Ski::preBuild()
 GeoVPhysVol * 
 SCT_Ski::build(SCT_Identifier id)
 {
-  GeoPhysVol * ski = new GeoPhysVol(m_logVolume);
-
- 
-  for (int iModule = 0; iModule < m_modulesPerSki; iModule++) {
-  
-    // Add modules. 
-    ski->add(m_refPointTransform);
-    GeoAlignableTransform * moduleTransform = new GeoAlignableTransform(m_modulePos[iModule]);
-    ski->add(moduleTransform);
-    ski->add(m_nameTag[iModule]);
-    ski->add(new GeoIdentifierTag(m_id[iModule]));
-    id.setEtaModule(m_id[iModule]); // Set identifier.
-    GeoVPhysVol * modulePV = m_module->build(id);
-    ski->add(modulePV);  
+    GeoPhysVol * ski=nullptr;
     
-    // Store alignable transform
-    m_detectorManager->addAlignableTransform(1, id.getWaferId(), moduleTransform, modulePV);
- 
-    // Add dogleg
-    ski->add(m_refPointTransform);
-    ski->add(m_doglegPos[iModule]);
-    ski->add(m_dogleg->getVolume());
-
-    // and coolingblock
-    ski->add(m_refPointTransform);
-    ski->add(m_coolingBlockPos[iModule]);
-    ski->add(m_coolingBlock->getVolume());
-  }
-
-  // Add Cooling pipe
-  ski->add(m_refPointTransform);
-  ski->add(m_coolingPipePos);
-  ski->add(m_coolingPipe->getVolume());
-  
-  return ski;
+    if(!m_sqliteReader){
+        
+        ski= new GeoPhysVol(m_logVolume);
+        
+        for (int iModule = 0; iModule < m_modulesPerSki; iModule++) {
+            
+            // Add modules.
+            ski->add(m_refPointTransform);
+            GeoAlignableTransform * moduleTransform = new GeoAlignableTransform(m_modulePos[iModule]);
+            ski->add(moduleTransform);
+            ski->add(m_nameTag[iModule]);
+            ski->add(new GeoIdentifierTag(m_id[iModule]));
+            id.setEtaModule(m_id[iModule]); // Set identifier.
+            GeoVPhysVol * modulePV = m_module->build(id);
+            ski->add(modulePV);
+            
+            // Store alignable transform
+            m_detectorManager->addAlignableTransform(1, id.getWaferId(), moduleTransform, modulePV);
+            
+            // Add dogleg
+            ski->add(m_refPointTransform);
+            ski->add(m_doglegPos[iModule]);
+            ski->add(m_dogleg->getVolume());
+            
+            // and coolingblock
+            ski->add(m_refPointTransform);
+            ski->add(m_coolingBlockPos[iModule]);
+            ski->add(m_coolingBlock->getVolume());
+        }
+        
+        // Add Cooling pipe
+        ski->add(m_refPointTransform);
+        ski->add(m_coolingPipePos);
+        ski->add(m_coolingPipe->getVolume());
+    }
+    else{
+        
+        std::map<std::string, GeoFullPhysVol*>        mapFPV = m_sqliteReader->getPublishedNodes<std::string, GeoFullPhysVol*>("SCT");
+        
+        std::map<std::string, GeoAlignableTransform*> mapAX  = m_sqliteReader->getPublishedNodes<std::string, GeoAlignableTransform*>("SCT");
+        
+        for (int iModule = 0; iModule < m_modulesPerSki; iModule++) {
+            
+            // Add modules.
+            id.setEtaModule(m_id[iModule]); // Set identifier.
+            m_module->build(id);
+            
+            std::string key="ModuleSKI_"+std::to_string(id.getLayerDisk())+"_"+std::to_string(id.getEtaModule())+"_"+std::to_string(id.getPhiModule());
+            
+            // Store alignable transform
+            m_detectorManager->addAlignableTransform(1, id.getWaferId(), mapAX[key], mapFPV[key]);
+            
+        }
+    }
+    return ski;
 }

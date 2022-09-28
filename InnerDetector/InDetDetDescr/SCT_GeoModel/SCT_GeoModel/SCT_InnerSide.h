@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2020 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
 */
 
 //
@@ -33,7 +33,8 @@ public:
   SCT_InnerSide(const std::string & name,
                 InDetDD::SCT_DetectorManager* detectorManager,
                 SCT_GeometryManager* geometryManager,
-                SCT_MaterialManager* materials);
+                SCT_MaterialManager* materials,
+                GeoModelIO::ReadGeoModel* sqliteReader);
   
   //explicitly disallow copy, assign, to appease coverity
   SCT_InnerSide(const SCT_InnerSide &) = delete;

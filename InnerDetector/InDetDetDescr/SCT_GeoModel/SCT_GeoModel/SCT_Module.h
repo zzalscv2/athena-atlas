@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2020 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef SCT_GEOMODEL_SCT_MODULE_H
@@ -28,7 +28,8 @@ public:
   SCT_Module(const std::string & name,
              InDetDD::SCT_DetectorManager* detectorManager,
              SCT_GeometryManager* geometryManager,
-             SCT_MaterialManager* materials);
+             SCT_MaterialManager* materials,
+             GeoModelIO::ReadGeoModel* sqliteReader);
 
   ~SCT_Module(); 
   //Explicitly disallow copy, assign to appease coverity
