@@ -2,13 +2,14 @@
   Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
 */
 
-#ifndef SCT_GEOMODEL_SCT_DETECTORFACTORY_H 
-#define SCT_GEOMODEL_SCT_DETECTORFACTORY_H 
+#ifndef SCT_GEOMODEL_SCT_DETECTORFACTORYLITE_H
+#define SCT_GEOMODEL_SCT_DETECTORFACTORYLITE_H
  
 #include "InDetGeoModelUtils/InDetDetectorFactoryBase.h" 
 #include "SCT_ReadoutGeometry/SCT_DetectorManager.h"
 #include "ReadoutGeometryBase/InDetDD_Defs.h"
 #include "CxxUtils/checker_macros.h"
+#include "GeoModelKernel/GeoVDetectorFactory.h"
 
 #include <memory>
 
@@ -19,16 +20,20 @@ class SCT_GeoModelAthenaComps;
 class SCT_MaterialManager;
 class SCT_Options;
 
-class SCT_DetectorFactory : public InDetDD::DetectorFactoryBase  
+namespace GeoModelIO {
+  class ReadGeoModel;
+}
+
+class SCT_DetectorFactoryLite : public InDetDD::DetectorFactoryBase
 { 
   
  public: 
   // Constructor
-  SCT_DetectorFactory(SCT_GeoModelAthenaComps * athenaComps, 
+  SCT_DetectorFactoryLite(GeoModelIO::ReadGeoModel *sqliteReader,SCT_GeoModelAthenaComps * athenaComps,
 		      const SCT_Options & options);
 
   // Destructor
-  virtual ~SCT_DetectorFactory(); 
+  virtual ~SCT_DetectorFactoryLite();
 
   // Creation of geometry:
   virtual void create(GeoPhysVol *world);   
@@ -38,9 +43,11 @@ class SCT_DetectorFactory : public InDetDD::DetectorFactoryBase
 
  private: 
   // Copy and assignments operations illegal and so are made private
-  SCT_DetectorFactory(const SCT_DetectorFactory &right); 
-  const SCT_DetectorFactory & operator=(const SCT_DetectorFactory &right); 
+  SCT_DetectorFactoryLite(const SCT_DetectorFactoryLite &right);
+  const SCT_DetectorFactoryLite & operator=(const SCT_DetectorFactoryLite &right);
 
+  // private member data:
+  GeoModelIO::ReadGeoModel    *m_sqliteReader;
   InDetDD::SCT_DetectorManager *m_detectorManager;
   std::unique_ptr<SCT_GeometryManager> m_geometryManager;
   std::unique_ptr<SCT_DataBase> m_db;

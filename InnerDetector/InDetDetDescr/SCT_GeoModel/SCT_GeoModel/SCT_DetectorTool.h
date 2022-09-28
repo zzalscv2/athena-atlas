@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2020 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef SCT_GEOMODEL_SCT_DETECTORTOOL_H
@@ -10,7 +10,6 @@
 
 #include "GeometryDBSvc/IGeometryDBSvc.h"
 #include "GeoModelInterfaces/IGeoDbTagSvc.h"
-#include "RDBAccessSvc/IRDBAccessSvc.h"
 
 #include "CxxUtils/checker_macros.h"
 
@@ -48,7 +47,6 @@ private:
   SCT_GeoModelAthenaComps m_athenaComps;
 
   ServiceHandle< IGeoDbTagSvc > m_geoDbTagSvc;
-  ServiceHandle< IRDBAccessSvc > m_rdbAccessSvc;
   ServiceHandle< IGeometryDBSvc > m_geometryDBSvc;
 
   StringProperty m_run1Folder{this, "Run1Folder", "/Indet/Align"};

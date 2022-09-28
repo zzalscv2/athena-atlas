@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef SCT_GEOMODEL_SCT_BARREL_H
@@ -12,6 +12,7 @@ class GeoFullPhysVol;
 class GeoLogVol;
 class SCT_Identifier;
 
+
 class SCT_Barrel : public SCT_UniqueComponentFactory
 {
 
@@ -19,7 +20,8 @@ public:
   SCT_Barrel(const std::string & name,
              InDetDD::SCT_DetectorManager* detectorManager,
              SCT_GeometryManager* geometryManager,
-             SCT_MaterialManager* materials);
+             SCT_MaterialManager* materials,
+             GeoModelIO::ReadGeoModel* sqliteReader);
   virtual GeoVPhysVol * build(SCT_Identifier id);
 
 public:

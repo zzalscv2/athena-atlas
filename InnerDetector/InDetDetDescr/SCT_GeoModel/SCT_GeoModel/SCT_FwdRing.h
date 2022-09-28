@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2020 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef SCT_GEOMODEL_SCT_FWDRING_H
@@ -29,7 +29,8 @@ public:
 	      int ec,
               InDetDD::SCT_DetectorManager* detectorManager,
               SCT_GeometryManager* geometryManager,
-              SCT_MaterialManager* materials);
+              SCT_MaterialManager* materials,
+              GeoModelIO::ReadGeoModel* sqliteReader);
 
   ~SCT_FwdRing();
   

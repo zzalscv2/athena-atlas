@@ -15,6 +15,9 @@ class SCT_MaterialManager;
 class GeoLogVol;
 class GeoVPhysVol;
 
+namespace GeoModelIO {
+  class ReadGeoModel;
+}
 
 class SCT_ComponentFactory
 {
@@ -72,15 +75,17 @@ public:
   SCT_UniqueComponentFactory(const std::string & name,
                              InDetDD::SCT_DetectorManager* detectorManager,
                              SCT_GeometryManager* geometryManager,
-                             SCT_MaterialManager* materials=nullptr) :
+                             SCT_MaterialManager* materials=nullptr, GeoModelIO::ReadGeoModel* sqliteReader=nullptr) :
     SCT_ComponentFactory(name, detectorManager, geometryManager, materials),
-    m_logVolume{nullptr}
+    m_logVolume{nullptr},
+    m_sqliteReader(sqliteReader)
   {};
 
   virtual GeoVPhysVol * build(SCT_Identifier id) = 0;
 
 protected:
   const GeoLogVol * m_logVolume;
+  GeoModelIO::ReadGeoModel* m_sqliteReader;
 
   virtual const GeoLogVol * preBuild() = 0;
 

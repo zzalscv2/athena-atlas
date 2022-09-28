@@ -35,7 +35,8 @@ public:
   SCT_FwdSensor(const std::string & name, int ringType,
                 InDetDD::SCT_DetectorManager* detectorManager,
                 SCT_GeometryManager* geometryManager,
-                SCT_MaterialManager* materials);
+                SCT_MaterialManager* materials,
+                GeoModelIO::ReadGeoModel* sqliteReader);
   ~SCT_FwdSensor();
 
   // Ring type

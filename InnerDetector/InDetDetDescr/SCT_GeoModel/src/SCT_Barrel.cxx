@@ -21,6 +21,7 @@
 
 #include "InDetGeoModelUtils/ExtraMaterial.h"
 
+#include "GeoModelRead/ReadGeoModel.h"
 #include "GeoModelKernel/GeoTube.h"
 #include "GeoModelKernel/GeoTubs.h"
 #include "GeoModelKernel/GeoLogVol.h"
@@ -34,41 +35,45 @@
 #include "GeoModelKernel/GeoShape.h"
 #include "GeoModelKernel/GeoShapeShift.h"
 #include "GaudiKernel/SystemOfUnits.h"
+#include "GaudiKernel/MsgStream.h"
 
 #include <iostream>
 
 SCT_Barrel::SCT_Barrel(const std::string & name,
                        InDetDD::SCT_DetectorManager* detectorManager,
                        SCT_GeometryManager* geometryManager,
-                       SCT_MaterialManager* materials)
-  : SCT_UniqueComponentFactory(name, detectorManager, geometryManager, materials)
+                       SCT_MaterialManager* materials,
+                       GeoModelIO::ReadGeoModel* sqliteReader)
+  : SCT_UniqueComponentFactory(name, detectorManager, geometryManager, materials, sqliteReader)
 {
   getParameters();
-  m_logVolume = SCT_Barrel::preBuild();
+  if(!m_sqliteReader)
+      m_logVolume = SCT_Barrel::preBuild();
 }
 
 
 void
 SCT_Barrel::getParameters()
 {
-  const SCT_BarrelParameters * parameters = m_geometryManager->barrelParameters();
-  
-  m_innerRadius = parameters->barrelInnerRadius();
-  m_outerRadius = parameters->barrelOuterRadius();
-  m_length =      parameters->barrelLength();
-  m_numLayers =   parameters->numLayers(); 
-
-  // Used in old geometry
-  m_thermalShieldEndWallThickness = parameters->thermalShieldEndCapThickness();
-
-  // Clearannce in z between layer and interlink.
-  m_zClearance = 1.*Gaudi::Units::mm;
-
-  // Layer internal structure and services depend on geometry version
-  m_isOldGeometry = parameters->isOldGeometry();
-
-  // Set numerology
-  m_detectorManager->numerology().setNumLayers(m_numLayers);
+    const SCT_BarrelParameters * parameters = m_geometryManager->barrelParameters();
+    
+    if(!m_sqliteReader){
+        m_innerRadius = parameters->barrelInnerRadius();
+        m_outerRadius = parameters->barrelOuterRadius();
+        m_length =      parameters->barrelLength();
+        
+        // Used in old geometry
+        m_thermalShieldEndWallThickness = parameters->thermalShieldEndCapThickness();
+        
+        // Clearannce in z between layer and interlink.
+        m_zClearance = 1.*Gaudi::Units::mm;
+        
+        // Layer internal structure and services depend on geometry version
+        m_isOldGeometry = parameters->isOldGeometry();
+    }
+    m_numLayers =   parameters->numLayers();
+    // Set numerology
+    m_detectorManager->numerology().setNumLayers(m_numLayers);
 
 }
 
@@ -85,84 +90,106 @@ SCT_Barrel::preBuild()
 GeoVPhysVol * 
 SCT_Barrel::build(SCT_Identifier id)
 {
-
-  GeoFullPhysVol * barrel = new GeoFullPhysVol(m_logVolume);
+    GeoFullPhysVol * barrel=nullptr;
+    if(!m_sqliteReader)
+    {
+         barrel = new GeoFullPhysVol(m_logVolume);
+        
+        // Old geometries are no longer supported - give up now if one is requested
+        if(m_isOldGeometry) {
+            MsgStream log(Athena::getMessageSvc(), "SCT_Barrel");
+            log<< MSG::INFO <<"SCT_Barrel Old barrel geometry versions are not supported"<<endmsg;
+            return barrel;
+        }
+        
+        // There is only one type of module. So we create it just the once and pass it to the layers.
+        SCT_Module module("Module", m_detectorManager, m_geometryManager, m_materials, m_sqliteReader);
+        
+        // Create the interlinks
+        SCT_InterLink interLink("InterLink", m_detectorManager, m_geometryManager, m_materials);
+        
+        // Calculte the length of the layer cylinder. This is the barrel length less the thermal
+        // shield and interlink width.
+        // This is only used for 'OldGeometry". In new geometry, layer length is set internally,
+        // and is equal to support cylinder length
+        double layerLength = m_length - 2*m_thermalShieldEndWallThickness - 2*interLink.length();
+        
+        // We reduce to allow some alignment clearance
+        layerLength -= 2*m_zClearance;
+        
+        for (int iLayer = 0; iLayer < m_numLayers; iLayer++) {
+            
+            // Create the layers
+            
+            layerLength = 0.;
+            SCT_Layer layer("Layer"+intToString(iLayer), iLayer, &module, m_detectorManager, m_geometryManager, m_materials, m_sqliteReader);
+            barrel->add(new GeoNameTag("Layer#"+intToString(iLayer)));
+            barrel->add(new GeoIdentifierTag(iLayer)); // Identifier layer= iLayer
+            id.setLayerDisk(iLayer);
+            GeoAlignableTransform * transform = new GeoAlignableTransform(GeoTrf::Transform3D::Identity());
+            barrel->add(transform);
+            GeoVPhysVol * layerPV = layer.build(id);
+            barrel->add(layerPV);
+            // Store alignable transform
+            m_detectorManager->addAlignableTransform(2, id.getWaferId(), transform, layerPV);
+            layerLength = std::max(layerLength,layer.length());
+        }
+        
+        // Build and place the interlinks
+        double interLinkZPos = 0.;
+        interLinkZPos = 0.5 * layerLength + m_zClearance + 0.5 * interLink.length();
+        barrel->add(new GeoTransform(GeoTrf::TranslateZ3D(+interLinkZPos)));
+        barrel->add(interLink.getVolume());
+        barrel->add(new GeoTransform(GeoTrf::TranslateZ3D(-interLinkZPos)));
+        barrel->add(interLink.getVolume());
+        
+        // Build and place the cooling spiders
+        double spiderZPos = 0.;
+        SCT_Spider spider("Spider", m_detectorManager, m_geometryManager, m_materials);
+        spiderZPos =  interLinkZPos + 0.5*interLink.length() + 0.5*spider.length();
+        barrel->add(new GeoTransform(GeoTrf::TranslateZ3D(+spiderZPos)));
+        barrel->add(spider.getVolume());
+        barrel->add(new GeoTransform(GeoTrf::TranslateZ3D(-spiderZPos)));
+        barrel->add(spider.getVolume());
+        
+        // Build and place the thermal shield.
+        buildThermalShield(barrel);
+        
+        // Build and place the EMI shield (inner thermal shield).
+        buildEMIShield(barrel);
+        
+        // Build and place SCT to Pixel attachment
+        SCT_PixelAttachment pixelAttachment("AttachmentPixelToSCT", m_detectorManager, m_geometryManager, m_materials);
+        barrel->add(new GeoTransform(GeoTrf::TranslateZ3D(+pixelAttachment.zPosition()))); // +ve z
+        barrel->add(pixelAttachment.getVolume());
+        barrel->add(new GeoTransform(GeoTrf::TranslateZ3D(-pixelAttachment.zPosition()))); // -ve z
+        barrel->add(pixelAttachment.getVolume());
+        
+        // Extra Material
+        InDetDD::ExtraMaterial xMat(m_geometryManager->distortedMatManager());
+        xMat.add(barrel, "SCTBarrel");
+        
+    }else
+    {
+        std::map<std::string, GeoFullPhysVol*>        mapFPV = m_sqliteReader->getPublishedNodes<std::string, GeoFullPhysVol*>("SCT");
+        std::map<std::string, GeoAlignableTransform*> mapAX  = m_sqliteReader->getPublishedNodes<std::string, GeoAlignableTransform*>("SCT");
+        
+        // There is only one type of module. So we create it just the once and pass it to the layers.
+        SCT_Module module("Module", m_detectorManager, m_geometryManager, nullptr, m_sqliteReader);
     
-  // Old geometries are no longer supported - give up now if one is requested
-  if(m_isOldGeometry) {
-    std::cout << "SCT_Barrel Old barrel geometry versions are not supported" << std::endl;
+        for (int iLayer = 0; iLayer < m_numLayers; iLayer++) {
+            // Create the layers
+            SCT_Layer layer("Layer"+intToString(iLayer), iLayer, &module, m_detectorManager, m_geometryManager, m_materials, m_sqliteReader);
+            id.setLayerDisk(iLayer);
+            layer.build(id); //MB to verify
+            // Store alignable transform
+            m_detectorManager->addAlignableTransform(2, id.getWaferId(), mapAX["Layer#"+intToString(iLayer)], mapFPV["Layer#"+intToString(iLayer)]);
+    
+        }
+    }
+    
     return barrel;
-  }
-
-  // There is only one type of module. So we create it just the once and pass it to the layers.
-  SCT_Module module("Module", m_detectorManager, m_geometryManager, m_materials);
-
-  // Create the interlinks
-  SCT_InterLink interLink("InterLink", m_detectorManager, m_geometryManager, m_materials);
-
-  // Calculte the length of the layer cylinder. This is the barrel length less the thermal 
-  // shield and interlink width.
-  // This is only used for 'OldGeometry". In new geometry, layer length is set internally,
-  // and is equal to support cylinder length
-  double layerLength = m_length - 2*m_thermalShieldEndWallThickness - 2*interLink.length();
-
-  // We reduce to allow some alignment clearance
-  layerLength -= 2*m_zClearance;
-
-  for (int iLayer = 0; iLayer < m_numLayers; iLayer++) {
-
-    // Create the layers
-
-    layerLength = 0.;
-    SCT_Layer layer("Layer"+intToString(iLayer), iLayer, &module, m_detectorManager, m_geometryManager, m_materials);
-    barrel->add(new GeoNameTag("Layer#"+intToString(iLayer)));
-    barrel->add(new GeoIdentifierTag(iLayer)); // Identifier layer= iLayer
-    id.setLayerDisk(iLayer); 
-    GeoAlignableTransform * transform = new GeoAlignableTransform(GeoTrf::Transform3D::Identity());
-    barrel->add(transform);
-    GeoVPhysVol * layerPV = layer.build(id);
-    barrel->add(layerPV);
-    // Store alignable transform
-    m_detectorManager->addAlignableTransform(2, id.getWaferId(), transform, layerPV);
-    layerLength = std::max(layerLength,layer.length());
-  }
-
-  // Build and place the interlinks
-  double interLinkZPos = 0.;
-  interLinkZPos = 0.5 * layerLength + m_zClearance + 0.5 * interLink.length();
-  barrel->add(new GeoTransform(GeoTrf::TranslateZ3D(+interLinkZPos)));
-  barrel->add(interLink.getVolume());
-  barrel->add(new GeoTransform(GeoTrf::TranslateZ3D(-interLinkZPos)));
-  barrel->add(interLink.getVolume());
-
-  // Build and place the cooling spiders
-  double spiderZPos = 0.;
-  SCT_Spider spider("Spider", m_detectorManager, m_geometryManager, m_materials);
-  spiderZPos =  interLinkZPos + 0.5*interLink.length() + 0.5*spider.length();
-  barrel->add(new GeoTransform(GeoTrf::TranslateZ3D(+spiderZPos)));
-  barrel->add(spider.getVolume());
-  barrel->add(new GeoTransform(GeoTrf::TranslateZ3D(-spiderZPos)));
-  barrel->add(spider.getVolume());
-
-  // Build and place the thermal shield.
-  buildThermalShield(barrel);
-
-  // Build and place the EMI shield (inner thermal shield).
-  buildEMIShield(barrel);
-
-  // Build and place SCT to Pixel attachment
-  SCT_PixelAttachment pixelAttachment("AttachmentPixelToSCT", m_detectorManager, m_geometryManager, m_materials);
-  barrel->add(new GeoTransform(GeoTrf::TranslateZ3D(+pixelAttachment.zPosition()))); // +ve z
-  barrel->add(pixelAttachment.getVolume());
-  barrel->add(new GeoTransform(GeoTrf::TranslateZ3D(-pixelAttachment.zPosition()))); // -ve z
-  barrel->add(pixelAttachment.getVolume());
-
-  // Extra Material
-  InDetDD::ExtraMaterial xMat(m_geometryManager->distortedMatManager());
-  xMat.add(barrel, "SCTBarrel");
-  
-  return barrel;
-  
+    
 }
 
 void SCT_Barrel::buildThermalShield(GeoFullPhysVol * parent)

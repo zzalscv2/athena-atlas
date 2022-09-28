@@ -15,6 +15,7 @@
 
 #include "SCT_ReadoutGeometry/SCT_DetectorManager.h"
 
+#include "GeoModelRead/ReadGeoModel.h"
 #include "GeoModelKernel/GeoTube.h"
 #include "GeoModelKernel/GeoBox.h"
 #include "GeoModelKernel/GeoLogVol.h"
@@ -40,8 +41,9 @@ SCT_FwdRing::SCT_FwdRing(const std::string & name,
                          int ec,
                          InDetDD::SCT_DetectorManager* detectorManager,
                          SCT_GeometryManager* geometryManager,
-                         SCT_MaterialManager* materials)
-  : SCT_UniqueComponentFactory(name, detectorManager, geometryManager, materials),
+                         SCT_MaterialManager* materials,
+                         GeoModelIO::ReadGeoModel* sqliteReader)
+  : SCT_UniqueComponentFactory(name, detectorManager, geometryManager, materials, sqliteReader),
     m_iWheel(iWheel),
     m_iRing(iRing),
     m_endcap(ec),
@@ -54,27 +56,28 @@ SCT_FwdRing::SCT_FwdRing(const std::string & name,
 void 
 SCT_FwdRing::getParameters()
 {
-  
-  const SCT_ForwardParameters * parameters = m_geometryManager->forwardParameters();
-  const SCT_GeneralParameters * generalParameters = m_geometryManager->generalParameters();
     
-  m_safety       = generalParameters->safety();
-  
-  m_numModules      = parameters->fwdRingNumModules(m_iRing);
-  m_moduleStagger   = parameters->fwdRingModuleStagger(m_iRing);
-  m_refStartAngle   = parameters->fwdRingPhiOfRefModule(m_iRing);
-  m_refFirstStagger = parameters->fwdRingStaggerOfRefModule(m_iWheel, m_iRing, m_endcap);
-  m_ringSide        = parameters->fwdWheelRingSide(m_iWheel, m_iRing, m_endcap);
-  m_stereoSign      = parameters->fwdWheelStereoType(m_iWheel);
-  m_ringOffset      = parameters->fwdRingDistToDiscCenter(m_iRing);
-  m_discSupportThickness =  parameters->fwdDiscSupportThickness();
-
-  m_discRotated     = (parameters->fwdRingUsualRingSide(m_iRing) != m_ringSide);
-
-  m_identifier = m_iRing;
-  
-  // Set numerology
-  m_detectorManager->numerology().setNumPhiModulesForDiskRing(m_iWheel,m_iRing,m_numModules);
+    const SCT_ForwardParameters * parameters = m_geometryManager->forwardParameters();
+    m_numModules      = parameters->fwdRingNumModules(m_iRing);
+    
+    if(!m_sqliteReader){
+        
+        const SCT_GeneralParameters * generalParameters = m_geometryManager->generalParameters();
+        m_safety       = generalParameters->safety();
+        
+        m_moduleStagger   = parameters->fwdRingModuleStagger(m_iRing);
+        m_refStartAngle   = parameters->fwdRingPhiOfRefModule(m_iRing);
+        m_refFirstStagger = parameters->fwdRingStaggerOfRefModule(m_iWheel, m_iRing, m_endcap);
+        m_ringSide        = parameters->fwdWheelRingSide(m_iWheel, m_iRing, m_endcap);
+        m_stereoSign      = parameters->fwdWheelStereoType(m_iWheel);
+        m_ringOffset      = parameters->fwdRingDistToDiscCenter(m_iRing);
+        m_discSupportThickness =  parameters->fwdDiscSupportThickness();
+        m_discRotated     = (parameters->fwdRingUsualRingSide(m_iRing) != m_ringSide);
+        m_identifier = m_iRing;
+    }
+    
+    // Set numerology
+    m_detectorManager->numerology().setNumPhiModulesForDiskRing(m_iWheel,m_iRing,m_numModules);
 
 }
 
@@ -85,6 +88,7 @@ SCT_FwdRing::~SCT_FwdRing()
 const GeoLogVol * 
 SCT_FwdRing::preBuild()
 {
+
   // Make a ring. This is made of two half rings. They are identical but as
   // we need different identifiers they are made seperately.
   // We will refer to the two halves as inner and outer.
@@ -125,6 +129,7 @@ SCT_FwdRing::preBuild()
   double moduleCountNegEC = angleNegEC / divisionAngle;
   m_moduleZero = static_cast<int>(floor(moduleCountNegEC + 0.5 - 0.0001));
   
+  if(m_sqliteReader) return nullptr;
 
   // Determine if it is an upper or lower.
   m_firstStagger = m_refFirstStagger;
@@ -150,7 +155,7 @@ SCT_FwdRing::preBuild()
 
   // We want the center in z to be at the module mid plane. So we shift the volume.
   double envelopeShift = -m_ringSide * (0.5 * m_thickness - m_thicknessOuter);
-
+  
   const GeoTube * tmpShape = new GeoTube(m_innerRadius, m_outerRadius, 0.5 * m_thickness);
   const GeoShape & ringEnvelopeShape = (*tmpShape <<  GeoTrf::Translate3D(0, 0, envelopeShift));
   GeoLogVol * ringLog = new GeoLogVol(getName(), &ringEnvelopeShape, m_materials->gasMaterial());
@@ -163,103 +168,152 @@ SCT_FwdRing::preBuild()
 GeoVPhysVol * 
 SCT_FwdRing::build(SCT_Identifier id)
 {
-
-  // Physical volume for the half ring
-  GeoPhysVol * ring = new GeoPhysVol(m_logVolume);
-  
-  double deltaPhi = 360*Gaudi::Units::degree / m_numModules;
-  bool negativeEndCap = (id.getBarrelEC() < 0);
-  
-  for (int i = 0; i < m_numModules; i++){
-
-    // As used by the identifier
-    int idNumber = i;
-
-    // Alternate upper/lower
-    int staggerUpperLower = m_firstStagger;
-    if (i%2) staggerUpperLower = -m_firstStagger;
-
-    // The negative endcap is rotated and so we have to play some tricks to get the
-    // identifier numbering right.
-
-    // In order to get the identifiers going in the direction of
-    // increasing phi we have to invert them in the negative endcap.
-
-    // Although the endcaps differ slightly (some upper/lower swaps) we build them in much the same
-    // way and change just the numbering.
-
-    // The id number for the detector element
-    int idModule = idNumber;
- 
-    if (negativeEndCap) {
-      // identifiers go in the opposite direction for the negative endcap.
-      // We renumber so that module number "moduleZero" becomes zero.
-      idModule = (m_numModules + m_moduleZero - idNumber) % m_numModules; 
+    
+    // Physical volume for the half ring
+    GeoPhysVol * ring=nullptr;
+    bool negativeEndCap = (id.getBarrelEC() < 0);
+    
+    if(!m_sqliteReader){
+        
+        ring=new GeoPhysVol(m_logVolume);
+        
+        double deltaPhi = 360*Gaudi::Units::degree / m_numModules;
+        
+        for (int i = 0; i < m_numModules; i++){
+            
+            // As used by the identifier
+            int idNumber = i;
+            
+            // Alternate upper/lower
+            int staggerUpperLower = m_firstStagger;
+            if (i%2) staggerUpperLower = -m_firstStagger;
+            
+            // The negative endcap is rotated and so we have to play some tricks to get the
+            // identifier numbering right.
+            
+            // In order to get the identifiers going in the direction of
+            // increasing phi we have to invert them in the negative endcap.
+            
+            // Although the endcaps differ slightly (some upper/lower swaps) we build them in much the same
+            // way and change just the numbering.
+            
+            // The id number for the detector element
+            int idModule = idNumber;
+            
+            if (negativeEndCap) {
+                // identifiers go in the opposite direction for the negative endcap.
+                // We renumber so that module number "moduleZero" becomes zero.
+                idModule = (m_numModules + m_moduleZero - idNumber) % m_numModules;
+            }
+            
+            // The module is a TRD with length along z-axis.
+            // We need to rotate this so length is along the y-axis
+            // This can be achieved with a 90 deg rotation around Y.
+            // This leaves the depth axis point in the -z direction which
+            // is correct for modules mounted on the -ve side (side closest to the IP, ringSide  = -1).
+            // For modules mounted on the opposite side we
+            // rotate 180 around X so that the depth axis is pointing in the same direction as z.
+            // Finally we rotate about z by phi and the 0.5*stereo (ie the u-phi or v-phi orientation)
+            
+            // It is assumed that the module is centered on the physics center (center of sensor)
+            
+            double phi = i * deltaPhi + m_startAngle;
+            
+            GeoTrf::Transform3D rot = GeoTrf::RotateZ3D(phi + 0.5 * m_module->stereoAngle() * m_stereoSign);
+            if (m_ringSide > 0) {
+                rot = rot*GeoTrf::RotateX3D(180*Gaudi::Units::degree);
+            }
+            rot = rot*GeoTrf::RotateY3D(90*Gaudi::Units::degree);
+            
+            double zPos =  staggerUpperLower * m_moduleStagger * m_ringSide;
+            GeoTrf::Vector3D xyz(m_module->sensorCenterRadius(), 0, zPos);
+            xyz = GeoTrf::RotateZ3D(phi)*xyz;
+            GeoTrf::Transform3D modulePos = GeoTrf::Translate3D(xyz.x(),xyz.y(),xyz.z())*rot;
+            
+            
+            // Add the module
+            std::string moduleName = "FwdModuleR" + intToString(m_iRing) + "#" + intToString(idModule);
+            ring->add(new GeoNameTag(moduleName));
+            ring->add(new GeoIdentifierTag(idModule));
+            GeoAlignableTransform * moduleTransform = new GeoAlignableTransform(modulePos);
+            ring->add(moduleTransform);
+            id.setPhiModule(idModule);
+            GeoVPhysVol * modulePV = m_module->build(id);
+            ring->add(modulePV);
+            
+            // Store alignable transform
+            m_detectorManager->addAlignableTransform(1, id.getWaferId(), moduleTransform, modulePV);
+            
+            // Add the moduleServices (contains the cooling block)
+            // In principle this should also be rotated by the stereo angle (although one
+            // would need to be care were the center of rotation is. However this is not
+            // really necessary for the services so we do not bother.
+            
+            double zModuleServices = 0;
+            double rModuleServices = 0;
+            GeoVPhysVol * moduleServices = nullptr;
+            if (staggerUpperLower > 0){ // Upper
+                zModuleServices =  m_moduleServicesHiZPos * m_ringSide;
+                rModuleServices =  m_moduleServicesHiRPos;
+                moduleServices  =   m_moduleServicesHi;
+            } else { // Lower
+                zModuleServices =  m_moduleServicesLoZPos * m_ringSide;
+                rModuleServices =  m_moduleServicesLoRPos;
+                moduleServices  =  m_moduleServicesLo;
+            }
+            
+            
+            ring->add(new GeoTransform(GeoTrf::RotateZ3D(phi)*GeoTrf::Translate3D(rModuleServices, 0, zModuleServices)));
+            ring->add(moduleServices);
+            
+        }
     }
+    else{
+        
+        std::map<std::string, GeoFullPhysVol*>        mapFPV = m_sqliteReader->getPublishedNodes<std::string, GeoFullPhysVol*>("SCT");
+               
+        std::map<std::string, GeoAlignableTransform*> mapAX  = m_sqliteReader->getPublishedNodes<std::string, GeoAlignableTransform*>("SCT");
+               
+        
+        for (int i = 0; i < m_numModules; i++){
+            
+            // As used by the identifier
+            int idNumber = i;
+            
+            // Alternate upper/lower
+            //int staggerUpperLower = m_firstStagger;
+            //if (i%2) staggerUpperLower = -m_firstStagger;
+            
+            // The negative endcap is rotated and so we have to play some tricks to get the
+            // identifier numbering right.
+            
+            // In order to get the identifiers going in the direction of
+            // increasing phi we have to invert them in the negative endcap.
+            
+            // Although the endcaps differ slightly (some upper/lower swaps) we build them in much the same
+            // way and change just the numbering.
+            
+            // The id number for the detector element
+            int idModule = idNumber;
+            
+            if (negativeEndCap) {
+                // identifiers go in the opposite direction for the negative endcap.
+                // We renumber so that module number "moduleZero" becomes zero.
+                idModule = (m_numModules + m_moduleZero - idNumber) % m_numModules;
+            }
+            
+            id.setPhiModule(idModule);
+            m_module->build(id);
+            std::string key="FwdModuleR" + intToString(m_iRing)+"_"+std::to_string(id.getBarrelEC())+"_"+std::to_string(id.getLayerDisk())+"_"+std::to_string(id.getEtaModule())+"_"+std::to_string(id.getPhiModule());
+            
+            // Store alignable transform
+            m_detectorManager->addAlignableTransform(1, id.getWaferId(), mapAX[key], mapFPV[key]);
+            
+        }
 
-    // The module is a TRD with length along z-axis. 
-    // We need to rotate this so length is along the y-axis
-    // This can be achieved with a 90 deg rotation around Y. 
-    // This leaves the depth axis point in the -z direction which
-    // is correct for modules mounted on the -ve side (side closest to the IP, ringSide  = -1).
-    // For modules mounted on the opposite side we
-    // rotate 180 around X so that the depth axis is pointing in the same direction as z.
-    // Finally we rotate about z by phi and the 0.5*stereo (ie the u-phi or v-phi orientation)
-
-    // It is assumed that the module is centered on the physics center (center of sensor)
-
-    double phi = i * deltaPhi + m_startAngle;
-
-    GeoTrf::Transform3D rot = GeoTrf::RotateZ3D(phi + 0.5 * m_module->stereoAngle() * m_stereoSign);
-    if (m_ringSide > 0) {
-      rot = rot*GeoTrf::RotateX3D(180*Gaudi::Units::degree);
     }
-    rot = rot*GeoTrf::RotateY3D(90*Gaudi::Units::degree);
     
-    double zPos =  staggerUpperLower * m_moduleStagger * m_ringSide;
-    GeoTrf::Vector3D xyz(m_module->sensorCenterRadius(), 0, zPos);
-    xyz = GeoTrf::RotateZ3D(phi)*xyz;
-    GeoTrf::Transform3D modulePos = GeoTrf::Translate3D(xyz.x(),xyz.y(),xyz.z())*rot;
-
-    
-    // Add the module
-    std::string moduleName = "FwdModuleR" + intToString(m_iRing) + "#" + intToString(idModule);
-    ring->add(new GeoNameTag(moduleName));
-    ring->add(new GeoIdentifierTag(idModule));
-    GeoAlignableTransform * moduleTransform = new GeoAlignableTransform(modulePos);
-    ring->add(moduleTransform);
-    id.setPhiModule(idModule);
-    GeoVPhysVol * modulePV = m_module->build(id);
-    ring->add(modulePV);
-
-    // Store alignable transform
-    m_detectorManager->addAlignableTransform(1, id.getWaferId(), moduleTransform, modulePV);  
-
-    // Add the moduleServices (contains the cooling block)
-    // In principle this should also be rotated by the stereo angle (although one
-    // would need to be care were the center of rotation is. However this is not
-    // really necessary for the services so we do not bother.
-    
-    double zModuleServices = 0;
-    double rModuleServices = 0;
-    GeoVPhysVol * moduleServices = nullptr;
-    if (staggerUpperLower > 0){ // Upper 
-      zModuleServices =  m_moduleServicesHiZPos * m_ringSide;
-      rModuleServices =  m_moduleServicesHiRPos;
-      moduleServices  =   m_moduleServicesHi;
-    } else { // Lower
-      zModuleServices =  m_moduleServicesLoZPos * m_ringSide;
-      rModuleServices =  m_moduleServicesLoRPos;
-      moduleServices  =  m_moduleServicesLo;
-    }
-      
-    
-    ring->add(new GeoTransform(GeoTrf::RotateZ3D(phi)*GeoTrf::Translate3D(rModuleServices, 0, zModuleServices)));
-    ring->add(moduleServices);
-  
-  }
-
-  return ring;
+    return ring;
 }
 
 

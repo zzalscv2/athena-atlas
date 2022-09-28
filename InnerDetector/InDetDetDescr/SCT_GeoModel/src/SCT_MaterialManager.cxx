@@ -25,13 +25,13 @@ SCT_MaterialManager::SCT_MaterialManager(SCT_DataBase* db)
     std::cout << "Could not locate DetectorStore" << std::endl;
     return;
   }
-
+  
   m_materialManager = std::make_unique<InDetMaterialManager>("SCT_MaterialManager", db->athenaComps());
   m_materialManager->addWeightTable(db->weightTable(), "sct");
   m_materialManager->addScalingTable(db->scalingTable());
-
+  
   loadMaterials();
-
+  
   m_gasMaterial = m_materialManager->getMaterial("std::Air");
 }
 

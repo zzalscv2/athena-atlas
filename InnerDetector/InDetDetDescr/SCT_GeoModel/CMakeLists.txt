@@ -4,7 +4,7 @@
 atlas_subdir( SCT_GeoModel )
 
 # External dependencies:
-find_package( GeoModel COMPONENTS GeoModelKernel )
+find_package( GeoModel COMPONENTS GeoModelKernel GeoModelDBManager GeoModelRead )
 
 # Component(s) in the package:
 atlas_add_component( SCT_GeoModel
