@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2017 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef TLateralShapeCorrection_h
@@ -36,7 +36,7 @@ public:
   virtual std::string str() const {return prefix();};
   virtual std::string gen_name() const {return prefix();};
 
-  virtual TCanvas* DrawCorr() const {return 0;};
+  virtual TCanvas* DrawCorr() {return 0;};
   
   Bool_t HasShapeFactor() const { return TestBit(kHasShapeFactor); };
   Bool_t HasCellFactor()  const { return TestBit(kHasCellFactor); };
