@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2017 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef  OVERLAYBYTESTREAMUTILS_BYTESTREAMMULTIPLEOUTPUTSTREAMCOPYTOOL_H
@@ -29,6 +29,9 @@
 
 #include "ByteStreamCnvSvc/ByteStreamInputSvc.h"
 #include "ByteStreamCnvSvc/ByteStreamOutputSvc.h"
+
+#include "CxxUtils/checker_macros.h"
+ATLAS_NO_CHECK_FILE_THREAD_SAFETY;  // this code is obsolete/unused (certainly in production)
 
 //<<<<<< CLASS DECLARATIONS                                             >>>>>>
 
