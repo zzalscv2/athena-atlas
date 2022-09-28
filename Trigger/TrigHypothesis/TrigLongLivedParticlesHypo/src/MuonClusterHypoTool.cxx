@@ -168,10 +168,10 @@ StatusCode  MuonClusterHypoTool::decide( DecisionInfo& input ) const
 
     }
 
-    ATH_MSG_INFO( "Writing out active chains:" );
+    ATH_MSG_DEBUG( "Writing out active chains:" );
     for (DecisionID activeChain : prev)
     {
-        ATH_MSG_INFO( HLT::Identifier( activeChain ) );
+        ATH_MSG_DEBUG( HLT::Identifier( activeChain ) );
     }
 
     // Checking if this HypoTool's chain is active in this event...
