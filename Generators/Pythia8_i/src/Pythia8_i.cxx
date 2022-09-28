@@ -21,7 +21,7 @@
 #include <limits>
 
 // Name of AtRndmGenSvc stream
-std::string     Pythia8_i::pythia_stream   = "PYTHIA8_INIT";
+std::string     Pythia8_i::m_pythia_stream   = "PYTHIA8_INIT";
 
 // fix Pythia8 shower weights change in conventions
 #define PYTHIA8_NWEIGHTS nWeights
@@ -149,7 +149,7 @@ StatusCode Pythia8_i::genInitialize() {
 
   m_version = m_pythia->settings.parm("Pythia:versionNumber");
 
-  Pythia8_i::pythia_stream =       "PYTHIA8_INIT";
+  Pythia8_i::m_pythia_stream =       "PYTHIA8_INIT";
 
   // By default add "nominal" to the list of shower weight names
   m_showerWeightNames.insert(m_showerWeightNames.begin(), "nominal");
@@ -251,19 +251,19 @@ StatusCode Pythia8_i::genInitialize() {
     if(m_atlasRndmEngine) delete m_atlasRndmEngine;
     m_atlasRndmEngine = new customRndm();
 
-    m_atlasRndmEngine->init(atRndmGenSvc(),Pythia8_i::pythia_stream);
+    m_atlasRndmEngine->init(atRndmGenSvc(),Pythia8_i::m_pythia_stream);
     m_pythia->setRndmEnginePtr(m_atlasRndmEngine);
 
     // Save the PYTHIA_INIT stream seeds....
-    CLHEP::HepRandomEngine* engine = atRndmGenSvc().GetEngine(Pythia8_i::pythia_stream);
+    CLHEP::HepRandomEngine* engine = atRndmGenSvc().GetEngine(Pythia8_i::m_pythia_stream);
 
     const long*   sip     =       engine->getSeeds();
     long  int     si1     =       sip[0];
     long  int     si2     =       sip[1];
 
-    atRndmGenSvc().CreateStream(si1, si2, Pythia8_i::pythia_stream);
-    Pythia8_i::pythia_stream =       "PYTHIA8";
-    m_atlasRndmEngine->m_stream=Pythia8_i::pythia_stream;
+    atRndmGenSvc().CreateStream(si1, si2, Pythia8_i::m_pythia_stream);
+    Pythia8_i::m_pythia_stream =       "PYTHIA8";
+    m_atlasRndmEngine->m_stream=Pythia8_i::m_pythia_stream;
 
   }else{
     ATH_MSG_INFO(" !!!!!!!!!!!!  WARNING ON PYTHIA RANDOM NUMBERS !!!!!!!!!! ");
@@ -386,7 +386,7 @@ StatusCode Pythia8_i::callGenerator(){
 
   if(m_useRndmGenSvc){
     // Save the random number seeds in the event
-    CLHEP::HepRandomEngine*  engine  = atRndmGenSvc().GetEngine(Pythia8_i::pythia_stream);
+    CLHEP::HepRandomEngine*  engine  = atRndmGenSvc().GetEngine(Pythia8_i::m_pythia_stream);
     const long* s =  engine->getSeeds();
     m_seeds.clear();
     m_seeds.push_back(s[0]);
@@ -791,10 +791,13 @@ void Pythia8_i::addLHEToHepMC(HepMC::GenEvent *evt){
 }
 
 ////////////////////////////////////////////////////////////////////////
-
-
 double Pythia8_i::pythiaVersion()const{
   return m_version;
+}
+
+////////////////////////////////////////////////////////////////////////
+const std::string& Pythia8_i::pythia_stream() {
+  return m_pythia_stream;
 }
 
 ////////////////////////////////////////////////////////////////////////
