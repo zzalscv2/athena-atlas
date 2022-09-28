@@ -2157,6 +2157,8 @@ def setupMenu():
         ChainProp(name='HLT_mu24_ivarmedium_2j20_roiftf_preselj20_L1MU14FCH', l1SeedThresholds=['MU14FCH','FSNOSEED'], stream=[PhysicsStream], groups=TagAndProbeGroup+SingleMuonGroup),
         ChainProp(name='HLT_mu26_ivarmedium_2j20_roiftf_preselj20_L1MU18VFCH', l1SeedThresholds=['MU18VFCH','FSNOSEED'], stream=[PhysicsStream], groups=TagAndProbeGroup+SingleMuonGroup),
         ChainProp(name='HLT_mu24_ivarmedium_2j20_roiftf_preselj20_L1MU18VFCH', l1SeedThresholds=['MU18VFCH','FSNOSEED'], stream=[PhysicsStream], groups=TagAndProbeGroup+SingleMuonGroup),
+     
+        
 
         # ATR 25512
         ChainProp(name='HLT_mu24_ivarmedium_2j20_0eta290_020jvt_boffperf_pf_ftf_L1MU18VFCH', l1SeedThresholds=['MU18VFCH','FSNOSEED'], groups=TagAndProbeGroup+SingleMuonGroup, monGroups=['muonMon:online','bJetMon:online']),
@@ -2275,6 +2277,14 @@ def setupMenu():
 
         # Muon-in-jet
         ChainProp(name='HLT_mu4_j20_0eta290_020jvt_boffperf_pf_ftf_dRAB03_L1MU3V_J15', l1SeedThresholds=['MU3V','FSNOSEED'], groups=SupportLegGroup+SingleBjetGroup),
+        # ATR-26032
+        ChainProp(name='HLT_mu10_j225_0eta290_020jvt_boffperf_pf_ftf_preselj180_dRAB04_L1J100', l1SeedThresholds=['MU8F','FSNOSEED'], stream=[PhysicsStream], groups=SupportLegGroup+SingleBjetGroup),
+        ChainProp(name='HLT_mu10_j300_0eta290_020jvt_boffperf_pf_ftf_preselj225_dRAB04_L1J100', l1SeedThresholds=['MU8F','FSNOSEED'], stream=[PhysicsStream], groups=SupportLegGroup+SingleBjetGroup),
+        ChainProp(name='HLT_mu10_j360_0eta290_020jvt_boffperf_pf_ftf_preselj225_dRAB04_L1J100', l1SeedThresholds=['MU8F','FSNOSEED'], stream=[PhysicsStream], groups=SupportLegGroup+SingleBjetGroup),
+        #
+        ChainProp(name='HLT_mu10_j225_0eta290_020jvt_boffperf_pf_ftf_preselj180_dRAB04_L1jJ160', l1SeedThresholds=['MU8F','FSNOSEED'], stream=[PhysicsStream], groups=SupportPhIGroup+SingleBjetGroup),
+        ChainProp(name='HLT_mu10_j300_0eta290_020jvt_boffperf_pf_ftf_preselj225_dRAB04_L1jJ160', l1SeedThresholds=['MU8F','FSNOSEED'], stream=[PhysicsStream], groups=SupportPhIGroup+SingleBjetGroup),
+        ChainProp(name='HLT_mu10_j360_0eta290_020jvt_boffperf_pf_ftf_preselj225_dRAB04_L1jJ160', l1SeedThresholds=['MU8F','FSNOSEED'], stream=[PhysicsStream], groups=SupportPhIGroup+SingleBjetGroup),
 
         # Phase I inputs ATR-24411
         # SUSY
