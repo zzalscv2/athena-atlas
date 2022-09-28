@@ -86,6 +86,13 @@ namespace MuonGM {
         virtual int numberOfStrips(const Identifier& layerId) const override final;
         virtual int numberOfStrips(int, bool measuresPhi) const override final;
 
+        /** Get the number of pad per layer */
+        int numberOfPads(const Identifier& layerId) const;
+
+        /** Get largest pad number, which is different to the number of pads in 
+            a gas volume due to the pad numbering in Athena */
+        int maxPadNumber(const Identifier& layerId) const;
+
         /** space point position for a given pair of phi and eta identifiers
             The LocalPosition is expressed in the reference frame of the phi
            surface. If one of the identifiers is outside the valid range, the
@@ -345,6 +352,26 @@ namespace MuonGM {
     inline int sTgcReadoutElement::numberOfStrips(int lay, bool measPhi) const {
         if (lay > -1 && lay < m_nlayers) { return measPhi ? m_nWires[lay] : m_nStrips[lay]; }
         return -1;
+    }
+
+    inline int sTgcReadoutElement::numberOfPads(const Identifier& layerId) const {
+        const MuonPadDesign* design = getPadDesign(layerId);
+        if (!design) {
+            MsgStream log(Athena::getMessageSvc(), "sTgcReadoutElement");
+            log << MSG::WARNING << "no pad design found when trying to get the number of pads" << endmsg;
+            return 0;
+        }
+        return design->nPadColumns * design->nPadH;
+    }
+
+    inline int sTgcReadoutElement::maxPadNumber(const Identifier& layerId) const {
+        const MuonPadDesign* design = getPadDesign(layerId);
+        if (!design) {
+            MsgStream log(Athena::getMessageSvc(), "sTgcReadoutElement");
+            log << MSG::WARNING << "no pad design found when trying to get the largest pad number" << endmsg;
+            return 0;
+        }
+        return (design->nPadColumns - 1) * manager()->stgcIdHelper()->padEtaMax() + design->nPadH;
     }
 
     inline bool sTgcReadoutElement::spacePointPosition(const Identifier& phiId, const Identifier& etaId, Amg::Vector2D& pos) const {
