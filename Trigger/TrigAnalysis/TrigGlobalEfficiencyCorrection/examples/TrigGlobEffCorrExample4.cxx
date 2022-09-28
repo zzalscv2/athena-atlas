@@ -83,7 +83,7 @@ int main(int argc, char* argv[])
 		return 1;
 	}
 	
-	cc = TrigGlobalEfficiencyCorrectionTool::suggestElectronMapKeys(triggerCombination, "2015_2017/rel21.2/Consolidation_September2018_v1", legsPerKey);
+	cc = TrigGlobalEfficiencyCorrectionTool::suggestElectronMapKeys(triggerCombination, "2015_2018/rel21.2/Precision_Summer2020_v1", legsPerKey);
 	if(cc == CP::CorrectionCode::Ok)
 	{
 		if(!quiet)
@@ -116,7 +116,7 @@ int main(int argc, char* argv[])
 		for(int j=0;j<2;++j) /// one tool instance for efficiencies, another for scale factors
 		{
 			auto t = electronToolsFactory.emplace(electronToolsFactory.end(), "AsgElectronEfficiencyCorrectionTool/ElTrigEff_"+std::to_string(nTools++));
-			t->setProperty("MapFilePath", "ElectronEfficiencyCorrection/2015_2017/rel21.2/Consolidation_September2018_v1/map3.txt").ignore();
+			t->setProperty("MapFilePath", "ElectronEfficiencyCorrection/2015_2018/rel21.2/Precision_Summer2020_v1/map4.txt").ignore();
 			t->setProperty("TriggerKey", (j? trigKey : "Eff_"+trigKey)).ignore();
 			t->setProperty("IdKey","Tight").ignore();
 			t->setProperty("IsoKey","FCTight").ignore();
