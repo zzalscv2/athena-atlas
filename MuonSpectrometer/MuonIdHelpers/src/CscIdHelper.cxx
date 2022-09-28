@@ -880,10 +880,10 @@ Identifier CscIdHelper::channelID(const std::string& stationNameStr, int station
 
 Identifier CscIdHelper::channelID(const Identifier& id, int chamberLayer, int wireLayer, int measuresPhi, int strip) const {
     Identifier result(id);
-    m_cla_impl.pack(chamberLayer, result);
-    m_lay_impl.pack(wireLayer, result);
-    m_mea_impl.pack(measuresPhi, result);
-    m_str_impl.pack(strip, result);
+    resetAndSet(m_cla_impl, chamberLayer, result);
+    resetAndSet(m_lay_impl, wireLayer, result);
+    resetAndSet(m_mea_impl, measuresPhi, result);
+    resetAndSet(m_str_impl, strip, result);
     return result;
 }
 Identifier CscIdHelper::channelID(const Identifier& id, int chamberLayer, int wireLayer, int measuresPhi, int strip, bool& isValid) const {

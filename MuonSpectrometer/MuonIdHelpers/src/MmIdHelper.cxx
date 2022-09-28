@@ -284,7 +284,7 @@ Identifier MmIdHelper::multilayerID(const Identifier& channelID) const {
 /*******************************************************************************/
 Identifier MmIdHelper::multilayerID(const Identifier& moduleID, int multilayer) const {
     Identifier result(moduleID);
-    m_mplet_impl.pack(multilayer, result);
+    resetAndSet(m_mplet_impl, multilayer, result);
     return result;
 }
 Identifier MmIdHelper::multilayerID(const Identifier& moduleID, int multilayer, bool& isValid) const {
@@ -695,11 +695,10 @@ Identifier MmIdHelper::channelID(const std::string& stationNameStr, int stationE
 
 /*******************************************************************************/
 Identifier MmIdHelper::channelID(const Identifier& id, int multilayer, int gasGap, int channel) const {
-    Identifier result(id);
-    m_mplet_impl.pack(multilayer, result);
-    m_gap_impl.pack(gasGap, result);
-    m_cha_impl.pack(channel, result);
-
+    Identifier result{id};
+    resetAndSet(m_mplet_impl, multilayer, result);
+    resetAndSet(m_gap_impl, gasGap, result);
+    resetAndSet(m_cha_impl, channel, result);
     return result;
 }
 Identifier MmIdHelper::channelID(const Identifier& id, int multilayer, int gasGap, int channel, bool& isValid) const {
