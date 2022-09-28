@@ -9,7 +9,7 @@
 # art-output: log.*
 # art-output: Config*.pkl
 
-InputEVNT='/cvmfs/atlas-nightlies.cern.ch/repo/data/data-art/SimCoreTests/valid1.410000.PowhegPythiaEvtGen_P2012_ttbar_hdamp172p5_nonallhad.evgen.EVNT.e4993.EVNT.08166201._000012.pool.root.1'
+InputEVNT='/cvmfs/atlas-nightlies.cern.ch/repo/data/data-art/CampaignInputs/mc21/EVNT/mc21_13p6TeV.601229.PhPy8EG_A14_ttbar_hdamp258p75_SingleLep.evgen.EVNT.e8453/EVNT.29328277._003902.pool.root.1'
 
 Sim_tf.py \
 --CA True \
@@ -17,7 +17,7 @@ Sim_tf.py \
 --simulator 'FullG4MT_QS' \
 --postInclude 'PyJobTransforms.TransformUtils.UseFrontier' \
 --preInclude 'EVNTtoHITS:Campaigns.MC21SimulationMultiBeamSpot' \
---geometryVersion 'default:ATLAS-R3S-2021-02-00-00' \
+--geometryVersion 'default:ATLAS-R3S-2021-03-00-00' \
 --inputEVNTFile $InputEVNT \
 --outputHITSFile 'test.CA.HITS.pool.root' \
 --maxEvents '25' \
@@ -34,7 +34,7 @@ Sim_tf.py \
 --simulator 'FullG4MT_QS' \
 --postInclude 'default:PyJobTransforms/UseFrontier.py' \
 --preInclude 'EVNTtoHITS:Campaigns/MC21SimulationMultiBeamSpot.py,SimulationJobOptions/preInclude.ExtraParticles.py,SimulationJobOptions/preInclude.G4ExtraProcesses.py' \
---geometryVersion 'default:ATLAS-R3S-2021-02-00-00' \
+--geometryVersion 'default:ATLAS-R3S-2021-03-00-00' \
 --inputEVNTFile $InputEVNT \
 --outputHITSFile 'test.CA.HITS.pool.root' \
 --maxEvents '25' \
@@ -47,7 +47,7 @@ Sim_tf.py \
 --simulator 'FullG4MT_QS' \
 --postInclude 'default:PyJobTransforms/UseFrontier.py' \
 --preInclude 'EVNTtoHITS:Campaigns/MC21SimulationMultiBeamSpot.py,SimulationJobOptions/preInclude.ExtraParticles.py,SimulationJobOptions/preInclude.G4ExtraProcesses.py' \
---geometryVersion 'default:ATLAS-R3S-2021-02-00-00' \
+--geometryVersion 'default:ATLAS-R3S-2021-03-00-00' \
 --inputEVNTFile $InputEVNT \
 --outputHITSFile 'test.HITS.pool.root' \
 --maxEvents '25' \
