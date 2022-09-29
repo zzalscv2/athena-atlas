@@ -522,10 +522,17 @@ class L1MenuConfig(object):
 
         allBoards = (list(L1MenuFlags.boards().items()) + list(L1MenuFlags.legacyBoards().items()))
         
-        # Only after we know all boards are defined, in the special case
-        # that we are running the dummy L1 menu for CTP input configuration
-        # we need to register more items that access every input
-        ItemDef.registerItems_AllCTPIn(self)
+        if 'AllCTPIn' in self.menuName:
+            # Only after we know all boards are defined, in the special case
+            # that we are running the dummy L1 menu for CTP input configuration
+            # we need to register more items that access every input
+            ItemDef.registerItems_AllCTPIn(self)
+
+        for (boardName, boardDef) in L1MenuFlags.legacyBoards().items():
+            for connDef in boardDef["connectors"]:
+                # Verify number and ordering of thresholds on L1Calo boards
+                if connDef["type"] == "ctpin" and connDef["format"] == "multiplicity":
+                    self.l1menu.checkL1CaloThresholds(connDef["thresholds"], boardName, connDef["name"])
 
         list_of_undefined_thresholds = []
         # new thresholds
