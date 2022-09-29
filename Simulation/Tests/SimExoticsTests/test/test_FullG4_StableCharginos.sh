@@ -3,6 +3,8 @@
 # art-description: MC16-style simulation of stable Charginos using FullG4 (tests the Charginos package alone)
 # art-type: grid
 # art-architecture:  '#x86_64-intel'
+# art-include: 22.0/Athena
+# art-include: 22.0/AthSimulation
 # art-include: master/Athena
 # art-include: master/AthSimulation
 # art-output: *.root
@@ -38,7 +40,7 @@ Sim_tf.py \
     --truthStrategy 'MC15aPlusLLP' \
     --simulator 'FullG4MT' \
     --postInclude 'default:PyJobTransforms/UseFrontier.py' \
-    --preInclude 'EVNTtoHITS:Campaigns/MC16Simulation.py,SimulationJobOptions.DebugAMSB.py' \
+    --preInclude 'EVNTtoHITS:Campaigns/MC16Simulation.py,SimulationJobOptions/preInclude.DebugAMSB.py' \
     --geometryVersion 'default:ATLAS-R2-2016-01-00-01' \
     --inputEVNTFile "/cvmfs/atlas-nightlies.cern.ch/repo/data/data-art/SimCoreTests/mc15_13TeV.404460.MGPy8EG_A14N23LO_mAMSB_C1C1_5000_68000_Stable.evgen.EVNT.e5654.EVNT.13360885._000001.pool.root.1" \
     --outputHITSFile "CA.HITS.pool.root" \
@@ -51,7 +53,7 @@ Sim_tf.py \
     --truthStrategy 'MC15aPlusLLP' \
     --simulator 'FullG4MT' \
     --postInclude 'default:PyJobTransforms/UseFrontier.py' \
-    --preInclude 'EVNTtoHITS:Campaigns/MC16Simulation.py,SimulationJobOptions.DebugAMSB.py' \
+    --preInclude 'EVNTtoHITS:Campaigns/MC16Simulation.py,SimulationJobOptions/preInclude.DebugAMSB.py' \
     --geometryVersion 'default:ATLAS-R2-2016-01-00-01' \
     --inputEVNTFile "/cvmfs/atlas-nightlies.cern.ch/repo/data/data-art/SimCoreTests/mc15_13TeV.404460.MGPy8EG_A14N23LO_mAMSB_C1C1_5000_68000_Stable.evgen.EVNT.e5654.EVNT.13360885._000001.pool.root.1" \
     --outputHITSFile "CG.HITS.pool.root" \
