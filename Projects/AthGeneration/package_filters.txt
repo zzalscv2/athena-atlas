@@ -145,6 +145,7 @@
 + Event/xAOD/xAODMuon
 + Event/xAOD/xAODPrimitives
 + Event/xAOD/xAODTracking
++ Event/xAOD/xAODMeasurementBase
 #+ Event/xAOD/xAODTrigger
 + Event/xAOD/xAODTruth
 + Event/xAOD/xAODTruthAthenaPool

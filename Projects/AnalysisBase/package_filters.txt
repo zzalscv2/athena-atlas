@@ -46,7 +46,6 @@
 + Event/xAOD/xAODTriggerCnv
 + Event/xAOD/xAODTruthCnv
 - Event/xAOD/.*Cnv
-- Event/xAOD/xAODMeasurementBase
 - Event/xAOD/xAODInDetMeasurement
 + Event/xAOD/.*
 + ForwardDetectors/ZDC/ZdcAnalysis

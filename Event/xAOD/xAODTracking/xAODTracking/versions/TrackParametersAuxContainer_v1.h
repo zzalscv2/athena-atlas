@@ -15,8 +15,8 @@ namespace xAOD {
         // we use vector instead of array even though the size is fixed
         // this saves on generating ROOT dictionaries for all array dimensions
         typedef std::vector<double> Storage;
-        std::vector<Storage> parameters;
-        std::vector<Storage> covariance;
+        std::vector<Storage> params;
+        std::vector<Storage> covMatrix;
     };
 }
 

@@ -13,7 +13,7 @@ namespace xAOD {
         TrackJacobianAuxContainer_v1();
         // see commend about storage in TrackParameters
         typedef std::vector<double> Storage;
-        std::vector<Storage> values;
+        std::vector<Storage> jac;
     };
 }
 

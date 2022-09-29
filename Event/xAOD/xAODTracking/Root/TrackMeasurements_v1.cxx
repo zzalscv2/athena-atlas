@@ -7,43 +7,55 @@
 
 namespace xAOD {
 
-    TrackMeasurements_v1::VectorMap TrackMeasurements_v1::measurements() {
-        static const SG::AuxElement::Accessor<std::vector<double>> acc("measurements");
-        if (!acc.isAvailable(*this)) throw std::runtime_error("Missing 'measurements' in TrackMeasurements_v1");
-        return VectorMap{acc(*this).data()};
+    AUXSTORE_OBJECT_SETTER_AND_GETTER(TrackMeasurements_v1,
+                                        std::vector<double>,
+                                        meas,
+                                        setMeas)
+
+    static const SG::AuxElement::Accessor<std::vector<double>> measAcc("meas");
+    TrackMeasurements_v1::VectorMap TrackMeasurements_v1::measEigen() {
+        return VectorMap{measAcc(*this).data()};
     }
 
-    TrackMeasurements_v1::ConstVectorMap TrackMeasurements_v1::measurements() const {
-        static const SG::AuxElement::ConstAccessor<std::vector<double>> acc("measurements");
-        if (!acc.isAvailable(*this)) throw std::runtime_error("Missing 'measurements' in TrackMeasurements_v1");
-        return ConstVectorMap{acc(*this).data()};
+    TrackMeasurements_v1::ConstVectorMap TrackMeasurements_v1::measEigen() const {
+        return ConstVectorMap{measAcc(*this).data()};
     }
 
-
-    TrackMeasurements_v1::MatrixMap TrackMeasurements_v1::covariance() {
-        static const SG::AuxElement::Accessor<std::vector<double>> acc("covariance");
-        if (!acc.isAvailable(*this)) throw std::runtime_error("Missing 'covariance' in TrackMeasurements_v1");;
-        return MatrixMap{acc(*this).data()};
+    AUXSTORE_OBJECT_SETTER_AND_GETTER(TrackMeasurements_v1,
+                                        std::vector<double>,
+                                        covMatrix,
+                                        setCovMatrix)
+    static const SG::AuxElement::Accessor<std::vector<double>> covMatrixAcc("covMatrix");
+    TrackMeasurements_v1::MatrixMap TrackMeasurements_v1::covMatrixEigen() {
+        return MatrixMap{covMatrixAcc(*this).data()};
     }
 
-    TrackMeasurements_v1::ConstMatrixMap TrackMeasurements_v1::covariance() const {
-        static const SG::AuxElement::ConstAccessor<std::vector<double>> acc("covariance");
-        if (!acc.isAvailable(*this)) throw std::runtime_error("Missing 'covariance' in TrackMeasurements_v1");;
-        return ConstMatrixMap{acc(*this).data()};
+    TrackMeasurements_v1::ConstMatrixMap TrackMeasurements_v1::covMatrixEigen() const {
+        return ConstMatrixMap{covMatrixAcc(*this).data()};
     }
+
+    AUXSTORE_OBJECT_SETTER_AND_GETTER(TrackMeasurements_v1,
+                                        ElementLink<xAOD::UncalibratedMeasurementContainer>,
+                                        uncalibratedMeasurementLink,
+                                        setUncalibratedMeasurementLink)
+
+    const UncalibratedMeasurement* TrackMeasurements_v1::uncalibratedMeasurement() const {
+        static const ConstAccessor<ElementLink<UncalibratedMeasurementContainer> >
+            acc("uncalibratedMeasurementLink");
+        if( ! acc.isAvailable( *this ) ) {
+            return nullptr;
+        }
+        const ElementLink<UncalibratedMeasurementContainer>& link = acc(*this);
+        if( ! link.isValid() ) {
+            return nullptr;
+        }
+        return *link;
+    }
+
 
 
     void TrackMeasurements_v1::resize(size_t sz) {
-        {
-            static const SG::AuxElement::Accessor<std::vector<double>> acc("measurements");
-            if (!acc.isAvailable(*this)) throw std::runtime_error("Missing 'measurements' in TrackMeasurements_v1");
-            acc(*this).resize(sz);
-
-        }
-        {
-            static const SG::AuxElement::Accessor<std::vector<double>> acc("covariance");
-            if (!acc.isAvailable(*this)) throw std::runtime_error("Missing 'covariance' in TrackMeasurements_v1");;
-            acc(*this).resize(sz * sz);
-        }
+        measAcc(*this).resize(sz);
+        covMatrixAcc(*this).resize(sz * sz);
     }
 }

@@ -6,8 +6,9 @@
 namespace xAOD {
   TrackMeasurementsAuxContainer_v1::TrackMeasurementsAuxContainer_v1()
     : AuxContainerBase() {
-    AUX_VARIABLE(measurements);
-    AUX_VARIABLE(covariance);
+    AUX_VARIABLE(meas);
+    AUX_VARIABLE(covMatrix);
+    AUX_VARIABLE(uncalibratedMeasurementLink);
 
   }
 }

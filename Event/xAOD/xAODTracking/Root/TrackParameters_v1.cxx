@@ -6,41 +6,27 @@
 
 
 namespace xAOD {
+    static const SG::AuxElement::Accessor<std::vector<double>> paramsAcc("params");
 
-    TrackParameters_v1::VectorMap TrackParameters_v1::parameters() {
-        static const SG::AuxElement::Accessor<std::vector<double>> acc("parameters");
-        if (!acc.isAvailable(*this)) throw std::runtime_error("Missing 'parameters' in TrackParameters_v1");
-        return VectorMap{acc(*this).data()};
+    TrackParameters_v1::VectorMap TrackParameters_v1::paramsEigen() {
+        return VectorMap{paramsAcc(*this).data()};
     }
 
-    TrackParameters_v1::ConstVectorMap TrackParameters_v1::parameters() const {
-        static const SG::AuxElement::ConstAccessor<std::vector<double>> acc("parameters");
-        if (!acc.isAvailable(*this)) throw std::runtime_error("Missing 'parameters' in TrackParameters_v1");
-        return ConstVectorMap{acc(*this).data()};
+    TrackParameters_v1::ConstVectorMap TrackParameters_v1::paramsEigen() const {
+        return ConstVectorMap{paramsAcc(*this).data()};
     }
 
+    static const SG::AuxElement::Accessor<std::vector<double>> covMatrixAcc("covMatrix");
 
-    TrackParameters_v1::MatrixMap TrackParameters_v1::covariance() {
-        static const SG::AuxElement::Accessor<std::vector<double>> acc("covariance");
-        if (!acc.isAvailable(*this)) throw std::runtime_error("Missing 'covariance' in TrackParameters_v1");;
-        return MatrixMap{acc(*this).data()};
+    TrackParameters_v1::MatrixMap TrackParameters_v1::covMatrixEigen() {
+        return MatrixMap{covMatrixAcc(*this).data()};
     }
-    TrackParameters_v1::ConstMatrixMap TrackParameters_v1::covariance() const {
-        static const SG::AuxElement::ConstAccessor<std::vector<double>> acc("covariance");
-        if (!acc.isAvailable(*this)) throw std::runtime_error("Missing 'covariance' in TrackParameters_v1");;
-        return ConstMatrixMap{acc(*this).data()};
+    TrackParameters_v1::ConstMatrixMap TrackParameters_v1::covMatrixEigen() const {
+        return ConstMatrixMap{covMatrixAcc(*this).data()};
     }
 
     void TrackParameters_v1::resize(size_t sz) {
-        {
-            static const SG::AuxElement::Accessor<std::vector<double>> acc("parameters");
-            if (!acc.isAvailable(*this)) throw std::runtime_error("Missing 'parameters' in TrackParameters_v1");
-            acc(*this).resize(sz);
-        }
-        {
-            static const SG::AuxElement::Accessor<std::vector<double>> acc("covariance");
-            if (!acc.isAvailable(*this)) throw std::runtime_error("Missing 'covariance' in TrackParameters_v1");;
-            acc(*this).resize(sz * sz);
-        }
+        paramsAcc(*this).resize(sz);
+        covMatrixAcc(*this).resize(sz * sz);
     }
 }

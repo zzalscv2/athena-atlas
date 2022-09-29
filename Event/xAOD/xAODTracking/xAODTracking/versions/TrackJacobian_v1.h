@@ -22,12 +22,12 @@ namespace xAOD {
         /**
          * access track update Jacobian matrix
          **/
-        ConstMatrixMap values() const;
+        ConstMatrixMap jacEigen() const;
 
         /**
          * access tack update Jacobian of non const element
          **/
-        MatrixMap values();
+        MatrixMap jacEigen();
 
         /**
          * @brief expands sizes of internal vectors for the data storage

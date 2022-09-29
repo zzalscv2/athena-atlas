@@ -6,7 +6,7 @@
 namespace xAOD {
   TrackParametersAuxContainer_v1::TrackParametersAuxContainer_v1()
     : AuxContainerBase() {
-    AUX_VARIABLE(parameters);
-    AUX_VARIABLE(covariance);
+    AUX_VARIABLE(params);
+    AUX_VARIABLE(covMatrix);
   }
 }

@@ -65,5 +65,7 @@ namespace xAOD {
     };
 
 }
+#include "AthContainers/DataVector.h"
+DATAVECTOR_BASE( xAOD::StripCluster_v1, xAOD::UncalibratedMeasurement_v1);
 
 #endif

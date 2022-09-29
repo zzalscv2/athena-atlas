@@ -6,6 +6,6 @@
 namespace xAOD {
   TrackJacobianAuxContainer_v1::TrackJacobianAuxContainer_v1()
     : AuxContainerBase() {
-    AUX_VARIABLE(values);
+    AUX_VARIABLE(jac);
   }
 }

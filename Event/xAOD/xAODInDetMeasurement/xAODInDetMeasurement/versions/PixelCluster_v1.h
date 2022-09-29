@@ -112,5 +112,6 @@ namespace xAOD {
     };
 
 }
-
+#include "AthContainers/DataVector.h"
+DATAVECTOR_BASE( xAOD::PixelCluster_v1, xAOD::UncalibratedMeasurement_v1);
 #endif

@@ -5,22 +5,16 @@
 #include "xAODTracking/versions/TrackJacobian_v1.h"
 
 namespace xAOD {
-
-    TrackJacobian_v1::MatrixMap TrackJacobian_v1::values() {
-        static const SG::AuxElement::Accessor<std::vector<double>> acc("values");
-        if (!acc.isAvailable(*this)) throw std::runtime_error("Missing 'values' in TrackJacobian_v1");;
-        return MatrixMap{acc(*this).data()};
+    static const SG::AuxElement::Accessor<std::vector<double>> jacAcc("jac");
+    TrackJacobian_v1::MatrixMap TrackJacobian_v1::jacEigen() {
+        return MatrixMap{jacAcc(*this).data()};
     }
 
-    TrackJacobian_v1::ConstMatrixMap TrackJacobian_v1::values() const {
-        static const SG::AuxElement::ConstAccessor<std::vector<double>> acc("values");
-        if (!acc.isAvailable(*this)) throw std::runtime_error("Missing 'values' in TrackJacobian_v1");;
-        return ConstMatrixMap{acc(*this).data()};
+    TrackJacobian_v1::ConstMatrixMap TrackJacobian_v1::jacEigen() const {
+        return ConstMatrixMap{jacAcc(*this).data()};
     }
 
     void TrackJacobian_v1::resize(size_t sz) {
-        static const SG::AuxElement::Accessor<std::vector<double>> acc("values");
-        if (!acc.isAvailable(*this)) throw std::runtime_error("Missing 'values' in TrackJacobian_v1");;
-        acc(*this).resize(sz);
+        jacAcc(*this).resize(sz);
     }
 }

@@ -18,7 +18,7 @@ atlas_add_library( xAODTracking
    PUBLIC_HEADERS xAODTracking
    INCLUDE_DIRS ${ROOT_INCLUDE_DIRS}
    LINK_LIBRARIES ${ROOT_LIBRARIES} AthContainers  AthLinks GeoPrimitives
-   EventPrimitives xAODBase xAODCore ${extra_libs} )
+   EventPrimitives xAODBase xAODCore xAODMeasurementBase ${extra_libs} )
 
 atlas_add_xaod_smart_pointer_dicts(
    INPUT xAODTracking/selection.xml
@@ -49,7 +49,9 @@ atlas_add_test( ut_xaodtracking_vertex
    SOURCES test/ut_xaodtracking_vertex.cxx
    LINK_LIBRARIES xAODTracking )
 
-atlas_add_test(xAODTracking_MultiTrajectoryBackends_test
-   SOURCES test/xAODTracking_MultiTrajectoryBackends_test.cxx
-   LINK_LIBRARIES xAODTracking
-   POST_EXEC_SCRIPT nopost.sh)
+if( NOT SIMULATIONBASE AND NOT GENERATIONBASE AND NOT XAOD_ANALYSIS )
+   atlas_add_test(MultiTrajectoryBackends_test
+      SOURCES test/MultiTrajectoryBackends_test.cxx
+      LINK_LIBRARIES xAODTracking xAODInDetMeasurement
+      POST_EXEC_SCRIPT nopost.sh)
+endif()
