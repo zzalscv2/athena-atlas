@@ -68,14 +68,25 @@ namespace SH
 	  {
 	    std::istringstream str (output);
 	    unsigned seconds = 0;
+
 	    if (!(str >> seconds))
 	    {
-	      ANA_MSG_INFO ("failed to parse command output: " << output);
+          // Output format is more complicated if RPM isn't installed
+          std::istringstream str2 (output.substr(output.rfind('\n',output.size()-2)+1,std::string::npos));
+
+          if (!(str2 >> seconds)){
+            ANA_MSG_INFO ("failed to parse command output: " << output);
+          } else
+          {
+            proxyExpiration = clock::now() + std::chrono::seconds (seconds);
+            haveProxy = true;
+          } // Second try was successful
+
 	    } else
 	    {
 	      proxyExpiration = clock::now() + std::chrono::seconds (seconds);
 	      haveProxy = true;
-	    }
+	    } // First try was successful
 	  }
 	}
 
@@ -497,7 +508,7 @@ namespace SH
 
     RucioDownloadResult result;
     result.did = readLine (output, "DID ");
-    result.totalFiles = readLineUnsigned (output, "Total files: ");
+    result.totalFiles = readLineUnsigned (output, "Total files (DID): ");
     result.downloadedFiles = readLineUnsigned (output, "Downloaded files: ");
     result.alreadyLocal = readLineUnsigned (output, "Files already found locally: ");
     result.notDownloaded = readLineUnsigned (output, "Files that cannot be downloaded: ");
