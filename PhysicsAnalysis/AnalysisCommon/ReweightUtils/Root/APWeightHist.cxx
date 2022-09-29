@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2017 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
 */
 
 #define APReweight_cxx
@@ -51,7 +51,7 @@ int APWeightHist::Fill(const double value, APWeightEntry* weight) {
   AddBinContent(bin, w);
   if (fSumw2.fN) fSumw2.fArray[bin] += w * w;
   if (bin == 0 || bin > fXaxis.GetNbins()) {
-    if (!fgStatOverflows) return -1;
+    if (!GetStatOverflowsBehaviour()) return -1;
   }
   Double_t z = (w > 0 ? w : -w);
   fTsumw += z;

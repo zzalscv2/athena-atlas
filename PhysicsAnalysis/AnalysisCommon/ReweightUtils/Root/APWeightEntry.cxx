@@ -1,15 +1,18 @@
 /*
-  Copyright (C) 2002-2017 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
 */
 
 #define APWeightEntry_cxx
 #include "ReweightUtils/APWeightEntry.h"
 #include "ReweightUtils/MathTools.h"
+
+#include "CxxUtils/checker_macros.h"
+#include "RootUtils/TRandomTLS.h"
 #include <cmath>
 #include <limits>
 #include <vector>
 #include "TH1F.h"
-#include "TRandom.h"
+#include "TRandom3.h"
 #include "TMath.h"
 
 using namespace std;
@@ -224,11 +227,13 @@ double APWeightEntry::GetSysUncert2() const {
 }
 
 double APWeightEntry::GetRandom() {
+
+  static RootUtils::TRandomTLS<TRandom3> random ATLAS_THREAD_SAFE;
   if (m_is_nan || m_integral < std::numeric_limits<double>::epsilon()) {
     return 1e-100;
   }
   if (!m_cumul) _ComputeCum();
-  double rn = gRandom->Rndm();
+  double rn = random->Rndm();
   int ibin = TMath::BinarySearch(1000, m_cumul, rn);
   return m_bins[ibin];
   //if (rn > m_cumul[ibin]) x += fabs(m_bins[1]-m_bins[0]) * (rn-m_cumul[ibin])/(m_cumul[ibin+1] - m_cumul[ibin]);
