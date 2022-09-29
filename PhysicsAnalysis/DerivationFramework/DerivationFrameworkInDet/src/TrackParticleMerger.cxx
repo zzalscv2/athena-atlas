@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
 */
 
 ///////////////////////////////////////////////////////////////////
@@ -14,7 +14,6 @@
 ///////////////////////////////////////////////////////////////////
 
 #include "DerivationFrameworkInDet/TrackParticleMerger.h"
-#include "GaudiKernel/MsgStream.h"
 
 ///////////////////////////////////////////////////////////////////
 // Constructor
@@ -53,8 +52,8 @@ namespace DerivationFramework {
   StatusCode TrackParticleMerger::addBranches() const
   {
     const EventContext& ctx = Gaudi::Hive::currentContext();
-    std::unique_ptr<xAOD::TrackParticleContainer> outputCol = m_createViewCollection ?
-    std::make_unique<xAOD::TrackParticleContainer>(SG::VIEW_ELEMENTS) : std::make_unique<xAOD::TrackParticleContainer>();
+    auto outputCol = std::make_unique<ConstDataVector<xAOD::TrackParticleContainer>>(
+      m_createViewCollection ? SG::VIEW_ELEMENTS : SG::OWN_ELEMENTS);
     ATH_MSG_DEBUG("Number of Track Particle collections " << m_trackParticleLocation.size());
     
     std::unique_ptr<xAOD::TrackParticleAuxContainer> outputAuxCol;
@@ -84,7 +83,7 @@ namespace DerivationFramework {
       // merge them in
       mergeTrackParticle(tciter,outputCol.get());
     }
-    SG::WriteHandle<xAOD::TrackParticleContainer> h_write(m_outtrackParticleLocation, ctx);
+    auto h_write = SG::makeHandle(m_outtrackParticleLocation, ctx);
     ATH_CHECK(h_write.record(std::move(outputCol)));	     
     // only write out the aux container if the create view collection flag is false
     if(!m_createViewCollection) { 
@@ -100,15 +99,15 @@ namespace DerivationFramework {
   ///////////////////////////////////////////////////////////////////
 
   void TrackParticleMerger::mergeTrackParticle(const xAOD::TrackParticleContainer* trackParticleCol,
-                                                  xAOD::TrackParticleContainer* outputCol) const
+                                               ConstDataVector<xAOD::TrackParticleContainer>* outputCol) const
   {
     // loop over tracks, accept them and add them into association tool
     if(!trackParticleCol || trackParticleCol->empty()) {return;}
     ATH_MSG_DEBUG("Size of track particle collection " << trackParticleCol->size());
     // loop over tracks
-    for(const auto *const rf: *trackParticleCol){
+    for(const xAOD::TrackParticle* rf: *trackParticleCol){
       // add track into output
-      xAOD::TrackParticle* newTrackParticle = m_createViewCollection ? const_cast<xAOD::TrackParticle*>(rf) : new xAOD::TrackParticle(*rf);
+      const xAOD::TrackParticle* newTrackParticle = m_createViewCollection ? rf : new xAOD::TrackParticle(*rf);
       outputCol->push_back(newTrackParticle);
     }
   }
