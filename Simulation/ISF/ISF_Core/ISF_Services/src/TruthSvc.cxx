@@ -373,17 +373,19 @@ void ISF::TruthSvc::recordIncidentToMCTruth( ISF::ITruthIncident& ti, bool passW
           }
         }
         p = ti.childParticle( i, secBC ); // potentially overrides secBC
-        // add particle to vertex
-        vtx->add_particle_out( p);
+        if (p) {
+          // add particle to vertex
+          vtx->add_particle_out( p);
 #ifdef HEPMC3
-        Barcode::ParticleBarcode secBCFromTI = ti.childBarcode(i);
-        if (secBCFromTI) {
-          HepMC::suggest_barcode( p, secBCFromTI );
-        }
-        else {
-          HepMC::suggest_barcode( p, secBC );
-        }
+          Barcode::ParticleBarcode secBCFromTI = ti.childBarcode(i);
+          if (secBCFromTI) {
+            HepMC::suggest_barcode( p, secBCFromTI );
+          }
+          else {
+            HepMC::suggest_barcode( p, secBC );
+          }
 #endif
+        }
       }
       ATH_MSG_VERBOSE ( "Writing out " << i << "th child particle: " << p);
     } // <-- if write out child particle
