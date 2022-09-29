@@ -586,6 +586,9 @@ int main(int argc, char** argv)
 
   int ntracks = 0;
 
+  double massMax = 130; // default invariant mass window for Tag and Probe Analyses only  
+  double massMin = 50;
+
   //bool printflag = false;  // JK removed (unused)
 
   bool rotate_testtracks = false;
@@ -645,8 +648,10 @@ int main(int argc, char** argv)
 
   /// only if not set from the command line
   if ( pdgId==0 && inputdata.isTagDefined("pdgId") ) pdgId = inputdata.GetValue("pdgId");
-  
 
+  if ( inputdata.isTagDefined("InvMassMax") ) massMax = inputdata.GetValue("InvMassMax");
+  if ( inputdata.isTagDefined("InvMassMin") ) massMin = inputdata.GetValue("InvMassMin");
+  
   if ( inputdata.isTagDefined("npix_rec") ) npix_rec = inputdata.GetValue("npix_rec");
   if ( inputdata.isTagDefined("nsct_rec") ) nsct_rec = inputdata.GetValue("nsct_rec");
 
@@ -1152,10 +1157,9 @@ int main(int argc, char** argv)
 	// tag chain must be the same as probe chain but with te=0 and extra=*_tag                                                                          
 	if ( tag_key != probe_key ) continue;
  
-	// if matching tag found then initialise tag and probe object and store tag and probe chains in there                                                        /// this will be passed into the ConfAnalysis, which will delete it when necessary                                                                
+	// if matching tag found then initialise tag and probe object and store tag and probe chains in there                                                        
+	/// this will be passed into the ConfAnalysis, which will delete it when necessary                                                                
 	/// could perhaps be done with a unique_ptrt
-	const double massMin = 40;
-	const double massMax = 150;
 	TnP_tool = new TagNProbe(refChains[0], massMin, massMax);
 	TnP_tool->tag(tag);
 	TnP_tool->probe(probe);
@@ -1805,7 +1809,7 @@ int main(int argc, char** argv)
 	// changes to output directory and books the invariant mass histograms
 	TH1F* m_invmass     = cf->getHist_invmass();
 	TH1F* m_invmass_obj = cf->getHist_invmassObj();
-	rois = TnP_tool->GetRois( track_ev->chains(), &refTracks, refFilter, m_invmass, m_invmass_obj );
+	rois = TnP_tool->GetRois( track_ev->chains(), &refTracks, refFilter, m_invmass, m_invmass_obj, &tom );
       } 
       else {
 	// if not a tnp analysis then fill rois in the normal way
