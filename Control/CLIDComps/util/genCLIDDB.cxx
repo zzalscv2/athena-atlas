@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2020 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
 */
 
 #include <iostream>
@@ -134,7 +134,7 @@ int main(int argc, char* argv[]) {
   // Set properties on CLIDSvc
   std::string dbfiles("{}");
   if (vm.count("input")) {
-    log << MSG::INFO << "Reading clid.db from " << vm["input"].as<std::string>() << "." << std::endl;
+    log << MSG::INFO << "Reading clid.db from " << vm["input"].as<std::string>() << "." << endmsg;
     dbfiles = "{\"" + vm["input"].as<std::string>() + "\"}";
   }
   CHECK_WITH_CONTEXT( pCLIDSvcProp->setProperty("CLIDDBFiles", dbfiles), appName, 2 );
