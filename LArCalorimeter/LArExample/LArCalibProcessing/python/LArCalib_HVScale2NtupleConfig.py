@@ -54,8 +54,8 @@ if __name__=="__main__":
     
     rlb=TimeStampToRunLumi(TimeStamp_ns)
     if rlb is None:
-        print("WARNING: Failed to convert time",TimeStamp_ns,"into a run/lumi number")
-        sys.exit(-1)
+        rlb=[0xFFFFFFF-1,0]
+        print("WARNING: Failed to convert time",TimeStamp_ns,"into a run/lumi number. Using 'infinite' run-number",rlb[0])
 
 
     from AthenaConfiguration.AllConfigFlags import ConfigFlags
