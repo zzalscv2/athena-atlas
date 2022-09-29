@@ -112,10 +112,6 @@ class TrigInDetReco(ExecStep):
                 chains += "'HLT_e5_idperf_tight_L1EM3',"
                 flags += 'doEgammaSlice=True;'
             if (i=='electron-tnp') :
-                chains += "'HLT_e26_lhtight_e14_etcut_idperf_probe_50invmAB130_L1EM22VHI',"
-                chains += "'HLT_e26_lhtight_e14_etcut_idperf_nogsf_probe_50invmAB130_L1EM22VHI',"
-                
-                # new chains
                 chains += "'HLT_e26_lhtight_e14_idperf_tight_probe_50invmAB130_L1EM22VHI',"
                 chains += "'HLT_e26_lhtight_e14_idperf_tight_nogsf_probe_50invmAB130_L1EM22VHI',"
                 flags += 'doEgammaSlice=True;'
