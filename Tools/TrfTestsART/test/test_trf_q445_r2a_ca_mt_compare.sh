@@ -75,3 +75,8 @@ echo "============ comparexAODDigest.py myAOD_def.txt myAOD_ca.txt"
 comparexAODDigest.py myAOD_def.txt myAOD_ca.txt
 rc7=$?
 echo "art-result: ${rc7} comparexAODDigest.py myAOD_def.txt myAOD_ca.txt"
+
+echo "============ diff-root def/myAOD_def.pool.root ca/myAOD_ca.pool.root"
+acmd.py diff-root def/myAOD_def.pool.root ca/myAOD_ca.pool.root --nan-equal --error-mode resilient --ignore-leaves RecoTimingObj_p1_HITStoRDO_timings RecoTimingObj_p1_RAWtoESD_mems RecoTimingObj_p1_RAWtoESD_timings RAWtoESD_mems RAWtoESD_timings ESDtoAOD_mems ESDtoAOD_timings HITStoRDO_timings RAWtoALL_mems RAWtoALL_timings RecoTimingObj_p1_RAWtoALL_mems RecoTimingObj_p1_RAWtoALL_timings RecoTimingObj_p1_EVNTtoHITS_timings EVNTtoHITS_timings RecoTimingObj_p1_Bkg_HITStoRDO_timings index_ref  --order-trees --entries 50 --mode semi-detailed
+rc8=$?
+echo "art-result: ${rc8} diff-root def/myAOD_def.pool.root ca/myAOD_ca.pool.root"
