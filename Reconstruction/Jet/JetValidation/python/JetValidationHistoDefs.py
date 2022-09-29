@@ -3,7 +3,7 @@
 def GetJetVariables(container, refcontainer=''):
     vars = []
 
- #   vars += [ "leadingjettrel"] # TODO this is missing in the common histo definitions
+    vars += ["leadingjettrel"]
 
     if ( ("Topo" in container or "PFlow" in container) and "Trimmed" not in container) and "SoftDrop" not in container:
         vars += [ "Width", 
