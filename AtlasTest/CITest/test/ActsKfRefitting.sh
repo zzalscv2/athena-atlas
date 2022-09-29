@@ -5,7 +5,7 @@ input_rdo=/cvmfs/atlas-nightlies.cern.ch/repo/data/data-art/InDetPhysValMonitori
 n_events=5
 
 Reco_tf.py --CA --steering doRAWtoALL \
-   --detectors ITkStrip ITkPixel Bpipe \
+   --detectors Bpipe ITkPixel ITkStrip \
    --preExec "ConfigFlags.Reco.EnableHGTDExtension=False;" \
    --preInclude "InDetConfig.ConfigurationHelpers.OnlyTrackingPreInclude" \
    --postInclude "ActsTrkFittingAlgs.ActsTrkFittingAlgsConfig.ActsReFitterAlgCfg" \
