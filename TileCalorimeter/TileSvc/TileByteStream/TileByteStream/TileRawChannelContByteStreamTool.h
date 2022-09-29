@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef TILEBYTESTREAM_TILERAWCHANNELCONTRAWEVENTTOOL_H
@@ -9,7 +9,8 @@
 
 #include "GaudiKernel/ToolHandle.h"
 #include "AthenaBaseComps/AthAlgTool.h"
-#include "ByteStreamCnvSvcBase/FullEventAssembler.h" 
+#include "ByteStreamCnvSvcBase/FullEventAssembler.h"
+#include "StoreGate/ReadCondHandleKey.h"
 
 class TileHWID;
 class TileRawChannelContainer;
@@ -56,13 +57,15 @@ class TileRawChannelContByteStreamTool: public AthAlgTool {
 
   private:
 
+    Gaudi::Property<bool> m_doFragType4{this, "DoFragType4", true, "Do frag type 4"};
+    Gaudi::Property<bool> m_doFragType5{this, "DoFragType5", false, "Do frag type 5"};
+    Gaudi::Property<bool> m_initializeForWriting{this, "InitializeForWriting", false, "Initialize for writing"};
+
+    SG::ReadCondHandleKey<TileHid2RESrcID> m_hid2RESrcIDKey{this,
+        "TileHid2RESrcID", "TileHid2RESrcIDHLT", "TileHid2RESrcID key"};
+
     const TileHWID* m_tileHWID;
-
-    const TileHid2RESrcID* m_hid2re;
-
     bool m_verbose;
-    bool m_doFragType4;
-    bool m_doFragType5;
 
     /** Handle to Tile calibration tool */
     ToolHandle<TileCondToolEmscale> m_tileToolEmscale{this,

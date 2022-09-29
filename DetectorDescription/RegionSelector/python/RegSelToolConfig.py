@@ -316,4 +316,6 @@ def regSelTool_FCALHAD_Cfg(flags):
                          conditions=LArRoIMapCondAlgCfg(flags))
 
 def regSelTool_TILE_Cfg(flags):
-    return regSelToolCfg(flags, "TILE", CompFactory.RegSelCondAlg_Tile)
+    from TileByteStream.TileHid2RESrcIDConfig import TileHid2RESrcIDCondAlgCfg
+    return regSelToolCfg(flags, "TILE", CompFactory.RegSelCondAlg_Tile,
+                         conditions=TileHid2RESrcIDCondAlgCfg(flags, ForHLT=True))

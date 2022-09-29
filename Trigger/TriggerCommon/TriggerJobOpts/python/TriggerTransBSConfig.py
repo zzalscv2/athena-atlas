@@ -91,8 +91,12 @@ def triggerTransBSCfg_Calo(flags, seqName="AthAlgSeq"):
     itemList += ["LArRawChannelContainer#*"]
     extraInputs += larExtraInputs
     # Tile
+    from TileByteStream.TileByteStreamConfig import TileRawChannelContByteStreamToolCfg
+    tileCfg, tileExtraInputs = TileRawChannelContByteStreamToolCfg(flags, InitializeForWriting=True)
+    acc.merge(tileCfg)
     itemList += ["TileRawChannelContainer#*"]
     typeNames += ["TileCellIDC/TileCellIDC"]
+    extraInputs += tileExtraInputs
     from TileConditions.TileBadChannelsConfig import TileBadChannelsCondAlgCfg
     acc.merge( TileBadChannelsCondAlgCfg(flags) )
     extraInputs += [('TileBadChannels','ConditionStore+TileBadChannels')]

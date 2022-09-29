@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2020 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
 */
 
 //****************************************************************************
@@ -21,6 +21,7 @@
 #define TILEBYTESTREAM_TILEMURCVCONTBYTESTREAMTOOL_H
 
 #include "ByteStreamCnvSvcBase/FullEventAssembler.h"
+#include "StoreGate/ReadCondHandleKey.h"
 
 #include "AthenaBaseComps/AthAlgTool.h"
 #include "TileEvent/TileMuonReceiverObj.h"
@@ -58,9 +59,12 @@ class TileMuRcvContByteStreamTool: public AthAlgTool {
 
  private:
 
-  const TileHWID* m_tileHWID;
+  Gaudi::Property<bool> m_initializeForWriting{this, "InitializeForWriting", false, "Initialize for writing"};
 
-  const TileHid2RESrcID* m_hid2re;
+  SG::ReadCondHandleKey<TileHid2RESrcID> m_hid2RESrcIDKey{this,
+     "TileHid2RESrcID", "TileHid2RESrcIDHLT", "TileHid2RESrcID key"};
+
+  const TileHWID* m_tileHWID;
 
   int m_runPeriod;
 };

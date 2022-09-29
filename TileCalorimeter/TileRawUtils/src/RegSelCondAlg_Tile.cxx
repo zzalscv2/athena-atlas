@@ -23,15 +23,12 @@
 
 #include "eformat/SourceIdentifier.h"
 
-
 #include "TileByteStream/TileHid2RESrcID.h"
 #include "TileIdentifier/TileHWID.h"
 #include "TileCalibBlobObjs/TileCalibUtils.h"
 #include "CaloIdentifier/TileID.h"
 #include "TileDetDescr/TileDetDescrManager.h"
-#include "TileConditions/TileCablingService.h"
 #include "CaloDetDescr/CaloDetDescrElement.h"
-#include "TileByteStream/TileROD_Decoder.h"
 
 #include <cmath>
 #include <iostream>
@@ -54,7 +51,7 @@ RegSelCondAlg_Tile::RegSelCondAlg_Tile(const std::string& name, ISvcLocator* pSv
 
 StatusCode RegSelCondAlg_Tile::initialize() {
   ATH_MSG_DEBUG("RegSelCondAlg_Tile::initialize() ");
-  ATH_CHECK(m_cablingKey.initialize());
+  ATH_CHECK(m_hid2RESrcIDKey.initialize());
   ATH_CHECK(m_tableKey.initialize());
   ATH_MSG_INFO("RegSelCondAlg_Tile::initialize() " << m_tableKey );
   return StatusCode::SUCCESS;
@@ -81,22 +78,16 @@ StatusCode RegSelCondAlg_Tile::execute(const EventContext& ctx)  const {
     return StatusCode::SUCCESS;
   }
 
-  /// annoyingly take the pixel cabling to determine whether to build this
-  /// calorimeter table using the EventIDRange.
-  /// Once the calorimeter has it own conditions data cabling, then we can
-  /// dispense with this and use the calorimeter conditions data directly
-
-  SG::ReadCondHandle<LArOnOffIdMapping> cablingHdl(m_cablingKey,ctx);
-  const LArOnOffIdMapping* cabling{*cablingHdl};
-  if(!cabling) {
-     ATH_MSG_ERROR( "Do not have cabling mapping from key " << m_cablingKey.key() );
+  SG::ReadCondHandle<TileHid2RESrcID> hid2RESrcID(m_hid2RESrcIDKey, ctx);
+  if(!hid2RESrcID.isValid()) {
+     ATH_MSG_ERROR( "Do not have TileHid2RESrcID from key " << m_hid2RESrcIDKey.key() );
      return StatusCode::FAILURE;
   }
 
   EventIDRange id_range;
   
-  if( !cablingHdl.range( id_range ) ) {
-    ATH_MSG_ERROR("Failed to retrieve validity range for " << cablingHdl.key());
+  if( !hid2RESrcID.range( id_range ) ) {
+    ATH_MSG_ERROR("Failed to retrieve validity range for " << hid2RESrcID.key());
     return StatusCode::FAILURE;
   }   
 
@@ -105,7 +96,7 @@ StatusCode RegSelCondAlg_Tile::execute(const EventContext& ctx)  const {
 
   /// create the new lookup table
 
-  std::unique_ptr<IRegSelLUT> rd = createTable();
+  std::unique_ptr<IRegSelLUT> rd = createTable(*hid2RESrcID);
 
   if ( !rd ) return StatusCode::FAILURE;
 
@@ -142,7 +133,7 @@ StatusCode RegSelCondAlg_Tile::execute(const EventContext& ctx)  const {
 
 
 
-std::unique_ptr<RegSelectorMap> RegSelCondAlg_Tile::createTable() const {
+std::unique_ptr<RegSelectorMap> RegSelCondAlg_Tile::createTable(const TileHid2RESrcID* hid2re) const {
 
   std::unique_ptr<RegSelectorMap> lut(nullptr);
 
@@ -171,14 +162,6 @@ std::unique_ptr<RegSelectorMap> RegSelCondAlg_Tile::createTable() const {
     return lut;
   }
 
-  ToolHandle<TileROD_Decoder> dec("TileROD_Decoder/TileROD_Decoder");
-  if((dec.retrieve()).isFailure()){
-    ATH_MSG_FATAL("Could not find TileRodDecoder");
-    return lut;
-  }
-
-  const TileHid2RESrcID* src = dec->getHid2reHLT();
-
   std::unique_ptr<RegionSelectorLUT> ttLut = std::make_unique<RegionSelectorLUT>(256);
 
   enum Partition { Ancillary = 0, LBA = 1, LBC = 2, EBA = 3, EBC = 4 };
@@ -201,9 +184,7 @@ std::unique_ptr<RegSelectorMap> RegSelCondAlg_Tile::createTable() const {
   // so presumably USE_CELL_PHI is not definied, so we don't want 
   /// this code - this is not clear at all
 
-# if (defined USE_CELL_PHI)
-  TileCablingService* cabling = TileCablingService::getInstance();
-# elif (defined USE_MODULE_PHI)
+# if (defined USE_MODULE_PHI)
 # else
   double dphi = 2 * M_PI / TileCalibUtils::MAX_DRAWER; // 0.09817477;
 # endif
@@ -218,26 +199,12 @@ std::unique_ptr<RegSelectorMap> RegSelCondAlg_Tile::createTable() const {
       if (hash<0) continue;
       
       int coll = tileHWID->frag(ros, drawer);
-      int rod = src->getRodID(coll);
+      int rod = hid2re->getRodID(coll);
 
       double etami = etamin[ros];
       double etama = etamax[ros];
 
-#     if (defined USE_CELL_PHI)
-      Identifier cell_id;
-      int index, pmt;
-      for (int ch=0; ch<cabling->getMaxChannels(); ch++){
-	HWIdentifier channelID = tileHWID->channel_id(ros,drawer,ch);
-	cell_id = cabling->h2s_cell_id_index(channelID,index,pmt);
-	if ( index >= 0 ) break; // found a normal cell
-      }
-
-      int cell_hash = tileID->cell_hash(cell_id);
-      CaloDetDescrElement* DDE = tileMgr->get_cell_element((IdentifierHash) cell_hash);
-      double phimin = DDE->phi() - DDE->dphi()/2.0;
-      if ( phimin < 0.0 ) phimin+=2*M_PI;
-      double phimax = phimin + DDE->dphi();
-#     elif (defined USE_MODULE_PHI)
+#     if (defined USE_MODULE_PHI)
       // alternative approach
       int section = (ros==LBA || ros==LBC) ? TileID::BARREL : TileID::EXTBAR;
       int side = (ros==LBA || ros==EBA) ? TileID::POSITIVE : TileID::NEGATIVE;

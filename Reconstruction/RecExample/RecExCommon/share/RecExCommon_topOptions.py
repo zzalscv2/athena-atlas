@@ -1307,6 +1307,13 @@ if rec.doWriteBS():
     StreamBSFileOutput.ItemList +=["2927#*"]
     StreamBSFileOutput.ItemList +=["2934#*"]
 
+    from TileByteStream.TileByteStreamConfig import TileRawChannelContByteStreamToolConfig
+    ToolSvc+=TileRawChannelContByteStreamToolConfig(InitializeForWriting=True,
+                                                    stream = StreamBSFileOutput)
+
+    from TileByteStream.TileByteStreamConfig import TileL2ContByteStreamToolConfig
+    ToolSvc+=TileL2ContByteStreamToolConfig(InitializeForWriting=True,
+                                            stream = StreamBSFileOutput)
 
     # Muon
     StreamBSFileOutput.ItemList +=["MdtCsmContainer#*"]

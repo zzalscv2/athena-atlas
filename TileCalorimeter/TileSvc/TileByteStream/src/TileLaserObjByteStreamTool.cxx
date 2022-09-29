@@ -10,6 +10,7 @@
 
 // Atlas includes
 #include "AthenaKernel/errorcheck.h"
+#include "StoreGate/ReadCondHandle.h"
 
 // Tile includes
 #include "TileByteStream/TileLaserObjByteStreamTool.h"
@@ -34,7 +35,6 @@ const InterfaceID& TileLaserObjByteStreamTool::interfaceID() {
 ( const std::string& type, const std::string& name,const IInterface* parent )
   : AthAlgTool(type,name,parent)
   , m_tileHWID(0)
-  , m_hid2re(0)
   , m_verbose(false)
 {
   declareInterface< TileLaserObjByteStreamTool  >( this );
@@ -57,7 +57,7 @@ StatusCode TileLaserObjByteStreamTool::initialize() {
   ToolHandle<TileROD_Decoder> dec("TileROD_Decoder");
   ATH_CHECK( dec.retrieve() );
 
-  m_hid2re = dec->getHid2reHLT();
+  ATH_CHECK( m_hid2RESrcIDKey.initialize(m_initializeForWriting) );
 
   return StatusCode::SUCCESS;
 }
