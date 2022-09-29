@@ -27,21 +27,21 @@ namespace xAOD {
         /**
          * access track parameters vector of const element
          **/
-        ConstVectorMap parameters() const;
+        ConstVectorMap paramsEigen() const;
         /**
          * access parameters of non const element
          **/
-        VectorMap parameters();
+        VectorMap paramsEigen();
 
         /**
          * access track covariance matrix (flattened, rows layout) of const element
          **/
-        ConstMatrixMap covariance() const;
+        ConstMatrixMap covMatrixEigen() const;
 
         /**
          * access track covariance matrix (flattened, rows layout)
          **/
-        MatrixMap covariance();
+        MatrixMap covMatrixEigen();
 
         /**
          * @brief expands sizes of internal vectors for the data storage

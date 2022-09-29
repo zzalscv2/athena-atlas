@@ -5,7 +5,8 @@
 #define XAODTRACKING_VERSIONS_TRACKMEASUREMENTSAUXCONTAINER_V1_H
 
 
-
+#include "xAODMeasurementBase/UncalibratedMeasurementContainer.h"
+#include "AthLinks/ElementLink.h"
 #include "xAODCore/AuxContainerBase.h"
 namespace xAOD {
  class TrackMeasurementsAuxContainer_v1 : public AuxContainerBase {
@@ -14,8 +15,9 @@ namespace xAOD {
         // we use vector instead of array even though the size is fixed
         // this saves on generating ROOT dictionaries for all array dimensions
         typedef std::vector<double> Storage;
-        std::vector<Storage> measurements;
-        std::vector<Storage> covariance;
+        std::vector<Storage> meas;
+        std::vector<Storage> covMatrix;
+        std::vector< ElementLink<xAOD::UncalibratedMeasurementContainer> > uncalibratedMeasurementLink;
     };
 }
 
