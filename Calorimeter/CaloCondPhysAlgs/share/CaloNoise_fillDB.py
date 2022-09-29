@@ -195,13 +195,6 @@ try:
               noiseB /= math.sqrt(mu/29.*10.) 
         pass
         flt.setData(hash,gain,0,noiseA)
-        if mu > 0 and dt > 0:
-           # new normalization
-           if dt > 25:
-              noiseB /= math.sqrt(mu/53.*10.)
-           else:
-              noiseB /= math.sqrt(mu/29.*10.) 
-        pass
         flt.setData(hash,gain,1,noiseB)
         
     #=== write to DB
