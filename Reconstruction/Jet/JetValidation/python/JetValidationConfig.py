@@ -12,5 +12,5 @@ def PhysValJetCfg(flags, **kwargs):
 	kwargs.setdefault("OutputLevel", WARNING)
 	kwargs.setdefault("DetailLevel", 10)
 
-	from JetValidation.JetValidationTools import PhysValJetToolCfg
+	from JetValidation.JetValidationToolsConfig import PhysValJetToolCfg
 	return PhysValJetToolCfg(flags, **kwargs)
