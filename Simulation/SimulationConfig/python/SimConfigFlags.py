@@ -18,6 +18,11 @@ def createSimConfigFlags():
     scf.addFlag("Sim.WorldRRange", False)  # 12500. / int or float
     scf.addFlag("Sim.WorldZRange", False)  # 22031. / int or float
 
+    def _barcodeOffsetFromTruthStrategy(prevFlags):
+        if prevFlags.Sim.TruthStrategy in [TruthStrategy.MC15, TruthStrategy.MC18, TruthStrategy.MC18LLP]:
+            return 1000000 # 1M
+        return 200000 # 200k - This is the default value - in practice it has been the same for all campaigns
+
     def _checkSimBarcodeOffsetConf(prevFlags):
         simBarcodeOffset  = 0
         if prevFlags.Input.Files:
@@ -25,12 +30,28 @@ def createSimConfigFlags():
             mdstring = GetFileMD(prevFlags.Input.Files).get("SimBarcodeOffset", "0")
             simBarcodeOffset = eval(mdstring)
             if not simBarcodeOffset:
-                # This is the default value - in practice it has been the same for all campaigns
-                simBarcodeOffset  = 200000
+                simBarcodeOffset  = _barcodeOffsetFromTruthStrategy(prevFlags)
         return simBarcodeOffset
+
+    def _regenerationIncrementFromTruthStrategy(prevFlags):
+        if prevFlags.Sim.TruthStrategy in [TruthStrategy.MC15, TruthStrategy.MC18, TruthStrategy.MC18LLP]:
+            return 10000000 # 10M
+        return 1000000 # 1M - This is the default value - in practice it has been the same for all campaigns
+
+    def _checkRegenerationIncrementConf(prevFlags):
+        regenInc  = 0
+        if prevFlags.Input.Files:
+            from AthenaConfiguration.AutoConfigFlags import GetFileMD
+            mdstring = GetFileMD(prevFlags.Input.Files).get("RegenerationIncrement", "0")
+            regenInc = eval(mdstring)
+            if not regenInc:
+                regenInc  = _regenerationIncrementFromTruthStrategy(prevFlags)
+        return regenInc
 
     # the G4 offset.
     scf.addFlag("Sim.SimBarcodeOffset", _checkSimBarcodeOffsetConf)
+    # barcode offset when a particle survives an interaction during simulation
+    scf.addFlag("Sim.RegenerationIncrement", _checkRegenerationIncrementConf)
 
     # Forward region
     scf.addFlag("Sim.TwissFileBeam1", False)
