@@ -293,7 +293,7 @@ def PHYSLITECfg(ConfigFlags):
                                          TriggerList = PHYSLITETriggerListsHelper.Run3TriggerNamesNoTau)
 
     # Event content
-    PHYSLITESlimmingHelper.AppendToDictionary = {
+    PHYSLITESlimmingHelper.AppendToDictionary.update({
         'TruthEvents':'xAOD::TruthEventContainer','TruthEventsAux':'xAOD::TruthEventAuxContainer',
         'MET_Truth':'xAOD::MissingETContainer','MET_TruthAux':'xAOD::MissingETAuxContainer',
         'TruthElectrons':'xAOD::TruthParticleContainer','TruthElectronsAux':'xAOD::TruthParticleAuxContainer',
@@ -322,7 +322,7 @@ def PHYSLITECfg(ConfigFlags):
         'METAssoc_AnalysisMET':'xAOD::MissingETAssociationMap', 'METAssoc_AnalysisMETAux':'xAOD::MissingETAuxAssociationMap',
         'AntiKt10TruthTrimmedPtFrac5SmallR20Jets':'xAOD::JetContainer', 'AntiKt10TruthTrimmedPtFrac5SmallR20JetsAux':'xAOD::JetAuxContainer',
         'AnalysisLargeRJets':'xAOD::JetContainer','AnalysisLargeRJetsAux':'xAOD::AuxContainerBase'
-    }
+    })
 
     PHYSLITESlimmingHelper.SmartCollections = [
         'EventInfo',
