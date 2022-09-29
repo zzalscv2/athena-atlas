@@ -503,6 +503,7 @@ class ItemDef:
         MenuItem('L1_2TAU2_VTE200').setLogic( d.HA2.x(2)      & Not(d.TE200) & physcond).setTriggerType(TT.calo)
         MenuItem('L1_2TAU3_VTE200').setLogic( d.HA3.x(2)      & Not(d.TE200) & physcond).setTriggerType(TT.calo)
 
+        MenuItem('L1_TAU1_TE3_VTE200').setLogic( d.HA1  & d.TE3    & Not(d.TE200) & physcond).setTriggerType(TT.calo)
         MenuItem('L1_TAU1_TE4_VTE200').setLogic( d.HA1  & d.TE4    & Not(d.TE200) & physcond).setTriggerType(TT.calo)
         MenuItem('L1_TAU1_TE5_VTE200').setLogic( d.HA1  & d.TE5    & Not(d.TE200) & physcond).setTriggerType(TT.calo)
 
@@ -1366,7 +1367,7 @@ class ItemDef:
         MenuItem('L1_RD0_BGRP9'          ).setLogic( d.RNDM0 & bgrp9cond          ).setTriggerType(TT.rand)
         MenuItem('L1_RD0_BGRP10'         ).setLogic( d.RNDM0 & alfacalib          ).setTriggerType(TT.rand)
         MenuItem('L1_RD0_BGRP11'         ).setLogic( d.RNDM0 & bgrp11cond         ).setTriggerType(TT.rand)
-        MenuItem('L1_RD0_BGRP15'         ).setLogic( d.RNDM0 & alfacalib          ).setTriggerType(TT.rand)
+        MenuItem('L1_RD0_BGRP15'         ).setLogic( d.RNDM0 & d.BGRP0 & d.BGRP15 ).setTriggerType(TT.rand)
         MenuItem('L1_RD0_FIRSTINTRAIN'   ).setLogic( d.RNDM0 & firstintrain       ).setTriggerType(TT.rand)
 
         MenuItem('L1_RD1_FILLED'         ).setLogic( d.RNDM1 & physcond           ).setTriggerType(TT.zerobs) # used to be TT.rand
