@@ -2,15 +2,15 @@
   Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
 */
 
-#ifndef XAODTRACKING_TRACKPARAMETERSAUXCONTAINER_H
-#define XAODTRACKING_TRACKPARAMETERSAUXCONTAINER_H
+#ifndef XAODTRACKING_TRACKPARAMETERAUXCONTAINER_H
+#define XAODTRACKING_TRACKPARAMETERAUXCONTAINER_H
 
-#include "xAODTracking/versions/TrackParametersAuxContainer_v1.h"
+#include "xAODTracking/versions/TrackParameterAuxContainer_v1.h"
 
 namespace xAOD {
-  typedef TrackParametersAuxContainer_v1 TrackParametersAuxContainer;
+  typedef TrackParameterAuxContainer_v1 TrackParameterAuxContainer;
 }
 
 #include "xAODCore/CLASS_DEF.h"
-CLASS_DEF( xAOD::TrackParametersAuxContainer , 1259944283 , 1 )
+CLASS_DEF( xAOD::TrackParameterAuxContainer , 1220910553 , 1 )
 #endif

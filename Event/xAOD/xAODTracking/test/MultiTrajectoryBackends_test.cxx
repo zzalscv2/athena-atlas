@@ -11,13 +11,13 @@
 #include "xAODTracking/TrackStateContainer.h"
 #include "xAODTracking/TrackStateAuxContainer.h"
 
-#include "xAODTracking/TrackMeasurements.h"
-#include "xAODTracking/TrackMeasurementsContainer.h"
-#include "xAODTracking/TrackMeasurementsAuxContainer.h"
+#include "xAODTracking/TrackMeasurement.h"
+#include "xAODTracking/TrackMeasurementContainer.h"
+#include "xAODTracking/TrackMeasurementAuxContainer.h"
 
-#include "xAODTracking/TrackParameters.h"
-#include "xAODTracking/TrackParametersContainer.h"
-#include "xAODTracking/TrackParametersAuxContainer.h"
+#include "xAODTracking/TrackParameter.h"
+#include "xAODTracking/TrackParameterContainer.h"
+#include "xAODTracking/TrackParameterAuxContainer.h"
 
 
 #include "xAODTracking/TrackJacobian.h"
@@ -34,16 +34,16 @@
 namespace {
 
 
-BOOST_AUTO_TEST_CASE(TrackMeasurements) {
+BOOST_AUTO_TEST_CASE(TrackMeasurement_build) {
     constexpr static size_t sz = 6;
 
-    xAOD::TrackMeasurementsContainer measurements;
-    xAOD::TrackMeasurementsAuxContainer aux;
+    xAOD::TrackMeasurementContainer measurements;
+    xAOD::TrackMeasurementAuxContainer aux;
     measurements.setStore(&aux);
 
     std::vector<double> semirandoms = {0.12, 0.92};
     for ( size_t p=0; p < semirandoms.size(); ++p) {
-        auto par = new xAOD::TrackMeasurements();    
+        auto par = new xAOD::TrackMeasurement();    
         measurements.push_back(par);
         par->resize();
         for ( size_t i = 0; i < sz; ++i) {
@@ -54,7 +54,7 @@ BOOST_AUTO_TEST_CASE(TrackMeasurements) {
         }
     }
     for ( size_t p=0; p < semirandoms.size(); ++p) {
-        const xAOD::TrackMeasurements* par = measurements.at(p);
+        const xAOD::TrackMeasurement* par = measurements.at(p);
         for ( size_t i = 0; i < sz; ++i) {
             const double stored = par->measEigen()(i);
             const double expected = i * semirandoms[p];
@@ -68,9 +68,9 @@ BOOST_AUTO_TEST_CASE(TrackMeasurements) {
     }
 }
 
-BOOST_AUTO_TEST_CASE(TrackMeasurementsLinksToUncalibratedMeasurement){
-    xAOD::TrackMeasurementsContainer measurements;
-    xAOD::TrackMeasurementsAuxContainer aux;
+BOOST_AUTO_TEST_CASE(TrackMeasurementLinksToUncalibratedMeasurement){
+    xAOD::TrackMeasurementContainer measurements;
+    xAOD::TrackMeasurementAuxContainer aux;
     measurements.setStore(&aux);
 
     xAOD::StripClusterContainer stripClusters;
@@ -113,17 +113,17 @@ BOOST_AUTO_TEST_CASE(TrackMeasurementsLinksToUncalibratedMeasurement){
 
     // link to measurements
     {
-        auto m = new xAOD::TrackMeasurements();    
+        auto m = new xAOD::TrackMeasurement();    
         measurements.push_back(m);
         m->setUncalibratedMeasurementLink({stripClusters, 1}); // skipping intentionally 1st element
     }
     {
-        auto m = new xAOD::TrackMeasurements();    
+        auto m = new xAOD::TrackMeasurement();    
         measurements.push_back(m);
         m->setUncalibratedMeasurementLink({pixelClusters, 1}); // skipping intentionally 1st element
     }
     {
-        auto m = new xAOD::TrackMeasurements();    
+        auto m = new xAOD::TrackMeasurement();    
         measurements.push_back(m);
         m->setUncalibratedMeasurementLink({pixelClusters, 0}); // reordering
     }
@@ -140,16 +140,16 @@ BOOST_AUTO_TEST_CASE(TrackMeasurementsLinksToUncalibratedMeasurement){
 
 }
 
-BOOST_AUTO_TEST_CASE(TrackParameters) {
+BOOST_AUTO_TEST_CASE(TrackParameter_build) {
     constexpr static size_t sz = 6;
 
-    xAOD::TrackParametersContainer pars;
-    xAOD::TrackParametersAuxContainer aux;
+    xAOD::TrackParameterContainer pars;
+    xAOD::TrackParameterAuxContainer aux;
     pars.setStore(&aux);
 
     std::vector<double> semirandoms = {0.7, 0.32};
     for ( size_t p=0; p < semirandoms.size(); ++p) {
-        auto par = new xAOD::TrackParameters();    
+        auto par = new xAOD::TrackParameter();    
         pars.push_back(par);
         par->resize();
         for ( size_t i = 0; i < sz; ++i) {
@@ -160,7 +160,7 @@ BOOST_AUTO_TEST_CASE(TrackParameters) {
         }
     }
     for ( size_t p=0; p < semirandoms.size(); ++p) {
-        const xAOD::TrackParameters* par = pars.at(p);
+        const xAOD::TrackParameter* par = pars.at(p);
         for ( size_t i = 0; i < sz; ++i) {
             const double stored = par->paramsEigen()(i);
             const double expected = i * semirandoms[p];

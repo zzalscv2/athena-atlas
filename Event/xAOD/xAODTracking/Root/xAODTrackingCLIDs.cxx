@@ -17,8 +17,10 @@
 #include "xAODTracking/VertexAuxContainer.h"
 #include "xAODTracking/TrackStateContainer.h"
 #include "xAODTracking/TrackStateAuxContainer.h"
-#include "xAODTracking/TrackParametersContainer.h"
-#include "xAODTracking/TrackParametersAuxContainer.h"
+#include "xAODTracking/TrackParameterContainer.h"
+#include "xAODTracking/TrackParameterAuxContainer.h"
 #include "xAODTracking/TrackJacobianContainer.h"
 #include "xAODTracking/TrackJacobianAuxContainer.h"
+#include "xAODTracking/TrackMeasurementContainer.h"
+#include "xAODTracking/TrackMeasurementAuxContainer.h"
 

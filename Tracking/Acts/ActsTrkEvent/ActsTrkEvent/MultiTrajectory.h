@@ -10,9 +10,9 @@
 #include "Acts/Utilities/HashedString.hpp"
 
 #include "xAODTracking/TrackStateContainer.h"
-#include "xAODTracking/TrackParametersContainer.h"
+#include "xAODTracking/TrackParameterContainer.h"
 #include "xAODTracking/TrackJacobianContainer.h"
-#include "xAODTracking/TrackMeasurementsContainer.h"
+#include "xAODTracking/TrackMeasurementContainer.h"
 
 namespace ActsTrk {
     constexpr static bool IsReadOnly = true;
@@ -29,9 +29,9 @@ namespace ActsTrk {
         public:
 
             using TrackStateContainerBackendPtr = typename std::conditional<RWState, const xAOD::TrackStateContainer*, xAOD::TrackStateContainer*>::type;
-            using TrackParametersContainerBackendPtr = typename std::conditional<RWState, const xAOD::TrackParametersContainer*, xAOD::TrackParametersContainer*>::type;
+            using TrackParameterContainerBackendPtr = typename std::conditional<RWState, const xAOD::TrackParameterContainer*, xAOD::TrackParameterContainer*>::type;
             using TrackJacobianContainerBackendPtr = typename std::conditional<RWState, const xAOD::TrackJacobianContainer*, xAOD::TrackJacobianContainer*>::type;
-            using TrackMeasurementsContainerBackendPtr = typename std::conditional<RWState, const xAOD::TrackMeasurementsContainer*, xAOD::TrackMeasurementsContainer*>::type;
+            using TrackMeasurementContainerBackendPtr = typename std::conditional<RWState, const xAOD::TrackMeasurementContainer*, xAOD::TrackMeasurementContainer*>::type;
             
             using IndexType = std::uint32_t;
 
@@ -43,8 +43,8 @@ namespace ActsTrk {
              * @note the MTJ does claim ownership over the data in the backend
              * @param state - track state (indices) backend             
              */
-            MultiTrajectory( TrackStateContainerBackendPtr states, TrackParametersContainerBackendPtr parameters,
-                             TrackJacobianContainerBackendPtr jacobians, TrackMeasurementsContainerBackendPtr measurements );
+            MultiTrajectory( TrackStateContainerBackendPtr states, TrackParameterContainerBackendPtr parameters,
+                             TrackJacobianContainerBackendPtr jacobians, TrackMeasurementContainerBackendPtr measurements );
 
             /**
              * @brief Construct a new Multi Trajectory object by moving from a modifiable version
@@ -117,9 +117,9 @@ namespace ActsTrk {
         private:
             // bare pointers to the backend (need to be fast and we do not claim ownership anyways)
             TrackStateContainerBackendPtr m_trackStates = nullptr;
-            TrackParametersContainerBackendPtr m_trackParameters = nullptr;
+            TrackParameterContainerBackendPtr m_trackParameters = nullptr;
             TrackJacobianContainerBackendPtr m_jacobians = nullptr;
-            TrackMeasurementsContainerBackendPtr m_measurements = nullptr;
+            TrackMeasurementContainerBackendPtr m_measurements = nullptr;
             friend class ActsTrk::MultiTrajectory<IsReadWrite>;
             friend class ActsTrk::MultiTrajectory<IsReadOnly>;
 

@@ -6,9 +6,9 @@
 namespace ActsTrk {
 template<>
 MultiTrajectory<IsReadWrite>::MultiTrajectory(MultiTrajectory<IsReadWrite>::TrackStateContainerBackendPtr states, 
-                                            MultiTrajectory<IsReadWrite>::TrackParametersContainerBackendPtr parameters,
+                                            MultiTrajectory<IsReadWrite>::TrackParameterContainerBackendPtr parameters,
                                             MultiTrajectory<IsReadWrite>::TrackJacobianContainerBackendPtr jacobians, 
-                                            MultiTrajectory<IsReadWrite>::TrackMeasurementsContainerBackendPtr measurements )
+                                            MultiTrajectory<IsReadWrite>::TrackMeasurementContainerBackendPtr measurements )
     : m_trackStates(states),
       m_trackParameters(parameters),
       m_jacobians(jacobians),

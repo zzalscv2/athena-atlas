@@ -2,8 +2,8 @@
   Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
 */
 
-#ifndef XAODTRACKING_VERSIONS_TRACKPARAMETERS_V1_H
-#define XAODTRACKING_VERSIONS_TRACKPARAMETERS_V1_H
+#ifndef XAODTRACKING_VERSIONS_TRACKPARAMETER_V1_H
+#define XAODTRACKING_VERSIONS_TRACKPARAMETER_V1_H
 #include <cstdint>
 #include "AthContainers/AuxElement.h"
 #include "EventPrimitives/EventPrimitives.h"
@@ -13,7 +13,7 @@ namespace xAOD {
      * @brief Track Parameters for Acts MultiTrajectory
      **/
 
-    class TrackParameters_v1 : public SG::AuxElement {
+    class TrackParameter_v1 : public SG::AuxElement {
     public:
         // plain std::vectors are mapped to Eigen vectors or matrices
         // TODO a common location for this types
@@ -22,7 +22,7 @@ namespace xAOD {
         using ConstMatrixMap = Eigen::Map<const Eigen::Matrix<double, 6, 6>>;
         using MatrixMap = Eigen::Map<Eigen::Matrix<double, 6, 6>>;
 
-        TrackParameters_v1() = default;
+        TrackParameter_v1() = default;
 
         /**
          * access track parameters vector of const element

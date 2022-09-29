@@ -1,17 +1,17 @@
 /*
   Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
 */
-#ifndef XAODTRACKING_VERSIONS_TRACKMEASUREMENTSAUXCONTAINER_V1_H
-#define XAODTRACKING_VERSIONS_TRACKMEASUREMENTSAUXCONTAINER_V1_H
+#ifndef XAODTRACKING_VERSIONS_TRACKMEASUREMENTAUXCONTAINER_V1_H
+#define XAODTRACKING_VERSIONS_TRACKMEASUREMENTAUXCONTAINER_V1_H
 
 
 #include "xAODMeasurementBase/UncalibratedMeasurementContainer.h"
 #include "AthLinks/ElementLink.h"
 #include "xAODCore/AuxContainerBase.h"
 namespace xAOD {
- class TrackMeasurementsAuxContainer_v1 : public AuxContainerBase {
+ class TrackMeasurementAuxContainer_v1 : public AuxContainerBase {
     public:
-        TrackMeasurementsAuxContainer_v1();
+        TrackMeasurementAuxContainer_v1();
         // we use vector instead of array even though the size is fixed
         // this saves on generating ROOT dictionaries for all array dimensions
         typedef std::vector<double> Storage;
@@ -22,7 +22,7 @@ namespace xAOD {
 }
 
 #include "xAODCore/BaseInfo.h"
-SG_BASE(xAOD::TrackMeasurementsAuxContainer_v1, xAOD::AuxContainerBase);
+SG_BASE(xAOD::TrackMeasurementAuxContainer_v1, xAOD::AuxContainerBase);
 
 
 #endif
