@@ -1422,7 +1422,7 @@ FastShowerCellBuilderTool::process_particle(CaloCellContainer* theCellContainer,
       ATH_MSG_DEBUG("lower : "<< Elower->GetTitle()<< " lower E: " << Elower->E()<< " ; upper : "<< Eupper->GetTitle()<< " upper E: " << Eupper->E());
       /* interpolate */
       if (m_jo_interpolate && Eupper->E()>Elower->E()) {
-        double ran = gRandom->Rndm();
+        double ran = rndm.Rndm();
         double wt;
         if(Ein>1.0e-6) wt = TMath::Log(Ein/Eupper->E())/TMath::Log(Elower->E()/Eupper->E()); //protect against E=0
         else wt=1.0;
@@ -2559,15 +2559,15 @@ std::vector<Trk::HitInfo>* FastShowerCellBuilderTool::caloHits(const HepMC::GenP
   // first extrapolation to reach the ID boundary
 
   // get CaloEntrance if not done already
-  if (!m_caloEntrance) {
-    m_caloEntrance = m_extrapolator->trackingGeometry()->trackingVolume(m_caloEntranceName);
-    if (!m_caloEntrance)  ATH_MSG_INFO("CaloEntrance not found ");
+  if (!m_caloEntrance.get()) {
+    m_caloEntrance.set(m_extrapolator->trackingGeometry()->trackingVolume(m_caloEntranceName));
+    if (!m_caloEntrance.get())  ATH_MSG_INFO("CaloEntrance not found ");
   }
 
   std::unique_ptr<const Trk::TrackParameters> caloEntry = nullptr;
 
-  if (m_caloEntrance && m_caloEntrance->inside(pos,0.001) &&
-      !m_extrapolator->trackingGeometry()->atVolumeBoundary(pos,m_caloEntrance,0.001)) {
+  if (m_caloEntrance.get() && m_caloEntrance.get()->inside(pos,0.001) &&
+      !m_extrapolator->trackingGeometry()->atVolumeBoundary(pos,m_caloEntrance.get(),0.001)) {
     ATH_MSG_DEBUG("Inside calo entrace extrapolation");
     std::vector<Trk::HitInfo>*     dummyHitVector = nullptr;
     if (charge == 0) {
@@ -2580,7 +2580,7 @@ std::vector<Trk::HitInfo>* FastShowerCellBuilderTool::caloHits(const HepMC::GenP
                                                        pHypothesis,
                                                        dummyHitVector,
                                                        nextGeoID,
-                                                       m_caloEntrance);
+                                                       m_caloEntrance.get());
 
     } else {
 
@@ -2591,7 +2591,7 @@ std::vector<Trk::HitInfo>* FastShowerCellBuilderTool::caloHits(const HepMC::GenP
                                                            pHypothesis,
                                                            dummyHitVector,
                                                            nextGeoID,
-                                                           m_caloEntrance);
+                                                           m_caloEntrance.get());
     }
   } else {
     caloEntry = inputPar.uniqueClone();

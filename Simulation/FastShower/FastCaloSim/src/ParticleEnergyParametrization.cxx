@@ -252,12 +252,12 @@ void ParticleEnergyParametrization::DiceParticle(ParticleEnergyShape& p,TRandom&
     return;
   }
   GetRandom2 (rand, *m_Ecal_vs_dist, p.dist_in, p.Ecal);
-  int distbin=m_Ecal_vs_dist->FindBin(p.dist_in);
+  int distbin=m_Ecal_vs_dist->FindFixBin(p.dist_in);
   if(distbin<1) distbin=1;
   if(distbin>m_Ecal_vs_dist->GetNbinsX()) distbin=m_Ecal_vs_dist->GetNbinsX();
   
-  double xmin= m_Ecal_vs_dist->GetXaxis()->GetBinLowEdge(distbin);
-  double xmax= m_Ecal_vs_dist->GetXaxis()->GetBinUpEdge(distbin);
+  double xmin= std::as_const(m_Ecal_vs_dist)->GetXaxis()->GetBinLowEdge(distbin);
+  double xmax= std::as_const(m_Ecal_vs_dist)->GetXaxis()->GetBinUpEdge(distbin);
 
   //p.dist_in = GetRandomInBinRange(rand, xmin,xmax ,(TH1F*)m_h_layer_d_fine);
   if(m_h_layer_d_fine) {
