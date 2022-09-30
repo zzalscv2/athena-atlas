@@ -181,7 +181,7 @@ def setup(HIGG4DxName, HIGG4DxStream, HIGG4DxSlimmingHelper):
         else:
             addJetOutputs(HIGG4DxSlimmingHelper, [HIGG4DxName], ['AntiKt10LCTopoTrimmedPtFrac5SmallR20Jets','AntiKt4TruthJets', 'AntiKt4TruthWZJets'])
         
-    if HIGG4DxName in ['HIGG4D3', 'HIGG4D6']:
+    if HIGG4DxName in ['HIGG4D2', 'HIGG4D3', 'HIGG4D6']:
         HIGG4DxSlimmingHelper.AppendToDictionary.update( {
               "AntiKtVR30Rmax4Rmin02TrackJets_BTagging201810"               :   "xAOD::JetContainer"        ,
               "AntiKtVR30Rmax4Rmin02TrackJets_BTagging201810Aux"            :   "xAOD::JetAuxContainer"     ,
