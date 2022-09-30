@@ -8,7 +8,6 @@
 #include "LArCalibTools/LArCond2NtupleBase.h"
 #include "StoreGate/ReadHandleKey.h"
 #include "LArRawEvent/LArDigitContainer.h"
-#include "xAODEventInfo/EventInfo.h"
 #include "LArRawEvent/LArFebHeaderContainer.h"
 
 
@@ -39,7 +38,6 @@ class LArDigits2Ntuple : public LArCond2NtupleBase
   NTuple::Item<short> m_bcid;
 
   SG::ReadHandleKey<LArDigitContainer> m_contKey{this, "ContainerKey", "FREE", "key for LArDigitContainer"};
-  SG::ReadHandleKey<xAOD::EventInfo> m_evtInfoKey { this, "EventInfoKey", "EventInfo", "SG for EventInfo Key" };
   SG::ReadHandleKey<LArFebHeaderContainer> m_LArFebHeaderContainerKey { this, "LArFebHeaderKey", "LArFebHeader" };
 };
 

@@ -3,7 +3,6 @@
 */
 
 #include "LArCalibTools/LArPulseShape.h"
-#include "EventInfo/EventID.h"
 #include "LArIdentifier/LArOnlineID.h"
 #include "LArIdentifier/LArOnline_SuperCellID.h"
 #include "CaloIdentifier/CaloIdManager.h"
@@ -38,8 +37,6 @@ StatusCode LArPulseShape::initialize() {
   ATH_CHECK( m_cablingKey.initialize() ); 
 
   ATH_CHECK( m_trigDec.retrieve() );
-
-  ATH_CHECK( m_evtInfoKey.initialize() );
 
   if (m_ntpath.size()==0 || m_ntTitle.size()==0) {
     ATH_MSG_ERROR( "Need to set variable 'm_ntpath' and 'm_ntTitle' in constructor of deriving class!" );
@@ -386,6 +383,7 @@ StatusCode LArPulseShape::initialize() {
 StatusCode LArPulseShape::execute() {
 
 
+  const EventContext& ctx = Gaudi::Hive::currentContext();
   short int bunchStr[8] = {1, 101, 201, 301, 1786, 1886, 1986, 2086}; //move to JO
   
   std::vector<std::string> chains = m_trigDec->getListOfTriggers();
@@ -395,9 +393,7 @@ StatusCode LArPulseShape::execute() {
 
   if (m_trigDec->isPassed("L1_RD1_BGRP10")) {   
 
-    SG::ReadHandle<xAOD::EventInfo> evt (m_evtInfoKey); 
-
-    int bunchId   = evt->bcid();
+    int bunchId   = ctx.eventID().bunch_crossing_id();
     
     m_mindist = 3564;
     m_closestBC = 0;

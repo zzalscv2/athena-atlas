@@ -3,8 +3,6 @@
 */
 
 #include "LArCalibTools/LArDigits2Ntuple.h"
-#include "EventInfo/EventInfo.h"
-#include "EventInfo/EventID.h"
 #include "LArRawEvent/LArDigitContainer.h"
 #include "Identifier/HWIdentifier.h"
 #include "LArRawEvent/LArSCDigit.h"
@@ -72,7 +70,6 @@ StatusCode LArDigits2Ntuple::initialize()
   }
 
   ATH_CHECK(m_contKey.initialize(m_contKey.key().size()) );
-  ATH_CHECK(m_evtInfoKey.initialize() );
   ATH_CHECK(m_LArFebHeaderContainerKey.initialize(!m_isSC) );
 
   m_ipass	   = 0;
@@ -85,6 +82,7 @@ StatusCode LArDigits2Ntuple::initialize()
 StatusCode LArDigits2Ntuple::execute()
 {
 
+  const EventContext& ctx = Gaudi::Hive::currentContext();
   if(m_contKey.key().empty()) return StatusCode::SUCCESS;
 
   StatusCode	sc;
@@ -95,8 +93,7 @@ StatusCode LArDigits2Ntuple::execute()
   unsigned long	thisbcid	   = 0;
   unsigned long	thisELVL1Id	   = 0;
 
-  SG::ReadHandle<xAOD::EventInfo>evt (m_evtInfoKey);
-  thisevent	   = evt->eventNumber();
+  thisevent	   = ctx.eventID().event_number();
 
   // Get BCID from FEB header
   if ( !m_isSC ){ // we are not processing SC data, Feb header could be accessed
@@ -113,7 +110,7 @@ StatusCode LArDigits2Ntuple::execute()
     }
   }else{
     // This should be used for main readout later, once TDAQ fill event headers also in calib. runs properly
-    thisbcid	   = evt->bcid();
+    thisbcid	   = ctx.eventID().bunch_crossing_id();
   }
 
   SG::ReadHandle<LArDigitContainer> hdlDigit(m_contKey);
