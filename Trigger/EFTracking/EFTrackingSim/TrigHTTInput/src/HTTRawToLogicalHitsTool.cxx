@@ -14,10 +14,6 @@
 #include "TrigHTTObjects/HTTOfflineHit.h"
 #include "TrigHTTObjects/HTTTruthTrack.h"
 
-#include "EventInfo/EventInfo.h"
-#include "EventInfo/TriggerInfo.h"
-#include "EventInfo/EventID.h"
-
 #include "TrigHTTMaps/HTTRegionMap.h"
 #include "TrigHTTMaps/HTTPlaneMap.h"
 #include "TrigHTTMaps/ITrigHTTMappingSvc.h"
