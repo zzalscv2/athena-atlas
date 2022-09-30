@@ -47,6 +47,13 @@ combineCovWithWeight(const AmgVector(5) & firstParameters,
                      const AmgSymMatrix(5) & secondMeasuredCov,
                      const double secondWeight);
 
-}
+/** @brief Helper to combine forward with  smoother MultiComponentStates
+ */
+Trk::MultiComponentState
+combine(const Trk::MultiComponentState& forwardsMultiState,
+        const Trk::MultiComponentState& smootherMultiState,
+        unsigned int maximumNumberOfComponents);
+
+}//end of MultiComponentStateCombiner namespace
 } // end Trk namespace
 #endif

@@ -61,103 +61,14 @@ buildFitQuality(const Trk::SmoothedTrajectory& smoothedTrajectory)
 }
 
 /*
- * Helper to combine forward with
- * smoother MultiComponentStates
- */
-Trk::MultiComponentState
-combine(const Trk::MultiComponentState& forwardsMultiState,
-        const Trk::MultiComponentState& smootherMultiState,
-        unsigned int maximumNumberOfComponents)
-{
-
-  std::unique_ptr<Trk::MultiComponentState> combinedMultiState =
-    std::make_unique<Trk::MultiComponentState>();
-
-  // Loop over all components in forwards multi-state
-  for (const auto& forwardsComponent : forwardsMultiState) {
-    // Need to check that all components have associated weight matricies
-    const AmgSymMatrix(5)* forwardMeasuredCov =
-      forwardsComponent.first->covariance();
-    // Loop over all components in the smoother multi-state
-    for (const auto& smootherComponent : smootherMultiState) {
-      // Need to check that all components have associated weight matricies
-      const AmgSymMatrix(5)* smootherMeasuredCov =
-        smootherComponent.first->covariance();
-      if (!smootherMeasuredCov && !forwardMeasuredCov) {
-        return {};
-      }
-
-      if (!forwardMeasuredCov) {
-        Trk::ComponentParameters smootherComponentOnly(
-          smootherComponent.first->clone(), smootherComponent.second);
-        combinedMultiState->push_back(std::move(smootherComponentOnly));
-        continue;
-      }
-
-      if (!smootherMeasuredCov) {
-        Trk::ComponentParameters forwardComponentOnly(
-          forwardsComponent.first->clone(), forwardsComponent.second);
-        combinedMultiState->push_back(std::move(forwardComponentOnly));
-        continue;
-      }
-
-      const AmgSymMatrix(5) summedCovariance =
-        *forwardMeasuredCov + *smootherMeasuredCov;
-      const AmgSymMatrix(5) K =
-        *forwardMeasuredCov * summedCovariance.inverse();
-      const AmgVector(5) newParameters =
-        forwardsComponent.first->parameters() +
-        K * (smootherComponent.first->parameters() -
-             forwardsComponent.first->parameters());
-      const AmgVector(5) parametersDiff =
-        forwardsComponent.first->parameters() -
-        smootherComponent.first->parameters();
-
-      AmgSymMatrix(5) covarianceOfNewParameters =
-        AmgSymMatrix(5)(K * *smootherMeasuredCov);
-
-      std::unique_ptr<Trk::TrackParameters> combinedTrackParameters =
-        (forwardsComponent.first)
-          ->associatedSurface()
-          .createUniqueTrackParameters(newParameters[Trk::loc1],
-                                       newParameters[Trk::loc2],
-                                       newParameters[Trk::phi],
-                                       newParameters[Trk::theta],
-                                       newParameters[Trk::qOverP],
-                                       std::move(covarianceOfNewParameters));
-      const AmgSymMatrix(5) invertedSummedCovariance =
-        summedCovariance.inverse();
-      // Determine the scaling factor for the new weighting. Determined from the
-      // PDF of the many-dimensional gaussian
-      double exponent =
-        parametersDiff.transpose() * invertedSummedCovariance * parametersDiff;
-      double weightScalingFactor = exp(-0.5 * exponent);
-      double combinedWeight = smootherComponent.second *
-                              forwardsComponent.second * weightScalingFactor;
-      Trk::ComponentParameters combinedComponent(
-        std::move(combinedTrackParameters), combinedWeight);
-      combinedMultiState->push_back(std::move(combinedComponent));
-    }
-  }
-  // Component reduction on the combined state
-  Trk::MultiComponentState mergedState =
-    Trk::QuickCloseComponentsMultiStateMerger::merge(
-      std::move(*combinedMultiState), maximumNumberOfComponents);
-  // Before return the weights of the states need to be renormalised to one.
-  Trk::MultiComponentStateHelpers::renormaliseState(mergedState);
-
-  return mergedState;
-}
-
-/*
  * Helper to return the MultiComponent TSOS
  * that we will push back to the Trajectory DataVector
  * (taking ownership)
  */
 Trk::MultiComponentStateOnSurface*
 smootherHelper(Trk::MultiComponentState&& updatedState,
-               std::unique_ptr<const Trk::MeasurementBase> measurement,
-               std::unique_ptr<Trk::FitQualityOnSurface> fitQuality,
+               std::unique_ptr<const Trk::MeasurementBase>&& measurement,
+               std::unique_ptr<Trk::FitQualityOnSurface>&& fitQuality,
                bool islast)
 
 {
@@ -396,7 +307,7 @@ Trk::GaussianSumFitter::fit(
   }
   // Perform GSF smoother operation
   MultiTrajectory smoothedTrajectory =
-    fit(ctx, extrapolatorCache, forwardTrajectory, particleHypothesis);
+    smootherFit(ctx, extrapolatorCache, forwardTrajectory, particleHypothesis);
   if (smoothedTrajectory.empty()) {
     m_SmootherFailure.fetch_add(1, std::memory_order_relaxed);
     return nullptr;
@@ -506,7 +417,7 @@ Trk::GaussianSumFitter::fit(
 
   // Perform GSF smoother operation
   MultiTrajectory smoothedTrajectory =
-    fit(ctx, extrapolatorCache, forwardTrajectory, particleHypothesis, ccot);
+    smootherFit(ctx, extrapolatorCache, forwardTrajectory, particleHypothesis, ccot);
   if (smoothedTrajectory.empty()) {
     m_SmootherFailure.fetch_add(1, std::memory_order_relaxed);
     return nullptr;
@@ -960,7 +871,7 @@ Trk::GaussianSumFitter::stepForwardFit(
  * Implementation of the smoothing of the trajectory.
  */
 Trk::GaussianSumFitter::MultiTrajectory
-Trk::GaussianSumFitter::fit(
+Trk::GaussianSumFitter::smootherFit(
   const EventContext& ctx,
   Trk::IMultiStateExtrapolator::Cache& extrapolatorCache,
   const MultiTrajectory& forwardTrajectory,
@@ -1109,7 +1020,7 @@ Trk::GaussianSumFitter::fit(
       continue;
     }
     // Update with the measurement
-    auto updatedState = Trk::GsfMeasurementUpdator::update(
+    updatedState = Trk::GsfMeasurementUpdator::update(
       std::move(extrapolatedState), *measurement, fitQuality);
     if (updatedState.empty()) {
       ATH_MSG_WARNING(
@@ -1125,7 +1036,8 @@ Trk::GaussianSumFitter::fit(
       const Trk::MultiComponentState& forwardsMultiState =
         (*trackStateOnSurface)->components();
       Trk::MultiComponentState combinedfitterState =
-        combine(forwardsMultiState, updatedState, m_maximumNumberOfComponents);
+        Trk::MultiComponentStateCombiner::combine(
+          forwardsMultiState, updatedState, m_maximumNumberOfComponents);
       if (combinedfitterState.empty()) {
         ATH_MSG_WARNING("Could not combine state from forward fit with "
                         "smoother state");
