@@ -189,52 +189,31 @@ StatusCode AsgPhotonEfficiencyCorrectionTool::initialize()
 // =============================================================================
 // The main accept method: the actual cuts are applied here 
 // =============================================================================
-const Result AsgPhotonEfficiencyCorrectionTool::calculate( const xAOD::Egamma* egam ) const
+CP::CorrectionCode AsgPhotonEfficiencyCorrectionTool::calculate( const xAOD::Egamma* egam, Result& result ) const
 {
-  Result result;
-  if ( !egam )
-    {
-      ATH_MSG_ERROR ( "Did NOT get a valid egamma pointer!" );
-      return result;
-    }
-  
-   // Get the run number
-  const xAOD::EventInfo* eventInfo = evtStore()->retrieve< const xAOD::EventInfo> ("EventInfo");
-  if(!eventInfo){
-    ATH_MSG_ERROR ( "Could not retrieve EventInfo object!" );
-    return result;
+
+  if ( !egam ) {
+    ATH_MSG_ERROR ( "Did NOT get a valid egamma pointer!" );
+    return CP::CorrectionCode::Error;
   }
 
-  //Retrieve the proper random Run Number
-  unsigned int runnumber = m_defaultRandomRunNumber;
-  if (m_useRandomRunNumber) {
-    static const SG::AuxElement::Accessor<unsigned int> randomrunnumber("RandomRunNumber");
-        if (!randomrunnumber.isAvailable(*eventInfo)) {
-          ATH_MSG_WARNING("Pileup tool not run before using PhotonEfficiencyTool! SFs do not reflect PU distribution in data");
-          return result;
-        }
-        runnumber = randomrunnumber(*(eventInfo));
-  }
-  
-  // Get the needed values (et, etas2, conv. flag) from the egamma object
-  
-  // check if converted
-  bool isConv=xAOD::EgammaHelpers::isConvertedPhoton(egam);
-
-  // retrieve transvrse energy from e/cosh(etaS2)
-  const xAOD::CaloCluster* cluster  = egam->caloCluster(); 
+  // retrieve transverse energy from e/cosh(etaS2)
+  const xAOD::CaloCluster* cluster  = egam->caloCluster();  
   if (!cluster){
-        ATH_MSG_ERROR("ERROR no cluster associated to the Photon \n"); 
-        return result;
-    }
-  double eta2   = fabsf(cluster->etaBE(2));
+    ATH_MSG_ERROR("No  cluster associated to the Photon \n"); 
+    return  CP::CorrectionCode::Error;
+  } 
+
   // use et from cluster because it is immutable under syst variations of ele energy scale
   const double energy = cluster->e();
   double et = 0.;
-  if (eta2 < 999.) {
-    const double cosheta = std::cosh(eta2);
+  if ( std::abs(egam->eta()) < 999.) {
+    const double cosheta = std::cosh(egam->eta());
     et = (cosheta != 0.) ? energy / cosheta : 0.;
   }
+
+  // eta from second layer
+  double eta2 = cluster->etaBE(2);
 
   // allow for a 5% margin at the lowest pT bin boundary (i.e. increase et by 5% 
   // for sub-threshold electrons). This assures that electrons that pass the 
@@ -245,15 +224,44 @@ const Result AsgPhotonEfficiencyCorrectionTool::calculate( const xAOD::Egamma* e
   }
   	
   // Check if photon in the range to get the SF
-  if(eta2>MAXETA) { // this should become a CP::CorrectionCode::OutOfValidityRange in the future
-        ATH_MSG_WARNING( "No correction factor provided for eta "<<cluster->etaBE(2)<<" Returning SF = 1 + / - 1");
-        return result;
+  if(std::abs(eta2)>MAXETA) { 
+    result.scaleFactor = 1;
+    result.totalUncertainty = 1;
+    ATH_MSG_WARNING( "No correction factor provided for eta "<<eta2<<" Returning SF = 1 + / - 1");
+    return CP::CorrectionCode::OutOfValidityRange;
   }
-  if (itr_pt!=m_pteta_bins.end() && et<itr_pt->first) { // this should become a CP::CorrectionCode::OutOfValidityRange in the future
-        ATH_MSG_WARNING( "No scale factor uncertainty provided for et "<<et/1e3<<"GeV Returning SF = 1 + / - 1");
-	return result;
+  if(et<MIN_ET) { 
+    result.scaleFactor = 1;
+    result.totalUncertainty = 1;
+    ATH_MSG_WARNING( "No correction factor provided for eT "<<et<<" Returning SF = 1 + / - 1");
+    return CP::CorrectionCode::OutOfValidityRange;
+  }
+  if (itr_pt!=m_pteta_bins.end() && et<itr_pt->first) {
+    result.scaleFactor = 1;
+    result.totalUncertainty = 1;
+    ATH_MSG_WARNING( "No scale factor uncertainty provided for et "<<et/1e3<<"GeV Returning SF = 1 + / - 1");
+    return CP::CorrectionCode::OutOfValidityRange;
   }
   
+  
+  // Get the run number
+  const xAOD::EventInfo* eventInfo = evtStore()->retrieve< const xAOD::EventInfo> ("EventInfo");
+  if(!eventInfo){
+    ATH_MSG_ERROR ( "Could not retrieve EventInfo object!" );
+    return CP::CorrectionCode::Error;
+  }
+
+  //Retrieve the proper random Run Number
+  unsigned int runnumber = m_defaultRandomRunNumber;
+  if (m_useRandomRunNumber) {
+    static const SG::AuxElement::Accessor<unsigned int> randomrunnumber("RandomRunNumber");
+        if (!randomrunnumber.isAvailable(*eventInfo)) {
+          ATH_MSG_WARNING("Pileup tool not run before using PhotonEfficiencyTool! SFs do not reflect PU distribution in data");
+	  return CP::CorrectionCode::Error;
+        }
+        runnumber = randomrunnumber(*(eventInfo));
+  }
+    
   // Get the DataType of the current egamma object
 //!  PATCore::ParticleDataType::DataType dataType = (PATCore::ParticleDataType::DataType) (egam->dataType());
 //!  ATH_MSG_VERBOSE( "The egamma object with author=" << egam->author()
@@ -264,85 +272,63 @@ const Result AsgPhotonEfficiencyCorrectionTool::calculate( const xAOD::Egamma* e
   PATCore::ParticleDataType::DataType dataType = PATCore::ParticleDataType::DataType::Data;
   if ( m_dataTypeOverwrite >= 0 ) dataType = (PATCore::ParticleDataType::DataType)m_dataTypeOverwrite;
 
-  // Call the ROOT tool to get an answer, check if the SF is for isolation or ID
-  return isConv ? m_rootTool_con->calculate( dataType,runnumber,eta2,et /* in MeV */) : m_rootTool_unc->calculate( dataType,runnumber,eta2,et /* in MeV */);
-  
-}
+  // check if converted
+  const bool isConv=xAOD::EgammaHelpers::isConvertedPhoton(egam);
 
-const Result AsgPhotonEfficiencyCorrectionTool::calculate( const xAOD::IParticle *part ) const
-{
-  const xAOD::Egamma* egam = dynamic_cast<const xAOD::Egamma*>(part);
-  if ( egam ){
-      return calculate(egam);
-    } 
-  else{
-      ATH_MSG_ERROR ( " Could not cast to const egamma pointer!" );
-      Result dummy;
-      return dummy;
-    }
+  // Call the ROOT tool to get an answer, check if the SF is for isolation or ID
+  const int status = isConv ? m_rootTool_con->calculate( dataType,runnumber,eta2,et,result) : m_rootTool_unc->calculate( dataType,runnumber,eta2,et,result);
+
+  // if status 0 something went wrong
+  if (!status) {
+    result.scaleFactor = 1;
+    result.totalUncertainty = 1;
+    return CP::CorrectionCode::OutOfValidityRange;
+  }
+  
+  return CP::CorrectionCode::Ok;
 }
 
 CP::CorrectionCode AsgPhotonEfficiencyCorrectionTool::getEfficiencyScaleFactor(const xAOD::Egamma& inputObject, double& efficiencyScaleFactor) const{
+  
+  Result sfresult;
+  CP::CorrectionCode status = calculate(&inputObject, sfresult);
 
-    const xAOD::CaloCluster* cluster  = inputObject.caloCluster();  
-    if (!cluster){
-        ATH_MSG_ERROR("No  cluster associated to the Photon \n"); 
-        efficiencyScaleFactor=1;
-        return  CP::CorrectionCode::Error;
-    } 
-    // if not in the range: return OutOfVelidityRange with SF = 1 +/- 1
-  
-    if(fabs(cluster->etaBE(2))>MAXETA || inputObject.pt()<MIN_ET){
-    efficiencyScaleFactor=1;
-    if(m_appliedSystematics!=nullptr) efficiencyScaleFactor+=appliedSystematics().getParameterByBaseName("PH_EFF_"+m_sysSubstring+"Uncertainty");
-	return CP::CorrectionCode::OutOfValidityRange;
+  if ( status != CP::CorrectionCode::Ok ) {
+    return status;
   }
-  
+
   if(m_appliedSystematics==nullptr){
-    efficiencyScaleFactor=calculate(&inputObject).scaleFactor;
-    return  CP::CorrectionCode::Ok;
+    efficiencyScaleFactor=sfresult.scaleFactor;
+    return CP::CorrectionCode::Ok;
   }
   
   //Get the result + the uncertainty
   float sigma(0);
   sigma=appliedSystematics().getParameterByBaseName("PH_EFF_"+m_sysSubstring+"Uncertainty");
-  efficiencyScaleFactor=calculate(&inputObject).scaleFactor+sigma*calculate(&inputObject).totalUncertainty;
+  efficiencyScaleFactor=sfresult.scaleFactor+sigma*sfresult.totalUncertainty;
   return  CP::CorrectionCode::Ok;
 }
 
 CP::CorrectionCode AsgPhotonEfficiencyCorrectionTool::getEfficiencyScaleFactorError(const xAOD::Egamma& inputObject, double& efficiencyScaleFactorError) const{   
 
-  // if not in the range: return OutOfVelidityRange with SF = 1 +/- 1
-  if(fabs((inputObject.caloCluster())->etaBE(2))>MAXETA || inputObject.pt()<MIN_ET){
-    efficiencyScaleFactorError=1;
-	return CP::CorrectionCode::OutOfValidityRange;
+  Result sfresult;
+  CP::CorrectionCode status = calculate(&inputObject, sfresult);
+
+  if ( status != CP::CorrectionCode::Ok ) {
+    return status;
   }
-  
-  efficiencyScaleFactorError=calculate(&inputObject).totalUncertainty;
+
+  efficiencyScaleFactorError=sfresult.totalUncertainty;
   return  CP::CorrectionCode::Ok;
 }
 
 CP::CorrectionCode AsgPhotonEfficiencyCorrectionTool::applyEfficiencyScaleFactor(xAOD::Egamma& inputObject) const {
-   
-  // if not in the range: return OutOfVelidityRange with SF = 1 +/- 1
-  if(fabs((inputObject.caloCluster())->etaBE(2))>MAXETA || inputObject.pt()<MIN_ET){
-    ATH_MSG_VERBOSE("decorate object");
-	inputObject.auxdata< float >( m_resultPrefix+m_resultName+"SF" ) = 1.0;
-	if(m_appliedSystematics != nullptr) inputObject.auxdata< float >( m_resultPrefix+m_resultName+"SF" ) =1.0 + appliedSystematics().getParameterByBaseName("PH_EFF_"+m_sysSubstring+"Uncertainty");
-	return CP::CorrectionCode::OutOfValidityRange;
-  }
   
-  float eff;
-  if(m_appliedSystematics==nullptr) eff  = calculate(&inputObject).scaleFactor;
-  else{ // if SF is up or down varies by sigma
-    float sigma(0);
-	sigma=appliedSystematics().getParameterByBaseName("PH_EFF_"+m_sysSubstring+"Uncertainty");
-	eff=calculate(&inputObject).scaleFactor+sigma*calculate(&inputObject).totalUncertainty;
-  }
-  // decorate photon
-  ATH_MSG_VERBOSE("decorate object");
-  inputObject.auxdata< float >( m_resultPrefix+m_resultName+"SF" ) = eff;
-  return  CP::CorrectionCode::Ok;
+  double efficiencyScaleFactor = 1.0;
+  CP::CorrectionCode result = getEfficiencyScaleFactor(inputObject, efficiencyScaleFactor);
+  const static SG::AuxElement::Decorator<float> dec(m_resultPrefix+m_resultName+"SF");
+  dec(inputObject) = efficiencyScaleFactor;
+  return result;
 }
 
 //=======================================================================

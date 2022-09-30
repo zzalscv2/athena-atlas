@@ -19,6 +19,8 @@
 
 // Local include(s):
 #include "PhotonEfficiencyCorrection/TPhotonEfficiencyCorrectionTool.h"
+#include "AsgMessaging/MessageCheck.h"
+#include "AsgTools/StandaloneToolHandle.h"
 #define GEV 1000.0
 #define TEV 1000000.0
 
@@ -68,52 +70,54 @@ int main (int argc, const char * argv[]) {
 	// read first run number from the directory name:
 	int run_number = atoi(dirName.Tokenize("_")->First()->GetName());
 	if(getenv("ROOTCOREDIR")==nullptr){
-        cout << "Please setup RootCore before running the PrintPhotonSF [file]"<<endl;
-        return 0.;
+	  cout << "Please setup RootCore before running the PrintPhotonSF [file]"<<endl;
+	  return 0.;
         }
 
 	// Create and initialize an instance for both types of photons
 	Root::TPhotonEfficiencyCorrectionTool tool_SF;
 	tool_SF.addFileName(file.Data());
 
-if(!tool_SF.initialize()){
-  printf("Tool not initialized properly, check the error massages\n");
-  return 0;
-}
+	if(!tool_SF.initialize()){
+	  printf("Tool not initialized properly, check the error massages\n");
+	  return 0;
+	}
 
-PATCore::ParticleDataType::DataType datatype=PATCore::ParticleDataType::Full;
-if(file.Contains("AFII")) datatype=PATCore::ParticleDataType::Fast;
+	PATCore::ParticleDataType::DataType datatype=PATCore::ParticleDataType::Full;
+	if(file.Contains("AFII")) datatype=PATCore::ParticleDataType::Fast;
 
-// Access the file to get the histogram binning:
-TH2F * h = file.Contains("AFII") ? (TH2F*)TFile::Open(file)->Get(Form("%s/AltFast2_sf",dirName.Data())) : (TH2F*)TFile::Open(file)->Get(Form("%s/FullSim_sf",dirName.Data()));
+	// Access the file to get the histogram binning:
+	TH2F * h = file.Contains("AFII") ? (TH2F*)TFile::Open(file)->Get(Form("%s/AltFast2_sf",dirName.Data())) : (TH2F*)TFile::Open(file)->Get(Form("%s/FullSim_sf",dirName.Data()));
 
 
-const Double_t * pTbounds = h->GetXaxis()->GetXbins()->GetArray();
-const Double_t * Etabounds = h->GetYaxis()->GetXbins()->GetArray();
+	const Double_t * pTbounds = h->GetXaxis()->GetXbins()->GetArray();
+	const Double_t * Etabounds = h->GetYaxis()->GetXbins()->GetArray();
 
-const int npTbins  = h->GetXaxis()->GetNbins();
-const int nEtabins = h->GetYaxis()->GetNbins();
+	const int npTbins  = h->GetXaxis()->GetNbins();
+	const int nEtabins = h->GetYaxis()->GetNbins();
 
-double pt, eta;
+	double pt, eta;
 
-// loop over bins, in different pt/eta region, and print the SF
-cout << "-----------------------------------------------------------------------------------"<<endl;
-cout << "Table of photon ScaleFactors obtained by data-driven measurements for input file:"<<endl; cout << file <<endl;
-cout << "-----------------------------------------------------------------------------------"<<endl;
-TString dash_line="---------------"; for(int i=1;i<=nEtabins;i++) dash_line+="------------------";
-cout << "|  pt[GeV]\t\t|"; for(int i=1;i<=nEtabins;i++) printf("%2.2f<eta<%2.2f\t|",Etabounds[i-1],Etabounds[i]); cout<<endl;
-cout << dash_line.Data() <<endl;
-for (int i=1;i<=npTbins;i++){
-pt=0.5*(pTbounds[i-1]+pTbounds[i]);
-if(pt/GEV<100) printf("|%2.1f-%2.1f\t\t|",pTbounds[i-1]/GEV,pTbounds[i]/GEV);
-else if(pt<TEV) printf("|%2.0f - %2.0f\t\t|",pTbounds[i-1]/GEV,pTbounds[i]/GEV);
-else printf("|%2.0f-%2.0f\t\t|",pTbounds[i-1]/GEV,pTbounds[i]/GEV);
-for(int j=1;j<=nEtabins;j++){
-eta=0.5*(Etabounds[j-1]+Etabounds[j]);
-printf("%2.2f+/-%2.4f\t|",tool_SF.calculate(datatype,run_number,eta,pt).scaleFactor,tool_SF.calculate(datatype,run_number,eta,pt).totalUncertainty);
-} cout << endl;
-}
-cout << dash_line.Data() <<endl;
+	// loop over bins, in different pt/eta region, and print the SF
+	cout << "-----------------------------------------------------------------------------------"<<endl;
+	cout << "Table of photon ScaleFactors obtained by data-driven measurements for input file:"<<endl; cout << file <<endl;
+	cout << "-----------------------------------------------------------------------------------"<<endl;
+	TString dash_line="---------------"; for(int i=1;i<=nEtabins;i++) dash_line+="------------------";
+	cout << "|  pt[GeV]\t\t|"; for(int i=1;i<=nEtabins;i++) printf("%2.2f<eta<%2.2f\t|",Etabounds[i-1],Etabounds[i]); cout<<endl;
+	cout << dash_line.Data() <<endl;
+	for (int i=1;i<=npTbins;i++){
+	  pt=0.5*(pTbounds[i-1]+pTbounds[i]);
+	  if(pt/GEV<100) printf("|%2.1f-%2.1f\t\t|",pTbounds[i-1]/GEV,pTbounds[i]/GEV);
+	  else if(pt<TEV) printf("|%2.0f - %2.0f\t\t|",pTbounds[i-1]/GEV,pTbounds[i]/GEV);
+	  else printf("|%2.0f-%2.0f\t\t|",pTbounds[i-1]/GEV,pTbounds[i]/GEV);
+	  for(int j=1;j<=nEtabins;j++){
+	    eta=0.5*(Etabounds[j-1]+Etabounds[j]);
+	    Root::TPhotonEfficiencyCorrectionTool::Result sf;
+	    tool_SF.calculate(datatype,run_number,eta,pt,sf);
+	    printf("%2.2f+/-%2.4f\t|",sf.scaleFactor,sf.totalUncertainty);
+	  } cout << endl;
+	}
+	cout << dash_line.Data() <<endl;
 
 } // END PROGRAM
 

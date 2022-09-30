@@ -85,11 +85,7 @@ public:
 private:
   typedef Root::TPhotonEfficiencyCorrectionTool::Result Result;
   /// I think these calculate methods are only used internally
-  const Result calculate( const xAOD::IParticle* part ) const;
-  const Result calculate( const xAOD::Egamma* egam ) const;
-  const Result calculate( const xAOD::Egamma& egam ) const{  
- 		    return calculate(&egam);
-  } // pass the Egamma obj by reference
+  CP::CorrectionCode calculate( const xAOD::Egamma* egam, Result& result ) const;
 
   /// Pointer to the underlying ROOT based tool
   Root::TPhotonEfficiencyCorrectionTool* m_rootTool_unc;
