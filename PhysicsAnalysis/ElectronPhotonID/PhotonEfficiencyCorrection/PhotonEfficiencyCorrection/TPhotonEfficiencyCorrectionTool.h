@@ -38,12 +38,13 @@ namespace Root {
         ~TPhotonEfficiencyCorrectionTool();
         int initialize();
         // Additional public methods
-        const Result calculate( const PATCore::ParticleDataType::DataType dataType,
-                const unsigned int runnumber,
-                const double cluster_eta,
-                const double et /* in MeV */
-                ) const;
-
+        int calculate( const PATCore::ParticleDataType::DataType dataType,
+				const unsigned int runnumber,
+				const double cluster_eta,
+				const double et, /* in MeV */
+				Result& sf_and_err
+				) const;
+	
     private :
     };
 
