@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2020 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
 */
 
 //
@@ -16,6 +16,7 @@
 // vector class
 #include <vector>
 #include "AthContainers/tools/DVLInfo.h"
+#include "boost/iterator/transform_iterator.hpp"
 
 //
 // Gaudi includes, not provided to rootcint
@@ -32,18 +33,25 @@ template <typename T>
 {
 public:
   //
-  // additional typedef 
-  typedef T base_value_type; 
-  typedef std::vector<T*>                           CONT; 
-  typedef typename CONT::value_type value_type; 
-  typedef typename CONT::pointer pointer;
-  typedef typename CONT::const_pointer const_pointer;
-  typedef typename CONT::iterator iterator;
-  typedef typename CONT::const_iterator const_iterator;
-  typedef typename CONT::reference reference;
-  typedef typename CONT::const_reference const_reference;
-  typedef typename CONT::size_type size_type;
-  typedef typename CONT::difference_type difference_type;
+  // additional typedef
+  using base_value_type = T;
+  using CONT = std::vector<T*>;
+  using value_type      = typename CONT::value_type;
+  using pointer         = typename CONT::pointer;
+  using reference       = typename CONT::reference;
+  using iterator        = typename CONT::iterator;
+  using size_type       = typename CONT::size_type;
+  using difference_type = typename CONT::difference_type;
+  using const_pointer   = const T* const*;
+  using const_reference = const T* const&;
+
+  struct make_const
+  {
+    const T* operator() (const T* x) const { return x; }
+  };
+  using const_iterator =
+    boost::transform_iterator<make_const, typename CONT::const_iterator>;
+
   //
   // default constructor for rootcint
 #ifdef __CINT__ 
@@ -104,10 +112,10 @@ public:
   bool empty() const { return m_hitvector.empty(); } 
 
   const_iterator begin() const 
-    { return m_hitvector.begin(); } 
+    { return const_iterator (m_hitvector.begin(), make_const()); }
   
   const_iterator end() const 
-    { return m_hitvector.end(); } 
+    { return const_iterator (m_hitvector.end(), make_const()); } 
   
   iterator begin()  
     { return m_hitvector.begin(); } 
@@ -118,8 +126,9 @@ public:
   size_type size() const { return m_hitvector.size(); }
   
   void push_back(T* t ) { m_hitvector.push_back(t);} 
+  void push_back(std::unique_ptr<T> t ) { m_hitvector.push_back(t.release());} 
 
-  T* At(unsigned int pos) const {
+  const T* At(unsigned int pos) const {
 	  return m_hitvector.at(pos);
 	  }
   
