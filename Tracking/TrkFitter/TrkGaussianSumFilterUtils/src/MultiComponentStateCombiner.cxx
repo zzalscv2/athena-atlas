@@ -12,6 +12,7 @@
 
 #include "TrkGaussianSumFilterUtils/MultiComponentStateCombiner.h"
 #include "TrkGaussianSumFilterUtils/MultiComponentStateModeCalculator.h"
+#include "TrkGaussianSumFilterUtils/QuickCloseComponentsMultiStateMerger.h"
 //
 #include "CxxUtils/phihelper.h"
 #include "TrkParameters/TrackParameters.h"
@@ -248,7 +249,8 @@ Trk::MultiComponentStateCombiner::combineWithWeight(
     finalParameters, finalWeight, secondParameters, secondWeight);
 
   const AmgSymMatrix(5)* firstMeasuredCov = firstTrackParameters->covariance();
-  const AmgSymMatrix(5)* secondMeasuredCov = secondTrackParameters->covariance();
+  const AmgSymMatrix(5)* secondMeasuredCov =
+    secondTrackParameters->covariance();
   // Check to see if first track parameters are measured or not
   if (firstMeasuredCov && secondMeasuredCov) {
     AmgSymMatrix(5) finalMeasuredCov(*firstMeasuredCov);
@@ -315,5 +317,97 @@ Trk::MultiComponentStateCombiner::combineCovWithWeight(
   firstMeasuredCov /= totalWeight;
   firstMeasuredCov += firstWeight * secondWeight * parameterDifference *
                       parameterDifference.transpose();
+}
+
+// The following does heave use of Eigen
+// for covariance. Avoid out-of-line calls
+// to Eigen
+#if defined(__GNUC__)
+[[gnu::flatten]]
+#endif
+Trk::MultiComponentState
+Trk::MultiComponentStateCombiner::combine(
+  const Trk::MultiComponentState& forwardsMultiState,
+  const Trk::MultiComponentState& smootherMultiState,
+  unsigned int maximumNumberOfComponents)
+{
+
+  std::unique_ptr<Trk::MultiComponentState> combinedMultiState =
+    std::make_unique<Trk::MultiComponentState>();
+
+  // Loop over all components in forwards multi-state
+  for (const auto& forwardsComponent : forwardsMultiState) {
+    // Need to check that all components have associated weight matricies
+    const AmgSymMatrix(5)* forwardMeasuredCov =
+      forwardsComponent.first->covariance();
+    // Loop over all components in the smoother multi-state
+    for (const auto& smootherComponent : smootherMultiState) {
+      // Need to check that all components have associated weight matricies
+      const AmgSymMatrix(5)* smootherMeasuredCov =
+        smootherComponent.first->covariance();
+      if (!smootherMeasuredCov && !forwardMeasuredCov) {
+        return {};
+      }
+
+      if (!forwardMeasuredCov) {
+        Trk::ComponentParameters smootherComponentOnly(
+          smootherComponent.first->clone(), smootherComponent.second);
+        combinedMultiState->push_back(std::move(smootherComponentOnly));
+        continue;
+      }
+
+      if (!smootherMeasuredCov) {
+        Trk::ComponentParameters forwardComponentOnly(
+          forwardsComponent.first->clone(), forwardsComponent.second);
+        combinedMultiState->push_back(std::move(forwardComponentOnly));
+        continue;
+      }
+
+      const AmgSymMatrix(5) summedCovariance =
+        *forwardMeasuredCov + *smootherMeasuredCov;
+      const AmgSymMatrix(5) K =
+        *forwardMeasuredCov * summedCovariance.inverse();
+      const AmgVector(5) newParameters =
+        forwardsComponent.first->parameters() +
+        K * (smootherComponent.first->parameters() -
+             forwardsComponent.first->parameters());
+      const AmgVector(5) parametersDiff =
+        forwardsComponent.first->parameters() -
+        smootherComponent.first->parameters();
+
+      AmgSymMatrix(5) covarianceOfNewParameters =
+        AmgSymMatrix(5)(K * *smootherMeasuredCov);
+
+      std::unique_ptr<Trk::TrackParameters> combinedTrackParameters =
+        (forwardsComponent.first)
+          ->associatedSurface()
+          .createUniqueTrackParameters(newParameters[Trk::loc1],
+                                       newParameters[Trk::loc2],
+                                       newParameters[Trk::phi],
+                                       newParameters[Trk::theta],
+                                       newParameters[Trk::qOverP],
+                                       std::move(covarianceOfNewParameters));
+      const AmgSymMatrix(5) invertedSummedCovariance =
+        summedCovariance.inverse();
+      // Determine the scaling factor for the new weighting. Determined from the
+      // PDF of the many-dimensional gaussian
+      double exponent =
+        parametersDiff.transpose() * invertedSummedCovariance * parametersDiff;
+      double weightScalingFactor = exp(-0.5 * exponent);
+      double combinedWeight = smootherComponent.second *
+                              forwardsComponent.second * weightScalingFactor;
+      Trk::ComponentParameters combinedComponent(
+        std::move(combinedTrackParameters), combinedWeight);
+      combinedMultiState->push_back(std::move(combinedComponent));
+    }
+  }
+  // Component reduction on the combined state
+  Trk::MultiComponentState mergedState =
+    Trk::QuickCloseComponentsMultiStateMerger::merge(
+      std::move(*combinedMultiState), maximumNumberOfComponents);
+  // Before return the weights of the states need to be renormalised to one.
+  Trk::MultiComponentStateHelpers::renormaliseState(mergedState);
+
+  return mergedState;
 }
 

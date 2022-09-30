@@ -11,7 +11,6 @@
 
 #include "TrkGaussianSumFilter/IMultiStateExtrapolator.h"
 #include "TrkGaussianSumFilterUtils/GsfMeasurementUpdator.h"
-#include "TrkGaussianSumFilterUtils/QuickCloseComponentsMultiStateMerger.h"
 //
 #include "TrkMultiComponentStateOnSurface/MultiComponentStateOnSurface.h"
 //
@@ -119,7 +118,7 @@ private:
     const ParticleHypothesis particleHypothesis = nonInteracting) const;
 
   /** Gsf smoothe trajectory*/
-  MultiTrajectory fit(
+  MultiTrajectory smootherFit(
     const EventContext& ctx,
     Trk::IMultiStateExtrapolator::Cache&,
     const MultiTrajectory&,
