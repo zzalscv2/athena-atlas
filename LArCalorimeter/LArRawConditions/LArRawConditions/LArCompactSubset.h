@@ -1,6 +1,6 @@
 // This file's extension implies that it's C, but it's really -*- C++ -*-.
 /*
-  Copyright (C) 2002-2020 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
 */
 /**
  * @file LArRawConditions/LArCompactSubset.h
@@ -272,14 +272,14 @@ public:
     /**
      * @brief Constructor from channel index and subset reference.
      */
-    const_iterator (unsigned int chan, LArCompactSubsetVector& subset);
+    const_iterator (unsigned int chan, const LArCompactSubsetVector& subset);
 
 
     /**
      * @brief Iterator dereference.
      * Yields a channel proxy.
      */
-    LArCompactSubsetChannelProxy operator*() const;
+    LArCompactSubsetConstChannelProxy operator*() const;
 
 
     /**
@@ -319,7 +319,7 @@ public:
     unsigned int m_chan;
 
     /// Subset within which we live.
-    LArCompactSubsetVector* m_subset;
+    const LArCompactSubsetVector* m_subset;
   };
 
 
@@ -346,7 +346,14 @@ public:
    * @brief Vector indexing.  Returns a channel proxy.
    * @param i Channel index within the vector.
    */
-  LArCompactSubsetChannelProxy operator[] (size_t i) const;
+  LArCompactSubsetChannelProxy operator[] (size_t i);
+
+
+  /**
+   * @brief Vector indexing.  Returns a channel proxy.
+   * @param i Channel index within the vector.
+   */
+  LArCompactSubsetConstChannelProxy operator[] (size_t i) const;
 
 
   /// Begin iterator.
@@ -446,7 +453,13 @@ public:
   /**
    * @brief `Dereference' the pointer.
    */
-  LArCompactSubsetChannelVector operator*() const;
+  LArCompactSubsetChannelVector operator*();
+
+
+  /**
+   * @brief `Dereference' the pointer.
+   */
+  LArCompactSubsetConstChannelVector operator*() const;
 
 
   /**
@@ -571,14 +584,14 @@ public:
      * @brief Adjust iterator.
      * @param delta Amount by which to advance the iterator.
      */
-    iterator operator+ (size_t delta) const;
+    iterator operator+ (size_t delta);
 
 
     /**
      * @brief Iterator difference.
      * @param other Other iterator for difference.
      */
-    difference_type operator- (const iterator& other) const;
+    difference_type operator- (const iterator& other);
 
 
   private:
