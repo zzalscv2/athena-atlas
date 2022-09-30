@@ -167,7 +167,7 @@ StatusCode Pythia8B_i::callGenerator(){
     
     if(useRndmGenSvc() && Pythia8B_i::p_AtRndmGenSvc){
         // Save the random number seeds in the event
-        CLHEP::HepRandomEngine*  engine  = Pythia8B_i::p_AtRndmGenSvc->GetEngine(Pythia8_i::pythia_stream);
+        CLHEP::HepRandomEngine*  engine  = Pythia8B_i::p_AtRndmGenSvc->GetEngine(Pythia8_i::pythia_stream());
         const long* s =  engine->getSeeds();
         m_seeds.clear();
         m_seeds.push_back(s[0]);
