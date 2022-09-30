@@ -200,7 +200,6 @@ class MonitorDef:
                     # "L1_ALFA_ANY", "L1_ALFA_B7L1U", "L1_ALFA_B7L1L", "L1_ALFA_A7L1U", "L1_ALFA_A7L1L", "L1_ALFA_A7R1U", "L1_ALFA_A7R1L", "L1_ALFA_B7R1U", "L1_ALFA_B7R1L",
                     # "L1_ZDC_A", "L1_ZDC_C", "L1_ZDC_AND",
                     "L1_LUCID_A", "L1_LUCID_C",
-                    "L1_BPTX0_BGRP12","L1_BPTX1_BGRP12",
                     "L1_CALREQ2",
                     "L1_TGC_BURST",
                     "L1_TRT_FILLED",
@@ -254,17 +253,202 @@ class MonitorDef:
         else:
             monItems[TBP|TAP|TAV] = [
                 "L1_EM12", # keep for LUMI group
-
-#                "L1_MU8F","L1_MU8VF","L1_MU14FCH", "L1_MU14FCHR",
-#                "L1_J100", "L1_J75p31ETA49","L1_J30p31ETA49",
-#                "L1_XE35", "L1_XE50",
-#                #"L1_MBTS_4_A", "L1_MBTS_4_C", "L1_MBTS_1_A", "L1_MBTS_1_C", "L1_MBTS_1", "L1_MBTS_2", "L1_MBTS_1_1",
-#                #"L1_ALFA_ANY", "L1_ALFA_B7L1U", "L1_ALFA_B7L1L", "L1_ALFA_A7L1U", "L1_ALFA_A7L1L", "L1_ALFA_A7R1U", "L1_ALFA_A7R1L", "L1_ALFA_B7R1U", "L1_ALFA_B7R1L",
-#                #"L1_ZDC_A", "L1_ZDC_C", "L1_ZDC_AND",
-#                #"L1_BPTX0_BGRP12","L1_BPTX1_BGRP12",
-#                "L1_CALREQ2",
-#                "L1_TGC_BURST",
-#                "L1_MU8VF_2MU5VF",
+                # Random
+                "L1_RD0_FILLED",
+                # Detector
+                "L1_CALREQ1", "L1_CALREQ2",
+                "L1_BPTX0_BGRP12","L1_BPTX1_BGRP12",
+                "L1_TGC_BURST",
+                "L1_ZB",
+                # Forward
+                # AFP
+                "L1_AFP_A", "L1_AFP_C",
+                "L1_AFP_A_OR_C", "L1_AFP_A_AND_C",
+                # AFP Calib
+                "L1_AFP_FSA_BGRP12",
+                "L1_AFP_FSA_TOF_T0_BGRP12",
+                "L1_AFP_FSA_TOF_T1_BGRP12",
+                "L1_AFP_FSA_TOF_T2_BGRP12",
+                "L1_AFP_FSA_TOF_T3_BGRP12",
+                "L1_AFP_FSC_BGRP12",
+                "L1_AFP_FSC_TOF_T0_BGRP12",
+                "L1_AFP_FSC_TOF_T1_BGRP12",
+                "L1_AFP_FSC_TOF_T2_BGRP12",
+                "L1_AFP_FSC_TOF_T3_BGRP12",
+                "L1_AFP_NSA_BGRP12",
+                "L1_AFP_NSC_BGRP12",
+                # AFP combined
+                "L1_AFP_A_AND_C_J12",
+                "L1_AFP_A_AND_C_MBTS_2",
+                "L1_AFP_A_AND_C_TOF_J20",
+                "L1_AFP_A_AND_C_TOF_J30",
+                "L1_AFP_A_AND_C_TOF_J50",
+                "L1_AFP_A_AND_C_TOF_J75",
+                "L1_AFP_A_AND_C_TOF_T0T1",
+                "L1_AFP_A_AND_C_TOF_T0T1_J20",
+                "L1_AFP_A_AND_C_TOF_T0T1_J30",
+                "L1_AFP_A_AND_C_TOF_T0T1_J50",
+                "L1_AFP_A_AND_C_TOF_T0T1_J75",
+                "L1_AFP_A_AND_C_TOF_T0T1_jJ125",
+                "L1_AFP_A_AND_C_TOF_T0T1_jJ50",
+                "L1_AFP_A_AND_C_TOF_T0T1_jJ60",
+                "L1_AFP_A_AND_C_TOF_T0T1_jJ90",
+                "L1_AFP_A_AND_C_TOF_jJ125",
+                "L1_AFP_A_AND_C_TOF_jJ50",
+                "L1_AFP_A_AND_C_TOF_jJ60",
+                "L1_AFP_A_AND_C_TOF_jJ90",
+                "L1_AFP_A_AND_C_jJ20",
+                "L1_AFP_A_AND_C_jJ30",
+                "L1_AFP_A_OR_C_EMPTY",
+                "L1_AFP_A_OR_C_FIRSTEMPTY",
+                "L1_AFP_A_OR_C_J12",
+                "L1_AFP_A_OR_C_MBTS_2",
+                "L1_AFP_A_OR_C_UNPAIRED_ISO",
+                "L1_AFP_A_OR_C_UNPAIRED_NONISO",
+                "L1_AFP_A_OR_C_jJ20",
+                "L1_AFP_A_OR_C_jJ30",
+                # ALFA
+                "L1_ALFA_ANY",
+                "L1_ALFA_A7L1L", "L1_ALFA_A7L1U", "L1_ALFA_A7R1L", "L1_ALFA_A7R1U",
+                "L1_ALFA_B7L1L", "L1_ALFA_B7L1U", "L1_ALFA_B7R1L", "L1_ALFA_B7R1U",
+                "L1_ALFA_ELAST15", "L1_ALFA_ELAST18",
+                "L1_ALFA_SYST9", "L1_ALFA_SYST10", "L1_ALFA_SYST11",
+                "L1_ALFA_SYST12", "L1_ALFA_SYST17", "L1_ALFA_SYST18",
+                # ZDC
+                # Basic inputs
+                "L1_ZDC_BIT0", "L1_ZDC_BIT1", "L1_ZDC_BIT2",
+                "L1_ZDC_COMB0", "L1_ZDC_COMB1", "L1_ZDC_COMB2", "L1_ZDC_COMB3",
+                "L1_ZDC_COMB4", "L1_ZDC_COMB5", "L1_ZDC_COMB6", "L1_ZDC_COMB7",
+                #
+                "L1_ZDC_A", "L1_ZDC_C", "L1_ZDC_A_C",
+                "L1_ZDC_AND", "L1_ZDC_A_AND_C",
+                "L1_ZDC_E1_AND_E1", "L1_ZDC_E2_AND_E2", "L1_ZDC_E2_AND_E3", "L1_ZDC_E3_AND_E3",
+                "L1_ZDC_E1_AND_E2ORE3", 
+                "L1_ZDC_OR", "L1_ZDC_OR_EMPTY", "L1_ZDC_OR_UNPAIRED_ISO",
+                "L1_ZDC_XOR_E1_E3", "L1_ZDC_XOR_E2",
+                # Vetos
+                "L1_ZDC_A_C_VTE50",
+                "L1_ZDC_A_VZDC_C_VTE200",
+                "L1_ZDC_C_VZDC_A_VTE200",
+                "L1_VZDC_A_VZDC_C_TE5_VTE200",
+                # LHCF
+                "L1_LHCF",
+                # MBTS
+                "L1_MBTS_A",
+                "L1_MBTS_C",
+                "L1_MBTS_1", "L1_MBTS_2", "L1_MBTS_1_1",
+                "L1_MBTS_1_EMPTY", "L1_MBTS_1_UNPAIRED_ISO",
+                "L1_MBTS_2_EMPTY", "L1_MBTS_2_UNPAIRED_ISO",
+                "L1_MBTS_1_1_EMPTY", "L1_MBTS_1_1_UNPAIRED_ISO",
+                "L1_MBTS_2_2", "L1_MBTS_3_3", "L1_MBTS_4_4",
+                "L1_MBTS_1_VTE50", "L1_MBTS_1_1_VTE50", "L1_MBTS_1_VTE200",
+                "L1_MBTS_1_A_ALFA_C", "L1_MBTS_1_C_ALFA_A",
+                "L1_MBTS_1_ZDC_A_VZDC_C_VTE200",
+                "L1_MBTS_1_ZDC_C_VZDC_A_VTE200",
+                # LAr Zee
+                "L1_LAR-ZEE",
+                "L1_LAR-ZEE-eEM",
+                # Background
+                "L1_BCM_2A_EMPTY", "L1_BCM_2C_EMPTY",
+                "L1_BCM_AC_CA_BGRP12", "L1_BCM_AC_UNPAIRED_ISO", "L1_BCM_CA_UNPAIRED_ISO",
+                "L1_BCM_Wide_BGRP12",
+                # Muons
+                "L1_MU3V", "L1_MU3VF", "L1_MU5VF",
+                "L1_MU8F", "L1_MU8VF", "L1_MU10BOM",
+                "L1_MU14FCH", "L1_MU14FCHR", "L1_MU15VFCH",
+                "L1_MU3V_EMPTY",
+                "L1_MU3V_FIRSTEMPTY",
+                "L1_MU5VF_EMPTY",
+                "L1_2MU3V", "L1_2MU5VF",
+                "L1_2MU8F",
+                "L1_MU5VF_2MU3V",
+                "L1_MU8VF_2MU5VF",
+                "L1_MU5VF_3MU3V", "L1_2MU5VF_3MU3V",
+                "L1_3MU3V", "L1_3MU5VF", "L1_4MU3V",
+                "L1_2MU14FCH_OVERLAY",
+                # Mu+X
+                "L1_MU3V_J12",
+                "L1_MU3V_ALFA_ANY",
+                "L1_MU3V_ALFA_EINE",
+                "L1_MU3V_VTE50",
+                "L1_MU5VF_VTE50",
+                "L1_MU5VF_AFP_A_OR_C",
+                "L1_2MU3V_VTE50",
+                # Legacy L1Calo
+                # EM
+                "L1_EM3", "L1_EM10", "L1_EM20VHI",
+                "L1_EM7_VTE200",
+                "L1_EM3_ALFA_ANY",
+                "L1_EM3_ALFA_EINE",
+                "L1_2EM3_ALFA_EINE",
+                "L1_EM7_AFP_A_OR_C",
+                # Tau
+                "L1_TAU8", "L1_TAU12IM",
+                "L1_TAU1_TE3_VTE200",
+                "L1_2TAU1_VTE50",
+                # Jet
+                "L1_J30", "L1_J50",
+                "L1_J20p31ETA49", "L1_J30p31ETA49",
+                "L1_2J15",
+                "L1_J12_EMPTY",
+                "L1_J40_XE50",
+                "L1_J12_ALFA_ANY", "L1_J12_ALFA_EINE", "L1_J12_VTE200",
+                # TE
+                "L1_TE3", "L1_TE5",
+                "L1_TE20", "L1_TE50",
+                "L1_TE100", "L1_TE200",
+                "L1_TE10000", "L1_TE12000",
+                #
+                "L1_TE3_VTE200",
+                "L1_TE3_VTE50",
+                "L1_TE5_VTE50",
+                "L1_TE5_VTE200",
+                "L1_TE20_VTE200",
+                "L1_TE50_VTE200",
+                #
+                "L1_TE7p0ETA49",
+                "L1_TE600p0ETA49",
+                "L1_TE1500p0ETA49",
+                "L1_TE3000p0ETA49",
+                "L1_TE1500p0ETA49_OVERLAY",
+                "L1_TE3000p0ETA49_OVERLAY",
+                "L1_TE3500p0ETA49_OVERLAY",
+                "L1_TE6500p0ETA49_OVERLAY",
+                "L1_TE8000p0ETA49_OVERLAY",
+                #
+                "L1_TE5_ZDC_A_VZDC_C_VTE200",
+                "L1_TE5_ZDC_C_VZDC_A_VTE200",
+                "L1_TE20_ZDC_A_VZDC_C_VTE200",
+                "L1_TE20_ZDC_C_VZDC_A_VTE200",
+                #
+                "L1_TE3p0ETA49_ZDC_A_VZDC_C_VTE200",
+                "L1_TE3p0ETA49_ZDC_C_VZDC_A_VTE200",
+                #
+                "L1_TE5_ALFA_ANY",
+                "L1_TE5_ALFA_EINE",
+                #
+                "L1_VTE20", "L1_VTE50", "L1_VTE200",
+                # TRT
+                "L1_TRT_VTE50", "L1_TRT_VTE200",
+                # XE
+                "L1_XE30", "L1_XE35", "L1_XE50", "L1_XE60",
+                # Phase-I L1Calo
+                "L1_eEM5", "L1_eEM9", "L1_eEM15",
+                "L1_eEM18", "L1_eEM18L",
+                "L1_eEM26", "L1_eEM26M",
+                "L1_2eEM18L",
+                #
+                "L1_eTAU12",
+                #
+                "L1_jJ20", "L1_jJ30", "L1_jJ40", "L1_jJ50",
+                "L1_jJ55", "L1_jJ60", "L1_jJ90",
+                "L1_jJ500", "L1_jJ500_LAR",
+                "L1_jJ40p31ETA49", "L1_jJ50p31ETA49", "L1_jJ60p31ETA49",
+                "L1_jJ90p31ETA49",
+                #
+                "L1_gTE200",
+                #
+                "L1_eEM9_AFP_A_AND_C", "L1_eEM9_AFP_A_OR_C",
                 ]
 
         monItemsHF[TBP|TAP|TAV] = [

@@ -109,20 +109,15 @@ class FlagAddress(object):
         # after basically above stops are repeated
 
         merged = self._name + "." + name
-        _msg.debug("Flags addr __getattr__ %s", merged )
         if self._flags.hasFlag( merged ):
-            _msg.debug("Flags addr __getattr__ there %s", merged )
             return self._flags._get( merged )
 
         if self._flags.hasCategory( merged ): # the flag name is not complete yet
-            _msg.debug("Flags addr __getattr__ category there %s", merged )
             return FlagAddress( self, name )
 
-        _msg.debug("Flags addr __getattr__ need dynaload %s", merged  )
         self._flags._loadDynaFlags( merged )
 
         if self._flags.hasCategory( merged ): # the flag name is not complete yet
-            _msg.debug("Flags addr __getattr__ category there after dynaload %s", merged )
             return FlagAddress( self, name )
 
         if self._flags.hasFlag( merged ):
@@ -182,7 +177,6 @@ class AthConfigFlags(object):
         return hash(str(self._flagdict.items()))
 
     def __getattr__(self, name):
-        _msg.debug("AthConfigFlags __getattr__ %s", name )
         if name in self._flagdict:
             return self._get(name)
         return FlagAddress(self, name)
@@ -191,7 +185,6 @@ class AthConfigFlags(object):
         if name.startswith("_"):
             return object.__setattr__(self, name, value)
 
-        _msg.debug("AthConfigFlags __getattr__ %s", name )
         if name in self._flagdict:
             return self._set(name, value)
         raise RuntimeError( "No such flag: "+ name+". The name is likely incomplete." )
@@ -269,7 +262,6 @@ class AthConfigFlags(object):
     def hasFlag(self, name):
         if name in self._flagdict:
             return True
-        _msg.debug("Flag %s absent, possibly not loaded yet?", name )
         return False
 
     def _set(self,name,value):

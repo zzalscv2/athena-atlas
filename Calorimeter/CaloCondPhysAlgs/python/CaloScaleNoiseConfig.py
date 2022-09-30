@@ -9,7 +9,7 @@ from LArCalibUtils.LArHVScaleConfig import LArHVScaleCfg
 from IOVDbSvc.IOVDbSvcConfig import addOverride
 from AthenaCommon.Logging import logging
 
-def CaloScaleNoiseCfg(flagsIn,absolute=True,mu=60,dt=25):
+def CaloScaleNoiseCfg(flagsIn,absolute=True,mu=60,dt=25,output='cellnoise_data.root'):
 
     #Clone flags-container and modify it, since this is not a standard reco job
     flags=flagsIn.clone()
@@ -64,7 +64,7 @@ def CaloScaleNoiseCfg(flagsIn,absolute=True,mu=60,dt=25):
     rootfile="cellnoise_data.root"
     if os.path.exists(rootfile):
         os.remove(rootfile)
-    result.addService(CompFactory.THistSvc(Output = ["file1 DATAFILE='cellnoise_data.root' OPT='RECREATE'"]))
+    result.addService(CompFactory.THistSvc(Output = ["file1 DATAFILE='"+output+"' OPT='RECREATE'"]))
     result.setAppProperty("HistogramPersistency","ROOT")
 
     return result
@@ -75,6 +75,8 @@ if __name__=="__main__":
     parser= argparse.ArgumentParser(description="(Re-)scale noise based on HV DCS values")
     parser.add_argument('datestamp',help="time specification like 2007-05-25:14:01:00")
     parser.add_argument('-a', '--absolute', action="store_true", help="Absolute rescaling based on noise derived from MC")
+    parser.add_argument('-t', '--globaltag', type=str, help="Global conditions tag ")
+    parser.add_argument('-o', '--output',type=str,default="hvcorr",help="name stub for root and sqlite output files")
     args = parser.parse_args()
     print(args)
 
@@ -91,11 +93,10 @@ if __name__=="__main__":
 
 
     from LArCalibProcessing.TimeStampToRunLumi import TimeStampToRunLumi
-    
     rlb=TimeStampToRunLumi(TimeStamp_ns)
     if rlb is None:
-        print("WARNING: Failed to convert time",TimeStamp_ns,"into a run/lumi number")
-        sys.exit(-1)
+        rlb=[0xFFFFFFFF-1,0]
+        print("WARNING: Failed to convert time",TimeStamp_ns,"into a run/lumi number. Using 'infinite' run-number",rlb[0])
 
 
     from AthenaConfiguration.AllConfigFlags import ConfigFlags
@@ -104,11 +105,13 @@ if __name__=="__main__":
     ConfigFlags.Input.TimeStamp=TimeStamp
     ConfigFlags.Input.Files=[]
     ConfigFlags.IOVDb.DatabaseInstance="CONDBR2"
-
+  
+    if args.globaltag:
+        ConfigFlags.IOVDb.GlobalTag=args.globaltag
 
     ConfigFlags.lock()
     cfg=MainEvgenServicesCfg(ConfigFlags)
-    cfg.merge(CaloScaleNoiseCfg(ConfigFlags,absolute=args.absolute))
+    cfg.merge(CaloScaleNoiseCfg(ConfigFlags,absolute=args.absolute,output=args.output))
 
     print("Start running...")
     cfg.run(1)

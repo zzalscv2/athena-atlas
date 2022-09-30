@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2017 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef TSplineReweight_h
@@ -30,7 +30,7 @@ public:
   
   virtual std::string str() const;
 
-  virtual TCanvas* DrawCorr() const;
+  virtual TCanvas* DrawCorr();
 
   ClassDef(TSplineReweight,1)  //TSplineReweight
 };

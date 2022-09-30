@@ -30,6 +30,7 @@ StatusCode TrigEgammaPrecisionElectronHypoTool::initialize()
   ATH_MSG_DEBUG( "dPHICLUSTERthr = " << m_dphicluster );
   ATH_MSG_DEBUG( "dETACLUSTERthr = " << m_detacluster );
   ATH_MSG_DEBUG( "d0Cut          = " << m_d0 );
+  ATH_MSG_DEBUG( "DoNoPid        = " << m_doNoPid );
   
   if ( m_etabin.empty() ) {
     ATH_MSG_ERROR(  " There are no cuts set (EtaBins property is an empty list)" );
@@ -80,7 +81,7 @@ bool TrigEgammaPrecisionElectronHypoTool::decide( const ITrigEgammaPrecisionElec
   auto roiDescriptor = input.roi;
 
 
-  if ( fabs( roiDescriptor->eta() ) > 2.6 ) {
+  if ( std::abs( roiDescriptor->eta() ) > 2.6 ) {
       ATH_MSG_DEBUG( "REJECT The electron had eta coordinates beyond the EM fiducial volume : " << roiDescriptor->eta() << "; stop the chain now" );       
       return false;
   } 
@@ -94,7 +95,7 @@ bool TrigEgammaPrecisionElectronHypoTool::decide( const ITrigEgammaPrecisionElec
   double phiRef = roiDescriptor->phi();
   ATH_MSG_DEBUG("etaRef: "<<etaRef);
   // correct phi the to right range ( probably not needed anymore )   
-  if ( fabs( phiRef ) > M_PI ) phiRef -= 2*M_PI; // correct phi if outside range
+  if ( std::abs( phiRef ) > M_PI ) phiRef -= 2*M_PI; // correct phi if outside range
   
   ATH_MSG_DEBUG("AcceptAll: "<<m_acceptAll);
 
@@ -103,7 +104,7 @@ bool TrigEgammaPrecisionElectronHypoTool::decide( const ITrigEgammaPrecisionElec
      pass = false;
      auto pClus = input.electron->caloCluster();
   
-     float absEta = fabs( pClus->eta() );
+     float absEta = std::abs( pClus->eta() );
   
      ATH_MSG_DEBUG("absEta: "<<absEta);
 
@@ -113,7 +114,7 @@ bool TrigEgammaPrecisionElectronHypoTool::decide( const ITrigEgammaPrecisionElec
   
      dEta =  pClus->eta() - etaRef;
      //  Deal with angle diferences greater than Pi
-     dPhi =  fabs( pClus->phi() - phiRef );
+     dPhi =  std::abs( pClus->phi() - phiRef );
      dPhi = ( dPhi < M_PI ? dPhi : 2*M_PI - dPhi ); // TB why only <
      ET  = pClus->et();
      eta = pClus->eta();
@@ -127,7 +128,7 @@ bool TrigEgammaPrecisionElectronHypoTool::decide( const ITrigEgammaPrecisionElec
                   << " cut: <"   << m_detacluster );
 
   
-     if ( fabs( pClus->eta() - etaRef ) > m_detacluster ) {
+     if ( std::abs( pClus->eta() - etaRef ) > m_detacluster ) {
        ATH_MSG_DEBUG("REJECT Electron dEta cut failed");
        return pass;
      }
@@ -166,7 +167,11 @@ bool TrigEgammaPrecisionElectronHypoTool::decide( const ITrigEgammaPrecisionElec
      }
      mon_ET = ET; 
      PassedCuts = PassedCuts + 1; // ET_em
-  
+     
+     if(m_doNoPid){
+       pass = true;
+       return pass;
+     }
      // d0 for LRT
      if (m_d0 and m_d0>0.)
      {
@@ -345,3 +350,4 @@ StatusCode TrigEgammaPrecisionElectronHypoTool::decide( std::vector<ElectronInfo
   }
   return StatusCode::SUCCESS;
 }
+

@@ -7,8 +7,6 @@
 # Brief: Test for TileCellBuilderFromHit.
 #
 
-from __future__ import print_function
-
 
 import ROOT
 ROOT.TH1F
@@ -417,6 +415,11 @@ bct2 = make_tileBadChanTool ('tilecellbuilder_bct2',
 
 from TileConditions.TileCondToolConf import bookTileSamplingFractionCondAlg
 bookTileSamplingFractionCondAlg(source='FILE')
+
+# Disable Geant version checking.
+from AthenaCommon.AlgSequence import AthSequencer
+condSeq = AthSequencer("AthCondSeq")
+condSeq.TileSamplingFractionCondAlg.G4Version = -1
 
 from TileRecUtils.TileRecUtilsConf import TileCellBuilderFromHit
 

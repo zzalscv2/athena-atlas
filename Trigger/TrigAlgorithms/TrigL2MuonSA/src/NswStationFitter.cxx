@@ -272,7 +272,7 @@ StatusCode TrigL2MuonSA::NswStationFitter::findStgcHitsInSegment(TrigL2MuonSA::S
   if(hitsInRoad == 0) return StatusCode::SUCCESS;
   
   if(hitsInRoad < 9) {
-    ATH_MSG_INFO("Number of STGC hits is too small, at least 9 hits required : "<<hitsInRoad<<" hits");
+    ATH_MSG_DEBUG("Number of STGC hits is too small, at least 9 hits required : "<<hitsInRoad<<" hits");
     return StatusCode::SUCCESS;
     } else if(hitsInRoad > 100) {
     ATH_MSG_WARNING("Number of STGC hits is too large, at most 100 hits allowed : "<<hitsInRoad<<" hits");
@@ -1182,7 +1182,7 @@ StatusCode TrigL2MuonSA::NswStationFitter::findMmHitsInSegment(TrigL2MuonSA::MmH
   if(hitsInRoad == 0) return StatusCode::SUCCESS;
   
   if(hitsInRoad < 6) {
-    ATH_MSG_INFO("Number of MM hits is too small, at least 6 hits required : "<<hitsInRoad<<" hits");
+    ATH_MSG_DEBUG("Number of MM hits is too small, at least 6 hits required : "<<hitsInRoad<<" hits");
     return StatusCode::SUCCESS;
     } else if(hitsInRoad > 100) {
     ATH_MSG_WARNING("Number of MM hits is too large, at most (2^16 - 1) hits allowed : "<<hitsInRoad<<" hits");

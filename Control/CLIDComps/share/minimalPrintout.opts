@@ -1,3 +1,6 @@
+//
+// Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+//
 //Joboptions to minimize printout when running genCLIDDB
 //based on example in POOLRootAccess/basic.opts
 //Author: Will Buttinger
@@ -9,3 +12,6 @@ ApplicationMgr.EventLoop = "MinimalEventLoopMgr"; //for minimal service creation
 //Quieten a few components
 MessageSvc.setWarning = {"ClassIDSvc"};
 MessageSvc.setWarning += {"ApplicationMgr"};
+
+// Do not look for any existing clid.db files during CLID file generation.
+ClassIDSvc.CLIDDBFiles = {};

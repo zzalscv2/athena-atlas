@@ -5,7 +5,10 @@
 #ifndef TFCSHitCellMappingWiggle_h
 #define TFCSHitCellMappingWiggle_h
 
-#include "CxxUtils/checker_macros.h"
+#ifndef __FastCaloSimStandAlone__ 
+  #include "CxxUtils/checker_macros.h"  
+#endif
+
 #include "ISF_FastCaloSimEvent/TFCSHitCellMapping.h"
 
 #ifdef USE_GPU

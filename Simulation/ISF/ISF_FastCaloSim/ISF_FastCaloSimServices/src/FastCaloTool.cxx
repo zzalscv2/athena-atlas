@@ -129,7 +129,9 @@ StatusCode ISF::FastCaloTool::setupEventST()
         ATH_MSG_FATAL( "Could not retrieve CaloCellContainer " << m_caloCellsOutputName );
         return StatusCode::FAILURE;
       }
-    m_theContainer = const_cast<CaloCellContainer *> (theConstContainer);
+    // this is only used if m_caloCellHack and there is a warning during initialize
+    auto cc_nc ATLAS_THREAD_SAFE = const_cast<CaloCellContainer *> (theConstContainer);
+    m_theContainer = cc_nc;
   }
 
   return this->commonSetup();
@@ -150,7 +152,9 @@ StatusCode ISF::FastCaloTool::setupEvent(const EventContext&)
       ATH_MSG_FATAL( "Could not retrieve CaloCellContainer " << m_caloCellsOutputName );
       return StatusCode::FAILURE;
     }
-    m_theContainer = const_cast<CaloCellContainer *> (theConstContainer);
+    // this is only used if m_caloCellHack and there is a warning during initialize
+    auto cc_nc ATLAS_THREAD_SAFE = const_cast<CaloCellContainer *> (theConstContainer);
+    m_theContainer = cc_nc;
   }
 
   return this->commonSetup();

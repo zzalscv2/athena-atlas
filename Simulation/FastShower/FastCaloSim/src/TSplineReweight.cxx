@@ -44,7 +44,7 @@ std::string TSplineReweight::str() const
   return out.str();
 }
 
-TCanvas* TSplineReweight::DrawCorr() const
+TCanvas* TSplineReweight::DrawCorr()
 {
   TCanvas* c=new TCanvas(gen_name().c_str(),str().c_str());
   m_spline->Draw();

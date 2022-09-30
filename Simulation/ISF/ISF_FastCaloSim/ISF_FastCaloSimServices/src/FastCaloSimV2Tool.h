@@ -17,6 +17,7 @@
 #include "CaloInterface/ICaloCellMakerTool.h"
 
 #include "AthenaKernel/IAthRNGSvc.h"
+#include "CxxUtils/checker_macros.h"
 
 #include "AtlasDetDescr/AtlasDetectorID.h"
 #include "CaloIdentifier/LArEM_ID.h"
@@ -38,7 +39,8 @@ namespace ISF {
       @author Elmar.Ritsch -at- cern.ch, Geraldine.Conti -at- cern.ch, Flavia.Dias -at- cern.ch
   */
 
-  class FastCaloSimV2Tool : public BaseSimulatorTool
+  class ATLAS_NOT_THREAD_SAFE FastCaloSimV2Tool : public BaseSimulatorTool
+  //    ^ modifies CaloCellContainer
   {
   public:
     /** Constructor with parameters */

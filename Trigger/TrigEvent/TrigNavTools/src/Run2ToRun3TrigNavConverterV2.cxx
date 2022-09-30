@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "AthLinks/ElementLinkVector.h"
@@ -7,7 +7,6 @@
 #include "xAODTrigger/TrigPassBitsContainer.h"
 #include "AthenaKernel/ClassID_traits.h"
 #include "TrigNavStructure/TriggerElement.h"
-
 #include "Run2ToRun3TrigNavConverterV2.h"
 
 namespace TCU = TrigCompositeUtils;
@@ -264,11 +263,11 @@ StatusCode Run2ToRun3TrigNavConverterV2::execute(const EventContext &context) co
     ATH_CHECK(numberOfHNodesPerProxyNotExcessive(convProxies));
   }
 
-  ATH_CHECK(createSFNodes(convProxies, *decisionOutput, m_finalTEIdsToChains, context));
-  ATH_CHECK(createL1Nodes(convProxies, *decisionOutput, context));
   ATH_CHECK(linkFeaNode(convProxies, *decisionOutput, *run2NavigationPtr, context));
   ATH_CHECK(linkRoiNode(convProxies, *run2NavigationPtr));
   ATH_CHECK(linkTrkNode(convProxies, *run2NavigationPtr));
+  ATH_CHECK(createL1Nodes(convProxies, *decisionOutput, context));
+  ATH_CHECK(createSFNodes(convProxies, *decisionOutput, m_finalTEIdsToChains, context));
   ATH_MSG_DEBUG("Conversion done, from " << convProxies.size() << " elements to " << decisionOutput->size() << " elements");
 
   // dispose temporaries
@@ -880,6 +879,10 @@ StatusCode Run2ToRun3TrigNavConverterV2::linkFeaNode(ConvProxySet_t &convProxies
       while (--feaN)
       {
         proxy->hNode.push_back(TrigCompositeUtils::newDecisionIn(&decisions, TrigCompositeUtils::hypoAlgNodeName())); // H
+        for (auto chainId : proxy->passChains) // adding hash values of active chains to expanded H nodes
+         {
+            TrigCompositeUtils::addDecisionID(chainId, proxy->hNode.back());
+         }
         // connecting to upeer IM node
         TrigCompositeUtils::linkToPrevious(proxy->hNode.back(), proxy->imNode, context); // H low IM up
         // connecting created H to IM in children proxies

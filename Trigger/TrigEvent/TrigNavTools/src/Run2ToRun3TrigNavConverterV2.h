@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
 */
 #ifndef TRIGNAVTOOLS_RUN2TORUN3TRIGNAVCONVERTERV2_H
 #define TRIGNAVTOOLS_RUN2TORUN3TRIGNAVCONVERTERV2_H
