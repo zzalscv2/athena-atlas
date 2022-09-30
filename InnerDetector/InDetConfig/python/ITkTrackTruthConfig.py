@@ -21,7 +21,9 @@ def ITkTrackTruthCfg(flags,
     # --- Detailed to old TrackTruth
     #
     from TrkConfig.TrkTruthAlgsConfig import ITkTrackTruthSimilaritySelectorCfg
-    acc.merge(ITkTrackTruthSimilaritySelectorCfg(flags, DetailedTruth, TracksTruth))
+    acc.merge(ITkTrackTruthSimilaritySelectorCfg(flags,
+                                                 DetailedTrackTruthName=DetailedTruth,
+                                                 OutputName=TracksTruth))
 
     return acc
 

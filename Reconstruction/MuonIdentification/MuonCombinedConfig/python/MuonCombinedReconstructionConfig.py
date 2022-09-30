@@ -407,7 +407,7 @@ def GetCombinedTrkContainers(flags):
                     "MSOnlyExtraPolatedMuonsLRTTrackParticles"]
         track_coll += ["CombinedMuonsLRTTracks",
                        "ExtraPolatedMuonsLRTTracks",
-                       "MSOnlyExtraPolatedMuonsLRTTracks"]
+                       "MSOnlyExtraPolatedMuonsLRTTrackParticlesTracks"]
     return tp_coll, track_coll
 
 
@@ -455,6 +455,50 @@ def MuonDecorationAlgsCfg(flags):
         result.merge(MuonPrecisionLayerDecorAlgCfg(flags, "MuonCombLRTPrecisionLayerDecorAlg",
                                                    MuonContainer="MuonsLRT",
                                                    TrackContainer=trk_cols))
+
+    return result
+
+def CombinedMuonTrackTruthAlgsCfg(flags):
+    result = ComponentAccumulator()
+    particle_cols, trk_cols = GetCombinedTrkContainers(flags)
+
+    from MuonConfig.MuonTruthAlgsConfig import MuonDetailedTrackTruthMakerCfg
+    result.merge(MuonDetailedTrackTruthMakerCfg(flags, name="MuonCombinedDetailedTrackTruthMaker",
+                                                TrackCollectionNames=trk_cols))
+
+    for i in range(len(trk_cols)):
+        from TrkConfig.TrkTruthAlgsConfig import TrackTruthSelectorCfg, TrackParticleTruthAlgCfg
+        result.merge(TrackTruthSelectorCfg(flags, tracks=trk_cols[i]))
+        result.merge(TrackParticleTruthAlgCfg(flags, tracks=trk_cols[i],
+                                              TrackParticleName=particle_cols[i]))
+
+    return result
+
+def CombinedMuonTruthAssociationAlgsCfg(flags):
+    result = ComponentAccumulator()
+    trk_cols = GetCombinedTrkContainers(flags)[0]
+
+    from MuonConfig.MuonTruthAlgsConfig import MuonTruthAssociationAlgCfg
+    result.merge(MuonTruthAssociationAlgCfg(flags))
+
+    if (flags.Detector.GeometryID and flags.InDet.Tracking.doR3LargeD0) \
+       or (flags.Detector.GeometryITk and flags.ITk.Tracking.doLargeD0):
+        result.merge(MuonTruthAssociationAlgCfg(flags, name="MuonTruthAssociationAlgLRT",
+                                                MuonContainerName="MuonsLRT",
+                                                RecoLinkName="recoMuonLinkLRT",
+                                                TrackContainers = trk_cols))
+
+    if flags.Muon.runCommissioningChain:
+        result.merge(MuonTruthAssociationAlgCfg(flags, name="MuonTruthAssociationAlg_EMEO",
+                                                MuonContainerName="EMEO_Muons",
+                                                RecoLinkName="",
+                                                TrackContainers = trk_cols))
+
+    if flags.MuonCombined.doMuGirl and flags.MuonCombined.doMuGirlLowBeta:
+        result.merge(MuonTruthAssociationAlgCfg(flags, name="MuonTruthAssociationAlgStau",
+                                                MuonContainerName="Staus",
+                                                RecoLinkName="",
+                                                TrackContainers = trk_cols))
 
     return result
 
@@ -592,7 +636,8 @@ def MuonCombinedReconstructionCfg(flags):
     result.merge(MuonCombinedInDetCandidateAlgCfg(flags))
     result.merge(MuonCombinedMuonCandidateAlgCfg(flags))
 
-    do_LRT = flags.Detector.GeometryID and flags.InDet.Tracking.doR3LargeD0
+    do_LRT = (flags.Detector.GeometryID and flags.InDet.Tracking.doR3LargeD0) \
+             or (flags.Detector.GeometryITk and flags.ITk.Tracking.doLargeD0)
     if do_LRT:
         result.merge(LRT_MuonCombinedInDetCandidateAlgCfg(flags))
 
@@ -671,6 +716,10 @@ def MuonCombinedReconstructionCfg(flags):
         MuonCombinedTrackSummaryToolCfg(flags)))
     
     # post processing
+    if flags.Input.isMC:
+        result.merge(CombinedMuonTrackTruthAlgsCfg(flags))
+        result.merge(CombinedMuonTruthAssociationAlgsCfg(flags))
+
     result.addEventAlgo(CompFactory.ClusterMatching.CaloClusterMatchLinkAlg(
         "MuonTCLinks", ClustersToDecorate="MuonClusterCollection"))
     result.merge(MuonDecorationAlgsCfg(flags))
@@ -755,7 +804,10 @@ if __name__ == "__main__":
     rename_maps = ['%s#%s->%s' % ("xAOD::MuonContainer", "Muons", "old_Muons"),
                    '%s#%s->%s' % ("xAOD::MuonAuxContainer",
                                   "MuonsAux.", "old_MuonsAux."),
-                   '%s#%s->%s' % ("xAOD::MuonContainer", "Muons.rpcHitIdentifier", "old_Muons.rpcHitIdentifier")]
+                   '%s#%s->%s' % ("xAOD::MuonContainer", "Muons.rpcHitIdentifier", "old_Muons.rpcHitIdentifier"),
+                   '%s#%s->%s' % ("xAOD::TruthParticleContainer",
+                                  "MuonTruthParticles.recoMuonLink", "MuonTruthParticles.old_recoMuonLink")
+    ]
     cfg.merge(AddressRemappingCfg(rename_maps))
 
     # Commented, because it should be added back in very soon.
