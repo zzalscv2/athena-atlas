@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
 */
 
 /** @file ByteStreamMultipleOutputStreamCopyTool.cxx
@@ -20,6 +20,9 @@
 #include <map>
 #include "TRandom3.h"
 #include <stdexcept>
+
+#include "CxxUtils/checker_macros.h"
+ATLAS_NO_CHECK_FILE_THREAD_SAFETY;  // this code is obsolete/unused (certainly in production)
 
 TRandom3 myrand;
 
