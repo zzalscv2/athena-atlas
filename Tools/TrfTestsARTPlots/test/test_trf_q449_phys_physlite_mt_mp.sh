@@ -5,6 +5,7 @@
 # art-include: master/Athena
 # art-include: 22.0/Athena
 # art-athena-mt: 8
+# art-output: dcube*
 # art-html: dcube_physlite
 
 export ATHENA_CORE_NUMBER=8
