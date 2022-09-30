@@ -12,7 +12,7 @@ atlas_add_library( TrigHTTInputLib
    INCLUDE_DIRS              ${ROOT_INCLUDE_DIRS}
    LINK_LIBRARIES            ${ROOT_LIBRARIES} AthenaBaseComps GaudiKernel InDetReadoutGeometry
                              TrigHTTConfToolsLib TrigHTTMapsLib TrigHTTObjectsLib
-   PRIVATE_LINK_LIBRARIES    AthContainers EventInfo InDetIdentifier  StoreGateLib TrigHTTSGInputLib )
+   PRIVATE_LINK_LIBRARIES    AthContainers InDetIdentifier  StoreGateLib TrigHTTSGInputLib )
 
 atlas_add_component( TrigHTTInput
    src/components/*.cxx
