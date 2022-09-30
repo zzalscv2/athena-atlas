@@ -36,7 +36,7 @@ class TileDQstatus;
  *  @brief Class for TileCal noise monitoring at cell level
  */
 
-class TileRawChannelNoiseMonTool: public TileFatherMonTool {
+class ATLAS_NOT_THREAD_SAFE TileRawChannelNoiseMonTool: public TileFatherMonTool {  // deprecated: ATLASRECTS-7259
 
   public:
 

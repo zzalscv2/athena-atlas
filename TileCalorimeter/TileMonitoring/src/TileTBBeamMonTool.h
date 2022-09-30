@@ -27,7 +27,7 @@ class TileID;
 class TileHWID;
 class TileInfo;
 
-class TileTBBeamMonTool: public TileFatherMonTool {
+class ATLAS_NOT_THREAD_SAFE TileTBBeamMonTool: public TileFatherMonTool {  // deprecated: ATLASRECTS-7259
   public:
     //Constructor
     TileTBBeamMonTool(const std::string & type, const std::string & name, const IInterface* parent);

@@ -20,7 +20,7 @@
  *  @brief Class for TileL2 based monitoring
  */
 
-class TileL2MonTool: public TileFatherMonTool {
+class ATLAS_NOT_THREAD_SAFE TileL2MonTool: public TileFatherMonTool {  // deprecated: ATLASRECTS-7259
 
   public:
 

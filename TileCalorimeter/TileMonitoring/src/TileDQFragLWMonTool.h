@@ -32,7 +32,7 @@ class TileInfo;
  *  @brief Class for TileCal monitoring of Data Quality fragment
  */
 
-class TileDQFragLWMonTool: public TileFatherMonTool {
+class ATLAS_NOT_THREAD_SAFE TileDQFragLWMonTool: public TileFatherMonTool {  // deprecated: ATLASRECTS-7259
 
   public:
 

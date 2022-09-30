@@ -16,7 +16,7 @@ class ITileBadChanTool;
  *  @brief Class for TileCal pulse shape monitoring
  */
 
-class TileTBPulseMonTool : public TileFatherMonTool {
+class ATLAS_NOT_THREAD_SAFE TileTBPulseMonTool : public TileFatherMonTool {  // deprecated: ATLASRECTS-7259
 
   public:
 
