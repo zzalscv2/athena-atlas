@@ -86,7 +86,7 @@ L1CaloBsDecoderRun3::L1CaloBsDecoderRun3()
 void
 L1CaloBsDecoderRun3::decodeEfexData( const uint32_t* beg, const uint32_t* end,
                                      std::list<L1CaloRdoEfexTower>& tower,
-                                     std::list<L1CaloRdoRodInfo>::const_iterator rodInfo )
+                                     std::list<L1CaloRdoRodInfo>::const_iterator rodInfo ) const
 {
    const uint32_t* payload( beg );
    const size_t fragmentSize = end - beg;
@@ -190,7 +190,7 @@ L1CaloBsDecoderRun3::decodeEfexDataChan( const uint32_t payload[],
                                          const uint32_t efexNumber, const uint32_t shelfNumber,
                                          const uint32_t errorMask,
                                          std::list<L1CaloRdoEfexTower>& tower,
-                                         std::list<L1CaloRdoRodInfo>::const_iterator rodInfo )
+                                         std::list<L1CaloRdoRodInfo>::const_iterator rodInfo ) const
 {
    // The EM and hadronic fibres have different encoding and cover
    // different numbers of towers with more or less granularity.
@@ -364,7 +364,7 @@ L1CaloBsDecoderRun3::decodeEfexDataChan( const uint32_t payload[],
 void
 L1CaloBsDecoderRun3::decodeEfexTobs( const uint32_t* beg, const uint32_t* end,
                                      std::list<L1CaloRdoEfexTob>& tob,
-                                     std::list<L1CaloRdoRodInfo>::const_iterator rodInfo )
+                                     std::list<L1CaloRdoRodInfo>::const_iterator rodInfo ) const
 {
    const uint32_t* payload( beg );
    const size_t fragmentSize = end - beg;
@@ -461,7 +461,7 @@ L1CaloBsDecoderRun3::decodeEfexTobSlice( const uint32_t payload[], size_t& index
                                          const uint32_t efexNumber, const uint32_t shelfNumber,
                                          const uint32_t numSlices, const uint32_t errorMask,
                                          std::list<L1CaloRdoEfexTob>& tob,
-                                         std::list<L1CaloRdoRodInfo>::const_iterator rodInfo )
+                                         std::list<L1CaloRdoRodInfo>::const_iterator rodInfo ) const
 {
    if ( index < 1 ) {
       return false;
@@ -568,7 +568,7 @@ L1CaloBsDecoderRun3::decodeEfexTobSlice( const uint32_t payload[], size_t& index
 void
 L1CaloBsDecoderRun3::decodeJfexData( const uint32_t* beg, const uint32_t* end,
                                      std::list<L1CaloRdoJfexTower>& tower,
-                                     std::list<L1CaloRdoRodInfo>::const_iterator rodInfo )
+                                     std::list<L1CaloRdoRodInfo>::const_iterator rodInfo ) const
 {
    const uint32_t* payload( beg );
    const size_t fragmentSize = end - beg;
@@ -641,7 +641,7 @@ L1CaloBsDecoderRun3::decodeJfexDataChan( const uint32_t payload[],
                                          const uint32_t jfexNumber, const uint32_t fpgaNumber,
                                          const uint32_t errorMask,
                                          std::list<L1CaloRdoJfexTower>& tower,
-                                         std::list<L1CaloRdoRodInfo>::const_iterator rodInfo )
+                                         std::list<L1CaloRdoRodInfo>::const_iterator rodInfo ) const
 {
    const uint32_t shelfNumber = 0x22;   // Hard code to P1 value (34)
    
@@ -775,7 +775,7 @@ L1CaloBsDecoderRun3::decodeJfexDataChan( const uint32_t payload[],
 void
 L1CaloBsDecoderRun3::decodeJfexTobs( const uint32_t* beg, const uint32_t* end,
                                      std::list<L1CaloRdoJfexTob>& tob,
-                                     std::list<L1CaloRdoRodInfo>::const_iterator rodInfo )
+                                     std::list<L1CaloRdoRodInfo>::const_iterator rodInfo ) const
 {
    const uint32_t* payload( beg );
    const size_t fragmentSize = end - beg;
@@ -861,7 +861,7 @@ L1CaloBsDecoderRun3::decodeJfexTobSlice( const uint32_t payload[], size_t blockS
                                          const uint32_t sliceNumber, const uint32_t numSlices,
                                          const uint32_t errorMask,
                                          std::list<L1CaloRdoJfexTob>& tob,
-                                         std::list<L1CaloRdoRodInfo>::const_iterator rodInfo )
+                                         std::list<L1CaloRdoRodInfo>::const_iterator rodInfo ) const
 {
    if ( index < 2 ) {
       return false;
@@ -1052,7 +1052,7 @@ L1CaloBsDecoderRun3::decodeJfexTobSlice( const uint32_t payload[], size_t blockS
 void
 L1CaloBsDecoderRun3::decodeGfexData( const uint32_t* beg, const uint32_t* end,
                                      std::list<L1CaloRdoGfexTower>& tower,
-                                     std::list<L1CaloRdoRodInfo>::const_iterator rodInfo )
+                                     std::list<L1CaloRdoRodInfo>::const_iterator rodInfo ) const
 {
    const uint32_t* payload( beg );
    
@@ -1131,7 +1131,7 @@ L1CaloBsDecoderRun3::decodeGfexDataChan( const uint32_t payload[],
                                          const uint32_t chanNumber,
                                          const uint32_t errorMask,
                                          std::list<L1CaloRdoGfexTower>& tower,
-                                         std::list<L1CaloRdoRodInfo>::const_iterator rodInfo )
+                                         std::list<L1CaloRdoRodInfo>::const_iterator rodInfo ) const
 {
    const uint32_t shelfNumber = 0x23;   // Hard code to P1 value (35)
    const uint32_t gfexNumber = 0;       // **CHECK** What is used in COOL/OKS?
@@ -1261,7 +1261,7 @@ L1CaloBsDecoderRun3::decodeGfexDataChan( const uint32_t payload[],
 void
 L1CaloBsDecoderRun3::decodeGfexTobs( const uint32_t* beg, const uint32_t* end,
                                      std::list<L1CaloRdoGfexTob>& tob,
-                                     std::list<L1CaloRdoRodInfo>::const_iterator rodInfo )
+                                     std::list<L1CaloRdoRodInfo>::const_iterator rodInfo ) const
 {
   // **FIXME** To be implemented!
    const uint32_t* payload( beg );
@@ -1334,7 +1334,7 @@ L1CaloBsDecoderRun3::decodeGfexTobSlice( const uint32_t payload[], uint32_t bloc
                                          const uint32_t sliceNumber, const uint32_t numSlices,
                                          const uint32_t errorMask,
                                          std::list<L1CaloRdoGfexTob>& tob,
-                                         std::list<L1CaloRdoRodInfo>::const_iterator rodInfo )
+                                         std::list<L1CaloRdoRodInfo>::const_iterator rodInfo ) const
 {
    // The subblock type is 0xA,B,C for jet TOBs from FPGA A,B,C
    // and 0x1,2,3 for global (MET) TOBs.
@@ -1421,7 +1421,7 @@ L1CaloBsDecoderRun3::decodePh1TopoData( const uint32_t* beg, const uint32_t* end
                                         std::list<L1CaloRdoJfexTob>& jtob,
                                         std::list<L1CaloRdoGfexTob>& gtob,
                                         std::list<L1CaloRdoMuonTob>& mtob,
-                                        std::list<L1CaloRdoRodInfo>::const_iterator rodInfo )
+                                        std::list<L1CaloRdoRodInfo>::const_iterator rodInfo ) const
 {
    const uint32_t* payload( beg );
    const size_t fragmentSize = end - beg;
@@ -1661,7 +1661,7 @@ L1CaloBsDecoderRun3::decodeOneEfexTob( const uint32_t word[], const uint32_t she
                                        L1CaloRdoFexTob::TobType tobType,
                                        L1CaloRdoFexTob::TobSource tobSource,
                                        std::list<L1CaloRdoEfexTob>& tob,
-                                       std::list<L1CaloRdoRodInfo>::const_iterator rodInfo )
+                                       std::list<L1CaloRdoRodInfo>::const_iterator rodInfo ) const
 {
    const uint32_t tobWord  = word[0];
    const uint32_t isolInfo = (tobWord      ) & 0xffc000;
