@@ -8,7 +8,6 @@
 #include "AthenaBaseComps/AthAlgorithm.h"
 #include "GaudiKernel/NTuple.h"
 
-#include "xAODEventInfo/EventInfo.h"
 #include "LArElecCalib/ILArFEBTempTool.h"
 #include "LArCalibTools/LArCond2NtupleBase.h"
 
@@ -77,7 +76,6 @@ class LArPulseShape : public AthAlgorithm {
    SG::ReadCondHandleKey<LuminosityCondData> m_lumiDataKey{this,"LumiKey", "LuminosityCondData","SG Key of LuminosityCondData object"};  
    SG::ReadCondHandleKey<LArOnOffIdMapping> m_cablingKey{this,"CablingKey","LArOnOffIdMap","SG Key of LArOnOffIdMapping object"};
    SG::ReadCondHandleKey<LArBadChannelCont> m_BCKey{this, "BadChanKey", "LArBadChannel", "SG bad channels key"};
-   SG::ReadHandleKey<xAOD::EventInfo> m_evtInfoKey { this, "EventInfo", "EventInfo", "" };
 
    const ILArPedestal* m_larPedestal = nullptr;
 
