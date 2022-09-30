@@ -5,7 +5,7 @@ atlas_subdir( TrigBjetHypo )
 
 # Component(s) in the package:
 atlas_add_component( TrigBjetHypo
-                     src/*.cxx
+                     src/*.cxx safeLogRatio.cxx
                      src/components/*.cxx
                      LINK_LIBRARIES AthLinks AthViews AthenaBaseComps AthenaMonitoringKernelLib CxxUtils DecisionHandlingLib EventPrimitives TrigCompositeUtilsLib TrigSteeringEvent xAODBTagging xAODJet xAODTracking BeamSpotConditionsData )
 

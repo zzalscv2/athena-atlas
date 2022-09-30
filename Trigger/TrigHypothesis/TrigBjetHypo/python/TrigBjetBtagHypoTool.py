@@ -11,12 +11,7 @@ log = logging.getLogger('TrigBjetBtagHypoTool')
 # DL1r (Place Holder while we wait for WPs to be defined)
 # Values taken from https://twiki.cern.ch/twiki/bin/view/AtlasProtected/BTaggingBenchmarksRelease21#DL1rnn_tagger
 bTaggingWP = \
-  { 'dl1r60' : 4.31
-  , 'dl1r70' : 2.98
-  , 'dl1r77' : 2.23
-  , 'dl1r85' : 1.32
-
-  , "dl1d40" : 6.957
+  { "dl1d40" : 6.957
   , "dl1d45" : 6.344
   , "dl1d50" : 5.730
   , "dl1d55" : 5.121
@@ -94,7 +89,7 @@ def decodeThreshold( threshold_btag ):
 
     tagger = "offperf" if threshold_btag == "offperf" else re.findall("(.*)[0-9]{2}",threshold_btag)[0]
 
-    allowedTaggers = ["offperf", "dl1r", "dl1d", "dl1d85bb", "gn1"]
+    allowedTaggers = ["offperf", "dl1d", "dl1d85bb", "gn1"]
     if tagger not in allowedTaggers:
         log.debug("tagger = %s not amidst allowed taggers ",threshold_btag)
         assert False, "Can't recognize tagger during TrigBjetHypoTool configuration. Tagger = "+threshold_btag
@@ -109,9 +104,6 @@ def decodeThreshold( threshold_btag ):
     # remove the bb part to get the b-only cut
     threshold_btag = threshold_btag.split("bb", maxsplit=1)[0]
 
-    # possibly roll back to dl1r for some chains
-    if "dl1r" in threshold_btag:
-        btagger = "DL1r"
     # for chains wanting to use GN1
     if "gn1" in threshold_btag:
         btagger = "GN120220813"
