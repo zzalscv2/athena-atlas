@@ -240,7 +240,7 @@ int fitVertexCascade( VKVertex * vk, int Pointing)
         target_trk->iniP[1]=target_trk->cnstP[1]=(target_trk->fitP[1]+target_trk->Perig[3])/2.;
         target_trk->iniP[2]=target_trk->cnstP[2]=(target_trk->fitP[2]+target_trk->Perig[4])/2.;
       }
-      if(tmpCov[0]>1.e4 || tmpCov[2]>1.e4) return -18; //Something is wrong in combined track creation
+      if(tmpCov[0]>1.e12 || tmpCov[2]>1.e12) return -18; //Something is wrong in combined track creation
       if(Pointing){tmpCov[0] += target_trk->Perig[0]*target_trk->Perig[0]; tmpCov[2] += target_trk->Perig[1]*target_trk->Perig[1];}
       tmpCov[0] += 0.0001*0.0001; tmpCov[2] += 0.0002*0.0002;  //numerical accuracy protection
 
