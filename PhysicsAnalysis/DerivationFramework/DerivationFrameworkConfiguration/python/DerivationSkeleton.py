@@ -24,8 +24,9 @@ def fromRunArgs(runArgs):
     ConfigFlags.Common.ProductionStep = ProductionStep.Derivation
 
     # Switch on PerfMon
-    ConfigFlags.PerfMon.doFullMonMT = True
-
+    from PerfMonComps.PerfMonConfigHelpers import setPerfmonFlagsFromRunArgs
+    setPerfmonFlagsFromRunArgs(ConfigFlags, runArgs)
+    
     # Input types
     allowedInputTypes = [ 'AOD', 'DAOD_PHYS', 'EVNT' ]
     availableInputTypes = [ hasattr(runArgs, f'input{inputType}File') for inputType in allowedInputTypes ]
@@ -82,8 +83,9 @@ def fromRunArgs(runArgs):
                 algo.SkimmingTools = []
 
     # PerfMonSD
-    from PerfMonComps.PerfMonCompsConfig import PerfMonMTSvcCfg
-    cfg.merge(PerfMonMTSvcCfg(ConfigFlags))
+    if ConfigFlags.PerfMon.doFullMonMT or ConfigFlags.PerfMon.doFastMonMT:
+       from PerfMonComps.PerfMonCompsConfig import PerfMonMTSvcCfg
+       cfg.merge(PerfMonMTSvcCfg(ConfigFlags))
 
     # Set EventPrintoutInterval to 100 events
     cfg.getService(cfg.getAppProps()['EventLoop']).EventPrintoutInterval = 100
