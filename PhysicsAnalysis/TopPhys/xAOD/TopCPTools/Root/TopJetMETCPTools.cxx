@@ -372,7 +372,7 @@ namespace top {
       }
       ATH_MSG_INFO("useJESPrecisionFlavourUncertainties option provided. JES precision flavour uncertainties are used.");
       conference = "Summer2022"; // case where we want JES precision flavour uncertainties
-      if (JMSOption != "None") {
+      if (JMSOption != "") {
 	conference = "Summer2022_JMS"; // case where we want JMS AND JES precision flavour uncertainties
       }
     }
