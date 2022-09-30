@@ -108,8 +108,8 @@ def TauCaloAlgCfg(flags):
 
     if flags.Calo.TopoCluster.doTopoClusterLocalCalib:
         CaloTopoForTausMaker.ClusterCorrectionTools += [result.popToolsAndMerge(tauTools.TauCaloClusterLocalCalibCfg(flags)),
-                                                        result.popToolsAndMerge(tauTools.TauCaloOOCPi0CalibCfg(flags)),
                                                         result.popToolsAndMerge(tauTools.TauCaloOOCCalibCfg(flags)),
+                                                        result.popToolsAndMerge(tauTools.TauCaloOOCPi0CalibCfg(flags)),
                                                         result.popToolsAndMerge(tauTools.TauCaloDMCalibCfg(flags))]
 
     result.addEventAlgo(CaloTopoForTausMaker)
