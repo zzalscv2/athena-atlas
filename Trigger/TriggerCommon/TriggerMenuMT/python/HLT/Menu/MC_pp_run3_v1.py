@@ -159,6 +159,10 @@ def addMCSignatures(chains):
         #ATR-25764 - adding Photon chains with different isolation WPs
         ChainProp(name='HLT_g25_tight_icaloloose_L1EM22VHI', groups=PrimaryLegGroup+EgammaJetGroup, monGroups=['egammaMon:shifter']),
         ChainProp(name='HLT_g25_tight_icalotight_L1EM22VHI', groups=PrimaryLegGroup+EgammaJetGroup, monGroups=['egammaMon:shifter']),
+
+        #------------ nopid trigger
+        # ATR-23723
+        ChainProp(name='HLT_e5_nopid_L1EM3', groups=SingleElectronGroup+['PS:NoBulkMCProd']),
     ]
 
     chainsMC['Bphysics'] = [    
