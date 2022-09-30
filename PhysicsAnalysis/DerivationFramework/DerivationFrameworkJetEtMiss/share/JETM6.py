@@ -242,6 +242,10 @@ thinningTools.append(JETM6EMUFOCSSKTPThinningTool)
 # Thin TruthParticles for truth jet constituents
 #====================================================================
 
+from DerivationFrameworkJetEtMiss.JetCommon import addCHSPFlowObjects
+addCHSPFlowObjects()
+
+
 if DerivationFrameworkHasTruth:
   from DerivationFrameworkJetEtMiss.DerivationFrameworkJetEtMissConf import DerivationFramework__ViewContainerThinning
   JETM6TruthJetInputThin = DerivationFramework__ViewContainerThinning( name = "JETM6ViewContThinning",
@@ -426,9 +430,24 @@ JETM6SlimmingHelper.AllVariables = [
 JETM6SlimmingHelper.AppendToDictionary["UFOCSSK"] = "xAOD::TrackCaloClusterContainer"
 JETM6SlimmingHelper.AppendToDictionary["UFOCSSKAux"] = "xAOD::TrackCaloClusterAuxContainer"
 
+JETM6SlimmingHelper.AppendToDictionary["JetETMissChargedParticleFlowObjects"]='xAOD::PFOContainer'
+JETM6SlimmingHelper.AppendToDictionary["JetETMissChargedParticleFlowObjectsAux"]='xAOD::PFOAuxContainer'
+
+
+JETM6SlimmingHelper.AppendToDictionary["CSSKChargedParticleFlowObjects"]='xAOD::PFOContainer'
+JETM6SlimmingHelper.AppendToDictionary["CSSKChargedParticleFlowObjectsAux"]='xAOD::ShallowAuxContainer'
+
+JETM6SlimmingHelper.AppendToDictionary["CSSKNeutralParticleFlowObjects"]='xAOD::PFOContainer'
+JETM6SlimmingHelper.AppendToDictionary["CSSKNeutralParticleFlowObjectsAux"]='xAOD::ShallowAuxContainer'
+
+
+
 JETM6SlimmingHelper.ExtraVariables  = ['CaloCalTopoClusters.calE.calEta.calM.calPhi.CENTER_MAG']
 #JETM6SlimmingHelper.ExtraVariables += ['UFOCSSK.pt.eta.phi.taste']
 JETM6SlimmingHelper.ExtraVariables += ['Electrons.'+NewTrigVars["Electrons"],'Muons.'+NewTrigVars["Muons"],'Photons.'+NewTrigVars["Photons"]]
+JETM6SlimmingHelper.ExtraVariables.append('JetETMissChargedParticleFlowObjects.pfo_TrackLinks')
+JETM6SlimmingHelper.ExtraVariables.append('CSSKChargedParticleFlowObjects.pt.eta.phi.m.e.charge.matchedToPV.pfo_TrackLinks')
+JETM6SlimmingHelper.ExtraVariables.append('CSSKNeutralParticleFlowObjects.pt.eta.phi.m.e.charge.pfo_TrackLinks')
 JETM6SlimmingHelper.ExtraVariables += [
     'AntiKt10TruthJets.SizeParameter',
     'AntiKt10UFOCSSKJets.SizeParameter',
