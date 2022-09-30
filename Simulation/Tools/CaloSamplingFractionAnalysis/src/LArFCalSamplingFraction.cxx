@@ -418,7 +418,7 @@ void LArFCalSamplingFraction::FCalHitCenter(const LArHitContainer *container
     double max3 = 0.0;
 
     // Loop over hits in container
-    for (LArHit* const& hit : *container) {
+    for (const LArHit* hit : *container) {
 
       const CaloDetDescrElement* caloDDE = caloMgr->get_element(hit->cellID());
       if(!caloDDE->is_lar_fcal()) {
@@ -477,7 +477,7 @@ void LArFCalSamplingFraction::FCalClusterCenter(const LArHitContainer *container
     double thisCG_R = 0.0;
 
     // Loop over hits in container
-    for (LArHit* const& hit : *container) {
+    for (const LArHit* hit : *container) {
 
       const CaloDetDescrElement* caloDDE = caloMgr->get_element(hit->cellID());
       if(!caloDDE->is_lar_fcal()) {
@@ -623,7 +623,7 @@ StatusCode LArFCalSamplingFraction::doCalib()
             continue;
 
         // Loop over calibration hits in container
-        for (CaloCalibrationHit* const& calibhit : *container) {
+        for (const CaloCalibrationHit* calibhit : *container) {
 
             Identifier identifier = calibhit->cellID();
             double energy = calibhit->energyTotal();
@@ -872,7 +872,7 @@ StatusCode LArFCalSamplingFraction::doFCal()
     }
 
     // Loop over hits in container
-    for (LArHit* const& hit : *container) {
+    for (const LArHit* hit : *container) {
 
         // Added by JPA to get particle id for each hit
         const McEventCollection *mcEventCollection;
