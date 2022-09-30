@@ -90,9 +90,8 @@ public:
   virtual StatusCode genFinalize();
 
   double pythiaVersion()const;
-  
-  static std::string    pythia_stream;
 
+  static const std::string& pythia_stream();
   static std::string xmlpath();
     
 protected:
@@ -166,10 +165,13 @@ private:
   bool m_doLHE3Weights;
   std::vector<std::string> m_weightCommands;
   std::vector<std::string> m_showerWeightNames;
-  
+
+  static std::string    m_pythia_stream;
+
   ToolHandle<IPythia8Custom>    m_athenaTool;
 
   static int s_allowedTunes(double version);
+
 
 };
 
