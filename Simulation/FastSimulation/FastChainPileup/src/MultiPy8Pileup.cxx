@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2017 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
 */
 
 // MultiPY8Pileup.cxx - extension of Pythia8_i to generate multiple pileup
@@ -80,7 +80,7 @@ StatusCode MultiPy8Pileup::genInitialize() {
 StatusCode MultiPy8Pileup::callGenerator() {
   // initialise random generators the first time - delayed after Pythia init
   if ( !m_randomEngine)
-    m_randomEngine = atRndmGenSvc().GetEngine( Pythia8_i::pythia_stream );
+    m_randomEngine = atRndmGenSvc().GetEngine( Pythia8_i::pythia_stream() );
 
   // decide how many events to generate
 
