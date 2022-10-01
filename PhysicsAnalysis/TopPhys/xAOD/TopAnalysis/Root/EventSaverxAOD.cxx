@@ -1,5 +1,5 @@
 /*
-   Copyright (C) 2002-2020 CERN for the benefit of the ATLAS collaboration
+   Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
  */
 
 #include "TopAnalysis/EventSaverxAOD.h"
@@ -77,7 +77,7 @@ namespace top {
     xAOD::SystematicEventContainer* allSystematics_output = new xAOD::SystematicEventContainer {};
     SG::IAuxStore* allSystematics_aux = evtStore()->event()->recordAux(m_config->sgKeyTopSystematicEvents() + "Aux.");
     allSystematics_output->setStore(allSystematics_aux);
-    for (auto currentSystematic : *allSystematics) {
+    for (const auto *currentSystematic : *allSystematics) {
       //cppcheck-suppress uninitvar
       xAOD::SystematicEvent* out = new xAOD::SystematicEvent {};
       out->makePrivateStore(*currentSystematic);
@@ -98,7 +98,7 @@ namespace top {
         xAOD::PartonHistoryContainer* partonHistory_output = new xAOD::PartonHistoryContainer {};
         SG::IAuxStore* partonHistory_aux = evtStore()->event()->recordAux(m_config->sgKeyTopPartonHistory() + "Aux.");
         partonHistory_output->setStore(partonHistory_aux);
-        for (auto x : *partonHistory) {
+        for (const auto *x : *partonHistory) {
           //cppcheck-suppress uninitvar
           xAOD::PartonHistory* out = new xAOD::PartonHistory {};
           out->makePrivateStore(*x);

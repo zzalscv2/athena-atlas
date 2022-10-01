@@ -1,5 +1,5 @@
 /*
-   Copyright (C) 2002-2017 CERN for the benefit of the ATLAS collaboration
+   Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
  */
 
 #ifndef EVENTSELECTIONMANAGER_H_
@@ -49,7 +49,7 @@ namespace top {
      */
     explicit EventSelectionManager(const std::vector<SelectionConfigurationData>& selectionConfigData,
                                    TFile* outputFile, const std::string& toolLoaderNames,
-                                   std::shared_ptr<top::TopConfig> config, EL::Worker* wk = nullptr);
+                                   const std::shared_ptr<top::TopConfig>& config, EL::Worker* wk = nullptr);
 
     /**
      * @brief Does not need to do anything
@@ -141,7 +141,7 @@ namespace top {
      *
      * @param selection The requested selection.
      */
-    std::vector<std::string> GetFakesMMConfigs(std::string selection) const;
+    std::vector<std::string> GetFakesMMConfigs(const std::string& selection) const;
   private:
     ///A vector of EventSelection objects, for doing fancy things
     std::vector<top::EventSelection> m_selections;

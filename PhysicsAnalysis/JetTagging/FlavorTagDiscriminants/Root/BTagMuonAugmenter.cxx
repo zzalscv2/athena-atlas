@@ -81,10 +81,10 @@ namespace FlavorTagDiscriminants {
     // Fill vectors holding objects that have the const accessors
     // and decorators available as members for each variable
     // that is decorated only.
-    for (std::string var : m_float_IO_variables) {
+    for (const std::string& var : m_float_IO_variables) {
       m_float_IO.emplace_back(CAccDec<float>(var));
     }
-    for (std::string var : m_unsigned_char_IO_variables) {
+    for (const std::string& var : m_unsigned_char_IO_variables) {
       m_unsigned_char_IO.emplace_back(CAccDec<unsigned char>(var));
     }
   }

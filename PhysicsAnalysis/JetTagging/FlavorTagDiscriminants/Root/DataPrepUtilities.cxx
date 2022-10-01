@@ -282,7 +282,10 @@ namespace FlavorTagDiscriminants {
       }
       std::sort(tracks.begin(), tracks.end(), std::greater<>());
       std::vector<const xAOD::TrackParticle*> only_tracks;
-      for (const auto& trk: tracks) only_tracks.push_back(trk.second);
+      only_tracks.reserve(tracks.size());
+      for (const auto& trk: tracks) {
+        only_tracks.push_back(trk.second);
+      }
       return only_tracks;
     }
 

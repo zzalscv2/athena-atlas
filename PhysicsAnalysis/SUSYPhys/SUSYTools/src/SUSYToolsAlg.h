@@ -1,7 +1,7 @@
 // -*- C++ -*-
 
 /*
-  Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
 */
 
 // SUSYToolsAlg.h
@@ -57,7 +57,7 @@ class SUSYToolsAlg : public EL::AnaAlgorithm {
     // helper functions
     void groupSysts(void);
     StatusCode bookHistograms(void);
-    void stdHistsForObj(xAOD::IParticle *obj, std::string objtype, std::string objlevel, std::map<std::string,std::string> config = std::map<std::string,std::string>());
+    void stdHistsForObj(xAOD::IParticle *obj, const std::string& objtype, const std::string& objlevel, std::map<std::string,std::string> config = std::map<std::string,std::string>());
 
     // configuration and main tools
     int  m_dataSource;

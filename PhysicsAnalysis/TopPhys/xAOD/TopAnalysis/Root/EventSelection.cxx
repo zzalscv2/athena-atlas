@@ -1,5 +1,5 @@
 /*
-   Copyright (C) 2002-2020 CERN for the benefit of the ATLAS collaboration
+   Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
  */
 
 #include "TopAnalysis/EventSelection.h"
@@ -33,7 +33,7 @@ using namespace TopAnalysis;
 namespace top {
   EventSelection::EventSelection(const std::string& name, const std::vector<std::string>& cutNames, TFile* outputFile,
                                  const std::vector<std::unique_ptr<top::ToolLoaderBase> >& toolLoaders,
-                                 std::shared_ptr<top::TopConfig> config, EL::Worker* wk) :
+                                 const std::shared_ptr<top::TopConfig>& config, EL::Worker* wk) :
     m_cutflow(nullptr),
     m_cutflow_Loose(nullptr),
     m_cutflowMCWeights(nullptr),
@@ -115,7 +115,7 @@ namespace top {
     for (const auto& currentCutName : cutNames) {
       //look through all the libraries and load any tools
       top::EventSelectorBase* tool = nullptr;
-      for (auto& libraryPtr : toolLoaders) {
+      for (const auto& libraryPtr : toolLoaders) {
         tool = libraryPtr->initTool(m_name, currentCutName, outputFile, config, wk);
         if (tool) break;
       }
@@ -218,7 +218,7 @@ namespace top {
     }
   }
 
-  void EventSelection::initialiseTopScaleFactorRetriever(std::shared_ptr<TopConfig> config) {
+  void EventSelection::initialiseTopScaleFactorRetriever(const std::shared_ptr<TopConfig>& config) {
     // Define this once, and then use it when needed
     if (asg::ToolStore::contains<ScaleFactorRetriever>("top::ScaleFactorRetriever")) {
       m_sfRetriever = asg::ToolStore::get<ScaleFactorRetriever>("top::ScaleFactorRetriever");
@@ -513,7 +513,7 @@ namespace top {
       if (currentCutName->name() != "FAKESMMCONFIGS") continue;
       else {
         FakesMMConfigs* conf = dynamic_cast<FakesMMConfigs*>(currentCutName.get());
-        for (std::string s : conf->configurations())
+        for (const std::string& s : conf->configurations())
           configs.push_back(s);
       }
     }

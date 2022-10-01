@@ -1,5 +1,5 @@
 /*
-   Copyright (C) 2002-2017 CERN for the benefit of the ATLAS collaboration
+   Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
  */
 
 #ifndef EVENTSAVERXAODNEXT_H_
@@ -74,7 +74,7 @@ namespace top {
 
     std::vector<unsigned int> thinObjectSelection(const std::size_t hashValue,
                                                   const std::vector<unsigned int>& objectList,
-                                                  const std::shared_ptr<ThinningMap_t> thinningMap) const;
+                                                  const std::shared_ptr<ThinningMap_t>& thinningMap) const;
 
 
     ClassDef(top::EventSaverxAODNext, 0);
