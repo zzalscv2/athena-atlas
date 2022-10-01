@@ -24,7 +24,7 @@ public:
    /// @param name name of the distribution, used as key when saving the distribution to a file
    /// @param title title of the distribution, displayed at the top of the distribution
    /// @param value pointer to the member method which calculates quantity used to fill the distribution
-  AFPSiLayerSummaryProfileEventEnd (AFPHitsMonitorTool* parentTool, const ManagedMonitorToolBase::MonGroup& monGrp, const std::string name, const std::string title, T (IAFPSiLayerMonitor::*value)() const) :
+  AFPSiLayerSummaryProfileEventEnd (AFPHitsMonitorTool* parentTool, const ManagedMonitorToolBase::MonGroup& monGrp, const std::string& name, const std::string& title, T (IAFPSiLayerMonitor::*value)() const) :
     AFPSiLayerSummaryProfileBase (parentTool, monGrp, name, title),
     m_value(value)
   {}

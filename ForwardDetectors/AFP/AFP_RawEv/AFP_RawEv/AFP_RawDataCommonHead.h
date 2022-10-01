@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2020 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef AFP_RAWDATACOMMONHEAD_H
@@ -30,12 +30,12 @@ private:
   /// it means bits marked with `d`. 
   /// - values 0-2 are used by silicon detectors
   /// - value 3 represent time-of-flight detector
-  uint16_t m_hitDiscConfig;
+  uint16_t m_hitDiscConfig = 0;
 
   /// @brief Values of the 5-8 most significant bits
   ///
   /// In the following record: `xxxx LLLL xxxx xxxx xxxx xxxx xxxx xxxx`
   /// it means bits marked with `L`.
-  uint16_t m_link;
+  uint16_t m_link = 0;
 };
 #endif

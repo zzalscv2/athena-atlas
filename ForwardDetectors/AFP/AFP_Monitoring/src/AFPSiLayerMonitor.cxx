@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2017 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "AFP_Monitoring/AFPSiLayerMonitor.h"
@@ -169,7 +169,7 @@ void AFPSiLayerMonitor::endOfLumiBlock()
 }
 
 
-std::string AFPSiLayerMonitor::makeHistName (const std::string name) const
+std::string AFPSiLayerMonitor::makeHistName (const std::string& name) const
 {
   std::stringstream histName;
   histName<<name<<"St"<<m_stationID<<"Layer"<<m_pixelLayerID;
@@ -178,7 +178,7 @@ std::string AFPSiLayerMonitor::makeHistName (const std::string name) const
 }
 
 
-std::string AFPSiLayerMonitor::makeHistTitle (const std::string title) const
+std::string AFPSiLayerMonitor::makeHistTitle (const std::string& title) const
 {
   std::stringstream histTitle;
   histTitle<<title<<" in station "<<m_stationID<<" for layer "<<m_pixelLayerID;

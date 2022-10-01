@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2017 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "AFP_Monitoring/AFPHitsMonitorTool.h"
@@ -88,7 +88,7 @@ void AFPSiStationMonitor::endOfLumiBlock(AFPHitsMonitorTool* /*toolToStoreHistog
     layer->endOfLumiBlock();
 }
 
-std::string AFPSiStationMonitor::makeName (const std::string name) const
+std::string AFPSiStationMonitor::makeName (const std::string& name) const
 {
   std::stringstream histName;
   histName <<name<<"Station"<<m_stationID;
@@ -96,7 +96,7 @@ std::string AFPSiStationMonitor::makeName (const std::string name) const
   return histName.str();
 }
 
-std::string AFPSiStationMonitor::makeTitle (const std::string title) const
+std::string AFPSiStationMonitor::makeTitle (const std::string& title) const
 {
   std::stringstream histTitle;
   histTitle <<title<<" in station "<<m_stationID;

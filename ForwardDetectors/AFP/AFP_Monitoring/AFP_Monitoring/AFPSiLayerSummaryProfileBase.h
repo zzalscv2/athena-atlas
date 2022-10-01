@@ -25,6 +25,9 @@ public:
   /// Does nothing. The ownership of the #m_profile object is taken by monitoring service.
   virtual ~AFPSiLayerSummaryProfileBase() {}
 
+  AFPSiLayerSummaryProfileBase (const AFPSiLayerSummaryProfileBase&) = delete;
+  AFPSiLayerSummaryProfileBase& operator= (const AFPSiLayerSummaryProfileBase&) = delete;
+
   /// Registers the #m_profile as a histogram in #m_parentTool.
   void book ();
 

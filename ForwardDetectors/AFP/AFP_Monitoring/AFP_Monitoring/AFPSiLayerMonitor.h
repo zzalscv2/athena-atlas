@@ -81,10 +81,10 @@ public:
   int layerID () const override {return m_pixelLayerID;}
 
   /// @copybrief IAFPSiLayerMonitor::makeHistName()
-  std::string makeHistName (const std::string name) const override;
+  std::string makeHistName (const std::string& name) const override;
 
   /// @copybrief IAFPSiLayerMonitor::makeHistTitle()
-  std::string makeHistTitle (const std::string title) const override;
+  std::string makeHistTitle (const std::string& title) const override;
 
   /// @copybrief IAFPSiLayerMonitor::histsDirName()
   ///
