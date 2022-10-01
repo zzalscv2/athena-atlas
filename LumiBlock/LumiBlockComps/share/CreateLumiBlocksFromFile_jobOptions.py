@@ -1,7 +1,6 @@
 #--------------------------------------------------------------
 # job options fragment to bootstrap metadata
 #--------------------------------------------------------------
-include ( "EventInfo/EventInfoDict_joboptions.py" )
 include ("LumiBlockAthenaPool/LumiBlockAthenaPool_joboptions.py")
 
 #To run the luminosity block from event info 'bootstrap' algo
