@@ -21,8 +21,6 @@ if not testSGKey ('xAOD::JetContainer', D3PDMakerFlags.JetSGKey()):
     from JetRecConfig.StandardSmallRJets import AntiKt4EMTopo, AntiKt4EMPFlow
     addDAODJets ([AntiKt4EMTopo, AntiKt4EMPFlow], topSequence)
     D3PDMakerFlags.JetSGKey = 'AntiKt4EMTopoJets'
-    from DerivationFrameworkJetEtMiss.METCommon import scheduleStandardMETContent
-    scheduleStandardMETContent (topSequence)
 
 
 # Set up a logger:
