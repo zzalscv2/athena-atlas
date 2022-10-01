@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
 */
 
 // +======================================================================+
@@ -35,10 +35,6 @@
 #include "CaloIdentifier/CaloLVL1_ID.h"
 #include "CaloIdentifier/CaloCell_ID.h"
 #include "CaloTriggerTool/CaloTriggerTowerService.h"
-//
-// ........ Event Header Files:
-//
-#include "EventInfo/PileUpTimeEventIndex.h"
 //
 // ........ Gaudi needed includes
 //

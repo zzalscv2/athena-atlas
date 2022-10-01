@@ -33,6 +33,6 @@ theApp.OutStream     +=["Stream1"]
 theApp.OutStreamType ="AthenaOutputStream"
 Stream1.EvtConversionSvc     ="AthenaPoolCnvSvc"
 Stream1.OutputFile =   "TTL1PoolFile2.root"
-Stream1.ItemList+=["EventInfo#*"]
+Stream1.ItemList+=["xAOD::EventInfo#*"]
 Stream1.ItemList+=["LArTTL1Container#*"]
 
