@@ -85,9 +85,12 @@ def MistimedStreamMonitorConfig(flags):
                             xbins=NumberOfGlobalErrors,xmin=0.,xmax=NumberOfGlobalErrors,xlabels=globalStatus_xlabels,
                             opt='kAlwaysCreate')
     
-    groupMapsEM         = helper.addGroup(MistimedMonAlg, 'Event_', mainDir)
-    groupMapsEM.defineHistogram('eventMonitor,lbMonitor;1d_selectedEvents_mistimedStreamAna', title='Events of interest - Lumi Block;Events of interest;Lumi Block',type='TH2I', xbins=NumberofEvents, ybins=NumberofEvents, path=trigPath)
-
+    groupMapsEvents         = helper.addGroup(MistimedMonAlg, 'Event_', mainDir)
+    groupMapsEvents.defineHistogram('eventMonitor,lbMonitor;1d_selectedEvents_mistimedStreamAna', title='Events of interest - Lumi Block;Events of interest;Lumi Block',type='TH2I', xbins=NumberofEvents, ybins=NumberofEvents, path=trigPath)
+    
+    groupMapsEvents_all         = helper.addGroup(MistimedMonAlg, 'Event_all_', mainDir)
+    groupMapsEvents_all.defineHistogram('eventMonitor_all,lbMonitor_all;1d_selectedEvents_mistimedStreamAna_notSaved', title='Events of interest - Lumi Block (not saved);Events of interest;Lumi Block',type='TH2I', path=trigPath)
+    
 
     # add monitoring algorithm to group, with group name and main directory
     histPath = trigPath+'/EventofInterest'

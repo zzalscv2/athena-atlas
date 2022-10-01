@@ -40,6 +40,7 @@ class TrigEgammaPrecisionElectronHypoTool : public extends<AthAlgTool, ITrigEgam
   Gaudi::Property< float >              m_d0{ this,  "d0Cut", -1., "d0 cut" };
   Gaudi::Property<std::string>          m_pidName{this,"PidName", "", "Pid name"};
   Gaudi::Property< bool >               m_acceptAll { this, "AcceptAll", false , "accept all." };
+  Gaudi::Property< bool >               m_doNoPid { this, "DoNoPid", false , "No Pid/Isolation applied" };
   ToolHandle< GenericMonitoringTool >   m_monTool { this, "MonTool", "", "Monitoring tool" };
 
 
@@ -48,3 +49,4 @@ class TrigEgammaPrecisionElectronHypoTool : public extends<AthAlgTool, ITrigEgam
 }; 
 
 #endif //> !TRIGEGAMMAHYPO_TRIGPRECISIONELECTRONPRECISIONHYPOTOOL_H
+

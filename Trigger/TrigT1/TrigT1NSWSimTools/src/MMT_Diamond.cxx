@@ -1,5 +1,4 @@
 #include "TrigT1NSWSimTools/MMT_Diamond.h"
-#include "AthenaKernel/getMessageSvc.h"
 #include "MuonAGDDDescription/MMDetectorDescription.h"
 #include "MuonAGDDDescription/MMDetectorHelper.h"
 #include <cmath>
@@ -128,14 +127,6 @@ void MMT_Diamond::createRoads_fillHits(const unsigned int iterator, std::vector<
   ATH_MSG_DEBUG("CreateRoadsAndFillHits: Feeding hitDatas Ended");
 }
 
-void MMT_Diamond::printHits(const unsigned int iterator) {
-  if (iterator < m_diamonds.size() && !m_diamonds[iterator].ev_hits.empty()) {
-    for (const auto &hit : m_diamonds[iterator].ev_hits) hit->printHit();
-  } else {
-    ATH_MSG_DEBUG("Hit vector is empty!");
-  }
-}
-
 void MMT_Diamond::findDiamonds(const unsigned int iterator, const double &sm_bc, const int &event) {
   auto t0 = std::chrono::high_resolution_clock::now();
   int ntrig = 0;
@@ -227,9 +218,6 @@ void MMT_Diamond::findDiamonds(const unsigned int iterator, const double &sm_bc,
         ATH_MSG_DEBUG("Coincidence FOUND @BC: " << bc);
         ATH_MSG_DEBUG("Road (i, u, v, count): (" << road->iRoad() << ", " << road->iRoadu() << ", " << road->iRoadv() << ", " << road->countHits() << ")");
         ATH_MSG_DEBUG("------------------------------------------------------------------");
-        for (const auto &hit: road->getHitVector()) {
-          ATH_MSG_DEBUG("Hit (board, BC, strip, eta): (" << hit.getPlane() << ", " << hit.getBC() << ", " << hit.getChannel() << ", " << hit.getStationEta() << ")");
-        }
 
         slope_t slope;
         slope.event = event;

@@ -1,6 +1,6 @@
 # Copyright (C) 2002-2018 CERN for the benefit of the ATLAS collaboration
 
-import sys
+import sys, os
 from PyCool import cool,coral
 from CoolConvUtilities import AtlCoolTool
 from AtlDataSummary.AtlDataSumLumiData import LumiBCIDData
@@ -16,7 +16,27 @@ def openDb(MONP = False, TDAQ = False):
     if MONP : schemaName = "MONP200"
     accountName = "ATLAS_COOLONL_TRIGGER"
     if TDAQ : accountName = "ATLAS_COOLONL_TDAQ"
-    dbstring="oracle://ATLAS_COOLPROD;schema="+accountName+";dbname="+schemaName+";user=ATLAS_COOL_READER;password=COOLRED4PRO"
+    # Get user and passwd from coral auth file - see: https://its.cern.ch/jira/browse/ATR-25572
+    # see this package in case the following doesn't work for you: Database/ConnectionManagement/AtlasAuthentication/data/dblookup.xml
+    connName="oracle://ATLAS_COOLPROD/"+accountName # aka. schema 
+    dbauthPath=os.environ.get('CORAL_AUTH_PATH')
+    dbpw = None
+    dbuser = None
+    # Get username and password by parsing authentication XML file
+    authenticationXmlDoc = minidom.parse(dbauthPath + "authentication.xml")
+    authenticationList = authenticationXmlDoc.getElementsByTagName("connection")
+    for entry in authenticationList:
+        if entry.attributes["name"].value == connName:
+            parameters = entry.getElementsByTagName("parameter")
+            # Set username and password from authentication parameters
+            for parameter in parameters:
+                if parameter.attributes["name"].value == "user":
+                    dbuser = parameter.attributes["value"].value
+                elif parameter.attributes["name"].value == "password":
+                    dbpw = parameter.attributes["value"].value
+    dbstring="oracle://ATLAS_COOLPROD;schema="+accountName+";dbname="+schemaName+";user="+dbuser+";password="+dbpw
+    #olddbstring="oracle://ATLAS_COOLPROD;schema="+accountName+";dbname="+schemaName+";user=ATLAS_COOL_READER;password=PAssWDusedTObeHEREinPLAINtext"
+
     try:
         db=dbSvc.openDatabase(dbstring,False)
     except Exception,e:
@@ -449,7 +469,27 @@ def readLhcFillNumber(run):
     iovrange = IOVRange(starttime = startTime, endtime = endTime)
 
     lhcfolder = '/LHC/DCS/FILLSTATE'
-    dbstring="oracle://ATLAS_COOLPROD;schema=ATLAS_COOLOFL_DCS;dbname=COMP200;user=ATLAS_COOL_READER;password=COOLRED4PRO"
+    # Get user and passwd from coral auth file - see: https://its.cern.ch/jira/browse/ATR-25572
+    # see this package in case the following doesn't work for you: Database/ConnectionManagement/AtlasAuthentication/data/dblookup.xml
+    connName="oracle://ATLAS_COOLPROD/ATLAS_COOLOFL_DCS" # the old online one: ATLAS_COOLONL_DCS is not in this file 
+    dbauthPath=os.environ.get('CORAL_AUTH_PATH')
+    dbpw = None
+    dbuser = None
+    # Get username and password by parsing authentication XML file
+    authenticationXmlDoc = minidom.parse(dbauthPath + "authentication.xml")
+    authenticationList = authenticationXmlDoc.getElementsByTagName("connection")
+    for entry in authenticationList:
+        if entry.attributes["name"].value == connName:
+            parameters = entry.getElementsByTagName("parameter")
+            # Set username and password from authentication parameters
+            for parameter in parameters:
+                if parameter.attributes["name"].value == "user":
+                    dbuser = parameter.attributes["value"].value
+                elif parameter.attributes["name"].value == "password":
+                    dbpw = parameter.attributes["value"].value
+    dbstring="oracle://ATLAS_COOLPROD;schema=ATLAS_COOLOFL_DCS;dbname=COMP200;user="+dbuser+";password="+dbpw
+    #olddbstring="oracle://ATLAS_COOLPROD;schema=ATLAS_COOLONL_DCS;dbname=COMP200;user=ATLAS_COOL_READER;password=PAssWDusedTObeHEREinPLAINtext"
+
     try:
         dbSvc=cool.DatabaseSvcFactory.databaseService()
         db=dbSvc.openDatabase(dbstring,False)

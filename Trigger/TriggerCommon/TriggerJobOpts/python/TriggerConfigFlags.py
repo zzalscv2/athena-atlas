@@ -232,6 +232,9 @@ def createTriggerFlags(doTriggerRecoFlags):
     # list of enabled trigger sub-systems in reconstruction: ['L1,'HLT']
     flags.addFlag('Trigger.availableRecoMetadata', lambda flags: __availableRecoMetadata(flags))
 
+    # Offline flag, determins if the HLT trigger decision and the HLT result should be decoded in reconstruction in jobs with Reco.EnableTrigger
+    flags.addFlag("Trigger.DecodeHLT", True)
+
     # the configuration source
     # see https://twiki.cern.ch/twiki/bin/view/Atlas/TriggerConfigFlag
     flags.addFlag('Trigger.triggerConfig', lambda flags: 'INFILE' if flags.Trigger.InputContainsConfigMetadata else 'FILE')

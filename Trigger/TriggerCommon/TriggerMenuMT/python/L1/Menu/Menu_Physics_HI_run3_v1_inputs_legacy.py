@@ -102,9 +102,9 @@ def defineLegacyInputsMenu():
             "type" : "ctpin",
             "legacy" : True,
             "thresholds" : [
-                'TE3', 'TE4', 'TE5',  'TE10', 'TE20',  'TE40', 'TE50', 'TE100', 'TE200', 'TE10000', 'TE12000', # 8 x TE
+                'TE3', 'TE5', 'TE20', 'TE50', 'TE100', 'TE200', 'TE10000', 'TE12000', # 8 x TE
                 'XE10', 'XE20', 'XE25', 'XE30', 'XE35', 'XE40', 'XE45', 'XE50', # 8 x XE
-                'XE55', 'XE60', 'XE65', 'XE70', 'XE75', 'XE80', 'XE150', 'XE300', # 8 x XE
+                'XS20', 'XS30', 'XS40', 'XS45', 'XS50', 'XS55', 'XS60', 'XS65',  # 8 x XS
             ]
         },
         {
@@ -118,6 +118,7 @@ def defineLegacyInputsMenu():
                 # 8 x restricted eta range in |eta|<4.9
                 'TE3p0ETA49','TE7p0ETA49','TE600p0ETA49', 'TE1500p0ETA49',
                 'TE3000p0ETA49', 'TE3500p0ETA49', 'TE6500p0ETA49', 'TE8000p0ETA49',
+                'XE55', 'XE60', 'XE65', 'XE70', 'XE75', 'XE80', 'XE150', 'XE300', # 8 x XE
             ]
         }
     ]

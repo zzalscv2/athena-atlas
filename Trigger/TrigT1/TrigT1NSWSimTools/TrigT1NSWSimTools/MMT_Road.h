@@ -1,8 +1,8 @@
-/*   
- *   Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
- */ 
+/*
+ *   Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+ */
 
-#ifndef MMT_ROAD_H 
+#ifndef MMT_ROAD_H
 #define MMT_ROAD_H
 
 #include "MMT_Hit.h"
@@ -47,7 +47,7 @@ class MMT_Road {
     double avgSofUV(const int uv1, const int uv2) const;
     double avgZofUV(const int uv1, const int uv2) const;
     bool checkCoincidences(const int &bcwind) const;
-    bool containsNeighbors(const MMT_Hit &hit) const;
+    bool containsNeighbors(const MMT_Hit* hit) const;
     unsigned int countHits() const { return m_road_hits.size(); }
     unsigned int countRealHits() const;
     unsigned int countUVHits(bool flag) const;
@@ -63,7 +63,6 @@ class MMT_Road {
     int getRoadSizeDownX() const { return m_roadSizeDownX; }
     int getRoadSizeUpUV() const { return m_roadSizeUpUV; }
     int getRoadSizeDownUV() const { return m_roadSizeDownUV; }
-    std::vector<MMT_Hit> getHitVector() const { return m_road_hits; }
     char getSector() const { return m_sector; }
     int getXthreshold() const { return m_xthr; }
     int getUVthreshold() const { return m_uvthr; }
@@ -90,7 +89,6 @@ class MMT_Road {
     double m_pitch, m_innerRadiusEta1, m_innerRadiusEta2;
     bool m_trig;
     std::vector<ROOT::Math::XYZVector> m_planeCoordinates;
-
-    std::vector<MMT_Hit> m_road_hits;
+    std::vector<std::unique_ptr<MMT_Hit> > m_road_hits;
 };
 #endif

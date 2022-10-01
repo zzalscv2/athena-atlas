@@ -40,17 +40,10 @@ preinclude_file = 'all:TrigInDetValidation/TIDV_cond_fix.py' #conditions fix for
 Jobs = [( "Truth",       " TIDAdata-run3.dat                    -o data-hists.root -p 11" ),
         ( "Offline",     " TIDAdata-run3-offline.dat -r Offline -o data-hists-offline.root" )] 
  
-Comp = [( "L2ele",              "L2electronTnP",      "data-hists.root",         " -c TIDAhisto-panel-TnP.dat -l e26_e14_etcut_idperf_50invmAB130_FTF_FE e26_e14_etcut_idperf_50invmAB130_FTF_FE_1_probe  -d HLTL2-plots " ),
-        ( "L2eleoffline",       "L2electronTnP",      "data-hists-offline.root", " -c TIDAhisto-panel-TnP.dat -l e26_e14_etcut_idperf_50invmAB130_FTF_FE e26_e14_etcut_idperf_50invmAB130_FTF_FE_1_probe -d HLTL2-plots-offline " ),
-        ( "EFele",              "EFelectronTnP",      "data-hists.root",         " -c TIDAhisto-panel-TnP.dat -l e26_e14_etcut_nogsf_idperf_50invmAB130_FTF_FE_1_probe e26_e14_etcut_nogsf_idperf_50invmAB130_IDTrig_1_probe e26_e14_etcut_idperf_50invmAB130_GSF_1_probe e26_e14_etcut_idperf_50invmAB130_GSF -d HLTEF-plots "         ),
-        ( "EFeleoffline",       "EFelectronTnP",      "data-hists-offline.root", " -c TIDAhisto-panel-TnP.dat -l e26_e14_etcut_nogsf_idperf_50invmAB130_FTF_FE_1_probe e26_e14_etcut_nogsf_idperf_50invmAB130_IDTrig_1_probe e26_e14_etcut_idperf_50invmAB130_GSF_1_probe e26_e14_etcut_idperf_50invmAB130_GSF -d HLTEF-plots-offline " ),
-        
-        # new chains
-        ( "L2ele",              "L2electronTnP",      "data-hists.root",         " -c TIDAhisto-panel-TnP.dat -l e26_e14_idperf_tight_50invmAB130_FTF_FE e26_e14_idperf_tight_50invmAB130_FTF_FE_1_probe  -d HLTL2-plots " ),
-        ( "L2eleoffline",       "L2electronTnP",      "data-hists-offline.root", " -c TIDAhisto-panel-TnP.dat -l e26_e14_idperf_tight_50invmAB130_FTF_FE e26_e14_idperf_tight_50invmAB130_FTF_FE_1_probe -d HLTL2-plots-offline " ),
-        ( "EFele",              "EFelectronTnP",      "data-hists.root",         " -c TIDAhisto-panel-TnP.dat -l e26_e14_nogsf_idperf_tight_50invmAB130_FTF_FE_1_probe e26_e14_nogsf_idperf_tight_50invmAB130_IDTrig_1_probe e26_e14_idperf_tight_50invmAB130_GSF_1_probe e26_e14_idperf_tight_50invmAB130_GSF -d HLTEF-plots "         ),
-        ( "EFeleoffline",       "EFelectronTnP",      "data-hists-offline.root", " -c TIDAhisto-panel-TnP.dat -l e26_e14_nogsf_idperf_tight_50invmAB130_FTF_FE_1_probe e26_e14_nogsf_idperf_tight_50invmAB130_IDTrig_1_probe e26_e14_idperf_tight_50invmAB130_GSF_1_probe e26_e14_idperf_tight_50invmAB130_GSF -d HLTEF-plots-offline " ),
-       ]
+Comp = [( "L2ele",              "L2electronTnP",      "data-hists.root",         " -c TIDAhisto-panel-TnP.dat -l e26_e14_idperf_tight_50invmAB130_FTF_FE_1 e26_e14_idperf_tight_50invmAB130_FTF_FE_1_probe  -d HLTL2-plots " ),
+        ( "L2eleoffline",       "L2electronTnP",      "data-hists-offline.root", " -c TIDAhisto-panel-TnP.dat -l e26_e14_idperf_tight_50invmAB130_FTF_FE_1 e26_e14_idperf_tight_50invmAB130_FTF_FE_1_probe -d HLTL2-plots-offline " ),
+        ( "EFele",              "EFelectronTnP",      "data-hists.root",         " -c TIDAhisto-panel-TnP.dat -l e26_e14_nogsf_idperf_tight_50invmAB130_FTF_FE_1_probe e26_e14_nogsf_idperf_tight_50invmAB130_IDTrig_1_probe e26_e14_idperf_tight_50invmAB130_GSF_1_probe e26_e14_idperf_tight_50invmAB130_GSF_1 -d HLTEF-plots "         ),
+        ( "EFeleoffline",       "EFelectronTnP",      "data-hists-offline.root", " -c TIDAhisto-panel-TnP.dat -l e26_e14_nogsf_idperf_tight_50invmAB130_FTF_FE_1_probe e26_e14_nogsf_idperf_tight_50invmAB130_IDTrig_1_probe e26_e14_idperf_tight_50invmAB130_GSF_1_probe e26_e14_idperf_tight_50invmAB130_GSF_1 -d HLTEF-plots-offline " ) ]
 
 
     

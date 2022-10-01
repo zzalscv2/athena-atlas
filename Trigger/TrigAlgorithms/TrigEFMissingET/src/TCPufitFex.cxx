@@ -82,14 +82,6 @@ namespace HLT
         else
           masked.push_back(tower);
       }
-      // Perform the fit
-      std::vector<SignedKinematics> corrections = PufitUtils::pufit(
-          pileupSum.sum,
-          pileupSum.covariance,
-          mean,
-          variance,
-          masked,
-          m_constraintImportance);
 
       // Save the sum over all towers to the corresponding component
       grid.sum(PufitGrid::SumStrategy::All).fillMETComponent(0, met);
@@ -97,9 +89,24 @@ namespace HLT
       METComponent sum = grid.sum(PufitGrid::SumStrategy::Masked);
       // Save this uncorrected sum to the corresponding component
       sum.fillMETComponent(1, met);
-      // Apply the corrections
-      for (const SignedKinematics &kin : corrections)
-        sum += kin;
+
+      // If variance is 0 then there are no towers in the trimmed mean calculation with energy > 0
+      // This will cause the fit to fail!
+      if (variance != 0)
+      {
+        // Perform the fit
+        std::vector<SignedKinematics> corrections = PufitUtils::pufit(
+            pileupSum.sum,
+            pileupSum.covariance,
+            mean,
+            variance,
+            masked,
+            m_constraintImportance);
+
+        // Apply the corrections
+        for (const SignedKinematics &kin : corrections)
+            sum += kin;
+      }
       sum.fillMET(met);
       return StatusCode::SUCCESS;
     }

@@ -12,16 +12,15 @@
 unset ATHENA_CORE_NUMBER
 
 # RUN3 setup
-# ATLAS-R3S-2021-01-00-02 and OFLCOND-MC16-SDR-RUN3-01
+# ATLAS-R3S-2021-03-00-00 and OFLCOND-MC16-SDR-RUN3-05
 Sim_tf.py \
     --CA \
-    --conditionsTag 'default:OFLCOND-MC16-SDR-RUN3-01' \
+    --conditionsTag 'default:OFLCOND-MC16-SDR-RUN3-05' \
     --simulator 'ATLFAST3F_G4MS' \
     --postInclude 'PyJobTransforms.UseFrontier' \
-    --preInclude 'EVNTtoHITS:Campaigns.MC16Simulation' \
-    --DataRunNumber '330000' \
-    --geometryVersion 'default:ATLAS-R3S-2021-01-00-02' \
-    --inputEVNTFile "/cvmfs/atlas-nightlies.cern.ch/repo/data/data-art/SimCoreTests/valid1.410000.PowhegPythiaEvtGen_P2012_ttbar_hdamp172p5_nonallhad.evgen.EVNT.e4993.EVNT.08166201._000012.pool.root.1" \
+    --preInclude 'EVNTtoHITS:Campaigns.MC21Simulation' \
+    --geometryVersion 'default:ATLAS-R3S-2021-03-00-00' \
+    --inputEVNTFile "/cvmfs/atlas-nightlies.cern.ch/repo/data/data-art/CampaignInputs/mc21/EVNT/mc21_13p6TeV.601229.PhPy8EG_A14_ttbar_hdamp258p75_SingleLep.evgen.EVNT.e8453/EVNT.29328277._003902.pool.root.1" \
     --outputHITSFile "test.CA.HITS.pool.root" \
     --maxEvents 4 \
     --postExec 'with open("ConfigSimCA.pkl", "wb") as f: cfg.store(f)' \
@@ -33,38 +32,36 @@ echo  "art-result: $rc simCA"
 status=$rc
 
 rc2=-9999
-if [ $rc2 -eq -9999 ]
-then
-    Sim_tf.py \
-        --conditionsTag 'default:OFLCOND-MC16-SDR-RUN3-01' \
-        --simulator 'ATLFAST3F_G4MS' \
-        --postInclude 'default:PyJobTransforms/UseFrontier.py' \
-        --preInclude 'EVNTtoHITS:Campaigns/MC16Simulation.py' \
-        --DataRunNumber '330000' \
-        --geometryVersion 'default:ATLAS-R3S-2021-01-00-02_VALIDATION' \
-        --inputEVNTFile "/cvmfs/atlas-nightlies.cern.ch/repo/data/data-art/SimCoreTests/valid1.410000.PowhegPythiaEvtGen_P2012_ttbar_hdamp172p5_nonallhad.evgen.EVNT.e4993.EVNT.08166201._000012.pool.root.1" \
-        --outputHITSFile "test.CA.HITS.pool.root" \
-        --maxEvents 4 \
-        --imf False \
-        --athenaopts '"--config-only=ConfigSimCG.pkl"'
+Sim_tf.py \
+    --conditionsTag 'default:OFLCOND-MC16-SDR-RUN3-05' \
+    --simulator 'ATLFAST3F_G4MS' \
+    --postInclude 'default:PyJobTransforms/UseFrontier.py' \
+    --preInclude 'EVNTtoHITS:Campaigns/MC21Simulation.py' \
+    --geometryVersion 'default:ATLAS-R3S-2021-03-00-00' \
+    --inputEVNTFile "/cvmfs/atlas-nightlies.cern.ch/repo/data/data-art/CampaignInputs/mc21/EVNT/mc21_13p6TeV.601229.PhPy8EG_A14_ttbar_hdamp258p75_SingleLep.evgen.EVNT.e8453/EVNT.29328277._003902.pool.root.1" \
+    --outputHITSFile "test.CA.HITS.pool.root" \
+    --maxEvents 4 \
+    --imf False \
+    --athenaopts '"--config-only=ConfigSimCG.pkl"'
 
-    Sim_tf.py \
-        --conditionsTag 'default:OFLCOND-MC16-SDR-RUN3-01' \
-        --simulator 'ATLFAST3F_G4MS' \
-        --postInclude 'default:PyJobTransforms/UseFrontier.py' \
-        --preInclude 'EVNTtoHITS:Campaigns/MC16Simulation.py' \
-        --DataRunNumber '330000' \
-        --geometryVersion 'default:ATLAS-R3S-2021-01-00-02_VALIDATION' \
-        --inputEVNTFile "/cvmfs/atlas-nightlies.cern.ch/repo/data/data-art/SimCoreTests/valid1.410000.PowhegPythiaEvtGen_P2012_ttbar_hdamp172p5_nonallhad.evgen.EVNT.e4993.EVNT.08166201._000012.pool.root.1" \
-        --outputHITSFile "test.CG.HITS.pool.root" \
-        --maxEvents 4 \
-        --imf False
+Sim_tf.py \
+    --conditionsTag 'default:OFLCOND-MC16-SDR-RUN3-05' \
+    --simulator 'ATLFAST3F_G4MS' \
+    --postInclude 'default:PyJobTransforms/UseFrontier.py' \
+    --preInclude 'EVNTtoHITS:Campaigns/MC21Simulation.py' \
+    --geometryVersion 'default:ATLAS-R3S-2021-03-00-00' \
+    --inputEVNTFile "/cvmfs/atlas-nightlies.cern.ch/repo/data/data-art/CampaignInputs/mc21/EVNT/mc21_13p6TeV.601229.PhPy8EG_A14_ttbar_hdamp258p75_SingleLep.evgen.EVNT.e8453/EVNT.29328277._003902.pool.root.1" \
+    --outputHITSFile "test.CG.HITS.pool.root" \
+    --maxEvents 4 \
+    --imf False
 
-    rc2=$?
-    status=$rc2
-    mv log.EVNTtoHITS log.EVNTtoHITS.CG
-fi
+rc2=$?
+mv log.EVNTtoHITS log.EVNTtoHITS.CG
 echo "art-result: $rc2 simOLD"
+if [ $status -eq 0 ]
+then
+    status=$rc2
+fi
 
 rc3=-9999
 if [ $rc2 -eq 0 ]

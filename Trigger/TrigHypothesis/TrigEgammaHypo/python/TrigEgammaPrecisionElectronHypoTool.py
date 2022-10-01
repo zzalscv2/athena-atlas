@@ -86,7 +86,8 @@ class TrigEgammaPrecisionElectronHypoToolConfig:
                            'dnntight' ,
                            'dnnmedium',
                            'dnnloose' ,
-                           'mergedtight'
+                           'mergedtight',
+                           'nopid',
                            ]
 
   __operation_points_lhInfo = [
@@ -140,6 +141,7 @@ class TrigEgammaPrecisionElectronHypoToolConfig:
     tool.PidName        = ""
     tool.d0Cut          = -1
     tool.AcceptAll      = False
+    tool.DoNoPid	= False
     self.__tool         = tool    
 
     self.__log.debug( 'Electron_Chain     :%s', self.__name )
@@ -188,10 +190,11 @@ class TrigEgammaPrecisionElectronHypoToolConfig:
     self.tool().dETACLUSTERthr = 9999.
     self.tool().dPHICLUSTERthr = 9999.
 
-  def etcut(self):
+  def noPid(self):
 
-    self.__log.debug( 'Configure etcut' )
-    self.tool().ETthr          = same( ( self.etthr() -  3 )*GeV )
+    self.tool().DoNoPid = True
+    self.__log.debug( 'Configure noPid' )
+    self.tool().ETthr          = same( self.etthr()*GeV, self.tool())
     # No other cuts applied
     self.tool().dETACLUSTERthr = 9999.
     self.tool().dPHICLUSTERthr = 9999.
@@ -229,7 +232,8 @@ class TrigEgammaPrecisionElectronHypoToolConfig:
 
     if 'nocut' == self.pidname():
       self.nocut()
-
+    elif 'nopid' == self.pidname():
+      self.noPid()
     else: # nominal chain using pid selection
       self.nominal()
 
@@ -442,4 +446,3 @@ def TrigEgammaPrecisionElectronCBSelectorCfg(name='TrigEgammaPrecisionElectronCB
         acc.addPublicTool(SelectorTool)
     
     return acc
-

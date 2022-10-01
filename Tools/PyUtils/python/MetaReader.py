@@ -1021,6 +1021,7 @@ def make_peeker(meta_dict):
                 'G4Version',
                 'TruthStrategy',
                 'SimBarcodeOffset',
+                'RegenerationIncrement',
                 'TRTRangeCut',
                 'SimulationFlavour',
                 'Simulator',
