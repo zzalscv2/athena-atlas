@@ -11,6 +11,7 @@
 #include "ByteStreamCnvSvc/ByteStreamInputSvc.h"
 #include "ByteStreamCnvSvcBase/ByteStreamAddress.h"
 #include "ByteStreamCnvSvc/ByteStreamExceptions.h"
+#include "CxxUtils/checker_macros.h"
 
 #include "GaudiKernel/ClassID.h"
 #include "GaudiKernel/FileIncident.h"
@@ -732,7 +733,8 @@ StatusCode EventSelectorByteStream::seek(Context& /* it */, int evtNum) const {
       }
       int delta = evtNum - m_firstEvt[m_fileCount];
       if (delta > 0) {
-        if (nextImpl(*m_beginIter,delta, lock).isFailure()) return StatusCode::FAILURE;
+        EventContextByteStream* beginIter ATLAS_THREAD_SAFE = m_beginIter;
+        if (nextImpl(*beginIter,delta, lock).isFailure()) return StatusCode::FAILURE;
       }
    }
    // event in current file
@@ -743,10 +745,12 @@ StatusCode EventSelectorByteStream::seek(Context& /* it */, int evtNum) const {
          // nothing to do
       }
       else if ( delta > 0 ) { // forward
-         if ( this->nextImpl(*m_beginIter, delta, lock).isFailure() ) return StatusCode::FAILURE;
+         EventContextByteStream* beginIter ATLAS_THREAD_SAFE = m_beginIter;
+         if ( this->nextImpl(*beginIter, delta, lock).isFailure() ) return StatusCode::FAILURE;
       }
       else if ( delta < 0 ) { // backward
-         if ( this->previousImpl(*m_beginIter, -1*delta, lock).isFailure() ) return(StatusCode::FAILURE);
+         EventContextByteStream* beginIter ATLAS_THREAD_SAFE = m_beginIter;
+         if ( this->previousImpl(*beginIter, -1*delta, lock).isFailure() ) return(StatusCode::FAILURE);
       }
    }
    return StatusCode::SUCCESS;

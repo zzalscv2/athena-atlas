@@ -20,7 +20,7 @@ atlas_add_library( ByteStreamCnvSvcLib
    PRIVATE_LINK_LIBRARIES ${TDAQ-COMMON_LIBRARIES} ${Boost_LIBRARIES}
    AthenaKernel SGTools CollectionBase FileCatalog
    AthenaPoolUtilities PersistentDataModel xAODEventInfo xAODTrigger
-   ByteStreamCnvSvcLegacy )
+   ByteStreamCnvSvcLegacy CxxUtils )
 
 atlas_add_component( ByteStreamCnvSvc
    src/components/*.cxx
