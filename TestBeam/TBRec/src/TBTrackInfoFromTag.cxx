@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2017 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
 */
 
 
@@ -103,12 +103,10 @@ StatusCode
 TBTrackInfoFromTag::execute()
 {
 	ATH_MSG_DEBUG("Executing TBTrackInfoFromTag...");
+        const EventContext& ctx = Gaudi::Hive::currentContext();
 
-	const EventInfo * evtInfo;
-	ATH_CHECK( evtStore()->retrieve(evtInfo,m_SGkey1) );
-
-	int runNumber = evtInfo->event_ID()->run_number();
-	uint64_t evtNumber = evtInfo->event_ID()->event_number();
+	int runNumber = ctx.eventID().run_number();
+	uint64_t evtNumber = ctx.eventID().event_number();
 
 	ATH_MSG_DEBUG("Run/Event numbers:\t " << runNumber << " / " << evtNumber); 
 

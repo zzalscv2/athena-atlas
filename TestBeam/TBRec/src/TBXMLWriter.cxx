@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
 */
 
 
@@ -8,9 +8,6 @@
 
 
 // event
-#include "EventInfo/EventInfo.h"
-#include "EventInfo/EventID.h"
-
 #include "GaudiKernel/ListItem.h"
 
 #include <string>
@@ -27,9 +24,6 @@ TBXMLWriter::TBXMLWriter(const std::string& name,
   : AthAlgorithm(name,pSvcLocator)
     , m_outputFrequency(1)
     , m_eventCounter(0)
-    , m_beginRun(0)
-    , m_runNumber((unsigned int)-1)
-    , m_eventNumber(0)
 {
   declareProperty("OutputFrequency",m_outputFrequency);
   declareProperty("WriteTools",m_writerToolNames);
@@ -120,6 +114,8 @@ StatusCode TBXMLWriter::initialize()
 
 StatusCode TBXMLWriter::execute()
 {
+  const EventContext& ctx = Gaudi::Hive::currentContext();
+
   /////////////////
   // Check Tools //
   /////////////////
@@ -134,25 +130,9 @@ StatusCode TBXMLWriter::execute()
       return StatusCode::SUCCESS;
     }
 
-  /////////////////////////
-  // Access Event Header //
-  /////////////////////////
-
-  const EventInfo* eventHeader;
-  ATH_CHECK( evtStore()->retrieve(eventHeader) );
-
-  const EventID* theEvent = eventHeader->event_ID();
-
   ///////////////
   // XML Files //
   ///////////////
-
-  m_beginRun = theEvent->run_number() != m_runNumber;
-  if ( m_beginRun )
-    {
-      m_runNumber = theEvent->run_number();
-    }
-  m_eventNumber = theEvent->event_number();
 
   // run info
   //  if ( m_geomWriter > 0 && thisRun != m_oldRun )
@@ -165,9 +145,9 @@ StatusCode TBXMLWriter::execute()
   std::ostringstream thisFileName;
   thisFileName << m_topDirectory << "/evnt." 
 	       << std::setw(6)   << std::setfill('0')
-	       << m_runNumber    << "." << std::setfill('0')
+	       << ctx.eventID().run_number()    << "." << std::setfill('0')
 	       << std::setw(6)
-	       << m_eventNumber  << ".xml" << std::ends;
+	       << ctx.eventID().event_number()  << ".xml" << std::ends;
 
   std::ofstream thisFileStream((thisFileName.str()).c_str());
 

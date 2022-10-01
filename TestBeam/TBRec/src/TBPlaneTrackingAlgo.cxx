@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "TBPlaneTrackingAlgo.h"
@@ -9,8 +9,6 @@
 #include "TBEvent/TBTrack.h"
 #include "TBEvent/TBEventInfo.h"
 
-#include "EventInfo/EventInfo.h"
-#include "EventInfo/EventID.h"
 #include "PathResolver/PathResolver.h"
 
 #include <vector>
@@ -52,6 +50,7 @@ StatusCode TBPlaneTrackingAlgo::execute()
 /////////////////////////////////////////
 {
   ATH_MSG_DEBUG ("Executing TBPlaneTracking algorithm");
+  const EventContext& ctx = Gaudi::Hive::currentContext();
   
   if(m_testAlgo == true){
     ATH_MSG_WARNING ("TBPlaneTrackingAlgo: " <<
@@ -75,19 +74,7 @@ StatusCode TBPlaneTrackingAlgo::execute()
   StatusCode sc1;
 
   // Get run number and get new calib constants -----------------------------
-  unsigned int thisrun=0;
-  const EventInfo* thisEventInfo = nullptr;
-  sc1=evtStore()->retrieve(thisEventInfo);
-  if (sc1!=StatusCode::SUCCESS){
-    ATH_MSG_WARNING ("No EventInfo object found! Can't read run number!");
-    ATH_MSG_WARNING ("     => can't get calib constant. Exit");
-    setFilterPassed(false);
-    return StatusCode::SUCCESS;
-  }
-  else
-    {
-      thisrun = thisEventInfo->event_ID()->run_number();
-    }
+  unsigned int thisrun=ctx.eventID().run_number();
 
   if(thisrun != m_runnumber)
     {
