@@ -122,7 +122,7 @@ def getConfigurationFiles(campaign=None, dsid=None, data_type=None, files=None, 
         configuration_files += defaultConfigFiles(campaign)
         return configuration_files
 
-    config = f'{default_directory}/DSID{dsid[:3]}xxx/pileup_{campaign}_dsid{dsid}_{simulation_type}.root'
+    config = f'{default_directory}/DSID{dsid[:3]}xxx/pileup_{campaign.value}_dsid{dsid}_{simulation_type}.root'
     from PathResolver import PathResolver
     if not PathResolver.FindCalibFile(config):
         return []
