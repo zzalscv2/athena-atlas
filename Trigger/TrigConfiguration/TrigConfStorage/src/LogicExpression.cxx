@@ -243,7 +243,7 @@ LogicExpression::totalNumberOfElements() const {
 
 
 void
-LogicExpression::printError(const std::string& message, int i) const {
+LogicExpression::printError(const std::string& message, int i) {
    std::string m="Error while parsing : ";
    std::string s="";
    int n = m.size();
@@ -256,7 +256,7 @@ LogicExpression::printError(const std::string& message, int i) const {
 
 
 void
-LogicExpression::printCurrentState() const {
+LogicExpression::printCurrentState() {
    char aaa[100];
    sprintf(aaa, "Current state: State=%c Nsublogics=%d Element=%s", 
            m_State, (int)subLogics().size(), m_Element.c_str());
@@ -265,7 +265,7 @@ LogicExpression::printCurrentState() const {
 
 
 void
-LogicExpression::print(const std::string& indent) const {
+LogicExpression::print(const std::string& indent) {
    std::string s=indent;
    if (m_State == kELEMENT) {
       m_ostream << indent << m_Element << std::endl;
