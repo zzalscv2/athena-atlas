@@ -118,10 +118,10 @@ double ResidualOffsetCorrection::GetResidualOffset ( double abseta, double mu, d
 
 double ResidualOffsetCorrection::GetResidualOffsetET( double abseta, double mu, double NPV,
                                                       int nJet, bool MuOnly, bool NOnly,
-                                                      std::vector<double> OffsetMu,
-                                                      std::vector<double> OffsetNPV,
-                                                      std::vector<double> OffsetNjet,
-                                                      TAxis *OffsetBins ) const {
+                                                      const std::vector<double>& OffsetMu,
+                                                      const std::vector<double>& OffsetNPV,
+                                                      const std::vector<double>& OffsetNjet,
+                                                      const TAxis *OffsetBins ) const {
 
   //mu rescaling
   const double muCorr = m_isData ? mu : mu*m_muSF;
