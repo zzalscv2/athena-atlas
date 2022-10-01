@@ -301,7 +301,7 @@ StatusCode TopxAODAlg::beginInputFile() {
       ATH_MSG_INFO(
           "The sum of weights for the following LHE3 weights were retrieved from the input file:");
       MsgStream &msgInfo = msg(MSG::Level::INFO);
-      for (std::string s : m_names_LHE3)
+      for (const std::string& s : m_names_LHE3)
         msgInfo << s << " ";
       msgInfo << std::endl;
       msgInfo.doOutput();
@@ -408,7 +408,7 @@ StatusCode TopxAODAlg::execute() {
                "Failed to retrieve TruthEvent container for LHAPDF");
     top::check(truthEvent->size() == 1,
                "TruthEvent container size != 1, not sure what to do with PDF reweighting");
-    for (auto tePtr : *truthEvent) {
+    for (const auto *tePtr : *truthEvent) {
       for (auto &pdf : m_totalEventsPdfWeighted) {
         if (tePtr->isAvailable<std::vector<float>>("AnalysisTop_" + pdf.first + "_Weights")) {
           pdf.second->resize(
@@ -550,7 +550,7 @@ StatusCode TopxAODAlg::execute() {
     ///-- Loop over all systematics and make a "top::Event" for each --///
     const xAOD::SystematicEventContainer *allSystematics =
         m_topEventMaker->systematicEvents(m_config->sgKeyTopSystematicEvents());
-    for (auto currentSystematic : *allSystematics) {
+    for (const auto *currentSystematic : *allSystematics) {
       if (!(currentSystematic->hashValue() == m_config->nominalHashValue() ||
             m_config->doTightSysts()))
         continue;
@@ -594,7 +594,7 @@ StatusCode TopxAODAlg::execute() {
     ///-- Loop over all Loose systematics and make a "top::Event" for each --///
     const xAOD::SystematicEventContainer *allSystematicsLoose =
         m_topEventMaker->systematicEvents(m_config->sgKeyTopSystematicEventsLoose());
-    for (auto currentSystematic : *allSystematicsLoose) {
+    for (const auto *currentSystematic : *allSystematicsLoose) {
       if (!(currentSystematic->hashValue() == m_config->nominalHashValue() ||
             m_config->doLooseSysts()))
         continue;

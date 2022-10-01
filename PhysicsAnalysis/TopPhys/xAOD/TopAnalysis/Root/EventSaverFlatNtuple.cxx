@@ -238,7 +238,7 @@ namespace top {
     //make a tree for each systematic
     std::string nominalTTreeName("SetMe"), nominalLooseTTreeName("SetMe");
     if (m_config->doTightEvents()) {
-      for (auto treeName : *config->systAllTTreeNames()) {
+      for (const auto& treeName : *config->systAllTTreeNames()) {
         if (treeName.first == m_config->nominalHashValue() || m_config->doTightSysts()) {
           m_treeManagers.push_back(std::shared_ptr<top::TreeManager>(new top::TreeManager(treeName.second, file,
                                                                                           m_config->
@@ -256,7 +256,7 @@ namespace top {
     }
 
     if (m_config->doLooseEvents()) {
-      for (auto treeName : *config->systAllTTreeNames()) {
+      for (const auto& treeName : *config->systAllTTreeNames()) {
         if (treeName.first == m_config->nominalHashValue() || m_config->doLooseSysts()) {
           m_treeManagers.push_back(std::shared_ptr<top::TreeManager>(new top::TreeManager(treeName.second + "_Loose",
                                                                                           file,
@@ -316,7 +316,7 @@ namespace top {
       // PDF information
       if (m_config->doTruthPDFInfo()) {
         if (m_config->doTruthPDFInfoInNominalTrees()) {//if PDF info requested to be saved in nominal trees of truth one
-          for (auto systematicTree : m_treeManagers) {//loop on systematic trees to only get the nominal ones
+          for (const auto& systematicTree : m_treeManagers) {//loop on systematic trees to only get the nominal ones
             if (systematicTree->name() == nominalTTreeName || systematicTree->name() == nominalLooseTTreeName) {
               systematicTree->makeOutputVariable(m_PDFinfo_X1, "PDFinfo_X1");
               systematicTree->makeOutputVariable(m_PDFinfo_X2, "PDFinfo_X2");
@@ -342,7 +342,7 @@ namespace top {
       if (m_config->doMCGeneratorWeights()) {
         if (m_config->doMCGeneratorWeightsInNominalTrees()) {//if MCGeneratorWeights requested to be saved in nominal
                                                              // trees of truth one
-          for (auto systematicTree : m_treeManagers) {//loop on systematic trees to only get the nominal ones
+          for (const auto& systematicTree : m_treeManagers) {//loop on systematic trees to only get the nominal ones
             if (systematicTree->name() == nominalTTreeName || systematicTree->name() == nominalLooseTTreeName) {
               systematicTree->makeOutputVariable(m_mc_generator_weights, "mc_generator_weights");
             }
@@ -359,7 +359,7 @@ namespace top {
         for (auto& pdf : m_PDF_eventWeights) {
           if (m_config->doLHAPDFInNominalTrees()) {//if PDF weights requested to be saved in nominal trees instead of
                                                    // truth one
-            for (auto systematicTree : m_treeManagers) {//loop on systematic trees to only get the nominal ones
+            for (const auto& systematicTree : m_treeManagers) {//loop on systematic trees to only get the nominal ones
               if (systematicTree->name() == nominalTTreeName ||
                   systematicTree->name() ==
                   nominalLooseTTreeName) systematicTree->makeOutputVariable(pdf.second, pdf.first);
@@ -401,7 +401,7 @@ namespace top {
     }
 
     //loop over systematics and attach variables
-    for (auto systematicTree : m_treeManagers) {
+    for (const auto& systematicTree : m_treeManagers) {
       if (m_config->isMC()) {
         systematicTree->makeOutputVariable(m_weight_mc, "weight_mc");
 
@@ -720,7 +720,7 @@ namespace top {
             systematicTree->makeOutputVariable(m_weight_bTagSF_eigen_Light_down[tagWP],
                                                "weight_bTagSF_" + shortBtagWP(tagWP) + "_eigenvars_Light_down");
             // named systematics
-            for (auto name : m_config->btagging_namedSysts(tagWP)) {
+            for (const auto& name : m_config->btagging_namedSysts(tagWP)) {
               systematicTree->makeOutputVariable(m_weight_bTagSF_named_up[tagWP][name],
                                                  "weight_bTagSF_" + shortBtagWP(tagWP) + "_" + betterBtagNamedSyst(
                                                    name) + "_up");
@@ -745,7 +745,7 @@ namespace top {
               systematicTree->makeOutputVariable(m_weight_trackjet_bTagSF_eigen_Light_down[tagWP], "weight_trackjet_bTagSF_" + shortBtagWP(
                                                    tagWP) + "_eigenvars_Light_down");
               // named systematics
-              for (auto name : m_config->trkjet_btagging_namedSysts(tagWP)) {
+              for (const auto& name : m_config->trkjet_btagging_namedSysts(tagWP)) {
                 systematicTree->makeOutputVariable(m_weight_trackjet_bTagSF_named_up[tagWP][name], "weight_trackjet_bTagSF_" + shortBtagWP(
                                                      tagWP) + "_" + betterBtagNamedSyst(name) + "_up");
                 systematicTree->makeOutputVariable(m_weight_trackjet_bTagSF_named_down[tagWP][name], "weight_trackjet_bTagSF_" + shortBtagWP(
@@ -1072,7 +1072,7 @@ namespace top {
         systematicTree->makeOutputVariable(m_tjet_eta, "tjet_eta");
         systematicTree->makeOutputVariable(m_tjet_phi, "tjet_phi");
         systematicTree->makeOutputVariable(m_tjet_e, "tjet_e");
-        for (auto& tagWP : m_config->bTagWP_trkJet()) {
+        for (const auto& tagWP : m_config->bTagWP_trkJet()) {
           if (tagWP.find("Continuous") == std::string::npos)
             systematicTree->makeOutputVariable(m_tjet_isbtagged[tagWP], "tjet_isbtagged_" + shortBtagWP(tagWP));
           else
@@ -1424,32 +1424,32 @@ namespace top {
         m_selectionDecisions[index] = 0;
         systematicTree->makeOutputVariable(m_selectionDecisions[index], branchName);
         // Add all triggers to a map so we don't get any duplicates
-        for (auto& trigger_name : m_config->allTriggers_Tight(branchName)) {
+        for (const auto& trigger_name : m_config->allTriggers_Tight(branchName)) {
           m_triggerDecisions [trigger_name.first] = 0;
         }
-        for (auto& trigger_name : m_config->allTriggers_Loose(branchName)) {
+        for (const auto& trigger_name : m_config->allTriggers_Loose(branchName)) {
           // let's make sure this isn't done twice
           if (m_triggerDecisions.find(trigger_name.first) != m_triggerDecisions.end()
               && m_triggerPrescales.find(trigger_name.first) != m_triggerPrescales.end()) continue;
           m_triggerDecisions [trigger_name.first] = 0;
         }
-        for (auto& trigger_name : m_config->electronTriggers_Tight(branchName))
+        for (const auto& trigger_name : m_config->electronTriggers_Tight(branchName))
           m_el_trigMatched [trigger_name.first] = std::vector<char>();
-        for (auto& trigger_name : m_config->electronTriggers_Loose(branchName)) {
+        for (const auto& trigger_name : m_config->electronTriggers_Loose(branchName)) {
           // let's make sure this isn't done twice
           if (m_el_trigMatched.find(trigger_name.first) != m_el_trigMatched.end()) continue;
           m_el_trigMatched [trigger_name.first] = std::vector<char>();
         }
-        for (auto& trigger_name : m_config->muonTriggers_Tight(branchName))
+        for (const auto& trigger_name : m_config->muonTriggers_Tight(branchName))
           m_mu_trigMatched [trigger_name.first] = std::vector<char>();
-        for (auto& trigger_name : m_config->muonTriggers_Loose(branchName)) {
+        for (const auto& trigger_name : m_config->muonTriggers_Loose(branchName)) {
           // let's make sure this isn't done twice
           if (m_mu_trigMatched.find(trigger_name.first) != m_mu_trigMatched.end()) continue;
           m_mu_trigMatched [trigger_name.first] = std::vector<char>();
         }
-        for (auto& trigger_name : m_config->photonTriggers_Tight(branchName))
+        for (const auto& trigger_name : m_config->photonTriggers_Tight(branchName))
           m_ph_trigMatched [trigger_name.first] = std::vector<char>();
-        for (auto& trigger_name : m_config->photonTriggers_Loose(branchName)) {
+        for (const auto& trigger_name : m_config->photonTriggers_Loose(branchName)) {
           // let's make sure this isn't done twice
           if (m_ph_trigMatched.find(trigger_name.first) != m_ph_trigMatched.end()) continue;
           m_ph_trigMatched [trigger_name.first] = std::vector<char>();
@@ -2003,7 +2003,7 @@ namespace top {
           m_sfRetriever->btagSF_eigen_vars(event, top::topSFSyst::BTAG_SF_EIGEN_LIGHT,
                                            m_weight_bTagSF_eigen_Light_up[tagWP],
                                            m_weight_bTagSF_eigen_Light_down[tagWP], tagWP);
-          for (auto name : m_config->btagging_namedSysts(tagWP)) {
+          for (const auto& name : m_config->btagging_namedSysts(tagWP)) {
             m_weight_bTagSF_named_up[tagWP][name] = m_sfRetriever->btagSF(event, top::topSFSyst::BTAG_SF_NAMED_UP, tagWP, false, name);
             m_weight_bTagSF_named_down[tagWP][name] = m_sfRetriever->btagSF(event, top::topSFSyst::BTAG_SF_NAMED_DOWN, tagWP, false, name);
           }
@@ -2019,7 +2019,7 @@ namespace top {
             m_sfRetriever->btagSF_eigen_vars(event, top::topSFSyst::BTAG_SF_EIGEN_LIGHT,
                                              m_weight_trackjet_bTagSF_eigen_Light_up[tagWP],
                                              m_weight_trackjet_bTagSF_eigen_Light_down[tagWP], tagWP, true);
-            for (auto name : m_config->trkjet_btagging_namedSysts(tagWP)) {
+            for (const auto& name : m_config->trkjet_btagging_namedSysts(tagWP)) {
               m_weight_trackjet_bTagSF_named_up[tagWP][name] = m_sfRetriever->btagSF(event, top::topSFSyst::BTAG_SF_NAMED_UP, tagWP, true, name);
               m_weight_trackjet_bTagSF_named_down[tagWP][name] = m_sfRetriever->btagSF(event, top::topSFSyst::BTAG_SF_NAMED_DOWN, tagWP, true, name);
             }
@@ -3401,7 +3401,7 @@ namespace top {
         m_rcjetsub_e[i].clear();
 
         const xAOD::Jet* subjet(nullptr);
-        for (auto rc_jet_subjet : rc_jet->getConstituents()) {
+        for (const auto *rc_jet_subjet : rc_jet->getConstituents()) {
           subjet = static_cast<const xAOD::Jet*>(rc_jet_subjet->rawConstituent());
           m_rcjetsub_pt[i].push_back(subjet->pt());
           m_rcjetsub_eta[i].push_back(subjet->eta());
@@ -3577,7 +3577,7 @@ namespace top {
             m_VarRCjetsubBranches[VarRC + "_" + name + "_sub_eta"][i].clear();
             m_VarRCjetsubBranches[VarRC + "_" + name + "_sub_phi"][i].clear();
             m_VarRCjetsubBranches[VarRC + "_" + name + "_sub_e"][i].clear();
-            for (auto rc_jet_subjet : rc_jet->getConstituents()) {
+            for (const auto *rc_jet_subjet : rc_jet->getConstituents()) {
               subjet = static_cast<const xAOD::Jet*>(rc_jet_subjet->rawConstituent());
               m_VarRCjetsubBranches[VarRC + "_" + name + "_sub_pt"][i].push_back(subjet->pt());
               m_VarRCjetsubBranches[VarRC + "_" + name + "_sub_eta"][i].push_back(subjet->eta());
@@ -4527,7 +4527,7 @@ namespace top {
         m_rcjet_L5_clstr.resize(sizeOfRCjets, -999.);
       }
       unsigned int i = 0;
-      for (auto rc_jet : plEvent.m_RCJets) {
+      for (const auto *rc_jet : plEvent.m_RCJets) {
         m_rcjet_pt[i] = rc_jet->pt();
         m_rcjet_eta[i] = rc_jet->eta();
         m_rcjet_phi[i] = rc_jet->phi();
@@ -4584,7 +4584,7 @@ namespace top {
         m_rcjetsub_e[i].clear();
 
         const xAOD::Jet* subjet(nullptr);
-        for (auto rc_jet_subjet : rc_jet->getConstituents()) {
+        for (const auto *rc_jet_subjet : rc_jet->getConstituents()) {
           subjet = static_cast<const xAOD::Jet*>(rc_jet_subjet->rawConstituent());
           m_rcjetsub_pt[i].push_back(subjet->pt());
           m_rcjetsub_eta[i].push_back(subjet->eta());
@@ -4772,7 +4772,7 @@ namespace top {
             m_VarRCjetsubBranchesParticle[VarRC + "_" + name + "_sub_eta"][i].clear();
             m_VarRCjetsubBranchesParticle[VarRC + "_" + name + "_sub_phi"][i].clear();
             m_VarRCjetsubBranchesParticle[VarRC + "_" + name + "_sub_e"][i].clear();
-            for (auto rc_jet_subjet : rc_jet->getConstituents()) {
+            for (const auto *rc_jet_subjet : rc_jet->getConstituents()) {
               subjet = static_cast<const xAOD::Jet*>(rc_jet_subjet->rawConstituent());
 
               m_VarRCjetsubBranchesParticle[VarRC + "_" + name + "_sub_pt"][i].push_back(subjet->pt());
@@ -4875,7 +4875,7 @@ namespace top {
 
     top::check(evtStore()->retrieve(truthEvent, m_config->sgKeyTruthEvent()), "Failed to retrieve truth PDF info");
 
-    for (auto tePtr : *truthEvent) {
+    for (const auto *tePtr : *truthEvent) {
       for (const std::string& pdf_name : m_config->LHAPDFSets()) {
         if (tePtr->isAvailable<std::vector<float> >("AnalysisTop_" + pdf_name + "_Weights")) {
           m_PDF_eventWeights[ pdf_name ] = tePtr->auxdata<std::vector<float> >("AnalysisTop_" + pdf_name + "_Weights");
@@ -4985,7 +4985,7 @@ namespace top {
   }
 
   // remove "FT_EFF_", spaces, and "-" in named systematics
-  std::string EventSaverFlatNtuple::betterBtagNamedSyst(const std::string name) {
+  std::string EventSaverFlatNtuple::betterBtagNamedSyst(const std::string& name) {
     std::string str = "FT_EFF_";
     std::string out = name;
     if (out.find(str) != std::string::npos) {

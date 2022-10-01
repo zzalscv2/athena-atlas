@@ -1,5 +1,5 @@
 /*
-   Copyright (C) 2002-2020 CERN for the benefit of the ATLAS collaboration
+   Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
  */
 
 #include <iostream>
@@ -48,7 +48,7 @@ using namespace TopAnalysis;
 
 // Prototype functions
 std::shared_ptr<top::TopConfig> InitialiseTopSoftware(int, char**);
-int TestFTag(std::shared_ptr<top::TopConfig>);
+int TestFTag(const std::shared_ptr<top::TopConfig>&);
 
 std::shared_ptr<top::TopConfig> InitialiseTopSoftware(int argc, char** argv) {
   if (argc != 3) {
@@ -112,7 +112,7 @@ std::shared_ptr<top::TopConfig> InitialiseTopSoftware(int argc, char** argv) {
   return topConfig;
 }
 
-int TestFTag(std::shared_ptr<top::TopConfig> topConfig) {
+int TestFTag(const std::shared_ptr<top::TopConfig>& topConfig) {
   // Here we need to access the flavour tagging CP tool
   // and get it to tell us what systematics are available
   // given the configuration we setup up

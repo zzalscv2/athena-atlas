@@ -377,7 +377,7 @@ StatusCode SUSYObjDef_xAOD::SUSYToolsInit()
 
         std::string temp(m_fatJetUncVars);
         do {
-          auto pos = temp.find(",");
+          auto pos = temp.find(',');
           shift_vars.push_back(temp.substr(0, pos));
           if (pos == std::string::npos)
             temp = "";
@@ -898,7 +898,7 @@ StatusCode SUSYObjDef_xAOD::SUSYToolsInit()
       // override map file use if correction file list is set for WP
       std::map<std::string,std::string> corrFNList;
       if ( !m_EG_corrFNList.empty() ) {
-         for ( auto WP_fname : split( m_EG_corrFNList, "," ) ) {
+         for ( const auto& WP_fname : split( m_EG_corrFNList, "," ) ) {
             std::string WP = WP_fname.substr(0,WP_fname.find(":"));
             std::string fname = WP_fname.substr(WP_fname.find(":")+1);
             corrFNList[WP] = fname; 
@@ -1371,7 +1371,7 @@ StatusCode SUSYObjDef_xAOD::SUSYToolsInit()
    
   
     std::string trkjetcoll = m_defaultTrackJets;
-    std::string BTagColl_TrkJet = trkjetcoll;
+    const std::string& BTagColl_TrkJet = trkjetcoll;
     if (m_slices["tjet"]) {
       if ( m_useBtagging_trkJet && m_defaultTrackJets.empty()) { 
          m_useBtagging_trkJet = false;

@@ -1183,7 +1183,7 @@ void SUSYObjDef_xAOD::configFromFile(std::string& property, const std::string& p
   }
 
   // post-processing to get rid of leading/trailing spaces and comments
-  std::string tmp_prop = property.substr(0, property.find("#", 0));
+  std::string tmp_prop = property.substr(0, property.find('#', 0));
   property = TString(tmp_prop).ReplaceAll(" ","").Data();
 
   // Interpret None as an empty string
@@ -1660,7 +1660,7 @@ void SUSYObjDef_xAOD::getTauConfig(const std::string& tauConfigPath, std::vector
   if (rEnv.Defined("SelectionCuts")) {
     cuts = split(rEnv.GetValue("SelectionCuts", " "), " ");
   } else {
-    auto l = rEnv.GetTable();
+    auto *l = rEnv.GetTable();
     for( Int_t i = 0; i < l->GetEntries(); ++i ) {
       cuts.push_back( l->At(i)->GetName() );
     }

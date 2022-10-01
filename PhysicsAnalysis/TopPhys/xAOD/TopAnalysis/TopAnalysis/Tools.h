@@ -1,5 +1,5 @@
 /*
-   Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+   Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
  */
 
 #ifndef TOPTOOLS_H__
@@ -137,7 +137,7 @@ namespace top {
  *
  * @return The object selection pointer.
  */
-  top::TopObjectSelection* loadObjectSelection(std::shared_ptr<top::TopConfig> config);
+  top::TopObjectSelection* loadObjectSelection(const std::shared_ptr<top::TopConfig>& config);
 
 /**
  * @brief Users may also want to write out custom ntuples / xAODs.  This too
@@ -150,7 +150,7 @@ namespace top {
  * @return If everything works, then a pointer to the event saver object.
  * Otherwise the program should end and tell people why.
  */
-  top::EventSaverBase* loadEventSaver(std::shared_ptr<top::TopConfig> config);
+  top::EventSaverBase* loadEventSaver(const std::shared_ptr<top::TopConfig>& config);
 
 /**
  * @brief This function will be used to load the metadata object and pull information
@@ -162,7 +162,7 @@ namespace top {
  * @return If successful, return true, else return false
  */
 
-  bool readMetaData(TFile* inputFile, std::shared_ptr<top::TopConfig> config);
+  bool readMetaData(TFile* inputFile, const std::shared_ptr<top::TopConfig>& config);
 
   /**
    * @brief Retrieve metadata from xAOD::FileMetaData object, to be stored in the TopConfig instance.
@@ -170,7 +170,7 @@ namespace top {
    * @param FMD pointer to xAOD::FileMetaData (for example during initialize via inputMetaStore())
    * @param config Pass in the config, before it is fixed, so that we can add info
   */
-  void readMetaData(const xAOD::FileMetaData* FMD, std::shared_ptr<top::TopConfig> config);
+  void readMetaData(const xAOD::FileMetaData* FMD, const std::shared_ptr<top::TopConfig>& config);
 }
 
 #endif

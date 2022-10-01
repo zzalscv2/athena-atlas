@@ -1,5 +1,5 @@
 /*
-   Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+   Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
  */
 
 #ifndef EVENTSAVERFLATNTUPLE_H_
@@ -224,7 +224,7 @@ namespace top {
     std::vector<top::TreeManager::BranchFilter> m_branchFilters;
 
     /// remove "FT_EFF_" and spaces in named systematics
-    std::string betterBtagNamedSyst(const std::string WP);
+    std::string betterBtagNamedSyst(const std::string& WP);
 
     /////////////////////////////////////
     /// Definition of event variables

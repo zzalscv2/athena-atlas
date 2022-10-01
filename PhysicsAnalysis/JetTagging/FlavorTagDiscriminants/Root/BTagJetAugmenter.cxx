@@ -57,7 +57,7 @@ namespace {
 }
 
 
-BTagJetAugmenter::BTagJetAugmenter(const std::string associator,
+BTagJetAugmenter::BTagJetAugmenter(const std::string& associator,
                                    FlavorTagDiscriminants::FlipTagConfig f,
                                    bool useIpxd):
   m_jetLink("jetLink"),
@@ -115,7 +115,7 @@ BTagJetAugmenter::BTagJetAugmenter(const std::string associator,
 {
 }
 
-BTagJetAugmenter::~BTagJetAugmenter() = default;
+
 BTagJetAugmenter::BTagJetAugmenter(BTagJetAugmenter&&) = default;
 
 std::set<std::string> BTagJetAugmenter::getDecoratorKeys() const {

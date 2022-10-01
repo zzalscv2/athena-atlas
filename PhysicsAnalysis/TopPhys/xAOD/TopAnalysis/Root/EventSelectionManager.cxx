@@ -1,5 +1,5 @@
 /*
-   Copyright (C) 2002-2020 CERN for the benefit of the ATLAS collaboration
+   Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
  */
 
 #include "TopAnalysis/EventSelectionManager.h"
@@ -30,7 +30,7 @@ using namespace TopAnalysis;
 namespace top {
   EventSelectionManager::EventSelectionManager(const std::vector<SelectionConfigurationData>& selectionConfigData,
                                                TFile* outputFile, const std::string& toolLoaderNames,
-                                               std::shared_ptr<top::TopConfig> config, EL::Worker* wk) {
+                                               const std::shared_ptr<top::TopConfig>& config, EL::Worker* wk) {
     std::vector<std::string> tokens;
 
     std::stringstream ss(toolLoaderNames);
@@ -142,7 +142,7 @@ namespace top {
       extraBranchList.push_back(currentSelection.name());
   }
 
-  std::vector<std::string> EventSelectionManager::GetFakesMMConfigs(std::string selection) const {
+  std::vector<std::string> EventSelectionManager::GetFakesMMConfigs(const std::string& selection) const {
     for (const auto& currentSelection : m_selections)
       if (currentSelection.name() == selection) return currentSelection.GetFakesMMConfigs();
 
