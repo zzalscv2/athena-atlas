@@ -19,6 +19,7 @@
 #include <iostream>
 #include <vector>
 #include <string>
+#include <unordered_set>
 
 class TBXMLWriter;
 
@@ -71,6 +72,8 @@ class TBXMLCaloCellWriterTool : public TBXMLWriterToolBase
   const CaloCell_ID*                    m_idHelper; 
 
   const TBXMLWriter*                    m_mother;
+
+  std::unordered_set<EventIDBase::number_type> m_runNumbers;
 
   SG::ReadCondHandleKey<CaloDetDescrManager> m_caloMgrKey { this
       , "CaloDetDescrManager"

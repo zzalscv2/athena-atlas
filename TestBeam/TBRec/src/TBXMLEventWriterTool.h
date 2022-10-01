@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2017 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef TBREC_TBXMLEVENTWRITERTOOL_H
@@ -44,9 +44,5 @@ class TBXMLEventWriterTool : public TBXMLWriterToolBase
 
   virtual StatusCode writeEvent( std::ostream& outFile,
 				 const std::string& entryTag);
-
- private:
-
-  const TBXMLWriter* m_mother;
 };
 #endif

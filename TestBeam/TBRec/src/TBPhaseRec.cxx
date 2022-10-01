@@ -1,12 +1,9 @@
 /*
-  Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
 */
 
 
 #include "TBPhaseRec.h"
-
-#include "EventInfo/EventInfo.h"
-#include "EventInfo/EventID.h"
 
 #include "TBEvent/TBTDCRaw.h"
 #include "TBEvent/TBTDCRawCont.h"
@@ -133,19 +130,10 @@ TBPhaseRec::initialize()
 StatusCode TBPhaseRec::execute()
 {
   ATH_MSG_VERBOSE ( "In execute()" );
+  const EventContext& ctx = Gaudi::Hive::currentContext();
 
   // Get run number...
-  unsigned int thisrun=0;
-  const EventInfo* thisEventInfo = nullptr;
-  StatusCode sc=evtStore()->retrieve(thisEventInfo);
-  if (sc!=StatusCode::SUCCESS){
-    ATH_MSG_WARNING ( "No EventInfo object found! Can't read run number!" );
-    ATH_MSG_WARNING ( "     => can't get calib constant. Exit" );
-    setFilterPassed(false);
-    return StatusCode::SUCCESS;
-  } else {
-    thisrun = thisEventInfo->event_ID()->run_number();
-  }
+  unsigned int thisrun=ctx.eventID().run_number();
   
   // ... and get new calib constants (only if calibration constant file has been specified!)
   if( thisrun != m_runnumber && m_calib_filename != "" ) {
@@ -157,7 +145,7 @@ StatusCode TBPhaseRec::execute()
   }
   
   TBTDCRawCont * tdcRawCont;
-  sc = evtStore()->retrieve(tdcRawCont, "TDCRawCont");
+  StatusCode sc = evtStore()->retrieve(tdcRawCont, "TDCRawCont");
   if (sc.isFailure()) {
     ATH_MSG_ERROR ( "TBObjectReco: Retrieval of TDCRawCont failed" );
     if (!m_neverReturnFailure) {

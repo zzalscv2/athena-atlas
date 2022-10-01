@@ -1,14 +1,11 @@
 /*
-  Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
 */
 
 
 #include "TBBPCRec.h"
 
 #include "PathResolver/PathResolver.h"
-
-#include "EventInfo/EventInfo.h"
-#include "EventInfo/EventID.h"
 
 #include <iostream>
 #include <fstream>
@@ -63,21 +60,10 @@ StatusCode
 TBBPCRec::execute()
 {
   ATH_MSG_DEBUG ( "In execute()" );
+  const EventContext& ctx = Gaudi::Hive::currentContext();
 
   // Get run number and get new calib constants -----------------------------
-  unsigned int thisrun=0;
-  const EventInfo* thisEventInfo = nullptr;
-  StatusCode sc=evtStore()->retrieve(thisEventInfo);
-  if (sc!=StatusCode::SUCCESS){
-    ATH_MSG_WARNING ( "No EventInfo object found! Can't read run number!" );
-    ATH_MSG_WARNING ( "     => can't get calib constant. Exit" );
-    setFilterPassed(false);
-    return StatusCode::SUCCESS;
-  }
-  else
-    {
-      thisrun = thisEventInfo->event_ID()->run_number();
-    }
+  unsigned int thisrun=ctx.eventID().run_number();
 
   if(thisrun != m_runnumber)
     {
@@ -88,7 +74,7 @@ TBBPCRec::execute()
 
   // Reconstruct BPC :
   TBBPCRawCont * bpcrawCont;
-  sc = evtStore()->retrieve(bpcrawCont, m_SGkey);
+  StatusCode sc = evtStore()->retrieve(bpcrawCont, m_SGkey);
   if (sc.isFailure()){
     ATH_MSG_DEBUG ( "TBObjectReco: Retrieval of "<<m_SGkey<<" failed" );
   }else {

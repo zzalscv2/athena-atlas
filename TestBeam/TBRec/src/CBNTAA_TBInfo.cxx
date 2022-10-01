@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2020 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "CBNTAA_TBInfo.h"
@@ -12,9 +12,6 @@
 #include "TBCaloGeometry/TBCaloCoordinate.h"
 #include "TBCondRunPar/TBCondRunParTool.h"
 #include "CondDBObjects/GenericDbTable.h"
-
-#include "EventInfo/EventInfo.h"
-#include "EventInfo/EventID.h"
 
 #include <cmath>
 
@@ -128,30 +125,15 @@ StatusCode CBNTAA_TBInfo::CBNT_initialize(){
 
 StatusCode CBNTAA_TBInfo::CBNT_execute(){
 
+  const EventContext& ctx = Gaudi::Hive::currentContext();
 
   m_runEnergy_nt=m_beamener;
   m_runParticleType_nt=m_beamtype;
     
   if ( m_DBRead ) {
 
-    StoreGateSvc* evtStore; 
-    StatusCode sc1 = serviceLocator()->service( "StoreGateSvc", evtStore);
-    if ( sc1.isFailure() )
-      {
-	ATH_MSG_ERROR( "Unable to get the StoreGateSvc"  );
-	return StatusCode::FAILURE ;
-      }
-    
-    const EventInfo* evtInfo;
-    sc1 = evtStore->retrieve(evtInfo);
-    if ( sc1.isFailure() )
-      {
-	ATH_MSG_INFO( "Unable to get EventInfo, run probably not begun yet "  );
-	return StatusCode::FAILURE ;
-      }
-    
-    int run = evtInfo->event_ID()->run_number(); 
-    uint64_t event = evtInfo->event_ID()->event_number();
+    int run = ctx.eventID().run_number(); 
+    uint64_t event = ctx.eventID().event_number();
 
     ATH_MSG_VERBOSE( "run   " << run  );
 

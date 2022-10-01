@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2017 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
 */
 
 
@@ -22,9 +22,7 @@ TBXMLEventWriterTool::TBXMLEventWriterTool(const std::string& type,
 					   const IInterface* parent)
   : TBXMLWriterToolBase(type,name,parent)
 {
-  // retrieve pointer to mother
-  m_mother = dynamic_cast<const TBXMLWriter*>(parent);
- }
+}
 
 TBXMLEventWriterTool::~TBXMLEventWriterTool()
 { }
@@ -36,19 +34,12 @@ TBXMLEventWriterTool::writeEvent(std::ostream& outStream,
 
   MsgStream log(msgSvc(),name());
 
-  // check 
-  if ( m_mother == 0 )
-    {
-      log << MSG::ERROR
-	  << "not hanging off the TBXMLWriter algorithm."
-	  << endmsg;
-      return StatusCode::FAILURE;
-    }
   log << MSG::DEBUG << "EntryTag: "<< entryTag <<endmsg;
       
   // access some data
-  unsigned int theRun     = m_mother->getRunNumber(); 
-  unsigned int theEvent   = m_mother->getEventNumber();
+  const EventContext& ctx = Gaudi::Hive::currentContext();
+  unsigned int theRun     = ctx.eventID().run_number();
+  unsigned int theEvent   = ctx.eventID().event_number();
   unsigned int theType    = 0;
 
   //////////////////////////

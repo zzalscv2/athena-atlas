@@ -130,10 +130,11 @@ TBXMLCaloCellWriterTool::writeEvent(std::ostream& outStream,
   // Check On Begin Run //
   ////////////////////////
 
-  if ( m_mother->handleBeginRun() )
-    {
+  const EventContext& ctx = Gaudi::Hive::currentContext();
+  EventIDBase::number_type run_number = ctx.eventID().run_number();
+  if (m_runNumbers.insert (run_number).second) {
       StatusCode checkOut =  this->writeRunFiles(m_mother->getFileDir(),
-						 m_mother->getRunNumber());
+						 run_number);
       if ( checkOut.isFailure() )
 	{
 	  log << MSG::ERROR
