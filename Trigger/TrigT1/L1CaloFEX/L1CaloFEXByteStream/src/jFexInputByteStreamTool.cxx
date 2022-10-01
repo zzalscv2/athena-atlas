@@ -150,9 +150,18 @@ StatusCode jFexInputByteStreamTool::convertFromBS(const std::vector<const ROBF*>
                     
                     const auto [IDsim, eta, phi, source] = m_Firm2Tower_map.at(intID);
                     
+                    std::vector<uint16_t> vtower(2,0);
+                    
+                    if(source == jBits::TILE or source == jBits::HEC or source == jBits::FCAL2 or source == jBits::FCAL3 ){
+                        vtower.at(1)=allDATA[idata];
+                    }
+                    else{
+                        vtower.at(0)=allDATA[idata];
+                    }
+                    
                     //initilize the jTower EDM
                     jTowersContainer->push_back( std::make_unique<xAOD::jFexTower>() );
-                    jTowersContainer->back()->initialize(eta, phi, IDsim, source, allDATA[idata], jfex, fpga, channel, idata, et_saturation );                    
+                    jTowersContainer->back()->initialize(eta, phi, IDsim, source, vtower, jfex, fpga, channel, idata, et_saturation );                    
                 }
                 
                 // keeping this for future x-checks

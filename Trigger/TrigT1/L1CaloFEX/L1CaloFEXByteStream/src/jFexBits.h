@@ -24,6 +24,15 @@ namespace LVL1::jFEXBits {
     static constexpr uint32_t DATA_WORDS_PER_BLOCK = 8;
 
 
+/************     Calo source scheme     ************/
+    static constexpr uint32_t EMB   = 0;
+    static constexpr uint32_t TILE  = 1;
+    static constexpr uint32_t EMEC  = 2;
+    static constexpr uint32_t HEC   = 3;
+    static constexpr uint32_t FCAL1 = 4;
+    static constexpr uint32_t FCAL2 = 5;
+    static constexpr uint32_t FCAL3 = 6;
+
 /************     FPGA scheme     ************/
     static constexpr uint32_t FPGA_U1 = 0;
     static constexpr uint32_t FPGA_U2 = 1;
