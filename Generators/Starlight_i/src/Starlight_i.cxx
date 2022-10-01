@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
 */
 
 // ------------------------------------------------------------- 
@@ -18,8 +18,6 @@
 
 #include "TruthUtils/GeneratorName.h"
 
-#include "GaudiKernel/MsgStream.h"
-
 #include "GeneratorUtils/StringParse.h"
 
 #include "AtlasHepMC/GenEvent.h"
@@ -32,14 +30,9 @@
 
 #include "CLHEP/Random/RandFlat.h"
 #include "CLHEP/Vector/LorentzVector.h"
-#include "AthenaKernel/IAtRndmGenSvc.h"
-
-#include "StoreGate/StoreGateSvc.h"
 
 namespace{
-// Pointer On AtRndmGenSvc
-  static IAtRndmGenSvc*  p_AtRndmGenSvc;
-  static std::string     starlight_stream = "STARLIGHT";
+  static const std::string starlight_stream = "STARLIGHT";
 }
 
 #include "reportingUtils.h"
@@ -88,8 +81,7 @@ Starlight_i::Starlight_i(const std::string& name, ISvcLocator* pSvcLocator):
 	     m_ptBinWidthInterference(0),
 	     m_xsecMethod(0),
 	     m_nThreads(1),
-	     m_pythFullRec(0),
-             m_storeGate(0)
+	     m_pythFullRec(0)
 {
   declareProperty("Initialize",	m_InitializeVector);
   declareProperty("ConfigFileName", m_configFileName);
@@ -110,20 +102,8 @@ StatusCode Starlight_i::genInitialize()
     ATH_MSG_INFO( "===> January 20 2011 STARLIGHT INTERFACE VERSION. \n"   );
     ATH_MSG_INFO( "===> STARLIGHT INITIALISING. \n"   );
 
-    StatusCode sc = service("StoreGateSvc", m_storeGate);
-    if (sc.isFailure())
-    {
-      ATH_MSG_INFO( "Unable to get pointer to StoreGate Service \n" );         
-      return sc;
-    }   
-
-    // not working yet, postpone
-    static const bool CREATEIFNOTTHERE(true);
-    ATH_CHECK( service("AtRndmGenSvc", p_AtRndmGenSvc, CREATEIFNOTTHERE) );
-
     // Save seeds
-    CLHEP::HepRandomEngine* engine = 
-      p_AtRndmGenSvc->GetEngine(starlight_stream);
+    CLHEP::HepRandomEngine* engine = atRndmGenSvc().GetEngine(starlight_stream);
     const long* sip = engine->getSeeds();
     m_randomSeed = sip[0];
     
