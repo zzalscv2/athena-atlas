@@ -10,7 +10,6 @@
 #include "Run3AFPMonitoring/AFPSiLayerAlgorithm.h"
 #include "StoreGate/ReadHandleKey.h"
 #include "xAODForward/AFPStationID.h"
-#include "EventInfo/EventID.h"
 
 
 namespace {
