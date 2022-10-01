@@ -29,7 +29,7 @@ atlas_add_library( ReweightUtilsLib
    INCLUDE_DIRS ${LHAPDF_INCLUDE_DIRS} ${ROOT_INCLUDE_DIRS}
    LINK_LIBRARIES ${LHAPDF_LIBRARIES} ${ROOT_LIBRARIES} AsgTools xAODEventInfo
    xAODBase PATInterfaces AsgAnalysisInterfaces
-   PRIVATE_LINK_LIBRARIES CxxUtils xAODParticleEvent xAODTruth PathResolver xAODCutFlow )
+   PRIVATE_LINK_LIBRARIES CxxUtils RootUtils xAODParticleEvent xAODTruth PathResolver xAODCutFlow )
 
 if( NOT XAOD_STANDALONE )
    atlas_add_component( ReweightUtils
