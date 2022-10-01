@@ -17,6 +17,7 @@
 #include "GeneratorFilters/xAODMultiBjetFilter.h"
 #include "GeneratorFilters/xAODMultiCjetFilter.h"
 #include "GeneratorFilters/xAODMultiElecMuTauFilter.h"
+#include "GeneratorFilters/xAODMultiElectronFilter.h"
 #include "GeneratorFilters/xAODMultiLeptonFilter.h"
 #include "GeneratorFilters/xAODMultiMuonFilter.h"
 #include "GeneratorFilters/xAODMuonFilter.h"
@@ -114,6 +115,7 @@ DECLARE_COMPONENT( xAODMETFilter)
 DECLARE_COMPONENT( xAODMultiBjetFilter )
 DECLARE_COMPONENT( xAODMultiCjetFilter )
 DECLARE_COMPONENT( xAODMultiElecMuTauFilter )
+DECLARE_COMPONENT( xAODMultiElectronFilter )
 DECLARE_COMPONENT( xAODMultiLeptonFilter)
 DECLARE_COMPONENT( xAODMultiMuonFilter)
 DECLARE_COMPONENT( xAODMuonFilter )
