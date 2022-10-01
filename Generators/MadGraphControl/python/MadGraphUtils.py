@@ -6,7 +6,7 @@
 #    updates to LHE handling and SUSY functionality by Emma Kuwertz <ekuwertz@cern.ch>
 #  Attempts to remove path-dependence of MadGraph
 
-import os,time,subprocess,glob,re
+import os,time,subprocess,glob,re,sys
 from AthenaCommon import Logging
 mglog = Logging.logging.getLogger('MadGraphUtils')
 
@@ -22,11 +22,17 @@ MADGRAPH_CATCH_ERRORS=True
 MADGRAPH_PDFSETTING=None
 MADGRAPH_COMMAND_STACK = []
 
-if 'PYTHONPATH' in os.environ and '/cvmfs/atlas.cern.ch/repo/sw/Generators/madgraph/models/latest/shutil_patch' not in os.environ['PYTHONPATH']:
+patched_shutil_loc='/cvmfs/atlas.cern.ch/repo/sw/Generators/madgraph/models/latest/shutil_patch'
+if 'PYTHONPATH' in os.environ and patched_shutil_loc not in os.environ['PYTHONPATH']:
     # add shutil_patch in first place so that the patched version of shutil.py is picked up by MG instead of original version
     # the patched version does not throw the errors that has made running MG and this code impossible on some file systems
-    os.environ['PYTHONPATH'] = '/cvmfs/atlas.cern.ch/repo/sw/Generators/madgraph/models/latest/shutil_patch:'+os.environ['PYTHONPATH']
-    MADGRAPH_COMMAND_STACK += ['export PYTHONPATH=/cvmfs/atlas.cern.ch/repo/sw/Generators/madgraph/models/latest/shutil_patch:${PYTHONPATH}']
+    os.environ['PYTHONPATH'] = patched_shutil_loc+':'+os.environ['PYTHONPATH']
+    MADGRAPH_COMMAND_STACK += ['export PYTHONPATH='+patched_shutil_loc+':${PYTHONPATH}']
+# we need to remove shutil from modules before we can use our version
+if 'shutil' in sys.modules:
+    sys.modules.pop('shutil')
+# make sure this python instance uses fixed shutil
+sys.path.insert(0,patched_shutil_loc)
 import shutil
 
 from MadGraphControl.MadGraphUtilsHelpers import checkSettingExists,checkSetting,checkSettingIsTrue,getDictFromCard,get_runArgs_info,get_physics_short,is_version_or_newer
