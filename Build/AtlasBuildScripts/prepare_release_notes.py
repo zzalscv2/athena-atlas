@@ -51,7 +51,7 @@ def main():
     args = parser.parse_args()
 
     if args.token and not gitlab_available:
-        print('WARNING - passing a token but was not able to import gitlab. You probably need to install python-gitlab first (see https://python-gitlab.readthedocs.io)')
+        print('WARNING - passing a token but was not able to import gitlab. You probably need to setup python-gitlab first (i.e. lsetup gitlab) or install it locally (see https://python-gitlab.readthedocs.io)')
 
     target_release = args.target
     nightly_tag = args.nightly
@@ -76,11 +76,27 @@ def main():
         gl = gitlab.Gitlab("https://gitlab.cern.ch", args.token)
         gl_project = gl.projects.get("atlas/athena")
 
+    print('About to parse the MRs. Depending on the number, this could take a few minutes (run with --verbose to get more output while this is happening).')
     merged_mrs = parse_mrs_from_log(output_log['stdout'].decode("utf-8"),
                                     pretty_format=pretty_format, verbose=verbose, gl_project=gl_project)
-    fill_template(target_release, nightly_tag, previous_release,
+    release_notes = fill_template(target_release, nightly_tag, previous_release,
                   merged_mrs, output_filename=args.output, verbose=verbose, gl_project=gl_project, group_mrs=args.group_merge_requests)
 
+    print()
+    if args.token and gitlab_available:
+        msg = 'Would you like me to create the release for you in gitlab (i.e. make the tag and fill in the release notes)?'
+        if input("%s (y/N) " % msg).lower() == 'y':
+            print('Is there a ticket associated with the release build request e.g. ATLINFR-XXXX? (press return to skip)')
+            ticket = input(': ')
+            print('Do you wish to add a description of the release?')
+            print('e.g. "Master release for derivations and upgrade", or "Production release for data-taking. ')
+            print('(press return to skip)')
+            message = input(': ')
+            if ticket:
+                message = message + '\nRelease request ticket: '+ticket
+            gl_project.tags.create({'tag_name':target_release, 'ref':nightly_tag, 'message':message+''})
+            release = gl_project.releases.create({'name':target_release, 'tag_name':target_release, 'description':release_notes})
+            print('Just created the following release:', release)
 
 def sanitize_args(target_release, nightly_tag, keep_going=False):
     if not target_release.startswith('release/'):
@@ -281,7 +297,7 @@ def fill_template(target_release, nightly_tag, previous_release,
     out_file.write(filled_template)
     out_file.close()
     print("Release notes generated in '%s'" % output_filename)
-
+    return filled_template
 
 if __name__ == '__main__':
     main()
