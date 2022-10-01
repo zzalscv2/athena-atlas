@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2017 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
 */
 
 /** @file ReadMeta.cxx
@@ -113,8 +113,8 @@ StatusCode ReadMeta::beginInputFile()
          }
       }
       if (ep_out != 0) {
-         for (ExampleHitContainer::const_iterator obj = ep_out->begin(); obj != ep_out->end(); obj++) {
-            ATH_MSG_INFO("Pedestal x = " << (*obj)->getX() << " y = " << (*obj)->getY() << " z = " << (*obj)->getZ() << " string = " << (*obj)->getDetector());
+         for (const ExampleHit* obj : *ep_out) {
+            ATH_MSG_INFO("Pedestal x = " << obj->getX() << " y = " << obj->getY() << " z = " << obj->getZ() << " string = " << obj->getDetector());
          }
       }
    }
