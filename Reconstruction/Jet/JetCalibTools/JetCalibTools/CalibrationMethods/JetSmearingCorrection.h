@@ -37,9 +37,9 @@ class JetSmearingCorrection
     private:
         // Helper methods
         StatusCode getSigmaSmear(xAOD::Jet& jet, double& sigmaSmear) const;
-        StatusCode getNominalResolution(const xAOD::Jet& jet, TH1* histo, const std::vector< std::unique_ptr<TH1> >& projections, double& resolution) const;
-        StatusCode readHisto(double& returnValue, TH1* histo, double x) const;
-        StatusCode readHisto(double& returnValue, TH1* histo, const std::vector< std::unique_ptr<TH1> >& projections, double x, double y) const;
+        StatusCode getNominalResolution(const xAOD::Jet& jet, const TH1* histo, const std::vector< std::unique_ptr<TH1> >& projections, double& resolution) const;
+        StatusCode readHisto(double& returnValue, const TH1* histo, double x) const;
+        StatusCode readHisto(double& returnValue, const TH1* histo, const std::vector< std::unique_ptr<TH1> >& projections, double x, double y) const;
         StatusCode cacheProjections(TH1* fullHistogram, std::vector< std::unique_ptr<TH1> >& cacheLocation, const std::string& type);
         TRandom3* getTLSRandomGen(unsigned long seed) const;
 

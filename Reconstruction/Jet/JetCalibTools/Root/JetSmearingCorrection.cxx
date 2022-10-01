@@ -227,7 +227,7 @@ StatusCode JetSmearingCorrection::initialize()
     return StatusCode::SUCCESS;
 }
 
-StatusCode JetSmearingCorrection::readHisto(double& returnValue, TH1* histo, double x) const
+StatusCode JetSmearingCorrection::readHisto(double& returnValue, const TH1* histo, double x) const
 {
     // Ensure that the histogram exists
     if (!histo)
@@ -271,7 +271,7 @@ StatusCode JetSmearingCorrection::readHisto(double& returnValue, TH1* histo, dou
     return StatusCode::SUCCESS;
 }
 
-StatusCode JetSmearingCorrection::readHisto(double& returnValue, TH1* histo, const std::vector< std::unique_ptr<TH1> >& projections, double x, double y) const
+StatusCode JetSmearingCorrection::readHisto(double& returnValue, const TH1* histo, const std::vector< std::unique_ptr<TH1> >& projections, double x, double y) const
 {
     // Ensure that the histogram exists
     if (!histo)
@@ -366,7 +366,7 @@ StatusCode JetSmearingCorrection::getSigmaSmear(xAOD::Jet& jet, double& sigmaSme
     return StatusCode::SUCCESS;
 }
 
-StatusCode JetSmearingCorrection::getNominalResolution(const xAOD::Jet& jet, TH1* histo, const std::vector< std::unique_ptr<TH1> >& projections, double& resolution) const
+StatusCode JetSmearingCorrection::getNominalResolution(const xAOD::Jet& jet, const TH1* histo, const std::vector< std::unique_ptr<TH1> >& projections, double& resolution) const
 {
     double localRes = 0;
     switch (m_histType)
