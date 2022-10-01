@@ -1,7 +1,7 @@
 // -*- c++ -*-
 
 /*
-  Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef INDETTRACKSELECTIONTOOL_INDETTRACKSELECTIONTOOL_H
@@ -108,18 +108,18 @@ namespace InDet {
 
     // helper method to setup the cut functions for TrackParticles and Trk::Tracks
     template <int VERBOSE, class Trk_Helper>
-    StatusCode setupCuts(std::map< std::string, std::vector< std::function<bool(Trk_Helper helper, asg::AsgMessaging &msgHelper)> > > &trackCuts);
+    StatusCode setupCuts(std::map< std::string, std::vector< std::function<bool(Trk_Helper helper, const asg::AsgMessaging &msgHelper)> > > &trackCuts);
 
     template <class Trk_Helper>
-    asg::AcceptData accept(Trk_Helper helper, const std::map< std::string, std::vector< std::function<bool(Trk_Helper helper, asg::AsgMessaging &msgHelper)> > > &trackCuts) const;
+    asg::AcceptData accept(Trk_Helper helper, const std::map< std::string, std::vector< std::function<bool(Trk_Helper helper, const asg::AsgMessaging &msgHelper)> > > &trackCuts) const;
 
     std::unordered_map< std::string, std::shared_ptr<TrackAccessor> > m_trackAccessors; //!< list of the accessors that need to be run for each track
 
     std::unique_ptr<asg::AsgMessaging> m_msgHelper;
-    std::map< std::string, std::vector< std::function<bool(InDetAccessor::TrackParticleHelper helper, asg::AsgMessaging &msgHelper)> > >
+    std::map< std::string, std::vector< std::function<bool(InDetAccessor::TrackParticleHelper helper, const asg::AsgMessaging &msgHelper)> > >
            m_trackParticleCuts; //!< First element is the name of the cut family, second element is the set of cuts
 #ifndef XAOD_ANALYSIS
-    std::map< std::string, std::vector< std::function<bool(InDetAccessor::TrkTrackHelper helper, asg::AsgMessaging &msgHelper)> > >
+    std::map< std::string, std::vector< std::function<bool(InDetAccessor::TrkTrackHelper helper, const asg::AsgMessaging &msgHelper)> > >
            m_trkTrackCuts; //!< First element is the name of the cut family, second element is the set of cuts
 #endif
 

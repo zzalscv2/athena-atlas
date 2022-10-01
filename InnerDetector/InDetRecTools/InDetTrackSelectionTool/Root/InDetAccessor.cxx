@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
 */
 #include "InDetAccessor.h"
 #ifndef XAOD_ANALYSIS
@@ -8,7 +8,7 @@
 #include "InDetRIO_OnTrack/SCT_ClusterOnTrack.h"
 
 namespace InDetAccessor {
-   std::tuple<uint8_t,uint8_t> getSiHitsTopBottom( const Trk::Track& track, asg::AsgMessaging &msgHelper) {
+   std::tuple<uint8_t,uint8_t> getSiHitsTopBottom( const Trk::Track& track, const asg::AsgMessaging &msgHelper) {
       std::tuple<uint8_t, uint8_t> top_bottom {0,0};
 
       const DataVector<const Trk::MeasurementBase>* trkMeasurements = track.measurementsOnTrack();

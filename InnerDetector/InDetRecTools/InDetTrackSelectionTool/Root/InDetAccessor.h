@@ -39,12 +39,12 @@ namespace InDetAccessor {
    // so define functsion for TrackParticles, and TrkTracks
    class TrackParticleHelper;
    template <short index>
-   double getDefiningParameters(TrackParticleHelper helper, asg::AsgMessaging &msgHelper);
+   double getDefiningParameters(TrackParticleHelper helper, const asg::AsgMessaging &msgHelper);
 
 #ifndef XAOD_ANALYSIS
    class TrkTrackHelper;
    template <short index>
-   double getDefiningParameters(TrkTrackHelper helper, asg::AsgMessaging &msgHelper);
+   double getDefiningParameters(TrkTrackHelper helper, const asg::AsgMessaging &msgHelper);
 #endif
 
    class TrackParticleHelper {
@@ -55,12 +55,12 @@ namespace InDetAccessor {
       const xAOD::TrackParticle &track()     const { return *m_track;}
       const xAOD::Vertex *vertex()           const { return  m_vtx; }
 
-      double pt(asg::AsgMessaging &)            const { return track().pt(); }
-      double eta(asg::AsgMessaging &)           const { return track().eta(); }
-      double theta(asg::AsgMessaging &msgHelper)const { return getDefiningParameters<InDetAccessor::theta>(*this,msgHelper); }
-      double qOverP(asg::AsgMessaging &)        const { return track().qOverP(); }
-      double d0(asg::AsgMessaging &msgHelper)   const { return getDefiningParameters<InDetAccessor::d0>(*this,msgHelper);}
-      double z0(asg::AsgMessaging &msgHelper)   const { return getDefiningParameters<InDetAccessor::z0>(*this,msgHelper);}
+      double pt(const asg::AsgMessaging &)            const { return track().pt(); }
+      double eta(const asg::AsgMessaging &)           const { return track().eta(); }
+      double theta(const asg::AsgMessaging &msgHelper)const { return getDefiningParameters<InDetAccessor::theta>(*this,msgHelper); }
+      double qOverP(const asg::AsgMessaging &)        const { return track().qOverP(); }
+      double d0(const asg::AsgMessaging &msgHelper)   const { return getDefiningParameters<InDetAccessor::d0>(*this,msgHelper);}
+      double z0(const asg::AsgMessaging &msgHelper)   const { return getDefiningParameters<InDetAccessor::z0>(*this,msgHelper);}
 
    private:
       const xAOD::TrackParticle *m_track;
@@ -77,27 +77,27 @@ namespace InDetAccessor {
       const Trk::TrackSummary &summary()       const { return *m_summary;}
       const Trk::TrackParameters *perigee()    const { return m_perigee; }
 
-      double pt(asg::AsgMessaging &msgHelper)     const {
+      double pt(const asg::AsgMessaging &msgHelper)     const {
          return hasPerigeeOrError(msgHelper)  ? perigee()->momentum().perp()   : std::nan("");
       }
-      double eta(asg::AsgMessaging &msgHelper)    const {
+      double eta(const asg::AsgMessaging &msgHelper)    const {
          return hasPerigeeOrError(msgHelper)  ? perigee()->momentum().eta()     : std::nan("");
       }
-      double theta(asg::AsgMessaging &msgHelper)  const { return getDefiningParameters<InDetAccessor::theta>(*this,msgHelper);}
-      double qOverP(asg::AsgMessaging &msgHelper) const {
+      double theta(const asg::AsgMessaging &msgHelper)  const { return getDefiningParameters<InDetAccessor::theta>(*this,msgHelper);}
+      double qOverP(const asg::AsgMessaging &msgHelper) const {
          return hasPerigeeOrError(msgHelper)  ?  1./perigee()->momentum().mag() : std::nan("");
       }
-      double d0(asg::AsgMessaging &msgHelper)     const { return getDefiningParameters<InDetAccessor::d0>(*this,msgHelper);}
-      double z0(asg::AsgMessaging &msgHelper)     const { return getDefiningParameters<InDetAccessor::z0>(*this,msgHelper);}
+      double d0(const asg::AsgMessaging &msgHelper)     const { return getDefiningParameters<InDetAccessor::d0>(*this,msgHelper);}
+      double z0(const asg::AsgMessaging &msgHelper)     const { return getDefiningParameters<InDetAccessor::z0>(*this,msgHelper);}
 
-      bool hasPerigeeOrError(asg::AsgMessaging &msgHelper) const {
+      bool hasPerigeeOrError(const asg::AsgMessaging &msgHelper) const {
          bool ret = perigee();
          if (!ret) {
             IDTRKSEL_MSG_ERROR( "Received zero pointer to perigee." );
          }
          return ret;
       }
-      bool hasSummaryOrError(asg::AsgMessaging &msgHelper) const {
+      bool hasSummaryOrError(const asg::AsgMessaging &msgHelper) const {
          bool ret = perigee();
          if (!ret) {
             IDTRKSEL_MSG_ERROR( "Received null pointer to track summary." );
@@ -115,10 +115,10 @@ namespace InDetAccessor {
 
    // summary accessor
    template <typename T_TrkHelper>
-   uint8_t getSummary(const T_TrkHelper & helper, asg::AsgMessaging &msgHelper, xAOD::SummaryType sumType);
+   uint8_t getSummary(const T_TrkHelper & helper, const asg::AsgMessaging &msgHelper, xAOD::SummaryType sumType);
 
    template <>
-   inline uint8_t getSummary(const TrackParticleHelper & helper, asg::AsgMessaging &msgHelper, xAOD::SummaryType summaryType) {
+   inline uint8_t getSummary(const TrackParticleHelper & helper, const asg::AsgMessaging &msgHelper, xAOD::SummaryType summaryType) {
       uint8_t summaryValue = 0;
       if (!helper.track().summaryValue(summaryValue, summaryType)) {
          IDTRKSEL_MSG_DEBUG( "Failed to get SummaryType " << std::to_string(summaryType) << " from xAOD::TrackParticle summary. A value of zero will be used instead." );
@@ -129,7 +129,7 @@ namespace InDetAccessor {
 
 #ifndef XAOD_ANALYSIS
    template <>
-   inline uint8_t getSummary(const TrkTrackHelper & helper, asg::AsgMessaging &msgHelper, xAOD::SummaryType summaryType) {
+   inline uint8_t getSummary(const TrkTrackHelper & helper, const asg::AsgMessaging &msgHelper, xAOD::SummaryType summaryType) {
       Int_t summaryTypeInt = static_cast<Int_t>(summaryType);
       Int_t checkSummaryValue = helper.summary().get( static_cast<Trk::SummaryType>(summaryTypeInt) );
       if (checkSummaryValue < 0) {
@@ -142,7 +142,7 @@ namespace InDetAccessor {
 #endif
 
    template <std::size_t n_summary_types, typename T_TrkHelper>
-   inline uint8_t getSummarySum(const T_TrkHelper helper, asg::AsgMessaging &msgHelper, std::array<xAOD::SummaryType,n_summary_types> sumTypes) {
+   inline uint8_t getSummarySum(const T_TrkHelper helper, const asg::AsgMessaging &msgHelper, std::array<xAOD::SummaryType,n_summary_types> sumTypes) {
       uint8_t sum=0;
       for (xAOD::SummaryType sum_type: sumTypes) {
          sum += getSummary(helper, msgHelper, sum_type);
@@ -153,16 +153,16 @@ namespace InDetAccessor {
 
    // fit quality accessor
    template <typename Trk_Helper>
-   double getFitChiSquare(const Trk_Helper & helper, asg::AsgMessaging &msgHelper);
+   double getFitChiSquare(const Trk_Helper & helper, const asg::AsgMessaging &msgHelper);
 
    template <>
-   inline double getFitChiSquare(const TrackParticleHelper & helper, asg::AsgMessaging &) {
+   inline double getFitChiSquare(const TrackParticleHelper & helper, const asg::AsgMessaging &) {
       return helper.track().chiSquared();
    }
 
 #ifndef XAOD_ANALYSIS
    template <>
-   inline double getFitChiSquare(const TrkTrackHelper & helper, asg::AsgMessaging &msgHelper) {
+   inline double getFitChiSquare(const TrkTrackHelper & helper, const asg::AsgMessaging &msgHelper) {
       if (!helper.track().fitQuality()) {
          IDTRKSEL_MSG_WARNING( "Zero pointer to fit quality received." );
          return std::nan("");
@@ -172,16 +172,16 @@ namespace InDetAccessor {
 #endif
 
    template <typename TrkHelper>
-   double getFitNDoF(const TrkHelper & helper, asg::AsgMessaging &msgHelper);
+   double getFitNDoF(const TrkHelper & helper, const asg::AsgMessaging &msgHelper);
 
    template <>
-   inline double getFitNDoF(const TrackParticleHelper & helper, asg::AsgMessaging &) {
+   inline double getFitNDoF(const TrackParticleHelper & helper, const asg::AsgMessaging &) {
       return helper.track().numberDoF();
    }
 
 #ifndef XAOD_ANALYSIS
    template <>
-   inline double getFitNDoF(const TrkTrackHelper & helper, asg::AsgMessaging &msgHelper) {
+   inline double getFitNDoF(const TrkTrackHelper & helper, const asg::AsgMessaging &msgHelper) {
       if (!helper.track().fitQuality()) {
          IDTRKSEL_MSG_WARNING( "Zero pointer to fit quality received." );
          return std::nan("");
@@ -193,10 +193,10 @@ namespace InDetAccessor {
 
    // eProbabilityHT accessor
    template <typename Trk_Helper>
-   float getEProbabilityHT(const Trk_Helper & helper, asg::AsgMessaging &msgHelper);
+   float getEProbabilityHT(const Trk_Helper & helper, const asg::AsgMessaging &msgHelper);
 
    template <>
-   inline float getEProbabilityHT(const TrackParticleHelper & helper, asg::AsgMessaging &msgHelper) {
+   inline float getEProbabilityHT(const TrackParticleHelper & helper, const asg::AsgMessaging &msgHelper) {
       float eProbHT =0.f;
       if (!helper.track().summaryValue(eProbHT, xAOD::SummaryType::eProbabilityHT)) {
          IDTRKSEL_MSG_DEBUG( "Failed to get eProbabilityHT from xAOD::TrackParticle summary. A value of zero will be used instead." );
@@ -207,7 +207,7 @@ namespace InDetAccessor {
 
 #ifndef XAOD_ANALYSIS
    template <>
-   inline float getEProbabilityHT(const TrkTrackHelper &, asg::AsgMessaging &) {
+   inline float getEProbabilityHT(const TrkTrackHelper &, const asg::AsgMessaging &) {
       throw std::runtime_error("eProbabilityHT only available in xAOD::TrackParticle not for Trk::Track.");
       return 0.f;
    }
@@ -216,7 +216,7 @@ namespace InDetAccessor {
    //defining parameters accessor
 
    template <short index>
-   inline double getDefiningParameters(TrackParticleHelper  helper, asg::AsgMessaging &) {
+   inline double getDefiningParameters(TrackParticleHelper  helper, const asg::AsgMessaging &) {
       static_assert(index<5);
       double param = helper.track().definingParameters()[index];
       if (index==1) {
@@ -230,7 +230,7 @@ namespace InDetAccessor {
 #ifndef XAOD_ANALYSIS
    template <short index>
    //cppcheck-suppress passedByValue
-   inline double getDefiningParameters(TrkTrackHelper  helper, asg::AsgMessaging &msgHelper) {
+   inline double getDefiningParameters(TrkTrackHelper  helper, const asg::AsgMessaging &msgHelper) {
       assert(index<5);
       return helper.hasPerigeeOrError(msgHelper) ? helper.perigee()->parameters()[index] : std::nan("");
    }
@@ -238,62 +238,62 @@ namespace InDetAccessor {
 
    // defining parameters covariance accessor
    template <typename Trk_Helper>
-   inline double getDefiningParametersCov(Trk_Helper & helper, [[maybe_unused]] asg::AsgMessaging &msgHelper, unsigned int index_i, unsigned int index_j);
+   inline double getDefiningParametersCov(Trk_Helper & helper, [[maybe_unused]] const asg::AsgMessaging &msgHelper, unsigned int index_i, unsigned int index_j);
 
    template <>
-   inline double getDefiningParametersCov(TrackParticleHelper & helper, [[maybe_unused]] asg::AsgMessaging &msgHelper, unsigned int index_i, unsigned int index_j) {
+   inline double getDefiningParametersCov(TrackParticleHelper & helper, [[maybe_unused]] const asg::AsgMessaging &msgHelper, unsigned int index_i, unsigned int index_j) {
       assert( index_i<5 && index_j<5);
       return helper.track().definingParametersCovMatrix()(index_i, index_j);
    }
 
 #ifndef XAOD_ANALYSIS
    template <>
-   inline double getDefiningParametersCov(TrkTrackHelper & helper, asg::AsgMessaging &msgHelper, unsigned int index_i, unsigned int index_j) {
+   inline double getDefiningParametersCov(TrkTrackHelper & helper, const asg::AsgMessaging &msgHelper, unsigned int index_i, unsigned int index_j) {
       assert( index_i<5 && index_j<5);
       return helper.hasPerigeeOrError(msgHelper) ? (*helper.perigee()->covariance())(index_i, index_j) : std::nan("");
    }
 #endif
 
    template <typename Trk_Helper>
-   inline Int_t getNumberOfUsedHitsdEdx(Trk_Helper & helper, asg::AsgMessaging &msgHelper);
+   inline Int_t getNumberOfUsedHitsdEdx(Trk_Helper & helper, const asg::AsgMessaging &msgHelper);
 
    template <>
-   inline Int_t getNumberOfUsedHitsdEdx(TrackParticleHelper & helper, [[maybe_unused]] asg::AsgMessaging &msgHelper) {
+   inline Int_t getNumberOfUsedHitsdEdx(TrackParticleHelper & helper, [[maybe_unused]] const asg::AsgMessaging &msgHelper) {
       return helper.track().numberOfUsedHitsdEdx();
    }
 
 #ifndef XAOD_ANALYSIS
    template <>
-   inline Int_t getNumberOfUsedHitsdEdx(TrkTrackHelper &, asg::AsgMessaging &) {
+   inline Int_t getNumberOfUsedHitsdEdx(TrkTrackHelper &, const asg::AsgMessaging &) {
       throw std::runtime_error("umberOfUsedHitsdEdx only available in xAOD::TrackParticle not for Trk::Track.");
       return 0;
    }
 #endif
 
    template <typename Trk_Helper>
-   inline Int_t getNumberOfIBLOverflowsdEdx(Trk_Helper & helper, asg::AsgMessaging &msgHelper);
+   inline Int_t getNumberOfIBLOverflowsdEdx(Trk_Helper & helper, const asg::AsgMessaging &msgHelper);
 
    template <>
-   inline Int_t getNumberOfIBLOverflowsdEdx(TrackParticleHelper & helper, [[maybe_unused]] asg::AsgMessaging &msgHelper) {
+   inline Int_t getNumberOfIBLOverflowsdEdx(TrackParticleHelper & helper, [[maybe_unused]] const asg::AsgMessaging &msgHelper) {
       return helper.track().numberOfUsedHitsdEdx();
    }
 
 #ifndef XAOD_ANALYSIS
    template <>
-   inline Int_t getNumberOfIBLOverflowsdEdx(TrkTrackHelper & , asg::AsgMessaging &) {
+   inline Int_t getNumberOfIBLOverflowsdEdx(TrkTrackHelper & , const asg::AsgMessaging &) {
       throw std::runtime_error("NumberOfIBLOverflowsdEdx only available in xAOD::TrackParticle not for Trk::Track.");
       return 0;
    }
 #endif
 
 #ifndef XAOD_ANALYSIS
-   std::tuple<uint8_t,uint8_t> getSiHitsTopBottom( const Trk::Track& track, asg::AsgMessaging &msgHelper);
+   std::tuple<uint8_t,uint8_t> getSiHitsTopBottom( const Trk::Track& track, const asg::AsgMessaging &msgHelper);
 
    template <typename Trk_Helper>
-   inline std::tuple<uint8_t,uint8_t> getSiHitsTopBottom(Trk_Helper & helper, asg::AsgMessaging &msgHelper);
+   inline std::tuple<uint8_t,uint8_t> getSiHitsTopBottom(Trk_Helper & helper, const asg::AsgMessaging &msgHelper);
 
    template <>
-   inline std::tuple<uint8_t,uint8_t> getSiHitsTopBottom(TrackParticleHelper & helper, asg::AsgMessaging &msgHelper) {
+   inline std::tuple<uint8_t,uint8_t> getSiHitsTopBottom(TrackParticleHelper & helper, const asg::AsgMessaging &msgHelper) {
       const Trk::Track* trkTrack = helper.track().track();
       if (!trkTrack) {
          IDTRKSEL_MSG_WARNING( "xAOD::TrackParticle has a null pointer to a Trk::Track." );
@@ -306,7 +306,7 @@ namespace InDetAccessor {
    }
 
    template <>
-   inline std::tuple<uint8_t,uint8_t> getSiHitsTopBottom(TrkTrackHelper & helper, asg::AsgMessaging &msgHelper) {
+   inline std::tuple<uint8_t,uint8_t> getSiHitsTopBottom(TrkTrackHelper & helper, const asg::AsgMessaging &msgHelper) {
       return getSiHitsTopBottom(helper.track(),msgHelper);
    }
 #endif
