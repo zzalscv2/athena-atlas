@@ -54,9 +54,8 @@ namespace Trig {
 
     StatusCode NavigationTesterAlg::initialize()
     {
-        ATH_CHECK(m_tool1.retrieve());
-	/*** TODO ***/
-        // ATH_CHECK(m_tool2.retrieve());
+        ATH_CHECK(m_toolRun2.retrieve());
+        ATH_CHECK(m_toolRun3.retrieve());
         if (m_chains.size() == 0)
             ATH_MSG_WARNING("No chains provided, algorithm will be no-op");
         return StatusCode::SUCCESS;
@@ -76,30 +75,37 @@ namespace Trig {
             // We don't care about the order of the combinations, or the order within the
             // combinations, we just care that they are the same. Therefore, we can convert the
             // vectors to sets and just look at the differences between them
-            std::vector<std::vector<const xAOD::IParticle *>> vecCombinations1;
-	    /*** TODO ***/
-            //std::vector<std::vector<const xAOD::IParticle *>> vecCombinations2;
-            ATH_MSG_DEBUG("###### CHAIN name " << chain);
-            ATH_CHECK(m_tool1->retrieveParticles(vecCombinations1, chain));
-            auto combs1 = vectorToSet(vecCombinations1);
-            ATH_MSG_DEBUG("combs1 size " << combs1.size());
-            for (auto& c : combs1 ) {
+            std::vector<std::vector<const xAOD::IParticle *>> vecCombinationsRun2;
+            ATH_MSG_DEBUG("###### checking features of CHAIN " << chain);
+            ATH_CHECK(m_toolRun2->retrieveParticles(vecCombinationsRun2, chain));
+            auto combsRun2 = vectorToSet(vecCombinationsRun2);
+            ATH_MSG_DEBUG("Run 2 size " << combsRun2.size());
+            for (auto& c : combsRun2 ) {
                 ATH_MSG_DEBUG(c);
             }
-	    /*** TODO ***/
-            // ATH_CHECK(m_tool2->retrieveParticles(vecCombinations2, chain));
-            // auto combs2 = vectorToSet(vecCombinations2);
-            // for (auto& c : combs2 ) {
-            //     ATH_MSG_DEBUG(c);
-            // }
+            std::vector<std::vector<const xAOD::IParticle *>> vecCombinationsRun3;
+            ATH_CHECK(m_toolRun3->retrieveParticles(vecCombinationsRun3, chain));
+            auto combsRun3 = vectorToSet(vecCombinationsRun3);
+            ATH_MSG_DEBUG("Run 3 size " << combsRun3.size());
 
+            for (auto& c : combsRun3 ) {
+                ATH_MSG_DEBUG(c);
+            }
+            if ( combsRun2.size() != combsRun3.size()) {
+                if ( m_failOnDifference ) {
+                    ATH_MSG_ERROR("Different count of feature accessed from chain " << chain  
+                                << " using Run 2 navigation " << combsRun2.size() 
+                                << " Run 3 navigation " << combsRun3.size() );
+                    return StatusCode::FAILURE;
+                }
 
+            }
         }
 
 	    /*** TODO ***/
-        //     ATH_CHECK(m_tool2->retrieveParticles(vecCombinations2, chain));
-        //     std::set<std::set<const xAOD::IParticle *>> combos1 = vectorToSet(vecCombinations1);
-        //     std::set<std::set<const xAOD::IParticle *>> combos2 = vectorToSet(vecCombinations2);
+        //     ATH_CHECK(m_toolRun3->retrieveParticles(vecCombinationsRun3, chain));
+        //     std::set<std::set<const xAOD::IParticle *>> combos1 = vectorToSet(vecCombinationsRun2);
+        //     std::set<std::set<const xAOD::IParticle *>> combos2 = vectorToSet(vecCombinationsRun3);
         //     ATH_MSG_DEBUG("Tool 1 retrieved " << combos1.size() << " combinations, tool 2 retrieved " << combos2.size());
         //     std::vector<std::set<const xAOD::IParticle *>> onlyIn1;
         //     std::vector<std::set<const xAOD::IParticle *>> onlyIn2;
