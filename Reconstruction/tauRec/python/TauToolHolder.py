@@ -539,6 +539,12 @@ def TauCaloTopoClusterMakerCfg(flags):
     TopoClusterForTaus.SeedCutsInAbsE                    = True
     TopoClusterForTaus.ClusterEtorAbsEtCut               = 0.5*GeV # 0.0*MeV in standard CaloCalTopoCluster JobOptions!
     TopoClusterForTaus.TwoGaussianNoise                  = flags.Calo.TopoCluster.doTwoGaussianNoise
+    # timing cut on seed cell
+    TopoClusterForTaus.SeedCutsInT = flags.Calo.TopoCluster.doTimeCut
+    TopoClusterForTaus.CutOOTseed = flags.Calo.TopoCluster.extendTimeCut and flags.Calo.TopoCluster.doTimeCut
+    TopoClusterForTaus.UseTimeCutUpperLimit = flags.Calo.TopoCluster.useUpperLimitForTimeCut
+    # may have to be tuned for EM clusters and/or LLP->tau reconstruction
+    TopoClusterForTaus.TimeCutUpperLimit = flags.Calo.TopoCluster.timeCutUpperLimit
 
     result.setPrivateTools(TopoClusterForTaus)
     return result
