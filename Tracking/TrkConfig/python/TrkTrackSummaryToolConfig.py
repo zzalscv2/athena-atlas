@@ -19,7 +19,7 @@
 
 from AthenaConfiguration.ComponentAccumulator import ComponentAccumulator
 from AthenaConfiguration.ComponentFactory import CompFactory
-
+from AthenaConfiguration.AccumulatorCache import AccumulatorCache
 
 def InDetTrackSummaryToolCfg(flags,
                              name='InDetTrackSummaryTool',
@@ -227,7 +227,7 @@ def GSFTrackSummaryToolCfg(flags,
     acc.setPrivateTools(CompFactory.Trk.TrackSummaryTool(name, **kwargs))
     return acc
 
-
+@AccumulatorCache
 def MuonTrackSummaryToolCfg(flags, name="MuonTrackSummaryTool", **kwargs):
     result = ComponentAccumulator()
     from MuonConfig.MuonRecToolsConfig import MuonTrackSummaryHelperToolCfg
@@ -239,7 +239,7 @@ def MuonTrackSummaryToolCfg(flags, name="MuonTrackSummaryTool", **kwargs):
     result.setPrivateTools(CompFactory.Trk.TrackSummaryTool(name, **kwargs))
     return result
 
-
+@AccumulatorCache
 def MuonCombinedTrackSummaryToolCfg(flags,
                                     name="CombinedMuonTrackSummary",
                                     **kwargs):

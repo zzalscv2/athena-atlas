@@ -6,6 +6,7 @@
 from AthenaConfiguration.ComponentAccumulator import ComponentAccumulator
 from AthenaConfiguration.ComponentFactory import CompFactory
 from AthenaConfiguration.Enums import BeamType
+from AthenaConfiguration.AccumulatorCache import AccumulatorCache
 from TrkConfig.AtlasExtrapolatorConfig import AtlasExtrapolatorCfg
 from MuonConfig.MuonRecToolsConfig import MuonEDMPrinterToolCfg
 from MuonConfig.MuonTrackBuildingConfig import MuonSegmentRegionRecoveryToolCfg
@@ -652,7 +653,7 @@ def MuonAlignmentUncertToolPhiCfg(flags, name="MuonAlignmentUncertToolPhi", **kw
     result.addPublicTool(tool)
     return result
 
-
+@AccumulatorCache
 def CombinedMuonTrackBuilderCfg(flags, name='CombinedMuonTrackBuilder', **kwargs):
     from AthenaCommon.SystemOfUnits import meter
     from MuonConfig.MuonRIO_OnTrackCreatorToolConfig import CscClusterOnTrackCreatorCfg, MdtDriftCircleOnTrackCreatorCfg
