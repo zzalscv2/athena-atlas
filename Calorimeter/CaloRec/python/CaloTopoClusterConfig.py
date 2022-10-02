@@ -258,7 +258,7 @@ def CaloTopoClusterToolCfg(configFlags, cellsname):
     TopoMaker.SeedCutsInT = configFlags.Calo.TopoCluster.doTimeCut
     TopoMaker.CutOOTseed = configFlags.Calo.TopoCluster.extendTimeCut and configFlags.Calo.TopoCluster.doTimeCut
     TopoMaker.UseTimeCutUpperLimit = configFlags.Calo.TopoCluster.useUpperLimitForTimeCut
-    TopoMaker.TimeCutUpperLimit = 20.0
+    TopoMaker.TimeCutUpperLimit = configFlags.Calo.TopoCluster.timeCutUpperLimit
 
     # note E or AbsE
     #

@@ -1,4 +1,4 @@
-# Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
 # Getter class duplicated from CaloRec/python/CaloClusterTopoGetter.py, in order to create a topo cluster collection using UE subtracted cells 
 # exact version at https://gitlab.cern.ch/qhu/athena/-/blob/50cbc0b97a726b71b3bb0e02d9c4f5fb09ee900a/Calorimeter/CaloRec/python/CaloClusterTopoGetter.py
 # please refer to the original version for details settings of clustering and calibration
@@ -293,7 +293,7 @@ class SubtractedCaloClusterTopoGetter ( Configured )  :
         TopoMaker.SeedCutsInT = jobproperties.CaloTopoClusterFlags.doTimeCut()
         TopoMaker.CutOOTseed = jobproperties.CaloTopoClusterFlags.extendTimeCut() and jobproperties.CaloTopoClusterFlags.doTimeCut()
         TopoMaker.UseTimeCutUpperLimit = jobproperties.CaloTopoClusterFlags.useUpperLimitForTimeCut()
-        TopoMaker.TimeCutUpperLimit = 20.0
+        TopoMaker.TimeCutUpperLimit = jobproperties.CaloTopoClusterFlags.timeCutUpperLimit()
 
         # note E or AbsE 
         #

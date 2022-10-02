@@ -236,7 +236,7 @@ TopoClusterForTaus.SeedCutsInT = jobproperties.CaloTopoClusterFlags.doTimeCut()
 TopoClusterForTaus.CutOOTseed = jobproperties.CaloTopoClusterFlags.extendTimeCut() and jobproperties.CaloTopoClusterFlags.doTimeCut()
 TopoClusterForTaus.UseTimeCutUpperLimit = jobproperties.CaloTopoClusterFlags.useUpperLimitForTimeCut()
 # may have to be tuned for EM clusters and/or LLP->tau reconstruction
-TopoClusterForTaus.TimeCutUpperLimit = 20.0
+TopoClusterForTaus.TimeCutUpperLimit = jobproperties.CaloTopoClusterFlags.timeCutUpperLimit()
 
 TopoSplitterForTaus = CaloTopoClusterSplitter("TauPi0TopoSplitter")
 # cells from the following samplings will be able to form local
