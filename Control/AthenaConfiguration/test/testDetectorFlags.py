@@ -4,6 +4,7 @@
 from AthenaConfiguration.AllConfigFlags import ConfigFlags
 from AthenaConfiguration.DetectorConfigFlags import setupDetectorsFromList, enableDetectors, disableDetectors
 
+ConfigFlags.Input.isMC = True
 ConfigFlags._loadDynaFlags('GeoModel')
 ConfigFlags._loadDynaFlags('Detector')
 

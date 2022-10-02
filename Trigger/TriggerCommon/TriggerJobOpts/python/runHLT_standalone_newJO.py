@@ -44,6 +44,11 @@ flags.Trigger.enableL1CaloPhase1=False
 flags.Trigger.enableL1CaloLegacy=True
 flags.Concurrency.NumThreads = 1
 
+# Disable some forward detetors
+flags.Detector.GeometryALFA = False
+flags.Detector.GeometryFwdRegion = False
+flags.Detector.GeometryLucid = False
+
 # disable Prescales for initial dev phase to allow only few chains in the menu
 flags.Trigger.disableCPS=True
 

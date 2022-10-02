@@ -96,11 +96,11 @@ def createDetectorConfigFlags():
                                                              or prevFlags.Detector.GeometrysTGC or prevFlags.Detector.GeometryMM))
 
     # Forward detectors (disabled by default)
-    dcf.addFlag('Detector.GeometryLucid',     False)
-    dcf.addFlag('Detector.GeometryZDC',       False)
-    dcf.addFlag('Detector.GeometryALFA',      False)
-    dcf.addFlag('Detector.GeometryAFP',       False)
-    dcf.addFlag('Detector.GeometryFwdRegion', False)
+    dcf.addFlag('Detector.GeometryLucid',     lambda prevFlags : 'Lucid' in getDefaultDetectors(prevFlags.GeoModel.AtlasVersion, includeForward=not prevFlags.Input.isMC))
+    dcf.addFlag('Detector.GeometryZDC',       lambda prevFlags : 'ZDC' in getDefaultDetectors(prevFlags.GeoModel.AtlasVersion, includeForward=not prevFlags.Input.isMC))
+    dcf.addFlag('Detector.GeometryALFA',      lambda prevFlags : 'ALFA' in getDefaultDetectors(prevFlags.GeoModel.AtlasVersion, includeForward=not prevFlags.Input.isMC))
+    dcf.addFlag('Detector.GeometryAFP',       lambda prevFlags : 'AFP' in getDefaultDetectors(prevFlags.GeoModel.AtlasVersion, includeForward=not prevFlags.Input.isMC))
+    dcf.addFlag('Detector.GeometryFwdRegion', lambda prevFlags : 'FwdRegion' in getDefaultDetectors(prevFlags.GeoModel.AtlasVersion, includeForward=not prevFlags.Input.isMC))
     dcf.addFlag('Detector.GeometryForward',   lambda prevFlags : (prevFlags.Detector.GeometryLucid or prevFlags.Detector.GeometryZDC
                                                                   or prevFlags.Detector.GeometryALFA or prevFlags.Detector.GeometryAFP
                                                                   or prevFlags.Detector.GeometryFwdRegion))
@@ -155,11 +155,11 @@ def createDetectorConfigFlags():
                                                            or prevFlags.Detector.EnablesTGC or prevFlags.Detector.EnableMM))
 
     # Forward detectors (disabled by default)
-    dcf.addFlag('Detector.EnableLucid',     False)
-    dcf.addFlag('Detector.EnableZDC',       False)
-    dcf.addFlag('Detector.EnableALFA',      False)
-    dcf.addFlag('Detector.EnableAFP',       False)
-    dcf.addFlag('Detector.EnableFwdRegion', False)
+    dcf.addFlag('Detector.EnableLucid',     lambda prevFlags : prevFlags.Detector.GeometryLucid)
+    dcf.addFlag('Detector.EnableZDC',       lambda prevFlags : prevFlags.Detector.GeometryZDC)
+    dcf.addFlag('Detector.EnableALFA',      lambda prevFlags : prevFlags.Detector.GeometryALFA)
+    dcf.addFlag('Detector.EnableAFP',       lambda prevFlags : prevFlags.Detector.GeometryAFP)
+    dcf.addFlag('Detector.EnableFwdRegion', lambda prevFlags : prevFlags.Detector.GeometryFwdRegion)
     dcf.addFlag('Detector.EnableForward',   lambda prevFlags : prevFlags.Detector.GeometryForward and
                                                                (prevFlags.Detector.EnableLucid or prevFlags.Detector.EnableZDC
                                                                 or prevFlags.Detector.EnableALFA or prevFlags.Detector.EnableAFP
