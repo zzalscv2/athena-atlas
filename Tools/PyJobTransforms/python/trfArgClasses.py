@@ -1172,6 +1172,70 @@ class argFile(argList):
         return myargdict
 
 
+class argYODAFile(argFile):
+    def __init__(self, value=list(), io = 'output', type=None, splitter=',', runarg=True, multipleOK=None, name=None):
+        super(argYODAFile, self).__init__(value=value, io=io, type=type, splitter=splitter, runarg=runarg, multipleOK=multipleOK,
+                                           name=name)
+
+        self._metadataKeys.update({
+                'nentries': self._getNumberOfEvents,
+                'lheSumOfPosWeights': self._getWeightedEvents,
+                'lheSumOfNegWeights': 0,
+                })
+
+    def _getNumberOfEvents(self, files):
+        msg.debug('Retrieving event count for LHE file {0}'.format(files))
+        import tarfile
+        for fname in files:
+            # Attempt to treat this as a pileup reweighting file
+            try :
+                tar = tarfile.open(fname, "r:gz")
+                lhecount = 0
+                for untar in tar.getmembers():
+                    fileTXT = tar.extractfile(untar)
+                    if fileTXT is not None :
+                        lines = fileTXT.read()
+                        lhecount = lines.count('/event')
+
+                self._fileMetadata[fname]['nentries'] = lhecount
+            except Exception:
+                msg.debug('Entries is set to None - event count undefined for this LHE')
+                self._fileMetadata[fname]['nentries'] = -1
+
+    def _getWeightedEvents(self, files):
+        msg.debug('Retrieving weight count for LHE file {0}'.format(files))
+        import tarfile
+        import re
+
+        for fname in files:
+            weightPos = 0
+            weightNeg = 0
+            try :
+                tar = tarfile.open(fname, "r:gz")
+                for untar in tar.getmembers():
+                    fileTXT = tar.extractfile(untar)
+                    next = False
+                    if fileTXT is not None :
+                        lines = fileTXT.readlines()
+                        for line in lines :
+                            if next :
+                                try :
+                                    w = float(re.sub(' +',' ',line).split(" ")[2])
+                                    if w > 0 : weightPos += w
+                                    else : weightNeg += abs(w)
+                                except Exception:
+                                    pass
+                                next = False
+                            if "<event" in line :
+                                next = True
+
+                self._fileMetadata[fname]['lheSumOfPosWeights'] = weightPos
+                self._fileMetadata[fname]['lheSumOfNegWeights'] = weightNeg
+            except Exception:
+                msg.debug('Entries is set to None - negative fraction count undefined for this LHE')
+                self._fileMetadata[fname]['lheSumOfPosWeights'] = -1
+                self._fileMetadata[fname]['lheSumOfNegWeights'] = -1
+
 ## @brief Athena file class
 #  @details Never used directly, but is the parent of concrete classes
 class argAthenaFile(argFile):
