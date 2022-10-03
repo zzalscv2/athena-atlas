@@ -104,8 +104,10 @@ if __name__ == "__main__":
     
     ConfigFlags.Input.Files = ["/afs/cern.ch/work/p/pbalek/public/data17_13TeV.00338480.physics_Main.daq.RAW/data17_13TeV.00338480.physics_Main.daq.RAW._lb0275._SFO-7._0007.data"]
     
-    ConfigFlags.Exec.MaxEvents=500
-    ConfigFlags.Concurrency.NumThreads=4
+    ConfigFlags.Output.doWriteAOD = True
+    ConfigFlags.Output.AODFileName = "AOD.pool.root"
+    ConfigFlags.Exec.MaxEvents = 500
+    ConfigFlags.Concurrency.NumThreads = 4
  
     ConfigFlags.fillFromArgs() # enable unit tests to switch only parts of reco: python -m HIRecConfig.HIRecConfig HeavyIon.doGlobal = 0 and so on
     ConfigFlags.lock()
@@ -113,8 +115,6 @@ if __name__ == "__main__":
     
     from AthenaConfiguration.MainServicesConfig import MainServicesCfg
     acc = MainServicesCfg(ConfigFlags)
-    acc.getEventAlgo("SGInputLoader").FailIfNoProxy = True # enforce no missing data
-    
     
     from ByteStreamCnvSvc.ByteStreamConfig import ByteStreamReadCfg
     acc.merge(ByteStreamReadCfg(ConfigFlags))
@@ -130,5 +130,4 @@ if __name__ == "__main__":
     if status.isFailure():
         import sys
         sys.exit(-1)
-
 

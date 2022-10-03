@@ -78,7 +78,7 @@ bool SUSYObjDef_xAOD::IsMETTrigPassed(const std::string& triggerName, bool j400_
 bool SUSYObjDef_xAOD::m_isTrigInTDT(const std::string& triggerName) const {
   auto mapItr = m_checkedTriggers.find(triggerName);
   if ( mapItr == m_checkedTriggers.end() ) {
-    auto cg = m_trigDecTool->getChainGroup(triggerName);
+    const auto *cg = m_trigDecTool->getChainGroup(triggerName);
     return m_checkedTriggers[triggerName] = cg->getListOfTriggers().size() != 0;
   }
   else {
@@ -230,7 +230,7 @@ bool SUSYObjDef_xAOD::IsTrigMatched(const std::initializer_list<const xAOD::IPar
 void SUSYObjDef_xAOD::TrigMatch(const xAOD::IParticle* p, std::initializer_list<std::string>::iterator i1, std::initializer_list<std::string>::iterator i2) {
   dec_trigmatched(*p) = 0;
 
-  for(auto it = i1; it != i2; ++it) {
+  for(const auto *it = i1; it != i2; ++it) {
     auto result = static_cast<int>(this->IsTrigMatched(p, *it));
     dec_trigmatched(*p) += result;
     p->auxdecor<char>(*it) = result;

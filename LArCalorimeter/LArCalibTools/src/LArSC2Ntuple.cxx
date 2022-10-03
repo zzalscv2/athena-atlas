@@ -137,11 +137,10 @@ StatusCode LArSC2Ntuple::execute()
   unsigned long long thisevent = 0;
   unsigned long	thisbcid       = 0;
 
-  SG::ReadHandle<xAOD::EventInfo>evt (m_evtInfoKey, ctx);
-  thisevent	   = evt->eventNumber();
+  thisevent	   = ctx.eventID().event_number();
 
   // This should be used for main readout later, once TDAQ fill event headers also in calib. runs properly
-  thisbcid	   = evt->bcid();
+  thisbcid	   = ctx.eventID().bunch_crossing_id();
   //
   /// set it here once and no need to set at each SC/cell
   bool hasDigitContainer=true;

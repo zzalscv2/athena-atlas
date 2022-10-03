@@ -168,51 +168,41 @@ std::string Trig::ChainGroup::getLowerName(const std::string& name) const {
   return cchain->lower_chain_name();
 }
 
-// Helper to get decision of a single chain (private)
-bool Trig::ChainGroup::isPassed(const TrigConf::HLTChain& chain, unsigned int condition) const
+  
+
+bool Trig::ChainGroup::isPassed(unsigned int condition) const 
 {
-  bool result = HLTResult(chain.chain_name(),condition);
-  if (result && (condition & TrigDefs::enforceLogicalFlow)) {
-    // enforceLogicalFlow
-    if (chain.level()=="EF") {
-      const std::string& nexttwo = getLowerName(chain.chain_name());
-      result = result && HLTResult(nexttwo,condition);
-      result = result && L1Result(getLowerName(nexttwo),condition);
+  bool RESULT = false;
 
-    } else if (chain.level()=="L2") {
-      result = result && L1Result(getLowerName(chain.chain_name()),condition);
+  for ( const TrigConf::HLTChain* ch : m_confChains ) {
+    bool chainRESULT = HLTResult(ch->chain_name(),condition);
+    if (chainRESULT && (condition & TrigDefs::enforceLogicalFlow)) {
+      // enforceLogicalFlow
+      if (ch->level()=="EF") {
+        const std::string& nexttwo = getLowerName(ch->chain_name());
+        chainRESULT = chainRESULT && HLTResult(nexttwo,condition);
+        chainRESULT = chainRESULT && L1Result(getLowerName(nexttwo),condition);
 
-    } else if (chain.level()=="HLT"){
-      result = result && L1Result(getLowerName(chain.chain_name()),condition);
+      } else if (ch->level()=="L2") {
+        chainRESULT = chainRESULT && L1Result(getLowerName(ch->chain_name()),condition);
+
+      } else if (ch->level()=="HLT"){
+	    chainRESULT = chainRESULT && L1Result(getLowerName(ch->chain_name()),condition);
+      }
+      
     }
+    RESULT = RESULT || chainRESULT;
   }
 
   for ( const TrigConf::TriggerItem* item : m_confItems ) {
-    result = result || L1Result(item->name(),condition);
+    RESULT = RESULT || L1Result(item->name(),condition);
   }
 
-  return result;
-}
-
-std::vector<bool> Trig::ChainGroup::isPassedForEach(unsigned int condition) const
-{
-  std::vector<bool> result;
-  result.reserve(m_confChains.size());
-  std::transform(m_confChains.cbegin(), m_confChains.cend(),
-                 std::back_inserter(result),
-                 [&](const TrigConf::HLTChain* ch) {return isPassed(*ch, condition);});
-  return result;
-}
-
-bool Trig::ChainGroup::isPassed(unsigned int condition) const
-{
   if (condition & TrigDefs::Express_passed) {
     ATH_MSG_ERROR("Incorrect use of Express_passed bit. Please use isPassedBits() and test for TrigDefs::Express_passed in the returned bit-map.");
   }
 
-  // This will short-circuit at the first passing chain
-  return std::any_of(m_confChains.cbegin(), m_confChains.cend(),
-                     [&](const TrigConf::HLTChain* ch) {return isPassed(*ch, condition);});
+  return RESULT;
 }
 
 unsigned int Trig::ChainGroup::HLTBits(const std::string& chain, const std::string& level, const TrigCompositeUtils::DecisionIDContainer& passExpress) const {

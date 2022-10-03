@@ -1,7 +1,7 @@
 //Dear emacs, this is -*- c++ -*-
 
 /*
-  Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
 */
 
 
@@ -51,6 +51,7 @@ public:
     typedef          LArConditionsSubsetTraits<T>        Traits;
     typedef typename Traits::FebId                       FebId;
     typedef typename Traits::ChannelVector               ChannelVector;
+    typedef typename Traits::ConstChannelVector          ConstChannelVector;
     typedef typename Traits::ChannelVectorPointer        ChannelVectorPointer;
     typedef typename std::map<FebId, ChannelVectorPointer >   ConditionsMap;
     typedef typename std::unordered_map<FebId, ChannelVectorPointer >   ConditionsHashMap;
@@ -594,7 +595,7 @@ LArConditionsContainerDB<T>::get(const FebId febId, const int channel) const
       return Traits::empty();
     }
 
-    const ChannelVector& vec = *it->second;
+    const ConstChannelVector& vec = *it->second;
     // First check the size - channel vec may be empty
     if (channel < static_cast<int>(vec.size())) {
 	return vec[channel];

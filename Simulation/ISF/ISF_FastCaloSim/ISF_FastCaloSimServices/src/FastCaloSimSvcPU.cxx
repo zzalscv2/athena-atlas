@@ -24,7 +24,7 @@
 #include "AtlasDetDescr/AtlasDetectorID.h"
 #include "IdDictParser/IdDictParser.h"
 #include "CaloIdentifier/LArEM_ID.h"
-
+#include "CxxUtils/checker_macros.h"
 
 // McEventCollection
 #include "GeneratorObjects/McEventCollection.h"
@@ -227,7 +227,9 @@ StatusCode ISF::FastCaloSimSvcPU::setupEvent()
       ATH_MSG_FATAL( m_screenOutputPrefix << "Could not retrieve CaloCellContainer " << m_caloCellsOutputName );
       return StatusCode::FAILURE;
     }
-    m_theContainer = const_cast<CaloCellContainer *> (theConstContainer);
+    // this is only used if m_caloCellHack and there is a warning during initialize
+    auto cc_nc ATLAS_THREAD_SAFE = const_cast<CaloCellContainer *> (theConstContainer);
+    m_theContainer = cc_nc;
   }
 
   // loop on setup tools

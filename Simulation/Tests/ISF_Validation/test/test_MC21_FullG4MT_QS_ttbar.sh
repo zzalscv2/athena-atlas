@@ -11,13 +11,12 @@
 
 Sim_tf.py \
 --CA True \
---conditionsTag 'default:OFLCOND-MC21-SDR-RUN3-03' \
+--conditionsTag 'default:OFLCOND-MC21-SDR-RUN3-05' \
 --simulator 'FullG4MT_QS' \
 --postInclude 'PyJobTransforms.TransformUtils.UseFrontier' \
 --preInclude 'EVNTtoHITS:Campaigns.MC21Simulation' \
---DataRunNumber '330000' \
---geometryVersion 'default:ATLAS-R3S-2021-02-00-00' \
---inputEVNTFile '/cvmfs/atlas-nightlies.cern.ch/repo/data/data-art/SimCoreTests/valid1.410000.PowhegPythiaEvtGen_P2012_ttbar_hdamp172p5_nonallhad.evgen.EVNT.e4993.EVNT.08166201._000012.pool.root.1' \
+--geometryVersion 'default:ATLAS-R3S-2021-03-00-00' \
+--inputEVNTFile '/cvmfs/atlas-nightlies.cern.ch/repo/data/data-art/CampaignInputs/mc21/EVNT/mc21_13p6TeV.601229.PhPy8EG_A14_ttbar_hdamp258p75_SingleLep.evgen.EVNT.e8453/EVNT.29328277._003902.pool.root.1' \
 --outputHITSFile 'test.CA.HITS.pool.root' \
 --maxEvents '4' \
 --postExec 'with open("ConfigSimCA.pkl", "wb") as f: cfg.store(f)' \
@@ -28,26 +27,24 @@ mv log.EVNTtoHITS log.EVNTtoHITS_CA
 echo  "art-result: $rc simCA"
 
 Sim_tf.py \
---conditionsTag 'default:OFLCOND-MC21-SDR-RUN3-03' \
+--conditionsTag 'default:OFLCOND-MC21-SDR-RUN3-05' \
 --simulator 'FullG4MT_QS' \
 --postInclude 'default:PyJobTransforms/UseFrontier.py' \
 --preInclude 'EVNTtoHITS:Campaigns/MC21Simulation.py,SimulationJobOptions/preInclude.ExtraParticles.py,SimulationJobOptions/preInclude.G4ExtraProcesses.py' \
---DataRunNumber '330000' \
---geometryVersion 'default:ATLAS-R3S-2021-02-00-00' \
---inputEVNTFile '/cvmfs/atlas-nightlies.cern.ch/repo/data/data-art/SimCoreTests/valid1.410000.PowhegPythiaEvtGen_P2012_ttbar_hdamp172p5_nonallhad.evgen.EVNT.e4993.EVNT.08166201._000012.pool.root.1' \
+--geometryVersion 'default:ATLAS-R3S-2021-03-00-00' \
+--inputEVNTFile '/cvmfs/atlas-nightlies.cern.ch/repo/data/data-art/CampaignInputs/mc21/EVNT/mc21_13p6TeV.601229.PhPy8EG_A14_ttbar_hdamp258p75_SingleLep.evgen.EVNT.e8453/EVNT.29328277._003902.pool.root.1' \
 --outputHITSFile 'test.CA.HITS.pool.root' \
 --maxEvents '4' \
 --imf False \
 --athenaopts '"--config-only=ConfigSimCG.pkl"'
 
 Sim_tf.py \
---conditionsTag 'default:OFLCOND-MC21-SDR-RUN3-03' \
+--conditionsTag 'default:OFLCOND-MC21-SDR-RUN3-05' \
 --simulator 'FullG4MT_QS' \
 --postInclude 'default:PyJobTransforms/UseFrontier.py' \
 --preInclude 'EVNTtoHITS:Campaigns/MC21Simulation.py,SimulationJobOptions/preInclude.ExtraParticles.py,SimulationJobOptions/preInclude.G4ExtraProcesses.py' \
---DataRunNumber '330000' \
---geometryVersion 'default:ATLAS-R3S-2021-02-00-00' \
---inputEVNTFile '/cvmfs/atlas-nightlies.cern.ch/repo/data/data-art/SimCoreTests/valid1.410000.PowhegPythiaEvtGen_P2012_ttbar_hdamp172p5_nonallhad.evgen.EVNT.e4993.EVNT.08166201._000012.pool.root.1' \
+--geometryVersion 'default:ATLAS-R3S-2021-03-00-00' \
+--inputEVNTFile '/cvmfs/atlas-nightlies.cern.ch/repo/data/data-art/CampaignInputs/mc21/EVNT/mc21_13p6TeV.601229.PhPy8EG_A14_ttbar_hdamp258p75_SingleLep.evgen.EVNT.e8453/EVNT.29328277._003902.pool.root.1' \
 --outputHITSFile 'test.HITS.pool.root' \
 --maxEvents '4' \
 --imf False

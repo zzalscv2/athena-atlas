@@ -14,8 +14,8 @@ atlas_add_library( PhotonEfficiencyCorrectionLib
    INCLUDE_DIRS ${Boost_INCLUDE_DIRS}
    PRIVATE_INCLUDE_DIRS ${ROOT_INCLUDE_DIRS}
    LINK_LIBRARIES ${Boost_LIBRARIES} EgammaAnalysisInterfacesLib AsgTools xAODEgamma
-   PATCoreAcceptLib PATInterfaces ElectronEfficiencyCorrectionLib
-   PRIVATE_LINK_LIBRARIES ${ROOT_LIBRARIES} xAODEventInfo PathResolver )
+   PATCoreAcceptLib PATInterfaces AsgMessagingLib ElectronEfficiencyCorrectionLib
+   PRIVATE_LINK_LIBRARIES ${ROOT_LIBRARIES} xAODEventInfo PathResolver AsgMessagingLib )
 
 if( NOT XAOD_STANDALONE )
    atlas_add_component( PhotonEfficiencyCorrection
@@ -44,7 +44,7 @@ if( XAOD_STANDALONE )
       INCLUDE_DIRS ${Boost_INCLUDE_DIRS} ${ROOT_INCLUDE_DIRS}
       LINK_LIBRARIES ${Boost_LIBRARIES} ${ROOT_LIBRARIES} AsgTools EgammaAnalysisInterfacesLib
       ElectronEfficiencyCorrectionLib PATCoreAcceptLib PATInterfaces PathResolver
-      xAODCore xAODEgamma xAODEventInfo PhotonEfficiencyCorrectionLib )
+      xAODCore xAODEgamma xAODEventInfo PhotonEfficiencyCorrectionLib AsgMessagingLib )
 
    #Tests
    atlas_add_test(ut_RunOnASGAOD

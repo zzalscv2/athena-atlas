@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2017 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef ATHENAPOOLEXAMPLEDATA_EXAMPLEHIT_H
@@ -56,7 +56,7 @@ public: // Non-static members
 
    /// Set the detector string.
    /// @param detector [IN] detector string.
-   void setDetector(std::string detector) { m_detector = detector; }
+   void setDetector(const std::string& detector) { m_detector = detector; }
 
 private:
    HepGeom::Vector3D<double> m_vec;

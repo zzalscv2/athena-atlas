@@ -66,7 +66,7 @@ dist_panel = {
      "z0_rec",  "z0_rec",       "xaxis:lin:-200:200",     "Trigger z_{0} [mm]",  "yaxis:log:auton",  "Normalised entries",
 
      "invmass",      "Tracks M_{INV}^{tag+probe}",      "xaxis:lin:autow",        "Offline tracks M_{INV} [GeV]",     "yaxis:lin:autow",  "Entries"  , 
-     "invmass_obj",  "Electrons M_{INV}^{tag+probe}",       "xaxis:lin:autow",        "Offline dielectron M_{INV} [GeV]",     "yaxis:lin:autow",  "Entries",
+     "invmassObj",  "Electrons M_{INV}^{tag+probe}",       "xaxis:lin:autow",        "Offline dielectron M_{INV} [GeV]",     "yaxis:lin:autow",  "Entries",
 };
 
 

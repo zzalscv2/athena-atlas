@@ -564,7 +564,7 @@ int main(int argc, char** argv) {
       if (!names_LHE3.empty()) {
         ATH_MSG_INFO("The sum of weights for the following LHE3 weights were retrieved from the input file:");
 	MsgStream &msgInfo = msg(MSG::Level::INFO);
-        for (std::string s : names_LHE3)
+        for (const std::string& s : names_LHE3)
           msgInfo << s << " ";
         msgInfo << std::endl;
 	msgInfo.doOutput();
@@ -676,7 +676,7 @@ int main(int argc, char** argv) {
         const xAOD::TruthEventContainer* truthEvent(nullptr);
         top::check(xaodEvent.retrieve(truthEvent, topConfig->sgKeyTruthEvent()), "Failed to retrieve TruthEvent container for LHAPDF");
         top::check(truthEvent->size() == 1, "TruthEvent container size != 1, not sure what to do with PDF reweighting");
-        for (auto tePtr : *truthEvent) {
+        for (const auto *tePtr : *truthEvent) {
           for (auto& pdf : totalEventsPdfWeighted) {
             if (tePtr->isAvailable< std::vector<float> >("AnalysisTop_" + pdf.first + "_Weights")) {
               pdf.second->resize(tePtr->auxdata< std::vector<float> >("AnalysisTop_" + pdf.first + "_Weights").size());
@@ -806,7 +806,7 @@ int main(int argc, char** argv) {
         ///-- Loop over all systematics and make a "top::Event" for each --///
         const xAOD::SystematicEventContainer* allSystematics = topEventMaker->systematicEvents(
           topConfig->sgKeyTopSystematicEvents());
-        for (auto currentSystematic : *allSystematics) {
+        for (const auto *currentSystematic : *allSystematics) {
           if (!(currentSystematic->hashValue() == topConfig->nominalHashValue() || topConfig->doTightSysts())) continue;
 
           ///-- Make a top::Event --///
@@ -843,7 +843,7 @@ int main(int argc, char** argv) {
         ///-- Loop over all Loose systematics and make a "top::Event" for each --///
         const xAOD::SystematicEventContainer* allSystematicsLoose = topEventMaker->systematicEvents(
           topConfig->sgKeyTopSystematicEventsLoose());
-        for (auto currentSystematic : *allSystematicsLoose) {
+        for (const auto *currentSystematic : *allSystematicsLoose) {
           if (!(currentSystematic->hashValue() == topConfig->nominalHashValue() || topConfig->doLooseSysts())) continue;
 
           ///-- Make a top::Event --///
@@ -914,7 +914,7 @@ int main(int argc, char** argv) {
         // try to get the first entry
         std::string pdf_set = totalEventsPdfWeighted.begin()->first;
         std::string p = pdf_set + "_0";
-        for (auto cbk : *cutBookKeepers) {
+        for (const auto *cbk : *cutBookKeepers) {
           std::string pdfName = cbk->name();
           if (p != pdfName) continue;
           pdfMetadataExists = true;
@@ -939,7 +939,7 @@ int main(int argc, char** argv) {
           for (size_t n = 0; n < totalEventsPdfWeighted[pdf_set]->size(); ++n) {
             std::string p = pdf_set + "_" + std::to_string(n);
             bool foundPdf = false;
-            for (auto cbk : *cutBookKeepers) {
+            for (const auto *cbk : *cutBookKeepers) {
               std::string pdfName = cbk->name();
               if (p != pdfName) continue;
               totalEventsPdfWeighted[pdf_set]->at(n) = cbk->sumOfEventWeights();

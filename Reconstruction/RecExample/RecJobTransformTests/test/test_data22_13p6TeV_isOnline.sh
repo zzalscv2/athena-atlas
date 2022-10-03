@@ -11,11 +11,9 @@
 inputFile="/cvmfs/atlas-nightlies.cern.ch/repo/data/data-art/RecJobTransformTests/data22_13p6TeV/data22_13p6TeV.00430536.physics_Main.daq.RAW/data22_13p6TeV.00430536.physics_Main.daq.RAW._lb1015._SFO-20._0001.data"
 
 preIncludeString="RecExOnline/RecExOnline_globalconfig.py,RecExOnline/RecExOnline_recoflags.py,RecExOnline/RecExOnline_monitoring.py"
-preExecStringOne="isOnline=True;isOnlineStateless=True;isGlobalMonitoring=False;useEmon=False;useAtlantisEmon=False;evtMax=300;
-fileName='${inputFile}'"
+preExecStringOne="isOnline=True;isOnlineStateless=True;isGlobalMonitoring=False;useEmon=False;useAtlantisEmon=False;evtMax=300;from AthenaConfiguration.AllConfigFlags import ConfigFlags;ConfigFlags.Trigger.triggerConfig=\"DB\";fileName=\"${inputFile}\""
 
-Reco_tf.py --inputBSFile="${inputFile}" \
-        --preInclude="${preIncludeString}" --preExec="${preExecStringOne}" --postInclude="RecExOnline/RecExOnline_postconfig.py" \
+Reco_tf.py --inputBSFile="${inputFile}" --preInclude="${preIncludeString}" --preExec="${preExecStringOne}" --postInclude="RecExOnline/RecExOnline_postconfig.py" \
         --AMI=f1263 --outputESDFile myESD.pool.root --outputAODFile myAOD.pool.root --outputHISTFile myHist.root
 
 #Remember retval of transform as art result

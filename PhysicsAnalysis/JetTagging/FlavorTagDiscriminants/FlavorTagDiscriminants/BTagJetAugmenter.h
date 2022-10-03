@@ -17,11 +17,11 @@ class BTagJetAugmenter
 public:
   typedef FlavorTagDiscriminants::FlipTagConfig FlipTagConfig;
 
-  BTagJetAugmenter(const std::string associator = "BTagTrackToJetAssociator",
+  BTagJetAugmenter(const std::string& associator = "BTagTrackToJetAssociator",
                    FlipTagConfig flip = FlipTagConfig::STANDARD,
                    bool useIpxd = false);
 
-  ~BTagJetAugmenter();
+  ~BTagJetAugmenter() = default;
   BTagJetAugmenter(BTagJetAugmenter&&);
   void augmentJfDr(const xAOD::BTagging &btag) const;
   void augmentIpRatios(const xAOD::BTagging &btag) const;

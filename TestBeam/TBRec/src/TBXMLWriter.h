@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef TBREC_TBXMLWRITER_H
@@ -42,9 +42,6 @@ class TBXMLWriter : public AthAlgorithm
 
   // tool support
   const std::string&  getFileDir() const { return m_topDirectory; }
-  unsigned int getRunNumber()      const { return m_runNumber;    }
-  unsigned int getEventNumber()    const { return m_eventNumber;  }
-  bool handleBeginRun()            const { return m_beginRun;     }
 
 
  private: 
@@ -69,10 +66,6 @@ class TBXMLWriter : public AthAlgorithm
   std::map<std::string,unsigned int> m_toolAccept;
   std::map<std::string,unsigned int> m_toolReject;
   std::map<std::string,unsigned int> m_toolInvoke;
-
-  bool         m_beginRun;
-  unsigned int m_runNumber;
-  unsigned int m_eventNumber;
 
   ///////////////
   // Functions //

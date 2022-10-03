@@ -1,13 +1,11 @@
 #
-# Copyright (C) 2002-2019 CERN for the benefit of the ATLAS collaboration.
+# Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration.
 #
 # File: TileRecUtils/share/TileCellBuilder_test.py
 # Author: sss
 # Date: Aug, 2018
 # Brief: Test for TileCellBuilder.
 #
-
-from __future__ import print_function
 
 
 import ROOT
@@ -27,6 +25,11 @@ from AtlasGeoModel import SetGeometryVersion
 from AtlasGeoModel import GeoModelInit
 from AtlasGeoModel import SetupRecoGeometry
 include('TileConditions/TileConditions_jobOptions.py')
+
+# Disable Geant version checking.
+from AthenaCommon.AlgSequence import AthSequencer
+condSeq = AthSequencer("AthCondSeq")
+condSeq.TileSamplingFractionCondAlg.G4Version = -1
 
 from GeoModelSvc.GeoModelSvcConf import GeoModelSvc
 ServiceMgr += GeoModelSvc()

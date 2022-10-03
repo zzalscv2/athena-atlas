@@ -73,14 +73,14 @@ public:
   /// Returns a string with station number and provided text.
   ///
   /// @param name string to be added in front of the standard text e.g. "Station1"
-  std::string makeName (const std::string name) const override;
+  std::string makeName (const std::string& name) const override;
 
   /// @copydoc IAFPSiStationMonitor::makeTitle()
   ///
   /// Returns a string with station number and provided text.
   ///
   /// @param title string to be added in front of the standard text e.g. " in station 1"
-  std::string makeTitle (const std::string title) const override;
+  std::string makeTitle (const std::string& title) const override;
 
   /// @copydoc IAFPSiStationMonitor::setAllLayersParent()
   ///

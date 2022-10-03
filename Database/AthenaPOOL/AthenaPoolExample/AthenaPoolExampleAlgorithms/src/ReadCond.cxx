@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2017 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
 */
 
 /** @file ReadCond.cxx
@@ -36,8 +36,8 @@ StatusCode ReadCond::execute() {
          ATH_MSG_ERROR("Could not find DataObject: PedestalWriteData");
          return StatusCode::FAILURE;
       }
-      for (ExampleHitContainer::const_iterator obj = ep->begin(); obj != ep->end(); obj++) {
-         ATH_MSG_INFO("Pedestal x = " << (*obj)->getX() << " y = " << (*obj)->getY() << " z = " << (*obj)->getZ() << " string = " << (*obj)->getDetector());
+      for (const ExampleHit* obj : *ep) {
+         ATH_MSG_INFO("Pedestal x = " << obj->getX() << " y = " << obj->getY() << " z = " << obj->getZ() << " string = " << obj->getDetector());
       }
    }
    if (detStore()->contains<ExampleHitContainer>("PedestalAppendData")) {
@@ -46,8 +46,8 @@ StatusCode ReadCond::execute() {
          ATH_MSG_ERROR("Could not find DataObject: PedestalAppendData");
          return StatusCode::FAILURE;
       }
-      for (ExampleHitContainer::const_iterator obj = ep->begin(); obj != ep->end(); obj++) {
-         ATH_MSG_INFO("Pedestal (2) x = " << (*obj)->getX() << " y = " << (*obj)->getY() << " z = " << (*obj)->getZ() << " string = " << (*obj)->getDetector());
+      for (const ExampleHit* obj : *ep) {
+         ATH_MSG_INFO("Pedestal (2) x = " << obj->getX() << " y = " << obj->getY() << " z = " << obj->getZ() << " string = " << obj->getDetector());
       }
    }
    return StatusCode::SUCCESS;

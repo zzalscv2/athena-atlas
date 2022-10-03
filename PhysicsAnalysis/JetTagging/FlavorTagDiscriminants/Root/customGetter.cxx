@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
 */
 #include "FlavorTagDiscriminants/customGetter.h"
 #include "FlavorTagDiscriminants/BTagTrackIpAccessor.h"
@@ -54,6 +54,7 @@ namespace {
       const xAOD::Jet& jet,
       const std::vector<const xAOD::TrackParticle*>& tracks) const {
       std::vector<double> sequence;
+      sequence.reserve(tracks.size());
       for (const auto* track: tracks) {
         sequence.push_back(m_getter(*track, jet));
       }
@@ -160,49 +161,49 @@ namespace {
     if (name == "pt") {
       return [](const Jet&, const Tracks& t) {
         std::vector<double> tracks;
-        for (auto* trk: t) tracks.push_back(trk->pt());
+        for (const auto* trk: t) tracks.push_back(trk->pt());
         return tracks;
       };
     }
     if (name == "eta") {
       return [](const Jet&, const Tracks& t) {
         std::vector<double> tracks;
-        for (auto* trk: t) tracks.push_back(trk->eta());
+        for (const auto* trk: t) tracks.push_back(trk->eta());
         return tracks;
       };
     }
     if (name == "phiUncertainty") {
       return [](const Jet&, const Tracks& t) {
         std::vector<double> tracks;
-        for (auto* trk: t) tracks.push_back(std::sqrt(trk->definingParametersCovMatrixDiagVec().at(2)));
+        for (const auto* trk: t) tracks.push_back(std::sqrt(trk->definingParametersCovMatrixDiagVec().at(2)));
         return tracks;
       };
     }
     if (name == "thetaUncertainty") {
       return [](const Jet&, const Tracks& t) {
         std::vector<double> tracks;
-        for (auto* trk: t) tracks.push_back(std::sqrt(trk->definingParametersCovMatrixDiagVec().at(3)));
+        for (const auto* trk: t) tracks.push_back(std::sqrt(trk->definingParametersCovMatrixDiagVec().at(3)));
         return tracks;
       };
     }
     if (name == "qOverPUncertainty") {
       return [](const Jet&, const Tracks& t) {
         std::vector<double> tracks;
-        for (auto* trk: t) tracks.push_back(std::sqrt(trk->definingParametersCovMatrixDiagVec().at(4)));
+        for (const auto* trk: t) tracks.push_back(std::sqrt(trk->definingParametersCovMatrixDiagVec().at(4)));
         return tracks;
       };
     }
     if (name == "z0RelativeToBeamspot") {
       return [](const Jet&, const Tracks& t) {
         std::vector<double> tracks;
-        for (auto* trk: t) tracks.push_back(trk->z0());
+        for (const auto* trk: t) tracks.push_back(trk->z0());
         return tracks;
       };
     }
     if (name == "log_z0RelativeToBeamspotUncertainty") {
       return [](const Jet&, const Tracks& t) {
         std::vector<double> tracks;
-        for (auto* trk: t) tracks.push_back(std::log(std::sqrt(trk->definingParametersCovMatrixDiagVec().at(1))));
+        for (const auto* trk: t) tracks.push_back(std::log(std::sqrt(trk->definingParametersCovMatrixDiagVec().at(1))));
         return tracks;
       };
     }

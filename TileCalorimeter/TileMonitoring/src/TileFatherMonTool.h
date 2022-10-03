@@ -16,6 +16,8 @@
 
 #include "TilePaterMonTool.h"
 
+#include "CxxUtils/checker_macros.h"
+
 class CaloCell;
 class TriggerInfo;
 
@@ -27,7 +29,7 @@ namespace Trig {
  *  @brief Base class for TileCal online monitoring tools in physics runs
  */ 
 
-class TileFatherMonTool: public TilePaterMonTool
+class ATLAS_NOT_THREAD_SAFE TileFatherMonTool: public TilePaterMonTool  // deprecated: ATLASRECTS-7259
 {
 
  public:

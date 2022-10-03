@@ -27,7 +27,7 @@ class TileInfo;
  *  @brief Class for TileCal monitoring at channel level
  */
 
-class TileRawChannelMonTool: public TilePaterMonTool {
+class ATLAS_NOT_THREAD_SAFE TileRawChannelMonTool: public TilePaterMonTool {  // deprecated: ATLASRECTS-7259
 
   public:
 

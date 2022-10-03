@@ -1,5 +1,5 @@
 /*
-   Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+   Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
  */
 
 #include "TopAnalysis/Tools.h"
@@ -12,12 +12,13 @@
 
 #include "TopEventSelectionTools/ToolLoaderBase.h"
 
-#include <iostream>
-#include <fstream>
-#include <sstream>
-#include <cstdlib>
 #include <cmath>
+#include <cstdlib>
+#include <fstream>
+#include <iostream>
 #include <memory>
+#include <sstream>
+#include <utility>
 
 #include "TTree.h"
 #include "TFile.h"
@@ -71,7 +72,7 @@ namespace top {
         // Find a variable name with Stream, then split off from DAOD
         // If we only need TOPQX, we just find "_", add 1 and substring from there instead
         if (name.find("Stream") != std::string::npos) {
-          auto cursor = name.find("_");
+          auto cursor = name.find('_');
           std::string stream = name.substr(cursor + 1);
           return stream;
         }
@@ -185,7 +186,7 @@ namespace top {
     while (std::getline(in, str)) {
       std::string newstring(str);
 
-      if (str.find("#") != std::string::npos) newstring = str.substr(0, str.find("#"));
+      if (str.find('#') != std::string::npos) newstring = str.substr(0, str.find('#'));
 
       //leading and trailing white space removal
       while (std::isspace(*newstring.begin()))
@@ -286,7 +287,7 @@ namespace top {
     }
   }
 
-  top::TopObjectSelection* loadObjectSelection(std::shared_ptr<top::TopConfig> config) {
+  top::TopObjectSelection* loadObjectSelection(const std::shared_ptr<top::TopConfig>& config) {
     ATH_MSG_INFO("Attempting to load ObjectSelection: " << config->objectSelectionName());
     TClass* c = ::TClass::GetClass(config->objectSelectionName().c_str());
 
@@ -309,7 +310,7 @@ namespace top {
     return objectSelection;
   }
 
-  top::EventSaverBase* loadEventSaver(std::shared_ptr<top::TopConfig> config) {
+  top::EventSaverBase* loadEventSaver(const std::shared_ptr<top::TopConfig>& config) {
     ATH_MSG_INFO("Attempting to load OutputFormat: " << config->outputFormat());
     TClass* c = ::TClass::GetClass(config->outputFormat().c_str());
 
@@ -326,7 +327,7 @@ namespace top {
     return bc;
   }
 
-  bool readMetaData(TFile* inputFile, std::shared_ptr<top::TopConfig> config) {
+  bool readMetaData(TFile* inputFile, const std::shared_ptr<top::TopConfig>& config) {
     // Load the file into a TEvent
     xAOD::TEvent xaodEvent(xAOD::TEvent::kClassAccess);
     top::check(xaodEvent.readFrom(inputFile), "Cannot load inputFile");
@@ -354,7 +355,7 @@ namespace top {
     return true;
   }
 
-  void readMetaData(const xAOD::FileMetaData* FMD, std::shared_ptr<top::TopConfig> config) {
+  void readMetaData(const xAOD::FileMetaData* FMD, const std::shared_ptr<top::TopConfig>& config) {
     int mcChannelNumber = -1;
     std::string dataType="?", simFlavour="?";
     float mcProcID = -1;
@@ -364,7 +365,7 @@ namespace top {
     // get dataType and parse the derivation stream
     FMD->value(xAOD::FileMetaData::dataType, dataType);
     if (dataType.find("StreamDAOD") != std::string::npos) {
-      auto cursor = dataType.find("_"); // split DAOD_BLALBA
+      auto cursor = dataType.find('_'); // split DAOD_BLALBA
       std::string stream = dataType.substr(cursor + 1);
       config->setDerivationStream(stream);
       config->setIsTruthDxAOD((stream.find("TRUTH") != std::string::npos));

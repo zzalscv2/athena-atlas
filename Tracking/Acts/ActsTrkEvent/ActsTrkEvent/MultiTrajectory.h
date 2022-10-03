@@ -10,13 +10,16 @@
 #include "Acts/Utilities/HashedString.hpp"
 
 #include "xAODTracking/TrackStateContainer.h"
-#include "xAODTracking/TrackParameterContainer.h"
+#include "xAODTracking/TrackParametersContainer.h"
 #include "xAODTracking/TrackJacobianContainer.h"
 #include "xAODTracking/TrackMeasurementContainer.h"
+
+
 
 namespace ActsTrk {
     constexpr static bool IsReadOnly = true;
     constexpr static bool IsReadWrite = false;
+
 
     /**
      * @brief Athena implementation of ACTS::MultiTrajectory
@@ -29,7 +32,7 @@ namespace ActsTrk {
         public:
 
             using TrackStateContainerBackendPtr = typename std::conditional<RWState, const xAOD::TrackStateContainer*, xAOD::TrackStateContainer*>::type;
-            using TrackParameterContainerBackendPtr = typename std::conditional<RWState, const xAOD::TrackParameterContainer*, xAOD::TrackParameterContainer*>::type;
+            using TrackParametersContainerBackendPtr = typename std::conditional<RWState, const xAOD::TrackParametersContainer*, xAOD::TrackParametersContainer*>::type;
             using TrackJacobianContainerBackendPtr = typename std::conditional<RWState, const xAOD::TrackJacobianContainer*, xAOD::TrackJacobianContainer*>::type;
             using TrackMeasurementContainerBackendPtr = typename std::conditional<RWState, const xAOD::TrackMeasurementContainer*, xAOD::TrackMeasurementContainer*>::type;
             
@@ -43,7 +46,7 @@ namespace ActsTrk {
              * @note the MTJ does claim ownership over the data in the backend
              * @param state - track state (indices) backend             
              */
-            MultiTrajectory( TrackStateContainerBackendPtr states, TrackParameterContainerBackendPtr parameters,
+            MultiTrajectory( TrackStateContainerBackendPtr states, TrackParametersContainerBackendPtr parameters,
                              TrackJacobianContainerBackendPtr jacobians, TrackMeasurementContainerBackendPtr measurements );
 
             /**
@@ -54,10 +57,10 @@ namespace ActsTrk {
             MultiTrajectory( ActsTrk::MultiTrajectory<IsReadWrite>&& rhs);
 
 
-
             ATH_MEMBER_REQUIRES(RWState==IsReadWrite, IndexType) addTrackState_impl(
-                Acts::TrackStatePropMask mask,
-                IndexType iprevious);
+                Acts::TrackStatePropMask mask, IndexType iprevious);
+    
+
 
             /**
              * @brief Access component by key
@@ -66,9 +69,11 @@ namespace ActsTrk {
              * @param istate 
              * @return std::any - that needs to be cast to a const ptr (non const for the nonconst variant)
              */
-            std::any component_impl(Acts::HashedString key, IndexType istate) const;
-            ATH_MEMBER_REQUIRES(RWState==IsReadWrite, std::any) component_impl(Acts::HashedString key, IndexType istate); // TODO disable for UNMODIFIABLE variant
 
+            const std::any component_impl(Acts::HashedString key, IndexType istate) const;
+            std::any component_impl(Acts::HashedString key, IndexType istate); 
+ 
+           
             /**
              * @brief checks if given state has requested component
              * 
@@ -77,7 +82,10 @@ namespace ActsTrk {
              * @return true 
              * @return false 
              */
+
             constexpr bool has_impl(Acts::HashedString key, IndexType istate) const;
+
+            
 
             /**
              * @brief obtains proxy to the track state under given index
@@ -102,7 +110,10 @@ namespace ActsTrk {
              * 
              * @return size_t 
              */
-            inline size_t size_impl() const;
+
+            inline size_t size_impl() const {
+            	return trackStates().size();
+            };
 
             /**
              * @brief clears backends
@@ -114,10 +125,20 @@ namespace ActsTrk {
              * @brief checks if the backends are connected (i.e. is safe to use, else any other call will cause segfaults)
              */
             bool has_backends() const;
+            
+            
         private:
             // bare pointers to the backend (need to be fast and we do not claim ownership anyways)
             TrackStateContainerBackendPtr m_trackStates = nullptr;
-            TrackParameterContainerBackendPtr m_trackParameters = nullptr;
+
+            inline const xAOD::TrackStateContainer& trackStates() const { return *m_trackStates; }
+            inline xAOD::TrackStateContainer& trackStates() { return *m_trackStates; }
+            
+            TrackParametersContainerBackendPtr m_trackParameters = nullptr;
+
+            inline const xAOD::TrackParametersContainer& trackParameters() const { return *m_trackParameters; }
+            inline xAOD::TrackParametersContainer& trackParameters() { return *m_trackParameters; }
+            
             TrackJacobianContainerBackendPtr m_jacobians = nullptr;
             TrackMeasurementContainerBackendPtr m_measurements = nullptr;
             friend class ActsTrk::MultiTrajectory<IsReadWrite>;
@@ -130,10 +151,18 @@ namespace ActsTrk {
             and m_trackParameters != nullptr;
     }
 
-    typedef ActsTrk::MultiTrajectory<ActsTrk::IsReadOnly> ConstMultiTrajectory;
+
+    typedef ActsTrk::MultiTrajectory<ActsTrk::IsReadOnly>  ConstMultiTrajectory;
     typedef ActsTrk::MultiTrajectory<ActsTrk::IsReadWrite> MutableMultiTrajectory;
+    
+
+
 
 } // EOF namespace ActsTrk
+
+               
+                
+#include "MultiTrajectory.icc"
 
 
 #include "AthenaKernel/CLASS_DEF.h"

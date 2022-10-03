@@ -27,7 +27,7 @@ class TileInfo;
  *  @brief Class for TileCal monitoring at digits level
  */
 
-class TileDigitsMonTool: public TilePaterMonTool 
+class ATLAS_NOT_THREAD_SAFE TileDigitsMonTool: public TilePaterMonTool  // deprecated: ATLASRECTS-7259
                        , virtual public ITileStuckBitsProbsTool {
 
   public:

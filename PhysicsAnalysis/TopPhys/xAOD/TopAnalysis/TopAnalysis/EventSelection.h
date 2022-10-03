@@ -1,5 +1,5 @@
 /*
-   Copyright (C) 2002-2017 CERN for the benefit of the ATLAS collaboration
+   Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
  */
 
 #ifndef EVENTSELECTION_H_
@@ -48,7 +48,7 @@ namespace top {
      */
     EventSelection(const std::string& name, const std::vector<std::string>& cutNames, TFile* outputFile,
                    const std::vector<std::unique_ptr<top::ToolLoaderBase> >& toolLoaders,
-                   std::shared_ptr<top::TopConfig> config, EL::Worker* wk);
+                   const std::shared_ptr<top::TopConfig>& config, EL::Worker* wk);
 
     /**
      * @brief Does not do anything
@@ -203,7 +203,7 @@ namespace top {
     ///Scale factors
     ScaleFactorRetriever* m_sfRetriever;
     /// Function to setup the tool in one place
-    void initialiseTopScaleFactorRetriever(std::shared_ptr<TopConfig> config);
+    void initialiseTopScaleFactorRetriever(const std::shared_ptr<TopConfig>& config);
 
     // Nominal hash value
     std::size_t m_nominalHashValue;

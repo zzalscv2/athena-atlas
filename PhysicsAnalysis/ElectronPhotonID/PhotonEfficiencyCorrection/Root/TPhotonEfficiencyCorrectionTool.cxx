@@ -27,11 +27,12 @@ int Root::TPhotonEfficiencyCorrectionTool::initialize(){
 }
 
 using Result = Root::TPhotonEfficiencyCorrectionTool::Result;
-const Result Root::TPhotonEfficiencyCorrectionTool::calculate( const PATCore::ParticleDataType::DataType dataType,
-                                  const unsigned int runnumber,
-                                  const double cluster_eta,
-                                  const double et /* in MeV */
-                                  ) const {
+int Root::TPhotonEfficiencyCorrectionTool::calculate( const PATCore::ParticleDataType::DataType dataType,
+						      const unsigned int runnumber,
+						      const double cluster_eta,
+						      const double et, /* in MeV */
+						      Result& sf_and_err
+						      ) const {
 
     size_t CorrIndex{0},MCToysIndex{0};
     std::vector<double> result;
@@ -44,18 +45,17 @@ const Result Root::TPhotonEfficiencyCorrectionTool::calculate( const PATCore::Pa
 									  MCToysIndex
 									  );
     
-    Result output;
-
     // if status 0 something went wrong
     if (!status) {
-      output.scaleFactor=-999;
-      output.totalUncertainty=1;
-      ATH_MSG_DEBUG("Something went wrong ... in the future we should report an CP::CorrectionCode::OutOfValidityRange");
-      return output;
+      sf_and_err.scaleFactor=-999;
+      sf_and_err.totalUncertainty=1;
+      ATH_MSG_DEBUG("Something went wrong ... for debugging, " << 
+		    "look for a message from TElectronEfficiencyCorrectionTool");
+      return 0;
     }
 
     // For Photons we only support one correlation model
-    output.scaleFactor= result[static_cast<size_t>(Root::TElectronEfficiencyCorrectionTool::Position::SF)];
-    output.totalUncertainty=result[static_cast<size_t>(Root::TElectronEfficiencyCorrectionTool::Position::Total)];
-    return output;
+    sf_and_err.scaleFactor= result[static_cast<size_t>(Root::TElectronEfficiencyCorrectionTool::Position::SF)];
+    sf_and_err.totalUncertainty=result[static_cast<size_t>(Root::TElectronEfficiencyCorrectionTool::Position::Total)];
+    return status;
 }

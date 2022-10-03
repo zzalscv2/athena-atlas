@@ -117,55 +117,87 @@ void sTgcRawDataMonAlg::fillsTgcOverviewHistograms(const Muon::sTgcPrepData *sTg
 void sTgcRawDataMonAlg::fillsTgcSummaryHistograms(const Muon::sTgcPrepData *sTgc_object) const
 {
   Identifier Id    = sTgc_object   -> identify();
-  if(!Id.is_valid()) return;
+  if(!Id.is_valid()) {
+    ATH_MSG_DEBUG("Invalid identifier found in Muon::sTgcPrepData");
+    return;
+  }
+
   int stationPhi   = m_idHelperSvc -> stgcIdHelper().stationPhi(Id);
   int stationEta   = m_idHelperSvc -> stgcIdHelper().stationEta(Id);
-  int multiplet    = m_idHelperSvc -> stgcIdHelper().multilayer(Id);
-  int gas_gap      = m_idHelperSvc -> stgcIdHelper().gasGap(Id);  
-  int channel_type = m_idHelperSvc -> stgcIdHelper().channelType(Id);
-  int charge       = sTgc_object   -> charge();
   int iside        = (stationEta > 0) ? 1 : 0;
+  int multiplet    = m_idHelperSvc -> stgcIdHelper().multilayer(Id);
+  int gasgap       = m_idHelperSvc -> stgcIdHelper().gasGap(Id);  
+
+  int channel_type = m_idHelperSvc -> stgcIdHelper().channelType(Id);
+
   std::string stationName = m_idHelperSvc -> stgcIdHelper().stationNameString(m_idHelperSvc -> stgcIdHelper().stationName(Id));
   int stationPhiComplete = get_sectorPhi_from_stationPhi_stName(stationPhi, stationName);
  
   std::vector<int> strip_charges_vec = sTgc_object -> stripCharges();  
   std::vector<short unsigned int> strip_numbers_perPhi_vec = sTgc_object -> stripNumbers();
 
-  std::vector<int> charge_vec;
-  std::vector<int> stationPhi_vec;
-  std::vector<int> stationEta_vec;
-  std::vector<int> stationEta_perPhi_vec;
-
-  charge_vec.push_back(charge);
-  stationPhi_vec.push_back(stationPhiComplete);
+  std::vector<int> charge, stationPhi_vec, stationEta_vec;
+  charge.push_back(sTgc_object->charge());
+  stationPhi_vec.push_back(stationPhi);
   stationEta_vec.push_back(stationEta);
-  stationEta_perPhi_vec.push_back(stationEta);
+
+  std::string monGroupName = "sTgc_sideGroup" + GeometricSectors::sTgc_Side[iside];
+  std::string baseName = "_" + GeometricSectors::sTgc_Side[iside] + "_multiplet_" + std::to_string(multiplet) + "_gasgap_" + std::to_string(gasgap);
+  std::string sPhiName = "_stationPhi_" + std::to_string(stationPhiComplete);
+
+  std::string varName  = "";
   
   if (channel_type == 0)
     {
-      auto charge_perLayer_pad_ = Monitored::Collection("charge_pad_" + GeometricSectors::sTgc_Side[iside] + "_multiplet_" + std::to_string(multiplet) + "_gasgap_" + std::to_string(gas_gap), charge_vec);
-      auto stationPhi_ = Monitored::Collection("sector_" + GeometricSectors::sTgc_Side[iside] + "_phi_multiplet_" + std::to_string(multiplet) + "_gasgap_" + std::to_string(gas_gap), stationPhi_vec);
-      auto stationEta_ = Monitored::Collection("sector_" + GeometricSectors::sTgc_Side[iside] + "_eta_multiplet_" + std::to_string(multiplet) + "_gasgap_" + std::to_string(gas_gap), stationEta_vec);
-      fill("sTgc_sideGroup" + GeometricSectors::sTgc_Side[iside], charge_perLayer_pad_, stationPhi_, stationEta_);    
+
+      varName = "pad_charge"+baseName;
+      auto charge_perLayer = Monitored::Collection(varName, charge);
+
+      varName = "pad_phi"+baseName;
+      auto stationPhi = Monitored::Collection(varName, stationPhi_vec);
+
+      varName = "pad_eta"+baseName;
+      auto stationEta = Monitored::Collection(varName, stationEta_vec);
+
+      fill(monGroupName, charge_perLayer, stationPhi, stationEta);    
     }
   
   else if (channel_type == 1)
     {      
-      auto charge_perLayer_strip_ = Monitored::Collection("charge_strip_" + GeometricSectors::sTgc_Side[iside] + "_multiplet_" + std::to_string(multiplet) + "_gasgap_" + std::to_string(gas_gap), charge_vec);
-      auto stationPhi_ = Monitored::Collection("sector_" + GeometricSectors::sTgc_Side[iside] + "_phi_multiplet_" + std::to_string(multiplet) + "_gasgap_" + std::to_string(gas_gap), stationPhi_vec);
-      auto stationEta_ = Monitored::Collection("sector_" + GeometricSectors::sTgc_Side[iside] + "_eta_multiplet_" + std::to_string(multiplet) + "_gasgap_" + std::to_string(gas_gap), stationEta_vec); 
-      auto stationEta_perPhi_ = Monitored::Collection("sector_" + GeometricSectors::sTgc_Side[iside] + "_eta_multiplet_" + std::to_string(multiplet) + "_gasgap_" + std::to_string(gas_gap) + "_stationPhi_" + std::to_string(stationPhiComplete), stationEta_perPhi_vec);
-      auto stripNumber_perLayer_perPhi_strip_ = Monitored::Collection("stripNumber_strip_" + GeometricSectors::sTgc_Side[iside] + "_multiplet_" + std::to_string(multiplet) + "_gasgap_" + std::to_string(gas_gap) + "_stationPhi_" + std::to_string(stationPhiComplete), strip_numbers_perPhi_vec);
-      auto charge_perLayer_perPhi_strip_ = Monitored::Collection("charge_strip_" + GeometricSectors::sTgc_Side[iside] + "_multiplet_" + std::to_string(multiplet) + "_gasgap_" + std::to_string(gas_gap) + "_stationPhi_" + std::to_string(stationPhiComplete), charge_vec);
-      fill("sTgc_sideGroup" + GeometricSectors::sTgc_Side[iside], charge_perLayer_strip_, stationPhi_, stationEta_, stationEta_perPhi_, stripNumber_perLayer_perPhi_strip_, charge_perLayer_perPhi_strip_);    
+
+      varName = "strip_charge"+baseName;
+      auto charge_perLayer = Monitored::Collection(varName, charge);
+
+      varName = "strip_phi"+baseName; 
+      auto stationPhi = Monitored::Collection(varName, stationPhi_vec);
+
+      varName = "strip_eta"+baseName;
+      auto stationEta = Monitored::Collection(varName, stationEta_vec);
+      
+      varName = "strip_eta"+baseName+sPhiName;
+      auto stationEta_perPhi = Monitored::Collection(varName, stationEta_vec);
+
+      varName = "strip_number"+baseName+sPhiName;
+      auto stripNumber_perLayer_perPhi = Monitored::Collection(varName, strip_numbers_perPhi_vec);
+
+      varName = "strip_charge"+baseName+sPhiName;
+      auto charge_perLayer_perPhi = Monitored::Collection(varName, strip_charges_vec);
+
+      fill(monGroupName, charge_perLayer, stationPhi, stationEta, stationEta_perPhi, stripNumber_perLayer_perPhi, charge_perLayer_perPhi);    
     }
   
   else if (channel_type == 2)
     {
-      auto charge_perLayer_wire_ = Monitored::Collection("charge_wire_" + GeometricSectors::sTgc_Side[iside] + "_multiplet_" + std::to_string(multiplet) + "_gasgap_" + std::to_string(gas_gap), charge_vec);
-      auto stationPhi_ = Monitored::Collection("sector_" + GeometricSectors::sTgc_Side[iside] + "_phi_multiplet_" + std::to_string(multiplet) + "_gasgap_" + std::to_string(gas_gap), stationPhi_vec);
-      auto stationEta_ = Monitored::Collection("sector_" + GeometricSectors::sTgc_Side[iside] + "_eta_multiplet_" + std::to_string(multiplet) + "_gasgap_" + std::to_string(gas_gap), stationEta_vec);
-      fill("sTgc_sideGroup" + GeometricSectors::sTgc_Side[iside], charge_perLayer_wire_, stationPhi_, stationEta_);    
+      varName = "wire_charge"+baseName;
+      auto charge_perLayer = Monitored::Collection(varName, charge);
+
+      varName = "wire_phi"+baseName;
+      auto stationPhi = Monitored::Collection(varName, stationPhi_vec);
+
+      varName = "wire_eta"+baseName;
+      auto stationEta = Monitored::Collection(varName, stationEta_vec);
+
+      fill(monGroupName, charge_perLayer, stationPhi, stationEta);    
     }
 }
 

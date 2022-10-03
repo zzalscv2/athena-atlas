@@ -21,7 +21,7 @@ msg = logging.getLogger('MetaReader')
 from PyUtils.MetaReader import read_metadata
 
 
-def _tree_print(content, indent = 2, pad = 0, list_max_items = -1, dict_sort=None, ascii=False):
+def _tree_print(content, indent=2, pad=0, list_max_items=-1, dict_sort=None, ascii=False, hide_content=False, hide_trigger=False):
 	s = ''
 
 	if isinstance(content, dict):
@@ -40,6 +40,12 @@ def _tree_print(content, indent = 2, pad = 0, list_max_items = -1, dict_sort=Non
 
 			last = i == items_count - 1
 
+			if hide_content and (key in ['itemList', 'metadata_items'] or 'EventFormatStream' in key):
+				continue
+
+			if hide_trigger and key in ['TriggerMenu', 'TriggerMenuJson_HLT', 'TriggerMenuJson_HLTMonitoring', 'TriggerMenuJson_HLTPS', 'TriggerMenuJson_L1', 'TriggerMenuJson_L1PS']:
+				continue
+
 			if pad == 0:
 				skey = str(key)
 			elif pad < 0:
@@ -52,7 +58,8 @@ def _tree_print(content, indent = 2, pad = 0, list_max_items = -1, dict_sort=Non
 			else:
 				s += ('|' if not last else '`') + '-' * indent + ' ' + skey + ': '
 
-			lines = _tree_print(value, indent=indent, pad = pad, dict_sort = dict_sort, list_max_items = list_max_items, ascii = ascii).split('\n')
+			lines = _tree_print(value, indent=indent, pad=pad, dict_sort=dict_sort, list_max_items=list_max_items, ascii=ascii,
+													hide_content=hide_content, hide_trigger=hide_trigger).split('\n')
 
 			if len(lines) == 1:
 				s += lines[0] + '\n'
@@ -138,6 +145,12 @@ def _main():
 						default=None,
 						type=bool,
 						help="Force promotion or not of the metadata keys ")
+	parser.add_argument('--hideContentList',
+						action='store_true',
+						help="Hide content lists (event-level and metadata containers)")
+	parser.add_argument('--hideTrigger',
+						action='store_true',
+						help="Hide trigger metadata")
 	args = parser.parse_args()
 
 	verbose = args.verbose
@@ -170,24 +183,20 @@ def _main():
 		else:
 			enc = sys.stdout.encoding
 			ascii = not sys.stdout.isatty() or not enc or enc.lower().find('ansi') >= 0 or enc.lower().find('ascii') >= 0
-			_tree_print(metadata, indent= indent, pad= 18, dict_sort='key', list_max_items = 8, ascii = True)
-			print(_tree_print(metadata, indent= indent, pad= 18, dict_sort='key', list_max_items = 8, ascii = ascii))
+			print(_tree_print(metadata, indent=indent, pad=18, dict_sort='key', list_max_items=8, ascii=ascii,
+												hide_content=args.hideContentList, hide_trigger=args.hideTrigger))
 
 	else:
 		if is_json:
 			with open(output, 'w') as fd:
-				print (json.dumps(metadata, indent=indent), file=fd)
+				print(json.dumps(metadata, indent=indent), file=fd)
 		else:
 			with open(output, 'w') as fd:
-				print (_tree_print(metadata, indent = indent, pad = 18, dict_sort = 'key', list_max_items = 8, ascii = True), file=fd)
+				print(_tree_print(metadata, indent=indent, pad=18, dict_sort='key', list_max_items=8, ascii=True,
+													hide_content=args.hideContentList, hide_trigger=args.hideTrigger),
+							file=fd)
 
 	msg.info('Done!')
 
 if __name__ == '__main__':
 	_main()
-
-
-
-
-
-

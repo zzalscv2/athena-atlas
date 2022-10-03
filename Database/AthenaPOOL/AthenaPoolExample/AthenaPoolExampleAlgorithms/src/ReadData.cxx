@@ -63,17 +63,15 @@ StatusCode ReadData::execute (const EventContext& ctx) const {
    if (p_SGinMeta->retrieve(esi1, esi2).isFailure() || esi1 == esi2) {
       ATH_MSG_WARNING("Could not find EventStreamInfo");
    } else {
-      for (; esi1 != esi2; esi1++) {
+      for (; esi1 != esi2; ++esi1) {
          ATH_MSG_INFO("EventStreamInfo: Number of events = " << esi1->getNumberOfEvents());
          ATH_MSG_INFO("EventStreamInfo: ItemList:");
-         for (std::set<std::pair<CLID, std::string> >::const_iterator iter = esi1->getItemList().begin(), iterEnd = esi1->getItemList().end();
-		         iter != iterEnd; iter++) {
-            ATH_MSG_INFO("CLID = " << iter->first << ", key = " << iter->second);
+         for (const std::pair<CLID, std::string>& p : esi1->getItemList()) {
+            ATH_MSG_INFO("CLID = " << p.first << ", key = " << p.second);
          }
-         for (std::set<EventType>::iterator iter = esi1->getEventTypes().begin(), iterEnd = esi1->getEventTypes().end();
-		         iter != iterEnd; iter++) {
-            ATH_MSG_INFO("EventType: " << iter->typeToString());
-            ATH_MSG_INFO("TagInfo: " << iter->get_detdescr_tags());
+         for (const EventType& et : esi1->getEventTypes()) {
+            ATH_MSG_INFO("EventType: " << et.typeToString());
+            ATH_MSG_INFO("TagInfo: " << et.get_detdescr_tags());
          }
       }
    }
@@ -84,9 +82,8 @@ StatusCode ReadData::execute (const EventContext& ctx) const {
          ATH_MSG_FATAL("Could not find EventBookkeeperCollection, key =");
          return StatusCode::FAILURE;
       }
-      for (EventBookkeeperCollection::const_iterator iter = ebc->begin(), iterEnd = ebc->end();
-		      iter != iterEnd; iter++) {
-         ATH_MSG_INFO("EventBookkeeper " << (*iter)->getName() << " accepted events: = " << (*iter)->getNAcceptedEvents());
+      for (const EventBookkeeper* bk : *ebc) {
+         ATH_MSG_INFO("EventBookkeeper " << bk->getName() << " accepted events: = " << bk->getNAcceptedEvents());
       }
    }
    const std::string ebcInKey = "EventBookkeepers";
@@ -96,17 +93,16 @@ StatusCode ReadData::execute (const EventContext& ctx) const {
          ATH_MSG_FATAL("Could not find EventBookkeeperCollection, key =");
          return StatusCode::FAILURE;
       }
-      for (EventBookkeeperCollection::const_iterator iter = ebc->begin(), iterEnd = ebc->end();
-		      iter != iterEnd; iter++) {
-         ATH_MSG_INFO("EventBookkeeper (In) " << (*iter)->getName() << " accepted events: = " << (*iter)->getNAcceptedEvents());
+      for (const EventBookkeeper* bk : *ebc) {
+         ATH_MSG_INFO("EventBookkeeper (In) " << bk->getName() << " accepted events: = " << bk->getNAcceptedEvents());
       }
    }
 
    SG::ReadHandle<DataHeader> dh (m_dataHeaderKey, ctx);
-   for (std::vector<DataHeaderElement>::const_iterator dhe_p = dh->begin(); dhe_p != dh->end(); dhe_p++) {
-      ATH_MSG_INFO("DataHeader (Event Content) " << dhe_p->getToken()->toString());
+   for (const DataHeaderElement& dhe : *dh) {
+      ATH_MSG_INFO("DataHeader (Event Content) " << dhe.getToken()->toString());
    }
-   for (std::vector<DataHeaderElement>::const_iterator dhe_p = dh->beginProvenance(); dhe_p != dh->endProvenance(); dhe_p++) {
+   for (std::vector<DataHeaderElement>::const_iterator dhe_p = dh->beginProvenance(); dhe_p != dh->endProvenance(); ++dhe_p) {
       ATH_MSG_INFO("DataHeader (Provenance) " << dhe_p->getToken()->toString());
    }
 

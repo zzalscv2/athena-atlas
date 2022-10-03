@@ -3,14 +3,15 @@
 */
 
 // System include(s):
-#include <memory>
 #include <cstdlib>
-#include <string>
 #include <iostream>
-#include <vector>
 #include <map>
-#include <regex>
+#include <memory>
 #include <numeric>
+#include <regex>
+#include <string>
+#include <utility>
+#include <vector>
 
 // ROOT include(s):
 #include <TEnv.h>
@@ -99,7 +100,7 @@ enum sel {
 };
 
 //====================================================================================================
-std::vector<std::string> getTokens(TString line, TString delim);
+std::vector<std::string> getTokens(TString line, const TString& delim);
 std::map<std::string, std::string> getFileContainers(std::unique_ptr<TFile> &);
 
 namespace asg{ANA_MSG_HEADER(msgSTT) ANA_MSG_SOURCE(msgSTT,"SUSYToolsTester")}
@@ -446,7 +447,7 @@ int main( int argc, char* argv[] ) {
       // Let's find the right CBK (latest with StreamAOD input before derivations)
       const xAOD::CutBookkeeper* allEventsCBK = nullptr;
       int maxcycle=-1;
-      for ( auto cbk : *completeCBC ) {
+      for ( const auto *cbk : *completeCBC ) {
         cbkname = cbk->name();
         stream = cbk->inputStream();
         ostream = (cbk->outputStreams().size() ? cbk->outputStreams()[0] : "");
@@ -1321,9 +1322,9 @@ int main( int argc, char* argv[] ) {
 
 //====================================================================================================
 //====================================================================================================
-std::vector<std::string> getTokens(TString line, TString delim) {
+std::vector<std::string> getTokens(TString line, const TString& delim) {
   std::vector<std::string> vtokens;
-  TObjArray* tokens = TString(line).Tokenize(delim); //delimiters
+  TObjArray* tokens = TString(std::move(line)).Tokenize(delim); //delimiters
   if(tokens->GetEntriesFast()) {
     TIter iString(tokens);
     TObjString* os = nullptr;

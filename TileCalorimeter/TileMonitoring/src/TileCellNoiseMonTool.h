@@ -22,7 +22,7 @@ class ITileBadChanTool;
  *  @brief Class for TileCal noise monitoring at cell level
  */
 
-class TileCellNoiseMonTool: public TileFatherMonTool {
+class ATLAS_NOT_THREAD_SAFE TileCellNoiseMonTool: public TileFatherMonTool {  // deprecated: ATLASRECTS-7259
 
   public:
 

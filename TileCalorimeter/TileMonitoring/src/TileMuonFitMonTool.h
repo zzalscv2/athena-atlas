@@ -22,7 +22,7 @@ class TileCosmicMuon;
  *  @brief Class for Tile MuonFit based monitoring
  */
 
-class TileMuonFitMonTool: public TileFatherMonTool {
+class ATLAS_NOT_THREAD_SAFE TileMuonFitMonTool: public TileFatherMonTool {  // deprecated: ATLASRECTS-7259
 
   public:
 

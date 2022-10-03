@@ -37,12 +37,14 @@ def main():
 
 def getTransform():
     executorSet = set()
+    from SimuJobTransforms.SimTransformUtils import addSimulationArguments
     executorSet.add(athenaExecutor(name = 'FCS_Ntup',
                                    skeletonFile = 'ISF_FastCaloSimParametrization/skeleton.ESDtoNTUP_FCS.py',
                                    inData = ['ESD'], outData = ['NTUP_FCS'],))
     trf = transform(executor = executorSet, description = 'FastCaloSim V2 Parametrization ntuple transform. Inputs must be ESD. Outputs must be ntuple files.')
     addAthenaArguments(trf.parser)
     addDetectorArguments(trf.parser)
+    addSimulationArguments(trf.parser)
     addFCS_NtupArgs(trf.parser)
     return trf
 

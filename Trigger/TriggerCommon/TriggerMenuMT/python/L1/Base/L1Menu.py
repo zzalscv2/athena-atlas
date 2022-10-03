@@ -145,6 +145,7 @@ class L1Menu(object):
     def checkBoardInputs(self, algo, connDefName, fpgaName ):
         if 'MuCTPi' in connDefName or 'Legacy' in connDefName:
             return
+
         boardName = connDefName+fpgaName
 
         allowedInputs = odict()
@@ -167,8 +168,34 @@ class L1Menu(object):
         if 'Mult_' not in algo.name:
             for algoInput in algo.inputs:
                 if not (any(x in algoInput for x in allowedInputs[boardName])):
-                     raise RuntimeError("Algorithm %s in board %s with input %s not allowed" % (algo.name, boardName, algoInput ))
+                    raise RuntimeError("Algorithm %s in board %s with input %s not allowed" % (algo.name, boardName, algoInput ))
 
+    def checkL1CaloThresholds(self, thresholds, boardName, connName):
+        fullName = boardName + connName
+
+        allowedInputs = odict()
+        allowedInputs['Ctpin7EM1'] = 8*['EM']
+        allowedInputs['Ctpin7EM2'] = 8*['EM']
+        allowedInputs['Ctpin7TAU1'] = 8*['HA']
+        allowedInputs['Ctpin7TAU2'] = 8*['HA']
+
+        allowedInputs['Ctpin8JET1'] = 10*['J']  # 3-bit JET
+        allowedInputs['Ctpin8JET2'] = 15*['J'] # 2-bit JET
+        allowedInputs['Ctpin8EN1'] = 8*['TE'] + 8*['XE'] + 8*['XS']
+        allowedInputs['Ctpin8EN2'] = 8*['TE'] + 8*['XE']
+
+        invalidThresholds = False
+        for ithr,thr in enumerate(thresholds):
+            try:
+                allowedThr = allowedInputs[fullName][ithr]
+                if thr[:len(allowedThr)] != allowedThr:
+                    log.error(f"Threshold {thr} does not match expected type {allowedThr} at position {ithr} in connector {fullName}")
+                    invalidThresholds = True
+            except IndexError:
+                log.error(f"Too many thresholds ({len(thresholds)}) provided for connector {fullName}, which only supports {len(allowedInputs[fullName])} thresholds")
+                invalidThresholds = True
+        if invalidThresholds:
+            raise RuntimeError("Incorrect specification of legacy L1Calo thresholds")
 
     def checkCTPINconnectors(self):
         for conn in self.connectors:

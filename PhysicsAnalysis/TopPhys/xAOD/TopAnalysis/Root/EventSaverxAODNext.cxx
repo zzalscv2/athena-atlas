@@ -1,5 +1,5 @@
 /*
-   Copyright (C) 2002-2020 CERN for the benefit of the ATLAS collaboration
+   Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
  */
 
 #include "TopAnalysis/EventSaverxAODNext.h"
@@ -65,7 +65,7 @@ namespace top {
         photonVariableSaveList += ".truthType.truthOrigin";
       }
 
-      for (auto currentSystematic : *m_config->systSgKeyMapPhotons()) {
+      for (const auto& currentSystematic : *m_config->systSgKeyMapPhotons()) {
         std::string sgKey = currentSystematic.second;
         evtStore()->event()->setAuxItemList(sgKey + "Aux.", photonVariableSaveList);
       }
@@ -78,7 +78,7 @@ namespace top {
         electronVariableSaveList += ".truthType.truthOrigin";
       }
 
-      for (auto currentSystematic : *m_config->systSgKeyMapElectrons()) {
+      for (const auto& currentSystematic : *m_config->systSgKeyMapElectrons()) {
         std::string sgKey = currentSystematic.second;
         evtStore()->event()->setAuxItemList(sgKey + "Aux.", electronVariableSaveList);
       }
@@ -93,7 +93,7 @@ namespace top {
       //   muonVariableSaveList += ".truthType.truthOrigin";
       // }
 
-      for (auto currentSystematic : *m_config->systSgKeyMapMuons()) {
+      for (const auto& currentSystematic : *m_config->systSgKeyMapMuons()) {
         std::string sgKey = currentSystematic.second;
         evtStore()->event()->setAuxItemList(sgKey + "Aux.", muonVariableSaveList);
       }
@@ -103,7 +103,7 @@ namespace top {
     if (m_config->useTaus()) {
       std::string tauVariableSaveList = settings->value("TauVariableSaveList");
 
-      for (auto currentSystematic : *m_config->systSgKeyMapTaus()) {
+      for (const auto& currentSystematic : *m_config->systSgKeyMapTaus()) {
         std::string sgKey = currentSystematic.second;
         evtStore()->event()->setAuxItemList(sgKey + "Aux.", tauVariableSaveList);
       }
@@ -114,7 +114,7 @@ namespace top {
     if (m_config->useJets()) {
       std::string jetVariableSaveList = settings->value("JetVariableSaveList");
 
-      for (auto currentSystematic : *m_config->systSgKeyMapJets(false)) {
+      for (const auto& currentSystematic : *m_config->systSgKeyMapJets(false)) {
         std::string sgKey = currentSystematic.second;
         evtStore()->event()->setAuxItemList(sgKey + "Aux.", jetVariableSaveList);
       }
@@ -123,7 +123,7 @@ namespace top {
     if (m_config->useLargeRJets()) {
       std::string jetVariableSaveList = settings->value("JetVariableSaveList");
 
-      for (auto currentSystematic : *m_config->systSgKeyMapLargeRJets()) {
+      for (const auto& currentSystematic : *m_config->systSgKeyMapLargeRJets()) {
         std::string sgKey = currentSystematic.second;
         evtStore()->event()->setAuxItemList(sgKey + "Aux.", jetVariableSaveList);
       }
@@ -132,7 +132,7 @@ namespace top {
     if (m_config->useTrackJets()) {
       std::string jetVariableSaveList = settings->value("JetVariableSaveList");
 
-      for (auto currentSystematic : *m_config->systSgKeyMapTrackJets()) {
+      for (const auto& currentSystematic : *m_config->systSgKeyMapTrackJets()) {
         std::string sgKey = currentSystematic.second;
         evtStore()->event()->setAuxItemList(sgKey + "Aux.", jetVariableSaveList);
       }
@@ -161,7 +161,7 @@ namespace top {
       saveEvent = true;
     }
     if (m_config->saveOnlySelectedEvents()) {
-      for (auto x : *allSystematics) {
+      for (const auto *x : *allSystematics) {
         if (x->auxdataConst<char>(m_config->passEventSelectionDecoration()) == 1) {
           saveEvent = true;
           saveEventObjects = true;
@@ -195,7 +195,7 @@ namespace top {
         m_config->sgKeyTopSystematicEvents() + "Aux.");
       allSystematics_output->setStore(allSystematics_output_aux);
       if (saveEventObjects) {
-        for (auto systematicPtr : *allSystematics) {
+        for (const auto *systematicPtr : *allSystematics) {
           if (!(systematicPtr->hashValue() == m_config->nominalHashValue() || m_config->doTightSysts() ||
                 m_config->doLooseSysts())) continue;
           xAOD::SystematicEvent* out = new xAOD::SystematicEvent {};
@@ -243,7 +243,7 @@ namespace top {
 
   std::vector<unsigned int> EventSaverxAODNext::thinObjectSelection(const std::size_t hashValue,
                                                                     const std::vector<unsigned int>& objectList,
-                                                                    const std::shared_ptr<ThinningMap_t> thinningMap)
+                                                                    const std::shared_ptr<ThinningMap_t>& thinningMap)
   const {
     // reduced output
     std::vector<unsigned int> out;
@@ -298,7 +298,7 @@ namespace top {
     const bool saveEventObjects) {
     std::shared_ptr<ThinningMap_t> thinningMap(new ThinningMap_t);
     if (m_config->usePhotons()) {
-      for (auto currentSystematic : *m_config->systSgKeyMapPhotons()) {
+      for (const auto& currentSystematic : *m_config->systSgKeyMapPhotons()) {
         std::map<unsigned int, unsigned int> currentSystematicThinningMap;
         std::string sgKey = currentSystematic.second;
         const xAOD::PhotonContainer* xaod(nullptr);
@@ -310,7 +310,7 @@ namespace top {
 
         if (saveEventObjects) {
           unsigned int index(0), indexReduced(0);
-          for (auto x : *xaod) {
+          for (const auto *x : *xaod) {
             bool save(m_saveAllObjects);
             if (x->isAvailable<char>("passPreORSelection")) {
               if (x->auxdataConst<char>("passPreORSelection") == 1) {
@@ -345,7 +345,7 @@ namespace top {
     const bool saveEventObjects) {
     std::shared_ptr<ThinningMap_t> thinningMap(new ThinningMap_t);
     if (m_config->useElectrons()) {
-      for (auto currentSystematic : *m_config->systSgKeyMapElectrons()) {
+      for (const auto& currentSystematic : *m_config->systSgKeyMapElectrons()) {
         std::map<unsigned int, unsigned int> currentSystematicThinningMap;
         std::string sgKey = currentSystematic.second;
         const xAOD::ElectronContainer* xaod(nullptr);
@@ -357,7 +357,7 @@ namespace top {
 
         if (saveEventObjects) {
           unsigned int index(0), indexReduced(0);
-          for (auto x : *xaod) {
+          for (const auto *x : *xaod) {
             bool save(m_saveAllObjects);
             if (x->isAvailable<char>("passPreORSelection")) {
               if (x->auxdataConst<char>("passPreORSelection") == 1) {
@@ -397,7 +397,7 @@ namespace top {
     const bool saveEventObjects) {
     std::shared_ptr<ThinningMap_t> thinningMap(new ThinningMap_t);
     if (m_config->useMuons()) {
-      for (auto currentSystematic : *m_config->systSgKeyMapMuons()) {
+      for (const auto& currentSystematic : *m_config->systSgKeyMapMuons()) {
         std::map<unsigned int, unsigned int> currentSystematicThinningMap;
         std::string sgKey = currentSystematic.second;
         const xAOD::MuonContainer* xaod(nullptr);
@@ -409,7 +409,7 @@ namespace top {
 
         if (saveEventObjects) {
           unsigned int index(0), indexReduced(0);
-          for (auto x : *xaod) {
+          for (const auto *x : *xaod) {
             bool save(m_saveAllObjects);
             if (x->isAvailable<char>("passPreORSelection")) {
               if (x->auxdataConst<char>("passPreORSelection") == 1) {
@@ -444,7 +444,7 @@ namespace top {
     const bool saveEventObjects) {
     std::shared_ptr<ThinningMap_t> thinningMap(new ThinningMap_t);
     if (m_config->useTaus()) {
-      for (auto currentSystematic : *m_config->systSgKeyMapTaus()) {
+      for (const auto& currentSystematic : *m_config->systSgKeyMapTaus()) {
         std::map<unsigned int, unsigned int> currentSystematicThinningMap;
         std::string sgKey = currentSystematic.second;
         const xAOD::TauJetContainer* xaod(nullptr);
@@ -456,7 +456,7 @@ namespace top {
 
         if (saveEventObjects) {
           unsigned int index(0), indexReduced(0);
-          for (auto x : *xaod) {
+          for (const auto *x : *xaod) {
             bool save(m_saveAllObjects);
             if (x->isAvailable<char>("passPreORSelection")) {
               if (x->auxdataConst<char>("passPreORSelection") == 1) {
@@ -491,7 +491,7 @@ namespace top {
     const bool saveEventObjects) {
     std::shared_ptr<ThinningMap_t> thinningMap(new ThinningMap_t);
     if (m_config->useJets()) {
-      for (auto currentSystematic : *m_config->systSgKeyMapJets(false)) {
+      for (const auto& currentSystematic : *m_config->systSgKeyMapJets(false)) {
         std::map<unsigned int, unsigned int> currentSystematicThinningMap;
         std::string sgKey = currentSystematic.second;
         const xAOD::JetContainer* xaod(nullptr);
@@ -503,7 +503,7 @@ namespace top {
 
         if (saveEventObjects) {
           unsigned int index(0), indexReduced(0);
-          for (auto x : *xaod) {
+          for (const auto *x : *xaod) {
             bool save(m_saveAllObjects);
             if (x->isAvailable<char>("passPreORSelection")) {
               if (x->auxdataConst<char>("passPreORSelection") == 1) {
@@ -546,7 +546,7 @@ namespace top {
     const bool saveEventObjects) {
     std::shared_ptr<ThinningMap_t> thinningMap(new ThinningMap_t);
     if (m_config->useLargeRJets()) {
-      for (auto currentSystematic : *m_config->systSgKeyMapLargeRJets()) {
+      for (const auto& currentSystematic : *m_config->systSgKeyMapLargeRJets()) {
         std::map<unsigned int, unsigned int> currentSystematicThinningMap;
         std::string sgKey = currentSystematic.second;
         const xAOD::JetContainer* xaod(nullptr);
@@ -558,7 +558,7 @@ namespace top {
 
         if (saveEventObjects) {
           unsigned int index(0), indexReduced(0);
-          for (auto x : *xaod) {
+          for (const auto *x : *xaod) {
             bool save(m_saveAllObjects);
             if (x->isAvailable<char>("passPreORSelection")) {
               if (x->auxdataConst<char>("passPreORSelection") == 1) {
@@ -600,7 +600,7 @@ namespace top {
     const bool saveEventObjects) {
     std::shared_ptr<ThinningMap_t> thinningMap(new ThinningMap_t);
     if (m_config->useTrackJets()) {
-      for (auto currentSystematic : *m_config->systSgKeyMapTrackJets()) {
+      for (const auto& currentSystematic : *m_config->systSgKeyMapTrackJets()) {
         std::map<unsigned int, unsigned int> currentSystematicThinningMap;
         std::string sgKey = currentSystematic.second;
         const xAOD::JetContainer* xaod(nullptr);
@@ -612,7 +612,7 @@ namespace top {
 
         if (saveEventObjects) {
           unsigned int index(0), indexReduced(0);
-          for (auto x : *xaod) {
+          for (const auto *x : *xaod) {
             bool save(m_saveAllObjects);
             if (x->isAvailable<char>("passPreORSelection")) {
               if (x->auxdataConst<char>("passPreORSelection") == 1) {

@@ -22,7 +22,7 @@
  *  @brief Class for TileCluster based monitoring
  */
 
-class TileClusterMonTool: public TileFatherMonTool {
+class ATLAS_NOT_THREAD_SAFE TileClusterMonTool: public TileFatherMonTool {  // deprecated: ATLASRECTS-7259
 
   public:
 

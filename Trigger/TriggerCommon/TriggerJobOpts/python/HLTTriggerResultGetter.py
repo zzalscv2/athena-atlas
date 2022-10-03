@@ -14,7 +14,7 @@ def HLTTriggerResultGetter(flags=None):
         from AthenaConfiguration.AllConfigFlags import ConfigFlags
         flags = ConfigFlags
 
-    if flags.Input.Format is Format.BS:
+    if flags.Input.Format is Format.BS and flags.Trigger.DecodeHLT:
         _log.info("Configuring BS unpacking")
         if flags.Trigger.EDMVersion in [1, 2]:
             from TriggerJobOpts.TriggerRecoConfig import Run1Run2BSExtractionCfg
@@ -124,11 +124,11 @@ def HLTTriggerResultGetter(flags=None):
         # Change in the future to 'if EDMVersion >= 3 or doEDMVersionConversion:'
 
         # Run 3 slimming
-        if flags.Trigger.doNavigationSlimming: 
+        if flags.Trigger.doNavigationSlimming and flags.Trigger.DecodeHLT: 
             from TrigNavSlimmingMT.TrigNavSlimmingMTConfig import TrigNavSlimmingMTCfg
             CAtoGlobalWrapper(TrigNavSlimmingMTCfg, flags)
         else:
-            _log.info("doNavigationSlimming is False, won't schedule run 3 navigation slimming")
+            _log.info("doNavigationSlimming or DecodeHLT is False, won't schedule run 3 trigger HLT navigation slimming")
 
     # This is the relevant ItemList if we are running in mixed old/new-style job options.
     # While some of the CA-fragments above do call addToESD/AOD as well, these calls are no-ops

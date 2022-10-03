@@ -79,13 +79,6 @@ namespace Trig {
        **/
       bool isPassed(unsigned int condition=TrigDefs::Physics) const;
       
-      /**
-       * @brief return vector with isPassed decision for each chain
-       * @param conditions is modifying the question
-       *
-       * The order of decisions is the same as in getListOfTriggers().
-       **/
-      std::vector<bool> isPassedForEach(unsigned int condition=TrigDefs::Physics) const;
 
       /**
        * @brief returns prescale factor
@@ -151,7 +144,6 @@ namespace Trig {
       const std::vector< std::string >& patterns() const {return m_patterns;}
    private:
 
-      bool  isPassed(const TrigConf::HLTChain& chain, unsigned int condition) const;
       bool  isCorrelatedL1items(const std::string& item) const;
       float correlatedL1Prescale(const std::string& item) const;
       float calculatePrescale(unsigned int condition=TrigDefs::Physics);

@@ -31,7 +31,7 @@ class TileDQstatus;
  *  @brief Class for TileCal monitoring at channel level
  */
 
-class TileRawChannelTimeMonTool: public TileFatherMonTool {
+class ATLAS_NOT_THREAD_SAFE TileRawChannelTimeMonTool: public TileFatherMonTool {  // deprecated: ATLASRECTS-7259
 
   public:
 

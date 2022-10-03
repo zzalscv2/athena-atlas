@@ -28,7 +28,7 @@ class IROBDataProviderSvc;
  *  @brief Class for TileROD based monitoring
  */
 
-class TileRODMonTool: public TileFatherMonTool {
+class ATLAS_NOT_THREAD_SAFE TileRODMonTool: public TileFatherMonTool {  // deprecated: ATLASRECTS-7259
 
   public:
 

@@ -945,7 +945,7 @@ TrackParticleCreatorTool::setTrackSummary(xAOD::TrackParticle& tp, const TrackSu
     ATH_MSG_DEBUG("now do muon hit info");
     Muon::IMuonHitSummaryTool::CompactSummary msSummary = m_hitSummaryTool->summary(summary);
     uint8_t numberOfPrecisionLayers = msSummary.nprecisionLayers;
-    ATH_MSG_DEBUG("# of prec layers: " << numberOfPrecisionLayers);
+    ATH_MSG_DEBUG("# of prec layers: " << static_cast<unsigned int>(numberOfPrecisionLayers));
     uint8_t numberOfPrecisionHoleLayers = msSummary.nprecisionHoleLayers;
     uint8_t numberOfPhiLayers = msSummary.nphiLayers;
     uint8_t numberOfPhiHoleLayers = msSummary.nphiHoleLayers;

@@ -41,7 +41,7 @@ class ITileBadChanTool;
  *  @brief Class for Tile Jet based monitoring
  */
 
-class TileJetMonTool: public TileFatherMonTool {
+class ATLAS_NOT_THREAD_SAFE TileJetMonTool: public TileFatherMonTool {  // deprecated: ATLASRECTS-7259
   
   public:
     TileJetMonTool(const std::string & type, const std::string & name, const IInterface* parent);

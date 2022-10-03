@@ -106,17 +106,17 @@
    <typedef name="xAOD::TrackStateAuxContainer" />
 
 
-   <!-- xAOD::TrackParameter interface type(s). -->
+   <!-- xAOD::TrackParameters interface type(s). -->
    <class name="xAOD::TrackParameters_v1" />
-   <class name="xAOD::TrackParameterContainer_v1"
+   <class name="xAOD::TrackParametersContainer_v1"
           id="114F2363-85E3-4082-95BD-5BF733E72797" />
-   <typedef name="xAOD::TrackParameter" />
-   <typedef name="xAOD::TrackParameterContainer" />
+   <typedef name="xAOD::TrackParameters" />
+   <typedef name="xAOD::TrackParametersContainer" />
 
-   <!-- xAOD::TrackParameter auxiliary type(s). -->
-   <class name="xAOD::TrackParameterAuxContainer_v1"
+   <!-- xAOD::TrackParameters auxiliary type(s). -->
+   <class name="xAOD::TrackParametersAuxContainer_v1"
           id="34EBC4FB-F439-4E3B-B896-583FAB4F78BB" />
-   <typedef name="xAOD::TrackParameterAuxContainer" />
+   <typedef name="xAOD::TrackParametersAuxContainer" />
 
 
    <!-- xAOD::TrackJacobian interface type(s). -->

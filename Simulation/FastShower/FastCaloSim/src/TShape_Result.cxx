@@ -11,6 +11,7 @@
 #include "TBuffer.h"
 #include <cmath>
 
+#include "CxxUtils/checker_macros.h"
 #include "FastCaloSimAthenaPool/FastShowerInfo.h"
 #include <exception>
 #include <stdexcept> // out_of_range exception
@@ -169,7 +170,10 @@ Double_t TShape_Result::f_2DSpline_getd(double dxfcx_mm,double dyfcy_mm,int maxi
   
   Int_t np=((TSplineAccess*)m_fitsplines_EtaPhiAspectRatio)->GetN();
   double fX,fY,fB,fC,fD;
-  ((TSpline3*)m_fitsplines_EtaPhiAspectRatio)->GetCoeff(np-1,fX,fY,fB,fC,fD);
+
+  // GetCoeff should be a const function (bug in ROOT)
+  TSpline3* sp3 ATLAS_THREAD_SAFE = static_cast<TSpline3*>(m_fitsplines_EtaPhiAspectRatio);
+  sp3->GetCoeff(np-1,fX,fY,fB,fC,fD);
 
   int niter=0;
   double oldd=d;

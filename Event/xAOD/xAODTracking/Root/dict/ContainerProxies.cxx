@@ -13,7 +13,7 @@
 #include "xAODTracking/versions/TrackStateValidationContainer_v1.h"
 #include "xAODTracking/versions/SCTRawHitValidationContainer_v1.h"
 #include "xAODTracking/versions/TrackStateContainer_v1.h"
-#include "xAODTracking/versions/TrackParameterContainer_v1.h"
+#include "xAODTracking/versions/TrackParametersContainer_v1.h"
 #include "xAODTracking/versions/TrackJacobianContainer_v1.h"
 #include "xAODTracking/versions/TrackMeasurementContainer_v1.h"
 
@@ -25,6 +25,6 @@ ADD_NS_DV_PROXY( xAOD, TrackMeasurementValidationContainer_v1 );
 ADD_NS_DV_PROXY( xAOD, TrackStateValidationContainer_v1 );
 ADD_NS_DV_PROXY( xAOD, SCTRawHitValidationContainer_v1 );
 ADD_NS_DV_PROXY( xAOD, TrackStateContainer_v1 );
-ADD_NS_DV_PROXY( xAOD, TrackParameterContainer_v1 );
+ADD_NS_DV_PROXY( xAOD, TrackParametersContainer_v1 );
 ADD_NS_DV_PROXY( xAOD, TrackJacobianContainer_v1 );
 ADD_NS_DV_PROXY( xAOD, TrackMeasurementContainer_v1 );

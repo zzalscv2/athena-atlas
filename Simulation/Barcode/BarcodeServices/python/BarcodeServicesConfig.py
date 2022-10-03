@@ -129,23 +129,3 @@ def ValidationBarcodeSvcCfg(ConfigFlags, name="Barcode_ValidationBarcodeSvc", **
     svc = CompFactory.Barcode.ValidationBarcodeSvc(name, **kwargs)
     result.addService(svc, primary=True)
     return result
-
-
-def barcodeOffsetForTruthStrategy(strategyName):
-    offsets = {'MC12':         200000,
-               'MC12LLP':      200000,
-               'MC12Plus':     200000,
-               'MC15a':        200000,
-               'MC15aPlus':    200000,
-               'MC15aPlusLLP': 200000,
-               'MC15':        1000000,
-               'MC16':         200000,
-               'MC16LLP':      200000,
-               'MC18':        1000000,
-               'MC18LLP':     1000000,
-               'Validation':   200000
-               }
-    currentOffset = offsets.get(strategyName)
-    if currentOffset is None:
-        raise RuntimeError("No barcode offset listed for truth strategy named "+str(strategyName))
-    return currentOffset

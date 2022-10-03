@@ -11,6 +11,7 @@
 
 #undef NDEBUG
 #include "AFP_EventTPCnv/AFP_TDLocRecoEvCollectionCnv_p1.h"
+#include "CxxUtils/checker_macros.h"
 #include "TestTools/leakcheck.h"
 #include "GaudiKernel/MsgStream.h"
 #include <cassert>
@@ -52,7 +53,7 @@ void testit (const AFP_TDLocRecoEvCollection& trans1)
 }
 
 
-void test1()
+void test1 ATLAS_NOT_THREAD_SAFE ()
 {
   std::cout << "test1\n";
   Athena_test::Leakcheck check;
@@ -69,7 +70,7 @@ void test1()
 }
 
 
-int main()
+int main ATLAS_NOT_THREAD_SAFE ()
 {
   std::cout << "AFP_EventTPCnv/AFP_TDLocRecoEvCollectionCnv_p1_test\n";
   test1();

@@ -147,9 +147,6 @@ class JobProperty(metaclass = _JobPropertyMeta):
                             self.__class__.__name__, context_name)
             raise RuntimeError('JobProperties: JobProperty:: __init__()')
 
-    def __nonzero__(self):
-        return self.get_Value()
-    
     def __bool__(self):
         return self.get_Value()
     

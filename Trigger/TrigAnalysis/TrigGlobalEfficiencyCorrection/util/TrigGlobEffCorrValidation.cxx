@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
 */
 
 // contact: jmaurer@cern.ch
@@ -52,8 +52,8 @@ public:
 	virtual StatusCode applySystematicVariation(const CP::SystematicSet&) override { return StatusCode::SUCCESS; }
 	virtual int systUncorrVariationIndex( const xAOD::Electron &) const override { return 0; }
   virtual int getNumberOfToys() const override {return 0;}
-  virtual const CP::SystematicSet& appliedSystematics() const { static const CP::SystematicSet dummy ; return dummy;};
-  virtual void printCorrelationModels() const {}
+  virtual const CP::SystematicSet& appliedSystematics() const override { static const CP::SystematicSet dummy ; return dummy;};
+  virtual void printCorrelationModels() const override {}
 };
 
 class SimplePhotonEfficiencyCorrectionTool : virtual public IAsgPhotonEfficiencyCorrectionTool, public asg::AsgTool

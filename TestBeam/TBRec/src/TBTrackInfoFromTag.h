@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef TBREC_TBTRACKINFOFROMTAG_H
@@ -30,9 +30,7 @@
 #include "AthenaBaseComps/AthAlgorithm.h"
 #include "AthContainers/DataVector.h"
 
-#include "EventInfo/EventInfo.h"
 #include "TBEvent/TBTrackInfo.h"
-#include "EventInfo/EventID.h"
 
 #include <string>
 #include <vector>

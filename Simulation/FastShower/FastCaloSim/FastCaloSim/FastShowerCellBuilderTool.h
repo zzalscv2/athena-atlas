@@ -13,6 +13,7 @@
 
 #include "GaudiKernel/ToolHandle.h"
 #include "AthenaKernel/IAthRNGSvc.h"
+#include "CxxUtils/CachedPointer.h"
 #include "FastCaloSim/BasicCellBuilderTool.h"
 #include "FastCaloSim/CellInfoContainer.h"
 #include "FastSimulationEvent/GenParticleEnergyDepositMap.h"
@@ -224,7 +225,7 @@ private:
   { this, "FastShowerInfoContainerKey", "FastShowerInfoContainer" };
   bool                     m_storeFastShowerInfo{false};
   Trk::PdgToParticleHypothesis        m_pdgToParticleHypothesis;
-  mutable const Trk::TrackingVolume*  m_caloEntrance{};
+  CxxUtils::CachedPointer<Trk::TrackingVolume>  m_caloEntrance;
   std::string                         m_caloEntranceName{"InDet::Containers::InnerDetector"};
 };
 

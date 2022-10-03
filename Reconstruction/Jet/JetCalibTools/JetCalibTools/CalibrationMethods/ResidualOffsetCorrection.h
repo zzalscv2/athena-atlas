@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef JETCALIBTOOLS_RESIDUALOFFSETCORRECTION_H
@@ -33,8 +33,10 @@ class ResidualOffsetCorrection : public asg::AsgMessaging
 
  private:
   double GetResidualOffsetET(double abseta, double mu, double NPV, int nJet, bool MuOnly, bool NOnly,
-                             std::vector<double> OffsetMu, std::vector<double> OffsetNPV,
-                             std::vector<double> OffsetNjet, TAxis *OffsetBins) const;
+                             const std::vector<double>& OffsetMu,
+                             const std::vector<double>& OffsetNPV,
+                             const std::vector<double>& OffsetNjet,
+                             const TAxis *OffsetBins) const;
 
   double GetNPVBeamspotCorrection(double NPV) const;
  

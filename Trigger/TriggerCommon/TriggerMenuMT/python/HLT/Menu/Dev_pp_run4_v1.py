@@ -21,7 +21,7 @@ from TriggerMenuMT.HLT.Menu.Physics_pp_run4_v1 import (#PhysicsStream,
                                                        METGroup,
                                                        #SingleJetGroup,
                                                        MultiJetGroup,
-                                                       SingleBjetGroup,
+                                                       #SingleBjetGroup,
                                                        #MultiBjetGroup,
                                                        #SingleTauGroup,
                                                        #MultiTauGroup,
@@ -78,7 +78,6 @@ def setupMenu():
 
 
     chains['Bjet'] += [
-        ChainProp(name="HLT_j225_0eta290_bdl1r70_pf_ftf_L1J100", l1SeedThresholds=['FSNOSEED'], groups=SingleBjetGroup + DevGroup),
     ]
 
     chains['Tau'] += [

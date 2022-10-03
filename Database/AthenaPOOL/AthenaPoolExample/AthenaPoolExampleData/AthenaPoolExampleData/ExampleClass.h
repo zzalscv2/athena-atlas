@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2017 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef ATHENAPOOLEXAMPLEDATA_EXAMPLECLASS_H
@@ -44,7 +44,7 @@ public: // Non-static members
 
    /// Set the text string.
    /// @param text [IN] text string.
-   void setText(std::string text) { m_text = text; }
+   void setText(const std::string& text) { m_text = text; }
 
 private:
    int m_run;

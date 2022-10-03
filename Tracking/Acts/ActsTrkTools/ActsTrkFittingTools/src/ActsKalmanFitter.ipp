@@ -27,7 +27,7 @@ ActsKalmanFitter::makeTrack(const EventContext& ctx, Acts::GeometryContext& tgCo
 
     std::vector<std::unique_ptr<const Acts::BoundTrackParameters>> actsSmoothedParam;
     // Loop over all the output state to create track state
-    fitOutput.fittedStates.visitBackwards(fitOutput.lastMeasurementIndex, [&](const auto &state) {
+    fitOutput.fittedStates->visitBackwards(fitOutput.lastMeasurementIndex, [&](const auto &state) {
       // First only concider state with an associated detector element not in the TRT
       auto flag = state.typeFlags();
       if (state.referenceSurface().associatedDetectorElement() != nullptr) {

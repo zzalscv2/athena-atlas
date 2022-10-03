@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2020 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
 */
 /**
  * @file LArRawConditions/LArCompactSubset.icc
@@ -276,7 +276,7 @@ LArCompactSubsetChannelVector::const_iterator::const_iterator()
  */
 inline
 LArCompactSubsetChannelVector::const_iterator::const_iterator
-  (unsigned int chan, LArCompactSubsetVector& subset)
+  (unsigned int chan, const LArCompactSubsetVector& subset)
     : m_chan (chan),
       m_subset (&subset)
 {
@@ -300,10 +300,10 @@ LArCompactSubsetChannelVector::const_iterator::operator++()
  * Yields a channel proxy.
  */
 inline
-LArCompactSubsetChannelProxy
+LArCompactSubsetConstChannelProxy
 LArCompactSubsetChannelVector::const_iterator::operator*() const
 {
-  return LArCompactSubsetChannelProxy (m_chan, *m_subset);
+  return LArCompactSubsetConstChannelProxy (m_chan, *m_subset);
 }
 
 
@@ -385,11 +385,25 @@ size_t LArCompactSubsetChannelVector::size() const
  */
 inline
 LArCompactSubsetChannelProxy
-LArCompactSubsetChannelVector::operator[] (size_t i) const
+LArCompactSubsetChannelVector::operator[] (size_t i)
 {
   unsigned int chan = m_subset->chanIndex (m_febIndex) + i;
   assert (chan <= m_subset->chanIndex (m_febIndex+1));
   return LArCompactSubsetChannelProxy (chan, *m_subset);
+}
+
+
+/**
+ * @brief Vector indexing.  Returns a channel proxy.
+ * @param i Channel index within the vector.
+ */
+inline
+LArCompactSubsetConstChannelProxy
+LArCompactSubsetChannelVector::operator[] (size_t i) const
+{
+  unsigned int chan = m_subset->chanIndex (m_febIndex) + i;
+  assert (chan <= m_subset->chanIndex (m_febIndex+1));
+  return LArCompactSubsetConstChannelProxy (chan, *m_subset);
 }
 
 
@@ -499,9 +513,20 @@ LArCompactSubsetChannelVectorPointer::LArCompactSubsetChannelVectorPointer
  */
 inline
 LArCompactSubsetChannelVector
-LArCompactSubsetChannelVectorPointer::operator*() const
+LArCompactSubsetChannelVectorPointer::operator*()
 {
   return LArCompactSubsetChannelVector (m_febIndex, m_subset);
+}
+
+
+/**
+ * @brief `Dereference' the pointer.
+ */
+inline
+LArCompactSubsetConstChannelVector
+LArCompactSubsetChannelVectorPointer::operator*() const
+{
+  return LArCompactSubsetConstChannelVector (m_febIndex, m_subset);
 }
 
 
@@ -616,7 +641,7 @@ LArCompactSubsetVector::iterator::operator++()
  */
 inline
 LArCompactSubsetVector::iterator
-LArCompactSubsetVector::iterator::operator+ (size_t delta) const
+LArCompactSubsetVector::iterator::operator+ (size_t delta)
 {
   return iterator (m_febIndex + delta, m_subset);
 }
@@ -628,7 +653,7 @@ LArCompactSubsetVector::iterator::operator+ (size_t delta) const
  */
 inline
 LArCompactSubsetVector::iterator::difference_type
-LArCompactSubsetVector::iterator::operator- (const iterator& other) const
+LArCompactSubsetVector::iterator::operator- (const iterator& other)
 {
   return m_febIndex - other.m_febIndex;
 }

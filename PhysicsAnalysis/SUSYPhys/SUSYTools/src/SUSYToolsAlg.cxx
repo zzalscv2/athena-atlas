@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
 */
 
 // SUSYToolsAlg.cxx
@@ -65,8 +65,8 @@ namespace Cut {
 }
 
 //====================================================================================================
-std::string findInReg(SG::AuxTypeRegistry& reg, xAOD::IParticle* obj, std::string searchkey);
-int getSize(std::map<std::string,std::vector<std::string>> &collection, std::string object);
+std::string findInReg(SG::AuxTypeRegistry& reg, xAOD::IParticle* obj, const std::string& searchkey);
+int getSize(std::map<std::string,std::vector<std::string>> &collection, const std::string& object);
 
 //====================================================================================================
 // Constructor
@@ -141,7 +141,7 @@ StatusCode SUSYToolsAlg::initialize() {
     m_grl.isUserConfigured();
 
     std::vector<std::string> myGRLs;
-    for ( auto x : m_GRLFiles ) myGRLs.push_back(x);
+    for ( const auto& x : m_GRLFiles ) myGRLs.push_back(x);
 
     ANA_CHECK( m_grl.setProperty("GoodRunsListVec", myGRLs) );
     ANA_CHECK( m_grl.setProperty("PassThrough", (myGRLs.size()>0?false:true)) );
@@ -220,7 +220,7 @@ StatusCode SUSYToolsAlg::initialize() {
   // Trim comments and extra spaces from config entries
   std::regex comment("#.*$");
   std::regex trimspaces("^ +| +$|( ) +");
-  for (auto keyval : m_configDict) {
+  for (const auto& keyval : m_configDict) {
      m_configDict[keyval.first] = regex_replace(m_configDict[keyval.first], comment, "");
      m_configDict[keyval.first] = regex_replace(m_configDict[keyval.first], trimspaces, "$1");
      ATH_MSG_DEBUG("config " << keyval.first << " : " << m_configDict[keyval.first]);
@@ -239,7 +239,7 @@ StatusCode SUSYToolsAlg::initialize() {
   m_slices["fjet"] = bool(rEnv.GetValue("Slices.FJet", true));
   m_slices["tjet"] = bool(rEnv.GetValue("Slices.TJet", true));
   m_slices["met"]  = bool(rEnv.GetValue("Slices.MET", true));
-  for (auto x : m_slices) { ATH_MSG_DEBUG( "Slice " << x.first << ": " << ((x.second)?"true":"false")); }
+  for (const auto& x : m_slices) { ATH_MSG_DEBUG( "Slice " << x.first << ": " << ((x.second)?"true":"false")); }
 
   return StatusCode::SUCCESS;
 }
@@ -273,7 +273,7 @@ StatusCode SUSYToolsAlg::finalize() {
 
   // label weights histograms
   std::map<std::string,std::string> mapweights = {{"event","EventWeight"},{"electrons","Electron"},{"photons","Photon"},{"muons","Muon"},{"taus","Tau"},{"jets","Jet"},{"btags","BTag"}};
-  for (auto weight : mapweights) {
+  for (const auto& weight : mapweights) {
      TH1* h = hist("Syst/weight_"+weight.first);
      std::vector syslist = syst_weights[weight.second];
      for (unsigned int i=1; i < syslist.size()+1; i++) { h->GetXaxis()->SetBinLabel(i, syslist.at(i-1).c_str()); }
@@ -333,7 +333,7 @@ StatusCode SUSYToolsAlg::execute() {
       ATH_MSG_ERROR("Failed to retrieve CutBookkeepers from MetaData! Exiting.");
     }
     std::string cbkname;
-    for ( auto cbk : *completeCBC ) {
+    for ( const auto *cbk : *completeCBC ) {
       cbkname = cbk->name();
       stream = cbk->inputStream();
       ATH_MSG_INFO("cbkname: " << cbkname << ", stream: " << stream);
@@ -531,7 +531,7 @@ StatusCode SUSYToolsAlg::execute() {
   if (evtStore()->contains<xAOD::TrigCompositeContainer>("TrigMatch_HLT_e24_lhtight_ivarloose_L1EM22VHI")) isRun3Trig = true;
 
   //--- Monitoring
-  for (auto obj : m_objects) { for (auto lev : m_levels) { m_obj_count[obj][lev] = 0; } }
+  for (const auto& obj : m_objects) { for (const auto& lev : m_levels) { m_obj_count[obj][lev] = 0; } }
 
   //----- Electrons
 
@@ -1321,16 +1321,16 @@ StatusCode SUSYToolsAlg::bookHistograms(void) {
   std::map<std::string,std::string>              labels_levels   = { {"nom","Nominal"}, {"bsl","Baseline"}, {"sig","Signal"} };
   std::map<std::string,std::string>              labels_dir      = { {"el","Electron"}, {"ph","Photon"}, {"mu","Muon"}, {"jet","Jet"}, {"bjet","bJet"}, {"tau","Tau"}, {"fatjet","LargeRJet"}, {"trkjet","TrackJet"} };
 
-  for (auto obj : m_objects) {
+  for (const auto& obj : m_objects) {
      m_obj_count[obj] = std::map<std::string,int>();
-     for (auto lev : m_levels) {
+     for (const auto& lev : m_levels) {
         m_obj_count[obj][lev] = 0;
      }
   }
 
-  for (auto obj : m_objects) {
-     for (auto lev : m_levels) {
-        for (auto var : m_vars) {
+  for (const auto& obj : m_objects) {
+     for (const auto& lev : m_levels) {
+        for (const auto& var : m_vars) {
            if (var.find("bweight")!=std::string::npos && obj.compare("bjet")!=0) continue;    // bweights only for bjets
            if (var.find("tagged")!=std::string::npos && obj.compare("fatjet")!=0) continue;   // boson tagging only for fjets
            if ((var.find("nTracks")!=std::string::npos||var.find("RNNJetScore")!=std::string::npos) && obj.compare("tau")!=0) continue; // nTracks/RNN score only for taus
@@ -1346,7 +1346,7 @@ StatusCode SUSYToolsAlg::bookHistograms(void) {
 
   // Trigger histograms
   for (std::string obj : {"el","mu","ph"}) {
-     for (auto trg : m_triggers[obj]) {
+     for (const auto& trg : m_triggers[obj]) {
         for (std::string var : {"pt","eta","phi"} ) {
            std::string key = "Trigger/"+obj+"_"+var+"_"+trg;
            std::string labels = ";"+labels_objects[obj]+" "+cfg_hist_labels[var][0]+";Efficiency "+trg;
@@ -1429,7 +1429,7 @@ void SUSYToolsAlg::groupSysts(void) {
 
 //====================================================================================================
 // Fill object histograms consistently for different selection levels / object types
-void SUSYToolsAlg::stdHistsForObj(xAOD::IParticle *obj, std::string objtype, std::string objlevel, std::map<std::string,std::string> config) {
+void SUSYToolsAlg::stdHistsForObj(xAOD::IParticle *obj, const std::string& objtype, const std::string& objlevel, std::map<std::string,std::string> config) {
    std::map<std::string,std::string> labels_dir = { {"el","Electron"}, {"ph","Photon"}, {"mu","Muon"}, {"jet","Jet"}, {"bjet","bJet"}, {"tau","Tau"}, {"fatjet","LargeRJet"}, {"trkjet","TrackJet"} };
    std::string dir = labels_dir[objtype]+"/";
 
@@ -1464,7 +1464,7 @@ void SUSYToolsAlg::stdHistsForObj(xAOD::IParticle *obj, std::string objtype, std
         bool istruthmatched = (bool)obj->auxdata<char>("IsTruthMatched");
         int pid(0),ppid(0);
         if (istruthmatched && obj->isAvailable<ElementLink<xAOD::TruthParticleContainer>>("truthParticleLink")) {
-           auto *tp = *(obj->auxdata<ElementLink<xAOD::TruthParticleContainer>>("truthParticleLink"));
+           const auto *tp = *(obj->auxdata<ElementLink<xAOD::TruthParticleContainer>>("truthParticleLink"));
            if (tp) {
              pid = tp->pdgId();
              ppid = (tp->nParents()>0)?tp->parent(0)->pdgId():0;
@@ -1499,7 +1499,7 @@ void SUSYToolsAlg::stdHistsForObj(xAOD::IParticle *obj, std::string objtype, std
 
 
 //====================================================================================================
-std::string findInReg(SG::AuxTypeRegistry& reg, xAOD::IParticle* obj, std::string searchkey) {
+std::string findInReg(SG::AuxTypeRegistry& reg, xAOD::IParticle* obj, const std::string& searchkey) {
    std::regex re_tag(searchkey);
    std::smatch matches;
    for (auto x : obj->getAuxIDs()) {
@@ -1513,7 +1513,7 @@ std::string findInReg(SG::AuxTypeRegistry& reg, xAOD::IParticle* obj, std::strin
 }
 
 //====================================================================================================
-int getSize(std::map<std::string,std::vector<std::string>> &collection, std::string object) {
+int getSize(std::map<std::string,std::vector<std::string>> &collection, const std::string& object) {
    if (collection.find(object) == collection.end()) return 1;
    return static_cast<int>(collection[object].size());
 }

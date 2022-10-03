@@ -152,12 +152,6 @@ IDPerfMonZmumu::IDPerfMonZmumu(const std::string& name,
   declareProperty("skipMS", m_skipMS = false);
   declareProperty("useCustomMuonSelector", m_useCustomMuonSelector = false );
   declareProperty("MuonSelector", m_muonSelector );
-
-
-  // initializing the eventInfo "accessor"
-  StatusCode test =  m_EventInfoKey.initialize() ;
-  return;
-
 }
 
 

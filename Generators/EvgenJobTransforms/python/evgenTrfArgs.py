@@ -75,7 +75,7 @@ def addStdEvgenArgs(parser):
 
     parser.add_argument("--outputYODAFile", group="Evgen",
                         help="Name of YODA file for Rivet histo output",
-                        type=trfArgClasses.argFactory(trfArgClasses.argFile, type='YODA', io='output', runarg=True))
+                        type=trfArgClasses.argFactory(trfArgClasses.argYODAFile, type='yoda', io='output', runarg=True))
 
     parser.add_argument("--rivetAnas", group="Evgen",
                         help="a comma-separated list of Rivet analyses to run on the resulting events",
