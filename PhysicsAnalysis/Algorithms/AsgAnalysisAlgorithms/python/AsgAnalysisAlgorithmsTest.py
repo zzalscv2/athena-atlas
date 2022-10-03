@@ -229,19 +229,15 @@ def pileupConfigFiles(dataType):
         lumicalcfiles = []
     else:
         lumicalcfiles = [
-            # These need to be updated for release 22 data
-            # "GoodRunsLists/data15_13TeV/20170619/PHYS_StandardGRL_All_Good_25ns_276262-284484_OflLumi-13TeV-008.root",
-            # "GoodRunsLists/data16_13TeV/20180129/PHYS_StandardGRL_All_Good_25ns_297730-311481_OflLumi-13TeV-009.root",
+            "GoodRunsLists/data15_13TeV/20170619/PHYS_StandardGRL_All_Good_25ns_276262-284484_OflLumi-13TeV-008.root",
+            "GoodRunsLists/data16_13TeV/20180129/PHYS_StandardGRL_All_Good_25ns_297730-311481_OflLumi-13TeV-009.root",
         ]
         if dataType == "mc":
             prwfiles = [
-                # These need to be updated for release 22 data and not
-                # be taken from cvmfs
-                #"/cvmfs/atlas.cern.ch/repo/sw/database/GroupData/dev/PileupReweighting/mc16_13TeV/pileup_mc16a_dsid410501_FS.root"
+                "PileupReweighting/mc20_common/mc20a.284500.physlite.prw.v1.root"
             ]
         else:
-            # We don't have a PRW file that works properly for the AFII file so we don't apply it in
-            # this case
+            # use fast sim case to test running without PRW
             prwfiles = []
     return prwfiles, lumicalcfiles
 

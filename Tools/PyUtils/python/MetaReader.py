@@ -381,7 +381,7 @@ def read_metadata(filenames, file_type = None, mode = 'lite', promote = None, me
                 meta_dict = make_peeker(meta_dict)
 
             if promote:
-                meta_dict = promote_keys(meta_dict)
+                meta_dict = promote_keys(meta_dict, mode)
 
             # If AnalysisBase the itemList must be grabbed another way
             if not isGaudiEnv():
@@ -919,11 +919,15 @@ def make_lite(meta_dict):
                         meta_dict[filename][key].pop(item)
 
         if '/TagInfo' in file_content:
-            keys_to_keep = ['beam_energy', 'beam_type', 'GeoAtlas', 'IOVDbGlobalTag', 'AODFixVersion', 'project_name']
+            keys_to_keep = ['beam_energy', 'beam_type', 'GeoAtlas', 'IOVDbGlobalTag', 'AODFixVersion', 'project_name', 'mc_campaign']
 
             for item in list(meta_dict[filename]['/TagInfo']):
                 if item not in keys_to_keep:
                     meta_dict[filename]['/TagInfo'].pop(item)
+
+            # default values:
+            if 'mc_campaign' not in meta_dict[filename]['/TagInfo']:
+                meta_dict[filename]['/TagInfo']['mc_campaign'] = ''
     return meta_dict
 
 
@@ -955,7 +959,8 @@ def make_peeker(meta_dict):
                 'project_name',
                 'triggerStreamOfFile',
                 'AtlasRelease',
-                'specialConfiguration'
+                'specialConfiguration',
+                'mc_campaign',
             ]
             for item in list(meta_dict[filename]['/TagInfo']):
                 if item not in keys_to_keep:
@@ -994,7 +999,7 @@ def make_peeker(meta_dict):
     return meta_dict
 
 
-def promote_keys(meta_dict):
+def promote_keys(meta_dict, mode):
     for filename, file_content in meta_dict.items():
         md = meta_dict[filename]
         for key in file_content:
@@ -1021,22 +1026,23 @@ def promote_keys(meta_dict):
                 break
 
             if not isGaudiEnv() and key in md['metadata_items'] and 'FileMetaData' in key:
-                md.update(md[key])
-
                 if 'beamType' in md[key]:
                     md['beam_type'] = md[key]['beamType']
 
                 if 'runNumbers' in md[key]:
-                    md['mc_event_number'] = md[key]['runNumbers'][0]
+                    md['runNumbers'] = md[key]['runNumbers']
 
                 if 'mcProcID' in md[key]:
                     md['mc_channel_number'] = int(md[key]['mcProcID'])
 
+                if 'mcCampaign' in md[key]:
+                    md['mc_campaign'] = md[key]['mcCampaign']
+
                 if 'lumiBlocks' in md[key]:
                     md['lumiBlockNumbers'] = md[key]['lumiBlocks']
                 
-                if 'amiTag' in md[key]:
-                    md['processingTags'] = md[key]['amiTag']
+                if mode == 'peeker' and 'amiTag' in md[key]:
+                    md['AMITag'] = md[key]['amiTag']
 
                 if 'beamEnergy' in md[key]:
                     md['beam_energy'] = md[key]['beamEnergy']
@@ -1046,6 +1052,9 @@ def promote_keys(meta_dict):
 
                 # EventType checks
                 md['eventTypes'] = []
+                if mode == 'peeker' and 'simFlavour' in md[key]:
+                    md['SimulationFlavour'] = md[key]['simFlavour']
+
                 if 'simFlavour' in md[key] and ('FullG4' in md[key]['simFlavour'] or 'ATLFAST' in md[key]['simFlavour']):
                     md['eventTypes'].append('IS_SIMULATION')
                 else:
@@ -1056,7 +1065,14 @@ def promote_keys(meta_dict):
                 else:
                   md['eventTypes'].append('IS_TESTBEAM')
 
-                meta_dict[filename].pop(key)
+                if 'dataType' in md[key]:
+                    md['processingTags'] = [md[key]['dataType']]
+
+                if mode == 'peeker' and 'productionRelease' in md[key]:
+                    md['AtlasRelease'] = md[key]['productionRelease']
+
+                if mode == 'lite':
+                    meta_dict[filename].pop(key)
                 break
 
         if '/TagInfo' in file_content:

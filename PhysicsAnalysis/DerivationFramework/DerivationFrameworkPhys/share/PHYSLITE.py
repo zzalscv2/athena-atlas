@@ -209,11 +209,15 @@ if DerivationFrameworkIsMonteCarlo:
   dataType = "mc"
 
 # Create a pile-up analysis sequence
-from AsgAnalysisAlgorithms.PileupAnalysisSequence import makePileupAnalysisSequence
-pileupSequence = makePileupAnalysisSequence( dataType )
-pileupSequence.configure( inputName = {}, outputName = {} )
-print( pileupSequence ) # For debugging
-SeqPHYSLITE += pileupSequence
+if DerivationFrameworkIsMonteCarlo:
+  from AsgAnalysisAlgorithms.PileupAnalysisSequence import makePileupAnalysisSequence
+  from RecExConfig.RecoFunctions import InputFileNames
+  from AthenaCommon.AthenaCommonFlags  import athenaCommonFlags
+  from Campaigns.Utils import Campaign
+  pileupSequence = makePileupAnalysisSequence( dataType, campaign=Campaign(athenaCommonFlags.MCCampaign()), files=InputFileNames(), useDefaultConfig=True )
+  pileupSequence.configure( inputName = {}, outputName = {} )
+  print( pileupSequence ) # For debugging
+  SeqPHYSLITE += pileupSequence
 
 # Include, and then set up the electron analysis sequence:
 from EgammaAnalysisAlgorithms.ElectronAnalysisSequence import  makeElectronAnalysisSequence
@@ -377,7 +381,7 @@ PHYSLITESlimmingHelper.ExtraVariables = [
   "MET_Core_AnalysisMET.name.mpx.mpy.sumet.source",
   "METAssoc_AnalysisMET.",
   "InDetTrackParticles.TTVA_AMVFVertices.TTVA_AMVFWeights.numberOfTRTHits.numberOfTRTOutliers",
-  "EventInfo.hardScatterVertexLink.RandomRunNumber",
+  "EventInfo.hardScatterVertexLink.RandomRunNumber.PileupWeight_NOSYS",
   "Kt4EMPFlowEventShape.Density",
   "TauTracks.pt.eta.phi.flagSet.trackLinks",
   ]

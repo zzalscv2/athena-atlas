@@ -348,6 +348,12 @@ class MCChannelNumber(JobProperty):
     allowedTypes=['int']
     StoredValue = 0
 
+class MCCampaign(JobProperty):
+    """MC campaign"""
+    statusOn=True
+    allowedTypes=['str']
+    StoredValue = ''
+
 ##-----------------------------------------------------------------------------
 ## 2nd step
 ## Definition of the AthenaCommon flag container
@@ -392,6 +398,7 @@ jobproperties.AthenaCommonFlags.add_JobProperty(isOnlineStateless)
 jobproperties.AthenaCommonFlags.add_JobProperty(RuntimeStrictness)
 jobproperties.AthenaCommonFlags.add_JobProperty(DoFullChain)
 jobproperties.AthenaCommonFlags.add_JobProperty(MCChannelNumber)
+jobproperties.AthenaCommonFlags.add_JobProperty(MCCampaign)
 
 ##-----------------------------------------------------------------------------
 ## 5th step
