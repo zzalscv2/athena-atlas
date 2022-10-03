@@ -1,6 +1,6 @@
 // Dear emacs, this is -*- c++ -*-
 //
-// Copyright (C) 2002-2019 CERN for the benefit of the ATLAS collaboration
+// Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
 //
 #ifndef ASGANALYSISALGORITHMS_ASGXAODNTUPLEMAKERALG_H
 #define ASGANALYSISALGORITHMS_ASGXAODNTUPLEMAKERALG_H
@@ -16,6 +16,7 @@
 #include "AsgMessaging/AsgMessaging.h"
 #include "AsgServices/ServiceHandle.h"
 #include "AnaAlgorithm/AnaAlgorithm.h"
+#include "CxxUtils/checker_macros.h"
 #include "SystematicsHandles/SysListHandle.h"
 
 // EDM include(s):
@@ -54,7 +55,7 @@ namespace CP {
    ///
    /// @author Attila Krasznahorkay <Attila.Krasznahorkay@cern.ch>
    ///
-   class AsgxAODNTupleMakerAlg : public EL::AnaAlgorithm {
+   class ATLAS_NOT_THREAD_SAFE AsgxAODNTupleMakerAlg : public EL::AnaAlgorithm {
 
    public:
       /// Algorithm constructor
@@ -230,7 +231,7 @@ namespace CP {
       /// type, and writes individual variables from the elements of the
       /// container using the same machinery that @c ElementProcessor employs.
       ///
-      class ContainerProcessor : public asg::AsgMessaging {
+      class ATLAS_NOT_THREAD_SAFE ContainerProcessor : public asg::AsgMessaging {
 
       public:
          /// Default constructor

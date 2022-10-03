@@ -109,10 +109,10 @@ namespace {
    /// @param msg Reference to the caller's @c MsgStream object
    /// @return A pointer to the container if successful, @c nullptr if not
    ///
-   const SG::AuxVectorBase* getVector( const std::string& key,
-                                       IProxyDict& evtStore,
-                                       bool allowMissing,
-                                       MsgStream& msg ) {
+   const SG::AuxVectorBase* getVector ATLAS_NOT_CONST_THREAD_SAFE ( const std::string& key,
+                                                                    IProxyDict& evtStore,
+                                                                    bool allowMissing,
+                                                                    MsgStream& msg ) {
 
       // Find all proxies with this key:
       auto proxies = evtStore.proxies();
@@ -174,10 +174,10 @@ namespace {
    /// @param msg Reference to the caller's @c MsgStream object
    /// @return A pointer to the container if successful, @c nullptr if not
    ///
-   const SG::AuxElement* getElement( const std::string& key,
-                                     IProxyDict& evtStore,
-                                     bool allowMissing,
-                                     MsgStream& msg ) {
+   const SG::AuxElement* getElement ATLAS_NOT_CONST_THREAD_SAFE ( const std::string& key,
+                                                                  IProxyDict& evtStore,
+                                                                  bool allowMissing,
+                                                                  MsgStream& msg ) {
 
       // Find all proxies with this key:
       auto proxies = evtStore.proxies();
@@ -812,7 +812,7 @@ namespace CP {
 
          // Get the offset that one needs to use to get from the element
          // pointers to SG::AuxElement pointers.
-         static const TClass* auxElementClass =
+         static const TClass* const auxElementClass =
             TClass::GetClass( typeid( SG::AuxElement ) );
          m_auxElementOffset =
             m_collProxy->GetValueClass()->GetBaseClassOffset( auxElementClass );
