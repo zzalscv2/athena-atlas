@@ -155,7 +155,7 @@ eReq = '( Electrons.pt > 10.0*GeV && abs(Electrons.eta) < 2.5 && Electrons.DFCom
 muReq = '( Muons.pt > 10.0*GeV && abs(Muons.eta) < 2.5 && Muons.DFCommonMuonsPreselection )' 
 trigger_ph = '(HLT_g140_loose || HLT_g300_etcut || HLT_2g50_loose_L12EM20VH || HLT_2g25_loose_g15_loose || HLT_g35_medium_g25_medium_L12EM20VH || HLT_2g25_tight_L12EM20VH || HLT_2g22_tight_L12EM15VHI || HLT_g35_loose_g25_loose || HLT_g35_medium_g25_medium || HLT_2g50_loose || HLT_2g20_tight || HLT_2g22_tight || HLT_2g20_tight_icalovloose_L12EM15VHI || HLT_2g20_tight_icalotight_L12EM15VHI || HLT_2g22_tight_L12EM15VHI || HLT_2g22_tight_icalovloose_L12EM15VHI || HLT_2g22_tight_icalotight_L12EM15VHI || HLT_2g22_tight_icalovloose || HLT_2g25_tight_L12EM20VH || HLT_2g20_loose || HLT_2g20_loose_L12EM15 || HLT_g35_medium_g25_medium || HLT_g35_medium_g25_medium_L12EM15VH || HLT_g35_loose_g25_loose || HLT_g35_loose_g25_loose_L12EM15VH || HLT_2g20_loose_g15_loose || HLT_3g20_loose || HLT_3g15_loose || HLT_2g6_tight_icalotight_L1J100 || HLT_2g6_loose_L1J100 || HLT_2g6_tight_icalotight_L1J50 || HLT_2g6_loose_L1J50 || HLT_g120_loose || HLT_g140_loose)' #single photon and di-photon
 noLep = '( (count('+eReq+') == 0) && (count('+muReq+') == 0) )' #Lepton veto (tight elec, loose mu)
-ditau = '(count( (DiTauJetsLowPt.pt > 50.0*GeV) && (DiTauJetsLowPt.nSubjets > 1) && (DiTauJetsLowPt.LSLMass >= 10000) && (DiTauJetsLowPt.LSLMass <= 130000) ) >= 1)'
+ditau = '(count( (DiTauJetsLowPt.pt > 50.0*GeV) && (DiTauJetsLowPt.nSubjets > 1) ) >= 1)'
 skim_expression = gReq + "&&" + noLep + "&&" + trigger_ph + "&&" + ditau 
 # # Keep photon triggers only
 # skim_expression = trigger_ph
