@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2018 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
 */
 #ifndef TRIGOUTPUTHANDLING_HLTEDMCREATOR_H
 #define TRIGOUTPUTHANDLING_HLTEDMCREATOR_H 1
@@ -251,6 +251,14 @@ class HLTEDMCreator: public extends<AthAlgTool, IHLTOutputTool>  {
    **/
   template<typename T>
   StatusCode initHandles( const HandlesGroup<T>&  handles );
+
+  /**
+   * Register AuxStore keys for the given keys
+   *
+   * This is required to avoid hash collisions (ATR-26386).
+   */
+  template<typename T>
+  StatusCode initAuxKey( const std::vector<SG::VarHandleKey*>& keys );
 
   template<typename T>
   struct ConstHandlesGroup {
