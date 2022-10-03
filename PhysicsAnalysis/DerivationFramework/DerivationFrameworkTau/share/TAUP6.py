@@ -22,7 +22,8 @@ saveCalo = True      ##  whether to save relevant "CaloCalTopoClusters"
 
 saveEleBDT = True   ##  whether to provide score of EleBDT for downstream usage
 
-doComparison = DerivationFrameworkHasTruth   ### whether to store original/conventional TauJets from AOD to dAOD
+doComparison = True   ## whether to store original/conventional TauJets from AOD to dAOD
+##  by default the Comparison is not necessary for real data 
 
 outputKey = 'MuRmTauJets'
 TracksKey = 'MuRmTauTracks'
@@ -333,6 +334,8 @@ FlavorTagInit( JetCollections = [ 'AntiKt4EMPFlowJets', 'AntiKt4EMTopoJets' ], S
 augTools = []
 if not globalflags.DataSource()=='data' :
 
+    from DerivationFrameworkCore.LHE3WeightMetadata import *
+
     MuRmTauConfig.addParticleTruth( DerivationFrameworkJob, doComparison, augTools )  
 
 #    chLep = " ( abs(TruthParticles.pdgId) == 13 || abs(TruthParticles.pdgId) == 15 )"
@@ -427,6 +430,7 @@ if saveCalo :
     TAUP6SlimmingHelper.ExtraVariables          += ExtraContentCaloClusters
 
 if DerivationFrameworkHasTruth:
+
     TAUP6SlimmingHelper.StaticContent +=  [ "xAOD::TruthParticleContainer#TruthMuons",
                                             "xAOD::TruthParticleAuxContainer#TruthMuonsAux.",
                                             "xAOD::TruthParticleContainer#TruthElectrons",
