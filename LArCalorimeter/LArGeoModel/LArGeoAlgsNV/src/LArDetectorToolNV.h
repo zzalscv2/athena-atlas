@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
 */
 
 /**
@@ -14,6 +14,7 @@
 
 #include "GeoModelUtilities/GeoModelTool.h"
 #include "AthenaKernel/IOVSvcDefs.h"
+#include "CxxUtils/checker_macros.h"
 
 #include "LArGeoCode/LArAlignHelper.h"
 
@@ -43,7 +44,7 @@ class LArDetectorToolNV final : public GeoModelTool {
   virtual StatusCode clear() override;
   
   // Register callback function on ConDB object
-  virtual StatusCode registerCallback() override;
+  virtual StatusCode registerCallback ATLAS_NOT_THREAD_SAFE () override;
   
   // Callback function itself
   virtual StatusCode align(IOVSVC_CALLBACK_ARGS) override;

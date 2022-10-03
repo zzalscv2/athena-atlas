@@ -240,7 +240,7 @@ StatusCode LArDetectorToolNV::clear()
   return StatusCode::SUCCESS;
 }
 
-StatusCode LArDetectorToolNV::registerCallback()
+StatusCode LArDetectorToolNV::registerCallback ATLAS_NOT_THREAD_SAFE ()
 {
   // Return FAILURE if no callbacks have been registered
   if(!m_applyAlignments) {
