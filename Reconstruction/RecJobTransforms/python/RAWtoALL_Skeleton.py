@@ -124,6 +124,9 @@ def fromRunArgs(runArgs):
     timeConfig = time.time()
     log.info("configured in %d seconds", timeConfig - timeStart)
 
+    # Print sum information about AccumulatorCache performance
+    from AthenaConfiguration.AccumulatorCache import AccumulatorDecorator
+    AccumulatorDecorator.printStats() 
 
     # Run the final accumulator
     sc = cfg.run()
