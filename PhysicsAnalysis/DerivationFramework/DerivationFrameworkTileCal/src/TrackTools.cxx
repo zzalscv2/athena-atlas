@@ -12,6 +12,8 @@
  */
 #include "TrackTools.h"
 #include "CaloIdentifier/TileID.h"
+#include "TileDetDescr/TileCellDim.h"
+#include "TileDetDescr/TileDetDescrManager.h"
 #include "GeoPrimitives/GeoPrimitives.h"
 #include "TrkParametersIdentificationHelpers/TrackParametersIdHelper.h"
 
@@ -32,6 +34,9 @@ StatusCode TrackTools::initialize(){
   ATH_CHECK(m_caloExtensionTool.retrieve());
 
   ATH_CHECK( detStore()->retrieve(m_tileID) );
+
+  //=== TileDetDescrManager
+  ATH_CHECK( detStore()->retrieve(m_tileMgr) );
 
   return StatusCode::SUCCESS;
 } // TrackTools::initialize
@@ -317,7 +322,6 @@ double TrackTools::getPath(const CaloCell* cell, const Trk::TrackParameters *ent
     double cellDPhi = cell->caloDDE()->dphi();
     double cellPhimin = cellPhi - cellDPhi / 2.;
     double cellPhimax = cellPhi + cellDPhi / 2.;
-    double cellEta = cell->caloDDE()->eta();
     double cellZ = cell->caloDDE()->z();
     double cellDZ = cell->caloDDE()->dz();
     double cellZmin = cellZ - cellDZ / 2.;
@@ -327,257 +331,31 @@ double TrackTools::getPath(const CaloCell* cell, const Trk::TrackParameters *ent
     double cellRmin = cellR - cellDR / 2.;
     double cellRmax = cellR + cellDR / 2.;
 
-    // TILECAL GEOMETRY
-    double rLBAmin = 2300;
-    double rLBAmax = 2600;
-    double rLBBmin = 2600;
-    double rLBBmax = 2990;
-    double rLBCmin = 2990;
-    double rLBCmax = 3440;
-    double rLBDmin = 3440;
-    double rLBDmax = 3820;
-
-    double rEBAmin = 2300;
-    double rEBAmax = 2600;
-    double rEBBmin = 2600;
-    double rEBBmax = 3140;
-    double rEBDmin = 3140;
-    double rEBDmax = 3820;
-
-    double rITC_D4_min  = 3630 - 380. / 2.;
-    double rITC_C10_min = 3215 - 450. / 2.;
-    double rITC_E1_min  = 2803 - 313. / 2.;
-    double rITC_E2_min  = 2476 - 341. / 2.;
-    double rITC_E3_min  = 2066 - 478. / 2.;
-    double rITC_E4_min  = 1646 - 362. / 2.;
-
-    double rITC_D4_max  = 3630 + 380. / 2.;
-    double rITC_C10_max = 3215 + 450. / 2.;
-    double rITC_E1_max  = 2803 + 313. / 2.;
-    double rITC_E2_max  = 2476 + 341. / 2.;
-    double rITC_E3_max  = 2066 + 478. / 2.;
-    double rITC_E4_max  = 1646 + 362. / 2.;
-
-    double zLBmin = -2802.5439;
-    double zLBmax = 2802.5454;
-    double zEBAmin = 3574.4978;
-    double zEBAmax = 6130.0039;
-    double zEBCmin = -6120.0018;
-    double zEBCmax = -3564.5006;
-
-    double zITC_D4_a  = 3405;
-    double zITC_C10_a = 3511;
-    double zITC_E1_a  = 3552;
-    //     double zITC_E2_a  = 3552;
-    double zITC_E3_a  = 3536;
-    //     double zITC_E4_a  = 3536;
-
-    double zITC_D4_c  = 3395;
-    double zITC_C10_c = 3501;
-    double zITC_E1_c  = 3542;
-    //     double zITC_E2_c  = 3542;
-    double zITC_E3_c  = 3526;
-    //     double zITC_E4_c  = 3526;
-
-    double zDITC_D4  = 309.;
-    double zDITC_C10 = 95.;
-    double zDITC_E1  = 12.;
-    //     double zDITC_E2  = 12.;
-    double zDITC_E3  = 6.;
-    //     double zDITC_E4  = 6.;
-
-    double cellZB[9]  = {141.495, 424.49, 707.485, 999.605, 1300.855, 1615.8, 1949., 2300.46, 2651.52};
-    double cellDZB[9] = {282.99, 283., 282.99, 301.25, 301.25, 328.64, 337.76, 365.16, 336.96};
-    double cellZC[9]  = {159.755, 483.83, 812.465, 1150.23, 1497.125, 1857.71, 2241.12, 2628.695,0};
-    double cellDZC[9] = {319.51, 328.64, 328.63, 346.9, 346.89, 374.28, 392.54, 382.61,0};
-
     double cellXimp[2], cellYimp[2], cellZimp[2];
-    //     double Sxz(0), Syz(0), Sxy(0);
     double x(0), y(0), z(0), r(0), phi(0);
     double deltaPhi;
-
-    int etaInd(-1);
-
-    float samplecellmap[81] = {
-        12, 12, 12, 12, 12, 12, 12, 12, 12, 12,
-        13, 13, 13, 13, 13, 13, 13, 13, 13,
-        14, 14, 14, 14,
-        16, 15, 17, 17, 17, 17,            //** ITC
-        18, 18, 18, 18, 18,
-        19, 19, 19, 19, 19,
-        20, 20,
-        12, 12, 12, 12, 12, 12, 12, 12, 12, 12,
-        13, 13, 13, 13, 13, 13, 13, 13, 13,
-        14, 14, 14,
-        16, 15, 17, 17, 17, 17,            //** ITC
-        18, 18, 18, 18, 18,
-        19, 19, 19, 19, 19,
-        20, 20
-    };
-    float etacellmap[81] = { 0.05,0.15,0.25,0.35,0.45,0.55,0.65,0.75,0.85,0.95,
-        0.05,0.15,0.25,0.35,0.45,0.55,0.65,0.75,0.85,
-        0.0, 0.2,0.4,0.6,
-        0.8579205,0.9583722,1.0589020,1.1593041,1.3098471,1.5103633,
-        1.1594202,1.2586680,1.3579534,1.4572804,1.556651,
-        1.0586925,1.1580252,1.2573844,1.3567756,1.4562022,
-        1.0074122,1.2063241,
-        -0.05,-0.15,-0.25,-0.35,-0.45,-0.55,-0.65,-0.75,-0.85,-0.95,
-        -0.05,-0.15,-0.25,-0.35,-0.45,-0.55,-0.65,-0.75,-0.85,
-        -0.2,-0.4,-0.6,
-        -0.855940, -0.956279, -1.056676, -1.156978,-1.307385,-1.507772,
-        -1.157065,-1.256501,-1.355965,-1.455460,-1.554988,
-        -1.056519,-1.156018,-1.255538,-1.355081,-1.454651,
-        -1.005559,-1.204743
-    };
-
-    for(int i = 0; i < 81; ++i){
-        if(sampleID == samplecellmap[i] && std::abs(cellEta - etacellmap[i]) < 0.001) etaInd = i;
-    } // FOR
 
     // COMPUTE PATH
     bool compute = true;
     int lBC(0);
     while(compute){
-        if(lBC == 1 && (etaInd == 18 || etaInd == 59) ) break;
+        if ((sampleID == 13) && (m_tileID->tower(cell->ID()) == 8)) break; // B9
         int np = 0;
         if(std::sqrt((layer1X - layer2X) * (layer1X - layer2X) + (layer1Y - layer2Y) * (layer1Y - layer2Y)) < 3818.5){
-            if(sampleID == 15){
-                cellRmin = rITC_C10_min;
-                cellRmax = rITC_C10_max;
-                if(cellEta > 0){
-                    if(cellZmin < zITC_C10_a - zDITC_C10 / 2.) cellZmin = zITC_C10_a - zDITC_C10 / 2.;
-                    if(cellZmax > zITC_C10_a + zDITC_C10 / 2.) cellZmax = zITC_C10_a + zDITC_C10 / 2.;
-                } // IF
-                else if(cellEta < 0){
-                    if(cellZmin < -zITC_C10_c - zDITC_C10 / 2.) cellZmin = -zITC_C10_c - zDITC_C10 / 2.;
-                    if(cellZmax > -zITC_C10_c + zDITC_C10 / 2.) cellZmax = -zITC_C10_c + zDITC_C10 / 2.;
-                } // ELSE IF
-            } // IF
-            else if(sampleID == 16){
-                cellRmin = rITC_D4_min;
-                cellRmax = rITC_D4_max;
-                if(cellEta > 0){
-                    if(cellZmin < zITC_D4_a - zDITC_D4 / 2.) cellZmin = zITC_D4_a - zDITC_D4 / 2.;
-                    if(cellZmax > zITC_D4_a + zDITC_D4 / 2.) cellZmax = zITC_D4_a + zDITC_D4 / 2.;
-                } // IF
-                else if(cellEta < 0){
-                    if(cellZmin < -zITC_D4_c - zDITC_D4 / 2.) cellZmin = -zITC_D4_c - zDITC_D4 / 2.;
-                    if(cellZmax > -zITC_D4_c + zDITC_D4 / 2.) cellZmax = -zITC_D4_c + zDITC_D4 / 2.;
-                } // ELSE IF
-            } // ELSE IF
-            else if(sampleID == 17){
-                if( etaInd == 25 || etaInd == 65 ){
-                    cellRmax = rITC_E1_max;
-                    cellRmin = rITC_E1_min;
-                } // IF
-                else if( etaInd == 26 || etaInd == 66 ){
-                    cellRmax = rITC_E2_max;
-                    cellRmin = rITC_E2_min;
-                } // ELSE IF
-                else if( etaInd == 27 || etaInd == 67 ){
-                    cellRmax = rITC_E3_max;
-                    cellRmin = rITC_E3_min;
-                } // ELSE IF
-                else if( etaInd == 28 || etaInd == 68 ){
-                    cellRmax = rITC_E4_max;
-                    cellRmin = rITC_E4_min;
-                } // ELSE IF
-                if( (etaInd>=25 && etaInd<=26) || (etaInd>=65 && etaInd<=66) ){
-                    if(cellEta > 0){
-                        if(cellZmin < zITC_E1_a - zDITC_E1/2.) cellZmin = zITC_E1_a - zDITC_E1 / 2.;
-                        if(cellZmax > zITC_E1_a + zDITC_E1/2.) cellZmax = zITC_E1_a + zDITC_E1 / 2.;
-                    } // IF
-                    else if(cellEta < 0){
-                        if(cellZmin < -zITC_E1_c-zDITC_E1 / 2.) cellZmin = -zITC_E1_c-zDITC_E1 / 2.;
-                        if(cellZmax > -zITC_E1_c+zDITC_E1 / 2.) cellZmax = -zITC_E1_c+zDITC_E1 / 2.;
-                    } // ELSE
-                } // IF
-                else if( (etaInd>=27 && etaInd<=28) || (etaInd>=67 && etaInd<=68) ){
-                    if(cellEta > 0){
-                        if(cellZmin < zITC_E3_a - zDITC_E3 / 2.) cellZmin = zITC_E3_a - zDITC_E3 / 2.;
-                        if(cellZmax > zITC_E3_a + zDITC_E3 / 2.) cellZmax = zITC_E3_a + zDITC_E3 / 2.;
-                    } // IF
-                    else if(cellEta < 0){
-                        if(cellZmin < -zITC_E3_c - zDITC_E3 / 2.) cellZmin = -zITC_E3_c - zDITC_E3 / 2.;
-                        if(cellZmax > -zITC_E3_c + zDITC_E3 / 2.) cellZmax = -zITC_E3_c + zDITC_E3 / 2.;
-                    } // ELSE IF
-                } // ELSE
-            } // ELSE IF
-            else if(sampleID == 12){
-                cellRmin = rLBAmin;
-                cellRmax = rLBAmax;
-
-                if(cellZmin < zLBmin) cellZmin = zLBmin;
-                if(cellZmax > zLBmax) cellZmax = zLBmax;
-            } // ELSE IF
-            else if(sampleID == 13 && lBC == 0){
-                cellRmin = rLBBmin;
-                cellRmax = rLBBmax;
-                int cpos = std::abs(cellEta) / 0.1;
-                cellZ = cellZB[cpos];
-                if(cellEta < 0) cellZ = -cellZ;
-                cellDZ = cellDZB[cpos];
-                cellZmin = cellZ - cellDZ/2;
-                cellZmax = cellZ + cellDZ/2;
-                if(cellZmin < zLBmin) cellZmin = zLBmin;
-                if(cellZmax > zLBmax) cellZmax = zLBmax;
-            } // ELSE IF
-            else if(sampleID == 13 && lBC == 1){
-                cellRmin = rLBCmin;
-                cellRmax = rLBCmax;
-                int cpos = std::abs(cellEta)/0.1;
-                if(cpos >= 8) return 0;
-                cellZ = cellZC[cpos];
-                if(cellEta < 0) cellZ = -cellZ;
-                cellDZ = cellDZC[cpos];
-                cellZmin = cellZ - cellDZ / 2;
-                cellZmax = cellZ + cellDZ / 2;
-                if(cellZmin < zLBmin) cellZmin = zLBmin;
-                if(cellZmax > zLBmax) cellZmax = zLBmax;
-            } // ELSE IF
-            else if(sampleID == 14){
-                cellRmin = rLBDmin;
-                cellRmax = rLBDmax;
-                if(cellZmin < zLBmin) cellZmin = zLBmin;
-                if(cellZmax > zLBmax) cellZmax = zLBmax;
-            } // ELSE IF
-            if(sampleID == 18){
-                cellRmin = rEBAmin;
-                cellRmax = rEBAmax;
-                if(cellEta > 0){
-                    if(cellZmin < zEBAmin) cellZmin = zEBAmin;
-                    if(cellZmax > zEBAmax) cellZmax = zEBAmax;
-                } // IF
-                else if(cellEta < 0){
-                    if(cellZmin < zEBCmin) cellZmin = zEBCmin;
-                    if(cellZmax > zEBCmax) cellZmax = zEBCmax;
-                } // IF
-            } // IF
-            if(sampleID == 19){
-                cellRmin = rEBBmin;
-                cellRmax = rEBBmax;
-                if(cellEta > 0){
-                    if(cellZmin < zEBAmin) cellZmin = zEBAmin;
-                    if(cellZmax > zEBAmax) cellZmax = zEBAmax;
-                } // IF
-                else if(cellEta < 0){
-                    if(cellZmin < zEBCmin) cellZmin = zEBCmin;
-                    if(cellZmax > zEBCmax) cellZmax = zEBCmax;
-                } // ELSE IF
-            } // IF
-            if(sampleID == 20){
-                cellRmin = rEBDmin;
-                cellRmax = rEBDmax;
-                if(cellEta > 0){
-                    if(cellZmin < zEBAmin) cellZmin = zEBAmin;
-                    if(cellZmax > zEBAmax) cellZmax = zEBAmax;
-                } // IF
-                else if(cellEta < 0){
-                    if(cellZmin < zEBCmin) cellZmin = zEBCmin;
-                    if(cellZmax > zEBCmax) cellZmax = zEBCmax;
-                } // ELSE IF
-            } // IF
-
+            if(sampleID == 13){
+                TileCellDim* cellDim = m_tileMgr->get_cell_dim(cell->ID());
+                if(lBC == 0){
+                  cellRmin = cellDim->getRMin(TILE_RAW_FIRST);
+                  cellRmax = cellDim->getRMax(TILE_RAW_THIRD);
+                  cellZmin = cellDim->getZMin(TILE_RAW_SECOND);
+                  cellZmax = cellDim->getZMax(TILE_RAW_SECOND);
+                } else if(lBC == 1){
+                  cellRmin = cellDim->getRMin(TILE_RAW_FOURTH);
+                  cellRmax = cellDim->getRMax(TILE_RAW_SIXTH);
+                  cellZmin = cellDim->getZMin(TILE_RAW_FIFTH);
+                  cellZmax = cellDim->getZMax(TILE_RAW_FIFTH);
+                }
+            }
             // CALCULATE POINTS OF INTERSECTION
             // INTERSECTIONS R PLANES
             double radius(cellRmin);
