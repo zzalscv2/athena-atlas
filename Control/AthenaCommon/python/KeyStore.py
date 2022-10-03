@@ -203,7 +203,7 @@ class CfgItemList( object ):
             if c._name == attr:
                 self._children.remove( c )
 
-    def __nonzero__(self):
+    def __bool__(self):
         return True
 
     def removeItem( self, item ):

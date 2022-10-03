@@ -375,9 +375,6 @@ class Configurable(metaclass=ConfigurableMeta.ConfigurableMeta ):
       except (AttributeError,KeyError):
          pass
 
-   def __nonzero__(self):
-      return True
-
    def remove( self, items ):
       if type(items) != list and type(items) != tuple:
          items = [ items ]

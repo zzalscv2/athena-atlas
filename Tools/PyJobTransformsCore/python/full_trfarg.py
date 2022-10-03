@@ -393,8 +393,8 @@ class JobOptionsArg(StringArg):
         self._exeEnv = {} # copy of python environment after last execution of joboptions
         StringArg.__init__(self,help,name)
 
-    def __nonzero__(self):
-        return Argument.__nonzero__(self) and  len(self.value()) > 0
+    def __bool__(self):
+        return Argument.__bool__(self) and  len(self.value()) > 0
 
     def isFullArgument(self):
         return True
