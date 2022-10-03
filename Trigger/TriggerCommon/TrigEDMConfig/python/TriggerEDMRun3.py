@@ -422,11 +422,8 @@ TriggerHLTListRun3 = [
     ('xAOD::TrigCompositeAuxContainer#L1TopoErrorFlags_LegacyAux.'+L1TopoErrorFlagVars, 'BS ESD AODFULL', 'L1'),
 
     #L1 mistime monitoring
-    ('xAOD::TrigCompositeContainer#HLT_TrigCompositeMistimeJ400', 'BS AODFULL', 'L1'),
-    ('xAOD::TrigCompositeContainer#HLT_TrigCompositeMistimeJ400.pass', 'BS AODFULL', 'L1'),
-    ('xAOD::TrigCompositeContainer#HLT_TrigCompositeMistimeJ400.other_type', 'BS AODFULL', 'L1'),
-    ('xAOD::TrigCompositeContainer#HLT_TrigCompositeMistimeJ400.beforeafterflag', 'BS AODFULL', 'L1'),
-    ('xAOD::TrigCompositeContainer#HLT_TrigCompositeMistimeJ400.l1a_type', 'BS AODFULL', 'L1'),
+    ('xAOD::TrigCompositeContainer#HLT_TrigCompositeMistimeJ400', 'BS ESD AODFULL', 'L1'),
+    ('xAOD::TrigCompositeAuxContainer#HLT_TrigCompositeMistimeJ400Aux.pass.other_type.beforeafterflag.l1a_type', 'BS ESD AODFULL', 'L1'),
 
     # LArPS
     ('xAOD::TrigEMClusterContainer#HLT_LArPS_AllCaloEMClusters',           'BS ESD AODCOMM', 'Egamma', 'inViews:LArPS_AllEM_Views'),

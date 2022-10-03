@@ -37,24 +37,6 @@ def getFlavourTagging( inputJets, inputVertex, inputTracks, BTagName,
 
     #Run new Run3 taggers, i.e. DL1, RNNIP, DL1r
     nnList = [
-        # r21 offline b-tagging NNs
-        'BTagging/201903/rnnip/antikt4empflow/network.json',
-        'BTagging/201903/dl1r/antikt4empflow/network.json',
-        'BTagging/201903/dl1/antikt4empflow/network.json',
-
-        # The following were the best offline R22 taggers according to
-        #
-        # https://ftag-docs.docs.cern.ch/algorithms/available_taggers/
-        #
-        # loose track selection, trained on r21
-        'BTagging/20210517/dipsLoose/antikt4empflow/network.json',
-        # IP3D track selection, trained on r21
-        'BTagging/20210517/dips/antikt4empflow/network.json',
-        # DL1d, uses "loose" dips above
-        'BTagging/20210519r22/dl1d/antikt4empflow/network.json',
-        # DL1d, uses IP3D dips above
-        'BTagging/20210528r22/dl1d/antikt4empflow/network.json',
-
 
         # These are trigger-specific trainings
         #

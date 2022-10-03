@@ -2,6 +2,7 @@
    Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
 */
 #include "BJetThreeValueCheck.h"
+#include "safeLogRatio.h"
 #include "AthenaMonitoringKernel/Monitored.h"
 
 BJetThreeValueCheck::BJetThreeValueCheck(
@@ -36,9 +37,7 @@ bool BJetThreeValueCheck::passThreshold(const SG::AuxElement& btag) const
   float c = m_acc->c(btag);
   float u = m_acc->u(btag);
   float f = m_cFraction;
-  float denom = f*c + (1-f)*u;
-  float ratio = (denom == 0 ? INFINITY : b / denom);
-  float llr = (ratio == 0 ? -INFINITY : std::log( ratio ));
+  float llr = safeLogRatio(b, f*c + (1-f)*u);
   Monitored::Group(m_monTool, Monitored::Scalar(m_llrName, llr));
   return llr > m_threshold;
 }

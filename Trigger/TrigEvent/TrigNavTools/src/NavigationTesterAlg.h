@@ -20,10 +20,10 @@ namespace Trig {
         StatusCode execute() override;
 
     private:
-        ToolHandle<Trig::IIParticleRetrievalTool> m_tool1{
-            this, "RetrievalTool1", "", "The first retrieval tool to test"};
-        ToolHandle<Trig::IIParticleRetrievalTool> m_tool2{
-            this, "RetrievalTool2", "", "The second retrieval tool to test"};
+        ToolHandle<Trig::IIParticleRetrievalTool> m_toolRun2{
+            this, "RetrievalToolRun2Nav", "", "The tool configured to use Run 2 format"};
+        ToolHandle<Trig::IIParticleRetrievalTool> m_toolRun3{
+            this, "RetrievalToolRun3Nav", "", "The tool configured for fetching RUn 3 format"};
         Gaudi::Property<std::vector<std::string>> m_chains{
             this, "Chains", {}, "The chains to test"};
         Gaudi::Property<bool> m_failOnDifference{

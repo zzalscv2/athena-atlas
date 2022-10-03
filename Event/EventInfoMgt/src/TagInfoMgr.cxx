@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
 */
 
 /**
@@ -7,7 +7,7 @@
  *
  * @brief implementation
  *
- * @author RD Schaffer <R.D.Schaffer@cern.ch>
+ * @author RD Schaffer <R.D.Schaffer@cern.ch>, M.Nowak
  */
 
 //<<<<<< INCLUDES                                                       >>>>>>
@@ -38,12 +38,8 @@
 #include "GaudiKernel/GaudiException.h"
 
 
-const std::string IOVCbkObjKey( "TagInfoMgrIOVCBKKey" );
-
-
 // Constructor with parameters:
-TagInfoMgr::TagInfoMgr(const std::string &name, 
-                       ISvcLocator *pSvcLocator) :
+TagInfoMgr::TagInfoMgr(const std::string &name, ISvcLocator *pSvcLocator) :
     AthService(name, pSvcLocator)
 {}
 
@@ -56,7 +52,6 @@ StatusCode
 TagInfoMgr::queryInterface( const InterfaceID& riid, void** ppvInterface ) 
 {
     if ( ITagInfoMgr::interfaceID().versionMatch(riid) ) {
-        ATH_MSG_DEBUG("matched ITagInfoMgr");
         *ppvInterface = (ITagInfoMgr*)this;
     }
     else {
@@ -90,8 +85,8 @@ StatusCode TagInfoMgr::initialize()
     incSvc->addListener( this, "BeginRun", 100);
 
     // Add BeginInputFile to trigger refilling meta data store after a new input file - priority has
-    // to be < 50 to be run after IOVDbMetaDataTool (triggered by MetaDataSvc), which has mergeing
-    // into the output file medat data the input meta data of the new file.
+    // to be < 50 to be run after IOVDbMetaDataTool (triggered by MetaDataSvc), which is merging
+    // the input meta data from the new file into the output file metadata.
     incSvc->addListener(this, "BeginInputFile", 50); // 
 
     return StatusCode::SUCCESS;
@@ -101,31 +96,16 @@ StatusCode TagInfoMgr::initialize()
 StatusCode TagInfoMgr::start()
 {
     ATH_MSG_DEBUG( "start()");
-
-    // Register callback to CondAttrListCollection object containing
-    // the TagInfo information - only if it exists, i.e. in the file
-    // meta data
-    if (m_detStore->contains<CondAttrListCollection>("/TagInfo")) { 
-        const DataHandle<CondAttrListCollection> tagInfoH;
-        if (m_detStore->regFcn(&TagInfoMgr::checkTagInfo, this,
-                               tagInfoH, "/TagInfo").isSuccess()) {
-          ATH_MSG_DEBUG( "Registered checkTagInfo callback for  /TagInfo ");
-        }
-        else {
-          ATH_MSG_DEBUG("Cannot register checkTagInfo function for /TagInfo ");
-        }
-    }
-    
     return StatusCode::SUCCESS;
 }
 
 // Finalize method:
 StatusCode TagInfoMgr::finalize() 
 {
-  // Get the messaging service, print where you are
   ATH_MSG_DEBUG( "finalize()");
   return StatusCode::SUCCESS;
 }
+
 
 StatusCode 
 TagInfoMgr::fillTagInfo(const CondAttrListCollection* tagInfoCond)
@@ -152,7 +132,7 @@ TagInfoMgr::fillTagInfo(const CondAttrListCollection* tagInfoCond)
 
     if (tagInfoCond) {
         // Coming from COOL
-        ATH_MSG_DEBUG( "fillTagInfo: - tags coming from COOL file meta data");
+        ATH_MSG_DEBUG( "fillTagInfo: - reading Tags from infile IOV metadata");
 
         // tagInfoCond->dump();
 
@@ -214,24 +194,18 @@ TagInfoMgr::fillTagInfo(const CondAttrListCollection* tagInfoCond)
         // *****        READ WITH TAGS IN EVENT INFO            *****
         // *****        RDS 04/2009                             *****
         // **********************************************************
-
-       //MN: FIX:  Is this case still in use? If not, remove it
+        //MN: 2021-2022 and still not clear what to do with this part
        
-        ATH_MSG_DEBUG( "fillTagInfo: Add in tags from EventInfo");
-        const DataHandle<EventInfo> evtH;
-        const DataHandle<EventInfo> evtHEnd;
-        if (m_storeGate->retrieve( evtH, evtHEnd ).isFailure() ) {
+        ATH_MSG_DEBUG( "fillTagInfo: Reading Tags from EventInfo");
+        const EventInfo* evtH = m_storeGate->tryConstRetrieve<EventInfo>();
+        if( !evtH ) {
             // For simulation, we may be in the initialzation phase
             // and we cannot get EventInfo. We simply skip this step,
             // assuming that most times the information is coming in
             // via conditions/file meta data.
-            ATH_MSG_DEBUG( "fillTagInfo:  Could not get event info - skipping the filling of TagInfo from input EventInfo");      
+            ATH_MSG_DEBUG( "fillTagInfo:  Could not find EventInfo - skipping the filling of TagInfo from input EventInfo");
         }
         else {
-            if (evtH == evtHEnd) {
-                ATH_MSG_ERROR( "fillTagInfo: No event info objects");
-                return (StatusCode::FAILURE);
-            }
             ATH_MSG_DEBUG( "fillTagInfo: Event ID: ["
                   << evtH->event_ID()->run_number()   << ","
                   << evtH->event_ID()->event_number() << ":"
@@ -518,8 +492,8 @@ TagInfoMgr::handle(const Incident& inc) {
     **/
 
     // Get the messaging service, print where you are
-    ATH_MSG_DEBUG( "handle: entering handle(), incidence type " << inc.type()
-          << " from " << inc.source());
+    ATH_MSG_DEBUG( "handle: received incident of type " << inc.type()
+                   << " from " << inc.source());
 
     const EventIDBase eventID =  inc.context().eventID();
 
@@ -585,6 +559,7 @@ TagInfoMgr::handle(const Incident& inc) {
            throw GaudiException( "iovDbSvc::processTagInfo ERROR", "TagInfoMgr::handle", StatusCode::FAILURE );
         }
         ATH_MSG_DEBUG( "handle: TagInfo successfully processed by IOVDbSvc to register callback");
+        notifyListeners();
     }
     else if ((inc.type() == IncidentType::BeginInputFile || inc.type() == IncidentType::BeginRun)
              && !m_isFirstBeginRun)
@@ -594,20 +569,10 @@ TagInfoMgr::handle(const Incident& inc) {
        if( updateTagInfo().isFailure() ) {
           throw GaudiException( "updateTagInfo ERROR:", "TagInfoMgr::handle", StatusCode::FAILURE );
        }
+       notifyListeners();
     }
 }
 
-//______________________________________________________________________________
-StatusCode
-TagInfoMgr::checkTagInfo(IOVSVC_CALLBACK_ARGS)
-{
-    // The conditions object in file meta data has change so we need
-    // to reset the TagInfo object in the detector store.
-    //
-    ATH_MSG_DEBUG( "checkTagInfo IOV callback");
-    StatusCode sc = updateTagInfo();
-    return sc;
-}
 
 //______________________________________________________________________________
 void
@@ -631,9 +596,7 @@ TagInfoMgr::updateTagInfo() {
     // Fill the TagInfo object
     //   The tag info may come from either the input file meta data or
     //   the currently available EventInfo object
-
     ATH_MSG_DEBUG( "updateTagInfo: getting /TagInfo");
-    std::unique_lock guard(m_mutex);
 
     // Check whether TagInfo is coming from file meta data or the
     // input event
@@ -661,6 +624,7 @@ TagInfoMgr::updateTagInfo() {
         return StatusCode::SUCCESS;
     }
 
+    std::unique_lock guard(m_mutex);
     ATH_CHECK( fillTagInfo(attrListColl) );
     if (attrListColl) ATH_MSG_DEBUG( "updateTagInfo: Filled TagInfo from file meta data ");
     else ATH_MSG_DEBUG( "updateTagInfo: Filled TagInfo from input event ");
@@ -741,43 +705,10 @@ TagInfoMgr::printTags(MsgStream& log) const
 }
 
 
-StatusCode
-TagInfoMgr::iovCallback(IOVSVC_CALLBACK_ARGS)
-{
-   ATH_MSG_DEBUG( "IOV callback");
-   notifyListeners();
-   return StatusCode::SUCCESS;
-}
-
 //______________________________________________________________________________
 void TagInfoMgr::addListener(Listener* listener)
 {
    std::unique_lock guard(m_mutex);
-   if( not m_detStore->contains<std::string>(IOVCbkObjKey)  ) {
-      ATH_MSG_DEBUG("adding IOV callback object to DetStore");
-      auto alignObj = std::make_unique<std::string>("Geometry aligment callbck trigger object");
-      if( m_detStore->record(std::move(alignObj), IOVCbkObjKey)  != StatusCode::SUCCESS) {
-         ATH_MSG_WARNING("Cannot register IOV callback object with key "  << IOVCbkObjKey);
-      }
-      else {
-         SG::DataProxy *dp =  m_detStore->proxy(ClassID_traits<std::string>::ID(), IOVCbkObjKey);
-         if( dp ) {
-            dp->setProvider(this, StoreID::DETECTOR_STORE);
-
-            const DataHandle<std::string> alignObjH;
-            if(m_detStore->regFcn(&TagInfoMgr::iovCallback, this,
-                                  alignObjH, IOVCbkObjKey) != StatusCode::SUCCESS) {
-               ATH_MSG_WARNING("Cannot register IOV callback for key - TagInfo update notification will not work"  << IOVCbkObjKey);
-            }
-            else {
-               ATH_MSG_DEBUG("Registered IOV callback for TagInfo changes");
-            }
-         } else {
-            ATH_MSG_WARNING("Failed to retrieve "  << IOVCbkObjKey);
-         }
-      }
-   }
-
    m_listeners.insert( listener );
 }
 
@@ -786,27 +717,5 @@ void TagInfoMgr::removeListener(Listener* listener)
 {
    std::unique_lock guard(m_mutex);
    m_listeners.erase( listener );
-}
-
-
-
-
-StatusCode 
-TagInfoMgr::preLoadAddresses( StoreID::type storeID, tadList& /*tlist*/ )
-{
-   if (storeID == StoreID::DETECTOR_STORE) {
-      ATH_MSG_DEBUG( "preLoadAddresses - not expected to be called");
-   }
-   return StatusCode::SUCCESS;
-}
-
-
-
-StatusCode       
-TagInfoMgr::updateAddress(StoreID::type /*storeID*/, SG::TransientAddress* /*tad*/,
-                          const EventContext& /*ctx*/)
-{
-   ATH_MSG_DEBUG( "updateAddress");
-   return StatusCode::SUCCESS;
 }
 

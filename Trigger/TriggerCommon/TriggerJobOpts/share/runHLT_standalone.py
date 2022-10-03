@@ -416,6 +416,10 @@ DetFlags.BField_setOn()
 DetFlags.simulate.all_setOff()
 DetFlags.pileup.all_setOff()
 DetFlags.overlay.all_setOff()
+# Disable some forward detetors
+ConfigFlags.Detector.GeometryALFA = False
+ConfigFlags.Detector.GeometryFwdRegion = False
+ConfigFlags.Detector.GeometryLucid = False
 
 include ("RecExCond/AllDet_detDescr.py")
 

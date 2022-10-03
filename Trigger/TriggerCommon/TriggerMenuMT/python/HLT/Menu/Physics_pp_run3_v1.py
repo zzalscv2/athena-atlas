@@ -318,7 +318,7 @@ def setupMenu():
         ChainProp(name='HLT_mu4_mu4_idperf_1invmAB5_L12MU3VF', l1SeedThresholds=['MU3VF','MU3VF'], stream=[PhysicsStream,'express'], groups=MultiMuonGroup+SupportGroup+['RATE:CPS_2MU3VF'], monGroups=['idMon:t0']),
      
         # ATR-25219, 1mu, for alignment run
-        ChainProp(name='HLT_mu15_mucombTag_L1MU20VFC',groups=['PS:Online']+SingleMuonGroup+SupportGroup),
+        ChainProp(name='HLT_mu15_mucombTag_L1MU20VFC',groups=['PS:Online']+SingleMuonGroup+SupportGroup, monGroups=['muonMon:online']),
 
         # ATR-26151
         ChainProp(name='HLT_mu24_ivarmedium_mu14_idperf_probe_50invmAB130_L1MU14FCH', l1SeedThresholds=['MU14FCH','PROBEMU8F'], stream=[PhysicsStream,'express'], groups=MultiMuonGroup+SupportGroup, monGroups=['idMon:shifter','idMon:t0']),
@@ -326,10 +326,13 @@ def setupMenu():
         ChainProp(name='HLT_mu26_ivarmedium_mu14_idperf_probe_50invmAB130_L1MU18VFCH', l1SeedThresholds=['MU18VFCH','PROBEMU8F'], stream=[PhysicsStream,'express'], groups=MultiMuonGroup+SupportGroup, monGroups=['idMon:shifter','idMon:t0']),
         
         
-        ChainProp(name='HLT_mu20_mucombTag_L1MU20VFC',groups=['PS:Online']+SingleMuonGroup+SupportGroup),
-        ChainProp(name='HLT_mu25_mucombTag_L1MU20VFC',groups=['PS:Online']+SingleMuonGroup+SupportGroup),
-        ChainProp(name='HLT_mu30_mucombTag_L1MU20VFC',groups=['PS:Online']+SingleMuonGroup+SupportGroup),
-        ChainProp(name='HLT_mu50_mucombTag_L1MU20VFC',groups=['PS:Online']+SingleMuonGroup+SupportGroup),
+        ChainProp(name='HLT_mu5_mucombTag_L1MU20VFC',groups=['PS:Online']+SingleMuonGroup+SupportGroup, monGroups=['muonMon:online']),
+        ChainProp(name='HLT_mu8_mucombTag_L1MU20VFC',groups=['PS:Online']+SingleMuonGroup+SupportGroup, monGroups=['muonMon:online']),
+        ChainProp(name='HLT_mu10_mucombTag_L1MU20VFC',groups=['PS:Online']+SingleMuonGroup+SupportGroup, monGroups=['muonMon:online']),
+        ChainProp(name='HLT_mu20_mucombTag_L1MU20VFC',groups=['PS:Online']+SingleMuonGroup+SupportGroup, monGroups=['muonMon:online']),
+        ChainProp(name='HLT_mu25_mucombTag_L1MU20VFC',groups=['PS:Online']+SingleMuonGroup+SupportGroup, monGroups=['muonMon:online']),
+        ChainProp(name='HLT_mu30_mucombTag_L1MU20VFC',groups=['PS:Online']+SingleMuonGroup+SupportGroup, monGroups=['muonMon:online']),
+        ChainProp(name='HLT_mu50_mucombTag_L1MU20VFC',groups=['PS:Online']+SingleMuonGroup+SupportGroup, monGroups=['muonMon:online']),
      ]
 
     chains['Egamma'] = [

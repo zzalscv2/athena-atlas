@@ -49,14 +49,6 @@ def TriggerRecoCfg(flags):
     elif flags.Trigger.EDMVersion in [1, 2]:
         acc.merge( Run1Run2BSExtractionCfg(flags) )
 
-        from AnalysisTriggerAlgs.AnalysisTriggerAlgsCAConfig import RoIBResultToxAODCfg
-        xRoIBResultAcc, _ = RoIBResultToxAODCfg(flags)
-        acc.merge( xRoIBResultAcc )
-
-        if flags.Input.Format is Format.BS:
-            from L1TopoByteStream.L1TopoByteStreamConfig import L1TopoRawDataContainerBSCnvCfg
-            acc.merge( L1TopoRawDataContainerBSCnvCfg(flags) )
-
         from TrigDecisionMaker.TrigDecisionMakerConfig import Run1Run2DecisionMakerCfg
         acc.merge (Run1Run2DecisionMakerCfg(flags) )
 
@@ -64,6 +56,16 @@ def TriggerRecoCfg(flags):
             acc.merge(Run2Run1NavigationSlimingCfg(flags))
     else:
         raise RuntimeError("Invalid EDMVersion=%s " % flags.Trigger.EDMVersion)
+
+    # Legacy L1Calo, L1Topo reco
+    if flags.Trigger.enableL1CaloLegacy:
+        from AnalysisTriggerAlgs.AnalysisTriggerAlgsCAConfig import RoIBResultToxAODCfg
+        xRoIBResultAcc, _ = RoIBResultToxAODCfg(flags)
+        acc.merge( xRoIBResultAcc )
+
+        if flags.Input.Format is Format.BS:
+            from L1TopoByteStream.L1TopoByteStreamConfig import L1TopoRawDataContainerBSCnvCfg
+            acc.merge( L1TopoRawDataContainerBSCnvCfg(flags) )
 
     if flags.Output.doWriteESD or flags.Output.doWriteAOD:
         acc.merge(TriggerEDMCfg(flags))

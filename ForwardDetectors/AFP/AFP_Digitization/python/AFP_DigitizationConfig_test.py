@@ -8,12 +8,10 @@
 
 # brief  A script to test AFP_Digitization package. Mostly inspired by Digitization/DigitizationConfig_test.py, but includes switching AFP digitization on (it's off by default). To test it:
 #           0. setup athena enviroment
-#           1a. run this script:
+#           1. run this script:
 #              $ python AFP_DigitizationConfig_test.py
-#           1b. it's also possible to add some arguments:
-#              $ python AFP_DigitizationConfig_test.py Detector.EnableAFP=True
 #           2. you may want to continue with reconstruction:
-#              $ RecoSteeringTest.py --filesInput=myRDO.pool.root --RDO Reco.EnableAFP=True
+#              $ RecoSteeringTest.py --filesInput=myRDO.pool.root --RDO
 
 
 if __name__ == "__main__":
@@ -30,8 +28,6 @@ if __name__ == "__main__":
     # Configure
     ConfigFlags.Input.Files = ["test.pool.root"]
     ConfigFlags.IOVDb.GlobalTag = "OFLCOND-MC16-SDR-RUN2-09"
-    ConfigFlags.Detector.EnableAFP = True
-    ConfigFlags.Detector.GeometryAFP = False
     ConfigFlags.GeoModel.Align.Dynamic = False
     ConfigFlags.Concurrency.NumThreads = 1
     ConfigFlags.Concurrency.NumConcurrentEvents=1

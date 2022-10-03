@@ -184,7 +184,7 @@ def RecoSteering(flags):
 
     # AFP
     acc.flagPerfmonDomain('AFP')
-    if flags.Reco.EnableAFP:
+    if flags.Detector.EnableAFP:
         from ForwardRec.AFPRecConfig import AFPRecCfg
         acc.merge(AFPRecCfg(flags))
         log.info("---------- Configured AFP reconstruction")

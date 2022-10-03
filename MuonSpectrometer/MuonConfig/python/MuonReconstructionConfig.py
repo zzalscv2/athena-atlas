@@ -164,45 +164,24 @@ def MuonReconstructionCfg(flags):
             track_cols += ["EMEO_MuonSpectrometerTracks"]
             track_colstp += ["EMEO_MuonSpectrometerTrackParticles"]
 
-        muondetailedtracktruthmaker = CompFactory.MuonDetailedTrackTruthMaker(name="MuonStandaloneDetailedTrackTruthMaker", TrackCollectionNames=track_cols,
-                                                                              PRD_TruthNames=["RPC_TruthMap", "TGC_TruthMap", "MDT_TruthMap"] +
-                                                                              (["CSC_TruthMap"] if flags.Detector.EnableCSC else []) +
-                                                                              (["MM_TruthMap"]if flags.Detector.EnableMM else []) +
-                                                                              (["STGC_TruthMap"] if flags.Detector.EnablesTGC else []))
-        result.addEventAlgo(muondetailedtracktruthmaker)
+        from MuonConfig.MuonTruthAlgsConfig import MuonDetailedTrackTruthMakerCfg
+        result.merge(MuonDetailedTrackTruthMakerCfg(flags, name="MuonStandaloneDetailedTrackTruthMaker",
+                                                    TrackCollectionNames=track_cols))
+
         for i in range(len(track_cols)):
-            result.addEventAlgo(CompFactory.TrackTruthSelector(name=track_cols[i] + "Selector",
-                                                               DetailedTrackTruthName=track_cols[i] +
-                                                               "DetailedTruth",
-                                                               OutputName=track_cols[i] + "Truth"))
-            result.addEventAlgo(CompFactory.TrackParticleTruthAlg(name=track_cols[i]+"TruthAlg",
-                                                                  TrackTruthName=track_cols[i] +
-                                                                  "Truth",
-                                                                  TrackParticleName=track_colstp[i]))
+            from TrkConfig.TrkTruthAlgsConfig import TrackTruthSelectorCfg, TrackParticleTruthAlgCfg
+            result.merge(TrackTruthSelectorCfg(flags, tracks=track_cols[i]))
+
+            result.merge(TrackParticleTruthAlgCfg(flags, tracks=track_cols[i],
+                                                  TrackParticleName=track_colstp[i]))
 
         # Check if we're making PRDs, i.e. DetFlags.makeRIO.Muon_on(): in old config
         # FIXME - I think we can remove this flag if we shift this to where PRDs are being created. However, this will involve some refactoring, so temporary fix is this.
         if flags.Muon.makePRDs:
             result.addEventAlgo(CompFactory.MuonPRD_MultiTruthMaker())
 
-            from MCTruthClassifier.MCTruthClassifierConfig import MCTruthClassifierCfg
-
-            PRD_TruthMaps = ["RPC_TruthMap","TGC_TruthMap","MDT_TruthMap"]
-            SDOs = ["RPC_SDO","TGC_SDO","MDT_SDO"]
-            CSCSDOs= "CSC_SDO" 
-            if (flags.Detector.EnablesTGC and flags.Detector.EnableMM):
-                SDOs+=["MM_SDO","sTGC_SDO"]
-                PRD_TruthMaps += ["MM_TruthMap", "STGC_TruthMap"]
-            if not flags.Detector.EnableCSC: 
-                CSCSDOs = ""
-            else: PRD_TruthMaps += ["CSC_TruthMap"]
-            result.addEventAlgo( CompFactory.Muon.MuonTruthDecorationAlg(name="MuonTruthDecorationAlg", 
-                                                        MCTruthClassifier=result.popToolsAndMerge(MCTruthClassifierCfg(flags)), 
-                                                        SDOs=SDOs, 
-                                                        CSCSDOs=CSCSDOs,
-                                                        PRD_TruthMaps = PRD_TruthMaps,
-                                                        Extrapolator=result.popToolsAndMerge(AtlasExtrapolatorCfg(flags)))
-                                                        )
+            from MuonConfig.MuonTruthAlgsConfig import MuonTruthDecorationAlgCfg
+            result.merge(MuonTruthDecorationAlgCfg(flags))
 
     if flags.Muon.doMSVertex:
         msvertexrecotool = CompFactory.Muon.MSVertexRecoTool(
