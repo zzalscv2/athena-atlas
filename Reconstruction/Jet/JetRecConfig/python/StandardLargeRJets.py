@@ -118,6 +118,15 @@ AntiKt10TruthSoftDrop = JetSoftDrop(AntiKt10Truth,
                                     Beta = 1., ZCut= 0.1,
                                     )
 
+AntiKt10TruthGEN = JetDefinition("AntiKt",1.0, cst.TruthGEN,
+                                ptmin = 5000, 
+                                ghostdefs = [],
+                                modifiers = ("Sort", )+truthmods,
+                                ghostarea = 0.,
+                                lock = True,
+)
+AntiKt10TruthGENWZ = AntiKt10TruthGEN.clone(inputdef=cst.TruthGENWZ)
+
 
 
 
