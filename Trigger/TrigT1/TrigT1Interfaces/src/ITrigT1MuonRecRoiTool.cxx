@@ -3,6 +3,7 @@
 */
 
 #include "TrigT1Interfaces/ITrigT1MuonRecRoiTool.h"
+#include "TrigT1MuctpiBits/MuCTPI_Bits.h"
 
 namespace LVL1{
 
@@ -59,28 +60,28 @@ namespace LVL1{
       m_GoodMFMask            = 0x00000000; // undef
     }else if( format == Run3 ){
       m_IsRun3Mask            = 0x80000000;
-      m_IsVetoedMask          = 0x00010000;
-      m_ChargeMask            = 0x00001000;
+      m_IsVetoedMask          = LVL1::MuCTPIBits::RUN3_CAND_WORD_VETO_MASK                     << LVL1::MuCTPIBits::RUN3_CAND_WORD_VETO_SHIFT;
+      m_ChargeMask            = LVL1::MuCTPIBits::RUN3_CAND_WORD_CANDFLAGS_ECFW_CHARGE_MASK    << LVL1::MuCTPIBits::RUN3_CAND_WORD_CANDFLAGS_ECFW_CHARGE_SHIFT;
       m_IsFirstCandMask       = 0x00000000; // undef
-      m_SectorAddressMask     = 0x1fe00000;
-      m_BarrelSectorIDMask    = 0x07c00000;
-      m_EndcapSectorIDMask    = 0x0fc00000;
-      m_ForwardSectorIDMask   = 0x07c00000;
-      m_SysIDMask             = 0x18000000;
-      m_SubSysIDMask          = 0x00200000;
-      m_ThresholdMask         = 0x00000f00;
-      m_BarrelRoIMask         = 0x0000001f;
-      m_EndcapRoIMask         = 0x000000ff;
-      m_ForwardRoIMask        = 0x0000003f;
-      m_EndcapRMask           = 0x000000fc;
-      m_EndcapPhiMask         = 0x00000003;
-      m_ForwardRMask          = 0x0000003c;
-      m_ForwardPhiMask        = 0x00000003;
-      m_OverflowPerRoIMask    = 0x00001000;
-      m_OverflowPerSectorMask = 0x00020000;
-      m_BW2Or3Mask            = 0x00002000;
-      m_InnerCoinMask         = 0x00004000;
-      m_GoodMFMask            = 0x00008000;
+      m_SectorAddressMask     = LVL1::MuCTPIBits::RUN3_CAND_SECTOR_ADDRESS_MASK                << LVL1::MuCTPIBits::RUN3_CAND_SECTOR_ADDRESS_SHIFT;
+      m_BarrelSectorIDMask    = LVL1::MuCTPIBits::BARREL_SECTORID_MASK                         << LVL1::MuCTPIBits::RUN3_CAND_SECTORID_SHIFT;
+      m_EndcapSectorIDMask    = LVL1::MuCTPIBits::ENDCAP_SECTORID_MASK                         << LVL1::MuCTPIBits::RUN3_CAND_SECTORID_SHIFT;
+      m_ForwardSectorIDMask   = LVL1::MuCTPIBits::FORWARD_SECTORID_MASK                        << LVL1::MuCTPIBits::RUN3_CAND_SECTORID_SHIFT;
+      m_SysIDMask             = LVL1::MuCTPIBits::RUN3_SUBSYS_ADDRESS_BAFW_MASK                << LVL1::MuCTPIBits::RUN3_SUBSYS_ADDRESS_SHIFT;
+      m_SubSysIDMask          = LVL1::MuCTPIBits::RUN3_SUBSYS_HEMISPHERE_MASK                  << LVL1::MuCTPIBits::RUN3_SUBSYS_HEMISPHERE_SHIFT;
+      m_ThresholdMask         = LVL1::MuCTPIBits::RUN3_CAND_PT_MASK                            << LVL1::MuCTPIBits::RUN3_CAND_PT_SHIFT;
+      m_BarrelRoIMask         = LVL1::MuCTPIBits::BARREL_ROI_MASK                              << LVL1::MuCTPIBits::RUN3_ROI_SHIFT;
+      m_EndcapRoIMask         = LVL1::MuCTPIBits::ENDCAP_ROI_MASK                              << LVL1::MuCTPIBits::RUN3_ROI_SHIFT;
+      m_ForwardRoIMask        = LVL1::MuCTPIBits::FORWARD_ROI_MASK                             << LVL1::MuCTPIBits::RUN3_ROI_SHIFT;
+      m_EndcapRMask           = LVL1::MuCTPIBits::RUN3_CAND_WORD_CANDFLAGS_EC_R_MASK           << LVL1::MuCTPIBits::RUN3_CAND_WORD_CANDFLAGS_ECFW_R_SHIFT;
+      m_EndcapPhiMask         = LVL1::MuCTPIBits::RUN3_CAND_WORD_CANDFLAGS_ECFW_PHI_MASK       << LVL1::MuCTPIBits::RUN3_CAND_WORD_CANDFLAGS_ECFW_PHI_SHIFT;
+      m_ForwardRMask          = LVL1::MuCTPIBits::RUN3_CAND_WORD_CANDFLAGS_FW_R_MASK           << LVL1::MuCTPIBits::RUN3_CAND_WORD_CANDFLAGS_ECFW_R_SHIFT;
+      m_ForwardPhiMask        = LVL1::MuCTPIBits::RUN3_CAND_WORD_CANDFLAGS_ECFW_PHI_MASK       << LVL1::MuCTPIBits::RUN3_CAND_WORD_CANDFLAGS_ECFW_PHI_SHIFT;
+      m_OverflowPerRoIMask    = LVL1::MuCTPIBits::ROI_OVERFLOW_MASK                            << LVL1::MuCTPIBits::RUN3_ROI_OVERFLOW_SHIFT;
+      m_OverflowPerSectorMask = LVL1::MuCTPIBits::CAND_OVERFLOW_MASK                           << LVL1::MuCTPIBits::RUN3_CAND_OVERFLOW_SHIFT;
+      m_BW2Or3Mask            = LVL1::MuCTPIBits::RUN3_CAND_WORD_CANDFLAGS_ECFW_BW23_MASK      << LVL1::MuCTPIBits::RUN3_CAND_WORD_CANDFLAGS_ECFW_BW23_SHIFT;
+      m_InnerCoinMask         = LVL1::MuCTPIBits::RUN3_CAND_WORD_CANDFLAGS_ECFW_INNERCOIN_MASK << LVL1::MuCTPIBits::RUN3_CAND_WORD_CANDFLAGS_ECFW_INNERCOIN_SHIFT;
+      m_GoodMFMask            = LVL1::MuCTPIBits::RUN3_CAND_WORD_CANDFLAGS_ECFW_GOODMF_MASK    << LVL1::MuCTPIBits::RUN3_CAND_WORD_CANDFLAGS_ECFW_GOODMF_SHIFT;
     }else{
       // no update
     }
