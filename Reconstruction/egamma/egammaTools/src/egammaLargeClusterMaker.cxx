@@ -63,10 +63,14 @@ egammaLargeClusterMaker::execute(const EventContext& ctx,
   for (const auto* cluster : *inputClusters) {
 
     if (!m_isFWD) {
+
+      if (cluster->et() < m_centEtThr)
+	continue;
+
       // find the center of the cluster, copying the logic of
       // egammaMiddleShape.cxx
 
-      // check if cluster is in barrel or in the end-cap
+      // check if cluster is in barrel or end-cap
       if (!cluster->inBarrel() && !cluster->inEndcap()) {
         continue;
       }
@@ -74,9 +78,7 @@ egammaLargeClusterMaker::execute(const EventContext& ctx,
       // check if cluster is in barrel or end-cap
       bool in_barrel = egammaEnergyPositionAllSamples::inBarrel(*cluster, 2);
       CaloSampling::CaloSample sam = CaloSampling::EMB2;
-      if (in_barrel) {
-        sam = CaloSampling::EMB2;
-      } else {
+      if (!in_barrel) {
         sam = CaloSampling::EME2;
       }
 
@@ -86,7 +88,9 @@ egammaLargeClusterMaker::execute(const EventContext& ctx,
       auto phi = cluster->phiSample(sam);
 
       if ((eta == 0. && phi == 0.) || fabs(eta) > 100) {
-        return StatusCode::SUCCESS;
+	ATH_MSG_WARNING("Weird input cluster, eta = "
+			<< eta << " phi = " << phi);
+	continue;
       }
 
       // Should get overritten
@@ -101,11 +105,14 @@ egammaLargeClusterMaker::execute(const EventContext& ctx,
       //                  the easiest is to look for the CaloDetDescrElement
 
       const CaloDetDescrElement* dde =
-        calodetdescrmgr->get_element(CaloCell_ID::LAREM, 0, barrel, eta, phi);
+        calodetdescrmgr->get_element(CaloCell_ID::LAREM, sampling_or_module,
+				     barrel, eta, phi);
 
       // if object does not exist then return
       if (!dde) {
-        return StatusCode::SUCCESS;
+	ATH_MSG_WARNING("Weird input cluster eta = " << eta << " phi = " << phi);
+	ATH_MSG_WARNING("No detetector element for seeding");
+	continue;
       }
 
       // local granularity
@@ -126,6 +133,7 @@ egammaLargeClusterMaker::execute(const EventContext& ctx,
                                 (CaloSampling::CaloSample)sam);
       if (sc.isFailure()) {
         ATH_MSG_WARNING("CaloLayerCalculator failed  fill ");
+	continue;
       }
       double etamax = calc.etarmax();
       double phimax = calc.phirmax();
@@ -139,6 +147,8 @@ egammaLargeClusterMaker::execute(const EventContext& ctx,
 
     } else {
       // FWD cluster collection
+      if (cluster->et() < m_fwdEtThr)
+	continue;
 
       // check if cluster is in EMEC or FCAL
       if (cluster->inBarrel()) {
@@ -148,17 +158,18 @@ egammaLargeClusterMaker::execute(const EventContext& ctx,
         ATH_MSG_DEBUG(" CLuster is FWD Cluster ");
       }
 
+      // need some positive energy in EME2 or FCAL0 to be a good candidate
+      if (!(cluster->eSample(CaloSampling::EME2)  > 0 ||
+	    cluster->eSample(CaloSampling::FCAL0) > 0))
+	continue;
+
       // check if cluster is in FCAL or EMEC
+      CaloSampling::CaloSample sam = CaloSampling::FCAL0;
       bool in_EMEC = false;
       if (cluster->eSample(CaloSampling::EME2) >
-          cluster->eSample(CaloSampling::FCAL0))
+          cluster->eSample(CaloSampling::FCAL0)) {
         in_EMEC = true;
-
-      CaloSampling::CaloSample sam = CaloSampling::FCAL0;
-      if (in_EMEC) {
         sam = CaloSampling::EME2;
-      } else {
-        sam = CaloSampling::FCAL0;
       }
 
       // granularity in (eta,phi) in the pre sampler
@@ -167,7 +178,11 @@ egammaLargeClusterMaker::execute(const EventContext& ctx,
       auto phi = cluster->phiSample(sam);
 
       if ((eta == 0. && phi == 0.) || fabs(eta) > 100) {
-        return StatusCode::SUCCESS;
+	ATH_MSG_WARNING("Weird input cluster, maxeta = "
+			<< eta << " phi = " << phi
+			<< " Eeme2 = " << cluster->eSample(CaloSampling::EME2)
+			<< " Efcal = " << cluster->eSample(CaloSampling::FCAL0));
+        continue;
       }
 
       // Should get overritten
@@ -187,7 +202,9 @@ egammaLargeClusterMaker::execute(const EventContext& ctx,
 
       // if object does not exist then return
       if (!dde) {
-        return StatusCode::SUCCESS;
+	ATH_MSG_WARNING("Weird input cluster eta = " << eta << " phi = " << phi);
+	ATH_MSG_WARNING("No detetector element for seeding");
+	continue;
       }
 
       // local granularity
@@ -216,7 +233,8 @@ egammaLargeClusterMaker::execute(const EventContext& ctx,
                                 in_EMEC ? newCluster : nullptr);
 
       if (sc.isFailure()) {
-        ATH_MSG_WARNING("CaloLayerCalculator failed  fill for FWD cluster");
+	ATH_MSG_WARNING("CaloLayerCalculator failed  fill for FWD cluster");
+	continue;
       }
       double etamax = calc.etarmax();
       double phimax = calc.phirmax();
@@ -224,18 +242,32 @@ egammaLargeClusterMaker::execute(const EventContext& ctx,
       newCluster->setEta0(etamax);
       newCluster->setPhi0(phimax);
 
+      std::map<CaloSampling::CaloSample,double> caloSamV;
       if (!in_EMEC) {
-        // If FCAL need to add cell to cluster in a cone
+	caloSamV[CaloSampling::FCAL0] = m_drFWD;
+      }
+      if (m_addCellsFromOtherSamplings) {
+	caloSamV[CaloSampling::EME1] = m_drEM;
+	if (in_EMEC) {
+	  caloSamV[CaloSampling::FCAL0] = m_drFWD;
+	} else {
+	  caloSamV[CaloSampling::EME2] = m_drFWD;
+	}
+      }
+
+      if (caloSamV.size()) {
+        // If FCAL need to add cell to cluster in a cone.
+	// Also if we want cells from other samplings
         std::vector<const CaloCell*> cells;
         cells.reserve(300);
         CaloCellList myList(calodetdescrmgr, cellcoll.ptr());
-        myList.select(cluster->etaSample(sam),
-                      cluster->phiSample(sam),
-                      m_drFWD,
-                      (CaloSampling::CaloSample)sam);
-
-        cells.insert(cells.end(), myList.begin(), myList.end());
-
+	for (auto s : caloSamV) {
+	  myList.select(cluster->etaSample(sam),
+			cluster->phiSample(sam),
+			s.second,
+			(CaloSampling::CaloSample)s.first);
+	  cells.insert(cells.end(), myList.begin(), myList.end());
+	}
         for (const auto* cell : cells) {
           if (!cell || !cell->caloDDE()){
             continue;
