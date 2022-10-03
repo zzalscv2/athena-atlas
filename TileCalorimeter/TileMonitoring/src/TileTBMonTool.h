@@ -25,7 +25,7 @@ class TileDQstatus;
  *  @brief Class for TileCal TB monitoring
  */
 
-class TileTBMonTool : public TileFatherMonTool {
+class ATLAS_NOT_THREAD_SAFE TileTBMonTool : public TileFatherMonTool {  // deprecated: ATLASRECTS-7259
 
   public:
 

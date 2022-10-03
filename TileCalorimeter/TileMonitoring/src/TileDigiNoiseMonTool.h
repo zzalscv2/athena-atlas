@@ -27,7 +27,7 @@ class TileCondToolNoiseSample;
  *  @brief Class for TileCal noise monitoring at digits level
  */
 
-class TileDigiNoiseMonTool : public TileFatherMonTool {
+class ATLAS_NOT_THREAD_SAFE TileDigiNoiseMonTool : public TileFatherMonTool {  // deprecated: ATLASRECTS-7259
 
   public:
 

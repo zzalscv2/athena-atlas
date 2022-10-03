@@ -29,7 +29,7 @@ class TileDigitsCollection;
  *  @brief Class for TileCal noise monitoring at digits level
  */
 
-class TileTMDBDigitsMonTool : public TileFatherMonTool {
+class ATLAS_NOT_THREAD_SAFE TileTMDBDigitsMonTool : public TileFatherMonTool {  // deprecated: ATLASRECTS-7259
 
   public:
 

@@ -23,7 +23,7 @@ class TileCell;
  *  @brief Class for TileCal monitoring at cell level
  */
 
-class TileTBCellMonTool: public TileFatherMonTool {
+class ATLAS_NOT_THREAD_SAFE TileTBCellMonTool: public TileFatherMonTool {  // deprecated: ATLASRECTS-7259
 
   public:
 

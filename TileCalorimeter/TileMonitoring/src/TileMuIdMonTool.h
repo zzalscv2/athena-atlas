@@ -20,7 +20,7 @@
  *  @brief Class for TileMuid based monitoring
  */
 
-class TileMuIdMonTool: public TileFatherMonTool {
+class ATLAS_NOT_THREAD_SAFE TileMuIdMonTool: public TileFatherMonTool {  // deprecated: ATLASRECTS-7259
 
   public:
 

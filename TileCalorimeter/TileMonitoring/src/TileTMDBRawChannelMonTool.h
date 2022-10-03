@@ -29,7 +29,7 @@ class TileRawChannelCollection;
  *  @brief Class for TileCal noise monitoring at digits level
  */
 
-class TileTMDBRawChannelMonTool : public TileFatherMonTool {
+class ATLAS_NOT_THREAD_SAFE TileTMDBRawChannelMonTool : public TileFatherMonTool {  // deprecated: ATLASRECTS-7259
 
   public:
 
