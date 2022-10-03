@@ -6,8 +6,13 @@ from AthenaConfiguration.Enums import Format
 
 from InDetConfig.TrackRecoConfig import FTAG_AUXDATA
 
+_flags_set = [] # For caching
 
 def CombinedTrackingPassFlagSets(flags):
+
+    global _flags_set
+    if _flags_set:
+        return _flags_set
 
     flags_set = []
 
@@ -30,10 +35,11 @@ def CombinedTrackingPassFlagSets(flags):
         flagsConv = flags.cloneAndReplace("ITk.Tracking.ActivePass", "ITk.Tracking.ConversionFindingPass")
         flags_set += [flagsConv]
 
+    _flags_set = flags_set # Put into cache 
+
     return flags_set
 
 def ITkClusterSplitProbabilityContainerName(flags):
-
     flags_set = CombinedTrackingPassFlagSets(flags)
     extension = flags_set[-1].ITk.Tracking.ActivePass.extension
     ClusterSplitProbContainer = "ITkAmbiguityProcessorSplitProb" + extension
@@ -45,7 +51,7 @@ def ITkTrackRecoCfg(flags):
 
     if flags.Input.Format is Format.BS:
         # TODO: ITk BS providers
-        raise RuntimeError("BS imputs not supported")
+        raise RuntimeError("ByteStream inputs not supported")
 
     from InDetConfig.SiliconPreProcessing import ITkRecPreProcessingSiliconCfg
     result.merge(ITkRecPreProcessingSiliconCfg(flags))
@@ -91,7 +97,7 @@ def ITkTrackRecoCfg(flags):
     from TrkConfig.TrkTrackCollectionMergerConfig import ITkTrackCollectionMergerAlgCfg
     result.merge(ITkTrackCollectionMergerAlgCfg(flags,
                                                 InputCombinedTracks = InputCombinedITkTracks,
-                                                CombinedITkClusterSplitProbContainer = ITkClusterSplitProbabilityContainerName(flags)))
+                                                CombinedITkClusterSplitProbContainer = ITkClusterSplitProbabilityContainerName(flags) if not flags.ITk.Tracking.doFastTracking else ""))
 
     if flags.ITk.Tracking.doTruth:
         result.merge(ITkTrackTruthCfg(flags))

@@ -4,7 +4,13 @@ from AthenaConfiguration.ComponentAccumulator import ComponentAccumulator
 from AthenaConfiguration.ComponentFactory import CompFactory
 from AthenaConfiguration.Enums import BeamType, Format
 
+_flags_set = [] # For caching
+
 def CombinedTrackingPassFlagSets(flags):
+
+    global _flags_set
+    if _flags_set:
+        return _flags_set
 
     flags_set = []
 
@@ -69,6 +75,8 @@ def CombinedTrackingPassFlagSets(flags):
     if flags.InDet.Tracking.doBeamGas:
         flagsBeamGas = flags.cloneAndReplace("InDet.Tracking.ActivePass", "InDet.Tracking.BeamGasPass")
         flags_set += [flagsBeamGas]
+
+    _flags_set = flags_set # Put into cache 
 
     return flags_set
 
