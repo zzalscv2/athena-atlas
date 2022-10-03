@@ -1,8 +1,7 @@
 """Define functions for event bookkeeping configuration using ComponentAccumulator
 
-Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
 """
-from AthenaConfiguration.ComponentAccumulator import ComponentAccumulator
 from AthenaConfiguration.ComponentFactory import CompFactory
 from AthenaServices.MetaDataSvcConfig import MetaDataSvcCfg
 
@@ -12,7 +11,9 @@ def BookkeeperToolCfg(flags, name='BookkeeperTool', output_name='CutBookkeepers'
     tool = CompFactory.BookkeeperTool(name,
                                       InputCollName = output_name,
                                       OutputCollName = output_name)
-    return MetaDataSvcCfg(flags, tools=[tool])
+    acc = MetaDataSvcCfg(flags, tools=[tool])
+    acc.addPublicTool(tool)
+    return acc
 
 
 def BookkeeperDumperToolCfg(flags):
@@ -20,17 +21,20 @@ def BookkeeperDumperToolCfg(flags):
     return MetaDataSvcCfg(flags, toolNames=['BookkeeperDumperTool'])
 
 
-def CutFlowSvcCfg(flags):
+def CutFlowSvcCfg(flags, **kwargs):
     """CutFlowSvc configuration"""
-    acc = ComponentAccumulator()
+    acc = BookkeeperToolCfg(flags)
 
+    kwargs.setdefault('Configured', True)
     # Determine current input stream name
-    # inputStreamName = GetCurrentStreamName( msg=msg )
+    kwargs.setdefault('InputStream', flags.Input.ProcessingTags[-1] if flags.Input.ProcessingTags else 'N/A')
+    # Configure skimming cycle
+    from AthenaConfiguration.AutoConfigFlags import GetFileMD
+    kwargs.setdefault('SkimmingCycle', GetFileMD(flags.Input.Files).get('currentCutCycle', -1) + 1)
 
-    acc.addService(CompFactory.CutFlowSvc(Configured=True))
-    # svcMgr.CutFlowSvc.InputStream   = inputStreamName
+    # Init the service
+    acc.addService(CompFactory.CutFlowSvc(**kwargs))
 
-    acc.merge(BookkeeperToolCfg(flags))
     # TODO: different sequence?
     acc.addEventAlgo(CompFactory.AllExecutedEventsCounterAlg())
 
