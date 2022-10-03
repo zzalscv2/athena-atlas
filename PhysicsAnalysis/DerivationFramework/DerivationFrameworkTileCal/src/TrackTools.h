@@ -20,6 +20,7 @@
 #include <memory>
 
 class TileID;
+class TileDetDescrManager;
 
 namespace TileCal {
 
@@ -53,10 +54,12 @@ class TrackTools: public extends<AthAlgTool, ITrackTools> {
 
     Gaudi::Property<bool> m_isCollision{this, "IsCollision", true};
 
-  ToolHandle <Trk::IParticleCaloExtensionTool> m_caloExtensionTool{this,
+    ToolHandle <Trk::IParticleCaloExtensionTool> m_caloExtensionTool{this,
        "ParticleCaloExtensionTool", "Trk::ParticleCaloExtensionTool/ParticleCaloExtensionTool"};
 
-    const TileID* m_tileID;
+    const TileID* m_tileID{nullptr};
+    const TileDetDescrManager* m_tileMgr{nullptr};
+    enum TILE_RAW{TILE_RAW_FIRST, TILE_RAW_SECOND, TILE_RAW_THIRD, TILE_RAW_FOURTH, TILE_RAW_FIFTH, TILE_RAW_SIXTH};
 };
 
 } // TileCal namespace
