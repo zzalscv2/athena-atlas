@@ -18,13 +18,20 @@ maxDict = {0:20,1:60,2:160,3:400,4:800,5:1300,6:1800,7:2500,8:3200,9:3900,10:460
 def CreateJets(prefiltSeq, jetR, mods=""):    
     # for compatibility with the rest of GEN config, we just re-map the
     # standard def. Best would be to change all clients in GEN to call us passing a full JetDefinition object
-    from JetRecConfig.StandardSmallRJets import  AntiKt4TruthGEN,AntiKt4TruthGENWZ,AntiKt6TruthGEN,AntiKt6TruthGENWZ
-    jetdef = {
-        (0.4,"") : AntiKt4TruthGEN,
-        (0.4,"WZ") : AntiKt4TruthGENWZ,
-        (0.6,"") : AntiKt6TruthGEN,
-        (0.6,"WZ") : AntiKt6TruthGENWZ,
-    }[ (jetR,mods) ]
+    if jetR < 0.65 :
+      from JetRecConfig.StandardSmallRJets import  AntiKt4TruthGEN,AntiKt4TruthGENWZ,AntiKt6TruthGEN,AntiKt6TruthGENWZ
+      jetdef = {
+          (0.4,"") : AntiKt4TruthGEN,
+          (0.4,"WZ") : AntiKt4TruthGENWZ,
+          (0.6,"") : AntiKt6TruthGEN,
+          (0.6,"WZ") : AntiKt6TruthGENWZ,
+      }[ (jetR,mods) ]
+    else :
+      from JetRecConfig.StandardLargeRJets import  AntiKt10TruthGEN,AntiKt10TruthGENWZ
+      jetdef = {
+          (1.0,"") : AntiKt10TruthGEN,
+          (1.0,"WZ") : AntiKt10TruthGENWZ,
+      }[ (jetR,mods) ]
 
     
     # run2-config compatibility. (run3 style would use a ComponentAccumulator).
