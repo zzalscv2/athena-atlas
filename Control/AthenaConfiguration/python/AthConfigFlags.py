@@ -151,10 +151,6 @@ class FlagAddress(object):
     __gt__ = __cmp__
     __ge__ = __cmp__
 
-
-    def __nonzero__(self):
-        raise RuntimeError( "No such flag: "+ self._name+".  The name is likely incomplete." )
-
     def __bool__(self):
         raise RuntimeError( "No such flag: "+ self._name+".  The name is likely incomplete." )
 

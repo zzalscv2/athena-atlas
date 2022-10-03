@@ -47,7 +47,7 @@ class Argument( TransformLogger ):
 
     ## Allow the argument to be asked if it is valid i.e. if _value has been set.
     #  @return Boolean
-    def __nonzero__( self ):
+    def __bool__( self ):
         return self._value is not None
 
     ## Getter function for the short help (String).
@@ -568,9 +568,9 @@ class FileArg( StringArg ):
     def fileInfo( self ):
         return self._fileInfo
     
-    def __nonzero__(self):
+    def __bool__(self):
         """Return whether an input filename is given"""
-        return Argument.__nonzero__(self) and self.value() != 'NONE'
+        return Argument.__bool__(self) and self.value() != 'NONE'
 
 
     def type(self):
@@ -785,9 +785,9 @@ class InputDataFileArg( DataFileArg ):
         DataFileArg.__init__( self, help, type, name, **kwargs )
         self._fileInfo = {}
         
-    def __nonzero__(self):
+    def __bool__(self):
         """Return whether an input filename list is given"""
-        return Argument.__nonzero__( self ) and len( self._value ) > 0
+        return Argument.__bool__( self ) and len( self._value ) > 0
         
     def basicType(self):
         return 'list'
