@@ -4,17 +4,32 @@
 #include "xAODCore/AuxStoreAccessorMacros.h"
 #include "xAODTracking/versions/TrackState_v1.h"
 
+#define DEFINE_API(__TYPE, __GETTER, __SETTER) \
+    AUXSTORE_PRIMITIVE_SETTER_AND_GETTER(TrackState_v1, __TYPE, __GETTER, __SETTER)  \
+    __TYPE* TrackState_v1::__GETTER##Ptr() { \
+        static const SG::AuxElement::Accessor<__TYPE> acc(#__GETTER); \
+        return &(acc(*this)); \
+    } \
+    const __TYPE* TrackState_v1::__GETTER##Ptr() const { \
+        static const SG::AuxElement::ConstAccessor<__TYPE> acc(#__GETTER); \
+        return &(acc(*this)); \
+    }
+
 
 namespace xAOD {
-    AUXSTORE_PRIMITIVE_SETTER_AND_GETTER(TrackState_v1, double, chi2, setChi2)
-    AUXSTORE_PRIMITIVE_SETTER_AND_GETTER(TrackState_v1, double, pathLength, setPathLength)
-    AUXSTORE_PRIMITIVE_SETTER_AND_GETTER(TrackState_v1, TrackStateIndexType, previous, setPrevious)
-    AUXSTORE_PRIMITIVE_SETTER_AND_GETTER(TrackState_v1, TrackStateIndexType, predicted, setPredicted)
-    AUXSTORE_PRIMITIVE_SETTER_AND_GETTER(TrackState_v1, TrackStateIndexType, filtered, setFiltered)
-    AUXSTORE_PRIMITIVE_SETTER_AND_GETTER(TrackState_v1, TrackStateIndexType, smoothed, setSmoothed)
-    AUXSTORE_PRIMITIVE_SETTER_AND_GETTER(TrackState_v1, TrackStateIndexType, jacobian, setJacobian)
-    AUXSTORE_PRIMITIVE_SETTER_AND_GETTER(TrackState_v1, TrackStateIndexType, projector, setProjector)
-    AUXSTORE_PRIMITIVE_SETTER_AND_GETTER(TrackState_v1, TrackStateIndexType, uncalibrated, setUncalibrated)
-    AUXSTORE_PRIMITIVE_SETTER_AND_GETTER(TrackState_v1, TrackStateIndexType, calibrated, setCalibrated)
-    AUXSTORE_PRIMITIVE_SETTER_AND_GETTER(TrackState_v1, TrackStateIndexType, measDim, setMeasDim)
+
+    DEFINE_API(double, chi2, setChi2)    
+    DEFINE_API(double, pathLength, setPathLength)
+    DEFINE_API(TrackStateIndexType, previous, setPrevious)
+    DEFINE_API(TrackStateIndexType, predicted, setPredicted)
+    DEFINE_API(TrackStateIndexType, filtered, setFiltered)
+    DEFINE_API(TrackStateIndexType, smoothed, setSmoothed)
+    DEFINE_API(TrackStateIndexType, jacobian, setJacobian)
+    DEFINE_API(TrackStateIndexType, projector, setProjector)
+    DEFINE_API(TrackStateIndexType, uncalibrated, setUncalibrated)
+    DEFINE_API(TrackStateIndexType, calibrated, setCalibrated)
+    DEFINE_API(TrackStateIndexType, measDim, setMeasDim)
 }
+
+
+#undef DEFINE_API

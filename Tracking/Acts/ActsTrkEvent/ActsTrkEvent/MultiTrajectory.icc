@@ -1,0 +1,138 @@
+/*
+  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+*/
+
+// implementation of addTrackState_impl    
+    
+    template<bool RWState> template<bool Enable> std::enable_if_t<(Enable && (RWState == ActsTrk::IsReadWrite)), unsigned int>  //TODO simplify this line
+    ActsTrk::MultiTrajectory<RWState>::addTrackState_impl( 
+                Acts::TrackStatePropMask mask,
+                ActsTrk::MultiTrajectory<RWState>::IndexType previous) {   
+        assert(m_trackStates && "Missing Track States backend");
+   
+        auto state = new xAOD::TrackState_v1();
+        trackStates().push_back(state);
+        
+        // set kInvalid
+        using Acts::MultiTrajectoryTraits::kInvalid;
+        
+           
+        if (previous >= kInvalid - 1) previous = kInvalid; // fix needed in Acts::MTJ
+        trackStates().back()->setPrevious(previous);
+        using namespace Acts;
+
+        auto addParam = [this]() -> IndexType {
+            trackParameters().push_back(new xAOD::TrackParameters_v1());
+            return trackParameters().size() - 1;
+        };
+
+        state->setPredicted(kInvalid);
+        if (ACTS_CHECK_BIT(mask, TrackStatePropMask::Predicted)) {
+            state->setPredicted(addParam());
+        }
+
+        state->setFiltered(kInvalid);
+        if (ACTS_CHECK_BIT(mask, TrackStatePropMask::Filtered)) {
+            state->setFiltered(addParam());
+        }
+        state->setSmoothed(kInvalid);
+        if (ACTS_CHECK_BIT(mask, TrackStatePropMask::Smoothed)) {
+            state->setSmoothed(addParam());
+        }
+        state->setJacobian(kInvalid);
+        state->setUncalibrated(kInvalid);
+        state->setCalibrated(kInvalid);
+        state->setProjector(kInvalid);
+
+        return m_trackStates->size() - 1;
+    }
+
+
+
+
+
+
+//  has_impl implementation
+
+    template<bool RWState>
+    constexpr bool ActsTrk::MultiTrajectory<RWState>::has_impl(Acts::HashedString key, ActsTrk::MultiTrajectory<RWState>::IndexType istate) const {
+        using namespace Acts::HashedStringLiteral;
+        
+        
+        // set kInvalid
+        using Acts::MultiTrajectoryTraits::kInvalid;        
+
+        switch (key) {
+		case "previous"_hash:  return trackStates()[istate]->previous() < kInvalid;
+		case "chi2"_hash:      return trackStates()[istate]->chi2() < kInvalid;
+		case "pathLength"_hash:return trackStates()[istate]->pathLength() < kInvalid;        
+		case "predicted"_hash: return trackStates()[istate]->predicted() < kInvalid;
+		case "filtered"_hash:  return trackStates()[istate]->filtered() < kInvalid;
+		case "smoothed"_hash:  return trackStates()[istate]->smoothed() < kInvalid;
+		case "jacobian"_hash:  return trackStates()[istate]->jacobian() < kInvalid;
+		case "projector"_hash: return trackStates()[istate]->projector() < kInvalid;
+		case "uncalibrated"_hash: return trackStates()[istate]->uncalibrated() < kInvalid;
+		case "calibrated"_hash: return trackStates()[istate]->calibrated() < kInvalid;
+		case "measdim"_hash: return trackStates()[istate]->measDim() < kInvalid;
+        }
+        
+        return false;
+    }
+
+
+
+//      component_impl implementation
+
+        template<bool RWState>
+        const std::any ActsTrk::MultiTrajectory<RWState>::component_impl(Acts::HashedString key, ActsTrk::MultiTrajectory<RWState>::IndexType istate) const {
+        	using namespace Acts::HashedStringLiteral;
+        	assert(istate < trackStates().size() && "Attempt to reach beyond the Track States container size");
+        	
+        	switch (key) {
+        		case "previous"_hash: return trackStates()[istate]->previousPtr();
+        		case "chi2"_hash: return trackStates()[istate]->chi2Ptr();
+        		case "pathLength"_hash: return trackStates()[istate]->pathLengthPtr();
+        		case "predicted"_hash: return trackStates()[istate]->predictedPtr();
+        		case "filtered"_hash: return trackStates()[istate]->filteredPtr();
+        		case "smoothed"_hash: return trackStates()[istate]->smoothedPtr();
+        		case "jacobian"_hash: return trackStates()[istate]->jacobianPtr();
+        		case "projector"_hash: return trackStates()[istate]->projectorPtr();
+        		case "uncalibrated"_hash: return trackStates()[istate]->uncalibratedPtr();
+        		case "calibrated"_hash: return trackStates()[istate]->calibratedPtr();
+        		case "measdim"_hash: return trackStates()[istate]->measDimPtr();
+        		default: {
+            			throw std::runtime_error("component_impl const no such a thing, " + std::to_string(key));           		
+        		}
+        	}
+        	
+    	}
+    	
+    	
+    // this duplication is quite bad
+            
+        template<bool RWState>
+        std::any ActsTrk::MultiTrajectory<RWState>::component_impl(Acts::HashedString key, ActsTrk::MultiTrajectory<RWState>::IndexType istate) {
+        	using namespace Acts::HashedStringLiteral;
+        	assert(istate < trackStates().size() && "Attempt to reach beyond the Track States container size");
+
+        	switch (key) {
+        		case "previous"_hash: return trackStates()[istate]->previousPtr();
+        		case "chi2"_hash: return trackStates()[istate]->chi2Ptr();
+        		case "pathLength"_hash: return trackStates()[istate]->pathLengthPtr();
+        		case "predicted"_hash: return trackStates()[istate]->predictedPtr();
+        		case "filtered"_hash: return trackStates()[istate]->filteredPtr();
+        		case "smoothed"_hash: return trackStates()[istate]->smoothedPtr();
+        		case "jacobian"_hash: return trackStates()[istate]->jacobianPtr();
+        		case "projector"_hash: return trackStates()[istate]->projectorPtr();
+        		case "uncalibrated"_hash: return trackStates()[istate]->uncalibratedPtr();
+        		case "calibrated"_hash: return trackStates()[istate]->calibratedPtr();
+        		case "measdim"_hash: return trackStates()[istate]->measDimPtr();
+        		default: {
+            			throw std::runtime_error("component_impl const no such a thing, " + std::to_string(key));           		
+        		}
+        	}
+
+    	}
+
+    
+ 

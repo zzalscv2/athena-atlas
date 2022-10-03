@@ -12,6 +12,7 @@ namespace xAOD {
      * @brief class describing TrackState - backend of navigation object of Acts::MultiTrajectory
      */
     class TrackState_v1 : public SG::AuxElement {
+      public:
         /**
          * @brief get chi2 of this track state
          */
@@ -23,6 +24,13 @@ namespace xAOD {
         void setChi2(double);
 
         /**
+         * @brief pointers API needed by MTJ
+         */
+        const double* chi2Ptr() const;
+        double* chi2Ptr();
+
+
+        /**
          * @brief get path length of this track state
          */
         double pathLength() const;
@@ -30,6 +38,12 @@ namespace xAOD {
          * @brief set path length of this track state
          */
         void setPathLength(double);
+
+        /**
+         * @brief pointers API needed by MTJ
+         */
+        const double* pathLengthPtr() const;
+        double* pathLengthPtr();
 
 
         /**
@@ -48,6 +62,13 @@ namespace xAOD {
         void setPrevious(TrackStateIndexType);
 
         /**
+         * @brief pointers API needed by MTJ
+         */
+        const TrackStateIndexType* previousPtr() const;
+        TrackStateIndexType* previousPtr();
+      
+
+        /**
          * @brief index in the TrackParametersContainer corresponding to this TrackStates container
          * It points to the parameter predicted parameters value (by KF) 
          * @return index, invalid if identical to max possible value of this type
@@ -59,6 +80,12 @@ namespace xAOD {
          * @see predicted() method for explanation
          */
         void setPredicted(TrackStateIndexType);
+
+        /**
+         * @brief pointers API needed by MTJ
+         */
+        const TrackStateIndexType* predictedPtr() const;
+        TrackStateIndexType* predictedPtr();
 
         /**
          * @brief index in the TrackParametersContainer corresponding to this TrackStates container
@@ -74,6 +101,12 @@ namespace xAOD {
         void setFiltered(TrackStateIndexType);
 
         /**
+         * @brief pointers API needed by MTJ
+         */
+        const TrackStateIndexType* filteredPtr() const;
+        TrackStateIndexType* filteredPtr();
+
+        /**
          * @brief index in the TrackParametersContainer corresponding to this TrackStates container
          * Points to the smoothed parameters
          * @return index, invalid if identical to max possible value of this type
@@ -85,6 +118,12 @@ namespace xAOD {
          * @see smoothed() method for explanation
          */
         void setSmoothed(TrackStateIndexType);
+
+        /**
+         * @brief pointers API needed by MTJ
+         */
+        const TrackStateIndexType* smoothedPtr() const;
+        TrackStateIndexType* smoothedPtr();
 
         /**
          * @brief index in the TrackJacobianContainer corresponding to this TrackStates container
@@ -100,6 +139,12 @@ namespace xAOD {
         void setJacobian(TrackStateIndexType);
 
         /**
+         * @brief pointers API needed by MTJ
+         */
+        const TrackStateIndexType* jacobianPtr() const;
+        TrackStateIndexType* jacobianPtr();
+
+        /**
          * @brief index in TrackMeasurementContainer corresponding to this TracksTate
          * 
          * @return index, invalid if identical to max possible value of this type
@@ -110,6 +155,12 @@ namespace xAOD {
          * @see projector()
          */        
         void setProjector(TrackStateIndexType);
+
+        /**
+         * @brief pointers API needed by MTJ
+         */
+        const TrackStateIndexType* projectorPtr() const;
+        TrackStateIndexType* projectorPtr();
 
         /**
          * @brief index in TrackMeasurementContainer corresponding to this TracksTate
@@ -124,6 +175,12 @@ namespace xAOD {
         void setUncalibrated(TrackStateIndexType);
 
         /**
+         * @brief pointers API needed by MTJ
+         */
+        const TrackStateIndexType* uncalibratedPtr() const;
+        TrackStateIndexType* uncalibratedPtr();
+
+        /**
          * @brief index in TrackMeasurementContainer corresponding to this TracksTate
          * Points to calibrated measurement
          * @return index, invalid if identical to max possible value of this type
@@ -136,6 +193,12 @@ namespace xAOD {
         void setCalibrated(TrackStateIndexType);
 
         /**
+         * @brief pointers API needed by MTJ
+         */
+        const TrackStateIndexType* calibratedPtr() const;
+        TrackStateIndexType* calibratedPtr();
+
+        /**
          * @brief measurement dimensions
          * 
          * @return TrackStateIndexType 
@@ -145,6 +208,12 @@ namespace xAOD {
          * @brief Set the measurement dimensions
          */
         void setMeasDim(TrackStateIndexType);
+
+        /**
+         * @brief pointers API needed by MTJ
+         */
+        const TrackStateIndexType* measDimPtr() const;
+        TrackStateIndexType* measDimPtr();
 
 
     };
