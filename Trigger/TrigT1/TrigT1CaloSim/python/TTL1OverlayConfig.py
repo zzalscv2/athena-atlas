@@ -77,14 +77,20 @@ def TileTTL1OverlayCfg(flags, name="TileTTL1Overlay", **kwargs):
         from OutputStreamAthenaPool.OutputStreamConfig import OutputStreamCfg
         acc.merge(OutputStreamCfg(flags, streamName='RDO', ItemList=[
             'TileTTL1Container#TileTTL1Cnt',
-            'TileTTL1Container#TileTTL1MBTS',
         ]))
+        if flags.Detector.EnableMBTS:
+            acc.merge(OutputStreamCfg(flags, streamName='RDO', ItemList=[
+                'TileTTL1Container#TileTTL1MBTS',
+            ]))
 
     if flags.Output.doWriteRDO_SGNL:
         from OutputStreamAthenaPool.OutputStreamConfig import OutputStreamCfg
         acc.merge(OutputStreamCfg(flags, streamName='RDO_SGNL', ItemList=[
             f'TileTTL1Container#{flags.Overlay.SigPrefix}TileTTL1Cnt',
-            f'TileTTL1Container#{flags.Overlay.SigPrefix}TileTTL1MBTS',
         ]))
+        if flags.Detector.EnableMBTS:
+            acc.merge(OutputStreamCfg(flags, streamName='RDO_SGNL', ItemList=[
+                f'TileTTL1Container#{flags.Overlay.SigPrefix}TileTTL1MBTS',
+            ]))
 
     return acc
