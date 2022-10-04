@@ -39,11 +39,6 @@ class jFEXDriver : public AthAlgorithm
   virtual StatusCode execute(/*const EventContext& ctx*/);// const;
   StatusCode finalize();
 
-  virtual StatusCode testSRJetEDM();
-  virtual StatusCode testLRJetEDM();
-  virtual StatusCode testTauEDM();
-  virtual StatusCode testFwdElEDM();
-
  private: 
 
   int m_numberOfEvents = 0;
@@ -51,11 +46,6 @@ class jFEXDriver : public AthAlgorithm
   SG::WriteHandleKey<LVL1::jTowerContainer> m_jTowerContainerSGKey {this, "MyETowers", "jTowerContainer", "MyETowers"};
 
   SG::WriteHandleKey<jFEXOutputCollection> m_jFEXOutputCollectionSGKey {this, "MyOutputs", "jFEXOutputCollection", "MyOutputs"};
-
-  SG::ReadHandleKey<xAOD::jFexSRJetRoIContainer> m_jFexSRJetEDMKey {this, "myEDMSR", "L1_jFexSRJetRoI", "Reading container of jFexSRRoIs"};
-  SG::ReadHandleKey<xAOD::jFexLRJetRoIContainer> m_jFexLRJetEDMKey {this, "myEDMLR", "L1_jFexLRJetRoI", "Reading container of jFexLRRoIs"};
-  SG::ReadHandleKey<xAOD::jFexTauRoIContainer> m_jFexTauEDMKey {this, "myEDMTau", "L1_jFexTauRoI", "Reading container of jFexTauRoIs"};
-  SG::ReadHandleKey<xAOD::jFexFwdElRoIContainer> m_jFexFwdElEDMKey {this, "myEDMFwdEl", "L1_jFexFwdElRoI", "Reading container of jFexFwdElRoIs"};
 
   ToolHandle<IjTowerBuilder> m_jTowerBuilderTool {this, "jTowerBuilderTool", "LVL1::jTowerBuilder", "Tool that builds jTowers for simulation"};
   ToolHandle<IjSuperCellTowerMapper> m_jSuperCellTowerMapperTool {this, "jSuperCellTowerMapperTool", "LVL1::jSuperCellTowerMapper", "Tool that maps supercells to jTowers"};
