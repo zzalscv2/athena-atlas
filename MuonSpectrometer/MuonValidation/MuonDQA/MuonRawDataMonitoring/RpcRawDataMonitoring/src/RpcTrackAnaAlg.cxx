@@ -558,7 +558,7 @@ StatusCode RpcTrackAnaAlg::extrapolate2RPC(const xAOD::TrackParticle *track, con
     return StatusCode::FAILURE;
   }
 
-  Trk::TrackParameters *trackParamLayer = nullptr;
+  std::unique_ptr<Trk::TrackParameters> trackParamLayer{};
   double minDR = 1.0; // A intial value
   
   const std::vector<int> dl_vec = dl_vec_it->second;
@@ -586,8 +586,8 @@ StatusCode RpcTrackAnaAlg::extrapolate2RPC(const xAOD::TrackParticle *track, con
 
       //
       // Extrapolate track to the gas gap surface and check whether the track position is in bounds
-      //
-      Trk::TrackParameters *trackParamInGap = computeTrackIntersectionWithGasGap(result, track, gap);
+      // returns new object
+      auto trackParamInGap = computeTrackIntersectionWithGasGap(result, track, gap);
 
       if(trackParamInGap == nullptr){
         continue;
@@ -600,7 +600,8 @@ StatusCode RpcTrackAnaAlg::extrapolate2RPC(const xAOD::TrackParticle *track, con
 
       if (result.minTrackGasGapDR < minDR){
         minDR = result.minTrackGasGapDR;
-        trackParamLayer = trackParamInGap;
+        //new object moved to trackParamLayer; previous trackParamLayer gets destroyed
+        trackParamLayer =std::move(trackParamInGap);
       }
       ATH_MSG_DEBUG( name() << " extrapolated gasgap: " << gap->gapid_str );
 
@@ -614,7 +615,8 @@ StatusCode RpcTrackAnaAlg::extrapolate2RPC(const xAOD::TrackParticle *track, con
   // propgate the track parameter of the last doublet
   // if no track paramater, use the input track
   if      (trackParamLayer != nullptr  ) {
-    return extrapolate2RPC(trackParamLayer, direction, results, nextDL);
+    //trackParamLayer used and then goes out of scope to destroy the object
+    return extrapolate2RPC(std::move(trackParamLayer), direction, results, nextDL);
   }
   else {
     return extrapolate2RPC(track, direction, results, nextDL);
@@ -622,7 +624,8 @@ StatusCode RpcTrackAnaAlg::extrapolate2RPC(const xAOD::TrackParticle *track, con
 }
 
 //========================================================================================================
-Trk::TrackParameters*  RpcTrackAnaAlg::computeTrackIntersectionWithGasGap(ExResult &                result,
+std::unique_ptr<Trk::TrackParameters>  
+RpcTrackAnaAlg::computeTrackIntersectionWithGasGap(ExResult &                result,
                                                             const xAOD::TrackParticle* track_particle,
                                                             const std::shared_ptr<GasGapData>         &gap) const
 {
@@ -636,7 +639,7 @@ Trk::TrackParameters*  RpcTrackAnaAlg::computeTrackIntersectionWithGasGap(ExResu
   // Get surface of this gas gap and extrapolate track to this surface
   const Trk::SurfaceBounds &bounds          = gap->readoutEl->bounds(gap->gapid);
   const Trk::PlaneSurface &gapSurface       = gap->readoutEl->surface(gap->gapid);
-  Trk::TrackParameters *detParameters = nullptr;
+  std::unique_ptr<Trk::TrackParameters> detParameters{};
 
   if(m_useAODParticle) {
     detParameters = m_extrapolator->extrapolate(ctx,
@@ -644,7 +647,7 @@ Trk::TrackParameters*  RpcTrackAnaAlg::computeTrackIntersectionWithGasGap(ExResu
                                                 gapSurface,
                                                 result.direction,
                                                 false,
-                                                Trk::muon).release();
+                                                Trk::muon);
   }
   else if (track_particle->track()) {
     detParameters = m_extrapolator->extrapolate(ctx,
@@ -652,7 +655,7 @@ Trk::TrackParameters*  RpcTrackAnaAlg::computeTrackIntersectionWithGasGap(ExResu
                                                 gapSurface,
                                                 result.direction,
                                                 true,
-                                                Trk::muon).release();
+                                                Trk::muon);
   }
   else {
     return detParameters;
@@ -683,7 +686,8 @@ Trk::TrackParameters*  RpcTrackAnaAlg::computeTrackIntersectionWithGasGap(ExResu
 }
 
 //========================================================================================================
-StatusCode RpcTrackAnaAlg::extrapolate2RPC(const Trk::TrackParameters* trackParam, const Trk::PropDirection direction, std::vector<GasGapResult> & results, BarrelDL barrelDL) const
+StatusCode 
+RpcTrackAnaAlg::extrapolate2RPC(std::unique_ptr<Trk::TrackParameters> trackParam, const Trk::PropDirection direction, std::vector<GasGapResult> & results, BarrelDL barrelDL) const
 {
   /*
     get intersections of the muon with the RPC planes
@@ -720,7 +724,7 @@ StatusCode RpcTrackAnaAlg::extrapolate2RPC(const Trk::TrackParameters* trackPara
     return StatusCode::FAILURE;
   }
 
-  const Trk::TrackParameters *trackParamLayer = nullptr;
+  std::unique_ptr<Trk::TrackParameters> trackParamLayer{};
   double minDR = 1.0; // A intial value
   
   const std::vector<int> dl_vec = dl_vec_it->second;
@@ -741,17 +745,17 @@ StatusCode RpcTrackAnaAlg::extrapolate2RPC(const Trk::TrackParameters* trackPara
     for(const std::shared_ptr<GasGapData> &gap: gasgapIt->second) {
       ExResult result(gap->gapid, direction);
 
-      // Compute track distance to the gas gap surface
-      gap->computeTrackDistanceToGasGap(result, trackParam);
+      // Compute track distance to the gas gap surface; doesnt take ownership
+      gap->computeTrackDistanceToGasGap(result, trackParam.get());
 
       if(result.minTrackGasGapDR > m_minDRTrackToGasGap) {
         continue;
       }
 
       //
-      // Extrapolate track to the gas gap surface and check whether the track position is in bounds
-      //
-      Trk::TrackParameters *trackParamInGap = computeTrackIntersectionWithGasGap(result,  trackParam, gap);
+      // Extrapolate track to the gas gap surface and check whether the track position is in bounds; doesnt take ownership
+      // but returns a new object
+      auto trackParamInGap = computeTrackIntersectionWithGasGap(result,  trackParam.get(), gap);
       if(trackParamInGap == nullptr){
         continue;
       }
@@ -764,7 +768,8 @@ StatusCode RpcTrackAnaAlg::extrapolate2RPC(const Trk::TrackParameters* trackPara
       
       if (result.minTrackGasGapDR < minDR){
         minDR = result.minTrackGasGapDR;
-        trackParamLayer = trackParamInGap;
+        //previously created trackParamInGap moved to trackParamLayer; previous trackParamLayer deleted
+        trackParamLayer = std::move(trackParamInGap);
       }
 
       results.push_back(std::make_pair(result, gap));
@@ -772,15 +777,16 @@ StatusCode RpcTrackAnaAlg::extrapolate2RPC(const Trk::TrackParameters* trackPara
   }
   
   if (trackParamLayer == nullptr){
-    trackParamLayer = trackParam;
+    trackParamLayer=std::move(trackParam);
   }
   BarrelDL nextDL = BarrelDL(barrelDL+1);
-
-  return extrapolate2RPC(trackParamLayer, direction, results, nextDL);
+  //trackParamLayer used and then goes out of scope, destroying the object
+  return extrapolate2RPC(std::move(trackParamLayer), direction, results, nextDL);
 }
 
 //========================================================================================================
-Trk::TrackParameters*  RpcTrackAnaAlg::computeTrackIntersectionWithGasGap(ExResult &                result,
+std::unique_ptr< Trk::TrackParameters> 
+RpcTrackAnaAlg::computeTrackIntersectionWithGasGap(ExResult &                result,
                                                             const Trk::TrackParameters* trackParam,
                                                             const std::shared_ptr<GasGapData>         &gap) const
 {
@@ -794,12 +800,12 @@ Trk::TrackParameters*  RpcTrackAnaAlg::computeTrackIntersectionWithGasGap(ExResu
   // Get surface of this gas gap and extrapolate track to this surface
   const Trk::SurfaceBounds &bounds    = gap->readoutEl->bounds(gap->gapid);
   const Trk::PlaneSurface &gapSurface = gap->readoutEl->surface(gap->gapid);
-  Trk::TrackParameters *detParameters = m_extrapolator->extrapolate(ctx,
+  auto detParameters = m_extrapolator->extrapolate(ctx,
                                                                     *trackParam,
                                                                     gapSurface,
                                                                     result.direction,
                                                                     true,
-                                                                    Trk::muon).release();
+                                                                    Trk::muon);
 
   if(!detParameters) {
     return detParameters;
