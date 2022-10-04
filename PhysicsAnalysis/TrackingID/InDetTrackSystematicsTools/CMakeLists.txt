@@ -23,6 +23,11 @@ if( NOT XAOD_STANDALONE )
       xAODTracking InDetTrackSystematicsToolsLib )
 endif()
 
+atlas_add_dictionary( InDetTrackSystematicsToolsDict
+   InDetTrackSystematicsTools/InDetTrackSystematicsToolsDict.h
+   InDetTrackSystematicsTools/selection.xml
+   LINK_LIBRARIES InDetTrackSystematicsToolsLib )
+
 # Executable(s) in the package:
 if( XAOD_STANDALONE )
    atlas_add_executable( InDetTrackSystsToolTester
