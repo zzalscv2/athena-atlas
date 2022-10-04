@@ -146,4 +146,3 @@ namespace Trig {
     }
 } //> end namespace Trig
 
-DECLARE_COMPONENT(Trig::NavigationTesterAlg);
