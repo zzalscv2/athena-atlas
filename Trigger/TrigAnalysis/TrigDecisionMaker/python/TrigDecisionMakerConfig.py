@@ -139,7 +139,7 @@ def Run3DecisionMakerCfg(flags):
     tdmv.doL1 = flags.Trigger.L1.doCTP
     tdmv.doHLT = True
     tdmv.samplingFrequency = 1
-    tdmv.errorOnFailure = False
+    tdmv.errorOnFailure = True
     tdmv.EDMVersion = flags.Trigger.EDMVersion
     from TrigDecisionTool.TrigDecisionToolConfig import TrigDecisionToolCfg, getRun3NavigationContainerFromInput
     tdmv.TrigDecisionTool = acc.getPrimaryAndMerge(TrigDecisionToolCfg(flags))

@@ -2,6 +2,7 @@
    Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
 */
 #include "BJetTwoValueCheck.h"
+#include "safeLogRatio.h"
 #include "AthenaMonitoringKernel/Monitored.h"
 
 BJetTwoValueCheck::BJetTwoValueCheck(
@@ -28,8 +29,7 @@ bool BJetTwoValueCheck::passThreshold(const SG::AuxElement& btag) const
 {
   float n = m_acc->n(btag);
   float d = m_acc->d(btag);
-  float ratio = (d == 0 ? INFINITY : n / d);
-  float llr = (ratio == 0 ? -INFINITY : std::log( ratio ));
+  float llr = safeLogRatio(n, d);
   Monitored::Group(m_monTool, Monitored::Scalar(m_llrName, llr));
   return llr > m_threshold;
 }

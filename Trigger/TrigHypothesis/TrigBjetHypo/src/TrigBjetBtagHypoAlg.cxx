@@ -453,39 +453,6 @@ StatusCode TrigBjetBtagHypoAlg::monitor_btagging( const ElementLinkVector< xAOD:
     monitor_for_SV1_L3d, monitor_for_SV1_significance3d
   );
 
-  // Monitor IP2D
-  MONITOR_BTAG_AUX_VAR(IP2D_isDefaults, char, bTaggingEL);
-  auto validIP2D_bTaggingEL = collect_valid_links(bTaggingEL, "IP2D");
-  CHECK( monitor_flavor_probabilities(validIP2D_bTaggingEL, "IP2D") );
-  MONITOR_BTAG_AUX_VAR(IP2D_bu, float, validIP2D_bTaggingEL);
-  MONITOR_BTAG_AUX_VAR(IP2D_bc, float, validIP2D_bTaggingEL);
-  MONITOR_BTAG_AUX_VAR(IP2D_cu, float, validIP2D_bTaggingEL);
-  auto monitor_group_for_IP2D = Monitored::Group( m_monTool, 
-    monitor_for_IP2D_bu, monitor_for_IP2D_bc, monitor_for_IP2D_cu
-  );
-
-  // Monitor IP3D
-  MONITOR_BTAG_AUX_VAR(IP3D_isDefaults, char, bTaggingEL);
-  auto validIP3D_bTaggingEL = collect_valid_links(bTaggingEL, "IP3D");
-  CHECK( monitor_flavor_probabilities(validIP3D_bTaggingEL, "IP3D") );
-  MONITOR_BTAG_AUX_VAR(IP3D_bu, float, validIP3D_bTaggingEL);
-  MONITOR_BTAG_AUX_VAR(IP3D_bc, float, validIP3D_bTaggingEL);
-  MONITOR_BTAG_AUX_VAR(IP3D_cu, float, validIP3D_bTaggingEL);
-  auto monitor_group_for_IP3D = Monitored::Group( m_monTool, 
-    monitor_for_IP3D_bu, monitor_for_IP3D_bc, monitor_for_IP3D_cu
-  );
-  for ( const ElementLink< xAOD::BTaggingContainer > bTagLink : validIP3D_bTaggingEL ) {
-    MONITOR_BTAG_AUX_TRACK_VAR(IP3D_valD0wrtPVofTracks, float);
-    MONITOR_BTAG_AUX_TRACK_VAR(IP3D_sigD0wrtPVofTracks, float);
-    MONITOR_BTAG_AUX_TRACK_VAR(IP3D_valZ0wrtPVofTracks, float);
-    MONITOR_BTAG_AUX_TRACK_VAR(IP3D_sigZ0wrtPVofTracks, float);
-
-    auto monitor_group_for_btag_track_vars = Monitored::Group( m_monTool,
-      monitor_for_IP3D_valD0wrtPVofTracks, monitor_for_IP3D_sigD0wrtPVofTracks,
-      monitor_for_IP3D_valZ0wrtPVofTracks, monitor_for_IP3D_sigZ0wrtPVofTracks
-    );
-  }
-
   // Monitor JetFitterSecondaryVertex
   MONITOR_BTAG_AUX_VAR(JetFitterSecondaryVertex_isDefaults, char, bTaggingEL);
   auto validJFSV_bTaggingEL = collect_valid_links(bTaggingEL, "JetFitterSecondaryVertex");
@@ -521,11 +488,9 @@ StatusCode TrigBjetBtagHypoAlg::monitor_btagging( const ElementLinkVector< xAOD:
 
 
 
-  auto monitor_group_for_btagging = Monitored::Group( m_monTool, 
+  auto monitor_group_for_btagging = Monitored::Group( m_monTool,
     monitor_for_JetFitter_isDefaults,
     monitor_for_SV1_isDefaults,
-    monitor_for_IP2D_isDefaults,
-    monitor_for_IP3D_isDefaults,
     monitor_for_JetFitterSecondaryVertex_isDefaults
   );
 

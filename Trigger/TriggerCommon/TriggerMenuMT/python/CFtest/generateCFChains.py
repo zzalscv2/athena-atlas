@@ -183,7 +183,7 @@ def generateCFChains(opt):
         
         menu.chainsInMenu['Bjet']  = [
             makeChain(name='HLT_j45_boffperf_ftf_subjesgscIS_preselj20_L1J20', L1Thresholds=["FSNOSEED"], ChainSteps=[step1,step2,step3] ),
-            makeChain(name='HLT_j45_bdl1r70_ftf_subjesgscIS_preselj20_L1J20',  L1Thresholds=["FSNOSEED"], ChainSteps=[step1,step2,step3] ),
+            makeChain(name='HLT_j45_bdl1d70_ftf_subjesgscIS_preselj20_L1J20',  L1Thresholds=["FSNOSEED"], ChainSteps=[step1,step2,step3] ),
             ]
 
    

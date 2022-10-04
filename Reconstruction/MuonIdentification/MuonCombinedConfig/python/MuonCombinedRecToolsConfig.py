@@ -6,6 +6,7 @@
 from AthenaConfiguration.ComponentAccumulator import ComponentAccumulator
 from AthenaConfiguration.ComponentFactory import CompFactory
 from AthenaConfiguration.Enums import BeamType
+from AthenaConfiguration.AccumulatorCache import AccumulatorCache
 from TrkConfig.AtlasExtrapolatorConfig import AtlasExtrapolatorCfg
 from MuonConfig.MuonRecToolsConfig import MuonEDMPrinterToolCfg
 from MuonConfig.MuonTrackBuildingConfig import MuonSegmentRegionRecoveryToolCfg
@@ -480,7 +481,7 @@ def MuidCaloEnergyToolParamCfg(flags, name='MuidCaloEnergyToolParam', **kwargs):
 
 def MuidTrackIsolationCfg(flags, name='MuidTrackIsolation', **kwargs):
      from MagFieldServices.MagFieldServicesConfig import AtlasFieldCacheCondAlgCfg
-     kwargs.setdefault("InDetTracksLocation", "CombinedInDetTracks")
+     kwargs.setdefault("InDetTracksLocation", "CombinedInDetTracks" if flags.Detector.GeometryID else "CombinedITkTracks")
      # RungeKuttaIntersector requires the magnetic field conditions
      result = AtlasFieldCacheCondAlgCfg(flags)
      tool = CompFactory.Rec.MuidTrackIsolation(name, **kwargs)
@@ -652,7 +653,7 @@ def MuonAlignmentUncertToolPhiCfg(flags, name="MuonAlignmentUncertToolPhi", **kw
     result.addPublicTool(tool)
     return result
 
-
+@AccumulatorCache
 def CombinedMuonTrackBuilderCfg(flags, name='CombinedMuonTrackBuilder', **kwargs):
     from AthenaCommon.SystemOfUnits import meter
     from MuonConfig.MuonRIO_OnTrackCreatorToolConfig import CscClusterOnTrackCreatorCfg, MdtDriftCircleOnTrackCreatorCfg

@@ -16,7 +16,7 @@
 
 namespace xAOD {
 
-   /// Class describing input data of a LVL1 eFEX
+   /// Class describing input data of a LVL1 jFEX
    //  in the xAOD format.
  
     class jFexTower_v1 : public SG::AuxElement{
@@ -48,10 +48,12 @@ namespace xAOD {
       ///  set fpga number
       void setChannel(uint8_t); /// setter for the above
       
-      /// get Energy Value
-      uint16_t towerEt() const; /// getter for the energy value
-      /// set Energy Value
-      void setTowerEt(uint16_t); /// setter for the above
+      /// get Energy Counts
+      const std::vector<uint16_t>& et_count() const; /// getter for the 11 energy counts
+      /// set Energy Counts
+      void setEt_count(const std::vector<uint16_t>&); /// setter for the above
+      void setEt_count(std::vector<uint16_t>&&); /// setter for the above      
+      
 
       /// get the location where Et is placed in the data stream
       uint8_t jFEXdataID() const; /// getter for the location in data stream where Et is placed [0-15]
@@ -73,12 +75,21 @@ namespace xAOD {
       uint8_t Calosource() const; /// getter for the calorimeter source
       /// set calorimeter source
       void setCalosource(uint8_t); ///setter for the above
+      
+      //Returns the EM layer
+      uint16_t jTowerEt_EM() const;
+      
+      //Returns the HAD layer
+      uint16_t jTowerEt_HAD() const;
+      
+      //Returns the Total Et
+      unsigned int jTowerEt() const;
 
       void initialize(  const float Eta,const float Phi);
       void initialize(  const float Eta,const float Phi,
                         const uint32_t IDsim,
                         const uint8_t source,
-                        const uint16_t TowerEt,
+                        const std::vector<uint16_t>& Et_count,
                         const uint8_t Module,
                         const uint8_t Fpga,
                         const uint8_t Channel,

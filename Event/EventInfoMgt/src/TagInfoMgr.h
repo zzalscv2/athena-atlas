@@ -1,10 +1,10 @@
 //Dear emacs, this is -*-c++-*-
 /*
-  Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef EVENTINFOMGT_TAGINFOMGR_H
-# define EVENTINFOMGT_TAGINFOMGR_H
+#define EVENTINFOMGT_TAGINFOMGR_H
 /**
  * @file TagInfoMgr.h
  *
@@ -17,7 +17,6 @@
 //<<<<<< INCLUDES                                                       >>>>>>
 
 #include "EventInfoMgt/ITagInfoMgr.h"
-#include "AthenaKernel/IOVSvcDefs.h"
 #include "AthenaBaseComps/AthService.h"
 #include "GaudiKernel/Service.h"
 #include "GaudiKernel/ServiceHandle.h"
@@ -27,7 +26,6 @@
 #include "GaudiKernel/MsgStream.h"
 #include "EventInfo/TagInfo.h"
 #include "IOVDbMetaDataTools/IIOVDbMetaDataTool.h"
-#include "AthenaKernel/IAddressProvider.h"
 
 #include <map>
 #include <set>
@@ -68,7 +66,6 @@ class CondAttrListCollection;
  */
 class TagInfoMgr : virtual public AthService,
                    virtual public ITagInfoMgr,
-                   virtual public IAddressProvider,
                    virtual public IIncidentListener
 {
 public:
@@ -96,9 +93,6 @@ public:
     /// Method to allow clients to remove a tag which may have come in
     /// on the input
     virtual StatusCode   removeTagFromInput(const std::string& tagName) override;
-
-    /// callback from IOVSvc - only used as test of callback
-    StatusCode           checkTagInfo(IOVSVC_CALLBACK_ARGS);
 
     /// Find tag by name, return by value
     virtual std::string  findTag ATLAS_CHECK_THREAD_SAFETY (const std::string & name) const override final;
@@ -131,18 +125,6 @@ public:
 
     /// Notify all listeners that the Tags were updated.
     void                 notifyListeners() const;
-    /// Callback from IOVSvc used to notifyListeners at the right time 
-    StatusCode           iovCallback(IOVSVC_CALLBACK_ARGS);
-
-    // Fake IAddressProvider interface implementation - allows to make TagInfoMgr
-    // a proxy provider and attach it to an object with an IOV callback
-    // MN: non-functional, hoipefully temporaru
-    using IAddressProvider::tadList, IAddressProvider::tadListIterator;
-
-    virtual StatusCode preLoadAddresses( StoreID::type storeID, tadList& tlist ) override;
-
-    virtual StatusCode updateAddress(StoreID::type storeID, SG::TransientAddress* tad,
-                                     const EventContext& ctx) override;
     //@}
 
 

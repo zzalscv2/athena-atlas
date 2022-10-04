@@ -91,7 +91,7 @@ def TrigBjetOnlineMonitoring(name="TrigBjetOnlineMonitoring"):
 
 
     # B-Tagging Histograms
-    for tagger in ['IP2D', 'IP3D', 'DL1r', 'rnnip', 'DL1d20211216', 'dips20211116', 'GN120220813']: make_flavor_hists(montool, tagger)
+    for tagger in ['DL1d20211216', 'dips20211116', 'GN120220813']: make_flavor_hists(montool, tagger)
     for tagger in ['DL1bb20220331']: make_b_flavor_hists(montool, tagger)
 
 
@@ -170,19 +170,6 @@ def TrigBjetOnlineMonitoring(name="TrigBjetOnlineMonitoring"):
         title='IP2D: Log(P_{c}/P_{light}), Likelihood ratio between the c-jet and light-flavour jet hypotheses',
         path='EXPERT', type='TH1F', xbins=100, xmin=-10, xmax=50)
 
-    montool.defineHistogram('IP3D_isDefaults',
-        title='IP3D_isDefaults',
-        path='EXPERT', type='TH1I', xbins=2, xmin=0, xmax=2)
-    montool.defineHistogram('IP3D_bu',
-        title='IP3D: Log(P_{b}/P_{light}), Likelihood ratio between the b-jet and light-flavour jet hypotheses',
-        path='EXPERT', type='TH1F', xbins=100, xmin=-10, xmax=50)
-    montool.defineHistogram('IP3D_bc',
-        title='IP3D: Log(P_{b}/P_{c}), Likelihood ratio between the b-jet and c-jet hypotheses',
-        path='EXPERT', type='TH1F', xbins=100, xmin=-10, xmax=50)
-    montool.defineHistogram('IP3D_cu',
-        title='IP3D: Log(P_{c}/P_{light}), Likelihood ratio between the c-jet and light-flavour jet hypotheses',
-        path='EXPERT', type='TH1F', xbins=100, xmin=-10, xmax=50)
-
     montool.defineHistogram('JetFitterSecondaryVertex_nTracks',
         title='JFSV: Number of Tracks',
         path='EXPERT', type='TH1I', xbins=50, xmin=0, xmax=50)
@@ -223,10 +210,4 @@ def TrigBjetOnlineMonitoring(name="TrigBjetOnlineMonitoring"):
         title='JFSV: Average #eta Between Track and Jet Vector for All Tracks from the Jet',
         path='EXPERT', type='TH1F', xbins=100, xmin=0, xmax=8)
 
-    montool.defineHistogram('IP3D_valD0wrtPVofTracks', title="Track d_{0} w/ Respect to PV of Tracks of IP3D;d_{0} (mm)", xmin=-2, xmax=2, xbins = default_bin_count, path='EXPERT', type='TH1F')
-    montool.defineHistogram('IP3D_sigD0wrtPVofTracks', title="Track d_{0} Significance w/ Respect to PV of Tracks of IP3D;d_{0} #sigma", xmin=-100, xmax=100, xbins = default_bin_count, path='EXPERT', type='TH1F')
-    montool.defineHistogram('IP3D_valZ0wrtPVofTracks', title="Track z_{0} w/ Respect to PV of Tracks of IP3D;z_{0} (mm)", xmin=-2, xmax=2, xbins = default_bin_count, path='EXPERT', type='TH1F')
-    montool.defineHistogram('IP3D_sigZ0wrtPVofTracks', title="Track z_{0} Significance w/ Respect to PV of Tracks of IP3D;z_{0} #sigma", xmin=-100, xmax=100, xbins = default_bin_count, path='EXPERT', type='TH1F')
-
-    
     return montool

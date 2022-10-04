@@ -6,7 +6,7 @@ from PyJobTransforms.TransformUtils import processPreExec, processPreInclude, pr
 from SimuJobTransforms.CommonSimulationSteering import CommonSimulationCfg, specialConfigPreInclude, specialConfigPostInclude
 
 
-def defaultSimulationFlags(ConfigFlags, detectors):
+def defaultSimulationFlags(ConfigFlags):
     """Fill default simulation flags"""
     # TODO: how to autoconfigure those
     # Writing out CalibrationHits only makes sense if we are running FullG4 simulation without frozen showers
@@ -19,17 +19,6 @@ def defaultSimulationFlags(ConfigFlags, detectors):
     ConfigFlags.Sim.ReleaseGeoModel = False
     ConfigFlags.Sim.ISFRun = True
     ConfigFlags.GeoModel.Align.Dynamic = False
-
-    # Fatras does not support simulating the BCM, so have to switch that off
-    if ConfigFlags.Sim.ISF.Simulator in [SimulationFlavour.ATLFASTIIFMT, SimulationFlavour.ATLFASTIIF_G4MS, SimulationFlavour.ATLFAST3F_G4MS]:
-        try:
-            detectors.remove('BCM')
-        except ValueError:
-            pass
-
-    # Setup detector flags
-    from AthenaConfiguration.DetectorConfigFlags import setupDetectorFlags
-    setupDetectorFlags(ConfigFlags, detectors, toggle_geometry=True)
 
 
 def fromRunArgs(runArgs):
@@ -58,7 +47,7 @@ def fromRunArgs(runArgs):
     detectors = getDetectorsFromRunArgs(ConfigFlags, runArgs)
 
     # Setup common simulation flags
-    defaultSimulationFlags(ConfigFlags, detectors)
+    defaultSimulationFlags(ConfigFlags)
 
     # Beam Type
     if hasattr(runArgs,'beamType'):
@@ -83,12 +72,12 @@ def fromRunArgs(runArgs):
         if ConfigFlags.Beam.Type is BeamType.Cosmics:
             ConfigFlags.Sim.ReadTR = True
             ConfigFlags.Sim.CosmicFilterVolumeNames = ['Muon']
-            ConfigFlags.Detector.GeometryCavern = True # simulate the cavern with a cosmic TR file
+            detectors.add('Cavern')  # simulate the cavern with a cosmic TR file
         elif hasattr(runArgs,"trackRecordType") and runArgs.trackRecordType=="stopped":
             ConfigFlags.Sim.ReadTR = True
             log.error('Stopped Particle simulation is not supported yet')
         else:
-            ConfigFlags.Detector.GeometryCavern = True # simulate the cavern
+            detectors.add('Cavern')  # simulate the cavern
             ConfigFlags.Sim.CavernBackground = CavernBackground.Read
     else:
         # Common cases
@@ -101,7 +90,7 @@ def fromRunArgs(runArgs):
             ConfigFlags.Sim.CosmicFilterVolumeNames = [getattr(runArgs, "CosmicFilterVolume", "InnerDetector")]
             ConfigFlags.Sim.CosmicFilterVolumeNames += [getattr(runArgs, "CosmicFilterVolume2", "NONE")]
             ConfigFlags.Sim.CosmicPtSlice = getattr(runArgs, "CosmicPtSlice", 'NONE')
-            ConfigFlags.Detector.GeometryCavern = True # simulate the cavern when generating cosmics on-the-fly
+            detectors.add('Cavern')  # simulate the cavern when generating cosmics on-the-fly
             log.debug('No inputEVNTFile provided. OK, as performing cosmics simulation.')
 
     if hasattr(runArgs, 'outputHITSFile'):
@@ -123,11 +112,15 @@ def fromRunArgs(runArgs):
             pass
         else:
             #Case 1b) Cavern Background
-            ConfigFlags.Detector.GeometryCavern = True # simulate the cavern
+            detectors.add('Cavern')  # simulate the cavern
             ConfigFlags.Sim.CalibrationRun = CalibrationRun.Off
             ConfigFlags.Sim.CavernBackground = CavernBackground.Write
     if not (hasattr(runArgs, 'outputHITSFile') or hasattr(runArgs, "outputEVNT_TRFile")):
         raise RuntimeError('No outputHITSFile or outputEVNT_TRFile defined')
+
+    # Setup detector flags
+    from AthenaConfiguration.DetectorConfigFlags import setupDetectorFlags
+    setupDetectorFlags(ConfigFlags, detectors, toggle_geometry=True)
 
     # Setup perfmon flags from runargs
     from PerfMonComps.PerfMonConfigHelpers import setPerfmonFlagsFromRunArgs
