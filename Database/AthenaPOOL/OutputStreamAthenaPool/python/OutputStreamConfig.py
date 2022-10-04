@@ -121,10 +121,18 @@ def OutputStreamCfg(configFlags, streamName, ItemList=[], MetadataItemList=[],
    if not disableEventTag:
       key = "SimpleTag"
       outputStream.WritingTool.AttributeListKey=key
+
+      propagateInputAttributeList = False
+      if "AthenaAttributeList#Input" in configFlags.Input.TypedCollections:
+         from SGComps.SGInputLoaderConfig import SGInputLoaderCfg
+         result.merge(SGInputLoaderCfg(configFlags, ["AthenaAttributeList#Input"]))
+         propagateInputAttributeList = True
+
       # build eventinfo attribute list
       tagBuilder = CompFactory.EventInfoTagBuilder(AttributeList=key,
                                                    Tool=CompFactory.EventInfoAttListTool(),
-                                                   EventInfoKey=eventInfoKey)
+                                                   EventInfoKey=eventInfoKey,
+                                                   PropagateInput=propagateInputAttributeList)
       result.addEventAlgo(tagBuilder)
 
    # For xAOD output
