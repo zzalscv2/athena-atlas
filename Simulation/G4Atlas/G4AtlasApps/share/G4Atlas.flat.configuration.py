@@ -177,8 +177,10 @@ if not simFlags.ISFRun:
         if hasattr(simFlags,'IncludeParentsInG4Event') and simFlags.IncludeParentsInG4Event.statusOn and simFlags.IncludeParentsInG4Event():
             stream1.ItemList += ["McEventCollection#GEN_EVENT"]
 
-        stream1.ItemList += ["xAOD::JetContainer#*",
-                             "xAOD::JetAuxContainer#*"]
+        stream1.ItemList += ["xAOD::JetContainer#AntiKt4TruthJets",
+                             "xAOD::AuxContainerBase!#AntiKt4TruthJetsAux.-constituentLinks.-constituentWeights",
+                             "xAOD::JetContainer#AntiKt6TruthJets",
+                             "xAOD::AuxContainerBase!#AntiKt6TruthJetsAux.-constituentLinks.-constituentWeights"]
         ## pile-up truth particles
         stream1.ItemList += ["xAOD::TruthParticleContainer#TruthPileupParticles",
                              "xAOD::TruthParticleAuxContainer#TruthPileupParticlesAux."]
