@@ -7,7 +7,7 @@
 namespace Trk {
 
 
-void cfClstPnt( double *par, const double *Vrt, double *ClstPnt)
+void cfClstPnt( double *par, const double *Vrt, double *ClstPnt) noexcept
 {
   double e[3];   //Track direction at perigee
   e[0] = cos(par[3]);

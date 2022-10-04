@@ -4,12 +4,11 @@
 
 #include "TrkVKalVrtCore/TrkVKalUtils.h"
 #include <cmath>
-#include <iostream>
 
 namespace Trk {
 
 
-void cferpr(const long int *ich, double  *par, double  *ref, const double  *s0, double  *errold, double  *errnew)
+void cferpr(const long int ich, double  *par, double  *ref, const double  s0, double  *errold, double  *errnew)
 {
 
 
@@ -52,14 +51,14 @@ void cferpr(const long int *ich, double  *par, double  *ref, const double  *s0, 
     derivm[6] = 1.;
     derivm[12] = 1.;
     derivm[24] = 1.;
-    if (*ich != 0) {
+    if (ich != 0) {
 	r__ = 1. / par[5];
 	dyp = r__ - par[1] + yp;
 	dsphi = -r__ * (yp * dyp + xp * xp) / (dyp * dyp + xp * xp);
 	dseps =  r__ * xp / (dyp * dyp + xp * xp);
-	dsrho = -r__ * (*s0) + r__ * r__ * dseps;
+	dsrho = -r__ * s0 + r__ * r__ * dseps;
 	derivm[5] = dseps * ctg;
-	derivm[7] = -(*s0) / (sinp3 * sinp3);
+	derivm[7] = -s0 / (sinp3 * sinp3);
 	derivm[8] = dsphi * ctg;
 	derivm[9] = dsrho * ctg;
 	derivm[15] = par[5] * dseps;
@@ -68,7 +67,7 @@ void cferpr(const long int *ich, double  *par, double  *ref, const double  *s0, 
 	dsq = sqrt(ref[1]*ref[1] + ref[2]*ref[2] + d__3*d__3 + 2.*d__3*yp);
 	derivm[4] = -(r__*r__) + d_sign(1., r__) * (r__*r__) * dyp / dsq;
 	derivm[3] = d_sign(1., r__) * (par[1] - r__) * xp / dsq;
-	derivm[19] = *s0 + par[5] * dsrho;
+	derivm[19] = s0 + par[5] * dsrho;
 	derivm[0] = d_sign(1., r__) * dyp / dsq;
 	derivm[18] = par[5] * dsphi + 1.;
     } else {

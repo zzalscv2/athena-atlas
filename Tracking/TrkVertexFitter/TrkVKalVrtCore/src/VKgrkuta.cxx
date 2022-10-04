@@ -12,7 +12,7 @@ namespace Trk {
 
 extern const vkalMagFld  myMagFld;
 
-void vkgrkuta_(const double *charge, const double *step, double *vect, double *vout, VKalVrtControlBase* CONTROL)
+void vkgrkuta_(const double charge, const double step, double *vect, double *vout, VKalVrtControlBase* CONTROL)
 {
     double equiv_2[3], equiv_5[3];
     long int iter, ncut, j;
@@ -61,14 +61,14 @@ void vkgrkuta_(const double *charge, const double *step, double *vect, double *v
     iter = 0;
     ncut = 0;
     for (j = 1; j <= 7; ++j) {vout[j] = vect[j];}
-    pinv = (*charge) * 2.9979251e-2 / vect[7];      // New for MM, MEV/C and KGAUSS
+    pinv = (charge) * 2.9979251e-2 / vect[7];      // New for MM, MEV/C and KGAUSS
     tl = 0.;
-    hst = *step;
+    hst = step;
 
 //std::cout <<" Now in grkuta="<<vect[1]<<", "<<vect[2]<<", "<<vect[3]<<'\n';
 
 L20:
-    rest = *step - tl;
+    rest = step - tl;
     if (fabs(hst) > fabs(rest)) hst = rest;
 /* *****      CALL GUFLD(VOUT,F) */
     myMagFld.getMagFld( vout[1], vout[2], vout[3], fx, fy, fz, CONTROL);
@@ -176,9 +176,9 @@ L20:
     vout[4] = cba * a;
     vout[5] = cba * b;
     vout[6] = cba * c;
-    rest = *step - tl;
-    if (*step < 0.)  rest = -rest;
-    if (rest > fabs(*step) * 1e-5)	goto L20;
+    rest = step - tl;
+    if (step < 0.)  rest = -rest;
+    if (rest > fabs(step) * 1e-5)	goto L20;
 
     return;
 
@@ -199,7 +199,7 @@ L40:
     f3 = f[2];
     f4 = sqrt(f1*f1 + f2*f2 + f3*f3);
     rho = -f4 * pinv;
-    tet = rho * *step;
+    tet = rho * step;
     if (tet != 0.) {
 	hnorm = 1. / f4;
 	f1 *= hnorm;
@@ -229,9 +229,9 @@ L40:
 	vout[6] = vect[6] + (g4 * vect[6] + g5 * hxp[2] + g6 * f3);
 
     } else {
-	vout[1] = vect[1] + *step * vect[4];
-	vout[2] = vect[2] + *step * vect[5];
-	vout[3] = vect[3] + *step * vect[6];
+	vout[1] = vect[1] + step * vect[4];
+	vout[2] = vect[2] + step * vect[5];
+	vout[3] = vect[3] + step * vect[6];
 
     }
 

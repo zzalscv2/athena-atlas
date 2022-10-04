@@ -16,7 +16,7 @@
  namespace Trk {
 
  extern void cfpest( int ntrk, double *vrt, long int *Charge, double (*part)[5], double (*par0)[3]);
- extern void xyztrp( const long int* Charge, double* vrt, double* Mom, double* CovVrtMom, double BMAG, double* Perig, double* CovPerig );
+ extern void xyztrp( const long int Charge, double* vrt, double* Mom, double* CovVrtMom, double BMAG, double* Perig, double* CovPerig );
 
  extern int CFit(VKalVrtControl *FitCONTROL, int ifCovV0, int NTRK, 
 	      long int *ich, double xyz0[3], double (*par0)[3],
@@ -376,7 +376,7 @@ int TrkVKalVrtFitter::VKalVrtFit3( int ntrk,
     state.m_fitField.getMagFld(Vrt[0], Vrt[1], Vrt[2] ,fx,fy,BMAG_CUR); 
     if(fabs(BMAG_CUR) < 0.01) BMAG_CUR=0.01;  // Safety
 
-    Trk::xyztrp( &vkCharge, Vrt, PMom, Cov0, BMAG_CUR, Per, CovPer );
+    Trk::xyztrp( vkCharge, Vrt, PMom, Cov0, BMAG_CUR, Per, CovPer );
 
     Perigee.clear();
     CovPerigee.clear();

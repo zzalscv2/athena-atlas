@@ -5,7 +5,6 @@
 #include "TrkVKalVrtCore/Propagator.h"
 #include "TrkVKalVrtCore/TrkVKalVrtCore.h"
 #include <cmath>
-#include <iostream>
 
 namespace Trk {
 
@@ -118,7 +117,7 @@ extern int cfdinv(double *, double *, long int);
 
 
     double cs, sn;
-    extern void cfClstPnt(double *p, const double *, double *);
+    extern void cfClstPnt(double *p, const double *, double *) noexcept;
 /* --------------------------------------------------------- */
 /*    SIGNIFICANCE IS CALCULATED FOR THE CLOSEST POINT NOW!!!*/
 /* Author: V.Kostyukhin                                      */

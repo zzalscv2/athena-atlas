@@ -5,7 +5,6 @@
 #include "TrkVKalVrtCore/TrkVKalVrtCoreBase.h"
 #include <algorithm>
 #include <cmath>
-#include <iostream>
 
 namespace Trk {
 
@@ -16,7 +15,7 @@ namespace Trk {
 //     PAR0(5) - fitted track 
 // ------------------------------------------------------------ 
 
-double cfchi2(double *xyzt, const long int *ich, double *part, 
+double cfchi2(double *xyzt, const long int ich, double *part, 
 	const double *par0, double *wgt, double *rmnd)
 {
 
@@ -30,7 +29,7 @@ double cfchi2(double *xyzt, const long int *ich, double *part,
 
     uu = xyzt[1] * cos(part[2]) + xyzt[2] * sin(part[2]);
     vv = xyzt[2] * cos(part[2]) - xyzt[1] * sin(part[2]);
-    sr = part[3] * std::abs(*ich);
+    sr = part[3] * std::abs(ich);
     epsf = -vv - (uu * uu + vv * vv) * sr / 2.;
     zpf = xyzt[3] - uu * (1. - vv * sr) / tan(part[1]);
     phif = part[2] - uu * sr;
@@ -228,7 +227,7 @@ void tdasatVK(const double *Der, const double *CovI, double *CovF, long int M, l
 
 // Zero symmetric matrix and set up diagonal elevents to VALUE
 //------------------------------------------------------------
-void cfsetdiag(long int n, double *matr, double value)
+void cfsetdiag(long int n, double *matr, double value) noexcept
 {
     long int i, j, ij;
     --matr;

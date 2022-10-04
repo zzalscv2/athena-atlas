@@ -25,8 +25,8 @@ namespace Trk {
 //
   class baseMagFld {
   public:
-     baseMagFld();
-     virtual ~baseMagFld();
+     baseMagFld() = default;
+     virtual ~baseMagFld() = default;
      virtual void getMagFld(const double,const double,const double,double&,double&,double&) =0;
   };
 
@@ -42,7 +42,7 @@ namespace Trk {
 
      void getMagFld(const double,const double,const double,double&,double&,double&, VKalVrtControlBase*)  const;
      double getMagFld(const double xyz[3], const VKalVrtControlBase* FitControl)  const;
-     double getCnvCst() const;
+     double getCnvCst() const {  return m_vkalCnvMagFld; }
   
    private:
      const double m_cnstBMAG;

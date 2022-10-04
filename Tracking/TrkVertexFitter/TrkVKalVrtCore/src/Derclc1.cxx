@@ -5,6 +5,7 @@
 #include "TrkVKalVrtCore/CommonPars.h"
 #include "TrkVKalVrtCore/Derivt.h"
 #include "TrkVKalVrtCore/TrkVKalVrtCoreBase.h"
+#include "TrkVKalVrtCore/TrkVKalUtils.h"
 #include <array>
 #include <algorithm>
 #include <cmath> 
@@ -31,7 +32,7 @@ void  calcMassConstraint( VKMassConstraint * cnst )
     const std::vector<int> &usedParticles=cnst->getUsedParticles();
     int usedNTRK = usedParticles.size();
     VKTrack * trk;
-    std::vector< std::array<double, 4> > pp(usedNTRK);
+    noinit_vector< std::array<double, 4> > pp(usedNTRK);
     for( itc=0; itc<usedNTRK; itc++){
       it = usedParticles[itc];
       trk = vk->TrackList.at(it).get();
