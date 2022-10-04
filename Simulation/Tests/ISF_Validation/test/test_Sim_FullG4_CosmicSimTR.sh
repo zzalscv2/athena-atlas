@@ -20,7 +20,7 @@ Sim_tf.py \
 --randomSeed 1234 \
 --DataRunNumber '10' \
 --geometryVersion 'ATLAS-R2-2015-03-01-00' \
---firstEvent 0 \
+--firstEvent 1 \
 --preInclude 'SimulationJobOptions/preInclude.Cosmics.py' \
 --beamType 'cosmics' \
 --imf False
