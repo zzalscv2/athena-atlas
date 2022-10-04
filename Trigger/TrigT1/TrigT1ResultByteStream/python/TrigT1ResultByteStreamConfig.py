@@ -278,6 +278,12 @@ def L1TriggerByteStreamEncoderCfg(flags):
 
   return acc
 
+def MuCTPIPhase1ByteStreamAlgoCfg(flags):
+  #print("MUCTPI DQ DEBUG python include algo")
+  acc = ComponentAccumulator()
+  alg = CompFactory.MuCTPIPhase1ByteStreamAlgo()
+  acc.addEventAlgo(alg)
+  return acc
 
 if __name__ == '__main__':
   from AthenaConfiguration.AllConfigFlags import ConfigFlags as flags
