@@ -13,8 +13,6 @@
 #include "MuonReadoutGeometry/MuonDetectorManager.h"
 
 // Misc includes
-#include "EventInfo/EventID.h"
-#include "EventInfo/EventInfo.h"
 #include "GaudiKernel/ITHistSvc.h"
 #include "TGCcablingInterface/ITGCcablingServerSvc.h"
 
