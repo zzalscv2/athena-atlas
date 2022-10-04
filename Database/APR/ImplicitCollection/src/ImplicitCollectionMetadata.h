@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef ImplicitCollectionMetadata_h
@@ -69,7 +69,7 @@ namespace pool {
           
       virtual void operator++() override { }
 
-      virtual const std::string&        key() const override { static std::string key; return key; }
+      virtual const std::string&        key() const override { static const std::string key; return key; }
       virtual const char *                value() override { return 0; }
 
     };
