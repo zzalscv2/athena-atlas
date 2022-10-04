@@ -1,4 +1,4 @@
-# Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
 #
 # @author Nils Krumnack
 
@@ -7,7 +7,7 @@ atlas_subdir( AsgAnalysisAlgorithms )
 atlas_add_library( AsgAnalysisAlgorithmsLib
    AsgAnalysisAlgorithms/*.h AsgAnalysisAlgorithms/*.icc Root/*.cxx
    PUBLIC_HEADERS AsgAnalysisAlgorithms
-   LINK_LIBRARIES AthContainers AthContainersInterfaces AsgTools xAODBase
+   LINK_LIBRARIES AthContainers AthContainersInterfaces AsgTools CxxUtils xAODBase
      xAODEventInfo SelectionHelpersLib SystematicsHandlesLib PATCoreLib
      PATInterfaces AnaAlgorithmLib AsgAnalysisInterfaces AssociationUtilsLib
      EventBookkeeperToolsLib IsolationSelectionLib PMGAnalysisInterfacesLib
