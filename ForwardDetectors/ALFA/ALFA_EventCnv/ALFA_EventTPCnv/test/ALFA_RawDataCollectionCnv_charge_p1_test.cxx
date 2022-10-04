@@ -1,8 +1,6 @@
 /*
   Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
 */
-
-// $Id$
 /**
  * @file ALFA_EventTPCnv/test/ALFA_RawDataCollectionCnv_charge_p1_test.cxx
  * @author scott snyder <snyder@bnl.gov>
@@ -13,6 +11,7 @@
 
 #undef NDEBUG
 #include "ALFA_EventTPCnv/ALFA_RawDataCollectionCnv_charge_p1.h"
+#include "CxxUtils/checker_macros.h"
 #include "TestTools/leakcheck.h"
 #include <cassert>
 #include <iostream>
@@ -87,7 +86,7 @@ void init_RawData (ALFA_RawData_charge& r, int o)
 }
 
 
-void test1()
+void test1 ATLAS_NOT_THREAD_SAFE ()
 {
   std::cout << "test1\n";
   Athena_test::Leakcheck check;
@@ -115,7 +114,7 @@ void test1()
 }
 
 
-int main()
+int main ATLAS_NOT_THREAD_SAFE ()
 {
   test1();
   return 0;
