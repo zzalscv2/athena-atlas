@@ -262,7 +262,7 @@ namespace InDet {
     return StatusCode::SUCCESS;
   }
 
-  float InDetTrackTruthFilterTool::getFractionDropped(float fDefault, TH2 *histogram, float pt, float eta) const {
+  float InDetTrackTruthFilterTool::getFractionDropped(float fDefault, const TH2 *histogram, float pt, float eta) const {
 
     if(histogram==nullptr) {
       return fDefault;
@@ -271,7 +271,7 @@ namespace InDet {
     pt *= 1.e-3; // unit conversion to GeV
     if( pt >= histogram->GetXaxis()->GetXmax() ) pt = histogram->GetXaxis()->GetXmax() - 0.001;
 
-    float frac = histogram->GetBinContent(histogram->FindBin(pt, eta));
+    float frac = histogram->GetBinContent(histogram->FindFixBin(pt, eta));
     if( frac > 1. ) {
       ATH_MSG_WARNING( "Fraction from histogram " << histogram->GetName()
            << " is greater than 1. Setting fraction to 1." );
