@@ -13,6 +13,9 @@ def MuonCreatorAlgMonitoring(name="MuonCreatorAlgMonitoring"):
     montool.defineHistogram( "muon_eta", type="TH1F", path="EXPERT", title="Muon eta; #eta", xbins=40, xmin=-3, xmax=3)
     montool.defineHistogram( "muon_phi", type="TH1F", path="EXPERT", title="Muon phi; #phi", xbins=40, xmin=-3.2, xmax=3.2)
 
+    montool.defineHistogram( "muon_MDT_R", type="TH1F", path="EXPERT", title="Muon MDT drift radius; drift radius", xbins=30, xmin=0., xmax=15.)
+    montool.defineHistogram( "muon_MDT_dR", type="TH1F", path="EXPERT", title="Muon MDT drift radius error; drift radius error", xbins=100, xmin=0., xmax=0.25)
+
     # Turn-off SA track histograms for inside-out muon reconstruction
     if not ("InsideOut" in name or "Late" in name):
         montool.defineHistogram( "satrks_n", type="TH1F", path="EXPERT", title="Number of SA tracks; N of tracks", xbins=50, xmin=0, xmax=50)
