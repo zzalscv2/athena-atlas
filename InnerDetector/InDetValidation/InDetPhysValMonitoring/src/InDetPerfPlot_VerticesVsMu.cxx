@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2020 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
 */
 
 /**
@@ -23,10 +23,9 @@ InDetPerfPlot_VerticesVsMu::InDetPerfPlot_VerticesVsMu(InDetPlotBase* pParent,
 
 void
 InDetPerfPlot_VerticesVsMu::initializePlots() {
-  const bool prependDirectory(false);
 
-  m_vx_n_vs_mu = Book2D("vx_n_vs_mu", "Number of vertices vs #mu;N vertices;#mu;Entries", 70, 0.0, 70., 100, 0.0, 100,
-                        prependDirectory);
+  book(m_vx_n_vs_mu, "vx_n_vs_mu");
+
 }
 
 void
