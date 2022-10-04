@@ -30,7 +30,6 @@ namespace MuonDQA {
 
   MuonDQAEventInfo::MuonDQAEventInfo( unsigned int run_number, 
                                       unsigned int event_number, 
-				      const std::string  & event_type,
 				      unsigned int time_stamp, 
 				      unsigned int ns_Offset, 
 				      const std::bitset<8> & trig_Type, 
@@ -38,7 +37,7 @@ namespace MuonDQA {
 				      unsigned int lumi_block, 
 				    
 				      std::string tag )
-    : m_runNumber( run_number ), m_eventNumber( event_number ), m_eventtype( std::move(event_type) ) , m_timeStamp( time_stamp ), 
+    : m_runNumber( run_number ), m_eventNumber( event_number ), m_timeStamp( time_stamp ), 
       m_ns_Offset( ns_Offset ), m_trigType ( trig_Type ), m_running_time( running_time ), m_lumiBlock( lumi_block ), 
         m_tag( std::move(tag) )
   {
@@ -67,7 +66,6 @@ namespace MuonDQA {
     stream << "MuonDQAEventInfo :      " << std::endl;
     stream << "         runnumber    = " << runNumber() << std::endl;
     stream << "         eventnumber  = " << eventNumber() << std::endl;
-    stream << "         eventType    = " << eventtype() << std::endl;
     stream << "         timestamp    = " << timeStamp() << std::endl;
     stream << "         ns_Offset    = " << ns_Offset() << std::endl;
     stream << "         trigType     = " << trigType() << std::endl;

@@ -25,7 +25,6 @@ namespace MuonDQA {
      MuonDQA::MuonDQAEventInfo: a class which stores the following information of an event:
      - run number
      - event number
-     - event Type
      - time stamp
      - ns Offset
      - Trigger Type
@@ -53,7 +52,6 @@ namespace MuonDQA {
     //!< constructor initializing all members
     MuonDQAEventInfo( unsigned int run_number,        // Run Number
                       unsigned int event_number,      // Event Number
-		      const std::string  & event_type,         // Event Type		      
 		      unsigned int time_stamp,        // Time stamp
                       unsigned int ns_Offset,         // ns Offset		      
 		      const std::bitset<8> & trig_Type,        // Trigger Type
@@ -69,7 +67,6 @@ namespace MuonDQA {
     
     unsigned int runNumber()   const { return m_runNumber ; }   //!< retrieving runnumber of MuonDQAMonitoring
     unsigned int eventNumber() const { return m_eventNumber ; } //!< retrieving eventnumber of MuonDQAMonitoring
-    std::string  eventtype()   const { return m_eventtype ; }    //!< retrieving eventType of MuonDQAMonitoring
     unsigned int timeStamp()   const { return m_timeStamp ; }   //!< retrieving timestamp of MuonDQAMonitoring
     unsigned int ns_Offset()   const { return m_ns_Offset ; }   //!< retrieving ns_Offset of MuonDQAMonitoring
     const std::bitset<8> trigType()  const { return m_trigType ; }    //!< retrieving Trigger Type of MuonDQAMonitoring
@@ -82,7 +79,6 @@ namespace MuonDQA {
 
     void setRunNumber( const unsigned int run_number ) { m_runNumber = run_number ; } //!< sets runnumber
     void setEventNumber( const unsigned int event_number ) { m_eventNumber = event_number ; } //!< sets eventnumber
-    void setEventType( const std::string & event_type ) { m_eventtype = event_type ; } //!< sets eventType
     void setTimeStamp( const unsigned int time_stamp ) { m_timeStamp = time_stamp ; } //!< sets timestamp
     void setOffset( const unsigned int ns_Offset ) { m_ns_Offset = ns_Offset ; } //!< sets ns_Offset
     void setTrigType( const std::bitset<8> & trig_Type ) { m_trigType = trig_Type ; } //!< sets Trigger Type
@@ -98,7 +94,6 @@ namespace MuonDQA {
       if( this != &right ) { 
         this->setRunNumber(right.runNumber());
         this->setEventNumber(right.eventNumber());
-        this->setEventType(right.eventtype());
         this->setTimeStamp(right.timeStamp());
         this->setOffset(right.ns_Offset());
         this->setTrigType(right.trigType());
@@ -117,7 +112,6 @@ namespace MuonDQA {
   private:
     unsigned int m_runNumber;     //!< runnumber member
     unsigned int m_eventNumber;   //!< eventnumber member
-    std::string m_eventtype;      //!< eventType member
     unsigned int m_timeStamp;     //!< timestamp member
     unsigned int m_ns_Offset;      // ns Offset member
     std::bitset<8> m_trigType ;         // Trigger Type member

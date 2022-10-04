@@ -7,15 +7,11 @@
 
 #include "GaudiKernel/MsgStream.h"
 #include "StoreGate/StoreGateSvc.h"
+#include "StoreGate/ReadHandle.h"
 #include "AthenaMonitoring/LogFileMsgStream.h"
 
 
 #include "AthenaMonitoring/AthenaMonManager.h"
-
-#include "EventInfo/EventInfo.h"
-#include "EventInfo/EventID.h"
-#include "EventInfo/EventType.h"
-#include "EventInfo/TriggerInfo.h"
 
 // trigger includes:
 #include "TrigT1Result/CTP_RDO.h"
@@ -52,6 +48,8 @@ namespace MuonDQA {
  
     // The StoreGateSvc is where event-by-event information is stored.
     ATH_CHECK(service( "StoreGateSvc", m_eventStore));
+
+    ATH_CHECK( m_eventInfoKey.initialize() );
 
     return StatusCode::SUCCESS;
   }
@@ -118,57 +116,34 @@ namespace MuonDQA {
   { 
   
     StatusCode sc = StatusCode::SUCCESS;  
-    const EventInfo* eventInfo = nullptr;
     ATH_MSG_VERBOSE( "MuonEventInfoMonTool::retrieveEventInfo() called" );
 
-   
+
     MuonDQAEventInfo MuonDQAeventInfo;
-       
-    sc = m_eventStore->retrieve(eventInfo);
-    if ( sc.isFailure() ) {
-      ATH_MSG_ERROR( "Could not find eventInfo " );
-      return MuonDQAeventInfo;
-    }else{
-      ATH_MSG_DEBUG( "MuonEventInfoMonTool::retrieved eventInfo" );
-    }
+
+    SG::ReadHandle<xAOD::EventInfo> eventInfo (m_eventInfoKey);
  
     //Cast eventID into MuonDQAEventInfo class:
     
-    MuonDQAeventInfo.setRunNumber( eventInfo->event_ID()->run_number() ) ;
-    MuonDQAeventInfo.setEventNumber( eventInfo->event_ID()->event_number() );
-    MuonDQAeventInfo.setEventType( eventInfo->event_type()->user_type() );
-    MuonDQAeventInfo.setTimeStamp( eventInfo->event_ID()->time_stamp() );
+    MuonDQAeventInfo.setRunNumber( eventInfo->runNumber() ) ;
+    MuonDQAeventInfo.setEventNumber( eventInfo->eventNumber() );
+    MuonDQAeventInfo.setTimeStamp( eventInfo->timeStamp() );
     // Number of days since 1/1/1970 
-    MuonDQAeventInfo.setOffset( eventInfo->event_ID()->time_stamp()/(24*3600));
+    MuonDQAeventInfo.setOffset( eventInfo->timeStamp()/(24*3600));
 
-    // protection against simulated cosmics when the trigger_info() of the event_info is not filled and returns a null pointer. 
-    if(eventInfo->trigger_info() != nullptr) {
-      MuonDQAeventInfo.setTrigType(eventInfo->trigger_info()->level1TriggerType());
-    }
-    else {
-      MuonDQAeventInfo.setTrigType(0);
-    }
+    MuonDQAeventInfo.setTrigType(eventInfo->level1TriggerType());
     
     // Get time of the day for the event and convert from seconds to hours
-    MuonDQAeventInfo.setRunTime( float( eventInfo->event_ID()->time_stamp() - ( ((eventInfo->event_ID()->time_stamp()/(24*3600))*24*3600)/3600. ) ) );         
-    MuonDQAeventInfo.setLumiBlock(eventInfo->event_ID()->lumi_block() );  
+    MuonDQAeventInfo.setRunTime( float( eventInfo->timeStamp() - ( ((eventInfo->timeStamp()/(24*3600))*24*3600)/3600. ) ) );         
+    MuonDQAeventInfo.setLumiBlock(eventInfo->lumiBlock() );  
      
     std::string eventTag=m_eventTag;
     MuonDQAeventInfo.setTag( eventTag );
     
     ATH_MSG_DEBUG( "MuonDQAeventInfo" << MuonDQAeventInfo );
  
-    // Retrieve trigger Info
-    const TriggerInfo* trig = eventInfo->trigger_info(); 
-    //bitset<8> m_l1Trig = 0; 
-    //uint m_l1Trig = 0;
-   
-    // protection against simulated cosmics
-    if(trig != nullptr) {
-      //bitset<8> m_l1Trig = trig->level1TriggerType();
-      uint l1Trig = (uint) ( trig->level1TriggerType() );
-      m_hTriggerType->Fill(l1Trig);
-    }
+    uint l1Trig = (uint) ( eventInfo->level1TriggerType() );
+    m_hTriggerType->Fill(l1Trig);
 
     // Get number of events per Trigger type : 0001 Tile | 0010 RPC | 0100 TGC | 1000 CTP
     //for(int idx = 0; idx < 0; idx++) if(l1Trig.test(idx)) m_hTriggerType->Fill(idx);

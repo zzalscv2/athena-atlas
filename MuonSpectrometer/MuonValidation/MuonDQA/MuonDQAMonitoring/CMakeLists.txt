@@ -11,7 +11,7 @@ atlas_add_component( MuonDQAMonitoring
                      src/*.cxx
                      src/components/*.cxx
                      INCLUDE_DIRS ${ROOT_INCLUDE_DIRS}
-                     LINK_LIBRARIES ${ROOT_LIBRARIES} AthenaMonitoringLib StoreGateLib GaudiKernel EventInfo TrigT1Result )
+                     LINK_LIBRARIES ${ROOT_LIBRARIES} AthenaMonitoringLib StoreGateLib GaudiKernel xAODEventInfo TrigT1Result )
 
 # Install files from the package:
 atlas_install_joboptions( share/*.py )
