@@ -1,9 +1,9 @@
 /*
-  Copyright (C) 2002-2020 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
 */
 
-#ifndef __SPACEPOINT_CONVERSION_UTILS_H__
-#define __SPACEPOINT_CONVERSION_UTILS_H__
+#ifndef TRIGONLINESPACEPOINTTOOL_SPACEPOINT_CONVERSION_UTILS_H
+#define TRIGONLINESPACEPOINTTOOL_SPACEPOINT_CONVERSION_UTILS_H
 
 #include <cmath>
 #include <array>

@@ -40,6 +40,11 @@
 
 #include "PathResolver/PathResolver.h"
 
+//for Phase II
+#include "TrigInDetPattRecoTools/FasTrackConnector.h"
+#include "TrigInDetPattRecoTools/GNN_Geometry.h"
+#include "TrigInDetPattRecoTools/TrigTrackSeedGenerator_ITk.h"
+
 //for UTT
 #include "InDetRIO_OnTrack/PixelClusterOnTrack.h"
 #include "InDetRIO_OnTrack/SCT_ClusterOnTrack.h"
@@ -84,7 +89,9 @@ TrigFastTrackFinder::TrigFastTrackFinder(const std::string& name, ISvcLocator* p
   m_doHitDV(false),
   m_doHitDV_Seeding(false),
   m_dodEdxTrk(false),
-  m_doDisappearingTrk(false)
+  m_doDisappearingTrk(false),
+  m_ITkMode(false),
+  m_standaloneMode(false)
 {
 
   /** Initial cut */
@@ -173,6 +180,10 @@ TrigFastTrackFinder::TrigFastTrackFinder(const std::string& name, ISvcLocator* p
   declareProperty("dodEdxTrk",         m_dodEdxTrk         = false);
   declareProperty("doDisappearingTrk", m_doDisappearingTrk = false);
   declareProperty("DisTrackFitter",    m_disTrkFitter );
+
+  // Phase II
+  declareProperty("ITkMode",           m_ITkMode = false);
+  declareProperty("StandaloneMode",           m_standaloneMode = false);
 }
 
 //--------------------------------------------------------------------------
@@ -183,7 +194,7 @@ TrigFastTrackFinder::~TrigFastTrackFinder() {}
 
 StatusCode TrigFastTrackFinder::initialize() {
 
-  ATH_CHECK(m_roiCollectionKey.initialize() );
+  ATH_CHECK(m_roiCollectionKey.initialize(!m_standaloneMode) );
   ATH_CHECK(m_outputTracksKey.initialize() );
 
   // optional input tracks collection if present the clusters on previously found tracks are not used to form seeds
@@ -274,6 +285,21 @@ StatusCode TrigFastTrackFinder::initialize() {
       m_tcs.m_vLUT.push_back(L);
     }
   }
+  if (m_ITkMode) {
+    //read data from layer connections file 
+    std::string conn_fileName = PathResolver::find_file("binTables_ITK_RUN4.txt", "DATAPATH");
+    if (conn_fileName.empty()) {
+      ATH_MSG_WARNING("Cannot find layer connections file " << conn_fileName);
+    }
+    else {
+      ATH_MSG_INFO(conn_fileName);
+      std::ifstream ifs(conn_fileName.c_str());
+      
+      m_tcs.m_conn = new FASTRACK_CONNECTOR(ifs);
+      
+      ATH_MSG_INFO("Layer connections are initialized from file " << conn_fileName);
+    }
+  }
 
   // UTT tools
   if( m_doDisappearingTrk ) {
@@ -342,6 +368,7 @@ StatusCode TrigFastTrackFinder::initialize() {
   ATH_MSG_DEBUG("	m_LRTmode                  : " <<  m_LRTmode           );
   ATH_MSG_DEBUG("	m_doHitDV                  : " <<  m_doHitDV      );
   ATH_MSG_DEBUG("	m_dodEdxTrk                : " <<  m_dodEdxTrk         );
+  ATH_MSG_DEBUG("	m_ITkMode                  : " <<  m_ITkMode         );
 
   ATH_MSG_DEBUG(" Initialized successfully");
 
@@ -365,6 +392,11 @@ StatusCode TrigFastTrackFinder::start()
   if(m_useNewLayerNumberScheme) {
     const std::vector<TRIG_INDET_SI_LAYER>* pVL = m_numberingTool->layerGeometry();
     std::copy(pVL->begin(),pVL->end(),std::back_inserter(m_tcs.m_layerGeometry));
+
+    if (m_ITkMode) {
+      TrigFTF_GNN_Geometry* pG = new TrigFTF_GNN_Geometry(m_tcs.m_layerGeometry, m_tcs.m_conn);
+      m_tcs.m_geo = pG;
+    }
   }
 
   m_tcs.m_tripletPtMin = m_tripletMinPtFrac*m_pTmin;
@@ -374,26 +406,6 @@ StatusCode TrigFastTrackFinder::start()
 
 
 StatusCode TrigFastTrackFinder::execute(const EventContext& ctx) const {
-
-  //RoI preparation/update
-
-  SG::ReadHandle<TrigRoiDescriptorCollection> roiCollection(m_roiCollectionKey, ctx);
-
-  ATH_CHECK(roiCollection.isValid());
-
-  if ( roiCollection->size()>1 ) ATH_MSG_WARNING( "More than one Roi in the collection: " << m_roiCollectionKey << ", this is not supported - use a composite Roi: Using the first Roi ONLY" );
-
-  if ( roiCollection->size()==0) {
-    ATH_MSG_ERROR("No Roi found for " << m_roiCollectionKey.key() );
-    return StatusCode::FAILURE;
-  }
-
-  TrigRoiDescriptor internalRoI = **roiCollection->begin();
-
-  /// internalRoI.manageConstituents(false);//Don't try to delete RoIs at the end
-
-  /// updating this class member counter is not going to be thread safe ...
-  m_countTotalRoI++;
 
   SG::WriteHandle<TrackCollection> outputTracks(m_outputTracksKey, ctx);
   outputTracks = std::make_unique<TrackCollection>();
@@ -407,7 +419,34 @@ StatusCode TrigFastTrackFinder::execute(const EventContext& ctx) const {
     }
   }
   InDet::ExtendedSiTrackMakerEventData_xk trackEventData(m_prdToTrackMap, ctx);
-  ATH_CHECK(findTracks(trackEventData, internalRoI, inputTracks, *outputTracks, ctx));
+
+  //RoI preparation/update
+
+  if (m_standaloneMode) {
+    const TrigRoiDescriptor internalRoI = TrigRoiDescriptor(true);
+
+    ATH_CHECK(findTracks(trackEventData, internalRoI, inputTracks, *outputTracks, ctx));
+
+  } else {
+    SG::ReadHandle<TrigRoiDescriptorCollection> roiCollection(m_roiCollectionKey, ctx);
+    
+    ATH_CHECK(roiCollection.isValid());
+    
+    if ( roiCollection->size()>1 ) ATH_MSG_WARNING( "More than one Roi in the collection: " << m_roiCollectionKey << ", this is not supported - use a composite Roi: Using the first Roi ONLY" );
+    
+    if ( roiCollection->size()==0) {
+      ATH_MSG_ERROR("No Roi found for " << m_roiCollectionKey.key() );
+      return StatusCode::FAILURE;
+    }
+    TrigRoiDescriptor internalRoI = **roiCollection->begin();
+
+    ATH_CHECK(findTracks(trackEventData, internalRoI, inputTracks, *outputTracks, ctx));
+  }
+
+  /// internalRoI.manageConstituents(false);//Don't try to delete RoIs at the end
+
+  /// updating this class member counter is not going to be thread safe ...
+  m_countTotalRoI++;
 
   return StatusCode::SUCCESS;
 }
@@ -549,18 +588,29 @@ StatusCode TrigFastTrackFinder::findTracks(InDet::SiTrackMakerEventData_xk &trac
 
 
   if(!m_useGPU) {
-    TRIG_TRACK_SEED_GENERATOR seedGen(m_tcs);
+    if (m_ITkMode) {
+      TRIG_TRACK_SEED_GENERATOR_ITK seedGen(m_tcs);
+      seedGen.loadSpacePoints(convertedSpacePoints);
 
-    seedGen.loadSpacePoints(convertedSpacePoints);
-
-    if (m_doZFinder && m_doFastZVseeding) {
-      seedGen.createSeeds(tmpRoi.get(), vZv);
+      if (m_doZFinder && m_doFastZVseeding) seedGen.createSeedsZv();
+      else seedGen.createSeeds(tmpRoi.get());
+    
+      seedGen.getSeeds(triplets);
+ 
+    } else {
+      TRIG_TRACK_SEED_GENERATOR seedGen(m_tcs);
+      
+      seedGen.loadSpacePoints(convertedSpacePoints);
+      
+      if (m_doZFinder && m_doFastZVseeding) {
+	seedGen.createSeeds(tmpRoi.get(), vZv);
+      }
+      else {
+	seedGen.createSeeds(tmpRoi.get());
+      }
+      
+      seedGen.getSeeds(triplets);
     }
-    else {
-      seedGen.createSeeds(tmpRoi.get());
-    }
-
-    seedGen.getSeeds(triplets);
   }
   else {
     //GPU offloading begins ...

@@ -1,9 +1,9 @@
 /*
-  Copyright (C) 2002-2020 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
 */
 
-#ifndef __TRIG_SEED_ML_LUT_H__
-#define __TRIG_SEED_ML_LUT_H__
+#ifndef TRIGINDETPATTRECOTOOLS_TRIG_SEED_ML_LUT_H
+#define TRIGINDETPATTRECOTOOLS_TRIG_SEED_ML_LUT_H
 
 #include <vector>
 
