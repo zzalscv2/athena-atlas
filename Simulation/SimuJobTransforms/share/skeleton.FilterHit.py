@@ -157,8 +157,10 @@ if releaseIsOlderThan(20,0):
     Stream1.ItemList += ["xAOD::JetContainer_v1#*",
                          "xAOD::JetAuxContainer_v1#*"]
 else:
-    Stream1.ItemList += ["xAOD::JetContainer#*",
-                         "xAOD::JetAuxContainer#*"]
+    Stream1.ItemList +=  ["xAOD::JetContainer#AntiKt4TruthJets",
+                          "xAOD::AuxContainerBase!#AntiKt4TruthJetsAux.-constituentLinks.-constituentWeights",
+                          "xAOD::JetContainer#AntiKt6TruthJets",
+                          "xAOD::AuxContainerBase!#AntiKt6TruthJetsAux.-constituentLinks.-constituentWeights"]
 
 # pile-up truth particles
 Stream1.ItemList += ["xAOD::TruthParticleContainer#TruthPileupParticles",
