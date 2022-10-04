@@ -175,18 +175,3 @@ atlas_add_citest( Trigger_athenaHLT_v1PhysP1
 
 atlas_add_citest( Trigger_athenaHLT_v1Cosmic
    SCRIPT test_trigP1_v1Cosmic_build.py )
-
-# TODO: We stop here for now (migration ongoing...)
-return()
-
-
-#################################################################################
-# Digitization/Simulation
-#################################################################################
-atlas_add_citest( MuonDigiReco_digi
-   SCRIPT Digi_tf.py --inputHITSFile /cvmfs/atlas-nightlies.cern.ch/repo/data/data-art/MuonRecRTT/Run3/HITS/AsymmetricLayout_HITS_v2.root --imf False --outputRDOFile OUT_RDO.root --conditionsTag OFLCOND-MC16-SDR-RUN3-02 )
-
-atlas_add_citest( MuonDigiReco_reco
-   SCRIPT Reco_tf.py --inputRDOFile ../MuonDigiReco_digi/OUT_RDO.root --autoConfiguration everything --imf False --outputESDFile OUT_ESD.root
-   DEPENDS_SUCCESS MuonDigiReco_digi
-   POST_EXEC_SCRIPT ${CMAKE_CURRENT_SOURCE_DIR}/test/checkMuonDigiReco.sh )
