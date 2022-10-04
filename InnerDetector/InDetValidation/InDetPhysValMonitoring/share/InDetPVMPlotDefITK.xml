@@ -35,7 +35,7 @@
 <!-- Number of tracks vs MU -->
 <!ENTITY NmuBINS "26">
 <!ENTITY EXPMU "260">
-<!ENTITY EXPTRK "2000">
+<!ENTITY EXPTRK "3000">
 <!ENTITY ETABINS2D "256">
 <!ENTITY PHIBINS2D "160">
 <!-- histogram definitions common to Run2 and ITk -->
