@@ -61,9 +61,9 @@ namespace LVL1 {
 
     virtual std::vector<std::vector<std::vector<uint32_t>>> getFwdElTOBs() override;
 
-    virtual std::vector<std::unique_ptr<jFEXTOB>> getTauTOBs() override;
-    virtual std::vector<std::unique_ptr<jFEXTOB>> getSmallRJetTOBs() override;
-    virtual std::vector<std::unique_ptr<jFEXTOB>> getLargeRJetTOBs() override;
+    virtual std::vector< std::vector<std::unique_ptr<jFEXTOB>> > getTauTOBs() override;
+    virtual std::vector< std::vector<std::unique_ptr<jFEXTOB>> > getSmallRJetTOBs() override;
+    virtual std::vector< std::vector<std::unique_ptr<jFEXTOB>> > getLargeRJetTOBs() override;
     virtual std::vector<std::unique_ptr<jFEXTOB>> getSumEtTOBs() override;
     virtual std::vector<std::unique_ptr<jFEXTOB>> getMetTOBs() override;    
     
