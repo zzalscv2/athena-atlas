@@ -1,4 +1,4 @@
-# Copyright (C) 2002-2020 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
 
 from __future__ import division
 
@@ -106,8 +106,10 @@ class IOVType(object):
     def intersect_run(self, run_number):
         runpart = run_number << 32
         sincelo, sincehi = RunLumi(runpart | 1), RunLumi(runpart | 0xFFFFFFFF)
-        return self._replace(since=max(self.since, sincelo),
-                              until=min(self.until, sincehi))
+        since, until = max(self.since, sincelo), min(self.until, sincehi)
+        if since >= until:
+            return None
+        return self._replace(since=since, until=until)
 
 def make_iov_type(name, variables, bases=(IOVType,), _memoized={}):
     """
@@ -131,7 +133,7 @@ def make_iov_type(name, variables, bases=(IOVType,), _memoized={}):
     
     cls._emptycls = type(name + "_EMPTY", (cls,), dict(
         _is_empty=True,
-        __nonzero__ = lambda self: False,
+        __bool__ = lambda self: False,
     ))   
     
     _memoized[args] = cls
