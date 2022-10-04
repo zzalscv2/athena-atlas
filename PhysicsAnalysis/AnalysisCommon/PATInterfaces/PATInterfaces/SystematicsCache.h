@@ -14,6 +14,7 @@
 #include <CxxUtils/checker_macros.h>
 #include <PATInterfaces/SystematicSet.h>
 #include <functional>
+#include <mutex>
 #include <tbb/concurrent_unordered_map.h>
 
 namespace CP
@@ -112,6 +113,9 @@ namespace CP
     /// systematic, calculating it if necessary
     StatusCode get (const CP::SystematicSet& sys, const CalibData*& result) const;
 
+
+    /// add an individual systematic variation
+    StatusCode add (const CP::SystematicSet& sys, CalibData value);
 
 
     /// Private Members
@@ -240,6 +244,25 @@ namespace CP
     // already there, this will do nothing.
     m_cache.emplace (sys, mycalib);
     result = mycalib.get();
+    return StatusCode::SUCCESS;
+  }
+
+
+
+  template<typename CalibData>
+  StatusCode SystematicsCache<CalibData> ::
+  add (const CP::SystematicSet& sys, CalibData value)
+  {
+    auto emplace_result = m_cache.emplace (sys, std::make_shared<CalibData> (std::move (value)));
+    if (emplace_result.second == false)
+    {
+      ANA_MSG_ERROR ("failed to add systematic, already present: " << sys.name());
+      return StatusCode::FAILURE;
+    }
+
+    for (const auto& var : sys)
+      m_affectingSystematics.insert (var);
+
     return StatusCode::SUCCESS;
   }
 }
