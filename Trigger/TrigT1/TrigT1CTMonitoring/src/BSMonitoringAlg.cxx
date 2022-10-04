@@ -17,8 +17,10 @@ StatusCode TrigT1CTMonitoring::BSMonitoringAlgorithm::initialize() {
     ATH_CHECK( m_rpcRoiTool.retrieve() );
     ATH_CHECK( m_tgcRoiTool.retrieve() );
     }*/
-  
-  ATH_CHECK( m_MuCTPI_RDOKey.initialize(m_processMuctpi) );
+
+  ATH_MSG_DEBUG( "MUCTPI DQ DEBUG isRun3?="<<m_isRun3);
+  ATH_CHECK( m_MuCTPI_Phase1_RDOKey.initialize(m_processMuctpi && m_isRun3) );
+  ATH_CHECK( m_MuCTPI_RDOKey.initialize(m_processMuctpi && !m_isRun3) );
   //ATH_CHECK( m_MuCTPI_RIOKey.initialize(m_processMuctpi && m_processMuctpiRIO && ! m_runOnESD) );
   ATH_CHECK( m_CTP_RDOKey.initialize(m_processCTP) );
   ATH_CHECK( m_CTP_RIOKey.initialize(m_processCTP && ! m_runOnESD) );
@@ -56,6 +58,7 @@ StatusCode TrigT1CTMonitoring::BSMonitoringAlgorithm::fillHistograms( const Even
 
     // Now see what exists in  StoreGate...
     const MuCTPI_RDO* theMuCTPI_RDO = 0;
+    const MuCTPI_Phase1_RDO* theMuCTPI_Phase1_RDO = 0;
     //const MuCTPI_RIO* theMuCTPI_RIO = 0;
     const CTP_RDO* theCTP_RDO = 0;
     const CTP_RIO* theCTP_RIO = 0;
@@ -65,6 +68,7 @@ StatusCode TrigT1CTMonitoring::BSMonitoringAlgorithm::fillHistograms( const Even
 
     //bool validMuCTPI_RIO = true;
     bool validMuCTPI_RDO = true;
+    bool validMuCTPI_Phase1_RDO = true;
     bool validCTP_RIO = true;
     bool validCTP_RDO = true;
     bool validRoIBResult = true;
@@ -85,11 +89,23 @@ StatusCode TrigT1CTMonitoring::BSMonitoringAlgorithm::fillHistograms( const Even
 
     if (m_processMuctpi) {
       ATH_MSG_DEBUG( "CTPMON fillHistograms() m_processMuctpi");
-      theMuCTPI_RDO = SG::get(m_MuCTPI_RDOKey, ctx);
-      if (!theMuCTPI_RDO) {
-	ATH_MSG_WARNING( "Could not find \"" << m_MuCTPI_RDOKey.key() << "\" in StoreGate");
-	validMuCTPI_RDO = false;
-	++numberOfInvalidFragments;
+      if(m_isRun3)
+      {
+          theMuCTPI_Phase1_RDO = SG::get(m_MuCTPI_Phase1_RDOKey, ctx);
+          if (!theMuCTPI_Phase1_RDO) {
+              ATH_MSG_WARNING( "Could not find \"" << m_MuCTPI_Phase1_RDOKey.key() << "\" in StoreGate");
+              validMuCTPI_Phase1_RDO = false;
+              ++numberOfInvalidFragments;
+          }
+      }
+      else
+      {
+          theMuCTPI_RDO = SG::get(m_MuCTPI_RDOKey, ctx);
+          if (!theMuCTPI_RDO) {
+              ATH_MSG_WARNING( "Could not find \"" << m_MuCTPI_RDOKey.key() << "\" in StoreGate");
+              validMuCTPI_RDO = false;
+              ++numberOfInvalidFragments;
+          }
       }
       // now try to get RPC and TGC SL output for comparisons
       theRPCContainer = SG::get(m_RPCContainerKey, ctx);
@@ -161,13 +177,24 @@ StatusCode TrigT1CTMonitoring::BSMonitoringAlgorithm::fillHistograms( const Even
     }
 
     //bool l1ctObjectMissingInStoreGate = ( !validCTP_RDO || !validCTP_RIO || !validMuCTPI_RDO || !validMuCTPI_RIO || !validRoIBResult );
-    bool l1ctObjectMissingInStoreGate = ( !validCTP_RDO || !validCTP_RIO || !validMuCTPI_RDO || !validRoIBResult );
+    bool l1ctObjectMissingInStoreGate;
+    if(m_isRun3)
+        l1ctObjectMissingInStoreGate = ( !validCTP_RDO || !validCTP_RIO || !validMuCTPI_Phase1_RDO || !validRoIBResult );
+    else
+        l1ctObjectMissingInStoreGate = ( !validCTP_RDO || !validCTP_RIO || !validMuCTPI_RDO || !validRoIBResult );
     if ( l1ctObjectMissingInStoreGate ) {
       ATH_MSG_WARNING( "At least one L1CT object is missing in SG");
     }
 
     //dumpData(theCTP_RDO, theCTP_RIO, theMuCTPI_RDO, theMuCTPI_RIO, roIBResult, ctx);
-    dumpData(theCTP_RDO, /*theCTP_RIO,*/ theMuCTPI_RDO, roIBResult, ctx);
+
+    if(m_isRun3)
+    {
+        //todo
+    }
+    else
+        dumpData(theCTP_RDO, /*theCTP_RIO,*/ theMuCTPI_RDO, roIBResult, ctx);
+
     if ( m_processCTP ) {
       if ( validCTP_RDO ) {
 	const std::vector<uint32_t> &cDataWords = theCTP_RDO->getDataWords();
@@ -185,7 +212,7 @@ StatusCode TrigT1CTMonitoring::BSMonitoringAlgorithm::fillHistograms( const Even
       }
     }
 
-    if ( m_processMuctpi ) {
+    if ( m_processMuctpi && !m_isRun3) {
       if ( validMuCTPI_RDO ) {
 	MuCTPI_MultiplicityWord_Decoder multWord(theMuCTPI_RDO->candidateMultiplicity(), m_inclusiveTriggerThresholds);
 	// consider the fragment incomplete if the number of data words is less than
@@ -203,8 +230,7 @@ StatusCode TrigT1CTMonitoring::BSMonitoringAlgorithm::fillHistograms( const Even
     }
 
     // if at least one fragment is missing/incomplete, print out a summary
-    // if (!validCTP_RDO || !validCTP_RIO || !validMuCTPI_RDO || !validMuCTPI_RIO || !validRoIBResult) {
-    if (!validCTP_RDO || !validCTP_RIO || !validMuCTPI_RDO || !validRoIBResult) {
+    if (!validCTP_RDO || !validCTP_RIO || ( (!m_isRun3 && !validMuCTPI_RDO) || (m_isRun3 && !validMuCTPI_Phase1_RDO) ) || !validRoIBResult) {
       ATH_MSG_WARNING( "At least one missing/invalid L1CT fragment detected");
       ATH_MSG_WARNING( "CTP_RDO: " << validCTP_RDO << ", CTP_RIO: " << validCTP_RIO
 		       //<< ", MuCTPI_RIO: " << validMuCTPI_RIO << ", MuCTPI_RDO: " << validMuCTPI_RDO
@@ -255,7 +281,7 @@ StatusCode TrigT1CTMonitoring::BSMonitoringAlgorithm::fillHistograms( const Even
         incompleteFragmentTypeX = 2;
 	fill(m_packageName, incompleteFragmentTypeX);
 	}*/
-      if (!validMuCTPI_RDO) {
+      if ( (!m_isRun3 && !validMuCTPI_RDO) || (m_isRun3 && !validMuCTPI_Phase1_RDO) ) {
         incompleteFragmentTypeX = 2;
 	fill(m_packageName, incompleteFragmentTypeX);
       }
@@ -278,8 +304,7 @@ StatusCode TrigT1CTMonitoring::BSMonitoringAlgorithm::fillHistograms( const Even
     }
 
     // if the event is incomplete (missing L1CT objects or according to EventInfo), skip filling the rest of the histograms
-    //if ( !validCTP_RDO || !validCTP_RIO || !validMuCTPI_RDO || !validMuCTPI_RIO || !validRoIBResult || incompleteEvent ) {
-    if ( !validCTP_RDO || !validCTP_RIO || !validMuCTPI_RDO || !validRoIBResult || incompleteEvent ) {
+    if ( !validCTP_RDO || !validCTP_RIO || ( (!m_isRun3 && !validMuCTPI_RDO) || (m_isRun3 && !validMuCTPI_Phase1_RDO) ) || !validRoIBResult || incompleteEvent ) {
       ATH_MSG_WARNING( "Event incomplete, will skip filling of all non-error histograms");
       //comment patrick: why was this here if later the single validities are checked?
       //bc of validCTP_RIO
@@ -294,25 +319,36 @@ StatusCode TrigT1CTMonitoring::BSMonitoringAlgorithm::fillHistograms( const Even
       doCtp(theCTP_RDO, theCTP_RIO, ctx);
     }
 
-    //if (m_processMuctpi && m_processCTP && validCTP_RDO && validCTP_RIO && validMuCTPI_RDO && validMuCTPI_RIO) {
-    if (m_processMuctpi && m_processCTP && validCTP_RDO && validMuCTPI_RDO ) {
-      ATH_MSG_DEBUG( "CTPMON before begin doCtpMuctpi()");
-      //doCtpMuctpi(theCTP_RDO, theCTP_RIO, theMuCTPI_RDO, theMuCTPI_RIO, ctx);
-      doCtpMuctpi(theCTP_RDO, theMuCTPI_RDO, ctx);
+    if(!m_isRun3)
+    {
+        if (m_processMuctpi && m_processCTP && validCTP_RDO && validMuCTPI_RDO) {
+            ATH_MSG_DEBUG( "CTPMON before begin doCtpMuctpi()");
+            doCtpMuctpi(theCTP_RDO, theMuCTPI_RDO, ctx);
+        }
+    }
+    else
+    {
+        //todo
     }
 
-    //if (m_processMuctpi && validMuCTPI_RDO && validMuCTPI_RIO && validTGCContainer && validRPCContainer) {
-    if (m_processMuctpi && validMuCTPI_RDO && validTGCContainer && validRPCContainer) {
-      ATH_MSG_DEBUG( "CTPMON before begin doMuctpi()");
-      //doMuctpi(theMuCTPI_RDO, theMuCTPI_RIO, theRPCContainer, theTGCContainer, ctx);
-      doMuctpi(theMuCTPI_RDO, theRPCContainer, theTGCContainer, ctx);
-      if (m_processRoIB && m_processMuctpiRIO) {
-	ATH_MSG_DEBUG( "CTPMON before begin doMuonRoI()");
-	//doMuonRoI(theMuCTPI_RDO, theMuCTPI_RIO, roIBResult, ctx);
-	doMuonRoI(theMuCTPI_RDO, roIBResult, ctx);
-      }
+    if(!m_isRun3)
+    {
+        if (m_processMuctpi && validMuCTPI_RDO && validTGCContainer && validRPCContainer) {
+            ATH_MSG_DEBUG( "CTPMON before begin doMuctpi()");
+            doMuctpi(theMuCTPI_RDO, theRPCContainer, theTGCContainer, ctx);
+            if (m_processRoIB && m_processMuctpiRIO) {
+                ATH_MSG_DEBUG( "CTPMON before begin doMuonRoI()");
+                doMuonRoI(theMuCTPI_RDO, roIBResult, ctx);
+            }
+        }
     }
-    //++m_eventCount;
+    else
+    {
+        if (m_processMuctpi && validMuCTPI_Phase1_RDO && validTGCContainer && validRPCContainer) {
+            ATH_MSG_DEBUG( "CTPMON before begin doMuctpi()");
+            doMuctpi(theMuCTPI_Phase1_RDO, ctx);
+        }
+    }
     ATH_MSG_DEBUG( "end fillHistograms()");
     return StatusCode::SUCCESS;
   }
@@ -321,6 +357,505 @@ StatusCode TrigT1CTMonitoring::BSMonitoringAlgorithm::fillHistograms( const Even
     return StatusCode::FAILURE;
   }
   }
+
+
+void
+TrigT1CTMonitoring::BSMonitoringAlgorithm::doMuctpi(const MuCTPI_Phase1_RDO* theMuCTPI_Phase1_RDO,
+                                                    //const RpcSectorLogicContainer* theRPCContainer,    to be re-included and compare
+                                                    //const Muon::TgcCoinDataContainer* theTGCContainer, to be re-included and compare
+                            const EventContext& ctx) const
+{
+  ATH_MSG_DEBUG( "CTPMON begin doMuctpi()");
+  //ERROR vector  - COMMON
+  auto errorPerLumiBlockX = Monitored::Scalar<int>("errorPerLumiBlockX",0);
+  //ERROR vectors - MUCTPI
+  auto errorSummaryMUCTPIX = Monitored::Scalar<int>("errorSummaryMUCTPIX",0);
+  auto errorSummaryMUCTPIY = Monitored::Scalar<int>("errorSummaryMUCTPIY",0);
+  auto errorSummaryPerLumiBlockMUCTPIX = Monitored::Scalar<int>("errorSummaryPerLumiBlockMUCTPIX",0);
+  auto errorSummaryPerLumiBlockMUCTPIY = Monitored::Scalar<int>("errorSummaryPerLumiBlockMUCTPIY",0);
+  auto statusDataWordMUCTPIX = Monitored::Scalar<int>("statusDataWordMUCTPIX",0);
+  auto statusDataWordMUCTPIY = Monitored::Scalar<int>("statusDataWordMUCTPIY",0);
+  auto statusDataWordPerLumiBlockMUCTPIX = Monitored::Scalar<int>("statusDataWordPerLumiBlockMUCTPIX",0);
+  auto statusDataWordPerLumiBlockMUCTPIY = Monitored::Scalar<int>("statusDataWordPerLumiBlockMUCTPIY",0);
+  // MUCTPI-specific
+  auto candPtBAX = Monitored::Scalar<int>("candPtBAX",0);
+  auto candPtECX = Monitored::Scalar<int>("candPtECX",0);
+  auto candPtFWX = Monitored::Scalar<int>("candPtFWX",0);
+  auto candRoiVsSLBACentralSliceX = Monitored::Scalar<int>("candRoiVsSLBACentralSliceX",0);
+  auto candRoiVsSLBACentralSliceY = Monitored::Scalar<int>("candRoiVsSLBACentralSliceY",0);
+  auto candRoiVsSLECCentralSliceX = Monitored::Scalar<int>("candRoiVsSLECCentralSliceX",0);
+  auto candRoiVsSLECCentralSliceY = Monitored::Scalar<int>("candRoiVsSLECCentralSliceY",0);
+  auto candRoiVsSLFWCentralSliceX = Monitored::Scalar<int>("candRoiVsSLFWCentralSliceX",0);
+  auto candRoiVsSLFWCentralSliceY = Monitored::Scalar<int>("candRoiVsSLFWCentralSliceY",0);
+  auto candRoiVsSLBAOtherSliceX = Monitored::Scalar<int>("candRoiVsSLBAOtherSliceX",0);
+  auto candRoiVsSLBAOtherSliceY = Monitored::Scalar<int>("candRoiVsSLBAOtherSliceY",0);
+  auto candRoiVsSLECOtherSliceX = Monitored::Scalar<int>("candRoiVsSLECOtherSliceX",0);
+  auto candRoiVsSLECOtherSliceY = Monitored::Scalar<int>("candRoiVsSLECOtherSliceY",0);
+  auto candRoiVsSLFWOtherSliceX = Monitored::Scalar<int>("candRoiVsSLFWOtherSliceX",0);
+  auto candRoiVsSLFWOtherSliceY = Monitored::Scalar<int>("candRoiVsSLFWOtherSliceY",0);
+  auto candCandFlagsVsSLBACentralSliceX = Monitored::Scalar<int>("candCandFlagsVsSLBACentralSliceX",0);
+  auto candCandFlagsVsSLBACentralSliceY = Monitored::Scalar<int>("candCandFlagsVsSLBACentralSliceY",0);
+  auto candCandFlagsVsSLECCentralSliceX = Monitored::Scalar<int>("candCandFlagsVsSLECCentralSliceX",0);
+  auto candCandFlagsVsSLECCentralSliceY = Monitored::Scalar<int>("candCandFlagsVsSLECCentralSliceY",0);
+  auto candCandFlagsVsSLFWCentralSliceX = Monitored::Scalar<int>("candCandFlagsVsSLFWCentralSliceX",0);
+  auto candCandFlagsVsSLFWCentralSliceY = Monitored::Scalar<int>("candCandFlagsVsSLFWCentralSliceY",0);
+  auto candErrorFlagVsSLBACentralSlicePerLBX = Monitored::Scalar<int>("candErrorFlagVsSLBACentralSlicePerLBX",0);
+  auto candErrorFlagVsSLBACentralSlicePerLBY = Monitored::Scalar<int>("candErrorFlagVsSLBACentralSlicePerLBY",0);
+  auto candErrorFlagVsSLECCentralSlicePerLBX = Monitored::Scalar<int>("candErrorFlagVsSLECCentralSlicePerLBX",0);
+  auto candErrorFlagVsSLECCentralSlicePerLBY = Monitored::Scalar<int>("candErrorFlagVsSLECCentralSlicePerLBY",0);
+  auto candErrorFlagVsSLFWCentralSlicePerLBX = Monitored::Scalar<int>("candErrorFlagVsSLFWCentralSlicePerLBX",0);
+  auto candErrorFlagVsSLFWCentralSlicePerLBY = Monitored::Scalar<int>("candErrorFlagVsSLFWCentralSlicePerLBY",0);
+  auto candSliceVsSLBAX = Monitored::Scalar<int>("candSliceVsSLBAX",0);
+  auto candSliceVsSLBAY = Monitored::Scalar<int>("candSliceVsSLBAY",0);
+  auto candSliceVsSLECX = Monitored::Scalar<int>("candSliceVsSLECX",0);
+  auto candSliceVsSLECY = Monitored::Scalar<int>("candSliceVsSLECY",0);
+  auto candSliceVsSLFWX = Monitored::Scalar<int>("candSliceVsSLFWX",0);
+  auto candSliceVsSLFWY = Monitored::Scalar<int>("candSliceVsSLFWY",0);
+  //TOB
+  auto tobEtaPhiAX = Monitored::Scalar<int>("tobEtaPhiAX",0);
+  auto tobEtaPhiAY = Monitored::Scalar<int>("tobEtaPhiAY",0);
+  auto tobEtaPhiA_GoodMFX = Monitored::Scalar<int>("tobEtaPhiA_GoodMFX",0);
+  auto tobEtaPhiA_GoodMFY = Monitored::Scalar<int>("tobEtaPhiA_GoodMFY",0);
+  auto tobEtaPhiA_InnerCoinX = Monitored::Scalar<int>("tobEtaPhiA_InnerCoinX",0);
+  auto tobEtaPhiA_InnerCoinY = Monitored::Scalar<int>("tobEtaPhiA_InnerCoinY",0);
+  auto tobEtaPhiA_BW23X = Monitored::Scalar<int>("tobEtaPhiA_BW23X",0);
+  auto tobEtaPhiA_BW23Y = Monitored::Scalar<int>("tobEtaPhiA_BW23Y",0);
+  auto tobEtaPhiA_ChargeX = Monitored::Scalar<int>("tobEtaPhiA_ChargeX",0);
+  auto tobEtaPhiA_ChargeY = Monitored::Scalar<int>("tobEtaPhiA_ChargeY",0);
+  auto tobEtaPhiCX = Monitored::Scalar<int>("tobEtaPhiCX",0);
+  auto tobEtaPhiCY = Monitored::Scalar<int>("tobEtaPhiCY",0);
+  auto tobEtaPhiC_GoodMFX = Monitored::Scalar<int>("tobEtaPhiC_GoodMFX",0);
+  auto tobEtaPhiC_GoodMFY = Monitored::Scalar<int>("tobEtaPhiC_GoodMFY",0);
+  auto tobEtaPhiC_InnerCoinX = Monitored::Scalar<int>("tobEtaPhiC_InnerCoinX",0);
+  auto tobEtaPhiC_InnerCoinY = Monitored::Scalar<int>("tobEtaPhiC_InnerCoinY",0);
+  auto tobEtaPhiC_BW23X = Monitored::Scalar<int>("tobEtaPhiC_BW23X",0);
+  auto tobEtaPhiC_BW23Y = Monitored::Scalar<int>("tobEtaPhiC_BW23Y",0);
+  auto tobEtaPhiC_ChargeX = Monitored::Scalar<int>("tobEtaPhiC_ChargeX",0);
+  auto tobEtaPhiC_ChargeY = Monitored::Scalar<int>("tobEtaPhiC_ChargeY",0);
+  auto tobPtVsEtaAX = Monitored::Scalar<int>("tobPtVsEtaAX",0);
+  auto tobPtVsEtaAY = Monitored::Scalar<int>("tobPtVsEtaAY",0);
+  auto tobPtVsPhiAX = Monitored::Scalar<int>("tobPtVsPhiAX",0);
+  auto tobPtVsPhiAY = Monitored::Scalar<int>("tobPtVsPhiAY",0);
+  auto tobPtVsEtaCX = Monitored::Scalar<int>("tobPtVsEtaCX",0);
+  auto tobPtVsEtaCY = Monitored::Scalar<int>("tobPtVsEtaCY",0);
+  auto tobPtVsPhiCX = Monitored::Scalar<int>("tobPtVsPhiCX",0);
+  auto tobPtVsPhiCY = Monitored::Scalar<int>("tobPtVsPhiCY",0);
+  //mlt
+  auto multX = Monitored::Scalar<int>("multX",0);
+  auto multPerLBX = Monitored::Scalar<int>("multPerLBX",0);
+  auto multPerLBY = Monitored::Scalar<int>("multPerLBY",0);
+  auto multSliceVsMultX = Monitored::Scalar<int>("multSliceVsMultX",0);
+  auto multSliceVsMultY = Monitored::Scalar<int>("multSliceVsMultY",0);
+
+
+
+
+  //get event info
+  auto eventInfo = GetEventInfo(ctx);
+  uint32_t currentLumiBlock = eventInfo->lumiBlock();
+
+  //get muctpi fragment data in the form of a vector of timeslices
+  const std::vector<LVL1::MuCTPIBits::Slice> &slices = theMuCTPI_Phase1_RDO->slices();
+
+  //https://gitlab.cern.ch/atlas/athena/-/blob/master/Trigger/TrigT1/TrigT1Result/src/MuCTPI_DataWord_Decoder.cxx
+  //https://gitlab.cern.ch/atlas/athena/-/blob/master/Trigger/TrigT1/TrigT1Result/TrigT1Result/MuCTPI_DataWord_Decoder.h
+
+
+  //data is grouped in slices:
+  for(uint iSlice=0;iSlice<theMuCTPI_Phase1_RDO->slices().size();iSlice++)
+  {
+
+      ATH_MSG_DEBUG( "MUCTPI DQ DEBUG: iSlice = "<<iSlice);
+
+      //assuming only 1,3,5,7 possible slices:
+      bool isCentralSlice=false;
+      if(theMuCTPI_Phase1_RDO->slices().size()==1)
+          isCentralSlice=true;
+      else
+          isCentralSlice = (theMuCTPI_Phase1_RDO->slices().size()-1)/2 == iSlice;
+
+      //-------------------------------------------------
+      // HEADER
+      //-------------------------------------------------
+      //uint header_bcid = slices[iSlice].bcid; //may be used later for comparison with RPC/TGC containers
+      uint header_tobCount = slices[iSlice].nTOB;  //check during cand/topo section below
+      uint header_candCount = slices[iSlice].nCand;//check during cand/topo section below
+
+      ///bcid check: header against RDO bcid
+      // actually skipping this, since it is checked online by HLT (MUCTPI_BCIDOffsetsWrtROB)
+
+      //-------------------------------------------------
+      // MULTIPLICITY
+      //-------------------------------------------------
+
+      ///MLT vector of up to 32 items:
+      /// fill histo 1D total numbers
+      /// fill histo 2D per LB
+      /// fill histo 2D per (timeslice relative BCID)
+
+      //flags from 3rd Mult word
+      if(isCentralSlice)
+      {
+
+      }
+
+      for(uint iThr=0;iThr<slices[iSlice].mlt.cnt.size();iThr++)
+      {
+          multX = iThr;
+          fill(m_packageName, multX);
+          multPerLBX = currentLumiBlock;
+          multPerLBY = iThr;
+          fill(m_packageName, multPerLBX, multPerLBY);
+
+          multSliceVsMultY = iThr;
+          if(isCentralSlice)
+              multSliceVsMultX = 0;
+          else
+              multSliceVsMultX = 1;
+          fill(m_packageName, multSliceVsMultX, multSliceVsMultY);
+      }
+
+
+      ///NSW mon trigger    todo?
+      ///cand overflow flag todo?
+
+      //-------------------------------------------------
+      // CANDIDATES
+      //-------------------------------------------------
+      //Errors:
+      ///if candCount!=candidate words
+      if(header_candCount != slices[iSlice].cand.size())
+      {
+          errorSummaryMUCTPIX=2;
+          fill(m_packageName, errorSummaryMUCTPIX);
+          errorSummaryPerLumiBlockMUCTPIX=2;
+          errorSummaryPerLumiBlockMUCTPIY=currentLumiBlock;
+          fill(m_packageName, errorSummaryPerLumiBlockMUCTPIX, errorSummaryPerLumiBlockMUCTPIY);
+      }
+
+
+      for(uint iCand=0;iCand<slices[iSlice].cand.size();iCand++)
+      {
+          /// 1D pT stats x3
+
+          /// 2D roi vs SL (    central slice) x3
+          /// 2D roi vs SL (non-central slice) x3
+
+          /// 2D cand flags vs SL BA (2)
+          /// 2D cand flags vs SL EC (4)
+          /// 2D cand flags vs SL FW (4)
+
+          /// 2D sec err flag per LB x3
+
+          /// 2D fill SL (central "VS" non-central slice) x3
+          /// todo: 1D fill ratio (central / non-central slice) x3 (hopefully can make the ratio on Han?)
+
+
+          ATH_MSG_DEBUG( "MUCTPI DQ DEBUG: iCand="<<iCand << " type="<<(int)slices[iSlice].cand[iCand].type<< " num="<<(int)slices[iSlice].cand[iCand].num<< " pt="<<slices[iSlice].cand[iCand].pt);
+
+          if(slices[iSlice].cand[iCand].type==LVL1::MuCTPIBits::SubsysID::Barrel)
+          {
+              uint num = slices[iSlice].cand[iCand].num + 32*(1-slices[iSlice].cand[iCand].side);//offset side C;
+              candPtBAX = slices[iSlice].cand[iCand].pt;
+              fill(m_packageName, candPtBAX);
+
+              if(isCentralSlice)
+              {
+                  candRoiVsSLBACentralSliceX = num;
+                  candRoiVsSLBACentralSliceY = slices[iSlice].cand[iCand].roi;
+                  fill(m_packageName, candRoiVsSLBACentralSliceX, candRoiVsSLBACentralSliceY);
+
+                  candCandFlagsVsSLBACentralSliceX = num;
+                  candCandFlagsVsSLBACentralSliceY = 0;
+                  if(slices[iSlice].cand[iCand].candFlag_gt1CandRoi)
+                      fill(m_packageName, candCandFlagsVsSLBACentralSliceX, candCandFlagsVsSLBACentralSliceY);
+
+                  candCandFlagsVsSLBACentralSliceY = 1;
+                  if(slices[iSlice].cand[iCand].candFlag_phiOverlap)
+                      fill(m_packageName, candCandFlagsVsSLBACentralSliceX, candCandFlagsVsSLBACentralSliceY);
+
+                  candErrorFlagVsSLBACentralSlicePerLBX = num;
+                  candErrorFlagVsSLBACentralSlicePerLBY = currentLumiBlock;
+                  if(slices[iSlice].cand[iCand].errorFlag)
+                      fill(m_packageName, candErrorFlagVsSLBACentralSlicePerLBX, candErrorFlagVsSLBACentralSlicePerLBY);
+
+                  candSliceVsSLBAX = num;
+                  candSliceVsSLBAY = 0;
+                  fill(m_packageName, candSliceVsSLBAX, candSliceVsSLBAY);
+              }
+              else
+              {
+                  candRoiVsSLBAOtherSliceX = slices[iSlice].cand[iCand].num + 32*(1-slices[iSlice].cand[iCand].side);//offset side C
+                  candRoiVsSLBAOtherSliceY = slices[iSlice].cand[iCand].roi;
+                  fill(m_packageName, candRoiVsSLBAOtherSliceX, candRoiVsSLBAOtherSliceY);
+
+                  candSliceVsSLBAX = num;
+                  candSliceVsSLBAY = 1;
+                  fill(m_packageName, candSliceVsSLBAX, candSliceVsSLBAY);
+              }
+          }
+          else if(slices[iSlice].cand[iCand].type==LVL1::MuCTPIBits::SubsysID::Endcap)
+          {
+              uint num = slices[iSlice].cand[iCand].num + 48*(1-slices[iSlice].cand[iCand].side);//offset side C;
+
+              candPtECX = slices[iSlice].cand[iCand].pt;
+              fill(m_packageName, candPtECX);
+
+              if(isCentralSlice)
+              {
+                  candRoiVsSLECCentralSliceX = num;
+                  candRoiVsSLECCentralSliceY = slices[iSlice].cand[iCand].roi;
+                  fill(m_packageName, candRoiVsSLECCentralSliceX, candRoiVsSLECCentralSliceY);
+
+                  candCandFlagsVsSLECCentralSliceX = num;
+                  candCandFlagsVsSLECCentralSliceY = 0;
+                  if(slices[iSlice].cand[iCand].candFlag_Charge)
+                      fill(m_packageName, candCandFlagsVsSLECCentralSliceX, candCandFlagsVsSLECCentralSliceY);
+
+                  candCandFlagsVsSLECCentralSliceY = 1;
+                  if(slices[iSlice].cand[iCand].candFlag_BW23)
+                      fill(m_packageName, candCandFlagsVsSLECCentralSliceX, candCandFlagsVsSLECCentralSliceY);
+
+                  candCandFlagsVsSLECCentralSliceY = 2;
+                  if(slices[iSlice].cand[iCand].candFlag_InnerCoin)
+                      fill(m_packageName, candCandFlagsVsSLECCentralSliceX, candCandFlagsVsSLECCentralSliceY);
+
+                  candCandFlagsVsSLECCentralSliceY = 3;
+                  if(slices[iSlice].cand[iCand].candFlag_GoodMF)
+                      fill(m_packageName, candCandFlagsVsSLECCentralSliceX, candCandFlagsVsSLECCentralSliceY);
+
+                  candErrorFlagVsSLECCentralSlicePerLBX = num;
+                  candErrorFlagVsSLECCentralSlicePerLBY = currentLumiBlock;
+                  if(slices[iSlice].cand[iCand].errorFlag)
+                      fill(m_packageName, candErrorFlagVsSLECCentralSlicePerLBX, candErrorFlagVsSLECCentralSlicePerLBY);
+
+                  candSliceVsSLECX = num;
+                  candSliceVsSLECY = 0;
+                  fill(m_packageName, candSliceVsSLECX, candSliceVsSLECY);
+              }
+              else
+              {
+                  candRoiVsSLECOtherSliceX = slices[iSlice].cand[iCand].num + 48*(1-slices[iSlice].cand[iCand].side);//offset side C
+                  candRoiVsSLECOtherSliceY = slices[iSlice].cand[iCand].roi;
+                  fill(m_packageName, candRoiVsSLECOtherSliceX, candRoiVsSLECOtherSliceY);
+
+                  candSliceVsSLECX = num;
+                  candSliceVsSLECY = 1;
+                  fill(m_packageName, candSliceVsSLECX, candSliceVsSLECY);
+              }
+          }
+          else if(slices[iSlice].cand[iCand].type==LVL1::MuCTPIBits::SubsysID::Forward)
+          {
+              uint num = slices[iSlice].cand[iCand].num + 24*(1-slices[iSlice].cand[iCand].side);//offset side C;
+              candPtFWX = slices[iSlice].cand[iCand].pt;
+              fill(m_packageName, candPtFWX);
+
+              if(isCentralSlice)
+              {
+                  candRoiVsSLFWCentralSliceX = num;
+                  candRoiVsSLFWCentralSliceY = slices[iSlice].cand[iCand].roi;
+                  fill(m_packageName, candRoiVsSLFWCentralSliceX, candRoiVsSLFWCentralSliceY);
+
+                  candCandFlagsVsSLFWCentralSliceX = num;
+                  candCandFlagsVsSLFWCentralSliceY = 0;
+                  if(slices[iSlice].cand[iCand].candFlag_Charge)
+                      fill(m_packageName, candCandFlagsVsSLFWCentralSliceX, candCandFlagsVsSLFWCentralSliceY);
+
+                  candCandFlagsVsSLFWCentralSliceY = 1;
+                  if(slices[iSlice].cand[iCand].candFlag_BW23)
+                      fill(m_packageName, candCandFlagsVsSLFWCentralSliceX, candCandFlagsVsSLFWCentralSliceY);
+
+                  candCandFlagsVsSLFWCentralSliceY = 2;
+                  if(slices[iSlice].cand[iCand].candFlag_InnerCoin)
+                      fill(m_packageName, candCandFlagsVsSLFWCentralSliceX, candCandFlagsVsSLFWCentralSliceY);
+
+                  candCandFlagsVsSLFWCentralSliceY = 3;
+                  if(slices[iSlice].cand[iCand].candFlag_GoodMF)
+                      fill(m_packageName, candCandFlagsVsSLFWCentralSliceX, candCandFlagsVsSLECCentralSliceY);
+
+                  candErrorFlagVsSLFWCentralSlicePerLBX = num;
+                  candErrorFlagVsSLFWCentralSlicePerLBY = currentLumiBlock;
+                  if(slices[iSlice].cand[iCand].errorFlag)
+                      fill(m_packageName, candErrorFlagVsSLFWCentralSlicePerLBX, candErrorFlagVsSLFWCentralSlicePerLBY);
+
+                  candSliceVsSLFWX = num;
+                  candSliceVsSLFWY = 0;
+                  fill(m_packageName, candSliceVsSLFWX, candSliceVsSLFWY);
+              }
+              else
+              {
+                  candRoiVsSLFWOtherSliceX = slices[iSlice].cand[iCand].num + 24*(1-slices[iSlice].cand[iCand].side);//offset side C
+                  candRoiVsSLFWOtherSliceY = slices[iSlice].cand[iCand].roi;
+                  fill(m_packageName, candRoiVsSLFWOtherSliceX, candRoiVsSLFWOtherSliceY);
+
+                  candSliceVsSLFWX = num;
+                  candSliceVsSLFWY = 1;
+                  fill(m_packageName, candSliceVsSLFWX, candSliceVsSLFWY);
+              }
+          }
+
+      }
+
+      //-------------------------------------------------
+      //TOBs
+      //-------------------------------------------------
+
+      ///per Side
+      {
+          /// 2D eta-phi hits
+          /// (clarify eta bits)
+
+          /// 2D eta/phi - fill when GoodMF    (EF only)
+          /// 2D eta/phi - fill when InnerCoin (EF only)
+          /// 2D eta/phi - fill when BW23      (EF only)
+          /// 2D eta/phi - fill when charge    (EF only)
+
+          /// 2D pT VS phi
+          /// 2D pT VS eta
+      }
+
+      ///if tobCount!=tob words
+      if(header_tobCount != slices[iSlice].tob.size())
+      {
+          errorSummaryMUCTPIX=3;
+          fill(m_packageName, errorSummaryMUCTPIX);
+          errorSummaryPerLumiBlockMUCTPIX=3;
+          errorSummaryPerLumiBlockMUCTPIY=currentLumiBlock;
+          fill(m_packageName, errorSummaryPerLumiBlockMUCTPIX, errorSummaryPerLumiBlockMUCTPIY);
+      }
+
+      for(uint iTOB=0;iTOB<slices[iSlice].tob.size();iTOB++)
+      {
+
+          uint eta = slices[iSlice].tob[iTOB].etaRaw;
+          uint phi = slices[iSlice].tob[iTOB].phiRaw;
+          uint pt = slices[iSlice].tob[iTOB].pt;
+
+          if(slices[iSlice].tob[iTOB].side==1)//A
+          {
+              tobEtaPhiAX = phi;
+              tobEtaPhiAY = eta;
+              fill(m_packageName, tobEtaPhiAX, tobEtaPhiAY);
+
+              if(slices[iSlice].tob[iTOB].candFlag_GoodMF)
+              {
+                  tobEtaPhiA_GoodMFX = phi;
+                  tobEtaPhiA_GoodMFY = eta;
+                  fill(m_packageName, tobEtaPhiA_GoodMFX, tobEtaPhiA_GoodMFY);
+              }
+              if(slices[iSlice].tob[iTOB].candFlag_InnerCoin)
+              {
+                  tobEtaPhiA_InnerCoinX = phi;
+                  tobEtaPhiA_InnerCoinY = eta;
+                  fill(m_packageName, tobEtaPhiA_InnerCoinX, tobEtaPhiA_InnerCoinY);
+              }
+              if(slices[iSlice].tob[iTOB].candFlag_BW23)
+              {
+                  tobEtaPhiA_BW23X = phi;
+                  tobEtaPhiA_BW23Y = eta;
+                  fill(m_packageName, tobEtaPhiA_BW23X, tobEtaPhiA_BW23Y);
+              }
+              if(slices[iSlice].tob[iTOB].candFlag_Charge)
+              {
+                  tobEtaPhiA_ChargeX = phi;
+                  tobEtaPhiA_ChargeY = eta;
+                  fill(m_packageName, tobEtaPhiA_ChargeX, tobEtaPhiA_ChargeY);
+              }
+
+              tobPtVsEtaAX = eta;
+              tobPtVsEtaAY = pt;
+              fill(m_packageName, tobPtVsEtaAX, tobPtVsEtaAY);
+              tobPtVsPhiAX = eta;
+              tobPtVsPhiAY = pt;
+              fill(m_packageName, tobPtVsPhiAX, tobPtVsPhiAY);
+          }//side A
+          else
+          {
+              tobEtaPhiCX = phi;
+              tobEtaPhiCY = eta;
+              fill(m_packageName, tobEtaPhiCX, tobEtaPhiCY);
+
+              if(slices[iSlice].tob[iTOB].candFlag_GoodMF)
+              {
+                  tobEtaPhiC_GoodMFX = phi;
+                  tobEtaPhiC_GoodMFY = eta;
+                  fill(m_packageName, tobEtaPhiC_GoodMFX, tobEtaPhiC_GoodMFY);
+              }
+              if(slices[iSlice].tob[iTOB].candFlag_InnerCoin)
+              {
+                  tobEtaPhiC_InnerCoinX = phi;
+                  tobEtaPhiC_InnerCoinY = eta;
+                  fill(m_packageName, tobEtaPhiC_InnerCoinX, tobEtaPhiC_InnerCoinY);
+              }
+              if(slices[iSlice].tob[iTOB].candFlag_BW23)
+              {
+                  tobEtaPhiC_BW23X = phi;
+                  tobEtaPhiC_BW23Y = eta;
+                  fill(m_packageName, tobEtaPhiC_BW23X, tobEtaPhiC_BW23Y);
+              }
+              if(slices[iSlice].tob[iTOB].candFlag_Charge)
+              {
+                  tobEtaPhiC_ChargeX = phi;
+                  tobEtaPhiC_ChargeY = eta;
+                  fill(m_packageName, tobEtaPhiC_ChargeX, tobEtaPhiC_ChargeY);
+              }
+
+              tobPtVsEtaCX = eta;
+              tobPtVsEtaCY = pt;
+              fill(m_packageName, tobPtVsEtaCX, tobPtVsEtaCY);
+              tobPtVsPhiCX = eta;
+              tobPtVsPhiCY = pt;
+              fill(m_packageName, tobPtVsPhiCX, tobPtVsPhiCY);
+          }//side C
+
+      }//TOB for loop
+
+
+      //-------------------------------------------------
+      //combined
+      //-------------------------------------------------
+
+      ///if cand<=32 && topo<=32, check if equal
+      /// todo: maybe should move this check in the RDO building actually...?
+      if(slices[iSlice].cand.size()<=32 && slices[iSlice].tob.size()<=32)
+          if(slices[iSlice].cand.size()!=slices[iSlice].tob.size())
+          {
+              ATH_MSG_DEBUG( "MUCTPI DQ DEBUG: Cand & TOB #words not equal. LB="<<std::dec<<currentLumiBlock);
+
+              errorSummaryMUCTPIX=4;
+              fill(m_packageName, errorSummaryMUCTPIX);
+              errorSummaryPerLumiBlockMUCTPIX=4;
+              errorSummaryPerLumiBlockMUCTPIY=currentLumiBlock;
+              fill(m_packageName, errorSummaryPerLumiBlockMUCTPIX, errorSummaryPerLumiBlockMUCTPIY);
+          }
+
+
+  }// slice for loop
+
+  //-------------------------------------------------
+  //status data word (last word in data words)
+  //-------------------------------------------------
+
+  /// 1D status word errors (16 bits)
+  /// 2D status word errors VS LB
+  /// todo: need to add 1D TProfile to make ratios?
+
+  //get muctpi fragment data in the form of a vector of timeslices
+  const std::vector< size_t > &errorBits = theMuCTPI_Phase1_RDO->errorBits();
+
+  for(uint iBit=0;iBit<errorBits.size();iBit++)
+  {
+      if(errorBits[iBit])
+      {
+          statusDataWordMUCTPIX=iBit;
+          fill(m_packageName, statusDataWordMUCTPIX);
+          statusDataWordPerLumiBlockMUCTPIX=iBit;
+          statusDataWordPerLumiBlockMUCTPIY=currentLumiBlock;
+          fill(m_packageName, statusDataWordPerLumiBlockMUCTPIX, statusDataWordPerLumiBlockMUCTPIY);
+      }
+  }
+
+}
 
 
 void
