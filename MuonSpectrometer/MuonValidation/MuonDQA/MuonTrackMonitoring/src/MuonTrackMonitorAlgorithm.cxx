@@ -80,7 +80,7 @@ StatusCode MuonTrackMonitorAlgorithm::FillTrackInformation(const std::string& sI
             deltaZ0 = tp->z0() + tp->vz() - pvtx->z();
         }
 
-        D0sig = xAOD::TrackingHelpers::d0significance( tp, beamPosSigmaX, beamPosSigmaY, beamPosSigmaXY );
+        D0sig = m_useBeamSpot ? xAOD::TrackingHelpers::d0significance( tp, beamPosSigmaX, beamPosSigmaY, beamPosSigmaXY ) : -1.;
 
         fill(tool, Author, Quality, Type, Eta, Phi, Pt, D0, Z0, chi2ndof, deltaZ0, D0sig);
     }
