@@ -16,6 +16,8 @@
 
  
 #include "AthenaMonitoring/ManagedMonitorToolBase.h"
+#include "xAODEventInfo/EventInfo.h"
+#include "StoreGate/ReadHandleKey.h"
 #include <string>
 
 class StatusCode;
@@ -64,6 +66,8 @@ namespace MuonDQA {
     
       TH1F* m_hTriggerType; 
 
+      SG::ReadHandleKey<xAOD::EventInfo> m_eventInfoKey
+        { this, "EventInfoKey", "EventInfo", "EventInfo SG key" };
     };
 }
 
