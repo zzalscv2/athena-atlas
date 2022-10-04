@@ -142,7 +142,7 @@ protected:
 
   ToolHandle<ITrigL2LayerNumberTool> m_numberingTool;
   ToolHandle<ITrigSpacePointConversionTool> m_spacePointTool;
-  ToolHandle<InDet::ISiTrackMaker> m_trackMaker;   // Track maker
+  ToolHandle<InDet::ISiTrackMaker> m_trackMaker;
   ToolHandle<ITrigInDetTrackFitter> m_trigInDetTrackFitter;
   ToolHandle<ITrigZFinder> m_trigZFinder;
   ToolHandle< Trk::ITrackSummaryTool > m_trackSummaryTool;
@@ -285,6 +285,10 @@ protected:
 			   std::vector<std::tuple<bool, double, Trk::Track*>>&,
 			   TrackCollection&,
 			   const std::vector<double>&, const std::vector<double>&, const std::vector<double>&) const;
+
+  // Phase II
+  bool m_ITkMode;
+  bool m_standaloneMode;
 };
 
 

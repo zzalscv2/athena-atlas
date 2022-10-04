@@ -8,23 +8,22 @@
 #include "PixelReadoutGeometry/PixelDetectorManager.h"
 #include "SCT_ReadoutGeometry/SCT_DetectorManager.h"
 
-#include "TrigL2LayerNumberTool.h"
+#include "TrigL2LayerNumberToolITk.h"
 #include "InDetReadoutGeometry/SiNumerology.h"
 
-TrigL2LayerNumberTool::TrigL2LayerNumberTool(const std::string& t, 
+TrigL2LayerNumberToolITk::TrigL2LayerNumberToolITk(const std::string& t, 
 					     const std::string& n,
 					     const IInterface*  p ): AthAlgTool(t,n,p),
 								     m_useNewScheme(false),
 								     m_MaxSiliconLayerNum(-1),
 								     m_OffsetEndcapPixels(-1),
 								     m_OffsetBarrelSCT(-1),
-								     m_OffsetEndcapSCT(-1)
-{
+								     m_OffsetEndcapSCT(-1) {
   declareInterface< ITrigL2LayerNumberTool >( this );
   declareProperty( "UseNewLayerScheme",      m_useNewScheme = false );
 }
 
-StatusCode TrigL2LayerNumberTool::initialize() {
+StatusCode TrigL2LayerNumberToolITk::initialize() {
 
   StatusCode sc = AthAlgTool::initialize();
 
@@ -42,13 +41,13 @@ StatusCode TrigL2LayerNumberTool::initialize() {
     return sc;
   } 
  
-  sc = detStore()->retrieve(m_pixelManager);  
+  sc = detStore()->retrieve(m_pixelManager,"ITkPixel");  
   if( sc.isFailure() ) {
     ATH_MSG_ERROR("Could not retrieve Pixel DetectorManager from detStore."); 
     return sc;
   } 
 
-  sc = detStore()->retrieve(m_sctManager);
+  sc = detStore()->retrieve(m_sctManager,"ITkStrip");
   if( sc.isFailure() ) {
     ATH_MSG_ERROR("Could not retrieve SCT DetectorManager from detStore.");
     return sc;
@@ -72,25 +71,25 @@ StatusCode TrigL2LayerNumberTool::initialize() {
 
     ATH_MSG_INFO("Total number of unique silicon layers = "<<m_hashMap.size());
 
-    m_MaxSiliconLayerNum = (int)m_hashMap.size();
+    m_MaxSiliconLayerNum = static_cast<int>(m_hashMap.size());
     m_OffsetEndcapPixels = m_LastBarrelLayer;
   }
 
   
-  ATH_MSG_INFO("TrigL2LayerNumberTool initialized ");
+  ATH_MSG_INFO("TrigL2LayerNumberToolITk initialized ");
 
   report();
 
   return sc;
 }
 
-StatusCode TrigL2LayerNumberTool::finalize()
+StatusCode TrigL2LayerNumberToolITk::finalize()
 {
   StatusCode sc = AthAlgTool::finalize(); 
   return sc;
 }
 
-void TrigL2LayerNumberTool::report() const {
+void TrigL2LayerNumberToolITk::report() const {
 
   ATH_MSG_INFO("TrigL2 Layer numbering scheme:");
   ATH_MSG_INFO("Total number of layers = "<<maxSiliconLayerNum());
@@ -99,11 +98,16 @@ void TrigL2LayerNumberTool::report() const {
   ATH_MSG_INFO("OffsetEndcapSCT        = "<<offsetEndcapSCT());
 }
 
-void TrigL2LayerNumberTool::createModuleHashMap(std::map<std::tuple<short,short,short>,std::vector<PhiEtaHash> >& hashMap) {
+
+void TrigL2LayerNumberToolITk::createModuleHashMap(std::map<std::tuple<int, int, short, short>,std::vector<PhiEtaHashITk> >& hashMap) {
+
+
+  //helper function
+
 
   short subdetid = 1;
-
-  for(int hash = 0; hash<(int)m_pixelId->wafer_hash_max(); hash++) {
+  
+  for(int hash = 0; hash<static_cast<int>(m_pixelId->wafer_hash_max()); hash++) {
 
     Identifier offlineId = m_pixelId->wafer_id(hash);
 
@@ -111,38 +115,61 @@ void TrigL2LayerNumberTool::createModuleHashMap(std::map<std::tuple<short,short,
  
     short barrel_ec = m_pixelId->barrel_ec(offlineId);
     if(abs(barrel_ec)>2) continue;//no DBM needed
-    short layer_disk = m_pixelId->layer_disk(offlineId);
+    
     short phi_index = m_pixelId->phi_module(offlineId);
     short eta_index = m_pixelId->eta_module(offlineId);
-    //auto t = std::make_tuple(subdetid, barrel_ec, layer_disk); 
+    int lay_id = m_pixelId->layer_disk(offlineId);
+    int eta_mod = m_pixelId->eta_module(offlineId);
 
-    auto t = std::make_tuple(barrel_ec==0 ? -100 : barrel_ec, subdetid, layer_disk); 
+    int vol_id = -1;
+    if(barrel_ec== 0) vol_id = 8;
+    if(barrel_ec==-2) vol_id = 7;
+    if(barrel_ec== 2) vol_id = 9;
+    
+    int new_vol, new_lay;
 
-    std::map<std::tuple<short,short,short>,std::vector<PhiEtaHash> >::iterator it = hashMap.find(t);
+    if(vol_id == 7 || vol_id == 9) {
+      new_vol = 10*vol_id + lay_id;
+      new_lay = eta_mod;
+    }
+    else if(vol_id == 8) {
+      new_lay = 0;
+      new_vol = 10*vol_id + lay_id;
+    }
+    
+    auto t = std::make_tuple(barrel_ec==0 ? -100 : barrel_ec, subdetid, new_vol, new_lay);
+
+    std::map<std::tuple<int, int, short, short>,std::vector<PhiEtaHashITk> >::iterator it = hashMap.find(t);
     if(it==hashMap.end())
-      hashMap.insert(std::pair<std::tuple<short,short,short>,std::vector<PhiEtaHash> >(t,std::vector<PhiEtaHash>(1, PhiEtaHash(phi_index, eta_index, hash) )));
-    else (*it).second.push_back(PhiEtaHash(phi_index, eta_index, hash));
+      hashMap.insert(std::pair<std::tuple<int, int, short, short>,std::vector<PhiEtaHashITk> >(t,std::vector<PhiEtaHashITk>(1, PhiEtaHashITk(phi_index, eta_index, hash) )));
+    else (*it).second.push_back(PhiEtaHashITk(phi_index, eta_index, hash));
   }
+
   subdetid = 2;
-  for(int hash = 0; hash<(int)m_sctId->wafer_hash_max(); hash++) {
+
+  for(int hash = 0; hash<static_cast<int>(m_sctId->wafer_hash_max()); hash++) {
 
     Identifier offlineId = m_sctId->wafer_id(hash);
 
     if(offlineId==0) continue;
  
     short barrel_ec = m_sctId->barrel_ec(offlineId);
-    short layer_disk = m_sctId->layer_disk(offlineId);
     short phi_index = m_sctId->phi_module(offlineId);
     short eta_index = m_sctId->eta_module(offlineId);
 
-    //    auto t = std::make_tuple(subdetid, barrel_ec, layer_disk); 
+    int vol_id = 13;
     
-    auto t = std::make_tuple(barrel_ec==0 ? -100 : barrel_ec, subdetid, layer_disk); 
+    if(barrel_ec) vol_id = 12;
+    if(barrel_ec>0) vol_id = 14;
 
-    std::map<std::tuple<short,short,short>,std::vector<PhiEtaHash> >::iterator it = hashMap.find(t);
+    int lay_id = m_sctId->layer_disk(offlineId);
+
+    auto t = std::make_tuple(barrel_ec==0 ? -100 : barrel_ec, subdetid, vol_id, lay_id); 
+
+    std::map<std::tuple<int, int, short, short>,std::vector<PhiEtaHashITk> >::iterator it = hashMap.find(t);
     if(it==hashMap.end())
-      hashMap.insert(std::pair<std::tuple<short,short,short>,std::vector<PhiEtaHash> >(t,std::vector<PhiEtaHash>(1, PhiEtaHash(phi_index, eta_index, hash))));
-    else (*it).second.push_back(PhiEtaHash(phi_index, eta_index, hash));
+      hashMap.insert(std::pair<std::tuple<int, int, short, short>,std::vector<PhiEtaHashITk> >(t,std::vector<PhiEtaHashITk>(1, PhiEtaHashITk(phi_index, eta_index, hash))));
+    else (*it).second.push_back(PhiEtaHashITk(phi_index, eta_index, hash));
   }
 
   m_pixelLayers.clear();
@@ -153,27 +180,36 @@ void TrigL2LayerNumberTool::createModuleHashMap(std::map<std::tuple<short,short,
   m_layerGeometry.resize(hashMap.size());
 
   int layerId=0;
-  m_LastBarrelLayer=0;
-  for(std::map<std::tuple<short,short,short>,std::vector<PhiEtaHash> >::iterator it = hashMap.begin();it!=hashMap.end();++it, layerId++) {
 
+  m_LastBarrelLayer=0;
+
+  for(std::map<std::tuple<int, int, short, short>,std::vector<PhiEtaHashITk> >::iterator it = hashMap.begin();it!=hashMap.end();++it, layerId++) {
+
+    short vol_id = std::get<2>((*it).first);
+    short lay_id = std::get<3>((*it).first);
+    int combinedId = int(vol_id)*1000 + lay_id;
+    
     short subdetId = std::get<1>((*it).first);
     short barrel_ec = std::get<0>((*it).first);
-    if(barrel_ec==-100) barrel_ec = 0;
-    //short layer_disc = std::get<2>((*it).first);
+
+    if(barrel_ec == -100) barrel_ec = 0;
 
     if(barrel_ec == 0) m_LastBarrelLayer++;
 
     m_layerGeometry[layerId].m_type = barrel_ec;
-    m_layerGeometry[layerId].m_subdet = subdetId;
+
+    m_layerGeometry[layerId].m_subdet = combinedId;
+
+    //m_layerGeometry[layerId].m_subdet = subdetId;
 
     float rc=0.0;
     float minBound = 100000.0;
     float maxBound =-100000.0;
     int nModules = 0;
-
-    for(std::vector<PhiEtaHash>::iterator hIt = (*it).second.begin();hIt != (*it).second.end();++hIt) {
+    
+    for(std::vector<PhiEtaHashITk>::iterator hIt = (*it).second.begin();hIt != (*it).second.end();++hIt) {
    
-      const InDetDD::SiDetectorElement *p{nullptr};
+      const InDetDD::SiDetectorElement *p = NULL;
 
       if(subdetId == 1) {//pixel
 	m_pixelLayers[(*hIt).m_hash] = layerId;
@@ -184,10 +220,6 @@ void TrigL2LayerNumberTool::createModuleHashMap(std::map<std::tuple<short,short,
 	p = m_sctManager->getDetectorElement((*hIt).m_hash);
       }
     
-      if (p==nullptr) {
-        ATH_MSG_ERROR("nullptr SiDetectorElement with idHash " << (*hIt).m_hash);
-        continue;
-      }
       const Amg::Vector3D& C = p->center();
       if(barrel_ec == 0) {
 	rc += sqrt(C(0)*C(0)+C(1)*C(1));
@@ -205,27 +237,9 @@ void TrigL2LayerNumberTool::createModuleHashMap(std::map<std::tuple<short,short,
     m_layerGeometry[layerId].m_minBound = minBound;
     m_layerGeometry[layerId].m_maxBound = maxBound;
   }
-
-  int M = (layerId-m_LastBarrelLayer)/2;
-
+  
   ATH_MSG_INFO("List of unique layers in Pixel and SCT :");
   for(int l=0;l<layerId;l++) {
-
-    int oldL = l;
-
-    if(l>m_LastBarrelLayer-1) {
-      oldL = l-m_LastBarrelLayer;
-      oldL = oldL < M ? oldL : oldL - M;
-      oldL += m_LastBarrelLayer;
-    }
-
-    if(m_layerGeometry[l].m_subdet==1) {
-      ATH_MSG_INFO("Layer "<<l<<" ("<<oldL<<") : PIX, reference coordinate ="<< m_layerGeometry[l].m_refCoord<<" boundaries: "<<m_layerGeometry[l].m_minBound<<
-		   " "<<m_layerGeometry[l].m_maxBound);
-    }
-    if(m_layerGeometry[l].m_subdet==2) {
-      ATH_MSG_INFO("Layer "<<l<<" ("<<oldL<<") : SCT, reference coordinate ="<< m_layerGeometry[l].m_refCoord<<" boundaries: "<<m_layerGeometry[l].m_minBound<<
-		   " "<<m_layerGeometry[l].m_maxBound);
-    }
+    ATH_MSG_INFO("Layer "<<l<<" ("<<m_layerGeometry[l].m_subdet<<") : reference coordinate ="<< m_layerGeometry[l].m_refCoord<<" boundaries: "<<m_layerGeometry[l].m_minBound<<" "<<m_layerGeometry[l].m_maxBound<<" type="<<m_layerGeometry[l].m_type);
   }
 }
