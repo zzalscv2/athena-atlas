@@ -72,7 +72,7 @@ void cfmasserr(VKVertex * vk, const int *list, double BMAG, double *MASS, double
 }
 
 
-void cfmasserrold_(const long int *ntrk, long int *list, double *parfs,
+void cfmasserrold_(const long int ntrk, long int *list, double *parfs,
         double *ams, double *deriv, double BMAG, double *dm, double *sigm)
 {
     int  i__;
@@ -93,7 +93,7 @@ void cfmasserrold_(const long int *ntrk, long int *list, double *parfs,
     constB = BMAG * vkalMagCnvCst ;
 
     int i3;
-    for (i__ = 1; i__ <= (*ntrk); ++i__) {
+    for (i__ = 1; i__ <= ntrk; ++i__) {
 	if (list[i__] == 1) {
 	    i3 = i__ * 3;
 	    pt = fabs(parfs[i3 + 3]);
@@ -110,7 +110,7 @@ void cfmasserrold_(const long int *ntrk, long int *list, double *parfs,
     }
 
 
-    for (i__ = 1; i__ <= (*ntrk); ++i__) {
+    for (i__ = 1; i__ <= ntrk; ++i__) {
 	i3 = i__ * 3;
 	if (list[i__] == 1) {
 	    pt = fabs(parfs[i3+3]);

@@ -7,8 +7,6 @@
 #include "TrkVKalVrtCore/TrkVKalVrtCoreBase.h"
 #include <algorithm>
 #include <cmath>
-#include <iostream>
-#include <thread>
 
 namespace Trk {
 

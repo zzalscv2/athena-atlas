@@ -9,7 +9,7 @@
 #include "TrkVKalVrtCore/ForVrtClose.h"
 #include "TrkVKalVrtCore/CommonPars.h"
 #include <vector>
-#include <iostream>
+#include <iosfwd>
 
 namespace Trk {
 

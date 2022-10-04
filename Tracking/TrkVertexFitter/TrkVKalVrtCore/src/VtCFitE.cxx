@@ -6,7 +6,6 @@
 #include "TrkVKalVrtCore/Derivt.h"
 #include "TrkVKalVrtCore/TrkVKalVrtCoreBase.h"
 #include <cmath>
-#include <iostream>
 
 namespace Trk {
 

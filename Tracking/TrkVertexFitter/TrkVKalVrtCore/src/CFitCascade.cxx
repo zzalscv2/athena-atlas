@@ -551,15 +551,8 @@ int processCascade(CascadeEvent & cascadeEvent_ )
     VKVertex * vk = cascadeEvent_.cascadeVertexList[cascadeEvent_.cascadeNV-1].get(); //Main vertex
     vk->passNearVertex  =true;                        // For fitting machinery
     vk->passWithTrkCov  =true;                        // For fitting machinery
-    vk->FVC.vrt[0] = primVrt[0];
-    vk->FVC.vrt[1] = primVrt[1];
-    vk->FVC.vrt[2] = primVrt[2];
-    vk->FVC.covvrt[0] = primVrtCov[0];
-    vk->FVC.covvrt[1] = primVrtCov[1];
-    vk->FVC.covvrt[2] = primVrtCov[2];
-    vk->FVC.covvrt[3] = primVrtCov[3];
-    vk->FVC.covvrt[4] = primVrtCov[4];
-    vk->FVC.covvrt[5] = primVrtCov[5];
+    std::copy(primVrt, primVrt+3, vk->FVC.vrt);
+    std::copy(primVrtCov, primVrtCov+6, vk->FVC.covvrt);
     return processCascade(cascadeEvent_);
 }
 //-----------------------------------------------------------------------------------

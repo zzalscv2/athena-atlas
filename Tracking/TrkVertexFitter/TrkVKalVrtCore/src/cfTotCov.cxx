@@ -21,7 +21,7 @@ namespace Trk {
 //            so CPU CONSUMING!!!
 //--------------------------------------------------------------
 extern int getFullVrtCov(VKVertex *, double *, const double *, double[6][6]);
-extern void cfsetdiag(long int , double *, double );
+extern void cfsetdiag(long int , double *, double ) noexcept;
 extern const vkalMagFld      myMagFld;
 
 int afterFit(VKVertex *vk, double *ader, double * dcv, double * ptot, double * VrtMomCov, const VKalVrtControlBase* CONTROL )

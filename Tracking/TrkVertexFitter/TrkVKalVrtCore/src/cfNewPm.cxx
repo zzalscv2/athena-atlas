@@ -6,7 +6,6 @@
 #include "TrkVKalVrtCore/TrkVKalUtils.h"
 #include "TrkVKalVrtCore/VKalVrtBMag.h"
 #include <cmath>
-#include <iostream>
 
 namespace Trk {
 
@@ -14,11 +13,11 @@ extern const vkalMagFld  myMagFld;
 
 
 extern double d_sign(double, double);
-extern void cfnewp(const long int *, double *, double *, double *, double *, double *);
-extern void vkgrkuta_(const double *, const double *, double *, double *, VKalVrtControlBase* =nullptr );
+extern void cfnewp(const long int, double *, double *, double *, double *, double *);
+extern void vkgrkuta_(const double, const double, double *, double *, VKalVrtControlBase* =nullptr );
 
 
-void cfnewpm(double *par, const double *xyzStart, double *xyzEnd, const double *ustep, double *parn, double *closePoint, VKalVrtControlBase * CONTROL)
+void cfnewpm(double *par, const double *xyzStart, double *xyzEnd, const double ustep, double *parn, double *closePoint, VKalVrtControlBase * CONTROL)
 {
     double d__1, d__2,dist_left;
     double vect[7], stmg, vout[7]={0.}, dpar0[5];
@@ -40,9 +39,9 @@ void cfnewpm(double *par, const double *xyzStart, double *xyzEnd, const double *
     --par;
 
     d__1 = tan(par[3]);
-    totway = (*ustep) * sqrt(1. / (d__1 * d__1) + 1.);
+    totway = (ustep) * sqrt(1. / (d__1 * d__1) + 1.);
 
-    if (fabs(*ustep) < 10. && fabs(totway) < 20.)  return;   // Distance(mm) is small. Simplest propagation is used
+    if (fabs(ustep) < 10. && fabs(totway) < 20.)  return;   // Distance(mm) is small. Simplest propagation is used
 
     stmg = 40.;  //Propagation step in mm for nonuniform field
 
@@ -73,7 +72,7 @@ void cfnewpm(double *par, const double *xyzStart, double *xyzEnd, const double *
 	poscur = d__1 < d__2 ? d__1 : d__2;
 	poscur = d_sign(poscur, totway);
 	dstep = poscur - posold;
-	vkgrkuta_(&charge, &dstep, vect, vout, CONTROL);
+	vkgrkuta_(charge, dstep, vect, vout, CONTROL);
 	vect[0] = vout[0];
 	vect[1] = vout[1];
 	vect[2] = vout[2];
@@ -107,7 +106,7 @@ void cfnewpm(double *par, const double *xyzStart, double *xyzEnd, const double *
     xyzst[1] = xyzEnd[1] - vout[1];
     xyzst[2] = xyzEnd[2] - vout[2];
 
-    cfnewp(&ich, dpar0, xyzst, &dp, parn, perig); // Last step of propagation 
+    cfnewp(ich, dpar0, xyzst, &dp, parn, perig); // Last step of propagation 
     closePoint[0] = perig[0] + vout[0];                  // with simple program
     closePoint[1] = perig[1] + vout[1];
     closePoint[2] = perig[2] + vout[2];

@@ -40,7 +40,7 @@ void protectCurvatureSign(double ini,double cur,double * Wgt){ //VK 15.12.2009 P
    Wgt[14]*=(0.7*0.7)/(x*x);
 }   
 
-extern int cfdinv(double *, double *, long int);
+extern int cfdinv(double *, double *, long int) noexcept;
 extern double cfSmallEigenvalue( double*, long int );
 
 

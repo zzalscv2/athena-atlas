@@ -7,7 +7,6 @@
 #include "TrkVKalVrtCore/TrkVKalVrtCore.h"
 #include "TrkVKalVrtCore/VKalVrtBMag.h"
 #include <cmath>
-#include <iostream>
 
 
 namespace Trk {

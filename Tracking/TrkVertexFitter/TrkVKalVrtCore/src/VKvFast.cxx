@@ -4,7 +4,6 @@
 
 #include "TrkVKalVrtCore/CommonPars.h"
 #include <cmath>
-#include <iostream>
 
 namespace Trk {
 

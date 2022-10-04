@@ -5,6 +5,7 @@
 #include <algorithm>
 #include <cmath>
 #include <memory>
+#include <iostream>
 
 #include "TrkVKalVrtCore/CommonPars.h"
 #include "TrkVKalVrtCore/TrkVKalVrtCore.h"
@@ -57,19 +58,28 @@ namespace Trk {
       fitP[i] = 0;
       cnstP[i] = 0.;
       iniP[i] = 0.;}
-     for(int i=0; i<5;  i++) {Perig[i]=refPerig[i]=Perigee[i]; rmnd[i]=0;}
-     for(int i=0; i<15; i++) {refCovar[i]=Covariance[i];}
+     std::copy(Perigee, Perigee+5, Perig);
+     std::copy(Perigee, Perigee+5, refPerig);
+     for(int i=0; i<5;  i++) { rmnd[i]=0;}
+     std::copy(Covariance, Covariance+15, refCovar);
      m_originVertex = vk;
   }
 
   void VKTrack::setCurrent(const double Perigee[], const double Weight[])
-  {  for(int i=0; i<5;  i++) Perig[i]=Perigee[i];
-     for(int i=0; i<15; i++) WgtM[i]=WgtM_save[i]=Weight[i];  }
+  {
+    std::copy(Perigee, Perigee+5, Perig);
+    std::copy(Weight, Weight+15, WgtM);
+    std::copy(Weight, Weight+15, WgtM_save);
+  }
   void VKTrack::setReference(const double Perigee[], const double Covariance[])
-  {  for(int i=0; i<5;  i++) refPerig[i]=Perigee[i];
-     for(int i=0; i<15; i++) refCovar[i]=Covariance[i]; }
+  {
+    std::copy(Perigee, Perigee+5, refPerig);
+    std::copy(Covariance, Covariance+15, refCovar);
+  }
   void VKTrack::restoreCurrentWgt()
-  { for(int i=0; i<15; i++) WgtM[i]=WgtM_save[i];}
+  {
+    std::copy(WgtM_save, WgtM_save+15, WgtM);
+  }
 
 //  VKTrack::VKTrack(const VKTrack & src )                 // copy operator
 //  {  Charge  =src.Charge;

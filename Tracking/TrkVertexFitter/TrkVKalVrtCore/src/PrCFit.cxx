@@ -75,23 +75,23 @@ void ForCFT::prcfit( long int ntrk, double  *wm, double  *wmfit, double  bmag, c
 /*										*/
 /*------------------------------------------------------------------------------*/
 
-    localbmag = bmag;
-    nmcnst = 0;
-    for (int i=0; i<8; ++i) wmfit[i] = -10000.;
+    this->localbmag = bmag;
+    this->nmcnst = 0;
+    for (int i=0; i<8; ++i) this->wmfit[i] = -10000.;
     summ = 0.;
     i__1 = ntrk<vkalNTrkM ? ntrk: vkalNTrkM;
     for (int i=0; i<i__1; ++i) {
-	wm[i] =  fabs(wm[i]);
+	this->wm[i] =  fabs(wm[i]);
 	summ += wm[i];
     }
     if ((*wmfit) > summ) {
 /*  Set general mass constraint based on ALL tracks */
-	nmcnst = 1;
+	this->nmcnst = 1;
 	for (int i = 0; i < vkalNTrkM; ++i) {
 	    indtrkmc[0][i] = 0;
 	    if (i < ntrk) {indtrkmc[0][i] = 1;}
 	}
-	wmfit[0] = (*wmfit);
+	this->wmfit[0] = (*wmfit);
     }
 
     this->vrt[0] = vrt[0];
@@ -103,19 +103,19 @@ void ForCFT::prcfit( long int ntrk, double  *wm, double  *wmfit, double  bmag, c
     this->covvrt[3] = vrte[3];
     this->covvrt[4] = vrte[4];
     this->covvrt[5] = vrte[5];
-    irob = 0;
-    IterationNumber    = 50;
-    IterationPrecision = 1.e-3;
-    for (int i = 0; i < vkalNTrkM; ++i) robres[i]=1.; //Safety
+    this->irob = 0;
+    this->IterationNumber    = 50;
+    this->IterationPrecision = 1.e-3;
+    for (int i = 0; i < vkalNTrkM; ++i) this->robres[i]=1.; //Safety
 //
 // Reset all constraints
 //
-useMassCnst = 0;
-usePhiCnst = 0;
-useThetaCnst = 0;
-useAprioriVrt = 0;
-usePointingCnst = 0;
-usePassNear = 0;
+this->useMassCnst = 0;
+this->usePhiCnst = 0;
+this->useThetaCnst = 0;
+this->useAprioriVrt = 0;
+this->usePointingCnst = 0;
+this->usePassNear = 0;
 //forcft_1.usePlaneCnst = 0;   //Used only on demand=> must NOT be reset here!!!
 } 
 

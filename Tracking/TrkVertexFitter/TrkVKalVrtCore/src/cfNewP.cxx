@@ -6,7 +6,7 @@
 
 namespace Trk {
 
-void cfnewp(const long int *ich, double *parold, double *ref, double *s, double *parnew, double *per)
+void cfnewp(const long int ich, double *parold, double *ref, double *s, double *parnew, double *per)
 {
  
     double dphi, coth, hper, zper, zeps, r__, cs, xc, yc, sn, sipart, eps;
@@ -39,7 +39,7 @@ void cfnewp(const long int *ich, double *parold, double *ref, double *s, double 
     zeps = parold[2];
 
 /*  Neutral track */
-    if ( (*ich) == 0) {
+    if ( ich == 0) {
 	hper = eps - ref[1] * sn + ref[2] * cs;
 	dphi = 0.;
 	(*s) = ref[1] * cs + ref[2] * sn;

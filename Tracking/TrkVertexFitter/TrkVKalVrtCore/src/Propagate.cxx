@@ -13,16 +13,15 @@
 #include "TrkVKalVrtCore/VKalVrtBMag.h"
 #include <cmath>
 //-------------------------------------------------
-#include <iostream>
 
 namespace Trk {
 
 extern const vkalMagFld      myMagFld;
 
 
-extern void cfnewp(const long int*, double*, double*, double*, double*, double*);
-extern void cferpr(const long int*, double*, double*, const double*, double*, double*);
-extern void cfnewpm (double*, const double*, double*, const double*, double*, double*, VKalVrtControlBase * =nullptr);
+extern void cfnewp(const long int, double*, double*, double*, double*, double*);
+extern void cferpr(const long int, double*, double*, const double, double*, double*);
+extern void cfnewpm (double*, const double*, double*, const double, double*, double*, VKalVrtControlBase * =nullptr);
 
 //------------------------------------------------------------------------
 //  Old propagator functions:
@@ -57,8 +56,8 @@ extern void cfnewpm (double*, const double*, double*, const double*, double*, do
       Goal[0]=RefEnd[0]-RefStart[0];
       Goal[1]=RefEnd[1]-RefStart[1];
       Goal[2]=RefEnd[2]-RefStart[2];
-      cfnewp( &Charge, ParOld, &Goal[0], &Way, ParNew, closePoint); 
-      if(CovOld != nullptr) cferpr( &Charge, ParOld, &Goal[0], &Way, CovOld, CovNew);
+      cfnewp( Charge, ParOld, &Goal[0], &Way, ParNew, closePoint); 
+      if(CovOld != nullptr) cferpr( Charge, ParOld, &Goal[0], Way, CovOld, CovNew);
       if(Charge==0){                      // Correction for different magnetic field values in Ini and End
         double vBx,vBy,vBz,vBzn;
         myMagFld.getMagFld(RefStart[0],RefStart[1],RefStart[2],vBx,vBy,vBz,CONTROL);
@@ -87,13 +86,13 @@ extern void cfnewpm (double*, const double*, double*, const double*, double*, do
       Goal[0]=RefEnd[0]-RefStart[0];
       Goal[1]=RefEnd[1]-RefStart[1];
       Goal[2]=RefEnd[2]-RefStart[2];
-      cfnewp( &Charge, ParOld, &Goal[0], &Way, ParNew, closePoint); 
-      if(CovOld != nullptr)cferpr( &Charge, ParOld, &Goal[0], &Way, CovOld, CovNew);
+      cfnewp( Charge, ParOld, &Goal[0], &Way, ParNew, closePoint); 
+      if(CovOld != nullptr)cferpr( Charge, ParOld, &Goal[0], Way, CovOld, CovNew);
 
 // double Save[5];  if(Way > 100){for (int ii=0; ii<5;ii++) Save[ii]=ParNew[ii];}
 // double Save[4];  if(Way > 10.){for (int ii=0; ii<3;ii++) Save[ii]=closePoint[ii];Save[3]=ParNew[0];}
  
-      if ( Charge != 0) cfnewpm( ParOld, RefStart, RefEnd, &Way, ParNew, closePoint, CONTROL);
+      if ( Charge != 0) cfnewpm( ParOld, RefStart, RefEnd, Way, ParNew, closePoint, CONTROL);
 
 //if(Way > 10){
 //  if(fabs(ParNew[3]- Save[3])>0.5 ) std::cout<<" ERROR ="<<ParNew[3]<<", "<<Save[3]<<",Way="<<Way<<'\n';
@@ -148,8 +147,8 @@ extern void cfnewpm (double*, const double*, double*, const double*, double*, do
    {
 //std::cout<<"Core: propagator control="<<FitControl<<" oldX,Y="<<RefOld[0]<<","<<RefOld[1]<<" newX,Y="<<RefNew[0]<<","<<RefNew[1]<<'\n';
      if( RefOld[0]==RefNew[0] && RefOld[1]==RefNew[1] && RefOld[2]==RefNew[2]){
-       for (int i=0; i<5;  i++) ParNew[i]=ParOld[i];
-       if(CovOld != nullptr) { for (int i=0; i<15; i++) CovNew[i]=CovOld[i];}
+       std::copy(ParOld, ParOld+5, ParNew);
+       if(CovOld != nullptr) { std::copy(CovOld, CovOld+15, CovNew);}
        return;
      }
 //
@@ -187,8 +186,8 @@ extern void cfnewpm (double*, const double*, double*, const double*, double*, do
                       VKalVrtControlBase * FitControl) 
    {
      if( RefOld[0]==RefNew[0] && RefOld[1]==RefNew[1] && RefOld[2]==RefNew[2]){
-       for (int i=0; i<5;  i++) ParNew[i]=trk->refPerig[i];
-       for (int i=0; i<15; i++) CovNew[i]=trk->refCovar[i];
+       std::copy(trk->refPerig, trk->refPerig+5, ParNew );
+       std::copy(trk->refCovar, trk->refCovar+15, CovNew );
        return;
      }
      long int TrkID = trk->Id;

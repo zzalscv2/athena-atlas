@@ -6,7 +6,6 @@
 #include "TrkVKalVrtCore/Propagator.h"
 #include "TrkVKalVrtCore/VKalVrtBMag.h"
 #include <cmath>
-#include <iostream>
 
 namespace Trk {
 
@@ -15,7 +14,7 @@ extern void tdasatVK(const double *, const double *, double *, long int, long in
 
 #define cnv_ref(a_1,a_2) cnv[(a_2)*6 + (a_1) - 7]
 
-void  xyztrp(const long int *ich, double *vrt0, double *pv0, double *covi, double BMAG, double *paro, double *errt)
+void  xyztrp(const long int ich, double *vrt0, double *pv0, double *covi, double BMAG, double *paro, double *errt)
 {
     double covd[15],par[5], cnv[36];	/* was [6][6] */ 
 /* ---------------------------------------------------------- */
@@ -45,8 +44,8 @@ void  xyztrp(const long int *ich, double *vrt0, double *pv0, double *covi, doubl
     double cs  = pv0[0] / pt;
     double sn  = pv0[1] / pt;
     double ctg = pv0[2] / pt;
-    double rho = (*ich) * constBF / pt;
-    if ((*ich) == 0)rho = constBF / pt;
+    double rho = ich * constBF / pt;
+    if (ich == 0)rho = constBF / pt;
 /* --  Output parameters */
     par[0] = 0.;                    /*            (-Yv*cos + Xv*sin) */
     par[1] = 0.;                    /*  Zv - cotth*(Xv*cos + Yv*sin) */
@@ -55,7 +54,7 @@ void  xyztrp(const long int *ich, double *vrt0, double *pv0, double *covi, doubl
     if(par[2]>M_PI-1.e-5) par[2]=M_PI-1.e-5;
     par[3] = atan2(pv0[1], pv0[0]);
     par[4] = rho;
-    if ((*ich) == 0)par[4] = constBF / pt;
+    if (ich == 0)par[4] = constBF / pt;
 //---
     double dTheta_dPx =  pv0[0]*pv0[2]/(pt*pp);   //dTheta/dPx
     double dTheta_dPy =  pv0[1]*pv0[2]/(pt*pp);   //dTheta/dPy
@@ -90,8 +89,8 @@ void  xyztrp(const long int *ich, double *vrt0, double *pv0, double *covi, doubl
 
     cnv_ref(1, 4) = 0.;
     cnv_ref(2, 4) = 0.;
-    if(*ich) cnv_ref(1, 4) = -cs * rho;  // For charged tracks only
-    if(*ich) cnv_ref(2, 4) = -sn * rho;  //
+    if(ich) cnv_ref(1, 4) = -cs * rho;  // For charged tracks only
+    if(ich) cnv_ref(2, 4) = -sn * rho;  //
     cnv_ref(3, 4) = 0.;
     cnv_ref(4, 4) = dPhi_dPx;
     cnv_ref(5, 4) = dPhi_dPy;
@@ -107,7 +106,7 @@ void  xyztrp(const long int *ich, double *vrt0, double *pv0, double *covi, doubl
 
 /* -- Translation to (0,0,0) (BackPropagation) --*/
     double Ref0[3]={0.,0.,0.};
-    myPropagator.Propagate(-999, (*ich), par, covd, vrt0, Ref0, paro, errt, nullptr);
+    myPropagator.Propagate(-999, ich, par, covd, vrt0, Ref0, paro, errt, nullptr);
 
 } 
 

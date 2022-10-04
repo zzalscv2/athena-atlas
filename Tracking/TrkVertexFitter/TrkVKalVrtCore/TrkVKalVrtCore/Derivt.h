@@ -9,7 +9,7 @@
 #include "TrkVKalVrtCore/CommonPars.h"
 #include "TrkVKalVrtCore/TrkVKalUtils.h"
 #include <vector>
-#include <iostream>
+#include <iosfwd>
 
 namespace Trk {
   
@@ -42,7 +42,7 @@ namespace Trk {
 //
 //  Mass constraint
 //
-   class VKMassConstraint : public VKConstraintBase
+   class VKMassConstraint final : public VKConstraintBase
    {
       public:
         VKMassConstraint(int,double, VKVertex*); 
@@ -64,7 +64,7 @@ namespace Trk {
 //
 //  Angular constraints
 //
-   class VKPhiConstraint : public VKConstraintBase
+   class VKPhiConstraint final : public VKConstraintBase
    {
       public:
         VKPhiConstraint(int,VKVertex*); 
@@ -86,7 +86,7 @@ namespace Trk {
 //
 //  Pointing constraints
 //
-   class VKPointConstraint : public VKConstraintBase
+   class VKPointConstraint final : public VKConstraintBase
    {
       public:
         VKPointConstraint(int,const double[3], VKVertex*, bool ); 
@@ -104,7 +104,7 @@ namespace Trk {
 //
 //  Vertex in plane constraint
 //
-   class VKPlaneConstraint : public VKConstraintBase
+   class VKPlaneConstraint final : public VKConstraintBase
    {
       public:
         VKPlaneConstraint(int, double, double, double, double, VKVertex*); 

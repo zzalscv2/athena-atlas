@@ -25,8 +25,6 @@ vkalMagFld::vkalMagFld()
 //   m_vkalCnvMagFld = 0.29979246;   /* For MeV and mm and Tesla*/
 }
 
-baseMagFld::baseMagFld() = default;
-baseMagFld::~baseMagFld() = default;
 
 void vkalMagFld::getMagFld(const double X,const double Y,const double Z,
                            double& bx, double& by, double& bz, VKalVrtControlBase* FitControl=nullptr ) const
@@ -61,10 +59,6 @@ double vkalMagFld::getMagFld(const double xyz[3], const VKalVrtControlBase* FitC
         FitControl->vk_objMagFld->getMagFld(xyz[0],xyz[1],xyz[2],bx,by,bz);
      }
      return bz;
-}
-
-double vkalMagFld::getCnvCst() const {
-   return this->m_vkalCnvMagFld;
 }
 
 
