@@ -19,6 +19,15 @@
 static const char* const fmt_oid = "[OID=%08lX%08lX-%016llX]";
 static const char* const fmt_aux = "[AUX=%08lX]";
 
+namespace{
+  void 
+  stringBefore(std::string & s, char sc){
+    auto n = s.find(sc);
+    if (n!=std::string::npos) s.resize(n);
+    return;
+  }
+}
+
 //___________________________________________________________________________
 AthenaHDFStreamTool::AthenaHDFStreamTool(const std::string& type,
 	const std::string& name,
@@ -149,12 +158,12 @@ StatusCode AthenaHDFStreamTool::putObject(const void* source, std::size_t nbytes
 
    if (m_token.find("[CONT=") != std::string::npos) m_token.replace(m_token.find("[CONT="), 6, "[CNT=");
    std::string ds_name = m_token.substr(m_token.find("[CNT=") + 5);
-   ds_name = ds_name.substr(0, ds_name.find("]"));
+   stringBefore(ds_name,']');
    while (ds_name.find("/") != std::string::npos) { ds_name = ds_name.replace(ds_name.find("/"), 1, "_"); }
 
    m_token.replace(m_token.find("[TECH="), 15, "[TECH=00000401]");
    std::string className = m_token.substr(m_token.find("[PNAME=") + 7);
-   className = className.substr(0, className.find(']'));
+   stringBefore(className, ']');
 
    long long unsigned int positionCount = 0;
    if (m_token.find("[CLID=") == std::string::npos) { // Core object
@@ -228,7 +237,7 @@ StatusCode AthenaHDFStreamTool::putObject(const void* source, std::size_t nbytes
    }
 
    std::string entry_name = ds_name.substr(ds_name.find("(") + 1);
-   entry_name = entry_name.substr(0, entry_name.find(")"));
+   stringBefore(entry_name,')');
 // For DataHeader, store entry point
    if (entry_name == "DataHeader" || entry_name == "DataHeaderForm") {
       auto dh_entry = ds_name + "_entry";
@@ -309,16 +318,17 @@ StatusCode AthenaHDFStreamTool::getObject(void** target, std::size_t& nbytes, in
    ATH_MSG_INFO("AthenaHDFStreamTool::getObject: token  = " << m_token);
 
    std::string clid_name = m_token.substr(m_token.find("[CLID=") + 6);
-   clid_name = clid_name.substr(0, clid_name.find("]"));
+   stringBefore(clid_name,']');
    std::string ds_name = m_token.substr(m_token.find("[CNT=") + 5);
-   ds_name = ds_name.substr(0, ds_name.find("]"));
+   stringBefore(ds_name, ']');
    if (ds_name.empty()) {
       return(StatusCode::SUCCESS);
    }
    while (ds_name.find("/") != std::string::npos) { ds_name = ds_name.replace(ds_name.find("/"), 1, "_"); }
 
    std::string oid_name = m_token.substr(m_token.find("[OID="));
-   oid_name = oid_name.substr(0, oid_name.find("]") + 1);
+   auto n = oid_name.find("]") + 1;
+   oid_name.resize(n);
    std::size_t firstU, firstL;
    long long unsigned int second;
    ::sscanf(oid_name.c_str(), fmt_oid, &firstU, &firstL, &second);
@@ -339,7 +349,7 @@ StatusCode AthenaHDFStreamTool::getObject(void** target, std::size_t& nbytes, in
    }
 
    std::string entry_name = ds_name.substr(ds_name.find("(") + 1);
-   entry_name = entry_name.substr(0, entry_name.find(")"));
+   stringBefore(entry_name,')');
 // For DataHeader, get stored size
    if (entry_name == "DataHeader") {
       if (clid_name == "7BE56CEF-C866-4BEE-9348-A5F34B5F1DAD") { // DataHeaderForm Token is copied from DataHeader, change container name
@@ -406,7 +416,7 @@ StatusCode AthenaHDFStreamTool::clearObject(const char** tokenString, int&/* num
    long long unsigned int second;
    ::sscanf(m_token.substr(m_token.find("[OID="), 40).c_str(), fmt_oid, &firstU, &firstL, &second);
    std::string ds_name = m_token.substr(m_token.find("[CNT=") + 5);
-   ds_name = ds_name.substr(0, ds_name.find("]"));
+   stringBefore(ds_name, ']'); 
    while (ds_name.find("/") != std::string::npos) { ds_name = ds_name.replace(ds_name.find("/"), 1, "_"); }
 
    if (firstU > 0 || ds_name.substr(ds_name.length() - 5, 4) == "Aux.") {
@@ -431,7 +441,7 @@ StatusCode AthenaHDFStreamTool::clearObject(const char** tokenString, int&/* num
    }
    // Return an empty token string for DataHeaderForm, to indicate HDF5 can't update DataHeader after it was written.
    std::string entry_name = ds_name.substr(ds_name.find("(") + 1);
-   entry_name = entry_name.substr(0, entry_name.find(")"));
+   stringBefore(entry_name, ')');
    if (entry_name == "DataHeaderForm") {
       m_token.clear();
    }
