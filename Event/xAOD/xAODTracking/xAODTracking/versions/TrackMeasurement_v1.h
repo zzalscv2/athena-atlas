@@ -1,8 +1,8 @@
 /*
   Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
 */
-#ifndef XAODTRACKING_VERSIONS_TRACKMEASUREMENTS_V1_H
-#define XAODTRACKING_VERSIONS_TRACKMEASUREMENTS_V1_H
+#ifndef XAODTRACKING_VERSIONS_TRACKMEASUREMENT_V1_H
+#define XAODTRACKING_VERSIONS_TRACKMEASUREMENT_V1_H
 #include <cstdint>
 #include "AthLinks/ElementLink.h"
 #include "AthContainers/AuxElement.h"
@@ -16,14 +16,14 @@ namespace xAOD {
      * @brief Track Measurements for Acts MultiTrajectory
      **/
 
-    class TrackMeasurements_v1 : public SG::AuxElement {
+    class TrackMeasurement_v1 : public SG::AuxElement {
     public:
         using ConstVectorMap = Eigen::Map<const Eigen::Matrix<double, 6, 1>>;
         using VectorMap = Eigen::Map<Eigen::Matrix<double, 6, 1>>;
         using ConstMatrixMap = Eigen::Map<const Eigen::Matrix<double, 6, 6>>;
         using MatrixMap = Eigen::Map<Eigen::Matrix<double, 6, 6>>;
 
-        TrackMeasurements_v1() = default;
+        TrackMeasurement_v1() = default;
         /**
          * access track Measurements vector of const element
          **/

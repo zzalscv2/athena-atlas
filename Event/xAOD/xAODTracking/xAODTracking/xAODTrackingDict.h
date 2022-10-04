@@ -77,12 +77,12 @@
 #include "xAODTracking/versions/TrackJacobianContainer_v1.h"
 #include "xAODTracking/versions/TrackJacobianAuxContainer_v1.h"
 
-#include "xAODTracking/TrackMeasurements.h"
-#include "xAODTracking/TrackMeasurementsContainer.h"
-#include "xAODTracking/TrackMeasurementsAuxContainer.h"
-#include "xAODTracking/versions/TrackMeasurements_v1.h"
-#include "xAODTracking/versions/TrackMeasurementsContainer_v1.h"
-#include "xAODTracking/versions/TrackMeasurementsAuxContainer_v1.h"
+#include "xAODTracking/TrackMeasurement.h"
+#include "xAODTracking/TrackMeasurementContainer.h"
+#include "xAODTracking/TrackMeasurementAuxContainer.h"
+#include "xAODTracking/versions/TrackMeasurement_v1.h"
+#include "xAODTracking/versions/TrackMeasurementContainer_v1.h"
+#include "xAODTracking/versions/TrackMeasurementAuxContainer_v1.h"
 
 
 // EDM include(s).

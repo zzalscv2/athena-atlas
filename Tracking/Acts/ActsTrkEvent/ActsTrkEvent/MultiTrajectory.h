@@ -12,7 +12,7 @@
 #include "xAODTracking/TrackStateContainer.h"
 #include "xAODTracking/TrackParametersContainer.h"
 #include "xAODTracking/TrackJacobianContainer.h"
-#include "xAODTracking/TrackMeasurementsContainer.h"
+#include "xAODTracking/TrackMeasurementContainer.h"
 
 
 
@@ -34,7 +34,7 @@ namespace ActsTrk {
             using TrackStateContainerBackendPtr = typename std::conditional<RWState, const xAOD::TrackStateContainer*, xAOD::TrackStateContainer*>::type;
             using TrackParametersContainerBackendPtr = typename std::conditional<RWState, const xAOD::TrackParametersContainer*, xAOD::TrackParametersContainer*>::type;
             using TrackJacobianContainerBackendPtr = typename std::conditional<RWState, const xAOD::TrackJacobianContainer*, xAOD::TrackJacobianContainer*>::type;
-            using TrackMeasurementsContainerBackendPtr = typename std::conditional<RWState, const xAOD::TrackMeasurementsContainer*, xAOD::TrackMeasurementsContainer*>::type;
+            using TrackMeasurementContainerBackendPtr = typename std::conditional<RWState, const xAOD::TrackMeasurementContainer*, xAOD::TrackMeasurementContainer*>::type;
             
             using IndexType = std::uint32_t;
 
@@ -47,7 +47,7 @@ namespace ActsTrk {
              * @param state - track state (indices) backend             
              */
             MultiTrajectory( TrackStateContainerBackendPtr states, TrackParametersContainerBackendPtr parameters,
-                             TrackJacobianContainerBackendPtr jacobians, TrackMeasurementsContainerBackendPtr measurements );
+                             TrackJacobianContainerBackendPtr jacobians, TrackMeasurementContainerBackendPtr measurements );
 
             /**
              * @brief Construct a new Multi Trajectory object by moving from a modifiable version
@@ -140,7 +140,7 @@ namespace ActsTrk {
             inline xAOD::TrackParametersContainer& trackParameters() { return *m_trackParameters; }
             
             TrackJacobianContainerBackendPtr m_jacobians = nullptr;
-            TrackMeasurementsContainerBackendPtr m_measurements = nullptr;
+            TrackMeasurementContainerBackendPtr m_measurements = nullptr;
             friend class ActsTrk::MultiTrajectory<IsReadWrite>;
             friend class ActsTrk::MultiTrajectory<IsReadOnly>;
 

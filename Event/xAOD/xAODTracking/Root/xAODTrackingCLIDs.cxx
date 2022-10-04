@@ -21,4 +21,6 @@
 #include "xAODTracking/TrackParametersAuxContainer.h"
 #include "xAODTracking/TrackJacobianContainer.h"
 #include "xAODTracking/TrackJacobianAuxContainer.h"
+#include "xAODTracking/TrackMeasurementContainer.h"
+#include "xAODTracking/TrackMeasurementAuxContainer.h"
 
