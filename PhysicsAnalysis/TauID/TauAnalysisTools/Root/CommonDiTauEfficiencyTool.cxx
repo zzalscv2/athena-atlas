@@ -295,17 +295,19 @@ CP::CorrectionCode CommonDiTauEfficiencyTool::getValue(const std::string& sHistN
     const xAOD::DiTauJet& xDiTau,
     double& dEfficiencyScaleFactor) const
 {
-  if (std::as_const(*m_mSF).find(sHistName) == std::as_const(*m_mSF).end())
+  const tSFMAP& mSF = *m_mSF;
+  auto it = mSF.find (sHistName);
+  if (it == mSF.end())
   {
     ATH_MSG_ERROR("Object with name "<<sHistName<<" was not found in input file.");
     ATH_MSG_DEBUG("Content of input file");
-    for (auto eEntry : *m_mSF)
+    for (auto eEntry : mSF)
       ATH_MSG_DEBUG("  Entry: "<<eEntry.first);
     return CP::CorrectionCode::Error;
   }
 
   // get a tuple (TObject*,functionPointer) from the scale factor map
-  tTupleObjectFunc tTuple = (*m_mSF)[sHistName];
+  tTupleObjectFunc tTuple = it->second;
 
   // get pt and eta (for x and y axis respectively)
   double dX = m_fXDiTau(xDiTau);
