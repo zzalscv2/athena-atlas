@@ -126,7 +126,7 @@ PyObject *qr_PyString_FromStdString(const string& str)
 
 PyObject *qr_PyUnicode_FromStdString(const string& str)
 {
-    return PyUnicode_FromStringAndSize(str.c_str(), str.size());
+    return PyUnicode_DecodeUTF8(str.c_str(), str.size(), "backslashreplace");
 }
 
 // payload_fetcher takes an IObject `o` to be retrieved from, a `name` to 

@@ -6,6 +6,7 @@ Testing virtual defects involving inversion ... ok
 DQDefects.tests.test_defect_insertion_retrieval ... ok
 DQDefects.tests.test_defect_insertion_retrieval_unicode ... ok
 Check that we raise an error if the defect name is not ASCII ... ok
+Check that we recover if any of the string payloads are bad UTF-8 ... ok
 DQDefects.tests.test_defect_empty_retrieval ... ok
 DQDefects.tests.test_virtual_defect_creation ... ok
 Check that the defect name list is updated when a defect is created ... ok
@@ -36,6 +37,6 @@ Test that defects are inserted correctly into non-contiguous ranges ... ok
 Test that return types are appropriate ... ok
 
 ----------------------------------------------------------------------
-Ran 36 tests in 26.579s
+Ran 37 tests in 26.579s
 
 OK

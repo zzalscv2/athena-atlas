@@ -206,6 +206,37 @@ def test_defect_failure_nonascii_name():
     ddb.create_defect(u"DQD_TÉST_DÉFÉCT_0", "Test")
 
 @with_setup(create_database, teardown_database)
+def test_defect_mangle_bad_stored_unicode():
+    """
+    Check that we recover if any of the string payloads are bad UTF-8
+    """
+    if six.PY3:
+        import ROOT
+        if ROOT.gROOT.GetVersionInt() < 62000:
+            # Passing str objects using multibyte encodings is broken
+            # with pyroot up to 6.18.  Should be fixed in 6.20?
+            return
+    ddb = DefectsDB(TEST_DATABASE, read_only=False)
+    
+    TEST_DEFECT_NAME = 'DQD_TEST_DEFECT_0'
+    TEST_SINCE, TEST_UNTIL = 0, 100
+
+    ddb.create_defect(TEST_DEFECT_NAME, "Test")
+
+    store = ddb.defects_folder.storeObject
+    p = ddb._defect_payload        
+    p["present"] = True
+    p["recoverable"] = False
+    p["user"] = b'\x80abc'
+    p["comment"] = b'\x80abc'
+
+    defect_id = ddb.defect_chan_as_id(TEST_DEFECT_NAME, True)
+        
+    store(TEST_SINCE, TEST_UNTIL, p, defect_id, ddb.defects_tag, False)
+    iovs = ddb.retrieve()
+    assert(iovs[0].user == '\\x80abc' and iovs[0].comment == '\\x80abc')
+
+@with_setup(create_database, teardown_database)
 def test_defect_empty_retrieval():
     ddb = DefectsDB(TEST_DATABASE, read_only=False)
     iovs = ddb.retrieve()
