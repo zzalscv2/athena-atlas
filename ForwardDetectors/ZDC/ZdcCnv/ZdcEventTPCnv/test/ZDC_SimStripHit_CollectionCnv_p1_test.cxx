@@ -1,8 +1,6 @@
 /*
-  Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
 */
-
-// $Id$
 /**
  * @file ZdcEventTPCnv/test/ZDC_SimStripHit_CollectionCnv_p1_test.cxx
  * @author scott snyder <snyder@bnl.gov>
@@ -13,6 +11,7 @@
 
 #undef NDEBUG
 #include "ZdcEventTPCnv/ZDC_SimStripHit_CollectionCnv_p1.h"
+#include "CxxUtils/checker_macros.h"
 #include "TestTools/leakcheck.h"
 #include <cassert>
 #include <iostream>
@@ -51,7 +50,7 @@ void testit (const ZDC_SimStripHit_Collection& trans1)
 }
 
 
-void test1()
+void test1 ATLAS_NOT_THREAD_SAFE ()
 {
   std::cout << "test1\n";
   ZDC_SimStripHit_Collection dum1 ("coll");
@@ -67,7 +66,7 @@ void test1()
 }
 
 
-int main()
+int main ATLAS_NOT_THREAD_SAFE ()
 {
   test1();
   return 0;

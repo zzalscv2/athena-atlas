@@ -1,4 +1,4 @@
-# Copyright (C) 2002-2020 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
 
 # Declare the package name:
 atlas_subdir( ZdcEventTPCnv )
@@ -19,39 +19,39 @@ atlas_add_dictionary( ZdcEventTPCnvDict
 atlas_add_test( ZdcDigitsCnv_p1_test
                 SOURCES
                 test/ZdcDigitsCnv_p1_test.cxx
-                LINK_LIBRARIES TestTools ZdcEventTPCnv )
+                LINK_LIBRARIES TestTools ZdcEventTPCnv CxxUtils )
 
 atlas_add_test( ZdcDigitsCollectionCnv_p1_test
                 SOURCES
                 test/ZdcDigitsCollectionCnv_p1_test.cxx
-                LINK_LIBRARIES TestTools ZdcEventTPCnv )
+                LINK_LIBRARIES TestTools ZdcEventTPCnv CxxUtils )
 
 atlas_add_test( ZdcRawChannelCnv_p1_test
                 SOURCES
                 test/ZdcRawChannelCnv_p1_test.cxx
-                LINK_LIBRARIES TestTools ZdcEventTPCnv )
+                LINK_LIBRARIES TestTools ZdcEventTPCnv CxxUtils )
 
 atlas_add_test( ZdcRawChannelCollectionCnv_p1_test
                 SOURCES
                 test/ZdcRawChannelCollectionCnv_p1_test.cxx
-                LINK_LIBRARIES TestTools ZdcEventTPCnv )
+                LINK_LIBRARIES TestTools ZdcEventTPCnv CxxUtils )
 
 atlas_add_test( ZDC_SimPixelHitCnv_p1_test
                 SOURCES
                 test/ZDC_SimPixelHitCnv_p1_test.cxx
-                LINK_LIBRARIES TestTools ZdcEventTPCnv )
+                LINK_LIBRARIES TestTools ZdcEventTPCnv CxxUtils )
 
 atlas_add_test( ZDC_SimPixelHit_CollectionCnv_p1_test
                 SOURCES
                 test/ZDC_SimPixelHit_CollectionCnv_p1_test.cxx
-                LINK_LIBRARIES TestTools ZdcEventTPCnv )
+                LINK_LIBRARIES TestTools ZdcEventTPCnv CxxUtils )
 
 atlas_add_test( ZDC_SimStripHitCnv_p1_test
                 SOURCES
                 test/ZDC_SimStripHitCnv_p1_test.cxx
-                LINK_LIBRARIES TestTools ZdcEventTPCnv )
+                LINK_LIBRARIES TestTools ZdcEventTPCnv CxxUtils )
 
 atlas_add_test( ZDC_SimStripHit_CollectionCnv_p1_test
                 SOURCES
                 test/ZDC_SimStripHit_CollectionCnv_p1_test.cxx
-                LINK_LIBRARIES TestTools ZdcEventTPCnv )
+                LINK_LIBRARIES TestTools ZdcEventTPCnv CxxUtils )
