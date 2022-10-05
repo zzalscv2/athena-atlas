@@ -14,14 +14,14 @@ TrkAndVtxPlots::TrkAndVtxPlots(PlotBase* pParent, const std::string& sDir):PlotB
 {}	
   
 void TrkAndVtxPlots::initializePlots(){
-  ntrk  = Book1D("ntrk", "Number of tracks; n ;Events", 1000, 0., 1000);
-  nvtx  = Book1D("nvtx", "Number of vertices; n ;Events", 50, 0., 50);
+  ntrk  = Book1D("ntrk", "Number of tracks; n ;Events", 3000, 0., 3000);
+  nvtx  = Book1D("nvtx", "Number of vertices; n ;Events", 150, 0., 150);
 
   vtx_x  = Book1D("x", "Vertex x; x ;Events", 200, -1., 1);
   vtx_y  = Book1D("y", "Vertex y; y ;Events", 300, -1.5, 1.5);
   vtx_z  = Book1D("z", "Vertex z; z ;Events", 200, -250., 250);
 
-  mu  = Book1D("mu", "Pileup; mu ;Events", 120, 0., 120);
+  mu  = Book1D("mu", "Pileup; mu ;Events", 250, 0., 250);
 }
 
  void TrkAndVtxPlots::fill(const xAOD::Vertex* vtx,const xAOD::EventInfo* evt) const{
