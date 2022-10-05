@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2018 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef ZDC_SIMPIXELHIT_COLLECTION
@@ -17,7 +17,7 @@ class ZDC_SimPixelHit_Collection: public ZDC_SimPixelHit_Collection1
 
  public :
 
-  ZDC_SimPixelHit_Collection(std::string name="ZDC_SimPixelHit_Collection") : ZDC_SimPixelHit_Collection1(name.c_str()) {}
+  ZDC_SimPixelHit_Collection(const std::string& name="ZDC_SimPixelHit_Collection") : ZDC_SimPixelHit_Collection1(name.c_str()) {}
 };
 
 typedef  ZDC_SimPixelHit_Collection::iterator       ZDC_SimPixelHit_Iterator;

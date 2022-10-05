@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2018 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef ZDC_SIMSTRIPHIT_COLLECTION
@@ -16,7 +16,7 @@ class ZDC_SimStripHit_Collection: public ZDC_SimStripHit_Collection1
 {
 
  public :
-  ZDC_SimStripHit_Collection(std::string name="ZDC_SimStripHit_Collection") : ZDC_SimStripHit_Collection1(name.c_str()) {}
+  ZDC_SimStripHit_Collection(const std::string& name="ZDC_SimStripHit_Collection") : ZDC_SimStripHit_Collection1(name.c_str()) {}
 };
 
 typedef  ZDC_SimStripHit_Collection::iterator       ZDC_SimStripHit_Iterator;
