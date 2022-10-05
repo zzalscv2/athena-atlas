@@ -25,7 +25,7 @@ atlas_add_library( G4DebuggingTools
                    OBJECT
                    NO_PUBLIC_HEADERS
                    PRIVATE_INCLUDE_DIRS ${GEANT4_INCLUDE_DIRS} ${XERCESC_INCLUDE_DIRS} ${CLHEP_INCLUDE_DIRS} ${TBB_INCLUDE_DIRS}
-                   PRIVATE_LINK_LIBRARIES ${GEANT4_LIBRARIES} ${XERCESC_LIBRARIES} ${CLHEP_LIBRARIES} ${TBB_LIBRARIES} GaudiKernel AthenaBaseComps StoreGateLib EventInfo G4AtlasInterfaces G4AtlasToolsLib MCTruth MCTruthBaseLib SimHelpers G4DebuggingHelperLib )
+                   PRIVATE_LINK_LIBRARIES ${GEANT4_LIBRARIES} ${XERCESC_LIBRARIES} ${CLHEP_LIBRARIES} ${TBB_LIBRARIES} GaudiKernel AthenaBaseComps StoreGateLib xAODEventInfo G4AtlasInterfaces G4AtlasToolsLib MCTruth MCTruthBaseLib SimHelpers G4DebuggingHelperLib )
 
 # Install files from the package:
 atlas_install_python_modules( python/*.py POST_BUILD_CMD ${ATLAS_FLAKE8} )
