@@ -6,8 +6,6 @@
 // Richard Hawkings, started 2/7/04
 
 #include "GaudiKernel/SmartDataPtr.h"
-#include "EventInfo/EventID.h"
-#include "EventInfo/EventInfo.h"
 #include "AthenaPoolUtilities/AthenaAttributeList.h"
 #include "AthenaPoolUtilities/CondAttrListCollection.h"
 #include "TBCondRunPar/TBCondRunParTool.h"
@@ -48,15 +46,10 @@ StatusCode TBCondRunParTool::finalize() {
 
 bool TBCondRunParTool::checkcache() {
   // find the current run and event - check if data structure may have changed
-  int run=0;
-  int event=0;
+  const EventContext& ctx = Gaudi::Hive::currentContext();
+  int run = ctx.eventID().run_number();
+  int event = ctx.eventID().event_number();
   bool update=false;
-  if (StatusCode::SUCCESS==evtStore()->retrieve(m_eventinfo)) {
-    run=m_eventinfo->event_ID()->run_number();
-    event=m_eventinfo->event_ID()->event_number();
-  } else {
-    ATH_MSG_ERROR ( "Could not retrieve run/event" );
-  }
   if (run!=m_crun || event!=m_cevent) {
     ATH_MSG_DEBUG ( "Retrieve new data for run/event " << run << "/" << event );
     m_crun=run;

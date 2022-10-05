@@ -1,4 +1,4 @@
-# Copyright (C) 2002-2020 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
 
 # Declare the package name:
 atlas_subdir( TBCondRunPar )
@@ -8,7 +8,7 @@ atlas_add_library( TBCondRunParLib
                    src/TBCondRunParTool.cxx
                    PUBLIC_HEADERS TBCondRunPar
                    LINK_LIBRARIES AthenaBaseComps GaudiKernel StoreGateLib
-                   PRIVATE_LINK_LIBRARIES AthenaPoolUtilities EventInfo )
+                   PRIVATE_LINK_LIBRARIES AthenaPoolUtilities )
 
 atlas_add_component( TBCondRunPar
                      src/components/*.cxx
