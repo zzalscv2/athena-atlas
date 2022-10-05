@@ -47,7 +47,7 @@ def addOutputCopyAlgorithms (algSeq, postfix, inputContainer, outputContainer, s
         copyalg.selection = ['outputSelect']
     else :
         copyalg.selection = []
-    copyalg.deepCopy = True
+    copyalg.deepCopy = False
     algSeq += copyalg
 
 
@@ -79,8 +79,17 @@ def makeSequenceOld (dataType, algSeq, vars, forCompare) :
                                            enableCutflow=True, enableKinematicHistograms=True, shallowViewOutput = False )
 
     from FTagAnalysisAlgorithms.FTagAnalysisSequence import makeFTagAnalysisSequence
-    makeFTagAnalysisSequence( jetSequence, dataType, jetContainer, noEfficiency = True, legacyRecommendations = True,
-                              enableCutflow=True )
+    btagger = "DL1r"
+    btagWP = "FixedCutBEff_77"
+    makeFTagAnalysisSequence( jetSequence, dataType, jetContainer, noEfficiency = False, legacyRecommendations = True,
+                              enableCutflow=True, btagger = btagger, btagWP = btagWP )
+    vars += [
+        'OutJets_%SYS%.ftag_select_' + btagger + '_' + btagWP + ' -> jet_ftag_select_%SYS%',
+    ]
+    if dataType != 'data' :
+        vars += [
+            'OutJets_%SYS%.ftag_effSF_' + btagger + '_' + btagWP + '_%SYS% -> jet_ftag_eff_%SYS%'
+        ]
 
     jetSequence.configure( inputName = jetContainer, outputName = 'AnaJets_%SYS%' )
 
@@ -130,6 +139,7 @@ def makeSequenceOld (dataType, algSeq, vars, forCompare) :
     vars += [ 'OutMuons_NOSYS.eta -> mu_eta',
               'OutMuons_NOSYS.phi -> mu_phi',
               'OutMuons_%SYS%.pt  -> mu_pt_%SYS%',
+              'OutMuons_NOSYS.charge -> mu_charge',
               'OutMuons_%SYS%.baselineSelection_medium -> mu_select_medium_%SYS%',
               'OutMuons_%SYS%.baselineSelection_tight  -> mu_select_tight_%SYS%', ]
     if dataType != 'data':
@@ -154,6 +164,7 @@ def makeSequenceOld (dataType, algSeq, vars, forCompare) :
     vars += [ 'OutElectrons_%SYS%.pt  -> el_pt_%SYS%',
               'OutElectrons_NOSYS.phi -> el_phi',
               'OutElectrons_NOSYS.eta -> el_eta',
+              'OutElectrons_NOSYS.charge -> el_charge',
               'OutElectrons_%SYS%.baselineSelection_loose -> el_select_loose_%SYS%', ]
     if dataType != 'data':
         vars += [ 'OutElectrons_%SYS%.effSF_loose_%SYS% -> el_effSF_loose_%SYS%', ]
@@ -186,6 +197,7 @@ def makeSequenceOld (dataType, algSeq, vars, forCompare) :
     vars += [ 'OutTauJets_%SYS%.pt  -> tau_pt_%SYS%',
               'OutTauJets_NOSYS.phi -> tau_phi',
               'OutTauJets_NOSYS.eta -> tau_eta',
+              'OutTauJets_NOSYS.charge -> tau_charge',
               'OutTauJets_%SYS%.baselineSelection_tight -> tau_select_tight_%SYS%', ]
     if dataType != 'data':
         vars += [ 'OutTauJets_%SYS%.tau_effSF_tight_%SYS% -> tau_effSF_tight_%SYS%', ]
@@ -382,7 +394,7 @@ def makeSequenceOld (dataType, algSeq, vars, forCompare) :
     # Include, and then set up the trigger analysis sequence:
     from TriggerAnalysisAlgorithms.TriggerAnalysisSequence import \
         makeTriggerAnalysisSequence
-    triggerSequence = makeTriggerAnalysisSequence( dataType, triggerChains=triggerChains )
+    triggerSequence = makeTriggerAnalysisSequence( dataType, triggerChains=triggerChains, noFilter=True )
     # FIXME: temporarily disabling this for comparisons, as there is no
     # corresponding configuration block.  also, maybe it should be possible
     # to disable filtering in the algorithm, i.e. just store the trigger
@@ -573,13 +585,28 @@ def makeSequenceBlocks (dataType, algSeq, vars, forCompare) :
 
 
 
-def makeSequence (dataType, useBlocks, forCompare) :
+def makeSequence (dataType, useBlocks, forCompare, noSystematics, hardCuts = False) :
+
+    # do some harder cuts on all object types, this is mostly used for
+    # benchmarking
+    if hardCuts :
+        global electronMinPt
+        electronMinPt = 27e3
+        global photonMinPt
+        photonMinPt = 27e3
+        global muonMinPt
+        muonMinPt = 27e3
+        global tauMinPt
+        tauMinPt = 27e3
+        global jetMinPt
+        jetMinPt = 45e3
 
     algSeq = AlgSequence()
 
     # Set up the systematics loader/handler service:
     sysService = createService( 'CP::SystematicsSvc', 'SystematicsSvc', sequence = algSeq )
-    sysService.sigmaRecommended = 1
+    if not noSystematics :
+        sysService.sigmaRecommended = 1
 
     vars = []
     if not useBlocks :
@@ -591,6 +618,8 @@ def makeSequence (dataType, useBlocks, forCompare) :
     # Add an ntuple dumper algorithm:
     treeMaker = createAlgorithm( 'CP::TreeMakerAlg', 'TreeMaker' )
     treeMaker.TreeName = 'analysis'
+    # the auto-flush setting still needs to be figured out
+    #treeMaker.TreeAutoFlush = 0
     algSeq += treeMaker
     ntupleMaker = createAlgorithm( 'CP::AsgxAODNTupleMakerAlg', 'NTupleMaker' )
     ntupleMaker.TreeName = 'analysis'

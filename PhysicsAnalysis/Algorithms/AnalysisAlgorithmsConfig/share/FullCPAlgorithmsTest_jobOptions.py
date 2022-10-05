@@ -15,6 +15,9 @@ athArgsParser.add_argument( '--block-config', dest='block_config',
 athArgsParser.add_argument( '--for-compare', dest='for_compare',
                             action = 'store_true', default = False,
                             help = 'Configure the job for comparison of sequences vs blocks' )
+athArgsParser.add_argument( '--no-systematics', dest='no_systematics',
+                            action = 'store_true', default = False,
+                            help = 'Configure the job to with no systematics' )
 athArgs = athArgsParser.parse_args()
 
 dataType = athArgs.data_type
@@ -36,7 +39,7 @@ testFile = os.getenv ( inputfile[dataType] )
 svcMgr.EventSelector.InputCollections = [testFile]
 
 from AnalysisAlgorithmsConfig.FullCPAlgorithmsTest import makeSequence
-algSeq = makeSequence (dataType, blockConfig, forCompare=forCompare)
+algSeq = makeSequence (dataType, blockConfig, forCompare=forCompare, noSystematics = athArgs.no_systematics)
 print (algSeq) # For debugging
 
 # Add all algorithms from the sequence to the job.
