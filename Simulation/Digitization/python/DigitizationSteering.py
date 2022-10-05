@@ -14,7 +14,6 @@ from AthenaPoolCnvSvc.PoolWriteConfig import PoolWriteCfg
 from BCM_Digitization.BCM_DigitizationConfig import BCM_DigitizationCfg
 from Digitization.DigitizationParametersConfig import writeDigitizationMetadata
 from LArDigitization.LArDigitizationConfig import LArTriggerDigitizationCfg
-from MCTruthSimAlgs.RecoTimingConfig import MergeRecoTimingObjCfg
 from MuonConfig.CSC_DigitizationConfig import CSC_DigitizationDigitToRDOCfg
 from MuonConfig.MDT_DigitizationConfig import MDT_DigitizationDigitToRDOCfg
 from MuonConfig.MM_DigitizationConfig import MM_DigitizationDigitToRDOCfg
@@ -184,11 +183,6 @@ def DigitizationMainContentCfg(flags):
     if flags.PerfMon.doFastMonMT or flags.PerfMon.doFullMonMT:
         from PerfMonComps.PerfMonCompsConfig import PerfMonMTSvcCfg
         acc.merge(PerfMonMTSvcCfg(flags))
-
-    # Timing
-    # TODO: do we even care about this anymore?
-    if flags.Digitization.EnableTruth:
-        acc.merge(MergeRecoTimingObjCfg(flags))
 
     return acc
 

@@ -156,23 +156,23 @@ class TestDigitizationMC16a(unittest.TestCase):
                 expected_Property)
 
 
-    def test___PileUpToolsAlg_is_third_in_AthAlgSeq(self):
-        expected_AlgSequence = ['TimingAlg/DigiTimerBegin', 'Simulation::BeamSpotFixerAlg/BeamSpotFixerAlg', 'PileUpToolsAlg/StandardSignalOnlyTruthPileUpToolsAlg', 'LArHitEMapToDigitAlg/LArHitEMapToDigitAlg', 'LArRawChannelBuilderAlg/LArRawChannelBuilder', 'TileDigitsMaker/TileDigitsMaker', 'TileDQstatusAlg/TileDQstatusAlg', 'TileRawChannelMaker/TileRChMaker', 'TileRawChannelToL2/TileRawChannelToL2', 'CscDigitToCscRDO/CscDigitToCscRDO', 'MdtDigitToMdtRDO/MdtDigitToMdtRDO', 'RpcDigitToRpcRDO/RpcDigitToRpcRDO', 'TgcDigitToTgcRDO/TgcDigitToTgcRDO', 'LArTTL1Maker/LArTTL1Maker', 'TileHitToTTL1/TileHitToTTL1', 'TilePulseForTileMuonReceiver/TilePulseForTileMuonReceiver', 'TileMuonReceiverDecision/TileMuonReceiverDecision']
+    def test___PileUpToolsAlg_is_second_in_AthAlgSeq(self):
+        expected_AlgSequence = ['Simulation::BeamSpotFixerAlg/BeamSpotFixerAlg', 'PileUpToolsAlg/StandardSignalOnlyTruthPileUpToolsAlg', 'LArHitEMapToDigitAlg/LArHitEMapToDigitAlg', 'LArRawChannelBuilderAlg/LArRawChannelBuilder', 'TileDigitsMaker/TileDigitsMaker', 'TileDQstatusAlg/TileDQstatusAlg', 'TileRawChannelMaker/TileRChMaker', 'TileRawChannelToL2/TileRawChannelToL2', 'CscDigitToCscRDO/CscDigitToCscRDO', 'MdtDigitToMdtRDO/MdtDigitToMdtRDO', 'RpcDigitToRpcRDO/RpcDigitToRpcRDO', 'TgcDigitToTgcRDO/TgcDigitToTgcRDO', 'LArTTL1Maker/LArTTL1Maker', 'TileHitToTTL1/TileHitToTTL1', 'TilePulseForTileMuonReceiver/TilePulseForTileMuonReceiver', 'TileMuonReceiverDecision/TileMuonReceiverDecision']
         ignore_Algs = ['EventInfoTagBuilder/EventInfoTagBuilder']
         ath_alg_seqence_as_str = self._job_config_dict['AthAlgSeq']['Members']
         # need to evaluate to obtain actual Python object
         ath_alg_seqence_list = [ alg for alg in eval(ath_alg_seqence_as_str) if alg not in ignore_Algs ]
 
-        actual_3rd_ath_alg_sequence_entry = ath_alg_seqence_list[2]
+        actual_2nd_ath_alg_sequence_entry = ath_alg_seqence_list[1]
         print(ath_alg_seqence_list)
-        expected_3rd_ath_alg_sequence_entry = "PileUpToolsAlg/StandardSignalOnlyTruthPileUpToolsAlg"
-        self.assertEqual(expected_3rd_ath_alg_sequence_entry,
-                         actual_3rd_ath_alg_sequence_entry)
+        expected_2nd_ath_alg_sequence_entry = "PileUpToolsAlg/StandardSignalOnlyTruthPileUpToolsAlg"
+        self.assertEqual(expected_2nd_ath_alg_sequence_entry,
+                         actual_2nd_ath_alg_sequence_entry)
         self.assertEqual(expected_AlgSequence, ath_alg_seqence_list)
 
 
     def test___StandardSignalOnlyTruthPileUpToolsAlg_PileUpTools(self):
-        expected_PileUpTools = ['MergeMcEventCollTool/SignalOnlyMcEventCollTool','MergeTruthJetsTool/MergeAntiKt4TruthJetsTool','MergeTruthJetsTool/MergeAntiKt6TruthJetsTool','MergeTrackRecordCollTool/MergeMuonEntryLayerTool','MergeCalibHitsTool/MergeCalibHitsTool','BCM_DigitizationTool/BCM_DigitizationTool','PixelDigitizationTool/PixelDigitizationTool','SCT_DigitizationTool/SCT_DigitizationTool','TRTDigitizationTool/TRTDigitizationTool','LArPileUpTool/LArPileUpTool','TileHitVecToCntTool/TileHitVecToCntTool','CscDigitizationTool/CscDigitizationTool','MdtDigitizationTool/MdtDigitizationTool','RpcDigitizationTool/RpcDigitizationTool','TgcDigitizationTool/TgcDigitizationTool','MergeRecoTimingObjTool/MergeRecoTimingObjTool']
+        expected_PileUpTools = ['MergeMcEventCollTool/SignalOnlyMcEventCollTool','MergeTruthJetsTool/MergeAntiKt4TruthJetsTool','MergeTruthJetsTool/MergeAntiKt6TruthJetsTool','MergeTrackRecordCollTool/MergeMuonEntryLayerTool','MergeCalibHitsTool/MergeCalibHitsTool','BCM_DigitizationTool/BCM_DigitizationTool','PixelDigitizationTool/PixelDigitizationTool','SCT_DigitizationTool/SCT_DigitizationTool','TRTDigitizationTool/TRTDigitizationTool','LArPileUpTool/LArPileUpTool','TileHitVecToCntTool/TileHitVecToCntTool','CscDigitizationTool/CscDigitizationTool','MdtDigitizationTool/MdtDigitizationTool','RpcDigitizationTool/RpcDigitizationTool','TgcDigitizationTool/TgcDigitizationTool']
         self._assert_Algorithm_property_unordered_equal(
             'StandardSignalOnlyTruthPileUpToolsAlg',
             'PileUpTools',

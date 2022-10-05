@@ -83,8 +83,6 @@ class PhysValExample
   std::string m_trackName; 
   std::string m_vertexName; 
 
-  std::vector<std::string> m_timingNames = {"EVNTtoHITS", "HITStoRDO", "RAWtoESD", "ESDtoAOD"};
-
   // Hists
   PhysVal::KinematicsPlots m_jetPlots;
   PhysVal::KinematicsPlots m_elecPlots;
@@ -95,10 +93,7 @@ class PhysValExample
   PhysVal::METPlots m_metPlots;
   PhysVal::BTagPlots m_btagPlots;
 
-  std::vector<TH1*> m_timingPlots;
-
   StatusCode book(PlotBase& plots);
-  StatusCode getTiming(const std::string& name, float& recoTime);
 
   //Flags to determine whether to fill example jet,met,btag plots
   bool m_doExJet;

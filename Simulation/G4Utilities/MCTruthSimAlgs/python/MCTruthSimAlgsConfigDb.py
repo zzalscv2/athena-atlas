@@ -20,7 +20,6 @@ addTool("MCTruthSimAlgs.MCTruthSimAlgsConfigLegacy.getTruthParticleRange"       
 addTool("MCTruthSimAlgs.MCTruthSimAlgsConfigLegacy.getMergeTruthParticlesTool"  , "MergeTruthParticlesTool")
 
 addTool("MCTruthSimAlgs.MCTruthSimAlgsConfigLegacy.getTimingObjRange"              , "TimingObjRange")
-addTool("MCTruthSimAlgs.MCTruthSimAlgsConfigLegacy.MergeRecoTimingObjTool"         , "MergeRecoTimingObjTool")
 
 addTool("MCTruthSimAlgs.MCTruthSimAlgsConfigLegacy.MergeHijingParsTool"            , "MergeHijingParsTool")
 

@@ -9,7 +9,6 @@ addAlgorithm("OverlayCopyAlgs.OverlayCopyAlgsConfigLegacy.getCopyInTimeAntiKt6Je
 addAlgorithm("OverlayCopyAlgs.OverlayCopyAlgsConfigLegacy.getCopyOutOfTimeAntiKt6JetTruthInfo", "CopyOutOfTimeAntiKt6JetTruthInfo")
 addAlgorithm("OverlayCopyAlgs.OverlayCopyAlgsConfigLegacy.getCopyPileupParticleTruthInfo", "CopyPileupParticleTruthInfo")
 addAlgorithm("OverlayCopyAlgs.OverlayCopyAlgsConfigLegacy.getCopyMcEventCollection", "CopyMcEventCollection")
-addAlgorithm("OverlayCopyAlgs.OverlayCopyAlgsConfigLegacy.getCopyTimings", "CopyTimings")
 addAlgorithm("OverlayCopyAlgs.OverlayCopyAlgsConfigLegacy.getCopyTrackRecordCollection", "CopyTrackRecordCollection")
 addAlgorithm("OverlayCopyAlgs.OverlayCopyAlgsConfigLegacy.getCopyTrackCollection", "CopyTrackCollection")
 addAlgorithm("OverlayCopyAlgs.OverlayCopyAlgsConfigLegacy.getCopyDetailedTrackTruthCollection", "CopyDetailedTrackTruthCollection")

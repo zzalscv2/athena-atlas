@@ -96,9 +96,6 @@ def getHITSStreamItemList():
     ## Ancillary scintillators
     #hitsItemList += ["ScintillatorHitCollection#*"]
 
-    ## TimingAlg
-    hitsItemList +=["RecoTimingObj#EVNTtoHITS_timings"]
-
     if simFlags.RecordStepInfo.get_Value():
         hitsItemList +=["ISF_FCS_Parametrization::FCS_StepInfoCollection#MergedEventSteps"]
 

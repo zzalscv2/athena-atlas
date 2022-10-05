@@ -63,7 +63,6 @@ svcMgr.SecondaryEventSelector.OutputLevel = DEBUG
 from SGComps import AddressRemappingSvc
 AddressRemappingSvc.addInputRename("EventInfo","McEventInfo" ,"Sig_McEventInfo")
 AddressRemappingSvc.addInputRename("McEventCollection","TruthEvent" ,"Sig_TruthEvent")
-AddressRemappingSvc.addInputRename("RecoTimingObj","EVNTtoHITS_timings" ,"Sig_EVNTtoHITS_timings")
 svcMgr.AddressRemappingSvc.OutputLevel = DEBUG
 
 #--------------------------------------------------------------
@@ -76,7 +75,6 @@ theApp.EvtMax = 10
 #--------------------------------------------------------------
 from AthenaCommon import CfgGetter
 topSequence += CfgGetter.getAlgorithm("CopyMcEventCollection")
-topSequence += CfgGetter.getAlgorithm("CopyTimings")
 
 #--------------------------------------------------------------
 # Athena EventLoop Manager
@@ -113,7 +111,6 @@ Stream1.OutputFile  = locals().get("outputFile", "OverlayRDO.root")
 # List of DO's to write out
 Stream1.ItemList =  []
 Stream1.ItemList += ["McEventCollection#TruthEvent"]
-Stream1.ItemList += ["RecoTimingObj#EVNTtoHITS_timings"]
 
 #--------------------------------------------------------------
 # Set output level threshold (2=DEBUG, 3=INFO, 4=WARNING, 5=ERROR, 6=FATAL )

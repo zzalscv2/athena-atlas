@@ -14,7 +14,6 @@ rec.doESD=False
 doTAG=False
 # switch off as much as possible
 rec.doTruth=False
-rec.doRecoTiming=False
 
 rec.doShowSizeStatistics=False
 rec.readTAG=False

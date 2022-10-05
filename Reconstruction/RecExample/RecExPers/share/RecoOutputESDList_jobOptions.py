@@ -231,14 +231,6 @@ if rec.doMonitoring():
                                          "xAOD::JetAuxContainer#AntiKt4EMTopoJetsAux.-passOR"]
                               )
 
-## StreamESD_Augmented.AddItem( "RecoTimingObj#RAWtoESD_timings" )
-#fullESDList += CfgItemList( "TimingEsd",
-#                            items=["RecoTimingObj#RAWtoESD_timings",
-#                                   "RecoTimingObj#RAWtoESD_mems",
-#                                   "RecoTimingObj#EVNTtoHITS_timings",
-#                                   "RecoTimingObj#HITStoRDO_timings"] )
-
-
 # Request for W. Ehrenfeld: Add Calibration hits to ESD/AOD files if present in input RDO
 if rec.doWriteCalibHits():
     fullESDList += CfgItemList( "CalibrationHits",

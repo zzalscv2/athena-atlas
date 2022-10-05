@@ -37,12 +37,6 @@ def _fill( item ):
                   'AntiKt6TowerJetsMomentMap',
                   'AntiKt6TruthJetsMomentMap'],
 
-
- 'RecoTimingObj': ['RAWtoESD_timings',
-                   'RAWtoESD_mems',
-                   'EVNTtoHITS_timings',
-                   'HITStoRDO_timings'],
-
  'egDetailContainer': ['egDetailAOD'],
  'egammaContainer': ['ElectronAODCollection',
                      'PhotonAODCollection']}

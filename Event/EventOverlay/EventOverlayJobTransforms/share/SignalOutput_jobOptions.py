@@ -15,8 +15,6 @@ signalStream.ItemList = []
 # Event info
 signalStream.ItemList += [ 'xAOD::EventInfo#' + overlayFlags.sigPrefix() + 'EventInfo', 'xAOD::EventAuxInfo#' + overlayFlags.sigPrefix() + 'EventInfoAux.' ]
 
-signalStream.ItemList += ['RecoTimingObj#' + overlayFlags.sigPrefix() + 'EVNTtoHITS_timings']
-
 if DetFlags.overlay.Truth_on():
     signalStream.ItemList += ['McEventCollection#' + overlayFlags.sigPrefix() + 'TruthEvent']
 

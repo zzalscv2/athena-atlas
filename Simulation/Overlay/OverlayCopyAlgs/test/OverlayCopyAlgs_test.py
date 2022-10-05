@@ -12,7 +12,7 @@ from OverlayConfiguration.OverlayTestHelpers import \
     CommonTestArgumentParser, defaultTestFlags, postprocessAndLockFlags, printAndRun
 from OverlayCopyAlgs.OverlayCopyAlgsConfig import \
     CopyCaloCalibrationHitContainersCfg, CopyJetTruthInfoCfg, CopyMcEventCollectionCfg, \
-    CopyTimingsCfg, CopyTrackRecordCollectionsCfg
+    CopyTrackRecordCollectionsCfg
 from xAODEventInfoCnv.xAODEventInfoCnvConfig import EventInfoOverlayCfg
 
 # Argument parsing
@@ -33,7 +33,6 @@ acc.merge(EventInfoOverlayCfg(ConfigFlags))
 # Add truth overlay
 acc.merge(CopyMcEventCollectionCfg(ConfigFlags))
 acc.merge(CopyJetTruthInfoCfg(ConfigFlags))
-acc.merge(CopyTimingsCfg(ConfigFlags))
 acc.merge(CopyCaloCalibrationHitContainersCfg(ConfigFlags))
 acc.merge(CopyTrackRecordCollectionsCfg(ConfigFlags))
 

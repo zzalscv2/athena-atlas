@@ -206,12 +206,6 @@ topSeq = AlgSequence()
 ## Set Overall per-Algorithm time-limit on the AlgSequence
 topSeq.TimeOut = 43200 * Units.s
 
-try:
-    from RecAlgs.RecAlgsConf import TimingAlg
-    topSeq+=TimingAlg("SimTimerBegin", TimingObjOutputName = "EVNTtoHITS_timings")
-except:
-    fast_chain_log.warning('Could not add TimingAlg, no timing info will be written out.')
-
 #### *********** import ISF_Example code here **************** ####
 
 include("ISF_Config/ISF_ConfigJobInclude.py")
@@ -455,12 +449,6 @@ topSeq = AlgSequence()
 
 ## Set Overall per-Algorithm time-limit on the AlgSequence
 topSeq.TimeOut = 43200 * Units.s
-
-try:
-    from RecAlgs.RecAlgsConf import TimingAlg
-    topSeq+=TimingAlg("DigiTimerBegin", TimingObjOutputName = "HITStoRDO_timings")
-except:
-    fast_chain_log.warning('Could not add TimingAlg, no timing info will be written out.')
 
 include ("Digitization/Digitization.py")
 

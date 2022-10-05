@@ -26,23 +26,6 @@ from AthenaCommon.Logging import logging
 logOverlay = logging.getLogger('Overlay')
 
 #-------------------------
-# Timings
-#-------------------------
-if nThreads > 0:
-    logOverlay.info("MT mode: Not scheduling TimingAlg")    
-else:
-    try:
-        from RecAlgs.RecAlgsConf import TimingAlg
-        job += TimingAlg("OverlayTimerBegin",
-                         TimingObjOutputName="HITStoRDO_timings")
-    except Exception:
-        logOverlay.warning('Could not add TimingAlg, no timing info will be written out.')
-
-# Copy over timings if needed
-if not overlayFlags.isDataOverlay():
-    job += CfgGetter.getAlgorithm("CopyTimings")
-
-#-------------------------
 # Double event selector
 #-------------------------
 import AthenaPoolCnvSvc.ReadAthenaPoolDouble

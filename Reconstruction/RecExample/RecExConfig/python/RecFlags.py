@@ -298,14 +298,6 @@ class doSemiDetailedPerfMon(JobProperty):
     StoredValue=True
 
 #
-class doRecoTiming(JobProperty):
-    """ If True store information about CPU and Memory usage in output file
-    """
-    statusOn=True
-    allowedTypes=['bool']
-    StoredValue=True
-
-#
 class doDumpMC(JobProperty):
     """ If True dumps mc truth in log file
     """
@@ -997,7 +989,7 @@ jobproperties.add_Container(Rec)
 _list_Rec=[TAGFromRDO, doTagRawSummary , doBeamBackgroundFiller, \
 OutputLevel, RootHistoOutput, RootNtupleOutput, UserAlgs, UserExecs, UserFlags, doDPD, DPDMakerScripts, LoadGeometry, doAOD, doAODCaloCells, doESD,\
 doAODall, doCBNT, doPyDump, doMonitoring, doCheckDictionary, doCheckJOT,CBNTAthenaAware,\
-doDetailedAuditor, doSGAuditor, doFastMemoryAuditor, doMemoryAuditor, OutputSuffix, OutputFileNameForRecoStep, doPerfMon, doDetailedPerfMon, doSemiDetailedPerfMon, doDetailedPerfMonMT, doRecoTiming, doDumpMC, doDumpPoolInputContent, doDumpProperties,\
+doDetailedAuditor, doSGAuditor, doFastMemoryAuditor, doMemoryAuditor, OutputSuffix, OutputFileNameForRecoStep, doPerfMon, doDetailedPerfMon, doSemiDetailedPerfMon, doDetailedPerfMonMT, doDumpMC, doDumpPoolInputContent, doDumpProperties,\
 doDumpTDS, doDumpTES, doFloatingPointException, \
 doEdmMonitor, doHist, doJiveXML, doPersint,doVP1, doNameAuditor, \
 doRestrictedESD, doShowSizeStatistics, doTimeLimit, doTruth,\

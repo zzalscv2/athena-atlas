@@ -230,10 +230,4 @@ def getStreamRDO_ItemList(log):
                                "DataVector<LVL1::JEMEtSums>#*",
                                "LVL1::CMMRoI#*"]
 
-
-    if DetFlags.writeRDOPool.any_on():
-        ## TimingAlg
-        StreamRDO_ItemList +=["RecoTimingObj#*EVNTtoHITS_timings"]
-        StreamRDO_ItemList +=["RecoTimingObj#*HITStoRDO_timings"]
-
     return StreamRDO_ItemList
