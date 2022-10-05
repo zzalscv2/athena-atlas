@@ -47,7 +47,7 @@ double eflowCaloObject::getClusterEnergy() const {
   return clusterEnergy;
 }
 
-void eflowCaloObject::simulateShower(eflowLayerIntegrator *integrator, eflowEEtaBinnedParameters* binnedParameters, bool useUpdated2015ChargedShowerSubtraction){
+void eflowCaloObject::simulateShower(eflowLayerIntegrator *integrator, const eflowEEtaBinnedParameters* binnedParameters, bool useUpdated2015ChargedShowerSubtraction){
 
   for (unsigned int iTrack = 0; iTrack < m_eflowRecTracks.size(); ++iTrack) {
 
