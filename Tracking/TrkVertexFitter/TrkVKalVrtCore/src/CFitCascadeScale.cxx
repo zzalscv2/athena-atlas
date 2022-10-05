@@ -121,7 +121,6 @@ int fitVertexCascadeScale( VKVertex * vk, double & distToVertex )
                 vk->nextCascadeVrt->refIterV, target_trk->Perig, tmpCov);
 //std::cout<<"testR,Z="<<target_trk->Perig[0]<<", "<<target_trk->Perig[1]<<'\n';
       distToVertex = sqrt(target_trk->Perig[0]*target_trk->Perig[0]+target_trk->Perig[1]*target_trk->Perig[1]);
-      cfdcopy(target_trk->Perig,target_trk->Perig,5);
       target_trk->iniP[0]=target_trk->cnstP[0]=target_trk->Perig[2];   //initial guess
       target_trk->iniP[1]=target_trk->cnstP[1]=target_trk->Perig[3];
       target_trk->iniP[2]=target_trk->cnstP[2]=target_trk->Perig[4];
