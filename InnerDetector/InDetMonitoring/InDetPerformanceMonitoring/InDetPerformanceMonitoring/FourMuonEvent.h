@@ -107,6 +107,7 @@ class FourMuonEvent : public EventAnalysis
   inline void                        SetMassWindowLow (double newvalue)                   { m_MassWindowLow = newvalue; }
   inline void                        SetMassWindowHigh (double newvalue)                  { m_MassWindowHigh = newvalue; }
   inline void                        SetMuonPtCut (double newvalue)                       { m_xMuonID.SetPtCut(newvalue); }
+  inline void                        SetMuonSelectionTool ( ToolHandle<CP::IMuonSelectionTool> mst ) { m_xMuonID.SetCustomMuonSelectionTool (mst); };
   void                               SetSecondMuonPtCut (double newvalue); 
   inline void                        SetOpeningAngleCut (double newvalue)                 { m_OpeningAngleCut = newvalue; }
   inline void                        SetZ0GapCut (double newvalue)                        { m_Z0GapCut = newvalue; }
