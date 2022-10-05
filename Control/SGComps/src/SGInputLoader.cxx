@@ -1,7 +1,7 @@
 ///////////////////////// -*- C++ -*- /////////////////////////////
 
 /*
-  Copyright (C) 2002-2017, 2019, 2020 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
 */
 
 // SGInputLoader.cxx 
@@ -103,8 +103,13 @@ SGInputLoader::execute()
   // add objects automatically added by the Scheduler
   if (m_first) {
     if (m_loadProxies.value()) {
-      for (auto obj : outputDataObjs() ) {
-        m_load.emplace(obj);
+      for (DataObjID obj : outputDataObjs() ) {
+        // Strip any decoration name.
+        std::string::size_type ppos = obj.key().find ('.');
+        if (ppos < obj.key().size()-1) {
+          obj.updateKey (obj.key().substr (0, ppos));
+        }
+        m_load.emplace (std::move(obj));
       }
     }
 
