@@ -1,4 +1,4 @@
-# Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
 
 # Declare the package name:
 atlas_subdir( PATInterfaces )
@@ -35,6 +35,12 @@ macro( _add_test name )
 endmacro( _add_test )
 
 # Test(s) in the package:
+atlas_add_test( gt_SystematicsCache
+   SOURCES test/gt_SystematicsCache.cxx
+   INCLUDE_DIRS ${GTEST_INCLUDE_DIRS}
+   LINK_LIBRARIES ${GTEST_LIBRARIES} PATInterfaces RootCoreUtils
+   POST_EXEC_SCRIPT nopost.sh )
+
 atlas_add_test( gt_SystematicSet
    SOURCES test/gt_SystematicSet.cxx
    INCLUDE_DIRS ${GTEST_INCLUDE_DIRS}
