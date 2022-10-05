@@ -309,7 +309,11 @@ protected:
     void addStationID(Identifier& id, int stationName, int stationEta, int stationPhi, int technology) const;
 
     void addStationID(ExpandedIdentifier& id, int stationName, int stationEta, int stationPhi, int technology) const;
-
+    
+    inline void resetAndSet(const IdDictFieldImplementation & dict, const int new_val, Identifier& id ) const {
+        dict.reset(id);
+        dict.pack(new_val,id);
+    }
 private:
     // Copy constructor - do not use!
     MuonIdHelper(const MuonIdHelper& other) = delete;
