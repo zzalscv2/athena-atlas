@@ -16,8 +16,6 @@
 #include "AthenaBaseComps/AthAlgTool.h"
 #include "GaudiKernel/MsgStream.h"
 
-class EventInfo;
-
 class TBCondRunParTool: public AthAlgTool {
  public:
   TBCondRunParTool(const std::string& type, const std::string& name,
@@ -60,7 +58,6 @@ class TBCondRunParTool: public AthAlgTool {
   bool extractCool(const int run);
   bool extractCoolTest(const std::string& folder, int run) const;
 
-  const EventInfo* m_eventinfo = nullptr;
   int m_crun;
   int m_cevent;
   std::string m_runpfolder;
