@@ -15,11 +15,11 @@
 export ATHENA_CORE_NUMBER=8
 
 # RUN3 setup
-# ATLAS-R3S-2021-03-00-00 and OFLCOND-MC16-SDR-RUN3-05
+# ATLAS-R3S-2021-03-00-00 and OFLCOND-MC21-SDR-RUN3-05
 Sim_tf.py \
     --CA \
     --multiprocess \
-    --conditionsTag 'default:OFLCOND-MC16-SDR-RUN3-05' \
+    --conditionsTag 'default:OFLCOND-MC21-SDR-RUN3-05' \
     --simulator 'FullG4MT_QS' \
     --postInclude 'PyJobTransforms.UseFrontier' \
     --preInclude 'EVNTtoHITS:Campaigns.MC21Simulation' \
@@ -38,7 +38,7 @@ status=$rc
 rc2=-9999
 Sim_tf.py \
     --multiprocess \
-    --conditionsTag 'default:OFLCOND-MC16-SDR-RUN3-05' \
+    --conditionsTag 'default:OFLCOND-MC21-SDR-RUN3-05' \
     --simulator 'FullG4MT_QS' \
     --postInclude 'default:PyJobTransforms/UseFrontier.py' \
     --preInclude 'EVNTtoHITS:Campaigns/MC21Simulation.py,SimulationJobOptions/preInclude.ExtraParticles.py,SimulationJobOptions/preInclude.G4ExtraProcesses.py' \
@@ -51,7 +51,7 @@ Sim_tf.py \
 
 Sim_tf.py \
     --multiprocess \
-    --conditionsTag 'default:OFLCOND-MC16-SDR-RUN3-05' \
+    --conditionsTag 'default:OFLCOND-MC21-SDR-RUN3-05' \
     --simulator 'FullG4MT_QS' \
     --postInclude 'default:PyJobTransforms/UseFrontier.py' \
     --preInclude 'EVNTtoHITS:Campaigns/MC21Simulation.py,SimulationJobOptions/preInclude.ExtraParticles.py,SimulationJobOptions/preInclude.G4ExtraProcesses.py' \
