@@ -552,8 +552,6 @@ std::vector <std::unique_ptr<jFEXTOB>> jFEXFPGA::getSmallRJetTOBs()
     }
     std::sort (tobsSort.begin(), tobsSort.end(), std::bind(TOBetSort<std::unique_ptr<jFEXTOB>>, std::placeholders::_1, std::placeholders::_2, FEXAlgoSpaceDefs::jJ_etBit, 0x7ff));
     
-    if(tobsSort.size()>7) tobsSort.resize(7);
-    
     return tobsSort;    
 
 }
@@ -571,8 +569,6 @@ std::vector <std::unique_ptr<jFEXTOB>> jFEXFPGA::getLargeRJetTOBs()
     }
     std::sort (tobsSort.begin(), tobsSort.end(), std::bind(TOBetSort<std::unique_ptr<jFEXTOB>>, std::placeholders::_1, std::placeholders::_2, FEXAlgoSpaceDefs::jLJ_etBit, 0x1fff));
     
-    if(tobsSort.size()>1) tobsSort.resize(1);
-    
     return tobsSort;    
 
 }
@@ -584,15 +580,6 @@ std::vector <std::unique_ptr<jFEXTOB>> jFEXFPGA::getLargeRJetTOBs()
     ATH_MSG_DEBUG("number of Forward Elec tobs: " << tobsSort.size() << " in FPGA: " << m_id<< " before truncation");
     //sort tobs by their et 
     std::sort (tobsSort.begin(), tobsSort.end(), etFwdElSort);
-
-   
-    while(tobsSort.size()<5) {
-      std::vector <uint32_t> v{0,0};
-      tobsSort.push_back(v);
-    }
-   
-    tobsSort.resize(5);
-
   
     return tobsSort;
 
@@ -609,8 +596,6 @@ std::vector <std::unique_ptr<jFEXTOB>> jFEXFPGA::getTauTOBs() {
         tobsSort.push_back(std::move(j));
     }
     std::sort (tobsSort.begin(), tobsSort.end(), std::bind(TOBetSort<std::unique_ptr<jFEXTOB>>, std::placeholders::_1, std::placeholders::_2, FEXAlgoSpaceDefs::jTau_etBit, 0x7ff));
-
-    if(tobsSort.size()>6) tobsSort.resize(6);
     
     return tobsSort;
 }

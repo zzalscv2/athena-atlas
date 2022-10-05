@@ -14,7 +14,7 @@ preIncludeString="RecExOnline/RecExOnline_globalconfig.py,RecExOnline/RecExOnlin
 preExecStringOne="isOnline=True;isOnlineStateless=True;isGlobalMonitoring=False;useEmon=False;useAtlantisEmon=False;evtMax=300;from AthenaConfiguration.AllConfigFlags import ConfigFlags;ConfigFlags.Trigger.triggerConfig=\"DB\";fileName=\"${inputFile}\""
 
 Reco_tf.py --inputBSFile="${inputFile}" --preInclude="${preIncludeString}" --preExec="${preExecStringOne}" --postInclude="RecExOnline/RecExOnline_postconfig.py" \
-        --AMI=f1263 --outputESDFile myESD.pool.root --outputAODFile myAOD.pool.root --outputHISTFile myHist.root
+        --AMI=f1263 --outputESDFile myESD.pool.root --outputAODFile myAOD.pool.root --outputHISTFile myHist.root --conditionsTag="CONDBR2-HLTP-2022-02"
 
 #Remember retval of transform as art result
 RES=$?

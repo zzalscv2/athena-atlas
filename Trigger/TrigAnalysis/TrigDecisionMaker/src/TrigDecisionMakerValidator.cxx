@@ -37,13 +37,17 @@ StatusCode TrigDec::TrigDecisionMakerValidator::execute(const EventContext& cont
 
   if (m_doL1) {
 
-    std::vector<std::string> l1Items = m_tdt->getListOfTriggers("L1_.*");
+    const Trig::ChainGroup* l1group = m_tdt->getChainGroup("L1_.*");
+    const std::vector<std::string> items = l1group->getListOfTriggers();
+    const std::vector<bool> isPassed = l1group->isPassedForEach();
+    const std::vector<unsigned int> bits = l1group->isPassedBitsForEach();
 
     size_t passL1 = 0;
-    for (const std::string& item : l1Items) {
+    for (size_t i = 0; i<items.size(); i++) {
 
-      const bool passedPhysics = m_tdt->isPassed(item);
-      const unsigned passBits = m_tdt->isPassedBits(item);
+      const std::string& item = items[i];
+      const bool passedPhysics = isPassed[i];
+      const unsigned passBits = bits[i];
       const bool l1TBP = (passBits & TrigDefs::L1_isPassedBeforePrescale);
       const bool l1TAP = (passBits & TrigDefs::L1_isPassedAfterPrescale);
       const bool l1TAV = (passBits & TrigDefs::L1_isPassedAfterVeto);
@@ -76,7 +80,10 @@ StatusCode TrigDec::TrigDecisionMakerValidator::execute(const EventContext& cont
 
   if (m_doHLT) {
 
-    std::vector<std::string> hltChains = m_tdt->getListOfTriggers("HLT_.*");
+    const Trig::ChainGroup* hltgroup = m_tdt->getChainGroup("HLT_.*");
+    const std::vector<std::string> items = hltgroup->getListOfTriggers();
+    const std::vector<bool> isPassed = hltgroup->isPassedForEach();
+    const std::vector<unsigned int> bits = hltgroup->isPassedBitsForEach();
 
     TrigCompositeUtils::DecisionIDContainer terminusIDs;
     if (m_edmVersion >= 3) {
@@ -89,10 +96,11 @@ StatusCode TrigDec::TrigDecisionMakerValidator::execute(const EventContext& cont
     }
 
     size_t passHLT = 0;
-    for (const std::string& chain : hltChains) {
+    for (size_t i = 0; i<items.size(); i++) {
 
-      const bool passedPhysics = m_tdt->isPassed(chain);
-      const unsigned passBits = m_tdt->isPassedBits(chain);
+      const std::string& chain = items[i];
+      const bool passedPhysics = isPassed[i];
+      const unsigned passBits = bits[i];
       const bool l1TBP = (passBits & TrigDefs::L1_isPassedBeforePrescale);
       const bool l1TAP = (passBits & TrigDefs::L1_isPassedAfterPrescale);
       const bool l1TAV = (passBits & TrigDefs::L1_isPassedAfterVeto);

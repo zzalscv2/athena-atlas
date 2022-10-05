@@ -14,6 +14,8 @@ msg = logging.getLogger('MetaReader')
 regexEventStreamInfo = re.compile(r'^EventStreamInfo(_p\d+)?$')
 regexIOVMetaDataContainer = re.compile(r'^IOVMetaDataContainer(_p\d+)?$')
 regexByteStreamMetadataContainer = re.compile(r'^ByteStreamMetadataContainer(_p\d+)?$')
+regexXAODCutBookkeeperContainer = re.compile(r'^xAOD::CutBookkeeperContainer(_v\d+)?$')
+regexXAODCutBookkeeperContainerAux = re.compile(r'^xAOD::CutBookkeeperAuxContainer(_v\d+)?$')
 regexXAODEventFormat = re.compile(r'^xAOD::EventFormat(_v\d+)?$')
 regexXAODFileMetaData = re.compile(r'^xAOD::FileMetaData(_v\d+)?$')
 regexXAODFileMetaDataAux = re.compile(r'^xAOD::FileMetaDataAuxInfo(_v\d+)?$')
@@ -170,7 +172,7 @@ def read_metadata(filenames, file_type = None, mode = 'lite', promote = None, me
 
                 # set the filters for name
                 if mode == 'peeker':
-                    meta_filter = {
+                    meta_filter.update({
                         'TriggerMenu': 'DataVector<xAOD::TriggerMenu_v1>', # R2 trigger metadata format AOD (deprecated)
                         'TriggerMenuAux.': 'xAOD::TriggerMenuAuxContainer_v1',
                         'DataVector<xAOD::TriggerMenu_v1>_TriggerMenu': 'DataVector<xAOD::TriggerMenu_v1>', # R2 trigger metadata format ESD (deprecated)
@@ -185,6 +187,8 @@ def read_metadata(filenames, file_type = None, mode = 'lite', promote = None, me
                         'TriggerMenuJson_L1Aux.': 'xAOD::TriggerMenuJsonAuxContainer_v1',
                         'TriggerMenuJson_L1PS': 'DataVector<xAOD::TriggerMenuJson_v1>', # R3 trigger metadata format AOD
                         'TriggerMenuJson_L1PSAux.': 'xAOD::TriggerMenuJsonAuxContainer_v1',
+                        'CutBookkeepers': 'xAOD::CutBookkeeperContainer_v1',
+                        'CutBookkeepersAux.': 'xAOD::CutBookkeeperAuxContainer_v1',
                         'FileMetaData': '*',
                         'FileMetaDataAux.': 'xAOD::FileMetaDataAuxInfo_v1',
                         'DataVector<xAOD::TriggerMenuJson_v1>_TriggerMenuJson_HLT': 'DataVector<xAOD::TriggerMenuJson_v1>', # R3 trigger metadata format ESD
@@ -197,7 +201,7 @@ def read_metadata(filenames, file_type = None, mode = 'lite', promote = None, me
                         'xAOD::TriggerMenuJsonAuxContainer_v1_TriggerMenuJson_L1Aux.': 'xAOD::TriggerMenuJsonAuxContainer_v1',
                         'DataVector<xAOD::TriggerMenuJson_v1>_TriggerMenuJson_L1PS': 'DataVector<xAOD::TriggerMenuJson_v1>', # R3 trigger metadata format ESD
                         'xAOD::TriggerMenuJsonAuxContainer_v1_TriggerMenuJson_L1PSAux.': 'xAOD::TriggerMenuJsonAuxContainer_v1'
-                    }
+                    })
 
                     if isGaudiEnv():
                         meta_filter.update({
@@ -246,10 +250,19 @@ def read_metadata(filenames, file_type = None, mode = 'lite', promote = None, me
                         keep = False
                         for filter_key, filter_class in meta_filter.items():
                             if (filter_key.replace('/', '_') in name.replace('/', '_') or filter_key == '*') and fnmatchcase(class_name, filter_class):
-                                keep = True
-                                break
+                                if 'CutBookkeepers' in filter_key:
+                                    keep = filter_key == name
+                                    if keep:
+                                        break
+                                else:
+                                    keep = True
+                                    break
 
                         if not keep:
+                            continue
+                    else:
+                        # CutBookkeepers should always be filtered:
+                        if 'CutBookkeepers' in name and name not in ['CutBookkeepers', 'CutBookkeepersAux.']:
                             continue
 
                     if not isGaudiEnv():
@@ -275,6 +288,10 @@ def read_metadata(filenames, file_type = None, mode = 'lite', promote = None, me
                         persistent_instances[name] = ROOT.xAOD.TriggerMenuJsonContainer_v1()
                     elif regexXAODTriggerMenuJsonAux.match(class_name) and _check_project() not in ['AthGeneration']:
                         persistent_instances[name] = ROOT.xAOD.TriggerMenuJsonAuxContainer_v1()
+                    elif regexXAODCutBookkeeperContainer.match(class_name):
+                        persistent_instances[name] = ROOT.xAOD.CutBookkeeperContainer_v1()
+                    elif regexXAODCutBookkeeperContainerAux.match(class_name):
+                        persistent_instances[name] = ROOT.xAOD.CutBookkeeperAuxContainer_v1()
                     elif regexXAODFileMetaData.match(class_name):
                         persistent_instances[name] = ROOT.xAOD.FileMetaData_v1()
                     elif regexXAODFileMetaDataAux.match(class_name):
@@ -337,14 +354,19 @@ def read_metadata(filenames, file_type = None, mode = 'lite', promote = None, me
                         aux = persistent_instances['TriggerMenuAux.']
                     elif key == 'DataVector<xAOD::TriggerMenu_v1>_TriggerMenu' and 'xAOD::TriggerMenuAuxContainer_v1_TriggerMenuAux.' in persistent_instances and not has_r3_trig_meta: # ESD case (legacy support, HLT and L1 menus)
                         aux = persistent_instances['xAOD::TriggerMenuAuxContainer_v1_TriggerMenuAux.']
+                    elif (key == 'CutBookkeepers'
+                          and 'CutBookkeepersAux.' in persistent_instances):
+                        aux = persistent_instances['CutBookkeepersAux.']
+                    elif key == 'CutBookkeepersAux.':
+                        continue   # Extracted using the interface object
                     elif (key == 'FileMetaData'
                           and 'FileMetaDataAux.' in persistent_instances):
                         aux = persistent_instances['FileMetaDataAux.']
                     elif (key == 'xAOD::FileMetaData_v1_FileMetaData'
                           and 'xAOD::FileMetaDataAuxInfo_v1_FileMetaDataAux.' in persistent_instances):
                         aux = persistent_instances['xAOD::FileMetaDataAuxInfo_v1_FileMetaDataAux.']
-                    elif 'Menu' in key and key.endswith('Aux.'): # Extracted using the interface object
-                        continue
+                    elif 'Menu' in key and key.endswith('Aux.'):
+                        continue   # Extracted using the interface object
 
                     return_obj = _convert_value(content, aux)
 
@@ -652,6 +674,8 @@ def _convert_value(value, aux = None):
 
             elif cl.__cpp_name__ == 'xAOD::EventFormat_v1':
                 return _extract_fields_ef(value)
+            elif cl.__cpp_name__ == 'xAOD::CutBookkeeperContainer_v1':
+                return _extract_fields_cbk(interface=value, aux=aux)
             elif cl.__cpp_name__ == 'xAOD::FileMetaData_v1':
                 return _extract_fields_fmd(interface=value, aux=aux)
 
@@ -820,6 +844,37 @@ def _extract_fields_ef(value):
     for ef_element in value:
         result[ef_element.first] = ef_element.second.className()
 
+    return result
+
+
+def _extract_fields_cbk(interface=None, aux=None):
+    """Extract CutBookkeeper content into dictionary
+
+    This function takes the CutBookkeeperContainer_v1 and CutBookkeeperAuxContainer_v1 objects.
+    It makes sure the the interface object uses the auxiary object as store.
+        Args:
+            interface (CutBookkeeperContainer_v1):     the interface class
+            aux       (CutBookkeeperAuxContainer_v1):  auxiliary container object
+        Returns
+            dict: with the cycle number and last stream
+    """
+    if not interface or not aux:
+        return {}
+    interface.setStore(aux)
+
+    max_cycle = -1
+    input_stream = ''
+
+    for cbk in interface:
+        current_cycle = int(cbk.cycle())
+        if current_cycle > max_cycle:
+            max_cycle = current_cycle
+            input_stream = str(cbk.inputStream())
+
+    result = {
+        'currentCutCycle': max_cycle,
+        'currentCutInputStream': input_stream,
+    }
     return result
 
 
@@ -1046,6 +1101,15 @@ def make_peeker(meta_dict):
                 if item not in keys_to_keep:
                     meta_dict[filename]['/Digitization/Parameters'].pop(item)
 
+        if 'CutBookkeepers' in file_content:
+            keys_to_keep = [
+                'currentCutCycle',
+                'currentCutInputStream',
+            ]
+            for item in list(meta_dict[filename]['CutBookkeepers']):
+                if item not in keys_to_keep:
+                    meta_dict[filename]['CutBookkeepers'].pop(item)
+
     return meta_dict
 
 
@@ -1136,6 +1200,10 @@ def promote_keys(meta_dict, mode):
         if '/Digitization/Parameters' in file_content:
             md.update(md['/Digitization/Parameters'])
             md.pop('/Digitization/Parameters')
+
+        if 'CutBookkeepers' in file_content:
+            md.update(md['CutBookkeepers'])
+            md.pop('CutBookkeepers')
 
     return meta_dict
 

@@ -18,6 +18,12 @@ def MuonTrackConfig(inputFlags, isOld=False, **kwargs):
     helper = AthMonitorCfgHelper(inputFlags, "MuonTrackMonitoringConfig")
     if inputFlags.Beam.Type != BeamType.Collisions:
          kwargs.setdefault("PrimaryVerticesKey", "")
+         kwargs.setdefault("RequireBeamSpot", False)
+    elif inputFlags.Output.doWriteESD or inputFlags.Output.doWriteAOD:
+        from xAODEventInfoCnv.EventInfoBeamSpotDecoratorAlgConfig import (
+            EventInfoBeamSpotDecoratorAlgCfg)
+        helper.resobj.merge(EventInfoBeamSpotDecoratorAlgCfg(inputFlags))
+
     muonTrackAlg = helper.addAlgorithm(MuonTrackMonitorAlgorithm, "MuonTrackMonitorAlg", **kwargs)
 
     myGroup = helper.addGroup(muonTrackAlg, "MuonTrackMonitorAlgorithm", "MuonPhysics/")

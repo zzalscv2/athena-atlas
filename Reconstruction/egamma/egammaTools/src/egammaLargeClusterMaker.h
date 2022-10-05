@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2019 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
 */
 
 /**
@@ -93,6 +93,13 @@ private:
     "Number of phi cell in each sampling in which to look for hottest cell"
   };
 
+  /** @brief Et cut on input central clusters to produce large clusters*/
+  Gaudi::Property<double> m_centEtThr{
+    this,
+    "CentralEtThreshold",
+    3000.,
+    "Value of Et cut on input central cluster to produce large cluster" };
+
   Gaudi::Property<double> m_netaFWD{
     this,
     "NetaFWD",
@@ -113,6 +120,28 @@ private:
     0.4,
     "Cone size to collec cell around hottest-cell FCAL"
   };
+
+  Gaudi::Property<double> m_drEM{
+    this,
+    "deltaR_EM",
+    0.3,
+    "Cone size to eventually collect EME1 cells around hottest-cell"
+  };
+
+  /** @brief Et cut on input forward clusters to produce large clusters*/
+  Gaudi::Property<double> m_fwdEtThr{
+    this,
+    "ForwardEtThreshold",
+    5000.,
+    "Value of Et cut on input forward cluster to produce large cluster" };
+
+  /** @brief Et cut on input forward clusters to produce large clusters*/
+  Gaudi::Property<bool> m_addCellsFromOtherSamplings{
+    this,
+    "AddCellsFromOtherSamplings",
+    true,
+    "Keep all cells from relevant samplings or just from the max sampling" };
+
 };
 
 #endif // EGAMMATOOLS_EMCLUSTERTOOL_H

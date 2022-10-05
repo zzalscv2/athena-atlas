@@ -37,7 +37,7 @@ bool Trig::DecisionAccess::isPassed(const Trig::ChainGroup* chainGroup,
   return chainGroup->isPassed(condition);
 }
 
-bool Trig::DecisionAccess::isPassed(const std::string& chain, 
+bool Trig::DecisionAccess::isPassed(const std::string& chain,
 				    unsigned int condition ) const
 
 {
@@ -49,18 +49,44 @@ bool Trig::DecisionAccess::isPassed(const std::string& chain) const {
   return isPassed(chain, TrigDefs::Physics);
 }
 
+std::vector<bool>
+Trig::DecisionAccess::isPassedForEach(const Trig::ChainGroup* chainGroup,
+                                      unsigned int condition) const
+{
+  return chainGroup->isPassedForEach(condition);
+}
+
+std::vector<bool>
+Trig::DecisionAccess::isPassedForEach(const std::string& chain,
+                                      unsigned int condition) const
+{
+  const Trig::ChainGroup *g = cgm()->createChainGroup(Trig::convertStringToVector(chain));
+  return g->isPassedForEach(condition);
+}
+
 unsigned int Trig::DecisionAccess::isPassedBits(const Trig::ChainGroup* chainGroup) const
 {
   return chainGroup->isPassedBits();
 }
 
 unsigned int Trig::DecisionAccess::isPassedBits(const std::string& chain) const
-
 {
   const Trig::ChainGroup *g = cgm()->createChainGroup(Trig::convertStringToVector(chain));
   return isPassedBits(g);
 }
 
+std::vector<unsigned int>
+Trig::DecisionAccess::isPassedBitsForEach(const Trig::ChainGroup* chainGroup) const
+{
+  return chainGroup->isPassedBitsForEach();
+}
+
+std::vector<unsigned int>
+Trig::DecisionAccess::isPassedBitsForEach(const std::string& chain) const
+{
+  const Trig::ChainGroup *g = cgm()->createChainGroup(Trig::convertStringToVector(chain));
+  return g->isPassedBitsForEach();
+}
 
 Trig::FeatureContainer
 Trig::DecisionAccess::features(const Trig::ChainGroup* chain, unsigned int condition) const {

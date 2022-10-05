@@ -1,0 +1,74 @@
+/*
+  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+*/
+
+#ifndef TRIGINDETPATTRECOTOOLS_GNN_TRACKING_FILTER_H
+#define TRIGINDETPATTRECOTOOLS_GNN_TRACKING_FILTER_H
+
+#include "GNN_DataStorage.h"
+#include "TrigInDetPattRecoEvent/TrigInDetSiLayer.h"
+
+typedef struct TrigFTF_GNN_EdgeState {
+
+public:
+
+struct Compare {
+    bool operator()(const struct TrigFTF_GNN_EdgeState* s1, const struct TrigFTF_GNN_EdgeState* s2) {
+      return s1->m_J > s2->m_J;
+    }
+  };
+
+
+  TrigFTF_GNN_EdgeState() {};
+
+TrigFTF_GNN_EdgeState(bool f) : m_initialized(f) {};
+
+  ~TrigFTF_GNN_EdgeState() {};
+
+  void initialize(TrigFTF_GNN_EDGE*);
+  void clone(const struct TrigFTF_GNN_EdgeState&);
+
+  float m_J;
+
+  std::vector<TrigFTF_GNN_EDGE*> m_vs;
+
+  float m_X[3], m_Y[2], m_Cx[3][3], m_Cy[2][2];
+  float m_refX, m_refY, m_c, m_s;
+  
+  bool m_initialized;
+
+} TrigFTF_GNN_EDGE_STATE;
+
+#define MAX_EDGE_STATE 2500
+
+
+typedef class TrigFTF_GNN_TrackingFilter {
+ public:
+  TrigFTF_GNN_TrackingFilter(const std::vector<TRIG_INDET_SI_LAYER>&, std::vector<TrigFTF_GNN_EDGE>&);
+  ~TrigFTF_GNN_TrackingFilter(){};
+
+  void followTrack(TrigFTF_GNN_EDGE*, TrigFTF_GNN_EDGE_STATE&);
+
+ protected:
+
+  void propagate(TrigFTF_GNN_EDGE*, TrigFTF_GNN_EDGE_STATE&);
+
+  bool update(TrigFTF_GNN_EDGE*, TrigFTF_GNN_EDGE_STATE&);
+
+  int getLayerType(int);  
+
+
+  const std::vector<TRIG_INDET_SI_LAYER>& m_geo;
+  
+  std::vector<TrigFTF_GNN_EDGE>& m_segStore;
+
+  std::vector<TrigFTF_GNN_EDGE_STATE*> m_stateVec;
+
+  TrigFTF_GNN_EDGE_STATE m_stateStore[MAX_EDGE_STATE];
+
+  int m_globalStateCounter;
+
+} TrigFTF_GNN_TRACKING_FILTER;
+
+
+#endif

@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2017 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef TRIGINDETPATTRECOTOOLS_TRIGTRACKSEEDGENERATOR_H
@@ -114,10 +114,6 @@ LPhiSector(int nPhiSlices) : m_nSP(0) {
       else m_threeIndices[2].push_back(0);
     }
   }
-  //for(int phiIdx=0;phiIdx<nPhiSlices;phiIdx++) {
-  //  std::cout<<"PHI SLICE "<<phiIdx<<"[ "<<m_threeIndices[0][phiIdx]<<" "<<m_threeIndices[1][phiIdx]
-  //	     <<" "<<m_threeIndices[2][phiIdx]<<"]"<<std::endl;
-  //}
 }
 
 LPhiSector(const LPhiSector& ps) : m_nSP(ps.m_nSP), m_phiSlices(ps.m_phiSlices), m_phiThreeSlices(ps.m_phiThreeSlices) {
@@ -206,18 +202,6 @@ public:
   LPhi_Storage(int nPhiSectors, int nLayers) {
     m_layers.reserve(nLayers);
     for(int i = 0;i<nLayers;i++) m_layers.push_back(L_PHI_SECTOR(nPhiSectors));
-    /*
-    for(int i = 0;i<nLayers;i++) {
-      std::cout<<"Layer "<<i<<std::endl;
-      for(int j=0;j<nPhiSectors;j++) {
-	std::cout<<"Phi sector "<<j<<" 3 indices ";
-	for(int k=0;k<3;k++) {
-	  std::cout<<m_layers[i].m_threeIndices[k][j]<<" ";
-	}
-	std::cout<<std::endl;
-      }
-    }
-    */
   }
 
   void addSpacePoint(int phiIdx, int layerId, const INDEXED_SP* p) {
@@ -290,15 +274,6 @@ InternalSoA() : m_spi(0), m_spo(0), m_r(0), m_u(0), m_v(0), m_t(0), m_ti(0), m_t
   }
   
   void resize(const int spSize) {
-    /*
-    m_spi.resize(spSize,0);
-    m_spo.resize(spSize,0);
-    m_r.resize(spSize);
-    m_u.resize(spSize);
-    m_v.resize(spSize);
-    m_t.resize(spSize);
-    m_tCov.resize(spSize);
-    */
 
     m_spi = new const TrigSiSpacePointBase*[spSize];
     m_spo = new const TrigSiSpacePointBase*[spSize];
@@ -313,41 +288,6 @@ InternalSoA() : m_spi(0), m_spo(0), m_r(0), m_u(0), m_v(0), m_t(0), m_ti(0), m_t
     m_sorted_sp_type = new int[spSize];
     m_sorted_sp_t = new double[spSize];
   }
-  /*
-  void reserveSpacePoints(const int spSize) {
-    m_spi.reserve(spSize);
-    m_spo.reserve(spSize);
-  }
-
-  void resizeComponents() {
-    size_t size = m_spi.size() + m_spo.size();
-    m_r.resize(size);
-    m_u.resize(size);
-    m_v.resize(size);
-    m_t.resize(size);
-    m_tCov.resize(size);
-  }
-
-  void clear() {
-    m_spi.clear();
-    m_spo.clear();
-    m_r.clear();
-    m_u.clear();
-    m_v.clear();
-    m_t.clear();
-    m_tCov.clear();
-  }
-  */
-
-  /*
-  std::vector<const TrigSiSpacePointBase*> m_spi;
-  std::vector<const TrigSiSpacePointBase*> m_spo;
-  std::vector<double> m_r;
-  std::vector<double> m_u;
-  std::vector<double> m_v;
-  std::vector<double> m_t;
-  std::vector<double> m_tCov;
-  */
 
   const TrigSiSpacePointBase** m_spi;
   const TrigSiSpacePointBase** m_spo;
@@ -407,8 +347,6 @@ private:
   std::vector<TrigInDetTriplet> m_triplets;
 
   float m_zMinus, m_zPlus, m_minCoord, m_maxCoord;
-
-  //bool m_isBarrel;
 
   int m_nInner, m_nOuter;
   std::vector<int> m_innerMarkers, m_outerMarkers;

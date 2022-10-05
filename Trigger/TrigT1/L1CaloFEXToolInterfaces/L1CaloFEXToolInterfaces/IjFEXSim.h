@@ -45,9 +45,9 @@ Interface definition for jFEXSim
 
     virtual std::vector<std::vector<std::vector<uint32_t>>> getFwdElTOBs() =0;
     
-    virtual std::vector<std::unique_ptr<jFEXTOB>> getTauTOBs() =0;
-    virtual std::vector<std::unique_ptr<jFEXTOB>> getSmallRJetTOBs() =0;
-    virtual std::vector<std::unique_ptr<jFEXTOB>> getLargeRJetTOBs() =0;
+    virtual std::vector< std::vector<std::unique_ptr<jFEXTOB>> > getTauTOBs() =0;
+    virtual std::vector< std::vector<std::unique_ptr<jFEXTOB>> > getSmallRJetTOBs() =0;
+    virtual std::vector< std::vector<std::unique_ptr<jFEXTOB>> > getLargeRJetTOBs() =0;
     virtual std::vector<std::unique_ptr<jFEXTOB>> getSumEtTOBs() =0;
     virtual std::vector<std::unique_ptr<jFEXTOB>> getMetTOBs() =0;    
     

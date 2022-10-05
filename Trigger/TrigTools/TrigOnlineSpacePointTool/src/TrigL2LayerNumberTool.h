@@ -1,9 +1,9 @@
 /*
-  Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
 */
 
-#ifndef __TRIG_L2_LAYER_NUMBER_TOOL__
-#define __TRIG_L2_LAYER_NUMBER_TOOL__
+#ifndef TRIGONLINESPACEPOINTTOOL_TRIG_L2_LAYER_NUMBER_TOOL_H
+#define TRIGONLINESPACEPOINTTOOL_TRIG_L2_LAYER_NUMBER_TOOL_H
 
 #include <vector>
 #include <map>
