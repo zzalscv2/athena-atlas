@@ -603,9 +603,9 @@ Identifier TgcIdHelper::channelID(const std::string& stationNameStr, int station
 
 Identifier TgcIdHelper::channelID(const Identifier& id, int gasGap, int isStrip, int channel) const {
     Identifier result(id);
-    m_gap_impl.pack(gasGap, result);
-    m_ist_impl.pack(isStrip, result);
-    m_cha_impl.pack(channel, result);
+    resetAndSet(m_gap_impl, gasGap, result);
+    resetAndSet(m_ist_impl, isStrip, result);
+    resetAndSet(m_cha_impl, channel, result);
     return result;
 }
 Identifier TgcIdHelper::channelID(const Identifier& id, int gasGap, int isStrip, int channel, bool& isValid) const {

@@ -844,7 +844,7 @@ Identifier RpcIdHelper::elementID(const std::string& stationNameStr, int station
 
 Identifier RpcIdHelper::elementID(const Identifier& id, int doubletR) const {
     Identifier result(id);
-    m_dbr_impl.pack(doubletR, result);
+    resetAndSet(m_dbr_impl, doubletR, result);
     return result;
 }
 
@@ -897,8 +897,8 @@ Identifier RpcIdHelper::panelID(const Identifier& channelID) const {
 
 Identifier RpcIdHelper::panelID(const Identifier& padID, int gasGap, int measuresPhi) const {
     Identifier result(padID);
-    m_gap_impl.pack(gasGap, result);
-    m_mea_impl.pack(measuresPhi, result);
+    resetAndSet(m_gap_impl, gasGap, result);
+    resetAndSet(m_mea_impl, measuresPhi, result);
     return result;
 }
 Identifier RpcIdHelper::panelID(const Identifier& padID, int gasGap, int measuresPhi, bool& isValid) const {
@@ -944,7 +944,7 @@ Identifier RpcIdHelper::gapID(const Identifier& panelID) const {
 
 Identifier RpcIdHelper::gapID(const Identifier& padID, int gasGap) const {
     Identifier result(padID);
-    m_gap_impl.pack(gasGap, result);
+    resetAndSet(m_gap_impl, gasGap, result);
     return result;
 }
 Identifier RpcIdHelper::gapID(const Identifier& padID, int gasGap, bool& isValid) const {
@@ -996,11 +996,11 @@ Identifier RpcIdHelper::channelID(const std::string& stationNameStr, int station
 Identifier RpcIdHelper::channelID(const Identifier& id, int doubletZ, int doubletPhi, int gasGap, int measuresPhi, int strip) const {
     // pack fields independently
     Identifier result(id);
-    m_dbz_impl.pack(doubletZ, result);
-    m_dbp_impl.pack(doubletPhi, result);
-    m_gap_impl.pack(gasGap, result);
-    m_mea_impl.pack(measuresPhi, result);
-    m_str_impl.pack(strip, result);
+    resetAndSet(m_dbz_impl, doubletZ, result);
+    resetAndSet(m_dbp_impl, doubletPhi, result);
+    resetAndSet(m_gap_impl, gasGap, result);
+    resetAndSet(m_mea_impl, measuresPhi, result);
+    resetAndSet(m_str_impl, strip, result);
     return result;
 }
 Identifier RpcIdHelper::channelID(const Identifier& id, int doubletZ, int doubletPhi, int gasGap, int measuresPhi, int strip,
@@ -1062,8 +1062,8 @@ Identifier RpcIdHelper::padID(int stationName, int stationEta, int stationPhi, i
 Identifier RpcIdHelper::padID(const Identifier& id, int doubletZ, int doubletPhi) const {
     // pack fields independently
     Identifier result(id);
-    m_dbz_impl.pack(doubletZ, result);
-    m_dbp_impl.pack(doubletPhi, result);
+    resetAndSet(m_dbz_impl, doubletZ, result);
+    resetAndSet(m_dbp_impl, doubletPhi, result);
     return result;
 }
 Identifier RpcIdHelper::padID(const Identifier& id, int doubletZ, int doubletPhi, bool& isValid) const {
