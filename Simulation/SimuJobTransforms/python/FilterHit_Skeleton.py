@@ -10,8 +10,10 @@ def getStreamHITS_ItemList(ConfigFlags):
     #--------------------------------------------------------------
     ItemList = ["McEventCollection#TruthEvent", # mc truth (hepmc)
                 "TrackRecordCollection#MuonEntryLayer", # others not used in pileup
-                "xAOD::JetContainer#*",
-                "xAOD::JetAuxContainer#*",
+                "xAOD::JetContainer#AntiKt4TruthJets",
+                "xAOD::AuxContainerBase!#AntiKt4TruthJetsAux.-constituentLinks.-constituentWeights",
+                "xAOD::JetContainer#AntiKt6TruthJets",
+                "xAOD::AuxContainerBase!#AntiKt6TruthJetsAux.-constituentLinks.-constituentWeights",
                 "xAOD::TruthParticleContainer#TruthPileupParticles",
                 "xAOD::TruthParticleAuxContainer#TruthPileupParticlesAux."]
 
