@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2020 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "TBCaloCoolPosTool.h"
@@ -8,9 +8,6 @@
 // Gaudi includes
 #include "GaudiKernel/MsgStream.h"
 #include "GaudiKernel/IIncidentSvc.h"
-
-#include "EventInfo/EventInfo.h"
-#include "EventInfo/EventID.h"
 
 
 TBCaloCoolPosTool::TBCaloCoolPosTool(const std::string& type, 
@@ -58,7 +55,7 @@ StatusCode TBCaloCoolPosTool::initialize()
 
 void TBCaloCoolPosTool::handle(const Incident&) 
 {
-  // This should be the beginning of Run.  EventInfo is available now. 
+  // This should be the beginning of Run.  
   
     ATH_MSG_DEBUG ("in handle()" );
     if(! m_init) { 
@@ -78,10 +75,8 @@ bool TBCaloCoolPosTool::initHandles()
 { 
       ATH_MSG_DEBUG ("in initHandles()" );
 
-      const EventInfo* evtInfo = nullptr;
-      ATH_CHECK( evtStore()->retrieve(evtInfo), false );
-
-      int run = evtInfo->event_ID()->run_number(); 
+      const EventContext& ctx = Gaudi::Hive::currentContext();
+      int run = ctx.eventID().run_number(); 
 
       std::string etaKey,thetaKey,zKey,deltaKey; 
 
