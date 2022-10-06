@@ -10,6 +10,7 @@
 #define EGAMMA_ANALYSIS_ALGORITHMS__EGAMMA_CALIBRATION_AND_SMEARING_ALG_H
 
 #include <AnaAlgorithm/AnaAlgorithm.h>
+#include <AsgTools/PropertyWrapper.h>
 #include <EgammaAnalysisInterfaces/IEgammaCalibrationAndSmearingTool.h>
 #include <EgammaAnalysisAlgorithms/CopyHelpers.h>
 #include <SelectionHelpers/SysReadSelectionHandle.h>
@@ -41,6 +42,19 @@ namespace CP
     /// \brief the smearing tool
   private:
     ToolHandle<CP::IEgammaCalibrationAndSmearingTool> m_calibrationAndSmearingTool;
+
+    /// \brief whether to ignore all tool systematics
+    ///
+    /// The tool can be configured only to run the non-systematics or
+    /// only the systematics part of the corrections.  That means this
+    /// algorithm needs to be scheduled twice, once without
+    /// systematics and once with.  Besides configuring the tools for
+    /// their respective roles the first algorithm should have this
+    /// property set to avoid reporting any systematics or trying to
+    /// request any systematics.
+  private:
+    Gaudi::Property<bool> m_noToolSystematics {
+      this, "noToolSystematics", false, "whether to ignore all tool systematics"};
 
     /// \brief the systematics list we run
   private:
