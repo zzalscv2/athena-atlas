@@ -135,15 +135,16 @@ def Run3DecisionMakerCfg(flags):
     acc.addEventAlgo( tdm )
 
     # Validate that the output of the TrigDecisionMakerMT is sensible.
-    tdmv = CompFactory.TrigDec.TrigDecisionMakerValidator()
-    tdmv.doL1 = flags.Trigger.L1.doCTP
-    tdmv.doHLT = True
-    tdmv.samplingFrequency = 1
-    tdmv.errorOnFailure = True
-    tdmv.EDMVersion = flags.Trigger.EDMVersion
-    from TrigDecisionTool.TrigDecisionToolConfig import TrigDecisionToolCfg, getRun3NavigationContainerFromInput
-    tdmv.TrigDecisionTool = acc.getPrimaryAndMerge(TrigDecisionToolCfg(flags))
-    tdmv.NavigationKey = getRun3NavigationContainerFromInput(flags)
-    acc.addEventAlgo( tdmv )
+    if flags.Trigger.DecisionMakerValidation.Execute:
+        tdmv = CompFactory.TrigDec.TrigDecisionMakerValidator()
+        tdmv.doL1 = flags.Trigger.L1.doCTP
+        tdmv.doHLT = True
+        tdmv.samplingFrequency = 1
+        tdmv.errorOnFailure = flags.Trigger.DecisionMakerValidation.ErrorMode
+        tdmv.EDMVersion = flags.Trigger.EDMVersion
+        from TrigDecisionTool.TrigDecisionToolConfig import TrigDecisionToolCfg, getRun3NavigationContainerFromInput
+        tdmv.TrigDecisionTool = acc.getPrimaryAndMerge(TrigDecisionToolCfg(flags))
+        tdmv.NavigationKey = getRun3NavigationContainerFromInput(flags)
+        acc.addEventAlgo( tdmv )
 
     return acc

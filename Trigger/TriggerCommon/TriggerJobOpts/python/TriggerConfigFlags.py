@@ -235,6 +235,11 @@ def createTriggerFlags(doTriggerRecoFlags):
     # Offline flag, determins if the HLT trigger decision and the HLT result should be decoded in reconstruction in jobs with Reco.EnableTrigger
     flags.addFlag("Trigger.DecodeHLT", True)
 
+    # Offline flag, controls the scheduling of the validation algorithm which performs consistency checks on the T0 extracted trigger decision data (recommended).
+    # And if the algorithm should issue a WARNING or ERROR (and Failure) on encountering issues
+    flags.addFlag("Trigger.DecisionMakerValidation.Execute", True)
+    flags.addFlag("Trigger.DecisionMakerValidation.ErrorMode", True)
+
     # the configuration source
     # see https://twiki.cern.ch/twiki/bin/view/Atlas/TriggerConfigFlag
     flags.addFlag('Trigger.triggerConfig', lambda flags: 'INFILE' if flags.Trigger.InputContainsConfigMetadata else 'FILE')
