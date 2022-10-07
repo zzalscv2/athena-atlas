@@ -28,9 +28,9 @@ namespace CP {
                                                      "derivations (only for *FixedRad or FixedCutPflow* for electrons), pre-p3517 "
                                                      "derivations (only for FC*), or pre-p3830 derivations (for other electron WPs)",
                                                      SG::AuxTypeRegistry::instance().getName(acc_ele.auxid()).c_str());
-                isoVars.push_back(FLT_MAX);
+                isoVars[acc] = FLT_MAX;
             } else
-                isoVars.push_back(acc_ele(x));
+                isoVars[acc] = acc_ele(x);           
         }
         const float isoValue = m_isoFunction->EvalPar(isoVars.data());
         return isoValue <= cutValue;

@@ -51,9 +51,6 @@ namespace CP
     SysCopyHandle<xAOD::PhotonContainer> m_photonsHandle {
       this, "photons", "", "the photons container to use"};
 
-  private:
-    int m_topoEtConeModel {IIsolationCloseByCorrectionTool::TopoConeCorrectionModel::DirectCaloClusters};
-
     /// \brief the helper for OutOfValidity results
   private:
     OutOfValidityEventHelper m_outOfValidity {this};

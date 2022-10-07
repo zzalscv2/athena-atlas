@@ -12,6 +12,10 @@ namespace CP {
         asg::AcceptData result(&m_acceptInfo);
         for (const auto& c : m_cuts) {
             if (c->accept(p)) result.setCutResult(c->name(), true);
+            else{
+                result.clear();
+                return result;
+            } 
         }
         return result;
     }
@@ -20,6 +24,10 @@ namespace CP {
         asg::AcceptData result(&m_acceptInfo);
         for (const auto& c : m_cuts) {
             if (c->accept(p)) { result.setCutResult(c->name(), true); }
+            else{
+                result.clear();
+                return result;
+            } 
         }
         return result;
     }
