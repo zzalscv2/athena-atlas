@@ -13,9 +13,9 @@
 xAODMultiElectronFilter::xAODMultiElectronFilter(const std::string& name, ISvcLocator* pSvcLocator)
 : GenFilter(name,pSvcLocator)
 {
-  declareProperty("ptcut",m_ptmin = 10000.);
-  declareProperty("etacut",m_etaRange = 10.0);
-  declareProperty("nElectrons",m_nElectrons = 2);
+  declareProperty("Ptcut",m_ptmin = 10000.);
+  declareProperty("Etacut",m_etaRange = 10.0);
+  declareProperty("NElectrons",m_nElectrons = 2);
 }
 StatusCode xAODMultiElectronFilter::filterEvent() {  
   // Retrieve TruthElectron container
