@@ -22,8 +22,7 @@ namespace CP
                         ISvcLocator* pSvcLocator)
     : AnaAlgorithm (name, pSvcLocator)
   {
-    declareProperty ("isolationCorrectionTool", m_isolationCorrectionTool);
-    declareProperty ("topoEtConeModel", m_topoEtConeModel);
+    declareProperty ("isolationCorrectionTool", m_isolationCorrectionTool);   
   }
 
 
@@ -59,7 +58,7 @@ namespace CP
 
       ANA_CHECK_CORRECTION_EVENT
         (m_outOfValidity, m_isolationCorrectionTool->getCloseByIsoCorrection
-         (electrons, muons, photons, m_topoEtConeModel));
+         (electrons, muons, photons));
     }
 
     return StatusCode::SUCCESS;

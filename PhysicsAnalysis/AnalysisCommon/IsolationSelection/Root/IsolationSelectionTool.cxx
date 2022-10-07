@@ -391,7 +391,7 @@ namespace CP {
     template <typename T>
     void IsolationSelectionTool::evaluateWP(const T& x, const std::vector<IsolationWP*>& WP, asg::AcceptData& accept) const {
         accept.clear();
-        for (auto& i : WP) {
+        for (IsolationWP* i : WP) {
             if (i->accept(x)) accept.setCutResult(i->name(), true);
         }
     }

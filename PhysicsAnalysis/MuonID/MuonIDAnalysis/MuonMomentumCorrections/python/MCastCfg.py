@@ -17,24 +17,26 @@ def setupMCastToolCfg(flags, name="MuonMomentumCorrections", **kwargs):
     acc.setPrivateTools(the_tool)
     return acc
 
-def setupCalibratedMuonProviderCfg(flags, name="CalibratedMuonProvider", **kwargs):
+def setupCalibratedMuonProviderCfg(flags, name="CalibratedMuonProvider", calibMode = 1, **kwargs):
     acc = ComponentAccumulator()    
     ### prw tool configuration
     if "prwTool" in kwargs:
         kwargs.setdefault( "useRndRunNumber", True)
     useRndNumber =  kwargs["useRndRunNumber"] if "useRndRunNumber" in kwargs else False
     kwargs.setdefault("Tool", acc.popToolsAndMerge(setupMCastToolCfg(flags,
+                                                                     calibMode = calibMode,
                                                                      useRandomRunNumber=useRndNumber)))    
 
     the_alg = CompFactory.CP.CalibratedMuonsProvider(name,**kwargs)
     acc.addEventAlgo(the_alg, primary = True)
     return acc
-def setupCalibratedTracksProviderCfg(flags, name="CalibratedMuonTracksProvider", **kwargs):
+def setupCalibratedTracksProviderCfg(flags, name="CalibratedMuonTracksProvider",calibMode = 1, **kwargs):
     acc = ComponentAccumulator()
     if "prwTool" in kwargs:
         kwargs.setdefault( "useRndRunNumber", True)
     useRndNumber =  kwargs["useRndRunNumber"] if "useRndRunNumber" in kwargs else False
     kwargs.setdefault("Tool", acc.popToolsAndMerge(setupMCastToolCfg(flags,
+                                                                     calibMode = calibMode,
                                                                      useRandomRunNumber=useRndNumber)))    
 
     the_alg = CompFactory.CP.CalibratedTracksProvider(name,**kwargs)
