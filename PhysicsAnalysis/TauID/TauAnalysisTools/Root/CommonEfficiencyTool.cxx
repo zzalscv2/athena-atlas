@@ -697,17 +697,19 @@ CP::CorrectionCode CommonEfficiencyTool::getValue(const std::string& sHistName,
     const xAOD::TauJet& xTau,
     double& dEfficiencyScaleFactor) const
 {
-  if (m_mSF->find(sHistName) == m_mSF->end())
+  const tSFMAP& mSF = *m_mSF;
+  auto it = mSF.find (sHistName);
+  if (it == mSF.end())
   {
     ATH_MSG_ERROR("Object with name "<<sHistName<<" was not found in input file.");
     ATH_MSG_DEBUG("Content of input file");
-    for (auto eEntry : *m_mSF)
+    for (auto eEntry : mSF)
       ATH_MSG_DEBUG("  Entry: "<<eEntry.first);
     return CP::CorrectionCode::Error;
   }
 
   // get a tuple (TObject*,functionPointer) from the scale factor map
-  tTupleObjectFunc tTuple = (*m_mSF)[sHistName];
+  tTupleObjectFunc tTuple = it->second;
 
   // get pt and eta (for x and y axis respectively)
   double dPt = m_fX(xTau);
