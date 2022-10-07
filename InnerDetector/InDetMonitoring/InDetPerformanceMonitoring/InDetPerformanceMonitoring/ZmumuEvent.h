@@ -84,20 +84,20 @@ class ZmumuEvent : public EventAnalysis
   const float&                       getZPhi(  ZTYPE eType )              { return m_fZPhiDir[eType];        }
   const float&                       getZPt(   ZTYPE eType )              { return m_fZPt[eType];            }
   void                               OrderMuonList ();
-  inline void                        setDebugMode(bool debug)             { m_doDebug=debug;}
+  inline void                        setDebugMode(bool debug)             { m_doDebug=debug; }
   inline void                        SetMuonPtCut (double newvalue)       { m_xMuonID.SetPtCut(newvalue); }
   inline void                        SetMuonQuality (std::string newname) { m_xMuonID.SetMuonQualityRequirement(newname); }
 
-  inline void SetMassWindowLow (double newvalue) {m_MassWindowLow = newvalue;}
-  inline void SetMassWindowHigh (double newvalue) {m_MassWindowHigh = newvalue;}
-  void SetLeadingMuonPtCut (double newvalue); 
-  void SetSecondMuonPtCut (double newvalue); 
-  inline void SetOpeningAngleCut (double newvalue) {m_OpeningAngleCut = newvalue;}
-  inline void SetZ0GapCut (double newvalue) {m_Z0GapCut = newvalue;}
-  inline void SetSkipMSCheck (bool value) {m_skipMScheck = value;}
+  inline void                        SetMassWindowLow (double newvalue)   { m_MassWindowLow = newvalue; }
+  inline void                        SetMassWindowHigh (double newvalue)  { m_MassWindowHigh = newvalue; }
+  void                               SetLeadingMuonPtCut (double newvalue); 
+  void                               SetSecondMuonPtCut (double newvalue); 
+  inline void                        SetOpeningAngleCut (double newvalue) {m_OpeningAngleCut = newvalue;}
+  inline void                        SetZ0GapCut (double newvalue)        {m_Z0GapCut = newvalue;}
+  inline void                        SetSkipMSCheck (bool value)          {m_skipMScheck = value;}
 
-  void setContainer( PerfMonServices::CONTAINERS container) { m_container = container; };
-  inline double GetInvMass() {return m_DiMuonPairInvMass;}
+  inline void                        setContainer ( PerfMonServices::CONTAINERS container) { m_container = container; };
+  inline double                      GetInvMass ()                        {return m_DiMuonPairInvMass;}
   inline void SetMuonSelectionTool ( ToolHandle<CP::IMuonSelectionTool> mst ) { m_muonSelectionTool = mst;  m_xMuonID.SetCustomMuonSelectionTool (mst); };
 
  protected:

@@ -6,28 +6,36 @@ def GetCurrentStreamName( msg ):
     # First, try to get the info from the RecFlags
     try:
         from RecExConfig.RecFlags import rec
-        msg.debug("Got the stream name from the RecFlags: %s", rec.mergingStreamName())
         streamName = rec.mergingStreamName()
-        if streamName == "":
-            streamName = "unknownStream"
-        return streamName
+        if streamName:
+            msg.debug("Got the stream name from the RecFlags: %s", streamName)
+            return streamName
     except ImportError:
-        msg.info("Couldn't get input stream name from the RecFlags... trying AthFile directly.")
+        msg.info("Couldn't get input stream name from the RecFlags... trying metadata directly.")
 
-    from PyUtils.MetaReader import read_metadata
     from AthenaCommon.AppMgr import ServiceMgr as svcMgr
     try:
-        input_file = svcMgr.EventSelector.InputCollections[0]
+        input_files = svcMgr.EventSelector.InputCollections
     except AttributeError:
         from AthenaCommon.AthenaCommonFlags import athenaCommonFlags
-        input_file = athenaCommonFlags.FilesInput()[0]
-    metadata = read_metadata(input_file)
-    metadata = metadata[input_file]  # promote all keys one level up
+        input_files = athenaCommonFlags.FilesInput()
 
-    for class_name, name in metadata['metadata_items'].items():
-        if name == 'EventStreamInfo':
-            return class_name
-    return 'unknownStream'
+    from AthenaConfiguration.AutoConfigFlags import GetFileMD
+    processingTags = GetFileMD(input_files).get("processingTags", [])
+    return processingTags[-1] if processingTags else 'N/A'
+
+
+def GetCurrentSkimmingCycle( msg ):
+    from AthenaCommon.AppMgr import ServiceMgr as svcMgr
+    try:
+        input_files = svcMgr.EventSelector.InputCollections
+    except AttributeError:
+        from AthenaCommon.AthenaCommonFlags import athenaCommonFlags
+        input_files = athenaCommonFlags.FilesInput()
+
+    from AthenaConfiguration.AutoConfigFlags import GetFileMD
+    return GetFileMD(input_files).get('currentCutCycle', -1) + 1
+
 
 def CreateCutFlowSvc( seq=None, addMetaDataToAllOutputFiles=True ):
     """
@@ -45,6 +53,9 @@ def CreateCutFlowSvc( seq=None, addMetaDataToAllOutputFiles=True ):
     inputStreamName = GetCurrentStreamName( msg=msg )
     msg.debug("CreateCutFlowSvc: Have inputStreamName = %s", inputStreamName)
 
+    skimmingCycle = GetCurrentSkimmingCycle( msg=msg )
+    msg.debug("CreateCutFlowSvc: Have skimmingCycle = %s", skimmingCycle)
+
     # Create the CutFlowSvc instance
     import AthenaCommon.CfgMgr as CfgMgr
     if not hasattr(svcMgr,"CutFlowSvc"):
@@ -54,6 +65,7 @@ def CreateCutFlowSvc( seq=None, addMetaDataToAllOutputFiles=True ):
         cutFlowSvc = svcMgr.CutFlowSvc
     cutFlowSvc.Configured  = True
     cutFlowSvc.InputStream = inputStreamName
+    cutFlowSvc.SkimmingCycle = skimmingCycle
 
     # Make sure MetaDataSvc is ready
     if not hasattr(svcMgr,'MetaDataSvc'):

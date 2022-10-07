@@ -5,8 +5,8 @@
 # art-type: grid
 # art-include: master/Athena
 # art-include: 22.0/Athena
-# art-input: mc15_13TeV.129190.Pythia8_AU2CTEQ6L1_ppToJpsie3e3.recon.RDO.e3802_s2608_s2183_r7042
-# art-input-nfiles: 16
+# art-input: valid1.801272.P8B_A14_CTEQ6L1_Jpsie3e3.recon.RDO.e8453_e8455_s3873_s3874_r13929_tid30652311_00
+# art-input-nfiles: 4
 # art-athena-mt: 4
 # art-html: https://idtrigger-val.web.cern.ch/idtrigger-val/TIDAWeb/TIDAart/?jobdir=
 # art-output: *.txt
@@ -27,15 +27,12 @@
 # art-output: cost-perEvent-chain
 # art-output: *.dat 
 
-
 Slices  = ['electron']
 Events  = 8000
 Threads = 8 
 Slots   = 8
-Input   = 'Jpsiee_pu40'    # defined in TrigValTools/share/TrigValInputs.json
+Input   = 'Jpsiee'    # defined in TrigValTools/share/TrigValInputs.json
 GridFiles=True
-
-preinclude_file = 'all:TrigInDetValidation/TIDV_cond_fix.py' #conditions fix for ATR-23982. In future find a more recent RDO  
 
 Jobs = [ ( "Truth",       " TIDAdata-run3.dat                    -o data-hists.root -p 11" ),
          ( "Offline",     " TIDAdata-run3-offline.dat -r Offline -o data-hists-offline.root" ) ]

@@ -225,6 +225,8 @@ StatusCode
 
       set(xAOD::FileMetaData::mcCampaign, m_tagInfoMgr->findTag("mc_campaign"));
 
+      set(xAOD::FileMetaData::generatorsInfo, m_tagInfoMgr->findTag("generators"));
+
       std::string beamEnergy = m_tagInfoMgr->findTag("beam_energy");
       try {
         set(xAOD::FileMetaData::beamEnergy,

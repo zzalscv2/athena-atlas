@@ -5,8 +5,8 @@
 # art-type: grid
 # art-include: master/Athena
 # art-include: 22.0/Athena
-# art-input: mc21.601190.PhPy8EG_AZNLO_Zmumu.recon.RDO.e8392_e7400_s3775_r13614
-# art-input-nfiles: 4
+# art-input: valid1.601190.PhPy8EG_AZNLO_Zmumu.recon.RDO.e8453_e8455_s3873_s3874_r13929_tid30652304_00
+# art-input-nfiles: 5
 # art-athena-mt: 8
 # art-html: https://idtrigger-val.web.cern.ch/idtrigger-val/TIDAWeb/TIDAart/?jobdir=
 # art-output: *.txt
@@ -27,13 +27,12 @@
 # art-output: cost-perEvent-chain
 # art-output: *.dat 
 
-
 Slices  = ['muon']
-Events  = 12000 
-Threads = 8 
+Events  = 10000
+Threads = 8
 Slots   = 8
-Input   = 'Zmumu_pu40'    # defined in TrigValTools/share/TrigValInputs.json
-GridFiles=True
+Input   = 'Zmumu'    # defined in TrigValTools/share/TrigValInputs.json
+GridFiles = True
 
 Jobs = [ ( "Truth",       " TIDAdata-run3.dat                    -o data-hists.root -p 13" ),
          ( "Offline",     " TIDAdata-run3-offline.dat -r Offline -o data-hists-offline.root" ) ]

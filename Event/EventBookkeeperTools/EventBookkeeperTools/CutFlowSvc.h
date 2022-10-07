@@ -145,7 +145,7 @@ private:
   CutBookkeepersLocalCache m_containers;
 
   /// The current skimming cycle, i.e., how many processing stages we already had
-  int m_skimmingCycle{};
+  Gaudi::Property<int> m_skimmingCycle{this, "SkimmingCycle", 0, "Skimming cycle of current job"};
 
   /// The name of the currently used input file stream
   Gaudi::Property<std::string> m_inputStream{this, "InputStream", "N/A", "The name of the input file stream"};

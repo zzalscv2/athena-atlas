@@ -36,8 +36,8 @@ flags.Calo.ClusterCorrection.defaultSource = [CALOCORR_POOL, CALOCORR_JO] # temp
 flags.Exec.MaxEvents = 50
 # TODO this two should be resolved in a smarter way (i.e. required passing the tag from the driver test, however now, parsing of string with - fails)
 flags.Common.isOnline = lambda f: not f.Input.isMC
-# temporarily roll back to v5 for Run3 MC due to incompatibility between MC21 RDO and v6 MDT conditions
-flags.IOVDb.GlobalTag = lambda f: ('OFLCOND-MC16-SDR-RUN2-08-02' if f.GeoModel.Run is LHCPeriod.Run2 else 'OFLCOND-MC21-SDR-RUN3-05') if f.Input.isMC else "CONDBR2-HLTP-2018-03"
+flags.IOVDb.GlobalTag = lambda f: ('OFLCOND-MC16-SDR-RUN2-08-02a' if f.GeoModel.Run is LHCPeriod.Run2 else 'OFLCOND-MC21-SDR-RUN3-07') if f.Input.isMC else "CONDBR2-HLTP-2022-02"
+flags.GeoModel.AtlasVersion = flags.Trigger.OnlineGeoTag
 flags.Common.MsgSourceLength=70
 flags.Trigger.doLVL1=True # run L1 sim also on data
 flags.Trigger.enableL1CaloPhase1=False
@@ -73,11 +73,6 @@ flags.Trigger.enabledSignatures = ['Muon', 'Photon','Electron']
 
 # if set to True, use standalone menu generation code
 oldMenuCode=False
-
-
-if flags.Trigger.Online.isPartition:
-    flags.GeoModel.AtlasVersion = flags.Trigger.OnlineGeoTag
-# else rely on the auto-configuration from input file
 
 
 flags.InDet.useSctDCS = False

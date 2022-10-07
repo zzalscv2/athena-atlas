@@ -31,7 +31,7 @@ FourMuonEvent::FourMuonEvent()
 
   m_container = PerfMonServices::MUON_COLLECTION; //PerfMonServices::ELECTRON_COLLECTION
 
-  m_doDebug = true;
+  m_doDebug = false;
   m_workAsFourMuons = false;
   m_workAsFourElectrons = false;
   m_workAsFourLeptons = true;
@@ -82,8 +82,6 @@ void FourMuonEvent::Init()
 //==================================================================================
 bool FourMuonEvent::Reco()
 {
-  bool thisdebug = false;
-
   m_eventCount++;
   (*m_msgStream) << MSG::DEBUG << " * FourMuonEvent::Reco * STARTING ** New event ** eventCount " << m_eventCount << endmsg;
   
@@ -103,7 +101,7 @@ bool FourMuonEvent::Reco()
 		     << " combined muons in container " << m_container 
 		     << " container name: " << PerfMonServices::getContainerName ( m_container ) 
 		     << endmsg; 
-      
+
       xAOD::MuonContainer::const_iterator xMuonItr  = pxMuonContainer->begin();
       xAOD::MuonContainer::const_iterator xMuonItrE  = pxMuonContainer->end();
       int theCount = 0;
@@ -138,10 +136,10 @@ bool FourMuonEvent::Reco()
     //pxElecContainer = evtStore()->retrieve( pxElecContainer, "Electrons" );
     
     if (pxElecContainer != nullptr) {
-      if (m_doDebug || thisdebug ){ std::cout << " * FourMuonEvent::Reco * retrieving xAOD::ElectronContainer SUCCESS. " 
-					      << " Container name: " << PerfMonServices::getContainerName (PerfMonServices::ELECTRON_COLLECTION) 
-					      << " size: " << pxElecContainer->size()
-					      << std::endl; }
+      (*m_msgStream) << MSG::DEBUG << " * FourMuonEvent::Reco * retrieving xAOD::ElectronContainer SUCCESS. " 
+		     << " Container name: " << PerfMonServices::getContainerName (PerfMonServices::ELECTRON_COLLECTION) 
+		     << " size: " << pxElecContainer->size()
+		     << endmsg;
       if (pxElecContainer->size() > 0 ){
 	m_xElecID.PrepareElectronList (pxElecContainer);
 	m_numberOfFullPassElectrons = m_xElecID.GetElectronCollectionSize();
@@ -229,9 +227,9 @@ bool FourMuonEvent::Reco()
       }
     }
     else {
-      if (m_doDebug || thisdebug) std::cout << " * FourMuonEvent::Reco * 4lepton selection FAILURE. Not enough muons or electrons. Event has " << m_numberOfFullPassMuons
-					    << " muons & " << m_numberOfFullPassElectrons << " electrons"
-					    << std::endl;
+      (*m_msgStream) << MSG::DEBUG << " * FourMuonEvent::Reco * 4lepton selection FAILURE. Not enough muons or electrons. Event has " << m_numberOfFullPassMuons
+		     << " muons & " << m_numberOfFullPassElectrons << " electrons"
+		     << endmsg;
     }
   }
   
