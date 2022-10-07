@@ -22,8 +22,6 @@ TCS::eEmSelect::eEmSelect(const std::string & name) : SortingAlg(name) {
    defineParameter( "REtaMin", 0);
    defineParameter( "RHadMin", 0);
    defineParameter( "WsTotMin", 0);
-   defineParameter( "MinEta", 0 );
-   defineParameter( "MaxEta", 63);
 }
 
 
@@ -34,9 +32,6 @@ TCS::StatusCode
 TCS::eEmSelect::initialize() {
    m_numberOfeEms = parameter("OutputWidth").value();
    m_et = parameter("MinET").value();
-   m_minEta = parameter("MinEta").value();
-   m_maxEta = parameter("MaxEta").value();
-   m_maxEta = parameter("MaxEta").value();
    m_minREta = parameter("REtaMin").value();
    m_minRHad = parameter("RHadMin").value();
    m_minWsTot = parameter("WsTotMin").value();
@@ -56,10 +51,6 @@ TCS::eEmSelect::sort(const InputTOBArray & input, TOBArray & output) {
       if ( !isocut(m_minREta, (*eem)-> Reta()) ) {continue;}
       if ( !isocut(m_minRHad, (*eem)-> Rhad()) ) {continue;}
       if ( !isocut(m_minWsTot, (*eem)-> Wstot()) ) {continue;}
-      
-      // eta cut
-      if (parType_t(std::abs((*eem)-> eta())) < m_minEta) continue; 
-      if (parType_t(std::abs((*eem)-> eta())) > m_maxEta) continue;  
       
       const GenericTOB gtob(**eem);
       output.push_back( gtob );
