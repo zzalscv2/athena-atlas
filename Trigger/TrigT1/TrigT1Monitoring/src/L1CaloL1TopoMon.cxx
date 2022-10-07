@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
 */
 
 #include <map>
@@ -13,9 +13,6 @@
 
 #include "GaudiKernel/MsgStream.h"
 #include "GaudiKernel/StatusCode.h"
-
-#include "EventInfo/EventID.h"
-#include "EventInfo/EventInfo.h"
 
 #include "LWHists/LWHist.h"
 #include "LWHists/TH1F_LW.h"
@@ -178,11 +175,8 @@ StatusCode L1CaloL1TopoMon::bookHistogramsRecurrent()
   }
 
   if (newRunFlag() || newLumiBlockFlag()) {
-    const EventInfo *evtInfo = 0;
-    StatusCode sc = evtStore()->retrieve(evtInfo);
-    if (sc.isSuccess()) {
-      m_lumiNo = evtInfo->event_ID()->lumi_block();
-    }
+    const EventContext& ctx = Gaudi::Hive::currentContext();
+    m_lumiNo = ctx.eventID().lumi_block();
   }
 
   //if ( newLumiBlockFlag() ) {}
