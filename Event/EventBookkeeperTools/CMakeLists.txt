@@ -55,10 +55,32 @@ if( NOT XAOD_STANDALONE )
                    POST_EXEC_SCRIPT noerror.sh )
 
    if( NOT GENERATIONBASE )
-      atlas_add_test( CutFlowSvcTest
+      atlas_add_test( CutFlowSvcTestSerial
                       SCRIPT test/test_CutFlowSvc.py
                       PRIVATE_WORKING_DIRECTORY
                       POST_EXEC_SCRIPT noerror.sh )
+
+      atlas_add_test( CutFlowSvcTestMT
+                      SCRIPT test/test_CutFlowSvc.py -t 2
+                      PRIVATE_WORKING_DIRECTORY
+                      POST_EXEC_SCRIPT noerror.sh )
+
+      if( NOT XAOD_ANALYSIS )
+         atlas_add_test( CutFlowSvcTestMPStandardIO
+                        SCRIPT test/test_CutFlowSvc.py -p 2
+                        PRIVATE_WORKING_DIRECTORY
+                        POST_EXEC_SCRIPT noerror.sh )
+
+         atlas_add_test( CutFlowSvcTestMPSharedWriter
+                        SCRIPT test/test_CutFlowSvc.py -p 2 --sharedWriter
+                        PRIVATE_WORKING_DIRECTORY
+                        POST_EXEC_SCRIPT noerror.sh )
+
+         atlas_add_test( CutFlowSvcTestData
+                        SCRIPT test/test_CutFlowSvc.py -t 2 --data
+                        PRIVATE_WORKING_DIRECTORY
+                        POST_EXEC_SCRIPT noerror.sh )
+      endif()
    endif()
 
    atlas_add_test( CutFlowSvcDummyAlg
@@ -83,10 +105,22 @@ if( NOT XAOD_STANDALONE )
                    POST_EXEC_SCRIPT noerror.sh )
 
    if( NOT GENERATIONBASE AND NOT XAOD_ANALYSIS )
-      atlas_add_test( CutFlowSvcOutputMP
-                      SCRIPT athena EventBookkeeperTools/TestCutFlowSvcOutput.py --nprocs=2 -c sharedWriter=True
+      atlas_add_test( CutFlowSvcOutputMPStandardIO
+                      SCRIPT athena EventBookkeeperTools/TestCutFlowSvcOutput.py --nprocs=2 -c sharedWriter=False
                       PROPERTIES PROCESSORS 2
                       PRIVATE_WORKING_DIRECTORY
                       POST_EXEC_SCRIPT noerror.sh )
+
+      atlas_add_test( CutFlowSvcOutputMPSharedWriter
+                      SCRIPT athena EventBookkeeperTools/TestCutFlowSvcOutput.py --nprocs=2 -c sharedWriter=True
+                      PROPERTIES PROCESSORS 2
+                      PRIVATE_WORKING_DIRECTORY
+                      POST_EXEC_SCRIPT nopost.sh )
+
+      atlas_add_test( CutFlowSvcOutputMPSharedWriterAlt
+                      SCRIPT athena EventBookkeeperTools/TestCutFlowSvcOutput.py --nprocs=2 -c sharedWriter=True -c alternativeInput=True
+                      PROPERTIES PROCESSORS 2
+                      PRIVATE_WORKING_DIRECTORY
+                      POST_EXEC_SCRIPT nopost.sh )
    endif()
 endif()

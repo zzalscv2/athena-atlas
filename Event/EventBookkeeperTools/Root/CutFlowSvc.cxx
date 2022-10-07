@@ -323,7 +323,7 @@ StatusCode CutFlowSvc::determineCycleNumberFromInput( const std::string& collNam
       int inCycle = cbk->cycle();
       if (inCycle > maxCycle) maxCycle = inCycle;
     }
-    m_skimmingCycle = std::max(m_skimmingCycle, maxCycle + 1);
+    m_skimmingCycle = std::max(m_skimmingCycle.value(), maxCycle + 1);
   }
 
   ATH_MSG_DEBUG("done calling determineCycleNumberFromInput('" << collName
