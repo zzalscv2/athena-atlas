@@ -10,7 +10,7 @@ def DetDescrCnvSvcCfg(flags, **kwargs):
     kwargs.setdefault("HasMM", flags.Detector.GeometryMM)
 
     # Use GEOM DB to read InDet dictionary information 
-    if flags.Detector.GeometryITk:
+    if flags.Detector.GeometryITk or flags.Detector.GeometryHGTD:
        kwargs.setdefault("useGeomDB_InDet", True)
     else:
        kwargs.setdefault("useGeomDB_InDet", False)   
