@@ -2,8 +2,8 @@
   Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
 */
 
-#ifndef H_ACTSTRKCLUSTERIZATION_PIXELCLUSTERIZATIONALG_H
-#define H_ACTSTRKCLUSTERIZATION_PIXELCLUSTERIZATIONALG_H
+#ifndef ACTSTRKCLUSTERIZATION_PIXELCLUSTERIZATIONALG_H
+#define ACTSTRKCLUSTERIZATION_PIXELCLUSTERIZATIONALG_H
 
 #include <ActsTrkToolInterfaces/IPixelClusteringTool.h>
 #include <AthenaBaseComps/AthReentrantAlgorithm.h>
@@ -18,17 +18,17 @@
 
 namespace ActsTrk {
 
-class PixelClusterizationAlgorithm : public AthReentrantAlgorithm {
+class PixelClusterizationAlg : public AthReentrantAlgorithm {
 public:
-    PixelClusterizationAlgorithm(const std::string& name, ISvcLocator* pSvcLocator);
-    virtual ~PixelClusterizationAlgorithm() = default;
+    PixelClusterizationAlg(const std::string& name, ISvcLocator* pSvcLocator);
+    virtual ~PixelClusterizationAlg() = default;
     virtual StatusCode initialize() override;
     virtual StatusCode execute(const EventContext& ctx) const override;
 
 private:
-    PixelClusterizationAlgorithm() = delete;
-    PixelClusterizationAlgorithm(const PixelClusterizationAlgorithm&) = delete;
-    PixelClusterizationAlgorithm &operator=(const PixelClusterizationAlgorithm&) = delete;
+    PixelClusterizationAlg() = delete;
+    PixelClusterizationAlg(const PixelClusterizationAlg&) = delete;
+    PixelClusterizationAlg &operator=(const PixelClusterizationAlg&) = delete;
 
     SG::ReadHandleKey<PixelRDO_Container> m_rdoContainerKey {this, "PixelRDOContainerKey", "PixelRDOs"};
     SG::WriteHandleKey<xAOD::PixelClusterContainer> m_clusterContainerKey {this, "PixelClustersKey", "xAODpixelClusters", "Key of output xAOD pixel cluster container"};

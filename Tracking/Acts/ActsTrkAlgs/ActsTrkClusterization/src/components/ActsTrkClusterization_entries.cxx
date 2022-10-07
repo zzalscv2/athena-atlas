@@ -4,4 +4,4 @@
 
 #include "src/PixelClusterizationAlg.h"
 
-DECLARE_COMPONENT(ActsTrk::PixelClusterizationAlgorithm)
+DECLARE_COMPONENT(ActsTrk::PixelClusterizationAlg)
