@@ -11,7 +11,7 @@
 export ATHENA_CORE_NUMBER=8
 Reco_tf.py \
   --AMI q449 \
-  --inputBSFile=/cvmfs/atlas-nightlies.cern.ch/repo/data/data-art/Tier0ChainTests/TCT_Run3/data22_13p6TeV.00429782.physics_Main.daq.RAW._lb0562._SFO-11._0001.data \
+  --inputBSFile=/cvmfs/atlas-nightlies.cern.ch/repo/data/data-art/Tier0ChainTests/TCT_Run3/data22_13p6TeV.00431493.physics_Main.daq.RAW._lb0525._SFO-16._0001.data \
   --sharedWriter True \
   --steering doRAWtoALL \
   --outputDAODFile art.pool.root \
@@ -45,8 +45,8 @@ echo "art-result: ${rc3} xAODHist DAOD_PHYSLITE.art.pool.root"
 
 # dcube references
 echo "============ dcube references"
-dcubeRef="/cvmfs/atlas-nightlies.cern.ch/repo/data/data-art/TrfTestsART/dcube/q449/v0/hist_physlite_2304.root"
-dcubeXML="/cvmfs/atlas-nightlies.cern.ch/repo/data/data-art/TrfTestsART/dcube/q449/v0/dcube_config_hist_physlite_2304.xml"
+dcubeRef="/cvmfs/atlas-nightlies.cern.ch/repo/data/data-art/TrfTestsART/dcube/q449/v1/hist_physlite_2306.root"
+dcubeXML="/cvmfs/atlas-nightlies.cern.ch/repo/data/data-art/TrfTestsART/dcube/q449/v1/dcube_config_hist_physlite_2306.xml"
 echo ${dcubeRef}
 echo ${dcubeXML}
 

@@ -11,6 +11,7 @@
 export ATHENA_CORE_NUMBER=8
 Reco_tf.py \
   --AMI q445 \
+  --inputHITSFile /cvmfs/atlas-nightlies.cern.ch/repo/data/data-art/Tier0ChainTests/mc21_13p6TeV.601229.PhPy8EG_A14_ttbar_hdamp258p75_SingleLep.simul.HITS.e8357_e7400_s3775/HITS.27679639._074687.pool.root.1 \
   --sharedWriter True \
   --steering 'doRDO_TRIG' 'doTRIGtoALL' \
   --outputDAODFile art.pool.root \
