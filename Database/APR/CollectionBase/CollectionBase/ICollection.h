@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2017 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef COLLECTIONBASE_ICOLLECTION_H
@@ -148,7 +148,7 @@ namespace pool {
     virtual ICollectionDataEditor& 	dataEditor() = 0;
 
     /// Returns an object used to query the collection.
-    virtual ICollectionQuery* 		newQuery() const = 0;
+    virtual ICollectionQuery* 		newQuery() = 0;
     
     /// Returns an object used to access collection metadata
     virtual ICollectionMetadata&	metadata() = 0;
