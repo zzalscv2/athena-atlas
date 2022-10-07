@@ -689,7 +689,7 @@ DsoDb::rflx_type ATLAS_NOT_THREAD_SAFE (const std::string& type_name) const
     libname = libname.substr(SHLIB_PREFIX.size(), std::string::npos);
   }
   if (boost::algorithm::ends_with(libname, SHLIB_SUFFIX)) {
-    libname = libname.substr(0, libname.size()-SHLIB_SUFFIX.size());
+    libname.resize(libname.size()-SHLIB_SUFFIX.size());
   }
 
   unsigned long err = System::loadDynamicLib( libname, &handle );
