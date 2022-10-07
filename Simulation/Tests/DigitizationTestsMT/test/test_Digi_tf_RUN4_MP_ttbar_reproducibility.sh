@@ -43,6 +43,7 @@ status=$rc
 echo "art-result: $rc Digi_tf.py SP"
 
 mv ${DigiOutFileNameSP} backup_${DigiOutFileNameSP}
+rm PoolFileCatalog.xml
 RDOMerge_tf.py --CA --inputRDOFile backup_${DigiOutFileNameSP} --outputRDO_MRGFile ${DigiOutFileNameSP}
 rm backup_${DigiOutFileNameSP}
 
