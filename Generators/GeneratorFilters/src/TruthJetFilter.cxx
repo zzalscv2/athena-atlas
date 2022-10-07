@@ -4,9 +4,6 @@
 
 #include "GeneratorFilters/TruthJetFilter.h"
 #include "GaudiKernel/PhysicalConstants.h"
-#include "McParticleEvent/TruthParticle.h"
-#include "McParticleEvent/TruthParticleContainer.h"
-#include "ParticleEvent/ParticleBaseContainer.h"
 #include "xAODJet/JetContainer.h"
 #include "TMath.h"
 
