@@ -1,6 +1,6 @@
 // -*- c++ -*-
 /*
-  Copyright (C) 2002-2017 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef INDETTRACKSYSTEMATICSTOOLS_INDETTRACKTRUTHFILTERTOOL_H
@@ -63,7 +63,7 @@ namespace InDet {
   private:
 
     StatusCode initTrkEffSystHistogram(float scale, TH2 *&histogram, std::string rootFileName, std::string histogramName) const;
-    float getFractionDropped(float fDefault, TH2 *histogram, float pt, float eta) const;
+    float getFractionDropped(float fDefault, const TH2 *histogram, float pt, float eta) const;
 
     int m_seed = 0;
     std::unique_ptr<TRandom3> m_rnd; //!
