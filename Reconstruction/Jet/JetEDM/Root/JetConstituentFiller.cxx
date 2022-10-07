@@ -40,7 +40,10 @@ typedef std::vector<ParType> ParTypeVector;
 int JetConstituentFiller::
 extractConstituents(xAOD::Jet& jet, const NameList* pghostlabs,
                     const fastjet::PseudoJet* ppj2) {
-  const fastjet::PseudoJet* ppseudojet = jet.getPseudoJet();
+
+  static const SG::AuxElement::Accessor<const fastjet::PseudoJet*> pjAccessor("PseudoJet");
+  const fastjet::PseudoJet* ppseudojet = pjAccessor(jet);
+
   if ( ppseudojet == 0 ) {
     ppseudojet = ppj2;
   }
@@ -157,25 +160,46 @@ int JetConstituentFiller::extractConstituents(xAOD::Jet& jet, const fastjet::Pse
 
 //**********************************************************************
 
-PseudoJetVector JetConstituentFiller::constituentPseudoJets(const xAOD::Jet& jet, bool ignoreGhosts){
+PseudoJetVector JetConstituentFiller::constituentPseudoJets(const xAOD::Jet& jet, bool ignoreGhosts, bool requireJetStructure){
 
-  const fastjet::PseudoJet* jet_pj = jet.getPseudoJet();
+  static const SG::AuxElement::Accessor<const fastjet::PseudoJet*> pjAccessor("PseudoJet");
+  const fastjet::PseudoJet* jet_pj = pjAccessor(jet);
 
   PseudoJetVector constituents;
 
-  if( jet_pj && !ignoreGhosts ) { // Retrieve constituents from the PseudoJet
+  if(jet_pj && !ignoreGhosts ){ // Retrieve constituents from the PseudoJet
     constituents = jet_pj->constituents(); // all constituents, including ghosts
     // Removed block for (existing jet_pt and ignoreGhosts), because
     // in the PseudoJetContainer model, the constituent user info is
     // not attached, and hence it's not possible to know if a pj is
     // ghost or constituent.
   } else { // no PseudoJet in jet or need to reject ghosts. Build them from constituents.
-    xAOD::JetConstituentVector constituents_tmp = jet.getConstituents();
-    constituents.reserve( jet.numConstituents() );
-    xAOD::JetConstituentVector::iterator it = constituents_tmp.begin();
-    xAOD::JetConstituentVector::iterator itE = constituents_tmp.end();
-    for( ; it !=itE; ++it) constituents.push_back( fastjet::PseudoJet( it->Px(), it->Py(), it->Pz(), it->E() ) );    
 
+    // For SoftDrop variables like zg, rg, the structure of the jet is needed and
+    // constituents have to be retrieved from the Pseudojet
+    if(jet_pj && requireJetStructure){
+      PseudoJetVector constituents_all = jet_pj->constituents(); // all constituents, including ghosts
+      //Filter out ghosts before calculating variables (comparison to constituents)
+      xAOD::JetConstituentVector constituents_tmp = jet.getConstituents();
+      constituents.reserve( jet.numConstituents() );
+      for(size_t i = 0; i < constituents_all.size(); i++){
+	for(size_t j = 0; j < constituents_tmp.size(); j++){
+	  if(std::abs((constituents_all[i].px()-constituents_tmp[j].Px())/constituents_tmp[j].Px()) < 0.0001 &&
+	     std::abs((constituents_all[i].py()-constituents_tmp[j].Py())/constituents_tmp[j].Py()) < 0.0001 && 
+	     std::abs((constituents_all[i].pz()-constituents_tmp[j].Pz())/constituents_tmp[j].Pz()) < 0.0001){
+	    constituents.push_back(constituents_all[i]);
+	    break;
+	  }
+	}
+      }
+    }
+    else{
+      xAOD::JetConstituentVector constituents_tmp = jet.getConstituents();
+      constituents.reserve( jet.numConstituents() );
+      for(size_t i = 0; i < constituents_tmp.size(); i++){
+	constituents.push_back( fastjet::PseudoJet( constituents_tmp[i].Px(), constituents_tmp[i].Py(), constituents_tmp[i].Pz(), constituents_tmp[i].E()) );
+      }
+    }
   }
   return constituents;
 }
