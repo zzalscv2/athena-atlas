@@ -37,8 +37,12 @@ struct EmptyMTJ { // setup empty MTJ
     measurementsBackendAux = std::make_unique<xAOD::TrackMeasurementAuxContainer>();
     measurementsBackend->setStore(measurementsBackendAux.get());
 
-    mtj = std::make_unique<ActsTrk::MultiTrajectory<ActsTrk::IsReadWrite>>(trackStateBackend.get(), parametersBackend.get(), 
-                                                                          jacobianBackend.get(), measurementsBackend.get());
+    mtj = std::make_unique<ActsTrk::MutableMultiTrajectory>(trackStateBackend.get(), parametersBackend.get(), 
+                                                            jacobianBackend.get(), measurementsBackend.get());
+    // backends can be shared 
+    ro_mtj = std::make_unique<ActsTrk::ConstMultiTrajectory>(trackStateBackend.get(), parametersBackend.get(), 
+                                                            jacobianBackend.get(), measurementsBackend.get());
+
   }
   std::unique_ptr<xAOD::TrackStateContainer> trackStateBackend;
   std::unique_ptr<xAOD::TrackStateAuxContainer> trackStateBackendAux;
@@ -50,26 +54,17 @@ struct EmptyMTJ { // setup empty MTJ
   std::unique_ptr<xAOD::TrackMeasurementAuxContainer> measurementsBackendAux;
 
 
-  std::unique_ptr<ActsTrk::MultiTrajectory<ActsTrk::IsReadWrite>> mtj;
+  std::unique_ptr<ActsTrk::MutableMultiTrajectory> mtj;
+  std::unique_ptr<ActsTrk::ConstMultiTrajectory> ro_mtj;
 };
 
 
-BOOST_FIXTURE_TEST_CASE(Move, EmptyMTJ) {
-    EmptyMTJ fixture;
-    BOOST_CHECK( fixture.mtj->has_backends());
-    ActsTrk::MultiTrajectory<ActsTrk::IsReadOnly> ro(std::move(*(fixture.mtj.get())));
-    BOOST_CHECK( fixture.mtj->has_backends() == false);
-    BOOST_CHECK( ro.has_backends());
-}
-
-
 BOOST_FIXTURE_TEST_CASE(Fill, EmptyMTJ) {
-    EmptyMTJ fixture;
-    BOOST_CHECK( fixture.mtj->has_backends());
+    BOOST_CHECK( mtj->has_backends());
     constexpr auto kMask = Acts::TrackStatePropMask::Predicted;
-    auto i0 = fixture.mtj->addTrackState(kMask);
-    auto i1a = fixture.mtj->addTrackState(kMask, i0);
-    auto i2a = fixture.mtj->addTrackState(kMask, i1a);
+    auto i0 = mtj->addTrackState(kMask);
+    auto i1a = mtj->addTrackState(kMask, i0);
+    auto i2a = mtj->addTrackState(kMask, i1a);
 
     
 
@@ -86,10 +81,14 @@ BOOST_FIXTURE_TEST_CASE(Fill, EmptyMTJ) {
 
   
  
-  std::vector<size_t> exp = { i2a, i1a, i0 };
+  const std::vector<size_t> exp = { i2a, i1a, i0 };
 
   
-  fixture.mtj->visitBackwards(i2a, collect);
+  mtj->visitBackwards(i2a, collect);
+  BOOST_CHECK_EQUAL_COLLECTIONS(act.begin(), act.end(), exp.begin(), exp.end());
+  // the same test on read only collection TODO, this needs streamlining so we so not repeat identical code
+  act.clear();
+  ro_mtj->visitBackwards(i2a, collect);
   BOOST_CHECK_EQUAL_COLLECTIONS(act.begin(), act.end(), exp.begin(), exp.end());
 
 }
