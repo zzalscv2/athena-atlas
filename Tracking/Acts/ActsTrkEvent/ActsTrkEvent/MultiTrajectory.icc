@@ -26,8 +26,9 @@ bool ActsTrk::MultiTrajectory<RWState>::has_backends() const {
 
 // implementation of addTrackState_impl    
     
-    template<bool RWState> template<bool Enable> std::enable_if_t<(Enable && (RWState == ActsTrk::IsReadWrite)), unsigned int>  //TODO simplify this line
-    ActsTrk::MultiTrajectory<RWState>::addTrackState_impl( 
+    template<bool RWState>
+    ATH_MEMBER_REQUIRES_DEF(RWState==ActsTrk::IsReadWrite, typename ActsTrk::MultiTrajectory<RWState>::IndexType)
+    ActsTrk::MultiTrajectory<RWState>::addTrackState_impl(
                 Acts::TrackStatePropMask mask,
                 ActsTrk::MultiTrajectory<RWState>::IndexType previous) {   
         assert(m_trackStates && "Missing Track States backend");
