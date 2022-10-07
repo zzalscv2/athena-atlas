@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "RootCollection.h"
@@ -516,7 +516,7 @@ namespace pool {
     }
 
      
-    ICollectionQuery* RootCollection::newQuery() const
+    ICollectionQuery* RootCollection::newQuery()
     {
        if( !isOpen() ) {
           throw pool::Exception( "Attempt to query a closed collection.", "RootCollection::dataEditor", "RootCollection" );
