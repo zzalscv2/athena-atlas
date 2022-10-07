@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2020 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef INCLUDE_IMPLICITCOLLECTION_IMPLICITCOLLECTION_H
@@ -126,7 +126,7 @@ namespace pool {
     virtual ICollectionDataEditor&         dataEditor();
 
     /// Returns an object used to query the collection.
-    virtual ICollectionQuery*                 newQuery() const;
+    virtual ICollectionQuery*                 newQuery();
 
     /// Returns an object used to access collection metadata
     virtual ICollectionMetadata&        metadata();
