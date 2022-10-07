@@ -246,12 +246,13 @@ IOVSvcTool::handle(const Incident &inc) {
      if (!m_first && m_preLoadData && m_checkOnce) {
         return;
      }
+     // cppcheck-suppress oppositeInnerCondition
      else if (!m_first) {
         if ( inc.type() != m_checkTrigger && inc.type() != IncidentType::BeginRun ) {
            return;
         }
      }
-
+     // cppcheck-suppress identicalInnerCondition
      if (m_first) {
         for (auto e : m_ignoredProxyNames) {
            DataProxy* proxy = p_cndSvc->proxy(e.first,e.second);
