@@ -27,14 +27,14 @@ StatusCode JetSubStructureMomentToolsBase::initialize() {
 }
 
 
-bool JetSubStructureMomentToolsBase::SetupDecoration(fastjet::PseudoJet& pseudojet,const  xAOD::Jet& jet) const {
+bool JetSubStructureMomentToolsBase::SetupDecoration(fastjet::PseudoJet& pseudojet,const  xAOD::Jet& jet, bool requireJetStructure) const {
 
   bool decorate = true;
   
   if (m_inputContainer.empty()) {
     if (!checkForConstituents(jet))
       decorate = false;
-    else pseudojet = buildPseudoJet(jet);
+    else pseudojet = buildPseudoJet(jet, requireJetStructure);
   }
   else {
     std::vector<const xAOD::IParticle*> AssociatedParticles;
@@ -51,8 +51,8 @@ bool JetSubStructureMomentToolsBase::SetupDecoration(fastjet::PseudoJet& pseudoj
 }
 
 
-fastjet::PseudoJet JetSubStructureMomentToolsBase::buildPseudoJet (const xAOD::Jet & jet) const {
-  std::vector<fastjet::PseudoJet> constit_pseudojets = jet::JetConstituentFiller::constituentPseudoJets(jet);
+fastjet::PseudoJet JetSubStructureMomentToolsBase::buildPseudoJet (const xAOD::Jet & jet, bool requireJetStructure) const {
+  std::vector<fastjet::PseudoJet> constit_pseudojets = jet::JetConstituentFiller::constituentPseudoJets(jet,true,requireJetStructure);
   return fastjet::join(constit_pseudojets);
 }
 

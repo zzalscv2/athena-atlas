@@ -13,7 +13,7 @@ SoftDropObservablesTool::SoftDropObservablesTool(std::string name) :
 int SoftDropObservablesTool::modifyJet(xAOD::Jet &injet) const {
   fastjet::PseudoJet jet;
 
-  bool decorate = SetupDecoration(jet,injet);
+  bool decorate = SetupDecoration(jet,injet,true);
 
   // Groomed jet moments
   float zg_value = -999, rg_value = -999;

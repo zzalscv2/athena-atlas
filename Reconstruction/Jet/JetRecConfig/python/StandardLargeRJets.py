@@ -35,6 +35,7 @@ truthmods        = ("PartonTruthLabel","TruthPartonDR",)
 pflowmods        = ()
 
 truthlabels = ("JetTaggingTruthLabel:R10TruthLabel_R21Consolidated","JetTaggingTruthLabel:R10TruthLabel_R21Precision","JetTaggingTruthLabel:R10TruthLabel_R21Precision_2022v1")
+truthlabels_SD = ("JetTaggingTruthLabel:R10TruthLabel_R21Precision","JetTaggingTruthLabel:R10TruthLabel_R21Precision_2022v1")
 
 substrmods = ("nsubjettiness", "nsubjettinessR", "ktsplitter",
               "ecorr", "ecorrR", "qw",
@@ -42,8 +43,8 @@ substrmods = ("nsubjettiness", "nsubjettinessR", "ktsplitter",
 )
 
 #Variables used for trimmed large-R jets
-lctopo_trimmed_mods = ("planarflow","angularity","comshapes","ktdr","TrackSumMoments")
-ufo_softdrop_mods = ("planarflow","angularity","comshapes","ktdr","ecorrgeneral","ecorrgeneralratios")
+lctopo_trimmed_mods = ("planarflow","angularity","comshapes","ktdr","TrackSumMoments","softdropobs")
+ufo_softdrop_mods = ("planarflow","angularity","comshapes","ktdr","ecorrgeneral","ecorrgeneralratios","softdropobs")
 
 # *********************************************************
 # Standard large R jets definitions
@@ -94,7 +95,7 @@ AntiKt10UFOCSSK = JetDefinition("AntiKt",1.0,cst.UFOCSSK,
                                 )
 
 AntiKt10UFOCSSKSoftDrop = JetSoftDrop(AntiKt10UFOCSSK,
-                                      modifiers = ("Calib:SoftDrop:mc","Filter:100000")+standardrecomods+substrmods+ufo_softdrop_mods+truthlabels+("JetGhostLabel",),
+                                      modifiers = ("Calib:SoftDrop:mc","Filter:100000")+standardrecomods+substrmods+ufo_softdrop_mods+truthlabels_SD+("JetGhostLabel",),
                                       Beta = 1., ZCut= 0.1,
                                      )
 

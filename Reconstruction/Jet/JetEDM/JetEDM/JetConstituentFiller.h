@@ -51,7 +51,7 @@ public :
 
   /// Returns the jet's constituents as a vector of PseudoJet 
   /// if ignoreGhosts==true, ghost constituents are removed from the output.
-  static PseudoJetVector constituentPseudoJets(const xAOD::Jet& jet, bool ignoreGhosts=true);
+  static PseudoJetVector constituentPseudoJets(const xAOD::Jet& jet, bool ignoreGhosts=true, bool requireJetStructure=false);
 
  protected:
   bool m_isTrigger;

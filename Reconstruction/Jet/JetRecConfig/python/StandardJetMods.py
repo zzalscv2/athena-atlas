@@ -226,6 +226,8 @@ stdJetModifiers.update(
 
     qw = JetModifier( "QwTool", "qw"),
 
+    softdropobs = JetModifier("SoftDropObservablesTool", "softdropobs"),
+
 )
 
 # VR track-jet decorations
