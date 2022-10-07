@@ -244,7 +244,7 @@ std::unique_ptr<AthenaInterprocess::ScheduledWork> EvtRangeScatterer::exec_func(
     std::string eventRange((const char*)eventRangeMessage,eventRangeSize);
     size_t carRet = eventRange.find('\n');
     if(carRet!=std::string::npos)
-      eventRange = eventRange.substr(0,carRet);
+      eventRange.resize(carRet);
 
     // Break the loop if no more ranges are expected
     if(eventRange.find(strStopProcessing)!=std::string::npos) {
@@ -257,7 +257,7 @@ std::unique_ptr<AthenaInterprocess::ScheduledWork> EvtRangeScatterer::exec_func(
     // Expected the following format: [{KEY:VALUE[,KEY:VALUE]}]
     // First get rid of the leading '[{' and the trailing '}]'
     if(boost::starts_with (eventRange, "[{")) eventRange=eventRange.substr(2);
-    if(boost::ends_with (eventRange, "}]")) eventRange=eventRange.substr(0,eventRange.size()-2);
+    if(boost::ends_with (eventRange, "}]")) eventRange.resize(eventRange.size()-2);
 
     std::map<std::string,std::string> eventRangeMap;
     size_t startpos(0);
@@ -451,7 +451,7 @@ void EvtRangeScatterer::trimRangeStrings(std::string& str)
   // get rid of trailing spaces
   i=str.size()-1;
   while(str[i]==' ') i--;
-  if(i) str = str.substr(0,i+1);
+  if(i) str.resize(i+1);
   
   // the string might be enclosed by either
   // "u\'" and "\'"
@@ -461,13 +461,13 @@ void EvtRangeScatterer::trimRangeStrings(std::string& str)
   if(boost::starts_with (str, "u\'")) {
     str = str.substr(2);
     if(boost::ends_with (str, "\'")) {
-      str = str.substr(0,str.size()-1);
+      str.resize(str.size()-1);
     }
   }
   else if(boost::starts_with (str, "\"")) {
     str = str.substr(1);
     if(boost::ends_with (str, "\"")) {
-      str = str.substr(0,str.size()-1);
+      str.resize(str.size()-1);
     }
   }
 }
