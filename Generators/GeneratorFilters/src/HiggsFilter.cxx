@@ -25,7 +25,6 @@
 // Header for this module:-
 
 #include "GeneratorFilters/HiggsFilter.h"
-#include "CLHEP/Units/SystemOfUnits.h"
 
 //--------------------------------------------------------------------------
 HiggsFilter::HiggsFilter(const std::string& name, 

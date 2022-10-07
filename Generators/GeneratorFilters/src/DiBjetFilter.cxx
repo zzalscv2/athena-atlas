@@ -22,7 +22,6 @@
 #include <math.h>
 #include "GaudiKernel/SystemOfUnits.h"
 #include "xAODJet/JetContainer.h"
-#include "McParticleEvent/TruthParticle.h"
 #include "CxxUtils/BasicTypes.h"
 #include "TRandom3.h"
 #include "TLorentzVector.h"

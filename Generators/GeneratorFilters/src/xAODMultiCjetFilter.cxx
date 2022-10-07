@@ -19,7 +19,6 @@
 // Other classes used by this class:-
 #include "GaudiKernel/SystemOfUnits.h"
 #include "xAODJet/JetContainer.h"
-#include "McParticleEvent/TruthParticle.h"
 #include "CxxUtils/BasicTypes.h"
 #include "TLorentzVector.h"
 

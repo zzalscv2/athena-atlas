@@ -4,9 +4,7 @@
 
 #include "GeneratorFilters/VBFForwardJetsFilter.h"
 #include "GaudiKernel/PhysicalConstants.h"
-#include "McParticleEvent/TruthParticle.h"
-#include "McParticleEvent/TruthParticleContainer.h"
-#include "ParticleEvent/ParticleBaseContainer.h"
+#include "GaudiKernel/SystemOfUnits.h"
 #include "xAODJet/JetContainer.h"
 
 
@@ -131,7 +129,7 @@ StatusCode VBFForwardJetsFilter::filterEvent() {
                                                           tau->momentum().e()-nutau.e());
           if (tauvis.vect().perp() >= m_LGMinPt && std::abs(tauvis.vect().pseudoRapidity()) <= m_LGMaxEta) {
             MCTruthTauList.push_back(tauvis);
-            ATH_MSG_INFO("had-tau pt(CLHEP::GeV) = " << tauvis.vect().perp()/CLHEP::GeV << " eta = " << tauvis.vect().pseudoRapidity());
+            ATH_MSG_INFO("had-tau pt(Gaudi::Units::GeV) = " << tauvis.vect().perp()/Gaudi::Units::GeV << " eta = " << tauvis.vect().pseudoRapidity());
           } 
         }
       }
@@ -171,7 +169,7 @@ StatusCode VBFForwardJetsFilter::filterEvent() {
                                                           tau->momentum().e()-nutau.e());
           if (tauvis.vect().perp() >= m_LGMinPt && std::abs(tauvis.vect().pseudoRapidity()) <= m_LGMaxEta) {
             MCTruthTauList.push_back(tauvis);
-            ATH_MSG_INFO("had-tau pt(CLHEP::GeV) = " << tauvis.vect().perp()/CLHEP::GeV << " eta = " << tauvis.vect().pseudoRapidity());
+            ATH_MSG_INFO("had-tau pt(Gaudi::Units::GeV) = " << tauvis.vect().perp()/Gaudi::Units::GeV << " eta = " << tauvis.vect().pseudoRapidity());
           } 
         }
       }
@@ -243,7 +241,7 @@ StatusCode VBFForwardJetsFilter::filterEvent() {
         for (unsigned j=i+1;j<jetList.size();++j) {
           double dEta = std::abs(jetList[i]->eta()-jetList[j]->eta());
           double Mjj = (jetList[i]->p4()+jetList[j]->p4()).M();
-          ATH_MSG_INFO("DeltaEtaJJ = " << dEta << " MassJJ(CLHEP::GeV) = " << Mjj/CLHEP::GeV << " (" << i << ", " << j << ")");
+          ATH_MSG_INFO("DeltaEtaJJ = " << dEta << " MassJJ(Gaudi::Units::GeV) = " << Mjj/Gaudi::Units::GeV << " (" << i << ", " << j << ")");
           if (okDeltaEtaJJ == 0 && dEta > m_DeltaEtaJJ) okDeltaEtaJJ = 1;
           if (okMassJJ == 0 && Mjj > m_MassJJ) okMassJJ = 1;
           if (okDeltaEtaJJ && okMassJJ) {

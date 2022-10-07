@@ -4,7 +4,6 @@
 
 #include "GeneratorFilters/xAODParentTwoChildrenFilter.h"
 #include "TruthUtils/PIDHelpers.h"
-#include "McParticleEvent/TruthParticle.h"
 #include "CxxUtils/BasicTypes.h"
 #include "xAODTruth/TruthVertexContainer.h"
 

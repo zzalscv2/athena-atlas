@@ -235,7 +235,7 @@ StatusCode TTbarWToLeptonFilter::filterEvent() {
   ATH_MSG_INFO("Found " << N_quark_tbar_all << " tbar quarks in event record");
   ATH_MSG_INFO("Found " << N_quark_t    << " t    -> W X decays");
   ATH_MSG_INFO("Found " << N_quark_tbar << " tbar -> W X decays");
-  ATH_MSG_INFO("Num leptons from W decays from tops with lepton pt above " << m_Ptmin/1000.0 << " CLHEP::GeV/c = " << N_pt_above_cut);
+  ATH_MSG_INFO("Num leptons from W decays from tops with lepton pt above " << m_Ptmin/1000.0 << " Gaudi::Units::GeV/c = " << N_pt_above_cut);
 
   int count_tops = 1;
   if(m_fourTopsFilter) count_tops = 2;
