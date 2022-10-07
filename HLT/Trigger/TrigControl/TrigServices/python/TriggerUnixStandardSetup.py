@@ -171,7 +171,4 @@ def setupCommonServicesEnd():
     if hasattr(athCondSeq, 'AtlasFieldMapCondAlg'):
         athCondSeq.AtlasFieldMapCondAlg.LoadMapOnStart = True
 
-    # Run CondAlgs before fork (ATR-26138)
-    svcMgr.HltEventLoopMgr.execAtStart = ['AthCondSeq']
-
     return
