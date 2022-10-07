@@ -5,6 +5,8 @@
 # art-type: grid
 # art-include: master/Athena
 # art-include: 22.0/Athena
+# art-input: valid1.601191.PhPy8EG_AZNLO_Ztautau.recon.RDO.e8453_e8455_s3873_s3874_r13929_tid30652308_00
+# art-input-nfiles: 3
 # art-athena-mt: 8
 # art-html: https://idtrigger-val.web.cern.ch/idtrigger-val/TIDAWeb/TIDAart/?jobdir=
 # art-output: *.txt
@@ -28,10 +30,11 @@
 
 Slices  = ['tau']
 Events  = 6000
-Threads = 8 
+Threads = 8
 Slots   = 8
 Release = "current"
-Input   = 'Ztautau_pu46'    # defined in TrigValTools/share/TrigValInputs.json  
+Input   = 'Ztautau'    # defined in TrigValTools/share/TrigValInputs.json  
+GridFiles = True
 
 preinclude_file = "RDOtoRDOTrigger:TrigInDetValidation/TIDAtaupt_preinclude.py"
 
@@ -48,4 +51,3 @@ Comp = [ ( "L2tau",        "L2tau",       "data-hists.root",          " -c TIDAh
    
 from AthenaCommon.Include import include 
 include("TrigInDetValidation/TrigInDetValidation_Base.py")
-

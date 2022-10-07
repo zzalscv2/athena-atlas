@@ -33,11 +33,11 @@ atlas_add_test( L1CaloFEXSimCfg_MC
                 PRIVATE_WORKING_DIRECTORY )
 
 atlas_add_test( L1CaloFEXSimCfg_R2data
-                SCRIPT python -m L1CaloFEXSim.L1CaloFEXSimCfg -i data -e -n 5
+                SCRIPT python -m L1CaloFEXSim.L1CaloFEXSimCfg -i data_run2_EB -e -n 5
                 LOG_SELECT_PATTERN "^ApplicationMgr"
                 PRIVATE_WORKING_DIRECTORY )
 
 atlas_add_test( L1CaloFEXSimCfg_R3data
-                SCRIPT python -m L1CaloFEXSim.L1CaloFEXSimCfg -i data_run3 -e -n 5
+                SCRIPT python -m L1CaloFEXSim.L1CaloFEXSimCfg -i data -e -n 5
                 LOG_SELECT_PATTERN "^ApplicationMgr"
                 PRIVATE_WORKING_DIRECTORY )
