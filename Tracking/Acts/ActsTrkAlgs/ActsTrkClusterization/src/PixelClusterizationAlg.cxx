@@ -1,15 +1,18 @@
+/*
+  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+*/
 #include "PixelClusterizationAlg.h"
 
 #include "xAODInDetMeasurement/PixelClusterAuxContainer.h"
 
 namespace ActsTrk {
 
-PixelClusterizationAlgorithm::PixelClusterizationAlgorithm(const std::string& name,
+PixelClusterizationAlg::PixelClusterizationAlg(const std::string& name,
 							   ISvcLocator* pSvcLocator)
     : AthReentrantAlgorithm(name, pSvcLocator) {}
 
 
-StatusCode PixelClusterizationAlgorithm::initialize()
+StatusCode PixelClusterizationAlg::initialize()
 {
     ATH_CHECK(m_rdoContainerKey.initialize());
     ATH_CHECK(m_clusterContainerKey.initialize());
@@ -23,7 +26,7 @@ StatusCode PixelClusterizationAlgorithm::initialize()
 }
 
 
-StatusCode PixelClusterizationAlgorithm::execute(const EventContext& ctx) const
+StatusCode PixelClusterizationAlg::execute(const EventContext& ctx) const
 {
     SG::ReadHandle<PixelRDO_Container> rdoContainer(m_rdoContainerKey, ctx);
     ATH_CHECK(rdoContainer.isValid());
