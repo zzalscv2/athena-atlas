@@ -35,7 +35,7 @@ msgcount = test.get_step("MessageCount")
 msgcount.thresholds = {
   'WARNING': 400,  # Remaining warnings are mostly from ATLASRECTS-3866
   'INFO': 600,
-  'other': 20
+  'other': 80     # temporarily raised from 20 to 80, due to FPE backtrace from LArLATOMEDecoder, MR 56994
 }
 msgcount.required = True # make the test exit code depend on this step
 

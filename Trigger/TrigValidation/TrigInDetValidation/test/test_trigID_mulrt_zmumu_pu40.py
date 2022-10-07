@@ -1,11 +1,11 @@
 #!/usr/bin/env python
 # Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
 
-# art-description: art job for mu_Zmumu_pu40
+# art-description: art job for mulrt_zmumu_pu40
 # art-type: grid
 # art-include: master/Athena
 # art-include: 22.0/Athena
-# art-input: mc21.601190.PhPy8EG_AZNLO_Zmumu.recon.RDO.e8392_e7400_s3775_r13614
+# art-input: valid1.601190.PhPy8EG_AZNLO_Zmumu.recon.RDO.e8453_e8455_s3873_s3874_r13929_tid30652304_00
 # art-input-nfiles: 4
 # art-athena-mt: 8
 # art-html: https://idtrigger-val.web.cern.ch/idtrigger-val/TIDAWeb/TIDAart/?jobdir=
@@ -27,12 +27,11 @@
 # art-output: cost-perEvent-chain
 # art-output: *.dat 
 
-
 Slices  = ['L2muonLRT']
-Events  = 8000 
-Threads = 8 
+Events  = 8000
+Threads = 8
 Slots   = 8
-Input   = 'Zmumu_pu40'    # defined in TrigValTools/share/TrigValInputs.json
+Input   = 'Zmumu'    # defined in TrigValTools/share/TrigValInputs.json
 GridFiles = True
 ExtraAna = ' -c LRT="True" '
 Release = "current"

@@ -1,5 +1,5 @@
 #!/usr/bin/env python
-# Copyright (C) 2002-2020 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
 
 # Test of Trigger config flags autoconfiguration
 # Exercised on BS data and MC POOL file formats
@@ -20,8 +20,8 @@ def get_file_from_art(package, test):
 from TrigValTools.TrigValSteering import Input
 inputfiles = {
     "Run1_Data": Input.get_input('data_run1').paths[0],
-    "Run2_Data": Input.get_input('data').paths[0],
-    "Run3_Data": Input.get_input('data_run3').paths[0],
+    "Run2_Data": Input.get_input('data_run2_EB').paths[0],
+    "Run3_Data": Input.get_input('data').paths[0],
     #
     "Run2_MC_r22": get_file_from_art("TrigAnalysisTest", "test_trigAna_RDOtoAOD_v7Primaries_build"),
     "Run2_MC_r21": '/cvmfs/atlas-nightlies.cern.ch/repo/data/data-art/Tier0ChainTests/q221/21.0/v3/myAOD.pool.root',
