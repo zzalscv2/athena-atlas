@@ -1,4 +1,4 @@
-# Copyright (C) 2002-2020 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
 
 # Declare the package name:
 atlas_subdir( ForwardRegion_EventTPCnv )
@@ -18,4 +18,4 @@ atlas_add_dictionary( ForwardRegion_EventTPCnvDict
 atlas_add_test( SimulationHitCnv_p1_test
                 SOURCES
                 test/SimulationHitCnv_p1_test.cxx
-                LINK_LIBRARIES ForwardRegion_EventTPCnv GaudiKernel TestTools )
+                LINK_LIBRARIES ForwardRegion_EventTPCnv GaudiKernel TestTools CxxUtils )
