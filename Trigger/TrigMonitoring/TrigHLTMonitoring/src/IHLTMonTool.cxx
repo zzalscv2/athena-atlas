@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "AthenaMonitoring/AthenaMonManager.h"
@@ -7,9 +7,6 @@
 
 #include "GaudiKernel/StatusCode.h"
 #include "StoreGate/StoreGateSvc.h"
-#include "EventInfo/TriggerInfo.h"
-#include "EventInfo/EventInfo.h"
-#include <EventInfo/EventID.h>
 
 #include "TROOT.h"
 #include "TH1.h"
@@ -97,76 +94,6 @@ StatusCode IHLTMonTool::initialize() {
   }
 
   return sc;
-}
-
-int IHLTMonTool::getL1info() {
-  
-  int lvl1info = 0;
-  
-  const EventInfo* EventInfo(0);
-  StatusCode sc = evtStore()->retrieve(EventInfo);
-  if (sc.isFailure())  {
-    return lvl1info;
-  } else {
-    const TriggerInfo* triggerInfo = EventInfo->trigger_info();
-    if (triggerInfo) {
-      return triggerInfo->level1TriggerType();
-    } else {
-      return lvl1info;
-    }
-  }
-}
-
-
-
-int IHLTMonTool::getRunNr() {
-
-  int runnr = -1;
-  const EventInfo* EventInfo(0);
-  StatusCode sc = evtStore()->retrieve(EventInfo);
-  if (sc.isFailure())  {
-    return runnr;
-  } else {
-    if ( EventInfo->event_ID()) {
-      //lumiBlockNumber = (int)  constEventInfo->event_ID()->lumi_block();
-      runnr = (int) EventInfo->event_ID()->run_number();
-    } else {
-      ATH_MSG_WARNING("missing event_ID");
-    }
-    return runnr;
-  }
-}
-
-int IHLTMonTool::getEventNr() {
-  const EventInfo* EventInfo(0);
-  StatusCode sc = evtStore()->retrieve(EventInfo);
-  int eventnr = -1;
-  if (sc.isFailure())  {
-    return eventnr;
-  } else {
-    if ( EventInfo->event_ID()) {
-      eventnr = (int) EventInfo->event_ID()->event_number();
-    } else {
-      ATH_MSG_WARNING("missing event_ID");
-    }
-    return eventnr;
-  }
-}
-
-int IHLTMonTool::getLumiBlockNr() {
-  const EventInfo* EventInfo(0);
-  StatusCode sc = evtStore()->retrieve(EventInfo);
-  int lbnr = -1;
-  if (sc.isFailure())  {
-    return lbnr;
-  } else {
-    if ( EventInfo->event_ID()) {
-      lbnr = (int) EventInfo->event_ID()->lumi_block();
-    } else {
-      ATH_MSG_WARNING("missing event_ID()");
-    }
-    return lbnr;
-  }
 }
 
 void IHLTMonTool::setCurrentMonGroup(const std::string &monGroup) {
