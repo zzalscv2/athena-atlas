@@ -20,11 +20,7 @@
 
 #include <iterator>
 #include <vector>
-#include <map>
-#include <set>
 #include <string>
-#include <stack>
-#include <boost/algorithm/string.hpp>
 
 #include "TrigDecisionInterface/Conditions.h"
 #include "TrigDecisionInterface/GroupProperties.h"
@@ -79,6 +75,13 @@ namespace Trig {
        **/
       bool isPassed(unsigned int condition=TrigDefs::Physics) const;
       
+      /**
+       * @brief return vector with isPassed decision for each chain
+       * @param conditions is modifying the question
+       *
+       * The order of decisions is the same as in getListOfTriggers().
+       **/
+      std::vector<bool> isPassedForEach(unsigned int condition=TrigDefs::Physics) const;
 
       /**
        * @brief returns prescale factor
@@ -102,6 +105,11 @@ namespace Trig {
        * Meaning of the returned bits can be understood by using masks defined in TrigDefs
        **/
       unsigned int isPassedBits() const;
+
+      /**
+       * @brief return result of isPassedBits for each chain in the group
+       */
+      std::vector<unsigned int> isPassedBitsForEach() const;
 
 
       /**
@@ -144,6 +152,7 @@ namespace Trig {
       const std::vector< std::string >& patterns() const {return m_patterns;}
    private:
 
+      bool  isPassed(const TrigConf::HLTChain& chain, unsigned int condition) const;
       bool  isCorrelatedL1items(const std::string& item) const;
       float correlatedL1Prescale(const std::string& item) const;
       float calculatePrescale(unsigned int condition=TrigDefs::Physics);
@@ -168,8 +177,8 @@ namespace Trig {
 
       std::vector<std::string> m_patterns;  //!< patterns with which the CG was constructed
     
-      std::set<const TrigConf::HLTChain*>           m_confChains;
-      std::set<const TrigConf::TriggerItem*>        m_confItems;
+      std::vector<const TrigConf::HLTChain*>           m_confChains;
+      std::vector<const TrigConf::TriggerItem*>        m_confItems;
 
 #ifndef __REFLEX__
       // quick cache (external therefore reference) of the result per event

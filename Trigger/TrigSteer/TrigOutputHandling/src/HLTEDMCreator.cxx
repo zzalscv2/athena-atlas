@@ -35,6 +35,16 @@ StatusCode HLTEDMCreator::initHandles( const HandlesGroup<T>&  handles ) {
   return StatusCode::SUCCESS;
 }
 
+template<typename T>
+StatusCode HLTEDMCreator::initAuxKey( const std::vector<SG::VarHandleKey*>& keys ) {
+  // Register Aux keys for all handles to avoid hash collisions (ATR-26386).
+  for (const SG::VarHandleKey* k : keys) {
+    SG::WriteHandleKey<T> auxkey(k->key()+"Aux.");
+    ATH_CHECK( auxkey.initialize() );
+  }
+  return StatusCode::SUCCESS;
+}
+
 
 StatusCode HLTEDMCreator::initialize()
 {  
@@ -69,55 +79,56 @@ StatusCode HLTEDMCreator::initialize()
 #define INIT(__TYPE) \
   ATH_CHECK( initHandles( HandlesGroup<__TYPE>( m_##__TYPE, m_##__TYPE##InViews, m_##__TYPE##Views ) ) );
 
-#define INIT_XAOD(__TYPE) \
-  ATH_CHECK( initHandles( HandlesGroup<xAOD::__TYPE>( m_##__TYPE, m_##__TYPE##InViews, m_##__TYPE##Views ) ) );
+#define INIT_XAOD(__TYPE, __STORE_TYPE) \
+  ATH_CHECK( initHandles( HandlesGroup<xAOD::__TYPE>( m_##__TYPE, m_##__TYPE##InViews, m_##__TYPE##Views ) ) ); \
+  ATH_CHECK( initAuxKey<xAOD::__STORE_TYPE>( m_##__TYPE.keys() ) );
 
   INIT( TrigRoiDescriptorCollection );
-  INIT_XAOD( TrigCompositeContainer );
+  INIT_XAOD( TrigCompositeContainer, TrigCompositeAuxContainer );
     
-  INIT_XAOD( TrigEMClusterContainer );
-  INIT_XAOD( TrigCaloClusterContainer );
-  INIT_XAOD( TrigRingerRingsContainer );
-  INIT_XAOD( TrigElectronContainer ); 
-  INIT_XAOD( ElectronContainer ); 
-  INIT_XAOD( PhotonContainer ); 
-  INIT_XAOD( TrigPhotonContainer );
-  INIT_XAOD( TrackParticleContainer );
-  INIT_XAOD( TrigMissingETContainer );
+  INIT_XAOD( TrigEMClusterContainer, TrigEMClusterAuxContainer );
+  INIT_XAOD( TrigCaloClusterContainer, TrigCaloClusterAuxContainer );
+  INIT_XAOD( TrigRingerRingsContainer, TrigRingerRingsAuxContainer );
+  INIT_XAOD( TrigElectronContainer, TrigElectronAuxContainer );
+  INIT_XAOD( ElectronContainer, ElectronAuxContainer );
+  INIT_XAOD( PhotonContainer, PhotonAuxContainer );
+  INIT_XAOD( TrigPhotonContainer, TrigPhotonAuxContainer );
+  INIT_XAOD( TrackParticleContainer, TrackParticleAuxContainer );
+  INIT_XAOD( TrigMissingETContainer, TrigMissingETAuxContainer );
 
-  INIT_XAOD( L2StandAloneMuonContainer );
-  INIT_XAOD( L2CombinedMuonContainer );
-  INIT_XAOD( L2IsoMuonContainer );
-  INIT_XAOD( MuonContainer );
-  INIT_XAOD( TauJetContainer );
-  INIT_XAOD( TauTrackContainer );
-  INIT_XAOD( JetContainer );
-  INIT_XAOD( VertexContainer );
-  INIT_XAOD( TrigBphysContainer );  
-  INIT_XAOD( BTaggingContainer );
-  INIT_XAOD( BTagVertexContainer );
-  INIT_XAOD( CaloClusterContainer );
-  INIT_XAOD( TrigT2MbtsBitsContainer );
-  INIT_XAOD( HIEventShapeContainer );
-  INIT_XAOD( TrigRNNOutputContainer );
-  INIT_XAOD( AFPSiHitsClusterContainer );
-  INIT_XAOD( AFPTrackContainer );
-  INIT_XAOD( AFPToFTrackContainer );
-  INIT_XAOD( AFPProtonContainer );
-  INIT_XAOD( AFPVertexContainer );
+  INIT_XAOD( L2StandAloneMuonContainer, L2StandAloneMuonAuxContainer );
+  INIT_XAOD( L2CombinedMuonContainer, L2CombinedMuonAuxContainer );
+  INIT_XAOD( L2IsoMuonContainer, L2IsoMuonAuxContainer );
+  INIT_XAOD( MuonContainer, MuonAuxContainer );
+  INIT_XAOD( TauJetContainer, TauJetAuxContainer );
+  INIT_XAOD( TauTrackContainer, TauTrackAuxContainer );
+  INIT_XAOD( JetContainer, JetAuxContainer );
+  INIT_XAOD( VertexContainer, VertexAuxContainer );
+  INIT_XAOD( TrigBphysContainer, TrigBphysAuxContainer );
+  INIT_XAOD( BTaggingContainer, BTaggingAuxContainer );
+  INIT_XAOD( BTagVertexContainer, BTagVertexAuxContainer );
+  INIT_XAOD( CaloClusterContainer, CaloClusterTrigAuxContainer ); // NOTE: Difference in interface and aux
+  INIT_XAOD( TrigT2MbtsBitsContainer, TrigT2MbtsBitsAuxContainer );
+  INIT_XAOD( HIEventShapeContainer, HIEventShapeAuxContainer );
+  INIT_XAOD( TrigRNNOutputContainer, TrigRNNOutputAuxContainer );
+  INIT_XAOD( AFPSiHitsClusterContainer, AFPSiHitsClusterAuxContainer );
+  INIT_XAOD( AFPTrackContainer, AFPTrackAuxContainer );
+  INIT_XAOD( AFPToFTrackContainer, AFPToFTrackAuxContainer );
+  INIT_XAOD( AFPProtonContainer, AFPProtonAuxContainer );
+  INIT_XAOD( AFPVertexContainer, AFPVertexAuxContainer );
 
   // Phase-I L1 RoIs EDM
-  INIT_XAOD( eFexEMRoIContainer );
-  INIT_XAOD( eFexTauRoIContainer );
-  INIT_XAOD( jFexTauRoIContainer );
-  INIT_XAOD( jFexFwdElRoIContainer );
-  INIT_XAOD( jFexSRJetRoIContainer );
-  INIT_XAOD( jFexLRJetRoIContainer );
-  INIT_XAOD( jFexMETRoIContainer );
-  INIT_XAOD( jFexSumETRoIContainer );
-  INIT_XAOD( gFexJetRoIContainer );
-  INIT_XAOD( gFexGlobalRoIContainer );
-  INIT_XAOD( MuonRoIContainer );
+  INIT_XAOD( eFexEMRoIContainer, eFexEMRoIAuxContainer );
+  INIT_XAOD( eFexTauRoIContainer, eFexTauRoIAuxContainer );
+  INIT_XAOD( jFexTauRoIContainer, jFexTauRoIAuxContainer );
+  INIT_XAOD( jFexFwdElRoIContainer, jFexFwdElRoIAuxContainer );
+  INIT_XAOD( jFexSRJetRoIContainer, jFexSRJetRoIAuxContainer );
+  INIT_XAOD( jFexLRJetRoIContainer, jFexLRJetRoIAuxContainer );
+  INIT_XAOD( jFexMETRoIContainer, jFexMETRoIAuxContainer );
+  INIT_XAOD( jFexSumETRoIContainer, jFexSumETRoIAuxContainer );
+  INIT_XAOD( gFexJetRoIContainer, gFexJetRoIAuxContainer );
+  INIT_XAOD( gFexGlobalRoIContainer, gFexGlobalRoIAuxContainer);
+  INIT_XAOD( MuonRoIContainer, MuonRoIAuxContainer );
 
 #undef INIT
 #undef INIT_XAOD

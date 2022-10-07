@@ -682,8 +682,8 @@ namespace Trk {
     double Chi2t=0., signif;
     if ( vk->useApriorVertex) {
 	    double d1 = vk->apriorV[0] - vk->refIterV[0] - xyzf[0];
-	    double d2 = vk->apriorV[1] - vk->refIterV[0] - xyzf[1];
-	    double d3 = vk->apriorV[2] - vk->refIterV[0] - xyzf[2];
+	    double d2 = vk->apriorV[1] - vk->refIterV[1] - xyzf[1];
+	    double d3 = vk->apriorV[2] - vk->refIterV[2] - xyzf[2];
 	    Chi2t  +=  wgtvrtd[0]*d1*d1 + wgtvrtd[2]*d2*d2 + wgtvrtd[5]*d3*d3 
 	          + 2.*(d2*d1*wgtvrtd[1] + d3*(d1*wgtvrtd[3] + d2*wgtvrtd[4]));
     }

@@ -741,46 +741,47 @@ void jFEXSim::SetTowersAndCells_SG(int tmp_jTowersIDs_subset[FEXAlgoSpaceDefs::j
   
 }
 
-std::vector<std::unique_ptr<jFEXTOB>> jFEXSim::getSmallRJetTOBs()
+std::vector< std::vector<std::unique_ptr<jFEXTOB>> > jFEXSim::getSmallRJetTOBs()
 { 
-    std::vector<std::unique_ptr<jFEXTOB>> sjTOBs;
+    std::vector< std::vector<std::unique_ptr<jFEXTOB>>> sjTOBs;
     sjTOBs.clear();
+    sjTOBs.resize(m_smallRJet_tobWords.size());
     
     // We need the copy since we cannot move a member of the class, since it will not be part of it anymore
     for (unsigned int i = 0; i < m_smallRJet_tobWords.size(); ++i){
         for(unsigned int j = 0; j < m_smallRJet_tobWords[i].size(); ++j){
-            sjTOBs.push_back(std::move(m_smallRJet_tobWords[i][j]));
+            sjTOBs.at(i).push_back(std::move(m_smallRJet_tobWords[i][j]));
         }
     } 
-    
     return sjTOBs;   
         
 }
 
-std::vector<std::unique_ptr<jFEXTOB>> jFEXSim::getLargeRJetTOBs()
+std::vector< std::vector<std::unique_ptr<jFEXTOB>> > jFEXSim::getLargeRJetTOBs()
 {
-    std::vector<std::unique_ptr<jFEXTOB>> ljTOBs;
+    std::vector< std::vector<std::unique_ptr<jFEXTOB>> > ljTOBs;
     ljTOBs.clear();
+    ljTOBs.resize(m_largeRJet_tobWords.size());
     
     // We need the copy since we cannot move a member of the class, since it will not be part of it anymore
     for (unsigned int i = 0; i < m_largeRJet_tobWords.size(); ++i){
         for(unsigned int j = 0; j < m_largeRJet_tobWords[i].size(); ++j){
-            ljTOBs.push_back(std::move(m_largeRJet_tobWords[i][j]));
+            ljTOBs.at(i).push_back(std::move(m_largeRJet_tobWords[i][j]));
         }
     } 
-    
     return ljTOBs;    
 }
 
-std::vector<std::unique_ptr<jFEXTOB>> jFEXSim::getTauTOBs()
+std::vector< std::vector<std::unique_ptr<jFEXTOB>> > jFEXSim::getTauTOBs()
 {
-    std::vector<std::unique_ptr<jFEXTOB>> tauTOBs;
+    std::vector< std::vector<std::unique_ptr<jFEXTOB>> > tauTOBs;
     tauTOBs.clear();
+    tauTOBs.resize(m_tau_tobWords.size());
     
     // We need the copy since we cannot move a member of the class, since it will not be part of it anymore
     for (unsigned int i = 0; i < m_tau_tobWords.size(); ++i){
         for(unsigned int j = 0; j < m_tau_tobWords[i].size(); ++j){
-            tauTOBs.push_back(std::move(m_tau_tobWords[i][j]));
+            tauTOBs.at(i).push_back(std::move(m_tau_tobWords[i][j]));
         }
     } 
     

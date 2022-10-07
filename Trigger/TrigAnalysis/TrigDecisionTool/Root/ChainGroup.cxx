@@ -168,41 +168,54 @@ std::string Trig::ChainGroup::getLowerName(const std::string& name) const {
   return cchain->lower_chain_name();
 }
 
-  
-
-bool Trig::ChainGroup::isPassed(unsigned int condition) const 
+// Helper to get decision of a single chain (private)
+bool Trig::ChainGroup::isPassed(const TrigConf::HLTChain& chain, unsigned int condition) const
 {
-  bool RESULT = false;
+  bool result = HLTResult(chain.chain_name(),condition);
+  if (result && (condition & TrigDefs::enforceLogicalFlow)) {
+    // enforceLogicalFlow
+    if (chain.level()=="EF") {
+      const std::string& nexttwo = getLowerName(chain.chain_name());
+      result = result && HLTResult(nexttwo,condition);
+      result = result && L1Result(getLowerName(nexttwo),condition);
 
-  for ( const TrigConf::HLTChain* ch : m_confChains ) {
-    bool chainRESULT = HLTResult(ch->chain_name(),condition);
-    if (chainRESULT && (condition & TrigDefs::enforceLogicalFlow)) {
-      // enforceLogicalFlow
-      if (ch->level()=="EF") {
-        const std::string& nexttwo = getLowerName(ch->chain_name());
-        chainRESULT = chainRESULT && HLTResult(nexttwo,condition);
-        chainRESULT = chainRESULT && L1Result(getLowerName(nexttwo),condition);
+    } else if (chain.level()=="L2") {
+      result = result && L1Result(getLowerName(chain.chain_name()),condition);
 
-      } else if (ch->level()=="L2") {
-        chainRESULT = chainRESULT && L1Result(getLowerName(ch->chain_name()),condition);
-
-      } else if (ch->level()=="HLT"){
-	    chainRESULT = chainRESULT && L1Result(getLowerName(ch->chain_name()),condition);
-      }
-      
+    } else if (chain.level()=="HLT"){
+      result = result && L1Result(getLowerName(chain.chain_name()),condition);
     }
-    RESULT = RESULT || chainRESULT;
   }
 
-  for ( const TrigConf::TriggerItem* item : m_confItems ) {
-    RESULT = RESULT || L1Result(item->name(),condition);
+  return result;
+}
+
+std::vector<bool> Trig::ChainGroup::isPassedForEach(unsigned int condition) const
+{
+  std::vector<bool> result;
+  result.reserve(m_confChains.size() + m_confItems.size());
+
+  for (const TrigConf::HLTChain* ch : m_confChains) {
+    result.push_back( isPassed(*ch, condition) );
+  }
+  for (const TrigConf::TriggerItem* item : m_confItems) {
+    result.push_back( L1Result(item->name(), condition) );
   }
 
+  return result;
+}
+
+bool Trig::ChainGroup::isPassed(unsigned int condition) const
+{
   if (condition & TrigDefs::Express_passed) {
     ATH_MSG_ERROR("Incorrect use of Express_passed bit. Please use isPassedBits() and test for TrigDefs::Express_passed in the returned bit-map.");
   }
 
-  return RESULT;
+  // True if any HLT or L1 item passed
+  return ( std::any_of(m_confChains.cbegin(), m_confChains.cend(),
+                       [&](const TrigConf::HLTChain* ch) {return isPassed(*ch, condition);}) ||
+           std::any_of(m_confItems.cbegin(), m_confItems.cend(),
+                       [&](const TrigConf::TriggerItem* item) {return L1Result(item->name(), condition);}) );
 }
 
 unsigned int Trig::ChainGroup::HLTBits(const std::string& chain, const std::string& level, const TrigCompositeUtils::DecisionIDContainer& passExpress) const {
@@ -245,10 +258,8 @@ unsigned int Trig::ChainGroup::L1Bits(const std::string& item) const {
   return r;
 }
 
-unsigned int Trig::ChainGroup::isPassedBits() const 
+std::vector<unsigned int> Trig::ChainGroup::isPassedBitsForEach() const
 {
-  unsigned int RESULT = 0;
-
   // This is for the express decision (R3 only), we read this directly from the navigation (not from bits)
   const SG::ReadHandleKey<TrigCompositeUtils::DecisionContainer>* navRHK = cgm().getRun3NavigationKeyPtr();
   TrigCompositeUtils::DecisionIDContainer passExpress;
@@ -262,9 +273,12 @@ unsigned int Trig::ChainGroup::isPassedBits() const
     }
   }
 
+  std::vector<unsigned int> all;
+  all.reserve(m_confChains.size() + m_confItems.size());
+
   for ( const TrigConf::HLTChain* ch : m_confChains ) {
 
-    RESULT = RESULT | HLTBits(ch->chain_name(), ch->level(), passExpress);
+    unsigned int RESULT = HLTBits(ch->chain_name(), ch->level(), passExpress);
 
     if (ch->level()=="EF") {
       const std::string& nexttwo = getLowerName(ch->chain_name());
@@ -277,14 +291,26 @@ unsigned int Trig::ChainGroup::isPassedBits() const
     } else if (ch->level()=="HLT") {
       RESULT = RESULT | L1Bits(getLowerName(ch->chain_name()));
     }
+
+    all.push_back(RESULT);
   }
 
   for ( const TrigConf::TriggerItem* item : m_confItems ) {
-    RESULT = RESULT | L1Bits(item->name());
+    all.push_back( L1Bits(item->name()) );
   }
-  return RESULT;
+
+  return all;
 }
 
+unsigned int Trig::ChainGroup::isPassedBits() const
+{
+  const std::vector<unsigned int> all = isPassedBitsForEach();
+  unsigned int result = 0;
+  for (unsigned int r : all) {
+    result = result | r;
+  }
+  return result;
+}
 
 HLT::ErrorCode Trig::ChainGroup::error() const {
   HLT::ErrorCode errorCode = HLT::OK;  
@@ -569,8 +595,6 @@ Trig::ChainGroup::update(const TrigConf::HLTChainList* confChains,
    m_confChains.clear();
    m_confItems.clear();
    m_names.clear();
-   m_names.reserve(m_patterns.size());
-
 
    // protect against genConf failure
    if (!(confChains && confItems) ) return;
@@ -584,15 +608,13 @@ Trig::ChainGroup::update(const TrigConf::HLTChainList* confChains,
 
         for(TrigConf::HLTChain* ch : *confChains) {
            if ( boost::regex_match(ch->chain_name().c_str(), what, compiled) ) {
-              m_confChains.insert(ch);
-              m_names.push_back(ch->chain_name());
+              m_confChains.push_back(ch);
            }
         }
 
         for(TrigConf::TriggerItem* item : *confItems) {
            if ( boost::regex_match( item->name().c_str(), what, compiled) ) {
-              m_confItems.insert(item);
-              m_names.push_back(item->name());
+              m_confItems.push_back(item);
            }
         }
      }
@@ -605,8 +627,7 @@ Trig::ChainGroup::update(const TrigConf::HLTChainList* confChains,
 
         for(TrigConf::HLTChain* ch : *confChains) {
            if (ch->chain_name() == what) {
-              m_confChains.insert(ch);
-              m_names.push_back(ch->chain_name());
+              m_confChains.push_back(ch);
               found_it = true;
               break;
            }
@@ -618,8 +639,7 @@ Trig::ChainGroup::update(const TrigConf::HLTChainList* confChains,
 
         for(TrigConf::TriggerItem* item : *confItems) {
            if (item->name() == what) {
-              m_confItems.insert(item);
-              m_names.push_back(item->name());
+              m_confItems.push_back(item);
               found_it = true;
               break;
            }
@@ -634,6 +654,11 @@ Trig::ChainGroup::update(const TrigConf::HLTChainList* confChains,
      }
 
    } // parseAsRegex
+
+   // Cache the names of all triggers
+   m_names.reserve(m_confChains.size() + m_confItems.size());
+   for (const TrigConf::HLTChain* ch : m_confChains)     m_names.push_back(ch->chain_name());
+   for (const TrigConf::TriggerItem* item : m_confItems) m_names.push_back(item->name());
 
    m_prescale = calculatePrescale(TrigDefs::Physics);
 }

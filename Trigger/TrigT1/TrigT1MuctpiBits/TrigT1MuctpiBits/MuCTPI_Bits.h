@@ -195,6 +195,11 @@ namespace LVL1::MuCTPIBits {
   static constexpr uint32_t RUN3_CAND_WORD_VETO_MASK = 0x1;
   static constexpr uint32_t RUN3_CAND_WORD_CANDFLAGS_SHIFT = 12;
   static constexpr uint32_t RUN3_CAND_WORD_CANDFLAGS_MASK = 0xf;
+  static constexpr uint32_t RUN3_CAND_WORD_CANDFLAGS_ECFW_R_SHIFT = 2;
+  static constexpr uint32_t RUN3_CAND_WORD_CANDFLAGS_EC_R_MASK = 0x3f;
+  static constexpr uint32_t RUN3_CAND_WORD_CANDFLAGS_FW_R_MASK = 0xf;
+  static constexpr uint32_t RUN3_CAND_WORD_CANDFLAGS_ECFW_PHI_SHIFT = 0;
+  static constexpr uint32_t RUN3_CAND_WORD_CANDFLAGS_ECFW_PHI_MASK = 0x3;
   static constexpr uint32_t RUN3_CAND_WORD_CANDFLAGS_BA_PHIOVERLAP_SHIFT = 13;
   static constexpr uint32_t RUN3_CAND_WORD_CANDFLAGS_BA_PHIOVERLAP_MASK = 0x1;
   static constexpr uint32_t RUN3_CAND_WORD_CANDFLAGS_BA_GT1ROI_SHIFT = 12;

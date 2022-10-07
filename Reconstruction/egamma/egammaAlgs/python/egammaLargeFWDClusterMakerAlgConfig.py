@@ -34,6 +34,7 @@ def egammaLargeFWDClusterMakerAlgCfg(
             "FWDele6_6",
             suffix="Nocorr",
             version="none",
+            corrlist=[],
             cells_name=flags.Egamma.Keys.Input.CaloCells)
         kwargs["ClusterCorrectionTools"] = acc.popToolsAndMerge(tools)
 

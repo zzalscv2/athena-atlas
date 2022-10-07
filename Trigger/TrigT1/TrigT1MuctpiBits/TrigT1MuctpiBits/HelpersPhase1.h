@@ -14,51 +14,6 @@ namespace LVL1::MuCTPIBits {
   // Helper types
   enum class WordType : uint8_t {Undefined=0, Timeslice, Multiplicity, Candidate, Topo, Status, MAX};
   enum class SubsysID : uint8_t {Undefined=0, Barrel, Forward, Endcap, MAX};
-  struct TimesliceHeader {
-    uint16_t bcid{0};
-    uint16_t tobCount{0};
-    uint16_t candCount{0};
-  };
-
-  struct Multiplicity {
-    bool nswMon               = false;
-    bool candOverflow         = false;
-    std::vector<uint32_t> cnt = {};
-  };
-  struct Candidate {
-    bool     side = false;//C=0 A=1
-    SubsysID type = SubsysID::Undefined;
-    uint32_t num{0};
-    uint32_t pt{0};//1-15
-    uint32_t roi{0};
-    bool errorFlag           = false;
-    bool vetoFlag            = false;
-    bool sectorFlag_gtN      = false;//BA: gt2, EC/FW: gt4
-    bool sectorFlag_nswMon   = false;//EC/FW only
-    bool candFlag_phiOverlap = false;//BA only
-    bool candFlag_gt1CandRoi = false;//BA only
-    bool candFlag_GoodMF     = false;//EC/FW only
-    bool candFlag_InnerCoin  = false;//EC/FW only
-    bool candFlag_BW23       = false;//EC/FW only
-    bool candFlag_Charge     = false;//EC/FW only
-  };
-  struct TopoTOB {
-    bool     side = false;//C=0 A=1
-    uint32_t pt{0};//1-15
-    uint32_t etaRaw{0};
-    uint32_t phiRaw{0};
-    bool candFlag_GoodMF     = false;//EC/FW only
-    bool candFlag_InnerCoin  = false;//EC/FW only
-    bool candFlag_BW23       = false;//EC/FW only
-    bool candFlag_Charge     = false;//EC/FW only
-  };
-
-  struct Slice {
-    uint32_t bcid{0},nTOB{0},nCand{0};
-    Multiplicity           mlt;
-    std::vector<Candidate> cand       = {};
-    std::vector<TopoTOB>       tob        = {};
-  };
 
   // Status data word error definitions
   static constexpr std::array<std::string_view,16> DataStatusWordErrors = {
@@ -242,6 +197,86 @@ namespace LVL1::MuCTPIBits {
     word |= status;
     return word;
   }
+  struct TimesliceHeader {
+      uint16_t bcid{0};
+      uint16_t tobCount{0};
+      uint16_t candCount{0};
+  };
+  struct Multiplicity {
+        bool nswMon               = false;
+        bool candOverflow         = false;
+        std::vector<uint32_t> cnt = {};
+  };
+  struct Candidate {
+      bool     side = false;//C=0 A=1
+      SubsysID type = SubsysID::Undefined;
+      uint32_t num{0};
+      uint32_t pt{0};//1-15
+      uint32_t roi{0};
+      bool errorFlag           = false;
+      bool vetoFlag            = false;
+      bool sectorFlag_gtN      = false;//BA: gt2, EC/FW: gt4
+      bool sectorFlag_nswMon   = false;//EC/FW only
+      bool candFlag_phiOverlap = false;//BA only
+      bool candFlag_gt1CandRoi = false;//BA only
+      bool candFlag_GoodMF     = false;//EC/FW only
+      bool candFlag_InnerCoin  = false;//EC/FW only
+      bool candFlag_BW23       = false;//EC/FW only
+      bool candFlag_Charge     = false;//EC/FW only
+      Candidate(uint32_t word)
+      {
+          errorFlag = maskedWord(word, RUN3_CAND_WORD_SECTORERRORFLAG_SHIFT, RUN3_CAND_WORD_SECTORERRORFLAG_MASK);
+          type = getSubsysID(word);
+          side = maskedWord(word, RUN3_SUBSYS_HEMISPHERE_SHIFT, RUN3_SUBSYS_HEMISPHERE_MASK);
+          if(type==SubsysID::Endcap)
+              num = maskedWord(word, RUN3_CAND_SECTORID_SHIFT, ENDCAP_SECTORID_MASK);
+          else
+              num = maskedWord(word, RUN3_CAND_SECTORID_SHIFT, BARREL_SECTORID_MASK);//same as FW
+          vetoFlag = maskedWord(word, RUN3_CAND_WORD_VETO_SHIFT, RUN3_CAND_WORD_VETO_MASK);
+          if(type==SubsysID::Barrel)
+          {
+              candFlag_phiOverlap = maskedWord(word, RUN3_CAND_WORD_CANDFLAGS_BA_PHIOVERLAP_SHIFT, RUN3_CAND_WORD_CANDFLAGS_BA_PHIOVERLAP_MASK);
+              candFlag_gt1CandRoi = maskedWord(word, RUN3_CAND_WORD_CANDFLAGS_BA_GT1ROI_SHIFT, RUN3_CAND_WORD_CANDFLAGS_BA_GT1ROI_MASK);
+          }
+          else
+          {
+              candFlag_GoodMF = maskedWord(word, RUN3_CAND_WORD_CANDFLAGS_ECFW_GOODMF_SHIFT, RUN3_CAND_WORD_CANDFLAGS_ECFW_GOODMF_MASK);
+              candFlag_InnerCoin = maskedWord(word, RUN3_CAND_WORD_CANDFLAGS_ECFW_INNERCOIN_SHIFT, RUN3_CAND_WORD_CANDFLAGS_ECFW_INNERCOIN_MASK);
+              candFlag_BW23 = maskedWord(word, RUN3_CAND_WORD_CANDFLAGS_ECFW_BW23_SHIFT, RUN3_CAND_WORD_CANDFLAGS_ECFW_BW23_MASK);
+              candFlag_Charge = maskedWord(word, RUN3_CAND_WORD_CANDFLAGS_ECFW_CHARGE_SHIFT, RUN3_CAND_WORD_CANDFLAGS_ECFW_CHARGE_MASK);
+          }
+          pt = maskedWord(word, RUN3_CAND_WORD_PT_SHIFT, RUN3_CAND_WORD_PT_MASK);
+          roi = maskedWord(word, RUN3_CAND_WORD_ROI_SHIFT, RUN3_CAND_WORD_ROI_MASK);
+      }
+  };
+  struct TopoTOB {
+      bool     side = false;//C=0 A=1
+      uint32_t pt{0};//1-15
+      uint32_t etaRaw{0};
+      uint32_t phiRaw{0};
+      bool candFlag_GoodMF     = false;//EC/FW only
+      bool candFlag_InnerCoin  = false;//EC/FW only
+      bool candFlag_BW23       = false;//EC/FW only
+      bool candFlag_Charge     = false;//EC/FW only
+      TopoTOB(uint32_t word)
+      {
+          side = maskedWord(word, RUN3_TOPO_WORD_HEMI_SHIFT, RUN3_TOPO_WORD_HEMI_MASK);
+          candFlag_GoodMF = maskedWord(word, RUN3_CAND_WORD_CANDFLAGS_ECFW_GOODMF_SHIFT, RUN3_CAND_WORD_CANDFLAGS_ECFW_GOODMF_MASK);
+          candFlag_InnerCoin = maskedWord(word, RUN3_CAND_WORD_CANDFLAGS_ECFW_INNERCOIN_SHIFT, RUN3_CAND_WORD_CANDFLAGS_ECFW_INNERCOIN_MASK);
+          candFlag_BW23 = maskedWord(word, RUN3_CAND_WORD_CANDFLAGS_ECFW_BW23_SHIFT, RUN3_CAND_WORD_CANDFLAGS_ECFW_BW23_MASK);
+          candFlag_Charge = maskedWord(word, RUN3_CAND_WORD_CANDFLAGS_ECFW_CHARGE_SHIFT, RUN3_CAND_WORD_CANDFLAGS_ECFW_CHARGE_MASK);
+          pt = maskedWord(word, RUN3_TOPO_WORD_PT_SHIFT, RUN3_TOPO_WORD_PT_MASK);
+          etaRaw = maskedWord(word, RUN3_TOPO_WORD_ETA_SHIFT, RUN3_TOPO_WORD_ETA_MASK);
+          phiRaw = maskedWord(word, RUN3_TOPO_WORD_PHI_SHIFT, RUN3_TOPO_WORD_PHI_MASK);
+      }
+  };
+
+  struct Slice {
+      uint32_t bcid{0},nTOB{0},nCand{0};
+      Multiplicity           mlt;
+      std::vector<Candidate> cand       = {};
+      std::vector<TopoTOB>       tob        = {};
+  };
 
 } // namespace LVL1::MuCTPIBits
 
