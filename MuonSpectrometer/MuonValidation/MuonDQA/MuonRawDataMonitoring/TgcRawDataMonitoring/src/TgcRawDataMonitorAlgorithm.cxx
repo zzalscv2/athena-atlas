@@ -1300,6 +1300,7 @@ StatusCode TgcRawDataMonitorAlgorithm::fillHistograms(const EventContext &ctx) c
     SG::ReadCondHandle<MuonGM::MuonDetectorManager> DetectorManagerHandle{m_DetectorManagerKey,ctx};
     const MuonGM::MuonDetectorManager* muonMgr = DetectorManagerHandle.cptr();
     SG::ReadHandle < Muon::TgcPrepDataContainer > tgcPrd(m_TgcPrepDataContainerKey, ctx);
+    std::map<const xAOD::Muon*, std::set<std::string>> map_muon_and_tgchits;
     if(tgcPrd.isValid() && muonMgr!=nullptr){
       ATH_MSG_DEBUG("Filling TGC PRD histograms");
       const TgcIdHelper &tgcIdHelper = m_idHelperSvc->tgcIdHelper();
@@ -1369,8 +1370,10 @@ StatusCode TgcRawDataMonitorAlgorithm::fillHistograms(const EventContext &ctx) c
 	      }else{ // wire
 		tgcHit.setResidual( rot_hitPos.Y() - rot_extPos.Y() );
 	      }
+	      cham.residuals[tgcHit.gap_name()].insert(tgcHit.residual());
 	      if(std::abs(tgcHit.residual()) < m_residualWindow.value()){
 		cham.chambersHasHit.insert(tgcHit.gap_name());
+		map_muon_and_tgchits[cham.muon].insert(tgcHit.gap_name());
 		hasMatchedTrack = true;
 	      }
 	    }
@@ -1601,7 +1604,18 @@ StatusCode TgcRawDataMonitorAlgorithm::fillHistograms(const EventContext &ctx) c
 	    double newY = extPosLocal.y() + extVecLocal.y() / extVecLocal.z() * ( gapZ - extPosLocal.z() );
 	    for(int iSorW = 0 ; iSorW < 2 ; iSorW++){
 	      if(cham.iM()==1 && iLay==2 && iSorW==0)continue;
+	      std::string gap_name_notype = Form("%sL%02d",cham_name.data(),iLay);
 	      std::string gap_name = Form("%sL%02d%s",cham_name.data(),iLay,(iSorW==0)?("S"):("W"));
+	      int nWhits = 0;
+	      int nShits = 0;
+	      for(const auto& chamHasHit : map_muon_and_tgchits[ext.muon]){
+		if( chamHasHit.find(gap_name_notype) != std::string::npos ) continue; // skipping the same gap
+		if( chamHasHit.find("M04") != std::string::npos ) continue; // skipping EI/FI
+		if( chamHasHit.find("W")!=std::string::npos ) nWhits++;
+		if( chamHasHit.find("S")!=std::string::npos ) nShits++;
+	      }
+	      if(nWhits < m_nHitsInOtherBWTGCWire.value())continue;
+	      if(nShits < m_nHitsInOtherBWTGCStrip.value())continue;
 	      std::string station_name = Form("%sM%02d%s",(cham.iSide()==TGC::TGCSIDE::TGCASIDE)?("A"):("C"),cham.iM(),(iSorW==0)?("S"):("W"));
 	      tgcEffPhiMap_Denominator[station_name].push_back(phimap_index);
 	      tgcEffEtaMap_Denominator[station_name].push_back(etamap_index);
@@ -1614,6 +1628,7 @@ StatusCode TgcRawDataMonitorAlgorithm::fillHistograms(const EventContext &ctx) c
 	      tgcEffEtaMap_Numerator[station_name].push_back(hitExist);
 	      tgcEffPhiMapGlobal_Numerator[station_name].push_back(hitExist);
 	      tgcEffMapHasHit[gap_name].push_back(hitExist);
+
 	    }
 	  }
 	}
