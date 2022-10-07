@@ -58,20 +58,20 @@ atlas_install_joboptions( share/StoreGateTestCommon.txt )
 # Configuration tests
 atlas_add_test( BCMOverlayConfig_test
                 SCRIPT test/BCMOverlayConfig_test.py
-                PROPERTIES TIMEOUT 300
+                PROPERTIES TIMEOUT 600
                 POST_EXEC_SCRIPT nopost.sh )
 
 atlas_add_test( PixelOverlayConfig_test
                 SCRIPT test/PixelOverlayConfig_test.py
-                PROPERTIES TIMEOUT 300
+                PROPERTIES TIMEOUT 600
                 POST_EXEC_SCRIPT nopost.sh )
 
 atlas_add_test( SCTOverlayConfig_test
                 SCRIPT test/SCTOverlayConfig_test.py
-                PROPERTIES TIMEOUT 300
+                PROPERTIES TIMEOUT 600
                 POST_EXEC_SCRIPT nopost.sh )
 
 atlas_add_test( TRTOverlayConfig_test
                 SCRIPT test/TRTOverlayConfig_test.py
-                PROPERTIES TIMEOUT 300
+                PROPERTIES TIMEOUT 600
                 POST_EXEC_SCRIPT nopost.sh )
