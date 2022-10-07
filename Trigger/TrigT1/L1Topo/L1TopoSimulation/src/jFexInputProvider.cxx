@@ -528,8 +528,7 @@ jFexInputProvider::fillXE(TCS::TopoInputEvent& inputEvent) const {
 
   SG::ReadHandle<xAOD::jFexMETRoIContainer> jXE_EDM(m_jXE_EDMKey);
   ATH_CHECK(jXE_EDM.isValid());
-  // The jFEX MET container has 12 elements, 2 TOBs per jFEX module, so a total of 24.
-  // We want to do a vector sum of Ex/Ey for the FPGA 0 and FPGA 2.  
+
   int global_ExTopo = 0;
   int global_EyTopo = 0;
 
@@ -541,11 +540,8 @@ jFexInputProvider::fillXE(TCS::TopoInputEvent& inputEvent) const {
     int jFexNumber = jFexRoI->jFexNumber();
     int fpgaNumber = jFexRoI->fpgaNumber();  
 
-    if( fpgaNumber==0 || fpgaNumber==2)
-      {
-	global_ExTopo += ExTopo;
-	global_EyTopo += EyTopo;
-      }
+    global_ExTopo += ExTopo;
+    global_EyTopo += EyTopo;
 
     ATH_MSG_DEBUG( "EDM jFex XE Number: "
                    << jFexNumber
@@ -586,12 +582,11 @@ jFexInputProvider::fillTE(TCS::TopoInputEvent& inputEvent) const {
 
   SG::ReadHandle<xAOD::jFexSumETRoIContainer> jTE_EDM(m_jTE_EDMKey);
   ATH_CHECK(jTE_EDM.isValid());
-  // The jFEX SumET container has 12 elements, 2 TOBs per jFEX module, so a total of 24.
-  // jTE is the Et sum for the FPGA 0 and FPGA 2.  
+
   int topoTE = 0;
   // jTE variations include jTEC, jTEFWD, jTEFWDA, jTEFWDC
-    // These quantities are defined according to the jFex module number
-    // FWDA = 5, FWDC = 0, C = 1,2,3,4
+  // These quantities are defined according to the jFex module number
+  // FWDA = 5, FWDC = 0, C = 1,2,3,4
   int topoTEC = 0;
   int topoTEFWD = 0;
   int topoTEFWDA = 0;
@@ -616,11 +611,8 @@ jFexInputProvider::fillTE(TCS::TopoInputEvent& inputEvent) const {
                    );
 
     // jTE
-    if( fpgaNumber==0 || fpgaNumber==2 )
-      {
-	topoTE += EtLowerTopo;
-	topoTE += EtUpperTopo;
-      }
+    topoTE += EtLowerTopo;
+    topoTE += EtUpperTopo;
 
     // jTEC
     if( jFexNumber!=0 && jFexNumber!=5 )

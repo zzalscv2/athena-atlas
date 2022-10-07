@@ -40,5 +40,5 @@ TCS::LateMuonTOB::clearHeap() {
 }
 
 void TCS::LateMuonTOB::print(std::ostream &o) const {
-    o << "cluster energy: " << Et() << ", eta: " << eta() << ", phi: " << phi();
+    o << "late muon energy: " << Et() << ", eta: " << eta() << ", phi: " << phi() << ", bw2or3: " << bw2or3() << ", innerCoin: " << innerCoin() << ", goodMF: " << goodMF() << ", charge: " << charge() << ", is2cand: " << is2cand() << ", isTGC: " << isTGC();
 }

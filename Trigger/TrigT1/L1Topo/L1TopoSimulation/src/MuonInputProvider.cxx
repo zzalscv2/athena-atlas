@@ -107,91 +107,179 @@ MuonInputProvider::handle(const Incident& incident) {
    hIsTGCEta->SetXTitle("#eta#times40");
    hIsTGCEta->SetYTitle("Is a TGC muon");
 
-   auto hLMPt = std::make_unique<TH1I>("LateMuonTOBPt", "Late Muon TOB Pt", 40, 0, 40);
-   hLMPt->SetXTitle("p_{T} [GeV]");
-   hLMPt->SetYTitle("Counts");
+   auto hLateMuonPt = std::make_unique<TH1I>("LateMuonTOBPt", "LateMuon TOB Pt", 40, 0, 40);
+   hLateMuonPt->SetXTitle("p_{T} [GeV]");
 
-   auto hLMPhiEta = std::make_unique<TH2I>("LateMuonTOBPhiEta", "Late Muon TOB Location", 50, -200, 200, 64, 0, 128);
-   hLMPhiEta->SetXTitle("#eta#times40");
-   hLMPhiEta->SetYTitle("#phi#times20");
-   
-   if (m_histSvc->regShared( histPath + "TOBPt", std::move(hPt), m_hPt ).isSuccess()){
-      ATH_MSG_DEBUG("TOBPt histogram has been registered successfully for MuonProvider.");
+   auto hLateMuonPtTGC = std::make_unique<TH1I>("LateMuonTOBPtTGC", "TGC LateMuon TOB Pt", 40, 0, 40);
+   hLateMuonPtTGC->SetXTitle("p_{T} [GeV]");
+
+   auto hLateMuonPtRPC = std::make_unique<TH1I>("LateMuonTOBPtRPC", "RPC LateMuon TOB Pt", 40, 0, 40);
+   hLateMuonPtRPC->SetXTitle("p_{T} [GeV]");
+
+   auto hLateMuonPtEta = std::make_unique<TH2I>("LateMuonTOBPtEta", "LateMuon TOB Pt vs Eta", 200, -200, 200, 40, 0, 40);
+   hLateMuonPtEta->SetXTitle("#eta#times40");
+   hLateMuonPtEta->SetYTitle("p_{T} [GeV]");
+
+   auto hLateMuonPhiEta = std::make_unique<TH2I>("LateMuonTOBPhiEta", "LateMuon TOB Location", 50, -200, 200, 64, 0, 128);
+   hLateMuonPhiEta->SetXTitle("#eta#times40");
+   hLateMuonPhiEta->SetYTitle("#phi#times20");
+
+   auto hLateMuonBW2or3Eta = std::make_unique<TH2I>("LateMuonTOBBW2or3Eta", "LateMuon TOB BW2or3 vs Eta", 200, -200, 200, 3, -1, 2);
+   hLateMuonBW2or3Eta->SetXTitle("#eta#times40");
+   hLateMuonBW2or3Eta->SetYTitle("TGC full-station coincidence");
+
+   auto hLateMuonInnerCoinEta = std::make_unique<TH2I>("LateMuonTOBInnerCoinEta", "LateMuon TOB InnerCoin vs Eta", 200, -200, 200, 3, -1, 2);
+   hLateMuonInnerCoinEta->SetXTitle("#eta#times40");
+   hLateMuonInnerCoinEta->SetYTitle("TGC inner coincidence");
+
+   auto hLateMuonGoodMFEta = std::make_unique<TH2I>("LateMuonTOBGoodMFEta", "LateMuon TOB GoodMF vs Eta", 200, -200, 200, 3, -1, 2);
+   hLateMuonGoodMFEta->SetXTitle("#eta#times40");
+   hLateMuonGoodMFEta->SetYTitle("good magnetic field");
+
+   auto hLateMuonChargeEta = std::make_unique<TH2I>("LateMuonTOBChargeEta", "LateMuon TOB Charge vs Eta", 200, -200, 200, 3, -1, 2);
+   hLateMuonChargeEta->SetXTitle("#eta#times40");
+   hLateMuonChargeEta->SetYTitle("charge");
+
+   auto hLateMuonIs2candEta = std::make_unique<TH2I>("LateMuonTOBIs2candEta", "LateMuon TOB Is2cand vs Eta", 200, -200, 200, 3, -1, 2);
+   hLateMuonIs2candEta->SetXTitle("#eta#times40");
+   hLateMuonIs2candEta->SetYTitle(">1 cand. in RPC pad");
+
+   auto hLateMuonIsTGCEta = std::make_unique<TH2I>("LateMuonTOBIsTGCEta", "LateMuon TOB IsTGC vs Eta", 200, -200, 200, 2, -0.5, 1.5);
+   hLateMuonIsTGCEta->SetXTitle("#eta#times40");
+   hLateMuonIsTGCEta->SetYTitle("Is a TGC muon");
+
+  
+   if (m_histSvc->regShared( histPath + "MuonTOBPt", std::move(hPt), m_hPt ).isSuccess()){
+      ATH_MSG_DEBUG("MuonTOBPt histogram has been registered successfully for MuonProvider.");
    }
    else{
-      ATH_MSG_WARNING("Could not register TOBPt histogram for MuonProvider");
+      ATH_MSG_WARNING("Could not register MuonTOBPt histogram for MuonProvider");
    }
-   if (m_histSvc->regShared( histPath + "TOBPtTGC", std::move(hPtTGC), m_hPtTGC ).isSuccess()){
-      ATH_MSG_DEBUG("TOBPtTGC histogram has been registered successfully for MuonProvider.");
-   }
-   else{
-      ATH_MSG_WARNING("Could not register TOBPtTGC histogram for MuonProvider");
-   }
-   if (m_histSvc->regShared( histPath + "TOBPtRPC", std::move(hPtRPC), m_hPtRPC ).isSuccess()){
-      ATH_MSG_DEBUG("TOBPtRPC histogram has been registered successfully for MuonProvider.");
+   if (m_histSvc->regShared( histPath + "MuonTOBPtTGC", std::move(hPtTGC), m_hPtTGC ).isSuccess()){
+      ATH_MSG_DEBUG("MuonTOBPtTGC histogram has been registered successfully for MuonProvider.");
    }
    else{
-      ATH_MSG_WARNING("Could not register TOBPtRPC histogram for MuonProvider");
+      ATH_MSG_WARNING("Could not register MuonTOBPtTGC histogram for MuonProvider");
    }
-   if (m_histSvc->regShared( histPath + "TOBPtEta", std::move(hPtEta), m_hPtEta ).isSuccess()){
-      ATH_MSG_DEBUG("TOBPtEta histogram has been registered successfully for MuonProvider.");
-   }
-   else{
-      ATH_MSG_WARNING("Could not register TOBPtEta histogram for MuonProvider");
-   }
-   if (m_histSvc->regShared( histPath + "TOBPhiEta", std::move(hPhiEta), m_hPhiEta ).isSuccess()){
-      ATH_MSG_DEBUG("TOBPhiEta histogram has been registered successfully for MuonProvider.");
+   if (m_histSvc->regShared( histPath + "MuonTOBPtRPC", std::move(hPtRPC), m_hPtRPC ).isSuccess()){
+      ATH_MSG_DEBUG("MuonTOBPtRPC histogram has been registered successfully for MuonProvider.");
    }
    else{
-      ATH_MSG_WARNING("Could not register TOBPhiEta histogram for MuonProvider");
+      ATH_MSG_WARNING("Could not register MuonTOBPtRPC histogram for MuonProvider");
    }
-   if (m_histSvc->regShared( histPath + "TOBBW2or3Eta", std::move(hBW2or3Eta), m_hBW2or3Eta ).isSuccess()){
-      ATH_MSG_DEBUG("TOBBW2or3Eta histogram has been registered successfully for MuonProvider.");
-   }
-   else{
-      ATH_MSG_WARNING("Could not register TOBBW2or3Eta histogram for MuonProvider");
-   }
-   if (m_histSvc->regShared( histPath + "TOBInnerCoinEta", std::move(hInnerCoinEta), m_hInnerCoinEta ).isSuccess()){
-      ATH_MSG_DEBUG("TOBInnerCoinEta histogram has been registered successfully for MuonProvider.");
+   if (m_histSvc->regShared( histPath + "MuonTOBPtEta", std::move(hPtEta), m_hPtEta ).isSuccess()){
+      ATH_MSG_DEBUG("MuonTOBPtEta histogram has been registered successfully for MuonProvider.");
    }
    else{
-      ATH_MSG_WARNING("Could not register TOBInnerCoinEta histogram for MuonProvider");
+      ATH_MSG_WARNING("Could not register MuonTOBPtEta histogram for MuonProvider");
    }
-   if (m_histSvc->regShared( histPath + "TOBGoodMFEta", std::move(hGoodMFEta), m_hGoodMFEta ).isSuccess()){
-      ATH_MSG_DEBUG("TOBGoodMFEta histogram has been registered successfully for MuonProvider.");
-   }
-   else{
-      ATH_MSG_WARNING("Could not register TOBGoodMFEta histogram for MuonProvider");
-   }
-   if (m_histSvc->regShared( histPath + "TOBChargeEta", std::move(hChargeEta), m_hChargeEta ).isSuccess()){
-      ATH_MSG_DEBUG("TOBChargeEta histogram has been registered successfully for MuonProvider.");
+   if (m_histSvc->regShared( histPath + "MuonTOBPhiEta", std::move(hPhiEta), m_hPhiEta ).isSuccess()){
+      ATH_MSG_DEBUG("MuonTOBPhiEta histogram has been registered successfully for MuonProvider.");
    }
    else{
-      ATH_MSG_WARNING("Could not register TOBChargeEta histogram for MuonProvider");
+      ATH_MSG_WARNING("Could not register MuonTOBPhiEta histogram for MuonProvider");
    }
-   if (m_histSvc->regShared( histPath + "TOBIs2candEta", std::move(hIs2candEta), m_hIs2candEta ).isSuccess()){
-      ATH_MSG_DEBUG("TOBIs2candEta histogram has been registered successfully for MuonProvider.");
-   }
-   else{
-      ATH_MSG_WARNING("Could not register TOBIs2candEta histogram for MuonProvider");
-   }
-   if (m_histSvc->regShared( histPath + "TOBIsTGCEta", std::move(hIsTGCEta), m_hIsTGCEta ).isSuccess()){
-      ATH_MSG_DEBUG("TOBIsTGCEta histogram has been registered successfully for MuonProvider.");
+   if (m_histSvc->regShared( histPath + "MuonTOBBW2or3Eta", std::move(hBW2or3Eta), m_hBW2or3Eta ).isSuccess()){
+      ATH_MSG_DEBUG("MuonTOBBW2or3Eta histogram has been registered successfully for MuonProvider.");
    }
    else{
-      ATH_MSG_WARNING("Could not register TOBIsTGCEta histogram for MuonProvider");
+      ATH_MSG_WARNING("Could not register MuonTOBBW2or3Eta histogram for MuonProvider");
    }
-   if (m_histSvc->regShared( histPath + "LateMuonTOBPt", std::move(hLMPt), m_hLMPt ).isSuccess()){
+   if (m_histSvc->regShared( histPath + "MuonTOBInnerCoinEta", std::move(hInnerCoinEta), m_hInnerCoinEta ).isSuccess()){
+      ATH_MSG_DEBUG("MuonTOBInnerCoinEta histogram has been registered successfully for MuonProvider.");
+   }
+   else{
+      ATH_MSG_WARNING("Could not register MuonTOBInnerCoinEta histogram for MuonProvider");
+   }
+   if (m_histSvc->regShared( histPath + "MuonTOBGoodMFEta", std::move(hGoodMFEta), m_hGoodMFEta ).isSuccess()){
+      ATH_MSG_DEBUG("MuonTOBGoodMFEta histogram has been registered successfully for MuonProvider.");
+   }
+   else{
+      ATH_MSG_WARNING("Could not register MuonTOBGoodMFEta histogram for MuonProvider");
+   }
+   if (m_histSvc->regShared( histPath + "MuonTOBChargeEta", std::move(hChargeEta), m_hChargeEta ).isSuccess()){
+      ATH_MSG_DEBUG("MuonTOBChargeEta histogram has been registered successfully for MuonProvider.");
+   }
+   else{
+      ATH_MSG_WARNING("Could not register MuonTOBChargeEta histogram for MuonProvider");
+   }
+   if (m_histSvc->regShared( histPath + "MuonTOBIs2candEta", std::move(hIs2candEta), m_hIs2candEta ).isSuccess()){
+      ATH_MSG_DEBUG("MuonTOBIs2candEta histogram has been registered successfully for MuonProvider.");
+   }
+   else{
+      ATH_MSG_WARNING("Could not register MuonTOBIs2candEta histogram for MuonProvider");
+   }
+   if (m_histSvc->regShared( histPath + "MuonTOBIsTGCEta", std::move(hIsTGCEta), m_hIsTGCEta ).isSuccess()){
+      ATH_MSG_DEBUG("MuonTOBIsTGCEta histogram has been registered successfully for MuonProvider.");
+   }
+   else{
+      ATH_MSG_WARNING("Could not register LateMuonTOBIsTGCEta histogram for MuonProvider");
+   }
+   if (m_histSvc->regShared( histPath + "LateMuonTOBPt", std::move(hLateMuonPt), m_hLateMuonPt ).isSuccess()){
       ATH_MSG_DEBUG("LateMuonTOBPt histogram has been registered successfully for MuonProvider.");
    }
    else{
       ATH_MSG_WARNING("Could not register LateMuonTOBPt histogram for MuonProvider");
    }
-   if (m_histSvc->regShared( histPath + "LateMuonTOBPhiEta", std::move(hLMPhiEta), m_hLMPhiEta ).isSuccess()){
+   if (m_histSvc->regShared( histPath + "LateMuonTOBPtTGC", std::move(hLateMuonPtTGC), m_hLateMuonPtTGC ).isSuccess()){
+      ATH_MSG_DEBUG("LateMuonTOBPtTGC histogram has been registered successfully for MuonProvider.");
+   }
+   else{
+      ATH_MSG_WARNING("Could not register LateMuonTOBPtTGC histogram for MuonProvider");
+   }
+   if (m_histSvc->regShared( histPath + "LateMuonTOBPtRPC", std::move(hLateMuonPtRPC), m_hLateMuonPtRPC ).isSuccess()){
+      ATH_MSG_DEBUG("LateMuonTOBPtRPC histogram has been registered successfully for MuonProvider.");
+   }
+   else{
+      ATH_MSG_WARNING("Could not register LateMuonTOBPtRPC histogram for MuonProvider");
+   }
+   if (m_histSvc->regShared( histPath + "LateMuonTOBPtEta", std::move(hLateMuonPtEta), m_hLateMuonPtEta ).isSuccess()){
+      ATH_MSG_DEBUG("LateMuonTOBPtEta histogram has been registered successfully for MuonProvider.");
+   }
+   else{
+      ATH_MSG_WARNING("Could not register LateMuonTOBPtEta histogram for MuonProvider");
+   }
+   if (m_histSvc->regShared( histPath + "LateMuonTOBPhiEta", std::move(hLateMuonPhiEta), m_hLateMuonPhiEta ).isSuccess()){
       ATH_MSG_DEBUG("LateMuonTOBPhiEta histogram has been registered successfully for MuonProvider.");
    }
    else{
       ATH_MSG_WARNING("Could not register LateMuonTOBPhiEta histogram for MuonProvider");
+   }
+   if (m_histSvc->regShared( histPath + "LateMuonTOBBW2or3Eta", std::move(hLateMuonBW2or3Eta), m_hLateMuonBW2or3Eta ).isSuccess()){
+      ATH_MSG_DEBUG("LateMuonTOBBW2or3Eta histogram has been registered successfully for MuonProvider.");
+   }
+   else{
+      ATH_MSG_WARNING("Could not register LateMuonTOBBW2or3Eta histogram for MuonProvider");
+   }
+   if (m_histSvc->regShared( histPath + "LateMuonTOBInnerCoinEta", std::move(hLateMuonInnerCoinEta), m_hLateMuonInnerCoinEta ).isSuccess()){
+      ATH_MSG_DEBUG("LateMuonTOBInnerCoinEta histogram has been registered successfully for MuonProvider.");
+   }
+   else{
+      ATH_MSG_WARNING("Could not register LateMuonTOBInnerCoinEta histogram for MuonProvider");
+   }
+   if (m_histSvc->regShared( histPath + "LateMuonTOBGoodMFEta", std::move(hLateMuonGoodMFEta), m_hLateMuonGoodMFEta ).isSuccess()){
+      ATH_MSG_DEBUG("LateMuonTOBGoodMFEta histogram has been registered successfully for MuonProvider.");
+   }
+   else{
+      ATH_MSG_WARNING("Could not register LateMuonTOBGoodMFEta histogram for MuonProvider");
+   }
+   if (m_histSvc->regShared( histPath + "LateMuonTOBChargeEta", std::move(hLateMuonChargeEta), m_hLateMuonChargeEta ).isSuccess()){
+      ATH_MSG_DEBUG("LateMuonTOBChargeEta histogram has been registered successfully for MuonProvider.");
+   }
+   else{
+      ATH_MSG_WARNING("Could not register LateMuonTOBChargeEta histogram for MuonProvider");
+   }
+   if (m_histSvc->regShared( histPath + "LateMuonTOBIs2candEta", std::move(hLateMuonIs2candEta), m_hLateMuonIs2candEta ).isSuccess()){
+      ATH_MSG_DEBUG("LateMuonTOBIs2candEta histogram has been registered successfully for MuonProvider.");
+   }
+   else{
+      ATH_MSG_WARNING("Could not register LateMuonTOBIs2candEta histogram for MuonProvider");
+   }
+   if (m_histSvc->regShared( histPath + "LateMuonTOBIsTGCEta", std::move(hLateMuonIsTGCEta), m_hLateMuonIsTGCEta ).isSuccess()){
+      ATH_MSG_DEBUG("LateMuonTOBIsTGCEta histogram has been registered successfully for MuonProvider.");
+   }
+   else{
+      ATH_MSG_WARNING("Could not register LateMuonTOBIsTGCEta histogram for MuonProvider");
    }
 }
 
@@ -276,20 +364,48 @@ MuonInputProvider::createLateMuonTOB(const MuCTPIL1TopoCandidate & roi) const {
 
    ATH_MSG_DEBUG("Late Muon ROI (MuCTPiToTopo):bcid=1 thr pt = " << roi.getptThresholdID() << " eta = " << roi.geteta() << " phi = " << roi.getphi() << ", w   = " << MSG::hex << std::setw( 8 ) << roi.getRoiID() << MSG::dec);
 
-   unsigned int LMEtTopo = roi.getptValue()*10;
-   int LMetaTopo = topoIndex(roi.geteta(),40);
-   int LMphiTopo = topoIndex(roi.getphi(),20);
-  
-   if (LMphiTopo < 0){ LMphiTopo += 128; }
+   unsigned int EtTopo = roi.getptValue()*10;
+   int etaTopo = topoIndex(roi.geteta(),40);
+   int phiTopo = topoIndex(roi.getphi(),20);
+
+   if (phiTopo < 0){ phiTopo += 128; }
  
-   TCS::LateMuonTOB muon( LMEtTopo, 0, LMetaTopo, static_cast<unsigned int>(LMphiTopo), roi.getRoiID() );
+   TCS::LateMuonTOB muon( EtTopo, 0, etaTopo, static_cast<unsigned int>(phiTopo), roi.getRoiID() );
 
-   muon.setEtDouble(static_cast<double>(LMEtTopo/10.));
-   muon.setEtaDouble(static_cast<double>(LMetaTopo/40.));
-   muon.setPhiDouble(static_cast<double>(LMphiTopo/20.));
+   muon.setEtDouble(static_cast<double>(EtTopo/10.));
+   muon.setEtaDouble(static_cast<double>(etaTopo/40.));
+   muon.setPhiDouble(static_cast<double>(phiTopo/20.));
 
-   m_hLMPt->Fill(muon.EtDouble());
-   m_hLMPhiEta->Fill(muon.eta(),muon.phi());
+   // Muon flags
+   if ( roi.getSectorName().at(0) != 'B' ) { // TGC ( endcap (E) + forward (F) )
+      muon.setBW2or3( topoFlag(roi.getbw2or3()) );
+      muon.setInnerCoin( topoFlag(roi.getinnerCoin()) );
+      muon.setGoodMF( topoFlag(roi.getgoodMF()) );
+      muon.setCharge( topoFlag(roi.getcharge()) );
+      muon.setIs2cand( 0 );
+      muon.setIsTGC( 1 );
+   }
+   else { // RPC ( barrel (B) )
+      muon.setBW2or3( 0 );
+      muon.setInnerCoin( 0 );
+      muon.setGoodMF( 0 );
+      muon.setCharge( 0 );
+      muon.setIs2cand( topoFlag(roi.getis2cand()) );
+      muon.setIsTGC( 0 );
+   }
+
+   m_hLateMuonPt->Fill(muon.EtDouble());
+   if ( muon.isTGC() ) { m_hLateMuonPtTGC->Fill( muon.EtDouble() ); }
+   else                { m_hLateMuonPtRPC->Fill( muon.EtDouble() ); }
+   m_hLateMuonPtEta->Fill( muon.eta(), muon.EtDouble() );
+   m_hLateMuonPhiEta->Fill( muon.eta(), muon.phi() );
+
+   m_hLateMuonBW2or3Eta->Fill( muon.eta(), muon.bw2or3() );
+   m_hLateMuonInnerCoinEta->Fill( muon.eta(), muon.innerCoin() );
+   m_hLateMuonGoodMFEta->Fill( muon.eta(), muon.goodMF() );
+   m_hLateMuonChargeEta->Fill( muon.eta(), muon.charge() );
+   m_hLateMuonIs2candEta->Fill( muon.eta(), muon.is2cand() );
+   m_hLateMuonIsTGCEta->Fill( muon.eta(), muon.isTGC() );
 
    ATH_MSG_DEBUG("LateMuon created");
    return muon;
