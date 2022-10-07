@@ -75,11 +75,16 @@ StatusCode BunchCrossingCondAlg::execute (const EventContext& ctx) const {
       bgs = &(m_trigConfigSvc->l1BunchGroupSet(ctx));
     }
     // bunch group 1 = paired
-    ATH_MSG_DEBUG("from BunchGroupCondData: BG1 bunches " << bgs->getBunchGroup(1)->bunches() );
-    for (const auto& pos : bgs->getBunchGroup(1)->bunches() ) {
-      bccd->m_beam1.set(pos);
-      bccd->m_beam2.set(pos);
-      bccd->m_luminous.set(pos);
+    if (bgs->size() >= 2) {
+      ATH_MSG_DEBUG("from BunchGroupCondData: BG1 bunches " << bgs->getBunchGroup(1)->bunches() );
+      for (const auto& pos : bgs->getBunchGroup(1)->bunches() ) {
+        bccd->m_beam1.set(pos);
+        bccd->m_beam2.set(pos);
+        bccd->m_luminous.set(pos);
+      }
+    }
+    else {
+      ATH_MSG_ERROR("missing bunch group data");
     }
     // in Run 1 we don't have bunch group information to determine beam 1 or beam 2 unpaired
     // so test if we have at least 15 bunch groups, then assume BG13/14 are the unpaired bunches
