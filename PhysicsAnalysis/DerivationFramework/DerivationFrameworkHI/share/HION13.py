@@ -303,13 +303,14 @@ ToolSvc += HION13_Select_TwoTrackMed
 expression = "( count(HION13TwoMuon.passed_TwoMuons) + count(HION13TwoTrack.passed_TwoTracks) > 1 || count(HION13TwoMuonMed.passed_TwoMuonsMed) + count(HION13TwoTrackMed.passed_TwoTracksMed) > 1 || count(HION13TwoMuon.passed_TwoMuons) + count(HION13TwoTrackMed.passed_TwoTracksMed) > 1 || count(HION13TwoMuonMed.passed_TwoMuonsMed) + count(HION13TwoTrack.passed_TwoTracks) > 1 || count(HION13TwoMuonHi.passed_TwoMuonsHi) + count(HION13TwoTrackHi.passed_TwoTracksHi) > 0 )"
 
 MBTriggers = [
-    "L1_ZDC_A_C_VTE50",
-    "L1_TE50_VTE600p0ETA49",
-    "L1_TE600p0ETA49",
+    "L1_ZDC_A_C_VTE50_PEB",
+    "L1_TE50_VTE600.0ETA49_PEB",
+    "L1_TE600.0ETA49_PEB",
     "HLT_mb_sptrk_L1ZDC_A_C_VTE50",
-    "HLT_noalg_pc_L1TE50_VTE600p0ETA49",
-    "HLT_noalg_cc_L1TE600p0ETA49",
+    "HLT_hi_hipeb_L1TE50_VTE600",
+    "HLT_hi_hipeb_L1TE600",
     "HLT_mb_sptrk_ion_L1ZDC_A_C_VTE50",
+    "HLT_mb_sptrk_hipeb_L1ZDC_A_C_VTE50",
     "HLT_noalg_mb_L1TE50",
     "HLT_mb_sptrk",
     "HLT_mb_mbts_L1MBTS_1",
