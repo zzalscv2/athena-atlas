@@ -49,18 +49,16 @@ namespace ActsTrk {
             MultiTrajectory( TrackStateContainerBackendPtr states, TrackParametersContainerBackendPtr parameters,
                              TrackJacobianContainerBackendPtr jacobians, TrackMeasurementContainerBackendPtr measurements );
 
+
             /**
-             * @brief Construct a new Multi Trajectory object by moving from a modifiable version
-             * @warning - this constructor truly moves, i.e. RHS object becomes unusable
-             * @param rhs - the MTJ to move from
+             * @brief Add state with stograge for data that depends on the mask
+             * 
+             * @param mask - bitmask deciding which backends are extended 
+             * @param istate - previous state
+             * @return index of just added state
              */
-            MultiTrajectory( ActsTrk::MultiTrajectory<IsReadWrite>&& rhs);
-
-
             ATH_MEMBER_REQUIRES(RWState==IsReadWrite, IndexType) addTrackState_impl(
                 Acts::TrackStatePropMask mask, IndexType iprevious);
-    
-
 
             /**
              * @brief Access component by key
@@ -145,12 +143,6 @@ namespace ActsTrk {
             friend class ActsTrk::MultiTrajectory<IsReadOnly>;
 
     };
-    template<bool RWState>
-    bool MultiTrajectory<RWState>::has_backends() const { 
-        return m_trackStates != nullptr 
-            and m_trackParameters != nullptr;
-    }
-
 
     typedef ActsTrk::MultiTrajectory<ActsTrk::IsReadOnly>  ConstMultiTrajectory;
     typedef ActsTrk::MultiTrajectory<ActsTrk::IsReadWrite> MutableMultiTrajectory;

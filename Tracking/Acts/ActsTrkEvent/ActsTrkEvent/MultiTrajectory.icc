@@ -1,6 +1,28 @@
 /*
   Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
 */
+template<bool RWState>
+ActsTrk::MultiTrajectory<RWState>::MultiTrajectory(MultiTrajectory<RWState>::TrackStateContainerBackendPtr states, 
+                                            MultiTrajectory<RWState>::TrackParametersContainerBackendPtr parameters,
+                                            MultiTrajectory<RWState>::TrackJacobianContainerBackendPtr jacobians, 
+                                            MultiTrajectory<RWState>::TrackMeasurementContainerBackendPtr measurements )
+    : m_trackStates(states),
+      m_trackParameters(parameters),
+      m_jacobians(jacobians),
+      m_measurements(measurements){        
+      } 
+
+
+
+
+template<bool RWState>
+bool ActsTrk::MultiTrajectory<RWState>::has_backends() const { 
+    return m_trackStates != nullptr 
+        and m_trackParameters != nullptr
+        and m_jacobians != nullptr
+        and m_measurements != nullptr;
+    }
+
 
 // implementation of addTrackState_impl    
     
