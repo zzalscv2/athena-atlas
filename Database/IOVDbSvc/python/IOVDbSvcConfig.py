@@ -131,6 +131,13 @@ def addFolderList(flags, listOfFolderInfoTuple, extensible=False, db=None, modif
         from AthenaPoolCnvSvc.PoolCommonConfig import AthenaPoolCnvSvcCfg
         result.merge(AthenaPoolCnvSvcCfg(flags))
 
+    if flags.IOVDb.CleanerRingSize > 0:
+        #HLT-jobs set IOVDb.CleanerRingSize to 0 to run without the cleaning-service, 
+        cleanerSvc = CompFactory.Athena.DelayedConditionsCleanerSvc(RingSize=flags.IOVDb.CleanerRingSize)
+        result.addService(cleanerSvc)
+        result.addService(CompFactory.Athena.ConditionsCleanerSvc(CleanerSvc=cleanerSvc))
+
+
     return result
 
 
