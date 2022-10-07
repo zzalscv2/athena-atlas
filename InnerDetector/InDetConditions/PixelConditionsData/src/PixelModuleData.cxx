@@ -427,6 +427,9 @@ float PixelModuleData::getDefaultQ2TotA() const { return m_paramA; }
 float PixelModuleData::getDefaultQ2TotE() const { return m_paramE; }
 float PixelModuleData::getDefaultQ2TotC() const { return m_paramC; }
 
+void PixelModuleData::setRUN3PIXLinearExtrapolation(bool doLinearExtrapolation) { m_doLinearExtrapolation = doLinearExtrapolation; }
+bool PixelModuleData::getRUN3PIXLinearExtrapolation() const { return m_doLinearExtrapolation; }
+
 // Lorentz angle correction
 void PixelModuleData::setBarrelLorentzAngleCorr(const std::vector<double> &barrelLorentzAngleCorr) { m_barrelLorentzAngleCorr = barrelLorentzAngleCorr; }
 void PixelModuleData::setEndcapLorentzAngleCorr(const std::vector<double> &endcapLorentzAngleCorr) { m_endcapLorentzAngleCorr = endcapLorentzAngleCorr; }

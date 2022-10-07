@@ -747,6 +747,9 @@ class PixelConfigCondAlg : public AthReentrantAlgorithm {
     Gaudi::Property<float> m_CalibrationParameterC
     {this, "DefaultCalibrationParameterC", 26000.0, "Default charge calibration parameter C"};
 
+    Gaudi::Property<bool> m_doRUN3PIXLinearExtrapolation
+    {this, "doRUN3PIXLinearExtrapolation", false, "Activation for linear extrapolation for PIXEL"};
+
     // DCS parameters
     Gaudi::Property<float> m_biasVoltage
     {this, "DefaultBiasVoltage", 150.0, "Default bias voltage"};
