@@ -89,6 +89,11 @@ def createHTTConfigFlags():
     cf.addFlag('lrtMonD0Range', (-100,100))
     cf.addFlag('lrtMonZ0Range', (-300,300))
 
+    # HTTLogicalHistProcessAlg
+    # cf.addFlag('etaPatternRoadFilter', None) #TO DO (will be uncomment when the value is known)
+    # cf.addFlag('phiRoadFilter', None) #TO DO (will be uncomment when the value is known)
+    cf.addFlag('sampleType', '')
+
     return cf
 
 
@@ -176,6 +181,8 @@ def createDev21_02_15_HTTConfigFlags():
     cf.doTracking = True
 
     return cf
+
+
 
 
 #####################################################################
