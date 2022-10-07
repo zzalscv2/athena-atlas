@@ -92,8 +92,16 @@ globalTag=`python getGlobalTag.py | awk '{print($1)}'`
 echo "Found current global tag $globalTag"
 
 
+echo " "
+echo "Running athena to read current HV scale factor correction in database for comparison"
+python -m LArCalibProcessing.LArCalib_HVScale2NtupleConfig $time  > readhv.log 2>&1
+if [ $? -ne 0 ];  then
+      echo "Athena reported an error ! Please check readhv.log!"
+      exit
+fi
 
 echo "Running athena to compute new HV corrections"
+python -m LArCalibProcessing.LArCalib_HVCorrConfig $time $run $lb -g $globalTag > hv.log 2>&1
 athena.py -c "date=\"${time}\";GlobalTag=\"${globalTag}\""  LArCalibProcessing/LArCalib_Example_HVCorr.py > hv.log 2>&1
 if [ $? -ne 0 ];  then
       echo "Athena reported an error ! Please check hv.log!"
@@ -133,13 +141,7 @@ fi
 
 
 
-echo " "
-echo "Running athena to read current HV scale factor correction in database for comparison"
-athena.py -c "date=\"${time}\"" LArCalibProcessing/LArHVCool2Ntuple_jobOptions.py > readhv.log 2>&1
-if [ $? -ne 0 ];  then
-      echo "Athena reported an error ! Please check readhv.log!"
-      exit
-fi
+
 
 if grep -q ERROR readhv.log
       then
@@ -205,8 +207,7 @@ fi
 
 echo " "
 echo "Running athena to rescale noise values from current UPD1 noise database"
-athena.py -c "date=\"${time}\";GlobalTag=\"${globalTag}\"" CaloCondPhysAlgs/CaloRescaleNoise_online_jobOptions.py > noise.log 2>&1
-
+python -m CaloCondPhysAlgs.CaloScaleNoiseConfig $time -t $globalTag  > noise.log 2>&1
 if [ $? -ne 0 ];  then
       echo "Athena reported an error ! Please check noise.log!"
       exit    
