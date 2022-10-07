@@ -45,7 +45,7 @@ echo "art-result: $rc2 FilterHitCA"
 
 rc3=-9999
 if [ $rc -eq 0 ]; then
-    art.py compare grid --entries 10 "${1}" "${2}" --mode=semi-detailed --file="$Output"
+    art.py compare grid --entries 10 "${1}" "${2}" --diff-root --mode=semi-detailed --file="$Output"
     rc3=$?
     status=$rc3
 fi
@@ -53,7 +53,7 @@ echo "art-result: $rc3 regression"
 
 rc3=-9999
 if [ $rc2 -eq 0 ]; then
-    art.py compare grid --entries 10 "${1}" "${2}" --mode=semi-detailed --file="$OutputFilter"
+    art.py compare grid --entries 10 "${1}" "${2}" --diff-root --mode=semi-detailed --file="$OutputFilter"
     rc4=$?
     status=$rc4
 fi
