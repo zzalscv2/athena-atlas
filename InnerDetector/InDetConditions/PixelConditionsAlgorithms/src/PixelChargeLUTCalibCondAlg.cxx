@@ -121,6 +121,12 @@ StatusCode PixelChargeLUTCalibCondAlg::execute(const EventContext& ctx) const {
           std::vector<float> totEGanged;
           std::vector<float> totCGanged;
 
+          std::vector<float> totF;
+          std::vector<float> totG;
+
+          std::vector<float> totFGanged;
+          std::vector<float> totGGanged;
+
           std::vector<float> totRes1;
           std::vector<float> totRes2;
 
@@ -148,6 +154,12 @@ StatusCode PixelChargeLUTCalibCondAlg::execute(const EventContext& ctx) const {
           totAGanged.reserve(numFE);
           totEGanged.reserve(numFE);
           totCGanged.reserve(numFE);
+
+          totF.reserve(numFE);
+          totG.reserve(numFE);
+
+          totFGanged.reserve(numFE);
+          totGGanged.reserve(numFE);
 
           totRes1.reserve(numFE);
           totRes2.reserve(numFE);
@@ -185,6 +197,8 @@ StatusCode PixelChargeLUTCalibCondAlg::execute(const EventContext& ctx) const {
                 totA.push_back(0.0);
                 totE.push_back(0.0);
                 totC.push_back(0.0);
+                totF.push_back(0.0);
+                totG.push_back(0.0);
 
                 totRes1.push_back(0.0); // TODO: avoid this in clients
                 totRes2.push_back(0.0); // TODO: avoid this in clients
@@ -211,16 +225,87 @@ StatusCode PixelChargeLUTCalibCondAlg::execute(const EventContext& ctx) const {
                 analogThresholdNoiseGanged.push_back(calibArray[10].get<int>());
                 inTimeThresholdGanged.push_back(calibArray[11].get<int>());
 
-                totA.push_back(calibArray[12].get<float>());
-                totE.push_back(calibArray[13].get<float>());
-                totC.push_back(calibArray[14].get<float>());
+                float paramA = calibArray[12].get<float>();
+                float paramE = calibArray[13].get<float>();
+                float paramC = calibArray[14].get<float>();
+                totA.push_back(paramA);
+                totE.push_back(paramE);
+                totC.push_back(paramC);
 
-                totAGanged.push_back(calibArray[15].get<float>());
-                totEGanged.push_back(calibArray[16].get<float>());
-                totCGanged.push_back(calibArray[17].get<float>());
+                float paramAGanged = calibArray[15].get<float>();
+                float paramEGanged = calibArray[16].get<float>();
+                float paramCGanged = calibArray[17].get<float>();
+                totAGanged.push_back(paramAGanged);
+                totEGanged.push_back(paramEGanged);
+                totCGanged.push_back(paramCGanged);
 
                 totRes1.push_back(calibArray[18].get<float>());
                 totRes2.push_back(calibArray[19].get<float>());
+
+                // Linear extrapolation above large charge
+                if (configData->getRUN3PIXLinearExtrapolation()) {
+                  writeCdo -> setCalibrationStrategy(moduleHash, PixelChargeCalibCondData::CalibrationStrategy::RUN3PIX);
+
+                  Identifier wafer_id = m_pixelID->wafer_id(IdentifierHash(moduleHash));
+                  int barrel_ec = m_pixelID->barrel_ec(wafer_id);
+                  int layer     = m_pixelID->layer_disk(wafer_id);
+
+                  // search for ToT when charge exceeds threshold
+                  if (!(element->isDBM())) {
+                    int totlimit = -1;
+                    float exth = 1e5;   // The calibration function is analytically connected at the threshold exth.
+
+                    // Normal pixels
+                    for (int itot=configData->getToTThreshold(barrel_ec,layer); itot<configData->getFEI3Latency(barrel_ec,layer); itot++) {
+                      float tmpcharge = (paramC*itot/paramA-paramE)/(1.0-itot/paramA);
+                      if (tmpcharge>exth) { totlimit=itot; break; }
+                    }
+                    if (totlimit>0) {
+                      float x1 = totlimit;
+                      float x2 = totlimit-5;
+                      float y1 = (paramC*x1/paramA-paramE)/(1.0-x1/paramA);
+                      float y2 = (paramC*x2/paramA-paramE)/(1.0-x2/paramA);
+                      totF.push_back((y1-y2)/(x1-x2));
+                      totG.push_back((y2*x1-y1*x2)/(x1-x2));
+                    }
+                    else {
+                      totF.push_back(0.0);
+                      totG.push_back(0.0);
+                    }
+
+                    // Ganged pixels
+                    totlimit = -1;
+                    for (int itot=configData->getToTThreshold(barrel_ec,layer); itot<configData->getFEI3Latency(barrel_ec,layer); itot++) {
+                      float tmpcharge = (paramCGanged*itot/paramAGanged-paramEGanged)/(1.0-itot/paramAGanged);
+                      if (tmpcharge>exth) { totlimit=itot; break; }
+                    }
+                    if (totlimit>0) {
+                      float x1 = totlimit;
+                      float x2 = totlimit-5;
+                      float y1 = (paramCGanged*x1/paramAGanged-paramEGanged)/(1.0-x1/paramAGanged);
+                      float y2 = (paramCGanged*x2/paramAGanged-paramEGanged)/(1.0-x2/paramAGanged);
+                      totFGanged.push_back((y1-y2)/(x1-x2));
+                      totGGanged.push_back((y2*x1-y1*x2)/(x1-x2));
+                    }
+                    else {
+                      totFGanged.push_back(0.0);
+                      totGGanged.push_back(0.0);
+                    }
+                  }
+                  else {    // DBM
+                    totF.push_back(0.0);
+                    totG.push_back(0.0);
+                    totFGanged.push_back(0.0);
+                    totGGanged.push_back(0.0);
+                  }
+                }
+                else {
+                  writeCdo -> setCalibrationStrategy(moduleHash, PixelChargeCalibCondData::CalibrationStrategy::RUN1PIX);
+                  totF.push_back(0.0);
+                  totG.push_back(0.0);
+                  totFGanged.push_back(0.0);
+                  totGGanged.push_back(0.0);
+                }
               }
             }
             else {
@@ -244,6 +329,9 @@ StatusCode PixelChargeLUTCalibCondAlg::execute(const EventContext& ctx) const {
           writeCdo -> setQ2TotE(InDetDD::PixelDiodeType::NORMAL, moduleHash, totE); // can not move as shared
           writeCdo -> setQ2TotC(InDetDD::PixelDiodeType::NORMAL, moduleHash, totC); // can not move as shared
 
+          writeCdo -> setQ2TotF(InDetDD::PixelDiodeType::NORMAL, moduleHash, totF); // can not move as shared
+          writeCdo -> setQ2TotG(InDetDD::PixelDiodeType::NORMAL, moduleHash, totG); // can not move as shared
+
           writeCdo -> setTotRes1(moduleHash, std::move(totRes1));
           writeCdo -> setTotRes2(moduleHash, std::move(totRes2));
 
@@ -257,6 +345,9 @@ StatusCode PixelChargeLUTCalibCondAlg::execute(const EventContext& ctx) const {
           writeCdo -> setQ2TotE(InDetDD::PixelDiodeType::LONG, moduleHash, totE); // can not move as shared
           writeCdo -> setQ2TotC(InDetDD::PixelDiodeType::LONG, moduleHash, totC); // can not move as shared
 
+          writeCdo -> setQ2TotF(InDetDD::PixelDiodeType::LONG, moduleHash, totF); // can not move as shared
+          writeCdo -> setQ2TotG(InDetDD::PixelDiodeType::LONG, moduleHash, totG); // can not move as shared
+
           // Ganged/large pixel
           if (p_design->getReadoutTechnology() == InDetDD::PixelReadoutTechnology::RD53) {
             writeCdo -> setAnalogThreshold(InDetDD::PixelDiodeType::LARGE, moduleHash, std::move(analogThresholdGanged));
@@ -267,6 +358,9 @@ StatusCode PixelChargeLUTCalibCondAlg::execute(const EventContext& ctx) const {
             writeCdo -> setQ2TotA(InDetDD::PixelDiodeType::LARGE, moduleHash, std::move(totAGanged));
             writeCdo -> setQ2TotE(InDetDD::PixelDiodeType::LARGE, moduleHash, std::move(totEGanged));
             writeCdo -> setQ2TotC(InDetDD::PixelDiodeType::LARGE, moduleHash, std::move(totCGanged));
+
+            writeCdo -> setQ2TotF(InDetDD::PixelDiodeType::LARGE, moduleHash, std::move(totFGanged));
+            writeCdo -> setQ2TotG(InDetDD::PixelDiodeType::LARGE, moduleHash, std::move(totGGanged));
           } else {
             writeCdo -> setAnalogThreshold(InDetDD::PixelDiodeType::GANGED, moduleHash, std::move(analogThresholdGanged));
             writeCdo -> setAnalogThresholdSigma(InDetDD::PixelDiodeType::GANGED, moduleHash, std::move(analogThresholdSigmaGanged));
@@ -276,6 +370,9 @@ StatusCode PixelChargeLUTCalibCondAlg::execute(const EventContext& ctx) const {
             writeCdo -> setQ2TotA(InDetDD::PixelDiodeType::GANGED, moduleHash, std::move(totAGanged));
             writeCdo -> setQ2TotE(InDetDD::PixelDiodeType::GANGED, moduleHash, std::move(totEGanged));
             writeCdo -> setQ2TotC(InDetDD::PixelDiodeType::GANGED, moduleHash, std::move(totCGanged));
+
+            writeCdo -> setQ2TotF(InDetDD::PixelDiodeType::GANGED, moduleHash, std::move(totFGanged));
+            writeCdo -> setQ2TotG(InDetDD::PixelDiodeType::GANGED, moduleHash, std::move(totGGanged));
           }
         }
       }
@@ -301,6 +398,8 @@ StatusCode PixelChargeLUTCalibCondAlg::execute(const EventContext& ctx) const {
         writeCdo -> setQ2TotA(type, moduleHash, std::vector<float>(numFE, configData->getDefaultQ2TotA()));
         writeCdo -> setQ2TotE(type, moduleHash, std::vector<float>(numFE, configData->getDefaultQ2TotE()));
         writeCdo -> setQ2TotC(type, moduleHash, std::vector<float>(numFE, configData->getDefaultQ2TotC()));
+        writeCdo -> setQ2TotF(type, moduleHash, std::vector<float>(numFE, 0.0));
+        writeCdo -> setQ2TotG(type, moduleHash, std::vector<float>(numFE, 0.0));
       }
 
       writeCdo -> setTotRes1(moduleHash, std::vector<float>(numFE, 0.0));
