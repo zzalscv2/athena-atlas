@@ -100,12 +100,13 @@ if [ $rc -eq 0 ]
 then
     FilterHit_tf.py \
         --CA \
-        --inputHITSFile="test.CG.HITS.pool.root" \
+        --inputHITSFile="test.CA.HITS.pool.root" \
         --maxEvents 200 \
         --postInclude 'PyJobTransforms.UseFrontier' \
         --skipEvents="0" \
         --TruthReductionScheme="SingleGenParticle" \
-        --outputHITS_FILTFile="filt.CG.HITS.pool.root" \
+        --outputHITS_FILTFile="filt.CA.HITS.pool.root" \
+        --postExec 'with open("ConfigFiltCA.pkl", "wb") as f: cfg.store(f)' \
         --imf False
     rc5=$?
     status=$rc5
@@ -116,6 +117,16 @@ echo  "art-result: $rc5 filtCA"
 rc6=-9999
 if [ $rc2 -eq 0 ]
 then
+    FilterHit_tf.py \
+        --inputHITSFile="test.CG.HITS.pool.root" \
+        --maxEvents 200 \
+        --postInclude="default:PyJobTransforms/UseFrontier.py" \
+        --skipEvents="0" \
+        --TruthReductionScheme="SingleGenParticle" \
+        --outputHITS_FILTFile="filt.CG.HITS.pool.root" \
+        --imf False \
+        --athenaopts '"--config-only=ConfigFiltCG.pkl"'
+
     FilterHit_tf.py \
         --inputHITSFile="test.CG.HITS.pool.root" \
         --maxEvents 200 \
