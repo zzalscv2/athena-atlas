@@ -13,7 +13,7 @@ atlas_add_library( TrigHLTMonitoringLib
                    PUBLIC_HEADERS TrigHLTMonitoring
                    INCLUDE_DIRS ${ROOT_INCLUDE_DIRS}
                    LINK_LIBRARIES AthenaMonitoringLib GaudiKernel LumiBlockCoolQuery StoreGateLib TrigConfInterfaces TrigDecisionToolLib
-                   PRIVATE_LINK_LIBRARIES ${ROOT_LIBRARIES} AthenaKernel AthenaMonitoringKernelLib EventInfo TrigSteeringEvent xAODTrigger )
+                   PRIVATE_LINK_LIBRARIES ${ROOT_LIBRARIES} AthenaKernel AthenaMonitoringKernelLib TrigSteeringEvent xAODTrigger )
 
 atlas_add_component( TrigHLTMonitoring
                      src/components/*.cxx 

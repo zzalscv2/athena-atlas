@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2019 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef IHLTMONTOOL_H
@@ -48,12 +48,6 @@ class IHLTMonTool : public ManagedMonitorToolBase {
   virtual StatusCode book() = 0; // called by bookHistograms
   virtual StatusCode fill() = 0; // called by fillHistograms
   virtual StatusCode proc() = 0; // called by procHistograms
-
-  // Available to aid the child
-  int getL1info();
-  int getRunNr();
-  int getEventNr();
-  int getLumiBlockNr();
 
   // Set current MonGroup
   void setCurrentMonGroup(const std::string &monGroup);
