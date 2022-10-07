@@ -301,10 +301,10 @@ namespace Rec {
         std::unique_ptr<const Trk::Volume> m_indetVolume;
 
         // vertex region and phi modularity for pseudo-measurement constraints
-        std::unique_ptr<Trk::RecVertex> m_beamAxis;
-        std::unique_ptr<Trk::PerigeeSurface> m_perigeeSurface;
+        std::unique_ptr<const Trk::RecVertex> m_beamAxis;
+        std::unique_ptr<const Trk::PerigeeSurface> m_perigeeSurface;
 
-        std::unique_ptr<Trk::RecVertex> m_vertex;
+        std::unique_ptr<const Trk::RecVertex> m_vertex;
 
         // counters
         mutable std::atomic_uint m_countAcceptedStandaloneFit{0};
