@@ -1,19 +1,16 @@
-# common fragment for xAODMultiLepton filter
+# common fragment for xAODMultiElectron filter
 # conversion to XAOD, 
-# creation of slimmed container containing electrons and muons
 # connecting the filter
 
 include ("GeneratorFilters/CreatexAODSlimContainers.py")
+createxAODSlimmedContainer("TruthElectrons",prefiltSeq)
+prefiltSeq.xAODCnv.AODContainerName = 'GEN_EVENT'
 
 from GeneratorFilters.GeneratorFiltersConf import xAODMultiElectronFilter
-xAODMultiElectronFilter = xAODMultiElectronFilter("xAODMultiElectronFilter")
+xAODMultiElectronFilter = xAODMultiElectronFilter("xAODMultiElectronFilter")  
 filtSeq += xAODMultiElectronFilter
 
-# to modiify cuts put into JOs e.g.:
-#filtSeq.xAODMultiElectronFilter.MinPt = 12000.0
-#filtSeq.xAODMultiElectronFilter.MaxEta = 10.0
-#filtSeq.xAODMultiElectronFilter.MinVisPtHadTau = 10000
-#filtSeq.xAODMultiElectronFilter.NLeptons = 4
-#filtSeq.xAODMultiElectronFilter.IncludeHadTaus = True
-#filtSeq.xAODMultiElectronFilter.TwoSameSignLightLeptonsOneHadTau = False 
-
+# to modify cuts put into JOs e.g.:
+#filtSeq.xAODMultiElectronFilter.Ptcut = 12000.0
+#filtSeq.xAODMultiElectronFilter.Etacut = 10.0
+#filtSeq.xAODMultiElectronFilter.NElectrons = 2
