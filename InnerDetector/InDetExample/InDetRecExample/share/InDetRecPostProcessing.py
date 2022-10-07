@@ -392,15 +392,6 @@ if InDetFlags.doSecVertexFinder():
     from InDetRecExample.ConfiguredSecondaryVertexCuts import ConfiguredSecondaryVertexCuts
     InDetSecondaryVertexCuts      = ConfiguredSecondaryVertexCuts(InDetFlags.secondaryVertexCutSetup(),
                                                                   InDetNewTrackingCuts.minSecondaryPt())
-
-    from AtlasGeoModel.CommonGMJobProperties import CommonGeometryFlags as geoFlags
-    if geoFlags.Run() == "RUN3":
-	    InDetSecondaryVertexCuts._ConfiguredSecondaryVertexCuts__SingleTrk_MinRatioOfHLhits = 0.40
-	    InDetSecondaryVertexCuts._ConfiguredSecondaryVertexCuts__TrkSel_TRTTrksBinnedRatioTRT = [0.51,  0.51,  0.51, 0.51, 0.51, 0.51, 0.51, 0.51, 0.51, 0.51]
-    else:
-	    InDetSecondaryVertexCuts._ConfiguredSecondaryVertexCuts__SingleTrk_MinRatioOfHLhits = 0.51
-	    InDetSecondaryVertexCuts._ConfiguredSecondaryVertexCuts__TrkSel_TRTTrksBinnedRatioTRT = [0.60,  0.51,  0.51, 0.51, 0.51, 0.51, 0.51, 0.51, 0.51, 0.51]
-
     if (InDetFlags.doPrintConfigurables()):
       printfunc (InDetSecondaryVertexCuts.printInfo()         )
     pass
@@ -433,6 +424,15 @@ if InDetFlags.doConversions():
     from InDetRecExample.ConfiguredSecondaryVertexCuts import ConfiguredSecondaryVertexCuts
     InDetConversionVertexCuts      = ConfiguredSecondaryVertexCuts(InDetFlags.conversionVertexCutSetup(),
                                                                    InDetNewTrackingCuts.minPT())
+
+    from AtlasGeoModel.CommonGMJobProperties import CommonGeometryFlags as geoFlags
+    if geoFlags.Run() == "RUN3":
+	    InDetConversionVertexCuts._ConfiguredSecondaryVertexCuts__SingleTrk_MinRatioOfHLhits = 0.40
+	    InDetConversionVertexCuts._ConfiguredSecondaryVertexCuts__TrkSel_TRTTrksBinnedRatioTRT = [0.51, 0.80, 0.90, 0.80, 0.51, 0.51, 0.51, 0.51, 0.51, 0.51]
+    else:
+	    InDetConversionVertexCuts._ConfiguredSecondaryVertexCuts__SingleTrk_MinRatioOfHLhits = 0.51
+	    InDetConversionVertexCuts._ConfiguredSecondaryVertexCuts__TrkSel_TRTTrksBinnedRatioTRT = [0.60, 0.80, 0.90, 0.80, 0.51, 0.51, 0.51, 0.51, 0.51, 0.51]
+
     if (InDetFlags.doPrintConfigurables()):
       printfunc (InDetConversionVertexCuts.printInfo())
     pass
