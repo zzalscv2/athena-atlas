@@ -15,11 +15,6 @@ def addFolder(parent, db, folder):
     log.info("Adding folder %s:%s to IOVDbSvc", db, folder)
     conddb.addFolder(db, folder, className='CondAttrListCollection')
 
-def addFolderWithTag(parent, db, folder, tag):
-    log = logging.getLogger(parent.getName())        
-    log.info("Adding folder %s:%s (tag %s) to IOVDbSvc", db, folder, tag)
-    conddb.addFolderWithTag(db, folder, tag, className='CondAttrListCollection')
-
 
 class MdtCondDbAlg(CfgMgr.MdtCondDbAlg):
     def __init__(self,name="MdtCondDbAlg",**kwargs):
@@ -173,37 +168,36 @@ class NswCalibDbAlg(CfgMgr.NswCalibDbAlg):
             kwargs["ReadKey_STGC_SIDEC_PDO"] = "/TGC/Onl/NSW/CHARGE/SIDEC"
         ## init algo
         super(NswCalibDbAlg,self).__init__(name,**kwargs)
-        ## CH: force specific tags for now, to remove later when stable in global tags
         ## data online
         if athenaCommonFlags.isOnline: 
-            addFolderWithTag(self, "MDT_ONL", "/MDT/Onl/MM/TIME/SIDEA"   , "MmTdoSideA-Const-3p73"  )
-            addFolderWithTag(self, "MDT_ONL", "/MDT/Onl/MM/TIME/SIDEC"   , "MmTdoSideC-Const-3p73"  )
-            addFolderWithTag(self, "MDT_ONL", "/MDT/Onl/MM/CHARGE/SIDEA" , "MmPdoSideA-Const-9p0"   )
-            addFolderWithTag(self, "MDT_ONL", "/MDT/Onl/MM/CHARGE/SIDEC" , "MmPdoSideC-Const-9p0"   )
-            addFolderWithTag(self, "TGC_ONL", "/TGC/Onl/NSW/TIME/SIDEA"  , "sTgcTdoSideA-Const-3p73")
-            addFolderWithTag(self, "TGC_ONL", "/TGC/Onl/NSW/TIME/SIDEC"  , "sTgcTdoSideC-Const-3p73")
-            addFolderWithTag(self, "TGC_ONL", "/TGC/Onl/NSW/CHARGE/SIDEA", "sTgcPdoSideA-Const-0p78")
-            addFolderWithTag(self, "TGC_ONL", "/TGC/Onl/NSW/CHARGE/SIDEC", "sTgcPdoSideC-Const-0p78")
+            addFolder(self, "MDT_ONL", "/MDT/Onl/MM/TIME/SIDEA"   )
+            addFolder(self, "MDT_ONL", "/MDT/Onl/MM/TIME/SIDEC"   )
+            addFolder(self, "MDT_ONL", "/MDT/Onl/MM/CHARGE/SIDEA" )
+            addFolder(self, "MDT_ONL", "/MDT/Onl/MM/CHARGE/SIDEC" )
+            addFolder(self, "TGC_ONL", "/TGC/Onl/NSW/TIME/SIDEA"  )
+            addFolder(self, "TGC_ONL", "/TGC/Onl/NSW/TIME/SIDEC"  )
+            addFolder(self, "TGC_ONL", "/TGC/Onl/NSW/CHARGE/SIDEA")
+            addFolder(self, "TGC_ONL", "/TGC/Onl/NSW/CHARGE/SIDEC")
             return
         ## data offline
-        addFolderWithTag(self, "MDT_OFL", "/MDT/MM/TIME/SIDEA"   , "MmTdoSideA-Const-3p73"  )
-        addFolderWithTag(self, "MDT_OFL", "/MDT/MM/TIME/SIDEC"   , "MmTdoSideC-Const-3p73"  )
-        addFolderWithTag(self, "MDT_OFL", "/MDT/MM/CHARGE/SIDEA" , "MmPdoSideA-Const-9p0"   )
-        addFolderWithTag(self, "MDT_OFL", "/MDT/MM/CHARGE/SIDEC" , "MmPdoSideC-Const-9p0"   )
-        addFolderWithTag(self, "TGC_OFL", "/TGC/NSW/TIME/SIDEA"  , "sTgcTdoSideA-Const-3p73")
-        addFolderWithTag(self, "TGC_OFL", "/TGC/NSW/TIME/SIDEC"  , "sTgcTdoSideC-Const-3p73")
-        addFolderWithTag(self, "TGC_OFL", "/TGC/NSW/CHARGE/SIDEA", "sTgcPdoSideA-Const-0p78")
-        addFolderWithTag(self, "TGC_OFL", "/TGC/NSW/CHARGE/SIDEC", "sTgcPdoSideC-Const-0p78")
+        addFolder(self, "MDT_OFL", "/MDT/MM/TIME/SIDEA"   )
+        addFolder(self, "MDT_OFL", "/MDT/MM/TIME/SIDEC"   )
+        addFolder(self, "MDT_OFL", "/MDT/MM/CHARGE/SIDEA" )
+        addFolder(self, "MDT_OFL", "/MDT/MM/CHARGE/SIDEC" )
+        addFolder(self, "TGC_OFL", "/TGC/NSW/TIME/SIDEA"  )
+        addFolder(self, "TGC_OFL", "/TGC/NSW/TIME/SIDEC"  )
+        addFolder(self, "TGC_OFL", "/TGC/NSW/CHARGE/SIDEA")
+        addFolder(self, "TGC_OFL", "/TGC/NSW/CHARGE/SIDEC")
         if not kwargs['isData']: ## MC
-            addFolderWithTag(self, "MDT_OFL", "/MDT/MM/THR/SIDEA" , "MmThrSideA-Const-55p4"  )
-            addFolderWithTag(self, "MDT_OFL", "/MDT/MM/THR/SIDEC" , "MmThrSideC-Const-55p4"  )
-            addFolderWithTag(self, "TGC_OFL", "/TGC/NSW/THR/SIDEA", "sTgcThrSideA-Const-52p7")
-            addFolderWithTag(self, "TGC_OFL", "/TGC/NSW/THR/SIDEC", "sTgcThrSideC-Const-52p7")
+            addFolder(self, "MDT_OFL", "/MDT/MM/THR/SIDEA" )
+            addFolder(self, "MDT_OFL", "/MDT/MM/THR/SIDEC" )
+            addFolder(self, "TGC_OFL", "/TGC/NSW/THR/SIDEA")
+            addFolder(self, "TGC_OFL", "/TGC/NSW/THR/SIDEC")
 
 class NswPassivationDbAlg(CfgMgr.NswPassivationDbAlg):
     def __init__(self,name="NswPassivationDbAlg",**kwargs):
         if athenaCommonFlags.isOnline: return
         if CommonGeometryFlags.Run in ["RUN1","RUN2"]: return
         super(NswPassivationDbAlg,self).__init__(name,**kwargs)
-        addFolderWithTag(self, "MDT_OFL", "/MDT/MM/PASSIVATION", "MmPassiv2022May19") ## force explicit tag for now, to be removed later once folder tag is resolved via global tag
+        addFolder(self, "MDT_OFL", "/MDT/MM/PASSIVATION")
 

@@ -5,6 +5,7 @@
 from AthenaConfiguration.ComponentAccumulator import ComponentAccumulator
 from AthenaConfiguration.ComponentFactory import CompFactory
 from IOVDbSvc.IOVDbSvcConfig import addFolders
+from AthenaConfiguration.Enums import LHCPeriod
 
 def MdtCondDbAlgCfg(flags, **kwargs):
     result  = ComponentAccumulator()
@@ -175,15 +176,17 @@ def NswCalibDbAlgCfg(flags, **kwargs):
 
         ## MM folders
         scheme  = "MDT_ONL"
-        #folders = ["/MDT/Onl/MM/TIME/SIDEA", "/MDT/Onl/MM/CHARGE/SIDEA", \
-        #           "/MDT/Onl/MM/TIME/SIDEC", "/MDT/Onl/MM/CHARGE/SIDEC"]
-        #result.merge( addFolders(flags, folders, detDb=scheme, className='CondAttrListCollection') )
         
-        # use specific folder tags for now
-        result.merge( addFolders(flags, ["/MDT/Onl/MM/TIME/SIDEA"  ], detDb=scheme, className='CondAttrListCollection' , tag="MmTdoSideA-Const-3p73") )
-        result.merge( addFolders(flags, ["/MDT/Onl/MM/TIME/SIDEC"  ], detDb=scheme, className='CondAttrListCollection' , tag="MmTdoSideC-Const-3p73") )
-        result.merge( addFolders(flags, ["/MDT/Onl/MM/CHARGE/SIDEA"], detDb=scheme, className='CondAttrListCollection' , tag="MmPdoSideA-Const-9p0" ) )
-        result.merge( addFolders(flags, ["/MDT/Onl/MM/CHARGE/SIDEC"], detDb=scheme, className='CondAttrListCollection' , tag="MmPdoSideC-Const-9p0" ) )
+        # use specific folder tags for Run 4
+        if flags.GeoModel.Run>=LHCPeriod.Run4:
+            result.merge( addFolders(flags, ["/MDT/Onl/MM/TIME/SIDEA"  ], detDb=scheme, className='CondAttrListCollection' , tag="MmTdoSideA-Const-3p73") )
+            result.merge( addFolders(flags, ["/MDT/Onl/MM/TIME/SIDEC"  ], detDb=scheme, className='CondAttrListCollection' , tag="MmTdoSideC-Const-3p73") )
+            result.merge( addFolders(flags, ["/MDT/Onl/MM/CHARGE/SIDEA"], detDb=scheme, className='CondAttrListCollection' , tag="MmPdoSideA-Const-9p0" ) )
+            result.merge( addFolders(flags, ["/MDT/Onl/MM/CHARGE/SIDEC"], detDb=scheme, className='CondAttrListCollection' , tag="MmPdoSideC-Const-9p0" ) )
+        else:
+            folders = ["/MDT/Onl/MM/TIME/SIDEA", "/MDT/Onl/MM/CHARGE/SIDEA", \
+                       "/MDT/Onl/MM/TIME/SIDEC", "/MDT/Onl/MM/CHARGE/SIDEC"]
+            result.merge( addFolders(flags, folders, detDb=scheme, className='CondAttrListCollection') )
 
         kwargs["ReadKey_MM_SIDEA_TDO"] = "/MDT/Onl/MM/TIME/SIDEA"
         kwargs["ReadKey_MM_SIDEC_TDO"] = "/MDT/Onl/MM/TIME/SIDEC"
@@ -193,15 +196,17 @@ def NswCalibDbAlgCfg(flags, **kwargs):
 
         ## sTGC folders
         scheme  = "TGC_ONL"
-        #folders = ["/TGC/Onl/NSW/TIME/SIDEA", "/TGC/Onl/NSW/CHARGE/SIDEA", \
-        #           "/TGC/Onl/NSW/TIME/SIDEC", "/TGC/Onl/NSW/CHARGE/SIDEC"]
-        #result.merge( addFolders(flags, folders , detDb=scheme, className='CondAttrListCollection') )
 
-        # use specific folder tags for now
-        result.merge( addFolders(flags, [ "/TGC/Onl/NSW/TIME/SIDEA"  ], detDb=scheme, className='CondAttrListCollection' , tag="sTgcTdoSideA-Const-3p73"))
-        result.merge( addFolders(flags, [ "/TGC/Onl/NSW/TIME/SIDEC"  ], detDb=scheme, className='CondAttrListCollection' , tag="sTgcTdoSideC-Const-3p73"))
-        result.merge( addFolders(flags, [ "/TGC/Onl/NSW/CHARGE/SIDEA"], detDb=scheme, className='CondAttrListCollection' , tag="sTgcPdoSideA-Const-0p78"))
-        result.merge( addFolders(flags, [ "/TGC/Onl/NSW/CHARGE/SIDEC"], detDb=scheme, className='CondAttrListCollection' , tag="sTgcPdoSideC-Const-0p78"))
+        # use specific folder tags for Run 4
+        if flags.GeoModel.Run>=LHCPeriod.Run4:
+            result.merge( addFolders(flags, [ "/TGC/Onl/NSW/TIME/SIDEA"  ], detDb=scheme, className='CondAttrListCollection' , tag="sTgcTdoSideA-Const-3p73"))
+            result.merge( addFolders(flags, [ "/TGC/Onl/NSW/TIME/SIDEC"  ], detDb=scheme, className='CondAttrListCollection' , tag="sTgcTdoSideC-Const-3p73"))
+            result.merge( addFolders(flags, [ "/TGC/Onl/NSW/CHARGE/SIDEA"], detDb=scheme, className='CondAttrListCollection' , tag="sTgcPdoSideA-Const-0p78-icpt0"))
+            result.merge( addFolders(flags, [ "/TGC/Onl/NSW/CHARGE/SIDEC"], detDb=scheme, className='CondAttrListCollection' , tag="sTgcPdoSideC-Const-0p78-icpt0"))
+        else:
+            folders = ["/TGC/Onl/NSW/TIME/SIDEA", "/TGC/Onl/NSW/CHARGE/SIDEA", \
+                       "/TGC/Onl/NSW/TIME/SIDEC", "/TGC/Onl/NSW/CHARGE/SIDEC"]
+            result.merge( addFolders(flags, folders , detDb=scheme, className='CondAttrListCollection') )
 
         kwargs["ReadKey_STGC_SIDEA_TDO"] = "/TGC/Onl/NSW/TIME/SIDEA"
         kwargs["ReadKey_STGC_SIDEC_TDO"] = "/TGC/Onl/NSW/TIME/SIDEC"
@@ -213,31 +218,35 @@ def NswCalibDbAlgCfg(flags, **kwargs):
 
         ## MM folders
         scheme  = "MDT_OFL"
-        #folders = ["/MDT/MM/TIME/SIDEA" , "/MDT/MM/CHARGE/SIDEA" , "/MDT/MM/THR/SIDEA" , \
-        #           "/MDT/MM/TIME/SIDEC" , "/MDT/MM/CHARGE/SIDEC" , "/MDT/MM/THR/SIDEC" ]
-        #result.merge( addFolders(flags, folders, detDb=scheme, className='CondAttrListCollection') )
         
-        # use specific folder tags for now
-        result.merge( addFolders(flags, ["/MDT/MM/TIME/SIDEA"  ], detDb=scheme, className='CondAttrListCollection' , tag="MmTdoSideA-Const-3p73") )
-        result.merge( addFolders(flags, ["/MDT/MM/TIME/SIDEC"  ], detDb=scheme, className='CondAttrListCollection' , tag="MmTdoSideC-Const-3p73") )
-        result.merge( addFolders(flags, ["/MDT/MM/CHARGE/SIDEA"], detDb=scheme, className='CondAttrListCollection' , tag="MmPdoSideA-Const-9p0" ) )
-        result.merge( addFolders(flags, ["/MDT/MM/CHARGE/SIDEC"], detDb=scheme, className='CondAttrListCollection' , tag="MmPdoSideC-Const-9p0" ) )
-        result.merge( addFolders(flags, ["/MDT/MM/THR/SIDEA"   ], detDb=scheme, className='CondAttrListCollection' , tag="MmThrSideA-Const-55p4") )
-        result.merge( addFolders(flags, ["/MDT/MM/THR/SIDEC"   ], detDb=scheme, className='CondAttrListCollection' , tag="MmThrSideC-Const-55p4") )
+        # use specific folder tags for Run 4
+        if flags.GeoModel.Run>=LHCPeriod.Run4:
+            result.merge( addFolders(flags, ["/MDT/MM/TIME/SIDEA"  ], detDb=scheme, className='CondAttrListCollection' , tag="MmTdoSideA-Const-3p73") )
+            result.merge( addFolders(flags, ["/MDT/MM/TIME/SIDEC"  ], detDb=scheme, className='CondAttrListCollection' , tag="MmTdoSideC-Const-3p73") )
+            result.merge( addFolders(flags, ["/MDT/MM/CHARGE/SIDEA"], detDb=scheme, className='CondAttrListCollection' , tag="MmPdoSideA-Const-9p0" ) )
+            result.merge( addFolders(flags, ["/MDT/MM/CHARGE/SIDEC"], detDb=scheme, className='CondAttrListCollection' , tag="MmPdoSideC-Const-9p0" ) )
+            result.merge( addFolders(flags, ["/MDT/MM/THR/SIDEA"   ], detDb=scheme, className='CondAttrListCollection' , tag="MmThrSideA-Const-55p4") )
+            result.merge( addFolders(flags, ["/MDT/MM/THR/SIDEC"   ], detDb=scheme, className='CondAttrListCollection' , tag="MmThrSideC-Const-55p4") )
+        else:
+            folders = ["/MDT/MM/TIME/SIDEA" , "/MDT/MM/CHARGE/SIDEA" , "/MDT/MM/THR/SIDEA" , \
+                       "/MDT/MM/TIME/SIDEC" , "/MDT/MM/CHARGE/SIDEC" , "/MDT/MM/THR/SIDEC" ]
+            result.merge( addFolders(flags, folders, detDb=scheme, className='CondAttrListCollection') )
 
         ## sTGC folders
         scheme  = "TGC_OFL"
-        #folders = ["/TGC/NSW/TIME/SIDEA", "/TGC/NSW/CHARGE/SIDEA", "/TGC/NSW/THR/SIDEA", \
-        #           "/TGC/NSW/TIME/SIDEC", "/TGC/NSW/CHARGE/SIDEC", "/TGC/NSW/THR/SIDEC"]
-        #result.merge( addFolders(flags, folders , detDb=scheme, className='CondAttrListCollection') )
 
-        # use specific folder tags for now
-        result.merge( addFolders(flags, [ "/TGC/NSW/TIME/SIDEA"  ], detDb=scheme, className='CondAttrListCollection' , tag="sTgcTdoSideA-Const-3p73"))
-        result.merge( addFolders(flags, [ "/TGC/NSW/TIME/SIDEC"  ], detDb=scheme, className='CondAttrListCollection' , tag="sTgcTdoSideC-Const-3p73"))
-        result.merge( addFolders(flags, [ "/TGC/NSW/CHARGE/SIDEA"], detDb=scheme, className='CondAttrListCollection' , tag="sTgcPdoSideA-Const-0p78"))
-        result.merge( addFolders(flags, [ "/TGC/NSW/CHARGE/SIDEC"], detDb=scheme, className='CondAttrListCollection' , tag="sTgcPdoSideC-Const-0p78"))
-        result.merge( addFolders(flags, [ "/TGC/NSW/THR/SIDEA"   ], detDb=scheme, className='CondAttrListCollection' , tag="sTgcThrSideA-Const-52p7"))
-        result.merge( addFolders(flags, [ "/TGC/NSW/THR/SIDEC"   ], detDb=scheme, className='CondAttrListCollection' , tag="sTgcThrSideC-Const-52p7"))
+        # use specific folder tags for Run 4
+        if flags.GeoModel.Run>=LHCPeriod.Run4:
+            result.merge( addFolders(flags, [ "/TGC/NSW/TIME/SIDEA"  ], detDb=scheme, className='CondAttrListCollection' , tag="sTgcTdoSideA-Const-3p73"))
+            result.merge( addFolders(flags, [ "/TGC/NSW/TIME/SIDEC"  ], detDb=scheme, className='CondAttrListCollection' , tag="sTgcTdoSideC-Const-3p73"))
+            result.merge( addFolders(flags, [ "/TGC/NSW/CHARGE/SIDEA"], detDb=scheme, className='CondAttrListCollection' , tag="sTgcPdoSideA-Const-0p78-icpt0"))
+            result.merge( addFolders(flags, [ "/TGC/NSW/CHARGE/SIDEC"], detDb=scheme, className='CondAttrListCollection' , tag="sTgcPdoSideC-Const-0p78-icpt0"))
+            result.merge( addFolders(flags, [ "/TGC/NSW/THR/SIDEA"   ], detDb=scheme, className='CondAttrListCollection' , tag="sTgcThrSideA-Const-15p0"))
+            result.merge( addFolders(flags, [ "/TGC/NSW/THR/SIDEC"   ], detDb=scheme, className='CondAttrListCollection' , tag="sTgcThrSideC-Const-15p0"))
+        else:
+            folders = ["/TGC/NSW/TIME/SIDEA", "/TGC/NSW/CHARGE/SIDEA", "/TGC/NSW/THR/SIDEA", \
+                       "/TGC/NSW/TIME/SIDEC", "/TGC/NSW/CHARGE/SIDEC", "/TGC/NSW/THR/SIDEC"]
+            result.merge( addFolders(flags, folders , detDb=scheme, className='CondAttrListCollection') )
 
     ## offline
     else:
@@ -245,34 +254,42 @@ def NswCalibDbAlgCfg(flags, **kwargs):
 
         ## MM folders
         scheme  = "MDT_OFL"
-        #folders = ["/MDT/MM/TIME/SIDEA", "/MDT/MM/CHARGE/SIDEA", \
-        #           "/MDT/MM/TIME/SIDEC", "/MDT/MM/CHARGE/SIDEC"]
-        #result.merge( addFolders(flags, folders, detDb=scheme, className='CondAttrListCollection') )
         
-        # use specific folder tags for now
-        result.merge( addFolders(flags, ["/MDT/MM/TIME/SIDEA"  ], detDb=scheme, className='CondAttrListCollection' , tag="MmTdoSideA-Const-3p73") )
-        result.merge( addFolders(flags, ["/MDT/MM/TIME/SIDEC"  ], detDb=scheme, className='CondAttrListCollection' , tag="MmTdoSideC-Const-3p73") )
-        result.merge( addFolders(flags, ["/MDT/MM/CHARGE/SIDEA"], detDb=scheme, className='CondAttrListCollection' , tag="MmPdoSideA-Const-9p0" ) )
-        result.merge( addFolders(flags, ["/MDT/MM/CHARGE/SIDEC"], detDb=scheme, className='CondAttrListCollection' , tag="MmPdoSideC-Const-9p0" ) )
+        # use specific folder tags for Run 4
+        if flags.GeoModel.Run>=LHCPeriod.Run4:
+            result.merge( addFolders(flags, ["/MDT/MM/TIME/SIDEA"  ], detDb=scheme, className='CondAttrListCollection' , tag="MmTdoSideA-Const-3p73") )
+            result.merge( addFolders(flags, ["/MDT/MM/TIME/SIDEC"  ], detDb=scheme, className='CondAttrListCollection' , tag="MmTdoSideC-Const-3p73") )
+            result.merge( addFolders(flags, ["/MDT/MM/CHARGE/SIDEA"], detDb=scheme, className='CondAttrListCollection' , tag="MmPdoSideA-Const-9p0" ) )
+            result.merge( addFolders(flags, ["/MDT/MM/CHARGE/SIDEC"], detDb=scheme, className='CondAttrListCollection' , tag="MmPdoSideC-Const-9p0" ) )
+        else:
+            folders = ["/MDT/MM/TIME/SIDEA", "/MDT/MM/CHARGE/SIDEA", \
+                       "/MDT/MM/TIME/SIDEC", "/MDT/MM/CHARGE/SIDEC"]
+            result.merge( addFolders(flags, folders, detDb=scheme, className='CondAttrListCollection') )
        
         ## sTGC folders
         scheme  = "TGC_OFL"
-        #folders = ["/TGC/NSW/TIME/SIDEA", "/TGC/NSW/CHARGE/SIDEA", \
-        #           "/TGC/NSW/TIME/SIDEC", "/TGC/NSW/CHARGE/SIDEC"]
-        #result.merge( addFolders(flags, folders , detDb=scheme, className='CondAttrListCollection') )
 
-        # use specific folder tags for now
-        result.merge( addFolders(flags, [ "/TGC/NSW/TIME/SIDEA"  ], detDb=scheme, className='CondAttrListCollection' , tag="sTgcTdoSideA-Const-3p73"))
-        result.merge( addFolders(flags, [ "/TGC/NSW/TIME/SIDEC"  ], detDb=scheme, className='CondAttrListCollection' , tag="sTgcTdoSideC-Const-3p73"))
-        result.merge( addFolders(flags, [ "/TGC/NSW/CHARGE/SIDEA"], detDb=scheme, className='CondAttrListCollection' , tag="sTgcPdoSideA-Const-0p78"))
-        result.merge( addFolders(flags, [ "/TGC/NSW/CHARGE/SIDEC"], detDb=scheme, className='CondAttrListCollection' , tag="sTgcPdoSideC-Const-0p78"))
+        # use specific folder tags for Run 4
+        if flags.GeoModel.Run>=LHCPeriod.Run4:
+            result.merge( addFolders(flags, [ "/TGC/NSW/TIME/SIDEA"  ], detDb=scheme, className='CondAttrListCollection' , tag="sTgcTdoSideA-Const-3p73"))
+            result.merge( addFolders(flags, [ "/TGC/NSW/TIME/SIDEC"  ], detDb=scheme, className='CondAttrListCollection' , tag="sTgcTdoSideC-Const-3p73"))
+            result.merge( addFolders(flags, [ "/TGC/NSW/CHARGE/SIDEA"], detDb=scheme, className='CondAttrListCollection' , tag="sTgcPdoSideA-Const-0p78-icpt0"))
+            result.merge( addFolders(flags, [ "/TGC/NSW/CHARGE/SIDEC"], detDb=scheme, className='CondAttrListCollection' , tag="sTgcPdoSideC-Const-0p78-icpt0"))
+        else:
+            folders = ["/TGC/NSW/TIME/SIDEA", "/TGC/NSW/CHARGE/SIDEA", \
+                       "/TGC/NSW/TIME/SIDEC", "/TGC/NSW/CHARGE/SIDEC"]
+            result.merge( addFolders(flags, folders , detDb=scheme, className='CondAttrListCollection') )
     
     result.addCondAlgo(CompFactory.NswCalibDbAlg(**kwargs))
     return result
 
 def NswPassivationDbAlgCfg(flags, **kwargs):
     acc = ComponentAccumulator()
-    acc.merge(addFolders(flags, "/MDT/MM/PASSIVATION", "MDT_OFL", className="CondAttrListCollection", tag="MmPassiv2022May19")) ## force explicit tag for now, to be removed later once folder tag is resolved via global tag
+    # use specific folder tags for Run 4
+    if flags.GeoModel.Run>=LHCPeriod.Run4:
+        acc.merge(addFolders(flags, "/MDT/MM/PASSIVATION", "MDT_OFL", className="CondAttrListCollection", tag="MmPassiv2022May19"))
+    else:
+        acc.merge(addFolders(flags, "/MDT/MM/PASSIVATION", "MDT_OFL", className="CondAttrListCollection"))
     alg = CompFactory.NswPassivationDbAlg("NswPassivationDbAlg", **kwargs)
     acc.addCondAlgo(alg)
     return acc
