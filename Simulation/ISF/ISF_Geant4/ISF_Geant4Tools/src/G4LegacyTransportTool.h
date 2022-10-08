@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2020 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef ISF_GEANT4TOOLS_G4LEGACYTRANSPORTTOOL_H
@@ -77,9 +77,9 @@ namespace iGeant4
     /// This is done (for now) because we get multiple tool instances in hive.
     void finalizeOnce();
 
-    virtual StatusCode simulate( const ISF::ISFParticle& isp, ISF::ISFParticleContainer& secondaries, McEventCollection* mcEventCollection ) const override;
+    virtual StatusCode simulate( const ISF::ISFParticle& isp, ISF::ISFParticleContainer& secondaries, McEventCollection* mcEventCollection ) override;
 
-    virtual StatusCode simulateVector( const ISF::ConstISFParticleVector& particles, ISF::ISFParticleContainer& secondaries, McEventCollection* mcEventCollection ) const override;
+    virtual StatusCode simulateVector( const ISF::ConstISFParticleVector& particles, ISF::ISFParticleContainer& secondaries, McEventCollection* mcEventCollection ) override;
 
     virtual StatusCode setupEvent(const EventContext&) override;
 
