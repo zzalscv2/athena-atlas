@@ -10,7 +10,7 @@ from ActsGeometry.ActsGeometryConfig import ActsATLASConverterToolCfg
         
 # ACTS algorithm using Athena objects upstream
 def ActsTrkITkPixelSeedingFromAthenaCfg(flags,
-                                        name: str = 'ActsTrkPixelSeedingAlgorithm',
+                                        name: str = 'ActsTrkPixelSeedingAlg',
                                         **kwargs):
     acc = ComponentAccumulator()
 
@@ -38,12 +38,12 @@ def ActsTrkITkPixelSeedingFromAthenaCfg(flags,
     kwargs.setdefault('UsePixel', True)
     kwargs.setdefault('DetectorElements', 'ITkPixelDetectorElementCollection')
 
-    acc.addEventAlgo(CompFactory.ActsTrk.SeedingFromAthenaAlgorithm(name, **kwargs))
+    acc.addEventAlgo(CompFactory.ActsTrk.SeedingFromAthenaAlg(name, **kwargs))
     return acc
 
 
 def ActsTrkITkStripSeedingFromAthenaCfg(flags,
-                                        name: str = 'ActsTrkStripSeedingAlgorithm',
+                                        name: str = 'ActsTrkStripSeedingAlg',
                                         **kwargs):
     acc = ComponentAccumulator()
 
@@ -71,7 +71,7 @@ def ActsTrkITkStripSeedingFromAthenaCfg(flags,
     kwargs.setdefault('UsePixel', False)
     kwargs.setdefault('DetectorElements', 'ITkStripDetectorElementCollection')
 
-    acc.addEventAlgo(CompFactory.ActsTrk.SeedingFromAthenaAlgorithm(name, **kwargs))
+    acc.addEventAlgo(CompFactory.ActsTrk.SeedingFromAthenaAlg(name, **kwargs))
     return acc
 
 
@@ -86,7 +86,7 @@ def ActsTrkSeedingFromAthenaCfg(flags):
 
 # ACTS only algorithm
 def ActsTrkITkPixelSeedingCfg(flags,
-                              name: str = 'ActsTrkPixelSeedingAlgorithm',
+                              name: str = 'ActsTrkPixelSeedingAlg',
                               **kwargs):
     acc = ComponentAccumulator()
 
@@ -101,11 +101,11 @@ def ActsTrkITkPixelSeedingCfg(flags,
     kwargs.setdefault('OutputSeeds', 'ITkPixelSeeds')
     kwargs.setdefault('SeedTool', seedTool)
 
-    acc.addEventAlgo(CompFactory.ActsTrk.SeedingAlgorithm(name, **kwargs))
+    acc.addEventAlgo(CompFactory.ActsTrk.SeedingAlg(name, **kwargs))
     return acc
 
 def ActsTrkITkStripSeedingCfg(flags,
-                              name: str = 'ActsTrkStripSeedingAlgorithm',
+                              name: str = 'ActsTrkStripSeedingAlg',
                               **kwargs):
     acc = ComponentAccumulator()
 
@@ -120,7 +120,7 @@ def ActsTrkITkStripSeedingCfg(flags,
     kwargs.setdefault('OutputSeeds', 'ITkStripSeeds')
     kwargs.setdefault('SeedTool', seedTool)
 
-    acc.addEventAlgo(CompFactory.ActsTrk.SeedingAlgorithm(name, **kwargs))
+    acc.addEventAlgo(CompFactory.ActsTrk.SeedingAlg(name, **kwargs))
     return acc
 
 def ActsTrkSeedingCfg(flags):
