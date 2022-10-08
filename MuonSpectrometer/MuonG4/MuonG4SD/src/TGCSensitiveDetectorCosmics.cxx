@@ -77,7 +77,7 @@ G4bool TGCSensitiveDetectorCosmics::ProcessHits(G4Step* aStep,G4TouchableHistory
     Amg::Vector3D globVrtxFix = Amg::Hep3VectorToEigen( globVrtx );
     double AlphaGlobal = -1*(globVrtxFix[0]*m_mom[0] + globVrtxFix[1]*m_mom[1] + globVrtxFix[2]*m_mom[2])/(m_mom[0]*m_mom[0] + m_mom[1]*m_mom[1] + m_mom[2]*m_mom[2]);
     m_globH = globVrtxFix + AlphaGlobal*m_mom;
-    G4cout << "COSMICS MAIN TRACK IN THE MDT!" << G4endl;
+    // G4cout << "COSMICS MAIN TRACK IN THE TGC!" << G4endl;
   }
   double globalDist = sqrt((m_globH[0] - globVrtx[0])*(m_globH[0] - globVrtx[0]) +
                            (m_globH[1] - globVrtx[1])*(m_globH[1] - globVrtx[1]) +
