@@ -24,21 +24,21 @@
 
 namespace ActsTrk {
 
-    /// @class PixelSpacePointFormationAlgorithm
-    /// This version of PixelSpacePointFormationAlgorithm uses xAOD pixel clusters
+    /// @class PixelSpacePointFormationAlg
+    /// This version of PixelSpacePointFormationAlg uses xAOD pixel clusters
     /// to find space points in the ITk pixeldetectors.
     /// Pixel space points are obtained directly from the clusters,
     /// with needed evaluation of the space point covariance terms
     /// Space points are then recorded to storegate as ActsTrk::SpacePoint
     /// into an ActsTrk::SpacePointContainer.
 
-    class PixelSpacePointFormationAlgorithm : public AthReentrantAlgorithm {
+    class PixelSpacePointFormationAlg : public AthReentrantAlgorithm {
     public:
         /// @name AthReentrantAlgorithm methods
         //@{
-        PixelSpacePointFormationAlgorithm(const std::string& name,
-                                     ISvcLocator* pSvcLocator);
-        virtual ~PixelSpacePointFormationAlgorithm() = default;
+        PixelSpacePointFormationAlg(const std::string& name,
+				    ISvcLocator* pSvcLocator);
+        virtual ~PixelSpacePointFormationAlg() = default;
         virtual StatusCode initialize() override;
         virtual StatusCode execute (const EventContext& ctx) const override;
         //@}
@@ -46,9 +46,9 @@ namespace ActsTrk {
     private:
         /// @name Disallow constructor without parameters, copy constructor, assignment operator
         //@{
-        PixelSpacePointFormationAlgorithm() = delete;
-        PixelSpacePointFormationAlgorithm(const PixelSpacePointFormationAlgorithm&) = delete;
-        PixelSpacePointFormationAlgorithm &operator=(const PixelSpacePointFormationAlgorithm&) = delete;
+        PixelSpacePointFormationAlg() = delete;
+        PixelSpacePointFormationAlg(const PixelSpacePointFormationAlg&) = delete;
+        PixelSpacePointFormationAlg &operator=(const PixelSpacePointFormationAlg&) = delete;
         //@}
 
         /// @name Input data using SG::ReadHandleKey

@@ -26,8 +26,8 @@
 
 namespace ActsTrk {
 
-    /// @class StripSpacePointFormationAlgorithm
-    /// This version of StripSpacePointFormationAlgorithm uses xAOD strip clusters
+    /// @class StripSpacePointFormationAlg
+    /// This version of StripSpacePointFormationAlg uses xAOD strip clusters
     /// to find space points in the ITk strip detectors.
     /// Strip space points are made by combining clusters from pairs of
     /// overlapping detectors. The access to overlapping detector elements is
@@ -39,13 +39,13 @@ namespace ActsTrk {
     /// Space points are then recorded to storegate as ActsTrk::SpacePoint
     /// into an ActsTrk::SpacePointContainer.
 
-    class StripSpacePointFormationAlgorithm : public AthReentrantAlgorithm {
+    class StripSpacePointFormationAlg : public AthReentrantAlgorithm {
     public:
         /// @name AthReentrantAlgorithm methods
         //@{
-        StripSpacePointFormationAlgorithm(const std::string& name,
-                                     ISvcLocator* pSvcLocator);
-        virtual ~StripSpacePointFormationAlgorithm() = default;
+        StripSpacePointFormationAlg(const std::string& name,
+				    ISvcLocator* pSvcLocator);
+        virtual ~StripSpacePointFormationAlg() = default;
         virtual StatusCode initialize() override;
         virtual StatusCode execute (const EventContext& ctx) const override;
         //@}
@@ -53,9 +53,9 @@ namespace ActsTrk {
     private:
         /// @name Disallow constructor without parameters, copy constructor, assignment operator
         //@{
-        StripSpacePointFormationAlgorithm() = delete;
-        StripSpacePointFormationAlgorithm(const StripSpacePointFormationAlgorithm&) = delete;
-        StripSpacePointFormationAlgorithm &operator=(const StripSpacePointFormationAlgorithm&) = delete;
+        StripSpacePointFormationAlg() = delete;
+        StripSpacePointFormationAlg(const StripSpacePointFormationAlg&) = delete;
+        StripSpacePointFormationAlg &operator=(const StripSpacePointFormationAlg&) = delete;
         //@}
 
         /// @name Input data using SG::ReadHandleKey

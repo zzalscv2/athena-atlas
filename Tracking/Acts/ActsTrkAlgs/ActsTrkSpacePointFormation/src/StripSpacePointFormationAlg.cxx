@@ -2,7 +2,7 @@
   Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
 */
 
-#include "StripSpacePointFormationAlgorithm.h"
+#include "StripSpacePointFormationAlg.h"
 
 #include "InDetReadoutGeometry/SiDetectorElement.h"
 
@@ -13,15 +13,15 @@
 namespace ActsTrk {
 
   //------------------------------------------------------------------------
-  StripSpacePointFormationAlgorithm::StripSpacePointFormationAlgorithm(const std::string& name,
-                                                                       ISvcLocator* pSvcLocator)
+  StripSpacePointFormationAlg::StripSpacePointFormationAlg(const std::string& name,
+							   ISvcLocator* pSvcLocator)
     : AthReentrantAlgorithm(name, pSvcLocator)
     {}
 
   //-----------------------------------------------------------------------
-  StatusCode StripSpacePointFormationAlgorithm::initialize()
+  StatusCode StripSpacePointFormationAlg::initialize()
   {
-    ATH_MSG_DEBUG( "StripSpacePointFormationAlgorithm::initialize()" );
+    ATH_MSG_DEBUG( "Initializing " << name() << " ... " );
 
     ATH_CHECK( m_stripClusterContainerKey.initialize() );
     ATH_CHECK( m_stripSpacePointContainerKey.initialize() );
@@ -42,7 +42,7 @@ namespace ActsTrk {
   }
 
   //-------------------------------------------------------------------------
-  StatusCode StripSpacePointFormationAlgorithm::execute (const EventContext& ctx) const
+  StatusCode StripSpacePointFormationAlg::execute (const EventContext& ctx) const
   {
     auto nReceivedSPsStrip = Monitored::Scalar<int>( "numStripSpacePoints" , 0 );
     auto nReceivedSPsStripOverlap = Monitored::Scalar<int>( "numStripOverlapSpacePoints" , 0 );

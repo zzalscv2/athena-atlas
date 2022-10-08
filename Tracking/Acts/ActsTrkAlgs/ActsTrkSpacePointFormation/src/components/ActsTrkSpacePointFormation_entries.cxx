@@ -2,8 +2,8 @@
   Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
 */
 
-#include "src/PixelSpacePointFormationAlgorithm.h"
-#include "src/StripSpacePointFormationAlgorithm.h"
+#include "src/PixelSpacePointFormationAlg.h"
+#include "src/StripSpacePointFormationAlg.h"
 
-DECLARE_COMPONENT( ActsTrk::PixelSpacePointFormationAlgorithm )
-DECLARE_COMPONENT( ActsTrk::StripSpacePointFormationAlgorithm )
+DECLARE_COMPONENT( ActsTrk::PixelSpacePointFormationAlg )
+DECLARE_COMPONENT( ActsTrk::StripSpacePointFormationAlg )
