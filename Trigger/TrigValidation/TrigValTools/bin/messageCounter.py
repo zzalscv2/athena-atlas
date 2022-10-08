@@ -1,6 +1,6 @@
 #!/usr/bin/env python
 #
-# Copyright (C) 2002-2020 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
 #
 
 '''
@@ -31,7 +31,9 @@ default_ignore_patterns = [
     r'Domain.*INFO.*DbDatabase',
     r'INFO Database being retired',
     r'StorageSvc.*INFO Building shape according to reflection information',
+    r'LArRawSCDataReadingAlg.LArLATOMEDecoder.*INFO.*bad quality bit for SC',
 ]
+# LArLATOMEDecoder INFO messages temporarily ignored for !56994, drop when issue fixed
 
 
 def get_parser():

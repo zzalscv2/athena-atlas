@@ -19,32 +19,59 @@ from EventBookkeeperTools.EventBookkeeperToolsConfig import CutFlowSvcCfg, CutFl
 parser = ArgumentParser(prog='test_CutFlowSvc')
 parser.add_argument('input', type=str, nargs='?',
                     help='Specify the input file')
-parser.add_argument('-t', '--threads', default=2, type=int,
+parser.add_argument("-d", "--data", default=False,
+                    action="store_true", help="Run with data")
+parser.add_argument('-t', '--threads', default=0, type=int,
                     help='The number of concurrent threads to run. 0 uses serial Athena.')
+parser.add_argument('-p', '--processes', default=0, type=int,
+                    help='The number of concurrent processes to run. 0 disables Athena MP.')
+parser.add_argument("--sharedWriter", default=False,
+                    action="store_true", help="Run with shared writer")
 args = parser.parse_args()
 
 if args.input:
-    ConfigFlags.Input.Files = [args.input]
+  ConfigFlags.Input.Files = [args.input]
+elif args.data:
+  ConfigFlags.Input.Files = defaultTestFiles.RAW
 else:
-    ConfigFlags.Input.Files = defaultTestFiles.AOD_MC
-ConfigFlags.Output.AODFileName = "testAOD.pool.root"
+  ConfigFlags.Input.Files = defaultTestFiles.AOD_MC
 
 # Flags relating to multithreaded execution
 threads = args.threads
-maxEvents = 10
+procs = args.processes
+maxEvents = 200
 ConfigFlags.Concurrency.NumThreads = threads
+ConfigFlags.Concurrency.NumProcs = procs
 if threads > 0:
-  maxEvents = 10 * threads
+  maxEvents = max(maxEvents, 10 * threads)
   ConfigFlags.Scheduler.ShowDataDeps = True
   ConfigFlags.Scheduler.ShowDataFlow = True
   ConfigFlags.Scheduler.ShowControlFlow = True
   ConfigFlags.Concurrency.NumConcurrentEvents = threads
+suffix = f"_test_{threads}_{procs}"
+if procs > 0:
+  maxEvents = max(maxEvents, 10 * procs)
+  if args.data:
+    suffix += "_data"
+  if args.sharedWriter:
+    maxEvents *= 5
+    ConfigFlags.MP.UseSharedWriter = True
+    suffix += "_sharedWriter"
+  ConfigFlags.MP.WorkerTopDir = f"athenaMP_workers{suffix}"
+  ConfigFlags.MP.EventOrdersFile = f"athenamp_eventorders{suffix}.txt"
+
+ConfigFlags.Output.AODFileName = f"testAOD{suffix}.pool.root"
 
 ConfigFlags.lock()
 
 # Setup service
 acc = MainServicesCfg(ConfigFlags)
-acc.merge(PoolReadCfg(ConfigFlags))
+from AthenaConfiguration.Enums import Format
+if ConfigFlags.Input.Format is Format.BS:
+  from ByteStreamCnvSvc.ByteStreamConfig import ByteStreamReadCfg
+  acc.merge(ByteStreamReadCfg(ConfigFlags))
+else:
+  acc.merge(PoolReadCfg(ConfigFlags))
 
 if 'EventInfo' not in ConfigFlags.Input.Collections:
   from xAODEventInfoCnv.xAODEventInfoCnvConfig import EventInfoCnvAlgCfg

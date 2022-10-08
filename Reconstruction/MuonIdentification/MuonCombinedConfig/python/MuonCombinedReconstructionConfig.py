@@ -364,7 +364,8 @@ def MuonSegContainerMergerAlgCfg(flags, name = "MuonSegContainerMergerAlg", **kw
         if flags.MuonCombined.doStatisticalCombination: tag_maps+=["stacoTagMap_EMEO"]
         if flags.MuonCombined.doCombinedFit: tag_maps+=["muidcoTagMap_EMEO"]
         muon_maps += ["MuonCandidates_EMEO"]
-    if flags.Detector.GeometryID and flags.InDet.Tracking.doR3LargeD0:
+    if (flags.Detector.GeometryID and flags.InDet.Tracking.doR3LargeD0) \
+   or (flags.Detector.GeometryITk and flags.ITk.Tracking.doLargeD0):
          if flags.MuonCombined.doMuGirl: tag_maps+=["MuGirlMap_LRT"]
          if flags.MuonCombined.doStatisticalCombination: tag_maps+=["stacoTagMap_LRT"]
          if flags.MuonCombined.doCombinedFit: tag_maps+=["muidcoTagMap_LRT"]
@@ -401,7 +402,8 @@ def GetCombinedTrkContainers(flags):
                     "ExtrapolatedStauTrackParticles"]
         track_coll += ["CombinedStauTracks",
                        "ExtrapolatedStauTracks"]
-    if flags.Detector.GeometryID and flags.InDet.Tracking.doR3LargeD0:
+    if (flags.Detector.GeometryID and flags.InDet.Tracking.doR3LargeD0) \
+   or (flags.Detector.GeometryITk and flags.ITk.Tracking.doLargeD0):
         tp_coll += ["CombinedMuonsLRTTrackParticles",
                     "ExtraPolatedMuonsLRTTrackParticles",
                     "MSOnlyExtraPolatedMuonsLRTTrackParticles"]
@@ -434,27 +436,41 @@ def MuonPrecisionLayerDecorAlgCfg(flags, name="MuonPrecisionLayerDecorAlg", **kw
 
 def MuonDecorationAlgsCfg(flags):
     result = ComponentAccumulator()
-    trk_cols = GetCombinedTrkContainers(flags)[0]
+    trk_cols = ["ExtrapolatedMuonTrackParticles", 
+                "CombinedMuonTrackParticles", 
+                "MSOnlyExtrapolatedMuonTrackParticles" ]
+    stau_coll = ["CombinedStauTrackParticles", "ExtrapolatedStauTrackParticles"]  if flags.MuonCombined.doMuGirl and flags.MuonCombined.doMuGirlLowBeta else []
+    track_coll_lrt = ["CombinedMuonsLRTTrackParticles", 
+                          "ExtraPolatedMuonsLRTTrackParticles",
+                          "MSOnlyExtraPolatedMuonsLRTTrackParticles"] if (flags.Detector.GeometryID and flags.InDet.Tracking.doR3LargeD0) \
+   or (flags.Detector.GeometryITk and flags.ITk.Tracking.doLargeD0) else []
 
     # Decorate the muon tracks
-    for coll in trk_cols:
+    for coll in trk_cols + stau_coll + track_coll_lrt:
         result.merge(MuonTrkIDMSScatterDecorAlgCfg(flags, "MuonCombIDMSScatterDecorAlg"+coll,
                                                    TrackContainer=coll))
 
         result.merge(MuonTrkAEOTDecorAlgCfg(flags, "MuonCombAEOTDecorAlg"+coll,
                                             TrackContainer=coll))
     # Proceed with the precision layer decoration
+    prec_trk_cols = ["ExtrapolatedMuonTrackParticles", 
+                "CombinedMuonTrackParticles", 
+                "MSOnlyExtrapolatedMuonTrackParticles" ]
     result.merge(MuonPrecisionLayerDecorAlgCfg(flags, "MuonCombPrecisionLayerDecorAlg",
                                                MuonContainer="Muons",
-                                               TrackContainer=trk_cols))
+                                               TrackContainer=prec_trk_cols))
     if flags.MuonCombined.doMuGirl and flags.MuonCombined.doMuGirlLowBeta:
+
         result.merge(MuonPrecisionLayerDecorAlgCfg(flags, "MuonCombStauPrecisionLayerDecorAlg",
                                                    MuonContainer="Staus",
-                                                   TrackContainer=trk_cols))
-    if flags.Detector.GeometryID and flags.InDet.Tracking.doR3LargeD0:
+                                                   TrackContainer=stau_coll))
+    if (flags.Detector.GeometryID and flags.InDet.Tracking.doR3LargeD0) \
+   or (flags.Detector.GeometryITk and flags.ITk.Tracking.doLargeD0):
+
+
         result.merge(MuonPrecisionLayerDecorAlgCfg(flags, "MuonCombLRTPrecisionLayerDecorAlg",
                                                    MuonContainer="MuonsLRT",
-                                                   TrackContainer=trk_cols))
+                                                   TrackContainer=track_coll_lrt))
 
     return result
 
@@ -552,6 +568,7 @@ def CombinedMuonOutputCfg(flags):
     aod_items += ["xAOD::TrackParticleContainer#"+col for col in particle_col]
     aod_items += ["xAOD::TrackParticleAuxContainer#"+col +
                   "Aux." + excludedAuxData for col in particle_col]
+
     aod_items += ["xAOD::MuonContainer#Muons"]
     aod_items += ["xAOD::MuonContainer#MuonsLRT"]
 
@@ -560,7 +577,8 @@ def CombinedMuonOutputCfg(flags):
                  "DFCommonMuonsLoose", "InnerDetectorPt", "MuonSpectrometerPt"]    
     #Remove GlobalFELinks and related variables - these are links between FlowElement (FE) containers created in jet finding and muons. 
     #Since these transient FE containers are not in the ESD/AOD, we should not write out these links.
-    gpf_vars=[ "chargedGlobalFELinks", "neutralGlobalFELinks", "muon_efrac_matched_GlobalFE", "deltaR_muon_clus_GlobalFEalg"]
+    gpf_vars = [ "chargedGlobalFELinks", "neutralGlobalFELinks", "deltaR_muon_clus_GlobalFEalg", "muon_efrac_matched_GlobalFE"]
+
     excludedMuonAuxData = ".-"+".-".join(iso_vars+wp_decors+gpf_vars)
 
     aod_items += ["xAOD::MuonAuxContainer#MuonsAux" + excludedMuonAuxData]
@@ -568,13 +586,13 @@ def CombinedMuonOutputCfg(flags):
 
     # stau
     aod_items += ["xAOD::MuonContainer#Staus"]
-    aod_items += ["xAOD::MuonAuxContainer#StausAux." + excludedAuxData]
+    aod_items += ["xAOD::MuonAuxContainer#StausAux" + excludedMuonAuxData]
     aod_items += ["xAOD::SlowMuonContainer#SlowMuons"]
     aod_items += ["xAOD::SlowMuonAuxContainer#SlowMuonsAux."]
 
     if flags.Muon.runCommissioningChain:
         aod_items += ["xAOD::MuonContainer#EMEO_Muons"]
-        aod_items += ["xAOD::MuonAuxContainer#EMEO_MuonsAux."]
+        aod_items += ["xAOD::MuonAuxContainer#EMEO_MuonsAux"+ excludedMuonAuxData ] 
     # +++++ ESD +++++
 
     # Tracks

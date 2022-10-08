@@ -56,7 +56,7 @@ def gen_config(input_name):
 test = Test.Test()
 test.art_type = 'build'
 test.exec_steps = []
-inputs = ['', 'data', 'data_run3']
+inputs = ['', 'data_run2_EB', 'data']
 for input_name in inputs:
     test.exec_steps.extend(gen_config(input_name))
 

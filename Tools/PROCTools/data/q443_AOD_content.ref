@@ -724,6 +724,7 @@ FileMetaDataAuxDyn.amiTag
 FileMetaDataAuxDyn.beamEnergy
 FileMetaDataAuxDyn.beamType
 FileMetaDataAuxDyn.conditionsTag
+FileMetaDataAuxDyn.generatorsInfo
 FileMetaDataAuxDyn.geometryVersion
 FileMetaDataAuxDyn.isDataOverlay
 FileMetaDataAuxDyn.mcCampaign

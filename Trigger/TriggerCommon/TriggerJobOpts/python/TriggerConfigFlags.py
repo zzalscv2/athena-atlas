@@ -206,10 +206,10 @@ def createTriggerFlags(doTriggerRecoFlags):
     flags.addFlag('Trigger.ExtraEDMList', [])
 
     # tag to be used for condutions used by HLT code
-    flags.addFlag('Trigger.OnlineCondTag', 'CONDBR2-HLTP-2018-03')
+    flags.addFlag('Trigger.OnlineCondTag', 'CONDBR2-HLTP-2022-02')
 
     # geometry version used by HLT online
-    flags.addFlag('Trigger.OnlineGeoTag', 'ATLAS-R2-2016-01-00-01')
+    flags.addFlag('Trigger.OnlineGeoTag', 'ATLAS-R3S-2021-03-00-00')
 
     def __availableRecoMetadata(flags):
         systems = ['L1','HLT']

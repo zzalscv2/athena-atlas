@@ -1,7 +1,7 @@
 #!/usr/bin/env python
 # Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
 
-# art-description: transform test of BSRDOtoRAW + T0Reco + T0Mon, using v1PhysP1 menu
+# art-description: transform test of BSRDOtoRAW + T0Reco + T0Mon, using v1PhysP1 menu, and Run2 EB data as input
 # art-type: build
 # art-include: master/Athena
 # art-include: 22.0/Athena
@@ -19,14 +19,14 @@ hlt.forks = 1
 hlt.threads = 4
 hlt.concurrent_events = 4
 hlt.max_events = 50
-hlt.args = f'--precommand=\\\"setMenu=\\\'{triggermenu}\\\'\\;doL1Sim=True\\;rewriteLVL1=True\\;\\\"'
+hlt.args = f'--precommand=\\\"setMenu=\\\'{triggermenu}\\\'\\;doL1Sim=True\\;rewriteLVL1=True\\;setDetDescr=\\\'ATLAS-R2-2016-01-00-01\\\'\\;setGlobalTag=\\\'CONDBR2-HLTP-2018-03\\\'\\;\\\"'
 hlt.args += ' --prodSysBSRDO True'
 hlt.args += ' --outputBSFile=RAW.pool.root'
 hlt.args += ' --outputHIST_HLTMONFile=hltmon.root'
 hlt.args += ' --outputDRAW_TRIGCOSTFile=TRIGCOST.pool.root'
 hlt.args += ' --outputNTUP_TRIGCOSTFile=cost.ntup.root'
-hlt.args += ' --runNumber 431885'  # RunNumber is set by Panda, but ignored by Trf to avoid changes from !48070
-hlt.input = 'data'
+hlt.args += ' --runNumber 360026'  # RunNumber is set by Panda, but ignored by Trf to avoid changes from !48070
+hlt.input = 'data_run2_EB'
 
 #====================================================================================================
 # Tier-0 reco step BS->ESD->AOD
@@ -55,7 +55,7 @@ tzreco.args = '--inputBSFile=RAW.pool.root'  # output of the previous step
 tzreco.args += ' --outputESDFile=ESD.pool.root --outputAODFile=AOD.pool.root'
 tzreco.args += ' --outputNTUP_TRIGRATEFile=rate.ntup.root'
 tzreco.args += ' --outputHISTFile=hist.root'
-tzreco.args += ' --conditionsTag=\'CONDBR2-BLKPA-2022-08\' --geometryVersion=\'ATLAS-R3S-2021-03-00-00\''
+tzreco.args += ' --conditionsTag=\'CONDBR2-BLKPA-RUN2-09\' --geometryVersion=\'ATLAS-R2-2016-01-00-01\''
 tzreco.args += ' --preExec="{:s}"'.format(tzrecoPreExec)
 tzreco.args += ' --postInclude="TriggerTest/disableChronoStatSvcPrintout.py"'
 

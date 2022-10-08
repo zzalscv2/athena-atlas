@@ -5,7 +5,8 @@
 # art-type: grid
 # art-include: master/Athena
 # art-include: 22.0/Athena
-# art-input-nfiles: 3
+# art-input: valid1.601229.PhPy8EG_A14_ttbar_hdamp258p75_SingleLep.recon.RDO.e8453_e8455_s3873_s3874_r13829_tid30652302_00
+# art-input-nfiles: 2
 # art-athena-mt: 4
 # art-html: https://idtrigger-val.web.cern.ch/idtrigger-val/TIDAWeb/TIDAart/?jobdir=
 # art-output: *.txt
@@ -28,9 +29,10 @@
 
 Slices = ['bjet']
 Events  = 4000
-Threads = 8 
+Threads = 8
 Slots   = 8
 Input   = 'ttbar'    # defined in TrigValTools/share/TrigValInputs.json  
+GridFiles = True
 Release = "current"
 
 Jobs = [ ( "Truth",       " TIDAdata-run3.dat                    -o data-hists.root" ),
@@ -44,4 +46,3 @@ Comp = [ ( "L2bjet",              "L2bjet",      "data-hists.root",         " -c
 
 from AthenaCommon.Include import include 
 include("TrigInDetValidation/TrigInDetValidation_Base.py")
-

@@ -1,11 +1,11 @@
 #!/usr/bin/env python
 # Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
 
-# art-description: art job for el_zee_pu40
+# art-description: art job for el_zee_pu40_elreco
 # art-type: grid
 # art-include: master/Athena
 # art-include: 22.0/Athena
-# art-input: mc15_13TeV.361106.PowhegPythia8EvtGen_AZNLOCTEQ6L1_Zee.recon.RDO.e3601_s2665_s2183_r7191
+# art-input: valid1.601189.PhPy8EG_AZNLO_Zee.recon.RDO.e8453_e8455_s3873_s3874_r13929_tid30659542_00
 # art-input-nfiles: 8
 # art-athena-mt: 8
 # art-html: https://idtrigger-val.web.cern.ch/idtrigger-val/TIDAWeb/TIDAart/?jobdir=
@@ -27,16 +27,13 @@
 # art-output: cost-perEvent-chain
 # art-output: *.dat 
 
-
 Slices  = ['electron']
 Events  = 16000
 Threads = 8 
 Slots   = 8
-Input   = 'Zee_pu40'    # defined in TrigValTools/share/TrigValInputs.json
-Release = "current"
+Input   = 'Zee'    # defined in TrigValTools/share/TrigValInputs.json
 GridFiles = True
-
-preinclude_file = 'all:TrigInDetValidation/TIDV_cond_fix.py' #conditions fix for ATR-23982. In future find a more recent RDO  
+Release = "current"
 
 Jobs = [ ( "Offline",     " TIDAdata-run3-offline.dat -r Electrons -o data-hists-offline.root" ) ]
 
@@ -44,8 +41,6 @@ Comp = [ ( "L2eleoffline",       "L2electron",      "data-hists-offline.root", "
          ( "L2eleoffline-lowpt", "L2electronLowpt", "data-hists-offline.root", " -c TIDAhisto-panel.dat  -d HLTL2-plots-lowpt-offline " ),
          ( "EFeleoffline",       "EFelectron",      "data-hists-offline.root", " -c TIDAhisto-panel.dat  -d HLTEF-plots-offline " ),
          ( "EFeleoffline-lowpt", "EFelectronLowpt", "data-hists-offline.root", " -c TIDAhisto-panel.dat  -d HLTEF-plots-lowpt-offline " )]
-
-
 
 
 from AthenaCommon.Include import include 

@@ -11,10 +11,10 @@
 unset ATHENA_CORE_NUMBER
 
 # RUN3 setup
-# ATLAS-R3S-2021-03-00-00 and OFLCOND-MC16-SDR-RUN3-05
+# ATLAS-R3S-2021-03-00-00 and OFLCOND-MC21-SDR-RUN3-07
 Sim_tf.py \
     --CA \
-    --conditionsTag 'default:OFLCOND-MC16-SDR-RUN3-05' \
+    --conditionsTag 'default:OFLCOND-MC21-SDR-RUN3-07' \
     --simulator 'ATLFASTIIF_G4MS' \
     --postInclude 'PyJobTransforms.UseFrontier' \
     --preInclude 'EVNTtoHITS:Campaigns.MC21Simulation' \
@@ -32,7 +32,7 @@ status=$rc
 
 rc2=-9999
 Sim_tf.py \
-    --conditionsTag 'default:OFLCOND-MC16-SDR-RUN3-05' \
+    --conditionsTag 'default:OFLCOND-MC21-SDR-RUN3-07' \
     --simulator 'ATLFASTIIF_G4MS' \
     --postInclude 'default:PyJobTransforms/UseFrontier.py' \
     --preInclude 'EVNTtoHITS:Campaigns/MC21Simulation.py' \
@@ -44,7 +44,7 @@ Sim_tf.py \
     --athenaopts '"--config-only=ConfigSimCG.pkl"'
 
 Sim_tf.py \
-    --conditionsTag 'default:OFLCOND-MC16-SDR-RUN3-05' \
+    --conditionsTag 'default:OFLCOND-MC21-SDR-RUN3-07' \
     --simulator 'ATLFASTIIF_G4MS' \
     --postInclude 'default:PyJobTransforms/UseFrontier.py' \
     --preInclude 'EVNTtoHITS:Campaigns/MC21Simulation.py' \

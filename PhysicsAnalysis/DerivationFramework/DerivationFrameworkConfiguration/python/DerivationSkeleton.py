@@ -71,6 +71,10 @@ def fromRunArgs(runArgs):
     from AthenaPoolCnvSvc.PoolWriteConfig import PoolWriteCfg
     cfg.merge(PoolWriteCfg(ConfigFlags))
 
+    # Cut flow service
+    from EventBookkeeperTools.EventBookkeeperToolsConfig import CutFlowSvcCfg
+    cfg.merge(CutFlowSvcCfg(ConfigFlags))
+
     for formatName in formats:
         derivationConfig = getattr(DerivationConfigList, f'{formatName}Cfg')
         cfg.merge(derivationConfig(ConfigFlags))

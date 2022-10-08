@@ -1,7 +1,7 @@
 #!/usr/bin/env python
 # Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
 
-# art-description: Trigger BS->RDO_TRIG athena test of the Cosmic_run3_v1 menu on physics_Main stream from a cosmic run
+# art-description: Trigger BS->RDO_TRIG athena test of the Cosmic_run3_v1 menu on express stream from a cosmic run
 # art-type: grid
 # art-include: master/Athena
 # art-include: 22.0/Athena
@@ -34,8 +34,6 @@ precommand = ''.join([
   "doL1Sim=True;",
   "doWriteBS=False;",
   "doWriteRDOTrigger=True;",
-  "setDetDescr='ATLAS-R3S-2021-01-00-02';",
-  "condOverride={'/MDT/Onl/T0BLOB':'MDTT0-RUN3-Onl-UPD1-01-BLOB'};"  # TODO: use R3 HLT cond tag when available
 ])
 ex.args = f'-c "{precommand}"'
 

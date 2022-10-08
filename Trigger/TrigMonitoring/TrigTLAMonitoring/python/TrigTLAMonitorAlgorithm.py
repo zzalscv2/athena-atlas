@@ -9,6 +9,192 @@
 @brief Example trigger python configuration for the Run III AthenaMonitoring package, based on the example by C Burton and P Onyisi
 '''
 
+def histdefs_eventinfo(pprefix):
+    """
+    Return a list of histogram definitions for global event variables
+
+    @param pprefix Prefix of histogram names
+    """
+    histograms=[
+        {'name'  :f'{pprefix}_AvgMu',
+         'ylabel':'events',
+         'xlabel':'AvgMu',
+         'xmin'  :-0.5,
+         'xmax'  :69.5,
+         'xbins' :70},
+        {'name'  :f'{pprefix}_NumPV',
+         'ylabel':'events',
+         'xlabel':'NumPV',
+         'xmin'  :-0.5,
+         'xmax'  :39.5,
+         'xbins' :40},
+        {'name'  :f'{pprefix}_JetDensityEMTopo',
+         'ylabel':'events',
+         'xlabel':'JetDensityEMTopo',
+         'xmin'  :-0.5,
+         'xmax'  :25000,
+         'xbins' :100},
+        {'name'  :f'{pprefix}_JetDensityEMPFlow',
+         'ylabel':'events',
+         'xlabel':'JetDensityEMPFlow',
+         'xmin'  :-0.5,
+         'xmax'  :25000,
+         'xbins' :100}
+    ]
+    return histograms
+
+def histdefs_jetvariables(pprefix, plabel, pflow=False):
+    """
+    Return a list of jet-specific histogram definitions for jet moment distributions
+
+    @param pprefix Prefix of histogram names
+    @param plabel Human-readable name of the jet to use in labeling axes
+    @param pflow bool to indicate that this is the PFlow jet collection, so that the track-based variables are added. 
+                False indicates that this is the calo jet collection, and additional calo variables are monitored.
+    """
+
+    histograms=[
+       {'name'  :f'{pprefix}ActiveArea',
+        'ylabel':f'{plabel}s',
+        'xlabel':f'{plabel} ActiveArea',
+        'xunit' :'',
+        'xmin'  :0,
+        'xmax'  :2.,
+        'xbins' :200},
+    ]
+    if pflow:
+        histograms+=[
+           {'name'  :f'{pprefix}TrackWidthPt1000',
+            'ylabel':f'{plabel}s',
+            'xlabel':f'{plabel} TrackWidthPt1000',
+            'xmin'  :-0.5,
+            'xmax'  :0.95,
+            'xbins' :50},
+           {'name'  :f'{pprefix}NumTrkPt1000',
+            'ylabel':f'{plabel}s',
+            'xlabel':f'{plabel} NumTrkPt1000',
+            'xmin'  :-0.5,
+            'xmax'  :39.5,
+            'xbins' :40},
+           {'name'  :f'{pprefix}SumPtTrkPt500',
+            'ylabel':f'{plabel}s',
+            'xlabel':f'{plabel} SumPtTrkPt500',
+            'xmin'  :-0.5,
+            'xmax'  :500e3,
+            'xunit' : 'MeV',
+            'xbins' :200},
+           {'name'  :f'{pprefix}SumPtChargedPFOPt500',
+            'ylabel':f'{plabel}s',
+            'xlabel':f'{plabel} SumPtChargedPFOPt500',
+            'xmin'  :-0.5,
+            'xmax'  :500e3,
+            'xunit' : 'MeV',
+            'xbins' :200},
+           {'name'  :f'{pprefix}Jvt',
+            'ylabel':f'{plabel}s',
+            'xlabel':f'{plabel} Jvt',
+            'xmin'  :-0.2,
+            'xmax'  :1.2,
+            'xbins' :70},
+           {'name'  :f'{pprefix}JvtRpt',
+            'ylabel':f'{plabel}s',
+            'xlabel':f'{plabel} JvtRpt',
+            'xmin'  :-0.1,
+            'xmax'  :1.4,
+            'xbins' :75},
+           {'name'  :f'{pprefix}fastDIPS20211215_pu',
+            'ylabel':f'{plabel}s',
+            'xlabel':f'{plabel} fastDips_pu',
+            'xmin'  :-0.2,
+            'xmax'  :1.2,
+            'xbins' :70},
+           {'name'  :f'{pprefix}fastDIPS20211215_pb',
+            'ylabel':f'{plabel}s',
+            'xlabel':f'{plabel} fastDips_pb',
+            'xmin'  :-0.2,
+            'xmax'  :1.2,
+            'xbins' :70},
+           {'name'  :f'{pprefix}fastDIPS20211215_pc',
+            'ylabel':f'{plabel}s',
+            'xlabel':f'{plabel} fastDips_pc',
+            'xmin'  :-0.2,
+            'xmax'  :1.2,
+            'xbins' :70},
+        ]
+    else:
+        histograms+=[
+           {'name'  :f'{pprefix}EMFrac',
+            'ylabel':f'{plabel}s',
+            'xlabel':f'{plabel} EMFrac',
+            'xmin'  :-0.1,
+            'xmax'  :1.4,
+            'xbins' :75},
+           {'name'  :f'{pprefix}HECFrac',
+            'ylabel':f'{plabel}s',
+            'xlabel':f'{plabel} HECFrac',
+            'xmin'  :-0.1,
+            'xmax'  :1.4,
+            'xbins' :75},
+           {'name'  :f'{pprefix}Timing',
+            'ylabel':f'{plabel}s',
+            'xlabel':f'{plabel} Timing',
+            'xunit' :'ns',
+            'xmin'  :-50,
+            'xmax'  :50,
+            'xbins' :50},
+           {'name'  :f'{pprefix}N90Constituents',
+            'ylabel':f'{plabel}s',
+            'xlabel':f'{plabel} N90Constituents',
+            'xunit' :'',
+            'xmin'  :0,
+            'xmax'  :20,
+            'xbins' :20},
+        ]
+    return histograms
+
+def histdefs_jetcalibscales(pprefix, plabel, pflow=False):
+    """
+    Return a list of jet-specific histogram definitions for jet pT distributions at different calibration scales
+
+    @param pprefix Prefix of histogram names
+    @param plabel Human-readable name of the jet to use in labeling axes
+    @param pflow bool to indicate that this is the PFlow jet collection, so that the track-based calibration scales are added.
+    """
+    histograms=[
+       {'name'  :f'{pprefix}JetConstitScaleMomentum_pt',
+        'ylabel':f'{plabel}s',
+        'xlabel':f'{plabel} JetConstitScaleMomentum_pt',
+        'xunit' :'GeV',
+        'xmin'  :0,
+        'xmax'  :750,
+        'xbins' :1500},
+       {'name'  :f'{pprefix}JetPileupScaleMomentum_pt',
+        'ylabel':f'{plabel}s',
+        'xlabel':f'{plabel} JetPileupScaleMomentum_pt',
+        'xunit' :'GeV',
+        'xmin'  :0,
+        'xmax'  :750,
+        'xbins' :1500},
+       {'name'  :f'{pprefix}JetEtaJESScaleMomentum_pt',
+        'ylabel':f'{plabel}s',
+        'xlabel':f'{plabel} JetEtaJESScaleMomentum_pt',
+        'xunit' :'GeV',
+        'xmin'  :0,
+        'xmax'  :750,
+        'xbins' :1500},
+    ]
+    if pflow:
+        histograms+= [
+          {'name'  :f'{pprefix}JetGSCScaleMomentum_pt',
+           'ylabel':f'{plabel}s',
+           'xlabel':f'{plabel} JetGSCScaleMomentum_pt',
+           'xunit' :'GeV',
+           'xmin'  :0,
+           'xmax'  :750,
+           'xbins' :1500}
+        ]
+    return histograms
+
 def histdefs_particle(pprefix, plabel):
     """
     Return a list of histogram definitions for particle kinematics.
@@ -141,6 +327,8 @@ def TrigTLAMonConfig(inputFlags):
     ### STEP 5 ###
     # Configure histograms
     #NB! The histograms defined here must match the ones in the cxx file exactly
+    histdefs_global=[]
+    histdefs_global+=histdefs_eventinfo('eventInfo')
     histdefs=[]
     histdefs+=histdefs_particle('jet'  ,'jet')
     histdefs+=histdefs_particle('pfjet','particle-flow jet')
@@ -150,7 +338,12 @@ def TrigTLAMonConfig(inputFlags):
     histdefs+=histdefs_dR      ('pfjet0','pfjet1', 'leading pf jet','subleading pf jet')
     histdefs+=histdefs_dR      ('jet0'  ,'ph0'   , 'leading jet'   ,'leading photon'   )
     histdefs+=histdefs_dR      ('pfjet0','ph0'   , 'leading pf jet','leading photon'   )
+    histdefs+=histdefs_jetcalibscales('jet'  ,'jet')
+    histdefs+=histdefs_jetcalibscales('pfjet','particle-flow jet', True)
+    histdefs+=histdefs_jetvariables('jet', 'jet')
+    histdefs+=histdefs_jetvariables('pfjet', 'particle-flow jet', True)
 
+    ## per chain histograms added here
     AllChains = []
     for chain in tla_triglist :
         AllChains.append(chain[2:])
@@ -170,6 +363,16 @@ def TrigTLAMonConfig(inputFlags):
                 TLAMonGroup.defineHistogram(HistName, title=f'Distribution of {histdef["name"]};{xlabel};{ylabel}',
                                             path='Shifter/'+chain[2:],xbins=histdef['xbins'],xmin=histdef['xmin'],xmax=histdef['xmax'])
 
+    # global histograms added here
+    for histdef in histdefs_global:
+        HistName = histdef['name']
+        xlabel=histdef.get('xlabel',histdef['name'  ])
+        if 'xunit' in histdef:
+            xlabel+=f' [{histdef["xunit"]}'
+        ylabel=histdef.get('ylabel',histdef['ylabel'])
+        TLAMonGroup.defineHistogram(HistName, title=f'Distribution of {histdef["name"]};{xlabel};{ylabel}',
+                                        path='Expert/EventInfo',xbins=histdef['xbins'],xmin=histdef['xmin'],xmax=histdef['xmax'])
+
     log.info (" ==> In TrigTLAMonitorAlgorithm.py: AllChains list:  %s", AllChains)
     trigTLAMonAlg.AllChains = AllChains
 
@@ -187,6 +390,7 @@ if __name__=='__main__':
     # AOD file copied from Bjets, just to avoid compilation warning, for TLA need to be changed!!!!
     parser.add_argument('input',nargs='?',default='/afs/cern.ch/work/e/enagy/public/ARTfiles/MCtest160322.AOD.pool.root')
     parser.add_argument('--data',action='store_true',help='Input file is data.')
+    parser.add_argument('--nevents',type=int,default=-1,help='Number of events to process.')
     args = parser.parse_args()
 
     # Setup logs
@@ -199,15 +403,19 @@ if __name__=='__main__':
     # Set the Athena configuration flags
     from AthenaConfiguration.AllConfigFlags import ConfigFlags
 
+    # Set execute flags (number of events to process)
+    ConfigFlags.Exec.MaxEvents = args.nevents
+
     # Input files (AOD or other files, e.g. costumized RAW file, to be defined 
     ConfigFlags.Input.Files = [args.input]
     ConfigFlags.Input.isMC = not args.data
 
     # Output file (root)
-
     ConfigFlags.Output.HISTFileName = 'TrigTLAMonitorOutput.root'
 
     # ConfigFlags.Trigger.triggerMenuSetup="Physics_pp_v7_primaries"
+    ConfigFlags.Trigger.triggerMenuSetup = 'Physics_pp_run3_v1'
+    ConfigFlags.Trigger.triggerConfig = 'DB'                   
     
     ConfigFlags.lock()
 
@@ -222,10 +430,6 @@ if __name__=='__main__':
 
     # If you want to turn on more detailed messages ...
     #trigTLAMonitorAcc.getEventAlgo('TrigTLAMonAlg').OutputLevel = 2 # DEBUG
-    cfg.printConfig(withDetails=True) # set True for exhaustive info
+    cfg.printConfig(withDetails=False) # set True for exhaustive info
 
-    Nevents = 25
-    #cfg.run(Nevents)
-    cfg.run() #use cfg.run(20) to only run on first 20 events
-
-
+    cfg.run()
