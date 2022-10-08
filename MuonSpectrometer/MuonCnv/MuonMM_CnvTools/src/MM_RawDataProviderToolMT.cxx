@@ -44,6 +44,7 @@ StatusCode Muon::MM_RawDataProviderToolMT::initRdoContainer(const EventContext& 
   // Create the identifiable RdoContainer in StoreGate to be filled with decoded fragment contents.
   SG::WriteHandle<MM_RawDataContainer> rdoContainerHandle(m_rdoContainerKey, ctx); 
 
+
   const bool externalCacheRDO = !m_rdoContainerCacheKey.key().empty();
   if(!externalCacheRDO){
     ATH_CHECK(rdoContainerHandle.record(std::make_unique<MM_RawDataContainer>(m_maxhashtoUse)));
@@ -70,7 +71,7 @@ StatusCode Muon::MM_RawDataProviderToolMT::convert(const std::vector<uint32_t>& 
   MM_RawDataContainer* rdoContainer{nullptr};
   ATH_CHECK(initRdoContainer(ctx, rdoContainer));
 
-  if (robIds.empty()) return StatusCode::SUCCESS;
+  if (robIds.empty() || m_skipDecoding) return StatusCode::SUCCESS;
   
   std::vector<const OFFLINE_FRAGMENTS_NAMESPACE::ROBFragment*> vecRobf;
 
@@ -90,7 +91,7 @@ StatusCode Muon::MM_RawDataProviderToolMT::convert(const std::vector<IdentifierH
   MM_RawDataContainer* rdoContainer{nullptr};
   ATH_CHECK(initRdoContainer(ctx, rdoContainer));
 
-  if (rdoIdhVect.empty()) return StatusCode::SUCCESS;
+  if (rdoIdhVect.empty() || m_skipDecoding) return StatusCode::SUCCESS;
   
   std::vector<const OFFLINE_FRAGMENTS_NAMESPACE::ROBFragment*> vecRobf;
   m_robDataProvider->getROBData(m_allRobIds, vecRobf);
@@ -106,7 +107,8 @@ StatusCode Muon::MM_RawDataProviderToolMT::convert(const EventContext& ctx) cons
 
   MM_RawDataContainer* rdoContainer{nullptr};
   ATH_CHECK(initRdoContainer(ctx, rdoContainer));
-  
+  if(m_skipDecoding) return StatusCode::SUCCESS;
+
   std::vector<const OFFLINE_FRAGMENTS_NAMESPACE::ROBFragment*> vecRobf;
   m_robDataProvider->getROBData(m_allRobIds, vecRobf);
   
