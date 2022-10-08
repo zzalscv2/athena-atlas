@@ -67,7 +67,7 @@ StatusCode Muon::STGC_ROD_Decoder::fillCollection(const ROBFragment& robFrag, co
   std::unordered_map<IdentifierHash, std::unique_ptr<STGC_RawDataCollection>> rdo_map;
 
   // error counters
-  int nerr_stationID{0}, nerr_duplicate{0}, nerr_channelID{0}, nerr_rdo{0};
+  int nerr_duplicate{0}, nerr_rdo{0};
 
   // loop on elinks. for STGCs a "module" is a quadruplet
   // therefore, we need an RDO (collection) per quadruplet!
@@ -78,17 +78,12 @@ StatusCode Muon::STGC_ROD_Decoder::fillCollection(const ROBFragment& robFrag, co
     
     // get the offline ID hash (module ctx) to be passed to the RDO 
     // also specifies the index of the RDO in the container.
-    bool         is_validID(false);
     const char*  station_name = elink->elinkId()->is_large_station() ? "STL" : "STS";
     int          station_eta  = (int)elink->elinkId()->station_eta();
     unsigned int station_phi  = (unsigned int)elink->elinkId()->station_phi();
     unsigned int multi_layer  = (unsigned int)elink->elinkId()->multi_layer();
     unsigned int gas_gap      = (unsigned int)elink->elinkId()->gas_gap();
-    Identifier   module_ID    = m_stgcIdHelper->elementID(station_name, station_eta, station_phi, is_validID);
-    if(!is_validID) { 
-      ++nerr_stationID; 
-      continue; 
-    }
+    Identifier   module_ID    = m_stgcIdHelper->elementID(station_name, station_eta, station_phi);
 
     IdentifierHash module_hashID;
     m_stgcIdHelper->get_module_hash(module_ID, module_hashID);
@@ -106,11 +101,8 @@ StatusCode Muon::STGC_ROD_Decoder::fillCollection(const ROBFragment& robFrag, co
        unsigned int channel_type   = channel->channel_type();
        if (channel_number == 0) continue; // skip disconnected vmm channels
 
-       Identifier channel_ID = m_stgcIdHelper->channelID(module_ID, multi_layer, gas_gap, channel_type, channel_number, is_validID);
-       if (!is_validID) { 
-         ++nerr_channelID; 
-         continue; 
-       }
+       Identifier channel_ID = m_stgcIdHelper->channelID(module_ID, multi_layer, gas_gap, channel_type, channel_number); // not validating the IDs (too slow)
+
        bool timeAndChargeInCounts = true; // always true for data from detector
        rdo->push_back(new STGC_RawData(channel_ID, channel->rel_bcid(), channel->tdo(), channel->pdo(), false,timeAndChargeInCounts)); // isDead = false (ok?)
     }
@@ -135,8 +127,6 @@ StatusCode Muon::STGC_ROD_Decoder::fillCollection(const ROBFragment& robFrag, co
 
   // error summary (to reduce the number of messages)
   if (nerr_duplicate) ATH_MSG_WARNING(nerr_duplicate << " elinks skipped since the same module hash has been added by a previous ROB fragment");
-  if (nerr_stationID) ATH_MSG_WARNING("Unable to create valid identifier for "<<nerr_stationID<<" modules (corrupt data?); elinks skipped");
-  if (nerr_channelID) ATH_MSG_WARNING("Unable to create valid identifier for "<<nerr_channelID<<" channels (corrupt data?); channels skipped");
   if (nerr_rdo)       ATH_MSG_WARNING("Failed to add "<<nerr_rdo<<" RDOs into the identifiable container");
 
   return StatusCode::SUCCESS;

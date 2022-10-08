@@ -308,6 +308,10 @@ StatusCode HltEventLoopMgr::prepareForRun(const ptree& /*pt*/)
 
   try
   {
+    // Reset the AlgExecStateSvc (important in case there was a stop/start)
+    m_aess->reset(m_currentRunCtx);
+
+    // Fire BeginRun incident
     m_incidentSvc->fireIncident(Incident(name(), IncidentType::BeginRun, m_currentRunCtx));
 
     // Initialize COOL helper (needs to be done after IOVDbSvc has loaded all folders)
@@ -370,7 +374,7 @@ StatusCode HltEventLoopMgr::execAtStart(const EventContext& ctx) const
   for (const std::string& name : m_execAtStart) {
     if ( algMgr->getAlgorithm(name, alg) ) {
       ATH_MSG_INFO("Executing " << alg->name() << "...");
-      sc &= alg->execute(ctx);
+      sc &= alg->sysExecute(ctx);
     }
     else ATH_MSG_WARNING("Cannot find algorithm or sequence " << name);
   }

@@ -21,6 +21,8 @@ PixelChargeCalibCondData::PixelChargeCalibCondData()
     m_totA.emplace(type, chipCharge());
     m_totE.emplace(type, chipCharge());
     m_totC.emplace(type, chipCharge());
+    m_totF.emplace(type, chipCharge());
+    m_totG.emplace(type, chipCharge());
   }
 }
 
@@ -57,6 +59,16 @@ void PixelChargeCalibCondData::setQ2TotE(InDetDD::PixelDiodeType type, unsigned 
 void PixelChargeCalibCondData::setQ2TotC(InDetDD::PixelDiodeType type, unsigned int moduleHash, std::vector<float> value)
 {
   m_totC.at(type)[moduleHash] = std::move(value);
+}
+
+void PixelChargeCalibCondData::setQ2TotF(InDetDD::PixelDiodeType type, unsigned int moduleHash, std::vector<float> value)
+{
+  m_totF.at(type)[moduleHash] = std::move(value);
+}
+
+void PixelChargeCalibCondData::setQ2TotG(InDetDD::PixelDiodeType type, unsigned int moduleHash, std::vector<float> value)
+{
+  m_totG.at(type)[moduleHash] = std::move(value);
 }
 
 void PixelChargeCalibCondData::setTotRes1(unsigned int moduleHash, std::vector<float> value) {
@@ -158,6 +170,32 @@ float PixelChargeCalibCondData::getQ2TotC(InDetDD::PixelDiodeType type, unsigned
   throw std::range_error(error.str());
 }
 
+float PixelChargeCalibCondData::getQ2TotF(InDetDD::PixelDiodeType type, unsigned int moduleHash, unsigned int FE) const
+{
+  const chipCharge &typeMap = m_totF.at(type);
+  auto it = typeMap.find(moduleHash);
+  if (it != typeMap.end() && FE < it->second.size()) {
+    return it->second[FE];
+  }
+
+  std::stringstream error;
+  error << "PixelChargeCalibCondData::getQ2TotF(" << static_cast<int>(type) << ", " << moduleHash << ", " << FE << "): array out of bounds";
+  throw std::range_error(error.str());
+}
+
+float PixelChargeCalibCondData::getQ2TotG(InDetDD::PixelDiodeType type, unsigned int moduleHash, unsigned int FE) const
+{
+  const chipCharge &typeMap = m_totG.at(type);
+  auto it = typeMap.find(moduleHash);
+  if (it != typeMap.end() && FE < it->second.size()) {
+    return it->second[FE];
+  }
+
+  std::stringstream error;
+  error << "PixelChargeCalibCondData::getQ2TotG(" << static_cast<int>(type) << ", " << moduleHash << ", " << FE << "): array out of bounds";
+  throw std::range_error(error.str());
+}
+
 float PixelChargeCalibCondData::getTotRes(unsigned int moduleHash, unsigned int FE, float Q) const
 {
   float res1{};
@@ -196,6 +234,14 @@ float PixelChargeCalibCondData::getToT(InDetDD::PixelDiodeType type, unsigned in
   if (paramC + Q != 0.0) {
     tot = paramA * (paramE + Q) / (paramC + Q);
   }
+
+  // Protection for large charge
+  float exth = 1e5;    // the calibration function is analytically connected at threshold exth.
+  if (Q>exth && getCalibrationStrategy(moduleHash)==CalibrationStrategy::RUN3PIX) {
+    float paramF = getQ2TotF(type, moduleHash, FE);
+    float paramG = getQ2TotG(type, moduleHash, FE);
+    tot = (Q-paramG)/paramF;
+  }
   return tot;
 }
 
@@ -211,6 +257,18 @@ float PixelChargeCalibCondData::getCharge(InDetDD::PixelDiodeType type, unsigned
   float charge = 0.0;
   if (std::fabs(paramA) > 0.0 && std::fabs(ToT / paramA - 1.0) > 0.0) {
     charge = (paramC * ToT / paramA - paramE) / (1.0 - ToT / paramA);
+  }
+
+  // Protection for small charge
+  float threshold = getAnalogThreshold(type,moduleHash,FE);
+  if (charge<threshold && getCalibrationStrategy(moduleHash)==CalibrationStrategy::RUN3PIX) { charge=threshold; }
+
+  // Protection for large charge
+  float exth = 1e5;    // the calibration function is analytically connected at threshold exth.
+  if (charge>exth && getCalibrationStrategy(moduleHash)==CalibrationStrategy::RUN3PIX) {
+    float paramF = getQ2TotF(type, moduleHash, FE);
+    float paramG = getQ2TotG(type, moduleHash, FE);
+    charge = paramF*ToT+paramG;
   }
   return charge;
 }

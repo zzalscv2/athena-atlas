@@ -232,7 +232,8 @@ def sTgcBytestreamDecodeCfg(flags, name="sTgcRawDataProvider"):
     Muon__STGC_RawDataProviderToolMT=CompFactory.Muon.STGC_RawDataProviderToolMT
     MuonsTgcRawDataProviderTool = Muon__STGC_RawDataProviderToolMT(name    = "STGC_RawDataProviderToolMT",
                                                                    Decoder = STGCRodDecoder,
-                                                                   RdoLocation = keyName )
+                                                                   RdoLocation = keyName,
+                                                                   SkipDecoding=flags.Muon.MuonTrigger and flags.Muon.runCommissioningChain )
 
     #if flags.Muon.MuonTrigger:
     #    MuonsTgcRawDataProviderTool.sTgcContainerCacheKey = MuonCacheNames.sTgcCache
@@ -276,7 +277,8 @@ def MmBytestreamDecodeCfg(flags, name="MmRawDataProvider"):
     Muon_MM_RawDataProviderToolMT = CompFactory.Muon.MM_RawDataProviderToolMT
     MuonMmRawDataProviderTool = Muon_MM_RawDataProviderToolMT(name  = "MM_RawDataProviderToolMT",
                                                               Decoder = MMRodDecoder,
-                                                              RdoLocation = keyName)
+                                                              RdoLocation = keyName,
+                                                              SkipDecoding=flags.Muon.MuonTrigger and flags.Muon.runCommissioningChain)
 
     #if flags.Muon.MuonTrigger:
     #    MuonMmRawDataProviderTool.RawDataContainerCacheKey = MuonCacheNames.MicromegasCache

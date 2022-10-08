@@ -100,8 +100,18 @@ namespace LVL1 {
       mutable LockedHandle<TH2> m_hChargeEta ATLAS_THREAD_SAFE;
       mutable LockedHandle<TH2> m_hIs2candEta ATLAS_THREAD_SAFE; 
       mutable LockedHandle<TH2> m_hIsTGCEta ATLAS_THREAD_SAFE;
-      mutable LockedHandle<TH1> m_hLMPt ATLAS_THREAD_SAFE;
-      mutable LockedHandle<TH2> m_hLMPhiEta ATLAS_THREAD_SAFE;
+
+      mutable LockedHandle<TH1> m_hLateMuonPt ATLAS_THREAD_SAFE;
+      mutable LockedHandle<TH1> m_hLateMuonPtTGC ATLAS_THREAD_SAFE;
+      mutable LockedHandle<TH1> m_hLateMuonPtRPC ATLAS_THREAD_SAFE;
+      mutable LockedHandle<TH2> m_hLateMuonPtEta ATLAS_THREAD_SAFE;
+      mutable LockedHandle<TH2> m_hLateMuonPhiEta ATLAS_THREAD_SAFE;
+      mutable LockedHandle<TH2> m_hLateMuonBW2or3Eta ATLAS_THREAD_SAFE;
+      mutable LockedHandle<TH2> m_hLateMuonInnerCoinEta ATLAS_THREAD_SAFE;
+      mutable LockedHandle<TH2> m_hLateMuonGoodMFEta ATLAS_THREAD_SAFE;
+      mutable LockedHandle<TH2> m_hLateMuonChargeEta ATLAS_THREAD_SAFE;
+      mutable LockedHandle<TH2> m_hLateMuonIs2candEta ATLAS_THREAD_SAFE; 
+      mutable LockedHandle<TH2> m_hLateMuonIsTGCEta ATLAS_THREAD_SAFE;
  
    };
 }

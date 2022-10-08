@@ -114,7 +114,7 @@ protected:
   bool        m_genericFlag;
 
   bool        m_initialisePerRun;
-  mutable bool        m_firstRun;
+  bool        m_firstRun;
 
   //pdgId
   int m_selectTruthPdgId;
@@ -126,9 +126,6 @@ protected:
 
   /// if an ntple file open?
   bool m_fileopen;
-
-  /// is this the first event
-  mutable bool m_first; 
 
   /// use only the highest pt tracks
   bool m_useHighestPT;

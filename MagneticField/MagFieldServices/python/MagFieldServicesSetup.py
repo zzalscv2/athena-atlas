@@ -20,6 +20,9 @@ def AtlasFieldCacheCondAlg(name="AtlasFieldCacheCondAlg",**kwargs):
     kwargs.setdefault( "UseSoleCurrent", 7730 )
     kwargs.setdefault( "UseToroCurrent", 20400 )
     kwargs.setdefault( "LockMapCurrents", True )
+    # consider field off if current is below these values:
+    kwargs.setdefault( "SoleMinCurrent", 160 )  # Standby current is 150A
+    kwargs.setdefault( "ToroMinCurrent", 210 )  # Standby current is 200A
   else:
     kwargs.setdefault( "UseDCS", True )
   return CfgMgr.MagField__AtlasFieldCacheCondAlg(name,**kwargs)
@@ -28,6 +31,9 @@ def AtlasFieldMapCondAlg(name="AtlasFieldMapCondAlg",**kwargs):
   if athenaCommonFlags.isOnline():
     # online does not use DCS
     kwargs.setdefault( "UseMapsFromCOOL", False )
+    # consider field off if current is below these values:
+    kwargs.setdefault( "SoleMinCurrent", 160 )  # Standby current is 150A
+    kwargs.setdefault( "ToroMinCurrent", 210 )  # Standby current is 200A
 
   return CfgMgr.MagField__AtlasFieldMapCondAlg(name,**kwargs)
 
