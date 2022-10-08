@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2020 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
 */
 
 /**
@@ -85,7 +85,7 @@ public:
 
 private:
   /// Returns the simulator to use for the given particle
-  const ISimulatorTool& identifySimulator(const ISF::ISFParticle& particle) const;
+  ISimulatorTool& identifySimulator(const ISF::ISFParticle& particle);
 
   /// Input Generator Truth collection
   SG::ReadHandleKey<McEventCollection> m_inputEvgenKey{this, "InputEvgenCollection", "", "Input EVGEN collection."};
