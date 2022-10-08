@@ -2,16 +2,16 @@
   Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
 */
 
-#include "EstimatedTrackParamsAnalysis.h"
+#include "EstimatedTrackParamsAnalysisAlg.h"
 
 namespace ActsTrk {
 
-  EstimatedTrackParamsAnalysis::EstimatedTrackParamsAnalysis(const std::string& name, 
-							     ISvcLocator* pSvcLocator)
+  EstimatedTrackParamsAnalysisAlg::EstimatedTrackParamsAnalysisAlg(const std::string& name, 
+								   ISvcLocator* pSvcLocator)
     : AthMonitorAlgorithm(name, pSvcLocator) 
   {}
   
-  StatusCode EstimatedTrackParamsAnalysis::initialize() {
+  StatusCode EstimatedTrackParamsAnalysisAlg::initialize() {
     ATH_MSG_INFO("Initializing " << name() << " ...");
 
     ATH_CHECK( m_inputTrackParamsColletionKey.initialize() );
@@ -19,7 +19,7 @@ namespace ActsTrk {
     return AthMonitorAlgorithm::initialize();
   }
 
-  StatusCode EstimatedTrackParamsAnalysis::fillHistograms(const EventContext& ctx) const {
+  StatusCode EstimatedTrackParamsAnalysisAlg::fillHistograms(const EventContext& ctx) const {
     ATH_MSG_DEBUG( "Filling Histograms for " << name() << " ... " );
 
     SG::ReadHandle< ActsTrk::BoundTrackParametersContainer > trackParamsHandle = SG::makeHandle( m_inputTrackParamsColletionKey, ctx);
@@ -28,7 +28,7 @@ namespace ActsTrk {
     ATH_MSG_DEBUG( "Retrieved " << trackParams->size() << " input parameters with key " << m_inputTrackParamsColletionKey.key() );
 
     auto monitor_nparams = Monitored::Scalar<int>("Nparams", trackParams->size());
-    fill("ActsTrkEstimatedTrackParamsAnalysis", monitor_nparams);
+    fill("ActsTrkEstimatedTrackParamsAnalysisAlg", monitor_nparams);
 
     auto monitor_pt = Monitored::Collection("track_param_pt", *trackParams,
 					    [] (const auto* param) -> double
@@ -59,7 +59,7 @@ namespace ActsTrk {
 						[] (const auto* param) -> int
 						{ return param->charge(); });
 
-    fill("ActsTrkEstimatedTrackParamsAnalysis",
+    fill("ActsTrkEstimatedTrackParamsAnalysisAlg",
 	 monitor_pt, monitor_eta,
 	 monitor_loc0, monitor_loc1,
 	 monitor_phi, monitor_theta,

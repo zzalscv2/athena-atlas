@@ -2,17 +2,17 @@
   Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
 */
 
-#include "StripClusterAnalysis.h"
+#include "StripClusterAnalysisAlg.h"
 #include "AthenaMonitoringKernel/Monitored.h"
 
 namespace ActsTrk {
 
-  StripClusterAnalysis::StripClusterAnalysis(const std::string& name, ISvcLocator *pSvcLocator)
+  StripClusterAnalysisAlg::StripClusterAnalysisAlg(const std::string& name, ISvcLocator *pSvcLocator)
     : AthMonitorAlgorithm(name, pSvcLocator) 
   {}
   
-  StatusCode StripClusterAnalysis::initialize() {
-    ATH_MSG_DEBUG( "Initializing ActsTrk::StripClusterAnalysis" );
+  StatusCode StripClusterAnalysisAlg::initialize() {
+    ATH_MSG_DEBUG( "Initializing " << name() << " ... " );
     
     ATH_CHECK( m_stripClusterContainerKey.initialize() );
     ATH_CHECK(detStore()->retrieve(m_stripID,"SCT_ID"));
@@ -20,8 +20,8 @@ namespace ActsTrk {
     return AthMonitorAlgorithm::initialize();
   }
 
-  StatusCode StripClusterAnalysis::fillHistograms(const EventContext& ctx) const {
-    ATH_MSG_DEBUG(" In ActsTrk::StripClusterAnalysis::fillHistograms()" );
+  StatusCode StripClusterAnalysisAlg::fillHistograms(const EventContext& ctx) const {
+    ATH_MSG_DEBUG(" In " << name() << "::fillHistograms()" );
     
     SG::ReadHandle< xAOD::StripClusterContainer > inputStripClusterContainer( m_stripClusterContainerKey, ctx );
     if (!inputStripClusterContainer.isValid()){
@@ -101,7 +101,7 @@ namespace ActsTrk {
 					       [] (const auto* cluster) -> int
 					       { return cluster->channelsInPhi(); });
     
-    fill("ActsTrkClusterAnalysis",
+    fill("ActsTrkClusterAnalysisAlg",
 	 monitor_barrelEndcap, monitor_layerDisk,
 	 monitor_phiModule, monitor_etaModule, monitor_sideModule,
 	 monitor_eta, monitor_perp,

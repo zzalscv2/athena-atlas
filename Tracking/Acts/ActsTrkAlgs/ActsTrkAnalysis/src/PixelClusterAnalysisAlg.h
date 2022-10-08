@@ -2,8 +2,8 @@
   Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
 */
 
-#ifndef ACTSTRKANALYSIS_PIXELCLUSTERANALYSIS_H
-#define ACTSTRKANALYSIS_PIXELCLUSTERANALYSIS_H
+#ifndef ACTSTRKANALYSIS_PIXELCLUSTERANALYSISALG_H
+#define ACTSTRKANALYSIS_PIXELCLUSTERANALYSISALG_H
 
 #include "AthenaMonitoring/AthMonitorAlgorithm.h"
 #include "StoreGate/ReadHandleKey.h"
@@ -12,11 +12,11 @@
 
 namespace ActsTrk {
 
-  class PixelClusterAnalysis final: 
+  class PixelClusterAnalysisAlg final: 
     public AthMonitorAlgorithm {
   public:
-    PixelClusterAnalysis(const std::string& name, ISvcLocator* pSvcLocator);
-    virtual ~PixelClusterAnalysis() override = default;
+    PixelClusterAnalysisAlg(const std::string& name, ISvcLocator* pSvcLocator);
+    virtual ~PixelClusterAnalysisAlg() override = default;
 
     virtual StatusCode initialize() override;
     virtual StatusCode fillHistograms(const EventContext& ctx) const override;
@@ -29,4 +29,4 @@ namespace ActsTrk {
 
 }
 
-#endif // ACTSTRKANALYSIS_PIXELCLUSTERANALYSIS_H
+#endif // ACTSTRKANALYSIS_PIXELCLUSTERANALYSISALG_H

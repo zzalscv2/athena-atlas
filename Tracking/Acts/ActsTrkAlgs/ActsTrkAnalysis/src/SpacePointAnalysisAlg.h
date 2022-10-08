@@ -2,8 +2,8 @@
   Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
 */
 
-#ifndef ACTSTRKANALYSIS_SPACEPOINTANALYSIS_H
-#define ACTSTRKANALYSIS_SPACEPOINTANALYSIS_H
+#ifndef ACTSTRKANALYSIS_SPACEPOINTANALYSISALG_H
+#define ACTSTRKANALYSIS_SPACEPOINTANALYSISALG_H
 
 #include "AthenaMonitoring/AthMonitorAlgorithm.h"
 #include "StoreGate/ReadHandleKey.h"
@@ -18,12 +18,12 @@
 
 namespace ActsTrk {
 
-  class SpacePointAnalysis final : 
+  class SpacePointAnalysisAlg final : 
     public AthMonitorAlgorithm {
 
   public:
-    SpacePointAnalysis(const std::string& name, ISvcLocator* pSvcLocator);
-    virtual ~SpacePointAnalysis() override = default;
+    SpacePointAnalysisAlg(const std::string& name, ISvcLocator* pSvcLocator);
+    virtual ~SpacePointAnalysisAlg() override = default;
 
     virtual StatusCode initialize() override;
     virtual StatusCode fillHistograms(const EventContext& ctx) const override;
@@ -38,4 +38,4 @@ namespace ActsTrk {
   };
 }
 
-#endif // ACTSTRKANALYSIS_SPACEPOINTANALYSIS_H
+#endif // ACTSTRKANALYSIS_SPACEPOINTANALYSISALG_H

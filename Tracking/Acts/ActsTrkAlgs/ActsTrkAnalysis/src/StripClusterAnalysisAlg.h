@@ -2,8 +2,8 @@
   Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
 */
 
-#ifndef ACTSTRKANALYSIS_STRIPCLUSTERANALYSIS_H
-#define ACTSTRKANALYSIS_STRIPCLUSTERANALYSIS_H
+#ifndef ACTSTRKANALYSIS_STRIPCLUSTERANALYSISALG_H
+#define ACTSTRKANALYSIS_STRIPCLUSTERANALYSISALG_H
 
 #include "AthenaMonitoring/AthMonitorAlgorithm.h"
 #include "StoreGate/ReadHandleKey.h"
@@ -12,11 +12,11 @@
 
 namespace ActsTrk {
 
-  class StripClusterAnalysis final : 
+  class StripClusterAnalysisAlg final : 
     public AthMonitorAlgorithm {
   public:
-    StripClusterAnalysis(const std::string& name, ISvcLocator* pSvcLocator);
-    virtual ~StripClusterAnalysis() override = default;
+    StripClusterAnalysisAlg(const std::string& name, ISvcLocator* pSvcLocator);
+    virtual ~StripClusterAnalysisAlg() override = default;
 
     virtual StatusCode initialize() override;
     virtual StatusCode fillHistograms(const EventContext& ctx) const override;
