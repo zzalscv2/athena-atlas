@@ -1,10 +1,6 @@
 <!-- Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration -->
 <lcgdict>
 
-  <class name="Measurement" />
-  <class name="MeasurementContainer" 
-	 id="982AECB9-B116-44E0-A7C6-88939B01B050" />
-
   <class name="SpacePointData"
 	 id="E3B251F4-6D90-489E-98F8-2C7B73EA4700" />
 

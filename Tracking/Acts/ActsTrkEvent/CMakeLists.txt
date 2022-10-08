@@ -23,7 +23,6 @@ atlas_add_dictionary( ActsTrkEventDict
 		      ActsTrkEvent/selection.xml
 		      LINK_LIBRARIES xAODCore ActsTrkEvent
 		      DATA_LINKS 
-		      ActsTrk::MeasurementContainer
 		      ActsTrk::SpacePointData
 		      ActsTrk::SpacePointMeasurementDetails
 		      ActsTrk::SpacePointContainer 
