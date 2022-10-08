@@ -1,7 +1,7 @@
 
 //Dear emacs, this is -*-c++-*-
 /*
-  Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
 */
 /**
  * NAME : CaloNoiseSigmaDiff.h
@@ -20,6 +20,6 @@
 typedef std::vector<float> CaloNoiseSigmaDiff;
 
 #include "AthenaKernel/CondCont.h"
-CONDCONT_DEF( CaloNoiseSigmaDiff, 200867267 );
+CONDCONT_MIXED_DEF( CaloNoiseSigmaDiff, 200867267 );
 
 #endif
