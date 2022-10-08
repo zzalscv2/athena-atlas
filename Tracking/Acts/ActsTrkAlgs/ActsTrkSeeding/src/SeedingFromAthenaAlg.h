@@ -2,8 +2,8 @@
   Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
 */
 
-#ifndef ACTSTRKSEEDING_SEEDINGFROMATHENAALGORITHM_H
-#define ACTSTRKSEEDING_SEEDINGFROMATHENAALGORITHM_H 1
+#ifndef ACTSTRKSEEDING_SEEDINGFROMATHENAALG_H
+#define ACTSTRKSEEDING_SEEDINGFROMATHENAALG_H 1
   
 // Base Class
 #include "AthenaBaseComps/AthReentrantAlgorithm.h"
@@ -36,13 +36,13 @@
 
 namespace ActsTrk {
 
-  class SeedingFromAthenaAlgorithm :
+  class SeedingFromAthenaAlg :
     public AthReentrantAlgorithm {
     
   public:
-    SeedingFromAthenaAlgorithm(const std::string &name,
+    SeedingFromAthenaAlg(const std::string &name,
 				   ISvcLocator *pSvcLocator);
-    virtual ~SeedingFromAthenaAlgorithm() = default;
+    virtual ~SeedingFromAthenaAlg() = default;
 
     
     virtual StatusCode initialize() override;
