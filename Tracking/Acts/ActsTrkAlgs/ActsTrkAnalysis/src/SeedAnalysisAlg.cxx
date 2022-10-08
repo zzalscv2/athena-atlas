@@ -2,7 +2,7 @@
   Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
 */
 
-#include "SeedAnalysis.h"
+#include "SeedAnalysisAlg.h"
 
 #include "ReadoutGeometryBase/SiLocalPosition.h" 
 #include "InDetReadoutGeometry/SiDetectorElement.h"
@@ -16,11 +16,11 @@
 
 namespace ActsTrk {
 
-  SeedAnalysis::SeedAnalysis(const std::string& name, ISvcLocator* pSvcLocator)
+  SeedAnalysisAlg::SeedAnalysisAlg(const std::string& name, ISvcLocator* pSvcLocator)
     : AthMonitorAlgorithm(name, pSvcLocator) 
   {}
 
-  StatusCode SeedAnalysis::initialize() {
+  StatusCode SeedAnalysisAlg::initialize() {
     ATH_MSG_INFO("Initializing " << name() << " ...");
 
     ATH_CHECK( m_beamSpotKey.initialize() );
@@ -45,7 +45,7 @@ namespace ActsTrk {
     return AthMonitorAlgorithm::initialize();
   }
 
-  StatusCode SeedAnalysis::fillHistograms(const EventContext& ctx) const {
+  StatusCode SeedAnalysisAlg::fillHistograms(const EventContext& ctx) const {
     ATH_MSG_DEBUG( "Filling Histograms for " << name() << " ... " );
 
     // CONDS
@@ -81,7 +81,7 @@ namespace ActsTrk {
     ATH_MSG_DEBUG( "Retrieved " << seed_collection->size() << " input elements from key " << m_inputSeedColletionKey.key() );
     
     auto monitor_nseed = Monitored::Scalar<int>("Nseed", seed_collection->size());
-    fill("ActsTrkSeedAnalysis", monitor_nseed);
+    fill("ActsTrkSeedAnalysisAlg", monitor_nseed);
 
     // bottom  
     auto monitor_x1 = 
@@ -192,7 +192,7 @@ namespace ActsTrk {
     auto monitor_truth_barcode = Monitored::Collection("truth_barcode", vec_truthBarcode);
     auto monitor_truth_prob = Monitored::Collection("truth_prob", vec_truthProb);
 
-    fill("ActsTrkSeedAnalysis",
+    fill("ActsTrkSeedAnalysisAlg",
 	 monitor_x1, monitor_y1, monitor_z1, monitor_r1,
 	 monitor_x2, monitor_y2, monitor_z2, monitor_r2,
 	 monitor_x3, monitor_y3, monitor_z3, monitor_r3,
@@ -205,10 +205,10 @@ namespace ActsTrk {
     return StatusCode::SUCCESS;
   }
 
-  StatusCode SeedAnalysis::fillTruthHistograms(const EventContext& ctx,
-					       const ActsTrk::SeedContainer& seed_container,
-					       std::vector<int>& truthBarCodeVec,
-					       std::vector<double>& truthProbVec) const
+  StatusCode SeedAnalysisAlg::fillTruthHistograms(const EventContext& ctx,
+						  const ActsTrk::SeedContainer& seed_container,
+						  std::vector<int>& truthBarCodeVec,
+						  std::vector<double>& truthProbVec) const
   {
     ATH_MSG_DEBUG( "Filling Truth Histograms for " << name() << " ... " );
 
@@ -312,14 +312,14 @@ namespace ActsTrk {
     auto monitor_estimated_eta = Monitored::Collection("estimated_eta", estimated_eta);
     auto monitor_pass = Monitored::Collection("passed", vec_pass);
 
-    fill("ActsTrkSeedAnalysis",
+    fill("ActsTrkSeedAnalysisAlg",
 	 monitor_pass,
 	 monitor_estimated_pt, monitor_estimated_eta);
 
     return StatusCode::SUCCESS;
   }
 
-  const Identifier SeedAnalysis::identify(const xAOD::PixelCluster& cluster) const
+  const Identifier SeedAnalysisAlg::identify(const xAOD::PixelCluster& cluster) const
   {
     static const SG::AuxElement::Accessor< ElementLink< InDet::PixelClusterCollection > > pixelLinkAcc("pixelClusterLink");
 
@@ -332,7 +332,7 @@ namespace ActsTrk {
     return (*pixelLink)->identify();
   }
 
-  const Identifier SeedAnalysis::identify(const xAOD::StripCluster& cluster) const
+  const Identifier SeedAnalysisAlg::identify(const xAOD::StripCluster& cluster) const
   {
     static const SG::AuxElement::Accessor< ElementLink< InDet::SCT_ClusterCollection > > stripLinkAcc("sctClusterLink");
 
@@ -346,9 +346,9 @@ namespace ActsTrk {
   }
 
 
-  void SeedAnalysis::matchParticleToSeedClusters(const PRD_MultiTruthCollection* prdTruth, 
-						 const Identifier& id, 
-						 std::map<int, int>& countMap) const {
+  void SeedAnalysisAlg::matchParticleToSeedClusters(const PRD_MultiTruthCollection* prdTruth, 
+						    const Identifier& id, 
+						    std::map<int, int>& countMap) const {
     auto n1 = prdTruth->count(id);
     if (n1 == 0) {
       int bc = 0;
@@ -375,7 +375,7 @@ namespace ActsTrk {
 
 
 
-  std::pair<int, double> SeedAnalysis::findSeedMajorityTruthParticle(const std::map<int, int>& countMap) const {
+  std::pair<int, double> SeedAnalysisAlg::findSeedMajorityTruthParticle(const std::map<int, int>& countMap) const {
     int bestCount = 0;
     int bestBarcode = std::numeric_limits<int>::min();
   
@@ -394,8 +394,8 @@ namespace ActsTrk {
   }
 
   // Same computation as in ActsTrk::SiSpacePointsSeedMaker
-  std::array<float, 7> SeedAnalysis::estimateParameters(const ActsTrk::Seed& seed,
-							float pTPerHelixRadius) const
+  std::array<float, 7> SeedAnalysisAlg::estimateParameters(const ActsTrk::Seed& seed,
+							   float pTPerHelixRadius) const
   {
     auto extractCoordinates = 
       [] (const ActsTrk::SpacePoint* sp) -> std::array<float,4>

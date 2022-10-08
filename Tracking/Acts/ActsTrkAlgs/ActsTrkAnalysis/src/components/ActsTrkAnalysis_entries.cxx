@@ -1,11 +1,15 @@
-#include "src/PixelClusterAnalysis.h"
-#include "src/StripClusterAnalysis.h"
-#include "src/SpacePointAnalysis.h"
-#include "src/SeedAnalysis.h"
-#include "src/EstimatedTrackParamsAnalysis.h"
+/*
+  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+*/
 
-DECLARE_COMPONENT( ActsTrk::PixelClusterAnalysis )
-DECLARE_COMPONENT( ActsTrk::StripClusterAnalysis )
-DECLARE_COMPONENT( ActsTrk::SpacePointAnalysis )
-DECLARE_COMPONENT( ActsTrk::SeedAnalysis )
-DECLARE_COMPONENT( ActsTrk::EstimatedTrackParamsAnalysis )
+#include "src/PixelClusterAnalysisAlg.h"
+#include "src/StripClusterAnalysisAlg.h"
+#include "src/SpacePointAnalysisAlg.h"
+#include "src/SeedAnalysisAlg.h"
+#include "src/EstimatedTrackParamsAnalysisAlg.h"
+
+DECLARE_COMPONENT( ActsTrk::PixelClusterAnalysisAlg )
+DECLARE_COMPONENT( ActsTrk::StripClusterAnalysisAlg )
+DECLARE_COMPONENT( ActsTrk::SpacePointAnalysisAlg )
+DECLARE_COMPONENT( ActsTrk::SeedAnalysisAlg )
+DECLARE_COMPONENT( ActsTrk::EstimatedTrackParamsAnalysisAlg )

@@ -2,7 +2,7 @@
   Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
 */
 
-#include "SpacePointAnalysis.h"
+#include "SpacePointAnalysisAlg.h"
 #include "AthenaMonitoringKernel/Monitored.h"
 #include "InDetIdentifier/PixelID.h"
 #include "InDetIdentifier/SCT_ID.h"
@@ -10,12 +10,12 @@
 #include "xAODMeasurementBase/UncalibratedMeasurementContainer.h"
 
 namespace ActsTrk {
-  SpacePointAnalysis::SpacePointAnalysis(const std::string& name, ISvcLocator *pSvcLocator)
+  SpacePointAnalysisAlg::SpacePointAnalysisAlg(const std::string& name, ISvcLocator *pSvcLocator)
     : AthMonitorAlgorithm(name, pSvcLocator) 
   {}
 
-  StatusCode SpacePointAnalysis::initialize() {
-    ATH_MSG_DEBUG( "Initializing ActsTrk::SpacePointAnalysis" );
+  StatusCode SpacePointAnalysisAlg::initialize() {
+    ATH_MSG_DEBUG( "Initializing " << name() << " ... " );
     
     ATH_CHECK( m_spacePointContainerKey.initialize() );
     ATH_CHECK( m_pixelClusterContainerKey.initialize(m_usePixel) );
@@ -27,8 +27,8 @@ namespace ActsTrk {
     return AthMonitorAlgorithm::initialize();
   }
   
-  StatusCode SpacePointAnalysis::fillHistograms(const EventContext& ctx) const {
-    ATH_MSG_DEBUG(" In ActsTrk::SpacePointAnalysis::execute()" );
+  StatusCode SpacePointAnalysisAlg::fillHistograms(const EventContext& ctx) const {
+    ATH_MSG_DEBUG(" In " << name() << "::fillHistograms()" );
     
     const PixelID *pixelID = nullptr;
     const SCT_ID *stripID = nullptr;
@@ -45,7 +45,7 @@ namespace ActsTrk {
     }
 
     auto monitor_nsp = Monitored::Scalar<int>("Nsp", inputSpacePointContainer->size());
-    fill("ActsTrkSpacePointAnalysis", monitor_nsp);
+    fill("ActsTrkSpacePointAnalysisAlg", monitor_nsp);
     
     std::variant < const xAOD::PixelClusterContainer*, const xAOD::StripClusterContainer* > inputContainer;
     
@@ -176,7 +176,7 @@ namespace ActsTrk {
 					       [] (const auto* spacePoint) -> double
 					       { return spacePoint->varianceZ(); }); 
 
-    fill("ActsTrkSpacePointAnalysis",
+    fill("ActsTrkSpacePointAnalysisAlg",
 	 monitor_barrelEndcap, monitor_layerDisk,
 	 monitor_phiModule, monitor_etaModule, monitor_sideModule,
 	 monitor_isInnermost, monitor_isNextToInnermost,

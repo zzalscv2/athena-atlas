@@ -2,8 +2,8 @@
   Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
 */
 
-#ifndef ACTSTRKANALYSIS_ESTIMATEDTRACKPARAMSANALYSIS_H
-#define ACTSTRKANALYSIS_ESTIMATEDTRACKPARAMSANALYSIS_H
+#ifndef ACTSTRKANALYSIS_ESTIMATEDTRACKPARAMSANALYSISALG_H
+#define ACTSTRKANALYSIS_ESTIMATEDTRACKPARAMSANALYSISALG_H
 
 #include "AthenaMonitoring/AthMonitorAlgorithm.h"
 #include "AthenaMonitoringKernel/Monitored.h"
@@ -12,11 +12,11 @@
 
 namespace ActsTrk {
 
-  class EstimatedTrackParamsAnalysis final :
+  class EstimatedTrackParamsAnalysisAlg final :
     public AthMonitorAlgorithm {
   public:
-    EstimatedTrackParamsAnalysis(const std::string& name, ISvcLocator* pSvcLocator);
-    virtual ~EstimatedTrackParamsAnalysis() override = default;
+    EstimatedTrackParamsAnalysisAlg(const std::string& name, ISvcLocator* pSvcLocator);
+    virtual ~EstimatedTrackParamsAnalysisAlg() override = default;
 
     virtual StatusCode initialize() override;
     virtual StatusCode fillHistograms(const EventContext& ctx) const override;

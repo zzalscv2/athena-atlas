@@ -2,17 +2,17 @@
   Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
 */
 
-#include "PixelClusterAnalysis.h"
+#include "PixelClusterAnalysisAlg.h"
 #include "AthenaMonitoringKernel/Monitored.h"
 
 namespace ActsTrk {
 
-  PixelClusterAnalysis::PixelClusterAnalysis(const std::string& name, ISvcLocator *pSvcLocator)
+  PixelClusterAnalysisAlg::PixelClusterAnalysisAlg(const std::string& name, ISvcLocator *pSvcLocator)
     : AthMonitorAlgorithm(name, pSvcLocator) 
   {}
   
-  StatusCode PixelClusterAnalysis::initialize() {
-    ATH_MSG_DEBUG( "Initializing ActsTrk::PixelClusterAnalysis" );
+  StatusCode PixelClusterAnalysisAlg::initialize() {
+    ATH_MSG_DEBUG( "Initializing " << name() << " ... " );
     
     ATH_CHECK( m_pixelClusterContainerKey.initialize() );
 
@@ -21,8 +21,8 @@ namespace ActsTrk {
     return AthMonitorAlgorithm::initialize();
   }
 
-  StatusCode PixelClusterAnalysis::fillHistograms(const EventContext& ctx) const {
-    ATH_MSG_DEBUG( "In ActsTrk::PixelClusterAnalysis::fillHistograms()" );
+  StatusCode PixelClusterAnalysisAlg::fillHistograms(const EventContext& ctx) const {
+    ATH_MSG_DEBUG( "In " << name() << "::fillHistograms()" );
     
     SG::ReadHandle< xAOD::PixelClusterContainer > inputPixelClusterContainer( m_pixelClusterContainerKey, ctx );
     if (!inputPixelClusterContainer.isValid()){
@@ -122,7 +122,7 @@ namespace ActsTrk {
 					       [] (const auto* cluster) -> int					       
 					       { return cluster->channelsInEta(); });
 
-    fill("ActsTrkClusterAnalysis",
+    fill("ActsTrkClusterAnalysisAlg",
 	 monitor_barrelEndcap, monitor_layerDisk,
 	 monitor_phiModule, monitor_etaModule,
 	 monitor_isInnermost, monitor_isNextToInnermost,

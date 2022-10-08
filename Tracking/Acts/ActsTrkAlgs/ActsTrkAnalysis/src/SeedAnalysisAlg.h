@@ -2,8 +2,8 @@
   Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
 */
 
-#ifndef ACTSTRKANALYSIS_SEEDANALYSIS_H
-#define ACTSTRKANALYSIS_SEEDANALYSIS_H
+#ifndef ACTSTRKANALYSIS_SEEDANALYSISALG_H
+#define ACTSTRKANALYSIS_SEEDANALYSISALG_H
 
 #include "AthenaMonitoring/AthMonitorAlgorithm.h"
 #include "TrkTruthData/PRD_MultiTruthCollection.h"
@@ -33,11 +33,11 @@
 
 namespace ActsTrk {
 
-  class SeedAnalysis final :
+  class SeedAnalysisAlg final :
     public AthMonitorAlgorithm {
   public:
-    SeedAnalysis(const std::string& name, ISvcLocator* pSvcLocator);
-    virtual ~SeedAnalysis() override = default;
+    SeedAnalysisAlg(const std::string& name, ISvcLocator* pSvcLocator);
+    virtual ~SeedAnalysisAlg() override = default;
 
     virtual StatusCode initialize() override;
     virtual StatusCode fillHistograms(const EventContext& ctx) const override;
