@@ -35,7 +35,7 @@ def ActsTrkPixelSpacePointFormationCfg(ConfigFlags,
     kwargs.setdefault("PixelSpacePoints", "ITkPixelSpacePoints")
     kwargs.setdefault("PixelSpacePointData", "ITkPixelSpacePointData")
 
-    acc.addEventAlgo(CompFactory.ActsTrk.PixelSpacePointFormationAlgorithm(name, **kwargs))
+    acc.addEventAlgo(CompFactory.ActsTrk.PixelSpacePointFormationAlg(name, **kwargs))
     return acc
 
 def ActsTrkStripSpacePointFormationCfg(ConfigFlags,
@@ -58,5 +58,5 @@ def ActsTrkStripSpacePointFormationCfg(ConfigFlags,
     kwargs.setdefault("StripOverlapSpacePointData", "ITkStripOverlapSpacePointData")
     kwargs.setdefault("ProcessOverlapForStrip", True)
 
-    acc.addEventAlgo(CompFactory.ActsTrk.StripSpacePointFormationAlgorithm(name, **kwargs))
+    acc.addEventAlgo(CompFactory.ActsTrk.StripSpacePointFormationAlg(name, **kwargs))
     return acc

@@ -2,7 +2,7 @@
   Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
 */
 
-#include "PixelSpacePointFormationAlgorithm.h"
+#include "PixelSpacePointFormationAlg.h"
 
 #include "InDetReadoutGeometry/SiDetectorElement.h"
 #include "PixelReadoutGeometry/PixelModuleDesign.h"
@@ -14,15 +14,15 @@
 namespace ActsTrk {
 
   //------------------------------------------------------------------------
-  PixelSpacePointFormationAlgorithm::PixelSpacePointFormationAlgorithm(const std::string& name,
-                                                                       ISvcLocator* pSvcLocator)
+  PixelSpacePointFormationAlg::PixelSpacePointFormationAlg(const std::string& name,
+							   ISvcLocator* pSvcLocator)
     : AthReentrantAlgorithm(name, pSvcLocator)
     {}
 
   //-----------------------------------------------------------------------
-  StatusCode PixelSpacePointFormationAlgorithm::initialize()
+  StatusCode PixelSpacePointFormationAlg::initialize()
   {
-    ATH_MSG_DEBUG( "PixelSpacePointFormationAlgorithm::initialize()" );
+    ATH_MSG_DEBUG( "Initializing " << name() << " ... " );
 
     ATH_CHECK( m_pixelClusterContainerKey.initialize() );
     ATH_CHECK( m_pixelSpacePointContainerKey.initialize() );
@@ -37,7 +37,7 @@ namespace ActsTrk {
   }
 
   //-------------------------------------------------------------------------
-  StatusCode PixelSpacePointFormationAlgorithm::execute (const EventContext& ctx) const
+  StatusCode PixelSpacePointFormationAlg::execute (const EventContext& ctx) const
   {
     auto nReceivedSPsPixel = Monitored::Scalar<int>( "numPixSpacePoints" , 0 );
     auto mon = Monitored::Group( m_monTool, nReceivedSPsPixel );
