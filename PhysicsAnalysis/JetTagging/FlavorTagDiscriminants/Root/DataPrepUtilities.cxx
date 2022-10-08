@@ -432,10 +432,27 @@ namespace FlavorTagDiscriminants {
           return {
             [=](const Tp* tp) {
               // from the track selector tool
-              if (std::abs(tp->eta()) > 4) return false;
+              if (std::abs(tp->eta()) > 4.0) return false;
               if (tp->pt() <= 1e3) return false;
               if (std::abs(aug.d0(*tp)) >= 1.0) return false;
               if (std::abs(aug.z0SinTheta(*tp)) >= 1.5) return false;
+              return true;
+            }, data_deps
+          };
+          // Loose track selection for DIPS upgrade config
+          // abs(eta) < 4
+          // pt > 0.5 GeV
+          // abs(d0) < 3.5 mm
+          // abs(z0 sin(theta)) < 5.0 mm
+          // No cuts for si hits, si holes and pix holes - only reconstruction selection is applied
+        case TrackSelection::DIPS_LOOSE_UPGRADE:
+          return {
+            [=](const Tp* tp) {
+              // from the track selector tool
+              if (std::abs(tp->eta()) > 4.0) return false;
+              if (tp->pt() <= 0.5e3) return false;
+              if (std::abs(aug.d0(*tp)) >= 3.5) return false;
+              if (std::abs(aug.z0SinTheta(*tp)) >= 5.0) return false;
               return true;
             }, data_deps
           };
@@ -703,6 +720,7 @@ namespace FlavorTagDiscriminants {
       TrkSelRegexes trk_select_regexes {
         {".*_ip3d_.*"_r, TrackSelection::IP3D_2018},
         {".*_dipsTightUpgrade_.*"_r, TrackSelection::DIPS_TIGHT_UPGRADE},
+        {".*_dipsLooseUpgrade_.*"_r, TrackSelection::DIPS_LOOSE_UPGRADE},
         {".*_all_.*"_r, TrackSelection::ALL},
         {".*_dipsLoose202102_.*"_r, TrackSelection::DIPS_LOOSE_202102},
         {".*_loose202102NoIpCuts_.*"_r, TrackSelection::LOOSE_202102_NOIP},
