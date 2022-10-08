@@ -52,6 +52,10 @@ namespace Muon {
 
       /** Rob Data Provider handle */
       ServiceHandle<IROBDataProviderSvc>  m_robDataProvider;
+
+      /**Flag to skip decoding and write empty container**/
+      Gaudi::Property<bool> m_skipDecoding{this, "SkipDecoding", false, "Skip the decoding but still write the container"};
+
   };
 } // end of namespace
 
