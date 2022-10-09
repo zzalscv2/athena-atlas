@@ -944,8 +944,13 @@ class checkFileTrigSize:
 
         ]
         triggerCounterCommon = Counter('triggerCommon',triggerListCommon)
+
         triggerListHLTNav = []
         triggerCounterHLTNav = Counter('triggerHLTNav',triggerListHLTNav)
+
+        triggerListUTT = []
+        triggerCounterUTT = Counter('UTT', triggerListUTT)
+
     
         truthList = [
             'McEventCollection_p4_GEN_AOD',
@@ -961,6 +966,7 @@ class checkFileTrigSize:
         ]
         truthCounter = Counter('truth',truthList)
             
+
         listofTriggerCounters = [
             triggerCounterBjet,
             triggerCounterBphys,
@@ -977,6 +983,8 @@ class checkFileTrigSize:
             triggerCounterSteer,
             triggerCounterL1,
             triggerCounterHLTNav,
+            triggerCounterUTT,
+    
         ]
     
         listofNonTrigCounters = [
@@ -1085,6 +1093,7 @@ class checkFileTrigSize:
 
             elif edm.getCategory(name)  == 'NOTFOUND' and name in triggerListConfigID:
                 self.triggerAlgList.append([name, 'Tracking', float(sizePerEvent)])
+
             elif edm.getCategory(name)  == 'NOTFOUND' and name.startswith("HLTNav_"):
                 self.triggerAlgList.append([name, 'HLTNav', float(sizePerEvent)])
 

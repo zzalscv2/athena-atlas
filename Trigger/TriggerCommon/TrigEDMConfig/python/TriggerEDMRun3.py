@@ -4,7 +4,8 @@
 # Definition of trigger EDM for Run 3
 
 # Concept of categories is kept similar to TriggerEDMRun2.py, categories are:
-#   Bjet, Bphys, Egamma, ID, Jet, L1, MET, MinBias, Muon, Steer, Tau, Calo (new in Run 3)
+# AllowedCategories = ['Bjet', 'Bphys', 'Egamma', 'ID', 'Jet', 'L1', 'MET', 'MinBias', 'Muon', 'Steer', 'Tau', 'Calo', 'UTT']
+# Bjet, Bphys, Egamma, ID, Jet, L1, MET, MinBias, Muon, Steer, Tau, Calo (new in Run 3), UTT (new in Run 3)
 
 # New additions in Run 3:
 #  * Dynamic varialbes/Container slimming: All dyn vars are removed unless explicitly specified to be kept!
@@ -850,40 +851,40 @@ TriggerHLTListRun3 = [
     ('xAOD::VertexAuxContainer#HLT_IDVertex_FSJetAux.',           'BS ESD AODFULL', 'Jet'),
 
     #FSLRT
-    ('xAOD::TrackParticleContainer#HLT_IDTrack_FSLRT_FTF',                  'BS ESD AODFULL', 'Jet'),
-    ('xAOD::TrackParticleAuxContainer#HLT_IDTrack_FSLRT_FTFAux.',          'BS ESD AODFULL', 'Jet'),
+    ('xAOD::TrackParticleContainer#HLT_IDTrack_FSLRT_FTF',                  'BS ESD AODFULL', 'UTT'),
+    ('xAOD::TrackParticleAuxContainer#HLT_IDTrack_FSLRT_FTFAux.',          'BS ESD AODFULL', 'UTT'),
 
-    ('xAOD::VertexContainer#HLT_IDVertex_FSLRT',                  'BS ESD AODFULL', 'Jet'),
-    ('xAOD::VertexAuxContainer#HLT_IDVertex_FSLRTAux.',          'BS ESD AODFULL', 'Jet'),
+    ('xAOD::VertexContainer#HLT_IDVertex_FSLRT',                  'BS ESD AODFULL', 'UTT'),
+    ('xAOD::VertexAuxContainer#HLT_IDVertex_FSLRTAux.',          'BS ESD AODFULL', 'UTT'),
 
-    ('xAOD::TrigCompositeContainer#HLT_FSLRT_TrackCount',                                             'BS ESD AODFULL AODSLIM', 'Jet'),
-    ('xAOD::TrigCompositeAuxContainer#HLT_FSLRT_TrackCountAux.ntrks.pTcuts.z0cuts.counts',            'BS ESD AODFULL AODSLIM', 'Jet'),
+    ('xAOD::TrigCompositeContainer#HLT_FSLRT_TrackCount',                                             'BS ESD AODFULL AODSLIM', 'UTT'),
+    ('xAOD::TrigCompositeAuxContainer#HLT_FSLRT_TrackCountAux.ntrks.pTcuts.z0cuts.counts',            'BS ESD AODFULL AODSLIM', 'UTT'),
 
     #FSLRT PT
-    ('xAOD::TrackParticleContainer#HLT_IDTrack_FSLRT_IDTrig',                  'BS ESD AODFULL', 'Jet'),
-    ('xAOD::TrackParticleAuxContainer#HLT_IDTrack_FSLRT_IDTrigAux.',          'BS ESD AODFULL', 'Jet'),
+    ('xAOD::TrackParticleContainer#HLT_IDTrack_FSLRT_IDTrig',                  'BS ESD AODFULL', 'UTT'),
+    ('xAOD::TrackParticleAuxContainer#HLT_IDTrack_FSLRT_IDTrigAux.',          'BS ESD AODFULL', 'UTT'),
 
     #DisVtx
     # - LRT
-    ('xAOD::TrackParticleContainer#HLT_IDTrack_DVLRT_FTF',          'BS ESD', 'Jet', 'inViews:DVRoIViews'),
-    ('xAOD::TrackParticleAuxContainer#HLT_IDTrack_DVLRT_FTFAux.',   'BS ESD', 'Jet'),
-    ('TrigRoiDescriptorCollection#HLT_Roi_DV',                      'BS ESD', 'Jet'),
+    ('xAOD::TrackParticleContainer#HLT_IDTrack_DVLRT_FTF',          'BS ESD', 'UTT', 'inViews:DVRoIViews'),
+    ('xAOD::TrackParticleAuxContainer#HLT_IDTrack_DVLRT_FTFAux.',   'BS ESD', 'UTT'),
+    ('TrigRoiDescriptorCollection#HLT_Roi_DV',                      'BS ESD', 'UTT'),
     # - Vertex
-    ('xAOD::VertexContainer#HLT_TrigDV_VSIVertex',                 'BS ESD AODFULL', 'Jet', 'inViews:DVRoIViews'),
-    ('xAOD::VertexAuxContainer#HLT_TrigDV_VSIVertexAux.'+VSIVars,  'BS ESD AODFULL', 'Jet'),
-    ('xAOD::VertexContainer#HLT_TrigDV_VSITrkPair',                'BS ESD AODFULL', 'Jet', 'inViews:DVRoIViews'),
-    ('xAOD::VertexAuxContainer#HLT_TrigDV_VSITrkPairAux.'+VSIVars, 'BS ESD AODFULL', 'Jet'),
+    ('xAOD::VertexContainer#HLT_TrigDV_VSIVertex',                 'BS ESD AODFULL', 'UTT', 'inViews:DVRoIViews'),
+    ('xAOD::VertexAuxContainer#HLT_TrigDV_VSIVertexAux.'+VSIVars,  'BS ESD AODFULL', 'UTT'),
+    ('xAOD::VertexContainer#HLT_TrigDV_VSITrkPair',                'BS ESD AODFULL', 'UTT', 'inViews:DVRoIViews'),
+    ('xAOD::VertexAuxContainer#HLT_TrigDV_VSITrkPairAux.'+VSIVars, 'BS ESD AODFULL', 'UTT'),
     # - Hypo
-    ('xAOD::TrigCompositeContainer#HLT_TrigDV_VtxCount',           'BS ESD AODFULL', 'Jet'),
-    ('xAOD::TrigCompositeAuxContainer#HLT_TrigDV_VtxCountAux.vsiHypo_nVtx.vsiHypo_pTcut.vsiHypo_rCut.vsiHypo_nTrkCut.vsiHypo_counts',  'BS ESD AODFULL', 'Jet'),
+    ('xAOD::TrigCompositeContainer#HLT_TrigDV_VtxCount',           'BS ESD AODFULL', 'UTT'),
+    ('xAOD::TrigCompositeAuxContainer#HLT_TrigDV_VtxCountAux.vsiHypo_nVtx.vsiHypo_pTcut.vsiHypo_rCut.vsiHypo_nTrkCut.vsiHypo_counts',  'BS ESD AODFULL', 'ID'),
 
     #Fullscan TrigVSI
-    ('xAOD::VertexContainer#HLT_TrigVSIVertex',                 'BS ESD AODFULL', 'Jet'),
-    ('xAOD::VertexAuxContainer#HLT_TrigVSIVertexAux.'+VSIVars,  'BS ESD AODFULL', 'Jet'),
-    ('xAOD::VertexContainer#HLT_TrigVSITrkPair',                'BS ESD AODFULL', 'Jet'),
-    ('xAOD::VertexAuxContainer#HLT_TrigVSITrkPairAux.'+VSIVars, 'BS ESD AODFULL', 'Jet'),
-    ('xAOD::TrigCompositeContainer#HLT_TrigVSI_VtxCount',       'BS ESD AODFULL', 'Jet'),
-    ('xAOD::TrigCompositeAuxContainer#HLT_TrigVSI_VtxCountAux.vsiHypo_nVtx.vsiHypo_pTcut.vsiHypo_rCut.vsiHypo_nTrkCut.vsiHypo_counts',  'BS ESD AODFULL', 'Jet'),
+    ('xAOD::VertexContainer#HLT_TrigVSIVertex',                 'BS ESD AODFULL', 'UTT'),
+    ('xAOD::VertexAuxContainer#HLT_TrigVSIVertexAux.'+VSIVars,  'BS ESD AODFULL', 'UTT'),
+    ('xAOD::VertexContainer#HLT_TrigVSITrkPair',                'BS ESD AODFULL', 'UTT'),
+    ('xAOD::VertexAuxContainer#HLT_TrigVSITrkPairAux.'+VSIVars, 'BS ESD AODFULL', 'UTT'),
+    ('xAOD::TrigCompositeContainer#HLT_TrigVSI_VtxCount',       'BS ESD AODFULL', 'UTT'),
+    ('xAOD::TrigCompositeAuxContainer#HLT_TrigVSI_VtxCountAux.vsiHypo_nVtx.vsiHypo_pTcut.vsiHypo_rCut.vsiHypo_nTrkCut.vsiHypo_counts',  'BS ESD AODFULL', 'UTT'),
 
     # HI event shape
     ('xAOD::HIEventShapeContainer#HLT_HIEventShapeEG',          'BS ESD AODCOMM',   'Egamma'),
@@ -1097,22 +1098,22 @@ TriggerHLTListRun3 = [
 
     # UTT
     # hit-based displaced vertex
-    ('xAOD::TrigCompositeContainer#HLT_HitDV',                             'BS ESD AODFULL AODSLIM', 'ID'),
-    ('xAOD::TrigCompositeAuxContainer#HLT_HitDVAux.'+hitDVVars,            'BS ESD AODFULL AODSLIM', 'ID'),
+    ('xAOD::TrigCompositeContainer#HLT_HitDV',                             'BS ESD AODFULL AODSLIM', 'UTT'),
+    ('xAOD::TrigCompositeAuxContainer#HLT_HitDVAux.'+hitDVVars,            'BS ESD AODFULL AODSLIM', 'UTT'),
 
     # dE/dx
-    ('xAOD::TrigCompositeContainer#HLT_dEdxTrk',                           'BS ESD AODCOMM', 'ID'),
-    ('xAOD::TrigCompositeAuxContainer#HLT_dEdxTrkAux.'+dEdxTrkVars,        'BS ESD AODCOMM', 'ID'),
-    ('xAOD::TrigCompositeContainer#HLT_dEdxHit',                           'BS ESD', 'ID'),
-    ('xAOD::TrigCompositeAuxContainer#HLT_dEdxHitAux.'+dEdxHitVars,        'BS ESD', 'ID'),
-    ('xAOD::TrigCompositeContainer#HLT_HPtdEdxTrk',                        'BS ESD AODFULL AODSLIM', 'ID'),
-    ('xAOD::TrigCompositeAuxContainer#HLT_HPtdEdxTrkAux.'+HPtdEdxTrkVars,  'BS ESD AODFULL AODSLIM', 'ID'),
+    ('xAOD::TrigCompositeContainer#HLT_dEdxTrk',                           'BS ESD AODCOMM', 'UTT'),
+    ('xAOD::TrigCompositeAuxContainer#HLT_dEdxTrkAux.'+dEdxTrkVars,        'BS ESD AODCOMM', 'UTT'),
+    ('xAOD::TrigCompositeContainer#HLT_dEdxHit',                           'BS ESD', 'UTT'),
+    ('xAOD::TrigCompositeAuxContainer#HLT_dEdxHitAux.'+dEdxHitVars,        'BS ESD', 'UTT'),
+    ('xAOD::TrigCompositeContainer#HLT_HPtdEdxTrk',                        'BS ESD AODFULL AODSLIM', 'UTT'),
+    ('xAOD::TrigCompositeAuxContainer#HLT_HPtdEdxTrkAux.'+HPtdEdxTrkVars,  'BS ESD AODFULL AODSLIM', 'UTT'),
 
     # disappearing track
-    ('xAOD::TrigCompositeContainer#HLT_DisTrkCand',                           'BS ESD AODCOMM', 'ID'),
-    ('xAOD::TrigCompositeAuxContainer#HLT_DisTrkCandAux.'+DisTrkCandVars,     'BS ESD AODCOMM', 'ID'),
-    ('xAOD::TrigCompositeContainer#HLT_DisTrkBDTSel',                         'BS ESD AODFULL AODSLIM', 'ID'),
-    ('xAOD::TrigCompositeAuxContainer#HLT_DisTrkBDTSelAux.'+DisTrkBDTSelVars, 'BS ESD AODFULL AODSLIM', 'ID'),
+    ('xAOD::TrigCompositeContainer#HLT_DisTrkCand',                           'BS ESD AODCOMM', 'UTT'),
+    ('xAOD::TrigCompositeAuxContainer#HLT_DisTrkCandAux.'+DisTrkCandVars,     'BS ESD AODCOMM', 'UTT'),
+    ('xAOD::TrigCompositeContainer#HLT_DisTrkBDTSel',                         'BS ESD AODFULL AODSLIM', 'UTT'),
+    ('xAOD::TrigCompositeAuxContainer#HLT_DisTrkBDTSelAux.'+DisTrkBDTSelVars, 'BS ESD AODFULL AODSLIM', 'UTT'),
 
     #
     ('xAOD::TrigCompositeContainer#HLTNav_R2ToR3Summary',   'ESD AODFULL AODSLIM AODBLSSLIM', 'Steer'),
