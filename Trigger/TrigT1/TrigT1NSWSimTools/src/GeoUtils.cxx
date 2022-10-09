@@ -1,48 +1,20 @@
 /*
-  Copyright (C) 2002-2018 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "TrigT1NSWSimTools/GeoUtils.h"
-#include <cmath>
-#include <TVector3.h>
-#include <algorithm>
-
 
 namespace NSWL1{
 
 float eta(float x,float y,float z){
-    TVector3 V(x,y,z);
+    ROOT::Math::XYZVector V(x,y,z);
     return V.Eta();
 }
 
-
-float phi(float x,float y){
-    TVector2 V(x,y); 
-   float angle= V.Phi();
-   return TVector2::Phi_mpi_pi(angle);
-}
-
 float phi(float x, float y, float z){
-    TVector3 V(x,y,z);
+    ROOT::Math::XYZVector V(x,y,z);
     return V.Phi();
-    
 }
-
-Polygon etaphi2xyTransform(const Polygon& p, float Z){
-    //loop over vertices :
-    Vertices vts;
-    for(const auto& v : boost::geometry::exterior_ring(p)){
-     float eta=coordinate<0>(v);
-     float phi=coordinate<1>(v);
-     float z=Z;
-     float theta=2*std::atan(std::exp(-1*eta));
-     float x=z*std::tan(theta)*std::cos(phi);
-     float y=z*std::tan(theta)*std::sin(phi);
-     vts.push_back(Vertex(x,y));
-    }
-    return buildPolygon(vts);
-}
-
 
 Polygon Project(const Polygon& p,float Zinit,float Zfin){
     //loop over vertices
@@ -50,17 +22,14 @@ Polygon Project(const Polygon& p,float Zinit,float Zfin){
     for(const auto& v : boost::geometry::exterior_ring(p)){
         float x=coordinate<0>(v);
         float y=coordinate<1>(v);
-        float z=Zinit;        
-        float et=eta(x,y,z);
-        float p=phi(x,y,z);
-        float theta=2*std::atan(std::exp(-1*et));
-        float r=Zfin*std::tan(theta);
-        float xproj=r*std::cos(p);
-        float yproj=r*std::sin(p);
-        vt.push_back(Vertex(xproj,yproj));
+        ROOT::Math::XYZVector vec(x, y, Zinit);
+        float phi=vec.Phi();
+        float theta=vec.Theta();
+        vec.SetZ(Zfin);
+        ROOT::Math::Polar3DVector projectedVec(vec.R(), theta, phi);
+        vt.push_back(Vertex(projectedVec.X(), projectedVec.Y()));
     }
     return buildPolygon(vt);
-    
 }
 
 int nVertices(const Polygon& p){
@@ -68,7 +37,6 @@ int nVertices(const Polygon& p){
 }
 
 Vertex getVertex(const Polygon& p,unsigned int i){
-    
     return boost::geometry::exterior_ring(p)[i];
 }
 
@@ -139,12 +107,10 @@ Polygon globalToLocal(const Polygon& pol,float z,const Trk::PlaneSurface & surf 
                 float x=coordinate<0>(v);
                 float y=coordinate<1>(v);
                 Amg::Vector2D local_corner;
-                surf.globalToLocal(Amg::Vector3D(x,y,z),Amg::Vector3D(),local_corner); 
+                surf.globalToLocal(Amg::Vector3D(x,y,z),Amg::Vector3D(),local_corner);
                 local_vertices.emplace_back(Vertex(local_corner.x(),local_corner.y()));
     }
-    
     return buildPolygon(local_vertices);
-    
 }
 
 
@@ -155,7 +121,7 @@ Polygon NilPolygon(){
         Vertex(0,0),
         Vertex(0,0),
         Vertex(0,0),
-        Vertex(0,0) 
+        Vertex(0,0)
     };
     return buildPolygon(nil);
 }
