@@ -47,6 +47,7 @@ from AthenaCommon.Configurable import ConfigurableRun3Behavior
 from AthenaConfiguration.AllConfigFlags import ConfigFlags
 from EventBookkeeperTools.EventBookkeeperToolsConfig import CutFlowSvcCfg
 
+ConfigFlags.Input.Files = [testFile]
 with ConfigurableRun3Behavior():
     cfg = CutFlowSvcCfg(ConfigFlags)
 
