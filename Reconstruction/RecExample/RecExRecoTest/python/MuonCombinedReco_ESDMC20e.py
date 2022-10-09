@@ -13,6 +13,9 @@ if __name__=="__main__":
 
     from AthenaPoolCnvSvc.PoolReadConfig import PoolReadCfg
     acc.merge(PoolReadCfg(ConfigFlags))
+    
+    from xAODTruthCnv.xAODTruthCnvConfig import GEN_AOD2xAODCfg
+    acc.merge(GEN_AOD2xAODCfg(ConfigFlags))
 
     from MuonCombinedConfig.MuonCombinedReconstructionConfig import MuonCombinedReconstructionCfg
     acc.merge(MuonCombinedReconstructionCfg(ConfigFlags))
