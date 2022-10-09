@@ -256,7 +256,7 @@ IOVSvcTool::handle(const Incident &inc) {
      if (m_first) {
         for (auto e : m_ignoredProxyNames) {
            DataProxy* proxy = p_cndSvc->proxy(e.first,e.second);
-
+           ATH_MSG_DEBUG("retrieving "<<fullProxyName(e.first,e.second));
            if (proxy == nullptr) {
               ATH_MSG_ERROR("ignoreProxy: could not retrieve proxy "
                             << fullProxyName(e.first,e.second) << " from store");

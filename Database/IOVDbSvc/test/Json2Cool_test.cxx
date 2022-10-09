@@ -37,36 +37,30 @@
 #include <string>
 #include <sstream>
 
+using namespace std::string_literals;
 using namespace IOVDbNamespace;
 using namespace cool;
-const auto pixelJson=R"foo({"node_description" : "<timeStamp>run-lumi</timeStamp><addrHeader><address_header service_type=\"71\" clid=\"1238547719\" /></addrHeader><typeName>CondAttrListCollection</typeName>", "folder_payloadspec": "stave: Int32, eta: Int32, mag: Float, base: Float, free: Float", "iov" : [0, 4294967295], "data_array" : [{ "100" : [ 0, 0, 0, 0, 0]},{ "200" : [ 1, 0, 0.3, 0, 0]}]})foo";
-
+const auto larJson=R"foo({"data":{"0":["[DB=8C26DCEB-1065-E011-8322-00145EDD7651][CNT=CollectionTree(CaloRec::CaloCellPositionShift/LArCellPositionShift)][CLID=3B3CCC72-7238-468E-B25E-6F85BA5C9D64][TECH=00000202][OID=00000003-00000000]"]}})foo";
+const std::string spec="PoolRef:String4k";
 
 BOOST_AUTO_TEST_SUITE(Json2CoolTest)
   BOOST_AUTO_TEST_CASE(Constructor){
     BasicFolder b;
-    std::istringstream initializerStream(pixelJson);
-    BOOST_CHECK_NO_THROW(Json2Cool j(initializerStream,b));
+    std::istringstream initializerStream(larJson);
+    BOOST_CHECK_NO_THROW(Json2Cool j(initializerStream,b, spec));
     BOOST_CHECK(b.empty() == false);
   }
   BOOST_AUTO_TEST_CASE(convertedProperties){
     auto pSpec=new coral::AttributeListSpecification;
-    pSpec->extend<int>("stave");
-    pSpec->extend<int>("eta");
-    pSpec->extend<float>("mag");
-    pSpec->extend<float>("base");
-    pSpec->extend<float>("free");
+    pSpec->extend<std::string>("PoolRef");
     coral::AttributeList attrList(*pSpec, true);
-    attrList[0].setValue(1);
-    attrList[1].setValue(0);
-    attrList[2].setValue(0.3f);
-    attrList[3].setValue(0.f);
-    attrList[4].setValue(0.f);
+    //MUST use string literal suffix 's' to set the value to a string
+    attrList[0].setValue("[DB=8C26DCEB-1065-E011-8322-00145EDD7651][CNT=CollectionTree(CaloRec::CaloCellPositionShift/LArCellPositionShift)][CLID=3B3CCC72-7238-468E-B25E-6F85BA5C9D64][TECH=00000202][OID=00000003-00000000]"s);
     BasicFolder b;
-    std::istringstream initializerStream(pixelJson);
-    BOOST_CHECK_NO_THROW(Json2Cool j(initializerStream,b));
-    BOOST_CHECK(b.getPayload(200) == attrList);
-    const std::pair<cool::ValidityKey, cool::ValidityKey> refIov(0, 4294967295);
+    std::istringstream initializerStream(larJson);
+    BOOST_CHECK_NO_THROW(Json2Cool j(initializerStream,b, spec));
+    BOOST_CHECK(b.getPayload(0) == attrList);
+    const std::pair<cool::ValidityKey, cool::ValidityKey> refIov(0, 9223372036854775807);
     BOOST_CHECK(b.iov() == refIov);
   }
   
@@ -86,7 +80,7 @@ BOOST_AUTO_TEST_SUITE(Json2CoolTest)
     referenceSpec->extend("ROB", StorageType::Int32);
     referenceSpec->extend("BCIDOffset", StorageType::Int16);
     referenceSpec->extend("AName", StorageType::String255);
-    const std::string jsonValues="[1,2,3,\"purple\"]";
+    const std::string jsonValues="[\"1\",\"2\",\"3\",\"purple\"]";
     std::istringstream initializerStream(jsonValues);
     nlohmann::json j;
     initializerStream >>j;

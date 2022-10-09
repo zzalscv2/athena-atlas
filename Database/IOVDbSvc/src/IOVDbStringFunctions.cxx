@@ -100,6 +100,14 @@ namespace IOVDbNamespace{
     return std::regex_replace(original, re,"\"");
   }
   
+  std::string
+  unescapeBackslash(const std::string & original){
+    const std::string regex=R"delim([\\]+)delim";
+    const std::string replace=R"delim(\)delim";
+    const std::regex re(regex);
+    return std::regex_replace(original, re,replace);
+  }
+  
   std::string 
   sanitiseFilename(const std::string & fname){
     std::string newName{fname};

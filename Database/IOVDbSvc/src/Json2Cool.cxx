@@ -11,6 +11,7 @@
 #include "CoralBase/Attribute.h"
 #include "CxxUtils/checker_macros.h"
 #include "boost/regex.hpp"
+#include "Base64Codec.h"
 #include <stdexcept>
 #include <iostream>
 
@@ -49,12 +50,14 @@ const std::map<std::string, cool::StorageType::TypeId> typeCorrespondance={
 namespace IOVDbNamespace{
 
 
-Json2Cool::Json2Cool(std::istream & stream, BasicFolder & b):m_basicFolder(b){
-   init(stream);
+Json2Cool::Json2Cool(std::istream & stream, BasicFolder & b, const std::string & specString):m_basicFolder(b){
+   init(stream, specString);
   }
   
   void
-  Json2Cool::init(std::istream & s){
+  Json2Cool::init(std::istream & s, const std::string & specString){
+    //temporary fudge: extend iov from 0 to infinity
+    const std::pair<cool::ValidityKey, cool::ValidityKey> iov(0, cool::ValidityKeyMax);
     if (not s.good()){
       const std::string msg("Json2Cool constructor; Input is invalid and could not be opened.");
       throw std::runtime_error(msg);
@@ -66,14 +69,13 @@ Json2Cool::Json2Cool(std::istream & stream, BasicFolder & b):m_basicFolder(b){
         std::cout<<"ERROR AT LINE "<<__LINE__<<" of "<<__FILE__<<std::endl;
         std::cout<<e.what()<<std::endl; //typically a parsing error
       }
-      const std::string specString=j["folder_payloadspec"];
-      const std::string description=j["node_description"];
-      m_isVectorPayload =(description.find("CondAttrListVec") != std::string::npos);
       m_sharedSpec = parsePayloadSpec(specString);
-      const auto & payload=j["data_array"];//payload is an array in any case
-      m_basicFolder.setVectorPayloadFlag(m_isVectorPayload);
-      const auto & iovFromFile=j["iov"];//iov is a two-element array
-      const std::pair<cool::ValidityKey, cool::ValidityKey> iov(iovFromFile[0], iovFromFile[1]);
+      const auto & payload=j["data"];//payload is an object in any case, of form {"0":["datastring"]}
+      //keep these lines for reference: iov handling is not yet implemented, but should be
+      //m_basicFolder.setVectorPayloadFlag(m_isVectorPayload);
+      //const auto & iovFromFile=j["iov"];//iov is a two-element array
+      //const std::pair<cool::ValidityKey, cool::ValidityKey> iov(iovFromFile[0], iovFromFile[1]);
+      m_isVectorPayload = false;
       m_basicFolder.setIov(iov);
       if (m_isVectorPayload){
         for (json::const_iterator k=payload.begin();k!=payload.end();++k){ //k are {"0":}
@@ -95,14 +97,11 @@ Json2Cool::Json2Cool(std::istream & stream, BasicFolder & b):m_basicFolder(b){
       } else {
         for (json::const_iterator i=payload.begin();i!=payload.end();++i){
           const json f=i.value();
-          for (json::const_iterator k=f.begin();k!=f.end();++k){
-            const std::string keyString=k.key();
-            const long long key=std::stoll(keyString);
-            auto & val=k.value();
-            auto r=createAttributeList(m_sharedSpec,val);
-            const auto & attList=r.attributeList();
-            m_basicFolder.addChannelPayload(key, attList);
-          }
+          const std::string ks=i.key();
+          const long long key=std::stoll(ks);
+          auto r=createAttributeList(m_sharedSpec,f);
+          const auto & attList=r.attributeList();
+          m_basicFolder.addChannelPayload(key, attList);
         }
       }
     }
@@ -116,7 +115,7 @@ Json2Cool::Json2Cool(std::istream & stream, BasicFolder & b):m_basicFolder(b){
     std::string input(stringSpecification);
     auto spec = new cool::RecordSpecification();
     
-    std::string regex=R"delim(([^\s]*):\s?([^\s,]*),?)delim";
+    std::string regex=R"delim(([^\s,:]*):\s?([^\s,]*),?)delim";
     boost::regex expression(regex);
     boost::smatch what;
     
@@ -128,6 +127,7 @@ Json2Cool::Json2Cool(std::istream & stream, BasicFolder & b):m_basicFolder(b){
       spec->extend(n, typeCorrespondance.find(t)->second);
       input = what.suffix();
       match=boost::regex_search(input, what, expression);
+      
     }
     return spec;
   }
@@ -136,102 +136,108 @@ Json2Cool::Json2Cool(std::istream & stream, BasicFolder & b):m_basicFolder(b){
   Json2Cool::createAttributeList(cool::RecordSpecification * pSpec, const nlohmann::json & j){
     cool::Record a(*pSpec);
     unsigned int s=a.size();
+   
     json::const_iterator it = j.begin();
     for (unsigned int i(0);i!=s;++i){
       auto & f=a[i];
-      const auto & v = it.value();
+      if (it == j.end()){
+        continue;
+      }
+      const auto  thisVal = it.value();
       ++it;
+      
       try{
         // cool::Record does not provide non-const access to AttributeList.
         // But this is safe because we are filling a local instance.
         auto & att ATLAS_THREAD_SAFE = const_cast<coral::Attribute&>(a.attributeList()[i]);
-        if (v.is_null()){
+        if (thisVal.is_null()){
           att.setNull();
           continue;
         }
-        if (v.is_string()){
-          const std::string & thisVal=v;
-          att.setValue<std::string>(thisVal);
-        } else {
-          auto & thisVal=v;
-          //nasty
-        
-          switch (f.storageType().id()){
-            case (StorageType::Bool):
-            {
-              const bool newVal=thisVal;
-              att.setValue<bool>(newVal);
-            }
-            break;
-            case (StorageType::UChar):
-            {
-              const unsigned char newVal=thisVal;
-              att.setValue<unsigned char>(newVal);
-            }
-            break;
-            case (StorageType::Int16):
-            {
-              const short newVal=thisVal;
-              att.setValue<short>(newVal);
-            }
-            break;
-            case (StorageType::UInt16):
-            {
-              const unsigned short newVal=thisVal;
-              att.setValue<unsigned short>(newVal);
-            }
-            break;
-          
-            case (StorageType::Int32):
-            {
-              const int newVal=thisVal;
-              att.setValue<int>(newVal);
-            }
-            break;
-            case (StorageType::UInt32):
-            {
-              const unsigned int newVal=thisVal;
-              att.setValue<unsigned int>(newVal);
-            }
-            break;
-            case (StorageType::UInt63):
-            {
-              const unsigned long long newVal=thisVal;
-              att.setValue<unsigned long long>(newVal);
-            }
-            break;
-            case (StorageType::Int64):
-            {
-              const  long long newVal=thisVal;
-              att.setValue< long long>(newVal);
-            }
-            break;
-            case (StorageType::Float):
-            {
-              const  float newVal=thisVal;
-              att.setValue<float>(newVal);
-            }
-            break;
-            case (StorageType::Double):
-            {
-              const  double newVal=thisVal;
-              att.setValue<double>(newVal);
-            }
-            break;
-            
-            case (StorageType::String255):
-            case (StorageType::String4k):
-            case (StorageType::String64k):
-            case (StorageType::String16M):
-            {
-              const  std::string newVal=thisVal;
-              att.setValue<std::string>(newVal);
-            }
-            break;
-            default:
-            //nop
-            break;
+        switch (f.storageType().id()){
+          case (StorageType::Bool):
+          {
+            const bool newVal=(thisVal.get<std::string>() == "true");
+            att.setValue<bool>(newVal);
           }
+          break;
+          case (StorageType::UChar):
+          {
+            const unsigned char newVal=std::stoul(thisVal.get<std::string>());
+            att.setValue<unsigned char>(newVal);
+          }
+          break;
+          case (StorageType::Int16):
+          {
+            const short newVal=std::stol(thisVal.get<std::string>());
+            att.setValue<short>(newVal);
+          }
+          break;
+          case (StorageType::UInt16):
+          {
+            const unsigned short newVal=std::stoul(thisVal.get<std::string>());
+            att.setValue<unsigned short>(newVal);
+          }
+          break;
+        
+          case (StorageType::Int32):
+          {
+            const int newVal=std::stoi(thisVal.get<std::string>());
+            att.setValue<int>(newVal);
+          }
+          break;
+          case (StorageType::UInt32):
+          {
+            const std::string valString=thisVal.get<std::string>();
+            const unsigned int newVal=std::stoull(valString);
+            att.setValue<unsigned int>(newVal);
+          }
+          break;
+          case (StorageType::UInt63):
+          {
+            const unsigned long long newVal=thisVal;
+            att.setValue<unsigned long long>(newVal);
+          }
+          break;
+          case (StorageType::Int64):
+          {
+            const  long long newVal=std::stoll(thisVal.get<std::string>());
+            att.setValue< long long>(newVal);
+          }
+          break;
+          case (StorageType::Float):
+          {
+            const  float newVal=std::stof(thisVal.get<std::string>());;
+            att.setValue<float>(newVal);
+          }
+          break;
+          case (StorageType::Double):
+          {
+            const  double newVal=std::stod(thisVal.get<std::string>());
+            att.setValue<double>(newVal);
+          }
+          break;
+          
+          case (StorageType::String255):
+          case (StorageType::String4k):
+          case (StorageType::String64k):
+          case (StorageType::String16M):
+          {
+            const  std::string newVal=thisVal;
+            att.setValue<std::string>(newVal);
+          }
+          break;
+          case (StorageType::Blob16M):
+          {
+            const std::string & s = thisVal.get<std::string>();
+            auto blob = base64Decode(s);
+            att.setValue<coral::Blob>(blob);
+          }
+          break;
+          default:
+          //nop
+          std::cout<<"UNTREATED TYPE!"<<std::endl;
+          break;
         }
       } catch (json::exception& e){
         std::cout<<e.what()<<std::endl;

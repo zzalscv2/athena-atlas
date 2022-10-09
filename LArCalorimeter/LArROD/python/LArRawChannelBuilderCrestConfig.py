@@ -109,5 +109,8 @@ if __name__=="__main__":
     
     DumpLArRawChannels=CompFactory.DumpLArRawChannels
     acc.addEventAlgo(DumpLArRawChannels(LArRawChannelContainerName="LArRawChannels_FromDigits",),sequenceName="AthAlgSeq")
-    
+    acc.getService("IOVDbSvc").GlobalTag="CREST-RUN12-SDR-25-MC"
+    acc.getService("IOVDbSvc").Source="CREST"
+    acc.getService("IOVDbSvc").OutputLevel=DEBUG
+    acc.getService("IOVDbSvc").DBInstance=""
     acc.run(3)
