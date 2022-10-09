@@ -80,7 +80,7 @@ StatusCode jFexInputByteStreamTool::convertFromBS(const std::vector<const ROBF*>
         
         //There is no data to decode.. not even the ROD trailers
         if(rob->rod_ndata() <= 0){
-            ATH_MSG_WARNING(C.B_RED<<"  No ROD words to decode: " << rob->rod_ndata() <<" in ROB 0x"<< std::hex << rob->rob_source_id()<< std::dec <<". Skipping"<<C.END);
+            ATH_MSG_DEBUG(C.B_RED<<"  No ROD words to decode: " << rob->rod_ndata() <<" in ROB 0x"<< std::hex << rob->rob_source_id()<< std::dec <<". Skipping"<<C.END);
             continue;
         }
         
