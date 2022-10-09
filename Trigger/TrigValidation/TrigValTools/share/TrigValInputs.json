@@ -77,7 +77,7 @@
         "source":"data",
         "format":"BS",
         "paths": [
-            "/cvmfs/atlas-nightlies.cern.ch/repo/data/data-art/TrigP1Test/data17_13TeV.00341615.physics_EnhancedBias.merge.RAW._lb0550._SFO-8._0001.1"
+            "/cvmfs/atlas-nightlies.cern.ch/repo/data/data-art/TrigP1Test/data22_13p6TeV.00428770.express_express.merge.RAW._lb0221._SFO-ALL._0001.1"
         ]
     },
     "ttbar_mc16": {
