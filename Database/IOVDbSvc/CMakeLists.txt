@@ -145,8 +145,8 @@ atlas_add_test( BasicFolder_test
    POST_EXEC_SCRIPT "nopost.sh" )
 
 atlas_add_test( Json2Cool_test
-   SOURCES test/Json2Cool_test.cxx src/Json2Cool.cxx src/BasicFolder.cxx
-   src/IOVDbStringFunctions.cxx
+   SOURCES test/Json2Cool_test.cxx src/Json2Cool.cxx src/BasicFolder.cxx 
+   src/IOVDbStringFunctions.cxx src/Base64Codec.cxx 
    INCLUDE_DIRS ${Boost_INCLUDE_DIRS} ${COOL_INCLUDE_DIRS} ${CORAL_INCLUDE_DIRS}
    LINK_LIBRARIES ${Boost_LIBRARIES} ${COOL_LIBRARIES} ${CORAL_LIBRARIES}
    nlohmann_json::nlohmann_json CxxUtils

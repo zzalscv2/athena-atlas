@@ -22,7 +22,7 @@ namespace IOVDbNamespace {
   class Json2Cool {
   public:
     
-    Json2Cool(std::istream & stream, BasicFolder & b);
+    Json2Cool(std::istream & stream, BasicFolder & b, const std::string &specString);
     ~Json2Cool();
     
     static cool::Record 
@@ -32,7 +32,7 @@ namespace IOVDbNamespace {
     parsePayloadSpec(const std::string & stringSpecification);
     
   private:
-    void init(std::istream & stream);
+    void init(std::istream & stream, const std::string & specString);
     cool::RecordSpecification * m_sharedSpec;
     //
     bool m_isVectorPayload;

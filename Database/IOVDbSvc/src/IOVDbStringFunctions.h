@@ -143,6 +143,9 @@ namespace IOVDbNamespace{
   
   std::string
   unescapeQuotes(const std::string & original);
+  
+  std::string
+  unescapeBackslash(const std::string & original);
   //! Parse string of format "A:X::B:C" to "A" , "X::B", "C"
   std::vector<std::string>
   parseLinkNames(const std::string &linktext);

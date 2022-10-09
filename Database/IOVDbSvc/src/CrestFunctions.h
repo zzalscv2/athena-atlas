@@ -11,7 +11,7 @@
 
 #include <vector>
 #include <string>
-#include <map>
+#include <map> //also contains std::pair
 
 #include "CoolKernel/ChannelId.h"
 
@@ -29,10 +29,10 @@ namespace IOVDbNamespace{
   std::string 
   getPayloadForHash(const std::string & hash, const bool testing=false);
   
-  std::vector<cool::ChannelId> 
+  std::pair<std::vector<cool::ChannelId> , std::vector<std::string>>
   extractChannelListFromJson(const std::string & jsonReply);
 
-  std::vector<cool::ChannelId> 
+  std::pair<std::vector<cool::ChannelId> , std::vector<std::string>>
   channelListForTag(const std::string & tag, const bool testing=false);
   
   std::map<cool::ChannelId, std::string> 

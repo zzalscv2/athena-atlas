@@ -5,9 +5,7 @@
 // IOVDbFolder.cxx - helper class for IOVDbSvc to manage folder & data cache
 // Richard Hawkings, started 24/11/08
 
-#include <sstream>
-#include <stdexcept>
-#include <fstream>
+
 
 
 #include "GaudiKernel/Bootstrap.h"
@@ -57,6 +55,9 @@
 #include "BasicFolder.h"
 
 #include "CrestFunctions.h"
+#include <sstream>
+#include <stdexcept>
+#include <fstream>
 
 using namespace IOVDbNamespace;
 
@@ -228,10 +229,12 @@ IOVDbFolder::loadCache(const cool::ValidityKey vkey,
     const std::string  completeTag=jsonTagName(globalTag, m_foldername);
     ATH_MSG_INFO("Download tag would be: "<<completeTag);
     std::string reply=getPayloadForTag(completeTag);
+    
     //
     std::istringstream ss(reply);
+    const auto & specString =  payloadSpecificationForTag(completeTag);
     //basic folder now contains the info
-    Json2Cool inputJson(ss, b);
+    Json2Cool inputJson(ss, b, specString);
     if (b.empty()){
       ATH_MSG_FATAL("Reading channel data from "<<m_foldername<<" failed.");
       return false;
@@ -314,7 +317,7 @@ IOVDbFolder::loadCache(const cool::ValidityKey vkey,
     // access COOL inside try/catch in case of using stale connection
     unsigned int attempts=0;
     
-    ATH_MSG_DEBUG( "Expecting to see " << nChannelsExpected << " channels" );
+    ATH_MSG_DEBUG( "loadCache: Expecting to see " << nChannelsExpected << " channels" );
     //
     while (attempts<2 && !retrievedone) {
       ++attempts;
@@ -330,7 +333,6 @@ IOVDbFolder::loadCache(const cool::ValidityKey vkey,
         // resolve the tag for MV folders if not already done so
         if (m_multiversion && m_tag.empty()) {
           if (!resolveTag(folder,globalTag)) return false;
-          ATH_MSG_DEBUG( "resolveTag returns " << m_tag);
         
         }
         if (m_foldertype==CoraCool) {
@@ -434,10 +436,11 @@ IOVDbFolder::loadCache(const cool::ValidityKey vkey,
     }
   } /*end of 'if ... COOL_DATABASE'*/ else {
     //this is code using CREST objects now
+    ATH_MSG_DEBUG( "loadCache: Expecting to see " << nChannelsExpected << " channels" );
     if (!resolveTag(nullptr,globalTag)) return false;
     addIOVtoCache(b.iov().first, b.iov().second);
-    ATH_MSG_INFO("Adding IOV to cache");
     const auto & channelNumbers=b.channelIds();
+    ATH_MSG_DEBUG( "ChannelIds is " << channelNumbers.size() << " long" );
     unsigned int iadd{};
     for (const auto & chan: channelNumbers){
       m_cachechan.push_back(chan);
@@ -464,6 +467,8 @@ IOVDbFolder::loadCache(const cool::ValidityKey vkey,
       }
     }
     retrievedone=true;
+    ATH_MSG_DEBUG( "Retrieved " << iadd << " objects for "<< m_nchan << " channels into cache" );
+    m_nobjread+=iadd;
   } //end of attempted retrieves using one of the methods
   if (!retrievedone) {
     const auto & [since,until] = m_iovs.getCacheBounds();
@@ -513,7 +518,7 @@ bool IOVDbFolder::loadCacheIfDbChanged(const cool::ValidityKey vkey,
   bool         retrievedone = false;
   //
   unsigned int nChannelsExpected = (m_chanrange.empty())? (m_nchan) : (IOVDbNamespace::countSelectedChannels(m_channums, m_chansel));
-  ATH_MSG_DEBUG( "Expecting to see " << nChannelsExpected << " channels" );
+  ATH_MSG_DEBUG( "loadCacheIfDbChanged: Expecting to see " << nChannelsExpected << " channels" );
   //
   while (attempts<2 && !retrievedone) {
     ++attempts;
@@ -524,7 +529,6 @@ bool IOVDbFolder::loadCacheIfDbChanged(const cool::ValidityKey vkey,
       // resolve the tag for MV folders if not already done so
       if (m_multiversion && m_tag.empty()) { // NEEDED OR NOT?
         if (!resolveTag(folder,globalTag)) return false;
-        ATH_MSG_DEBUG( "resolveTag returns " << m_tag );
       }   
       int counter=0;
       const auto & [since,until] = m_iovs.getCacheBounds();
@@ -900,7 +904,7 @@ IOVDbFolder::preLoadFolder(ITagInfoMgr *tagInfoMgr , const unsigned int cacheRun
   } else {
     // folder description from meta-data set already earlier
   }
-  ATH_MSG_DEBUG( "Folder description for " << m_foldername << ": " << m_folderDescription);
+  ATH_MSG_INFO( "Folder description for " << m_foldername << ": " << m_folderDescription);
   // register folder with meta-data tool if writing metadata
   if (m_writemeta) {
     if (StatusCode::SUCCESS!=p_metaDataTool->registerFolder(m_foldername,m_folderDescription)) {
@@ -916,9 +920,8 @@ IOVDbFolder::preLoadFolder(ITagInfoMgr *tagInfoMgr , const unsigned int cacheRun
   if( not m_useFileMetaData ) {
     if(m_source=="CREST"){
         const std::string  & crestTag=resolveCrestTag(globalTag,m_foldername );
-        m_channums=channelListForTag(crestTag);
+        std::tie(m_channums, m_channames) =channelListForTag(crestTag);
         const std::string & payloadSpec = payloadSpecificationForTag(crestTag);
-        std::cout<<"payload spec "<<payloadSpec<<std::endl;
         //determine foldertype from the description, the spec and the number of channels
         m_foldertype = IOVDbNamespace::determineFolderType(m_folderDescription, payloadSpec, m_channums);
     } else {
@@ -1001,6 +1004,7 @@ IOVDbFolder::resolveTag(cool::IFolderPtr fptr,const std::string& globalTag) {
   }
   if(m_source=="CREST"){
     m_tag=IOVDbNamespace::resolveCrestTag(globalTag,m_foldername);
+    ATH_MSG_DEBUG( "resolveTag returns " << m_tag );
     return true;
   }
   // check for magic tags
@@ -1036,6 +1040,7 @@ IOVDbFolder::resolveTag(cool::IFolderPtr fptr,const std::string& globalTag) {
       return false;
     }
   }
+  ATH_MSG_DEBUG( "resolveTag returns " << m_tag );
   return true;
 }
 
@@ -1090,6 +1095,7 @@ IOVDbFolder::setSharedSpec(const coral::AttributeList& atrlist) {
 void 
 IOVDbFolder::addIOVtoCache(cool::ValidityKey since,cool::ValidityKey until) {
   // add IOV to the cache
+  ATH_MSG_DEBUG("Adding IOV to cache, from "<<since<<" to "<<until);
   m_iovs.addIov(since, until);
 }
 

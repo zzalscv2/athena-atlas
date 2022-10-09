@@ -139,6 +139,18 @@ BOOST_AUTO_TEST_SUITE(IOVDbStringFunctionsTest)
     BOOST_TEST(prefixTarget.second == "GeoAtlas");
   }
   
+  BOOST_AUTO_TEST_CASE(unescapeQuote){
+    std::string quotedString=R"delim(\"I am quoted\")delim";
+    std::string unescapedString=R"delim("I am quoted")delim";
+    BOOST_TEST(IOVDbNamespace::unescapeQuotes(quotedString) == unescapedString);
+  }
+  
+  BOOST_AUTO_TEST_CASE(unescapeBackslash){
+    std::string quotedString=R"delim(\\\"I am enclosed\\\")delim";
+    std::string unescapedString=R"delim(\"I am enclosed\")delim";
+    BOOST_TEST(IOVDbNamespace::unescapeBackslash(quotedString) == unescapedString);
+  }
+  
   BOOST_AUTO_TEST_CASE(replaceServiceType71){
     std::string mutableXml = "<timeStamp>run-lumi</timeStamp><addrHeader><address_header service_type=\"71\" clid=\"1170039409\" /></addrHeader><typeName>piggy::AlignableTransformContainer</typeName>";
     const std::string expectedResult="<timeStamp>run-lumi</timeStamp><addrHeader><address_header service_type=\"256\" clid=\"1170039409\" /></addrHeader><typeName>piggy::AlignableTransformContainer</typeName>";
