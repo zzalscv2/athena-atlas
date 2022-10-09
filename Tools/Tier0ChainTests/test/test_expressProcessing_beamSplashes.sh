@@ -8,11 +8,10 @@
 
 
 Reco_tf.py  \
---AMI x654  \
+--AMI x701  \
 --inputBSFile="/cvmfs/atlas-nightlies.cern.ch/repo/data/data-art/Tier0ChainTests/TCT_Run3/data22_comm.00420624.express_express.merge.RAW._lb1054._SFO-ALL._0001.1" \
 --outputAODFile="AOD.pool.root" \
 --outputESDFile="ESD.pool.root" \
---outputDAOD_L1CALO2File="L1CALO2.pool.root" \
 --outputHISTFile="HIST.root" \
 --imf False
 
