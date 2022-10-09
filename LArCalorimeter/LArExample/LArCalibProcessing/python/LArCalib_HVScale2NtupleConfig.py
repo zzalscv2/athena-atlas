@@ -20,6 +20,7 @@ def LArHVScaleCorr2NtupleCfg(flags, rootfile="hvcorr_read.root"):
 
     theLArHVScaleCorr2Ntuple = CompFactory.LArHVScaleCorr2Ntuple("LArHVScaleCorr2Ntuple")
     theLArHVScaleCorr2Ntuple.AddFEBTempInfo = False
+    theLArHVScaleCorr2Ntuple.OffId=True
     result.addEventAlgo(theLArHVScaleCorr2Ntuple)
 
     import os

@@ -25,7 +25,7 @@
 
 #include "TrigInDetAnalysisExample/AnalysisConfigMT_Ntuple.h"
 
-
+#include <mutex>
 
 TrigR3Mon::TrigR3Mon( const std::string & name, ISvcLocator* pSvcLocator) 
   :  AthMonitorAlgorithm(name, pSvcLocator), 
@@ -35,7 +35,6 @@ TrigR3Mon::TrigR3Mon( const std::string & name, ISvcLocator* pSvcLocator)
      m_firstRun(true),
      m_keepAllEvents(false),
      m_fileopen(false),
-     m_first(true),
      m_useHighestPT(false),
      m_vtxIndex(-1),
      m_runPurity(false),
@@ -555,13 +554,13 @@ StatusCode TrigR3Mon::bookHistograms() {
 StatusCode TrigR3Mon::fillHistograms(const EventContext &/*context*/) const {
 
   ATH_MSG_DEBUG( " ----- enter fill() ----- " );
- 
-  std::vector<std::string> selectChains  = m_tdt->getListOfTriggers( "HLT_e.*" );
-  
-  int passed_count = 0;
-  
+
+  const Trig::ChainGroup* chainGroup = m_tdt->getChainGroup( "HLT_e.*" );
+  const std::vector<std::string> selectChains = chainGroup->getListOfTriggers();
+
   /// print out all the configured chains if need be
-  if ( m_first ) { 
+  static std::once_flag flag;
+  std::call_once(flag, [&]() {
     for ( unsigned i=0 ; i<selectChains.size() ; i++ ) {
       ATH_MSG_DEBUG( "\tchain " << selectChains[i] << " from TDT" );
     }
@@ -570,25 +569,22 @@ StatusCode TrigR3Mon::fillHistograms(const EventContext &/*context*/) const {
       if ( i>5 ) i=5;
       ATH_MSG_INFO( "^[[91;1m" << "configured chain " << selectChains[i] << "^[[m" );
     }
-  }
+  });
   
-  /// not properly thread safe, but it is only protects printout on the first event so should be ok 
-  m_first = false;
-
-  for ( unsigned i=0 ; i<selectChains.size() ; i++ ) {
-    if ( m_tdt->isPassed(selectChains[i]) ) {
-      passed_count++;
-      ATH_MSG_DEBUG( "chain " << selectChains[i] << "\tpass: " << m_tdt->isPassed(selectChains[i]) << "\tprescale: " << m_tdt->getPrescale(selectChains[i]) );
-     }
+  if (msgLvl(MSG::DEBUG)) {
+    const std::vector<bool> isPassed = chainGroup->isPassedForEach();
+    for ( unsigned i=0 ; i<selectChains.size() ; i++ ) {
+      if ( isPassed[i] ) {
+        ATH_MSG_DEBUG( "chain " << selectChains[i] << "\tpass: " << isPassed[i] << "\tprescale: " << m_tdt->getPrescale(selectChains[i]) );
+      }
+    }
   }
   
   for ( unsigned i=0 ; i<m_sequences.size() ; i++ ) { 
     m_sequences[i]->execute();
   }
 
-  if(msg().level() <= MSG::DEBUG) {
-    msg(MSG::DEBUG) << " ----- exit fill() ----- " << endmsg;
-  }
+  ATH_MSG_DEBUG(" ----- exit fill() ----- ");
 
   return StatusCode::SUCCESS;
 }

@@ -1,5 +1,6 @@
 # Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
 
+from AthenaConfiguration.AccumulatorCache import AccumulatorCache
 from .TrigConfigSvcCfg import getTrigConfigFromFlag, getL1MenuFileName, getHLTMenuFileName, getL1PrescalesSetFileName, getHLTPrescalesSetFileName, getBunchGroupSetFileName, getHLTJobOptionsFileName, getHLTMonitoringFileName
 
 from TrigConfIO.L1TriggerConfigAccess import L1MenuAccess, L1PrescalesSetAccess, BunchGroupSetAccess
@@ -93,6 +94,7 @@ def _getJSONFromMetadata(flags, key):
 L1 information
 
 """
+@AccumulatorCache
 def getL1MenuAccess( flags = None ):
     tc = getTrigConfigFromFlag( flags )
     if tc["SOURCE"] == "FILE":
@@ -111,6 +113,7 @@ def getL1MenuAccess( flags = None ):
     return cfg
 
 
+@AccumulatorCache
 def getL1PrescalesSetAccess( flags = None ):
     tc = getTrigConfigFromFlag( flags )
     if tc["SOURCE"] == "FILE":
@@ -129,6 +132,7 @@ def getL1PrescalesSetAccess( flags = None ):
     return cfg
 
 
+@AccumulatorCache
 def getBunchGroupSetAccess( flags = None ):
     tc = getTrigConfigFromFlag( flags )
     if tc["SOURCE"] == "FILE":
@@ -156,6 +160,7 @@ def getBunchGroupSetAccess( flags = None ):
 HLT information
 
 """
+@AccumulatorCache
 def getHLTMenuAccess( flags = None ):
     tc = getTrigConfigFromFlag( flags )
     if tc["SOURCE"] == "FILE":
@@ -174,6 +179,7 @@ def getHLTMenuAccess( flags = None ):
     return cfg
 
 
+@AccumulatorCache
 def getHLTPrescalesSetAccess( flags = None ):
     tc = getTrigConfigFromFlag( flags )
     if tc["SOURCE"] == "FILE":
@@ -192,6 +198,7 @@ def getHLTPrescalesSetAccess( flags = None ):
     return cfg
 
 
+@AccumulatorCache
 def getHLTJobOptionsAccess( flags = None ):
     tc = getTrigConfigFromFlag( flags )
     if tc["SOURCE"] == "FILE":
@@ -209,6 +216,8 @@ def getHLTJobOptionsAccess( flags = None ):
         raise RuntimeError("Unknown source of trigger configuration: %s" % tc["SOURCE"])
     return cfg
 
+
+@AccumulatorCache
 def getHLTMonitoringAccess( flags = None ):
     tc = getTrigConfigFromFlag( flags )
     if tc["SOURCE"] == "FILE":

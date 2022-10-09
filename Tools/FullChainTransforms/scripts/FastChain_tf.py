@@ -45,26 +45,16 @@ def getTransform():
 
     # Sim + Digi - factor these out into an importable function in time
     executorSet.add(athenaExecutor(name = 'EVNTtoRDO', skeletonFile = 'FullChainTransforms/FastChainSkeleton.EVGENtoRDO.py',
-                                   skeletonCA = 'FullChainTransforms.FastChain_Skeleton',
+                                   skeletonCA = 'FullChainTransforms.FastChainSkeleton',
                                    substep = 'simdigi', tryDropAndReload = False, perfMonFile = 'ntuple.pmon.gz',
-                                   inData=['NULL','EVNT'],
+                                   inData=['NULL','EVNT', 'RDO_BKG', 'BS_SKIM'],
                                    outData=['RDO','NULL'] ))
-
-    # Overlay
-    from OverlayConfiguration.OverlayTransformHelpers import addOverlayArguments
-    executorSet.add(athenaExecutor(name='Overlay',
-                                   skeletonFile='OverlayConfiguration/skeleton_LegacyOverlay.py',
-                                   skeletonCA='OverlayConfiguration.OverlaySkeleton',
-                                   substep='overlay',
-                                   tryDropAndReload=False,
-                                   perfMonFile='ntuple.pmon.gz',
-                                   inData=['RDO_BKG', 'BS_SKIM', 'HITS'],
-                                   outData=['RDO', 'RDO_SGNL']))
 
     # Sim + Overlay - execute with the argument --steering "doFCwOverlay"
     executorSet.add(athenaExecutor(name = 'EVNTtoRDOwOverlay', skeletonFile = 'FullChainTransforms/FastChainSkeleton.EVGENtoRDOwOverlay.py',
                                    substep = 'simoverlay', tryDropAndReload = False, perfMonFile = 'ntuple.pmon.gz',
                                    inData = ['NULL'], outData = ['NULL']))
+
 
     trf = transform(executor = executorSet, description = 'Fast chain ATLAS transform with ISF simulation, digitisation'
                     ' and reconstruction. Inputs can be EVNT, with outputs of RDO, ESD, AOD or DPDs.'
@@ -89,6 +79,7 @@ def getTransform():
     addFastChainTrfArgs(trf.parser)
 
     # Overlay arguments
+    from OverlayConfiguration.OverlayTransformHelpers import addOverlayArguments
     addOverlayArguments(trf.parser)
 
     # Add PhysVal

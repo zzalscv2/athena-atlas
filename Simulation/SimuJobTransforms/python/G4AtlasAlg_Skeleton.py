@@ -40,6 +40,8 @@ def fromRunArgs(runArgs):
 
     if hasattr(runArgs, 'simulator'):
         ConfigFlags.Sim.ISF.Simulator = SimulationFlavour(runArgs.simulator)
+    else:
+        ConfigFlags.Sim.ISF.Simulator = SimulationFlavour.AtlasG4
 
     # Generate detector list
     from SimuJobTransforms.SimulationHelpers import getDetectorsFromRunArgs

@@ -30,6 +30,9 @@ def AtlasFieldCacheCondAlgCfg(flags, **kwargs):
     if flags.Common.isOnline:
       # online does not use DCS
       afmArgs.update( UseMapsFromCOOL = False )
+      # consider field off if current is below these values:
+      afmArgs.update( SoleMinCurrent = 160 )  # Standby current is 150A
+      afmArgs.update( ToroMinCurrent = 210 )  # Standby current is 200A
     else:
       # UseMapsFromCOOL is default for standard running
       afmArgs.update( UseMapsFromCOOL =  True)
@@ -49,6 +52,9 @@ def AtlasFieldCacheCondAlgCfg(flags, **kwargs):
       afcArgs.update( UseSoleCurrent = 7730 )
       afcArgs.update( UseToroCurrent = 20400 )
       afcArgs.update( LockMapCurrents = True )
+      # consider field off if current is below these values:
+      afcArgs.update( SoleMinCurrent = 160 )  # Standby current is 150A
+      afcArgs.update( ToroMinCurrent = 210 )  # Standby current is 200A
     else:
       afcArgs.update( UseDCS = True )
     # For test, UseDCS is set to False

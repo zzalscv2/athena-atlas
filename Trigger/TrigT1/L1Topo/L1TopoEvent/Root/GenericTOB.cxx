@@ -176,19 +176,24 @@ TCS::GenericTOB::GenericTOB(const MuonTOB & muon) :
    , m_tobType(MUON)
 {}
 
-// constructor for latemuon
+// constructor from latemuon
 TCS::GenericTOB::GenericTOB(const LateMuonTOB & lateMuon) :
    BaseTOB(lateMuon.roiWord(), lateMuon.tobName())
    , m_Et(lateMuon.Et())
    , m_eta(lateMuon.eta())
    , m_phi(static_cast<int>(lateMuon.phi()))
+   , m_bw2or3(lateMuon.bw2or3())
+   , m_innerCoin(lateMuon.innerCoin())
+   , m_goodMF(lateMuon.goodMF())
+   , m_charge(lateMuon.charge())
+   , m_is2cand(lateMuon.is2cand())
    , m_EtDouble(lateMuon.EtDouble())
    , m_etaDouble(lateMuon.EtaDouble())
    , m_phiDouble(lateMuon.PhiDouble())
    , m_tobType(LATEMUON) 
 {}
 
-// constructor for muonNextBC
+// constructor from muonNextBC
 TCS::GenericTOB::GenericTOB(const MuonNextBCTOB & muonNextBC) :
    BaseTOB(muonNextBC.roiWord(), muonNextBC.tobName())
    , m_Et(muonNextBC.Et())

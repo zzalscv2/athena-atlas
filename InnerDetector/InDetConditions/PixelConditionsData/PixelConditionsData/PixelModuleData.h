@@ -124,6 +124,9 @@ class PixelModuleData
     float getDefaultQ2TotE() const;
     float getDefaultQ2TotC() const;
 
+    void setRUN3PIXLinearExtrapolation(bool doLinearExtrapolation);
+    bool getRUN3PIXLinearExtrapolation() const;
+
     // Lorentz angle correction
     void setBarrelLorentzAngleCorr(const std::vector<double> &barrelLorentzAngleCorr);
     void setEndcapLorentzAngleCorr(const std::vector<double> &endcapLorentzAngleCorr);
@@ -261,6 +264,7 @@ class PixelModuleData
     float m_paramA{};
     float m_paramE{};
     float m_paramC{};
+    bool m_doLinearExtrapolation{};
 
     std::vector<double> m_barrelLorentzAngleCorr;
     std::vector<double> m_endcapLorentzAngleCorr;
