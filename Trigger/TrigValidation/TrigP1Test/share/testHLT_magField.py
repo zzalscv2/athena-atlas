@@ -8,7 +8,7 @@ from AthenaCommon.GlobalFlags import globalflags
 from AthenaCommon.AlgSequence import AthSequencer, AlgSequence
 
 globalflags.DataSource='data'
-globalflags.ConditionsTag='CONDBR2-HLTP-2018-01'
+globalflags.ConditionsTag='CONDBR2-HLTP-2022-02'
 
 from IOVDbSvc.CondDB import conddb
 conddb.setGlobalTag(globalflags.ConditionsTag())
