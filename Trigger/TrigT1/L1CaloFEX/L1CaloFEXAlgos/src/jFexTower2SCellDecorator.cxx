@@ -31,14 +31,19 @@ jFexTower2SCellDecorator::jFexTower2SCellDecorator(const std::string& name, ISvc
 StatusCode jFexTower2SCellDecorator::initialize() {
     ATH_MSG_INFO( "L1CaloFEXTools/jFexTower2SCellDecorator::initialize()");
     ATH_CHECK( m_SCellKey.initialize() );
+    ATH_CHECK( m_triggerTowerKey.initialize() );
     ATH_CHECK( m_jTowersReadKey.initialize() );
     ATH_CHECK( m_SCellEtdecorKey.initialize() );
     ATH_CHECK( m_SCellEtadecorKey.initialize() );
     ATH_CHECK( m_SCellPhidecorKey.initialize() );
-    ATH_CHECK( m_towerEtMeVdecorKey.initialize() );
+    ATH_CHECK( m_jtowerEtMeVdecorKey.initialize() );
+    ATH_CHECK( m_TileEtMeVdecorKey.initialize() );
+    ATH_CHECK( m_TileEtadecorKey.initialize() );
+    ATH_CHECK( m_TilePhidecorKey.initialize() );
     
     //Reading from CVMFS Trigger Tower and their corresponding SCell ID
-    ATH_CHECK(ReadfromFile(m_jFEX2Scellmapping));
+    ATH_CHECK(ReadSCfromFile(m_jFEX2Scellmapping));
+    ATH_CHECK(ReadTilefromFile(m_jFEX2Tilemapping));
     
     return StatusCode::SUCCESS;
 }
@@ -52,6 +57,13 @@ StatusCode jFexTower2SCellDecorator::execute(const EventContext& ctx) const {
         return StatusCode::FAILURE;
     }
     
+    //Reading the TriggerTower container
+    SG::ReadHandle<xAOD::TriggerTowerContainer> triggerTowerContainer(m_triggerTowerKey, ctx);
+    if(!triggerTowerContainer.isValid()) {
+        ATH_MSG_FATAL("Could not retrieve collection " << triggerTowerContainer.key() );
+        return StatusCode::FAILURE;
+    }
+
     //Reading the jTower container
     SG::ReadHandle<xAOD::jFexTowerContainer> jTowerContainer(m_jTowersReadKey, ctx);
     if(!jTowerContainer.isValid()) {
@@ -59,11 +71,12 @@ StatusCode jFexTower2SCellDecorator::execute(const EventContext& ctx) const {
         return StatusCode::FAILURE;
     }  
      
-    if(ScellContainer->empty() || jTowerContainer->empty()){
-        ATH_MSG_WARNING("Nothing to decorate here, at least one container is empty. ScellContainer.size="<<ScellContainer->size() << " or jTowerContainer.size=" << jTowerContainer->size() );
+    if(ScellContainer->empty() || triggerTowerContainer->empty() || jTowerContainer->empty() ){
+        ATH_MSG_WARNING("Nothing to decorate here, at least one container is empty. ScellContainer.size="<<ScellContainer->size() << " or jTowerContainer.size=" << jTowerContainer->size() << " or triggerTowerContainer.size=" << triggerTowerContainer->size() );
         return StatusCode::SUCCESS;
     }
     
+    // building Scell ID pointers
     std::unordered_map< uint64_t, const CaloCell*> map_ScellID2ptr;
     
     for(const CaloCell* scell : *ScellContainer){
@@ -71,11 +84,24 @@ StatusCode jFexTower2SCellDecorator::execute(const EventContext& ctx) const {
         map_ScellID2ptr[ID] = scell;
     }
     
+    // building Tile ID pointers
+    std::unordered_map< uint32_t, const xAOD::TriggerTower*> map_TileID2ptr;
+    
+    for(const xAOD::TriggerTower* tower : *triggerTowerContainer){
+        
+        // keeping just 
+        if(std::abs(tower->eta())>1.5 || tower->sampling()!=1) continue;
+        map_TileID2ptr[tower->coolId()]=tower;
+    }    
+        
     //Setup Decorator Handlers
-    SG::WriteDecorHandle<xAOD::jFexTowerContainer, std::vector<float> > jTowerSCellEt (m_SCellEtdecorKey   , ctx);
-    SG::WriteDecorHandle<xAOD::jFexTowerContainer, std::vector<float> > jTowerSCellEta(m_SCellEtadecorKey  , ctx);
-    SG::WriteDecorHandle<xAOD::jFexTowerContainer, std::vector<float> > jTowerSCellPhi(m_SCellPhidecorKey  , ctx);
-    SG::WriteDecorHandle<xAOD::jFexTowerContainer, int >                jTowerEtMeV   (m_towerEtMeVdecorKey, ctx);
+    SG::WriteDecorHandle<xAOD::jFexTowerContainer, std::vector<float> > jTowerSCellEt  (m_SCellEtdecorKey    , ctx);
+    SG::WriteDecorHandle<xAOD::jFexTowerContainer, std::vector<float> > jTowerSCellEta (m_SCellEtadecorKey   , ctx);
+    SG::WriteDecorHandle<xAOD::jFexTowerContainer, std::vector<float> > jTowerSCellPhi (m_SCellPhidecorKey   , ctx);
+    SG::WriteDecorHandle<xAOD::jFexTowerContainer, int >                jTowerEtMeV    (m_jtowerEtMeVdecorKey, ctx);
+    SG::WriteDecorHandle<xAOD::jFexTowerContainer, int >                jTowerTileEtMeV(m_TileEtMeVdecorKey  , ctx);
+    SG::WriteDecorHandle<xAOD::jFexTowerContainer, float >              jTowerTileEta  (m_TileEtadecorKey    , ctx);
+    SG::WriteDecorHandle<xAOD::jFexTowerContainer, float >              jTowerTilePhi  (m_TilePhidecorKey    , ctx);
     
     //looping over the jTowers to decorate them!
     for(const xAOD::jFexTower* jTower : *jTowerContainer){
@@ -97,6 +123,9 @@ StatusCode jFexTower2SCellDecorator::execute(const EventContext& ctx) const {
         std::vector<float> scEt;
         std::vector<float> scEta;
         std::vector<float> scPhi;
+        int TileEt = -99;
+        float TileEta = -99.0;
+        float TilePhi = -99.0;
         
         if(source != 1){ // Source == 1 is belong to Tile Calorimeter, and of course the is not SCell information!
             
@@ -121,12 +150,37 @@ StatusCode jFexTower2SCellDecorator::execute(const EventContext& ctx) const {
 
             }   
         }
-        
+        else if(source == 1){
+            
+            //check that the jFEX Tower ID exists in the map
+            if(m_map_TTower2Tile.find(jFexID) == m_map_TTower2Tile.end()) {
+                ATH_MSG_ERROR("ID: "<<jFexID<< " not found on map m_map_TTower2Tile");
+                return StatusCode::FAILURE;
+            }
+            
+            uint32_t TileID = std::get<0>( m_map_TTower2Tile.at(jFexID) );
+            
+            //check that the Tile Identifier exists in the map
+            if(map_TileID2ptr.find(TileID) == map_TileID2ptr.end()) {
+                ATH_MSG_ERROR("Scell ID: "<<TileID<< " not found on map map_TileID2ptr");
+                return StatusCode::FAILURE;
+            }            
+            
+            TileEt = map_TileID2ptr.at(TileID)->cpET()*500;
+            TileEta = map_TileID2ptr.at(TileID)->eta();
+            float phi = map_TileID2ptr.at(TileID)->phi() < M_PI ? map_TileID2ptr.at(TileID)->phi() : map_TileID2ptr.at(TileID)->phi()-2*M_PI;
+            TilePhi = phi;
+            
+        }
+                    
         // Decorating the tower with the corresponding information
-        jTowerSCellEt (*jTower) = scEt;
-        jTowerSCellEta(*jTower) = scEta;
-        jTowerSCellPhi(*jTower) = scPhi;
-        jTowerEtMeV   (*jTower) = static_cast<int>( jFEXCompression::Expand(jFexEt) );
+        jTowerSCellEt   (*jTower) = scEt;
+        jTowerSCellEta  (*jTower) = scEta;
+        jTowerSCellPhi  (*jTower) = scPhi;
+        jTowerEtMeV     (*jTower) = static_cast<int>( jFEXCompression::Expand(jFexEt) );
+        jTowerTileEtMeV (*jTower) = static_cast<int>( TileEt );
+        jTowerTileEta   (*jTower) = TileEta;
+        jTowerTilePhi   (*jTower) = TilePhi;
         
     }
     
@@ -135,7 +189,7 @@ StatusCode jFexTower2SCellDecorator::execute(const EventContext& ctx) const {
 }
 
 
-StatusCode  jFexTower2SCellDecorator::ReadfromFile(const std::string& fileName){
+StatusCode  jFexTower2SCellDecorator::ReadSCfromFile(const std::string& fileName){
     
     std::string myline;
     
@@ -198,6 +252,58 @@ bool jFexTower2SCellDecorator::isBadSCellID(const std::string& ID) const{
     }
     return false;
 }
+
+
+
+
+StatusCode  jFexTower2SCellDecorator::ReadTilefromFile(const std::string& fileName){
+   
+    std::string myline;
+    
+    //openning file with ifstream
+    std::ifstream myfile(fileName);
+    
+    if ( !myfile.is_open() ){
+        ATH_MSG_FATAL("Could not open file:" << fileName);
+        return StatusCode::FAILURE;
+    }
+    
+    //loading the mapping information into an unordered_map <Fex Tower ID, vector of SCell IDs>
+    while ( std::getline (myfile, myline) ) {
+
+        //removing the header of the file (it is just information!)
+        if(myline[0] == '#') continue;
+        
+        //Splitting myline in different substrings
+        std::stringstream oneLine(myline);
+        
+        std::vector<std::string> elements;
+        std::string element = "";
+        
+        while(std::getline(oneLine, element, ' ')){
+            elements.push_back(element);
+        }
+        
+        if(elements.size() != 4){
+            ATH_MSG_ERROR("Invalid number of element in " << myline << ". Expecting 4 elements {jFexID, TileID, eta, phi}");
+            return StatusCode::FAILURE;
+        }
+        
+        uint32_t jFexID = std::stoi( elements.at(0) );
+        uint32_t TileID = std::stoi( elements.at(1) );
+        float eta       = std::stof( elements.at(2) );
+        float phi       = std::stof( elements.at(3) );
+        
+        m_map_TTower2Tile[jFexID] = {TileID,eta,phi};
+        
+    }
+    myfile.close();
+    
+    return StatusCode::SUCCESS;
+}
+
+
+
 
 
 }
