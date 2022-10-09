@@ -146,7 +146,7 @@ class DerivationTest(WorkflowTest):
         if "maxEvents" not in extra_args:
             extra_args += " --maxEvents 10"
 
-        threads = 2
+        threads = 0
         if setup.custom_threads is not None:
             threads = setup.custom_threads
 

@@ -118,11 +118,9 @@ atlas_add_citest( RecoRun4MC
    SCRIPT RunWorkflowTests_Run4.py --CI -r -w MCReco -e '--maxEvents 5 --inputHITSFile=../../SimulationRun4FullSim/run_s3761/myHITS.pool.root'  # go two levels up as the test runs in a subfolder
    DEPENDS_SUCCESS SimulationRun4FullSim )
 
-# FIXME: Tadej will fix this test in a follow-up (see !57339)
-#atlas_add_citest( RecoRun4MC_DAODPHYS
-#   SCRIPT RunWorkflowTests_Run4.py --CI -d -e '--maxEvents 5 --inputAODFile=../../RecoRun4MC/run_q447/myAOD.pool.root'  # go two levels up as the test runs in a subfolder
-#   PROPERTIES PROCESSORS 2
-#   DEPENDS_SUCCESS RecoRun4MC )
+atlas_add_citest( RecoRun4MC_DAODPHYS
+  SCRIPT RunWorkflowTests_Run4.py --CI -d -e '--maxEvents 5 --inputAODFile=../../RecoRun4MC/run_q447/myAOD.pool.root'  # go two levels up as the test runs in a subfolder
+  DEPENDS_SUCCESS RecoRun4MC )
 
 #################################################################################
 # Data Quality
