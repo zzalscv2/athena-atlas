@@ -25,6 +25,7 @@ namespace CP
     , m_efficiencyTool ("BTaggingEfficiencyTool", this)
   {
     declareProperty ("efficiencyTool", m_efficiencyTool, "the calibration and smearing tool we apply");
+    declareProperty ("onlyEfficiency", m_onlyEfficiency, "whether only to calculate efficiencies");
     declareProperty ("onlyInefficiency", m_onlyInefficiency, "whether only to calculate inefficiencies");
   }
 
@@ -33,9 +34,9 @@ namespace CP
   StatusCode BTaggingEfficiencyAlg ::
   initialize ()
   {
-    if (m_onlyInefficiency && m_selectionHandle)
+    if (m_onlyEfficiency && m_onlyInefficiency)
     {
-      ANA_MSG_ERROR ("can't specify both onlyInefficiency and selectionDecoration");
+      ANA_MSG_ERROR ("can't specify both onlyEfficiency and onlyInefficiency");
       return StatusCode::FAILURE;
     }
 
@@ -83,7 +84,7 @@ namespace CP
           // this selection accessor/decoration has nothing to do with
           // it.  You do the pre-selection via a view container like
           // for all the other CP algorithms.
-          if (!m_onlyInefficiency && m_selectionHandle.getBool (*jet, sys))
+          if (m_onlyEfficiency || (!m_onlyInefficiency && m_selectionHandle.getBool (*jet, sys)))
           {
             ANA_CHECK_CORRECTION (m_outOfValidity, *jet, m_efficiencyTool->getScaleFactor (*jet, sf));
           } else
