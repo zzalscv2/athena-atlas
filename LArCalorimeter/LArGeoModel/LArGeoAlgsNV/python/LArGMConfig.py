@@ -54,6 +54,9 @@ def LArGMCfg(configFlags):
 
             AthReadAlg_ExtraInputs.append(('CaloDetDescrManager', 'ConditionStore+CaloDetDescrManager'))            
             if configFlags.GeoModel.Run is LHCPeriod.Run3 and configFlags.Detector.GeometryTile or sCellsInInput:
+                # TODO: avoid depending on Tile in SuperCell alignment
+                from TileGeoModel.TileGMConfig import TileGMCfg
+                result.merge(TileGMCfg(configFlags))
                 result.addCondAlgo(CompFactory.CaloSuperCellAlignCondAlg())
                 AthReadAlg_ExtraInputs.append(('CaloSuperCellDetDescrManager', 'ConditionStore+CaloSuperCellDetDescrManager'))
 
@@ -71,6 +74,9 @@ def LArGMCfg(configFlags):
         if activateCondAlgs:
             result.addCondAlgo(CompFactory.CaloAlignCondAlg(LArAlignmentStore="",CaloCellPositionShiftFolder=""))
             if configFlags.GeoModel.Run is LHCPeriod.Run3 and configFlags.Detector.GeometryTile:
+                # TODO: avoid depending on Tile in SuperCell alignment
+                from TileGeoModel.TileGMConfig import TileGMCfg
+                result.merge(TileGMCfg(configFlags))
                 result.addCondAlgo(CompFactory.CaloSuperCellAlignCondAlg())
             
     return result
