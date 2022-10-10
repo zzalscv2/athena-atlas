@@ -432,17 +432,14 @@ Root::TElectronEfficiencyCorrectionTool::calculate(
    */
   const std::vector<std::vector<TObjArray>>& sysList =
     (isFastSim) ? m_fastSysList : m_sysList;
-  std::vector<double> corrSys;
-  corrSys.reserve(16);
-  corrSys.clear();
   if (sysList.size() > static_cast<unsigned int>(index)) {
     if (sysList.at(index).size() > static_cast<unsigned int>(runnumberIndex)) {
       const int sys_entries = sysList.at(index).at(runnumberIndex).GetEntries();
       for (int sys = 0; sys < sys_entries; ++sys) {
         tmpHist =
           (TH2*)sysList.at(index).at(runnumberIndex).At(sys_entries - 1 - sys);
-        corrSys.push_back(tmpHist->GetBinContent(globalBinNumber));
-        result[position_corrSys + sys_entries - 1 - sys] = corrSys[sys];
+        double sysVal= tmpHist->GetBinContent(globalBinNumber);
+        result[position_corrSys + sys_entries - 1 - sys] = sysVal;
       }
       if (m_nSysMax > 0 && sys_entries <= 1) {
         if (result[position_corrSys] == 0) {
