@@ -72,10 +72,17 @@ AntiKt4PV0Track = JetDefinition("AntiKt", 0.4, cst.PV0Track,
 # Standard small R reco jet definitions
 # *********************************************************
 
+# Configurable filter for PhysVal
+from AthenaConfiguration.AllConfigFlags import ConfigFlags
+filterPF = ("Filter:10000",)
+filterEM = ("Filter:15000",)
+if not ConfigFlags.Jet.useCalibJetThreshold:
+    filterPF = ("Filter:1",)
+    filterEM = ("Filter:1",)
 
 AntiKt4EMPFlow = JetDefinition("AntiKt",0.4,cst.GPFlow,
                                ghostdefs = standardghosts+flavourghosts,
-                               modifiers = calibmods+("Filter:10000",)+truthmods+standardmods,
+                               modifiers = calibmods+filterPF+truthmods+standardmods,
                                lock = True
 )
 
@@ -92,7 +99,7 @@ AntiKt4LCTopo = JetDefinition("AntiKt",0.4,cst.LCTopoOrigin,
 
 AntiKt4EMTopo = JetDefinition("AntiKt",0.4,cst.EMTopoOrigin,
                               ghostdefs = standardghosts+["TrackLRT"]+flavourghosts,
-                              modifiers = calibmods+("Filter:15000",)+truthmods+standardmods+clustermods,
+                              modifiers = calibmods+filterEM+truthmods+standardmods+clustermods,
                               lock = True,
 )
 
