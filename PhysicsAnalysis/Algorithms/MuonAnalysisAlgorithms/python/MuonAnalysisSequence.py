@@ -247,5 +247,5 @@ def makeMuonWorkingPointSequence( seq, dataType, workingPoint, postfix = '',
     alg.selectionDecoration = 'baselineSelection' + postfix + ',as_char'
     seq.append( alg, inputPropName = 'particles',
                 stageName = 'selection',
-                dynConfig = {'preselection' : lambda meta : "&&".join (meta["selectionDecorNamesOutput"])})
+                dynConfig = {'preselection' : lambda meta : "&&".join (meta["selectionDecorNames"])})
     pass
