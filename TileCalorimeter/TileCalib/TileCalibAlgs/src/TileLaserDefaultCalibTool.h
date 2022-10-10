@@ -205,6 +205,11 @@ class TileLaserDefaultCalibTool : public AthAlgTool, virtual public ITileCalibTo
 
   bool m_LASERII;
   long long m_evtNr;
+  int m_have_pedestals{0};
+  int m_have_alpha{0};
+  int m_have_led{0};
+  int m_have_linearity{0};
+  int m_have_laser{0};
 
   RunningStat* (*m_rs_meantime)[NGAINS];
   RunningStat* (*m_rs_time)[NDRAWERS][NCHANNELS][NGAINS];

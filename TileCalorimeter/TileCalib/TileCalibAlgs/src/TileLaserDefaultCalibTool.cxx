@@ -448,14 +448,9 @@ StatusCode TileLaserDefaultCalibTool::execute(){
   
   if ( m_LASERII ) {  // LASERII
     // We need to have pedestals
-    static int have_pedestals = 0; 
-    static int have_alpha = 0; 
-    static int have_led = 0; 
-    static int have_linearity = 0; 
-    static int have_laser = 0;
 
-    if ( ! (have_pedestals && have_alpha && have_led ) ) {
-      ATH_MSG_DEBUG ( "Calib type " << laserObj->getCalibType() << have_pedestals << have_alpha <<have_led<<have_linearity<<have_laser);
+    if ( ! (m_have_pedestals && m_have_alpha && m_have_led ) ) {
+      ATH_MSG_DEBUG ( "Calib type " << laserObj->getCalibType() << m_have_pedestals << m_have_alpha <<m_have_led<<m_have_linearity<<m_have_laser);
       switch ( laserObj->getCalibType()  ) {
 
       case TileLaserObject::calibType::Pedestal0: 	
@@ -478,7 +473,7 @@ StatusCode TileLaserDefaultCalibTool::execute(){
 	    m_diode_Ped_LASERII[NDIODES][gain]   = laserObj->getMean(13, gain, TileLaserObject::calibType::Pedestal0);
 	    m_diode_Ped_S_LASERII[NDIODES][gain] = laserObj->getSigma(13, gain, TileLaserObject::calibType::Pedestal0);	     
 	  }
-	  have_pedestals = 1;
+	  m_have_pedestals = 1;
 	} 
 	break; 
 	
@@ -498,7 +493,7 @@ StatusCode TileLaserDefaultCalibTool::execute(){
 	    m_diode_Alpha_LASERII[NDIODES][gain]   = laserObj->getMean(13, gain, TileLaserObject::calibType::Alpha);
 	    m_diode_Alpha_S_LASERII[NDIODES][gain] = laserObj->getSigma(13, gain, TileLaserObject::calibType::Alpha);	     
 	  }
-	  have_alpha = 1;
+	  m_have_alpha = 1;
 	} 
 	break; 
 		
@@ -515,7 +510,7 @@ StatusCode TileLaserDefaultCalibTool::execute(){
 	      m_diode_Led_S_LASERII[NDIODES][gain] = laserObj->getSigma(13, gain, TileLaserObject::calibType::LED);	     
 	    }
 	  }
-	  have_led = 1;
+	  m_have_led = 1;
 	} 
 	break; 	
 
@@ -526,7 +521,7 @@ StatusCode TileLaserDefaultCalibTool::execute(){
       }
     }
     
-    if (! have_pedestals) return StatusCode::SUCCESS; // We can't do anything yet
+    if (! m_have_pedestals) return StatusCode::SUCCESS; // We can't do anything yet
 
     // Now we have pedestals, start accumulating the Diode responses
     for ( int diode=0; diode<NDIODES; ++diode ) {
