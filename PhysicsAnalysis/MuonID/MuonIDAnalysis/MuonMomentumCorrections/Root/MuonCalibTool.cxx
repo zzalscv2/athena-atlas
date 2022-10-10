@@ -100,6 +100,7 @@ namespace CP
                 ATH_CHECK(m_MuonIntHighTSmearTool.setProperty("OutputLevel", msg().level()));
             }
             ATH_CHECK(m_MuonIntHighTSmearTool.retrieve());
+            m_MuonIntHighTSmearToolInitialized = !m_MuonIntHighTSmearTool.empty();
         }
         if (!applySystematicVariation(SystematicSet()))
         {
@@ -264,7 +265,7 @@ namespace CP
     {
         SystematicSet result = m_MuonIntSagittaTool->affectingSystematics();
         result.insert(m_MuonIntScaleSmearTool->affectingSystematics());
-        if (!m_MuonIntHighTSmearTool.empty()) result.insert(m_MuonIntHighTSmearTool->affectingSystematics());     
+        if (m_MuonIntHighTSmearToolInitialized) result.insert(m_MuonIntHighTSmearTool->affectingSystematics());
         return result;
     }
 
@@ -279,7 +280,7 @@ namespace CP
         code = m_MuonIntScaleSmearTool->applySystematicVariation(systConfig);          
         if(code != StatusCode::SUCCESS) return code;
 
-        if (!m_MuonIntHighTSmearTool.empty()){
+        if (m_MuonIntHighTSmearToolInitialized){
             code = m_MuonIntHighTSmearTool->applySystematicVariation(systConfig);          
             if(code != StatusCode::SUCCESS) return code;
         }
