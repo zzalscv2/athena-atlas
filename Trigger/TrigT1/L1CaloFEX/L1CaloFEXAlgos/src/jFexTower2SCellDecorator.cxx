@@ -110,11 +110,8 @@ StatusCode jFexTower2SCellDecorator::execute(const EventContext& ctx) const {
         uint8_t  source = jTower->Calosource();
         uint16_t jFexEt = 0;
         
-        if(source == 0 or source == 2 or source == 4){  //for EM layer only.  0 = EMB, 2 = EMEC, 4 = FCAL1
-            jFexEt = jTower->jTowerEt_EM();
-        }
-        else if(source == 1 or source == 3 or source == 5 or source == 6 ){ //for HAD layer only.  1 = TILE, 3 = HEC, 5,6 = FCAL2,3
-            jFexEt = jTower->jTowerEt_HAD();
+        if(source < 7){
+            jFexEt = jTower->jTowerEt();
         }
         else{
             ATH_MSG_WARNING("Undefined source element: "<<source);

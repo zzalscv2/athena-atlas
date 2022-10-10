@@ -27,6 +27,8 @@ class jFexTowerAuxContainer_v1 : public AuxContainerBase {
 
         std::vector<float>    eta;
         std::vector<float>    phi;
+        std::vector<int>      iEta;
+        std::vector<int>      iPhi;
         std::vector<uint8_t>  module;
         std::vector<uint8_t>  fpga;
         std::vector<uint8_t>  channel;
