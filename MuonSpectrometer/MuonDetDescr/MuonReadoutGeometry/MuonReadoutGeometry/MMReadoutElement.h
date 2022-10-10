@@ -78,24 +78,6 @@ namespace MuonGM {
         /** Global space point position for a given pair of phi and eta identifiers
             If one of the identifiers is outside the valid range, the function will return false */
         virtual bool spacePointPosition(const Identifier& phiId, const Identifier& etaId, Amg::Vector3D& pos) const override final;
-
-	/** space point position (global) for a given pair of stereo MM identifier */
-	virtual bool spacePointPosition(const Identifier& id1, const Identifier& id2, Amg::Vector3D gpos_id1, Amg::Vector3D gpos_id2, Amg::Vector3D& gpos) const;
-
-        /** space point position for a pair of phi and eta local positions and a layer identifier
-            The LocalPosition is expressed in the reference frame of the phi projection.
-        */
-        void spacePointPosition(const Amg::Vector2D& phiPos, const Amg::Vector2D& etaPos, Amg::Vector2D& pos) const;
-
-        /** space point position to correct the position of 1D clusters.
-            Accepts a precision (x) coordinate and a y-seed, in the local layer frame, and returns a 3D position, 
-            in the same frame so that MMReadoutElement::transform() can be directly cast on it. Accounts for:
-            a) the stereo angle: x += locYseed*tan(sAngle)
-            b) PCB deformations (as-built), if as-built conditions are enabled
-            c) Chamber deformations (b-lines), if b-lines are enabled
-        */
-        void spacePointPosition(const Identifier& layerId, double locXpos, double locYseed, Amg::Vector3D& pos) const;
-
         /** simHit local (SD) To Global position - to be used by MuonGeoAdaprors only
          */
         Amg::Vector3D localToGlobalCoords(const Amg::Vector3D& locPos, const Identifier& id) const;
@@ -103,12 +85,14 @@ namespace MuonGM {
         /** TrkDetElementInterface */
         virtual Trk::DetectorElemType detectorType() const override final { return Trk::DetectorElemType::MM; }
 
+        /** Method calculating the global position of the hit on surface taking the as-built corrections into account.
+         *  The local position is expressed in the reference frame of each individual layer
+        */
+        bool spacePointPosition(const Identifier& layerId, const Amg::Vector2D& localPos, Amg::Vector3D& pos) const;
+        
         /** @brief function to fill tracking cache */
         virtual void fillCache() override final;
-        virtual void refreshCache() override final {
-            clearCache();
-            fillCache();
-        }
+        virtual void refreshCache() override final;
 
         /** @brief returns the hash to be used to look up the surface and transform in the MuonClusterReadoutElement tracking cache */
         virtual int surfaceHash(const Identifier& id) const override final;
@@ -157,6 +141,7 @@ namespace MuonGM {
         const BLinePar* getBLinePar() const { return m_BLinePar; }
         void  clearALinePar();
         void  clearBLinePar() { m_BLinePar = nullptr; }
+        
 
     private:
         using PCBPassivation = NswPassivationDbData::PCBPassivation;
@@ -190,14 +175,6 @@ namespace MuonGM {
         std::array<Amg::Transform3D, 4> m_Xlg{make_array<Amg::Transform3D,4>(Amg::Transform3D::Identity())};
     };
 
-    inline void MMReadoutElement::clearALinePar() {
-        if (has_ALines()) {
-            m_ALinePar = nullptr; 
-            m_delta = Amg::Transform3D::Identity(); 
-            refreshCache();
-        }
-    }
-
     inline int MMReadoutElement::surfaceHash(const Identifier& id) const { return surfaceHash(manager()->mmIdHelper()->gasGap(id), 0); }
 
     inline int MMReadoutElement::surfaceHash(int gasGap, int /*measPhi*/) const { return gasGap - 1; } // measPhi not used
@@ -206,12 +183,11 @@ namespace MuonGM {
 
     inline int MMReadoutElement::layerHash(int gasGap) const { return gasGap - 1; }
 
-    inline int MMReadoutElement::boundaryHash(const Identifier& /*id*/) const { return 0; }
+    inline int MMReadoutElement::boundaryHash(const Identifier& id) const { return layerHash(manager()->mmIdHelper()->gasGap(id)); }
 
     inline bool MMReadoutElement::measuresPhi(const Identifier& /*id*/) const { return false; }
 
     inline const MuonChannelDesign* MMReadoutElement::getDesign(const Identifier& id) const {
-        // return measuresPhi(id) ? &m_phiDesign : &m_etaDesign;
         return &(m_etaDesign[layerHash(id)]);
     }
     inline double MMReadoutElement::distanceToReadout(const Amg::Vector2D& pos, const Identifier& id) const {
@@ -230,13 +206,13 @@ namespace MuonGM {
     inline bool MMReadoutElement::stripPosition(const Identifier& id, Amg::Vector2D& pos) const {
         const MuonChannelDesign* design = getDesign(id);
         if (!design) return false;
-        return design->channelPosition(manager()->mmIdHelper()->channel(id), pos);
+        return design->center(manager()->mmIdHelper()->channel(id), pos);
     }
 
     inline double MMReadoutElement::stripAngle(const Identifier& id) const {
         const MuonChannelDesign* design = getDesign(id);
         if (!design) return 0;
-        return design->sAngle;
+        return design->stereoAngle();
     }
 
     inline double MMReadoutElement::stripLength(const Identifier& id) const {
@@ -259,7 +235,7 @@ namespace MuonGM {
 
         double l = design->channelHalfLength(manager()->mmIdHelper()->channel(id), true);
         if (l < 0) return -1;
-        return std::max(0., l - passiv.left/std::cos(design->sideAngle - design->sAngle));
+        return std::max(0., l - design->passivatedLength(passiv.left, true));
     }
         
     inline double MMReadoutElement::stripActiveLengthRight(const Identifier& id) const {
@@ -272,7 +248,7 @@ namespace MuonGM {
 
         double l = design->channelHalfLength(manager()->mmIdHelper()->channel(id), false);
         if (l < 0) return -1;
-        return std::max(0., l - passiv.right/std::cos(design->sideAngle + design->sAngle));
+        return std::max(0., l - design->passivatedLength(passiv.right, false));
     }
 
     inline bool MMReadoutElement::insideActiveBounds(const Identifier& id, const Amg::Vector2D& locpos, double tol1, double tol2) const {
@@ -286,27 +262,24 @@ namespace MuonGM {
         // ** Horizontal passivation: mask entire strips
         //==============================================
         int pcb      = (stripNo-1)/1024 + 1; // starts from 1
-        int pcbStrip = stripNo - 1024*(pcb - 1);
-        PCBPassivation pcbPassiv = m_passivData ? m_passivData->getPassivation(channelId) : s_dummy_passiv;
+        int pcbStrip = stripNo % 1024;// - 1024*(pcb - 1);
+        const PCBPassivation& pcbPassiv = m_passivData ? m_passivData->getPassivation(channelId) : s_dummy_passiv;
         // if(m_passivData && !pcbPassiv.valid) return false;
         // the passivated width is constant along the PCB edge (not along y for stereo strips)
-        if(pcb != 1) pcbPassiv.bottom /= std::cos(design->sAngle);
         bool topPcb{pcb == 5 || (std::abs(getStationEta()) == 2 && pcb == 3)};
-        if(!topPcb) pcbPassiv.top     /= std::cos(design->sAngle);
-        int pcbStripMin =    1 + (int)std::floor((pcbPassiv.bottom + 0.5*design->inputPitch - tol1)/design->inputPitch); // first pcb strip surviving passivation
-        int pcbStripMax = 1024 - (int)std::floor((pcbPassiv.top    + 0.5*design->inputPitch - tol1)/design->inputPitch); //  last pcb strip surviving passivation
+        int pcbStripMin =    1 + (int)std::floor((design->passivatedHeight(pcbPassiv.bottom, pcb ==1) + 0.5*design->inputPitch - tol1)/design->inputPitch); // first pcb strip surviving passivation
+        int pcbStripMax = 1024 - (int)std::floor((design->passivatedHeight(pcbPassiv.top, topPcb)    + 0.5*design->inputPitch - tol1)/design->inputPitch); //  last pcb strip surviving passivation
         if(pcbStrip < pcbStripMin || pcbStrip > pcbStripMax) return false;
 
         // ** Vertical passivation: cut strips from left and right
         //=======================================
-        const double& passivW = (locpos[1]<0) ? pcbPassiv.left : pcbPassiv.right;
-        return bounds(id).inside(locpos, tol1, tol2 - passivW/std::cos(design->sideAngle));
+        return bounds(id).inside(locpos, tol1, tol2  - design->passivatedLength(locpos[1]<0 ? pcbPassiv.left : pcbPassiv.right , locpos[1] < 0));
     }
 
     inline bool MMReadoutElement::stripGlobalPosition(const Identifier& id, Amg::Vector3D& gpos) const {
-        Amg::Vector2D lpos(0., 0.);
+        Amg::Vector2D lpos{Amg::Vector2D::Zero()};
         if (!stripPosition(id, lpos)) return false;
-        surface(id).localToGlobal(lpos, Amg::Vector3D(0., 0., 0.), gpos);
+        surface(id).localToGlobal(lpos, Amg::Vector3D::Zero(), gpos);
         return true;
     }
 
@@ -324,89 +297,31 @@ namespace MuonGM {
     inline int MMReadoutElement::numberOfMissingTopStrips(const Identifier& id) const {
         const MuonChannelDesign* design = getDesign(id);
         if (!design) return -1;
-        int nStrips = design->sAngle == 0 ? design->nMissedTopEta : design->nMissedTopStereo;
-        return nStrips;
+        return design->numberOfMissingTopStrips();
     }
 
     inline int MMReadoutElement::numberOfMissingBottomStrips(const Identifier& id) const {
         const MuonChannelDesign* design = getDesign(id);
         if (!design) return -1;
-        int nStrips = design->sAngle == 0 ? design->nMissedBottomEta : design->nMissedBottomStereo;
-        return nStrips;
+        return design->numberOfMissingBottomStrips();
     }
 
     inline bool MMReadoutElement::spacePointPosition(const Identifier& phiId, const Identifier& etaId, Amg::Vector2D& pos) const {
-        Amg::Vector2D phiPos;
-        Amg::Vector2D etaPos;
-        if (!stripPosition(phiId, phiPos) || !stripPosition(etaId, etaPos)) return false;
-        spacePointPosition(phiPos, etaPos, pos);
+        if (!stripPosition(etaId, pos)) return false;
+        const MuonChannelDesign* phi_design = getDesign(phiId);
+        const MuonChannelDesign* eta_design = getDesign(etaId);
+        if (!phi_design || !eta_design) return false;
+        pos = phi_design->rotation() * eta_design->rotation().inverse()*pos;
         return true;
     }
-
+    
     inline bool MMReadoutElement::spacePointPosition(const Identifier& phiId, const Identifier& etaId, Amg::Vector3D& pos) const {
-        Amg::Vector2D lpos;
+        Amg::Vector2D lpos{Amg::Vector2D::Zero()};
         spacePointPosition(phiId, etaId, lpos);
         surface(phiId).localToGlobal(lpos, pos, pos);
         return true;
     }
-
-    inline bool MMReadoutElement::spacePointPosition( const Identifier& id1, const Identifier& id2, Amg::Vector3D gpos_id1, Amg::Vector3D gpos_id2, Amg::Vector3D& gpos ) const {
-      
-      int multilay1 = manager()->mmIdHelper()->multilayer(id1);
-      int multilay2 = manager()->mmIdHelper()->multilayer(id2);
-      int lay1 = manager()->mmIdHelper()->gasGap(id1);
-      int lay2 = manager()->mmIdHelper()->gasGap(id2);
-
-      //check to use only layer on the same multiplet, not the same layer and at least one stereo
-      if ( (multilay1 != multilay2 || lay1 == lay2) || !( manager()->mmIdHelper()->isStereo(id1) || manager()->mmIdHelper()->isStereo(id2) ) ) return false;
-
-      double angles = std::abs(getDesign(id1)->sAngle); //stereo angle
-      double tan_angles = std::tan(angles);
-      double phi = gpos_id1.phi(); //phi of the MM sector
-
-      //parameters used to calculate the phi
-      double A = ( gpos_id1.x() - gpos_id2.x() ) / ( gpos_id1.x() + gpos_id2.x() );
-      double B = ( gpos_id1.z() - gpos_id2.z() ) / ( gpos_id1.z() + gpos_id2.z() );
-      //tan(phi/2)
-      double tan_phi2 = ( tan_angles - std::sqrt(tan_angles*tan_angles - B*B + A*A) ) / (A+B);
-
-      //ad hoc change for the sector at PI/2
-      if ( std::abs( std::abs(phi) - M_PI_2 ) < 0.01) {
-	A = ( gpos_id1.y() - gpos_id2.y() ) / ( gpos_id1.y() + gpos_id2.y() );
-	tan_phi2 = ( A - std::sqrt(A*A - B*B + tan_angles*tan_angles ) ) / (B-tan_angles);
-      }
-
-      double dphi = 0; //dphi = angle wrt the center of the sector 
-      if (manager()->mmIdHelper()->stationEta(id1) > 0) dphi = -2*std::atan(tan_phi2);
-      else dphi = 2*std::atan(tan_phi2);
-
-      //ad hoc change for the sector at PI/2
-      if ( std::abs( std::abs(phi) - M_PI_2 ) < 0.01) {
-	if (dphi*phi < 0) dphi += phi;
-	else dphi -= phi;
-      }
-
-      const double tan_phi_plus_dphi = std::tan(phi+dphi);
-      const double tan_phi_minus_angles = std::tan(phi-angles);
-
-      //global positions
-      gpos[0] = (gpos_id1.y() + gpos_id1.x()/tan_phi_minus_angles)/(tan_phi_plus_dphi + 1./tan_phi_minus_angles);
-      gpos[1] = gpos[0]*tan_phi_plus_dphi;
-      gpos[2] = gpos_id1.z();
-
-      //check if the stereo-superpoint is on the surface
-      Amg::Vector2D lpos;
-      const Trk::PlaneSurface& surf1 = surface(id1);
-      surf1.globalToLocal(gpos,gpos,lpos);
-      if( !surf1.insideBounds(lpos) ) return false;
-
-      return true;
-    }
-
-    inline void MMReadoutElement::spacePointPosition(const Amg::Vector2D& phiPos, const Amg::Vector2D& etaPos, Amg::Vector2D& pos) const {
-        pos[0] = phiPos.x();
-        pos[1] = etaPos.x();
-    }
+   
 }  // namespace MuonGM
 
 #endif  // MUONREADOUTGEOMETRY_MMREADOUTELEMENT_H

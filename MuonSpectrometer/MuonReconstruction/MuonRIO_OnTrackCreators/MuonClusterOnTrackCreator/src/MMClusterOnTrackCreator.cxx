@@ -51,7 +51,7 @@ const Muon::MuonClusterOnTrack* Muon::MMClusterOnTrackCreator::createRIO_OnTrack
         ATH_MSG_VERBOSE("Making 1-dim local parameters: " << m_idHelperSvc->toString(RIO.identify()));
     }
 
-    Amg::Vector2D lp;
+    Amg::Vector2D lp{Amg::Vector2D::Zero()};
     double positionAlongStrip = 0;
 
     if (!EL->surface(RIO.identify()).globalToLocal(GP, GP, lp)) {
@@ -93,8 +93,8 @@ const Muon::MuonClusterOnTrack* Muon::MMClusterOnTrackCreator::calibratedCluster
     }
 
     // check whether PrepRawData has detector element, if not there print warning
-    const Trk::TrkDetElementBase* EL = RIO.detectorElement();
-    if (!EL) {
+    const MuonGM::MMReadoutElement* mmEL = dynamic_cast<const MuonGM::MMReadoutElement*>(RIO.detectorElement());
+    if (!mmEL) {
         ATH_MSG_WARNING("RIO does not have associated detectorElement!, cannot produce ROT");
         return nullptr;
     }
@@ -103,24 +103,23 @@ const Muon::MuonClusterOnTrack* Muon::MMClusterOnTrackCreator::calibratedCluster
     //
     Trk::LocalParameters locpar =  RIO.localCovariance().cols() > 1 ? Trk::LocalParameters{RIO.localPosition()} : 
                                   Trk::LocalParameters{Trk::DefinedParameter{RIO.localPosition().x(), Trk::locX}};
-  
+    
     Amg::Vector2D lp{Amg::Vector2D::Zero()};
-    double positionAlongStrip = 0;
-
-    if (!EL->surface(RIO.identify()).globalToLocal(GP, GP, lp)) {
+   
+    if (!mmEL->surface(RIO.identify()).globalToLocal(GP, GP, lp)) {
         Amg::Vector3D lpos = RIO.detectorElement()->surface(RIO.identify()).transform().inverse() * GP;
         ATH_MSG_WARNING("Extrapolated GlobalPosition not on detector surface! Distance " << lpos.z());
-        lp[Trk::locX] = lpos.x();
-        lp[Trk::locY] = lpos.y();
+        lp[0] = lpos[0];
+        lp[1] = lpos[1];        
     }
-    positionAlongStrip = lp[Trk::locY];
-
+    lp[Trk::locX] = locpar[Trk::locX];
     /// correct the local x-coordinate for the stereo angle (stereo strips only),
     /// as-built conditions and b-lines (eta and stereo strips), if enabled.
     /// note: there's no point in correcting the seeded y-coordinate.
     Amg::Vector3D localposition3D{Amg::Vector3D::Zero()};
-    const MuonGM::MMReadoutElement* mmEL = dynamic_cast<const MuonGM::MMReadoutElement*>(EL);
-    mmEL->spacePointPosition(RIO.identify(), locpar[Trk::locX], positionAlongStrip, localposition3D);
+    if (!mmEL->spacePointPosition(RIO.identify(), lp, localposition3D)){
+        ATH_MSG_WARNING("Application of final as-built parameters failed for channel "<<m_idHelperSvc->toString(RIO.identify())<<" local pos = ("<<lp.x()<<"/"<<lp.y()<<").");
+    }
     locpar[Trk::locX] = localposition3D.x();
     double offsetZ = localposition3D.z();
    
@@ -132,21 +131,19 @@ const Muon::MuonClusterOnTrack* Muon::MMClusterOnTrackCreator::calibratedCluster
         ATH_MSG_WARNING("Could not calibrate the MM Cluster in the RIO on track creator");
         return cluster;
     }
-
-     Amg::Vector2D localposition2D{locpar[Trk::locX],0.};
-     Amg::MatrixX loce = RIO.localCovariance();
-   
+    
+     Amg::MatrixX loce = RIO.localCovariance();   
     /// calibrate the cluster position along the precision coordinate
-    sc = m_clusterBuilderTool->getCalibratedClusterPosition(MClus, calibratedStrips, GD.theta(), localposition2D, loce);
+    sc = m_clusterBuilderTool->getCalibratedClusterPosition(MClus, calibratedStrips, GD.theta(), lp, loce);
     if (sc != StatusCode::SUCCESS) {
         ATH_MSG_WARNING("Could not calibrate the MM Cluster in the RIO on track creator");
         return cluster;
     }
     /// set the value of the local parameter after the calibration
-    locpar[Trk::locX] = localposition2D[Trk::locX];
+    locpar[Trk::locX] = lp[Trk::locX];
 
     ATH_MSG_VERBOSE("generating MMClusterOnTrack in MMClusterBuilder");
-    cluster = new MMClusterOnTrack(MClus, locpar, loce, positionAlongStrip);
+    cluster = new MMClusterOnTrack(MClus, locpar, loce, lp.y());
     cluster->setOffsetNormal(offsetZ);
 
     return cluster;

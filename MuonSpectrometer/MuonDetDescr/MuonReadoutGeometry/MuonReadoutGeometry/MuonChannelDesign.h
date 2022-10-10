@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
 */
 
 /***************************************************************************
@@ -13,46 +13,32 @@
 #include "AthenaKernel/getMessageSvc.h"
 #include "GaudiKernel/MsgStream.h"
 #include "GeoPrimitives/GeoPrimitives.h"
-
+#include "EventPrimitives/EventPrimitives.h"
+#include "MuonReadoutGeometry/GlobalUtilities.h"
+#include "cmath"
 namespace MuonGM {
 
     struct MuonChannelDesign {
     public:
-        enum ChannelType { etaStrip, phiStrip };
-        enum DetType { MM, STGC, Other };
+        MuonChannelDesign();
+        enum class ChannelType { etaStrip, phiStrip };
+        enum class DetType { MM, STGC, Other };
         ChannelType type{ ChannelType::etaStrip };
         DetType  detType{ DetType::Other };
         int nch{-1};             // total #of active strips
-        int febSide{0};
-        double sAngle{0.};       // stereo angle
-        double sideAngle{0.};    // trapezoid leg angle w.r.t. to the radial axis (used for MM)
         double inputPitch{0.};   // we use this param to define the pitch for MM
         double inputWidth{0.};
         double inputLength{0.};
-        double deadI{0.};        // test param for sTGC
-        double deadO{0.};        // test param for sTGC
-        double deadS{0.};        // test param for sTGC
-        double firstPos{0.};     // the position of the first active strip
         double firstPitch{0.};   // Pitch of 1st strip or number of wires in 1st group
         double groupWidth{0.};   // Number of Wires per group
         double nGroups{0.};      // Number of Wire groups
         double wireCutout{0.};
-        double xSize{0.};        // radial distance (active area)
-        double minYSize{0.};     // bottom length (active area)
-        double maxYSize{0.};     // top length (active area)
         double thickness{0.};    // gas thickness
         double yCutout{0.};
-        double minYPhiL{0.};     // (left bottom) distance between first eta and stereo strips (MM)
-        double minYPhiR{0.};     // (right bottom) distance between first eta and stereo strips (MM)
-        double maxYPhi{0.};      // (top) distance between last eta and stereo strips (MM)
         int nMissedTopEta{0};    // #of strips that are not connected to any FE boards (MM)
         int nMissedBottomEta{0};
         int nMissedTopStereo{0};
         int nMissedBottomStereo{0};
-        int nRoutedTop{0};       // #of strips that have shorter lengths (at the corners of the PCBs) (MM)
-        int nRoutedBottom{0};
-        double dlStereoTop{0.};  // length between the first eta and stereo
-        double dlStereoBottom{0.};
         int totalStrips{0};      // total strips per MM module
 
         /** distance to readout */
@@ -72,14 +58,22 @@ namespace MuonGM {
          *  It returns -1 if not a sTGC chamber.*/
         int wireNumber(const Amg::Vector2D& pos) const;
 
-        /** calculate local channel position for a given channel number */
-        bool channelPosition(int channel, Amg::Vector2D& pos) const;
-
+       
         /** calculate local channel width */
-        double channelWidth(const Amg::Vector2D& pos) const;
+        double channelWidth() const;
 
-        /** calculate local stereo angle */
-        double stereoAngle(int ) const { return sAngle; }
+       
+        /** set the trapezoid dimensions */
+        void defineTrapezoid(double HalfShortY, double HalfLongY, double HalfHeight);
+        void defineTrapezoid(double HalfShortY, double HalfLongY, double HalfHeight, double sAngle);
+    
+
+        /* returns the stereo angle */
+        double stereoAngle() const { return m_sAngle; }
+        /* returns whether the stereo angle is non-zero */
+        double hasStereoAngle() const {return m_hasStereo;}
+        /* returns the rotation matrix between eta <-> phi layer */
+        const AmgSymMatrix(2)& rotation() const { return m_rotMat; }
 
         /** calculate channel length for a given channel number */
         double channelLength(int channel) const;
@@ -89,71 +83,110 @@ namespace MuonGM {
 
         /** thickness of gas gap */
         double gasGapThickness() const { return thickness; }
+
+        /// Returns the center on the strip
+        bool center(int channel, Amg::Vector2D& pos) const;
+        /// Returns the left edge of the strip
+        bool leftEdge(int channel, Amg::Vector2D& pos) const;
+        /// Returns the right edge of the strip
+        bool rightEdge(int channel, Amg::Vector2D& pos) const;
+        /// Returns the number of missing top channels
+        int numberOfMissingTopStrips() const;
+        /// Returns the number of missing bottom strips
+        int numberOfMissingBottomStrips() const;
+
+        // radial distance (active area)
+        double xSize() const;
+        // top length (active area)
+        double maxYSize() const;
+        // bottom length (active area)
+        double minYSize() const;
+        //// In the context of passivation the trapezoid is rotated by 90 degrees again
+        ////  The short parallel edge (Left edge in the nominal description of the design) is the bottom
+        ////      top edge -> left edge
+        ///       bottom edge -> right edge
+        /// a rectangle with height H parallel to the inclined edges is passivated
+        double passivatedLength(double passivWidth, bool left)  const;
+        /// Passivation is applied parallell to
+        double passivatedHeight(double passivHeight, bool edge) const;
+
+        /// Set the position of the first strip along the x-axis
+        void setFirstPos(const double pos);
+        /// Returns the position of the first strip along the x-axis
+        double firstPos() const;
+    private:
+         /** calculate local channel position for a given channel number */
+        bool channelPosition(int channel, Amg::Vector2D& pos) const;
+
+         ///Returns the intersection of the strip with the left edge
+        bool leftInterSect(int channel, Amg::Vector2D& pos) const;
+        /// Returns the right edge of the strip
+        bool rightInterSect(int channel, Amg::Vector2D& pos) const;
+        /// Returns the geometrical strip center
+        bool geomCenter(int channel, Amg::Vector2D& pos) const;
+
+         /** calculate local stereo angle */
+        void setStereoAngle(double sAngle);
+       
+        bool m_hasStereo{false};
+        double m_sAngle{0.};       // stereo angle
+        /// Direction of the strips
+        Amg::Vector2D m_stereoDir{0,1};        
+        /// Direction pointing to the next strips
+        Amg::Vector2D m_stereoNormal{1.,0.};
+        /// Position of the first measurement
+        double m_firstPos{0.};
+        /// Vector describing the right edge of the trapzoid
+        Amg::Vector2D m_topEdge{Amg::Vector2D::Zero()};
+        /// Vector describing the left edge of the trapezoid
+        Amg::Vector2D m_bottomEdge{Amg::Vector2D::Zero()};
+        
+        /// Bottom left point of the trapezoid
+        Amg::Vector2D m_bottomLeft{Amg::Vector2D::Zero()};
+        /// Bottom right point of the trapezoid
+        Amg::Vector2D m_bottomRight{Amg::Vector2D::Zero()};
+        /// Top right point of the trapezoid
+        Amg::Vector2D m_topLeft{Amg::Vector2D::Zero()};
+        /// Bottom right point of the trapezoid
+        Amg::Vector2D m_topRight{Amg::Vector2D::Zero()};
+
+        AmgSymMatrix(2) m_rotMat{AmgSymMatrix(2)::Identity()};      
+        double m_maxHorSize{0.}; /// Maximum length of the horizontal edges
+
+        double m_xSize{0.};        // radial distance (active area)
+        double m_minYSize{0.};     // bottom length (active area)
+        double m_maxYSize{0.};     // top length (active area)
+     
     };
-
-
-    //============================================================================
-    inline double MuonChannelDesign::distanceToReadout(const Amg::Vector2D& pos) const {
-
-        // implemented for micromegas and sTGC strips
-        // (for sTGC wires returns the full wire length)
-
-        Amg::Vector2D chPos;
-        int chNum = channelNumber(pos);
-        if (!channelPosition(chNum, chPos)) return -1.;
-
-        double stripL = channelLength(chNum);
-        double dist{stripL};
-
-        if (type == ChannelType::etaStrip) {
-
-            if (detType == DetType::MM) {
-    
-                // MM: febSide tells the side of the first FEB on PCB1 (and all odd FEBs).
-                double posAlongStrip = (pos.x() - chPos.x()) * std::sin(sAngle) + (pos.y() - chPos.y()) * std::cos(sAngle); 
-                int FEB = (chNum-1)/512 + 1; // FEB number (starting from 1)
-                dist = ((febSide > 0) == FEB%2) ? 0.5*stripL - posAlongStrip : 0.5*stripL + posAlongStrip;
-
-            } else if (detType == DetType::STGC) {
-
-                // sTGC: there is one sFEB/module/layer
-                double posAlongStrip = pos.y() - chPos.y(); 
-                dist = (febSide > 0) ? 0.5*stripL - posAlongStrip : 0.5*stripL + posAlongStrip;
-            }
-        }
-
-        if (dist < 0.) return 0.;
-        return std::min(dist, stripL);
-    }
-
 
     //============================================================================
     inline double MuonChannelDesign::distanceToChannel(const Amg::Vector2D& pos, int chNum) const {
+        Amg::Vector2D cen{Amg::Vector2D::Zero()};
+        if (!center(chNum, cen)) return std::numeric_limits<float>::max();
         
-        Amg::Vector2D chPos;
-        if (!channelPosition(chNum, chPos)) return -10000.;
-
-        if (type == ChannelType::etaStrip && detType == DetType::MM) {
-            return pos.x() - pos.y()*std::tan(sAngle) - chPos.x();
-        }
-
-        return pos.x() - chPos.x();
+        return (cen - pos).x();
     }
+    inline double MuonChannelDesign::distanceToReadout(const Amg::Vector2D& pos) const {
+        throw std::runtime_error("MuonChannelDesign::distanceToReadout() - is not properly defined");
+        return pos.dot(pos);
+    }
+
 
 
     //============================================================================
     inline int MuonChannelDesign::channelNumber(const Amg::Vector2D& pos) const {
-
+        static const Amg::Vector2D x_axis{1.,0.};
+           
         int chNum{-1};
         if (type == ChannelType::etaStrip && detType == DetType::MM) {
-
             // ** MM strips: keeping cases outside the active area, but within the envelope, 
             // to avoid warnings from MuonPRDTest. Those channels are removed from digitization.
-            double xMid = pos.x() - pos.y() * std::tan(sAngle);
-            const int& missedBottom = sAngle ? nMissedBottomStereo : nMissedBottomEta;
+            const Amg::Vector2D posInEta = m_rotMat.inverse()*pos;
+            const double xMid = (posInEta - firstPos()*x_axis).dot(m_stereoNormal) / m_stereoNormal.x();
+            const int missedBottom =  numberOfMissingBottomStrips();
 
-            // firstPos is always 1/2 pitch above the center of the first active strip
-            chNum = (int)std::floor((xMid - firstPos) / inputPitch) + missedBottom + 2;
+            // first position is always 1/2 pitch above the center of the first active strip
+            chNum = static_cast<int>(std::floor( xMid  / inputPitch)) + missedBottom + 2;
             if (chNum < 1 || chNum > totalStrips) chNum = -1;
 
         } else if (type == ChannelType::phiStrip && detType == DetType::STGC) {
@@ -164,7 +197,7 @@ namespace MuonGM {
         } else {
 
             // ** All other cases
-            chNum = (int)std::floor( (pos.x() - firstPos) / inputPitch ) + 2;
+            chNum = (int)std::floor( (pos.x() - firstPos()) / inputPitch ) + 2;
             if (chNum < 1 || chNum > nch) chNum = -1;
         }
    
@@ -191,12 +224,12 @@ namespace MuonGM {
             // If a hit is positionned after the last wire but inside the gas volume.
             // This is really a check for the few mm on the fringe of the gas volume
             // Especially important for QL3. We still consider the digit active.
-            if (grNumber > nGroups && pos.x() < 0.5 * maxYSize) grNumber = nGroups;
+            if (grNumber > nGroups && pos.x() < 0.5 * m_maxYSize) grNumber = nGroups;
         }
 
         // If hit is in an inactive wire region of QL1/QS1, return 63 (invalid).
         // This allows better tracking of hits.
-        if (wireCutout != 0. && pos.y() < 0.5 * xSize - wireCutout) return 63;
+        if (wireCutout != 0. && pos.y() < 0.5 * m_xSize - wireCutout) return 63;
         if (grNumber < 1 || grNumber > nGroups) return -1;
         
         return grNumber;
@@ -209,10 +242,10 @@ namespace MuonGM {
         // Only determine wire number for sTGC wire surfaces
         int wire_number{-1};
         if (type == ChannelType::phiStrip && detType == DetType::STGC) {
-            if ((pos.x() > -0.5 * maxYSize) && (pos.x() < firstPos)) { // before first wire
+            if ((pos.x() > -0.5 * m_maxYSize) && (pos.x() < firstPos())) { // before first wire
                 wire_number = 1;
             } else {
-                wire_number = (pos.x() - firstPos) / inputPitch + 1;
+                wire_number = (pos.x() - firstPos()) / inputPitch + 1;
                 // Print a warning if the wire number is outside the range [1, nch]
                 if (wire_number < 1 || wire_number > nch) {
                     MsgStream log(Athena::getMessageSvc(), "MuonChannelDesign");
@@ -241,15 +274,15 @@ namespace MuonGM {
 
                 // calculate the end of the first wire group (accounts for staggering).
                 // for wires, firstPitch is the number of wires in the first group
-                double firstX = firstPos + (firstPitch - 1) * inputPitch;  
+                double firstX = firstPos() + (firstPitch - 1) * inputPitch;  
                 double locX{0.};
 
                 if (st == 1) {               
                     // first group: average the starting and ending x of the group
-                    locX = 0.5 * (-0.5 * maxYSize + firstX);
+                    locX = 0.5 * (-0.5 * m_maxYSize + firstX);
                 } else if (st == nGroups)  { 
                     // last group: average the starting and ending x of the group
-                    locX = 0.5 * (0.5 * maxYSize + firstX + (nGroups - 2) * groupWidth * inputPitch);
+                    locX = 0.5 * (0.5 * m_maxYSize + firstX + (nGroups - 2) * groupWidth * inputPitch);
                 } else {
                     locX = firstX + groupWidth * inputPitch * (st - 1.5);
                 }
@@ -260,14 +293,13 @@ namespace MuonGM {
             } else {
 
                 //** Default case for phi wires
-                double dY   = 0.5 * (maxYSize - minYSize);
-                double locY = firstPos + (st-1)*inputPitch;
+                double dY   = 0.5 * (m_maxYSize - m_minYSize);
+                double locY = firstPos() + (st-1)*inputPitch;
                 double locX{0.};
 
-                if (std::abs(locY) > 0.5*minYSize - deadS) {
-                    locX = 0.5 * (xSize - deadO - deadI) * (1. - (0.5*maxYSize-deadS - std::abs(locY)) / dY) + 0.5 * (deadI - deadO);
+                if (std::abs(locY) > 0.5*m_minYSize) {
+                    locX = 0.5 * m_xSize *(1. - (0.5*m_maxYSize - std::abs(locY)) / dY);
                 }
-
                 pos[0] = locY;
                 pos[1] = locX;
             }
@@ -275,19 +307,18 @@ namespace MuonGM {
         } else if (detType == DetType::MM) {
                 
             //** MM eta strips (strip numbering starts at 1)
-            const int& nMissedBottom = (sAngle == 0.) ? nMissedBottomEta : nMissedBottomStereo;
+            const int nMissedBottom = numberOfMissingBottomStrips();
             if (st <= nMissedBottom || st > nMissedBottom + nch) return false;
-
+            
             // firstPos is 1/2 pitch above the center of the first active strip.
-            pos[0] = firstPos + inputPitch * (st - nMissedBottom - 1.5);
-            pos[1] = 0; // centre of strip
-
+            static const Amg::Vector2D x_axis{1.,0.};
+            pos = (firstPos()  + inputPitch* (st - nMissedBottom - 1.5)) * x_axis;
         } else {
 
             //** sTGC and default case for eta strips
             if (st < 1 || st > nch) return false;
 
-            double x = firstPos + (st - 1.5)*inputPitch;
+            double x = firstPos() + (st - 1.5)*inputPitch;
             if (detType == DetType::STGC) {
                 if (firstPitch == inputPitch && st == nch) x -= inputWidth/4.; // case last strip is a half-strip
                 if (firstPitch  < inputPitch && st ==   1) x += inputWidth/4.; // case first strip is a half-strip
@@ -299,83 +330,27 @@ namespace MuonGM {
 
         return true;
     }
-
-
+    
     //============================================================================
     inline double MuonChannelDesign::channelHalfLength(int st, bool left) const {
-
-        if (type == ChannelType::etaStrip && detType == DetType::MM) {
-
-            // keeping cases outside the active area (but within envelope) in case such length is needed
-            if (st < 1 || st > totalStrips) return -0.5;
-
-            // the length of MM eta strips is even on the two sides of the x axis.          
-            double etaLength = inputLength + ((maxYSize-minYSize)*(st-nMissedBottomEta-0.5)*inputPitch/xSize);
-            if (sAngle == 0.) return 0.5*etaLength;
- 
-            // the length of MM stereo strips is uneven on the two sides of the x axis.
-            double sideAngle = std::atan( (maxYSize - minYSize)/(2.*xSize) );
-            return left ? 0.5*etaLength*(std::cos(sAngle) + std::sin(sAngle)*std::tan(sAngle - sideAngle))
-                        : 0.5*etaLength*(std::cos(sAngle) + std::sin(sAngle)*std::tan(sAngle + sideAngle));
-        }
-        
+        Amg::Vector2D cen{Amg::Vector2D::Zero()}, side{Amg::Vector2D::Zero()};
+        if (!geomCenter(st,cen) || (left&& !leftInterSect(st, side)) ||  (!left && !rightInterSect(st, side)))  return -0.5;
+        if (type == ChannelType::etaStrip && detType == DetType::MM && (st < 1 || st > totalStrips)) return -0.5;           
         // default case:
-        return 0.5*channelLength(st);
+        return (cen - side).mag();
     }
     
 
     //============================================================================
     inline double MuonChannelDesign::channelLength(int st) const {
-
-        if (type == ChannelType::phiStrip) {
-
-            if (st < 1 || st > nch) return -1;
-
-            // max wire length in the trapezoid region (below cutout base for sTGC QL3)
-            double lX = xSize - deadI - deadO - yCutout;
-
-            // correction for wires on the sides of the trapezoid
-            double absY = std::abs(firstPos + (st-1)*inputPitch);
-            if (absY > 0.5 * minYSize - deadS) {
-                double dY = 0.5*(maxYSize - minYSize);
-                lX *= (0.5*maxYSize - deadS - absY) / dY;
-            }
-            
-            return lX + yCutout;
-
-        } else if (type == ChannelType::etaStrip) {
-        
-            if (detType == DetType::MM) {
-
-                // eta strips: no need to calculate each side separately; we know they are equal
-                if (sAngle == 0.) return 2*channelHalfLength(st, false); 
-
-                // stereo strips: get the length on each side
-                return channelHalfLength(st, false) + channelHalfLength(st, true);
-
-            } else {
-
-                // get the x-coordinate of the strip
-                Amg::Vector2D chPos;
-                if (!channelPosition(st, chPos)) return -1;
-
-                // for QL3, if the strip is above the cutout base, return the base length.
-                // In this case, also mind that x = 0 is on the cutout base.
-                if (yCutout && chPos.x() >= 0.) return maxYSize - 2*deadS;
-
-                // vertical distance from the small base
-                double dX    = chPos.x() - (firstPos - firstPitch);
-                double dXmax = xSize - deadI - deadO - yCutout;
-                return minYSize + (maxYSize - minYSize) * dX / dXmax;
-            } 
-        }
-
-        return inputLength;
+        Amg::Vector2D left{Amg::Vector2D::Zero()}, right{Amg::Vector2D::Zero()};
+        if(!leftInterSect(st,left)|| !rightInterSect(st, right)) return -0.5;
+        return (left - right).mag();       
     }
 
 
     //============================================================================
-    inline double MuonChannelDesign::channelWidth(const Amg::Vector2D& /*pos*/) const {
+    inline double MuonChannelDesign::channelWidth() const {
 
         if (detType == DetType::STGC) {
             // eta strips: return the pitch (3.2mm), not the width (2.7mm)
@@ -385,6 +360,82 @@ namespace MuonGM {
 
         return inputWidth;
     }
+    inline bool  MuonChannelDesign::geomCenter(int channel, Amg::Vector2D& pos) const {
+        Amg::Vector2D l_pos{Amg::Vector2D::Zero()}, r_pos{Amg::Vector2D::Zero()};
+        if (!leftInterSect(channel,l_pos) || !rightInterSect(channel,r_pos)) return false;
+        pos = 0.5 * (l_pos + r_pos);
+        return true;
+    }
+
+    inline bool MuonChannelDesign::leftInterSect(int channel, Amg::Vector2D& pos) const {
+       /// Nominal channel position
+       Amg::Vector2D chanPos{Amg::Vector2D::Zero()};
+       if (!channelPosition(channel, chanPos)) return false;
+       std::optional<double>  lambda =intersect<2>(chanPos, m_stereoDir, m_bottomLeft, m_bottomEdge);
+       if (!lambda) return false;
+       /// If the channel is a stereo channel && lamda is either smaller 0 or longer
+       /// then the bottom edge, then it's a routed strip
+       if (m_hasStereo && ( (*lambda) < 0. || (*lambda) > m_maxHorSize)) { 
+            const Amg::Vector2D e_y{0., 1.};                  
+            const std::optional<double> bottom_line =intersect<2>(m_stereoDir.x() > 0.? m_bottomLeft:  m_bottomRight, e_y, chanPos, m_stereoDir);
+            if (bottom_line)  {
+                pos = chanPos + (*bottom_line)* m_stereoDir;
+                return true;
+            }
+       }
+       pos = (m_bottomLeft + (*lambda) * m_bottomEdge); 
+       return true;
+    }
+    inline bool MuonChannelDesign::rightInterSect(int channel, Amg::Vector2D& pos) const {
+        /// Nominal channel position
+        Amg::Vector2D chanPos{Amg::Vector2D::Zero()};
+        if (!channelPosition(channel, chanPos)) return false;
+        /// We expect lambda to be positive
+        const std::optional<double> lambda =intersect<2>(chanPos, m_stereoDir, m_topRight, m_topEdge);
+        if (!lambda) return false;
+        /// If the channel is a stereo channel && lamda is either smaller 0 or longer
+        /// then the bottom edge, then it's a routed strip
+        if (m_hasStereo&& ( (*lambda) < 0  || (*lambda) > m_maxHorSize)) { 
+            const Amg::Vector2D e_y{0., 1.};              
+            const std::optional<double> top_line =intersect<2>(m_stereoDir.x() >  0. ? m_topRight: m_topLeft, e_y, chanPos, m_stereoDir);
+            if (top_line) {
+                pos = chanPos + (*top_line) * m_stereoDir;
+                return true;
+            }
+       }
+       pos = (m_topRight + (*lambda) * m_topEdge);
+       return true; 
+    }
+    inline int MuonChannelDesign::numberOfMissingTopStrips() const{ return !m_hasStereo  ? nMissedTopEta : nMissedTopStereo; }        
+    inline int MuonChannelDesign::numberOfMissingBottomStrips() const { return !m_hasStereo ? nMissedBottomEta : nMissedBottomStereo;}
+    inline double MuonChannelDesign::xSize() const {return m_xSize;}
+    inline double MuonChannelDesign::maxYSize() const {return m_maxYSize;}
+    inline double MuonChannelDesign::minYSize() const {return m_minYSize;}
+    
+    inline bool MuonChannelDesign::center(int channel, Amg::Vector2D& pos) const {
+        if (!geomCenter(channel, pos)) return false;
+        pos = m_rotMat * pos;
+        return true;
+    }
+    inline bool MuonChannelDesign::leftEdge(int channel, Amg::Vector2D& pos) const {
+        if (!leftInterSect(channel, pos)) return false;
+        pos = m_rotMat * pos;
+        return true;
+    }
+    inline bool MuonChannelDesign::rightEdge(int channel, Amg::Vector2D& pos) const {
+        if (!rightInterSect(channel, pos)) return false;
+        pos = m_rotMat * pos;
+        return true;
+    }
+    /// The passivated length 
+    inline double MuonChannelDesign::passivatedLength(double passivWidth, bool left)  const{
+        const Amg::Vector2D& edge = (left ? m_bottomEdge : m_topEdge);
+        return passivWidth * std::abs(m_stereoDir.x() *edge.y() - m_stereoDir.y()* edge.x());
+    }
+    inline double MuonChannelDesign::passivatedHeight(double passivHeight, bool edge_pcb) const{
+        return passivHeight*std::abs(edge_pcb? m_stereoDir.x() : 1.);
+    }
+    inline double MuonChannelDesign::firstPos() const {return m_firstPos;}
 
 }  // namespace MuonGM
 #endif  // MUONREADOUTGEOMETRY_MUONCHANNELDESIGN_H

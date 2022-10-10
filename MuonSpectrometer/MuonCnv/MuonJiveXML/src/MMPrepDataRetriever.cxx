@@ -77,7 +77,7 @@ namespace JiveXML {
         const MuonGM::MuonChannelDesign* design = element->getDesign(id);
         element->stripGlobalPosition(id, globalPos);
         length = design->channelLength(channel);
-        angle = design->stereoAngle(channel);
+        angle = design->stereoAngle();
 
         x.push_back(DataType(globalPos.x()/CLHEP::cm));
         y.push_back(DataType(globalPos.y()/CLHEP::cm));

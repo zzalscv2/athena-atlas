@@ -117,8 +117,8 @@ void PRDHandle_sTGC::buildShapes(SoNode*&shape_simple, SoNode*&shape_detailed)
     if (!design) return;
     
     double etaWidth=design->channelLength(idhelper->channel(id));
-    double phiMaxWidth=design->maxYSize/design->nch;
-    double phiMinWidth=design->minYSize/design->nch;
+    double phiMaxWidth=design->maxYSize()/design->nch;
+    double phiMinWidth=design->minYSize()/design->nch;
     
 
     shape_simple = common()->nodeManager()->getShapeNode_Wire(etaWidth,phiMinWidth,phiMaxWidth,0.01); // fixme: now shape_simple == shape_detailed
