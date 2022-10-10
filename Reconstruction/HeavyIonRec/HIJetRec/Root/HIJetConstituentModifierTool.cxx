@@ -31,9 +31,9 @@ int HIJetConstituentModifierTool::modifyJet(xAOD::Jet& jet) const {
     std::vector<size_t> cluster_indices;
     cluster_indices.reserve(constituents.size());
 
-    for (auto citer = constituents.begin(); citer != constituents.end(); ++citer)
+    for (const auto *constituent : constituents)
     {
-      cluster_indices.push_back(citer->rawConstituent()->index());
+      cluster_indices.push_back(constituent->rawConstituent()->index());
     }
 
     /// The accessor for the cluster element links

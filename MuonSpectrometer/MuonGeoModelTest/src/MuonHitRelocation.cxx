@@ -147,7 +147,7 @@ StatusCode MuonHitRelocation::execute() {
 
     Amg::Vector3D direction(0., 0., 0.);
     for (e = mcEvent->begin(); e != mcEvent->end(); e++) {
-        for (auto p : (**e)) {
+        for (auto *p : (**e)) {
             float xv = p->production_vertex()->position().x();
             float yv = p->production_vertex()->position().y();
             float zv = p->production_vertex()->position().z();
@@ -172,20 +172,20 @@ StatusCode MuonHitRelocation::execute() {
         const MDTSimHitCollection* mdt_collection;
         if (evtStore()->retrieve(mdt_collection) == StatusCode::SUCCESS) {
             ATH_MSG_VERBOSE("MDT hit Collection found with size = " << mdt_collection->size());
-            for (MDTSimHitConstIterator i_hit = mdt_collection->begin(); i_hit != mdt_collection->end(); ++i_hit) {
-                GeoMDTHit ghit(*i_hit);
+            for (const auto & i_hit : *mdt_collection) {
+                GeoMDTHit ghit(i_hit);
 
                 m_c->event = context.eventID().event_number();
                 m_c->run = context.eventID().run_number();
                 m_c->theta = direction.theta();
                 m_c->phi = direction.phi();
 
-                m_c->lx = (*i_hit).localPosition().x();
-                m_c->ly = (*i_hit).localPosition().y();
-                m_c->lz = (*i_hit).localPosition().z();
+                m_c->lx = i_hit.localPosition().x();
+                m_c->ly = i_hit.localPosition().y();
+                m_c->lz = i_hit.localPosition().z();
                 ATH_MSG_DEBUG("        MDT hit - local coords " << m_c->lx << " " << m_c->ly << " " << m_c->lz);
 
-                const int idHit = (*i_hit).MDTid();
+                const int idHit = i_hit.MDTid();
                 Amg::Vector3D u = ghit.getGlobalPosition();
                 m_c->x = u.x();
                 m_c->y = u.y();
@@ -230,19 +230,19 @@ StatusCode MuonHitRelocation::execute() {
         const TGCSimHitCollection* tgc_collection;
         if (evtStore()->retrieve(tgc_collection) == StatusCode::SUCCESS) {
             ATH_MSG_VERBOSE("TGC hit Collection found with size = " << tgc_collection->size());
-            for (TGCSimHitConstIterator i_hit = tgc_collection->begin(); i_hit != tgc_collection->end(); ++i_hit) {
-                GeoTGCHit ghit(*i_hit);
+            for (const auto & i_hit : *tgc_collection) {
+                GeoTGCHit ghit(i_hit);
                 m_c->event = context.eventID().event_number();
                 m_c->run = context.eventID().run_number();
                 m_c->theta = direction.theta();
                 m_c->phi = direction.phi();
 
-                m_c->lx = (*i_hit).localPosition().x();
-                m_c->ly = (*i_hit).localPosition().y();
-                m_c->lz = (*i_hit).localPosition().z();
+                m_c->lx = i_hit.localPosition().x();
+                m_c->ly = i_hit.localPosition().y();
+                m_c->lz = i_hit.localPosition().z();
                 ATH_MSG_DEBUG("        TGC hit - local coords " << m_c->lx << " " << m_c->ly << " " << m_c->lz);
 
-                const int idHit = (*i_hit).TGCid();
+                const int idHit = i_hit.TGCid();
 
                 Amg::Vector3D u = ghit.getGlobalPosition();
                 m_c->x = u.x();
@@ -288,20 +288,20 @@ StatusCode MuonHitRelocation::execute() {
         const RPCSimHitCollection* rpc_collection;
         if (evtStore()->retrieve(rpc_collection) == StatusCode::SUCCESS) {
             ATH_MSG_VERBOSE("RPC hit Collection found with size = " << rpc_collection->size());
-            for (RPCSimHitConstIterator i_hit = rpc_collection->begin(); i_hit != rpc_collection->end(); ++i_hit) {
+            for (const auto & i_hit : *rpc_collection) {
                 m_c->event = context.eventID().event_number();
                 m_c->run = context.eventID().run_number();
 
-                GeoRPCHit ghit(*i_hit);
+                GeoRPCHit ghit(i_hit);
                 m_c->theta = direction.theta();
                 m_c->phi = direction.phi();
 
-                m_c->lx = (*i_hit).localPosition().x();
-                m_c->ly = (*i_hit).localPosition().y();
-                m_c->lz = (*i_hit).localPosition().z();
+                m_c->lx = i_hit.localPosition().x();
+                m_c->ly = i_hit.localPosition().y();
+                m_c->lz = i_hit.localPosition().z();
                 ATH_MSG_DEBUG("        RPC hit - local coords " << m_c->lx << " " << m_c->ly << " " << m_c->lz);
 
-                const int idHit = (*i_hit).RPCid();
+                const int idHit = i_hit.RPCid();
                 Amg::Vector3D u = ghit.getGlobalPosition();
                 m_c->x = u.x();
                 m_c->y = u.y();
@@ -346,8 +346,8 @@ StatusCode MuonHitRelocation::execute() {
         const CSCSimHitCollection* csc_collection;
         if (evtStore()->retrieve(csc_collection) == StatusCode::SUCCESS) {
             ATH_MSG_VERBOSE("CSC hit Collection found with size = " << csc_collection->size());
-            for (CSCSimHitConstIterator i_hit = csc_collection->begin(); i_hit != csc_collection->end(); ++i_hit) {
-                GeoCSCHit ghit(*i_hit);
+            for (const auto & i_hit : *csc_collection) {
+                GeoCSCHit ghit(i_hit);
                 m_c->event = context.eventID().event_number();
                 m_c->run = context.eventID().run_number();
                 m_c->theta = direction.theta();
@@ -358,7 +358,7 @@ StatusCode MuonHitRelocation::execute() {
                 m_c->lz = 0;
                 ATH_MSG_DEBUG("        CSC hit - local coords " << m_c->lx << " " << m_c->ly << " " << m_c->lz);
 
-                const int idHit = (*i_hit).CSCid();
+                const int idHit = i_hit.CSCid();
                 Amg::Vector3D u = ghit.getGlobalPosition();
                 m_c->x = u.x();
                 m_c->y = u.y();
@@ -404,8 +404,8 @@ StatusCode MuonHitRelocation::execute() {
         const sTGCSimHitCollection* stgc_collection;
         if (evtStore()->retrieve(stgc_collection, "sTGC_Hits") == StatusCode::SUCCESS) {
             ATH_MSG_VERBOSE("sTGC Muon hit Collection sTGC hit found with size = " << stgc_collection->size());
-            for (sTGCSimHitConstIterator i_hit = stgc_collection->begin(); i_hit != stgc_collection->end(); ++i_hit) {
-                GeosTGCHit ghit(*i_hit);
+            for (const auto & i_hit : *stgc_collection) {
+                GeosTGCHit ghit(i_hit);
 
                 m_c->event = context.eventID().event_number();
                 m_c->run = context.eventID().run_number();
@@ -417,14 +417,14 @@ StatusCode MuonHitRelocation::execute() {
                 m_c->lz = -999;
                 ATH_MSG_DEBUG("        sTGC hit - local coords " << m_c->lx << " " << m_c->ly << " " << m_c->lz);
 
-                const int idHit = (*i_hit).sTGCId();
+                const int idHit = i_hit.sTGCId();
 
                 Amg::Vector3D u = ghit.getGlobalPosition();
                 m_c->x = u.x();
                 m_c->y = u.y();
                 m_c->z = u.z();
-                ATH_MSG_DEBUG("       sTGC hit - OrigGlobCoord " << (*i_hit).globalPosition().x() << " " << (*i_hit).globalPosition().y()
-                                                                 << " " << (*i_hit).globalPosition().z());
+                ATH_MSG_DEBUG("       sTGC hit - OrigGlobCoord " << i_hit.globalPosition().x() << " " << i_hit.globalPosition().y()
+                                                                 << " " << i_hit.globalPosition().z());
                 ATH_MSG_DEBUG("       sTGC hit - global coords " << m_c->x << " " << m_c->y << " " << m_c->z);
 
                 Amg::Vector3D tmp1 = direction.cross(Amg::Vector3D(0, 0, 1));
@@ -468,8 +468,8 @@ StatusCode MuonHitRelocation::execute() {
         const MMSimHitCollection* mm_collection;
         if (evtStore()->retrieve(mm_collection, "MM_Hits") == StatusCode::SUCCESS) {
             ATH_MSG_VERBOSE("MM Muon hit Collection (Micromegas) found with size = " << mm_collection->size());
-            for (MMSimHitConstIterator i_hit = mm_collection->begin(); i_hit != mm_collection->end(); ++i_hit) {
-                GeoMMHit ghit(*i_hit);
+            for (const auto & i_hit : *mm_collection) {
+                GeoMMHit ghit(i_hit);
 
                 m_c->event = context.eventID().event_number();
                 m_c->run = context.eventID().run_number();
@@ -481,14 +481,14 @@ StatusCode MuonHitRelocation::execute() {
                 m_c->lz = -999;
                 ATH_MSG_DEBUG("        MM hit - local coords " << m_c->lx << " " << m_c->ly << " " << m_c->lz);
 
-                const int idHit = (*i_hit).MMId();
+                const int idHit = i_hit.MMId();
 
                 Amg::Vector3D u = ghit.getGlobalPosition();
                 m_c->x = u.x();
                 m_c->y = u.y();
                 m_c->z = u.z();
-                ATH_MSG_DEBUG("        MM hit - OrigGlobCoord " << (*i_hit).globalPosition().x() << " " << (*i_hit).globalPosition().y()
-                                                                << " " << (*i_hit).globalPosition().z());
+                ATH_MSG_DEBUG("        MM hit - OrigGlobCoord " << i_hit.globalPosition().x() << " " << i_hit.globalPosition().y()
+                                                                << " " << i_hit.globalPosition().z());
                 ATH_MSG_DEBUG("        MM hit - global coords " << m_c->x << " " << m_c->y << " " << m_c->z);
                 Amg::Vector3D gtrk = ghit.getTrkGlobalPosition();
                 Amg::Vector3D ltrk = ghit.getTrkLocalPosition();

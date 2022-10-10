@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2020 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "HIClusterMaker.h"
@@ -49,8 +49,7 @@ StatusCode HIClusterMaker::execute()
   ATH_CHECK(CaloClusterStoreHelper::AddContainerWriteHandle(writeHandleContainer));
 
   //loop on towers
-  for(INavigable4MomentumCollection::const_iterator towerItr=navInColl->begin();
-      towerItr!=navInColl->end(); towerItr++)
+  for(const auto *towerItr : *navInColl)
   {
 
     //initialize variables
@@ -65,7 +64,7 @@ StatusCode HIClusterMaker::execute()
     //Default is to sort the cells by either pointer values leading to irreproducible output
     //CaloCellIDFcn ensures cells are ordered by their IDs
     NavigationToken<CaloCell,double,CaloCellIDFcn> cellToken;
-    (*towerItr)->fillToken(cellToken,double(1.));
+    towerItr->fillToken(cellToken,double(1.));
 
     // Make the cluster:
     std::unique_ptr<xAOD::CaloCluster> cl(CaloClusterStoreHelper::makeCluster(cellColl));
@@ -98,8 +97,8 @@ StatusCode HIClusterMaker::execute()
 
     }//end cell loop
 
-    float eta0=(*towerItr)->eta();
-    float phi0=(*towerItr)->phi();
+    float eta0=towerItr->eta();
+    float phi0=towerItr->phi();
 
     if(E_cl < m_EminMoment)
     {

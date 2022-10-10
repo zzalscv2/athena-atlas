@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2020 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
 */
 
 ////////////////////////////////////////////////////////////////////
@@ -60,12 +60,12 @@ void AlignmentErrorTool::makeAlignmentDeviations(const Trk::Track& track, std::v
     std::vector<deviationStr> devStrVec;
     readCdo->getVec(devStrVec);
     std::vector<deviationSummary_t*> devSumVec;
-    for (unsigned int i = 0; i < devStrVec.size(); i++) {
+    for (auto & i : devStrVec) {
         deviationSummary_t* tmp = new deviationSummary_t;
-        tmp->traslation = devStrVec[i].traslation;
-        tmp->rotation = devStrVec[i].rotation;
-        tmp->stationName = devStrVec[i].stationName;
-        tmp->multilayer = devStrVec[i].multilayer;
+        tmp->traslation = i.traslation;
+        tmp->rotation = i.rotation;
+        tmp->stationName = i.stationName;
+        tmp->multilayer = i.multilayer;
         tmp->hits.clear();
         Amg::Vector3D nullvec(0., 0., 0.);
         tmp->sumP = nullvec;
@@ -80,9 +80,7 @@ void AlignmentErrorTool::makeAlignmentDeviations(const Trk::Track& track, std::v
 
     // LOOP ON HITS ON TRACK //
     unsigned int nPrecisionHits = 0;
-    for (tsosc_t::const_iterator it = tsosc->begin(), end = tsosc->end(); it != end; it++) {
-        const Trk::TrackStateOnSurface* tsos = *it;
-
+    for (const auto *tsos : *tsosc) {
         if (tsos->type(Trk::TrackStateOnSurface::Measurement)) {
             const Trk::MeasurementBase* meas = tsos->measurementOnTrack();
             const Trk::RIO_OnTrack* rot = dynamic_cast<const Trk::RIO_OnTrack*>(meas);
@@ -122,26 +120,26 @@ void AlignmentErrorTool::makeAlignmentDeviations(const Trk::Track& track, std::v
                 bool is_matched = false;
 
                 // LOOP ON STATION DEVIATIONS EXTRACTED FROM INPUT FILE //
-                for (unsigned int iDev = 0; iDev < devSumVec.size(); iDev++) {
+                for (auto & iDev : devSumVec) {
                     // find a match to the reg exp //
-                    boost::regex tmp_stationName = devSumVec[iDev]->stationName;
+                    boost::regex tmp_stationName = iDev->stationName;
 
                     if (boost::regex_match(completename, tmp_stationName)) {
-                        if (!boost::regex_match(multilayer_sstring, devSumVec[iDev]->multilayer) && !m_idHelperSvc->isCsc(channelId)) {
+                        if (!boost::regex_match(multilayer_sstring, iDev->multilayer) && !m_idHelperSvc->isCsc(channelId)) {
                             continue;
                         }
 
                         // ASSOCIATE EACH NUISANCE TO A LIST OF HITS
-                        devSumVec[iDev]->hits.push_back(rot);
+                        iDev->hits.push_back(rot);
 
                         // COMPUTE RELEVANT NUMBERS
                         const Trk::PrepRawData* prd = rot->prepRawData();
                         const Trk::Surface& sur = prd->detectorElement()->surface(prd->identify());
                         double w2 = sqrt(rot->localCovariance()(Trk::loc1, Trk::loc1));
                         w2 = 1. / (w2 * w2);
-                        devSumVec[iDev]->sumW2 += w2;
-                        devSumVec[iDev]->sumP += w2 * tsos->trackParameters()->position();
-                        devSumVec[iDev]->sumU += w2 * tsos->trackParameters()->momentum().unit();
+                        iDev->sumW2 += w2;
+                        iDev->sumP += w2 * tsos->trackParameters()->position();
+                        iDev->sumU += w2 * tsos->trackParameters()->momentum().unit();
 
                         // CHECK 1 //
                         Amg::Vector3D zATLAS(0., 0., 1.);
@@ -151,7 +149,7 @@ void AlignmentErrorTool::makeAlignmentDeviations(const Trk::Track& track, std::v
                         double sign = (v1.dot(v2) > 0.) ? 1. : -1.;
 
                         // ARTIFICIALLY ORIENTATE EVERYTHING TOWARDS THE SAME DIRECTION
-                        devSumVec[iDev]->sumV += sign * w2 * sur.transform().rotation().col(2);
+                        iDev->sumV += sign * w2 * sur.transform().rotation().col(2);
 
                         // FOR CROSS-CHECK
                         is_matched = true;
@@ -180,9 +178,9 @@ void AlignmentErrorTool::makeAlignmentDeviations(const Trk::Track& track, std::v
     // CHECK HIT LISTS OVERLAP
     // FIRST CREATE AN INDEPENDENT COPY OF THE STRUCT VECTOR
     std::vector<deviationSummary_t*> new_deviationsVec;
-    for (unsigned int iDev = 0; iDev < devSumVec.size(); iDev++) {
+    for (auto & iDev : devSumVec) {
         deviationSummary_t* tmp = new deviationSummary_t();
-        (*tmp) = (*devSumVec[iDev]);
+        (*tmp) = (*iDev);
         new_deviationsVec.push_back(tmp);
     }
 
@@ -236,23 +234,23 @@ void AlignmentErrorTool::makeAlignmentDeviations(const Trk::Track& track, std::v
     deviations.clear();
     ATH_MSG_DEBUG("************************************");
     ATH_MSG_DEBUG("FINAL LIST OF DEVIATIONS");
-    for (unsigned int iDev = 0; iDev < new_deviationsVec.size(); iDev++) {
+    for (auto & iDev : new_deviationsVec) {
         // THIS HAPPENS IF A MERGING HAD BEEN DONE
-        if (!new_deviationsVec[iDev]) { continue; }
+        if (!iDev) { continue; }
 
         // SKIP IF NO HITS ARE ASSOCIATED TO THIS DEVIATION
-        if (new_deviationsVec[iDev]->hits.size() == 0) {
+        if (iDev->hits.size() == 0) {
             // ATH_MSG_DEBUG("No hits found associated to the rule " << new_deviationsVec[iDev]->stationName.str() << ", skip");
             continue;
         }
 
-        double rotation = new_deviationsVec[iDev]->rotation;
-        double traslation = new_deviationsVec[iDev]->traslation;
+        double rotation = iDev->rotation;
+        double traslation = iDev->traslation;
 
-        Amg::Vector3D sumP = new_deviationsVec[iDev]->sumP;
-        Amg::Vector3D sumU = new_deviationsVec[iDev]->sumU;
-        Amg::Vector3D sumV = new_deviationsVec[iDev]->sumV;
-        double sumW2 = new_deviationsVec[iDev]->sumW2;
+        Amg::Vector3D sumP = iDev->sumP;
+        Amg::Vector3D sumU = iDev->sumU;
+        Amg::Vector3D sumV = iDev->sumV;
+        double sumW2 = iDev->sumW2;
 
         sumP *= (1. / sumW2);
         sumU *= (1. / sumW2);
@@ -260,29 +258,29 @@ void AlignmentErrorTool::makeAlignmentDeviations(const Trk::Track& track, std::v
 
         if (traslation >= 0.001 * Gaudi::Units::mm) {
             std::size_t hitshash = 0;
-            for (auto it : new_deviationsVec[iDev]->hits) boost::hash_combine(hitshash, (it->identify()).get_compact());
+            for (const auto *it : iDev->hits) boost::hash_combine(hitshash, (it->identify()).get_compact());
             deviations.push_back(
-                new AlignmentTranslationDeviation(sumU.cross(sumV), traslation * Gaudi::Units::mm, new_deviationsVec[iDev]->hits));
+                new AlignmentTranslationDeviation(sumU.cross(sumV), traslation * Gaudi::Units::mm, iDev->hits));
             deviations.back()->setHashOfHits(hitshash);
 
             ATH_MSG_DEBUG("A translation along ("
                           << sumU.x() << ", " << sumU.y() << ", " << sumU.z() << ") with sigma=" << traslation * Gaudi::Units::mm
-                          << " mm was applied to " << new_deviationsVec[iDev]->hits.size()
-                          << " hits matching the station: " << new_deviationsVec[iDev]->stationName.str() << " and the multilayer "
-                          << new_deviationsVec[iDev]->multilayer.str());
+                          << " mm was applied to " << iDev->hits.size()
+                          << " hits matching the station: " << iDev->stationName.str() << " and the multilayer "
+                          << iDev->multilayer.str());
         }
         if (rotation >= 0.000001 * Gaudi::Units::rad) {
             std::size_t hitshash = 0;
-            for (auto it : new_deviationsVec[iDev]->hits) boost::hash_combine(hitshash, (it->identify()).get_compact());
-            deviations.push_back(new AlignmentRotationDeviation(sumP, sumV, rotation * Gaudi::Units::rad, new_deviationsVec[iDev]->hits));
+            for (const auto *it : iDev->hits) boost::hash_combine(hitshash, (it->identify()).get_compact());
+            deviations.push_back(new AlignmentRotationDeviation(sumP, sumV, rotation * Gaudi::Units::rad, iDev->hits));
             deviations.back()->setHashOfHits(hitshash);
 
             ATH_MSG_DEBUG("A rotation around the center = (" << sumP.x() << ", " << sumP.y() << ", " << sumP.z() << ") and axis = ("
                                                              << sumV.x() << ", " << sumV.y() << ", " << sumV.z()
                                                              << ") with sigma=" << rotation / Gaudi::Units::mrad << " mrad was applied to "
-                                                             << new_deviationsVec[iDev]->hits.size() << " hits matching the station "
-                                                             << new_deviationsVec[iDev]->stationName.str() << " and the multilayer "
-                                                             << new_deviationsVec[iDev]->multilayer.str());
+                                                             << iDev->hits.size() << " hits matching the station "
+                                                             << iDev->stationName.str() << " and the multilayer "
+                                                             << iDev->multilayer.str());
         }
 
     }  // LOOP ON NUISANCES
@@ -293,9 +291,9 @@ void AlignmentErrorTool::makeAlignmentDeviations(const Trk::Track& track, std::v
     ATH_MSG_DEBUG("******************************");
 
     // NOW EMPTY THE LOCAL DEVIATIONS VECTOR //
-    for (unsigned int iDev = 0; iDev < new_deviationsVec.size(); iDev++) { delete new_deviationsVec[iDev]; }
+    for (auto & iDev : new_deviationsVec) { delete iDev; }
 
-    for (unsigned int iDev = 0; iDev < devSumVec.size(); iDev++) { delete devSumVec[iDev]; }
+    for (auto & iDev : devSumVec) { delete iDev; }
 
     // ATH_MSG_DEBUG("Currently we have " << AlignmentErrorTool::deviationSummary_t::i_instance << " deviation vectors");
 

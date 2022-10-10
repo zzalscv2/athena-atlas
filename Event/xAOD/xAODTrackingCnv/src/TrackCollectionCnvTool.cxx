@@ -49,10 +49,10 @@ namespace xAODMaker {
       }
       xAOD::TrackParticle* particle = createParticle(*xaod, *aod, **itr);
 
-      if(!particle){
-	ATH_MSG_WARNING("Failed to create a TrackParticle");
-	continue;
-      }      
+      if (!particle) {
+        ATH_MSG_WARNING("Failed to create a TrackParticle");
+        continue;
+      }
     }
 
     ATH_MSG_DEBUG( "Sizes of containers after conversion: aod, xaod: " << aod->size() << ", " << xaod->size() );
@@ -85,7 +85,7 @@ namespace xAODMaker {
       xAOD::TrackParticle* particle = createParticle(*xaod, *aod, **itr);
       if(!particle){
         ATH_MSG_WARNING("convertAndAugment: Failed to create a TrackParticle");
-        itrMap++;
+        ++itrMap;
         continue;
       }
       // Augment xAOD object with information from track map
@@ -123,10 +123,15 @@ namespace xAODMaker {
       std::vector<int> v_rejectReason(std::get<xAOD::ObserverToolIndex::rejectReason_full>((*itrMap).second).begin(),std::get<xAOD::ObserverToolIndex::rejectReason_full>((*itrMap).second).end());
       particle->auxdecor<std::vector<int>>("rejectStep_full") = v_rejectStep;
       particle->auxdecor<std::vector<int>>("rejectReason_full") = v_rejectReason;
-			ATH_MSG_DEBUG("convertAndAugment: Augmenting TrackParticle with id "<<particle->auxdata<long int>("Id")<<" and rejectReason "<<particle->auxdata<int>("rejectReason")<<" (has chi2 = "<<particle->chiSquared()<<")");
-      itrMap++;
+      ATH_MSG_DEBUG("convertAndAugment: Augmenting TrackParticle with id "
+                    << particle->auxdata<long int>("Id") << " and rejectReason "
+                    << particle->auxdata<int>("rejectReason")
+                    << " (has chi2 = " << particle->chiSquared() << ")");
+      ++itrMap;
     }
-    ATH_MSG_DEBUG( "convertAndAugment: Sizes of containers after conversion: aod, xaod: " << aod->size() << ", " << xaod->size() );
+    ATH_MSG_DEBUG(
+      "convertAndAugment: Sizes of containers after conversion: aod, xaod: "
+      << aod->size() << ", " << xaod->size());
     return StatusCode::SUCCESS;    
   }
 

@@ -136,7 +136,7 @@ void HIJetCellSubtractorTool::subtractWithMoments(xAOD::CaloCluster* cl, const x
   std::vector<float> E_sample(CaloSampling::Unknown,0);
   uint32_t samplingPattern=0;
 
-  auto cellLink = cl->getCellLinks();
+  const auto *cellLink = cl->getCellLinks();
   if( cellLink == NULL){
      ATH_MSG_ERROR("HIJetCellSubtraction: cellLink null - returning");
      return;

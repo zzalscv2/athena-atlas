@@ -123,9 +123,8 @@ int HIEventShapeJetIteration::execute() const
 StatusCode HIEventShapeJetIteration::makeClusterList(std::vector<const xAOD::CaloCluster*>& particleList, const xAOD::JetContainer* theJets,
 						     std::set<unsigned int>& used_indices, std::set<unsigned int>& used_eta_bins) const
 {
-  for(xAOD::JetContainer::const_iterator jItr=theJets->begin(); jItr!=theJets->end(); jItr++)
+  for(const auto *theJet : *theJets)
   {
-    const xAOD::Jet* theJet=(*jItr);
     xAOD::IParticle::FourMom_t jet4mom=theJet->p4();
     std::vector<const xAOD::IParticle*> assoc_clusters;
     //only use jet constituents
@@ -146,10 +145,10 @@ StatusCode HIEventShapeJetIteration::makeClusterList(std::vector<const xAOD::Cal
 		   << std::setw(10) << jet4mom.E()*1e-3
 		   << std::setw(25) << " has " << assoc_clusters.size() << " assoc. clusters");
 
-    for(auto pItr = assoc_clusters.begin(); pItr!=assoc_clusters.end(); pItr++)
+    for(auto & assoc_cluster : assoc_clusters)
     {
-      if( jet4mom.DeltaR( (*pItr)->p4() ) >  m_excludeDR ) continue;
-      const xAOD::CaloCluster* cl_ptr=static_cast<const xAOD::CaloCluster*>(*pItr);
+      if( jet4mom.DeltaR( assoc_cluster->p4() ) >  m_excludeDR ) continue;
+      const xAOD::CaloCluster* cl_ptr=static_cast<const xAOD::CaloCluster*>(assoc_cluster);
       unsigned int tower_index=HI::TowerBins::findEtaPhiBin(cl_ptr->eta0(),cl_ptr->phi0());
 
       if(used_indices.insert(tower_index).second)
@@ -173,7 +172,7 @@ StatusCode HIEventShapeJetIteration::makeClusterList(std::vector<const xAOD::Cal
 {
   std::set<unsigned int> used_indices;
   std::set<unsigned int> used_eta_bins;
-  for(auto theJets : theJets_vector)
+  for(const auto *theJets : theJets_vector)
   {
     ATH_CHECK(makeClusterList(particleList,theJets,used_indices,used_eta_bins));
   }
@@ -193,9 +192,9 @@ void HIEventShapeJetIteration::updateShape(xAOD::HIEventShapeContainer* output_s
     }
   }
 
-  for(auto pItr = assoc_clusters.begin(); pItr!=assoc_clusters.end(); pItr++)
+  for(const auto *assoc_cluster : assoc_clusters)
   {
-     m_subtractorTool->updateUsingCluster(output_shape,es_index,(*pItr));
+     m_subtractorTool->updateUsingCluster(output_shape,es_index,assoc_cluster);
   }
 
   if(!m_subtractorTool->usesCells())
@@ -231,9 +230,8 @@ StatusCode HIEventShapeJetIteration::fillModulatorShape(xAOD::HIEventShape* ms, 
     summary_container = read_handle_cont.cptr();
 
     const xAOD::HIEventShape* s_fcal=0;
-    for(unsigned int i=0; i<summary_container->size(); i++)
+    for(const auto *sh : *summary_container)
     {
-      const xAOD::HIEventShape* sh=(*summary_container)[i];
       std::string summary;
       if(sh->isAvailable<std::string>("Summary")) summary=sh->auxdata<std::string>("Summary");
       if(summary.compare("FCal")==0)
@@ -271,18 +269,18 @@ StatusCode HIEventShapeJetIteration::remodulate(xAOD::HIEventShapeContainer* out
   std::vector<float> mod_factors(HI::TowerBins::numEtaBins(),0);
   std::vector<float> mod_counts(HI::TowerBins::numEtaBins(),0);
 
-  for(std::set<unsigned int>::const_iterator sItr=used_indices.begin(); sItr!=used_indices.end(); sItr++)
+  for(unsigned int used_indice : used_indices)
   {
-    unsigned int phi_bin=(*sItr) % HI::TowerBins::numPhiBins();
-    unsigned int eta_bin=(*sItr) / HI::TowerBins::numPhiBins();
+    unsigned int phi_bin=used_indice % HI::TowerBins::numPhiBins();
+    unsigned int eta_bin=used_indice / HI::TowerBins::numPhiBins();
     mod_counts[eta_bin]++;
     mod_factors[eta_bin]+=(m_modulatorTool->getModulation(HI::TowerBins::getBinCenterPhi(phi_bin),ms)-1.);
   }
   double nphibins=HI::TowerBins::numPhiBins();
   //now loop on shape and correct;
-  for(unsigned int i=0; i<output_shape->size(); i++)
+  for(auto && i : *output_shape)
   {
-    xAOD::HIEventShape* s=output_shape->at(i);
+    xAOD::HIEventShape* s=i;
     float eta0=0.5*(s->etaMin()+s->etaMax());
     unsigned int eb=HI::TowerBins::findBinEta(eta0);
     double neff=nphibins-mod_counts[eb];
@@ -331,11 +329,11 @@ StatusCode HIEventShapeJetIteration::getShapes(const xAOD::HIEventShapeContainer
     output_shapex->setStore( output_Aux.get() );
     output_shapex->reserve( input_shape->size() );
 
-    for(auto s=input_shape->begin(); s!=input_shape->end(); s++)
+    for(const auto *s : *input_shape)
     {
       xAOD::HIEventShape* s_copy=new xAOD::HIEventShape();
       output_shapex->push_back(s_copy);
-      *s_copy=**s;
+      *s_copy=*s;
     }
     if(record)
     {

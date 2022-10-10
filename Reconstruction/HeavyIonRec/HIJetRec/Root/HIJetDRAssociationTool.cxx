@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2017 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "HIJetDRAssociationTool.h"
@@ -34,9 +34,8 @@ StatusCode HIJetDRAssociationTool::modify(xAOD::JetContainer& jets) const
   {
     std::vector<const xAOD::IParticle*> ParticleVector;
     xAOD::Jet* theJet=(*ijet);
-    for(xAOD::IParticleContainer::const_iterator pItr=ppars->begin(); pItr!=ppars->end(); pItr++)
+    for(const auto* ap : *ppars)
     {
-      const xAOD::IParticle* ap=(*pItr);
       if(theJet->p4().DeltaR( ap->p4()) < m_DR) ParticleVector.push_back(ap);
     }
     theJet->setAssociatedObjects(m_assocName,ParticleVector);

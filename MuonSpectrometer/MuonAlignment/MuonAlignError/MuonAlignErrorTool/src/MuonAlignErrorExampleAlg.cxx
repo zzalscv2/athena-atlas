@@ -33,8 +33,7 @@ StatusCode MuonAlignErrorExampleAlg::execute() {
     if (sc.isFailure()) return sc;
 
     // LOOP ON MUON TRACKS //
-    for (::TrackCollection::const_iterator it = tracks->begin(), end = tracks->end(); it != end; it++) {
-        const Trk::Track* track = *it;
+    for (const auto *track : *tracks) {
         muonTrack(track);
     }
 
@@ -56,13 +55,13 @@ void MuonAlignErrorExampleAlg::muonTrack(const Trk::Track* track) {
     std::vector<const Trk::RIO_OnTrack*> hits;
 
     // DO SOME CHECKS AND THEN CLEAN UP
-    for (std::vector<Trk::AlignmentDeviation*>::iterator it(deviations.begin()), end(deviations.end()); it != end; ++it) {
-        (*it)->getListOfHits(hits);
+    for (auto & deviation : deviations) {
+        deviation->getListOfHits(hits);
 
         std::set<std::string> myidset_all;
-        for (std::vector<const Trk::RIO_OnTrack*>::iterator jt(hits.begin()), end(hits.end()); jt != end; ++jt) {
+        for (auto & hit : hits) {
             // JOCHEN WAY
-            Identifier myid = ((const Trk::RIO_OnTrack*)(*jt))->identify();
+            Identifier myid = ((const Trk::RIO_OnTrack*)hit)->identify();
 
             if (!(m_idHelperSvc->isMM(myid) || m_idHelperSvc->issTgc(myid))) {
                 // CAMILLA WAY
@@ -76,7 +75,7 @@ void MuonAlignErrorExampleAlg::muonTrack(const Trk::Track* track) {
         m_cham_per_dev->Fill(myidset_all.size());
 
         // cleanup
-        delete (*it);
+        delete deviation;
     }
 }
 
