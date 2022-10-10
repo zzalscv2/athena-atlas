@@ -82,7 +82,7 @@ def defaultTestFlags(configFlags, args):
         elif args.run is LHCPeriod.Run3:
             configFlags.Input.Files = defaultTestFiles.RDO_BKG_RUN3
             configFlags.Input.SecondaryFiles = defaultTestFiles.HITS_RUN3
-            configFlags.IOVDb.GlobalTag = "OFLCOND-MC21-SDR-RUN3-05"
+            configFlags.IOVDb.GlobalTag = "OFLCOND-MC21-SDR-RUN3-07"
         elif args.run is LHCPeriod.Run4:
             configFlags.Input.Files = defaultTestFiles.RDO_BKG_RUN4
             configFlags.Input.SecondaryFiles = defaultTestFiles.HITS_RUN4
