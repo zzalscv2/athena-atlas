@@ -16,11 +16,6 @@ outStream.ItemList = []
 # Event info
 outStream.ItemList += [ 'xAOD::EventInfo#EventInfo', 'xAOD::EventAuxInfo#EventInfoAux.' ]
 
-# Timings
-outStream.ItemList += ['RecoTimingObj#EVNTtoHITS_timings']
-if not overlayFlags.isDataOverlay() and nThreads == 0:
-    outStream.ItemList += ['RecoTimingObj#HITStoRDO_timings']
-
 # Truth
 if DetFlags.overlay.Truth_on():
     outStream.ItemList += ['McEventCollection#TruthEvent']

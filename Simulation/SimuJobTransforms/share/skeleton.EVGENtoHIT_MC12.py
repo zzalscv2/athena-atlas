@@ -250,13 +250,6 @@ if nThreads > 0:
     if not hasattr(svcMgr, 'ThreadPoolSvc'):
         svcMgr+=ThreadPoolSvc("ThreadPoolSvc")
     svcMgr.ThreadPoolSvc.ThreadInitTools+=["G4ThreadInitTool"]
-else:
-    try:
-        from RecAlgs.RecAlgsConf import TimingAlg
-        topSeq+=TimingAlg("SimTimerBegin", TimingObjOutputName = "EVNTtoHITS_timings")
-    except:
-        atlasG4log.warning('Could not add TimingAlg, no timing info will be written out.')
-    pass
 
 from AthenaCommon.CfgGetter import getAlgorithm
 topSeq += getAlgorithm("BeamEffectsAlg", tryDefaultConfigurable=True)

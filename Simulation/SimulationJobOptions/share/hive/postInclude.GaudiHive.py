@@ -9,9 +9,6 @@ topSeq = AlgSequence()
 from AthenaCommon.AppMgr import theApp
 StreamHITS = theApp.getOutputStream( "StreamHITS" )
 
-# I'm not sure if we need this timing setting here,
-# so leaving this older code commented out for now.
-#topSeq.G4AtlasAlg.ExtraOutputs = [('SiHitCollection','SCT_Hits'),('RecoTimingObj','EVNTtoHITS_timings')]
 topSeq.G4AtlasAlg.ExtraInputs =  [('McEventCollection','StoreGateSvc+BeamTruthEvent')]
 topSeq.G4AtlasAlg.ExtraOutputs = [('SiHitCollection','StoreGateSvc+SCT_Hits')]
 StreamHITS.ExtraInputs += topSeq.G4AtlasAlg.ExtraOutputs

@@ -389,41 +389,6 @@ def MergeCalibHitsTool(name="MergeCalibHitsTool", **kwargs):
 
 
 ############################################################################
-
-# The earliest bunch crossing time for which interactions will be sent
-# to the RecoTimingObj merging code.
-def TimingObj_FirstXing():
-    return -1
-
-# The latest bunch crossing time for which interactions will be sent
-# to the RecoTimingObj merging code.
-def TimingObj_LastXing():
-    return 1
-
-def getTimingObjRange(name="TimingObjRange" , **kwargs):
-    #this is the time of the xing in ns
-    kwargs.setdefault('FirstXing', TimingObj_FirstXing() )
-    kwargs.setdefault('LastXing',  TimingObj_LastXing() )
-    kwargs.setdefault('ItemList', ["RecoTimingObj#EVNTtoHITS_timings"] )
-    return CfgMgr.PileUpXingFolder(name, **kwargs)
-
-
-def MergeRecoTimingObjTool(name="MergeRecoTimingObjTool", **kwargs):
-    if digitizationFlags.doXingByXingPileUp(): # PileUpTool approach
-        kwargs.setdefault("FirstXing", TimingObj_FirstXing() )
-        kwargs.setdefault("LastXing",  TimingObj_LastXing() )
-
-    kwargs.setdefault("RecoTimingObjInputKey", "EVNTtoHITS_timings")
-    if digitizationFlags.PileUpPresampling and 'LegacyOverlay' not in digitizationFlags.experimentalDigi():
-        from OverlayCommonAlgs.OverlayFlags import overlayFlags
-        kwargs.setdefault("RecoTimingObjOutputKey", overlayFlags.bkgPrefix() + "EVNTtoHITS_timings")
-    else:
-        kwargs.setdefault("RecoTimingObjOutputKey", "EVNTtoHITS_timings")
-
-    return CfgMgr.MergeRecoTimingObjTool(name, **kwargs)
-
-
-############################################################################
 def MergeGenericMuonSimHitCollTool(name="MergeGenericMuonSimHitCollTool", **kwargs):
     return CfgMgr.MergeGenericMuonSimHitCollTool(name, **kwargs)
 

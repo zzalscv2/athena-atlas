@@ -579,11 +579,6 @@ else:
 ## Set Overall per-Algorithm time-limit on the AlgSequence
 topSequence.TimeOut = 43200 * Units.s
 
-try:
-    from RecAlgs.RecAlgsConf import TimingAlg
-    topSequence+=TimingAlg("SimTimerBegin", TimingObjOutputName = "EVNTtoHITS_timings")
-except:
-    fast_chain_log.warning('Could not add TimingAlg, no timing info will be written out.')
 
 #### *********** import ISF_Example code here **************** ####
 
@@ -1106,13 +1101,6 @@ if DetFlags.pileup.any_on():
 #
 #==============================================================
 #
-
-try:
-    from RecAlgs.RecAlgsConf import TimingAlg
-    topSequence+=TimingAlg("DigiTimerBegin", TimingObjOutputName = "HITStoRDO_timings")
-except:
-    fast_chain_log.warning('Could not add TimingAlg, no timing info will be written out.')
-
 
 # Set up PileupMergeSvc used by subdetectors
 #from AthenaCommon.DetFlags import DetFlags

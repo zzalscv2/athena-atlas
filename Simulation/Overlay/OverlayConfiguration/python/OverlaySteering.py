@@ -29,7 +29,7 @@ from MuonConfig.sTGC_OverlayConfig import sTGC_OverlayCfg
 from MuonConfig.TGC_OverlayConfig import TGC_OverlayCfg
 from OverlayCopyAlgs.OverlayCopyAlgsConfig import \
     CopyCaloCalibrationHitContainersCfg, CopyJetTruthInfoCfg, CopyPileupParticleTruthInfoCfg, CopyMcEventCollectionCfg, \
-    CopyTimingsCfg, CopyTrackRecordCollectionsCfg
+    CopyTrackRecordCollectionsCfg
 from TileSimAlgs.TileDigitizationConfig import TileDigitizationCfg, TileOverlayTriggerDigitizationCfg
 from TrigT1CaloSim.TTL1OverlayConfig import LArTTL1OverlayCfg, TileTTL1OverlayCfg
 from xAODEventInfoCnv.xAODEventInfoCnvConfig import EventInfoOverlayCfg
@@ -65,7 +65,6 @@ def OverlayMainContentCfg(configFlags):
     if configFlags.Digitization.EnableTruth:
         acc.merge(CopyJetTruthInfoCfg(configFlags))
         acc.merge(CopyPileupParticleTruthInfoCfg(configFlags))
-        acc.merge(CopyTimingsCfg(configFlags))
         acc.merge(CopyCaloCalibrationHitContainersCfg(configFlags))
         acc.merge(CopyTrackRecordCollectionsCfg(configFlags))
 

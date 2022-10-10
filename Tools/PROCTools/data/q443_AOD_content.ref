@@ -572,9 +572,6 @@ DataHeaderForm
 DiTauJets
 DiTauJetsAux.
 E4prContainer
-ESDtoAOD_mems
-ESDtoAOD_timings
-EVNTtoHITS_timings
 ElectronCaloRings
 ElectronCaloRingsAux.
 ElectronRingSets
@@ -827,7 +824,6 @@ GSFTrackParticlesAuxDyn.truthMatchProbability
 GSFTrackParticlesAuxDyn.truthOrigin
 GSFTrackParticlesAuxDyn.truthParticleLink
 GSFTrackParticlesAuxDyn.truthType
-HITStoRDO_timings
 HLT_CombinedMuonFeatureContainer
 HLT_MuonFeatureContainer
 HLT_MuonFeatureDetailsContainer
@@ -1959,8 +1955,6 @@ PhotonsAuxDyn.widths2
 PrimaryVertices
 PrimaryVerticesAux.
 PrimaryVerticesAuxDyn.sumPt2
-RAWtoESD_mems
-RAWtoESD_timings
 RunNumber
 SlowMuons
 SlowMuonsAux.

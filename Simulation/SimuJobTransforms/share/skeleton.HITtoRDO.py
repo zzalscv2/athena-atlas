@@ -384,21 +384,6 @@ topSeq = AlgSequence()
 ## Set Overall per-Algorithm time-limit on the AlgSequence
 topSeq.TimeOut = 43200 * Units.s
 
-
-if jobproperties.ConcurrencyFlags.NumThreads() == 0:
-    try:
-        timingOutput = "HITStoRDO_timings"
-        if digitizationFlags.PileUpPresampling and 'LegacyOverlay' not in digitizationFlags.experimentalDigi():
-            from OverlayCommonAlgs.OverlayFlags import overlayFlags
-            timingOutput = overlayFlags.bkgPrefix() + timingOutput
-
-        from RecAlgs.RecAlgsConf import TimingAlg
-        topSeq += TimingAlg("DigiTimerBegin", TimingObjOutputName = timingOutput)
-    except:
-        digilog.warning('Could not add TimingAlg, no timing info will be written out.')
-else:
-    digilog.info("MT mode, not scheduling TimingAlg")
-
 include ("Digitization/Digitization.py")
 
 from PyUtils import AMITagHelper

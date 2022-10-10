@@ -30,8 +30,6 @@
 #include "xAODBTagging/BTagging.h" 
 #include "xAODBTagging/BTaggingUtilities.h"
 
-#include "RecEvent/RecoTimingObj.h"
-
 #include "AthenaBaseComps/AthCheckMacros.h"
 
 namespace PhysVal {
@@ -112,15 +110,6 @@ namespace PhysVal {
  	ATH_CHECK(book(m_metPlots));
       }
 
-      for (const auto& name : m_timingNames) {
-	if (name == "EVNTtoHITS") {
-	  m_timingPlots.push_back(new TH1F(("Timing" + name).c_str(), ("Timing" + name).c_str(), 10000, 0, 10000));
-	} else {
-	  m_timingPlots.push_back(new TH1F(("Timing" + name).c_str(), ("Timing" + name).c_str(), 10000, 0, 100));
-	}
-	ATH_CHECK(regHist(m_timingPlots.back(), "Summary/Timing/" + name,all));
-      }
-      
       return StatusCode::SUCCESS;      
  }
   
@@ -203,15 +192,7 @@ namespace PhysVal {
       }
       m_metPlots.fill(met,event);
     }
-    int i(0);
-    for (const auto& name : m_timingNames) {
-      float time;
-      if (getTiming(name, time).isSuccess()) {
-	m_timingPlots[i]->Fill(time,event->beamSpotWeight());
-      }
-      ++i;
-    }
-    
+
     return StatusCode::SUCCESS;
   }
   
@@ -220,55 +201,5 @@ namespace PhysVal {
     ATH_MSG_INFO ("Finalising hists " << name() << "...");
     return StatusCode::SUCCESS;
   }
-  
-  /////////////////////////////////////////////////////////////////// 
-// Const methods: 
-///////////////////////////////////////////////////////////////////
-
-/////////////////////////////////////////////////////////////////// 
-// Non-const methods: 
-/////////////////////////////////////////////////////////////////// 
-
-/////////////////////////////////////////////////////////////////// 
-// Protected methods: 
-/////////////////////////////////////////////////////////////////// 
-
-  StatusCode PhysValExample::getTiming(const std::string& name, float& recoTime) {
-    // Code form
-    // m_recoInclPers
-    
-    const RecoTimingObj* recTiming(nullptr);
-    recoTime = 0;
-    if (evtStore()->contains<RecoTimingObj>(name + "_timings")) {
-      if (evtStore()->retrieve( recTiming, name + "_timings" ).isFailure()) {
-	ATH_MSG_VERBOSE("Cannot get RecoTimingObj with name " << name + "_timings");
-	return StatusCode::SUCCESS;
-      }
-      
-      bool recoInclPers(true);
-      if (recoInclPers) {
-	if (!(*recTiming).empty()) 
-	  recoTime=*((*recTiming).rbegin());
-      } else {
-	if ((*recTiming).size() > 1)
-	  recoTime=(*recTiming)[(*recTiming).size()-2];
-      }
-    }
-    
-    ATH_MSG_VERBOSE("Filling RecoTiming <" << recoTime << ">.");
-    
-    return StatusCode::SUCCESS;
-  }
-  
-  /////////////////////////////////////////////////////////////////// 
-// Const methods: 
-///////////////////////////////////////////////////////////////////
-
-/////////////////////////////////////////////////////////////////// 
-// Non-const methods: 
-/////////////////////////////////////////////////////////////////// 
-
 
 }
-
-//  LocalWords:  str 

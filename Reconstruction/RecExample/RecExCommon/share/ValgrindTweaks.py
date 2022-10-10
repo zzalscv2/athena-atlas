@@ -11,6 +11,3 @@ from PerfMonComps.PerfMonFlags import jobproperties as pmon_properties
 pmon_properties.PerfMonFlags.doMonitoring.set_Value_and_Lock(False)
 pmon_properties.PerfMonFlags.doDetailedMonitoring.set_Value_and_Lock(False)
 pmon_properties.PerfMonFlags.doSemiDetailedMonitoring.set_Value_and_Lock(False)
-
-
-rec.doRecoTiming.set_Value_and_Lock(False)

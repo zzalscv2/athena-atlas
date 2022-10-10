@@ -15,9 +15,6 @@ else:
     AddressRemappingSvc.addInputRename('xAOD::EventAuxInfo', 'EventInfoAux.', 'Sig_EventInfoAux.')
     AddressRemappingSvc.addInputRename('xAOD::EventInfo', 'EventInfo', 'Sig_EventInfo')
 
-# Timings
-AddressRemappingSvc.addInputRename('RecoTimingObj', 'EVNTtoHITS_timings', 'Sig_EVNTtoHITS_timings')
-
 # Truth
 if DetFlags.overlay.Truth_on():
     AddressRemappingSvc.addInputRename('McEventCollection', 'TruthEvent', 'Sig_TruthEvent')

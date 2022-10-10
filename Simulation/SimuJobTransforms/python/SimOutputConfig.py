@@ -122,6 +122,4 @@ def getStreamHITS_ItemList(ConfigFlags):
         ItemList += ["TrackRecordCollection#CosmicRecord",
                      "TrackRecordCollection#CosmicPerigee"]
 
-    # TimingAlg
-    ItemList += ["RecoTimingObj#EVNTtoHITS_timings"]
     return ItemList

@@ -224,9 +224,6 @@ if not simFlags.ISFRun:
         ### Ancillary scintillators
         #stream1.ItemList += ["ScintillatorHitCollection#*"]
 
-        ## TimingAlg
-        stream1.ItemList +=["RecoTimingObj#EVNTtoHITS_timings"]
-
         ## Add cosmics and test beam configuration hit persistency if required cf. geom tag
         layout = simFlags.SimLayout.get_Value()
         if "tb" not in layout:

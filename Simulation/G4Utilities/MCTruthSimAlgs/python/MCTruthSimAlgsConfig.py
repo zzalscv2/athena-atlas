@@ -287,43 +287,6 @@ def MergeCalibHitsCfg(flags, name="MergeCalibHitsTool", **kwargs):
     return acc
 
 
-# The earliest bunch crossing time for which interactions will be sent
-# to the RecoTimingObj merging code.
-def TimingObj_FirstXing():
-    return -1
-
-
-# The latest bunch crossing time for which interactions will be sent
-# to the RecoTimingObj merging code.
-def TimingObj_LastXing():
-    return 1
-
-
-def TimingObjRangeCfg(flags, name="TimingObjRange", **kwargs):
-    """Return a RecoTiming configured PileUpXingFolder tool"""
-    #this is the time of the xing in ns
-    kwargs.setdefault("FirstXing", TimingObj_FirstXing())
-    kwargs.setdefault("LastXing",  TimingObj_LastXing())
-    kwargs.setdefault("ItemList", ["RecoTimingObj#EVNTtoHITS_timings"])
-    return PileUpXingFolderCfg(flags, name, **kwargs)
-
-
-def MergeRecoTimingObjCfg(flags, name="MergeRecoTimingObjTool", **kwargs):
-    acc = ComponentAccumulator()
-    rangetool = acc.popToolsAndMerge(TimingObjRangeCfg(flags))
-    acc.merge(PileUpMergeSvcCfg(flags, Intervals=rangetool))
-    if flags.Digitization.DoXingByXingPileUp: # PileUpTool approach
-        kwargs.setdefault("FirstXing", TimingObj_FirstXing())
-        kwargs.setdefault("LastXing",  TimingObj_LastXing())
-    kwargs.setdefault("RecoTimingObjInputKey", "EVNTtoHITS_timings")
-    if flags.Common.ProductionStep == ProductionStep.PileUpPresampling:
-        kwargs.setdefault("RecoTimingObjInputKey", flags.Overlay.BkgPrefix + "EVNTtoHITS_timings")
-    else:
-        kwargs.setdefault("RecoTimingObjInputKey", "EVNTtoHITS_timings")
-    acc.setPrivateTools(CompFactory.MergeRecoTimingObjTool(name, **kwargs))
-    return acc
-
-
 def MergeGenericMuonSimHitCollCfg(flags, name="MergeGenericMuonSimHitCollTool", **kwargs):
     acc = ComponentAccumulator()
     tool = CompFactory.MergeGenericMuonSimHitCollTool(name, **kwargs)

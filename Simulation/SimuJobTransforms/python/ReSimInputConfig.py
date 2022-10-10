@@ -7,7 +7,6 @@ def RenameHitCollectionsOnReadCfg(ConfigFlags):
     result = ComponentAccumulator()
     from SGComps.AddressRemappingConfig import InputRenameCfg
     result.merge(InputRenameCfg("McEventCollection","TruthEvent","TruthEventOLD"))
-    result.merge(InputRenameCfg("RecoTimingObj","EVNTtoHITS_timings","EVNTtoHITS_timingsOLD"))
 
     if ConfigFlags.Detector.EnableID or  ConfigFlags.Detector.EnableITk:
         if ConfigFlags.Detector.EnableBCM:

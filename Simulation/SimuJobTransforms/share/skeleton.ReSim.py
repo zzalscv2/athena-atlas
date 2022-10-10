@@ -212,12 +212,6 @@ topSeq.TimeOut = 43200 * Units.s
 from AthenaCommon.CfgGetter import getAlgorithm
 topSeq += getAlgorithm("ISF_SimEventFilter")
 
-## try:
-##     from RecAlgs.RecAlgsConf import TimingAlg
-##     topSeq+=TimingAlg("SimTimerBegin", TimingObjOutputName = "EVNTtoHITS_timings")
-## except:
-##     atlasG4log.warning('Could not add TimingAlg, no timing info will be written out.')
-
 copyHitSequence += getAlgorithm("ISF_InvertedSimEventFilter")
 copyHitSequence += getAlgorithm('RenameHitCollections')
 
@@ -227,7 +221,7 @@ include("ISF_Config/ISF_ConfigJobInclude.py")
 #Configure AddressRemappingSvc here
 from SGComps import AddressRemappingSvc
 AddressRemappingSvc.addInputRename("McEventCollection","TruthEvent","TruthEventOLD")
-AddressRemappingSvc.addInputRename("RecoTimingObj", "EVNTtoHITS_timings", "EVNTtoHITS_timingsOLD")
+
 ## Inner Detector
 if DetFlags.ID_on():
     if DetFlags.BCM_on():

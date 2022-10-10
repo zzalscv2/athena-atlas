@@ -248,12 +248,6 @@ if jobproperties.Beam.beamType.get_Value() != 'cosmics':
     else:
         simFlags.EventFilter.set_On()
 
-try:
-    from RecAlgs.RecAlgsConf import TimingAlg
-    topSeq+=TimingAlg("SimTimerBegin", TimingObjOutputName = "EVNTtoHITS_timings")
-except:
-    atlasG4log.warning('Could not add TimingAlg, no timing info will be written out.')
-
 ## The looper killer is on by default. Disable it if this is requested.
 if hasattr(runArgs, "enableLooperKiller") and not runArgs.enableLooperKiller:
     simFlags.OptionalUserActionList.removeAction('G4UA::LooperKillerTool')

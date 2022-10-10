@@ -70,23 +70,6 @@ excludeTracePattern.append("*/GaudiConfig2/*")
 include ( "RecExCond/RecExCommon_flags.py" )
 from AthenaCommon.DetFlags import DetFlags   # this import has to be after RecExCommon_flags.py !
 
-if (jobproperties.ConcurrencyFlags.NumThreads() > 0):
-    logRecExCommon_topOptions.info("MT mode: Not scheduling RecoTiming")
-    rec.doRecoTiming.set_Value_and_Lock(False)
-
-if (rec.doRecoTiming() and rec.OutputFileNameForRecoStep() in ('RAWtoESD','ESDtoAOD','RAWtoALL')):
-
-    from RecAlgs.RecAlgsConf import TimingAlg
-    topSequence+=TimingAlg("RecoTimerBegin")
-    topSequence.RecoTimerBegin.TimingObjOutputName=rec.OutputFileNameForRecoStep()+"_timings"
-    try:
-        from RecAlgs.RecAlgsConf import MemoryAlg
-        topSequence+=MemoryAlg("RecoMemoryBegin")
-        topSequence.RecoMemoryBegin.MemoryObjOutputName=rec.OutputFileNameForRecoStep()+"_mems"
-    except Exception:
-        logRecExCommon_topOptions.info("Could not instantiate MemoryAlg")
-
-
 if rec.doESDReconstruction():
     from RecAlgs.RecAlgsConf import EventInfoUnlocker
     topSequence+=EventInfoUnlocker("UnlockEventInfo")
@@ -487,16 +470,6 @@ if rec.doTrigger:
 
 AODFix.AODFix_postTrigger()
 
-if globalflags.DataSource()=='geant4':
-    if (rec.doRecoTiming() and rec.OutputFileNameForRecoStep() in ('RAWtoESD','ESDtoAOD','RAWtoALL')):
-        topSequence+=TimingAlg("RecoTimerAfterTrigger")
-        topSequence.RecoTimerAfterTrigger.TimingObjOutputName=rec.OutputFileNameForRecoStep()+"_timings"
-        try:
-            topSequence+=MemoryAlg("RecoMemoryAfterTrigger")
-            topSequence.RecoMemoryAfterTrigger.MemoryObjOutputName=rec.OutputFileNameForRecoStep()+"_mems"
-        except Exception:
-            logRecExCommon_topOptions.info("Could not instantiate MemoryAlg")
-
 if globalflags.InputFormat.is_bytestream():
     logRecExCommon_topOptions.info("BS file : storing in objKeyStore the list of input object from ByteStreamAddressProviderSvc.TypeNames. Unsafe ! ")
     newTN=[]
@@ -607,29 +580,6 @@ if len(rec.UserExecs())>0:
     for uExec in allExecs:
         exec(uExec)
     del allExecs
-
-if (rec.doRecoTiming() and rec.OutputFileNameForRecoStep() in ('RAWtoESD','ESDtoAOD','RAWtoALL')):
-    topSequence+=TimingAlg("RecoTimerBeforeOutput")
-    topSequence.RecoTimerBeforeOutput.TimingObjOutputName=rec.OutputFileNameForRecoStep()+"_timings"
-    try:
-        topSequence+=MemoryAlg("RecoMemoryBeforeOutput")
-        topSequence.RecoMemoryBeforeOutput.MemoryObjOutputName=rec.OutputFileNameForRecoStep()+"_mems"
-    except Exception:
-        logRecExCommon_topOptions.info("Could not instantiate MemoryAlg")
-
-    from RecExConfig.ObjKeyStore import objKeyStore
-    objKeyStore.addStreamESD("RecoTimingObj",rec.OutputFileNameForRecoStep()+"_timings" )
-    objKeyStore.addStreamAOD("RecoTimingObj",rec.OutputFileNameForRecoStep()+"_timings" )
-    objKeyStore.addStreamESD("RecoTimingObj",rec.OutputFileNameForRecoStep()+"_mems" )
-    objKeyStore.addStreamAOD("RecoTimingObj",rec.OutputFileNameForRecoStep()+"_mems" )
-
-    # transfer RecoTimingObj from previous steps from RDO to ESD.
-    # The transfer from ESD to AOD is done already in OKS_StreamESD_fromESD.py
-    if ( rec.OutputFileNameForRecoStep() == 'RAWtoESD' and
-         globalflags.DataSource()=='geant4' ):
-        objKeyStore.addStreamESD("RecoTimingObj","EVNTtoHITS_timings" )
-        objKeyStore.addStreamESD("RecoTimingObj","HITStoRDO_timings" )
-
 
 from RecAlgs.RecAlgsConf import JobInfo
 topSequence+=JobInfo(PrintFATAL=False)
@@ -1219,10 +1169,6 @@ if rec.doWriteAOD():
         StreamAOD_Augmented.GetEventStream().ExtendProvenanceRecord = False
         # all input to be copied to output
         StreamAOD_Augmented.GetEventStream().TakeItemsFromInput =True
-
-    # StreamAOD_Augmented.AddItem( "RecoTimingObj#RAWtoESD_timings" )
-    # StreamAOD_Augmented.AddItem( "RecoTimingObj#ESDtoAOD_timings" )
-    # StreamAOD_Augmented.AddItem( "RecoTimingObj#ESDtoAOD_mems" )
 
     # Add the Thinned Trk Tracks associated to egamma and muon objects in data
     if  AODFlags.AddEgammaMuonTracksInAOD and not rec.doTruth():

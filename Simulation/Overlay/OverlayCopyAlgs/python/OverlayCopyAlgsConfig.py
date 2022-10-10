@@ -301,47 +301,6 @@ def CopyPRD_MultiTruthCollectionAlgCfg(flags, collectionName, **kwargs):
     return acc
 
 
-def CopyTimingsCfg(flags, name="CopyTimings", **kwargs):
-    """Return a ComponentAccumulator for the CopyTimings algorithm"""
-    acc = ComponentAccumulator()
-    if "EVNTtoHITS_timings" not in flags.Input.SecondaryCollections:
-        return acc
-
-    # Disable background copying
-    kwargs.setdefault("BkgInputKey", "")
-
-    kwargs.setdefault("SignalInputKey", f"{flags.Overlay.SigPrefix}EVNTtoHITS_timings")
-    kwargs.setdefault("OutputKey", "EVNTtoHITS_timings")
-
-    from SGComps.SGInputLoaderConfig import SGInputLoaderCfg
-    acc.merge(SGInputLoaderCfg(flags, [f'RecoTimingObj#{kwargs["SignalInputKey"]}']))
-
-    # Copy RecoTimingObj
-    acc.addEventAlgo(CompFactory.CopyTimings(name, **kwargs))
-
-    # Re-map signal address
-    from SGComps.AddressRemappingConfig import AddressRemappingCfg
-    acc.merge(AddressRemappingCfg([
-        f"RecoTimingObj#EVNTtoHITS_timings->{flags.Overlay.SigPrefix}EVNTtoHITS_timings"
-    ]))
-
-    # Output
-    if flags.Output.doWriteRDO:
-        from OutputStreamAthenaPool.OutputStreamConfig import OutputStreamCfg
-        acc.merge(OutputStreamCfg(flags, "RDO", ItemList=[
-            "RecoTimingObj#EVNTtoHITS_timings"
-        ]))
-
-    # Add signal output
-    if flags.Output.doWriteRDO_SGNL:
-        from OutputStreamAthenaPool.OutputStreamConfig import OutputStreamCfg
-        acc.merge(OutputStreamCfg(flags, "RDO_SGNL", ItemList=[
-            f"RecoTimingObj#{flags.Overlay.SigPrefix}EVNTtoHITS_timings"
-        ]))
-
-    return acc
-
-
 def CopyTrackRecordCollectionAlgCfg(flags, collectionName, name="CopyTrackRecordCollection", **kwargs):
     """Return a ComponentAccumulator for the TrackRecordCollection copying"""
     acc = ComponentAccumulator()

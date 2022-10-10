@@ -328,8 +328,6 @@ def getStandardPileUpToolsList():
     PileUpToolsList += getStandardCaloPileUpTools()
     ## Muon System Digitization
     PileUpToolsList += getStandardMuonPileUpTools()
-    ## RecoTimingObj
-    PileUpToolsList += [ "MergeRecoTimingObjTool" ]
     return PileUpToolsList
 
 def getStandardSignalOnlyTruthPileUpToolsList():
@@ -344,8 +342,6 @@ def getStandardSignalOnlyTruthPileUpToolsList():
     PileUpToolsList += getStandardCaloPileUpTools()
     ## Muon System Digitization
     PileUpToolsList += getStandardMuonPileUpTools()
-    ## RecoTimingObj
-    PileUpToolsList += [ "MergeRecoTimingObjTool" ]
     return PileUpToolsList
 
 def getStandardInTimeOnlyTruthPileUpToolsList():
@@ -360,8 +356,6 @@ def getStandardInTimeOnlyTruthPileUpToolsList():
     PileUpToolsList += getStandardCaloPileUpTools()
     ## Muon System Digitization
     PileUpToolsList += getStandardMuonPileUpTools()
-    ## RecoTimingObj
-    PileUpToolsList += [ "MergeRecoTimingObjTool" ]
     return PileUpToolsList
 
 def getStandardInTimeOnlyGeantinoTruthPileUpToolsList():
@@ -376,8 +370,6 @@ def getStandardInTimeOnlyGeantinoTruthPileUpToolsList():
     PileUpToolsList += getStandardCaloPileUpTools()
     ## Muon System Digitization
     PileUpToolsList += getStandardMuonPileUpTools()
-    ## RecoTimingObj
-    PileUpToolsList += [ "MergeRecoTimingObjTool" ]
     return PileUpToolsList
 
 def getFastPileUpToolsList():
@@ -392,8 +384,6 @@ def getFastPileUpToolsList():
     PileUpToolsList += getStandardCaloPileUpTools()
     ## Muon System Digitization
     PileUpToolsList += getStandardMuonPileUpTools()
-    ## RecoTimingObj
-    PileUpToolsList += [ "MergeRecoTimingObjTool" ]
     return PileUpToolsList
 
 def getSplitPileUpToolsList():
@@ -408,8 +398,6 @@ def getSplitPileUpToolsList():
     PileUpToolsList += getStandardCaloPileUpTools()
     ## Muon System Digitization
     PileUpToolsList += getStandardMuonPileUpTools()
-    ## RecoTimingObj
-    PileUpToolsList += [ "MergeRecoTimingObjTool" ]
     return PileUpToolsList
 
 def getSplitSFPileUpToolsList():
@@ -424,8 +412,6 @@ def getSplitSFPileUpToolsList():
     PileUpToolsList += getStandardCaloPileUpTools()
     ## Muon System Digitization
     PileUpToolsList += getStandardMuonPileUpTools()
-    ## RecoTimingObj
-    PileUpToolsList += [ "MergeRecoTimingObjTool" ]
     return PileUpToolsList
 
 def getSplitNoMergePileUpToolsList():
@@ -440,8 +426,6 @@ def getSplitNoMergePileUpToolsList():
     PileUpToolsList += getStandardCaloPileUpTools()
     ## Muon System Digitization
     PileUpToolsList += getStandardMuonPileUpTools()
-    ## RecoTimingObj
-    PileUpToolsList += [ "MergeRecoTimingObjTool" ]
     return PileUpToolsList
 
 def getSplitNoMergeSFPileUpToolsList():
@@ -456,8 +440,6 @@ def getSplitNoMergeSFPileUpToolsList():
     PileUpToolsList += getStandardCaloPileUpTools()
     ## Muon System Digitization
     PileUpToolsList += getStandardMuonPileUpTools()
-    ## RecoTimingObj
-    PileUpToolsList += [ "MergeRecoTimingObjTool" ]
     return PileUpToolsList
 
 def getSplitNoMergeFSPileUpToolsList():
@@ -472,8 +454,6 @@ def getSplitNoMergeFSPileUpToolsList():
     PileUpToolsList += getStandardCaloPileUpTools()
     ## Muon System Digitization
     PileUpToolsList += getStandardMuonPileUpTools()
-    ## RecoTimingObj
-    PileUpToolsList += [ "MergeRecoTimingObjTool" ]
     return PileUpToolsList
 
 def getSplitNoMergeFFPileUpToolsList():
@@ -488,8 +468,6 @@ def getSplitNoMergeFFPileUpToolsList():
     PileUpToolsList += getStandardCaloPileUpTools()
     ## Muon System Digitization
     PileUpToolsList += getStandardMuonPileUpTools()
-    ## RecoTimingObj
-    PileUpToolsList += [ "MergeRecoTimingObjTool" ]
     return PileUpToolsList
 
 def getStandardPileUpToolsAlg(name="StandardPileUpToolsAlg", **kwargs):
