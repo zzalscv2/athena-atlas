@@ -3490,7 +3490,7 @@ BPHY23_AllVariables += ["ExtrapolatedMuonTrackParticles"]
 
 ## muon container
 BPHY23_AllVariables += ["Muons"]
-
+BPHY23_AllVariables += ["MuonSegments"]
 
 ## we have to disable vxTrackAtVertex branch since it is not xAOD compatible
 for cascade in CascadeCollections:
