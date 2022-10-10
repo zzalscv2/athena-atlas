@@ -10,7 +10,6 @@ monitoring_photon = [
     'HLT_g22_tight_L1EM15VHI',
     'HLT_g35_medium_L1EM20VH',
     'HLT_g25_medium_L1EM20VH',
-    'HLT_g50_loose_L1EM20VH',
     'HLT_g140_loose_L1EM22VHI',
     'HLT_g300_etcut_L1EM22VHI'
         ]
@@ -20,6 +19,7 @@ monitoring_bootstrap = {
         'HLT_g35_medium_L1EM20VH' : 'HLT_g25_loose_L1EM20VH',
         'HLT_g22_tight_L1EM15VHI' : 'HLT_g20_tight_L1EM15VHI',
         'HLT_g20_tight_icaloloose_L1EM15VHI': 'HLT_g20_tight_L1EM15VHI',
+        'HLT_g50_loose_L1EM20VH'  : 'HLT_g25_loose_L1EM20VH',
         }
 
 
@@ -39,7 +39,7 @@ monitoringTP_electron = [
     'HLT_e140_lhloose_L1EM22VHI',
     'HLT_e140_lhloose_noringer_L1EM22VHI',
     'HLT_e60_lhmedium_L1EM22VHI',
-    'HLT_e26_lhtight_L1EM22VHI',   
+    'HLT_e26_lhtight_L1EM22VHI',
     'HLT_e26_lhtight_ivarloose_L1EM22VHI',
     'HLT_e26_lhtight_ivarmedium_L1EM22VHI',
     'HLT_e28_lhtight_ivarloose_L1EM22VHI'
@@ -57,7 +57,7 @@ validation_photon = [
         'HLT_g25_tight_icaloloose_L1EM22VHI',
         'HLT_g25_tight_icalotight_L1EM22VHI',
         'HLT_g20_medium_L1EM15VHI',
-        'HLT_g20_loose_L1EM15VHI',        
+        'HLT_g20_loose_L1EM15VHI',
         'HLT_g140_loose_L1EM22VHI',
         'HLT_g140_loose_L1eEM26M',
         'HLT_g300_etcut_L1EM22VHI',
@@ -90,7 +90,7 @@ validationTP_electron = [
         'HLT_e26_lhtight_ivarloose_L1EM15VH',
         'HLT_e26_lhtight_ivarloose_L1EM22VHI',
         'HLT_e26_lhtight_ivarmedium_L1EM22VHI',
-        'HLT_e28_lhtight_ivarloose_L1EM22VHI'
+        'HLT_e28_lhtight_ivarloose_L1EM22VHI',
         'HLT_e140_lhloose_L1EM22VHI',
         'HLT_e140_lhloose_noringer_L1EM22VHI',
         'HLT_e60_lhmedium_L1EM22VHI',
@@ -129,8 +129,8 @@ validationTP_jpsiee = ['HLT_e5_lhtight_L1EM3']
 
 
 validation_Zee = [
-        'HLT_e26_lhtight_e15_etcut_Zee_L1EM22VHI', 
-        'HLT_e26_lhtight_e15_idperf_tight_Zee_L1EM22VHI', 
+        'HLT_e26_lhtight_e15_etcut_Zee_L1EM22VHI',
+        'HLT_e26_lhtight_e15_idperf_tight_Zee_L1EM22VHI',
         'HLT_e20_lhtight_ivarloose_L1ZAFB-25DPHI-eEM18I'
         ] # adding Zee/special chains later
 
@@ -177,16 +177,16 @@ primary_single_ele = ['HLT_e26_lhtight_ivarloose_L1EM22VHI',
                 'HLT_e26_lhtight_ivarmedium_L1EM22VHI',
                 'HLT_e28_lhtight_ivarloose_L1EM22VHI',
                 'HLT_e60_lhmedium_L1EM22VHI',
-                'HLT_e140_lhloose_L1EM22VHI',                            
-        ] 
+                'HLT_e140_lhloose_L1EM22VHI',
+        ]
 
 primary_double_pho = [
         'HLT_2g20_tight_icaloloose_L12EM15VHI',
         'HLT_2g22_tight_L12EM15VHI',
         'HLT_g35_medium_g25_medium_L12EM20VH',
         'HLT_2g50_loose_L12EM20VH',
-        ]       
-        
+        ]
+
 monitoring_Zee = ['HLT_e26_lhtight_e14_etcut_probe_50invmAB130_L1EM22VHI',
                 'HLT_e26_lhtight_e14_etcut_L1EM22VHI',
                 'HLT_e26_lhtight_e14_etcut_probe_50invmAB130_L1eEM26M',

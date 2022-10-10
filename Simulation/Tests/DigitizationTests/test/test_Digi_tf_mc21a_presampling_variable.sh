@@ -29,7 +29,7 @@ LowPtMinbiasHitsFiles4="/cvmfs/atlas-nightlies.cern.ch/repo/data/data-art/Digiti
 Digi_tf.py \
 --PileUpPresampling True \
 --splitConfig 'HITtoRDO:Campaigns.BeamspotSplitMC21a' \
---conditionsTag default:OFLCOND-MC21-SDR-RUN3-05 \
+--conditionsTag default:OFLCOND-MC21-SDR-RUN3-07 \
 --digiSeedOffset1 170 --digiSeedOffset2 170 \
 --digiSteeringConf 'StandardSignalOnlyTruth' \
 --geometryVersion default:ATLAS-R3S-2021-02-00-00 \
@@ -54,7 +54,7 @@ Digi_tf.py \
 Digi_tf.py \
 --PileUpPresampling True \
 --splitConfig 'HITtoRDO:Campaigns.BeamspotSplitMC21a' \
---conditionsTag default:OFLCOND-MC21-SDR-RUN3-05 \
+--conditionsTag default:OFLCOND-MC21-SDR-RUN3-07 \
 --digiSeedOffset1 170 --digiSeedOffset2 170 \
 --digiSteeringConf 'StandardSignalOnlyTruth' \
 --geometryVersion default:ATLAS-R3S-2021-02-00-00 \
@@ -94,7 +94,7 @@ then
     --CA \
     --splitConfig 'HITtoRDO:Campaigns.BeamspotSplitMC21a' \
     --PileUpPresampling True \
-    --conditionsTag default:OFLCOND-MC21-SDR-RUN3-05 \
+    --conditionsTag default:OFLCOND-MC21-SDR-RUN3-07 \
     --digiSeedOffset1 170 --digiSeedOffset2 170 \
     --digiSteeringConf 'StandardSignalOnlyTruth' \
     --geometryVersion default:ATLAS-R3S-2021-02-00-00 \

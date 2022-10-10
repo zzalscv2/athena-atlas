@@ -16,7 +16,6 @@ from TriggerMenuMT.HLT.Menu.Physics_pp_run3_v1 import ( SingleElectronGroup,
                                                         BphysicsGroup,
                                                         EOFBPhysL1MuGroup,
                                                         EOFL1MuGroup,
-                                                        EgammaJetGroup,
                                                         EgammaMETGroup,
                                                         MultiJetGroup,
                                                         PrimaryLegGroup,
@@ -157,12 +156,31 @@ def addMCSignatures(chains):
         ChainProp(name='HLT_g0_hiptrt_L1eEM26M' , groups=SinglePhotonGroup), 
 
         #ATR-25764 - adding Photon chains with different isolation WPs
-        ChainProp(name='HLT_g25_tight_icaloloose_L1EM22VHI', groups=PrimaryLegGroup+EgammaJetGroup, monGroups=['egammaMon:shifter']),
-        ChainProp(name='HLT_g25_tight_icalotight_L1EM22VHI', groups=PrimaryLegGroup+EgammaJetGroup, monGroups=['egammaMon:shifter']),
+        ChainProp(name='HLT_g25_tight_icaloloose_L1EM22VHI', groups=SinglePhotonGroup, monGroups=['egammaMon:shifter']),
+        ChainProp(name='HLT_g25_tight_icalotight_L1EM22VHI', groups=SinglePhotonGroup, monGroups=['egammaMon:shifter']),
 
-        #------------ nopid trigger
+        #------------ nopid trigger and etcut from ATR-26311
         # ATR-23723
         ChainProp(name='HLT_e5_nopid_L1EM3', groups=SingleElectronGroup+['PS:NoBulkMCProd']),
+        ChainProp(name='HLT_e5_etcut_L1EM3', groups=SingleElectronGroup+['PS:NoBulkMCProd']),
+
+        #  ATR-26311
+        #  Validating/checking eFEX and primary electron trigger
+        ChainProp(name='HLT_e26_etcut_L1EM22VHI', groups=SingleElectronGroup),
+        ChainProp(name='HLT_e26_lhtight_L1EM22VHI', groups=SingleElectronGroup,monGroups=['egammaMon:t0_tp']),
+        ChainProp(name='HLT_e26_lhtight_ivarloose_L1EM22VH', groups=SingleElectronGroup),
+        ChainProp(name='HLT_e26_lhtight_ivarloose_L1eEM26', groups=SingleElectronGroup,monGroups=['egammaMon:t0_tp']),
+        ChainProp(name='HLT_e26_lhtight_ivarloose_L1eEM26T', groups=SingleElectronGroup),
+
+        # Ringer development / validation also ATR-24384
+        ChainProp(name='HLT_g20_loose_ringer_L1EM15VHI', groups=SinglePhotonGroup,monGroups=['egammaMon:shifter']),
+        ChainProp(name='HLT_g20_medium_ringer_L1EM15VHI', groups=SinglePhotonGroup,monGroups=['egammaMon:shifter']),
+        ChainProp(name='HLT_g20_tight_ringer_L1EM15VHI', groups=SinglePhotonGroup,monGroups=['egammaMon:shifter']),
+        ChainProp(name='HLT_g120_loose_ringer_L1EM22VHI', groups=SinglePhotonGroup,monGroups=['egammaMon:shifter']),
+        ChainProp(name='HLT_g20_loose_L1EM15VHI',  groups=SinglePhotonGroup,monGroups=['egammaMon:shifter']),
+        ChainProp(name='HLT_g20_medium_L1EM15VHI', groups=SinglePhotonGroup,monGroups=['egammaMon:shifter']),
+        
+        
     ]
 
     chainsMC['Bphysics'] = [    

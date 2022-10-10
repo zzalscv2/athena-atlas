@@ -78,7 +78,7 @@ StatusCode MuonCreatorAlg::execute(const EventContext& ctx) const {
 
     // Create the xAOD container and its auxiliary store:
     SG::WriteHandle<xAOD::MuonContainer> wh_muons{m_muonCollectionName, ctx};
-    ATH_CHECK(wh_muons.record(std::make_unique<xAOD::MuonContainer>(), std::make_unique<xAOD::MuonAuxContainer>()));
+    ATH_CHECK(wh_muons.recordNonConst(std::make_unique<xAOD::MuonContainer>(), std::make_unique<xAOD::MuonAuxContainer>()));
     ATH_MSG_DEBUG("Recorded Muons with key: " << m_muonCollectionName.key());
     MuonCombined::IMuonCreatorTool::OutputData output(*(wh_muons.ptr()));
 

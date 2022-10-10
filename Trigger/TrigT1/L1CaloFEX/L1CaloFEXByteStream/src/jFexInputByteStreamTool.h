@@ -52,8 +52,12 @@ class jFexInputByteStreamTool : public extends<AthAlgTool, IL1TriggerByteStreamT
         // ------------------------- Properties --------------------------------------
         // ROBIDs property required by the interface
         Gaudi::Property<std::vector<uint32_t>> m_robIds {this, "ROBIDs", {}, "List of ROB IDs required for conversion to/from xAOD RoI"};
+        
         // FiberMapping property required by the interface
-        Gaudi::Property<std::string> m_FiberMapping {this, "FiberMapping", PathResolver::find_calib_file("L1CaloFEXByteStream/2022-09-13/jFEX_fiber_mapping.txt").c_str(), "Text file to convert from hardware fiber to eta-phi location"};
+        
+        // Commented out until the mapping issue is solve and the new version is validated
+        //Gaudi::Property<std::string> m_FiberMapping {this, "FiberMapping", PathResolver::find_calib_file("L1CaloFEXByteStream/2022-09-13/jFEX_fiber_mapping.txt").c_str(), "Text file to convert from hardware fiber to eta-phi location"};
+        Gaudi::Property<std::string> m_FiberMapping {this, "FiberMapping", "/afs/cern.ch/user/s/serodrig/public/L1CaloScellMapping/athenaMap.txt", "Text file to convert from hardware fiber to eta-phi location"};
 
          //Write handle keys for the L1Calo EDMs for BS->xAOD mode of operation
         SG::WriteHandleKey< xAOD::jFexTowerContainer> m_jTowersWriteKey   {this,"jTowersWriteKey"  ,"L1_jTowers","Write jFexEDM Trigger Tower container"};
@@ -72,7 +76,7 @@ class jFexInputByteStreamTool : public extends<AthAlgTool, IL1TriggerByteStreamT
         
         // hash the index into one integer in the format 0xJFCCT (hexadecimal)
         constexpr static unsigned int mapIndex(unsigned int jfex, unsigned int fpga, unsigned int channel, unsigned int tower);
-        std::unordered_map<unsigned int, std::array<float,4> > m_Firm2Tower_map; /// {map index, {IDsimulation,eta,phi}}
+        std::unordered_map<unsigned int, std::array<float,6> > m_Firm2Tower_map; /// {map index, {IDsimulation,eta,phi,source,iEta,iPhi}}
         
         
         

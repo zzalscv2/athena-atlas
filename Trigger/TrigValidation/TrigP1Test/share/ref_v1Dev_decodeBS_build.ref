@@ -1764,14 +1764,6 @@ HLT_e26_lhtight_ivarloose_mu22noL1_j20_roiftf_preselj20_L1EM22VHI:
     1: 2
 HLT_e26_lhtight_ivarloose_mu22noL1_j20_roiftf_preselj20_L1eEM26M:
   eventCount: 0
-HLT_e26_lhtight_ivarloose_nogsf_L1EM22VH:
-  eventCount: 0
-  stepCounts:
-    0: 2
-    1: 2
-  stepFeatures:
-    0: 2
-    1: 2
 HLT_e26_lhtight_ivarloose_nogsf_L1EM22VHI:
   eventCount: 0
   stepCounts:
