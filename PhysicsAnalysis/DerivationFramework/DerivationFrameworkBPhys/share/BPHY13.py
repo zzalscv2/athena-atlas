@@ -126,7 +126,7 @@ BPHY13FourTrackSelectAndWrite = DerivationFramework__Reco_dimuTrkTrk(
     PVContainerName          = "PrimaryVertices",
     RefPVContainerName       = "BPHY13RefittedPrimaryVertices",
     RefitPV                  = True,
-    MaxPVrefit               = 10000,
+    MaxPVrefit               = 20,
     DoVertexType             = 7)
 
 ToolSvc += BPHY13FourTrackSelectAndWrite 
@@ -561,8 +561,8 @@ BPHY13SlimmingHelper.IncludeBPhysTriggerContent = True
 
 ## primary vertices
 BPHY13_AllVariables += ["PrimaryVertices"]
-BPHY13_StaticContent += ["xAOD::VertexContainer#BPHY13RefittedPrimaryVertices"]
-BPHY13_StaticContent += ["xAOD::VertexAuxContainer#BPHY13RefittedPrimaryVerticesAux."]
+#BPHY13_StaticContent += ["xAOD::VertexContainer#BPHY13RefittedPrimaryVertices"]
+#BPHY13_StaticContent += ["xAOD::VertexAuxContainer#BPHY13RefittedPrimaryVerticesAux."]
 
 ## ID track particles
 BPHY13_AllVariables += ["InDetTrackParticles"]
@@ -575,7 +575,7 @@ BPHY13_AllVariables += ["ExtrapolatedMuonTrackParticles"]
 
 ## muon container
 BPHY13_AllVariables += ["Muons"]
-
+BPHY13_AllVariables += ["MuonSegments"]
 
 BPHY13_StaticContent += ["xAOD::VertexContainer#%s"        % BPHY13FourTrackSelectAndWrite.OutputVtxContainerName]
 BPHY13_StaticContent += ["xAOD::VertexAuxContainer#%sAux." % BPHY13FourTrackSelectAndWrite.OutputVtxContainerName]
