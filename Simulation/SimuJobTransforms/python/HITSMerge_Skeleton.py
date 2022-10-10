@@ -54,13 +54,9 @@ def fromRunArgs(runArgs):
     cfg.merge(PoolReadCfg(ConfigFlags))
     cfg.merge(PoolWriteCfg(ConfigFlags))
 
-    # Minor geometry dependencies
-    if ConfigFlags.Detector.GeometryLAr:
-        from LArGeoAlgsNV.LArGMConfig import LArGMCfg
-        cfg.merge(LArGMCfg(ConfigFlags))
-    if ConfigFlags.Detector.GeometryTile:
-        from TileGeoModel.TileGMConfig import TileGMCfg
-        cfg.merge(TileGMCfg(ConfigFlags))
+    # Identifiers
+    from DetDescrCnvSvc.DetDescrCnvSvcConfig import DetDescrCnvSvcCfg
+    cfg.merge(DetDescrCnvSvcCfg(ConfigFlags))
 
     from OutputStreamAthenaPool.OutputStreamConfig import OutputStreamCfg
     cfg.merge(OutputStreamCfg(ConfigFlags, 'HITS', disableEventTag="xAOD::EventInfo#EventInfo" not in ConfigFlags.Input.TypedCollections))
