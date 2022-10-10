@@ -13,6 +13,8 @@ jFexTowerAuxContainer_v1::jFexTowerAuxContainer_v1() :
 
     AUX_VARIABLE( eta         );
     AUX_VARIABLE( phi         );
+    AUX_VARIABLE( iEta        );
+    AUX_VARIABLE( iPhi        );
     AUX_VARIABLE( module      );
     AUX_VARIABLE( fpga        );
     AUX_VARIABLE( channel     );

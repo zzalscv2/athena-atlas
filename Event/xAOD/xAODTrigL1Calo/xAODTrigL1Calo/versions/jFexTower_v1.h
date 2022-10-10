@@ -28,10 +28,16 @@ namespace xAOD {
       /// @brief The pseudorapidity (\f$\eta\f$)
       float eta() const; /// getter for the global eta value (float)
       void setEta(float); /// setter for the above
+      
+      int iEta() const; /// getter for the global eta value (int)
+      void setiEta(int); /// setter for the above
 
       /// @brief The azimuthal angle (\f$\phi\f$)     
       float phi() const; /// getter for the global phi value (float)
       void setPhi(float); /// setter for the above
+      
+      int iPhi() const; /// getter for the global phi value (int)
+      void setiPhi(int); /// setter for the above
 
       /// get module number
       uint8_t module() const; /// getter for the module number [0-5] inclusive
@@ -60,9 +66,9 @@ namespace xAOD {
       /// set the location where Et is placed in the data stream
       void setJFEXdataID(uint8_t); /// setter for the above
 
-      /// Is jTower saturated?
+      /// Is the Tower saturated?
       char isSaturated() const; /// getter for the saturation flag of jTower
-      /// set saturation flag of jTower
+      /// set saturation flag of the Tower
       void setIsSaturated(char); ///setter for the above
 
       /// get the Simulation ID
@@ -71,22 +77,17 @@ namespace xAOD {
       void setjFEXtowerID(uint32_t); ///setter for the above
 
       /// Information about the calorimeter source
-      /// Calosource values:  0: barrel, 1: tile, 2: emec, 3: hec, 4: fcal1, 5: fcal2, 6: fcal3, 7: Combination of EM and HAD layer (a real jTower)
+      /// Calosource values:  0: barrel, 1: tile, 2: emec, 3: hec, 4: fcal1, 5: fcal2, 6: fcal3
       uint8_t Calosource() const; /// getter for the calorimeter source
       /// set calorimeter source
       void setCalosource(uint8_t); ///setter for the above
       
-      //Returns the EM layer
-      uint16_t jTowerEt_EM() const;
-      
-      //Returns the HAD layer
-      uint16_t jTowerEt_HAD() const;
-      
-      //Returns the Total Et
-      unsigned int jTowerEt() const;
+      //Returns the Et of the Tower
+      uint16_t jTowerEt() const;
+
 
       void initialize(  const float Eta,const float Phi);
-      void initialize(  const float Eta,const float Phi,
+      void initialize(  const float Eta,const float Phi,const int IEta,const int IPhi,
                         const uint32_t IDsim,
                         const uint8_t source,
                         const std::vector<uint16_t>& Et_count,
