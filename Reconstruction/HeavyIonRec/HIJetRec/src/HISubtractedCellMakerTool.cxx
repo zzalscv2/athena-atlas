@@ -50,7 +50,7 @@ StatusCode HISubtractedCellMakerTool::process (CaloCellContainer* theCells,
     return StatusCode::SUCCESS;
   }
 
-  auto modtool_nc = m_modulatorTool.get();
+  const auto *modtool_nc = m_modulatorTool.get();
   CHECK(modtool_nc->retrieveShape());
 
   for(auto pCell : *theCells)

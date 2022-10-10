@@ -33,7 +33,7 @@ StatusCode HIClusterSubtraction::initialize()
 	//Vertex container needs to be initialized only if origin correction will take place
 	ATH_CHECK( m_vertexContainer.initialize( m_originCorrection ) );
 
-  for (auto tool :  m_clusterCorrectionTools)
+  for (const auto& tool :  m_clusterCorrectionTools)
   {
     StatusCode sc = tool.retrieve();
     if (sc.isFailure()) ATH_MSG_ERROR("Failed to retrieve correction tool " << tool);
@@ -105,11 +105,11 @@ int HIClusterSubtraction::execute() const
 		// ReadHandle to retrieve the vertex container
 		SG::ReadHandle<xAOD::VertexContainer>  readHandleVertexContainer ( m_vertexContainer );
     vertices = readHandleVertexContainer.get();
-    for ( size_t iVertex = 0; iVertex < vertices->size(); ++iVertex )
+    for (const auto *vertice : *vertices)
     {
-      if(vertices->at(iVertex)->vertexType() == xAOD::VxType::PriVtx)
+      if(vertice->vertexType() == xAOD::VxType::PriVtx)
       {
-        	primVertex=vertices->at(iVertex);
+        	primVertex=vertice;
         	break;
       }
     }
@@ -126,7 +126,7 @@ int HIClusterSubtraction::execute() const
   }
 	bool missingMoment=false;
 
-	auto originalCluster = readHandleClusters.cptr();
+	const auto *originalCluster = readHandleClusters.cptr();
 	// Create the new container and its auxiliary store.
 	xAOD::CaloClusterContainer* copyClusters = new xAOD::CaloClusterContainer();
   xAOD::AuxContainerBase* copyClustersAux = new xAOD::AuxContainerBase();
@@ -185,11 +185,10 @@ int HIClusterSubtraction::execute() const
 		}
   }//End of iterator over CaloClusterContainer
 
-    for(ToolHandleArray<CaloClusterCollectionProcessor>::const_iterator toolIt=m_clusterCorrectionTools.begin();
-	      toolIt != m_clusterCorrectionTools.end(); toolIt++)
+    for(const auto & clusterCorrectionTool : m_clusterCorrectionTools)
     {
-      ATH_MSG_DEBUG(" Applying correction = " << (*toolIt)->name() );
-			CHECK((*toolIt)->execute(Gaudi::Hive::currentContext(), copyClusters), 1);
+      ATH_MSG_DEBUG(" Applying correction = " << clusterCorrectionTool->name() );
+			CHECK(clusterCorrectionTool->execute(Gaudi::Hive::currentContext(), copyClusters), 1);
     }//End loop over correction tools
 
 		if(missingMoment) ATH_MSG_WARNING("No origin correction applied, CENTERMAG missing");

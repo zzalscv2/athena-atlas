@@ -77,14 +77,14 @@ StatusCode HIJetConstituentSubtractionTool::modify(xAOD::JetContainer& jets) con
     xAOD::IParticle::FourMom_t p4_subtr;
     xAOD::IParticle::FourMom_t p4_unsubtr;
     const xAOD::JetConstituentVector constituents = (*ijet)->getConstituents();
-    for (xAOD::JetConstituentVector::iterator itr = constituents.begin(); itr != constituents.end(); ++itr)
+    for (const auto* constituent : constituents)
     {
-      m_subtractorTool->subtract(p4_cl,itr->rawConstituent(),shape,es_index,m_modulatorTool, eshape); //modifies p4_cl to be constituent 4-vector AFTER subtraction
+      m_subtractorTool->subtract(p4_cl,constituent->rawConstituent(),shape,es_index,m_modulatorTool, eshape); //modifies p4_cl to be constituent 4-vector AFTER subtraction
       p4_subtr+=p4_cl;
 
       if( msgLvl(MSG::DEBUG) )
       {
-      	const xAOD::CaloCluster* cl=static_cast<const xAOD::CaloCluster*>(itr->rawConstituent());
+      	const xAOD::CaloCluster* cl=static_cast<const xAOD::CaloCluster*>(constituent->rawConstituent());
         //here we can still keep cl->p4 because it's taking the unsubtracted state - moreover is debug
       	p4_unsubtr+=cl->p4(HIJetRec::unsubtractedClusterState());
       }

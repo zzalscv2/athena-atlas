@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2020 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
 */
 #include "StoreGate/WriteDecorHandle.h"
 
@@ -39,9 +39,9 @@ StatusCode HIJetMaxOverMeanTool::initialize()
     float sum=0;
     float count=0;
     const xAOD::JetConstituentVector constituents = jet->getConstituents();
-    for (xAOD::JetConstituentVector::iterator itr = constituents.begin(); itr != constituents.end(); ++itr)
+    for (const auto *constituent : constituents)
     {
-      float et=(*itr)->e()/std::cosh((*itr)->eta());
+      float et=constituent->e()/std::cosh(constituent->eta());
       if(et > max) max=et;
       sum+=et;
       count++;

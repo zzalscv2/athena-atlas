@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
 */
 
 
@@ -65,8 +65,10 @@ namespace xAODMaker {
      const std::vector< float > diagVec = tp.definingParametersCovMatrixDiagVec();
      std::vector< float > diagVecCompr;
 
-     for( unsigned int i = 0; i < diagVec.size(); ++i ) {
-       diagVecCompr.push_back(m_diagCovMatrixCompressor->reduceFloatPrecision( diagVec[i] ));
+     diagVecCompr.reserve(diagVec.size());
+     for (float i : diagVec) {
+       diagVecCompr.push_back(
+         m_diagCovMatrixCompressor->reduceFloatPrecision(i));
      }
 
      tp.setDefiningParametersCovMatrixDiagVec( diagVecCompr );

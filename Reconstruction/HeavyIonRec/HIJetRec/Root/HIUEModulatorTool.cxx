@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2017 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "HIUEModulatorTool.h"
@@ -91,11 +91,11 @@ float HIUEModulatorTool::modulate(const std::vector<unsigned int>& nh_vector, co
   float et=shape->et();
   if(et > 0.)
   {
-    for(unsigned int i=0; i < nh_vector.size(); i++)
+    for(unsigned int i : nh_vector)
     {
 
-      unsigned int ih=nh_vector.at(i)-1;
-      float nphi=nh_vector.at(i);
+      unsigned int ih=i-1;
+      float nphi=i;
 
       nphi*=phi;
       float qx=shape->etCos().at(ih);
@@ -115,11 +115,11 @@ StatusCode HIUEModulatorTool::checkQVectorSize(const xAOD::HIEventShape* shape, 
 
 StatusCode HIUEModulatorTool::checkCompatibility() const
 {
-  for(unsigned int i=0; i < m_nh_vector.size(); i++)
+  for(unsigned int i : m_nh_vector)
   {
-    if(checkQVectorSize(m_shape,m_nh_vector.at(i)).isFailure())
+    if(checkQVectorSize(m_shape,i).isFailure())
     {
-      ATH_MSG_ERROR("HIEventShapeContainer " << m_shape_key << " does not have requested harmonic " << m_nh_vector.at(i) );
+      ATH_MSG_ERROR("HIEventShapeContainer " << m_shape_key << " does not have requested harmonic " << i );
       return StatusCode::FAILURE;
     }
   }
