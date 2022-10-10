@@ -240,8 +240,8 @@ if doObj("OFC"):
 
   else:
     if SuperCells:
-       #conddb.addFolder("",getDBFolderAndTag("/LAR/ElecCalibOflSC/OFC/PhysWave/RTM/"+OFCFolder) + '<key>LArOFC</key>',
-       conddb.addFolder("",getDBFolderAndTag("/LAR/ElecCalibOflSC/OFC/CaliWave") + '<key>LArOFC</key>',
+       conddb.addFolder("",getDBFolderAndTag("/LAR/ElecCalibOflSC/OFC/PhysWave/RTM/"+OFCFolder) + '<key>LArOFC</key>',
+       #conddb.addFolder("",getDBFolderAndTag("/LAR/ElecCalibOflSC/OFC/CaliWave") + '<key>LArOFC</key>',
                      className='LArOFCComplete')
     else:   
        conddb.addFolder("",getDBFolderAndTag("/LAR/ElecCalibOfl/OFC/PhysWave/RTM/"+OFCFolder) + '<key>LArOFC</key>',
