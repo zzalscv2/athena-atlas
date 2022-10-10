@@ -8,6 +8,7 @@
 # art-output: physval*.root
 # art-output: *.xml
 # art-output: dcube*
+# art-html: dcube_last
 
 #RDO is made at rel 22.0.73
 #reference plots are made at rel 22.0.73

@@ -11,6 +11,7 @@
 # art-output: *.xml 
 # art-output: art_core_0
 # art-output: dcube*
+# art-html: dcube_last
 
 #RDO is made at rel 22.0.73
 #reference plots are made at rel 22.0.73
