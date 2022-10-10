@@ -1917,7 +1917,7 @@ namespace Muon {
                         ATH_MSG_WARNING("No design found for " << m_idHelperSvc->toString(id));
                         continue;
                     }
-                    chWidth = 0.5 * design->channelWidth(prd->localPosition());
+                    chWidth = 0.5 * design->channelWidth();
                     ATH_MSG_DEBUG(" Wire Gang chWidth " << chWidth << " phi global " << prd->globalPosition().phi());
                 }
 

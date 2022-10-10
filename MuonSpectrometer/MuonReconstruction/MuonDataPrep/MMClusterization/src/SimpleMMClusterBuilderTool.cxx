@@ -229,14 +229,16 @@ StatusCode SimpleMMClusterBuilderTool::getCalibratedClusterPosition(const Muon::
 
 {
     /// correct the precision coordinate of the local position based on the centroid calibration
-    double xPosCalib = 0.0;
-    double totalCharge = 0.0;
+    double xPosCalib{0.}, totalCharge{0.};
     for (const auto& it : strips) {
         xPosCalib += it.charge * it.dx;
         totalCharge += it.charge;
     }
+    if (std::abs(totalCharge) < std::numeric_limits<float>::epsilon()) {
+        return StatusCode::FAILURE;
+    }
 
-    xPosCalib = xPosCalib / totalCharge;
+    xPosCalib /=  totalCharge;
 
     ATH_MSG_DEBUG("position before calibration and correction: " << clusterLocalPosition[Trk::locX] << " " << xPosCalib);
 
