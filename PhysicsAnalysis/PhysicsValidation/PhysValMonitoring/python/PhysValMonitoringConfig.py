@@ -48,6 +48,9 @@ def PhysValMonitoringCfg(flags, name="PhysValMonManager", tools=[], **kwargs):
     if flags.PhysVal.doInDet:
         from InDetPhysValMonitoring.InDetPhysValMonitoringConfig import InDetPhysValMonitoringToolCfg
         tools.append(acc.popToolsAndMerge(InDetPhysValMonitoringToolCfg(flags)))
+    if flags.PhysVal.doInDetLargeD0:
+        from InDetPhysValMonitoring.InDetPhysValMonitoringConfig import InDetLargeD0PhysValMonitoringToolCfg
+        tools.append(acc.popToolsAndMerge(InDetLargeD0PhysValMonitoringToolCfg(flags)))
     if flags.PhysVal.doBtag:
         from JetTagDQA.JetTagDQAConfig import PhysValBTagCfg
         tools.append(acc.popToolsAndMerge(PhysValBTagCfg(flags)))

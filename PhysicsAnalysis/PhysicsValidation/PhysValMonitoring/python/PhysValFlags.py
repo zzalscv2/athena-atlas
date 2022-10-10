@@ -8,6 +8,7 @@ def createPhysValConfigFlags():
 
     icf.addFlag("PhysVal.doExample", False)
     icf.addFlag("PhysVal.doInDet", False)
+    icf.addFlag("PhysVal.doInDetLargeD0", False)
     icf.addFlag("PhysVal.doBtag", False)
     icf.addFlag("PhysVal.doMET", False)
     icf.addFlag("PhysVal.doEgamma", False)
