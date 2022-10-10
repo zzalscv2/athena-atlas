@@ -17,6 +17,9 @@
 
 
 namespace ActsTrk {
+
+    namespace detail { struct Decoration; }
+
     constexpr static bool IsReadOnly = true;
     constexpr static bool IsReadWrite = false;
 
@@ -123,8 +126,16 @@ namespace ActsTrk {
              * @brief checks if the backends are connected (i.e. is safe to use, else any other call will cause segfaults)
              */
             bool has_backends() const;
-            
-            
+
+            /**
+             * @brief enables particular decoration, type & name need to be specified
+             * 
+             * @tparam T type of decoration (usually POD) 
+             * @param name name of the decoration
+             */
+            template<typename T>
+            void enableDecoration(const std::string& name);
+
         private:
             // bare pointers to the backend (need to be fast and we do not claim ownership anyways)
             TrackStateContainerBackendPtr m_trackStates = nullptr;
@@ -142,11 +153,32 @@ namespace ActsTrk {
             friend class ActsTrk::MultiTrajectory<IsReadWrite>;
             friend class ActsTrk::MultiTrajectory<IsReadOnly>;
 
+            std::vector<detail::Decoration> m_decorations;
+
+            //!< decoration accessors, one per type
+            template<typename T>
+            std::any decorationSetter(IndexType, const std::string&);
+            template<typename T>
+            const std::any decorationGetter(IndexType, const std::string&) const;
     };
 
     typedef ActsTrk::MultiTrajectory<ActsTrk::IsReadOnly>  ConstMultiTrajectory;
     typedef ActsTrk::MultiTrajectory<ActsTrk::IsReadWrite> MutableMultiTrajectory;
-    
+
+
+    namespace detail {
+        struct Decoration {
+            using SetterType = std::function<std::any(MultiTrajectory<true>::IndexType, const std::string&)>;
+            using GetterType = std::function<const std::any(MultiTrajectory<true>::IndexType, const std::string&)>;
+
+            Decoration(const std::string& n, SetterType s, GetterType g)
+                : name(n), hash(Acts::hashString(name)), setter(s), getter(g) {}
+            std::string name; // xAOD API needs this
+            uint32_t hash; // Acts API comes with this
+            SetterType setter;// type aware accessors
+            GetterType getter;
+    };
+    }
 
 
 

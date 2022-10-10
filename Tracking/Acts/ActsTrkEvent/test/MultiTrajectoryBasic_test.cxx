@@ -93,8 +93,37 @@ BOOST_FIXTURE_TEST_CASE(Fill, EmptyMTJ) {
 
 }
 
+BOOST_FIXTURE_TEST_CASE(Dynamic_columns, EmptyMTJ) {
+    using namespace Acts::HashedStringLiteral;
+    BOOST_CHECK( mtj->has_backends());
+    mtj->enableDecoration<short>("author");
+    constexpr auto kMask = Acts::TrackStatePropMask::Predicted;
+    auto i0 = mtj->addTrackState(kMask);
+    auto i1 = mtj->addTrackState(kMask, i0);
+    auto i2 = mtj->addTrackState(kMask, i1);
+    // dynamic column enabled late
+    mtj->enableDecoration<float>("mcprob");
+    auto ts0 = mtj->getTrackState(i0);
+    auto ts1 = mtj->getTrackState(i1);
+    auto ts2 = mtj->getTrackState(i2);
+    ts0.component<short, "author"_hash>() = 5;
+    ts1.component<short, "author"_hash>() = 6;
+    ts2.component<short, "author"_hash>() = 4;
 
+    ts0.component<float, "mcprob"_hash>() = 0.5;
+    ts1.component<float, "mcprob"_hash>() = 0.9;
+    // unset for ts2
+
+    // read them back
+    BOOST_CHECK_EQUAL((ts0.component<short,"author"_hash>()), 5);
+    BOOST_CHECK_EQUAL((ts1.component<short,"author"_hash>()), 6);
+    BOOST_CHECK_EQUAL((ts2.component<short,"author"_hash>()), 4);
+    
+    BOOST_TEST((ts0.component<float,"mcprob"_hash>()) == 0.5, boost::test_tools::tolerance(0.01));
+    BOOST_TEST((ts1.component<float,"mcprob"_hash>()) == 0.9, boost::test_tools::tolerance(0.01));
+    BOOST_TEST((ts2.component<float,"mcprob"_hash>()) == 0.0, boost::test_tools::tolerance(0.01));
+
+    BOOST_CHECK_THROW((ts2.component<float,"sth"_hash>()), std::runtime_error);
+}
 // TODO remaining tests
-
-
 }

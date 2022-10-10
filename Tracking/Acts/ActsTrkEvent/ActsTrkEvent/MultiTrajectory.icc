@@ -97,6 +97,12 @@ bool ActsTrk::MultiTrajectory<RWState>::has_backends() const {
 		case "uncalibrated"_hash: return trackStates()[istate]->uncalibrated() < kInvalid;
 		case "calibrated"_hash: return trackStates()[istate]->calibrated() < kInvalid;
 		case "measdim"_hash: return trackStates()[istate]->measDim() < kInvalid;
+        default:
+            for (auto& d : m_decorations) {
+                if (d.hash == key) {
+                    return true;
+                }
+            }
         }
         
         return false;
@@ -124,10 +130,14 @@ bool ActsTrk::MultiTrajectory<RWState>::has_backends() const {
         		case "calibrated"_hash: return trackStates()[istate]->calibratedPtr();
         		case "measdim"_hash: return trackStates()[istate]->measDimPtr();
         		default: {
-            			throw std::runtime_error("component_impl const no such a thing, " + std::to_string(key));           		
-        		}
-        	}
-        	
+                    for (auto& d : m_decorations) {
+                        if (d.hash == key) {
+                            return d.getter(istate, d.name);
+                        }
+                    }
+                    throw std::runtime_error("no such component " + std::to_string(key));                    
+        	    }
+            }
     	}
     	
     	
@@ -151,11 +161,49 @@ bool ActsTrk::MultiTrajectory<RWState>::has_backends() const {
         		case "calibrated"_hash: return trackStates()[istate]->calibratedPtr();
         		case "measdim"_hash: return trackStates()[istate]->measDimPtr();
         		default: {
-            			throw std::runtime_error("component_impl const no such a thing, " + std::to_string(key));           		
+                    for (auto& d : m_decorations) {
+                        if (d.hash == key) {
+                            return d.getter(istate, d.name);
+                        }
+                    }
+            		throw std::runtime_error("no such component " + std::to_string(key));           		
         		}
         	}
 
     	}
 
     
- 
+    
+    template<bool RWState>
+    template<typename T>
+    void ActsTrk::MultiTrajectory<RWState>::enableDecoration(const std::string& name) {
+        // It is actually not clear if we would allow decorating RO MTJ, maybe we do        
+        using std::placeholders::_1;
+        using std::placeholders::_2;
+        if constexpr (std::is_same<T, float>::value
+                    or std::is_same<T, double>::value
+                    or std::is_same<T, short>::value
+                    or std::is_same<T, int>::value) {
+            m_decorations.emplace_back(name,
+                std::bind(&ActsTrk::MultiTrajectory<RWState>::decorationSetter<T>, this, _1, _2),
+                std::bind(&ActsTrk::MultiTrajectory<RWState>::decorationGetter<T>, this, _1, _2));
+        } else {
+            throw std::runtime_error("Can't add decoration of this type");
+        }
+    }
+
+    template<bool RWState>
+    template<typename T>
+    std::any ActsTrk::MultiTrajectory<RWState>::decorationSetter(IndexType idx, const std::string& name) {
+        //TODO this approach is known not to be fastest possible, it would be better to construct SG::Accessor and reuse it
+        // however the SG::Accessor is typed and we'll need a classic inheritance for that
+        SG::AuxElement* el = trackStates().at(idx);
+        return &(el->auxdecor<T>(name));
+    }
+
+    template<bool RWState>
+    template<typename T>
+    const std::any ActsTrk::MultiTrajectory<RWState>::decorationGetter(IndexType idx, const std::string& name) const {
+        const SG::AuxElement* el = trackStates().at(idx);
+        return &(el->auxdecor<T>(name)); // yeah, xAOD auxdecor returns nonconst ref even for const AuxElements, here we shield
+    }
