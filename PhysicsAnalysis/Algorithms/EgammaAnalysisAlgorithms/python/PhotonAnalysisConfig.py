@@ -33,10 +33,15 @@ class PhotonCalibrationConfig (ConfigBlock) :
 
     def makeAlgs (self, config) :
 
+        if config.isPhyslite() :
+            config.setSourceName (self.containerName, "AnalysisPhotons")
+        else :
+            config.setSourceName (self.containerName, "Photons")
+
         cleaningWP = 'NoTime' if self.cleaningAllowLate else ''
 
         # Set up a shallow copy to decorate
-        if config.wantCopy (self.containerName, 'Photons') :
+        if config.wantCopy (self.containerName) :
             alg = config.createAlgorithm( 'CP::AsgShallowCopyAlg', 'PhotonShallowCopyAlg' + self.postfix )
             alg.input = config.readName (self.containerName)
             alg.output = config.copyName (self.containerName)

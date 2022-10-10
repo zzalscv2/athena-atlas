@@ -74,10 +74,11 @@ class ConfigAccumulator :
     """
 
 
-    def __init__ (self, dataType, algSeq):
+    def __init__ (self, dataType, algSeq, isPhyslite=False):
         if dataType not in ["data", "mc", "afii"] :
             raise ValueError ("invalid data type: " + dataType)
         self._dataType = dataType
+        self._isPhyslite = isPhyslite
         self._algSeq = algSeq
         self._containerConfig = {}
         self._pass = 0
@@ -88,6 +89,11 @@ class ConfigAccumulator :
     def dataType (self) :
         """the data type we run on (data, mc, afii)"""
         return self._dataType
+
+
+    def isPhyslite (self) :
+        """whether we run on PHYSLITE"""
+        return self._isPhyslite
 
 
     def createAlgorithm (self, type, name) :
@@ -135,7 +141,19 @@ class ConfigAccumulator :
             DualUseConfig.addPrivateTool (self._currentAlg, type, name)
 
 
-    def readName (self, containerName, sourceName=None) :
+    def setSourceName (self, containerName, sourceName) :
+        """set the (default) name of the original container
+
+        This is essentially meant to allow using e.g. the muon
+        configuration and the user not having to manually specify that
+        they want to use the Muons/AnalysisMuons container from the
+        input file.
+        """
+        if containerName not in self._containerConfig :
+            self._containerConfig[containerName] = ContainerConfig (containerName, sourceName)
+
+
+    def readName (self, containerName) :
         """get the name of the "current copy" of the given container
 
         As extra copies get created during processing this will track
@@ -143,9 +161,7 @@ class ConfigAccumulator :
         in the name of the container before the first copy.
         """
         if containerName not in self._containerConfig :
-            if not sourceName :
-                raise Exception ("no source container for: " + containerName)
-            self._containerConfig[containerName] = ContainerConfig (containerName, sourceName)
+            raise Exception ("no source container for: " + containerName)
         return self._containerConfig[containerName].currentName()
 
 
@@ -158,16 +174,14 @@ class ConfigAccumulator :
         return self._containerConfig[containerName].currentName()
 
 
-    def wantCopy (self, containerName, sourceName=None) :
+    def wantCopy (self, containerName) :
         """ask whether we want/need a copy of the container
 
         This usually only happens if no copy of the container has been
         made yet and the copy is needed to allow modifications, etc.
         """
         if containerName not in self._containerConfig :
-            if not sourceName :
-                raise Exception ("no source container for: " + containerName)
-            self._containerConfig[containerName] = ContainerConfig (containerName, sourceName)
+            raise Exception ("no source container for: " + containerName)
         return self._containerConfig[containerName].index == 0
 
 
