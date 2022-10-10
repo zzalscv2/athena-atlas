@@ -765,6 +765,7 @@ if __name__ == "__main__":
     ConfigFlags.Concurrency.NumThreads = args.threads
     # Might change this later, but good enough for the moment.
     ConfigFlags.Concurrency.NumConcurrentEvents = args.threads
+    ConfigFlags.IOVDb.GlobalTag = "OFLCOND-MC21-SDR-RUN3-07"
 
     ConfigFlags.Output.ESDFileName = args.output
     ConfigFlags.InDet.Tracking.doR3LargeD0 = False  # Not working with this input
