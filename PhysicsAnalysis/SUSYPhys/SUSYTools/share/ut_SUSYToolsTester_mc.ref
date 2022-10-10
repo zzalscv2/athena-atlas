@@ -27,7 +27,7 @@ Package.SUSYToolsTester  INFO    xsec DB initialized
 Package.SUSYToolsTester  INFO     ABOUT TO INITIALIZE SUSYTOOLS 
 SUSYObjDef_xAOD          INFO    Initialising... 
 SUSYObjDef_xAOD          INFO    *****     *****     *****     *****
-SUSYObjDef_xAOD          INFO    Configuring from file /nfs/dust/atlas/user/mrimoldi/software/DevelopST_R22/truthJET/build/x86_64-centos7-gcc11-opt/data/SUSYTools/SUSYTools_Default.conf
+SUSYObjDef_xAOD          INFO    Configuring from file /nfs/dust/atlas/user/mrimoldi/software/DevelopST_R22/10oct22/build/x86_64-centos7-gcc11-opt/data/SUSYTools/SUSYTools_Default.conf
 SUSYObjDef_xAOD          INFO    Config file opened
 SUSYObjDef_xAOD          INFO    readConfig(): Loaded property Jet.InputType with value 9
 SUSYObjDef_xAOD          INFO    readConfig(): Loaded property Muon.Id with value 1
@@ -69,7 +69,7 @@ SUSYObjDef_xAOD          INFO    configFromFile(): Loaded property "Ele.IdExpert
 SUSYObjDef_xAOD          INFO    configFromFile(): Loaded property "Ele.EffNPcorrModel" with value TOTAL
 SUSYObjDef_xAOD          INFO    configFromFile(): Loaded property "Ele.EffCorrFNList" with value 
 SUSYObjDef_xAOD          INFO    configFromFile(): Loaded property "Ele.TriggerSFStringSingle" with value SINGLE_E_2015_e24_lhmedium_L1EM20VH_OR_e60_lhmedium_OR_e120_lhloose_2016_2018_e26_lhtight_nod0_ivarloose_OR_e60_lhmedium_nod0_OR_e140_lhloose_nod0
-SUSYObjDef_xAOD          INFO    configFromFile(): Loaded property "Ele.EffMapFilePath" with value ElectronEfficiencyCorrection/2015_2025/rel22.2/2022_Summer_Prerecom_v1/map0.txt
+SUSYObjDef_xAOD          INFO    configFromFile(): Loaded property "Ele.EffMapFilePath" with value ElectronEfficiencyCorrection/2015_2025/rel22.2/2022_Summer_Prerecom_v1/map1.txt
 SUSYObjDef_xAOD          INFO    configFromFile(): Loaded property "Trig.Singlelep2015" with value e24_lhmedium_L1EM20VH_OR_e60_lhmedium_OR_e120_lhloose||mu20_iloose_L1MU15_OR_mu50
 SUSYObjDef_xAOD          INFO    configFromFile(): Loaded property "Trig.Singlelep2016" with value e26_lhtight_nod0_ivarloose_OR_e60_lhmedium_nod0_OR_e140_lhloose_nod0||mu26_ivarmedium_OR_mu50
 SUSYObjDef_xAOD          INFO    configFromFile(): Loaded property "Trig.Singlelep2017" with value e26_lhtight_nod0_ivarloose_OR_e60_lhmedium_nod0_OR_e140_lhloose_nod0||mu26_ivarmedium_OR_mu50
@@ -266,7 +266,7 @@ PathResolver             WARNING Locating dev file dev/PileupReweighting/share/D
 Info in <CP::TPileupReweighting::AddLumiCalcFile>: Adding LumiMetaData (scale factor=0.970874)...
 Info in <CP::TPileupReweighting::AddLumiCalcFile>: Adding LumiMetaData (scale factor=1.010100)...
 Info in <CP::TPileupReweighting::AddLumiCalcFile>: Adding LumiMetaData (scale factor=0.934579)...
-DefaultWeightTool        INFO    AsgTool DefaultWeightTool @ 0xf55f090
+DefaultWeightTool        INFO    AsgTool DefaultWeightTool @ 0x108f0470
 ToolSvc.JetCalibTool_A...INFO    Initializing ToolSvc.JetCalibTool_AntiKt4EMPFlow to calibrate AntiKt4EMPFlowjets
 ToolSvc.JetCalibTool_A...INFO    Reading global JES settings from: JES_MC16Recommendation_Consolidated_PFlow_Apr2019_Rel21.config
 ToolSvc.JetCalibTool_A...INFO    resolved in: /cvmfs/atlas.cern.ch/repo/sw/database/GroupData/JetCalibTools/CalibArea-00-04-82/CalibrationConfigs/JES_MC16Recommendation_Consolidated_PFlow_Apr2019_Rel21.config
@@ -682,7 +682,7 @@ ToolSvc.JetVertexTagge...INFO      Reading JVT file from:
     JetMomentTools/JVTlikelihood_20140805.root
 
 ToolSvc.JetVertexTagge...INFO                         resolved in  :
-    /cvmfs/atlas-nightlies.cern.ch/repo/sw/master_AnalysisBase_x86_64-centos7-gcc11-opt/2022-09-14T0220/AnalysisBase/22.2.89/InstallArea/x86_64-centos7-gcc11-opt/data/JetMomentTools/JVTlikelihood_20140805.root
+    /cvmfs/atlas-nightlies.cern.ch/repo/sw/master_AnalysisBase_x86_64-centos7-gcc11-opt/2022-10-10T0220/AnalysisBase/22.2.93/InstallArea/x86_64-centos7-gcc11-opt/data/JetMomentTools/JVTlikelihood_20140805.root
 
 
 ToolSvc.JVTEfficiencyToolINFO     Path found = /cvmfs/atlas.cern.ch/repo/sw/database/GroupData/JetJvtEfficiency/Moriond2018/JvtSFFile_EMPFlowJets.root
@@ -985,27 +985,6 @@ ToolSvc.IsoTool          INFO    Initialising...
 ToolSvc.IsoBaselineTool  INFO    Initialising...
 ToolSvc.IsoHighPtTool    INFO    Initialising...
 ToolSvc.IsoCloseByTool   INFO    The following isolation cones are considered for Electron
-ToolSvc.IsoCloseByTool   INFO    No TrackSelectionTool provided, so I will create and configure my own, called: TrackParticleSelectionTool
-ToolSvc.TrackParticleS...INFO    Initializing track selection tool.
-ToolSvc.TrackParticleS...INFO    Cut level set to "Loose".
-ToolSvc.TrackParticleS...INFO    This will not overwrite other cuts that have been set.
-ToolSvc.TrackParticleS...INFO      Minimum Pt: 500 MeV
-ToolSvc.TrackParticleS...INFO      Maximum |Eta|: 2.5
-ToolSvc.TrackParticleS...INFO      Maximum z0*sin(theta): 3 mm
-ToolSvc.TrackParticleS...INFO      Maximum pixel holes: 1
-ToolSvc.TrackParticleS...INFO      Minimum silicon (pixel + SCT) hits: 7
-ToolSvc.TrackParticleS...INFO      Maximum silicon holes: 2
-ToolSvc.TrackParticleS...INFO      No more than one shared module:
-ToolSvc.TrackParticleS...INFO        i.e. max 1 shared pixel hit or
-ToolSvc.TrackParticleS...INFO        2 shared SCT hits, and not both.
-ToolSvc.ttva_selection...INFO    Initializing TrackVertexAssociationTool.
-ToolSvc.ttva_selection...WARNING WorkingPoint 'Loose' corresponds to a Run 2 working point and is not recommended - remapping to 'Old_Loose' (same definition, however).
-ToolSvc.ttva_selection...INFO    TVA working point 'Old_Loose' provided - tool properties have been configured accordingly.
-ToolSvc.ttva_selection...INFO    (For Custom WP:) cut on d0: -1	(d0_cut).
-ToolSvc.ttva_selection...INFO    (For Custom WP:) cut on Δz * sin θ: -1	(dzSinTheta_cut).
-ToolSvc.ttva_selection...INFO    (For Custom WP:) allow UsedInFit MatchStatus: 1	(doUsedInFit).
-ToolSvc.ttva_selection...INFO    Require VxType::PriVtx for unique match: 1	(requirePriVtx).
-ToolSvc.IsoCloseByTool   INFO    The following isolation cones are considered for Electron
 ToolSvc.IsoCloseByTool   INFO         --- ptvarcone30_Nonprompt_All_MaxWeightTTVALooseCone_pt1000
 ToolSvc.IsoCloseByTool   INFO         --- topoetcone20
 ToolSvc.IsoCloseByTool   INFO    The following isolation cones are considered for Muon
@@ -1014,6 +993,25 @@ ToolSvc.IsoCloseByTool   INFO         --- topoetcone20
 ToolSvc.IsoCloseByTool   INFO    The following isolation cones are considered for Photon
 ToolSvc.IsoCloseByTool   INFO         --- topoetcone40
 ToolSvc.IsoCloseByTool   INFO         --- ptcone20
+ToolSvc.IsoCloseByTool   INFO    No TrackSelectionTool provided, so I will create and configure my own, called: TrackParticleSelectionTool
+ToolSvc.IsoCloseByTool...INFO    Initializing track selection tool.
+ToolSvc.IsoCloseByTool...INFO    Cut level set to "Loose".
+ToolSvc.IsoCloseByTool...INFO    This will not overwrite other cuts that have been set.
+ToolSvc.IsoCloseByTool...INFO      Minimum Pt: 500 MeV
+ToolSvc.IsoCloseByTool...INFO      Maximum |Eta|: 2.5
+ToolSvc.IsoCloseByTool...INFO      Maximum z0*sin(theta): 3 mm
+ToolSvc.IsoCloseByTool...INFO      Maximum pixel holes: 1
+ToolSvc.IsoCloseByTool...INFO      Minimum silicon (pixel + SCT) hits: 7
+ToolSvc.IsoCloseByTool...INFO      Maximum silicon holes: 2
+ToolSvc.IsoCloseByTool...INFO      No more than one shared module:
+ToolSvc.IsoCloseByTool...INFO        i.e. max 1 shared pixel hit or
+ToolSvc.IsoCloseByTool...INFO        2 shared SCT hits, and not both.
+ToolSvc.IsoCloseByTool...INFO    Initializing TrackVertexAssociationTool.
+ToolSvc.IsoCloseByTool...INFO    TVA working point 'Nonprompt_All_MaxWeight' provided - tool properties have been configured accordingly.
+ToolSvc.IsoCloseByTool...INFO    (For Custom WP:) cut on d0: -1	(d0_cut).
+ToolSvc.IsoCloseByTool...INFO    (For Custom WP:) cut on Δz * sin θ: -1	(dzSinTheta_cut).
+ToolSvc.IsoCloseByTool...INFO    (For Custom WP:) allow UsedInFit MatchStatus: 1	(doUsedInFit).
+ToolSvc.IsoCloseByTool...INFO    Require VxType::PriVtx for unique match: 0	(requirePriVtx).
 SUSYObjDef_xAOD          INFO    SUSYTools: Autoconfiguring ORTool
 ToolSvc.PMGSHVjetRewei...INFO    Initializing ToolSvc.PMGSHVjetReweighter...
 ToolSvc.PMGSHVjetRewei...INFO    Initializing ToolSvc.PMGSHVjetReweighterWZ...
@@ -1729,9 +1727,9 @@ ToolSvc.TopTagger        WARNING One (or more) tagger input variable has an out-
 Package.SUSYToolsTester  INFO    ===>>>  start processing event #, 204040979run #310000 99 events processed so far  <<<===
 Info in <SUSYToolsTester>: ===>>>  done processing event #204040979, run #310000 100 events processed so far  <<<===
 Info in <SUSYToolsTester>: Time per event:          (CPU / WALL)
-  Entire loop           - 214.500000 / 214.700050 ms
-  First event           - 620.000000 / 645.684958 ms
-  Excluding first event - 210.404040 / 210.346636 ms
+  Entire loop           - 218.300000 / 218.487058 ms
+  First event           - 670.000000 / 678.827047 ms
+  Excluding first event - 213.737374 / 213.837142 ms
 Package.SUSYToolsTester  INFO    -- Dummy Cutflow -- >>>> Variation  <<<<
 Package.SUSYToolsTester  INFO    Cut 0(All)-> el: 100, mu: 100
 Package.SUSYToolsTester  INFO    Cut 1(GRL+Cleaning)-> el: 100, mu: 100
