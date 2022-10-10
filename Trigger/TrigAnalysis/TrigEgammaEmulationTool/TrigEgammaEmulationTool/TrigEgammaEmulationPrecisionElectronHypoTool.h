@@ -46,6 +46,7 @@ namespace Trig{
       Gaudi::Property<float>                m_d0{ this,  "d0Cut", -1, "d0 cut" };
 
       Gaudi::Property<bool>                m_acceptAll{ this,  "AcceptAll", false, "Accept all events" };
+      Gaudi::Property< bool >               m_doNoPid { this, "DoNoPid", false , "No Pid/Isolation applied" };
 
 
 
