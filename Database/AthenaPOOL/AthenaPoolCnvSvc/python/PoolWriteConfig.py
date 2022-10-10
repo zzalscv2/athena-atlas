@@ -7,6 +7,9 @@ def PoolWriteCfg(flags, forceTreeAutoFlush=-1):
     """Return ComponentAccumulator configured to Write POOL files"""
     # based on WriteAthenaPool._configureWriteAthenaPool
 
+    from AthenaCommon.Logging import logging
+    msg = logging.getLogger( 'PoolWriteCfg' )
+
     PoolAttributes = []
     # Switch off splitting by setting default SplitLevel to 0
     PoolAttributes += ["DEFAULT_SPLITLEVEL ='0'"]
@@ -24,6 +27,7 @@ def PoolWriteCfg(flags, forceTreeAutoFlush=-1):
     # Kept in sync with RecoUtils.py
     from AthenaPoolCnvSvc import PoolAttributeHelper as pah
 
+    auto_flush = None
     if flags.Output.EVNT_TRFileName:
         # Use LZMA w/ Level 1
         comp_alg = 1 if flags.Output.EVNT_TRFileName.endswith('_000') or flags.Output.EVNT_TRFileName.startswith('tmp.') else 2
@@ -83,6 +87,8 @@ def PoolWriteCfg(flags, forceTreeAutoFlush=-1):
         PoolAttributes += [ pah.setTreeAutoFlush( flags.Output.AODFileName, "POOLContainerForm", auto_flush ) ]
 
     # Derivation framework output settings    
+    use_parallel_compression = flags.MP.UseSharedWriter and flags.MP.UseParallelCompression
+    max_auto_flush = auto_flush if auto_flush else -1
     for flag in [key for key in flags._flagdict.keys() if ("Output.DAOD_" in key and "FileName" in key)]:
         # Since there may be several outputs, this has to be done in a loop 
         FileName = flags._flagdict[flag]._value 
@@ -95,7 +101,7 @@ def PoolWriteCfg(flags, forceTreeAutoFlush=-1):
         # By default use 20 MB AutoFlush (or 500 events for SharedWriter w/ parallel compession)
         # for event data except for a number of select formats (see below)
         TREE_AUTO_FLUSH = -20000000
-        if flags.MP.UseSharedWriter and flags.MP.UseParallelCompression:
+        if use_parallel_compression:
             TREE_AUTO_FLUSH = 500
         # By default use split-level 0 except for DAOD_PHYSLITE which is maximally split
         CONTAINER_SPLITLEVEL = 0
@@ -109,6 +115,24 @@ def PoolWriteCfg(flags, forceTreeAutoFlush=-1):
         PoolAttributes += [ pah.setTreeAutoFlush( FileName, "CollectionTree", str(TREE_AUTO_FLUSH) ) ]
         PoolAttributes += [ pah.setContainerSplitLevel( FileName, "CollectionTree", str(CONTAINER_SPLITLEVEL) ) ]
         PoolAttributes += [ pah.setContainerSplitLevel( FileName, "Aux.", str(CONTAINER_SPLITLEVEL) ) ]
+        # Find the maximum AutoFlush across all formats
+        if use_parallel_compression and TREE_AUTO_FLUSH > max_auto_flush:
+            max_auto_flush = TREE_AUTO_FLUSH
+
+    # If we don't have "enough" events, disable parallelCompression if we're using SharedWriter
+    # In this context, "enough" means each worker has a chance to make at least one flush to the disk
+    if use_parallel_compression:
+        # Now compute the total number of events this job will process
+        requested_events = flags.Exec.MaxEvents
+        available_events = flags.Input.FileNentries - flags.Exec.SkipEvents
+        total_entries = available_events if requested_events == -1 else min( available_events, requested_events )
+        if ( total_entries > 0 ) and ( max_auto_flush > 0 ) and ( max_auto_flush * flags.Concurrency.NumProcs >= total_entries ):
+            msg.info( "Not enough events to process, disabling parallel compression for SharedWriter!" )
+            msg.info( f"Processing {total_entries} events in {flags.Concurrency.NumProcs} workers "
+                      f"and a maximum (across all outputs) AutoFlush of {max_auto_flush}")
+            use_parallel_compression = False
 
     from AthenaPoolCnvSvc.PoolCommonConfig import AthenaPoolCnvSvcCfg
-    return AthenaPoolCnvSvcCfg(flags, PoolAttributes=PoolAttributes)
+    return AthenaPoolCnvSvcCfg(flags,
+                               PoolAttributes=PoolAttributes,
+                               ParallelCompression=use_parallel_compression)

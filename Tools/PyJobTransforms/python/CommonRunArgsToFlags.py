@@ -19,6 +19,11 @@ def commonRunArgsToFlags(runArgs,configFlags):
         from AthenaConfiguration.Enums import BeamType
         configFlags.Beam.Type=BeamType(runArgs.beamType)
 
+    # Read the input entries for some common types
+    for ftype in ["HITS", "RDO", "ESD", "AOD"]:
+        if hasattr(runArgs, f"input{ftype}FileNentries"):
+            configFlags.Input.FileNentries = getattr(runArgs, f"input{ftype}FileNentries")
+
     ## Threading arguments
     if hasattr(runArgs,"nprocs"):
         configFlags.Concurrency.NumProcs = runArgs.nprocs

@@ -79,7 +79,6 @@ def AthenaMPCfg(configFlags):
     event_range_channel = configFlags.MP.EventRangeChannel
     use_shared_reader = configFlags.MP.UseSharedReader
     use_shared_writer = configFlags.MP.UseSharedWriter
-    use_parallel_compression = configFlags.MP.UseParallelCompression
 
     if configFlags.MP.Strategy=='SharedQueue' or configFlags.MP.Strategy=='RoundRobin':
         if use_shared_reader:
@@ -120,8 +119,7 @@ def AthenaMPCfg(configFlags):
                 result.merge(PoolWriteCfg(configFlags))
                 from AthenaPoolCnvSvc.PoolCommonConfig import AthenaPoolCnvSvcCfg
                 result.merge(AthenaPoolCnvSvcCfg(configFlags,
-                                                 OutputStreamingTool=[outputStreamingTool],
-                                                 ParallelCompression=use_parallel_compression))
+                                                 OutputStreamingTool=[outputStreamingTool]))
 
         queue_provider = CompFactory.SharedEvtQueueProvider(UseSharedReader=use_shared_reader,
                                                             IsPileup=mpevtloop.IsPileup,
