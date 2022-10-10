@@ -42,6 +42,10 @@ thinningTools = []
 # Thin TruthParticles for truth jet constituents
 #====================================================================
 
+from DerivationFrameworkJetEtMiss.JetCommon import addCHSPFlowObjects
+addCHSPFlowObjects()
+
+
 if DerivationFrameworkHasTruth:
   from DerivationFrameworkJetEtMiss.DerivationFrameworkJetEtMissConf import DerivationFramework__ViewContainerThinning
   JETM8TruthJetInputThin = DerivationFramework__ViewContainerThinning( name = "JETM8ViewContThinning",
@@ -296,6 +300,7 @@ JETM8SlimmingHelper.SmartCollections = ["Electrons", "Photons", "Muons",
                                         "BTagging_AntiKtVR30Rmax4Rmin02Track_201810",
                                         "BTagging_AntiKtVR30Rmax4Rmin02Track_201903",
                                         ]
+
 JETM8SlimmingHelper.AllVariables = ["CaloCalTopoClusters",
                                     "TrackCaloClustersCombinedAndNeutral",
                                     "UFOCSSK",
@@ -305,7 +310,20 @@ JETM8SlimmingHelper.AllVariables = ["CaloCalTopoClusters",
 JETM8SlimmingHelper.AppendToDictionary["UFOCSSK"] = "xAOD::TrackCaloClusterContainer"
 JETM8SlimmingHelper.AppendToDictionary["UFOCSSKAux"] = "xAOD::TrackCaloClusterAuxContainer"
 
-JETM8SlimmingHelper.ExtraVariables += ["UFOCSSK.pt.eta.phi.taste"]
+JETM8SlimmingHelper.AppendToDictionary["JetETMissChargedParticleFlowObjects"]='xAOD::PFOContainer'
+JETM8SlimmingHelper.AppendToDictionary["JetETMissChargedParticleFlowObjectsAux"]='xAOD::PFOAuxContainer'
+
+JETM8SlimmingHelper.AppendToDictionary["CSSKChargedParticleFlowObjects"]='xAOD::PFOContainer'
+JETM8SlimmingHelper.AppendToDictionary["CSSKChargedParticleFlowObjectsAux"]='xAOD::ShallowAuxContainer'
+
+JETM8SlimmingHelper.AppendToDictionary["CSSKNeutralParticleFlowObjects"]='xAOD::PFOContainer'
+JETM8SlimmingHelper.AppendToDictionary["CSSKNeutralParticleFlowObjectsAux"]='xAOD::ShallowAuxContainer'
+
+# JETM8SlimmingHelper.ExtraVariables += ["UFOCSSK.pt.eta.phi.taste"]
+JETM8SlimmingHelper.ExtraVariables += ['JetETMissChargedParticleFlowObjects.pfo_TrackLinks', 
+                                       'CSSKChargedParticleFlowObjects.pt.eta.phi.m.e.charge.matchedToPV.pfo_TrackLinks', 
+                                       'CSSKNeutralParticleFlowObjects.pt.eta.phi.m.e.charge.pfo_TrackLinks'
+                                       ]
 JETM8SlimmingHelper.ExtraVariables += ['AntiKt10LCTopoJets.SizeParameter',
                                        'AntiKt10TruthJets.SizeParameter',
                                        'AntiKt10TruthJets.Split12',
@@ -329,6 +347,7 @@ JETM8SlimmingHelper.ExtraVariables += ['AntiKt10LCTopoJets.SizeParameter',
                                        'AntiKt10UFOCSSKSoftDropBeta100Zcut10Jets.GhostTrack',
                                        'AntiKt10UFOCSSKBottomUpSoftDropBeta100Zcut5Jets.GhostTrack'
                                        ]
+
 
 # Add origin corrected clusters to keep LCTopo constituents
 addOriginCorrectedClusters(JETM8SlimmingHelper, writeLC=True, writeEM=False)
