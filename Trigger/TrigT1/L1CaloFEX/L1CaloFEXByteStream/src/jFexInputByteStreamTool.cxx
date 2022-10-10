@@ -80,7 +80,7 @@ StatusCode jFexInputByteStreamTool::convertFromBS(const std::vector<const ROBF*>
         
         //There is no data to decode.. not even the ROD trailers
         if(rob->rod_ndata() <= 0){
-            ATH_MSG_WARNING(C.B_RED<<"  No ROD words to decode: " << rob->rod_ndata() <<" in ROB 0x"<< std::hex << rob->rob_source_id()<< std::dec <<". Skipping"<<C.END);
+            ATH_MSG_DEBUG(C.B_RED<<"  No ROD words to decode: " << rob->rod_ndata() <<" in ROB 0x"<< std::hex << rob->rob_source_id()<< std::dec <<". Skipping"<<C.END);
             continue;
         }
         
@@ -148,20 +148,16 @@ StatusCode jFexInputByteStreamTool::convertFromBS(const std::vector<const ROBF*>
                         continue;
                     }
                     
-                    const auto [IDsim, eta, phi, source] = m_Firm2Tower_map.at(intID);
+                    const auto [IDsim, eta, phi, source, iEta, iPhi] = m_Firm2Tower_map.at(intID);
                     
-                    std::vector<uint16_t> vtower(2,0);
+                    std::vector<uint16_t> vtower;
+                    vtower.clear();
+                    vtower.push_back(allDATA[idata]);
                     
-                    if(source == jBits::TILE or source == jBits::HEC or source == jBits::FCAL2 or source == jBits::FCAL3 ){
-                        vtower.at(1)=allDATA[idata];
-                    }
-                    else{
-                        vtower.at(0)=allDATA[idata];
-                    }
                     
                     //initilize the jTower EDM
                     jTowersContainer->push_back( std::make_unique<xAOD::jFexTower>() );
-                    jTowersContainer->back()->initialize(eta, phi, IDsim, source, vtower, jfex, fpga, channel, idata, et_saturation );                    
+                    jTowersContainer->back()->initialize(eta, phi, iEta, iPhi, IDsim, source, vtower, jfex, fpga, channel, idata, et_saturation );                    
                 }
                 
                 // keeping this for future x-checks
@@ -318,8 +314,8 @@ StatusCode jFexInputByteStreamTool::ReadfromFile(const std::string & fileName){
             ATH_MSG_ERROR("Unexpected number of elemennts (10 expected) in file: "<< fileName);
             return StatusCode::FAILURE;
         }
-        // building array of  <IDSimulation, eta, phi, source>
-        std::array<float,4> aux_arr{ {elements.at(7),elements.at(8),elements.at(9),elements.at(4)} };
+        // building array of  <IDSimulation, eta, phi, source, iEta, iPhi>
+        std::array<float,6> aux_arr{ {elements.at(7),elements.at(8),elements.at(9),elements.at(4),elements.at(5),elements.at(6)} };
         
         //filling the map with the hash given by mapIndex()
         m_Firm2Tower_map[ mapIndex(elements.at(0),elements.at(1),elements.at(2),elements.at(3)) ] = aux_arr;

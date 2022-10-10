@@ -135,6 +135,10 @@ def fromRunArgs(runArgs):
     # force TreeAutoFlush=1 as events will be accessed randomly
     cfg.merge(PoolWriteCfg(ConfigFlags, forceTreeAutoFlush=1))
 
+    # Identifiers
+    from DetDescrCnvSvc.DetDescrCnvSvcConfig import DetDescrCnvSvcCfg
+    cfg.merge(DetDescrCnvSvcCfg(ConfigFlags))
+
     # add LArHitFilter + AddressRemappingSvc
     if ConfigFlags.Detector.EnableLAr:
         from LArDigitization.LArDigitizationConfig import LArHitFilterCfg

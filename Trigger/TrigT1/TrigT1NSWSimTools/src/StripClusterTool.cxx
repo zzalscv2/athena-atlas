@@ -260,7 +260,7 @@ namespace NSWL1 {
           double truth_globalPosZ = hit_gpos.z();
           float  truth_energy     = strip_sdo.word();
 
-          if(std::fabs(locx-lpos.x())>.001 || std::fabs(locy - lpos.y())>.001){
+          if(std::abs(locx-lpos.x())>.001 || std::abs(locy - lpos.y())>.001){
             ATH_MSG_DEBUG("OLD locx " << locx << " new locx " << lpos.x() << " b " << int(locx!=lpos.x()));
             ATH_MSG_DEBUG("OLD locy " << locy << " new locy " << lpos.y() << " b " << int(locy!=lpos.y()));
             ATH_MSG_DEBUG("Cluster hit, truth barcode = " << truth_barcode);
@@ -309,15 +309,14 @@ namespace NSWL1 {
 
       }//end of this_cl loop
 
-      if ( abs(x_pos/charge)<200 && abs(y_pos/charge)<200){
-        ATH_MSG_WARNING("Cluster ------------------------------------------" );
-        ATH_MSG_WARNING("Cluster strip charge: " << charge );
-        ATH_MSG_WARNING("Cluster strip glob X: " << x_pos << x_pos/charge);
-        ATH_MSG_WARNING("Cluster strip glob Y: " << y_pos << y_pos/charge);
-        ATH_MSG_WARNING("Cluster strip glob Z: " << z_pos << z_pos/charge);
-      }
-    
       if (charge != 0){
+        if ( std::abs(x_pos/charge)<200. && std::abs(y_pos/charge)<200.){
+          ATH_MSG_WARNING("Cluster ------------------------------------------" );
+          ATH_MSG_WARNING("Cluster strip charge: " << charge );
+          ATH_MSG_WARNING("Cluster strip glob X: " << x_pos << x_pos/charge);
+          ATH_MSG_WARNING("Cluster strip glob Y: " << y_pos << y_pos/charge);
+          ATH_MSG_WARNING("Cluster strip glob Z: " << z_pos << z_pos/charge);
+        }
         x_pos=x_pos/charge;
         y_pos=y_pos/charge;
         z_pos=z_pos/charge;

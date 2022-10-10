@@ -189,8 +189,7 @@ StatusCode jFexRoiByteStreamTool::convertFromBS(const std::vector<const ROBF*>& 
             //Padding wordis when there is an even number in the payload, but odd number of xTOB and TOB.. need to check and remove the extra word.
             unsigned int paddingWord = 0;
             if(total_tobs % 2){
-                //printf("Odd number of TOBs + xTOBs: %4d, there is a padding word! CAREFUL!\n",total_tobs);
-                ATH_MSG_WARNING("Odd number of TOBs + xTOBs:"<< total_tobs<<", there is a padding word!");
+                ATH_MSG_DEBUG("Odd number of TOBs + xTOBs:"<< total_tobs<<", there is a padding word!");
                 paddingWord = 1;
             }
             
@@ -215,7 +214,7 @@ StatusCode jFexRoiByteStreamTool::convertFromBS(const std::vector<const ROBF*>& 
             unsigned int tobIndex = trailers_pos - (jBits::jFEX2ROD_WORDS + jBits::TOB_TRAILERS + paddingWord);
             
             if(paddingWord == 1){
-                ATH_MSG_WARNING("Padding word: "<< std::hex << vec_words.at(tobIndex) <<std::dec);
+                ATH_MSG_DEBUG("Padding word: "<< std::hex << vec_words.at(tobIndex) <<std::dec);
             }
             
             if(m_convertExtendedTOBs) {

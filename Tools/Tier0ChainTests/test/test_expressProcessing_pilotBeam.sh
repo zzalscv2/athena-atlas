@@ -9,15 +9,20 @@
 # There was a database connection problem reported in ATR-24782. Rodney Walker's solution is to use the following export to fix the problem:
 export TNS_ADMIN=/cvmfs/atlas.cern.ch/repo/sw/database/DBRelease/current/oracle-admin
 
-
 Reco_tf.py  \
---AMI x623  \
---inputBSFile="/cvmfs/atlas-nightlies.cern.ch/repo/data/data-art/Tier0ChainTests/TCT_Run3/data21_comm.00404400.express_express.merge.RAW._lb2497._SFO-ALL._0001.1" \
---outputAODFile="AOD.pool.root" \
---outputESDFile="ESD.pool.root" \
---outputDAOD_L1CALO2File="L1CALO2.pool.root" \
---outputHISTFile="HIST.root" \
---imf False
+--conditionsTag=CONDBR2-BLKPA-2022-08 \
+--geometryVersion=ATLAS-R3S-2021-02-00-00 \
+--autoConfiguration=everything \
+--maxEvents=-1 \
+--preExec="all:from RecExConfig.RecFlags import rec; rec.doExpressProcessing.set_Value_and_Lock(True); rec.doZdc.set_Value_and_Lock(False); from AthenaConfiguration.AllConfigFlags import ConfigFlags; ConfigFlags.Common.doExpressProcessing=True; ConfigFlags.Trigger.triggerConfig= 'DB'; ConfigFlags.Trigger.enableL1MuonPhase1=True; DQMonFlags.useTrigger=False; DQMonFlags.doHLTMon=False;" \
+--inputBSFile=/cvmfs/atlas-nightlies.cern.ch/repo/data/data-art/Tier0ChainTests/TCT_Run3/data21_comm.00404400.express_express.merge.RAW._lb2497._SFO-ALL._0001.1 \
+--steering=doRAWtoALL \
+--athenaopts="--threads=8" \
+--outputAODFile=AOD.pool.root \
+--outputESDFile=ESD.pool.root \
+--outputHISTFile=HIST.root \
+--imf=False
+
 
 rc1=$?
 echo "art-result: $rc1 Reco"
