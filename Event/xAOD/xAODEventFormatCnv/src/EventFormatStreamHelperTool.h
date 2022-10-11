@@ -75,7 +75,7 @@ class EventFormatStreamHelperTool : public extends< AthAlgTool, IAthenaOutputToo
 
   /// Type names for which a metadata entry should be added
   Gaudi::Property< std::vector< std::string > > m_typeNames{ this,
-    "TypeNames", { ".*xAOD::.*" },
+    "TypeNames", { ".*xAOD::.*", "DataVector<SG::AuxElement>" },
     "Type names for which metadata entries are added" };
 
   /// StoreGate keys that should be ignored during the metadata collection
