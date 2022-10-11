@@ -127,4 +127,10 @@ def configurePrefetchingInitialRoI(flags, chains):
     hltBeginSeq = findSubSequence(AlgSequence(), 'HLTBeginSeq')
     for det,chainFilter in chainFilterMap.items():
         prefetchAlg = findAlgorithm(hltBeginSeq, f'ROBPrefetchingAlg_{det}_initialRoI')
+        if not chainFilter:
+            # Empty filter means unconditional prefetching
+            # - prevent this by adding a non-existent hash to the list which effectively disables the prefetching alg
+            _log.info('No chains matched to %s - forcing ChainFilter=[0] to disable this alg\'s prefetching', prefetchAlg.getName())
+            chainFilter = [0]
+
         prefetchAlg.ChainFilter = chainFilter
