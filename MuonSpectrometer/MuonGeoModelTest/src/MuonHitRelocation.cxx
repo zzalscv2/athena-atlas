@@ -147,7 +147,7 @@ StatusCode MuonHitRelocation::execute() {
 
     Amg::Vector3D direction(0., 0., 0.);
     for (e = mcEvent->begin(); e != mcEvent->end(); e++) {
-        for (auto *p : (**e)) {
+        for (auto p : (**e)) {
             float xv = p->production_vertex()->position().x();
             float yv = p->production_vertex()->position().y();
             float zv = p->production_vertex()->position().z();
