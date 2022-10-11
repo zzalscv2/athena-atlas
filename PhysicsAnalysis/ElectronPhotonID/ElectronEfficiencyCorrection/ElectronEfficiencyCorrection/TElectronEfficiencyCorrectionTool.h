@@ -8,47 +8,50 @@
 
 /**
   @class TElectronEfficiencyCorrectionTool
-  @brief Calculate the egamma scale factors 
-  Implementation class for the e/gamma Efficiency Scale Factors. This code implements
-  the underlying logic of accessign the ROOT files containing the recommendations.
+  @brief Calculate the egamma scale factors
+  Implementation class for the e/gamma Efficiency Scale Factors. This code
+  implements the underlying logic of accessign the ROOT files containing the
+  recommendations.
   @authors Kristin Lohwasser, Karsten Koeneke, Felix Buehrer
   @date   January 2013
   @updated by Christos Anastopoulos 2017-2018
   */
 
 // STL includes
-#include <vector>
-#include <string>
 #include <array>
 #include <map>
-//Root fwd declares
-class TKey;
-class TH1;
-class TH2;
+#include <memory>
+#include <string>
+#include <vector>
 // ROOT includes
-#include "TRandom3.h"
+#include "TH1.h"
+#include "TH2.h"
 #include "TObjArray.h"
+#include "TRandom3.h"
 // Core includes
-#include "PATCore/PATCoreEnums.h"
 #include "AsgMessaging/AsgMessaging.h"
+#include "PATCore/PATCoreEnums.h"
 
 namespace Root {
 class TElectronEfficiencyCorrectionTool : public asg::AsgMessaging
 {
-public: 
+public:
+  using HistArray = std::vector<std::unique_ptr<TH1>>;
   /**
    * The position of each result
    */
-  enum struct Position{
-    SF=0,
-    Total=1,
-    Stat=2,
-    UnCorr=3,
-    End=4
+  enum struct Position
+  {
+    SF = 0,
+    Total = 1,
+    Stat = 2,
+    UnCorr = 3,
+    End = 4
   };
 
   /** Standard constructor */
-  TElectronEfficiencyCorrectionTool( const char* name="TElectronEfficiencyCorrectionTool" );
+  TElectronEfficiencyCorrectionTool(
+    const char* name = "TElectronEfficiencyCorrectionTool");
 
   /** Standard destructor */
   ~TElectronEfficiencyCorrectionTool();
@@ -57,128 +60,129 @@ public:
   /** Initialize this class */
   int initialize();
 
-  /** The main calculate method: the actual cuts are applied here 
+  /** The main calculate method: the actual cuts are applied here
    *  @c dataType PATCore::ParticleDataType::DataType (e.g DATA,FULL etc)
    *  @ runnumber the run number 1st dimension of the stored measurements
    *  @ cluster_eta the cluster eta 2nd dimension of the stored measurements
    *  @ et third dimension of the stored measurments
    *  @ result the vector with the results. The first
-   *  @ Position::End entries are filled with the 
+   *  @ Position::End entries are filled with the
    *  SF, Total uncertainty, Stat uncertainty, Uncorr uncertainty
    *  @ index_of_corr this is where the correlated syst start
    *  @ index_of_toys this is where the potential toys start
-   *  returns 0 in failure 
+   *  returns 0 in failure
    */
-  int calculate( const PATCore::ParticleDataType::DataType dataType,
-                 const unsigned int runnumber,
-                 const double cluster_eta,
-                 const double et, /* in MeV */
-                 std::vector<double>& result,
-                 size_t& index_of_corr,
-                 size_t& index_of_toys) const;
+  int calculate(const PATCore::ParticleDataType::DataType dataType,
+                const unsigned int runnumber,
+                const double cluster_eta,
+                const double et, /* in MeV */
+                std::vector<double>& result,
+                size_t& index_of_corr,
+                size_t& index_of_toys) const;
 
   /// Add an input file with the auxiliary measurement
-  inline void addFileName ( const std::string& val ) { 
-    m_corrFileNameList.push_back(val); 
+  inline void addFileName(const std::string& val)
+  {
+    m_corrFileNameList.push_back(val);
   }
-  ///Running these book toys 
-  inline void bookToyMCScaleFactors(const int nToyMC) {
+  /// Running these book toys
+  inline void bookToyMCScaleFactors(const int nToyMC)
+  {
     m_doToyMC = true;
     m_nToyMC = nToyMC;
   }
 
-  inline void bookCombToyMCScaleFactors(const int nToyMC) {
+  inline void bookCombToyMCScaleFactors(const int nToyMC)
+  {
     m_doCombToyMC = true;
     m_nToyMC = nToyMC;
   }
 
-  ///Helpers to get the binning of the uncertainties
-  //in a std::map (pt, eta) 
-  int getNbins(std::map<float, std::vector<float> >& ptEta) const; 
+  /// Helpers to get the binning of the uncertainties
+  // in a std::map (pt, eta)
+  int getNbins(std::map<float, std::vector<float>>& ptEta) const;
 
   /// get number of systematics
-  inline int getNSyst() const {
-    return m_nSysMax;
-  }
-  
-  ///Set the Random Seed
-  inline void setSeed( const unsigned long int seed) { 
-    m_seed = seed; 
-  }
+  inline int getNSyst() const { return m_nSysMax; }
+
+  /// Set the Random Seed
+  inline void setSeed(const unsigned long int seed) { m_seed = seed; }
 
 private:
   // Private methods
   /// Load all histograms from the input file(s)
   int getHistograms();
 
-  int setupHistogramsInFolder( const TObjArray& dirNameArray, 
-                               int lastIdx );
+  int setupHistogramsInFolder(const TObjArray& dirNameArray, int lastIdx);
 
-  bool setupUncorrToySyst(std::vector<TObjArray>& objs,
-                          std::vector<TObjArray>& sysObjs,
-                          std::vector< std::vector<TObjArray>>& uncorrToyMCSyst);
+  bool setupUncorrToySyst(std::vector<std::vector<TH1*>>& objs,
+                          std::vector<std::vector<TH1*>>& sysObjs,
+                          std::vector<std::vector<HistArray>>& uncorrToyMCSyst);
 
-   std::vector<TObjArray> buildToyMCTable (const TObjArray &sf, 
-                                          const TObjArray &eig, 
-                                          const TObjArray& stat, 
-                                          const TObjArray& uncorr, 
-                                          const std::vector<TObjArray> &corr);
+  std::vector<HistArray> buildToyMCTable(
+    const std::vector<TH1*>& sf,
+    const std::vector<TH1*>& eig,
+    const std::vector<TH1*>& stat,
+    const std::vector<TH1*>& uncorr,
+    const std::vector<std::vector<TH1*>>& corr);
 
-  std::vector<TH2*> buildSingleToyMC(const TH2* sf, 
-                                     const TH2* stat, 
-                                     const TH2* uncorr, 
-                                     const TObjArray& corr,
+  std::vector<TH2*> buildSingleToyMC(const TH2* sf,
+                                     const TH2* stat,
+                                     const TH2* uncorr,
+                                     const std::vector<TH1*>& corr,
                                      int& randomCounter);
 
-  TH2* buildSingleCombToyMC(const TH2 *sf, 
-                            const TH2* stat, 
-                            const TH2* uncorr, 
-                            const TObjArray& corr,
+  TH2* buildSingleCombToyMC(const TH2* sf,
+                            const TH2* stat,
+                            const TH2* uncorr,
+                            const std::vector<TH1*>& corr,
                             const int nSys,
                             int& randomCounter);
 
-  void setupTempMapsHelper(TObject* obj,
-                           std::vector<TObjArray>& objs,
-                           std::vector<TObjArray >& sysObjs,int& seenSystematics) ;
+  void setupTempMapsHelper(TH1* obj,
+                           std::vector<std::vector<TH1*>>& objs,
+                           std::vector<std::vector<TH1*>>& sysObjs,
+                           int& seenSystematics);
 
-  /// Fill and interpret the setup, depending on which histograms are found in the input file(s)
-  int setup( const TObjArray& hist,
-             std::vector< TObjArray >& histList,
-             std::vector< unsigned int >& beginRunNumberList,
-             std::vector< unsigned int >& endRunNumberList,
-             const int runNumBegin,
-             const int runNumEnd) const ;
+  /// Fill and interpret the setup, depending on which histograms are found in
+  /// the input file(s)
+  int setup(const std::vector<TH1*>& hists,
+            std::vector<HistArray>& histList,
+            std::vector<unsigned int>& beginRunNumberList,
+            std::vector<unsigned int>& endRunNumberList,
+            const int runNumBegin,
+            const int runNumEnd) const;
 
-private :
-  ///Flag to control Toys
+private:
+  /// Flag to control Toys
   bool m_doToyMC;
   bool m_doCombToyMC;
-  ///The number of toys
+  /// The number of toys
   int m_nToyMC;
   /// The Random seed
   unsigned long int m_seed;
-  ///Maximum number of systematics
+  /// Maximum number of systematics
   int m_nSysMax;
-  //The representation of the prepared toy SF tables
-  std::vector< std::vector<TObjArray>> m_uncorrToyMCSystFull;
-  std::vector< std::vector<TObjArray>> m_uncorrToyMCSystFast;
+  // The representation of the prepared toy SF tables
+  std::vector<std::vector<HistArray>> m_uncorrToyMCSystFull;
+  std::vector<std::vector<HistArray>> m_uncorrToyMCSystFast;
   /// The list of file name(s)
-  std::vector< std::string > m_corrFileNameList;
+  std::vector<std::string> m_corrFileNameList;
   /// List of run numbers where histograms become valid for full simulation
-  std::vector< unsigned int > m_begRunNumberList;
+  std::vector<unsigned int> m_begRunNumberList;
   /// List of run numbers where histograms stop being valid for full simulation
-  std::vector< unsigned int > m_endRunNumberList;
+  std::vector<unsigned int> m_endRunNumberList;
   /// List of run numbers where histograms become valid for fast simulation
-  std::vector< unsigned int > m_begRunNumberListFastSim;
+  std::vector<unsigned int> m_begRunNumberListFastSim;
   /// List of run numbers where histograms stop being valid for fast simulation
-  std::vector< unsigned int > m_endRunNumberListFastSim;    
- /// List of histograms for full Geant4 simulation
-  std::vector<std::vector< TObjArray > > m_histList;
-  std::vector< std::vector< TObjArray > > m_sysList;
+  std::vector<unsigned int> m_endRunNumberListFastSim;
+  /// List of histograms for full Geant4 simulation
+  std::vector<std::vector<HistArray>> m_histList;
+  std::vector<std::vector<HistArray>> m_sysList;
   /// List of histograms for fast simulation
-  std::vector< std::vector< TObjArray > > m_fastHistList;
-  std::vector< std::vector< TObjArray > > m_fastSysList;
-  //The Random generator class   
+  std::vector<std::vector<HistArray>> m_fastHistList;
+  std::vector<std::vector<HistArray>> m_fastSysList;
+  // The Random generator class
   TRandom3 m_Rndm;
 }; // End: class definition
 } // End: namespace Root
