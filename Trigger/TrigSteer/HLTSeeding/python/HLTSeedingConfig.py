@@ -127,8 +127,8 @@ def createCaloRoIUnpackers(flags):
         Decisions = mapThresholdToL1DecisionCollection("eEM"),
         DecisionsProbe = mapThresholdToL1DecisionCollection("PROBEeEM"),
         OutputTrigRoIs = recordable(mapThresholdToL1RoICollection("eEM")),
-        RoIHalfWidthEta = 0.1,
-        RoIHalfWidthPhi = 0.1,
+        RoIHalfWidthEta = 0.2,
+        RoIHalfWidthPhi = 0.2,
         MonTool = RoIsUnpackingMonitoring(prefix="eEM", maxCount=maxRoICount_eFex))
     eFexTauUnpacker = CompFactory.eFexTauRoIsUnpackingTool(
         Decisions = mapThresholdToL1DecisionCollection("eTAU"),

@@ -20,7 +20,6 @@ ex.concurrent_events = 4
 precommand = ''.join([
   "setMenu='Dev_pp_run3_v1';",  
   "doL1Sim=False;",
-  "enableL1MuonPhase1=False;",
   "doEmptyMenu=True;",
   "doWriteBS=False;",
   "doWriteRDOTrigger=True;",

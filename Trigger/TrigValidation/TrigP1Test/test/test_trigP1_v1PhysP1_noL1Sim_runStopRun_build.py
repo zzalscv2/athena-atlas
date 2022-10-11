@@ -17,7 +17,6 @@ ex.job_options = 'TriggerJobOpts/runHLT_standalone.py'
 ex.input = 'data'
 precommand = ''.join([
   "setMenu='PhysicsP1_pp_run3_v1_HLTReprocessing_prescale';",
-  "enableL1MuonPhase1=False;",
   "forceEnableAllChains=True;",
   "enableCostMonitoring=False;",
   "disableChains=['HLT_cosmic_id_L1MU3V_EMPTY','HLT_cosmic_id_L1MU8VF_EMPTY']", # Temporary workaround for ATR-25459

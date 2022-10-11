@@ -10,7 +10,7 @@ export TNS_ADMIN=/cvmfs/atlas.cern.ch/repo/sw/database/DBRelease/current/oracle-
 
 
 Reco_tf.py  \
---conditionsTag=CONDBR2-BLKPA-2022-08 \
+--conditionsTag=CONDBR2-ES1PA-2022-06 \
 --geometryVersion=ATLAS-R3S-2021-02-00-00 \
 --autoConfiguration=everything \
 --maxEvents=200 \

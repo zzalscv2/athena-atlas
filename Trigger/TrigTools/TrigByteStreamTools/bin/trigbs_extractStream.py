@@ -1,16 +1,14 @@
 #!/usr/bin/env tdaq_python
 
-# Copyright (C) 2002-2020 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
 
 # select events for a given stream name from an input file and write them in an outfile
 # the output file obeys the conventions used by the SFO in P1
 
-from __future__ import print_function
-
 import sys
 import os
 
-def peb_writer(argv):
+def peb_writer():
   """Runs the splitting routines"""
 
   import eformat, logging
@@ -163,14 +161,14 @@ def peb_writer(argv):
           if e.lumi_block() != lumiBlockNumber:
             logging.error(' Event (Run,Global ID) = (%d,%d) has a lumi block number %d,'
                           ' which is different from LB = %d for the output file. Event skipped.',
-                          (e.run_no(),e.global_id(),e.lumi_block(),lumiBlockNumber))
+                          e.run_no(),e.global_id(),e.lumi_block(),lumiBlockNumber)
             continue
 
         # check that all events have the same run number as the output file indicates otherwise skip event
         if e.run_no() != runNumber:
             logging.error(' Event (Run,Global ID) = (%d,%d) has a run number,'
                           ' which is different from the run number = %d for the output file. Event skipped.',
-                          (e.run_no(),e.global_id(),runNumber))
+                          e.run_no(),e.global_id(),runNumber)
             continue
 
         # set the overall tag type for the first match
@@ -264,4 +262,4 @@ def peb_writer(argv):
   sys.exit(0)
 
 if __name__ == "__main__":
-  peb_writer(sys.argv)
+  peb_writer()
