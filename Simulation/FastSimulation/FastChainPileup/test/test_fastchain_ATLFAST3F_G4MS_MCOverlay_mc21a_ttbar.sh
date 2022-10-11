@@ -9,9 +9,9 @@
 # art-output: ESDtoAOD_config.txt
 # art-architecture: '#x86_64-intel'
 
-events=25
-EVNT_File="/cvmfs/atlas-nightlies.cern.ch/repo/data/data-art/SimCoreTests/valid1.410000.PowhegPythiaEvtGen_P2012_ttbar_hdamp172p5_nonallhad.evgen.EVNT.e4993.EVNT.08166201._000012.pool.root.1"
-RDO_BKG_File="/cvmfs/atlas-nightlies.cern.ch/repo/data/data-art/OverlayTests/PresampledPileUp/22.0/Run3/v3/mc21a_presampling.RDO.pool.root"
+events=50
+EVNT_File='/cvmfs/atlas-nightlies.cern.ch/repo/data/data-art/CampaignInputs/mc21/EVNT/mc21_13p6TeV.601229.PhPy8EG_A14_ttbar_hdamp258p75_SingleLep.evgen.EVNT.e8453/EVNT.29328277._003902.pool.root.1'
+RDO_BKG_File="/cvmfs/atlas-nightlies.cern.ch/repo/data/data-art/CampaignInputs/mc21/RDO_BKG/mc21_13p6TeV.900149.PG_single_nu_Pt50.digit.RDO.e8453_e8455_s3864_d1761/50events.RDO.pool.root"
 RDO_File="MC_plus_MC.RDO.pool.root"
 AOD_File="MC_plus_MC.AOD.pool.root"
 NTUP_File="MC_plus_MC.NTUP.pool.root"
@@ -22,6 +22,8 @@ FastChain_tf.py \
   --steering doFCwOverlay \
   --physicsList FTFP_BERT_ATL \
   --useISF True \
+  --jobNumber 1 \
+  --DataRunNumber 410000 \
   --randomSeed 123 \
   --inputEVNTFile ${EVNT_File} \
   --inputRDO_BKGFile ${RDO_BKG_File} \
@@ -30,12 +32,11 @@ FastChain_tf.py \
   --skipEvents 0 \
   --digiSeedOffset1 511 \
   --digiSeedOffset2 727 \
-  --conditionsTag 'OFLCOND-MC21-SDR-RUN3-05' \
-  --geometryVersion 'ATLAS-R3S-2021-02-00-00' \
+  --conditionsTag 'OFLCOND-MC21-SDR-RUN3-07' \
+  --geometryVersion 'ATLAS-R3S-2021-03-00-00' \
   --postInclude 'default:PyJobTransforms/UseFrontier.py' \
-  --preInclude 'all:Campaigns/MC21Simulation.py,SimulationJobOptions/preInclude.FrozenShowersFCalOnly.py,Campaigns/MC21a.py' \
+  --preInclude 'all:Campaigns/MC21a.py,Campaigns/MC21SimulationMultiBeamSpot.py' \
   --postExec 'from AthenaCommon.ConfigurationShelve import saveToAscii;saveToAscii("config.txt")' \
-  --DataRunNumber '330000' \
   --imf False
 
 rc=$?
