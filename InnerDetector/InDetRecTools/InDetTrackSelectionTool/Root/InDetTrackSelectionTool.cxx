@@ -1132,7 +1132,7 @@ void InDet::InDetTrackSelectionTool::setCutLevelPrivate(InDet::CutLevel level, B
     setCutLevelPrivate(CutLevel::NoCut, overwrite); // if hard overwrite, reset all cuts first. will do nothing if !overwrite
     // change the cuts if a hard overwrite is asked for or if the cuts are unset
     if (overwrite || m_maxAbsEta >= LOCAL_MAX_DOUBLE) m_maxAbsEta = 2.5;
-    if (overwrite || m_minNSiHits < 0) m_minNSiHits = 7;
+    if (overwrite || m_minNSiHits < 0) m_minNSiHits = 8;
     m_maxOneSharedModule = true;
     if (overwrite || m_maxNSiHoles >= LOCAL_MAX_INT) m_maxNSiHoles = 2;
     if (overwrite || m_maxNPixelHoles >= LOCAL_MAX_INT) m_maxNPixelHoles = 1;
@@ -1140,7 +1140,7 @@ void InDet::InDetTrackSelectionTool::setCutLevelPrivate(InDet::CutLevel level, B
   case CutLevel::LoosePrimary :
     setCutLevelPrivate(CutLevel::NoCut, overwrite); // implement loose cuts first
     if (overwrite || m_maxAbsEta >= LOCAL_MAX_DOUBLE) m_maxAbsEta = 2.5;
-    if (overwrite || m_minNSiHits < 0) m_minNSiHits = 7;
+    if (overwrite || m_minNSiHits < 0) m_minNSiHits = 8;
     m_maxOneSharedModule = true;
     if (overwrite || m_maxNSiHoles >= LOCAL_MAX_INT) m_maxNSiHoles = 2;
     if (overwrite || m_maxNPixelHoles >= LOCAL_MAX_INT) m_maxNPixelHoles = 1;
