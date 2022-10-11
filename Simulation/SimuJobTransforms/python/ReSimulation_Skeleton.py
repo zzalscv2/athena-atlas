@@ -6,13 +6,13 @@ from PyJobTransforms.TransformUtils import processPreExec, processPreInclude, pr
 from SimuJobTransforms.CommonSimulationSteering import CommonSimulationCfg, specialConfigPreInclude, specialConfigPostInclude
 
 
-def defaultReSimulationFlags(ConfigFlags, detectors):
+def defaultReSimulationFlags(ConfigFlags):
     """Fill default resimulation flags"""
     ConfigFlags.Sim.ISF.ReSimulation = True
 
     # others are the same as standard simulation
     from SimuJobTransforms.ISF_Skeleton import defaultSimulationFlags
-    defaultSimulationFlags(ConfigFlags, detectors)
+    defaultSimulationFlags(ConfigFlags)
 
 
 def fromRunArgs(runArgs):
@@ -32,15 +32,15 @@ def fromRunArgs(runArgs):
     from AthenaConfiguration.Enums import ProductionStep
     ConfigFlags.Common.ProductionStep = ProductionStep.Simulation
 
+    if hasattr(runArgs, 'simulator'):
+       ConfigFlags.Sim.ISF.Simulator = SimulationFlavour(runArgs.simulator)
+
     # Generate detector list
     from SimuJobTransforms.SimulationHelpers import getDetectorsFromRunArgs
     detectors = getDetectorsFromRunArgs(ConfigFlags, runArgs)
 
-    if hasattr(runArgs, 'simulator'):
-       ConfigFlags.Sim.ISF.Simulator = SimulationFlavour(runArgs.simulator)
-
     # Setup common simulation flags
-    defaultReSimulationFlags(ConfigFlags, detectors)
+    defaultReSimulationFlags(ConfigFlags)
 
     if hasattr(runArgs, 'inputHITSFile'):
         ConfigFlags.Input.Files = runArgs.inputHITSFile
@@ -53,6 +53,14 @@ def fromRunArgs(runArgs):
             ConfigFlags.Output.HITSFileName = ''
         else:
             ConfigFlags.Output.HITSFileName  = runArgs.outputHITS_RSMFile
+
+    # Setup detector flags
+    from AthenaConfiguration.DetectorConfigFlags import setupDetectorFlags
+    setupDetectorFlags(ConfigFlags, detectors, toggle_geometry=True)
+
+    # Setup perfmon flags from runargs
+    from PerfMonComps.PerfMonConfigHelpers import setPerfmonFlagsFromRunArgs
+    setPerfmonFlagsFromRunArgs(ConfigFlags, runArgs)
 
     # Pre-include
     processPreInclude(runArgs, ConfigFlags)
