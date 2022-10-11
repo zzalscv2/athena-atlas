@@ -71,6 +71,10 @@ namespace CP
     SysReadSelectionHandle m_selectionHandle {
       this, "selectionDecoration", "", "the decoration for the asg selection"};
 
+    /// \brief only run the efficency for all jets
+  private:
+    bool m_onlyEfficiency {false};
+
     /// \brief only run the inefficency for all jets
   private:
     bool m_onlyInefficiency {false};
