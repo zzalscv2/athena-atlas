@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "VP1Algs/VP1Alg.h"
@@ -8,9 +8,6 @@
 #include "VP1UtilsBase/VP1FileUtilities.h"
 
 #include <xAODEventInfo/EventInfo.h>
-#include "EventInfo/EventInfo.h"
-#include "EventInfo/TriggerInfo.h"
-#include "EventInfo/EventID.h"
 #include "PathResolver/PathResolver.h"
 
 #include "GaudiKernel/IToolSvc.h"
@@ -144,14 +141,7 @@ StatusCode VP1Alg::execute()
 
 
 
-  // Get L1 trigger type from the EventInfo
   unsigned int trigType = 0;
-  const EventInfo*  evt;
-  StatusCode statusEvt = evtStore()->retrieve(evt);
-  if(statusEvt.isSuccess()) {
-   const TriggerInfo* trig = evt->trigger_info();
-   trigType = trig ? trig->level1TriggerType() : 0;
-  }
 
   // retrieve the eventInfo object from the event store
   const xAOD::EventInfo *eventInfo = nullptr;
@@ -163,6 +153,8 @@ StatusCode VP1Alg::execute()
     const uint32_t           runNumber   = eventInfo->runNumber();
     msg(MSG::DEBUG) << " Got run number = " << runNumber
                     << ", event number = " << eventNumber << endmsg;
+
+    trigType = eventInfo->level1TriggerType();
     
     // Get time stamp:
     uint32_t time = eventInfo->timeStamp();//0 means no info.
