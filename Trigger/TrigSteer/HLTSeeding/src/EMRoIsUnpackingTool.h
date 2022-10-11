@@ -31,7 +31,7 @@ private:
     "Name of the RoIs object produced by the unpacker"};
 
   Gaudi::Property<float> m_roIWidth{
-    this, "RoIWidth", 0.1, "Size of RoI in eta/ phi"};
+    this, "RoIWidth", 0.2, "Size of RoI in eta/ phi"};
 
   LVL1::CPRoIDecoder m_cpDecoder;
 };
