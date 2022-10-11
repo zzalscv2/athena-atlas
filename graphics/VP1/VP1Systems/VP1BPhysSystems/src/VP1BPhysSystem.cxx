@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2020 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
 */
 
 /////////////////////////////////////////////////////////////////////////
@@ -36,8 +36,6 @@
 
 
 #include "StoreGate/StoreGateSvc.h"
-#include "EventInfo/EventInfo.h"
-#include "EventInfo/EventID.h"
 
 #include "TrkTrack/Track.h"
 #include "TrkTrack/TrackCollection.h"
@@ -204,16 +202,9 @@ void VP1BPhysSystem::actualBuild() {
 	if(m_tree==nullptr) return;
 
   //retrieving event info
-	const EventInfo* eventInfo;
-	StatusCode sc = m_sg->retrieve(eventInfo);
-	if (!sc.isSuccess()) {
-		message("Error: Could not retrieve EventInfo");
-		return;
-	}
-
-	const EventID* eventID = eventInfo->event_ID(); // Get EventInfo
-	int evtNum = eventID->event_number();
-	int runNum = eventID->run_number();
+        const EventContext& ctx = Gaudi::Hive::currentContext();
+	int evtNum = ctx.eventID().event_number();
+	int runNum = ctx.eventID().run_number();
 
   //retrieve TrackParticle candidates
 	const Rec::TrackParticleContainer* partCont;
