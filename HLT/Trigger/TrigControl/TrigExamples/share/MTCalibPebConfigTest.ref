@@ -4,6 +4,7 @@ Py:ComponentAccumulator    INFO Top sequence 0
 Py:ComponentAccumulator    INFO \__ l1Seq (seq: PAR OR)
 Py:ComponentAccumulator    INFO    \__ L1TriggerByteStreamDecoderAlg/L1TriggerByteStreamDecoder (alg) 
 Py:ComponentAccumulator    INFO    \__ SGInputLoader/SGInputLoader (alg) 
+Py:ComponentAccumulator    INFO    \__ L1TriggerResultMaker/L1TriggerResultMaker (alg) 
 Py:ComponentAccumulator    INFO    \__ HLTSeeding/HLTSeeding (alg) 
 Py:ComponentAccumulator    INFO Top sequence 1
 Py:ComponentAccumulator    INFO \__ AthAlgSeq (seq: PAR AND)
