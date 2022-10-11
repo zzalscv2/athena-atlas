@@ -147,8 +147,8 @@ namespace ISF {
     SG::WriteHandleKey<MDTSimHitCollection>            m_outputMDTHits{this, "OutputMDTHits", "", ""};
     SG::WriteHandleKey<RPCSimHitCollection>             m_outputRPCHits{this, "OutputRPCHits", "", ""};
     SG::WriteHandleKey<TGCSimHitCollection>             m_outputTGCHits{this, "OutputTGCHits", "", ""};
-    SG::WriteHandleKey<MMSimHitCollection> m_outputMMHits{this, "OutputHits", "", "Output MM hits name"};
-    SG::WriteHandleKey<sTGCSimHitCollection> m_outputsTGCHits{this, "OutputsTGCHits", "", "Output TGC hits name"};
+    SG::WriteHandleKey<MMSimHitCollection>              m_outputMMHits{this, "OutputMMHits", "", "Output MM hits name"};
+    SG::WriteHandleKey<sTGCSimHitCollection>           m_outputsTGCHits{this, "OutputsTGCHits", "", "Output sTGC hits name"};
 
     // Phase 2 Upgrade HitCollections
     SG::WriteHandleKey<SiHitCollection>              m_outputITkPixelHits{this, "OutputITkPixelHits", "", ""};

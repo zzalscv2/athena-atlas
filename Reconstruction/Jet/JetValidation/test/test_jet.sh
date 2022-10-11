@@ -31,7 +31,7 @@ Reco_tf.py \
     --valid=True \
     --validationFlags 'doInDet,doJet' \
     --autoConfiguration everything \
-    --conditionsTag 'all:OFLCOND-MC16-SDR-RUN2-09' \
+    --conditionsTag 'all:OFLCOND-MC21-SDR-RUN3-08' \
     --preExec 'from RecExConfig.RecFlags import rec;rec.doTrigger=False; from JetRec.JetRecFlags import jetFlags; jetFlags.writeJetsToAOD.set_Value_and_Lock(True)'
 
 rc=$?

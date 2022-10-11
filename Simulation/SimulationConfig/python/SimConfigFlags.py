@@ -183,7 +183,7 @@ def createSimConfigFlags():
     def _decideHITSMerging(prevFlags):
         simulator = prevFlags.Sim.ISF.Simulator
         # Further specialization possible in future
-        if simulator in [SimulationFlavour.FullG4MT, SimulationFlavour.FullG4MT_QS, SimulationFlavour.PassBackG4MT]:
+        if simulator in [SimulationFlavour.FullG4MT, SimulationFlavour.FullG4MT_QS, SimulationFlavour.PassBackG4MT, SimulationFlavour.AtlasG4]:
             doID = False
             doITk = False
             doCALO = False

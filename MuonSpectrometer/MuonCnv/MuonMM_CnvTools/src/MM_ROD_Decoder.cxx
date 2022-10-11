@@ -63,7 +63,7 @@ StatusCode Muon::MM_ROD_Decoder::fillCollection(const OFFLINE_FRAGMENTS_NAMESPAC
   std::unordered_map<IdentifierHash, std::unique_ptr<MM_RawDataCollection>> rdo_map;
 
   // error counters
-  int nerr_stationID{0}, nerr_duplicate{0}, nerr_channelID{0}, nerr_rdo{0};
+  int nerr_duplicate{0}, nerr_rdo{0};
 
   // loop on elinks. we need an RDO (collection) per quadruplet!
   for (auto* elink : elinks) {
@@ -73,17 +73,12 @@ StatusCode Muon::MM_ROD_Decoder::fillCollection(const OFFLINE_FRAGMENTS_NAMESPAC
 
     // get the offline ID hash (module ctx) to be passed to the RDO 
     // also specifies the index of the RDO in the container.
-    bool         is_validID(false);
     const char*  station_name = elink->elinkId()->is_large_station() ? "MML" : "MMS";
     int          station_eta  = (int)elink->elinkId()->station_eta();
     unsigned int station_phi  = (unsigned int)elink->elinkId()->station_phi();
     unsigned int multi_layer  = (unsigned int)elink->elinkId()->multi_layer();
     unsigned int gas_gap      = (unsigned int)elink->elinkId()->gas_gap();
-    Identifier   module_ID    = m_MmIdHelper->elementID(station_name, station_eta, station_phi, is_validID);
-    if(!is_validID) { 
-      ++nerr_stationID;
-      continue;
-    }
+    Identifier   module_ID    = m_MmIdHelper->elementID(station_name, station_eta, station_phi);
 
     IdentifierHash module_hashID;
     m_MmIdHelper->get_module_hash(module_ID, module_hashID);
@@ -99,12 +94,8 @@ StatusCode Muon::MM_ROD_Decoder::fillCollection(const OFFLINE_FRAGMENTS_NAMESPAC
     for (auto channel : channels) {
        unsigned int channel_number = channel->channel_number();
        if (channel_number == 0) continue; // skip disconnected vmm channels
-       Identifier channel_ID = m_MmIdHelper->channelID(module_ID, multi_layer, gas_gap, channel_number, is_validID);
-       if (!is_validID) { 
-         ++nerr_channelID; 
-         continue; 
-       }
-       
+       Identifier channel_ID = m_MmIdHelper->channelID(module_ID, multi_layer, gas_gap, channel_number);  // not validating the IDs (too slow)
+
        // for data the time and charge are in counts
        bool timeAndChargeInCounts = true;
        rdo->push_back(new MM_RawData(channel_ID, channel_number, channel->tdo(), channel->pdo(), channel->rel_bcid(),timeAndChargeInCounts)); // isDead = false (ok?)
@@ -130,8 +121,6 @@ StatusCode Muon::MM_ROD_Decoder::fillCollection(const OFFLINE_FRAGMENTS_NAMESPAC
 
   // error summary (to reduce the number of messages)
   if (nerr_duplicate) ATH_MSG_WARNING(nerr_duplicate << " elinks skipped since the same module hash has been added by a previous ROB fragment");
-  if (nerr_stationID) ATH_MSG_WARNING("Unable to create valid identifier for "<<nerr_stationID<<" modules (corrupt data?); elinks skipped");
-  if (nerr_channelID) ATH_MSG_WARNING("Unable to create valid identifier for "<<nerr_channelID<<" channels (corrupt data?); channels skipped");
   if (nerr_rdo)       ATH_MSG_ERROR("Failed to add "<<nerr_rdo<<" RDOs into the identifiable container");
 
   return StatusCode::SUCCESS;

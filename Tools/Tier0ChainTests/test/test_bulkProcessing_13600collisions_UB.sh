@@ -19,8 +19,6 @@ Reco_tf.py  \
 --outputDRAW_ZMUMUFile="myDRAW_ZMUMU.data" \
 --imf False
 
-
-
 rc1=$?
 echo "art-result: $rc1 Reco"
 
@@ -37,7 +35,9 @@ echo  "art-result: ${rc2} (against previous nightly)"
 rc3=-9999
 if [ ${rc1} -eq 0 ]
 then
-  art.py compare ref . /cvmfs/atlas-nightlies.cern.ch/repo/data/data-art/Tier0ChainTests/TCT_Run3-22.0_references_for_comparison/test_bulkProcessing_13600collisions_UB \
+  ArtRef=/cvmfs/atlas-nightlies.cern.ch/repo/data/data-art/Tier0ChainTests/TCT_Run3-22.0_references_for_comparison/test_bulkProcessing_13600collisions_UB
+  cat $ArtRef/version.txt
+  art.py compare ref . $ArtRef \
   --entries 100 --mode=semi-detailed --order-trees --ignore-exit-code diff-pool
   rc3=$?
 fi

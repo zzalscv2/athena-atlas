@@ -10,6 +10,7 @@ from TriggerMenuMT.HLT.Config.ControlFlow.HLTCFTools import NoCAmigration
 log = logging.getLogger(__name__)
 
 
+
 def addTLAStep(chain, chainDict):
     '''
     Add one extra chain step for TLA Activities
@@ -30,12 +31,13 @@ def addTLAStep(chain, chainDict):
     # we add one step per TLA chain, with sequences matching the list of signatures
     # and multiplicities matching those of the previous step of the chain (already merged if combined)
     prevStep = chain.steps[-1]
-    stepName = 'Step{:d}_merged{:d}_TLAStep_{:s}'.format(len(chain.steps)+1,len(prevStep.legIds), prevStep.name)
+    stepName = 'Step_merged{:d}_TLAStep_{:s}'.format(len(prevStep.legIds), prevStep.name)
     step = ChainStep(name         = stepName,
                     Sequences     = tlaSequencesList,
                     multiplicity = prevStep.multiplicity,
                     chainDicts   = prevStep.stepDicts)	
 
+    log.debug("addTLAStep: About to add step %s ", stepName) 
     chain.steps.append(step)
 
 
@@ -96,11 +98,13 @@ def alignTLASteps(chain_configs, chain_dicts):
 
     def getTLAStepPosition(chainConfig):
         tlaStep = findTLAStep(chainConfig)
+
         try:
             if isRun3Cfg() and tlaStep is None:
                 raise NoCAmigration ("[alignTLASteps] Missing TLA sequence with CA configurables")
         except NoCAmigration:
             return 0
+        log.debug('getTLAStepPosition found step %s and return %d',tlaStep,chainConfig.steps.index(tlaStep) + 1)
         return chainConfig.steps.index(tlaStep) + 1
 
     # First loop to find the maximal TLA step positions to which we need to align
@@ -109,10 +113,14 @@ def alignTLASteps(chain_configs, chain_dicts):
         if tlaStepPosition > maxTLAStepPosition:
             maxTLAStepPosition = tlaStepPosition
     
+    log.debug('maxTLAStepPosition=%d',maxTLAStepPosition)
+    
     # Second loop to insert empty steps before the TLA steps where needed
-    for chainName, chainConfig in all_tla_chain_configs.items():
+    for chainName, chainConfig in all_tla_chain_configs.items():        
         tlaStepPosition = getTLAStepPosition(chainConfig)
+        log.debug('Aligning TLA step at step %d for chain %s ', tlaStepPosition, chainName)
         if tlaStepPosition < maxTLAStepPosition:
             numStepsNeeded = maxTLAStepPosition - tlaStepPosition
             log.debug('Aligning TLA step for chain %s by adding %d empty steps', chainName, numStepsNeeded)
             chainConfig.insertEmptySteps('EmptyTLAAlign', numStepsNeeded, tlaStepPosition-1)
+            chainConfig.numberAllSteps()

@@ -114,6 +114,7 @@
 + Reconstruction/LwtnnUtils
 + Simulation/SimulationConfig
 + Tools/ART
++ Tools/Campaigns
 + Tools/DirectIOART
 + Tools/PathResolver
 + Tools/PyUtils

@@ -30,7 +30,7 @@ Digi_tf.py \
 --detectors Truth \
 --PileUpPresampling True \
 --splitConfig 'HITtoRDO:Campaigns.BeamspotSplitMC21a' \
---conditionsTag default:OFLCOND-MC21-SDR-RUN3-05 \
+--conditionsTag default:OFLCOND-MC21-SDR-RUN3-07 \
 --digiSeedOffset1 170 --digiSeedOffset2 170 \
 --digiSteeringConf 'StandardSignalOnlyTruth' \
 --geometryVersion default:ATLAS-R3S-2021-02-00-00 \
@@ -56,7 +56,7 @@ Digi_tf.py \
 --detectors Truth \
 --PileUpPresampling True \
 --splitConfig 'HITtoRDO:Campaigns.BeamspotSplitMC21a' \
---conditionsTag default:OFLCOND-MC21-SDR-RUN3-05 \
+--conditionsTag default:OFLCOND-MC21-SDR-RUN3-07 \
 --digiSeedOffset1 170 --digiSeedOffset2 170 \
 --digiSteeringConf 'StandardSignalOnlyTruth' \
 --geometryVersion default:ATLAS-R3S-2021-02-00-00 \
@@ -97,7 +97,7 @@ then
     --detectors Truth \
     --splitConfig 'HITtoRDO:Campaigns.BeamspotSplitMC21a' \
     --PileUpPresampling True \
-    --conditionsTag default:OFLCOND-MC21-SDR-RUN3-05 \
+    --conditionsTag default:OFLCOND-MC21-SDR-RUN3-07 \
     --digiSeedOffset1 170 --digiSeedOffset2 170 \
     --digiSteeringConf 'StandardSignalOnlyTruth' \
     --geometryVersion default:ATLAS-R3S-2021-02-00-00 \

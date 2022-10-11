@@ -34,8 +34,6 @@ hltPrecommand = ''.join([
   "doCosmics=True;",
   "doL1Sim=True;",
   "rewriteLVL1=True;",
-  "setDetDescr='ATLAS-R3S-2021-01-00-02';",
-  "condOverride={'/MDT/Onl/T0BLOB':'MDTT0-RUN3-Onl-UPD1-01-BLOB'};" # TODO: use R3 HLT cond tag when available
 ])
 hlt.args = f'-c "{hltPrecommand}"'
 hlt.args += ' -o output'
@@ -46,7 +44,8 @@ filter_bs = ExecStep.ExecStep('FilterBS')
 filter_bs.type = 'other'
 filter_bs.executable = 'trigbs_extractStream.py'
 filter_bs.input = ''
-filter_bs.args = '-s Main ' + find_file('*_HLTMPPy_output.*.data')
+filter_bs.args = '-l 0' # data_cos input includes files from multiple LBs, see ATR-26461
+filter_bs.args += ' -s Main ' + find_file('*_HLTMPPy_output.*.data')
 
 # Tier-0 reco step (BS->ESD->AOD)
 tzrecoPreExec = ' '.join([
@@ -64,10 +63,9 @@ tzreco.explicit_input = True
 tzreco.max_events = 2000
 tzreco.args = '--inputBSFile=' + find_file('*.physics_Main*._athenaHLT*.data')  # output of the previous step
 tzreco.args += ' --outputESDFile=ESD.pool.root --outputAODFile=AOD.pool.root'
-tzreco.args += ' --geometryVersion=\'ATLAS-R3S-2021-01-00-02\''
-tzreco.args += ' --conditionsTag=\'CONDBR2-BLKPA-RUN2-09\''  # TODO: use R3 BLK cond tag when available
+tzreco.args += ' --geometryVersion=\'ATLAS-R3S-2021-03-00-00\'' # RecExConfig AutoConfiguration use outdated default
+tzreco.args += ' --conditionsTag=\'CONDBR2-BLKPA-2022-08\''     # RecExConfig AutoConfiguration use outdated default
 tzreco.args += ' --preExec="{:s}"'.format(tzrecoPreExec)
-tzreco.args += ' --postExec="conddb.addOverride(\'/MDT/T0BLOB\',\'MDTT0-RUN3-01-00\')"'  # TODO: use R3 BLK cond tag when available
 tzreco.args += ' --postInclude="TriggerTest/disableChronoStatSvcPrintout.py"'
 
 # Tier-0 monitoring step (AOD->HIST)

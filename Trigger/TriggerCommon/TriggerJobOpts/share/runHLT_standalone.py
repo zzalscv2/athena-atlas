@@ -190,13 +190,12 @@ ConfigFlags.GeoModel.AtlasVersion = globalflags.DetDescrVersion()
 #set conditions tag
 if opt.setGlobalTag is None:
     if globalflags.DataSource=='data':
-        opt.setGlobalTag = ConfigFlags.Trigger.OnlineCondTag if opt.isOnline else 'CONDBR2-BLKPA-2018-13'
+        opt.setGlobalTag = ConfigFlags.Trigger.OnlineCondTag if opt.isOnline else 'CONDBR2-BLKPA-2022-08'
     else:
         if ConfigFlags.GeoModel.Run == LHCPeriod.Run3:
-            # temporarily roll back to v5 for Run3 MC due to incompatibility between MC21 RDO and v6 MDT conditions
-            opt.setGlobalTag = 'OFLCOND-MC21-SDR-RUN3-05'
+            opt.setGlobalTag = 'OFLCOND-MC21-SDR-RUN3-07'
         else:
-            opt.setGlobalTag = 'OFLCOND-MC16-SDR-RUN2-08-02'
+            opt.setGlobalTag = 'OFLCOND-MC16-SDR-RUN2-08-02a'
 
 globalflags.ConditionsTag = opt.setGlobalTag or ConfigFlags.Trigger.OnlineCondTag
 ConfigFlags.IOVDb.GlobalTag = globalflags.ConditionsTag()

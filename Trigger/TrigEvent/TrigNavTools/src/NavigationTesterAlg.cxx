@@ -19,7 +19,9 @@ namespace {
             ret.emplace(combination.begin(), combination.end());
         return ret;
     }
+}
 
+namespace xAOD {
     std::ostream &operator<<(std::ostream &os, const xAOD::IParticle *p)
     {
         return os << "["
@@ -30,7 +32,9 @@ namespace {
             << "]";
 
     }
+}
 
+namespace std {
     // Define printing operators for the set and IParticle pointers
     template <typename T>
     std::ostream &operator<<(std::ostream &os, const std::set<T> &s)
@@ -146,4 +150,3 @@ namespace Trig {
     }
 } //> end namespace Trig
 
-DECLARE_COMPONENT(Trig::NavigationTesterAlg);

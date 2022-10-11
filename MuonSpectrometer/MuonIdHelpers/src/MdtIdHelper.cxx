@@ -301,8 +301,8 @@ Identifier MdtIdHelper::multilayerID(const Identifier& channelID) const {
 }
 
 Identifier MdtIdHelper::multilayerID(const Identifier& moduleID, int multilayer) const {
-    Identifier result(moduleID);
-    m_mla_impl.pack(multilayer, result);
+    Identifier result{moduleID};
+    resetAndSet(m_mla_impl, multilayer, result);
     return result;
 }
 
@@ -712,9 +712,9 @@ Identifier MdtIdHelper::channelID(const std::string& stationNameStr, int station
 
 Identifier MdtIdHelper::channelID(const Identifier& id, int multilayer, int tubeLayer, int tube) const {
     Identifier result(id);
-    m_mla_impl.pack(multilayer, result);
-    m_lay_impl.pack(tubeLayer, result);
-    m_tub_impl.pack(tube, result);
+    resetAndSet(m_mla_impl, multilayer, result);
+    resetAndSet(m_lay_impl, tubeLayer, result);
+    resetAndSet(m_tub_impl, tube, result);
     return result;
 }
 Identifier MdtIdHelper::channelID(const Identifier& id, int multilayer, int tubeLayer, int tube, bool& isValid) const {

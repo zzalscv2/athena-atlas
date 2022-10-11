@@ -22,6 +22,7 @@ class PixelChargeCalibCondData
     enum class CalibrationStrategy
     {
       RUN1PIX,
+      RUN3PIX,
       LUTFEI4,
       RD53
     };
@@ -35,6 +36,8 @@ class PixelChargeCalibCondData
     void setQ2TotA(InDetDD::PixelDiodeType type, unsigned int moduleHash, std::vector<float> value);
     void setQ2TotE(InDetDD::PixelDiodeType type, unsigned int moduleHash, std::vector<float> value);
     void setQ2TotC(InDetDD::PixelDiodeType type, unsigned int moduleHash, std::vector<float> value);
+    void setQ2TotF(InDetDD::PixelDiodeType type, unsigned int moduleHash, std::vector<float> value);
+    void setQ2TotG(InDetDD::PixelDiodeType type, unsigned int moduleHash, std::vector<float> value);
 
     void setTotRes1(unsigned int moduleHash, std::vector<float> value);
     void setTotRes2(unsigned int moduleHash, std::vector<float> value);
@@ -47,6 +50,8 @@ class PixelChargeCalibCondData
     float getQ2TotA(InDetDD::PixelDiodeType type, unsigned int moduleHash, unsigned int FE) const;
     float getQ2TotE(InDetDD::PixelDiodeType type, unsigned int moduleHash, unsigned int FE) const;
     float getQ2TotC(InDetDD::PixelDiodeType type, unsigned int moduleHash, unsigned int FE) const;
+    float getQ2TotF(InDetDD::PixelDiodeType type, unsigned int moduleHash, unsigned int FE) const;
+    float getQ2TotG(InDetDD::PixelDiodeType type, unsigned int moduleHash, unsigned int FE) const;
 
     float getTotRes(unsigned int moduleHash, unsigned int FE, float Q) const;
 
@@ -77,6 +82,8 @@ class PixelChargeCalibCondData
     chipChargeMap m_totA;
     chipChargeMap m_totE;
     chipChargeMap m_totC;
+    chipChargeMap m_totF;
+    chipChargeMap m_totG;
 
     chipCharge m_totRes1;
     chipCharge m_totRes2;

@@ -1,12 +1,14 @@
 # Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
-from SimulationConfig.SimEnums import SimulationFlavour, TruthStrategy
-from LArConfiguration.LArConfigRun2 import LArConfigRun2PileUp, LArConfigRun2NoPileUp
+from Campaigns.Utils import Campaign
 
 
 def MC16a(flags):
     """MC16a flags for MC to match 2015 and 2016 data"""
+    flags.Input.MCCampaign = Campaign.MC16a
+
     flags.Beam.NumberOfCollisions = 20.
 
+    from LArConfiguration.LArConfigRun2 import LArConfigRun2PileUp
     LArConfigRun2PileUp(flags)
     flags.Digitization.HighGainEMECIW = True
 
@@ -22,8 +24,11 @@ def MC16a(flags):
 
 def MC16d(flags):
     """MC16d flags for MC to match 2017 data"""
+    flags.Input.MCCampaign = Campaign.MC16d
+
     flags.Beam.NumberOfCollisions = 20.
 
+    from LArConfiguration.LArConfigRun2 import LArConfigRun2PileUp
     LArConfigRun2PileUp(flags)
 
     flags.Tile.BestPhaseFromCOOL = False
@@ -38,8 +43,11 @@ def MC16d(flags):
 
 def MC16e(flags):
     """MC16e flags for MC to match 2018 data"""
+    flags.Input.MCCampaign = Campaign.MC16e
+
     flags.Beam.NumberOfCollisions = 20.
 
+    from LArConfiguration.LArConfigRun2 import LArConfigRun2PileUp
     LArConfigRun2PileUp(flags)
 
     flags.Tile.BestPhaseFromCOOL = False
@@ -56,6 +64,7 @@ def MC16NoPileUp(flags):
     """MC16 flags for MC without pile-up"""
     flags.Beam.NumberOfCollisions = 0.
 
+    from LArConfiguration.LArConfigRun2 import LArConfigRun2NoPileUp
     LArConfigRun2NoPileUp(flags)
 
     flags.Tile.BestPhaseFromCOOL = False
@@ -64,6 +73,7 @@ def MC16NoPileUp(flags):
 
 def MC16Simulation(flags):
     """MC16 flags for simulation"""
+    from SimulationConfig.SimEnums import SimulationFlavour, TruthStrategy
     flags.Sim.PhysicsList = 'FTFP_BERT_ATL'
     flags.Sim.TruthStrategy = TruthStrategy.MC15aPlus
 

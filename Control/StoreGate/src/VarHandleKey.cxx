@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
 */
 
 // $Id$
@@ -135,7 +135,19 @@ StatusCode VarHandleKey::initialize (bool used /*= true*/)
     return StatusCode::FAILURE;
   }
 
-  m_hashedKey = m_storeHandle->stringToKey (m_sgKey, clid());
+  CLID this_clid = clid();
+  m_hashedKey = m_storeHandle->stringToKey (m_sgKey, this_clid);
+
+  // Make sure we also register hashes for base classes at this point,
+  // to prevent collisions with transient keys.
+  const SG::BaseInfoBase* bib = SG::BaseInfoBase::find (this_clid);
+  if (bib) {
+    for (CLID base_clid : bib->get_bases()) {
+      if (base_clid != this_clid) {
+         m_storeHandle->stringToKey (m_sgKey, base_clid);
+      }
+    }
+  }
 
   return StatusCode::SUCCESS;
 }

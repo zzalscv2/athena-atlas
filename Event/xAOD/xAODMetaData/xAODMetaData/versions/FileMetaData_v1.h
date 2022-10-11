@@ -75,8 +75,12 @@ namespace xAOD {
          simFlavour = 10,
          /// Used data overlay for backgrounds [bool]
          isDataOverlay = 11,
+         /// MC campaign [string]
+         mcCampaign = 12,
+         /// Generators information [string]
+         generatorsInfo = 13,
          /// End marker
-         END = 12
+         END = 14
       }; // enum MetaDataType
 
       /// Get a pre-defined string value out of the object

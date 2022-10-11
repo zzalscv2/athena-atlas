@@ -68,10 +68,10 @@ class RpcTrackAnaAlg : public AthMonitorAlgorithm
     StatusCode triggerMatching(const xAOD::Muon* , const std::vector<TagDef>& ) const;
 
     StatusCode extrapolate2RPC(const xAOD::TrackParticle *track, const Trk::PropDirection direction, std::vector<GasGapResult>& results, BarrelDL barrelDL) const;
-    Trk::TrackParameters* computeTrackIntersectionWithGasGap(ExResult &result, const xAOD::TrackParticle* track_particle, const std::shared_ptr<GasGapData> &gap) const;
+    std::unique_ptr<Trk::TrackParameters> computeTrackIntersectionWithGasGap(ExResult &result, const xAOD::TrackParticle* track_particle, const std::shared_ptr<GasGapData> &gap) const;
     
-    StatusCode extrapolate2RPC(const Trk::TrackParameters* trackParam, const Trk::PropDirection direction, std::vector<GasGapResult>& results, BarrelDL barrelDL) const;
-    Trk::TrackParameters* computeTrackIntersectionWithGasGap(ExResult &result, const Trk::TrackParameters * trackParam, const std::shared_ptr<GasGapData> &gap) const;
+    StatusCode extrapolate2RPC(std::unique_ptr<Trk::TrackParameters> trackParam, const Trk::PropDirection direction, std::vector<GasGapResult>& results, BarrelDL barrelDL) const;
+    std::unique_ptr<Trk::TrackParameters> computeTrackIntersectionWithGasGap(ExResult &result, const Trk::TrackParameters * trackParam, const std::shared_ptr<GasGapData> &gap) const;
     
     
     StatusCode readHitsPerGasgap(const EventContext& ctx, std::vector<GasGapResult>& results, MuonSource muon_source) const;

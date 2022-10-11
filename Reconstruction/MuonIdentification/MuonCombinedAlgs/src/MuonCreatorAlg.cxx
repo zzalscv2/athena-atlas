@@ -20,6 +20,9 @@
 #include "xAODMuon/SlowMuonContainer.h"
 #include "xAODTracking/TrackParticleAuxContainer.h"
 #include "xAODTracking/TrackParticleContainer.h"
+#include "MuonRIO_OnTrack/MdtDriftCircleOnTrack.h"
+#include "EventPrimitives/EventPrimitivesHelpers.h"
+
 namespace {
     constexpr const double MeVtoGeV = 1 / Gaudi::Units::GeV;
 }
@@ -75,7 +78,7 @@ StatusCode MuonCreatorAlg::execute(const EventContext& ctx) const {
 
     // Create the xAOD container and its auxiliary store:
     SG::WriteHandle<xAOD::MuonContainer> wh_muons{m_muonCollectionName, ctx};
-    ATH_CHECK(wh_muons.record(std::make_unique<xAOD::MuonContainer>(), std::make_unique<xAOD::MuonAuxContainer>()));
+    ATH_CHECK(wh_muons.recordNonConst(std::make_unique<xAOD::MuonContainer>(), std::make_unique<xAOD::MuonAuxContainer>()));
     ATH_MSG_DEBUG("Recorded Muons with key: " << m_muonCollectionName.key());
     MuonCombined::IMuonCreatorTool::OutputData output(*(wh_muons.ptr()));
 
@@ -169,6 +172,21 @@ StatusCode MuonCreatorAlg::execute(const EventContext& ctx) const {
         auto muon_eta = Monitored::Collection("muon_eta", *(wh_muons.ptr()), &xAOD::Muon_v1::eta);
         auto muon_phi = Monitored::Collection("muon_phi", *(wh_muons.ptr()), &xAOD::Muon_v1::phi);
 
+        std::vector<float> MDT_R, MDT_dR;
+        for( const auto &mu : *wh_muons ) {
+            if (!(mu->muonType() == xAOD::Muon::CaloTagged || mu->muonType() == xAOD::Muon::SegmentTagged)) {
+                const Trk::Track* trk = mu->primaryTrackParticle()->track();
+                for (const Trk::TrackStateOnSurface* tsos : *trk->trackStateOnSurfaces()) {
+                    const Muon::MdtDriftCircleOnTrack* mdt = dynamic_cast <const Muon::MdtDriftCircleOnTrack*>(tsos->measurementOnTrack());
+                    if (!mdt) continue;
+                    MDT_R.push_back(std::abs(mdt->driftRadius()));
+                    MDT_dR.push_back(Amg::error(mdt->localCovariance(), Trk::locX));
+                }
+            }
+        }
+        auto muon_MDT_R = Monitored::Collection("muon_MDT_R", MDT_R);
+        auto muon_MDT_dR = Monitored::Collection("muon_MDT_dR", MDT_dR);
+
         auto satrks_n = Monitored::Scalar<int>("satrks_n", wh_extrtp->size());
         auto satrks_pt = Monitored::Collection("satrks_pt", *(wh_extrtp.ptr()),
                                                [](auto const& satrk) { return satrk->pt() * MeVtoGeV; });  // converted to GeV
@@ -191,10 +209,10 @@ StatusCode MuonCreatorAlg::execute(const EventContext& ctx) const {
                                                     [](auto const& idtrk) { return idtrk->indetTrackParticle().eta(); });
             auto idtrks_phi = Monitored::Collection("idtrks_phi", *indetCandidateCollection,
                                                     [](auto const& idtrk) { return idtrk->indetTrackParticle().phi(); });
-            auto monitorIt = Monitored::Group(m_monTool, muon_n, muon_pt, muon_eta, muon_phi, satrks_n, satrks_pt, satrks_eta, satrks_phi,
+            auto monitorIt = Monitored::Group(m_monTool, muon_n, muon_pt, muon_eta, muon_phi, muon_MDT_R, muon_MDT_dR, satrks_n, satrks_pt, satrks_eta, satrks_phi,
                                               cbtrks_n, cbtrks_pt, cbtrks_eta, cbtrks_phi, idtrks_n, idtrks_pt, idtrks_eta, idtrks_phi);
         } else
-            auto monitorIt = Monitored::Group(m_monTool, muon_n, muon_pt, muon_eta, muon_phi, satrks_n, satrks_pt, satrks_eta, satrks_phi,
+            auto monitorIt = Monitored::Group(m_monTool, muon_n, muon_pt, muon_eta, muon_phi, muon_MDT_R, muon_MDT_dR, satrks_n, satrks_pt, satrks_eta, satrks_phi,
                                               cbtrks_n, cbtrks_pt, cbtrks_eta, cbtrks_phi);
     }
 

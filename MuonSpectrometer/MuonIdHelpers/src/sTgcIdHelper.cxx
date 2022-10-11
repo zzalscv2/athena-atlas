@@ -295,7 +295,7 @@ Identifier sTgcIdHelper::multilayerID(const Identifier& channelID) const {
 /*******************************************************************************/
 Identifier sTgcIdHelper::multilayerID(const Identifier& moduleID, int multilayer) const {
     Identifier result(moduleID);
-    m_mplet_impl.pack(multilayer, result);
+    resetAndSet(m_mplet_impl, multilayer, result);
     return result;
 }
 Identifier sTgcIdHelper::multilayerID(const Identifier& moduleID, int multilayer, bool& isValid) const {
@@ -847,10 +847,10 @@ Identifier sTgcIdHelper::channelID(const std::string& stationNameStr, int statio
 /*******************************************************************************/
 Identifier sTgcIdHelper::channelID(const Identifier& id, int multilayer, int gasGap, int channelType, int channel) const {
     Identifier result = parentID(id);
-    m_mplet_impl.pack(multilayer, result);
-    m_gap_impl.pack(gasGap, result);
-    m_typ_impl.pack(channelType, result);
-    m_cha_impl.pack(channel, result);
+    resetAndSet(m_mplet_impl, multilayer, result);
+    resetAndSet(m_gap_impl, gasGap, result);
+    resetAndSet(m_typ_impl, channelType, result);
+    resetAndSet(m_cha_impl, channel, result);
     return result;
 }
 Identifier sTgcIdHelper::channelID(const Identifier& id, int multilayer, int gasGap, int channelType, int channel, bool& isValid) const {
@@ -910,9 +910,9 @@ Identifier sTgcIdHelper::padID(const std::string& stationNameStr, int stationEta
 Identifier sTgcIdHelper::padID(const Identifier& id, int multilayer, int gasGap, int channelType, int padEta, int padPhi) const {
     Identifier result(id);
     if (channelType != Pad) return result;
-    m_mplet_impl.pack(multilayer, result);
-    m_gap_impl.pack(gasGap, result);
-    m_typ_impl.pack(channelType, result);
+    resetAndSet(m_mplet_impl, multilayer, result);
+    resetAndSet(m_gap_impl, gasGap, result);
+    resetAndSet(m_typ_impl, channelType, result);
     int channel = (padPhi - 1) * PadEtaMax + padEta;
     m_cha_impl.pack(channel, result);
 

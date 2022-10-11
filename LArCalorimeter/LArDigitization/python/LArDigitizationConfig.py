@@ -412,11 +412,11 @@ def LArSuperCellOverlayCfg(flags, **kwargs):
 def LArHitFilterCfg(flags, **kwargs):
     """ Return ComponentAccumulator with LArHitFilter """
     acc = ComponentAccumulator()
-    acc.merge(LArGMCfg(flags))
+    from DetDescrCnvSvc.DetDescrCnvSvcConfig import DetDescrCnvSvcCfg
+    acc.merge(DetDescrCnvSvcCfg(flags))  # we do not need the whole geometry, identifiers are enough
     acc.merge(InputRenameCfg("LArHitContainer","LArHitEMB","LArHitEMBOLD"))
     acc.merge(InputRenameCfg("LArHitContainer","LArHitEMEC","LArHitEMECOLD"))
     acc.merge(InputRenameCfg("LArHitContainer","LArHitHEC","LArHitHECOLD"))
     acc.merge(InputRenameCfg("LArHitContainer","LArHitFCAL","LArHitFCALOLD"))
-    LArHitFilter = CompFactory.LArHitFilter
-    acc.addEventAlgo(LArHitFilter("LArHitFilter"))
+    acc.addEventAlgo(CompFactory.LArHitFilter("LArHitFilter"))
     return acc

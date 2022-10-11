@@ -7,6 +7,7 @@ def createJetConfigFlags():
 
     flags.addFlag("Jet.doUpstreamDependencies", False)
     flags.addFlag("Jet.WriteToAOD", False)
+    flags.addFlag("Jet.useCalibJetThreshold", True)
 
     return flags
 

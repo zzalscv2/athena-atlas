@@ -1,5 +1,5 @@
 #!/usr/bin/env python
-# Copyright (C) 2002-2020 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
 
 # art-description: HelloWorld in athenaHLT with OH monitoring
 # art-type: build
@@ -21,7 +21,7 @@ ex.perfmon = False # perfmon currently not fully supported with athenaHLT -M
 test = Test.Test()
 test.art_type = 'build'
 test.exec_steps = [ex]
-test.check_steps = TrigP1TestSteps.default_check_steps_OHMon(test, 'r0000360026_athenaHLT_HLT-Histogramming.root:run_360026/lb_-1')
+test.check_steps = TrigP1TestSteps.default_check_steps_OHMon(test, 'r0000431885_athenaHLT_HLT-Histogramming.root:run_431885/lb_-1')
 
 import sys
 sys.exit(test.run())

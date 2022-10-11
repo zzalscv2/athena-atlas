@@ -148,6 +148,8 @@ bool TrigEgammaEmulationPrecisionElectronHypoTool::decide(   const Trig::TrigDat
     return false;
   }
   PassedCuts = PassedCuts + 1; // ET_em
+  if(m_doNoPid) return true;
+
 
 
   // d0 for LRT

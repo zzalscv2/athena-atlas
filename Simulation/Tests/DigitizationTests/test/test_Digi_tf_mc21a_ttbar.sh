@@ -21,7 +21,7 @@ LowPtMinbiasHitsFiles="/cvmfs/atlas-nightlies.cern.ch/repo/data/data-art/Digitiz
 
 # config only
 Digi_tf.py \
---conditionsTag default:OFLCOND-MC21-SDR-RUN3-05 \
+--conditionsTag default:OFLCOND-MC21-SDR-RUN3-07 \
 --digiSeedOffset1 170 --digiSeedOffset2 170 \
 --digiSteeringConf 'StandardSignalOnlyTruth' \
 --geometryVersion default:ATLAS-R3S-2021-02-00-00 \
@@ -38,7 +38,7 @@ Digi_tf.py \
 
 # full run
 Digi_tf.py \
---conditionsTag default:OFLCOND-MC21-SDR-RUN3-05 \
+--conditionsTag default:OFLCOND-MC21-SDR-RUN3-07 \
 --digiSeedOffset1 170 --digiSeedOffset2 170 \
 --digiSteeringConf 'StandardSignalOnlyTruth' \
 --geometryVersion default:ATLAS-R3S-2021-02-00-00 \
@@ -64,7 +64,7 @@ if [[ $rc -eq 0 ]]
 then
     Digi_tf.py \
     --CA \
-    --conditionsTag default:OFLCOND-MC21-SDR-RUN3-05 \
+    --conditionsTag default:OFLCOND-MC21-SDR-RUN3-07 \
     --digiSeedOffset1 170 --digiSeedOffset2 170 \
     --digiSteeringConf 'StandardSignalOnlyTruth' \
     --geometryVersion default:ATLAS-R3S-2021-02-00-00 \

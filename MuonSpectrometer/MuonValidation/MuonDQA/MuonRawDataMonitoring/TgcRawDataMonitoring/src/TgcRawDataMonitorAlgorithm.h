@@ -78,6 +78,7 @@ class TgcRawDataMonitorAlgorithm : public AthMonitorAlgorithm {
     const xAOD::Muon* muon{};
     std::set<std::string> passedChambers;
     std::set<std::string> chambersHasHit;
+    std::map<std::string,std::set<double>> residuals;
   };
   struct ExtTrigInfo{
     double eta{};
@@ -211,7 +212,9 @@ class TgcRawDataMonitorAlgorithm : public AthMonitorAlgorithm {
   DoubleProperty m_residualWindow{this,"ResidualWindow", 200.,"Window size in mm between hit position and track-extrapolated position"};
   DoubleProperty m_dPhiCutOnM3{this,"dPhiCutOnM3", 0.2,"Window size in delta phi on M3 between hit position and track-extrapolated position"};
   DoubleProperty m_dRCutOnM3{this,"dRCutOnM3", 1000.,"Window size in delta R (radious) on M3 between hit position and track-extrapolated position"};
-  
+  IntegerProperty m_nHitsInOtherBWTGCWire{this,"nHitsInOtherTGCWire",3,"Number of hits in other BW-TGC wire channels"};
+  IntegerProperty m_nHitsInOtherBWTGCStrip{this,"nHitsInOtherTGCStrip",2,"Number of hits in other BW-TGC strip channels"};
+
   std::vector<double> m_extZposition;
   std::vector<CtpDecMonObj> m_CtpDecMonObj;
   std::set<std::string> m_thrMonList;

@@ -191,6 +191,7 @@
 + Reconstruction/RecExample/RecExConfig
 + Simulation/Tools/AtlasCLHEP_RandomGenerators
 + Tools/ART
++ Tools/Campaigns
 + Tools/PathResolver
 + Tools/PmbCxxUtils
 + Tools/PyJobTransforms

@@ -1,14 +1,16 @@
 /*
-  Copyright (C) 2002-2017 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
 */
 
-#ifndef __TRIG_COMBINATORIAL_SETTINGS_H__
-#define __TRIG_COMBINATORIAL_SETTINGS_H__
+#ifndef TRIGINDETPATTRECOTOOLS_TRIG_COMBINATORIAL_SETTINGS_H
+#define TRIGINDETPATTRECOTOOLS_TRIG_COMBINATORIAL_SETTINGS_H
 
 class IRoiDescriptor;
 #include <vector>
 #include "TrigInDetPattRecoEvent/TrigInDetSiLayer.h"
 #include "TrigInDetPattRecoTools/TrigSeedML_LUT.h"
+#include "TrigInDetPattRecoTools/FasTrackConnector.h"
+#include "TrigInDetPattRecoTools/GNN_Geometry.h"
 
 typedef struct TrigCombinatorialSettings {
 public:
@@ -65,6 +67,9 @@ public:
 
   float m_zvError;
   bool m_LRTmode;
+
+  const FASTRACK_CONNECTOR* m_conn;
+  const TrigFTF_GNN_GEOMETRY*       m_geo;
 
   std::vector<TRIG_INDET_SI_LAYER> m_layerGeometry;
 

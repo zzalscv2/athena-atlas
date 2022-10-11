@@ -150,11 +150,6 @@ def L1CaloFEXSimCfg(flags):
         gFEX.gFEXSysSimTool.Key_gMETComponentsRmsOutputContainer=getSimHandle(gFEX.gFEXSysSimTool.Key_gMETComponentsRmsOutputContainer)
         gFEX.gFEXSysSimTool.Key_gScalarENoiseCutOutputContainer=getSimHandle(gFEX.gFEXSysSimTool.Key_gScalarENoiseCutOutputContainer)
         gFEX.gFEXSysSimTool.Key_gScalarERmsOutputContainer=getSimHandle(gFEX.gFEXSysSimTool.Key_gScalarERmsOutputContainer)
-        # set jFEX input containers
-        jFEX.myEDMSR=jFEX.jFEXSysSimTool.Key_jFexSRJetOutputContainer
-        jFEX.myEDMLR=jFEX.jFEXSysSimTool.Key_jFexLRJetOutputContainer
-        jFEX.myEDMTau=jFEX.jFEXSysSimTool.Key_jFexTauOutputContainer
-        jFEX.myEDMFwdEl=jFEX.jFEXSysSimTool.Key_jFexFwdElOutputContainer
 
     return acc
 

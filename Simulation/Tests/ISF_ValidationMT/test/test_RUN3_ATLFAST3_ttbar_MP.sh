@@ -11,14 +11,14 @@
 # art-output: Config*.pkl
 
 # RUN3 setup
-# ATLAS-R3S-2021-03-00-00 and OFLCOND-MC16-SDR-RUN3-05
+# ATLAS-R3S-2021-03-00-00 and OFLCOND-MC21-SDR-RUN3-07
 
 export ATHENA_CORE_NUMBER=8
 
 Sim_tf.py \
     --multiprocess \
     --CA \
-    --conditionsTag 'default:OFLCOND-MC16-SDR-RUN3-05' \
+    --conditionsTag 'default:OFLCOND-MC21-SDR-RUN3-07' \
     --simulator 'ATLFAST3MT' \
     --postInclude 'PyJobTransforms.UseFrontier' \
     --preInclude 'EVNTtoHITS:Campaigns.MC21Simulation' \
@@ -37,7 +37,7 @@ status=$rc
 rc2=-9999
 Sim_tf.py \
     --multiprocess \
-    --conditionsTag 'default:OFLCOND-MC16-SDR-RUN3-05' \
+    --conditionsTag 'default:OFLCOND-MC21-SDR-RUN3-07' \
     --simulator 'ATLFAST3MT' \
     --postInclude 'default:PyJobTransforms/UseFrontier.py' \
 --preInclude 'EVNTtoHITS:Campaigns/MC21Simulation.py' \
@@ -50,7 +50,7 @@ Sim_tf.py \
 
 Sim_tf.py \
 --multiprocess \
---conditionsTag 'default:OFLCOND-MC16-SDR-RUN3-05' \
+--conditionsTag 'default:OFLCOND-MC21-SDR-RUN3-07' \
 --simulator 'ATLFAST3MT' \
 --postInclude 'default:PyJobTransforms/UseFrontier.py' \
 --preInclude 'EVNTtoHITS:Campaigns/MC21Simulation.py' \
@@ -75,6 +75,7 @@ then
   acmd.py diff-root test.CG.HITS.pool.root test.CA.HITS.pool.root \
     --error-mode resilient \
     --mode semi-detailed \
+    --order-trees \
     --ignore-leaves RecoTimingObj_p1_EVNTtoHITS_timings index_ref
   rc3=$?
   status=$rc3

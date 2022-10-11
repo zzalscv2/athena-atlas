@@ -20,7 +20,7 @@ HSHitsFile="/cvmfs/atlas-nightlies.cern.ch/repo/data/data-art/DigitizationTests/
 # config only
 Digi_tf.py \
 --DataRunNumber 330000 \
---conditionsTag default:OFLCOND-MC21-SDR-RUN3-05 \
+--conditionsTag default:OFLCOND-MC21-SDR-RUN3-07 \
 --digiSeedOffset1 170 --digiSeedOffset2 170 \
 --geometryVersion default:ATLAS-R3S-2021-02-00-00 \
 --inputHITSFile ${HSHitsFile} \
@@ -35,7 +35,7 @@ Digi_tf.py \
 # full run
 Digi_tf.py \
 --DataRunNumber 330000 \
---conditionsTag default:OFLCOND-MC21-SDR-RUN3-05 \
+--conditionsTag default:OFLCOND-MC21-SDR-RUN3-07 \
 --digiSeedOffset1 170 --digiSeedOffset2 170 \
 --geometryVersion default:ATLAS-R3S-2021-02-00-00 \
 --inputHITSFile ${HSHitsFile} \
@@ -59,7 +59,7 @@ then
     Digi_tf.py \
     --CA \
     --DataRunNumber 330000 \
-    --conditionsTag default:OFLCOND-MC21-SDR-RUN3-05 \
+    --conditionsTag default:OFLCOND-MC21-SDR-RUN3-07 \
     --digiSeedOffset1 170 --digiSeedOffset2 170 \
     --geometryVersion default:ATLAS-R3S-2021-02-00-00 \
     --inputHITSFile ${HSHitsFile} \

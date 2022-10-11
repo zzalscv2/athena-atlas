@@ -30,7 +30,7 @@ if __name__ == '__main__':
     parser.add_argument('--evtMax',type=int,default=-1,help="number of events")
     parser.add_argument('--filesInput',nargs='+',help="input files",required=True)
     parser.add_argument('--outputLevel',default="WARNING",choices={ 'INFO','WARNING','DEBUG','VERBOSE'})
-    parser.add_argument('--outputs',nargs='+',choices={"jTowers"},required=True, help="What data to decode and output.")
+    parser.add_argument('--outputs',nargs='+',choices={"jTowers","jTOBs"},required=True, help="What data to decode and output.")
     args = parser.parse_args()
 
 
@@ -83,7 +83,7 @@ if __name__ == '__main__':
     # Generate run3 L1 menu
     from TrigConfigSvc.TrigConfigSvcCfg import L1ConfigSvcCfg
     acc.merge(L1ConfigSvcCfg(flags))
-
+    
     decoderTools = []
     outputEDM = []
     maybeMissingRobs = []
@@ -92,6 +92,17 @@ if __name__ == '__main__':
         auxType = edmType.replace('Container','AuxContainer')
         return [f'{edmType}#{edmName}',
             f'{auxType}#{edmName}Aux.']
+
+    ########################################
+    # jFEX ROIs
+    ########################################
+    if 'jTOBs' in args.outputs:
+        from L1CaloFEXByteStream.L1CaloFEXByteStreamConfig import jFexRoiByteStreamToolCfg
+        jFexTool = jFexRoiByteStreamToolCfg('jFexBSDecoder', flags)
+        for module_id in jFexTool.ROBIDs:
+            maybeMissingRobs.append(module_id)
+
+        decoderTools += [jFexTool]
 
 
     ########################################
@@ -114,15 +125,24 @@ if __name__ == '__main__':
     ########################################
     # Decorators   
     ########################################
-    from L1CaloFEXSim.L1CaloFEXSimCfg import ReadSCellFromByteStreamCfg
-    if any(["data22_cos" in f for f in args.filesInput]):
+    
+    # Decodes LATOME into SCell container
+    from L1CaloFEXSim.L1CaloFEXSimCfg import ReadSCellFromByteStreamCfg,TriggerTowersInputCfg
+    if any(["data22_cos" or "data22_comm" in f for f in args.filesInput]):
         acc.merge(ReadSCellFromByteStreamCfg(flags,keyIn="SC_ET_ID"))
     else:
         acc.merge(ReadSCellFromByteStreamCfg(flags))
     
-    DecoratorAlgo = L1CaloFEXDecoratorCfg('FEX2SCellDecorator')   
+    # Creates the TriggerTower container
+    acc.merge(TriggerTowersInputCfg(flags))
+    
+    # Uses SCell to decorate the jTowers
+    DecoratorAlgo = L1CaloFEXDecoratorCfg('jFexTower2SCellDecorator')   
     acc.merge(DecoratorAlgo)
 
+
+
+    # Saving containers
     from OutputStreamAthenaPool.OutputStreamConfig import OutputStreamCfg
     log.debug('Adding the following output EDM to ItemList: %s', outputEDM)
     acc.merge(OutputStreamCfg(flags, 'AOD', ItemList=outputEDM))

@@ -45,21 +45,16 @@ StatusCode TrigHLTMonitorAlgorithm::fillHistograms( const EventContext& ctx ) co
   ////////////////////////////////////
   // L1 items monitoring
 
-  const std::vector<std::string> L1items = m_trigDecTool->getChainGroup("L1_.*")->getListOfTriggers();
-
-  // Fill. First argument is the tool (GMT) name as defined in the py file, 
-  // all others are the variables to be saved.
-  // Alternative fill method. Get the group yourself, and pass it to the fill function.
+  const Trig::ChainGroup* l1group = m_trigDecTool->getChainGroup("L1_.*");
+  const std::vector<std::string> L1items = l1group->getListOfTriggers();
+  const std::vector<bool> isPassed = l1group->isPassedForEach();
 
   ATH_MSG_DEBUG("Filling L1Events histogram");
-  for(const std::string& l1name : L1items) {
-
-    // Manually create single-trigger group to avoid regex parsing (ATR-23427)
-    const Trig::ChainGroup* trig = m_trigDecTool->getChainGroup(l1name, TrigDefs::Group::NoRegex);
-    if(m_trigDecTool->isPassed(trig)) {
+  for(size_t i = 0; i<isPassed.size(); i++) {
+    if(isPassed[i]) {
       /// Fill L1 histogram
-      L1Events = l1name;
-      ATH_MSG_DEBUG("L1Chain " << l1name << " is passed");
+      L1Events = L1items[i];
+      ATH_MSG_DEBUG("L1Chain " << L1items[i] << " is passed");
       fill(tool,L1Events);
     }
   }
@@ -119,13 +114,13 @@ StatusCode TrigHLTMonitorAlgorithm::fillHistograms( const EventContext& ctx ) co
     //Loop over HLT chains
     ATH_MSG_DEBUG( "Filling HLT" << signaturename << " and RoI information for " << thisregex );
 
-    const std::vector<std::string> chainNames = m_trigDecTool->getChainGroup(thisregex)->getListOfTriggers();
+    const Trig::ChainGroup* group = m_trigDecTool->getChainGroup(thisregex);
+    const std::vector<std::string> chainNames = group->getListOfTriggers();
+    const std::vector<bool> isPassed = group->isPassedForEach(TrigDefs::requireDecision);
 
-    for(const std::string& chain : chainNames) {
-
-      // Manually create single-trigger group to avoid regex parsing (ATR-23427)
-      const Trig::ChainGroup* trig = m_trigDecTool->getChainGroup(chain, TrigDefs::Group::NoRegex);
-      if(m_trigDecTool->isPassed(trig, TrigDefs::requireDecision)) {
+    for(size_t i=0; i<isPassed.size(); i++) {
+      if(isPassed[i]) {
+        const std::string& chain = chainNames[i];
         ATH_MSG_DEBUG( "    Chain " << chain << " IS passed");
 
         /// Fill plain chains histogram

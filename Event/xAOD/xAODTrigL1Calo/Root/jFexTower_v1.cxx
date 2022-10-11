@@ -12,6 +12,8 @@ namespace xAOD {
 
 AUXSTORE_PRIMITIVE_SETTER_AND_GETTER( jFexTower_v1, float    , eta         , setEta         )
 AUXSTORE_PRIMITIVE_SETTER_AND_GETTER( jFexTower_v1, float    , phi         , setPhi         )
+AUXSTORE_PRIMITIVE_SETTER_AND_GETTER( jFexTower_v1, int      , iEta        , setiEta        )
+AUXSTORE_PRIMITIVE_SETTER_AND_GETTER( jFexTower_v1, int      , iPhi        , setiPhi        )
 AUXSTORE_PRIMITIVE_SETTER_AND_GETTER( jFexTower_v1, uint8_t  , module      , setModule      )
 AUXSTORE_PRIMITIVE_SETTER_AND_GETTER( jFexTower_v1, uint8_t  , fpga        , setFpga        )
 AUXSTORE_PRIMITIVE_SETTER_AND_GETTER( jFexTower_v1, uint8_t  , channel     , setChannel     )
@@ -31,6 +33,8 @@ void jFexTower_v1::initialize(const float Eta,const float Phi)
 
 void jFexTower_v1::initialize(const float Eta,
                               const float Phi,
+                              const int IEta,
+                              const int IPhi,
                               const uint32_t IDSim,
                               const uint8_t source,
                               const std::vector<uint16_t>& Et_count,
@@ -42,6 +46,8 @@ void jFexTower_v1::initialize(const float Eta,
 {
     setEta( Eta );
     setPhi( Phi );
+    setiEta( IEta );
+    setiPhi( IPhi );
     setModule( Module );
     setFpga( Fpga );
     setChannel( Channel );
@@ -52,33 +58,14 @@ void jFexTower_v1::initialize(const float Eta,
     setEt_count( Et_count );
 }
 
-/// Return Et in EM layer
-uint16_t jFexTower_v1::jTowerEt_EM() const {
+/// Returns the Et of the Tower (in counts! it needs conversion)
+uint16_t jFexTower_v1::jTowerEt() const {
     
-    if(et_count().size() == 2){
+    if(et_count().size() == 1){
         return et_count().at(0);
     }
     return 0;
 }
-
-/// Return Et in HAD layer
-uint16_t jFexTower_v1::jTowerEt_HAD() const {
-    
-    if(et_count().size() == 2){
-        return et_count().at(1);
-    }
-    return 0;
-}
-
-/// Return jTower Total Et
-unsigned int jFexTower_v1::jTowerEt() const {
-    
-    if(et_count().size() == 2){
-        return et_count().at(0) + et_count().at(1);
-    }
-    return 0;
-}
-
 
 
 

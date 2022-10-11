@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
 */
 
 // class header
@@ -393,7 +393,7 @@ StatusCode iGeant4::G4TransportTool::setupEvent(const EventContext& ctx)
 }
 
 //________________________________________________________________________
-StatusCode iGeant4::G4TransportTool::releaseEvent(const EventContext&)
+StatusCode iGeant4::G4TransportTool::releaseEvent(const EventContext& ctx)
 {
   ATH_MSG_DEBUG ( "release Event" );
   /** @todo : strip hits of the tracks ... */
@@ -427,8 +427,7 @@ StatusCode iGeant4::G4TransportTool::releaseEvent(const EventContext&)
     const float avgTimePerEvent=(m_nrOfEntries>1) ? m_accumulatedEventTime/(numEntriesFloat-1.f) : eventTime;
     const float avgTimeSqPerEvent=(m_nrOfEntries>1) ? m_accumulatedEventTimeSq/(numEntriesFloat-1.f) : eventTime*eventTime;
     const float sigma=(m_nrOfEntries>2) ? std::sqrt(std::abs(avgTimeSqPerEvent - avgTimePerEvent*avgTimePerEvent)/(numEntriesFloat-2.f)) : 0;
-
-    ATH_MSG_INFO("\t Event nr. "<<m_nrOfEntries<<" took " << std::setprecision(4) <<
+    ATH_MSG_INFO("\t Run:Event "<<ctx.eventID().run_number()<<":"<<ctx.eventID().event_number() << "\t ("<<m_nrOfEntries<<"th event for this worker) took " << std::setprecision(4) <<
                  eventTime << " s. New average " << std::setprecision(4) <<
                  avgTimePerEvent<<" +- "<<std::setprecision(4) << sigma);
   }

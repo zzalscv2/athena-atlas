@@ -206,10 +206,10 @@ def createTriggerFlags(doTriggerRecoFlags):
     flags.addFlag('Trigger.ExtraEDMList', [])
 
     # tag to be used for condutions used by HLT code
-    flags.addFlag('Trigger.OnlineCondTag', 'CONDBR2-HLTP-2018-03')
+    flags.addFlag('Trigger.OnlineCondTag', 'CONDBR2-HLTP-2022-02')
 
     # geometry version used by HLT online
-    flags.addFlag('Trigger.OnlineGeoTag', 'ATLAS-R2-2016-01-00-01')
+    flags.addFlag('Trigger.OnlineGeoTag', 'ATLAS-R3S-2021-03-00-00')
 
     def __availableRecoMetadata(flags):
         systems = ['L1','HLT']
@@ -234,6 +234,11 @@ def createTriggerFlags(doTriggerRecoFlags):
 
     # Offline flag, determins if the HLT trigger decision and the HLT result should be decoded in reconstruction in jobs with Reco.EnableTrigger
     flags.addFlag("Trigger.DecodeHLT", True)
+
+    # Offline flag, controls the scheduling of the validation algorithm which performs consistency checks on the T0 extracted trigger decision data (recommended).
+    # And if the algorithm should issue a WARNING or ERROR (and Failure) on encountering issues
+    flags.addFlag("Trigger.DecisionMakerValidation.Execute", True)
+    flags.addFlag("Trigger.DecisionMakerValidation.ErrorMode", True)
 
     # the configuration source
     # see https://twiki.cern.ch/twiki/bin/view/Atlas/TriggerConfigFlag

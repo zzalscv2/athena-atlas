@@ -28,8 +28,10 @@ def getStreamHITS_ItemList(ConfigFlags):
     if ConfigFlags.Sim.IncludeParentsInG4Event:
         ItemList += ["McEventCollection#GEN_EVENT"]
 
-    ItemList += ["xAOD::JetContainer#*",
-                 "xAOD::JetAuxContainer#*"]
+    ItemList += ["xAOD::JetContainer#AntiKt4TruthJets",
+                 "xAOD::AuxContainerBase!#AntiKt4TruthJetsAux.-constituentLinks.-constituentWeights",
+                 "xAOD::JetContainer#AntiKt6TruthJets",
+                 "xAOD::AuxContainerBase!#AntiKt6TruthJetsAux.-constituentLinks.-constituentWeights"]
 
     # pile-up truth particles
     ItemList += ["xAOD::TruthParticleContainer#TruthPileupParticles",

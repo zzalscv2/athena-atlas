@@ -70,8 +70,6 @@ class TopoAlgoDef:
         alg.addvariable('REtaMin',   0)
         alg.addvariable('RHadMin',   0)
         alg.addvariable('WsTotMin',  0)
-        alg.addvariable('MinEta',    0*_eta_conversion)
-        alg.addvariable('MaxEta',   49*_eta_conversion)
         tm.registerTopoAlgo(alg)
 
         alg = AlgConf.eEmSelect( name = 'eEMabl', inputs = 'eEmTobs', outputs = 'eEMabl' )
@@ -81,8 +79,6 @@ class TopoAlgoDef:
         alg.addvariable('REtaMin',   1)
         alg.addvariable('RHadMin',   1)
         alg.addvariable('WsTotMin',  1)
-        alg.addvariable('MinEta',    0*_eta_conversion)
-        alg.addvariable('MaxEta',   49*_eta_conversion)
         tm.registerTopoAlgo(alg)
 
         alg = AlgConf.eEmSelect( name = 'eEMabm', inputs = 'eEmTobs', outputs = 'eEMabm' )
@@ -92,8 +88,6 @@ class TopoAlgoDef:
         alg.addvariable('REtaMin',   2)
         alg.addvariable('RHadMin',   2)
         alg.addvariable('WsTotMin',  2)
-        alg.addvariable('MinEta',    0*_eta_conversion)
-        alg.addvariable('MaxEta',   49*_eta_conversion)
         tm.registerTopoAlgo(alg)
 
         # eTAU inputs
@@ -212,13 +206,15 @@ class TopoAlgoDef:
         tm.registerTopoAlgo(alg)
     
         #LATE 
-        #TODO: update to new muon inputs
         alg = AlgConf.MuonSort_1BC( name = 'LMUs', inputs = 'LateMuonTobArray', outputs = 'LMUs' )
         alg.addgeneric('InputWidth', HW.muonInputWidth)
         alg.addgeneric('OutputWidth', 1)
         alg.addgeneric('nDelayedMuons', 1)
         alg.addvariable('MinEta',  0*_eta_conversion)
         alg.addvariable('MaxEta', 25*_eta_conversion)
+        alg.addvariable('InnerCoinCut', 0)
+        alg.addvariable('FullStationCut', 1)
+        alg.addvariable('GoodMFieldCut', 0)
         tm.registerTopoAlgo(alg)
 
         #jJets inputs
@@ -873,7 +869,6 @@ class TopoAlgoDef:
 
                 
         # LATE MUON : LATE-MU10s1
-        # TODO: to be updated with phase1 muons
         for x in [     
             #{"otype" : "LATE-MU", "ocut" : 10, "inputwidth": HW.muonOutputWidthSort},
             {"otype" : "LATE-MU", "ocut" : 10, "inputwidth": HW.NumberOfDelayedMuons},

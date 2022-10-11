@@ -6,6 +6,7 @@
 
 #include <vector>
 #include <string>
+#include <chrono>
 
 // TDAQ include files
 
@@ -45,16 +46,29 @@ struct Params
   bool print_raw {false};
   unsigned int printout_level {0};
   unsigned int max_events {0};
+  std::vector <std::string> detectors;
   std::vector <std::string> file_names;
+};
+
+struct Statistics
+{
+  static const unsigned int max_stat {1000000};
+  unsigned int nevents {0};
+  unsigned int stat_events {0};
+  std::vector <unsigned int> nhits; 
+  std::vector <float> elapsed_vector;
+  std::vector <float> elapsed_vector_event;
 };
 
 void test_nsw_common_decoder_help (char *progname)
 {
-  std::cout << "Usage: " << progname << " [-v] [-t] [-f] [-h] file1, file2, ..." << std::endl;
+  std::cout << "Usage: " << progname
+	    << " [-v] [-r] [-t] [-f] [-d <MMG/STG>] [-n events] [-h] file1, file2, ..." << std::endl;
   std::cout << "\t\t[-n events] maximum number of events to read (default = all)" << std::endl;
   std::cout << "\t\t[-r] print raw fragments" << std::endl;
   std::cout << "\t\t[-t] only shows hits taken from tree view of decoded data" << std::endl;
   std::cout << "\t\t[-f] only shows hits taken from flat view of decoded data" << std::endl;
+  std::cout << "\t\t[-d <MMG/STG>] select one of the two subdetectors" << std::endl;
   std::cout << "\t\tMultiple [-v] options increase printout detail level" << std::endl;
 }
 
@@ -65,12 +79,18 @@ int test_nsw_common_decoder_opt (int argc, char **argv, Params& params)
 
   for (i=1; i < argc; ++i)
   {
+    std::string det;
+
     if (argv[i][0] == '-')
       switch (argv[i][1])
       {
         case 'v':
 	  params.printout = true;
           ++params.printout_level;
+	  break;
+        case 'd':
+	  det = argv[++i];
+	  params.detectors.push_back (det);
 	  break;
         case 'r':
 	  params.print_raw = true;
@@ -113,16 +133,42 @@ int test_nsw_common_decoder_init ()
   return errcode;
 }
 
-int test_nsw_common_decoder_end ()
+int test_nsw_common_decoder_end (const Statistics &statistics)
 {
   int errcode = ERR_NOERR;
+  double nhits_average = 0, elapsed_average = 0, elapsed_average_event = 0;
+
+  for (auto n : statistics.nhits)
+    nhits_average += n;
+
+  for (auto f : statistics.elapsed_vector)
+    elapsed_average += f;
+
+  for (auto f : statistics.elapsed_vector_event)
+    elapsed_average_event += f;
+
+  nhits_average /= statistics.nhits.size ();
+  elapsed_average /= statistics.elapsed_vector.size ();
+  elapsed_average_event /= statistics.elapsed_vector_event.size ();
+
+  std::cout << "Total event number                = " << statistics.nevents << std::endl;
+  std::cout << "Total event number for statistics = " << statistics.stat_events << std::endl;
+  std::cout << "Fragments                         = " << statistics.elapsed_vector.size () << std::endl;
+  std::cout << "Events with fragments             = " << statistics.elapsed_vector_event.size () << std::endl;
+  std::cout << "Average elapsed time per fragment = " << elapsed_average << " ms" << std::endl;
+  std::cout << "Average elapsed time per event    = " << elapsed_average_event << " ms" << std::endl;
+  std::cout << "Average hits per event            = " << nhits_average << std::endl;
+
   return errcode;
 }
 
-int test_nsw_common_decoder_event (eformat::read::FullEventFragment &f, const Params& params)
+int test_nsw_common_decoder_event (const eformat::read::FullEventFragment &f, const Params &params, Statistics &statistics)
 {
   int errcode = ERR_NOERR;
   std::vector <eformat::read::ROBFragment> robs;
+
+  unsigned int time_elapsed_event = 0;
+  unsigned int nchan_event = 0;
 
   if (params.printout_level > 2)
     std::cout << "Entering fragment analysis" << std::endl;
@@ -160,222 +206,253 @@ int test_nsw_common_decoder_event (eformat::read::FullEventFragment &f, const Pa
 
     if (is_nsw && m < sectors)
     {
-      if (params.printout_level > 2)
-        std::cout << "NSW fragment found: detector ID = 0x" << std::hex << s << std::dec << " length " << r->rod_ndata () << std::endl;
-
-      // Print out raw fragment
-
-      if (params.print_raw)
+      if (params.detectors.size () == 0 ||
+	  ((std::find (params.detectors.begin (), params.detectors.end (), "MMG") != params.detectors.end () && is_mmg) ||
+	   (std::find (params.detectors.begin (), params.detectors.end (), "STG") != params.detectors.end () && is_stg)))
       {
-	std::cout << "ROD fragment size in words: Total: " << r->rod_fragment_size_word ()
-                  << " Header: " << r->rod_header_size_word () << " Trailer: " << r->rod_trailer_size_word () << std::endl;
-	std::cout << "ROD source ID: 0x" << std::hex << r->rod_source_id ()
-		  << " ROD L1 ID: " << r->rod_lvl1_id () << std::dec << std::endl;
-	std::cout << "Data words: " << r->rod_ndata () << std::endl;
-	std::cout << std::hex;
+	if (params.printout_level > 2)
+	  std::cout << "NSW fragment found: detector ID = 0x" << std::hex << s << std::dec << " length " << r->rod_ndata () << std::endl;
 
-	const uint32_t *bs = r->rod_data ();
+	// Print out raw fragment
 
-	for (unsigned int i = 0; i < r->rod_ndata (); ++i)
+	if (params.print_raw)
 	{
-	  std::cout << "\t" << bs[i];
-	  if (i % 4 == 3)
-	    std::cout << std::endl;
+	  std::cout << "ROD fragment size in words: Total: " << r->rod_fragment_size_word ()
+		    << " Header: " << r->rod_header_size_word () << " Trailer: " << r->rod_trailer_size_word () << std::endl;
+	  std::cout << "ROD source ID: 0x" << std::hex << r->rod_source_id ()
+		    << " ROD L1 ID: " << r->rod_lvl1_id () << std::dec << std::endl;
+	  std::cout << "Data words: " << r->rod_ndata () << std::endl;
+	  std::cout << std::hex;
+
+	  const uint32_t *bs = r->rod_data ();
+
+	  for (unsigned int i = 0; i < r->rod_ndata (); ++i)
+	  {
+	    std::cout << "\t" << bs[i];
+	    if (i % 4 == 3)
+	      std::cout << std::endl;
+	  }
+
+	  std::cout << std::dec;
 	}
 
-	std::cout << std::dec;
-      }
+	// Decode the ROB fragment (including sanity check)
 
-      // Decode the ROB fragment (including sanity check)
+	std::chrono::steady_clock::time_point begin = std::chrono::steady_clock::now ();
+	Muon::nsw::NSWCommonDecoder nsw_decoder (*r);
+	std::chrono::steady_clock::time_point end = std::chrono::steady_clock::now ();
 
-      Muon::nsw::NSWCommonDecoder nsw_decoder (*r);
+	unsigned int time_elapsed = std::chrono::duration_cast <std::chrono::microseconds> (end - begin).count ();
+	float time_elapsed_ms = static_cast <float> (time_elapsed) / 1000;
 
-      // Check direct access to channels and tree access to elinks and channels
+	if (statistics.stat_events < statistics.max_stat)
+	  statistics.elapsed_vector.push_back (time_elapsed_ms);
 
-      // Check the number of channels by accessing in both ways
+	time_elapsed_event += time_elapsed;
 
-      unsigned int nchan = 0;
-      const std::vector <Muon::nsw::NSWElink *>& links = nsw_decoder.get_elinks ();
-      for (auto i = links.begin (); i != links.end (); ++i)
-	nchan += (*i)->get_channels ().size ();
+	if (params.printout)
+	  std::cout << "Time difference = " << time_elapsed_ms << " [ms]" << std::endl;
 
-      if (nchan != nsw_decoder.get_channels ().size ())
-        ers::error (eformat::InconsistentChannelNumber (ERS_HERE, nchan, nsw_decoder.get_channels ().size ()));
+	// Check direct access to channels and tree access to elinks and channels
 
-      if (params.printout_level > 2)
-	std::cout << "Hit number = " << nchan << std::endl;
+	// Check the number of channels by accessing in both ways
 
-      // How to access information about detector elements and channels using the tree view
+	unsigned int nchan = 0;
+	const std::vector <Muon::nsw::NSWElink *>& links = nsw_decoder.get_elinks ();
+	for (auto i = links.begin (); i != links.end (); ++i)
+	  nchan += (*i)->get_channels ().size ();
 
-      if (params.tree_view)
-      {
-        for (auto i = links.begin (); i != links.end (); ++i)
-        {
-          if (! (*i)->isNull ())
-          {
-            uint16_t l1Id  = (*i)->l1Id ();
-            uint16_t bcId  = (*i)->bcId ();
+	if (nchan != nsw_decoder.get_channels ().size ())
+	  ers::error (eformat::InconsistentChannelNumber (ERS_HERE, nchan, nsw_decoder.get_channels ().size ()));
 
-            uint8_t sector = (*i)->elinkId ()->sector (); // (*i)->elinkId () returns a pointer to a Muon::nsw::ResourceId object
-            uint8_t layer  = (*i)->elinkId ()->layer ();
-	    uint8_t radius = (*i)->elinkId ()->radius ();
-            uint8_t elink  = (*i)->elinkId ()->elink ();  // elink number is not needed to decode channel position
+	if (params.printout_level > 2)
+	  std::cout << "Hit number = " << nchan << std::endl;
 
-            // Offline ID components
+	nchan_event += nchan;
 
-            std::string station_name;
+	// How to access information about detector elements and channels using the tree view
 
-            if (is_mmg)
-              station_name = (*i)->elinkId ()->is_large_station () ? "MML" : "MMS";
-            else
-              station_name = (*i)->elinkId ()->is_large_station () ? "STL" : "STS";
+	if (params.tree_view)
+	{
+	  for (auto i = links.begin (); i != links.end (); ++i)
+	  {
+	    if (! (*i)->isNull ())
+	    {
+	      uint16_t l1Id  = (*i)->l1Id ();
+	      uint16_t bcId  = (*i)->bcId ();
 
-            int8_t   station_eta    = (*i)->elinkId ()->station_eta ();
-            uint8_t  station_phi    = (*i)->elinkId ()->station_phi ();
-            uint8_t  multi_layer    = (*i)->elinkId ()->multi_layer ();
-            uint8_t  gas_gap        = (*i)->elinkId ()->gas_gap ();
+	      uint8_t sector = (*i)->elinkId ()->sector (); // (*i)->elinkId () returns a pointer to a Muon::nsw::ResourceId object
+	      uint8_t layer  = (*i)->elinkId ()->layer ();
+	      uint8_t radius = (*i)->elinkId ()->radius ();
+	      uint8_t elink  = (*i)->elinkId ()->elink ();  // elink number is not needed to decode channel position
 
-            const std::vector <Muon::nsw::VMMChannel *> channels = (*i)->get_channels ();
-            for (auto j = channels.begin (); j != channels.end (); ++j)
-            {
-              uint16_t vmm_number  = (*j)->vmm ();
-              uint16_t vmm_channel = (*j)->vmm_channel ();
-              uint16_t rel_bcid    = (*j)->rel_bcid ();
-              uint16_t pdo         = (*j)->pdo ();
-              uint16_t tdo         = (*j)->tdo ();
-              bool     parity      = (*j)->parity ();
-              bool     neighbor    = (*j)->neighbor ();
+	      // Offline ID components
 
-              // Get offline information
+	      std::string station_name;
 
-              uint8_t  channel_type   = (*j)->channel_type ();
-              uint16_t channel_number = (*j)->channel_number ();
+	      if (is_mmg)
+		station_name = (*i)->elinkId ()->is_large_station () ? "MML" : "MMS";
+	      else
+		station_name = (*i)->elinkId ()->is_large_station () ? "STL" : "STS";
 
-              if (params.printout)
-              {
-                if (params.printout_level > 1)
-                {
-                  std::cout << "ROD header:" << std::endl;
-                  std::cout << "\t\tROD fragment size (words)  " << r->rod_fragment_size_word () << std::endl;
-                  std::cout << "\t\tROD header size (words)    " << r->rod_header_size_word () << std::endl;
-                  std::cout << "\t\tROD trailer size (words)   " << r->rod_trailer_size_word () << std::endl;
-                  std::cout << "\t\tROD format version          0x" << std::hex << r->rod_version () << std::dec << std::endl;
-                  std::cout << "\t\tROD source ID               0x" << std::hex << r->rod_source_id () << std::dec << std::endl;
-                  std::cout << "\t\tROD L1ID                   " << r->rod_lvl1_id () << std::endl;
-                  std::cout << "\t\tROD BCID                   " << r->rod_bc_id () << std::endl;
-                  std::cout << "\t\tROD trigger type           " << r->rod_lvl1_trigger_type () << std::endl;
-                  std::cout << "\t\tROD run number             " << r->rod_run_no () << std::endl;
-                  std::cout << "\t\tROD detector event type    " << r->rod_detev_type () << std::endl;
-                  std::cout << "\t\tROD number of status words " << r->rod_nstatus () << std::endl;
-                }
+	      int8_t   station_eta    = (*i)->elinkId ()->station_eta ();
+	      uint8_t  station_phi    = (*i)->elinkId ()->station_phi ();
+	      uint8_t  multi_layer    = (*i)->elinkId ()->multi_layer ();
+	      uint8_t  gas_gap        = (*i)->elinkId ()->gas_gap ();
 
-                std::cout << "Online decoding of hit word 0x" << std::hex << (*j)->vmm_word ()
-                          << " on link 0x" << (*i)->elinkWord () << std::dec << std::endl;
-                std::cout << "Parity " << parity << " Calculated parity " << (*j)->calculate_parity () << std::endl;
-                std::cout << "L1ID " << l1Id << " BCID " << bcId << " Sector " << static_cast <unsigned int> (sector)
-                          << " Layer " << static_cast <unsigned int> (layer) << " Radius " << static_cast <unsigned int> (radius)
-                          << " Elink " << static_cast <unsigned int> (elink) << std::endl;
-                std::cout << "VMM " << vmm_number << " Channel " << vmm_channel << " Relative BCID " << rel_bcid 
-                          << " Pdo " << pdo << " Tdo " << tdo << " Parity " << parity << " Neighbor " << neighbor << std::endl;
-                std::cout << "Offline decoding of hit word 0x" << std::hex << (*j)->vmm_word ()
-                          << " on link 0x" << (*i)->elinkWord () << std::dec << std::endl;
-                std::cout << "Station name " << station_name << " Station eta " << static_cast <int> (station_eta)
-                          << " Station phi " << static_cast <unsigned int> (station_phi) << std::endl;
-                std::cout << "Multilayer " << static_cast <unsigned int> (multi_layer) << " Gas gap " << static_cast <unsigned int> (gas_gap)
-                          << " Channel type " << static_cast <unsigned int> (channel_type)
-                          << " Channel Number " << channel_number << std::endl;
-              }
-            }
-          }
-        }
-      }
+	      const std::vector <Muon::nsw::VMMChannel *> channels = (*i)->get_channels ();
+	      for (auto j = channels.begin (); j != channels.end (); ++j)
+	      {
+		uint16_t vmm_number  = (*j)->vmm ();
+		uint16_t vmm_channel = (*j)->vmm_channel ();
+		uint16_t rel_bcid    = (*j)->rel_bcid ();
+		uint16_t pdo         = (*j)->pdo ();
+		uint16_t tdo         = (*j)->tdo ();
+		bool     parity      = (*j)->parity ();
+		bool     neighbor    = (*j)->neighbor ();
 
-      // The same information can be accessed through the list of all the channels for that ROB as follows
+		// Get offline information
 
-      if (params.flat_view)
-      {
-        const std::vector <Muon::nsw::VMMChannel *>& channels = nsw_decoder.get_channels ();
-        for (auto j = channels.begin (); j != channels.end (); ++j)
-        {
-          const Muon::nsw::NSWElink *link = (*j)->elink ();
+		uint8_t  channel_type   = (*j)->channel_type ();
+		uint16_t channel_number = (*j)->channel_number ();
 
-          uint16_t l1Id  = link->l1Id ();
-          uint16_t bcId  = link->bcId ();
+		if (params.printout)
+		{
+		  if (params.printout_level > 1)
+		  {
+		    std::cout << "ROD header:" << std::endl;
+		    std::cout << "\t\tROD fragment size (words)  " << r->rod_fragment_size_word () << std::endl;
+		    std::cout << "\t\tROD header size (words)    " << r->rod_header_size_word () << std::endl;
+		    std::cout << "\t\tROD trailer size (words)   " << r->rod_trailer_size_word () << std::endl;
+		    std::cout << "\t\tROD format version          0x" << std::hex << r->rod_version () << std::dec << std::endl;
+		    std::cout << "\t\tROD source ID               0x" << std::hex << r->rod_source_id () << std::dec << std::endl;
+		    std::cout << "\t\tROD L1ID                   " << r->rod_lvl1_id () << std::endl;
+		    std::cout << "\t\tROD BCID                   " << r->rod_bc_id () << std::endl;
+		    std::cout << "\t\tROD trigger type           " << r->rod_lvl1_trigger_type () << std::endl;
+		    std::cout << "\t\tROD run number             " << r->rod_run_no () << std::endl;
+		    std::cout << "\t\tROD detector event type    " << r->rod_detev_type () << std::endl;
+		    std::cout << "\t\tROD number of status words " << r->rod_nstatus () << std::endl;
+		  }
 
-          uint8_t sector = link->elinkId ()->sector (); // (*i)->elinkId () returns a pointer to a Muon::nsw::ResourceId object
-          uint8_t layer  = link->elinkId ()->layer ();
-	  uint8_t radius = link->elinkId ()->radius ();
-          uint8_t elink  = link->elinkId ()->elink ();  // elink number is not needed to decode channel position
+		  std::cout << "Online decoding of hit word 0x" << std::hex << (*j)->vmm_word ()
+			    << " on link 0x" << (*i)->elinkWord () << std::dec << std::endl;
+		  std::cout << "Parity " << parity << " Calculated parity " << (*j)->calculate_parity () << std::endl;
+		  std::cout << "L1ID " << l1Id << " BCID " << bcId << " Sector " << static_cast <unsigned int> (sector)
+			    << " Layer " << static_cast <unsigned int> (layer) << " Radius " << static_cast <unsigned int> (radius)
+			    << " Elink " << static_cast <unsigned int> (elink) << std::endl;
+		  std::cout << "VMM " << vmm_number << " Channel " << vmm_channel << " Relative BCID " << rel_bcid 
+			    << " Pdo " << pdo << " Tdo " << tdo << " Parity " << parity << " Neighbor " << neighbor << std::endl;
+		  std::cout << "Offline decoding of hit word 0x" << std::hex << (*j)->vmm_word ()
+			    << " on link 0x" << (*i)->elinkWord () << std::dec << std::endl;
+		  std::cout << "Station name " << station_name << " Station eta " << static_cast <int> (station_eta)
+			    << " Station phi " << static_cast <unsigned int> (station_phi) << std::endl;
+		  std::cout << "Multilayer " << static_cast <unsigned int> (multi_layer) << " Gas gap " << static_cast <unsigned int> (gas_gap)
+			    << " Channel type " << static_cast <unsigned int> (channel_type)
+			    << " Channel Number " << channel_number << std::endl;
+		}
+	      }
+	    }
+	  }
+	}
 
-          uint16_t vmm_number  = (*j)->vmm ();
-          uint16_t vmm_channel = (*j)->vmm_channel ();
-          uint16_t rel_bcid    = (*j)->rel_bcid ();
-          uint16_t pdo         = (*j)->pdo ();
-          uint16_t tdo         = (*j)->tdo ();
-          bool     parity      = (*j)->parity ();
-          bool     neighbor    = (*j)->neighbor ();
+	// The same information can be accessed through the list of all the channels for that ROB as follows
 
-          // Offline ID components
+	if (params.flat_view)
+	{
+	  const std::vector <Muon::nsw::VMMChannel *>& channels = nsw_decoder.get_channels ();
+	  for (auto j = channels.begin (); j != channels.end (); ++j)
+	  {
+	    const Muon::nsw::NSWElink *link = (*j)->elink ();
 
-          std::string station_name;
-          if (is_mmg)
-            station_name = (*j)->is_large_station () ? "MML" : "MMS";
-          else
-            station_name = (*j)->is_large_station () ? "STL" : "STS";
+	    uint16_t l1Id  = link->l1Id ();
+	    uint16_t bcId  = link->bcId ();
 
-          int8_t   station_eta    = (*j)->station_eta ();
-          uint8_t  station_phi    = (*j)->station_phi ();
-          uint8_t  multi_layer    = (*j)->multi_layer ();
-          uint8_t  gas_gap        = (*j)->gas_gap ();
-          uint8_t  channel_type   = (*j)->channel_type ();
-          uint16_t channel_number = (*j)->channel_number ();
+	    uint8_t sector = link->elinkId ()->sector (); // (*i)->elinkId () returns a pointer to a Muon::nsw::ResourceId object
+	    uint8_t layer  = link->elinkId ()->layer ();
+	    uint8_t radius = link->elinkId ()->radius ();
+	    uint8_t elink  = link->elinkId ()->elink ();  // elink number is not needed to decode channel position
 
-          if (params.printout)
-          {
-            if (params.printout_level > 1)
-            {
-              std::cout << "ROD header:" << std::endl;
-              std::cout << "\t\tROD fragment size (words)  " << r->rod_fragment_size_word () << std::endl;
-              std::cout << "\t\tROD header size (words)    " << r->rod_header_size_word () << std::endl;
-              std::cout << "\t\tROD trailer size (words)   " << r->rod_trailer_size_word () << std::endl;
-              std::cout << "\t\tROD format version          0x" << std::hex << r->rod_version () << std::dec << std::endl;
-              std::cout << "\t\tROD source ID               0x" << std::hex << r->rod_source_id () << std::dec << std::endl;
-              std::cout << "\t\tROD L1ID                   " << r->rod_lvl1_id () << std::endl;
-              std::cout << "\t\tROD BCID                   " << r->rod_bc_id () << std::endl;
-              std::cout << "\t\tROD trigger type           " << r->rod_lvl1_trigger_type () << std::endl;
-              std::cout << "\t\tROD run number             " << r->rod_run_no () << std::endl;
-              std::cout << "\t\tROD detector event type    " << r->rod_detev_type () << std::endl;
-              std::cout << "\t\tROD number of status words " << r->rod_nstatus () << std::endl;
-            }
+	    uint16_t vmm_number  = (*j)->vmm ();
+	    uint16_t vmm_channel = (*j)->vmm_channel ();
+	    uint16_t rel_bcid    = (*j)->rel_bcid ();
+	    uint16_t pdo         = (*j)->pdo ();
+	    uint16_t tdo         = (*j)->tdo ();
+	    bool     parity      = (*j)->parity ();
+	    bool     neighbor    = (*j)->neighbor ();
 
-            std::cout << "Online decoding of hit word 0x" << std::hex << (*j)->vmm_word () << " on link 0x" << link->elinkWord () << std::dec << std::endl;
-            std::cout << "Parity " << parity << " Calculated parity " << (*j)->calculate_parity () << std::endl;
-            std::cout << "L1ID " << l1Id << " BCID " << bcId << " Sector " << static_cast <unsigned int> (sector)
-                      << " Layer " << static_cast <unsigned int> (layer) << " Radius " << static_cast <unsigned int> (radius)
-                      << " Elink " << static_cast <unsigned int> (elink) << std::endl;
-            std::cout << "VMM " << vmm_number << " Channel " << vmm_channel << " Relative BCID " << rel_bcid 
-                      << " Pdo " << pdo << " Tdo " << tdo << " Parity " << parity << " Neighbor " << neighbor << std::endl;
-            std::cout << "Offline decoding of hit word 0x" << std::hex << (*j)->vmm_word () << " on link 0x" << link->elinkWord () << std::dec << std::endl;
-            std::cout << "Station name " << station_name << " Station eta " << static_cast <int> (station_eta)
-                      << " Station phi " << static_cast <unsigned int> (station_phi) << std::endl;
-            std::cout << "Multilayer " << static_cast <unsigned int> (multi_layer) << " Gas gap " << static_cast <unsigned int> (gas_gap)
-                      << " Channel type " << static_cast <unsigned int> (channel_type)
-                      << " Channel Number " << channel_number << std::endl;
-          }
-        }
+	    // Offline ID components
+
+	    std::string station_name;
+	    if (is_mmg)
+	      station_name = (*j)->is_large_station () ? "MML" : "MMS";
+	    else
+	      station_name = (*j)->is_large_station () ? "STL" : "STS";
+
+	    int8_t   station_eta    = (*j)->station_eta ();
+	    uint8_t  station_phi    = (*j)->station_phi ();
+	    uint8_t  multi_layer    = (*j)->multi_layer ();
+	    uint8_t  gas_gap        = (*j)->gas_gap ();
+	    uint8_t  channel_type   = (*j)->channel_type ();
+	    uint16_t channel_number = (*j)->channel_number ();
+
+	    if (params.printout)
+	    {
+	      if (params.printout_level > 1)
+	      {
+		std::cout << "ROD header:" << std::endl;
+		std::cout << "\t\tROD fragment size (words)  " << r->rod_fragment_size_word () << std::endl;
+		std::cout << "\t\tROD header size (words)    " << r->rod_header_size_word () << std::endl;
+		std::cout << "\t\tROD trailer size (words)   " << r->rod_trailer_size_word () << std::endl;
+		std::cout << "\t\tROD format version          0x" << std::hex << r->rod_version () << std::dec << std::endl;
+		std::cout << "\t\tROD source ID               0x" << std::hex << r->rod_source_id () << std::dec << std::endl;
+		std::cout << "\t\tROD L1ID                   " << r->rod_lvl1_id () << std::endl;
+		std::cout << "\t\tROD BCID                   " << r->rod_bc_id () << std::endl;
+		std::cout << "\t\tROD trigger type           " << r->rod_lvl1_trigger_type () << std::endl;
+		std::cout << "\t\tROD run number             " << r->rod_run_no () << std::endl;
+		std::cout << "\t\tROD detector event type    " << r->rod_detev_type () << std::endl;
+		std::cout << "\t\tROD number of status words " << r->rod_nstatus () << std::endl;
+	      }
+
+	      std::cout << "Online decoding of hit word 0x" << std::hex << (*j)->vmm_word () << " on link 0x" << link->elinkWord () << std::dec << std::endl;
+	      std::cout << "Parity " << parity << " Calculated parity " << (*j)->calculate_parity () << std::endl;
+	      std::cout << "L1ID " << l1Id << " BCID " << bcId << " Sector " << static_cast <unsigned int> (sector)
+			<< " Layer " << static_cast <unsigned int> (layer) << " Radius " << static_cast <unsigned int> (radius)
+			<< " Elink " << static_cast <unsigned int> (elink) << std::endl;
+	      std::cout << "VMM " << vmm_number << " Channel " << vmm_channel << " Relative BCID " << rel_bcid 
+			<< " Pdo " << pdo << " Tdo " << tdo << " Parity " << parity << " Neighbor " << neighbor << std::endl;
+	      std::cout << "Offline decoding of hit word 0x" << std::hex << (*j)->vmm_word () << " on link 0x" << link->elinkWord () << std::dec << std::endl;
+	      std::cout << "Station name " << station_name << " Station eta " << static_cast <int> (station_eta)
+			<< " Station phi " << static_cast <unsigned int> (station_phi) << std::endl;
+	      std::cout << "Multilayer " << static_cast <unsigned int> (multi_layer) << " Gas gap " << static_cast <unsigned int> (gas_gap)
+			<< " Channel type " << static_cast <unsigned int> (channel_type)
+			<< " Channel Number " << channel_number << std::endl;
+	    }
+	  }
+	}
       }
     }
+  }
+
+  if (params.printout_level > 2)
+    std::cout << "Hit number per event = " << nchan_event << std::endl;
+
+  if (statistics.stat_events < statistics.max_stat)
+  {
+    float time_elapsed_event_ms = static_cast <float> (time_elapsed_event) / 1000;
+
+    ++statistics.stat_events;
+    statistics.elapsed_vector_event.push_back (time_elapsed_event_ms);
+    statistics.nhits.push_back (nchan_event);
   }
 
   return errcode;
 }
 
-int test_nsw_common_decoder_loop (const Params& params)
+int test_nsw_common_decoder_loop (const Params &params, Statistics &statistics)
 {
   int errcode = ERR_NOERR;
-  unsigned int tot_nev = 0;
 
-  for (const std::string& filename : params.file_names)
+  for (const std::string &filename : params.file_names)
   {
     char *buf = nullptr;
     unsigned int size = 0;
@@ -383,7 +460,7 @@ int test_nsw_common_decoder_loop (const Params& params)
     std::string data_file_name (filename);
 
     std::cout << "Reading file " << data_file_name << std::endl;
-    std::unique_ptr<DataReader> reader(pickDataReader(data_file_name));
+    std::unique_ptr <DataReader> reader (pickDataReader (data_file_name));
 
     if (!reader || !reader->good ())
     {
@@ -391,7 +468,7 @@ int test_nsw_common_decoder_loop (const Params& params)
       return ERR_GENERIC;
     }
 
-    while (!reader->endOfFile () && (params.max_events == 0 || tot_nev < params.max_events))
+    while (!reader->endOfFile () && (params.max_events == 0 || statistics.nevents < params.max_events))
     {
       try
       {
@@ -408,14 +485,14 @@ int test_nsw_common_decoder_loop (const Params& params)
         eformat::read::FullEventFragment f ((unsigned int *) buf);
         f.check ();
 
-        if ((errcode = test_nsw_common_decoder_event (f, params)) != ERR_NOERR)
+        if ((errcode = test_nsw_common_decoder_event (f, params, statistics)) != ERR_NOERR)
         {
           ers::error (ers::File (ERS_HERE, data_file_name.c_str ()));
           if (buf) delete buf;
           continue;
         }
 
-        ++tot_nev;
+        ++statistics.nevents;
       }
 
       catch (ers::Issue &ex)
@@ -430,8 +507,6 @@ int test_nsw_common_decoder_loop (const Params& params)
     }
   }
 
-  std::cout << "Total event number: " << tot_nev << std::endl;
-
   return errcode;
 }
 
@@ -439,6 +514,9 @@ int main (int argc, char **argv)
 {
   int err = ERR_NOERR;
   Params params;
+  Statistics statistics;
+
+  // Global statistics
 
   if ((err = test_nsw_common_decoder_opt (argc, argv, params)) != ERR_NOERR)
     return err;
@@ -446,10 +524,10 @@ int main (int argc, char **argv)
   if ((err = test_nsw_common_decoder_init ()) != ERR_NOERR)
     return err;
 
-  if ((err = test_nsw_common_decoder_loop (params)) != ERR_NOERR)
+  if ((err = test_nsw_common_decoder_loop (params, statistics)) != ERR_NOERR)
     return err;
 
-  if ((err = test_nsw_common_decoder_end ()) != ERR_NOERR)
+  if ((err = test_nsw_common_decoder_end (statistics)) != ERR_NOERR)
     return err;
 
   return err;

@@ -103,7 +103,7 @@ class MTCalibPebHypoOptions:
         self.PEBSubDetList = []
         self.CreateRandomData = {}
         self.EnableL1CaloPhase1 = False  # Sets ConfigFlags.Trigger.enableL1CaloPhase1
-        self.EnableL1MuonPhase1 = False  # Sets ConfigFlags.Trigger.enableL1MuonPhase1
+        self.EnableL1MuonPhase1 = True  # Sets ConfigFlags.Trigger.enableL1MuonPhase1
         self.EnableL1CaloLegacy = True  # Sets ConfigFlags.Trigger.enableL1CaloLegacy
 
 
