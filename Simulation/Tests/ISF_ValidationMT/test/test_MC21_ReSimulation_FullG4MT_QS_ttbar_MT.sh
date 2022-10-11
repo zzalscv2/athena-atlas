@@ -5,6 +5,7 @@
 # art-type: grid
 # art-architecture:  '#x86_64-intel'
 # art-output: log.*
+# art-output: Config*.pkl
 # art-output: original.HITS.pool.root
 # art-output: resim.*.HITS.pool.root
 
@@ -30,10 +31,10 @@ else
         --imf False
 
     rc=$?
-    echo "art-result: $rc initial-simOLD"
+    mv log.EVNTtoHITS log.EVNTtoHITS.initial
 fi
 status=$rc
-mv log.EVNTtoHITS log.EVNTtoHITS.initial
+echo "art-result: $rc initial-simOLD"
 
 rc1=-9999
 if [ $rc -eq 0 ]
@@ -90,7 +91,7 @@ fi
 echo "art-result: $rc2 resimOLD"
 
 rc3=-9999
-if [ $rc2 -eq 0 ]
+if [ $status -eq 0 ]
 then
   # Compare the outputs
   acmd.py diff-root resim.CG.HITS.pool.root resim.CA.HITS.pool.root \
