@@ -21,21 +21,21 @@ atlas_add_component( ISF_HepMC_Tools
 atlas_add_test( GenParticleGenericFilter_test
                 SOURCES test/GenParticleGenericFilter_test.cxx src/GenParticleGenericFilter.cxx
                 INCLUDE_DIRS ${GTEST_INCLUDE_DIRS} ${GMOCK_INCLUDE_DIRS} 
-                LINK_LIBRARIES ${GTEST_LIBRARIES} ${GMOCK_LIBRARIES} AtlasHepMCLib AthenaBaseComps ISF_HepMC_Interfaces
+                LINK_LIBRARIES ${GTEST_LIBRARIES} ${GMOCK_LIBRARIES} AtlasHepMCLib AthenaBaseComps ISF_HepMC_Interfaces CxxUtils
                 POST_EXEC_SCRIPT nopost.sh )
 
 # Tests
 atlas_add_test( GenParticleInteractingFilter_test
                 SOURCES test/GenParticleInteractingFilter_test.cxx src/GenParticleInteractingFilter.cxx
                 INCLUDE_DIRS ${GTEST_INCLUDE_DIRS} ${GMOCK_INCLUDE_DIRS} 
-                LINK_LIBRARIES ${GTEST_LIBRARIES} ${GMOCK_LIBRARIES} AtlasHepMCLib AthenaBaseComps TruthUtils ISF_HepMC_Interfaces
+                LINK_LIBRARIES ${GTEST_LIBRARIES} ${GMOCK_LIBRARIES} AtlasHepMCLib AthenaBaseComps TruthUtils ISF_HepMC_Interfaces CxxUtils
                 POST_EXEC_SCRIPT nopost.sh )
 
 # Tests
 atlas_add_test( GenParticleLifetimeFilter_test
                 SOURCES test/GenParticleLifetimeFilter_test.cxx src/GenParticleLifetimeFilter.cxx
                 INCLUDE_DIRS ${GTEST_INCLUDE_DIRS} ${GMOCK_INCLUDE_DIRS} 
-                LINK_LIBRARIES ${GTEST_LIBRARIES} ${GMOCK_LIBRARIES} AtlasHepMCLib AthenaBaseComps TruthUtils ISF_HepMC_Interfaces
+                LINK_LIBRARIES ${GTEST_LIBRARIES} ${GMOCK_LIBRARIES} AtlasHepMCLib AthenaBaseComps TruthUtils ISF_HepMC_Interfaces CxxUtils
                 POST_EXEC_SCRIPT nopost.sh )
 
 # Install files from the package:
