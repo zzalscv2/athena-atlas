@@ -1,0 +1,394 @@
+/*
+  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+*/
+
+#include <ROOT/RDataFrame.hxx>
+#include <ROOT/RLogger.hxx>
+#include <TCanvas.h>
+#include <TF1.h>
+#include <TH1D.h>
+#include <TRatioPlot.h>
+#include <TROOT.h>
+#include <TStyle.h>
+
+#include <boost/program_options.hpp>
+
+#include <algorithm>
+#include <chrono>
+#include <iostream>
+#include <memory>
+#include <string>
+
+// Intersection of two lists of vectors, needed to get the variables that are common to both samples
+std::vector<std::string> intersection(std::vector<std::string> &v1,
+                                      std::vector<std::string> &v2)
+{
+  std::vector<std::string> v3;
+
+  std::sort(v1.begin(), v1.end());
+  std::sort(v2.begin(), v2.end());
+
+  std::set_intersection(v1.begin(), v1.end(),
+                        v2.begin(), v2.end(),
+                        back_inserter(v3));
+  // Alphabetical order while we're at it
+  std::sort(v3.begin(), v3.end(), [](const std::string &a, const std::string &b) -> bool
+            { return a < b; });
+
+  return v3;
+}
+
+int main(int argc, char *argv[])
+{
+  namespace po = boost::program_options;
+  po::options_description poDescription("Common options");
+  poDescription.add_options()
+    ("help", "produce help message")
+    ("tree-name", po::value<std::string>()->required(), "tree name")
+    ("reference-file", po::value<std::string>()->required(), "reference file(s), wildcards supported")
+    ("test-file", po::value<std::string>()->required(), "test file(s), wildcards supported")
+    ("branch-name", po::value<std::string>(), "base branch name (optional)");
+
+  po::options_description poDescriptionAdvanced("Advanced options");
+  poDescriptionAdvanced.add_options()
+    ("scale", "scale histograms that both have the same event count")
+    ("rebin",  "do smart rebinning")
+    ("benchmark", "benchmark the code")
+    ("verbose", "verbose logging");
+
+  po::options_description poDescriptionAll;
+  poDescriptionAll.add(poDescription).add(poDescriptionAdvanced);
+
+  po::positional_options_description poPositionalOptions;
+  poPositionalOptions.add("tree-name", 1);
+  poPositionalOptions.add("reference-file", 1);
+  poPositionalOptions.add("test-file", 1);
+  poPositionalOptions.add("branch-name", 1);
+
+  po::variables_map poVariablesMap;
+  po::store(po::command_line_parser(argc, argv)
+    .options(poDescriptionAll)
+    .positional(poPositionalOptions).run(),
+    poVariablesMap);
+
+  if (poVariablesMap.count("help"))
+  {
+    std::cout << "Usage: compareFlatTrees [OPTION] tree-name reference-file test-file [branch-name]" << std::endl;
+    std::cout << poDescriptionAll << std::endl;
+    return 0;
+  }
+
+  po::notify(poVariablesMap);
+
+  // Base name of branches to read
+  std::string treeName = poVariablesMap["tree-name"].as<std::string>();
+  std::string referenceInput = poVariablesMap["reference-file"].as<std::string>();
+  std::string testInput = poVariablesMap["test-file"].as<std::string>();
+  std::string baseBranchName;
+  std::string outputPDF;
+  if (poVariablesMap.count("branch-name") > 0)
+  {
+    baseBranchName = poVariablesMap["branch-name"].as<std::string>();
+    outputPDF = "comparison_" + treeName + "_" + baseBranchName + ".pdf";
+  }
+  else
+  {
+    outputPDF = "comparison_" + treeName + ".pdf";
+  }
+
+  bool scale = poVariablesMap.count("scale") > 0;
+  bool rebin = poVariablesMap.count("rebin") > 0;
+  bool benchmark = poVariablesMap.count("benchmark") > 0;
+  bool verbose = poVariablesMap.count("verbose") > 0;
+
+  // Verbose logging
+  // auto verbosity = ROOT::Experimental::RLogScopedVerbosity(ROOT::Detail::RDF::RDFLogChannel(), ROOT::Experimental::ELogLevel::kInfo);
+
+  // Run in batch mode - output is pdf
+  gROOT->SetBatch(kTRUE);
+  // Suppress logging
+  if (!verbose)
+  {
+    gErrorIgnoreLevel = kWarning;
+  }
+  // No stats box
+  gStyle->SetOptStat(0);
+  // No error bar ticks
+  gStyle->SetEndErrorSize(0);
+  // Parallel processing where possible
+  ROOT::EnableImplicitMT(4);
+
+  // Create RDataFrame
+  ROOT::RDataFrame dataFrameRefr(treeName, referenceInput);
+  ROOT::RDataFrame dataFrameTest(treeName, testInput);
+
+  // Event count and ratio
+  auto eventsRefr{dataFrameRefr.Count()};
+  auto eventsTest{dataFrameTest.Count()};
+  float eventRatio{static_cast<float>(eventsRefr.GetValue()) / static_cast<float>(eventsTest.GetValue())};
+
+  // Get column names for each file and then the intersection
+  auto colNamesRefr = dataFrameRefr.GetColumnNames();
+  auto colNamesTest = dataFrameTest.GetColumnNames();
+  auto colNames = intersection(colNamesRefr, colNamesTest);
+
+  // Loop over column names and get a list of the required columns
+  std::vector<std::string> requiredColumns;
+  std::cout << "Will attempt to plot the following columns:" << std::endl;
+  for (auto &&colName : colNames)
+  {
+    if ((baseBranchName.empty() || colName.find(baseBranchName) != std::string::npos) && // include
+        (colName.find("Trig") == std::string::npos) &&                                   // exclude, not meaningful
+        (colName.find("Link") == std::string::npos) &&                                   // exclude, elementlinks
+        (colName.find("m_persIndex") == std::string::npos) &&                            // exclude, elementlinks
+        (colName.find("m_persKey") == std::string::npos) &&                              // exclude, elementlinks
+        (colName.find("Parent") == std::string::npos) &&                                 // exclude, elementlinks
+        (colName.find("original") == std::string::npos) &&                               // exclude, elementlinks
+        (colName.find("EventInfoAuxDyn.detDescrTags") == std::string::npos) &&           // exclude, std::pair
+        (dataFrameRefr.GetColumnType(colName).find("xAOD") == std::string::npos) &&      // exclude, needs ATLAS s/w
+        (dataFrameRefr.GetColumnType(colName) != "ROOT::VecOps::RVec<string>") &&        // exclude, needs ATLAS s/w
+        (dataFrameRefr.GetColumnType(colName).find("vector") == std::string::npos))
+    { // exclude, needs unwrapping
+      requiredColumns.push_back(colName);
+      std::cout << "   " << colName << " " << dataFrameRefr.GetColumnType(colName) << std::endl;
+    }
+  }
+
+  // Create canvas
+  auto c1 = new TCanvas("c1", "Tree comparison");
+
+  // Set binning
+  int nBins{128};
+  size_t nBinsU = static_cast<size_t>(nBins);
+
+  // Loop over the required columns and plot them for each sample along with the ratio
+  // Write resulting plots to a pdf file
+  bool fileOpen{};
+  size_t counter{};
+  size_t failedCount{};
+  std::chrono::seconds totalDuration{};
+  std::unordered_map<std::string, ROOT::RDF::RResultPtr<double>> mapMinValues;
+  std::unordered_map<std::string, ROOT::RDF::RResultPtr<double>> mapMaxValues;
+  std::unordered_map<std::string, ROOT::RDF::RResultPtr<TH1D>> mapHistRefr;
+  std::unordered_map<std::string, ROOT::RDF::RResultPtr<TH1D>> mapHistTest;
+
+  std::cout << "Preparing ranges..." << std::endl;
+  for (const std::string &colName : requiredColumns)
+  {
+    mapMinValues.emplace(colName, dataFrameRefr.Min(colName));
+    mapMaxValues.emplace(colName, dataFrameRefr.Max(colName));
+  }
+
+  std::cout << "Preparing histograms..." << std::endl;
+  auto start = std::chrono::high_resolution_clock::now();
+  for (const std::string &colName : requiredColumns)
+  {
+    const char* colNameCh = colName.c_str();
+
+    // Initial histogram range
+    float min = static_cast<float>(mapMinValues[colName].GetValue());
+    float max = static_cast<float>(mapMaxValues[colName].GetValue()) * 1.02f;
+    if (max > 250e3 && min > 0.0f)
+    {
+      min = 0.0f;
+    }
+
+    // Initial histograms
+    mapHistRefr.emplace(colName, dataFrameRefr.Histo1D({colNameCh, colNameCh, nBins, min, max}, colNameCh));
+    mapHistTest.emplace(colName, dataFrameTest.Histo1D({colNameCh, colNameCh, nBins, min, max}, colNameCh));
+  }
+  auto stop = std::chrono::high_resolution_clock::now();
+  auto duration = std::chrono::duration_cast<std::chrono::seconds>(stop - start);
+  totalDuration += duration;
+  if (benchmark)
+  {
+    std::cout << "   Time for this step: " << duration.count() << " seconds " << std::endl;
+    std::cout << "   Elapsed time: " << totalDuration.count() << " seconds (" << std::chrono::duration_cast<std::chrono::minutes>(totalDuration).count() << " minutes)" << std::endl;
+  }
+
+  if (rebin)
+  {
+    std::cout << "Rebinning histograms..." << std::endl;
+    auto start = std::chrono::high_resolution_clock::now();
+    for (const std::string &colName : requiredColumns)
+    {
+      const char* colNameCh = colName.c_str();
+      auto &histRefr = mapHistRefr[colName];
+      auto &histTest = mapHistTest[colName];
+
+      // Initial histogram range
+      float min = static_cast<float>(mapMinValues[colName].GetValue());
+      float max = static_cast<float>(mapMaxValues[colName].GetValue()) * 1.02f;
+      if (max > 250e3 && min > 0.0f)
+      {
+        min = 0.0f;
+      }
+
+      // Check range - make sure that bins other than the first contain at least one per mille events
+      // Avoids case where max is determined by a single outlier leading to most events being in the 1st bin
+      bool rangeSatisfactory{};
+      size_t rangeItrCntr{};
+      while (!rangeSatisfactory && rangeItrCntr < 10)
+      {
+        ++rangeItrCntr;
+        if (verbose)
+        {
+          std::cout << std::endl
+                    << "   Range tuning... iteration number " << rangeItrCntr << std::endl;
+        }
+        float entriesFirstBin = static_cast<float>(histRefr.GetPtr()->GetBinContent(1));
+        float entriesLastBin = static_cast<float>(histRefr.GetPtr()->GetBinContent(nBins));
+        float entriesOtherBins{};
+        for (size_t i{2}; i < nBinsU; ++i)
+        {
+          entriesOtherBins += static_cast<float>(histRefr.GetPtr()->GetBinContent(i));
+        }
+        bool firstBinOK{((entriesOtherBins + entriesLastBin) / entriesFirstBin > 0.001f)};
+        bool lastBinOK{((entriesOtherBins + entriesFirstBin) / entriesLastBin > 0.001f)};
+        rangeSatisfactory = ((firstBinOK && lastBinOK) || entriesOtherBins == 0.0f);
+        if (!rangeSatisfactory)
+        {
+          if (verbose)
+          {
+            std::cout << "Min " << min << std::endl;
+            std::cout << "Max " << max << std::endl;
+            std::cout << "1st " << entriesFirstBin << std::endl;
+            std::cout << "Mid " << entriesOtherBins << std::endl;
+            std::cout << "End " << entriesLastBin << std::endl;
+            std::cout << "R/F " << (entriesOtherBins + entriesLastBin) / entriesFirstBin << std::endl;
+            std::cout << "R/L " << (entriesOtherBins + entriesFirstBin) / entriesLastBin << std::endl;
+          }
+          if (!firstBinOK)
+          {
+            max = (max - min) / static_cast<float>(nBins);
+            histRefr = dataFrameRefr.Histo1D({colNameCh, colNameCh, nBins, min, max}, colNameCh);
+            histTest = dataFrameTest.Histo1D({colNameCh, colNameCh, nBins, min, max}, colNameCh);
+          }
+          if (!lastBinOK)
+          {
+            min = max * (1.0f - (1.0f / static_cast<float>(nBins)));
+            histRefr = dataFrameRefr.Histo1D({colNameCh, colNameCh, nBins, min, max}, colNameCh);
+            histTest = dataFrameTest.Histo1D({colNameCh, colNameCh, nBins, min, max}, colNameCh);
+          }
+        }
+      }
+    }
+
+    auto stop = std::chrono::high_resolution_clock::now();
+    auto duration = std::chrono::duration_cast<std::chrono::seconds>(stop - start);
+    totalDuration += duration;
+    if (benchmark)
+    {
+      std::cout << "   Time for this step: " << duration.count() << " seconds " << std::endl;
+      std::cout << "   Elapsed time: " << totalDuration.count() << " seconds (" << std::chrono::duration_cast<std::chrono::minutes>(totalDuration).count() << " minutes)" << std::endl;
+    }
+  }
+
+  std::cout << "Running comparisons..." << std::endl;
+  start = std::chrono::high_resolution_clock::now();
+  for (const std::string &colName : requiredColumns)
+  {
+    ++counter;
+
+    std::cout << "Processing column " << counter << " of " << requiredColumns.size() << " : " << colName << " ... ";
+
+    auto h1 = mapHistRefr[colName].GetPtr();
+    auto h2 = mapHistTest[colName].GetPtr();
+
+    if (scale)
+    {
+      h2->Scale(eventRatio);
+    }
+    h2->SetMarkerStyle(20);
+    h2->SetMarkerSize(0.8);
+
+    if (!verbose)
+    {
+      gErrorIgnoreLevel = kError; // this is spammy due to empty bins
+    }
+    auto rp = std::unique_ptr<TRatioPlot>(new TRatioPlot(h2, h1));
+    if (!verbose)
+    {
+      gErrorIgnoreLevel = kWarning;
+    }
+
+    rp->SetH1DrawOpt("PE");
+    rp->SetH2DrawOpt("hist");
+    rp->SetGraphDrawOpt("PE");
+    rp->Draw();
+    rp->GetUpperRefXaxis()->SetTitle(colName.c_str());
+    rp->GetUpperRefYaxis()->SetTitle("Count");
+    rp->GetLowerRefYaxis()->SetTitle("Test / Ref.");
+    rp->GetLowerRefGraph()->SetMarkerStyle(20);
+    rp->GetLowerRefGraph()->SetMarkerSize(0.8);
+
+    bool valid{true};
+    for (int i{}; i < rp->GetLowerRefGraph()->GetN(); i++)
+    {
+      if (rp->GetLowerRefGraph()->GetY()[i] != 1.0)
+      {
+        valid = false;
+        break;
+      }
+    }
+    if (valid)
+    {
+      std::cout << "PASS" << std::endl;
+      continue;
+    }
+    else
+    {
+      std::cout << "FAILED" << std::endl;
+      ++failedCount;
+    }
+
+    rp->GetLowerRefGraph()->SetMinimum(0.5);
+    rp->GetLowerRefGraph()->SetMaximum(1.5);
+    rp->GetLowYaxis()->SetNdivisions(505);
+
+    c1->SetTicks(0, 1);
+    c1->Update();
+
+    if (!fileOpen)
+    {
+      // Open file
+      c1->Print((outputPDF + "[").c_str());
+      fileOpen = true;
+    }
+    // Actual plot
+    c1->Print(outputPDF.c_str());
+    c1->Clear();
+  }
+
+  if (fileOpen)
+  {
+    // Close file
+    c1->Print((outputPDF + "]").c_str());
+  }
+
+  stop = std::chrono::high_resolution_clock::now();
+  duration = std::chrono::duration_cast<std::chrono::seconds>(stop - start);
+  totalDuration += duration;
+  if (benchmark)
+  {
+    std::cout << "   Time for this step: " << duration.count() << " seconds " << std::endl;
+    std::cout << "   Elapsed time: " << totalDuration.count() << " seconds (" << std::chrono::duration_cast<std::chrono::minutes>(totalDuration).count() << " minutes)" << std::endl;
+  }
+
+  std::cout << "========================" << std::endl;
+  std::cout << "Reference events: " << eventsRefr.GetValue() << std::endl;
+  std::cout << "Test events: " << eventsTest.GetValue() << std::endl;
+  std::cout << "Ratio: " << eventRatio << std::endl;
+  std::cout << "========================" << std::endl;
+  std::cout << "Tested columns: " << requiredColumns.size() << std::endl;
+  std::cout << "Passed: " << requiredColumns.size() - failedCount << std::endl;
+  std::cout << "Failed: " << failedCount << std::endl;
+  std::cout << "========================" << std::endl;
+
+  if (failedCount)
+  {
+    return 1;
+  }
+
+  return 0;
+}
