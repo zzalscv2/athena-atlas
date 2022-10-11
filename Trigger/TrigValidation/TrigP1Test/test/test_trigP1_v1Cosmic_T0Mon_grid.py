@@ -44,7 +44,8 @@ filter_bs = ExecStep.ExecStep('FilterBS')
 filter_bs.type = 'other'
 filter_bs.executable = 'trigbs_extractStream.py'
 filter_bs.input = ''
-filter_bs.args = '-s Main ' + find_file('*_HLTMPPy_output.*.data')
+filter_bs.args = '-l 0' # data_cos input includes files from multiple LBs, see ATR-26461
+filter_bs.args += ' -s Main ' + find_file('*_HLTMPPy_output.*.data')
 
 # Tier-0 reco step (BS->ESD->AOD)
 tzrecoPreExec = ' '.join([

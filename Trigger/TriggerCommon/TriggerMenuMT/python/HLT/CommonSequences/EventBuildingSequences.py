@@ -314,6 +314,7 @@ def alignEventBuildingSteps(chain_configs, chain_dicts):
             numStepsNeeded = maxPebStepPosition[ebt] - pebStepPosition
             log.debug('Aligning PEB step for chain %s by adding %d empty steps', chainName, numStepsNeeded)
             chainConfig.insertEmptySteps('EmptyPEBAlign', numStepsNeeded, pebStepPosition-1)
+            chainConfig.numberAllSteps()
 
 
 def isRoIBasedPEB(flags, eventBuildType):

@@ -2321,7 +2321,6 @@ class argSubstepSteering(argSubstep):
                       'doOverlay': {'HITtoRDO': [('in', '-', 'HITS'), ('out', '-', 'RDO'), ('out', '-', 'RDO_FILT')],
                                     'Overlay': [('in', '+', ('HITS', 'RDO_BKG')), ('out', '+', 'RDO')]},
                       'doFCwOverlay': {'EVNTtoRDO': [('in', '-', 'EVNT'), ('out', '-', 'RDO')],
-                                       'Overlay': [('in', '-', 'RDO_BKG'), ('out', '-', 'RDO')],
                                        'EVNTtoRDOwOverlay': [('in', '+', ('EVNT', 'RDO_BKG')), ('out', '+', 'RDO'), ('out', '+', 'RDO_SGNL')]},
                       'afterburn': {'generate': [('out', '-', 'EVNT')]},
                       'doRAWtoALL': {'RAWtoALL': [('in', '+', 'BS'), ('in', '+', 'RDO'), ('in', '+', 'RDO_FTK'),

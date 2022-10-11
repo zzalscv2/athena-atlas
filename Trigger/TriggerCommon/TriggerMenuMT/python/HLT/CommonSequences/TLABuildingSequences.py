@@ -123,3 +123,4 @@ def alignTLASteps(chain_configs, chain_dicts):
             numStepsNeeded = maxTLAStepPosition - tlaStepPosition
             log.debug('Aligning TLA step for chain %s by adding %d empty steps', chainName, numStepsNeeded)
             chainConfig.insertEmptySteps('EmptyTLAAlign', numStepsNeeded, tlaStepPosition-1)
+            chainConfig.numberAllSteps()
