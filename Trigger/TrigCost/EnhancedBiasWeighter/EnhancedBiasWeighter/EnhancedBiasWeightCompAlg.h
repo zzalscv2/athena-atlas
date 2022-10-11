@@ -47,7 +47,7 @@ class EnhancedBiasWeightCompAlg : public AthReentrantAlgorithm {
         std::string getName() const {return m_id.name();}
         TrigCompositeUtils::DecisionID getId() const {return m_id;}
         double getTotalPrescale() const {return m_totalPrescale;}
-        bool getIsRandom() const {return (getName().find("HLT_noalg_eb_L1RD") != std::string::npos);}
+        bool getIsRandom() const {return (getName().find("HLT_noalg_L1RD") != std::string::npos);}
         bool getIsNoPS() const {return (getName().find("noPS") != std::string::npos);}
         bool getIsDisabled() const {return (m_totalPrescale <= 0);}
 
