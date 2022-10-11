@@ -18,7 +18,6 @@ ex.threads = 1
 precommand = ''.join([
   "setMenu='Dev_pp_run3_v1';",  
   "doL1Sim=False;",
-  "enableL1MuonPhase1=False;",
   "doWriteBS=False;",
   "doWriteRDOTrigger=True;",
   "forceEnableAllChains=True;",
