@@ -75,6 +75,7 @@ then
   acmd.py diff-root test.CG.HITS.pool.root test.CA.HITS.pool.root \
     --error-mode resilient \
     --mode semi-detailed \
+    --order-trees \
     --ignore-leaves RecoTimingObj_p1_EVNTtoHITS_timings index_ref
   rc3=$?
   status=$rc3
