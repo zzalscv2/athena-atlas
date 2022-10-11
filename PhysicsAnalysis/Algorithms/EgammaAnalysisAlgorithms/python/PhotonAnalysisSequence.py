@@ -294,17 +294,6 @@ def makePhotonWorkingPointSequence( seq, dataType, workingPoint, postfix = '',
                     dynConfig = {'preselection' : lambda meta : "&&".join (meta["selectionDecorNamesOutput"])} )
         pass
 
-    # Set up an algorithm used for decorating baseline photon selection:
-    alg = createAlgorithm( 'CP::AsgSelectionAlg',
-                           'PhotonSelectionSummary' + postfix )
-    alg.selectionDecoration = 'baselineSelection' + postfix + ',as_char'
-    seq.append( alg, inputPropName = 'particles',
-                stageName = 'selection',
-                metaConfig = {'selectionDecorNames' : [alg.selectionDecoration],
-                              'selectionDecorNamesOutput' : [alg.selectionDecoration],
-                              'selectionDecorCount' : [1]},
-                dynConfig = {'preselection' : lambda meta : "&&".join (meta["selectionDecorNamesOutput"])} )
-
     # Set up the photon efficiency correction algorithm.
     alg = createAlgorithm( 'CP::PhotonEfficiencyCorrectionAlg',
                            'PhotonEfficiencyCorrectionAlg' + postfix )
@@ -327,3 +316,11 @@ def makePhotonWorkingPointSequence( seq, dataType, workingPoint, postfix = '',
         pass
 
     pass
+
+    # Set up an algorithm used for decorating baseline photon selection:
+    alg = createAlgorithm( 'CP::AsgSelectionAlg',
+                           'PhotonSelectionSummary' + postfix )
+    alg.selectionDecoration = 'baselineSelection' + postfix + ',as_char'
+    seq.append( alg, inputPropName = 'particles',
+                stageName = 'selection',
+                dynConfig = {'preselection' : lambda meta : "&&".join (meta["selectionDecorNames"])} )
