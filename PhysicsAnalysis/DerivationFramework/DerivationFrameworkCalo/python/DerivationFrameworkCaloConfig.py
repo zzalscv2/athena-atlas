@@ -10,6 +10,8 @@ def MaxCellDecoratorCfg(ConfigFlags,**kwargs):
     kwargs.setdefault("SGKey_electrons", ConfigFlags.Egamma.Keys.Output.Electrons)
     kwargs.setdefault("SGKey_photons", ConfigFlags.Egamma.Keys.Output.Photons)
     acc.setPrivateTools(CompFactory.DerivationFramework.MaxCellDecorator(**kwargs))
+    from LArCabling.LArCablingConfig import LArOnOffIdMappingCfg
+    acc.merge(LArOnOffIdMappingCfg(ConfigFlags))
     return acc
 
 def GainDecoratorCfg(ConfigFlags,**kwargs):
