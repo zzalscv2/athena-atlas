@@ -79,6 +79,7 @@ def createITkConfigFlags():
   itkcf.addFlagsCategory("ITk.PriVertex", createITkPriVertexingFlags, prefix=True)
 
   itkcf.addFlag("ITk.Tracking.convertInDetClusters", False) # Turn on conversion of InDet clusters to xAOD clusters
+  itkcf.addFlag("ITk.Tracking.convertXAODClusters", False) # Turn on conversion of xAOD clusters to InDet clusters
   itkcf.addFlag("ITk.Tracking.EnableNativexAODclusters", False) # Turn on native xAOD clusters creation. Incompatible with convertInDetClusters!
   itkcf.addFlag("ITk.Tracking.produceNewSpacePointContainer", False) # Turn on to produce ActsTrk::SpacePointContainers
 

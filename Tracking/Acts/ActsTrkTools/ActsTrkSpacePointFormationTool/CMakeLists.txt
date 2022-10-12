@@ -13,7 +13,6 @@ atlas_add_component( ActsTrkSpacePointFormationTool
                      GaudiKernel
                      ActsTrkEvent
                      ActsTrkToolInterfacesLib
-                     ActsUtilsLib
                      InDetCondTools
                      PixelReadoutGeometryLib
                      ReadoutGeometryBase
