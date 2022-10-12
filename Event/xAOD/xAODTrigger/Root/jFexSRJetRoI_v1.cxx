@@ -130,39 +130,35 @@ namespace xAOD {
     int jFexSRJetRoI_v1::unpackGlobalEta() const {
         int globalEta = 0;
 
-        if(jFexNumber()==5 ) {
-                    
-            if(tobLocalEta() <=s_FWD_EtaPosition[1]) { //Region 1
-                globalEta = (tobLocalEta() + (8*(jFexNumber() -3)) );
+        // this is covering from -2.5 to 2.5 in eta, which means half module 0 and 5 and modules 1, 2, 3 and 4
+        if(tobLocalEta()<9){ 
+            if(jFexNumber()<3){
+                globalEta= 8*(jFexNumber()-2) - (tobLocalEta()+1);
             }
-            else if(tobLocalEta() <=s_FWD_EtaPosition[3]) { //Region 2
-                globalEta = 25 +2*(tobLocalEta()-9);
-            }
-            else if(tobLocalEta() == s_FWD_EtaPosition[4] ) { //Region 3
-                globalEta = 31;
-            }
-            else if(tobLocalEta() <= s_FWD_EtaPosition[6]) { //Region 4
-                globalEta = s_FCAL_EtaPosition[tobLocalEta()-13]-1;
-            }        
-            
+            else if(jFexNumber()<6){
+                globalEta= 8*(jFexNumber()-3) + (tobLocalEta());
+            }            
         }
-        else if(jFexNumber()==0) {
-            
-            if(tobLocalEta() <=s_FWD_EtaPosition[1]) { //Region 1
-                globalEta = (8-tobLocalEta() + (8*(jFexNumber() -3)) )-1;
+        else{
+            if(jFexNumber()==5 ) {
+                        
+                if(tobLocalEta() <=s_FWD_EtaPosition[4]) { //Region 2 and 3
+                    globalEta = 25 +2*(tobLocalEta()-9);
+                }
+                else if(tobLocalEta() <= s_FWD_EtaPosition[6]) { //Region 4
+                    globalEta = s_FCAL_EtaPosition[tobLocalEta()-13];
+                }        
+                
             }
-            else if(tobLocalEta() <=s_FWD_EtaPosition[3]) { //Region 2
-                globalEta = -27 -2*(tobLocalEta()-9);
-            }
-            else if(tobLocalEta() == s_FWD_EtaPosition[4] ) { //Region 3
-                globalEta = -32;
-            }
-            else if(tobLocalEta() <= s_FWD_EtaPosition[6]) { //Region 4
-                globalEta = -s_FCAL_EtaPosition[tobLocalEta()-13];
-            }
-        }
-        else { //Module 1-4
-            globalEta = (tobLocalEta() + (8*(jFexNumber() -3)) );
+            else if(jFexNumber()==0) {
+                
+                if(tobLocalEta() <=s_FWD_EtaPosition[4]) { //Region 2 and 3
+                    globalEta = -(25 +2*(tobLocalEta()-9))-1;
+                }
+                else if(tobLocalEta() <= s_FWD_EtaPosition[6]) { //Region 4
+                    globalEta = -s_FCAL_EtaPosition[tobLocalEta()-13]-1;
+                }
+            }            
         }
 
         return globalEta;
