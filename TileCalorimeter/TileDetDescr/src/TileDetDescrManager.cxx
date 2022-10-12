@@ -523,11 +523,16 @@ void TileDetDescrManager::create_elements(bool checks)
                                        -cell_dim->getZMin(ic)); // size and position right
 
                 if (section == TileID::BARREL && sample==1 && tower < 8) {
-                  if ( m_verbose && (0 == iphi) )
+                  if ( m_verbose && (0 == iphi) ) {
+                    double z1  = 0.5*(cell_dim->getZMax(0)+cell_dim->getZMin(0));
+                    double dz1 = fabs(cell_dim->getZMax(0)-cell_dim->getZMin(0));
+                    double z2  = 0.5*(cell_dim->getZMax(ic)+cell_dim->getZMin(ic));
+                    double dz2 = fabs(cell_dim->getZMax(ic)-cell_dim->getZMin(ic));
                     std::cout<<"old z/dz: " << oldz << " " << olddz << std::endl
-                             <<"new z/dz: " << z << " " << dz << " "
+                             <<"new z/dz: " << z << " " << dz << " ( B: " << z1 << " " << dz1 << "  C: " << z2 << " " << dz2 << " ) "
                              << z/oldz*100-100 << " % diff "
                              <<"do not change z/dz for BC cells in barrel"<<std::endl;
+                  }
                 } else if ( (section == TileID::GAPDET) && (sample == TileID::SAMP_E) ) {
 
                   elt->set_z( descr->zcenter(isamp) );
@@ -762,15 +767,14 @@ void TileDetDescrManager::create_elements(bool checks)
 
                     double standardD4dz = elt->dz();
                     double specialD4dz = m_dbManager->TILBdzmodul()*Gaudi::Units::cm;
-                    if ( Id4 == 8 ) specialD4dz = 0.;
-                    /* WILL BE FIXED LATER
-                    else if (! m_dbManager->addPlatesToCell()) specialD4dz -= m_dbManager->TILBdzend1()*Gaudi::Units::cm;
+                    if (! m_dbManager->addPlatesToCell()) specialD4dz -= m_dbManager->TILBdzend1()*Gaudi::Units::cm;
+                    // special case of non-existing D4 in EBA15 and EBC18
+                    // if ( Id4 == 8 ) specialD4dz = 0.; commented out - don't set size to zero - it'll be used in TICAL derivation code
 
                     if (elt->z() > 0.)
                       elt->set_z(elt->z()+0.5*(standardD4dz-specialD4dz));
                     else
                       elt->set_z(elt->z()-0.5*(standardD4dz-specialD4dz));
-                    */
                     elt->set_dz(specialD4dz);
                     elt->set_volume(newv * specialD4dz/(standardD4dz));
 
@@ -848,9 +852,6 @@ void TileDetDescrManager::create_elements(bool checks)
                         oldz = elt->z();
                         double standardD5dz = elt->dz();
                         double specialD4dz = m_dbManager->TILBdzmodul()*Gaudi::Units::cm;
-                        elt->set_dz(specialD4dz + standardD5dz);
-                        elt->set_volume(elt->volume()* (1. + specialD4dz/standardD5dz));
-                        /* WILL BE FIXED LATER
                         double specialD4Rin = m_dbManager->TILBrmin()*Gaudi::Units::cm;
                         if (m_dbManager->addPlatesToCell()) {
                           specialD4Rin -= m_dbManager->TILBdrfront()*Gaudi::Units::cm;
@@ -859,6 +860,7 @@ void TileDetDescrManager::create_elements(bool checks)
                         }
                         double newS = (pow((elt->r() + elt->dr()/2.),2) - specialD4Rin*specialD4Rin)/(2.*elt->r()*elt->dr());
                         elt->set_volume(elt->volume()* (1. + newS*specialD4dz/standardD5dz));
+                        /* commented out - don't change z and dz for special D5+D4
                         elt->set_dz(specialD4dz + standardD5dz);
                         if (elt->z() > 0.)
                           elt->set_z(elt->z()-0.5*specialD4dz);
