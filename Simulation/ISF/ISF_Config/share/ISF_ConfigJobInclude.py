@@ -184,7 +184,10 @@ configureRunNumberOverrides()
 
 if ISF_Flags.HITSMergingRequired.anyOn():
     topSeq += collection_merger_alg
-    
+
+if simFlags.CalibrationRun.get_Value() in ['LAr', 'LAr+Tile']:
+    topSeq += getAlgorithm("DeadMaterialCalibrationHitMerger")
+
 #--------------------------------------------------------------
 # Post kernel configuration
 #--------------------------------------------------------------

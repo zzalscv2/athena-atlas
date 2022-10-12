@@ -52,8 +52,17 @@ def getStreamHITS_ItemList(ConfigFlags):
        ItemList += ["TrackRecordCollection#CaloEntryLayer"]
 
     if ConfigFlags.Detector.EnableCalo:
-        ItemList += ["CaloCalibrationHitContainer#*",
-                     "TrackRecordCollection#MuonEntryLayer"]
+        ItemList += ["TrackRecordCollection#MuonEntryLayer"]
+        from SimulationConfig.SimEnums import CalibrationRun
+        if ConfigFlags.Sim.CalibrationRun in [CalibrationRun.LAr, CalibrationRun.LArTile]:
+            ItemList += ["CaloCalibrationHitContainer#LArCalibrationHitActive",
+                         "CaloCalibrationHitContainer#LArCalibrationHitDeadMaterial",
+                         "CaloCalibrationHitContainer#LArCalibrationHitInactive",
+                         "CaloCalibrationHitContainer#TileCalibHitActiveCell",
+                         "CaloCalibrationHitContainer#TileCalibHitInactiveCell",
+                         "CaloCalibrationHitContainer#TileCalibHitDeadMaterial"]
+        else:
+            ItemList += ["CaloCalibrationHitContainer#*"] #TODO be more precise about this case
 
     if ConfigFlags.Detector.EnableLAr:
         ItemList += ["LArHitContainer#LArHitEMB",

@@ -111,6 +111,11 @@ def CommonSimulationCfg(ConfigFlags, log):
         from G4AtlasAlg.G4AtlasAlgConfig import G4AtlasAlgCfg
         cfg.merge(G4AtlasAlgCfg(ConfigFlags))
 
+    from SimulationConfig.SimEnums import CalibrationRun
+    if ConfigFlags.Sim.CalibrationRun in [CalibrationRun.LAr, CalibrationRun.LArTile]:
+        from LArG4SD.LArG4SDToolConfig import DeadMaterialCalibrationHitMergerCfg
+        cfg.merge(DeadMaterialCalibrationHitMergerCfg(ConfigFlags))
+
     from OutputStreamAthenaPool.OutputStreamConfig import OutputStreamCfg
     from SimuJobTransforms.SimOutputConfig import getStreamHITS_ItemList
     cfg.merge( OutputStreamCfg(ConfigFlags,"HITS", ItemList=getStreamHITS_ItemList(ConfigFlags), disableEventTag=False, AcceptAlgs=AcceptAlgNames) )
