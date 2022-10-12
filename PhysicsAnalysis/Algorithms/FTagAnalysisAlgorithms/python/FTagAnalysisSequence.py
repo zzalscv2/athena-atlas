@@ -144,6 +144,7 @@ def makeFTagAnalysisSequence( seq, dataType, jetCollection,
             alg.efficiencyTool.EfficiencyLightCalibrations = DSID
         alg.scaleFactorDecoration = 'ftag_effSF_' + btagger + '_' + btagWP + '_%SYS%'
         alg.selectionDecoration = 'ftag_select_' + btagger + '_' + btagWP + ',as_char'
+        alg.onlyEfficiency = btagWP == 'Continuous'
         alg.outOfValidity = 2
         alg.outOfValidityDeco = 'no_ftag_' + btagger + '_' + btagWP
         if preselection is not None:
