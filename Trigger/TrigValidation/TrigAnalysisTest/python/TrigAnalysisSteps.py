@@ -68,7 +68,7 @@ class CheckFileTrigSizeStep(CheckFileStep):
     '''
     def __init__(self, name='CheckFileTrigSize'):
         super(CheckFileTrigSizeStep, self).__init__(name)
-        self.input_file = 'AOD.pool.root,ESD.pool.root,RDO_TRIG.pool.root'
+        self.input_file = 'AOD.pool.root,ESD.pool.root,RDO_TRIG.pool.root,DAOD_PHYS.DAOD.pool.root'
         self.executable = 'checkFileTrigSize.py'
 
 

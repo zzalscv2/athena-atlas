@@ -1,7 +1,7 @@
 #!/usr/bin/env python
 # Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
 
-# art-description: Test of P1+Tier0 workflow, runs athenaHLT with PhysicsP1_pp_run3_v1 menu followed by offline reco, monitoring and analysis step for EDM monitoring
+# art-description: Test of P1+Tier0 workflow, runs athenaHLT with PhysicsP1_pp_run3_v1 menu followed by offline reco, DAOD production, monitoring and analysis step for EDM monitoring
 # art-type: grid
 # art-athena-mt: 4
 # art-include: master/Athena
@@ -82,10 +82,18 @@ tzreco.args += ' --preExec="{:s}"'.format(tzrecoPreExec)
 tzreco.args += ' --postInclude="TriggerTest/disableChronoStatSvcPrintout.py"'
 tzreco.args += ' --steering doRAWtoALL'
 
+aod2daod = ExecStep.ExecStep('AODtoDAOD')
+aod2daod.type = 'Derivation_tf'
+aod2daod.input = ''
+aod2daod.forks = 4
+aod2daod.explicit_input = True
+aod2daod.args = '--inputAODFile=AOD.pool.root --outputDAODFile=DAOD.pool.root --formats=PHYS'
+aod2daod.args += ' --sharedWriter=True --athenaMPMergeTargetSize "DAOD_*:0"'
+
 # The full test
 test = Test.Test()
 test.art_type = 'grid'
-test.exec_steps = [hlt, filter_bs, tzreco]
+test.exec_steps = [hlt, filter_bs, tzreco, aod2daod]
 test.check_steps = CheckSteps.default_check_steps(test)
 add_analysis_steps(test)
 

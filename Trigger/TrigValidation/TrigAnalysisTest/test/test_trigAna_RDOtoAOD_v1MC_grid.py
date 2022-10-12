@@ -1,7 +1,7 @@
 #!/usr/bin/env python
 # Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
 #
-# art-description: Test of transform RDO->RDO_TRIG->ESD->AOD with threads=4, MC_pp_run3_v1 and AODSLIM
+# art-description: Test of transform RDO->RDO_TRIG->ESD->AOD->DAOD with threads=4, MC_pp_run3_v1 and AODSLIM
 # art-type: grid
 # art-include: master/Athena
 # art-include: 22.0/Athena
@@ -38,9 +38,17 @@ rdo2aod.concurrent_events = 4
 rdo2aod.args = '--outputAODFile=AOD.pool.root --steering="doRDO_TRIG"'
 rdo2aod.args += ' --preExec="all:{:s};"'.format(preExec)
 
+aod2daod = ExecStep.ExecStep('AODtoDAOD')
+aod2daod.type = 'Derivation_tf'
+aod2daod.input = ''
+aod2daod.forks = 4
+aod2daod.explicit_input = True
+aod2daod.args = '--inputAODFile=AOD.pool.root --outputDAODFile=DAOD.pool.root --formats=PHYS'
+aod2daod.args += ' --sharedWriter=True --athenaMPMergeTargetSize "DAOD_*:0"'
+
 test = Test.Test()
 test.art_type = 'grid'
-test.exec_steps = [rdo2aod]
+test.exec_steps = [rdo2aod, aod2daod]
 test.check_steps = CheckSteps.default_check_steps(test)
 add_analysis_steps(test)
 
