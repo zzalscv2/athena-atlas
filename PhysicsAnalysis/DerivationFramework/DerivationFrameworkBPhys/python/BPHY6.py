@@ -145,6 +145,7 @@ def BPHY6Cfg(ConfigFlags):
        BPHY6TruthThinTool = CompFactory.DerivationFramework.GenericTruthThinning(name   = "BPHY6TruthThinTool",
                          ParticleSelectionString = "TruthParticles.pdgId == 443 || TruthParticles.pdgId == 100443 || TruthParticles.pdgId == 553 || TruthParticles.pdgId == 100553 || TruthParticles.pdgId == 200553 || TruthParticles.pdgId == 23 || TruthParticles.pdgId == 531 || TruthParticles.pdgId == 511 || TruthParticles.pdgId == 521 || TruthParticles.pdgId == 541",
                          PreserveDescendants     = True,
+                         StreamName = streamName,
                          PreserveAncestors       = True)
        BPHY6ThinningTools.append(BPHY6TruthThinTool)
 
