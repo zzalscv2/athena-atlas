@@ -975,20 +975,22 @@ StatusCode TrigL2MuonSA::NswStationFitter::calcMergedHit(TrigL2MuonSA::TrackPatt
          cosTiltAngleV = 0;
   double sinTiltAngleU = 0,
          sinTiltAngleV = 0;
-  if(side_mm == 1){
+  if(side_mm > ZERO_LIMIT){
     tanTiltAngleU = tan( 1.5/360.*2.*M_PI),
     tanTiltAngleV = tan(-1.5/360.*2.*M_PI);
     cosTiltAngleU = cos( 1.5/360.*2.*M_PI),
     cosTiltAngleV = cos(-1.5/360.*2.*M_PI);
     sinTiltAngleU = sin( 1.5/360.*2.*M_PI),
     sinTiltAngleV = sin(-1.5/360.*2.*M_PI);
-  } else if(side_mm == -1){
+  } else if(side_mm < -1.*ZERO_LIMIT){
     tanTiltAngleU = tan(-1.5/360.*2.*M_PI),
     tanTiltAngleV = tan(1.5/360.*2.*M_PI);
     cosTiltAngleU = cos(-1.5/360.*2.*M_PI),
     cosTiltAngleV = cos(1.5/360.*2.*M_PI);
     sinTiltAngleU = sin(-1.5/360.*2.*M_PI),
     sinTiltAngleV = sin(1.5/360.*2.*M_PI);
+  } else {
+    ATH_MSG_DEBUG("@@Merge@@ no U, V layer hits -> not consider tilt of U/V layers");
   }
   for (unsigned int iHit = 0; iHit < mmHits.size(); ++iHit) {
     if (localPhiCenter > 2.*M_PI) {
@@ -1005,7 +1007,11 @@ StatusCode TrigL2MuonSA::NswStationFitter::calcMergedHit(TrigL2MuonSA::TrackPatt
     if (mmHits.at(iHit).layerNumber >1 && mmHits.at(iHit).layerNumber < 6){
       double rInterpolate = slopefit * mmHits.at(iHit).z + interceptfit;
       double rProj = mmHits.at(iHit).r;
-      if ((mmHits.at(iHit).layerNumber)%2 == 0) { // layer U
+      if(std::abs(side_mm) < ZERO_LIMIT) {
+        phiLocal.push_back(0);
+        ATH_MSG_DEBUG("@@Merge@@ philocalmm 0");
+      }
+      else if ((mmHits.at(iHit).layerNumber)%2 == 0) { // layer U
         phiLocal.push_back( std::atan((rProj-rInterpolate)/tanTiltAngleU/rInterpolate));
         ATH_MSG_DEBUG("@@Merge@@ philocalmmU " << std::atan((rProj-rInterpolate)/tanTiltAngleU/rInterpolate));
       } else {  // layer V      
@@ -1052,13 +1058,15 @@ StatusCode TrigL2MuonSA::NswStationFitter::calcMergedHit(TrigL2MuonSA::TrackPatt
       r_mm.push_back(mmHits.at(iHit).r/std::cos(phiLocalAvg));
       z_mm.push_back(mmHits.at(iHit).z);
       isStgc_mm.push_back(false);
-      side_mm = std::abs(mmHits.at(iHit).z)/mmHits.at(iHit).z;
     } else {
       z_mm.push_back(mmHits.at(iHit).z);
       isStgc_mm.push_back(false);
       
       double rProj = mmHits.at(iHit).r;
-      if ((mmHits.at(iHit).layerNumber)%2 == 0) { // layer U
+      if(std::abs(side_mm) < ZERO_LIMIT) { // no layer U/V
+        r_mm.push_back(rProj);
+      }
+      else if ((mmHits.at(iHit).layerNumber)%2 == 0) { // layer U
         double rPrime = (rProj * cosTiltAngleU)/(cos(phiLocalAvg)*cosTiltAngleU + sin(phiLocalAvg)*sinTiltAngleU);
         r_mm.push_back(rPrime);
       } else { //layer V
@@ -1089,13 +1097,13 @@ StatusCode TrigL2MuonSA::NswStationFitter::calcMergedHit(TrigL2MuonSA::TrackPatt
     isStgc = isStgc_stgc;
     copy(isStgc_mm.begin(), isStgc_mm.end(), back_inserter(isStgc));
 
-    if(side_stgc == -1){
+    if(side_stgc < -1.*ZERO_LIMIT){
       StgcSegZ = -7526.329;
     }
     StgcSegR = slopefit_stgc * StgcSegZ + interceptfit_stgc;
     double StgcSegOriginTheta = std::atan(StgcSegR / StgcSegZ);
     double StgcSegEta         = side_stgc * (- std::log(std::abs(std::tan(StgcSegOriginTheta / 2))));
-    if(side_mm == -1){
+    if(side_mm < -1.*ZERO_LIMIT){
       MmSegZ = -7526.329;
     }
     MmSegR = slopefit_mm * MmSegZ + interceptfit_mm;
@@ -1103,14 +1111,14 @@ StatusCode TrigL2MuonSA::NswStationFitter::calcMergedHit(TrigL2MuonSA::TrackPatt
     double MmSegEta         = side_stgc * (- std::log(std::abs(std::tan(MmSegOriginTheta / 2))));
 
     double SegEtaAve = 0;
-    if(side_stgc != 0 || side_mm != 0){
-      if(side_stgc == side_mm){
+    if(std::abs(side_stgc) > ZERO_LIMIT || std::abs(side_mm) > ZERO_LIMIT){
+      if(side_stgc*side_mm > 0){
         side = side_stgc;
         SegEtaAve = (StgcSegEta + MmSegEta)/2;
-      } else if(side_stgc == 0) {
+      } else if(std::abs(side_stgc) < ZERO_LIMIT) {
         side = side_mm;
         SegEtaAve = MmSegEta;
-      } else if(side_mm == 0) {
+      } else if(std::abs(side_mm) < ZERO_LIMIT) {
         side = side_stgc;
         SegEtaAve = StgcSegEta;
       }
@@ -1145,7 +1153,7 @@ StatusCode TrigL2MuonSA::NswStationFitter::calcMergedHit(TrigL2MuonSA::TrackPatt
   xAOD::L2MuonParameters::Chamber inner = xAOD::L2MuonParameters::Chamber::EndcapInner;
   TrigL2MuonSA::SuperPoint* superPoint = &(trackPattern.superPoints[inner]);
   double NSWCenterZ = 7526.329; 
-  if(side == -1){
+  if(side < -1.*ZERO_LIMIT){
     NSWCenterZ = -7526.329;
   }
   superPoint->R = slopefit * NSWCenterZ + interceptfit;
@@ -1394,10 +1402,10 @@ void TrigL2MuonSA::NswStationFitter::findSetOfMmHitIds(TrigL2MuonSA::MmHits& mmH
 
   double tanTiltAngleU = 0,
          tanTiltAngleV = 0;
-  if(side == 1){
+  if(side > ZERO_LIMIT){
     tanTiltAngleU = tan( 1.5/360.*2.*M_PI),
     tanTiltAngleV = tan(-1.5/360.*2.*M_PI);
-  } else if(side == -1){
+  } else if(side < -1.*ZERO_LIMIT){
     tanTiltAngleU = tan(-1.5/360.*2.*M_PI),
     tanTiltAngleV = tan(1.5/360.*2.*M_PI);
   }
@@ -1426,7 +1434,10 @@ void TrigL2MuonSA::NswStationFitter::findSetOfMmHitIds(TrigL2MuonSA::MmHits& mmH
         }
         double rInterpolate = slopeX * mmHits.at(hitIdsU[iLayer]).z + interceptX;
         double rProj = mmHits.at(hitIdsU[iLayer]).r;
-        phiLocalU[iLayer] = std::atan((rProj-rInterpolate)/tanTiltAngleU/rInterpolate);
+	if(std::abs(tanTiltAngleU) < ZERO_LIMIT)
+	  phiLocalU[iLayer] = 0;
+	else
+	  phiLocalU[iLayer] = std::atan((rProj-rInterpolate)/tanTiltAngleU/rInterpolate);
       }
 
       for(unsigned int iPairV = 0; iPairV < hitIdsInTwo[3].size(); ++iPairV) {
@@ -1446,7 +1457,10 @@ void TrigL2MuonSA::NswStationFitter::findSetOfMmHitIds(TrigL2MuonSA::MmHits& mmH
           }
           double rInterpolate = slopeX * mmHits.at(hitIdsV[iLayer]).z + interceptX;
           double rProj = mmHits.at(hitIdsV[iLayer]).r;
-          phiLocalV[iLayer] = std::atan((rProj-rInterpolate)/tanTiltAngleV/rInterpolate);
+	  if(std::abs(tanTiltAngleV) < ZERO_LIMIT)
+	    phiLocalV[iLayer] = 0;
+	  else
+	    phiLocalV[iLayer] = std::atan((rProj-rInterpolate)/tanTiltAngleV/rInterpolate);
         }
 
         if ( std::abs(phiLocalU[0]-phiLocalV[0]) > 0.05 &&

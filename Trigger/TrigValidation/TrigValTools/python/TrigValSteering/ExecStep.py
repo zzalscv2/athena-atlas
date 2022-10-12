@@ -348,7 +348,7 @@ class ExecStep(Step):
             if self.type == 'athena':
                 self.args += ' --filesInput={}'.format(input_str)
             elif self.type == 'athenaHLT':
-                self.args += ' --file={}'.format(input_str)
+                self.args += ''.join([f" --file={inputFile}" for inputFile in input_str.split(',')])
             elif self.type.endswith('_tf'):
                 if self.input_object is None:
                     self.misconfig_abort(

@@ -5,7 +5,6 @@
 # art-type: grid
 # art-include: master/Athena
 # art-include: 22.0/Athena
-# art-include: 21.3/Athena
 # art-include: 21.9/Athena
 # art-output: log.HITtoRDO
 

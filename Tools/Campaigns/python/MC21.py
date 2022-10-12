@@ -101,3 +101,19 @@ def MC21SimulationMultiBeamSpot(flags):
     from RunDependentSimComps.PileUpUtils import generateRunAndLumiProfile
     generateRunAndLumiProfile(flags,
                               profile= 'RunDependentSimData.PileUpProfile_run410000_MC21a_MultiBeamspot')
+
+
+def MC21SimulationCalibrationHits(flags):
+    """MC21 flags for simulation with CalibrationHits"""
+    MC21Simulation(flags)
+    from SimuJobTransforms import CalHits, ParticleID
+    CalHits(flags)
+    ParticleID(flags)
+
+
+def MC21SimulationMultiBeamSpotCalibrationHits(flags):
+    """MC21 flags for simulation with CalibrationHits"""
+    MC21SimulationMultiBeamSpot(flags)
+    from SimuJobTransforms import CalHits, ParticleID
+    CalHits(flags)
+    ParticleID(flags)

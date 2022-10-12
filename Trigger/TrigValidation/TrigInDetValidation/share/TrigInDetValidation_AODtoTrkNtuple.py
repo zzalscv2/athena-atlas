@@ -12,6 +12,7 @@ theApp.EvtMax=-1                                       #says how many events to 
 
 from AthenaConfiguration.AllConfigFlags import ConfigFlags
 ConfigFlags.Input.Files = FilesInput
+ConfigFlags.lock()
 
 import AthenaPoolCnvSvc.ReadAthenaPool                   #sets up reading of POOL files (e.g. xAODs)
 # svcMgr.EventSelector.InputCollections=[os.environ['ASG_TEST_FILE_DATA']] #replace with input file
@@ -21,7 +22,6 @@ algseq = CfgMgr.AthSequencer("AthAlgSeq")                #gets the main AthSeque
 
 #only specifying here so that has the standard 'TrigDecisionTool' name
 
-from AthenaConfiguration.AllConfigFlags import ConfigFlags
 from AthenaConfiguration.ComponentAccumulator import CAtoGlobalWrapper
 from TrigDecisionTool.TrigDecisionToolConfig import TrigDecisionToolCfg
 CAtoGlobalWrapper(TrigDecisionToolCfg, ConfigFlags)
