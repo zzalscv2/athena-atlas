@@ -127,11 +127,15 @@ StatusCode gFexInputByteStreamTool::convertFromBS(const std::vector<const ROBF*>
             }
         }
 
-        // For eacj FPGA we resemble the fibers->gTowers used in hardware
+        // For each FPGA we resemble the fibers->gTowers used in hardware
         // Atwr, Btwr, Ctwr will contain towers for each FPGA
         gtFPGA Atwr  = {{{0}}};
         gtFPGA Btwr  = {{{0}}};
         gtFPGA Ctwr  = {{{0}}};
+
+        gtFPGA AtwrS  = {{{0}}};
+        gtFPGA BtwrS  = {{{0}}};
+        gtFPGA CtwrS  = {{{0}}};
 
         a_gtrx_map(Afiber, AMapped);
 
@@ -152,6 +156,7 @@ StatusCode gFexInputByteStreamTool::convertFromBS(const std::vector<const ROBF*>
                          gPos::AMPD_DTYP_ARR, 
                          gPos::AMSK  );
 
+        gtRescale(Atwr, AtwrS, 4);
 
         b_gtrx_map(Bfiber, BMapped);
 
@@ -169,6 +174,7 @@ StatusCode gFexInputByteStreamTool::convertFromBS(const std::vector<const ROBF*>
                           gPos::BMPD_DTYP_ARR, 
                           gPos::BMSK  );
 
+        gtRescale(Btwr, BtwrS, 4);
 
         c_gtrx_map(Cfiber, CMapped);
 
@@ -186,6 +192,8 @@ StatusCode gFexInputByteStreamTool::convertFromBS(const std::vector<const ROBF*>
                           gPos::CMPD_DTYP_ARR, 
                           gPos::CMSK  );
 
+        gtRescale(Ctwr, CtwrS, 4);
+
         // Fill the gTower EDM with the corresponding towers
         int iEta = 0;
         int iPhi = 0;
@@ -193,15 +201,15 @@ StatusCode gFexInputByteStreamTool::convertFromBS(const std::vector<const ROBF*>
         int Fpga = 0;
         char IsSaturated = 0;
 
-        int twr_rows = Atwr.size();
-        int twr_cols = Atwr[0].size();
+        int twr_rows = AtwrS.size();
+        int twr_cols = AtwrS[0].size();
         
         // Save towers from FPGA A in gTower EDM
         for (int irow = 0; irow < twr_rows; irow++){
             for (int icol = 0; icol < twr_cols; icol++){
                 iEta = icol + 8;
-                iPhi = 31 - irow;
-                Et = Atwr[irow][icol];
+                iPhi = irow;
+                Et = AtwrS[irow][icol];
                 Fpga = 0;
                 gTowersContainer->push_back( std::make_unique<xAOD::gFexTower>() );
                 gTowersContainer->back()->initialize(iEta, iPhi, Et, Fpga, IsSaturated);                    
@@ -214,8 +222,8 @@ StatusCode gFexInputByteStreamTool::convertFromBS(const std::vector<const ROBF*>
         for (int irow = 0; irow < twr_rows; irow++){
             for (int icol = 0; icol < twr_cols; icol++){
                 iEta = icol + 20;
-                iPhi = 31 - irow;
-                Et = Btwr[irow][icol];
+                iPhi = irow;
+                Et = BtwrS[irow][icol];
                 Fpga = 1;
                 gTowersContainer->push_back( std::make_unique<xAOD::gFexTower>() );
                 gTowersContainer->back()->initialize(iEta, iPhi, Et, Fpga, IsSaturated);     
@@ -225,16 +233,16 @@ StatusCode gFexInputByteStreamTool::convertFromBS(const std::vector<const ROBF*>
         for (int irow = 0; irow < twr_rows; irow++){
             for (int icol = 0; icol < twr_cols/2; icol++){                
                 iEta = icol + 2;
-                iPhi = 31 - irow;
-                Et = Ctwr[irow][icol];
+                iPhi = irow;
+                Et = CtwrS[irow][icol];
                 Fpga = 2;
                 gTowersContainer->push_back( std::make_unique<xAOD::gFexTower>() );
                 gTowersContainer->back()->initialize(iEta, iPhi, Et, Fpga, IsSaturated);     
             }
             for (int icol = twr_cols/2; icol < twr_cols; icol++){                
                 iEta = icol + 26;
-                iPhi = 31 - irow;
-                Et = Ctwr[irow][icol];
+                iPhi = irow;
+                Et = CtwrS[irow][icol];
                 Fpga = 2;
                 gTowersContainer->push_back( std::make_unique<xAOD::gFexTower>() );
                 gTowersContainer->back()->initialize(iEta, iPhi, Et, Fpga, IsSaturated);     
@@ -1042,6 +1050,15 @@ void  gFexInputByteStreamTool::undoMLE(int &datumPtr ) const{
     datumPtr = dout;
 }
 
+void gFexInputByteStreamTool::gtRescale(gtFPGA twr, gtFPGA &twrScaled, int scale) const{
+    int rows = twr.size();
+    int cols = twr[0].size();
+    for(int irow=0; irow<rows; irow++){
+        for( int icolumn=0; icolumn<cols; icolumn++){
+            twrScaled[irow][icolumn] = twr[irow][icolumn]/scale; 
+        }
+    }
+}
 
 /// xAOD->BS conversion
 StatusCode gFexInputByteStreamTool::convertToBS(std::vector<WROBF*>& /*vrobf*/, const EventContext& /*eventContext*/) {

@@ -9,6 +9,7 @@
 #
 #
 #########################################################
+include.block("SimulationJobOptions/preInclude.G4ExtraProcesses.py")
 
 ## Add the physics tool
 simFlags.PhysicsOptions += ['G4EMProcessesPhysicsTool']

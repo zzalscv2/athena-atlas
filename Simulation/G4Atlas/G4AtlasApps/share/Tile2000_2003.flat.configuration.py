@@ -186,8 +186,16 @@ if not simFlags.ISFRun:
                                  "TrackRecordCollection#CaloEntryLayer"]
         ## Calo
         if DetFlags.Calo_on():
-            stream1.ItemList += ["CaloCalibrationHitContainer#*",
-                                 "LArHitContainer#*",
+            if simFlags.CalibrationRun.get_Value() in ['LAr', 'LAr+Tile']:
+                stream1.ItemList += ["CaloCalibrationHitContainer#LArCalibrationHitActive",
+                                     "CaloCalibrationHitContainer#LArCalibrationHitDeadMaterial",
+                                     "CaloCalibrationHitContainer#LArCalibrationHitInactive",
+                                     "CaloCalibrationHitContainer#TileCalibHitActiveCell",
+                                     "CaloCalibrationHitContainer#TileCalibHitInactiveCell",
+                                     "CaloCalibrationHitContainer#TileCalibHitDeadMaterial"]
+            else:
+                stream1.ItemList += ["CaloCalibrationHitContainer#*"]
+            stream1.ItemList += ["LArHitContainer#*",
                                  "TileHitVector#*",
                                  #"SimpleScintillatorHitCollection#*",
                                  "TrackRecordCollection#MuonEntryLayer"]

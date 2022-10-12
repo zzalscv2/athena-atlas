@@ -38,7 +38,7 @@ echo "Found ${NWARNING} WARNING, ${NERROR} ERROR and ${NFATAL} FATAL messages in
 # the postExec overrides the muon geometry to use the Run4 muon layout
 Digi_tf.py --inputHITSFile OUT_HITS.root \
            --imf False \
-           --postExec 'database_layout="MuonSpectrometer-R.10.01";include("MuonGeoModel/InitGeoFromLocal_postIncl.py");conddb.addOverride("/MDT/RTBLOB","MDTRT_Sim-Run4-01");conddb.addOverride("/MDT/T0BLOB","MDTT0_Sim-Run4-01")' \
+           --postExec 'database_layout="MuonSpectrometer-R.10.01";include("MuonGeoModel/InitGeoFromLocal_postIncl.py");conddb.addOverride("/MDT/RTBLOB","MDTRT_Sim-Run4-01");conddb.addOverride("/MDT/T0BLOB","MDTT0_Sim-Run4-01");topSequence.MdtDigitToMdtRDO.isPhaseII=True;' \
            --outputRDOFile OUT_RDO.root
 exit_code=$?
 echo  "art-result: ${exit_code} Digi_tf.py"

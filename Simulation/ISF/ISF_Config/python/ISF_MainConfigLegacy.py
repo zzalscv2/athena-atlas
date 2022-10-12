@@ -252,6 +252,9 @@ def getKernel_GenericG4Only(name="ISF_Kernel_GenericG4Only", **kwargs):
         kwargs.setdefault("CavernSimulationSelectors"   , [ 'ISF_FullGeant4Selector' ] )
     else:
         kwargs.setdefault("CavernSimulationSelectors"   , [ 'ISF_DefaultParticleKillerSelector' ] )
+    if simFlags.CalibrationRun.get_Value() in ['LAr', 'LAr+Tile']:
+        # Needed to ensure that DeadMaterialCalibrationHitsMerger is scheduled correctly.
+        kwargs.setdefault("ExtraOutputs", [( 'CaloCalibrationHitContainer' , 'StoreGateSvc+LArCalibrationHitActive_DEAD' ), ( 'CaloCalibrationHitContainer' , 'StoreGateSvc+LArCalibrationHitDeadMaterial_DEAD' ), ( 'CaloCalibrationHitContainer' , 'StoreGateSvc+LArCalibrationHitInactive_DEAD' )])
     return getKernel_GenericSimulator(name, **kwargs)
 
 ############## Simulator: GenericG4OnlyMT ###############
@@ -261,6 +264,10 @@ def getKernel_GenericG4OnlyMT(name="ISF_Kernel_GenericG4OnlyMT", **kwargs):
     kwargs.setdefault("CaloSimulationSelectors"     , [ 'ISF_FullGeant4Selector' ] )
     kwargs.setdefault("MSSimulationSelectors"       , [ 'ISF_FullGeant4Selector' ] )
     kwargs.setdefault("CavernSimulationSelectors"   , [ 'ISF_DefaultParticleKillerSelector' ] )
+    from G4AtlasApps.SimFlags import simFlags
+    if simFlags.CalibrationRun.get_Value() in ['LAr', 'LAr+Tile']:
+        # Needed to ensure that DeadMaterialCalibrationHitsMerger is scheduled correctly.
+        kwargs.setdefault("ExtraOutputs", [( 'CaloCalibrationHitContainer' , 'StoreGateSvc+LArCalibrationHitActive_DEAD' ), ( 'CaloCalibrationHitContainer' , 'StoreGateSvc+LArCalibrationHitDeadMaterial_DEAD' ), ( 'CaloCalibrationHitContainer' , 'StoreGateSvc+LArCalibrationHitInactive_DEAD' )])
     return getKernel_GenericSimulatorMT(name, **kwargs)
 
 ############## Simulator: FullG4 ###############

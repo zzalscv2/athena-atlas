@@ -40,8 +40,16 @@ def getHITSStreamItemList():
                          "TrackRecordCollection#CaloEntryLayer"]
     ## Calo
     if DetFlags.Calo_on():
-        hitsItemList += ["CaloCalibrationHitContainer#*",
-                         "LArHitContainer#LArHitEMB",
+        if simFlags.CalibrationRun.get_Value() in ['LAr', 'LAr+Tile']:
+            hitsItemList += ["CaloCalibrationHitContainer#LArCalibrationHitActive",
+                             "CaloCalibrationHitContainer#LArCalibrationHitDeadMaterial",
+                             "CaloCalibrationHitContainer#LArCalibrationHitInactive",
+                             "CaloCalibrationHitContainer#TileCalibHitActiveCell",
+                             "CaloCalibrationHitContainer#TileCalibHitInactiveCell",
+                             "CaloCalibrationHitContainer#TileCalibHitDeadMaterial"]
+        else:
+            hitsItemList += ["CaloCalibrationHitContainer#*"]
+        hitsItemList += ["LArHitContainer#LArHitEMB",
                          "LArHitContainer#LArHitEMEC",
                          "LArHitContainer#LArHitHEC",
                          "LArHitContainer#LArHitFCAL",

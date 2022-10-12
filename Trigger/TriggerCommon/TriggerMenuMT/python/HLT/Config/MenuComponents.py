@@ -461,8 +461,13 @@ class MenuSequence(object):
             probeIM.Views = baseIM.Views.Path + "_probe"
             probeIM.RoITool = baseIM.RoITool
             probeIM.InputCachedViews = baseIM.InputMakerOutputDecisions
-            if hasattr(baseIM.RoITool,"RoisWriteHandleKey") and baseIM.RoITool.RoisWriteHandleKey.Path!="StoreGateSvc+":
-                probeIM.RoITool.RoisWriteHandleKey = baseIM.RoITool.RoisWriteHandleKey.Path + "_probe"
+            def updateHandle(baseTool, probeTool, handleName):
+                if hasattr(baseTool, handleName) and getattr(baseTool, handleName).Path!="StoreGateSvc+":
+                    setattr(probeTool, handleName, getattr(baseTool, handleName).Path + "_probe")
+            updateHandle(baseIM.RoITool, probeIM.RoITool, "RoisWriteHandleKey")
+            if hasattr(baseIM.RoITool, "RoiCreator"):
+                updateHandle(baseIM.RoITool, probeIM.RoITool, "ExtraPrefetchRoIsKey")
+                updateHandle(baseIM.RoITool.RoiCreator, probeIM.RoITool.RoiCreator, "RoisWriteHandleKey")
         else:
             raise TypeError(f"Probe leg input maker may not be of type '{baseIM.__class__}'.")
 

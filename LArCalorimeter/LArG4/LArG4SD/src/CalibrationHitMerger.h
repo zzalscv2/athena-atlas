@@ -12,6 +12,7 @@
 
 // Framework includes
 #include "AthenaBaseComps/AthAlgorithm.h"
+#include "StoreGate/ReadHandleKey.h"
 #include "StoreGate/WriteHandleKey.h"
 #include "CaloSimEvent/CaloCalibrationHitContainer.h"
 
@@ -29,12 +30,11 @@ namespace LArG4 {
     CalibrationHitMerger( const std::string& name, ISvcLocator* pSvcLocator );
 
     /** Destructor */
-    virtual ~CalibrationHitMerger();
+    virtual ~CalibrationHitMerger() = default;
 
     /** Athena algorithm's interface methods */
     virtual StatusCode  initialize() override final;
     virtual StatusCode  execute()    override final;
-    virtual StatusCode  finalize()   override final;
 
   private:
     class LessHit {
@@ -51,23 +51,9 @@ namespace LArG4 {
     /** Initialize the given VarHandleKey */
     StatusCode initializeVarHandleKey( SG::VarHandleKey& varHandleKey ) const;
 
-    /** Commonly used member and function parameter types */
-    typedef std::vector<std::string>  SGKeyVector_t;
-    typedef std::vector<SG::ReadHandleKey<CaloCalibrationHitContainer>> ReadHandleKeyVector_t;
+    SG::ReadHandleKeyArray<CaloCalibrationHitContainer> m_inputHits{this, "InputHits", {}, "Input collection ReadHandleKeys"};
 
-
-    /** Setup a vector of ReadHandleKeys for the given vector of string StoreGate Keys */
-    StatusCode setupReadHandleKeyVector( const SGKeyVector_t&      sgKeyVec,
-                                         ReadHandleKeyVector_t& readHandleVec ) const;
-
-    /** Input collection StoreGate keys */
-    SGKeyVector_t m_inputHitsSGKeys;
-
-    /** Input collection ReadHandleKeys */
-    ReadHandleKeyVector_t m_inputHits;
-
-    /** Output collection WriteHandleKeys */
-    SG::WriteHandleKey<CaloCalibrationHitContainer> m_outputHits;
+    SG::WriteHandleKey<CaloCalibrationHitContainer> m_outputHits{this, "OutputHits", "", "Output collection WriteHandleKeys"};
   };
 
 }

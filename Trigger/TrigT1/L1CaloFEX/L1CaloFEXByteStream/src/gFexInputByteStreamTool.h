@@ -97,6 +97,9 @@ class gFexInputByteStreamTool : public extends<AthAlgTool, IL1TriggerByteStreamT
 
         virtual void undoMLE(int &datumPtr ) const;
 
+        virtual void gtRescale(gtFPGA twr, gtFPGA &twrScaled, int scale) const;
+        
+
         
 };
 
