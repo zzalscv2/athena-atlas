@@ -13,7 +13,7 @@ namespace xAOD{
   AUXSTORE_PRIMITIVE_SETTER_AND_GETTER( gFexTower_v1, uint8_t , iEta , setEta )
   AUXSTORE_PRIMITIVE_SETTER_AND_GETTER( gFexTower_v1, uint8_t , iPhi , setPhi )
   AUXSTORE_PRIMITIVE_SETTER_AND_GETTER( gFexTower_v1, uint8_t , fpga , setFpga )
-  AUXSTORE_PRIMITIVE_SETTER_AND_GETTER( gFexTower_v1, int16_t , towerEt , setTowerEt )
+  AUXSTORE_PRIMITIVE_SETTER_AND_GETTER( gFexTower_v1, int , towerEt , setTowerEt )
   AUXSTORE_PRIMITIVE_SETTER_AND_GETTER( gFexTower_v1, char , isSaturated , setIsSaturated )
   
   /// initialize
@@ -25,7 +25,7 @@ namespace xAOD{
   
   void gFexTower_v1::initialize(const uint8_t Eta,
                                 const uint8_t Phi,
-                                const int16_t TowerEt,
+                                const int TowerEt,
                                 const uint8_t Fpga,
                                 const char IsSaturated)
   {
@@ -33,20 +33,8 @@ namespace xAOD{
     setPhi( Phi );
     setFpga( Fpga );
     setIsSaturated( IsSaturated );
-    setTowerEt( signedEt(TowerEt) );
+    setTowerEt( TowerEt );
 
   }
-
-  // Extract TowerEt with sign 
-  int16_t gFexTower_v1::signedEt(int16_t TowerEt) const {
-    int16_t signedTowerEt = TowerEt; 
-    int SIGNMASK = 0x0800;
-    int EXTENDS =  0xF000;
-    if((SIGNMASK & signedTowerEt)) {
-      signedTowerEt = (EXTENDS | signedTowerEt); 
-    }
-    return signedTowerEt; 
-  }
-
 
 } // namespace xAOD
