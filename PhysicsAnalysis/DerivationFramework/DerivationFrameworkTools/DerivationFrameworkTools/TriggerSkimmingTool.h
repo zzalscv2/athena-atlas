@@ -27,6 +27,7 @@ namespace DerivationFramework {
     private:
       Gaudi::Property<std::vector<std::string>> m_triggerListAND{this,"TriggerListAND", {}};
       Gaudi::Property<std::vector<std::string>> m_triggerListOR{this,"TriggerListOR", {}};
+      Gaudi::Property<std::vector<std::string>> m_triggerListORHLTOnly{this,"TriggerListORHLTOnly", {}, "Decision is based on HLT only (unseeded triggers)"};
       PublicToolHandle<Trig::TrigDecisionTool> m_trigDec{this, "TrigDecisionTool", "Trig::TrigDecisionTool/TrigDecisionTool"};
 
   }; 
