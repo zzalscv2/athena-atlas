@@ -4,12 +4,14 @@
 
 from AthenaCommon.CFElements import parOR, seqAND
 from AthenaCommon.GlobalFlags import globalflags
+from AthenaConfiguration.ComponentFactory import CompFactory
 from ViewAlgs.ViewAlgsConf import EventViewCreatorAlgorithm
 from DecisionHandling.DecisionHandlingConf import ViewCreatorInitialROITool, ViewCreatorFetchFromViewROITool, ViewCreatorPreviousROITool
 from TrigT2CaloCommon.CaloDef import HLTLCTopoRecoSequence
 from TrigEDMConfig.TriggerEDMRun3 import recordable
 from TriggerMenuMT.HLT.Config.MenuComponents import RecoFragmentsPool, algorithmCAToGlobalWrapper
 from TrigGenericAlgs.TrigGenericAlgsConfig import ROBPrefetchingAlgCfg_Si, ROBPrefetchingAlgCfg_Calo
+from TriggerJobOpts.TriggerConfigFlags import ROBPrefetching
 import AthenaCommon.CfgMgr as CfgMgr
 
 
@@ -299,9 +301,27 @@ def tauFTFCoreSequence(flags):
     newRoITool.RoisWriteHandleKey       = recordable("HLT_Roi_TauCore") #RoI collection recorded to EDM           
     newRoITool.InViewRoIs               = "UpdatedCaloRoI" #input RoIs from calo only step   
 
+    extraPrefetching = ROBPrefetching.TauCoreLargeRoI in flags.Trigger.ROBPrefetchingOptions
+    if extraPrefetching:
+      # Add extra RoI to prefetch ROBs for the subsequent tauIso step together with ROBs for tauCore
+      from TrigInDetConfig.ConfigSettings import getInDetTrigConfig
+      tauIsoConfig = getInDetTrigConfig("tauIso")
+      prefetchRoIUpdater                   = CompFactory.RoiUpdaterTool()
+      prefetchRoIUpdater.useBeamSpot       = True
+      prefetchRoIUpdater.NSigma            = 1.5
+      prefetchRoIUpdater.EtaWidth          = tauIsoConfig.etaHalfWidth
+      prefetchRoIUpdater.PhiWidth          = tauIsoConfig.phiHalfWidth
+      prefetchRoIUpdater.ZedWidth          = tauIsoConfig.zedHalfWidth
+      prefetchRoITool                      = CompFactory.ViewCreatorExtraPrefetchROITool()
+      prefetchRoITool.RoiCreator           = newRoITool
+      prefetchRoITool.RoiUpdater           = prefetchRoIUpdater
+      prefetchRoITool.ExtraPrefetchRoIsKey = str(newRoITool.RoisWriteHandleKey) + "_forPrefetching"
+      prefetchRoITool.PrefetchRoIsLinkName = "prefetchRoI"
+      prefetchRoITool.MergeWithOriginal    = True
+
     ftfCoreViewsMaker                   = EventViewCreatorAlgorithm("IMFTFCore")
     ftfCoreViewsMaker.mergeUsingFeature = True
-    ftfCoreViewsMaker.RoITool           = newRoITool
+    ftfCoreViewsMaker.RoITool           = prefetchRoITool if extraPrefetching else newRoITool
     ftfCoreViewsMaker.InViewRoIs        = "RoiForTauCore"
     ftfCoreViewsMaker.Views             = "TAUFTFCoreViews"
     ftfCoreViewsMaker.ViewFallThrough   = True
@@ -309,6 +329,8 @@ def tauFTFCoreSequence(flags):
     ftfCoreViewsMaker.ViewNodeName      = RecoSequenceName
 
     robPrefetchAlg = algorithmCAToGlobalWrapper(ROBPrefetchingAlgCfg_Si, flags, nameSuffix=ftfCoreViewsMaker.name())[0]
+    if extraPrefetching:
+      robPrefetchAlg.RoILinkName = str(prefetchRoITool.PrefetchRoIsLinkName)
 
     (tauFTFCoreInViewSequence, sequenceOut) = tauFTFSequence( ftfCoreViewsMaker.InViewRoIs, RecoSequenceName)
 
