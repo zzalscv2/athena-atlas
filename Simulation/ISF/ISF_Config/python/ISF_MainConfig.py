@@ -78,7 +78,10 @@ def Kernel_GenericSimulatorMTCfg(flags, writeMetadata, name="ISF_Kernel_GenericS
     kwargs.setdefault("Cardinality", flags.Concurrency.NumThreads)
     kwargs.setdefault("InputEvgenCollection", "BeamTruthEvent")
     kwargs.setdefault("OutputTruthCollection", "TruthEvent")
-
+    from SimulationConfig.SimEnums import CalibrationRun
+    if flags.Sim.CalibrationRun in [CalibrationRun.LAr, CalibrationRun.LArTile]:
+        # Needed to ensure that DeadMaterialCalibrationHitsMerger is scheduled correctly.
+        kwargs.setdefault("ExtraOutputs", [( 'CaloCalibrationHitContainer' , 'StoreGateSvc+LArCalibrationHitActive_DEAD' ), ( 'CaloCalibrationHitContainer' , 'StoreGateSvc+LArCalibrationHitDeadMaterial_DEAD' ), ( 'CaloCalibrationHitContainer' , 'StoreGateSvc+LArCalibrationHitInactive_DEAD' )])
     #Write MetaData container
     if writeMetadata:
         acc.merge(writeSimulationParametersMetadata(flags))

@@ -286,6 +286,9 @@ if doFastCaloSim and ISF_Flags.HITSMergingRequired.anyOn():
     # Add the collection merger algorithm for FastCaloSim in G4 to the sequence
     topSeq += collection_merger_alg
 
+if simFlags.CalibrationRun.get_Value() in ['LAr', 'LAr+Tile']:
+    topSeq += getAlgorithm("DeadMaterialCalibrationHitMerger")
+
 ## Add AMITag MetaData to TagInfoMgr
 from PyUtils import AMITagHelper
 AMITagHelper.SetAMITag(runArgs=runArgs)

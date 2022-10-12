@@ -1,36 +1,19 @@
 /*
-  Copyright (C) 2002-2017 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "CalibrationHitMerger.h"
 
 /** Constructor */
 LArG4::CalibrationHitMerger::CalibrationHitMerger( const std::string& name, ISvcLocator* pSvcLocator ) :
-  ::AthAlgorithm( name, pSvcLocator ),
-  m_inputHitsSGKeys(),
-  m_inputHits(),
-  m_outputHits()
-{
-  // Input collections StoreGate keys
-  declareProperty( "InputHits",    m_inputHitsSGKeys   );
-
-  // Output collections
-  declareProperty( "OutputHits",   m_outputHits        );
-}
-
-
-/** Destructor */
-LArG4::CalibrationHitMerger::~CalibrationHitMerger()
+  ::AthAlgorithm( name, pSvcLocator )
 {}
-
 
 /** Athena Algorithm initialize */
 StatusCode LArG4::CalibrationHitMerger::initialize()
 {
-  ATH_CHECK(setupReadHandleKeyVector(m_inputHitsSGKeys,   m_inputHits  ));
-
-  ATH_CHECK(initializeVarHandleKey(m_outputHits  ));
-
+  ATH_CHECK(m_inputHits.initialize());
+  ATH_CHECK(m_outputHits.initialize());
   return StatusCode::SUCCESS;
 }
 
@@ -110,38 +93,3 @@ StatusCode LArG4::CalibrationHitMerger::execute()
   ATH_MSG_DEBUG(outputHandle.name() << " has " << outputHandle->size() << " hits. Merged " << nHitsMerged << " hits.");
   return StatusCode::SUCCESS;
 }
-
-
-/** Athena Algorithm finalize */
-StatusCode LArG4::CalibrationHitMerger::finalize()
-{
-  return StatusCode::SUCCESS;
-}
-
-/** Initialize the given VarHandleKey */
-StatusCode LArG4::CalibrationHitMerger::initializeVarHandleKey( SG::VarHandleKey& varHandleKey ) const {
-  if ( varHandleKey.key().empty() )
-    return StatusCode::SUCCESS;
-
-  return varHandleKey.initialize();
-}
-/** Setup a vector of ReadHandleKeys for the given vector of string StoreGate Keys */
-StatusCode LArG4::CalibrationHitMerger::setupReadHandleKeyVector( const SGKeyVector_t&      sgKeyVec,
-                                                                ReadHandleKeyVector_t& readHandleVec ) const {
-  readHandleVec.reserve( sgKeyVec.size() );
-
-  // convert string StoreGate key to ReadHandleKey
-  for ( const auto& sgKey: sgKeyVec ) {
-    readHandleVec.emplace_back( sgKey );
-  }
-
-  // initialize all ReadHandleKeys
-  for ( auto& readHandleKey: readHandleVec ) {
-    if ( readHandleKey.initialize().isFailure() ) {
-      return StatusCode::FAILURE;
-    }
-  }
-
-  return StatusCode::SUCCESS;
-}
-

@@ -9,6 +9,7 @@
 #
 #
 #########################################################
+include.block("SimulationJobOptions/preInclude.ExtraParticles.py")
 
 ## Add the physics tool
 simFlags.PhysicsOptions += ['ExtraParticlesPhysicsTool']

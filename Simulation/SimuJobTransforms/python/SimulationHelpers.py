@@ -59,6 +59,12 @@ def enableG4SignalCavern(ConfigFlags):
 def enableCalHits(ConfigFlags):
     """Turns on calibration hits for LAr and Tile"""
     ConfigFlags.Sim.CalibrationRun = CalibrationRun.LArTile
+    # deactivate incompatible optimizations
+    ConfigFlags.Sim.LArParameterization = LArParameterization.NoFrozenShowers
+    ConfigFlags.Sim.NRRThreshold = False
+    ConfigFlags.Sim.NRRWeight = False
+    ConfigFlags.Sim.PRRThreshold = False
+    ConfigFlags.Sim.PRRWeight = False
 
 
 def enableParticleID(ConfigFlags):
