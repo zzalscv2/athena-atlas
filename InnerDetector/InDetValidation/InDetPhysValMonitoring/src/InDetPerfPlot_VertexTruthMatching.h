@@ -215,13 +215,19 @@ private:
     TH1* m_vx_nVertices_ALL_matched;
     TH1* m_vx_nVertices_ALL_merged;
     TH1* m_vx_nVertices_ALL_split;
+    TH1* m_vx_nVertices_ALL_fake;
     TH1* m_vx_nVertices_HS_matched;
     TH1* m_vx_nVertices_HS_merged;
     TH1* m_vx_nVertices_HS_split;
+    TH1* m_vx_nVertices_HS_fake;
     TH1* m_vx_nVertices_matched;
     TH1* m_vx_nVertices_merged;
     TH1* m_vx_nVertices_split;
+    TH1* m_vx_nVertices_fake;
 
+    // delta z plot
+    TH1* m_vx_all_dz;
+    TH1* m_vx_hs_mindz;
 
     ///@}
 private:
