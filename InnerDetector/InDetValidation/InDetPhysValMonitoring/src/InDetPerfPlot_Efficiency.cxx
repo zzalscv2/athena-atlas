@@ -37,6 +37,7 @@ void
 InDetPerfPlot_Efficiency::initializePlots() {
 
   book(m_efficiency_vs_pteta, "efficiency_vs_pteta");
+  book(m_efficiency_vs_ptmu, "efficiency_vs_ptmu");
 
   book(m_efficiency_vs_eta, "efficiency_vs_eta");
   book(m_efficiency_vs_pt, "efficiency_vs_pt");
@@ -70,6 +71,7 @@ InDetPerfPlot_Efficiency::fill(const xAOD::TruthParticle& truth, const bool isGo
   double phi = truth.phi();
 
   fillHisto(m_efficiency_vs_pteta, pt, eta, isGood, weight);
+  fillHisto(m_efficiency_vs_ptmu, pt, mu, isGood, weight);
 
   fillHisto(m_efficiency_vs_eta, eta, isGood, weight);
   fillHisto(m_efficiency_vs_pt, pt, isGood, weight);
