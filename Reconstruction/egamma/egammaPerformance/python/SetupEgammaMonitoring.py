@@ -9,7 +9,7 @@
 @brief Example python configuration for the Run III AthenaMonitoring package
 '''
 from AthenaConfiguration.ComponentFactory import CompFactory
-import TrigEgammaMonitoring.TrigEgammaMonitCategory as egammaConf
+import TrigEgammaMonitoring.TrigEgammaMonitCategoryMT as egammaConf
 
 def BookHistogramsPerRegions(thegroupe,theparttype,thename,title,path,xbins,xmin,xmax,thetype="TH1F",thecut="is_pt_gt_4gev"):
     '''
@@ -22,7 +22,6 @@ def BookHistogramsPerRegions(thegroupe,theparttype,thename,title,path,xbins,xmin
         htitle = title + " " + theparttype + " " + Regions[n]
         thefinalcut = thecut+Regions[n] 
         thegroupe.defineHistogram(hname,title=htitle, path=path, xbins=xbins,xmin=xmin,xmax=xmax,type = thetype, cutmask = thefinalcut)
-
 
 def BookHistogramsPerForwardRegions(thegroupe,theparttype,thename,title,path,xbins,xmin,xmax,thetype="TH1F",thecut="is_pt_gt_10gev"):
     '''
@@ -311,11 +310,11 @@ def BookTnPHistograms(groupe,reconame,TnPType,MassLowerCut,MassUpperCut):
     groupe.defineHistogram(hname,title=htitle, path='TnPCandidate',xbins=100,xmin=MassLowerCut,xmax=MassUpperCut)
 
     hname = "MassZ_ENDCAP;" + TnPType + "_candidate_mass_distribution_Lead_in_EndCap"
-    htitle = TnPType + " candidate mass in Barrel ; M_{ee} [MeV/ c^{2}]; N" + tlabel
+    htitle = TnPType + " candidate mass in EndCap ; M_{ee} [MeV/ c^{2}]; N" + tlabel
     groupe.defineHistogram(hname,title=htitle, path='TnPCandidate',xbins=100,xmin=MassLowerCut,xmax=MassUpperCut)
 
     hname = "MassZ_CRACK;" + TnPType + "_candidate_mass_distribution_Lead_in_Crack"
-    htitle = TnPType + " candidate mass in Barrel ; M_{ee} [MeV/ c^{2}]; N" + tlabel
+    htitle = TnPType + " candidate mass in Crack Regionl ; M_{ee} [MeV/ c^{2}]; N" + tlabel
     groupe.defineHistogram(hname,title=htitle, path='TnPCandidate',xbins=100,xmin=MassLowerCut,xmax=MassUpperCut)
 
     # The next two histos receive 1 entry per leading electron probe candidate
