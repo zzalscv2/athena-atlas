@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2002-2019 CERN for the benefit of the ATLAS collaboration.
+ * Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration.
  */
 /**
  * @file StoreGate/test/TypelessWriteHandleKey_test.cxx
@@ -41,14 +41,14 @@ void test1()
   assert (k1.mode() == Gaudi::DataHandle::Writer);
   assert (k2.storeHandle().name() == "FeeSvc");
 
-  k2 = "BarSvc+EventInfo/ccc";
-  assert (k2.clid() == 2101);
+  k2 = "BarSvc+xAOD::EventInfo/ccc";
+  assert (k2.clid() == 45903698);
   assert (k2.key() == "ccc");
   assert (k1.mode() == Gaudi::DataHandle::Writer);
   assert (k2.storeHandle().name() == "BarSvc");
 
   EXPECT_EXCEPTION (SG::ExcBadHandleKey,
-                    k2 = "BarSvc+EventInfo/ddd/");
+                    k2 = "BarSvc+xAOD::EventInfo/ddd/");
 
 
   TestOwner owner;
