@@ -562,7 +562,7 @@ if newInDetAlignAlg_Options["runAccumulate"]:
         from InDetAlignNtupleTools.InDetAlignNtupleToolsConf import InDet__SimpleIDNtupleTool
         ntupleTool = InDet__SimpleIDNtupleTool( name = "SimpleIDNtupleTool",
                                                 OutputLevel = INFO,
-                                                TrackSummaryTool = InDetTrackSummaryTool,
+                                                TrackParticleCreatorTool = InDetParticleCreatorTool,
                                                 AlignModuleTool = alignModuleTool,
                                                 StoreDerivatives = newInDetAlignAlg_Options["writeDerivatives"]
                                             )

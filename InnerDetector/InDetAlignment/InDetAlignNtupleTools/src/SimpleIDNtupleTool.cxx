@@ -9,13 +9,13 @@
 #include "TrkTrack/Track.h"
 #include "TrkRIO_OnTrack/RIO_OnTrack.h"
 #include "TrkEventPrimitives/TrackStateDefs.h"
-#include "TrkTrackSummary/TrackSummary.h"
 
 #include "xAODEventInfo/EventInfo.h"
 
 #include "InDetIdentifier/TRT_ID.h"
 
-#include "TrkToolInterfaces/ITrackSummaryTool.h"
+#include "xAODTracking/TrackParticle.h"
+#include "TrkToolInterfaces/ITrackParticleCreatorTool.h"
 
 #include "TrkAlignEvent/AlignModule.h"
 #include "TrkAlignEvent/AlignTSOS.h"
@@ -37,7 +37,7 @@ namespace InDet {
 //________________________________________________________________________
   SimpleIDNtupleTool::SimpleIDNtupleTool(const std::string& type, const std::string& name, const IInterface* parent)
     : AthAlgTool(type, name, parent)
-    , m_trackSumTool("Trk::TrackSummaryTool/TrackSummaryTool", this)
+    , m_particleCreator("Trk::TrackParticleCreatorTool/TrackParticleCreatorTool", this)
     , m_alignModuleTool{}
     , m_idHelper{}
     , m_file{}
@@ -106,7 +106,7 @@ namespace InDet {
     , m_max_hits{150}
     , m_storeDerivatives{false} {
     declareInterface<Trk::IFillNtupleTool>(this);
-    declareProperty("TrackSummaryTool", m_trackSumTool, "tool to extract track info");
+    declareProperty("TrackParticleCreatorTool", m_particleCreator, "tool to build TrackParticle");
     declareProperty("AlignModuleTool", m_alignModuleTool);
     declareProperty("MaxHits", m_max_hits);
     declareProperty("StoreDerivatives", m_storeDerivatives);
@@ -164,8 +164,8 @@ namespace InDet {
     // retrieve TRT ID helper
     ATH_CHECK(detStore()->retrieve(m_idHelper, "TRT_ID"));
 
-    // get TrackSummaryTool
-    ATH_CHECK(m_trackSumTool.retrieve());
+    // get TrackParticleCreatorTool
+    ATH_CHECK(m_particleCreator.retrieve());
 
     // get AlignModuleTool
     if (m_alignModuleTool.empty() || m_alignModuleTool.retrieve().isFailure()) {
@@ -255,22 +255,24 @@ namespace InDet {
       m_xvtx = aMeasPer->position().x();
       m_yvtx = aMeasPer->position().y();
       m_zvtx = aMeasPer->position().z();
-      std::unique_ptr<const Trk::TrackSummary> summary = 
-        m_trackSumTool->summary((*alignTrack));
-      if (not summary) ATH_MSG_ERROR("Could not get Trk::TrackSummary");
+
+      xAOD::TrackParticle* trackPart = m_particleCreator->createParticle(*alignTrack);
+      uint8_t iSummaryValue(0); // Dummy counter to retrieve summary values
+
+      if (not trackPart) ATH_MSG_ERROR("Could not get xAOD::TrackParticle");
       else {
         // hits
-        m_nhitspix = summary->get(Trk::numberOfPixelHits);
-        m_nhitssct = summary->get(Trk::numberOfSCTHits);
-        m_nhitstrt = summary->get(Trk::numberOfTRTHits);
+        m_nhitspix = trackPart->summaryValue(iSummaryValue, xAOD::numberOfPixelHits) ? iSummaryValue : 0;
+        m_nhitssct = trackPart->summaryValue(iSummaryValue, xAOD::numberOfSCTHits) ? iSummaryValue : 0;
+        m_nhitstrt = trackPart->summaryValue(iSummaryValue, xAOD::numberOfTRTHits) ? iSummaryValue : 0;
 
         ATH_MSG_DEBUG("   -- number of Pixel hits : " << m_nhitspix);
         ATH_MSG_DEBUG("   -- number of SCT hits   : " << m_nhitssct);
         ATH_MSG_DEBUG("   -- number of TRT hits   : " << m_nhitstrt);
 
         // shared hits
-        m_nshpix = summary->get(Trk::numberOfPixelSharedHits);
-        m_nshsct = summary->get(Trk::numberOfSCTSharedHits);
+        m_nshpix = trackPart->summaryValue(iSummaryValue, xAOD::numberOfPixelSharedHits) ? iSummaryValue : 0;
+        m_nshsct = trackPart->summaryValue(iSummaryValue, xAOD::numberOfSCTSharedHits) ? iSummaryValue : 0;
         m_nshared = m_nshpix + m_nshsct;
 
         if (m_nshpix < 0) m_nshpix = 0;
@@ -282,8 +284,8 @@ namespace InDet {
         ATH_MSG_DEBUG("  -- number of SCT shared hits   : " << m_nshsct);
 
         // holes
-        m_nhpix = summary->get(Trk::numberOfPixelHoles);
-        m_nhsct = summary->get(Trk::numberOfSCTHoles);
+        m_nhpix = trackPart->summaryValue(iSummaryValue, xAOD::numberOfPixelHoles) ? iSummaryValue : 0;
+        m_nhsct = trackPart->summaryValue(iSummaryValue, xAOD::numberOfSCTHoles) ? iSummaryValue : 0;
         m_nholes = m_nhpix + m_nhsct;
 
         if (m_nhpix < 0) m_nhpix = 0;

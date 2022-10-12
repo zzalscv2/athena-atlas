@@ -36,7 +36,7 @@ class ConfiguredxAODTrackParticleCreation:
          InDetxAODParticleCreatorTool = Trk__TrackParticleCreatorTool(name = "InDetxAODParticleCreatorTool"+InputTrackCollection,
                                                                       TrackToVertex           = TrackingCommon.getInDetTrackToVertexTool(),
                                                                       TrackSummaryTool        = TrackingCommon.getInDetTrackSummaryToolSharedHits(),
-                                                                      TestPixelLayerTool      = TrackingCommong.getInDetTestPixelLayerToolInner(),
+                                                                      TestPixelLayerTool      = TrackingCommon.getInDetTestPixelLayerToolInner(),
                                                                       ComputeAdditionalInfo   = True,
                                                                       BadClusterID            = InDetFlags.pixelClusterBadClusterID(),
                                                                       KeepParameters          = True,

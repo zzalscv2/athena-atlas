@@ -36,8 +36,8 @@
 
 #include "TrkToolInterfaces/ITruthToTrack.h"
 #include "TrkExInterfaces/IExtrapolator.h"
-#include "TrkTrackSummary/TrackSummary.h"
-#include "TrkToolInterfaces/ITrackSummaryTool.h"
+#include "xAODTracking/TrackParticle.h"
+#include "TrkToolInterfaces/ITrackParticleCreatorTool.h"
 #include "TrkEventPrimitives/FitQuality.h"
 #include "CLHEP/GenericFunctions/CumulativeChiSquare.hh"
 #include "CLHEP/Geometry/Point3D.h"
@@ -79,7 +79,7 @@ InDetAlignFillTrack::InDetAlignFillTrack (const std::string& type,
   m_events(0),
   m_truthToTrack("Trk::TruthToTrack", this),
   m_extrapolator("Trk::Extrapolator/CosmicsExtrapolator", this),
-  m_trackSumTool("Trk::TrackSummaryTool", this) {
+  m_particleCreator("Trk::TrackParticleCreatorTool/TrackParticleCreatorTool", this) {
   declareInterface<IInDetAlignFillTrack>(this);
   declareProperty("InputTrkCol", m_inputCol = "Tracks");
   declareProperty("InputUpTrkCol", m_inputUpCol = "");
@@ -102,8 +102,8 @@ InDetAlignFillTrack::InDetAlignFillTrack (const std::string& type,
                   "tool to produce perigee track parameters from generated parameters");
   declareProperty("ExtrapolationTool", m_extrapolator,
                   "tool to extrapolate tracks");
-  declareProperty("TrackSummaryTool", m_trackSumTool,
-                  "tool to extract track info");
+  declareProperty("TrackParticleCreatorTool", m_particleCreator,
+                  "tool to build TrackParticle");
 }
 
 //=====================================================================
@@ -119,8 +119,8 @@ StatusCode InDetAlignFillTrack::initialize() {
   ATH_MSG_DEBUG("Initialize() of FillTrack");
   // retrieve the NTuple Service
   ATH_CHECK(service("NTupleSvc", m_ntupleSvc));
-  // get TrackSummaryTool
-  ATH_CHECK(m_trackSumTool.retrieve());
+  // get TrackParticleCreatorTool
+  ATH_CHECK(m_particleCreator.retrieve());
   // if Truth...
   if (m_doTruth) {
     // Get TruthToTrack
@@ -883,14 +883,16 @@ void InDetAlignFillTrack::dumpTrack(int itrk, const Trk::Track* trk,
     int nshared = 0, nshpix = 0, nshsct = 0;
     int nholes = 0, nhpix = 0, nhsct = 0;
 
-    std::unique_ptr<Trk::TrackSummary> summary = m_trackSumTool->summary((*trk));
-    if (!summary) ATH_MSG_ERROR("Could not create TrackSummary");
+    xAOD::TrackParticle* trackPart = m_particleCreator->createParticle(*trk);
+    uint8_t iSummaryValue(0); // Dummy counter to retrieve summary values
+
+    if (not trackPart) ATH_MSG_ERROR("Could not get xAOD::TrackParticle");
 
     else {
       // hits
-      nhitspix = summary->get(Trk::numberOfPixelHits);
-      nhitssct = summary->get(Trk::numberOfSCTHits);
-      nhitstrt = summary->get(Trk::numberOfTRTHits);
+      nhitspix = trackPart->summaryValue(iSummaryValue, xAOD::numberOfPixelHits) ? iSummaryValue : 0;
+      nhitssct = trackPart->summaryValue(iSummaryValue, xAOD::numberOfSCTHits) ? iSummaryValue : 0;
+      nhitstrt = trackPart->summaryValue(iSummaryValue, xAOD::numberOfTRTHits) ? iSummaryValue : 0;
 
       if (msgLvl(MSG::DEBUG)) {
         msg(MSG::DEBUG) << "   -- number of Pixel hits : " << nhitspix << endmsg;
@@ -915,8 +917,8 @@ void InDetAlignFillTrack::dumpTrack(int itrk, const Trk::Track* trk,
       }
 
       // shared hits
-      nshpix = summary->get(Trk::numberOfPixelSharedHits);
-      nshsct = summary->get(Trk::numberOfSCTSharedHits);
+      nshpix = trackPart->summaryValue(iSummaryValue, xAOD::numberOfPixelSharedHits) ? iSummaryValue : 0;
+      nshsct = trackPart->summaryValue(iSummaryValue, xAOD::numberOfSCTSharedHits) ? iSummaryValue : 0;
       nshared = nshpix + nshsct;
 
       if (nshpix < 0) nshpix = 0;
@@ -930,8 +932,8 @@ void InDetAlignFillTrack::dumpTrack(int itrk, const Trk::Track* trk,
       }
 
       // holes
-      nhpix = summary->get(Trk::numberOfPixelHoles);
-      nhsct = summary->get(Trk::numberOfSCTHoles);
+      nhpix = trackPart->summaryValue(iSummaryValue, xAOD::numberOfPixelHoles) ? iSummaryValue : 0;
+      nhsct = trackPart->summaryValue(iSummaryValue, xAOD::numberOfSCTHoles) ? iSummaryValue : 0;
       nholes = nhpix + nhsct;
 
       if (nhpix < 0) nhpix = 0;
