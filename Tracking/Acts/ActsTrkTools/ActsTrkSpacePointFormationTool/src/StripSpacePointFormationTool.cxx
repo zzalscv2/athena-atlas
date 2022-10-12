@@ -9,7 +9,7 @@
 #include "InDetReadoutGeometry/SiDetectorElement.h"
 #include "SCT_ReadoutGeometry/StripStereoAnnulusDesign.h"
 #include "xAODInDetMeasurement/StripClusterAuxContainer.h"
-#include "ActsUtils/ContainerAccessor.h"
+#include "xAODInDetMeasurement/ContainerAccessor.h"
 
 namespace ActsTrk {
 

@@ -10,6 +10,12 @@ def ITkInDetToXAODClusterConversionCfg(flags, name="ITkInDetToXAODClusterConvers
     acc.addEventAlgo(conversionAlg)
     return acc
 
+def ITkXAODToInDetClusterConversionCfg(flags, name="ITkXAODToInDetClusterConversion", **kwargs):
+    acc = ComponentAccumulator()
+    conversionAlg=CompFactory.InDet.XAODToInDetClusterConversion(name, **kwargs)
+    acc.addEventAlgo(conversionAlg)
+    return acc
+
 def PixelClusterizationCfg(flags, name = "InDetPixelClusterization", **kwargs):
     acc = ComponentAccumulator()
     from InDetConfig.SiClusterizationToolConfig import MergedPixelsToolCfg, PixelGangedAmbiguitiesFinderCfg

@@ -6,7 +6,7 @@
 #include "AthenaMonitoringKernel/Monitored.h"
 #include "InDetIdentifier/PixelID.h"
 #include "InDetIdentifier/SCT_ID.h"
-#include "ActsUtils/ContainerAccessor.h"
+#include "xAODInDetMeasurement/ContainerAccessor.h"
 #include "xAODMeasurementBase/UncalibratedMeasurementContainer.h"
 
 namespace ActsTrk {
