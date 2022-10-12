@@ -58,7 +58,7 @@ int main()
   tcs.m_maxEndcapPix    = -1;
   tcs.m_maxSiliconLayer = 32;
 
-  std::vector<TRIG_INDET_SI_LAYER> pVL;
+  std::vector<TrigInDetSiLayer> pVL;
   pVL.resize(32);
   pVL.at(0).m_subdet = 1;
   pVL.at(0).m_type = 0;

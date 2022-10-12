@@ -69,9 +69,9 @@ public:
   bool m_LRTmode;
 
   const FASTRACK_CONNECTOR* m_conn;
-  const TrigFTF_GNN_GEOMETRY*       m_geo;
+  const TrigFTF_GNN_Geometry*       m_geo;
 
-  std::vector<TRIG_INDET_SI_LAYER> m_layerGeometry;
+  std::vector<TrigInDetSiLayer> m_layerGeometry;
 
   int m_useTrigSeedML;
   std::vector<TrigSeedML_LUT> m_vLUT;
