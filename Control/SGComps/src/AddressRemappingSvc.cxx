@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
 */
 
 /** @file AddressRemappingSvc.cxx
@@ -71,12 +71,12 @@ StatusCode AddressRemappingSvc::initialize() {
 
       std::string clidStr = entry.first.substr(0, p_oldSep);
       std::set<CLID> symClids;
-      for (std::string::size_type p_clidSep = clidStr.rfind(','); p_clidSep != std::string::npos; clidStr = clidStr.substr(0, p_clidSep), p_clidSep = clidStr.rfind(',')) {
+      for (std::string::size_type p_clidSep = clidStr.rfind(','); p_clidSep != std::string::npos; clidStr.resize(p_clidSep), p_clidSep = clidStr.rfind(',')) {
          symClids.insert(getClid(clidStr.substr(p_clidSep + 1)));
       }
       std::string keyStr = entry.first.substr(p_oldSep + 1);
       std::set<std::string> aliases;
-      for (std::string::size_type p_keySep = keyStr.rfind(','); p_keySep != std::string::npos; keyStr = keyStr.substr(0, p_keySep), p_keySep = keyStr.rfind(',')) {
+      for (std::string::size_type p_keySep = keyStr.rfind(','); p_keySep != std::string::npos; keyStr.resize(p_keySep), p_keySep = keyStr.rfind(',')) {
          aliases.insert(keyStr.substr(p_keySep + 1));
       }
       SG::TransientAddress oldTad(getClid(clidStr), keyStr);

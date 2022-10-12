@@ -955,6 +955,6 @@ int PerfMonMTSvc::get_cpu_core_info() const {
 uint64_t PerfMonMTSvc::get_memory_info() const {
   std::string val = get_info_from_file("/proc/meminfo","MemTotal");
   if (val.empty()) return 0;
-  val = val.substr(0, val.size() - 3);  // strip the trailing kB
+  val.resize(val.size() - 3);  // strip the trailing kB
   return std::stoull(val);
 }

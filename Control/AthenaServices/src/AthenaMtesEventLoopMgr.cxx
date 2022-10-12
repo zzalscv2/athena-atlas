@@ -47,6 +47,29 @@
 #include <cstdlib>
 #include <unistd.h>
 
+namespace {
+  bool 
+  leftString(std::string & s, char sc){
+  bool truncated{false};
+  auto n = s.find(sc);
+  if (n!=std::string::npos){
+    s.resize(n);
+    truncated=true;
+  }
+  return truncated;
+}
+
+  bool 
+  leftString(std::string & s, int n){
+    bool truncated{false};
+    if (static_cast<size_t>(n) < s.size()){
+      s.resize(n);
+      truncated=true;
+    }
+    return truncated;
+  }
+}
+
 AthenaMtesEventLoopMgr::AthenaMtesEventLoopMgr(const std::string& nam
 					       , ISvcLocator* svcLoc)
   : MinimalEventLoopMgr(nam, svcLoc)
@@ -1360,8 +1383,7 @@ std::unique_ptr<AthenaMtesEventLoopMgr::RangeStruct> AthenaMtesEventLoopMgr::get
      void* eventRangeMessage;
      ssize_t eventRangeSize = socket->recv(eventRangeMessage, m_socketName.value());
      range = std::string((const char*)eventRangeMessage,eventRangeSize);
-     size_t carRet = range.find('\n');
-     if(carRet!=std::string::npos) range = range.substr(0,carRet);
+     leftString(range, '\n');
   }
 
   std::unique_ptr<RangeStruct> result = std::make_unique<RangeStruct>();
@@ -1375,7 +1397,10 @@ std::unique_ptr<AthenaMtesEventLoopMgr::RangeStruct> AthenaMtesEventLoopMgr::get
   // Expected the following format: [{KEY:VALUE[,KEY:VALUE]}]
   // First get rid of the leading '[{' and the trailing '}]'
   if(boost::starts_with (range, "[{")) range=range.substr(2);
-  if(boost::ends_with (range, "}]")) range=range.substr(0,range.size()-2);
+  if(boost::ends_with (range, "}]")){
+    const int truncate = range.size()-2;
+    leftString(range, truncate);
+  }
 
   std::map<std::string,std::string> eventRangeMap;
   size_t startpos(0);
@@ -1490,7 +1515,7 @@ void AthenaMtesEventLoopMgr::trimRangeStrings(std::string& str)
   // get rid of trailing spaces
   i=str.size()-1;
   while(str[i]==' ') i--;
-  if(i) str = str.substr(0,i+1);
+  if(i) str.resize(i+1);
 
   // the string might be enclosed by either
   // "u\'" and "\'"
@@ -1500,13 +1525,13 @@ void AthenaMtesEventLoopMgr::trimRangeStrings(std::string& str)
   if(boost::starts_with (str, "u\'")) {
     str = str.substr(2);
     if(str.rfind('\'')==str.size()-1) {
-      str = str.substr(0,str.size()-1);
+      str.pop_back();
     }
   }
   else if(boost::starts_with (str, "\"")) {
     str = str.substr(1);
     if(str.rfind('\"')==str.size()-1) {
-      str = str.substr(0,str.size()-1);
+      str.pop_back();
     }
   } 
 }
