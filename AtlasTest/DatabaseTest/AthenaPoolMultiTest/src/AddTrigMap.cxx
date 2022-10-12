@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2019 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
 */
 
 /**
@@ -68,10 +68,8 @@ StatusCode AddTrigMap::execute()
      ATH_CHECK( wftm.record (std::move (ftm)) );
    }
    // Now add a copy for exclude list test
-   if (ftm2) {
-     SG::WriteHandle<FauxTriggerMap> wftm2(m_wftm2);
-     ATH_CHECK( wftm2.record (std::move (ftm2)) );
-   }
+   SG::WriteHandle<FauxTriggerMap> wftm2(m_wftm2);
+   ATH_CHECK( wftm2.record (std::move (ftm2)) );
 
    ATH_MSG_INFO( "registered all data"  );
    return(StatusCode::SUCCESS);
