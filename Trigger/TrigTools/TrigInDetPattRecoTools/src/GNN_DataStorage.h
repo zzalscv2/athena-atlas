@@ -130,7 +130,7 @@ public:
   TrigFTF_GNN_NODE* m_n1;
   TrigFTF_GNN_NODE* m_n2;
   
-  char m_level, m_next;
+  signed char m_level, m_next;
 
   unsigned char m_nNei;
   float m_p[4];
