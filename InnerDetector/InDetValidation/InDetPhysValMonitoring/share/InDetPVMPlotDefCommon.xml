@@ -1442,6 +1442,10 @@
   <x title="Number of vertices per event ALL" n="100" lo="0" hi="50"/>
   <y title="Entries" />
 </h>
+<h id="vx_nVertices_ALL_fake" type="TH1" title="Number of ALL fake vertices per event with sum pt > 20GeV">
+  <x title="Number of vertices per event ALL" n="100" lo="0" hi="50"/>
+  <y title="Entries" />
+</h>
 <h id="vx_nVertices_HS_matched" type="TH1" title="Number of HS matched vertices per event with sumpt > 0">
   <x title="Number of vertices per event HS" n="100" lo="0" hi="5"/>
   <y title="Entries" />
@@ -1454,6 +1458,10 @@
   <x title="Number of vertices per event HS" n="100" lo="0" hi="5"/>
   <y title="Entries" />
 </h>
+<h id="vx_nVertices_HS_fake" type="TH1" title="Number of HS fake vertices per event with sumpt > 0">
+  <x title="Number of vertices per event HS" n="100" lo="0" hi="5"/>
+  <y title="Entries" />
+</h>
 <h id="vx_nVertices_matched" type="TH1" title="Number of PU matched vertices per event with sumpt > 0">
   <x title="Number of vertices per event PU" n="100" lo="0" hi="50"/>
   <y title="Entries" />
@@ -1463,6 +1471,10 @@
   <y title="Entries" />
 </h>
 <h id="vx_nVertices_split" type="TH1" title="Number of PU split vertices per event with sumpt > 0">
+  <x title="Number of vertices per event PU" n="100" lo="0" hi="50"/>
+  <y title="Entries" />
+</h>
+<h id="vx_nVertices_fake" type="TH1" title="Number of PU fake vertices per event with sumpt > 0">
   <x title="Number of vertices per event PU" n="100" lo="0" hi="50"/>
   <y title="Entries" />
 </h>
@@ -2501,4 +2513,13 @@
 <h id="vx_n_vs_mu" type="TH2" title="Number of vertices vs #mu;N vertices;#mu;Entries">
   <x title="#LT#mu#GT" n="&EXPMU;" lo="0.0" hi="&EXPMU;"/>
   <y title="Number of Vertices" n="&EXPMU;" lo="0.0" hi="&EXPMU;"/>
+</h>
+<!-- delta z -->
+<h id="vx_all_dz" type="TH1" title="#Delta z between any vertex">
+   <x title="#Delta z" n="160" lo="-8.0" hi="8.0"/>
+   <y title="Number of Entries"/>
+</h>
+<h id="vx_hs_mindz" type="TH1" title="#Delta z between the HS and the closest one">
+   <x title="#Delta z" n="160" lo="-8.0" hi="8.0"/>
+   <y title="Number of Entries"/>
 </h>

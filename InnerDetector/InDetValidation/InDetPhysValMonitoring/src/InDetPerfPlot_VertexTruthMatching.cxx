@@ -175,12 +175,18 @@ InDetPerfPlot_VertexTruthMatching::InDetPerfPlot_VertexTruthMatching(InDetPlotBa
     m_vx_nVertices_ALL_matched(nullptr),
     m_vx_nVertices_ALL_merged(nullptr),
     m_vx_nVertices_ALL_split(nullptr),
+    m_vx_nVertices_ALL_fake(nullptr),
     m_vx_nVertices_HS_matched(nullptr),
     m_vx_nVertices_HS_merged(nullptr),
     m_vx_nVertices_HS_split(nullptr),
+    m_vx_nVertices_HS_fake(nullptr),
     m_vx_nVertices_matched(nullptr),
     m_vx_nVertices_merged(nullptr),
-    m_vx_nVertices_split(nullptr)
+    m_vx_nVertices_split(nullptr),
+    m_vx_nVertices_fake(nullptr),
+
+    m_vx_all_dz(nullptr),
+    m_vx_hs_mindz(nullptr)
 
 
 {
@@ -349,12 +355,18 @@ void InDetPerfPlot_VertexTruthMatching::initializePlots() {
         book(m_vx_nVertices_matched,"vx_nVertices_matched");
         book(m_vx_nVertices_merged,"vx_nVertices_merged");
         book(m_vx_nVertices_split, "vx_nVertices_split");
+        book(m_vx_nVertices_fake, "vx_nVertices_fake");
         book(m_vx_nVertices_HS_matched,"vx_nVertices_HS_matched");
         book(m_vx_nVertices_HS_merged,"vx_nVertices_HS_merged");
         book(m_vx_nVertices_HS_split,"vx_nVertices_HS_split");
+        book(m_vx_nVertices_HS_fake,"vx_nVertices_HS_fake");
         book(m_vx_nVertices_ALL_matched,"vx_nVertices_ALL_matched");
         book(m_vx_nVertices_ALL_merged,"vx_nVertices_ALL_merged");
         book(m_vx_nVertices_ALL_split,"vx_nVertices_ALL_split");
+        book(m_vx_nVertices_ALL_fake,"vx_nVertices_ALL_fake");
+
+	  book(m_vx_hs_mindz,"vx_hs_mindz");
+	  book(m_vx_all_dz,"vx_all_dz");
 
     }
 
@@ -624,14 +636,21 @@ void InDetPerfPlot_VertexTruthMatching::fill(const xAOD::Vertex* recoHardScatter
         float number_matched = 0;
         float number_merged = 0;
         float number_split = 0;
+        float number_fake = 0;
         float number_matched_HS = 0;
         float number_merged_HS = 0;
         float number_split_HS = 0;
+        float number_fake_HS = 0;
         float number_matched_PU = 0;
         float number_merged_PU = 0;
         float number_split_PU = 0;
- 
-        // Iterate over vertices:
+        float number_fake_PU = 0;
+        
+	  // variables for delta z between the HS and the closest one
+	  float vx_hs_mindz=9999.; 
+	  float min_fabs_dz = 9999.;
+        
+	  // Iterate over vertices:
         InDetVertexTruthMatchUtils::VertexMatchType matchType;
         for (const auto& vertex : vertexContainer.stdcont()) {
 
@@ -960,6 +979,17 @@ void InDetPerfPlot_VertexTruthMatching::fill(const xAOD::Vertex* recoHardScatter
              }
          }
 
+         else if (matchType == InDetVertexTruthMatchUtils::VertexMatchType::FAKE) {
+              if (vertex == bestRecoHSVtx_truth) {
+                 number_fake_HS++;
+              }
+              else {
+                 number_fake_PU++;         
+              }
+              if (sumPt > minpt) {
+                  number_fake++;    
+             }
+         }
         } // end of if (ndf != 0)
  
 
@@ -1019,18 +1049,38 @@ void InDetPerfPlot_VertexTruthMatching::fill(const xAOD::Vertex* recoHardScatter
            }
    
         } 
+
+// delta z  between HS and nearby vertices
+	  float absd_hs_dz = std::abs(bestRecoHSVtx_truth->z() - vertex->z());
+	  if(bestRecoHSVtx_truth != vertex && absd_hs_dz < min_fabs_dz) {
+	     min_fabs_dz = absd_hs_dz;
+	     vx_hs_mindz = bestRecoHSVtx_truth->z() - vertex->z();
+	  }
+// loop over vertices again for dz of every vertices pair
+	  for (const auto& vertex2 : vertexContainer.stdcont()) {
+	     if (vertex2->vertexType() == xAOD::VxType::NoVtx) continue;
+	     if(vertex2 == vertex) continue;
+	     fillHisto(m_vx_all_dz, vertex->z() - vertex2->z(), 0.5*weight);
+	  }
+
        } // end loop over vertices
 
 // new histos to count number of vertices per event
         fillHisto(m_vx_nVertices_ALL_matched, number_matched,weight);
         fillHisto(m_vx_nVertices_ALL_merged, number_merged,weight);
         fillHisto(m_vx_nVertices_ALL_split, number_split,weight);
+        fillHisto(m_vx_nVertices_ALL_fake, number_fake,weight);
         fillHisto(m_vx_nVertices_HS_matched, number_matched_HS,weight);
         fillHisto(m_vx_nVertices_HS_merged, number_merged_HS,weight);
         fillHisto(m_vx_nVertices_HS_split, number_split_HS,weight);
+        fillHisto(m_vx_nVertices_HS_fake, number_fake_HS,weight);
         fillHisto(m_vx_nVertices_matched, number_matched_PU,weight);
         fillHisto(m_vx_nVertices_merged, number_merged_PU,weight);
         fillHisto(m_vx_nVertices_split, number_split_PU,weight);
+        fillHisto(m_vx_nVertices_fake, number_fake_PU,weight);
+
+// new histo to delta z between HS and the closest one
+	  fillHisto(m_vx_hs_mindz, vx_hs_mindz, weight);
 
         // Now fill plots relating to the reconstruction of our truth HS vertex (efficiency and resolutions)
         if (!truthHSVertices.empty()) {
