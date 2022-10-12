@@ -17,6 +17,14 @@
 # art-output: log.RAWtoESD_1thread
 # art-output: log.RAWtoESD_5thread
 # art-output: log.RAWtoESD_8thread
+# art-output: log.HITtoRDO_serial
+# art-output: log.HITtoRDO_1thread
+# art-output: log.HITtoRDO_5thread
+# art-output: log.HITtoRDO_8thread
+# art-output: log.RDOtoRDOTrigger_serial
+# art-output: log.RDOtoRDOTrigger_1thread
+# art-output: log.RDOtoRDOTrigger_5thread
+# art-output: log.RDOtoRDOTrigger_8thread
 
 #####################################################################
 Reco_tf.py --AMI q443 \
@@ -28,6 +36,8 @@ if [ ${exit_code} -ne 0 ]
 then
     exit ${exit_code}
 fi
+mv log.HITtoRDO log.HITtoRDO_serial
+mv log.RDOtoRDOTrigger log.RDOtoRDOTrigger_serial
 mv log.RAWtoESD log.RAWtoESD_serial
 #####################################################################
 
@@ -43,6 +53,8 @@ if [ ${exit_code} -ne 0 ]
 then
     exit ${exit_code}
 fi
+mv log.HITtoRDO log.HITtoRDO_1thread
+mv log.RDOtoRDOTrigger log.RDOtoRDOTrigger_1thread
 mv log.RAWtoESD log.RAWtoESD_1thread
 #####################################################################
 
@@ -58,6 +70,8 @@ if [ ${exit_code} -ne 0 ]
 then
     exit ${exit_code}
 fi
+mv log.HITtoRDO log.HITtoRDO_5thread
+mv log.RDOtoRDOTrigger log.RDOtoRDOTrigger_5thread
 mv log.RAWtoESD log.RAWtoESD_5thread
 #####################################################################
 
@@ -73,6 +87,8 @@ if [ ${exit_code} -ne 0 ]
 then
     exit ${exit_code}
 fi
+mv log.HITtoRDO log.HITtoRDO_8thread
+mv log.RDOtoRDOTrigger log.RDOtoRDOTrigger_8thread
 mv log.RAWtoESD log.RAWtoESD_8thread
 #####################################################################
 
