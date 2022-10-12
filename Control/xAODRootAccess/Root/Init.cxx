@@ -137,7 +137,7 @@ namespace xAOD {
       // pre-set maximum value:
       std::string source( location );
       if( source.size() > sMessageSourceWidth ) {
-         source = source.substr( 0, sMessageSourceWidth - 3 );
+         source.resize( sMessageSourceWidth - 3 );
          source += "...";
       }
 

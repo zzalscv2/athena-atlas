@@ -33,6 +33,21 @@
 #include "boost/bind/bind.hpp"
 #include "boost/algorithm/string/predicate.hpp"
 
+namespace {
+  bool 
+  leftString(std::string & s, char sc){
+    bool truncated{false};
+    auto n = s.find(sc);
+    if (n!=std::string::npos){
+      s.resize(n);
+      truncated=true;
+    }
+    return truncated;
+  }
+
+}
+
+
 //________________________________________________________________________________
 MetaDataSvc::MetaDataSvc(const std::string& name, ISvcLocator* pSvcLocator) : ::AthService(name, pSvcLocator),
 	m_inputDataStore("StoreGateSvc/InputMetaDataStore", name),
@@ -426,6 +441,7 @@ std::string MetaDataSvc::removeStreamFromKey(std::string& key) {
    size_t epos = key.find(']', pos);
    size_t spos = pos + m_streamInKeyMark.size();
    std::string stream = key.substr( spos, epos - spos );
+   //cppcheck-suppress uselessCallsSubstr
    key = key.substr(0, pos) + key.substr(epos+1);
    return stream;
 }
@@ -440,17 +456,17 @@ std::set<std::string> MetaDataSvc::getPerStreamKeysFor(const std::string& key ) 
 //__________________________________________________________________________
 StatusCode MetaDataSvc::addProxyToInputMetaDataStore(const std::string& tokenStr) {
    std::string fileName = tokenStr.substr(tokenStr.find("[FILE=") + 6);
-   fileName = fileName.substr(0, fileName.find(']'));
+   leftString(fileName, ']');
    std::string className = tokenStr.substr(tokenStr.find("[PNAME=") + 7);
-   className = className.substr(0, className.find(']'));
+   leftString(className, ']'); 
    std::string contName = tokenStr.substr(tokenStr.find("[CONT=") + 6);
-   contName = contName.substr(0, contName.find(']'));
+   leftString(contName,']');
    std::size_t pos1 = contName.find('(');
    std::string keyName = contName.substr(pos1 + 1, contName.size() - pos1 - 2);
    std::size_t pos2 = keyName.find('/');
-   if (pos2 != std::string::npos) keyName = keyName.substr(pos2 + 1);
+   if (pos2 != std::string::npos) keyName.resize(pos2 + 1);
    std::string numName = tokenStr.substr(tokenStr.find("[NUM=") + 5);
-   numName = numName.substr(0, numName.find(']'));
+   leftString(numName,']');
    unsigned long num = 0;
    std::istringstream iss(numName);
    iss >> num;
