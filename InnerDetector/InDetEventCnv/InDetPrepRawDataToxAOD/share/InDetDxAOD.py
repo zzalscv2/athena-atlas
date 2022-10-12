@@ -151,7 +151,7 @@ if makeSplitTracks:
     InDetxAODSplitParticleCreatorTool = Trk__TrackParticleCreatorTool(name = "InDetSplitxAODParticleCreatorTool",
                                                                       TrackToVertex           = TrackingCommon.getInDetTrackToVertexTool(),
                                                                       TrackSummaryTool        = TrackingCommon.getInDetTrackSummaryToolSharedHits(),
-                                                                      TestPixelLayerTool      = TrackingCommong.getInDetTestPixelLayerToolInner(),
+                                                                      TestPixelLayerTool      = TrackingCommon.getInDetTestPixelLayerToolInner(),
                                                                       ComputeAdditionalInfo   = True,
                                                                       KeepParameters          = True)
     ToolSvc += InDetxAODSplitParticleCreatorTool

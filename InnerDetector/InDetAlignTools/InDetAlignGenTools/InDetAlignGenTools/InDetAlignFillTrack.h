@@ -30,6 +30,7 @@ namespace Trk {
   class Track;
   class ITruthToTrack; //!< Produces perigee track parameters from generated parameters
   class IExtrapolator;
+  class ITrackParticleCreatorTool;
 }
 
 namespace HepPDT {
@@ -103,7 +104,7 @@ class InDetAlignFillTrack: virtual public IInDetAlignFillTrack, public AthAlgToo
 
   ToolHandle < Trk::ITruthToTrack >      m_truthToTrack;  //!<  Pointer to TruthToTrack
   ToolHandle < Trk::IExtrapolator >      m_extrapolator;  //!<  Pointer to IExtrapolator
-  ToolHandle < Trk::ITrackSummaryTool >  m_trackSumTool;  //!<  Pointer to Trk::ITrackSummaryTool
+  ToolHandle <Trk::ITrackParticleCreatorTool> m_particleCreator; //!< Pointer to track particle creator tool
 
   NTuple::Item<long> m_nt_ntracks;            //!< number of tracks
   NTuple::Item<long> m_nt_nUptracks;          //!< number of Up tracks

@@ -15,8 +15,8 @@
 
 #include "InDetAlignGenTools/InDetAlignTrackSelTool.h"
 
-#include "TrkTrackSummary/TrackSummary.h"
-#include "TrkToolInterfaces/ITrackSummaryTool.h"
+#include "xAODTracking/TrackParticle.h"
+#include "TrkToolInterfaces/ITrackParticleCreatorTool.h"
 
 #include "TrkParameters/TrackParameters.h"
 #include "TrkEventPrimitives/FitQuality.h"
@@ -27,7 +27,7 @@ InDetAlignTrackSelTool::InDetAlignTrackSelTool( const std::string& type
 						, const IInterface* parent
 						)
   : AthAlgTool(type,name,parent),
-    m_trackSumTool("Trk::TrackSummaryTool", this),
+    m_particleCreator("Trk::TrackParticleCreatorTool/TrackParticleCreatorTool", this),
     m_minMomentum(0),
     m_minPt(2),
     m_maxShared(0),
@@ -42,8 +42,8 @@ InDetAlignTrackSelTool::InDetAlignTrackSelTool( const std::string& type
   declareProperty("MinChi2Prob"        , m_minChi2Prob);
 
   // Tools
-  declareProperty("TrackSummaryTool"   , m_trackSumTool,
-		  "tool to extract track info");
+  declareProperty("TrackParticleCreatorTool", m_particleCreator,
+                  "tool to build TrackParticle");
 }
 
 InDetAlignTrackSelTool::~InDetAlignTrackSelTool()
@@ -53,11 +53,8 @@ InDetAlignTrackSelTool::~InDetAlignTrackSelTool()
 StatusCode InDetAlignTrackSelTool::initialize(){
   ////////////////////////////////////////////////////////////////////////////////////////
 
-  // get TrackSummaryTool
-  if ( m_trackSumTool.retrieve().isFailure() ) {
-    ATH_MSG_FATAL( "Failed to retrieve tool " << m_trackSumTool ) ;
-    return StatusCode::FAILURE;
-  } else ATH_MSG_DEBUG( "Retrieved tool " << m_trackSumTool ) ;
+  // get TrackParticleCreatorTool
+  ATH_CHECK(m_particleCreator.retrieve());
   
   ATH_MSG_DEBUG( "Cuts selected : min_Momentum(CLHEP::GeV)=" <<  m_minMomentum
 		<< " min_pt(CLHEP::GeV)=" <<  m_minPt
@@ -126,14 +123,16 @@ int InDetAlignTrackSelTool::nShared(const Trk::Track& track) const {
   ATH_MSG_DEBUG( "in nShared()" ) ;
   int nshared=0, nshpix, nshsct;
 
-  std::unique_ptr<Trk::TrackSummary> summary = m_trackSumTool->summary(track);
-  if(!summary){
-    ATH_MSG_ERROR( "Could not create TrackSummary" ) ;
+  xAOD::TrackParticle* trackPart = m_particleCreator->createParticle(track);
+  uint8_t iSummaryValue(0); // Dummy counter to retrieve summary values
+
+  if (not trackPart){
+    ATH_MSG_ERROR("Could not get xAOD::TrackParticle");
     nshared = 1000;
   }
   else{
-    nshpix = summary->get(Trk::numberOfPixelSharedHits);
-    nshsct = summary->get(Trk::numberOfSCTSharedHits);
+    nshpix = trackPart->summaryValue(iSummaryValue, xAOD::numberOfPixelSharedHits) ? iSummaryValue : 0;
+    nshsct = trackPart->summaryValue(iSummaryValue, xAOD::numberOfSCTSharedHits) ? iSummaryValue : 0;
 
     if(nshpix==-1) 
       nshpix=0;
@@ -152,17 +151,16 @@ int InDetAlignTrackSelTool::nHoles(const Trk::Track& track) const {
   ATH_MSG_DEBUG( "in nHoles() " ) ;
   int nholes=0, nhpix, nhsct;
 
-  std::unique_ptr<Trk::TrackSummary> summary = m_trackSumTool->summary(track);
-  if(summary==nullptr){
-    ATH_MSG_ERROR( "Could not create TrackSummary" ) ;
+  xAOD::TrackParticle* trackPart = m_particleCreator->createParticle(track);
+  uint8_t iSummaryValue(0); // Dummy counter to retrieve summary values
+
+  if (not trackPart){
+    ATH_MSG_ERROR("Could not get xAOD::TrackParticle");
     nholes = 1000;
   }
   else{
-    ATH_MSG_VERBOSE( "TrackSummary created. Dumping it..." ) ;
-    ATH_MSG_VERBOSE( (*summary) ) ;
-
-    nhpix = summary->get(Trk::numberOfPixelHoles);
-    nhsct = summary->get(Trk::numberOfSCTHoles);
+    nhpix = trackPart->summaryValue(iSummaryValue, xAOD::numberOfPixelHoles) ? iSummaryValue : 0;
+    nhsct = trackPart->summaryValue(iSummaryValue, xAOD::numberOfSCTHoles) ? iSummaryValue : 0;
 
     if(nhpix==-1)
       nhpix = 0;

@@ -489,7 +489,7 @@ if newInDetAlignAlg_Options["runAccumulate"]:
 		ntupleTool = InDet__SimpleIDNtupleTool(
 			name = "SimpleIDNtupleTool",
 			OutputLevel = INFO,
-			TrackSummaryTool = InDetTrackSummaryTool,
+			TrackParticleCreatorTool = InDetParticleCreatorTool,
 			AlignModuleTool = alignModuleTool,
 			StoreDerivatives = newInDetAlignAlg_Options["writeDerivatives"]
 		)

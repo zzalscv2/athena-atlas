@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2017 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef INDETALIGNNTUPLETOOLS_SIMPLEIDNTUPLETOOL_H
@@ -26,7 +26,7 @@ class TTree;
 namespace Trk
 {
 	class AlignTrack;
-	class ITrackSummaryTool;
+	class ITrackParticleCreatorTool;
 	class IAlignModuleTool;
 }
 
@@ -67,7 +67,7 @@ namespace InDet
 
 			void initializeNtuple();
 
-			ToolHandle <Trk::ITrackSummaryTool>         m_trackSumTool;    //!< Pointer to track summary tool
+			ToolHandle <Trk::ITrackParticleCreatorTool> m_particleCreator; //!< Pointer to track particle creator tool
 			ToolHandle <Trk::IAlignModuleTool>          m_alignModuleTool; //!< Pointer to AlignmModuleTool
 
 			const TRT_ID * m_idHelper;

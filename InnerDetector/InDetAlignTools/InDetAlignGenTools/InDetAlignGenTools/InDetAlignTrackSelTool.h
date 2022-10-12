@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2017 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
 */
 
 // InDetAlignTrackSelTool.h
@@ -27,12 +27,11 @@
 
 #include "AthenaBaseComps/AthAlgTool.h"
 #include "GaudiKernel/ToolHandle.h"
-#include "TrkToolInterfaces/ITrackSummaryTool.h"
 #include "InDetAlignGenTools/IInDetAlignTrackSelTool.h"
 
 namespace Trk {
   class Track;
-  class ITrackSummaryTool;
+  class ITrackParticleCreatorTool;
 }
 
 class InDetAlignTrackSelTool: virtual public IInDetAlignTrackSelTool, public AthAlgTool {
@@ -52,7 +51,7 @@ class InDetAlignTrackSelTool: virtual public IInDetAlignTrackSelTool, public Ath
   int nHoles(const Trk::Track&) const;
   double chi2Prob(const Trk::Track&) const;
   
-  ToolHandle < Trk::ITrackSummaryTool >  m_trackSumTool;  //!<  Pointer to Trk::ITrackSummaryTool
+  ToolHandle <Trk::ITrackParticleCreatorTool> m_particleCreator; //!< Pointer to track particle creator tool
 
   double m_minMomentum; //!< Minimum value of the momentum of the track
   double m_minPt;  //!< Minimum value of the transverse momentum of the track
