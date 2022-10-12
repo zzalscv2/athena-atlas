@@ -310,11 +310,11 @@ TrackSelectionTool::accept(const xAOD::TrackParticle* p) const {
   }
   if (m_minSiNotShared > -1) {
     acceptData.setCutResult("minSiNotShared",
-                          (iBLayerHits + iPixHits + iSCTHits - iBLayerSharedHits - iPixSharedHits - iSCTSharedHits) >=
+                          (iPixHits + iSCTHits - iPixSharedHits - iSCTSharedHits) >=
                           m_minSiNotShared);
   }
   if (m_maxShared > -1) {
-    acceptData.setCutResult("maxShared", iBLayerSharedHits + iPixSharedHits + iSCTSharedHits <= m_maxShared);
+    acceptData.setCutResult("maxShared", iPixSharedHits + iSCTSharedHits <= m_maxShared);
   }
   if (m_minPixelHits > -1) {
     acceptData.setCutResult("minPixelHits", iPixHits >= m_minPixelHits);
