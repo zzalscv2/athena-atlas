@@ -114,8 +114,7 @@ if GridFiles:
     if local:
        hlt.input = Input   # should match definition in TrigValTools/share/TrigValInputs.json  
     else:
-       hlt.input = ''
-       hlt.args += ' --inputRDOFile=$ArtInFile '
+       hlt.input = '$ArtInFile'
 
 if (Malloc):
     import os
