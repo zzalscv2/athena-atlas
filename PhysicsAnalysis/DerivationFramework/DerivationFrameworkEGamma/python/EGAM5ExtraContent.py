@@ -98,5 +98,5 @@ ExtraContainersTriggerDataOnly=[
         "HLT_xAOD__TrigEMClusterContainer_TrigT2CaloEgammaAux."
         ]
 
-#should probably slim electron/fwdelectrons/cluster collections and keep only relevant subset of variables..
+#should probably slim electron/cluster collections and keep only relevant subset of variables..
 # no ForwardElectrons, InDetTrackParticlesForward, ForwardElectronClusters, CaloCalTopoCluster

@@ -316,6 +316,12 @@ def _createCfgFlags():
         return createPhysValConfigFlags()
     _addFlagsCategory(acf, "PhysVal", __physVal , "PhysValMonitoring")
 
+#egamma derivation Flags:
+    def __egammaDerivation():
+        from DerivationFrameworkEGamma.EGammaDFConfigFlags import createEGammaDFConfigFlags
+        return createEGammaDFConfigFlags()
+    _addFlagsCategory(acf, "Derivation.Egamma", __egammaDerivation, 'DerivationFrameworkEGamma' )
+
     # For AnalysisBase, pick up things grabbed in Athena by the functions above
     if not isGaudiEnv():
         def EDMVersion(flags):

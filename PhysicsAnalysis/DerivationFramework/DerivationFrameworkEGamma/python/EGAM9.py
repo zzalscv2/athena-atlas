@@ -1,0 +1,498 @@
+# Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+#!/usr/bin/env python
+#====================================================================
+# EGAM9.py
+# This defines DAOD_EGAM9, a skimmed DAOD format for Run 3.
+# keep events passing or of photon triggers used for boostrap efficiency 
+# measurement of photon triggers
+# It requires the flag EGAM9 in Derivation_tf.py   
+#====================================================================
+
+from AthenaConfiguration.ComponentAccumulator import ComponentAccumulator
+from AthenaConfiguration.ComponentFactory import CompFactory
+
+#should not be needed
+from DerivationFrameworkEGamma.PhotonsCPDetailedContent import (
+    PhotonsCPDetailedContent )
+from DerivationFrameworkEGamma.ElectronsCPDetailedContent import (
+    ElectronsCPDetailedContent, GSFTracksCPDetailedContent )
+
+# additional settings for this derivation
+thinCells = False
+keepCells = False
+applyTriggerSelection = False
+saveJets = False
+
+def EGAM9SkimmingToolCfg(flags):
+    '''Configure the EGAM9 skimming tool'''
+    acc = ComponentAccumulator()
+
+    # criteria for off-line based selection
+    photon_selection = '(count(Photons.pt > 9.5*GeV && ' + \
+                              'Photons.DFCommonPhotonsIsEMLoose) > 0)'
+    electron_selection = '(count(Electrons.pt > 9.5*GeV && ' + \
+                                'Electrons.DFCommonElectronsLHMedium) > 0)'
+    expression = photon_selection + ' || ' + electron_selection
+
+    if applyTriggerSelection:
+        # trigger-based selection
+        # HLT_noalg_ triggers
+        triggers = []
+        triggers += ['HLT_noalg_L1EM15VH']
+        triggers += ['HLT_noalg_L1EM12']
+        triggers += ['HLT_noalg_L1EM15']
+        triggers += ['HLT_noalg_L1EM18VH']
+        triggers += ['HLT_noalg_L1EM20VH']
+        triggers += ['HLT_noalg_L1EM10']
+        triggers += ['HLT_noalg_L1EM10VH']
+        triggers += ['HLT_noalg_L1EM13VH']
+        triggers += ['HLT_noalg_L1EM20VHI']
+        triggers += ['HLT_noalg_L1EM22VHI']
+        triggers += ['HLT_noalg_L1EM8VH']
+
+        # pt_cut triggers
+        triggers += ['HLT_g20_etcut_L1EM12']
+
+        # Passed through triggers for bootstrapping
+        triggers += ['HLT_g10_loose']
+        triggers += ['HLT_g15_loose_L1EM7']
+        triggers += ['HLT_g20_loose_L1EM12']
+        triggers += ['HLT_g20_loose']
+        triggers += ['HLT_g25_loose_L1EM15']
+        triggers += ['HLT_g60_loose']
+        triggers += ['HLT_g100_loose']
+        triggers += ['HLT_g120_loose']
+        triggers += ['HLT_g160_loose']
+        triggers += ['HLT_g160_loose_L1EM24VHIM']
+        triggers += ['HLT_g180_loose']
+        triggers += ['HLT_g180_loose_L1EM24VHIM']
+        triggers += ['HLT_g35_loose_L1EM15']
+        triggers += ['HLT_g40_loose_L1EM15']
+        triggers += ['HLT_g45_loose_L1EM15']
+        triggers += ['HLT_g50_loose_L1EM15']
+        triggers += ['HLT_g70_loose']
+        triggers += ['HLT_g80_loose']
+        triggers += ['HLT_g140_loose']
+        triggers += ['HLT_g200_loose']
+        print('EGAM9 trigger skimming list (OR): ', triggers)    
+        EGAM9_TriggerSkimmingTool = \
+            CompFactory.DerivationFramework.TriggerSkimmingTool(
+                name = 'EGAM9_TriggerSkimmingTool',
+                TriggerListOR = triggers)
+
+        # off-line based selection
+        print('EGAM9 offline skimming expression: ', expression)
+        EGAM9_OfflineSkimmingTool = \
+            CompFactory.DerivationFramework.xAODStringSkimmingTool(
+                name = 'EGAM9_OfflineSkimmingTool',
+                expression = expression)
+
+        # do the AND of trigger-based and offline-based selection
+        print('EGAM9 skimming is logical AND of previous selections')
+        EGAM9_SkimmingTool = \
+            CompFactory.DerivationFramework.FilterCombinationAND(
+                name = 'EGAM9_SkimmingTool',
+                FilterList=[EGAM9_OfflineSkimmingTool, 
+                            EGAM9_TriggerSkimmingTool])
+        acc.addPublicTool(EGAM9_OfflineSkimmingTool)
+        acc.addPublicTool(EGAM9_TriggerSkimmingTool)
+        acc.addPublicTool(EGAM9_SkimmingTool, primary = True)
+    else:
+        # off-line based selection
+        print('EGAM9 skimming expression: ', expression)
+        EGAM9_SkimmingTool = \
+            CompFactory.DerivationFramework.xAODStringSkimmingTool(
+                name = 'EGAM9_SkimmingTool',
+                expression = expression)
+        acc.addPublicTool(EGAM9_SkimmingTool, primary = True)
+    
+    return acc
+
+
+def EGAM9KernelCfg(ConfigFlags, name='EGAM9Kernel', **kwargs):
+    '''Configure the derivation framework driving algorithm (kernel) 
+       for EGAM9'''
+    acc = ComponentAccumulator()
+
+
+    # Common augmentations
+    from DerivationFrameworkPhys.PhysCommonConfig import ( 
+        PhysCommonAugmentationsCfg )
+    acc.merge( PhysCommonAugmentationsCfg(
+        ConfigFlags,
+        TriggerListsHelper = kwargs['TriggerListsHelper'] ) )
+    
+
+    # EGAM9 augmentations
+    augmentationTools = []
+
+    #====================================================================
+    # Max Cell energy and time
+    #====================================================================
+    from DerivationFrameworkCalo.DerivationFrameworkCaloConfig import (
+        MaxCellDecoratorCfg )
+    MaxCellDecorator = acc.popToolsAndMerge(MaxCellDecoratorCfg(ConfigFlags))
+    acc.addPublicTool(MaxCellDecorator)
+    augmentationTools.append(MaxCellDecorator)  
+   
+    # ====================================================================
+    # Gain and cluster energies per layer decoration tool
+    # ====================================================================
+    from DerivationFrameworkCalo.DerivationFrameworkCaloConfig import (
+        GainDecoratorCfg, ClusterEnergyPerLayerDecoratorCfg )
+    EGAM9_GainDecoratorTool = acc.popToolsAndMerge(
+        GainDecoratorCfg(ConfigFlags, name = 'EGAM9_GainDecoratorTool' ))
+    acc.addPublicTool(EGAM9_GainDecoratorTool)
+    augmentationTools.append(EGAM9_GainDecoratorTool)
+
+    # might need some modification when cell-level reweighting is implemented (see share/EGAM9.py)
+    cluster_sizes = (3,7), (5,5), (7,11)
+    for neta, nphi in cluster_sizes:
+        cename = 'EGAM9_ClusterEnergyPerLayerDecorator_%sx%s' % (neta, nphi)
+        EGAM9_ClusterEnergyPerLayerDecorator = acc.popToolsAndMerge(
+            ClusterEnergyPerLayerDecoratorCfg(
+                ConfigFlags,
+                neta = neta,
+                nphi=nphi,
+                name=cename ))
+        acc.addPublicTool(EGAM9_ClusterEnergyPerLayerDecorator)
+        augmentationTools.append(EGAM9_ClusterEnergyPerLayerDecorator)
+
+
+    # thinning tools
+    thinningTools = []
+
+    # Track thinning
+    if ConfigFlags.Derivation.Egamma.doTrackThinning:
+
+        streamName = kwargs['StreamName']
+
+        TrackThinningKeepElectronTracks = False
+        TrackThinningKeepPhotonTracks = True
+        TrackThinningKeepPVTracks = False
+
+        # Tracks associated with Electrons
+        if (TrackThinningKeepElectronTracks):
+            EGAM9ElectronTPThinningTool = \
+                CompFactory.DerivationFramework.EgammaTrackParticleThinning(
+                    name = 'EGAM9ElectronTPThinningTool',
+                    StreamName = streamName,
+                    SGKey = 'Electrons',
+                    GSFTrackParticlesKey = 'GSFTrackParticles',
+                    InDetTrackParticlesKey = 'InDetTrackParticles',
+                    SelectionString = 'Electrons.pt > 0*GeV',
+                    BestMatchOnly = True,
+                    ConeSize = 0.3)
+            acc.addPublicTool(EGAM9ElectronTPThinningTool)
+            thinningTools.append(EGAM9ElectronTPThinningTool)
+
+        # Tracks associated with Photons
+        if (TrackThinningKeepPhotonTracks):
+            EGAM9PhotonTPThinningTool = \
+                CompFactory.DerivationFramework.EgammaTrackParticleThinning(
+                    name = 'EGAM9PhotonTPThinningTool',
+                    StreamName = streamName,
+                    SGKey = 'Photons',
+                    GSFTrackParticlesKey = 'GSFTrackParticles',
+                    InDetTrackParticlesKey = 'InDetTrackParticles',
+                    SelectionString = 'Photons.pt > 0*GeV',
+                    BestMatchOnly = True,
+                    ConeSize = 0.3)
+            acc.addPublicTool(EGAM9PhotonTPThinningTool)
+            thinningTools.append(EGAM9PhotonTPThinningTool)
+
+        # Tracks from primary vertex
+        if (TrackThinningKeepPVTracks) :
+            from DerivationFrameworkInDet.InDetToolsConfig import (
+                TrackParticleThinningCfg )
+            thinning_expression = ' && '.join([
+                '(InDetTrackParticles.DFCommonTightPrimary)',
+                '(abs(DFCommonInDetTrackZ0AtPV)*sin(InDetTrackParticles.theta) < 3.0*mm)', 
+                '(InDetTrackParticles.pt > 10*GeV)'])
+            EGAM9TPThinningTool = acc.getPrimaryAndMerge(
+                TrackParticleThinningCfg(
+                    ConfigFlags,
+                    name = 'EGAM9TPThinningTool',
+                    StreamName = streamName,
+                    SelectionString = thinning_expression,
+                    InDetTrackParticlesKey = 'InDetTrackParticles') )
+            thinningTools.append(EGAM9TPThinningTool)
+
+    # truth thinning
+    if ConfigFlags.Input.isMC:
+        # W, Z and Higgs
+        truth_cond_WZH = ' && '.join(['(abs(TruthParticles.pdgId) >= 23)',
+                                      '(abs(TruthParticles.pdgId) <= 25)'])
+        # Leptons
+        truth_cond_lep = ' && '.join(['(abs(TruthParticles.pdgId) >= 11)',
+                                      '(abs(TruthParticles.pdgId) <= 16)'])
+        # Top quark
+        truth_cond_top = '(abs(TruthParticles.pdgId) ==  6)'
+        # Photon
+        truth_cond_gam = ' && '.join(['(abs(TruthParticles.pdgId) == 22)',
+                                      '(TruthParticles.pt > 1*GeV)'])
+        # stable particles
+        truth_cond_finalState = ' && '.join(['(TruthParticles.status == 1)',
+                                             '(TruthParticles.barcode<200000)'])
+        truth_expression = '( ' + truth_cond_WZH        + ' ) || ' + \
+                           '( ' + truth_cond_lep        + ' ) || ' + \
+                           '( ' + truth_cond_top        + ' ) || ' + \
+                           '( ' + truth_cond_gam        + ' ) || ' + \
+                           '( ' + truth_cond_finalState + ' )'
+        print('EGAM9 truth thinning expression: ', truth_expression)
+
+        EGAM9TruthThinningTool = \
+            CompFactory.DerivationFramework.GenericTruthThinning(
+                name = 'EGAM9TruthThinningTool',
+                StreamName = streamName,
+                ParticleSelectionString = truth_expression,
+                PreserveDescendants = False,
+                PreserveGeneratorDescendants = True,
+                PreserveAncestors = True)
+        acc.addPublicTool(EGAM9TruthThinningTool)
+        thinningTools.append(EGAM9TruthThinningTool)
+
+    # Keep only calo cells associated with the egammaClusters collection
+    if thinCells:
+        from DerivationFrameworkCalo.CaloCellDFGetterConfig import (
+            thinCaloCellsForDFCfg )
+        acc.merge(thinCaloCellsForDFCfg (ConfigFlags,
+                                         inputClusterKeys=['egammaClusters'],
+                                         streamName = 'StreamDAOD_EGAM9',
+                                         inputCellKey = 'AllCalo',
+                                         outputCellKey = 'DFEGAMCellContainer'))
+
+    # skimming
+    skimmingTool = acc.getPrimaryAndMerge(EGAM9SkimmingToolCfg(ConfigFlags))
+
+
+    # setup the kernel
+    acc.addEventAlgo(CompFactory.DerivationFramework.DerivationKernel(name,
+                                      SkimmingTools = [skimmingTool],
+                                      AugmentationTools = augmentationTools,
+                                      ThinningTools = thinningTools) )
+
+    return acc
+
+
+
+def EGAM9Cfg(ConfigFlags):
+
+    acc = ComponentAccumulator()
+
+
+    # Get the lists of triggers needed for trigger matching.
+    # This is needed at this scope (for the slimming) and further down
+    # in the config chain for actually configuring the matching, so we create
+    # it here and pass it down
+    # TODO: this should ideally be called higher up to avoid it being run
+    # multiple times in a train.
+    # DODO: restrict it to relevant triggers
+    from DerivationFrameworkPhys.TriggerListsHelper import TriggerListsHelper
+    EGAM9TriggerListsHelper = TriggerListsHelper()
+    #EGAM9TriggerListsHelper.Run3TriggerNames = EGAM9TriggerListsHelper.Run3TriggerNamesNoTau
+    #EGAM9TriggerListsHelper.Run3TriggerNamesTau = []
+    EGAM9TriggerListsHelper.Run2TriggerNames = EGAM9TriggerListsHelper.Run2TriggerNamesNoTau
+    EGAM9TriggerListsHelper.Run2TriggerNamesTau = []
+
+    # configure skimming/thinning/augmentation tools
+    acc.merge(EGAM9KernelCfg(ConfigFlags,
+                             name = 'EGAM9Kernel',
+                             StreamName = 'StreamDAOD_EGAM9',
+                             TriggerListsHelper = EGAM9TriggerListsHelper))
+    
+
+    # configure slimming
+    from OutputStreamAthenaPool.OutputStreamConfig import OutputStreamCfg
+    from DerivationFrameworkCore.SlimmingHelper import SlimmingHelper
+    EGAM9SlimmingHelper = SlimmingHelper(
+        'EGAM9SlimmingHelper',
+        NamesAndTypes = ConfigFlags.Input.TypedCollections )
+
+
+    # ------------------------------------------
+    # containers for which we save all variables
+    # -------------------------------------------
+
+    # baseline
+    EGAM9SlimmingHelper.AllVariables =[
+        'Electrons',
+        'Photons',
+        'GSFTrackParticles',
+        'egammaClusters' ]
+
+    # for trigger studies we also add:  
+    EGAM9SlimmingHelper.AllVariables += [
+        'HLT_xAOD__ElectronContainer_egamma_Electrons',
+        'HLT_xAOD__ElectronContainer_egamma_ElectronsAux.',
+        'HLT_xAOD__PhotonContainer_egamma_Photons',
+        'HLT_xAOD__PhotonContainer_egamma_PhotonsAux.',
+        'HLT_xAOD__PhotonContainer_egamma_Iso_Photons',
+        'HLT_xAOD__PhotonContainer_egamma_Iso_PhotonsAux.',
+        'HLT_xAOD__TrigElectronContainer_L2ElectronFex',
+        'HLT_xAOD__TrigElectronContainer_L2ElectronFexAux.',
+        'HLT_xAOD__TrigPhotonContainer_L2PhotonFex',
+        'HLT_xAOD__TrigPhotonContainer_L2PhotonFexAux.',
+        'HLT_xAOD__CaloClusterContainer_TrigEFCaloCalibFex',
+        'HLT_xAOD__CaloClusterContainer_TrigEFCaloCalibFexAux.',
+        'HLT_xAOD__TrackParticleContainer_InDetTrigTrackingxAODCnv_Electron_EFID',
+        'HLT_xAOD__TrackParticleContainer_InDetTrigTrackingxAODCnv_Electron_EFIDAux.',
+        'LVL1EmTauRoIs',
+        'LVL1EmTauRoIsAux.',
+        'HLT_TrigPassBitsCollection_passbits',
+        'HLT_TrigPassBitsCollection_passbitsAux.',
+        'HLT_TrigPassFlagsCollection_passflags',
+        'HLT_TrigPassFlagsCollection_passflagsAux.',
+        'HLT_TrigRoiDescriptorCollection_initialRoI',
+        'HLT_TrigRoiDescriptorCollection_initialRoIAux.'
+    ]
+    if not ConfigFlags.Input.isMC:
+        EGAM9SlimmingHelper.AllVariables += [
+            'HLT_xAOD__TrigEMClusterContainer_TrigT2CaloEgamma',
+            'HLT_xAOD__TrigEMClusterContainer_TrigT2CaloEgammaAux.',
+            'HLT_xAOD__CaloClusterContainer_TrigCaloClusterMaker',
+            'HLT_xAOD__CaloClusterContainer_TrigCaloClusterMakerAux.',
+            'HLT_xAOD__TrackParticleContainer_InDetTrigTrackingxAODCnv_Electron_FTF',
+            'HLT_xAOD__TrackParticleContainer_InDetTrigTrackingxAODCnv_Electron_FTFAux.',
+            'HLT_xAOD__TrackParticleContainer_InDetTrigTrackingxAODCnv_Electron_L2ID',
+            'HLT_xAOD__TrackParticleContainer_InDetTrigTrackingxAODCnv_Electron_L2IDAux.',
+            'HLT_xAOD__TrackParticleContainer_InDetTrigTrackingxAODCnv_Electron_IDTrig',
+            'HLT_xAOD__TrackParticleContainer_InDetTrigTrackingxAODCnv_Electron_IDTrigAux.'
+        ]
+
+    # and on MC we also add:
+    if ConfigFlags.Input.isMC:
+        EGAM9SlimmingHelper.AllVariables += [
+            'TruthEvents',
+            'TruthParticles',
+            'TruthVertices',
+            'egammaTruthParticles'
+        ]
+
+
+
+    # -------------------------------------------
+    # containers that we slim
+    # -------------------------------------------
+
+    # first add variables from smart-slimming
+    # adding only also those for which we add all variables since
+    # the XXXCPContent.py files also bring in some extra variables 
+    # for other collections
+    EGAM9SlimmingHelper.SmartCollections = ['Electrons',
+                                            'Photons',
+                                            'InDetTrackParticles',
+                                            'PrimaryVertices',
+    ]
+    if saveJets:
+        EGAM9SlimmingHelper.SmartCollections += ['AntiKt4EMPFlowJets']
+        if ConfigFlags.Input.isMC:
+            EGAM9SlimmingHelper.SmartCollections += ['AntiKt4TruthJets',
+                                                     'AntiKt4TruthDressedWZJets']
+
+    # then add extra variables:
+
+    # photons
+    EGAM9SlimmingHelper.ExtraVariables += [
+        'Photons.DFCommonLoosePrime5' ]
+
+    # conversion vertices
+    EGAM9SlimmingHelper.ExtraVariables += [
+        'GSFConversionVertices.x.y.z.px.py.pz.pt1.pt2.etaAtCalo.phiAtCalo',
+        'GSFConversionVertices.trackParticleLinks' ]
+
+    # primary vertices
+    EGAM9SlimmingHelper.ExtraVariables += [
+        'PrimaryVertices.x.y.sumPt2' ]
+
+    # track jets
+    if saveJets:
+        EGAM9SlimmingHelper.ExtraVariables += [
+            'AntiKt4PV0TrackJets.pt.eta.phi.e.m.btaggingLink.constituentLinks' ]
+
+
+    # photons and electrons: detailed shower shape variables and track variables
+    EGAM9SlimmingHelper.ExtraVariables += PhotonsCPDetailedContent
+    EGAM9SlimmingHelper.ExtraVariables += ElectronsCPDetailedContent
+    EGAM9SlimmingHelper.ExtraVariables += GSFTracksCPDetailedContent
+    
+    # photons: gain and cluster energy per layer
+    from DerivationFrameworkCalo.DerivationFrameworkCaloFactories import (
+        getGainDecorations, getClusterEnergyPerLayerDecorations )
+    GainDecoratorTool = None
+    ClusterEnergyPerLayerDecorators = []  
+    for toolStr in acc.getEventAlgo('EGAM9Kernel').AugmentationTools:
+        toolStr  = f'{toolStr}'
+        splitStr = toolStr.split('/')
+        tool =  acc.getPublicTool(splitStr[1])
+        if splitStr[0] == 'DerivationFramework::GainDecorator':
+            GainDecoratorTool = tool
+        elif splitStr[0] == 'DerivationFramework::ClusterEnergyPerLayerDecorator':
+            ClusterEnergyPerLayerDecorators.append( tool )
+
+    if GainDecoratorTool : 
+        EGAM9SlimmingHelper.ExtraVariables.extend(
+            getGainDecorations(GainDecoratorTool) )
+    for tool in ClusterEnergyPerLayerDecorators:
+        EGAM9SlimmingHelper.ExtraVariables.extend(
+            getClusterEnergyPerLayerDecorations( tool ) )
+
+    # energy density
+    EGAM9SlimmingHelper.ExtraVariables += [ 
+        'TopoClusterIsoCentralEventShape.Density',
+        'TopoClusterIsoForwardEventShape.Density',
+        'NeutralParticleFlowIsoCentralEventShape.Density',
+        'NeutralParticleFlowIsoForwardEventShape.Density']
+
+    # truth
+    if ConfigFlags.Input.isMC:
+        EGAM9SlimmingHelper.ExtraVariables += [
+            'Photons.truthOrigin.truthType.truthParticleLink' ]
+
+    # Add event info
+    if ConfigFlags.Derivation.Egamma.doEventInfoSlimming:
+        EGAM9SlimmingHelper.SmartCollections.append('EventInfo')
+    else:
+        EGAM9SlimmingHelper.AllVariables += ['EventInfo']    
+    
+    # Add egamma trigger objects
+    EGAM9SlimmingHelper.IncludeEGammaTriggerContent = True
+
+    # Add trigger matching info
+    # Run 2
+    if ConfigFlags.Trigger.EDMVersion == 2:
+        from DerivationFrameworkPhys.TriggerMatchingCommonConfig import (
+            AddRun2TriggerMatchingToSlimmingHelper )
+        AddRun2TriggerMatchingToSlimmingHelper(
+            SlimmingHelper = EGAM9SlimmingHelper,
+            OutputContainerPrefix = 'TrigMatch_', 
+            TriggerList = EGAM9TriggerListsHelper.Run2TriggerNamesTau)
+        AddRun2TriggerMatchingToSlimmingHelper(
+            SlimmingHelper = EGAM9SlimmingHelper, 
+            OutputContainerPrefix = 'TrigMatch_',
+            TriggerList = EGAM9TriggerListsHelper.Run2TriggerNamesNoTau)
+    # Run 3
+    if ConfigFlags.Trigger.EDMVersion == 3:
+        from TrigNavSlimmingMT.TrigNavSlimmingMTConfig import (
+            AddRun3TrigNavSlimmingCollectionsToSlimmingHelper )
+        AddRun3TrigNavSlimmingCollectionsToSlimmingHelper(EGAM9SlimmingHelper)
+
+    # Add CellContainer and cluster->cell links
+    if keepCells:
+        if thinCells:
+            EGAM9SlimmingHelper.StaticContent = [
+                'CaloCellContainer#DFEGAMCellContainer',
+                'CaloClusterCellLinkContainer#egammaClusters_links']
+        else:
+            EGAM9SlimmingHelper.StaticContent = [
+                'CaloCellContainer#AllCalo',
+                'CaloClusterCellLinkContainer#egammaClusters_links']
+
+    EGAM9ItemList = EGAM9SlimmingHelper.GetItemList()
+    acc.merge(OutputStreamCfg(ConfigFlags,
+                              'DAOD_EGAM9',
+                              ItemList = EGAM9ItemList,
+                              AcceptAlgs = ['EGAM9Kernel']))
+
+    return acc
+    

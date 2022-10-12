@@ -59,6 +59,17 @@ from DerivationFrameworkBPhys.BPHY22 import BPHY22Cfg
 from DerivationFrameworkTileCal.TCAL1 import TCAL1Cfg
 from DerivationFrameworkTileCal.TCAL2 import TCAL2Cfg
 
+# EGamma derivations
+from DerivationFrameworkEGamma.EGAM1 import EGAM1Cfg
+from DerivationFrameworkEGamma.EGAM2 import EGAM2Cfg
+from DerivationFrameworkEGamma.EGAM3 import EGAM3Cfg
+from DerivationFrameworkEGamma.EGAM4 import EGAM4Cfg
+from DerivationFrameworkEGamma.EGAM5 import EGAM5Cfg
+from DerivationFrameworkEGamma.EGAM7 import EGAM7Cfg
+from DerivationFrameworkEGamma.EGAM8 import EGAM8Cfg
+from DerivationFrameworkEGamma.EGAM9 import EGAM9Cfg
+from DerivationFrameworkEGamma.EGAM10 import EGAM10Cfg
+
 # Avoids compilation warnings from Flake8
 __all__ = ['TEST1Cfg','TEST2Cfg','TEST3Cfg','TEST4Cfg','TEST5Cfg','TEST6Cfg',
            'TRUTH0Cfg','TRUTH1Cfg','TRUTH3Cfg',
@@ -71,6 +82,8 @@ __all__ = ['TEST1Cfg','TEST2Cfg','TEST3Cfg','TEST4Cfg','TEST5Cfg','TEST6Cfg',
            'BPHY10Cfg', 'BPHY12Cfg', 'BPHY13Cfg', 'BPHY15Cfg',
            'BPHY16Cfg',
            'BPHY21Cfg', 'BPHY22Cfg',
-           'TCAL1Cfg', 'TCAL2Cfg'
+           'TCAL1Cfg', 'TCAL2Cfg',
+           'EGAM1Cfg', 'EGAM2Cfg', 'EGAM3Cfg', 'EGAM4Cfg', 'EGAM5Cfg',
+           'EGAM7Cfg', 'EGAM8Cfg', 'EGAM9Cfg', 'EGAM10Cfg'
            ]
 
