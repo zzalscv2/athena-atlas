@@ -14,6 +14,8 @@ class ROBPrefetching(FlagEnum):
     StepRoI = 'StepRoI'
     # Enable mapping chains' first step to pre-HLT prefetching rules based on initial RoIs
     InitialRoI = 'InitialRoI'
+    # Enable using larger RoI in TauCore step to speculatively prefetch ROBs for the subsequent TauIso step (ATR-26419)
+    TauCoreLargeRoI = 'TauCoreLargeRoI'
 
 def createTriggerFlags(doTriggerRecoFlags):
     flags = AthConfigFlags()
@@ -91,7 +93,7 @@ def createTriggerFlags(doTriggerRecoFlags):
     flags.addFlag('Trigger.doRuntimeNaviVal', False)
 
     # Select ROBPrefetching options, out of ROBPrefetching enum, empty list means no prefetching
-    flags.addFlag('Trigger.ROBPrefetchingOptions', [ROBPrefetching.InitialRoI, ROBPrefetching.StepRoI])
+    flags.addFlag('Trigger.ROBPrefetchingOptions', [ROBPrefetching.InitialRoI, ROBPrefetching.StepRoI, ROBPrefetching.TauCoreLargeRoI])
 
     # if 1, Run1 decoding version is set; if 2, Run2; if 3, Run 3
     def EDMVersion(flags):
