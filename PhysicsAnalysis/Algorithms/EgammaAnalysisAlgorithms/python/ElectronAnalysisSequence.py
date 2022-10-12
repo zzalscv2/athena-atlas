@@ -292,14 +292,6 @@ def makeElectronWorkingPointSequence( seq, dataType, workingPoint,
                     dynConfig = {'preselection' : lambda meta : "&&".join (meta["selectionDecorNamesOutput"])} )
         pass
 
-    # Set up an algorithm used for decorating baseline electron selection:
-    alg = createAlgorithm( 'CP::AsgSelectionAlg',
-                           'ElectronSelectionSummary' + postfix )
-    alg.selectionDecoration = 'baselineSelection' + postfix + ',as_char'
-    seq.append( alg, inputPropName = 'particles',
-                stageName = 'selection',
-                dynConfig = {'preselection' : lambda meta : "&&".join (meta["selectionDecorNamesOutput"])} )
-
     # Set up the electron efficiency correction algorithm:
     alg = createAlgorithm( 'CP::ElectronEfficiencyCorrectionAlg',
                            'ElectronEfficiencyCorrectionAlg' + postfix )
@@ -322,3 +314,11 @@ def makeElectronWorkingPointSequence( seq, dataType, workingPoint,
                     stageName = 'efficiency',
                     dynConfig = {'preselection' : lambda meta : "&&".join (meta["selectionDecorNamesOutput"])} )
         pass
+
+    # Set up an algorithm used for decorating baseline electron selection:
+    alg = createAlgorithm( 'CP::AsgSelectionAlg',
+                           'ElectronSelectionSummary' + postfix )
+    alg.selectionDecoration = 'baselineSelection' + postfix + ',as_char'
+    seq.append( alg, inputPropName = 'particles',
+                stageName = 'selection',
+                dynConfig = {'preselection' : lambda meta : "&&".join (meta["selectionDecorNames"])} )
