@@ -97,6 +97,7 @@ then
   acmd.py diff-root resim.CG.HITS.pool.root resim.CA.HITS.pool.root \
     --error-mode resilient \
     --mode semi-detailed \
+    --order-trees \
     --ignore-leaves RecoTimingObj_p1_EVNTtoHITS_timings index_ref
   rc3=$?
   status=$rc3
@@ -109,7 +110,7 @@ if [ $rc2 -eq 0 ]
 then
     ArtPackage=$1
     ArtJobName=$2
-    art.py compare grid --entries 10 ${ArtPackage} ${ArtJobName} --diff-root --mode=semi-detailed --ignore-leave RecoTimingObj_p1_EVNTtoHITS_timingsOLD --file=resim.CG.HITS.pool.root
+    art.py compare grid --entries 10 ${ArtPackage} ${ArtJobName}  --order-trees --diff-root --mode=semi-detailed --ignore-leave RecoTimingObj_p1_EVNTtoHITS_timingsOLD --file=resim.CG.HITS.pool.root
     rc4=$?
     status=$rc4
 fi

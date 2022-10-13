@@ -127,68 +127,23 @@ namespace xAOD {
    }
 
   // Global coords
-  // As the Trigger towers are 1x1 in Eta - Phi coords (x10). This changes in the FCAL, and depends on the eta position
+  // It has been decided that jFEX Large-R jets are going up to 2.5 so like jFEX Taus
     int jFexLRJetRoI_v1::unpackGlobalEta() const {
+        
         int globalEta = 0;
-
-        if(jFexNumber()==5 ) {
-
-            if(tobLocalEta() <=s_FWD_EtaPosition[1]) { //Region 1
-                globalEta = (tobLocalEta() + (8*(jFexNumber() -3)) );
-            }
-            else if(tobLocalEta() <=s_FWD_EtaPosition[3]) { //Region 2
-                globalEta = 25 +2*(tobLocalEta()-9);
-            }
-            else if(tobLocalEta() == s_FWD_EtaPosition[4] ) { //Region 3
-                globalEta = 31;
-            }
-            else if(tobLocalEta() <= s_FWD_EtaPosition[6]) { //Region 4
-                globalEta = s_FCAL_EtaPosition[tobLocalEta()-13]-1;
-            }
-
+        if(jFexNumber()<3){
+            globalEta= 8*(jFexNumber()-2) - (tobLocalEta()+1);
         }
-        else if(jFexNumber()==0) {
-
-            if(tobLocalEta() <=s_FWD_EtaPosition[1]) { //Region 1
-                globalEta = (8-tobLocalEta() + (8*(jFexNumber() -3)) )-1;
-            }
-            else if(tobLocalEta() <=s_FWD_EtaPosition[3]) { //Region 2
-                globalEta = -27 -2*(tobLocalEta()-9);
-            }
-            else if(tobLocalEta() == s_FWD_EtaPosition[4] ) { //Region 3
-                globalEta = -32;
-            }
-            else if(tobLocalEta() <= s_FWD_EtaPosition[6]) { //Region 4
-                globalEta = -s_FCAL_EtaPosition[tobLocalEta()-13];
-            }
+        else if(jFexNumber()<6){
+            globalEta= 8*(jFexNumber()-3) + (tobLocalEta());
         }
-        else { //Module 1-4
-            globalEta = (tobLocalEta() + (8*(jFexNumber() -3)) );
-        }
-
         return globalEta;
     }
 
+    // In the region of |eta|<2.5 there is not different granularity
     uint jFexLRJetRoI_v1::unpackGlobalPhi() const {
-        uint globalPhi = 0;
 
-        //16 is the phi height of an FPGA
-        if(jFexNumber() == 0 || jFexNumber() == 5) {
-
-            if(tobLocalEta() <=s_FWD_EtaPosition[1]) { //Region 1
-                globalPhi = tobLocalPhi() + (fpgaNumber() * 16);
-            }
-            else if(tobLocalEta() <=s_FWD_EtaPosition[4]) {//Region 2 and Region 3 have the same granularity
-                globalPhi = (16*fpgaNumber()) + 2*(tobLocalPhi());
-            }
-            else if(tobLocalEta() <=s_FWD_EtaPosition[6]) {//Region 4
-                globalPhi = (16*fpgaNumber()) + 4*(tobLocalPhi());
-            }
-        }
-        else{ //Modules 1-4
-            globalPhi = tobLocalPhi() + (fpgaNumber() * 16);
-        }
-
+        uint globalPhi = tobLocalPhi() + (fpgaNumber() * 16);
         return globalPhi;
 
     }

@@ -28,6 +28,7 @@ AnalysisR3_Tier0::AnalysisR3_Tier0(const std::string& name,
     // m_z0Cut(z0Cut),
     m_debug(false),
     m_eventid(0),
+    m_vtxanal(0),
     m_monTool(0)
 {}
 
@@ -228,8 +229,14 @@ void AnalysisR3_Tier0::initialise_R3() {
   m_hd0vsphi       = new TIDA::Histogram<float>( monTool(),  "d0_vs_phi_prof" );
   m_hd0vsphi_rec   = new TIDA::Histogram<float>( monTool(),  "d0_vs_phi_rec_prof" );
 
+  /// should we protect this ? If initialise is called again do we really want 
+  /// a new analysis ? Or should we just carry on with the ixisting on, so text 
+  /// if m_vtxanal is non zero and skip it if so ? 
+
+  if ( m_vtxanal ) delete m_vtxanal;
   m_vtxanal = 0;
 
+  
 #if 1
 
   /// vertex analyses if required ...
@@ -479,7 +486,11 @@ void AnalysisR3_Tier0::execute_vtx(const std::vector<TIDA::Vertex*>& vtx0,
 
 
 void AnalysisR3_Tier0::finalise() {
-  if ( m_vtxanal ) m_vtxanal->finalise();
+  if ( m_vtxanal ) { 
+    m_vtxanal->finalise();
+    delete m_vtxanal;
+    m_vtxanal = 0;
+  }
 } 
 
 

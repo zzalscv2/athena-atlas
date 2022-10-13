@@ -9,11 +9,14 @@
 #include <PixelReadoutDefinitions/PixelReadoutDefinitions.h>
 
 #include <map>
+#include <iostream>
+#include <limits>
 
 class PixelChargeCalibCondData
 {
   public:
     PixelChargeCalibCondData();
+    PixelChargeCalibCondData(std::size_t max_module_hash);
 
     static constexpr size_t IBLCalibrationSize{16};
     using IBLCalibration = std::array<float, IBLCalibrationSize>;
@@ -28,19 +31,19 @@ class PixelChargeCalibCondData
     };
 
     // Normal pixel
-    void setAnalogThreshold(InDetDD::PixelDiodeType type, unsigned int moduleHash, std::vector<int> value);
-    void setAnalogThresholdSigma(InDetDD::PixelDiodeType type, unsigned int moduleHash, std::vector<int> value);
-    void setAnalogThresholdNoise(InDetDD::PixelDiodeType type, unsigned int moduleHash, std::vector<int> value);
-    void setInTimeThreshold(InDetDD::PixelDiodeType type, unsigned int moduleHash, std::vector<int> value);
+    void setAnalogThreshold(InDetDD::PixelDiodeType type, unsigned int moduleHash, std::vector<int> &&value);
+    void setAnalogThresholdSigma(InDetDD::PixelDiodeType type, unsigned int moduleHash, std::vector<int> &&value);
+    void setAnalogThresholdNoise(InDetDD::PixelDiodeType type, unsigned int moduleHash, std::vector<int> &&value);
+    void setInTimeThreshold(InDetDD::PixelDiodeType type, unsigned int moduleHash, std::vector<int> &&value);
 
-    void setQ2TotA(InDetDD::PixelDiodeType type, unsigned int moduleHash, std::vector<float> value);
-    void setQ2TotE(InDetDD::PixelDiodeType type, unsigned int moduleHash, std::vector<float> value);
-    void setQ2TotC(InDetDD::PixelDiodeType type, unsigned int moduleHash, std::vector<float> value);
-    void setQ2TotF(InDetDD::PixelDiodeType type, unsigned int moduleHash, std::vector<float> value);
-    void setQ2TotG(InDetDD::PixelDiodeType type, unsigned int moduleHash, std::vector<float> value);
+    void setQ2TotA(InDetDD::PixelDiodeType type, unsigned int moduleHash, std::vector<float> &&value);
+    void setQ2TotE(InDetDD::PixelDiodeType type, unsigned int moduleHash, std::vector<float> &&value);
+    void setQ2TotC(InDetDD::PixelDiodeType type, unsigned int moduleHash, std::vector<float> &&value);
+    void setQ2TotF(InDetDD::PixelDiodeType type, unsigned int moduleHash, std::vector<float> &&value);
+    void setQ2TotG(InDetDD::PixelDiodeType type, unsigned int moduleHash, std::vector<float> &&value);
 
-    void setTotRes1(unsigned int moduleHash, std::vector<float> value);
-    void setTotRes2(unsigned int moduleHash, std::vector<float> value);
+    void setTotRes1(unsigned int moduleHash, std::vector<float> &&value);
+    void setTotRes2(unsigned int moduleHash, std::vector<float> &&value);
 
     int getAnalogThreshold(InDetDD::PixelDiodeType type, unsigned int moduleHash, unsigned int FE) const;
     int getAnalogThresholdSigma(InDetDD::PixelDiodeType type, unsigned int moduleHash, unsigned int FE) const;
@@ -69,10 +72,29 @@ class PixelChargeCalibCondData
     void clear();
 
   private:
-    using chipThreshold = std::map<unsigned int, std::vector<int>>;
-    using chipCharge = std::map<unsigned int, std::vector<float>>;
-    using chipThresholdMap = std::map<InDetDD::PixelDiodeType, chipThreshold>;
-    using chipChargeMap = std::map<InDetDD::PixelDiodeType, chipCharge>;
+    std::size_t m_maxModuleHash = 0;
+
+    constexpr static std::size_t s_NPixelDiods = 4;
+    static unsigned short diodIndex(InDetDD::PixelDiodeType type) { return static_cast<unsigned int>(type); }
+
+   template <typename T>
+    static void resize(std::size_t idx, std::size_t max_size, T &container)  { if (idx >= container.size()) { container.resize(max_size); } }
+    template <typename T, typename T_Value>
+    static void setValue(std::size_t max_size, T &container, unsigned int moduleHash, T_Value &&value)  {
+       resize( moduleHash,max_size, container);
+       container.at(moduleHash) = std::move(value);
+    }
+
+    template <typename T, typename T_Value>
+    static void setValue(std::size_t max_size, T &container, InDetDD::PixelDiodeType type, unsigned int moduleHash, T_Value &&value)  {
+       resize( moduleHash,max_size, container.at(diodIndex(type)));
+       container.at(diodIndex(type)).at(moduleHash) = std::move(value);
+    }
+
+    using chipThreshold = std::vector<std::vector<int>>;
+    using chipCharge = std::vector<std::vector<float>>;
+    using chipThresholdMap = std::array<chipThreshold, s_NPixelDiods>;
+    using chipChargeMap = std::array<chipCharge, s_NPixelDiods>;
 
     chipThresholdMap m_analogThreshold;
     chipThresholdMap m_analogThresholdSigma;

@@ -63,7 +63,7 @@ StatusCode PixelChargeCalibCondAlg::execute(const EventContext& ctx) const {
   const PixelModuleData *configData = *configDataHandle;
 
   // Construct the output Cond Object and fill it in
-  std::unique_ptr<PixelChargeCalibCondData> writeCdo(std::make_unique<PixelChargeCalibCondData>());
+  std::unique_ptr<PixelChargeCalibCondData> writeCdo(std::make_unique<PixelChargeCalibCondData>(m_pixelID->wafer_hash_max()));
 
   const EventIDBase start{EventIDBase::UNDEFNUM, EventIDBase::UNDEFEVT, 0,                       0,                       EventIDBase::UNDEFNUM, EventIDBase::UNDEFNUM};
   const EventIDBase stop {EventIDBase::UNDEFNUM, EventIDBase::UNDEFEVT, EventIDBase::UNDEFNUM-1, EventIDBase::UNDEFNUM-1, EventIDBase::UNDEFNUM, EventIDBase::UNDEFNUM};
@@ -195,9 +195,9 @@ StatusCode PixelChargeCalibCondAlg::execute(const EventContext& ctx) const {
         writeCdo -> setAnalogThresholdNoise(InDetDD::PixelDiodeType::NORMAL, channelNumber, std::move(analogThresholdNoise));
         writeCdo -> setInTimeThreshold(InDetDD::PixelDiodeType::NORMAL, channelNumber, std::move(inTimeThreshold));
 
-        writeCdo -> setQ2TotA(InDetDD::PixelDiodeType::NORMAL, channelNumber, totA); // can not move as shared
-        writeCdo -> setQ2TotE(InDetDD::PixelDiodeType::NORMAL, channelNumber, totE); // can not move as shared
-        writeCdo -> setQ2TotC(InDetDD::PixelDiodeType::NORMAL, channelNumber, totC); // can not move as shared
+        writeCdo -> setQ2TotA(InDetDD::PixelDiodeType::NORMAL, channelNumber, std::vector<float> (totA)); // can not move as shared
+        writeCdo -> setQ2TotE(InDetDD::PixelDiodeType::NORMAL, channelNumber, std::vector<float> (totE)); // can not move as shared
+        writeCdo -> setQ2TotC(InDetDD::PixelDiodeType::NORMAL, channelNumber, std::vector<float> (totC)); // can not move as shared
 
         writeCdo -> setTotRes1(channelNumber, std::move(totRes1));
         writeCdo -> setTotRes2(channelNumber, std::move(totRes2));
@@ -208,9 +208,9 @@ StatusCode PixelChargeCalibCondAlg::execute(const EventContext& ctx) const {
         writeCdo -> setAnalogThresholdNoise(InDetDD::PixelDiodeType::LONG, channelNumber, std::move(analogThresholdNoiseLong));
         writeCdo -> setInTimeThreshold(InDetDD::PixelDiodeType::LONG, channelNumber, std::move(inTimeThresholdLong));
 
-        writeCdo -> setQ2TotA(InDetDD::PixelDiodeType::LONG, channelNumber, totA); // can not move as shared
-        writeCdo -> setQ2TotE(InDetDD::PixelDiodeType::LONG, channelNumber, totE); // can not move as shared
-        writeCdo -> setQ2TotC(InDetDD::PixelDiodeType::LONG, channelNumber, totC); // can not move as shared
+        writeCdo -> setQ2TotA(InDetDD::PixelDiodeType::LONG, channelNumber, std::move(totA)); // can move now
+        writeCdo -> setQ2TotE(InDetDD::PixelDiodeType::LONG, channelNumber, std::move(totE)); // can move now
+        writeCdo -> setQ2TotC(InDetDD::PixelDiodeType::LONG, channelNumber, std::move(totC)); // can move now
 
         // Ganged pixel
         writeCdo -> setAnalogThreshold(InDetDD::PixelDiodeType::GANGED, channelNumber, std::move(analogThresholdGanged));
