@@ -16,6 +16,7 @@
  
 class IAFP_GenericPixelTool{
 public:
+        virtual ~IAFP_GenericPixelTool() = default;
 	virtual int Identify(std::shared_ptr<const TH2F> input, std::vector<TH2F>& output) const = 0;
 }; 
 
