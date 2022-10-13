@@ -142,12 +142,11 @@ StatusCode MuonHitRelocation::execute() {
     StatusCode sc = evtStore()->retrieve(mcEvent, "TruthEvent");
     if (sc.isFailure()) return StatusCode::SUCCESS;
 
-    DataVector<HepMC::GenEvent>::const_iterator e;
     if (mcEvent->size() != 1) return StatusCode::SUCCESS;
 
     Amg::Vector3D direction(0., 0., 0.);
-    for (e = mcEvent->begin(); e != mcEvent->end(); e++) {
-        for (auto p : (**e)) {
+    for (const HepMC::GenEvent* e : *mcEvent) {
+      for (HepMC::ConstGenParticlePtr p : *e) {
             float xv = p->production_vertex()->position().x();
             float yv = p->production_vertex()->position().y();
             float zv = p->production_vertex()->position().z();
