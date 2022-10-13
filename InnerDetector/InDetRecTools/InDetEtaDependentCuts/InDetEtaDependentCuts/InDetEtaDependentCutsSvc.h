@@ -64,7 +64,7 @@ namespace InDet {
     private: 
       template <class T>
       T getValueAtEta(const std::vector< T > cuts, const double eta) const{
-        return cuts.at(getIndexByEta(eta)); //will throw a range error if eta > maxEta
+        return cuts.at(getIndexByEta(eta)); // will print an info and clamp if out of range
       }
       
       int getIndexByEta(const double eta) const;

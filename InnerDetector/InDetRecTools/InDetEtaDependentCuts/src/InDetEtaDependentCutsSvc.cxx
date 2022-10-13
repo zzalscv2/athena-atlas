@@ -6,6 +6,7 @@
 // InDetEtaDependentCutsSvc includes
 #include "InDetEtaDependentCuts/InDetEtaDependentCutsSvc.h"
 
+#include <algorithm>
 #include <cmath>
 #include <functional>
 #include <variant>
@@ -170,11 +171,13 @@ namespace InDet {
 
     int 
     InDetEtaDependentCutsSvc::getIndexByEta(const double eta) const {
-      const double absEta = std::abs(eta);
-      if (absEta > m_etaBins.value().back()) {
-        ATH_MSG_ERROR("Requesting cut value for eta outside expected range!! ");
-        return -1;
+      double absEta = std::abs(eta);
+      if (absEta > m_etaBins.value().back() || absEta < m_etaBins.value().front()) {
+        ATH_MSG_INFO("Requesting cut value outside of configured eta range: clamping eta="
+            << absEta << " to eta=" 
+            << std::clamp(absEta, m_etaBins.value().front(), m_etaBins.value().back()));
       }
+      absEta = std::clamp(absEta, m_etaBins.value().front(), m_etaBins.value().back());
       const auto pVal =  std::lower_bound(m_etaBins.value().begin(), m_etaBins.value().end(), absEta);
       const int bin = std::distance(m_etaBins.value().begin(), pVal);
       ATH_MSG_DEBUG("Checking (abs(eta)/bin) = (" << absEta << "," << bin << ")");
