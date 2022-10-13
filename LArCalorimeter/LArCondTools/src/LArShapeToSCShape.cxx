@@ -60,15 +60,15 @@ StatusCode LArShapeToSCShape::execute()
 
  
   //Retrieve shape for regular cells
-  const ILArShape* cellShape;
+  const ILArShape* cellShape = nullptr;
   CHECK(detStore()->retrieve(cellShape,"LArShape"));
 
   //Retrieve SuperCell id
-  const CaloCell_SuperCell_ID* caloSCID;
+  const CaloCell_SuperCell_ID* caloSCID = nullptr;
   CHECK(detStore()->retrieve(caloSCID));
 
   //Retrive SuperCell online id
-  const LArOnline_SuperCellID* onlSCID;
+  const LArOnline_SuperCellID* onlSCID = nullptr;
   CHECK(detStore()->retrieve(onlSCID));
 
   const EventContext& ctx = Gaudi::Hive::currentContext();
