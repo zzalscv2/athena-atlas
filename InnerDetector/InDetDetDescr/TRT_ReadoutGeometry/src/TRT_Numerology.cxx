@@ -12,16 +12,15 @@ TRT_Numerology::TRT_Numerology() :
   m_nphiEndcap(0)
 {
   // Zero out the arrays
-  for (int i = 0; i < 3; i++) {
-    m_nlayerBarrel[i] = 0;
+  for (unsigned int & i : m_nlayerBarrel) {
+    i = 0;
   }
-  for (int j = 0; j < 18; j++) {
-    m_nlayerEndcap[j] = 0;
+  for (unsigned int & j : m_nlayerEndcap) {
+    j = 0;
   }    
 }
 
-TRT_Numerology::~TRT_Numerology() {
-}
+
 
 void TRT_Numerology::setNBarrelLayers(unsigned int module, unsigned int nLayers) {
   m_nlayerBarrel[module]=nLayers;

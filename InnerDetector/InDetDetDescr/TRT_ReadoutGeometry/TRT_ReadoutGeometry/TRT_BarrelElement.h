@@ -68,7 +68,7 @@ namespace InDetDD {
     /**	Returns a pointer to conditions data.  This includes
     	information on dead and noisy wires, as well as wire
     	sags. */
-    const TRT_BarrelConditions * getConditionsData() const;
+    static const TRT_BarrelConditions * getConditionsData() ;
 
     /**	Returns a pointer to a descriptor, giving common
     	information on module construction: */

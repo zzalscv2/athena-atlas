@@ -35,7 +35,7 @@ namespace InDetDD {
       TRT_BarrelCode( unsigned int  isPositive, unsigned int moduleIndex, unsigned phiIndex, unsigned int strawLayerIndex); 
       
       TRT_BarrelCode( const TRT_BarrelCode & right );
-      ~TRT_BarrelCode();
+      ~TRT_BarrelCode() = default;
       //(operator= ) was returning const ref; changed on 10/12/2014 sroe
       TRT_BarrelCode & operator=( const TRT_BarrelCode & right );
       

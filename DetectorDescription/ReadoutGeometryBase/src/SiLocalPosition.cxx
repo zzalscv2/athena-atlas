@@ -23,11 +23,9 @@ SiLocalPosition::SiLocalPosition() :
 {}
 
 // Copy constructor:
-SiLocalPosition::SiLocalPosition(const SiLocalPosition &position) :
-  m_xEta(position.m_xEta),
-  m_xPhi(position.m_xPhi),
-  m_xDepth(position.m_xDepth)
-{}
+SiLocalPosition::SiLocalPosition(const SiLocalPosition &position) 
+  
+= default;
 
 // Constructor with parameters:
 SiLocalPosition::SiLocalPosition(const double xEta,const double xPhi,

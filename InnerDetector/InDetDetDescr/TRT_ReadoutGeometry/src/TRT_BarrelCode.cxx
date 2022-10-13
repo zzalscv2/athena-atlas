@@ -49,9 +49,7 @@ TRT_BarrelCode::TRT_BarrelCode(const TRT_BarrelCode &right)
 
 
 
-TRT_BarrelCode::~TRT_BarrelCode()
-{
-}
+
 
 
 TRT_BarrelCode & TRT_BarrelCode::operator=(const TRT_BarrelCode &right)

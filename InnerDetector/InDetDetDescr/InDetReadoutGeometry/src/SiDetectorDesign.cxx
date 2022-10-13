@@ -50,7 +50,6 @@ SiDetectorDesign::SiDetectorDesign(double thickness,
 		 thicknessDirection){
 }
 // Destructor:
-SiDetectorDesign::~SiDetectorDesign() {
-}
+SiDetectorDesign::~SiDetectorDesign() = default;
 
 } // namespace InDetDD

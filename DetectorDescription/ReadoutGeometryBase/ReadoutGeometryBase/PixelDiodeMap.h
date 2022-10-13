@@ -117,8 +117,8 @@ class PixelDiodeMatrix;
                return 0 if no intersection
                x1,x2 are the centers
                dx1,dx2 are the full lengths */
-          double intersectionLength1D(const double x1,const double dx1,
-        			      const double x2,const double dx2) const;
+          static double intersectionLength1D(const double x1,const double dx1,
+        			      const double x2,const double dx2) ;
           
           /** Slower method. Called by neighboursOfCell if m_generalLayout set. */
           void neighboursOfCellGeneral(const SiCellId & cellId,

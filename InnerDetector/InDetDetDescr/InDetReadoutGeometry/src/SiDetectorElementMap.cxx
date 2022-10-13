@@ -23,8 +23,8 @@ void SiDetectorElementMap::addEntry(const IdentifierHash hashId, const InDetDD::
 
 const InDetDD::SiDetectorElement* SiDetectorElementMap::readEntry(const IdentifierHash hashId) const
 {
-  for (auto it = m_detElementMap.begin(); it != m_detElementMap.end(); it++) {
-    if(it->first==hashId) return it->second;
+  for (auto it : m_detElementMap) {
+    if(it.first==hashId) return it.second;
   }
   return nullptr;
 }

@@ -29,9 +29,7 @@ namespace InDetDD
     {
     }
 
-    SiDetectorManager::~SiDetectorManager()
-    {
-    }
+    SiDetectorManager::~SiDetectorManager() = default;
 
     const std::string& SiDetectorManager::tag() const
     {
@@ -64,7 +62,7 @@ namespace InDetDD
     bool SiDetectorManager::setAlignableTransformLocalDelta(ExtendedAlignableTransform * extXF, 
                                                             const Amg::Transform3D & localToGlobalXF,
                                                             const Amg::Transform3D & delta,
-                                                            GeoVAlignmentStore* alignStore) const
+                                                            GeoVAlignmentStore* alignStore) 
     {
         // ATTENTION -------------------------------------------------------- (A.S.)
         // CLHEP < -- > AMG interface method
@@ -102,7 +100,7 @@ namespace InDetDD
 
     bool SiDetectorManager::setAlignableTransformGlobalDelta(ExtendedAlignableTransform * extXF, 
                                                              const Amg::Transform3D& delta,
-                                                             GeoVAlignmentStore* alignStore) const {
+                                                             GeoVAlignmentStore* alignStore) {
         // ATTENTION -------------------------------------------------------- (A.S.)
         // CLHEP < -- > AMG interface method
         

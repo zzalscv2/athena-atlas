@@ -38,8 +38,7 @@ using Trk::distDepth;
 
   // Destructor:
   SolidStateDetectorElementBase::~SolidStateDetectorElementBase()
-  {
-  }
+  = default;
 
 
   
@@ -170,7 +169,7 @@ using Trk::distDepth;
     if (!dir.m_depthDirection) xDepth = -xDepth;
     if (!dir.m_phiDirection) xPhi = -xPhi;
     if (!dir.m_etaDirection) xEta = -xEta;
-    return HepGeom::Point3D<double>(xPhi, xEta, xDepth);
+    return {xPhi, xEta, xDepth};
   }
   
   // Get eta/phi extent. Returns min/max eta and phi and r (for barrel)
@@ -191,13 +190,13 @@ using Trk::distDepth;
 
     double phiOffset = 0.;
 
-    for (int i = 0; i < 4; i++) {
+    for (auto & corner : corners) {
       double etaMinPoint = 0.;
       double etaMaxPoint = 0.;
       double phiPoint = 0.;
 
       // Get the eta phi value for this corner.
-      getEtaPhiPoint(corners[i], deltaZ, etaMinPoint, etaMaxPoint, phiPoint);
+      getEtaPhiPoint(corner, deltaZ, etaMinPoint, etaMaxPoint, phiPoint);
 
       if (first) { // Use the first point to initialize the min/max values.
 
@@ -378,7 +377,7 @@ using Trk::distDepth;
     bool setAxisDir = false;
 #endif
     if (!m_axisDir.isValid()) {
-        AxisDir dir;
+        AxisDir dir{};
         // Determine the unit vectors in global frame
    
         const Amg::Vector3D &geoModelPhiAxis = localAxes[m_hitPhi];
@@ -539,13 +538,13 @@ using Trk::distDepth;
    
     const HepGeom::Transform3D rShift = HepGeom::TranslateY3D(radialShift);//in local frame, radius is y=distEta
 
-    for (int i = 0; i < 4; i++) {
+    for (auto & corner : corners) {
 
-      corners[i].transform(rShift);
+      corner.transform(rShift);
 
       // m_tranform is already there as  part of the cache construction
       // This method seems to be used only as a helper for updateCache
-      HepGeom::Point3D<double> globalPoint = cache.m_transformCLHEP * corners[i];
+      HepGeom::Point3D<double> globalPoint = cache.m_transformCLHEP * corner;
 
       double rPoint = globalPoint.perp();
       double zPoint = globalPoint.z();

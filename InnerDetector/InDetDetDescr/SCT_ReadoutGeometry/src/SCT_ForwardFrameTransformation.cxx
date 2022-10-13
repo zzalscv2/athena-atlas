@@ -23,11 +23,9 @@ using std::sin;
 namespace InDetDD {
 
 // Copy constructor:
-SCT_ForwardFrameTransformation::SCT_ForwardFrameTransformation(const SCT_ForwardFrameTransformation &frame) :
-  m_etaCenter(frame.m_etaCenter),
-  m_phiCenter(frame.m_phiCenter),
-  m_radius(frame.m_radius)
-{}
+SCT_ForwardFrameTransformation::SCT_ForwardFrameTransformation(const SCT_ForwardFrameTransformation &frame) 
+  
+= default;
 
 // Constructor with parameters:
 SCT_ForwardFrameTransformation::SCT_ForwardFrameTransformation(const double etaCenter,const double phiCenter,const double radius) :

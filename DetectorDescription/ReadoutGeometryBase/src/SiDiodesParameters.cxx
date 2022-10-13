@@ -22,10 +22,9 @@ SiDiodesParameters::SiDiodesParameters() :
 {}
 
 // Copy constructor:
-SiDiodesParameters::SiDiodesParameters(const SiDiodesParameters &parameters) :
-  m_centre(parameters.m_centre),
-  m_width(parameters.m_width)
-{}
+SiDiodesParameters::SiDiodesParameters(const SiDiodesParameters &parameters) 
+  
+= default;
 
 // Constructor with parameters:
 SiDiodesParameters::SiDiodesParameters(const SiLocalPosition &centre,

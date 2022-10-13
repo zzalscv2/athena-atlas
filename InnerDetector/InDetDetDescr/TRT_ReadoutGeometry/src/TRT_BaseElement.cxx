@@ -261,8 +261,8 @@ void
 TRT_BaseElement::deleteCache()
 {
   // for all straws
-  for (size_t i = 0; i < m_strawSurfacesCache.size(); i++) {
-    m_strawSurfacesCache[i].store(nullptr);
+  for (auto & i : m_strawSurfacesCache) {
+    i.store(nullptr);
   }
 }
 

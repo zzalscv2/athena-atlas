@@ -78,11 +78,27 @@ StripStereoAnnulusDesign::StripStereoAnnulusDesign(const SiDetectorDesign::Axis 
     double phi = m_nStrips[0] * m_pitch[0];
 
     if (m_usePC) {
-        // Maths for calculating PC bounds is based off Trk::AnnulusBoundsPC::fromCartesian() and detailed at https://hep.ph.liv.ac.uk/~jsmith/dropbox/AnnulusBoundsPC_Constructor_Maths.pdf. This will later form some kind of INT Note or report or similar internal documentation,
-        Amg::Vector2D origin(m_R * (1.0 - std::cos(m_stereo)) , m_R*std::sin(-m_stereo));
-        m_bounds = std::make_unique<Trk::AnnulusBoundsPC>(Trk::AnnulusBoundsPC(m_stripStartRadius[0], m_stripEndRadius.back(),phi*-0.5,phi*0.5,origin,0));
+      // Maths for calculating PC bounds is based off
+      // Trk::AnnulusBoundsPC::fromCartesian() and detailed at
+      // https://hep.ph.liv.ac.uk/~jsmith/dropbox/AnnulusBoundsPC_Constructor_Maths.pdf.
+      // This will later form some kind of INT Note or report or similar
+      // internal documentation,
+      Amg::Vector2D origin(m_R * (1.0 - std::cos(m_stereo)),
+                           m_R * std::sin(-m_stereo));
+      m_bounds = std::make_unique<Trk::AnnulusBoundsPC>(
+        Trk::AnnulusBoundsPC(m_stripStartRadius[0],
+                             m_stripEndRadius.back(),
+                             phi * -0.5,
+                             phi * 0.5,
+                             origin,
+                             0));
     } else {
-        m_bounds = std::make_unique<Trk::AnnulusBounds>(Trk::AnnulusBounds(m_stripStartRadius[0], m_stripEndRadius.back(), m_waferCentreR, phi, m_stereo));
+      m_bounds = std::make_unique<Trk::AnnulusBounds>(
+        Trk::AnnulusBounds(m_stripStartRadius[0],
+                           m_stripEndRadius.back(),
+                           m_waferCentreR,
+                           phi,
+                           m_stereo));
     }
 }
 
@@ -295,7 +311,6 @@ void StripStereoAnnulusDesign::neighboursOfCell(const SiCellId &cellId, std::vec
         neighbours.emplace_back(stripP);
     }
 
-    return;
 }
 
 /**
@@ -304,7 +319,7 @@ void StripStereoAnnulusDesign::neighboursOfCell(const SiCellId &cellId, std::vec
  * @return const Trk::SurfaceBounds& The module bounds.
  */
 const Trk::SurfaceBounds &StripStereoAnnulusDesign::bounds() const {
-    return *(m_bounds.get()); // Equivalent but more explicit than *m_bounds - 
+    return *(m_bounds); // Equivalent but more explicit than *m_bounds - 
                               // gets the normal pointer from the unique then dereferences it.
 }
 
@@ -587,8 +602,6 @@ void StripStereoAnnulusDesign::distanceToDetectorEdge(SiLocalPosition const & po
     phiDist = rad_strip * (phiAngleMax - phi_strip);
   else
     phiDist = rad_strip * std::min(phiAngleMax - phi_strip, phi_strip - phiAngleMin);
-
-  return;
 }
 
 DetectorShape StripStereoAnnulusDesign::shape() const

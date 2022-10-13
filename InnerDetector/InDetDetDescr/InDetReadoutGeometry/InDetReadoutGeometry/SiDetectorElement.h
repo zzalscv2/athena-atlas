@@ -83,23 +83,21 @@ namespace InDetDD {
    * The private methods of this class do not have locks.
    *
    * The method updateCache of is of particular interest as
-   * it set all cache values and at the end sets the
-   * m_cacheValid atomic variable to true.
+   * it set all cache values.
    *
-   * The const methods call the updateCache() under a mutex lock
-   * when the need to perform lazy initialization
+   * The const methods call updateCache()
+   * when they need to perform lazy initialization
+   *
    * \code{.cpp}
-   * if (!m_cacheValid) {
-   *   std::lock_guard<std::mutex> lock(m_mutex);
-   *   if (!m_cacheValid) updateCache();
-   * }
+   * if (!m_cache.isValid()) updateCache();
    * \endcode
    *
    * So as concurrent const operations are valid
-   * and do not race with each other.
+   * * and do not race with each other.
    *
-   * The non-const methods do not use a mutex lock. They can set the state
+   * The non-const methods can set the state
    * of the cache or the cache itself (invalidate/setCache methods etc)
+   *
    *
    * Note: Synchronisation of creating SiDetElements for different events
    * and accessing for each events

@@ -107,15 +107,15 @@ class SiNumerology;
     
       
       /** Helper method to set delta transform from a global delta - Amg interface*/
-      bool setAlignableTransformGlobalDelta(ExtendedAlignableTransform * extXF, 
+      static bool setAlignableTransformGlobalDelta(ExtendedAlignableTransform * extXF, 
                                             const Amg::Transform3D & delta,
-                                            GeoVAlignmentStore* alignStore=nullptr) const;
+                                            GeoVAlignmentStore* alignStore=nullptr) ;
     
       /** Helper method to set delta transform from a local delta - Amg interface */
-      bool setAlignableTransformLocalDelta(ExtendedAlignableTransform * extXF, 
+      static bool setAlignableTransformLocalDelta(ExtendedAlignableTransform * extXF, 
                                            const Amg::Transform3D & localToGlobalXF,
                                            const Amg::Transform3D & delta,
-                                           GeoVAlignmentStore* alignStore=nullptr) const;
+                                           GeoVAlignmentStore* alignStore=nullptr) ;
     
       /** Access to module design; returns an _observer_ pointer */
       const SiDetectorDesign * addDesign(std::unique_ptr<const SiDetectorDesign>&&);

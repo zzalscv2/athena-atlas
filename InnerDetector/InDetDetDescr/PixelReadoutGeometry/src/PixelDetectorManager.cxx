@@ -72,8 +72,8 @@ namespace InDetDD {
   PixelDetectorManager::~PixelDetectorManager()
   {
     // Clean up
-    for (size_t i=0; i < m_volume.size(); i++) {
-      m_volume[i]->unref();
+    for (auto & i : m_volume) {
+      i->unref();
     }
   }
 
@@ -383,16 +383,15 @@ namespace InDetDD {
   // loop over all the AlignableTransform objects in the collection
   std::string IBLalignfolder = alignfolder;
   IBLalignfolder.append("/PIXB1");// "/Indet/Align/PIXB1"
-  for (DataVector<AlignableTransform>::const_iterator pat=container->begin();
-       pat!=container->end();++pat)
+  for (const auto *pat : *container)
   {
-    if (!( (*pat)->tag()==IBLalignfolder &&
+    if (!( pat->tag()==IBLalignfolder &&
      numerology().numPhiModulesForLayer(0)==14 &&
      numerology().numLayers()==4) ){  // hard-coded to IBL for now; no other geometry should really apply this!
-      ATH_MSG_DEBUG("IBLDist; ignoring collections " << (*pat)->tag());
+      ATH_MSG_DEBUG("IBLDist; ignoring collections " << pat->tag());
     }
     else{
-      const AlignableTransform* transformCollection = *pat;
+      const AlignableTransform* transformCollection = pat;
       for (AlignableTransform::AlignTransMem_citr trans_iter = transformCollection->begin();
          trans_iter != transformCollection->end();
          ++trans_iter)
@@ -422,7 +421,7 @@ namespace InDetDD {
 
         Amg::Transform3D shift = Amg::Translation3D(basex+bowx,0,0) * Amg::RotationMatrix3D::Identity();
 
-        const AlignableTransform* cpat = *pat;
+        const AlignableTransform* cpat = pat;
         AlignableTransform::AlignTransMem_citr this_trans=cpat->findIdent(trans_iter->identify());
         HepGeom::Transform3D newtrans = Amg::EigenTransformToCLHEP(shift)*this_trans->transform();
 
@@ -666,8 +665,7 @@ namespace InDetDD {
     ATH_MSG_LVL_NOCHK(level, "    " << tr(0,0) << "  " << tr(0,1) << "  " << tr(0,2));
     ATH_MSG_LVL_NOCHK(level, "    " << tr(1,0) << "  " << tr(1,1) << "  " << tr(1,2));
     ATH_MSG_LVL_NOCHK(level, "    " << tr(2,0) << "  " << tr(2,1) << "  " << tr(2,2));
-    return;
-  }
+ }
 
 
 } // namespace InDetDD
