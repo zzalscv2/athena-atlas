@@ -11,7 +11,7 @@
 export ATHENA_CORE_NUMBER=8
 Reco_tf.py \
   --AMI q445 \
-  --inputHITSFile /cvmfs/atlas-nightlies.cern.ch/repo/data/data-art/Tier0ChainTests/mc21_13p6TeV.601229.PhPy8EG_A14_ttbar_hdamp258p75_SingleLep.simul.HITS.e8357_e7400_s3775/HITS.27679639._074687.pool.root.1 \
+  --inputHITSFile /cvmfs/atlas-nightlies.cern.ch/repo/data/data-art/CampaignInputs/mc21/HITS/mc21_13p6TeV.601229.PhPy8EG_A14_ttbar_hdamp258p75_SingleLep.simul.HITS.e8453_s3873/1000events_singleBS.HITS.pool.root \
   --sharedWriter True \
   --steering 'doRDO_TRIG' 'doTRIGtoALL' \
   --outputDAODFile art.pool.root \
@@ -20,7 +20,7 @@ Reco_tf.py \
   --postExec 'from AthenaAuditors.AthenaAuditorsConf import FPEAuditor;FPEAuditor.NStacktracesOnFPE=10; from DerivationFrameworkJetEtMiss.JetCommon import swapAlgsInSequence;swapAlgsInSequence(topSequence,"jetalg_ConstitModCorrectPFOCSSKCHS_GPFlowCSSK", "UFOInfoAlgCSSK" );' \
   --runNumber=410000 \
   --DataRunNumber=410000 \
-  --maxEvents 2000
+  --maxEvents 1000
 
 rc1=$?
 echo "art-result: ${rc1} Reco_tf_q445_phys_physlite_mt_mp" 
@@ -47,8 +47,8 @@ echo "art-result: ${rc3} xAODHist DAOD_PHYSLITE.art.pool.root"
 
 # dcube references
 echo "============ dcube references"
-dcubeRef="/cvmfs/atlas-nightlies.cern.ch/repo/data/data-art/TrfTestsART/dcube/q445/v0/hist_physlite_2305.root"
-dcubeXML="/cvmfs/atlas-nightlies.cern.ch/repo/data/data-art/TrfTestsART/dcube/q445/v0/dcube_config_hist_physlite_2305.xml"
+dcubeRef="/cvmfs/atlas-nightlies.cern.ch/repo/data/data-art/TrfTestsART/dcube/q445/v1/hist_physlite_2306.root"
+dcubeXML="/cvmfs/atlas-nightlies.cern.ch/repo/data/data-art/TrfTestsART/dcube/q445/v1/dcube_config_hist_physlite_2306.xml"
 echo ${dcubeRef}
 echo ${dcubeXML}
 
