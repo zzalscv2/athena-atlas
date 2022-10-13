@@ -16,8 +16,9 @@
 #include "ReadoutGeometryBase/PixelDiodeMatrix.h"
 #include "ReadoutGeometryBase/SiCellId.h"
 
-#include <cmath>
 #include <algorithm>
+#include <cmath>
+#include <utility>
 
 namespace InDetDD {
 
@@ -25,14 +26,13 @@ namespace InDetDD {
 
 // Implicit constructor:
 PixelDiodeMap::PixelDiodeMap(std::shared_ptr<const PixelDiodeMatrix> matrix) :
-  m_matrix(matrix),
+  m_matrix(std::move(matrix)),
   m_generalLayout(false) 
 {
 }
 
 PixelDiodeMap::~PixelDiodeMap()
-{
-}
+= default;
 
 
   SiCellId PixelDiodeMap::cellIdOfPosition(const Amg::Vector2D & localPos) const
@@ -48,7 +48,7 @@ PixelDiodeMap::~PixelDiodeMap()
   double halfLength = 0.5*length();
   if ( (abs(localPos[distPhi]) > halfWidth) || 
        (abs(localPos[distEta]) > halfLength) ) {
-    return SiCellId(); // Invalid Id.
+    return {}; // Invalid Id.
   }
 
   // position relative to bottom left corner.
@@ -60,7 +60,7 @@ PixelDiodeMap::~PixelDiodeMap()
   const PixelDiodeMatrix *cell = m_matrix->cellIdOfPosition(relativePos, cellId);
   // return invalid Id if there was a problem (don't expect this to be the case).
   if (cell==nullptr) {
-    return SiCellId(); // Invalid id.
+    return {}; // Invalid id.
   } 
 
   return cellId;
@@ -80,7 +80,7 @@ PixelDiodeMap::parameters(const SiCellId & cellId) const
       (cellId.phiIndex() >= m_matrix->phiCells()) ||
       (cellId.etaIndex() < 0) ||
       (cellId.etaIndex() >= m_matrix->etaCells())) {
-    return SiDiodesParameters();
+    return {};
   }
 
   double halfWidth = 0.5*width();
@@ -101,7 +101,7 @@ PixelDiodeMap::parameters(const SiCellId & cellId) const
   }
 
   // return something in case of failure.
-  return SiDiodesParameters();
+  return {};
 }
 
 void PixelDiodeMap::neighboursOfCell(const SiCellId & cellId,
@@ -129,21 +129,21 @@ void PixelDiodeMap::neighboursOfCell(const SiCellId & cellId,
   int etaP = etaIndex+1;
 
   // -,0
-  if (phiM >= 0)                                 neighbours.push_back(SiCellId(phiM,etaIndex));
+  if (phiM >= 0)                                 neighbours.emplace_back(phiM,etaIndex);
   // -,-
-  if (phiM >= 0 && etaM >= 0)                    neighbours.push_back(SiCellId(phiM,etaM));
+  if (phiM >= 0 && etaM >= 0)                    neighbours.emplace_back(phiM,etaM);
   // 0,-
-  if (etaM >= 0)                                 neighbours.push_back(SiCellId(phiIndex,etaM));
+  if (etaM >= 0)                                 neighbours.emplace_back(phiIndex,etaM);
   // +,-
-  if (phiP < phiDiodes() && etaM >= 0)           neighbours.push_back(SiCellId(phiP,etaM));
+  if (phiP < phiDiodes() && etaM >= 0)           neighbours.emplace_back(phiP,etaM);
   // +,0
-  if (phiP < phiDiodes())                        neighbours.push_back(SiCellId(phiP,etaIndex));
+  if (phiP < phiDiodes())                        neighbours.emplace_back(phiP,etaIndex);
   // -,+
-  if (phiM >= 0 && etaP < etaDiodes())           neighbours.push_back(SiCellId(phiM,etaP));
+  if (phiM >= 0 && etaP < etaDiodes())           neighbours.emplace_back(phiM,etaP);
   // 0,+
-  if (etaP < etaDiodes())                        neighbours.push_back(SiCellId(phiIndex,etaP));
+  if (etaP < etaDiodes())                        neighbours.emplace_back(phiIndex,etaP);
   // +,+
-  if (phiP < phiDiodes() && etaP < etaDiodes())  neighbours.push_back(SiCellId(phiP,etaP));
+  if (phiP < phiDiodes() && etaP < etaDiodes())  neighbours.emplace_back(phiP,etaP);
 }
 
 // Get the neighbouring PixelDiodes of a given PixelDiode:
@@ -195,11 +195,10 @@ void PixelDiodeMap::neighboursOfCellGeneral(const SiCellId & cellId,
   neighbours.reserve(8);
 
   // loop on all positions to check
-  for(std::vector<SiLocalPosition>::const_iterator p_position=positions.begin() ;
-      p_position!=positions.end() ; ++p_position) {
+  for(const auto & position : positions) {
 
     // get the PixelDiode for this position
-    SiCellId cellId_neighb = cellIdOfPosition(*p_position);
+    SiCellId cellId_neighb = cellIdOfPosition(position);
 
     if (cellId.isValid()) {
       // check if the diode is already in the list
@@ -272,7 +271,7 @@ double PixelDiodeMap::intersectionLengthGeneral(const SiCellId &diode1,
 
 // Compute the intersection length along one direction:
 double PixelDiodeMap::intersectionLength1D(const double x1,const double dx1,
-					   const double x2,const double dx2) const
+					   const double x2,const double dx2) 
 {
   // compute distance between the two centers
   double distance=std::abs(x1-x2);

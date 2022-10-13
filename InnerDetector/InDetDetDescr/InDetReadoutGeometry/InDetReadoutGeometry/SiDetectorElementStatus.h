@@ -127,7 +127,7 @@ namespace InDet {
     protected:
        virtual unsigned int numberOfChips(const InDetDD::SiDetectorDesign& design) const = 0;
     private:
-       void notOwningBadCells() const;
+       static void notOwningBadCells() ;
        void copyBadCells() {
           m_badCells = new std::vector<std::vector<unsigned short> > (*m_badCells);
           m_owner=true;

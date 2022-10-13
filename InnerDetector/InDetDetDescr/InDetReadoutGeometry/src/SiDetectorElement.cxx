@@ -48,8 +48,7 @@ namespace InDetDD {
 
   // Destructor:
   SiDetectorElement::~SiDetectorElement()
-  {
-  }
+  = default;
 
   bool
   SiDetectorElement::isPixel() const
@@ -84,7 +83,7 @@ bool
   bool
   SiDetectorElement::isBlayer() const
   {
-    if (const auto pIdHelper= getIdHelper();isPixel() and isBarrel() and 
+    if (const auto *const pIdHelper= getIdHelper();isPixel() and isBarrel() and 
       pIdHelper->helper() ==  AtlasDetectorID::HelperType::Pixel) {
       const PixelID* p_pixelId = static_cast<const PixelID*>(pIdHelper);
       return (0==p_pixelId->layer_disk(m_id));
@@ -96,7 +95,7 @@ bool
   bool
   SiDetectorElement::isInnermostPixelLayer() const
   {
-    if (const auto pIdHelper= getIdHelper(); isPixel() and isBarrel()
+    if (const auto *const pIdHelper= getIdHelper(); isPixel() and isBarrel()
      and pIdHelper->helper() ==  AtlasDetectorID::HelperType::Pixel) {
       const PixelID* p_pixelId = static_cast<const PixelID*>(pIdHelper);
       return ( 0==p_pixelId->layer_disk(m_id));
@@ -108,7 +107,7 @@ bool
   bool
   SiDetectorElement::isNextToInnermostPixelLayer() const
   {
-    if (const auto pIdHelper = getIdHelper(); isPixel() and isBarrel() and
+    if (const auto *const pIdHelper = getIdHelper(); isPixel() and isBarrel() and
       pIdHelper->helper() ==  AtlasDetectorID::HelperType::Pixel) {
       const PixelID* p_pixelId = static_cast<const PixelID*>(pIdHelper);
       return ( 1==p_pixelId->layer_disk(m_id));
@@ -125,7 +124,7 @@ bool
     // If something fails it returns the id in an invalid state.
 
     if (cellId.isValid()) {
-      const auto pAtlasHelper = getIdHelper();
+      const auto *const pAtlasHelper = getIdHelper();
       if (isPixel()) {
         if (pAtlasHelper->helper() ==  AtlasDetectorID::HelperType::Pixel) {
           const PixelID* pixelIdHelper = static_cast<const PixelID*>(pAtlasHelper);
@@ -156,9 +155,9 @@ bool
     // If something fails it returns the cellId in an invalid state.
 
     if (identifier.is_valid()) {
-      const auto pAtlasHelper = getIdHelper();
+      const auto *const pAtlasHelper = getIdHelper();
       if (isPixel() and pAtlasHelper->helper() == AtlasDetectorID::HelperType::Pixel) {
-        const auto pixelIdHelper = static_cast<const PixelID*>(pAtlasHelper); 
+        const auto *const pixelIdHelper = static_cast<const PixelID*>(pAtlasHelper); 
         cellId = SiCellId(pixelIdHelper->phi_index(identifier), pixelIdHelper->eta_index(identifier));
       } else if (isSCT() and pAtlasHelper->helper() == AtlasDetectorID::HelperType::SCT) {
         const SCT_ID* sctIdHelper = static_cast<const SCT_ID*>(pAtlasHelper);
@@ -169,7 +168,7 @@ bool
         int strip = sctIdHelper->strip(identifier);
         int row = sctIdHelper->row(identifier);
         if(row>0){
-          auto &sctDesign = *static_cast<const SiDetectorDesign *>(m_siDesign);
+          const auto &sctDesign = *static_cast<const SiDetectorDesign *>(m_siDesign);
           int strip1D = sctDesign.strip1Dim(strip, row);
           cellId = SiCellId(strip1D);
         }else {

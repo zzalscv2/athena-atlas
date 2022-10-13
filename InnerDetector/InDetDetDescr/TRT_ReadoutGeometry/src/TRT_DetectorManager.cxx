@@ -49,20 +49,20 @@ namespace InDetDD {
     //
     // NULL out barrel and endcap arrays:
     //
-        for (unsigned int ec=0;ec<2;ec++) {
-            for (unsigned int mod=0;mod<NMODMAX;mod++) {
-                for (unsigned int phi=0; phi<NPHIMAX;phi++) {
-                    for (unsigned int sLay=0;sLay<NSTRAWLAYMAXBR;sLay++) {
-                        m_barrelArray[ec][mod][phi][sLay]=nullptr;
+        for (auto & ec : m_barrelArray) {
+            for (auto & mod : ec) {
+                for (auto & phi : mod) {
+                    for (auto & sLay : phi) {
+                        sLay=nullptr;
                     }
                 }
             }
         }
-        for (unsigned int ec=0;ec<2;ec++) {
-            for (unsigned int whe=0;whe<NWHEELMAX;whe++) {
-                for (unsigned int sLay=0;sLay<NSTRAWLAYMAXEC;sLay++) {
-                    for(unsigned int phi=0;phi<NPHIMAX;phi++) {
-                        m_endcapArray[ec][whe][sLay][phi]=nullptr;
+        for (auto & ec : m_endcapArray) {
+            for (auto & whe : ec) {
+                for (auto & sLay : whe) {
+                    for(auto & phi : sLay) {
+                        phi=nullptr;
                     }
                 }
             }
@@ -83,37 +83,36 @@ namespace InDetDD {
 
     TRT_DetectorManager::~TRT_DetectorManager()
     {
-        for (size_t i=0;i<m_volume.size();i++) {
-            m_volume[i]->unref();
+        for (auto & i : m_volume) {
+            i->unref();
         }
-        for (unsigned int ec=0;ec<2;ec++) {
-            for (unsigned int mod=0;mod<NMODMAX;mod++) {
-                for (unsigned int phi=0; phi<NPHIMAX;phi++) {
-                    for (unsigned int sLay=0;sLay<NSTRAWLAYMAXBR;sLay++) {
-                        delete m_barrelArray[ec][mod][phi][sLay];
+        for (auto & ec : m_barrelArray) {
+            for (auto & mod : ec) {
+                for (auto & phi : mod) {
+                    for (auto & sLay : phi) {
+                        delete sLay;
                     }
                 }
             }
         }
-        for (unsigned int ec=0;ec<2;ec++) {
-            for (unsigned int whe=0;whe<NWHEELMAX;whe++) {
-                for (unsigned int sLay=0;sLay<NSTRAWLAYMAXEC;sLay++) {
-                    for(unsigned int phi=0;phi<NPHIMAX;phi++) {
-                        delete m_endcapArray[ec][whe][sLay][phi];
+        for (auto & ec : m_endcapArray) {
+            for (auto & whe : ec) {
+                for (auto & sLay : whe) {
+                    for(auto & phi : sLay) {
+                        delete phi;
                     }
                 }
             }
         }
         delete m_numerology;
         if (m_ownsIdHelper)    delete m_idHelper;
-        for (int i=0;i<3;i++) delete m_barrelXF[i];
-        for (int i=0;i<3;i++) delete m_endcapXF[i];
+        for (auto & i : m_barrelXF) delete i;
+        for (auto & i : m_endcapXF) delete i;
 
 
-        for (unsigned int i = 0; i < m_alignableTransforms.size(); i++) {
-            AlignableTransformMap& m = m_alignableTransforms[i];
-            for (AlignableTransformMap::iterator j = m.begin(); j != m.end(); ++j) {
-                delete j->second;
+        for (auto & m : m_alignableTransforms) {
+            for (auto & j : m) {
+                delete j.second;
             }
         }
 
@@ -660,9 +659,9 @@ namespace InDetDD {
     const CondAttrListCollection* atrlistcol=nullptr;
     if (StatusCode::SUCCESS==m_detStore->retrieve(atrlistcol,key)) {
       // loop over objects in collection
-      for (CondAttrListCollection::const_iterator citr=atrlistcol->begin(); citr!=atrlistcol->end();++citr) {
+      for (const auto & citr : *atrlistcol) {
 
-        const coral::AttributeList& atrlist=citr->second;
+        const coral::AttributeList& atrlist=citr.second;
 	ident = getIdHelper()->module_id(atrlist["bec"].data<int>(),
                                         atrlist["layer"].data<int>(),
 					atrlist["sector"].data<int>());
@@ -673,7 +672,7 @@ namespace InDetDD {
 	newrotation.set(atrlist["phi"].data<float>(),atrlist["theta"].data<float>(),atrlist["psi"].data<float>());
 	HepGeom::Transform3D newtransform(newrotation, newtranslation);
 
-        msg(MSG::DEBUG) << "New global DB -- channel: " << citr->first
+        msg(MSG::DEBUG) << "New global DB -- channel: " << citr.first
 			<< " ,bec: "    << atrlist["bec"].data<int>()
                         << " ,layer: "  << atrlist["layer"].data<int>()
 			<< " ,sector: " << atrlist["sector"].data<int>()

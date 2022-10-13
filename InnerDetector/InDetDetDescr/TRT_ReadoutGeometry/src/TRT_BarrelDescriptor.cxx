@@ -22,8 +22,7 @@ TRT_BarrelDescriptor::TRT_BarrelDescriptor()
 }
 
 TRT_BarrelDescriptor::~TRT_BarrelDescriptor()
-{
-}
+= default;
 
 void TRT_BarrelDescriptor::addStraw(double xPos, double yPos) {
 

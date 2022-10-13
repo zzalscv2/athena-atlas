@@ -27,7 +27,7 @@ namespace InDetDD {
       TRT_Numerology();
     
       // Destructor:
-      ~TRT_Numerology();
+      ~TRT_Numerology() = default;
     
       // Modifiers:
       void setNBarrelLayers(unsigned int module, unsigned int nLayers);

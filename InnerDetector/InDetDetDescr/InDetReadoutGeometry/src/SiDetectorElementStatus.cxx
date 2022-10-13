@@ -79,5 +79,5 @@ namespace InDet {
       return *this;
    }
 
-   void SiDetectorElementStatus::notOwningBadCells() const { throw std::logic_error("Bad cells not owned by this  instance, cannot return non const bad cell pointer."); }
+   void SiDetectorElementStatus::notOwningBadCells() { throw std::logic_error("Bad cells not owned by this  instance, cannot return non const bad cell pointer."); }
 } // namespace InDetDD

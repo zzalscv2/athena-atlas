@@ -139,7 +139,7 @@ public:
 
 
     // Transform from SiHit to GeoModel frame
-    const Amg::Transform3D SiHitToGeoModel() const;
+    static const Amg::Transform3D SiHitToGeoModel() ;
     
     // ------------------------------------------------------------------------------------------
 

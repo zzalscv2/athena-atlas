@@ -66,7 +66,7 @@ TRT_EndcapElement::TRT_EndcapElement(const TRT_EndcapElement& right,
   m_strawSurfacesCache.resize(m_nstraws);
 }
 
-TRT_EndcapElement::~TRT_EndcapElement() {}
+TRT_EndcapElement::~TRT_EndcapElement() = default;
 
 
 const double&
@@ -76,7 +76,7 @@ TRT_EndcapElement::strawLength() const
 }
 
 const TRT_EndcapConditions*
-TRT_EndcapElement::getConditionsData() const
+TRT_EndcapElement::getConditionsData() 
 {
   return nullptr;
 }

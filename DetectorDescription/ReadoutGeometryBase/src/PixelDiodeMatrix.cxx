@@ -7,6 +7,7 @@
 #include "TrkEventPrimitives/ParamDefs.h"
 
 #include <cassert>
+#include <utility>
 
 namespace InDetDD {
 
@@ -43,10 +44,10 @@ std::shared_ptr<const PixelDiodeMatrix> PixelDiodeMatrix::construct(Direction di
   class Helper : public PixelDiodeMatrix{};
   std::shared_ptr<PixelDiodeMatrix> ptr = std::make_shared<Helper>();
   ptr->initialize(direction,
-                  lowerCell,
-                  middleCells,
+                  std::move(lowerCell),
+                  std::move(middleCells),
                   numCells,
-                  upperCell);
+                  std::move(upperCell));
   return ptr;
 }
 
@@ -62,9 +63,9 @@ void PixelDiodeMatrix::initialize(Direction direction,  // phi or eta
   m_etaCells = 0;
   m_direction = direction;
   m_numCells = numCells;
-  m_lowerCell = lowerCell;
-  m_middleCells = middleCells;
-  m_upperCell = upperCell;
+  m_lowerCell = std::move(lowerCell);
+  m_middleCells = std::move(middleCells);
+  m_upperCell = std::move(upperCell);
   m_singleCell = false;
 
   // middleCells must be non zero.

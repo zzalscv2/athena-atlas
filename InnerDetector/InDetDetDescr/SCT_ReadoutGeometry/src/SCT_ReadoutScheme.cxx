@@ -17,12 +17,9 @@
 namespace InDetDD {
 
 // Copy constructor:
-SCT_ReadoutScheme::SCT_ReadoutScheme(const SCT_ReadoutScheme &scheme) :
-  m_crystals(scheme.m_crystals),
-  m_diodes(scheme.m_diodes),
-  m_cells(scheme.m_cells),
-  m_shift(scheme.m_shift)
-{}
+SCT_ReadoutScheme::SCT_ReadoutScheme(const SCT_ReadoutScheme &scheme) 
+  
+= default;
 
 // Constructor with parameters:
 SCT_ReadoutScheme::SCT_ReadoutScheme(const int crystals,const int diodes,

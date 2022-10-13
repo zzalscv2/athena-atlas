@@ -35,7 +35,7 @@ namespace InDetDD {
 		      unsigned int phiIndex); 
       
       TRT_EndcapCode( const TRT_EndcapCode & right );
-      ~TRT_EndcapCode();
+      ~TRT_EndcapCode() = default;
       //was returning a const ref; changed 10/12/2014, sroe
       TRT_EndcapCode & operator=( const TRT_EndcapCode & right );
       

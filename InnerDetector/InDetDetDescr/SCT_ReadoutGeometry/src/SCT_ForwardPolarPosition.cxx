@@ -23,10 +23,9 @@ SCT_ForwardPolarPosition::SCT_ForwardPolarPosition() :
 {}
 
 // Copy constructor:
-SCT_ForwardPolarPosition::SCT_ForwardPolarPosition(const SCT_ForwardPolarPosition &polar) :
-  m_r(polar.m_r),
-  m_theta(polar.m_theta)
-{}
+SCT_ForwardPolarPosition::SCT_ForwardPolarPosition(const SCT_ForwardPolarPosition &polar) 
+  
+= default;
 
 // Constructor with parameters:
 SCT_ForwardPolarPosition::SCT_ForwardPolarPosition(const double r,const double theta) :

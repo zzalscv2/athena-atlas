@@ -46,9 +46,7 @@ TRT_EndcapCode::TRT_EndcapCode(const TRT_EndcapCode &right)
 
 
 
-TRT_EndcapCode::~TRT_EndcapCode()
-{
-}
+
 
 
 TRT_EndcapCode & TRT_EndcapCode::operator=(const TRT_EndcapCode &right)

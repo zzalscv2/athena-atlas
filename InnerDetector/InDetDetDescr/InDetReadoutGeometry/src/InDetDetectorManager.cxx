@@ -27,7 +27,7 @@ namespace InDetDD
 
   // Destructor
     InDetDetectorManager::~InDetDetectorManager() 
-        {}
+        = default;
 
 
     const Version& InDetDetectorManager::getVersion() const
@@ -109,12 +109,10 @@ namespace InDetDD
 
 
             // New global aligment folders should be processed first
-            for (std::set<std::string>::const_iterator iterFolders = m_globalFolders.begin();
-            iterFolders != m_globalFolders.end();
-            ++iterFolders) {
+            for (const auto & globalFolder : m_globalFolders) {
 
                 try {
-                    bool status = processGlobalAlignmentContainer(*iterFolders);
+                    bool status = processGlobalAlignmentContainer(globalFolder);
                     alignmentChange = (alignmentChange || status);
                 } catch(std::runtime_error& err) {
                     // keys are empty when running simualtion. It is normal for detector specific aligments not to exist.
@@ -124,12 +122,10 @@ namespace InDetDD
             }
 
             // Regular alignments. Loop through folder keys. Normally only one.
-            for (std::set<std::string>::const_iterator iterFolders = m_folders.begin();
-            iterFolders != m_folders.end();
-            ++iterFolders) {
+            for (const auto & folder : m_folders) {
 
                 try {
-                    bool status = processAlignmentContainer(*iterFolders);
+                    bool status = processAlignmentContainer(folder);
                     alignmentChange = (alignmentChange || status);
                 }
                 catch(std::runtime_error& err) {
@@ -139,11 +135,9 @@ namespace InDetDD
                 }
             }  
             // Detector specific aligments
-            for (std::set<std::string>::const_iterator iterFolders = m_specialFolders.begin();
-            iterFolders != m_specialFolders.end();
-            ++iterFolders) {
+            for (const auto & specialFolder : m_specialFolders) {
                 try {
-                    bool status = processSpecialAlignment(*iterFolders, aligninfo.AlignFolder());
+                    bool status = processSpecialAlignment(specialFolder, aligninfo.AlignFolder());
                     alignmentChange = (alignmentChange || status);
                 } catch(std::runtime_error& err) {
                     // keys are empty when running simualtion. It is normal for detector specific aligments not to exist.
@@ -298,10 +292,9 @@ namespace InDetDD
             throw std::runtime_error("Unable to apply Inner Detector alignments.");
         }
         // loop over all the AlignableTransform objects in the collection
-        for (DataVector<AlignableTransform>::const_iterator pat=container->begin();
-        pat!=container->end();++pat) {
+        for (const auto *pat : *container) {
 
-            bool status = processKey((*pat)->tag(),*pat);
+            bool status = processKey(pat->tag(),pat);
             alignmentChange = (alignmentChange || status);
         }
         return alignmentChange;
@@ -322,9 +315,8 @@ namespace InDetDD
         // use only the last ones.
         // /Indet/AlignL3/SCTEA9 appear repeatedly in tags of the /Indet/AlignL3 folder
         std::map<const std::string, const AlignableTransform*> stringToTransform;
-        for (DataVector<AlignableTransform>::const_iterator pat=container->begin();
-             pat!=container->end();++pat) {
-            stringToTransform[(*pat)->tag()] = *pat;
+        for (const auto *pat : *container) {
+            stringToTransform[pat->tag()] = pat;
         }
         for (const std::pair<const std::string, const AlignableTransform*>& value: stringToTransform) {
             bool status = processKey(value.first, value.second, alignStore);

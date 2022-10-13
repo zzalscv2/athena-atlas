@@ -58,24 +58,24 @@ PixelReadoutScheme::numberOfConnectedCells(const SiReadoutCellId & readoutId) co
 SiCellId 
 PixelReadoutScheme::connectedCell(const SiReadoutCellId & readoutId, unsigned int number) const
 {
-  if (!readoutId.isValid()) return SiCellId();
+  if (!readoutId.isValid()) return {};
   
   // Do quick check to see if it is outside ganged pixel range.
   int phiIndex = readoutId.phiIndex();
   if (m_rowConnections.outsideReadout(phiIndex)) return readoutId;
 
   int numConnected = m_rowConnections.numberOfConnectedCells(phiIndex);
-  if (!numConnected || static_cast<int>(number) >= numConnected) return SiCellId();
+  if (!numConnected || static_cast<int>(number) >= numConnected) return {};
 
   int newPhiIndex = m_rowConnections.connectedCell(phiIndex, number);
-  return SiCellId(newPhiIndex, readoutId.etaIndex());
+  return {newPhiIndex, readoutId.etaIndex()};
 }  
 
 // Id of the readout cell for this diode.
 SiReadoutCellId
 PixelReadoutScheme::readoutIdOfCell(const SiCellId & cellId) const
 {
-  if (!cellId.isValid()) return SiReadoutCellId();
+  if (!cellId.isValid()) return {};
 
   int phiIndex = cellId.phiIndex();
   int newPhiIndex = phiIndex;
@@ -83,7 +83,7 @@ PixelReadoutScheme::readoutIdOfCell(const SiCellId & cellId) const
     newPhiIndex = m_rowConnections.readoutOfDiode(phiIndex);
   } 
   
-  return SiReadoutCellId(newPhiIndex, cellId.etaIndex()); 
+  return {newPhiIndex, cellId.etaIndex()}; 
 
 }
 
@@ -92,10 +92,10 @@ PixelReadoutScheme::gangedCell(const SiCellId & cellId) const
 {
   if (!cellId.isValid()) return cellId;
   int phiIndex = cellId.phiIndex();
-  if (m_rowConnections.outsideReadout(phiIndex)) return SiCellId(); // Invalid ID
+  if (m_rowConnections.outsideReadout(phiIndex)) return {}; // Invalid ID
   int newPhiIndex = m_rowConnections.gangedCell(phiIndex); 
-  if (newPhiIndex == phiIndex) return SiCellId(); // Invalid ID
-  return SiCellId(newPhiIndex, cellId.etaIndex());
+  if (newPhiIndex == phiIndex) return {}; // Invalid ID
+  return {newPhiIndex, cellId.etaIndex()};
 }
 
 

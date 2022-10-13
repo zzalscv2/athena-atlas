@@ -118,8 +118,8 @@ void PixelMultipleConnection1D::debugPrintout()
   std::cout << "m_readoutToDiode: ";
   for (unsigned int i = 0; i < m_readoutToDiode.size(); i++) {
     std::cout << "(" << m_lowerReadout + i << ": ";
-    for (unsigned int j = 0; j < m_readoutToDiode[i].size(); j++) {
-      std::cout << m_readoutToDiode[i][j] << " ";
+    for (int j : m_readoutToDiode[i]) {
+      std::cout << j << " ";
     }
     std::cout << ") ";
   }

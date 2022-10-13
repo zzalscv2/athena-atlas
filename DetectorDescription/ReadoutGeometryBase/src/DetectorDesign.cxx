@@ -53,7 +53,7 @@ DetectorDesign::DetectorDesign(double thickness,
 
 }
 
-DetectorDesign::~DetectorDesign(){}
+DetectorDesign::~DetectorDesign()= default;
 
  
 

@@ -78,7 +78,6 @@ void StripBoxDesign::neighboursOfCell(const SiCellId &cellId,
         neighbours.emplace_back(stripP);
     }
 
-    return;
 }
 
 const Trk::SurfaceBounds &StripBoxDesign::bounds() const {

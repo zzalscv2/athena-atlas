@@ -104,20 +104,20 @@ namespace InDetDD{
       delete p;
     }
     m_trtcoll.clear();
-    for (unsigned int ec=0;ec<2;ec++) {
-      for (unsigned int mod=0;mod<NMODMAX;mod++) {
-        for (unsigned int phi=0; phi<NPHIMAX;phi++) {
-          for (unsigned int sLay=0;sLay<NSTRAWLAYMAXBR;sLay++) {
-            m_baArray[ec][mod][phi][sLay] = nullptr;
+    for (auto & ec : m_baArray) {
+      for (auto & mod : ec) {
+        for (auto & phi : mod) {
+          for (auto & sLay : phi) {
+            sLay = nullptr;
           }
         }
       }
     }
-    for (unsigned int ec=0;ec<2;ec++) {
-      for (unsigned int whe=0;whe<NWHEELMAX;whe++) {
-        for (unsigned int sLay=0;sLay<NSTRAWLAYMAXEC;sLay++) {
-          for(unsigned int phi=0;phi<NPHIMAX;phi++) {
-            m_ecArray[ec][whe][sLay][phi] = nullptr;
+    for (auto & ec : m_ecArray) {
+      for (auto & whe : ec) {
+        for (auto & sLay : whe) {
+          for(auto & phi : sLay) {
+            phi = nullptr;
           }
         }
       }

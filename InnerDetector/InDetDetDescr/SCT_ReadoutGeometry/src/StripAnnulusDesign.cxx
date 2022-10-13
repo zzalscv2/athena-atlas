@@ -60,7 +60,6 @@ void StripAnnulusDesign::neighboursOfCell(const SiCellId &cellId, std::vector<Si
         neighbours.emplace_back(stripP);
     }
 
-    return;
 }
 
 const Trk::SurfaceBounds &StripAnnulusDesign::bounds() const {
@@ -191,7 +190,7 @@ double StripAnnulusDesign::etaPitch() const { // DEPRECATED
     return length();
 }
 
-const Amg::Transform3D StripAnnulusDesign::SiHitToGeoModel() const {
+const Amg::Transform3D StripAnnulusDesign::SiHitToGeoModel() {
   return Amg::getRotateY3D(90.*CLHEP::deg);
 }
 

@@ -91,7 +91,7 @@ namespace ITk
       Gaudi::setInstance( static_cast<IAppMgrUI*>(nullptr) );
     }
 
-    void ReleaseSmartIFComponent(IInterface* comp) {
+    static void ReleaseSmartIFComponent(IInterface* comp) {
       size_t finalRefCount = 1; // keep one reference for the SmartIF destructor
       for (size_t refCount = comp->refCount(); refCount>finalRefCount; refCount--) {
         comp->release();
