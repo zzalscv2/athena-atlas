@@ -23,7 +23,7 @@ StatusCode TRTStrawStatusCondAlg::initialize()
   ATH_CHECK (m_strawStatusPermWriteKey.initialize());
   ATH_CHECK (m_strawStatusHTWriteKey.initialize());
   ATH_CHECK (m_strawStatusSummaryWriteKey.initialize());
-  ATH_CHECK (m_strawStatusHTSummaryWriteKey.initialize());
+  ATH_CHECK (m_strawStatusHTSummaryWriteKey.initialize(!m_strawStatusHTSummaryWriteKey.empty()));
 
   // TRT ID helper
   ATH_CHECK(detStore()->retrieve(m_trtId, "TRT_ID"));
@@ -39,24 +39,35 @@ StatusCode TRTStrawStatusCondAlg::execute(const EventContext &ctx) const
 
   SG::WriteCondHandle<TRTCond::StrawStatusData> strawStatusHandle{m_strawStatusWriteKey, ctx};
   SG::WriteCondHandle<TRTCond::StrawStatusData> strawStatusPermHandle{m_strawStatusPermWriteKey, ctx};
-  SG::WriteCondHandle<TRTCond::StrawStatusData> strawStatusHTHandle{m_strawStatusHTWriteKey, ctx};
   SG::WriteCondHandle<TRTCond::StrawStatusSummary> strawStatusSummaryHandle{m_strawStatusSummaryWriteKey, ctx};
-  SG::WriteCondHandle<TRTCond::StrawStatusSummary> strawStatusHTSummaryHandle{m_strawStatusHTSummaryWriteKey, ctx};
+
+  SG::WriteCondHandle<TRTCond::StrawStatusData> strawStatusHTHandle{m_strawStatusHTWriteKey, ctx};
+  std::unique_ptr<SG::WriteCondHandle<TRTCond::StrawStatusSummary>> strawStatusHTSummaryHandle{};
+  if (!m_strawStatusHTSummaryWriteKey.empty()) {
+    strawStatusHTSummaryHandle = std::make_unique<SG::WriteCondHandle<TRTCond::StrawStatusSummary>>(m_strawStatusHTSummaryWriteKey, ctx);
+  }
 
   bool alreadyPresent = strawStatusHandle.isValid();
   alreadyPresent &= strawStatusPermHandle.isValid();
-  alreadyPresent &= strawStatusHTHandle.isValid();
   alreadyPresent &= strawStatusSummaryHandle.isValid();
-  alreadyPresent &= strawStatusHTSummaryHandle.isValid();
+  alreadyPresent &= strawStatusHTHandle.isValid();
+  if (strawStatusHTSummaryHandle != nullptr) {
+    alreadyPresent &= strawStatusHTSummaryHandle->isValid();
+  }
   if(alreadyPresent){
     ATH_MSG_DEBUG("All objects are still valid");
     return StatusCode::SUCCESS;
   }
-  auto outputStrawStatusHTSummary = std::make_unique<TRTCond::StrawStatusSummary>(m_trtId->straw_hash_max());
-  auto outputStrawStatusSummary = std::make_unique<TRTCond::StrawStatusSummary>(m_trtId->straw_hash_max());
-  auto outputStrawStatusHT = std::make_unique<TRTCond::StrawStatusData>(m_trtId->straw_hash_max());
-  auto outputStrawStatusPerm = std::make_unique<TRTCond::StrawStatusData>(m_trtId->straw_hash_max());
   auto outputStrawStatus = std::make_unique<TRTCond::StrawStatusData>(m_trtId->straw_hash_max());
+  auto outputStrawStatusPerm = std::make_unique<TRTCond::StrawStatusData>(m_trtId->straw_hash_max());
+  auto outputStrawStatusSummary = std::make_unique<TRTCond::StrawStatusSummary>(m_trtId->straw_hash_max());
+
+  auto outputStrawStatusHT = std::make_unique<TRTCond::StrawStatusData>(m_trtId->straw_hash_max());
+  std::unique_ptr<TRTCond::StrawStatusSummary> outputStrawStatusHTSummary{};
+  if (!m_strawStatusHTSummaryWriteKey.empty()) {
+    outputStrawStatusHTSummary = std::make_unique<TRTCond::StrawStatusSummary>(m_trtId->straw_hash_max());
+  }
+
   SG::ReadCondHandle<StrawStatusContainer> strawReadHandle{m_strawReadKey, ctx};
   if (!strawReadHandle.isValid()) {
     ATH_MSG_FATAL("No access to conditions " << strawReadHandle.key());
@@ -156,7 +167,9 @@ StatusCode TRTStrawStatusCondAlg::execute(const EventContext &ctx) const
       else statusHTBool = static_cast<bool>((statusHT & statusBitmask) >> 8);
 
       outputStrawStatusSummary->setStatus(hashId, statusBool || statusPermBool);
-      outputStrawStatusHTSummary->setStatus(hashId, statusHTBool);
+      if (outputStrawStatusHTSummary != nullptr) {
+        outputStrawStatusHTSummary->setStatus(hashId, statusHTBool);
+      }
     }
   }
 
@@ -190,7 +203,7 @@ StatusCode TRTStrawStatusCondAlg::execute(const EventContext &ctx) const
     return StatusCode::FAILURE;
   }
 
-  if (strawStatusHTSummaryHandle.record(rangeHT, std::move(outputStrawStatusHTSummary)).isFailure()) {
+  if (strawStatusHTSummaryHandle != nullptr && strawStatusHTSummaryHandle->record(rangeHT, std::move(outputStrawStatusHTSummary)).isFailure()) {
     ATH_MSG_ERROR("Could not record AliveStraws " << m_strawStatusHTSummaryWriteKey.key() 
                   << " with EventRange " << rangeHT
                   << " into Conditions Store");

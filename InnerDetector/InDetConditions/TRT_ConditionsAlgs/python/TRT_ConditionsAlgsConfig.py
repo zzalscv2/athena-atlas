@@ -29,6 +29,8 @@ def TRTStrawStatusCondAlgCfg(flags, name="TRTStrawStatusCondAlg", **kwargs):
     acc = ComponentAccumulator()
     acc.merge(addFoldersSplitOnline(flags, "TRT", "/TRT/Onl/Cond/Status", "/TRT/Cond/Status", className="TRTCond::StrawStatusMultChanContainer"))
     acc.merge(addFoldersSplitOnline(flags, "TRT", "/TRT/Onl/Cond/StatusPermanent", "/TRT/Cond/StatusPermanent", className="TRTCond::StrawStatusMultChanContainer"))
+    # Argon straw list
+    acc.merge(addFoldersSplitOnline(flags, "TRT", "/TRT/Onl/Cond/StatusHT", "/TRT/Cond/StatusHT", className="TRTCond::StrawStatusMultChanContainer"))
     acc.addCondAlgo(CompFactory.TRTStrawStatusCondAlg(name, **kwargs))
     return acc
 
