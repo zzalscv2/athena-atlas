@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2017 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef __TRTALIGNHISTOCHISQPROJECTION_HH__
@@ -26,6 +26,9 @@ namespace TRTAlign
     HistoChisqProjection(const char* name, int dim, int nbins, float xmin, float xmax) ;
     ~HistoChisqProjection() ;
     
+    HistoChisqProjection(const HistoChisqProjection&) = delete;
+    HistoChisqProjection& operator=(const HistoChisqProjection&) = delete;
+
     // use this if the weight matrix for first and second derivative are equal
     void add( const CLHEP::HepMatrix& deriv, const CLHEP::HepSymMatrix& weight,  
     	      const CLHEP::HepSymMatrix& variance, const CLHEP::HepVector& residual ) {
