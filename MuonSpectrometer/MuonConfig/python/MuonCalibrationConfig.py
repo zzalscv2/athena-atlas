@@ -148,10 +148,10 @@ def NSWCalibToolCfg(flags, name="NSWCalibTool", **kwargs):
     result.merge(NswCalibDbAlgCfg(flags))
     kwargs.setdefault("isData", not flags.Input.isMC)
     if flags.Input.isMC: ## peaking times for MC
-        kwargs.setdefault("mmPeakTime",200.)
+        kwargs.setdefault("mmPeakTime",200)
         kwargs.setdefault("sTgcPeakTime",0)
     else: ## peaking times for data
-        kwargs.setdefault("mmPeakTime",200.)
+        kwargs.setdefault("mmPeakTime",200)
         kwargs.setdefault("sTgcPeakTime",0)
     the_tool = CompFactory.Muon.NSWCalibTool(name,**kwargs)
     result.setPrivateTools(the_tool)

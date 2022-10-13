@@ -210,7 +210,7 @@ def CscBytestreamDecodeCfg(flags, name="CscRawDataProvider"):
 
     return acc
 
-def sTgcBytestreamDecodeCfg(flags, name="sTgcRawDataProvider"):
+def sTgcBytestreamDecodeCfg(flags, name="MuonsTgcRawDataProvider"):
 
     acc = ComponentAccumulator()
 
@@ -230,7 +230,7 @@ def sTgcBytestreamDecodeCfg(flags, name="sTgcRawDataProvider"):
     # Setup the RAW data provider tool
     keyName = flags.Overlay.BkgPrefix + "sTGCRDO" if flags.Common.isOverlay else "sTGCRDO"
     Muon__STGC_RawDataProviderToolMT=CompFactory.Muon.STGC_RawDataProviderToolMT
-    MuonsTgcRawDataProviderTool = Muon__STGC_RawDataProviderToolMT(name    = "STGC_RawDataProviderToolMT",
+    MuonsTgcRawDataProviderTool = Muon__STGC_RawDataProviderToolMT(name    = "sTgcRawDataProviderTool",
                                                                    Decoder = STGCRodDecoder,
                                                                    RdoLocation = keyName,
                                                                    SkipDecoding=flags.Muon.MuonTrigger and flags.Muon.runCommissioningChain )

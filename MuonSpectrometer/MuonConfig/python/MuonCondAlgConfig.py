@@ -169,7 +169,6 @@ def TgcDigitCondAlgCfg(flags):
 
 def NswCalibDbAlgCfg(flags, **kwargs):
     result = ComponentAccumulator()
-
     ## online scenario
     if flags.Common.isOnline:
         kwargs['isData'] = True

@@ -127,15 +127,13 @@ namespace xAOD {
   int jFexTauRoI_v1::unpackGlobalEta() const{
       
     int globalEta = 0;
-    if(jFexNumber()==0){
-        globalEta = -25+tobLocalEta(); //-25 is the minimum eta for the most granular part of module 0 
+    if(jFexNumber()<3){
+        globalEta= 8*(jFexNumber()-2) - (tobLocalEta()+1);
     }
-    else if(jFexNumber()==5){
-        globalEta = 16+tobLocalEta(); //16 is the minimum eta for the most granular part of module 5
+    else if(jFexNumber()<6){
+        globalEta= 8*(jFexNumber()-3) + (tobLocalEta());
     }
-    else{
-        globalEta = tobLocalEta()+(8*(jFexNumber() - 3)) ;  // for module 1 to 4 
-    }
+
     return globalEta;
   }
 

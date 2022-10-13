@@ -876,7 +876,7 @@ TriggerHLTListRun3 = [
     ('xAOD::VertexAuxContainer#HLT_TrigDV_VSITrkPairAux.'+VSIVars, 'BS ESD AODFULL', 'UTT'),
     # - Hypo
     ('xAOD::TrigCompositeContainer#HLT_TrigDV_VtxCount',           'BS ESD AODFULL', 'UTT'),
-    ('xAOD::TrigCompositeAuxContainer#HLT_TrigDV_VtxCountAux.vsiHypo_nVtx.vsiHypo_pTcut.vsiHypo_rCut.vsiHypo_nTrkCut.vsiHypo_counts',  'BS ESD AODFULL', 'ID'),
+    ('xAOD::TrigCompositeAuxContainer#HLT_TrigDV_VtxCountAux.vsiHypo_nVtx.vsiHypo_pTcut.vsiHypo_rCut.vsiHypo_nTrkCut.vsiHypo_counts',  'BS ESD AODFULL', 'UTT'),
 
     #Fullscan TrigVSI
     ('xAOD::VertexContainer#HLT_TrigVSIVertex',                 'BS ESD AODFULL', 'UTT'),

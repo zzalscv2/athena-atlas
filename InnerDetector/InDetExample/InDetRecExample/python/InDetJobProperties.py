@@ -1179,6 +1179,13 @@ class doTIDE_AmbiTrackMonitoring(InDetFlagsJobProperty):
     statusOn     = True
     allowedTypes = ['bool']
     StoredValue  = False
+
+class disableBeamSpotDecoration(InDetFlagsJobProperty):
+    """Allow EventInfoBeamSpotDecoratorAlg to be skipped (e.g. for calibration data where this is not available)"""
+    statusOn     = True
+    allowedTypes = ['bool']
+    StoredValue  = False
+
 ## Decide whether to wrap the new configuration in the old.
 class useNewConfig(JobProperty):
     statusOn=True
@@ -2721,6 +2728,7 @@ _list_InDetJobProperties = [Enabled,
                             doTRTPIDNN,
                             doTTVADecos,
                             doTIDE_AmbiTrackMonitoring,
+                            disableBeamSpotDecoration,
                             useNewConfig
                            ]
 for j in _list_InDetJobProperties: 

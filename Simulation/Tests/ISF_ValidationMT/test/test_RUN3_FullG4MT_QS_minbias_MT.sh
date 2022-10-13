@@ -13,11 +13,11 @@
 export ATHENA_CORE_NUMBER=8
 
 # RUN3 setup
-# ATLAS-R3S-2021-03-00-00 and OFLCOND-MC21-SDR-RUN3-05
+# ATLAS-R3S-2021-03-00-00 and OFLCOND-MC21-SDR-RUN3-07
 Sim_tf.py \
     --CA \
     --multithreaded \
-    --conditionsTag 'default:OFLCOND-MC21-SDR-RUN3-05' \
+    --conditionsTag 'default:OFLCOND-MC21-SDR-RUN3-07' \
     --simulator 'FullG4MT_QS' \
     --postExec 'all:from IOVDbSvcConfig import addOverride;cfg.merge(addOverride(flags, "/Indet/Beampos", "IndetBeampos-RunDep-MC21-BestKnowledge-002"))' \
     --postInclude 'PyJobTransforms.UseFrontier' \
@@ -37,7 +37,7 @@ status=$rc
 rc2=-9999
 Sim_tf.py \
     --multithreaded \
-    --conditionsTag 'default:OFLCOND-MC21-SDR-RUN3-05' \
+    --conditionsTag 'default:OFLCOND-MC21-SDR-RUN3-07' \
     --simulator 'FullG4MT_QS' \
     --postExec 'all:conddb.addOverride("/Indet/Beampos", "IndetBeampos-RunDep-MC21-BestKnowledge-002");' \
     --postInclude 'default:PyJobTransforms/UseFrontier.py' \
@@ -51,7 +51,7 @@ Sim_tf.py \
 
 Sim_tf.py \
     --multithreaded \
-    --conditionsTag 'default:OFLCOND-MC21-SDR-RUN3-05' \
+    --conditionsTag 'default:OFLCOND-MC21-SDR-RUN3-07' \
     --simulator 'FullG4MT_QS' \
     --postExec 'all:conddb.addOverride("/Indet/Beampos", "IndetBeampos-RunDep-MC21-BestKnowledge-002");' \
     --postInclude 'default:PyJobTransforms/UseFrontier.py' \
@@ -73,12 +73,12 @@ fi
 rc3=-9999
 if [ $status -eq 0 ]
 then
-    # Compare the outputs
+    # Compare the outputs - ignoring truth jet variables which are set to NaN.
     acmd.py diff-root test.CG.HITS.pool.root test.CA.HITS.pool.root \
         --error-mode resilient \
         --mode semi-detailed \
         --order-trees \
-        --ignore-leaves RecoTimingObj_p1_EVNTtoHITS_timings index_ref
+        --ignore-leaves index_ref xAOD::AuxContainerBase_AntiKt4TruthJetsAuxDyn.HadronConeExclTruthLabelLxy xAOD::AuxContainerBase_AntiKt4TruthJetsAuxDyn.HadronConeExclTruthLabelPt xAOD::AuxContainerBase_AntiKt6TruthJetsAuxDyn.HadronConeExclTruthLabelLxy xAOD::AuxContainerBase_AntiKt6TruthJetsAuxDyn.HadronConeExclTruthLabelPt
     rc3=$?
     status=$rc3
 fi
@@ -89,7 +89,7 @@ if [ $rc2 -eq 0 ]
 then
     ArtPackage=$1
     ArtJobName=$2
-    art.py compare grid --entries 10 ${ArtPackage} ${ArtJobName} --diff-root --mode=semi-detailed --file=test.CG.HITS.pool.root
+    art.py compare grid --entries 10 ${ArtPackage} ${ArtJobName} --order-trees --diff-root --mode=semi-detailed --file=test.CG.HITS.pool.root
     rc4=$?
     status=$rc4
 fi
@@ -144,12 +144,12 @@ echo  "art-result: $rc6 filtOLD"
 rc7=-9999
 if [ $status -eq 0 ]
 then
-    # Compare the outputs
+    # Compare the outputs - ignoring truth jet variables which are set to NaN.
     acmd.py diff-root filt.CG.HITS.pool.root filt.CA.HITS.pool.root \
         --error-mode resilient \
         --mode semi-detailed \
         --order-trees \
-        --ignore-leaves RecoTimingObj_p1_EVNTtoHITS_timings index_ref
+        --ignore-leaves index_ref xAOD::AuxContainerBase_AntiKt4TruthJetsAuxDyn.HadronConeExclTruthLabelLxy xAOD::AuxContainerBase_AntiKt4TruthJetsAuxDyn.HadronConeExclTruthLabelPt xAOD::AuxContainerBase_AntiKt6TruthJetsAuxDyn.HadronConeExclTruthLabelLxy xAOD::AuxContainerBase_AntiKt6TruthJetsAuxDyn.HadronConeExclTruthLabelPt
     rc7=$?
     status=$rc7
 fi
@@ -160,7 +160,7 @@ if [ $rc6 -eq 0 ]
 then
     ArtPackage=$1
     ArtJobName=$2
-    art.py compare grid --entries 10 ${ArtPackage} ${ArtJobName} --diff-root --mode=semi-detailed --file=filt.CG.HITS.pool.root
+    art.py compare grid --entries 10 ${ArtPackage} ${ArtJobName}  --order-trees --diff-root --mode=semi-detailed --file=filt.CG.HITS.pool.root
     rc8=$?
     status=$rc8
 fi
