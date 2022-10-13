@@ -118,7 +118,7 @@ Trk::TrackingVolumeManipulator::confineVolume(TrackingVolume& tvol,
     if (bound->outsideVolume() == nullptr) {
       bound->setOutsideVolume(outsideVol);
     }
-    if (bound.get()->insideVolume() == nullptr) {
+    if (bound->insideVolume() == nullptr) {
       bound->setInsideVolume(outsideVol);
     }
   }
