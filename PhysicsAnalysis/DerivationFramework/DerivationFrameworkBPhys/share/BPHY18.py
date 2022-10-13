@@ -504,7 +504,6 @@ StaticContent += ["xAOD::VertexContainer#%s"        %                 BPHY18BeeK
 StaticContent += ["xAOD::VertexAuxContainer#%sAux.-vxTrackAtVertex" % BPHY18BeeKstSelectAndWrite.OutputVtxContainerName]
 
 StaticContent += ["xAOD::VertexContainer#%s"        % BPHY18_diMeson_revertex.OutputVtxContainerName]
-StaticContent += ["xAOD::VertexAuxContainer#%sAux." % BPHY18_diMeson_revertex.OutputVtxContainerName]
 StaticContent += ["xAOD::VertexAuxContainer#%sAux.-vxTrackAtVertex" % BPHY18_diMeson_revertex.OutputVtxContainerName]
 
 AllVariables += [ "GSFTrackParticles"] 
