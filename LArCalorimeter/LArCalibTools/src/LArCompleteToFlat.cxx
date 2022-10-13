@@ -705,7 +705,7 @@ StatusCode LArCompleteToFlat::stop() {
 
 
   if (m_HVScaleCorrInput.size()) {
-    const LArHVScaleCorrComplete* HVScaleCorrComplete;
+    const LArHVScaleCorrComplete* HVScaleCorrComplete = nullptr;
     sc=detStore()->retrieve(HVScaleCorrComplete,m_HVScaleCorrInput);
     if (sc.isFailure()) {
       if(m_forceStop) { 
@@ -720,7 +720,7 @@ StatusCode LArCompleteToFlat::stop() {
   }//end if have m_HVScaleCorrInput
 
   if (m_PedestalInput.size()) {
-    const LArPedestalComplete* pedComplete;
+    const LArPedestalComplete* pedComplete = nullptr;
     sc=detStore()->retrieve(pedComplete,m_PedestalInput);
     if (sc.isFailure()) {
       if(m_forceStop) { 
@@ -753,7 +753,7 @@ StatusCode LArCompleteToFlat::stop() {
 
   //OFC:
   if (m_OFCInput.size()) {
-    const LArOFCComplete* ofcComplete;
+    const LArOFCComplete* ofcComplete = nullptr;
     sc=detStore()->retrieve(ofcComplete,m_OFCInput);
     if (sc.isFailure()) {
       if(m_forceStop) { 
