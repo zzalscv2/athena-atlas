@@ -142,6 +142,17 @@ jetList = [AntiKt4EMTopo_deriv,
 
 addDAODJets(jetList,DerivationFrameworkJob)
 
+#We also need to build links between the newly created jet constituents (GlobalFE)
+#and electrons,photons,muons and taus
+from AthenaConfiguration.AllConfigFlags import ConfigFlags
+from AthenaConfiguration.ComponentAccumulator import CAtoGlobalWrapper
+from eflowRec.PFCfg import PFGlobalFlowElementLinkingCfg
+CAtoGlobalWrapper(PFGlobalFlowElementLinkingCfg,ConfigFlags)
+#AOD do not have calorimeter cells for CaloCalTopoCluster, so we have to use 
+#this special setting for the muon-FE links.
+DerivationFrameworkJob.PFMuonGlobalFlowElementAssoc.m_UseMuonTopoClusters=True
+
+
 # Event cleaning flags
 addEventCleanFlags(sequence=DerivationFrameworkJob)
 
