@@ -287,7 +287,7 @@ StatusCode MonitorPhotonAlgorithm::fillHistograms( const EventContext& ctx ) con
       bool isUnconverted = (myconvtype==xAOD::EgammaParameters::ConversionType::unconverted) ;
 
       if (isUnconverted) {
-	npunconv++;
+	mynpunconv++;
 	etconv = -1.;
 	etaconv = -6.;
 	phiconv = -6.;
@@ -296,7 +296,7 @@ StatusCode MonitorPhotonAlgorithm::fillHistograms( const EventContext& ctx ) con
 	phiunconv = myphi;
       }
       else {
-	npconv++;
+	mynpconv++;
 	etunconv = -1.;
 	etaunconv = -6.;
 	phiunconv = -6.;
