@@ -24,6 +24,15 @@ def _isOldConfigurable(c):
     return isinstance(c, Configurable)
 
 
+def _conf2HelperToBuiltin(value):
+    """Recursively convert GaudiConfig2 ListHelper to list and DictHelper to dict"""
+    if isinstance(value, GaudiConfig2.semantics._ListHelper):
+        return [_conf2HelperToBuiltin(item) for item in value.data]
+    if isinstance(value, GaudiConfig2.semantics._DictHelper):
+        return dict([(k,_conf2HelperToBuiltin(v)) for k,v in value.data.items()])
+    return value
+
+
 def _setProperties( dest, src, indent="" ):
     """Set properties from src (GaudiConfig2) on dest configurable"""
 
@@ -60,7 +69,7 @@ def _setProperties( dest, src, indent="" ):
 
         else: # plain data
             if isinstance(pvalue,(GaudiConfig2.semantics._ListHelper,GaudiConfig2.semantics._DictHelper)):
-                pvalue = pvalue.data
+                pvalue = _conf2HelperToBuiltin(pvalue)
             try: # sometimes values are not printable
                 _log.debug( "%sSetting property %s to value %s", indent, pname, pvalue )
             except Exception:
