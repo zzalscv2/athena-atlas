@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "MergeCalibHitsTool.h"
@@ -142,13 +142,11 @@ StatusCode MergeCalibHitsTool::processAllSubEvents(const EventContext& /*ctx*/) 
     CaloCalibrationHitContainer* newContainer = new CaloCalibrationHitContainer(m_CalibrationHitContainer[iHitContainer]);
 
     // loop over this container, perform a deep brute-force copy
-    CaloCalibrationHitContainer::const_iterator calibhititer;
     int nhit=0;
     ATH_MSG_DEBUG ( " Start loop over calibration hits of signal event " );
-    for(calibhititer=hitCont->begin();
-        calibhititer != hitCont->end();calibhititer++) {
+    for (const CaloCalibrationHit* hit : *hitCont) {
       nhit++;
-      newContainer->push_back(new CaloCalibrationHit(**calibhititer));
+      newContainer->push_back(new CaloCalibrationHit(*hit));
     }   // end of loop over calibration hits
 
     ATH_MSG_DEBUG ( " Number of hits found in this container " << nhit );

@@ -212,12 +212,12 @@ double MergeTruthJetsTool::processJetContainer(const xAOD::JetContainer* inputJe
         continue;
       }
       if (max_pT<origTruthJet->pt()) max_pT=origTruthJet->pt();
-      if (!outputJetContainer) continue;
       ATH_MSG_VERBOSE( "processJetContainer: Jet with pT = " << origTruthJet->pt() << " GeV passed ptCut of " << ptCut << "GeV." );
     }
     catch (...) {
       ATH_MSG_ERROR ( "Failed to find Truth jet pT for Jet in a BCID at time = " << timeOfBCID );
     }
+    if (!outputJetContainer) continue;
     xAOD::Jet* outputTruthJet = new xAOD::Jet();
     outputJetContainer->push_back(outputTruthJet);
     *outputTruthJet = *origTruthJet; // deep-copy
