@@ -5,86 +5,82 @@
 #include "PixelConditionsData/PixelChargeCalibCondData.h"
 #include <cfloat>
 
-#include <cfloat>
 
 PixelChargeCalibCondData::PixelChargeCalibCondData()
 {
-  const std::array<InDetDD::PixelDiodeType, 4> types
-    = {InDetDD::PixelDiodeType::NORMAL, InDetDD::PixelDiodeType::LONG, InDetDD::PixelDiodeType::GANGED, InDetDD::PixelDiodeType::LARGE};
-
-  for (InDetDD::PixelDiodeType type : types) {
-    m_analogThreshold.emplace(type, chipThreshold());
-    m_analogThresholdSigma.emplace(type, chipThreshold());
-    m_analogThresholdNoise.emplace(type, chipThreshold());
-    m_inTimeThreshold.emplace(type, chipThreshold());
-
-    m_totA.emplace(type, chipCharge());
-    m_totE.emplace(type, chipCharge());
-    m_totC.emplace(type, chipCharge());
-    m_totF.emplace(type, chipCharge());
-    m_totG.emplace(type, chipCharge());
-  }
+   static_assert(static_cast<std::size_t>(InDetDD::PixelDiodeType::NORMAL) < s_NPixelDiods);
+   static_assert(static_cast<std::size_t>(InDetDD::PixelDiodeType::LONG)   < s_NPixelDiods);
+   static_assert(static_cast<std::size_t>(InDetDD::PixelDiodeType::GANGED) < s_NPixelDiods);
+   static_assert(static_cast<std::size_t>(InDetDD::PixelDiodeType::LARGE)  < s_NPixelDiods);
 }
 
-void PixelChargeCalibCondData::setAnalogThreshold(InDetDD::PixelDiodeType type, unsigned int moduleHash, std::vector<int> value)
+PixelChargeCalibCondData::PixelChargeCalibCondData(std::size_t max_module_hash) : m_maxModuleHash(max_module_hash)
 {
-  m_analogThreshold.at(type)[moduleHash] = std::move(value);
+   static_assert(static_cast<std::size_t>(InDetDD::PixelDiodeType::NORMAL) < s_NPixelDiods);
+   static_assert(static_cast<std::size_t>(InDetDD::PixelDiodeType::LONG)   < s_NPixelDiods);
+   static_assert(static_cast<std::size_t>(InDetDD::PixelDiodeType::GANGED) < s_NPixelDiods);
+   static_assert(static_cast<std::size_t>(InDetDD::PixelDiodeType::LARGE)  < s_NPixelDiods);
 }
 
-void PixelChargeCalibCondData::setAnalogThresholdSigma(InDetDD::PixelDiodeType type, unsigned int moduleHash, std::vector<int> value)
+void PixelChargeCalibCondData::setAnalogThreshold(InDetDD::PixelDiodeType type, unsigned int moduleHash, std::vector<int> &&value)
 {
-  m_analogThresholdSigma.at(type)[moduleHash] = std::move(value);
+   setValue(m_maxModuleHash, m_analogThreshold, type, moduleHash, std::move(value));
 }
 
-void PixelChargeCalibCondData::setAnalogThresholdNoise(InDetDD::PixelDiodeType type, unsigned int moduleHash, std::vector<int> value)
+void PixelChargeCalibCondData::setAnalogThresholdSigma(InDetDD::PixelDiodeType type, unsigned int moduleHash, std::vector<int> &&value)
 {
-  m_analogThresholdNoise.at(type)[moduleHash] = std::move(value);
+   setValue(m_maxModuleHash, m_analogThresholdSigma, type, moduleHash, std::move(value));
 }
 
-void PixelChargeCalibCondData::setInTimeThreshold(InDetDD::PixelDiodeType type, unsigned int moduleHash, std::vector<int> value)
+void PixelChargeCalibCondData::setAnalogThresholdNoise(InDetDD::PixelDiodeType type, unsigned int moduleHash, std::vector<int> &&value)
 {
-  m_inTimeThreshold.at(type)[moduleHash] = std::move(value);
+   setValue(m_maxModuleHash, m_analogThresholdNoise, type, moduleHash, std::move(value));
 }
 
-void PixelChargeCalibCondData::setQ2TotA(InDetDD::PixelDiodeType type, unsigned int moduleHash, std::vector<float> value)
+void PixelChargeCalibCondData::setInTimeThreshold(InDetDD::PixelDiodeType type, unsigned int moduleHash, std::vector<int> &&value)
 {
-  m_totA.at(type)[moduleHash] = std::move(value);
+   setValue(m_maxModuleHash, m_inTimeThreshold,type, moduleHash, std::move(value));
 }
 
-void PixelChargeCalibCondData::setQ2TotE(InDetDD::PixelDiodeType type, unsigned int moduleHash, std::vector<float> value)
+void PixelChargeCalibCondData::setQ2TotA(InDetDD::PixelDiodeType type, unsigned int moduleHash, std::vector<float> &&value)
 {
-  m_totE.at(type)[moduleHash] = std::move(value);
+   setValue(m_maxModuleHash, m_totA,type,moduleHash,std::move(value));
 }
 
-void PixelChargeCalibCondData::setQ2TotC(InDetDD::PixelDiodeType type, unsigned int moduleHash, std::vector<float> value)
+void PixelChargeCalibCondData::setQ2TotE(InDetDD::PixelDiodeType type, unsigned int moduleHash, std::vector<float> &&value)
 {
-  m_totC.at(type)[moduleHash] = std::move(value);
+   setValue(m_maxModuleHash, m_totE, type, moduleHash,  std::move(value));
 }
 
-void PixelChargeCalibCondData::setQ2TotF(InDetDD::PixelDiodeType type, unsigned int moduleHash, std::vector<float> value)
+void PixelChargeCalibCondData::setQ2TotC(InDetDD::PixelDiodeType type, unsigned int moduleHash, std::vector<float> &&value)
 {
-  m_totF.at(type)[moduleHash] = std::move(value);
+   setValue(m_maxModuleHash, m_totC,type,moduleHash,  std::move(value));
 }
 
-void PixelChargeCalibCondData::setQ2TotG(InDetDD::PixelDiodeType type, unsigned int moduleHash, std::vector<float> value)
+void PixelChargeCalibCondData::setQ2TotF(InDetDD::PixelDiodeType type, unsigned int moduleHash, std::vector<float> &&value)
 {
-  m_totG.at(type)[moduleHash] = std::move(value);
+   setValue(m_maxModuleHash, m_totF, type, moduleHash,  std::move(value));
 }
 
-void PixelChargeCalibCondData::setTotRes1(unsigned int moduleHash, std::vector<float> value) {
-  m_totRes1[moduleHash] = std::move(value);
+void PixelChargeCalibCondData::setQ2TotG(InDetDD::PixelDiodeType type, unsigned int moduleHash, std::vector<float> &&value)
+{
+   setValue( m_maxModuleHash, m_totG, type, moduleHash, std::move(value) );
 }
 
-void PixelChargeCalibCondData::setTotRes2(unsigned int moduleHash, std::vector<float> value) {
-  m_totRes2[moduleHash] = std::move(value);
+void PixelChargeCalibCondData::setTotRes1(unsigned int moduleHash, std::vector<float> &&value) {
+   setValue(m_maxModuleHash, m_totRes1, moduleHash,std::move(value));
+}
+
+void PixelChargeCalibCondData::setTotRes2(unsigned int moduleHash, std::vector<float> &&value) {
+   setValue(m_maxModuleHash, m_totRes2,moduleHash, std::move(value));
 }
 
 int PixelChargeCalibCondData::getAnalogThreshold(InDetDD::PixelDiodeType type, unsigned int moduleHash, unsigned int FE) const
 {
-  const chipThreshold &typeMap = m_analogThreshold.at(type);
-  auto it = typeMap.find(moduleHash);
-  if (it != typeMap.end() && FE < it->second.size()) {
-    return it->second[FE];
+  const chipThreshold &typeMap = m_analogThreshold.at(diodIndex(type));
+  const auto &fe_vec = typeMap.at(moduleHash);
+  if (FE < fe_vec.size()) {
+    return fe_vec[FE];
   }
 
   std::stringstream error;
@@ -94,10 +90,10 @@ int PixelChargeCalibCondData::getAnalogThreshold(InDetDD::PixelDiodeType type, u
 
 int PixelChargeCalibCondData::getAnalogThresholdSigma(InDetDD::PixelDiodeType type, unsigned int moduleHash, unsigned int FE) const
 {
-  const chipThreshold &typeMap = m_analogThresholdSigma.at(type);
-  auto it = typeMap.find(moduleHash);
-  if (it != typeMap.end() && FE < it->second.size()) {
-    return it->second[FE];
+  const chipThreshold &typeMap = m_analogThresholdSigma.at(diodIndex(type));
+  const auto &fe_vec = typeMap.at(moduleHash);
+  if (FE < fe_vec.size()) {
+     return fe_vec.at(FE);
   }
 
   std::stringstream error;
@@ -107,10 +103,10 @@ int PixelChargeCalibCondData::getAnalogThresholdSigma(InDetDD::PixelDiodeType ty
 
 int PixelChargeCalibCondData::getAnalogThresholdNoise(InDetDD::PixelDiodeType type, unsigned int moduleHash, unsigned int FE) const
 {
-  const chipThreshold &typeMap = m_analogThresholdNoise.at(type);
-  auto it = typeMap.find(moduleHash);
-  if (it != typeMap.end() && FE < it->second.size()) {
-    return it->second[FE];
+  const chipThreshold &typeMap = m_analogThresholdNoise.at(diodIndex(type));
+  const auto &fe_vec = typeMap.at(moduleHash);
+  if (FE < fe_vec.size()) {
+    return fe_vec[FE];
   }
 
   std::stringstream error;
@@ -120,10 +116,10 @@ int PixelChargeCalibCondData::getAnalogThresholdNoise(InDetDD::PixelDiodeType ty
 
 int PixelChargeCalibCondData::getInTimeThreshold(InDetDD::PixelDiodeType type, unsigned int moduleHash, unsigned int FE) const
 {
-  const chipThreshold &typeMap = m_inTimeThreshold.at(type);
-  auto it = typeMap.find(moduleHash);
-  if (it != typeMap.end() && FE < it->second.size()) {
-    return it->second[FE];
+  const chipThreshold &typeMap = m_inTimeThreshold.at(diodIndex(type));
+  const auto &fe_vec = typeMap.at(moduleHash);
+  if (FE < fe_vec.size()) {
+    return fe_vec[FE];
   }
 
   std::stringstream error;
@@ -133,10 +129,10 @@ int PixelChargeCalibCondData::getInTimeThreshold(InDetDD::PixelDiodeType type, u
 
 float PixelChargeCalibCondData::getQ2TotA(InDetDD::PixelDiodeType type, unsigned int moduleHash, unsigned int FE) const
 {
-  const chipCharge &typeMap = m_totA.at(type);
-  auto it = typeMap.find(moduleHash);
-  if (it != typeMap.end() && FE < it->second.size()) {
-    return it->second[FE];
+  const chipCharge &typeMap = m_totA.at(diodIndex(type));
+  const auto &fe_vec = typeMap.at(moduleHash);
+  if (FE < fe_vec.size()) {
+    return fe_vec[FE];
   }
 
   std::stringstream error;
@@ -146,10 +142,10 @@ float PixelChargeCalibCondData::getQ2TotA(InDetDD::PixelDiodeType type, unsigned
 
 float PixelChargeCalibCondData::getQ2TotE(InDetDD::PixelDiodeType type, unsigned int moduleHash, unsigned int FE) const
 {
-  const chipCharge &typeMap = m_totE.at(type);
-  auto it = typeMap.find(moduleHash);
-  if (it != typeMap.end() && FE < it->second.size()) {
-    return it->second[FE];
+  const chipCharge &typeMap = m_totE.at(diodIndex(type));
+  const auto &fe_vec = typeMap.at(moduleHash);
+  if (FE < fe_vec.size()) {
+    return fe_vec[FE];
   }
 
   std::stringstream error;
@@ -159,10 +155,10 @@ float PixelChargeCalibCondData::getQ2TotE(InDetDD::PixelDiodeType type, unsigned
 
 float PixelChargeCalibCondData::getQ2TotC(InDetDD::PixelDiodeType type, unsigned int moduleHash, unsigned int FE) const
 {
-  const chipCharge &typeMap = m_totC.at(type);
-  auto it = typeMap.find(moduleHash);
-  if (it != typeMap.end() && FE < it->second.size()) {
-    return it->second[FE];
+  const chipCharge &typeMap = m_totC.at(diodIndex(type));
+  const auto &fe_vec = typeMap.at(moduleHash);
+  if (FE < fe_vec.size()) {
+    return fe_vec[FE];
   }
 
   std::stringstream error;
@@ -172,10 +168,10 @@ float PixelChargeCalibCondData::getQ2TotC(InDetDD::PixelDiodeType type, unsigned
 
 float PixelChargeCalibCondData::getQ2TotF(InDetDD::PixelDiodeType type, unsigned int moduleHash, unsigned int FE) const
 {
-  const chipCharge &typeMap = m_totF.at(type);
-  auto it = typeMap.find(moduleHash);
-  if (it != typeMap.end() && FE < it->second.size()) {
-    return it->second[FE];
+  const chipCharge &typeMap = m_totF.at(diodIndex(type));
+  const auto &fe_vec = typeMap.at(moduleHash);
+  if (FE < fe_vec.size()) {
+    return fe_vec[FE];
   }
 
   std::stringstream error;
@@ -185,10 +181,10 @@ float PixelChargeCalibCondData::getQ2TotF(InDetDD::PixelDiodeType type, unsigned
 
 float PixelChargeCalibCondData::getQ2TotG(InDetDD::PixelDiodeType type, unsigned int moduleHash, unsigned int FE) const
 {
-  const chipCharge &typeMap = m_totG.at(type);
-  auto it = typeMap.find(moduleHash);
-  if (it != typeMap.end() && FE < it->second.size()) {
-    return it->second[FE];
+  const chipCharge &typeMap = m_totG.at(diodIndex(type));
+  const auto &fe_vec = typeMap.at(moduleHash);
+  if (FE < fe_vec.size()) {
+    return fe_vec[FE];
   }
 
   std::stringstream error;
@@ -199,25 +195,28 @@ float PixelChargeCalibCondData::getQ2TotG(InDetDD::PixelDiodeType type, unsigned
 float PixelChargeCalibCondData::getTotRes(unsigned int moduleHash, unsigned int FE, float Q) const
 {
   float res1{};
-  auto it = m_totRes1.find(moduleHash);
-  if (it != m_totRes1.end() && FE < it->second.size()) {
-    res1 = it->second[FE];
+  {
+  const auto &fe_vec = m_totRes1.at(moduleHash);
+  if (FE < fe_vec.size()) {
+    res1 = fe_vec[FE];
   } else {
     std::stringstream error;
     error << "PixelChargeCalibCondData::getTotRes(" << moduleHash << ", " << FE << "): res1 array out of bounds";
     throw std::range_error(error.str());
   }
+  }
 
   float res2{};
-  it = m_totRes2.find(moduleHash);
-  if (it != m_totRes2.end() && FE < it->second.size()) {
-    res2 = it->second.at(FE);
+  {
+  const auto &fe_vec = m_totRes2.at(moduleHash);
+  if (FE < fe_vec.size()) {
+    res2 = fe_vec[FE];
   } else {
     std::stringstream error;
     error << "PixelChargeCalibCondData::getTotRes(" << moduleHash << ", " << FE << "): res2 array out of bounds";
     throw std::range_error(error.str());
   }
-
+  }
   return res1 + res2 * Q;
 }
 

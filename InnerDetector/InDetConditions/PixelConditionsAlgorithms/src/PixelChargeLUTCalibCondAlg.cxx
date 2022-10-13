@@ -62,7 +62,7 @@ StatusCode PixelChargeLUTCalibCondAlg::execute(const EventContext& ctx) const {
     = {InDetDD::PixelDiodeType::NORMAL, InDetDD::PixelDiodeType::LONG, InDetDD::PixelDiodeType::GANGED, InDetDD::PixelDiodeType::LARGE};
 
   // Construct the output Cond Object and fill it in
-  std::unique_ptr<PixelChargeCalibCondData> writeCdo(std::make_unique<PixelChargeCalibCondData>());
+  std::unique_ptr<PixelChargeCalibCondData> writeCdo(std::make_unique<PixelChargeCalibCondData>(m_pixelID->wafer_hash_max()));
 
   const EventIDBase start{EventIDBase::UNDEFNUM, EventIDBase::UNDEFEVT, 0,                       0,                       EventIDBase::UNDEFNUM, EventIDBase::UNDEFNUM};
   const EventIDBase stop {EventIDBase::UNDEFNUM, EventIDBase::UNDEFEVT, EventIDBase::UNDEFNUM-1, EventIDBase::UNDEFNUM-1, EventIDBase::UNDEFNUM, EventIDBase::UNDEFNUM};
@@ -325,12 +325,12 @@ StatusCode PixelChargeLUTCalibCondAlg::execute(const EventContext& ctx) const {
           writeCdo -> setAnalogThresholdNoise(InDetDD::PixelDiodeType::NORMAL, moduleHash, std::move(analogThresholdNoise));
           writeCdo -> setInTimeThreshold(InDetDD::PixelDiodeType::NORMAL, moduleHash, std::move(inTimeThreshold));
 
-          writeCdo -> setQ2TotA(InDetDD::PixelDiodeType::NORMAL, moduleHash, totA); // can not move as shared
-          writeCdo -> setQ2TotE(InDetDD::PixelDiodeType::NORMAL, moduleHash, totE); // can not move as shared
-          writeCdo -> setQ2TotC(InDetDD::PixelDiodeType::NORMAL, moduleHash, totC); // can not move as shared
+          writeCdo -> setQ2TotA(InDetDD::PixelDiodeType::NORMAL, moduleHash, std::vector<float> (totA)); // can not move as shared
+          writeCdo -> setQ2TotE(InDetDD::PixelDiodeType::NORMAL, moduleHash, std::vector<float> (totE)); // can not move as shared
+          writeCdo -> setQ2TotC(InDetDD::PixelDiodeType::NORMAL, moduleHash, std::vector<float> (totC)); // can not move as shared
 
-          writeCdo -> setQ2TotF(InDetDD::PixelDiodeType::NORMAL, moduleHash, totF); // can not move as shared
-          writeCdo -> setQ2TotG(InDetDD::PixelDiodeType::NORMAL, moduleHash, totG); // can not move as shared
+          writeCdo -> setQ2TotF(InDetDD::PixelDiodeType::NORMAL, moduleHash, std::vector<float> (totF)); // can not move as shared
+          writeCdo -> setQ2TotG(InDetDD::PixelDiodeType::NORMAL, moduleHash, std::vector<float> (totG)); // can not move as shared
 
           writeCdo -> setTotRes1(moduleHash, std::move(totRes1));
           writeCdo -> setTotRes2(moduleHash, std::move(totRes2));
@@ -341,12 +341,12 @@ StatusCode PixelChargeLUTCalibCondAlg::execute(const EventContext& ctx) const {
           writeCdo -> setAnalogThresholdNoise(InDetDD::PixelDiodeType::LONG, moduleHash, std::move(analogThresholdNoiseLong));
           writeCdo -> setInTimeThreshold(InDetDD::PixelDiodeType::LONG, moduleHash, std::move(inTimeThresholdLong));
 
-          writeCdo -> setQ2TotA(InDetDD::PixelDiodeType::LONG, moduleHash, totA); // can not move as shared
-          writeCdo -> setQ2TotE(InDetDD::PixelDiodeType::LONG, moduleHash, totE); // can not move as shared
-          writeCdo -> setQ2TotC(InDetDD::PixelDiodeType::LONG, moduleHash, totC); // can not move as shared
+          writeCdo -> setQ2TotA(InDetDD::PixelDiodeType::LONG, moduleHash, std::move(totA) ); // can move now
+          writeCdo -> setQ2TotE(InDetDD::PixelDiodeType::LONG, moduleHash, std::move(totE) ); // can move now
+          writeCdo -> setQ2TotC(InDetDD::PixelDiodeType::LONG, moduleHash, std::move(totC) ); // can move now
 
-          writeCdo -> setQ2TotF(InDetDD::PixelDiodeType::LONG, moduleHash, totF); // can not move as shared
-          writeCdo -> setQ2TotG(InDetDD::PixelDiodeType::LONG, moduleHash, totG); // can not move as shared
+          writeCdo -> setQ2TotF(InDetDD::PixelDiodeType::LONG, moduleHash, std::move(totF)); // can move now
+          writeCdo -> setQ2TotG(InDetDD::PixelDiodeType::LONG, moduleHash, std::move(totG)); // can move now
 
           // Ganged/large pixel
           if (p_design->getReadoutTechnology() == InDetDD::PixelReadoutTechnology::RD53) {
