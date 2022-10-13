@@ -5,7 +5,7 @@
 
 import eformat
 from xml.dom import minidom
-
+from collections import OrderedDict
 from DQUtils.sugar import RunLumi
 
 from AthenaCommon.Logging import logging
@@ -13,7 +13,7 @@ log = logging.getLogger('ExtractRunDetails.py')
 
 
 # Read the start timestamp of the start lumiblock and the ned of the end lumiblock
-def readRunStartEndFromCool(runNumber, lbStart=-1, lbEnd=-1):
+def readTimestampsOfLb(runNumber, lbStart=-1, lbEnd=-1):
     ''' 
     Returns start and end of the run read from COOL database
     '''
@@ -28,22 +28,22 @@ def readRunStartEndFromCool(runNumber, lbStart=-1, lbEnd=-1):
 
     from PyCool import cool
     objs = f.browseObjects(since, until, cool.ChannelSelection(0) )
-    objs.goToNext()
-    
-    # First result
-    objCurrRef = objs.currentRef()
-    startTime = objCurrRef.payload()["StartTime"]
-    
+
+    lbCounter = lbStart
+    timestampDict = OrderedDict()
     while objs.goToNext():
         objCurrRef = objs.currentRef()
+        timestampDict[lbCounter] = {"start": int(objCurrRef.payload()["StartTime"]/1000), "end": int(objCurrRef.payload()["EndTime"]/1000)}
+        lbCounter+=1
 
-    endTime = objCurrRef.payload()["EndTime"]
+    startTime = timestampDict[lbStart]["start"]
+    endTime = timestampDict[lbEnd]["end"]
 
     from time import ctime
-    log.info("Read start and end of run {0} from COOL: {1} - {2}".format(runNumber, ctime(startTime/1E9).replace(' ','_'), ctime(endTime/1E9).replace(' ','_')))
+    log.info("Read start and end of run {0} from COOL: {1} - {2}".format(runNumber, ctime(startTime/1E6).replace(' ','_'), ctime(endTime/1E6).replace(' ','_')))
     log.debug("Timestamps: {0} - {1} ".format(startTime, endTime))
 
-    return (startTime, endTime)
+    return timestampDict
 
 
 # Read the published deadtime value from IS based on start and stop of the run timestamps
@@ -54,7 +54,7 @@ def readDeadtimeFromIS(startOfRun, endOfRun, server="https://atlasop.cern.ch"):
         deadTimeData =  pbeast.get_data(
             'ATLAS', 'CtpBusyInfo', 'ctpcore_objects/CtpcoreBusyInfoObject/fraction',
             'L1CT.CTP.Instantaneous.BusyFractions/ctpcore_objects\\[9\\]', 
-            True, int(startOfRun/1000), int(endOfRun/1000))[0].data['L1CT.CTP.Instantaneous.BusyFractions/ctpcore_objects[9]']
+            True, startOfRun, endOfRun)[0].data['L1CT.CTP.Instantaneous.BusyFractions/ctpcore_objects[9]']
 
         totalDeadtime = 0
         for entry in deadTimeData:
@@ -71,6 +71,38 @@ def readDeadtimeFromIS(startOfRun, endOfRun, server="https://atlasop.cern.ch"):
     except RuntimeError:
         log.error("Error when reading from Pbeast! Remember to export pbeast server sso: export PBEAST_SERVER_SSO_SETUP_TYPE=AutoUpdateKerberos")
         return -1
+
+
+# Read average physics deadtime for item from TRP per lumiblock
+def getPhysicsDeadtimePerLB(startOfRun, endOfRun, lbRangesDict, itemName="L1_TAU8--enabled", server="https://atlasop.cern.ch"):
+    try:
+        import libpbeastpy
+        pbeast = libpbeastpy.ServerProxy(server)
+        physicsDT = pbeast.get_data('ATLAS', 'L1_Rate', 'DT', 'ISS_TRP.' + itemName, False, startOfRun, endOfRun, 0, True)[0].data['ISS_TRP.' + itemName]
+
+        entryCounter = 1
+        deadtimePerLb = {}
+        for lbRange in lbRangesDict:
+            avgDt = 0
+            counter = 0
+            while physicsDT[entryCounter].ts > lbRangesDict[lbRange]["start"] and physicsDT[entryCounter].ts < lbRangesDict[lbRange]["end"]:
+                if type(physicsDT[entryCounter].value) != float: # None type
+                    entryCounter += 1
+                    continue
+                avgDt += physicsDT[entryCounter].value
+                counter += 1
+                entryCounter += 1
+                
+            deadtimePerLb[lbRange] = avgDt/counter if counter > 0 else 1.
+
+        return deadtimePerLb
+
+    except ImportError:
+        log.error("The pbeast python library was not found! Remember to setup tdaq release")
+        return {}
+    except RuntimeError:
+        log.error("Error when reading from Pbeast! Remember to export pbeast server sso: export PBEAST_SERVER_SSO_SETUP_TYPE=AutoUpdateKerberos")
+        return {}
 
 
 # Create xml node storing luminosity values
@@ -105,7 +137,7 @@ def createFiltersNodes(xmlRoot, chainsDict):
     return filters
 
 # Save lumiblock details for each lumi block lumi, pileup, nevents from COOL database
-def createLumiBlockNodes(xmlRoot, runNumber, lbStart, lbEnd):
+def createLumiBlockNodes(xmlRoot, runNumber, lbStart, lbEnd, deadTimeData):
     from PyCool import cool
     from TrigConfStorage.TriggerCoolUtil import TriggerCoolUtil
     db = TriggerCoolUtil.GetConnection('CONDBR2')
@@ -124,7 +156,7 @@ def createLumiBlockNodes(xmlRoot, runNumber, lbStart, lbEnd):
     while folderIterator.goToNext():
         payload=folderIterator.currentRef().payload()
         nEvents = nEventsPerLB[i] if i in nEventsPerLB else 0
-        lbNode= createLbNode(xmlRoot, i, payload["LBAvInstLumi"], payload["LBAvEvtsPerBX"], nEvents)
+        lbNode = createLbNode(xmlRoot, i, payload["LBAvInstLumi"], payload["LBAvEvtsPerBX"], nEvents, deadTimeData[i])
         lbNodeList.appendChild(lbNode)
         log.debug("Lumiblock {0} lumi {1} pileup {2} events {3}".format(i, payload["LBAvInstLumi"], payload["LBAvEvtsPerBX"], nEvents))
         
@@ -134,11 +166,12 @@ def createLumiBlockNodes(xmlRoot, runNumber, lbStart, lbEnd):
 
 
 # Create a node for a single lumiblock entry
-def createLbNode(xmlRoot, lbId, lumi, mu, nEvents):
+def createLbNode(xmlRoot, lbId, lumi, mu, nEvents, avgDeadtime):
     l = xmlRoot.createElement('lb')
     l.setAttribute('id', str(lbId))
     l.setAttribute('lumi', str(round(lumi, 3)))
     l.setAttribute('mu', str(round(mu, 3)))
+    l.setAttribute('deadtime', str(round(avgDeadtime, 3)))
     l.appendChild(xmlRoot.createTextNode(str(nEvents))) 
 
     return l
@@ -206,7 +239,9 @@ if __name__=='__main__':
 
     # Read the start and end of lumiblocks from COOL to retrieve deadtime from IS
     log.info("Retrieving timestamps of lumiblocks {0} to {1}".format(min(lumiblocks), max(lumiblocks)))
-    (startOfRun, endOfRun) = readRunStartEndFromCool(runNumber, min(lumiblocks), max(lumiblocks))
+
+    lbRanges = readTimestampsOfLb(runNumber, min(lumiblocks), max(lumiblocks))
+    (startOfRun, endOfRun) = (lbRanges[min(lumiblocks)]["start"], lbRanges[max(lumiblocks)]["end"])
     lumiValNode = createDeadtimeNode(root, readDeadtimeFromIS(startOfRun, endOfRun))
     xml.appendChild(lumiValNode)
 
@@ -215,7 +250,8 @@ if __name__=='__main__':
     xml.appendChild(bgNode)
 
     # Retireve lumiblocks info
-    lumiNode = createLumiBlockNodes(root, runNumber, min(lumiblocks), max(lumiblocks))
+    deadTimeData = getPhysicsDeadtimePerLB(startOfRun, endOfRun, lbRanges)
+    lumiNode = createLumiBlockNodes(root, runNumber, min(lumiblocks), max(lumiblocks), deadTimeData)
     xml.appendChild(lumiNode)
 
     # Write to file
