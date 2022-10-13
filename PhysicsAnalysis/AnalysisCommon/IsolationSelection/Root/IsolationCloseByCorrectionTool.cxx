@@ -98,11 +98,11 @@ namespace CP {
             }
         }
         m_has_nonTTVA |= std::find_if(types.begin(), types.end(),
-                                      [this](const IsolationType& t) { return isTrackIso(t) && !isTrackIsoTTVA(t); }) != types.end();
+                                      [](const IsolationType& t) { return isTrackIso(t) && !isTrackIsoTTVA(t); }) != types.end();
         m_hasPflowIso |= std::find_if(types.begin(), types.end(),
-                                      [this](const IsolationType& t) { return isPFlowIso(t); }) != types.end();
+                                      [](const IsolationType& t) { return isPFlowIso(t); }) != types.end();
         m_hasEtConeIso |= std::find_if(types.begin(), types.end(),
-                                      [this](const IsolationType& t) { return isTopoEtIso(t); }) != types.end();
+                                      [](const IsolationType& t) { return isTopoEtIso(t); }) != types.end();
     }
 #ifndef XAOD_STANDALONE
     void IsolationCloseByCorrectionTool::declareDependency(const std::vector<std::string>& containers, const IsoVector& types) {
