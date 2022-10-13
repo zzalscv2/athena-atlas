@@ -42,7 +42,8 @@ extractConstituents(xAOD::Jet& jet, const NameList* pghostlabs,
                     const fastjet::PseudoJet* ppj2) {
 
   static const SG::AuxElement::Accessor<const fastjet::PseudoJet*> pjAccessor("PseudoJet");
-  const fastjet::PseudoJet* ppseudojet = pjAccessor(jet);
+  const fastjet::PseudoJet* ppseudojet = nullptr; 
+  if(pjAccessor.isAvailable(jet)) ppseudojet = pjAccessor(jet);
 
   if ( ppseudojet == 0 ) {
     ppseudojet = ppj2;
@@ -163,7 +164,8 @@ int JetConstituentFiller::extractConstituents(xAOD::Jet& jet, const fastjet::Pse
 PseudoJetVector JetConstituentFiller::constituentPseudoJets(const xAOD::Jet& jet, bool ignoreGhosts, bool requireJetStructure){
 
   static const SG::AuxElement::Accessor<const fastjet::PseudoJet*> pjAccessor("PseudoJet");
-  const fastjet::PseudoJet* jet_pj = pjAccessor(jet);
+  const fastjet::PseudoJet* jet_pj = nullptr;
+  if(pjAccessor.isAvailable(jet)) jet_pj = pjAccessor(jet);
 
   PseudoJetVector constituents;
 
