@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2017 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
 */
 
 // IMdtCalibrationOutput.h
@@ -28,7 +28,7 @@ namespace MuonCalib {
     class IMdtCalibrationOutput {
     public:
         /** constructor, string used to identify the instance */
-        IMdtCalibrationOutput(std::string name) : m_name(name) {}
+        IMdtCalibrationOutput(const std::string& name) : m_name(name) {}
 
         /** destructor */
         virtual ~IMdtCalibrationOutput() {}
