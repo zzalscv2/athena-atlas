@@ -146,7 +146,7 @@ namespace Trk
       ServiceHandle<PropResultRootWriterSvc> m_atlasPropResultWriterSvc;
       ServiceHandle<PropResultRootWriterSvc> m_actsPropResultWriterSvc;
       ServiceHandle<IAthRNGSvc> m_rndmSvc;
-      ATHRNG::RNGWrapper* m_randomEngine;
+      ATHRNG::RNGWrapper* m_randomEngine = nullptr;
     }; 
 } // end of namespace
 
