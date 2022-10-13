@@ -137,7 +137,7 @@ def TgcPrepDataAllBCto3BCCfg(flags, name="TgcPrepDataAllTo3Replicator", **kwargs
     return acc
 
 
-def StgcRdoToPrepDataToolCfg(flags, name="StgcRdoToPrepDataTool", **kwargs):
+def StgcRdoToPrepDataToolCfg(flags, name="STGC_PrepDataProviderTool", **kwargs):
     result = ComponentAccumulator()
     kwargs.setdefault("PrdCacheKey" , MuonPrdCacheNames.sTgcCache if flags.Muon.MuonTrigger else "")
 

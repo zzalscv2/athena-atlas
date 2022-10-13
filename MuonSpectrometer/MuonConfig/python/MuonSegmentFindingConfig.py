@@ -651,6 +651,8 @@ def MuonPatternCalibrationCfg(flags, name="MuonPatternCalibration", **kwargs):
     kwargs.setdefault("MdtCreator", result.popPrivateTools())
     kwargs.setdefault('ClusterCreator', result.popToolsAndMerge(MuonClusterOnTrackCreatorCfg(flags)))
     kwargs.setdefault("Printer", result.popToolsAndMerge(MuonEDMPrinterToolCfg(flags) ))
+    kwargs.setdefault('TgcPrepDataContainer', 'TGC_MeasurementsAllBCs' if not flags.Muon.useTGCPriorNextBC else 'TGC_Measurements')
+
     # Won't explicitly configure MuonIdHelperSvc
     result.setPrivateTools( CompFactory.Muon.MuonPatternCalibration(name, **kwargs) )
     return result
@@ -735,13 +737,14 @@ def MuonSegmentFindingCfg(flags, cardinality=1):
     result.merge(MuonLayerHoughAlgCfg(flags))
     result.merge(MuonSegmentFinderAlgCfg(flags, name="MuonSegmentMaker"))
   
-    result.merge(MooSegmentFinderAlg_NCBCfg(flags, Cardinality=cardinality))
     
     if flags.Muon.runCommissioningChain:
         result.merge(MuonSegmentFilterAlgCfg(flags))
 
     result.addEventAlgo(CompFactory.xAODMaker.MuonSegmentCnvAlg("MuonSegmentCnvAlg"))
-    result.addEventAlgo(CompFactory.xAODMaker.MuonSegmentCnvAlg("MuonSegmentCnvAlg_NCB",
+    if flags.Detector.EnableCSC:
+        result.merge(MooSegmentFinderAlg_NCBCfg(flags))
+        result.addEventAlgo(CompFactory.xAODMaker.MuonSegmentCnvAlg("MuonSegmentCnvAlg_NCB",
                                                                       SegmentContainerName="NCB_TrackMuonSegments",
                                                                       xAODContainerName="NCB_MuonSegments") )
 

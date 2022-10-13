@@ -185,7 +185,8 @@ def MuonReconstructionCfg(flags):
 
     if flags.Muon.doMSVertex:
         msvertexrecotool = CompFactory.Muon.MSVertexRecoTool(
-            MyExtrapolator=result.popToolsAndMerge(AtlasExtrapolatorCfg(flags)))
+            MyExtrapolator=result.popToolsAndMerge(AtlasExtrapolatorCfg(flags)),
+            TGCKey = 'TGC_MeasurementsAllBCs' if not flags.Muon.useTGCPriorNextBC else 'TGC_Measurements')
         the_alg = CompFactory.MSVertexRecoAlg(
             name="MSVertexRecoAlg", MSVertexRecoTool=msvertexrecotool)
         # Not explicitly configuring MSVertexTrackletTool
