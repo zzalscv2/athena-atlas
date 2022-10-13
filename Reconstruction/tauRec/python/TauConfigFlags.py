@@ -3,7 +3,7 @@
 import unittest
 from AthenaConfiguration.AthConfigFlags import AthConfigFlags
 import AthenaCommon.SystemOfUnits as Units
-
+from AthenaConfiguration.Enums import LHCPeriod
 
 def createTauConfigFlags():
     tau_cfg = AthConfigFlags()
@@ -34,7 +34,7 @@ def createTauConfigFlags():
 
     # Settings common to Run2 and Run3
     tau_cfg.addFlag("Tau.SeedMinPt", 0.0*Units.GeV)
-    tau_cfg.addFlag("Tau.SeedMaxEta", 2.5)
+    tau_cfg.addFlag("Tau.SeedMaxEta", lambda pcf: 2.5 if pcf.GeoModel.Run <= LHCPeriod.Run3 else 4.0)
     # FIXME: MaxNTracks is not used, drop at the next occasion
     tau_cfg.addFlag("Tau.MaxNTracks", -1)
     tau_cfg.addFlag("Tau.RemoveDupeCoreTracks", True)
