@@ -142,7 +142,7 @@ namespace CP {
         }
 
         // Store everything in the final ntuples
-        auto fill_helper = [&,this](std::shared_ptr<IsoCorrectionTestHelper> helper, xAOD::IParticleContainer* parts) -> StatusCode{
+        auto fill_helper = [&](std::shared_ptr<IsoCorrectionTestHelper> helper, xAOD::IParticleContainer* parts) -> StatusCode{
             if (!helper) return StatusCode::SUCCESS;
             helper->SetClusters(muon_clusters);
             helper->SetFlowElements(pflows);
