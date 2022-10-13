@@ -87,6 +87,7 @@ aod2daod.forks = 4
 aod2daod.explicit_input = True
 aod2daod.args = '--inputAODFile=AOD.pool.root --outputDAODFile=DAOD.pool.root --CA --formats=PHYS'
 aod2daod.args += ' --sharedWriter=True --athenaMPMergeTargetSize "DAOD_*:0"'
+aod2daod.args += ' --asetup="all:Athena,master,latest"'
 
 # Define the test with the above steps
 test = Test.Test()
