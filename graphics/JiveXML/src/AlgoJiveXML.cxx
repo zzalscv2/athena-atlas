@@ -8,10 +8,6 @@
 #include "JiveXML/XMLFormatTool.h"
 #include "JiveXML/StreamToFileTool.h"
 
-#include "EventInfo/EventInfo.h"
-#include "EventInfo/EventID.h"
-#include "EventInfo/EventType.h"
-#include "EventInfo/PileUpEventInfo.h"
 #include "xAODEventInfo/EventInfo.h"
 
 #include "GaudiKernel/MsgStream.h"
@@ -201,43 +197,32 @@ namespace JiveXML{
 
     // new treatment of mc_channel_number for mc12
     // from: https://twiki.cern.ch/twiki/bin/viewauth/Atlas/PileupDigitization#Contents_of_Pileup_RDO
-    //Retrieve new PileupEventInfo from StoreGate
     unsigned int mcChannelNo = 0;
     bool firstEv = true;
-    const PileUpEventInfo* pevt = 0;
-    if (evtStore()->retrieve(pevt).isFailure()){
-      ATH_MSG_WARNING( "Could not find PileUpEventInfo" );
-    }
-    else {
-      ATH_MSG_DEBUG( "Pileup Info Retrieved Successfully as 'PileUpEventInfo' Object " );
       
-      //+++ Get sub-event info object
-      ATH_MSG_DEBUG( "Sub Event Infos: " );
-      PileUpEventInfo::SubEvent::const_iterator it  = pevt->beginSubEvt();
-      PileUpEventInfo::SubEvent::const_iterator end = pevt->endSubEvt();
-      if (it == end) ATH_MSG_DEBUG( "None found" );
-      for (; it != end; ++it) {
-	const EventInfo* sevt = (*it).pSubEvt;
-	if (sevt) {
-	  if (firstEv){ 
-	    mcChannelNo =  sevt->event_type()->mc_channel_number(); // the 'real' mc-channel 
-	    ATH_MSG_INFO( " mc_channel from PileUpEventInfo   : " << sevt->event_type()->mc_channel_number() );
-            firstEv = false;
-          }       
-	  ATH_MSG_VERBOSE("Sub Event Info:\n  Time         : " << (*it).time()                             
-	       << "  Index        : " << (*it).index()                            
-	       << "  Provenance   : " << (*it).type()                         // This is the provenance stuff: signal, minbias, cavern, etc
-	       << "  Run Number   : " << sevt->event_ID()->run_number()           
-	       << "  Event Number : " << sevt->event_ID()->event_number()         
-	       << "  ns Offset    : " << sevt->event_ID()->time_stamp_ns_offset() 
-	       << "  Lumi Block   : " << sevt->event_ID()->lumi_block()           
-	       << "  mc_channel   : " << sevt->event_type()->mc_channel_number() 
-               << "  BCID         : " << sevt->event_ID()->bunch_crossing_id()    
-               << "  Geo version  : " << m_geometryVersionIn                      
-	       << "  User Type    : " << sevt->event_type()->user_type()          );
-	}
-	else ATH_MSG_VERBOSE("Subevent is null ptr ");
+    //+++ Get sub-event info object
+    ATH_MSG_DEBUG( "Sub Event Infos: " );
+    for (const xAOD::EventInfo::SubEvent& subevt : eventInfo->subEvents()) {
+      const xAOD::EventInfo* sevt = subevt.ptr();
+      if (sevt) {
+        if (firstEv){ 
+          mcChannelNo =  sevt->mcChannelNumber(); // the 'real' mc-channel 
+          ATH_MSG_INFO( " mc_channel from SubEvent   : " << sevt->mcChannelNumber() );
+          firstEv = false;
+        }
+        ATH_MSG_VERBOSE("Sub Event Info:\n  Time         : " << subevt.time()
+                        << "  Index        : " << subevt.index()
+                        << "  Provenance   : " << subevt.type()                         // This is the provenance stuff: signal, minbias, cavern, etc
+                        << "  Run Number   : " << sevt->runNumber()           
+                        << "  Event Number : " << sevt->eventNumber()         
+                        << "  ns Offset    : " << sevt->timeStampNSOffset() 
+                        << "  Lumi Block   : " << sevt->lumiBlock()           
+                        << "  mc_channel   : " << sevt->mcChannelNumber() 
+                        << "  BCID         : " << sevt->bcid()    
+                        << "  Geo version  : " << m_geometryVersionIn
+                        );
       }
+      else ATH_MSG_VERBOSE("Subevent is null ptr ");
     }
 
     //Get run and event numbers
