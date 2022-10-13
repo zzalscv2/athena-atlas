@@ -10,23 +10,6 @@
 #     * Commenting the getStruct method (added by who???)
 #     * Adding the LoosePhotons object
 
-# Syntax : 
-#   -r, --run          :Run number
-#  -ll, --upperlb      :Upper lb
-#  -s, --stream        : Stream without prefix: express/CosmicCalo/Main/ZeroBias/MinBias
-#  -t, --tag           : DAQ tag: data16_13TeV, data16_cos... By default retrieve it via atlasdqm
-#  -a, --amiTag        : First letter of AMI tag: x->express / f->bulk
-#  -e, --eta           : Eta of hot spot
-#  -p, --phi           : Phi of hot spot
-#  -x, --x             : X of hot spot
-#  -y, --y             : Y of hot spot
-#  -ia, --integralAbove: Lower bound of integral
-#  -d, --delta         : Distance to look around hot spot
-#  -o, --object        : 2D OCCUPANCY: TopoClusters,EMTopoClusters, EMTopoJets,TightFwdElectrons,LoosePhotons,Tau
-#                        1D OCCUPANCY: EMTopoJets_eta,Tau_eta,Tau_phi
-#                        INTEGRAL: NumberTau,NumberTightFwdElectrons,NumberHLTJet
-#  -m, --min           :Min number of occurences in a LB
-#  -g, --grl           :Look for Calo/LAr/Tile defects set in suspicious LBs
 
 import os, sys
 import argparse
@@ -325,9 +308,7 @@ def main(args):
   for iHisto in histoPath.keys():
     #if histoPath[iHisto] not in histPathList:
     #  print("The desired histo path",histoPath[iHisto],"is not in the input file!")
-    #  print(histPathList)
-    #  sys.exit()
-    print(histoPath[iHisto])
+
     histo[iHisto] = f.Get(histoPath[iHisto])
     histo[iHisto].SetTitle("%s (%s) - Run %d"%(histo[iHisto].GetTitle(),histoLegend[iHisto],args.runNumber))
 
@@ -454,11 +435,17 @@ def main(args):
   lbFilePathList = pathExtract.returnEosHistPathLB(args.runNumber,args.lowerLumiBlock,args.upperLumiBlock,args.stream,args.amiTag,args.tag)
   nbHitInHot = []
 
-  nLB=2500
+
+  LBs = [int(f.split("_lb")[1].split(".")[0]) for f in lbFilePathList]
+  maxLB = max(LBs)
+  print("Max LB is",maxLB)
+
+
+  nLB=maxLB
   nbHitInHot = {}
   for iHisto in histoPath.keys():
     nbHitInHot[iHisto] = [0.] * nLB
-  lowerLB = 2500
+  lowerLB = maxLB
   upperLB = 0
   lbCanvas = []
   histoLBNoisy = []
