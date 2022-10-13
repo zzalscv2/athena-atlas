@@ -250,6 +250,9 @@ def MuonRefitToolCfg(flags, name="MuonRefitTool", **kwargs):
     if flags.IOVDb.DatabaseInstance == 'COMP200' or \
                 'HLT'  in flags.IOVDb.GlobalTag or flags.Common.isOnline or flags.Muon.MuonTrigger:
         kwargs["AlignmentErrorTool"] = None
+    else:
+        from MuonConfig.MuonGeometryConfig import MuonAlignmentErrorDbAlgCfg
+        result.merge(MuonAlignmentErrorDbAlgCfg(flags))
     # AlignmentErrorTool doesn't seem to need explicit configuration
     printer =  result.popToolsAndMerge(MuonEDMPrinterToolCfg(flags))
     kwargs.setdefault('Printer', printer) #PublicToolHandle
