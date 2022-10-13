@@ -1,9 +1,9 @@
 /*
-  Copyright (C) 2002-2017 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
 */
 
-#ifndef __ITRIG_L2_LAYER_NUMBER_TOOL_H__
-#define __ITRIG_L2_LAYER_NUMBER_TOOL_H__
+#ifndef TRIGINDETTOOLINTERFACES_ITRIGL2LAYERNUMBERTOOL_H
+#define TRIGINDETTOOLINTERFACES_ITRIGL2LAYERNUMBERTOOL_H
 
 #include "GaudiKernel/IAlgTool.h"
 #include "TrigInDetPattRecoEvent/TrigInDetSiLayer.h"
@@ -34,7 +34,7 @@ class ITrigL2LayerNumberTool : virtual public IAlgTool {
   virtual int maxNumberOfUniqueLayers() const  = 0;
   virtual const std::vector<short>* pixelLayers() const  = 0; // hashId addressable arrays of layer numbers
   virtual const std::vector<short>* sctLayers() const  = 0; // hashId addressable arrays of layer numbers
-  virtual const std::vector<TRIG_INDET_SI_LAYER>* layerGeometry() const = 0;
+  virtual const std::vector<TrigInDetSiLayer>* layerGeometry() const = 0;
 };
 
 #endif
