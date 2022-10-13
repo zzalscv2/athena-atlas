@@ -970,15 +970,14 @@ StatusCode BTaggingTruthTaggingTool::chooseTagBins_cum(TRFinfo &trfinf,std::vect
 	sum += trfinf.effMC_allBins[tagged_bin][j];
 	incl.push_back(sum);
       }
+
       float theX = trfinf.rand.Uniform(sum);
-      for(unsigned int bin = 0; bin < m_OperatingBins.size(); bin++){
-	  float tag_index = (incl.at(bin) >= theX) ? m_OperatingBins[bin] : m_OperatingBins.back();
-          btagops.push_back(tag_index);
-          prob *= (trfinf.effMC_allBins[tag_index][j]);
-	  ATH_MSG_DEBUG("bin " <<tag_index <<" theX " <<theX <<" incl.at(bin) "  <<incl.at(bin) <<" effMC " <<trfinf.effMC_allBins[tag_index][j] <<" prob* "  <<prob);
-          break;
-      }
-    }
+      auto tag_index = std::lower_bound(incl.begin(), incl.end(), theX) - incl.begin();
+      float tbin_choice = m_OperatingBins[tag_index];
+      btagops.push_back(tbin_choice);
+      prob *= (trfinf.effMC_allBins[tbin_choice][j]);
+      ATH_MSG_DEBUG("it " <<tag_index <<" theX " <<theX <<" effMC " <<trfinf.effMC_allBins[tbin_choice][j] <<" prob* "  <<prob);
+    } //tagged
     else { // untagged jet
       float untag_sum  = 0. ;
       incl.clear();
@@ -989,13 +988,11 @@ StatusCode BTaggingTruthTaggingTool::chooseTagBins_cum(TRFinfo &trfinf,std::vect
       }
       
       float theX = trfinf.rand.Uniform(untag_sum);
-      for(unsigned int bin=0; bin< untagged_bins.size(); bin++) {
-	float untag_index = (incl.at(bin) >= theX) ? untagged_bins[bin] : untagged_bins.back();
-	btagops.push_back(untag_index);
-	prob *= 1 - trfinf.effMC_allBins[untag_index][j];
-	ATH_MSG_DEBUG("i " <<bin  <<" unt_bin " <<untag_index <<" theX " <<theX <<" incl.at(bin) "  <<incl.at(bin) <<" 1-effMC " <<1-trfinf.effMC_allBins[untag_index][j] <<" prob* " <<prob);
-	break;
-      }
+      auto untag_index = std::lower_bound(incl.begin(), incl.end(), theX) - incl.begin();
+      float utbin_choice = untagged_bins[untag_index]; 
+      	btagops.push_back(utbin_choice);
+	prob *= 1 - trfinf.effMC_allBins[utbin_choice][j];
+	ATH_MSG_DEBUG(" unt_bin " <<untag_index <<" theX " <<theX<<" 1-effMC " <<1-trfinf.effMC_allBins[utbin_choice][j] <<" prob* " <<prob);
     }
   }
 
