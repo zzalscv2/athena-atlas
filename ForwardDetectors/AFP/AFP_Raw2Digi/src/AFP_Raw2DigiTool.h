@@ -75,5 +75,19 @@ protected:
   /// tofHit passed as argument.  Mapping is implemented according to
   /// https://twiki.cern.ch/twiki/bin/view/Atlas/AFPHPTDC#Channel_Mapping
   void setBarAndTrainID(xAOD::AFPToFHit* tofHit, const EventContext& ctx) const;
+  
+private:
+  
+  // TODO: this should go to the database at some moment
+  // @brief mapping of channels to trainID and barID
+  //
+  // indices are: runID (Run2, Run3 till 12 Oct 2002, Run3 since 12 Oct 2022); hptdcID (1,2); channel (0...11)
+  // channels 1,4,7,10 shouldn't exist; Run2 data has channels 1 and 4 as well, this is a known problem
+  const int m_channel2train[3][2][12]={{{0,-2,1,0,-2,1, 0,-1,1,0,-1,1}, {2,-2,3,2,-2,3, 2,-1,3,2,-1,3}},
+                                       {{1,-1,0,1,-1,0, 1,-1,0,1,-1,0}, {3,-1,2,3,-1,2, 3,-1,2,3,-1,2}},
+                                       {{1,-1,3,1,-1,3, 1,-1,3,1,-1,3}, {0,-1,2,0,-1,2, 0,-1,2,0,-1,2}}};
+  const int m_channel2bar[3][2][12] = {{{0,-2,2,3,-2,1, 2,-1,0,1,-1,3}, {0,-2,2,3,-2,1, 2,-1,0,1,-1,3}},
+                                       {{0,-1,2,3,-1,1, 2,-1,0,1,-1,3}, {0,-1,2,3,-1,1, 2,-1,0,1,-1,3}},
+                                       {{0,-1,2,3,-1,1, 2,-1,0,1,-1,3}, {0,-1,2,3,-1,1, 2,-1,0,1,-1,3}}};
 };
 #endif 
