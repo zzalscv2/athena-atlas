@@ -30,7 +30,7 @@ namespace xAODMaker {
 
       declareProperty( "AODKey", m_aodKey = "" );
       declareProperty( "xAODKey", m_xaodKey = "EventInfo" );
-      declareProperty( "PileupKey", m_pileupKey = "" );
+      declareProperty( "PileupKey", m_pileupKey = "PileupEventInfo" );
       declareProperty( "CnvTool", m_cnvTool );
    }
 
@@ -44,15 +44,9 @@ namespace xAODMaker {
       // Retrieve the converter tool:
       CHECK( m_cnvTool.retrieve() );
 
-      if (m_pileupKey.key().empty()) {
-        m_pileupKey = "Pileup" + m_xaodKey.key();
-      }
-
       CHECK( m_aodKey.initialize(SG::AllowEmpty) );
       CHECK( m_xaodKey.initialize() );
-
-      /// FIXME: Should do this only if we have a PileUpEventInfo.
-      CHECK( m_pileupKey.initialize(!m_pileupKey.key().empty()) );
+      CHECK( m_pileupKey.initialize(SG::AllowEmpty) );
 
       // Return gracefully:
       return StatusCode::SUCCESS;

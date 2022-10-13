@@ -20,6 +20,11 @@ def EventInfoCnvAlgCfg(flags, name="EventInfoCnvAlg",
     kwargs.setdefault("AODKey", inputKey)
     kwargs.setdefault("xAODKey", outputKey)
 
+    if f"PileUpEventInfo#{inputKey}" in flags.Input.TypedCollections:
+        kwargs.setdefault("PileupKey", f"Pileup{outputKey}")
+    else:
+        kwargs.setdefault("PileupKey", "")
+
     # TODO: luminosity
 
     if not disableBeamSpot:
