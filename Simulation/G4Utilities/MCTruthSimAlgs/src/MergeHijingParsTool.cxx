@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "MergeHijingParsTool.h"
@@ -35,7 +35,7 @@ StatusCode MergeHijingParsTool::processBunchXing(int bunchXing,
     return StatusCode::SUCCESS;
   }
   SubEventIterator iEvt = bSubEvents;
-  for (; iEvt!=eSubEvents; iEvt++) {
+  for (; iEvt!=eSubEvents; ++iEvt) {
     const HijingEventParams *hijing_pars(nullptr);
     if (m_pMergeSvc->retrieveSingleSubEvtData(m_outputObject.name(), hijing_pars,
                                               bunchXing, iEvt).isSuccess()) {
