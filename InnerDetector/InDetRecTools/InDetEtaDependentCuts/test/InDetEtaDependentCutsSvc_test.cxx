@@ -64,7 +64,7 @@ BOOST_AUTO_TEST_SUITE(EtaDependentCutsSvcTest)
     //double  getMinPtAtEta           (const double eta)
     BOOST_TEST(idEDCSvc->getMinPtAtEta(eta) == 900.);
     //check it throws if eta is out of bounds (will also print error)
-    BOOST_CHECK_THROW(idEDCSvc->getMinPtAtEta(invalidEta), std::out_of_range);
+    BOOST_TEST(idEDCSvc->getMinPtAtEta(invalidEta) == 900.0);
     //double  getMaxZImpactAtEta      (const double eta)
     BOOST_TEST(idEDCSvc->getMaxZImpactAtEta(eta) == 200.);
     //double  getMaxPrimaryImpactAtEta(const double eta);
