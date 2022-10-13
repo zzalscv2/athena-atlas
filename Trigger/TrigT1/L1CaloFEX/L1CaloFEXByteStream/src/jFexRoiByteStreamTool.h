@@ -28,6 +28,8 @@
 #include "xAODTrigger/jFexSumETRoIContainer.h"
 #include "xAODTrigger/jFexSumETRoIAuxContainer.h"
 
+#include "TrigConfData/L1Menu.h"
+
 // Athena includes
 #include "AthenaBaseComps/AthAlgTool.h"
 
@@ -63,6 +65,12 @@ class jFexRoiByteStreamTool : public extends<AthAlgTool, IL1TriggerByteStreamToo
         // ROBIDs property required by the interface
         Gaudi::Property<std::vector<uint32_t>> m_robIds {this, "ROBIDs", {}, "List of ROB IDs required for conversion to/from xAOD RoI"};
         Gaudi::Property<bool> m_convertExtendedTOBs {this, "ConvertExtendedTOBs", false, "Convert xTOBs instead of TOBs"};
+        
+        Gaudi::Property<std::string> m_TobMapping {this, "TobMapping", "/afs/cern.ch/user/s/serodrig/public/L1CaloScellMapping/athenaTobMap.txt", "Text file to convert from hardware internal coordinates to eta-phi location"};
+        
+        //Read handle key for the L1Menu
+        SG::ReadHandleKey<TrigConf::L1Menu> m_l1MenuKey   {this, "L1TriggerMenu", "DetectorStore+L1TriggerMenu","Name of the L1Menu object to read configuration from"};
+
 
         // Write handle keys for the L1Calo EDMs for BS->xAOD mode of operation
         SG::WriteHandleKey< xAOD::jFexSRJetRoIContainer> m_jJWriteKey   {this,"jJRoIContainerWriteKey"  ,"L1_jFexSRJetRoI","Write jFexEDM SRjet container"};
@@ -84,6 +92,25 @@ class jFexRoiByteStreamTool : public extends<AthAlgTool, IL1TriggerByteStreamToo
         std::array<uint32_t,4> xTOBCounterTrailer(uint32_t word) const;
         std::array<uint32_t,3> jFEXtoRODTrailer  (uint32_t word0, uint32_t word1) const;
         void     jFEXtoRODHeader   (uint32_t word0, uint32_t word1) const;
+        
+        //unpacking internal coordinates
+        
+        std::array<float,2> getEtaPhi  (unsigned int jfex, unsigned int fpga, uint32_t word) const;
+        std::array<uint8_t,2> unpackLocalCoords  (uint32_t word) const;
+        static const int s_etaBit   = 5;
+        static const int s_phiBit   = 1;
+        static const int s_etaMask  = 0x1f;
+        static const int s_phiMask  = 0xf;
+
+        
+                
+        // Read Mapping file to link internal word eta/phi to float Eta/Phi coordinates
+        StatusCode ReadfromFile(const std::string&);
+        
+        // hash the index into one integer in the format 0xJFCCT (hexadecimal)
+        constexpr static unsigned int mapIndex(unsigned int jfex, unsigned int fpga, unsigned int iEta, unsigned int iPhi);
+        std::unordered_map<unsigned int, std::array<float,2> > m_TobPos_map; /// {map index, {eta,phi}}
+        
         
 };
 
