@@ -274,8 +274,7 @@ namespace InDet {
     std::vector<Trk::VxTrackAtVertex> tmpVTAV;
 
     std::vector<Trk::VxTrackAtVertex> trkAtVtx = initVxCandidate->vxTrackAtVertex();
-    for (unsigned int i = 0; i < trkAtVtx.size() ; ++i) {
-      Trk::VxTrackAtVertex vtxTrack = trkAtVtx[i];
+    for (const auto& vtxTrack : trkAtVtx) {
       const Trk::TrackParameters*  vtxPer = vtxTrack.perigeeAtVertex();
       const AmgVector(5)& iv = vtxPer->parameters();
       AmgSymMatrix(5) em(*(vtxPer->covariance()));
@@ -298,8 +297,7 @@ namespace InDet {
     xAOD::Vertex *vx = new xAOD::Vertex(*initVxCandidate);
     vx->setPosition(correctVertex);
     vx->vxTrackAtVertex().clear();
-    for (unsigned int i = 0; i < tmpVTAV.size() ; ++i) {
-      Trk::VxTrackAtVertex vtxTrack = tmpVTAV[i];
+    for (const auto& vtxTrack : tmpVTAV) {
       vx->vxTrackAtVertex().push_back(vtxTrack);
     }
 

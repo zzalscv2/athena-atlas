@@ -448,9 +448,9 @@ Trk::TargetSurfaces::findNext()
     ++index;
     ++is;
   }
-  for (unsigned it = 0; it < m_tempSurfaces.size(); ++it) {
-    is = m_tempSurfaces[it].begin();
-    while (is != m_tempSurfaces[it].end()) {
+  for (auto & tempSurface : m_tempSurfaces) {
+    is = tempSurface.begin();
+    while (is != tempSurface.end()) {
       if ((*is).status != -1 && (*is).distanceAlongPath > m_tolerance) {
         ++m_numAlongPath;
         double dd = (*is).distanceAlongPath;
@@ -570,10 +570,10 @@ Trk::TargetSurfaces::checkDistance(const Amg::Vector3D& pos,
     m_absDist = true;
   }
 
-  for (unsigned it = 0; it < m_tempSurfaces.size(); ++it) {
-    is = m_tempSurfaces[it].begin();
+  for (auto & tempSurface : m_tempSurfaces) {
+    is = tempSurface.begin();
 
-    while (is != m_tempSurfaces[it].end()) {
+    while (is != tempSurface.end()) {
 
       if ((*is).status == -1 ||
           (fabs((*is).distance) - m_lastStep) < 2 * fabs(nextStep)) {
@@ -671,10 +671,10 @@ Trk::TargetSurfaces::fillSolutions(int hitSf,
     ++is;
   }
 
-  for (unsigned it = 0; it < m_tempSurfaces.size(); ++it) {
-    is = m_tempSurfaces[it].begin();
+  for (auto & tempSurface : m_tempSurfaces) {
+    is = tempSurface.begin();
 
-    while (is != m_tempSurfaces[it].end()) {
+    while (is != tempSurface.end()) {
 
       if ((*is).status != -1) {
 
