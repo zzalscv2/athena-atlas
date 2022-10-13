@@ -41,8 +41,7 @@ void Trk::DetailedHitInfo::addHit(Trk::DetectorRegion region, int layer, int eta
   // if reaches this point the element is not found, then you add it to m_detailedHitInfo  
   m_prevEta = eta_module;
   std::vector < std::tuple <int, int, int> > counts = {{layer, 1, hit}};
-  m_detailedHitInfo.push_back(std::make_pair(region, counts));  
-  return;
+  m_detailedHitInfo.emplace_back(region, counts);  
 }
 
 int Trk::DetailedHitInfo::getHits(Trk::DetectorRegion region, int layer)

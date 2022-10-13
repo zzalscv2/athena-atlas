@@ -606,7 +606,7 @@ Mode3dFromFsmw1dFinder::CheckCorrelation( [[maybe_unused]] Mode3dFromFsmw1dInfo&
 
     std::vector< std::pair<int,int> > supp ;  // merge crossings in both modes if correlated
     double bX = 0., bY = 0., bZ = 0., Bwght = 0. ;
-    for (auto bx : bb)
+    for (const auto& bx : bb)
     {
       for (auto & ib : bx)
       {
@@ -892,7 +892,7 @@ Mode3dFromFsmw1dFinder::Mode2Seed( Mode3dFromFsmw1dInfo& info,
 {
   double seedX = 0., seedY = 0., seedZ = 0. ;
   double maxWght = -99.9 ;
-  for (auto modes : phiradiZol) 
+  for (const auto& modes : phiradiZol) 
   {
     double totwght = 0. ;
     double seedX0 = 0., seedY0 = 0., seedZ0 = 0. ;
@@ -936,7 +936,7 @@ Mode3dFromFsmw1dFinder::Mode2Seed( Mode3dFromFsmw1dInfo& info,
   double mindistcut = 999999999.9 , mindist = 999999999.9 ;
   double seedX = 0., seedY = 0., seedZ = 0. ;
 
-  for (auto xymodes : phiradi)
+  for (const auto& xymodes : phiradi)
   {
     double xywght = 0. ;
     double xyX = 0., xyY = 0., xyZ = 0. ;
@@ -963,7 +963,7 @@ Mode3dFromFsmw1dFinder::Mode2Seed( Mode3dFromFsmw1dInfo& info,
       continue ;
 
     double zX = 0., zY = 0., zZ = 0., zwght = 0. ;
-    for (auto zmodes : Z) 
+    for (const auto& zmodes : Z) 
     {
       for (auto & zmode : zmodes)
       {
@@ -1027,7 +1027,7 @@ Mode3dFromFsmw1dFinder::Mode2Seed( Mode3dFromFsmw1dInfo& info,
   double mindistcut = 999999999.9 , mindist = 999999999.9 ;
   double seedX = 0., seedY = 0., seedZ = 0. ;
 
-  for (auto pmodes : phi)
+  for (const auto& pmodes : phi)
   {
     double pwght = 0. ;
     double pX = 0., pY = 0., pZ = 0. ;
@@ -1051,7 +1051,7 @@ Mode3dFromFsmw1dFinder::Mode2Seed( Mode3dFromFsmw1dInfo& info,
     } else
       continue ;
 
-    for (auto rmodes : radi)
+    for (const auto& rmodes : radi)
     {
       double rwght = 0. ;
       double rX = 0., rY = 0., rZ = 0. ;
@@ -1078,7 +1078,7 @@ Mode3dFromFsmw1dFinder::Mode2Seed( Mode3dFromFsmw1dInfo& info,
       double Dxy = (   ( pX - rX )*( pX - rX ) + ( pY - rY )*( pY - rY ) 
                      + ( pZ - rZ )*( pZ - rZ ) )/( pwght + rwght ) ;
 
-      for (auto zmodes : Z)
+      for (const auto& zmodes : Z)
       {
         double zwght = 0. ;
         double zX = 0., zY = 0., zZ = 0. ;
