@@ -101,7 +101,7 @@ StatusCode MdtCalibDbAlg::initialize() {
     ATH_CHECK(m_readKeyTube.initialize());
     ATH_CHECK(m_writeKeyRt.initialize());
     ATH_CHECK(m_writeKeyTube.initialize());
-    ATH_CHECK(m_writeKeyCor.initialize());
+    ATH_CHECK(m_writeKeyCor.initialize(m_create_b_field_function.value() || m_createWireSagFunction.value() || m_createSlewingFunction.value()));
 
     ATH_CHECK(detStore()->retrieve(m_detMgr));
     return StatusCode::SUCCESS;
@@ -258,12 +258,14 @@ StatusCode MdtCalibDbAlg::loadRt() {
     }
     std::unique_ptr<MdtRtRelationCollection> writeCdoRt{std::make_unique<MdtRtRelationCollection>()};
 
-    SG::WriteCondHandle<MdtCorFuncSetCollection> writeHandleCor{m_writeKeyCor};
-    if (writeHandleCor.isValid()) {
-        ATH_MSG_DEBUG("CondHandle " << writeHandleCor.fullKey() << " is already valid.");
-        return StatusCode::SUCCESS;
+    std::unique_ptr<SG::WriteCondHandle<MdtCorFuncSetCollection>> writeHandleCor{};
+    if (m_createSlewingFunction || m_createWireSagFunction || m_create_b_field_function) {
+        writeHandleCor = std::make_unique<SG::WriteCondHandle<MdtCorFuncSetCollection>>(m_writeKeyCor);
+        if (writeHandleCor->isValid()) {
+            ATH_MSG_DEBUG("CondHandle " << writeHandleCor->fullKey() << " is already valid.");
+            return StatusCode::SUCCESS;
+        }
     }
-    std::unique_ptr<MdtCorFuncSetCollection> writeCdoCor{std::make_unique<MdtCorFuncSetCollection>()};
 
     // like MdtCalibDbCoolStrTool::loadRt()
     // m_rtData is writeCdoRt here
@@ -587,41 +589,40 @@ StatusCode MdtCalibDbAlg::loadRt() {
     // like MdtCalibrationDbSvc
     // for corData in loadRt
 
-    // If all of the 3 cor flags were 0
-    // it returned success here in prvious Tool
-    // but here at least record default as an Alg
-    // and then check flags again in the DbSvc
-
-    writeCdoCor->resize(writeCdoRt->size());
-    ATH_MSG_DEBUG("Initializing " << writeCdoCor->size() << " b-field functions");
-    for (unsigned int i = 0; i < writeCdoCor->size(); i++) {
-        (*writeCdoCor)[i] = new MuonCalib::MdtCorFuncSet();
-        if (m_create_b_field_function) initialize_B_correction((*writeCdoCor)[i], (*writeCdoRt)[i]);
-        if (m_createWireSagFunction) initializeSagCorrection((*writeCdoCor)[i]);
-        if (m_createSlewingFunction) (*writeCdoCor)[i]->setSlewing(new MuonCalib::MdtSlewCorFuncHardcoded(MuonCalib::CalibFunc::ParVec()));
-    }
-
     // finally record writeCdo
 
     if (writeCdoRt->empty()) {
         ATH_MSG_WARNING("writeCdoRt->size()==0");
         return StatusCode::FAILURE;
     }
+    const MdtRtRelationCollection *writeCdoRtPtr = writeCdoRt.get();
     if (writeHandleRt.record(rangeRt, std::move(writeCdoRt)).isFailure()) {
         ATH_MSG_FATAL("Could not record " << writeHandleRt.key() << " with EventRange " << rangeRt << " into Conditions Store");
         return StatusCode::FAILURE;
     }
     ATH_MSG_INFO("recorded new " << writeHandleRt.key() << " with range " << rangeRt << " into Conditions Store");
 
-    if (writeCdoCor->empty()) {
-        ATH_MSG_WARNING("writeCdoCor->size()==0");
-        return StatusCode::FAILURE;
+    if (writeHandleCor != nullptr) {
+        std::unique_ptr<MdtCorFuncSetCollection> writeCdoCor{std::make_unique<MdtCorFuncSetCollection>()};
+        writeCdoCor->resize(writeCdoRtPtr->size());
+        ATH_MSG_DEBUG("Initializing " << writeCdoCor->size() << " b-field functions");
+        for (unsigned int i = 0; i < writeCdoCor->size(); i++) {
+            (*writeCdoCor)[i] = new MuonCalib::MdtCorFuncSet();
+            if (m_create_b_field_function) initialize_B_correction((*writeCdoCor)[i], (*writeCdoRtPtr)[i]);
+            if (m_createWireSagFunction) initializeSagCorrection((*writeCdoCor)[i]);
+            if (m_createSlewingFunction) (*writeCdoCor)[i]->setSlewing(new MuonCalib::MdtSlewCorFuncHardcoded(MuonCalib::CalibFunc::ParVec()));
+        }
+
+        if (writeCdoCor->empty()) {
+            ATH_MSG_WARNING("writeCdoCor->size()==0");
+            return StatusCode::FAILURE;
+        }
+        if (writeHandleCor->record(rangeRt, std::move(writeCdoCor)).isFailure()) {
+            ATH_MSG_FATAL("Could not record " << writeHandleCor->key() << " with EventRange " << rangeRt << " into Conditions Store");
+            return StatusCode::FAILURE;
+        }
+        ATH_MSG_INFO("recorded new " << writeHandleCor->key() << " with range " << rangeRt << " into Conditions Store");
     }
-    if (writeHandleCor.record(rangeRt, std::move(writeCdoCor)).isFailure()) {
-        ATH_MSG_FATAL("Could not record " << writeHandleCor.key() << " with EventRange " << rangeRt << " into Conditions Store");
-        return StatusCode::FAILURE;
-    }
-    ATH_MSG_INFO("recorded new " << writeHandleCor.key() << " with range " << rangeRt << " into Conditions Store");
 
     return StatusCode::SUCCESS;
 }
