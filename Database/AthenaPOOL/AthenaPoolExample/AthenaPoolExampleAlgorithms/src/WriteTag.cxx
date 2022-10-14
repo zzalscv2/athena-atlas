@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2017 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
 */
 
 /** @file WriteTag.cxx
@@ -57,7 +57,8 @@ StatusCode WriteTag::execute (const EventContext& ctx) const {
    unsigned int runNumber = ctx.eventID().run_number();
    ATH_MSG_INFO("EventInfo event: " << eventNumber << "  run: " << runNumber);
 
-   auto tagAttribList = std::make_unique<TagAthenaAttributeList>(*m_attribListSpec);
+   const AthenaAttributeListSpecification* attribListSpec = m_attribListSpec;
+   auto tagAttribList = std::make_unique<TagAthenaAttributeList>(*attribListSpec);
    (*tagAttribList)["RunNumber"].data<unsigned int>() = runNumber;
    (*tagAttribList)["EventNumber"].data<unsigned int>() = eventNumber;
    if (m_magic > 0) {
