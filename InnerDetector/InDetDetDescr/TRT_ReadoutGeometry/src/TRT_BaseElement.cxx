@@ -17,8 +17,7 @@ namespace InDetDD {
 TRT_BaseElement::TRT_BaseElement(const GeoVFullPhysVol* volume,
                                  const Identifier& id,
                                  const TRT_ID* idHelper,
-                                 const TRT_Conditions* conditions,
-                                 const GeoAlignmentStore* geoAlignStore)
+                                 const TRT_Conditions* conditions)
   : Trk::TrkDetElementBase(volume)
   , m_id(id)
   , m_idHelper(idHelper)
@@ -26,19 +25,16 @@ TRT_BaseElement::TRT_BaseElement(const GeoVFullPhysVol* volume,
   , m_surfaceCache{}
   , m_surface{}
   , m_surfaces{}
-  , m_geoAlignStore(geoAlignStore)
 {
   m_idHash = m_idHelper->straw_layer_hash(id);
 }
 
-TRT_BaseElement::TRT_BaseElement(const TRT_BaseElement& right,
-                                 const GeoAlignmentStore* geoAlignmentStore)
+TRT_BaseElement::TRT_BaseElement(const TRT_BaseElement& right)
   : Trk::TrkDetElementBase(right.getMaterialGeom())
   , m_id(right.m_id)
   , m_idHash(right.m_idHash)
   , m_idHelper(right.m_idHelper)
   , m_conditions(right.m_conditions)
-  , m_geoAlignStore(geoAlignmentStore)
 {}
 
 Identifier

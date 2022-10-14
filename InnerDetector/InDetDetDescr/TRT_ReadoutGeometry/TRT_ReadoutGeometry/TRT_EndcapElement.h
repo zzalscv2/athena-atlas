@@ -52,10 +52,9 @@ namespace InDetDD {
                         unsigned int strawLayIndex,
                         unsigned int phiIndex,
                         const TRT_ID* idHelper,
-                        const TRT_Conditions* conditions,
-                        const GeoAlignmentStore* geoAlignStore = nullptr);
+                        const TRT_Conditions* conditions);
 
-      TRT_EndcapElement(const TRT_EndcapElement &right, const GeoAlignmentStore* geoAlignStore);
+      TRT_EndcapElement(const TRT_EndcapElement &right);
 
       /** Destructor: */
       virtual ~TRT_EndcapElement();
@@ -116,7 +115,6 @@ namespace InDetDD {
       void createSurfaceCache(Identifier id) const;
 
       // Illegal Operations:
-      TRT_EndcapElement(const TRT_EndcapElement& right) = delete;
       const TRT_EndcapElement& operator=(const TRT_EndcapElement& right) =
         delete;
 

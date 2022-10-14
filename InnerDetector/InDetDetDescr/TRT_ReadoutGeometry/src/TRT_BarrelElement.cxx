@@ -29,16 +29,14 @@ TRT_BarrelElement::TRT_BarrelElement(const GeoVFullPhysVol* volume,
                                      unsigned int phiIndex,
                                      unsigned int strawLayIndex,
                                      const TRT_ID* idHelper,
-                                     const TRT_Conditions* conditions,
-                                     const GeoAlignmentStore* geoAlignStore)
+                                     const TRT_Conditions* conditions)
   : TRT_BaseElement(volume,
                     idHelper->layer_id((isPositive ? 1 : -1),
                                        phiIndex,
                                        modIndex,
                                        strawLayIndex),
                     idHelper,
-                    conditions,
-                    geoAlignStore)
+                    conditions)
   , m_code(isPositive, modIndex, phiIndex, strawLayIndex)
   , m_descriptor(descriptor)
   , m_nextInPhi(nullptr)
@@ -52,9 +50,8 @@ TRT_BarrelElement::TRT_BarrelElement(const GeoVFullPhysVol* volume,
   m_strawSurfacesCache.resize(m_nstraws);
 }
 
-TRT_BarrelElement::TRT_BarrelElement(const TRT_BarrelElement& right,
-                                     const GeoAlignmentStore* geoAlignStore)
-  : TRT_BaseElement(right, geoAlignStore)
+TRT_BarrelElement::TRT_BarrelElement(const TRT_BarrelElement& right)
+  : TRT_BaseElement(right)
   , m_code(right.m_code)
   , m_descriptor(right.m_descriptor)
   , m_nextInPhi(right.m_nextInPhi)

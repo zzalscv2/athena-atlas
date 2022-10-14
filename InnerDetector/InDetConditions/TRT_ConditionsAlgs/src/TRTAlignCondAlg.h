@@ -28,13 +28,12 @@ class TRTAlignCondAlg : public AthAlgorithm
 
   virtual StatusCode initialize() override;
   virtual StatusCode execute() override;
-  virtual StatusCode finalize() override;
 
  private:
   SG::ReadCondHandleKey<CondAttrListCollection> m_readKeyDynamicGlobal{this, "ReadKeyDynamicGlobal","/TRT/AlignL1/TRT","Read handle for global alignment conditions"};
   SG::ReadCondHandleKey<AlignableTransformContainer> m_readKeyDynamicRegular{this, "ReadKeyDynamicRegular","/TRT/AlignL2","Read handle for Dynamic Alignable transform containers"};
   SG::ReadCondHandleKey<AlignableTransformContainer> m_readKeyRegular{this, "ReadKeyRegular","/TRT/Align","Read handle for Static Alignable transform containers"};
-  SG::WriteCondHandleKey<GeoAlignmentStore>  m_writeKeyAlignStore{this,"WriteKeyAlignStore","GeoAlignmentStore","Write handle key to store GeoAlignmentStore constants"};
+  SG::WriteCondHandleKey<GeoAlignmentStore>  m_writeKeyAlignStore{this,"WriteKeyAlignStore","TRT_AlignmentStore","Write handle key to store TRT GeoAlignmentStore constants"};
   SG::WriteCondHandleKey<InDetDD::TRT_DetElementContainer> m_writeKeyDetElCont{this, "WriteKeyDetElCont", "TRT_DetElementContainer", "Key of output to store detector element structures for TRT"};
 
   const InDetDD::TRT_DetectorManager* m_detManager;

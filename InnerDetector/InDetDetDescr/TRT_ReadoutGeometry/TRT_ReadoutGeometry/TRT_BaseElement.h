@@ -64,11 +64,9 @@ namespace InDetDD {
     TRT_BaseElement(const GeoVFullPhysVol* volume,
                     const Identifier& id,
                     const TRT_ID* idHelper,
-                    const TRT_Conditions* conditions,
-                    const GeoAlignmentStore* geoAlignStore = nullptr);
+                    const TRT_Conditions* conditions);
 
-    TRT_BaseElement(const TRT_BaseElement& right,
-                    const GeoAlignmentStore* geoAlignStore);
+    TRT_BaseElement(const TRT_BaseElement& right);
 
     /** Destructor: */
     virtual ~TRT_BaseElement() = default;
@@ -200,7 +198,6 @@ namespace InDetDD {
   private:
 
     /** Illegal operations: */
-    TRT_BaseElement(const TRT_BaseElement&right);
     const TRT_BaseElement& operator=(const TRT_BaseElement&right);
     /** Helper method for cache dealing */
     void deleteCache();
@@ -226,7 +223,6 @@ namespace InDetDD {
     CxxUtils::CachedUniquePtr<Trk::Surface> m_surface;
 
     CxxUtils::CachedValue<std::vector<const Trk::Surface*>> m_surfaces;
-    const GeoAlignmentStore* m_geoAlignStore=nullptr;
 
   };
 

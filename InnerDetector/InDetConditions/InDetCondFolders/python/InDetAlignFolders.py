@@ -41,7 +41,8 @@ if DetFlags.pixel_on() :
 # TRT Condition Algorithm
 from TRT_ConditionsAlgs.TRT_ConditionsAlgsConf import TRTAlignCondAlg
 TRTAlignCondAlg = TRTAlignCondAlg(name = "TRTAlignCondAlg",
-                                  UseDynamicFolders = InDetGeometryFlags.useDynamicAlignFolders())
+                                  UseDynamicFolders = InDetGeometryFlags.useDynamicAlignFolders(),
+                                  WriteKeyAlignStore = "")
 
 # Control loading of the dynamic folder scheme;
 # In future we might want to add also to MC DB
