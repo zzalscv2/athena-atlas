@@ -568,8 +568,8 @@ StatusCode TopxAODAlg::execute() {
               (m_config->isAFII() && m_config->PileupActualMu_AF().size() == 0)) {
             ATH_MSG_WARNING(
                 "\n********************************************************************************"
-                "*******\nYou are running over mc16d or mc16e sample but you are not using actual "
-                "mu reweighting!\nYou are strongly adviced to use it.\nCheck "
+                "*******\nYou are running over MC campaigns which support actual mu rewighting, but you are not using it!"
+                "\nYou are strongly adviced to use it.\nCheck "
                 "https://twiki.cern.ch/twiki/bin/view/AtlasProtected/"
                 "TopxAODStartGuideR21#PRW_and_Lumicalc_files\n*************************************"
                 "**************************************************\n");
