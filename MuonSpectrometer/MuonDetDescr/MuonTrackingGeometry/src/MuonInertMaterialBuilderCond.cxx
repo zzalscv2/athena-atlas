@@ -122,17 +122,16 @@ Muon::MuonInertMaterialBuilderCond::buildDetachedTrackingVolumes(const EventCont
         if (blend) {
             // decide if object suitable for blending; does not concern shields
             double protMass = 0.;
-            for (unsigned int ic = 0; ic < (*msTypeIter).first->constituents()->size(); ic++) {
-                protMass += calculateVolume((*((*msTypeIter).first->constituents()))[ic].first.get()) *
-                            (*((*msTypeIter).first->constituents()))[ic].second;
+            for (const auto & ic : *(*msTypeIter).first->constituents()) {
+                protMass += calculateVolume(ic.first.get()) *
+                            ic.second;
             }
             perm = msTypeName.compare(0, 1, "J") != 0 && m_blendLimit > 0 && protMass > m_blendLimit;
         }
         if (perm) msTypeName += "PERM";
         //
         const Trk::DetachedTrackingVolume* msTV = (*msTypeIter).first;
-        for (unsigned int it = 0; it < (*msTypeIter).second.size(); it++) {
-            Amg::Transform3D combTr((*msTypeIter).second[it]);
+        for (auto combTr : (*msTypeIter).second) {
             std::unique_ptr<Trk::DetachedTrackingVolume> newStat{msTV->clone(msTypeName, combTr)};
             if (perm){
                 mInert.first.push_back(std::move(newStat));
@@ -144,7 +143,7 @@ Muon::MuonInertMaterialBuilderCond::buildDetachedTrackingVolumes(const EventCont
     }
 
     // clean up prototypes
-    for (unsigned int it = 0; it < msTypes->size(); it++) delete (*msTypes)[it].first;
+    for (auto & it : *msTypes) delete it.first;
     delete msTypes;
 
     // merge
@@ -278,10 +277,10 @@ Muon::MuonInertMaterialBuilderCond::buildDetachedTrackingVolumeTypes(const Event
                 // if(pName.substr(0,4)=="MM_1") continue;
 
                 bool found = false;
-                for (unsigned int ip = 0; ip < objs.size(); ip++) {
-                    if (protoName == objs[ip].first->name()) {
+                for (auto & obj : objs) {
+                    if (protoName == obj.first->name()) {
                         found = true;
-                        if (simpleTree) objs[ip].second.push_back(vol.getTransform());
+                        if (simpleTree) obj.second.push_back(vol.getTransform());
                         // else objs[ip].second.insert(objs[ip].second.end(),vols[ish].second.begin(),vols[ish].second.end());
                     }
                 }
@@ -345,7 +344,7 @@ Muon::MuonInertMaterialBuilderCond::buildDetachedTrackingVolumeTypes(const Event
         new std::vector<std::pair<Trk::DetachedTrackingVolume*, std::vector<Amg::Transform3D>>>(std::move(objs));
 
     int count = 0;
-    for (unsigned int i = 0; i < mObjects->size(); i++) count += (*mObjects)[i].second.size();
+    for (auto & mObject : *mObjects) count += mObject.second.size();
 
     ATH_MSG_INFO(name() << " returns " << mObjects->size() << " prototypes, to be cloned into " << count << " objects");
 
@@ -402,9 +401,9 @@ Trk::TrackingVolume* Muon::MuonInertMaterialBuilderCond::simplifyShape(
 
     ATH_MSG_VERBOSE("simplifying shape for:" << trVol->volumeName() << "," << constituents[0].second.first << ","
                                              << constituents[0].second.second << " nr constituents " << constituents.size());
-    for (unsigned int i = 0; i < constituents.size(); i++)
-        ATH_MSG_VERBOSE("constituent:" << calculateVolume(constituents[i].first) << "," << constituents[i].second.first << ","
-                                       << constituents[i].second.second);
+    for (auto & constituent : constituents)
+        ATH_MSG_VERBOSE("constituent:" << calculateVolume(constituent.first) << "," << constituent.second.first << ","
+                                       << constituent.second.second);
 
     int simpleMode = 0;
 
@@ -437,12 +436,12 @@ Trk::TrackingVolume* Muon::MuonInertMaterialBuilderCond::simplifyShape(
             newVol = new Trk::TrackingVolume(*envelope, mat, nullptr, nullptr, envName);
             delete trVol;
         } else {  // enclose simplified constituents
-            for (unsigned int ic = 0; ic < constituents.size(); ic++) {
-                double fraction = constituents[ic].second.first;
+            for (auto & constituent : constituents) {
+                double fraction = constituent.second.first;
                 ATH_MSG_VERBOSE(" Applying scaling for " << trVol->volumeName() << " fraction " << fraction);
                 // simplified material rescales X0, l0 and density
                 Trk::Material mat(trVol->X0 / fraction, trVol->L0 / fraction, trVol->A, trVol->Z, fraction * trVol->rho);
-                Trk::TrackingVolume* trc = new Trk::TrackingVolume(*(constituents[ic].first), mat, nullptr, nullptr, trVol->volumeName());
+                Trk::TrackingVolume* trc = new Trk::TrackingVolume(*(constituent.first), mat, nullptr, nullptr, trVol->volumeName());
                 confinedVols->push_back(trc);
             }
             envName = trVol->volumeName() + "_envelope";
@@ -465,10 +464,10 @@ Trk::TrackingVolume* Muon::MuonInertMaterialBuilderCond::simplifyShape(
     if (blend) {
         // save calculable volumes for blending
         std::vector<std::pair<std::unique_ptr<const Trk::Volume>, float>> confinedConst;
-        for (unsigned int ic = 0; ic < constituents.size(); ic++) {
-            float scale = simpleMode == 2 ? 1 : constituents[ic].second.first;
+        for (auto & constituent : constituents) {
+            float scale = simpleMode == 2 ? 1 : constituent.second.first;
             confinedConst.emplace_back(
-                std::make_unique<Trk::Volume>(*(constituents[ic].first), newVol->transform().inverse()), scale);
+                std::make_unique<Trk::Volume>(*(constituent.first), newVol->transform().inverse()), scale);
         }
         constituentsVector->push_back(std::move(confinedConst));
     }
@@ -561,10 +560,10 @@ void Muon::MuonInertMaterialBuilderCond::getObjsForTranslation(
         const GeoLogVol* clv = cv->getLogVol();
         if (!cv->getNChildVols()) {
             bool found = false;
-            for (unsigned int is = 0; is < vols.size(); is++) {
-                if (clv->getName() == vols[is].first->getName()) {
+            for (auto & vol : vols) {
+                if (clv->getName() == vol.first->getName()) {
                     found = true;
-                    vols[is].second.push_back(transform * transf);
+                    vol.second.push_back(transform * transf);
                     break;
                 }
             }
@@ -647,9 +646,9 @@ const Trk::Volume* Muon::MuonInertMaterialBuilderCond::createEnvelope(
 #undef double
 #endif
             double z = spbBounds->halflengthZ();
-            for (unsigned int iv = 0; iv < xyVtx.size(); iv++) {
-                edges.push_back(transf.inverse() * (*sIter).first->transform() * Amg::Vector3D(xyVtx[iv].first, xyVtx[iv].second, -z));
-                edges.push_back(transf.inverse() * (*sIter).first->transform() * Amg::Vector3D(xyVtx[iv].first, xyVtx[iv].second, z));
+            for (auto & iv : xyVtx) {
+                edges.push_back(transf.inverse() * (*sIter).first->transform() * Amg::Vector3D(iv.first, iv.second, -z));
+                edges.push_back(transf.inverse() * (*sIter).first->transform() * Amg::Vector3D(iv.first, iv.second, z));
             }
             ATH_MSG_VERBOSE(" createEnvelope psbBounds ");
         } else {
@@ -666,14 +665,14 @@ const Trk::Volume* Muon::MuonInertMaterialBuilderCond::createEnvelope(
     double zMin = 25000.;
     double zMax = -25000.;
     // double rSize = -1.;
-    for (unsigned int ie = 0; ie < edges.size(); ie++) {
-        xMin = fmin(xMin, edges[ie].x());
-        xMax = fmax(xMax, edges[ie].x());
-        yMin = fmin(yMin, edges[ie].y());
-        yMax = fmax(yMax, edges[ie].y());
-        zMin = fmin(zMin, edges[ie].z());
-        zMax = fmax(zMax, edges[ie].z());
-        ATH_MSG_VERBOSE(" Envelope edges x " << edges[ie].x() << " y " << edges[ie].y() << " z " << edges[ie].z());
+    for (auto & edge : edges) {
+        xMin = fmin(xMin, edge.x());
+        xMax = fmax(xMax, edge.x());
+        yMin = fmin(yMin, edge.y());
+        yMax = fmax(yMax, edge.y());
+        zMin = fmin(zMin, edge.z());
+        zMax = fmax(zMax, edge.z());
+        ATH_MSG_VERBOSE(" Envelope edges x " << edge.x() << " y " << edge.y() << " z " << edge.z());
     }
 
     double xSize = 0.5 * (xMax - xMin);
@@ -867,8 +866,9 @@ std::vector<std::pair<const Trk::Volume*, std::pair<float, float>>> Muon::MuonIn
 
     // estimate fraction of cutouts & overlaps
     std::vector<std::pair<const Trk::Volume*, std::pair<float, float>>> wConst;
-    for (unsigned int i = 0; i < constituents.size(); i++)
-        wConst.emplace_back(constituents[i].first, std::pair<float, float>(1., 0.));
+    wConst.reserve(constituents.size());
+for (auto & constituent : constituents)
+        wConst.emplace_back(constituent.first, std::pair<float, float>(1., 0.));
 
     if (estimateVol && (constituents.size() > 1 || constituents[0].second)) {
         for (unsigned int iv = 0; iv < constituents.size(); iv++) {
@@ -881,11 +881,11 @@ std::vector<std::pair<const Trk::Volume*, std::pair<float, float>>> Muon::MuonIn
                     // recalculate inner radius for better efficiency
                     std::vector<std::pair<const Trk::Volume*, std::pair<float, float>>> subtr =
                         splitComposedVolume(constituents[iv].second, false);
-                    for (unsigned int is = 0; is < subtr.size(); is++) {
+                    for (auto & is : subtr) {
                         const Trk::CylinderVolumeBounds* cyls =
-                            dynamic_cast<const Trk::CylinderVolumeBounds*>(&(subtr[is].first->volumeBounds()));
+                            dynamic_cast<const Trk::CylinderVolumeBounds*>(&(is.first->volumeBounds()));
                         if (cyls) {
-                            Amg::Vector3D dc = subtr[is].first->transform().inverse() * constituents[iv].first->center();
+                            Amg::Vector3D dc = is.first->transform().inverse() * constituents[iv].first->center();
                             if (cyls->outerRadius() < cyl->outerRadius() && dc.perp() < 0.001 && fabs(dc.z()) < 10. &&
                                 fabs(cyl->halflengthZ() - cyls->halflengthZ()) < 10.) {
                                 replaceVol = new Trk::Volume(new Amg::Transform3D(constituents[iv].first->transform()),
@@ -928,7 +928,7 @@ std::vector<std::pair<const Trk::Volume*, std::pair<float, float>>> Muon::MuonIn
         }
     }
 
-    for (size_t i = 0; i < garbage.size(); i++) delete garbage[i];
+    for (auto & i : garbage) delete i;
 
     return wConst;
 }

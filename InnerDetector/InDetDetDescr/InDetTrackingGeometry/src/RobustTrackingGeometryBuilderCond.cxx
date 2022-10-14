@@ -572,8 +572,7 @@ InDet::RobustTrackingGeometryBuilderCond::trackingGeometry
     
      // negative positions
      std::vector<double> negDiscPositionZ(m_enclosingDiscPositionZ);
-     for (std::vector<double>::iterator posIter = negDiscPositionZ.begin();
-         posIter != negDiscPositionZ.end(); ++posIter) (*posIter) *= -1;
+     for (double & posIter : negDiscPositionZ) posIter *= -1;
         
      
      Trk::TrackingVolume* negativeEnclosure =  !negDiscPositionZ.empty() ?

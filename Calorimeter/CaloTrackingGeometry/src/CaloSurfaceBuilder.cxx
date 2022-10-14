@@ -98,9 +98,9 @@ StatusCode
 CaloSurfaceBuilder::finalize()
 {
   // clear surface cash
-  for (unsigned int i = 0; i < m_layerEntries.size(); i++) {
-    delete m_layerEntries[i].first;
-    delete m_layerEntries[i].second;
+  for (auto & layerEntry : m_layerEntries) {
+    delete layerEntry.first;
+    delete layerEntry.second;
   }
 
   if (!m_layerExits.empty()) {

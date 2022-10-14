@@ -246,8 +246,8 @@ bool InDet::DiscOverlapDescriptor::dumpSurfaces(std::vector<Trk::SurfaceIntersec
   static const PixelID* const pixIdHelper = getPixelID(detStore);
   static const SCT_ID* const sctIdHelper = getSCT_ID(detStore);
  
-  for (unsigned int surf = 0; surf < surfaces.size(); surf++) {
-    Identifier hitId = ((surfaces.at(surf)).object)->associatedDetectorElementIdentifier(); 
+  for (auto & surface : surfaces) {
+    Identifier hitId = (surface.object)->associatedDetectorElementIdentifier(); 
     if (m_pixelCase)
       std::cout <<  "barrel_ec " << pixIdHelper->barrel_ec(hitId) 
                 << ", layer_disk " << pixIdHelper->layer_disk(hitId) 

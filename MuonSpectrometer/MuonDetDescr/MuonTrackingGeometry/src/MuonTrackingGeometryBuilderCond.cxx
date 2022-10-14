@@ -223,8 +223,8 @@ Muon::MuonTrackingGeometryBuilderCond::trackingGeometry(
 
         // find maximal z,R extent
         float maxR = 0.;
-        for (unsigned int i = 0; i < envelopeDefs.size(); i++) {
-            if (envelopeDefs[i].first > maxR) maxR = envelopeDefs[i].first;
+        for (auto & envelopeDef : envelopeDefs) {
+            if (envelopeDef.first > maxR) maxR = envelopeDef.first;
         }
 
         aLVC.m_outerBarrelRadius = maxR;
@@ -394,9 +394,9 @@ Muon::MuonTrackingGeometryBuilderCond::trackingGeometry(
             ATH_MSG_DEBUG(" m_loadMSentry " << m_loadMSentry << " m_enclosingEnvelopeSvc " << m_enclosingEnvelopeSvc);
             double rmax = 0.;
             double zmax = 0.;
-            for (unsigned int i = 0; i < envelopeDefs.size(); i++) {
-                if (envelopeDefs[i].first > rmax) rmax = envelopeDefs[i].first;
-                if (fabs(envelopeDefs[i].second) > zmax) zmax = fabs(envelopeDefs[i].second);
+            for (const auto & envelopeDef : envelopeDefs) {
+                if (envelopeDef.first > rmax) rmax = envelopeDef.first;
+                if (fabs(envelopeDef.second) > zmax) zmax = fabs(envelopeDef.second);
             }
             if (!envelopeDefs.empty()) {
                 if (rmax > 0. && rmax <= aLVC.m_innerBarrelRadius && zmax > 0. && zmax <= m_barrelZ) {
@@ -417,11 +417,11 @@ Muon::MuonTrackingGeometryBuilderCond::trackingGeometry(
 
     // construct inner and outer envelope
 
-    for (unsigned int i = 0; i < envelopeDefs.size(); i++) {
+    for (auto & envelopeDef : envelopeDefs) {
         // ATH_MSG_VERBOSE( "Rz pair:"<< i<<":"<< envelopeDefs[i].first<<","<<envelopeDefs[i].second );
         if (!aLVC.m_msCutoutsIn.empty() && aLVC.m_msCutoutsIn.back().second == -aLVC.m_outerEndcapZ) break;
-        if (aLVC.m_msCutoutsIn.empty() || fabs(aLVC.m_msCutoutsIn.back().second) > m_barrelZ || fabs(envelopeDefs[i].second) > m_barrelZ)
-            aLVC.m_msCutoutsIn.push_back(envelopeDefs[i]);
+        if (aLVC.m_msCutoutsIn.empty() || fabs(aLVC.m_msCutoutsIn.back().second) > m_barrelZ || fabs(envelopeDef.second) > m_barrelZ)
+            aLVC.m_msCutoutsIn.push_back(envelopeDef);
         else if (!aLVC.m_msCutoutsIn.empty() && aLVC.m_msCutoutsIn.back().second == m_barrelZ &&
                  aLVC.m_msCutoutsIn.back().first != aLVC.m_innerBarrelRadius) {
             aLVC.m_msCutoutsIn.push_back(RZPair(aLVC.m_innerBarrelRadius, m_barrelZ));
@@ -714,19 +714,18 @@ Muon::MuonTrackingGeometryBuilderCond::trackingGeometry(
 
     // clean-up
     if (aLVC.m_stationSpan) {
-        for (size_t i = 0; i < aLVC.m_stationSpan->size(); i++) delete (*aLVC.m_stationSpan)[i];
+        for (auto *i : *aLVC.m_stationSpan) delete i;
         delete aLVC.m_stationSpan;
     }
     if (aLVC.m_inertSpan) {
-        for (size_t i = 0; i < aLVC.m_inertSpan->size(); i++) delete (*aLVC.m_inertSpan)[i];
+        for (auto *i : *aLVC.m_inertSpan) delete i;
         delete aLVC.m_inertSpan;
     }
 
-    for (size_t i = 0; i < aLVC.m_spans.size(); i++) delete aLVC.m_spans[i];
+    for (auto & span : aLVC.m_spans) delete span;
 
-    for (std::map<Trk::DetachedTrackingVolume*, std::vector<Trk::TrackingVolume*>*>::iterator it = aLVC.m_blendMap.begin();
-         it != aLVC.m_blendMap.end(); ++it) {
-        delete it->second;
+    for (auto & it : aLVC.m_blendMap) {
+        delete it.second;
     }
 
     trackingGeometry->m_muonInertMaterialConstituents = std::move(constituentsVector);
@@ -877,9 +876,9 @@ const Muon::Span* Muon::MuonTrackingGeometryBuilderCond::findVolumeSpan(const Tr
 #ifdef TRKDETDESCR_USEFLOATPRECISON
 #undef double
 #endif
-        for (unsigned int i = 0; i < vtcs.size(); i++) {
-            edges.emplace_back(vtcs[i].first, vtcs[i].second, spb->halflengthZ());
-            edges.emplace_back(vtcs[i].first, vtcs[i].second, -spb->halflengthZ());
+        for (const auto & vtc : vtcs) {
+            edges.emplace_back(vtc.first, vtc.second, spb->halflengthZ());
+            edges.emplace_back(vtc.first, vtc.second, -spb->halflengthZ());
         }
         // center
         edges.emplace_back(0., 0., spb->halflengthZ());
@@ -893,9 +892,9 @@ const Muon::Span* Muon::MuonTrackingGeometryBuilderCond::findVolumeSpan(const Tr
 #ifdef TRKDETDESCR_USEFLOATPRECISON
 #undef double
 #endif
-        for (unsigned int i = 0; i < vtcs.size(); i++) {
-            edges.emplace_back(vtcs[i].first, vtcs[i].second, prism->halflengthZ());
-            edges.emplace_back(vtcs[i].first, vtcs[i].second, -prism->halflengthZ());
+        for (const auto & vtc : vtcs) {
+            edges.emplace_back(vtc.first, vtc.second, prism->halflengthZ());
+            edges.emplace_back(vtc.first, vtc.second, -prism->halflengthZ());
         }
         edges.emplace_back(0., 0., prism->halflengthZ());
         edges.emplace_back(0., 0., -prism->halflengthZ());
@@ -1023,66 +1022,66 @@ Muon::MuonTrackingGeometryBuilderCond::findVolumesSpan(const std::vector<std::un
         new std::vector<std::vector<std::pair<Trk::DetachedTrackingVolume*, const Span*> >*>(9);
     // split MS into 9 blocks to speed up the build-up of geometry
     for (unsigned int i = 0; i < 9; i++) (*spans)[i] = new std::vector<std::pair<Trk::DetachedTrackingVolume*, const Span*> >;
-    for (unsigned int iobj = 0; iobj < objs->size(); iobj++) {
-        Amg::Transform3D transform = (*objs)[iobj]->trackingVolume()->transform();
-        const Muon::Span* span = findVolumeSpan(&((*objs)[iobj]->trackingVolume()->volumeBounds()), transform, zTol, phiTol, aLVC);
-        double x0 = (*objs)[iobj]->trackingVolume()->X0;
+    for (const auto & obj : *objs) {
+        Amg::Transform3D transform = obj->trackingVolume()->transform();
+        const Muon::Span* span = findVolumeSpan(&(obj->trackingVolume()->volumeBounds()), transform, zTol, phiTol, aLVC);
+        double x0 = obj->trackingVolume()->X0;
         double intX0 = fabs((*span)[0] - (*span)[1]) / (x0 + 0.000000001);
-        double l0 = (*objs)[iobj]->trackingVolume()->L0;
-        ATH_MSG_DEBUG("span:" << (*objs)[iobj]->name() << "," << (*span)[0] << "," << (*span)[1] << "," << (*span)[2] << "," << (*span)[3]
+        double l0 = obj->trackingVolume()->L0;
+        ATH_MSG_DEBUG("span:" << obj->name() << "," << (*span)[0] << "," << (*span)[1] << "," << (*span)[2] << "," << (*span)[3]
                               << "," << (*span)[4] << "," << (*span)[5] << " X0 " << x0 << " L0 " << l0 << " intX0 for span0 span1 "
                               << intX0);
 
         int nspans = 0;
         // negative outer wheel
         if ((*span)[0] < -m_bigWheel) {
-            (*spans)[0]->push_back(std::pair<Trk::DetachedTrackingVolume*, const Span*>((*objs)[iobj].get(), span));
+            (*spans)[0]->push_back(std::pair<Trk::DetachedTrackingVolume*, const Span*>(obj.get(), span));
             nspans++;
         }
         // negative big wheel
         if ((*span)[0] < -aLVC.m_innerEndcapZ && (*span)[1] > -m_bigWheel) {
-            (*spans)[1]->push_back(std::pair<Trk::DetachedTrackingVolume*, const Span*>((*objs)[iobj].get(), span));
+            (*spans)[1]->push_back(std::pair<Trk::DetachedTrackingVolume*, const Span*>(obj.get(), span));
             nspans++;
         }
         // neg.ect
         if ((*span)[0] < -m_ectZ && (*span)[1] > -aLVC.m_innerEndcapZ) {
-            (*spans)[2]->push_back(std::pair<Trk::DetachedTrackingVolume*, const Span*>((*objs)[iobj].get(), span));
+            (*spans)[2]->push_back(std::pair<Trk::DetachedTrackingVolume*, const Span*>(obj.get(), span));
             nspans++;
         }
         // neg.small wheel
         if ((*span)[0] < -m_diskShieldZ && (*span)[1] > -m_ectZ) {
-            (*spans)[3]->push_back(std::pair<Trk::DetachedTrackingVolume*, const Span*>((*objs)[iobj].get(), span));
+            (*spans)[3]->push_back(std::pair<Trk::DetachedTrackingVolume*, const Span*>(obj.get(), span));
             nspans++;
         }
         // barrel
         if ((*span)[0] < m_diskShieldZ && (*span)[1] > -m_diskShieldZ) {
             //	 && ((*span)[5]> m_innerBarrelRadius || (*span)[0]<-m_barrelZ || (*span)[1]>m_barrelZ)  ) {
-            (*spans)[4]->push_back(std::pair<Trk::DetachedTrackingVolume*, const Span*>((*objs)[iobj].get(), span));
+            (*spans)[4]->push_back(std::pair<Trk::DetachedTrackingVolume*, const Span*>(obj.get(), span));
             nspans++;
         }
         // pos.small wheel
         if ((*span)[0] < m_ectZ && (*span)[1] > m_diskShieldZ) {
-            (*spans)[5]->push_back(std::pair<Trk::DetachedTrackingVolume*, const Span*>((*objs)[iobj].get(), span));
+            (*spans)[5]->push_back(std::pair<Trk::DetachedTrackingVolume*, const Span*>(obj.get(), span));
             nspans++;
         }
         // pos.ect
         if ((*span)[0] < aLVC.m_innerEndcapZ && (*span)[1] > m_ectZ) {
-            (*spans)[6]->push_back(std::pair<Trk::DetachedTrackingVolume*, const Span*>((*objs)[iobj].get(), span));
+            (*spans)[6]->push_back(std::pair<Trk::DetachedTrackingVolume*, const Span*>(obj.get(), span));
             nspans++;
         }
         // positive big wheel
         if ((*span)[0] < m_bigWheel && (*span)[1] > aLVC.m_innerEndcapZ) {
-            (*spans)[7]->push_back(std::pair<Trk::DetachedTrackingVolume*, const Span*>((*objs)[iobj].get(), span));
+            (*spans)[7]->push_back(std::pair<Trk::DetachedTrackingVolume*, const Span*>(obj.get(), span));
             nspans++;
         }
         // positive outer wheel
         if ((*span)[1] > m_bigWheel) {
-            (*spans)[8]->push_back(std::pair<Trk::DetachedTrackingVolume*, const Span*>((*objs)[iobj].get(), span));
+            (*spans)[8]->push_back(std::pair<Trk::DetachedTrackingVolume*, const Span*>(obj.get(), span));
             nspans++;
         }
 
-        if (nspans == 0) ATH_MSG_WARNING(" object not selected in span regions " << (*objs)[iobj]->name());
-        if (nspans > 1) ATH_MSG_VERBOSE(" object selected in " << nspans << " span regions " << (*objs)[iobj]->name());
+        if (nspans == 0) ATH_MSG_WARNING(" object not selected in span regions " << obj->name());
+        if (nspans > 1) ATH_MSG_VERBOSE(" object selected in " << nspans << " span regions " << obj->name());
 
         aLVC.m_spans.push_back(span);  // keep track of things to delete
     }
@@ -1164,12 +1163,12 @@ Trk::TrackingVolume* Muon::MuonTrackingGeometryBuilderCond::processVolume(const 
                 if (detVols) aLVC.m_frameStat += detVols->size();
                 // prepare blending
                 if (m_blendInertMaterial && !blendVols.empty()) {
-                    for (unsigned int id = 0; id < blendVols.size(); id++) {
-                        if (!aLVC.m_blendMap[blendVols[id]]) {
-                            aLVC.m_blendMap[blendVols[id]] = new std::vector<Trk::TrackingVolume*>;
-                            aLVC.m_blendVols.push_back(blendVols[id]);
+                    for (auto & blendVol : blendVols) {
+                        if (!aLVC.m_blendMap[blendVol]) {
+                            aLVC.m_blendMap[blendVol] = new std::vector<Trk::TrackingVolume*>;
+                            aLVC.m_blendVols.push_back(blendVol);
                         }
-                        aLVC.m_blendMap[blendVols[id]]->push_back(sVol);
+                        aLVC.m_blendMap[blendVol]->push_back(sVol);
                     }
                 }
                 //
@@ -1239,12 +1238,12 @@ Trk::TrackingVolume* Muon::MuonTrackingGeometryBuilderCond::processVolume(const 
         if (muonObjs) aLVC.m_frameStat += muonObjs->size();
         // prepare blending
         if (m_blendInertMaterial && !blendVols.empty()) {
-            for (unsigned int id = 0; id < blendVols.size(); id++) {
-                if (!aLVC.m_blendMap[blendVols[id]]) {
-                    aLVC.m_blendMap[blendVols[id]] = new std::vector<Trk::TrackingVolume*>;
-                    aLVC.m_blendVols.push_back(blendVols[id]);
+            for (auto & blendVol : blendVols) {
+                if (!aLVC.m_blendMap[blendVol]) {
+                    aLVC.m_blendMap[blendVol] = new std::vector<Trk::TrackingVolume*>;
+                    aLVC.m_blendVols.push_back(blendVol);
                 }
-                aLVC.m_blendMap[blendVols[id]]->push_back(tVol);
+                aLVC.m_blendMap[blendVol]->push_back(tVol);
             }
         }
     }
@@ -1423,12 +1422,12 @@ Trk::TrackingVolume* Muon::MuonTrackingGeometryBuilderCond::processVolume(const 
                     if (detVols) aLVC.m_frameStat += detVols->size();
                     // prepare blending
                     if (m_blendInertMaterial && !blendVols.empty()) {
-                        for (unsigned int id = 0; id < blendVols.size(); id++) {
-                            if (!aLVC.m_blendMap[blendVols[id]]) {
-                                aLVC.m_blendMap[blendVols[id]] = new std::vector<Trk::TrackingVolume*>;
-                                aLVC.m_blendVols.push_back(blendVols[id]);
+                        for (auto & blendVol : blendVols) {
+                            if (!aLVC.m_blendMap[blendVol]) {
+                                aLVC.m_blendMap[blendVol] = new std::vector<Trk::TrackingVolume*>;
+                                aLVC.m_blendVols.push_back(blendVol);
                             }
-                            aLVC.m_blendMap[blendVols[id]]->push_back(sVol);
+                            aLVC.m_blendMap[blendVol]->push_back(sVol);
                         }
                     }
                     // reference point for the check of envelope
@@ -1506,8 +1505,8 @@ Trk::TrackingVolume* Muon::MuonTrackingGeometryBuilderCond::processVolume(const 
                     }
                 }
                 if (phiN > 1 && phi == phiN - 1) {
-                    for (unsigned int j = 0; j < phiSubs[0].size(); j++) {
-                        m_trackingVolumeHelper->setOutsideTrackingVolumeArray(*(phiSubs[0][j]), Trk::tubeSectorNegativePhi, phBins[phi]);
+                    for (auto & j : phiSubs[0]) {
+                        m_trackingVolumeHelper->setOutsideTrackingVolumeArray(*j, Trk::tubeSectorNegativePhi, phBins[phi]);
                     }
                 }
                 // finish eta gluing
@@ -1521,8 +1520,8 @@ Trk::TrackingVolume* Muon::MuonTrackingGeometryBuilderCond::processVolume(const 
             subVolumes.push_back(phiSubs);
             hBins.push_back(phBins);
             // get rid of the garbage
-            for (unsigned int j = 0; j < garbVol.size(); j++)
-                for (unsigned int jj = 0; jj < garbVol[j].size(); jj++) delete garbVol[j][jj];
+            for (auto & j : garbVol)
+                for (auto & jj : j) delete jj;
         }
 
         // Trk::BinUtility3DZFH* volBinUtil=new Trk::BinUtility3DZFH(zBinUtil,pBinUtil,hBinUtil,new Amg::Transform3D(vol->transform()));
@@ -1592,12 +1591,12 @@ Trk::TrackingVolume* Muon::MuonTrackingGeometryBuilderCond::processVolume(const 
                 if (detVols) aLVC.m_frameStat += detVols->size();
                 // prepare blending
                 if (m_blendInertMaterial && !blendVols.empty()) {
-                    for (unsigned int id = 0; id < blendVols.size(); id++) {
-                        if (!aLVC.m_blendMap[blendVols[id]]) {
-                            aLVC.m_blendMap[blendVols[id]] = new std::vector<Trk::TrackingVolume*>;
-                            aLVC.m_blendVols.push_back(blendVols[id]);
+                    for (auto & blendVol : blendVols) {
+                        if (!aLVC.m_blendMap[blendVol]) {
+                            aLVC.m_blendMap[blendVol] = new std::vector<Trk::TrackingVolume*>;
+                            aLVC.m_blendVols.push_back(blendVol);
                         }
-                        aLVC.m_blendMap[blendVols[id]]->push_back(sVol);
+                        aLVC.m_blendMap[blendVol]->push_back(sVol);
                     }
                 }
                 // reference point for the check of envelope
@@ -1675,12 +1674,12 @@ Trk::TrackingVolume* Muon::MuonTrackingGeometryBuilderCond::processVolume(const 
         if (muonObjs) aLVC.m_frameStat += muonObjs->size();
         // prepare blending
         if (m_blendInertMaterial && !blendVols.empty()) {
-            for (unsigned int id = 0; id < blendVols.size(); id++) {
-                if (!aLVC.m_blendMap[blendVols[id]]) {
-                    aLVC.m_blendMap[blendVols[id]] = new std::vector<Trk::TrackingVolume*>;
-                    aLVC.m_blendVols.push_back(blendVols[id]);
+            for (auto & blendVol : blendVols) {
+                if (!aLVC.m_blendMap[blendVol]) {
+                    aLVC.m_blendMap[blendVol] = new std::vector<Trk::TrackingVolume*>;
+                    aLVC.m_blendVols.push_back(blendVol);
                 }
-                aLVC.m_blendMap[blendVols[id]]->push_back(tVol);
+                aLVC.m_blendMap[blendVol]->push_back(tVol);
             }
         }
     }
@@ -1714,10 +1713,10 @@ Trk::TrackingVolume* Muon::MuonTrackingGeometryBuilderCond::processShield(const 
     double z1 = zPos - hz;
     double z2 = zPos + hz;
     zSteps.push_back(z1);
-    for (unsigned int iz = 0; iz < aLVC.m_shieldZPart.size(); iz++) {
-        if (aLVC.m_shieldZPart[iz] > z1 && aLVC.m_shieldZPart[iz] < z2) {
-            zSteps.push_back(aLVC.m_shieldZPart[iz]);
-            z1 = aLVC.m_shieldZPart[iz];
+    for (double iz : aLVC.m_shieldZPart) {
+        if (iz > z1 && iz < z2) {
+            zSteps.push_back(iz);
+            z1 = iz;
         }
     }
     zSteps.push_back(z2);
@@ -1787,12 +1786,12 @@ Trk::TrackingVolume* Muon::MuonTrackingGeometryBuilderCond::processShield(const 
             if (detVols) aLVC.m_frameStat += detVols->size();
             // prepare blending
             if (m_blendInertMaterial && !blendVols.empty()) {
-                for (unsigned int id = 0; id < blendVols.size(); id++) {
-                    if (!aLVC.m_blendMap[blendVols[id]]) {
-                        aLVC.m_blendMap[blendVols[id]] = new std::vector<Trk::TrackingVolume*>;
-                        aLVC.m_blendVols.push_back(blendVols[id]);
+                for (auto & blendVol : blendVols) {
+                    if (!aLVC.m_blendMap[blendVol]) {
+                        aLVC.m_blendMap[blendVol] = new std::vector<Trk::TrackingVolume*>;
+                        aLVC.m_blendVols.push_back(blendVol);
                     }
-                    aLVC.m_blendMap[blendVols[id]]->push_back(sVol);
+                    aLVC.m_blendMap[blendVol]->push_back(sVol);
                 }
             }
             // reference point for the check of envelope
@@ -2336,8 +2335,7 @@ void Muon::MuonTrackingGeometryBuilderCond::getZParts(LocalVariablesContainer& a
         if (i < zSiz - 1) aLVC.m_zPartitionsType.push_back(aLVC.m_zPartitionsType[zSiz - 2 - i]);
     }
 
-    return;
-}
+    }
 
 void Muon::MuonTrackingGeometryBuilderCond::getPhiParts(int mode, LocalVariablesContainer& aLVC) const {
     if (mode == 0) {  // trivial
@@ -2411,8 +2409,7 @@ void Muon::MuonTrackingGeometryBuilderCond::getPhiParts(int mode, LocalVariables
         // std::cout<<"adjustedPhi:"<<ic<<","<<m_adjustedPhi[ic]<<","<<m_adjustedPhiType[ic]<< std::endl;
     }
 
-    return;
-}
+    }
 
 void Muon::MuonTrackingGeometryBuilderCond::getHParts(LocalVariablesContainer& aLVC) const {
     // hardcode for the moment
@@ -2674,8 +2671,6 @@ void Muon::MuonTrackingGeometryBuilderCond::getHParts(LocalVariablesContainer& a
     aLVC.m_hPartitions.push_back(swZF);
     aLVC.m_hPartitions.push_back(innerZF);
     aLVC.m_hPartitions.push_back(outerZF);
-
-    return;
 }
 
 void Muon::MuonTrackingGeometryBuilderCond::getShieldParts(LocalVariablesContainer& aLVC) const {
@@ -2715,8 +2710,6 @@ void Muon::MuonTrackingGeometryBuilderCond::getShieldParts(LocalVariablesContain
     diskShield.emplace_back(0, 2700.);
     diskShield.emplace_back(0, 4255.);
     aLVC.m_shieldHPart.push_back(diskShield);
-
-    return;
 }
 
 double Muon::MuonTrackingGeometryBuilderCond::calculateVolume(const Trk::Volume* envelope) const {

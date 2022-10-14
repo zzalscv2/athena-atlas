@@ -984,7 +984,7 @@ Trk::Layer* InDet::StagedTrackingGeometryBuilder::mergeDiscLayers (std::vector<T
    for (const auto *sf : layerSurfaces) {
      const InDetDD::SiDetectorElement* detElement = dynamic_cast<const InDetDD::SiDetectorElement*>(sf->associatedDetectorElement());
      const std::vector<const Trk::Surface*>& allSurfacesVector = detElement->surfaces();
-     for (auto *subsf : allSurfacesVector)  
+     for (const auto *subsf : allSurfacesVector)  
        //Problematic for MT noge that we couple to the detElement owned surfaces
        Trk::IGeometryBuilder::associateLayer(*layer, const_cast<Trk::Surface&>(*subsf));
    }

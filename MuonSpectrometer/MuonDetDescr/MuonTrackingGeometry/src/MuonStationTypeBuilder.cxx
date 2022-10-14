@@ -393,7 +393,7 @@ Trk::TrackingVolumeArray* Muon::MuonStationTypeBuilder::processBoxStationCompone
         components = m_trackingVolumeArrayCreator->cuboidVolumesArrayNav(trkVols, binUtility, false);
     }
 
-    for (size_t i = 0; i < compVol.size(); i++) delete compVol[i];
+    for (auto & i : compVol) delete i;
 
     return components;
 }
@@ -653,7 +653,7 @@ Trk::TrackingVolumeArray* Muon::MuonStationTypeBuilder::processTrdStationCompone
         components = m_trackingVolumeArrayCreator->trapezoidVolumesArrayNav(trkVols, binUtility, false);
     }
 
-    for (size_t i = 0; i < compVol.size(); i++) delete compVol[i];
+    for (auto & i : compVol) delete i;
 
     return components;
 }
@@ -698,9 +698,9 @@ Trk::TrackingVolume* Muon::MuonStationTypeBuilder::processMdtBox(Trk::Volume*& v
         }
         if ((clv->getName()) == "MultiLayerFoam") {
             xv = decodeX(clv->getShape());
-            for (unsigned int i = 0; i < cache.m_mdtFoamMat.size(); i++) {
-                if (std::abs(xv - 0.5 * cache.m_mdtFoamMat[i]->thickness()) < 0.001) {
-                    mdtMat = cache.m_mdtFoamMat[i].get();
+            for (auto & i : cache.m_mdtFoamMat) {
+                if (std::abs(xv - 0.5 * i->thickness()) < 0.001) {
+                    mdtMat = i.get();
                     break;
                 }
             }
@@ -850,9 +850,9 @@ Trk::TrackingVolume* Muon::MuonStationTypeBuilder::processMdtTrd(Trk::Volume*& v
         }
         if ((clv->getName()) == "MultiLayerFoam") {
             xv = decodeX(clv->getShape());
-            for (unsigned int i = 0; i < cache.m_mdtFoamMat.size(); i++) {
-                if (std::abs(xv - 0.5 * cache.m_mdtFoamMat[i]->thickness()) < 0.001) {
-                    mdtMat = cache.m_mdtFoamMat[i].get();
+            for (auto & i : cache.m_mdtFoamMat) {
+                if (std::abs(xv - 0.5 * i->thickness()) < 0.001) {
+                    mdtMat = i.get();
                     break;
                 }
             }
@@ -983,9 +983,9 @@ Trk::TrackingVolume* Muon::MuonStationTypeBuilder::processRpc(Trk::Volume*& vol,
             if ((glv->getName()).compare(0, 3, "Ded") == 0) {
                 // find if material exists already
                 bool found = false;
-                for (unsigned int i = 0; i < cache.m_rpcDed.size(); i++) {
-                    if (std::abs(thickness - cache.m_rpcDed[i]->thickness()) < 0.001) {
-                        rpcMat = Trk::MaterialProperties(*cache.m_rpcDed[i]);
+                for (auto & i : cache.m_rpcDed) {
+                    if (std::abs(thickness - i->thickness()) < 0.001) {
+                        rpcMat = Trk::MaterialProperties(*i);
                         found = true;
                         break;
                     }
@@ -1036,9 +1036,9 @@ Trk::TrackingVolume* Muon::MuonStationTypeBuilder::processRpc(Trk::Volume*& vol,
                 if ((glv->getName()).compare(0, 3, "Ded") == 0) {
                     // find if material exists already
                     bool found = false;
-                    for (unsigned int i = 0; i < cache.m_rpcDed.size(); i++) {
-                        if (std::abs(thickness - cache.m_rpcDed[i]->thickness()) < 0.001) {
-                            rpcMat = Trk::MaterialProperties(*cache.m_rpcDed[i]);
+                    for (auto & i : cache.m_rpcDed) {
+                        if (std::abs(thickness - i->thickness()) < 0.001) {
+                            rpcMat = Trk::MaterialProperties(*i);
                             found = true;
                             break;
                         }
@@ -1387,24 +1387,24 @@ Trk::TrackingVolume* Muon::MuonStationTypeBuilder::processNSW(const MuonGM::Muon
     // loop over layers and retrieve boundaries
     double zMin{25000.}, zMax{-25000.}, rMin{13000.}, rMed{0.}, rMax{0.}, hMin{0.}, hMed{0.}, hMax{0.};
 
-    for (unsigned int il = 0; il < layers.size(); il++) {
-        zMin = fmin(zMin, (layers[il]->surfaceRepresentation().center().z()) - 0.5 * layers[il]->thickness());
-        zMax = fmax(zMax, (layers[il]->surfaceRepresentation().center().z()) + 0.5 * layers[il]->thickness());
+    for (auto *layer : layers) {
+        zMin = fmin(zMin, (layer->surfaceRepresentation().center().z()) - 0.5 * layer->thickness());
+        zMax = fmax(zMax, (layer->surfaceRepresentation().center().z()) + 0.5 * layer->thickness());
 
-        const Trk::TrapezoidBounds* trdBounds = dynamic_cast<const Trk::TrapezoidBounds*>(&(layers[il]->surfaceRepresentation().bounds()));
+        const Trk::TrapezoidBounds* trdBounds = dynamic_cast<const Trk::TrapezoidBounds*>(&(layer->surfaceRepresentation().bounds()));
 
         if (trdBounds) {
-            rMin = fmin(rMin, (layers[il]->surfaceRepresentation().center().perp()) - trdBounds->halflengthY());
-            rMax = fmax(rMax, (layers[il]->surfaceRepresentation().center().perp()) + trdBounds->halflengthY());
+            rMin = fmin(rMin, (layer->surfaceRepresentation().center().perp()) - trdBounds->halflengthY());
+            rMax = fmax(rMax, (layer->surfaceRepresentation().center().perp()) + trdBounds->halflengthY());
 
             // hMin taken from MM, ring 0
-            Identifier id(layers[il]->layerType());
+            Identifier id(layer->layerType());
             if (muonDetMgr->mmIdHelper()->is_mm(id)) {
                 if (std::abs(muonDetMgr->mmIdHelper()->stationEta(id)) == 1) hMin = trdBounds->minHalflengthX();
                 // hMed taken from MM, ring 1
                 if (std::abs(muonDetMgr->mmIdHelper()->stationEta(id)) == 2) {
                     hMed = trdBounds->minHalflengthX();
-                    rMed = layers[il]->surfaceRepresentation().center().perp() - trdBounds->halflengthY();
+                    rMed = layer->surfaceRepresentation().center().perp() - trdBounds->halflengthY();
                 }
                 // hMax taken from MM, ring 3
                 if (std::abs(muonDetMgr->mmIdHelper()->stationEta(id)) == 4) hMax = trdBounds->maxHalflengthX();
@@ -1548,7 +1548,7 @@ Trk::TrackingVolume* Muon::MuonStationTypeBuilder::processCscStation(const GeoVP
     }
     // this should be enough to build station envelope
     double xTotal = 0;
-    for (unsigned int i = 0; i < xSizes.size(); i++) xTotal += xSizes[i];
+    for (double xSize : xSizes) xTotal += xSize;
     double xShift = 0.5 * (xmx + xmn);
     double zShift = 0;
     zShift = std::abs(((compTransf.front()).translation())[2]) + std::abs(((compTransf.back()).translation())[2]);
@@ -2335,11 +2335,11 @@ std::pair<Trk::Layer*, const std::vector<Trk::Layer*>*> Muon::MuonStationTypeBui
         if (m_multilayerRepresentation && trVol->confinedVolumes()) {
             Trk::BinnedArraySpan<Trk::TrackingVolume * const> vols = trVol->confinedVolumes()->arrayObjects();
             if (vols.size() > 1) {
-                for (unsigned int i = 0; i < vols.size(); i++) {
-                    Trk::MaterialProperties matMulti = collectStationMaterial(vols[i], sf);
+                for (auto *vol : vols) {
+                    Trk::MaterialProperties matMulti = collectStationMaterial(vol, sf);
                     ATH_MSG_VERBOSE(" collectStationMaterial cub matMulti " << matMulti);
                     multi->push_back(new Trk::PlaneLayer(
-                        Amg::Transform3D(vols[i]->transform() * Amg::AngleAxis3D(0.5 * M_PI, Amg::Vector3D(0., 1., 0.)) *
+                        Amg::Transform3D(vol->transform() * Amg::AngleAxis3D(0.5 * M_PI, Amg::Vector3D(0., 1., 0.)) *
                                          Amg::AngleAxis3D(0.5 * M_PI, Amg::Vector3D(0., 0., 1.))),
                         bounds, Trk::HomogeneousLayerMaterial(matMulti, 0.), matMulti.thickness(), od, 1));
                 }
@@ -2364,16 +2364,16 @@ std::pair<Trk::Layer*, const std::vector<Trk::Layer*>*> Muon::MuonStationTypeBui
         }
         Trk::HomogeneousLayerMaterial mat(matProp, 0.);
         layer = new Trk::PlaneLayer(Amg::Transform3D(subt * trVol->transform()), bounds, mat, thickness, od, 1);
-        for (size_t i = 0; i < surfs->size(); i++) delete (*surfs)[i];
+        for (const auto *surf : *surfs) delete surf;
         delete surfs;
         // multilayers
         if (m_multilayerRepresentation && trVol->confinedVolumes()) {
           Trk::BinnedArraySpan<Trk::TrackingVolume * const> vols = trVol->confinedVolumes()->arrayObjects();
             if (vols.size() > 1) {
-                for (unsigned int i = 0; i < vols.size(); i++) {
-                    Trk::MaterialProperties matMulti = collectStationMaterial(vols[i], sf);
+                for (auto *vol : vols) {
+                    Trk::MaterialProperties matMulti = collectStationMaterial(vol, sf);
                     ATH_MSG_VERBOSE(" collectStationMaterial trd matMulti  " << matMulti);
-                    multi->push_back(new Trk::PlaneLayer(Amg::Transform3D(vols[i]->transform()), bounds,
+                    multi->push_back(new Trk::PlaneLayer(Amg::Transform3D(vol->transform()), bounds,
                                                          Trk::HomogeneousLayerMaterial(matMulti, 0.), matMulti.thickness(), od, 1));
                 }
             }
@@ -2398,16 +2398,16 @@ std::pair<Trk::Layer*, const std::vector<Trk::Layer*>*> Muon::MuonStationTypeBui
         }
         Trk::HomogeneousLayerMaterial mat(matProp, 0.);
         layer = new Trk::PlaneLayer(Amg::Transform3D(trVol->transform()), bounds, mat, thickness, od, 1);
-        for (size_t i = 0; i < surfs->size(); i++) delete (*surfs)[i];
+        for (const auto *surf : *surfs) delete surf;
         delete surfs;
         // multilayers
         if (m_multilayerRepresentation && trVol->confinedVolumes()) {
           Trk::BinnedArraySpan<Trk::TrackingVolume * const> vols = trVol->confinedVolumes()->arrayObjects();
             if (vols.size() > 1) {
-                for (unsigned int i = 0; i < vols.size(); i++) {
-                    Trk::MaterialProperties matMulti = collectStationMaterial(vols[i], sf);
+                for (auto *vol : vols) {
+                    Trk::MaterialProperties matMulti = collectStationMaterial(vol, sf);
                     ATH_MSG_VERBOSE(" collectStationMaterial dtrd matMulti  " << matMulti);
-                    multi->push_back(new Trk::PlaneLayer(Amg::Transform3D(vols[i]->transform()), bounds,
+                    multi->push_back(new Trk::PlaneLayer(Amg::Transform3D(vol->transform()), bounds,
                                                          Trk::HomogeneousLayerMaterial(matMulti, 0.), matMulti.thickness(), od, 1));
                 }
             }
@@ -2660,30 +2660,30 @@ Trk::MaterialProperties Muon::MuonStationTypeBuilder::collectStationMaterial(con
     // components layers
     if (vol->confinedLayers()) {
       Trk::BinnedArraySpan<Trk::Layer const * const> lays = vol->confinedLayers()->arrayObjects();
-        for (unsigned il = 0; il < lays.size(); il++) {
+        for (const auto *lay : lays) {
             const Trk::MaterialProperties* mLay =
-                lays[il]->layerMaterialProperties()->fullMaterial(lays[il]->surfaceRepresentation().center());
+                lay->layerMaterialProperties()->fullMaterial(lay->surfaceRepresentation().center());
             // protect nan
-            if (mLay && lays[il]->thickness() > 0 && mLay->material().x0() > 0.) {
-                layMat.addMaterial(mLay->material(), lays[il]->thickness() / mLay->material().x0());
+            if (mLay && lay->thickness() > 0 && mLay->material().x0() > 0.) {
+                layMat.addMaterial(mLay->material(), lay->thickness() / mLay->material().x0());
                 ATH_MSG_VERBOSE(" collectStationMaterial after add confined lay " << layMat);
             }
         }
     }
     if (!vol->confinedArbitraryLayers().empty()) {
         Trk::ArraySpan<const Trk::Layer* const> lays = vol->confinedArbitraryLayers();
-        for (unsigned il = 0; il < lays.size(); il++) {
+        for (const auto *lay : lays) {
             const Trk::MaterialProperties* mLay =
-                lays[il]->layerMaterialProperties()->fullMaterial(lays[il]->surfaceRepresentation().center());
+                lay->layerMaterialProperties()->fullMaterial(lay->surfaceRepresentation().center());
             // scaling factor
-            const Trk::RectangleBounds* rect = dynamic_cast<const Trk::RectangleBounds*>(&(lays[il]->surfaceRepresentation().bounds()));
-            const Trk::TrapezoidBounds* trap = dynamic_cast<const Trk::TrapezoidBounds*>(&(lays[il]->surfaceRepresentation().bounds()));
+            const Trk::RectangleBounds* rect = dynamic_cast<const Trk::RectangleBounds*>(&(lay->surfaceRepresentation().bounds()));
+            const Trk::TrapezoidBounds* trap = dynamic_cast<const Trk::TrapezoidBounds*>(&(lay->surfaceRepresentation().bounds()));
             if ((rect || trap) && mLay) {
                 double scale = rect ? 4 * rect->halflengthX() * rect->halflengthY() / sf
                                     : 2 * (trap->minHalflengthX() + trap->maxHalflengthX()) * trap->halflengthY() / sf;
                 // protect nan
-                if (lays[il]->thickness() > 0 && mLay->material().x0() > 0.) {
-                    layMat.addMaterial(mLay->material(), scale * lays[il]->thickness() / mLay->material().x0());
+                if (lay->thickness() > 0 && mLay->material().x0() > 0.) {
+                    layMat.addMaterial(mLay->material(), scale * lay->thickness() / mLay->material().x0());
                     ATH_MSG_VERBOSE(" collectStationMaterial after add confined sub lay " << layMat);
                 }
             }
@@ -2692,35 +2692,35 @@ Trk::MaterialProperties Muon::MuonStationTypeBuilder::collectStationMaterial(con
     // subvolumes
     if (vol->confinedVolumes()) {
       Trk::BinnedArraySpan<Trk::TrackingVolume const * const> subVols = vol->confinedVolumes()->arrayObjects();
-        for (unsigned iv = 0; iv < subVols.size(); iv++) {
-            if (subVols[iv]->confinedLayers()) {
-              Trk::BinnedArraySpan<Trk::Layer const * const> lays = subVols[iv]->confinedLayers()->arrayObjects();
-                for (unsigned il = 0; il < lays.size(); il++) {
+        for (const auto *subVol : subVols) {
+            if (subVol->confinedLayers()) {
+              Trk::BinnedArraySpan<Trk::Layer const * const> lays = subVol->confinedLayers()->arrayObjects();
+                for (const auto *lay : lays) {
                     const Trk::MaterialProperties* mLay =
-                        lays[il]->layerMaterialProperties()->fullMaterial(lays[il]->surfaceRepresentation().center());
+                        lay->layerMaterialProperties()->fullMaterial(lay->surfaceRepresentation().center());
                     // protect nan
-                    if (mLay && lays[il]->thickness() > 0 && mLay->material().x0() > 0.) {
-                        layMat.addMaterial(mLay->material(), lays[il]->thickness() / mLay->material().x0());
+                    if (mLay && lay->thickness() > 0 && mLay->material().x0() > 0.) {
+                        layMat.addMaterial(mLay->material(), lay->thickness() / mLay->material().x0());
                         ATH_MSG_VERBOSE(" collectStationMaterial after add confined vol " << layMat);
                     }
                 }
             }
-            if (!subVols[iv]->confinedArbitraryLayers().empty()) {
-                Trk::ArraySpan<const Trk::Layer* const> lays = (subVols[iv]->confinedArbitraryLayers());
-                for (unsigned il = 0; il < lays.size(); il++) {
+            if (!subVol->confinedArbitraryLayers().empty()) {
+                Trk::ArraySpan<const Trk::Layer* const> lays = (subVol->confinedArbitraryLayers());
+                for (const auto *lay : lays) {
                     const Trk::MaterialProperties* mLay =
-                        lays[il]->layerMaterialProperties()->fullMaterial(lays[il]->surfaceRepresentation().center());
+                        lay->layerMaterialProperties()->fullMaterial(lay->surfaceRepresentation().center());
                     // scaling factor
                     const Trk::RectangleBounds* rect =
-                        dynamic_cast<const Trk::RectangleBounds*>(&(lays[il]->surfaceRepresentation().bounds()));
+                        dynamic_cast<const Trk::RectangleBounds*>(&(lay->surfaceRepresentation().bounds()));
                     const Trk::TrapezoidBounds* trap =
-                        dynamic_cast<const Trk::TrapezoidBounds*>(&(lays[il]->surfaceRepresentation().bounds()));
+                        dynamic_cast<const Trk::TrapezoidBounds*>(&(lay->surfaceRepresentation().bounds()));
                     if ((rect || trap) && mLay) {
                         double scale = rect ? 4 * rect->halflengthX() * rect->halflengthY() / sf
                                             : 2 * (trap->minHalflengthX() + trap->maxHalflengthX()) * trap->halflengthY() / sf;
                         // protect nan
-                        if (lays[il]->thickness() > 0 && mLay->material().x0() > 0.) {
-                            layMat.addMaterial(mLay->material(), scale * lays[il]->thickness() / mLay->material().x0());
+                        if (lay->thickness() > 0 && mLay->material().x0() > 0.) {
+                            layMat.addMaterial(mLay->material(), scale * lay->thickness() / mLay->material().x0());
                             ATH_MSG_VERBOSE(" collectStationMaterial after add sub vols " << layMat);
                         }
                     }
