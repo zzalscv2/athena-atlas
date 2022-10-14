@@ -6,7 +6,7 @@
 
 TGC::TgcHit::TgcHit(double x,double y,double z,
 		    double shortWidth,double longWidth,double length,
-		    bool isStrip,int gasGap,int channel,int stationEta,int stationPhi,int stationName, int bunch) :
+		    bool isStrip,int gasGap,int channel,int stationEta,int stationPhi,int stationName, int bcmask) :
   m_x{x},
   m_y{y},
   m_z{z},
@@ -19,9 +19,11 @@ TGC::TgcHit::TgcHit(double x,double y,double z,
   m_stationEta{stationEta},
   m_stationPhi{stationPhi},
   m_stationName{stationName},
-  m_bunch{bunch},
-  m_residual{-99999}
+  m_bcmask{bcmask},
+  m_residuals{}
 {
-  initChamber(stationEta,stationPhi,stationName),
-  m_gap_name = Form("%sL%02d%s",cham_name().data(),m_gasGap,(m_isStrip)?("S"):("W"));
+  initChamber(stationEta,stationPhi,stationName);
+  m_gap_name = Form("%sL%02d",cham_name().data(),m_gasGap);
+  m_type_name = Form("%s%s",m_gap_name.data(),(m_isStrip)?("S"):("W"));
+  m_channel_name = Form("%sCh%03d",m_type_name.data(),m_channel);
 }
