@@ -10,10 +10,6 @@
          
 #include "StgcRawDataMonitoring/StgcRawDataMonAlg.h"
 
-int sTgcRawDataMonAlg::get_sectorPhi_from_stationPhi_stName(int stationPhi, const std::string &stName) const 
-{ 
-  int iStation = (stName == "STS") ? 1 : 0;
-  
-  return 2*stationPhi - iStation;
+int sTgcRawDataMonAlg::getSectors(const Identifier& id) const { 
+  return m_idHelperSvc -> sector(id)*(m_idHelperSvc -> stationEta(id) > 0 ? 1. : -1.);
 }
-
