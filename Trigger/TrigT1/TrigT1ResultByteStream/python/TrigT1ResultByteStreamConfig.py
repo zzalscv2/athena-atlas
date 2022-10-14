@@ -11,9 +11,8 @@ from libpyeformat_helper import SourceIdentifier, SubDetector
 
 from L1CaloFEXByteStream.L1CaloFEXByteStreamConfig import eFexByteStreamToolCfg, jFexRoiByteStreamToolCfg, jFexInputByteStreamToolCfg, gFexByteStreamToolCfg, gFexInputByteStreamToolCfg
 from L1TopoByteStream.L1TopoByteStreamConfig import L1TopoPhase1ByteStreamToolCfg
-from TrigT1MuonRecRoiTool.TrigT1MuonRecRoiToolConfig import getRun3RPCRecRoiTool
-from TrigT1MuonRecRoiTool.TrigT1MuonRecRoiToolConfig import getRun3TGCRecRoiTool
-from TrigT1MuctpiPhase1.TrigT1MuctpiPhase1Config import getTrigThresholdDecisionTool
+from TrigT1MuonRecRoiTool.TrigT1MuonRecRoiToolConfig import RPCRecRoiToolCfg, TGCRecRoiToolCfg
+from TrigT1MuctpiPhase1.TrigT1MuctpiPhase1Config import TrigThresholdDecisionToolCfg
 
 _log = logging.getLogger('TrigT1ResultByteStreamConfig')
 
@@ -98,11 +97,14 @@ def MuonRoIByteStreamToolCfg(name, flags, writeBS=False):
     tool.MuonRoIContainerWriteKeys += [recordable(c) for c in containerNames]
     tool.L1TopoOutputLocID += topocontainerNames
 
-  tool.RPCRecRoiTool = getRun3RPCRecRoiTool(name="RPCRecRoiTool",useRun3Config=flags.Trigger.enableL1MuonPhase1)
-  tool.TGCRecRoiTool = getRun3TGCRecRoiTool(name="TGCRecRoiTool",useRun3Config=flags.Trigger.enableL1MuonPhase1)
-  tool.TrigThresholdDecisionTool = getTrigThresholdDecisionTool(name="TrigThresholdDecisionTool")
+  acc = ComponentAccumulator()
 
-  return tool
+  tool.RPCRecRoiTool = acc.popToolsAndMerge(RPCRecRoiToolCfg(flags))
+  tool.TGCRecRoiTool = acc.popToolsAndMerge(TGCRecRoiToolCfg(flags))
+  tool.TrigThresholdDecisionTool = acc.popToolsAndMerge(TrigThresholdDecisionToolCfg(flags))
+ 
+  acc.setPrivateTools(tool)
+  return acc
 
 def doRoIBResult(flags):
   '''
@@ -126,6 +128,7 @@ def doRoIBResult(flags):
 
 def L1TriggerByteStreamDecoderCfg(flags, returnEDM=False):
 
+  acc = ComponentAccumulator()
   decoderTools = []
   maybeMissingRobs = []
 
@@ -151,9 +154,9 @@ def L1TriggerByteStreamDecoderCfg(flags, returnEDM=False):
   # Run-3 L1Muon decoding (only when running HLT - offline we read it from HLT result)
   ########################################
   if flags.Trigger.L1.doMuon and flags.Trigger.enableL1MuonPhase1 and flags.Trigger.doHLT:
-    muonRoiTool = MuonRoIByteStreamToolCfg(name="L1MuonBSDecoderTool",
-                                           flags=flags,
-                                           writeBS=False)
+    muonRoiTool = acc.popToolsAndMerge(MuonRoIByteStreamToolCfg(name="L1MuonBSDecoderTool",
+                                                                flags=flags,
+                                                                writeBS=False))
     decoderTools += [muonRoiTool]
 
   ########################################
@@ -229,7 +232,6 @@ def L1TriggerByteStreamDecoderCfg(flags, returnEDM=False):
   from TrigT1ResultByteStream.TrigT1ResultByteStreamMonitoring import L1TriggerByteStreamDecoderMonitoring
   decoderAlg.MonTool = L1TriggerByteStreamDecoderMonitoring(decoderAlg.getName(), flags, decoderTools)
 
-  acc = ComponentAccumulator()
   acc.addEventAlgo(decoderAlg, primary=True)
 
   # The decoderAlg needs to load ByteStreamMetadata for the detector mask
@@ -269,9 +271,9 @@ def L1TriggerByteStreamEncoderCfg(flags):
 
   # Run-3 L1Muon encoding
   if flags.Trigger.L1.doMuon and flags.Trigger.enableL1MuonPhase1:
-    muonRoiTool = MuonRoIByteStreamToolCfg(name="L1MuonBSEncoderTool",
-                                           flags=flags,
-                                           writeBS=True)
+    muonRoiTool = acc.popToolsAndMerge(MuonRoIByteStreamToolCfg(name="L1MuonBSEncoderTool",
+                                                                flags=flags,
+                                                                writeBS=True))
     acc.addPublicTool(muonRoiTool)
 
   # TODO: Run-3 L1Calo, L1Topo, CTP
