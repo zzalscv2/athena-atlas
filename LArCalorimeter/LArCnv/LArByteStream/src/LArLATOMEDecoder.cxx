@@ -605,7 +605,7 @@ void LArLATOMEDecoder::EventProcess::fillCollection(const ROBFragment* robFrag, 
 	}
 	int RAWValue0 = -999;
 	if (!at0val && SCID != hwidEmpty && at0!=MonDataType::Invalid) { 
-	  m_decoder->msg(MSG::INFO) << "at0 bad quality bit for SC:" << nsc << " BC " << iBC
+	  m_decoder->msg(MSG::DEBUG) << "at0 bad quality bit for SC:" << nsc << " BC " << iBC
 				       << " latome " << robFrag->rod_source_id() << endmsg;
 	  RAWValue0 = -1; 
 	} else{
@@ -632,7 +632,7 @@ void LArLATOMEDecoder::EventProcess::fillCollection(const ROBFragment* robFrag, 
 
 	int RAWValue1 = -999;
 	if (!at1val && SCID != hwidEmpty && at1!=MonDataType::Invalid) { 
-	  m_decoder->msg(MSG::INFO) << "at1 bad quality bit for SC:" << nsc << " BC " << iBC
+	  m_decoder->msg(MSG::DEBUG) << "at1 bad quality bit for SC:" << nsc << " BC " << iBC
 				       << " latome " << robFrag->rod_source_id() << endmsg;
 	  RAWValue1 = -1; 
 	}else{
