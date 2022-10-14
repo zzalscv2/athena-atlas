@@ -42,8 +42,8 @@ StatusCode LArSCSimpleMaker::initialize(){
 	ATH_CHECK( m_scidtool.retrieve() );
 	ATH_CHECK( detStore()->retrieve (m_sem_mgr, "CaloSuperCellMgr") );
 	ATH_CHECK( detStore()->retrieve (m_calo_id_manager, "CaloIdManager") );
-	if (m_compNoise )ATH_CHECK( m_noise_per_cell_Key.initialize() );
-        if ( m_addBCID ) ATH_CHECK( m_bcidAvgKey.initialize() );
+	ATH_CHECK( m_noise_per_cell_Key.initialize(m_compNoise) );
+  ATH_CHECK( m_bcidAvgKey.initialize(m_addBCID) );
 	return StatusCode::SUCCESS;
 }
 
