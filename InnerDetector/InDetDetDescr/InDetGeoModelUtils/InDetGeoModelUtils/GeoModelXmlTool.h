@@ -35,6 +35,8 @@ protected:
   Gaudi::Property<std::string> m_detectorName{this, "DetectorName", "ITkStrip", ""};
   ServiceHandle<IRDBAccessSvc> m_rdbAccessSvc{this, "RDBAccessSvc", "RDBAccessSvc", ""};
   ServiceHandle<IGeoDbTagSvc> m_geoDbTagSvc{this, "GeoDbTagSvc", "GeoDbTagSvc", ""};
+  Gaudi::Property<std::string> m_dtdName{this, "OverrideDtdName", "", "Override standard .dtd file from GeoModelXml"};
+
 
 private:
 

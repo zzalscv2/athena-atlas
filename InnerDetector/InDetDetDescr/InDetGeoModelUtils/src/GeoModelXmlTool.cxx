@@ -142,15 +142,27 @@ void GeoModelXmlTool::createTopVolume_impl(GeoPhysVol* world, GmxInterface& gmxI
     }
   }
 
-  // Use the DTD from Athena
+  // Use the DTD from GeoModel
   if (m_gmxFilename.empty()) {
-    std::string dtdFile = '"' + PathResolver::find_file("GeoModelXml/geomodel.dtd", "DATAPATH") + '"';
-    ATH_MSG_DEBUG("dtdFile = " << dtdFile);
-    size_t index = gmxInput.find("\"geomodel.dtd\"");
+    std::string replacementName = "GeoModelXml/";
+    //now, work out the specific dtd version in the input .gmx
+    std::string startdelim = "SYSTEM \"";
+    std::string enddelim = "\" [";
+    unsigned startpos = gmxInput.find(startdelim) + startdelim.length();
+    unsigned endpos = gmxInput.find(enddelim);
+    std::string searchName = gmxInput.substr(startpos,(endpos - startpos));
+    if(searchName=="geomodel.dtd") replacementName+="geomodel_v0.dtd"; //used in xml for initial geometry tags - special case
+    else replacementName+=searchName;
+    ATH_MSG_DEBUG("Searching for "<<searchName<<" and replacing it with "<<replacementName);
+    size_t chars = searchName.length();
+    size_t index = gmxInput.find(searchName);
+    if(m_dtdName!="")  replacementName=m_dtdName; //allow overriding of dtd version
     if (index != std::string::npos) {
-      gmxInput.replace(index, 14, dtdFile);
-    } else {
-      throw std::runtime_error("GeoModelXmlTool::createTopVolume: Did not find string geomodel.dtd in the gmx input string.");
+        std::string dtdFile = PathResolver::find_file(replacementName, "DATAPATH");
+        ATH_MSG_DEBUG("dtdFile = " << dtdFile);  
+        gmxInput.replace(index,chars, dtdFile);
+    } else {  
+      throw std::runtime_error("GeoModelXmlTool::createTopVolume: Did not find valid .dtd in the gmx input string.");
     }
   }
 
