@@ -55,46 +55,42 @@ InDetTestPixelLayerTool::initialize()
 
   // retrieve ID helpers:
   if (detStore()->retrieve(m_idHelper, "AtlasID").isFailure()) {
-    msg(MSG::FATAL) << "Could not get AtlasDetectorID helper" << endmsg;
+    ATH_MSG_FATAL("Could not get AtlasDetectorID helper");
     return StatusCode::FAILURE;
   }
 
   sc = detStore()->retrieve(m_pixelId, "PixelID");
   if (sc.isFailure()) {
-    msg(MSG::ERROR) << "Could not get PixelID helper !" << endmsg;
+    ATH_MSG_INFO("Could not get PixelID helper !");
     return StatusCode::FAILURE;
   }
 
   m_configured = true;
   if (m_extrapolator.empty()) {
-    msg(MSG::INFO) << "Extrapolator not configured " << endmsg; // n
+    ATH_MSG_INFO("Extrapolator not configured ");
     m_configured = false;
   } else {
     if (m_extrapolator.retrieve().isFailure()) {
-      msg(MSG::FATAL) << "Failed to retrieve tool " << m_extrapolator
-                      << endmsg; // n
+      ATH_MSG_FATAL("Failed to retrieve tool " << m_extrapolator);
       return StatusCode::FAILURE;
     } else {
-      msg(MSG::INFO) << "Retrieved tool " << m_extrapolator << endmsg; // n
+      ATH_MSG_INFO("Retrieved tool " << m_extrapolator);
     }
   }
 
-  ATH_CHECK(m_pixelCondSummaryTool.retrieve( DisableTool{!m_pixelDetElStatus.empty() && !VALIDATE_STATUS_ARRAY_ACTIVATED} ));
-  ATH_CHECK(m_pixelDetElStatus.initialize( !m_pixelDetElStatus.empty()) );
+  ATH_CHECK(
+    m_pixelCondSummaryTool.retrieve(DisableTool{ !m_pixelDetElStatus.empty() && !VALIDATE_STATUS_ARRAY_ACTIVATED }));
+  ATH_CHECK(m_pixelDetElStatus.initialize(!m_pixelDetElStatus.empty()));
   if (!m_pixelDetElStatus.empty()) {
-     ATH_CHECK(m_pixelReadout.retrieve() );
+    ATH_CHECK(m_pixelReadout.retrieve());
   }
 
   if (!m_configured) {
-    msg(MSG::INFO) << "you are using an unconfigured tool" << endmsg;
-    msg(MSG::INFO) << "will not be able to extrapolate to the pixelLayer"
-                   << endmsg;
-    msg(MSG::INFO) << "the values from the track summary will be returned"
-                   << endmsg;
+    ATH_MSG_INFO( "you are using an unconfigured tool");
+    ATH_MSG_INFO("will not be able to extrapolate to the pixelLayer");
+    ATH_MSG_INFO("the values from the track summary will be returned");
   }
 
-  msg(MSG::VERBOSE) << " Initialization of InDetTestPixelLayerTool succesfull"
-                    << endmsg;
   return StatusCode::SUCCESS;
 }
 
@@ -183,10 +179,13 @@ InDet::InDetTestPixelLayerTool::expectHitInPixelLayer(
     if (checkBarrelOnly && !m_pixelId->is_barrel(id)) continue;
     if (m_pixelId->layer_disk(id) != pixel_layer) continue;
 
-    VALIDATE_STATUS_ARRAY(!m_pixelDetElStatus.empty(),pixelDetElStatus->isGood(p->associatedSurface().associatedDetectorElement()->identifyHash()), m_pixelCondSummaryTool->isGood(id, InDetConditions::PIXEL_MODULE));
+    VALIDATE_STATUS_ARRAY(!m_pixelDetElStatus.empty(),
+                          pixelDetElStatus->isGood(p->associatedSurface().associatedDetectorElement()->identifyHash()),
+                          m_pixelCondSummaryTool->isGood(id, InDetConditions::PIXEL_MODULE));
 
-    if ( (!m_pixelDetElStatus.empty() && pixelDetElStatus->isGood(p->associatedSurface().associatedDetectorElement()->identifyHash()))
-         || (m_pixelDetElStatus.empty() && m_pixelCondSummaryTool->isGood(id, InDetConditions::PIXEL_MODULE))) {
+    if ((!m_pixelDetElStatus.empty() &&
+         pixelDetElStatus->isGood(p->associatedSurface().associatedDetectorElement()->identifyHash())) ||
+        (m_pixelDetElStatus.empty() && m_pixelCondSummaryTool->isGood(id, InDetConditions::PIXEL_MODULE))) {
 
       if (m_checkActiveAreas) {
 
@@ -194,8 +193,10 @@ InDet::InDetTestPixelLayerTool::expectHitInPixelLayer(
 
           if (m_checkDeadRegions) {
 
-            double fracGood =
-               getFracGood(p.get(), m_phiRegionSize, m_etaRegionSize, !m_pixelDetElStatus.empty() ? pixelDetElStatus.cptr() : nullptr);
+            double fracGood = getFracGood(p.get(),
+                                          m_phiRegionSize,
+                                          m_etaRegionSize,
+                                          !m_pixelDetElStatus.empty() ? pixelDetElStatus.cptr() : nullptr);
             if (fracGood > m_goodFracCut && fracGood >= 0) {
               ATH_MSG_DEBUG("Condition Summary: b-layer good");
               expect_hit =
@@ -243,13 +244,18 @@ InDet::InDetTestPixelLayerTool::expectHit(
 
   SG::ReadHandle<InDet::SiDetectorElementStatus> pixelDetElStatus(getPixelDetElStatus(Gaudi::Hive::currentContext()));
 
-  VALIDATE_STATUS_ARRAY(!m_pixelDetElStatus.empty(),pixelDetElStatus->isGood(trackpar->associatedSurface().associatedDetectorElement()->identifyHash()), m_pixelCondSummaryTool->isGood(id, InDetConditions::PIXEL_MODULE));
-    if ( (!m_pixelDetElStatus.empty() && pixelDetElStatus->isGood(trackpar->associatedSurface().associatedDetectorElement()->identifyHash()))
-       || (m_pixelDetElStatus.empty() && m_pixelCondSummaryTool->isGood(id, InDetConditions::PIXEL_MODULE))) {
+  VALIDATE_STATUS_ARRAY(
+    !m_pixelDetElStatus.empty(),
+    pixelDetElStatus->isGood(trackpar->associatedSurface().associatedDetectorElement()->identifyHash()),
+    m_pixelCondSummaryTool->isGood(id, InDetConditions::PIXEL_MODULE));
+  if ((!m_pixelDetElStatus.empty() &&
+       pixelDetElStatus->isGood(trackpar->associatedSurface().associatedDetectorElement()->identifyHash())) ||
+      (m_pixelDetElStatus.empty() && m_pixelCondSummaryTool->isGood(id, InDetConditions::PIXEL_MODULE))) {
 
     if (m_checkDeadRegions) {
 
-      double fracGood = getFracGood(trackpar, m_phiRegionSize, m_etaRegionSize, !m_pixelDetElStatus.empty() ? pixelDetElStatus.cptr() : nullptr);
+      double fracGood = getFracGood(
+        trackpar, m_phiRegionSize, m_etaRegionSize, !m_pixelDetElStatus.empty() ? pixelDetElStatus.cptr() : nullptr);
       if (fracGood > m_goodFracCut && fracGood >= 0) {
         ATH_MSG_DEBUG("Condition Summary: b-layer good");
         expect_hit = true; /// pass good module -> hit is expected on pixelLayer
@@ -332,13 +338,18 @@ InDet::InDetTestPixelLayerTool::getFracGood(
     if (m_pixelId->layer_disk(id) != pixel_layer)
       continue;
 
-    VALIDATE_STATUS_ARRAY(!m_pixelDetElStatus.empty(),pixelDetElStatus->isGood(trackpar->associatedSurface().associatedDetectorElement()->identifyHash()), m_pixelCondSummaryTool->isGood(id, InDetConditions::PIXEL_MODULE));
-      if (  (!m_pixelDetElStatus.empty() && pixelDetElStatus->isGood(p->associatedSurface().associatedDetectorElement()->identifyHash()))
-        || (m_pixelDetElStatus.empty() && m_pixelCondSummaryTool->isGood(id, InDetConditions::PIXEL_MODULE))) {
+    VALIDATE_STATUS_ARRAY(
+      !m_pixelDetElStatus.empty(),
+      pixelDetElStatus->isGood(trackpar->associatedSurface().associatedDetectorElement()->identifyHash()),
+      m_pixelCondSummaryTool->isGood(id, InDetConditions::PIXEL_MODULE));
+    if ((!m_pixelDetElStatus.empty() &&
+         pixelDetElStatus->isGood(p->associatedSurface().associatedDetectorElement()->identifyHash())) ||
+        (m_pixelDetElStatus.empty() && m_pixelCondSummaryTool->isGood(id, InDetConditions::PIXEL_MODULE))) {
 
       if (isActive(p.get())) {
 
-        return getFracGood(p.get(), m_phiRegionSize, m_etaRegionSize, !m_pixelDetElStatus.empty() ? pixelDetElStatus.cptr() : nullptr);
+        return getFracGood(
+          p.get(), m_phiRegionSize, m_etaRegionSize, !m_pixelDetElStatus.empty() ? pixelDetElStatus.cptr() : nullptr);
 
       } else {
         ATH_MSG_DEBUG(
@@ -466,8 +477,10 @@ InDet::InDetTestPixelLayerTool::getTrackStateOnPixelLayerInfo(
        pixelLayerParam) {
     TrackStateOnPixelLayerInfo pixelLayerInfo;
 
-    double fracGood =
-      getFracGood(trkParam.get(), m_phiRegionSize, m_etaRegionSize, !m_pixelDetElStatus.empty() ? pixelDetElStatus.cptr() : nullptr);
+    double fracGood = getFracGood(trkParam.get(),
+                                  m_phiRegionSize,
+                                  m_etaRegionSize,
+                                  !m_pixelDetElStatus.empty() ? pixelDetElStatus.cptr() : nullptr);
     pixelLayerInfo.goodFraction(fracGood);
 
     Identifier id =
@@ -531,10 +544,14 @@ InDet::InDetTestPixelLayerTool::getTrackStateOnPixelLayerInfo(
     pixelLayerInfo.errLocalX(error_locx);
     pixelLayerInfo.errLocalY(error_locy);
 
-    VALIDATE_STATUS_ARRAY(!m_pixelDetElStatus.empty(),pixelDetElStatus->isGood(trkParam->associatedSurface().associatedDetectorElement()->identifyHash()), m_pixelCondSummaryTool->isGood(id, InDetConditions::PIXEL_MODULE));
+    VALIDATE_STATUS_ARRAY(
+      !m_pixelDetElStatus.empty(),
+      pixelDetElStatus->isGood(trkParam->associatedSurface().associatedDetectorElement()->identifyHash()),
+      m_pixelCondSummaryTool->isGood(id, InDetConditions::PIXEL_MODULE));
     bool isgood =
-      (  (!m_pixelDetElStatus.empty() && pixelDetElStatus->isGood(trkParam->associatedSurface().associatedDetectorElement()->identifyHash()))
-       || (m_pixelDetElStatus.empty() && m_pixelCondSummaryTool->isGood(id, InDetConditions::PIXEL_MODULE)));
+      ((!m_pixelDetElStatus.empty() &&
+        pixelDetElStatus->isGood(trkParam->associatedSurface().associatedDetectorElement()->identifyHash())) ||
+       (m_pixelDetElStatus.empty() && m_pixelCondSummaryTool->isGood(id, InDetConditions::PIXEL_MODULE)));
 
     double phitol = 2.5;
     double etatol = 5.;
@@ -718,15 +735,18 @@ InDet::InDetTestPixelLayerTool::getFracGood(
       Identifier moduleID = m_pixelId->wafer_id(centreId);
       IdentifierHash id_hash = m_pixelId->wafer_hash(moduleID);
 
-      VALIDATE_STATUS_ARRAY(!m_pixelDetElStatus.empty(),pixelDetElStatus->isChipGood(id_hash,m_pixelReadout->getFE(centreId, moduleID)), m_pixelCondSummaryTool->isGood(centreId, context));
-      bool is_chip_good (  (!m_pixelDetElStatus.empty() && pixelDetElStatus->isChipGood(id_hash,m_pixelReadout->getFE(centreId, moduleID)))
-                      || (m_pixelDetElStatus.empty() && m_pixelCondSummaryTool->isGood(centreId, context)));
-      if (!is_chip_good)
+      VALIDATE_STATUS_ARRAY(!m_pixelDetElStatus.empty(),
+                            pixelDetElStatus->isChipGood(id_hash, m_pixelReadout->getFE(centreId, moduleID)),
+                            m_pixelCondSummaryTool->isGood(centreId, context));
+      bool is_chip_good((!m_pixelDetElStatus.empty() &&
+                         pixelDetElStatus->isChipGood(id_hash, m_pixelReadout->getFE(centreId, moduleID))) ||
+                        (m_pixelDetElStatus.empty() && m_pixelCondSummaryTool->isGood(centreId, context)));
+      if (!is_chip_good){
         return 0.;
-    }
-
-    else
+      }
+    } else {
       ATH_MSG_WARNING("Invalid Identifier, skipping check of FE...");
+    }
   }
 
   Amg::Vector2D startLocPos(startLocX, startLocY);
@@ -742,12 +762,12 @@ InDet::InDetTestPixelLayerTool::getFracGood(
   double frac =0.;
 
   if (pixelDetElStatus) {
-     frac = Pixel::getGoodFraction(*pixelDetElStatus, *m_pixelReadout, *m_pixelId, moduleid, id_hash, startId, endId);
-     VALIDATE_STATUS_ARRAY(!m_pixelDetElStatus.empty(),frac, m_pixelCondSummaryTool->goodFraction(id_hash, startId, endId));
+    frac = Pixel::getGoodFraction(*pixelDetElStatus, *m_pixelReadout, *m_pixelId, moduleid, id_hash, startId, endId);
+    VALIDATE_STATUS_ARRAY(
+      !m_pixelDetElStatus.empty(), frac, m_pixelCondSummaryTool->goodFraction(id_hash, startId, endId));
 
-  }
-  else {
-      frac = m_pixelCondSummaryTool->goodFraction(id_hash, startId, endId);
+  } else {
+    frac = m_pixelCondSummaryTool->goodFraction(id_hash, startId, endId);
   }
 
   return frac;

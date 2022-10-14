@@ -755,9 +755,8 @@ InDet::SiLayerBuilderCond::createDiscLayers(
        // preperare the rboundaries
        std::vector<float> discRboundaries;
        discRboundaries.push_back(float(*discRingMinRcopy.begin()));
-       for ( std::vector<double>::iterator ringMaxRIter = discRingMaxR[discCounter].begin(); 
-            ringMaxRIter != discRingMaxR[discCounter].end(); ++ringMaxRIter)   
-           discRboundaries.push_back(float(*ringMaxRIter));
+       for (double & ringMaxRIter : discRingMaxR[discCounter])   
+           discRboundaries.push_back(float(ringMaxRIter));
 
        // screen output           
        ATH_MSG_DEBUG( "Building a DiscLayer with " << discRsectors << " R sectors. " );
@@ -1441,8 +1440,8 @@ void InDet::SiLayerBuilderCond::registerSurfacesToLayer(Trk::BinnedArraySpan<Trk
 {
     if (!m_setLayerAssociation) return;
     
-    auto laySurfIter    = layerSurfaces.begin();
-    auto laySurfIterEnd = layerSurfaces.end();
+    const auto *laySurfIter    = layerSurfaces.begin();
+    const auto *laySurfIterEnd = layerSurfaces.end();
     // register the surfaces to the layer
     for (; laySurfIter != laySurfIterEnd; ++laySurfIter){
         if (*laySurfIter) { 

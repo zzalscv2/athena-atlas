@@ -190,8 +190,8 @@ bool InDet::PixelOverlapDescriptor::dumpSurfaces(std::vector<Trk::SurfaceInterse
   }
   
   std::cout << "Dumping Surfaces for Pixel with size = " << surfaces.size() << std::endl;
-  for (unsigned int surf = 0; surf < surfaces.size(); surf++) {
-    Identifier hitId = ((surfaces.at(surf)).object)->associatedDetectorElementIdentifier(); 
+  for (auto & surface : surfaces) {
+    Identifier hitId = (surface.object)->associatedDetectorElementIdentifier(); 
     std::cout <<  "barrel_ec " << m_pixIdHelper.load()->barrel_ec(hitId) << ", layer_disk " << m_pixIdHelper.load()->layer_disk(hitId) << ", phi_module " << m_pixIdHelper.load()->phi_module(hitId) << ", eta_module " << m_pixIdHelper.load()->eta_module(hitId) << std::endl;
   }  
   return true;

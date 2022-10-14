@@ -313,8 +313,8 @@ Muon::MuonStationBuilderCond::buildDetachedTrackingVolumes(const EventContext& c
                     ATH_MSG_DEBUG("cloned 1 NSWL station:" << newStat->trackingVolume()->center());
                     // no detailed identification of NSW layer representation
                     Trk::ArraySpan<Trk::Layer* const> lays = newStat->trackingVolume()->confinedArbitraryLayers();
-                    for (unsigned int il = 0; il < lays.size(); il++) {
-                        int iType = lays[il]->layerType();
+                    for (auto *lay : lays) {
+                        int iType = lay->layerType();
                         if (iType != 0) {
                             Identifier id(iType);
                             Identifier nid(0);
@@ -333,7 +333,7 @@ Muon::MuonStationBuilderCond::buildDetachedTrackingVolumes(const EventContext& c
                             if (!is_valid) continue;
 
                             unsigned int nType = nid.get_identifier32().get_compact();
-                            lays[il]->setLayerType(nType);
+                            lay->setLayerType(nType);
                         }
                     }
                     mStations->push_back(std::move(newStat));
@@ -345,8 +345,8 @@ Muon::MuonStationBuilderCond::buildDetachedTrackingVolumes(const EventContext& c
                     ATH_MSG_DEBUG("cloned 2 NSWL station mtypeL :" << mtypeL->trackingVolume()->center());
                     // recalculate identifier
                     Trk::ArraySpan<Trk::Layer* const> lays = mtypeL->trackingVolume()->confinedArbitraryLayers();
-                    for (unsigned int il = 0; il < lays.size(); il++) {
-                        int iType = lays[il]->layerType();
+                    for (auto *lay : lays) {
+                        int iType = lay->layerType();
                         if (iType != 0) {
                             Identifier id(iType);
                             Identifier nid(0);
@@ -365,7 +365,7 @@ Muon::MuonStationBuilderCond::buildDetachedTrackingVolumes(const EventContext& c
                             if (!is_valid) continue;
 
                             unsigned int nType = nid.get_identifier32().get_compact();
-                            lays[il]->setLayerType(nType);
+                            lay->setLayerType(nType);
                         }
                     }
                     const auto *mtypeLptr = mtypeL.get();
@@ -377,8 +377,8 @@ Muon::MuonStationBuilderCond::buildDetachedTrackingVolumes(const EventContext& c
                         ATH_MSG_DEBUG("cloned NSWL station:" << newStat->trackingVolume()->center());
                         // recalculate identifiers
                         Trk::ArraySpan<Trk::Layer* const> lays = newStat->trackingVolume()->confinedArbitraryLayers();
-                        for (unsigned int il = 0; il < lays.size(); il++) {
-                            int iType = lays[il]->layerType();
+                        for (auto *lay : lays) {
+                            int iType = lay->layerType();
                             if (iType != 0) {
                                 Identifier id(iType);
                                 Identifier nid(0);
@@ -397,7 +397,7 @@ Muon::MuonStationBuilderCond::buildDetachedTrackingVolumes(const EventContext& c
                                 if (!is_valid) continue;
 
                                 unsigned int nType = nid.get_identifier32().get_compact();
-                                lays[il]->setLayerType(nType);
+                                lay->setLayerType(nType);
                             }
                         }
                         mStations->push_back(std::move(newStat));
@@ -416,8 +416,8 @@ Muon::MuonStationBuilderCond::buildDetachedTrackingVolumes(const EventContext& c
                     ATH_MSG_DEBUG("cloned NSWS station:" << newStat->trackingVolume()->center());
                     // recalculate identifiers
                     Trk::ArraySpan<Trk::Layer* const> lays = newStat->trackingVolume()->confinedArbitraryLayers();
-                    for (unsigned int il = 0; il < lays.size(); il++) {
-                        int iType = lays[il]->layerType();
+                    for (auto *lay : lays) {
+                        int iType = lay->layerType();
                         if (iType != 0) {
                             Identifier id(iType);
                             Identifier nid(0);
@@ -436,7 +436,7 @@ Muon::MuonStationBuilderCond::buildDetachedTrackingVolumes(const EventContext& c
                             if (!is_valid) continue;
 
                             unsigned int nType = nid.get_identifier32().get_compact();
-                            lays[il]->setLayerType(nType);
+                            lay->setLayerType(nType);
                         }
                     }
                     mStations->push_back(std::move(newStat));
@@ -451,8 +451,8 @@ Muon::MuonStationBuilderCond::buildDetachedTrackingVolumes(const EventContext& c
                     ATH_MSG_DEBUG("cloned NSWS station:" << mtypeS->trackingVolume()->center());
                     // recalculate identifiers
                     Trk::ArraySpan<Trk::Layer* const> lays = mtypeS->trackingVolume()->confinedArbitraryLayers();
-                    for (unsigned int il = 0; il < lays.size(); il++) {
-                        int iType = lays[il]->layerType();
+                    for (auto *lay : lays) {
+                        int iType = lay->layerType();
                         if (iType != 0) {
                             Identifier id(iType);
                             Identifier nid(0);
@@ -471,7 +471,7 @@ Muon::MuonStationBuilderCond::buildDetachedTrackingVolumes(const EventContext& c
                             if (!is_valid) continue;
 
                             unsigned int nType = nid.get_identifier32().get_compact();
-                            lays[il]->setLayerType(nType);
+                            lay->setLayerType(nType);
                         }
                     }
                     const auto *mtypeSptr = mtypeS.get();
@@ -483,8 +483,8 @@ Muon::MuonStationBuilderCond::buildDetachedTrackingVolumes(const EventContext& c
                         ATH_MSG_DEBUG("cloned NSWS station:" << newStat->trackingVolume()->center());
                         // recalculate identifiers
                         Trk::ArraySpan<Trk::Layer* const> lays = newStat->trackingVolume()->confinedArbitraryLayers();
-                        for (unsigned int il = 0; il < lays.size(); il++) {
-                            int iType = lays[il]->layerType();
+                        for (auto *lay : lays) {
+                            int iType = lay->layerType();
                             if (iType != 0) {
                                 Identifier id(iType);
                                 Identifier nid(0);
@@ -503,7 +503,7 @@ Muon::MuonStationBuilderCond::buildDetachedTrackingVolumes(const EventContext& c
                                 if (!is_valid) continue;
 
                                 unsigned int nType = nid.get_identifier32().get_compact();
-                                lays[il]->setLayerType(nType);
+                                lay->setLayerType(nType);
                             }
                         }
                         mStations->push_back(std::move(newStat));
@@ -687,8 +687,8 @@ std::vector<std::unique_ptr<Trk::DetachedTrackingVolume>> Muon::MuonStationBuild
                 }
                 if (name.compare(0, 1, "B") == 0 && eta < 0) { name = (clv->getName()).substr(0, vname.size() - 8) + "-"; }
                 unsigned is = 0;
-                for (unsigned in = 0; in < stations.size(); in++) {
-                    if (stations[in] != nullptr && name == stations[in]->name()) is++;
+                for (auto & station : stations) {
+                    if (station != nullptr && name == station->name()) is++;
                 }
                 if (is == 0) {
                     ATH_MSG_VERBOSE(" new station type " << name << "," << clv->getShape()->type());
@@ -708,13 +708,13 @@ std::vector<std::unique_ptr<Trk::DetachedTrackingVolume>> Muon::MuonStationBuild
                             } else {
                                 std::vector<Trk::TrackingVolume*> tgc_stations =
                                     m_muonStationTypeBuilder->processTgcStation(cv, cache);
-                                for (unsigned int i = 0; i < tgc_stations.size();++i) {
+                                for (auto & tgc_station : tgc_stations) {
                                     // create layer representation
                                     std::pair<Trk::Layer*, const std::vector<Trk::Layer*>*> layerRepr =
-                                        m_muonStationTypeBuilder->createLayerRepresentation(tgc_stations[i]);
+                                        m_muonStationTypeBuilder->createLayerRepresentation(tgc_station);
                                     // create prototype as detached tracking volume
                                     Trk::DetachedTrackingVolume* typeStat =
-                                        new Trk::DetachedTrackingVolume(name, tgc_stations[i], layerRepr.first, layerRepr.second);
+                                        new Trk::DetachedTrackingVolume(name, tgc_station, layerRepr.first, layerRepr.second);
                                     stations.emplace_back(typeStat);
                                 }
                             }
@@ -972,44 +972,44 @@ void Muon::MuonStationBuilderCond::identifyLayers(Trk::DetachedTrackingVolume* s
         const int nameIndex = m_idHelperSvc->mdtIdHelper().stationNameIndex(stationName.substr(0, 3));
         if (station->trackingVolume()->confinedVolumes()) {
             Trk::BinnedArraySpan<Trk::TrackingVolume * const> cVols = station->trackingVolume()->confinedVolumes()->arrayObjects();
-            for (unsigned int i = 0; i < cVols.size();++i) {
-                if (cVols[i]->confinedLayers()) {
-                    Trk::BinnedArraySpan<Trk::Layer * const> cLays = cVols[i]->confinedLayers()->arrayObjects();
+            for (auto *cVol : cVols) {
+                if (cVol->confinedLayers()) {
+                    Trk::BinnedArraySpan<Trk::Layer * const> cLays = cVol->confinedLayers()->arrayObjects();
                     const MuonGM::MdtReadoutElement* mdtROE = nullptr;
                     bool is_valid{false};
-                    for (unsigned int il = 0; il < cLays.size(); ++il) {
-                        Identifier id(cLays[il]->layerType());
+                    for (auto *cLay : cLays) {
+                        Identifier id(cLay->layerType());
                         if (id.get_compact() > 0 && m_idHelperSvc->isMdt(id)) {
                             Identifier newId = m_idHelperSvc->mdtIdHelper().channelID(
                                 nameIndex, eta, phi, m_idHelperSvc->mdtIdHelper().multilayer(id),
                                 m_idHelperSvc->mdtIdHelper().tubeLayer(id), m_idHelperSvc->mdtIdHelper().tube(id), is_valid);
                             if (!mdtROE) mdtROE = is_valid ? muonMgr->getMdtReadoutElement(newId) : nullptr;
                             unsigned int newid = newId.get_identifier32().get_compact();
-                            cLays[il]->setLayerType(newid);
+                            cLay->setLayerType(newid);
                             // check reference position
                             if (mdtROE) {
-                                double ref = cLays[il]->getRef();
+                                double ref = cLay->getRef();
                                 // double loc = mdtROE->localROPos(newId)[2];     // this does not take into account ROE shift wrt TG
                                 // station/layer
-                                double loc = (cLays[il]->surfaceRepresentation().transform().inverse() * mdtROE->tubePos(newId))[1];
+                                double loc = (cLay->surfaceRepresentation().transform().inverse() * mdtROE->tubePos(newId))[1];
                                 if (std::abs(ref) > 10e6) {
                                     double sign = (ref > 0.) ? 1. : -1.;
                                     int dec = int(ref / 1e5);
                                     ref = ref - dec * 1e5 - 0.5 * (sign + 1) * 1e5;
                                     if (std::abs(ref - loc) > 0.001) {  // re-pack
-                                        cLays[il]->setRef(loc + dec * 1e5 + 0.5 * (sign + 1) * 1e5);
+                                        cLay->setRef(loc + dec * 1e5 + 0.5 * (sign + 1) * 1e5);
                                     }
                                 } else if (std::abs(ref - loc) > 0.001){
-                                    cLays[il]->setRef(loc);
+                                    cLay->setRef(loc);
                                 }
                             }
                         }
                     }
                 }
-                if (!cVols[i]->confinedArbitraryLayers().empty()) {
-                    Trk::ArraySpan<Trk::Layer* const> cLays = cVols[i]->confinedArbitraryLayers();
-                    for (unsigned int il = 0; il < cLays.size(); il++) {
-                        Identifier id(cLays[il]->layerType());
+                if (!cVol->confinedArbitraryLayers().empty()) {
+                    Trk::ArraySpan<Trk::Layer* const> cLays = cVol->confinedArbitraryLayers();
+                    for (auto *cLay : cLays) {
+                        Identifier id(cLay->layerType());
                         bool is_valid{false};
                         if (m_idHelperSvc->hasRPC() && id.get_compact() > 0 && m_idHelperSvc->isRpc(id)) {
                             Identifier newId = m_idHelperSvc->rpcIdHelper().channelID(
@@ -1017,7 +1017,7 @@ void Muon::MuonStationBuilderCond::identifyLayers(Trk::DetachedTrackingVolume* s
                                 m_idHelperSvc->rpcIdHelper().doubletPhi(id), m_idHelperSvc->rpcIdHelper().gasGap(id),
                                 m_idHelperSvc->rpcIdHelper().measuresPhi(id), m_idHelperSvc->rpcIdHelper().strip(id), is_valid);
                             int newid = newId.get_identifier32().get_compact();
-                            cLays[il]->setLayerType(newid);
+                            cLay->setLayerType(newid);
                         }
                     }
                 }
@@ -1027,19 +1027,19 @@ void Muon::MuonStationBuilderCond::identifyLayers(Trk::DetachedTrackingVolume* s
     // by now, all the layers should be identified - verify
     if (station->trackingVolume()->confinedVolumes()) {
         Trk::BinnedArraySpan<Trk::TrackingVolume * const> cVols = station->trackingVolume()->confinedVolumes()->arrayObjects();
-        for (unsigned int i = 0; i < cVols.size();++i) {
-            if (cVols[i]->confinedLayers()) {
-                Trk::BinnedArraySpan<Trk::Layer * const> cLays = cVols[i]->confinedLayers()->arrayObjects();
+        for (auto *cVol : cVols) {
+            if (cVol->confinedLayers()) {
+                Trk::BinnedArraySpan<Trk::Layer * const> cLays = cVol->confinedLayers()->arrayObjects();
                 for (unsigned int il = 0; il < cLays.size(); il++) {
                     Identifier id(cLays[il]->layerType());
-                    if (id == 1) ATH_MSG_DEBUG(station->name() << "," << cVols[i]->volumeName() << ", unidentified active layer:" << il);
+                    if (id == 1) ATH_MSG_DEBUG(station->name() << "," << cVol->volumeName() << ", unidentified active layer:" << il);
                 }
             }
-            if (!cVols[i]->confinedArbitraryLayers().empty()) {
-                Trk::ArraySpan<Trk::Layer* const> cLays = cVols[i]->confinedArbitraryLayers();
+            if (!cVol->confinedArbitraryLayers().empty()) {
+                Trk::ArraySpan<Trk::Layer* const> cLays = cVol->confinedArbitraryLayers();
                 for (unsigned int il = 0; il < cLays.size(); il++) {
                     Identifier id(cLays[il]->layerType());
-                    if (id == 1) ATH_MSG_DEBUG(station->name() << "," << cVols[i]->volumeName() << ", unidentified active layer:" << il);
+                    if (id == 1) ATH_MSG_DEBUG(station->name() << "," << cVol->volumeName() << ", unidentified active layer:" << il);
                 }
             }
         }
@@ -1095,10 +1095,10 @@ void Muon::MuonStationBuilderCond::identifyPrototype(Trk::TrackingVolume* statio
         Trk::BinnedArray<Trk::TrackingVolume>* confinedVolumes = station->confinedVolumes();
         if (confinedVolumes) {
             Trk::BinnedArraySpan<Trk::TrackingVolume * const> vols = confinedVolumes->arrayObjects();
-            for (unsigned int iv = 0; iv < vols.size(); iv++) {
-                if (m_idHelperSvc->hasRPC() && vols[iv]->volumeName() == "RPC") {
+            for (auto *vol : vols) {
+                if (m_idHelperSvc->hasRPC() && vol->volumeName() == "RPC") {
                     // for active layers do a search of associated ROE
-                    Trk::ArraySpan<Trk::Layer* const> layers = vols[iv]->confinedArbitraryLayers();
+                    Trk::ArraySpan<Trk::Layer* const> layers = vol->confinedArbitraryLayers();
                     int nameIndex = m_idHelperSvc->rpcIdHelper().stationNameIndex(stationNameShort);
                     if (stationNameShort == "BME") continue;  // BME chambers do not have RPCs
                     if (stationNameShort == "BMG") continue;  // BMG chambers do not have RPCs
@@ -1146,22 +1146,22 @@ void Muon::MuonStationBuilderCond::identifyPrototype(Trk::TrackingVolume* statio
                                             bool is_valid{false};
                                             Identifier etaId = m_idHelperSvc->rpcIdHelper().channelID(
                                                 nameIndex, eta, phi, doubletR + 1, doubletZ + 1, doubletPhi + 1, gasGap + 1, 0, 1, is_valid);
-                                            for (unsigned int il = 0; il < layers.size(); il++) {
-                                                if (layers[il]->layerType() != 0 &&
-                                                    layers[il]->surfaceRepresentation().isOnSurface(
-                                                        transf.inverse() * rpc->stripPos(etaId), false, 0.5 * layers[il]->thickness())) {
+                                            for (auto *layer : layers) {
+                                                if (layer->layerType() != 0 &&
+                                                    layer->surfaceRepresentation().isOnSurface(
+                                                        transf.inverse() * rpc->stripPos(etaId), false, 0.5 * layer->thickness())) {
                                                     const Amg::Vector3D locPos1 =
-                                                        layers[il]->surfaceRepresentation().transform().inverse() * transf.inverse() *
+                                                        layer->surfaceRepresentation().transform().inverse() * transf.inverse() *
                                                         rpc->stripPos(etaId);
                                                     const Amg::Vector3D locPos2 =
                                                         rpc->surface(etaId).transform().inverse() * rpc->stripPos(etaId);
                                                     double swap = (std::abs(locPos1[1] - locPos2[0]) > 0.001) ? 20000. : 0.;
                                                     unsigned int id = etaId.get_identifier32().get_compact();
-                                                    layers[il]->setLayerType(id);
+                                                    layer->setLayerType(id);
                                                     const Amg::Vector3D locPos =
-                                                        layers[il]->surfaceRepresentation().transform().inverse() * transf.inverse() *
+                                                        layer->surfaceRepresentation().transform().inverse() * transf.inverse() *
                                                         rpc->surface(etaId).center();
-                                                    layers[il]->setRef(swap + locPos[0]);
+                                                    layer->setRef(swap + locPos[0]);
                                                 }
                                             }
                                         }
@@ -1178,21 +1178,21 @@ void Muon::MuonStationBuilderCond::identifyPrototype(Trk::TrackingVolume* statio
     // by now, all the layers should be identified - verify
     if (station->confinedVolumes()) {
         Trk::BinnedArraySpan<Trk::TrackingVolume * const> cVols = station->confinedVolumes()->arrayObjects();
-        for (unsigned int i = 0; i < cVols.size();++i) {
-            if (cVols[i]->confinedLayers()) {
-                Trk::BinnedArraySpan<Trk::Layer * const> cLays = cVols[i]->confinedLayers()->arrayObjects();
+        for (auto *cVol : cVols) {
+            if (cVol->confinedLayers()) {
+                Trk::BinnedArraySpan<Trk::Layer * const> cLays = cVol->confinedLayers()->arrayObjects();
                 for (unsigned int il = 0; il < cLays.size(); il++) {
                     Identifier id(cLays[il]->layerType());
                     if (id == 1)
-                        ATH_MSG_DEBUG(station->volumeName() << "," << cVols[i]->volumeName() << ", unidentified active layer:" << il);
+                        ATH_MSG_DEBUG(station->volumeName() << "," << cVol->volumeName() << ", unidentified active layer:" << il);
                 }
             }
-            if (!cVols[i]->confinedArbitraryLayers().empty()) {
-                Trk::ArraySpan<Trk::Layer* const> cLays = cVols[i]->confinedArbitraryLayers();
+            if (!cVol->confinedArbitraryLayers().empty()) {
+                Trk::ArraySpan<Trk::Layer* const> cLays = cVol->confinedArbitraryLayers();
                 for (unsigned int il = 0; il < cLays.size(); il++) {
                     Identifier id(cLays[il]->layerType());
                     if (id == 1)
-                        ATH_MSG_DEBUG(station->volumeName() << "," << cVols[i]->volumeName() << ", unidentified active layer:" << il);
+                        ATH_MSG_DEBUG(station->volumeName() << "," << cVol->volumeName() << ", unidentified active layer:" << il);
                 }
             }
         }

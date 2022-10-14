@@ -769,9 +769,8 @@ std::vector<Trk::DiscLayer* >* InDet::SiLayerBuilder::createDiscLayers(std::vect
        // preperare the rboundaries
        std::vector<float> discRboundaries;
        discRboundaries.push_back(float(*discRingMinRcopy.begin()));
-       for ( std::vector<double>::iterator ringMaxRIter = discRingMaxR[discCounter].begin(); 
-            ringMaxRIter != discRingMaxR[discCounter].end(); ++ringMaxRIter)   
-           discRboundaries.push_back(float(*ringMaxRIter));
+       for (double & ringMaxRIter : discRingMaxR[discCounter])   
+           discRboundaries.push_back(float(ringMaxRIter));
 
        // screen output           
        ATH_MSG_DEBUG( "Building a DiscLayer with " << discRsectors << " R sectors. " );

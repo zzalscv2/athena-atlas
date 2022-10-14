@@ -164,7 +164,7 @@ StatusCode Calo::CaloTrackingGeometryBuilder::initialize()
 StatusCode Calo::CaloTrackingGeometryBuilder::finalize()
 {
   // empty the material garbage
-  for ( auto ptr : m_materialGarbage ) {
+  for ( const auto *ptr : m_materialGarbage ) {
     delete ptr;
   }
   m_materialGarbage.clear();
@@ -1399,11 +1399,12 @@ Trk::TrackingGeometry* Calo::CaloTrackingGeometryBuilder::trackingGeometry(Trk::
 												      *m_caloMaterial,
 												      "Calo::Containers::CombinedRCalo");
       std::vector<Trk::TrackingVolume*> envZVols;
-      for (unsigned int i=0; i<backwardCutoutVols.size(); i++) envZVols.push_back(backwardCutoutVols[i]);   
+      envZVols.reserve(backwardCutoutVols.size());
+for (auto & backwardCutoutVol : backwardCutoutVols) envZVols.push_back(backwardCutoutVol);   
       if (ecNegBuffer) envZVols.push_back(ecNegBuffer);
       envZVols.push_back(caloRVolume);  
       if (ecPosBuffer) envZVols.push_back(ecPosBuffer);
-      for (unsigned int i=0; i<forwardCutoutVols.size(); i++) envZVols.push_back(forwardCutoutVols[i]);
+      for (auto & forwardCutoutVol : forwardCutoutVols) envZVols.push_back(forwardCutoutVol);
       
       calorimeter = m_trackingVolumeCreator->createContainerTrackingVolume(envZVols,
 									   *m_caloMaterial,
@@ -1523,10 +1524,10 @@ Calo::CaloTrackingGeometryBuilder::createBeamPipeVolumes(
   RZPairVector dim; 
   dim.push_back(RZPair(bpCutouts[0].first,zmin));
   float rOut = bpCutouts[0].first;
-  for (unsigned int i=0; i<bpCutouts.size(); i++) {
-    if (bpCutouts[i].second<=dim[0].second) dim[0].first=bpCutouts[i].first;
-    else if ( bpCutouts[i].second<=zmax ) dim.push_back(bpCutouts[i]);
-    if ( bpCutouts[i].second<=zmax ) rOut = bpCutouts[i].first;
+  for (const auto & bpCutout : bpCutouts) {
+    if (bpCutout.second<=dim[0].second) dim[0].first=bpCutout.first;
+    else if ( bpCutout.second<=zmax ) dim.push_back(bpCutout);
+    if ( bpCutout.second<=zmax ) rOut = bpCutout.first;
   }
   
   if (dim.back().second < zmax) dim.push_back(RZPair(rOut,zmax));

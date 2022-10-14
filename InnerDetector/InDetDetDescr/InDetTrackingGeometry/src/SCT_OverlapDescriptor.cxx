@@ -158,8 +158,8 @@ bool InDet::SCT_OverlapDescriptor::dumpSurfaces(std::vector<Trk::SurfaceIntersec
   }
 
   std::cout << "Dumping Surfaces for SCT with size = " << surfaces.size() << std::endl;
-  for (unsigned int surf = 0; surf < surfaces.size(); surf++) {
-    Identifier hitId = ((surfaces.at(surf)).object)->associatedDetectorElementIdentifier(); 
+  for (auto & surface : surfaces) {
+    Identifier hitId = (surface.object)->associatedDetectorElementIdentifier(); 
     std::cout <<  "barrel_ec " << m_sctIdHelper.load()->barrel_ec(hitId) 
               << ", layer_disk " << m_sctIdHelper.load()->layer_disk(hitId) << ", phi_module " << m_sctIdHelper.load()->phi_module(hitId) 
               << ", eta_module " << m_sctIdHelper.load()->eta_module(hitId) << ", side " << m_sctIdHelper.load()->side(hitId) <<std::endl;
