@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2017 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "MonteCarloReactUtils/ShiftFunction.h"
@@ -9,14 +9,9 @@
 
 #include <TH1.h>
 #include <TH2.h>
-#include <TH3.h>
-#include <TF1.h>
-#include <TF2.h>
 #include <TAxis.h>
-#include <TMath.h>
-
+#include <iostream>
 #include <sstream>
-#include <vector>
 
 using namespace MonteCarloReact;
 using namespace std;
@@ -64,7 +59,7 @@ void ShiftFunction::defineBins( int nbins, float xlo, float xhi)
 
 void ShiftFunction::addTAxis(const TAxis* axis) {
   m_axisEdges.push_back(vector<float>()) ;
-  for( int i = 0; i < axis->GetNbins(); i++) 
+  for( int i = 0; i < axis->GetNbins(); ++i) 
     m_axisEdges.back().push_back(axis->GetBinLowEdge( i+1)) ;  
   m_axisEdges.back().push_back(axis->GetBinUpEdge( axis->GetNbins())) ;  
   initRes() ;
@@ -82,7 +77,7 @@ int ShiftFunction::getNbins(int n) const {
 
   int nbins = 1 ; 
   for (vector<vector<float> >::const_iterator it = m_axisEdges.begin(); 
-       it != m_axisEdges.end(); it++) nbins *= it->size() - 1 ;
+       it != m_axisEdges.end(); ++it) nbins *= it->size() - 1 ;
   return nbins ;  
 }
 
@@ -132,7 +127,7 @@ void ShiftFunction::setVal(const vector<float>& axis, std::string s)
 int ShiftFunction::getBinIndex( const vector<float>& value) const {
   vector<double> dvalue;
   dvalue.clear();
-  for(size_t i = 0; i < value.size(); i++) {
+  for(size_t i = 0; i < value.size(); ++i) {
     dvalue.push_back((double)value[i]);
   } 
   return getBinIndex( dvalue);
@@ -147,7 +142,7 @@ int ShiftFunction::getBinIndex( const vector<double>& value) const {
       throw runtime_error(st.str()) ;
   }
   vector<int> axis ;
-  for (int i = 0; i < int(value.size()) ; i++) {
+  for (int i = 0; i < int(value.size()) ; ++i) {
     int bin = 0 ;
     try { 
       bin =  findBin( i, *(value.begin()+i)) ;
@@ -325,12 +320,12 @@ double ShiftFunction::getFuncVal(const std::vector<float>& value,
 {
   vector<double> dvalue;
   dvalue.clear();
-  for(size_t i = 0; i < value.size(); i++) {
+  for(size_t i = 0; i < value.size(); ++i) {
     dvalue.push_back((double)value[i]);
   } 
   vector<double> dxval;
   dxval.clear();
-  for(size_t i = 0; i < xval.size(); i++) {
+  for(size_t i = 0; i < xval.size(); ++i) {
     dxval.push_back((double)xval[i]);
   } 
   return getFuncVal( dvalue, dxval);
@@ -429,7 +424,7 @@ bool ShiftFunction::parseInputLine( const string & key, const vector< string> & 
       throw runtime_error((string) "ShiftFunction::ParseInputLine ERROR: number of efficiency bin is 0. "+
 			  "Check mcr file structure and the bin  edges information.") ;    
     vector<int> bins ;
-    for (int i=0; i< dim; i++) {
+    for (int i=0; i< dim; ++i) {
       bins.push_back(atoi( (line[i]).c_str()));
     }
     
@@ -446,23 +441,23 @@ void ShiftFunction::stream( ostream & os) const
 {
   // first do bin edges
   for (vector<vector<float> >::const_iterator it =  m_axisEdges.begin();
-       it != m_axisEdges.end() ; it++) {
+       it != m_axisEdges.end() ; ++it) {
     os << "BinEdges" << it - m_axisEdges.begin() +1 << " : " ;
-    for (vector<float>::const_iterator jt = it->begin(); jt != it->end() ; jt++) 
+    for (vector<float>::const_iterator jt = it->begin(); jt != it->end() ; ++jt) 
       os << *jt << " " ;
     os << endl;
   }
   
   // now do data itself
   for(vector< TF1 >::const_iterator it = m_tf1.begin(); 
-      it != m_tf1.end() ; it++) {
+      it != m_tf1.end() ; ++it) {
     // save bin number
     os << "BinVal : " ;
     int index = it - m_tf1.begin() ;
     for (vector<vector<float> >::const_iterator jt =  m_axisEdges.begin();
-	 jt != m_axisEdges.end() ; jt++) {          
+	 jt != m_axisEdges.end() ; ++jt) {          
       int n = 1 ;
-      for (vector<vector<float> >::const_iterator nt = jt+1 ; nt != m_axisEdges.end() ; nt++) 
+      for (vector<vector<float> >::const_iterator nt = jt+1 ; nt != m_axisEdges.end() ; ++nt) 
 	n *= nt->size() - 1 ; 
       int x =  index/n  ;
       index = index%n ;

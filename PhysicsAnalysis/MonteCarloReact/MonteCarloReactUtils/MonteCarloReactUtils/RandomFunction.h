@@ -10,11 +10,11 @@
 
 #include <vector>
 #include <string>
-#include <iostream>
+#include <iosfwd>
 
 #include <TF2.h>
-class TF1;
-class TH1F;
+#include <TF1.h>
+
 class TAxis ;
 
 namespace MonteCarloReact {

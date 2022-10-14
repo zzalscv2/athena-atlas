@@ -1,13 +1,10 @@
 /*
-  Copyright (C) 2002-2017 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "MonteCarloReactUtils/ResInfo.h"
 #include "MonteCarloReactUtils/EffInfo.h"
-#include <iostream>
-#include <sstream>
-#include <map>
-#include <vector>
+#include <stdexcept>
 #include <algorithm>
 
 using namespace MonteCarloReact;
@@ -374,7 +371,7 @@ template<class T> bool ResInfo::getEntry( const std::string & id, T & value, int
     return false;
     
   const  std::vector< std::string > & vec = mapIter->second;
-  if( i > (int) vec.size() )
+  if( i >= (int) vec.size() )
     return false;
     
   const std::string & svalue = vec.at(i);
@@ -490,7 +487,7 @@ bool ResInfo::contains (const ResInfo& info) const {
   bool trigger_processed = false ;
 
   for ( map<string,vector<string> >::const_iterator it = m_map.begin() ;
-	it != m_map.end(); it++) {
+	it != m_map.end(); ++it) {
     if (it->first == "Comments" || it->first == "ATLASNoteID") continue ;
     map<string,vector<string> >::const_iterator jt ;
 
@@ -542,7 +539,7 @@ bool ResInfo::contains (const ResInfo& info) const {
     if ((jt = info.m_map.find(it->first)) == info.m_map.end()) return false ; 
     if (jt->second.size() < it->second.size()) return false ;
     for (vector<string>::const_iterator vt = it->second.begin();
-	 vt != it->second.end(); vt++) 
+	 vt != it->second.end(); ++vt) 
       if (find (jt->second.begin(), jt->second.end(), *vt) == jt->second.end()) return false ;    
   }
   return true ;

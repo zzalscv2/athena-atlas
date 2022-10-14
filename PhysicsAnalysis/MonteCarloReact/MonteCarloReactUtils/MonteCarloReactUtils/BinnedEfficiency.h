@@ -11,7 +11,7 @@
 
 #include <vector>
 #include <string>
-#include <iostream>
+#include <iosfwd>
 
 class TH1;
 class TH1F;
