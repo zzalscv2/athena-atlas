@@ -16,8 +16,6 @@ def TRT_StrawStatusSummaryToolCfg(flags, name="TRT_StrawStatusSummaryTool", forc
         # Dead/Noisy Straw Lists
         from TRT_ConditionsAlgs.TRT_ConditionsAlgsConfig import TRTStrawStatusCondAlgCfg
         acc.merge(TRTStrawStatusCondAlgCfg(flags))
-        # Argon straw list
-        acc.merge(addFoldersSplitOnline(flags, "TRT", "/TRT/Onl/Cond/StatusHT", "/TRT/Cond/StatusHT", className="TRTCond::StrawStatusMultChanContainer"))
 
     kwargs.setdefault("isGEANT4", flags.GeoModel.Align.LegacyConditionsAccess or forceLegacyAccess)
 

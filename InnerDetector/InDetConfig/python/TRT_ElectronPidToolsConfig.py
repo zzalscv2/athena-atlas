@@ -27,7 +27,10 @@ def TRT_LocalOccupancyCfg(flags, name="TRT_LocalOccupancy", **kwargs):
 def TRT_OverlayLocalOccupancyCfg(flags, name="TRT_OverlayLocalOccupancy", **kwargs):
     """Return a ComponentAccumulator for overlay TRT_LocalOccupancy Tool"""
     kwargs.setdefault("TRT_DriftCircleCollection", "")
-    return TRT_LocalOccupancyCfg(flags, name, **kwargs)
+    from TRT_ConditionsAlgs.TRT_ConditionsAlgsConfig import TRTStrawStatusCondAlgCfg
+    acc = TRTStrawStatusCondAlgCfg(flags, StrawStatusHTSummaryWriteKey="")
+    acc.setPrivateTools(acc.popToolsAndMerge(TRT_LocalOccupancyCfg(flags, name, **kwargs)))
+    return acc
 
 
 def TRTOccupancyIncludeCfg(flags, name="TRTOccupancyInclude", **kwargs):
