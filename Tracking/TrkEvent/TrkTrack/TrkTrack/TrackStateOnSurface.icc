@@ -79,3 +79,11 @@ Trk::TrackStateOnSurface::types() const
 {
   return m_typeFlags;
 }
+
+inline const std::bitset<
+  Trk::TrackStateOnSurface::NumberOfPersistencyHints>
+Trk::TrackStateOnSurface::hints() const
+{
+  return {m_hints};
+}
+

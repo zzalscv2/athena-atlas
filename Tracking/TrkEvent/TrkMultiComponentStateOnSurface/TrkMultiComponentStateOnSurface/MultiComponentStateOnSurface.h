@@ -85,7 +85,7 @@ public:
     double modeQoverP = 0.);
 
   /** Create a MultiComponentStateOnSurface Object with an explicit declaration
-   * o the track parameters to be passed to the base and also a
+   * of the track parameters to be passed to the base and also a
    * TrackStateOnSurfaceType */
   MultiComponentStateOnSurface(
     std::unique_ptr<const MeasurementBase>,

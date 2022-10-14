@@ -117,8 +117,11 @@ Trk::TrackSlimmingTool::slim(const Trk::Track& track) const
   DataVector<const TrackStateOnSurface>::const_iterator itTSoS =
     oldTrackStates->begin();
   for (; itTSoS != oldTrackStates->end(); ++itTSoS) {
-    const_cast<TrackStateOnSurface&>((**itTSoS))
-      .setHint(Trk::TrackStateOnSurface::PartialPersistification);
+
+    //The hints we want to create for this tsos
+    std::bitset<Trk::TrackStateOnSurface::NumberOfPersistencyHints> hints{};
+    //
+    hints.set(Trk::TrackStateOnSurface::PartialPersistification);
     parameters = nullptr;
     rot = nullptr;
     // if requested: keep calorimeter TSOS with adjacent scatterers (on combined
@@ -129,8 +132,7 @@ Trk::TrackSlimmingTool::slim(const Trk::Track& track) const
       if (itTSoS != oldTrackStates->begin()) {
         --itTSoS;
         if ((**itTSoS).type(TrackStateOnSurface::Scatterer)) {
-          const_cast<TrackStateOnSurface&>((**itTSoS))
-            .resetHint(Trk::TrackStateOnSurface::PartialPersistification);
+          hints.reset(Trk::TrackStateOnSurface::PartialPersistification);
         }
         ++itTSoS;
       }
@@ -139,25 +141,23 @@ Trk::TrackSlimmingTool::slim(const Trk::Track& track) const
         dynamic_cast<const MaterialEffectsOnTrack*>(
           (**itTSoS).materialEffectsOnTrack());
       if (meot && meot->energyLoss()) {
-        const_cast<TrackStateOnSurface&>((**itTSoS))
-          .setHint(Trk::TrackStateOnSurface::PersistifySlimCaloDeposit);
-        const_cast<TrackStateOnSurface&>((**itTSoS))
-          .setHint(Trk::TrackStateOnSurface::PersistifyTrackParameters);
+        hints.set(Trk::TrackStateOnSurface::PersistifySlimCaloDeposit);
+        hints.set(Trk::TrackStateOnSurface::PersistifyTrackParameters);
       }
       // following TSOS (if Scatterer)
       ++itTSoS;
       if (itTSoS != oldTrackStates->end() &&
           (**itTSoS).type(TrackStateOnSurface::Scatterer)) {
-        const_cast<TrackStateOnSurface&>((**itTSoS))
-          .resetHint(Trk::TrackStateOnSurface::PartialPersistification);
+        hints.reset(Trk::TrackStateOnSurface::PartialPersistification);
       }
       --itTSoS;
     }
 
     // We only keep TSOS if they either contain a perigee, OR are a measurement
     if ((*itTSoS)->measurementOnTrack() == nullptr &&
-        !(*itTSoS)->type(TrackStateOnSurface::Perigee))
+        !(*itTSoS)->type(TrackStateOnSurface::Perigee)){
       continue;
+    }
 
     keepParameter = keepParameters((*itTSoS),
                                    firstValidIDTSOS,
@@ -175,14 +175,14 @@ Trk::TrackSlimmingTool::slim(const Trk::Track& track) const
     }
     if (rot != nullptr || parameters != nullptr) {
       if (rot) {
-        const_cast<TrackStateOnSurface&>((**itTSoS))
-          .setHint(Trk::TrackStateOnSurface::PersistifyMeasurement);
+        hints.set(Trk::TrackStateOnSurface::PersistifyMeasurement);
       }
       if (parameters) {
-        const_cast<TrackStateOnSurface&>((**itTSoS))
-          .setHint(Trk::TrackStateOnSurface::PersistifyTrackParameters);
+        hints.set(Trk::TrackStateOnSurface::PersistifyTrackParameters);
       }
     }
+    //pass the hints to the tsos
+    (*itTSoS)->setHints(hints.to_ulong());
   }
   return nullptr;
 }

@@ -13,12 +13,18 @@
 #include "TrkTrack/TrackStateOnSurface.h"
 
 namespace {
-   unsigned int keepTSOS(const Trk::TrackStateOnSurface *tsos) {
-      return (tsos &&
-		   (   !tsos->type(Trk::TrackStateOnSurface::PartialPersistification)
-		    || tsos->type(Trk::TrackStateOnSurface::PersistifyTrackParameters)
-		    || tsos->type(Trk::TrackStateOnSurface::PersistifyMeasurement)) );
-   }
+unsigned int
+keepTSOS(const Trk::TrackStateOnSurface* tsos)
+{
+  if (!tsos) {
+    return false;
+  }
+  std::bitset<Trk::TrackStateOnSurface::NumberOfPersistencyHints>
+    persHints = tsos->hints();
+  return (!persHints.test(Trk::TrackStateOnSurface::PartialPersistification) ||
+          persHints.test(Trk::TrackStateOnSurface::PersistifyTrackParameters) ||
+          persHints.test(Trk::TrackStateOnSurface::PersistifyMeasurement));
+}
 }
 
 //-----------------------------------------------------------------------------

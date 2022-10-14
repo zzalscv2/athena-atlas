@@ -31,8 +31,7 @@ TrackStateOnSurface::TrackStateOnSurface(
   std::unique_ptr<const TrackParameters> trackParameters,
   std::unique_ptr<const FitQualityOnSurface> fitQoS,
   std::unique_ptr<const MaterialEffectsBase> materialEffects,
-  const std::bitset<TrackStateOnSurface::NumberOfTrackStateOnSurfaceTypes>&
-    typePattern,
+  const std::bitset<TrackStateOnSurface::NumberOfTrackStateOnSurfaceTypes>& typePattern,
   std::unique_ptr<const AlignmentEffectsOnTrack> alignmentEffectsOnTrack)
   : m_fitQualityOnSurface(std::move(fitQoS))
   , m_trackParameters(std::move(trackParameters))
@@ -40,6 +39,25 @@ TrackStateOnSurface::TrackStateOnSurface(
   , m_materialEffectsOnTrack(std::move(materialEffects))
   , m_alignmentEffectsOnTrack(std::move(alignmentEffectsOnTrack))
   , m_typeFlags(typePattern)
+{
+  assert(isSane());
+}
+
+TrackStateOnSurface::TrackStateOnSurface(
+  std::unique_ptr<const MeasurementBase> meas,
+  std::unique_ptr<const TrackParameters> trackParameters,
+  std::unique_ptr<const FitQualityOnSurface> fitQoS,
+  std::unique_ptr<const MaterialEffectsBase> materialEffects,
+  const std::bitset<TrackStateOnSurface::NumberOfTrackStateOnSurfaceTypes>& typePattern,
+  const std::bitset<TrackStateOnSurface::NumberOfPersistencyHints>& hintPattern,
+  std::unique_ptr<const AlignmentEffectsOnTrack> alignmentEffectsOnTrack)
+  : m_fitQualityOnSurface(std::move(fitQoS))
+  , m_trackParameters(std::move(trackParameters))
+  , m_measurementOnTrack(std::move(meas))
+  , m_materialEffectsOnTrack(std::move(materialEffects))
+  , m_alignmentEffectsOnTrack(std::move(alignmentEffectsOnTrack))
+  , m_typeFlags(typePattern)
+  , m_hints(hintPattern.to_ulong())
 {
   assert(isSane());
 }
@@ -54,6 +72,7 @@ TrackStateOnSurface::TrackStateOnSurface(
   setFlags();
 }
 
+//copy 
 TrackStateOnSurface::TrackStateOnSurface(const TrackStateOnSurface& rhs)
   : m_fitQualityOnSurface(
       rhs.m_fitQualityOnSurface
@@ -73,27 +92,55 @@ TrackStateOnSurface::TrackStateOnSurface(const TrackStateOnSurface& rhs)
   , m_typeFlags(rhs.m_typeFlags)
 {}
 
+// move
+TrackStateOnSurface::TrackStateOnSurface(TrackStateOnSurface&& rhs) noexcept
+  : m_fitQualityOnSurface(std::move(rhs.m_fitQualityOnSurface))
+  , m_trackParameters(std::move(rhs.m_trackParameters))
+  , m_measurementOnTrack(std::move(rhs.m_measurementOnTrack))
+  , m_materialEffectsOnTrack(std::move(rhs.m_materialEffectsOnTrack))
+  , m_alignmentEffectsOnTrack(std::move(rhs.m_alignmentEffectsOnTrack))
+  , m_typeFlags(rhs.m_typeFlags)
+{
+}
+
+// copy assignment
 TrackStateOnSurface&
 TrackStateOnSurface::operator=(const TrackStateOnSurface& rhs)
 {
   if (this != &rhs) {
-   m_fitQualityOnSurface =
-      rhs.m_fitQualityOnSurface
-        ? std::make_unique<const FitQualityOnSurface>(*rhs.m_fitQualityOnSurface)
-        : nullptr;
+    m_fitQualityOnSurface = rhs.m_fitQualityOnSurface
+                              ? std::make_unique<const FitQualityOnSurface>(
+                                  *rhs.m_fitQualityOnSurface)
+                              : nullptr;
     m_trackParameters.reset(
       rhs.m_trackParameters ? rhs.m_trackParameters->clone() : nullptr);
     m_measurementOnTrack.reset(
       rhs.m_measurementOnTrack ? rhs.m_measurementOnTrack->clone() : nullptr);
     m_materialEffectsOnTrack.reset(rhs.m_materialEffectsOnTrack
-                                 ? rhs.m_materialEffectsOnTrack->clone()
-                                 : nullptr);
+                                     ? rhs.m_materialEffectsOnTrack->clone()
+                                     : nullptr);
     m_alignmentEffectsOnTrack =
       rhs.m_alignmentEffectsOnTrack
-        ? std::make_unique<const AlignmentEffectsOnTrack>(*rhs.m_alignmentEffectsOnTrack)
+        ? std::make_unique<const AlignmentEffectsOnTrack>(
+            *rhs.m_alignmentEffectsOnTrack)
         : nullptr;
     m_typeFlags = rhs.m_typeFlags;
     assert(isSane());
+  }
+  return *this;
+}
+
+// move assignment
+TrackStateOnSurface&
+TrackStateOnSurface::operator=(Trk::TrackStateOnSurface&& rhs) noexcept
+{
+  if (this != &rhs) {
+    m_fitQualityOnSurface = std::move(rhs.m_fitQualityOnSurface);
+    m_trackParameters = std::move(rhs.m_trackParameters);
+    m_measurementOnTrack = std::move(rhs.m_measurementOnTrack);
+    m_materialEffectsOnTrack = std::move(rhs.m_materialEffectsOnTrack);
+    m_alignmentEffectsOnTrack = std::move(rhs.m_alignmentEffectsOnTrack);
+    m_typeFlags = std::move(rhs.m_typeFlags);
   }
   return *this;
 }
@@ -212,26 +259,14 @@ TrackStateOnSurface::isSane() const
 }
 
 void
-TrackStateOnSurface::setHint(const TrackStateOnSurfaceType& type)
+TrackStateOnSurface::setHints(const uint8_t hints) const
 {
-  if (type >= PartialPersistification && type <= PersistifySlimCaloDeposit) {
-    // allowed to modify persistification flags although this is const
-    m_typeFlags.set(type);
-  } else {
-    throw std::logic_error(
-      "Can only use TrackStateOnSurface::mark to set persistification flags");
-  }
-}
-
-void
-TrackStateOnSurface::resetHint(const TrackStateOnSurfaceType& type)
-{
-  if (type >= PartialPersistification && type <= PersistifySlimCaloDeposit) {
-    // allowed to modify persistification flags although this is const
-    m_typeFlags.reset(type);
-  } else {
-    throw std::logic_error(
-      "Can only use TrackStateOnSurface::mark to set persistification flags");
+  // The extra "hidden" bit we save (1<<NumberOfPersistencyHints) 
+  // is to dissalow repeated calls to setHints(0).
+  uint8_t exp = 0;
+  if (!m_hints.compare_exchange_strong (exp, hints | (1<<NumberOfPersistencyHints))) {
+    throw std::runtime_error(
+      "TSOS trying to set again already set Persistification Hints");
   }
 }
 

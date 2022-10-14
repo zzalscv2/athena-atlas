@@ -50,12 +50,15 @@ persToTrans( const Trk::TrackStateOnSurface_p1 *persObj, Trk::TrackStateOnSurfac
       }
    }
 #endif
-
+  std::bitset<Trk::TrackStateOnSurface::NumberOfTrackStateOnSurfaceTypes> types;
+  std::bitset<Trk::TrackStateOnSurface::NumberOfPersistencyHints> hints;
+  Trk::TrackStateOnSurface::splitToBitsets(persObj->m_typeFlags, types, hints);
   *transObj = Trk::TrackStateOnSurface (std::unique_ptr<const Trk::MeasurementBase>(meas),
                                         std::unique_ptr<const Trk::TrackParameters>(trackParameters),
                                         std::unique_ptr<const Trk::FitQualityOnSurface>(fitQoS),
                                         std::unique_ptr<const Trk::MaterialEffectsBase>(materialEffects),
-                                        persObj->m_typeFlags);
+                                        types,
+                                        hints);
 }
 
 

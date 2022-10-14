@@ -31,17 +31,22 @@ persToTrans( const Trk::TrackStateOnSurface_p3 *persObj, Trk::TrackStateOnSurfac
   ITPConverterFor<Trk::MaterialEffectsBase> *matBaseCnv = nullptr;  
   const Trk::MaterialEffectsBase* materialEffects = createTransFromPStore( &matBaseCnv, persObj->m_materialEffects, log );
 
+  std::bitset<Trk::TrackStateOnSurface::NumberOfTrackStateOnSurfaceTypes> types;
+  std::bitset<Trk::TrackStateOnSurface::NumberOfPersistencyHints> hints;
+  Trk::TrackStateOnSurface::splitToBitsets(persObj->m_typeFlags, types, hints);
   // There were some tracks saved that violate the isSane test in
   // TrackStateOnSurface.  If we were to pass meas or materialEffects
   // to this ctor then we would trip that assertion.  However,
   // we want to preserve the previous behavior of the TP converters,
   // which did allow reading  such tracks.  So defer setting these pointers
   // until after the checks,
-  *transObj = Trk::TrackStateOnSurface (nullptr,
-                                        std::unique_ptr<const Trk::TrackParameters> (trackParameters),
-                                        std::unique_ptr<const Trk::FitQualityOnSurface> (fitQoS),
-                                        nullptr,
-                                        persObj->m_typeFlags);
+  *transObj = Trk::TrackStateOnSurface(
+    nullptr,
+    std::unique_ptr<const Trk::TrackParameters>(trackParameters),
+    std::unique_ptr<const Trk::FitQualityOnSurface>(fitQoS),
+    nullptr,
+    types,
+    hints);
   transObj->m_measurementOnTrack.reset(meas);
   transObj->m_materialEffectsOnTrack.reset(materialEffects);
 }
@@ -54,10 +59,11 @@ transToPers( const Trk::TrackStateOnSurface *transObj, Trk::TrackStateOnSurface_
   ITPConverter* dummy = topConverter ()->converterForType( typeid(Trk::TrackParameters));    
   if (!m_parametersCnv)  m_parametersCnv = dynamic_cast<TrackParametersCnv_p2*>(dummy); // FIXME - only in init?
   
-  bool persistify_all = !(transObj->type(Trk::TrackStateOnSurface::PartialPersistification));
+  std::bitset<Trk::TrackStateOnSurface::NumberOfPersistencyHints> persHints = transObj->hints();
+  bool persistify_all = !(persHints.test(Trk::TrackStateOnSurface::PartialPersistification));
  
   persObj->m_trackParameters = toPersistent( &m_parametersCnv,
-                                             ( (persistify_all || transObj->type(Trk::TrackStateOnSurface::PersistifyTrackParameters) ) 
+                                             ( (persistify_all || persHints.test(Trk::TrackStateOnSurface::PersistifyTrackParameters) ) 
                                                ? transObj->trackParameters()
                                                : nullptr),
                                              log );
@@ -70,7 +76,7 @@ transToPers( const Trk::TrackStateOnSurface *transObj, Trk::TrackStateOnSurface_
 
   ITPConverterFor<Trk::MeasurementBase>  *measureCnv = nullptr;
   persObj->m_measurementOnTrack = toPersistent( &measureCnv,
-                                                ((persistify_all || transObj->type(Trk::TrackStateOnSurface::PersistifyMeasurement) )
+                                                ((persistify_all || persHints.test(Trk::TrackStateOnSurface::PersistifyMeasurement) )
                                                  ? transObj->measurementOnTrack()
                                                  : nullptr),
                                                 log );
@@ -78,19 +84,22 @@ transToPers( const Trk::TrackStateOnSurface *transObj, Trk::TrackStateOnSurface_
   ITPConverterFor<Trk::MaterialEffectsBase> *matBaseCnv = nullptr;
   // @TODO create slimmed material effects on track object
   persObj->m_materialEffects = toPersistent( &matBaseCnv,
-                                             ((persistify_all ||  transObj->type(Trk::TrackStateOnSurface::PersistifySlimCaloDeposit))
+                                             ((persistify_all ||  persHints.test(Trk::TrackStateOnSurface::PersistifySlimCaloDeposit))
                                               ? transObj->materialEffectsOnTrack()
                                               : nullptr), log );
-  if (persistify_all ) {
-    persObj->m_typeFlags = transObj->types().to_ulong();
-  }
-  else {
-    std::bitset<Trk::TrackStateOnSurface::NumberOfTrackStateOnSurfaceTypes> typePattern; 
-    if ((persistify_all || transObj->type(Trk::TrackStateOnSurface::PersistifyTrackParameters))
-        && transObj->type(Trk::TrackStateOnSurface::Perigee)) {
+  if (persistify_all) {
+    persObj->m_typeFlags =
+      Trk::TrackStateOnSurface::joinBitsets(transObj->types(), persHints);
+  } else {
+    std::bitset<Trk::TrackStateOnSurface::NumberOfTrackStateOnSurfaceTypes>
+      typePattern;
+    if ((persistify_all ||
+         persHints.test(Trk::TrackStateOnSurface::PersistifyTrackParameters)) &&
+        transObj->type(Trk::TrackStateOnSurface::Perigee)) {
       typePattern.set(Trk::TrackStateOnSurface::Perigee);
     }
-    if (persistify_all || transObj->type(Trk::TrackStateOnSurface::PersistifyMeasurement)) {
+    if (persistify_all ||
+        persHints.test(Trk::TrackStateOnSurface::PersistifyMeasurement)) {
       if (transObj->type(Trk::TrackStateOnSurface::Measurement)) {
         typePattern.set(Trk::TrackStateOnSurface::Measurement);
       }
