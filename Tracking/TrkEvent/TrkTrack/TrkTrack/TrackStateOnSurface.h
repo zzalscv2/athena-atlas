@@ -19,8 +19,9 @@ email                : edward.moyse@cern.ch
 #include "TrkMeasurementBase/MeasurementBase.h"
 #include "TrkTrack/AlignmentEffectsOnTrack.h"
 //
-#include "CxxUtils/checker_macros.h"
 //
+#include <atomic>
+#include <cstdint>
 #include <bitset>
 #include <iostream>
 #include <memory>
@@ -65,6 +66,7 @@ namespace Trk {
  *   by a Trk::TrackParameters
  *
  * @author edward.moyse@cern.ch
+ * @author Chistos Anastopoulos Athena MT migration
  */
 class TrackStateOnSurface
 {
@@ -72,15 +74,31 @@ class TrackStateOnSurface
   friend class ::TrackStateOnSurfaceCnv_p3;
 
 public:
-  /**
-   * This enum describes the type of TrackStateOnSurface.
-   * @todo Update TrackStateOnSurfaceType definitions, especially \
-   *       InertMaterial etc
+  /*
+   * Historically, we had a single bitset.
+   *
+   * for types and hints.
+   * The relevant indices in the bitset were controlled
+   * by a single enum.
+   *
+   * For MT we splitted the hints from the types.
+   * So we have two enums controlling two
+   * bitsets.
+   *
+   * The types can be queried as before
+   * from user code.
+   *
+   * The Hints exist only for
+   * interacting with persistification
+   * In order to support existing code
+   * They are atomic and are to be set
+   * only once for each TSOS.
+   * they had to remain part of TSOS.
    */
   enum TrackStateOnSurfaceType
   {
     /** This is a measurement, and will at least contain a
-       Trk::MeasurementBase*/
+         Trk::MeasurementBase*/
     Measurement = 0,
 
     /** This represents inert material, and so will contain MaterialEffectsBase
@@ -132,28 +150,64 @@ public:
      */
     Alignment = 11,
 
-    PartialPersistification = 12,
+    NumberOfTrackStateOnSurfaceTypes = 12
+  };
+
+  enum PersistencyHint
+  {
+
+    PartialPersistification = 0,
     /**
      *  Mark the measuremenet for persistification
      */
-    PersistifyMeasurement = 13,
+    PersistifyMeasurement = 1,
 
     /**
      *  Mark track parameters for persisitification
      */
-    PersistifyTrackParameters = 14,
+    PersistifyTrackParameters = 2,
 
     /**
      *  Mark track parameters for persisitification
      */
-    PersistifySlimCaloDeposit = 15,
+    PersistifySlimCaloDeposit = 3,
 
-    NumberOfTrackStateOnSurfaceTypes = 16
-    /**
-     *  Persistify all
-     */
-
+    NumberOfPersistencyHints = 4
   };
+
+  /*
+   * Helpers to join and split the bitsets 
+   * for the types and hints
+   * Needed in order to keep the same T/P separation.
+   * Note that in the Persistent side we keep a single ulong
+   */
+  static unsigned int long joinBitsets(
+    const std::bitset<NumberOfTrackStateOnSurfaceTypes>& types,
+    const std::bitset<NumberOfPersistencyHints>& hints)
+  {
+    //put hints in place
+    unsigned int long res = hints.to_ulong();
+    //shift them up
+    res = (res << NumberOfTrackStateOnSurfaceTypes);
+    //Add type
+    res += types.to_ulong();
+    return res;
+  }
+
+  static void splitToBitsets(
+    const unsigned int long input,
+    std::bitset<NumberOfTrackStateOnSurfaceTypes>& types,
+    std::bitset<NumberOfPersistencyHints>& hints)
+  {
+    // mask with NumberOfTrackStateOnSurfaceTypes bits set to 1
+    constexpr unsigned int long maskTypesSet =
+      (1 << NumberOfTrackStateOnSurfaceTypes) - 1;
+    //keep just the Type part of the input
+    types = std::bitset<NumberOfTrackStateOnSurfaceTypes>(input & maskTypesSet);
+    //keep the upper Hints part of the input
+    hints = std::bitset<NumberOfPersistencyHints>(
+      input >> NumberOfTrackStateOnSurfaceTypes);
+  }
 
   enum Variety
   {
@@ -182,10 +236,7 @@ public:
   /**
    * Full constructor.
    *
-   * The objects passed in belong to the this object, or to the Track to which
-   * this FQOS will be assigned.
-   * It is 'explicit' to avoid problems such as bug#74513.
-   *
+   * The objects passed in belong to the this object
    * @param[in] meas pointer to a MeasurementBase, or 0 if no object is being
    *            passed.
    * @param[in] trackParameter pointer to a TrackParameters, or 0 if no object
@@ -210,11 +261,19 @@ public:
     std::unique_ptr<const AlignmentEffectsOnTrack> alignmentEffectsOnTrack = nullptr
   );
 
+  explicit TrackStateOnSurface(
+    std::unique_ptr<const MeasurementBase> meas,
+    std::unique_ptr<const TrackParameters> trackParameters,
+    std::unique_ptr<const FitQualityOnSurface> fitQoS,
+    std::unique_ptr<const MaterialEffectsBase> materialEffectsOnTrack,
+    const std::bitset<TrackStateOnSurface::NumberOfTrackStateOnSurfaceTypes>& typePattern,
+    const std::bitset<TrackStateOnSurface::NumberOfPersistencyHints>& hintPattern,
+    std::unique_ptr<const AlignmentEffectsOnTrack> alignmentEffectsOnTrack = nullptr
+  );
+
   /**
    * constructor without a FitQualityOnSurface. Both the objects passed now
-   * belong to this class, or to the track to which this TrackStateOnSurface
-   * belongs.
-   *
+   * belong to this object, 
    * This ctor will set appropriate flags for all non-null objects passed
    * in (i.e. if there is a MeasurementBase, it will set the measurement flag)
    */
@@ -230,12 +289,13 @@ public:
   /** copy ctor*/
   TrackStateOnSurface(const TrackStateOnSurface& trackStateOnSurface);
   /** Move ctor*/
-  TrackStateOnSurface(TrackStateOnSurface&& trackStateOnSurface) noexcept = default;
+  TrackStateOnSurface(TrackStateOnSurface&& trackStateOnSurface) noexcept;
+
   /* Assignment */
   Trk::TrackStateOnSurface& operator=(const Trk::TrackStateOnSurface& rhs);
-  Trk::TrackStateOnSurface& operator=(Trk::TrackStateOnSurface&& rhs) noexcept = default;
+  Trk::TrackStateOnSurface& operator=(Trk::TrackStateOnSurface&& rhs) noexcept;
   /** destructor*/
-  virtual ~TrackStateOnSurface() = default ;
+  virtual ~TrackStateOnSurface() = default;
 
   /** returns 0 if there is no FQOS object assigned*/
   const FitQualityOnSurface* fitQualityOnSurface() const;
@@ -270,18 +330,6 @@ public:
    */
   virtual Trk::TrackStateOnSurface::Variety variety() const;
 
-  /**
-   * Use this method to set persistification hints.
-   * @throw logic_error if the type is not a persistification flag.
-   */
-  void setHint(const TrackStateOnSurfaceType& type);
-
-  /**
-   * Use this method to clear persistification hint flag.
-   * @throw logic_error if the type is not a persistification flag.
-   */
-  void resetHint(const TrackStateOnSurfaceType& type);
-
   /** returns a string with the expanded type of the object (i.e. if it has
    * several type bits set, they all will be returned)*/
   std::string dumpType() const;
@@ -300,6 +348,21 @@ public:
   */
   const std::bitset<NumberOfTrackStateOnSurfaceTypes>& types() const;
 
+  /**
+   * Use this method to set persistification hints.
+   * This can be called only once per TSOS
+   * It will set a cached Value which we can not reset
+   * But this allows it to be const..
+   */
+  void setHints(const uint8_t hints) const;
+  /**
+   * Use this method to get the persistification hints
+   */
+  const std::bitset<NumberOfPersistencyHints> hints() const;
+
+  /**
+   * return associated surface
+   */
   const Trk::Surface& surface() const;
   //!< Used to perform sanity checks on this object (i.e. all consistuents are
   //!< on the same surface). Returns 'true' if it seems okay.
@@ -315,6 +378,7 @@ private:
   std::unique_ptr<const MaterialEffectsBase> m_materialEffectsOnTrack{};
   std::unique_ptr<const AlignmentEffectsOnTrack> m_alignmentEffectsOnTrack{};
   std::bitset<NumberOfTrackStateOnSurfaceTypes> m_typeFlags{};
+  mutable std::atomic<uint8_t> m_hints{};
 };
 
 /**Overload of << operator for MsgStream for debug output*/

@@ -32,7 +32,7 @@ public:
   /**This method 'skims' interesting information from the passed track.
    * @param track A const reference to the track to be skimmed
    *
-   * For compatibility reasons in can do two different things
+   * For compatibility reasons it can do two different things
    * depending on so called setPersistificationHints.
    *
    * When setPersistificationHints is not to be used
@@ -43,16 +43,8 @@ public:
    * it sets persistification hints
    * @return nullptr
    *
-   * The later behaviour can be nom thread-safe as it
-   * modifies the const TrackStateOnSurfaces attached
-   * to the const Trk::Track reference.
-   *
-   * If you need MT safety 
-   * A. If the Trk::Track is not const consider the slimTrack method
-   * B. If it is const consider using slimCopy
    */
-  virtual Trk::Track* slim
-  ATLAS_NOT_THREAD_SAFE(const Trk::Track& track) const = 0;
+  virtual Trk::Track* slim(const Trk::Track& track) const = 0;
   /**
    * This method always creates a std::unique_ptr<Trk::Track> with information
    * removed

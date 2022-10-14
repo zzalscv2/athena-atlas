@@ -58,17 +58,10 @@ public:
    *
    * When m_setPersistificationHints = True
    * it sets persistification hints
-   * @return nullptr
-   * The later behaviour can be nom thread-safe as it
-   * modifies the const TrackStateOnSurfaces attached
-   * to the const Trk::Track reference.
+   * and returns nullptr
    *
-   * If you need MT safety 
-   * A. If the Trk::Track is not const consider the slimTrack method
-   * B. If it is const consider using slimCopy
    */
-  Trk::Track* slim
-  ATLAS_NOT_THREAD_SAFE(const Trk::Track& track) const override final;
+  Trk::Track* slim(const Trk::Track& track) const override final;
 
   /**
    * This method always creates a std::unique_ptr<Trk::Track> with information
