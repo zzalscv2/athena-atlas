@@ -2019,7 +2019,7 @@ void MuonGMCheck::buildRpcRegionSelectorMap() {
     std::ofstream fout0("RPCMapIdAndHash.txt");
     fout0 << "RPC ExtendedId HashId Etamin Etamax Phimin Phimax " << std::endl;
 
-    for (std::vector<Identifier>::const_iterator i = idfirst; i != idlast; i++) {
+    for (std::vector<Identifier>::const_iterator i = idfirst; i != idlast; ++i) {
         Identifier Id = *i;
         IdentifierHash Idhash;
         int gethash_code = m_idHelperSvc->rpcIdHelper().get_hash(Id, Idhash, &rpcModuleContext);
@@ -2124,7 +2124,7 @@ void MuonGMCheck::buildMdtRegionSelectorMap() {
     std::ofstream fout0("MDTMapIdAndHash.txt");
     fout0 << "MDT ExtendedId HashId Etamin Etamax Phimin Phimax " << std::endl;
 
-    for (std::vector<Identifier>::const_iterator i = idfirst; i != idlast; i++) {
+    for (std::vector<Identifier>::const_iterator i = idfirst; i != idlast; ++i) {
         Identifier Id = *i;
         IdentifierHash Idhash;
         int gethash_code = m_idHelperSvc->mdtIdHelper().get_hash(Id, Idhash, &mdtModuleContext);
@@ -2374,7 +2374,7 @@ void MuonGMCheck::buildTgcRegionSelectorMap() {
     std::ofstream fout0("TGCMapIdAndHash.txt");
     fout0 << "TGC ExtendedId HashId Etamin Etamax Phimin Phimax " << std::endl;
 
-    for (std::vector<Identifier>::const_iterator i = idfirst; i != idlast; i++) {
+    for (std::vector<Identifier>::const_iterator i = idfirst; i != idlast; ++i) {
         Identifier elemId = *i;
         IdentifierHash hashId;
 
@@ -2463,7 +2463,7 @@ void MuonGMCheck::buildCscRegionSelectorMap() {
     std::ofstream fout0("CSCMapIdAndHash.txt");
     fout0 << "CSC ExtendedId HashId Etamin Etamax Phimin Phimax " << std::endl;
 
-    for (std::vector<Identifier>::const_iterator i = idfirst; i != idlast; i++) {
+    for (std::vector<Identifier>::const_iterator i = idfirst; i != idlast; ++i) {
         Identifier Id = *i;
         IdentifierHash Idhash;
         int gethash_code = m_idHelperSvc->cscIdHelper().get_hash(Id, Idhash, &cscModuleContext);
@@ -2885,7 +2885,7 @@ void MuonGMCheck::testMdtDetectorElementHash() {
     std::ofstream fout0("testDEtElemHash_MDT.txt");
     fout0 << "MDT ExtendedId HashId Etamin Etamax Phimin Phimax " << std::endl;
 
-    for (std::vector<Identifier>::const_iterator i = idfirst; i != idlast; i++) {
+    for (std::vector<Identifier>::const_iterator i = idfirst; i != idlast; ++i) {
         Identifier Id = *i;
         IdentifierHash Idhash;
         int gethash_code = m_idHelperSvc->mdtIdHelper().get_hash(Id, Idhash, &mdtDetElemContext);
@@ -2964,7 +2964,7 @@ void MuonGMCheck::testRpcDetectorElementHash() {
     std::ofstream fout0("testDEtElemHash_RPC.txt");
     fout0 << "RPC ExtendedId HashId Etamin Etamax Phimin Phimax " << std::endl;
 
-    for (std::vector<Identifier>::const_iterator i = idfirst; i != idlast; i++) {
+    for (std::vector<Identifier>::const_iterator i = idfirst; i != idlast; ++i) {
         Identifier Id = *i;
         IdentifierHash Idhash;
         int gethash_code = m_idHelperSvc->rpcIdHelper().get_hash(Id, Idhash, &rpcDetElemContext);
@@ -3038,7 +3038,7 @@ void MuonGMCheck::testTgcDetectorElementHash() {
     std::ofstream fout0("testDEtElemHash_TGC.txt");
     fout0 << "TGC ExtendedId HashId Etamin Etamax Phimin Phimax " << std::endl;
 
-    for (std::vector<Identifier>::const_iterator i = idfirst; i != idlast; i++) {
+    for (std::vector<Identifier>::const_iterator i = idfirst; i != idlast; ++i) {
         Identifier Id = *i;
         IdentifierHash Idhash;
         int gethash_code = m_idHelperSvc->tgcIdHelper().get_hash(Id, Idhash, &tgcDetElemContext);
@@ -3110,7 +3110,7 @@ void MuonGMCheck::testCscDetectorElementHash() {
     std::ofstream fout0("testDEtElemHash_CSC.txt");
     fout0 << "CSC ExtendedId HashId Etamin Etamax Phimin Phimax " << std::endl;
 
-    for (std::vector<Identifier>::const_iterator i = idfirst; i != idlast; i++) {
+    for (std::vector<Identifier>::const_iterator i = idfirst; i != idlast; ++i) {
         Identifier Id = *i;
         IdentifierHash Idhash;
         int gethash_code = m_idHelperSvc->cscIdHelper().get_hash(Id, Idhash, &cscDetElemContext);
