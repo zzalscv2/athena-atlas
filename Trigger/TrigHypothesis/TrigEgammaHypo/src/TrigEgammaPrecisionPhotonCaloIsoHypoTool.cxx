@@ -125,11 +125,11 @@ bool TrigEgammaPrecisionPhotonCaloIsoHypoTool::decide( const ITrigEgammaPrecisio
   // phi = pClus->phi();
 
   // eta range
-  if ( cutIndex == -1 ) {  // VD
+  if ( !m_acceptAll && cutIndex == -1 ) {  // VD
     ATH_MSG_DEBUG( "Photon : " << absEta << " outside eta range " << m_etabin[m_etabin.size()-1] );
     return pass;
   } else { 
-    ATH_MSG_DEBUG( "eta bin used for cuts " << cutIndex );
+    ATH_MSG_DEBUG( "eta bin used for cuts " << cutIndex << " AcceptAll = " << m_acceptAll );
   }
   mon_etaBin = m_etabin[cutIndex]; 
   PassedCuts = PassedCuts + 1; // passed eta cut
@@ -253,7 +253,8 @@ bool TrigEgammaPrecisionPhotonCaloIsoHypoTool::decide( const ITrigEgammaPrecisio
 	  pass_reltopoetcone = pass_reltopoetcone && pass_this_reltopoetcone ; 
   }
   // Reach this point successfully  
-  pass = pass_reletcone && pass_reltopoetcone;
+  pass = m_acceptAll || (pass_reletcone && pass_reltopoetcone);
+  ATH_MSG_DEBUG( "AcceptAll          = " << m_acceptAll );
   ATH_MSG_DEBUG( "pass_reletcone     = " << pass_reletcone );
   ATH_MSG_DEBUG( "pass_reltopoetcone = " << pass_reltopoetcone );
   ATH_MSG_DEBUG( "pass               = " << pass );

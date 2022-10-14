@@ -678,7 +678,7 @@ PhotonChainParts = {
     'threshold'      : '',
     'extra'          : ['hiptrt', 'ion'],
     'IDinfo'         : ['etcut','loose','medium','tight'],
-    'isoInfo'        : ['icaloloose','icalomedium','icalotight'],
+    'isoInfo'        : ['noiso', 'icaloloose','icalomedium','icalotight'],
     'reccalibInfo'   : [],
     'trkInfo'        : [],
     'caloInfo'       : [],
