@@ -7,7 +7,6 @@
 
 #include "AsgTools/AsgTool.h"
 #include "AsgDataHandles/ReadHandleKey.h"
-#include "AsgDataHandles/WriteHandleKey.h"
 
 #include "xAODForward/ZdcModuleContainer.h"
 #include "xAODTrigL1Calo/TriggerTowerContainer.h"
@@ -42,8 +41,7 @@ public:
   void initialize40MHz();
   void initializeTriggerEffs(unsigned int runNumber);
 
-  StatusCode recoZdcModule(const xAOD::ZdcModule& module) override;
-  StatusCode recoZdcModules(const xAOD::ZdcModuleContainer& moduleContainer) override;
+  StatusCode recoZdcModules(const xAOD::ZdcModuleContainer& moduleContainer, const xAOD::ZdcModuleContainer& moduleSumContainer) override;
   StatusCode reprocessZdc() override;
 
   // methods for processing, used for decoration
@@ -54,16 +52,6 @@ public:
   void setTimeCalibrations(unsigned int runNumber);
 
   float getModuleSum(int side);
-
-  //float getModuleFitAmplitude(int side, int imod);
-  //float getModuleFitT0(int side, int imod);
-  //float getModuleAmplitude(int side, int imod);
-  //float getModuleTime(int side, int imod);
-  //float getModuleChisq(int side, int imod);
-  //float getModuleStatus(int side, int imod);
-
-  //float getModuleCalibAmplitude(int side, int imod);
-  //float getModuleCalibTime(int side, int imod);
 
   float getCalibModuleSum(int side);
   float getCalibModuleSumErr(int side);
@@ -122,6 +110,7 @@ private:
   std::unique_ptr<ZDCDataAnalyzer> initializePbPb2015G4();
   std::unique_ptr<ZDCDataAnalyzer> initializepPb2016();
   std::unique_ptr<ZDCDataAnalyzer> initializePbPb2018();
+  std::unique_ptr<ZDCDataAnalyzer> initializeLHCf2022();
 
   StatusCode configureNewRun(unsigned int runNumber);
 
@@ -148,12 +137,11 @@ private:
   SG::ReadHandleKey<xAOD::EventInfo> m_eventInfoKey {
     this, "EventInfoKey", "EventInfo",
       "Location of the event info."};
-  SG::WriteHandleKey<xAOD::ZdcModuleContainer> m_ZdcModuleWriteKey {
-    this, "ZdcModuleWriteKey", "ZdcSums",
-      "Output location of ZDC reprocessed data"};
 
   std::string m_zdcModuleContainerName;
   const xAOD::ZdcModuleContainer* m_zdcModules {nullptr};
+  std::string m_zdcSumContainerName;
+  const xAOD::ZdcModuleContainer* m_zdcSums {nullptr};
   bool m_flipEMDelay;
   bool m_lowGainOnly;
   bool m_combineDelay;
@@ -177,6 +165,7 @@ private:
   bool m_fixTau2;
   float m_deltaTCut;
   float m_ChisqRatioCut;
+  int m_LHCRun;
 
   std::shared_ptr<ZDCDataAnalyzer> m_zdcDataAnalyzer;
   std::shared_ptr<ZDCDataAnalyzer> m_zdcDataAnalyzer_40MHz;

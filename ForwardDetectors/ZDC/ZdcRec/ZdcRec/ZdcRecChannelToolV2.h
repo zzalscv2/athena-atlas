@@ -46,7 +46,7 @@ class ZdcRecChannelToolV2: public asg::AsgTool, virtual public IIncidentListener
   virtual StatusCode finalize() override;
   virtual void handle( const Incident& ) override;
 
-  int convertTT2ZM(const xAOD::TriggerTowerContainer* ttCollection, xAOD::ZdcModuleContainer* zdcModules) const;
+  int convertTT2ZM(const xAOD::TriggerTowerContainer* ttCollection, xAOD::ZdcModuleContainer* zdcModules, xAOD::ZdcModuleContainer* zdcSums) const;
   int makeRawFromDigits(xAOD::ZdcModuleContainer& zdcModules) const; // NOT const -- we're going to modify the objects to add signal processing
   int makeWaveformFromDigits(xAOD::ZdcModule& module) const;
   static int splitWaveform(std::map<int,float>& waveform, std::vector<float>& times, std::vector<float>& adcs) ;

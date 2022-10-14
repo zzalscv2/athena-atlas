@@ -17,7 +17,8 @@
 #include <string>
 
 #include "CxxUtils/checker_macros.h"
-ATLAS_NO_CHECK_FILE_THREAD_SAFETY;  // standalone ROOT analysis code
+ATLAS_NO_CHECK_FILE_THREAD_SAFETY; 
+
 
 class ZDCPulseAnalyzer
 {
@@ -76,6 +77,7 @@ private:
   float m_tmax;
 
   std::string m_fitFunction;
+  size_t m_2ndDerivStep;
   size_t m_peak2ndDerivMinSample;
   size_t m_peak2ndDerivMinTolerance;
   float m_peak2ndDerivMinThreshLG;
@@ -86,6 +88,16 @@ private:
   bool m_enableRepass;
   float m_peak2ndDerivMinRepassLG;
   float m_peak2ndDerivMinRepassHG;
+
+  // Gain factors for low gain and high gain
+  //
+  float m_gainFactorHG;
+  float m_gainFactorLG;
+
+  // Uncertainties on the ADC values due to noise
+  //
+  float m_noiseSigHG;
+  float m_noiseSigLG;
 
   // Default fit values and cuts that can be set via modifier methods
   //
@@ -200,6 +212,7 @@ private:
 
   float m_maxADCValue;
   float m_minADCValue;
+
   float m_maxDelta;
   float m_minDelta;
 
@@ -229,6 +242,7 @@ private:
   float m_fitTau1;
   float m_fitTau2;
   float m_fitChisq;
+  float m_fitNDoF;
   float m_fitPreT0;
   float m_fitPreAmp;
   float m_fitPostT0;
@@ -253,7 +267,7 @@ private:
   std::vector<float> m_ADCSSampSigLG;
 
   std::vector<float> m_samplesSub;
-  std::vector<float> m_samplesDeriv;
+
   std::vector<float> m_samplesDeriv2nd;
 
   std::vector<float> m_fitPulls;
@@ -268,7 +282,7 @@ private:
 
   bool AnalyzeData(size_t nSamples, size_t preSample,
                    const std::vector<float>& samples,        // The samples used for this event
-                   const std::vector<float>& samplesSig,     // The "resolution" on the ADC value
+                   float noiseSig,                           // The "resolution" on the ADC value
                    const std::vector<float>& toCorrParams,   // The parameters used to correct the t0
                    float maxChisqDivAmp,                     // The maximum chisq / amplitude ratio
                    float minT0Corr, float maxT0Corr,          // The minimum and maximum corrected T0 values
@@ -276,14 +290,16 @@ private:
                   );
 
 
-  void FillHistogram(const std::vector<float>& samples, const std::vector<float>& samplesSig) const
+  static std::vector<float> Calculate2ndDerivative(const std::vector <float>& inputData, unsigned int step);
+
+  void FillHistogram(const std::vector<float>& samples, float noiseSig) const
   {
     if (!m_useDelayed) {
       // Set the data and errors in the histogram object
       //
       for (size_t isample = 0; isample < m_Nsample; isample++) {
         m_fitHist->SetBinContent(isample + 1, samples[isample]);
-        m_fitHist->SetBinError(isample + 1, samplesSig[isample]);
+        m_fitHist->SetBinError(isample + 1, noiseSig);
       }
     }
     else {
@@ -293,8 +309,8 @@ private:
         m_fitHist->SetBinContent(isample + 1, samples[isample * 2]);
         m_delayedHist->SetBinContent(isample + 1, samples[isample * 2 + 1]);
 
-        m_fitHist->SetBinError(isample + 1, samplesSig[isample]); // ***** horrible hack: fix ASAP
-        m_delayedHist->SetBinError(isample + 1, samplesSig[isample]);
+        m_fitHist->SetBinError(isample + 1, noiseSig); 
+        m_delayedHist->SetBinError(isample + 1, noiseSig);
       }
 
     }
@@ -327,7 +343,11 @@ public:
 
   void enableRepass(float peak2ndDerivMinRepassHG, float peak2ndDerivMinRepassLG);
 
-  void SetPeak2ndDerivMinTolerance(size_t tolerance) {m_peak2ndDerivMinTolerance = tolerance;}
+  void SetPeak2ndDerivMinTolerance(size_t tolerance) {
+    m_peak2ndDerivMinTolerance = tolerance;
+    m_defaultT0Max = m_deltaTSample * (m_peak2ndDerivMinSample + m_peak2ndDerivMinTolerance + 1);
+    m_defaultT0Min = m_deltaTSample * (m_peak2ndDerivMinSample - m_peak2ndDerivMinTolerance + 1);
+  }
 
   void SetForceLG(bool forceLG) {m_forceLG = forceLG;}
   bool ForceLG() const {return m_forceLG;}
@@ -335,6 +355,12 @@ public:
   void SetCutValues(float chisqDivAmpCutHG, float chisqDivAmpCutLG,
                     float deltaT0MinHG, float deltaT0MaxHG,
                     float deltaT0MinLG, float deltaT0MaxLG) ;
+
+  void SetNoiseSigmas(float noiseSigHG, float noiseSigLG) 
+  {
+    m_noiseSigHG = noiseSigHG;
+    m_noiseSigLG = noiseSigLG;
+  }
 
   void SetFitMinMaxAmp(float minAmpHG, float minAmpLG, float maxAmpHG, float maxAmpLG);
 
@@ -456,8 +482,8 @@ public:
     // We defer filling the histogram if we don't have a pulse until the histogram is requested
     //
     if (!m_havePulse) {
-      if (UseLowGain()) FillHistogram(m_samplesSub, m_ADCSSampSigLG);
-      else FillHistogram(m_samplesSub, m_ADCSSampSigHG);
+      if (UseLowGain()) FillHistogram(m_samplesSub, m_noiseSigLG);
+      else FillHistogram(m_samplesSub, m_noiseSigHG);
     }
 
     return m_fitHist.get();
@@ -486,7 +512,6 @@ public:
   void Dump_setting() const;
 
   const std::vector<float>& GetSamplesSub() const {return m_samplesSub;}
-  const std::vector<float>& GetSamplesDeriv() const {return m_samplesDeriv;}
   const std::vector<float>& GetSamplesDeriv2nd() const {return m_samplesDeriv2nd;}
 };
 

@@ -7,5 +7,7 @@ atlas_subdir( ZdcConditions )
 atlas_add_library( ZdcConditions
                    src/*.cxx
                    PUBLIC_HEADERS ZdcConditions
-                   LINK_LIBRARIES Identifier ZdcIdentifier
-                   PRIVATE_LINK_LIBRARIES StoreGateLib )
+                   LINK_LIBRARIES Identifier ZdcIdentifier AsgMessagingLib CxxUtils
+                   PRIVATE_LINK_LIBRARIES StoreGateLib PathResolver)
+
+atlas_install_data( data/* )

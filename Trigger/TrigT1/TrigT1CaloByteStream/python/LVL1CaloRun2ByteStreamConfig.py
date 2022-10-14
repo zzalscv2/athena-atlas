@@ -22,8 +22,6 @@ def typeNamesToDecodeAll():
         "xAOD::TriggerTowerContainer/TriggerTowersSpare",
         "xAOD::TriggerTowerAuxContainer/TriggerTowersSpareAux.",
         # ZDC
-        "xAOD::TriggerTowerContainer/ZdcTriggerTowers",
-        "xAOD::TriggerTowerAuxContainer/ZdcTriggerTowersAux.",
     # ===== CPM ================================================================
         "xAOD::CPMTowerContainer/CPMTowers",
         "xAOD::CPMTowerAuxContainer/CPMTowersAux.",

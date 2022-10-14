@@ -122,7 +122,13 @@ if DetFlags.detdescr.Muon_on():
     except Exception:
         treatException("Could not MuonRecExample/MuonRecOutputItemList_jobOptions.py")
 
-
+#ZDC
+if DetFlags.detdescr.ZDC_on():
+    fullAODList += CfgItemList("ZDC", items = [
+        "xAOD::ZdcModuleContainer#ZdcModules",
+        "xAOD::ZdcModuleAuxContainer#ZdcModulesAux.",
+        "xAOD::ZdcModuleContainer#ZdcSums",
+        "xAOD::ZdcModuleAuxContainer#ZdcSumsAux."])
 
 if DetFlags.detdescr.ALFA_on():
     protectedInclude("ForwardRec/ALFARec_OuputItemList_jobOptions.py")

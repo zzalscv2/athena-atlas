@@ -18,8 +18,6 @@
 
 namespace ZDC
 {
-std::atomic<int> ZdcAnalysisTool::s_debugLevel = 0;
-
 ZdcAnalysisTool::ZdcAnalysisTool(const std::string& name)
     : asg::AsgTool(name), m_name(name), m_init(false),
       m_writeAux(false), m_eventReady(false),
@@ -32,9 +30,10 @@ ZdcAnalysisTool::ZdcAnalysisTool(const std::string& name)
 #endif
 
     declareProperty("ZdcModuleContainerName", m_zdcModuleContainerName = "ZdcModules", "Location of ZDC processed data");
+    declareProperty("ZdcSumContainerName", m_zdcSumContainerName = "ZdcSums", "Location of ZDC processed sums");
     declareProperty("Configuration", m_configuration = "PbPb2015");
     declareProperty("FlipEMDelay", m_flipEMDelay = false);
-    declareProperty("LowGainOnly", m_lowGainOnly = false);
+    declareProperty("LowGainOnly", m_lowGainOnly = true);
     declareProperty("WriteAux", m_writeAux = true);
     declareProperty("AuxSuffix", m_auxSuffix = "");
 
@@ -57,18 +56,19 @@ ZdcAnalysisTool::ZdcAnalysisTool(const std::string& name)
     declareProperty("CombineDelay", m_combineDelay = false);
     declareProperty("DelayDeltaT", m_delayDeltaT = -12.5);
 
-    declareProperty("PeakSample", m_peakSample = 2);
-    declareProperty("Peak2ndDerivThresh", m_Peak2ndDerivThresh = 10);
+    declareProperty("PeakSample", m_peakSample = 11);
+    declareProperty("Peak2ndDerivThresh", m_Peak2ndDerivThresh = 20);
 
-    declareProperty("T0", m_t0 = 50);
+    declareProperty("T0", m_t0 = 30);
     declareProperty("Tau1", m_tau1 = 5);
     declareProperty("Tau2", m_tau2 = 25);
     declareProperty("FixTau1", m_fixTau1 = false);
     declareProperty("FixTau2", m_fixTau2 = false);
 
-    declareProperty("DeltaTCut", m_deltaTCut = 25);
+    declareProperty("DeltaTCut", m_deltaTCut = 10);
     declareProperty("ChisqRatioCut", m_ChisqRatioCut = 10);
 
+    declareProperty("LHCRun", m_LHCRun = 3);
 
 }
 
@@ -187,6 +187,68 @@ void ZdcAnalysisTool::initializeTriggerEffs(unsigned int runNumber)
     m_zdcTriggerEfficiency->SetEffParamCorrCoeffs(effparamsCorrCoeffs);
 
     return;
+
+}
+
+std::unique_ptr<ZDCDataAnalyzer> ZdcAnalysisTool::initializeLHCf2022()
+{
+  
+  m_deltaTSample = 3.125;
+  m_numSample = 24;
+
+  ZDCDataAnalyzer::ZDCModuleFloatArray tau1, tau2, peak2ndDerivMinSamples, t0;
+  ZDCDataAnalyzer::ZDCModuleFloatArray peak2ndDerivMinThresholdsHG, peak2ndDerivMinThresholdsLG;
+  ZDCDataAnalyzer::ZDCModuleFloatArray deltaT0CutLow, deltaT0CutHigh, chisqDivAmpCut;
+  ZDCDataAnalyzer::ZDCModuleBoolArray fixTau1Arr, fixTau2Arr;
+  
+  for (size_t side : {0, 1}) {
+    for (size_t module : {0, 1, 2, 3}) {
+      fixTau1Arr[side][module] = false;
+      fixTau2Arr[side][module] = false;
+      tau1[side][module] = 1;
+      tau2[side][module] = 4.5;
+      
+      peak2ndDerivMinSamples[side][module] = 10;
+      peak2ndDerivMinThresholdsHG[side][module] = -12;
+      peak2ndDerivMinThresholdsLG[side][module] = -10;
+      
+      t0[side][module] = 32;
+      deltaT0CutLow[side][module] = -100;
+      deltaT0CutHigh[side][module] = 100;
+      chisqDivAmpCut[side][module] = 500;
+    }
+  }
+  
+  ATH_MSG_INFO( "LHCF2022: delta t cut, value low = " << deltaT0CutLow[0][0] << ", high = " << deltaT0CutHigh[0][0] );
+  
+  ZDCDataAnalyzer::ZDCModuleFloatArray HGOverFlowADC = {{{{4000, 4000, 4000, 4000}}, {{4000, 4000, 4000, 4000}}}};
+  ZDCDataAnalyzer::ZDCModuleFloatArray HGUnderFlowADC = {{{{1, 1, 1, 1}}, {{1, 1, 1, 1}}}};
+  ZDCDataAnalyzer::ZDCModuleFloatArray LGOverFlowADC = {{{{4000, 4000, 4000, 4000}}, {{4000, 4000, 4000, 4000}}}};
+  
+  //  Construct the data analyzer
+  //
+  std::unique_ptr<ZDCDataAnalyzer> zdcDataAnalyzer (new ZDCDataAnalyzer(MakeMessageFunction(),
+									m_numSample, m_deltaTSample, 
+									m_presample, "FermiExp", 
+									peak2ndDerivMinSamples,
+									peak2ndDerivMinThresholdsHG, 
+									peak2ndDerivMinThresholdsLG, 
+									m_lowGainOnly)); // last parameter is lowGainOnly
+  zdcDataAnalyzer->SetPeak2ndDerivMinTolerances(4);
+  zdcDataAnalyzer->SetADCOverUnderflowValues(HGOverFlowADC, HGUnderFlowADC, LGOverFlowADC);
+  zdcDataAnalyzer->SetTauT0Values(fixTau1Arr, fixTau2Arr, tau1, tau2, t0, t0);
+  zdcDataAnalyzer->SetCutValues(chisqDivAmpCut, chisqDivAmpCut, deltaT0CutLow, deltaT0CutHigh, deltaT0CutLow, deltaT0CutHigh);
+
+
+  // Set the amplitude fit range limits
+  //
+  zdcDataAnalyzer->SetFitMinMaxAmpValues(5, 2, 5000, 5000);
+
+  // disable EM module on each side
+  zdcDataAnalyzer->disableModule(0, 0);
+  zdcDataAnalyzer->disableModule(1, 0);
+  
+  return zdcDataAnalyzer;
 
 }
 
@@ -810,6 +872,9 @@ StatusCode ZdcAnalysisTool::initialize()
     else if (m_configuration == "PbPb2015G4") {
       m_zdcDataAnalyzer = initializePbPb2015G4();
     }
+    else if (m_configuration == "LHCf2022") {
+      m_zdcDataAnalyzer = initializeLHCf2022();
+    }
     else {
         ATH_MSG_ERROR("Unknown configuration: "  << m_configuration);
         return StatusCode::FAILURE;
@@ -846,10 +911,8 @@ StatusCode ZdcAnalysisTool::initialize()
     ATH_MSG_INFO("ChisqRatioCut: " << m_ChisqRatioCut);
 
     ATH_CHECK( m_eventInfoKey.initialize());
-    ATH_CHECK( m_ZdcModuleWriteKey.initialize() );
 
     if (m_writeAux && m_auxSuffix != "") {
-        //m_auxSuffix = "_" + m_auxSuffix;
         ATH_MSG_INFO("suffix string = " << m_auxSuffix);
     }
 
@@ -876,168 +939,133 @@ StatusCode ZdcAnalysisTool::configureNewRun(unsigned int runNumber)
     return StatusCode::SUCCESS;
 }
 
-StatusCode ZdcAnalysisTool::recoZdcModule(const xAOD::ZdcModule& module)
+
+StatusCode ZdcAnalysisTool::recoZdcModules(const xAOD::ZdcModuleContainer& moduleContainer, const xAOD::ZdcModuleContainer& moduleSumContainer)
 {
-    ATH_MSG_DEBUG("Processing ZDC module S/T/M/C = "
-                  << module.side() << " "
-                  << module.type() << " "
-                  << module.zdcModule() << " "
-                  << module.channel()
-                 );
-    const std::vector<unsigned short>* adc0;
-    const std::vector<unsigned short>* adc1;
-
-
-    if (module.type() == 0 && module.zdcModule() == 0 && m_flipEMDelay) // flip delay/non-delay for EM big tube
-    {
-        adc0 = &(*(module.TTg0d1Link()))->adc();
-        adc1 = &(*(module.TTg1d1Link()))->adc();
-    }
-    else
-    {
-        adc0 = &(*(module.TTg0d0Link()))->adc();
-        adc1 = &(*(module.TTg1d0Link()))->adc();
-    }
-
-    float amp;
-    float time;
-    float qual;
-
-    float deltaT = m_deltaTSample;
-
-    sigprocMaxFinder(*adc0, deltaT, amp, time, qual);
-    if (m_writeAux) {
-        module.auxdecor<float>("amplitudeG0_mf" + m_auxSuffix) = amp;
-        module.auxdecor<float>("timeG0_mf" + m_auxSuffix) = time;
-    }
-
-    sigprocMaxFinder(*adc1, deltaT, amp, time, qual);
-    module.auxdecor<float>("amplitudeG1_mf" + m_auxSuffix) = amp;
-    module.auxdecor<float>("timeG1_mf" + m_auxSuffix) = time;
-
-    if (module.type() == 0)
-    {
-        sigprocSincInterp(*adc0, deltaT, amp, time, qual);
-        module.auxdecor<float>("amplitudeG0_si" + m_auxSuffix) = amp;
-        module.auxdecor<float>("timeG0_si" + m_auxSuffix) = time;
-    }
-
-    return StatusCode::SUCCESS;
-}
-
-StatusCode ZdcAnalysisTool::recoZdcModules(const xAOD::ZdcModuleContainer& moduleContainer)
-{
-
+  
   SG::ReadHandle<xAOD::EventInfo> eventInfo(m_eventInfoKey);
   if (!eventInfo.isValid()) return StatusCode::FAILURE;
-
-  //  const xAOD::EventInfo* eventInfo = 0;
-  //  ATH_CHECK(evtStore()->retrieve(eventInfo, "EventInfo"));
-
-    // check for new run number, if new, possibly update configuration and/or calibrations
-    //
-    unsigned int thisRunNumber = eventInfo->runNumber();
-    if (thisRunNumber != m_runNumber) {
-        ATH_MSG_DEBUG("ZDC analysis tool will be configured for run " << thisRunNumber);
-
-        ATH_CHECK(configureNewRun(thisRunNumber)); // ALWAYS check methods that return StatusCode
-
-        ATH_MSG_DEBUG("Setting up calibrations");
-
-        if (m_doCalib) {
-            //
-            // Check for calibration override
-            //
-            unsigned int calibRunNumber = thisRunNumber;
-            if (m_forceCalibRun > -1) calibRunNumber = m_forceCalibRun;
-
-            setEnergyCalibrations(calibRunNumber);
-            if (m_doTrigEff) initializeTriggerEffs(calibRunNumber); // if energy calibrations fail to load, then so will trigger efficiencies
-            if (m_doTimeCalib) setTimeCalibrations(calibRunNumber);
-        }
-
-        m_runNumber = thisRunNumber;
-    }
-
-    m_lumiBlock = eventInfo->lumiBlock();
-
-    unsigned int calibLumiBlock = m_lumiBlock;
+    
+  // check for new run number, if new, possibly update configuration and/or calibrations
+  //
+  unsigned int thisRunNumber = eventInfo->runNumber();
+  if (thisRunNumber != m_runNumber) {
+    ATH_MSG_DEBUG("ZDC analysis tool will be configured for run " << thisRunNumber);
+    
+    ATH_CHECK(configureNewRun(thisRunNumber)); // ALWAYS check methods that return StatusCode
+    
+    ATH_MSG_DEBUG("Setting up calibrations");
+    
     if (m_doCalib) {
-        if (m_forceCalibRun > 0) calibLumiBlock = m_forceCalibLB;
+      //
+      // Check for calibration override
+      //
+      unsigned int calibRunNumber = thisRunNumber;
+      if (m_forceCalibRun > -1) calibRunNumber = m_forceCalibRun;
+      
+      setEnergyCalibrations(calibRunNumber);
+      if (m_doTrigEff) initializeTriggerEffs(calibRunNumber); // if energy calibrations fail to load, then so will trigger efficiencies
+      if (m_doTimeCalib) setTimeCalibrations(calibRunNumber);
     }
-
-    ATH_MSG_DEBUG("Starting event processing");
-    m_zdcDataAnalyzer->StartEvent(calibLumiBlock);
-
-    const std::vector<unsigned short>* adcUndelayLG = 0;
-    const std::vector<unsigned short>* adcUndelayHG = 0;
-
-    const std::vector<unsigned short>* adcDelayLG = 0;
-    const std::vector<unsigned short>* adcDelayHG = 0;
-
-    ATH_MSG_DEBUG("Processing modules");
+    
+    m_runNumber = thisRunNumber;
+  }
+  
+  m_lumiBlock = eventInfo->lumiBlock();
+  
+  unsigned int calibLumiBlock = m_lumiBlock;
+  if (m_doCalib) {
+    if (m_forceCalibRun > 0) calibLumiBlock = m_forceCalibLB;
+  }
+  
+  ATH_MSG_DEBUG("Starting event processing");
+  ATH_MSG_DEBUG("LB=" << calibLumiBlock);
+  
+  m_zdcDataAnalyzer->StartEvent(calibLumiBlock);
+  
+  const std::vector<unsigned short>* adcUndelayLG = 0;
+  const std::vector<unsigned short>* adcUndelayHG = 0;
+  
+  const std::vector<unsigned short>* adcDelayLG = 0;
+  const std::vector<unsigned short>* adcDelayHG = 0;
+  
+  ATH_MSG_DEBUG("Processing modules");
     for (const auto zdcModule : moduleContainer)
-    {
+      {
+	
+        if (zdcModule->zdcType() == 1) continue; // skip position sensitive modules
+	
+	if (m_LHCRun==3) // no delay channels, so we drop the index
+	  {
+	    adcUndelayLG = &(zdcModule->auxdata<std::vector<uint16_t>>("g0data")); // g0
+	    adcUndelayHG = &(zdcModule->auxdata<std::vector<uint16_t>>("g1data")); // g1
+	  }
+	else if (m_LHCRun==2)
+	  {
+	    if (zdcModule->zdcModule() == 0 && m_flipEMDelay) // flip delay/non-delay for 2015 ONLY
+	      {
+		adcUndelayLG = &(zdcModule->auxdata<std::vector<uint16_t>>("g0d1Data")); // g0d1
+		adcUndelayHG = &(zdcModule->auxdata<std::vector<uint16_t>>("g1d1Data")); // g1d1
+		
+		adcDelayLG = &(zdcModule->auxdata<std::vector<uint16_t>>("g0d0Data")); // g0d0
+		adcDelayHG = &(zdcModule->auxdata<std::vector<uint16_t>>("g1d0Data")); // g1d0
+	      }
+	    else // nominal configuation
+	      {
+		adcUndelayLG = &(zdcModule->auxdata<std::vector<uint16_t>>("g0d0Data")); // g0d0
+		adcUndelayHG = &(zdcModule->auxdata<std::vector<uint16_t>>("g1d0Data")); // g1d0
+		
+		adcDelayLG = &(zdcModule->auxdata<std::vector<uint16_t>>("g0d1Data")); // g0d1
+		adcDelayHG = &(zdcModule->auxdata<std::vector<uint16_t>>("g1d1Data")); // g1d1
+	      }
+	  }
+	else
+	  {
+	    ATH_MSG_INFO("Unknown LHC Run " << m_LHCRun);
+	    return StatusCode::FAILURE;
+	  }
 
-        if (zdcModule->type() == 1) continue;
-
-        if (zdcModule->zdcModule() == 0 && m_flipEMDelay) // flip delay/non-delay for 2015 ONLY
-        {
-            adcUndelayLG = &(*(zdcModule->TTg0d1Link()))->adc();
-            adcUndelayHG = &(*(zdcModule->TTg1d1Link()))->adc();
-
-            adcDelayLG = &(*(zdcModule->TTg0d0Link()))->adc();
-            adcDelayHG = &(*(zdcModule->TTg1d0Link()))->adc();
-        }
-        else
-        {
-            adcUndelayLG = &(*(zdcModule->TTg0d0Link()))->adc();
-            adcUndelayHG = &(*(zdcModule->TTg1d0Link()))->adc();
-
-            adcDelayLG = &(*(zdcModule->TTg0d1Link()))->adc();
-            adcDelayHG = &(*(zdcModule->TTg1d1Link()))->adc();
-        }
-
+	// Why were these static? to optimize processing time	
         std::vector<float> HGUndelADCSamples(m_numSample);
         std::vector<float> LGUndelADCSamples(m_numSample);
-
+	
         std::copy(adcUndelayLG->begin(), adcUndelayLG->end(), LGUndelADCSamples.begin());
         std::copy(adcUndelayHG->begin(), adcUndelayHG->end(), HGUndelADCSamples.begin());
-
-        int side = (zdcModule->side() == -1) ? 0 : 1 ;
-
+	
+        int side = (zdcModule->zdcSide() == -1) ? 0 : 1 ;
+	
         if (!m_combineDelay) {
-            m_zdcDataAnalyzer->LoadAndAnalyzeData(side, zdcModule->zdcModule(), HGUndelADCSamples, LGUndelADCSamples);
+	  m_zdcDataAnalyzer->LoadAndAnalyzeData(side, zdcModule->zdcModule(), HGUndelADCSamples, LGUndelADCSamples);
         }
         else {
-            std::vector<float> HGDelayADCSamples(m_numSample);
-            std::vector<float> LGDelayADCSamples(m_numSample);
-
-            std::copy(adcDelayLG->begin(), adcDelayLG->end(), LGDelayADCSamples.begin());
-            std::copy(adcDelayHG->begin(), adcDelayHG->end(), HGDelayADCSamples.begin());
-
-            // If the delayed channels actually come earlier (as in the pPb in 2016), we invert the meaning of delayed and undelayed
-            //   see the initialization sections for similar inversion on the sign of the pedestal difference
-            //
-
-            m_zdcDataAnalyzer->LoadAndAnalyzeData(side, zdcModule->zdcModule(),
-                                                  HGUndelADCSamples, LGUndelADCSamples,
-                                                  HGDelayADCSamples, LGDelayADCSamples);
+	  std::vector<float> HGDelayADCSamples(m_numSample);
+	  std::vector<float> LGDelayADCSamples(m_numSample);
+	  
+	  std::copy(adcDelayLG->begin(), adcDelayLG->end(), LGDelayADCSamples.begin());
+	  std::copy(adcDelayHG->begin(), adcDelayHG->end(), HGDelayADCSamples.begin());
+	  
+	  // If the delayed channels actually come earlier (as in the pPb in 2016), we invert the meaning of delayed and undelayed
+	  //   see the initialization sections for similar inversion on the sign of the pedestal difference
+	  //
+	  
+	  m_zdcDataAnalyzer->LoadAndAnalyzeData(side, zdcModule->zdcModule(),
+						HGUndelADCSamples, LGUndelADCSamples,
+						HGDelayADCSamples, LGDelayADCSamples);
         }
-    }
-
+      }
+    
     ATH_MSG_DEBUG("Finishing event processing");
-
+    
     m_zdcDataAnalyzer->FinishEvent();
-
+    
     ATH_MSG_DEBUG("Adding variables");
-
+    
     for (const auto zdcModule : moduleContainer)
     {
 
-        if (zdcModule->type() == 1) continue;
+        if (zdcModule->zdcType() == 1) continue;
 
-        int side = (zdcModule->side() == -1) ? 0 : 1 ;
+        int side = (zdcModule->zdcSide() == -1) ? 0 : 1 ;
         int mod = zdcModule->zdcModule();
 
         if (m_writeAux) {
@@ -1067,46 +1095,35 @@ StatusCode ZdcAnalysisTool::recoZdcModules(const xAOD::ZdcModuleContainer& modul
             zdcModule->auxdecor<float>("MinDeriv2nd" + m_auxSuffix) = pulseAna_p->GetMinDeriv2nd();
 
         }
-        ATH_MSG_INFO ("side = " << side << " module=" << zdcModule->zdcModule() << " CalibEnergy=" << zdcModule->auxdecor<float>("CalibEnergy")
+        ATH_MSG_DEBUG ("side = " << side << " module=" << zdcModule->zdcModule() << " CalibEnergy=" << zdcModule->auxdecor<float>("CalibEnergy")
                          << " should be " << m_zdcDataAnalyzer->GetModuleCalibAmplitude(side, mod));
     }
 
-    // Record sum objects
+    // Output sum information
+    // In Run 3 - we have to assume the container already exists (since it is needed to store the per-side trigger info)
+    // reprocessing will add new variables with the suffix
 
-    std::unique_ptr<xAOD::ZdcModuleContainer> newModuleContainer( new xAOD::ZdcModuleContainer() );
-    std::unique_ptr<xAOD::ZdcModuleAuxContainer> newModuleAuxContainer( new xAOD::ZdcModuleAuxContainer() );
-
-    newModuleContainer->setStore( newModuleAuxContainer.get() );
-
-    for (int iside = 0; iside < 2; iside++)
-    {
-        xAOD::ZdcModule* zdc_sum = new xAOD::ZdcModule;
-        newModuleContainer.get()->push_back(zdc_sum);
-        zdc_sum->setSide(iside);
+    for (const auto zdc_sum: moduleSumContainer)
+      {
+	int iside = zdc_sum->zdcSide();
 
         float calibEnergy = getCalibModuleSum(iside);
-        zdc_sum->auxdecor<float>("CalibEnergy") = calibEnergy;
+        zdc_sum->auxdecor<float>("CalibEnergy"+m_auxSuffix) = calibEnergy;
         float calibEnergyErr = getCalibModuleSumErr(iside);
-        zdc_sum->auxdecor<float>("CalibEnergyErr") = calibEnergyErr;
+        zdc_sum->auxdecor<float>("CalibEnergyErr"+m_auxSuffix) = calibEnergyErr;
 
         float uncalibSum = getUncalibModuleSum(iside);
-        zdc_sum->auxdecor<float>("UncalibSum") = uncalibSum;
+        zdc_sum->auxdecor<float>("UncalibSum"+m_auxSuffix) = uncalibSum;
         float uncalibSumErr = getUncalibModuleSumErr(iside);
-        zdc_sum->auxdecor<float>("UncalibSumErr") = uncalibSumErr;
+        zdc_sum->auxdecor<float>("UncalibSumErr"+m_auxSuffix) = uncalibSumErr;
 
         float finalEnergy = calibEnergy;
 
-        zdc_sum->auxdecor<float>("FinalEnergy") = finalEnergy;
-        zdc_sum->auxdecor<float>("AverageTime") = getAverageTime(iside);
-        zdc_sum->auxdecor<unsigned int>("Status") = !sideFailed(iside);
-        zdc_sum->auxdecor<unsigned int>("ModuleMask") = (getModuleMask() >> (4 * iside)) & 0xF;
+        zdc_sum->auxdecor<float>("FinalEnergy"+m_auxSuffix) = finalEnergy;
+        zdc_sum->auxdecor<float>("AverageTime"+m_auxSuffix) = getAverageTime(iside);
+        zdc_sum->auxdecor<unsigned int>("Status"+m_auxSuffix) = !sideFailed(iside);
+        zdc_sum->auxdecor<unsigned int>("ModuleMask"+m_auxSuffix) = (getModuleMask() >> (4 * iside)) & 0xF;
     }
-
-    //ATH_CHECK( evtStore()->record( newModuleContainer.release() , "ZdcSums" + m_auxSuffix) ) ;
-    //ATH_CHECK( evtStore()->record( newModuleAuxContainer.release() , "ZdcSums"  + m_auxSuffix + "Aux.") );
-
-    ATH_CHECK( SG::WriteHandle<xAOD::ZdcModuleContainer>(m_ZdcModuleWriteKey).record( std::move(newModuleContainer), std::move(newModuleAuxContainer)));
- 
 
     return StatusCode::SUCCESS;
 }
@@ -1214,11 +1231,16 @@ StatusCode ZdcAnalysisTool::reprocessZdc()
     }
     m_eventReady = false;
     ATH_MSG_INFO ("Trying to retrieve " << m_zdcModuleContainerName);
+
     m_zdcModules = 0;
     ATH_CHECK(evtStore()->retrieve(m_zdcModules, m_zdcModuleContainerName));
+
+    m_zdcSums = 0;
+    ATH_CHECK(evtStore()->retrieve(m_zdcSums, m_zdcSumContainerName));
+
     m_eventReady = true;
 
-    ATH_CHECK(recoZdcModules(*m_zdcModules));
+    ATH_CHECK(recoZdcModules(*m_zdcModules, *m_zdcSums));
 
     return StatusCode::SUCCESS;
 }

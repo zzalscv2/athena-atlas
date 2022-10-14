@@ -141,8 +141,9 @@ StatusCode ZdcRecV2::execute()
 	std::unique_ptr<xAOD::ZdcModuleAuxContainer> moduleAuxContainer( new xAOD::ZdcModuleAuxContainer() );
 	moduleContainer->setStore( moduleAuxContainer.get() );
 
-	int ncha = m_ChannelTool->convertTT2ZM(m_ttContainer, moduleContainer.get() );
-	msg( MSG::DEBUG ) << "Channel tool returns " << ncha << endmsg;
+	// Disabled for Run 3 since this code isn't being run anyway
+	//int ncha = m_ChannelTool->convertTT2ZM(m_ttContainer, moduleContainer.get() );
+	//msg( MSG::DEBUG ) << "Channel tool returns " << ncha << endmsg;
 
 	msg( MSG::DEBUG ) << ZdcModuleToString(*moduleContainer) << endmsg;
 	//msg( MSG::INFO ) << ZdcModuleToString(*moduleContainer) << endmsg;

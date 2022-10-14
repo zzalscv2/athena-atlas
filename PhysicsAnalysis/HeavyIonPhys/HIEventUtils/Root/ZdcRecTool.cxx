@@ -1,6 +1,7 @@
 /*
-  Copyright (C) 2002-2020 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
 */
+
 
 #include "HIEventUtils/ZdcRecTool.h"
 #include "TGraph.h"
@@ -51,50 +52,14 @@ namespace ZDC
 
   StatusCode ZdcRecTool::recoZdcModule(const xAOD::ZdcModule& module)
   {
-    ATH_MSG_DEBUG("Processing ZDC module S/T/M/C = "
-    << module.side() << " "
-    << module.type() << " "
+
+    ATH_MSG_DEBUG("Not processing ZDC module S/T/M/C = "
+    << module.zdcSide() << " "
+    << module.zdcType() << " "
     << module.zdcModule() << " "
-    << module.channel()
+    << module.zdcChannel()
   );
-  const std::vector<unsigned short>* adc0;
-  const std::vector<unsigned short>* adc1;
 
-  if (module.type()==0 && module.zdcModule()==0) // flip delay/non-delay for EM big tube
-  {
-    adc0 = &(*(module.TTg0d1Link()))->adc();
-    adc1 = &(*(module.TTg1d1Link()))->adc();
-  }
-  else
-  {
-    adc0 = &(*(module.TTg0d0Link()))->adc();
-    adc1 = &(*(module.TTg1d0Link()))->adc();
-  }
-
-  float amp{};
-  float time;
-  float qual;
-
-  const float deltaT = 12.5;
-
-  sigprocMaxFinder(*adc0,deltaT,amp,time,qual);
-  module.auxdecor<float>("amplitudeG0_mf")=amp;
-  module.auxdecor<float>("timeG0_mf")=time;
-
-  sigprocMaxFinder(*adc1,deltaT,amp,time,qual);
-  module.auxdecor<float>("amplitudeG1_mf")=amp;
-  module.auxdecor<float>("timeG1_mf")=time;
-
-  if (module.type()==0)
-  {
-    sigprocPeakFitter(*adc0,deltaT,amp,time,qual);
-    module.auxdecor<float>("amplitudeG0_pf")=amp;
-    module.auxdecor<float>("timeG0_pf")=time;
-
-    sigprocSincInterp(*adc0,deltaT,amp,time,qual);
-    module.auxdecor<float>("amplitudeG0_si")=amp;
-    module.auxdecor<float>("timeG0_si")=time;
-  }
 
   return StatusCode::SUCCESS;
 }
@@ -243,3 +208,4 @@ double FermiExpFit(double* xvec, double* pvec)
 }
 
 } // namespace ZDC
+

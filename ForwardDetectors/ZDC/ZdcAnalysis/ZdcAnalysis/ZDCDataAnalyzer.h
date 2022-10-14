@@ -13,13 +13,14 @@
 #include <string>
 
 #include "CxxUtils/checker_macros.h"
-ATLAS_NO_CHECK_FILE_THREAD_SAFETY;  // standalone ROOT analysis code
+ATLAS_NO_CHECK_FILE_THREAD_SAFETY; 
 
 class ZDCDataAnalyzer
 {
 public:
   typedef std::array<std::array<float, 4>, 2> ZDCModuleFloatArray;
   typedef std::array<std::array<bool, 4>, 2> ZDCModuleBoolArray;
+  typedef std::array<std::array<int, 4>, 2> ZDCModuleIntArray;
 
 private:
   ZDCMsg::MessageFunctionPtr m_msgFunc_p;
@@ -92,6 +93,8 @@ public:
 
   void enableRepass(const ZDCModuleFloatArray& peak2ndDerivMinRepassHG, const ZDCModuleFloatArray& peak2ndDerivMinRepassLG);
 
+  bool ModuleDisabled(unsigned int side, unsigned int module) const {return m_moduleDisabled[side][module];}
+
   unsigned int GetModuleMask() const {return m_moduleMask;}
 
   float GetModuleSum(size_t side) const {return m_moduleSum.at(side);}
@@ -128,14 +131,16 @@ public:
   void SetADCOverUnderflowValues(const ZDCModuleFloatArray& HGOverflowADC, const ZDCModuleFloatArray& HGUnderflowADC,
                                  const ZDCModuleFloatArray& LGOverflowADC);
 
+  void SetNoiseSigmas(const ZDCModuleFloatArray& noiseSigmasHG, const ZDCModuleFloatArray& noiseSigmasLG);
+
   void SetTauT0Values(const ZDCModuleBoolArray& fxiTau1, const ZDCModuleBoolArray& fxiTau2,
                       const ZDCModuleFloatArray& tau1, const ZDCModuleFloatArray& tau2,
                       const ZDCModuleFloatArray& t0HG, const ZDCModuleFloatArray& t0LG);
 
-  void SetModuleAmpFractionLG(const ZDCDataAnalyzer::ZDCModuleFloatArray& moduleAmpFractionLG);
-
   void SetFitMinMaxAmpValues(const ZDCModuleFloatArray& minAmpHG, const ZDCModuleFloatArray& minAmpLG,
                              const ZDCModuleFloatArray& maxAmpHG, const ZDCModuleFloatArray& maxAmpLG);
+
+  void SetFitMinMaxAmpValues(float minHG, float minLG, float maxHG, float maxLG);
 
   void SetCutValues(const ZDCModuleFloatArray& chisqDivAmpCutHG, const ZDCModuleFloatArray& chisqDivAmpCutLG,
                     const ZDCModuleFloatArray& deltaT0MinHG, const ZDCModuleFloatArray& deltaT0MaxHG,
@@ -146,6 +151,8 @@ public:
                            const std::array<std::array<std::vector<float>, 4>, 2>& LGParamArr);
 
   void SetNonlinCorrParams(const std::array<std::array<std::vector<float>, 4>, 2>& HGNonlinCorrParams);
+
+  void SetModuleAmpFractionLG(const ZDCDataAnalyzer::ZDCModuleFloatArray& moduleAmpFractionLG);
 
   void LoadEnergyCalibrations(std::array<std::array<std::unique_ptr<TSpline>, 4>, 2>& calibSplines)
   {
