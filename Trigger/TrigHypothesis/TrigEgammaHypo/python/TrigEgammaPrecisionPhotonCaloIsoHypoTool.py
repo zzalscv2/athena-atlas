@@ -48,7 +48,7 @@ class TrigEgammaPrecisionPhotonCaloIsoHypoToolConfig:
                         }
 
   __caloIsolationOffset = {
-                          None          : [None, None, None],
+                          None         : [None, None, None],
                           'icaloloose' : [0.,0.,0.],
                           'icalomedium': [0.,0.,0],
                           'icalotight' : [0.,0.,2.45*GeV]
@@ -84,6 +84,10 @@ class TrigEgammaPrecisionPhotonCaloIsoHypoToolConfig:
   # Isolation and nominal cut
   #
   def isoCut(self):
+
+    if self.isoInfo() == 'noiso':
+        self.tool().AcceptAll = True
+        return
     self.tool().RelTopoEtConeCut = self.__caloIsolationCut[self.isoInfo()]
     self.tool().RelEtConeCut = self.__caloEtconeCut[self.isoInfo()]
     self.tool().Offset = self.__caloIsolationOffset[self.isoInfo()]
@@ -96,10 +100,13 @@ class TrigEgammaPrecisionPhotonCaloIsoHypoToolConfig:
   #
   def compile(self):
 
-    if self.isoInfo() not in self.__caloIsolationCut.keys():
-        self.__log.error('Isolation cut %s not defined!', self.isoInfo())
-    self.__log.debug('Configuring Isolation cut %s with values %s for [topoetcone20/et, topoetcone30/et, topoetcone40/et]',self.isoInfo(),str(self.__caloIsolationCut[self.isoInfo()]))
-    self.__log.debug('                       and offset values %s for [topoetcone20/et, topoetcone30/et, topoetcone40/et]',self.isoInfo(),str(self.__caloIsolationOffset[self.isoInfo()]))
+    if self.isoInfo() != 'noiso':
+        if self.isoInfo() not in self.__caloIsolationCut.keys():
+            self.__log.error('Isolation cut %s not defined!', self.isoInfo())
+        self.__log.debug('Configuring Isolation cut %s with values %s for [topoetcone20/et, topoetcone30/et, topoetcone40/et]',self.isoInfo(),str(self.__caloIsolationCut[self.isoInfo()]))
+        self.__log.debug('                       and offset values %s for [topoetcone20/et, topoetcone30/et, topoetcone40/et]',self.isoInfo(),str(self.__caloIsolationOffset[self.isoInfo()]))
+    else:
+        self.__log.debug('Configuring Isolation to AcceptAll (not applying any cut)')
     self.isoCut()
 
 

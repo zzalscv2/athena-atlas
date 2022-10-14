@@ -109,7 +109,7 @@ class PhotonChainConfiguration(ChainConfigurationBase):
 
         # Finally we need to run isolaton *IF* its an isolated chain
         # Step 5
-        if 'icaloloose' in self.chainPart['isoInfo'] or 'icalomedium' in self.chainPart['isoInfo'] or 'icalotight' in self.chainPart['isoInfo']:
+        if 'noiso' in self.chainPart['isoInfo'] or 'icaloloose' in self.chainPart['isoInfo'] or 'icalomedium' in self.chainPart['isoInfo'] or 'icalotight' in self.chainPart['isoInfo']:
             stepNames += ['getPhotonCaloIso']
 
         return stepNames

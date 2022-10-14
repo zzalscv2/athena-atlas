@@ -2477,6 +2477,20 @@ HLT_g20_loose_L1EM15VHI:
     3: 2
 HLT_g20_loose_L1eEM18L:
   eventCount: 0
+HLT_g20_loose_noiso_L1EM15VH:
+  eventCount: 2
+  stepCounts:
+    0: 7
+    1: 4
+    2: 4
+    3: 2
+    4: 2
+  stepFeatures:
+    0: 8
+    1: 4
+    2: 4
+    3: 2
+    4: 2
 HLT_g20_loose_ringer_L1EM15VHI:
   eventCount: 2
   stepCounts:
@@ -3674,6 +3688,22 @@ HLT_g35_tight_mu18noL1_L1EM24VHI:
     1: 2
     2: 2
     3: 1
+HLT_g35_tight_noiso_3j25_pf_ftf_PhysicsTLA_L1EM22VHI:
+  eventCount: 0
+  stepCounts:
+    0: 3
+    1: 2
+    2: 2
+    3: 1
+    4: 1
+    5: 1
+  stepFeatures:
+    0: 3
+    1: 2
+    2: 2
+    3: 1
+    4: 1
+    5: 1
 HLT_g35_tight_tau25_dikaonmass_tracktwoMVA_50invmAB_L1EM22VHI:
   eventCount: 0
   stepCounts:
@@ -3878,6 +3908,14 @@ HLT_g45_tight_icaloloose_2j55_0eta200_emergingPTF0p1dR0p4_pf_ftf_L1EM22VHI:
   stepFeatures:
     0: 2
     1: 1
+HLT_g45_tight_noiso_3j25_pf_ftf_PhysicsTLA_L1EM22VHI:
+  eventCount: 0
+  stepCounts:
+    0: 2
+    1: 1
+  stepFeatures:
+    0: 2
+    1: 1
 HLT_g50_loose_L1EM20VH:
   eventCount: 0
   stepCounts:
@@ -3887,6 +3925,12 @@ HLT_g50_loose_L1EM20VH:
 HLT_g50_loose_L1eEM24L:
   eventCount: 0
 HLT_g50_tight_3j25_pf_ftf_PhysicsTLA_L1EM22VHI:
+  eventCount: 0
+  stepCounts:
+    0: 1
+  stepFeatures:
+    0: 1
+HLT_g50_tight_noiso_3j25_pf_ftf_PhysicsTLA_L1EM22VHI:
   eventCount: 0
   stepCounts:
     0: 1
@@ -3913,6 +3957,12 @@ HLT_g60_tight_3j25_pf_ftf_PhysicsTLA_L1EM22VHI:
   stepFeatures:
     0: 1
 HLT_g60_tight_icaloloose_2j55_0eta200_emergingPTF0p1dR0p4_pf_ftf_L1EM22VHI:
+  eventCount: 0
+  stepCounts:
+    0: 1
+  stepFeatures:
+    0: 1
+HLT_g60_tight_noiso_3j25_pf_ftf_PhysicsTLA_L1EM22VHI:
   eventCount: 0
   stepCounts:
     0: 1
