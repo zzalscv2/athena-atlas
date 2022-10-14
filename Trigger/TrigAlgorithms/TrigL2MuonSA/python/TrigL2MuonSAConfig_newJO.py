@@ -19,9 +19,9 @@ def RpcDataPreparatorCfg( flags, roisKey ):
 
     # Set Rpc data preparator for MuFast data preparator
     TrigL2MuonSA__RpcDataPreparator=CompFactory.getComp("TrigL2MuonSA::RpcDataPreparator")
-    from TrigT1MuonRecRoiTool.TrigT1MuonRecRoiToolConfig import getRun3RPCRecRoiTool
+    from TrigT1MuonRecRoiTool.TrigT1MuonRecRoiToolConfig import RPCRecRoiToolCfg
     RpcDataPreparator = TrigL2MuonSA__RpcDataPreparator()
-    RpcDataPreparator.TrigT1RPCRecRoiTool = getRun3RPCRecRoiTool(name="RPCRecRoiTool",useRun3Config=flags.Trigger.enableL1MuonPhase1)
+    RpcDataPreparator.TrigT1RPCRecRoiTool = acc.popToolsAndMerge(RPCRecRoiToolCfg(flags, useRun3Config=flags.Trigger.enableL1MuonPhase1))
     from RegionSelector.RegSelToolConfig import regSelTool_RPC_Cfg
     RpcDataPreparator.RegSel_RPC = acc.popToolsAndMerge( regSelTool_RPC_Cfg( flags ) )
 
@@ -174,7 +174,7 @@ def muFastSteeringCfg( flags, roisKey, setup="" ):
     # Set MuFast data preparator
     TrigL2MuonSA__MuFastDataPreparator=CompFactory.getComp("TrigL2MuonSA::MuFastDataPreparator")
 
-    from TrigT1MuonRecRoiTool.TrigT1MuonRecRoiToolConfig import getRun3RPCRecRoiTool
+    from TrigT1MuonRecRoiTool.TrigT1MuonRecRoiToolConfig import RPCRecRoiToolCfg
     MuFastDataPreparator = TrigL2MuonSA__MuFastDataPreparator( CSCDataPreparator = CscDataPreparator,
                                                                MDTDataPreparator = MdtDataPreparator,
                                                                RPCDataPreparator = RpcDataPreparator,
@@ -184,7 +184,7 @@ def muFastSteeringCfg( flags, roisKey, setup="" ):
                                                                RpcRoadDefiner = RpcRoadDefiner,
                                                                TgcRoadDefiner = TgcRoadDefiner,
                                                                ClusterRoadDefiner = ClusterRoadDefiner,
-                                                               TrigT1RPCRecRoiTool = getRun3RPCRecRoiTool(name="RPCRecRoiTool",useRun3Config=flags.Trigger.enableL1MuonPhase1) )
+                                                               TrigT1RPCRecRoiTool = acc.popToolsAndMerge(RPCRecRoiToolCfg(flags, useRun3Config=flags.Trigger.enableL1MuonPhase1)) )
 
     # Setup the station fitter
     TrigL2MuonSA__MuFastStationFitter,TrigL2MuonSA__PtFromAlphaBeta=CompFactory.getComps("TrigL2MuonSA::MuFastStationFitter","TrigL2MuonSA::PtFromAlphaBeta")
