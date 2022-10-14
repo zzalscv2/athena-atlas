@@ -53,11 +53,9 @@ namespace InDetDD {
                       unsigned int phiIndex,
                       unsigned int strawLayIndex,
                       const TRT_ID* idHelper,
-                      const TRT_Conditions* conditions,
-                      const GeoAlignmentStore* geoAlignStore = nullptr);
+                      const TRT_Conditions* conditions);
 
-    TRT_BarrelElement(const TRT_BarrelElement& right,
-                      const GeoAlignmentStore* geoAlignStore);
+    TRT_BarrelElement(const TRT_BarrelElement& right);
 
     /** Destructor: */
     virtual ~TRT_BarrelElement() = default;
@@ -127,7 +125,6 @@ namespace InDetDD {
 
   private:
     /** Illegal Operations: */
-    TRT_BarrelElement(const TRT_BarrelElement& right) = delete;
     const TRT_BarrelElement& operator=(const TRT_BarrelElement& right) = delete;
     /** These transforms are effectively to the local coord
       system of a straw derived from GeoModel -> hence CLHEP */

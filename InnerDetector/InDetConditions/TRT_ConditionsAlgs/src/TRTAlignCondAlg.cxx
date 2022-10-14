@@ -30,7 +30,7 @@ StatusCode TRTAlignCondAlg::initialize()
   ATH_CHECK( m_readKeyDynamicRegular.initialize(m_useDynamicFolders.value()) );
 
   // Write condition handles initialize
-  ATH_CHECK( m_writeKeyAlignStore.initialize() );
+  ATH_CHECK( m_writeKeyAlignStore.initialize(!m_writeKeyAlignStore.empty()) );
   ATH_CHECK( m_writeKeyDetElCont.initialize() );
 
   ATH_CHECK(detStore()->retrieve(m_detManager,"TRT"));
@@ -44,9 +44,7 @@ StatusCode TRTAlignCondAlg::execute()
 
   const EventContext& ctx = Gaudi::Hive::currentContext();
   // ____________ Construct Write Cond Handles and check their validity ____________
-  SG::WriteCondHandle<GeoAlignmentStore> writeHandle{m_writeKeyAlignStore,ctx};
-  SG::WriteCondHandle<InDetDD::TRT_DetElementContainer> writeHandleDetElCont{m_writeKeyDetElCont,ctx};
-
+  SG::WriteCondHandle<InDetDD::TRT_DetElementContainer> writeHandleDetElCont{m_writeKeyDetElCont, ctx};
   if (writeHandleDetElCont.isValid()) {
     ATH_MSG_DEBUG("CondHandle " << writeHandleDetElCont.fullKey() << " is already valid."
                   << ". In theory this should not be called, but may happen"
@@ -54,15 +52,19 @@ StatusCode TRTAlignCondAlg::execute()
     return StatusCode::SUCCESS;
   }
 
-  if(writeHandle.isValid()) {
-    ATH_MSG_DEBUG("CondHandle " << writeHandle.fullKey() << " is already valid."
-                  << ". In theory this should not be called, but may happen"
-                  << " if multiple concurrent events are being processed out of order.");
-    return StatusCode::SUCCESS;
+  std::unique_ptr<SG::WriteCondHandle<GeoAlignmentStore>> writeHandleAlignStore{};
+  if (!m_writeKeyAlignStore.empty()) {
+    writeHandleAlignStore = std::make_unique<SG::WriteCondHandle<GeoAlignmentStore>>(m_writeKeyAlignStore, ctx);
+    if (writeHandleAlignStore->isValid()) {
+      ATH_MSG_DEBUG("CondHandle " << writeHandleAlignStore->fullKey() << " is already valid."
+                    << ". In theory this should not be called, but may happen"
+                    << " if multiple concurrent events are being processed out of order.");
+      return StatusCode::SUCCESS;
+    }
   }
 
   // ____________ Construct new Write Cond Object and its range ____________
-  std::unique_ptr<GeoAlignmentStore> writeCdo{std::make_unique<GeoAlignmentStore>()};
+  std::unique_ptr<GeoAlignmentStore> writeCdoAlignStore{std::make_unique<GeoAlignmentStore>()};
 
   EventIDRange rangeW;
 
@@ -132,7 +134,7 @@ StatusCode TRTAlignCondAlg::execute()
   }
 
   // ____________ Apply alignments to TRT GeoModel ____________
-  if(m_detManager->align(readCdoContainer,writeCdo.get()).isFailure()) {
+  if(m_detManager->align(readCdoContainer, writeCdoAlignStore.get()).isFailure()) {
     ATH_MSG_ERROR("Failed to apply alignments to TRT");
     return StatusCode::FAILURE;
   }
@@ -160,13 +162,13 @@ StatusCode TRTAlignCondAlg::execute()
     if(type == InDetDD::TRT_BaseElement::ENDCAP) {
       const InDetDD::TRT_EndcapElement* oldEl_Endcap = static_cast<const InDetDD::TRT_EndcapElement*>(oldEl);
       //New encap element with new alignment created based on old element
-      InDetDD::TRT_EndcapElement* newEl = new InDetDD::TRT_EndcapElement(*oldEl_Endcap,writeCdo.get());
+      InDetDD::TRT_EndcapElement* newEl = new InDetDD::TRT_EndcapElement(*oldEl_Endcap);
       oldToNewECMap[oldEl_Endcap] = newEl;
       writeCdoDetElCont->addEndcapElement(newEl);
     } else if (type == InDetDD::TRT_BaseElement::BARREL) {
       const InDetDD::TRT_BarrelElement* oldEl_Barrel = static_cast<const InDetDD::TRT_BarrelElement*>(oldEl);
       //New barrel element with new alignment created based on old element
-      InDetDD::TRT_BarrelElement* newEl = new InDetDD::TRT_BarrelElement(*oldEl_Barrel,writeCdo.get());
+      InDetDD::TRT_BarrelElement* newEl = new InDetDD::TRT_BarrelElement(*oldEl_Barrel);
       oldToNewBAMap[oldEl_Barrel] = newEl;
       writeCdoDetElCont->addBarrelElement(newEl);
     } else {
@@ -200,13 +202,15 @@ StatusCode TRTAlignCondAlg::execute()
   writeCdoDetElCont->setNumerology(m_detManager->getNumerology());
 
   // Record the resulting CDO
-  if(writeHandle.record(rangeW, std::move(writeCdo)).isFailure()) {
-    ATH_MSG_ERROR("Could not record GeoAlignmentStore " << writeHandle.key()
-		  << " with EventRange " << rangeW
-		  << " into Conditions Store");
-    return StatusCode::FAILURE;
+  if (writeHandleAlignStore != nullptr) {
+    if(writeHandleAlignStore->record(rangeW, std::move(writeCdoAlignStore)).isFailure()) {
+      ATH_MSG_ERROR("Could not record GeoAlignmentStore " << writeHandleAlignStore->key()
+        << " with EventRange " << rangeW
+        << " into Conditions Store");
+      return StatusCode::FAILURE;
+    }
+    ATH_MSG_INFO("recorded new CDO " << writeHandleAlignStore->key() << " with range " << rangeW << " into Conditions Store");
   }
-  ATH_MSG_INFO("recorded new CDO " << writeHandle.key() << " with range " << rangeW << " into Conditions Store");
 
   if (writeHandleDetElCont.record(rangeW, std::move(writeCdoDetElCont)).isFailure()) {
     ATH_MSG_FATAL("Could not record " << writeHandleDetElCont.key()
@@ -216,11 +220,5 @@ StatusCode TRTAlignCondAlg::execute()
   }
   ATH_MSG_INFO("recorded new CDO " << writeHandleDetElCont.key() << " with range " << rangeW << " with size of " << writeHandleDetElContSize << " into Conditions Store");
 
-  return StatusCode::SUCCESS;
-}
-
-StatusCode TRTAlignCondAlg::finalize()
-{
-  ATH_MSG_DEBUG("finalize " << name());
   return StatusCode::SUCCESS;
 }

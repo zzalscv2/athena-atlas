@@ -19,6 +19,7 @@ def TRTAlignCondAlgCfg(flags, name="TRTAlignCondAlg", **kwargs):
         acc.merge(addFoldersSplitOnline(flags, "TRT", "/TRT/Onl/Align", "/TRT/Align", className="AlignableTransformContainer"))
 
     kwargs.setdefault("UseDynamicFolders", flags.GeoModel.Align.Dynamic)
+    kwargs.setdefault("WriteKeyAlignStore", "")  # currently unused
 
     acc.addCondAlgo(CompFactory.TRTAlignCondAlg(name, **kwargs))
     return acc

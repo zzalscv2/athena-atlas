@@ -31,8 +31,7 @@ TRT_EndcapElement::TRT_EndcapElement(const GeoVFullPhysVol* volume,
                                      unsigned int strawLayIndex,
                                      unsigned int phiIndex,
                                      const TRT_ID* idHelper,
-                                     const TRT_Conditions* conditions,
-                                     const GeoAlignmentStore* geoAlignStore)
+                                     const TRT_Conditions* conditions)
   :
 
   TRT_BaseElement(volume,
@@ -41,8 +40,7 @@ TRT_EndcapElement::TRT_EndcapElement(const GeoVFullPhysVol* volume,
                                      wheelIndex,
                                      strawLayIndex),
                   idHelper,
-                  conditions,
-                  geoAlignStore)
+                  conditions)
   , m_code(isPositive, wheelIndex, strawLayIndex, phiIndex)
   , m_descriptor(descriptor)
   , m_nextInZ(nullptr)
@@ -53,9 +51,8 @@ TRT_EndcapElement::TRT_EndcapElement(const GeoVFullPhysVol* volume,
   m_strawSurfacesCache.resize(m_nstraws);
 }
 
-TRT_EndcapElement::TRT_EndcapElement(const TRT_EndcapElement& right,
-                                     const GeoAlignmentStore* geoAlignStore)
-  : TRT_BaseElement(right, geoAlignStore)
+TRT_EndcapElement::TRT_EndcapElement(const TRT_EndcapElement& right)
+  : TRT_BaseElement(right)
   , m_code(right.m_code)
   , m_descriptor(right.m_descriptor)
   , m_nextInZ(right.m_nextInZ)
