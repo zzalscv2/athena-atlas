@@ -126,7 +126,7 @@ void TrigL2LayerNumberToolITk::createModuleHashMap(std::map<std::tuple<int, int,
     if(barrel_ec==-2) vol_id = 7;
     if(barrel_ec== 2) vol_id = 9;
     
-    int new_vol, new_lay;
+    int new_vol=0, new_lay=0;
 
     if(vol_id == 7 || vol_id == 9) {
       new_vol = 10*vol_id + lay_id;
