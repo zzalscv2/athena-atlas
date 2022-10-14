@@ -46,15 +46,14 @@ class TrigEgammaPrecisionPhotonCaloIsoHypoTool : public extends<AthAlgTool, ITri
     HLT::Identifier m_decisionId;
     
 //    //Calorimeter electron ID  cuts
-      Gaudi::Property< std::vector<float> > m_etabin { this, "EtaBins", {} , "Bins of eta" }; //!<  selection variable for PRECISION calo selection:eta bins
-//    Gaudi::Property< std::vector<float> > m_eTthr { this, "ETthr", {}, "ET Threshold" };
-//    Gaudi::Property< float >              m_detacluster { this, "dETACLUSTERthr", 0. , "" };
-//    Gaudi::Property< float >              m_dphicluster { this, "dPHICLUSTERthr", 0. , "" };
+	Gaudi::Property< std::vector<float> > m_etabin { this, "EtaBins", {} , "Bins of eta" }; //!<  selection variable for PRECISION calo selection:eta bins
     Gaudi::Property< std::vector<float> > m_RelEtConeCut { this, "RelEtConeCut", {999., 999., 999.} , "Calo isolation cut on etcone20" };
     Gaudi::Property< std::vector<float> > m_RelTopoEtConeCut { this, "RelTopoEtConeCut", {999., 999., 999.}, "Calo isolation cut in [TopoEtcone20/pt, TopoEtcone30/pt, TopoEtcone40/pt]" };
     Gaudi::Property< std::vector<float> > m_CutOffset { this, "Offset", {0., 0., 0.} , "Calo isolation offset cut in [(Topo)Etcone20/pt, (Topo)Etcone30/pt, (Topo)Etcone40/pt]" };
     Gaudi::Property< std::string >        m_pidName {this, "PidName", "", "Pid name"}; 
-    
+   
+    /* Accept all in case of noiso instance */	
+    Gaudi::Property< bool >        m_acceptAll {this, "AcceptAll", false, "Force accept the event"}; 
     /* monitoring */
     ToolHandle< GenericMonitoringTool >   m_monTool { this, "MonTool", "", "Monitoring tool" };
   

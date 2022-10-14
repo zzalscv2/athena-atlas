@@ -189,6 +189,13 @@ def RecoSteering(flags):
         acc.merge(AFPRecCfg(flags))
         log.info("---------- Configured AFP reconstruction")
 
+    # ZDC under construction but disabled as per APR-90
+    #acc.flagPerfmonDomain('ZDC')
+    #if flags.Reco.EnableZDC:
+    #    from ForwardRec.ZDCRecConfig import ZDCRecCfg
+    #    acc.merge(ZDCRecCfg(flags))
+    #    log.info("---------- Configured ZDC reconstruction")
+
     # Monitoring
     acc.flagPerfmonDomain('DQM')
     if flags.DQ.doMonitoring:

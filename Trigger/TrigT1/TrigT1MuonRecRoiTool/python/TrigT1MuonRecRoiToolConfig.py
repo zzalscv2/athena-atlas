@@ -1,12 +1,29 @@
-# Copyright (C) 2002-2020 CERN for the benefit of the ATLAS collaboration
+#
+# Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+#
 from AthenaConfiguration.ComponentFactory import CompFactory
+from MuonConfig.MuonCablingConfig import RPCCablingConfigCfg, TGCCablingConfigCfg
+from MuonConfig.MuonGeometryConfig import MuonDetectorCondAlgCfg
 
-def getRun3RPCRecRoiTool(name = "RPCRecRoiTool", useRun3Config=True):
+def RPCRecRoiToolCfg(flags, name="RPCRecRoiTool", useRun3Config=True):
+    acc = RPCCablingConfigCfg(flags)
+    acc.merge(MuonDetectorCondAlgCfg(flags))
+
     tool = CompFactory.getComp("LVL1::TrigT1RPCRecRoiTool")(name)
-    tool.UseRun3Config=useRun3Config
-    return tool
+    tool.UseRun3Config = useRun3Config
+    tool.ReadKey = str(acc.getCondAlgo("RpcCablingCondAlg").WriteKey)
+    tool.DetectorManagerKey = str(acc.getCondAlgo("MuonDetectorCondAlg").WriteDetectorManagerKey)
+    acc.setPrivateTools(tool)
 
-def getRun3TGCRecRoiTool(name = "TGCRecRoiTool", useRun3Config=True):
+    return acc
+
+def TGCRecRoiToolCfg(flags, name="TGCRecRoiTool", useRun3Config=True):
+    acc = TGCCablingConfigCfg(flags)
+    acc.merge(MuonDetectorCondAlgCfg(flags))
+
     tool = CompFactory.getComp("LVL1::TrigT1TGCRecRoiTool")(name)
-    tool.UseRun3Config=useRun3Config
-    return tool
+    tool.UseRun3Config = useRun3Config
+    tool.DetectorManagerKey = str(acc.getCondAlgo("MuonDetectorCondAlg").WriteDetectorManagerKey)
+    acc.setPrivateTools(tool)
+
+    return acc

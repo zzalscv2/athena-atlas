@@ -58,9 +58,9 @@ StatusCode MuonAlignmentCondAlg::initialize() {
     // Write Handles
     ATH_CHECK(m_writeALineKey.initialize());
     ATH_CHECK(m_writeBLineKey.initialize());
-    ATH_CHECK(m_writeILineKey.initialize(m_idHelperSvc->hasCSC()));
-    ATH_CHECK(m_writeMdtAsBuiltKey.initialize());
-    ATH_CHECK(m_writeNswAsBuiltKey.initialize());
+    ATH_CHECK(m_writeILineKey.initialize(m_idHelperSvc->hasCSC() && m_ILinesFromDb and m_ILineRequested));
+    ATH_CHECK(m_writeMdtAsBuiltKey.initialize(m_MdtAsBuiltRequested));
+    ATH_CHECK(m_writeNswAsBuiltKey.initialize(m_NswAsBuiltRequested));
 
     ATH_CHECK(detStore()->retrieve(m_muonDetMgrDS));
     m_geometryVersion = m_muonDetMgrDS->geometryVersion();

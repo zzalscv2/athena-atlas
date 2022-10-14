@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef _ZDCFitWrapper_h
@@ -68,6 +68,9 @@ public:
     SetT0FitLimits(t0Min, t0Max);
   }
 
+  virtual void ConstrainFit() = 0;
+  virtual void UnconstrainFit() = 0;
+
   virtual float GetAmplitude() const = 0;
   virtual float GetAmpError() const = 0;
   virtual float GetTime() const = 0;
@@ -119,7 +122,7 @@ public:
 
 class ZDCFitExpFermiVariableTaus : public ZDCFitWrapper
 {
-private:
+protected:
   bool m_fixTau1;
   bool m_fixTau2;
 
@@ -164,10 +167,9 @@ public:
   {
     const TF1* theTF1 = ZDCFitWrapper::GetWrapperTF1();
     double amp = theTF1->GetParameter(0);
-    double slope = theTF1->GetParameter(4);
+    double constant = theTF1->GetParameter(4);
 
-    double background = slope * GetTime();
-    return background / amp;
+    return constant / amp;
   }
 
   //  virtual float GetNDOF() const {return _fitFunc->GetNDF(); }
@@ -176,6 +178,14 @@ public:
     return ZDCFermiExpFit(x, p);
   }
 
+  virtual void ConstrainFit() override;
+  virtual void UnconstrainFit() override;
+};
+
+class ZDCFitExpFermiVariableTausRun3 : public ZDCFitExpFermiVariableTaus
+{
+public:
+  ZDCFitExpFermiVariableTausRun3(const std::string& tag, float tmin, float tmax, bool fixTau1, bool fixTau2, float tau1, float tau2);
 };
 
 class ZDCFitExpFermiFixedTaus : public ZDCFitWrapper
@@ -197,6 +207,9 @@ public:
 
   virtual void DoInitialize(float initialAmp, float initialT0, float ampMin, float ampMax);
   virtual void SetT0FitLimits(float tMin, float tMax);
+
+  virtual void ConstrainFit() override;
+  virtual void UnconstrainFit() override;
 
   virtual float GetAmplitude() const {return GetWrapperTF1()->GetParameter(0); }
   virtual float GetAmpError() const {return GetWrapperTF1()->GetParError(0); }
@@ -229,11 +242,13 @@ public:
   {
     double amp = p[0];
     double t0 = p[1];
+    double C = p[2];
+
     double deltaT = x[0] - t0;
 
     double expFermi =  amp * m_norm * m_expFermiFunc->operator()(deltaT);
 
-    return expFermi; // + bckgd;
+    return expFermi + C; // + bckgd;
   }
 };
 
@@ -260,6 +275,9 @@ public:
 
   virtual void SetPrePulseT0Range(float tmin, float tmax) override;
   virtual void SetPostPulseT0Range(float /*tmin*/, float /*tmax*/, float /*initialPostT0*/) override {return;}
+
+  virtual void ConstrainFit() override;
+  virtual void UnconstrainFit() override;
 
   virtual unsigned int GetPreT0ParIndex() const override {return 3;}
 
@@ -316,6 +334,8 @@ public:
     double t0 = p[1];
     double preAmp = p[2];
     double preT0 = p[3];
+    double C = p[4];
+
     //    double linSlope = p[4];
 
     double deltaT = t - t0;
@@ -332,7 +352,7 @@ public:
     double pulse2 =  preAmp * m_norm * (m_expFermiFunc->operator()(deltaTPre) -
                                         m_expFermiFunc->operator()(deltaPresamp));
 
-    return pulse1 + pulse2;// + bckgd;
+    return C + pulse1 + pulse2;// + bckgd;
   }
 };
 
@@ -356,6 +376,9 @@ public:
 
   virtual void DoInitialize(float initialAmp, float initialT0, float ampMin, float ampMax) override;
   virtual void SetT0FitLimits(float tMin, float tMax) override;
+
+  virtual void ConstrainFit() override;
+  virtual void UnconstrainFit() override;
 
   virtual float GetAmplitude() const override {return GetWrapperTF1()->GetParameter(0); }
   virtual float GetAmpError() const override {return GetWrapperTF1()->GetParError(0); }
@@ -414,6 +437,9 @@ public:
 
   virtual void DoInitialize(float initialAmp, float initialT0, float ampMin, float ampMax) override;
   virtual void SetT0FitLimits(float tMin, float tMax) override;
+
+  virtual void ConstrainFit() override;
+  virtual void UnconstrainFit() override;
 
   virtual void SetInitialPrePulse(float amp, float t0, float /*expamp = 0*/, bool /*fixPrePulseToZero = false*/) override {
     GetWrapperTF1()->SetParameter(2, std::max(amp, (float) 1.5)); //1.5 here ensures that we're above lower limit
@@ -530,6 +556,9 @@ public:
     GetWrapperTF1()->SetParameter(3, t0);
     GetWrapperTF1()->SetParameter(6, std::max(std::abs(expamp), (float) 1.5));
   }
+  
+  virtual void ConstrainFit() override;
+  virtual void UnconstrainFit() override;
 
   virtual void SetPrePulseT0Range(float tmin, float tmax) override;
   virtual void SetPostPulseT0Range(float /*tmin*/, float /*tmax*/, float /*initialPostT0*/) override {return;}
@@ -649,6 +678,9 @@ public:
       GetWrapperTF1()->FixParameter(3, 20.);
     }
   }
+
+  virtual void ConstrainFit() override;
+  virtual void UnconstrainFit() override;
 
   virtual void SetPrePulseT0Range(float tmin, float tmax) override;
   virtual void SetPostPulseT0Range(float tmin, float tmax, float initialPostT0) override;

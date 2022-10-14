@@ -6984,6 +6984,20 @@ HLT_g20_loose_L1eEM18L:
     1: 14
     2: 13
     3: 12
+HLT_g20_loose_noiso_L1EM15VH:
+  eventCount: 12
+  stepCounts:
+    0: 17
+    1: 13
+    2: 13
+    3: 12
+    4: 12
+  stepFeatures:
+    0: 23
+    1: 16
+    2: 14
+    3: 13
+    4: 15
 HLT_g20_loose_ringer_L1EM15VHI:
   eventCount: 10
   stepCounts:
@@ -8791,6 +8805,28 @@ HLT_g35_tight_mu18noL1_L1EM24VHI:
     1: 8
     2: 8
     3: 6
+HLT_g35_tight_noiso_3j25_pf_ftf_PhysicsTLA_L1EM22VHI:
+  eventCount: 6
+  stepCounts:
+    0: 10
+    1: 8
+    2: 8
+    3: 6
+    4: 6
+    5: 6
+    6: 6
+    7: 6
+    8: 6
+  stepFeatures:
+    0: 11
+    1: 8
+    2: 8
+    3: 6
+    4: 6
+    5: 6
+    6: 30
+    7: 36
+    8: 12
 HLT_g35_tight_tau25_dikaonmass_tracktwoMVA_50invmAB_L1EM22VHI:
   eventCount: 0
   stepCounts:
@@ -9121,6 +9157,28 @@ HLT_g45_tight_icaloloose_2j55_0eta200_emergingPTF0p1dR0p4_pf_ftf_L1EM22VHI:
     5: 4
     6: 8
     7: 2
+HLT_g45_tight_noiso_3j25_pf_ftf_PhysicsTLA_L1EM22VHI:
+  eventCount: 4
+  stepCounts:
+    0: 9
+    1: 7
+    2: 6
+    3: 4
+    4: 4
+    5: 4
+    6: 4
+    7: 4
+    8: 4
+  stepFeatures:
+    0: 10
+    1: 7
+    2: 6
+    3: 4
+    4: 4
+    5: 4
+    6: 18
+    7: 22
+    8: 8
 HLT_g50_loose_L1EM20VH:
   eventCount: 5
   stepCounts:
@@ -9165,6 +9223,28 @@ HLT_g50_tight_3j25_pf_ftf_PhysicsTLA_L1EM22VHI:
     5: 18
     6: 22
     7: 8
+HLT_g50_tight_noiso_3j25_pf_ftf_PhysicsTLA_L1EM22VHI:
+  eventCount: 4
+  stepCounts:
+    0: 7
+    1: 6
+    2: 6
+    3: 4
+    4: 4
+    5: 4
+    6: 4
+    7: 4
+    8: 4
+  stepFeatures:
+    0: 8
+    1: 6
+    2: 6
+    3: 4
+    4: 4
+    5: 4
+    6: 18
+    7: 22
+    8: 8
 HLT_g60_loose_L1EM22VHI:
   eventCount: 5
   stepCounts:
@@ -9247,6 +9327,28 @@ HLT_g60_tight_icaloloose_2j55_0eta200_emergingPTF0p1dR0p4_pf_ftf_L1EM22VHI:
     5: 4
     6: 8
     7: 2
+HLT_g60_tight_noiso_3j25_pf_ftf_PhysicsTLA_L1EM22VHI:
+  eventCount: 4
+  stepCounts:
+    0: 7
+    1: 6
+    2: 6
+    3: 4
+    4: 4
+    5: 4
+    6: 4
+    7: 4
+    8: 4
+  stepFeatures:
+    0: 8
+    1: 6
+    2: 6
+    3: 4
+    4: 4
+    5: 4
+    6: 18
+    7: 22
+    8: 8
 HLT_g80_loose_L1EM22VHI:
   eventCount: 2
   stepCounts:
@@ -16946,6 +17048,18 @@ HLT_mu4_mu4_idperf_1invmAB5_L12MU3VF:
     1: 14
     2: 14
     3: 12
+HLT_mu4_mu4_idtp_idJpsimumu_L12MU3VF:
+  eventCount: 1
+  stepCounts:
+    0: 3
+    1: 3
+    2: 3
+    3: 1
+  stepFeatures:
+    0: 14
+    1: 14
+    2: 14
+    3: 13
 HLT_mu50_L1MU14FCH:
   eventCount: 3
   stepCounts:

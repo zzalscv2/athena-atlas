@@ -3,9 +3,10 @@
 #
 
 import math
+from AthenaConfiguration.ComponentAccumulator import ComponentAccumulator
+from AthenaConfiguration.ComponentFactory import CompFactory
 from AthenaCommon.Logging import logging
 log = logging.getLogger('HLTSeedingConfig')
-from AthenaConfiguration.ComponentFactory import CompFactory
 
 _mapL1ThresholdToDecisionCollection = {
     # Full-scan
@@ -217,14 +218,15 @@ def createKeyWriterTool():
     keyWriter.IncludeBunchgroupKey = False
     return keyWriter
 
-def getL1TriggerResultMaker(flags):
+def L1TriggerResultMakerCfg(flags):
+    acc = ComponentAccumulator()
     l1trMaker = CompFactory.L1TriggerResultMaker()
 
     # Muon RoIs
     if flags.Trigger.enableL1MuonPhase1:
        l1trMaker.MuRoIKey = "LVL1MuonRoIs"
-       from TrigT1MuctpiPhase1.TrigT1MuctpiPhase1Config import getTrigThresholdDecisionTool
-       l1trMaker.ThresholdPatternTools += [getTrigThresholdDecisionTool()]
+       from TrigT1MuctpiPhase1.TrigT1MuctpiPhase1Config import TrigThresholdDecisionToolCfg
+       l1trMaker.ThresholdPatternTools += [acc.popToolsAndMerge(TrigThresholdDecisionToolCfg(flags))]
     else:
        l1trMaker.MuRoIKey = ""
 
@@ -263,9 +265,9 @@ def getL1TriggerResultMaker(flags):
     # Placeholder for other L1 xAOD outputs:
     # - CTP result
     # - L1Topo result
-    # - the remaining Run-3 L1Calo RoIs
 
-    return l1trMaker
+    acc.addEventAlgo(l1trMaker, primary=True)
+    return acc
 
 
 class HLTSeeding(CompFactory.HLTSeeding) :
@@ -311,9 +313,6 @@ class HLTSeeding(CompFactory.HLTSeeding) :
 
 
 def HLTSeedingCfg(flags, seqName = None):
-
-    from AthenaConfiguration.ComponentAccumulator import ComponentAccumulator
-
     if seqName:
         from AthenaCommon.CFElements import parOR
         acc = ComponentAccumulator(sequence=parOR(seqName)) # TODO - once rec-ex-common JO are phased out this can also be dropped
@@ -360,9 +359,6 @@ def HLTSeedingCfg(flags, seqName = None):
             decoderAlg.xAODRoIUnpackers += createMuonRoIUnpackers(flags)
         else:
             decoderAlg.RoIBRoIUnpackers += createLegacyMuonRoIUnpackers(flags)
-        from MuonConfig.MuonCablingConfig import RPCCablingConfigCfg, TGCCablingConfigCfg
-        acc.merge( TGCCablingConfigCfg( flags ) )
-        acc.merge( RPCCablingConfigCfg( flags ) )
 
     decoderAlg.prescaler = createPrescalingTool()
     decoderAlg.KeyWriterTool = createKeyWriterTool()
@@ -376,7 +372,7 @@ def HLTSeedingCfg(flags, seqName = None):
 
     # Add the algorithm creating L1TriggerResult which is the input to HLTSeeding (Run-3 L1)
     if flags.Trigger.enableL1MuonPhase1 or flags.Trigger.enableL1CaloPhase1:
-        acc.addEventAlgo( getL1TriggerResultMaker(flags), sequenceName = seqName )
+        acc.merge( L1TriggerResultMakerCfg(flags), sequenceName = seqName )
 
     acc.addEventAlgo( decoderAlg, sequenceName = seqName )
 

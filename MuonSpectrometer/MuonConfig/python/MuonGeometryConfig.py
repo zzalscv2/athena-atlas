@@ -164,13 +164,16 @@ def MuonAlignmentCondAlgCfg(flags):
             pass
 
     acc.addCondAlgo(MuonAlign)
-
-    if flags.IOVDb.DatabaseInstance != 'COMP200' and \
-                'HLT' not in flags.IOVDb.GlobalTag and not flags.Common.isOnline:
-        acc.merge(addFolders( flags, '/MUONALIGN/ERRS', 'MUONALIGN_OFL', className='CondAttrListCollection'))
-        acc.addCondAlgo(CompFactory.MuonAlignmentErrorDbAlg("MuonAlignmentErrorDbAlg"))
-    
     return acc
+
+
+def MuonAlignmentErrorDbAlgCfg(flags):
+    acc = ComponentAccumulator()
+    from IOVDbSvc.IOVDbSvcConfig import addFolders
+    acc.merge(addFolders(flags, "/MUONALIGN/ERRS", "MUONALIGN_OFL", className="CondAttrListCollection"))
+    acc.addCondAlgo(CompFactory.MuonAlignmentErrorDbAlg("MuonAlignmentErrorDbAlg"))
+    return acc
+
 
 def MuonDetectorCondAlgCfg(flags):
     acc = MuonAlignmentCondAlgCfg(flags)

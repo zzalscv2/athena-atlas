@@ -18,7 +18,7 @@
 #include <numeric>
 
 #include "CxxUtils/checker_macros.h"
-ATLAS_NO_CHECK_FILE_THREAD_SAFETY;  // standalone ROOT analysis code
+ATLAS_NO_CHECK_FILE_THREAD_SAFETY;
 
 extern int gErrorIgnoreLevel;
 
@@ -102,7 +102,7 @@ ZDCPulseAnalyzer::ZDCPulseAnalyzer(ZDCMsg::MessageFunctionPtr msgFunc_p, std::st
   m_enableRepass(false),
   m_haveTimingCorrections(false), m_haveNonlinCorr(false), m_initializedFits(false),
   m_ADCSamplesHGSub(Nsample, 0), m_ADCSamplesLGSub(Nsample, 0),
-  m_ADCSSampSigHG(Nsample, 1), m_ADCSSampSigLG(Nsample, 1), // By default the ADC uncertainties are set to one
+  m_ADCSSampSigHG(Nsample, 0), m_ADCSSampSigLG(Nsample, 0), 
   m_samplesSub(Nsample, 0)
 {
   // Create the histogram used for fitting
@@ -158,6 +158,11 @@ void ZDCPulseAnalyzer::SetDefaults()
   m_HGUnderflowADC = 20;
   m_LGOverflowADC  = 1000;
 
+  m_2ndDerivStep = 2;
+
+  m_noiseSigHG = 1;
+  m_noiseSigLG = 1;
+
   m_chisqDivAmpCutLG = 100;
   m_chisqDivAmpCutHG = 100;
 
@@ -181,6 +186,9 @@ void ZDCPulseAnalyzer::SetDefaults()
 
   m_fitAmpMaxHG = 1500;
   m_fitAmpMaxLG = 1500;
+
+  m_postPulse = false;
+  m_prePulse = false;
 
   m_initialPrePulseT0  = -10;
   m_initialPrePulseAmp = 5;
@@ -219,6 +227,9 @@ void ZDCPulseAnalyzer::Reset(bool repass)
 
     m_ADCSamplesHGSub.assign(sampleVecSize, 0);
     m_ADCSamplesLGSub.assign(sampleVecSize, 0);
+
+    m_ADCSSampSigHG.assign(sampleVecSize, m_noiseSigHG);
+    m_ADCSSampSigLG.assign(sampleVecSize, m_noiseSigLG); 
 
     m_minSampleEvt = 0;
     m_maxSampleEvt = (m_useDelayed ? 2 * m_Nsample - 1 : m_Nsample - 1);
@@ -284,12 +295,14 @@ void ZDCPulseAnalyzer::Reset(bool repass)
   m_fitPostT0lo   = 0;
 
   m_samplesSub.clear();
-  m_samplesDeriv.clear();
+
   m_samplesDeriv2nd.clear();
 }
 
 void ZDCPulseAnalyzer::SetFitMinMaxAmp(float minAmpHG, float minAmpLG, float maxAmpHG, float maxAmpLG)
 {
+  std::cout << "Setting fit min,max amp values " << minAmpHG << ", " << maxAmpHG << std::endl;
+
   m_fitAmpMinHG = minAmpHG;
   m_fitAmpMinLG = minAmpLG;
 
@@ -361,6 +374,19 @@ void ZDCPulseAnalyzer::SetupFitFunctions()
       // Use the variable tau version of the expFermiFit
       //
       m_defaultFitWrapper = std::unique_ptr<ZDCFitWrapper>(new ZDCFitExpFermiVariableTaus(m_tag, m_tmin, m_tmax, m_fixTau1, m_fixTau2, m_nominalTau1, m_nominalTau2));
+    }
+    else {
+      m_defaultFitWrapper = std::unique_ptr<ZDCFitWrapper>(new ZDCFitExpFermiFixedTaus(m_tag, m_tmin, m_tmax, m_nominalTau1, m_nominalTau2));
+    }
+
+    m_prePulseFitWrapper = std::unique_ptr<ZDCPrePulseFitWrapper>(new ZDCFitExpFermiPrePulse(m_tag, m_tmin, m_tmax, m_nominalTau1, m_nominalTau2));
+  }
+  if (m_fitFunction == "FermiExpRun3") {
+    if (!m_fixTau1 || !m_fixTau2) {
+      //
+      // Use the variable tau version of the expFermiFit
+      //
+      m_defaultFitWrapper = std::unique_ptr<ZDCFitWrapper>(new ZDCFitExpFermiVariableTausRun3(m_tag, m_tmin, m_tmax, m_fixTau1, m_fixTau2, m_nominalTau1, m_nominalTau2));
     }
     else {
       m_defaultFitWrapper = std::unique_ptr<ZDCFitWrapper>(new ZDCFitExpFermiFixedTaus(m_tag, m_tmin, m_tmax, m_nominalTau1, m_nominalTau2));
@@ -458,7 +484,7 @@ bool ZDCPulseAnalyzer::LoadAndAnalyzeData(const std::vector<float>& ADCSamplesHG
     if (ADCLG > m_LGOverflowADC) {
       m_LGOverflow = true;
       m_fail = true;
-      m_amplitude = 1024 * m_gainHG; // Give a vale here even though we know it's wrong because
+      m_amplitude = m_LGOverflowADC * m_gainHG; // Give a vale here even though we know it's wrong because
       //   the user may not check the return value and we know that
       //   amplitude is bigger than this
     }
@@ -534,7 +560,7 @@ bool ZDCPulseAnalyzer::LoadAndAnalyzeData(const std::vector<float>& ADCSamplesHG
     if (ADCLG > m_LGOverflowADC) {
       m_LGOverflow = true;
       m_fail       = true;
-      m_amplitude  = 1024 * m_gainHG; // Give a value here even though we know it's wrong because
+      m_amplitude  = m_LGOverflowADC * m_gainHG; // Give a value here even though we know it's wrong because
       //   the user may not check the return value and we know that
       //   amplitude is bigger than this
     }
@@ -639,7 +665,7 @@ bool ZDCPulseAnalyzer::DoAnalysis(bool repass)
 
   m_useLowGain = m_HGUnderflow || m_HGOverflow || m_forceLG;
   if (m_useLowGain) {
-    bool result = AnalyzeData(m_Nsample * nSampleScale, m_preSampleIdx, m_ADCSamplesLGSub, m_ADCSSampSigLG, m_LGT0CorrParams, m_chisqDivAmpCutLG,
+    bool result = AnalyzeData(m_Nsample * nSampleScale, m_preSampleIdx, m_ADCSamplesLGSub, m_noiseSigLG, m_LGT0CorrParams, m_chisqDivAmpCutLG,
                               m_T0CutLowLG, m_T0CutHighLG, deriv2ndThreshLG);
     if (result) {
       if (BadChisq()) {
@@ -649,7 +675,7 @@ bool ZDCPulseAnalyzer::DoAnalysis(bool repass)
           m_minSampleEvt = 1;
 
           Reset(true);
-          result = AnalyzeData(m_Nsample * nSampleScale, m_preSampleIdx, m_ADCSamplesLGSub, m_ADCSSampSigLG, m_LGT0CorrParams,
+          result = AnalyzeData(m_Nsample * nSampleScale, m_preSampleIdx, m_ADCSamplesLGSub, m_noiseSigLG, m_LGT0CorrParams,
                                m_chisqDivAmpCutLG, m_T0CutLowLG, m_T0CutHighLG, deriv2ndThreshLG);
         }
       }
@@ -672,7 +698,7 @@ bool ZDCPulseAnalyzer::DoAnalysis(bool repass)
     return result;
   }
   else {
-    bool result = AnalyzeData(m_Nsample * nSampleScale, m_preSampleIdx, m_ADCSamplesHGSub, m_ADCSSampSigHG, m_HGT0CorrParams, m_chisqDivAmpCutHG,
+    bool result = AnalyzeData(m_Nsample * nSampleScale, m_preSampleIdx, m_ADCSamplesHGSub, m_noiseSigHG, m_HGT0CorrParams, m_chisqDivAmpCutHG,
                               m_T0CutLowHG, m_T0CutHighHG, deriv2ndThreshHG);
     if (result) {
       if (BadChisq()) {
@@ -682,7 +708,7 @@ bool ZDCPulseAnalyzer::DoAnalysis(bool repass)
           m_minSampleEvt = 1;
 
           Reset(true);
-          result = AnalyzeData(m_Nsample * nSampleScale, m_preSampleIdx, m_ADCSamplesHGSub, m_ADCSSampSigHG, m_HGT0CorrParams, m_chisqDivAmpCutHG,
+          result = AnalyzeData(m_Nsample * nSampleScale, m_preSampleIdx, m_ADCSamplesHGSub, m_noiseSigHG, m_HGT0CorrParams, m_chisqDivAmpCutHG,
                                m_T0CutLowHG, m_T0CutHighHG, deriv2ndThreshHG);
         }
       }
@@ -711,7 +737,7 @@ bool ZDCPulseAnalyzer::DoAnalysis(bool repass)
 
 bool ZDCPulseAnalyzer::AnalyzeData(size_t nSamples, size_t preSampleIdx,
                                    const std::vector<float>& samples,        // The samples used for this event
-                                   const std::vector<float>& samplesSig,     // The "resolution" on the ADC value
+				   float noiseSig,
                                    const std::vector<float>& t0CorrParams,   // The parameters used to correct the t0
                                    float maxChisqDivAmp,                     // The maximum chisq / amplitude ratio
                                    float minT0Corr, float maxT0Corr,         // The minimum and maximum corrected T0 values
@@ -824,21 +850,9 @@ bool ZDCPulseAnalyzer::AnalyzeData(size_t nSamples, size_t preSampleIdx,
   m_maxSampl = std::distance(m_samplesSub.cbegin(), maxIter);
   m_minSampl = std::distance(m_samplesSub.cbegin(), minIter);
 
-  // Calculate first and 2nd "derivatives"
+  // Calculate the second derivatives using step size m_2ndDerivStep
   //
-  std::vector<float> deriv(nSamples, 0);
-  std::adjacent_difference(m_samplesSub.begin(), m_samplesSub.end(), deriv.begin());
-
-  // Save the derivatives, dropping the useless first element
-  //
-  m_samplesDeriv.insert(m_samplesDeriv.begin(), deriv.begin() + 1, deriv.end());
-
-  std::vector<float> deriv2nd(nSamples - 1, 0);
-  std::adjacent_difference(m_samplesDeriv.begin(), m_samplesDeriv.end(), deriv2nd.begin());
-
-  // Save the second derivatives, dropping the useless first element
-  //
-  m_samplesDeriv2nd.insert(m_samplesDeriv2nd.begin(), deriv2nd.begin() + 1, deriv2nd.end());
+  m_samplesDeriv2nd = Calculate2ndDerivative(m_samplesSub, m_2ndDerivStep);
 
   // Find the sample which has the lowest 2nd derivative. We loop over the range defined by the
   //  tolerance on the position of the minimum second derivative. Note: the +1 in the upper iterator is because
@@ -846,21 +860,18 @@ bool ZDCPulseAnalyzer::AnalyzeData(size_t nSamples, size_t preSampleIdx,
   //
   SampleCIter minDeriv2ndIter;
 
-  int upperDelta = std::min(m_peak2ndDerivMinSample + m_peak2ndDerivMinTolerance + 1, nSamples - 2);
+  int upperDelta = std::min(m_peak2ndDerivMinSample + m_peak2ndDerivMinTolerance + 1, nSamples);
   minDeriv2ndIter = std::min_element(m_samplesDeriv2nd.begin() + m_peak2ndDerivMinSample - m_peak2ndDerivMinTolerance, m_samplesDeriv2nd.begin() + upperDelta);
 
   m_minDeriv2nd = *minDeriv2ndIter;
   m_minDeriv2ndIndex = std::distance(m_samplesDeriv2nd.cbegin(), minDeriv2ndIter);
 
-  double nominPeakDeriv2nd = m_samplesDeriv2nd[m_peak2ndDerivMinSample];
+  // Also check the ADC value for the "peak" sample to make sure it is significant (at least 3 sigma)
+  // The factor of sqrt(2) on the noise is because we have done a pre-sample subtraction
+  //
+  float peakADCSig = m_samplesSub[m_minDeriv2ndIndex]/(std::sqrt(2)*noiseSig);
 
-  //  The ket test for presence of a pulse: is the minimum 2nd derivative in the right place and is it
-  //    large enough (sufficiently negative)
-  //
-  // bac +++ new as of 2/6/20: if the maximum 2nd derivative is not at the expected position, require the 2nd derivative
-  //                           at the expected position to still be negative
-  //
-  if (m_minDeriv2nd <= peak2ndDerivMinThresh && nominPeakDeriv2nd < 0) {
+  if (m_minDeriv2nd <= peak2ndDerivMinThresh && peakADCSig > 3) {
     m_havePulse = true;
   }
   else {
@@ -877,162 +888,126 @@ bool ZDCPulseAnalyzer::AnalyzeData(size_t nSamples, size_t preSampleIdx,
   // To check for exponential tail, test the slope determined by the minimum ADC value (and pre-sample)
   // **beware** this can cause trouble in 2015 data where the pulses had overshoot due to the transformers
   //
-  float expSlopeTest = m_minADCValue / std::max( float( m_maxADCValue - m_minADCValue ), float( 1.0 ));
-  if (expSlopeTest < -0.05) {
-    m_preExpTail = true;
-  }
 
-  bool lastPosDeriv = false;
-
-  int loopLimit = (m_havePulse ? m_minDeriv2ndIndex - 2 : m_peak2ndDerivMinSample - 2);
-  for (int isampl = m_minSampleEvt; isampl < loopLimit; isampl++) {
-
-    // If any of the derivatives prior to the peak (as determined by the 2nd derivative) are significantly positive
-    //   then we have a peaked pre-pulse
-    //
-    if (m_samplesDeriv[isampl] > (m_maxADCValue - m_minADCValue + 1) * 0.02) {
-
+  // Implement a much simpler test for presence of an exponential tail from an OOT pulse
+  //   namely if the slope evaluated at the presample is significantly negative, then 
+  //   we have a preceeding pulse.
+  //
+  // Note that we don't have to subtract the FADC value corresponding to the presample because 
+  //   that subtraction has already been done.
+  //
+  if (m_havePulse) {
+    float derivPresampleSig = m_samplesSub[m_usedPresampIdx]/(std::sqrt(2)*noiseSig);
+    if (derivPresampleSig < -6) m_preExpTail = true;
+    
+    
+    int loopLimit = (m_havePulse ? m_minDeriv2ndIndex - 2 : m_peak2ndDerivMinSample - 2);
+    
+    for (int isample = m_usedPresampIdx + 1; isample < loopLimit; isample++) {
       //
-      //  Put a threshold on the derivative as a fraction of the difference between max and min so that
-      //     we don't waste lots of time for insignificant prepulses.
+      // If any of the second derivatives prior to the peak are significantly negative, we have a an extra pulse
+      //   prior to the main one -- as opposed to just an expnential tail
       //
-      if (m_samplesDeriv[isampl] / (m_maxADCValue - m_minADCValue + 1) > 0.05) {  // ??? why no abs()
-        m_prePulse = true;
+      if (m_samplesDeriv2nd[isample] < 0.15 * m_minDeriv2nd && m_samplesDeriv2nd[isample]/(std::sqrt(6)*noiseSig) < -4) {
+	m_prePulse = true;
+	if (m_samplesSub[isample] > m_initialPrePulseAmp) {
+	  m_initialPrePulseAmp = m_samplesSub[isample];
+	  m_initialPrePulseT0 = m_deltaTSample * (isample);
+	}
       }
-
-      // Also, if we have two positive derivatives in a row, we have a prepulse
-      //
-      if (lastPosDeriv) {
-        m_prePulse = true;
-      }
-      else lastPosDeriv = true;
     }
-    else {
-      lastPosDeriv = false;
-    }
-
-    //  If any of the 2nd derivatives before the minium are negative, we have the possibility of positive
-    //    preceeding pulse
-    //
-    if (m_samplesDeriv2nd[isampl] < 0.25 * m_minDeriv2nd && m_samplesDeriv2nd[isampl + 1] > 1) {
-      m_prePulse = true;
-    }
-  }
-
-  if (m_fitFunction == "ComplexPrePulse" || m_fitFunction == "GeneralPulse") {
-    if (!m_prePulse) m_fixPrePulse = true;
-  }
-
-  if (m_preExpTail) {
-    m_initialPrePulseT0  = -20;
-    m_initialPrePulseAmp = m_samplesSub[m_minSampleEvt];
 
     if (m_fitFunction == "ComplexPrePulse" || m_fitFunction == "GeneralPulse") {
-      m_initialPrePulseT0  = m_fitTMin + 5;
-      SampleCIter expMinIter = std::min_element(m_samplesSub.begin(), m_samplesSub.begin() + m_peak2ndDerivMinSample);
-      m_initialExpAmp = std::abs(*expMinIter - m_samplesSub[0]);
-      m_initialPrePulseAmp = 0.1;
+      if (!m_prePulse) m_fixPrePulse = true;
     }
-  }
+    
+    if (m_preExpTail) {
+      m_initialPrePulseT0  = -20;
+      m_initialPrePulseAmp = m_samplesSub[m_minSampleEvt];
+      
+      if (m_fitFunction == "ComplexPrePulse" || m_fitFunction == "GeneralPulse") {
+	m_initialPrePulseT0  = m_fitTMin + 5;
+	SampleCIter expMinIter = std::min_element(m_samplesSub.begin(), m_samplesSub.begin() + m_peak2ndDerivMinSample);
+	m_initialExpAmp = std::abs(*expMinIter - m_samplesSub[0]);
+	m_initialPrePulseAmp = 0.1;
+      }
+    }
+  
 
-  if (m_prePulse) {
-    // If we have a prepulse, find the smallest 2nd derivative
+    if (m_preExpTail) m_prePulse = true;
+    
+    
+    // -----------------------------------------------------
+    // Post pulse detection
     //
-    SampleCIter minPreDeriv2ndIter = std::min_element(m_samplesDeriv2nd.begin() + m_minSampleEvt,
-                                     m_samplesDeriv2nd.begin() + loopLimit + 1);
+    if (m_fitFunction == "GeneralPulse") {
+      
+      for (int isampl = m_minDeriv2ndIndex + 2; isampl < (int) m_samplesDeriv2nd.size(); isampl++) {
 
-    int minPreDeriv2ndIndex = std::distance(m_samplesDeriv2nd.cbegin(), minPreDeriv2ndIter);
-    float minPreDeriv2nd = *minPreDeriv2ndIter + 1e-3;
-
-    SampleCIter minSamplePreIter = std::min_element(m_samplesSub.begin() + std::max(m_minSampleEvt, minPreDeriv2ndIndex), m_samplesSub.begin() + m_peak2ndDerivMinSample - m_peak2ndDerivMinTolerance + 1);
-
-    float minSamplePre = *minSamplePreIter;
-    int minSamplePreIndex = std::distance(m_samplesSub.cbegin(), minSamplePreIter);
-
-    float avgSlopePre = (m_samplesSub[minSamplePreIndex] - m_samplesSub[m_minSampleEvt]) / (float(minSamplePreIndex - m_minSampleEvt + 1e-3) );
-
-    if (!m_preExpTail || !(expSlopeTest / minPreDeriv2nd > 0.25 || avgSlopePre / minPreDeriv2nd > 0.75)) {
-      m_initialPrePulseT0 = m_deltaTSample * (minPreDeriv2ndIndex + 1);
-
-      if (minPreDeriv2nd == m_samplesDeriv2nd[minPreDeriv2ndIndex + 1]) m_initialPrePulseT0 +=  m_deltaTSample;
-
-      m_initialPrePulseAmp = m_samplesSub[minPreDeriv2ndIndex + 1] - minSamplePre;
+	float deriv2ndTest = 0;
+	// The place to apply the cut on samples depends on whether we have found a minimum or a maximum
+	//   The +1 for the minimum accounts for the shift between 2nd derivative and the samples
+	//   if we find a maximum we cut one sample lower
+	//
+	if (m_samplesDeriv2nd[isampl] > 0 && std::abs(deriv2ndTest) > 1.5) {  // the start of the post pulse, +3 to get at least 3 points into the fit
+	  m_postPulse = true;
+	  m_maxSampleEvt = std::min(isampl + 1, m_maxSampleEvt);
+	  m_fitTMax = m_deltaTSample * (isampl + 3) + m_deltaTSample / 2;
+	  m_adjTimeRangeEvent = true;
+	  m_initialPostPulseT0 = m_deltaTSample * (isampl + 2);
+	  break;
+	}
+	else if (m_samplesDeriv2nd[isampl] < 0 && std::abs(deriv2ndTest) > 0.5) { // the middle of the post pulse, +2 to get at least 3 points into the fit
+	  m_postPulse = true;
+	  m_maxSampleEvt = std::min(isampl, m_maxSampleEvt);
+	  m_fitTMax = m_deltaTSample * (isampl + 2) + m_deltaTSample / 2;
+	  m_adjTimeRangeEvent = true;
+	  m_initialPostPulseT0 = m_deltaTSample * (isampl + 1);
+	  break;
+	}
+      }
+      
+      // Prevent the upper limit of fit range is set to be too low.
+      //
+      m_fitTMax = std::max((float) 105, m_fitTMax);
+      
+      // Then make sure it's below default TMax that was given at the beginning
+      //
+      m_fitTMax = std::min(m_defaultFitTMax, m_fitTMax);
+      
+      m_fitPostT0lo = m_fitTMax - 2 * m_deltaTSample;
+      if (m_fitPostT0lo <= m_deltaTSample * (m_minDeriv2ndIndex + 1)) m_fitPostT0lo = m_deltaTSample * (m_minDeriv2ndIndex + 1) + m_deltaTSample / 2;
+    }
+    else {
+      for (int isampl = m_minDeriv2ndIndex + 2; isampl < (int) m_samplesDeriv2nd.size(); isampl++) {
+	
+	// add small 1e-3 in division to avoid floating overflow
+	//
+	float deriv2ndTest = m_samplesDeriv2nd[isampl] / m_minDeriv2nd;
+	
+	// The place to apply the cut on samples depends on whether we have found a minimum or a maximum
+	//   The +1 for the minimum accounts for the shift between 2nd derivative and the samples
+	//   if we find a maximum we cut one sample lower
+	//
+	if (m_samplesDeriv2nd[isampl] > 0 && std::abs(deriv2ndTest) > 1.5) {
+	  m_postPulse = true;
+	  m_maxSampleEvt = std::min(isampl + 1, m_maxSampleEvt);
+	  m_adjTimeRangeEvent = true;
+	  break;
+	}
+	else if ((m_samplesDeriv2nd[isampl] < 0 && std::abs(deriv2ndTest) > 0.5)) {
+	  m_postPulse = true;
+	  m_maxSampleEvt = std::min(isampl, m_maxSampleEvt);
+	  m_adjTimeRangeEvent = true;
+	  break;
+	}
+      }
     }
   }
-
-  if (m_preExpTail) m_prePulse = true;
-
 
   // -----------------------------------------------------
-  // Post pulse detection
-  //
-  if (m_fitFunction == "GeneralPulse") {
 
-    for (int isampl = m_minDeriv2ndIndex + 2; isampl < (int) m_samplesDeriv2nd.size(); isampl++) {
-      // add small 1e-3 in division to avoid floating overflow
-      //
-      float deriv2ndTest = 2 * m_samplesDeriv2nd[isampl] / (m_samplesDeriv[isampl] + m_samplesDeriv[isampl + 1] + 1e-3);
-      // The place to apply the cut on samples depends on whether we have found a minimum or a maximum
-      //   The +1 for the minimum accounts for the shift between 2nd derivative and the samples
-      //   if we find a maximum we cut one sample lower
-      //
-      if (m_samplesDeriv2nd[isampl] > 0 && std::abs(deriv2ndTest) > 1.5) {  // the start of the post pulse, +3 to get at least 3 points into the fit
-        m_postPulse = true;
-        m_maxSampleEvt = std::min(isampl + 1, m_maxSampleEvt);
-        m_fitTMax = m_deltaTSample * (isampl + 3) + m_deltaTSample / 2;
-        m_adjTimeRangeEvent = true;
-        m_initialPostPulseT0 = m_deltaTSample * (isampl + 2);
-        break;
-      }
-      else if ((m_samplesDeriv2nd[isampl] < 0 && std::abs(deriv2ndTest) > 0.5)) { // the middle of the post pulse, +2 to get at least 3 points into the fit
-        m_postPulse = true;
-        m_maxSampleEvt = std::min(isampl, m_maxSampleEvt);
-        m_fitTMax = m_deltaTSample * (isampl + 2) + m_deltaTSample / 2;
-        m_adjTimeRangeEvent = true;
-        m_initialPostPulseT0 = m_deltaTSample * (isampl + 1);
-        break;
-      }
-    }
-
-    // Prevent the upper limit of fit range is set to be too low.
-    //
-    m_fitTMax = std::max((float) 105, m_fitTMax);
-
-    // Then make sure it's below default TMax that was given at the beginning
-    //
-    m_fitTMax = std::min(m_defaultFitTMax, m_fitTMax);
-
-    m_fitPostT0lo = m_fitTMax - 2 * m_deltaTSample;
-    if (m_fitPostT0lo <= m_deltaTSample * (m_minDeriv2ndIndex + 1)) m_fitPostT0lo = m_deltaTSample * (m_minDeriv2ndIndex + 1) + m_deltaTSample / 2;
-  }
-  else {
-    for (int isampl = m_minDeriv2ndIndex + 2; isampl < (int) m_samplesDeriv2nd.size(); isampl++) {
-
-      // add small 1e-3 in division to avoid floating overflow
-      //
-      float deriv2ndTest = 2 * m_samplesDeriv2nd[isampl] / (m_samplesDeriv[isampl] + m_samplesDeriv[isampl + 1] + 1e-3);
-
-      // The place to apply the cut on samples depends on whether we have found a minimum or a maximum
-      //   The +1 for the minimum accounts for the shift between 2nd derivative and the samples
-      //   if we find a maximum we cut one sample lower
-      //
-      if (m_samplesDeriv2nd[isampl] > 0 && std::abs(deriv2ndTest) > 1.5) {
-        m_postPulse = true;
-        m_maxSampleEvt = std::min(isampl + 1, m_maxSampleEvt);
-        m_adjTimeRangeEvent = true;
-        break;
-      }
-      else if ((m_samplesDeriv2nd[isampl] < 0 && std::abs(deriv2ndTest) > 0.5)) {
-        m_postPulse = true;
-        m_maxSampleEvt = std::min(isampl, m_maxSampleEvt);
-        m_adjTimeRangeEvent = true;
-        break;
-      }
-    }
-  }
-  // -----------------------------------------------------
-
-  FillHistogram(m_samplesSub, samplesSig);
+  FillHistogram(m_samplesSub, noiseSig);
 
   //  Stop now if we have no pulse or we've detected a failure
   //
@@ -1062,7 +1037,7 @@ bool ZDCPulseAnalyzer::AnalyzeData(size_t nSamples, size_t preSampleIdx,
 
     // Now check for valid chisq and valid time
     //
-    if (m_fitChisq / (m_fitAmplitude + 1.0e-6) > maxChisqDivAmp) m_badChisq = true;
+    if (m_fitChisq/m_fitNDoF > 2 && m_fitChisq / (m_fitAmplitude + 1.0e-6) > maxChisqDivAmp) m_badChisq = true;
     if (m_fitTimeCorr < minT0Corr || m_fitTimeCorr > maxT0Corr) m_badT0 = true;
   }
 
@@ -1102,23 +1077,68 @@ void ZDCPulseAnalyzer::DoFit()
 
   // Now perform the fit
   //
-  std::string options = s_fitOptions;
-  if (QuietFits()) options += "Q0";
+  std::string options = s_fitOptions + "N";
+  if (QuietFits()) {
+    options += "Q";
+  }
 
+  m_fitFailed = false;
+  //
+  //  Fit the data with the function provided by the fit wrapper
+  //
   TFitResultPtr result_ptr = m_fitHist->Fit(fitWrapper->GetWrapperTF1RawPtr(), options.c_str(), "", m_fitTMin, m_fitTMax);
 
   int fitStatus = result_ptr;
-  if (fitStatus != 0) {
-    TFitResultPtr try2Result_ptr = m_fitHist->Fit(fitWrapper->GetWrapperTF1RawPtr(), options.c_str(), "", m_fitTMin, m_fitTMax);
-    if ((int) try2Result_ptr != 0) m_fitFailed = true;
-  }
-  else m_fitFailed = false;
 
-  //  if (!m_fitFailed) {
+  //
+  // If the first fit failed, also check the EDM. If sufficiently small, the failure is almost surely due
+  //   to parameter limits and we just accept the result
+  //
+  if (fitStatus != 0 && result_ptr->Edm() > 0.001) {
+    //
+    // We contstrain the fit and try again
+    //
+    fitWrapper->ConstrainFit();
+
+    TFitResultPtr constrFitResult_ptr = m_fitHist->Fit(fitWrapper->GetWrapperTF1RawPtr(), options.c_str(), "", m_fitTMin, m_fitTMax);
+    if ((int) constrFitResult_ptr != 0) {
+      //
+      // Even the constrained fit failed, so we quit.
+      //
+      m_fitFailed = true;
+    }
+
+    // Now we release the constraint and re-fit
+    //
+    fitWrapper->UnconstrainFit();
+
+    TFitResultPtr unconstrFitResult_ptr = m_fitHist->Fit(fitWrapper->GetWrapperTF1RawPtr(), options.c_str(), "", m_fitTMin, m_fitTMax);
+    if ((int) unconstrFitResult_ptr != 0) {
+      //
+      // The unconstrained fit failed again, so we redo the constrained fit
+      //
+      fitWrapper->ConstrainFit();
+      
+      TFitResultPtr constrFit2Result_ptr = m_fitHist->Fit(fitWrapper->GetWrapperTF1RawPtr(), options.c_str(), "", m_fitTMin, m_fitTMax);
+      if ((int) constrFit2Result_ptr != 0) {
+      //
+      // Even the constrained fit failed the second time, so we quit.
+      //
+	m_fitFailed = true;
+      }
+
+      fitWrapper->UnconstrainFit();
+    }
+  }
+
+  if (!m_fitFailed && s_saveFitFunc) {
+    m_fitHist->GetListOfFunctions()->Clear();
+    m_fitHist->GetListOfFunctions()->Add(fitWrapper->GetWrapperTF1RawPtr());
+  }
+
   m_bkgdMaxFraction = fitWrapper->GetBkgdMaxFraction();
   if (std::abs(m_bkgdMaxFraction) > 0.25) {
-    std::string tempOptions = options + "e";
-    m_fitHist->Fit(fitWrapper->GetWrapperTF1RawPtr(), tempOptions.c_str(), "", m_fitTMin, m_fitTMax);
+    m_fitHist->Fit(fitWrapper->GetWrapperTF1RawPtr(), options.c_str(), "", m_fitTMin, m_fitTMax);
     m_bkgdMaxFraction = fitWrapper->GetBkgdMaxFraction();
   }
 
@@ -1127,6 +1147,7 @@ void ZDCPulseAnalyzer::DoFit()
 
   m_fitTimeSub = m_fitTime - t0Initial;
   m_fitChisq = result_ptr->Chi2();
+  m_fitNDoF = result_ptr->Ndf();
 
   m_fitTau1 = fitWrapper->GetTau1();
   m_fitTau2 = fitWrapper->GetTau2();
@@ -1355,6 +1376,7 @@ void ZDCPulseAnalyzer::DoFitCombined()
 
   m_fitTimeSub = m_fitTime - t0Initial;
   m_fitChisq = chi2;
+  m_fitNDoF = ndf;
 
   m_fitTau1 = fitWrapper->GetTau1();
   m_fitTau2 = fitWrapper->GetTau2();
@@ -1433,15 +1455,6 @@ void ZDCPulseAnalyzer::Dump() const
     message1 << ", [" << sample << "] = " << m_samplesSub[sample];
   }
   (*m_msgFunc_p)(ZDCMsg::Info, message1.str());
-
-
-  std::ostringstream message2;
-  message2 << "samplesDeriv ";
-  for (size_t sample = 0; sample < m_samplesDeriv.size(); sample++) {
-    message2 << ", [" << sample << "] = " << m_samplesDeriv[sample];
-  }
-  (*m_msgFunc_p)(ZDCMsg::Info, message2.str());
-
 
   std::ostringstream message3;
   message3 << "samplesDeriv2nd ";
@@ -1604,3 +1617,24 @@ std::shared_ptr<TGraphErrors> ZDCPulseAnalyzer::GetDelayedGraph() const {
 
   return theGraph;
 }
+
+std::vector<float> ZDCPulseAnalyzer::Calculate2ndDerivative(const std::vector <float>& inputData, unsigned int step)
+{
+  // Start with two zero entries for which we can't calculate the double-step derivative
+  //
+  std::vector<float> results(step, 0);
+  
+  unsigned int nSamples = inputData.size();
+
+  for (unsigned int sample = step; sample < nSamples - step; sample++) {
+    int deriv2nd = inputData[sample + step] + inputData[sample - step] - 2*inputData[sample];
+    results.push_back(deriv2nd);
+  }
+
+  for (unsigned int i = 0; i < step; i++) { 
+    results.push_back(0);
+  }
+
+  return results;
+}
+ 

@@ -30,7 +30,7 @@ class TrigEgammaMonitorPhotonAlgorithm: public TrigEgammaMonitorAnalysisAlgorith
 
 
     /*! navigation method called by executeNavigation */
-    StatusCode executeNavigation(const EventContext& ctx, const std::string& trigItem,float, const std::string& pidName,
+    StatusCode executeNavigation(const EventContext& ctx, const TrigInfo& info,
                                  std::vector<std::pair<std::shared_ptr<const xAOD::Egamma>, const TrigCompositeUtils::Decision*>> &) const;
   
     /*! List of triggers to study */

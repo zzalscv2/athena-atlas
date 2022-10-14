@@ -138,7 +138,7 @@ def Run3DecisionMakerCfg(flags):
     if flags.Trigger.DecisionMakerValidation.Execute:
         tdmv = CompFactory.TrigDec.TrigDecisionMakerValidator()
         tdmv.doL1 = flags.Trigger.L1.doCTP
-        tdmv.doHLT = True
+        tdmv.doHLT = flags.Trigger.DecodeHLT
         tdmv.samplingFrequency = 1
         tdmv.errorOnFailure = flags.Trigger.DecisionMakerValidation.ErrorMode
         tdmv.EDMVersion = flags.Trigger.EDMVersion
