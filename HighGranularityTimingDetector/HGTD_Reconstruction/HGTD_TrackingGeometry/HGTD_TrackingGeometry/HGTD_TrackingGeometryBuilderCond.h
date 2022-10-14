@@ -16,6 +16,7 @@
 // Trk
 #include "TrkDetDescrInterfaces/IGeometryBuilderCond.h"
 #include "TrkDetDescrUtils/GeometrySignature.h"
+#include "TrkGeometry/TrackingGeometry.h"
 
 // STL
 #include <vector>
@@ -25,7 +26,6 @@
 namespace Trk {
   class Material;
   class Layer;
-  class TrackingGeometry;
   class ITrackingVolumeCreator;
   class ILayerArrayCreator;
   class ILayerBuilderCond;

@@ -21,6 +21,7 @@
 #include "TrkDetDescrInterfaces/ILayerBuilderCond.h"
 #include "TrkDetDescrUtils/SharedObject.h"
 #include "TrkDetDescrUtils/BinnedArray.h"
+#include "TrkGeometry/TrackingGeometry.h"
 // STL
 #include <vector>
 
