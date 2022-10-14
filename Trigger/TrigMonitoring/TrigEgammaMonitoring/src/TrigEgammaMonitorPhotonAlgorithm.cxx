@@ -90,7 +90,7 @@ StatusCode TrigEgammaMonitorPhotonAlgorithm::fillHistograms( const EventContext&
           
         std::vector< std::pair<std::shared_ptr<const xAOD::Egamma>, const TrigCompositeUtils::Decision * >> pairObjs;
     
-        if ( executeNavigation( ctx, info.trigger,info.etthr,info.pidname,pairObjs).isFailure() ) 
+        if ( executeNavigation( ctx,info,pairObjs).isFailure() ) 
         {
             ATH_MSG_DEBUG("executeNavigation Fails");
             return StatusCode::SUCCESS;
@@ -118,7 +118,7 @@ StatusCode TrigEgammaMonitorPhotonAlgorithm::fillHistograms( const EventContext&
 
 
 
-StatusCode TrigEgammaMonitorPhotonAlgorithm::executeNavigation( const EventContext& ctx, const std::string& trigItem, float etthr, const std::string& pidName,  
+StatusCode TrigEgammaMonitorPhotonAlgorithm::executeNavigation( const EventContext& ctx, const TrigInfo& info,
                                                        std::vector<std::pair<std::shared_ptr<const xAOD::Egamma>, const TrigCompositeUtils::Decision * >> &pairObjs) 
   const
 {
@@ -131,9 +131,10 @@ StatusCode TrigEgammaMonitorPhotonAlgorithm::executeNavigation( const EventConte
     ATH_MSG_DEBUG("Failed to retrieve offline photons ");
 	  return StatusCode::FAILURE;
   }
- 
+  const std::string trigItem = info.trigger;
+  const float etthr = info.etthr;
+  const std::string pidName = info.pidname;
   const std::string decor="is"+pidName;
-
 
   for(const auto *const eg : *offPhotons ){
       const TrigCompositeUtils::Decision *dec=nullptr; 
@@ -142,20 +143,19 @@ StatusCode TrigEgammaMonitorPhotonAlgorithm::executeNavigation( const EventConte
           continue;
       } 
       if( !(getCluster_et(eg) > (etthr-5.)*Gaudi::Units::GeV)) continue; //Take 5 GeV below threshold
-      
-      if(!eg->passSelection(m_photonPid)) {
-        ATH_MSG_DEBUG("Fails PhotonID: " << m_photonPid);
-        continue; // reject offline photons reproved by tight requiriment
+      if(!info.etcut){
+        if(!eg->passSelection(m_photonPid)) {
+          ATH_MSG_DEBUG("Fails PhotonID: " << m_photonPid);
+          continue; // reject offline photons reproved by tight requiriment
+        }
       }
-      
       if(m_forcePidSelection){///default is true
         if(!ApplyPhotonPid(eg,pidName)){
-	        ATH_MSG_DEBUG("Fails PhotonID "<< pidName);
+	        ATH_MSG_DEBUG("Fails PhotonID: "<< pidName << " Trigger: " << trigItem);
 	        continue;
 	      }
 	      ATH_MSG_DEBUG("Passes PhotonID "<< pidName);
       }
-
       // default is false: if true, skip converted photons 
       if(m_doUnconverted){
           if (eg->vertex()){
@@ -168,6 +168,7 @@ StatusCode TrigEgammaMonitorPhotonAlgorithm::executeNavigation( const EventConte
       match()->match(ph.get(), trigItem, dec, TrigDefs::includeFailedDecisions);
       //match()->match(ph, trigItem, dec);
       pairObjs.emplace_back(ph, dec);
+      // }
 
   }
 

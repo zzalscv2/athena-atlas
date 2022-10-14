@@ -29,10 +29,6 @@ def treat_list_of_chains_by_name( list_of_chains, part_name=None):
     else:
         return list_of_chains
 
-#Force generation of all online monitoring histograms on HypoAlgs side 
-def doOnlineMonForceCfg():
-    doOnlineMonForce = False
-    return doOnlineMonForce
 
 
 class TrigEgammaMonAlgBuilder:
@@ -78,7 +74,6 @@ class TrigEgammaMonAlgBuilder:
     self.basePath = basePath
     self.detailedHistograms = detailedHistograms 
     self.configureMode()
-    self.doOnlineMonForceCfg()
     
 
 
@@ -122,11 +117,6 @@ class TrigEgammaMonAlgBuilder:
     self.setProperties()
     self.configureMonitor()
     self.configureHistograms()
-
-
-  def doOnlineMonForceCfg(self):
-    doOnlineMonForce = self.activate_onlineMonHypos
-    return doOnlineMonForce
 
 
   def get_monitoring_mode(self):
