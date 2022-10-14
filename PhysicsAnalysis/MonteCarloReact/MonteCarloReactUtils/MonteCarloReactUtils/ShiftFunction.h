@@ -10,11 +10,10 @@
 
 #include <vector>
 #include <string>
-#include <iostream>
+#include <iosfwd>
 
 #include <TF2.h>
-class TF1;
-class TF2;
+#include <TF1.h>
 class TH1F;
 class TAxis ;
 

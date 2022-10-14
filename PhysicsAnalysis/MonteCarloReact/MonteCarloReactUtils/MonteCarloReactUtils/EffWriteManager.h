@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2017 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef MONTECARLOREACT_EFFWRITEMANAGER_H
@@ -7,6 +7,8 @@
 
 #include "MonteCarloReactUtils/EffExceptions.h"
 #include "MonteCarloReactUtils/Efficiency.h"
+#include <string>
+#include <vector>
 
 namespace MonteCarloReact {
 

@@ -53,7 +53,7 @@ bool ResTool::makeResolutionObj(const ResInfo& request, const std::string& path)
   // Create a file_name from params
   string FileName = request.makeFileName();
   vector<string>::const_iterator it = files.begin()  ;
-  for (; it != files.end(); it++) {
+  for (; it != files.end(); ++it) {
     if(it->size() >= FileName.size() && it->substr(it->size()-FileName.size()) == FileName) break ;
   }
   if (it == files.end()) 
@@ -147,7 +147,7 @@ bool ResTool::makeResolutionObj(const ResInfo& request, const std::vector<std::s
   string FileName = request.makeFileName();
   
   vector<string>::const_iterator it = files.begin()  ;
-  for (; it != files.end(); it++) {
+  for (; it != files.end(); ++it) {
     if(it->size() >= FileName.size() && it->substr(it->size()-FileName.size()) == FileName) break ;
   }
   if (it == files.end()) 

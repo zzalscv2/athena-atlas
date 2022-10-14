@@ -3,10 +3,7 @@
 */
 
 #include "MonteCarloReactUtils/EffInfo.h"
-#include <iostream>
 #include <sstream>
-#include <map>
-#include <vector>
 #include <algorithm>
 
 
@@ -434,7 +431,7 @@ bool EffInfo::contains (const EffInfo& info) const {
   bool trigger_processed = false ;
 
   for ( map<string,vector<string> >::const_iterator it = m_map.begin() ;
-	it != m_map.end(); it++) {
+	it != m_map.end(); ++it) {
     if (it->first == "Comments" || it->first == "ATLASNoteID") continue ;
     map<string,vector<string> >::const_iterator jt ;
 
@@ -486,7 +483,7 @@ bool EffInfo::contains (const EffInfo& info) const {
     if ((jt = info.m_map.find(it->first)) == info.m_map.end()) return false ; 
     if (jt->second.size() < it->second.size()) return false ;
     for (vector<string>::const_iterator vt = it->second.begin();
-	 vt != it->second.end(); vt++) 
+	 vt != it->second.end(); ++vt) 
       if (find (jt->second.begin(), jt->second.end(), *vt) == jt->second.end()) return false ;    
   }
   return true ;

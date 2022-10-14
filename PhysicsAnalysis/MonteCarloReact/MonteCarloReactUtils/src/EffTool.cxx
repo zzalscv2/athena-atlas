@@ -66,7 +66,7 @@ bool EffTool::makeEfficiencyObj(const EffInfo& request, const std::string& path)
   // Create a file_name from params
   string FileName = request.makeFileName();
   vector<string>::const_iterator it = files.begin()  ;
-  for (; it != files.end(); it++) 
+  for (; it != files.end(); ++it) 
     if(it->size() >= FileName.size() && it->substr(it->size()-FileName.size()) == FileName) break ;
   
   if (it == files.end()) 
@@ -140,13 +140,13 @@ bool EffTool::makeEfficiencyObj(const EffInfo& request, const std::vector<std::s
   vector<string> files ;
   typedef vector<string>::size_type size_t;
 
-  for(size_t p = 0; p < path.size(); p++) {
+  for(size_t p = 0; p < path.size(); ++p) {
     addFilesToList(path[p].c_str(), files) ;    
   }
   
   if (files.size() == 0) {
     cerr << "MonteCarloReactUtils::EffObj ERROR: Directory ";
-    for(size_t p = 0; p < path.size(); p++) {
+    for(size_t p = 0; p < path.size(); ++p) {
       cerr << path[p] << " ";
     }
     cerr <<  "does not contain any mcr file!" 
@@ -156,7 +156,7 @@ bool EffTool::makeEfficiencyObj(const EffInfo& request, const std::vector<std::s
   // Create a file_name from params
   string FileName = request.makeFileName();
   vector<string>::const_iterator it = files.begin()  ;
-  for (; it != files.end(); it++) 
+  for (; it != files.end(); ++it) 
     if(it->size() >= FileName.size() && it->substr(it->size()-FileName.size()) == FileName) break ;
   
   if (it == files.end()) 

@@ -15,6 +15,7 @@
 #include <cstdlib>
 #include <sstream>
 #include <vector>
+#include <iostream>
 
 using namespace MonteCarloReact;
 using namespace std;
@@ -169,7 +170,7 @@ int BinnedEfficiency::getNbins(int n) const {
 
   int nbins = 1 ; 
   for (vector<vector<float> >::const_iterator it = m_axisEdges.begin(); 
-       it != m_axisEdges.end(); it++) nbins *= it->size() - 1 ;
+       it != m_axisEdges.end(); ++it) nbins *= it->size() - 1 ;
   return nbins ;  
 }
 
@@ -354,20 +355,20 @@ TH1F* BinnedEfficiency::getProjection(int axis_number)  const {
 
   vector<EffVal> effval ;
   effval.resize(nx) ;
-  for (vector< EffVal >::const_iterator it =  m_eff.begin(); it != m_eff.end(); it++) {
+  for (vector< EffVal >::const_iterator it =  m_eff.begin(); it != m_eff.end(); ++it) {
     // find bin number for requested axis
     int x = -1 ;
     int index = it - m_eff.begin() ;
     for (vector<vector<float> >::const_iterator jt =  m_axisEdges.begin();
-	 jt != m_axisEdges.end() ; jt++) {          
+	 jt != m_axisEdges.end() ; ++jt) {          
       int n = 1 ;
-      for (vector<vector<float> >::const_iterator nt = jt+1 ; nt != m_axisEdges.end() ; nt++) 
+      for (vector<vector<float> >::const_iterator nt = jt+1 ; nt != m_axisEdges.end() ; ++nt) 
 	n *= nt->size() - 1 ; 
       x =  index/n  ;
       index = index%n ;
       if (jt - m_axisEdges.begin() == axis_number) break ;
     }
-    effval.at(x) += *it ; 
+    if (x>-1) effval.at(x) += *it ; 
   }
   
   for (int j = 0; j < nx; j++) {
@@ -553,16 +554,16 @@ void BinnedEfficiency::stream( ostream & os) const
 {
   // first do bin edges
   for (vector<vector<float> >::const_iterator it =  m_axisEdges.begin();
-       it != m_axisEdges.end() ; it++) {
+       it != m_axisEdges.end() ; ++it) {
     os << "BinEdges" << it - m_axisEdges.begin() +1 << " : " ;
-    for (vector<float>::const_iterator jt = it->begin(); jt != it->end() ; jt++) 
+    for (vector<float>::const_iterator jt = it->begin(); jt != it->end() ; ++jt) 
       os << *jt << " " ;
     os << endl;
   }
 
   // now do data itself
   for(vector< EffVal >::const_iterator it = m_eff.begin(); 
-      it != m_eff.end() ; it++) {
+      it != m_eff.end() ; ++it) {
     // ignore bins with null information
     //if (it->getValue() == 0 && it->getErrorLow() == 0 && it->getErrorHigh() == 0) continue ;
 
@@ -570,9 +571,9 @@ void BinnedEfficiency::stream( ostream & os) const
     os << "BinVal : " ;
     int index = it - m_eff.begin() ;
     for (vector<vector<float> >::const_iterator jt =  m_axisEdges.begin();
-	 jt != m_axisEdges.end() ; jt++) {          
+	 jt != m_axisEdges.end() ; ++jt) {          
       int n = 1 ;
-      for (vector<vector<float> >::const_iterator nt = jt+1 ; nt != m_axisEdges.end() ; nt++) 
+      for (vector<vector<float> >::const_iterator nt = jt+1 ; nt != m_axisEdges.end() ; ++nt) 
 	n *= nt->size() - 1 ; 
       int x =  index/n  ;
       index = index%n ;

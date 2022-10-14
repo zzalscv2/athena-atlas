@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2017 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "MonteCarloReactUtils/EffWriteManager.h"
@@ -30,7 +30,7 @@ bool EffWriteManager::save(const Efficiency& eff) {
   }
 
   vector<string>::const_iterator it = files.begin()  ;
-  for (; it != files.end(); it++) 
+  for (; it != files.end(); ++it) 
     if(it->find(FileName) != string::npos) break ;
   
   if (it == files.end()) {
