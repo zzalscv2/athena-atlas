@@ -168,7 +168,7 @@ bool ISF::GenParticleSimWhiteList::pass(HepMC::ConstGenParticlePtr particle , st
     ATH_MSG_ERROR( "are using, or a bug in the generator.  Either way it should be fixed.  The");
     ATH_MSG_ERROR( "particle will come next, and then we will throw.");
     ATH_MSG_ERROR( particle );
-    throw; 
+    throw std::runtime_error("GenParticleSimWhiteList: Particle with no end vertex and not in whitelist"); 
   }
 
   return passFilter;
@@ -211,7 +211,7 @@ bool ISF::GenParticleSimWhiteList::pass(const HepMC::GenParticle& particle , std
     ATH_MSG_ERROR( "are using, or a bug in the generator.  Either way it should be fixed.  The");
     ATH_MSG_ERROR( "particle will come next, and then we will throw.");
     ATH_MSG_ERROR( particle );
-    throw; 
+    throw std::runtime_error("GenParticleSimWhiteList: Particle with no end vertex and not in whitelist");  
   }
 
   return passFilter;
