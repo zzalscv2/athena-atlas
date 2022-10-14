@@ -453,10 +453,11 @@ namespace Analysis
             probi.push_back((1.-effc));
           }
         }
-
-        BTag.setVariable<float>(m_xAODBaseName, "pb", probi[0]);
-        BTag.setVariable<float>(m_xAODBaseName, "pu", probi[1]);
-        if (m_useCHypo) BTag.setVariable<float>(m_xAODBaseName, "pc", probi[2]);
+        if (probi.size()>=2){
+          BTag.setVariable<float>(m_xAODBaseName, "pb", probi[0]);
+          BTag.setVariable<float>(m_xAODBaseName, "pu", probi[1]);
+        }
+        if (m_useCHypo and (probi.size()>=3)) BTag.setVariable<float>(m_xAODBaseName, "pc", probi[2]);
 
       } // end analysis mode
 
