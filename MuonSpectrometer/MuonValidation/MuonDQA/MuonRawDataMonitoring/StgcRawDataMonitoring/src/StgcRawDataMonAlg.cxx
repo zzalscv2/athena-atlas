@@ -20,184 +20,201 @@
 // ********************************************************************* 
 /////////////////////////////////////////////////////////////////////////////
 
-sTgcRawDataMonAlg::sTgcRawDataMonAlg( const std::string& name, ISvcLocator* pSvcLocator ) : AthMonitorAlgorithm(name,pSvcLocator)	      
-{
+sTgcRawDataMonAlg::sTgcRawDataMonAlg(const std::string& name, ISvcLocator* pSvcLocator) : AthMonitorAlgorithm(name, pSvcLocator) {
   //Declare the property 
 }
 
-
-StatusCode sTgcRawDataMonAlg::initialize()
-{   
+StatusCode sTgcRawDataMonAlg::initialize() {   
   ATH_CHECK(AthMonitorAlgorithm::initialize());
   ATH_CHECK(m_idHelperSvc.retrieve());
   ATH_CHECK(m_sTgcContainerKey.initialize());
-
-  ATH_MSG_INFO("sTGCRawDataMonAlg Successfuly initialized");
+  ATH_CHECK(m_detectorManagerKey.initialize());
   
   return StatusCode::SUCCESS;
 } 
 
-StatusCode sTgcRawDataMonAlg::fillHistograms(const EventContext& ctx) const
-{  
-  SG::ReadHandle<Muon::sTgcPrepDataContainer> sTgc_container(m_sTgcContainerKey, ctx);
-  ATH_CHECK(sTgc_container.isValid());
-
-  if (m_dosTgcESD && m_dosTgcOverview)  
-    {
-      for(const Muon::sTgcPrepDataCollection* coll : *sTgc_container)
-	{	  
-	  for (const Muon::sTgcPrepData* prd : *coll)
-	    {
-	      fillsTgcOverviewHistograms(prd, *coll);
-	      fillsTgcSummaryHistograms(prd);
-	    }
-	}
+StatusCode sTgcRawDataMonAlg::fillHistograms(const EventContext& ctx) const {  
+  SG::ReadHandle<Muon::sTgcPrepDataContainer> sTgcContainer(m_sTgcContainerKey, ctx);
+  SG::ReadCondHandle<MuonGM::MuonDetectorManager> detectorManagerKey(m_detectorManagerKey, ctx);
+  
+  if (m_dosTgcESD && m_dosTgcOverview) {
+    for(const Muon::sTgcPrepDataCollection* coll : *sTgcContainer) {
+      for (const Muon::sTgcPrepData* prd : *coll) {
+	fillsTgcOverviewHistograms(prd, *coll);
+	fillsTgcSummaryHistograms(prd, detectorManagerKey.cptr());
+      }
     }
-     
+  }
+  
   return StatusCode::SUCCESS;
 }
 
-void sTgcRawDataMonAlg::fillsTgcOverviewHistograms(const Muon::sTgcPrepData *sTgc_object, const Muon::MuonPrepDataCollection<Muon::sTgcPrepData> &prd) const 
-{   
-  auto charge_all = Monitored::Collection("charge_all", prd, [] (const Muon::sTgcPrepData *aux) 
-					  {
-					    return aux -> charge();
-					  });
+void sTgcRawDataMonAlg::fillsTgcOverviewHistograms(const Muon::sTgcPrepData *sTgcObject, const Muon::MuonPrepDataCollection<Muon::sTgcPrepData> &prd) const {   
+  auto chargeMon = Monitored::Collection("charge", prd, [] (const Muon::sTgcPrepData *aux) 
+					 {
+					   return aux -> charge();
+					 });
   
-  auto numberofstrips_percluster = Monitored::Collection("numberofstrips_percluster", prd, [] (const Muon::sTgcPrepData *aux) 
-							 {
-							   const std::vector<Identifier> &stripIds = aux -> rdoList(); 
-							   return stripIds.size();
-							 });
+  auto numberOfStripsPerClusterMon = Monitored::Collection("numberOfStripsPerCluster", prd, [] (const Muon::sTgcPrepData *aux) 
+							   {
+							     const std::vector<Identifier> &stripIds = aux -> rdoList(); 
+							     return stripIds.size();
+							   });
   
-  fill("sTgcMonitor", charge_all, numberofstrips_percluster);
-  
-  std::vector<short int> strip_times_target = sTgc_object-> stripTimes();
-  std::vector<int> strip_charges_target = sTgc_object-> stripCharges();
-  std::vector<short unsigned int> strip_number_target = sTgc_object-> stripNumbers();
+  auto timeMon = Monitored::Collection("time", prd, [] (const Muon::sTgcPrepData *aux) 
+				       {
+					 return aux -> time();
+				       });
 
-  auto time_all = Monitored::Collection("time_all", prd, [] (const Muon::sTgcPrepData *aux) 
-					{
-					  return aux -> time();
-					});
-      
-  auto strip_times = Monitored::Collection("strip_times", strip_times_target);
-  auto strip_charges = Monitored::Collection("strip_charges", strip_charges_target);
-  auto strip_number = Monitored::Collection("strip_number", strip_number_target);
-
-  fill("sTgcMonitor", time_all, strip_times, strip_charges, strip_number);
-
-  auto x_mon = Monitored::Collection("x_mon", prd, [] (const Muon::sTgcPrepData *aux) 
-				     {
-				       Amg::Vector3D pos = aux -> globalPosition(); 
-				       return pos.x();
-				     });
+  fill("sTgcOverview", chargeMon, numberOfStripsPerClusterMon, timeMon);
   
-  auto y_mon = Monitored::Collection("y_mon", prd, [] (const Muon::sTgcPrepData *aux) 
-				     {
-				       Amg::Vector3D pos = aux -> globalPosition(); 
-				       return pos.y();
-				     });
-  
-  auto z_mon = Monitored::Collection("z_mon", prd, [] (const Muon::sTgcPrepData *aux) 
-				     {
-				       Amg::Vector3D pos = aux -> globalPosition(); 
-				       return pos.z();
-				     });
-  
-  auto R_mon = Monitored::Collection("R_mon", prd, [] (const Muon::sTgcPrepData *aux) 
-				     {
-				       Amg::Vector3D pos = aux -> globalPosition(); 
-				       return std::hypot(pos.x(), pos.y());
-				     });
+  std::vector<short int> stripTimesVec           = sTgcObject -> stripTimes();
+  std::vector<int> stripChargesVec               = sTgcObject -> stripCharges();
+  std::vector<short unsigned int> stripNumberVec = sTgcObject -> stripNumbers();
 
-  fill("sTgcMonitor", x_mon, y_mon, z_mon, R_mon);
+  auto stripTimesMon   = Monitored::Collection("stripTimes", stripTimesVec);
+  auto stripChargesMon = Monitored::Collection("stripCharges", stripChargesVec);
+  auto stripNumbersMon = Monitored::Collection("stripNumbers", stripNumberVec);
+
+  fill("sTgcOverview", stripTimesMon, stripChargesMon, stripNumbersMon);
+
+  auto xMon = Monitored::Collection("x", prd, [] (const Muon::sTgcPrepData *aux) 
+				    {
+				      Amg::Vector3D pos = aux -> globalPosition(); 
+				      return pos.x();
+				    });
+  
+  auto yMon = Monitored::Collection("y", prd, [] (const Muon::sTgcPrepData *aux) 
+				    {
+				      Amg::Vector3D pos = aux -> globalPosition(); 
+				      return pos.y();
+				    });
+  
+  auto zMon = Monitored::Collection("z", prd, [] (const Muon::sTgcPrepData *aux) 
+				    {
+				      Amg::Vector3D pos = aux -> globalPosition(); 
+				      return pos.z();
+				    });
+  
+  auto rMon = Monitored::Collection("r", prd, [] (const Muon::sTgcPrepData *aux) 
+				    {
+				      Amg::Vector3D pos = aux -> globalPosition(); 
+				      return std::hypot(pos.x(), pos.y());
+				    });
+
+  fill("sTgcOverview", xMon, yMon, zMon, rMon);
 }
 
-void sTgcRawDataMonAlg::fillsTgcSummaryHistograms(const Muon::sTgcPrepData *sTgc_object) const
-{
-  Identifier Id    = sTgc_object   -> identify();
-  if(!Id.is_valid()) {
+void sTgcRawDataMonAlg::fillsTgcSummaryHistograms(const Muon::sTgcPrepData *sTgcObject, const MuonGM::MuonDetectorManager *muonDetectorManagerObject) const {
+  Identifier id    = sTgcObject -> identify();
+
+  if(!id.is_valid()) {
     ATH_MSG_DEBUG("Invalid identifier found in Muon::sTgcPrepData");
     return;
   }
 
-  int stationPhi   = m_idHelperSvc -> stgcIdHelper().stationPhi(Id);
-  int stationEta   = m_idHelperSvc -> stgcIdHelper().stationEta(Id);
-  int iside        = (stationEta > 0) ? 1 : 0;
-  int multiplet    = m_idHelperSvc -> stgcIdHelper().multilayer(Id);
-  int gasgap       = m_idHelperSvc -> stgcIdHelper().gasGap(Id);  
+  std::string stationName = m_idHelperSvc -> stgcIdHelper().stationNameString(m_idHelperSvc -> stgcIdHelper().stationName(id));
+  int stationEta          = m_idHelperSvc -> stgcIdHelper().stationEta(id);
+  int stationPhi          = m_idHelperSvc -> stgcIdHelper().stationPhi(id);
+  int iside               = (stationEta > 0) ? 1 : 0;
+  std::string side        = GeometricSectors::sTgc_Side[iside];
+  int multiplet           = m_idHelperSvc -> stgcIdHelper().multilayer(id);
+  int gasGap              = m_idHelperSvc -> stgcIdHelper().gasGap(id);    
+  int channelType         = m_idHelperSvc -> stgcIdHelper().channelType(id);
+  int sector              = m_idHelperSvc -> sector(id);
+  int sectorsTotal        = getSectors(id);
+  int stationEtaShifted   = (stationEta   < 0) ? stationEta   - 1: stationEta;
+  int sectorsTotalShifted = (sectorsTotal < 0) ? sectorsTotal - 1: sectorsTotal; 
 
-  int channel_type = m_idHelperSvc -> stgcIdHelper().channelType(Id);
-
-  std::string stationName = m_idHelperSvc -> stgcIdHelper().stationNameString(m_idHelperSvc -> stgcIdHelper().stationName(Id));
-  int stationPhiComplete = get_sectorPhi_from_stationPhi_stName(stationPhi, stationName);
- 
-  std::vector<int> strip_charges_vec = sTgc_object -> stripCharges();  
-  std::vector<short unsigned int> strip_numbers_perPhi_vec = sTgc_object -> stripNumbers();
-
-  std::vector<int> charge, stationPhi_vec, stationEta_vec;
-  charge.push_back(sTgc_object->charge());
-  stationPhi_vec.push_back(stationPhi);
-  stationEta_vec.push_back(stationEta);
-
-  std::string monGroupName = "sTgc_sideGroup" + GeometricSectors::sTgc_Side[iside];
-  std::string baseName = "_" + GeometricSectors::sTgc_Side[iside] + "_multiplet_" + std::to_string(multiplet) + "_gasgap_" + std::to_string(gasgap);
-  std::string sPhiName = "_stationPhi_" + std::to_string(stationPhiComplete);
-
-  std::string varName  = "";
-  
-  if (channel_type == 0)
-    {
-
-      varName = "pad_charge"+baseName;
-      auto charge_perLayer = Monitored::Collection(varName, charge);
-
-      varName = "pad_phi"+baseName;
-      auto stationPhi = Monitored::Collection(varName, stationPhi_vec);
-
-      varName = "pad_eta"+baseName;
-      auto stationEta = Monitored::Collection(varName, stationEta_vec);
-
-      fill(monGroupName, charge_perLayer, stationPhi, stationEta);    
+  if (channelType == sTgcIdHelper::sTgcChannelTypes::Pad) {
+    int padNumber = m_idHelperSvc -> stgcIdHelper().channel(id);       
+    Identifier idPadQ1 = m_idHelperSvc -> stgcIdHelper().channelID(stationName, 1, stationPhi, multiplet, gasGap, channelType, 1);    
+    Identifier idPadQ2 = m_idHelperSvc -> stgcIdHelper().channelID(stationName, 2, stationPhi, multiplet, gasGap, channelType, 1);
+    const MuonGM::sTgcReadoutElement *sTgcReadoutObjectPadQ1 = muonDetectorManagerObject -> getsTgcReadoutElement(idPadQ1);
+    const MuonGM::sTgcReadoutElement *sTgcReadoutObjectPadQ2 = muonDetectorManagerObject -> getsTgcReadoutElement(idPadQ2);
+    int maxPadNumberQ1 = sTgcReadoutObjectPadQ1 -> maxPadNumber(idPadQ1);
+    int maxPadNumberQ2 = sTgcReadoutObjectPadQ2 -> maxPadNumber(idPadQ2);    
+    auto padHit        = 1;
+            
+    if (std::abs(stationEta) == 1) {
+      auto sectorMon    = Monitored::Scalar<int>("sector_multiplet_" + std::to_string(multiplet) + "_gasgap_" + std::to_string(gasGap), sectorsTotalShifted);
+      auto padNumberMon = Monitored::Scalar<int>("padNumber_multiplet_" + std::to_string(multiplet) + "_gasgap_" + std::to_string(gasGap), padNumber);
+      auto padHitMon    = Monitored::Scalar<int>("padHit_multiplet_" + std::to_string(multiplet) + "_gasgap_" + std::to_string(gasGap), (int) padHit);
+      fill("sTgcOccupancy", sectorMon, padNumberMon, padHitMon);
     }
   
-  else if (channel_type == 1)
-    {      
-
-      varName = "strip_charge"+baseName;
-      auto charge_perLayer = Monitored::Collection(varName, charge);
-
-      varName = "strip_phi"+baseName; 
-      auto stationPhi = Monitored::Collection(varName, stationPhi_vec);
-
-      varName = "strip_eta"+baseName;
-      auto stationEta = Monitored::Collection(varName, stationEta_vec);
-      
-      varName = "strip_eta"+baseName+sPhiName;
-      auto stationEta_perPhi = Monitored::Collection(varName, stationEta_vec);
-
-      varName = "strip_number"+baseName+sPhiName;
-      auto stripNumber_perLayer_perPhi = Monitored::Collection(varName, strip_numbers_perPhi_vec);
-
-      varName = "strip_charge"+baseName+sPhiName;
-      auto charge_perLayer_perPhi = Monitored::Collection(varName, strip_charges_vec);
-
-      fill(monGroupName, charge_perLayer, stationPhi, stationEta, stationEta_perPhi, stripNumber_perLayer_perPhi, charge_perLayer_perPhi);    
+    else if (std::abs(stationEta) == 2) {
+      auto sectorMon    = Monitored::Scalar<int>("sector_multiplet_" + std::to_string(multiplet) + "_gasgap_" + std::to_string(gasGap), sectorsTotalShifted);
+      auto padNumberMon = Monitored::Scalar<int>("padNumber_multiplet_" + std::to_string(multiplet) + "_gasgap_" + std::to_string(gasGap), padNumber + maxPadNumberQ1);
+      auto padHitMon    = Monitored::Scalar<int>("padHit_multiplet_" + std::to_string(multiplet) + "_gasgap_" + std::to_string(gasGap), (int) padHit);
+      fill("sTgcOccupancy", sectorMon, padNumberMon, padHitMon);
     }
+   
+    else {
+      auto sectorMon    = Monitored::Scalar<int>("sector_multiplet_" + std::to_string(multiplet) + "_gasgap_" + std::to_string(gasGap), sectorsTotalShifted);
+      auto padNumberMon = Monitored::Scalar<int>("padNumber_multiplet_" + std::to_string(multiplet) + "_gasgap_" + std::to_string(gasGap), padNumber + maxPadNumberQ1 + maxPadNumberQ2);
+      auto padHitMon    = Monitored::Scalar<int>("padHit_multiplet_" + std::to_string(multiplet) + "_gasgap_" + std::to_string(gasGap), (int) padHit);
+      fill("sTgcOccupancy", sectorMon, padNumberMon, padHitMon);
+    }
+    
+    auto sectorSidedMon       = Monitored::Scalar<int>("sector_multiplet_"  + std::to_string(multiplet) + "_gasgap_" + std::to_string(gasGap), sector);
+    auto stationEtaSidedMon   = Monitored::Scalar<int>("stationEta_multiplet_" + std::to_string(multiplet) + "_gasgap_" + std::to_string(gasGap), stationEtaShifted);
+    auto padHitLayersSidedMon = Monitored::Scalar<int>("padHitLayers_multiplet_"  + std::to_string(multiplet) + "_gasgap_" + std::to_string(gasGap), (int) padHit);
+    fill("sTgcLayers", sectorSidedMon, stationEtaSidedMon, padHitLayersSidedMon);
+  }
   
-  else if (channel_type == 2)
-    {
-      varName = "wire_charge"+baseName;
-      auto charge_perLayer = Monitored::Collection(varName, charge);
-
-      varName = "wire_phi"+baseName;
-      auto stationPhi = Monitored::Collection(varName, stationPhi_vec);
-
-      varName = "wire_eta"+baseName;
-      auto stationEta = Monitored::Collection(varName, stationEta_vec);
-
-      fill(monGroupName, charge_perLayer, stationPhi, stationEta);    
+  else if (channelType == sTgcIdHelper::sTgcChannelTypes::Strip) {
+    int stripNumber      = m_idHelperSvc -> stgcIdHelper().channel(id);
+    Identifier idStripQ1 = m_idHelperSvc -> stgcIdHelper().channelID(stationName, 1, stationPhi, multiplet, gasGap, channelType, 1);    
+    Identifier idStripQ2 = m_idHelperSvc -> stgcIdHelper().channelID(stationName, 2, stationPhi, multiplet, gasGap, channelType, 1);
+    const MuonGM::sTgcReadoutElement *sTgcReadoutObjectStripQ1 = muonDetectorManagerObject -> getsTgcReadoutElement(idStripQ1);
+    const MuonGM::sTgcReadoutElement *sTgcReadoutObjectStripQ2 = muonDetectorManagerObject -> getsTgcReadoutElement(idStripQ2);    
+    int maxStripNumberQ1 = sTgcReadoutObjectStripQ1 -> numberOfStrips(idStripQ1);
+    int maxStripNumberQ2 = sTgcReadoutObjectStripQ2 -> numberOfStrips(idStripQ2);
+    auto stripHit        = 1;
+            
+    if (std::abs(stationEta) == 1) {
+      auto sectorMon      = Monitored::Scalar<int>("sector_multiplet_" + std::to_string(multiplet) + "_gasgap_" + std::to_string(gasGap), sectorsTotalShifted);
+      auto stripNumberMon = Monitored::Scalar<int>("stripNumber_multiplet_" + std::to_string(multiplet) + "_gasgap_" + std::to_string(gasGap), stripNumber);
+      auto stripHitMon    = Monitored::Scalar<int>("stripHit_multiplet_" + std::to_string(multiplet) + "_gasgap_" + std::to_string(gasGap), (int) stripHit);
+      fill("sTgcOccupancy", sectorMon, stripNumberMon, stripHitMon);
     }
+    
+    else if (std::abs(stationEta) == 2) {
+      auto sectorMon      = Monitored::Scalar<int>("sector_multiplet_" + std::to_string(multiplet) + "_gasgap_" + std::to_string(gasGap), sectorsTotalShifted);
+      auto stripNumberMon = Monitored::Scalar<int>("stripNumber_multiplet_" + std::to_string(multiplet) + "_gasgap_" + std::to_string(gasGap), stripNumber + maxStripNumberQ1 + 1);
+      auto stripHitMon    = Monitored::Scalar<int>("stripHit_multiplet_" + std::to_string(multiplet) + "_gasgap_" + std::to_string(gasGap), (int) stripHit);
+      fill("sTgcOccupancy", sectorMon, stripNumberMon, stripHitMon);
+    }
+    
+    else {
+      auto sectorMon      = Monitored::Scalar<int>("sector_multiplet_" + std::to_string(multiplet) + "_gasgap_" + std::to_string(gasGap), sectorsTotalShifted);
+      auto stripNumberMon = Monitored::Scalar<int>("stripNumber_multiplet_" + std::to_string(multiplet) + "_gasgap_" + std::to_string(gasGap), stripNumber + maxStripNumberQ1 + maxStripNumberQ2 + 1);
+      auto stripHitMon    = Monitored::Scalar<int>("stripHit_multiplet_" + std::to_string(multiplet) + "_gasgap_" + std::to_string(gasGap), (int) stripHit);
+      fill("sTgcOccupancy", sectorMon, stripNumberMon, stripHitMon);
+    }
+    
+    auto sectorSidedMon         = Monitored::Scalar<int>("sector_multiplet_" + std::to_string(multiplet) + "_gasgap_" + std::to_string(gasGap), sector);
+    auto stationEtaSidedMon     = Monitored::Scalar<int>("stationEta_multiplet_" + std::to_string(multiplet) + "_gasgap_" + std::to_string(gasGap), stationEtaShifted); 
+    auto stripHitLayersSidedMon = Monitored::Scalar<int>("stripHitLayers_multiplet_" + std::to_string(multiplet) + "_gasgap_" + std::to_string(gasGap), (int) stripHit);
+    fill("sTgcLayers", sectorSidedMon, stationEtaSidedMon, stripHitLayersSidedMon);
+  }
+  
+  else if (channelType == sTgcIdHelper::sTgcChannelTypes::Wire) {
+    int wireGroupNumber      = m_idHelperSvc -> stgcIdHelper().channel(id);
+    Identifier idWireGroupQ3 = m_idHelperSvc -> stgcIdHelper().channelID("STL", 3, stationPhi, 1, 3, channelType, 1);
+    const MuonGM::sTgcReadoutElement *sTgcReadoutObjectWireGroupQ3 = muonDetectorManagerObject -> getsTgcReadoutElement(idWireGroupQ3);
+    int maxWireGroupNumberQ3 = sTgcReadoutObjectWireGroupQ3 -> numberOfStrips(idWireGroupQ3);
+    auto wireGroupHit        = 1;
+    
+    auto stationEtaMon      = Monitored::Scalar<int>("stationEta_multiplet_" + std::to_string(multiplet) + "_gasgap_" + std::to_string(gasGap), stationEtaShifted);
+    auto wireGroupNumberMon = Monitored::Scalar<int>("wireGroupNumber_multiplet_" + std::to_string(multiplet) + "_gasgap_" + std::to_string(gasGap), wireGroupNumber + (sector - 1)*maxWireGroupNumberQ3); 
+    auto wireGroupHitMon    = Monitored::Scalar<int>("wireGroupHit_multiplet_" + std::to_string(multiplet) + "_gasgap_" + std::to_string(gasGap), (int) wireGroupHit);
+    fill("sTgcLayers", stationEtaMon, wireGroupNumberMon, wireGroupHitMon);
+
+    auto sectorSidedMon             = Monitored::Scalar<int>("sector_multiplet_" + std::to_string(multiplet) + "_gasgap_" + std::to_string(gasGap), sector);
+    auto stationEtaSidedMon         = Monitored::Scalar<int>("stationEta_multiplet_" + std::to_string(multiplet) + "_gasgap_" + std::to_string(gasGap), stationEtaShifted); 
+    auto wireGroupHitLayersSidedMon = Monitored::Scalar<int>("wireGroupHitLayers_multiplet_" + std::to_string(multiplet) + "_gasgap_" + std::to_string(gasGap), (int) wireGroupHit);
+    fill("sTgcLayers", sectorSidedMon, stationEtaSidedMon, wireGroupHitLayersSidedMon);
+  }
 }
-
