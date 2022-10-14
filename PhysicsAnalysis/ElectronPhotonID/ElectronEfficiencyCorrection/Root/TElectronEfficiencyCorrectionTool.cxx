@@ -18,6 +18,7 @@
 #include <cmath>
 #include <iostream>
 #include <memory>
+#include <cstring>
 // ROOT includes
 #include "TClass.h"
 #include "TFile.h"
@@ -61,7 +62,7 @@ keytostring(int input)
 }
 
 namespace {
-const std::string LowPt_string("LowPt");
+char const * const LowPt_string = "LowPt" ;
 const std::vector<int> s_keys = { mapkey::sf,
                                   mapkey::stat,
                                   mapkey::eig,
@@ -218,7 +219,7 @@ Root::TElectronEfficiencyCorrectionTool::calculate(
    * Key/Index is SF,Stat,Eigen,UnCorr
    * The Entry in this index is a vector<HistArray>
    * Each vector<HistArray>  has as many entries as supported Run periods.
-   * Each TObjjArray has 2D histos (could be standard, low-et, or forward
+   * Each HistArray has 2D histos (could be standard, low-et, or forward
    * electrons) The 2D Histo then has the number we want. What follows is the
    * logic to get to this number.
    */
@@ -260,7 +261,7 @@ Root::TElectronEfficiencyCorrectionTool::calculate(
     invalid = false;
 
     tmpHist = static_cast<TH2*>(sfObjectArray[i].get());
-    const auto* xAxis = tmpHist->GetXaxis();
+    const auto * const xAxis = tmpHist->GetXaxis();
     // invalid if we are below minimum et
     if (et < xAxis->GetXmin()) {
       smallEt++;
@@ -284,10 +285,10 @@ Root::TElectronEfficiencyCorrectionTool::calculate(
      * for very high Et
      */
     if (et > xAxis->GetXmax()) {
-      if (TString(tmpHist->GetName()).Contains(LowPt_string)) {
+      if (std::strstr(tmpHist->GetName(), LowPt_string) != nullptr) {
         invalid = true;
       } else {
-        xValue = tmpHist->GetXaxis()->GetBinCenter(tmpHist->GetNbinsX());
+        xValue = xAxis->GetBinCenter(tmpHist->GetNbinsX());
         changedEt = true;
       }
     }
@@ -746,10 +747,10 @@ Root::TElectronEfficiencyCorrectionTool::setupHistogramsInFolder(
     if (obj->IsA()->InheritsFrom("TH1")) {
       // The histogram containing the scale factors need to end with _sf and
       // need to contain either the string "FullSim" or "AtlFast2"!
-      if (TString(obj->GetName()).Contains("FullSim")) {
+      if (std::strstr(obj->GetName(), "FullSim") != nullptr) {
         setupTempMapsHelper(
           static_cast<TH1*>(obj), objsFull, sysObjsFull, seenSystematics);
-      } else if (TString(obj->GetName()).Contains("AtlFast2")) {
+      } else if (std::strstr(obj->GetName(), "AtlFast2") != nullptr) {
         setupTempMapsHelper(
           static_cast<TH1*>(obj), objsFast, sysObjsFast, seenSystematics);
       } else {
