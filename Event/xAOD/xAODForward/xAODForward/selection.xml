@@ -148,6 +148,8 @@
    <!-- xAOD::ZdcModule auxiliary type(s). -->
    <class name="xAOD::ZdcModuleAuxContainer_v1"
           id="72D723CD-1C67-49D2-9C70-5EE14C3B26A6" />
+   <class name="xAOD::ZdcModuleAuxContainer_v2"
+          id="861C3629-5D94-498F-8849-78AD269D703D" />
    <typedef name="xAOD::ZdcModuleAuxContainer" />
 
    <!-- xAOD::MBTSModule interface type(s). -->

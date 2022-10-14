@@ -3,86 +3,58 @@
 */
 
 ///////////////////////////////////////////////////////////////////
-// ZdcRec.h, (c) ATLAS Detector software
+// ZdcRecRun3.h, (c) ATLAS Detector software
 ///////////////////////////////////////////////////////////////////
 
-#ifndef ZDCRECV3_H
-#define ZDCRECV3_H
+#ifndef ZDCRECRun3_H
+#define ZDCRECRun3_H
 
 #include <string>
 #include <map>
 
-
-
-//which one ???
 #include "AthenaBaseComps/AthAlgorithm.h"
-//#include "GaudiKernel/Algorithm.h"
 #include "StoreGate/WriteHandleKey.h"
 #include "StoreGate/ReadHandleKey.h"
 #include "GaudiKernel/ToolHandle.h"
 #include "GaudiKernel/ServiceHandle.h"
-
-
-
-//#include "ZdcRec/ZdcRecNoiseTool.h"
-//#include "ZdcRec/ZdcRecChannelTool.h"
 
 class ISvcLocator;
 class StatusCode;
 class Identifier;
 class StoreGateSvc;
 
-class ZdcRecChannelToolV2;
-#include "xAODTrigL1Calo/TriggerTowerContainer.h"
+class ZdcRecChannelToolLucrod;
+#include "ZdcByteStream/ZdcLucrodDataContainer.h"
 #include "xAODForward/ZdcModuleContainer.h"
 #include "xAODForward/ZdcModuleAuxContainer.h"
 #include "ZdcAnalysis/ZdcAnalysisTool.h"
 
-/** @class ZdcRec
+/** @class ZdcRecRun3
 
-    Class definition for the ZDC Reconstruction class
+    Class definition for the ZDC Reconstruction class for Run 3
 
-    @author  Brian Cole and Peter Steinberg, bcole@cern.ch, peter.steinberg@bnl.gov
-             and M. Leite leite@cern.ch
+    @author  Brian Cole and Peter Steinberg, bcole@cern.ch, steinberg@bnl.gov
 */
 
 
-class ZdcRecV3 : public AthAlgorithm
+class ZdcRecRun3 : public AthAlgorithm
 {
 
 public:
 
-	ZdcRecV3(const std::string& name, ISvcLocator* pSvcLocator);
-	~ZdcRecV3();
+	ZdcRecRun3(const std::string& name, ISvcLocator* pSvcLocator);
+	~ZdcRecRun3();
 
 	StatusCode initialize() override;
 	StatusCode execute() override;
 	StatusCode finalize() override;
 
 private:
-
-  /** class member version of retrieving StoreGate */
-	//StoreGateSvc* m_storeGate;
-	// ServiceHandle<StoreGateSvc> m_storeGate;
-
-
-	/** Does the collection own it's objects ? **/
+	
 	int m_ownPolicy;
 
-
-	/** Digits data container name */
-	//std::string m_ttContainerName;
-
-	/** Raw data object name */
-	//std::string m_zdcModuleContainerName;
-	//std::string m_zdcModuleAuxContainerName;
-
-
-	/** Pointer to Zdc input "digits" data */
-	//const xAOD::TriggerTowerContainer* m_ttContainer;
-
-	SG::ReadHandleKey<xAOD::TriggerTowerContainer> m_ttContainerName
-	  { this, "DigitsContainerName", "ZdcTriggerTowers", "" };
+	SG::ReadHandleKey<ZdcLucrodDataContainer> m_zldContainerName
+          { this, "ZdcLucrodDataContainerKey", "ZdcLucrodDataContainer", "" };
 
 	SG::WriteHandleKey<xAOD::ZdcModuleContainer> m_zdcModuleContainerName
 	  { this, "ZdcModuleContainerName", "ZdcModules", "" };
@@ -90,11 +62,13 @@ private:
 	SG::WriteHandleKey<xAOD::ZdcModuleContainer> m_zdcSumContainerName
 	  { this, "ZdcSumContainerName", "ZdcSums", "" };
 
+
 	//Include here all tools to do the job. They will be called by the algorithm execute method
 	//Another option is to use ToolHandleArray<IZdcRecTool>, where IZdcRecTool is the factory for
 	//the tools
-	ToolHandle<ZdcRecChannelToolV2> m_ChannelTool
-	  { this, "ChannelTool", "ZdcRecChannelToolV2", "" };
+
+	ToolHandle<ZdcRecChannelToolLucrod> m_ChannelTool
+	  { this, "ChannelTool", "ZdcRecChannelToolLucrod", "" };
 	ToolHandle<ZDC::IZdcAnalysisTool> m_zdcTool
 	  { this, "ZdcAnalysisTool", "ZDC::ZdcAnalysisTool/ZdcAnalysisTool", "" };
 

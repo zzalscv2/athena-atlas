@@ -81,6 +81,7 @@
 #include "xAODForward/versions/ZdcModule_v1.h"
 #include "xAODForward/versions/ZdcModuleContainer_v1.h"
 #include "xAODForward/versions/ZdcModuleAuxContainer_v1.h"
+#include "xAODForward/versions/ZdcModuleAuxContainer_v2.h"
 
 #include "xAODForward/MBTSModule.h"
 #include "xAODForward/MBTSModuleContainer.h"

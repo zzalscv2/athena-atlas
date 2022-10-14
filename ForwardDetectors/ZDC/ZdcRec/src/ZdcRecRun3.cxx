@@ -3,10 +3,10 @@
 */
 
 /*
- * ZdcRecV3.cxx
+ * ZdcRecRun3.cxx
  *
- *  Created on: Sept 11, 2016 (never forget)
- *      Author: Peter.Steinberg@bnl.gov
+ *  Created on: June 23, 2022 (never forget)
+ *      Author: steinberg@bnl.gov
  */
 
 
@@ -18,54 +18,31 @@
 #include "StoreGate/StoreGateSvc.h"
 #include "StoreGate/WriteHandle.h"
 #include "StoreGate/ReadHandle.h"
-//#include "Identifier/Identifier.h"
 
-#include "xAODForward/ZdcModuleAuxContainer.h"
-#include "xAODForward/ZdcModuleContainer.h"
-#include "ZdcRec/ZdcRecV3.h"
-#include "ZdcRec/ZdcRecChannelToolV2.h"
+#include "ZdcRec/ZdcRecRun3.h"
+#include "ZdcRec/ZdcRecChannelToolLucrod.h"
 #include "xAODForward/ZdcModuleToString.h"
-#include "ZdcAnalysis/ZdcAnalysisTool.h"
 #include "ZdcByteStream/ZdcToString.h"
 
 //==================================================================================================
-ZdcRecV3::ZdcRecV3(const std::string& name, ISvcLocator* pSvcLocator) :
+ZdcRecRun3::ZdcRecRun3(const std::string& name, ISvcLocator* pSvcLocator) :
 
 	AthAlgorithm(name, pSvcLocator),
-	//m_storeGate("StoreGateSvc", name),
 	m_ownPolicy(static_cast<int> (SG::OWN_ELEMENTS))
-	//m_ttContainerName("ZdcTriggerTowers"),
-	//m_zdcModuleContainerName("ZdcModules"),
-	//m_zdcModuleAuxContainerName("ZdcModulesAux."),
-	//m_ttContainer(0),
-	//m_zdcTool("ZDC::ZdcAnalysisTool/ZdcAnalysisTool")
 {
-	declareProperty("OwnPolicy",m_ownPolicy) ;
-
-	//declareProperty("DigitsContainerName", m_ttContainerName, "ZdcTriggerTowers");
-	//declareProperty("ZdcModuleContainerName",    m_zdcModuleContainerName,    "ZdcModules");
-	//declareProperty("ZdcModuleAuxContainerName",    m_zdcModuleAuxContainerName,    "ZdcModulesAux.");
+  declareProperty("OwnPolicy",m_ownPolicy) ;
 }
+
 //==================================================================================================
 
 //==================================================================================================
-ZdcRecV3::~ZdcRecV3() {}
+ZdcRecRun3::~ZdcRecRun3() {}
 //==================================================================================================
 
 //==================================================================================================
-StatusCode ZdcRecV3::initialize()
+StatusCode ZdcRecRun3::initialize()
 {
 	MsgStream mLog(msgSvc(), name());
-
-	/*
-	// Look up the Storegate service
-	StatusCode sc = m_storeGate.retrieve();
-	if (sc.isFailure())
-	{
-		mLog << MSG::FATAL << "--> ZDC: Unable to retrieve pointer to StoreGateSvc" << endmsg;
-		return sc;
-	}
-	*/
 
 	// Reconstruction Tool
 	ATH_CHECK( m_ChannelTool.retrieve() );
@@ -75,7 +52,7 @@ StatusCode ZdcRecV3::initialize()
 
 	ATH_CHECK( m_zdcModuleContainerName.initialize() );
 	ATH_CHECK( m_zdcSumContainerName.initialize() );
-	ATH_CHECK( m_ttContainerName.initialize(SG::AllowEmpty) );
+	ATH_CHECK( m_zldContainerName.initialize(SG::AllowEmpty) );
 
 	if (m_ownPolicy == SG::OWN_ELEMENTS)
 		mLog << MSG::DEBUG << "...will OWN its cells." << endmsg;
@@ -83,28 +60,32 @@ StatusCode ZdcRecV3::initialize()
 		mLog << MSG::DEBUG << "...will VIEW its cells." << endmsg;
 
 
-	mLog << MSG::DEBUG << "--> ZDC: ZdcRecV3 initialization complete" << endmsg;
+	mLog << MSG::DEBUG << "--> ZDC: ZdcRecRun3 initialization complete" << endmsg;
 
 	return StatusCode::SUCCESS;
 }
 //==================================================================================================
 
 //==================================================================================================
-StatusCode ZdcRecV3::execute()
+StatusCode ZdcRecRun3::execute()
 {
 
+  ATH_MSG_DEBUG("In ZdRecRun3");
+
   const EventContext& ctx = Gaudi::Hive::currentContext();
-  ATH_MSG_DEBUG ("--> ZDC: ZdcRecV3 execute starting on "
+
+  ATH_MSG_DEBUG ("--> ZDC: ZdcRecRun3 execute starting on "
                  << ctx.evt()
                  << "th event");
 
   //Look for the container presence
-  if (m_ttContainerName.empty()) {
+  if (m_zldContainerName.empty()) {
     return StatusCode::SUCCESS;
   }
 
-  // Look up the Digits "TriggerTowerContainer" in Storegate
-  SG::ReadHandle<xAOD::TriggerTowerContainer> ttContainer (m_ttContainerName, ctx);
+  ATH_MSG_DEBUG("Trying to get LUCROD DATA!");
+  SG::ReadHandle<ZdcLucrodDataContainer> zldContainer    (m_zldContainerName, ctx);
+  ATH_MSG_DEBUG("Did I get LUCROD DATA?");
   
   //Create the containers to hold the reconstructed information (you just pass the pointer and the converter does the work)	
   std::unique_ptr<xAOD::ZdcModuleContainer> moduleContainer( new xAOD::ZdcModuleContainer());
@@ -115,18 +96,31 @@ StatusCode ZdcRecV3::execute()
   std::unique_ptr<xAOD::ZdcModuleContainer> moduleSumContainer( new xAOD::ZdcModuleContainer());
   std::unique_ptr<xAOD::ZdcModuleAuxContainer> moduleSumAuxContainer( new xAOD::ZdcModuleAuxContainer() );
   moduleSumContainer->setStore( moduleSumAuxContainer.get() );
-  
+
+  ATH_MSG_DEBUG("Trying to convert!");
+
   // rearrange ZDC channels and perform fast reco on all channels (including non-big tubes)
-  int ncha = m_ChannelTool->convertTT2ZM(ttContainer.get(), moduleContainer.get(), moduleSumContainer.get() );
-  ATH_MSG_DEBUG("m_ChannelTool->convertTT2ZM returned " << ncha << " channels");
-  //msg( MSG::DEBUG ) << ZdcModuleToString(*moduleContainer) << endmsg;
+  int ncha = m_ChannelTool->convertLucrod2ZM(zldContainer.get(), moduleContainer.get(), moduleSumContainer.get() );
+  ATH_MSG_DEBUG("m_ChannelTool->convertLucrod2ZM returned " << ncha << " channels");
+
+  ATH_MSG_DEBUG("Dumping modules");
+  ATH_MSG_DEBUG( ZdcModuleToString(*moduleContainer) );
+  ATH_MSG_DEBUG("Dumping module sums");
+  ATH_MSG_DEBUG( ZdcModuleToString(*moduleSumContainer) );
   
   // re-reconstruct big tubes 
-  ATH_CHECK( m_zdcTool->recoZdcModules(*moduleContainer.get(), *moduleSumContainer.get() ) ); // passes by reference
+  ATH_CHECK( m_zdcTool->recoZdcModules(*moduleContainer.get(), *moduleSumContainer.get()) ); // passes by reference
+
+  // eventually reconstruct RPD, using ML libraries
+  // ATH_CHECK( m_rpdTool...)
 
   SG::WriteHandle<xAOD::ZdcModuleContainer> moduleContainerH (m_zdcModuleContainerName, ctx);
   ATH_CHECK( moduleContainerH.record (std::move(moduleContainer),
 				      std::move(moduleAuxContainer)) );
+
+  SG::WriteHandle<xAOD::ZdcModuleContainer> moduleSumContainerH (m_zdcSumContainerName, ctx);
+  ATH_CHECK( moduleSumContainerH.record (std::move(moduleSumContainer),
+					 std::move(moduleSumAuxContainer)) );
 
   return StatusCode::SUCCESS;
 
@@ -134,10 +128,10 @@ StatusCode ZdcRecV3::execute()
 //==================================================================================================
 
 //==================================================================================================
-StatusCode ZdcRecV3::finalize()
+StatusCode ZdcRecRun3::finalize()
 {
 
-  ATH_MSG_DEBUG( "--> ZDC: ZdcRecV3 finalize complete" );
+  ATH_MSG_DEBUG( "--> ZDC: ZdcRecRun3 finalize complete" );
 
   return StatusCode::SUCCESS;
 

@@ -161,7 +161,7 @@ double HIPileupTool::get_nNeutrons(const xAOD::ZdcModuleContainer& ZdcCont) cons
    bool isCalib=1;
     double ZdcE=0;
    for (const auto *zdcModule : ZdcCont) {
-      if (zdcModule->type()!=0) continue;
+      if (zdcModule->zdcType()!=0) continue;
 
       if (!(zdcModule->isAvailable<float>("CalibEnergy"))) {isCalib = 0; continue;}
       float modE = zdcModule->auxdecor<float>("CalibEnergy");
