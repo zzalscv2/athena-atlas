@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2019 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "JetTagTools/SVForIPTool.h"
@@ -66,7 +66,7 @@ namespace Analysis {
       
     BTag->variable<std::vector<ElementLink<xAOD::TrackParticleContainer> > >(secVxFinderName, "badTracksIP", TrkFromV0_ELs);
 
-    for (std::vector<ElementLink<xAOD::TrackParticleContainer> >::iterator itr=TrkFromV0_ELs.begin();itr!=TrkFromV0_ELs.end();itr++)
+    for (std::vector<ElementLink<xAOD::TrackParticleContainer> >::iterator itr=TrkFromV0_ELs.begin();itr!=TrkFromV0_ELs.end();++itr)
       {
 	if (itr->isValid())
 	  {

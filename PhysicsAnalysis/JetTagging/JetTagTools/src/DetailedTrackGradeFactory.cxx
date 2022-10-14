@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "JetTagTools/DetailedTrackGradeFactory.h"
@@ -787,6 +787,7 @@ TrackGrade* DetailedTrackGradeFactory::getGrade(const xAOD::TrackParticle & trac
   
   if (gradeToReturn==0) {
     ATH_MSG_ERROR("Grade not found. Internal error... ");
+    return nullptr;
   }
   
   return new TrackGrade(*gradeToReturn);  

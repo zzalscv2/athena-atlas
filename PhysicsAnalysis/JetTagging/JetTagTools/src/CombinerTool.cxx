@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2017 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
 */
 
 //////////////////////////////////////////////////////////////////////////////////////////////
@@ -10,7 +10,6 @@
 
 #include "JetTagTools/CombinerTool.h"
 #include "JetEvent/JetTagInfoBase.h"
-//#include "JetEvent/Jet.h"
 #include "xAODJet/Jet.h"
 
 namespace Analysis
@@ -124,7 +123,7 @@ std::vector<double> CombinerTool::simpleCombine( const xAOD::Jet& particleJet,
     {
         bool firstValidTagger(true);
         int count(0);
-        for ( std::vector<std::string>::const_iterator strItr = combineTheseTaggers.begin(); strItr != combineTheseTaggers.end(); strItr++ )
+        for ( std::vector<std::string>::const_iterator strItr = combineTheseTaggers.begin(); strItr != combineTheseTaggers.end(); ++strItr )
         {
             ATH_MSG_VERBOSE("#BTAG# Combining likelihood from these taggers " << *strItr);
             const JetTagInfoBase* infoObject(particleJet.tagInfo(*strItr));
