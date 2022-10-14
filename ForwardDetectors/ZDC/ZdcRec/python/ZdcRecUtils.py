@@ -2,9 +2,4 @@
 
 def AppendOutputList(HIAODItemList) :
     """Adds HIGlobalAODOutputList to the list passed in as an argument"""
-    HIAODItemList+= ["xAOD::TriggerTowerContainer#ZdcTriggerTowers",
-                     "xAOD::TriggerTowerAuxContainer#ZdcTriggerTowersAux.",
-                     "xAOD::ZdcModuleContainer#ZdcModules",
-                     "xAOD::ZdcModuleAuxContainer#ZdcModulesAux.",
-                     "xAOD::ZdcModuleContainer#ZdcSums",
-                     "xAOD::ZdcModuleAuxContainer#ZdcSumsAux."] 
+    HIAODItemList+= ["xAOD::ZdcModuleContainer#ZdcModules","xAOD::ZdcModuleAuxContainer#ZdcModulesAux.","xAOD::ZdcModuleContainer#ZdcSums","xAOD::ZdcModuleAuxContainer#ZdcSumsAux."] 

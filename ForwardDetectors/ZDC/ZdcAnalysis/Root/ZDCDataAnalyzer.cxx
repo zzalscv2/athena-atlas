@@ -9,7 +9,7 @@
 #include <utility>
 
 #include "CxxUtils/checker_macros.h"
-ATLAS_NO_CHECK_FILE_THREAD_SAFETY;  // standalone ROOT analysis code
+ATLAS_NO_CHECK_FILE_THREAD_SAFETY;
 
 ZDCDataAnalyzer::ZDCDataAnalyzer(ZDCMsg::MessageFunctionPtr msgFunc_p, int nSample, float deltaTSample, size_t preSampleIdx, std::string fitFunction,
                                  const ZDCModuleFloatArray& peak2ndDerivMinSamples,
@@ -176,6 +176,15 @@ void ZDCDataAnalyzer::SetTauT0Values(const ZDCModuleBoolArray& fixTau1, const ZD
   }
 }
 
+void ZDCDataAnalyzer::SetNoiseSigmas(const ZDCModuleFloatArray& noiseSigmasHG, const ZDCModuleFloatArray& noiseSigmasLG)
+{
+  for (size_t side : {0, 1}) {
+    for (size_t module : {0, 1, 2, 3}) {
+      m_moduleAnalyzers[side][module]->SetNoiseSigmas(noiseSigmasHG[side][module], noiseSigmasLG[side][module]);
+    }
+  }
+}
+
 void ZDCDataAnalyzer::SetModuleAmpFractionLG(const ZDCDataAnalyzer::ZDCModuleFloatArray& moduleAmpFractionLG) {
   for (size_t side : {0, 1}) {
     for (size_t module : {0, 1, 2, 3}) {
@@ -196,6 +205,14 @@ void ZDCDataAnalyzer::SetFitMinMaxAmpValues(const ZDCModuleFloatArray& minAmpHG,
   }
 }
 
+void ZDCDataAnalyzer::SetFitMinMaxAmpValues(float minHG, float minLG, float maxHG, float maxLG)
+{
+  for (size_t side : {0, 1}) {
+    for (size_t module : {0, 1, 2, 3}) {
+      m_moduleAnalyzers[side][module]->SetFitMinMaxAmp(minHG, minLG, maxHG, maxLG);
+    }
+  }
+}
 
 void ZDCDataAnalyzer::SetADCOverUnderflowValues(const ZDCModuleFloatArray& HGOverflowADC, const ZDCModuleFloatArray& HGUnderflowADC,
     const ZDCModuleFloatArray& LGOverflowADC)
@@ -329,10 +346,11 @@ void ZDCDataAnalyzer::StartEvent(int lumiBlock)
 
 void ZDCDataAnalyzer::LoadAndAnalyzeData(size_t side, size_t module, const std::vector<float>& HGSamples, const std::vector<float>& LGSamples)
 {
+
   // We immediately return if this module is disabled
   //
   if (m_moduleDisabled[side][module]) {
-    (*m_msgFunc_p)(ZDCMsg::Verbose, ("Skipping analysis of disabled mofule for event index " + std::to_string(m_eventCount) + ", side, module = " + std::to_string(side) + ", " + std::to_string(module)));
+    (*m_msgFunc_p)(ZDCMsg::Verbose, ("Skipping analysis of disabled module for event index " + std::to_string(m_eventCount) + ", side, module = " + std::to_string(side) + ", " + std::to_string(module)));
 
     return;
   }
@@ -409,6 +427,8 @@ bool ZDCDataAnalyzer::FinishEvent()
       if (sideNPulsesMod[side] == 0) continue;
 
       for (size_t module : {0, 1, 2, 3}) {
+	if (m_moduleDisabled[side][module]) continue;
+
         ZDCPulseAnalyzer* pulseAna_p = m_moduleAnalyzers[side][module].get();
 
         // If this module had no pulse the first time, reanalyze it (with a lower 2nd derivative threshold)

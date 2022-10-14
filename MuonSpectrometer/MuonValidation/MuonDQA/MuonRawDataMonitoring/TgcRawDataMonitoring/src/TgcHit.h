@@ -4,13 +4,15 @@
 #ifndef TGCRAWDATAMONITORING_TGCHIT_H
 #define TGCRAWDATAMONITORING_TGCHIT_H
 #include "TgcChamber.h"
+#include <map>
+#include "xAODMuon/Muon.h"
 namespace TGC {
   
   class TgcHit : public TgcChamber {
   public:
     TgcHit(double x,double y,double z,
 	   double shortWidth,double longWidth,double length,
-	   bool isStrip,int gasGap,int channel,int eta,int phi,int station, int bunch);
+	   bool isStrip,int gasGap,int channel,int eta,int phi,int station, int bcmask);
 
     const double& X() const;
     const double& Y() const;
@@ -24,10 +26,12 @@ namespace TGC {
     const int& stationEta() const;
     const int& stationPhi() const;
     const int& stationName() const;
-    const int& bunch() const;
+    const int& bcmask() const;
     const std::string& gap_name() const;
-    const double& residual() const;
-    void setResidual(double v);
+    const std::string& type_name() const;
+    const std::string& channel_name() const;
+    const std::map<const xAOD::Muon*,const double>& residuals() const;
+    void addResidual(const xAOD::Muon* m, const double v);
 
   private:
     double m_x{};
@@ -42,9 +46,11 @@ namespace TGC {
     int m_stationEta{};
     int m_stationPhi{};
     int m_stationName{};
-    int m_bunch{};
-    double m_residual{};
+    int m_bcmask{};
+    std::map<const xAOD::Muon*,const double> m_residuals{};
     std::string m_gap_name{"none"};
+    std::string m_type_name{"none"};
+    std::string m_channel_name{"none"};
   };
   
   inline const double& TgcHit::X() const {return m_x;}
@@ -59,10 +65,12 @@ namespace TGC {
   inline const int& TgcHit::stationEta() const {return m_stationEta;}
   inline const int& TgcHit::stationPhi() const {return m_stationPhi;}
   inline const int& TgcHit::stationName() const {return m_stationName;}
-  inline const int& TgcHit::bunch() const {return m_bunch;}
+  inline const int& TgcHit::bcmask() const {return m_bcmask;}
   inline const std::string& TgcHit::gap_name() const {return m_gap_name;}
-  inline const double& TgcHit::residual() const {return m_residual;}
-  inline void TgcHit::setResidual(double v) {m_residual = v;}
+  inline const std::string& TgcHit::type_name() const {return m_type_name;}
+  inline const std::string& TgcHit::channel_name() const {return m_channel_name;}
+  inline const std::map<const xAOD::Muon*,const double>& TgcHit::residuals() const {return m_residuals;}
+  inline void TgcHit::addResidual(const xAOD::Muon* m, const double v) {m_residuals.insert(std::make_pair(m,v));}
   
 }
 #endif

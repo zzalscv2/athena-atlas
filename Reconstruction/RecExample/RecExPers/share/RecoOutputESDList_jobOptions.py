@@ -105,8 +105,11 @@ if DetFlags.detdescr.Lucid_on():
 
 #ZDC
 if DetFlags.detdescr.ZDC_on():
-    fullESDList += CfgItemList("ZDC", items = ["ZdcDigitsCollection#ZdcDigitsCollection","ZdcRawChannelCollection#ZdcRawChannelCollection"])
-
+    fullESDList += CfgItemList("ZDC", items = [
+        "xAOD::ZdcModuleContainer#ZdcModules",
+        "xAOD::ZdcModuleAuxContainer#ZdcModulesAux.",
+        "xAOD::ZdcModuleContainer#ZdcSums",
+        "xAOD::ZdcModuleAuxContainer#ZdcSumsAux."])
 
 if DetFlags.detdescr.ALFA_on():
     protectedInclude("ForwardRec/ALFARec_OuputItemList_jobOptions.py")

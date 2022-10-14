@@ -15,49 +15,47 @@
 #ifndef sTgcRawDataMonAlg_H
 #define sTgcRawDataMonAlg_H
 
-//Core Include
+// Core Include
 #include "AthenaMonitoring/AthMonitorAlgorithm.h"
 
-//Helper Includes
+// Helper Includes
 #include "MuonIdHelpers/IMuonIdHelperSvc.h"
 #include "MuonPrepRawData/sTgcPrepDataContainer.h"
 #include "StoreGate/ReadHandleKey.h"
 #include "MuonPrepRawData/sTgcPrepData.h"
+#include "MuonReadoutGeometry/MuonDetectorManager.h"
+#include "MuonIdHelpers/sTgcIdHelper.h"
 
-//stl includes                                                                                 
+// stl includes                                                                                 
 #include <string>
 
-namespace Muon 
-{
+namespace Muon {
   class sTgcPrepData;
 }
 
-namespace GeometricSectors
-{
-  static const std::array<std::string, 2> sTgc_Side   = {"CSide", "ASide"};
+namespace GeometricSectors {
+  static const std::array<std::string, 2> sTgc_Side = {"CSide", "ASide"};
 }
 
-class sTgcRawDataMonAlg: public AthMonitorAlgorithm 
-{
+class sTgcRawDataMonAlg: public AthMonitorAlgorithm {
  public:
-  
   sTgcRawDataMonAlg(const std::string& name, ISvcLocator* pSvcLocator);
   
   virtual ~sTgcRawDataMonAlg()=default;
   virtual StatusCode initialize() override;
   virtual StatusCode fillHistograms(const EventContext& ctx) const override;
-  
  private:  
-
   ServiceHandle<Muon::IMuonIdHelperSvc> m_idHelperSvc {this, "MuonIdHelperSvc", "Muon::MuonIdHelperSvc/MuonIdHelperSvc"};
- 
+    
   void fillsTgcOverviewHistograms(const Muon::sTgcPrepData*, const Muon::MuonPrepDataCollection<Muon::sTgcPrepData> &prd) const;
-  void fillsTgcSummaryHistograms(const Muon::sTgcPrepData*) const; 
-  int get_sectorPhi_from_stationPhi_stName(const int stationPhi, const std::string& stName) const;
+  void fillsTgcSummaryHistograms(const Muon::sTgcPrepData*, const MuonGM::MuonDetectorManager*) const;
 
-  SG::ReadHandleKey<Muon::sTgcPrepDataContainer> m_sTgcContainerKey{this,"sTGCPrepDataContainerName", "STGC_Measurements"};
+  int getSectors(const Identifier& id) const;
+  
+  SG::ReadHandleKey<Muon::sTgcPrepDataContainer> m_sTgcContainerKey{this,"sTgcPrepDataContainerName", "STGC_Measurements"};
+  SG::ReadCondHandleKey<MuonGM::MuonDetectorManager> m_detectorManagerKey{this, "DetectorManagerKey", "MuonDetectorManager","Key of input MuonDetectorManager condition data"};
 
-  Gaudi::Property<bool> m_dosTgcESD{this,"dosTgcESD",true};
-  Gaudi::Property<bool> m_dosTgcOverview{this,"dosTgcOverview",true};
+  Gaudi::Property<bool> m_dosTgcESD{this,"dosTgcESD", true};
+  Gaudi::Property<bool> m_dosTgcOverview{this,"dosTgcOverview", true};
 };    
 #endif

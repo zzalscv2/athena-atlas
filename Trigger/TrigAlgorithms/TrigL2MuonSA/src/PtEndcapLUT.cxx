@@ -125,6 +125,9 @@ double TrigL2MuonSA::PtEndcapLUT::alpha(double z1, double r1, double z2, double 
   CLHEP::Hep2Vector mid1(z1, r1);
   CLHEP::Hep2Vector mid2(z2, r2);
   CLHEP::Hep2Vector dir = mid2 - mid1;
+
+  if(std::abs(mid1.unit() * dir.unit()) > 1.) return 0;
+
   double a = std::acos(mid1.unit() * dir.unit());
 
   return a;

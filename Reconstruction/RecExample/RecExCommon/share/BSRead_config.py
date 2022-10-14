@@ -8,6 +8,8 @@
 
 
 from AthenaCommon.Logging import logging
+from AtlasGeoModel.CommonGMJobProperties import CommonGeometryFlags as geoFlags
+
 logBSRead = logging.getLogger( 'BSRead_config' )
 
 
@@ -93,7 +95,11 @@ if rec.doTrigger() :
 if DetFlags.readRDOBS.Lucid_on():
     protectedInclude ("LUCID_RawDataByteStreamCnv/LUCID_ByteStreamRawDataCnv.py")
 
-if DetFlags.readRDOBS.ZDC_on() and rec.doTrigger():
+if DetFlags.readRDOBS.ZDC_on():
     protectedInclude ("ZdcByteStream/ZdcByteStreamRawDataCnvV2.py")
-    svcMgr.ByteStreamAddressProviderSvc.TypeNames += [ "xAOD::TriggerTowerContainer/ZdcTriggerTowers"]	
-    svcMgr.ByteStreamAddressProviderSvc.TypeNames += [ "xAOD::TriggerTowerAuxContainer/ZdcTriggerTowersAux."]
+
+    if (geoFlags.Run=="RUN2"):
+        svcMgr.ByteStreamAddressProviderSvc.TypeNames += [ "xAOD::TriggerTowerContainer/ZdcTriggerTowers"]	
+        svcMgr.ByteStreamAddressProviderSvc.TypeNames += [ "xAOD::TriggerTowerAuxContainer/ZdcTriggerTowersAux."]
+
+

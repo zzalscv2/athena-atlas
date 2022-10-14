@@ -21,6 +21,7 @@
 #include "ITgcRawDataMonitorTool.h"
 #include "MuonPrepRawData/TgcPrepDataContainer.h"
 #include "TrigConfData/L1Menu.h"
+#include "xAODTracking/VertexContainer.h"
 #include <memory>
 #include <vector>
 #include <set>
@@ -164,7 +165,10 @@ class TgcRawDataMonitorAlgorithm : public AthMonitorAlgorithm {
   SG::ReadHandleKey<Muon::TgcCoinDataContainer> m_TgcCoinDataContainerCurrBCKey{this,"TgcCoinDataContainerCurrBCName","TrigT1CoinDataCollection","TGC Coin Data Container CurrBC"};
   SG::ReadHandleKey<Muon::TgcCoinDataContainer> m_TgcCoinDataContainerNextBCKey{this,"TgcCoinDataContainerNextBCName","TrigT1CoinDataCollectionNextBC","TGC Coin Data Container NextBC"};
   SG::ReadHandleKey<Muon::TgcCoinDataContainer> m_TgcCoinDataContainerPrevBCKey{this,"TgcCoinDataContainerPrevBCName","TrigT1CoinDataCollectionPriorBC","TGC Coin Data Container PrevBC"};
+  SG::ReadHandleKey<xAOD::VertexContainer> m_PrimaryVertexContainerKey{this,"PrimaryVertexContainerName","PrimaryVertices","Primary Vertex Container"};
   
+  DoubleProperty m_muonToPVdz{this,"MuonToPVdz",50.,"Window size in deltaZ between muon track and primary vertex"};
+  DoubleProperty m_muonToPVdca{this,"MuonToPVdca",0.5,"Distance to closest approach of muon track to primary vertex"};
   BooleanProperty m_doExpressProcessing{this,"doExpressProcessing",false,"Processing express_express data"};
   StringProperty m_packageName{this,"PackageName","TgcRawDataMonitor","group name for histograming"};
   StringProperty m_ctpDecMonList{this,"CtpDecisionMoniorList","Tit:L1_2MU4,Mul:2,HLT:HLT_2mu4,RPC:1,TGC:1;","list of L1MU items to be monitored for before/after CTP decision"};
@@ -197,7 +201,7 @@ class TgcRawDataMonitorAlgorithm : public AthMonitorAlgorithm {
   BooleanProperty m_useOnlyCombinedMuons{this,"UseOnlyCombinedMuons",false,"use only CombinedMuons"};
   BooleanProperty m_useOnlyMuidCoStacoMuons{this,"UseOnlyMuidCoStacoMuons",false,"use only MuidCo and Staco Muons"};
   BooleanProperty m_useMuonSelectorTool{this,"UseMuonSelectorTool",true,"use MuonSelectorTool"};
-  DoubleProperty m_pTCutOnExtrapolation{this,"pTCutOnExtrapolation",6000.,"pT [in MeV] cut on the extrapolation tracks"}; 
+  DoubleProperty m_pTCutOnExtrapolation{this,"pTCutOnExtrapolation",5000.,"pT [in MeV] cut on the extrapolation tracks"};
   DoubleProperty m_M1_Z{this,"M1_Z",13436.5,"z-position of TGC M1-station in mm for track extrapolate"}; 
   DoubleProperty m_M2_Z{this,"M2_Z",14728.2,"z-position of TGC M2-station in mm for track extrapolate"};
   DoubleProperty m_M3_Z{this,"M3_Z",15148.2,"z-position of TGC M3-station in mm for track extrapolate"};
@@ -214,10 +218,13 @@ class TgcRawDataMonitorAlgorithm : public AthMonitorAlgorithm {
   DoubleProperty m_dRCutOnM3{this,"dRCutOnM3", 1000.,"Window size in delta R (radious) on M3 between hit position and track-extrapolated position"};
   IntegerProperty m_nHitsInOtherBWTGCWire{this,"nHitsInOtherTGCWire",3,"Number of hits in other BW-TGC wire channels"};
   IntegerProperty m_nHitsInOtherBWTGCStrip{this,"nHitsInOtherTGCStrip",2,"Number of hits in other BW-TGC strip channels"};
+  BooleanProperty m_dumpFullChannelList{this,"DumpFullChannelList",false,"Dump full channel list"};
+  StringProperty m_maskChannelFileName{this,"MaskChannelFileName","","Name of file for mask channels"};
 
   std::vector<double> m_extZposition;
   std::vector<CtpDecMonObj> m_CtpDecMonObj;
   std::set<std::string> m_thrMonList;
+  std::set<std::string> m_maskChannelList;
 
   using MonVariables=std::vector < std::reference_wrapper < Monitored::IMonitoredVariable >>;
   void fillTgcCoin(const std::string&,

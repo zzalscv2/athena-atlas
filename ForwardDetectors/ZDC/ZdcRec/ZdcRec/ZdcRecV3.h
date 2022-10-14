@@ -81,11 +81,14 @@ private:
 	/** Pointer to Zdc input "digits" data */
 	//const xAOD::TriggerTowerContainer* m_ttContainer;
 
+	SG::ReadHandleKey<xAOD::TriggerTowerContainer> m_ttContainerName
+	  { this, "DigitsContainerName", "ZdcTriggerTowers", "" };
+
 	SG::WriteHandleKey<xAOD::ZdcModuleContainer> m_zdcModuleContainerName
 	  { this, "ZdcModuleContainerName", "ZdcModules", "" };
 
-	SG::ReadHandleKey<xAOD::TriggerTowerContainer> m_ttContainerName
-	  { this, "DigitsContainerName", "ZdcTriggerTowers", "" };
+	SG::WriteHandleKey<xAOD::ZdcModuleContainer> m_zdcSumContainerName
+	  { this, "ZdcSumContainerName", "ZdcSums", "" };
 
 	//Include here all tools to do the job. They will be called by the algorithm execute method
 	//Another option is to use ToolHandleArray<IZdcRecTool>, where IZdcRecTool is the factory for

@@ -58,127 +58,15 @@ StatusCode HIMonitoringZdcTool::fillHistograms() {
   xAOD::ZdcModuleContainer::const_iterator zdc_end = zdcs->end();
 
   for (; zdc_itr != zdc_end; ++zdc_itr) {
-    if ((*zdc_itr)->type() != 0) continue;
-    int thisSide = ((*zdc_itr)->side() == -1 ? 0 : 1);
-    int imod = (*zdc_itr)->zdcModule();
-
-    if (thisSide == 1 && imod == 0) m_NEW_AEM = ((*zdc_itr)->auxdataConst<float>("Amplitude"));
-    if (thisSide == 1 && imod == 1) m_NEW_AHAD1 = ((*zdc_itr)->auxdataConst<float>("Amplitude"));
-    if (thisSide == 1 && imod == 2) m_NEW_AHAD2 = ((*zdc_itr)->auxdataConst<float>("Amplitude"));
-    if (thisSide == 1 && imod == 3) m_NEW_AHAD3 = ((*zdc_itr)->auxdataConst<float>("Amplitude"));
-    if (thisSide == 0 && imod == 0) m_NEW_CEM = ((*zdc_itr)->auxdataConst<float>("Amplitude"));
-    if (thisSide == 0 && imod == 1) m_NEW_CHAD1 = ((*zdc_itr)->auxdataConst<float>("Amplitude"));
-    if (thisSide == 0 && imod == 2) m_NEW_CHAD2 = ((*zdc_itr)->auxdataConst<float>("Amplitude"));
-    if (thisSide == 0 && imod == 3) m_NEW_CHAD3 = ((*zdc_itr)->auxdataConst<float>("Amplitude"));
-/*
-        if(thisSide==1&&imod==0)m_AEM =   ((*zdc_itr)->amplitude());
-        if(thisSide==1&&imod==1)m_AHAD1 = ((*zdc_itr)->amplitude());
-        if(thisSide==1&&imod==2)m_AHAD2 = ((*zdc_itr)->amplitude());
-        if(thisSide==1&&imod==3)m_AHAD3 = ((*zdc_itr)->amplitude());
-        if(thisSide==0&&imod==0)m_CEM =   ((*zdc_itr)->amplitude());
-        if(thisSide==0&&imod==1)m_CHAD1 = ((*zdc_itr)->amplitude());
-        if(thisSide==0&&imod==2)m_CHAD2 = ((*zdc_itr)->amplitude());
-        if(thisSide==0&&imod==3)m_CHAD3 = ((*zdc_itr)->amplitude());
- */
-    if (thisSide == 1 && imod == 0) m_G0AEM = ((*zdc_itr)->amplitudeG0());
-    if (thisSide == 1 && imod == 1) m_G0AHAD1 = ((*zdc_itr)->amplitudeG0());
-    if (thisSide == 1 && imod == 2) m_G0AHAD2 = ((*zdc_itr)->amplitudeG0());
-    if (thisSide == 1 && imod == 3) m_G0AHAD3 = ((*zdc_itr)->amplitudeG0());
-    if (thisSide == 0 && imod == 0) m_G0CEM = ((*zdc_itr)->amplitudeG0());
-    if (thisSide == 0 && imod == 1) m_G0CHAD1 = ((*zdc_itr)->amplitudeG0());
-    if (thisSide == 0 && imod == 2) m_G0CHAD2 = ((*zdc_itr)->amplitudeG0());
-    if (thisSide == 0 && imod == 3) m_G0CHAD3 = ((*zdc_itr)->amplitudeG0());
-
-    if (thisSide == 1 && imod == 0) m_G1AEM = ((*zdc_itr)->amplitudeG1());
-    if (thisSide == 1 && imod == 1) m_G1AHAD1 = ((*zdc_itr)->amplitudeG1());
-    if (thisSide == 1 && imod == 2) m_G1AHAD2 = ((*zdc_itr)->amplitudeG1());
-    if (thisSide == 1 && imod == 3) m_G1AHAD3 = ((*zdc_itr)->amplitudeG1());
-    if (thisSide == 0 && imod == 0) m_G1CEM = ((*zdc_itr)->amplitudeG1());
-    if (thisSide == 0 && imod == 1) m_G1CHAD1 = ((*zdc_itr)->amplitudeG1());
-    if (thisSide == 0 && imod == 2) m_G1CHAD2 = ((*zdc_itr)->amplitudeG1());
-    if (thisSide == 0 && imod == 3) m_G1CHAD3 = ((*zdc_itr)->amplitudeG1());
-
-    //	m_hamp_NEW[imod][thisSide]->Fill((*zdc_itr)->auxdataConst<float>("Amplitude"));
-    //	m_hamp[imod][thisSide]->Fill((*zdc_itr)->amplitude());
-    m_hamp[imod][thisSide]->Fill((*zdc_itr)->auxdataConst<float>("Amplitude"));
-    m_hampG0[imod][thisSide]->Fill((*zdc_itr)->amplitudeG0());
-    m_hampG1[imod][thisSide]->Fill((*zdc_itr)->amplitudeG1());
-
-    //	m_hSumSideAmp_NEW[1]->Fill(m_NEW_AEM+m_NEW_AHAD1+m_NEW_AHAD2+m_NEW_AHAD3);
-    //	hSumSideAmp_NEW[0]->Fill(m_NEW_CEM+m_NEW_CHAD1+m_NEW_CHAD2+m_NEW_CHAD3);
-    //	m_hSumSideAmp[1]->Fill(m_AEM+m_AHAD1+m_AHAD2+m_AHAD3);
-    //	hSumSideAmp[0]->Fill(m_CEM+m_CHAD1+m_CHAD2+m_CHAD3);
-
-
-    //	if(thisSide==1) m_NEW_SumSideA = m_NEW_AEM+m_NEW_AHAD1+m_NEW_AHAD2+m_NEW_AHAD3;
-    //	if(thisSide==0) m_NEW_SumSideC = m_NEW_CEM+m_NEW_CHAD1+m_NEW_CHAD2+m_NEW_CHAD3;
-    //if(thisSide==1) m_SumSideA = m_AEM+m_AHAD1+m_AHAD2+m_AHAD3;
-    //if(thisSide==0) m_SumSideC = m_CEM+m_CHAD1+m_CHAD2+m_CHAD3;
+    // removed since using unused amplitudes
   }
 
-  //if(thisSide==1) m_SumSideA = m_NEW_AEM+m_NEW_AHAD1+m_NEW_AHAD2+m_NEW_AHAD3;
-  //if(thisSide==0) m_SumSideC = m_NEW_CEM+m_NEW_CHAD1+m_NEW_CHAD2+m_NEW_CHAD3;
-  m_NEW_SumSideA = m_NEW_AEM + m_NEW_AHAD1 + m_NEW_AHAD2 + m_NEW_AHAD3;
-  m_NEW_SumSideC = m_NEW_CEM + m_NEW_CHAD1 + m_NEW_CHAD2 + m_NEW_CHAD3;
-
-  //m_hSumSideAmp[1]->Fill(m_NEW_AEM+m_NEW_AHAD1+m_NEW_AHAD2+m_NEW_AHAD3);
-  //m_hSumSideAmp[0]->Fill(m_NEW_CEM+m_NEW_CHAD1+m_NEW_CHAD2+m_NEW_CHAD3);
-  m_hSumSideAmp[1]->Fill(m_NEW_SumSideA);
-  m_hSumSideAmp[0]->Fill(m_NEW_SumSideC);
-  m_hSideAC->Fill(m_NEW_SumSideA, m_NEW_SumSideC);
-
-  m_hEM_HAD1[0]->Fill(m_NEW_CEM, m_NEW_CHAD1);
-  m_hHAD1_HAD2[0]->Fill(m_NEW_CHAD1, m_NEW_CHAD2);
-  m_hHAD2_HAD3[0]->Fill(m_NEW_CHAD2, m_NEW_CHAD3);
-  m_hEM_HAD1[1]->Fill(m_NEW_AEM, m_NEW_AHAD1);
-  m_hHAD1_HAD2[1]->Fill(m_NEW_AHAD1, m_NEW_AHAD2);
-  m_hHAD2_HAD3[1]->Fill(m_NEW_AHAD2, m_NEW_AHAD3);
-
-  m_hSumSideAmpG0[1]->Fill(m_G0AEM + m_G0AHAD1 + m_G0AHAD2 + m_G0AHAD3);
-  m_hSumSideAmpG0[0]->Fill(m_G0CEM + m_G0CHAD1 + m_G0CHAD2 + m_G0CHAD3);
-  m_hSumSideAmpG1[1]->Fill(m_G1AEM + m_G1AHAD1 + m_G1AHAD2 + m_G1AHAD3);
-  m_hSumSideAmpG1[0]->Fill(m_G1CEM + m_G1CHAD1 + m_G1CHAD2 + m_G1CHAD3);
-
-  /*
-     m_hEM_HAD1[0]->Fill(m_CEM, m_CHAD1);
-     m_hHAD1_HAD2[0]->Fill(m_CHAD1, m_CHAD2);
-     m_hHAD2_HAD3[0]->Fill(m_CHAD2, m_CHAD3);
-     m_hEM_HAD1[1]->Fill(m_AEM, m_AHAD1);
-     m_hHAD1_HAD2[1]->Fill(m_AHAD1, m_AHAD2);
-     m_hHAD2_HAD3[1]->Fill(m_AHAD2, m_AHAD3);
-     m_hSideAC->Fill(m_SumSideA, m_SumSideC);
-
-     m_hEM_HAD1_NEW[0]->Fill(m_NEW_CEM, m_NEW_CHAD1);
-     m_hHAD1_HAD2_NEW[0]->Fill(m_NEW_CHAD1, m_NEW_CHAD2);
-     m_hHAD2_HAD3_NEW[0]->Fill(m_NEW_CHAD2, m_NEW_CHAD3);
-     m_hEM_HAD1_NEW[1]->Fill(m_NEW_AEM, m_NEW_AHAD1);
-     m_hHAD1_HAD2_NEW[1]->Fill(m_NEW_AHAD1, m_NEW_AHAD2);
-     m_hHAD2_HAD3_NEW[1]->Fill(m_NEW_AHAD2, m_NEW_AHAD3);
-     m_hSideAC_NEW->Fill(m_NEW_SumSideA, m_NEW_SumSideC);
-   */
   return StatusCode::SUCCESS;
 }
 
-StatusCode HIMonitoringZdcTool::procHistograms( ) {
-  //if( endOfLowStatFlag() || endOfLumiBlockFlag() ) {  }
-
-  if (endOfRunFlag()) {
-    for (int k = 0; k < s_Nside; k++) {
-      if (m_hSumSideAmp[k]->GetEntries() > 0) m_hSumSideAmp[k]->Scale(1. / m_hSumSideAmp[k]->GetEntries());
-      //       if(hSumSideAmp_NEW[k]->GetEntries() > 0) hSumSideAmp_NEW[k]->Scale(1./hSumSideAmp_NEW[k]->GetEntries());
-      if (m_hSumSideAmpG0[k]->GetEntries() > 0) m_hSumSideAmpG0[k]->Scale(1. / m_hSumSideAmpG0[k]->GetEntries());
-      if (m_hSumSideAmpG1[k]->GetEntries() > 0) m_hSumSideAmpG1[k]->Scale(1. / m_hSumSideAmpG1[k]->GetEntries());
-
-      for (int i = 0; i < s_Nmod; i++) {
-        if (m_hamp[i][k]->GetEntries() > 0) m_hamp[i][k]->Scale(1. / m_hamp[i][k]->GetEntries());
-        //             if(m_hamp_NEW[i][k]->GetEntries() > 0)
-        // m_hamp_NEW[i][k]->Scale(1./m_hamp_NEW[i][k]->GetEntries());
-        if (m_hampG0[i][k]->GetEntries() > 0) m_hampG0[i][k]->Scale(1. / m_hampG0[i][k]->GetEntries());
-        if (m_hampG1[i][k]->GetEntries() > 0) m_hampG1[i][k]->Scale(1. / m_hampG1[i][k]->GetEntries());
-      }
-    }
-  }
-
+StatusCode HIMonitoringZdcTool::procHistograms( ) 
+{
+  //functionality removed
   return StatusCode::SUCCESS;
 }
 

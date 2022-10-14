@@ -74,6 +74,7 @@ StatusCode ZdcRecV3::initialize()
 	ATH_CHECK( m_zdcTool.retrieve() );
 
 	ATH_CHECK( m_zdcModuleContainerName.initialize() );
+	ATH_CHECK( m_zdcSumContainerName.initialize() );
 	ATH_CHECK( m_ttContainerName.initialize(SG::AllowEmpty) );
 
 	if (m_ownPolicy == SG::OWN_ELEMENTS)
@@ -103,20 +104,25 @@ StatusCode ZdcRecV3::execute()
   }
 
   // Look up the Digits "TriggerTowerContainer" in Storegate
-  SG::ReadHandle<xAOD::TriggerTowerContainer> ttContainer    (m_ttContainerName, ctx);
+  SG::ReadHandle<xAOD::TriggerTowerContainer> ttContainer (m_ttContainerName, ctx);
   
   //Create the containers to hold the reconstructed information (you just pass the pointer and the converter does the work)	
   std::unique_ptr<xAOD::ZdcModuleContainer> moduleContainer( new xAOD::ZdcModuleContainer());
   std::unique_ptr<xAOD::ZdcModuleAuxContainer> moduleAuxContainer( new xAOD::ZdcModuleAuxContainer() );
   moduleContainer->setStore( moduleAuxContainer.get() );
+
+  //Create the containers to hold the reconstructed information (you just pass the pointer and the converter does the work)	
+  std::unique_ptr<xAOD::ZdcModuleContainer> moduleSumContainer( new xAOD::ZdcModuleContainer());
+  std::unique_ptr<xAOD::ZdcModuleAuxContainer> moduleSumAuxContainer( new xAOD::ZdcModuleAuxContainer() );
+  moduleSumContainer->setStore( moduleSumAuxContainer.get() );
   
   // rearrange ZDC channels and perform fast reco on all channels (including non-big tubes)
-  int ncha = m_ChannelTool->convertTT2ZM(ttContainer.get(), moduleContainer.get() );
+  int ncha = m_ChannelTool->convertTT2ZM(ttContainer.get(), moduleContainer.get(), moduleSumContainer.get() );
   ATH_MSG_DEBUG("m_ChannelTool->convertTT2ZM returned " << ncha << " channels");
   //msg( MSG::DEBUG ) << ZdcModuleToString(*moduleContainer) << endmsg;
   
   // re-reconstruct big tubes 
-  ATH_CHECK( m_zdcTool->recoZdcModules(*moduleContainer.get()) ); // passes by reference
+  ATH_CHECK( m_zdcTool->recoZdcModules(*moduleContainer.get(), *moduleSumContainer.get() ) ); // passes by reference
 
   SG::WriteHandle<xAOD::ZdcModuleContainer> moduleContainerH (m_zdcModuleContainerName, ctx);
   ATH_CHECK( moduleContainerH.record (std::move(moduleContainer),

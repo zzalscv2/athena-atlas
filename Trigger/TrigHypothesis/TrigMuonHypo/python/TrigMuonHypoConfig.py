@@ -275,6 +275,7 @@ trigMuonEFInvMassThresholds = {
     'invmJPsiOS' : [2.5, 4.3],
     'invmDimu'   : [1.5, 14.],
     'idZmumu'    : [50., 130.],
+    'idJpsimumu' : [1., 5.],
 }
 
 # Monitoring groups to monitor
@@ -1006,7 +1007,15 @@ class TrigMuonEFIdtpHypoConfig(object):
         return tool
 
 def TrigMuonEFIdtpInvMassHypoToolFromDict( chainDict ) :
-    thresholds = 'idZmumu'
+    cname = chainDict['chainName']
+    if 'idZmumu' in cname : 
+        thresholds = 'idZmumu'
+    elif 'idJpsimumu' in cname :
+        thresholds = 'idJpsimumu'
+    else :
+        log.warning("unknown chain name for IdtpInvmassHypo, chain name= %s, setting threshold of Z mass",cname)
+        thresholds = 'idZmumu'
+
     config = TrigMuonEFIdtpInvMassHypoConfig()
     tool = config.ConfigurationHypoTool( chainDict['chainName'], thresholds )
 

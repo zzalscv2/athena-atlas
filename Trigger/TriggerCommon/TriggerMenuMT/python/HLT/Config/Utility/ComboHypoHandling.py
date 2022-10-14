@@ -207,6 +207,7 @@ comboConfigurator = {
     'mT':TrigComboHypoToolFromDict,
     'afpdijet':TrigAFPDijetComboHypoToolCfg,
     'idZmumu':TrigMuonEFIdtpInvMassHypoToolCfg,
+    'idJpsimumu':TrigMuonEFIdtpInvMassHypoToolCfg,
 }
 
 def addTopoInfo(theChainConfig, mainChainDict, listOfChainDefs, lengthOfChainConfigs):
