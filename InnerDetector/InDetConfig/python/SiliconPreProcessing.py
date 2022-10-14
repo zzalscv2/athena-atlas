@@ -129,9 +129,7 @@ def ITkRecPreProcessingSiliconCfg(flags, **kwargs):
         from ActsTrkClusterization.ActsTrkClusterizationConfig import ActsTrkITkPixelClusterizationAlgCfg
         acc.merge(ActsTrkITkPixelClusterizationAlgCfg(flags))
 
-    if flags.ITk.Tracking.convertXAODClusters and flags.ITk.Tracking.EnableNativexAODclusters and flags.Detector.EnableITkPixel:
-        if flags.Detector.EnableITkStrip:
-            raise RuntimeError("Strip cluster conversion from xAOD to InDet EDM not yet implemented!")
+    if flags.ITk.Tracking.convertXAODClusters and flags.Detector.EnableITkPixel and flags.Detector.EnableITkStrip:
         #
         # --- Conversion algorithm for xAOD clusters to xAOD clusters
         #

@@ -12,6 +12,10 @@ def ITkInDetToXAODClusterConversionCfg(flags, name="ITkInDetToXAODClusterConvers
 
 def ITkXAODToInDetClusterConversionCfg(flags, name="ITkXAODToInDetClusterConversion", **kwargs):
     acc = ComponentAccumulator()
+
+    from SiLorentzAngleTool.ITkStripLorentzAngleConfig import ITkStripLorentzAngleToolCfg
+    kwargs.setdefault("LorentzAngleTool", acc.popToolsAndMerge(ITkStripLorentzAngleToolCfg(flags)) )
+
     conversionAlg=CompFactory.InDet.XAODToInDetClusterConversion(name, **kwargs)
     acc.addEventAlgo(conversionAlg)
     return acc
