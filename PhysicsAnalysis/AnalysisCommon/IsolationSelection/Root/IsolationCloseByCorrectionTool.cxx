@@ -667,7 +667,6 @@ namespace CP {
         strPar.pt = x.pt();
         strPar.eta = x.eta();
         strPar.type = x.type();
-        std::vector<float> corrections;
         if (getCloseByCorrection(strPar.isolationValues, x, iso_types, closePar) == CorrectionCode::Error) {
             ATH_MSG_WARNING("Could not calculate the corrections. acceptCorrected(x) is done without the corrections.");
             if (m_dec_isoselection) (*m_dec_isoselection)(x) = bool(m_selectorTool->accept(x));
@@ -676,8 +675,7 @@ namespace CP {
         for (unsigned int i = 0; i < iso_types.size(); ++i) {
             const SG::AuxElement::Accessor<float>* acc = xAOD::getIsolationAccessor(iso_types.at(i));
             float old = (*acc)(x);
-            ATH_MSG_DEBUG("Correcting " << toString(iso_types.at(i)) << " from " << old << " to " << corrections.at(i));
-            strPar.isolationValues[iso_types.at(i)] = corrections.at(i);
+            ATH_MSG_DEBUG("Correcting " << toString(iso_types.at(i)) << " from " << old << " to " << strPar.isolationValues.at(i));
         }
         auto accept = m_selectorTool->accept(strPar);
         if (m_dec_isoselection) (*m_dec_isoselection)(x) = bool(accept);
