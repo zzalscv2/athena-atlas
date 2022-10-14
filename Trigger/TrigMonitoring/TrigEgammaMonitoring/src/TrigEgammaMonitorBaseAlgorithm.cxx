@@ -628,7 +628,7 @@ void TrigEgammaMonitorBaseAlgorithm::setTrigInfo(const std::string& trigger){
     bool etcut = false;
     bool idperf = false;
     bool isolated = false;
-    std::string pidname = m_defaultProbePid;
+    
     std::string isolation="";
     bool l1legacy=true;
 
@@ -641,11 +641,18 @@ void TrigEgammaMonitorBaseAlgorithm::setTrigInfo(const std::string& trigger){
 
     std::vector<std::string> parts;
     boost::split(parts,hltinfo,boost::is_any_of("_"));
+    std::string pidname;
 
     // e/gXX_(pidname/etcut/idperf)_*_L1EMXX
-    if(boost::contains(parts.at(0),"e")) signature = "Electron";
-    else if(boost::contains(parts.at(0),"g")) signature = "Photon";
-    else ATH_MSG_ERROR("Cannot set trigger type from name");
+    if(boost::contains(parts.at(0),"e")) {
+        signature = "Electron";
+        pidname = m_defaultProbePidElectron;
+    }else if(boost::contains(parts.at(0),"g")) {
+        signature = "Photon";
+        pidname = m_defaultProbePidPhoton;
+    }else {
+        ATH_MSG_ERROR("Cannot set trigger type from name");
+    }
 
     ATH_MSG_INFO(parts.at(1));
     if(parts.at(1) == "idperf"){
@@ -684,7 +691,7 @@ void TrigEgammaMonitorBaseAlgorithm::setTrigInfo(const std::string& trigger){
 
     ATH_MSG_INFO("=================== Chain Parser =======================");
     ATH_MSG_INFO( "trigger     : " << trigger );
-    ATH_MSG_INFO( "threshould  : " << threshold);
+    ATH_MSG_INFO( "threshold   : " << threshold);
     ATH_MSG_INFO( "Pidname     : " << pidname );
     ATH_MSG_INFO( "signature   : " << signature);
     ATH_MSG_INFO( "etcut       : " << (etcut?"Yes":"No"));

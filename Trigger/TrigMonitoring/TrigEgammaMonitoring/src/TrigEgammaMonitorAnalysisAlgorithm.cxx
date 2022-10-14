@@ -447,6 +447,21 @@ void TrigEgammaMonitorAnalysisAlgorithm::fillDistributions( const std::vector< s
           fillTracking( trigger, el_vec, true );
       }
   }else if ( info.signature == "Photon"){
+        // Fast Photon
+      {
+          std::string key = match()->key("FastPhotons");         
+          std::vector<const xAOD::TrigPhoton*> ph_vec;
+          // Get only passed objects
+          auto vec =  tdt()->features<xAOD::TrigPhotonContainer>(trigger,condition,key );      
+          for( auto &featLinkInfo : vec ){
+              if(! featLinkInfo.isValid() ) continue;
+              const auto *feat = *(featLinkInfo.link);
+              if(!feat) continue;
+              ph_vec.push_back(feat);
+          }
+          fillL2Photon( trigger, ph_vec );
+      }
+
       // HLT Photon
       {
           std::vector<const xAOD::Egamma*> ph_vec;
@@ -580,6 +595,31 @@ void TrigEgammaMonitorAnalysisAlgorithm::fillL2Electron(const std::string &trigg
 
     fill( monGroup, et_col, eta_col, phi_col, highet_col );
 }
+
+void TrigEgammaMonitorAnalysisAlgorithm::fillL2Photon(const std::string &trigger, const std::vector< const xAOD::TrigPhoton* >& ph_vec) const
+{
+ 
+    auto monGroup = getGroup(trigger+"_Distributions_L2Photon");
+    
+    std::vector<float> et_vec, eta_vec, phi_vec, highet_vec;
+    
+    auto et_col   = Monitored::Collection("et" , et_vec  ); 
+    auto highet_col   = Monitored::Collection("highet" , highet_vec  );    
+    auto eta_col  = Monitored::Collection("eta", eta_vec );    
+    auto phi_col  = Monitored::Collection("phi", phi_vec );    
+    
+    for ( const auto *ph : ph_vec )
+    {
+      if(!ph)  continue;
+      et_vec.push_back( ph->pt()/Gaudi::Units::GeV );
+      highet_vec.push_back( ph->pt()/Gaudi::Units::GeV );
+      eta_vec.push_back( ph->eta() );
+      phi_vec.push_back( ph->phi() );
+    }
+
+    fill( monGroup, et_col, eta_col, phi_col, highet_col );
+}
+
 
 void TrigEgammaMonitorAnalysisAlgorithm::fillEFCalo(const std::string &trigger, const std::vector< const xAOD::CaloCluster*>& clus_vec) const
 {
