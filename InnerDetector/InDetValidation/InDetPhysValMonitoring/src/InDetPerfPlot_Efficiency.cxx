@@ -1,35 +1,15 @@
 /*
-  Copyright (C) 2002-2020 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "InDetPerfPlot_Efficiency.h"
-// #include "TrkValHistUtils/EfficiencyPurityCalculator.h"
-#include "xAODTruth/TruthParticle.h"
 #include "xAODTruth/TruthVertex.h"
-#include "InDetPhysValMonitoringUtilities.h"
-#include <cmath>
+#include "logLinearBinning.h"
+#include "GaudiKernel/SystemOfUnits.h" //for Gaudi::Units
 using namespace IDPVM;
 
 InDetPerfPlot_Efficiency::InDetPerfPlot_Efficiency(InDetPlotBase* pParent, const std::string& sDir) :
-  InDetPlotBase(pParent, sDir),
-  m_efficiency_vs_pteta{},
-  m_efficiency_vs_eta{},
-  m_efficiency_vs_pt{},
-  m_efficiency_vs_pt_low{},
-  m_efficiency_vs_pt_high{},
-  m_efficiency_vs_pt_log{},
-  m_efficiency_vs_phi{},
-  m_efficiency_vs_d0{},
-  m_efficiency_vs_z0{},
-  m_efficiency_vs_R{},
-  m_efficiency_vs_Z{},
-  m_efficiency_vs_mu{},
-  m_extended_efficiency_vs_d0{},
-  m_extended_efficiency_vs_z0{},
-  m_efficiency_vs_prodR{},
-  m_efficiency_vs_prodR_extended{},
-  m_efficiency_vs_prodZ{},
-  m_efficiency_vs_prodZ_extended{} {
+  InDetPlotBase(pParent, sDir){
   // nop
 }
 

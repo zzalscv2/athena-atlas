@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2020 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef INDETPHYSVALMONITORING_INDETPERFPLOT_EFFICIENCY
@@ -18,11 +18,10 @@
 
 // local includes
 #include "InDetPlotBase.h"
-#include "xAODTracking/TrackParticle.h"
 #include "xAODTruth/TruthParticle.h"
-#include "logLinearBinning.h"
 // std includes
 #include <string>
+class TEfficiency;
 
 ///class holding Pt plots for Inner Detector RTT Validation and implementing fill methods
 class InDetPerfPlot_Efficiency: public InDetPlotBase {
@@ -31,27 +30,27 @@ public:
 
   void fill(const xAOD::TruthParticle& truth, const bool isGood, float weight, float mu);
 private:
-  TEfficiency* m_efficiency_vs_pteta;
-  TEfficiency* m_efficiency_vs_ptmu;
+  TEfficiency* m_efficiency_vs_pteta{};
+  TEfficiency* m_efficiency_vs_ptmu{};
 
-  TEfficiency* m_efficiency_vs_eta;
-  TEfficiency* m_efficiency_vs_pt;
-  TEfficiency* m_efficiency_vs_pt_low;
-  TEfficiency* m_efficiency_vs_pt_high;
-  TEfficiency* m_efficiency_vs_pt_log;
-  TEfficiency* m_efficiency_vs_phi;
-  TEfficiency* m_efficiency_vs_d0;
-  TEfficiency* m_efficiency_vs_z0;
-  TEfficiency* m_efficiency_vs_R;
-  TEfficiency* m_efficiency_vs_Z;
-  TEfficiency* m_efficiency_vs_mu;
+  TEfficiency* m_efficiency_vs_eta{};
+  TEfficiency* m_efficiency_vs_pt{};
+  TEfficiency* m_efficiency_vs_pt_low{};
+  TEfficiency* m_efficiency_vs_pt_high{};
+  TEfficiency* m_efficiency_vs_pt_log{};
+  TEfficiency* m_efficiency_vs_phi{};
+  TEfficiency* m_efficiency_vs_d0{};
+  TEfficiency* m_efficiency_vs_z0{};
+  TEfficiency* m_efficiency_vs_R{};
+  TEfficiency* m_efficiency_vs_Z{};
+  TEfficiency* m_efficiency_vs_mu{};
 
-  TEfficiency* m_extended_efficiency_vs_d0;
-  TEfficiency* m_extended_efficiency_vs_z0;
-  TEfficiency* m_efficiency_vs_prodR;
-  TEfficiency* m_efficiency_vs_prodR_extended;
-  TEfficiency* m_efficiency_vs_prodZ;
-  TEfficiency* m_efficiency_vs_prodZ_extended;
+  TEfficiency* m_extended_efficiency_vs_d0{};
+  TEfficiency* m_extended_efficiency_vs_z0{};
+  TEfficiency* m_efficiency_vs_prodR{};
+  TEfficiency* m_efficiency_vs_prodR_extended{};
+  TEfficiency* m_efficiency_vs_prodZ{};
+  TEfficiency* m_efficiency_vs_prodZ_extended{};
 
   // plot base has nop default implementation of this; we use it to book the histos
   void initializePlots();
