@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2017 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
 */
 
 ///////////////////////////////////////////////////////////////////
@@ -75,7 +75,7 @@ bool ISF::GenParticlePositionFilter::pass(const HepMC::GenParticle& particle) co
   // of any of the given ISF Simulation GeoIDs
   std::vector<int>::const_iterator checkRegionIt    = m_checkRegion.begin();
   std::vector<int>::const_iterator checkRegionItEnd = m_checkRegion.end();
-  for ( ; (checkRegionIt!=checkRegionItEnd) && (!inside); checkRegionIt++) {
+  for ( ; (checkRegionIt!=checkRegionItEnd) && (!inside); ++checkRegionIt) {
     // consult the GeoID identification service
     ISF::InsideType insideCheck = m_geoIDSvc->inside( pos.x(),
                                                       pos.y(),
