@@ -7,9 +7,12 @@
 #include "MuonReadoutGeometry/MuonDetectorManager.h"
 #include "StoreGate/ReadCondHandleKey.h"
 #include "MuonIdHelpers/IMuonIdHelperSvc.h"
+#include <map> //for map
+#include <memory> //for unique_ptr
 
-#include "TGraph.h"
-#include "TH1.h"
+class TGraph;
+class TH1;
+
 class NSWGeoPlottingAlg : public AthHistogramAlgorithm {
 public:
     NSWGeoPlottingAlg(const std::string& name, ISvcLocator* pSvcLocator);

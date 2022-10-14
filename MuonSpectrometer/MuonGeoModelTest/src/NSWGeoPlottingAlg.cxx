@@ -10,9 +10,11 @@
 #include "TrkSurfaces/Surface.h"
 #include "TrkSurfaces/RotatedTrapezoidBounds.h"
 #include "GaudiKernel/SystemOfUnits.h"
+#include "TH1.h"
 #include "TGraph.h"
 #include "TFile.h"
 #include "TH2D.h"
+#include <cmath>
 
 namespace {
     std::string to_string(const Amg::Vector3D& v) {
@@ -95,7 +97,6 @@ StatusCode NSWGeoPlottingAlg::initialize() {
                                                             st_roe->getDesign(id);  
           
           const Trk::TrkDetElementBase* roe = mm_roe;
-          if (!roe) roe = st_roe;
           auto fill_graphs = [&](const Amg::Vector2D& locPos, int strip) {
                             
             if ((is_mm || std::abs(locPos.y()) < 1.e-3 ) && design->channelNumber(locPos) != strip) {

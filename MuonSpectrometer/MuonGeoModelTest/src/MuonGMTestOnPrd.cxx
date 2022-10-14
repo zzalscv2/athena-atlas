@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2020 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
 */
 
 /***************************************************************************
@@ -114,7 +114,7 @@ StatusCode MuonGMTestOnPrd::execute() {
                 int iccphi = 0;
                 int icceta = 0;
                 int icctrg = 0;
-                for (it_rpcPrepData = rpcColl->begin(); it_rpcPrepData != rpcColl->end(); it_rpcPrepData++) {
+                for (it_rpcPrepData = rpcColl->begin(); it_rpcPrepData != rpcColl->end(); ++it_rpcPrepData) {
                     icc++;
                     ict++;
                     if ((*it_rpcPrepData)->triggerInfo() > 0) {
@@ -166,7 +166,7 @@ StatusCode MuonGMTestOnPrd::execute() {
                                                << " found with size " << tgcColl->size());
                 Muon::TgcPrepDataCollection::const_iterator it_tgcPrepData;
 
-                for (it_tgcPrepData = tgcColl->begin(); it_tgcPrepData != tgcColl->end(); it_tgcPrepData++) {
+                for (it_tgcPrepData = tgcColl->begin(); it_tgcPrepData != tgcColl->end(); ++it_tgcPrepData) {
                     ATH_MSG_INFO("in Coll n. " << ncoll << "      PrepData Offline ID "
                                                << m_TgcIdHelper->show_to_string((*it_tgcPrepData)->identify()));
                 }
