@@ -5970,6 +5970,8 @@ HLT_mu4_l2io_L1MU3V:
     3: 1
 HLT_mu4_mu4_idperf_1invmAB5_L12MU3VF:
   eventCount: 0
+HLT_mu4_mu4_idtp_idJpsimumu_L12MU3VF:
+  eventCount: 0
 HLT_mu50_L1MU14FCH:
   eventCount: 0
 HLT_mu50_L1MU18VFCH:
