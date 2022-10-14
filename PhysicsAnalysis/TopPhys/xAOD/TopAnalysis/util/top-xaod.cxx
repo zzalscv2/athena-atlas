@@ -820,7 +820,7 @@ int main(int argc, char** argv) {
               if ((!topConfig->isAFII() && topConfig->PileupActualMu_FS().size() == 0) || 
                 (topConfig->isAFII() && topConfig->PileupActualMu_AF().size() == 0)) {
                 ATH_MSG_WARNING("\n***************************************************************************************"
-		                "\nYou are running over mc16d or mc16e sample but you are not using actual mu reweighting!"
+		                "\nYou are running over MC campaigns which support actual mu rewighting, but you are not using it!"
 		                "\nYou are strongly adviced to use it.\nCheck https://twiki.cern.ch/twiki/bin/view/AtlasProtected/TopxAODStartGuideR21#PRW_and_Lumicalc_files"
 		                "\n***************************************************************************************\n");
               }
