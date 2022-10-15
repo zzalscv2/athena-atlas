@@ -3,6 +3,9 @@
 # art-description: MC16-style simulation of stable Charginos using FullG4 (tests the Charginos package alone)
 # art-architecture:  '#x86_64-intel'
 # art-type: grid
+# art-output: *.root
+# art-output: PDGTABLE.*
+# art-output: log.*
 # art-include: 21.0/Athena
 # art-include: 21.0/AthSimulation
 # art-include: 21.3/Athena
@@ -18,7 +21,8 @@ Sim_tf.py \
 --truthStrategy 'MC15aPlusLLP' \
 --simulator 'FullG4' \
 --postInclude 'default:PyJobTransforms/UseFrontier.py' \
---preInclude 'EVNTtoHITS:SimulationJobOptions/preInclude.BeamPipeKill.py,SimulationJobOptions/preInclude.FrozenShowersFCalOnly.py' \
+--preInclude 'EVNTtoHITS:SimulationJobOptions/preInclude.BeamPipeKill.py,SimulationJobOptions/preInclude.FrozenShowersFCalOnly.py,SimulationJobOptions/preInclude.DebugAMSB.py' \
+--preExec 'EVNTtoHITS:simFlags.TightMuonStepping=True; simFlags.SimBarcodeOffset.set_Value_and_Lock(200000); simFlags.TRTRangeCut=30.0;' \
 --DataRunNumber '284500' \
 --geometryVersion 'default:ATLAS-R2-2016-01-00-01' \
 --inputEVNTFile "/cvmfs/atlas-nightlies.cern.ch/repo/data/data-art/SimCoreTests/mc15_13TeV.404460.MGPy8EG_A14N23LO_mAMSB_C1C1_5000_68000_Stable.evgen.EVNT.e5654.EVNT.13360885._000001.pool.root.1" \
