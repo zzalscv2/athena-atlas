@@ -10,11 +10,11 @@ MuonCombinedESDList = []
 if DetFlags.detdescr.Muon_on():
    
   if muonCombinedRecFlags.saveUnassocSegments():
-      MuonCombinedESDList+=[ "Trk::SegmentCollection#UnAssocMuonSegments"]
+      MuonCombinedESDList+=[ "Trk::SegmentCollection#UnAssocMuonTrkSegments"]
       
   if muonCombinedRecFlags.doMuGirlLowBeta() and muonCombinedRecFlags.doMuGirl():
       MuonCombinedESDList+=[ "Trk::SegmentCollection#TrkStauSegments"]
-  MuonCombinedESDList+=["Trk::SegmentCollection#TrackMuonSegments"]
+  MuonCombinedESDList+=["Trk::SegmentCollection#TrkMuonSegments"]
   if muonRecFlags.doStandalone():    
     # ========================Muons===============================================
     cmb_trk_container = GetCombinedTrackParticles()[1] 

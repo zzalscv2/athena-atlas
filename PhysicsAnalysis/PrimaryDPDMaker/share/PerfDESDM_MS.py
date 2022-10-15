@@ -395,7 +395,14 @@ AlignmentTriggerMuonStream.AddItem(["Muon::RpcPrepDataContainer#*"])
 AlignmentTriggerMuonStream.AddItem(["Muon::TgcPrepDataContainer#*"])
 AlignmentTriggerMuonStream.AddItem(["Muon::MdtPrepDataContainer#*"])
 #Alignment
-AlignmentTriggerMuonStream.AddItem(["Trk::SegmentCollection#TrackMuonSegments"])
+
+#This is the muon segment container containing all segments but we need the individual one since otherwise the navigation from xAOD to Trk segment does not work
+#AlignmentTriggerMuonStream.AddItem(["Trk::SegmentCollection#TrackMuonSegments"])
+AlignmentTriggerMuonStream.AddItem(["Trk::SegmentCollection#TrkMuonSegments"])
+AlignmentTriggerMuonStream.AddItem(["Trk::SegmentCollection#UnAssocMuonTrkSegments"])
+if not MuonGeometryFlags.hasCSC():
+    AlignmentTriggerMuonStream.AddItem(["Trk::SegmentCollection#TrackMuonNSWSegments"])
+
 AlignmentTriggerMuonStream.AddItem(["xAOD::VertexContainer#PrimaryVertices"])
 AlignmentTriggerMuonStream.AddItem(["xAOD::VertexAuxContainer#PrimaryVerticesAux.-vxTrackAtVertex.-MvfFitInfo.-isInitialized.-VTAV"])
 AlignmentTriggerMuonStream.AddItem(["TrackCollection#MuonSpectrometerTracks"])

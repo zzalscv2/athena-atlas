@@ -597,7 +597,9 @@ def CombinedMuonOutputCfg(flags):
 
     # Tracks
     esd_items = ["TrackCollection#"+col for col in trk_col]
-    esd_items+=["Trk::SegmentCollection#TrackMuonSegments"]
+    esd_items+=["Trk::SegmentCollection#TrkMuonSegments"]
+    if flags.MuonCombined.writeUnAssocSegments:
+        esd_items+=["Trk::SegmentCollection#UnAssocMuonTrkSegments"]
     # Truth
     if flags.Input.isMC:
         esd_items = [

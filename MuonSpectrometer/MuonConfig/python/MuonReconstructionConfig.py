@@ -95,6 +95,8 @@ def StandaloneMuonOutputCfg(flags):
     esd_items += ["TrackCollection#MuonSpectrometerTracks"]
     if flags.Muon.runCommissioningChain:
         esd_items += ["TrackCollection#EMEO_MuonSpectrometerTracks"]
+    if flags.Detector.EnableMM or flags.Detector.EnablesTGC:
+            esd_items += ["Trk::SegmentCollection#TrackMuonNSWSegments"]
 
     # Truth
     if flags.Input.isMC:
