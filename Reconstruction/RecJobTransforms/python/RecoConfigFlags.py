@@ -16,6 +16,7 @@ _all_domains = [
     "CaloRinger",
     "AFP",
     "HI",
+    "BeamSpotDecoration",
     "PostProcessing",
 ]
 
@@ -72,6 +73,9 @@ def createRecoConfigFlags():
     # enable automatically for HI data
     flags.addFlag("Reco.EnableHI",
                   lambda prevFlags: "_hi" in prevFlags.Input.ProjectName)
+    
+    # enable alg for decorating EventInfo with BeamSpot info (maybe not always available for calibration runs, etc)
+    flags.addFlag("Reco.EnableBeamSpotDecoration", True)
 
     # common thinning and other post-processing
     flags.addFlag("Reco.EnablePostProcessing", True)
