@@ -1,6 +1,6 @@
 #!/bin/sh
 #
-# art-description: MC16-style simulation of decaying Neutralinos using FullG4 (tests sim response to many displaced “primary” particles)
+# art-description: MC20-style simulation of decaying Neutralinos using FullG4_LongLived (tests sim response to many displaced “primary” particles)
 # art-architecture:  '#x86_64-intel'
 # art-type: grid
 # art-output: *.root
@@ -19,9 +19,9 @@ Sim_tf.py \
 --conditionsTag 'default:OFLCOND-MC16-SDR-14' \
 --physicsList 'FTFP_BERT_ATL' \
 --truthStrategy 'MC15aPlusLLP' \
---simulator 'FullG4' \
+--simulator 'FullG4_LongLived' \
 --postInclude 'default:PyJobTransforms/UseFrontier.py' \
---preInclude 'EVNTtoHITS:SimulationJobOptions/preInclude.BeamPipeKill.py,SimulationJobOptions/preInclude.FrozenShowersFCalOnly.py' \
+--preInclude 'EVNTtoHITS:SimulationJobOptions/preInclude.BeamPipeKill.py,SimulationJobOptions/preInclude.FrozenShowersFCalOnly.py,SimulationJobOptions/preInclude.ExtraParticles.py,SimulationJobOptions/preInclude.G4ExtraProcesses.py' \
 --preExec 'EVNTtoHITS:simFlags.TightMuonStepping=True; simFlags.SimBarcodeOffset.set_Value_and_Lock(200000); simFlags.TRTRangeCut=30.0;' \
 --DataRunNumber '284500' \
 --geometryVersion 'default:ATLAS-R2-2016-01-00-01' \

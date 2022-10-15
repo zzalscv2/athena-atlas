@@ -3,6 +3,9 @@
 # art-description: MC16-style simulation of decaying Charginos (busy events) using FullG4 (tests Charginos and Gauginos packages)
 # art-architecture:  '#x86_64-intel'
 # art-type: grid
+# art-output: *.root
+# art-output: PDGTABLE.*
+# art-output: log.*
 # art-include: 21.0/Athena
 # art-include: 21.0/AthSimulation
 # art-include: 21.3/Athena
@@ -18,7 +21,8 @@ Sim_tf.py \
 --truthStrategy 'MC15aPlusLLP' \
 --simulator 'FullG4' \
 --postInclude 'default:PyJobTransforms/UseFrontier.py' \
---preInclude 'EVNTtoHITS:SimulationJobOptions/preInclude.BeamPipeKill.py,SimulationJobOptions/preInclude.FrozenShowersFCalOnly.py' \
+--preInclude 'EVNTtoHITS:SimulationJobOptions/preInclude.BeamPipeKill.py,SimulationJobOptions/preInclude.FrozenShowersFCalOnly.py,SimulationJobOptions/preInclude.DebugAMSB.py' \
+--preExec 'EVNTtoHITS:simFlags.TightMuonStepping=True; simFlags.SimBarcodeOffset.set_Value_and_Lock(200000); simFlags.TRTRangeCut=30.0;' \
 --DataRunNumber '284500' \
 --geometryVersion 'default:ATLAS-R2-2016-01-00-01' \
 --inputEVNTFile "/cvmfs/atlas-nightlies.cern.ch/repo/data/data-art/SimCoreTests/mc15_13TeV.448300.MGPy8EG_A14N23LO_GG_mixedC1LLP_0p2_1400_1200.evgen.EVNT.e7183.EVNT.16706750._000001.pool.root.1" \
