@@ -73,7 +73,7 @@ class TrigL2LayerNumberToolITk : virtual public ITrigL2LayerNumberTool, public A
     return &m_sctLayers;
   }
 
-  virtual const std::vector<TRIG_INDET_SI_LAYER>* layerGeometry() const {
+  virtual const std::vector<TrigInDetSiLayer>* layerGeometry() const {
     return &m_layerGeometry;
   }
 
@@ -97,6 +97,6 @@ class TrigL2LayerNumberToolITk : virtual public ITrigL2LayerNumberTool, public A
   
   std::map<std::tuple<int, int, short, short>,std::vector<PhiEtaHashITk> > m_hashMap;
   std::vector<short> m_pixelLayers, m_sctLayers;//hashid addressable arrays of layer numbers
-  std::vector<TRIG_INDET_SI_LAYER> m_layerGeometry;
+  std::vector<TrigInDetSiLayer> m_layerGeometry;
 };
 #endif
