@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
 */
 
 #include <cmath>
@@ -22,9 +22,6 @@
 #include "GaudiKernel/IInterface.h"
 #include "GaudiKernel/MsgStream.h"
 #include "GaudiKernel/StatusCode.h"
-
-#include "EventInfo/EventInfo.h"
-#include "EventInfo/EventID.h"
 
 #include "TrigConfL1Data/CTPConfig.h"
 #include "TrigConfL1Data/L1DataDef.h"
@@ -1610,15 +1607,8 @@ bool TrigT1CaloLWHistogramToolV1::getMinMaxBin(TProfile2D_LW* hist,
 
 void TrigT1CaloLWHistogramToolV1::fillEventNumber(LWHist2D* hist, double y)
 {
-  int eventNumber = 0;
-  const EventInfo* evInfo = 0;
-  StatusCode sc = evtStore()->retrieve(evInfo);
-  if (sc.isFailure()) {
-    msg(MSG::DEBUG) << "No EventInfo found" << endmsg;
-  } else {
-    const EventID* evID = evInfo->event_ID();
-    if (evID) eventNumber = evID->event_number();
-  }
+  const EventContext& ctx = Gaudi::Hive::currentContext();
+  int eventNumber = ctx.eventID().event_number();
   if (eventNumber <= 0) return;
   const int biny  = hist->GetYaxis()->FindBin(y);
   const int nbins = hist->GetNbinsX();

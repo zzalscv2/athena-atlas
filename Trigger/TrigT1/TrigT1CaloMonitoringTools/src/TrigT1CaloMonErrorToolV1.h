@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2017 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef TRIGT1CALOBYTESTREAM_TRIGT1CALOMONERRORTOOLV1_H
@@ -10,6 +10,8 @@
 
 #include "AsgTools/AsgTool.h"
 #include "TrigT1CaloMonitoringTools/ITrigT1CaloMonErrorTool.h"
+#include "StoreGate/ReadHandleKey.h"
+#include "xAODEventInfo/EventInfo.h"
 
 class IInterface;
 class StatusCode;
@@ -119,6 +121,9 @@ private:
    /// Flag corrupt events
    std::string m_flagCorruptEvents;
 
+
+   SG::ReadHandleKey<xAOD::EventInfo> m_eventInfoKey
+     { this, "EventInfoKey", "EventInfo", "SG key for EventInfo" };
 };
 
 } // end namespace

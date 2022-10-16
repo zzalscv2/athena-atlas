@@ -46,13 +46,6 @@ namespace LVL1
  *
  *  Now uses Light Weight Histogram classes
  *
- *  <b>StoreGate Containers Used:</b>
- *
- *  <table>
- *  <tr><th> Container    </th><th> Comment                         </th></tr>
- *  <tr><td> @c EventInfo </td><td> For event number via @c EventID </td></tr>
- *  </table>
- *
  *  <b>Services Used:</b>
  *
  *  <table>
