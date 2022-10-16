@@ -16,9 +16,9 @@ def egammaxAODThinningCfg(flags, name="EGammaxAODThinning"):
     acc = ComponentAccumulator()
     # Add e/gamma track thinning
     if flags.Egamma.doTrackThinning:
-        from egammaAlgs.egammaTrackSlimmerConfig import (
-            egammaTrackSlimmerCfg)
-        acc.merge(egammaTrackSlimmerCfg(flags))
+        from egammaAlgs.egammaTrackThinnerConfig import (
+            egammaTrackThinnerCfg)
+        acc.merge(egammaTrackThinnerCfg(flags))
 
     # keep cells for egamma and egammaLargeClusters
     if flags.Egamma.keepCaloCellsAOD:

@@ -54,7 +54,7 @@ atlas_add_test( egammaTruthAssociationConfig_test
     SCRIPT python -m egammaAlgs.egammaTruthAssociationConfig
     POST_EXEC_SCRIPT nopost.sh)
 
-atlas_add_test( egammaTrackSlimmerConfig_test
-    SCRIPT python -m egammaAlgs.egammaTrackSlimmerConfig
+atlas_add_test( egammaTrackThinnerConfig_test
+    SCRIPT python -m egammaAlgs.egammaTrackThinnerConfig
     POST_EXEC_SCRIPT nopost.sh)
 

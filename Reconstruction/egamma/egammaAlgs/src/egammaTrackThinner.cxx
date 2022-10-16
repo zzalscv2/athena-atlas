@@ -3,13 +3,13 @@
 */
 
 /********************************************************************
-NAME:     egammaTrackSlimmer.cxx
+NAME:     egammaTrackThinner.cxx
 PACKAGE:  offline/Reconstruction/egammaRec
 ********************************************************************/
 
 // INCLUDE HEADER FILES:
 
-#include "egammaTrackSlimmer.h"
+#include "egammaTrackThinner.h"
 
 #include "xAODTracking/TrackParticleContainer.h"
 #include "xAODTracking/VertexContainer.h"
@@ -27,9 +27,9 @@ PACKAGE:  offline/Reconstruction/egammaRec
 
 // INITIALIZE METHOD:
      
-StatusCode egammaTrackSlimmer::initialize()
+StatusCode egammaTrackThinner::initialize()
 {
-  ATH_MSG_INFO("Initializing egammaTrackSlimmer");
+  ATH_MSG_INFO("Initializing egammaTrackThinner");
 
   // initialize data handles
   ATH_CHECK(m_InputElectronContainerKey.initialize(m_doThinning));
@@ -43,16 +43,16 @@ StatusCode egammaTrackSlimmer::initialize()
 
 // FINALIZE METHOD:
 
-StatusCode egammaTrackSlimmer::finalize() {
+StatusCode egammaTrackThinner::finalize() {
   return StatusCode::SUCCESS;
 }
 
 /////////////////////////////////////////////////////////////////
 // ATHENA EXECUTE METHOD:
    
-StatusCode egammaTrackSlimmer::execute (const EventContext& ctx) const {
+StatusCode egammaTrackThinner::execute (const EventContext& ctx) const {
   
-  ATH_MSG_DEBUG("Executing egammaTrackSlimmer");
+  ATH_MSG_DEBUG("Executing egammaTrackThinner");
   if(!m_doThinning){
     ATH_MSG_DEBUG("Thinning not requested do nothing");
     return StatusCode::SUCCESS;
