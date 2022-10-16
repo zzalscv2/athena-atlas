@@ -18,7 +18,7 @@ if "TimeStamp" not in dir():
       ts=strptime(date+'/UTC','%Y-%m-%d:%H:%M:%S/%Z')
       TimeStamp=int(timegm(ts))*1000000000L
    except ValueError:
-      print "ERROR in time specification, use e.g. 2007-05-25:14:01:00"
+      print("ERROR in time specification, use e.g. 2007-05-25:14:01:00")
 
 # run number only relevant for HV mapping information..   Use latest mapping here
 if "RunNumber" not in dir():

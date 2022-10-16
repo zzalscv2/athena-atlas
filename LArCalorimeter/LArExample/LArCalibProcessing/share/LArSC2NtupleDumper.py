@@ -54,7 +54,6 @@ if __name__=='__main__':
   from LArCafJobs.LArSCDumperFlags import addSCDumpFlags
   addSCDumpFlags(ConfigFlags)
 
-  # now set flags according parsed options
   if len(args.infile) > 0:
      ConfigFlags.Input.Files = [args.infile]
   elif len(args.inppatt) > 0:
@@ -64,26 +63,65 @@ if __name__=='__main__':
      from LArCalibProcessing.GetInputFiles import GetInputFilesFromPrefix
      ConfigFlags.Input.Files = GetInputFilesFromPrefix(args.indir,args.inpref)
 
-  if args.samples:
-     SamplesKey="SC"
+  # first autoconfig
+  from LArConditionsCommon.LArRunFormat import getLArDTInfoForRun
+  try:
+     runinfo=getLArDTInfoForRun(ConfigFlags.Input.RunNumber[0], connstring="COOLONL_LAR/CONDBR2")
+  except Exception:
+     log.warning("Could not get DT run info, using defaults !")
+     ConfigFlags.LArSCDump.doEt=True
+     if args.nsamp > 0:
+        ConfigFlags.LArSCDump.nSamples=args.nsamp
+     else:   
+        ConfigFlags.LArSCDump.nSamples=5
+     ConfigFlags.LArSCDump.nEt=1
+     ConfigFlags.LArSCDump.digitsKey="SC"
+     CKeys=["SC_ET"]
   else:
-     SamplesKey=""
+     CKeys=[]
+     ConfigFlags.LArSCDump.digitsKey=""
+     for i in range(0,len(runinfo.streamTypes())):
+        if runinfo.streamTypes()[i] ==  "SelectedEnergy":
+              CKeys += ["SC_ET_ID"]
+              ConfigFlags.LArSCDump.doEt=True
+              ConfigFlags.LArSCDump.nEt=runinfo.streamLengths()[i]
+        elif runinfo.streamTypes()[i] ==  "Energy":
+              CKeys += ["SC_ET"]
+              ConfigFlags.LArSCDump.doEt=True
+              ConfigFlags.LArSCDump.nEt=runinfo.streamLengths()[i]
+        elif runinfo.streamTypes()[i] ==  "RawADC":
+              ConfigFlags.LArSCDump.digitsKey="SC"
+              ConfigFlags.LArSCDump.nSamples=runinfo.streamLengths()[i]
+        elif runinfo.streamTypes()[i] ==  "ADC":
+              CKeys += ["SC_ADC_BAS"]
+              ConfigFlags.LArSCDump.nSamples=runinfo.streamLengths()[i]
+     if args.nsamp < ConfigFlags.LArSCDump.nSamples:
+        ConfigFlags.LArSCDump.nSamples=args.nsamp
+  
+  log.info("Autoconfigured: ")
+  log.info("nSamples: %d nEt: %d digitsKey %s",ConfigFlags.LArSCDump.nSamples, ConfigFlags.LArSCDump.nEt, ConfigFlags.LArSCDump.digitsKey)
+  log.info(CKeys)
 
-  CKeys=[]
-  if args.samplesBas:
+  # now set flags according parsed options
+  #if args.samples and not ("SC" in CKeys or ConfigFlags.LArSCDump.digitsKey=="SC"):
+  #   log.warning("Samples asked, but they are not in RunLogger, no output !!!!")
+
+  if args.samplesBas and "SC_ADC_BAS" not in CKeys:
      CKeys += ["SC_ADC_BAS"]
-  if args.Et:
+  if args.Et and "SC_ET" not in CKeys:
      CKeys += ["SC_ET"]
-  if args.EtId:
+  if args.EtId and "SC_ET_ID" not in CKeys:
      CKeys += ["SC_ET_ID"]
-  if args.lheader:
+  if args.lheader and "SC_LATOME_HEADER" not in CKeys:
      CKeys += ["SC_LATOME_HEADER"]
 
   if args.rod:
      ConfigFlags.LArSCDump.doRawChan=True  
+     CKeys += ["LArRawChannels"]
+     log.info("Adding ROD energies")
 
   # now construct the job
-  ConfigFlags.Input.ProjectName="data22_calib"
+  #ConfigFlags.Input.ProjectName="data22_calib"
   ConfigFlags.LAr.doAlign=False
 
   ConfigFlags.lock()
@@ -112,8 +150,9 @@ if __name__=='__main__':
   from LArCalibProcessing.LArSC2NtupleConfig import LArSC2NtupleCfg
   acc.merge(LArSC2NtupleCfg(ConfigFlags, AddBadChannelInfo=args.bc, AddFEBTempInfo=False, isSC=True, isFlat=False, 
                             OffId=args.offline, AddHash=args.ahash, AddCalib=args.calib, RealGeometry=args.geom, ExpandId=args.expid, # from LArCond2NtupleBase 
-                            NSamples=args.nsamp, FTlist={}, FillBCID=args.bcid, ContainerKey=SamplesKey,  # from LArDigits2Ntuple
+                            NSamples=ConfigFlags.LArSCDump.nSamples, FTlist={}, FillBCID=args.bcid, ContainerKey=ConfigFlags.LArSCDump.digitsKey,  # from LArDigits2Ntuple
                             SCContainerKeys=CKeys, OverwriteEventNumber = args.overEvN,                        # from LArSC2Ntuple
+                            FillRODEnergy = ConfigFlags.LArSCDump.doRawChan,
                             OutputLevel=args.olevel
                            ))
   # ROOT file writing
