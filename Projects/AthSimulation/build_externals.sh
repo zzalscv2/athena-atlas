@@ -10,7 +10,7 @@ ATLAS_PROJECT_DIR=$(cd $(dirname ${BASH_SOURCE[0]}) && pwd)
 ATLAS_EXT_PROJECT_NAME="AthSimulationExternals"
 ATLAS_BUILDTYPE="RelWithDebInfo"
 ATLAS_EXTRA_CMAKE_ARGS=(-DLCG_VERSION_NUMBER=101
-                        -DLCG_VERSION_POSTFIX="_ATLAS_26"
+                        -DLCG_VERSION_POSTFIX="_ATLAS_28"
                         -DATLAS_GAUDI_TAG="v36r6.002"
                         -DATLAS_GEOMODEL_TAG="4.2.8.1")
 ATLAS_EXTRA_MAKE_ARGS=()
