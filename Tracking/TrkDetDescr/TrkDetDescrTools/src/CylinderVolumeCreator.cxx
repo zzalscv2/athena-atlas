@@ -346,7 +346,7 @@ Trk::CylinderVolumeCreator::createGapTrackingVolume(
 Trk::TrackingVolume*
 Trk::CylinderVolumeCreator::createContainerTrackingVolume(
   const std::vector<Trk::TrackingVolume*>& volumes,
-  Trk::Material& matprop,
+  const Trk::Material& matprop,
   const std::string& volumeName,
   bool buildBoundaryLayers,
   bool replaceBoundaryFace) const

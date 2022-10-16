@@ -146,7 +146,7 @@ public:
   */
   virtual TrackingVolume* createContainerTrackingVolume(
     const std::vector<TrackingVolume*>& volumes,
-    Material& matprop,
+    const Material& matprop,
     const std::string& volumeName = "UndefinedVolume",
     bool buildBoundaryLayers = false,
     bool replaceBoundaryFace = false) const = 0;
