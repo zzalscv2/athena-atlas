@@ -41,15 +41,15 @@ StatusCode LArOFCtoOFC::stop()
 
  
   //Retrieve OFC computed
-  const LArOFCComplete* cellOFC;
+  const LArOFCComplete* cellOFC = nullptr;
   CHECK(detStore()->retrieve(cellOFC,m_inKey));
 
   //Retrive online id
-  const LArOnlineID* onlID;
+  const LArOnlineID* onlID = nullptr;
   CHECK(detStore()->retrieve(onlID));
 
   //Retrieve shape
-  const LArShapeComplete* cellShape;
+  const LArShapeComplete* cellShape = nullptr;
   if(m_doShape) {
      CHECK(detStore()->retrieve(cellShape,m_inShapeKey));
   }
