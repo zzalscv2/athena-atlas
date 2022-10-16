@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
 */
 
 
@@ -8,8 +8,7 @@
 #include "GaudiKernel/StatusCode.h"
 #include "SGTools/StlVectorClids.h"
 #include "AthContainers/DataVector.h"
-#include "EventInfo/EventInfo.h"
-#include "EventInfo/TriggerInfo.h"
+#include "StoreGate/ReadHandle.h"
 
 #include "xAODTrigL1Calo/CMXEtSumsContainer.h"
 #include "xAODTrigL1Calo/CMXJetTobContainer.h"
@@ -101,6 +100,7 @@ StatusCode TrigT1CaloMonErrorTool::initialize()
 {
   msg(MSG::INFO) << "Initializing " << name() << endmsg;
 
+  ATH_CHECK( m_eventInfoKey.initialize() );
   return StatusCode::SUCCESS;
 }
 
@@ -293,13 +293,8 @@ bool TrigT1CaloMonErrorTool::corrupt()
 
 bool TrigT1CaloMonErrorTool::fullEventTimeout()
 {
-  unsigned int evtStatus = 0;
-  const EventInfo* evtInfo = 0;
-  StatusCode sc = evtStore()->retrieve(evtInfo);
-  if ( sc.isSuccess() ) {
-    const TriggerInfo* trigInfo = evtInfo->trigger_info();
-    if (trigInfo) evtStatus = trigInfo->statusElement();
-  }
+  SG::ReadHandle<xAOD::EventInfo> evtInfo (m_eventInfoKey);
+  unsigned int evtStatus =evtInfo->statusElement();
   return (((evtStatus >> 2) & 0x1) == 1);
 }
 
