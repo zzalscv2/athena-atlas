@@ -390,7 +390,7 @@ StatusCode TrigFastTrackFinder::start()
   m_tcs.m_layerGeometry.clear();
 
   if(m_useNewLayerNumberScheme) {
-    const std::vector<TRIG_INDET_SI_LAYER>* pVL = m_numberingTool->layerGeometry();
+    const std::vector<TrigInDetSiLayer>* pVL = m_numberingTool->layerGeometry();
     std::copy(pVL->begin(),pVL->end(),std::back_inserter(m_tcs.m_layerGeometry));
 
     if (m_ITkMode) {
