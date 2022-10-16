@@ -124,12 +124,12 @@ public:
     BinningType btype = arbitrary) const override final;
 
   /** @copydoc ITrackingVolumeCreator::createContainerTrackingVolume(
-          const std::vector<const TrackingVolume*>, Material&, ,
+          const std::vector<const TrackingVolume*>, const Material&, ,
           const std::string&) const;
    */
   virtual TrackingVolume* createContainerTrackingVolume
   (const std::vector<TrackingVolume*>& volumes,
-                        Material& matprop,
+                        const Material& matprop,
                         const std::string& volumeName = "UndefinedVolume",
                         bool buildBoundaryLayers = false,
                         bool replaceBoundaryFace = false) const override final;
