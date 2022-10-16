@@ -50,6 +50,9 @@ namespace ISF {
                       const HepMC::FourVector *position = 0);
     ~ISFTruthIncident();
 
+    ISFTruthIncident( const ISFTruthIncident& ) = delete;
+    ISFTruthIncident& operator= ( const ISFTruthIncident& ) = delete;
+
     /** Return HepMC position of the truth vertex */
     const HepMC::FourVector&  position() const override final;
     /** Return category of the physics process represented by the truth incident (eg hadronic, em, ..) */
