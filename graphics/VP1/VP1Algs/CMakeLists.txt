@@ -1,4 +1,4 @@
-# Copyright (C) 2002-2020 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
 
 # Declare the package name:
 atlas_subdir( VP1Algs )
@@ -12,7 +12,7 @@ find_package( libffi )
 atlas_add_component( VP1Algs
                      src/*.cxx
                      src/components/*.cxx
-                     LINK_LIBRARIES AthenaBaseComps GaudiKernel EventInfo PathResolver  xAODEventInfo 
+                     LINK_LIBRARIES AthenaBaseComps GaudiKernel PathResolver  xAODEventInfo 
                      PRIVATE_LINK_LIBRARIES VP1Gui VP1UtilsBase )
 
 # Install files from the package:

@@ -1,4 +1,4 @@
-# Copyright (C) 2002-2020 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
 
 # Declare the package name:
 atlas_subdir( VP1BPhysSystems )
@@ -22,4 +22,4 @@ atlas_add_library( VP1BPhysSystems VP1BPhysSystems/*.h src/*.h src/*.cxx src/*.q
                    PUBLIC_HEADERS VP1BPhysSystems
                    PRIVATE_INCLUDE_DIRS ${ROOT_INCLUDE_DIRS} ${COIN3D_INCLUDE_DIRS}
                    LINK_LIBRARIES GeoPrimitives VP1Base VP1TrackSystems GL
-                   PRIVATE_LINK_LIBRARIES ${ROOT_LIBRARIES} ${COIN3D_LIBRARIES} EventInfo Particle StoreGateLib TrkExInterfaces TrkParameters TrkTrack VP1Utils )
+                   PRIVATE_LINK_LIBRARIES ${ROOT_LIBRARIES} ${COIN3D_LIBRARIES} Particle StoreGateLib TrkExInterfaces TrkParameters TrkTrack VP1Utils )
