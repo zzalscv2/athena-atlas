@@ -15,19 +15,20 @@
 #include <algorithm>
 
 AtlasPhysListFactory::AtlasPhysListFactory() 
-  : m_defName("FTFP_BERT_MuBias"),m_verbose(0)
+  : m_defName("FTFP_BERT_MuBias"),
+    m_verbose(0),
+    m_listnames {
+      "QGSP_BERT_MuBias",
+      "FTFP_BERT_ATL_newElastic", //(newer elastic cross-sections and final-state models)
+      "FTFP_BERT_ATL_noDiffraction", //(both projectile and target direction are switched off)
+      "QGSP_FTFP_BERT_ATL", //(QGS model used above 25 GeV, transition betwen FTF and QGS between 12 and 25 GeV)
+      "FTFP_BERT_BIC_ATL", //(binary cascade model as much as possible, Bertini cascade model for the rest)
+      "FTFP_BERT_ATL_rescattering", //(re-scattering of the final-state produced by FTF is simulated with the binary cascade model)
+      "FTFP_BERP_ATL", // (office Geant4 Preco model is used instead of Bertini)
+      "FTFP_BERT_ATL_chipsXS", //(different inelastic hadron-nucleus cros-sections)
+      "FTFP_BERT_ATL_HP" //(transportation of neutrons below 20 MeV is more accurate)
+    }
 {
-  m_listnames = {
-    "QGSP_BERT_MuBias",
-    "FTFP_BERT_ATL_newElastic", //(newer elastic cross-sections and final-state models)
-    "FTFP_BERT_ATL_noDiffraction", //(both projectile and target direction are switched off)
-    "QGSP_FTFP_BERT_ATL", //(QGS model used above 25 GeV, transition betwen FTF and QGS between 12 and 25 GeV)
-    "FTFP_BERT_BIC_ATL", //(binary cascade model as much as possible, Bertini cascade model for the rest)
-    "FTFP_BERT_ATL_rescattering", //(re-scattering of the final-state produced by FTF is simulated with the binary cascade model)
-    "FTFP_BERP_ATL", // (office Geant4 Preco model is used instead of Bertini)
-    "FTFP_BERT_ATL_chipsXS", //(different inelastic hadron-nucleus cros-sections)
-    "FTFP_BERT_ATL_HP" //(transportation of neutrons below 20 MeV is more accurate)
-  };
 }
 
 G4VModularPhysicsList* 
