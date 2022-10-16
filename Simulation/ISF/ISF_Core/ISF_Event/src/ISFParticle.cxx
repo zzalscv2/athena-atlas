@@ -139,6 +139,7 @@ ISF::ISFParticle::~ISFParticle() {
   if (m_partLink) delete m_partLink;
 }
 
+// cppcheck-suppress operatorEqVarError; m_order not copied
 ISF::ISFParticle& ISF::ISFParticle::operator=(const ISF::ISFParticle& rhs)
 {
 
@@ -169,6 +170,7 @@ ISF::ISFParticle& ISF::ISFParticle::operator=(const ISF::ISFParticle& rhs)
   return *this;
 }
 
+// cppcheck-suppress operatorEqVarError; m_order not copied
 ISF::ISFParticle& ISF::ISFParticle::operator=(ISF::ISFParticle&& rhs)
 {
   m_position     = rhs.position();
