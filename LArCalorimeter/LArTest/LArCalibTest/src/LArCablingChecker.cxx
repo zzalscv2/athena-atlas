@@ -74,10 +74,8 @@ StatusCode LArCablingChecker::initialize() {
 }
 
 StatusCode LArCablingChecker::execute() {
-  const xAOD::EventInfo* thisEventInfo;
-  ATH_CHECK( evtStore()->retrieve(thisEventInfo) );
-
-  unsigned eventNb = thisEventInfo->eventNumber();
+  const EventContext& ctx = Gaudi::Hive::currentContext();
+  unsigned eventNb = ctx.eventID().event_number();
 
   ATH_MSG_INFO ( "======== executing event "<< eventNb << " ========" );
   //m_outfile << "Checking Event " << eventNb << "..." << std::endl;
@@ -87,24 +85,24 @@ StatusCode LArCablingChecker::execute() {
   ATH_CHECK( evtStore()->retrieve(larDigitCont, m_key) );
   
   //const LArCalibParams* calibParams;
-  const LArCalibParams* calibParams;
+  const LArCalibParams* calibParams = nullptr;
   ATH_CHECK( detStore()->retrieve(calibParams,"LArCalibParams") );
 
-  SG::ReadCondHandle<LArBadChannelCont> readHandle{m_BCKey};
+  SG::ReadCondHandle<LArBadChannelCont> readHandle(m_BCKey, ctx);
   const LArBadChannelCont *bcCont {*readHandle};
   if(!bcCont) {
      ATH_MSG_ERROR( "Do not have Bad chan container " << m_BCKey.key() );
      return StatusCode::FAILURE;
   }
 
-  SG::ReadCondHandle<LArOnOffIdMapping> cablingHdl{m_cablingKey};
+  SG::ReadCondHandle<LArOnOffIdMapping> cablingHdl(m_cablingKey, ctx);
   const LArOnOffIdMapping* cabling=*cablingHdl;
   if(!cabling) {
      ATH_MSG_ERROR( "Do not have cabling object LArOnOffIdMapping" );
      return StatusCode::FAILURE;
   }
 
-  SG::ReadCondHandle<LArCalibLineMapping> clHdl{m_CLKey};
+  SG::ReadCondHandle<LArCalibLineMapping> clHdl(m_CLKey, ctx);
   const LArCalibLineMapping *clCont {*clHdl};
   if(!clCont) {
      ATH_MSG_ERROR( "Do not have calib line mapping !!!" );
