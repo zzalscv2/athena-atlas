@@ -36,10 +36,10 @@ int padding = 0;
 // function prototypes
 
 int updateHists(std::string inFileName, std::string inStem, std::string outFileName = "", std::string outStem = "");
-bool makeDirectories(std::string dirName);
-bool makeDir(std::string dirName);
-void Copy(std::string inDir, std::string outDir, std::string inHist = "", std::string outHist = "");
-void CopyHist(std::string inDir, std::string outDir, std::string inHist, std::string outHist);
+bool makeDirectories(const std::string & dirName);
+bool makeDir(const std::string & dirName);
+void Copy(const std::string & inDir, const std::string & outDir, const std::string & inHist = "", const td::string & outHist = "");
+void CopyHist(const std::string & inDir, const std::string & outDir, const std::string & inHist, const std::string & outHist);
 
 //----------------------------------------
 // main macro
@@ -114,7 +114,7 @@ int updateHists(std::string inFileName, std::string inStem, std::string outFileN
     return 0;
 }
 
-bool makeDirectories(std::string dirName)
+bool makeDirectories(const std::string & dirName)
 {
     padding += 3;
     std::cout << std::setw(padding) << " ";
@@ -139,7 +139,7 @@ bool makeDirectories(std::string dirName)
     return success;
 }
 
-bool makeDir(std::string dirName)
+bool makeDir(const std::string & dirName)
 {
     padding += 3;
     std::cout << std::setw(padding) << " ";
@@ -154,7 +154,7 @@ bool makeDir(std::string dirName)
     return gDirectory->cd(dirName.c_str());
 }
 
-void Copy(std::string inDir, std::string outDir, std::string inHist, std::string outHist)
+void Copy(const std::string & inDir, const std::string & outDir, const std::string & inHist, const std::string & outHist)
 {
     padding += 3;
 
@@ -200,7 +200,7 @@ void Copy(std::string inDir, std::string outDir, std::string inHist, std::string
     padding -= 3;
 }
 
-void CopyHist(std::string inDir, std::string outDir, std::string inHist, std::string outHist)
+void CopyHist(const std::string &inDir, const std::string & outDir, const std::string & inHist, const &std::string outHist)
 {
     TDirectory *sourceDir = source->GetDirectory(inDir.c_str());
     TDirectory *targetDir = target->GetDirectory(outDir.c_str());

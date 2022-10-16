@@ -190,8 +190,7 @@ int handleHisto(TDirectory *hanDir, TKey *histoKey)
     string histoName = GetPathInFile(hanDir->GetPath()).c_str();
     histoName.erase(histoName.length()-1, histoName.length()); //configdir = histoname + _ 
     
-    if(overviewMap.find(histoName) == overviewMap.end())
-      overviewMap[histoName] = new overviewMapT();
+    overviewMap.try_emplace(histoName, new overviewMapT());
     
     if (detailedOutput)
       cout << "\nHistogram: " << histoName.c_str() << " was checked with " << algName.c_str() << endl;
@@ -277,7 +276,7 @@ void BrowseDirectoryStructure(TDirectory* indir, int indentlevel = 0)
   return;
 }  
 
-void PrintSummary(string outfilename)
+void PrintSummary(const string & outfilename)
 {
   //open file for writing
   ofstream outfile;
@@ -368,11 +367,11 @@ void handleOverviewMap(string outfile)
   vector<double> *vBuff = 0;
   TH1 *hBuff = 0;
   
-  for(it = overviewMap.begin(); it != overviewMap.end(); it++)
+  for(it = overviewMap.begin(); it != overviewMap.end(); ++it)
   {
     string histoName = it->first;
     //puts(histoName.c_str());
-    for (itt = it->second->begin(); itt != it->second->end(); itt++)
+    for (itt = it->second->begin(); itt != it->second->end(); ++itt)
     {
       string paramName = itt->first;
       //puts(paramName.c_str());
