@@ -104,15 +104,8 @@ def ParticlePositionFilterDynamicCfg(ConfigFlags, name="ISF_ParticlePositionFilt
 
 def GenParticleInteractingFilterCfg(ConfigFlags, name="ISF_GenParticleInteractingFilter", **kwargs):
     result = ComponentAccumulator()
-
-    #todo (dnoel) - add this functionality
-    #from G4AtlasApps.SimFlags import simFlags
-    #simdict = simFlags.specialConfiguration.get_Value()
-    #if simdict is not None and "InteractingPDGCodes" in simdict:
-    #    kwargs.setdefault("AdditionalInteractingParticleTypes", eval(simdict["InteractingPDGCodes"]))
-    #if simdict is not None and "NonInteractingPDGCodes" in simdict:
-    #    kwargs.setdefault("AdditionalNonInteractingParticleTypes", eval(simdict["InteractingNonPDGCodes"]))
-
+    kwargs.setdefault("AdditionalInteractingParticleTypes", eval(ConfigFlags.Input.SpecialConfiguration.get("InteractingPDGCodes", "[]")))
+    kwargs.setdefault("AdditionalNonInteractingParticleTypes", eval(ConfigFlags.Input.SpecialConfiguration.get("NonInteractingPDGCodes", "[]")))
     result.setPrivateTools(CompFactory.ISF.GenParticleInteractingFilter(name, **kwargs))
     return result
 
