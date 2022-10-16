@@ -48,7 +48,7 @@ rec.doAODCaloCells = False
 from ParticleBuilderOptions.AODFlags import AODFlags
 AODFlags.Photon             = False
 AODFlags.Electron           = False
-AODFlags.egammaTrackSlimmer = False
+AODFlags.egammaTrackThinner = False
 AODFlags.JetTag             = False
 AODFlags.Streaming          = False
 AODFlags.FastSimulation     = False
@@ -63,7 +63,7 @@ AODFlags.ParticleJet        = False
 #    rec.doAODCaloCells.set_Value_and_Lock(True)
 #    AODFlags.Photon             = True
 #    AODFlags.Electron           = True
-#    AODFlags.egammaTrackSlimmer = True
+#    AODFlags.egammaTrackThinner = True
 #    pass
     
 #These containers do not exists in the ESD. They have to be created on the fly if using AOD-based tools later on.

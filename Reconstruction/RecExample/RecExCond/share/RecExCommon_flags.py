@@ -416,7 +416,7 @@ if not rec.doJetMissingETTag:
 if not rec.doEgamma:
 
    if _AODFlagsAvailable:
-      AODFlags.egammaTrackSlimmer=False
+      AODFlags.egammaTrackThinner=False
    
 if not rec.doMuonCombined:
    #FIXME a separate container to be used eventually

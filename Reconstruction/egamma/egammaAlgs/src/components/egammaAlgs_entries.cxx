@@ -2,7 +2,7 @@
 #include "../xAODEgammaBuilder.h"
 #include "../egammaForwardBuilder.h"
 #include "../egammaTruthAssociationAlg.h"
-#include "../egammaTrackSlimmer.h"
+#include "../egammaTrackThinner.h"
 #include "../EMBremCollectionBuilder.h"
 #include "../EMVertexBuilder.h"
 #include "../egammaTopoClusterCopier.h"
@@ -16,7 +16,7 @@ DECLARE_COMPONENT( egammaRecBuilder )
 DECLARE_COMPONENT( xAODEgammaBuilder )
 DECLARE_COMPONENT( egammaForwardBuilder )
 DECLARE_COMPONENT( egammaTruthAssociationAlg )
-DECLARE_COMPONENT( egammaTrackSlimmer )
+DECLARE_COMPONENT( egammaTrackThinner )
 DECLARE_COMPONENT( EMBremCollectionBuilder )
 DECLARE_COMPONENT( EMVertexBuilder )
 DECLARE_COMPONENT( egammaTopoClusterCopier )

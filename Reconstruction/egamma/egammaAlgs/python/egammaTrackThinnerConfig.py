@@ -4,9 +4,9 @@ from AthenaCommon.Logging import logging
 from AthenaConfiguration.ComponentFactory import CompFactory
 from AthenaConfiguration.ComponentAccumulator import ComponentAccumulator
 
-def egammaTrackSlimmerCfg(
+def egammaTrackThinnerCfg(
         flags,
-        name='egammaTrackSlimmer',
+        name='egammaTrackThinner',
         **kwargs):
 
     mlog = logging.getLogger(name)
@@ -24,7 +24,7 @@ def egammaTrackSlimmerCfg(
     kwargs.setdefault("VertexContainerName",
                       flags.Egamma.Keys.Output.ConversionVertices)
 
-    acc.addEventAlgo(CompFactory.egammaTrackSlimmer(name, **kwargs))
+    acc.addEventAlgo(CompFactory.egammaTrackThinner(name, **kwargs))
 
     return acc
 
@@ -37,11 +37,11 @@ if __name__ == "__main__":
     flags.Input.Files = defaultTestFiles.ESD
 
     acc = MainServicesCfg(flags)
-    mlog = logging.getLogger("egammaTrackSlimmerConfigTest")
-    mlog.info("Configuring  egammaTrackSlimmer: ")
-    acc.merge(egammaTrackSlimmerCfg(flags))
+    mlog = logging.getLogger("egammaTrackThinnerConfigTest")
+    mlog.info("Configuring  egammaTrackThinner: ")
+    acc.merge(egammaTrackThinnerCfg(flags))
     printProperties(mlog,
-                    acc.getEventAlgo("egammaTrackSlimmer"),
+                    acc.getEventAlgo("egammaTrackThinner"),
                     nestLevel=1,
                     printDefaults=True)
     with open("egammatrackslimmer.pkl", "wb") as f:

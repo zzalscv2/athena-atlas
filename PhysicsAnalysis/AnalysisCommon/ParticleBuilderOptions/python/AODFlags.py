@@ -41,8 +41,8 @@ class Electron(JobProperty):
     allowedTypes=['bool']
     StoredValue=True
 
-class egammaTrackSlimmer(JobProperty):
-    """ If True, add egammaTrackSlimmer
+class egammaTrackThinner(JobProperty):
+    """ If True, add egammaTrackThinner
     """
     statusOn=True
     allowedTypes=['bool']
@@ -302,7 +302,7 @@ jobproperties.add_Container(AODFlagsContainer)
 
 # I want always the following flags in the AOD container
 _list_AOD=[ \
-    Photon,Electron,egammaTrackSlimmer, \
+    Photon,Electron,egammaTrackThinner, \
     AddEgammaMuonTracksInAOD, \
     AddEgammaTracksInMCAOD, \
     ThinGeantTruth, \

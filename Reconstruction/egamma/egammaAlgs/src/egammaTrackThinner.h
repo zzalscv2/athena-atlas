@@ -5,7 +5,7 @@
 #ifndef EGAMMAALGS_EGAMMATRACKSLIMMER_H
 #define EGAMMAALGS_EGAMMATRACKSLIMMER_H
 /**
-  @class egammaTrackSlimmer Thinning of GSFTrackParticle collection
+  @class egammaTrackThinner Thinning of GSFTrackParticle collection
 */
 
 
@@ -21,7 +21,7 @@
 #include "StoreGate/ThinningHandleKey.h"
 
 
-class egammaTrackSlimmer : public AthReentrantAlgorithm
+class egammaTrackThinner : public AthReentrantAlgorithm
 {
  public:
 
@@ -72,12 +72,4 @@ class egammaTrackSlimmer : public AthReentrantAlgorithm
 };
 
 #endif
-
-
-
-
-
-
-
-
 
