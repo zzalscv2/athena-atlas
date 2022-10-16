@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2020 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "MuonIdHelpersAlgs/TestMuonIdHelpers.h"
@@ -8,18 +8,13 @@
 #include <cmath>
 
 TestMuonIdHelpers::TestMuonIdHelpers(const std::string& name, ISvcLocator* pSvcLocator) :
-  AthAlgorithm(name, pSvcLocator) {
-
-  m_testMDT = true;
-  m_testCSC = true;
-  m_testRPC = true;
-  m_testTGC = true;
-
+  AthAlgorithm(name, pSvcLocator)
+{
   // Declare the properties
-  declareProperty ("testMDT", m_testMDT);
-  declareProperty ("testCSC", m_testCSC);
-  declareProperty ("testRPC", m_testRPC);
-  declareProperty ("testTGC", m_testTGC);
+  declareProperty ("testMDT", m_testMDT = true);
+  declareProperty ("testCSC", m_testCSC = true);
+  declareProperty ("testRPC", m_testRPC = true);
+  declareProperty ("testTGC", m_testTGC = true);
 
 }
 
