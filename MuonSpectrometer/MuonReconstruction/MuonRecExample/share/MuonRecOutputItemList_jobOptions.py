@@ -87,6 +87,7 @@ if DetFlags.detdescr.Muon_on() and rec.doWriteESD():
    MuonESDList+=["TrackCollection#MuonSpectrometerTracks"] 
    if MuonGeometryFlags.hasSTGC() or MuonGeometryFlags.hasMM():
       MuonESDList+=["TrackCollection#EMEO_MuonSpectrometerTracks"]
+      MuonESDList+=["Trk::SegmentCollection#TrackMuonNSWSegments"]
    else:
       MuonESDList+=["Trk::SegmentCollection#NCB_TrackMuonSegments"]
       

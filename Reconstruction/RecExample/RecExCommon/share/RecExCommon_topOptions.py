@@ -495,7 +495,7 @@ if rec.readRDO():
 #
 # Write beamspot information into xAOD::EventInfo.
 #
-if globalflags.InputFormat.is_bytestream() and not athenaCommonFlags.isOnline() and not InDetFlags.disableBeamSpotDecoration():
+if globalflags.InputFormat.is_bytestream() and not athenaCommonFlags.isOnline() and InDetFlags.enableBeamSpotDecoration():
     topSequence += CfgMgr.xAODMaker__EventInfoBeamSpotDecoratorAlg()
     pass
 
