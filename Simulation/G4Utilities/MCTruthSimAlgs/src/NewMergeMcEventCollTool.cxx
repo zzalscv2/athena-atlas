@@ -1,10 +1,8 @@
 /*
-  Copyright (C) 2002-2019 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "NewMergeMcEventCollTool.h"
-#include "EventInfo/EventType.h"
-#include "EventInfo/PileUpTimeEventIndex.h"
 #include <fstream>
 
 NewMergeMcEventCollTool::NewMergeMcEventCollTool(const std::string& type,
@@ -113,7 +111,7 @@ StatusCode NewMergeMcEventCollTool::processAllSubEvents(const EventContext& ctx)
   return StatusCode::SUCCESS;
 }
 
-StatusCode NewMergeMcEventCollTool::processEvent(const McEventCollection *pMcEvtColl, McEventCollection *outputMcEventCollection, PileUpTimeEventIndex::time_type timeOffset)
+StatusCode NewMergeMcEventCollTool::processEvent(const McEventCollection *pMcEvtColl, McEventCollection *outputMcEventCollection, long timeOffset)
 {
   ATH_MSG_VERBOSE(  this->name()<<"::processEvent()" );
   if (!outputMcEventCollection) {

@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2019 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef MCTRUTHSIMALGS_NEWMERGEMCEVENTCOLLTOOL_H
@@ -44,7 +44,7 @@ public:
 
 private:
   //** Add the required information from the current GenEvent to the output McEventCollection
-  StatusCode processEvent(const McEventCollection *pMcEvtColl, McEventCollection *outputMcEventCollection, PileUpTimeEventIndex::time_type timeOffset=0);
+  StatusCode processEvent(const McEventCollection *pMcEvtColl, McEventCollection *outputMcEventCollection, long timeOffset=0);
   //** Print out detailed debug info if required.
   void printDetailsOfMergedMcEventCollection(McEventCollection *outputMcEventCollection) const;
   //** Handle for the PileUpMergeSvc (provides input McEventCollections)
