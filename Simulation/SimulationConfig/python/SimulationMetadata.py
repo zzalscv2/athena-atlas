@@ -1,14 +1,15 @@
 # Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
-
 ### This module contains functions which may need to peek at the input file metadata
-
-from AthenaKernel.EventIdOverrideConfig import getMinMaxRunNumbers
-## Get the logger
 from AthenaCommon.Logging import logging
-simMDlog = logging.getLogger('Sim_Metadata')
+from AthenaConfiguration.ComponentAccumulator import ComponentAccumulator
+from AthenaConfiguration.Enums import ProductionStep
+from AthenaKernel.EventIdOverrideConfig import getMinMaxRunNumbers
+
+folderName = "/Simulation/Parameters"
+
 
 def fillAtlasMetadata(ConfigFlags, dbFiller):
-
+    simMDlog = logging.getLogger('Sim_Metadata')
     #add all ConfigFlags to the metadata
     #todo - only add certain ones?
     #in future this should be a ConfigFlags method...?
@@ -47,6 +48,7 @@ def fillAtlasMetadata(ConfigFlags, dbFiller):
 
 
 def writeSimulationParametersMetadata(ConfigFlags):
+    simMDlog = logging.getLogger('Sim_Metadata')
     from IOVDbMetaDataTools import ParameterDbFiller
     dbFiller = ParameterDbFiller.ParameterDbFiller()
     myRunNumber, myEndRunNumber = getMinMaxRunNumbers(ConfigFlags)
@@ -62,12 +64,27 @@ def writeSimulationParametersMetadata(ConfigFlags):
     #-------------------------------------------------
     dbFiller.genSimDb()
 
-    from IOVDbSvc.IOVDbSvcConfig import IOVDbSvcCfg
-    cfg = IOVDbSvcCfg(ConfigFlags)
-    folder = "/Simulation/Parameters"
-    dbConnection = "sqlite://;schema=SimParams.db;dbname=SIMPARAM"
+    return writeSimulationParameters(ConfigFlags)
 
-    cfg.getService("IOVDbSvc").Folders += [ folder + "<dbConnection>" + dbConnection + "</dbConnection>" ]
-    cfg.getService("IOVDbSvc").FoldersToMetaData += [ folder ]
-    #cfg.getService("IOVSvc").partialPreLoadData = True #FIXME IOVSvc missing??
-    return cfg
+
+def readSimulationParameters(ConfigFlags):
+    """Read digitization parameters metadata"""
+    from IOVDbSvc.IOVDbSvcConfig import addFolders
+    if ConfigFlags.Common.ProductionStep not in [ProductionStep.Simulation, ProductionStep.FastChain]:
+        return addFolders(ConfigFlags, folderName, className="AthenaAttributeList", tag="HEAD")
+
+    # Here we are in a job which runs simulation, so the
+    # /Simulation/Parameters metadata is not present in the
+    # input file and will be created during the job
+    return addFolders(ConfigFlags, folderName, detDb="SimParams.db", db="SIMPARAM", className="AthenaAttributeList")
+
+
+def writeSimulationParameters(ConfigFlags):
+    """Write digitization parameters metadata"""
+    if ConfigFlags.Overlay.DataOverlay:
+        return ComponentAccumulator()
+
+    from IOVDbSvc.IOVDbSvcConfig import IOVDbSvcCfg, addFolders
+    acc = IOVDbSvcCfg(ConfigFlags, FoldersToMetaData=[folderName])
+    acc.merge(addFolders(ConfigFlags, folderName, detDb="SimParams.db", db="SIMPARAM"))
+    return acc

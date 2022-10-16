@@ -251,14 +251,3 @@ def writeOverlayDigitizationMetadata(flags,pileupDict):
 
     # Make the MetaData Db
     dbFiller.genDigitDb()
-
-def overlayMetadataWrite(flags):
-    """Write overlay metadata"""
-    from IOVDbSvc.IOVDbSvcConfig import IOVDbSvcCfg, addFolders
-    acc = IOVDbSvcCfg(flags)
-    if not flags.Overlay.DataOverlay:
-        iovDbSvc=acc.getPrimary()
-        folder = "/Digitization/Parameters"
-        iovDbSvc.FoldersToMetaData += [ folder ]
-        acc.merge(addFolders(flags,[folder,],detDb="DigitParams.db",db="DIGPARAM",className='AthenaAttributeList'))
-    return acc

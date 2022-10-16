@@ -49,7 +49,6 @@ svcMgr.IOVDbSvc.dbConnection  = DBConnectionCOOL_OFL
 svcMgr.ProxyProviderSvc.OutputLevel = INFO
 svcMgr.AthenaPoolCnvSvc.OutputLevel = INFO
 
-svcMgr.IOVSvc.partialPreLoadData     = False
 #svcMgr.IOVDbSvc.OnlineMode   = True
 
 from McEventSelector.McEventSelectorConf import McEventSelector

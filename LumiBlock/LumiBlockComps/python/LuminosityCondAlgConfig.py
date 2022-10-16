@@ -51,7 +51,8 @@ def LuminosityCondAlgCfg (configFlags, useOnlineLumi=None, suffix=None):
 
 
 def luminosityCondAlgMCCfg (configFlags, name, result):
-    result.merge(addFolders(configFlags,'/Digitization/Parameters',None,className="AthenaAttributeList",tag='HEAD'))
+    from Digitization.DigitizationParametersConfig import readDigitizationParameters
+    result.merge(readDigitizationParameters(configFlags))
     return { 'LuminosityFolderInputKey' : '',
              'DigitizationFolderInputKey' : '/Digitization/Parameters',
              'OnlineLumiCalibrationInputKey' : '',
@@ -59,6 +60,7 @@ def luminosityCondAlgMCCfg (configFlags, name, result):
              'BunchGroupInputKey' : '',
              'FillParamsInputKey' : '',
              'IsMC' : True }
+
 
 # Configuration for offline default luminosity used in Run2
 def luminosityCondAlgRun2Cfg (configFlags, name, result):

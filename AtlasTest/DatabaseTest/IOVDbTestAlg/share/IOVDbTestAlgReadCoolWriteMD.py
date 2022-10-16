@@ -215,10 +215,3 @@ folder = "/Digitization/Parameters"
 dbConnection = "sqlite://;schema=DigitParams.db;dbname=DIGPARAM"
 svcMgr.IOVDbSvc.Folders += [ folder + "<dbConnection>" + dbConnection + "</dbConnection>" ]
 svcMgr.IOVDbSvc.FoldersToMetaData += [ folder ]
-
-# To force the reading in of the folders to be written as file meta
-# data, need following:
-svcMgr.IOVSvc.partialPreLoadData = True
-
-
-

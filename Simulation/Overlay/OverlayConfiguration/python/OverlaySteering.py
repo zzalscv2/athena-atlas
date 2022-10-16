@@ -9,7 +9,8 @@ from AthenaConfiguration.DetectorConfigFlags import getEnabledDetectors
 from AthenaConfiguration.Enums import LHCPeriod
 from AthenaPoolCnvSvc.PoolReadConfig import PoolReadCfg
 from AthenaPoolCnvSvc.PoolWriteConfig import PoolWriteCfg
-from OverlayConfiguration.OverlayMetadata import overlayMetadataCheck, overlayMetadataWrite, \
+from Digitization.DigitizationParametersConfig import writeDigitizationParameters
+from OverlayConfiguration.OverlayMetadata import overlayMetadataCheck, \
     fastChainOverlayMetadataCheck
 
 from InDetOverlay.BCMOverlayConfig import BCMOverlayCfg
@@ -54,7 +55,7 @@ def OverlayMainContentCfg(configFlags):
         fastChainOverlayMetadataCheck(configFlags)
     else:
         overlayMetadataCheck(configFlags)
-    acc = overlayMetadataWrite(configFlags)
+    acc = writeDigitizationParameters(configFlags)
 
     # Add event info overlay
     acc.merge(EventInfoOverlayCfg(configFlags))
