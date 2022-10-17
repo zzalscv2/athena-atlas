@@ -2,11 +2,12 @@
   Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
 */
 
+#include <cmath>
 #include <iostream>
 #include <map>
 #include <string>
+#include <utility>
 #include <vector>
-#include <math.h>
 
 #include "boost/current_function.hpp"
 #include <boost/any.hpp>
@@ -17,10 +18,6 @@
 // Framework include(s):
 
 #include "xAODBase/IParticle.h"
-
-#include "xAODRootAccess/Init.h"
-#include "xAODRootAccess/TEvent.h"
-#include "xAODRootAccess/TStore.h"
 
 #include "xAODTruth/TruthVertexContainer.h"
 #include "xAODTruth/TruthVertexAuxContainer.h"
@@ -305,7 +302,7 @@ HFORType HFOR_Truth::jetBasedRemoval( const xAOD::JetContainer* jets) {
 // Here we take all b and c quarks in the MC event tree and find if it is a
 // final state quark
 //==============================================================================
-bool HFOR_Truth::is_FinalState(const xAOD::TruthParticle* bcQuark) {
+bool HFOR_Truth::is_FinalState(const xAOD::TruthParticle* bcQuark) const {
   //This checks if the quark passed is final state or not
   //TODO: check that this particle is really a b/c quark, check that it is not null
 
@@ -354,7 +351,7 @@ bool HFOR_Truth::is_FinalState(const xAOD::TruthParticle* bcQuark) {
 // occupy
 //==============================================================================
 bool HFOR_Truth::findHFQuarks(const std::map <int,
-                              std::vector<const xAOD::TruthParticle* > > fsQuarksMap)  {
+                              std::vector<const xAOD::TruthParticle* > >& fsQuarksMap)  {
 
   //What I return is a map containing a map of vectors  GS quarks and ME quarks
   m_qq.clear() ;	//VERY IMPORTANT
@@ -401,9 +398,9 @@ bool HFOR_Truth::findHFQuarks(const std::map <int,
 
   // 1) Loop and find fs quarks with status 3
 
-  for (auto& fsQuarks: fsQuarksMap ) {
+  for (const auto& fsQuarks: fsQuarksMap ) {
     fsq_pdgId = fsQuarks.first ;
-    for (auto& bcQuark: fsQuarks.second) {
+    for (const auto& bcQuark: fsQuarks.second) {
       fsq_status = bcQuark->status() ;
       if (fsq_status == 3) {
         if ( bcQuark->nChildren() == 0 ) {
@@ -429,9 +426,9 @@ bool HFOR_Truth::findHFQuarks(const std::map <int,
 
   // 2) Loop again and find fs quarks with status != 3
 
-  for (auto& fsQuarks: fsQuarksMap ) {
+  for (const auto& fsQuarks: fsQuarksMap ) {
     fsq_pdgId = fsQuarks.first ;
-    for (auto& bcQuark: fsQuarks.second) {
+    for (const auto& bcQuark: fsQuarks.second) {
       fsq_status = bcQuark->status() ;
       if (fsq_status != 3) {
         //recursive search through ancestors, as xAOD cannot give a list of
@@ -570,42 +567,42 @@ bool HFOR_Truth::findHFQuarks(const std::map <int,
   if(m_debug){
     std::cout<<"m_qq.size = "<<m_qq.size()<<endl;
     std::cout<<"PDF n = "<<PDF.size()<<std::endl;
-    for(uint i=0; i<PDF.size(); ++i)  std::cout<<PDF[i]->barcode()<<std::endl;
+    for(auto & i : PDF)  std::cout<<i->barcode()<<std::endl;
     std::cout<<"ME n = "<<ME.size()<<std::endl;
-    for(uint i=0; i<ME.size(); ++i)  std::cout<<ME[i]->barcode()<<std::endl;
+    for(auto & i : ME)  std::cout<<i->barcode()<<std::endl;
     std::cout<<"GS n = "<<GS.size()<<std::endl;
-    for (auto gs_item : GS){
+    for (const auto& gs_item : GS){
       std::cout<<"GS item i = "<<gs_item.first<<std::endl;
-      for(uint i=0; i<gs_item.second.size(); ++i)  std::cout<<gs_item.second.at(i)->barcode()<<std::endl;
+      for(const auto & i : gs_item.second)  std::cout<<i->barcode()<<std::endl;
     }
       
     std::cout<<"xPDF n = "<<xPDF.size()<<std::endl;
-    for (auto xPDF_item : xPDF){
+    for (const auto& xPDF_item : xPDF){
       std::cout<<"xPDF item i = "<<xPDF_item.first<<std::endl;
-      for(uint i=0; i<xPDF_item.second.size(); ++i)  std::cout<<xPDF_item.second.at(i)->barcode()<<std::endl;
+      for(const auto & i : xPDF_item.second)  std::cout<<i->barcode()<<std::endl;
     }
       
     std::cout<<"xME n = "<<xME.size()<<std::endl;
-    for (auto xME_item : xME){
+    for (const auto& xME_item : xME){
       std::cout<<"xME item i = "<<xME_item.first<<std::endl;
-      for(uint i=0; i<xME_item.second.size(); ++i)  std::cout<<xME_item.second.at(i)->barcode()<<std::endl;
+      for(const auto & i : xME_item.second)  std::cout<<i->barcode()<<std::endl;
     }
       
     std::cout<<"MPI n = "<<MPI.size()<<std::endl;
-    for (auto mpi_item : MPI){
+    for (const auto& mpi_item : MPI){
       std::cout<<"MPI item i = "<<mpi_item.first<<std::endl;
-      for(uint i=0; i<mpi_item.second.size(); ++i)  std::cout<<mpi_item.second.at(i)->barcode()<<std::endl;
+      for(const auto & i : mpi_item.second)  std::cout<<i->barcode()<<std::endl;
     }
     std::cout<<"ME_PDF n = "<<ME_PDF.size()<<std::endl;
-    for (auto ME_PDF_item : ME_PDF){
+    for (const auto& ME_PDF_item : ME_PDF){
       std::cout<<"ME_PDF item i = "<<ME_PDF_item.first<<std::endl;
-      for(uint i=0; i<ME_PDF_item.second.size(); ++i)  std::cout<<ME_PDF_item.second.at(i)->barcode()<<std::endl;
+      for(const auto & i : ME_PDF_item.second)  std::cout<<i->barcode()<<std::endl;
     }
       
     std::cout<<"UFO n = "<<UFO.size()<<std::endl;
-    for (auto UFO_item : UFO){
+    for (const auto& UFO_item : UFO){
       std::cout<<"UFO item i = "<<UFO_item.first<<std::endl;
-      for(uint i=0; i<UFO_item.second.size(); ++i)  std::cout<<UFO_item.second.at(i)->barcode()<<std::endl;
+      for(const auto & i : UFO_item.second)  std::cout<<i->barcode()<<std::endl;
     }
   }
 
@@ -698,7 +695,7 @@ bool HFOR_Truth::is_sameFlavor(const xAOD::TruthParticle* x,
 //==============================================================================
 int HFOR_Truth::readRunConfig(std::string runConfigFile) {
 
-  m_runConfigFile = runConfigFile ;
+  m_runConfigFile = std::move(runConfigFile) ;
 
   //std::cout <<  BOOST_CURRENT_FUNCTION << " Reading Configuration file: " << m_runConfigFile << std::endl;
   boost::property_tree::ptree runConfig ;
@@ -791,7 +788,7 @@ void HFOR_Truth::setMatchConeSize(double deltaR) {
 //==============================================================================
 // Getter to access the value of cone size used in the overlap removal
 //==============================================================================
-double HFOR_Truth::getMatchConeSize() {
+double HFOR_Truth::getMatchConeSize() const {
   return m_matchCone ;
 }
 //==============================================================================
@@ -858,12 +855,12 @@ HFORType HFOR_Truth::angularBasedRemoval( void ) {
   //light sample
   if (m_sampleType == HFORType::isLight) {
     //Remove ME b,c quarks
-    if ( (m_qq["ME"][4].size() > 0) || (m_qq["ME"][5].size()>0) ) {
+    if ( (!m_qq["ME"][4].empty()) || (!m_qq["ME"][5].empty()) ) {
       tipo = HFORType::kill ;
       if(m_debug) std::cout << "Killed by ME size 4,5: " <<  m_qq["ME"][4].size() << " , " << m_qq["ME"][4].size() << std::endl ;
     }
     //Remove un-matched GS b,c quarks
-    else if (m_qq["GS"][5].size() > 0) {
+    else if (!m_qq["GS"][5].empty()) {
       if (hasMatch["GS"][5] > 0) {
         tipo = HFORType::isBB;
       }
@@ -872,7 +869,7 @@ HFORType HFOR_Truth::angularBasedRemoval( void ) {
       }
 
     }
-    else if (m_qq["GS"][4].size() > 0) {
+    else if (!m_qq["GS"][4].empty()) {
       if (hasMatch["GS"][4] > 0) {
         tipo = HFORType::isCC;
       }
@@ -891,7 +888,7 @@ HFORType HFOR_Truth::angularBasedRemoval( void ) {
     else if (hasMatch["GS"][5] > 0) {
       tipo = HFORType::isBB ;
     }
-    else if (m_qq["GS"][5].size()>0) {
+    else if (!m_qq["GS"][5].empty()) {
       tipo = HFORType::kill ;
     }
   }
@@ -902,7 +899,7 @@ HFORType HFOR_Truth::angularBasedRemoval( void ) {
     if ( hasMatch["GS"][5] > 0 ) {
       tipo = HFORType::isBB ;
     }
-    else if (m_qq["GS"][5].size() > 0 ) {
+    else if (!m_qq["GS"][5].empty() ) {
       tipo = HFORType::kill ;
     }
   }
@@ -922,7 +919,7 @@ HFORType HFOR_Truth::angularBasedRemoval( void ) {
 //==============================================================================
 //Access the bookkeeper map
 //==============================================================================
-unsigned long int HFOR_Truth::getNquarks(std::string process, int flavor) {
+unsigned long int HFOR_Truth::getNquarks(const std::string& process, int flavor) {
   //Access the number of quarks found in this sample according to the
   //process and flavor
   //TODO: check the keys ..

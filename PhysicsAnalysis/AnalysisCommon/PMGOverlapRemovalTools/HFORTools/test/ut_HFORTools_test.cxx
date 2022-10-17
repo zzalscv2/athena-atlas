@@ -59,7 +59,7 @@ int main() {
 
 	  evt.getEntry(i);
 
-	  const xAOD::EventInfo* eventInfo = 0;
+	  const xAOD::EventInfo* eventInfo = nullptr;
 	  ANA_CHECK( evt.retrieve( eventInfo, "EventInfo" ) );
 	  unsigned long int evtNumber = eventInfo->eventNumber() ;
 

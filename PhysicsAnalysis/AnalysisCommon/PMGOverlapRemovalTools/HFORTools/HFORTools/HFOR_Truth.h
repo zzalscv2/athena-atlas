@@ -60,13 +60,13 @@ class HFOR_Truth
   void        setMatchConeSize(double deltaR) ;
 
   //Returns the current size of the cone to be used in the heavy quark classification
-  double      getMatchConeSize() ;
+  double      getMatchConeSize() const ;
 
   //Reads a file written according to BOOST property tree with the DSID and type
   int readRunConfig(std::string runConfigFile) ;
 
   //Bookkeeper accessors
-  unsigned long int getNquarks(std::string process, int flavor) ;
+  unsigned long int getNquarks(const std::string& process, int flavor) ;
   unsigned long int getNclass(HFORType) ;
 
   std::map<std::string, std::map<int, std::vector<float> > > getdR() ;
@@ -92,33 +92,33 @@ class HFOR_Truth
 
 
   //Helper to check the parent type of the b or c quark
-  std::map<std::string, bool> checkAncestor(const xAOD::TruthParticle* ancestor, const xAOD::TruthParticle* bcQuark) ;
+  static std::map<std::string, bool> checkAncestor(const xAOD::TruthParticle* ancestor, const xAOD::TruthParticle* bcQuark) ;
 
   // Here we will take the final state quarks found in this event and classify
   // them as from Matrix Element, Gluon Spliting PDF or MPI.
-  bool findHFQuarks(const std::map <int, std::vector<const xAOD::TruthParticle* > > fsQuarksMap) ;
+  bool findHFQuarks(const std::map <int, std::vector<const xAOD::TruthParticle* > >& fsQuarksMap) ;
 
   //Based on the angle between the 2 b or c quarks and it's classification as from
   //ME or GS the event will be flagged to be killed or kept
   HFORType angularBasedRemoval( void ) ;
 
   //Helper to return if 2 particles are same flavor
-  bool is_sameFlavor(const xAOD::TruthParticle* x, const xAOD::TruthParticle* y) ;
+  static bool is_sameFlavor(const xAOD::TruthParticle* x, const xAOD::TruthParticle* y) ;
 
   //Helper to return if a given particle is final state particle
-  bool is_FinalState(const xAOD::TruthParticle* bcQuark) ;
+  bool is_FinalState(const xAOD::TruthParticle* bcQuark) const ;
 
   //Helper to return if a particle is a b quark
-  bool is_b(const xAOD::TruthParticle* particle) ;
+  static bool is_b(const xAOD::TruthParticle* particle) ;
 
   //Helper to return if a particle is a c quark
-  bool is_c(const xAOD::TruthParticle* particle) ;
+  static bool is_c(const xAOD::TruthParticle* particle) ;
 
   //Helper to return if a particle is a hadron
-  bool is_bHadron(const xAOD::TruthParticle* x) ;
+  static bool is_bHadron(const xAOD::TruthParticle* x) ;
 
   //Helper to return if a particle is a proton
-  bool is_proton(const xAOD::TruthParticle* x) ;
+  static bool is_proton(const xAOD::TruthParticle* x) ;
 
   //Book-keepers for what the tool is doing
   //Create a map to hold the number of quarks identifyed
