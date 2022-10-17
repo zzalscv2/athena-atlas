@@ -35,9 +35,14 @@ from DerivationFrameworkPhysicsValidation.PHYSVAL import PHYSVALCfg
 # HIGG1D1 Higgs->gammagamma derivation
 from DerivationFrameworkHiggs.HIGG1D1 import HIGG1D1Cfg
 
+# FTAG derivations
+from DerivationFrameworkFlavourTag.FTAG1 import FTAG1Cfg
+from DerivationFrameworkFlavourTag.FTAG2 import FTAG2Cfg
+
 # Avoids compilation warnings from Flake8
 __all__ = ['TEST1Cfg','TEST2Cfg','TEST3Cfg','TEST4Cfg','TEST5Cfg','TEST6Cfg',
            'TRUTH0Cfg','TRUTH1Cfg','TRUTH3Cfg',
            'PHYSCfg',
            'PHYSVALCfg',
+           'FTAG1Cfg', 'FTAG2Cfg',
            'HIGG1D1Cfg']          
