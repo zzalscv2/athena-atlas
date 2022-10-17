@@ -47,6 +47,9 @@ namespace Muon {
                      
             const Amg::Vector3D& dir() const {return *m_dir;}
             const Amg::Vector3D& pos() const {return m_cl->globalPosition();}
+
+            double dirDot(const SeedMeasurement& other) const {return dirDot(other.dir());}
+            double dirDot(const Amg::Vector3D& v) const { return dir().dot(v); }
         
             void setDistance(double d){m_distance = d;}
             double distance() const {return m_distance;}
@@ -60,7 +63,7 @@ namespace Muon {
 
         //// Constructor used for the three micro mega stereo seeds
         NSWSeed(const MuonClusterSegmentFinderTool* parent, const std::array<SeedMeasurement, 4>& seed,
-                const AmgSymMatrix(8)& diamond);
+                const AmgSymMatrix(2)& diamond);
 
         //// Constructor to build seeds from 2 eta/phi strips
         NSWSeed(const MuonClusterSegmentFinderTool* parent, const SeedMeasurement& first, const SeedMeasurement& second);
@@ -234,7 +237,7 @@ namespace Muon {
 
         std::vector<NSWSeed> segmentSeedFromMM(const LayerMeasVec& orderedClusters) const;
         std::vector<NSWSeed> segmentSeedFromMM(const LayerMeasVec& orderedClusters, 
-                                               const std::array<unsigned int,4>& selLayers,
+                                               std::array<unsigned int,4> selLayers,
                                                unsigned int& trial_counter) const;
 
         
