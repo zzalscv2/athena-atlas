@@ -73,6 +73,7 @@ class _ConfigSettingsBase() :
       #at the moment. Setting them explicitely here will prevent trigger count differences in
       #https://gitlab.cern.ch/atlas/athena/-/merge_requests/56607
       self._maxRPhiImpact   = 10.
+      self._maxRPhiImpactEM = 50. # mm
       self._maxZImpact      = 250.
       self._maxEta          = 2.7
       self._minSiClusters   = 7
@@ -349,6 +350,10 @@ class _ConfigSettingsBase() :
       return self._maxRPhiImpact
 
    @property
+   def maxRPhiImpactEM(self):
+      return self._maxRPhiImpactEM
+
+   @property
    def maxZImpact(self):
       return self._maxZImpact
 
@@ -438,6 +443,7 @@ class _ConfigSettingsBase() :
       log.info( "   roi                   : %s", self._roi )
       log.info( "   addSingleTrackVertices: %s", self._addSingleTrackVertices )
       log.info( "   maxRPhiImpact         : %s", self._maxRPhiImpact )
+      log.info( "   maxRPhiImpactEM       : %s", self._maxRPhiImpactEM )
       log.info( "   maxZImpact            : %s", self._maxZImpact )
       log.info( "   maxEta                : %s", self._maxEta )
       log.info( "   maxSiHoles            : %s", self._maxSiHoles )
