@@ -614,7 +614,8 @@ SUSYObjDef_xAOD::SUSYObjDef_xAOD( const std::string& name )
   declareProperty( "EleEffNPcorrModel", m_EG_corrModel );
   //Egamma correction file list override
   declareProperty( "EleEffCorrFNList", m_EG_corrFNList );
-
+  declareProperty( "IsRun3", m_isRun3 );
+  
   //For electron trigger SF tools
   declareProperty( "ElectronTriggerSFStringSingle",      m_electronTriggerSFStringSingle);
 

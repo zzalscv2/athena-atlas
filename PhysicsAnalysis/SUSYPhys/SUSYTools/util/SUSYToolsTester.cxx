@@ -136,7 +136,16 @@ int main( int argc, char* argv[] ) {
   int debug = 1;
   Long64_t entries=-1;
 
+  // Open the input file:
+  TString fileName = argv[1];
+  ANA_MSG_INFO( "Opening file: " << fileName );
+  std::unique_ptr< TFile > ifile( TFile::Open( fileName, "READ" ) );
+  ANA_CHECK( ifile.get() );
+
+  bool isRun3 = false;
+  if ((fileName.Contains("mc21a") || fileName.Contains("data22")) && fileName.Contains("13p6TeV")) isRun3 = true;
   std::string config_file = (PathResolverFindCalibFile("SUSYTools/SUSYTools_Default.conf")).c_str();
+  if (isRun3) config_file = (PathResolverFindCalibFile("SUSYTools/SUSYTools_Default_Run3.conf")).c_str();
   std::string prw_file = "DUMMY";
   std::string ilumicalc_file = "DUMMY";
 
@@ -166,11 +175,6 @@ int main( int argc, char* argv[] ) {
   }
   ST::ISUSYObjDef_xAODTool::DataSource datasource = (isData ? ST::ISUSYObjDef_xAODTool::Data : (isAtlfast ? ST::ISUSYObjDef_xAODTool::AtlfastII : ST::ISUSYObjDef_xAODTool::FullSim));
 
-  // Open the input file:
-  TString fileName = argv[1];
-  ANA_MSG_INFO( "Opening file: " << fileName );
-  std::unique_ptr< TFile > ifile( TFile::Open( fileName, "READ" ) );
-  ANA_CHECK( ifile.get() );
 
   // Open file and check available containers
   std::map<std::string, std::string> containers = getFileContainers(ifile);
@@ -187,14 +191,8 @@ int main( int argc, char* argv[] ) {
   }
 
   // Create a TEvent object:
-#ifdef ROOTCORE
-  xAOD::TEvent event( xAOD::TEvent::kAthenaAccess );
-#else
-  POOL::TEvent event( POOL::TEvent::kAthenaAccess );
-#endif
 
-  //xAOD::TEvent event( xAOD::TEvent::kBranchAccess );
-  //xAOD::TEvent event( xAOD::TEvent::kClassAccess );
+  xAOD::TEvent event( xAOD::TEvent::kClassAccess );
   ANA_CHECK( event.readFrom( ifile.get() ) );
   ANA_MSG_INFO( "Number of events in the file: " << static_cast< int >( event.getEntries() ) );
 
@@ -220,7 +218,7 @@ int main( int argc, char* argv[] ) {
     myGRLs.push_back(PathResolverFindCalibFile("GoodRunsLists/data16_13TeV/20180129/physics_25ns_21.0.19.xml"));
     myGRLs.push_back(PathResolverFindCalibFile("GoodRunsLists/data17_13TeV/20180619/physics_25ns_Triggerno17e33prim.xml"));
     myGRLs.push_back(PathResolverFindCalibFile("GoodRunsLists/data18_13TeV/20190219/physics_25ns_Triggerno17e33prim.xml"));
-    myGRLs.push_back(PathResolverFindCalibFile("GoodRunsLists/data22_13p6TeV/20220820/data22_13p6TeV.periodDE_DetStatus-v108-pro28_MERGED_PHYS_StandardGRL_All_Good_25ns_ignore__TRIG_HLT_MUO_Upstream_Barrel_problem__TRIG_HLT_MUO_Upstream_Endcap_problem__TRIG_L1_MUB_coverage__TRIG_L1_MUE_misconf_electronics__TRIG_L1_MUB_lost_sync.xml"));
+    myGRLs.push_back(PathResolverFindCalibFile("GoodRunsLists/data22_13p6TeV/20220922/physics_25ns_ignoreTRIGMUO.xml"));
 
     ANA_CHECK( m_grl.setProperty("GoodRunsListVec", myGRLs) );
     ANA_CHECK( m_grl.setProperty("PassThrough", false) );
@@ -231,8 +229,15 @@ int main( int argc, char* argv[] ) {
 
   //xsec DB
   SUSY::CrossSectionDB *my_XsecDB(0);
-  if (!isData) {
-    my_XsecDB = new SUSY::CrossSectionDB(PathResolverFindCalibFile("dev/PMGTools/PMGxsecDB_mc16.txt"));
+  if (!isData){
+    ANA_MSG_INFO(fileName);
+    if (isRun3) {
+      my_XsecDB = new SUSY::CrossSectionDB(PathResolverFindCalibFile("dev/PMGTools/PMGxsecDB_mc21.txt"));
+    }
+    else 
+    {
+      my_XsecDB = new SUSY::CrossSectionDB(PathResolverFindCalibFile("dev/PMGTools/PMGxsecDB_mc16.txt"));
+    }
     ANA_MSG_INFO( "xsec DB initialized" );
   }
 
@@ -370,13 +375,23 @@ int main( int argc, char* argv[] ) {
   }
 
   // ============================================================================================
-  // Triggers to check
-  std::vector<std::string> el_triggers {"HLT_e24_lhmedium_L1EM20VH","HLT_e26_lhtight_nod0_ivarloose", "HLT_e60_lhmedium_nod0", "HLT_e160_lhloose_nod0"};
-  std::vector<std::string> mu_triggers {"HLT_mu26_ivarmedium","HLT_mu50","HLT_mu20_mu8noL1"};
-  std::vector<std::string> ph_triggers {"HLT_g120_loose"};
-  std::vector<std::string> tau_triggers {"HLT_tau125_medium1_tracktwo", "HLT_tau40_mediumRNN_tracktwoMVA_tau35_mediumRNN_tracktwoMVA"};
-  std::vector<std::string> emu_triggers {"HLT_2e12_lhloose_nod0_mu10", "HLT_e12_lhloose_nod0_2mu10", "HLT_e17_lhloose_nod0_mu14", "HLT_e7_lhmedium_nod0_mu24"};
-
+  // Triggers from https://twiki.cern.ch/twiki/bin/view/Atlas/LowestUnprescaled
+  std::vector<std::string> el_triggers,mu_triggers,ph_triggers,tau_triggers,emu_triggers;
+  if (isRun3){
+    el_triggers = {"HLT_e26_lhtight_ivarloose_L1EM22VHI", "HLT_e60_lhmedium_L1EM22VHI", "HLT_e140_lhloose_L1EM22VHI","HLT_e300_etcut_L1EM22VHI"};
+    mu_triggers = {"HLT_mu24_ivarmedium_L1MU14FCH","HLT_mu50_L1MU14FCH","HLT_mu60_0eta105_msonly_L1MU14FCH","HLT_mu60_L1MU14FCH","HLT_mu80_msonly_3layersEC_L1MU14FCH"};
+    ph_triggers = {"HLT_g140_loose_L1EM22VHI","HLT_g300_etcut_L1EM22VHI"};
+    tau_triggers = {"HLT_tau160_mediumRNN_tracktwoMVA_L1TAU100", "HLT_tau40_mediumRNN_tracktwoMVA_tau35_mediumRNN_tracktwoMVA_03dRAB_L1TAU25IM_2TAU20IM_2J25_3J20"};
+    emu_triggers = {"HLT_2e12_lhloose_mu10_L12EM8VH_MU8F", "HLT_e12_lhloose_2mu10_L12MU8F", "HLT_e17_lhloose_mu14_L1EM15VH_MU8F", "HLT_e7_lhmedium_mu24_L1MU14FCH"};
+  }
+  else
+  {
+    el_triggers = {"HLT_e24_lhmedium_L1EM20VH","HLT_e26_lhtight_nod0_ivarloose", "HLT_e60_lhmedium_nod0", "HLT_e160_lhloose_nod0"};
+    mu_triggers = {"HLT_mu26_ivarmedium","HLT_mu50","HLT_mu20_mu8noL1"};
+    ph_triggers = {"HLT_g120_loose"};
+    tau_triggers = {"HLT_tau125_medium1_tracktwo", "HLT_tau40_mediumRNN_tracktwoMVA_tau35_mediumRNN_tracktwoMVA"};
+    emu_triggers = {"HLT_2e12_lhloose_nod0_mu10", "HLT_e12_lhloose_nod0_2mu10", "HLT_e17_lhloose_nod0_mu14", "HLT_e7_lhmedium_nod0_mu24"};
+  }
   // ============================================================================================
   // Systematics and counts
   std::vector<ST::SystInfo> systInfoList;
@@ -717,8 +732,9 @@ int main( int argc, char* argv[] ) {
 
       if (debug>0 && entry==0) {
         // Testing trigger
-        std::string trigItem[6] = {"HLT_e26_lhtight_nod0_ivarloose","HLT_mu26_ivarmedium","HLT_mu50","HLT_xe100","HLT_noalg_.*"};
-        for (int it = 0; it < 6; it++) {
+        std::vector<std::string> trigItem = {"HLT_e26_lhtight_nod0_ivarloose","HLT_mu26_ivarmedium","HLT_mu50","HLT_xe100","HLT_noalg_.*"}; // Trigger for Run 2
+        if (isRun3) trigItem = {"HLT_e26_lhtight_ivarloose_L1EM22VHI","HLT_mu24_ivarmedium_L1MU14FCH","HLT_mu50_L1MU14FCH","HLT_xe100","HLT_noalg_.*"}; // Trigger for Run 3
+        for (int it = 0; it < (int) trigItem.size(); it++) {
           bool passed = objTool.IsTrigPassed(trigItem[it]);
           float prescale = objTool.GetTrigPrescale(trigItem[it]);
           ANA_MSG_DEBUG( "Pass " << trigItem[it].c_str() << " trigger? " << (int)passed << ", prescale " << prescale );
@@ -1024,9 +1040,12 @@ int main( int argc, char* argv[] ) {
       TString muTrig2015 = "HLT_mu20_iloose_L1MU15_OR_HLT_mu50"; //"HLT_mu18_mu8noL1"; //"HLT_mu20_iloose_L1MU15_OR_HLT_mu50";
       TString muTrig2016 = "HLT_mu26_ivarmedium_OR_HLT_mu50";
       TString muTrig2017 = "HLT_mu26_ivarmedium_OR_HLT_mu50";
+      TString muTrig2022 = "HLT_mu24_ivarmedium_L1MU14FCH_OR_HLT_mu50_L1MU14FCH";
+
       std::vector<std::string> muTrigs2015 = {"HLT_mu20_iloose_L1MU15","HLT_mu50"}; //"HLT_mu18_mu8noL1"; //"HLT_mu20_iloose_L1MU15_OR_HLT_mu50";
       std::vector<std::string> muTrigs2016 = {"HLT_mu26_ivarmedium","HLT_mu50"};
       std::vector<std::string> muTrigs2017 = {"HLT_mu26_ivarmedium","HLT_mu50"};
+      std::vector<std::string> muTrigs2022 = {"HLT_mu24_ivarmedium_L1MU14FCH","HLT_mu50_L1MU14FCH"};
 
       if (slices["mu"]) {
         ANA_MSG_DEBUG( "Muon step - selection" );
@@ -1063,8 +1082,10 @@ int main( int argc, char* argv[] ) {
                 my_mu_trigs=muTrigs2015;
               else if(objTool.treatAsYear()==2016)
                 my_mu_trigs=muTrigs2016;
-              else
+              else if(objTool.treatAsYear()==2017 || objTool.treatAsYear()==2018)
                 my_mu_trigs=muTrigs2017;
+              else
+                my_mu_trigs=muTrigs2022;
             }
             else{
               my_mu_trigs=muTrigs2016;
@@ -1120,7 +1141,9 @@ int main( int argc, char* argv[] ) {
           ANA_MSG_DEBUG("MUON BEFORE SF = " << muonSF << "   " << objTool.treatAsYear() << "   "  << objTool.GetRandomRunNumber() << "    " <<  objTool.GetPileupWeight() );
           if(objTool.treatAsYear()==2015)        muonSF = objTool.GetTotalMuonSF(*muons, true, true, muTrig2015.Data());
           else if(objTool.treatAsYear()==2016)   muonSF = objTool.GetTotalMuonSF(*muons, true, true, muTrig2016.Data());
-          else                                   muonSF = objTool.GetTotalMuonSF(*muons, true, true, muTrig2017.Data());
+          else if(objTool.treatAsYear()==2017)   muonSF = objTool.GetTotalMuonSF(*muons, true, true, muTrig2017.Data());
+          else if(objTool.treatAsYear()==2018)   muonSF = objTool.GetTotalMuonSF(*muons, true, true, muTrig2017.Data());
+          else                                   muonSF = objTool.GetTotalMuonSF(*muons, true, true, muTrig2022.Data());
           ANA_MSG_DEBUG("MUON AFTER SF =  " << muonSF << "   " << objTool.treatAsYear() << "   "  << objTool.GetRandomRunNumber() << "    " <<  objTool.GetPileupWeight() );
         }
       }

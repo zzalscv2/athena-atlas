@@ -100,11 +100,25 @@ if( XAOD_STANDALONE )
       LOG_IGNORE_PATTERN ${extra_patterns}
       PROPERTIES TIMEOUT 300
    )
+   atlas_add_test( ut_SUSYToolsTester_data_Run3
+      SCRIPT SUSYToolsTester /cvmfs/atlas-nightlies.cern.ch/repo/data/data-art/SUSYTools/DAOD_PHYS.data22_13p6TeV.430542.data22_p5267.PHYS.pool.root
+            maxEvents=1000 isData=1 isAtlfast=0 Debug=0
+      LOG_IGNORE_PATTERN ${extra_patterns}
+      PROPERTIES TIMEOUT 300
+   )
    atlas_add_test( ut_SUSYToolsTester_mc
       SCRIPT SUSYToolsTester /cvmfs/atlas-nightlies.cern.ch/repo/data/data-art/SUSYTools/DAOD_PHYS.mc20_13TeV.410470.FS_mc20e_p5226.PHYS.pool.root
              maxEvents=100 isData=0 isAtlfast=0 Debug=0 NoSyst=0
              PRWFile=dev/PileupReweighting/mc16_13TeV/pileup_mc16e_dsid410470_FS.root
              ilumicalcFile=GoodRunsLists/data18_13TeV/20190318/ilumicalc_histograms_None_348885-364292_OflLumi-13TeV-010.root
+      LOG_IGNORE_PATTERN ${extra_patterns}
+      PROPERTIES TIMEOUT 300
+   )
+   atlas_add_test( ut_SUSYToolsTester_mc_Run3
+      SCRIPT SUSYToolsTester /cvmfs/atlas-nightlies.cern.ch/repo/data/data-art/SUSYTools/DAOD_PHYS.mc21_13p6TeV.601229.FS_mc21a_p5278.PHYS.pool.root
+             maxEvents=100 isData=0 isAtlfast=0 Debug=0 NoSyst=0
+             PRWFile=dev/PileupReweighting/mc16_13TeV/pileup_mc21a_dsid601229_FS.root
+             ilumicalcFile=GoodRunsLists/data22_13p6TeV/20220922/ilumicalc_histograms_None_428648-430648_OflLumi-Run3-001.root
       LOG_IGNORE_PATTERN ${extra_patterns}
       PROPERTIES TIMEOUT 300
    )
