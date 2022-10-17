@@ -58,85 +58,85 @@ void TrackCnv_p4::persToTrans( const Trk::Track_p4 *persObj,
 //-----------------------------------------------------------------------------
 // Transient to persistent
 //-----------------------------------------------------------------------------
-void TrackCnv_p4::transToPers( const Trk::Track    *transObj,
-             Trk::Track_p4 *persObj,
-             MsgStream       &log )
+void
+TrackCnv_p4::transToPers(const Trk::Track* transObj, Trk::Track_p4* persObj, MsgStream& log)
 {
-  // std::cout<<"TrackCnv_p4::transToPers"<<std::endl;
-  
-  persObj->m_fitter              = static_cast<unsigned int>(transObj->info().m_fitter);
-  persObj->m_particleHypo        = static_cast<unsigned int>(transObj->info().m_particleHypo);
-  persObj->m_properties          = transObj->info().m_properties.to_ulong();
 
+  persObj->m_fitter = static_cast<unsigned int>(transObj->info().m_fitter);
+  persObj->m_particleHypo = static_cast<unsigned int>(transObj->info().m_particleHypo);
+  persObj->m_properties = transObj->info().m_properties.to_ulong();
 
   if (transObj->info().m_patternRecognition.size()<32) {
     persObj->m_patternRecognition  = transObj->info().m_patternRecognition.to_ulong();
-  }else{
-  // more 32 bits so have to do it the hard way.
+  } else {
+    // more 32 bits so have to do it the hard way.
     unsigned int i = 0;
-    unsigned int size=transObj->info().m_patternRecognition.size();
-    for (;i<32;++i)       persObj->m_patternRecognition    |= ((transObj->info().m_patternRecognition[i]) << i);
-    for (i=32;i<size;++i) persObj->m_extPatternRecognition |= ((transObj->info().m_patternRecognition[i]) << (i-32));
+    unsigned int size = transObj->info().m_patternRecognition.size();
+    for (; i < 32; ++i) {
+      persObj->m_patternRecognition |= ((transObj->info().m_patternRecognition[i]) << i);
+    }
+    for (i = 32; i < size; ++i) {
+      persObj->m_extPatternRecognition |= ((transObj->info().m_patternRecognition[i]) << (i - 32));
+    }
   }
 
   assert(transObj->fitQuality());
-  if (transObj->m_fitQuality){
+  if (transObj->m_fitQuality) {
     persObj->m_chiSquared = transObj->m_fitQuality->chiSquared();
-    persObj->m_numberDoF  = transObj->m_fitQuality->numberDoF();
+    persObj->m_numberDoF = transObj->m_fitQuality->numberDoF();
   } else {
-    log<<MSG::WARNING<<"No FitQuality on track at ["<<transObj<<"]"<<" with info="<<transObj->info().dumpInfo()<<endmsg;
+    log << MSG::WARNING << "No FitQuality on track at [" << transObj << "]"
+        << " with info=" << transObj->info().dumpInfo() << endmsg;
   }
 
-
   if (!transObj->m_trackStateVector.empty()) {
-
-    // In case  we have multi component state on Surface
-    TrkMultiComponentStateOnSurfaceDV multiDV(SG::VIEW_ELEMENTS);
-    {
-      bool isMulti = (transObj->m_trackStateVector[0]->variety() ==
-                      Trk::TrackStateOnSurface::MultiComponent);
-      if (isMulti) {
+    // Hints based slimming check if we need to persistify less TSOS
+    unsigned int n_elms = 0;
+    for (const Trk::TrackStateOnSurface* tsos : (transObj->m_trackStateVector)) {
+      if (keepTSOS(tsos)) {
+        ++n_elms;
+      }
+    }
+    //Check if we have a Track with Multi TSOS
+    bool isMulti = (transObj->m_trackStateVector[0]->variety() == Trk::TrackStateOnSurface::MultiComponent);
+    if (n_elms != transObj->m_trackStateVector.size()) { //We need to persistify less TSOS 
+      if (!isMulti) {
+        // Track std TSOS
+        DataVector<const Trk::TrackStateOnSurface> tsosDV(SG::VIEW_ELEMENTS);
+        tsosDV.reserve(n_elms);
+        for (const Trk::TrackStateOnSurface* tsos : (transObj->m_trackStateVector)) {
+          if (keepTSOS(tsos)) {
+            tsosDV.push_back(tsos);
+          }
+        }
+        m_trackStateVectorCnv.transToPers(&tsosDV, &persObj->m_trackState, log);
+      } else {
+        // Track with Multi TSOS
+        TrkMultiComponentStateOnSurfaceDV multiDV(SG::VIEW_ELEMENTS);
+        multiDV.reserve(n_elms);
+        for (const Trk::TrackStateOnSurface* tsos : (transObj->m_trackStateVector)) {
+          if (keepTSOS(tsos)) {
+            multiDV.push_back(static_cast<const Trk::MultiComponentStateOnSurface*>(tsos));
+          }
+        }
+        m_multiStateVectorCnv.transToPers(&multiDV, &persObj->m_trackState, log);
+      }
+    } else { // We need to persistify all TSOS
+      if (!isMulti) {
+        //Track with std TSOS
+        m_trackStateVectorCnv.transToPers(&transObj->m_trackStateVector, &persObj->m_trackState, log);
+      } else { 
+        // Multi TSOS so we need to still "convert"
+        TrkMultiComponentStateOnSurfaceDV multiDV(SG::VIEW_ELEMENTS);
         multiDV.reserve(transObj->m_trackStateVector.size());
         for (const Trk::TrackStateOnSurface* tsos :
              (transObj->m_trackStateVector)) {
-          multiDV.push_back(
-            static_cast<const Trk::MultiComponentStateOnSurface*>(tsos));
+          multiDV.push_back(static_cast<const Trk::MultiComponentStateOnSurface*>(tsos));
         }
+        m_multiStateVectorCnv.transToPers(&multiDV, &persObj->m_trackState, log);
       }
     }
-
-    // Hints based slimming check
-    unsigned int n_elms = 0;
-    {
-      for (const Trk::TrackStateOnSurface* tsos :
-           (transObj->m_trackStateVector)) {
-        if (keepTSOS(tsos))
-          ++n_elms;
-      }
-    }
-    if (n_elms != transObj->m_trackStateVector.size()) {
-      DataVector<const Trk::TrackStateOnSurface> pers_tsos(SG::VIEW_ELEMENTS);
-      pers_tsos.reserve(n_elms);
-      {
-        for (const Trk::TrackStateOnSurface* tsos :
-             (transObj->m_trackStateVector)) {
-          if (keepTSOS(tsos)) {
-            pers_tsos.push_back(const_cast<Trk::TrackStateOnSurface*>(tsos));
-          }
-        }
-      }
-      m_trackStateVectorCnv.transToPers(
-        &pers_tsos, &persObj->m_trackState, log);
-    } else { // No Hints based slimming
-      if (!multiDV.empty()) {
-        m_multiStateVectorCnv.transToPers(
-          &multiDV, &persObj->m_trackState, log);
-      } else {
-        m_trackStateVectorCnv.transToPers(
-          &transObj->m_trackStateVector, &persObj->m_trackState, log);
-      }
-    }
-  } else {//empty
-    m_trackStateVectorCnv.transToPers( &transObj->m_trackStateVector, &persObj->m_trackState, log );
+  } else { // empty
+    m_trackStateVectorCnv.transToPers(&transObj->m_trackStateVector, &persObj->m_trackState, log);
   }
 }
