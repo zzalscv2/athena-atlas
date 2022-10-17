@@ -44,6 +44,12 @@ namespace FlavorTagDiscriminants {
     SG::WriteDecorHandleKey< xAOD::TrackParticleContainer > m_dec_vertex_index {
       this, "truthVertexIndex", "truthVertexIndex", 
         "Truth vertex index of the track"};
+    SG::WriteDecorHandleKey< xAOD::TrackParticleContainer > m_dec_barcode {
+      this, "barcode", "barcode", 
+        "Barcode of linked truth particle"};
+    SG::WriteDecorHandleKey< xAOD::TrackParticleContainer > m_dec_parent_barcode {
+      this, "parentBarcode", "parentBarcode", 
+        "Barcode of parent of linked truth particle"};
 
     // truth origin tool
     ToolHandle<InDet::InDetTrackTruthOriginTool> m_trackTruthOriginTool {
@@ -59,6 +65,7 @@ namespace FlavorTagDiscriminants {
     const xAOD::TruthVertex* get_nearest_vertex(const xAOD::TruthVertex* search_vertex, 
                                                 std::vector<const xAOD::TruthVertex*> vertices) const;
     float get_distance(const xAOD::TruthVertex* vertex_A, const xAOD::TruthVertex* vertex_B) const;
+    const xAOD::TruthParticle* get_parent_hadron(const xAOD::TruthParticle* truth_particle) const;
   };
 
 }

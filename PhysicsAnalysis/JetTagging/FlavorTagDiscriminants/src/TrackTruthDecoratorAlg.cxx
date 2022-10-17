@@ -37,14 +37,20 @@ namespace FlavorTagDiscriminants {
     // Prepare decorators
     m_dec_origin_label = m_TrackContainerKey.key() + "." + m_dec_origin_label.key();
     m_dec_vertex_index = m_TrackContainerKey.key() + "." + m_dec_vertex_index.key();
+    m_dec_barcode = m_TrackContainerKey.key() + "." + m_dec_barcode.key();
+    m_dec_parent_barcode = m_TrackContainerKey.key() + "." + m_dec_parent_barcode.key();
 
     // Initialize decorators
     ATH_MSG_DEBUG( "Inizializing decorators:"  );
     ATH_MSG_DEBUG( "    ** " << m_dec_origin_label );
     ATH_MSG_DEBUG( "    ** " << m_dec_vertex_index );
+    ATH_MSG_DEBUG( "    ** " << m_dec_barcode );
+    ATH_MSG_DEBUG( "    ** " << m_dec_parent_barcode );
 
     CHECK( m_dec_origin_label.initialize() );
     CHECK( m_dec_vertex_index.initialize() );
+    CHECK( m_dec_barcode.initialize() );
+    CHECK( m_dec_parent_barcode.initialize() );
     
     // Retrieve tools
     ATH_CHECK( m_trackTruthOriginTool.retrieve() );
@@ -68,6 +74,8 @@ namespace FlavorTagDiscriminants {
     // instantiate decorators
     SG::WriteDecorHandle<TPC, int> dec_origin_label(m_dec_origin_label, ctx);
     SG::WriteDecorHandle<TPC, int> dec_vertex_index(m_dec_vertex_index, ctx);
+    SG::WriteDecorHandle<TPC, int> dec_barcode(m_dec_barcode, ctx);
+    SG::WriteDecorHandle<TPC, int> dec_parent_barcode(m_dec_parent_barcode, ctx);
 
     // get the truth primary vertex
     const xAOD::TruthVertex* truth_PV = truth_events->at(0)->truthVertex(0);
@@ -80,11 +88,19 @@ namespace FlavorTagDiscriminants {
     // first loop - decorate origin label, just store truth vertex for now
     auto trk_truth_vertex = std::vector<const xAOD::TruthVertex*>();
     for ( const auto& track : sorted_tracks ) {
+      
+      // get linked truth particle and decorate bacode
+      auto truth = m_trackTruthOriginTool->getTruth(track);
+      dec_barcode(*track) = truth ? truth->barcode() : -2;
+
+      // get parent hadron and decorate barcode 
+      auto truth_parent = get_parent_hadron(truth);
+      dec_parent_barcode(*track) = truth_parent ? truth_parent->barcode() : -2;
 
       // store the truth origin of the track
       int trackTruthOrigin = m_trackTruthOriginTool->getTrackOrigin(track);
 
-      // get exclusive track origin as defined
+      // get exclusive track origin
       int trackTruthLabel = InDet::ExclusiveOrigin::getExclusiveOrigin(trackTruthOrigin);
       dec_origin_label(*track) = trackTruthLabel;
       
@@ -182,6 +198,23 @@ namespace FlavorTagDiscriminants {
                                              const xAOD::TruthVertex* vertex_B) const {
     if ( !vertex_A or !vertex_B ) { return 999.0; }
     return (vertex_A->v4().Vect() - vertex_B->v4().Vect()).Mag();
+  }
+
+  const xAOD::TruthParticle* TrackTruthDecoratorAlg::get_parent_hadron(
+    const xAOD::TruthParticle* truth_particle) const {
+    
+    if ( truth_particle == nullptr ) { return nullptr; }
+    if ( truth_particle->isBottomHadron() or truth_particle->isCharmHadron() ) {
+      return truth_particle;
+    }
+    for(unsigned int p = 0; p < truth_particle->nParents(); p++) {
+      const xAOD::TruthParticle* parent = truth_particle->parent(p);
+      auto parent_hadron = get_parent_hadron(parent);
+      if ( parent_hadron != nullptr ) {
+        return parent_hadron;
+      }
+    }
+    return nullptr;
   }
 
 }
