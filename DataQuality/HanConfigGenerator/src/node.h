@@ -27,7 +27,7 @@ public:
   
 public:
   
-  node( node* n=0, const std::string d="", TObject* t=0 ) : 
+  node( node* n=0, const std::string &d="", TObject* t=0 ) : 
     mname("duff"), mparent(n), mtype(DUFF), mpath(""), mdepth(d), mobj(t) { 
     if ( t!=0 )  mname = t->GetName();
     mhirate = std::pair<std::string, double>( "", 0); 
