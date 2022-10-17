@@ -31,7 +31,7 @@ class TrackStateOnSurface;
   @author  Christos Anastopoulos Athena MT modifications
 
 */
-class TrackSlimmingTool
+class TrackSlimmingTool final
   : virtual public ITrackSlimmingTool
   , public AthAlgTool
 {
@@ -52,11 +52,10 @@ public:
    * For compatibility reasons in can do two different things
    * depending on the value of m_setPersistificationHints.
    *
-   * When m_setPersistificationHints = False
-   * @return A 'slimmed' version of 'track'.
-   * This is equivalent to calling the slimCopy below
+   * When  setPersistificationHints = False
+   * @return A 'slimmed' copy of the  'track'.
    *
-   * When m_setPersistificationHints = True
+   * When setPersistificationHints = True
    * it sets persistification hints
    * and returns nullptr
    *
@@ -64,20 +63,11 @@ public:
   Trk::Track* slim(const Trk::Track& track) const override final;
 
   /**
-   * This method always creates a std::unique_ptr<Trk::Track> with information
-   * removed
-   * @param track A const reference to the track to be skimmed. It will not be
-   * modified in any way.
-   * @return A 'slimmed' version of 'track', where exactly what information is
-   * copied depends on how the tool is configured
-   */
-  std::unique_ptr<Trk::Track> slimCopy(
-    const Trk::Track& track) const override final;
-
-  /**
-   * Slim/skim a non const Track. (m_setPersistificationHints is not used)
+   * Slim/skim a non const Track.
    * @param track A reference to the track to be skimmed.
-   * It will be modified.
+   *
+   * When setPersistificationHints = True
+   * it sets persistification hints
    */
   void slimTrack(Trk::Track& track) const override final;
 
@@ -100,6 +90,24 @@ private:
 
   /**atlas id helper*/
   const AtlasDetectorID* m_detID;
+
+  /**
+   * This method just set persistification
+   * Hints
+   */
+  void setHints(const Trk::Track& track) const;
+
+  /*
+   * This method resets the TSOS of a Track 
+   * keeping only the ones we want
+   */
+  void resetTSOS(Trk::Track& track) const;
+  /**
+   * This method always creates a std::unique_ptr<Trk::Track> with information
+   * removed calling the resetTSOS above
+   */
+  std::unique_ptr<Trk::Track> slimCopy(const Trk::Track& track) const;
+
 
   void checkForValidMeas(const Trk::TrackStateOnSurface* tsos,
                          bool& isIDmeas,

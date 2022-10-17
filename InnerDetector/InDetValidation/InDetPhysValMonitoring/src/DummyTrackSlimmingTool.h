@@ -37,7 +37,6 @@ public:
         configured
    */
   virtual Trk::Track* slim (const Trk::Track& track) const override;
-  virtual std::unique_ptr<Trk::Track> slimCopy(const Trk::Track& track) const override;
   virtual void slimTrack(Trk::Track&) const override;
 
 private:

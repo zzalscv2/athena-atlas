@@ -36,29 +36,22 @@ public:
    * depending on so called setPersistificationHints.
    *
    * When setPersistificationHints is not to be used
-   * @return A 'slimmed' version of 'track'.
-   * This is equivalent to calling the slimCopy below
+   * @return A 'slimmed' copy of the input 'track'.
    *
-   * When asetPersistificationHints = True
+   * When setPersistificationHints = True
    * it sets persistification hints
    * @return nullptr
    *
    */
   virtual Trk::Track* slim(const Trk::Track& track) const = 0;
   /**
-   * This method always creates a std::unique_ptr<Trk::Track> with information
-   * removed
-   * @param track A const reference to the track to be skimmed. It will not be
-   * modified in any way.
-   * @return A 'slimmed' version of 'track', where exactly what information is
-   * copied depends on how the tool is configured
-   */
-  virtual std::unique_ptr<Trk::Track> slimCopy(
-    const Trk::Track& track) const = 0;
-  /**
    * Slim/skim a non const Track.
    * @param track A reference to the track to be skimmed.
    * It will be modified.
+   *
+   * When setPersistificationHints = True
+   * it sets persistification hints
+   *
    */
   virtual void slimTrack(Trk::Track& track) const = 0;
 };
