@@ -63,16 +63,9 @@ ToolSvc += ElectronTrkMagField
 #
 # set up geometry
 #
-from InDetRecExample.TrackingCommon import use_tracking_geometry_cond_alg
 geom_svc=None
-geom_cond_key=''
-if not use_tracking_geometry_cond_alg :
-	from TrkConfig.AtlasTrackingGeometrySvcConfig import TrackingGeometrySvcCfg
-	acc = TrackingGeometrySvcCfg(flags)
-	geom_svc = acc.getPrimary()
-else :
-  cond_alg = TrackingCommon.createAndAddCondAlg(TrackingCommon.getTrackingGeometryCondAlg, "AtlasTrackingGeometryCondAlg", name="AtlasTrackingGeometryCondAlg")
-  geom_cond_key = cond_alg.TrackingGeometryWriteKey
+cond_alg = TrackingCommon.createAndAddCondAlg(TrackingCommon.getTrackingGeometryCondAlg, "AtlasTrackingGeometryCondAlg", name="AtlasTrackingGeometryCondAlg")
+geom_cond_key = cond_alg.TrackingGeometryWriteKey
 #
 # get propagator
 #

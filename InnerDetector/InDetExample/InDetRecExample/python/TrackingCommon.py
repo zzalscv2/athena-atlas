@@ -4,7 +4,6 @@ from AthenaCommon.GlobalFlags import globalflags
 from AthenaCommon.Logging import logging
 log = logging.getLogger('TrackingCommon')
 
-use_tracking_geometry_cond_alg = True
 
 def createAndAddCondAlg(creator, the_name, **kwargs) :
     from AthenaCommon.AlgSequence import AlgSequence
@@ -597,12 +596,9 @@ def getTrackingGeometryCondAlg(name="AtlasTrackingGeometryCondAlg",**kwargs) :
 @makePublicTool
 def getAtlasNavigator(name='AtlasNavigator', **kwargs) :
     the_name = makeName( name, kwargs)
-    if use_tracking_geometry_cond_alg and 'TrackingGeometryKey' not in kwargs :
+    if  'TrackingGeometryKey' not in kwargs :
         cond_alg = createAndAddCondAlg(getTrackingGeometryCondAlg, "AtlasTrackingGeometryCondAlg", name="AtlasTrackingGeometryCondAlg")
         kwargs = setDefaults(kwargs, TrackingGeometryKey=cond_alg.TrackingGeometryWriteKey)
-    elif 'TrackingGeometrySvc' not in kwargs :
-        from TrkDetDescrSvc.AtlasTrackingGeometrySvc import AtlasTrackingGeometrySvc
-        kwargs = setDefaults(kwargs, TrackingGeometrySvc = AtlasTrackingGeometrySvc)
 
     from TrkExTools.TrkExToolsConf import Trk__Navigator
     return Trk__Navigator(name=the_name,**kwargs)
@@ -654,12 +650,9 @@ def getInDetPatternUpdator(name='InDetPatternUpdator',**kwargs) :
 @makePublicTool
 def getTrkMaterialProviderTool(name='TrkMaterialProviderTool',**kwargs) :
     the_name = makeName(name,kwargs)
-    if use_tracking_geometry_cond_alg and 'TrackingGeometryReadKey' not in kwargs :
+    if 'TrackingGeometryReadKey' not in kwargs :
         cond_alg = createAndAddCondAlg(getTrackingGeometryCondAlg, "AtlasTrackingGeometryCondAlg", name="AtlasTrackingGeometryCondAlg")
         kwargs = setDefaults(kwargs, TrackingGeometryReadKey=cond_alg.TrackingGeometryWriteKey)
-    else :
-        from TrkDetDescrSvc.AtlasTrackingGeometrySvc import AtlasTrackingGeometrySvc
-        kwargs = setDefaults(kwargs, TrackingGeometrySvc = AtlasTrackingGeometrySvc)
 
     from TrkMaterialProvider.TrkMaterialProviderConf import Trk__TrkMaterialProviderTool
     return Trk__TrkMaterialProviderTool( name = the_name, **kwargs)
