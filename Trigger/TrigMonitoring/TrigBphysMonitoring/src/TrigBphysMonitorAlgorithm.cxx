@@ -99,7 +99,7 @@ StatusCode TrigBphysMonitorAlgorithm::fillChains(const EventContext& ctx) const 
   
   for(const auto& monitoredChain : m_ChainNames_MuMu) {
     ATH_MSG_DEBUG("Process chain " << monitoredChain);
-    if( !getTrigDecisionTool()->isPassed(monitoredChain) ) {
+    if( !isChainPassed(monitoredChain) ) {
       ATH_MSG_DEBUG("Chain " << monitoredChain << " is not passed");
       continue;
     }
@@ -110,7 +110,7 @@ StatusCode TrigBphysMonitorAlgorithm::fillChains(const EventContext& ctx) const 
   
   for(const auto& monitoredChain : m_ChainNames_MuMuX) {
     ATH_MSG_DEBUG("Process chain " << monitoredChain);
-    if( !getTrigDecisionTool()->isPassed(monitoredChain) ) {
+    if( !isChainPassed(monitoredChain) ) {
       ATH_MSG_DEBUG("Chain " << monitoredChain << " is not passed");
       continue;
     }
@@ -121,7 +121,7 @@ StatusCode TrigBphysMonitorAlgorithm::fillChains(const EventContext& ctx) const 
   
   for(const auto& monitoredChain : m_ChainNames_ElEl) {
     ATH_MSG_DEBUG("Process chain " << monitoredChain);
-    if( !getTrigDecisionTool()->isPassed(monitoredChain) ) {
+    if( !isChainPassed(monitoredChain) ) {
       ATH_MSG_DEBUG("Chain " << monitoredChain << " is not passed");
       continue;
     }
@@ -358,7 +358,7 @@ StatusCode TrigBphysMonitorAlgorithm::fillOfflineDimuons(const EventContext& ctx
     ATH_MSG_DEBUG("Process dimuons for " << dimuonMonGroupName);
     if(dimuonMonGroupName != "Any") {
       auto& monitoredChain = dimuonMonGroupName;
-      if( !(dimuonMonGroupName == "Any") && !getTrigDecisionTool()->isPassed(monitoredChain) ) {
+      if( !(dimuonMonGroupName == "Any") && !isChainPassed(monitoredChain) ) {
         ATH_MSG_DEBUG("Chain " << monitoredChain << " is not passed");
         continue;
       }
@@ -433,6 +433,17 @@ StatusCode TrigBphysMonitorAlgorithm::fillVertexHists(const ToolHandle<GenericMo
   fill(currentMonGroup, dimu_mass, dimu_pt, dimu_y, dimu_chi2, dimu_Lxy, dimu_LxySig);
   
   return StatusCode::SUCCESS;
+}
+
+bool TrigBphysMonitorAlgorithm::isChainPassed(const std::string& chain) const {
+  // Check if a chain is passed after prescale, accounting for Express Stream prescales if necessary
+  if(!m_requireExplicitESDecision) {
+    return getTrigDecisionTool()->isPassed(chain);
+  }
+  else {
+    const unsigned int passBits = getTrigDecisionTool()->isPassedBits(chain);
+    return passBits & TrigDefs::Express_passed;
+  }
 }
 
 StatusCode TrigBphysMonitorAlgorithm::buildDimuons(const EventContext& ctx, std::vector<std::unique_ptr<xAOD::Vertex>>& vxContainer) const {
