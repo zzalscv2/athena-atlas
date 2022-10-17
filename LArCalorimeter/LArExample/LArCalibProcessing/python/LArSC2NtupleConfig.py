@@ -22,7 +22,14 @@ def LArSC2NtupleCfg(flags, **kwargs):
           cfg.merge(LArRawDataReadingCfg(flags))
           from LArCabling.LArCablingConfig import LArOnOffIdMappingCfg
           cfg.merge(LArOnOffIdMappingCfg(flags))
-          
+
+          from LArConfiguration.LArConfigFlags import RawChannelSource
+          if flags.LAr.RawChannelSource is RawChannelSource.Calculated:
+             from LArROD.LArRawChannelBuilderAlgConfig import LArRawChannelBuilderAlgCfg
+             cfg.merge(LArRawChannelBuilderAlgCfg(flags))
+
+             cfg.getEventAlgo("LArRawChannelBuilder").LArRawChannelKey="LArRawChannels"
+ 
        alg=CompFactory.LArSC2Ntuple('LArSC2Ntuple',**kwargs)
        # if debug is needed, uncomment:
        #from AthenaCommon.Constants import DEBUG
