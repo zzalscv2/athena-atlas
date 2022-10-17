@@ -56,7 +56,6 @@ DetFlags.digitize.all_setOff()
 from AthenaCommon.GlobalFlags import globalflags
 globalflags.DetGeo = 'atlas'
 globalflags.DataSource = 'data'
-#globalflags.InputFormat = 'pool'
 globalflags.InputFormat = 'bytestream'
 globalflags.DatabaseInstance="CONDBR2"
 
@@ -69,16 +68,18 @@ from AtlasGeoModel import SetupRecoGeometry
 
 svcMgr.IOVDbSvc.GlobalTag = GlobalTag
 
-#TileUseDCS=False
 include( "CaloDetMgrDetDescrCnv/CaloDetMgrDetDescrCnv_joboptions.py")
 include( "CaloIdCnv/CaloIdCnv_joboptions.py" )
-#include( "TileIdCnv/TileIdCnv_jobOptions.py" )
 include( "LArDetDescr/LArDetDescr_joboptions.py" )
-#include("TileConditions/TileConditions_jobOptions.py" )
-#include("LArConditionsCommon/LArConditionsCommon_comm_jobOptions.py")
 include( "LArConditionsCommon/LArIdMap_comm_jobOptions.py" )
 
-from LArConditionsCommon import LArHVDB
+conddb.addFolder("LAR_OFL","/LAR/IdentifierOfl/HVLineToElectrodeMap",className="AthenaAttributeList")
+from AthenaCommon.AlgSequence import AthSequencer
+condseq = AthSequencer("AthCondSeq")
+
+from LArRecUtils.LArRecUtilsConf import LArHVIdMappingAlg
+hvmapalg = LArHVIdMappingAlg(ReadKey="/LAR/IdentifierOfl/HVLineToElectrodeMap",WriteKey="LArHVIdMap")
+condseq += hvmapalg
 #--------------------------------------------------------------
 # Access to IOVSvc, IOVDbSvc and CondDBMySQLCnvSvc
 #--------------------------------------------------------------
@@ -98,6 +99,13 @@ if 'inputsqlite' in dir():
 else:  
    conddb.addFolder("LAR_OFL","/LAR/HVPathologiesOfl/Pathologies<tag>"+foldertag+"</tag>")
     
+from AthenaCommon.AlgSequence import AthSequencer
+condseq = AthSequencer("AthCondSeq")
+
+from LArRecUtils.LArRecUtilsConf import LArHVIdMappingAlg
+hvmapalg = LArHVIdMappingAlg(ReadKey="/LAR/IdentifierOfl/HVLineToElectrodeMap",WriteKey="LArHVIdMap")
+condseq += hvmapalg
+
 svcMgr.MessageSvc.OutputLevel = 4
 svcMgr.MessageSvc.debugLimit  = 99999999
 svcMgr.MessageSvc.infoLimit   = 99999999

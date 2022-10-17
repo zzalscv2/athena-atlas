@@ -326,12 +326,11 @@ StatusCode LArFEBMonAlg::fillHistograms(const EventContext& ctx) const {
      evtrej=-1;
   }
 
-  if (thisEvent->errorState(xAOD::EventInfo::LAr)==xAOD::EventInfo::Error || nbOfFeb != m_nbOfFebBlocksTotal || nbOfFeb < m_nFEBnominal){ // Event in error (whatever is the cause)
-    if (thisEvent->isEventFlagBitSet(xAOD::EventInfo::LAr,LArEventBitInfo::DATACORRUPTED) || thisEvent->isEventFlagBitSet(xAOD::EventInfo::LAr,LArEventBitInfo::DATACORRUPTEDVETO) || nbOfFeb != m_nbOfFebBlocksTotal){ // Event corrupted (>=1/4 FEBs in error)
-      evtrej=2;
-      auto rbits = Monitored::Scalar<unsigned long>("rejBits", rejectionBits.to_ulong());
-      fill(m_monGroupName, rbits, evtrej);
-    }
+  if (thisEvent->isEventFlagBitSet(xAOD::EventInfo::LAr,LArEventBitInfo::DATACORRUPTED) || thisEvent->isEventFlagBitSet(xAOD::EventInfo::LAr,LArEventBitInfo::DATACORRUPTEDVETO) || nbOfFeb != m_nbOfFebBlocksTotal){ // Event corrupted (>=1/4 FEBs in error)
+    evtrej=2;
+    auto rbits = Monitored::Scalar<unsigned long>("rejBits", rejectionBits.to_ulong());
+    fill(m_monGroupName, rbits, evtrej);
+    
     evt_yield = 100.;
     if (thisEvent->isEventFlagBitSet(xAOD::EventInfo::LAr,LArEventBitInfo::DATACORRUPTEDVETO)) {
        evtrej=4;

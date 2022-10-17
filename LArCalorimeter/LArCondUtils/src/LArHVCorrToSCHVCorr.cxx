@@ -48,7 +48,7 @@ StatusCode LArHVCorrToSCHVCorr::stop()
   }
 
   //Retrive SuperCell online id
-  const LArOnline_SuperCellID* onlSCID;
+  const LArOnline_SuperCellID* onlSCID = nullptr;
   CHECK(detStore()->retrieve(onlSCID));
 
   SG::ReadCondHandle<LArOnOffIdMapping> cablingHdl{m_cablingKey, ctx};

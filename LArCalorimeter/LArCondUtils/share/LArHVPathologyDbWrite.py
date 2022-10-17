@@ -26,12 +26,15 @@ if "GloablTag" not in dir():
 if "date" not in dir():
     date="2015-09-29:12:00:00"
 
+if "mode" not in dir():
+       mode=0
+
 if "TimeStamp" not in dir():
    try:
       ts=strptime(date+'/UTC','%Y-%m-%d:%H:%M:%S/%Z')
-      TimeStamp=int(timegm(ts))*1000000000L
+      TimeStamp=int(timegm(ts))*1000000000
    except ValueError:
-      print "ERROR in time specification, use e.g. 2007-05-25:14:01:00"
+      print("ERROR in time specification, use e.g. 2007-05-25:14:01:00")
 
 
 ## basic job configuration
@@ -50,7 +53,6 @@ topSequence = AlgSequence()
 from AthenaCommon.DetFlags import DetFlags
 DetFlags.all_setOff()
 DetFlags.LAr_setOn()
-#DetFlags.Tile_setOn()
 
 from AthenaCommon.GlobalFlags import globalflags
 globalflags.DetGeo = 'atlas'
@@ -70,13 +72,15 @@ svcMgr.IOVDbSvc.GlobalTag = GlobalTag
 TileUseDCS=False
 include( "CaloDetMgrDetDescrCnv/CaloDetMgrDetDescrCnv_joboptions.py")
 include( "CaloIdCnv/CaloIdCnv_joboptions.py" )
-#include( "TileIdCnv/TileIdCnv_jobOptions.py" )
 include( "LArDetDescr/LArDetDescr_joboptions.py" )
-#include("TileConditions/TileConditions_jobOptions.py" )
-#include("LArConditionsCommon/LArConditionsCommon_comm_jobOptions.py")
 
-from LArConditionsCommon import LArHVDB
+conddb.addFolder("LAR_OFL","/LAR/IdentifierOfl/HVLineToElectrodeMap",className="AthenaAttributeList")
+from AthenaCommon.AlgSequence import AthSequencer
+condseq = AthSequencer("AthCondSeq")
 
+from LArRecUtils.LArRecUtilsConf import LArHVIdMappingAlg
+hvmapalg = LArHVIdMappingAlg(ReadKey="/LAR/IdentifierOfl/HVLineToElectrodeMap",WriteKey="LArHVIdMap")
+condseq += hvmapalg
 
 
 #--------------------------------------------------------------
@@ -92,7 +96,7 @@ LArHVPathologyDbAlg.WriteCondObjs = True
 LArHVPathologyDbAlg.InpFile       =  InputFile
 LArHVPathologyDbAlg.Folder        = "/LAR/HVPathologiesOfl/Pathologies"
 LArHVPathologyDbAlg.TagName       = tagName
-LArHVPathologyDbAlg.Mode          = 1
+LArHVPathologyDbAlg.Mode          = mode
 topSequence += LArHVPathologyDbAlg
 
 # Here mytest.db is the name of SQLite file created by this job
