@@ -1,15 +1,16 @@
 /*
-  Copyright (C) 2002-2017 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef TRACKPARTICLEASSOCIATIONALGS_TRACKPARTICLECELLASSOCIATIONALG_H
 #define TRACKPARTICLEASSOCIATIONALGS_TRACKPARTICLECELLASSOCIATIONALG_H
 
-#include "AthenaBaseComps/AthAlgorithm.h"
+#include "AthenaBaseComps/AthReentrantAlgorithm.h"
+
 #include "GaudiKernel/ToolHandle.h"
 #include "StoreGate/ReadHandleKey.h"
 #include "StoreGate/WriteHandleKey.h"
-#include <string>
+
 #include "xAODTracking/TrackParticleContainer.h"
 #include "xAODCaloEvent/CaloClusterContainer.h"
 #include "xAODCaloEvent/CaloClusterAuxContainer.h"
@@ -19,20 +20,21 @@
 #include "xAODAssociations/TrackParticleClusterAssociationAuxContainer.h"
 
 
+#include <string>
 namespace Rec {
   class IParticleCaloCellAssociationTool;
 }
 
-class TrackParticleCellAssociationAlg : public AthAlgorithm
+class TrackParticleCellAssociationAlg : public AthReentrantAlgorithm
 {
  public:
   TrackParticleCellAssociationAlg(const std::string& name, ISvcLocator* pSvcLocator);
 
   ~TrackParticleCellAssociationAlg();
 
-  StatusCode initialize();
-  StatusCode execute();
-  StatusCode finalize();
+  StatusCode initialize() override;
+  StatusCode execute(const EventContext& ctx) const override;
+  StatusCode finalize() override;
 
  private:
 

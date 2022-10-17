@@ -10,7 +10,7 @@
 #include "CaloUtils/CaloClusterStoreHelper.h"
 
 TrackParticleCellAssociationAlg::TrackParticleCellAssociationAlg(const std::string& name, ISvcLocator* pSvcLocator):
-  AthAlgorithm(name,pSvcLocator),
+  AthReentrantAlgorithm(name,pSvcLocator),
   m_caloCellAssociationTool("Rec::ParticleCaloCellAssociationTool/ParticleCaloCellAssociationTool", this) {
 
   declareProperty("ParticleCaloCellAssociationTool",m_caloCellAssociationTool);
@@ -33,17 +33,17 @@ StatusCode TrackParticleCellAssociationAlg::initialize()
   return StatusCode::SUCCESS; 
 }
 
-StatusCode TrackParticleCellAssociationAlg::execute()
+StatusCode TrackParticleCellAssociationAlg::execute(const EventContext& ctx) const
 {
   // get track particles
-  SG::ReadHandle<xAOD::TrackParticleContainer> trackParticles{m_trackParticleCollectionName};
+  SG::ReadHandle<xAOD::TrackParticleContainer> trackParticles{m_trackParticleCollectionName,ctx};
 
   // Create the xAOD container and its auxiliary store:
-  SG::WriteHandle<xAOD::CaloClusterContainer> clusColl( m_clusterContainerName /*,ctx*/);
+  SG::WriteHandle<xAOD::CaloClusterContainer> clusColl( m_clusterContainerName ,ctx);
   ATH_CHECK(CaloClusterStoreHelper::AddContainerWriteHandle(clusColl));
 
   
-  SG::WriteHandle<xAOD::TrackParticleClusterAssociationContainer> xaoda( m_associationContainerName/*,ctx*/);
+  SG::WriteHandle<xAOD::TrackParticleClusterAssociationContainer> xaoda( m_associationContainerName, ctx);
   ATH_CHECK(xaoda.record (std::make_unique<xAOD::TrackParticleClusterAssociationContainer>(),
 			  std::make_unique<xAOD::TrackParticleClusterAssociationAuxContainer>()));
 
@@ -104,7 +104,7 @@ StatusCode TrackParticleCellAssociationAlg::execute()
 
   ATH_MSG_DEBUG(" Total number of selected tracks: " << ntracks );
 
-  SG::WriteHandle<CaloClusterCellLinkContainer> cellLinks (m_clusterCellLinkName /*, ctx*/);
+  SG::WriteHandle<CaloClusterCellLinkContainer> cellLinks (m_clusterCellLinkName , ctx);
   ATH_CHECK(CaloClusterStoreHelper::finalizeClusters (cellLinks,
                                                       clusColl.ptr()));
   return StatusCode::SUCCESS;
