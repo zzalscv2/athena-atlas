@@ -61,6 +61,8 @@ class _ConfigSettingsBase() :
       self._doHitDV             = False 
       self._doDisappearingTrk   = False
       self._usePixelNN          = False
+      self._maxRPhiImpactEM = 50. # mm
+
 
       if hasattr(self.__class__, 'override') and callable(getattr(self.__class__, 'override')) :
          self.override()
@@ -308,6 +310,10 @@ class _ConfigSettingsBase() :
    def usePixelNN(self):
        return self._usePixelNN
 
+   @property
+   def maxRPhiImpactEM(self):
+      return self._maxRPhiImpactEM
+
    def printout(self):
       from AthenaCommon.Logging import logging
       log = logging.getLogger("InDetTrigConfig: ")
@@ -346,3 +352,4 @@ class _ConfigSettingsBase() :
       log.info( "   record                : {}".format( self._record ) )
       log.info( "   Roi                   : {}".format( self._Roi ) )
       log.info( "   addSingleTrackVertices: {}".format( self._addSingleTrackVertices ) )
+      log.info( "   maxRPhiImpactEM       : %s", self._maxRPhiImpactEM )

@@ -244,6 +244,7 @@ def scoringTool_builder( signature, config, summaryTool, prefix=None ):
   
   from InDetTrigRecExample.InDetTrigConfigRecLoadTools import InDetTrigTRTDriftCircleCut
 
+
   # NB: This DriftCircleCutTool should not be used here, we want to use the AmbiScoringTool 
   #     without using the DriftCircleCutTool at all, but unfortunatly, the AmbiScoringTool
   #     needs a DriftCircleCut tool - either the one we pass in, or the default offline 
@@ -257,9 +258,11 @@ def scoringTool_builder( signature, config, summaryTool, prefix=None ):
                                               doEmCaloSeed = False,
                                               SummaryTool  = summaryTool,
                                               minTRTonTrk        = 0,
-                                              DriftCircleCutTool = InDetTrigTRTDriftCircleCut )
+                                              DriftCircleCutTool = InDetTrigTRTDriftCircleCut,
+                                              maxRPhiImpEM = config.maxRPhiImpactEM ) 
                                                                                           
   log.info( scoringTool )
+
 
   from AthenaCommon.AppMgr import ToolSvc
   ToolSvc += scoringTool
