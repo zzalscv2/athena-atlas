@@ -78,6 +78,7 @@ FastChain_tf.py \
   --jobNumber 1 \
   --randomSeed 123 \
   --inputEVNTFile ${EVNT_File} \
+  --inputRDO_BKGFile ${RDO_BKG_File} \
   --outputRDOFile ${RDO_File} \
   --maxEvents ${events} \
   --skipEvents 0 \
@@ -86,8 +87,8 @@ FastChain_tf.py \
   --preInclude 'Campaigns.MC21a' 'Campaigns.MC21Simulation' \
   --postInclude 'PyJobTransforms.UseFrontier' \
   --inputRDO_BKGFile ${RDO_BKG_File} \
-  --conditionsTag OFLCOND-MC21-SDR-RUN3-07  \
-  --geometryVersion ATLAS-R3S-2021-03-00-00 \
+  --conditionsTag 'OFLCOND-MC21-SDR-RUN3-07'  \
+  --geometryVersion 'ATLAS-R3S-2021-03-00-00' \
   --imf False
 ca=$?
 echo  "art-result: $ca EVNTtoRDO_CA"
