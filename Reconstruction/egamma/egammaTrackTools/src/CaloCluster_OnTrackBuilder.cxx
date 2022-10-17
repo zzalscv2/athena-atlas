@@ -14,44 +14,53 @@
 
 #include "TrkCaloCluster_OnTrack/CaloCluster_OnTrack.h"
 
-#include "StoreGate/ReadHandle.h"
 #include "GaudiKernel/SystemOfUnits.h"
+#include "StoreGate/ReadHandle.h"
 
 namespace {
 
-// cluster Et in MeV and absEta returns
-// quick phi resolution parametrization
-// in rad 
+// cluster E in MeV and absEta returns
+// quick phi variance parametrization
+// sigma^2 where sigma is mrad
 double
-phiResol(double clusterEt, double absEta)
+phiVariance(double clusterE, double absEta)
 {
-  // convert from MeV to GeV 
-  double EtinGeV = clusterEt * 1e-3;
+  // convert from MeV to GeV
+  const double EinGeV = clusterE * 1e-3;
+  // sigma phi = b/E (+) c
+  // E in GeV
+  // and (+) sum in quadrature
+  // we return variance so
+  // sigma^2 = (b*b)/(E*E) + c*c
+  //
+  if (absEta < 0.1) {
+    return (0.14 * 0.14) / (EinGeV * EinGeV) + 0.001 * 0.001;
+  }
   if (absEta < 0.6) {
-    return 0.065 / std::sqrt(EtinGeV) - 0.007;
+    return (0.15 * 0.15) / (EinGeV * EinGeV) + 0.001 * 0.001;
   }
   if (absEta < 0.8) {
-    return 0.074 / std::sqrt(EtinGeV) - 0.008;
+    return (0.19 * 0.19) / (EinGeV * EinGeV) + 0.001 * 0.001;
   }
   if (absEta < 1.15) {
-    return 0.085 / std::sqrt(EtinGeV) - 0.010;
+    return (0.26 * 0.26) / (EinGeV * EinGeV) + 0.001 * 0.001;
   }
   if (absEta < 1.37) {
-    return 0.091 / std::sqrt(EtinGeV) - 0.010;
+    return (0.36 * 0.36) / (EinGeV * EinGeV) + 0.001 * 0.001;
   }
   if (absEta < 1.52) {
-    return 0.082 / std::sqrt(EtinGeV) - 0.006;
+    return (0.52 * 0.52) / (EinGeV * EinGeV) + 0.003 * 0.003;
   }
   if (absEta < 1.81) {
-    return 0.084 / std::sqrt(EtinGeV) - 0.008;
+    return (0.46 * 0.46) / (EinGeV * EinGeV) + 0.004 * 0.004;
   }
   if (absEta < 2.01) {
-    return 0.046 / std::sqrt(EtinGeV) - 0.001;
+    return (0.35 * 0.35) / (EinGeV * EinGeV) + 0.004 * 0.004;
   }
   if (absEta < 2.37) {
-    return 0.032 / std::sqrt(EtinGeV) + 0.001;
+    return (0.38 * 0.38) / (EinGeV * EinGeV) + 0.005 * 0.005;
   }
-  return 0.030 / std::sqrt(EtinGeV) + 0.003;
+  return (0.47 * 0.47) / (EinGeV * EinGeV) + 0.006 * 0.006;
 }
 }
 
@@ -215,33 +224,29 @@ CaloCluster_OnTrackBuilder::getClusterErrorMatrix(
 
   const double clusterE = cluster->e();
   const double clusterEta = cluster->eta();
-  const double clusterEt = cluster->et();
 
-  //variance in phi from calorimeter phi resolution 
-  double phiresol = phiResol(clusterEt, std::abs(clusterEta));
-  if (phiresol < 4e-3) {
-    //Avoid going too small for  very high pt
-    //as the quick one did not have such data
-    //so here 4 mrad is the smaller 
-    phiresol = 4e-3;
+  // variance in phi from calorimeter phi resolution
+  double phivariance = phiVariance(clusterE, std::abs(clusterEta));
+  if (phivariance < 1e-5) {
+    // Avoid going too small for  very high E
+    phivariance = 1e-5;
   }
-  const double phivariance = phiresol * phiresol;
 
-  //q over p variance from sigmaE/E (calo energy resolution)
+  // q over p variance from sigmaE/E (calo energy resolution)
   const double sigmaP_over_P = m_eg_resol->getResolution(0, // electron
                                                          clusterE,
                                                          clusterEta,
                                                          2 // 90% quantile
   );
-  const double qOverP = 1./clusterE;
-  const double qOverP_variance =(qOverP*qOverP)*(sigmaP_over_P*sigmaP_over_P);
+  const double qOverP = 1. / clusterE;
+  const double qOverP_variance =
+    (qOverP * qOverP) * (sigmaP_over_P * sigmaP_over_P);
 
   // Variance in Z
-  // sigma ~ 20 mm large error 
+  // sigma ~ 20 mm large error
   // As currently we do not want to rely
   // on the eta side of the cluster.
   constexpr double zvariance = 400;
- 
 
   if (xAOD::EgammaHelpers::isBarrel(cluster)) {
     // The two coordinates for a cyclinder are
@@ -249,7 +254,7 @@ CaloCluster_OnTrackBuilder::getClusterErrorMatrix(
     // Trk::locZ    = 1(ie z)
     const Amg::Vector3D& surfRefPoint = surf.globalReferencePoint();
     double r = surfRefPoint.perp();
-    double r2 = r*r;
+    double r2 = r * r;
     int indexCount(0);
     if (m_useClusterPhi) {
       covMatrix(indexCount, indexCount) = phivariance * r2;
