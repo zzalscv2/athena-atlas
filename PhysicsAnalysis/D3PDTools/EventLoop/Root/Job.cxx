@@ -81,6 +81,7 @@ namespace EL
   const std::string Job::optGridMergeOutput = "nc_mergeOutput";
   const std::string Job::optGridAddNthFieldOfInDSToLFN = "nc_addNthFieldOfInDSToLFN";
   const std::string Job::optGridWorkingGroup = "nc_workingGroup";
+  const std::string Job::optGridPrunShipAdditionalFilesOrDirs = "nc_prunShipAdditionalFilesOrDirs";
   const std::string Job::optGridShowCmd = "nc_showCmd";
   const std::string Job::optGridCpuTimePerEvent = "nc_cpuTimePerEvent";
   const std::string Job::optGridMaxWalltime = "nc_maxWalltime";
