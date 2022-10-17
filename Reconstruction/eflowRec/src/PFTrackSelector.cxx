@@ -10,7 +10,7 @@
 constexpr float invGeV = 1./CLHEP::GeV;
 
 PFTrackSelector::PFTrackSelector(const std::string& name, ISvcLocator* pSvcLocator):
-  AthAlgorithm(name, pSvcLocator)
+  AthReentrantAlgorithm(name, pSvcLocator)
 {
 }
 
@@ -38,7 +38,7 @@ StatusCode PFTrackSelector::initialize(){
 
 }
 
-StatusCode PFTrackSelector::execute(){
+StatusCode PFTrackSelector::execute(const EventContext& ctx) const{
   // Monitor the time taken to execute the alg
   auto t_exec = Monitored::Timer<std::chrono::milliseconds>( "TIME_execute" );
 	Monitored::ScopedTimer execution_time(t_exec);
@@ -46,12 +46,12 @@ StatusCode PFTrackSelector::execute(){
   auto eta_track = Monitored::Scalar( "eta_track", 0. );
   auto pt_track = Monitored::Scalar( "pt_track", 0. );
 
-  SG::WriteHandle<eflowRecTrackContainer> eflowRecTracksWriteHandle(m_eflowRecTracksWriteHandleKey);  
+  SG::WriteHandle<eflowRecTrackContainer> eflowRecTracksWriteHandle(m_eflowRecTracksWriteHandleKey, ctx);
   ATH_CHECK(eflowRecTracksWriteHandle.record(std::make_unique<eflowRecTrackContainer>()));
 
   /* Verify the read handle has a valid pointer, and if not return */
-  SG::ReadHandle<xAOD::TrackParticleContainer> tracksReadHandle(m_tracksReadHandleKey);
-  if (!tracksReadHandle.isValid()){
+  SG::ReadHandle<xAOD::TrackParticleContainer> tracksReadHandle(m_tracksReadHandleKey, ctx);
+  if (!tracksReadHandle.isValid()) {
     ATH_MSG_WARNING("Can not retrieve xAOD::TrackParticleContainer with name: " << tracksReadHandle.key());
     return StatusCode::FAILURE;
   }
@@ -65,8 +65,9 @@ StatusCode PFTrackSelector::execute(){
       continue;	
     }
 
-    ATH_MSG_DEBUG("Have track with E, pt, eta and phi of " << thisTrack->e() << ", " << thisTrack->pt() << ", " << thisTrack->eta() << " and " << thisTrack->phi());
-    
+    ATH_MSG_DEBUG("Have track with E, pt, eta and phi of " << thisTrack->e() << ", " << thisTrack->pt() << ", "
+                                                           << thisTrack->eta() << " and " << thisTrack->phi());
+
     bool rejectTrack(!selectTrack(*thisTrack));
 
     bool isElectron = this->isElectron(thisTrack);
@@ -102,68 +103,84 @@ StatusCode PFTrackSelector::execute(){
 
 StatusCode PFTrackSelector::finalize(){return StatusCode::SUCCESS;}
 
-bool PFTrackSelector::selectTrack(const xAOD::TrackParticle& track) {
-  //We pass a null xAOD::Vertex pointer to accept here, the vertex is only needed if z0 cuts are applied (which they are not)
-  if (track.pt()*0.001 < m_upperTrackPtCut) return static_cast<bool>(m_trackSelectorTool->accept(track, nullptr));
-  else return false;
+bool
+PFTrackSelector::selectTrack(const xAOD::TrackParticle& track) const
+{
+  // We pass a null xAOD::Vertex pointer to accept here, the vertex is only needed if z0 cuts are applied (which they
+  // are not)
+  if (track.pt() * 0.001 < m_upperTrackPtCut){
+    return static_cast<bool>(m_trackSelectorTool->accept(track, nullptr));
+  }
+  else
+    return false;
 }
 
-bool PFTrackSelector::isElectron(const xAOD::TrackParticle* track){
+bool PFTrackSelector::isElectron(const xAOD::TrackParticle* track) const{
 
-  if(m_electronsReadHandleKey.key().empty()) return false;
+  if (m_electronsReadHandleKey.key().empty())
+    return false;
 
   SG::ReadHandle<xAOD::ElectronContainer> electronsReadHandle(m_electronsReadHandleKey);
-  if (electronsReadHandle.isValid()){
+  if (electronsReadHandle.isValid()) {
 
-    for (const auto *thisElectron : *electronsReadHandle){
+    for (const auto* thisElectron : *electronsReadHandle) {
 
-      if (thisElectron){
-	unsigned int nTrack = thisElectron->nTrackParticles();
-	
-	if (0 != nTrack){	  
-	  const xAOD::TrackParticle* origTrack = xAOD::EgammaHelpers::getOriginalTrackParticle(thisElectron);	  
-	  if (origTrack){
-	    if (track == origTrack) {
-	      return true;
-	    }
-	  }//if valid track pointer
-	  else ATH_MSG_WARNING("Electron object map has NULL pointer to original TrackParticle");
-	}//if has a track
-	else ATH_MSG_WARNING("Electron object has " << nTrack << " tracks");
-      }//if valid pointer
-      else ATH_MSG_WARNING("Electron is a NULL pointer");
-    }//electron loop    
-  }
-  else ATH_MSG_WARNING("Invalid ReadHandle for electrons with key: " << electronsReadHandle.key());
+      if (thisElectron) {
+        unsigned int nTrack = thisElectron->nTrackParticles();
+
+        if (0 != nTrack) {
+          const xAOD::TrackParticle* origTrack = xAOD::EgammaHelpers::getOriginalTrackParticle(thisElectron);
+          if (origTrack) {
+            if (track == origTrack) {
+              return true;
+            }
+          } // if valid track pointer
+          else
+            ATH_MSG_WARNING("Electron object map has NULL pointer to original TrackParticle");
+        } // if has a track
+        else
+          ATH_MSG_WARNING("Electron object has " << nTrack << " tracks");
+      } // if valid pointer
+      else
+        ATH_MSG_WARNING("Electron is a NULL pointer");
+    } // electron loop
+  } else
+    ATH_MSG_WARNING("Invalid ReadHandle for electrons with key: " << electronsReadHandle.key());
 
   return false;
-
 }
 
-bool PFTrackSelector::isMuon(const xAOD::TrackParticle* track){
+bool
+PFTrackSelector::isMuon(const xAOD::TrackParticle* track) const
+{
 
-  if(m_muonsReadHandleKey.key().empty()) return false;
+  if (m_muonsReadHandleKey.key().empty())
+    return false;
 
   SG::ReadHandle<xAOD::MuonContainer> muonsReadHandle(m_muonsReadHandleKey);
-  if (muonsReadHandle.isValid()){
+  if (muonsReadHandle.isValid()) {
 
-    for (const auto *theMuon : *muonsReadHandle){      
-      if (theMuon){
-	ATH_MSG_DEBUG("Considering muon in isMuon with e,pt, eta and phi of " << theMuon->e() << ", " << theMuon->pt() << ", " << theMuon->eta() << " and " << theMuon->phi());
-	const ElementLink< xAOD::TrackParticleContainer >& theLink = theMuon->inDetTrackParticleLink();
-	if (theLink.isValid()){
-	  const xAOD::TrackParticle* ID_track = *theLink;
-	  if (ID_track){
-	    if (track == ID_track) return true;
-	  }
-	  else ATH_MSG_WARNING("This muon has a NULL pointer to the track");
-	}
-	else ATH_MSG_WARNING("This muon has an invalid link to the track");
-      }//if muon pointer is valid
-      else ATH_MSG_WARNING("This muon is a NULL pointer");
-    }//muon loop
-  }
-  else ATH_MSG_WARNING("Invalid ReadHandle for muons with key: " << muonsReadHandle.key());
+    for (const auto* theMuon : *muonsReadHandle) {
+      if (theMuon) {
+        ATH_MSG_DEBUG("Considering muon in isMuon with e,pt, eta and phi of "
+                      << theMuon->e() << ", " << theMuon->pt() << ", " << theMuon->eta() << " and " << theMuon->phi());
+        const ElementLink<xAOD::TrackParticleContainer>& theLink = theMuon->inDetTrackParticleLink();
+        if (theLink.isValid()) {
+          const xAOD::TrackParticle* ID_track = *theLink;
+          if (ID_track) {
+            if (track == ID_track){
+              return true;
+            }
+          } else
+            ATH_MSG_WARNING("This muon has a NULL pointer to the track");
+        } else
+          ATH_MSG_WARNING("This muon has an invalid link to the track");
+      } // if muon pointer is valid
+      else
+        ATH_MSG_WARNING("This muon is a NULL pointer");
+    } // muon loop
+  } else
+    ATH_MSG_WARNING("Invalid ReadHandle for muons with key: " << muonsReadHandle.key());
 
   return false;
 }
