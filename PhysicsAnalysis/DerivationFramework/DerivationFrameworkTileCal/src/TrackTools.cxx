@@ -258,7 +258,18 @@ double TrackTools::getPathInsideCell(const TRACK *track, const CaloCell *cell) c
     case 14: sampling_entrance = 12; sampling_exit = 14; break;
     case 15: sampling_entrance = 12; sampling_exit = 20; break; // for C10, the entrance is A10, the exit is D5
     case 16: sampling_entrance = 12; sampling_exit = 13; break;
-    case 17: sampling_entrance = 17; sampling_exit = 19; break;
+    case 17:
+      sampling_entrance = 17;
+      if (cell_tower == 10) {        // E1
+        sampling_exit = 19;          // the exit is B11
+      } else if (cell_tower == 11) { // E2
+        if (getTrackInCellSampling(track, CaloSampling::CaloSample::TileExt0)) sampling_exit = 18; // the exit is A12
+        else sampling_exit = 19;     // the exit is B11
+       } else if ((cell_tower == 13) || (cell_tower == 15)) { // E3 or E4
+        if (getTrackInCellSampling(track, CaloSampling::CaloSample::PreSamplerE)) sampling_exit = 4; // the exit is PreSamplerE
+        else sampling_exit = 18;     // the exit is TileExt0
+      }
+      break;
     case 18:
       sampling_entrance = 18;
       if      (cell_tower>=11 && cell_tower<=13) sampling_exit = 20;
