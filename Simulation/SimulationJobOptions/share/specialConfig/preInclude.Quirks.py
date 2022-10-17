@@ -1,8 +1,9 @@
 
 import os
 
-import ExtraParticles.PDGHelpers
-
+from G4AtlasApps.SimFlags import simFlags
+from ExtraParticles.PDGHelpers import getLocalPDGTableName
+tableName = getLocalPDGTableName(simFlags.ExtraParticlesPDGTABLE.get_Value())
 quirk_firststring=1e-6 #mm
 quirk_maxboost=1e-2
 quirk_maxmerge=1e-6 #mm
@@ -32,7 +33,7 @@ quirk_charge = float(simdict["CHARGE"])
 quirk_pdgid = int(simdict["PDGID"])
 quirk_stringforce = float(simdict["STRINGFORCE"])
 
-f = open('PDGTABLE.MeV', 'a')
+f=open(tableName,'a')
 f.write("M%8d                          %.8E +0.0E+00 -0.0E+00 Quirk               +\n" % (quirk_pdgid, quirk_mass))
 f.write("W%8d                          0.E+00         +0.0E+00 -0.0E+00 Quirk               +\n" % quirk_pdgid)
 f.close()

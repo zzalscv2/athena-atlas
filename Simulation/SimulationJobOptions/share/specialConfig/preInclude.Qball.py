@@ -5,8 +5,10 @@
 def load_files_for_qball_scenario(MASS, CHARGE):
     import os, shutil, sys
 
-    import ExtraParticles.PDGHelpers
-
+    from G4AtlasApps.SimFlags import simFlags
+    from ExtraParticles.PDGHelpers import getLocalPDGTableName
+    tableName = getLocalPDGTableName(simFlags.ExtraParticlesPDGTABLE.get_Value())
+    f=open(tableName,'a')
     CODE=10000000+int(float(CHARGE)*100)
 
     ALINE1="M {code}                         {intmass}.E+03       +0.0E+00 -0.0E+00 Qball           +".format(code=CODE,intmass=int(MASS))
@@ -14,7 +16,6 @@ def load_files_for_qball_scenario(MASS, CHARGE):
     BLINE1="{code}  {intmass}.00  {charge}  0.0 # Qball".format(code=CODE,intmass=int(MASS), charge=CHARGE)
     BLINE2="-{code}  {intmass}.00  -{charge}  0.0 # QballBar".format(code=CODE,intmass=int(MASS), charge=CHARGE)
 
-    f=open('PDGTABLE.MeV','a')
     f.writelines(str(ALINE1))
     f.writelines('\n')
     f.writelines(str(ALINE2))
@@ -59,16 +60,14 @@ except:
 assert "MASS" in simdict
 assert "CHARGE" in simdict
 load_files_for_qball_scenario(simdict["MASS"], simdict["CHARGE"])
+pdgcodes = eval(simdict['InteractingPDGCodes']) if 'InteractingPDGCodes' in simdict else []
+from ExtraParticles.PDGHelpers import updateExtraParticleWhiteList
+updateExtraParticleWhiteList('G4particle_whitelist_ExtraParticles.txt', pdgcodes)
 
 if doG4SimConfig:
     from G4AtlasApps import AtlasG4Eng
     AtlasG4Eng.G4Eng.log.info("Unlocking simFlags.EquationOfMotion to reset the value for Monopole simulation.")
     from G4AtlasApps.SimFlags import simFlags
-    # FIXME ideally would include this file early enough, so that the unlocking is not required
-    #simFlags.EquationOfMotion.unlock()
-    #simFlags.EquationOfMotion.set_On()
-    #simFlags.EquationOfMotion.set_Value_and_Lock("G4mplEqMagElectricField")#"MonopoleEquationOfMotion")
-    #simFlags.G4Stepper.set_Value_and_Lock('ClassicalRK4')
     simFlags.PhysicsOptions += ["MonopolePhysicsTool"]
     # add monopole-specific configuration for looper killer
     simFlags.OptionalUserActionList.addAction('G4UA::MonopoleLooperKillerTool',['Step'])

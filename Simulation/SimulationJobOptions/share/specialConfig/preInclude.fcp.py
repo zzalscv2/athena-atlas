@@ -6,16 +6,18 @@ def load_files_for_fcp_scenario(MASS, CHARGE, X, Y):
     import os, shutil, sys
 
     CODE=int(20000000)+int(X)*1000+int(Y)*10
-    print("Trying to load %s, %s for particle with code %s" % (X, Y, CODE))
+    print "Trying to load %s, %s for particle with code %s" % (X, Y, CODE)
 
     pdgLine1="M {code}                         {intmass}.E+03       +0.0E+00 -0.0E+00 fcp           +\n".format(code=CODE,intmass=int(MASS))
     pdgLine2="W {code}                         0.E+00         +0.0E+00 -0.0E+00 fcp           +\n".format(code=CODE)
     particleLine1="{code}  {intmass}.00  {fcharge}  0.0 # fcp\n".format(code=CODE,intmass=int(MASS), fcharge=float(CHARGE))
     particleLine2="-{code}  {intmass}.00  -{fcharge}  0.0 # fcpBar\n".format(code=CODE,intmass=int(MASS), fcharge=float(CHARGE))
 
-    import ExtraParticles.PDGHelpers
-
-    f=open('PDGTABLE.MeV','a')
+    # retreive the PDGTABLE file
+    from G4AtlasApps.SimFlags import simFlags
+    from ExtraParticles.PDGHelpers import getLocalPDGTableName
+    tableName = getLocalPDGTableName(simFlags.ExtraParticlesPDGTABLE.get_Value())
+    f=open(tableName,'a')
     f.writelines(str(pdgLine1))
     f.writelines(str(pdgLine2))
     f.close()
@@ -60,6 +62,10 @@ assert "CHARGE" in simdict
 assert "X" in simdict
 assert "Y" in simdict
 load_files_for_fcp_scenario(simdict["MASS"], simdict["CHARGE"], simdict["X"], simdict["Y"])
+pdgcodes = eval(simdict['InteractingPDGCodes']) if 'InteractingPDGCodes' in simdict else []
+from ExtraParticles.PDGHelpers import updateExtraParticleWhiteList
+updateExtraParticleWhiteList('G4particle_whitelist_ExtraParticles.txt', pdgcodes)
+
 
 if doG4SimConfig:
     from G4AtlasApps import AtlasG4Eng

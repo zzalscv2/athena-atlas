@@ -31,20 +31,60 @@ import os
 from AthenaCommon.SystemOfUnits import MeV, joule
 from AthenaCommon.PhysicalConstants import hbar_Planck, h_Planck
 from AthenaCommon.Logging import logging
-from G4AtlasApps.SimFlags import simFlags
 
+__gotLocalPDGTABLE__ = False
+__gotLocalWhiteList__ = False
 
-def getPDGTABLE(table):
-    # Delete a local file if present
+def makeLocalCopyOfPDGTABLE(table):
+    global __gotLocalPDGTABLE__
+    # Delete a local file from a previous job if present
     if os.path.isfile(table):
         os.remove(table)
     # Grab the file
     os.system('get_files -data %s' % table)
+    # make a back-up copy
+    import shutil
+    shutil.copy(table, table+'.orig')
+    __gotLocalPDGTABLE__ = True
+
+
+def getLocalPDGTableName(table):
+    global __gotLocalPDGTABLE__
+    if not (__gotLocalPDGTABLE__ and os.path.isfile(table)):
+        makeLocalCopyOfPDGTABLE(table)
+    return table
+
+
+def getOriginalPDGTableName(table):
+    global __gotLocalPDGTABLE__
+    tableorig = table+'.orig'
+    if not (__gotLocalPDGTABLE__ and os.path.isfile(tableorig)):
+        makeLocalCopyOfPDGTABLE(table)
+    return tableorig
+
+
+def getExtraParticleWhiteList(whitelist):
+    global __gotLocalWhiteList__
+    # Delete a local file from a previous job if present
+    if not (__gotLocalWhiteList__ and os.path.isfile(whitelist)):
+        if os.path.isfile(whitelist):
+            os.remove(whitelist)
+        #create blank file
+        blank = open(whitelist, 'w')
+        blank.close()
+        __gotLocalWhiteList__ = True
     return True
 
 
-# retreive the PDGTABLE file
-tableRetrieved = getPDGTABLE(simFlags.ExtraParticlesPDGTABLE.get_Value())
+def updateExtraParticleWhiteList(listName='G4particle_whitelist_ExtraParticles.txt', pdgcodes=[]):
+    if getExtraParticleWhiteList(listName):
+        import shutil
+        shutil.copy(listName, listName+'.org')
+    # update the whitelist for GenParticleSimWhiteList
+    writer = open(listName, 'a')
+    for pdg in pdgcodes:
+        writer.write('%s\n' % pdg)
+    writer.close
 
 
 class ExtraParticle(object):
@@ -113,57 +153,58 @@ class PDGParser(object):
     def parsePDGTABLE(self):
 
         # parse the PDGTABLE
-        with open(self.table, 'r') as f:
-            for line in f:
-                if line.startswith('*'):
-                    # Comments start with '*'
+        f = open(self.table, 'r')
+        for line in f:
+            if line.startswith('*'):
+                # Comments start with '*'
+                continue
+            splitLine = line.split()
+
+            # Name of the particle
+            baseName = splitLine[-2]
+
+            # Number of particle entries
+            charges = splitLine[-1].split(',')
+
+            # Mass or Width
+            prop = ''
+            symbol = splitLine[0]
+            if symbol == 'M':
+                prop = 'mass'
+            elif symbol == 'W':
+                prop = 'width'
+            else:
+                raise ValueError(
+                    'Unidentified symbol %s for particle %s' % (
+                        symbol, baseName))
+
+            pdgs = splitLine[1:1+len(charges)]
+            value = float(splitLine[1+len(charges)])
+
+            for pdg, charge in zip(pdgs, charges):
+                if not self.accept(int(pdg)):
                     continue
-                splitLine = line.split()
-
-                # Name of the particle
-                baseName = splitLine[-2]
-
-                # Number of particle entries
-                charges = splitLine[-1].split(',')
-
-                # Mass or Width
-                prop = ''
-                symbol = splitLine[0]
-                if symbol == 'M':
-                    prop = 'mass'
-                elif symbol == 'W':
-                    prop = 'width'
+                name = self.formatName(baseName, charge)
+                kwargs = dict()
+                kwargs.setdefault('name', name)
+                kwargs.setdefault(prop, value * MeV)
+                kwargs.setdefault('pdg', int(pdg))
+                kwargs.setdefault('charge', self.formatCharge(charge))
+                if name not in self.extraParticles.keys():
+                    self.extraParticles[name] = ExtraParticle(**kwargs)
                 else:
-                    raise ValueError(
-                        'Unidentified symbol %s for particle %s' % (
-                            symbol, baseName))
-
-                pdgs = splitLine[1:1+len(charges)]
-                value = float(splitLine[1+len(charges)])
-
-                for pdg, charge in zip(pdgs, charges):
-                    if not self.accept(int(pdg)):
+                    if getattr(self.extraParticles[name], prop) != -1:
+                        self.log.warning(
+                            "Property %s is already"
+                            "set for particle %s."
+                            "Current value is %s and"
+                            "incoming value is %s.",
+                            prop, name,
+                            getattr(self.extraParticles[name], prop),
+                            value)
                         continue
-                    name = self.formatName(baseName, charge)
-                    kwargs = dict()
-                    kwargs.setdefault('name', name)
-                    kwargs.setdefault(prop, value * MeV)
-                    kwargs.setdefault('pdg', int(pdg))
-                    kwargs.setdefault('charge', self.formatCharge(charge))
-                    if name not in self.extraParticles.keys():
-                        self.extraParticles[name] = ExtraParticle(**kwargs)
-                    else:
-                        if getattr(self.extraParticles[name], prop) != -1:
-                            self.log.warning(
-                                "Property %s is already"
-                                "set for particle %s."
-                                "Current value is %s and"
-                                "incoming value is %s.",
-                                prop, name,
-                                getattr(self.extraParticles[name], prop),
-                                value)
-                            continue
-                        setattr(self.extraParticles[name], prop, value)
+                    setattr(self.extraParticles[name], prop, value)
+        f.close()
 
         for name in self.extraParticles:
             # calculate lifetime
@@ -199,11 +240,8 @@ class PDGParser(object):
             raise ValueError('Unexpected charge %s' % charge)
 
     def createList(self):
-
-        # make a new whitelist for GenParticleSimWhiteList
-        with open('G4particle_whitelist_ExtraParticles.txt', 'w') as writer:
-            for name in self.extraParticles:
-                writer.write('%s\n' % self.extraParticles[name].pdg)
+        pdgcodes = [ self.extraParticles[name].pdg for name in self.extraParticles ]
+        updateExtraParticleWhiteList('G4particle_whitelist_ExtraParticles.txt', pdgcodes)
 
         # generate output in correct format
         outDict = dict()

@@ -3,13 +3,15 @@ def get_and_fix_PDGTABLE(replace):
     import os, shutil, re
 
     # Download generic PDGTABLE (overwrite existing one if it exists)
-    import ExtraParticles.PDGHelpers
-    shutil.move('PDGTABLE.MeV', 'PDGTABLE.MeV.org')
+    from G4AtlasApps.SimFlags import simFlags
+    from ExtraParticles.PDGHelpers import getLocalPDGTableName
+    tableName = getLocalPDGTableName(simFlags.ExtraParticlesPDGTABLE.get_Value())
+    shutil.move( tableName,  tableName+'.backup')
 
     # an example line to illustrate the fixed format, see PDGTABLE.MeV for more details
     # M 1000022                          0.E+00         +0.0E+00 -0.0E+00 ~chi(0,1)     0
 
-    lines = open('PDGTABLE.MeV.org').readlines()
+    lines = open(tableName+'.backup','r').readlines()
     for pdgid,mass,name,charge in replace:
         if not re.search(r'[MW]\s+'+str(pdgid)+'\s+\S+', ''.join(lines)):
             lines.append('M' + str(pdgid).rjust(8) +''.ljust(26) +
@@ -51,6 +53,8 @@ C1Mass = eval(simdict["AMSBC1Mass"])
 N1Mass = eval(simdict["AMSBN1Mass"])
 # patching PDGTABLE
 get_and_fix_PDGTABLE([(1000022, N1Mass, '~chi(0,1)', '0'), (1000024, C1Mass, '~chi(+,1)', '+')])
+from ExtraParticles.PDGHelpers import updateExtraParticleWhiteList
+updateExtraParticleWhiteList('G4particle_whitelist_ExtraParticles.txt', [1000022,-1000024,1000024])
 
 if doG4SimConfig:
     from G4AtlasApps.SimFlags import simFlags
