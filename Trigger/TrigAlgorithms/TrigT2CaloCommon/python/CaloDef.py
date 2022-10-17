@@ -245,7 +245,8 @@ def HLTRoITopoRecoSequence(ConfigFlags, RoIs, algSuffix=''):
     import AthenaCommon.CfgMgr as CfgMgr
     HLTRoITopoRecoSequenceVDV = CfgMgr.AthViews__ViewDataVerifier("HLTRoITopoRecoSequenceVDV%s"%algSuffix)
     HLTRoITopoRecoSequenceVDV.DataObjects = [( 'TrigRoiDescriptorCollection' , 'StoreGateSvc+PrecisionCaloRoIs%s'%algSuffix ),
-                                             ( 'CaloBCIDAverage' , 'StoreGateSvc+CaloBCIDAverage' )]
+                                             ( 'CaloBCIDAverage' , 'StoreGateSvc+CaloBCIDAverage' ),
+                                             ( 'SG::AuxElement' , 'StoreGateSvc+EventInfo.averageInteractionsPerCrossing' )]
 
     cellMaker = HLTCellMaker(ConfigFlags, RoIs, algSuffix="RoI%s"%algSuffix)
     topoClusterMaker = _algoHLTTopoCluster(inputEDM = cellMaker.CellsName, algSuffix="RoI%s"%algSuffix)
@@ -263,7 +264,8 @@ def HLTHIRoITopoRecoSequence(ConfigFlags, RoIs, algSuffix=''):
     HLTRoITopoRecoSequenceVDV = CfgMgr.AthViews__ViewDataVerifier("HLTHIRoITopoRecoSequenceVDV")
     HLTRoITopoRecoSequenceVDV.DataObjects = [( 'TrigRoiDescriptorCollection' , 'StoreGateSvc+PrecisionCaloRoIs' ),
                                              ( 'xAOD::HIEventShapeContainer' , 'StoreGateSvc+' + eventShape ),
-                                             ( 'CaloBCIDAverage' , 'StoreGateSvc+CaloBCIDAverage' )]
+                                             ( 'CaloBCIDAverage' , 'StoreGateSvc+CaloBCIDAverage' ),
+                                             ( 'SG::AuxElement' , 'StoreGateSvc+EventInfo.averageInteractionsPerCrossing' )]
 
     cellMaker = HLTCellMaker(ConfigFlags, RoIs, algSuffix="HIRoI")
     cellCorrector = _algoHLTCaloCellCorrector(
