@@ -67,6 +67,10 @@ public:
     m_implementation->linkParent( parent );
   }
 
+  const std::set< const View* >& getParentLinks() const {
+    return m_implementation->getParentLinks();
+  }
+
   void setFilter( std::vector< std::string > const& inputFilter ) {
     m_implementation->setFilter( inputFilter );
   }
