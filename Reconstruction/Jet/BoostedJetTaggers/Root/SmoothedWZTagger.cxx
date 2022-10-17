@@ -278,6 +278,11 @@ Root::TAccept& SmoothedWZTagger::tag( const xAOD::Jet& jet ) const {
 
     // decorate the jet with tracks multiplicity from the un-grommed jet
     ANA_CHECK_THROW( GetUnGroomTracks(jet) );
+
+    float jet_ntrk = jet.auxdata<int>("ParentJetNTrkPt500");
+
+    if (jet_ntrk < cut_ntrk) m_accept.setCutResult( "PassNtrk", true );
+
   }
 
   /// Get enum to decorate m_accept state if only using 2-var tagger

@@ -21,6 +21,7 @@
 #include "BoostedJetTaggers/SmoothedTopTagger.h"
 #include "BoostedJetTaggers/SmoothedWZTagger.h"
 #include "BoostedJetTaggers/JSSWTopTaggerDNN.h"
+#include "BoostedJetTaggers/JSSWTopTaggerANN.h"
 
 namespace top {
   BoostedTaggingCPTools::BoostedTaggingCPTools(const std::string& name) :
@@ -68,6 +69,9 @@ namespace top {
       if (taggerType == "JSSWTopTaggerDNN") top::check(ASG_MAKE_ANA_TOOL(m_taggers[fullName],
                                                                          JSSWTopTaggerDNN),
                                                        "Failed to make " + origName);
+      else if (taggerType == "JSSWTopTaggerANN") top::check(ASG_MAKE_ANA_TOOL(m_taggers[fullName],
+									      JSSWTopTaggerANN),
+							    "Failed to make " + origName);
       else if (taggerType == "SmoothedWZTagger" or taggerType == "SmoothedWZTaggerCNN") top::check(ASG_MAKE_ANA_TOOL(m_taggers[fullName],
                                                                               SmoothedWZTagger),
                                                             "Failed to make " + origName);
@@ -80,7 +84,7 @@ namespace top {
                  "Failed to set CalibArea for " + origName);
       // not all BJT taggers implement IsMC property -- only those that have calibration SFs
       // so we have to check here that we try to set this property only where applicable
-      if (taggerType == "JSSWTopTaggerDNN" || taggerType == "SmoothedWZTagger") {
+      if (taggerType == "JSSWTopTaggerDNN" || taggerType == "JSSWTopTaggerANN" || taggerType == "SmoothedWZTagger") {
         top::check(m_taggers[fullName].setProperty("IsMC", m_config->isMC()), "Failed to set IsMC for " + origName);
       }
       top::check(m_taggers[fullName].initialize(), "Failed to initialize " + origName);
@@ -116,12 +120,13 @@ namespace top {
     
     // Calib areas
     m_taggersCalibAreas["JSSWTopTaggerDNN"] = "JSSWTopTaggerDNN/Rel21/";
+    m_taggersCalibAreas["JSSWTopTaggerANN"] = "JSSWTopTaggerANN/Rel21/";
     m_taggersCalibAreas["SmoothedWZTagger"] = "SmoothedWZTaggers/Rel21/";
     m_taggersCalibAreas["SmoothedWZTaggerCNN"] = "Local"; // this is needed only until configs will be on cvmf
     
     // Supported tagger types
     m_taggersTypes = {
-      "JSSWTopTaggerDNN", "SmoothedWZTagger", "SmoothedWZTaggerCNN"
+      "JSSWTopTaggerDNN", "JSSWTopTaggerANN", "SmoothedWZTagger", "SmoothedWZTaggerCNN"
     };
     
     // Supported jet collections
@@ -166,6 +171,7 @@ namespace top {
       // https://twiki.cern.ch/twiki/bin/view/AtlasProtected/BoostedJetTaggingRecommendationFullRun2#UFO_jets
       m_taggersCalibAreas["SmoothedWZTagger"] = "SmoothedWZTaggers/Rel21/February2022/";
       m_taggersCalibAreas["JSSWTopTaggerDNN"] = "JSSWTopTaggerDNN/Rel21/February2022/";
+      m_taggersCalibAreas["JSSWTopTaggerANN"] = "JSSWTopTaggerANN/Rel21/February2022/";
 
       // 3-Var
       std::string taggerType="SmoothedWZTagger";
@@ -182,7 +188,7 @@ namespace top {
       // DNN
       taggerType="JSSWTopTaggerDNN";
       setConfig(taggerType,"JSSDNNW50","JSSDNN50Tagger_AntiKt10UFOCSSKSoftDrop_Jan22.dat");
-      setConfig(taggerType,"JSSDNNW80","JSSDNN50Tagger_AntiKt10UFOCSSKSoftDrop_Jan22.dat");
+      setConfig(taggerType,"JSSDNNW80","JSSDNN80Tagger_AntiKt10UFOCSSKSoftDrop_Jan22.dat");
 
       // CNN
       taggerType="SmoothedWZTaggerCNN";
