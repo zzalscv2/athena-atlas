@@ -184,7 +184,6 @@
 + InnerDetector/InDetConditions/InDetCondTools
 + InnerDetector/InDetConditions/InDetConditionsAthenaPool
 + InnerDetector/InDetConditions/InDetConditionsSummaryService
-+ InnerDetector/InDetConditions/InDetCoolCoralClientUtils
 + InnerDetector/InDetConditions/SCT_ConditionsData
 + InnerDetector/InDetConditions/TRT_ConditionsAlgs
 + InnerDetector/InDetConditions/TRT_ConditionsData
