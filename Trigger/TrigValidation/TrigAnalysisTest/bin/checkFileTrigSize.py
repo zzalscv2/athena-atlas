@@ -1097,6 +1097,10 @@ class checkFileTrigSize:
             elif edm.getCategory(name)  == 'NOTFOUND' and name.startswith("HLTNav_"):
                 self.triggerAlgList.append([name, 'HLTNav', float(sizePerEvent)])
 
+            elif edm.getCategory(name) == 'NOTFOUND' and name.startswith("TrigMatch_"):
+                self.triggerAlgList.append([name, 'TrigMatching', float(sizePerEvent)])
+                
+
             ## Do some simple checks if algorithm is not found in dictionary (and isn't IOVMetaDataContainer*)
             ## Add these to triggerAlgsNotIncluded
             ## Can be used to debug the search algorithm of getCategory() in TriggerEDM.py
