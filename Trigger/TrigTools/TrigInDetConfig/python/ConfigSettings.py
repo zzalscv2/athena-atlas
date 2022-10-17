@@ -309,6 +309,7 @@ class ConfigSettings_electronLRT( _ConfigSettingsBase ):
       self._newConfig           = True
       self._maxZImpact        = 500.
       self._maxRPhiImpact     = 300.
+      self._maxRPhiImpactEM   = 300.
       self._maxEta            = 2.7
       self._maxDoubleHoles    = 0
       self._maxSiHoles        = 2
@@ -340,6 +341,7 @@ class ConfigSettings_muonLRT( _ConfigSettingsBase ):
       self._newConfig           = True
       self._maxZImpact        = 500.
       self._maxRPhiImpact     = 300.
+      self._maxRPhiImpEM      = 300.
       self._maxEta            = 2.7
       self._maxDoubleHoles    = 0
       self._maxSiHoles        = 2
@@ -372,6 +374,7 @@ class ConfigSettings_tauLRT( _ConfigSettingsBase ):
       self._newConfig           = True
       self._maxZImpact        = 500.
       self._maxRPhiImpact     = 300.
+      self._maxRPhiImpEM      = 300.
       self._maxEta            = 2.7
       self._maxDoubleHoles    = 0
       self._maxSiHoles        = 2
@@ -400,6 +403,7 @@ class ConfigSettings_bjetLRT( _ConfigSettingsBase ):
       self._newConfig           = True
       self._maxZImpact        = 500.
       self._maxRPhiImpact     = 300.
+      self._maxRPhiImpactEM   = 300.
       self._maxEta            = 2.7
       self._maxDoubleHoles    = 0
       self._maxSiHoles        = 2
@@ -435,6 +439,7 @@ class ConfigSettings_fullScanLRT( _ConfigSettingsBase ):
       self._newConfig           = True
       self._maxZImpact        = 500.
       self._maxRPhiImpact     = 300.
+      self._maxRPhiImpactEM   = 300.
       self._maxEta            = 2.7
       self._maxDoubleHoles    = 0
       self._maxSiHoles        = 2
@@ -470,6 +475,7 @@ class ConfigSettings_DJetLRT( _ConfigSettingsBase ):
       self._newConfig           = True
       self._maxZImpact        = 500.
       self._maxRPhiImpact     = 300.
+      self._maxRPhiImpactEM   = 300.
       self._maxEta            = 2.7
       self._maxDoubleHoles    = 0
       self._maxSiHoles        = 2
@@ -506,6 +512,7 @@ class ConfigSettings_DVtxLRT( _ConfigSettingsBase ):
       self._newConfig           = True
       self._maxZImpact        = 500.
       self._maxRPhiImpact     = 300.
+      self._maxRPhiImpactEM   = 300.
       self._maxEta            = 2.7
       self._maxDoubleHoles    = 0
       self._maxSiHoles        = 2
