@@ -5,14 +5,15 @@
 def load_files_for_monopole_scenario(MASS, GCHARGE):
     import os, shutil, sys
 
-    import ExtraParticles.PDGHelpers
-
+    from G4AtlasApps.SimFlags import simFlags
+    from ExtraParticles.PDGHelpers import getLocalPDGTableName
+    tableName = getLocalPDGTableName(simFlags.ExtraParticlesPDGTABLE.get_Value())
+    f=open(tableName,'a')
     ALINE1="M 4110000                         {intmass}.E+03       +0.0E+00 -0.0E+00 Monopole         0".format(intmass=int(MASS))
     ALINE2="W 4110000                          0.E+00         +0.0E+00 -0.0E+00 Monopole         0"
     BLINE1="4110000 {intmass}.00 0.0 {gcharge} # Monopole".format(intmass=int(MASS), gcharge=GCHARGE)
     BLINE2="-4110000 {intmass}.00 0.0 -{gcharge} # MonopoleBar".format(intmass=int(MASS), gcharge=GCHARGE)
 
-    f=open('PDGTABLE.MeV','a')
     f.writelines(str(ALINE1))
     f.writelines('\n')
     f.writelines(str(ALINE2))
@@ -32,6 +33,7 @@ def load_files_for_monopole_scenario(MASS, GCHARGE):
     del ALINE2
     del BLINE1
     del BLINE2
+
 
 doG4SimConfig = True
 from AthenaCommon.AthenaCommonFlags import athenaCommonFlags
@@ -55,6 +57,9 @@ except:
 assert "MASS" in simdict
 assert "GCHARGE" in simdict
 load_files_for_monopole_scenario(simdict["MASS"], simdict["GCHARGE"])
+pdgcodes = eval(simdict['InteractingPDGCodes']) if 'InteractingPDGCodes' in simdict else []
+from ExtraParticles.PDGHelpers import updateExtraParticleWhiteList
+updateExtraParticleWhiteList('G4particle_whitelist_ExtraParticles.txt', pdgcodes)
 
 if doG4SimConfig:
     from G4AtlasApps import AtlasG4Eng

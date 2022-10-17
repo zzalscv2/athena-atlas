@@ -6,13 +6,15 @@ def get_and_fix_PDGTABLE(replace):
     import os, shutil, re, sys
 
     # Download generic PDGTABLE (do not overwrite existing one if it exists, use existing one instead) 
-    import ExtraParticles.PDGHelpers
-    shutil.move('PDGTABLE.MeV', 'PDGTABLE.MeV.org')
+    from G4AtlasApps.SimFlags import simFlags
+    from ExtraParticles.PDGHelpers import getLocalPDGTableName
+    tableName = getLocalPDGTableName(simFlags.ExtraParticlesPDGTABLE.get_Value())
+    shutil.move( tableName,  tableName+'.backup')
 
     # an example line to illustrate the fixed format, see PDGTABLE.MeV for more details
     # M 1000022                          0.E+00         +0.0E+00 -0.0E+00 ~chi(0,1)     0
 
-    lines = open('PDGTABLE.MeV.org').readlines()
+    lines = open( tableName+'.backup','r').readlines()
     for pdgid,mass,name,charge in replace:
         if not re.search(r'[MW]\s+'+str(pdgid)+'\s+\S+', ''.join(lines)):
             lines.append('M' + str(pdgid).rjust(8) +''.ljust(26) +
@@ -35,24 +37,31 @@ def get_and_fix_PDGTABLE(replace):
     print 'modfied PDGTABLE\n%s\n' % ''.join(lines)
     sys.stdout.flush()
 
-def load_files_for_sleptonLLP_scenario(simdict):
 
+def load_files_for_sleptonLLP_scenario(simdict):
+    pdgcodes = []
     if "GMSBSlepton" in simdict:
         get_and_fix_PDGTABLE([
                 (2000011, eval(simdict.get("GMSBSlepton",'0')), '~e(R)', '-'),
-                (2000013, eval(simdict.get("GMSBSlepton",'0')), '~mu(R)', '-'),            
+                (2000013, eval(simdict.get("GMSBSlepton",'0')), '~mu(R)', '-'),
                 (1000011, eval(simdict.get("GMSBSlepton",'0')), '~e(L)', '-'),
                 (1000013, eval(simdict.get("GMSBSlepton",'0')), '~mu(L)', '-'),
                 ])
+        pdgcodes += [-2000011,2000011,-2000013,2000013,-1000011,1000011,-1000013,1000013]
     if "GMSBStau" in simdict:
         get_and_fix_PDGTABLE([
                 (2000015, eval(simdict.get("GMSBStau",'0')), '~tau(R)', '-'),
                 (1000015, eval(simdict.get("GMSBStau",'0')), '~tau(L)', '-'),
                 ])
+        pdgcodes += [-2000015,2000015,-1000015,1000015]
     if "GMSBGravitino" in simdict:
         get_and_fix_PDGTABLE([
                 (1000039, eval(simdict.get("GMSBGravitino",'0')), '~G', '0'),
                 ])
+        pdgcodes += [1000039]
+
+    from ExtraParticles.PDGHelpers import updateExtraParticleWhiteList
+    updateExtraParticleWhiteList('G4particle_whitelist_ExtraParticles.txt', pdgcodes)
 
 doG4SimConfig = True
 from AthenaCommon.AthenaCommonFlags import athenaCommonFlags
@@ -74,15 +83,16 @@ except:
 load_files_for_sleptonLLP_scenario(simdict)
 
 if doG4SimConfig:
-    simFlags.PhysicsOptions += ["GauginosPhysicsTool","AllSleptonsPhysicsTool"]
+    localPhysicsOptions = ["GauginosPhysicsTool","AllSleptonsPhysicsTool"]
     # Slepton decays from SleptonsConfig
     if "GMSBSlepton" in simdict:
-        simFlags.PhysicsOptions += ["SElectronRPlusToElectronGravitino","SElectronLPlusToElectronGravitino"]
-        simFlags.PhysicsOptions += ["SElectronRMinusToElectronGravitino","SElectronLMinusToElectronGravitino"]
-        simFlags.PhysicsOptions += ["SMuonRPlusToMuonGravitino","SMuonLPlusToMuonGravitino"]
-        simFlags.PhysicsOptions += ["SMuonRMinusToMuonGravitino","SMuonLMinusToMuonGravitino"]
+        localPhysicsOptions += ["SElectronRPlusToElectronGravitino","SElectronLPlusToElectronGravitino"]
+        localPhysicsOptions += ["SElectronRMinusToElectronGravitino","SElectronLMinusToElectronGravitino"]
+        localPhysicsOptions += ["SMuonRPlusToMuonGravitino","SMuonLPlusToMuonGravitino"]
+        localPhysicsOptions += ["SMuonRMinusToMuonGravitino","SMuonLMinusToMuonGravitino"]
     if "GMSBStau" in simdict:
-        simFlags.PhysicsOptions += ["STauRPlusToTauGravitino","STauLPlusToTauGravitino"]
-        simFlags.PhysicsOptions += ["STauRMinusToTauGravitino","STauLMinusToTauGravitino"]
+        localPhysicsOptions += ["STauRPlusToTauGravitino","STauLPlusToTauGravitino"]
+        localPhysicsOptions += ["STauRMinusToTauGravitino","STauLMinusToTauGravitino"]
 
+    simFlags.PhysicsOptions += localPhysicsOptions
 del doG4SimConfig, simdict
