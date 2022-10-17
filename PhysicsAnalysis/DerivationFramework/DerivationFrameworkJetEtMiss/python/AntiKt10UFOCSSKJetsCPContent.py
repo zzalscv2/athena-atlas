@@ -7,4 +7,5 @@ AntiKt10UFOCSSKJetsCPContent = [
 "AntiKt10UFOCSSKJetsAux.GhostBHadronsFinalCount.GhostHBosonsCount.GhostTQuarksFinalCount.GhostTrack.GhostWBosonsCount.GhostZBosonsCount",
 "AntiKt10UFOCSSKJetsAux.GhostAntiKtVR30Rmax4Rmin02PV0TrackJets",
 "AntiKt10UFOCSSKJetsAux.HadronConeExclExtendedTruthLabelID.HadronConeExclTruthLabelID.NumTrkPt500.SumPtTrkPt500",
+"AntiKt10UFOCSSKJetsAux.HadronGhostExtendedTruthLabelID.GhostTausFinalCount.GhostCHadronsFinalCount",
 ]
