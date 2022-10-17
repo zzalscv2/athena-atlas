@@ -45,17 +45,22 @@ def IsoCloseByCorrSkimmingAlgCfg(flags, name="IsoCloseByCorrSkimmingAlg", ttva_w
     ### Photon selection needs to be still defined
     # kwargs.setdefault("PhotonSelectionTool", <blah>)   
     kwargs.setdefault("PhotContainer", "")
-    the_alg = CompFactory.CP.IsoCloseByCorrectionTrkSelAlg(name, **kwargs)
+    the_alg = CompFactory.CP.IsoCloseByCorrectionTrkSelAlg(name+ttva_wp, **kwargs)
     result.addEventAlgo(the_alg, primary = True)
     return result
+
 def IsoCloseByCaloDecorCfg(flags, name="IsoCloseByCaloDecor", containers =[], **kwargs):
     result = ComponentAccumulator()
-    kwargs.setdefault("IsoCloseByCorrectionTool", result.popToolsAndMerge(IsoCloseByCorrectionToolCfg(flags)))    
+    ## Configure the tool such that the calo & pflow clusters are decorated
+    ## https://gitlab.cern.ch/atlas/athena/-/blob/master/PhysicsAnalysis/AnalysisCommon/IsolationSelection/IsolationSelection/IsolationCloseByCorrectionTool.h#L35-39
+    kwargs.setdefault("IsoCloseByCorrectionTool", result.popToolsAndMerge(IsoCloseByCorrectionToolCfg(flags,
+                                                                                                      CaloCorrectionModel = -1)))    
     for cont in containers:
         result.addEventAlgo(CompFactory.CP.IsoCloseByCaloDecorAlg(name = name + cont, 
                                                                   PrimaryContainer = cont, 
                                                                   **kwargs))
     return result
+    
 def TestIsoCloseByCorrectionCfg(flags, name="TestIsoCloseByAlg", **kwargs):
     result = ComponentAccumulator()
     from ElectronPhotonSelectorTools.AsgElectronLikelihoodToolsConfig import AsgElectronLikelihoodToolCfg

@@ -211,7 +211,7 @@ if __name__ == '__main__':
                 
             for m1 in range(m):
                 if mu_trk_iso: Muon_Track_polution_dR.Fill( mu.DeltaR(muon_t_vec[m1]), mu_trk_iso[m] / mu_trk[m1] )
-                #if mu_calo_iso: Muon_Topo_polution_dR.Fill( mu.DeltaR(muon_t_calo_vec[m1]), mu_calo_iso[m] / (mu_clu[m1] if mu_clu[m1]!= 0. else 1.) )
+                if mu_calo_iso: Muon_Topo_polution_dR.Fill( mu.DeltaR(muon_t_calo_vec[m1]), mu_calo_iso[m] / (mu_clu[m1] if mu_clu[m1]!= 0. else 1.) )
                     
             for e, el  in enumerate(elec_t_vec):
                 if mu_trk_iso: Muon_Track_polution_dR.Fill( mu.DeltaR(el), mu_trk_iso[m] / el_trk[e]  )
@@ -228,7 +228,7 @@ if __name__ == '__main__':
        
             for m, mu  in enumerate(muon_t_vec):
                 if el_trk_iso: Elec_Track_polution_dR.Fill( mu.DeltaR(el), el_trk_iso[e] / mu_trk[m])
-                #if el_calo_iso: Elec_Topo_polution_dR.Fill( mu.DeltaR(muon_t_calo_vec[m]), el_calo_iso[e] / (mu_clu[m] if mu_clu[m]!= 0. else 1.))
+                if el_calo_iso: Elec_Topo_polution_dR.Fill( mu.DeltaR(muon_t_calo_vec[m]), el_calo_iso[e] / (mu_clu[m] if mu_clu[m]!= 0. else 1.))
                 
 
     # do this here, since before it destroys the argparse
