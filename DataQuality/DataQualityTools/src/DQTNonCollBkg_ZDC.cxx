@@ -16,7 +16,6 @@
 
 
 #include "ZdcEvent/ZdcDigits.h"
-//#include "ZdcIdentifier/ZdcID.h"
 #include "ZdcRec/ZdcSignalSinc.h"
 
 #include "DataQualityTools/DQTNonCollBkg_ZDC.h"
@@ -235,7 +234,7 @@ StatusCode DQTNonCollBkg_ZDC::fillHistograms()
   ATH_MSG_DEBUG( "--> DQT_ZDC: SUCCESS retrieving " << m_digitsContainerName );
 
   //Loop over the channels
-  for (iter = digitsCollection->begin(); iter != digitsCollection->end(); iter++)
+  for (iter = digitsCollection->begin(); iter != digitsCollection->end(); ++iter)
     {
       digits_p = *iter;
       id = digits_p->identify();
@@ -284,7 +283,7 @@ StatusCode DQTNonCollBkg_ZDC::fillHistograms()
       //3) Subtratct baseline pedestal
       //We need to be carefull. Sometimes the vector size here is zero (PPM flaw) and
       //the code crashs if we do not treat this.
-      for (vit = wfm.begin(); vit < wfm.end(); vit++)
+      for (vit = wfm.begin(); vit < wfm.end(); ++vit)
         {
           if (vit->size() == 0)
             vit->resize(7);
@@ -418,7 +417,7 @@ int  DQTNonCollBkg_ZDC::getEnergyAndTimeByModule(const Identifier& id,
   // We will fix only on low gain, undelayed information
   wfmIndex = 0;  
   i = 0;
-  for (vit = wfm.begin(); vit<wfm.end(); vit++) {
+  for (vit = wfm.begin(); vit<wfm.end(); ++vit) {
       if (i == wfmIndex)
         {
           y = *vit;
