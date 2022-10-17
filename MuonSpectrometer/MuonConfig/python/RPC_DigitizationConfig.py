@@ -1,10 +1,10 @@
 """Define methods to construct configured RPC Digitization tools and algorithms
 
-Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
 """
 from AthenaConfiguration.ComponentAccumulator import ComponentAccumulator
 from AthenaConfiguration.ComponentFactory import CompFactory
-from AthenaConfiguration.Enums import ProductionStep
+from AthenaConfiguration.Enums import LHCPeriod, ProductionStep
 from OutputStreamAthenaPool.OutputStreamConfig import OutputStreamCfg
 from MuonConfig.MuonGeometryConfig import MuonGeoModelCfg
 from MuonConfig.MuonByteStreamCnvTestConfig import RpcDigitToRpcRDOCfg
@@ -35,8 +35,10 @@ def RPC_RangeCfg(flags, name="RPC_Range", **kwargs):
 
 def RPC_DigitizationToolCommonCfg(flags, name="RpcDigitizationTool", **kwargs):
     """Return ComponentAccumulator with configured RpcDigitizationTool"""
-    from MuonConfig.MuonCondAlgConfig import RpcCondDbAlgCfg # MT-safe conditions access
-    acc = RpcCondDbAlgCfg(flags)
+    acc = ComponentAccumulator()
+    if flags.GeoModel.Run < LHCPeriod.Run3:  # Run 3 and later currently do not use conditions
+        from MuonConfig.MuonCondAlgConfig import RpcCondDbAlgCfg
+        acc.merge(RpcCondDbAlgCfg(flags))
     if flags.Digitization.DoXingByXingPileUp:
         kwargs.setdefault("FirstXing", RPC_FirstXing())
         kwargs.setdefault("LastXing", RPC_LastXing())
