@@ -31,7 +31,8 @@ def EMBremCollectionBuilderCfg(flags,
         slimmingTool = CompFactory.Trk.TrackSlimmingTool(
             name="GSFBuildInDetTrackSlimmingTool",
             KeepParameters=False,
-            KeepOutliers=True)
+            KeepOutliers=True,
+            OnlySetPersistificationHints=True,)
         kwargs["TrackSlimmingTool"] = slimmingTool
 
     kwargs.setdefault(

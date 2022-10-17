@@ -38,10 +38,10 @@ Trk::TrackSlimmingTool::TrackSlimmingTool(const std::string& t,
     m_keepCaloDeposit,
     "If this is set to true, any CaloDeposit with its adjacent MEOT's will be "
     "kept on the slimmed track (combined muon property)");
-  declareProperty(
-    "KeepOutliers",
-    m_keepOutliers,
-    "If this is set to true, Outliers will be kept on the slimmed track");
+  declareProperty("KeepOutliers",
+                  m_keepOutliers,
+                  "If this is set to true, Outlier measurements will be kept "
+                  "on the slimmed track");
   declareProperty("KeepParameters",
                   m_keepParameters,
                   "If this is set to true, the first and last parameters will "
@@ -81,24 +81,37 @@ Trk::TrackSlimmingTool::finalize()
 Trk::Track*
 Trk::TrackSlimmingTool::slim(const Trk::Track& track) const
 {
-  /*
-   * Without persistifications hints we can use the copy
-   * method
-   */
+  // either we return a slimmed copy
   if (!m_setPersistificationHints) {
     return slimCopy(track).release();
   }
-  /*
-   * Setting the persistification hints can be non-thread safe
-   * as it involves const casting the input rather than creating new.
-   */
+  // or we just set hints
+  setHints(track);
+  return nullptr;
+}
+
+void
+Trk::TrackSlimmingTool::slimTrack(Trk::Track& track) const
+{
+  // either we return a slimmed copy
+  if (m_setPersistificationHints) {
+    setHints(track);
+  } else {
+    resetTSOS(track);
+  }
+  track.info().setTrackProperties(TrackInfo::SlimmedTrack);
+}
+
+void
+Trk::TrackSlimmingTool::setHints(const Trk::Track& track) const
+{
   const DataVector<const TrackStateOnSurface>* oldTrackStates =
     track.trackStateOnSurfaces();
   if (oldTrackStates == nullptr) {
-    ATH_MSG_WARNING("Track has no TSOS vector! Skipping track, returning 0.");
-    return nullptr;
+    ATH_MSG_WARNING("Track has no TSOS vector! Skipping track, returning");
+    return;
   }
-  
+
   const TrackStateOnSurface* firstValidIDTSOS(nullptr);
   const TrackStateOnSurface* lastValidIDTSOS(nullptr);
   const TrackStateOnSurface* firstValidMSTSOS(nullptr);
@@ -118,7 +131,7 @@ Trk::TrackSlimmingTool::slim(const Trk::Track& track) const
     oldTrackStates->begin();
   for (; itTSoS != oldTrackStates->end(); ++itTSoS) {
 
-    //The hints we want to create for this tsos
+    // The hints we want to create for this tsos
     std::bitset<Trk::TrackStateOnSurface::NumberOfPersistencyHints> hints{};
     //
     hints.set(Trk::TrackStateOnSurface::PartialPersistification);
@@ -155,7 +168,7 @@ Trk::TrackSlimmingTool::slim(const Trk::Track& track) const
 
     // We only keep TSOS if they either contain a perigee, OR are a measurement
     if ((*itTSoS)->measurementOnTrack() == nullptr &&
-        !(*itTSoS)->type(TrackStateOnSurface::Perigee)){
+        !(*itTSoS)->type(TrackStateOnSurface::Perigee)) {
       continue;
     }
 
@@ -181,15 +194,15 @@ Trk::TrackSlimmingTool::slim(const Trk::Track& track) const
         hints.set(Trk::TrackStateOnSurface::PersistifyTrackParameters);
       }
     }
-    //pass the hints to the tsos
+    // pass the hints to the tsos
     (*itTSoS)->setHints(hints.to_ulong());
   }
-  return nullptr;
 }
 
 void
-Trk::TrackSlimmingTool::slimTrack(Trk::Track& track) const
+Trk::TrackSlimmingTool::resetTSOS(Trk::Track& track) const
 {
+
   const DataVector<const TrackStateOnSurface>* oldTrackStates =
     track.trackStateOnSurfaces();
   if (oldTrackStates == nullptr) {
@@ -206,7 +219,6 @@ Trk::TrackSlimmingTool::slimTrack(Trk::Track& track) const
     // search last valid TSOS first (as won't be found in later loop)
     findLastValidTSoS(oldTrackStates, lastValidIDTSOS, lastValidMSTSOS);
   }
-
   // If m_keepParameters is true, then we want to keep the first and last
   // parameters of ID & MS.
   std::unique_ptr<const Trk::MeasurementBase> rot{};
@@ -241,10 +253,11 @@ Trk::TrackSlimmingTool::slimTrack(Trk::Track& track) const
           nullptr,
           (**itTSoS).trackParameters()->uniqueClone(),
           nullptr,
-          std::make_unique<const MaterialEffectsOnTrack>(meot->thicknessInX0(),
-                                     std::nullopt,
-                                     std::make_unique<EnergyLoss>(*meot->energyLoss()),
-                                     meot->associatedSurface()),
+          std::make_unique<const MaterialEffectsOnTrack>(
+            meot->thicknessInX0(),
+            std::nullopt,
+            std::make_unique<EnergyLoss>(*meot->energyLoss()),
+            meot->associatedSurface()),
           (**itTSoS).types()));
       }
       // following TSOS (if Scatterer)
@@ -286,7 +299,7 @@ Trk::TrackSlimmingTool::slimTrack(Trk::Track& track) const
       if ((*itTSoS)->type(TrackStateOnSurface::Outlier)) {
         typePattern.set(TrackStateOnSurface::Outlier);
       }
-      rot =(*itTSoS)->measurementOnTrack()->uniqueClone();
+      rot = (*itTSoS)->measurementOnTrack()->uniqueClone();
     }
 
     Trk::TrackStateOnSurface* newTSOS = nullptr;
@@ -296,9 +309,8 @@ Trk::TrackSlimmingTool::slimTrack(Trk::Track& track) const
       trackStates.push_back(newTSOS);
     }
   }
+  // This resets also the caches.
   track.setTrackStateOnSurfaces(std::move(trackStates));
-  track.info().setTrackProperties(TrackInfo::SlimmedTrack);
-  // The above resets also the caches.
 }
 
 std::unique_ptr<Trk::Track>
@@ -312,7 +324,7 @@ Trk::TrackSlimmingTool::slimCopy(const Trk::Track& track) const
   }
   // Make a copy of the input
   std::unique_ptr<Trk::Track> newTrack = std::make_unique<Trk::Track>(track);
-  slimTrack(*newTrack);
+  resetTSOS(*newTrack);
   return newTrack;
 }
 
@@ -324,7 +336,7 @@ Trk::TrackSlimmingTool::checkForValidMeas(const Trk::TrackStateOnSurface* tsos,
   if (tsos->measurementOnTrack() != nullptr) {
     bool isPseudo = (tsos->measurementOnTrack()->type(
       Trk::MeasurementBaseType::PseudoMeasurementOnTrack));
-    // Handle horrible cROTs
+    // Handle cROTs
     const Trk::CompetingRIOsOnTrack* cROT = nullptr;
     if (tsos->measurementOnTrack()->type(
           Trk::MeasurementBaseType::CompetingRIOsOnTrack)) {
@@ -334,15 +346,15 @@ Trk::TrackSlimmingTool::checkForValidMeas(const Trk::TrackStateOnSurface* tsos,
     Identifier id;
     if (cROT) {
       id = cROT->rioOnTrack(cROT->indexOfMaxAssignProb()).identify();
-      } else {
-        id = tsos->measurementOnTrack()
-               ->associatedSurface()
-               .associatedDetectorElementIdentifier();
-      }
-      isIDmeas = !isPseudo && m_detID->is_indet(id);
-      isMSmeas = tsos->measurementOnTrack() != nullptr && !isPseudo &&
-                 m_detID->is_muon(id);
+    } else {
+      id = tsos->measurementOnTrack()
+             ->associatedSurface()
+             .associatedDetectorElementIdentifier();
     }
+    isIDmeas = !isPseudo && m_detID->is_indet(id);
+    isMSmeas = tsos->measurementOnTrack() != nullptr && !isPseudo &&
+               m_detID->is_muon(id);
+  }
 }
 
 void
