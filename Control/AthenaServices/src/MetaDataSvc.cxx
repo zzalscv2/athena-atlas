@@ -464,7 +464,7 @@ StatusCode MetaDataSvc::addProxyToInputMetaDataStore(const std::string& tokenStr
    std::size_t pos1 = contName.find('(');
    std::string keyName = contName.substr(pos1 + 1, contName.size() - pos1 - 2);
    std::size_t pos2 = keyName.find('/');
-   if (pos2 != std::string::npos) keyName.resize(pos2 + 1);
+   if (pos2 != std::string::npos) keyName = keyName.substr(pos2 + 1);
    std::string numName = tokenStr.substr(tokenStr.find("[NUM=") + 5);
    leftString(numName,']');
    unsigned long num = 0;
