@@ -581,9 +581,6 @@ if len(rec.UserExecs())>0:
         exec(uExec)
     del allExecs
 
-from RecAlgs.RecAlgsConf import JobInfo
-topSequence+=JobInfo(PrintFATAL=False)
-
 if rec.doPhysValMonHists():
     include("PhysValMon/PhysValMon_RecoOpt.py")
 
