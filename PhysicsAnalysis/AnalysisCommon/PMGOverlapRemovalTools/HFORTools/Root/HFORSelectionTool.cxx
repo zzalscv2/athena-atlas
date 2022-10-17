@@ -188,8 +188,7 @@ bool HFORSelectionTool::isSelected()  {
 
   ATH_MSG_DEBUG( BOOST_CURRENT_FUNCTION << " Event Type " << (unsigned int) m_decisionType) ;
 
-  if (m_decisionType == HFORType::kill) selected = false ;
-  else selected = true ;
+  selected = m_decisionType != HFORType::kill ;
 
   //BookKeeping of how many kills/passed we have.
   //TODO: create a dictionary with key as sample type so we can count per type,

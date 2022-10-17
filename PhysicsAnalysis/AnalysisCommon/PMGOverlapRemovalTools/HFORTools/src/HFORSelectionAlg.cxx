@@ -28,7 +28,7 @@ HFORSelectionAlg::HFORSelectionAlg( const std::string& name,
 // Destructor
 ///////////////
 HFORSelectionAlg::~HFORSelectionAlg()
-{}
+= default;
 
 
 
