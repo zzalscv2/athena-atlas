@@ -31,9 +31,7 @@ default_ignore_patterns = [
     r'Domain.*INFO.*DbDatabase',
     r'INFO Database being retired',
     r'StorageSvc.*INFO Building shape according to reflection information',
-    r'LArRawSCDataReadingAlg.LArLATOMEDecoder.*INFO.*bad quality bit for SC',
 ]
-# LArLATOMEDecoder INFO messages temporarily ignored for !56994, drop when issue fixed
 
 
 def get_parser():

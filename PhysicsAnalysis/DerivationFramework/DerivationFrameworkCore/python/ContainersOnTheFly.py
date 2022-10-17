@@ -82,6 +82,8 @@ ContainersOnTheFly = [
                         ["AntiKt4EMTopoCSSKJetsAux","xAOD::JetAuxContainer"],
                         ["AntiKt4EMPFlowCSSKJets","xAOD::JetContainer"],
                         ["AntiKt4EMPFlowCSSKJetsAux","xAOD::JetAuxContainer"],
+                        ["AntiKt10PV0TrackJets","xAOD::JetContainer"],
+                        ["AntiKt10PV0TrackJetsAux","xAOD::JetAuxContainer"],
                         
                         ["AntiKt10LCTopoJets","xAOD::JetContainer"],
                         ["AntiKt10LCTopoJetsAux","xAOD::JetAuxContainer"],
@@ -131,6 +133,22 @@ ContainersOnTheFly = [
                         ["MET_Core_AntiKt4EMPFlowAux",'xAOD::MissingETAuxContainer'],
                         ["METAssoc_AntiKt4EMPFlow",'xAOD::MissingETAssociationMap'],
                         ["METAssoc_AntiKt4EMPFlowAux",'xAOD::MissingETAuxAssociationMap'],
+
+                        ["EMOriginTopoClusters","xAOD::CaloClusterContainer"], 
+                        ["EMOriginTopoClustersAux","xAOD::ShallowAuxContainer"],
+                        ["LCOriginTopoClusters","xAOD::CaloClusterContainer"], 
+                        ["LCOriginTopoClustersAux","xAOD::ShallowAuxContainer"],
+
+                        ["BTagging_AntiKt4EMPFlowJFVtx","xAOD::BTagVertexContainer"],
+                        ["BTagging_AntiKt4EMPFlowJFVtxAux","xAOD::BTagVertexAuxContainer"],
+                        ["BTagging_AntiKt4EMPFlowSecVtx","xAOD::VertexContainer"],
+                        ["BTagging_AntiKt4EMPFlowSecVtxAux","xAOD::VertexAuxContainer"],
+                                        
+                        ["CHSGChargedParticleFlowObjects","xAOD::FlowElementContainer"], 
+                        ["CHSGChargedParticleFlowObjectsAux","xAOD::ShallowAuxContainer"],
+                        ["CHSGNeutralParticleFlowObjects","xAOD::FlowElementContainer"], 
+                        ["CHSGNeutralParticleFlowObjectsAux","xAOD::ShallowAuxContainer"],
+
 ]
 
 from InDetPrepRawDataToxAOD.InDetDxAODJobProperties import InDetDxAODFlags

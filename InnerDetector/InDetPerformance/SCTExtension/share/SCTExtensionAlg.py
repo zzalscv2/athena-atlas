@@ -7,7 +7,7 @@ job = AlgSequence()
 # Add top algorithms to be run
 from SCTExtension.SCTExtensionConf import SCTExtensionAlg
 SCTExtension = SCTExtensionAlg( "SCTExtensionAlg" )   # 1 alg, named "MyNewPackage"
-print SCTExtension
+
 job += SCTExtension
 #--------------------------------------------------------------
 # Set output level threshold (DEBUG, INFO, WARNING, ERROR, FATAL)

@@ -150,6 +150,12 @@ class EventViewCreatorAlgorithm : public ::InputMakerBase
      **/
     StatusCode populateMatchingCacheWithCachedViews(const TrigCompositeUtils::DecisionContainer* cachedViews, MatchingCache& matchingCache, const EventContext& context) const;
 
+  private:
+
+    /**
+     * @brief Obtain view(s) from most recent prior step(s) which are to be wired up.
+     **/
+    std::vector<TrigCompositeUtils::LinkInfo<ViewContainer>> viewsToLink(const TrigCompositeUtils::Decision* outputDecision) const; 
 
 };
 

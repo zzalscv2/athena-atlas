@@ -63,7 +63,7 @@ if 'noisesqlite' in dir():
       conddb.addMarkup("/LAR/NoiseOfl/CellNoise","<db>sqlite://;schema="+noisesqlite+";dbname=CONDBR2</db><tag>"+noisetag+"</tag>")
    else:   
       conddb.addMarkup("/LAR/NoiseOfl/CellNoise","<db>sqlite://;schema="+noisesqlite+";dbname=CONDBR2</db>")
-else:      
+else:
    if 'noisetag' in dir():
       conddb.addOverride("/LAR/NoiseOfl/CellNoise",""+noisetag+"")
 

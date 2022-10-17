@@ -5,9 +5,6 @@
 # This is to define common objects used by PHYSVAL, FTAG1 and FTAG2.
 #====================================================================
 
-from DerivationFrameworkCore.DerivationFrameworkMaster import DerivationFrameworkIsMonteCarlo
-from DerivationFrameworkMCTruth.MCTruthCommon import addTruth3ContentToSlimmerTool
-from DerivationFrameworkEGamma.ElectronsCPDetailedContent import GSFTracksCPDetailedContent
 
 ## Common items used in PHYSVAL, FTAG1 and FTAG2
 PHYSVAL_FTAG1_FTAG2_mc_AppendToDictionary = {
@@ -38,17 +35,24 @@ PHYSVAL_FTAG1_FTAG2_StaticContent += ["xAOD::VertexAuxContainer#BTagging_AntiKt4
 
 
 ## Common functions used in PHYSVAL, FTAG1 and FTAG2
-def add_static_content_to_SlimmingHelper(SlimmingHelper):
-    SlimmingHelper.StaticContent = PHYSVAL_FTAG1_FTAG2_StaticContent
+def add_static_content_to_SlimmingHelper(SlimmingHelper, extra_StaticContent=[]):
+    all_StaticContent = PHYSVAL_FTAG1_FTAG2_StaticContent
+    if len(extra_StaticContent) > 0:
+        all_StaticContent += extra_StaticContent
+    SlimmingHelper.StaticContent = all_StaticContent
 
 def add_truth_to_SlimmingHelper(SlimmingHelper):
-    if DerivationFrameworkIsMonteCarlo:
-        SlimmingHelper.AppendToDictionary = PHYSVAL_FTAG1_FTAG2_mc_AppendToDictionary
-        addTruth3ContentToSlimmerTool(SlimmingHelper)
-        SlimmingHelper.AllVariables += ['TruthHFWithDecayParticles','TruthHFWithDecayVertices','TruthCharm']
+    from DerivationFrameworkMCTruth.MCTruthCommonConfig import addTruth3ContentToSlimmerTool
+    for _cont in PHYSVAL_FTAG1_FTAG2_mc_AppendToDictionary:
+        _type = PHYSVAL_FTAG1_FTAG2_mc_AppendToDictionary[_cont]
+        if _cont not in SlimmingHelper.AppendToDictionary:
+            SlimmingHelper.AppendToDictionary[_cont] = _type
+    addTruth3ContentToSlimmerTool(SlimmingHelper)
+    SlimmingHelper.AllVariables += ['TruthHFWithDecayParticles','TruthHFWithDecayVertices','TruthCharm','TruthPileupParticles','InTimeAntiKt4TruthJets','OutOfTimeAntiKt4TruthJets']
 
 def add_ExtraVariables_to_SlimmingHelper(SlimmingHelper):
     SlimmingHelper.ExtraVariables += PHYSVAL_FTAG1_FTAG2_ExtraVariables
+    from DerivationFrameworkEGamma.ElectronsCPDetailedContent import GSFTracksCPDetailedContent
     SlimmingHelper.ExtraVariables += GSFTracksCPDetailedContent
 
 ## Common function used in FTAG1 and FTAG2
@@ -69,5 +73,27 @@ def trigger_setup(SlimmingHelper, option=''):
         SlimmingHelper.IncludeBJetTriggerContent = True
         SlimmingHelper.IncludeBPhysTriggerContent = True
 
-
+def trigger_matching(SlimmingHelper, TriggerListsHelper, ConfigFlags):
+    # Trigger matching
+    # Run 2
+    if ConfigFlags.Trigger.EDMVersion == 2:
+        from DerivationFrameworkPhys.TriggerMatchingCommonConfig import AddRun2TriggerMatchingToSlimmingHelper
+        AddRun2TriggerMatchingToSlimmingHelper(SlimmingHelper = SlimmingHelper,
+                OutputContainerPrefix = "TrigMatch_",
+                TriggerList = TriggerListsHelper.Run2TriggerNamesTau)
+        AddRun2TriggerMatchingToSlimmingHelper(SlimmingHelper = SlimmingHelper,
+                OutputContainerPrefix = "TrigMatch_",
+                TriggerList = TriggerListsHelper.Run2TriggerNamesNoTau)
+    # Run 3
+    if ConfigFlags.Trigger.EDMVersion == 3:
+        from TrigNavSlimmingMT.TrigNavSlimmingMTConfig import AddRun3TrigNavSlimmingCollectionsToSlimmingHelper
+        AddRun3TrigNavSlimmingCollectionsToSlimmingHelper(SlimmingHelper)
+        # Run 2 is added here temporarily to allow testing/comparison/debugging
+        from DerivationFrameworkPhys.TriggerMatchingCommonConfig import AddRun2TriggerMatchingToSlimmingHelper
+        AddRun2TriggerMatchingToSlimmingHelper(SlimmingHelper = SlimmingHelper,
+                OutputContainerPrefix = "TrigMatch_",
+                TriggerList = TriggerListsHelper.Run3TriggerNamesTau)
+        AddRun2TriggerMatchingToSlimmingHelper(SlimmingHelper = SlimmingHelper,
+                OutputContainerPrefix = "TrigMatch_",
+                TriggerList = TriggerListsHelper.Run3TriggerNamesNoTau)
 
