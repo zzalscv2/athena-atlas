@@ -53,7 +53,7 @@ if __name__ == "__main__":
                                 MergeLRT = False))
     for WP in listofTTVAWP:
         cfg.merge(DerivationTrackIsoCfg(ConfigFlags, WP = WP, object_type = ('Electrons', 'Muons', 'Photons')))
-        cfg.merge(IsoCloseByCorrSkimmingAlgCfg(ConfigFlags, ttva_wp = WP,                                              
+        cfg.merge(IsoCloseByCorrSkimmingAlgCfg(ConfigFlags, ttva_wp = WP,
                                                 OutContainerKey="AssocCloseByTracks"))
     ### Pflow isolation
     from LArGeoAlgsNV.LArGMConfig import LArGMCfg

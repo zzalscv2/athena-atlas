@@ -109,7 +109,7 @@ def PHYSKernelCfg(ConfigFlags, name='PHYSKernel', **kwargs):
 
 
 def PHYSCfg(ConfigFlags):
-
+    stream_name = 'StreamDAOD_PHYS'
     acc = ComponentAccumulator()
 
     # Get the lists of triggers needed for trigger matching.
@@ -120,8 +120,12 @@ def PHYSCfg(ConfigFlags):
     PHYSTriggerListsHelper = TriggerListsHelper()
 
     # Common augmentations
-    acc.merge(PHYSKernelCfg(ConfigFlags, name="PHYSKernel", StreamName = 'StreamDAOD_PHYS', TriggerListsHelper = PHYSTriggerListsHelper))
-
+    acc.merge(PHYSKernelCfg(ConfigFlags, name="PHYSKernel", StreamName = stream_name, TriggerListsHelper = PHYSTriggerListsHelper))
+    
+    ## Higgs augmentations    
+    from DerivationFrameworkHiggs.HiggsPhysContent import  setupHiggsAugmentationAlgs, setupHiggsSlimmingVariables
+    acc.merge(setupHiggsAugmentationAlgs(ConfigFlags, stream_name = stream_name))
+    
     # ============================
     # Define contents of the format
     # =============================
@@ -157,8 +161,8 @@ def PHYSCfg(ConfigFlags):
     StaticContent += ["xAOD::VertexContainer#SoftBVrtClusterTool_Medium_Vertices"]
     StaticContent += ["xAOD::VertexAuxContainer#SoftBVrtClusterTool_Medium_VerticesAux." + excludedVertexAuxData]
     StaticContent += ["xAOD::VertexContainer#SoftBVrtClusterTool_Loose_Vertices"]
-    StaticContent += ["xAOD::VertexAuxContainer#SoftBVrtClusterTool_Loose_VerticesAux." + excludedVertexAuxData]
-    
+    StaticContent += ["xAOD::VertexAuxContainer#SoftBVrtClusterTool_Loose_VerticesAux." + excludedVertexAuxData]   
+
     PHYSSlimmingHelper.StaticContent = StaticContent
     
     # Truth containers
@@ -180,6 +184,9 @@ def PHYSCfg(ConfigFlags):
                                               "HLT_xAOD__TrigMissingETContainer_TrigEFMissingET.ex.ey",
                                               "HLT_xAOD__TrigMissingETContainer_TrigEFMissingET_mht.ex.ey"]
 
+    setupHiggsSlimmingVariables(ConfigFlags, PHYSSlimmingHelper)
+   
+   
     # Trigger content
     PHYSSlimmingHelper.IncludeTriggerNavigation = False
     PHYSSlimmingHelper.IncludeJetTriggerContent = False
