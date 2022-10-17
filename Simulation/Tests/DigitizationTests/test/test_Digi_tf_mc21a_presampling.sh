@@ -11,49 +11,53 @@
 # art-output: legacy.*
 # art-output: DigiPUConfig*
 
+if [ -z ${ATLAS_REFERENCE_DATA+x} ]; then
+  ATLAS_REFERENCE_DATA="/cvmfs/atlas-nightlies.cern.ch/repo/data/data-art"
+fi
+
 Events=25
 DigiOutFileNameCG="mc21a_presampling.CG.RDO.pool.root"
 DigiOutFileNameCA="mc21a_presampling.CA.RDO.pool.root"
-HSHitsFile="/cvmfs/atlas-nightlies.cern.ch/repo/data/data-art/DigitizationTests/NSW/mc21_13p6TeV.159000.ParticleGenerator_nu_E50.simul.HITS.e3711/HITS.05259738._001019.pool.root.1"
-HighPtMinbiasHitsFiles="/cvmfs/atlas-nightlies.cern.ch/repo/data/data-art/DigitizationTests/NSW/mc21_13p6TeV.800831.Py8EG_minbias_inelastic_highjetphotonlepton.merge.HITS.e8341_s3775_s3787/*"
-LowPtMinbiasHitsFiles="/cvmfs/atlas-nightlies.cern.ch/repo/data/data-art/DigitizationTests/NSW/mc21_13p6TeV.900311.Epos_minbias_inelastic_lowjetphoton.merge.HITS.e8341_s3775_s3787/*"
+HSHitsFile="${ATLAS_REFERENCE_DATA}/CampaignInputs/mc21/HITS/mc21_13p6TeV.900149.PG_single_nu_Pt50.simul.HITS.e8453_s3864/HITS.29241942._001453.pool.root.1"
+HighPtMinbiasHitsFiles="${ATLAS_REFERENCE_DATA}/CampaignInputs/mc21/HITS/mc21_13p6TeV.800831.Py8EG_minbias_inelastic_highjetphotonlepton.merge.HITS.e8453_e8455_s3876_s3880/*"
+LowPtMinbiasHitsFiles="${ATLAS_REFERENCE_DATA}/CampaignInputs/mc21/HITS/mc21_13p6TeV.900311.Epos_minbias_inelastic_lowjetphoton.merge.HITS.e8453_s3876_s3880/*"
 
 
 # config only
 Digi_tf.py \
---PileUpPresampling True \
---conditionsTag default:OFLCOND-MC21-SDR-RUN3-07 \
---digiSeedOffset1 170 --digiSeedOffset2 170 \
---digiSteeringConf 'StandardSignalOnlyTruth' \
---geometryVersion default:ATLAS-R3S-2021-02-00-00 \
---inputHITSFile ${HSHitsFile} \
---inputHighPtMinbiasHitsFile ${HighPtMinbiasHitsFiles} \
---inputLowPtMinbiasHitsFile ${LowPtMinbiasHitsFiles} \
---jobNumber 568 \
---maxEvents ${Events} \
---outputRDOFile ${DigiOutFileNameCA} \
---postInclude 'default:PyJobTransforms/UseFrontier.py' \
---preInclude 'HITtoRDO:Campaigns/PileUpPresamplingMC21aSingleBeamspot.py' \
---skipEvents 0 \
---athenaopts '"--config-only=DigiPUConfigCG.pkl"'
+    --PileUpPresampling True \
+    --conditionsTag default:OFLCOND-MC21-SDR-RUN3-07 \
+    --digiSeedOffset1 170 --digiSeedOffset2 170 \
+    --digiSteeringConf 'StandardSignalOnlyTruth' \
+    --geometryVersion default:ATLAS-R3S-2021-03-00-00 \
+    --inputHITSFile ${HSHitsFile} \
+    --inputHighPtMinbiasHitsFile ${HighPtMinbiasHitsFiles} \
+    --inputLowPtMinbiasHitsFile ${LowPtMinbiasHitsFiles} \
+    --jobNumber 568 \
+    --maxEvents ${Events} \
+    --outputRDOFile ${DigiOutFileNameCA} \
+    --postInclude 'default:PyJobTransforms/UseFrontier.py' \
+    --preInclude 'HITtoRDO:Campaigns/PileUpPresamplingMC21aSingleBeamspot.py' \
+    --skipEvents 0 \
+    --athenaopts '"--config-only=DigiPUConfigCG.pkl"'
 
 # full run
 Digi_tf.py \
---PileUpPresampling True \
---conditionsTag default:OFLCOND-MC21-SDR-RUN3-07 \
---digiSeedOffset1 170 --digiSeedOffset2 170 \
---digiSteeringConf 'StandardSignalOnlyTruth' \
---geometryVersion default:ATLAS-R3S-2021-02-00-00 \
---inputHITSFile ${HSHitsFile} \
---inputHighPtMinbiasHitsFile ${HighPtMinbiasHitsFiles} \
---inputLowPtMinbiasHitsFile ${LowPtMinbiasHitsFiles} \
---jobNumber 568 \
---maxEvents ${Events} \
---outputRDOFile ${DigiOutFileNameCG} \
---postExec 'HITtoRDO:job+=CfgMgr.JobOptsDumperAlg(FileName="DigiPUConfigCG.txt")' \
---postInclude 'default:PyJobTransforms/UseFrontier.py' \
---preInclude 'HITtoRDO:Campaigns/PileUpPresamplingMC21aSingleBeamspot.py' \
---skipEvents 0
+    --PileUpPresampling True \
+    --conditionsTag default:OFLCOND-MC21-SDR-RUN3-07 \
+    --digiSeedOffset1 170 --digiSeedOffset2 170 \
+    --digiSteeringConf 'StandardSignalOnlyTruth' \
+    --geometryVersion default:ATLAS-R3S-2021-03-00-00 \
+    --inputHITSFile ${HSHitsFile} \
+    --inputHighPtMinbiasHitsFile ${HighPtMinbiasHitsFiles} \
+    --inputLowPtMinbiasHitsFile ${LowPtMinbiasHitsFiles} \
+    --jobNumber 568 \
+    --maxEvents ${Events} \
+    --outputRDOFile ${DigiOutFileNameCG} \
+    --postExec 'HITtoRDO:job+=CfgMgr.JobOptsDumperAlg(FileName="DigiPUConfigCG.txt")' \
+    --postInclude 'default:PyJobTransforms/UseFrontier.py' \
+    --preInclude 'HITtoRDO:Campaigns/PileUpPresamplingMC21aSingleBeamspot.py' \
+    --skipEvents 0
 
 rc=$?
 status=$rc
@@ -62,15 +66,13 @@ mv runargs.HITtoRDO.py runargs.legacy.HITtoRDO.py
 mv log.HITtoRDO legacy.HITtoRDO
 
 rc2=-9999
-if [[ $rc -eq 0 ]]
-then
-    Digi_tf.py \
+Digi_tf.py \
     --CA \
     --PileUpPresampling True \
     --conditionsTag default:OFLCOND-MC21-SDR-RUN3-07 \
     --digiSeedOffset1 170 --digiSeedOffset2 170 \
     --digiSteeringConf 'StandardSignalOnlyTruth' \
-    --geometryVersion default:ATLAS-R3S-2021-02-00-00 \
+    --geometryVersion default:ATLAS-R3S-2021-03-00-00 \
     --inputHITSFile ${HSHitsFile} \
     --inputHighPtMinbiasHitsFile ${HighPtMinbiasHitsFiles} \
     --inputLowPtMinbiasHitsFile ${LowPtMinbiasHitsFiles} \
@@ -81,13 +83,15 @@ then
     --preInclude 'HITtoRDO:Campaigns.MC21aSingleBeamspot' \
     --skipEvents 0
 
-    rc2=$?
+rc2=$?
+if [[ $status -eq 0 ]]
+then
     status=$rc2
 fi
 echo "art-result: $rc2 digiCA"
 
 rc3=-9999
-if [ $rc -eq 0 ] && [ $rc2 -eq 0 ]
+if [[ $status -eq 0 ]]
 then
     acmd.py diff-root ${DigiOutFileNameCG} ${DigiOutFileNameCA} \
         --mode=semi-detailed --error-mode resilient --order-trees \
@@ -105,7 +109,7 @@ rc4=-9999
 if [[ $rc -eq 0 ]]
 then
     # Do reference comparisons
-    art.py compare ref --mode=semi-detailed --no-diff-meta "$DigiOutFileNameCG" "/cvmfs/atlas-nightlies.cern.ch/repo/data/data-art/DigitizationTests/ReferenceFiles/$DigitizationTestsVersion/$CMTCONFIG/$DigiOutFileNameCG"
+    art.py compare ref --mode=semi-detailed --no-diff-meta "$DigiOutFileNameCG" "${ATLAS_REFERENCE_DATA}/DigitizationTests/ReferenceFiles/$DigitizationTestsVersion/$CMTCONFIG/$DigiOutFileNameCG"
     rc4=$?
     status=$rc4
 fi
