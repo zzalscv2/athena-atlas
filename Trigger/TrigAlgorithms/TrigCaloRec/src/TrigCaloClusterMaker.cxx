@@ -71,6 +71,8 @@ StatusCode TrigCaloClusterMaker::initialize()
   ATH_CHECK( m_inputCellsKey.initialize() );
   ATH_CHECK( m_outputClustersKey.initialize() );
   ATH_CHECK( m_clusterCellLinkOutput.initialize() );
+  ATH_CHECK( m_avgMuKey.initialize() );
+  ATH_CHECK( m_noiseCDOKey.initialize(m_monCells) );
 
   for (ToolHandle<CaloClusterCollectionProcessor>& clproc : m_clusterMakers) {
     // Set the CellsName property on the input tool (why isn't this done in
@@ -136,9 +138,12 @@ StatusCode TrigCaloClusterMaker::execute(const EventContext& ctx) const
   auto mon_badCells = Monitored::Collection("N_BAD_CELLS",N_BAD_CELLS );
   auto mon_engFrac = Monitored::Collection("ENG_FRAC_MAX",N_BAD_CELLS );
   auto mon_size = Monitored::Collection("size",sizeVec );
+  auto monmu = Monitored::Scalar("mu",-999.0);
+  auto moncount_1thrsigma = Monitored::Scalar("count_1thrsigma",-999.0);
+  auto moncount_2thrsigma = Monitored::Scalar("count_2thrsigma",-999.0);
   auto monitorIt = Monitored::Group( m_monTool, time_tot, time_clusMaker,  time_clusCorr, mon_container_size, mon_clusEt,
 					    mon_clusPhi, mon_clusEta, mon_clusSignalState, mon_clusSize, 
-					    mon_badCells, mon_engFrac, mon_size);	    
+					    mon_badCells, mon_engFrac, mon_size, monmu, moncount_1thrsigma, moncount_2thrsigma);
 
 
   // Looping over cluster maker tools...
@@ -147,6 +152,29 @@ StatusCode TrigCaloClusterMaker::execute(const EventContext& ctx) const
 
   auto cells = SG::makeHandle(m_inputCellsKey, ctx);
   ATH_MSG_VERBOSE(" Input Cells : " << cells.name() <<" of size " <<cells->size() );
+
+  float mu(0.0);
+  SG::ReadDecorHandle<xAOD::EventInfo,float> eventInfoDecor(m_avgMuKey,ctx);
+  if(eventInfoDecor.isPresent()) {
+       mu = eventInfoDecor(0);
+       ATH_MSG_DEBUG("Average mu " << mu);
+  }
+  unsigned int count_1thrsigma(0), count_2thrsigma(0);
+  if (m_monCells) {
+     SG::ReadCondHandle<CaloNoise> noiseHdl{m_noiseCDOKey, ctx};
+     const CaloNoise *noisep = *noiseHdl;
+     for (const auto cell : *cells ) {
+        const CaloDetDescrElement* cdde = cell->caloDDE();
+	if (cdde->is_tile() ) continue;
+	float thr=noisep->getNoise(cdde->identifyHash(), cell->gain());
+	if ( cell->energy() > m_1thr*thr ){
+	   count_1thrsigma++;
+	   if ( cell->energy() > m_2thr*thr )count_2thrsigma++;
+	} // if 1th
+     } // end of for over cells
+   } // end of if m_monCells
+  
+   
 
   for (const ToolHandle<CaloClusterCollectionProcessor>& clproc : m_clusterMakers) {
     
@@ -225,6 +253,9 @@ StatusCode TrigCaloClusterMaker::execute(const EventContext& ctx) const
     ATH_MSG_DEBUG(" REGTEST: Last Cluster phi = " << (pCaloClusterContainer->back())->phi() );
     mon_container_size = pCaloClusterContainer->size(); // fill monitored variable
   }
+  monmu=mu;
+  moncount_1thrsigma = count_1thrsigma;
+  moncount_2thrsigma = count_2thrsigma;
 
   // Stop timer
   time_tot.stop();
