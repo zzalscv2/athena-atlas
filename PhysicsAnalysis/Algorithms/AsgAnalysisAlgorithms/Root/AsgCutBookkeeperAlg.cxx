@@ -144,25 +144,34 @@ namespace CP
           index = std::stoi(match[1]);
         }
 
-        uint64_t nEventsProcessed  = cbk->nAcceptedEvents();
-        double sumOfWeights        = cbk->sumOfEventWeights();
-        double sumOfWeightsSquared = cbk->sumOfEventWeightsSquared();
-
-        // Write CutBookkeeper information to the info
-        ANA_MSG_VERBOSE ("CutBookkeeper information from the current file for index " << index << ":");
-        ANA_MSG_VERBOSE ("Initial events                 = " << nEventsProcessed);
-        ANA_MSG_VERBOSE ("Initial sum of weights         = " << sumOfWeights);
-        ANA_MSG_VERBOSE ("Initial sum of weights squared = " << sumOfWeightsSquared);
-
-        auto it = m_weights.emplace(index, WeightsGroup()).first;
-        it->second.nEventsProcessed    += nEventsProcessed;
-        it->second.sumOfWeights        += sumOfWeights;
-        it->second.sumOfWeightsSquared += sumOfWeightsSquared;
+        processCutBookkeeper(cbk, index);
 
         counter++;
       }
     }
 
+    // now try systematics-aware containers
+    for (size_t index{1}; index < m_truthWeightTool->getWeightNames().size(); ++index)
+    {
+      std::string cbkName = "CutBookkeepers_weight_" + std::to_string(index);
+      if (!inputMetaStore()->contains<xAOD::CutBookkeeperContainer>(cbkName))
+      {
+        ANA_MSG_VERBOSE ("No container named " << cbkName << "available");
+        continue;
+      }
+
+      ANA_CHECK (inputMetaStore()->retrieve(completeCBC, cbkName));
+      for (const xAOD::CutBookkeeper *cbk : *completeCBC)
+      {
+        if (cbk->cycle() == maxCycle && cbk->name().find("AllExecutedEvents") == 0 && cbk->inputStream() == "StreamAOD")
+        {
+          processCutBookkeeper(cbk, index);
+          counter++;
+        }
+      }
+    }
+
+    // check if we actually had systematics available
     if (counter == 1 && m_enableSystematics) {
       ANA_MSG_WARNING ("This sample does not support CutBookkeeper systematics. Disabling...");
       m_enableSystematics = false;
@@ -171,6 +180,28 @@ namespace CP
     ANA_CHECK (m_systematics.retrieve());
 
     return StatusCode::SUCCESS;
+  }
+
+
+
+  void AsgCutBookkeeperAlg ::
+  processCutBookkeeper (const xAOD::CutBookkeeper *cbk,
+                        size_t index)
+  {
+    uint64_t nEventsProcessed  = cbk->nAcceptedEvents();
+    double sumOfWeights        = cbk->sumOfEventWeights();
+    double sumOfWeightsSquared = cbk->sumOfEventWeightsSquared();
+
+    // Write CutBookkeeper information to the info
+    ANA_MSG_VERBOSE ("CutBookkeeper information from the current file for index " << index << ":");
+    ANA_MSG_VERBOSE ("Initial events                 = " << nEventsProcessed);
+    ANA_MSG_VERBOSE ("Initial sum of weights         = " << sumOfWeights);
+    ANA_MSG_VERBOSE ("Initial sum of weights squared = " << sumOfWeightsSquared);
+
+    auto it = m_weights.emplace(index, WeightsGroup()).first;
+    it->second.nEventsProcessed    += nEventsProcessed;
+    it->second.sumOfWeights        += sumOfWeights;
+    it->second.sumOfWeightsSquared += sumOfWeightsSquared;
   }
 
 
