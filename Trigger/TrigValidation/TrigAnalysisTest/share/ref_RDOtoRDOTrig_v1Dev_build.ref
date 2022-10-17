@@ -14127,7 +14127,7 @@ HLT_mu24_ivarmedium_j20_pf_ftf_L1MU18VFCH:
     5: 4
     6: 29
 HLT_mu24_ivarmedium_mu10_ivarmedium_probe_L1MU14FCH:
-  eventCount: 0
+  eventCount: 1
   stepCounts:
     0: 5
     1: 5
@@ -14138,6 +14138,7 @@ HLT_mu24_ivarmedium_mu10_ivarmedium_probe_L1MU14FCH:
     6: 1
     7: 1
     8: 1
+    9: 1
   stepFeatures:
     0: 6
     1: 5
@@ -15090,7 +15091,7 @@ HLT_mu26_ivarmedium_j20_pf_ftf_L1MU18VFCH:
     5: 4
     6: 29
 HLT_mu26_ivarmedium_mu10_ivarmedium_probe_L1MU14FCH:
-  eventCount: 0
+  eventCount: 1
   stepCounts:
     0: 6
     1: 5
@@ -15101,6 +15102,7 @@ HLT_mu26_ivarmedium_mu10_ivarmedium_probe_L1MU14FCH:
     6: 1
     7: 1
     8: 1
+    9: 1
   stepFeatures:
     0: 7
     1: 5
@@ -15113,7 +15115,7 @@ HLT_mu26_ivarmedium_mu10_ivarmedium_probe_L1MU14FCH:
     8: 2
     9: 1
 HLT_mu26_ivarmedium_mu10_ivarmedium_probe_L1MU18VFCH:
-  eventCount: 0
+  eventCount: 1
   stepCounts:
     0: 6
     1: 5
@@ -15124,6 +15126,7 @@ HLT_mu26_ivarmedium_mu10_ivarmedium_probe_L1MU18VFCH:
     6: 1
     7: 1
     8: 1
+    9: 1
   stepFeatures:
     0: 7
     1: 5

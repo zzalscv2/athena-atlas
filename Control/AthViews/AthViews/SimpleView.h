@@ -53,6 +53,12 @@ class SimpleView : public IProxyDict
     virtual void linkParent( const IProxyDict* parent );
 
     /**
+    * @brief returns the links to the previously used views
+    **/
+    virtual const std::set< const SG::View* >& getParentLinks() const
+    { return m_parents; } 
+
+    /**
     * @brief Set a filtering rule for anything loaded via fallthrough
     **/
     void setFilter( std::vector< std::string > const& inputFilter )

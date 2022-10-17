@@ -114,8 +114,7 @@ StatusCode EventViewCreatorAlgorithm::execute( const EventContext& context ) con
       ElementLink<TrigRoiDescriptorCollection> cachedROIEL = cached->objectLink<TrigRoiDescriptorCollection>(roiString());
       ATH_CHECK(cachedViewEL.isValid());
       ATH_CHECK(cachedROIEL.isValid());
-      ATH_MSG_DEBUG("Re-using cached existing view from " << cachedViewEL.dataID() << ", index:" << cachedViewEL.index() 
-        << " on ROI " << **cachedROIEL);
+      ATH_MSG_DEBUG("Re-using cached existing view from " << cachedViewEL.dataID() << ", index:" << cachedViewEL.index() << " on ROI " << **cachedROIEL);
       outputDecision->setObjectLink( viewString(), cachedViewEL );
       outputDecision->setObjectLink( roiString(), cachedROIEL );
       // Note: This overwrites the link created in the above tool with what should be a spatially identical ROI (check?)
@@ -174,19 +173,77 @@ StatusCode EventViewCreatorAlgorithm::execute( const EventContext& context ) con
   return StatusCode::SUCCESS;
 }
 
+bool endsWith(const std::string& value, const std::string& ending) {
+  if (ending.size() > value.size()) {
+    return false;
+  }
+  return std::equal(ending.rbegin(), ending.rend(), value.rbegin());
+}
+
+std::vector<LinkInfo<ViewContainer>> EventViewCreatorAlgorithm::viewsToLink(const Decision* outputDecision) const { 
+  return findLinks<ViewContainer>(outputDecision, viewString(), TrigDefs::lastFeatureOfType);
+}
+
 bool EventViewCreatorAlgorithm::checkCache(const DecisionContainer* cachedViews, const Decision* outputDecision, size_t& cachedIndex, MatchingCache& matchingCache, const EventContext& context) const {
   if (cachedViews == nullptr or m_cacheDisabled) {
     return false; // No cached input configured, which is fine.
   }
 
+  // If we ever stop using cached views mid-processing of a chain, then it is by far safer to continue to not use cached views in all following steps. See for example towards the end of ATR-25996
+  // We can tell this by querying for View instances in previous steps and looking for evidence of the instance being cached (no "_probe" postfix, from initiall "tag" pass)
+  // or not cached (with "_probe" postfix, from second "probe" pass)
+  std::vector<LinkInfo<ViewContainer>> previousStepViews = findLinks<ViewContainer>(outputDecision, viewString(), TrigDefs::allFeaturesOfType);
+  // If this collection is empty then we're the 1st step, so OK to look for a cached EventView to re-use. Otherwise...
+  if (previousStepViews.size()) { 
+    // If there are one or more prior steps, we want to focus on the most recent which will be the first entry in the vector
+    ElementLink<ViewContainer> previousView = previousStepViews.at(0).link;
+    const bool previousStepDidNotUsedCachedView = endsWith(previousView.dataID(), "_probe");
+    if (previousStepDidNotUsedCachedView) {
+      // If we are not the 1st step, and the previous step did not use a cached view, then we are safer here to not use one either. Don't search for one. Just say no to caching here.
+      ATH_MSG_DEBUG("Previous probe step used a probe EventView for this decision object. Do not attempt to use a cached EventView in this step.");
+      return false; 
+    }
+  }
+
   bool usedROIMatchingFlag{false}; // Sanity check
-  const bool result = matchInCollection(cachedViews, outputDecision, cachedIndex, usedROIMatchingFlag, matchingCache, context);
+  bool result = matchInCollection(cachedViews, outputDecision, cachedIndex, usedROIMatchingFlag, matchingCache, context);
   if (usedROIMatchingFlag and m_mergeUsingFeature) {
     ATH_MSG_ERROR("Called matchInCollection in an EVCA configured with mergeUsingFeature=True, however ROI matching was used instead?! Should not be possible.");
   }
+
+  if (result) {
+    // We have another check we have to make before we are confident that we can re-use this View
+    // The view will have originally be launched linked to N proxies (N>=0), which are the previous Steps which the View
+    // needs to link to (in which one might need to later search for physics collections needed in this or later Steps).
+    // 
+    // But the list of proxies in the probe pass might be different than what it was in the tag pass.
+    // We cannot change the list of proxies in the existing tag EventView (it is now immutable)
+    // 
+    // So if we are missing required proxies then we cannot re-use this EventView and have to reject the cached EV.
+    const SG::View* view = *(cachedViews->at(cachedIndex)->objectLink<ViewContainer>(viewString()));
+
+    // What prior views would we have linked if we were spawning a new View here in probe?
+    std::vector<LinkInfo<ViewContainer>> viewsToLinkVector = viewsToLink(outputDecision);
+    for (const LinkInfo<ViewContainer>& toLinkLI : viewsToLinkVector) {
+      const SG::View* toLink = *(toLinkLI.link);
+      // Was toLink linked as a proxy back in the tag stage?
+      bool foundIt = false;
+      for (const SG::View* prevLinked : view->getParentLinks()) {
+        if (prevLinked == toLink) {
+          foundIt = true;
+          break;
+        }
+      }
+      if (!foundIt) {
+        ATH_MSG_DEBUG("The cached view from the tag step is not linked to the required views from earlier steps which we need in the probe processing, we cannot re-use it.");
+        result = false;
+        break;
+      }
+    }
+  }
+
   return result;
 }
-
 
 StatusCode EventViewCreatorAlgorithm::populateMatchingCacheWithCachedViews(const DecisionContainer* cachedViews, MatchingCache& matchingCache, const EventContext& context) const {
   const std::string linkNameToMatch = m_mergeUsingFeature ? featureString() : m_roisLink.value();
@@ -214,8 +271,8 @@ StatusCode EventViewCreatorAlgorithm::linkViewToParent( const TrigCompositeUtils
       << viewString() << "' link. Call this fn BEFORE linking the new View.");
     return StatusCode::FAILURE;
   }
-  std::vector<LinkInfo<ViewContainer>> parentViews = findLinks<ViewContainer>(outputDecision, viewString(), TrigDefs::lastFeatureOfType);
-  if (parentViews.size() == 0) {
+  std::vector<LinkInfo<ViewContainer>> viewsToLinkVector = viewsToLink(outputDecision);
+  if (viewsToLinkVector.size() == 0) {
     ATH_MSG_ERROR("Could not find the parent View, but 'RequireParentView' is true.");
     return StatusCode::FAILURE;
   }
@@ -224,12 +281,13 @@ StatusCode EventViewCreatorAlgorithm::linkViewToParent( const TrigCompositeUtils
   // Or, a tau ROI processed with different algorithms for different chains in an earlier Step.
   // This will only cause a problem if downstream a collection is requested which was produced in more that one
   // of the linked parent Views (or their parents...) as it is then ambiguous which collection should be read. 
-  ATH_MSG_DEBUG( "Will link " << parentViews.size() << " parent view(s)" );
-  for (const LinkInfo<ViewContainer>& parentViewLI : parentViews) {
-    ATH_CHECK(parentViewLI.isValid());
-    newView->linkParent( *(parentViewLI.link) );
-    ATH_MSG_DEBUG( "Parent view linked (" << parentViewLI.link.dataID() << ", index:" << parentViewLI.link.index() << ")" );
+  ATH_MSG_DEBUG( "Will link " << viewsToLinkVector.size() << " parent view(s)" );
+  for (const LinkInfo<ViewContainer>& toLinkLI : viewsToLinkVector) {
+    ATH_CHECK(toLinkLI.isValid());
+    newView->linkParent( *(toLinkLI.link) );
+    ATH_MSG_DEBUG( "Parent view linked (" << toLinkLI.link.dataID() << ", index:" << toLinkLI.link.index() << ")" );
   }
+
   return StatusCode::SUCCESS;
 }
 
