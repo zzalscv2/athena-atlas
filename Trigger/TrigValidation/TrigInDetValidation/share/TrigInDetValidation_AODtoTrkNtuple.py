@@ -220,10 +220,6 @@ if ( True ) :
     "HLT_e30_idperf_loose_lrtloose_L1EM22VHI:HLT_IDTrack_ElecLRT_IDTrig:HLT_Roi_FastElectron_LRT",
 
     # electron lrt e tag
-    "HLT_e26_lhtight_ivarloose_e5_lhvloose_nopix_lrtloose_idperf_probe_L1EM22VHI:HLT_IDTrack_ElecLRT_FTF:roi=HLT_Roi_FastElectron_LRT:te=1",
-    "HLT_e26_lhtight_ivarloose_e5_lhvloose_nopix_lrtloose_idperf_probe_L1EM22VHI:HLT_IDTrack_ElecLRT_IDTrig:roi=HLT_Roi_FastElectron_LRT:te=1",
- 
-    # new chains
     "HLT_e26_lhtight_ivarloose_e5_idperf_loose_lrtloose_probe_L1EM22VHI:HLT_IDTrack_ElecLRT_FTF:roi=HLT_Roi_FastElectron_LRT:te=1",
     "HLT_e26_lhtight_ivarloose_e5_idperf_loose_lrtloose_probe_L1EM22VHI:HLT_IDTrack_ElecLRT_IDTrig:roi=HLT_Roi_FastElectron_LRT:te=1",
 
@@ -231,10 +227,6 @@ if ( True ) :
     "HLT_e26_lhtight_ivarloose_e30_lhloose_nopix_lrtmedium_probe_L1EM22VHI:HLT_IDTrack_ElecLRT_IDTrig:roi=HLT_Roi_FastElectron_LRT:te=1",
 
     # electron lrt photon tag
-    "HLT_e5_lhvloose_nopix_lrtloose_idperf_probe_g25_medium_L1EM20VH:HLT_IDTrack_ElecLRT_FTF:roi=HLT_Roi_FastElectron_LRT:te=0",
-    "HLT_e5_lhvloose_nopix_lrtloose_idperf_probe_g25_medium_L1EM20VH:HLT_IDTrack_ElecLRT_IDTrig:roi=HLT_Roi_FastElectron_LRT:te=0",
-
-    # new chains
     "HLT_e5_idperf_loose_lrtloose_probe_g25_medium_L1EM20VH:HLT_IDTrack_ElecLRT_FTF:roi=HLT_Roi_FastElectron_LRT:te=0",
     "HLT_e5_idperf_loose_lrtloose_probe_g25_medium_L1EM20VH:HLT_IDTrack_ElecLRT_IDTrig:roi=HLT_Roi_FastElectron_LRT:te=0",
 

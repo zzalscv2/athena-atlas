@@ -97,8 +97,8 @@ class TrigInDetReco(ExecStep):
             if (i=='L2electronLRT') :
                 chains += "'HLT_e20_idperf_loose_lrtloose_L1EM15VH',"
                 chains += "'HLT_e30_idperf_loose_lrtloose_L1EM22VHI',"
-                chains += "'HLT_e26_lhtight_ivarloose_e5_lhvloose_nopix_lrtloose_idperf_probe_L1EM22VHI',"
-                chains += "'HLT_e5_lhvloose_nopix_lrtloose_idperf_probe_g25_medium_L1EM20VH',"
+                chains += "'HLT_e26_lhtight_ivarloose_e5_idperf_loose_lrtloose_probe_L1EM22VHI',"
+                chains += "'HLT_e5_idperf_loose_lrtloose_probe_g25_medium_L1EM20VH',"
 
                 # new chains
                 chains += "'HLT_e26_lhtight_ivarloose_e5_idperf_loose_lrtloose_probe_L1EM22VHI',"
