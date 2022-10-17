@@ -223,15 +223,15 @@ def L1TriggerResultMakerCfg(flags):
     l1trMaker = CompFactory.L1TriggerResultMaker()
 
     # Muon RoIs
-    if flags.Trigger.enableL1MuonPhase1:
-       l1trMaker.MuRoIKey = "LVL1MuonRoIs"
-       from TrigT1MuctpiPhase1.TrigT1MuctpiPhase1Config import TrigThresholdDecisionToolCfg
-       l1trMaker.ThresholdPatternTools += [acc.popToolsAndMerge(TrigThresholdDecisionToolCfg(flags))]
+    if flags.Trigger.L1.doMuon and flags.Trigger.enableL1MuonPhase1:
+        l1trMaker.MuRoIKey = "LVL1MuonRoIs"
+        from TrigT1MuctpiPhase1.TrigT1MuctpiPhase1Config import TrigThresholdDecisionToolCfg
+        l1trMaker.ThresholdPatternTools += [acc.popToolsAndMerge(TrigThresholdDecisionToolCfg(flags))]
     else:
-       l1trMaker.MuRoIKey = ""
+        l1trMaker.MuRoIKey = ""
 
     # L1Calo RoIs
-    if flags.Trigger.enableL1CaloPhase1:
+    if flags.Trigger.L1.doCalo and flags.Trigger.enableL1CaloPhase1:
         l1trMaker.eFexEMRoIKey = "L1_eEMRoI"
         l1trMaker.eFexTauRoIKey = "L1_eTauRoI"
         l1trMaker.jFexTauRoIKey = "L1_jFexTauRoI"
@@ -252,15 +252,15 @@ def L1TriggerResultMakerCfg(flags):
             CompFactory.gFexLRJetRoIThresholdsTool(),
         ]
     else:
-       l1trMaker.eFexEMRoIKey = ""
-       l1trMaker.eFexTauRoIKey = ""
-       l1trMaker.jFexTauRoIKey = ""
-       l1trMaker.jFexSRJetRoIKey = ""
-       l1trMaker.jFexLRJetRoIKey = ""
-       l1trMaker.gFexSRJetRoIKey = ""
-       l1trMaker.gFexLRJetRoIKey = ""
-       l1trMaker.cTauRoIKey = ""
-       l1trMaker.cjTauLinkKey = ""
+        l1trMaker.eFexEMRoIKey = ""
+        l1trMaker.eFexTauRoIKey = ""
+        l1trMaker.jFexTauRoIKey = ""
+        l1trMaker.jFexSRJetRoIKey = ""
+        l1trMaker.jFexLRJetRoIKey = ""
+        l1trMaker.gFexSRJetRoIKey = ""
+        l1trMaker.gFexLRJetRoIKey = ""
+        l1trMaker.cTauRoIKey = ""
+        l1trMaker.cjTauLinkKey = ""
 
     # Placeholder for other L1 xAOD outputs:
     # - CTP result
@@ -290,14 +290,14 @@ class HLTSeeding(CompFactory.HLTSeeding) :
                                             Decisions=mapThresholdToL1DecisionCollection("FSNOSEED"),
                                             OutputTrigRoIs = recordable(mapThresholdToL1RoICollection("FSNOSEED") )) ]
         # EM unpacker
-        if flags.Trigger.doID or flags.Trigger.doCalo:
+        if flags.Trigger.L1.doCalo:
             if flags.Trigger.enableL1CaloPhase1:
                 self.xAODRoIUnpackers += createCaloRoIUnpackers(flags)
             if flags.Trigger.enableL1CaloLegacy:
                 self.RoIBRoIUnpackers += createLegacyCaloRoIUnpackers()
 
         # MU unpacker
-        if flags.Trigger.doMuon:
+        if flags.Trigger.L1.doMuon:
             if flags.Trigger.enableL1MuonPhase1:
                 self.xAODRoIUnpackers += createMuonRoIUnpackers(flags)
             else:
@@ -348,13 +348,13 @@ def HLTSeedingCfg(flags, seqName = None):
         CompFactory.FSRoIsUnpackingTool("FSRoIsUnpackingTool", Decisions=mapThresholdToL1DecisionCollection("FSNOSEED"),
                                         OutputTrigRoIs = recordable(mapThresholdToL1RoICollection("FSNOSEED")) ) ]
 
-    if flags.Trigger.doCalo:
+    if flags.Trigger.L1.doCalo:
         if flags.Trigger.enableL1CaloPhase1:
             decoderAlg.xAODRoIUnpackers += createCaloRoIUnpackers(flags)
         if flags.Trigger.enableL1CaloLegacy:
             decoderAlg.RoIBRoIUnpackers += createLegacyCaloRoIUnpackers()
 
-    if flags.Trigger.doMuon:
+    if flags.Trigger.L1.doMuon:
         if flags.Trigger.enableL1MuonPhase1:
             decoderAlg.xAODRoIUnpackers += createMuonRoIUnpackers(flags)
         else:
