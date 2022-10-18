@@ -1,14 +1,18 @@
 # Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
 
-from AthenaKernel.EventIdOverrideConfig import getMinMaxRunNumbers
 from AthenaCommon.Logging import logging
-from AthenaConfiguration.Enums import FlagEnum
-logDigitizationWriteMetadata = logging.getLogger( 'DigitizationParametersConfig' )
+from AthenaConfiguration.ComponentAccumulator import ComponentAccumulator
+from AthenaConfiguration.Enums import FlagEnum, ProductionStep
+from AthenaKernel.EventIdOverrideConfig import getMinMaxRunNumbers
+
+folderName = "/Digitization/Parameters"
+
 
 def writeDigitizationMetadata(ConfigFlags):
     from IOVDbMetaDataTools import ParameterDbFiller
     dbFiller = ParameterDbFiller.ParameterDbFiller()
     myRunNumber, myEndRunNumber = getMinMaxRunNumbers(ConfigFlags)
+    logDigitizationWriteMetadata = logging.getLogger( 'DigitizationParametersConfig' )
     logDigitizationWriteMetadata.debug('ParameterDbFiller BeginRun = %s', str(myRunNumber) )
     dbFiller.setBeginRun(myRunNumber)
     logDigitizationWriteMetadata.debug('ParameterDbFiller EndRun   = %s', str(myEndRunNumber) )
@@ -75,10 +79,27 @@ def writeDigitizationMetadata(ConfigFlags):
     #-------------------------------------------------
     dbFiller.genDigitDb()
 
-    folder = "/Digitization/Parameters"
-    from IOVDbSvc.IOVDbSvcConfig import addFolders
-    cfg=addFolders(ConfigFlags,[folder,],detDb="DigitParams.db",db="DIGPARAM",className='AthenaAttributeList')
-    cfg.getService("IOVDbSvc").FoldersToMetaData += [ folder ]
-    #cfg.getService("IOVSvc").partialPreLoadData = True #FIXME IOVSvc missing??
-    return cfg
+    return writeDigitizationParameters(ConfigFlags)
 
+
+def readDigitizationParameters(ConfigFlags):
+    """Read digitization parameters metadata"""
+    from IOVDbSvc.IOVDbSvcConfig import addFolders
+    if ConfigFlags.Common.ProductionStep not in [ProductionStep.Digitization, ProductionStep.PileUpPresampling, ProductionStep.Overlay, ProductionStep.FastChain]:
+        return addFolders(ConfigFlags, folderName, className="AthenaAttributeList", tag="HEAD")
+
+    # Here we are in a job which runs digitization, so the
+    # /Digitization/Parameters metadata is not present in the
+    # input file and will be created during the job
+    return addFolders(ConfigFlags, folderName, detDb="DigitParams.db", db="DIGPARAM", className="AthenaAttributeList")
+
+
+def writeDigitizationParameters(ConfigFlags):
+    """Write digitization parameters metadata"""
+    if ConfigFlags.Overlay.DataOverlay:
+        return ComponentAccumulator()
+
+    from IOVDbSvc.IOVDbSvcConfig import IOVDbSvcCfg, addFolders
+    acc = IOVDbSvcCfg(ConfigFlags, FoldersToMetaData=[folderName])
+    acc.merge(addFolders(ConfigFlags, folderName, detDb="DigitParams.db", db="DIGPARAM"))
+    return acc

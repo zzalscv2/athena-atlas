@@ -18,14 +18,8 @@ def BunchCrossingCondAlgCfg(configFlags):
 
     if configFlags.Beam.BunchStructureSource == BunchStructureSource.MC:
         folder = "/Digitization/Parameters"
-        from AthenaConfiguration.Enums import ProductionStep
-        if configFlags.Common.ProductionStep not in [ProductionStep.Digitization, ProductionStep.PileUpPresampling, ProductionStep.Overlay, ProductionStep.FastChain]:
-            result.merge(addFolders(configFlags,folder,None,className="AthenaAttributeList",tag='HEAD'))
-        else:
-            # Here we are in a job which runs digitization, so the
-            # /Digitization/Parameters metadata is not present in the
-            # input file and will be created during the job
-            pass
+        from Digitization.DigitizationParametersConfig import readDigitizationParameters
+        result.merge(readDigitizationParameters(configFlags))
     elif configFlags.Beam.BunchStructureSource == BunchStructureSource.FILLPARAMS:
         folder = '/TDAQ/OLC/LHC/FILLPARAMS'
         result.merge(addFolders(configFlags,folder,'TDAQ',className = 'AthenaAttributeList',tag='HEAD'))

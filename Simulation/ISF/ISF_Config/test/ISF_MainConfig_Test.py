@@ -75,8 +75,8 @@ if __name__ == '__main__':
     cfg.merge(BeamEffectsAlgCfg(ConfigFlags))
 
     # add the ISF_MainConfig
-    from ISF_Config.ISF_MainConfig import Kernel_FullG4MTCfg
-    cfg.merge(Kernel_FullG4MTCfg(ConfigFlags))
+    from ISF_Config.ISF_MainConfig import ISF_KernelCfg
+    cfg.merge(ISF_KernelCfg(ConfigFlags))
 
     from OutputStreamAthenaPool.OutputStreamConfig import OutputStreamCfg
     from SimuJobTransforms.SimOutputConfig import getStreamHITS_ItemList

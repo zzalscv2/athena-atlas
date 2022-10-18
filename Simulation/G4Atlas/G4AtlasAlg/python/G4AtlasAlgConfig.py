@@ -4,7 +4,7 @@ from ISF_Services.ISF_ServicesConfig import TruthServiceCfg, InputConverterCfg
 from ISF_Services.ISF_ServicesCoreConfig import GeoIDSvcCfg
 from G4AtlasTools.G4AtlasToolsConfig import SensitiveDetectorMasterToolCfg, FastSimulationMasterToolCfg
 from G4AtlasServices.G4AtlasUserActionConfig import UserActionSvcCfg
-from SimulationConfig.SimulationMetadata import writeSimulationParametersMetadata
+from SimulationConfig.SimulationMetadata import writeSimulationParametersMetadata, readSimulationParameters
 from AthenaConfiguration.ComponentFactory import CompFactory
 from AthenaConfiguration.ComponentAccumulator import ComponentAccumulator
 
@@ -62,8 +62,9 @@ def G4AtlasAlgCfg(ConfigFlags, name="G4AtlasAlg", **kwargs):
     result.addPublicTool(FastSimulation)
     kwargs.setdefault("FastSimMasterTool", result.getPublicTool(FastSimulation.name))
 
-    #Write MetaData container
+    #Write MetaData container and make it available to the job
     result.merge(writeSimulationParametersMetadata(ConfigFlags))
+    result.merge(readSimulationParameters(ConfigFlags))  # for FileMetaData creation
 
     #User action services (Slow...)
     kwargs.setdefault("UserActionSvc", result.getPrimaryAndMerge(UserActionSvcCfg(ConfigFlags)).name)

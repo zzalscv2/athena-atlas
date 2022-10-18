@@ -36,4 +36,3 @@ def loadOverlayDigitizationMetadata():
     conddb.addFolder("",folder+"<db>" + dbConnection + "</db>", className = 'AthenaAttributeList')
     from AthenaCommon.AppMgr import ServiceMgr
     ServiceMgr.IOVDbSvc.FoldersToMetaData += [ folder ]
-    ServiceMgr.IOVSvc.partialPreLoadData = True

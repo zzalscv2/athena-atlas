@@ -10,7 +10,8 @@ from AthenaConfiguration.MainServicesConfig import MainServicesCfg
 from AthenaPoolCnvSvc.PoolReadConfig import PoolReadCfg
 from xAODEventInfoCnv.xAODEventInfoCnvConfig import EventInfoOverlayCfg
 
-from OverlayConfiguration.OverlayMetadata import overlayMetadataCheck, overlayMetadataWrite
+from Digitization.DigitizationParametersConfig import writeDigitizationParameters
+from OverlayConfiguration.OverlayMetadata import overlayMetadataCheck
 from OverlayConfiguration.OverlayTestHelpers import defaultTestFlags, postprocessAndLockFlags, printAndRun, CommonTestArgumentParser
 
 # Argument parsing
@@ -26,7 +27,7 @@ ConfigFlags.dump()
 # Construct our accumulator to run
 acc = MainServicesCfg(ConfigFlags)
 acc.merge(PoolReadCfg(ConfigFlags))
-acc.merge(overlayMetadataWrite(ConfigFlags))
+acc.merge(writeDigitizationParameters(ConfigFlags))
 
 # Add event info overlay for minimal output
 acc.merge(EventInfoOverlayCfg(ConfigFlags))

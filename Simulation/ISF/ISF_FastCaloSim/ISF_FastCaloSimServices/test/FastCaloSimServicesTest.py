@@ -36,8 +36,8 @@ def FastCaloSimServicesMainCfg(ConfigFlags):
     acc.merge(BeamEffectsAlgCfg(ConfigFlags))
 
     # Add Kernel_ATLFAST3MT from ISF_MainConfig
-    from ISF_Config.ISF_MainConfig import Kernel_ATLFAST3MT_QSCfg
-    acc.merge(Kernel_ATLFAST3MT_QSCfg(ConfigFlags))
+    from ISF_Config.ISF_MainConfig import ISF_KernelCfg
+    acc.merge(ISF_KernelCfg(ConfigFlags))
 
     from OutputStreamAthenaPool.OutputStreamConfig import OutputStreamCfg
     from SimuJobTransforms.SimOutputConfig import getStreamHITS_ItemList
@@ -74,6 +74,8 @@ if __name__ == '__main__':
 
 
     from AthenaConfiguration.AllConfigFlags import ConfigFlags
+    from SimulationConfig.SimEnums import SimulationFlavour
+    ConfigFlags.Sim.ISF.Simulator = SimulationFlavour.ATLFAST3MT_QS
     from AthenaConfiguration.ComponentFactory import CompFactory
 
     # Configure
