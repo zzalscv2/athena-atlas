@@ -3,6 +3,13 @@
 from AthenaConfiguration.ComponentAccumulator import ComponentAccumulator
 from AthenaConfiguration.ComponentFactory import CompFactory
 
+# Relative timing results from ATLASRECTS-6755
+# normalized to Trk::KalmanUpdator_xk time
+# KalmanUpdator_xk   :   1
+# KalmanUpdatorAmg   :   1.2
+# KalmanUpdatorSMatrix : 1.45
+# KalmanUpdator : 3.8
+
 
 def KalmanUpdator_xkCfg(flags, name='KalmanUpdator_xk', **kwargs):
     result = ComponentAccumulator()
@@ -38,10 +45,9 @@ def InDetUpdatorCfg(flags, name='InDetUpdator', **kwargs):
     acc.setPrivateTools(tool)
     return acc
 
+
 # Needed as long as flags.InDet.Tracking vs flags.ITk.Tracking are used
 # To remove ultimately after Tracking flags are unified
-
-
 def ITkUpdatorCfg(flags, name='ITkUpdator', **kwargs):
     result = ComponentAccumulator()
 

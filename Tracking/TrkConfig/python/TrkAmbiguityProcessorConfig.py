@@ -60,7 +60,8 @@ def SimpleAmbiguityProcessorToolCfg(flags,
         from TrkConfig.TrkTrackSummaryToolConfig import (
             InDetTrackSummaryToolAmbiCfg)
         kwargs.setdefault("TrackSummaryTool", acc.popToolsAndMerge(
-            InDetTrackSummaryToolAmbiCfg(flags, name="InDetAmbiguityProcessorSplitProbTrackSummaryTool" + flags.InDet.Tracking.ActivePass.extension)))
+            InDetTrackSummaryToolAmbiCfg(flags, 
+            name="InDetAmbiguityProcessorSplitProbTrackSummaryTool" + flags.InDet.Tracking.ActivePass.extension)))
 
     if "SelectionTool" not in kwargs:
         from InDetConfig.InDetAmbiTrackSelectionToolConfig import (

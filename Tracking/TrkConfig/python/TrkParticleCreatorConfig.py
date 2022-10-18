@@ -1,13 +1,16 @@
 # Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
 # Configuration of TrkParticleCreator package
+# Creating xAOD::TrackParticles starting from 
+# input Trk::Tracks
+
 from AthenaConfiguration.ComponentAccumulator import ComponentAccumulator
 from AthenaConfiguration.ComponentFactory import CompFactory
 from AthenaConfiguration.Enums import BeamType, LHCPeriod
 
+
 ####################################
 #####        InDet/ITk         #####
 ####################################
-
 def TrackParticleCreatorToolCfg(flags, name="InDetxAODParticleCreatorTool", **kwargs):
 
     if flags.Detector.GeometryITk:
@@ -135,33 +138,38 @@ def ITkTrackParticleCreatorToolCfg(flags, name="ITkTrackParticleCreatorTool", **
     return result
 
 
-####################################
-#####         egamma           #####
-####################################
-
-def GSFBuildInDetParticleCreatorToolCfg(flags, name="GSFBuildInDetParticleCreatorTool", **kwargs):
+# egamma : Used to create TrackParticels from GSF Tracks after refit
+def GSFBuildInDetParticleCreatorToolCfg(flags,
+                                        name="GSFBuildInDetParticleCreatorTool",
+                                        **kwargs):
     result = ComponentAccumulator()
 
     if "TrackToVertex" not in kwargs:
         from TrackToVertex.TrackToVertexConfig import TrackToVertexCfg
-        kwargs.setdefault("TrackToVertex", result.popToolsAndMerge(TrackToVertexCfg(flags)))
+        kwargs.setdefault("TrackToVertex", result.popToolsAndMerge(
+            TrackToVertexCfg(flags)))
 
     if "TrackSummaryTool" not in kwargs:
         from TrkConfig.TrkTrackSummaryToolConfig import GSFTrackSummaryToolCfg
-        TrackSummaryTool = result.popToolsAndMerge(GSFTrackSummaryToolCfg(flags))
+        TrackSummaryTool = result.popToolsAndMerge(
+            GSFTrackSummaryToolCfg(flags))
         result.addPublicTool(TrackSummaryTool)
         kwargs.setdefault("TrackSummaryTool", TrackSummaryTool)
 
     if flags.GeoModel.Run < LHCPeriod.Run4 and "PixelToTPIDTool" not in kwargs:
-        kwargs.setdefault("PixelToTPIDTool", CompFactory.InDet.PixelToTPIDTool(name="GSFBuildPixelToTPIDTool"))
+        kwargs.setdefault("PixelToTPIDTool", CompFactory.InDet.PixelToTPIDTool(
+            name="GSFBuildPixelToTPIDTool"))
 
-    if flags.Detector.EnableTRT and "TRT_ElectronPidTool" not in kwargs :
+    if flags.Detector.EnableTRT and "TRT_ElectronPidTool" not in kwargs:
         from InDetConfig.TRT_ElectronPidToolsConfig import GSFBuildTRT_ElectronPidToolCfg
-        kwargs.setdefault("TRT_ElectronPidTool", result.popToolsAndMerge(GSFBuildTRT_ElectronPidToolCfg(flags)))
+        kwargs.setdefault("TRT_ElectronPidTool", result.popToolsAndMerge(
+            GSFBuildTRT_ElectronPidToolCfg(flags)))
 
-    if (flags.Detector.EnablePixel or flags.Detector.EnableITkPixel) and "TestPixelLayerTool" not in kwargs:
+    if ((flags.Detector.EnablePixel or flags.Detector.EnableITkPixel)
+            and "TestPixelLayerTool" not in kwargs):
         from InDetConfig.InDetTestPixelLayerConfig import InDetTestPixelLayerToolInnerCfg
-        kwargs.setdefault("TestPixelLayerTool", result.popToolsAndMerge(InDetTestPixelLayerToolInnerCfg(flags)))
+        kwargs.setdefault("TestPixelLayerTool", result.popToolsAndMerge(
+            InDetTestPixelLayerToolInnerCfg(flags)))
 
     kwargs.setdefault("ComputeAdditionalInfo", True)
     kwargs.setdefault("KeepParameters", True)
@@ -169,14 +177,14 @@ def GSFBuildInDetParticleCreatorToolCfg(flags, name="GSFBuildInDetParticleCreato
     kwargs.setdefault("IBLParameterSvc",
                       "IBLParameterSvc" if flags.Detector.GeometryID else "")
 
-    result.setPrivateTools(CompFactory.Trk.TrackParticleCreatorTool(name, **kwargs))
+    result.setPrivateTools(
+        CompFactory.Trk.TrackParticleCreatorTool(name, **kwargs))
     return result
 
 
 ####################################
 #####          Muons           #####
 ####################################
-
 def MuonParticleCreatorToolCfg(flags, name="MuonParticleCreatorTool", **kwargs):
     result = ComponentAccumulator()
 
