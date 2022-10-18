@@ -48,6 +48,7 @@ int main(int argc, char **argv) {
                     "$ROOTCOREBIN/data/TopAnalysis/input-13TeV-fondueworld.txt output\n");
     return 1;
   }
+  gErrorAbortLevel = kError;
 
   // to disable the sending of file access statistics
   xAOD::TFileAccessTracer::enableDataSubmission(false);

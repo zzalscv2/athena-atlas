@@ -96,6 +96,8 @@ int main(int argc, char** argv) {
     return 1;
   }
 
+  gErrorAbortLevel = kError;
+
   // to disable the sending of file access statistics
   xAOD::TFileAccessTracer::enableDataSubmission(false);
 
