@@ -1145,6 +1145,9 @@ HLT_IDTrack_Bjet_IDTrigAuxDyn.btagIp_trackMomentum
 HLT_IDTrack_Bjet_IDTrigAuxDyn.btagIp_z0SinTheta
 HLT_IDTrack_Bjet_IDTrigAuxDyn.btagIp_z0SinThetaUncertainty
 HLT_IDTrack_Bjet_IDTrigAuxDyn.viewIndex
+HLT_IDTrack_Bmumux_FTF
+HLT_IDTrack_Bmumux_FTFAux.
+HLT_IDTrack_Bmumux_FTFAuxDyn.viewIndex
 HLT_IDTrack_Bmumux_IDTrig
 HLT_IDTrack_Bmumux_IDTrigAux.
 HLT_IDTrack_Bmumux_IDTrigAuxDyn.viewIndex
@@ -1329,6 +1332,7 @@ HLT_NoMuonDiElecPrecisionAux.
 HLT_NoMuonDiElecPrecisionGSF
 HLT_NoMuonDiElecPrecisionGSFAux.
 HLT_Roi_Bjet
+HLT_Roi_Bmumux
 HLT_Roi_DJ
 HLT_Roi_FS
 HLT_Roi_FastElectron

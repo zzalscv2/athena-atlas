@@ -268,6 +268,8 @@ HLT_IDTrack_Bjet_FTF
 HLT_IDTrack_Bjet_FTFAux.
 HLT_IDTrack_Bjet_IDTrig
 HLT_IDTrack_Bjet_IDTrigAux.
+HLT_IDTrack_Bmumux_FTF
+HLT_IDTrack_Bmumux_FTFAux.
 HLT_IDTrack_Bmumux_IDTrig
 HLT_IDTrack_Bmumux_IDTrigAux.
 HLT_IDTrack_Cosmic_EFID
@@ -404,6 +406,7 @@ HLT_NoMuonDiElecPrecisionAux.
 HLT_NoMuonDiElecPrecisionGSF
 HLT_NoMuonDiElecPrecisionGSFAux.
 HLT_Roi_Bjet
+HLT_Roi_Bmumux
 HLT_Roi_DJ
 HLT_Roi_FastElectron
 HLT_Roi_FastElectron_LRT
