@@ -546,7 +546,7 @@ def BSMonitoringConfig(inputFlags):
         #mult
         monPath="/MUCTPI/Mult"
         myGroup.defineHistogram('multX;mult', title='MLT thresholds total count', path=monPath,xbins=32,xmin=-0.5,xmax=31.5,opt='kAlwaysCreate')
-        myGroup.defineHistogram('multPerLBX;multPerLBY;multPerLB', title='MLT thresholds total count - per LB', path=monPath,xbins=2000,xmin=0,xmax=2000,ybins=32,ymin=-0.5,ymax=31.5,opt='kAlwaysCreate')
+        myGroup.defineHistogram('multPerLBX,multPerLBY;multPerLB', title='MLT thresholds total count - per LB', type='TH2F',path=monPath,xbins=2000,xmin=0,xmax=2000,ybins=32,ymin=-0.5,ymax=31.5,opt='kAlwaysCreate')
 
         multSliceVsMultMUCTPIBinLabels = [ #cxx indices
         "Central Slice"         ,      #1
