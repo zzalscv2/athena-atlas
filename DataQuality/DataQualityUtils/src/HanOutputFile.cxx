@@ -3048,7 +3048,7 @@ namespace dqutils
             cy1 = coordinates.substr(found1 + 1, found2 - found1 - 1);
             double y1 = std::strtod(cy1.c_str(), NULL);
             std::string txt = coordinates.substr(found2 + 2, coordinates.size());
-            txt = txt.substr(0, txt.size() - 1);
+            txt.pop_back();
             if (txt == "X" && x1 < y1)
             {
               h->GetXaxis()->SetRangeUser(x1, y1);
@@ -3065,7 +3065,7 @@ namespace dqutils
           else
           {
             std::string txt = coordinates.substr(found1 + 2, coordinates.size());
-            txt = txt.substr(0, txt.size() - 1);
+            txt.pop_back();
             if (txt[1] == 'M')
             {
               if (txt == "XMax")
@@ -3414,7 +3414,7 @@ namespace dqutils
             cy1 = coordinates.substr(found1 + 1, found2 - found1 - 1);
             double y1 = std::strtod(cy1.c_str(), NULL);
             std::string txt = coordinates.substr(found2 + 2, coordinates.size());
-            txt = txt.substr(0, txt.size() - 1);
+            txt.pop_back();
             c->cd();
             TText* T = new TText;
             if (NDC)
@@ -3522,7 +3522,7 @@ namespace dqutils
               txtsize = coordinates.substr(found2 + 1, found3 - found2 - 1);
               double size = std::strtod(txtsize.c_str(), NULL);
               std::string txt = coordinates.substr(found3 + 2, coordinates.size());
-              txt = txt.substr(0, txt.size() - 1);
+              txt.pop_back();
               c->cd();
               TText* T = new TText;
               T->SetTextSize(size / 100);
