@@ -28,6 +28,7 @@
 #include "DataQualityInterfaces/ConditionsSingleton.h"
 #include "DataQualityInterfaces/DatabaseConfig.h"
 #include "DataQualityInterfaces/HanAlgorithmConfig.h"
+#include "DataQualityInterfaces/HanConfigCompAlg.h"
 #include "DataQualityInterfaces/HanConfigAlgLimit.h"
 #include "DataQualityInterfaces/HanConfigAlgPar.h"
 #include "DataQualityInterfaces/HanConfigAssessor.h"
@@ -919,7 +920,7 @@ Visit( const MiniConfigTreeNode* node )
     } else {
       strHistName = strNodeName.substr(0, atsign);
       strFullHistName = histNode->GetPathName();
-      strFullHistName = strFullHistName.substr(0, strFullHistName.find('@'));
+      strFullHistName.resize(strFullHistName.find('@'));
     }
 
     if( strHistName == "all_in_dir" )
@@ -996,7 +997,7 @@ Visit( const MiniConfigTreeNode* node )
       strHistName = strNodeName.substr(0, atsign);
       extension = strNodeName.substr(atsign, std::string::npos);
       strFullHistName = histNode->GetPathName();
-      strFullHistName = strFullHistName.substr(0, strFullHistName.find('@'));
+      strFullHistName.resize(strFullHistName.find('@'));
     }
 
     if( strHistName == "all_in_dir" ) {

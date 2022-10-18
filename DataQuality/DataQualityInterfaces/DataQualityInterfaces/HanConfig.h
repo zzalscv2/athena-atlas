@@ -15,7 +15,6 @@
 
 #include "DataQualityInterfaces/MiniConfigTreeNode.h"
 #include "DataQualityInterfaces/HanConfigAssessor.h"
-#include "DataQualityInterfaces/HanConfigCompAlg.h"
 #include "DataQualityInterfaces/DatabaseConfig.h"
 
 #ifndef __CINT__
@@ -36,7 +35,6 @@ namespace dqm_core {
 namespace dqi {
 
 class MiniConfig;
-class HanConfigAssessor;
 class HanConfigGroup;
 class HanOutput;
 class HanInputRootFile;
