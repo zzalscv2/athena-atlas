@@ -74,10 +74,9 @@ def PhysCommonAugmentationsCfg(ConfigFlags,**kwargs):
     #We also need to build links between the newly created jet constituents (GlobalFE)
     #and electrons,photons,muons and taus
     from eflowRec.PFCfg import PFGlobalFlowElementLinkingCfg
-    acc.merge(PFGlobalFlowElementLinkingCfg(ConfigFlags))
-    #AOD do not have calorimeter cells for CaloCalTopoCluster, so we have to use 
+    #AOD do not have calorimeter cells for CaloCalTopoCluster, so we have to use
     #this special setting for the muon-FE links.
-    acc.getEventAlgo("PFMuonGlobalFlowElementAssoc").m_UseMuonTopoClusters=True
+    acc.merge(PFGlobalFlowElementLinkingCfg(ConfigFlags, UseMuonTopoClusters=True))
     acc.merge(AddDiTauLowPtCfg(ConfigFlags, prefix = 'PhysCommon'))
     acc.merge(AddTauWPDecorationCfg(ConfigFlags, prefix = 'PhysCommon', evetoFixTag="v1"))
     FTagJetColl = ['AntiKt4EMPFlowJets','AntiKtVR30Rmax4Rmin02TrackJets']

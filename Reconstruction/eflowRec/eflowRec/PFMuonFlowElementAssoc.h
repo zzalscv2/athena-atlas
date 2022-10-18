@@ -75,13 +75,13 @@ private:
   SG::ReadDecorHandleKey<xAOD::CaloClusterContainer> m_ClustCollectionLinkKey{this,"ElementLinkName", "MuonClusterCollection.constituentClusterLinks"};
 
   /** Gaudi Property to configure linkage of Neutral Flow Elements to Muon clusters (EXPERIMENTAL - default = False/OFF) **/
-  Gaudi::Property<bool> m_LinkNeutralFEClusters{this,"m_LinkNeutralFEClusters",false,"Toggle usage of linkage of Neutral FlowElements - false by default (EXPERIMENTAL)"};
+  Gaudi::Property<bool> m_LinkNeutralFEClusters{this,"LinkNeutralFEClusters",false,"Toggle usage of linkage of Neutral FlowElements - false by default (EXPERIMENTAL)"};
 
   /** 
       (EXPERIMENTAL) Gaudi Property to configure linkage of Neutral FEs to TopoClusters associated to Muons. Only works with previous option set to True (m_LinkNeutralFEClusters). 
       True: Link FEs to Topoclusters associated to Muons
       False: Link FEs to CaloClusters associated to Muons
  **/
-  Gaudi::Property<bool> m_UseMuonTopoClusters{this,"m_UseMuonTopoClusters",false,"Toggle usage of linker of muon associated topoclusters to flow elements - false by default (EXPERIMENTAL)"};
+  Gaudi::Property<bool> m_UseMuonTopoClusters{this,"UseMuonTopoClusters",false,"Toggle usage of linker of muon associated topoclusters to flow elements - false by default (EXPERIMENTAL)"};
 };
 #endif // PFMUONFLOWELEMENTASSOC.H
