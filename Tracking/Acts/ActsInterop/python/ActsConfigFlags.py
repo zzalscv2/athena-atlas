@@ -13,4 +13,7 @@ def createActsConfigFlags():
     # Track Finding Flags - TO BE ADDED
     actscf.addFlag('Acts.TrackFinding.useSiSpacePointSeedMaker', False)
 
+    # Monitoring
+    actscf.addFlag('Acts.doMonitoring', False)
+
     return actscf

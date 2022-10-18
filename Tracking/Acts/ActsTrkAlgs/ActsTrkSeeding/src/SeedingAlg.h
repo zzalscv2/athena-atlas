@@ -18,6 +18,7 @@
 #include "BeamSpotConditionsData/BeamSpotData.h"
 #include "MagFieldConditions/AtlasFieldCacheCondObj.h"
 #include "MagFieldElements/AtlasFieldCache.h"
+#include "AthenaMonitoringKernel/GenericMonitoringTool.h"
 
 // Handle Keys
 #include "StoreGate/ReadCondHandleKey.h"
@@ -41,6 +42,7 @@ namespace ActsTrk {
   private:
     // Tool Handles
     ToolHandle< ActsTrk::ISeedingTool > m_seedsTool {this, "SeedTool", "","Seed Tool"};
+    ToolHandle< GenericMonitoringTool > m_monTool {this, "MonTool", "", "Monitoring tool"};
 
     // Handle Keys
     SG::ReadCondHandleKey< InDet::BeamSpotData > m_beamSpotKey{this, "BeamSpotKey", "BeamSpotData", "SG key for beam spot"};

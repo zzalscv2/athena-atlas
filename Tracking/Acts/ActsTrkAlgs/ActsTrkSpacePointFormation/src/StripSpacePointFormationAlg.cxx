@@ -44,9 +44,10 @@ namespace ActsTrk {
   //-------------------------------------------------------------------------
   StatusCode StripSpacePointFormationAlg::execute (const EventContext& ctx) const
   {
+    auto timer = Monitored::Timer<std::chrono::milliseconds>( "TIME_execute" );
     auto nReceivedSPsStrip = Monitored::Scalar<int>( "numStripSpacePoints" , 0 );
     auto nReceivedSPsStripOverlap = Monitored::Scalar<int>( "numStripOverlapSpacePoints" , 0 );
-    auto mon = Monitored::Group( m_monTool, nReceivedSPsStrip, nReceivedSPsStripOverlap );
+    auto mon = Monitored::Group( m_monTool, timer, nReceivedSPsStrip, nReceivedSPsStripOverlap );
 
     SG::ReadCondHandle<InDet::BeamSpotData> beamSpotHandle { m_beamSpotKey, ctx };
     const InDet::BeamSpotData* beamSpot = *beamSpotHandle;

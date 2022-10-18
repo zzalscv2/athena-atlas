@@ -18,6 +18,7 @@
 #include "InDetPrepRawData/SiClusterCollection.h"
 #include "InDetPrepRawData/SiClusterContainer.h"
 #include "SiSPSeededTrackFinderData/SiSpacePointForSeed.h"
+#include "AthenaMonitoringKernel/Monitored.h"
 
 #include <boost/container/static_vector.hpp>
 
@@ -52,11 +53,17 @@ namespace ActsTrk {
     ATH_CHECK( m_pixelClusterContainerKey.initialize(m_usePixel) );
     ATH_CHECK( m_stripClusterContainerKey.initialize(not m_usePixel) );
 
+    if ( not m_monTool.empty() )
+      ATH_CHECK( m_monTool.retrieve() );
+
     return StatusCode::SUCCESS;
   }
   
   StatusCode SeedingFromAthenaAlg::execute(const EventContext& ctx) const {
     ATH_MSG_DEBUG( "Executing " << name() <<" ... " );
+
+    auto timer = Monitored::Timer<std::chrono::milliseconds>( "TIME_execute" );
+    auto mon = Monitored::Group( m_monTool, timer );
     
     // ================================================== //
     // ===================== CONDS ====================== // 
