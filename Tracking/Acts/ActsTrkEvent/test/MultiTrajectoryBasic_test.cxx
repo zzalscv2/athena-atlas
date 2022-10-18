@@ -63,8 +63,11 @@ BOOST_FIXTURE_TEST_CASE(Fill, EmptyMTJ) {
     BOOST_CHECK( mtj->has_backends());
     constexpr auto kMask = Acts::TrackStatePropMask::Predicted;
     auto i0 = mtj->addTrackState(kMask);
+    // trajectory bifurcates here into multiple hypotheses
     auto i1a = mtj->addTrackState(kMask, i0);
+    auto i1b = mtj->addTrackState(kMask, i0);
     auto i2a = mtj->addTrackState(kMask, i1a);
+    auto i2b = mtj->addTrackState(kMask, i1b);
 
     
 
@@ -80,17 +83,22 @@ BOOST_FIXTURE_TEST_CASE(Fill, EmptyMTJ) {
   };
 
   
- 
-  const std::vector<size_t> exp = { i2a, i1a, i0 };
-
-  
-  mtj->visitBackwards(i2a, collect);
+  std::vector<size_t> exp = { i2a, i1a, i0 };
+  mtj->applyBackwards(i2a, collect);
   BOOST_CHECK_EQUAL_COLLECTIONS(act.begin(), act.end(), exp.begin(), exp.end());
   // the same test on read only collection TODO, this needs streamlining so we so not repeat identical code
   act.clear();
   ro_mtj->visitBackwards(i2a, collect);
   BOOST_CHECK_EQUAL_COLLECTIONS(act.begin(), act.end(), exp.begin(), exp.end());
 
+  act.clear();
+  exp = {i2b, i1b, i0};
+  mtj->applyBackwards(i2b, collect);
+  BOOST_CHECK_EQUAL_COLLECTIONS(act.begin(), act.end(), exp.begin(), exp.end());
+  // the same test on read only collection 
+  act.clear();
+  ro_mtj->visitBackwards(i2b, collect);
+  BOOST_CHECK_EQUAL_COLLECTIONS(act.begin(), act.end(), exp.begin(), exp.end());
 }
 
 BOOST_FIXTURE_TEST_CASE(Dynamic_columns, EmptyMTJ) {
@@ -125,5 +133,209 @@ BOOST_FIXTURE_TEST_CASE(Dynamic_columns, EmptyMTJ) {
 
     BOOST_CHECK_THROW((ts2.component<float,"sth"_hash>()), std::runtime_error);
 }
+
+BOOST_FIXTURE_TEST_CASE(Clear, EmptyMTJ) {
+  constexpr auto kMask = Acts::TrackStatePropMask::Predicted;
+  
+  BOOST_CHECK_EQUAL(mtj->size(), 0);
+
+  auto i0 = mtj->addTrackState(kMask);
+  // trajectory bifurcates here into multiple hypotheses
+  auto i1a = mtj->addTrackState(kMask, i0);
+  auto i1b = mtj->addTrackState(kMask, i0);
+  mtj->addTrackState(kMask, i1a);
+  mtj->addTrackState(kMask, i1b);
+
+  BOOST_CHECK_EQUAL(mtj->size(), 5);
+  mtj->clear();
+  BOOST_CHECK_EQUAL(mtj->size(), 0);
+  
+}
+
+
+BOOST_FIXTURE_TEST_CASE(ApplyWithAbort, EmptyMTJ) {
+  constexpr auto kMask = Acts::TrackStatePropMask::Predicted;
+
+  // construct trajectory with three components
+
+  auto i0 = mtj->addTrackState(kMask);
+  auto i1 = mtj->addTrackState(kMask, i0);
+  auto i2 = mtj->addTrackState(kMask, i1);
+
+  size_t n = 0;
+  mtj->applyBackwards(i2, [&](const auto&) {
+    n++;
+    return false;
+  });
+  BOOST_CHECK_EQUAL(n, 1u);
+
+  n = 0;
+  mtj->applyBackwards(i2, [&](const auto& ts) {
+    n++;
+    if (ts.index() == i1) {
+      return false;
+    }
+    return true;
+  });
+  BOOST_CHECK_EQUAL(n, 2u);
+
+  n = 0;
+  mtj->applyBackwards(i2, [&](const auto&) {
+    n++;
+    return true;
+  });
+  BOOST_CHECK_EQUAL(n, 3u);
+}
+
+
+BOOST_FIXTURE_TEST_CASE(BitmaskOperators, EmptyMTJ) {
+  using PM = Acts::TrackStatePropMask;
+
+  auto bs1 = PM::Predicted;
+
+  BOOST_CHECK(ACTS_CHECK_BIT(bs1, PM::Predicted));
+  BOOST_CHECK(!ACTS_CHECK_BIT(bs1, PM::Calibrated));
+
+  auto bs2 = PM::Calibrated;
+
+  BOOST_CHECK(!ACTS_CHECK_BIT(bs2, PM::Predicted));
+  BOOST_CHECK(ACTS_CHECK_BIT(bs2, PM::Calibrated));
+
+  auto bs3 = PM::Calibrated | PM::Predicted;
+
+  BOOST_CHECK(ACTS_CHECK_BIT(bs3, PM::Predicted));
+  BOOST_CHECK(ACTS_CHECK_BIT(bs3, PM::Calibrated));
+
+  BOOST_CHECK(ACTS_CHECK_BIT(PM::All, PM::Predicted));
+  BOOST_CHECK(ACTS_CHECK_BIT(PM::All, PM::Calibrated));
+
+  auto bs4 = PM::Predicted | PM::Jacobian | PM::Smoothed;
+  BOOST_CHECK(ACTS_CHECK_BIT(bs4, PM::Predicted));
+  BOOST_CHECK(ACTS_CHECK_BIT(bs4, PM::Jacobian));
+  BOOST_CHECK(ACTS_CHECK_BIT(bs4, PM::Smoothed));
+  BOOST_CHECK(!ACTS_CHECK_BIT(bs4, PM::Calibrated));
+  BOOST_CHECK(!ACTS_CHECK_BIT(bs4, PM::Filtered));
+
+  auto cnv = [](auto a) -> std::bitset<8> {
+    return static_cast<std::underlying_type<PM>::type>(a);
+  };
+
+  BOOST_CHECK(cnv(PM::All).all());    // all ones
+  BOOST_CHECK(cnv(PM::None).none());  // all zeros
+
+  // test orthogonality
+  std::array<PM, 5> values{PM::Predicted, PM::Filtered, PM::Smoothed,
+                           PM::Jacobian, PM::Calibrated};
+  for (size_t i = 0; i < values.size(); i++) {
+    for (size_t j = 0; j < values.size(); j++) {
+      PM a = values[i];
+      PM b = values[j];
+
+      if (i == j) {
+        BOOST_CHECK(cnv(a & b).count() == 1);
+      } else {
+        BOOST_CHECK(cnv(a & b).none());
+      }
+    }
+  }
+
+  BOOST_CHECK(cnv(PM::Predicted ^ PM::Filtered).count() == 2);
+  BOOST_CHECK(cnv(PM::Predicted ^ PM::Predicted).none());
+  BOOST_CHECK(~(PM::Predicted | PM::Calibrated) ==
+              (PM::All ^ PM::Predicted ^ PM::Calibrated));
+
+  PM base = PM::None;
+  BOOST_CHECK(cnv(base) == 0);
+
+  base &= PM::Filtered;
+  BOOST_CHECK(cnv(base) == 0);
+
+  base |= PM::Filtered;
+  BOOST_CHECK(base == PM::Filtered);
+
+  base |= PM::Calibrated;
+  BOOST_CHECK(base == (PM::Filtered | PM::Calibrated));
+
+  base ^= PM::All;
+  BOOST_CHECK(base == ~(PM::Filtered | PM::Calibrated));
+}
+
+
+BOOST_FIXTURE_TEST_CASE(AddTrackStateWithBitMask, EmptyMTJ) {
+
+  using PM = Acts::TrackStatePropMask;
+  using namespace Acts::HashedStringLiteral;
+
+  // TODO : add tests checking "calibratedSourceLink","referenceSurface","typeFlags"
+  // see: https://github.com/acts-project/acts/blob/5cbcbf01f1d6bbe79a98b84bdc6ef076cf763c01/Tests/UnitTests/Core/EventData/MultiTrajectoryTests.cpp#L321
+  auto alwaysPresent = [](auto& ts) {  
+    BOOST_CHECK(ts.template has<"measdim"_hash>());
+    BOOST_CHECK(ts.template has<"chi2"_hash>());
+    BOOST_CHECK(ts.template has<"pathLength"_hash>());
+  };
+
+  auto ts = mtj->getTrackState(mtj->addTrackState(PM::All));
+  BOOST_CHECK(ts.hasPredicted());
+  BOOST_CHECK(ts.hasFiltered());
+  BOOST_CHECK(ts.hasSmoothed());
+  BOOST_CHECK(ts.hasCalibrated());
+  BOOST_CHECK(ts.hasProjector());
+  BOOST_CHECK(ts.hasJacobian());
+  alwaysPresent(ts);
+
+  ts = mtj->getTrackState(mtj->addTrackState(PM::None));
+  BOOST_CHECK(!ts.hasPredicted());
+  BOOST_CHECK(!ts.hasFiltered());
+  BOOST_CHECK(!ts.hasSmoothed());
+  BOOST_CHECK(!ts.hasCalibrated());
+  BOOST_CHECK(!ts.hasProjector());
+  BOOST_CHECK(!ts.hasJacobian());
+  alwaysPresent(ts);
+
+  ts = mtj->getTrackState(mtj->addTrackState(PM::Predicted));
+  BOOST_CHECK(ts.hasPredicted());
+  BOOST_CHECK(!ts.hasFiltered());
+  BOOST_CHECK(!ts.hasSmoothed());
+  BOOST_CHECK(!ts.hasCalibrated());
+  BOOST_CHECK(!ts.hasProjector());
+  BOOST_CHECK(!ts.hasJacobian());
+  alwaysPresent(ts);
+
+  ts = mtj->getTrackState(mtj->addTrackState(PM::Filtered));
+  BOOST_CHECK(!ts.hasPredicted());
+  BOOST_CHECK(ts.hasFiltered());
+  BOOST_CHECK(!ts.hasSmoothed());
+  BOOST_CHECK(!ts.hasCalibrated());
+  BOOST_CHECK(!ts.hasProjector());
+  BOOST_CHECK(!ts.hasJacobian());
+  alwaysPresent(ts);
+
+  ts = mtj->getTrackState(mtj->addTrackState(PM::Smoothed));
+  BOOST_CHECK(!ts.hasPredicted());
+  BOOST_CHECK(!ts.hasFiltered());
+  BOOST_CHECK(ts.hasSmoothed());
+  BOOST_CHECK(!ts.hasCalibrated());
+  BOOST_CHECK(!ts.hasProjector());
+  BOOST_CHECK(!ts.hasJacobian());
+  alwaysPresent(ts);
+
+  ts = mtj->getTrackState(mtj->addTrackState(PM::Calibrated));
+  BOOST_CHECK(!ts.hasPredicted());
+  BOOST_CHECK(!ts.hasFiltered());
+  BOOST_CHECK(!ts.hasSmoothed());
+  BOOST_CHECK(ts.hasCalibrated());
+  BOOST_CHECK(ts.hasProjector());
+  BOOST_CHECK(!ts.hasJacobian());
+
+  ts = mtj->getTrackState(mtj->addTrackState(PM::Jacobian));
+  BOOST_CHECK(!ts.hasPredicted());
+  BOOST_CHECK(!ts.hasFiltered());
+  BOOST_CHECK(!ts.hasSmoothed());
+  BOOST_CHECK(!ts.hasCalibrated());
+  BOOST_CHECK(!ts.hasProjector());
+  BOOST_CHECK(ts.hasJacobian());
+  alwaysPresent(ts);
+}
+
 // TODO remaining tests
 }
