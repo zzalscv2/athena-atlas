@@ -8,8 +8,8 @@ ActsTrk::MultiTrajectory<RWState>::MultiTrajectory(MultiTrajectory<RWState>::Tra
                                             MultiTrajectory<RWState>::TrackMeasurementContainerBackendPtr measurements )
     : m_trackStates(states),
       m_trackParameters(parameters),
-      m_jacobians(jacobians),
-      m_measurements(measurements){        
+      m_trackJacobians(jacobians),
+      m_trackMeasurements(measurements){        
       } 
 
 
@@ -19,8 +19,8 @@ template<bool RWState>
 bool ActsTrk::MultiTrajectory<RWState>::has_backends() const { 
     return m_trackStates != nullptr 
         and m_trackParameters != nullptr
-        and m_jacobians != nullptr
-        and m_measurements != nullptr;
+        and m_trackJacobians != nullptr
+        and m_trackMeasurements != nullptr;
     }
 
 
@@ -49,6 +49,16 @@ bool ActsTrk::MultiTrajectory<RWState>::has_backends() const {
             return trackParameters().size() - 1;
         };
 
+        auto addJacobian = [this]() -> IndexType {
+            trackJacobians().push_back(new xAOD::TrackJacobian_v1());
+            return trackJacobians().size() - 1;
+        };
+
+        auto addMeasurement = [this]() -> IndexType {
+            trackMeasurements().push_back(new xAOD::TrackMeasurement_v1());
+            return trackMeasurements().size() - 1;
+        };
+
         state->setPredicted(kInvalid);
         if (ACTS_CHECK_BIT(mask, TrackStatePropMask::Predicted)) {
             state->setPredicted(addParam());
@@ -58,15 +68,27 @@ bool ActsTrk::MultiTrajectory<RWState>::has_backends() const {
         if (ACTS_CHECK_BIT(mask, TrackStatePropMask::Filtered)) {
             state->setFiltered(addParam());
         }
+
         state->setSmoothed(kInvalid);
         if (ACTS_CHECK_BIT(mask, TrackStatePropMask::Smoothed)) {
             state->setSmoothed(addParam());
         }
-        state->setJacobian(kInvalid);
-        state->setUncalibrated(kInvalid);
+
         state->setCalibrated(kInvalid);
         state->setProjector(kInvalid);
+        if (ACTS_CHECK_BIT(mask, TrackStatePropMask::Calibrated)) {
+            state->setCalibrated(addMeasurement());
+            // TODO: in Acts there is m_projections collection
+            // https://github.com/acts-project/acts/blob/main/Core/src/EventData/VectorMultiTrajectory.cpp#L83
+            state->setProjector(addParam());
+        }
 
+        state->setJacobian(kInvalid);
+        if (ACTS_CHECK_BIT(mask, TrackStatePropMask::Jacobian)) {
+            state->setJacobian(addJacobian());
+        }
+
+        state->setUncalibrated(kInvalid);
         return m_trackStates->size() - 1;
     }
 

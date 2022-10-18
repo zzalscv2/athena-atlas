@@ -120,7 +120,12 @@ namespace ActsTrk {
              * @brief clears backends
              * 
              */
-            inline void clear_impl();            
+            inline void clear_impl(){   
+                m_trackStates->clear();
+                m_trackParameters->clear();
+                m_trackJacobians->clear();
+                m_trackMeasurements->clear();
+            };              
 
             /**
              * @brief checks if the backends are connected (i.e. is safe to use, else any other call will cause segfaults)
@@ -148,8 +153,17 @@ namespace ActsTrk {
             inline const xAOD::TrackParametersContainer& trackParameters() const { return *m_trackParameters; }
             inline xAOD::TrackParametersContainer& trackParameters() { return *m_trackParameters; }
             
-            TrackJacobianContainerBackendPtr m_jacobians = nullptr;
-            TrackMeasurementContainerBackendPtr m_measurements = nullptr;
+            TrackJacobianContainerBackendPtr m_trackJacobians = nullptr;
+
+            inline const xAOD::TrackJacobianContainer& trackJacobians() const { return *m_trackJacobians; }
+            inline xAOD::TrackJacobianContainer& trackJacobians() { return *m_trackJacobians; }
+
+            TrackMeasurementContainerBackendPtr m_trackMeasurements = nullptr;
+
+            inline const xAOD::TrackMeasurementContainer& trackMeasurements() const { return *m_trackMeasurements; }
+            inline xAOD::TrackMeasurementContainer& trackMeasurements() { return *m_trackMeasurements; }
+
+
             friend class ActsTrk::MultiTrajectory<IsReadWrite>;
             friend class ActsTrk::MultiTrajectory<IsReadOnly>;
 
