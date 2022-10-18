@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2017 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
 */
 
 /*! \file 
@@ -418,7 +418,7 @@ dqm_algorithms::OccupancyHoleFinder::getMDTChamberName(const TH2* histo, int bin
   std::string phiStat_str = TString::Format("%i", phiStat).Data();
   if(phiStat_str.size() == 1) phiStat_str = std::string("0")+phiStat_str;
   std::string etaStat_c = TString::Format("%i", etaStat).Data();
-  name = name.substr(0,2);
+  name.resize(2);
   name+=stat_type;
   name+=etaStat_c;
   name+=side;

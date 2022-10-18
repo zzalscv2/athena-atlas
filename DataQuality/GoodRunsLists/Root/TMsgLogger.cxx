@@ -109,7 +109,7 @@ string Root::TMsgLogger::GetFormattedSource() const
    else             source_name = m_strSource;
 
    if (source_name.size() > m_maxSourceSize) {
-      source_name = source_name.substr( 0, m_maxSourceSize - 3 );
+      source_name.resize(m_maxSourceSize - 3 );
       source_name += "...";
    }
    
