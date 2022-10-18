@@ -2,8 +2,8 @@
   Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
 */
 
-#ifndef EGAMMAALGS_EGAMMATRACKSLIMMER_H
-#define EGAMMAALGS_EGAMMATRACKSLIMMER_H
+#ifndef EGAMMAALGS_EGAMMATRACKTHINNER_H
+#define EGAMMAALGS_EGAMMATRACKTHINNER_H
 /**
   @class egammaTrackThinner Thinning of GSFTrackParticle collection
 */

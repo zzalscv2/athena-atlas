@@ -44,5 +44,5 @@ if __name__ == "__main__":
                     acc.getEventAlgo("egammaTrackThinner"),
                     nestLevel=1,
                     printDefaults=True)
-    with open("egammatrackslimmer.pkl", "wb") as f:
+    with open("egammatrackthinner.pkl", "wb") as f:
         acc.store(f)
