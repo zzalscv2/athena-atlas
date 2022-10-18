@@ -19,7 +19,10 @@ namespace ParticleJetTools {
     std::string singleint;
     std::string doubleint;
     std::string pt;
+    std::string pt_scaled;
     std::string Lxy;
+    std::string dr;
+    std::string pdgId;
   };
 
   struct LabelDecorators {
@@ -27,7 +30,10 @@ namespace ParticleJetTools {
     SG::AuxElement::Decorator<int> singleint;
     SG::AuxElement::Decorator<int> doubleint;
     SG::AuxElement::Decorator<float> pt;
+    SG::AuxElement::Decorator<float> pt_scaled;
     SG::AuxElement::Decorator<float> Lxy;
+    SG::AuxElement::Decorator<float> dr;
+    SG::AuxElement::Decorator<int> pdgId;
   };
 
   class IParticleLinker {
@@ -54,6 +60,11 @@ namespace ParticleJetTools {
                     const Particles& particles,
                     const LabelDecorators& decs);
 
+  float partPt(const xAOD::TruthParticle* part);
+  float partLxy(const xAOD::TruthParticle* part);
+  float partDR(const xAOD::TruthParticle* part, const xAOD::Jet& jet);
+  int partPdgId(const xAOD::TruthParticle* part);
+      
   void childrenRemoved
   ( const std::vector<const xAOD::TruthParticle*>& parents
     , std::vector<const xAOD::TruthParticle*>& children

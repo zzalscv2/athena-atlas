@@ -15,8 +15,11 @@ ParticleJetDeltaRLabelTool::ParticleJetDeltaRLabelTool(const std::string& name)
         : AsgTool(name) {
     declareProperty("LabelName", m_labelnames.singleint="", "Name of the jet label attribute to be added.");
     declareProperty("DoubleLabelName", m_labelnames.doubleint="", "Name of the jet label attribute to be added (with the possibility of up to 2 matched hadrons).");
-    declareProperty("LabelPtName", m_labelnames.pt="HadronConeExclTruthLabelPt", "Name of attribute for maximum particle pt");
-    declareProperty("LabelLxyName", m_labelnames.Lxy="HadronConeExclTruthLabelLxy", "Name of attribute for Lxy of particle with maximum pt");
+    declareProperty("LabelPtName", m_labelnames.pt="HadronConeExclTruthLabelPt", "Name of attribute for labelling particle pt");
+    declareProperty("LabelPtScaledName", m_labelnames.pt_scaled="HadronConeExclTruthLabelPtScaled", "Name of attribute for labelling particle pt divided by jet pt");
+    declareProperty("LabelLxyName", m_labelnames.Lxy="HadronConeExclTruthLabelLxy", "Name of attribute for Lxy of labelling particle");
+    declareProperty("LabelDRName", m_labelnames.dr="HadronConeExclTruthLabelDR", "Name of attribute for dR(part, jet) for labelling particle");
+    declareProperty("LabelPdgIdName", m_labelnames.pdgId="HadronConeExclTruthLabelPdgId", "Name of attribute for pdgID of labelling particle");
     declareProperty("BLabelName", m_bottomlabelname="", "Name of the attribute to be added for matched B hadrons.");
     declareProperty("CLabelName", m_charmlabelname="", "Name of the attribute to be added for matched C hadrons.");
     declareProperty("TauLabelName", m_taulabelname="", "Name of the attribute to be added for matched taus.");
