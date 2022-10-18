@@ -25,7 +25,7 @@ Reco_tf.py --inputRDOFile /cvmfs/atlas-nightlies.cern.ch/repo/data/data-art/Muon
            --autoConfiguration everything \
            --imf False \
            --postInclude MuonPRDTest/NSWPRDValAlg.reco.py \
-           --conditionsTag 'default:OFLCOND-MC21-SDR-RUN3-05' \
+           --conditionsTag 'default:OFLCOND-MC21-SDR-RUN3-09' \
            --outputESDFile OUT_ESD.root  \
            --postExec "RAWtoESD:condSeq = AthSequencer ('AthCondSeq');condSeq.AtlasTrackingGeometryCondAlg.OutputLevel=VERBOSE;" \
            --athenaopts='--exctrace'
