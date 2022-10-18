@@ -7,7 +7,6 @@
 from AthenaConfiguration.ComponentAccumulator import ComponentAccumulator
 from AthenaConfiguration.ComponentFactory import CompFactory
 from MagFieldServices.MagFieldServicesConfig import AtlasFieldCacheCondAlgCfg
-from InDetRecExample.TrackingCommon import use_tracking_geometry_cond_alg
 
 # import the ExtrapolationEngine configurable
 ExEngine=CompFactory.Trk.ExtrapolationEngine
@@ -19,17 +18,9 @@ def AtlasExtrapolationEngineCfg( flags, name = 'Extrapolation', nameprefix='Atla
     result.merge(acc)
 
     # get the correct TrackingGeometry setup
-    geom_svc=None
-    geom_cond_key=''
-    if not use_tracking_geometry_cond_alg :
-      from TrkConfig.AtlasTrackingGeometrySvcConfig import TrackingGeometrySvcCfg
-      acc = TrackingGeometrySvcCfg(flags)
-      geom_svc = acc.getPrimary()
-      result.merge(acc)
-    else :
-      from TrackingGeometryCondAlg.AtlasTrackingGeometryCondAlgConfig import TrackingGeometryCondAlgCfg
-      result.merge( TrackingGeometryCondAlgCfg(flags) )
-      geom_cond_key = 'AtlasTrackingGeometry'
+    from TrackingGeometryCondAlg.AtlasTrackingGeometryCondAlgConfig import TrackingGeometryCondAlgCfg
+    result.merge( TrackingGeometryCondAlgCfg(flags) )
+    geom_cond_key = 'AtlasTrackingGeometry'
 
     from TrkConfig.TrkExRungeKuttaPropagatorConfig import RungeKuttaPropagatorCfg
     AtlasRungeKuttaPropagator = acc.popToolsAndMerge(RungeKuttaPropagatorCfg(flags, name='AtlasRungeKuttaPropagator'))
@@ -59,8 +50,6 @@ def AtlasExtrapolationEngineCfg( flags, name = 'Extrapolation', nameprefix='Atla
     # give the tools it needs 
     staticNavigator.PropagationEngine        = staticPropagator
     staticNavigator.MaterialEffectsEngine    = materialEffectsEngine
-    if not use_tracking_geometry_cond_alg :
-      staticNavigator.TrackingGeometrySvc         = geom_svc
     staticNavigator.TrackingGeometryReadKey     = geom_cond_key        
     # Geometry name
     # configure output formatting               
@@ -90,8 +79,6 @@ def AtlasExtrapolationEngineCfg( flags, name = 'Extrapolation', nameprefix='Atla
                       TrackingGeometryReadKey = geom_cond_key,
                       OutputPrefix           = '[ME] - ', 
                       OutputPostfix          = ' - ')
-    if not use_tracking_geometry_cond_alg :
-      extrapolator.TrackingGeometrySvc         = geom_svc
       
     result.addPublicTool(extrapolator, primary=True)
     return result

@@ -70,10 +70,8 @@ class AlignmentTrackFitter () :
         from TrkGlobalChi2Fitter.TrkGlobalChi2FitterConf import Trk__GlobalChi2Fitter
         Fitter = Trk__GlobalChi2Fitter()
 
-        cond_alg = None
-        if TrackingCommon.use_tracking_geometry_cond_alg:
-            cond_alg = createAndAddCondAlg(TrackingCommon.getTrackingGeometryCondAlg, "AtlasTrackingGeometryCondAlg", name="AtlasTrackingGeometryCondAlg")
-            Fitter.TrackingGeometryReadKey= cond_alg.TrackingGeometryWriteKey
+        cond_alg = createAndAddCondAlg(TrackingCommon.getTrackingGeometryCondAlg, "AtlasTrackingGeometryCondAlg", name="AtlasTrackingGeometryCondAlg")
+        Fitter.TrackingGeometryReadKey= cond_alg.TrackingGeometryWriteKey
 
         ToolSvc += Fitter
         self._fitter = Fitter
