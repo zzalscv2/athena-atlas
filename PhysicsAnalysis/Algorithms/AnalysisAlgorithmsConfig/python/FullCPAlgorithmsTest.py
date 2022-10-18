@@ -551,69 +551,47 @@ def makeSequenceBlocks (dataType, algSeq, vars, forCompare, isPhyslite, noPhysli
             'OutJets_%SYS%.jvt_effSF_%SYS% -> jet_jvtEfficiency_%SYS%',
         ]
 
+    from AsgAnalysisAlgorithms.AsgAnalysisConfig import makePtEtaSelectionConfig
+
+    makePtEtaSelectionConfig (configSeq, 'AnaElectrons',
+                              selectionDecoration='selectPtEta',
+                              minPt=electronMinPt, maxEta=electronMaxEta)
+    makePtEtaSelectionConfig (configSeq, 'AnaPhotons',
+                              selectionDecoration='selectPtEta',
+                              minPt=photonMinPt, maxEta=photonMaxEta)
+    makePtEtaSelectionConfig (configSeq, 'AnaMuons',
+                              selectionDecoration='selectPtEta',
+                              minPt=muonMinPt, maxEta=muonMaxEta)
+    makePtEtaSelectionConfig (configSeq, 'AnaTauJets',
+                              selectionDecoration='selectPtEta',
+                              minPt=tauMinPt, maxEta=tauMaxEta)
+    makePtEtaSelectionConfig (configSeq, 'AnaJets',
+                              selectionDecoration='selectPtEta',
+                              minPt=jetMinPt, maxEta=jetMaxEta)
+
+
+    from AsgAnalysisAlgorithms.AsgAnalysisConfig import makeOutputThinningConfig
+
+    makeOutputThinningConfig (configSeq, 'AnaElectrons',
+                              selection='selectPtEta&&baselineSelection_loose,as_char',
+                              outputName='OutElectrons')
+    makeOutputThinningConfig (configSeq, 'AnaPhotons',
+                              selection='selectPtEta&&baselineSelection_tight,as_char',
+                              outputName='OutPhotons')
+    makeOutputThinningConfig (configSeq, 'AnaMuons',
+                              selection='selectPtEta&&baselineSelection_medium,as_char',
+                              outputName='OutMuons')
+    makeOutputThinningConfig (configSeq, 'AnaTauJets',
+                              selection='selectPtEta&&baselineSelection_tight,as_char',
+                              outputName='OutTauJets')
+    makeOutputThinningConfig (configSeq, 'AnaJets',
+                              selection='selectPtEta',
+                              outputName='OutJets')
+
+
 
     configAccumulator = ConfigAccumulator (dataType, algSeq, isPhyslite=isPhyslite)
     configSeq.fullConfigure (configAccumulator)
-
-    selalg = createAlgorithm( 'CP::AsgSelectionAlg', 'UserElectronsSelectionAlg' )
-    addPrivateTool( selalg, 'selectionTool', 'CP::AsgPtEtaSelectionTool' )
-    if electronMinPt is not None :
-        selalg.selectionTool.minPt = electronMinPt
-    if electronMaxEta is not None :
-        selalg.selectionTool.maxEta = electronMaxEta
-    selalg.selectionDecoration = 'selectPtEta'
-    selalg.particles = 'AnaElectrons_%SYS%'
-    algSeq += selalg
-    addOutputCopyAlgorithms (algSeq, 'Electrons', 'AnaElectrons_%SYS%', 'OutElectrons_%SYS%',
-                             'selectPtEta&&baselineSelection_loose,as_char')
-
-    selalg = createAlgorithm( 'CP::AsgSelectionAlg', 'UserPhotonsSelectionAlg' )
-    addPrivateTool( selalg, 'selectionTool', 'CP::AsgPtEtaSelectionTool' )
-    if photonMinPt is not None :
-        selalg.selectionTool.minPt = photonMinPt
-    if photonMaxEta is not None :
-        selalg.selectionTool.maxEta = photonMaxEta
-    selalg.selectionDecoration = 'selectPtEta'
-    selalg.particles = 'AnaPhotons_%SYS%'
-    algSeq += selalg
-    addOutputCopyAlgorithms (algSeq, 'Photons', 'AnaPhotons_%SYS%', 'OutPhotons_%SYS%',
-                             'selectPtEta&&baselineSelection_tight,as_char')
-
-    selalg = createAlgorithm( 'CP::AsgSelectionAlg', 'UserMuonsSelectionAlg' )
-    addPrivateTool( selalg, 'selectionTool', 'CP::AsgPtEtaSelectionTool' )
-    if muonMinPt is not None :
-        selalg.selectionTool.minPt = muonMinPt
-    if muonMaxEta is not None :
-        selalg.selectionTool.maxEta = muonMaxEta
-    selalg.selectionDecoration = 'selectPtEta'
-    selalg.particles = 'AnaMuons_%SYS%'
-    algSeq += selalg
-    addOutputCopyAlgorithms (algSeq, 'Muons', 'AnaMuons_%SYS%', 'OutMuons_%SYS%',
-                             'selectPtEta&&baselineSelection_medium,as_char')
-
-    selalg = createAlgorithm( 'CP::AsgSelectionAlg', 'UserTausSelectionAlg' )
-    addPrivateTool( selalg, 'selectionTool', 'CP::AsgPtEtaSelectionTool' )
-    if tauMinPt is not None :
-        selalg.selectionTool.minPt = tauMinPt
-    if tauMaxEta is not None :
-        selalg.selectionTool.maxEta = tauMaxEta
-    selalg.selectionDecoration = 'selectPtEta'
-    selalg.particles = 'AnaTauJets_%SYS%'
-    algSeq += selalg
-    addOutputCopyAlgorithms (algSeq, 'TauJets', 'AnaTauJets_%SYS%', 'OutTauJets_%SYS%',
-                             'selectPtEta&&baselineSelection_tight,as_char')
-
-    selalg = createAlgorithm( 'CP::AsgSelectionAlg', 'UserJetsSelectionAlg' )
-    addPrivateTool( selalg, 'selectionTool', 'CP::AsgPtEtaSelectionTool' )
-    if jetMinPt is not None :
-        selalg.selectionTool.minPt = jetMinPt
-    if jetMaxEta is not None :
-        selalg.selectionTool.maxEta = jetMaxEta
-    selalg.selectionDecoration = 'selectPtEta'
-    selalg.particles = 'AnaJets_%SYS%'
-    algSeq += selalg
-    addOutputCopyAlgorithms (algSeq, 'Jets', 'AnaJets_%SYS%', 'OutJets_%SYS%',
-                             'selectPtEta')
 
 
 
