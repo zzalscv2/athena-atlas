@@ -434,7 +434,7 @@ else:
     AlignmentTriggerMuonStream.AddItem(["Muon::sTgcPrepDataContainer#*"])
     ## trigger containers
     AlignmentTriggerMuonStream.AddItem(["Muon::NSW_PadTriggerDataContainer#*"])
-    AlignmentTriggerMuonStream.AddItem(["Muon::NSW_TrigRawDataContainer#*"])
+    AlignmentTriggerMuonStream.AddItem(["Muon::NSW_TrigRawDataContainer#NSWTRGRDO"])
     ### 
     AlignmentTriggerMuonStream.AddItem(["xAOD::MuonSegmentContainer#xAODNSWSegments"])
     AlignmentTriggerMuonStream.AddItem(["xAOD::MuonSegmentAuxContainer#xAODNSWSegmentsAux."])
