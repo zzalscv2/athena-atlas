@@ -92,10 +92,11 @@ if __name__=="__main__":
     acc.getPrimary().CaloCellsOutputName="AllCaloNew"
     cfg.merge(acc)
     
-    cfg.addEventAlgo(CompFactory.CaloCellDumper(InputContainer="AllCaloNew"))
+    from AthenaCommon.SystemOfUnits import GeV
+    cfg.addEventAlgo(CompFactory.CaloCellDumper(InputContainer="AllCaloNew",EnergyCut=2*GeV))
 
     #cfg.getService("StoreGateSvc").Dump=True
-    cfg.run(10)
+    cfg.run(5)
 
     #f=open("CaloCellMaker.pkl","wb")
     #cfg.store(f)

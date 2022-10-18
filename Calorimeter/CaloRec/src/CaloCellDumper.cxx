@@ -39,6 +39,9 @@ StatusCode CaloCellDumper::execute() {
   m_outfile << "Event " << evt << " contains " << cells->size() << " CaloCells" << std::endl;
   m_outfile << "ID\tEnergy\tTime\tQual\tprov" << std::endl;
 
+  double remainingEne=0;
+  unsigned nRemaining=0;
+
   for (const auto *cell : *cells) {
     if (cell->e()>m_eCut.value()) {
       std::stringstream id;
@@ -73,6 +76,13 @@ StatusCode CaloCellDumper::execute() {
 		<< "\t" << cell->e() << "\t" << cell->time() << "\t" << cell->gain() 
 		<< "\t" << cell->quality() << "\t0x" << std::hex << cell->provenance() << std::dec << std::endl;
     }
+    else {//not bigger that m_eCut
+      ++nRemaining;
+      remainingEne+=cell->e();
+    }
+  }
+  if (nRemaining) {
+    m_outfile << "Sum of " << nRemaining << " cell energies: " << remainingEne << std::endl;
   }
  return StatusCode::SUCCESS;
 }

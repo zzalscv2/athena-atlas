@@ -126,3 +126,7 @@ atlas_add_test( ToolConstantsCondAlgConfig_test
                 SCRIPT python -m CaloRec.ToolConstantsCondAlgConfig
                 LOG_SELECT_PATTERN "ComponentAccumulator|^---" )
 
+atlas_add_test( CaloCellMakerTest
+                SCRIPT python ${CMAKE_CURRENT_SOURCE_DIR}/python/CaloCellMakerConfig.py
+                POST_EXEC_SCRIPT " /usr/bin/diff CaloCells.txt ${CMAKE_CURRENT_SOURCE_DIR}/share/CaloCells.txt.ref > diff.log " )
+
