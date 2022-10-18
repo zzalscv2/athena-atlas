@@ -23,7 +23,7 @@ private:
   StringProperty m_packageName{this,"PackageName","OverviewMonitor","group name for histograming"};
   
   // Error vector StoreGate key
-  StringProperty m_ppmErrorLocation{this,"PPMErrorLocation","L1CaloPPMErrorVector","PPM Error Vector"};
+  SG::ReadHandleKey<ErrorVector> m_ppmErrorLocation{this,"PPMErrorLocation","L1CaloPPMErrorVector","PPM Error Vector"};
   StringProperty m_ppmSpareErrorLocation{this,"PPMSpareErrorLocation","L1CaloPPMSpareErrorVector","PPM Spare Error Vector"};
   SG::ReadHandleKey<ErrorVector> m_cpmErrorLocation{this,"CPMErrorLocation","L1CaloCPMErrorVector","CPM Error Vector"};
   StringProperty m_jemErrorLocation{this,"JEMErrorLocation","L1CaloJEMErrorVector","JEM Error Vector"};

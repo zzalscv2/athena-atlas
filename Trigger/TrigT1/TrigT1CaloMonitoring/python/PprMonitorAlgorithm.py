@@ -322,6 +322,58 @@ def PprMonitoringConfig(inputFlags):
                                      cutmask='mask_PedCorrUnderflow', 
                                      opt='kAlwaysCreate') 
     
+    globalError_xlabels = [
+        "ChannelDisabled",
+        "MCMAbsent",
+        "Timeout",
+        "ASICFull",
+        "EventMismatch",
+        "BunchMismatch",
+        "FIFOCorrupt",
+        "PinParity",
+    ]
+
+    globalError_xlabels_link = [
+        "GLinkParity",
+        "GLinkProtocol",
+        "BCNMismatch",
+        "FIFOOverflow",
+        "ModuleError",
+        " ",
+        "GLinkDown",
+        "GLinkTimeout",
+    ]
+
+
+
+    group_Error_1DSummary= helper.addGroup(PprMonAlg, 'group1DErrorSummary', mainDir)     
+    group_Error_1DSummary.defineHistogram('bit_2D;ppm_1d_ErrorSummary', title='Summary of SubStatus Errors', type='TH1F', path=histPath,xbins=8,xmin=0, xmax=8, xlabels=globalError_xlabels_link,opt='kAlwaysCreate')
+    
+
+    group_Error_ASICErrorEventNumbers= helper.addGroup(PprMonAlg, 'groupASICErrorEventNumbers', mainDir)     
+    group_Error_ASICErrorEventNumbers.defineHistogram('eventMonitor,bit_2D;ppm_2d_ASICErrorEventNumbers', title='ASIC Error Field Event Numbers;Events with Error/Mismatch;;', type='TH2I', path=histPath,xbins=10,xmin=0, xmax=10, ybins=8, ymin=0, ymax=8,  ylabels=globalError_xlabels,opt='kAlwaysCreate')
+
+    
+    group_Error_ErrorEventNumbers= helper.addGroup(PprMonAlg, 'groupErrorEventNumbers', mainDir)     
+    group_Error_ErrorEventNumbers.defineHistogram('eventMonitor,bit_2D;ppm_2d_ErrorEventNumbers', title='SubStatus Error Event Numbers;Events with Error/Mismatch;;', type='TH2I', path=histPath,xbins=10,xmin=0, xmax=10, ybins=8, ymin=0, ymax=8,  ylabels=globalError_xlabels_link,opt='kAlwaysCreate')
+
+
+    group_Error_ErrorField03= helper.addGroup(PprMonAlg, 'groupErrorField03', mainDir)     
+    group_Error_ErrorField03.defineHistogram('bit_2D,y_2D;ppm_2d_ErrorField03', title='Errors from TT SubStatus Word (crates 0-3)', type='TH2I', path=histPath,xbins=8,xmin=0, xmax=8, ybins=64, ymin=0, ymax=64,  xlabels=globalError_xlabels, ylabels=BinErrors('cr0cr1cr2cr3'),opt='kAlwaysCreate')
+        
+    group_Error_ErrorField47= helper.addGroup(PprMonAlg, 'groupErrorField47', mainDir)     
+    group_Error_ErrorField47.defineHistogram('bit_2D,y_2D;ppm_2d_ErrorField47', title='Errors from TT SubStatus Word (crates 4-7)', type='TH2I', path=histPath,xbins=8,xmin=0, xmax=8, ybins=64, ymin=0, ymax=64,  xlabels=globalError_xlabels, ylabels=BinErrors('cr4cr5cr6cr7'),opt='kAlwaysCreate')
+    
+   
+    group_Error_Status03= helper.addGroup(PprMonAlg, 'groupStatus03', mainDir)     
+    group_Error_Status03.defineHistogram('bit_2D,y_2D;ppm_2d_Status03', title='Errors from TT SubStatus Word (crates 0-3)', type='TH2I', path=histPath,xbins=8,xmin=0, xmax=8, ybins=64, ymin=0, ymax=64,  xlabels=globalError_xlabels_link, ylabels=BinErrors('cr0cr1cr2cr3'),opt='kAlwaysCreate')
+    
+
+    group_Error_Status47= helper.addGroup(PprMonAlg, 'groupStatus47', mainDir)     
+    group_Error_Status47.defineHistogram('bit_2D,y_2D;ppm_2d_Status47', title='Errors from TT SubStatus Word (crates 4-7)', type='TH2I', path=histPath,xbins=8,xmin=0, xmax=8, ybins=64, ymin=0, ymax=64,  xlabels=globalError_xlabels_link, ylabels=BinErrors('cr4cr5cr6cr7'),opt='kAlwaysCreate')
+
+
+  
 
     # Finish up
 
@@ -330,37 +382,53 @@ def PprMonitoringConfig(inputFlags):
     return result
 
 
+
+def BinErrors(crs):
+
+    cr0 = crs.split("cr")[1]
+    cr1 = crs.split("cr")[2]
+    cr2=  crs.split("cr")[3]
+    cr3=  crs.split("cr")[4]
+    
+    yErrorLabels = []
+    for i in range(0, 16,2):
+        yErrorLabels.append(str(cr0)+'/'+str(i))
+    for i in range(0, 16,2):
+        yErrorLabels.append(str(cr1)+'/'+str(i))
+    for i in range(0, 16,2):
+        yErrorLabels.append(str(cr2)+'/'+str(i))
+    for i in range(0, 16,2):
+        yErrorLabels.append(str(cr3)+'/'+str(i))
+        
+    return yErrorLabels
+        
+
 if __name__=='__main__':
     # set input file and config options
-    from AthenaConfiguration.AllConfigFlags import ConfigFlags
-    import glob
 
-    inputs = glob.glob('/eos/atlas/atlascerngroupdisk/data-art/build-output/master/Athena/x86_64-centos7-gcc8-opt/2020-04-06T2139/TrigP1Test/test_trigP1_v1PhysP1_T0Mon_build/ESD.pool.root')
+    from AthenaConfiguration.AllConfigFlags import ConfigFlags as flags
+    flags.Exec.MaxEvents = 1
 
-    ConfigFlags.Input.Files = inputs
-    ConfigFlags.Output.HISTFileName = 'ExampleMonitorOutput_LVL1.root'
+    flags.Input.Files = ["/eos/atlas/atlastier0/rucio/data22_13p6TeV/express_express/00423433/data22_13p6TeV.00423433.express_express.recon.ESD.x653/data22_13p6TeV.00423433.express_express.recon.ESD.x653._lb0015._SFO-ALL._0001.2"]
+    flags.Output.HISTFileName = 'ExampleMonitorOutput_LVL1.root'
 
-    ConfigFlags.lock()
-    ConfigFlags.dump() # print all the configs
+    flags.lock()
 
     from AthenaCommon.AppMgr import ServiceMgr
     ServiceMgr.Dump = False
 
-    from AthenaConfiguration.MainServicesConfig import MainServicesSerialCfg 
+    from AthenaConfiguration.MainServicesConfig import MainServicesCfg
     from AthenaPoolCnvSvc.PoolReadConfig import PoolReadCfg
-    cfg = MainServicesSerialCfg()
-    cfg.merge(PoolReadCfg(ConfigFlags))
+    cfg = MainServicesCfg(flags)
+    cfg.merge(PoolReadCfg(flags))
+    
 
-    PprMonitorCfg = PprMonitoringConfig(ConfigFlags)
+    PprMonitorCfg = PprMonitoringConfig(flags)
     cfg.merge(PprMonitorCfg)
 
     # message level for algorithm
-    PprMonitorCfg.getEventAlgo('PprMonAlg').OutputLevel = 2 # 1/2 INFO/DEBUG
+    PprMonitorCfg.getEventAlgo('PprMonAlg').OutputLevel = 1 # 1/2 INFO/DEBUG
     # options - print all details of algorithms, very short summary 
     cfg.printConfig(withDetails=True, summariseProps = True)
-
-    nevents=-1
-    status = cfg.run(nevents)
-    if status.isFailure():
-        import sys
-        sys.exit(-1)
+    import sys
+    sys.exit(cfg.run().isFailure())
