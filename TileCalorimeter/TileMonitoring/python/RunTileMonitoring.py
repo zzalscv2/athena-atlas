@@ -109,7 +109,7 @@ if __name__=='__main__':
     parser.add_argument('--lvl1Logic', default='Ignore', choices=['And','Or','Ignore'], help='EMON, default: Ignore')
     parser.add_argument('--lvl1Origin', default='TAV', choices=['TBP','TAP','TAV'], help='EMON, default: TAV')
     parser.add_argument('--streamType', default='physics', help='EMON, HLT stream type (e.g. physics or calibration)')
-    parser.add_argument('--streamNames', default="", help='EMON, List of HLT stream names')
+    parser.add_argument('--streamNames', default=['express','Main','Standby','CosmicCalo','L1Calo','ZeroBias','Background','MinBias','CosmicMuons','IDCosmic'], help='EMON, List of HLT stream names')
     parser.add_argument('--streamLogic', default='Or', choices=['And','Or','Ignore'], help='EMON, default: Or')
     parser.add_argument('--triggerType', type=int, default=256, help='EMON, LVL1 8 bit trigger type, default: 256')
     parser.add_argument('--groupName', default="TilePhysMon", help='EMON, Name of the monitoring group')
@@ -126,7 +126,7 @@ if __name__=='__main__':
 
     # Set up default arguments which can be overriden via command line
     if not any([args.laser, args.noise, args.mbts]):
-        mbts = False if args.stateless else True
+        mbts = False if (args.stateless and args.useMbtsTrigger) else True
         parser.set_defaults(cells=True, towers=True, clusters=True, muid=True, muonfit=True, mbts=mbts,
                             rod=True, tmdb=True, tmdbDigits=True, tmdbRawChannels=True)
     elif args.noise:
@@ -159,7 +159,7 @@ if __name__=='__main__':
             _l1Names += ['L1_MBTSA' + str(counter) for counter in range(0, 16)]
             _l1Names += ['L1_MBTSC' + str(counter) for counter in range(0, 16)]
             parser.set_defaults(lvl1Logic='Or', lvl1Origin='TBP', lvl1Items=_l1Items, lvl1Names=_l1Names,
-                                streamNames=[], streamLogic='And', keyCount=1000, groupName='TileMBTSMon', useMbtsTrigger = True)
+                                keyCount=1000, groupName='TileMBTSMon', useMbtsTrigger = True)
         elif any([args.tmdb, args.tmdbDigits]):
             parser.set_defaults(postProcessingInterval=100)
 
@@ -178,7 +178,6 @@ if __name__=='__main__':
     # Set the Athena configuration flags to defaults (can be overriden via comand line)
     ConfigFlags.DQ.useTrigger = False
     ConfigFlags.DQ.enableLumiAccess = False
-    ConfigFlags.GeoModel.AtlasVersion = 'ATLAS-R2-2016-01-00-01'
     ConfigFlags.Tile.RunType = 'PHY'
 
     if args.mbts and args.useMbtsTrigger:
@@ -209,17 +208,19 @@ if __name__=='__main__':
             ConfigFlags.Input.Files = defaultTestFiles.RAW
 
     runNumber = ConfigFlags.Input.RunNumber[0]
+    ConfigFlags.GeoModel.AtlasVersion = 'ATLAS-R3S-2021-02-00-00' if not ConfigFlags.Input.isMC and runNumber >= 411938 else 'ATLAS-R2-2016-01-00-01'
+
     if not ConfigFlags.Output.HISTFileName:
         ConfigFlags.Output.HISTFileName = 'tilemon_{}.root'.format(runNumber)
 
     if args.online:
         ConfigFlags.Common.isOnline = True
     if ConfigFlags.Common.isOnline:
-        ConfigFlags.IOVDb.GlobalTag = 'CONDBR2-HLTP-2018-01' if runNumber > 232498 else 'COMCOND-HLTP-004-02'
+        ConfigFlags.IOVDb.GlobalTag = 'CONDBR2-HLTP-2022-02' if runNumber > 232498 else 'COMCOND-HLTP-004-02'
         ConfigFlags.DQ.Environment = 'online'
         ConfigFlags.DQ.FileKey = ''
     else:
-        ConfigFlags.IOVDb.GlobalTag = 'CONDBR2-BLKPA-2018-14' if runNumber > 232498 else 'COMCOND-BLKPA-RUN1-06'
+        ConfigFlags.IOVDb.GlobalTag = 'CONDBR2-BLKPA-2022-08' if runNumber > 232498 else 'COMCOND-BLKPA-RUN1-06'
 
     if args.laser:
         ConfigFlags.Tile.RunType = 'LAS'
@@ -264,7 +265,7 @@ if __name__=='__main__':
         typeNames += ['TileDigitsContainer/MuRcvDigitsCnt']
     if any([args.tmdbRawChannels, args.tmdb]):
         typeNames += ['TileRawChannelContainer/MuRcvRawChCnt']
-    if args.mbts:
+    if args.mbts and args.useMbtsTrigger:
         typeNames += ['CTP_RDO/CTP_RDO']
     if ConfigFlags.Tile.RunType != 'PHY':
         typeNames += ['TileBeamElemContainer/TileBeamElemCnt']
@@ -299,9 +300,6 @@ if __name__=='__main__':
 
     from TileRecUtils.TileRawChannelMakerConfig import TileRawChannelMakerCfg
     cfg.merge( TileRawChannelMakerCfg(ConfigFlags) )
-
-    from TileMonitoring.TileDQFragMonitorAlgorithm import TileDQFragMonitoringConfig
-    cfg.merge( TileDQFragMonitoringConfig(ConfigFlags) )
 
     l1Triggers = ['bit0_RNDM', 'bit1_ZeroBias', 'bit2_L1Cal', 'bit3_Muon',
                   'bit4_RPC', 'bit5_FTK', 'bit6_CTP', 'bit7_Calib', 'AnyPhysTrig']
@@ -367,6 +365,9 @@ if __name__=='__main__':
     if args.rawChanNoise:
         from TileMonitoring.TileRawChannelNoiseMonitorAlgorithm import TileRawChannelNoiseMonitoringConfig
         cfg.merge(TileRawChannelNoiseMonitoringConfig(ConfigFlags))
+
+    from TileMonitoring.TileDQFragMonitorAlgorithm import TileDQFragMonitoringConfig
+    cfg.merge( TileDQFragMonitoringConfig(ConfigFlags) )
 
     if any([args.digiNoise, args.rawChanNoise, args.tmdbDigits, args.tmdb]) and args.postProcessingInterval > 0:
         from AthenaCommon.Utils.unixtools import find_datafile
