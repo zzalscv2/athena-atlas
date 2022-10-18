@@ -126,18 +126,19 @@ def AtlasExtrapolatorCfg(flags, name='AtlasExtrapolator'):
     AtlasELossUpdater = result.popToolsAndMerge(TC.AtlasEnergyLossUpdatorCfg(flags))
     AtlasEnergyLossUpdater = AtlasELossUpdater
 
-
     # call the base class constructor
-    Extrapolator = CompFactory.Trk.Extrapolator(name,
-                                                Navigator=AtlasNavigator,
-                                                MaterialEffectsUpdators=AtlasUpdators,
-                                                MultipleScatteringUpdater=result.popToolsAndMerge(AtlasMultipleScatteringUpdatorCfg(flags, UseTrkUtils=True )),
-                                                STEP_Propagator=AtlasSTEP_Propagator,
-                                                Propagators=AtlasPropagators,
-                                                SubPropagators=AtlasSubPropagators,
-                                                SubMEUpdators=AtlasSubUpdators,
-                                                EnergyLossUpdater=AtlasEnergyLossUpdater
-                                                )
+    Extrapolator = CompFactory.Trk.Extrapolator(
+        name,
+        Navigator=AtlasNavigator,
+        MaterialEffectsUpdators=AtlasUpdators,
+        MultipleScatteringUpdater=result.popToolsAndMerge(
+            AtlasMultipleScatteringUpdatorCfg(flags, UseTrkUtils=True)),
+        STEP_Propagator=AtlasSTEP_Propagator,
+        Propagators=AtlasPropagators,
+        SubPropagators=AtlasSubPropagators,
+        SubMEUpdators=AtlasSubUpdators,
+        EnergyLossUpdater=AtlasEnergyLossUpdater
+    )
 
     result.setPrivateTools(Extrapolator)
     return result
@@ -335,7 +336,8 @@ def MuonExtrapolatorCfg(flags, name="MuonExtrapolator", **kwargs):
                                           name="MuonMaterialEffectsUpdator"))
     kwargs.setdefault("MaterialEffectsUpdators", [AtlasMaterialEffectsUpdator])
 
-    kwargs.setdefault("MultipleScatteringUpdater", result.popToolsAndMerge(AtlasMultipleScatteringUpdatorCfg(flags, UseTrkUtils=True)))
+    kwargs.setdefault("MultipleScatteringUpdater",
+                      result.popToolsAndMerge(AtlasMultipleScatteringUpdatorCfg(flags, UseTrkUtils=True)))
 
     AtlasNavigator = result.popToolsAndMerge(TC.AtlasNavigatorCfg(flags))
     kwargs.setdefault("Navigator", AtlasNavigator)
@@ -395,15 +397,18 @@ def MCTBExtrapolatorCfg(flags, name='MCTBExtrapolator', **kwargs):
     if use_old_names:
         kwargs.setdefault("Propagators", [result.popToolsAndMerge(
             AtlasSTEP_PropagatorCfg(flags, name='MCTBPropagator'))])
-        kwargs.setdefault("STEP_Propagator", result.popToolsAndMerge(AtlasSTEP_PropagatorCfg(flags))) #These have different names in old-style, even though they're configured the same(!)
+        kwargs.setdefault("STEP_Propagator",
+                          result.popToolsAndMerge(AtlasSTEP_PropagatorCfg(flags)))
     else:    
         prop = result.popToolsAndMerge(
             AtlasSTEP_PropagatorCfg(flags))
         kwargs.setdefault("Propagators", [prop])
         kwargs.setdefault("STEP_Propagator", prop)
     kwargs.setdefault("ResolveMuonStation", False)
-    kwargs.setdefault("Navigator", result.popToolsAndMerge(TC.AtlasNavigatorCfg(flags, name="InDetNavigator")))
-    kwargs.setdefault("EnergyLossUpdater", result.popToolsAndMerge(TC.AtlasEnergyLossUpdatorCfg(flags, UseTrkUtils=True)))
+    kwargs.setdefault("Navigator", result.popToolsAndMerge(
+        TC.AtlasNavigatorCfg(flags, name="InDetNavigator")))
+    kwargs.setdefault("EnergyLossUpdater", result.popToolsAndMerge(
+        TC.AtlasEnergyLossUpdatorCfg(flags, UseTrkUtils=True)))
 
     return MuonExtrapolatorCfg(flags, name, **kwargs)
 
