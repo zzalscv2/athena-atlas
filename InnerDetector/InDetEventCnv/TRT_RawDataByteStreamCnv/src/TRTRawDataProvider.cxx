@@ -12,13 +12,13 @@ using OFFLINE_FRAGMENTS_NAMESPACE::ROBFragment;
 // Constructor
 
 TRTRawDataProvider::TRTRawDataProvider(const std::string& name,
-				       ISvcLocator* pSvcLocator) :
-  AthAlgorithm      ( name, pSvcLocator ),
-  m_robDataProvider ( "ROBDataProviderSvc", name ),
-  m_rawDataTool     ( "TRTRawDataProviderTool",this ),
-  m_CablingSvc      ( "TRT_CablingSvc", name ),
-  m_trt_id          ( nullptr ),
-  m_rdoContainerKey("")
+                                       ISvcLocator* pSvcLocator)
+  : AthReentrantAlgorithm(name, pSvcLocator)
+  , m_robDataProvider("ROBDataProviderSvc", name)
+  , m_rawDataTool("TRTRawDataProviderTool", this)
+  , m_CablingSvc("TRT_CablingSvc", name)
+  , m_trt_id(nullptr)
+  , m_rdoContainerKey("")
 {
   declareProperty("RoIs", m_roiCollectionKey = std::string(""), "RoIs to read in");
   declareProperty("isRoI_Seeded", m_roiSeeded = false, "Use RoI");
@@ -94,9 +94,9 @@ StatusCode TRTRawDataProvider::initialize() {
 // --------------------------------------------------------------------
 // Execute
 
-StatusCode TRTRawDataProvider::execute() 
+StatusCode TRTRawDataProvider::execute(const EventContext& ctx) const
 {
-  SG::WriteHandle<TRT_RDO_Container> rdoContainer(m_rdoContainerKey);
+  SG::WriteHandle<TRT_RDO_Container> rdoContainer(m_rdoContainerKey,ctx);
   rdoContainer = std::make_unique<TRT_RDO_Container>(m_trt_id->straw_hash_max(), EventContainers::Mode::OfflineFast); 
   ATH_CHECK(rdoContainer.isValid());
 
@@ -107,7 +107,7 @@ StatusCode TRTRawDataProvider::execute()
     listOfRobs = m_CablingSvc->getAllRods();
   }
   else {//Enter RoI-seeded mode
-      SG::ReadHandle<TrigRoiDescriptorCollection> roiCollection(m_roiCollectionKey);
+      SG::ReadHandle<TrigRoiDescriptorCollection> roiCollection(m_roiCollectionKey,ctx);
       ATH_CHECK(roiCollection.isValid());
 
       TrigRoiDescriptorCollection::const_iterator roi = roiCollection->begin();
@@ -121,7 +121,7 @@ StatusCode TRTRawDataProvider::execute()
       m_regionSelector->ROBIDList( superRoI, listOfRobs );
   }
   std::vector<const ROBFragment*> listOfRobf;
-  m_robDataProvider->getROBData( listOfRobs, listOfRobf);
+  m_robDataProvider->getROBData( ctx, listOfRobs, listOfRobf);
 
   ATH_MSG_DEBUG( "Number of ROB fragments " << listOfRobf.size() );
 
@@ -134,7 +134,7 @@ StatusCode TRTRawDataProvider::execute()
 
   if (!m_bsErrContKey.empty()) {
     ATH_MSG_DEBUG("Recording BS error container");
-    SG::WriteHandle<TRT_BSErrContainer> bsErrContHdl{m_bsErrContKey};
+    SG::WriteHandle<TRT_BSErrContainer> bsErrContHdl{m_bsErrContKey, ctx};
     ATH_CHECK(bsErrContHdl.record(std::move(bsErrCont)));
   }
 

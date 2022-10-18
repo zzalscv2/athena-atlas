@@ -20,7 +20,7 @@
 #include "IRegionSelector/IRegSelTool.h" 
 #include "TrigSteeringEvent/TrigRoiDescriptorCollection.h"
 
-#include "AthenaBaseComps/AthAlgorithm.h"
+#include "AthenaBaseComps/AthReentrantAlgorithm.h"
 
 #include "InDetByteStreamErrors/TRT_BSErrContainer.h"
           
@@ -30,7 +30,7 @@ class TRTRawDataProviderTool;
 class TRT_CablingSvc;
 
 
-class TRTRawDataProvider : public AthAlgorithm
+class TRTRawDataProvider final: public AthReentrantAlgorithm
 {
 public:
 
@@ -38,13 +38,13 @@ public:
   TRTRawDataProvider(const std::string &name, ISvcLocator *pSvcLocator);
 
   //! Initialize
-  virtual StatusCode initialize();
+  virtual StatusCode initialize() override;
 
   //! Execute
-  virtual StatusCode execute();
+  virtual StatusCode execute(const EventContext& ctx) const override;
 
   //! Finalize
-  virtual StatusCode finalize()
+  virtual StatusCode finalize() override
     { return StatusCode::SUCCESS;}
 
   //! Destructor
