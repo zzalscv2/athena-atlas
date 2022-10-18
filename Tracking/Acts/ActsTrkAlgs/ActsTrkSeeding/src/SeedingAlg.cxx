@@ -14,6 +14,7 @@
 #include "Acts/Seeding/Seedfinder.hpp"
 
 #include "TrkSpacePoint/SpacePointCollection.h"
+#include "AthenaMonitoringKernel/Monitored.h"
 
 namespace ActsTrk {
   
@@ -35,12 +36,18 @@ namespace ActsTrk {
     // Read nd Write handles
     ATH_CHECK( m_spacePointKey.initialize() );
     ATH_CHECK( m_seedKey.initialize() );
+
+    if ( not m_monTool.empty() )
+      ATH_CHECK( m_monTool.retrieve() );
     
     return StatusCode::SUCCESS;
   }
   
   StatusCode SeedingAlg::execute(const EventContext& ctx) const {
     ATH_MSG_DEBUG( "Executing " << name() <<" ... " );
+
+    auto timer = Monitored::Timer<std::chrono::milliseconds>( "TIME_execute" );
+    auto mon = Monitored::Group( m_monTool, timer );
     
     // ================================================== //
     // ===================== CONDS ====================== // 

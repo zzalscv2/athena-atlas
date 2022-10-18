@@ -73,7 +73,7 @@ namespace ActsTrk {
         /// For space point formation
         ToolHandle<ActsTrk::IPixelSpacePointFormationTool> m_spacePointMakerTool{this, "SpacePointFormationTool", "", "Tool dedicated to the creation of pixel space points"};
         /// For monitoring
-        ToolHandle<GenericMonitoringTool> m_monTool{this, "monTool", "", "Monitoring tool"};
+        ToolHandle<GenericMonitoringTool> m_monTool{this, "MonTool", "", "Monitoring tool"};
         //@}
 
   };

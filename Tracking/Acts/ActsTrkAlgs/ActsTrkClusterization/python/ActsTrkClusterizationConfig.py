@@ -9,5 +9,11 @@ def ActsTrkITkPixelClusterizationAlgCfg(flags, name='ActsTrkITkPixelClusterizati
     kwargs.setdefault("PixelRDOContainerKey", "ITkPixelRDOs")
     kwargs.setdefault("PixelClustersKey", "ITkPixelClusters")
     kwargs.setdefault("PixelClusteringTool", acc.popToolsAndMerge(ActsTrkITkPixelClusteringToolCfg(flags)))
+
+    if flags.Acts.doMonitoring:
+        from ActsTrkAnalysis.ActsTrkLiveMonitoringConfig import ActsTrkITkPixelClusterizationLiveMonitoringToolCfg
+        kwargs.setdefault('MonTool', acc.popToolsAndMerge(ActsTrkITkPixelClusterizationLiveMonitoringToolCfg(flags)))
+
     acc.addEventAlgo(CompFactory.ActsTrk.PixelClusterizationAlg(name, **kwargs))
     return acc
+

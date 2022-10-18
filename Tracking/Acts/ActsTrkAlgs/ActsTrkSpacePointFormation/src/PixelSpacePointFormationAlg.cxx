@@ -39,8 +39,9 @@ namespace ActsTrk {
   //-------------------------------------------------------------------------
   StatusCode PixelSpacePointFormationAlg::execute (const EventContext& ctx) const
   {
+    auto timer = Monitored::Timer<std::chrono::milliseconds>( "TIME_execute" );
     auto nReceivedSPsPixel = Monitored::Scalar<int>( "numPixSpacePoints" , 0 );
-    auto mon = Monitored::Group( m_monTool, nReceivedSPsPixel );
+    auto mon = Monitored::Group( m_monTool, timer, nReceivedSPsPixel );
 
     auto pixelSpacePointContainer = SG::WriteHandle<ActsTrk::SpacePointContainer>( m_pixelSpacePointContainerKey, ctx );
     ATH_MSG_DEBUG( "--- Pixel Space Point Container `" << m_pixelSpacePointContainerKey.key() << "` created ..." );

@@ -4,7 +4,6 @@ from AthenaConfiguration.ComponentFactory import CompFactory
 
 def ActsTrkPixelSpacePointToolCfg(flags, name = "ActsTrkPixelSpacePointTool", **kwargs):
     acc = ComponentAccumulator()
-
     acc.setPrivateTools(CompFactory.ActsTrk.PixelSpacePointFormationTool(name, **kwargs))
     return acc
 
@@ -13,7 +12,6 @@ def ActsTrkStripSpacePointToolCfg(flags, name = "ActsTrkStripSpacePointTool", **
 
     from SiLorentzAngleTool.ITkStripLorentzAngleConfig import ITkStripLorentzAngleToolCfg
     kwargs.setdefault("LorentzAngleTool", acc.popToolsAndMerge(ITkStripLorentzAngleToolCfg(flags)) )
-
     kwargs.setdefault("AllClusters", False)
 
     acc.setPrivateTools(CompFactory.ActsTrk.StripSpacePointFormationTool(name, **kwargs))
@@ -34,6 +32,10 @@ def ActsTrkPixelSpacePointFormationCfg(ConfigFlags,
 
     kwargs.setdefault("PixelSpacePoints", "ITkPixelSpacePoints")
     kwargs.setdefault("PixelSpacePointData", "ITkPixelSpacePointData")
+
+    if ConfigFlags.Acts.doMonitoring:
+        from ActsTrkAnalysis.ActsTrkLiveMonitoringConfig import ActsTrkPixelSpacePointFormatioLiveMonitoringToolCfg
+        kwargs.setdefault("MonTool", acc.popToolsAndMerge(ActsTrkPixelSpacePointFormatioLiveMonitoringToolCfg(ConfigFlags)))
 
     acc.addEventAlgo(CompFactory.ActsTrk.PixelSpacePointFormationAlg(name, **kwargs))
     return acc
@@ -58,5 +60,10 @@ def ActsTrkStripSpacePointFormationCfg(ConfigFlags,
     kwargs.setdefault("StripOverlapSpacePointData", "ITkStripOverlapSpacePointData")
     kwargs.setdefault("ProcessOverlapForStrip", True)
 
+    if ConfigFlags.Acts.doMonitoring:
+        from ActsTrkAnalysis.ActsTrkLiveMonitoringConfig import ActsTrkStripSpacePointFormatioLiveMonitoringToolCfg
+        kwargs.setdefault("MonTool", acc.popToolsAndMerge(ActsTrkStripSpacePointFormatioLiveMonitoringToolCfg(ConfigFlags)))
+
     acc.addEventAlgo(CompFactory.ActsTrk.StripSpacePointFormationAlg(name, **kwargs))
     return acc
+

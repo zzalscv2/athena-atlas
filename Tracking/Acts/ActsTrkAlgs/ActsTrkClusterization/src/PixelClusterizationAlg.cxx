@@ -2,7 +2,7 @@
   Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
 */
 #include "PixelClusterizationAlg.h"
-
+#include "AthenaMonitoringKernel/Monitored.h"
 #include "xAODInDetMeasurement/PixelClusterAuxContainer.h"
 
 namespace ActsTrk {
@@ -28,6 +28,9 @@ StatusCode PixelClusterizationAlg::initialize()
 
 StatusCode PixelClusterizationAlg::execute(const EventContext& ctx) const
 {
+    auto timer = Monitored::Timer<std::chrono::milliseconds>( "TIME_execute" );
+    auto mon = Monitored::Group( m_monTool, timer );
+
     SG::ReadHandle<PixelRDO_Container> rdoContainer(m_rdoContainerKey, ctx);
     ATH_CHECK(rdoContainer.isValid());
 
@@ -43,7 +46,6 @@ StatusCode PixelClusterizationAlg::execute(const EventContext& ctx) const
 	else
 	    ATH_MSG_DEBUG("No input RDOs for this container element");
     }
-
 
 
     return StatusCode::SUCCESS;

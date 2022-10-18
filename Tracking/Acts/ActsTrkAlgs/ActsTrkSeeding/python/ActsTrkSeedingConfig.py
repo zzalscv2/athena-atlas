@@ -38,6 +38,10 @@ def ActsTrkITkPixelSeedingFromAthenaCfg(flags,
     kwargs.setdefault('UsePixel', True)
     kwargs.setdefault('DetectorElements', 'ITkPixelDetectorElementCollection')
 
+    if flags.Acts.doMonitoring:
+        from ActsTrkAnalysis.ActsTrkLiveMonitoringConfig import ActsTrkITkPixelSeedingLiveMonitoringCfg
+        kwargs.setdefault('MonTool', acc.popToolsAndMerge(ActsTrkITkPixelSeedingLiveMonitoringCfg(flags)))
+
     acc.addEventAlgo(CompFactory.ActsTrk.SeedingFromAthenaAlg(name, **kwargs))
     return acc
 
@@ -71,6 +75,10 @@ def ActsTrkITkStripSeedingFromAthenaCfg(flags,
     kwargs.setdefault('UsePixel', False)
     kwargs.setdefault('DetectorElements', 'ITkStripDetectorElementCollection')
 
+    if flags.Acts.doMonitoring:
+        from ActsTrkAnalysis.ActsTrkLiveMonitoringConfig import ActsTrkITkStripSeedingLiveMonitoringCfg
+        kwargs.setdefault('MonTool', acc.popToolsAndMerge(ActsTrkITkStripSeedingLiveMonitoringCfg(flags)))
+
     acc.addEventAlgo(CompFactory.ActsTrk.SeedingFromAthenaAlg(name, **kwargs))
     return acc
 
@@ -101,6 +109,10 @@ def ActsTrkITkPixelSeedingCfg(flags,
     kwargs.setdefault('OutputSeeds', 'ITkPixelSeeds')
     kwargs.setdefault('SeedTool', seedTool)
 
+    if flags.Acts.doMonitoring:
+        from ActsTrkAnalysis.ActsTrkLiveMonitoringConfig import ActsTrkITkPixelSeedingLiveMonitoringCfg
+        kwargs.setdefault('MonTool', acc.popToolsAndMerge(ActsTrkITkPixelSeedingLiveMonitoringCfg(flags)))
+
     acc.addEventAlgo(CompFactory.ActsTrk.SeedingAlg(name, **kwargs))
     return acc
 
@@ -119,6 +131,10 @@ def ActsTrkITkStripSeedingCfg(flags,
     kwargs.setdefault('InputSpacePoints', ['ITkStripSpacePoints', 'ITkStripOverlapSpacePoints'])
     kwargs.setdefault('OutputSeeds', 'ITkStripSeeds')
     kwargs.setdefault('SeedTool', seedTool)
+
+    if flags.Acts.doMonitoring:
+        from ActsTrkAnalysis.ActsTrkLiveMonitoringConfig import ActsTrkITkStripSeedingLiveMonitoringCfg
+        kwargs.setdefault('MonTool', acc.popToolsAndMerge(ActsTrkITkStripSeedingLiveMonitoringCfg(flags)))
 
     acc.addEventAlgo(CompFactory.ActsTrk.SeedingAlg(name, **kwargs))
     return acc
