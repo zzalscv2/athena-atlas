@@ -924,7 +924,7 @@ int jSuperCellTowerMapper::FindAndConnectTower(std::unique_ptr<jTowerContainer> 
             towereta = eta_index;
             towerphi = phi_index;
 
-            layer = 0; // By definition for jFEX
+            layer = 1; // By definition for jFEX
 
             switch (sample) { // only one supercell per layer in all regions for HECX
             case CaloSampling::HEC0: {
@@ -952,7 +952,7 @@ int jSuperCellTowerMapper::FindAndConnectTower(std::unique_ptr<jTowerContainer> 
             towereta = eta_index;
             towerphi = phi_index;
 
-            layer = 0; // By definition for jFEX
+            layer = 1; // By definition for jFEX
 
             switch (sample) { // only one supercell per layer in all regions for HECX
             case CaloSampling::HEC0: {
@@ -1030,6 +1030,7 @@ int jSuperCellTowerMapper::FindAndConnectTower(std::unique_ptr<jTowerContainer> 
                 towerID_Modifier = 800000;
             }
             iCell = 0;
+            layer = 0;
             break;
         }
         case CaloSampling::FCAL1: {
@@ -1040,6 +1041,7 @@ int jSuperCellTowerMapper::FindAndConnectTower(std::unique_ptr<jTowerContainer> 
                 towerID_Modifier = 1000000;
             }
             iCell = 1;
+            layer = 1;
             break;
         }
         case CaloSampling::FCAL2: {
@@ -1050,6 +1052,7 @@ int jSuperCellTowerMapper::FindAndConnectTower(std::unique_ptr<jTowerContainer> 
                 towerID_Modifier = 1200000;
             }
             iCell = 1;
+            layer = 1;
             break;
         }
         default: {
@@ -1057,7 +1060,6 @@ int jSuperCellTowerMapper::FindAndConnectTower(std::unique_ptr<jTowerContainer> 
         }
         }
 
-        layer = 0;
         towereta = eta_index;
         towerphi = phi_index;
 
@@ -1228,6 +1230,32 @@ StatusCode jSuperCellTowerMapper::AssignPileupAndNoiseValues(std::unique_ptr<jTo
     
 }
 
+std::string jSuperCellTowerMapper::DectectorName(const CaloSampling::CaloSample sample){
+    std::string sampleName ="";
+    switch (sample) {
+        case CaloSampling::PreSamplerB: { sampleName = "PreSamplerB";   break; }
+        case CaloSampling::EMB1:        { sampleName = "EMB1";          break; }
+        case CaloSampling::EMB2:        { sampleName = "EMB2";          break; }
+        case CaloSampling::EMB3:        { sampleName = "EMB3";          break; }
+        case CaloSampling::PreSamplerE: { sampleName = "PreSamplerE";   break; }
+        case CaloSampling::EME1:        { sampleName = "EME1";          break; }
+        case CaloSampling::EME2:        { sampleName = "EME2";          break; }
+        case CaloSampling::EME3:        { sampleName = "EME3";          break; }
+        case CaloSampling::HEC0:        { sampleName = "HEC0";          break; }
+        case CaloSampling::HEC1:        { sampleName = "HEC1";          break; }
+        case CaloSampling::HEC2:        { sampleName = "HEC2";          break; }
+        case CaloSampling::HEC3:        { sampleName = "HEC3";          break; }
+        case CaloSampling::FCAL0:       { sampleName = "FCAL0";         break; }
+        case CaloSampling::FCAL1:       { sampleName = "FCAL1";         break; }
+        case CaloSampling::FCAL2:       { sampleName = "FCAL2";         break; }
+        default: {
+            ATH_MSG_DEBUG("\n==== jSuperCellTowerMapper ============ Supercell has invalid CaloSampling value: " << sample << " (Needs investigation).  Please report this!");
+            sampleName = "----"; 
+            break;
+        }
+    }   
+    return  sampleName;
+}
 
 
 } // end of LVL1 namespace

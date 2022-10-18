@@ -49,6 +49,8 @@ class eSuperCellTowerMapper: public AthAlgTool, virtual public IeSuperCellTowerM
   virtual void ConnectSuperCellToTower(/*eTowerContainer**/std::unique_ptr<eTowerContainer> & my_eTowerContainerRaw, int iETower, Identifier ID, int iCell, float et, int layer, bool doenergysplit) override;
   virtual int FindTowerIDForSuperCell(int towereta, int towerphi) override;
   virtual void PrintCellSpec(const CaloSampling::CaloSample sample, int layer, const int region, const int eta_index, const int phi_index, const int pos_neg, int iETower, int iCell, int prov, Identifier ID, bool doenergysplit) override;
+  
+  std::string DectectorName(const CaloSampling::CaloSample sample);
 
 };
 

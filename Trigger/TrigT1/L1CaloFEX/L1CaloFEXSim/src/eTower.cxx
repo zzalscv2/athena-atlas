@@ -69,8 +69,11 @@ namespace LVL1 {
   {
     m_scID.clear();
     m_scID.resize(14);
+    m_scID_split.clear();
+    m_scID_split.resize(14);
     for (unsigned int i=0; i<m_scID.size(); i++){
       m_scID[i] = Identifier();
+      m_scID_split[i] = Identifier();
     }
   }
 
@@ -130,6 +133,19 @@ namespace LVL1 {
 
       m_etSplits[cell] = 1;
       m_etSplits[cell+1] = 1;
+      
+      if(cell==1){
+          m_scID[12] = ID;
+      }
+      else if(cell==3){
+          m_scID[13] = ID;
+      }
+      
+      
+      m_scID_split[cell] = ID;
+      m_scID_split[cell+1] = ID;
+      
+      m_scID.push_back(ID);
 
       unsigned int outET1 = eFEXCompression::decode((unsigned int)m_et_float[cell],layer);
       unsigned int outET2 = eFEXCompression::decode((unsigned int)m_et_float[cell+1],layer);
@@ -252,7 +268,7 @@ namespace LVL1 {
       return m_et[9];
     }
     else if (layer == 4){
-      return (m_et[10] + m_et[11] + m_et[12] + m_et[13]);
+      return (m_et[10] + m_et[11]);
     }
 
     
@@ -276,7 +292,7 @@ namespace LVL1 {
       return m_et_float[9];
     }
     else if (layer == 4){
-      return (m_et_float[10] + m_et_float[11] + m_et_float[12] + m_et_float[13]);
+      return (m_et_float[10] + m_et_float[11]);
     }
 
 
@@ -309,8 +325,6 @@ namespace LVL1 {
     else if (layer == 4){
       cells_in_layer.push_back(m_scID[10]);
       cells_in_layer.push_back(m_scID[11]);
-      cells_in_layer.push_back(m_scID[12]);
-      cells_in_layer.push_back(m_scID[13]);
     }
 
     return cells_in_layer;
