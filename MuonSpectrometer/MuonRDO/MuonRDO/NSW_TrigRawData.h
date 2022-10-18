@@ -20,7 +20,7 @@ class NSW_TrigRawData : public DataVector<Muon::NSW_TrigRawDataSegment>
   NSW_TrigRawData(uint16_t sectorId, char sectorSide, uint16_t bcId);
   NSW_TrigRawData(const NSW_TrigRawData &trd, const bool phiResBit);
 
-  ~NSW_TrigRawData() { };
+  ~NSW_TrigRawData()=default;
 
   uint16_t sectorId() const {return m_sectorId;}
   char sectorSide() const {return m_sectorSide;}

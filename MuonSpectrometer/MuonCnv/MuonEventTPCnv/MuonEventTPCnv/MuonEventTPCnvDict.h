@@ -44,6 +44,6 @@
 #include "MuonEventTPCnv/MuonRDO/MM_RawDataContainer_p2.h"
 #include "MuonEventTPCnv/MuonRDO/MM_RawDataContainer_p3.h"
 #include "MuonEventTPCnv/MuonRDO/NSW_PadTriggerDataContainer_p1.h"
-
+#include "MuonEventTPCnv/MuonRDO/NSW_TrigRawDataContainer_p1.h"
 
 #endif // MUONEVENTTPCNV_MUONEVENTTPCNVDICT_H
