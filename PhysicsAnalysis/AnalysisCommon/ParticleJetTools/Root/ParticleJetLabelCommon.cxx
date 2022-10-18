@@ -97,7 +97,10 @@ namespace ParticleJetTools {
     singleint(n.singleint),
     doubleint(n.doubleint),
     pt(n.pt),
-    Lxy(n.Lxy)
+    pt_scaled(n.pt_scaled),
+    Lxy(n.Lxy),
+    dr(n.dr),
+    pdgId(n.pdgId)
   {
   }
 
@@ -142,39 +145,39 @@ namespace ParticleJetTools {
                                   });
       return *itr;
     };
-    auto partPt = [](const auto& part) -> float {
-      if (!part) return NAN;
-      return part->pt();
-    };
-    auto partLxy = [](const auto& part) -> float {
-      if (!part) return NAN;
-      if ( part->decayVtx() ) { return part->decayVtx()->perp(); }
-      else return INFINITY;
-    };
 
     // set truth label for jets above pt threshold
     // hierarchy: b > c > tau > light
+    int label = 0; // default: light
+    const xAOD::TruthParticle* labelling_particle = nullptr;
     if (particles.b.size()) {
-      decs.singleint(jet) = 5;
-      const auto maxPtPart = getMaxPtPart(particles.b);
-      decs.pt(jet) = partPt(maxPtPart);
-      decs.Lxy(jet) = partLxy(maxPtPart);
+      label = 5;
+      labelling_particle = getMaxPtPart(particles.b);
     } else if (particles.c.size()) {
-      decs.singleint(jet) = 4;
-      const auto maxPtPart = getMaxPtPart(particles.c);
-      decs.pt(jet) = partPt(maxPtPart);
-      decs.Lxy(jet) = partLxy(maxPtPart);
+      label = 4;
+      labelling_particle = getMaxPtPart(particles.c);
     } else if (particles.tau.size()) {
-      decs.singleint(jet) = 15;
-      const auto maxPtPart = getMaxPtPart(particles.tau);
-      decs.pt(jet) = partPt(maxPtPart);
-      decs.Lxy(jet) = partLxy(maxPtPart);
-    } else {
-      decs.singleint(jet) = 0;
-      decs.pt(jet) = NAN;
-      decs.Lxy(jet) = NAN;
+      label = 15;
+      labelling_particle = getMaxPtPart(particles.tau);
     }
 
+    // decorate info about the labelling particle
+    decs.singleint(jet) = label;
+    if (label == 0) {
+      decs.pt(jet) = NAN;
+      decs.pt_scaled(jet) = NAN;
+      decs.Lxy(jet) = NAN;
+      decs.dr(jet) = NAN;
+      decs.pdgId(jet) = 0;
+    } else {
+      decs.pt(jet) = partPt(labelling_particle);
+      decs.pt_scaled(jet) = partPt(labelling_particle) / jet.pt();
+      decs.Lxy(jet) = partLxy(labelling_particle);
+      decs.dr(jet) = partDR(labelling_particle, jet);
+      decs.pdgId(jet) = partPdgId(labelling_particle);
+    }
+
+    // extended flavour label
     if (particles.b.size()) {
       if (particles.b.size() >= 2)
         decs.doubleint(jet) = 55;
@@ -204,6 +207,24 @@ namespace ParticleJetTools {
                     const Particles& particles,
                     const LabelNames& names) {
     setJetLabels(jet, particles, LabelDecorators(names));
+  }
+
+  float partPt(const xAOD::TruthParticle* part) {
+    if (!part) return NAN;
+    return part->pt(); 
+  }
+  float partLxy(const xAOD::TruthParticle* part) {
+    if (!part) return NAN;
+    if ( part->decayVtx() ) { return part->decayVtx()->perp(); }
+    else return INFINITY;
+  }
+  float partDR(const xAOD::TruthParticle* part, const xAOD::Jet& jet) {
+    if (!part) return NAN;
+    return part->p4().DeltaR(jet.p4());
+  }
+  int partPdgId(const xAOD::TruthParticle* part) {
+    if (!part) return 0;
+    return part->pdgId();
   }
 
 }
