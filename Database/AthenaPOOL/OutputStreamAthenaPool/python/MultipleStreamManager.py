@@ -1,4 +1,4 @@
-# Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
 
 ########################################################
 ##  AugmentedStreams & MultipleStreamManager classes  ##
@@ -599,9 +599,11 @@ class MultipleStreamManager:
         # By default use 20 MB AutoFlush (or 500 events for SharedWriter w/ parallel compession)
         # for event data except for a number of select formats (see below)
         TREE_AUTO_FLUSH = -20000000
-        from AthenaMP.AthenaMPFlags import jobproperties as amjp
-        if amjp.AthenaMPFlags.UseSharedWriter() and amjp.AthenaMPFlags.UseParallelCompression():
-            TREE_AUTO_FLUSH = 500
+        from PyUtils.moduleExists import moduleExists
+        if moduleExists ('AthenaMP'): # AthenaMP not in AthAnalysis project
+            from AthenaMP.AthenaMPFlags import jobproperties as amjp
+            if amjp.AthenaMPFlags.UseSharedWriter() and amjp.AthenaMPFlags.UseParallelCompression():
+                TREE_AUTO_FLUSH = 500
         # By default use split-level 0 except for DAOD_PHYSLITE which is maximally split
         CONTAINER_SPLITLEVEL = 0
         if StreamName in ["StreamDAOD_PHYSVAL"]:
