@@ -41,6 +41,7 @@ class InDetTrigTrackingCuts :
     self.__maxSctHoles             = 3                # was 5
     self.__maxDoubleHoles          = 1                # was 2
     self.__maxPrimaryImpact        = 10.0 * Units.mm  # low lumi
+    self.__maxEMImpact             = 50.0 * Units.mm 
     self.__maxZImpact              = 320. * Units.mm
     if self.__indetflags.doRobustReco():
       self.__minClusters             = 7                # Igor 6, was 7
@@ -449,6 +450,7 @@ class InDetTrigTrackingCuts :
       self.__maxSctHoles             = 1
       self.__maxDoubleHoles          = 0
       self.__maxPrimaryImpact        = 300.0 * Units.mm
+      self.__maxEMImpact             = 300.0 * Units.mm
       self.__maxZImpact              = 500. * Units.mm
       self.__roadWidth               = 5.
       self.__seedFilterLevel         = 1
@@ -494,6 +496,9 @@ class InDetTrigTrackingCuts :
 
   def maxPrimaryImpact( self ) :
     return self.__maxPrimaryImpact
+
+  def maxEMImpact( self ) :
+    return self.__maxEMImpact
 
   def maxSecondaryImpact( self ) :
     return self.__maxSecondaryImpact
@@ -651,6 +656,7 @@ class InDetTrigTrackingCuts :
     print ('* NewTracking cuts:')
     print ('* -----------------')
     print ('* max Rphi IP (primaries)     : ', self.__maxPrimaryImpact, ' mm')
+    print ('* max Rphi IP (EM)            : ', self.__maxEMImpact, ' mm')
     print ('* min number of clusters      :  ', self.__minClusters)
     print ('* min number of pixel hits    :  ', self.__minPixel)
     print ('* min number of NOT shared    :  ', self.__minSiNotShared)

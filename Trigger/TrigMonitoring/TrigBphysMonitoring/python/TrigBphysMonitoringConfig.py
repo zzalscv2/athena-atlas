@@ -112,21 +112,13 @@ class TrigBphysMonAlgBuilder:
 
     self.__logger.info("TrigBphysMonToolBuilder.setProperties()")
     self.basePath = 'HLT/BphysMon'
-   
-    if self.pp_mode is True:
-      self.setDefaultProperties()
-    elif self.hi_mode is True:
-      # This should be change in future
-      self.setDefaultProperties()
-    elif self.cosmic_mode is True:
-      # This should be change in future
-      self.setDefaultProperties()
-    elif self.mc_mode is True:
-      # This should be change in future
-      self.setDefaultProperties()
-    else:
-      self.__logger.info('  No monitoring mode configured, use default')
-      self.setDefaultProperties()
+    
+    self.setDefaultProperties()
+    
+    if not self.mc_mode :
+      self.setStreamChecks()
+    else :
+      self.__logger.info("  We run on MC, don't care about streams")
       
 
 
@@ -171,11 +163,26 @@ class TrigBphysMonAlgBuilder:
                                  'HLT_Bmumux',
                                  'HLT_Bmutrk',
                                  #'HLT_DrellYan', #uncomment when the DY chains are implemented
-                                 'HLT_DiElecPrecision',
-                                 'HLT_NoMuonDiElecPrecision']
+                                 'HLT_DiElecPrecision', # not used
+                                 'HLT_DiElecPrecisionGSF', 
+                                 'HLT_NoMuonDiElecPrecision', # not used
+                                 'HLT_NoMuonDiElecPrecisionGSF',
+                                 ]
+    
+    self.require_explicit_ES_decision = False
     
     self.__logger.info('  Configured bphys containers: %s',self.monitored_containers)
-
+  
+  
+  def setStreamChecks(self):
+    if self.helper.inputFlags.Common.doExpressProcessing :
+      #enable checking that the event triggered by certain chain was explicitly sent to express stream
+      self.__logger.info("  Processing Express stream, will enable requireExplicitESDecision")
+      self.require_explicit_ES_decision = True
+    else :
+      self.__logger.info("  Processing a normal stream, won't check ES decision")
+  
+  
   #
   # Create all monitor algorithms
   #
@@ -210,6 +217,8 @@ class TrigBphysMonAlgBuilder:
     self.bphysMonAlg.ChainNames_MuMu = self.monitored_mumu_list
     self.bphysMonAlg.ChainNames_MuMuX = self.monitored_mumux_list
     self.bphysMonAlg.ChainNames_ElEl = self.monitored_elel_list
+    
+    self.bphysMonAlg.requireExplicitESDecision = self.require_explicit_ES_decision
 
 
   def configureHistograms(self):
@@ -298,7 +307,7 @@ class TrigBphysMonAlgBuilder:
     currentMonGroup.defineHistogram(objStr+'_fitmass',title=f'{objTitle} fitted mass;m({objSign}) [GeV];Events / (0.1 GeV)',
                                 xbins=150,xmin=0.0,xmax=15.0)
     currentMonGroup.defineHistogram(objStr+'_pt',title=f'{objTitle} transverse momentum;p_{{T}}({objSign}) [GeV];Events / (1 GeV)',
-                                xbins=40,xmin=0.0,xmax=40.0)
+                                xbins=80,xmin=0.0,xmax=80.0)
     currentMonGroup.defineHistogram(objStr+'_y',title=f'{objTitle} rapidity;y({objSign}) [GeV];Events / (0.1)',
                                 xbins=50,xmin=-2.5,xmax=2.5)
     currentMonGroup.defineHistogram(objStr+'_chi2',title=f'{objTitle} #chi^{{2}};#chi^{{2}}({objSign});Events / (0.5)',

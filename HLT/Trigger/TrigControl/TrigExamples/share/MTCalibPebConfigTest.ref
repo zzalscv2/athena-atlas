@@ -16,18 +16,14 @@ Py:ComponentAccumulator    INFO          \__ TriggerSummaryAlg/TriggerSummaryAlg
 Py:ComponentAccumulator    INFO          \__ DecisionSummaryMakerAlg/DecisionSummaryMakerAlg (alg) 
 Py:ComponentAccumulator    INFO    \__ SGInputLoader/SGInputLoader (alg) 
 Py:ComponentAccumulator    INFO Condition Algorithms
-Py:ComponentAccumulator    INFO  \__ CondInputLoader (cond alg)
-Py:ComponentAccumulator    INFO  \__ RpcCablingCondAlg (cond alg)
-Py:ComponentAccumulator    INFO  \__ MuonAlignmentCondAlg (cond alg)
-Py:ComponentAccumulator    INFO  \__ MuonDetectorCondAlg (cond alg)
 Py:ComponentAccumulator    INFO  \__ TrigConf__BunchGroupCondAlg (cond alg)
+Py:ComponentAccumulator    INFO  \__ CondInputLoader (cond alg)
 Py:ComponentAccumulator    INFO  \__ HLTPrescaleCondAlg (cond alg)
 Py:ComponentAccumulator    INFO Services
-Py:ComponentAccumulator    INFO ['IOVDbSvc', 'PoolSvc', 'CondSvc', 'ProxyProviderSvc', 'DBReplicaSvc', 'TagInfoMgr', 'MetaDataStore', 'InputMetaDataStore', 'MetaDataSvc', 'AthenaPoolCnvSvc', 'EventPersistencySvc', 'DetDescrCnvSvc', 'GeoModelSvc', 'AGDDtoGeoSvc', 'MuonIdHelperSvc', 'MuonTGC_CablingSvc', 'TGCcablingServerSvc', 'ByteStreamCnvSvc', 'ByteStreamInputSvc', 'EventSelectorByteStream', 'ByteStreamAddressProviderSvc', 'LVL1ConfigSvc', 'HLTConfigSvc', 'ROBDataProviderSvc', 'HltEventLoopMgr']
+Py:ComponentAccumulator    INFO ['ByteStreamCnvSvc', 'ByteStreamInputSvc', 'EventSelectorByteStream', 'EventPersistencySvc', 'ByteStreamAddressProviderSvc', 'ProxyProviderSvc', 'LVL1ConfigSvc', 'HLTConfigSvc', 'IOVDbSvc', 'PoolSvc', 'CondSvc', 'DBReplicaSvc', 'TagInfoMgr', 'MetaDataStore', 'InputMetaDataStore', 'MetaDataSvc', 'AthenaPoolCnvSvc', 'ROBDataProviderSvc', 'HltEventLoopMgr']
 Py:ComponentAccumulator    INFO Public Tools
 Py:ComponentAccumulator    INFO [
 Py:ComponentAccumulator    INFO   IOVDbMetaDataTool/IOVDbMetaDataTool,
-Py:ComponentAccumulator    INFO   TGCCablingDbTool/TGCCablingDbTool,
 Py:ComponentAccumulator    INFO ]
 Py:ComponentAccumulator    INFO Private Tools
 Py:ComponentAccumulator    INFO [

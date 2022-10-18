@@ -36,6 +36,8 @@ private:
   Gaudi::Property<std::vector<std::string>> m_ChainNames_MuMuX{this, "ChainNames_MuMuX", {}};
   Gaudi::Property<std::vector<std::string>> m_ChainNames_ElEl{this, "ChainNames_ElEl", {}};
   
+  Gaudi::Property<bool> m_requireExplicitESDecision{this, "requireExplicitESDecision", false};
+  
   Gaudi::Property<double> m_dimuMassLower_prefit{this, "dimuMassLower_prefit", 0.};
   Gaudi::Property<double> m_dimuMassUpper_prefit{this, "dimuMassUpper_prefit", 16000.};
   Gaudi::Property<double> m_dimuMassLower_postfit{this, "dimuMassLower_postfit", 0.};
@@ -72,6 +74,8 @@ private:
   StatusCode fillOfflineDimuons(const EventContext& ctx, const std::vector<std::unique_ptr<xAOD::Vertex>>& dimuonContainer) const;
   StatusCode fillOfflineDimuonHists(const EventContext& /*ctx*/, const std::string& dimuonMonGroupName, const std::vector<std::unique_ptr<xAOD::Vertex>>& dimuonContainer) const;
   StatusCode fillVertexHists(const ToolHandle<GenericMonitoringTool>& currentMonGroup, const xAOD::Vertex* vertex, const std::string& objStr) const;
+  
+  bool isChainPassed(const std::string& chain) const;
   
   StatusCode buildDimuons(const EventContext& ctx, std::vector<std::unique_ptr<xAOD::Vertex>>& vxContainer) const;
   std::unique_ptr<xAOD::Vertex> dimuonFit(const xAOD::TrackParticle* mu1, const xAOD::TrackParticle* mu2) const;

@@ -104,7 +104,7 @@ condseq = AthSequencer("AthCondSeq")
 
 from LArRecUtils.LArRecUtilsConf import LArHVIdMappingAlg
 hvmapalg = LArHVIdMappingAlg(ReadKey="/LAR/IdentifierOfl/HVLineToElectrodeMap",WriteKey="LArHVIdMap")
-condseq += hvmapalg   
+condseq += hvmapalg
 
 svcMgr.MessageSvc.OutputLevel = 4
 svcMgr.MessageSvc.debugLimit  = 99999999

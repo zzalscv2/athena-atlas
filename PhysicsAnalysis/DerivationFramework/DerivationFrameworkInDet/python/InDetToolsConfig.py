@@ -160,9 +160,19 @@ def DiTauTrackParticleThinningCfg(ConfigFlags, name, **kwargs):
                       primary = True)
     return acc
 
+# Tool for thinning TrackParticles that are associated with jets
+def JetTrackParticleThinningCfg(ConfigFlags, name, **kwargs):
+    """Configure the JetTrackParticleThinning tool"""
+    acc = ComponentAccumulator()
+    JetTrackParticleThinning = CompFactory.DerivationFramework.JetTrackParticleThinning
+    acc.addPublicTool(JetTrackParticleThinning(name,**kwargs),
+            primary = True)
+    return acc
+
 def TauJetLepRMParticleThinningCfg(ConfigFlags, name, **kwargs):
     """Configure the DiTauTrackParticleThinning tool"""
     acc = ComponentAccumulator()
     TauJetLepRMParticleThinningTool = CompFactory.DerivationFramework.TauJets_LepRMParticleThinning
     acc.addPublicTool(TauJetLepRMParticleThinningTool(name, **kwargs), primary = True)
     return acc
+

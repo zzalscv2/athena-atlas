@@ -106,10 +106,6 @@ FtagCommon.add_truth_to_SlimmingHelper(FTAG1SlimmingHelper)
 # Add ExtraVariables
 FtagCommon.add_ExtraVariables_to_SlimmingHelper(FTAG1SlimmingHelper)
 
-# Add trigger matching
-PhysCommonTrigger.trigmatching_helper_notau.add_to_slimming(FTAG1SlimmingHelper)
-PhysCommonTrigger.trigmatching_helper_tau.add_to_slimming(FTAG1SlimmingHelper)
-
 # Final construction of output stream
 FTAG1SlimmingHelper.AppendContentToStream(FTAG1Stream)
 

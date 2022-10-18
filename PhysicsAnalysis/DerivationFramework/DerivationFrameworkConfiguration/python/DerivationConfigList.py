@@ -71,11 +71,17 @@ from DerivationFrameworkEGamma.EGAM8 import EGAM8Cfg
 from DerivationFrameworkEGamma.EGAM9 import EGAM9Cfg
 from DerivationFrameworkEGamma.EGAM10 import EGAM10Cfg
 
+# FTAG derivations
+from DerivationFrameworkFlavourTag.FTAG1 import FTAG1Cfg
+from DerivationFrameworkFlavourTag.FTAG2 import FTAG2Cfg
+
+
 # Avoids compilation warnings from Flake8
 __all__ = ['TEST1Cfg','TEST2Cfg','TEST3Cfg','TEST4Cfg','TEST5Cfg','TEST6Cfg',
            'TRUTH0Cfg','TRUTH1Cfg','TRUTH3Cfg',
            'PHYSCfg','PHYSLITECfg',
            'PHYSVALCfg',
+           'FTAG1Cfg', 'FTAG2Cfg',
            'HIGG1D1Cfg',
            'LLP1Cfg',
            'BPHY1Cfg','BPHY2Cfg', 'BPHY3Cfg', 'BPHY4Cfg', 'BPHY5Cfg',
@@ -87,4 +93,3 @@ __all__ = ['TEST1Cfg','TEST2Cfg','TEST3Cfg','TEST4Cfg','TEST5Cfg','TEST6Cfg',
            'EGAM1Cfg', 'EGAM2Cfg', 'EGAM3Cfg', 'EGAM4Cfg', 'EGAM5Cfg',
            'EGAM7Cfg', 'EGAM8Cfg', 'EGAM9Cfg', 'EGAM10Cfg'
            ]
-

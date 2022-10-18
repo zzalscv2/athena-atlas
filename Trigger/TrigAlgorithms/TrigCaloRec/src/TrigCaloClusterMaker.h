@@ -27,6 +27,9 @@
 #include "AthenaMonitoringKernel/GenericMonitoringTool.h"
 #include "GaudiKernel/ToolHandle.h"
 #include "StoreGate/WriteDecorHandleKey.h"
+#include "StoreGate/ReadDecorHandle.h"
+#include "CaloConditions/CaloNoise.h"
+#include "EventInfo/EventInfo.h"
 
 
 class TrigCaloClusterMaker : public AthReentrantAlgorithm {
@@ -48,17 +51,6 @@ class TrigCaloClusterMaker : public AthReentrantAlgorithm {
   // Following used for testing only :
   //bool        m_useMeaningfullNames;      
   std::string m_clustersOutputName;
-
-//   double m_Eta;
-//   double m_Phi;
-//   double m_Et;
-//   double m_rCore;
-//   double m_EtaEFvsL2;
-//   double m_PhiEFvsL2;
-//   double m_IsoFrac;
-//   double m_StripWidth;
-//   double m_EMFraction;
-//   double m_EdRFraction;
 
   SG::ReadHandleKey<CaloCellContainer> m_inputCellsKey{ this,
       "Cells",                  // property name
@@ -83,6 +75,15 @@ class TrigCaloClusterMaker : public AthReentrantAlgorithm {
       "Decor_ncells",                // decorator name
       "nCells",                      // default value
       "Decorator containing the number of cells associated to a cluster"};
+
+  // adding noise handle for monitoring purposes
+  SG::ReadCondHandleKey<CaloNoise> m_noiseCDOKey{this,"CaloNoiseKey","totalNoise","SG Key of CaloNoise data object"};
+  // Still for monitoring purposes
+  Gaudi::Property<bool>  m_monCells { this, "MonCells", false, "Do I monitor the cells I receive" };
+  Gaudi::Property<float> m_1thr { this, "Thr1", 2, "First Threshold to pass" };
+  Gaudi::Property<float> m_2thr { this, "Thr2", 4, "Second Threshold to pass" };
+  //Event input: To get <mu> from Event Info
+  SG::ReadDecorHandleKey<xAOD::EventInfo> m_avgMuKey { this, "averageInteractionsPerCrossingKey", "EventInfo.averageInteractionsPerCrossing", "Decoration for Average Interaction Per Crossing" };
 
   bool m_isSW{false};
 };

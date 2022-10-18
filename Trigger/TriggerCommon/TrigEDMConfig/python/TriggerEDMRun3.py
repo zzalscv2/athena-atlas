@@ -832,8 +832,8 @@ TriggerHLTListRun3 = [
 
 
     # TLA Photons
-    ('xAOD::PhotonContainer#HLT_egamma_Photons_TLA',                                    'BS PhysicsTLA JetPEBPhysicsTLA ESD', 'Egamma'),
-    ('xAOD::PhotonAuxContainer#HLT_egamma_Photons_TLAAux.',                             'BS PhysicsTLA JetPEBPhysicsTLA ESD', 'Egamma'),
+    ('xAOD::PhotonContainer#HLT_egamma_Photons_TLA',                                           'BS PhysicsTLA JetPEBPhysicsTLA ESD', 'Egamma'),
+    ('xAOD::PhotonAuxContainer#HLT_egamma_Photons_TLAAux.'+PhVars,                             'BS PhysicsTLA JetPEBPhysicsTLA ESD', 'Egamma'),
 
     # TLA Muons
     ('xAOD::MuonContainer#HLT_MuonsCB_RoI_TLA',                                       'BS PhysicsTLA JetPEBPhysicsTLA ESD', 'Muon'),

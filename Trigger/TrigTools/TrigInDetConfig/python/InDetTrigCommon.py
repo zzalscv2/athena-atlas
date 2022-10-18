@@ -247,6 +247,7 @@ def ambiguityScoringTool_builder(name, config, trackSummaryTool ):
                           #to have a steeper turn-n curve
                           minPt               = config.pTmin, #TODO: double check values, implement 0.95 for MinBias?  #InDetTrigCutValues.minPT(), #config.pTmin(),
                           maxRPhiImp          = InDetTrigCutValues.maxPrimaryImpact(),
+                          maxRPhiImpEM        = InDetTrigCutValues.maxEMImpact(),
                           maxZImp             = InDetTrigCutValues.maxZImpact(),
                           maxEta              = InDetTrigCutValues.maxEta(),
                           minSiClusters       = InDetTrigCutValues.minClusters(),

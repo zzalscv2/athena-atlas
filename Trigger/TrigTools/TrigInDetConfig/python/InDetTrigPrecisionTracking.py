@@ -261,6 +261,9 @@ def scoringTool_builder( signature, config, summaryTool, prefix=None, SiOnly=Tru
   if(config.maxRPhiImpact is not None):
     kwargs = setDefaults(kwargs, maxRPhiImp = config.maxRPhiImpact)
 
+  if(config.maxRPhiImpactEM is not None):
+    kwargs = setDefaults(kwargs, maxRPhiImpEM = config.maxRPhiImpactEM)
+
   if(config.maxZImpact is not None):
     kwargs = setDefaults(kwargs, maxZImp = config.maxZImpact)
     
