@@ -19,11 +19,13 @@
 #include <RootCoreUtils/Assert.h>
 #include <RootCoreUtils/hadd.h>
 #include <RootCoreUtils/ExceptionMsg.h>
+#include <RootCoreUtils/ShellExec.h>
 #include <SampleHandler/MetaObject.h>
 #include <SampleHandler/Sample.h>
 #include <SampleHandler/SampleGrid.h>
 #include <SampleHandler/SampleHandler.h>
 #include <SampleHandler/GridTools.h>
+
 
 #include <TList.h>
 #include <TPython.h>
@@ -39,13 +41,14 @@
 #include <vector>
 #include <stdexcept>
 
+#include <boost/algorithm/string.hpp>
+
 #include "pool.h"
 #include <mutex>
 
 ClassImp(EL::PrunDriver)
 
 namespace {
-
   namespace JobState {  
     static const unsigned int NSTATES = 6;
     enum Enum { INIT=0, RUN=1, DOWNLOAD=2, MERGE=3, FINISHED=4, FAILED=5 };
@@ -478,12 +481,35 @@ doManagerStep (Detail::ManagerData& data) const
       //  "$ROOTCOREBIN/user_scripts/EventLoopGrid/elg_merge";
       const std::string runShOrig = PathResolverFindCalibFile("EventLoopGrid/runjob.sh");
       const std::string mergeShOrig = PathResolverFindCalibFile("EventLoopGrid/elg_merge");
+
       const std::string jobDefFile = jobELGDir + "/jobdef.root";
       gSystem->Exec(Form("mkdir -p %s", jobELGDir.c_str()));
       gSystem->Exec(Form("cp %s %s", runShOrig.c_str(), runShFile.c_str()));
       gSystem->Exec(Form("chmod +x %s", runShFile.c_str()));
       gSystem->Exec(Form("cp %s %s", mergeShOrig.c_str(), mergeShFile.c_str()));
       gSystem->Exec(Form("chmod +x %s", mergeShFile.c_str()));
+
+      // create symbolic links for additionnal files/directories if any to ship to the grid 
+      std::string listToShipToGrid = data.options.castString(EL::Job::optGridPrunShipAdditionalFilesOrDirs, ""); 
+      // parse the list of comma separated files and/or directories to ship to the grid 
+      if (listToShipToGrid.size()){
+        ANA_MSG_INFO (
+          "Creating symbolic links for additional files or directories to be sent to grid.\n"
+          "For root or heavy files you should also add their name (not the full path) to EL::Job::optUserFiles.\n"
+          "Otherwise prun ignores those files."
+        );
+
+        std::vector<std::string> vect_filesOrDirToShip;
+        // split string based on comma separators
+        boost::split(vect_filesOrDirToShip,listToShipToGrid,boost::is_any_of(","));
+        
+        // Create symbolic links of files or directories to the submission directory
+        for (const std::string & fileOrDirToShip: vect_filesOrDirToShip){
+          ANA_MSG_INFO (("Creating symbolic link for: " +fileOrDirToShip).c_str());
+          RCU::Shell::exec("ln -sf " + fileOrDirToShip + " " + jobELGDir);
+        }
+        ANA_MSG_INFO ("Finished creation of symbolic links");
+      }
 
       const SH::SampleHandler& sh = data.job->sampleHandler();
 
