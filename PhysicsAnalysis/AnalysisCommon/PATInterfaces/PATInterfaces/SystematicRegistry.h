@@ -13,6 +13,8 @@
 
 namespace CP
 {
+  class IReentrantSystematicsTool;
+
 
   /// This module implements the central registry for handling systematic
   /// uncertainties with CP tools.
@@ -49,7 +51,7 @@ namespace CP
     // Interface methods for editing the registry
 
     /// effects: register all the systematics from the tool
-    StatusCode registerSystematics (const ISystematicsTool& tool);
+    StatusCode registerSystematics (const IReentrantSystematicsTool& tool);
 
     /// description: add a systematic to the global registry set
     void registerSystematic(const SystematicVariation& systematic);

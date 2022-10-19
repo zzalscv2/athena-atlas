@@ -116,6 +116,7 @@ namespace CP
 
     /// add an individual systematic variation
     StatusCode add (const CP::SystematicSet& sys, CalibData value);
+    StatusCode add (const SystematicVariation& variation, CalibData value);
 
 
     /// Private Members
@@ -264,6 +265,17 @@ namespace CP
       m_affectingSystematics.insert (var);
 
     return StatusCode::SUCCESS;
+  }
+
+
+
+  template<typename CalibData>
+  StatusCode SystematicsCache<CalibData> ::
+  add (const SystematicVariation& variation, CalibData value)
+  {
+    SystematicSet sys;
+    sys.insert (variation);
+    return add (sys, std::move (value));
   }
 }
 

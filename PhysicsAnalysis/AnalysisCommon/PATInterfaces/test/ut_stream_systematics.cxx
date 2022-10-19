@@ -20,8 +20,7 @@
 int main(int /*argc*/, char** /*argv*/)
 {
   //std::cout << "running ut_stream_systematics" << std::endl;
-  std::string fileDir =
-    gSystem->ExpandPathName("/tmp/$USER/ut_stream_systematics/");
+  std::string fileDir = "PATInterfaces_ut_stream_systematics/";
   std::string mkdirCommand = "mkdir -p " + fileDir;
   system(mkdirCommand.c_str());
   std::string fileName = fileDir + "sysStreamTest.root";

@@ -10,7 +10,7 @@
 
 // Local include(s):
 #include <PATInterfaces/SystematicRegistry.h>
-#include <PATInterfaces/ISystematicsTool.h>
+#include <PATInterfaces/IReentrantSystematicsTool.h>
 #include <PATInterfaces/SystematicSet.h>
 #include <AsgMessaging/StatusCode.h>
 
@@ -42,7 +42,7 @@ namespace CP
 
 
   StatusCode SystematicRegistry ::
-  registerSystematics (const ISystematicsTool& tool)
+  registerSystematics (const IReentrantSystematicsTool& tool)
   {
     registerSystematics (tool.affectingSystematics());
     return addSystematicsToRecommended (tool.recommendedSystematics());
