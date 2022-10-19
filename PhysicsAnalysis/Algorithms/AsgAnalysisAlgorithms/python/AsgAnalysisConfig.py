@@ -73,6 +73,37 @@ class PileupReweightingBlock (ConfigBlock):
 
 
 
+class GeneratorAnalysisBlock (ConfigBlock):
+    """the ConfigBlock for generator algorithms"""
+
+    def __init__ (self) :
+        super (GeneratorAnalysisBlock, self).__init__ ()
+        self.saveCutBookkeepers = False
+        self.runNumber = 0
+        self.cutBookkeepersSystematics = False
+
+    def makeAlgs (self, config) :
+
+        if config.dataType() not in ["mc", "afii"] :
+            raise ValueError ("invalid data type: " + config.dataType())
+
+        if self.saveCutBookkeepers and not self.runNumber:
+            raise ValueError ("invalid run number: " + 0)
+
+        # Set up the CutBookkeepers algorithm:
+        if self.saveCutBookkeepers:
+          alg = config.createAlgorithm('CP::AsgCutBookkeeperAlg', 'CutBookkeeperAlg')
+          alg.runNumber = self.runNumber
+          alg.enableSystematics = self.cutBookkeepersSystematics
+          config.addPrivateTool( 'truthWeightTool', 'PMGTools::PMGTruthWeightTool' )
+
+        # Set up the weights algorithm:
+        alg = config.createAlgorithm( 'CP::PMGTruthWeightAlg', 'PMGTruthWeightAlg' )
+        config.addPrivateTool( 'truthWeightTool', 'PMGTools::PMGTruthWeightTool' )
+        alg.decoration = 'generatorWeight_%SYS%'
+
+
+
 class PtEtaSelectionBlock (ConfigBlock):
     """the ConfigBlock for a pt-eta selection"""
 
@@ -165,6 +196,26 @@ def makePileupReweightingConfig( seq, campaign=None, files=None, useDefaultConfi
     config.useDefaultConfig = useDefaultConfig
     config.userLumicalcFiles = userLumicalcFiles
     config.userPileupConfigs = userPileupConfigs
+    seq.append (config)
+
+
+
+def makeGeneratorAnalysisConfig( seq,
+                                 saveCutBookkeepers=False,
+                                 runNumber=0,
+                                 cutBookkeepersSystematics=False ):
+    """Create a generator analysis algorithm sequence
+
+    Keyword arguments:
+      saveCutBookkeepers -- save cut bokkeepers information into output file
+      runNumber -- MC run number
+      cutBookkeepersSystematics -- store CutBookkeepers systematics
+    """
+
+    config = GeneratorAnalysisBlock ()
+    config.saveCutBookkeepers = saveCutBookkeepers
+    config.runNumber = runNumber
+    config.cutBookkeepersSystematics = cutBookkeepersSystematics
     seq.append (config)
 
 

@@ -436,8 +436,7 @@ def makeSequenceOld (dataType, algSeq, vars, forCompare, isPhyslite, noPhysliteB
             makeGeneratorAnalysisSequence
         generatorSequence = makeGeneratorAnalysisSequence( dataType, saveCutBookkeepers=True, runNumber=284500, cutBookkeepersSystematics=True )
         algSeq += generatorSequence
-        if not forCompare :
-            vars += [ 'EventInfo.generatorWeight_%SYS% -> generatorWeight_%SYS%', ]
+        vars += [ 'EventInfo.generatorWeight_%SYS% -> generatorWeight_%SYS%', ]
 
 
     # Include, and then set up the trigger analysis sequence:
@@ -567,6 +566,15 @@ def makeSequenceBlocks (dataType, algSeq, vars, forCompare, isPhyslite, noPhysli
         vars += [
             'OutJets_%SYS%.jvt_effSF_%SYS% -> jet_jvtEfficiency_%SYS%',
         ]
+
+
+    if dataType != 'data' :
+        # Include, and then set up the generator analysis sequence:
+        from AsgAnalysisAlgorithms.AsgAnalysisConfig import \
+            makeGeneratorAnalysisConfig
+        generatorSequence = makeGeneratorAnalysisConfig( configSeq, saveCutBookkeepers=True, runNumber=284500, cutBookkeepersSystematics=True )
+        vars += [ 'EventInfo.generatorWeight_%SYS% -> generatorWeight_%SYS%', ]
+
 
     from AsgAnalysisAlgorithms.AsgAnalysisConfig import makePtEtaSelectionConfig
 
