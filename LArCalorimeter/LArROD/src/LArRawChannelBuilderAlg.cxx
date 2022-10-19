@@ -117,6 +117,8 @@ StatusCode LArRawChannelBuilderAlg::execute(const EventContext& ctx) const {
 
   //Loop over digits:
   for (const LArDigit* digit : *inputContainer) {
+  
+    size_t firstSample=m_firstSample;
 
     const HWIdentifier id=digit->hardwareID();
     const bool connected=(*cabling)->isOnlineConnected(id);
@@ -125,7 +127,6 @@ StatusCode LArRawChannelBuilderAlg::execute(const EventContext& ctx) const {
     ATH_MSG_VERBOSE("Working on channel " << m_onlineId->channel_name(id));
 
     const std::vector<short>& samples=digit->samples();
-    const size_t nSamples=samples.size();
     const int gain=digit->gain();
     const float p=peds->pedestal(id,gain);
    
@@ -134,12 +135,19 @@ StatusCode LArRawChannelBuilderAlg::execute(const EventContext& ctx) const {
     //The following autos will resolve either into vectors or vector-proxies
     const auto& ofca=ofcs->OFC_a(id,gain);
     const auto& adc2mev=adc2MeVs->ADC2MEV(id,gain);
+
+    // ensure that the size of the samples vector is compatible with ofc_a size when preceeding samples are saved
+    const size_t nSamples=samples.size()-firstSample;
+    if (nSamples<ofca.size()) {
+      ATH_MSG_ERROR("effective sample size: "<< nSamples << ", must be >= OFC_a size: " << ofca.size());
+      return StatusCode::FAILURE;
+    }
     
     //Sanity check on input conditions data:
     // FIXME: fix to get splash test running, should implement the iterations later
     size_t len=nSamples;
     if(!m_isSC && ATH_UNLIKELY(ofca.size()<nSamples)) {
-      if (!connected) continue; //No conditions for disconencted channel, who cares?
+      if (!connected) continue; //No conditions for disconnected channel, who cares?
       ATH_MSG_DEBUG("Number of OFC a's doesn't match number of samples for conencted channel " << m_onlineId->channel_name(id) 
 		    << " gain " << gain << ". OFC size=" << ofca.size() << ", nbr ADC samples=" << nSamples);
       len=ofca.size();
@@ -172,8 +180,8 @@ StatusCode LArRawChannelBuilderAlg::execute(const EventContext& ctx) const {
     // Check saturation AND discount pedestal
     std::vector<float> samp_no_ped(nSamples,0.0);
     for (size_t i=0;i<nSamples;++i) {
-      if (samples[i]==4096 || samples[i]==0) saturated=true;
-      samp_no_ped[i]=samples[i]-p;
+      if (samples[i+firstSample]==4096 || samples[i+firstSample]==0) saturated=true; //choose the correct first sample
+      samp_no_ped[i]=samples[i+firstSample]-p;
     }
     if (!m_isSC){
       for (size_t i=0;i<len;++i) {
@@ -237,7 +245,6 @@ StatusCode LArRawChannelBuilderAlg::execute(const EventContext& ctx) const {
       const auto& fullShape=shapes->Shape(id,gain);
       
       //Get Q-factor
-      size_t firstSample=m_firstSample;
       // fixing HEC to move +1 in case of 4 samples and firstSample 0 (copied from old LArRawChannelBuilder)
       if (fullShape.size()>nSamples && nSamples==4 && m_firstSample==0) {
 	if (m_onlineId->isHECchannel(id)) {
