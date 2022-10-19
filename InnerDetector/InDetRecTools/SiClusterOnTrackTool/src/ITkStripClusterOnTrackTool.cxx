@@ -443,7 +443,7 @@ std::unique_ptr<const InDet::SCT_ClusterOnTrack> ITk::StripClusterOnTrackTool::c
   ATH_MSG_VERBOSE(name() << " " << __FUNCTION__);
   if(!SC) return nullptr;
   
-  const SCT_ID* sct_ID;
+  const SCT_ID* sct_ID = nullptr;
   if (detStore()->retrieve(sct_ID, "SCT_ID").isFailure()) {
     ATH_MSG_ERROR ( "Could not get SCT ID helper" );
     throw std::runtime_error("Unable to get SCT_ID helper");
