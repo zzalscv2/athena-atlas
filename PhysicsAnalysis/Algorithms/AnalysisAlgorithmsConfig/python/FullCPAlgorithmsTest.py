@@ -116,12 +116,11 @@ def makeSequenceOld (dataType, algSeq, vars, forCompare, isPhyslite, noPhysliteB
              'OutJets_NOSYS.eta -> jet_eta', ]
     if dataType != 'data' :
         vars += [ 'OutJets_%SYS%.jvt_effSF_%SYS% -> jet_jvtEfficiency_%SYS%', ]
-        if not forCompare :
-            vars += [
-                # 'EventInfo.jvt_effSF_%SYS% -> jvtSF_%SYS%',
-                # 'EventInfo.fjvt_effSF_%SYS% -> fjvtSF_%SYS%',
-                # 'OutJets_%SYS%.fjvt_effSF_NOSYS -> jet_fjvtEfficiency_%SYS%',
-            ]
+        vars += [
+            # 'EventInfo.jvt_effSF_%SYS% -> jvtSF_%SYS%',
+            # 'EventInfo.fjvt_effSF_%SYS% -> fjvtSF_%SYS%',
+            # 'OutJets_%SYS%.fjvt_effSF_NOSYS -> jet_fjvtEfficiency_%SYS%',
+        ]
 
 
     # Include, and then set up the muon analysis algorithm sequence:
@@ -419,13 +418,8 @@ def makeSequenceOld (dataType, algSeq, vars, forCompare, isPhyslite, noPhysliteB
     from TriggerAnalysisAlgorithms.TriggerAnalysisSequence import \
         makeTriggerAnalysisSequence
     triggerSequence = makeTriggerAnalysisSequence( dataType, triggerChains=triggerChains, noFilter=True )
-    # FIXME: temporarily disabling this for comparisons, as there is no
-    # corresponding configuration block.  also, maybe it should be possible
-    # to disable filtering in the algorithm, i.e. just store the trigger
-    # decision without throwing away events.
-    if not forCompare :
-        algSeq += triggerSequence
-        vars += ['EventInfo.trigPassed_' + t + ' -> trigPassed_' + t for t in triggerChains]
+    algSeq += triggerSequence
+    vars += ['EventInfo.trigPassed_' + t + ' -> trigPassed_' + t for t in triggerChains]
 
 
 
@@ -548,8 +542,15 @@ def makeSequenceBlocks (dataType, algSeq, vars, forCompare, isPhyslite, noPhysli
         # Include, and then set up the generator analysis sequence:
         from AsgAnalysisAlgorithms.AsgAnalysisConfig import \
             makeGeneratorAnalysisConfig
-        generatorSequence = makeGeneratorAnalysisConfig( configSeq, saveCutBookkeepers=True, runNumber=284500, cutBookkeepersSystematics=True )
+        makeGeneratorAnalysisConfig( configSeq, saveCutBookkeepers=True, runNumber=284500, cutBookkeepersSystematics=True )
         vars += [ 'EventInfo.generatorWeight_%SYS% -> generatorWeight_%SYS%', ]
+
+
+    # Include, and then set up the trigger analysis sequence:
+    from TriggerAnalysisAlgorithms.TriggerAnalysisConfig import \
+        makeTriggerAnalysisConfig
+    makeTriggerAnalysisConfig( configSeq, triggerChains=triggerChains, noFilter=True )
+    vars += ['EventInfo.trigPassed_' + t + ' -> trigPassed_' + t for t in triggerChains]
 
 
     from AsgAnalysisAlgorithms.AsgAnalysisConfig import makePtEtaSelectionConfig
