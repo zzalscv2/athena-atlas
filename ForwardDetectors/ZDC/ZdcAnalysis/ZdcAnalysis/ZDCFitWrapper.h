@@ -133,16 +133,16 @@ public:
 
   ZDCFitExpFermiVariableTaus(const std::string& tag, float tmin, float tmax, bool fixTau1, bool fixTau2, float tau1, float tau2);
 
-  virtual void DoInitialize(float initialAmp, float initialT0, float ampMin, float ampMax);
-  virtual void SetT0FitLimits(float tMin, float tMax);
+  virtual void DoInitialize(float initialAmp, float initialT0, float ampMin, float ampMax) override;
+  virtual void SetT0FitLimits(float tMin, float tMax) override;
 
-  virtual float GetAmplitude() const {return GetWrapperTF1()->GetParameter(0); }
-  virtual float GetAmpError() const {return GetWrapperTF1()->GetParError(0); }
+  virtual float GetAmplitude() const override {return GetWrapperTF1()->GetParameter(0); }
+  virtual float GetAmpError() const override {return GetWrapperTF1()->GetParError(0); }
 
-  virtual float GetTau1() const {return GetWrapperTF1()->GetParameter(2);}
-  virtual float GetTau2() const {return GetWrapperTF1()->GetParameter(3);}
+  virtual float GetTau1() const override {return GetWrapperTF1()->GetParameter(2);}
+  virtual float GetTau2() const override {return GetWrapperTF1()->GetParameter(3);}
 
-  virtual float GetTime() const {
+  virtual float GetTime() const override {
     const TF1* theTF1 = GetWrapperTF1();
 
     float fitT0 =  theTF1->GetParameter(1);
@@ -156,14 +156,14 @@ public:
     return fitT0;
   }
 
-  virtual float GetShapeParameter(size_t index) const
+  virtual float GetShapeParameter(size_t index) const override
   {
     if (index == 0) return GetWrapperTF1()->GetParameter(2);
     else if (index == 1) return GetWrapperTF1()->GetParameter(3);
     else throw std::runtime_error("Fit parameter does not exist.");
   }
 
-  virtual float GetBkgdMaxFraction() const
+  virtual float GetBkgdMaxFraction() const override
   {
     const TF1* theTF1 = ZDCFitWrapper::GetWrapperTF1();
     double amp = theTF1->GetParameter(0);
@@ -174,7 +174,7 @@ public:
 
   //  virtual float GetNDOF() const {return _fitFunc->GetNDF(); }
 
-  virtual double operator()(const double *x, const double *p) {
+  virtual double operator()(const double *x, const double *p)  override{
     return ZDCFermiExpFit(x, p);
   }
 
@@ -205,30 +205,30 @@ public:
 
   ~ZDCFitExpFermiFixedTaus() {}
 
-  virtual void DoInitialize(float initialAmp, float initialT0, float ampMin, float ampMax);
-  virtual void SetT0FitLimits(float tMin, float tMax);
+  virtual void DoInitialize(float initialAmp, float initialT0, float ampMin, float ampMax) override;
+  virtual void SetT0FitLimits(float tMin, float tMax) override;
 
   virtual void ConstrainFit() override;
   virtual void UnconstrainFit() override;
 
-  virtual float GetAmplitude() const {return GetWrapperTF1()->GetParameter(0); }
-  virtual float GetAmpError() const {return GetWrapperTF1()->GetParError(0); }
+  virtual float GetAmplitude() const override {return GetWrapperTF1()->GetParameter(0); }
+  virtual float GetAmpError() const override {return GetWrapperTF1()->GetParError(0); }
 
-  virtual float GetTau1() const {return m_tau1;}
-  virtual float GetTau2() const {return m_tau2;}
+  virtual float GetTau1() const override {return m_tau1;}
+  virtual float GetTau2() const override {return m_tau2;}
 
-  virtual float GetTime() const {
+  virtual float GetTime() const override {
     return GetWrapperTF1()->GetParameter(1) + m_timeCorr; // Correct the time to the maximum
   }
 
-  virtual float GetShapeParameter(size_t index) const
+  virtual float GetShapeParameter(size_t index) const override
   {
     if (index == 0) return m_tau1;
     else if (index == 1) return m_tau2;
     else throw std::runtime_error("Fit parameter does not exist.");
   }
 
-  virtual float GetBkgdMaxFraction() const
+  virtual float GetBkgdMaxFraction() const override
   {
     const TF1* theTF1 = ZDCFitWrapper::GetWrapperTF1();
     double amp = theTF1->GetParameter(0);
@@ -238,7 +238,7 @@ public:
     return background / amp;
   }
 
-  virtual double operator() (const double *x, const double *p)
+  virtual double operator() (const double *x, const double *p) override
   {
     double amp = p[0];
     double t0 = p[1];
