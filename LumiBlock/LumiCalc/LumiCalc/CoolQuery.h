@@ -288,7 +288,7 @@ class CoolQuery{
     std::map<cool::ValidityKey, T> getLumiIterator(const std::string& luminame, const std::string& folder_name, const std::string& tag, const cool::ChannelId& id );
 
   // returns numerical 1/2/3 values for trigger "triggername" 
-  unsigned int getTriggerLevel(std::string triggername);    
+  unsigned int getTriggerLevel(const std::string& triggername);    
 
   // Retrieve all lumi data at once
   struct LumiFolderData {

@@ -76,9 +76,9 @@ std::string CoolQuery::transConn(const std::string& inconn) {
 }
 
 //===========================================================================
-unsigned int CoolQuery::getTriggerLevel(std::string triggername){
+unsigned int CoolQuery::getTriggerLevel(const std::string& triggername){
 
-  size_t found = triggername.find_first_of("_");
+  size_t found = triggername.find_first_of('_');
   if(found != std::string::npos){
     std::string s_lvl = triggername.substr(0,found);
     if(s_lvl == "EF") return 3;

@@ -3,6 +3,8 @@
 */
 
 // Class header
+#include <utility>
+
 #include "ISF_FastCaloSimParametrization/CaloCellContainerSD.h"
 
 // Athena headers
@@ -16,7 +18,7 @@ CaloCellContainerSD::CaloCellContainerSD(const std::string& name, const std::str
   : G4VSensitiveDetector( name ),
     m_EmptyCellBuilderTool("EmptyCellBuilderTool/EmptyCellBuilderTool"),
     m_caloCellContainer (CaloCellContainerName),
-    m_FastHitConvertTool (FastHitConvertTool)
+    m_FastHitConvertTool (std::move(FastHitConvertTool))
 {
   if(m_EmptyCellBuilderTool.retrieve().isFailure()) {
     G4Exception("CaloCellContainerSD", "FailedEmptyCellBuilderToolRetrieval", FatalException, "CaloCellContainerSD: Failed to retrieve the empty cell builder tool.");

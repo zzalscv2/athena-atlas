@@ -1,15 +1,17 @@
 #define __TrackInfo_cxx__
+#include <utility>
+
 #include "TrackInfo.h"
 namespace MMCTest {
     TrackInfo::TrackInfo(std::string type, std::vector<std::string> systs) {
-        m_Type = type;
-        m_Systs = systs;
+        m_Type = std::move(type);
+        m_Systs = std::move(systs);
         Reset();
     }
 
     void TrackInfo::Reset() {
         m_Pt = -999.;
-        for (auto s : m_Systs) { m_CalibPt[s] = -999.; }
+        for (const auto& s : m_Systs) { m_CalibPt[s] = -999.; }
         m_Eta = -999.;
         m_Phi = -999.;
         m_QoverP = -999.;
@@ -33,7 +35,7 @@ namespace MMCTest {
         t->Branch(("Muon_" + m_Type + "_NDoF").c_str(), &m_NDoF);
         t->Branch(("Muon_" + m_Type + "_TrackPars").c_str(), &m_TrackPars);
         t->Branch(("Muon_" + m_Type + "_TrackCovMatrix").c_str(), &m_TrackCovMatrix);
-        for (auto s : m_Systs) { t->Branch(("Muon_" + m_Type + "_" + s + "CalibPt").c_str(), &m_CalibPt[s]); }
+        for (const auto& s : m_Systs) { t->Branch(("Muon_" + m_Type + "_" + s + "CalibPt").c_str(), &m_CalibPt[s]); }
     }
 
     void TrackInfo::Fill(const xAOD::TrackParticle* tp) {
