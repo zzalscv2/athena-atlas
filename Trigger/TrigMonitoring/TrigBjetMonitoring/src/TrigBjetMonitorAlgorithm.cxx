@@ -566,21 +566,21 @@ StatusCode TrigBjetMonitorAlgorithm::fillHistograms( const EventContext& ctx ) c
 	    NameH = "DIPSL_pu_tr_"+trigName;
 	    ATH_MSG_DEBUG( " NameH: " << NameH  );
 	    auto DIPSL_pu = Monitored::Scalar<double>(NameH,0.0);
-	    btag->pu("dipsLoose20210517",DIPSL_pu);
+	    btag->pu("dips20211116",DIPSL_pu);
 	    ATH_MSG_DEBUG("        DIPSL_pu: " << DIPSL_pu);
 	    fill("TrigBjetMonitor",DIPSL_pu);
 	    
 	    NameH = "DIPSL_pc_tr_"+trigName;
 	    ATH_MSG_DEBUG( " NameH: " << NameH  );
 	    auto DIPSL_pc = Monitored::Scalar<double>(NameH,0.0);
-	    btag->pc("dipsLoose20210517",DIPSL_pc);
+	    btag->pc("dips20211116",DIPSL_pc);
 	    ATH_MSG_DEBUG("        DIPSL_pc: " << DIPSL_pc);
 	    fill("TrigBjetMonitor",DIPSL_pc);
 	    
 	    NameH = "DIPSL_pb_tr_"+trigName;
 	    ATH_MSG_DEBUG( " NameH: " << NameH  );
 	    auto DIPSL_pb = Monitored::Scalar<double>(NameH,0.0);
-	    btag->pb("dipsLoose20210517",DIPSL_pb);
+	    btag->pb("dips20211116",DIPSL_pb);
 	    ATH_MSG_DEBUG("        DIPSL_pb: " << DIPSL_pb);
 	    fill("TrigBjetMonitor",DIPSL_pb);
 	    
