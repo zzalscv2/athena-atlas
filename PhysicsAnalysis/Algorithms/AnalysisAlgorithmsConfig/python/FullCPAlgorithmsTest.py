@@ -447,28 +447,21 @@ def makeSequenceOld (dataType, algSeq, vars, forCompare, isPhyslite, noPhysliteB
 
 def makeSequenceBlocks (dataType, algSeq, vars, forCompare, isPhyslite, noPhysliteBroken) :
 
+    configSeq = ConfigSequence ()
+
+
     if not isPhyslite :
         # Include, and then set up the pileup analysis sequence:
         prwfiles, lumicalcfiles = pileupConfigFiles(dataType)
 
-        from AsgAnalysisAlgorithms.PileupAnalysisSequence import \
-            makePileupAnalysisSequence
-        pileupSequence = makePileupAnalysisSequence(
-            dataType,
-            userPileupConfigs=prwfiles,
-            userLumicalcFiles=lumicalcfiles,
-        )
-        pileupSequence.configure( inputName = {}, outputName = {} )
-
-        # Add the pileup sequence to the job:
-        algSeq += pileupSequence
-
+        from AsgAnalysisAlgorithms.AsgAnalysisConfig import \
+            makePileupReweightingConfig
+        makePileupReweightingConfig (configSeq,
+                                     userPileupConfigs=prwfiles,
+                                     userLumicalcFiles=lumicalcfiles)
 
     vars += [ 'EventInfo.runNumber     -> runNumber',
               'EventInfo.eventNumber   -> eventNumber', ]
-
-
-    configSeq = ConfigSequence ()
 
 
     # Include, and then set up the electron analysis algorithm sequence:
