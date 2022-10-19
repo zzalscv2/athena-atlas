@@ -119,6 +119,9 @@ namespace CP {
 
         MCP::DataYear getPeriod(bool isData) const; 
 
+   private:
+
+        bool m_MuonIntHighTSmearToolInitialized{false};
 
     };  // class MuonCalibTool
 
