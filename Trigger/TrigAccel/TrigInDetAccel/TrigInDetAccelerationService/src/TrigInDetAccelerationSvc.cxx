@@ -154,8 +154,8 @@ const std::vector<short>& TrigInDetAccelerationSvc::getLayerInformation(int i) c
 
 bool TrigInDetAccelerationSvc::exportGeometryInformation(const std::map<std::tuple<short,short,short>,std::vector<PhiEtaHash> >& hashMap) const {
   
-  const InDetDD::SCT_DetectorManager *  sct_mgr;
-  const InDetDD::PixelDetectorManager * pix_mgr;
+  const InDetDD::SCT_DetectorManager *  sct_mgr = nullptr;
+  const InDetDD::PixelDetectorManager * pix_mgr = nullptr;
 
   if (m_detStore->retrieve(sct_mgr, "SCT").isFailure()) {
     ATH_MSG_WARNING("failed to get SCT Manager");
@@ -281,8 +281,8 @@ bool TrigInDetAccelerationSvc::exportGeometryInformation(const std::map<std::tup
 
 bool TrigInDetAccelerationSvc::extractGeometryInformation(std::map<std::tuple<short,short,short>, std::vector<PhiEtaHash> >& hashMap) {
 
-  const PixelID* pixelId;
-  const SCT_ID* sctId;
+  const PixelID* pixelId = nullptr;
+  const SCT_ID* sctId = nullptr;
 
   if (m_detStore->retrieve(pixelId, "PixelID").isFailure()) {
     ATH_MSG_WARNING("Could not get Pixel ID helper");
