@@ -102,39 +102,6 @@ def TRT_StandaloneTrackFinderCfg(flags, name ='InDetTRT_StandaloneTrackFinder', 
     acc.addEventAlgo(InDetTRT_StandaloneTrackFinder)
     return acc
 
-def TRT_SegmentsToTrackCfg( flags, name ='InDetTRT_SegmentsToTrack_Barrel', extension = "", BarrelSegments = None, prd_to_track_map = '', **kwargs):
-    acc = ComponentAccumulator()
-
-    if extension == "_TRT":
-        TRTStandaloneTracks = 'StandaloneTRTTracks'
-    else:
-        TRTStandaloneTracks = 'TRTStandaloneTracks'
-
-    #
-    # --- cosmics segment to track conversion for Barrel
-    #
-    from TrkConfig.CommonTrackFitterConfig import InDetTrackFitterCfg
-    InDetTrackFitter = acc.popToolsAndMerge(InDetTrackFitterCfg(flags))
-
-    from TrkConfig.TrkTrackSummaryToolConfig import InDetTrackSummaryToolSharedHitsCfg
-    InDetTrackSummaryToolTRTTracks = acc.popToolsAndMerge(InDetTrackSummaryToolSharedHitsCfg(flags))
-
-    from InDetConfig.InDetAssociationToolsConfig import InDetPRDtoTrackMapToolGangedPixelsCfg
-    InDetPRDtoTrackMapToolGangedPixels = acc.popToolsAndMerge( InDetPRDtoTrackMapToolGangedPixelsCfg(flags) )
-
-    kwargs.setdefault("InputSegmentsCollection", BarrelSegments)
-    kwargs.setdefault("OutputTrackCollection", TRTStandaloneTracks)
-    kwargs.setdefault("TrackFitter", InDetTrackFitter)
-    kwargs.setdefault("SummaryTool", InDetTrackSummaryToolTRTTracks)
-    kwargs.setdefault("AssociationTool", InDetPRDtoTrackMapToolGangedPixels if prd_to_track_map !='' else None,)
-    kwargs.setdefault("InputAssociationMapName", prd_to_track_map)
-    kwargs.setdefault("MinNHit", flags.InDet.Tracking.ActivePass.minTRTonly)
-    kwargs.setdefault("OutlierRemoval", True)
-    kwargs.setdefault("MaterialEffects", False)
-
-    InDetTrkSegmenttoTrk = CompFactory.InDet.TRT_SegmentsToTrack(name = name, **kwargs)
-    acc.addEventAlgo(InDetTrkSegmenttoTrk)
-    return acc
 # ------------------------------------------------------------------------------------
 #
 # ----------- TRT Standelone Track Finding
@@ -167,10 +134,11 @@ def TRTStandaloneCfg( flags, extension = '', InputCollections = None, BarrelSegm
         #
         # --- cosmics segment to track conversion for Barrel
         #
+        from InDetConfig.TRT_SegmentsToTrackConfig import TRT_SegmentsToTrackCfg
         acc.merge(TRT_SegmentsToTrackCfg(flags, name = 'InDetTRT_SegmentsToTrack_Barrel'+extension,
-                                                extension=extension,
-                                                BarrelSegments = BarrelSegments,
-                                                prd_to_track_map = prd_to_track_map))
+                                         OutputTrackCollection = 'StandaloneTRTTracks' if extension=="_TRT" else 'TRTStandaloneTracks',
+                                         InputSegmentsCollection = BarrelSegments,
+                                         InputAssociationMapName = prd_to_track_map))
 
     return acc
 
