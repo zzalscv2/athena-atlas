@@ -11,7 +11,7 @@ def LArRawChannelBuilderAlgCfg(configFlags, **kwargs):
     acc = LArADC2MeVCondAlgCfg(configFlags)
 
     kwargs.setdefault("name", "LArRawChannelBuilder")
-    kwargs.setdefault("firstSample", configFlags.LAr.ROD.FirstSample)
+    kwargs.setdefault("firstSample", configFlags.LAr.ROD.nPreceedingSamples if configFlags.LAr.ROD.nPreceedingSamples!=0 else configFlags.LAr.ROD.FirstSample)
     obj = "AthenaAttributeList"
     dspkey = 'Run2DSPThresholdsKey'
     from IOVDbSvc.IOVDbSvcConfig import addFolders

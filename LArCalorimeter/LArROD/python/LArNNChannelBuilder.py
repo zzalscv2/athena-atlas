@@ -11,7 +11,8 @@ def LArNNRawChannelBuilderCfg(configFlags, name="LArNNRawChannelBuilder", **kwar
 
     acc = LArADC2MeVCondAlgCfg(configFlags)
 
-    kwargs.setdefault("firstSample", configFlags.LAr.ROD.FirstSample)
+    # the NN always requires 1 sample in the past
+    kwargs.setdefault("firstSample", (configFlags.LAr.ROD.nPreceedingSamples-1) if configFlags.LAr.ROD.nPreceedingSamples!=0 else configFlags.LAr.ROD.FirstSample)
 
     if configFlags.Input.isMC:
         kwargs.setdefault("LArRawChannelKey", "LArRawChannels")

@@ -93,7 +93,19 @@ StatusCode LArNNRawChannelBuilder::execute(const EventContext& ctx) const {
     ATH_MSG_VERBOSE("Working on channel " << m_onlineId->channel_name(id));
 
     const std::vector<short>& samples = digit->samples();
-    const size_t nSamples = samples.size();
+    const size_t nSamples = 5; //hardcoded as the network always uses 5 samples
+
+    if ( (samples.size() - m_firstSample) < nSamples) {
+      ATH_MSG_ERROR("mismatched effective sample size: "<< samples.size() - m_firstSample << ", must be > " << nSamples); 
+      return StatusCode::FAILURE;
+    }
+
+    //The following creates a sub-sample vector of the correct size to be passed on to the NN
+    std::vector<short>subsamples(nSamples, 0.0);
+    for (size_t i = m_firstSample; i < m_firstSample+nSamples; ++i) {
+      subsamples.push_back(samples[i]);
+    }
+
     const int gain = digit->gain();
     const float p = peds->pedestal(id, gain);
 
@@ -122,8 +134,8 @@ StatusCode LArNNRawChannelBuilder::execute(const EventContext& ctx) const {
     // Check saturation AND discount pedestal
     std::vector<float>samp_no_ped(nSamples, 0.0);
     for (size_t i = 0; i < nSamples; ++i) {
-      if (samples[i] == 4096 || samples[i] == 0) saturated = true;
-      samp_no_ped[i] = samples[i]-p;
+      if (subsamples[i] == 4096 || subsamples[i] == 0) saturated = true;
+      samp_no_ped[i] = subsamples[i]-p;
     }
 
     // LWTNN configuration
@@ -139,7 +151,7 @@ StatusCode LArNNRawChannelBuilder::execute(const EventContext& ctx) const {
 
     nn_in.clear();
 
-    for (auto d : samples) {
+    for (auto d : subsamples) {
 
       nn_in.push_back((d-p)/4096.0);
 
