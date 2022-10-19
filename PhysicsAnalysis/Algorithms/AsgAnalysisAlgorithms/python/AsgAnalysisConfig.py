@@ -4,6 +4,75 @@
 from AnalysisAlgorithmsConfig.ConfigBlock import ConfigBlock
 
 
+class PileupReweightingBlock (ConfigBlock):
+    """the ConfigBlock for pileup reweighting"""
+
+    def __init__ (self) :
+        super (PileupReweightingBlock, self).__init__ ()
+        self.campaign=None
+        self.files=None
+        self.useDefaultConfig=False
+        self.userLumicalcFiles=None
+        self.userPileupConfigs=None
+
+
+    def makeAlgs (self, config) :
+
+        from Campaigns.Utils import Campaign
+
+        try:
+            from AthenaCommon.Logging import logging
+        except ImportError:
+            import logging
+        log = logging.getLogger('makePileupAnalysisSequence')
+
+        # TODO: support per-campaign config
+
+        toolConfigFiles = []
+        toolLumicalcFiles = []
+        campaign = self.campaign
+        if self.files is not None and (campaign is None or campaign is Campaign.Unknown or self.userPileupConfigs is None):
+            if campaign is None or campaign is Campaign.Unknown:
+                from Campaigns.Utils import getMCCampaign
+                campaign = getMCCampaign(self.files)
+                if campaign:
+                    log.info(f'Autoconfiguring PRW with campaign: {campaign}')
+                else:
+                    log.info('Campaign could not be determined.')
+
+            if campaign:
+                if self.userPileupConfigs is None:
+                    from PileupReweighting.AutoconfigurePRW import getConfigurationFiles
+                    toolConfigFiles = getConfigurationFiles(campaign=campaign, files=self.files, useDefaultConfig=self.useDefaultConfig)
+                    log.info('Setting PRW configuration based on input files')
+
+                    if toolConfigFiles:
+                        log.info(f'Using PRW configuration: {", ".join(toolConfigFiles)}')
+                else:
+                    log.info('Using user provided PRW configuration')
+
+        if self.userPileupConfigs is not None:
+            toolConfigFiles = self.userPileupConfigs[:]
+
+        if self.userLumicalcFiles is not None:
+            log.info('Using user-provided lumicalc files')
+            toolLumicalcFiles = self.userLumicalcFiles[:]
+        else:
+            from PileupReweighting.AutoconfigurePRW import getLumicalcFiles
+            toolLumicalcFiles = getLumicalcFiles(campaign)
+
+        # Set up the only algorithm of the sequence:
+        alg = config.createAlgorithm( 'CP::PileupReweightingAlg', 'PileupReweightingAlg' )
+        config.addPrivateTool( 'pileupReweightingTool', 'CP::PileupReweightingTool' )
+        alg.pileupReweightingTool.ConfigFiles = toolConfigFiles
+        if not toolConfigFiles and dataType != "data":
+            log.info("No PRW config files provided. Disabling reweighting")
+            # Setting the weight decoration to the empty string disables the reweighting
+            alg.pileupWeightDecoration = ""
+        alg.pileupReweightingTool.LumiCalcFiles = toolLumicalcFiles
+
+
+
 class PtEtaSelectionBlock (ConfigBlock):
     """the ConfigBlock for a pt-eta selection"""
 
@@ -80,6 +149,23 @@ class OutputThinningBlock (ConfigBlock):
         else :
             alg.selection = []
         alg.deepCopy = False
+
+
+
+def makePileupReweightingConfig( seq, campaign=None, files=None, useDefaultConfig=False, userLumicalcFiles=None, userPileupConfigs=None ):
+    """Create a PRW analysis config
+
+    Keyword arguments:
+    """
+    # TO DO: add explanation of the keyword arguments, left to experts
+
+    config = PileupReweightingBlock ()
+    config.campaign = campaign
+    config.files = files
+    config.useDefaultConfig = useDefaultConfig
+    config.userLumicalcFiles = userLumicalcFiles
+    config.userPileupConfigs = userPileupConfigs
+    seq.append (config)
 
 
 
