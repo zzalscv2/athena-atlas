@@ -215,7 +215,7 @@ CorrectionCode BTaggingSelectionTool::getTaggerWeight( const xAOD::Jet& jet, dou
 
  if ( "MV2cl100_MV2c100"==taggerName ){
 
-  ATH_MSG_ERROR("Cannot retrive weight for 2D taggers!");
+  ATH_MSG_ERROR("Cannot retrieve weight for 2D taggers!");
 
   return CorrectionCode::Error;
  }
@@ -248,6 +248,7 @@ CorrectionCode BTaggingSelectionTool::getTaggerWeight( const xAOD::Jet& jet, dou
 
   if ((!btag)){
    ATH_MSG_ERROR("Failed to retrieve the BTagging information");
+   return CorrectionCode::Error;
   }
 
   if ( (!btag->pb(taggerName, dl1_pb ))
@@ -376,6 +377,7 @@ asg::AcceptData BTaggingSelectionTool::accept( const xAOD::Jet& jet ) const {
 
     if ((!btag)){
       ATH_MSG_ERROR("Failed to retrieve the BTagging information");
+      return acceptData;
     }
 
     if ( (!btag->MVx_discriminant("MV2cl100", weight_mv2cl100 ))|| (!btag->MVx_discriminant("MV2c100", weight_mv2c100 )) ){
