@@ -65,7 +65,7 @@ class PileupReweightingBlock (ConfigBlock):
         alg = config.createAlgorithm( 'CP::PileupReweightingAlg', 'PileupReweightingAlg' )
         config.addPrivateTool( 'pileupReweightingTool', 'CP::PileupReweightingTool' )
         alg.pileupReweightingTool.ConfigFiles = toolConfigFiles
-        if not toolConfigFiles and dataType != "data":
+        if not toolConfigFiles and config.dataType() != "data":
             log.info("No PRW config files provided. Disabling reweighting")
             # Setting the weight decoration to the empty string disables the reweighting
             alg.pileupWeightDecoration = ""
@@ -101,6 +101,22 @@ class GeneratorAnalysisBlock (ConfigBlock):
         alg = config.createAlgorithm( 'CP::PMGTruthWeightAlg', 'PMGTruthWeightAlg' )
         config.addPrivateTool( 'truthWeightTool', 'PMGTools::PMGTruthWeightTool' )
         alg.decoration = 'generatorWeight_%SYS%'
+
+
+
+class PrimaryVertexBlock (ConfigBlock):
+    """the ConfigBlock for requiring primary vertices"""
+
+    def __init__ (self) :
+        super (PrimaryVertexBlock, self).__init__ ()
+
+
+    def makeAlgs (self, config) :
+
+        config.createAlgorithm( 'CP::VertexSelectionAlg',
+                                'PrimaryVertexSelectorAlg' )
+        config.VertexContainer = 'PrimaryVertices'
+        config.MinVertices = 1
 
 
 
@@ -216,6 +232,15 @@ def makeGeneratorAnalysisConfig( seq,
     config.saveCutBookkeepers = saveCutBookkeepers
     config.runNumber = runNumber
     config.cutBookkeepersSystematics = cutBookkeepersSystematics
+    seq.append (config)
+
+
+
+def makePrimaryVertexConfig( seq ) :
+    """Create config block that requires a primary vertex
+    """
+
+    config = PrimaryVertexBlock ()
     seq.append (config)
 
 

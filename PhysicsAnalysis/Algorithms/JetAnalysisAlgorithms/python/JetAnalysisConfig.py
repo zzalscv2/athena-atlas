@@ -153,7 +153,7 @@ class SmallRJetAnalysisConfig (ConfigBlock) :
             # Set this actually to the *output* collection
             alg.jets = config.readName (self.containerName)
             alg.jetsOut = config.copyName (self.containerName)
-            alg.decorator.JetContainer = alg.jetsOut
+            alg.decorator.JetContainer = alg.jetsOut.replace ('%SYS%', 'NOSYS')
             alg.decorator.SuppressInputDependence=True
             alg.decorator.SuppressOutputDependence=True
 
