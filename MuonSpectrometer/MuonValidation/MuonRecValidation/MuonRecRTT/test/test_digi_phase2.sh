@@ -14,6 +14,7 @@
 # simulation was executed in Athena,22.0.34
 Digi_tf.py --inputHITSFile /cvmfs/atlas-nightlies.cern.ch/repo/data/data-art/MuonRecRTT/Run4/HITS/HITS_DiMuon_2k__AbsEta_09_28__Pt_10_1000GeV.root \
            --imf False \
+           --conditionsTag "default:OFLCOND-MC21-SDR-RUN4-01" \
            --postExec 'database_layout="MuonSpectrometer-R.10.01";include("MuonGeoModel/InitGeoFromLocal_postIncl.py");conddb.addOverride("/MDT/RTBLOB","MDTRT_Sim-Run4-01");conddb.addOverride("/MDT/T0BLOB","MDTT0_Sim-Run4-01");svcMgr.MessageSvc.Format = "% F%67W%S%7W%R%T %0W%M";topSequence.MdtDigitToMdtRDO.isPhaseII=True;' \
            --outputRDOFile OUT_RDO.root \
            --athenaopts='--exctrace'

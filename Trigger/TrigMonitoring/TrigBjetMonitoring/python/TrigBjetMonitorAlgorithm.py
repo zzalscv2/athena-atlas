@@ -614,7 +614,7 @@ if __name__=='__main__':
     #ConfigFlags.Input.isMC = False
 
     # AOD file to be run w/ MT access and Mon Groups implemented
-    file = '/afs/cern.ch/work/e/enagy/public/ARTfiles/MCtest090922.AOD.pool.root'
+    file = '/eos/user/e/enagy/ARTfiles/MCtest171022.AOD.pool.root'
 
     ConfigFlags.Input.Files = [file]
     ConfigFlags.Input.isMC = True

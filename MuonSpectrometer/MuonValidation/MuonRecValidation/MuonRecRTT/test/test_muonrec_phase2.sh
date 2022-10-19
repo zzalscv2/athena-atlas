@@ -23,6 +23,7 @@
 Reco_tf.py --inputRDOFile /cvmfs/atlas-nightlies.cern.ch/repo/data/data-art/MuonRecRTT/Run4/RDO/RDO_DiMuon_Endcap_R4LatestLayout_v1.root \
            --preExec "from MuonRecExample.MuonRecFlags import muonRecFlags;muonRecFlags.setDefaults();muonRecFlags.useLooseErrorTuning.set_Value_and_Lock(True);muonRecFlags.doTrackPerformance=True;muonRecFlags.TrackPerfSummaryLevel=2;muonRecFlags.TrackPerfDebugLevel=5;from RecExConfig.RecFlags import rec;rec.doTrigger=False;rec.doEgamma=True;rec.doLucid=False;rec.doZdc=False;rec.doJetMissingETTag=True;from MuonRecExample.MuonStandaloneFlags import muonStandaloneFlags;muonStandaloneFlags.printSummary=True;" \
            --autoConfiguration everything \
+           --conditionsTag "default:OFLCOND-MC21-SDR-RUN4-01" \
            --imf False \
            --postInclude MuonPRDTest/NSWPRDValAlg.reco.py \
            --postExec 'database_layout="MuonSpectrometer-R.10.01";include("MuonGeoModel/InitGeoFromLocal_postIncl.py");conddb.addOverride("/MDT/RTBLOB","MDTRT_Sim-Run4-01");conddb.addOverride("/MDT/T0BLOB","MDTT0_Sim-Run4-01")' \

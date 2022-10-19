@@ -14,6 +14,7 @@ StatusCode OverviewMonitorAlgorithm::initialize() {
   ATH_MSG_DEBUG("OverviewMonitorAlgorith::initialize");
   ATH_MSG_DEBUG("Package Name "<< m_packageName);
   
+  ATH_CHECK(m_ppmErrorLocation.initialize());
   ATH_CHECK(m_cpmErrorLocation.initialize());
   ATH_CHECK(m_cpmMismatchLocation.initialize());
   ATH_CHECK(m_ppmSimBSMismatchLocation.initialize());
@@ -38,6 +39,41 @@ StatusCode OverviewMonitorAlgorithm::fillHistograms( const EventContext& ctx ) c
   Monitored::Scalar<int> globalOverviewY = Monitored::Scalar<int>("globalOverviewY", 0);
 
   int err_per_LB=0;
+
+
+   // PPM data
+  { 
+    const auto* errTES = SG::get(m_ppmErrorLocation, ctx);
+    if (!errTES || errTES->size() != size_t(ppmCrates)) {
+      ATH_MSG_INFO("No PPM error vector of expected size");
+    } else {
+      for (int crate = 0; crate < ppmCrates; ++crate) {
+	const int err = (*errTES)[crate];
+	if (err == 0)
+	  continue;
+	globalOverviewY=crate;
+	if ((err >> DataStatus) & 0x1) {
+	  globalOverviewX=DataStatus;
+	  fill(m_packageName,globalOverviewX,globalOverviewY);
+	  err_per_LB+=1;
+	}
+	if ((err >> DataError) & 0x1) {
+	  globalOverviewX=DataError;
+	  fill(m_packageName,globalOverviewX,globalOverviewY);
+	  err_per_LB+=1;
+
+	}
+	if ((err >> PPMSubStatus) & 0x1) {
+	  globalOverviewX=PPMSubStatus;
+	  globalOverviewY=crate;
+	  fill(m_packageName,globalOverviewX,globalOverviewY);
+	  err_per_LB+=1;
+	}
+      }
+    }
+  }
+
+
 
   // CPM and CPM CMX Error data
   {

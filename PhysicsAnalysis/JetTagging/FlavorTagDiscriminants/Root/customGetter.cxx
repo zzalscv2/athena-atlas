@@ -20,20 +20,21 @@ namespace {
     const std::string& name)
   {
     if (name == "pt") {
-      return [](const xAOD::Jet& j) {return j.pt();};
+      return [](const xAOD::Jet& j) -> float {return j.pt();};
     }
     if (name == "log_pt") {
-      return [](const xAOD::Jet& j) {return std::log(j.pt());};
-    }
-    if (name == "abs_eta") {
-      return [](const xAOD::Jet& j) {return std::abs(j.eta());};
+      return [](const xAOD::Jet& j) -> float {return std::log(j.pt());};
     }
     if (name == "eta") {
-      return [](const xAOD::Jet& j) {return j.eta();};
+      return [](const xAOD::Jet& j) -> float {return j.eta();};
+    }
+    if (name == "abs_eta") {
+      return [](const xAOD::Jet& j) -> float {return std::abs(j.eta());};
     }
     if (name == "energy") {
-      return [](const xAOD::Jet& j) {return j.e();};
+      return [](const xAOD::Jet& j) -> float {return j.e();};
     }
+
     throw std::logic_error("no match for custom getter " + name);
   }
 
@@ -121,21 +122,64 @@ namespace {
   }
 
   std::optional<FlavorTagDiscriminants::SequenceFromTracks>
-  sequenceNoDep(const std::string& name)
+  sequenceNoIpDep(const std::string& name)
   {
 
     using Tp = xAOD::TrackParticle;
     using Jet = xAOD::Jet;
     typedef std::vector<const xAOD::TrackParticle*> Tracks;
 
+    if (name == "pt") {
+      return TJGetter([](const Tp& t, const Jet&) {
+        return t.pt();
+      });
+    }
     if (name == "log_pt") {
       return TJGetter([](const Tp& t, const Jet&) {
         return std::log(t.pt());
       });
     }
+    if (name == "ptfrac") {
+      return TJGetter([](const Tp& t, const Jet& j) {
+        return t.pt() / j.pt();
+      });
+    }
     if (name == "log_ptfrac") {
       return TJGetter([](const Tp& t, const Jet& j) {
         return std::log(t.pt() / j.pt());
+      });
+    }
+
+    if (name == "eta") {
+      return TJGetter([](const Tp& t, const Jet&) {
+        return t.eta();
+      });
+    }
+    if (name == "deta") {
+      return TJGetter([](const Tp& t, const Jet& j) {
+        return t.eta() - j.eta();
+      });
+    }
+    if (name == "abs_deta") {
+      return TJGetter([](const Tp& t, const Jet& j) {
+        return copysign(1.0, j.eta()) * (t.eta() - j.eta());
+      });
+    }
+
+    if (name == "phi") {
+      return TJGetter([](const Tp& t, const Jet&) {
+        return t.phi();
+      });
+    }
+    if (name == "dphi") {
+      return TJGetter([](const Tp& t, const Jet& j) {
+        return t.p4().DeltaPhi(j.p4());
+      });
+    }
+
+    if (name == "dr") {
+      return TJGetter([](const Tp& t, const Jet& j) {
+        return t.p4().DeltaR(j.p4());
       });
     }
     if (name == "log_dr") {
@@ -148,64 +192,42 @@ namespace {
         return std::log(t.p4().DeltaR(j.p4()) + 1e-7);
       });
     }
-    if (name == "dphi") {
-      return TJGetter([](const Tp& t, const Jet& j) {
-        return t.p4().DeltaPhi(j.p4());
+
+    if (name == "mass") {
+      return TJGetter([](const Tp& t, const Jet&) {
+        return t.m();
       });
     }
-    if (name == "deta") {
-      return TJGetter([](const Tp& t, const Jet& j) {
-        return t.eta() - j.eta();
+    if (name == "energy") {
+      return TJGetter([](const Tp& t, const Jet&) {
+        return t.e();
       });
     }
-    if (name == "pt") {
-      return [](const Jet&, const Tracks& t) {
-        std::vector<double> tracks;
-        for (const auto* trk: t) tracks.push_back(trk->pt());
-        return tracks;
-      };
-    }
-    if (name == "eta") {
-      return [](const Jet&, const Tracks& t) {
-        std::vector<double> tracks;
-        for (const auto* trk: t) tracks.push_back(trk->eta());
-        return tracks;
-      };
-    }
+
     if (name == "phiUncertainty") {
-      return [](const Jet&, const Tracks& t) {
-        std::vector<double> tracks;
-        for (const auto* trk: t) tracks.push_back(std::sqrt(trk->definingParametersCovMatrixDiagVec().at(2)));
-        return tracks;
-      };
+      return TJGetter([](const Tp& t, const Jet&) {
+        return std::sqrt(t.definingParametersCovMatrixDiagVec().at(2));
+      });
     }
     if (name == "thetaUncertainty") {
-      return [](const Jet&, const Tracks& t) {
-        std::vector<double> tracks;
-        for (const auto* trk: t) tracks.push_back(std::sqrt(trk->definingParametersCovMatrixDiagVec().at(3)));
-        return tracks;
-      };
+      return TJGetter([](const Tp& t, const Jet&) {
+        return std::sqrt(t.definingParametersCovMatrixDiagVec().at(3));
+      });
     }
     if (name == "qOverPUncertainty") {
-      return [](const Jet&, const Tracks& t) {
-        std::vector<double> tracks;
-        for (const auto* trk: t) tracks.push_back(std::sqrt(trk->definingParametersCovMatrixDiagVec().at(4)));
-        return tracks;
-      };
+      return TJGetter([](const Tp& t, const Jet&) {
+        return std::sqrt(t.definingParametersCovMatrixDiagVec().at(4));
+      });
     }
     if (name == "z0RelativeToBeamspot") {
-      return [](const Jet&, const Tracks& t) {
-        std::vector<double> tracks;
-        for (const auto* trk: t) tracks.push_back(trk->z0());
-        return tracks;
-      };
+      return TJGetter([](const Tp& t, const Jet&) {
+        return t.z0();
+      });
     }
     if (name == "log_z0RelativeToBeamspotUncertainty") {
-      return [](const Jet&, const Tracks& t) {
-        std::vector<double> tracks;
-        for (const auto* trk: t) tracks.push_back(std::log(std::sqrt(trk->definingParametersCovMatrixDiagVec().at(1))));
-        return tracks;
-      };
+      return TJGetter([](const Tp& t, const Jet&) {
+        return std::log(std::sqrt(t.definingParametersCovMatrixDiagVec().at(1)));
+      });
     }
     return std::nullopt;
   }
@@ -264,7 +286,7 @@ namespace FlavorTagDiscriminants {
       return {*getter, deps};
     }
 
-    if (auto getter = sequenceNoDep(name)) {
+    if (auto getter = sequenceNoIpDep(name)) {
       return {*getter, {}};
     }
     throw std::logic_error("no match for custom getter " + name);

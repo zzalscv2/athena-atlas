@@ -8,6 +8,7 @@
 #include "AthenaMonitoringKernel/Monitored.h"
 #include "StoreGate/ReadHandleKey.h"
 
+
 class PprMonitorAlgorithm : public AthMonitorAlgorithm {
 public:PprMonitorAlgorithm( const std::string& name, ISvcLocator* pSvcLocator );
   virtual ~PprMonitorAlgorithm()=default;
@@ -43,6 +44,11 @@ private:
   std::map<std::string,int> m_groupTimeslice_EM; 
   std::map<std::string,int> m_groupTimeslice_HAD; 
 
+
+  // Error vector StoreGate key
+  SG::WriteHandleKey<std::vector<int>> m_errorLocation{this,"ErrorLocationPPM","L1CaloPPMErrorVector","ErrorVector"};
+
+  typedef std::vector<int> ErrorVector;
   /// Helper functions
   
  StatusCode makePPMTower( const xAOD::TriggerTower_v2* tt, 

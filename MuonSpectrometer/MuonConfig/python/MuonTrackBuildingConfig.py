@@ -35,7 +35,7 @@ def MooTrackFitterCfg(flags, name = 'MooTrackFitter', prefix='', **kwargs):
     
     momentum_estimator=""
     if flags.Beam.Type is BeamType.Cosmics:
-        momentum_estimator = result.popToolsAndMerge(MuonSegmentMomentum(DoCosmics = True))
+        momentum_estimator = MuonSegmentMomentum(DoCosmics = True)
     else:
         momentum_estimator=result.popToolsAndMerge(MuonSegmentMomentumFromFieldCfg(flags))
         

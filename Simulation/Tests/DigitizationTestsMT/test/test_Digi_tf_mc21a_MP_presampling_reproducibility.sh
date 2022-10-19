@@ -10,6 +10,10 @@
 # art-output: mc21a_presampling_MP_fork_evt0.RDO.pool.root
 # art-output: mc21a_presampling_MP_fork_evt1.RDO.pool.root
 
+f [ -z ${ATLAS_REFERENCE_DATA+x} ]; then
+  ATLAS_REFERENCE_DATA="/cvmfs/atlas-nightlies.cern.ch/repo/data/data-art"
+fi
+
 export ATHENA_CORE_NUMBER=8
 
 Events=100
@@ -17,25 +21,25 @@ DigiOutFileNameSP="mc21a_presampling_SP.RDO.pool.root"
 DigiOutFileNameMP0="mc21a_presampling_MP_fork_evt0.RDO.pool.root"
 DigiOutFileNameMP1="mc21a_presampling_MP_fork_evt1.RDO.pool.root"
 
-HSHitsFile="/cvmfs/atlas-nightlies.cern.ch/repo/data/data-art/DigitizationTests/NSW/mc21_13p6TeV.900149.PG_single_nu_Pt50.simul.HITS.e8442_e8447_s3822/*"
-HighPtMinbiasHitsFiles1="/cvmfs/atlas-nightlies.cern.ch/repo/data/data-art/DigitizationTests/NSW/mc21_13p6TeV.800831.Py8EG_minbias_inelastic_highjetphotonlepton.merge.HITS.e8341_s3775_s3787/*"
-HighPtMinbiasHitsFiles2="/cvmfs/atlas-nightlies.cern.ch/repo/data/data-art/DigitizationTests/NSW/mc21_13p6TeV.800831.Py8EG_minbias_inelastic_highjetphotonlepton.merge.HITS.e8341_s3782_s3787/*"
-HighPtMinbiasHitsFiles3="/cvmfs/atlas-nightlies.cern.ch/repo/data/data-art/DigitizationTests/NSW/mc21_13p6TeV.800831.Py8EG_minbias_inelastic_highjetphotonlepton.merge.HITS.e8341_s3783_s3787/*"
-HighPtMinbiasHitsFiles4="/cvmfs/atlas-nightlies.cern.ch/repo/data/data-art/DigitizationTests/NSW/mc21_13p6TeV.800831.Py8EG_minbias_inelastic_highjetphotonlepton.merge.HITS.e8341_s3784_s3787/*"
-LowPtMinbiasHitsFiles1="/cvmfs/atlas-nightlies.cern.ch/repo/data/data-art/DigitizationTests/NSW/mc21_13p6TeV.900311.Epos_minbias_inelastic_lowjetphoton.merge.HITS.e8341_s3775_s3787/*"
-LowPtMinbiasHitsFiles2="/cvmfs/atlas-nightlies.cern.ch/repo/data/data-art/DigitizationTests/NSW/mc21_13p6TeV.900311.Epos_minbias_inelastic_lowjetphoton.merge.HITS.e8341_s3782_s3787/*"
-LowPtMinbiasHitsFiles3="/cvmfs/atlas-nightlies.cern.ch/repo/data/data-art/DigitizationTests/NSW/mc21_13p6TeV.900311.Epos_minbias_inelastic_lowjetphoton.merge.HITS.e8341_s3783_s3787/*"
-LowPtMinbiasHitsFiles4="/cvmfs/atlas-nightlies.cern.ch/repo/data/data-art/DigitizationTests/NSW/mc21_13p6TeV.900311.Epos_minbias_inelastic_lowjetphoton.merge.HITS.e8341_s3784_s3787/*"
+HSHitsFile="${ATLAS_REFERENCE_DATA}/CampaignInputs/mc21/HITS/mc21_13p6TeV.900149.PG_single_nu_Pt50.simul.HITS.e8453_s3864/HITS.29241942._001453.pool.root.1"
+HighPtMinbiasHitsFiles1="${ATLAS_REFERENCE_DATA}/CampaignInputs/mc21/HITS/mc21_13p6TeV.800831.Py8EG_minbias_inelastic_highjetphotonlepton.merge.HITS.e8453_e8455_s3876_s3880/*"
+HighPtMinbiasHitsFiles2="${ATLAS_REFERENCE_DATA}/CampaignInputs/mc21/HITS/mc21_13p6TeV.800831.Py8EG_minbias_inelastic_highjetphotonlepton.merge.HITS.e8453_e8455_s3877_s3880/*"
+HighPtMinbiasHitsFiles3="${ATLAS_REFERENCE_DATA}/CampaignInputs/mc21/HITS/mc21_13p6TeV.800831.Py8EG_minbias_inelastic_highjetphotonlepton.merge.HITS.e8453_e8455_s3878_s3880/*"
+HighPtMinbiasHitsFiles4="${ATLAS_REFERENCE_DATA}/CampaignInputs/mc21/HITS/mc21_13p6TeV.800831.Py8EG_minbias_inelastic_highjetphotonlepton.merge.HITS.e8453_e8455_s3879_s3880/*"
+LowPtMinbiasHitsFiles1="${ATLAS_REFERENCE_DATA}/CampaignInputs/mc21/HITS/mc21_13p6TeV.900311.Epos_minbias_inelastic_lowjetphoton.merge.HITS.e8453_s3876_s3880/*"
+LowPtMinbiasHitsFiles2="${ATLAS_REFERENCE_DATA}/CampaignInputs/mc21/HITS/mc21_13p6TeV.900311.Epos_minbias_inelastic_lowjetphoton.merge.HITS.e8453_s3877_s3880/*"
+LowPtMinbiasHitsFiles3="${ATLAS_REFERENCE_DATA}/CampaignInputs/mc21/HITS/mc21_13p6TeV.900311.Epos_minbias_inelastic_lowjetphoton.merge.HITS.e8453_s3878_s3880/*"
+LowPtMinbiasHitsFiles4="${ATLAS_REFERENCE_DATA}/CampaignInputs/mc21/HITS/mc21_13p6TeV.900311.Epos_minbias_inelastic_lowjetphoton.merge.HITS.e8453_s3879_s3880/*"
 
 
 Digi_tf.py \
 --splitConfig 'HITtoRDO:Campaigns.BeamspotSplitMC21a' \
 --detectors Truth \
 --PileUpPresampling True \
---conditionsTag default:OFLCOND-MC21-SDR-RUN3-05 \
+--conditionsTag default:OFLCOND-MC21-SDR-RUN3-07 \
 --digiSeedOffset1 170 --digiSeedOffset2 170 \
 --digiSteeringConf 'StandardSignalOnlyTruth' \
---geometryVersion default:ATLAS-R3S-2021-02-00-00 \
+--geometryVersion default:ATLAS-R3S-2021-03-00-00 \
 --inputHITSFile ${HSHitsFile} \
 --inputHighPtMinbiasHitsFile ${HighPtMinbiasHitsFiles1} \
 --inputHighPtMinbiasHitsFile ${HighPtMinbiasHitsFiles2} \
@@ -62,10 +66,10 @@ Digi_tf.py \
 --splitConfig 'HITtoRDO:Campaigns.BeamspotSplitMC21a' \
 --detectors Truth \
 --PileUpPresampling True \
---conditionsTag default:OFLCOND-MC21-SDR-RUN3-05 \
+--conditionsTag default:OFLCOND-MC21-SDR-RUN3-07 \
 --digiSeedOffset1 170 --digiSeedOffset2 170 \
 --digiSteeringConf 'StandardSignalOnlyTruth' \
---geometryVersion default:ATLAS-R3S-2021-02-00-00 \
+--geometryVersion default:ATLAS-R3S-2021-03-00-00 \
 --inputHITSFile ${HSHitsFile} \
 --inputHighPtMinbiasHitsFile ${HighPtMinbiasHitsFiles1} \
 --inputHighPtMinbiasHitsFile ${HighPtMinbiasHitsFiles2} \
@@ -94,10 +98,10 @@ Digi_tf.py \
 --splitConfig 'HITtoRDO:Campaigns.BeamspotSplitMC21a' \
 --detectors Truth \
 --PileUpPresampling True \
---conditionsTag default:OFLCOND-MC21-SDR-RUN3-05 \
+--conditionsTag default:OFLCOND-MC21-SDR-RUN3-07 \
 --digiSeedOffset1 170 --digiSeedOffset2 170 \
 --digiSteeringConf 'StandardSignalOnlyTruth' \
---geometryVersion default:ATLAS-R3S-2021-02-00-00 \
+--geometryVersion default:ATLAS-R3S-2021-03-00-00 \
 --inputHITSFile ${HSHitsFile} \
 --inputHighPtMinbiasHitsFile ${HighPtMinbiasHitsFiles1} \
 --inputHighPtMinbiasHitsFile ${HighPtMinbiasHitsFiles2} \

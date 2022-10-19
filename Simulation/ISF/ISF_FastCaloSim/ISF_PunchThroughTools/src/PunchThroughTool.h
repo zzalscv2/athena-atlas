@@ -8,6 +8,8 @@
 #include "ISF_FastCaloSimInterfaces/IPunchThroughTool.h"
 #include <string>
 
+#include "ISF_FastCaloSimInterfaces/IPunchThroughClassifier.h"
+
 // Athena Base
 #include "AthenaBaseComps/AthAlgTool.h"
 
@@ -29,6 +31,14 @@
 #include "ISF_Event/ISFParticleContainer.h"
 
 #include "AtlasHepMC/GenEvent_fwd.h"
+
+//libXML
+#include <libxml/xmlmemory.h>
+#include <libxml/parser.h>
+#include <libxml/tree.h>
+#include <libxml/xmlreader.h>
+#include <libxml/xpath.h>
+#include <libxml/xpathInternals.h>
 
 /*-------------------------------------------------------------------------
  *  Forward declarations
@@ -61,7 +71,7 @@ namespace ISF {
     /** AlgTool finalize method */
     virtual StatusCode finalize  ();
     /** interface function: fill a vector with the punch-through particles */
-    const ISF::ISFParticleVector* computePunchThroughParticles(const ISF::ISFParticle &isfp, CLHEP::HepRandomEngine* rndmEngine) const;
+    const ISF::ISFParticleVector* computePunchThroughParticles(const ISF::ISFParticle &isfp, const TFCSSimulationState& simulstate, CLHEP::HepRandomEngine* rndmEngine) const;
 
   private:
     /*---------------------------------------------------------------------
@@ -85,15 +95,15 @@ namespace ISF {
      *  particles with the right distributions (energy, theta, phi).
      *  if a second argument is given, create exactly this number of particles
      *  (also with the right energy,theta,phi distributions */
-    int getAllParticles(const ISF::ISFParticle &isfp, ISFParticleVector& isfpCont, CLHEP::HepRandomEngine* rndmEngine, int pdg, int numParticles = -1) const;
+    int getAllParticles(const ISF::ISFParticle &isfp, ISFParticleVector& isfpCont, CLHEP::HepRandomEngine* rndmEngine, int pdg, double interpEnergy, double interpEta, int numParticles = -1) const;
 
     /** get the right number of particles for the given pdg while considering
      *  the correlation to an other particle type, which has already created
      *  'corrParticles' number of particles */
-    int getCorrelatedParticles(const ISF::ISFParticle &isfp, ISFParticleVector& isfpCont, int doPdg, int corrParticles, CLHEP::HepRandomEngine* rndmEngine) const;
+    int getCorrelatedParticles(const ISF::ISFParticle &isfp, ISFParticleVector& isfpCont, int doPdg, int corrParticles, CLHEP::HepRandomEngine* rndmEngine, double interpEnergy, double interpEta) const;
 
     /** create exactly one punch-through particle with the given pdg and the given max energy */
-    ISF::ISFParticle *getOneParticle(const ISF::ISFParticle &isfp, int pdg, double maxEnergy, CLHEP::HepRandomEngine* rndmEngine) const;
+    ISF::ISFParticle *getOneParticle(const ISF::ISFParticle &isfp, int pdg, CLHEP::HepRandomEngine* rndmEngine, double interpEnergy, double interpEta) const;
 
     /** create a ISF Particle state at the MS entrace containing a particle with the given properties */
     ISF::ISFParticle *createExitPs(const ISF::ISFParticle &isfp, int PDGcode, double energy, double theta, double phi, double momTheta, double momPhi) const;
@@ -103,9 +113,41 @@ namespace ISF {
     /** get particle through the calorimeter */
     Amg::Vector3D propagator(double theta, double phi) const;
 
+    //apply the inverse PCA transform
+    std::vector<double> inversePCA(std::vector<double> &variables) const;
+
+    //apply the inverse CDF trainsform
+    double inverseCdfTransform(double variable, std::map<double, double> inverse_cdf_map) const;
+
+    //dot product between matrix and vector, used to inverse PCA
+    std::vector<double> dotProduct(const std::vector<std::vector<double>> &m, const std::vector<double> &v) const;
+
+    //returns normal cdf based on normal gaussian value
+    double normal_cdf(double x) const;
+
+    //apply energy interpolation
+    double interpolateEnergy(const double &energy, CLHEP::HepRandomEngine* rndmEngine) const;
+
+    //apply eta interpolation
+    double interpolateEta(const double &eta, CLHEP::HepRandomEngine* rndmEngine) const;
+
+    //load inverse quantile transformer from XML
+    StatusCode initializeInverseCDF(std::string quantileTransformerConfigFile);
+
+    //get CDF mapping for individual XML node
+    std::map<double, double> getVariableCDFmappings(xmlNodePtr& nodeParent);
+
+    //load inverse PCA from XML
+    StatusCode initializeInversePCA(std::string inversePCAConfigFile);
+
+
     /*---------------------------------------------------------------------
      *  Private members
      *---------------------------------------------------------------------*/
+
+     /** energy and eta points in param */
+     std::vector<double>                 m_energyPoints;
+     std::vector<double>                 m_etaPoints;
 
     /** calo-MS borders */
     double                               m_R1{0.};
@@ -128,6 +170,10 @@ namespace ISF {
 
     /** Properties */
     std::string                          m_filenameLookupTable{"CaloPunchThroughParametrisation.root"};     //!< holds the filename of the lookup table (property)
+    std::string                          m_filenameInverseCDF;     //!< holds the filename of inverse quantile transformer config
+    std::string                          m_filenameInversePCA;     //!< holds the filename of inverse PCA config
+
+    ToolHandle< IPunchThroughClassifier >     m_punchThroughClassifier;
     std::vector<int>                     m_pdgInitiators;           //!< vector of punch-through initiator pgds
     std::vector<int>                     m_initiatorsMinEnergy;     //!< vector of punch-through initiator min energyies to create punch through
     std::vector<double>                  m_initiatorsEtaRange;      //!< vector of min and max abs eta range to allow punch through initiators
@@ -144,6 +190,12 @@ namespace ISF {
     std::vector<double>                  m_energyFactor;            //!< scale the energy of the punch-through particles
 
     /*---------------------------------------------------------------------
+     *  Constants
+     *---------------------------------------------------------------------*/
+     constexpr static double m_SQRT_0p5 = std::sqrt(0.5);
+     constexpr static double m_SQRT_2 = std::sqrt(2);
+
+    /*---------------------------------------------------------------------
      *  ServiceHandles
      *---------------------------------------------------------------------*/
     ServiceHandle<IPartPropSvc>          m_particlePropSvc;         //!< particle properties svc
@@ -153,6 +205,15 @@ namespace ISF {
 
     /** beam pipe radius */
     double                              m_beamPipe{500.};
+
+    std::vector<std::vector<double>> m_inverse_PCA_matrix;
+    std::vector<double> m_PCA_means;
+
+    std::map<double, double>  m_variable0_inverse_cdf;
+    std::map<double, double>  m_variable1_inverse_cdf;
+    std::map<double, double>  m_variable2_inverse_cdf;
+    std::map<double, double>  m_variable3_inverse_cdf;
+    std::map<double, double>  m_variable4_inverse_cdf;
   };
 }
 

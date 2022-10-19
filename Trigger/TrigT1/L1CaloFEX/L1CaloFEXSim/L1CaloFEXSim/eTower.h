@@ -115,6 +115,8 @@ namespace LVL1 {
     void setSCID(Identifier ID, int cell, float et, int layer, bool doenergysplit);
 
     std::vector<Identifier> getSCIDs() const { return m_scID; }
+    
+    std::vector<Identifier> getSCIDs_split() const { return m_scID_split; }
 
     Identifier getSCID(int cell) const { return m_scID[cell]; }
 
@@ -129,6 +131,7 @@ namespace LVL1 {
     float m_eta;
     float m_phi;
     std::vector<Identifier> m_scID;
+    std::vector<Identifier> m_scID_split;
     std::vector<unsigned int> m_et;    
     std::vector<float> m_et_float;
     std::vector<unsigned int> m_etSplits;

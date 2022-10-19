@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2019 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
 */  
 
 #ifndef NSW_TRIGRAWDATACONTAINER_H
@@ -13,6 +13,8 @@
 namespace Muon {
   class NSW_TrigRawDataContainer : public DataVector<Muon::NSW_TrigRawData> {
 
+  friend class NSW_TrigRawDataContainerCnv_p1;
+
  public:
   NSW_TrigRawDataContainer();
 
@@ -20,15 +22,8 @@ namespace Muon {
 
  private:
 
-
-};
+  };
 }
 
 CLASS_DEF(Muon::NSW_TrigRawDataContainer,1172141273,1)
-
 #endif   /// NSW_TRIGRAWDATACONTAINER_H
-
-
-
-
-
