@@ -58,13 +58,6 @@ StatusCode LArNoisyROAlg::execute (const EventContext& ctx) const
       for(LArBadFebCont::BadChanVec::const_iterator i = badCont->begin(); i!=badCont->end(); ++i) {
         bf.insert(i->first);
       }
-      if(bf.size() == 0) {
-        if(m_isMC) {
-          ATH_MSG_DEBUG("Empty ist of known Bad FEBs as expected ");
-        } else {   
-          ATH_MSG_WARNING("List of known Bad FEBs empty !? ");
-        }
-      }
     }
   
     SG::ReadCondHandle<LArBadFebCont> MNBHdl(m_knownMNBFEBsVecKey, ctx);
@@ -72,13 +65,6 @@ StatusCode LArNoisyROAlg::execute (const EventContext& ctx) const
     if(MNBCont) {
       for(LArBadFebCont::BadChanVec::const_iterator i = MNBCont->begin(); i!=MNBCont->end(); ++i) {
         MNBfeb.push_back(HWIdentifier(i->first));
-      } 
-      if(MNBfeb.size() == 0) {
-        if(m_isMC) {
-          ATH_MSG_DEBUG("Empty ist of known Bad FEBs as expected ");
-        } else {   
-          ATH_MSG_WARNING("List of known MNB FEBs empty !? ");
-        }
       } 
     }
   }
