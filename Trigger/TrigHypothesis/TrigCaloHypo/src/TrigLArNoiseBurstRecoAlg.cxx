@@ -152,6 +152,14 @@ StatusCode TrigLArNoiseBurstRecoAlg::execute( const EventContext& context ) cons
           fill(m_monTool,bitWise);
         }
   }
+  if ( noisyRO->MNBTight_PsVetoFlaggedPartitions() ) {
+        ATH_MSG_DEBUG("Passed : MNBTight_PSVetoFlaggedPartions");
+        flag |= 0x40;
+        if ( monitor ) {
+          auto bitWise = Monitored::Scalar<std::string>(bitWise_flags,"MNBTight_PsVetoFlaggedPartions");
+          fill(m_monTool,bitWise);
+        }
+  }
 
   if ( (flag & m_mask) != 0x0 ) {
      ATH_MSG_DEBUG("LAr Noise detected : ");
