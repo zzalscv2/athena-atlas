@@ -74,6 +74,16 @@ def makeSequenceOld (dataType, algSeq, vars, forCompare, isPhyslite, noPhysliteB
              'EventInfo.eventNumber   -> eventNumber', ]
 
 
+    # FIX ME: this algorithm should be run on both data and MC, but in MC
+    # it produces strange errors in CutFlowSvc in Athena
+    if not forCompare or dataType == 'data' :
+        # Skip events with no primary vertex:
+        algSeq += createAlgorithm( 'CP::VertexSelectionAlg',
+                                   'PrimaryVertexSelectorAlg' )
+        algSeq.PrimaryVertexSelectorAlg.VertexContainer = 'PrimaryVertices'
+        algSeq.PrimaryVertexSelectorAlg.MinVertices = 1
+
+
     # Include, and then set up the jet analysis algorithm sequence:
     from JetAnalysisAlgorithms.JetAnalysisSequence import makeJetAnalysisSequence
     jetContainer = 'AntiKt4EMPFlowJets'
@@ -238,7 +248,7 @@ def makeSequenceOld (dataType, algSeq, vars, forCompare, isPhyslite, noPhysliteB
 
 
 
-    # temporarily disabled until di-taus are supported in R22
+    # FIX ME: temporarily disabled until di-taus are supported in R22
     # # Include, and then set up the tau analysis algorithm sequence:
     # from TauAnalysisAlgorithms.DiTauAnalysisSequence import makeDiTauAnalysisSequence
     # diTauSequence = makeDiTauAnalysisSequence( dataType, 'Tight', postfix = 'tight' )
@@ -392,18 +402,15 @@ def makeSequenceOld (dataType, algSeq, vars, forCompare, isPhyslite, noPhysliteB
         },
         outputName = { } )
 
-    # FIX ME: temporarily disabling this for data, as there are some
-    # errors with missing primary vertices
-    if dataType != 'data' :
-        algSeq += overlapSequence
-        if not forCompare :
-            vars += [
-                'OutJets_%SYS%.passesOR_%SYS% -> jet_select_or_%SYS%',
-                'OutElectrons_%SYS%.passesOR_%SYS% -> el_select_or_%SYS%',
-                'OutPhotons_%SYS%.passesOR_%SYS% -> ph_select_or_%SYS%',
-                'OutMuons_%SYS%.passesOR_%SYS% -> mu_select_or_%SYS%',
-                'OutTauJets_%SYS%.passesOR_%SYS% -> tau_select_or_%SYS%',
-            ]
+    algSeq += overlapSequence
+    if not forCompare :
+        vars += [
+            'OutJets_%SYS%.passesOR_%SYS% -> jet_select_or_%SYS%',
+            'OutElectrons_%SYS%.passesOR_%SYS% -> el_select_or_%SYS%',
+            'OutPhotons_%SYS%.passesOR_%SYS% -> ph_select_or_%SYS%',
+            'OutMuons_%SYS%.passesOR_%SYS% -> mu_select_or_%SYS%',
+            'OutTauJets_%SYS%.passesOR_%SYS% -> tau_select_or_%SYS%',
+        ]
 
     if dataType != 'data' :
         # Include, and then set up the generator analysis sequence:
@@ -414,12 +421,15 @@ def makeSequenceOld (dataType, algSeq, vars, forCompare, isPhyslite, noPhysliteB
         vars += [ 'EventInfo.generatorWeight_%SYS% -> generatorWeight_%SYS%', ]
 
 
-    # Include, and then set up the trigger analysis sequence:
-    from TriggerAnalysisAlgorithms.TriggerAnalysisSequence import \
-        makeTriggerAnalysisSequence
-    triggerSequence = makeTriggerAnalysisSequence( dataType, triggerChains=triggerChains, noFilter=True )
-    algSeq += triggerSequence
-    vars += ['EventInfo.trigPassed_' + t + ' -> trigPassed_' + t for t in triggerChains]
+    # FIX ME: this algorithm should be run on both data and MC, but in MC
+    # it produces strange errors in CutFlowSvc in Athena
+    if not forCompare or dataType == 'data' :
+        # Include, and then set up the trigger analysis sequence:
+        from TriggerAnalysisAlgorithms.TriggerAnalysisSequence import \
+            makeTriggerAnalysisSequence
+        triggerSequence = makeTriggerAnalysisSequence( dataType, triggerChains=triggerChains, noFilter=True )
+        algSeq += triggerSequence
+        vars += ['EventInfo.trigPassed_' + t + ' -> trigPassed_' + t for t in triggerChains]
 
 
 
@@ -435,6 +445,8 @@ def makeSequenceOld (dataType, algSeq, vars, forCompare, isPhyslite, noPhysliteB
                              'selectPtEta&&baselineSelection_tight,as_char')
     addOutputCopyAlgorithms (algSeq, 'Jets', 'AnaJets_%SYS%', 'OutJets_%SYS%',
                              'selectPtEta')
+
+    pass
 
 
 
@@ -457,6 +469,15 @@ def makeSequenceBlocks (dataType, algSeq, vars, forCompare, isPhyslite, noPhysli
               'EventInfo.eventNumber   -> eventNumber', ]
 
 
+    # FIX ME: this algorithm should be run on both data and MC, but in MC
+    # it produces strange errors in CutFlowSvc in Athena
+    if not forCompare or dataType == 'data' :
+        # Skip events with no primary vertex:
+        from AsgAnalysisAlgorithms.AsgAnalysisConfig import \
+            makePrimaryVertexConfig
+        makePrimaryVertexConfig (configSeq)
+
+
     # Include, and then set up the electron analysis algorithm sequence:
     from EgammaAnalysisAlgorithms.ElectronAnalysisConfig import makeElectronCalibrationConfig, makeElectronWorkingPointConfig
 
@@ -476,6 +497,7 @@ def makeSequenceBlocks (dataType, algSeq, vars, forCompare, isPhyslite, noPhysli
     vars += [ 'OutElectrons_NOSYS.eta -> el_eta',
               'OutElectrons_NOSYS.phi -> el_phi',
               'OutElectrons_%SYS%.pt  -> el_pt_%SYS%',
+              'OutElectrons_NOSYS.charge -> el_charge',
               'OutElectrons_%SYS%.baselineSelection_loose -> el_select_loose_%SYS%', ]
     if dataType != 'data':
         vars += [ 'OutElectrons_%SYS%.effSF_loose_%SYS% -> el_effSF_loose_%SYS%', ]
@@ -503,6 +525,7 @@ def makeSequenceBlocks (dataType, algSeq, vars, forCompare, isPhyslite, noPhysli
     vars += [ 'OutMuons_NOSYS.eta -> mu_eta',
               'OutMuons_NOSYS.phi -> mu_phi',
               'OutMuons_%SYS%.pt  -> mu_pt_%SYS%',
+              'OutMuons_NOSYS.charge -> mu_charge',
               'OutMuons_%SYS%.baselineSelection_medium -> mu_select_medium_%SYS%',
               'OutMuons_%SYS%.baselineSelection_tight  -> mu_select_tight_%SYS%', ]
     if dataType != 'data':
@@ -517,6 +540,7 @@ def makeSequenceBlocks (dataType, algSeq, vars, forCompare, isPhyslite, noPhysli
     makeTauWorkingPointConfig (configSeq, 'AnaTauJets', workingPoint='Tight', postfix='tight')
     vars += [ 'OutTauJets_NOSYS.eta -> tau_eta',
               'OutTauJets_NOSYS.phi -> tau_phi',
+              'OutTauJets_NOSYS.charge -> tau_charge',
               'OutTauJets_%SYS%.pt  -> tau_pt_%SYS%',
               'OutTauJets_%SYS%.baselineSelection_tight  -> tau_select_tight_%SYS%', ]
     if dataType != 'data':
@@ -546,11 +570,14 @@ def makeSequenceBlocks (dataType, algSeq, vars, forCompare, isPhyslite, noPhysli
         vars += [ 'EventInfo.generatorWeight_%SYS% -> generatorWeight_%SYS%', ]
 
 
-    # Include, and then set up the trigger analysis sequence:
-    from TriggerAnalysisAlgorithms.TriggerAnalysisConfig import \
-        makeTriggerAnalysisConfig
-    makeTriggerAnalysisConfig( configSeq, triggerChains=triggerChains, noFilter=True )
-    vars += ['EventInfo.trigPassed_' + t + ' -> trigPassed_' + t for t in triggerChains]
+    # FIX ME: this algorithm should be run on both data and MC, but in MC
+    # it produces strange errors in CutFlowSvc in Athena
+    if not forCompare or dataType == 'data' :
+        # Include, and then set up the trigger analysis sequence:
+        from TriggerAnalysisAlgorithms.TriggerAnalysisConfig import \
+            makeTriggerAnalysisConfig
+        makeTriggerAnalysisConfig( configSeq, triggerChains=triggerChains, noFilter=True )
+        vars += ['EventInfo.trigPassed_' + t + ' -> trigPassed_' + t for t in triggerChains]
 
 
     from AsgAnalysisAlgorithms.AsgAnalysisConfig import makePtEtaSelectionConfig

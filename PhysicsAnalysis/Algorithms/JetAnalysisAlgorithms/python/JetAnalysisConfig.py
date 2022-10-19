@@ -145,6 +145,17 @@ class SmallRJetAnalysisConfig (ConfigBlock) :
             alg.jetsOut = config.copyName (self.containerName)
             alg.preselection = config.getPreselection (self.containerName, '')
 
+        if self.runNNJvtUpdate:
+            assert self.jetInput=="EMPFlow", "NN JVT only defined for PFlow jets"
+            alg = config.createAlgorithm( 'CP::JetDecoratorAlg', 'NNJvtUpdateAlg'+self.postfix )
+            config.addPrivateTool( 'decorator', 'JetPileupTag::JetVertexNNTagger' )
+            # Set this actually to the *output* collection
+            alg.jets = config.readName (self.containerName)
+            alg.jetsOut = config.copyName (self.containerName)
+            alg.decorator.JetContainer = alg.jetsOut.replace ('%SYS%', 'NOSYS')
+            alg.decorator.SuppressInputDependence=True
+            alg.decorator.SuppressOutputDependence=True
+
         if self.runFJvtUpdate :
             alg = config.createAlgorithm( 'CP::JetModifierAlg', 'JetModifierAlg'+self.postfix )
             config.addPrivateTool( 'modifierTool', 'JetForwardJvtTool')

@@ -44,10 +44,10 @@ class JetJvtAnalysisConfig (ConfigBlock) :
 
         if self.runSelection:
             config.addSelection (self.containerName, '', 'jvt_selection',
-                                 bits=1)
+                                 bits=1, preselection=False)
             if self.enableFJvt :
                 config.addSelection (self.containerName, '', 'fjvt_selection',
-                                     bits=1)
+                                     bits=1, preselection=False)
 
 
 def makeJetJvtAnalysisConfig( seq, containerName, jetCollection,
