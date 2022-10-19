@@ -1316,7 +1316,7 @@ void  LumiCalculator::IntegrateLumi ATLAS_NOT_THREAD_SAFE (const xAOD::LumiBlock
 
 // Deal with composite L1 trigger
 void
-LumiCalculator::ParseL1Trigger(std::string lowerch, CoolQuery * cq_trigger) {
+LumiCalculator::ParseL1Trigger(const std::string& lowerch, CoolQuery * cq_trigger) {
 
   //
   // Check if we have multiple entries

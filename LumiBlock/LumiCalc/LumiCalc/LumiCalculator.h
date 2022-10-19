@@ -54,7 +54,7 @@ class LumiCalculator{
 
   void LoadChannelIds();
 
-  void ParseL1Trigger(std::string lowerch, CoolQuery* cq_trigger);
+  void ParseL1Trigger(const std::string& lowerch, CoolQuery* cq_trigger);
 
   //TCanvas* GetNiceCanvas(const char* name="tcan", const char* title="tcan");
 
