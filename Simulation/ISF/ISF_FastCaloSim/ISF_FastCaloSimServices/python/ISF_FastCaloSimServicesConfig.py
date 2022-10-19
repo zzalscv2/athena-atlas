@@ -20,31 +20,21 @@ def PunchThroughToolCfg(flags, name="ISF_PunchThroughTool", **kwargs):
     from BarcodeServices.BarcodeServicesConfig import BarcodeSvcCfg
     from SubDetectorEnvelopes.SubDetectorEnvelopesConfig import EnvelopeDefSvcCfg
     acc = ComponentAccumulator()
-    kwargs.setdefault("FilenameLookupTable"     , "FastCaloSim/MC16/TFCSparam_mpt_v05.root")
-    kwargs.setdefault("FilenameInverseCdf"      , "FastCaloSim/MC16/TFCSparam_mpt_inverseCdf_v02.xml")
-    kwargs.setdefault("FilenameInversePca"      , "FastCaloSim/MC16/TFCSparam_mpt_inversePca_v02.xml")
-    kwargs.setdefault("PunchThroughInitiators"  , [ 211, 321, 311, 310, 130, 2212, 2112]        )
-    kwargs.setdefault("InitiatorsMinEnergy"     , [ 65536, 65536, 65536, 65536, 65536, 65536, 65536]                                         )
-    kwargs.setdefault("InitiatorsEtaRange"      , [ -3.2,   3.2 ]                               )
-    kwargs.setdefault("PunchThroughParticles"   , [ 2212,   211,    22,     11,     13,     2112,   321,    310,    130 ]    )
-    kwargs.setdefault("PunchThroughParticles"   , [ 2212,   211,    22,     11,     13,     2112,   321,    310,    130 ]    )
+    kwargs.setdefault("FilenameLookupTable", "FastCaloSim/MC16/TFCSparam_mpt_v01.root")
+    kwargs.setdefault("PunchThroughInitiators", [211])
+    kwargs.setdefault("InitiatorsMinEnergy"     , [ 65536 ]                                         )
+    kwargs.setdefault("InitiatorsEtaRange"      , [       -2.7,     2.7 ]                               )
+    kwargs.setdefault("PunchThroughParticles", [   2212,     211,      22,      11,      13])
+    kwargs.setdefault("DoAntiParticles"      , [  False,    True,   False,    True,    True])
     kwargs.setdefault("CorrelatedParticle"      , []    )
-    kwargs.setdefault("FullCorrelationEnergy"   , [ 100000., 100000., 100000., 100000.,      0., 100000., 100000., 100000., 100000.]    )
-    kwargs.setdefault("MinEnergy"               , [   938.3,   135.6,     50.,     50.,   105.7,   939.6, 493.7,   497.6,   497.6 ]    )
-    kwargs.setdefault("MaxNumParticles"         , [      -1,      -1,      -1,      -1,      -1,    -1,     -1,     -1,     -1 ]    )
-    kwargs.setdefault("EnergyFactor"            , [      1.,      1.,      1.,      1.,      1.,    1.,      1.,      1.,     1. ]    )
+    kwargs.setdefault("FullCorrelationEnergy", [100000., 100000., 100000., 100000.,      0.])
+    kwargs.setdefault("MinEnergy"            , [  938.3,   135.6,     50.,     50.,   105.7])
+    kwargs.setdefault("MaxNumParticles"      , [     -1,      -1,      -1,      -1,      -1])
+    kwargs.setdefault("EnergyFactor"         , [     1.,      1.,      1.,      1.,      1.])
     kwargs.setdefault("BarcodeSvc", acc.getPrimaryAndMerge(BarcodeSvcCfg(flags)).name)
     kwargs.setdefault("EnvelopeDefSvc", acc.getPrimaryAndMerge(EnvelopeDefSvcCfg(flags)).name)
     kwargs.setdefault("BeamPipeRadius", 500.)
     acc.setPrivateTools(CompFactory.ISF.PunchThroughTool(name, **kwargs))
-    return acc
-
-def PunchThroughClassifierCfg(flags, name="ISF_PunchThroughClassifier", **kwargs):
-    acc = ComponentAccumulator()
-    kwargs.setdefault("ScalerConfigFileName"     , "FastCaloSim/MC16/TFCSparam_mpt_classScaler_v02.xml" )
-    kwargs.setdefault("NetworkConfigFileName"     , "FastCaloSim/MC16/TFCSparam_mpt_classNet_v02.json" )
-    kwargs.setdefault("CalibratorConfigFileName"    , "FastCaloSim/MC16/TFCSparam_mpt_classCalib_v02.xml")
-    acc.setPrivateTools(CompFactory.ISF.PunchThroughClassifier(name, **kwargs))
     return acc
 
 
@@ -245,12 +235,6 @@ def FastCaloToolBaseCfg(flags, name="ISF_FastCaloTool", **kwargs):
         Extrapolator = acc.popToolsAndMerge(NITimedExtrapolatorCfg(flags))
         acc.addPublicTool(Extrapolator)
         kwargs.setdefault("Extrapolator", acc.getPublicTool(Extrapolator.name))
-    if "ISF_PunchThroughTool" not in kwargs:
-        PT_tool = acc.popToolsAndMerge(PunchThroughToolCfg(flags))
-        acc.addPublicTool(PT_tool)
-    if "ISF_PunchThroughClassifier" not in kwargs:
-        PT_classifier = acc.popToolsAndMerge(PunchThroughClassifierCfg(flags))
-        acc.addPublicTool(PT_classifier)
     if "ParticleTruthSvc" not in kwargs:
         kwargs.setdefault("ParticleTruthSvc", acc.getPrimaryAndMerge(TruthServiceCfg(flags)).name)
     acc.setPrivateTools(CompFactory.ISF.FastCaloTool(name, **kwargs))
@@ -298,13 +282,8 @@ def FastCaloSimV2ToolCfg(flags, name="ISF_FastCaloSimV2Tool", **kwargs):
     kwargs.setdefault("ParamSvc", acc.getPrimaryAndMerge(FastCaloSimV2ParamSvcCfg(flags)).name)
     kwargs.setdefault("RandomSvc", acc.getPrimaryAndMerge(AthRNGSvcCfg(flags)).name)
     kwargs.setdefault("RandomStream", "FastCaloSimRnd")
-
     PT_tool = acc.popToolsAndMerge(PunchThroughToolCfg(flags))
-    acc.addPublicTool(PT_tool)
-
-    PT_classifier = acc.popToolsAndMerge(PunchThroughClassifierCfg(flags))
-    acc.addPublicTool(PT_classifier)
-
+    kwargs.setdefault("PunchThroughTool", PT_tool)
     if "ParticleTruthSvc" not in kwargs:
         kwargs.setdefault("ParticleTruthSvc", acc.getPrimaryAndMerge(TruthServiceCfg(flags)).name)
 
@@ -360,7 +339,7 @@ def FastHitConvAlgFastCaloSimSvcCfg(flags, name="ISF_FastHitConvAlgFastCaloSimSv
 
 def FastCaloSimPileupOTSvcCfg(flags, name="ISF_FastCaloSimPileupOTSvc", **kwargs):
     acc = ComponentAccumulator()
-
+    
     FastHit = acc.popToolsAndMerge(FastHitConvertToolCfg(flags))
     acc.addPublicTool(FastHit)
     EmptyCellBuilder = acc.popToolsAndMerge(EmptyCellBuilderToolCfg(flags))
@@ -386,13 +365,6 @@ def FastCaloSimPileupOTSvcCfg(flags, name="ISF_FastCaloSimPileupOTSvc", **kwargs
                                                       acc.getPublicTool(CaloCellContainer.name),
                                                       acc.getPublicTool(FastHit.name)])
     kwargs.setdefault("Extrapolator", acc.getPublicTool(Extrapolator.name))
-
-    PT_tool = acc.popToolsAndMerge(PunchThroughToolCfg(flags))
-    acc.addPublicTool(PT_tool)
-
-    PT_classifier = acc.popToolsAndMerge(PunchThroughClassifierCfg(flags))
-    acc.addPublicTool(PT_classifier)
-
     if "ParticleTruthSvc" not in kwargs:
         kwargs.setdefault("ParticleTruthSvc", acc.getPrimaryAndMerge(TruthServiceCfg(flags)).name)
     acc.addService(CompFactory.ISF.FastCaloSimSvcPU(name, **kwargs), primary = True)
@@ -440,12 +412,5 @@ def DNNCaloSimSvcCfg(flags, name="ISF_DNNCaloSimSvc", **kwargs):
     kwargs.setdefault("RandomStream", "FastCaloSimRnd")
     kwargs.setdefault("RandomSvc",
                       acc.getPrimaryAndMerge(AthRNGSvcCfg(flags)).name)
-
-    PT_tool = acc.popToolsAndMerge(PunchThroughToolCfg(flags))
-    acc.addPublicTool(PT_tool)
-
-    PT_classifier = acc.popToolsAndMerge(PunchThroughClassifierCfg(flags))
-    acc.addPublicTool(PT_classifier)
-
     acc.addService(CompFactory.ISF.DNNCaloSimSvc(name, **kwargs), primary = True)
     return acc
