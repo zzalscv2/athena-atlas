@@ -329,7 +329,7 @@ StatusCode jFEXFPGA::execute(jFEXOutputCollection* inputOutputCollection) {
                     //calculates the 1st energy ring
                     m_jFEXtauAlgoTool->setFirstEtRing(TT_First_ETring);
                     
-                    uint32_t jTau_tobword = m_IjFEXFormTOBsTool->formTauTOB(mphi,meta,m_jFEXtauAlgoTool->getClusterEt(),m_jFEXtauAlgoTool->getFirstEtRing(),thr_jTAU.resolutionMeV(),thr_jTAU.ptMinToTopoMeV(m_jfex_string[m_jfexid]));
+                    uint32_t jTau_tobword = m_IjFEXFormTOBsTool->formTauTOB(m_jfexid,mphi,meta,m_jFEXtauAlgoTool->getClusterEt(),m_jFEXtauAlgoTool->getFirstEtRing(),thr_jTAU.resolutionMeV(),thr_jTAU.ptMinToTopoMeV(m_jfex_string[m_jfexid]));
 
                     std::unique_ptr<jFEXTOB> jTau_tob = std::make_unique<jFEXTOB>();
                     jTau_tob->initialize(m_id,m_jfexid,jTau_tobword,thr_jTAU.resolutionMeV(),m_jTowersIDs_Thin[mphi][meta]);
@@ -432,12 +432,12 @@ StatusCode jFEXFPGA::execute(jFEXOutputCollection* inputOutputCollection) {
         int max_meta=17;
         
         if(m_jfexid ==0) {
-
             for(int i=0; i<FEXAlgoSpaceDefs::jFEX_algoSpace_height; i++) {
                 for(int j=28; j<(FEXAlgoSpaceDefs::jFEX_wide_algoSpace_width-6); j++) { //lower values of j (j<28) are the Fcals not entering in the jFEX tau range
                     jTowersIDs[i][j-28+8]=m_jTowersIDs_Wide[i][j]; // second argument in m_jTowersIDs is to center the FPGA core area in te same region as the central FPGAs
                 }
-            }
+            }         
+            
         }
         else if(m_jfexid ==5 ) {
 
@@ -487,7 +487,7 @@ StatusCode jFEXFPGA::execute(jFEXOutputCollection* inputOutputCollection) {
                     //calculates the 1st energy ring
                     m_jFEXtauAlgoTool->setFirstEtRing(TT_First_ETring);
                     
-                    uint32_t jTau_tobword = m_IjFEXFormTOBsTool->formTauTOB(mphi,meta,m_jFEXtauAlgoTool->getClusterEt(),m_jFEXtauAlgoTool->getFirstEtRing(),thr_jTAU.resolutionMeV(),thr_jTAU.ptMinToTopoMeV(m_jfex_string[m_jfexid]));
+                    uint32_t jTau_tobword = m_IjFEXFormTOBsTool->formTauTOB(m_jfexid,mphi,meta,m_jFEXtauAlgoTool->getClusterEt(),m_jFEXtauAlgoTool->getFirstEtRing(),thr_jTAU.resolutionMeV(),thr_jTAU.ptMinToTopoMeV(m_jfex_string[m_jfexid]));
                     
                     std::unique_ptr<jFEXTOB> jTau_tob = std::make_unique<jFEXTOB>();
                     jTau_tob->initialize(m_id,m_jfexid,jTau_tobword,thr_jTAU.resolutionMeV(),jTowersIDs[mphi][meta]);
