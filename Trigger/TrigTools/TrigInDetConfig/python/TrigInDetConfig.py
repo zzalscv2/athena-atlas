@@ -313,8 +313,9 @@ def trigInDetFastTrackingCfg( inflags, roisKey="EMRoIs", signatureName='', in_vi
   acc.merge(trtDataPrep(flags, roisKey, signature))
 
   from InDetConfig.InDetPrepRawDataFormationConfig import TrigPixelClusterizationCfg, TrigSCTClusterizationCfg
-  acc.merge(TrigPixelClusterizationCfg(flags, roisKey=roisKey, signature=signature))
-  acc.merge(TrigSCTClusterizationCfg(flags, roisKey=roisKey, signature=signature))
+  acc.merge(TrigPixelClusterizationCfg(flags, name="InDetPixelClusterization"+signature, RoIs=roisKey))
+  acc.merge(TrigSCTClusterizationCfg(flags, name="InDetSCT_Clusterization"+signature, RoIs=roisKey))
+
   from InDetConfig.SiSpacePointFormationConfig import TrigSiTrackerSpacePointFinderCfg
   acc.merge(TrigSiTrackerSpacePointFinderCfg(flags, name="InDetSiTrackerSpacePointFinder_"+signature))
   acc.merge(ftfCfg(flags, roisKey, signature, signatureName))
