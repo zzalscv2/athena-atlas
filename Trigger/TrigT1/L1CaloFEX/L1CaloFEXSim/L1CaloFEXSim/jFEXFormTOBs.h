@@ -33,7 +33,7 @@ class jFEXFormTOBs : public AthAlgTool, virtual public IjFEXFormTOBs {
         /** Destructor */
         virtual ~jFEXFormTOBs();
 
-        virtual uint32_t formTauTOB  (int, int, int, int, int, int) override;
+        virtual uint32_t formTauTOB  (int, int, int, int, int, int, int) override;
         virtual uint32_t formSRJetTOB(int, int, int, int, int, int) override;
         virtual uint32_t formLRJetTOB(int, int, int, int, int, int) override;
         virtual uint32_t formSumETTOB(int, int, int ) override;
