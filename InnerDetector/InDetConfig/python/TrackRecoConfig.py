@@ -19,8 +19,6 @@ def CombinedTrackingPassFlagSets(flags):
         flags = flags.cloneAndReplace("InDet.Tracking.ActivePass", "InDet.Tracking.VtxLumiPass")
     elif flags.InDet.Tracking.doVtxBeamSpot:
         flags = flags.cloneAndReplace("InDet.Tracking.ActivePass", "InDet.Tracking.VtxBeamSpotPass")
-    elif flags.Beam.Type is BeamType.Cosmics:
-        flags = flags.cloneAndReplace("InDet.Tracking.ActivePass", "InDet.Tracking.CosmicsPass")
     elif flags.Reco.EnableHI:
         flags = flags.cloneAndReplace("InDet.Tracking.ActivePass", "InDet.Tracking.HeavyIonPass")
     elif flags.InDet.Tracking.doHighPileup:
@@ -82,6 +80,9 @@ def CombinedTrackingPassFlagSets(flags):
 
 def ClusterSplitProbabilityContainerName(flags):
 
+    if flags.Beam.Type is BeamType.Cosmics:
+        return "InDetAmbiguityProcessorSplitProb"
+
     flags_set = CombinedTrackingPassFlagSets(flags)
     extension = flags_set[-1].InDet.Tracking.ActivePass.extension
     ClusterSplitProbContainer = "InDetAmbiguityProcessorSplitProb" + extension
@@ -89,6 +90,44 @@ def ClusterSplitProbabilityContainerName(flags):
         ClusterSplitProbContainer = "InDetTRT_SeededAmbiguityProcessorSplitProb"
 
     return ClusterSplitProbContainer
+
+# TODO find config to validate this
+def InDetCosmicsTrackRecoCfg(flags):
+    result = ComponentAccumulator()
+
+    from InDetConfig.TrackingSiPatternConfig import TrackingSiPatternCfg
+    result.merge(TrackingSiPatternCfg(flags,
+                                      InputCollections = [],
+                                      ResolvedTrackCollectionKey = "ResolvedTracks",
+                                      SiSPSeededTrackCollectionKey = "SiSPSeededTracks"))
+
+    from InDetConfig.TRTExtensionConfig import NewTrackingTRTExtensionCfg
+    result.merge(NewTrackingTRTExtensionCfg(flags,
+                                            SiTrackCollection = "ResolvedTracks",
+                                            ExtendedTrackCollection = "ExtendedTracks",
+                                            ExtendedTracksMap = "ExtendedTracksMap"))
+
+    from InDetConfig.TRTSegmentFindingConfig import TRTSegmentFindingCfg
+    result.merge(TRTSegmentFindingCfg(flags,
+                                      extension = "",
+                                      InputCollections = [],
+                                      BarrelSegments = "TRTSegments_Phase"))
+
+    from InDetConfig.InDetTrackPRD_AssociationConfig import InDetTrackPRD_AssociationCfg
+    result.merge(InDetTrackPRD_AssociationCfg(flags,
+                                              name = 'InDetTRTonly_TrackPRD_AssociationPhase',
+                                              AssociationMapName = 'InDetTRTonly_PRDtoTrackMapPhase',
+                                              TracksName = []))
+
+    from InDetConfig.TRT_SegmentsToTrackConfig import TRT_SegmentsToTrackCfg
+    result.merge(TRT_SegmentsToTrackCfg(flags, name = 'InDetTRT_SegmentsToTrack_BarrelPhase',
+                                        InputSegmentsCollection = "TRTSegments_Phase",
+                                        OutputTrackCollection = "TRT_Tracks_Phase"))
+
+    from InDetConfig.InDetCosmicsEventPhaseConfig import InDetCosmicsEventPhaseCfg
+    result.merge(InDetCosmicsEventPhaseCfg(flags,  InputTracksNames=["TRT_Tracks_Phase"]))
+
+    return result
 
 def InDetTrackRecoCfg(flags):
     if flags.Detector.GeometryITk:
@@ -170,7 +209,9 @@ def InDetTrackRecoCfg(flags):
                                       InputCollections = [],
                                       BarrelSegments = "TRTSegmentsTRT"))
 
-    # @TODO add TRTPhase computation somewhere (needed for cosmics)
+    if flags.Beam.Type is BeamType.Cosmics:
+        flagsCosmics = flags.cloneAndReplace("InDet.Tracking.ActivePass", "InDet.Tracking.CosmicsPass")
+        result.merge(InDetCosmicsTrackRecoCfg(flagsCosmics))
 
     # ------------------------------------------------------------
     #
@@ -178,7 +219,7 @@ def InDetTrackRecoCfg(flags):
     #
     # ------------------------------------------------------------
 
-    flags_set = CombinedTrackingPassFlagSets(flags)
+    flags_set = [] if flags.Beam.Type is BeamType.Cosmics else CombinedTrackingPassFlagSets(flags)
     InputCombinedInDetTracks = [] # Tracks to be ultimately merged in InDetTrackParticle collection
     InputExtendedInDetTracks = [] # Includes also tracks which end in standalone TrackParticle collections
     ClusterSplitProbContainer = ""
