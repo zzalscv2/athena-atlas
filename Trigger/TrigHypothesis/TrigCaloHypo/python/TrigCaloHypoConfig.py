@@ -25,7 +25,7 @@ class TrigLArNoiseBurstRecoAlgCfg ( CompFactory.TrigLArNoiseBurstRecoAlg ):
          self.NoiseTool = theLArNoisyROTool
          from AthenaMonitoringKernel.GenericMonitoringTool import GenericMonitoringTool,defineHistogram
          monTool = GenericMonitoringTool()
-         cutLabels = ["Input","BadFEBFlaggedPartitions", "BadFEB_WFlaggedPartitions", "SatTightFlaggedPartitions", "MNBLooseFlaggedPartions", "MNBTightFlaggedPartions", "Output" ]
+         cutLabels = ["Input","BadFEBFlaggedPartitions", "BadFEB_WFlaggedPartitions", "SatTightFlaggedPartitions", "MNBLooseFlaggedPartions", "MNBTightFlaggedPartions", "MNBTight_PsVetoFlaggedPartions", "Output" ]
          monTool.Histograms = [ defineHistogram('bitWise_flags', type='TH1I', path='EXPERT', title="LArNoiseBurst Cut Counter;Cut ;  Count", xbins=len(cutLabels), xmin=0, xmax=len(cutLabels), xlabels=cutLabels),
          defineHistogram('TIME_larnoisetool', type='TH1F', path='EXPERT', title="Time; time(ps)", xbins=100, xmin=-100.0,xmax=15000) ]
          self.MonTool = monTool
