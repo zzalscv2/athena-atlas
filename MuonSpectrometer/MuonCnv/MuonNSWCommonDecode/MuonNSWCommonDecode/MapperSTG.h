@@ -25,8 +25,12 @@ namespace Muon
       bool vmm_info (uint8_t channel_type, uint8_t sector_type, uint8_t mod_radius, uint8_t layer, uint16_t channel_number, uint16_t& vmm, uint16_t& vmm_chan) const;
 
       static uint16_t private_id (uint8_t channel_type, uint8_t sector_type, uint8_t feb_radius, uint8_t layer);
+      
+      // Mappings to different numbering conventions
       uint16_t AB_to_Athena_channel_number (uint8_t channel_type, uint8_t sector_type, uint8_t feb_radius, uint8_t layer, uint16_t channel_number) const;
       uint16_t Athena_to_AB_channel_number (uint8_t channel_type, uint8_t sector_type, uint8_t feb_radius, uint8_t layer, uint16_t channel_number) const;
+      uint16_t NSWID_to_Athena_channel_number (uint8_t channel_type, uint8_t sector_type, uint8_t feb_radius, uint8_t layer, uint16_t channel_number, bool sideA) const;
+      uint16_t Athena_to_NSWID_channel_number (uint8_t channel_type, uint8_t sector_type, uint8_t feb_radius, uint8_t layer, uint16_t channel_number, bool sideA) const;
     };
   
     static const std::map <uint16_t, std::vector<std::vector<uint8_t>>> s_stgc_channel_map =
