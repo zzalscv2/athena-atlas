@@ -151,7 +151,7 @@ def EnvelopeDefSvcCfg(ConfigFlags, name="AtlasGeometry_EnvelopeDefSvc", **kwargs
     #set the GeoModelSvc
     from AtlasGeoModel.GeoModelConfig import GeoModelCfg
     acc = GeoModelCfg(ConfigFlags)
-    kwargs.setdefault("GeoModelSvc", acc.getService("GeoModelSvc").name)
+    kwargs.setdefault("GeoModelSvc", acc.getService("GeoModelSvc").getFullJobOptName())
     result.merge(acc)
 
     result.addService(CompFactory.DetDescrDBEnvelopeSvc(name, **kwargs),primary=True)
