@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
 */
 
 // class header
@@ -183,7 +183,7 @@ namespace G4UA{
 
       std::string vname1;
       bool pass=false;
-      for (it=m_entryLayerMap.begin(); it!=m_entryLayerMap.end(); it++) {
+      for (it=m_entryLayerMap.begin(); it!=m_entryLayerMap.end(); ++it) {
 
         int il=(*it).second;
 

@@ -106,9 +106,9 @@ namespace G4UA{
       mutable float                                                 m_vtx_pperp_diff;
       mutable float                                                 m_p_mother;
       mutable float                                                 m_radLength;
-      mutable int                                                   m_pdg_child[MAXCHILDREN];     // decay product pdg code
-      mutable float                                                 m_fp_child[MAXCHILDREN];      // fraction of incoming momentum
-      mutable float                                                 m_oa_child[MAXCHILDREN];      // opening angle wrt the mother
+      mutable int                                                   m_pdg_child[MAXCHILDREN] ={};     // decay product pdg code
+      mutable float                                                 m_fp_child[MAXCHILDREN] ={};      // fraction of incoming momentum
+      mutable float                                                 m_oa_child[MAXCHILDREN] ={};      // opening angle wrt the mother
       
       
       int m_volumeOffset;

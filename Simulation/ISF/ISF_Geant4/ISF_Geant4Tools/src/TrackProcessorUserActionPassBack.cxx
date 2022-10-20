@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2017 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
 */
 
 ///////////////////////////////////////////////////////////////////
@@ -299,10 +299,10 @@ namespace G4UA {
       else
       {
         // store the particle for retrieval in MT mode
-        if ( parentISP ) {
-          newISP->setBCID( parentISP->getBCID() );
-          if (!newISP->getTruthBinding()) newISP->setTruthBinding(new ISF::TruthBinding(*parentISP->getTruthBinding()));
-        }
+        //parentISP must be non-null by here, it has already been deeferenced
+        newISP->setBCID( parentISP->getBCID() );
+        if (!newISP->getTruthBinding()) newISP->setTruthBinding(new ISF::TruthBinding(*parentISP->getTruthBinding()));
+        
         m_storedSecondaries.push_back( newISP );
       }
 
