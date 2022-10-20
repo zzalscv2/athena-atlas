@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2017 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
 */
 
 ///////////////////////////////////////////////////////////////////
@@ -28,14 +28,8 @@ ISF::MemoryMonitoringTool::MemoryMonitoringTool( const std::string& t,
 /** Destructor */
 ISF::MemoryMonitoringTool::~MemoryMonitoringTool() {
   // clean up memory
-  // loop over all (infoStr,memUsage) pairs and print them
-  InfoUsagePairVector::const_iterator it    = m_table.begin();
-  InfoUsagePairVector::const_iterator itEnd = m_table.end();
-  for ( ; it != itEnd; ++it) {
-    // the Info string:
-    //delete (*it)->first;
-    // the InfoUsagePair:
-    delete (*it);
+  for (auto & p : m_table){ 
+    delete p;
   }
   // reset summary table vector
   m_table.clear();
@@ -113,7 +107,7 @@ void ISF::MemoryMonitoringTool::recordCurrent( const char *infoStr) {
 /** dump all internally stored memory monitoring information */
 void ISF::MemoryMonitoringTool::dumpSummary(const char *desc) const {
 
-  ATH_MSG_INFO("*****************************************************"<<endmsg<<
+  ATH_MSG_INFO("*****************************************************\n"<<
                "*  (VmMem) MEMORY SUMMARY: (kBytes)");
 
   // loop over all (infoStr,memUsage) pairs and print them
@@ -127,6 +121,7 @@ void ISF::MemoryMonitoringTool::dumpSummary(const char *desc) const {
   }
 
   if (m_numCalls) {
+    //cppcheck-suppress uselessAssignmentPtrArg
     if (!desc) desc = "MemoryMonitor call";
     ATH_MSG_INFO( "*  Average memory per " << desc << " : "
                   << (int)(m_accumulatedCallMemory/m_numCalls) );

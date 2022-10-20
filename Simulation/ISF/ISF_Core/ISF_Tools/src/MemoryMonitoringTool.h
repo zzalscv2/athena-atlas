@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2017 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
 */
 
 ///////////////////////////////////////////////////////////////////
@@ -14,7 +14,7 @@
 
 // ISF includes
 #include "ISF_Interfaces/IMonitoringTool.h"
-#include "ISF_Interfaces/ISimulationSelector.h"
+
 
 // stl includes
 #include <utility>
