@@ -125,6 +125,8 @@ namespace CP
 
     double MuonCalibIntScaleSmearTool::getCorrectedPt(const MCP::MuonObj& mu, const MCP::TrackCalibObj& trk, const std::map<MCP::ScaleSmearParam, double>& calibConstant) const
     {
+        if(trk.calib_pt == 0) return 0;
+        
         // For debugging:: Todo add checking if in verbose mode
         ATH_MSG_VERBOSE("MuonType:  "<<MCP::toString(trk.type));
         for(const auto& var: calibConstant) ATH_MSG_VERBOSE("var:  "<<MCP::toString(var.first)<<" = "<<var.second);
@@ -143,6 +145,8 @@ namespace CP
 
     double MuonCalibIntScaleSmearTool::getSmearCorr(const MCP::MuonObj& mu, const MCP::TrackCalibObj& trk, double r0, double r1, double r2) const
     {
+        if(trk.calib_pt == 0) return 1;
+
         double pT = trk.calib_pt;
         if(trk.type == MCP::TrackType::ID)
         {
@@ -165,7 +169,17 @@ namespace CP
         double deltaCBME = mu.CB.calib_pt - mu.ME.calib_pt;
         double deltaCBID = mu.CB.calib_pt - mu.ID.calib_pt;
        
-        if (mu.CB.calib_pt != 0) 
+        if (mu.ME.calib_pt == 0)
+        {
+            weightID = 1.0;
+            weightME = 0.0;
+        }
+        else if (mu.ID.calib_pt == 0)
+        {
+            weightID = 0.0;
+            weightME = 1.0;
+        }
+        else if (mu.CB.calib_pt != 0) 
         {        
             if (std::abs(deltaCBME) > 0 || std::abs(deltaCBID) > 0) 
             {
@@ -208,8 +222,12 @@ namespace CP
         double smearIDCorr = getSmearCorr(mu, mu.ID, calibIDConstant.at(MCP::ScaleSmearParam::r0), calibIDConstant.at(MCP::ScaleSmearParam::r1), calibIDConstant.at(MCP::ScaleSmearParam::r2));
         double smearMECorr = getSmearCorr(mu, mu.ME, calibMEConstant.at(MCP::ScaleSmearParam::r0), calibMEConstant.at(MCP::ScaleSmearParam::r1), calibMEConstant.at(MCP::ScaleSmearParam::r2));
         double smearCorr = weightID * smearIDCorr + weightME * smearMECorr;
+        double scaleCB = 0;
+
         // apply the full correction
-        double scaleCB = (calibIDConstant.at(MCP::ScaleSmearParam::s1) * weightID + (calibMEConstant.at(MCP::ScaleSmearParam::s1) + calibMEConstant.at(MCP::ScaleSmearParam::s0) / mu.ME.calib_pt) * weightME);
+        if(weightID == 0) scaleCB = (calibMEConstant.at(MCP::ScaleSmearParam::s1) + calibMEConstant.at(MCP::ScaleSmearParam::s0) / mu.ME.calib_pt) * weightME;
+        else if(weightME == 0) scaleCB = calibIDConstant.at(MCP::ScaleSmearParam::s1) * weightID ;
+        else scaleCB = (calibIDConstant.at(MCP::ScaleSmearParam::s1) * weightID + (calibMEConstant.at(MCP::ScaleSmearParam::s1) + calibMEConstant.at(MCP::ScaleSmearParam::s0) / mu.ME.calib_pt) * weightME);
 
         ATH_MSG_VERBOSE("mu.ID.calib_pt: "<<mu.ID.calib_pt);
         ATH_MSG_VERBOSE("mu.ME.calib_pt: "<<mu.ME.calib_pt);

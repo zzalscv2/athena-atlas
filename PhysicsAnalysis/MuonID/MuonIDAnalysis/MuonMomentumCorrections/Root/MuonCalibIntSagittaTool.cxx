@@ -275,6 +275,9 @@ namespace CP
 
     double MuonCalibIntSagittaTool::statCombCorrection(const MCP::MuonObj& mu, double corrIDpT, double corrMEpT, double CBpT) const
     {
+        ATH_MSG_VERBOSE("Sag mu.ID.calib_pt: "<<mu.ID.calib_pt);
+        ATH_MSG_VERBOSE("Sag mu.ME.calib_pt: "<<mu.ME.calib_pt);
+        ATH_MSG_VERBOSE("Sag mu.CB.calib_pt: "<<mu.CB.calib_pt);
 
         // Corner cases to prevent a NaN in the combination
         if(mu.ID.calib_pt == 0) return CBpT;
@@ -298,11 +301,13 @@ namespace CP
         using TLV = ROOT::Math::LorentzVector<ROOT::Math::PtEtaPhiM4D<double>>;
         TLV tlv{mu.ID.calib_pt, mu.ID.eta, mu.ID.phi, mu.ID.mass};
         // Now modify the ID covariance matrix, and convert it to MeV
-        parsID[4] = 1.0 / (tlv.P() * 1e3);
+        if(tlv.P() == 0) parsID[4] = 1e12;
+        else parsID[4] = 1.0 / (tlv.P() * 1e3);
 
         tlv.SetCoordinates(mu.ME.calib_pt, mu.ME.eta, mu.ME.phi, mu.ME.mass);   
         // Now modify the ME covariance matrix
-        parsMS[4] = 1.0 / (tlv.P() * 1e3);
+        if(tlv.P() == 0) parsMS[4] = 1e12;
+        else parsMS[4] = 1.0 / (tlv.P() * 1e3);
 
         CorrectionCode SysCorrCode = applyStatCombination(parsID, covID, parsMS, covMS, mu.CB.charge, parsCBNom, covCBNom, chi2Nom);
         if (SysCorrCode != CorrectionCode::Ok) return CBpT;
@@ -312,11 +317,13 @@ namespace CP
         // create the TLV with original ID pT
         tlv.SetCoordinates(corrIDpT,  mu.ID.eta, mu.ID.phi, mu.ID.mass);
         // Now modify the ID covariance matrix, and convert it to MeV
-        parsID[4] = 1.0 / (tlv.P() * 1e3);
+        if(tlv.P() == 0) parsID[4] = 1e12;
+        else parsID[4] = 1.0 / (tlv.P() * 1e3);
 
         tlv.SetCoordinates(corrMEpT, mu.ME.eta, mu.ME.phi, mu.ME.mass);   
         // Now modify the ME covariance matrix
-        parsMS[4] = 1.0 / (tlv.P() * 1e3);
+        if(tlv.P() == 0) parsMS[4] = 1e12;
+        else parsMS[4] = 1.0 / (tlv.P() * 1e3);
 
         SysCorrCode = applyStatCombination(parsID, covID, parsMS, covMS, mu.CB.charge, parsCBCorr, covCBCorr, chi2Nom);
         if (SysCorrCode != CorrectionCode::Ok) return CBpT;
