@@ -68,6 +68,10 @@ private:
   Gaudi::Property<double> m_HTOccupancyCorrectionEC{this, "TRT_HT_OccupancyCorrectionEndcap", 0.090, ""};
   Gaudi::Property<double> m_HTOccupancyCorrectionB_noE{this, "TRT_HT_OccupancyCorrectionBarrelNoE", 0.060, ""};
   Gaudi::Property<double> m_HTOccupancyCorrectionEC_noE{this, "TRT_HT_OccupancyCorrectionEndcapNoE", 0.050, ""};
+  Gaudi::Property<double> m_HTOccupancyCorrectionB_Ar{this, "TRT_HT_OccupancyCorrectionBarrelAr", 0.0, ""};
+  Gaudi::Property<double> m_HTOccupancyCorrectionEC_Ar{this, "TRT_HT_OccupancyCorrectionEndcapAr", 0.0, ""};
+  Gaudi::Property<double> m_HTOccupancyCorrectionB_Ar_noE{this, "TRT_HT_OccupancyCorrectionBarrelArNoE", 0.0, ""};
+  Gaudi::Property<double> m_HTOccupancyCorrectionEC_Ar_noE{this, "TRT_HT_OccupancyCorrectionEndcapArNoE", 0.0, ""};
   ToolHandle<InDet::ITRT_LocalOccupancy>  m_TRT_LocalOccupancyTool{this, "TRT_LocalOccupancyTool", "TRT_LocalOccupancy", ""};
 
 };
