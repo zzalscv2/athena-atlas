@@ -11,24 +11,53 @@
 # -$4 : System 
 ##################################################################
 
-date
+rundir=$1
+year=$2
+tag=$3
 
-cd $1
-
+date=`date`
+echo "Date is ${date}"
+cd ${rundir}
+echo "Now in ${rundir}"
 export AtlasSetup=/afs/cern.ch/atlas/software/dist/AtlasSetup
-source $AtlasSetup/scripts/asetup.sh 21.0.66,Athena,gcc62
+source $AtlasSetup/scripts/asetup.sh Athena,22.0.81
 
 system=$4
 
 echo "====================================================================================="
 echo "====================================================================================="
-echo "Processing "$system
+echo "Processing "${system}
 echo "====================================================================================="
 echo "====================================================================================="
-
-python DeMoUpdate.py -b -y $2 -t $3 -s $system --allRuns --resetYS --vetoLumiEvol &> YearStats-$system/daemon-allruns.out
-python DeMoUpdate.py -b -y $2 -t $3 -s $system --grlUpdate &> YearStats-$system/daemon-grl.out
-python DeMoStatus.py -y $2 -t $3 -s $system --savePlots &> YearStats-$system/daemon-grl2.out
-python DeMoScan.py -y $2 -t $3 -s $system --recapDefects &> YearStats-$system/daemon-recapdefects.out
+    
+if [ ! -d YearStats-${system} ]; then
+    mkdir YearStats-${system}
+fi
+# Script for the weekly production
+cmd="python DeMoUpdate.py -b -y ${year} -t ${tag} -s ${system} --weekly --vetoLumiEvol --noUpdateYS"
+log="YearStats-${system}/daemon-weekly.out"
+echo "** ${cmd} **"
+eval "rm -f ${log}"
+eval "${cmd} &> ${log}"
+# Script for updating the year stats for all runs (Tier0_2022 DeMo tag)
+# If you want to restrict to the RunList/grl-*.dat created/updated by the DQ coordination (GRL_2022 DeMo tag), remove the  --noGrlFilter option
+# If you want to reset the year stats, add --resetYS (no recommanded as much longer)
+cmd="python DeMoUpdate.py -b -y ${year} -t ${tag} -s ${system} --grlUpdate --noGrlFilter --vetoLumiEvol"
+log="YearStats-${system}/${year}/${tag}/daemon-grl.out"
+echo "** ${cmd} **"
+eval "rm -f ${log}"
+eval "${cmd} &> ${log}"
+# Creating the run YS plots
+cmd="python DeMoStatus.py --yearStatsLarge -s ${system} -y ${year} -t ${tag} --savePlots"
+log="YearStats-${system}/${year}/${tag}/daemon-YSplots.out"
+echo "** ${cmd} **"
+eval "rm -f ${log}"
+eval "${cmd} &> ${log}"
+# Producing the defect recap
+cmd="python DeMoScan.py -y ${year} -t ${tag} -s ${system} --recapDefects"
+log="YearStats-${system}/${year}/${tag}/daemon-recapDefects.out"
+echo "** ${cmd} **"
+eval "rm -f ${log}"
+eval "${cmd} &> ${log}"
 
 /afs/cern.ch/user/a/atlasdqm/www/DeMo/generate.exe
