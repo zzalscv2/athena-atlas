@@ -128,3 +128,10 @@ def ITkSiTrackerSpacePointFinderCfg(flags, name = "ITkSiTrackerSpacePointFinder"
 
     acc.addEventAlgo(CompFactory.InDet.SiTrackerSpacePointFinder(name, **kwargs))
     return acc
+
+def ITkTrigSiTrackerSpacePointFinderCfg(flags, name = "ITkTrigSiTrackerSpacePointFinder", signature = "", **kwargs):
+    kwargs.setdefault("PixelsClustersName", "ITkTrigPixelClusters")
+    kwargs.setdefault("SCT_ClustersName", "ITkTrigStripClusters")
+    kwargs.setdefault("SpacePointsPixelName", "ITkPixelTrigSpacePoints")
+    kwargs.setdefault("SpacePointsSCTName", "ITkStripTrigSpacePoints")
+    return ITkSiTrackerSpacePointFinderCfg(flags, name=name+signature, **kwargs)
