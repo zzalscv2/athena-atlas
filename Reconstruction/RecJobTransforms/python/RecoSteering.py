@@ -137,8 +137,9 @@ def RecoSteering(flags):
     if flags.Reco.EnableJet:
         from JetRecConfig.JetRecoSteering import JetRecoSteeringCfg
         acc.merge(JetRecoSteeringCfg(flags))
-        #We also need to build links between the newly created jet constituents (GlobalFE)
-        #and electrons,photons,muons and taus
+        # We also need to build links between the newly
+        # created jet constituents (GlobalFE)
+        # and electrons,photons,muons and taus
         from eflowRec.PFCfg import PFGlobalFlowElementLinkingCfg
         acc.merge(PFGlobalFlowElementLinkingCfg(flags))
         log.info("---------- Configured jets")
@@ -223,8 +224,7 @@ def RecoSteering(flags):
         log.info("setup POOL format writing")
 
     if flags.Output.doWriteESD:
-        # Needed for Trk::Tracks TPCnv/
-        # Assumes we write Trk::Track on ESD
+        # Needed for Trk::Tracks TPCnv
         from TrkEventCnvTools.TrkEventCnvToolsConfigCA import (
             TrkEventCnvSuperToolCfg)
         acc.merge(TrkEventCnvSuperToolCfg(flags))
