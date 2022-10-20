@@ -1,7 +1,6 @@
 # Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
 ### This module contains functions which may need to peek at the input file metadata
 from AthenaCommon.Logging import logging
-from AthenaConfiguration.ComponentAccumulator import ComponentAccumulator
 from AthenaConfiguration.Enums import ProductionStep
 from AthenaKernel.EventIdOverrideConfig import getMinMaxRunNumbers
 
@@ -81,9 +80,6 @@ def readSimulationParameters(ConfigFlags):
 
 def writeSimulationParameters(ConfigFlags):
     """Write digitization parameters metadata"""
-    if ConfigFlags.Overlay.DataOverlay:
-        return ComponentAccumulator()
-
     from IOVDbSvc.IOVDbSvcConfig import IOVDbSvcCfg, addFolders
     acc = IOVDbSvcCfg(ConfigFlags, FoldersToMetaData=[folderName])
     acc.merge(addFolders(ConfigFlags, folderName, detDb="SimParams.db", db="SIMPARAM"))
