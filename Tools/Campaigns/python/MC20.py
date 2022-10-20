@@ -16,9 +16,6 @@ def MC20a(flags):
     LArConfigRun2PileUp(flags)
     flags.Digitization.HighGainEMECIW = True
 
-    flags.Tile.BestPhaseFromCOOL = False
-    flags.Tile.correctTime = False
-
     ## pile-up
     # These numbers are based upon a relative XS scaling of the high-pt slice
     # of 64%, which leads to a relative high-pt / low-pt sampling of
@@ -46,9 +43,6 @@ def MC20d(flags):
 
     from LArConfiguration.LArConfigRun2 import LArConfigRun2PileUp
     LArConfigRun2PileUp(flags)
-
-    flags.Tile.BestPhaseFromCOOL = False
-    flags.Tile.correctTime = False
 
     ## pile-up
     # These numbers are based upon a relative XS scaling of the high-pt slice
@@ -78,9 +72,6 @@ def MC20e(flags):
     from LArConfiguration.LArConfigRun2 import LArConfigRun2PileUp
     LArConfigRun2PileUp(flags)
 
-    flags.Tile.BestPhaseFromCOOL = False
-    flags.Tile.correctTime = False
-
     ## pile-up
     # These numbers are based upon a relative XS scaling of the high-pt slice
     # of 64%, which leads to a relative high-pt / low-pt sampling of
@@ -106,6 +97,3 @@ def MC20NoPileUp(flags):
 
     from LArConfiguration.LArConfigRun2 import LArConfigRun2NoPileUp
     LArConfigRun2NoPileUp(flags)
-
-    flags.Tile.BestPhaseFromCOOL = False
-    flags.Tile.correctTime = False

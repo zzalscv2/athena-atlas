@@ -12,9 +12,6 @@ def PhaseIIPileUpBase(flags, collisions=200):
 
     flags.Digitization.DoInnerDetectorNoise = False  # disable noise for now
 
-    flags.Tile.BestPhaseFromCOOL = False
-    flags.Tile.correctTime = False
-
 
 def PhaseIIPileUp60(flags):
     """Phase-II Upgrade / Run 4 flags for MC with pile-up, mu=60"""
@@ -95,9 +92,6 @@ def PhaseIINoPileUp(flags):
     LArConfigRun3NoPileUp(flags)
 
     flags.Digitization.DoInnerDetectorNoise = False  # disable noise for now
-
-    flags.Tile.BestPhaseFromCOOL = False
-    flags.Tile.correctTime = False
 
 
 def PhaseIISimulation(flags):
