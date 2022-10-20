@@ -16,7 +16,7 @@ namespace NswAsBuilt {
  /**
    * Athena indices for a MM quadruplet:
    *  - stationName: MMS(55) or MML(56) for MM chambers
-   *                 STS(57) or STL(57) for sTGC chambers
+   *                 STS(57) or STL(58) for sTGC chambers
    *  - eta: 1,2 (A side), -1,-2 (C side) for MM
    *  - eta: 1,2,3 (A side), -1,-2,-3 (C side) for sTGC
    *  - phi: in [1,8]
@@ -26,8 +26,8 @@ namespace NswAsBuilt {
     enum StationName {
       MMS=55,
       MML=56,
-      STL=57,
-      STS=58
+      STS=57,
+      STL=58
     };
 
     StationName stationName{};
