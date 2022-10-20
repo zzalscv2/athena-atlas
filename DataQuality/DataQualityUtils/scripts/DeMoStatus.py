@@ -1,22 +1,24 @@
 #! /usr/bin/env python
-# Copyright (C) 2002-2020 CERN for the benefit of the ATLAS collaboration
-# Author : Benjamin Trocme (LPSC - Grenoble) - 2017
+# Copyright (C) 2002-2018 CERN for the benefit of the ATLAS collaboration
+# Author : Benjamin Trocme (LPSC - Grenoble) - 2017 - 2022
+# Python 3 migration by Miaoran Lu         
 # Displays the year cumulated stats (GRL runs)
 ##################################################################
 
-from __future__ import print_function
-import os,sys
+import os,sys  
+
+import time
 
 from ROOT import TFile
+from ROOT import TProfile,TH1F
 from ROOT import TCanvas
-from ROOT import gStyle,gPad
-from ROOT import kBlack
+from ROOT import gStyle,gPad,gROOT
+from ROOT import kBlack,kOrange,kGreen
+gROOT.SetBatch(False)
 
 sys.path.append("/afs/cern.ch/user/l/larmon/public/prod/Misc")
 
-from gb import MakeTH1,SetXLabel,MakeTProfile
-
-from DeMoLib import plotStack, initialize
+from DeMoLib import strLumi, plotStack, initialize, MakeTH1,SetXLabel,MakeTProfile
 
 global debug
 debug = False
@@ -42,7 +44,7 @@ def mergeSubPeriod(tprof_subperiod,tprof_letter):
   return
 
 ########################################################################
-# ATLASLabel copied from atlastyle package, as import does not work for unknown region
+# ATLASLabel copied from atlastyle package, as import does not work for unknown reasons
 def ATLASLabel(x,y,text=""):
   from ROOT import TLatex
   from ROOT import gPad
@@ -64,22 +66,28 @@ def ATLASLabel(x,y,text=""):
 ########################################################################
 # Main script
 from argparse import RawTextHelpFormatter,ArgumentParser
+from ROOT import gROOT
 
 parser = ArgumentParser(description='',formatter_class=RawTextHelpFormatter)
 parser.add_argument('-y','--year',dest='parser_year',default = ["2018"],nargs='*',help='Year [Default: 2018]',action='store')
 parser.add_argument('-t','--tag',dest='parser_tag',default = ["Tier0_2018"],nargs='*',help='Defect tag [Default: "Tier0_2018"]',action='store')
 parser.add_argument('-s','--system',dest='parser_system',default="LAr",help='System: LAr, CaloCP [Default: "LAr"]',action='store')
 parser.add_argument('-d','--directory',dest='parser_directory',default="./",help='Directory to display',action='store')
+parser.add_argument('-b','--batch',dest='parser_batchMode',help='Batch mode',action='store_true')
 parser.add_argument('--yearStats',dest='parser_plotYS',help='Plot the year stats per period',action='store_true')
 parser.add_argument('--yearStatsLarge',dest='parser_letterYS',help='Plot the year stats as a function of the letter (large) periods',action='store_true')
 parser.add_argument('--lumiNotPercent',dest='parser_lumiNotPercent',help='Display results in term of lumi and not percent',action='store_true')
 parser.add_argument('--noRecovPlot',dest='parser_noRecovPlot',help='Do not plot the recoverable histograms',action='store_false')
 parser.add_argument('--savePlots',dest='parser_savePlots',help='Save yearStats results in ~larmon/public/prod/LADIeS/DeMoPlots',action='store_true')
 parser.add_argument('--approvedPlots',dest='parser_approvedPlots',help='Cosmetics to get the approved plots',action='store_true')
+parser.add_argument('--noSingleTagPlot',dest='parser_noSingleTagPlot',help='When > 1 tag, display only comparison plots',action='store_true')
 
 args = parser.parse_args()
 
 parser.print_help()
+
+if args.parser_batchMode:
+  gROOT.SetBatch(True)
 
 yearTagProperties = {}
 partitions = {}
@@ -87,7 +95,7 @@ defects = {}
 defectVeto = {}
 veto = {}
 signOff = {}
-initialize(args.parser_system,yearTagProperties,partitions,defects,defectVeto,veto,signOff,args.parser_year[0])
+initialize(args.parser_system,yearTagProperties,partitions,defects,defectVeto,veto,signOff,args.parser_year[0],args.parser_tag[0])
 
 yearTagList = []
 yearTagDir = {}
@@ -99,7 +107,6 @@ for iYear in args.parser_year:
       yearTagList.append(yearTag)
       yearTagDir[yearTag] = directory
 
-#  yearTagList.sort(reverse=True)
 yearTagList.sort()
 
 if len(yearTagList) == 0:
@@ -113,6 +120,7 @@ options['lumiNotPercent'] = args.parser_lumiNotPercent
 options['recovPlot'] = args.parser_noRecovPlot
 options['savePlots'] = args.parser_savePlots  
 options['approvedPlots'] = args.parser_approvedPlots
+options['noSingleTagPlot'] = args.parser_noSingleTagPlot
 
 if options['savePlots']:
   options['plotYearStats'] = True
@@ -127,6 +135,12 @@ if options['approvedPlots']:
 
 if not (options['plotYearStats'] or options['plotYearStatsLarge'] or options['savePlots']):
   options['plotYearStats'] = True
+
+yearTagNb = len(yearTagList)
+yearTagLabels = yearTagNb*[""]
+for iYT in range(yearTagNb):
+  if options['approvedPlots']: yearTagLabels[iYT] = yearTagList[iYT].split("/")[0]
+  else: yearTagLabels[iYT] = yearTagList[iYT]
 
 gStyle.SetOptStat(0)
 
@@ -145,7 +159,7 @@ subperiodNb = {}
 runsCharact = {}
 
 for iYT in yearTagList:
-  print("I am treating the following year/tag:%s"%iYT)
+  print(("I am treating the following year/tag:%s"%iYT))
 
   canvasResults[iYT] = {}
   legendResults[iYT] = {}
@@ -165,20 +179,21 @@ for iYT in yearTagList:
     if int(iRun)>runsCharact[iYT]['High']:runsCharact[iYT]['High']=int(iRun)
     runsCharact[iYT]['Number'] += 1
 
-  runsCharact[iYT]['Range']="%d->%d / GRL only"%(runsCharact[iYT]['Low'],runsCharact[iYT]['High'])
-  print("I found %d runs in this year/tag (%s)"%(runsCharact[iYT]['Number'],runsCharact[iYT]['Range']))
+  runsCharact[iYT]['Range']="%d->%d"%(runsCharact[iYT]['Low'],runsCharact[iYT]['High'])
+  print(("I found %d runs in this year/tag (%s)"%(runsCharact[iYT]['Number'],runsCharact[iYT]['Range'])))
 
   if (options['plotYearStats'] or options['plotYearStatsLarge']):
     if options['approvedPlots']:
       xAxisTitle = "Period"
-      legendHead = iYT.split("/")[0]
+      legendHead = "%s - %s"%(args.parser_system,iYT.split("/")[0])
     else:
       xAxisTitle = "Period (%s)"%runsCharact[iYT]['Range']
-      legendHead = iYT
+      legendHead = "%s - %s"%(args.parser_system,iYT)
 
     # Retrieve the defect, veto histograms from the YearStats root file
     hProfPeriod_IntolDefect[iYT] = {}
-    for iDef in defects["intol"]+defects["intol_recov"]:
+    allIntolDef = ["allIntol","allIntol_recov"] # Summed inefficiencies without double counting
+    for iDef in defects["intol"]+defects["intol_recov"]+allIntolDef:
       iDefName = iDef.rsplit("__",1)[0] # Trick needed to get the defect name for the recoverable defect histogram
       hProfPeriod_IntolDefect[iYT][iDef] = file[iYT].Get("hProfPeriod_IntolDefect_%s_archive"%(iDef))
       hProfPeriod_IntolDefect[iYT][iDef].SetFillColor(defectVeto["color"][iDefName])
@@ -187,17 +202,21 @@ for iYT in yearTagList:
     for iVeto in veto["all"]:
       hProfPeriod_Veto[iYT][iVeto] = file[iYT].Get("hProfPeriod_Veto_%s_archive"%(iVeto))
       hProfPeriod_Veto[iYT][iVeto].SetFillColor(defectVeto["color"][iVeto])
+    if len(veto["all"]): # Summed inefficiencies
+      hProfPeriod_Veto[iYT]["allVeto"] = file[iYT].Get("hProfPeriod_Veto_allVeto_archive")
+      hProfPeriod_Veto[iYT]["allVeto"].SetFillColor(kBlack)
+      
 
     # Plot the stack for subperiod
-    if (options['plotYearStats']):
-      totalIneffDef = plotStack("defects--%s--%s"%(xAxisTitle,iYT),hProfPeriod_IntolDefect[iYT],defects["intol"],defectVeto["description"],h1Period_IntLuminosity[iYT],options['lumiNotPercent'],stackResults[iYT],canvasResults[iYT],legendResults[iYT],options['recovPlot'],False,options['approvedPlots'])
+    if (options['plotYearStats'] and not options['noSingleTagPlot']):
+      totalIneffDef = plotStack("defects--%s--%s - %s"%(xAxisTitle,args.parser_system,iYT),hProfPeriod_IntolDefect[iYT],defects["intol"],defectVeto["description"],h1Period_IntLuminosity[iYT],options['lumiNotPercent'],stackResults[iYT],canvasResults[iYT],legendResults[iYT],options['recovPlot'],False,options['approvedPlots'])
       if options['approvedPlots']:
         ATLASLabel(0.4,0.8,"Internal")
 #      ATLASLabel(0.1,0.81,"Preliminary")
       if len(veto["all"]): 
         totalIneffVeto = plotStack("veto--%s--%s"%(xAxisTitle,iYT),hProfPeriod_Veto[iYT],veto["all"],defectVeto["description"],h1Period_IntLuminosity[iYT],options['lumiNotPercent'],stackResults[iYT],canvasResults[iYT],legendResults[iYT],False,False,options['approvedPlots'])
-      if options['approvedPlots']:
-        ATLASLabel(0.1,0.81,"Internal")
+        if options['approvedPlots']:
+          ATLASLabel(0.1,0.81,"Internal")
 #      ATLASLabel(0.1,0.81,"Preliminary")
 
     # Plot the stack for letter period  
@@ -213,7 +232,7 @@ for iYT in yearTagList:
       # Merge the subperiod histograms into letter period histograms
       hProfPeriodLett_IntolDefect[iYT] = {}
       hProfPeriodLett_Veto[iYT] = {}
-      for iDef in defects["intol"]+defects["intol_recov"]: # Loop on defect (including recoverable histos)
+      for iDef in defects["intol"]+defects["intol_recov"]+allIntolDef: # Loop on defect (including recoverable histos and summed inefficiencies)
         iDefName = iDef.rsplit("__",1)[0] # Trick needed to get the defect name for the recoverable defect histogram
         hProfPeriodLett_IntolDefect[iYT][iDef] = MakeTProfile("hProfPeriodLett_IntolDefect_%s_%s"%(iYT,iDef),"%s"%(defectVeto["description"][iDefName]),"Lost luminosity [%]", -0.5,+0.5+letperiodNb,letperiodNb+1,defectVeto["color"][iDefName])
         SetXLabel(hProfPeriodLett_IntolDefect[iYT][iDef],letperiodList)
@@ -225,6 +244,11 @@ for iYT in yearTagList:
         SetXLabel(hProfPeriodLett_Veto[iYT][iVeto],letperiodList)
         hProfPeriodLett_Veto[iYT][iVeto].GetXaxis().SetBinLabel(letperiodNb+1,"All") # In all bins, all runs
         mergeSubPeriod(hProfPeriod_Veto[iYT][iVeto],hProfPeriodLett_Veto[iYT][iVeto])
+      if len(veto["all"]): # Summed inefficiencies
+        hProfPeriodLett_Veto[iYT]["allVeto"] = MakeTProfile("hProfPeriodLett_Veto_%s_allVeto"%iYT,"allVeto","Lost luminosity [%]", -0.5,+0.5+letperiodNb,letperiodNb+1,kBlack)
+        SetXLabel(hProfPeriodLett_Veto[iYT]["allVeto"],letperiodList)
+        hProfPeriodLett_Veto[iYT]["allVeto"].GetXaxis().SetBinLabel(letperiodNb+1,"All") # In all bins, all runs
+        mergeSubPeriod(hProfPeriod_Veto[iYT]["allVeto"],hProfPeriodLett_Veto[iYT]["allVeto"])
 
       # Merge the subperiod luminosity histograms
       h1PeriodLett_IntLuminosity[iYT] = MakeTH1("hProfPeriodLett_IntLuminosity_%s"%(iYT),"Period","Luminosity[pb^{-1}]", -0.5,+0.5+letperiodNb,letperiodNb+1,kBlack)
@@ -233,84 +257,91 @@ for iYT in yearTagList:
       h1PeriodLett_IntLuminosity[iYT].SetTitle("")
       mergeSubPeriod(h1Period_IntLuminosity[iYT],h1PeriodLett_IntLuminosity[iYT])
 
-      # Plot the stack for letter periods
-      totalIneffDef = plotStack("defects--%s--%s"%(xAxisTitle,legendHead),hProfPeriodLett_IntolDefect[iYT],defects["intol"],defectVeto["description"],h1PeriodLett_IntLuminosity[iYT],options['lumiNotPercent'],stackResults[iYT],canvasResults[iYT],legendResults[iYT],options['recovPlot'],False,options['approvedPlots'])
-      if options['approvedPlots']:
-        ATLASLabel(0.4,0.8,"Internal")
-      if len(veto["all"]): 
-        totalIneffVeto = plotStack("veto--%s--%s"%(xAxisTitle,legendHead),hProfPeriodLett_Veto[iYT],veto["all"],defectVeto["description"],h1PeriodLett_IntLuminosity[iYT],options['lumiNotPercent'],stackResults[iYT],canvasResults[iYT],legendResults[iYT],False,False,options['approvedPlots'])
-      if options['approvedPlots']:
-        ATLASLabel(0.4,0.85,"Internal")
+      if (not options['noSingleTagPlot']):
+        # Plot the stack for letter periods
+        totalIneffDef = plotStack("defects--%s--%s"%(xAxisTitle,legendHead),hProfPeriodLett_IntolDefect[iYT],defects["intol"],defectVeto["description"],h1PeriodLett_IntLuminosity[iYT],options['lumiNotPercent'],stackResults[iYT],canvasResults[iYT],legendResults[iYT],options['recovPlot'],False,options['approvedPlots'])
+        if options['approvedPlots']:
+          ATLASLabel(0.4,0.8,"Internal")
+        if len(veto["all"]): 
+          totalIneffVeto = plotStack("veto--%s--%s"%(xAxisTitle,legendHead),hProfPeriodLett_Veto[iYT],veto["all"],defectVeto["description"],h1PeriodLett_IntLuminosity[iYT],options['lumiNotPercent'],stackResults[iYT],canvasResults[iYT],legendResults[iYT],False,False,options['approvedPlots'])
+          if options['approvedPlots']:
+            ATLASLabel(0.4,0.85,"Internal")
 
     # And finally the integrated luminosities
+    canvasResults[iYT]['intLumi']= TCanvas( "c_intLumi_%s"%(iYT),"Integrated luminosity per period", 200, 10, 1150, 500)
+    # Same margin as for the stacked results
+    canvasResults[iYT]['intLumi'].SetLeftMargin(0.08)
+    canvasResults[iYT]['intLumi'].SetRightMargin(0.35)
+
     if (options['plotYearStatsLarge']):
-      canvasResults[iYT]['intLumi']= TCanvas( "c_intLumi_%s"%(iYT),"Integrated luminosity per period", 200, 10, 1000, 800)
-      canvasResults[iYT]['intLumi'].Divide(1,2)
-      canvasResults[iYT]['intLumi'].cd(1)
-      gPad.SetGrid(1)
-      h1Period_IntLuminosity[iYT].Draw("P HIST")
-      canvasResults[iYT]['intLumi'].cd(2)
-      gPad.SetGrid(1)
       h1PeriodLett_IntLuminosity[iYT].Draw("P HIST")
-      for iBin in range(1,h1PeriodLett_IntLuminosity[iYT].GetNbinsX()):
-        print("Period %s: %.3f pb-1"%(h1PeriodLett_IntLuminosity[iYT].GetXaxis().GetBinLabel(iBin),h1PeriodLett_IntLuminosity[iYT].GetBinContent(iBin)))
+      for iBin in range(1,h1PeriodLett_IntLuminosity[iYT].GetNbinsX()+1):
+        print(("Period %s: %.3f pb-1"%(h1PeriodLett_IntLuminosity[iYT].GetXaxis().GetBinLabel(iBin),h1PeriodLett_IntLuminosity[iYT].GetBinContent(iBin))))
     else:
-      canvasResults[iYT]['intLumi']= TCanvas( "c_intLumi_%s"%(iYT),"Integrated luminosity per period", 200, 10, 1000, 500)
       h1Period_IntLuminosity[iYT].Draw("P HIST")
-      for iBin in range(1,h1Period_IntLuminosity[iYT].GetNbinsX()):
-        print("Period %s: %.3f pb-1"%(h1Period_IntLuminosity[iYT].GetXaxis().GetBinLabel(iBin),h1Period_IntLuminosity[iYT].GetBinContent(iBin)))
+      for iBin in range(1,h1Period_IntLuminosity[iYT].GetNbinsX()+1):
+        print(("Period %s: %.3f pb-1"%(h1Period_IntLuminosity[iYT].GetXaxis().GetBinLabel(iBin),h1Period_IntLuminosity[iYT].GetBinContent(iBin))))
 
     canvasResults[iYT]['intLumi'].SetGridy(1)
 
-    # On request, save the plot in LArPage1/DeMoPlots to be displayed in Page1
+    # On request, save the plots 
     if options["savePlots"]:
-      for iCanvas in canvasResults[iYT].keys():
+      for iCanvas in list(canvasResults[iYT].keys()):
         canvasResults[iYT][iCanvas].Update()
         if ("defects" in iCanvas):
-          canvasResults[iYT][iCanvas].Print("%s/grl-defects.png"%yearTagDir[yearTag])
+          canvasResults[iYT][iCanvas].Print("%s/grl-defects.png"%yearTagDir[iYT])
         if ("veto" in iCanvas):
-          canvasResults[iYT][iCanvas].Print("%s/grl-veto.png"%yearTagDir[yearTag])
+          canvasResults[iYT][iCanvas].Print("%s/grl-veto.png"%yearTagDir[iYT])
         if ("intLumi" in iCanvas):
-          canvasResults[iYT][iCanvas].Print("%s/grl-lumi.png"%yearTagDir[yearTag])
-#      f0 = open("../LArPage1/DeMoPlots/ineff.dat",'w')
-#      f0.write("%.3f %.3f %s\n"%(totalIneffDef,totalIneffVeto,strLumi(h1Period_IntLuminosity[iYT].GetBinContent(subperiodNb[iYT]),"pb")))
-#      f0.write(strftime("%d %b-%H:%M",localtime()))
-#      f0.close()
-#      os.system("cp %s/runs-ALL.dat ../LArPage1/DeMoPlots/"%(directory))
-
-yearTagNb = len(yearTagList)
+          canvasResults[iYT][iCanvas].Print("%s/grl-lumi.png"%yearTagDir[iYT])
 
 # Produce a unique comparison plot between the different year tags (if more than 2)
 if (yearTagNb >= 2 and (options['plotYearStats'] or options['plotYearStatsLarge'])):
   h1YearTag_IntLuminosity = MakeTH1("h1YearTag_IntLuminosity","Year/Tag","Luminosity[pb^{-1}]", -0.5,-0.5+yearTagNb,yearTagNb,kBlack)
-  SetXLabel(h1YearTag_IntLuminosity,yearTagList)
+  SetXLabel(h1YearTag_IntLuminosity,yearTagLabels)
   for iYT in range(yearTagNb):
     h1YearTag_IntLuminosity.Fill(iYT,h1Period_IntLuminosity[yearTagList[iYT]].GetBinContent(subperiodNb[yearTagList[iYT]]))
 
   h1YearTag_IntolDefect = {}
-  for iDef in defects["intol"]+defects["intol_recov"]:
+  for iDef in defects["intol"]+defects["intol_recov"]+allIntolDef:
     iDefName = iDef.rsplit("__",1)[0] # Trick needed to get the defect name for the recoverable defect histogram
     h1YearTag_IntolDefect[iDef] = MakeTH1("h1YearTag_IntolDefect_%s"%(iDef),"%s"%(defectVeto["description"][iDefName]),"Lost luminosity [%]", -0.5,-0.5+yearTagNb,yearTagNb,defectVeto["color"][iDefName])
-    SetXLabel(h1YearTag_IntolDefect[iDef],yearTagList)
+    SetXLabel(h1YearTag_IntolDefect[iDef],yearTagLabels)
     for iYT in range(yearTagNb):
       h1YearTag_IntolDefect[iDef].Fill(iYT,hProfPeriod_IntolDefect[yearTagList[iYT]][iDef].GetBinContent(subperiodNb[yearTagList[iYT]]))
       
-  legendHeader = ""
-  if (yearTagNb == 2):
-    legendHeader = "%s / %s"%(yearTagList[0],yearTagList[1])
+#  legendHeader = ""
+  legendHeader = "#splitline{                   %s  "%(yearTagLabels[0].split("/")[0])
+  for iTag in range(1,yearTagNb):
+    legendHeader += "   /  %s "%(yearTagLabels[iTag].split("/")[0])
+  legendHeader += "}{Luminos. : %3.1f fb^{-1} "%(h1Period_IntLuminosity[yearTagList[0]].GetBinContent(subperiodNb[yearTagList[0]])/1000.)
+  for iTag in range(1,yearTagNb):
+    legendHeader += "/ %3.1f fb^{-1}"%(h1Period_IntLuminosity[yearTagList[iTag]].GetBinContent(subperiodNb[yearTagList[iTag]])/1000.)
+  legendHeader += "}"
+
   plotStack("defects--Year--%s"%legendHeader,h1YearTag_IntolDefect,defects["intol"],defectVeto["description"],h1YearTag_IntLuminosity,options['lumiNotPercent'],stackResults,canvasResults,legendResults,False,True,options['approvedPlots'])
   if options['approvedPlots']:
-    ATLASLabel(0.1,0.81,"Internal")
-#  ATLASLabel(0.1,0.82,"Preliminary")
+    ATLASLabel(0.1,0.85,"Internal")
+  if options["savePlots"]:
+    canvasResults["defects--Year--%s"%legendHeader].Print("%s/YearStats-%s/run2-defects-DQPaper_.png"%(args.parser_directory,args.parser_system))
+    canvasResults["defects--Year--%s"%legendHeader].Print("%s/YearStats-%s/run2-defects-DQPaper_.pdf"%(args.parser_directory,args.parser_system))
+    canvasResults["defects--Year--%s"%legendHeader].Print("%s/YearStats-%s/run2-defects-DQPaper_.eps"%(args.parser_directory,args.parser_system))
   
   h1YearTag_Veto = {}
-  for iVeto in veto["all"]:
-    h1YearTag_Veto[iVeto] = MakeTH1("h1YearTag_Veto_%s"%(iVeto),"%s"%(defectVeto["description"][iVeto]),"Lost luminosity [%]", -0.5,-0.5+yearTagNb,yearTagNb,defectVeto["color"][iVeto])
-    SetXLabel(h1YearTag_Veto[iVeto],yearTagList)
-    for iYT in range(yearTagNb):
-      h1YearTag_Veto[iVeto].Fill(iYT,hProfPeriod_Veto[yearTagList[iYT]][iVeto].GetBinContent(subperiodNb[yearTagList[iYT]]))
+  if (len(veto["all"])):
+    for iVeto in (veto["all"]+["allVeto"]):
+      h1YearTag_Veto[iVeto] = MakeTH1("h1YearTag_Veto_%s"%(iVeto),"%s"%(defectVeto["description"][iVeto]),"Lost luminosity [%]", -0.5,-0.5+yearTagNb,yearTagNb,defectVeto["color"][iVeto])
+      SetXLabel(h1YearTag_Veto[iVeto],yearTagLabels)
+      for iYT in range(yearTagNb):
+        h1YearTag_Veto[iVeto].Fill(iYT,hProfPeriod_Veto[yearTagList[iYT]][iVeto].GetBinContent(subperiodNb[yearTagList[iYT]]))
 
   if len(veto["all"]): 
     plotStack("veto--Year--%s"%legendHeader,h1YearTag_Veto,veto["all"],defectVeto["description"],h1YearTag_IntLuminosity,options['lumiNotPercent'],stackResults,canvasResults,legendResults,False,True,options['approvedPlots'])
     if options['approvedPlots']:
       ATLASLabel(0.1,0.81,"Internal")
+    if options["savePlots"]:
+      canvasResults["veto--Year--%s"%legendHeader].Print("%s/YearStats-%s/run2-veto-DQPaper_.png"%(args.parser_directory,args.parser_system))
+      canvasResults["veto--Year--%s"%legendHeader].Print("%s/YearStats-%s/run2-veto-DQPaper_.pdf"%(args.parser_directory,args.parser_system))
+      canvasResults["veto--Year--%s"%legendHeader].Print("%s/YearStats-%s/run2-veto-DQPaper_.eps"%(args.parser_directory,args.parser_system))
+
+input("I am done. Type <return> to exit...")
