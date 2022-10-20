@@ -114,14 +114,14 @@ def SetAMITag(outputTag=None, inputTags=None, runArgs=None):
     if not inputTags:
         inputTags = InputAMITags()
 
+    tags = inputTags
+    if outputTag and outputTag not in inputTags:
+        tags += [outputTag]
+    tags = [tag for tag in tags if amitagRegex.match(tag)]
+    amitag = '_'.join(tags)
     try:
-        if outputTag not in inputTags:
-            tags = inputTags + [outputTag]
-        tags = [tag for tag in tags if amitagRegex.match(tag)]
-        amitag = '_'.join(tags)
         if amitag:
-            ServiceMgr.TagInfoMgr.ExtraTagValuePairs.update(
-                    {'AMITag': amitag})
+            ServiceMgr.TagInfoMgr.ExtraTagValuePairs.update( {'AMITag': amitag})
             log.info("Output AMITag in in-file metadata set to {}".format(amitag))
         else:
             log.debug("Not adding empty AMITag to /TagInfo")
