@@ -25,7 +25,12 @@ namespace MCP {
         double getCalibConstant(const TrackCalibObj& trk) const;
 
     protected:
-        std::unique_ptr<const TH1> m_calibConstantHist;       
+        std::unique_ptr<const TH1> m_calibConstantHist;  
+        double m_maxX{-1};
+        double m_minX{-1};
+        double m_maxY{-1};
+        double m_minY{-1};
+             
     };
 
 } 
