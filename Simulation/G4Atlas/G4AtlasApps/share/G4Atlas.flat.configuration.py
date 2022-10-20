@@ -113,7 +113,8 @@ if simFlags.SimulateCavern.get_Value():
 ## Protects GeoModelSvc in the simulation from the AlignCallbacks
 gms.AlignCallbacks = False
 ## Muon GeoModel tweaks
-if DetFlags.Muon_on():
+AGDDInput=simFlags.AGDDInput.get_Value()
+if DetFlags.Muon_on() and AGDDInput:
     ## Additional material in the muon system
     from AGDD2GeoSvc.AGDD2GeoSvcConf import AGDDtoGeoSvc
     AGDD2Geo = AGDDtoGeoSvc()

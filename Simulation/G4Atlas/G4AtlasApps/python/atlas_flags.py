@@ -420,3 +420,14 @@ class QuasiStableParticleRadius(JobProperty):
     statusOn = True
     allowedTypes = ['float']
     StoredValue = 30.19 # mm
+
+class  AGDDInput(JobProperty):
+    """
+    AGDD Input is enabled (default) if true.
+    """
+    statusOn = True
+    allowedTypes = ['bool']
+    StoredValue = True
+
+
+    
