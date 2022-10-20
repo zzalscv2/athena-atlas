@@ -9,23 +9,6 @@ from PyJobTransforms.TransformUtils import processPreExec, processPreInclude, pr
 from SimuJobTransforms.CommonSimulationSteering import specialConfigPreInclude, specialConfigPostInclude
 
 
-def defaultOverlayFlags(configFlags):
-    """Fill default overlay flags"""
-    # TODO: how to autoconfigure those
-    configFlags.GeoModel.Align.Dynamic = False
-    configFlags.Digitization.DoCaloNoise = False
-    configFlags.Digitization.DoInnerDetectorNoise = False
-    configFlags.Digitization.EnableCaloHSTruthRecoInputs = False
-    configFlags.LAr.OFCShapeFolder = "4samples1phase"
-    configFlags.LAr.ROD.DoOFCPileupOptimization = True
-    configFlags.LAr.ROD.nSamples = 4
-    configFlags.LAr.ROD.NumberOfCollisions = 20
-    configFlags.LAr.ROD.UseHighestGainAutoCorr = True
-    configFlags.Tile.BestPhaseFromCOOL = False
-    configFlags.Tile.correctTime = False
-    configFlags.Tile.zeroAmplitudeWithoutDigits = False
-
-
 def setOverlayInputFiles(runArgs, configFlags, log):
     hasRDO_BKGInput = hasattr(runArgs, 'inputRDO_BKGFile')
     hasBS_SKIMInput = hasattr(runArgs, 'inputBS_SKIMFile')
@@ -113,9 +96,6 @@ def fromRunArgs(runArgs):
     # Setup digitization flags
     from Digitization.DigitizationConfigFlags import digitizationRunArgsToFlags
     digitizationRunArgsToFlags(runArgs, ConfigFlags)
-
-    # Setup common overlay flags
-    defaultOverlayFlags(ConfigFlags)
 
     # Setup detector flags
     from AthenaConfiguration.DetectorConfigFlags import setupDetectorFlags

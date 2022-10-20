@@ -59,6 +59,7 @@ then
     --outputRDOFile dataOverlayRDO.pool.root \
     --maxEvents $events \
     --conditionsTag CONDBR2-BLKPA-2016-12-01 \
+    --preInclude 'Campaigns.DataOverlayPPTest' \
     --postInclude 'OverlayConfiguration.OverlayTestHelpers.OverlayJobOptsDumperCfg' \
     --postExec 'with open("ConfigOverlay.pkl", "wb") as f: cfg.store(f)' \
     --imf False \
