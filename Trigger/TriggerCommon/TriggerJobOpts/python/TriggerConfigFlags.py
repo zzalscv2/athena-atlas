@@ -320,6 +320,11 @@ def createTriggerRecoFlags():
         return createTrigTrackingPassFlags()
     flags.addFlagsCategory( 'Trigger.InDetTracking', __idTrk )
 
+    def __idITk():
+        from TrigInDetConfig.TrigTrackingPassFlagsITk import createTrigTrackingPassFlagsITk
+        return createTrigTrackingPassFlagsITk()
+    flags.addFlagsCategory( 'Trigger.ITkTracking', __idITk )
+     
     # NB: Longer term it may be worth moving these into a PF set of config flags, but right now the only ones that exist do not seem to be used in the HLT.
     # When we use component accumulators for this in the HLT maybe we should revisit this
     # PFO-muon removal option for the full-scan hadronic signatures.
