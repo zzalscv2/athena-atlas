@@ -332,15 +332,23 @@ void TRTOverlay::mergeCollections(TRT_RDO_Collection *bkgCollection,
 
             // Get random number
             int det = m_trtId->barrel_ec(rdoId);
-            float HTOccupancyCorrection = 0;
-            if (isElectron) {
-              HTOccupancyCorrection = std::abs(det) > 1 ? m_HTOccupancyCorrectionEC : m_HTOccupancyCorrectionB;
+            float HTOccupancyCorrection = 0.;
+            if (isXenonStraw) {
+              if (isElectron) {
+                HTOccupancyCorrection = std::abs(det) > 1 ? m_HTOccupancyCorrectionEC : m_HTOccupancyCorrectionB;
+              } else {
+                HTOccupancyCorrection = std::abs(det) > 1 ? m_HTOccupancyCorrectionEC_noE : m_HTOccupancyCorrectionB_noE;
+              }
             } else {
-              HTOccupancyCorrection = std::abs(det) > 1 ? m_HTOccupancyCorrectionEC_noE : m_HTOccupancyCorrectionB_noE;
+              if (isElectron) {
+                HTOccupancyCorrection = std::abs(det) > 1 ? m_HTOccupancyCorrectionEC_Ar : m_HTOccupancyCorrectionB_Ar;
+              } else {
+                HTOccupancyCorrection = std::abs(det) > 1 ? m_HTOccupancyCorrectionEC_Ar_noE : m_HTOccupancyCorrectionB_Ar_noE;
+              }
             }
 
             unsigned int newWord = 0;
-            if (isXenonStraw && occupancy * HTOccupancyCorrection > CLHEP::RandFlat::shoot(rndmEngine, 0, 1)) {
+            if (HTOccupancyCorrection != 0. && occupancy * HTOccupancyCorrection > CLHEP::RandFlat::shoot(rndmEngine, 0, 1)) {
               newWord += 1 << (26-9);
             }
   
