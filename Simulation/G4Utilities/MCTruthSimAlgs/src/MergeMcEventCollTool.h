@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2019 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef MCTRUTHSIMALGS_MERGEMCEVENTCOLLTOOL_H
@@ -108,7 +108,7 @@ private:
   //** do the slimming - flag to do slimming or not
   BooleanProperty m_doSlimming{this, "DoSlimming", true, "flag to do the slimming or save everything"};
   //** Should any details of GenEvents corresponding to each puType be saved?
-  bool m_saveType[NOPUTYPE];
+  bool m_saveType[NOPUTYPE]={};
   //** The index (before sorting) within the McEventCollection where the background events start
   unsigned int m_startingIndexForBackground{0};
   //** Bool to indicate that the next GenEvent is a new signal event
