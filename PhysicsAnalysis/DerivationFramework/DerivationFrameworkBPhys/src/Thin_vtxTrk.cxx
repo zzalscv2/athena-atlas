@@ -32,8 +32,6 @@ DerivationFramework::Thin_vtxTrk::Thin_vtxTrk(const std::string& t, const std::s
   declareProperty("PassFlags"                 , m_passFlags);
   declareProperty("AcceptanceRadius"          , m_acceptanceR);
   declareProperty("IgnoreFlags"                   , m_noFlags);
-  declareProperty("ApplyAnd"                  , m_and = false);
-  declareProperty("ApplyAndForTracks"         , m_trackAnd = false);
   declareProperty("ThinTracks"                , m_thinTracks = true);
 }
 
@@ -91,8 +89,9 @@ StatusCode DerivationFramework::Thin_vtxTrk::finalize()
 // The thinning itself
 StatusCode DerivationFramework::Thin_vtxTrk::doThinning() const
 {
+  const EventContext& ctx = Gaudi::Hive::currentContext();
   // Retrieve main TrackParticle collection
-  SG::ThinningHandle<xAOD::TrackParticleContainer> importedTrackParticles(m_trackParticleContainerName);
+  SG::ThinningHandle<xAOD::TrackParticleContainer> importedTrackParticles(m_trackParticleContainerName, ctx);
   
   // Check the event contains tracks
   unsigned int nTracks = importedTrackParticles->size();
@@ -107,13 +106,13 @@ StatusCode DerivationFramework::Thin_vtxTrk::doThinning() const
   std::unordered_map<std::string, SG::ReadDecorHandle<xAOD::VertexContainer, Char_t>> handles;
   handles.reserve(m_passArray.size());
   for(const auto &key : m_passArray){
-        auto it = handles.emplace(key.key(), key);
+        auto it = handles.emplace(std::piecewise_construct, std::forward_as_tuple(key.key()), std::forward_as_tuple(key, ctx));
         if(!(*it.first).second.isPresent()) return StatusCode::FAILURE;
   }
 
   // retieve vertex 
   for(const auto& name : m_vertexContainerName){
-    SG::ThinningHandle<xAOD::VertexContainer> vertexContainer(name);
+    SG::ThinningHandle<xAOD::VertexContainer> vertexContainer(name, ctx);
     std::vector<bool> vtxMask(vertexContainer->size(), false); // default: don't keep any vertices
     
     // loop over vertices
@@ -173,12 +172,7 @@ StatusCode DerivationFramework::Thin_vtxTrk::doThinning() const
     } // end of loop over vertices
     
     // Execute the thinning service based on the vtxMask.
-    if (m_and) {
-      vertexContainer.keep(vtxMask, SG::ThinningHandleBase::Op::And);
-    }
-    if (!m_and) {
-      vertexContainer.keep(vtxMask, SG::ThinningHandleBase::Op::Or);
-    }
+    vertexContainer.keep(vtxMask);
   }
   
   // Count up the trackMask contents
@@ -187,12 +181,7 @@ StatusCode DerivationFramework::Thin_vtxTrk::doThinning() const
   m_nVtxPass+= nVtxPass;
   if(m_thinTracks || m_acceptanceR > 0.) {
     // Execute the thinning service based on the trackMask. Finish.
-    if (m_trackAnd) {
-      importedTrackParticles.keep(trackMask, SG::ThinningHandleBase::Op::And);
-    }
-    if (!m_trackAnd) {
-      importedTrackParticles.keep(trackMask, SG::ThinningHandleBase::Op::Or);
-    }
+    importedTrackParticles.keep(trackMask);
   }
 
   return StatusCode::SUCCESS;

@@ -31,7 +31,6 @@ DerivationFramework::Thin_vtxDuplicates::Thin_vtxDuplicates(const std::string& t
   declareProperty("VertexContainerName"      , m_vertexContainerNames);
   declareProperty("PassFlags"                 , m_passFlags);
   //declareProperty("AcceptanceRadius"          , m_acceptanceR);
-  declareProperty("ApplyAnd"                  , m_and = true);  //This will be applied depending on the order in which the thinning tools are added to the kernel
   declareProperty("IgnoreFlags"               , m_noFlags);
   //declareProperty("ApplyAndForTracks"         , m_trackAnd = false);
   //declareProperty("ThinTracks"                , m_thinTracks = true);
@@ -75,8 +74,9 @@ StatusCode DerivationFramework::Thin_vtxDuplicates::finalize()
 // The thinning itself
 StatusCode DerivationFramework::Thin_vtxDuplicates::doThinning() const
 {
-    // retieve vertex 
-    SG::ThinningHandle< xAOD::VertexContainer > vertexContainer(m_vertexContainerNames);
+    // retieve vertex
+    const EventContext& ctx = Gaudi::Hive::currentContext();
+    SG::ThinningHandle< xAOD::VertexContainer > vertexContainer(m_vertexContainerNames, ctx);
     std::vector<bool> vtxMask(vertexContainer->size(), true); // default: keep all vertices
     int vtxTot = 0;
     int nVtxPass = 0;
@@ -85,7 +85,7 @@ StatusCode DerivationFramework::Thin_vtxDuplicates::doThinning() const
     std::vector<SG::ReadDecorHandle<xAOD::VertexContainer, Char_t>> handles;
     handles.reserve(m_passFlags.size());
     for(const auto &key : m_passFlags){
-        handles.emplace_back(key);
+        handles.emplace_back(key, ctx);
         if(!handles.back().isPresent()) return StatusCode::FAILURE;
     }
     for(auto vtxItr = vertexContainer->cbegin(); vtxItr!=vertexContainer->cend(); ++vtxItr, ++k) {
@@ -159,12 +159,7 @@ StatusCode DerivationFramework::Thin_vtxDuplicates::doThinning() const
     } // end of loop over vertices
     
     // Execute the thinning service based on the vtxMask.
-    if (m_and) {
-      vertexContainer.keep(vtxMask, SG::ThinningHandleBase::Op::And);
-    }
-    if (!m_and) {
-      vertexContainer.keep(vtxMask, SG::ThinningHandleBase::Op::Or);
-    }
+    vertexContainer.keep(vtxMask);
     
     m_nVtxTot.fetch_add( vtxTot, std::memory_order_relaxed);
     m_nVtxPass.fetch_add( nVtxPass, std::memory_order_relaxed);

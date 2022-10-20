@@ -30,7 +30,6 @@ namespace DerivationFramework {
       
       SG::ThinningHandleKey< xAOD::VertexContainer >  m_vertexContainerNames;
       SG::ReadDecorHandleKeyArray<xAOD::VertexContainer> m_passFlags;
-      bool m_and;
   }; 
 }
 

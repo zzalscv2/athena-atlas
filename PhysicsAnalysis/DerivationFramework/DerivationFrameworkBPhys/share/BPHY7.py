@@ -501,8 +501,7 @@ BPHY7Thin_vtxTrk = DerivationFramework__Thin_vtxTrk(
   TrackParticleContainerName = "InDetTrackParticles",
   AcceptanceRadius	     = 1.,
   VertexContainerNames       = ["BPHY7Tau3MuCandidates"],
-  PassFlags                  = ["passed_Tau3MuLoose", "passed_Ds2MuPi"],
-  ApplyAnd                   = True )  # "and" requirement for Vertices
+  PassFlags                  = ["passed_Tau3MuLoose", "passed_Ds2MuPi"])  # "and" requirement for Vertices
 
 ToolSvc += BPHY7Thin_vtxTrk
 
