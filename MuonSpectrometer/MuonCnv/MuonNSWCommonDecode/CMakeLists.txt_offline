@@ -18,6 +18,13 @@ atlas_add_library (MuonNSWCommonDecode
                    INCLUDE_DIRS ${TDAQ-COMMON_INCLUDE_DIRS} ${Boost_INCLUDE_DIRS}
                    LINK_LIBRARIES ${TDAQ-COMMON_LIBRARIES} ${Boost_LIBRARIES})
 
+atlas_add_executable (test_stgc_cabling
+		      src/test/test_stgc_cabling.cxx
+                      INCLUDE_DIRS ${TDAQ-COMMON_INCLUDE_DIRS} ${Boost_INCLUDE_DIRS}
+		      LINK_LIBRARIES
+		        MuonNSWCommonDecode
+			${TDAQ-COMMON_LIBRARIES} ${Boost_LIBRARIES})
+			
 atlas_add_executable (test_nsw_common_decoder
 		      src/test/test_nsw_common_decoder.cxx
                       INCLUDE_DIRS ${TDAQ-COMMON_INCLUDE_DIRS} ${Boost_INCLUDE_DIRS}
