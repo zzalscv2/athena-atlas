@@ -1078,8 +1078,7 @@ else:
     from TrkTrackSlimmingTool.TrkTrackSlimmingToolConf import Trk__TrackSlimmingTool as ConfigurableTrackSlimmingTool
     InDetTrkSlimmingTool = ConfigurableTrackSlimmingTool(name           = "InDetTrackSlimmingTool",
                                                          KeepParameters = InDetFlags.KeepParameters(),
-                                                         KeepOutliers   = True,
-                                                         OnlySetPersistificationHints = False)
+                                                         KeepOutliers   = True,)
     ToolSvc += InDetTrkSlimmingTool
 
     from RecExConfig.AutoConfiguration import IsInInputFile
@@ -1093,24 +1092,13 @@ else:
       if InDetFlags.doSlimPoolTrack() :
         InDetTrkSlimmingToolTracks = ConfigurableTrackSlimmingTool(name           = "InDetTrackSlimmingToolTPCnv",
                                                                    KeepParameters = InDetFlags.KeepParameters(),
-                                                                   KeepOutliers   = True,
-                                                                   OnlySetPersistificationHints = InDetFlags.doSlimPoolTrack() )
+                                                                   KeepOutliers   = True,)
         ToolSvc += InDetTrkSlimmingToolTracks
       else :
         InDetTrkSlimmingToolTracks=InDetTrkSlimmingTool
 
       if (InDetFlags.doPrintConfigurables()):
         printfunc (InDetTrkSlimmingTool)
-
-      from TrkTrackSlimmer.TrkTrackSlimmerConf import Trk__TrackSlimmer as ConfigurableTrackSlimmer
-      InDetTrkSlimmer = ConfigurableTrackSlimmer(name                 = "InDetTrackSlimmer",
-                                                 TrackLocation        = [ InputTrackCollection ],
-                                                 SlimmedTrackLocation = [ InDetKeys.Tracks() ],
-                                                 TrackSlimmingTool    = InDetTrkSlimmingToolTracks,
-                                                 OnlySetPersistificationHints = InDetFlags.doSlimPoolTrack() )
-      topSequence += InDetTrkSlimmer
-      if (InDetFlags.doPrintConfigurables()):
-        printfunc (InDetTrkSlimmer)
 
       if not (InDetFlags.doMonitoringGlobal() or
               InDetFlags.doNtupleCreation() or
@@ -1134,7 +1122,6 @@ else:
          #      should be the one pointed by InDetKeys.Tracks()? Trying to
          #      find a solution...
          if InDetFlags.useExistingTracksAsInput():
-            InDetTrkSlimmer.SlimmedTrackLocation = [ "MergedTracks" ]
             InputTrackCollection = "MergedTracks"
             if InDetFlags.doTruth():
                 InputDetailedTrackTruth   = "MergedTracksDetailedTruth"

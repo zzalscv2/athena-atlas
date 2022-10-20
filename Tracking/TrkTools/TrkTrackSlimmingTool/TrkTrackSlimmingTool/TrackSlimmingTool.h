@@ -47,29 +47,31 @@ public:
   /** standard Athena-Algorithm method */
   virtual StatusCode finalize() override;
 
-  /**This method 'skims' interesting information from the passed track.
-   * @param track A const reference to the track to be skimmed
-   * For compatibility reasons in can do two different things
-   * depending on the value of m_setPersistificationHints.
-   *
-   * When  setPersistificationHints = False
-   * @return A 'slimmed' copy of the  'track'.
-   *
-   * When setPersistificationHints = True
-   * it sets persistification hints
-   * and returns nullptr
-   *
-   */
-  Trk::Track* slim(const Trk::Track& track) const override final;
-
   /**
-   * Slim/skim a non const Track.
-   * @param track A reference to the track to be skimmed.
+   * Slim a non const Track.
+   * @param track A reference to the track to be slimmed.
    *
-   * When setPersistificationHints = True
-   * it sets persistification hints
+   * The method sets persistification hints
+   * in the Track's TrackStateOnSurfaces
+   * So a slimmed version is written to disk
+   *
+   * The properties are modified
+   * setTrackProperties(TrackInfo::SlimmedTrack);
    */
   void slimTrack(Trk::Track& track) const override final;
+  /**
+   * Slim a const Track.
+   * @param track A const reference to the track to be slimmed.
+   *
+   * The method sets persistification hints
+   * in the Track's TrackStateOnSurfaces
+   * So a slimmed version is written to disk
+   *
+   * Same as the non-const version but does
+   * not set the SlimmedTrack property.
+   *
+   */
+  void slimConstTrack(const Trk::Track& track) const override final;
 
 private:
   /** any CaloDeposit with its adjacent MEOT's will be kept on the slimmed track
@@ -83,11 +85,6 @@ private:
    * on the slimmed track*/
   bool m_keepParameters;
 
-  /** Do not create slimmed tracks but only set hints for the persistifier to
-   * drop information while writing.
-   */
-  bool m_setPersistificationHints;
-
   /**atlas id helper*/
   const AtlasDetectorID* m_detID;
 
@@ -96,18 +93,6 @@ private:
    * Hints
    */
   void setHints(const Trk::Track& track) const;
-
-  /*
-   * This method resets the TSOS of a Track 
-   * keeping only the ones we want
-   */
-  void resetTSOS(Trk::Track& track) const;
-  /**
-   * This method always creates a std::unique_ptr<Trk::Track> with information
-   * removed calling the resetTSOS above
-   */
-  std::unique_ptr<Trk::Track> slimCopy(const Trk::Track& track) const;
-
 
   void checkForValidMeas(const Trk::TrackStateOnSurface* tsos,
                          bool& isIDmeas,

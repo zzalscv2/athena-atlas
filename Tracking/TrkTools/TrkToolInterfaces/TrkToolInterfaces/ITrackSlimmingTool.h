@@ -29,32 +29,31 @@ class ITrackSlimmingTool : virtual public IAlgTool
 {
 public:
   static const InterfaceID& interfaceID();
-  /**This method 'skims' interesting information from the passed track.
-   * @param track A const reference to the track to be skimmed
-   *
-   * For compatibility reasons it can do two different things
-   * depending on so called setPersistificationHints.
-   *
-   * When setPersistificationHints is not to be used
-   * @return A 'slimmed' copy of the input 'track'.
-   *
-   * When setPersistificationHints = True
-   * it sets persistification hints
-   * @return nullptr
-   *
-   */
-  virtual Trk::Track* slim(const Trk::Track& track) const = 0;
   /**
-   * Slim/skim a non const Track.
-   * @param track A reference to the track to be skimmed.
-   * It will be modified.
+   * Slim a non const Track.
+   * @param track A reference to the track to be slimmed.
    *
-   * When setPersistificationHints = True
-   * it sets persistification hints
-   *
+   * The method sets persistification hints
+   * in the Track's TrackStateOnSurfaces
+   * So a slimmed version is written to disk
+   * 
+   * The properties are modified
+   * setTrackProperties(TrackInfo::SlimmedTrack);
    */
   virtual void slimTrack(Trk::Track& track) const = 0;
-};
+  /**
+   *
+   * Slim a non const Track.
+   * @param track A const reference to the track to be slimmed.
+   * The method sets persistification hints
+   * in the Track's TrackStateOnSurfaces
+   * So a slimmed version is written to disk
+   *
+   * The track properties of a const track can not be modified.
+   *
+   */
+  virtual void slimConstTrack(const Trk::Track& track) const = 0;
+ };
 
 inline const InterfaceID&
 Trk::ITrackSlimmingTool::interfaceID()

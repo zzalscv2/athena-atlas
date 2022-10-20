@@ -10,19 +10,12 @@ DummyTrackSlimmingTool::DummyTrackSlimmingTool(const std::string& type, const st
   declareInterface<Trk::ITrackSlimmingTool>(this);
 }
 
-/**This method 'skims' interesting information from the passed track, and creates a new one with cloned copies of this
-   information
-   @param track A reference to the track to be skimmed. It will not be modified in any way.
-   @return A 'slimmed' version of 'track', where exactly what information is copied depends on how the tool is
-      configured
- */
-Trk::Track*
-DummyTrackSlimmingTool::slim(const Trk::Track& track) const {
-  return new Trk::Track(track);
+void
+DummyTrackSlimmingTool::slimTrack(Trk::Track&) const{
 }
 
 void
-DummyTrackSlimmingTool::slimTrack(Trk::Track&) const{
+DummyTrackSlimmingTool::slimConstTrack(const Trk::Track&) const{
 }
 
 

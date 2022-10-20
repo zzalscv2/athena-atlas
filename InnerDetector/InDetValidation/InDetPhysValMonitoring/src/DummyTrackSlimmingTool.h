@@ -36,8 +36,8 @@ public:
      @return A 'slimmed' version of 'track', where exactly what information is copied depends on how the tool is
         configured
    */
-  virtual Trk::Track* slim (const Trk::Track& track) const override;
   virtual void slimTrack(Trk::Track&) const override;
+  virtual void slimConstTrack(const Trk::Track&) const override;
 
 private:
 };

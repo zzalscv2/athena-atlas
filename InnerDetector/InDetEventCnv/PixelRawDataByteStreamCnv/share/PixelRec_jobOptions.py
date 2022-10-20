@@ -192,14 +192,6 @@ if InDetFlags.doNewTracking():
       ToolSvc += InDetTrkSlimmingTool
       print      InDetTrkSlimmingTool
       
-      from TrkTrackSlimmer.TrkTrackSlimmerConf import Trk__TrackSlimmer as ConfigurableTrackSlimmer
-      InDetTrkSlimmer = ConfigurableTrackSlimmer(name                 = "InDetTrackSlimmer",
-                                                 TrackLocation        = [ InputTrackCollection ],
-                                                 SlimmedTrackLocation = [ OutputTrackCollection ],
-                                                 TrackSlimmingTool    = InDetTrkSlimmingTool)
-      #InDetTrkSlimmer.OutputLevel=VERBOSE
-      topSequence += InDetTrkSlimmer
-      print          InDetTrkSlimmer
       # --- for output
       InDetKeys.AliasToTracks = 'none'
                                                                               
