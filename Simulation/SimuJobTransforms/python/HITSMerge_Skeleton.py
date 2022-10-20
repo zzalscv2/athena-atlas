@@ -54,6 +54,10 @@ def fromRunArgs(runArgs):
     cfg.merge(PoolReadCfg(ConfigFlags))
     cfg.merge(PoolWriteCfg(ConfigFlags))
 
+    # Ensure proper metadata propagation
+    from IOVDbSvc.IOVDbSvcConfig import IOVDbSvcCfg
+    cfg.merge(IOVDbSvcCfg(ConfigFlags))
+
     # Identifiers
     from DetDescrCnvSvc.DetDescrCnvSvcConfig import DetDescrCnvSvcCfg
     cfg.merge(DetDescrCnvSvcCfg(ConfigFlags))
