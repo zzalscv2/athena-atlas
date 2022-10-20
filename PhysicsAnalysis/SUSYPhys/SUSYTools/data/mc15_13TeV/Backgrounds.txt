@@ -1929,6 +1929,27 @@
 304708          Sherpa_CT10_Zqq_Pt500_1000                                    0.90771               1.0             1.0000E+00         0.0                           
 304709          Sherpa_CT10_Zqq_Pt1000                                        0.018344              1.0             1.0000E+00         0.0                           
 
+##########################################################################################################################
+# sherpa 2.2.11p3 hadronic V+jets samples
+
+700439          Sh_2211_Zqq_ptZ_100_ECMS                                      490.18                1.0             1.000000E+00       0.0  
+700441          Sh_2211_Wqq_ptW_200_ECMS                                      144.67                1.0             1.000000E+00       0.0  
+
+##########################################################################################################################
+# sherpa 2.1.1 hadronic Vgamma+jets samples
+
+305435          Sherpa_CT10_WqqGammaPt140_280                                 1.6658                1.0             1.0000E+00         0.0  
+305436          Sherpa_CT10_WqqGammaPt280_500                                 0.2423                1.0             1.0000E+00         0.0  
+305437          Sherpa_CT10_WqqGammaPt500_1000                                0.037905              1.0             1.0000E+00         0.0  
+305438          Sherpa_CT10_WqqGammaPt1000_2000                               0.0018226             1.0             1.0000E+00         0.0  
+305439          Sherpa_CT10_WqqGammaPt2000_inf                                1.6915e-05            1.0             1.0000E+00         0.0  
+
+305440          Sherpa_CT10_ZqqGammaPt140_280                                 0.65585               1.0             1.000000E+00       0.0  
+305441          Sherpa_CT10_ZqqGammaPt280_500                                 0.077056              1.0             1.000000E+00       0.0  
+305442          Sherpa_CT10_ZqqGammaPt500_1000                                0.010387              1.0             1.0000E+00         0.0  
+305443          Sherpa_CT10_ZqqGammaPt1000_2000                               0.00046103            1.0             1.000000E+00       0.0  
+305444          Sherpa_CT10_ZqqGammaPt2000_inf                                4.3086e-06            1.0             1.0000E+00         0.0  
+
 ################################################################################################################
 # Sherpa gamma+jet
 
@@ -2179,6 +2200,31 @@
 423107          Pythia8EvtGen_A14NNPDF23LO_gammajet_DP800_1000                2286.9                1.0             3.5289E-05         0.0                           
 423110          Pythia8EvtGen_A14NNPDF23LO_gammajet_DP2000_2500               3.3277                1.0             3.4290E-05         0.0                           
 423111          Pythia8EvtGen_A14NNPDF23LO_gammajet_DP2500_3000               0.32495               1.0             3.0204E-05         0.0                           
+
+################################################################################################################
+# Pythia8 gamma+jet 
+
+# direct
+800662          Py8_gammajet_direct_DP70_140_ordered                          28396.0               1.0             7.2863E-02         0.0
+800663          Py8_gammajet_direct_DP140_280_ordered                         2625.5                1.0             7.0598E-02         0.0
+800664          Py8_gammajet_direct_DP280_500_ordered                         198.39                1.0             6.0369E-02         0.0
+800665          Py8_gammajet_direct_DP500_800_ordered                         18.846                1.0             4.4596E-02         0.0
+800666          Py8_gammajet_direct_DP800_1000_ordered                        2.3312                1.0             2.4130E-02         0.0
+800667          Py8_gammajet_direct_DP1000_1500_ordered                       0.79945               1.0             2.3667E-02         0.0
+800668          Py8_gammajet_direct_DP1500_2000_ordered                       0.055512              1.0             1.9632E-02         0.0
+800669          Py8_gammajet_direct_DP2000_2500_ordered                       0.0052361             1.0             1.6644E-02         0.0
+800670          Py8_gammajet_direct_DP2500_3000_ordered                       0.00052733            1.0             1.4446E-02         0.0
+800671          Py8_gammajet_direct_DP3000_inf_ordered                        4.8856e-05            1.0             1.4371E-02         0.0
+
+# fragmented
+800676          Py8_gammajet_frag_DP70_140_ordered                            106180000.0           1.0             1.9271E-05         0.0
+800677          Py8_gammajet_frag_DP140_280_ordered                           6702000.0             1.0             2.0959E-05         0.0
+800678          Py8_gammajet_frag_DP280_500_ordered                           344070.0              1.0             2.0507E-05         0.0
+800679          Py8_gammajet_frag_DP500_800_ordered                           23711.0               1.0             1.6991E-05         0.0
+800680          Py8_gammajet_frag_DP800_1000_ordered                          2284.6                1.0             1.0123E-05         0.0
+800681          Py8_gammajet_frag_DP1000_1500_ordered                         701.22                1.0             1.0074E-05         0.0
+800682          Py8_gammajet_frag_DP1500_2000_ordered                         70.086                1.0             5.0238E-06         0.0
+800683          Py8_gammajet_frag_DP2000_inf_ordered                          11.548                1.0             2.4464E-06         0.0
 
 ################################################################################################################
 # Sherpa gamma+gamma
@@ -2585,9 +2631,9 @@
 364557          Sherpa_222_NNPDF30NNLO_mumugammagamma_pty_35_70               0.60995               1.0             1.0000E+00         0.0                           
 364558          Sherpa_222_NNPDF30NNLO_mumugammagamma_pty_70_140              0.059859              1.0             1.0000E+00         0.0                           
 364559          Sherpa_222_NNPDF30NNLO_mumugammagamma_pty_140_E_CMS           0.010591              1.0             1.0000E+00         0.0                           
-364562          Sherpa_222_NNPDF30NNLO_tautaugammagamma_pty_35_70             0.75276               1.0             1.0000E+00         0.0                           
+364562          Sherpa_222_NNPDF30NNLO_tautaugammagamma_pty_35_70             0.61372               1.0             1.0000E+00         0.0                           
 364563          Sherpa_222_NNPDF30NNLO_tautaugammagamma_pty_70_140            0.059833              1.0             1.0000E+00         0.0                           
-364564          Sherpa_222_NNPDF30NNLO_tautaugammagamma_pty_140_E_CMS         0.02836               1.0             1.0000E+00         0.0                           
+364564          Sherpa_222_NNPDF30NNLO_tautaugammagamma_pty_140_E_CMS         0.010199              1.0             1.0000E+00         0.0                           
 364567          Sherpa_222_NNPDF30NNLO_nunugammagamma_pty_35_70               0.050754              1.0             1.0000E+00         0.0                           
 364568          Sherpa_222_NNPDF30NNLO_nunugammagamma_pty_70_140              0.018181              1.0             1.0000E+00         0.0                           
 364569          Sherpa_222_NNPDF30NNLO_nunugammagamma_pty_140_E_CMS           0.0048364             1.0             1.0000E+00         0.0                           
@@ -2638,6 +2684,24 @@
 427032          Pythia8EvtGen_A14NNPDF23LO_jetjet_JZRW2_mufilter              2433200000.0          1.0             1.9662E-04         0.0                           
 427033          Pythia8EvtGen_A14NNPDF23LO_jetjet_JZRW3_mufilter              26453000.0            1.0             4.6821E-04         0.0                           
 427034          Pythia8EvtGen_A14NNPDF23LO_jetjet_JZRW4_mufilter              254640.0              1.0             8.1439E-04         0.0                           
+
+##########################################################################################################################
+# Pythia 8.230 dijet
+
+364700          Pythia8EvtGen_A14NNPDF23LO_jetjet_JZ0WithSW                   78050000000.0         1.0             9.753263E-01       0.0
+364701          Pythia8EvtGen_A14NNPDF23LO_jetjet_JZ1WithSW                   78050000000.0         1.0             2.442452E-02       0.0
+364702          Pythia8EvtGen_A14NNPDF23LO_jetjet_JZ2WithSW                   2433100000.0          1.0             9.863123E-03       0.0
+364703          Pythia8EvtGen_A14NNPDF23LO_jetjet_JZ3WithSW                   26450000.0            1.0             1.165838E-02       0.0
+364704          Pythia8EvtGen_A14NNPDF23LO_jetjet_JZ4WithSW                   254610.0              1.0             1.336560E-02       0.0
+364705          Pythia8EvtGen_A14NNPDF23LO_jetjet_JZ5WithSW                   4553.2                1.0             1.452648E-02       0.0
+364706          Pythia8EvtGen_A14NNPDF23LO_jetjet_JZ6WithSW                   257.54                1.0             9.471878E-03       0.0
+364707          Pythia8EvtGen_A14NNPDF23LO_jetjet_JZ7WithSW                   16.215                1.0             1.109724E-02       0.0
+364708          Pythia8EvtGen_A14NNPDF23LO_jetjet_JZ8WithSW                   0.62506               1.0             1.015436E-02       0.0
+364709          Pythia8EvtGen_A14NNPDF23LO_jetjet_JZ9WithSW                   0.019639              1.0             1.2056E-02         0.0
+364710          Pythia8EvtGen_A14NNPDF23LO_jetjet_JZ10WithSW                  0.0011962             1.0             5.893302E-03       0.0
+364711          Pythia8EvtGen_A14NNPDF23LO_jetjet_JZ11WithSW                  4.2263e-05            1.0             2.673000E-03       0.0
+364712          Pythia8EvtGen_A14NNPDF23LO_jetjet_JZ12WithSW                  1.0367e-06            1.0             4.288923E-04       0.0
+
 
 ################################################################################################################
 # PowhegPythia8 dijet
