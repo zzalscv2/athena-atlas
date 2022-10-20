@@ -1093,9 +1093,6 @@ TriggerHLTListRun3 = [
     ('xAOD::TrackParticleContainer#HLT_IDTrack_Cosmic_IDTrig',               'BS ESD AODFULL', 'Cosmic', 'inViews:CosmicViewRoIs,MUCombViewCosmic'),
     ('xAOD::TrackParticleAuxContainer#HLT_IDTrack_Cosmic_IDTrigAux.',        'BS ESD AODFULL', 'Cosmic'),
 
-
-    ('ROIB::RoIBResult#*',                         'ESD', 'Misc'),
-
     # UTT
     # hit-based displaced vertex
     ('xAOD::TrigCompositeContainer#HLT_HitDV',                             'BS ESD AODFULL AODSLIM', 'UTT'),
