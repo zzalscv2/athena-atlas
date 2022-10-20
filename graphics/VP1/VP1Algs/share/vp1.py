@@ -400,7 +400,7 @@ if vp1Extrapolator and (vp1ID or vp1Muon):
     topSequence += VP1TrkInitializer
 
     if not vp1Fatras and vp1Mc:
-        include ('TrkDetDescrSvc/AtlasTrackingGeometrySvc.py')
+        from TrkDetDescrSvc.AtlasTrackingGeometrySvc import AtlasTrackingGeometrySvc
 
     from TrkExTools.AtlasExtrapolator import AtlasExtrapolator
     VP1ExtraPolatorName='VP1Extrapolator';
