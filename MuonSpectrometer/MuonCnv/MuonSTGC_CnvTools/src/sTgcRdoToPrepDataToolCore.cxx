@@ -152,7 +152,7 @@ StatusCode Muon::sTgcRdoToPrepDataToolCore::processCollection(Muon::sTgcPrepData
             if (!design) {
                 ATH_MSG_WARNING("Failed to get design for sTGC strip/wire" );
             } else {
-                width = design->channelWidth(localPos);
+                width = design->channelWidth();
             }
         }
         

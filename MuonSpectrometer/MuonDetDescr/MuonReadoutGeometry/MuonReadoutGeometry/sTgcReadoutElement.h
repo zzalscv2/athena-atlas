@@ -250,27 +250,29 @@ namespace MuonGM {
     }
 
     inline int sTgcReadoutElement::boundaryHash(const Identifier& id) const {
-        int iphi = manager()->stgcIdHelper()->channelType(id) != 1 ? 1 : 0;  // wires and pads have locX oriented along phi
+        int iphi = manager()->stgcIdHelper()->channelType(id) != sTgcIdHelper::sTgcChannelTypes::Strip;  // wires and pads have locX oriented along phi
         if (std::abs(getStationEta()) < 3) iphi += 2 * (manager()->stgcIdHelper()->gasGap(id) - 1);
         return iphi;
     }
 
-    inline bool sTgcReadoutElement::measuresPhi(const Identifier& id) const { return (manager()->stgcIdHelper()->channelType(id) != 1); }
+    inline bool sTgcReadoutElement::measuresPhi(const Identifier& id) const { 
+        return (manager()->stgcIdHelper()->channelType(id) != sTgcIdHelper::sTgcChannelTypes::Strip); 
+    }
 
     inline const MuonChannelDesign* sTgcReadoutElement::getDesign(const Identifier& id) const {
-        if (manager()->stgcIdHelper()->channelType(id) == 1) return &(m_etaDesign[manager()->stgcIdHelper()->gasGap(id) - 1]);
-        if (manager()->stgcIdHelper()->channelType(id) == 2) return &(m_phiDesign[manager()->stgcIdHelper()->gasGap(id) - 1]);
-        return 0;
+        if (manager()->stgcIdHelper()->channelType(id) == sTgcIdHelper::sTgcChannelTypes::Strip) return &(m_etaDesign[manager()->stgcIdHelper()->gasGap(id) - 1]);
+        if (manager()->stgcIdHelper()->channelType(id) == sTgcIdHelper::sTgcChannelTypes::Wire) return &(m_phiDesign[manager()->stgcIdHelper()->gasGap(id) - 1]);
+        return nullptr;
     }
 
     inline const MuonPadDesign* sTgcReadoutElement::getPadDesign(const Identifier& id) const {
-        if (manager()->stgcIdHelper()->channelType(id) == 0) return &(m_padDesign[manager()->stgcIdHelper()->gasGap(id) - 1]);
-        return 0;
+        if (manager()->stgcIdHelper()->channelType(id) == sTgcIdHelper::sTgcChannelTypes::Pad) return &(m_padDesign[manager()->stgcIdHelper()->gasGap(id) - 1]);
+        return nullptr;
     }
 
     inline MuonPadDesign* sTgcReadoutElement::getPadDesign(const Identifier& id) {
-        if (manager()->stgcIdHelper()->channelType(id) == 0) return &(m_padDesign[manager()->stgcIdHelper()->gasGap(id) - 1]);
-        return 0;
+        if (manager()->stgcIdHelper()->channelType(id) == sTgcIdHelper::sTgcChannelTypes::Pad) return &(m_padDesign[manager()->stgcIdHelper()->gasGap(id) - 1]);
+        return nullptr;
     }
 
     inline const MuonChannelDesign* sTgcReadoutElement::getDesign(int gasGap, int channelType) const {
@@ -288,7 +290,7 @@ namespace MuonGM {
     }
 
     inline int sTgcReadoutElement::stripNumber(const Amg::Vector2D& pos, const Identifier& id) const {
-        if (manager()->stgcIdHelper()->channelType(id) == 0) return padNumber(pos, id);
+        if (manager()->stgcIdHelper()->channelType(id) == sTgcIdHelper::sTgcChannelTypes::Pad) return padNumber(pos, id);
 
         const MuonChannelDesign* design = getDesign(id);
         if (!design) return -1;
@@ -296,11 +298,11 @@ namespace MuonGM {
     }
 
     inline bool sTgcReadoutElement::stripPosition(const Identifier& id, Amg::Vector2D& pos) const {
-        if (manager()->stgcIdHelper()->channelType(id) == 0) return padPosition(id, pos);
+        if (manager()->stgcIdHelper()->channelType(id) == sTgcIdHelper::sTgcChannelTypes::Pad) return padPosition(id, pos);
 
         const MuonChannelDesign* design = getDesign(id);
         if (!design) return 0;
-        return design->channelPosition(manager()->stgcIdHelper()->channel(id), pos);
+        return design->center(manager()->stgcIdHelper()->channel(id), pos);
     }
 
     inline bool sTgcReadoutElement::stripGlobalPosition(const Identifier& id, Amg::Vector3D& gpos) const {
@@ -338,7 +340,7 @@ namespace MuonGM {
 
         if (design->wireCutout == 0.) return false;  // Not QL1 / QS1
 
-        if (posY < 0.5 * design->xSize - design->wireCutout) return true;
+        if (posY < 0.5 * design->xSize() - design->wireCutout) return true;
 
         return false;
     }
@@ -346,7 +348,8 @@ namespace MuonGM {
     inline int sTgcReadoutElement::numberOfLayers(bool) const { return m_nlayers; }
 
     inline int sTgcReadoutElement::numberOfStrips(const Identifier& layerId) const {
-        return numberOfStrips(manager()->stgcIdHelper()->gasGap(layerId) - 1, manager()->stgcIdHelper()->channelType(layerId) == 2);
+        return numberOfStrips(manager()->stgcIdHelper()->gasGap(layerId) - 1, 
+                             manager()->stgcIdHelper()->channelType(layerId) == sTgcIdHelper::sTgcChannelTypes::Wire);
     }
 
     inline int sTgcReadoutElement::numberOfStrips(int lay, bool measPhi) const {
