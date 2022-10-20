@@ -140,7 +140,6 @@ StatusCode InDetToXAODClusterConversion::execute(const EventContext& ctx) const 
     ATH_MSG_DEBUG( "Recorded xAOD::StripClusterContainer with key: " << m_outputStripClusterContainerKey.key()  );
 
     SG::ReadHandle<InDet::SCT_ClusterContainer> inputStripClusterContainer(m_inputStripClusterContainerKey, ctx);
-
     for (const auto clusterCollection : *inputStripClusterContainer) {
         if (!clusterCollection) continue;
         for(const auto theCluster : *clusterCollection)  {
@@ -165,7 +164,7 @@ StatusCode InDetToXAODClusterConversion::execute(const EventContext& ctx) const 
                 localPosition(0, 0) = localPos.x();
                 localCovariance(0, 0) = element->phiPitch()*element->phiPitch()/12.;
             } else {
-                InDetDD::SiCellId cellId = element->cellIdFromIdentifier(clusterId);
+                InDetDD::SiCellId cellId = element->cellIdOfPosition(localPos);
                 const InDetDD::StripStereoAnnulusDesign *design = dynamic_cast<const InDetDD::StripStereoAnnulusDesign *>(&element->design());
                 if ( design==nullptr ) {
                     ATH_MSG_FATAL( "Invalid strip annulus design for module with identifier/identifierHash " << element->identify() << "/" << idHash);
