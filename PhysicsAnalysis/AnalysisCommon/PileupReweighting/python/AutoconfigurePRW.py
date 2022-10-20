@@ -104,7 +104,7 @@ def getConfigurationFiles(campaign=None, dsid=None, data_type=None, files=None, 
                 simulation_flavour = GetFileMD(files).get('Simulator', '')
                 if not simulation_flavour:
                     simulation_flavour = GetFileMD(files).get('SimulationFlavour', '')
-                data_type = 'mc' if simulation_flavour in ['', 'FullG4', 'FullG4_QS', 'FullG4_Longlived'] else 'afii'
+                data_type = 'mc' if (not simulation_flavour or 'FullG4' in simulation_flavour) else 'afii'
 
     # data_type as in pileup analysis sequence: either 'data' or ('mc' or 'afii')
     if data_type == 'data':
